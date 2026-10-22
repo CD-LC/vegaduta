@@ -1,6 +1,15 @@
 package com.agenticai.core.workflow;
 
 import com.agenticai.core.json.JsonMappers;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.BooleanNode;
+import tools.jackson.databind.node.NullNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,13 +20,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.BooleanNode;
-import tools.jackson.databind.node.NullNode;
-import tools.jackson.databind.node.ObjectNode;
-import tools.jackson.databind.node.TextNode;
 
 /**
  * The pure, deterministic, no-LLM data operations behind the eight data nodes ({@code set}, {@code
@@ -227,13 +229,13 @@ final class WorkflowDataOps {
                             + "' (expected auto, string, number, boolean, json or null).");
         }
         if (raw == null) {
-            return "string".equals(type) ? TextNode.valueOf("") : NullNode.getInstance();
+            return "string".equals(type) ? StringNode.valueOf("") : NullNode.getInstance();
         }
         if (!(raw instanceof String)) {
             // API-authored config can carry real JSON types; honour them unless a string was asked
             // for.
             if ("string".equals(type)) {
-                return TextNode.valueOf(raw.toString());
+                return StringNode.valueOf(raw.toString());
             }
             JsonNode tree = mapper.valueToTree(raw);
             return tree == null ? NullNode.getInstance() : tree;
@@ -241,7 +243,7 @@ final class WorkflowDataOps {
         String s = (String) raw;
         switch (type) {
             case "string":
-                return TextNode.valueOf(s);
+                return StringNode.valueOf(s);
             case "null":
                 return NullNode.getInstance();
             case "number":
@@ -315,11 +317,11 @@ final class WorkflowDataOps {
                     }
                     if (!t.isEmpty() && (t.charAt(0) == '{' || t.charAt(0) == '[')) {
                         JsonNode parsed = parseOrNull(t);
-                        if (parsed != null && parsed.isContainerNode()) {
+                        if (parsed != null && parsed.isContainer()) {
                             return parsed;
                         }
                     }
-                    return TextNode.valueOf(s);
+                    return StringNode.valueOf(s);
                 }
         }
     }
@@ -482,7 +484,8 @@ final class WorkflowDataOps {
             JsonNode root = parseOrNull(text);
             if (root == null || !root.isArray()) {
                 throw new IllegalArgumentException(
-                        "The input is not a JSON array - set 'Items field' if the list sits inside an object.");
+                        "The input is not a JSON array - set 'Items field' if the list sits inside"
+                            + " an object.");
             }
             return new Items(checkSize((ArrayNode) root), null, "");
         }

@@ -1,5 +1,10 @@
 package com.agenticai.core.agents.tools.apiguide;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -8,10 +13,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A searchable, read-only view of the platform's OpenAPI document. Everything it returns is copied
@@ -55,7 +56,7 @@ final class ApiGuideIndex {
     ApiGuideIndex(ObjectMapper mapper, String specJson) throws IOException {
         this.mapper = mapper;
         this.root = mapper.readTree(specJson);
-        Iterator<Map.Entry<String, JsonNode>> paths = root.path("paths").fields();
+        Iterator<Map.Entry<String, JsonNode>> paths = root.path("paths").properties().iterator();
         while (paths.hasNext()) {
             Map.Entry<String, JsonNode> p = paths.next();
             for (String verb : VERBS) {
@@ -135,7 +136,8 @@ final class ApiGuideIndex {
         out.put(
                 "next",
                 scored.isEmpty()
-                        ? "Nothing matched. Try other words (a noun from the task, e.g. 'agents', 'jobs', 'knowledge')."
+                        ? "Nothing matched. Try other words (a noun from the task, e.g. 'agents',"
+                              + " 'jobs', 'knowledge')."
                         : "Call again with action=describe, method and path for the one you need.");
         return out;
     }
@@ -168,8 +170,8 @@ final class ApiGuideIndex {
             o.put("type", resolve(p.path("schema")).path("type").asString("string"));
         }
         JsonNode body = op.node().path("requestBody").path("content");
-        if (body.isObject() && body.fields().hasNext()) {
-            Map.Entry<String, JsonNode> first = body.fields().next();
+        if (body.isObject() && !body.properties().isEmpty()) {
+            Map.Entry<String, JsonNode> first = body.properties().iterator().next();
             ObjectNode b = out.putObject("body");
             b.put("contentType", first.getKey());
             b.set("schema", summarise(first.getValue().path("schema"), 0));
@@ -183,23 +185,26 @@ final class ApiGuideIndex {
         }
         if (ok != null) {
             JsonNode content = ok.path("content");
-            if (content.isObject() && content.fields().hasNext()) {
+            if (content.isObject() && !content.properties().isEmpty()) {
                 out.set(
                         "response",
-                        summarise(content.fields().next().getValue().path("schema"), 0));
+                        summarise(
+                                content.properties().iterator().next().getValue().path("schema"),
+                                0));
             }
         }
         out.put(
                 "showItLive",
                 "Embed this in your reply as a ```json_ui block so the user sees the live result: "
-                        + "{\"version\":\"v1\",\"root\":{\"type\":\"apiCall\",\"props\":{\"method\":\""
+                    + "{\"version\":\"v1\",\"root\":{\"type\":\"apiCall\",\"props\":{\"method\":\""
                         + op.method()
                         + "\",\"path\":\""
                         + op.path()
                         + "\",\"title\":\""
                         + op.summary().replace("\"", "'")
-                        + "\"}}}. GET runs on its own; anything else waits for the user to press Send. Put {id}-style values "
-                        + "into path, ?query into query (object) and the JSON body into body (object).");
+                        + "\"}}}. GET runs on its own; anything else waits for the user to press"
+                        + " Send. Put {id}-style values into path, ?query into query (object) and"
+                        + " the JSON body into body (object).");
         return out;
     }
 
@@ -223,7 +228,7 @@ final class ApiGuideIndex {
         JsonNode props = s.path("properties");
         if (props.isObject() && depth < MAX_SCHEMA_DEPTH) {
             ObjectNode po = out.putObject("properties");
-            Iterator<Map.Entry<String, JsonNode>> it = props.fields();
+            Iterator<Map.Entry<String, JsonNode>> it = props.properties().iterator();
             int n = 0;
             while (it.hasNext() && n++ < 40) {
                 Map.Entry<String, JsonNode> e = it.next();

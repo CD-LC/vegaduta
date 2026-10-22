@@ -2,6 +2,16 @@ package com.agenticai.core.platform.ops;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.tenancy.PlatformSettingsService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
@@ -10,12 +20,6 @@ import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Platform-wide maintenance mode and announcement banner, each stored as ONE JSON document in a
@@ -46,9 +50,7 @@ public class PlatformBroadcastService {
     static final int MAX_MESSAGE_CHARS = 1000;
     static final int MAX_URL_CHARS = 2000;
     private static final Set<String> LEVELS = Set.of("info", "warning", "critical");
-    private static final ObjectMapper JSON =
-            JsonMappers.withJavaTime()
-                    .disable(tools.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    private static final ObjectMapper JSON = JsonMappers.isoDates();
 
     /**
      * {@code GET/PUT /api/platform/maintenance}. {@code startedAt} is set by the server when it is
@@ -305,7 +307,7 @@ public class PlatformBroadcastService {
         try {
             JsonNode n = JSON.readTree(raw);
             return n != null && n.isObject() ? n : null;
-        } catch (java.io.IOException e) {
+        } catch (JacksonException e) {
             return null;
         }
     }

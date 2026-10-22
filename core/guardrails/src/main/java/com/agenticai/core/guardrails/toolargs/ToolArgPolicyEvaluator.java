@@ -4,6 +4,11 @@ import com.agenticai.core.guardrails.toolargs.ToolArgPolicySet.ToolPolicy;
 import com.agenticai.core.guardrails.toolargs.ToolArgRule.ArgType;
 import com.agenticai.core.guardrails.toolargs.ToolArgRule.NormalizedPath;
 import com.agenticai.core.json.JsonMappers;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,11 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.JsonParser;
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Checks one tool call's JSON arguments against a {@link ToolArgPolicySet}, BEFORE the tool runs.
@@ -88,10 +88,7 @@ public final class ToolArgPolicyEvaluator {
     /**
      * Strict reader: duplicate keys and trailing tokens are errors, so two parsers cannot disagree.
      */
-    private static final ObjectMapper STRICT =
-            JsonMappers.plain()
-                    .configure(JsonParser.Feature.STRICT_DUPLICATE_DETECTION, true)
-                    .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true);
+    private static final ObjectMapper STRICT = JsonMappers.strictReader();
 
     private final ToolArgPolicySet policySet;
 
@@ -152,7 +149,8 @@ public final class ToolArgPolicyEvaluator {
                     label,
                     "",
                     "json",
-                    "the arguments are not valid JSON (duplicate keys and trailing text are not accepted)");
+                    "the arguments are not valid JSON (duplicate keys and trailing text are not"
+                        + " accepted)");
         }
         if (root == null || !root.isObject()) {
             return deny(label, "", "json", "the arguments must be a JSON object");
@@ -178,7 +176,8 @@ public final class ToolArgPolicyEvaluator {
                                                         "unlisted",
                                                         "argument '"
                                                                 + name
-                                                                + "' is not allowed for this tool"));
+                                                                + "' is not allowed for this"
+                                                                + " tool"));
                                     }
                                 });
             }
@@ -319,7 +318,7 @@ public final class ToolArgPolicyEvaluator {
         if (!textRules) {
             return;
         }
-        if (value.isContainerNode()) {
+        if (value.isContainer()) {
             add(out, new Violation(tool, path, "text", q + " must be a text value"));
             return;
         }

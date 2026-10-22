@@ -1,19 +1,23 @@
 package com.agenticai.core.mcpserver;
 
 import com.agenticai.core.json.JsonMappers;
+
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Keeps a Java exception from reaching an MCP client (B11). The MCP transport answers some client
@@ -134,7 +138,7 @@ final class McpErrorScrubbingResponse extends HttpServletResponseWrapper {
         JsonNode node;
         try {
             node = MAPPER.readTree(body);
-        } catch (IOException notJson) {
+        } catch (JacksonException notJson) {
             return body;
         }
         if (node == null || !node.isObject() || !node.has("stackTrace")) {
@@ -150,7 +154,7 @@ final class McpErrorScrubbingResponse extends HttpServletResponseWrapper {
         reply.set("error", error);
         try {
             return MAPPER.writeValueAsBytes(reply);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             return "{\"jsonrpc\":\"2.0\",\"id\":null,\"error\":{\"code\":-32600,\"message\":\"Bad request\"}}"
                     .getBytes(StandardCharsets.UTF_8);
         }

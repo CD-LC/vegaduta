@@ -1,11 +1,12 @@
 package com.agenticai.core.agents.tools.mcpapps;
 
+import tools.jackson.databind.JsonNode;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import tools.jackson.databind.JsonNode;
 
 /**
  * Per-request guards of {@link McpAppsService}: the sliding-window rate limit applied to app views
@@ -27,7 +28,7 @@ final class McpAppsRequestGuard {
             return n.asString().toLowerCase(Locale.ROOT).contains("ui://");
         }
         if (n.isObject()) {
-            var it = n.fields();
+            var it = n.properties().iterator();
             while (it.hasNext()) {
                 var f = it.next();
                 if (f.getKey().toLowerCase(Locale.ROOT).contains("ui://")

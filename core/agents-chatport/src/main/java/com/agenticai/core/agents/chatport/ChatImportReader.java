@@ -5,15 +5,7 @@ import static com.agenticai.core.agents.chatport.ChatImportParser.MAX_STRING_CHA
 
 import com.agenticai.core.agents.chatport.ChatImportParser.Limits;
 import com.agenticai.core.json.JsonMappers;
-import java.io.ByteArrayInputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
 import tools.jackson.core.StreamReadConstraints;
@@ -23,6 +15,16 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.JsonNodeFactory;
 import tools.jackson.databind.node.ObjectNode;
+
+import java.io.ByteArrayInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * The container and stream layer of {@link ChatImportParser}: unwraps the export .zip under an
@@ -132,7 +134,8 @@ final class ChatImportReader {
             used += n;
             if (used > budget) {
                 throw new LimitExceededException(
-                        "That .zip expands to far more data than a chat export should; it was not imported.");
+                        "That .zip expands to far more data than a chat export should; it was not"
+                            + " imported.");
             }
         }
     }
@@ -193,8 +196,8 @@ final class ChatImportReader {
                 readTopLevelObject(p, c);
             } else {
                 throw new LimitExceededException(
-                        "That file does not look like a ChatGPT, Claude or VegaDuta conversations export "
-                                + "(expected a JSON list of conversations).");
+                        "That file does not look like a ChatGPT, Claude or VegaDuta conversations"
+                            + " export (expected a JSON list of conversations).");
             }
         }
     }
@@ -220,7 +223,7 @@ final class ChatImportReader {
         budget.depth = 1;
         try {
             budget.node();
-            while (p.nextToken() == JsonToken.FIELD_NAME) {
+            while (p.nextToken() == JsonToken.PROPERTY_NAME) {
                 String name = p.currentName();
                 JsonToken value = p.nextToken();
                 if (ENVELOPE_CONVERSATIONS.equals(name) && value == JsonToken.START_ARRAY) {
@@ -345,7 +348,7 @@ final class ChatImportReader {
             budget.depth++;
             budget.node();
             ObjectNode obj = f.objectNode();
-            while (p.nextToken() == JsonToken.FIELD_NAME) {
+            while (p.nextToken() == JsonToken.PROPERTY_NAME) {
                 String name = p.currentName();
                 budget.chars(name.length());
                 p.nextToken();

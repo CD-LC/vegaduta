@@ -3,18 +3,22 @@ package com.agenticai.core.agents.tools.localshell;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.net.SafeHttpClients;
 import com.agenticai.core.security.net.SsrfGuard;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Set;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientResponseException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Runs the Assistant's commands in the workspace-runner container (services/workspace-runner)
@@ -68,12 +72,12 @@ final class RunnerShellRunner implements ShellRunner {
 
     @Override
     public String environmentNote() {
-        return "It runs in a separate build container (JDK 21, Maven, Node 22 and npm, git, python3) that sees "
-                + "only the person's projects folder, mounted as "
+        return "It runs in a separate build container (JDK 21, Maven, Node 22 and npm, git,"
+                   + " python3) that sees only the person's projects folder, mounted as "
                 + workspaceLabel
-                + "; pass `folder` (relative to it) to work in the folder the person attached - the command then "
-                + "already starts there, so do not cd into it. It has network "
-                + "access for downloading dependencies, and nothing else of this computer.";
+                + "; pass `folder` (relative to it) to work in the folder the person attached - the"
+                + " command then already starts there, so do not cd into it. It has network access"
+                + " for downloading dependencies, and nothing else of this computer.";
     }
 
     @Override
@@ -195,7 +199,7 @@ final class RunnerShellRunner implements ShellRunner {
     private static JsonNode parse(String json) {
         try {
             return json == null ? null : MAPPER.readTree(json);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             return null;
         }
     }

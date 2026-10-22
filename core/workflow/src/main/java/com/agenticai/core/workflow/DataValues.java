@@ -2,11 +2,12 @@ package com.agenticai.core.workflow;
 
 import static com.agenticai.core.workflow.NumberCanon.numberText;
 
-import java.util.Locale;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.NullNode;
+
+import java.util.Locale;
 
 /**
  * Value-level helpers every data operation shares: absent/empty tests, the text a value compares
@@ -35,7 +36,7 @@ final class DataValues {
         if (v.isString()) {
             return v.asString().isBlank();
         }
-        if (v.isContainerNode()) {
+        if (v.isContainer()) {
             return v.size() == 0;
         }
         return false;

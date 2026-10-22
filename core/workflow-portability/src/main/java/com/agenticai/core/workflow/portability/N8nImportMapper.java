@@ -12,6 +12,10 @@ import com.agenticai.core.workflow.portability.N8nImportModel.Level;
 import com.agenticai.core.workflow.portability.N8nImportModel.NodeCtx;
 import com.agenticai.core.workflow.portability.N8nImportModel.Outputs;
 import com.agenticai.core.workflow.portability.N8nImportModel.Src;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,8 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Best-effort import of an n8n workflow export (JSON) into a {@link PortableWorkflow}, with an
@@ -149,7 +151,8 @@ public final class N8nImportMapper {
                 wf.fidelity.skipped++;
                 wf.report.unsupported(
                         "Sticky note '" + AgentImportText.inline(name, 60) + "'",
-                        "Sticky notes are canvas annotations, not steps, so they are not imported.");
+                        "Sticky notes are canvas annotations, not steps, so they are not"
+                            + " imported.");
                 continue;
             }
             if (byName.containsKey(name)) {
@@ -181,13 +184,13 @@ public final class N8nImportMapper {
         if (connections == null) {
             return;
         }
-        Iterator<Map.Entry<String, JsonNode>> sources = connections.fields();
+        Iterator<Map.Entry<String, JsonNode>> sources = connections.properties().iterator();
         while (sources.hasNext()) {
             Map.Entry<String, JsonNode> source = sources.next();
             if (!source.getValue().isObject()) {
                 continue;
             }
-            Iterator<Map.Entry<String, JsonNode>> kinds = source.getValue().fields();
+            Iterator<Map.Entry<String, JsonNode>> kinds = source.getValue().properties().iterator();
             while (kinds.hasNext()) {
                 Map.Entry<String, JsonNode> kind = kinds.next();
                 JsonNode outputs = kind.getValue();
@@ -281,8 +284,9 @@ public final class N8nImportMapper {
                             + ")",
                     "Attached to another node as '"
                             + entry.getValue().get(0).connectionType()
-                            + "', which has no equivalent: it is not imported as a step. Its name, type and parameters "
-                            + "(credentials removed) are kept on the node it was attached to.");
+                            + "', which has no equivalent: it is not imported as a step. Its name,"
+                            + " type and parameters (credentials removed) are kept on the node it"
+                            + " was attached to.");
         }
     }
 
@@ -303,8 +307,8 @@ public final class N8nImportMapper {
 
         if (s.raw().path("disabled").asBoolean(false)) {
             c.lose(
-                    "The node was disabled in n8n (n8n passes data straight through a disabled node), so it was "
-                            + "imported as a pass-through.");
+                    "The node was disabled in n8n (n8n passes data straight through a disabled"
+                        + " node), so it was imported as a pass-through.");
             return passthrough(c, "[Disabled] ", Level.APPROXIMATE);
         }
         switch (shortType) {
@@ -331,15 +335,17 @@ public final class N8nImportMapper {
                 Map<String, Object> config = new LinkedHashMap<>();
                 config.put("channel", "log");
                 c.lose(
-                        "The HTTP response (status, headers, body shaping) is not reproduced; this platform returns "
-                                + "the run's result. The step was imported as a log Output node.");
+                        "The HTTP response (status, headers, body shaping) is not reproduced; this"
+                            + " platform returns the run's result. The step was imported as a log"
+                            + " Output node.");
                 return finish(c, "output", s.name(), config, Level.APPROXIMATE, Outputs.PLAIN);
             }
             case "splitInBatches" -> {
                 c.lose(
-                        "n8n walks the nodes after the 'loop' output once per batch and returns to this node; here the "
-                                + "next node runs once per item and results are collected, then flow continues. Batch size and "
-                                + "multi-step loop bodies are not preserved.");
+                        "n8n walks the nodes after the 'loop' output once per batch and returns to"
+                            + " this node; here the next node runs once per item and results are"
+                            + " collected, then flow continues. Batch size and multi-step loop"
+                            + " bodies are not preserved.");
                 return finish(
                         c,
                         "loop",
@@ -378,8 +384,8 @@ public final class N8nImportMapper {
             case "set", "editFields" -> {
                 return placeholder(
                         c,
-                        "Set / Edit Fields assigns typed fields; the Transform node cannot reproduce "
-                                + "that exactly, so it was not guessed.",
+                        "Set / Edit Fields assigns typed fields; the Transform node cannot"
+                            + " reproduce that exactly, so it was not guessed.",
                         Outputs.PLAIN);
             }
             default -> {
@@ -412,7 +418,7 @@ public final class N8nImportMapper {
         if (credentials == null) {
             return;
         }
-        Iterator<Map.Entry<String, JsonNode>> it = credentials.fields();
+        Iterator<Map.Entry<String, JsonNode>> it = credentials.properties().iterator();
         while (it.hasNext()) {
             Map.Entry<String, JsonNode> entry = it.next();
             // Only the NAME is read. The id points at the source instance and is never needed.
@@ -431,9 +437,10 @@ public final class N8nImportMapper {
             if (!wf.report.hasNeedsManualFor(what)) {
                 wf.report.needsManual(
                         what,
-                        "n8n exports only a credential's name and id, never its secret, and the import never carries one.",
-                        "Create the matching integration or vault secret on this platform and attach it to the node "
-                                + "(placeholder "
+                        "n8n exports only a credential's name and id, never its secret, and the"
+                            + " import never carries one.",
+                        "Create the matching integration or vault secret on this platform and"
+                            + " attach it to the node (placeholder "
                                 + key
                                 + ").");
             }
@@ -449,8 +456,8 @@ public final class N8nImportMapper {
                 "n8n webhook"
                         + (path == null ? "" : " path '" + AgentImportText.inline(path, 60) + "'")
                         + (method == null ? "" : " (" + method + ")")
-                        + " is not reproduced: a new webhook URL is created when you enable the webhook trigger on the "
-                        + "activated workflow.");
+                        + " is not reproduced: a new webhook URL is created when you enable the"
+                        + " webhook trigger on the activated workflow.");
         return finish(c, "trigger", c.src.name(), config, Level.EXACT, Outputs.PLAIN);
     }
 
@@ -525,9 +532,9 @@ public final class N8nImportMapper {
         c.lose(
                 "Choose the agent that should run this step (placeholder "
                         + key
-                        + "). The n8n prompt and system message "
-                        + "were not applied: they are kept as importedPrompt / importedInstructions to copy into the agent. "
-                        + "The agent receives this node's input.");
+                        + "). The n8n prompt and system message were not applied: they are kept as"
+                        + " importedPrompt / importedInstructions to copy into the agent. The agent"
+                        + " receives this node's input.");
         return finish(c, "agent", c.src.name(), config, Level.APPROXIMATE, Outputs.PLAIN);
     }
 
@@ -569,8 +576,9 @@ public final class N8nImportMapper {
         config.put("mode", "expression");
         config.put("expression", translation.expression());
         c.lose(
-                "Comparison details (type coercion, case sensitivity) are not preserved: the condition was rewritten "
-                        + "as an expression, and the true/false outputs keep their order.");
+                "Comparison details (type coercion, case sensitivity) are not preserved: the"
+                    + " condition was rewritten as an expression, and the true/false outputs keep"
+                    + " their order.");
         return finish(c, "condition", c.src.name(), config, Level.APPROXIMATE, Outputs.CONDITION);
     }
 
@@ -593,15 +601,15 @@ public final class N8nImportMapper {
         if (!javascript) {
             return placeholder(
                     c,
-                    "Python code cannot run on this platform. The original source is kept in the node's "
-                            + "importedSource field.",
+                    "Python code cannot run on this platform. The original source is kept in the"
+                        + " node's importedSource field.",
                     Outputs.PLAIN,
                     config);
         }
         c.lose(
-                "JavaScript is never executed on this platform. The original source is kept in the node's "
-                        + "importedSource field and the node passes its input through unchanged until you replace it with a "
-                        + "Transform, Agent or Tool step.");
+                "JavaScript is never executed on this platform. The original source is kept in the"
+                    + " node's importedSource field and the node passes its input through unchanged"
+                    + " until you replace it with a Transform, Agent or Tool step.");
         Built b =
                 finish(
                         c,
@@ -673,8 +681,9 @@ public final class N8nImportMapper {
         List<String> notes = new ArrayList<>(c.notes);
         if (c.expression) {
             notes.add(
-                    "It carried n8n expressions. They were translated where VegaDuta has the same accessor "
-                            + "($json, $node[...]) and are otherwise kept as written; n8n expressions are JavaScript, so check them.");
+                    "It carried n8n expressions. They were translated where VegaDuta has the same"
+                        + " accessor ($json, $node[...]) and are otherwise kept as written; n8n"
+                        + " expressions are JavaScript, so check them.");
         }
         Built b = new Built();
         b.level = effective;
@@ -722,15 +731,16 @@ public final class N8nImportMapper {
                     wf.report.needsManual(
                             "Node '" + name + "'",
                             String.join(" ", b.notes),
-                            "Open the node on the canvas and check it before activating the workflow.");
+                            "Open the node on the canvas and check it before activating the"
+                                + " workflow.");
                 }
                 default -> {
                     wf.fidelity.placeholders++;
                     wf.report.unsupported(
                             "Node '" + name + "'",
                             b.reason
-                                    + " Kept as an inert pass-through placeholder with its original name, type and parameters "
-                                    + "(credentials removed).");
+                                    + " Kept as an inert pass-through placeholder with its original"
+                                    + " name, type and parameters (credentials removed).");
                 }
             }
             PlaceholderScanner.scan(b.node.config(), b.node.id(), name, wf.placeholders, Map.of());
@@ -740,7 +750,8 @@ public final class N8nImportMapper {
     private void workflowLevelNotes(JsonNode root) {
         if (root.path("active").asBoolean(false)) {
             wf.report.warn(
-                    "The workflow was active in n8n. It is imported as a DRAFT and is never activated.");
+                    "The workflow was active in n8n. It is imported as a DRAFT and is never"
+                        + " activated.");
         }
         JsonNode pinData = root.get("pinData");
         if (pinData != null && pinData.isObject() && pinData.size() > 0) {
@@ -752,8 +763,8 @@ public final class N8nImportMapper {
                 || AgentImportJson.arr(root, "tags") != null
                 || root.has("staticData")) {
             wf.report.warn(
-                    "Workflow-level n8n settings, tags and static data (timezone, error workflow, execution "
-                            + "order) are not imported.");
+                    "Workflow-level n8n settings, tags and static data (timezone, error workflow,"
+                        + " execution order) are not imported.");
         }
     }
 }

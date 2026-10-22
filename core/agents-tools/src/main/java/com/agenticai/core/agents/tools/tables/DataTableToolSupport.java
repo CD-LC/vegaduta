@@ -3,21 +3,20 @@ package com.agenticai.core.agents.tools.tables;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.tables.DataTableDtos.RowView;
+
+import org.springframework.web.server.ResponseStatusException;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.web.server.ResponseStatusException;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.SerializationFeature;
 
 /** Shared argument parsing and failure rendering for the two data-table tools. */
 final class DataTableToolSupport {
 
-    static final ObjectMapper MAPPER =
-            JsonMappers.plain()
-                    .findAndRegisterModules()
-                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    static final ObjectMapper MAPPER = JsonMappers.isoDates();
 
     /** The most characters one tool result may carry back into the model's context. */
     static final int MAX_RESULT_CHARS = 12_000;

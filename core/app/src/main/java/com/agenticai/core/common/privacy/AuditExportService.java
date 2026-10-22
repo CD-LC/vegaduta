@@ -3,6 +3,15 @@ package com.agenticai.core.common.privacy;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.json.JsonMappers;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -12,12 +21,6 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
-import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-import tools.jackson.core.JsonGenerator;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Exports the current tenant's audit events for a time range, to support the fiduciary's breach
@@ -99,63 +102,55 @@ public class AuditExportService {
             throws IOException {
         validate(from, to);
         AtomicLong rows = new AtomicLong();
-        try (JsonGenerator g = MAPPER.getFactory().createGenerator(out)) {
+        try (JsonGenerator g = MAPPER.createGenerator(out)) {
             g.writeStartObject();
-            g.writeStringField("from", from.toString());
-            g.writeStringField("to", to.toString());
-            g.writeStringField("generatedAt", Instant.now().toString());
-            g.writeArrayFieldStart("entries");
+            g.writeStringProperty("from", from.toString());
+            g.writeStringProperty("to", to.toString());
+            g.writeStringProperty("generatedAt", Instant.now().toString());
+            g.writeArrayPropertyStart("entries");
             jdbc.query(
                     QUERY,
                     rs -> {
-                        try {
-                            g.writeStartObject();
-                            g.writeStringField("id", String.valueOf(rs.getObject(1)));
-                            g.writeStringField(
-                                    "createdAt", rs.getTimestamp(2).toInstant().toString());
-                            g.writeStringField("actorId", rs.getString(3));
-                            g.writeStringField("actionType", rs.getString(4));
-                            g.writeStringField("targetType", rs.getString(5));
-                            g.writeStringField("targetId", rs.getString(6));
-                            g.writeStringField("outcome", rs.getString(7));
-                            g.writeStringField("detail", rs.getString(8));
-                            g.writeEndObject();
-                            rows.incrementAndGet();
-                        } catch (IOException e) {
-                            throw new java.io.UncheckedIOException(e);
-                        }
+                        g.writeStartObject();
+                        g.writeStringProperty("id", String.valueOf(rs.getObject(1)));
+                        g.writeStringProperty(
+                                "createdAt", rs.getTimestamp(2).toInstant().toString());
+                        g.writeStringProperty("actorId", rs.getString(3));
+                        g.writeStringProperty("actionType", rs.getString(4));
+                        g.writeStringProperty("targetType", rs.getString(5));
+                        g.writeStringProperty("targetId", rs.getString(6));
+                        g.writeStringProperty("outcome", rs.getString(7));
+                        g.writeStringProperty("detail", rs.getString(8));
+                        g.writeEndObject();
+                        rows.incrementAndGet();
                     },
                     Timestamp.from(from),
                     Timestamp.from(to));
             g.writeEndArray();
-            g.writeArrayFieldStart("seals");
+            g.writeArrayPropertyStart("seals");
             jdbc.query(
                     "SELECT seq, first_row_at, last_row_at, row_count, seal_hash, prev_seal_hash,"
                             + " algorithm, key_id, signature FROM audit_seal"
                             + " WHERE last_row_at >= ? AND first_row_at < ? ORDER BY seq",
                     rs -> {
-                        try {
-                            g.writeStartObject();
-                            g.writeNumberField("seq", rs.getLong(1));
-                            g.writeStringField(
-                                    "firstRowAt", rs.getTimestamp(2).toInstant().toString());
-                            g.writeStringField(
-                                    "lastRowAt", rs.getTimestamp(3).toInstant().toString());
-                            g.writeNumberField("rowCount", rs.getInt(4));
-                            g.writeStringField("sealHash", rs.getString(5));
-                            g.writeStringField("prevSealHash", rs.getString(6));
-                            g.writeStringField("algorithm", rs.getString(7));
-                            g.writeStringField("keyId", rs.getString(8));
-                            g.writeStringField("signature", rs.getString(9));
-                            g.writeEndObject();
-                        } catch (IOException e) {
-                            throw new java.io.UncheckedIOException(e);
-                        }
+                        g.writeStartObject();
+                        g.writeNumberProperty("seq", rs.getLong(1));
+                        g.writeStringProperty(
+                                "firstRowAt", rs.getTimestamp(2).toInstant().toString());
+                        g.writeStringProperty(
+                                "lastRowAt", rs.getTimestamp(3).toInstant().toString());
+                        g.writeNumberProperty("rowCount", rs.getInt(4));
+                        g.writeStringProperty("sealHash", rs.getString(5));
+                        g.writeStringProperty("prevSealHash", rs.getString(6));
+                        g.writeStringProperty("algorithm", rs.getString(7));
+                        g.writeStringProperty("keyId", rs.getString(8));
+                        g.writeStringProperty("signature", rs.getString(9));
+                        g.writeEndObject();
                     },
                     Timestamp.from(from),
                     Timestamp.from(to));
             g.writeEndArray();
-            g.writeNumberField("entryCount", rows.get());
+            g.writeNumberProperty("entryCount", rows.get());
             g.writeEndObject();
         }
         recordExport(actor, from, to, rows.get(), "json");

@@ -1,11 +1,12 @@
 package com.agenticai.core.agents.importer;
 
+import tools.jackson.databind.JsonNode;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.regex.Pattern;
-import tools.jackson.databind.JsonNode;
 
 /**
  * Type-tolerant accessors over untrusted JSON. A wrong type or a missing field yields null / empty
@@ -20,8 +21,9 @@ public final class AgentImportJson {
     /** Keys whose values are credentials or credential references; never read, only counted. */
     private static final Pattern SECRET_KEY =
             Pattern.compile(
-                    "(?i)(api[-_ ]?key|secret|passw(or)?d|credential|bearer|authorization|auth[-_ ]?token|access[-_ ]?token"
-                            + "|refresh[-_ ]?token|private[-_ ]?key|session[-_ ]?token|^token$|^key$)");
+                    "(?i)(api[-_ ]?key|secret|passw(or)?d|credential|bearer|authorization|auth[-_"
+                        + " ]?token|access[-_ ]?token|refresh[-_ ]?token|private[-_"
+                        + " ]?key|session[-_ ]?token|^token$|^key$)");
 
     /** Upper bound on nodes visited when scanning for credential fields. */
     private static final int SCAN_NODE_CAP = 200_000;
@@ -112,7 +114,7 @@ public final class AgentImportJson {
         if (v.isString()) {
             return !v.asString().isBlank();
         }
-        if (v.isContainerNode()) {
+        if (v.isContainer()) {
             return v.size() > 0;
         }
         return true;
@@ -161,13 +163,13 @@ public final class AgentImportJson {
             JsonNode n = stack.pop();
             visited++;
             if (n.isObject()) {
-                var it = n.fields();
+                var it = n.properties().iterator();
                 while (it.hasNext()) {
                     var e = it.next();
                     JsonNode v = e.getValue();
                     if (isSecretKey(e.getKey()) && isNonEmptyValue(v)) {
                         count++;
-                    } else if (v.isContainerNode()) {
+                    } else if (v.isContainer()) {
                         stack.push(v);
                     }
                 }
@@ -185,7 +187,7 @@ public final class AgentImportJson {
         if (v.isString()) {
             return !v.asString().isBlank();
         }
-        if (v.isContainerNode()) {
+        if (v.isContainer()) {
             return v.size() > 0;
         }
         return true;

@@ -8,15 +8,11 @@ import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.WorkflowRun;
 import com.agenticai.core.workflow.WorkflowRunRepository;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
+
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import io.temporal.client.WorkflowStub;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -24,6 +20,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Drop-in replacement for {@code WorkflowExecutionEngine} - same external contract ({@code
@@ -160,12 +163,13 @@ public class TemporalWorkflowExecutionEngine {
                 pinnedVersion = resolved.get().getVersionNumber();
                 try {
                     effectiveGraph =
-                            new tools.jackson.databind.ObjectMapper()
+                            com.agenticai.core.json.JsonMappers.plain()
                                     .readValue(
                                             resolved.get().getGraphJson(), WorkflowGraphDto.class);
                 } catch (Exception e) {
                     log.warn(
-                            "Workflow {}: pinned version v{} graph is undecodable - running the caller's graph",
+                            "Workflow {}: pinned version v{} graph is undecodable - running the"
+                                + " caller's graph",
                             definition.getId(),
                             pinnedVersion,
                             e);
@@ -234,8 +238,8 @@ public class TemporalWorkflowExecutionEngine {
             // RUNNING with a growing trace (progressActivities.recordProgress
             // keeps writing to the same row) until it actually finishes.
             log.info(
-                    "Workflow run {} for '{}' is still running after {}s - returning current state, "
-                            + "the run continues in the background.",
+                    "Workflow run {} for '{}' is still running after {}s - returning current state,"
+                        + " the run continues in the background.",
                     runId,
                     definition.getName(),
                     runTimeoutSeconds);
@@ -290,8 +294,8 @@ public class TemporalWorkflowExecutionEngine {
             workflowClient.newUntypedWorkflowStub("workflow-run-" + runId).cancel();
         } catch (RuntimeException e) {
             log.info(
-                    "Cancel requested for workflow run {} but its Temporal execution could not be reached "
-                            + "(likely already finished) - treating as a no-op: {}",
+                    "Cancel requested for workflow run {} but its Temporal execution could not be"
+                        + " reached (likely already finished) - treating as a no-op: {}",
                     runId,
                     e.getMessage());
         }

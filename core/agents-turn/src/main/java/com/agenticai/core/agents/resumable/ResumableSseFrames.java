@@ -1,13 +1,14 @@
 package com.agenticai.core.agents.resumable;
 
 import com.agenticai.core.agents.resumable.ResumableStreamBuffer.Entry;
+
 import org.springframework.http.codec.ServerSentEvent;
 
 /** SSE framing of resumable-stream buffer entries; see {@link ResumableChatStreamService}. */
 final class ResumableSseFrames {
 
     private static final tools.jackson.databind.ObjectMapper JSON =
-            new tools.jackson.databind.ObjectMapper();
+            com.agenticai.core.json.JsonMappers.plain();
 
     private ResumableSseFrames() {}
 

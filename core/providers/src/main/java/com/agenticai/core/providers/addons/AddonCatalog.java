@@ -2,6 +2,16 @@ package com.agenticai.core.providers.addons;
 
 import com.agenticai.core.providers.addons.AddonDefinition.Availability;
 import com.agenticai.core.providers.addons.AddonDefinition.Kind;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -15,13 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.JsonParser;
-import tools.jackson.core.StreamReadFeature;
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The add-on catalog: {@code addons/catalog.json} on the classpath, the single source of truth for
@@ -170,7 +173,7 @@ public class AddonCatalog {
                         .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                         .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
                         .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
-                        .disable(JsonParser.Feature.ALLOW_COMMENTS)
+                        .disable(JsonReadFeature.ALLOW_JAVA_COMMENTS)
                         .build();
         CatalogFile file;
         try {
@@ -261,7 +264,8 @@ public class AddonCatalog {
         if (d.kind() == Kind.MCP_SERVER && !planned) {
             problems.add(
                     where
-                            + ": kind 'mcp-server' has no executor yet, so it can only be listed as planned");
+                            + ": kind 'mcp-server' has no executor yet, so it can only be listed as"
+                            + " planned");
         }
         if (!planned && (d.license() == null || d.license().isBlank())) {
             problems.add(where + ": license is required for an available add-on");
@@ -310,7 +314,8 @@ public class AddonCatalog {
         if (d.compose() != null || d.model() != null || d.observe() != null) {
             problems.add(
                     where
-                            + ": a planned add-on cannot carry compose, model or observe (nothing can be switched on)");
+                            + ": a planned add-on cannot carry compose, model or observe (nothing"
+                            + " can be switched on)");
         }
         if (d.hostCommand() != null && !d.hostCommand().isEmpty()) {
             problems.add(where + ": a planned add-on has no hostCommand");

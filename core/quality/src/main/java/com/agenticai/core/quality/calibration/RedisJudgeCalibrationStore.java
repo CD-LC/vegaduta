@@ -1,6 +1,16 @@
 package com.agenticai.core.quality.calibration;
 
 import com.agenticai.core.json.JsonMappers;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -8,14 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * The production {@link JudgeCalibrationStore}: JSON documents in Redis hashes, no SQL table (this
@@ -40,11 +42,7 @@ public class RedisJudgeCalibrationStore implements JudgeCalibrationStore {
 
     private static final Logger log = LoggerFactory.getLogger(RedisJudgeCalibrationStore.class);
 
-    private static final ObjectMapper MAPPER =
-            JsonMappers.plain()
-                    .findAndRegisterModules()
-                    .disable(tools.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private static final ObjectMapper MAPPER = JsonMappers.isoDatesLenient();
 
     private final StringRedisTemplate redis;
     private final InMemoryJudgeCalibrationStore fallback = new InMemoryJudgeCalibrationStore();
@@ -53,8 +51,8 @@ public class RedisJudgeCalibrationStore implements JudgeCalibrationStore {
         this.redis = redisProvider.getIfAvailable();
         if (this.redis == null) {
             log.warn(
-                    "No Redis available: judge calibration sets and history are held in memory only "
-                            + "(lost on restart, not shared between replicas).");
+                    "No Redis available: judge calibration sets and history are held in memory only"
+                        + " (lost on restart, not shared between replicas).");
         }
     }
 

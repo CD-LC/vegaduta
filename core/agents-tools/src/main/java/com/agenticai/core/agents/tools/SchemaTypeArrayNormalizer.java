@@ -2,18 +2,21 @@ package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.chat.GeminiSchemaSelfHealer;
 import com.agenticai.core.json.JsonMappers;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.DefaultToolDefinition;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.metadata.ToolMetadata;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Fixes one specific JSON Schema shape a resolved tool's {@code inputSchema()} can carry that
@@ -210,7 +213,7 @@ final class SchemaTypeArrayNormalizer {
                 boolean alreadyArray =
                         typeNode != null
                                 && typeNode.isString()
-                                && "array".equalsIgnoreCase(typeNode.textValue());
+                                && "array".equalsIgnoreCase(typeNode.stringValue());
                 if (!alreadyArray) {
                     obj.put("type", "array");
                     changed[0] = true;
@@ -229,8 +232,8 @@ final class SchemaTypeArrayNormalizer {
 
     private static String firstNonNullType(ArrayNode typeArray) {
         for (JsonNode t : typeArray) {
-            if (t.isString() && !"null".equalsIgnoreCase(t.textValue())) {
-                return t.textValue();
+            if (t.isString() && !"null".equalsIgnoreCase(t.stringValue())) {
+                return t.stringValue();
             }
         }
         return null;

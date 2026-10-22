@@ -16,6 +16,12 @@ import static com.agenticai.core.workflow.WorkflowDataOps.str;
 import com.agenticai.core.workflow.WorkflowDataOps.Condition;
 import com.agenticai.core.workflow.WorkflowDataOps.Items;
 import com.agenticai.core.workflow.WorkflowDataOps.Outcome;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.StringNode;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,10 +30,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.TextNode;
 
 /**
  * The {@code filter} and {@code switch} data operations and the condition language they share
@@ -163,7 +165,7 @@ final class DataFilterOps {
                 new ConditionEvaluator(bool(config.get("ignoreCase"), false));
         JsonNode item = DataValues.parse(mapper, input);
         if (item == null) {
-            item = TextNode.valueOf(input == null ? "" : input);
+            item = StringNode.valueOf(input == null ? "" : input);
         }
         List<String> log = new ArrayList<>();
         for (Map<String, Object> c : cases) {
@@ -248,7 +250,8 @@ final class DataFilterOps {
             if (regexTooDeep > 0) {
                 log.add(
                         regexTooDeep
-                                + " regex match(es) were too deep for the input and were treated as no match.");
+                                + " regex match(es) were too deep for the input and were treated as"
+                                + " no match.");
             }
             if (regexSkippedLong > 0) {
                 log.add(
@@ -346,7 +349,8 @@ final class DataFilterOps {
             long now = System.nanoTime();
             if (now - totalDeadline > 0) {
                 throw new IllegalStateException(
-                        "Regex evaluation budget exceeded - simplify the pattern or reduce the input.");
+                        "Regex evaluation budget exceeded - simplify the pattern or reduce the"
+                            + " input.");
             }
             long deadline = Math.min(now + REGEX_MATCH_BUDGET_NANOS, totalDeadline);
             try {
@@ -357,7 +361,8 @@ final class DataFilterOps {
                     throw new IllegalStateException(
                             "Regex '"
                                     + abbreviate(pattern, 40)
-                                    + "' timed out repeatedly (catastrophic backtracking?) - simplify the pattern.");
+                                    + "' timed out repeatedly (catastrophic backtracking?) -"
+                                    + " simplify the pattern.");
                 }
                 return false;
             } catch (StackOverflowError e) {

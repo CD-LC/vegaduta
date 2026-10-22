@@ -1,12 +1,13 @@
 package com.agenticai.core.agents.openai;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.JsonNodeFactory;
 
 /**
  * Validates an Open Responses request and folds it into the {@link OpenAiChatRequest} the shared
@@ -100,9 +101,9 @@ final class OpenResponsesInputMapper {
         if (r.previousResponseId() != null && !r.previousResponseId().isBlank()) {
             throw bad(
                     UNSUPPORTED,
-                    "'previous_response_id' is not supported: responses are not stored. "
-                            + "Send an X-Session-Id header to continue a server-held conversation, or resend the earlier "
-                            + "turns in 'input'.");
+                    "'previous_response_id' is not supported: responses are not stored. Send an"
+                        + " X-Session-Id header to continue a server-held conversation, or resend"
+                        + " the earlier turns in 'input'.");
         }
         if (!isAbsent(r.conversation())) {
             throw bad(
@@ -154,7 +155,7 @@ final class OpenResponsesInputMapper {
         if (metadata.size() > MAX_METADATA_ENTRIES) {
             throw bad(INVALID, "'metadata' can have at most " + MAX_METADATA_ENTRIES + " entries");
         }
-        Iterator<Map.Entry<String, JsonNode>> it = metadata.fields();
+        Iterator<Map.Entry<String, JsonNode>> it = metadata.properties().iterator();
         while (it.hasNext()) {
             Map.Entry<String, JsonNode> e = it.next();
             if (!e.getValue().isString()) {
