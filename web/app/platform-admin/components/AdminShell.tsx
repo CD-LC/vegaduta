@@ -12,7 +12,8 @@ import NotificationBell from "./NotificationBell";
 import { Button } from "./ui/button";
 import { filterBillingNav } from "../lib/billing-flag";
 import { useConfirm } from "./admin/ConfirmDialog";
-import { NAV_SECTIONS, isNavItemActive, sectionHasActive, type AdminNavItem } from "./adminNav";
+import { NAV_SECTIONS, filterEditionNav, isNavItemActive, sectionHasActive, type AdminNavItem } from "./adminNav";
+import { isPersonalEdition } from "../../lib/edition";
 
 // Governance & Operations Console IA (PLATFORM-ADMIN-GOVERNANCE-AND-CONTROLS.md
 // §3 + §10) - the admin console is organized into ten sections so an admin
@@ -48,6 +49,15 @@ function initialsOf(name: string) {
 // flush on its last call already cleared anyway).
 let prefetchedFor: string | null = null;
 
+// Reads that feed the rail's queue badges and the overview's spend tile. Their controllers (spend report,
+// MCP review, abuse monitor, template moderation) are operator tooling a personal install does not run,
+// so the shell does not ask for them there; it would only collect 404s.
+const OPERATOR_ONLY_PREFETCH: ReadonlySet<string> = new Set([
+  "/api/platform/spend/summary",
+  "/api/platform/mcp-review/pending",
+  "/api/platform/abuse-monitor/throttled",
+]);
+
 export default function AdminShell({
   title,
   eyebrow = "Platform Admin",
@@ -62,6 +72,8 @@ export default function AdminShell({
   const askConfirm = useConfirm();
   const { username, logout } = useAuth();
   const pathname = usePathname();
+  // Personal edition: one owner, no fleet - no operator queues to count (see OPERATOR_ONLY_PREFETCH).
+  const personal = isPersonalEdition();
   // Light-first (2026-09-26): the console now defaults to light to match the
   // tenant console's default look; the dark/light toggle persists per-user.
   const [mode, setMode] = useState("light");
@@ -151,10 +163,11 @@ export default function AdminShell({
   // shared GET cache - failures just leave the badge hidden, never crash nav.
   useEffect(() => {
     let cancelled = false;
+    const none = Promise.resolve<null>(null);
     Promise.all([
-      api.listPendingMcpReviews().catch((): null => null),
-      api.getAdminTemplatesPendingQuiet().catch((): null => null),
-      api.getAbuseThrottled().catch((): null => null),
+      personal ? none : api.listPendingMcpReviews().catch((): null => null),
+      personal ? none : api.getAdminTemplatesPendingQuiet().catch((): null => null),
+      personal ? none : api.getAbuseThrottled().catch((): null => null),
       api.getKillSwitchStatus().catch((): null => null),
     ]).then(
       ([mcp, templates, abuse, ks]) => {
@@ -171,7 +184,7 @@ export default function AdminShell({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [personal]);
 
   async function handleResumePlatform() {
     if (!(await askConfirm("Resume the platform? Every tenant's requests will flow again immediately."))) return;
@@ -194,18 +207,20 @@ export default function AdminShell({
   useEffect(() => {
     if (!username || prefetchedFor === username) return;
     prefetchedFor = username;
-    prefetchApiGets([
-      "/api/platform/health",
-      "/api/platform/issues/open-count",
-      "/api/platform/spend/summary",
-      "/api/platform/tenant-counts",
-      "/api/system/status",
-      // Rail badge + kill-switch banner reads
-      "/api/platform/mcp-review/pending",
-      "/api/platform/abuse-monitor/throttled",
-      "/api/platform/kill-switch",
-    ]);
-  }, [username]);
+    prefetchApiGets(
+      [
+        "/api/platform/health",
+        "/api/platform/issues/open-count",
+        "/api/platform/spend/summary",
+        "/api/platform/tenant-counts",
+        "/api/system/status",
+        // Rail badge + kill-switch banner reads
+        "/api/platform/mcp-review/pending",
+        "/api/platform/abuse-monitor/throttled",
+        "/api/platform/kill-switch",
+      ].filter((u) => !personal || !OPERATOR_ONLY_PREFETCH.has(u))
+    );
+  }, [username, personal]);
 
   function isActive(item: AdminNavItem) {
     return isNavItemActive(item, pathname);
@@ -294,7 +309,7 @@ export default function AdminShell({
           <div className="px-3 pb-1.5 pt-1 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground select-none">
             {eyebrow}
           </div>
-          {filterBillingNav(NAV_SECTIONS).map((section, i) => {
+          {filterEditionNav(filterBillingNav(NAV_SECTIONS), personal).map((section, i) => {
             const groupId = (section.label ?? "home").toLowerCase().replace(/[^a-z0-9]+/g, "-");
             const hasActive = sectionHasActive(section, pathname);
             const open = !section.label || hasActive || !collapsed[section.label];
