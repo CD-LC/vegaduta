@@ -782,8 +782,20 @@ verify_local_agent_model() {
       pull_missing_model "$EMBED_MODEL" && EMBED_NOT_PULLED=0
     fi
   fi
-  say "Checking that '$model' can run agents (tool calls)..."
-  grade="$(probe_tool_grade "$LOCAL_AI" "$model" || true)"
+  # The probe sends a real chat completion, which loads the model cold (up to 240 s on a laptop), and its
+  # answer only changes when the model does. So it runs on the first start and when the model changes; a
+  # restart reuses the recorded grade. VEGADUTA_REPROBE=1 measures again.
+  local seen; seen="$(get_env LOCAL_MODEL_GRADE)"
+  if [ "${VEGADUTA_REPROBE:-0}" != 1 ] && [ "${seen%%|*}" = "$model" ] && [ "${seen#*|}" != "$seen" ] && [ -n "${seen#*|}" ]; then
+    grade="$(printf '%s' "${seen#*|}" | tr '_' ' ')"
+    say "Using the tool-call grade recorded for '$model' ($grade); VEGADUTA_REPROBE=1 measures it again."
+  else
+    say "Checking that '$model' can run agents (tool calls)..."
+    grade="$(probe_tool_grade "$LOCAL_AI" "$model" || true)"
+    case "$grade" in
+      structured|text|'chat only') set_env LOCAL_MODEL_GRADE "$model|$(printf '%s' "$grade" | tr ' ' '_')" force ;;
+    esac
+  fi
   # The catalog records what full agent prompts showed; a short probe can be kinder.
   [ "$grade" = structured ] && grep -q "^${model}|.*|chat only|" "$MODELS_CATALOG" && grade="chat only"
   case "$grade" in
@@ -1839,6 +1851,8 @@ personal_start_native() {
     export APP_ENCRYPTION_KEY="$enc_key" PLATFORM_MASTER_KEY="$master_key"
     export APP_WEB_PUBLIC_URL="$app" APP_WEB_ALLOWED_ORIGINS="$app,http://localhost:3000,http://127.0.0.1:3000"
     export APP_STORAGE_TYPE=local APP_STORAGE_LOCAL_PATH="$PERSONAL_HOME/storage"
+    # The same single switch the container stack uses (personal.yml): .env's VEGADUTA_EDITION.
+    APP_EDITION_TIER="$(env_or VEGADUTA_EDITION personal)"; export APP_EDITION_TIER
     export MCP_STDIO_SIDECAR_ENABLED=false MANAGEMENT_HEALTH_MAIL_ENABLED=false MANAGEMENT_TRACING_ENABLED=false
     # The sidecar container publishes this loopback port (personal.native.yml); only used with --profile rag.
     export SIDECAR_BASE_URL="${SIDECAR_BASE_URL:-http://127.0.0.1:$(env_or SIDECAR_HOST_PORT 8001)}" SIDECAR_SHARED_SECRET="$sc_secret"
@@ -1988,6 +2002,14 @@ personal_sync_public_urls() {
   case "$cur" in ""|http://localhost:[0-9]*) [ "$cur" = "http://localhost:$core_port" ] || set_env PUBLIC_API_URL "http://localhost:$core_port" force ;; esac
 }
 
+# personal_sync_edition: VEGADUTA_EDITION (personal | lite | full) is the ONE switch that feeds core's
+# APP_EDITION_TIER and the console's NEXT_PUBLIC_EDITION (deploy/compose/personal.yml). It is written into .env
+# so the Setup app, which reconciles .env with this template, keeps it rather than reverting it. A value the
+# owner already put there (including full, to get every feature back) is never replaced.
+personal_sync_edition() {
+  set_env VEGADUTA_EDITION personal
+}
+
 # Day-one defaults of a FRESH personal install (no state file yet): private web search (SearXNG, no API key) and
 # the MCP runner (STDIO connectors; the starter set is registered on the first start) are on unless declined.
 # Decline with --no-search / --no-tools (remembered in the state file) or VEGADUTA_SEARCH=0 / VEGADUTA_TOOLS=0 in
@@ -2051,6 +2073,7 @@ personal_up() {
     set_env HOST_ACCELERATOR "$HOST_ACCELERATOR" force
   fi
   build_compose_args
+  personal_sync_edition
   if [ "$DRY_RUN" = 1 ]; then
     save_state
     printf 'plan: tier=personal native_core=%s profiles=%s local_ai=%s local_model=%s search=%s tools=%s browser=%s\n' \

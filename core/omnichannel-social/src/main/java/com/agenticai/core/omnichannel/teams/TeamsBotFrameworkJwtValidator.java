@@ -1,5 +1,7 @@
 package com.agenticai.core.omnichannel.teams;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.List;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimNames;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Component;
  * Microsoft key set is fetched once per process, not per message.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class TeamsBotFrameworkJwtValidator {
 
     private static final String JWKS_URI = "https://login.botframework.com/v1/.well-known/keys";

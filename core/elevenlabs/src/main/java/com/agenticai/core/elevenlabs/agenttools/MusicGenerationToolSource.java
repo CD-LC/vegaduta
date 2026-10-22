@@ -1,6 +1,8 @@
 package com.agenticai.core.elevenlabs.agenttools;
 
 import com.agenticai.core.agentspi.MediaToolSource;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.List;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
  * simply offers nothing.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class MusicGenerationToolSource implements MediaToolSource {
 
     private final ObjectProvider<MusicGenerationService> musicGenerationService;

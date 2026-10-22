@@ -391,7 +391,9 @@ WORKDIR /app
 # the cache for each module - app, app-jobs and app-worker then each carried
 # their own ~5 GB copy of identical layers (found by the kind install test).
 ARG MODULE=app
-COPY --from=build /build/${MODULE}/target/*.jar app.jar
+# --chown on the COPY, not a recursive chown afterwards: `chown -R /app` rewrites the whole jar
+# into a second ~340 MB layer (the published image carried the jar twice).
+COPY --from=build --chown=agentic:agentic /build/${MODULE}/target/*.jar app.jar
 
 # mcp-stdio-proxy (MCP-STDIO-SANDBOXING, 2026-08-05, see
 # docs/architecture/MCP-STDIO-SANDBOXING-DESIGN.md §8) - a small, fixed, TRUSTED relay script,
@@ -399,8 +401,8 @@ COPY --from=build /build/${MODULE}/target/*.jar app.jar
 # DynamicMcpConnectionManager.wrapForSidecar spawns THIS instead of the real
 # `npx`/`uvx <pkg>` - it forwards bytes to the mcp-stdio-runner sidecar,
 # which spawns the real (potentially untrusted) package inside itself
-# instead. Root-owned (COPY default, no chown) and left out of the
-# `chown -R agentic:agentic /app` below - the agentic user can read+execute
+# instead. Root-owned (COPY default, no chown) and outside /app, so the
+# `chown` of /app below never reaches it - the agentic user can read+execute
 # it but not modify it, same "tenant can't tamper with trusted relay code"
 # posture tool-sandbox's own harness uses for its runner.
 COPY mcp-stdio-proxy/framing.js mcp-stdio-proxy/proxy.js /opt/mcp-stdio-proxy/
@@ -408,7 +410,7 @@ COPY mcp-stdio-proxy/framing.js mcp-stdio-proxy/proxy.js /opt/mcp-stdio-proxy/
 # mcp-data is MCP_FILESYSTEM_ROOT's default target (see core/.env.example) -
 # create it here so the built-in filesystem MCP tool has somewhere writable
 # even before any volume is mounted over it.
-RUN mkdir -p /app/mcp-data && chown -R agentic:agentic /app
+RUN mkdir -p /app/mcp-data && chown agentic:agentic /app /app/mcp-data
 
 # Default root for app.storage.type=local (the `lite` profile,
 # APP_STORAGE_LOCAL_PATH=/data/storage). Unused with the default S3 storage;

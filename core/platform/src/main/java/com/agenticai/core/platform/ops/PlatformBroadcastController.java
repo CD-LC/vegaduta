@@ -6,6 +6,8 @@ import com.agenticai.core.platform.ops.PlatformBroadcastService.AnnouncementUpda
 import com.agenticai.core.platform.ops.PlatformBroadcastService.MaintenanceState;
 import com.agenticai.core.platform.ops.PlatformBroadcastService.MaintenanceUpdate;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Maintenance mode and the announcement banner for the platform console.
- * Role-gated by the blanket {@code /api/platform/** -> ROLE_platform-admin}
- * rule. Switching maintenance (which 503s every tenant) additionally needs
- * {@code X-Master-Key}, checked exactly as tenant deletion does
- * ({@link TenantDeletionController#authenticateMasterKey}); the banner does not.
+ * Maintenance mode and the announcement banner for the platform console. Role-gated by the blanket
+ * {@code /api/platform/** -> ROLE_platform-admin} rule. Switching maintenance (which 503s every
+ * tenant) additionally needs {@code X-Master-Key}, checked exactly as tenant deletion does ({@link
+ * TenantDeletionController#authenticateMasterKey}); the banner does not.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform")
 public class PlatformBroadcastController {
@@ -28,8 +30,9 @@ public class PlatformBroadcastController {
     private final PlatformBroadcastService broadcast;
     private final String masterKey;
 
-    public PlatformBroadcastController(PlatformBroadcastService broadcast,
-                                       @Value("${app.platform.master-key:}") String masterKey) {
+    public PlatformBroadcastController(
+            PlatformBroadcastService broadcast,
+            @Value("${app.platform.master-key:}") String masterKey) {
         this.broadcast = broadcast;
         this.masterKey = masterKey;
     }
@@ -41,9 +44,8 @@ public class PlatformBroadcastController {
 
     @PutMapping("/maintenance")
     public MaintenanceState setMaintenance(
-        @RequestHeader(value = "X-Master-Key", required = false) String presentedMasterKey,
-        @RequestBody MaintenanceUpdate body
-    ) {
+            @RequestHeader(value = "X-Master-Key", required = false) String presentedMasterKey,
+            @RequestBody MaintenanceUpdate body) {
         TenantDeletionController.authenticateMasterKey(masterKey, presentedMasterKey);
         return broadcast.updateMaintenance(body, actor());
     }

@@ -21,6 +21,7 @@ import {
   variantKeys,
 } from "./overlay/copyVariants";
 import { copyOrFallback, hostedModelClaimAllowed, optionalTourCopy } from "./consumerGuide";
+import { isPersonalEdition } from "../../lib/edition";
 import { useTranslations } from "../../lib/i18n";
 import { useReducedMotionSafe } from "../../lib/useReducedMotionSafe";
 import { Button } from "../ui/button";
@@ -101,7 +102,13 @@ export default function TourOverlay() {
   // land on. Free is the honest default there - it is the claim the product
   // makes to everyone at the door, and it never over-promises to a tenant whose
   // plan we could not read.
-  const stepVariants = useMemo(() => [audience, plan ?? "Free"], [audience, plan]);
+  // A personal install goes first: its own wording (`channelsPersonalBody`) wins where one exists, so the
+  // Channels step names the channels a personal install has instead of Slack and a "free plan". With no
+  // such key, or on lite/full (the entry is null and skipped), the chain is exactly what it was.
+  const stepVariants = useMemo(
+    () => [isPersonalEdition() ? "Personal" : null, audience, plan ?? "Free"],
+    [audience, plan]
+  );
   const audienceVariants = useMemo(() => [audience], [audience]);
   // Same reasoning for the completion modal, which has no un-varied key either:
   // Admin is the wording every visitor got before this round, so an unresolved
