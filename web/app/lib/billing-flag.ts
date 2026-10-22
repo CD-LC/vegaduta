@@ -1,10 +1,10 @@
 import { isPersonalEdition } from "./edition";
-import { getPublicEnv } from "./env";
+import { getPublicPolicy } from "./env";
 
 // Billing switch (OSS default, 2026-09-29). Self-hosted installs have no
 // plans, prices or payment processor, so every plans/prices/upgrade/billing
 // surface is hidden unless the operator sets NEXT_PUBLIC_BILLING_ENABLED=1
-// (the hosted SaaS does). Read at RUNTIME through getPublicEnv (window.__ENV
+// (the hosted SaaS does). Read at RUNTIME through getPublicPolicy (window.__ENV
 // > build-time value), so one image serves both postures.
 //
 // Unset / anything other than "1" = OFF. When ON, every gated call site takes
@@ -21,7 +21,7 @@ import { getPublicEnv } from "./env";
 /** Live read - use in components and tests (re-evaluates per call). */
 export function isBillingEnabled(): boolean {
   if (isPersonalEdition()) return false;
-  return getPublicEnv("NEXT_PUBLIC_BILLING_ENABLED") === "1";
+  return getPublicPolicy("NEXT_PUBLIC_BILLING_ENABLED") === "1";
 }
 
 /** Module-load snapshot, for module-level constants. Prefer isBillingEnabled(). */

@@ -14,6 +14,7 @@ import { filterBillingNav } from "../lib/billing-flag";
 import { useConfirm } from "./admin/ConfirmDialog";
 import { NAV_SECTIONS, filterEditionNav, isNavItemActive, sectionHasActive, type AdminNavItem } from "./adminNav";
 import { isPersonalEdition } from "../../lib/edition";
+import { NAV_COLLAPSED_KEY, parseCollapsed, serializeCollapsed } from "./navCollapsed";
 
 // Governance & Operations Console IA (PLATFORM-ADMIN-GOVERNANCE-AND-CONTROLS.md
 // §3 + §10) - the admin console is organized into ten sections so an admin
@@ -231,8 +232,8 @@ export default function AdminShell({
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem("vd-admin-nav-collapsed");
-      if (raw) setCollapsed(JSON.parse(raw));
+      const raw = window.localStorage.getItem(NAV_COLLAPSED_KEY);
+      if (raw) setCollapsed(parseCollapsed(raw));
     } catch {
       // private mode / corrupt value: all groups open.
     }
@@ -241,7 +242,7 @@ export default function AdminShell({
     setCollapsed((prev) => {
       const next = { ...prev, [label]: !prev[label] };
       try {
-        window.localStorage.setItem("vd-admin-nav-collapsed", JSON.stringify(next));
+        window.localStorage.setItem(NAV_COLLAPSED_KEY, serializeCollapsed(next));
       } catch {
         // not persisted; still toggles for this visit.
       }
