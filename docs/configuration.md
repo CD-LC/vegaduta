@@ -1264,6 +1264,141 @@ List endpoints for workflow runs, channel contacts, knowledge documents and appr
 optional `limit` and `offset` parameters with a default cap and a hard maximum; internal callers
 stay unbounded. See [List endpoint paging](api/LIST-ENDPOINT-PAGING.md).
 
+## Service environment
+
+Environment variables read by the Python and Node services in `services/` (not by `core`). On/off
+switches and service URLs are in [Feature flags for optional services](#feature-flags-for-optional-services);
+this section lists the tuning, capacity and isolation settings. The defaults are the ones in each service's
+settings module (`app/settings.py`, `app/config.py` or `server.js`) and the Compose file sets only a few of
+them. Set one in `deploy/compose/.env` only if the Compose service passes it through; otherwise add it to
+that service's `environment:` block (or the chart's `env` for Helm). Each service's own README has the
+full list for it, including the auth and URL variables; the rows here are the ones that were not written
+down before. Names ending in `_KEY`, `_PASSWORD` or `_TOKEN` are secrets: set them from the secret store,
+never in a tracked file.
+
+### sidecar (ML helper, port 8001)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `SIDECAR_LOG_LEVEL` | `INFO` | Python log level |
+| `EMBED_QUEUE_TIMEOUT_S` | `30` | how long an embed request waits for a free slot before the sidecar fails it fast (a 503-shaped error the caller retries) |
+| `RERANK_MAX_CONCURRENT` / `RERANK_QUEUE_TIMEOUT_S` | `1` / `30` | concurrent rerank passes and how long one waits for a slot; raise the first only with spare CPU |
+| `WHISPER_CPU_THREADS` / `WHISPER_NUM_WORKERS` | `1` / `2` | speech-to-text CPU threads per transcription and concurrent transcriptions |
+| `WHISPER_LIVE_RESERVED_WORKERS` | `1` | transcription workers kept for live calls so document ingestion cannot starve them; ignored (0) when `WHISPER_NUM_WORKERS` is 1 |
+| `TESSERACT_CMD` | unset | path to the Tesseract executable for OCR when it is not on `PATH` |
+| `FFMPEG_BINARY` / `FFPROBE_BINARY` | `ffmpeg` / `ffprobe` | executables used by the render endpoints |
+| `RENDER_TIMEOUT_S` | `3600` | wall-clock limit for one render |
+| `RENDER_MAX_FETCH_MB` | `512` | largest remote media file a render will download |
+| `SARVAM_SPEAKER` | empty | Sarvam voice; empty lets Sarvam pick the default for the model. Speaker names are per model, so clear it when changing `SARVAM_MODEL` |
+| `SARVAM_MAX_CHARS_PER_REQUEST` | `1400` | text is split into chunks of at most this many characters per Sarvam request |
+| `SARVAM_MAX_CONCURRENT` / `SARVAM_TIMEOUT_S` | `1` / `60` | concurrent Sarvam requests and the per-request timeout |
+
+### code-intel (repository indexing, port 8090)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `CODE_INTEL_GIT_ALLOWED_SCHEMES` | `https` | URL schemes a tenant-supplied `git_url` may use (comma-separated). `file`, `ssh` and `git` would reach this container's own disk or internal hosts; widen only for a trusted install |
+| `CODE_INTEL_ALLOWED_AUTH_ENV` | empty | extra environment variable names a repository may name as `auth_env`; `CODE_INTEL_GIT_TOKEN` is always allowed |
+| `CODE_INTEL_AUTH_ENV_URL_PREFIXES` | empty | `git_url` prefixes to which an `auth_env` credential may be sent; empty means `auth_env` is unusable, so a tenant cannot make the operator's token travel to their own remote |
+| `CODE_INTEL_ENFORCE_REPO_LIMITS` | empty (off) | `true` enforces the two repository limits below; off keeps existing repositories working |
+| `CODE_INTEL_MAX_REPO_MB` / `CODE_INTEL_MAX_REPO_FILES` | `500` / `50000` | per-repository size and file count, enforced only when the switch above is `true` |
+| `CODE_INTEL_TENANT_QUOTA_MB` | `0` (off) | total checkout size per tenant |
+| `CODE_INTEL_GITDIR_ROOT` | `<system temp dir>/code-intel-gitdirs` | where git directories are kept, apart from the checkouts (tests, operators) |
+| `CODE_INTEL_GIT_TIMEOUT` | `300` | seconds allowed for one git operation |
+| `CODE_INTEL_MAX_HEAVY_JOBS` / `CODE_INTEL_MAX_TENANT_HEAVY_JOBS` | `4` / `2` | concurrent index, clone and graph-build jobs in total and per tenant |
+| `CODE_INTEL_MAX_QUEUED_HEAVY_JOBS` / `CODE_INTEL_HEAVY_QUEUE_WAIT` | `8` / `900` | background jobs allowed to wait for a slot, and how many seconds each waits |
+| `CODE_INTEL_HEAVY_RETRY_AFTER` | `30` | seconds in the `Retry-After` answered to a refused heavy job |
+| `CODE_INTEL_EMBED_MODEL` | `BAAI/bge-small-en-v1.5` | default embedding model (with `CODE_INTEL_EMBEDDER`) |
+| `CODE_INTEL_ALLOWED_EMBED_MODELS` | empty | models a repository may request besides the default; empty means no per-repository overrides |
+| `CODE_INTEL_EMBEDDER_CACHE` | `2` | embedder models kept loaded |
+| `OPENAI_API_KEY` | `not-needed-for-local` placeholder | read only when the `openai` embedder is selected; a secret |
+| `CODE_INTEL_RERANK_ENABLED` | `false` | cross-encoder reranking of search results |
+| `CODE_INTEL_RERANK_MODEL` | `cross-encoder/ms-marco-MiniLM-L-6-v2` | the reranking model |
+| `CODE_INTEL_RERANK_MAX_CONCURRENT` / `CODE_INTEL_RERANK_QUEUE_TIMEOUT_S` | `1` / `30` | the same pair as in the sidecar |
+| `CODE_INTEL_DOCKER_USER` | `auto` | user of the sandbox container in run mode `docker`: `auto` is this process's own non-root uid:gid (never root), an explicit `uid:gid` needs the workspaces writable by that uid, empty means the image default (root, not recommended) |
+| `CODE_INTEL_DOCKER_READ_ONLY` | `true` | read-only root filesystem in the sandbox container |
+| `CODE_INTEL_DOCKER_TMPFS_SIZE` / `CODE_INTEL_DOCKER_TMPFS_EXEC` | `512m` / `true` | size of the RAM-backed `/tmp` and whether it allows execution (build tools need it) |
+| `CODE_INTEL_DOCKER_CAP_DROP` | `ALL` | capabilities dropped from the sandbox container |
+| `CODE_INTEL_DOCKER_NO_NEW_PRIVILEGES` | `true` | `no-new-privileges` on the sandbox container |
+| `CODE_INTEL_DOCKER_NANO_CPUS` | `1000000000` | CPU limit of the sandbox container in billionths of a CPU (1 CPU) |
+| `CODE_INTEL_E2B_TEMPLATE` | `base` | E2B template when the run mode is `e2b` (needs `E2B_API_KEY`, a secret) |
+
+### app-builder (port 8091)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `APP_BUILDER_KEYCLOAK_AUDIENCE` | unset | required `aud` of a Keycloak token; the audience is not checked while unset |
+| `APP_BUILDER_KEYCLOAK_ALLOWED_AZP` | `agentic-ai-core,agentic-ai-web` | Keycloak clients whose tokens are accepted (`azp`). Empty refuses every bearer token; there is no wildcard. The internal-token path does not use it |
+| `APP_BUILDER_CODE_INTEL_TIMEOUT` | `60` | seconds to wait for a code-intel call |
+| `APP_BUILDER_MAX_FIX_ATTEMPTS` | `3` | automatic repair attempts after a failed build or test (0 to 6); each is one more model call |
+| `APP_BUILDER_PUBLIC_URL` | empty | public base URL shown to users for the generated apps' data API; set it in production, because the request's own URL is unreliable behind a proxy |
+| `APP_BUILDER_DATA_API_ENABLED` | `true` | operator switch for the generated apps' data API |
+| `APP_BUILDER_DATA_API_MAX_CONNS` | `8` | database connections the data API proxy may use at once (1 to 12); beyond it, 503 |
+| `APP_BUILDER_DATA_API_STATEMENT_TIMEOUT_MS` | `5000` | statement timeout of the data API (500 to 30000) |
+| `APP_BUILDER_DATA_API_ANON_RPM` / `APP_BUILDER_DATA_API_ANON_RPM_PER_IP` | `600` / `120` | requests per minute for an anonymous key, and per client IP (best effort, the IP comes from proxy headers) |
+| `APP_BUILDER_DATA_API_SERVICE_RPM` | `1200` | requests per minute for a service key |
+| `APP_BUILDER_PREVIEW_DOMAIN` | `preview.localhost` | domain under which previews are served (`<project>.<domain>`); wildcard DNS and a tunnel hostname are a manual step |
+| `APP_BUILDER_IMPORT_MAX_FILES` / `APP_BUILDER_IMPORT_MAX_BYTES` | `5000` / `104857600` | size limits when importing an existing repository; a larger tree is refused with 413 and a hint to use `subdir` |
+
+Android builds of a generated Capacitor app read `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`,
+`ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` (the upload signing key; secrets) and `VERSION_CODE` (default
+`1`) and `VERSION_NAME` (default `1.0.0`) in the build environment, through
+`scripts/android-release-config.mjs` of the template.
+
+### tool-sandbox (port 8095)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `TOOL_SANDBOX_RUN_UID` / `TOOL_SANDBOX_RUN_GID` | unset (the image sets `5001`) | the one unprivileged uid and gid tenant code runs as |
+| `TOOL_SANDBOX_RUN_UID_RANGE` | unset | inclusive range such as `20000-29999`; each run gets its own uid from it, so two concurrent runs cannot signal or read each other. Unset or malformed falls back to the single uid and logs a warning |
+| `TOOL_SANDBOX_ALLOW_MISSING_CAP_KILL` | `false` | without `CAP_KILL` a timed-out run cannot be killed, so the service refuses to start; `true` starts it anyway with weaker enforcement |
+| `TOOL_SANDBOX_WORK_ROOT` / `TOOL_SANDBOX_CACHE_ROOT` / `TOOL_SANDBOX_HARNESS_ROOT` | `/tmp/sandbox-work` / `/tmp/sandbox-cache` / `/opt/tool-sandbox` (the image uses `/var/sandbox/work` and `/var/sandbox/cache`) | per-run working directories, the compiled-artifact cache and the harness files |
+| `TOOL_SANDBOX_MAX_INPUT_BYTES` / `TOOL_SANDBOX_MAX_OUTPUT_BYTES` / `TOOL_SANDBOX_MAX_RESULT_BYTES` | `262144` / `65536` / `262144` | size limits for the input, captured output and result |
+| `TOOL_SANDBOX_DEFAULT_TIMEOUT_MS` / `TOOL_SANDBOX_DEFAULT_MEMORY_MB` | `5000` / `128` | defaults for a run that does not ask for more |
+| `TOOL_SANDBOX_COMPILE_TIMEOUT_MS` / `TOOL_SANDBOX_COMPILE_MEMORY_MB` | `30000` / `512` | separate, larger budget for compiling Java |
+| `TOOL_SANDBOX_MAX_CACHE_ENTRIES` | `64` | compiled artifacts kept per tenant, oldest evicted first |
+| `TOOL_SANDBOX_JAVAC` / `TOOL_SANDBOX_JAVA` / `TOOL_SANDBOX_PYTHON` | `javac` / `java` / `python3` | toolchain executables |
+
+### workspace-runner (the Assistant's build container, port 8090)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `WORKSPACE_RUNNER_PORT` | `8090` | listen port |
+| `WORKSPACE_ROOT` | `/workspace` | the projects folder inside the container |
+| `WORKSPACE_RUNNER_SECRET_FILE` | unset | file holding the shared secret (preferred, so it is never in an environment); `WORKSPACE_RUNNER_SECRET` is the fallback. The service refuses to start without one |
+| `WORKSPACE_RUNNER_MAX_CONCURRENT` | `4` | commands running at once |
+| `WORKSPACE_RUNNER_MAX_OUTPUT_CHARS` | `200000` | output kept per command |
+| `WORKSPACE_RUNNER_KILL_GRACE_MS` | `5000` | wait between the termination signal and a forced kill |
+| `WORKSPACE_RUNNER_SETTLE_MS` | `4000` | how long a started dev server is watched for its first output before the call returns |
+| `WORKSPACE_RUNNER_PREVIEW_PORT_FIRST` / `WORKSPACE_RUNNER_PREVIEW_PORT_COUNT` | `13210` / `10` | the port range dev servers get. **Keep it equal to the range Compose publishes** (`13210-13219` in `personal.yml` and `lite.yml`); changing one side only breaks previews silently |
+| `MAVEN_OPTS` / `GRADLE_USER_HOME` | empty | passed through to the commands the Assistant runs (`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS` is in `.env.example`) |
+
+### voice-agent (LiveKit worker, port 8081)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `LIVEKIT_AGENT_NAME` | empty | leave empty: the worker uses implicit dispatch; setting it without changing how tokens are minted means the worker is never offered a job |
+| `ELEVEN_API_KEY` | unset | fallback for `ELEVENLABS_API_KEY` (a secret) |
+| `ELEVENLABS_MODEL` | `eleven_turbo_v2_5` | ElevenLabs model |
+| `SARVAM_SPEAKER` | empty | as in the sidecar |
+| `PERCEPTION_SCENE_DIFF_THRESHOLD` | `0.10` | how much a camera frame must change (0 to 1, mean grayscale difference) before the agent looks again; raise it for less chatter |
+| `VOICE_AGENT_VAD_MIN_SILENCE_DURATION_S` | `0.35` | silence that ends a turn; raise for slow speakers or noisy rooms |
+| `VOICE_AGENT_LOG_LEVEL` | `INFO` | log level |
+| `VOICE_AGENT_DEV_STATIC_BEARER_TOKEN` | empty | local testing only: **never set it in a deployment**, it makes every call authenticate as one account |
+
+### rl-trainer (port 8095)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `RL_TRAINER_KEYCLOAK_AUDIENCE` | unset | required `aud` of a Keycloak token; not checked while unset |
+| `RL_TRAINER_KEYCLOAK_ALLOWED_AZP` | `agentic-ai-core,agentic-ai-web` | accepted Keycloak clients; empty refuses every bearer token |
+
+### mcp-stdio-runner
+
+| Variable | Default | Effect |
+|---|---|---|
+| `MCP_STDIO_RUNNER_SWEEP_INTERVAL_MS` | `30000` | how often the runner checks for children past `MCP_STDIO_RUNNER_IDLE_TTL_MS` or `MCP_STDIO_RUNNER_MAX_LIFETIME_MS`; `0` turns the check off, so neither limit is enforced |
+
 ## Compose-only variables
 
 `deploy/compose/.env.example` is the complete, grouped reference for the

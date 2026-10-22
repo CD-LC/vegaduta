@@ -34,7 +34,7 @@ class Settings:
         default_factory=lambda: os.environ.get("CODE_INTEL_INTERNAL_TOKEN", "")
     )
 
-    # Keycloak (auth_mode=keycloak). Defaults match deploy/docker-compose.yml.
+    # Keycloak (auth_mode=keycloak). Defaults match deploy/compose/docker-compose.yml.
     #
     # keycloak_issuer is the value VALIDATED against the token's `iss` claim.
     # Under Keycloak's KC_HOSTNAME_STRICT (how this platform runs it), every
@@ -307,7 +307,7 @@ class Settings:
     # in a log line, an error body, or /health.
     #
     # OPTIONAL and currently unset everywhere: no deployment passes
-    # ANTHROPIC_API_KEY to this service (not deploy/docker-compose.yml, not
+    # ANTHROPIC_API_KEY to this service (not deploy/compose/docker-compose.yml, not
     # infra/terraform/environments/azure-phase1/main.tf, not .env.example), and
     # `anthropic` is a commented-out optional line in requirements.txt, so it
     # is not in the image either. Both gaps are reported as an unavailable

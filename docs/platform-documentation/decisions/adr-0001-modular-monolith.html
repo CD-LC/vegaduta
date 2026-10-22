@@ -10,7 +10,7 @@
   <dt>Decided</dt><dd>2026-07</dd>
   <dt>Deciders</dt><dd>Platform Engineering</dd>
   <dt>Amended</dt><dd>2026-10-15: the ~7-service decomposition target is withdrawn; the target architecture below replaces it</dd>
-  <dt>Related</dt><dd><a href="../../architecture/ADR-0014-horizontal-scaling.md">ADR-0014 horizontal scaling</a>, <a href="../../architecture/overview.md">Architecture overview</a>, <a href="../../architecture/STRUCTURAL-AUDIT-2026-10-14.md">Structural audit</a>; see <code>shape-api</code> / <code>shape-jobs</code> in the <a href="../overview/glossary.html">Glossary</a></dd>
+  <dt>Related</dt><dd><a href="../../architecture/ADR-0014-horizontal-scaling/">ADR-0014 horizontal scaling</a>, <a href="../../architecture/overview/">Architecture overview</a>, <a href="../../architecture/STRUCTURAL-AUDIT-2026-10-14/">Structural audit</a>; see <code>shape-api</code> / <code>shape-jobs</code> in the <a href="../overview/glossary.html">Glossary</a></dd>
 </dl>
 
 <h2>Context</h2>
@@ -83,7 +83,7 @@
     (<code>StructureRulesTest</code>, <code>ModuleBoundaryRulesTest</code>) enforce
     this, and the baselines only shrink.</li>
   <li><strong>Scale by workload class and replica, not by module</strong>
-    (<a href="../../architecture/ADR-0014-horizontal-scaling.md">ADR-0014</a>), in this order:
+    (<a href="../../architecture/ADR-0014-horizontal-scaling/">ADR-0014</a>), in this order:
     more <code>api</code> replicas; job pools for background work (ingest, webhooks,
     intake, billing); cells (a full stack per tenant group) when one cluster is
     saturated.</li>

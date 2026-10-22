@@ -2,7 +2,7 @@
 voice-agent worker entrypoint.
 
 Registers with the self-hosted LiveKit server (same server
-`deploy/docker-compose.yml`'s `livekit` service and core/voice's
+`deploy/compose/docker-compose.yml`'s `livekit` service and core/voice's
 `LiveKitTokenService` already point at) and, for every call room a browser
 joins via `CallPanel.tsx`/`VoiceCallController#issueToken`, runs an
 `AgentSession` wiring together:

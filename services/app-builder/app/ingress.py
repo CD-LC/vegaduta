@@ -6,7 +6,7 @@ real public URL) with actual runtime route registration against
 ``deploy/caddy/Caddyfile``'s already-running ``:8899`` server, using
 Caddy's admin API (default ``http://caddy:2019`` inside the compose
 network — see ``deploy/caddy/Caddyfile``'s ``admin`` global directive and
-``deploy/docker-compose.yml``'s ``caddy`` service, which deliberately does
+``deploy/compose/docker-compose.yml``'s ``caddy`` service, which deliberately does
 NOT publish 2019 to the host or the tunnel — admin API access is
 container-to-container only).
 

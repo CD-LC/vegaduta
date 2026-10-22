@@ -7,20 +7,30 @@ choose; everything else is mechanical.
 
 The repository's public identity is recorded in
 [`scripts/dev/repo-identity.env`](../../scripts/dev/repo-identity.env). It has
-been settled: the repository is `CD-LC/vegaduta` and images and charts are
-published under `ghcr.io/cd-lc`. The table lists the current values. The
-`TODO(maintainers)` notes still in `SECURITY.md`, `MAINTAINERS.md` and
-`.github/CODEOWNERS` mark the values still to confirm (contact address, lead
-handle, maintainers team); rerun the script below to change any of them.
+settled: the repository is `CD-LC/vegaduta`, images and charts are published
+under `ghcr.io/cd-lc`, the project lead is `@punith-naga`, and
+`contact@cdandlc.com` is the contact address. The table lists the current
+values. Only the `maintainers` team is still to be created in GitHub (see
+below). Rerun the script below only if one of the values changes.
 
 | Current value | Used for | Decide |
 |---|---|---|
 | `CD-LC/vegaduta` | GitHub owner/repository: README badges and clone URL, `install.sh`, CITATION.cff, issue-template links, `pom.xml` `<scm>`, Helm chart metadata, theme links | Who owns the `vegaduta` GitHub account. It must be an **organization** (teams, rulesets, org secrets); a user account can be converted under Settings -> Organizations. |
 | `ghcr.io/cd-lc` | image and chart registry namespace | follows the owner |
-| `@CD-LC/maintainers` | CODEOWNERS | create the `maintainers` team in the organization, or use a username |
+| `@CD-LC/maintainers` | CODEOWNERS | **the team must exist** (see below) |
 | `punith-naga` | MAINTAINERS.md | the project lead's GitHub handle (the account that also authors commits) |
 | `contact@cdandlc.com` | SECURITY.md fallback contact | a monitored address |
-| `contact@cdandlc.com` | CODE_OF_CONDUCT.md | a monitored address (can be the same) |
+| `contact@cdandlc.com` | CODE_OF_CONDUCT.md | a monitored address (the same address as the security contact: changing one with the script rewrites both) |
+
+**The `maintainers` team must exist.** `.github/CODEOWNERS` names
+`@CD-LC/maintainers` in every rule. As of 2026-10-22 the `CD-LC` organization
+has the teams `qubit16`, `vegaduta` and `yantrika` but no `maintainers`, so
+GitHub reports "Unknown owner" for all ten rules and routes no review request.
+Create the team in the organization (public, so CODEOWNERS can resolve it), add
+the project lead, and give it **Write** on `CD-LC/vegaduta`. Verify with
+`gh api repos/CD-LC/vegaduta/codeowners/errors --jq '.errors | length'`, which
+must print `0`. If you prefer a single user as owner, run the script below
+with `--team @<user>` instead.
 
 Then rewrite every occurrence in one step and review the diff:
 
@@ -34,8 +44,10 @@ git diff
 ```
 
 `--registry` defaults to `ghcr.io/<owner>` and `--team` to
-`@<owner>/maintainers`. Afterwards, `grep -rn 'TODO(maintainers)' .` lists the
-remaining notes to delete.
+`@<owner>/maintainers`. The script rewrites
+[`repo-identity.env`](../../scripts/dev/repo-identity.env) too; keep that file
+equal to what the tracked files say, because the script finds a value by
+searching for it.
 
 ## 2. Repository settings
 
@@ -52,6 +64,30 @@ remaining notes to delete.
   (SECURITY.md depends on it), Dependabot alerts and security updates, secret
   scanning and push protection.
 - Discussions: enable (the issue templates and SUPPORT.md link to them).
+
+State on 2026-10-22 (public repository; read it again with
+`gh api repos/CD-LC/vegaduta --jq '{has_discussions, security_and_analysis}'`,
+`gh api repos/CD-LC/vegaduta/private-vulnerability-reporting` and
+`gh api repos/CD-LC/vegaduta/actions/permissions/workflow`):
+
+| Setting | Today | Wanted |
+|---|---|---|
+| Private vulnerability reporting | on | on |
+| Dependabot alerts | on | on |
+| Secret scanning | on | on |
+| Actions default token permission | read; Actions cannot approve pull requests | same |
+| **Dependabot security updates** | **off** | on |
+| **Secret scanning push protection** | **off** | on |
+| Secret scanning non-provider patterns, validity checks | off | optional; on if the plan allows |
+| **Discussions** | **off** (issue templates and SUPPORT.md link to them) | on |
+| **Branch ruleset on `main`** | **none** | [branch-protection.md](branch-protection.md) |
+| **`maintainers` team** | **does not exist** | create it (section 1) |
+
+The rows in bold are for the repository owner to change in GitHub; no
+pull request can do it. Code scanning already runs, but 1,092 alerts are open
+(11 critical, 546 high, 450 medium, 85 low; 2026-10-22), so a new alert is
+easy to miss. Triage the critical and high ones first: fix them, or dismiss
+each with a reason (test-only code, false positive) so the list carries signal.
 - Labels: `bash scripts/dev/create-labels.sh <org>/<repo>` (Dependabot and the
   labeler cannot apply labels that do not exist).
 - Branch ruleset: [branch-protection.md](branch-protection.md).
