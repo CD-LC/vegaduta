@@ -38,6 +38,8 @@ import { Button } from "../components/ui/button";
 import { EmptyState } from "../components/ax/page-kit";
 import LlmSpendSection from "../components/billing/LlmSpendSection";
 import { isBillingEnabled } from "../lib/billing-flag";
+import { isPersonalEdition } from "../lib/edition";
+import { hiddenOnPersonalInstall } from "../lib/personalInstall";
 import SpendCapCard from "../components/SpendCapCard";
 import BudgetTopUpCard from "./BudgetTopUpCard";
 
@@ -317,9 +319,11 @@ export default function UsagePage() {
             <Button asChild variant="outline" size="sm">
               <Link href="/insights">{tx("usageLinkInsights")}</Link>
             </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/roi">{tx("usageLinkRoi")}</Link>
-            </Button>
+            {!hiddenOnPersonalInstall("/roi") && (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/roi">{tx("usageLinkRoi")}</Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -410,8 +414,10 @@ export default function UsagePage() {
           {/* Monthly hosted-AI spend cap (platform-admin set); hidden when none. */}
           <SpendCapCard />
 
-          {/* Buy more of the per-user budget (BudgetTopUpController); hides itself when top-ups are off. */}
-          <BudgetTopUpCard />
+          {/* Buy more of the per-user budget (BudgetTopUpController); hides itself when top-ups are off.
+              Not mounted at all without billing (a personal install has no payments): the card would
+              otherwise call /api/budget on load only to hide itself. */}
+          {billingOn && !isPersonalEdition() && <BudgetTopUpCard />}
 
           {/* Cross-link to the money view (2026-09-24): this page is the
               allowance meter every member can read; the per-provider cost,
