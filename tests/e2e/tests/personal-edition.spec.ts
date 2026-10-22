@@ -231,10 +231,12 @@ test.describe("personal edition: signed in as the owner", () => {
     }
   });
 
-  test("Ctrl+K lists none of the hidden destinations", async ({ owner }) => {
+  test("the Jump to… palette lists none of the hidden destinations", async ({ owner }) => {
     await owner.goto("/assistant");
     await expect(owner.getByRole("navigation", { name: "Primary" })).toBeVisible();
-    await owner.keyboard.press("ControlOrMeta+k");
+    // Ctrl+K on /assistant opens the Assistant's own command palette (actions and prompts), not the
+    // navigation palette this test inspects, so open the navigation one from its top-bar button.
+    await owner.getByRole("button", { name: "Jump to…" }).click();
     const options = owner.getByRole("listbox", { name: "Jump to…" }).getByRole("option");
     await expect(options.first()).toBeVisible();
     // The first span of an option is its label; the second (if any) is its group.
