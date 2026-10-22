@@ -122,6 +122,18 @@ app:
   # here (the shared default keeps it off for multi-tenant servers).
   data-tables:
     enabled: ${DATA_TABLES_ENABLED:true}
+  # ---- start-up time: keep best-effort work off the readiness path ----
+  # A laptop has one owner and one schema, so none of this needs to finish before the console opens.
+  startup:
+    # Runs the network-bound warm-ups and the per-agent version-snapshot backfill after readiness
+    # instead of before it (see application.yml app.startup.background-warmup for what moves).
+    background-warmup:
+      enabled: ${APP_STARTUP_BACKGROUND_WARMUP_ENABLED:true}
+  tenancy:
+    # The one personal schema is checked with a single query when its migration history already lists
+    # every script, not with a Flyway instance, classpath scan and checksum pass (257 scripts) on every
+    # restart. A schema that is behind still gets the full migrate. Set false to checksum-validate on boot.
+    migrate-skip-up-to-date: ${TENANCY_MIGRATE_SKIP_UP_TO_DATE:true}
   edition:
     billing-enabled: ${APP_EDITION_BILLING_ENABLED:false}
   # Documents, agent memory and the per-turn query embedding. `auto` picks a cloud key if one is
@@ -201,6 +213,12 @@ app:
       enabled: ${TELEGRAM_POLLING_ENABLED:true}
   mail:
     from: ${WORKFLOW_MAIL_FROM:workflows@agentic-ai.local}
+
+# The "Browse registry" tab fetches the official MCP registry on first use. Warming it during boot is
+# network and CPU work a one-person install does not need before it has opened that tab.
+mcp:
+  registry:
+    warm-on-startup: ${MCP_REGISTRY_WARM_ON_STARTUP:false}
 
 management:
   tracing:

@@ -168,7 +168,8 @@ search flag, so a Windows install does not get web search by default; it adds th
 
 **What it costs.** Two more images to pull on the first start (SearXNG, and the runner with Node, uv and Python)
 and about 1.3 GB more of memory limits (512 MB + 768 MB; limits, not measured use), which takes the personal budget
-from about 2.5 GB to about 3.8 GB. The first start takes longer; `--wait-timeout` already defaults to 900 s. None of
+from about 2.5 GB to about 3.8 GB. The first start takes longer; `--wait-timeout` already defaults to 900 s and core's
+health check allows a 10-minute start period (failed checks inside it do not count). None of
 this was run on a real Docker stack when it was written: the launcher plan, the compose files and the registration
 logic are tested, the containers were not started.
 

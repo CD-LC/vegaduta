@@ -760,8 +760,20 @@ verify_local_agent_model() {
       pull_missing_model "$EMBED_MODEL" && EMBED_NOT_PULLED=0
     fi
   fi
-  say "Checking that '$model' can run agents (tool calls)..."
-  grade="$(probe_tool_grade "$LOCAL_AI" "$model" || true)"
+  # The probe sends a real chat completion, which loads the model cold (up to 240 s on a laptop), and its
+  # answer only changes when the model does. So it runs on the first start and when the model changes; a
+  # restart reuses the recorded grade. VEGADUTA_REPROBE=1 measures again.
+  local seen; seen="$(get_env LOCAL_MODEL_GRADE)"
+  if [ "${VEGADUTA_REPROBE:-0}" != 1 ] && [ "${seen%%|*}" = "$model" ] && [ "${seen#*|}" != "$seen" ] && [ -n "${seen#*|}" ]; then
+    grade="$(printf '%s' "${seen#*|}" | tr '_' ' ')"
+    say "Using the tool-call grade recorded for '$model' ($grade); VEGADUTA_REPROBE=1 measures it again."
+  else
+    say "Checking that '$model' can run agents (tool calls)..."
+    grade="$(probe_tool_grade "$LOCAL_AI" "$model" || true)"
+    case "$grade" in
+      structured|text|'chat only') set_env LOCAL_MODEL_GRADE "$model|$(printf '%s' "$grade" | tr ' ' '_')" force ;;
+    esac
+  fi
   # The catalog records what full agent prompts showed; a short probe can be kinder.
   [ "$grade" = structured ] && grep -q "^${model}|.*|chat only|" "$MODELS_CATALOG" && grade="chat only"
   case "$grade" in

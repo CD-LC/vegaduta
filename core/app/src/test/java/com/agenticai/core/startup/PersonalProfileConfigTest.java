@@ -99,6 +99,29 @@ class PersonalProfileConfigTest {
     }
 
     @Test
+    void keepsBestEffortWorkOffTheReadinessPath() throws IOException {
+        StandardEnvironment env = environment(Map.of());
+
+        assertThat(env.getProperty("app.startup.background-warmup.enabled")).isEqualTo("true");
+        assertThat(env.getProperty("app.tenancy.migrate-skip-up-to-date")).isEqualTo("true");
+        assertThat(env.getProperty("mcp.registry.warm-on-startup")).isEqualTo("false");
+    }
+
+    @Test
+    void theStartUpShortcutsCanBeSwitchedBackFromTheEnvironment() throws IOException {
+        StandardEnvironment env =
+                environment(
+                        Map.of(
+                                "APP_STARTUP_BACKGROUND_WARMUP_ENABLED", "false",
+                                "TENANCY_MIGRATE_SKIP_UP_TO_DATE", "false",
+                                "MCP_REGISTRY_WARM_ON_STARTUP", "true"));
+
+        assertThat(env.getProperty("app.startup.background-warmup.enabled")).isEqualTo("false");
+        assertThat(env.getProperty("app.tenancy.migrate-skip-up-to-date")).isEqualTo("false");
+        assertThat(env.getProperty("mcp.registry.warm-on-startup")).isEqualTo("true");
+    }
+
+    @Test
     void doesNotSwitchKafkaOrTemporalOn() throws IOException {
         // Both stay governed by the `workflow` / `temporal` profiles (not part of the personal
         // profile set) and by an explicit bootstrap server; this file must not pre-empt that.

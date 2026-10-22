@@ -10,6 +10,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **A first personal start no longer gives up while core is still booting.** On an empty database core runs about 640 migrations and creates the owner's schema before it reports ready; on a busy laptop that took 5 minutes, longer than core's health budget (120 s plus 10 checks 15 s apart), so Compose stopped with "dependency failed to start" and the console was never created. Core now has a 10-minute start period (failed checks do not count inside it), and the console starts as soon as core's container is up instead of after core is healthy; `up --wait` still waits for core. The personal stack's healthchecks (Postgres, core, console, MCP runner, search) also probe every 1-2 seconds while starting, so each service reports healthy within seconds of being ready instead of on the next 5-30 s tick.
 - **SDK artifacts now ship the license they declare.** Every `io.github.cd-lc:*` jar carried the repository's BSL-1.1 `LICENSE`/`NOTICE` in `META-INF` while its POM declares Apache-2.0; the `sdk/` subtree now has its own Apache-2.0 `LICENSE` and `NOTICE` (also copied into the Python and TypeScript package directories), and the jars bundle those.
 - **`ApprovalNotificationBlockedException` is a `GovernanceException` again.** It extended `RuntimeException`, so `catch (GovernanceException)` - the documented one-stop handler - missed it.
 - **REST clients: streams, retries and errors are publish-grade.** The Python client's 60 s request timeout also applied to SSE reads, so a stream idle for a minute died; `stream()` now bounds connect+headers only (`http.client`, blocking reads). Both clients retry idempotent GET/HEAD on 429/5xx/network failures honouring `Retry-After`, re-resolve a callable token once on 401, wrap transport failures in a `NetworkError`, expose `code`, `headers` and `retry_after`/`retryAfterMs` on `ApiError`, and send an SDK `User-Agent`. The TypeScript client gains `timeoutMs` (client and per-call), `maxRetries` and `userAgent` options.
@@ -18,6 +19,11 @@ Release notes on GitHub are generated from the section for each version.
 ### Added
 
 - **A release path for the generated REST clients.** `.github/workflows/rest-sdk-release.yml` verifies, builds, attests and publishes the npm and PyPI `vegaduta-sdk` packages for `restsdk-v*` tags (publish stays off until `SDK_PUBLISH_NPM`/`SDK_PUBLISH_PYPI` are set); setup and procedure in `docs/maintainers/releasing-rest-sdks.md`. New tests cover the classification package (lethal-trifecta detector, resolver overrides, composite and annotated sources) and the Spring AI wiring, plus the retry/timeout/error paths in both REST runtimes.
+
+### Changed
+
+- **Faster personal start.** The core JVM starts with a 25% initial heap instead of about 24 MB, which avoids dozens of stop-the-world grow-and-collect cycles during boot. The personal profile now moves best-effort work off the readiness path: the agent version-snapshot backfill runs after readiness (`APP_STARTUP_BACKGROUND_WARMUP_ENABLED`), a restart checks the personal schema with one query when its migration history is already complete (`TENANCY_MIGRATE_SKIP_UP_TO_DATE`), and the MCP registry is no longer fetched during boot (`MCP_REGISTRY_WARM_ON_STARTUP`). Each can be set back from the environment.
+- **A restart no longer re-runs the local model's tool-call test.** `scripts/vegaduta` sent a real chat request to the model on every start (a cold model load, up to 240 s). It now measures once, records the result in `.env` as `LOCAL_MODEL_GRADE`, and reuses it until the model changes; `VEGADUTA_REPROBE=1` measures again.
 
 ## [0.1.9] - 2026-10-21
 
