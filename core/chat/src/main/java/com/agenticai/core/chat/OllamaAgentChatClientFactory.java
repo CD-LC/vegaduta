@@ -144,7 +144,7 @@ public class OllamaAgentChatClientFactory implements AgentChatClientFactory {
                         .api(normalizeBaseUrl(credential.baseUrl()))
                         // Ollama sends thinking as "reasoning"; Spring AI 2's OpenAI model reads
                         // both "reasoning" and "reasoning_content" natively, so no wire rewrite
-                        // is needed (it was for 1.x, see OllamaReasoningAliasTest).
+                        // is needed (it was for 1.x; see OllamaWireBehaviourTest).
                         .guarded();
         apiBuilder = hasKey ? apiBuilder.apiKey(credential.apiKey()) : apiBuilder.noApiKey();
 

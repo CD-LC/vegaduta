@@ -196,16 +196,12 @@ public class HostedLlmChatClientFactory {
         String model = resolveModel(provider);
         OpenAiCompatModelBuilder.Api openAiApi = modelBuilder.api(endpoint.baseUrl());
         // The install's own Ollama (LocalLlmPoolBootstrap / LocalModelsService rows) gets what a
-        // tenant OLLAMA provider row already gets in OllamaAgentChatClientFactory: the
-        // reasoning-field alias, so a thinking model's reasoning reaches the `thinking` step
-        // events instead of being dropped, and the num_ctx override below. Other pool rows are
-        // untouched: a cloud provider can 400 on an unknown body field.
+        // tenant OLLAMA provider row already gets in OllamaAgentChatClientFactory: the num_ctx
+        // override below (Spring AI 2's OpenAI model reads Ollama's "reasoning" field itself, so a
+        // thinking model's reasoning reaches the `thinking` step events with no wire rewrite; see
+        // OllamaWireBehaviourTest). Other pool rows are untouched: a cloud provider can 400 on an
+        // unknown body field.
         boolean localOllama = isLocalOllamaRow(provider);
-        // PORT-TODO(boot4): OllamaReasoningAlias was a WebClient/RestClient filter on Spring AI
-        // 1.x's
-        // OpenAiApi builders; those are gone in Spring AI 2 (the model sits on the OpenAI SDK's
-        // OkHttp client), so the alias has to be re-seated as an OkHttp interceptor on this Api
-        // (see OpenAiCompatModelBuilder.rewriteBody) before the local-Ollama pool row is exercised.
         // Keyless rows (a local Ollama / llama.cpp / vLLM entry made by the local-LLM bootstrap)
         // send no Authorization header at all, like OllamaAgentChatClientFactory. Trimmed for the
         // same reason the model is (see resolveModel): the key is decrypted straight out of the
