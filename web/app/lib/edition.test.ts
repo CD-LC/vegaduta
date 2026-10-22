@@ -88,8 +88,40 @@ describe("edition resolution", () => {
     }
   });
 
-  it("lets an explicit edition win over what the older switches say", () => {
+  it("resolves every combination of explicit edition, auth mode and deploy env", () => {
+    // [NEXT_PUBLIC_EDITION, NEXT_PUBLIC_AUTH_MODE, NEXT_PUBLIC_DEPLOY_ENV] -> declared edition.
+    // Local auth is personal whatever else is set (the pre-edition meaning); an explicit tier decides
+    // when sign-in is not local; the deploy env is only the last fallback.
+    const editions = ["", "personal", "lite", "full"];
+    const auths = ["", "keycloak", "local"];
+    const deploys = ["", "lite", "full", "production"];
+    for (const e of editions)
+      for (const a of auths)
+        for (const d of deploys) {
+          vi.unstubAllEnvs();
+          const env: Record<string, string> = {};
+          if (e) env.NEXT_PUBLIC_EDITION = e;
+          if (a) env.NEXT_PUBLIC_AUTH_MODE = a;
+          if (d) env.NEXT_PUBLIC_DEPLOY_ENV = d;
+          stub(env);
+          let want: ReturnType<typeof declaredEdition>;
+          if (a === "local") want = "personal";
+          else if (e) want = e as "personal" | "lite" | "full";
+          else want = d === "lite" || d === "full" ? d : null;
+          expect(declaredEdition(), `edition=${e} auth=${a} deploy=${d}`).toBe(want);
+        }
+  });
+
+  it("does not let an explicit lite or full un-hide pages on a local-auth console", () => {
     stub({ NEXT_PUBLIC_EDITION: "full", NEXT_PUBLIC_AUTH_MODE: "local", NEXT_PUBLIC_DEPLOY_ENV: "lite" });
+    expect(edition()).toBe("personal");
+    vi.unstubAllEnvs();
+    stub({ NEXT_PUBLIC_EDITION: "lite", NEXT_PUBLIC_AUTH_MODE: "local" });
+    expect(isPersonalEdition()).toBe(true);
+  });
+
+  it("lets an explicit edition win over the deploy env when sign-in is not local", () => {
+    stub({ NEXT_PUBLIC_EDITION: "full", NEXT_PUBLIC_AUTH_MODE: "keycloak", NEXT_PUBLIC_DEPLOY_ENV: "lite" });
     expect(edition()).toBe("full");
     vi.unstubAllEnvs();
     stub({ NEXT_PUBLIC_EDITION: "personal", NEXT_PUBLIC_DEPLOY_ENV: "full" });
