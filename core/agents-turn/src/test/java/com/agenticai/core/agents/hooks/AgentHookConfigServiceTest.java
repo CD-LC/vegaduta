@@ -43,7 +43,7 @@ class AgentHookConfigServiceTest {
     private static final UUID AGENT = UUID.fromString("55555555-5555-5555-5555-555555555555");
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String BLOCK_HOOK =
-        "{\"hooks\":[{\"id\":\"no-delete\",\"point\":\"BEFORE_TOOL\",\"match\":{\"tool\":\"delete_*\"},\"action\":\"block\"}]}";
+            "{\"hooks\":[{\"id\":\"no-delete\",\"point\":\"BEFORE_TOOL\",\"match\":{\"tool\":\"delete_*\"},\"action\":\"block\"}]}";
 
     private final Map<String, AgentHookConfig> store = new HashMap<>();
     private final AgentHookConfigRepository repository = mock(AgentHookConfigRepository.class);
@@ -66,17 +66,21 @@ class AgentHookConfigServiceTest {
     }
 
     private AgentHookConfigService service(boolean enabled) {
-        return new AgentHookConfigService(repository, provider(agentService), audit, enabled, "ops.example.com", 60_000);
+        return new AgentHookConfigService(
+                repository, provider(agentService), audit, enabled, "ops.example.com", 60_000);
     }
 
     @BeforeEach
     void setUp() {
-        when(repository.findById(anyString())).thenAnswer(i -> Optional.ofNullable(store.get((String) i.getArgument(0))));
-        when(repository.save(any(AgentHookConfig.class))).thenAnswer(i -> {
-            AgentHookConfig c = i.getArgument(0);
-            store.put(c.getScopeKey(), c);
-            return c;
-        });
+        when(repository.findById(anyString()))
+                .thenAnswer(i -> Optional.ofNullable(store.get((String) i.getArgument(0))));
+        when(repository.save(any(AgentHookConfig.class)))
+                .thenAnswer(
+                        i -> {
+                            AgentHookConfig c = i.getArgument(0);
+                            store.put(c.getScopeKey(), c);
+                            return c;
+                        });
         asUser("PERM_MANAGE_GUARDRAILS");
     }
 
@@ -127,7 +131,14 @@ class AgentHookConfigServiceTest {
         assertEquals("block", saved.hooks().get(0).get("action"));
         assertEquals(1, HookSchema.parseStored(store.get(AGENT.toString()).getHooksJson()).size());
         assertEquals("user-1", store.get(AGENT.toString()).getUpdatedBy());
-        verify(audit).record(eq("user-1"), eq("agent.hooks.update"), eq("agent"), eq(AGENT.toString()), eq(AuditOutcome.SUCCESS), anyString());
+        verify(audit)
+                .record(
+                        eq("user-1"),
+                        eq("agent.hooks.update"),
+                        eq("agent"),
+                        eq(AGENT.toString()),
+                        eq(AuditOutcome.SUCCESS),
+                        anyString());
         verify(agentService).requireAccess(AGENT, PermissionLevel.EDITOR);
         assertEquals(1, service.getAgentHooks(AGENT).hooks().size());
     }
@@ -136,7 +147,10 @@ class AgentHookConfigServiceTest {
     void savingNeedsTheGuardrailsAuthorityNotJustEditAccess() {
         asUser("PERM_MANAGE_AGENTS");
 
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> service(true).putAgentHooks(AGENT, json(BLOCK_HOOK)));
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> service(true).putAgentHooks(AGENT, json(BLOCK_HOOK)));
 
         assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
         assertTrue(store.isEmpty());
@@ -156,14 +170,20 @@ class AgentHookConfigServiceTest {
     @Test
     void anAgentTheCallerCannotSeeAnswersBeforeAnyForbiddenOrConflict() {
         asUser("PERM_MANAGE_AGENTS");
-        when(agentService.requireAccess(AGENT, PermissionLevel.VIEWER)).thenThrow(new IllegalStateException("not found"));
+        when(agentService.requireAccess(AGENT, PermissionLevel.VIEWER))
+                .thenThrow(new IllegalStateException("not found"));
 
-        assertThrows(IllegalStateException.class, () -> service(false).putAgentHooks(AGENT, json(BLOCK_HOOK)));
+        assertThrows(
+                IllegalStateException.class,
+                () -> service(false).putAgentHooks(AGENT, json(BLOCK_HOOK)));
     }
 
     @Test
     void savingIsAConflictWhileTheFeatureIsOff() {
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> service(false).putAgentHooks(AGENT, json(BLOCK_HOOK)));
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> service(false).putAgentHooks(AGENT, json(BLOCK_HOOK)));
 
         assertEquals(HttpStatus.CONFLICT, e.getStatusCode());
         assertTrue(store.isEmpty());
@@ -173,18 +193,34 @@ class AgentHookConfigServiceTest {
     void theHooksFieldMustBePresentSoATypoCannotClearAnAgent() {
         service(true).putAgentHooks(AGENT, json(BLOCK_HOOK));
 
-        assertThrows(IllegalArgumentException.class, () -> service(true).putAgentHooks(AGENT, json("{}")));
-        assertThrows(IllegalArgumentException.class, () -> service(true).putAgentHooks(AGENT, json("{\"hook\":[]}")));
-        assertThrows(IllegalArgumentException.class, () -> service(true).putAgentHooks(AGENT, json("{\"hooks\":{}}")));
-        assertThrows(IllegalArgumentException.class, () -> service(true).putAgentHooks(AGENT, null));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service(true).putAgentHooks(AGENT, json("{}")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service(true).putAgentHooks(AGENT, json("{\"hook\":[]}")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service(true).putAgentHooks(AGENT, json("{\"hooks\":{}}")));
+        assertThrows(
+                IllegalArgumentException.class, () -> service(true).putAgentHooks(AGENT, null));
 
-        assertEquals(1, HookSchema.parseStored(store.get(AGENT.toString()).getHooksJson()).size(), "the saved hooks survived");
+        assertEquals(
+                1,
+                HookSchema.parseStored(store.get(AGENT.toString()).getHooksJson()).size(),
+                "the saved hooks survived");
     }
 
     @Test
     void anInvalidHookIsRejectedAndNothingIsWritten() {
-        assertThrows(IllegalArgumentException.class, () -> service(true).putAgentHooks(AGENT,
-            json("{\"hooks\":[{\"id\":\"a\",\"point\":\"AFTER_MODEL\",\"action\":\"limit\",\"params\":{\"maxPerMinute\":1}}]}")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        service(true)
+                                .putAgentHooks(
+                                        AGENT,
+                                        json(
+                                                "{\"hooks\":[{\"id\":\"a\",\"point\":\"AFTER_MODEL\",\"action\":\"limit\",\"params\":{\"maxPerMinute\":1}}]}")));
 
         assertTrue(store.isEmpty());
         verify(repository, never()).save(any(AgentHookConfig.class));
@@ -192,17 +228,30 @@ class AgentHookConfigServiceTest {
 
     @Test
     void aWebhookMustPointAtAnAllowListedHost() {
-        String body = "{\"hooks\":[{\"id\":\"vet\",\"point\":\"BEFORE_TOOL\",\"action\":\"webhook\",\"params\":{\"url\":\"%s\"}}]}";
+        String body =
+                "{\"hooks\":[{\"id\":\"vet\",\"point\":\"BEFORE_TOOL\",\"action\":\"webhook\",\"params\":{\"url\":\"%s\"}}]}";
 
-        assertThrows(IllegalArgumentException.class,
-            () -> service(true).putAgentHooks(AGENT, json(String.format(body, "https://evil.example.net/x"))));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        service(true)
+                                .putAgentHooks(
+                                        AGENT,
+                                        json(String.format(body, "https://evil.example.net/x"))));
         // The operator's list (config) is honoured...
         service(true).putAgentHooks(AGENT, json(String.format(body, "https://ops.example.com/x")));
         // ...and so is the workspace's own, once an admin added the host.
-        assertThrows(IllegalArgumentException.class,
-            () -> service(true).putAgentHooks(AGENT, json(String.format(body, "https://tenant.example.org/x"))));
-        service(true).putTenantHooks(json("{\"hooks\":[],\"webhookHosts\":[\"tenant.example.org\"]}"));
-        service(true).putAgentHooks(AGENT, json(String.format(body, "https://tenant.example.org/x")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        service(true)
+                                .putAgentHooks(
+                                        AGENT,
+                                        json(String.format(body, "https://tenant.example.org/x"))));
+        service(true)
+                .putTenantHooks(json("{\"hooks\":[],\"webhookHosts\":[\"tenant.example.org\"]}"));
+        service(true)
+                .putAgentHooks(AGENT, json(String.format(body, "https://tenant.example.org/x")));
     }
 
     // ----------------------------------------------------------- workspace defaults
@@ -211,51 +260,93 @@ class AgentHookConfigServiceTest {
     void workspaceDefaultsAreSavedWithTheirWebhookHostsAndAbsentHostsAreKept() {
         AgentHookConfigService service = service(true);
 
-        TenantHooksResponse saved = service.putTenantHooks(json(
-            "{\"hooks\":[{\"id\":\"audit\",\"point\":\"ON_RUN_END\",\"action\":\"log\"}],\"webhookHosts\":[\"Hooks.Example.org\",\"*.corp.example.org\",\"hooks.example.org\"]}"));
+        TenantHooksResponse saved =
+                service.putTenantHooks(
+                        json(
+                                "{\"hooks\":[{\"id\":\"audit\",\"point\":\"ON_RUN_END\",\"action\":\"log\"}],\"webhookHosts\":[\"Hooks.Example.org\",\"*.corp.example.org\",\"hooks.example.org\"]}"));
 
         assertEquals(1, saved.hooks().size());
-        assertEquals(List.of("hooks.example.org", "*.corp.example.org"), saved.webhookHosts(), "normalised and de-duplicated");
+        assertEquals(
+                List.of("hooks.example.org", "*.corp.example.org"),
+                saved.webhookHosts(),
+                "normalised and de-duplicated");
         assertEquals(List.of("ops.example.com"), saved.platformWebhookHosts());
 
         TenantHooksResponse again = service.putTenantHooks(json("{\"hooks\":[]}"));
 
         assertTrue(again.hooks().isEmpty());
-        assertEquals(List.of("hooks.example.org", "*.corp.example.org"), again.webhookHosts(), "no webhookHosts field: the list is kept");
-        verify(audit, times(2)).record(eq("user-1"), eq("agent.hooks.defaults.update"), eq("tenant"), eq("tenant-a"), eq(AuditOutcome.SUCCESS), anyString());
+        assertEquals(
+                List.of("hooks.example.org", "*.corp.example.org"),
+                again.webhookHosts(),
+                "no webhookHosts field: the list is kept");
+        verify(audit, times(2))
+                .record(
+                        eq("user-1"),
+                        eq("agent.hooks.defaults.update"),
+                        eq("tenant"),
+                        eq("tenant-a"),
+                        eq(AuditOutcome.SUCCESS),
+                        anyString());
     }
 
     @Test
     void workspaceDefaultsNeedTheAuthorityAndRejectBadHosts() {
-        for (String bad : List.of("\"https://x.example.com\"", "\"x.example.com:8443\"", "\"x\"", "\"*\"", "\"a b.example.com\"", "1")) {
-            assertThrows(IllegalArgumentException.class,
-                () -> service(true).putTenantHooks(json("{\"hooks\":[],\"webhookHosts\":[" + bad + "]}")), bad);
+        for (String bad :
+                List.of(
+                        "\"https://x.example.com\"",
+                        "\"x.example.com:8443\"",
+                        "\"x\"",
+                        "\"*\"",
+                        "\"a b.example.com\"",
+                        "1")) {
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () ->
+                            service(true)
+                                    .putTenantHooks(
+                                            json("{\"hooks\":[],\"webhookHosts\":[" + bad + "]}")),
+                    bad);
         }
-        assertThrows(IllegalArgumentException.class, () -> service(true).putTenantHooks(json("{\"hooks\":[],\"webhookHosts\":\"x.example.com\"}")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        service(true)
+                                .putTenantHooks(
+                                        json("{\"hooks\":[],\"webhookHosts\":\"x.example.com\"}")));
 
         asUser("PERM_VIEW_AUDIT_LOG");
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> service(true).putTenantHooks(json("{\"hooks\":[]}")));
+        ResponseStatusException e =
+                assertThrows(
+                        ResponseStatusException.class,
+                        () -> service(true).putTenantHooks(json("{\"hooks\":[]}")));
         assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
     }
 
     @Test
     void theWorkspaceDefaultsEndpointNeedsTheGovernanceAuthorityEvenToRead() {
         asUser("PERM_VIEW_AUDIT_LOG");
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> service(true).getTenantHooks());
+        ResponseStatusException e =
+                assertThrows(ResponseStatusException.class, () -> service(true).getTenantHooks());
         assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
     }
 
     @Test
     void aReaderWithoutTheGovernanceAuthoritySeesWebhookUrlsCutToTheirHost() {
         AgentHookConfigService service = service(true);
-        String hook = "{\"hooks\":[{\"id\":\"vet\",\"point\":\"BEFORE_TOOL\",\"action\":\"webhook\","
-            + "\"params\":{\"url\":\"https://ops.example.com/hook/abc?token=s3cret\"}}]}";
+        String hook =
+                "{\"hooks\":[{\"id\":\"vet\",\"point\":\"BEFORE_TOOL\",\"action\":\"webhook\","
+                        + "\"params\":{\"url\":\"https://ops.example.com/hook/abc?token=s3cret\"}}]}";
         service.putAgentHooks(AGENT, json(hook));
-        assertEquals("https://ops.example.com/hook/abc?token=s3cret",
-            ((Map<?, ?>) service.getAgentHooks(AGENT).hooks().get(0).get("params")).get("url"), "the manager sees it whole");
+        assertEquals(
+                "https://ops.example.com/hook/abc?token=s3cret",
+                ((Map<?, ?>) service.getAgentHooks(AGENT).hooks().get(0).get("params")).get("url"),
+                "the manager sees it whole");
 
         asUser("PERM_VIEW_AUDIT_LOG");
-        String seen = (String) ((Map<?, ?>) service.getAgentHooks(AGENT).hooks().get(0).get("params")).get("url");
+        String seen =
+                (String)
+                        ((Map<?, ?>) service.getAgentHooks(AGENT).hooks().get(0).get("params"))
+                                .get("url");
 
         assertEquals("https://ops.example.com/...", seen);
     }
@@ -270,7 +361,9 @@ class AgentHookConfigServiceTest {
     @Test
     void anAgentSeesTheWorkspaceDefaultsAsInherited() {
         AgentHookConfigService service = service(true);
-        service.putTenantHooks(json("{\"hooks\":[{\"id\":\"audit\",\"point\":\"ON_RUN_END\",\"action\":\"log\"}]}"));
+        service.putTenantHooks(
+                json(
+                        "{\"hooks\":[{\"id\":\"audit\",\"point\":\"ON_RUN_END\",\"action\":\"log\"}]}"));
 
         AgentHooksResponse view = service.getAgentHooks(AGENT);
 
@@ -284,13 +377,18 @@ class AgentHookConfigServiceTest {
     @Test
     void effectiveIsTheWorkspaceDefaultsThenTheAgentsOwn() {
         AgentHookConfigService service = service(true);
-        service.putTenantHooks(json("{\"hooks\":[{\"id\":\"audit\",\"point\":\"ON_RUN_END\",\"action\":\"log\"}],\"webhookHosts\":[\"tenant.example.org\"]}"));
+        service.putTenantHooks(
+                json(
+                        "{\"hooks\":[{\"id\":\"audit\",\"point\":\"ON_RUN_END\",\"action\":\"log\"}],\"webhookHosts\":[\"tenant.example.org\"]}"));
         service.putAgentHooks(AGENT, json(BLOCK_HOOK));
 
         HookSet set = service.effective(AGENT);
 
         assertEquals(2, set.hooks().size());
-        assertEquals("tenant:audit", set.hooks().get(0).key(), "workspace defaults always evaluate first");
+        assertEquals(
+                "tenant:audit",
+                set.hooks().get(0).key(),
+                "workspace defaults always evaluate first");
         assertEquals("agent:no-delete", set.hooks().get(1).key());
         assertEquals(List.of("tenant.example.org"), set.webhookHosts());
     }
@@ -308,7 +406,8 @@ class AgentHookConfigServiceTest {
         verify(repository, never()).findById(anyString());
 
         service.putAgentHooks(AGENT, json("{\"hooks\":[]}"));
-        assertTrue(service.effective(AGENT).isEmpty(), "the save took effect at once on this replica");
+        assertTrue(
+                service.effective(AGENT).isEmpty(), "the save took effect at once on this replica");
     }
 
     @Test
@@ -316,7 +415,9 @@ class AgentHookConfigServiceTest {
         AgentHookConfigService service = service(true);
         assertTrue(service.effective(AGENT).isEmpty());
 
-        service.putTenantHooks(json("{\"hooks\":[{\"id\":\"audit\",\"point\":\"ON_RUN_END\",\"action\":\"log\"}]}"));
+        service.putTenantHooks(
+                json(
+                        "{\"hooks\":[{\"id\":\"audit\",\"point\":\"ON_RUN_END\",\"action\":\"log\"}]}"));
 
         assertEquals(1, service.effective(AGENT).hooks().size());
     }
@@ -332,13 +433,17 @@ class AgentHookConfigServiceTest {
 
     @Test
     void aFailedReloadKeepsTheLastKnownSetInsteadOfDroppingGovernance() {
-        AgentHookConfigService stale = new AgentHookConfigService(repository, provider(agentService), audit, true, "", 0);
+        AgentHookConfigService stale =
+                new AgentHookConfigService(repository, provider(agentService), audit, true, "", 0);
         stale.putAgentHooks(AGENT, json(BLOCK_HOOK));
         assertEquals(1, stale.effective(AGENT).hooks().size());
 
         when(repository.findById(anyString())).thenThrow(new IllegalStateException("db down"));
 
-        assertEquals(1, stale.effective(AGENT).hooks().size(), "ttl 0 forces a reload, which fails; the last good set is used");
+        assertEquals(
+                1,
+                stale.effective(AGENT).hooks().size(),
+                "ttl 0 forces a reload, which fails; the last good set is used");
         verify(repository, atLeastOnce()).findById(anyString());
     }
 
@@ -356,15 +461,22 @@ class AgentHookConfigServiceTest {
 
     @Test
     void hostListsAreParsedStrictly() {
-        assertEquals(List.of("a.example.com", "*.b.example.com"), AgentHookConfigService.parseHostCsv(" A.example.com, *.b.example.com ,,a.example.com"));
+        assertEquals(
+                List.of("a.example.com", "*.b.example.com"),
+                AgentHookConfigService.parseHostCsv(
+                        " A.example.com, *.b.example.com ,,a.example.com"));
         assertTrue(AgentHookConfigService.parseHostCsv("").isEmpty());
         assertTrue(AgentHookConfigService.parseHostCsv(null).isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> AgentHookConfigService.parseHostArray(json("[\"localhost\"]")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> AgentHookConfigService.parseHostArray(json("[\"localhost\"]")));
         StringBuilder many = new StringBuilder("[");
         for (int i = 0; i < 21; i++) {
             many.append(i == 0 ? "" : ",").append("\"h").append(i).append(".example.com\"");
         }
         many.append("]");
-        assertThrows(IllegalArgumentException.class, () -> AgentHookConfigService.parseHostArray(json(many.toString())));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> AgentHookConfigService.parseHostArray(json(many.toString())));
     }
 }

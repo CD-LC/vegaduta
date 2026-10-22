@@ -27,7 +27,9 @@ class AiOutputValidatorTest {
     void absentAndNullAreAbsentNotInvented() throws Exception {
         assertNull(c(p("a", ParamType.STRING), "null").value());
         assertNull(c(p("a", ParamType.STRING), "null").problem());
-        assertNull(AiOutputValidator.coerce(p("a", ParamType.NUMBER), null, M.getNodeFactory(), M).problem());
+        assertNull(
+                AiOutputValidator.coerce(p("a", ParamType.NUMBER), null, M.getNodeFactory(), M)
+                        .problem());
     }
 
     @Test

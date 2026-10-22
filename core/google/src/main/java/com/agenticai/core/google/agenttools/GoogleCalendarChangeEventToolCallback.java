@@ -13,30 +13,32 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * The two calendar writes that change an appointment someone else may be relying on:
- * {@code google_calendar_move_event} and {@code google_calendar_cancel_event}. One class, two tool
- * names ({@link #move} / {@link #cancel}), because each must be its own name to be classified and
- * gated on its own: both are declared irreversible EGRESS in {@code BuiltInToolClassifications}
- * (Google emails every attendee when {@code notify_attendees} is true, and a moved or cancelled
- * appointment cannot be un-sent), so the confirmation gate asks a human before either runs. They are
+ * The two calendar writes that change an appointment someone else may be relying on: {@code
+ * google_calendar_move_event} and {@code google_calendar_cancel_event}. One class, two tool names
+ * ({@link #move} / {@link #cancel}), because each must be its own name to be classified and gated
+ * on its own: both are declared irreversible EGRESS in {@code BuiltInToolClassifications} (Google
+ * emails every attendee when {@code notify_attendees} is true, and a moved or cancelled appointment
+ * cannot be un-sent), so the confirmation gate asks a human before either runs. They are
  * deliberately NOT on the confirmation-exempt list that {@code google_calendar} is on.
  *
  * <p>{@code notify_attendees} is required, not defaulted: whether the customer hears about the
  * change is a decision the agent states and the approver sees.
  *
- * <p>The approval card shows {@link #describeForConfirmation}: which event, the new time, and whether
- * the customer will be emailed, built from the arguments alone (no Google call, so it is cheap and
- * cannot fail the gate).
+ * <p>The approval card shows {@link #describeForConfirmation}: which event, the new time, and
+ * whether the customer will be emailed, built from the arguments alone (no Google call, so it is
+ * cheap and cannot fail the gate).
  *
  * <p>Logs never carry the arguments or Google's error body (an event title is often a customer's
  * name); only the tool name and the exception class.
  */
-public final class GoogleCalendarChangeEventToolCallback implements ToolCallback, ToolConfirmationDescriber {
+public final class GoogleCalendarChangeEventToolCallback
+        implements ToolCallback, ToolConfirmationDescriber {
 
     static final String MOVE = "google_calendar_move_event";
     static final String CANCEL = "google_calendar_cancel_event";
 
-    private static final Logger log = LoggerFactory.getLogger(GoogleCalendarChangeEventToolCallback.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(GoogleCalendarChangeEventToolCallback.class);
     private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     private final GoogleCalendarClient client;
@@ -110,16 +112,23 @@ public final class GoogleCalendarChangeEventToolCallback implements ToolCallback
             Map<String, Object> args = MAPPER.readValue(toolInput, Map.class);
             Object eventId = args.get("event_id");
             Object notify = args.get("notify_attendees");
-            String who = Boolean.TRUE.equals(notify)
-                    ? "Google will email every attendee about this change."
-                    : Boolean.FALSE.equals(notify)
-                            ? "Attendees will not be notified."
-                            : "notify_attendees was not given; the call will be refused.";
+            String who =
+                    Boolean.TRUE.equals(notify)
+                            ? "Google will email every attendee about this change."
+                            : Boolean.FALSE.equals(notify)
+                                    ? "Attendees will not be notified."
+                                    : "notify_attendees was not given; the call will be refused.";
             if (cancelling) {
                 return "Cancel Google Calendar event " + eventId + ".\n" + who;
             }
-            return "Reschedule Google Calendar event " + eventId + "\nNew time: " + args.get("start") + " to "
-                    + args.get("end") + "\n" + who;
+            return "Reschedule Google Calendar event "
+                    + eventId
+                    + "\nNew time: "
+                    + args.get("start")
+                    + " to "
+                    + args.get("end")
+                    + "\n"
+                    + who;
         } catch (Exception e) {
             return null;
         }
@@ -131,12 +140,14 @@ public final class GoogleCalendarChangeEventToolCallback implements ToolCallback
         String name = cancelling ? CANCEL : MOVE;
         try {
             Map<String, Object> args = MAPPER.readValue(toolInput, Map.class);
-            String eventId = args.get("event_id") == null ? null : args.get("event_id").toString().trim();
+            String eventId =
+                    args.get("event_id") == null ? null : args.get("event_id").toString().trim();
             if (eventId == null || eventId.isEmpty()) {
                 return GoogleCalendarFreeSlotsToolCallback.errorJson("event_id is required");
             }
             if (!(args.get("notify_attendees") instanceof Boolean notify)) {
-                return GoogleCalendarFreeSlotsToolCallback.errorJson("notify_attendees (true or false) is required");
+                return GoogleCalendarFreeSlotsToolCallback.errorJson(
+                        "notify_attendees (true or false) is required");
             }
             Map<String, Object> result = new LinkedHashMap<>();
             if (cancelling) {
@@ -146,7 +157,8 @@ public final class GoogleCalendarChangeEventToolCallback implements ToolCallback
                 String start = args.get("start") == null ? null : args.get("start").toString();
                 String end = args.get("end") == null ? null : args.get("end").toString();
                 if (start == null || end == null) {
-                    return GoogleCalendarFreeSlotsToolCallback.errorJson("start and end are required");
+                    return GoogleCalendarFreeSlotsToolCallback.errorJson(
+                            "start and end are required");
                 }
                 if (!OffsetDateTime.parse(end).isAfter(OffsetDateTime.parse(start))) {
                     return GoogleCalendarFreeSlotsToolCallback.errorJson("end must be after start");
@@ -161,7 +173,8 @@ public final class GoogleCalendarChangeEventToolCallback implements ToolCallback
                     "start and end must be RFC3339 date-times with an offset, e.g. 2026-10-15T15:00:00+05:30");
         } catch (Exception e) {
             log.warn("{} tool call failed: {}", name, e.getClass().getSimpleName());
-            return GoogleCalendarFreeSlotsToolCallback.errorJson("Google Calendar call failed: " + e.getMessage());
+            return GoogleCalendarFreeSlotsToolCallback.errorJson(
+                    "Google Calendar call failed: " + e.getMessage());
         }
     }
 }

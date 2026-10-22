@@ -25,15 +25,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
- * {@code list_my_agents} is the external caller's discovery surface for
- * what its key can do - the danger case is not a wrong name but a LEAK:
- * because the advertised MCP tool list is JVM-wide, this callback's own
- * read of {@link com.agenticai.core.mcpserver.McpCallerContext} is the only
- * thing keeping one grant's listing from including agents that grant (or
- * tenant) was never given. Also pinned: a dangling exposed id (agent
- * deleted after the grant was configured) degrades to omission, not a
- * failed listing - the grant editor has no FK onto the agent table, so this
- * state is fully reachable in production.
+ * {@code list_my_agents} is the external caller's discovery surface for what its key can do - the
+ * danger case is not a wrong name but a LEAK: because the advertised MCP tool list is JVM-wide,
+ * this callback's own read of {@link com.agenticai.core.mcpserver.McpCallerContext} is the only
+ * thing keeping one grant's listing from including agents that grant (or tenant) was never given.
+ * Also pinned: a dangling exposed id (agent deleted after the grant was configured) degrades to
+ * omission, not a failed listing - the grant editor has no FK onto the agent table, so this state
+ * is fully reachable in production.
  */
 class McpListAgentsToolCallbackTest {
 
@@ -53,9 +51,22 @@ class McpListAgentsToolCallbackTest {
         McpCallerContextTestAccess.clear();
     }
 
-    /** Real entity + reflection-backfilled id (JPA assigns it), then the production mapper - keeps the test honest about what AgentResponse actually exposes. */
+    /**
+     * Real entity + reflection-backfilled id (JPA assigns it), then the production mapper - keeps
+     * the test honest about what AgentResponse actually exposes.
+     */
     private AgentResponse agentNamed(UUID id, String name) {
-        Agent agent = new Agent(name, "prompt", ProviderName.OPENAI, "gpt-4o", 1024, 0.7, 1.0, false, ExperienceMode.SIMPLE);
+        Agent agent =
+                new Agent(
+                        name,
+                        "prompt",
+                        ProviderName.OPENAI,
+                        "gpt-4o",
+                        1024,
+                        0.7,
+                        1.0,
+                        false,
+                        ExperienceMode.SIMPLE);
         ReflectionTestUtils.setField(agent, "id", id);
         return AgentResponse.from(agent);
     }
@@ -102,9 +113,15 @@ class McpListAgentsToolCallbackTest {
     void aDeletedAgentIsOmittedWhileTheRestOfTheListingSurvives() throws Exception {
         UUID liveAgentId = UUID.randomUUID();
         UUID deletedAgentId = UUID.randomUUID();
-        McpCallerContextTestAccess.set(UUID.randomUUID(), new HashSet<>(Set.of(liveAgentId, deletedAgentId)), Set.of(), Set.of());
-        when(agentService.getGrantedAgent(liveAgentId)).thenReturn(agentNamed(liveAgentId, "Still Here"));
-        when(agentService.getGrantedAgent(deletedAgentId)).thenThrow(new RuntimeException("agent not found"));
+        McpCallerContextTestAccess.set(
+                UUID.randomUUID(),
+                new HashSet<>(Set.of(liveAgentId, deletedAgentId)),
+                Set.of(),
+                Set.of());
+        when(agentService.getGrantedAgent(liveAgentId))
+                .thenReturn(agentNamed(liveAgentId, "Still Here"));
+        when(agentService.getGrantedAgent(deletedAgentId))
+                .thenThrow(new RuntimeException("agent not found"));
 
         JsonNode result = MAPPER.readTree(callback.call("{}"));
 

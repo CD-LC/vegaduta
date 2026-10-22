@@ -18,38 +18,31 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Prompt-to-agent generation (Tier-3) - the audit gap "AskAiHelper
- * assists; it doesn't go describe -> full agent". {@code POST
- * /api/agents/generate} takes a natural-language description and returns a
- * REAL agent row: one structured LLM call produces the spec, {@code
- * AgentService#create} performs the actual creation so every existing
- * gate (plan caps, FREE-provider coercion, model resolution, version
- * snapshot) applies exactly as if the admin had typed the same fields by
- * hand.
+ * Prompt-to-agent generation (Tier-3) - the audit gap "AskAiHelper assists; it doesn't go describe
+ * -> full agent". {@code POST /api/agents/generate} takes a natural-language description and
+ * returns a REAL agent row: one structured LLM call produces the spec, {@code AgentService#create}
+ * performs the actual creation so every existing gate (plan caps, FREE-provider coercion, model
+ * resolution, version snapshot) applies exactly as if the admin had typed the same fields by hand.
  *
  * <h2>Safety posture</h2>
+ *
  * <ul>
  *   <li>Generated specs are CONSERVATIVE: only name/systemPrompt/
- *       description/knowledgeBaseEnabled/shareMemoryWithTenant/
- *       reasoningDepth are applied. Generation params, provider/model and
- *       tool allow-lists are left at {@code AgentService}'s defaults
- *       (unrestricted tools, catalog-picked model) rather than trusting an
- *       LLM to name tools that may not exist or a model the tenant has no
- *       key for.
- *   <li>Channel binding never hijacks: a requested channel that already
- *       has a default agent is SKIPPED and reported, not overwritten -
- *       silently re-routing a live channel because a generator suggested
- *       it is exactly the class of surprise this codebase's
- *       least-surprise rule exists to prevent.
- *   <li>Everything is reviewable after the fact: the response returns the
- *       full generated spec, and the agent row itself carries the usual
- *       created-by/version history trail.
+ *       description/knowledgeBaseEnabled/shareMemoryWithTenant/ reasoningDepth are applied.
+ *       Generation params, provider/model and tool allow-lists are left at {@code AgentService}'s
+ *       defaults (unrestricted tools, catalog-picked model) rather than trusting an LLM to name
+ *       tools that may not exist or a model the tenant has no key for.
+ *   <li>Channel binding never hijacks: a requested channel that already has a default agent is
+ *       SKIPPED and reported, not overwritten - silently re-routing a live channel because a
+ *       generator suggested it is exactly the class of surprise this codebase's least-surprise rule
+ *       exists to prevent.
+ *   <li>Everything is reviewable after the fact: the response returns the full generated spec, and
+ *       the agent row itself carries the usual created-by/version history trail.
  * </ul>
  */
 @Service
@@ -57,7 +50,8 @@ public class AgentGenerationService {
 
     private static final Logger log = LoggerFactory.getLogger(AgentGenerationService.class);
 
-    private static final String SYSTEM_PROMPT = """
+    private static final String SYSTEM_PROMPT =
+            """
         You configure new agents on an AI-agent SaaS platform. Given an
         admin's natural-language description of the agent they want,
         produce ONE JSON object (no markdown fences, no commentary) with
@@ -94,13 +88,12 @@ public class AgentGenerationService {
     private final ObjectMapper objectMapper;
 
     public AgentGenerationService(
-        AssistService assistService,
-        AgentService agentService,
-        ChannelSessionService channelSessionService,
-        ProviderCredentialResolver credentialResolver,
-        TenantLimits tenantLimits,
-        ObjectMapper objectMapper
-    ) {
+            AssistService assistService,
+            AgentService agentService,
+            ChannelSessionService channelSessionService,
+            ProviderCredentialResolver credentialResolver,
+            TenantLimits tenantLimits,
+            ObjectMapper objectMapper) {
         this.assistService = assistService;
         this.agentService = agentService;
         this.channelSessionService = channelSessionService;
@@ -123,7 +116,7 @@ public class AgentGenerationService {
             // failure worth surfacing, not silently creating a
             // default-prompted agent nobody asked for.
             throw new AgentGenerationException(
-                "The model returned no systemPrompt for this description - try rephrasing it.");
+                    "The model returned no systemPrompt for this description - try rephrasing it.");
         }
         String agentDescription = textOr(spec, "description", truncate(description, 200));
 
@@ -134,13 +127,27 @@ public class AgentGenerationService {
         // create() treats it.
         ProviderName providerName = resolveProviderName();
 
-        AgentResponse agent = agentService.create(new AgentCreateRequest(
-            name, systemPrompt, providerName,
-            null, null, null, null,
-            spec.path("knowledgeBaseEnabled").asBoolean(false),
-            null,
-            parseReasoningDepth(spec.path("reasoningDepth").asText(null)),
-            null, null, null, null, null, null, null, null));
+        AgentResponse agent =
+                agentService.create(
+                        new AgentCreateRequest(
+                                name,
+                                systemPrompt,
+                                providerName,
+                                null,
+                                null,
+                                null,
+                                null,
+                                spec.path("knowledgeBaseEnabled").asBoolean(false),
+                                null,
+                                parseReasoningDepth(spec.path("reasoningDepth").asText(null)),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null));
 
         List<String> applied = new ArrayList<>();
         if (spec.path("knowledgeBaseEnabled").asBoolean(false)) {
@@ -170,14 +177,22 @@ public class AgentGenerationService {
                 continue;
             }
             if (channel == ChannelType.WHATSAPP) {
-                skippedChannels.add(Map.of("channel", channelName,
-                    "reason", "WhatsApp needs a declared task for the agent - connect it on the Channels page"));
+                skippedChannels.add(
+                        Map.of(
+                                "channel",
+                                channelName,
+                                "reason",
+                                "WhatsApp needs a declared task for the agent - connect it on the Channels page"));
                 continue;
             }
             var existing = channelSessionService.routingFor(channel);
             if (existing.isPresent() && existing.get().getAgentId() != null) {
-                skippedChannels.add(Map.of("channel", channelName,
-                    "reason", "already routed to agent " + existing.get().getAgentId()));
+                skippedChannels.add(
+                        Map.of(
+                                "channel",
+                                channelName,
+                                "reason",
+                                "already routed to agent " + existing.get().getAgentId()));
                 continue;
             }
             channelSessionService.setDefaultAgent(channel, agent.id());
@@ -192,8 +207,10 @@ public class AgentGenerationService {
         response.put("appliedCapabilities", applied);
         response.put("boundChannels", boundChannels);
         response.put("skippedChannels", skippedChannels);
-        response.put("note", "Review the generated agent in the workbench before exposing it - "
-            + "generated prompts are a starting point, not a vetted configuration.");
+        response.put(
+                "note",
+                "Review the generated agent in the workbench before exposing it - "
+                        + "generated prompts are a starting point, not a vetted configuration.");
         return response;
     }
 
@@ -203,7 +220,7 @@ public class AgentGenerationService {
         if (node == null) {
             log.warn("Agent generation spec parse failed; raw={}", raw);
             throw new AgentGenerationException(
-                "The model returned unparseable JSON - try again or rephrase the description.");
+                    "The model returned unparseable JSON - try again or rephrase the description.");
         }
         if (!node.isObject()) {
             throw new AgentGenerationException("The model returned a non-object spec.");
@@ -240,8 +257,8 @@ public class AgentGenerationService {
     private static String textOr(JsonNode node, String field, String fallback) {
         JsonNode value = node.get(field);
         return value != null && value.isTextual() && !value.asText().isBlank()
-            ? value.asText().trim()
-            : fallback;
+                ? value.asText().trim()
+                : fallback;
     }
 
     private static String truncate(String value, int max) {

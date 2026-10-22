@@ -21,9 +21,10 @@ import java.util.TreeMap;
 import org.junit.jupiter.api.Test;
 
 /**
- * Each factory must be byte-behaviour-identical to the inline construction it replaced (ADR-0012 P1b).
- * Parity is asserted by comparing the full effective configuration (every feature flag, registered
- * modules, default inclusion) with a mapper built the old way, plus behavioural round trips.
+ * Each factory must be byte-behaviour-identical to the inline construction it replaced (ADR-0012
+ * P1b). Parity is asserted by comparing the full effective configuration (every feature flag,
+ * registered modules, default inclusion) with a mapper built the old way, plus behavioural round
+ * trips.
  */
 class JsonMappersTest {
 
@@ -51,38 +52,45 @@ class JsonMappersTest {
     @Test
     void plainEqualsNewObjectMapper() {
         assertSameConfig(new ObjectMapper(), JsonMappers.plain());
-        assertTrue(JsonMappers.plain().getRegisteredModuleIds().isEmpty(), "plain() registers no modules");
+        assertTrue(
+                JsonMappers.plain().getRegisteredModuleIds().isEmpty(),
+                "plain() registers no modules");
     }
 
     @Test
     void withJavaTimeEqualsRegisterModule() {
-        assertSameConfig(new ObjectMapper().registerModule(new JavaTimeModule()), JsonMappers.withJavaTime());
+        assertSameConfig(
+                new ObjectMapper().registerModule(new JavaTimeModule()),
+                JsonMappers.withJavaTime());
     }
 
     @Test
     void lenientEqualsConfigureFailOnUnknownFalse() {
         assertSameConfig(
-            new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false),
-            JsonMappers.lenient());
+                new ObjectMapper()
+                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false),
+                JsonMappers.lenient());
     }
 
     @Test
     void nonNullEqualsSetDefaultPropertyInclusion() {
         assertSameConfig(
-            new ObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL), JsonMappers.nonNull());
+                new ObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL),
+                JsonMappers.nonNull());
     }
 
     @Test
     void sortedMapKeysEqualsEnableOrderMapEntries() {
         assertSameConfig(
-            new ObjectMapper().enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS), JsonMappers.sortedMapKeys());
+                new ObjectMapper().enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS),
+                JsonMappers.sortedMapKeys());
     }
 
     @Test
     void strictTrailingTokensEqualsEnableFailOnTrailingTokens() {
         assertSameConfig(
-            new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS),
-            JsonMappers.strictTrailingTokens());
+                new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS),
+                JsonMappers.strictTrailingTokens());
     }
 
     @Test
@@ -91,8 +99,7 @@ class JsonMappersTest {
         assertNotSame(JsonMappers.lenient(), JsonMappers.lenient());
     }
 
-    record Point(int x, String label) {
-    }
+    record Point(int x, String label) {}
 
     @Test
     void plainRoundTripsRecordsAndTrees() throws JsonProcessingException {
@@ -102,18 +109,24 @@ class JsonMappersTest {
         assertEquals(new Point(3, "a"), m.readValue(json, Point.class));
         JsonNode tree = m.readTree("{\"a\":[1,2,{\"b\":null}]}");
         assertEquals("{\"a\":[1,2,{\"b\":null}]}", m.writeValueAsString(tree));
-        assertThrows(UnrecognizedPropertyException.class, () -> m.readValue("{\"x\":1,\"zzz\":2}", Point.class));
+        assertThrows(
+                UnrecognizedPropertyException.class,
+                () -> m.readValue("{\"x\":1,\"zzz\":2}", Point.class));
     }
 
     @Test
     void lenientIgnoresUnknownProperties() throws JsonProcessingException {
-        assertEquals(new Point(1, null), JsonMappers.lenient().readValue("{\"x\":1,\"zzz\":2}", Point.class));
+        assertEquals(
+                new Point(1, null),
+                JsonMappers.lenient().readValue("{\"x\":1,\"zzz\":2}", Point.class));
     }
 
     @Test
     void nonNullOmitsNullProperties() throws JsonProcessingException {
         assertEquals("{\"x\":1}", JsonMappers.nonNull().writeValueAsString(new Point(1, null)));
-        assertEquals("{\"x\":1,\"label\":null}", JsonMappers.plain().writeValueAsString(new Point(1, null)));
+        assertEquals(
+                "{\"x\":1,\"label\":null}",
+                JsonMappers.plain().writeValueAsString(new Point(1, null)));
     }
 
     @Test
@@ -127,7 +140,9 @@ class JsonMappersTest {
 
     @Test
     void strictTrailingTokensRejectsTrailingContent() throws JsonProcessingException {
-        assertThrows(JsonProcessingException.class, () -> JsonMappers.strictTrailingTokens().readTree("{} {}"));
+        assertThrows(
+                JsonProcessingException.class,
+                () -> JsonMappers.strictTrailingTokens().readTree("{} {}"));
         assertEquals("{}", JsonMappers.plain().readTree("{} {}").toString());
     }
 
@@ -136,6 +151,7 @@ class JsonMappersTest {
         Instant t = Instant.parse("2026-01-02T03:04:05Z");
         // With the module and default WRITE_DATES_AS_TIMESTAMPS: numeric seconds.nanos.
         assertEquals("1767323045.000000000", JsonMappers.withJavaTime().writeValueAsString(t));
-        assertThrows(JsonProcessingException.class, () -> JsonMappers.plain().writeValueAsString(t));
+        assertThrows(
+                JsonProcessingException.class, () -> JsonMappers.plain().writeValueAsString(t));
     }
 }

@@ -9,29 +9,30 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Validates an Open Responses request and folds it into the {@link OpenAiChatRequest}
- * the shared prompt builder ({@link OpenAiChatRequest#toPrompt}) already understands,
- * so {@code /v1/responses} and {@code /v1/chat/completions} build the agent prompt the
- * same way (system/developer turns and earlier turns become a transcript, or only the
- * last user message when the caller holds a server-side session).
+ * Validates an Open Responses request and folds it into the {@link OpenAiChatRequest} the shared
+ * prompt builder ({@link OpenAiChatRequest#toPrompt}) already understands, so {@code /v1/responses}
+ * and {@code /v1/chat/completions} build the agent prompt the same way (system/developer turns and
+ * earlier turns become a transcript, or only the last user message when the caller holds a
+ * server-side session).
  *
  * <h2>Policy: nothing is silently pretended</h2>
+ *
  * <ul>
- *   <li><b>Accepted</b>: {@code model}, {@code input} (a string, or an array of message items
- *       with {@code role} + string or {@code input_text}/{@code output_text} parts),
- *       {@code instructions}, {@code stream}, {@code metadata} (echoed back).</li>
+ *   <li><b>Accepted</b>: {@code model}, {@code input} (a string, or an array of message items with
+ *       {@code role} + string or {@code input_text}/{@code output_text} parts), {@code
+ *       instructions}, {@code stream}, {@code metadata} (echoed back).
  *   <li><b>Accepted but not applied</b> (the agent owns its sampling, as on chat completions):
  *       {@code temperature}, {@code max_output_tokens}. They are range-checked and the response
- *       reports them as {@code null}, never as if they had been applied.</li>
+ *       reports them as {@code null}, never as if they had been applied.
  *   <li><b>Rejected with 400 {@code unsupported_parameter}</b>: {@code previous_response_id}
- *       (responses are not stored: send the {@code X-Session-Id} header to continue a
- *       server-held session), {@code conversation}, {@code background=true}, a non-empty
- *       {@code tools} array or a forcing {@code tool_choice} (no request-side tool
- *       pass-through: the agent runs its own configured tools), and any input item or content
- *       part that is not text (images, files, function calls and their outputs, reasoning
- *       items, item references).</li>
- *   <li>Everything else in the body is ignored, like on the chat endpoint.</li>
+ *       (responses are not stored: send the {@code X-Session-Id} header to continue a server-held
+ *       session), {@code conversation}, {@code background=true}, a non-empty {@code tools} array or
+ *       a forcing {@code tool_choice} (no request-side tool pass-through: the agent runs its own
+ *       configured tools), and any input item or content part that is not text (images, files,
+ *       function calls and their outputs, reasoning items, item references).
+ *   <li>Everything else in the body is ignored, like on the chat endpoint.
  * </ul>
+ *
  * All failures are {@link OpenAiCompatException}s with client-safe messages.
  */
 final class OpenResponsesInputMapper {
@@ -97,26 +98,37 @@ final class OpenResponsesInputMapper {
 
     private static void rejectUnsupported(OpenResponsesRequest r) {
         if (r.previousResponseId() != null && !r.previousResponseId().isBlank()) {
-            throw bad(UNSUPPORTED, "'previous_response_id' is not supported: responses are not stored. "
-                + "Send an X-Session-Id header to continue a server-held conversation, or resend the earlier "
-                + "turns in 'input'.");
+            throw bad(
+                    UNSUPPORTED,
+                    "'previous_response_id' is not supported: responses are not stored. "
+                            + "Send an X-Session-Id header to continue a server-held conversation, or resend the earlier "
+                            + "turns in 'input'.");
         }
         if (!isAbsent(r.conversation())) {
-            throw bad(UNSUPPORTED, "'conversation' is not supported. Send an X-Session-Id header to continue "
-                + "a server-held conversation.");
+            throw bad(
+                    UNSUPPORTED,
+                    "'conversation' is not supported. Send an X-Session-Id header to continue "
+                            + "a server-held conversation.");
         }
         if (Boolean.TRUE.equals(r.background())) {
-            throw bad(UNSUPPORTED, "'background' is not supported: use stream=true for long-running turns.");
+            throw bad(
+                    UNSUPPORTED,
+                    "'background' is not supported: use stream=true for long-running turns.");
         }
         JsonNode tools = r.tools();
         if (!isAbsent(tools) && (!tools.isArray() || tools.size() > 0)) {
-            throw bad(UNSUPPORTED, "'tools' is not supported: the agent runs its own configured tools, "
-                + "request-side tools are not passed through.");
+            throw bad(
+                    UNSUPPORTED,
+                    "'tools' is not supported: the agent runs its own configured tools, "
+                            + "request-side tools are not passed through.");
         }
         JsonNode choice = r.toolChoice();
-        if (!isAbsent(choice) && !(choice.isTextual()
-            && ("auto".equals(choice.asText()) || "none".equals(choice.asText())))) {
-            throw bad(UNSUPPORTED, "'tool_choice' is not supported: only 'auto' and 'none' are accepted.");
+        if (!isAbsent(choice)
+                && !(choice.isTextual()
+                        && ("auto".equals(choice.asText()) || "none".equals(choice.asText())))) {
+            throw bad(
+                    UNSUPPORTED,
+                    "'tool_choice' is not supported: only 'auto' and 'none' are accepted.");
         }
     }
 
@@ -157,8 +169,13 @@ final class OpenResponsesInputMapper {
         }
         JsonNode type = item.get("type");
         if (!isAbsent(type) && !(type.isTextual() && "message".equals(type.asText()))) {
-            throw bad(UNSUPPORTED, at + " has unsupported item type '" + safe(type) + "': only message items "
-                + "are supported");
+            throw bad(
+                    UNSUPPORTED,
+                    at
+                            + " has unsupported item type '"
+                            + safe(type)
+                            + "': only message items "
+                            + "are supported");
         }
         JsonNode role = item.get("role");
         if (isAbsent(role) || !role.isTextual() || !ROLES.contains(role.asText())) {
@@ -181,12 +198,18 @@ final class OpenResponsesInputMapper {
         for (JsonNode part : content) {
             JsonNode type = part == null ? null : part.get("type");
             if (isAbsent(type) || !type.isTextual() || !TEXT_PART_TYPES.contains(type.asText())) {
-                throw bad(UNSUPPORTED, at + " has unsupported content part type '" + safe(type)
-                    + "': only input_text is supported");
+                throw bad(
+                        UNSUPPORTED,
+                        at
+                                + " has unsupported content part type '"
+                                + safe(type)
+                                + "': only input_text is supported");
             }
             JsonNode text = part.get("text");
             if (isAbsent(text) || !text.isTextual()) {
-                throw bad(INVALID, at + " content part of type '" + type.asText() + "' needs a string 'text'");
+                throw bad(
+                        INVALID,
+                        at + " content part of type '" + type.asText() + "' needs a string 'text'");
             }
             if (joined.length() > 0) {
                 joined.append('\n');

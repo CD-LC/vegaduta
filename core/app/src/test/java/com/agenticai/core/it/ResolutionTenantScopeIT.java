@@ -138,7 +138,8 @@ class ResolutionTenantScopeIT extends AbstractContextIT {
     }
 
     private int eventCount(String schema) {
-        return jdbc.queryForObject("SELECT count(*) FROM " + schema + ".resolution_event", Integer.class);
+        return jdbc.queryForObject(
+                "SELECT count(*) FROM " + schema + ".resolution_event", Integer.class);
     }
 
     @Test
@@ -173,7 +174,10 @@ class ResolutionTenantScopeIT extends AbstractContextIT {
                                 "agentId", agentA.toString(),
                                 "outcome", "RESOLVED_AI",
                                 "dedupeKey", "explicit-1"));
-        mvc.perform(post("/api/tenant/resolutions").contentType(MediaType.APPLICATION_JSON).content(body))
+        mvc.perform(
+                        post("/api/tenant/resolutions")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.recorded").value(true));
         assertThat(eventCount(A)).isEqualTo(1);
@@ -213,13 +217,17 @@ class ResolutionTenantScopeIT extends AbstractContextIT {
         assertThat(eventCount(B)).isEqualTo(1);
         assertThat(
                         jdbc.queryForObject(
-                                "SELECT count(*) FROM " + A + ".resolution_event WHERE conversation_key = ?",
+                                "SELECT count(*) FROM "
+                                        + A
+                                        + ".resolution_event WHERE conversation_key = ?",
                                 Integer.class,
                                 "cs:" + sessionIdOf(A)))
                 .isEqualTo(1);
     }
 
-    /** The repository is only safe inside a transaction; this documents the contract it relies on. */
+    /**
+     * The repository is only safe inside a transaction; this documents the contract it relies on.
+     */
     @Test
     void repositoryReadOutsideATransactionIsNotTenantScoped() {
         insertEvent(A, "a-1");

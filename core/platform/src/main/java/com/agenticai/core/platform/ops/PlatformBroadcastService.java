@@ -4,12 +4,6 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
@@ -18,6 +12,10 @@ import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Platform-wide maintenance mode and announcement banner, each stored as ONE JSON document in a

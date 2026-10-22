@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -56,13 +55,22 @@ class AgentJobSubmitGateAndPagingTest {
     void setUp() {
         agentId = UUID.randomUUID();
         repository = mock(AgentJobRepository.class);
-        when(repository.save(any(AgentJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(repository.findByAgentIdOrderByCreatedAtDesc(any(), any())).thenReturn(new PageImpl<>(List.of()));
+        when(repository.save(any(AgentJob.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.findByAgentIdOrderByCreatedAtDesc(any(), any()))
+                .thenReturn(new PageImpl<>(List.of()));
         agentService = mock(AgentService.class);
         executor = mock(AgentJobExecutor.class);
-        service = new AgentJobService(
-            repository, mock(AgentRepository.class), agentService, executor, new AgentJobProperties(),
-            new SimpleMeterRegistry(), new ObjectMapper(), 15);
+        service =
+                new AgentJobService(
+                        repository,
+                        mock(AgentRepository.class),
+                        agentService,
+                        executor,
+                        new AgentJobProperties(),
+                        new SimpleMeterRegistry(),
+                        new ObjectMapper(),
+                        15);
         TenantContext.set(TenantContext.of(TENANT, USER, Set.of("ROLE_user")));
     }
 
@@ -116,13 +124,14 @@ class AgentJobSubmitGateAndPagingTest {
     void aGatedAgentsDirectJobReservesTheFeatureMeterOnceAndKeepsIt() {
         AtomicInteger reserved = new AtomicInteger();
         AtomicInteger released = new AtomicInteger();
-        installGate((agent, tenant, subject) -> {
-            assertEquals(agentId, agent);
-            assertEquals(TENANT, tenant);
-            assertEquals(USER, subject);
-            reserved.incrementAndGet();
-            return released::incrementAndGet;
-        });
+        installGate(
+                (agent, tenant, subject) -> {
+                    assertEquals(agentId, agent);
+                    assertEquals(TENANT, tenant);
+                    assertEquals(USER, subject);
+                    reserved.incrementAndGet();
+                    return released::incrementAndGet;
+                });
 
         assertNotNull(service.submit(agentId, request()));
         assertEquals(1, reserved.get());
@@ -132,10 +141,11 @@ class AgentJobSubmitGateAndPagingTest {
     @Test
     void theFacadesAlreadyReservedRunIsNotCountedTwice() {
         AtomicInteger reserved = new AtomicInteger();
-        installGate((agent, tenant, subject) -> {
-            reserved.incrementAndGet();
-            return () -> { };
-        });
+        installGate(
+                (agent, tenant, subject) -> {
+                    reserved.incrementAndGet();
+                    return () -> {};
+                });
 
         service.submit(agentId, request(), true);
         assertEquals(0, reserved.get());
@@ -150,9 +160,10 @@ class AgentJobSubmitGateAndPagingTest {
 
     @Test
     void aRefusedReservationWritesNoJob() {
-        installGate((agent, tenant, subject) -> {
-            throw new IllegalStateException("run cap used");
-        });
+        installGate(
+                (agent, tenant, subject) -> {
+                    throw new IllegalStateException("run cap used");
+                });
         assertThrows(IllegalStateException.class, () -> service.submit(agentId, request()));
         verify(repository, never()).save(any(AgentJob.class));
     }
@@ -171,7 +182,8 @@ class AgentJobSubmitGateAndPagingTest {
     void aSavedJobWhoseDispatchBlowsUpIsStillASuccessfulSubmitAndKeepsItsReservation() {
         AtomicInteger released = new AtomicInteger();
         installGate((agent, tenant, subject) -> released::incrementAndGet);
-        when(executor.tryDispatch(any(UUID.class), anyString())).thenThrow(new IllegalStateException("pool gone"));
+        when(executor.tryDispatch(any(UUID.class), anyString()))
+                .thenThrow(new IllegalStateException("pool gone"));
 
         assertNotNull(service.submit(agentId, request()));
         assertEquals(0, released.get(), "the durable row will still run, so the run stays counted");
@@ -183,45 +195,67 @@ class AgentJobSubmitGateAndPagingTest {
     void historySliceReportsHasMoreFromTheExtraRow() {
         List<AgentJob> rows = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            rows.add(AgentJob.queued(UUID.randomUUID(), TENANT, agentId, "Research question: " + i, USER, USER,
-                Set.of(), AgentJobOrigin.API, null, 60, 1, 1, null));
+            rows.add(
+                    AgentJob.queued(
+                            UUID.randomUUID(),
+                            TENANT,
+                            agentId,
+                            "Research question: " + i,
+                            USER,
+                            USER,
+                            Set.of(),
+                            AgentJobOrigin.API,
+                            null,
+                            60,
+                            1,
+                            1,
+                            null));
         }
-        when(repository.findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(any(), anyString(), any()))
-            .thenReturn(rows);
+        when(repository.findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(
+                        any(), anyString(), any()))
+                .thenReturn(rows);
 
         AgentJobService.SummarySlice slice =
-            service.listForAgentsWithGoalPrefix(List.of(agentId), "Research question", 3, 3);
+                service.listForAgentsWithGoalPrefix(List.of(agentId), "Research question", 3, 3);
         assertEquals(3, slice.items().size());
         assertTrue(slice.hasMore());
 
         ArgumentCaptor<Pageable> pageable = ArgumentCaptor.forClass(Pageable.class);
-        verify(repository).findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(
-            eq(List.of(agentId)), eq("Research question"), pageable.capture());
+        verify(repository)
+                .findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(
+                        eq(List.of(agentId)), eq("Research question"), pageable.capture());
         assertEquals(3L, pageable.getValue().getOffset());
         assertEquals(4, pageable.getValue().getPageSize(), "limit + 1 rows are fetched");
 
-        when(repository.findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(any(), anyString(), any()))
-            .thenReturn(rows.subList(0, 3));
-        assertFalse(service.listForAgentsWithGoalPrefix(List.of(agentId), "Research question", 3, 3).hasMore());
+        when(repository.findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(
+                        any(), anyString(), any()))
+                .thenReturn(rows.subList(0, 3));
+        assertFalse(
+                service.listForAgentsWithGoalPrefix(List.of(agentId), "Research question", 3, 3)
+                        .hasMore());
     }
 
     @Test
     void historySliceSkipsAgentsTheCallerCannotView() {
         UUID hidden = UUID.randomUUID();
-        doThrow(new IllegalStateException("no access")).when(agentService).requireAccess(hidden, PermissionLevel.VIEWER);
-        when(repository.findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(any(), anyString(), any()))
-            .thenReturn(List.of());
+        doThrow(new IllegalStateException("no access"))
+                .when(agentService)
+                .requireAccess(hidden, PermissionLevel.VIEWER);
+        when(repository.findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(
+                        any(), anyString(), any()))
+                .thenReturn(List.of());
 
         service.listForAgentsWithGoalPrefix(List.of(hidden, agentId), "Research question", 10, 0);
-        verify(repository).findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(
-            eq(List.of(agentId)), eq("Research question"), any());
+        verify(repository)
+                .findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(
+                        eq(List.of(agentId)), eq("Research question"), any());
 
         // Nothing visible at all: no query, empty page.
         AgentJobService.SummarySlice none =
-            service.listForAgentsWithGoalPrefix(List.of(hidden), "Research question", 10, 0);
+                service.listForAgentsWithGoalPrefix(List.of(hidden), "Research question", 10, 0);
         assertTrue(none.items().isEmpty());
         assertFalse(none.hasMore());
         verify(repository, org.mockito.Mockito.times(1))
-            .findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(any(), anyString(), any());
+                .findByAgentIdInAndGoalStartingWithOrderByCreatedAtDesc(any(), anyString(), any());
     }
 }

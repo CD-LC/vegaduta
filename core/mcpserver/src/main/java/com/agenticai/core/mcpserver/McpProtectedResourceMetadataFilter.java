@@ -41,7 +41,9 @@ class McpProtectedResourceMetadataFilter extends OncePerRequestFilter {
         this.json = doc.toString();
     }
 
-    /** The RFC 9728 well-known URL for {@code resource}: path inserted after the well-known segment. */
+    /**
+     * The RFC 9728 well-known URL for {@code resource}: path inserted after the well-known segment.
+     */
     static String metadataUrl(String resource) {
         URI uri = URI.create(resource);
         String path = uri.getRawPath() == null ? "" : uri.getRawPath();
@@ -53,8 +55,9 @@ class McpProtectedResourceMetadataFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-        throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
         if (!"GET".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             response.setHeader("Allow", "GET");

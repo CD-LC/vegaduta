@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Manual/API-triggered Signal send + default agent - same posture as {@code TelegramSendController}. */
+/**
+ * Manual/API-triggered Signal send + default agent - same posture as {@code
+ * TelegramSendController}.
+ */
 @RestController
 @RequestMapping("/api/channels/signal")
 public class SignalSendController {
@@ -30,7 +33,8 @@ public class SignalSendController {
     private final HumanApprovalGateService gateService;
     private final ChannelSessionService channelSessionService;
 
-    public SignalSendController(HumanApprovalGateService gateService, ChannelSessionService channelSessionService) {
+    public SignalSendController(
+            HumanApprovalGateService gateService, ChannelSessionService channelSessionService) {
         this.gateService = gateService;
         this.channelSessionService = channelSessionService;
     }
@@ -39,20 +43,24 @@ public class SignalSendController {
     public SendResult send(@Valid @RequestBody SendRequest request) {
         if (!SignalAddress.isAddressable(request.to())) {
             throw new ChannelConfigurationException(
-                "signal", "Send to a number like +4915112345678, a UUID or group:<id>.");
+                    "signal", "Send to a number like +4915112345678, a UUID or group:<id>.");
         }
         String payloadJson;
         try {
-            payloadJson = MAPPER.writeValueAsString(new SignalChannelAdapter.SendPayload(request.to(), request.body()));
+            payloadJson =
+                    MAPPER.writeValueAsString(
+                            new SignalChannelAdapter.SendPayload(request.to(), request.body()));
         } catch (Exception e) {
-            throw new ChannelPayloadSerializationException("Signal", "Failed to serialize Signal send payload", e);
+            throw new ChannelPayloadSerializationException(
+                    "Signal", "Failed to serialize Signal send payload", e);
         }
         String requestedBy = TenantContext.current().map(TenantContext::getSubject).orElse(null);
-        ApprovalEvaluation evaluation = gateService.evaluate(
-            SignalChannelAdapter.ACTION_TYPE,
-            "Send Signal message to " + SignalAddress.mask(request.to()),
-            payloadJson,
-            requestedBy);
+        ApprovalEvaluation evaluation =
+                gateService.evaluate(
+                        SignalChannelAdapter.ACTION_TYPE,
+                        "Send Signal message to " + SignalAddress.mask(request.to()),
+                        payloadJson,
+                        requestedBy);
         return new SendResult(evaluation.approved(), evaluation.pendingRequestId());
     }
 

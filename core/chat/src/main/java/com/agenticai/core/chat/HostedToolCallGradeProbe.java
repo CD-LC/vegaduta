@@ -48,15 +48,17 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
     static final Set<String> PROBE_TOOL_NAMES = Set.of("get_weather", "get_time");
     static final String PROBE_QUESTION = "What is the weather in Paris right now?";
 
-    private static final Pattern PARAMETER_SIZE = Pattern.compile("([0-9]+(?:\\.[0-9]+)?)\\s*B", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PARAMETER_SIZE =
+            Pattern.compile("([0-9]+(?:\\.[0-9]+)?)\\s*B", Pattern.CASE_INSENSITIVE);
 
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
     private final boolean enabled;
 
     /**
-     * Same probe over the SSRF-guarded transport (address-pinned, no redirects), for a base URL a TENANT typed
-     * (the BYOK local-server probe). Null on the guarded instance itself and when the unit-test seam built this.
+     * Same probe over the SSRF-guarded transport (address-pinned, no redirects), for a base URL a
+     * TENANT typed (the BYOK local-server probe). Null on the guarded instance itself and when the
+     * unit-test seam built this.
      */
     private final HostedToolCallGradeProbe guardedProbe;
 
@@ -65,22 +67,27 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
     // constructor found") while every unit test passed.
     @Autowired
     public HostedToolCallGradeProbe(
-        LlmHttpClientFactory httpClientFactory,
-        ObjectMapper objectMapper,
-        @Value("${app.llm.tool-call-probe.enabled:true}") boolean enabled
-    ) {
-        this(httpClientFactory.restClientBuilder(), objectMapper, enabled,
-            new HostedToolCallGradeProbe(httpClientFactory.guardedRestClientBuilder(), objectMapper, enabled, null));
+            LlmHttpClientFactory httpClientFactory,
+            ObjectMapper objectMapper,
+            @Value("${app.llm.tool-call-probe.enabled:true}") boolean enabled) {
+        this(
+                httpClientFactory.restClientBuilder(),
+                objectMapper,
+                enabled,
+                new HostedToolCallGradeProbe(
+                        httpClientFactory.guardedRestClientBuilder(), objectMapper, enabled, null));
     }
 
-    HostedToolCallGradeProbe(RestClient.Builder restClientBuilder, ObjectMapper objectMapper, boolean enabled) {
+    HostedToolCallGradeProbe(
+            RestClient.Builder restClientBuilder, ObjectMapper objectMapper, boolean enabled) {
         this(restClientBuilder, objectMapper, enabled, null);
     }
 
     private HostedToolCallGradeProbe(
-        RestClient.Builder restClientBuilder, ObjectMapper objectMapper, boolean enabled,
-        HostedToolCallGradeProbe guardedProbe
-    ) {
+            RestClient.Builder restClientBuilder,
+            ObjectMapper objectMapper,
+            boolean enabled,
+            HostedToolCallGradeProbe guardedProbe) {
         this.restClient = restClientBuilder.build();
         this.objectMapper = objectMapper;
         this.enabled = enabled;
@@ -88,16 +95,21 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
     }
 
     /**
-     * The guard (DNS-resolving host check) is the caller's job; the guarded transport here pins the connection to
-     * the addresses it validated. Without a guarded instance (unit-test seam) nothing is probed.
+     * The guard (DNS-resolving host check) is the caller's job; the guarded transport here pins the
+     * connection to the addresses it validated. Without a guarded instance (unit-test seam) nothing
+     * is probed.
      */
     @Override
-    public Optional<Result> probeTenantServer(String baseUrl, String completionsPath, String model, String apiKeyOrNull) {
-        return guardedProbe == null ? Optional.empty() : guardedProbe.probe(baseUrl, completionsPath, model, apiKeyOrNull);
+    public Optional<Result> probeTenantServer(
+            String baseUrl, String completionsPath, String model, String apiKeyOrNull) {
+        return guardedProbe == null
+                ? Optional.empty()
+                : guardedProbe.probe(baseUrl, completionsPath, model, apiKeyOrNull);
     }
 
     @Override
-    public Optional<Result> probe(String baseUrl, String completionsPath, String model, String apiKeyOrNull) {
+    public Optional<Result> probe(
+            String baseUrl, String completionsPath, String model, String apiKeyOrNull) {
         if (!enabled || !StringUtils.hasText(baseUrl) || !StringUtils.hasText(model)) {
             return Optional.empty();
         }
@@ -107,16 +119,26 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
             ServerKind kind = show != null ? ServerKind.OLLAMA : detectNonOllamaKind(base);
             Double parameterBillions = show == null ? null : parameterBillions(show);
             if (show != null && !ollamaReportsTools(show)) {
-                log.info("Ollama reports no 'tools' capability for model '{}' at {}: graded NONE without a call.", model, base);
+                log.info(
+                        "Ollama reports no 'tools' capability for model '{}' at {}: graded NONE without a call.",
+                        model,
+                        base);
                 return Optional.of(new Result(ToolCallGrade.NONE, kind, parameterBillions));
             }
-            String url = base + (StringUtils.hasText(completionsPath) ? completionsPath : "/v1/chat/completions");
+            String url =
+                    base
+                            + (StringUtils.hasText(completionsPath)
+                                    ? completionsPath
+                                    : "/v1/chat/completions");
             ToolCallGrade grade = gradeChatReply(url, model, apiKeyOrNull);
             if (grade == null) {
                 return Optional.empty();
             }
-            if (kind == ServerKind.OLLAMA && grade != ToolCallGrade.STRUCTURED && !ollamaHonoursFormat(url, model, apiKeyOrNull)) {
-                // Only asked when the router would lean on it: a STRUCTURED row never uses the schema.
+            if (kind == ServerKind.OLLAMA
+                    && grade != ToolCallGrade.STRUCTURED
+                    && !ollamaHonoursFormat(url, model, apiKeyOrNull)) {
+                // Only asked when the router would lean on it: a STRUCTURED row never uses the
+                // schema.
                 kind = ServerKind.OLLAMA_WITHOUT_FORMAT;
             }
             return Optional.of(new Result(grade, kind, parameterBillions));
@@ -127,12 +149,17 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
     }
 
     @Override
-    public boolean honoursJsonSchema(String baseUrl, String completionsPath, String model, String apiKeyOrNull) {
+    public boolean honoursJsonSchema(
+            String baseUrl, String completionsPath, String model, String apiKeyOrNull) {
         if (!enabled || !StringUtils.hasText(baseUrl) || !StringUtils.hasText(model)) {
             return true;
         }
         String base = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
-        String url = base + (StringUtils.hasText(completionsPath) ? completionsPath : "/v1/chat/completions");
+        String url =
+                base
+                        + (StringUtils.hasText(completionsPath)
+                                ? completionsPath
+                                : "/v1/chat/completions");
         try {
             return ollamaHonoursFormat(url, model, apiKeyOrNull);
         } catch (RuntimeException e) {
@@ -140,13 +167,19 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
         }
     }
 
-    /** The {@code /api/show} body, or null when this is not an Ollama server (or it did not answer). */
+    /**
+     * The {@code /api/show} body, or null when this is not an Ollama server (or it did not answer).
+     */
     private JsonNode ollamaShow(String base, String model) {
         try {
             ObjectNode body = objectMapper.createObjectNode().put("model", model);
-            return restClient.post().uri(base + "/api/show")
-                .contentType(MediaType.APPLICATION_JSON).body(body.toString())
-                .retrieve().body(JsonNode.class);
+            return restClient
+                    .post()
+                    .uri(base + "/api/show")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body.toString())
+                    .retrieve()
+                    .body(JsonNode.class);
         } catch (RuntimeException e) {
             log.debug("{}/api/show did not answer like Ollama: {}", base, e.toString());
             return null;
@@ -186,7 +219,10 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
         return false;
     }
 
-    /** {@code details.parameter_size} ("3.2B") first, then {@code model_info.general.parameter_count}. */
+    /**
+     * {@code details.parameter_size} ("3.2B") first, then {@code
+     * model_info.general.parameter_count}.
+     */
     static Double parameterBillions(JsonNode show) {
         JsonNode details = show.get("details");
         if (details != null && details.hasNonNull("parameter_size")) {
@@ -206,7 +242,8 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
     }
 
     private ToolCallGrade gradeChatReply(String url, String model, String apiKeyOrNull) {
-        RestClient.RequestBodySpec request = restClient.post().uri(url).contentType(MediaType.APPLICATION_JSON);
+        RestClient.RequestBodySpec request =
+                restClient.post().uri(url).contentType(MediaType.APPLICATION_JSON);
         if (StringUtils.hasText(apiKeyOrNull)) {
             request = request.header("Authorization", "Bearer " + apiKeyOrNull.trim());
         }
@@ -215,8 +252,12 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
             reply = request.body(probeRequest(model).toString()).retrieve().body(JsonNode.class);
         } catch (RestClientResponseException e) {
             String detail = e.getResponseBodyAsString().toLowerCase(Locale.ROOT);
-            if (e.getStatusCode().is4xxClientError() && (detail.contains("tool") || detail.contains("function"))) {
-                log.info("{} rejected the tools parameter (HTTP {}): graded NONE.", url, e.getStatusCode().value());
+            if (e.getStatusCode().is4xxClientError()
+                    && (detail.contains("tool") || detail.contains("function"))) {
+                log.info(
+                        "{} rejected the tools parameter (HTTP {}): graded NONE.",
+                        url,
+                        e.getStatusCode().value());
                 return ToolCallGrade.NONE;
             }
             throw e;
@@ -225,22 +266,31 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
     }
 
     /**
-     * One tiny request with {@code response_format: json_schema}: false when the server answers a 4xx
-     * that names structured output (Ollama 0.19 for a model its MLX runner serves), true otherwise.
+     * One tiny request with {@code response_format: json_schema}: false when the server answers a
+     * 4xx that names structured output (Ollama 0.19 for a model its MLX runner serves), true
+     * otherwise.
      */
     private boolean ollamaHonoursFormat(String url, String model, String apiKeyOrNull) {
         ObjectNode body = objectMapper.createObjectNode();
         body.put("model", model);
         body.put("stream", false);
         body.put("max_tokens", 20);
-        body.putArray("messages").addObject().put("role", "user").put("content", "Reply with {\"ok\":true}");
+        body.putArray("messages")
+                .addObject()
+                .put("role", "user")
+                .put("content", "Reply with {\"ok\":true}");
         ObjectNode schema = objectMapper.createObjectNode();
         schema.put("type", "object");
         schema.putObject("properties").putObject("ok").put("type", "boolean");
         ObjectNode responseFormat = body.putObject("response_format");
         responseFormat.put("type", "json_schema");
-        responseFormat.putObject("json_schema").put("name", "probe").put("strict", false).set("schema", schema);
-        RestClient.RequestBodySpec request = restClient.post().uri(url).contentType(MediaType.APPLICATION_JSON);
+        responseFormat
+                .putObject("json_schema")
+                .put("name", "probe")
+                .put("strict", false)
+                .set("schema", schema);
+        RestClient.RequestBodySpec request =
+                restClient.post().uri(url).contentType(MediaType.APPLICATION_JSON);
         if (StringUtils.hasText(apiKeyOrNull)) {
             request = request.header("Authorization", "Bearer " + apiKeyOrNull.trim());
         }
@@ -249,11 +299,16 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
             return true;
         } catch (RestClientResponseException e) {
             String detail = e.getResponseBodyAsString().toLowerCase(Locale.ROOT);
-            boolean refused = e.getStatusCode().is4xxClientError()
-                && (detail.contains("structured output") || detail.contains("format"));
+            boolean refused =
+                    e.getStatusCode().is4xxClientError()
+                            && (detail.contains("structured output") || detail.contains("format"));
             if (refused) {
-                log.info("{} does not honour response_format for model '{}' ({}): the constrained router will not"
-                    + " use it.", url, model, e.getStatusCode().value());
+                log.info(
+                        "{} does not honour response_format for model '{}' ({}): the constrained router will not"
+                                + " use it.",
+                        url,
+                        model,
+                        e.getStatusCode().value());
             }
             return !refused;
         } catch (RuntimeException e) {
@@ -262,7 +317,9 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
         }
     }
 
-    /** The grade of one non-streaming chat-completions reply; null when it has no message at all. */
+    /**
+     * The grade of one non-streaming chat-completions reply; null when it has no message at all.
+     */
     static ToolCallGrade grade(JsonNode reply, ObjectMapper objectMapper) {
         if (reply == null) {
             return null;
@@ -276,7 +333,8 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
             return ToolCallGrade.STRUCTURED;
         }
         String content = message.hasNonNull("content") ? message.get("content").asText() : "";
-        List<AssistantMessage.ToolCall> textCalls = TextToolCallParser.parse(content, PROBE_TOOL_NAMES, objectMapper);
+        List<AssistantMessage.ToolCall> textCalls =
+                TextToolCallParser.parse(content, PROBE_TOOL_NAMES, objectMapper);
         return textCalls.isEmpty() ? ToolCallGrade.NONE : ToolCallGrade.TEXT;
     }
 
@@ -287,17 +345,31 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
         body.put("temperature", 0);
         body.put("max_tokens", 200);
         ArrayNode messages = body.putArray("messages");
-        messages.addObject().put("role", "system")
-            .put("content", "You can call tools. When a tool answers the question, call it instead of answering yourself.");
+        messages.addObject()
+                .put("role", "system")
+                .put(
+                        "content",
+                        "You can call tools. When a tool answers the question, call it instead of answering yourself.");
         messages.addObject().put("role", "user").put("content", PROBE_QUESTION);
         ArrayNode tools = body.putArray("tools");
-        tools.add(tool("get_weather", "Current weather for a city.", "city", "City name, e.g. Paris"));
-        tools.add(tool("get_time", "Current time in a time zone.", "timezone", "IANA time zone, e.g. Europe/Paris"));
+        tools.add(
+                tool(
+                        "get_weather",
+                        "Current weather for a city.",
+                        "city",
+                        "City name, e.g. Paris"));
+        tools.add(
+                tool(
+                        "get_time",
+                        "Current time in a time zone.",
+                        "timezone",
+                        "IANA time zone, e.g. Europe/Paris"));
         body.put("tool_choice", "auto");
         return body;
     }
 
-    private ObjectNode tool(String name, String description, String param, String paramDescription) {
+    private ObjectNode tool(
+            String name, String description, String param, String paramDescription) {
         ObjectNode tool = objectMapper.createObjectNode();
         tool.put("type", "function");
         ObjectNode function = tool.putObject("function");
@@ -305,7 +377,11 @@ public class HostedToolCallGradeProbe implements ToolCallCapabilityProbe {
         function.put("description", description);
         ObjectNode parameters = function.putObject("parameters");
         parameters.put("type", "object");
-        parameters.putObject("properties").putObject(param).put("type", "string").put("description", paramDescription);
+        parameters
+                .putObject("properties")
+                .putObject(param)
+                .put("type", "string")
+                .put("description", paramDescription);
         parameters.putArray("required").add(param);
         return tool;
     }

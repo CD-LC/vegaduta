@@ -361,8 +361,8 @@ class SessionAppendScriptRedisTest {
         }
         System.out.printf(
                 "ROUND-TRIPS per appendTurn (legacy -> script): no summariser/no tenant %d -> %d;"
-                    + " no summariser/tenant %d -> %d; summariser/tenant %d -> %d; summariser/no"
-                    + " tenant %d -> %d%n",
+                        + " no summariser/tenant %d -> %d; summariser/tenant %d -> %d; summariser/no"
+                        + " tenant %d -> %d%n",
                 rows[0][0],
                 rows[0][1],
                 rows[1][0],

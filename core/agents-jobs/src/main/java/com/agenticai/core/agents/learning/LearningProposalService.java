@@ -34,19 +34,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The generic store behind every "the assistant learns" loop. A loop only files a proposal here; the agent
- * PROPOSES and the person APPROVES, so nothing reaches a prompt, a schedule or a stored preference before
- * {@link #approve}. Approval is handed to the {@link LearningProposalApplier} registered for the proposal's kind.
+ * The generic store behind every "the assistant learns" loop. A loop only files a proposal here;
+ * the agent PROPOSES and the person APPROVES, so nothing reaches a prompt, a schedule or a stored
+ * preference before {@link #approve}. Approval is handed to the {@link LearningProposalApplier}
+ * registered for the proposal's kind.
  *
- * <p>Off unless {@code app.learning.proposals.enabled=true} (on in the personal profile): then no bean exists and
- * the REST routes answer 404. Bounds: at most {@code app.learning.proposals.max-pending} PENDING proposals per
- * person, identical pending text is one row, text the person already rejected is not proposed again, and
- * PENDING proposals expire after {@code ttl-days}. Everything stored is scrubbed of secrets and personal data like
- * a drafted skill is.
+ * <p>Off unless {@code app.learning.proposals.enabled=true} (on in the personal profile): then no
+ * bean exists and the REST routes answer 404. Bounds: at most {@code
+ * app.learning.proposals.max-pending} PENDING proposals per person, identical pending text is one
+ * row, text the person already rejected is not proposed again, and PENDING proposals expire after
+ * {@code ttl-days}. Everything stored is scrubbed of secrets and personal data like a drafted skill
+ * is.
  *
- * <p>For loops: call {@link #claimSlot} before spending a model call (per-agent cooldown and daily cap), run the
- * work with {@link #runOffThread} (never on the request thread; the tenant is carried across) and file the result
- * with {@link #propose}, which never throws.
+ * <p>For loops: call {@link #claimSlot} before spending a model call (per-agent cooldown and daily
+ * cap), run the work with {@link #runOffThread} (never on the request thread; the tenant is carried
+ * across) and file the result with {@link #propose}, which never throws.
  */
 @Service
 @ConditionalOnProperty(name = "app.learning.proposals.enabled", havingValue = "true")
@@ -57,7 +59,10 @@ public class LearningProposalService {
     static final int MAX_TITLE_CHARS = 200;
     public static final int MAX_BODY_CHARS = 2_000;
     private static final int MAX_JSON_CHARS = 4_000;
-    /** More redactions than this means the text is about one specific case, not general learning. */
+
+    /**
+     * More redactions than this means the text is about one specific case, not general learning.
+     */
     static final int MAX_REDACTIONS = 3;
 
     /** What {@link #propose} did. Only CREATED stored a row. */
@@ -70,7 +75,10 @@ public class LearningProposalService {
         INVALID
     }
 
-    /** What a loop files. {@code payload} and {@code evidence} are JSON-serialisable maps, may be null. */
+    /**
+     * What a loop files. {@code payload} and {@code evidence} are JSON-serialisable maps, may be
+     * null.
+     */
     public record Proposal(
             String subject,
             UUID agentId,
@@ -140,8 +148,9 @@ public class LearningProposalService {
     }
 
     /**
-     * Runs learning work off the calling (request) thread on a small bounded worker, with the caller's tenant
-     * re-applied. Returns false when the queue is full (the work is skipped, learning is best effort).
+     * Runs learning work off the calling (request) thread on a small bounded worker, with the
+     * caller's tenant re-applied. Returns false when the queue is full (the work is skipped,
+     * learning is best effort).
      */
     public boolean runOffThread(Runnable work) {
         TenantScope scope = TenantScope.capture();
@@ -177,7 +186,8 @@ public class LearningProposalService {
             return new Result(Outcome.INVALID, null);
         }
         String body = clean(in.body(), MAX_BODY_CHARS);
-        String title = clean(blank(in.title()) ? firstLine(in.body()) : in.title(), MAX_TITLE_CHARS);
+        String title =
+                clean(blank(in.title()) ? firstLine(in.body()) : in.title(), MAX_TITLE_CHARS);
         if (blank(body) || blank(title)) {
             return new Result(Outcome.INVALID, null);
         }
@@ -230,9 +240,14 @@ public class LearningProposalService {
         return list(subject, status, kind, null);
     }
 
-    /** {@link #list(String, LearningProposalStatus, LearningProposalKind)} capped to {@code limit}. */
+    /**
+     * {@link #list(String, LearningProposalStatus, LearningProposalKind)} capped to {@code limit}.
+     */
     public List<LearningProposalView> list(
-            String subject, LearningProposalStatus status, LearningProposalKind kind, Integer limit) {
+            String subject,
+            LearningProposalStatus status,
+            LearningProposalKind kind,
+            Integer limit) {
         expireStale(Instant.now());
         List<LearningProposal> rows;
         if (status != null && kind != null) {
@@ -259,9 +274,10 @@ public class LearningProposalService {
     }
 
     /**
-     * Approves a PENDING proposal: hands it (with the person's edit of the text, if any) to its kind's applier,
-     * and only when that succeeds marks it APPROVED. 404 unknown or not yours, 409 not pending, no applier for the
-     * kind, or the applier refused (its message is shown to the person).
+     * Approves a PENDING proposal: hands it (with the person's edit of the text, if any) to its
+     * kind's applier, and only when that succeeds marks it APPROVED. 404 unknown or not yours, 409
+     * not pending, no applier for the kind, or the applier refused (its message is shown to the
+     * person).
      */
     public LearningProposalView approve(String subject, UUID id, String editedBody) {
         LearningProposal p = pending(subject, id);
@@ -277,7 +293,8 @@ public class LearningProposalService {
         if (editedBody != null) {
             text = scrubber.scrub(clean(editedBody, MAX_BODY_CHARS));
             if (blank(text)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The text cannot be empty.");
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "The text cannot be empty.");
             }
         }
         try {
@@ -308,7 +325,10 @@ public class LearningProposalService {
                                                 HttpStatus.NOT_FOUND, "No such suggestion."));
         if (p.getStatus() != LearningProposalStatus.PENDING) {
             throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "This suggestion was already " + p.getStatus().name().toLowerCase(Locale.ROOT) + ".");
+                    HttpStatus.CONFLICT,
+                    "This suggestion was already "
+                            + p.getStatus().name().toLowerCase(Locale.ROOT)
+                            + ".");
         }
         return p;
     }
@@ -359,7 +379,8 @@ public class LearningProposalService {
 
     private JsonNode scrubNode(JsonNode node) {
         if (node.isTextual()) {
-            return com.fasterxml.jackson.databind.node.TextNode.valueOf(scrubber.scrub(node.asText()));
+            return com.fasterxml.jackson.databind.node.TextNode.valueOf(
+                    scrubber.scrub(node.asText()));
         }
         if (node.isObject()) {
             var out = JsonMappers.plain().createObjectNode();

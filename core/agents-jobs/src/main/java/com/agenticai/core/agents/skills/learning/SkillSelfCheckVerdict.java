@@ -48,7 +48,11 @@ public record SkillSelfCheckVerdict(Verdict verdict, String reason) {
             return Optional.empty();
         }
         String reason =
-                node.path("reason").asText("").replaceAll("[<>]", "").replaceAll("\\s+", " ").strip();
+                node.path("reason")
+                        .asText("")
+                        .replaceAll("[<>]", "")
+                        .replaceAll("\\s+", " ")
+                        .strip();
         if (reason.length() > MAX_REASON) {
             reason = reason.substring(0, MAX_REASON).stripTrailing();
         }

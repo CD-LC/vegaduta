@@ -17,27 +17,29 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Validates and normalises cell values against a table's declared column types. Pure and static: no Spring, no
- * database, so every rule is unit-testable.
+ * Validates and normalises cell values against a table's declared column types. Pure and static: no
+ * Spring, no database, so every rule is unit-testable.
  *
- * <p>Normal forms: {@code text} -> String; {@code number} -> Long when integral and in range, else Double
- * (NaN/Infinity rejected); {@code boolean} -> Boolean; {@code date} -> {@code yyyy-MM-dd} for a date-only value or
- * a UTC ISO-8601 instant for a date-time (so lexicographic order is chronological within each form); {@code json}
- * -> any JSON value (a String that parses as an object/array is parsed). An empty string is "no value" for every
- * type except text. Every cell is capped at {@code maxCellBytes} UTF-8 bytes of its JSON form.
+ * <p>Normal forms: {@code text} -> String; {@code number} -> Long when integral and in range, else
+ * Double (NaN/Infinity rejected); {@code boolean} -> Boolean; {@code date} -> {@code yyyy-MM-dd}
+ * for a date-only value or a UTC ISO-8601 instant for a date-time (so lexicographic order is
+ * chronological within each form); {@code json} -> any JSON value (a String that parses as an
+ * object/array is parsed). An empty string is "no value" for every type except text. Every cell is
+ * capped at {@code maxCellBytes} UTF-8 bytes of its JSON form.
  */
 public final class DataTableValidator {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-    private DataTableValidator() {
-    }
+    private DataTableValidator() {}
 
     /**
-     * Normalises a (possibly partial) row. Unknown column names are rejected. A null value is kept as a null entry
-     * so a patch can clear a cell; callers that insert drop the null entries with {@link #withoutNulls}.
+     * Normalises a (possibly partial) row. Unknown column names are rejected. A null value is kept
+     * as a null entry so a patch can clear a cell; callers that insert drop the null entries with
+     * {@link #withoutNulls}.
      */
-    public static Map<String, Object> normalizeRow(List<DataTableColumn> columns, Map<String, Object> raw, int maxCellBytes) {
+    public static Map<String, Object> normalizeRow(
+            List<DataTableColumn> columns, Map<String, Object> raw, int maxCellBytes) {
         Map<String, Object> out = new LinkedHashMap<>();
         if (raw == null) {
             return out;
@@ -45,7 +47,8 @@ public final class DataTableValidator {
         for (Map.Entry<String, Object> e : raw.entrySet()) {
             DataTableColumn col = find(columns, e.getKey());
             if (col == null) {
-                throw new IllegalArgumentException("Unknown column '" + e.getKey() + "'" + hint(columns));
+                throw new IllegalArgumentException(
+                        "Unknown column '" + e.getKey() + "'" + hint(columns));
             }
             out.put(col.name(), coerce(col, e.getValue(), maxCellBytes));
         }
@@ -62,7 +65,10 @@ public final class DataTableValidator {
         return out;
     }
 
-    /** Column lookup by exact name first, then case-insensitively (so a CSV header "Email" finds {@code email}). */
+    /**
+     * Column lookup by exact name first, then case-insensitively (so a CSV header "Email" finds
+     * {@code email}).
+     */
     public static DataTableColumn find(List<DataTableColumn> columns, String name) {
         if (name == null) {
             return null;
@@ -81,7 +87,10 @@ public final class DataTableValidator {
         return null;
     }
 
-    /** Coerces one value to the column's normal form; throws IllegalArgumentException (safe to show) when it does not fit. */
+    /**
+     * Coerces one value to the column's normal form; throws IllegalArgumentException (safe to show)
+     * when it does not fit.
+     */
     public static Object coerce(DataTableColumn col, Object value, int maxCellBytes) {
         Object out = coerceType(col, value);
         if (out != null) {
@@ -213,7 +222,10 @@ public final class DataTableValidator {
             }
             return s;
         }
-        if (value instanceof Map<?, ?> || value instanceof List<?> || value instanceof Number || value instanceof Boolean) {
+        if (value instanceof Map<?, ?>
+                || value instanceof List<?>
+                || value instanceof Number
+                || value instanceof Boolean) {
             return value;
         }
         throw bad(col, "valid JSON");
@@ -228,12 +240,19 @@ public final class DataTableValidator {
         }
         if (bytes > maxCellBytes) {
             throw new IllegalArgumentException(
-                "Value for column '" + col.name() + "' is " + bytes + " bytes - the limit is " + maxCellBytes + " bytes per cell");
+                    "Value for column '"
+                            + col.name()
+                            + "' is "
+                            + bytes
+                            + " bytes - the limit is "
+                            + maxCellBytes
+                            + " bytes per cell");
         }
     }
 
     private static IllegalArgumentException bad(DataTableColumn col, String expected) {
-        return new IllegalArgumentException("Column '" + col.name() + "' (" + col.type().wire() + ") expects " + expected);
+        return new IllegalArgumentException(
+                "Column '" + col.name() + "' (" + col.type().wire() + ") expects " + expected);
     }
 
     private static String hint(List<DataTableColumn> columns) {

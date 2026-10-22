@@ -6,11 +6,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
+import java.io.IOException;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,19 +31,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.io.IOException;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 /**
- * Golden-small check of {@link OpenApiSpecGenerator} against tiny fixture controllers: header,
- * tags and paths, one operation of each shape (create, parameters, streaming, delete, regex path,
- * public route), the component schemas and the skipped-handler list. The structural checks over the
- * real controller set live in {@link OpenApiSpecGeneratorTest}.
+ * Golden-small check of {@link OpenApiSpecGenerator} against tiny fixture controllers: header, tags
+ * and paths, one operation of each shape (create, parameters, streaming, delete, regex path, public
+ * route), the component schemas and the skipped-handler list. The structural checks over the real
+ * controller set live in {@link OpenApiSpecGeneratorTest}.
  */
 class OpenApiFixtureSpecTest {
 

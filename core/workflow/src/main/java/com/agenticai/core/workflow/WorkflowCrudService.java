@@ -23,7 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Create / list / update / delete / duplicate / validate and the per-workflow settings setters,
  * split out of {@link WorkflowService}. A graph is always validated before it is saved as {@link
- * WorkflowStatus#ACTIVE}; DRAFT saves skip that gate so a work-in-progress graph can still be saved.
+ * WorkflowStatus#ACTIVE}; DRAFT saves skip that gate so a work-in-progress graph can still be
+ * saved.
  */
 @Service
 class WorkflowCrudService {
@@ -242,7 +243,10 @@ class WorkflowCrudService {
      */
     public WorkflowResponse toResponse(WorkflowDefinition definition) {
         return WorkflowResponse.from(
-                definition, objectMapper, guard.isEditable(definition), guard.accessLevelOf(definition));
+                definition,
+                objectMapper,
+                guard.isEditable(definition),
+                guard.accessLevelOf(definition));
     }
 
     @Transactional(readOnly = true)
@@ -333,8 +337,8 @@ class WorkflowCrudService {
      * PATCH /execution-limits - explicitly sets per-run step ceiling and per-step timeout.
      * Switching a workflow to {@link TuningMode#MANUAL} before calling this is not required - these
      * limits can be overridden regardless of the current tuning mode (subsequent SIMPLE inference
-     * would overwrite them, but that requires an explicit re-infer action, not an implicit one).
-     * A null argument leaves that setting unchanged.
+     * would overwrite them, but that requires an explicit re-infer action, not an implicit one). A
+     * null argument leaves that setting unchanged.
      */
     @Transactional
     public WorkflowDefinition setExecutionLimits(
@@ -357,7 +361,10 @@ class WorkflowCrudService {
         return definitionRepository.save(definition);
     }
 
-    /** The definition's {@code updatedAt}, the entity tag of {@code /api/workflows/{id}}; no access check. */
+    /**
+     * The definition's {@code updatedAt}, the entity tag of {@code /api/workflows/{id}}; no access
+     * check.
+     */
     Optional<java.time.Instant> lastModified(UUID workflowId) {
         return definitionRepository.findById(workflowId).map(WorkflowDefinition::getUpdatedAt);
     }

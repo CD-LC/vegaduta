@@ -101,7 +101,8 @@ class ResearchResultSanitizerAndGateTest {
         AgentCapabilityStateRepository states = mock(AgentCapabilityStateRepository.class);
         ResearchRunUsageService usage = usage();
         UUID agentId = UUID.randomUUID();
-        when(states.findById(new AgentCapabilityStateId(agentId, DeepResearchCapability.CAPABILITY_KEY)))
+        when(states.findById(
+                        new AgentCapabilityStateId(agentId, DeepResearchCapability.CAPABILITY_KEY)))
                 .thenReturn(
                         Optional.of(
                                 new AgentCapabilityState(
@@ -121,7 +122,8 @@ class ResearchResultSanitizerAndGateTest {
         AgentCapabilityStateRepository states = mock(AgentCapabilityStateRepository.class);
         ResearchRunUsageService usage = usage();
         UUID agentId = UUID.randomUUID();
-        when(states.findById(new AgentCapabilityStateId(agentId, DeepResearchCapability.CAPABILITY_KEY)))
+        when(states.findById(
+                        new AgentCapabilityStateId(agentId, DeepResearchCapability.CAPABILITY_KEY)))
                 .thenReturn(
                         Optional.of(
                                 new AgentCapabilityState(
@@ -146,12 +148,15 @@ class ResearchResultSanitizerAndGateTest {
         ResearchRunUsageService usage = usage();
         UUID plain = UUID.randomUUID();
         UUID off = UUID.randomUUID();
-        when(states.findById(new AgentCapabilityStateId(plain, DeepResearchCapability.CAPABILITY_KEY)))
+        when(states.findById(
+                        new AgentCapabilityStateId(plain, DeepResearchCapability.CAPABILITY_KEY)))
                 .thenReturn(Optional.empty());
-        when(states.findById(new AgentCapabilityStateId(off, DeepResearchCapability.CAPABILITY_KEY)))
+        when(states.findById(
+                        new AgentCapabilityStateId(off, DeepResearchCapability.CAPABILITY_KEY)))
                 .thenReturn(
                         Optional.of(
-                                new AgentCapabilityState(off, DeepResearchCapability.CAPABILITY_KEY, false)));
+                                new AgentCapabilityState(
+                                        off, DeepResearchCapability.CAPABILITY_KEY, false)));
         ResearchAgentSubmitGate gate = new ResearchAgentSubmitGate(states, usage);
 
         assertNull(gate.reserve(plain, "t1", "alice"));

@@ -14,8 +14,7 @@ class NodeOutputMapper {
         this.objectMapper = objectMapper;
     }
 
-    String applyOutputMapping(
-            String outputField, AgentChatService.StructuredAgentOutput output) {
+    String applyOutputMapping(String outputField, AgentChatService.StructuredAgentOutput output) {
         return switch (outputField) {
             case "confidence" -> String.valueOf(output.confidence());
             case "sources" -> writeJsonQuietly(output.sources());

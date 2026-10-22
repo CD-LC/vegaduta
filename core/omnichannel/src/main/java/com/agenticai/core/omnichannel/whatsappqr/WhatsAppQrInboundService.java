@@ -93,7 +93,9 @@ public class WhatsAppQrInboundService {
         return handled;
     }
 
-    /** @return false only when no inbound slot could be had. */
+    /**
+     * @return false only when no inbound slot could be had.
+     */
     private boolean handle(WhatsAppQrEnvelope envelope) {
         // Admission BEFORE any side effect (session creation writes a message-log row). A message
         // that is knowably cheap (an existing unpaired conversation) takes an inline permit so
@@ -145,7 +147,9 @@ public class WhatsAppQrInboundService {
                     try {
                         chatAndReply(session, envelope);
                     } catch (RuntimeException e) {
-                        log.warn("Failed to process WhatsApp QR inbound message: {}", e.getMessage());
+                        log.warn(
+                                "Failed to process WhatsApp QR inbound message: {}",
+                                e.getMessage());
                     }
                 });
     }
@@ -161,7 +165,8 @@ public class WhatsAppQrInboundService {
                                     session.getExternalId(),
                                     envelope.text())
                             .build();
-            TurnContext turnContext = TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+            TurnContext turnContext =
+                    TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
             reply =
                     agentChatService
                             .chat(turnContext, chatTurn)
@@ -179,7 +184,10 @@ public class WhatsAppQrInboundService {
         }
     }
 
-    /** The session points at a since-deleted agent: tell the sender and leave an audit trail for the admin. */
+    /**
+     * The session points at a since-deleted agent: tell the sender and leave an audit trail for the
+     * admin.
+     */
     private void handleStaleAgentBinding(ChannelSession session, String conversation) {
         log.warn(
                 "WhatsApp QR session {} is bound to agent {} which no longer exists",
@@ -203,7 +211,9 @@ public class WhatsAppQrInboundService {
                         + " - please try again shortly.");
     }
 
-    /** First contact with an unknown sender: a single pairing notice, then silence until approved. */
+    /**
+     * First contact with an unknown sender: a single pairing notice, then silence until approved.
+     */
     private void handleUnpaired(ChannelSession session, String conversation) {
         if (session.isPairingNoticeSent()) {
             log.info(
@@ -225,9 +235,14 @@ public class WhatsAppQrInboundService {
     private void sendThroughApprovalGate(String to, String replyText) {
         String payloadJson;
         try {
-            payloadJson = MAPPER.writeValueAsString(new WhatsAppQrChannelAdapter.SendPayload(to, replyText));
+            payloadJson =
+                    MAPPER.writeValueAsString(
+                            new WhatsAppQrChannelAdapter.SendPayload(to, replyText));
         } catch (Exception e) {
-            log.error("Failed to serialize WhatsApp QR auto-reply payload for {}", WhatsAppQrAddress.mask(to), e);
+            log.error(
+                    "Failed to serialize WhatsApp QR auto-reply payload for {}",
+                    WhatsAppQrAddress.mask(to),
+                    e);
             return;
         }
         gateService.evaluate(

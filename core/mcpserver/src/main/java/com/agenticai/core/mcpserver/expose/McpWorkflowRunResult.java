@@ -12,17 +12,23 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Pure mapping from a {@link WorkflowRunResponse} to the compact JSON an MCP client gets back from a
- * {@code workflow_*} tool or {@code get_run}: status, the last step's output, an approximate cost
+ * Pure mapping from a {@link WorkflowRunResponse} to the compact JSON an MCP client gets back from
+ * a {@code workflow_*} tool or {@code get_run}: status, the last step's output, an approximate cost
  * (sum of the per-step costs the engine already records) and a trimmed step list. Node inputs, tool
  * call payloads and log lines are deliberately NOT included - they can carry far more than the
  * caller asked for.
  */
 public final class McpWorkflowRunResult {
 
-    /** Statuses in which a human has to act inside the platform before the run can go on - not answerable over MCP. */
-    static final Set<WorkflowRunStatus> NEEDS_HUMAN = Set.of(
-        WorkflowRunStatus.AWAITING_APPROVAL, WorkflowRunStatus.AWAITING_INPUT, WorkflowRunStatus.AWAITING_VOICE_INPUT);
+    /**
+     * Statuses in which a human has to act inside the platform before the run can go on - not
+     * answerable over MCP.
+     */
+    static final Set<WorkflowRunStatus> NEEDS_HUMAN =
+            Set.of(
+                    WorkflowRunStatus.AWAITING_APPROVAL,
+                    WorkflowRunStatus.AWAITING_INPUT,
+                    WorkflowRunStatus.AWAITING_VOICE_INPUT);
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
     private static final int MAX_STEPS = 50;
@@ -72,7 +78,10 @@ public final class McpWorkflowRunResult {
         return text.substring(0, maxChars) + "... [truncated]";
     }
 
-    /** JSON text for the tool result. {@code hint} (nullable) tells the caller what to do next, e.g. poll with get_run. */
+    /**
+     * JSON text for the tool result. {@code hint} (nullable) tells the caller what to do next, e.g.
+     * poll with get_run.
+     */
     public static String toJson(WorkflowRunResponse run, int maxOutputChars, String hint) {
         ObjectNode root = MAPPER.createObjectNode();
         root.put("run_id", run.id() == null ? null : run.id().toString());
@@ -97,7 +106,11 @@ public final class McpWorkflowRunResult {
                     continue;
                 }
                 ObjectNode step = steps.addObject();
-                step.put("node", entry.label() != null && !entry.label().isBlank() ? entry.label() : entry.nodeId());
+                step.put(
+                        "node",
+                        entry.label() != null && !entry.label().isBlank()
+                                ? entry.label()
+                                : entry.nodeId());
                 step.put("status", entry.status());
                 step.put("summary", truncate(entry.summary(), 300));
             }

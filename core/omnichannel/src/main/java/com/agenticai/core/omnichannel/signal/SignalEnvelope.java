@@ -41,15 +41,18 @@ public record SignalEnvelope(
         return isGroup() ? SignalAddress.groupExternalId(groupId) : senderId();
     }
 
-    /** Idempotency key: signal-cli redelivers on reconnect, the same sender never reuses a timestamp. */
+    /**
+     * Idempotency key: signal-cli redelivers on reconnect, the same sender never reuses a
+     * timestamp.
+     */
     public String dedupKey() {
         return conversationId() + ":" + senderId() + ":" + timestamp;
     }
 
     /**
-     * @param wrapper an element of {@code GET /v1/receive} or a websocket frame:
-     *     {@code {"envelope":{...},"account":"+..."}} (a bare envelope and a JSON-RPC style {@code
-     *     params} wrapper are accepted too)
+     * @param wrapper an element of {@code GET /v1/receive} or a websocket frame: {@code
+     *     {"envelope":{...},"account":"+..."}} (a bare envelope and a JSON-RPC style {@code params}
+     *     wrapper are accepted too)
      * @param accountNumber the connected number, to drop the account's own echoes
      */
     public static Optional<SignalEnvelope> parse(JsonNode wrapper, String accountNumber) {
@@ -62,7 +65,9 @@ public record SignalEnvelope(
         if (!data.isObject()) {
             return Optional.empty();
         }
-        if (data.hasNonNull("reaction") || data.hasNonNull("remoteDelete") || data.hasNonNull("storyContext")) {
+        if (data.hasNonNull("reaction")
+                || data.hasNonNull("remoteDelete")
+                || data.hasNonNull("storyContext")) {
             return Optional.empty();
         }
         String number = blankToNull(firstText(envelope, "sourceNumber", "source"));
@@ -96,13 +101,18 @@ public record SignalEnvelope(
                 break;
             }
             // Both come from the sender: no line breaks, and short.
-            String type = sanitize(attachment.path("contentType").asText("file")).replace('\n', ' ');
+            String type =
+                    sanitize(attachment.path("contentType").asText("file")).replace('\n', ' ');
             type = type.isEmpty() ? "file" : cap(type, 100);
-            String name = cap(sanitize(attachment.path("filename").asText("")).replace('\n', ' '), 100);
+            String name =
+                    cap(sanitize(attachment.path("filename").asText("")).replace('\n', ' '), 100);
             notes.add("[attachment: " + type + (name.isEmpty() ? "" : " " + name) + "]");
         }
         if (!notes.isEmpty()) {
-            text = text.isEmpty() ? String.join("\n", notes) : text + "\n" + String.join("\n", notes);
+            text =
+                    text.isEmpty()
+                            ? String.join("\n", notes)
+                            : text + "\n" + String.join("\n", notes);
         }
         if (text.isBlank()) {
             return Optional.empty();

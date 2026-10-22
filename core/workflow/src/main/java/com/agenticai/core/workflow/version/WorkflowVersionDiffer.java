@@ -17,9 +17,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * The read-only diffs of {@link WorkflowVersionService}: the structural version diff (graph + {@code details_json})
- * and the run-to-run diff aligned off each run's trace. Pure functions of the documents it is given - no
- * repository, cache or tenant access.
+ * The read-only diffs of {@link WorkflowVersionService}: the structural version diff (graph +
+ * {@code details_json}) and the run-to-run diff aligned off each run's trace. Pure functions of the
+ * documents it is given - no repository, cache or tenant access.
  */
 final class WorkflowVersionDiffer {
 
@@ -268,9 +268,7 @@ final class WorkflowVersionDiffer {
             rollup.put("lastStatus", entry.status());
             rollup.put("lastSummary", entry.summary());
             if (entry.startedAt() != null && entry.completedAt() != null) {
-                long ms =
-                        Duration.between(entry.startedAt(), entry.completedAt())
-                                .toMillis();
+                long ms = Duration.between(entry.startedAt(), entry.completedAt()).toMillis();
                 rollup.put("totalMs", ((Number) rollup.get("totalMs")).longValue() + ms);
             }
         }
@@ -382,9 +380,7 @@ final class WorkflowVersionDiffer {
             a.fieldNames().forEachRemaining(names::add);
             b.fieldNames().forEachRemaining(names::add);
             for (String name : names) {
-                boolean childSecret =
-                        secret
-                                || AgentStepEventRedactor.isSecretKey(name);
+                boolean childSecret = secret || AgentStepEventRedactor.isSecretKey(name);
                 diffValue(path + "." + name, a.path(name), b.path(name), childSecret, out);
             }
             return;

@@ -5,7 +5,6 @@ import com.agenticai.core.workflow.WorkflowDataOps.Condition;
 import com.agenticai.core.workflow.dto.WorkflowEdgeDto;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -15,27 +14,31 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * Save-time checks for the eight data nodes, called from {@link OrchestratorService#validate}. Everything a
- * node's runtime would reject with a {@link IllegalArgumentException} for a reason that is knowable from the
- * stored config alone (unknown operator, empty condition list, malformed literal, duplicate Switch case names) is
- * reported here, so it surfaces on Validate / Activate instead of as a SKIPPED node mid-run. Values that contain a
- * {@code {{ }}} expression are only known at run time and are not checked.
+ * Save-time checks for the eight data nodes, called from {@link OrchestratorService#validate}.
+ * Everything a node's runtime would reject with a {@link IllegalArgumentException} for a reason
+ * that is knowable from the stored config alone (unknown operator, empty condition list, malformed
+ * literal, duplicate Switch case names) is reported here, so it surfaces on Validate / Activate
+ * instead of as a SKIPPED node mid-run. Values that contain a {@code {{ }}} expression are only
+ * known at run time and are not checked.
  */
 final class WorkflowDataNodeValidator {
 
-    static final Set<String> TYPES = Set.of("set", "filter", "sort", "aggregate", "limit", "dedupe", "switch", "merge");
+    static final Set<String> TYPES =
+            Set.of("set", "filter", "sort", "aggregate", "limit", "dedupe", "switch", "merge");
 
     private static final WorkflowDataOps OPS = new WorkflowDataOps(JsonMappers.plain());
-    private static final Set<String> RESERVED_HANDLES = Set.of(WorkflowDataOps.SWITCH_DEFAULT_HANDLE, "error");
+    private static final Set<String> RESERVED_HANDLES =
+            Set.of(WorkflowDataOps.SWITCH_DEFAULT_HANDLE, "error");
 
-    private WorkflowDataNodeValidator() {
-    }
+    private WorkflowDataNodeValidator() {}
 
     static boolean handles(String type) {
         return type != null && TYPES.contains(type.toLowerCase(Locale.ROOT));
     }
 
-    /** Per-node config checks. Messages follow the other node types' "X node 'label' ..." wording. */
+    /**
+     * Per-node config checks. Messages follow the other node types' "X node 'label' ..." wording.
+     */
     static void validate(WorkflowNodeDto node, List<String> errors) {
         String type = node.type() == null ? "" : node.type().toLowerCase(Locale.ROOT);
         Map<String, Object> config = node.config();
@@ -49,7 +52,8 @@ final class WorkflowDataNodeValidator {
             case "sort" -> validateSort(who, config, errors);
             case "aggregate" -> validateAggregate(who, config, errors);
             case "limit" -> validateLimit(who, config, errors);
-            case "dedupe" -> checkChoice(who, "keep", config.get("keep"), Set.of("first", "last"), errors);
+            case "dedupe" ->
+                    checkChoice(who, "keep", config.get("keep"), Set.of("first", "last"), errors);
             case "switch" -> validateSwitch(who, config, errors);
             case "merge" -> validateMerge(who, config, errors);
             default -> {
@@ -59,9 +63,10 @@ final class WorkflowDataNodeValidator {
     }
 
     /**
-     * Graph-level check: a Switch routes by matching its chosen case name against each outgoing edge's
-     * {@code sourceHandle}, so an edge off a Switch must come from one of its case ports, the default port or the
-     * shared error port - anything else is a connection the engine can never follow.
+     * Graph-level check: a Switch routes by matching its chosen case name against each outgoing
+     * edge's {@code sourceHandle}, so an edge off a Switch must come from one of its case ports,
+     * the default port or the shared error port - anything else is a connection the engine can
+     * never follow.
      */
     static void validateGraph(WorkflowGraphDto graph, List<String> errors) {
         for (WorkflowNodeDto node : graph.nodes()) {
@@ -81,11 +86,18 @@ final class WorkflowDataNodeValidator {
                 }
                 String handle = edge.sourceHandle() == null ? "" : edge.sourceHandle().strip();
                 if (handle.isEmpty()) {
-                    errors.add("Switch node '" + node.label() + "' has a connection that is not attached to a case or the "
-                        + "default port - it would never be followed. Drag the connection from one of the node's ports.");
+                    errors.add(
+                            "Switch node '"
+                                    + node.label()
+                                    + "' has a connection that is not attached to a case or the "
+                                    + "default port - it would never be followed. Drag the connection from one of the node's ports.");
                 } else if (!ports.contains(handle.toLowerCase(Locale.ROOT))) {
-                    errors.add("Switch node '" + node.label() + "' has a connection from port '" + handle
-                        + "', which is not one of its cases (renamed or removed?).");
+                    errors.add(
+                            "Switch node '"
+                                    + node.label()
+                                    + "' has a connection from port '"
+                                    + handle
+                                    + "', which is not one of its cases (renamed or removed?).");
                 }
             }
         }
@@ -106,8 +118,17 @@ final class WorkflowDataNodeValidator {
             String type = WorkflowDataOps.str(a.get("type"));
             Object value = a.get("value");
             if (value instanceof String s && s.contains("{{")) {
-                if (type != null && !type.isBlank() && !WorkflowDataOps.SET_TYPES.contains(type.strip().toLowerCase(Locale.ROOT))) {
-                    errors.add(who + " field '" + name.strip() + "' has an unknown type '" + type + "'.");
+                if (type != null
+                        && !type.isBlank()
+                        && !WorkflowDataOps.SET_TYPES.contains(
+                                type.strip().toLowerCase(Locale.ROOT))) {
+                    errors.add(
+                            who
+                                    + " field '"
+                                    + name.strip()
+                                    + "' has an unknown type '"
+                                    + type
+                                    + "'.");
                 }
                 continue;
             }
@@ -129,18 +150,26 @@ final class WorkflowDataNodeValidator {
             if (single == null || single.isBlank()) {
                 errors.add(who + " has no sort key - choose the field to sort by.");
             } else {
-                checkChoice(who, "direction", config.get("direction"), Set.of("asc", "desc"), errors);
-                checkChoice(who, "sortType", config.get("sortType"), Set.of("auto", "string", "number", "date"), errors);
+                checkChoice(
+                        who, "direction", config.get("direction"), Set.of("asc", "desc"), errors);
+                checkChoice(
+                        who,
+                        "sortType",
+                        config.get("sortType"),
+                        Set.of("auto", "string", "number", "date"),
+                        errors);
             }
             return;
         }
         for (Map<String, Object> k : keys) {
             checkChoice(who, "direction", k.get("direction"), Set.of("asc", "desc"), errors);
-            checkChoice(who, "type", k.get("type"), Set.of("auto", "string", "number", "date"), errors);
+            checkChoice(
+                    who, "type", k.get("type"), Set.of("auto", "string", "number", "date"), errors);
         }
     }
 
-    private static void validateAggregate(String who, Map<String, Object> config, List<String> errors) {
+    private static void validateAggregate(
+            String who, Map<String, Object> config, List<String> errors) {
         List<Map<String, Object>> specs = WorkflowDataOps.mapList(config.get("aggregations"));
         if (specs.isEmpty()) {
             errors.add(who + " has nothing to calculate - add at least one aggregation.");
@@ -149,8 +178,11 @@ final class WorkflowDataNodeValidator {
         for (Map<String, Object> s : specs) {
             String op = WorkflowDataOps.str(s.get("operation"));
             if (WorkflowDataOps.normalizeAggregateOperation(op) == null) {
-                errors.add(who + " has an unknown operation '" + (op == null ? "" : op)
-                    + "' (expected count, sum, avg, min, max, first, last, concat or collect).");
+                errors.add(
+                        who
+                                + " has an unknown operation '"
+                                + (op == null ? "" : op)
+                                + "' (expected count, sum, avg, min, max, first, last, concat or collect).");
             }
         }
     }
@@ -162,13 +194,18 @@ final class WorkflowDataNodeValidator {
         } else if (!(count instanceof String s && s.contains("{{"))) {
             Integer n = WorkflowDataOps.intOrNull(count);
             if (n == null || n < 0) {
-                errors.add(who + " needs a whole number of 0 or more for its count (got '" + count + "').");
+                errors.add(
+                        who
+                                + " needs a whole number of 0 or more for its count (got '"
+                                + count
+                                + "').");
             }
         }
         checkChoice(who, "mode", config.get("mode"), Set.of("first", "last"), errors);
     }
 
-    private static void validateSwitch(String who, Map<String, Object> config, List<String> errors) {
+    private static void validateSwitch(
+            String who, Map<String, Object> config, List<String> errors) {
         List<Map<String, Object>> cases = WorkflowDataOps.mapList(config.get("cases"));
         if (cases.isEmpty()) {
             errors.add(who + " has no cases - add at least one case with a name and a condition.");
@@ -183,20 +220,34 @@ final class WorkflowDataNodeValidator {
             }
             String key = name.strip().toLowerCase(Locale.ROOT);
             if (RESERVED_HANDLES.contains(key)) {
-                errors.add(who + " has a case named '" + name.strip() + "', which is reserved - pick another name.");
+                errors.add(
+                        who
+                                + " has a case named '"
+                                + name.strip()
+                                + "', which is reserved - pick another name.");
             } else if (!seen.add(key)) {
-                errors.add(who + " has two cases named '" + name.strip() + "' - case names must be unique.");
+                errors.add(
+                        who
+                                + " has two cases named '"
+                                + name.strip()
+                                + "' - case names must be unique.");
             }
-            requireConditions(who + " case '" + name.strip() + "'", c.get("conditions"), "condition", errors);
+            requireConditions(
+                    who + " case '" + name.strip() + "'", c.get("conditions"), "condition", errors);
             checkCombinator(who, c.get("combinator"), errors);
         }
     }
 
     private static void validateMerge(String who, Map<String, Object> config, List<String> errors) {
         String mode = WorkflowDataOps.str(config.get("mode"));
-        String normalized = mode == null || mode.isBlank() ? "append" : mode.strip().toLowerCase(Locale.ROOT);
+        String normalized =
+                mode == null || mode.isBlank() ? "append" : mode.strip().toLowerCase(Locale.ROOT);
         if (!WorkflowDataOps.MERGE_MODES.contains(normalized)) {
-            errors.add(who + " has an unknown mode '" + mode + "' (expected append, join or first_non_empty).");
+            errors.add(
+                    who
+                            + " has an unknown mode '"
+                            + mode
+                            + "' (expected append, join or first_non_empty).");
             return;
         }
         if (normalized.equals("join")) {
@@ -204,20 +255,26 @@ final class WorkflowDataNodeValidator {
             if (key == null || key.isBlank()) {
                 errors.add(who + " joins inputs but has no key field to match on.");
             }
-            checkChoice(who, "joinType", config.get("joinType"), WorkflowDataOps.JOIN_TYPES, errors);
+            checkChoice(
+                    who, "joinType", config.get("joinType"), WorkflowDataOps.JOIN_TYPES, errors);
         }
         Object min = config.get("minInputs");
         if (min != null && !min.toString().isBlank()) {
             Integer n = WorkflowDataOps.intOrNull(min);
             if (n == null || n < 0) {
-                errors.add(who + " needs a whole number of 0 or more for 'minimum inputs' (got '" + min + "').");
+                errors.add(
+                        who
+                                + " needs a whole number of 0 or more for 'minimum inputs' (got '"
+                                + min
+                                + "').");
             }
         }
     }
 
     // ---- shared
 
-    private static void requireConditions(String who, Object raw, String noun, List<String> errors) {
+    private static void requireConditions(
+            String who, Object raw, String noun, List<String> errors) {
         List<Condition> conditions = WorkflowDataOps.conditions(raw);
         if (conditions.isEmpty()) {
             errors.add(who + " has no " + noun + " - add at least one.");
@@ -231,12 +288,22 @@ final class WorkflowDataNodeValidator {
             }
             if (op.equals("regex") && !c.value().contains("{{")) {
                 if (c.value().length() > WorkflowDataOps.MAX_REGEX_PATTERN_CHARS) {
-                    errors.add(who + " has a regex longer than " + WorkflowDataOps.MAX_REGEX_PATTERN_CHARS + " characters.");
+                    errors.add(
+                            who
+                                    + " has a regex longer than "
+                                    + WorkflowDataOps.MAX_REGEX_PATTERN_CHARS
+                                    + " characters.");
                 } else {
                     try {
                         Pattern.compile(c.value());
                     } catch (PatternSyntaxException e) {
-                        errors.add(who + " has an invalid regex '" + c.value() + "': " + e.getDescription() + ".");
+                        errors.add(
+                                who
+                                        + " has an invalid regex '"
+                                        + c.value()
+                                        + "': "
+                                        + e.getDescription()
+                                        + ".");
                     }
                 }
             }
@@ -247,7 +314,8 @@ final class WorkflowDataNodeValidator {
         checkChoice(who, "combinator", combinator, Set.of("and", "or"), errors);
     }
 
-    private static void checkChoice(String who, String key, Object raw, Set<String> allowed, List<String> errors) {
+    private static void checkChoice(
+            String who, String key, Object raw, Set<String> allowed, List<String> errors) {
         if (raw == null || raw.toString().isBlank()) {
             return;
         }

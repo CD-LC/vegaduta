@@ -5,18 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 
 /**
- * Validation and encoding of the fields a caller writes on an {@link EvalDataset} or {@link EvalDatasetCase}:
- * name, user message, pass threshold and the {@code expected_tools} JSON-array column. Split out of
- * {@link EvalDatasetService}, which applies them on every write; each failure is an
- * {@link IllegalArgumentException} (a 400).
+ * Validation and encoding of the fields a caller writes on an {@link EvalDataset} or {@link
+ * EvalDatasetCase}: name, user message, pass threshold and the {@code expected_tools} JSON-array
+ * column. Split out of {@link EvalDatasetService}, which applies them on every write; each failure
+ * is an {@link IllegalArgumentException} (a 400).
  */
 final class EvalCaseInputs {
 
     /** Same static-mapper pattern as {@link EvalDatasetService}'s reads of the same column. */
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-    private EvalCaseInputs() {
-    }
+    private EvalCaseInputs() {}
 
     static String requireName(String name) {
         if (name == null || name.isBlank()) {
@@ -60,7 +59,9 @@ final class EvalCaseInputs {
         }
         if (expectedTools.size() > EvalDatasetService.MAX_EXPECTED_TOOLS) {
             throw new IllegalArgumentException(
-                    "'expectedTools' can list at most " + EvalDatasetService.MAX_EXPECTED_TOOLS + " tool names.");
+                    "'expectedTools' can list at most "
+                            + EvalDatasetService.MAX_EXPECTED_TOOLS
+                            + " tool names.");
         }
         List<String> cleaned =
                 expectedTools.stream()

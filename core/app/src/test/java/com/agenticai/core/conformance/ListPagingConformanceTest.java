@@ -4,10 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,11 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Conformance by construction (ADR-0019): every list-returning GET operation in the committed
- * {@code docs/api/openapi.json} must take a paging parameter (limit, offset, page, size or
- * cursor), unless it is listed in {@code conformance/list-paging-allowlist.txt}.
+ * {@code docs/api/openapi.json} must take a paging parameter (limit, offset, page, size or cursor),
+ * unless it is listed in {@code conformance/list-paging-allowlist.txt}.
  *
  * <p>The allowlist is a ratchet: it can only shrink. A new unpaged list endpoint fails the build,
  * and so does an allowlisted entry that now has paging (delete the line). To print the current

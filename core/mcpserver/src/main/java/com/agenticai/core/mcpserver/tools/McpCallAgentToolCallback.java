@@ -66,9 +66,9 @@ public class McpCallAgentToolCallback implements ToolCallback {
                 .name("call_agent")
                 .description(
                         "Sends a message to one of your organization's agents (see list_my_agents"
-                            + " for valid agent_id values) and returns its reply. Pass the same"
-                            + " session_id on a follow-up call to continue the same conversation"
-                            + " with short-term memory; omit it to start a fresh conversation.")
+                                + " for valid agent_id values) and returns its reply. Pass the same"
+                                + " session_id on a follow-up call to continue the same conversation"
+                                + " with short-term memory; omit it to start a fresh conversation.")
                 .inputSchema(
                         """
 {
@@ -92,9 +92,9 @@ public class McpCallAgentToolCallback implements ToolCallback {
                                 () ->
                                         new IllegalStateException(
                                                 "call_agent invoked with no McpCallerContext set -"
-                                                    + " McpApiKeyAuthFilter should have rejected"
-                                                    + " this request before it ever reached tool"
-                                                    + " dispatch."));
+                                                        + " McpApiKeyAuthFilter should have rejected"
+                                                        + " this request before it ever reached tool"
+                                                        + " dispatch."));
         try {
             JsonNode input = MAPPER.readTree(toolInput);
             String agentIdRaw = textOrNull(input, "agent_id");

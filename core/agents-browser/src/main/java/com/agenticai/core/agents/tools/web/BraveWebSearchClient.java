@@ -2,9 +2,9 @@ package com.agenticai.core.agents.tools.web;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.resilience.CircuitBreakerRegistry;
-import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.resilience.DependencyUnavailableException;
 import com.agenticai.core.resilience.ResilienceGuard;
+import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;

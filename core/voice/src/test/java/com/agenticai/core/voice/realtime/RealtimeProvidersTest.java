@@ -9,9 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 /**
- * Frame-shape tests for the two realtime providers - the upstream contract
- * each provider's API documents. A wrong field name here means the provider
- * silently ignores our config, so these pin the wire format.
+ * Frame-shape tests for the two realtime providers - the upstream contract each provider's API
+ * documents. A wrong field name here means the provider silently ignores our config, so these pin
+ * the wire format.
  */
 class RealtimeProvidersTest {
 
@@ -29,34 +29,57 @@ class RealtimeProvidersTest {
 
     @Test
     void geminiSetupFrame_matchesTheBidiGenerateContentShape() throws Exception {
-        String frame = GeminiLiveRealtimeProvider.buildSetupFrame(
-            new RealtimeSessionConfig("k", "gemini-2.5-flash-native-audio-preview-09-2025", "You are helpful.", "Aoede"));
+        String frame =
+                GeminiLiveRealtimeProvider.buildSetupFrame(
+                        new RealtimeSessionConfig(
+                                "k",
+                                "gemini-2.5-flash-native-audio-preview-09-2025",
+                                "You are helpful.",
+                                "Aoede"));
 
         JsonNode setup = MAPPER.readTree(frame).path("setup");
-        assertEquals("models/gemini-2.5-flash-native-audio-preview-09-2025", setup.path("model").asText());
-        assertEquals("AUDIO", setup.path("generationConfig").path("responseModalities").get(0).asText());
-        assertEquals("Aoede", setup.path("generationConfig").path("speechConfig")
-            .path("voiceConfig").path("prebuiltVoiceConfig").path("voiceName").asText());
-        assertEquals("You are helpful.",
-            setup.path("systemInstruction").path("parts").get(0).path("text").asText());
+        assertEquals(
+                "models/gemini-2.5-flash-native-audio-preview-09-2025",
+                setup.path("model").asText());
+        assertEquals(
+                "AUDIO", setup.path("generationConfig").path("responseModalities").get(0).asText());
+        assertEquals(
+                "Aoede",
+                setup.path("generationConfig")
+                        .path("speechConfig")
+                        .path("voiceConfig")
+                        .path("prebuiltVoiceConfig")
+                        .path("voiceName")
+                        .asText());
+        assertEquals(
+                "You are helpful.",
+                setup.path("systemInstruction").path("parts").get(0).path("text").asText());
     }
 
     @Test
     void geminiSetupFrame_defaultsModelAndVoice_andPrefixesModelsNamespace() throws Exception {
-        String frame = GeminiLiveRealtimeProvider.buildSetupFrame(
-            new RealtimeSessionConfig("k", "gemini-live-x", null, null));
+        String frame =
+                GeminiLiveRealtimeProvider.buildSetupFrame(
+                        new RealtimeSessionConfig("k", "gemini-live-x", null, null));
 
         JsonNode setup = MAPPER.readTree(frame).path("setup");
         assertEquals("models/gemini-live-x", setup.path("model").asText());
-        assertEquals("Puck", setup.path("generationConfig").path("speechConfig")
-            .path("voiceConfig").path("prebuiltVoiceConfig").path("voiceName").asText());
+        assertEquals(
+                "Puck",
+                setup.path("generationConfig")
+                        .path("speechConfig")
+                        .path("voiceConfig")
+                        .path("prebuiltVoiceConfig")
+                        .path("voiceName")
+                        .asText());
         assertTrue(setup.path("systemInstruction").isMissingNode());
     }
 
     @Test
     void openAiSessionUpdate_matchesTheRealtimeApiShape() throws Exception {
-        String frame = OpenAiRealtimeProvider.buildSessionUpdate(
-            new RealtimeSessionConfig("k", "gpt-realtime", "Speak plainly.", "verse"));
+        String frame =
+                OpenAiRealtimeProvider.buildSessionUpdate(
+                        new RealtimeSessionConfig("k", "gpt-realtime", "Speak plainly.", "verse"));
 
         JsonNode root = MAPPER.readTree(frame);
         assertEquals("session.update", root.path("type").asText());
@@ -71,8 +94,11 @@ class RealtimeProvidersTest {
 
     @Test
     void openAiSessionUpdate_defaultsVoiceToAlloy() throws Exception {
-        JsonNode session = MAPPER.readTree(OpenAiRealtimeProvider.buildSessionUpdate(
-            new RealtimeSessionConfig("k", null, null, null))).path("session");
+        JsonNode session =
+                MAPPER.readTree(
+                                OpenAiRealtimeProvider.buildSessionUpdate(
+                                        new RealtimeSessionConfig("k", null, null, null)))
+                        .path("session");
         assertEquals("alloy", session.path("voice").asText());
     }
 }

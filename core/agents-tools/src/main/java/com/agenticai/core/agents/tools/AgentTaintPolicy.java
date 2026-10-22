@@ -10,9 +10,9 @@ import com.agenticai.core.guardrails.taint.TaintMode;
 import com.agenticai.core.guardrails.taint.ToolTaintClassifier;
 import com.agenticai.core.guardrails.taint.ToolTaintProfile;
 import com.agenticai.core.guardrails.taint.TurnTaint;
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.net.URI;
@@ -32,9 +32,9 @@ import org.springframework.stereotype.Component;
 
 /**
  * Wires the untrusted-content taint layer ({@code app.agents.taint.mode}, see {@link TaintMode})
- * into the tool chain: owns the per-turn {@link TurnTaint}, answers "does this tool produce
- * tainted output / is this call a side effect" from the tool-classification registry, and builds
- * the {@link TaintGate} that {@code GuardedToolCallback} consults.
+ * into the tool chain: owns the per-turn {@link TurnTaint}, answers "does this tool produce tainted
+ * output / is this call a side effect" from the tool-classification registry, and builds the {@link
+ * TaintGate} that {@code GuardedToolCallback} consults.
  *
  * <h2>Classification rules (conservative)</h2>
  *
@@ -49,11 +49,12 @@ import org.springframework.stereotype.Component;
  *       the untrusted case; other unknown first-party tools are not assumed to carry foreign
  *       content, or every unclassified read would taint every turn.
  *   <li>{@code http_request} / {@code fetch_web_page} / {@code browser_navigate} are classified
- *       read-only by name, but the call itself can write or leak: a non-GET/HEAD/OPTIONS method is a sink, and when {@code
- *       app.agents.taint.http-get-allow-hosts} is set a GET to any other host is a sink too (a
- *       query string is an exfiltration channel). Residual: {@code deep_research}, {@code
- *       verify_citations} and {@code web_search} take a query, not a URL, so the host list cannot
- *       cover them; with the list unset (the default, also in {@code personal}) no GET is a sink.
+ *       read-only by name, but the call itself can write or leak: a non-GET/HEAD/OPTIONS method is
+ *       a sink, and when {@code app.agents.taint.http-get-allow-hosts} is set a GET to any other
+ *       host is a sink too (a query string is an exfiltration channel). Residual: {@code
+ *       deep_research}, {@code verify_citations} and {@code web_search} take a query, not a URL, so
+ *       the host list cannot cover them; with the list unset (the default, also in {@code
+ *       personal}) no GET is a sink.
  * </ul>
  *
  * <p><b>Default off.</b> Without the {@code personal} profile (or an explicit setting) the layer is
@@ -61,7 +62,7 @@ import org.springframework.stereotype.Component;
  * opt-in; it does the classification work on every guarded tool call and writes one audit row per
  * tool per tainted turn.
  *
- * Verdicts are memoised per tenant and tool for 60 seconds (the registry read is a database
+ * <p>Verdicts are memoised per tenant and tool for 60 seconds (the registry read is a database
  * lookup), so the steady-state cost per tool call is one map read. Nothing here crosses a thread
  * boundary with a thread-local: the turn state is a plain object captured by the tool wrappers.
  */
@@ -72,8 +73,14 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
 
     static final String MCP_PREFIX = "mcp__";
     private static final Set<String> READ_METHODS = Set.of("GET", "HEAD", "OPTIONS");
-    /** Read tools whose {@code url} argument is a data channel: a query string can carry context out. */
-    private static final Set<String> HTTP_TOOLS = Set.of("http_request", "fetch_web_page", "browser_navigate");
+
+    /**
+     * Read tools whose {@code url} argument is a data channel: a query string can carry context
+     * out.
+     */
+    private static final Set<String> HTTP_TOOLS =
+            Set.of("http_request", "fetch_web_page", "browser_navigate");
+
     private static final long CACHE_TTL_MILLIS = 60_000L;
     private static final int CACHE_MAX = 2_000;
     private static final int AUDIT_TARGET_MAX = 128;
@@ -94,15 +101,14 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
      * ~45 resolve helpers changes.
      */
     private static final Map<AtomicInteger, TurnTaint> TURNS =
-        Collections.synchronizedMap(new WeakHashMap<>());
+            Collections.synchronizedMap(new WeakHashMap<>());
 
     public AgentTaintPolicy(
-        @Value("${app.agents.taint.mode:off}") String mode,
-        @Value("${app.agents.taint.http-get-allow-hosts:}") String getAllowHosts,
-        ObjectProvider<ToolClassificationRegistry> registry,
-        ObjectProvider<MeterRegistry> meters,
-        ObjectProvider<AuditLogService> audit
-    ) {
+            @Value("${app.agents.taint.mode:off}") String mode,
+            @Value("${app.agents.taint.http-get-allow-hosts:}") String getAllowHosts,
+            ObjectProvider<ToolClassificationRegistry> registry,
+            ObjectProvider<MeterRegistry> meters,
+            ObjectProvider<AuditLogService> audit) {
         this.mode = TaintMode.parse(mode);
         this.getAllowHosts = parseHosts(getAllowHosts);
         this.registry = registry;
@@ -133,13 +139,16 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
         }
     }
 
-    /** The gate for one tool of one turn, or null when the layer is off (the chain is unchanged). */
+    /**
+     * The gate for one tool of one turn, or null when the layer is off (the chain is unchanged).
+     */
     public TaintGate gateFor(AtomicInteger turnKey, UUID agentId, String sessionId) {
         TurnTaint turn = turnTaint(turnKey);
         if (turn == null) {
             return null;
         }
-        return new TaintGate(mode, turn, this, meters.getIfAvailable(), this::audit, agentId, sessionId);
+        return new TaintGate(
+                mode, turn, this, meters.getIfAvailable(), this::audit, agentId, sessionId);
     }
 
     @Override
@@ -190,15 +199,18 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
             JsonNode args = JSON.readTree(toolInput);
             String method = args.path("method").asText("GET").trim().toUpperCase(Locale.ROOT);
             if (!method.isEmpty() && !READ_METHODS.contains(method)) {
-                return new ToolTaintProfile(base.producesTaint(), true, base.label() + "+" + method);
+                return new ToolTaintProfile(
+                        base.producesTaint(), true, base.label() + "+" + method);
             }
             if (!getAllowHosts.isEmpty() && !hostAllowed(args.path("url").asText(""))) {
-                return new ToolTaintProfile(base.producesTaint(), true, base.label() + "+host_not_allowlisted");
+                return new ToolTaintProfile(
+                        base.producesTaint(), true, base.label() + "+host_not_allowlisted");
             }
             return base;
         } catch (Exception e) {
             // Unparseable arguments on a tool that sends requests: fail closed.
-            return new ToolTaintProfile(base.producesTaint(), true, base.label() + "+unparseable_args");
+            return new ToolTaintProfile(
+                    base.producesTaint(), true, base.label() + "+unparseable_args");
         }
     }
 
@@ -239,10 +251,13 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
             return;
         }
         try {
-            // audit_log_entry.target_id is varchar(128); an MCP tool name can exceed it, and a failed
+            // audit_log_entry.target_id is varchar(128); an MCP tool name can exceed it, and a
+            // failed
             // insert would silently lose exactly the evidence this layer exists to keep.
-            String target = toolName != null && toolName.length() > AUDIT_TARGET_MAX
-                ? toolName.substring(0, AUDIT_TARGET_MAX) : toolName;
+            String target =
+                    toolName != null && toolName.length() > AUDIT_TARGET_MAX
+                            ? toolName.substring(0, AUDIT_TARGET_MAX)
+                            : toolName;
             service.record("agent-taint", action, "tool", target, outcome, detail);
         } catch (RuntimeException e) {
             log.warn("Could not record taint audit entry for tool '{}'", toolName, e);

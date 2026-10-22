@@ -39,10 +39,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Inbound WhatsApp.
- * Outbound send ({@link WhatsAppSendController}) was already built; a real reply from Twilio
- * reaching an agent's chat session (and the agent's answer reaching the user back on WhatsApp) was
- * the missing half.
+ * Inbound WhatsApp. Outbound send ({@link WhatsAppSendController}) was already built; a real reply
+ * from Twilio reaching an agent's chat session (and the agent's answer reaching the user back on
+ * WhatsApp) was the missing half.
  *
  * <p>Authenticated by {@link TwilioSignatureValidator}, not a Keycloak JWT - see {@code
  * SecurityConfig}'s {@code /webhook/**} {@code permitAll()} rule and its javadoc for why: Twilio's
@@ -185,11 +184,11 @@ public class TwilioWebhookController {
                                 () -> {
                                     log.warn(
                                             "No tenant link found for Twilio AccountSid ***{} -"
-                                                + " falling back to the {} schema. This is expected"
-                                                + " for a single-tenant setup where the credential"
-                                                + " was activated before this link existed;"
-                                                + " otherwise, this AccountSid was never activated"
-                                                + " via POST /api/channels/twilio/credential.",
+                                                    + " falling back to the {} schema. This is expected"
+                                                    + " for a single-tenant setup where the credential"
+                                                    + " was activated before this link existed;"
+                                                    + " otherwise, this AccountSid was never activated"
+                                                    + " via POST /api/channels/twilio/credential.",
                                             lastFour(accountSid),
                                             TenantSchemaResolver.DEFAULT_SCHEMA);
                                     return TenantSchemaResolver.DEFAULT_SCHEMA;

@@ -13,9 +13,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
- * Approved LESSON: stored as an agent-private memory fact (the same store and per-person cap as a fact the
- * person types in by hand), so the agent recalls it in later conversations with that person. The agent is the
- * proposal's {@code agentId}, else payload {@code agentId}.
+ * Approved LESSON: stored as an agent-private memory fact (the same store and per-person cap as a
+ * fact the person types in by hand), so the agent recalls it in later conversations with that
+ * person. The agent is the proposal's {@code agentId}, else payload {@code agentId}.
  */
 @Component
 @ConditionalOnProperty(name = "app.learning.proposals.enabled", havingValue = "true")
@@ -40,7 +40,8 @@ public class LessonApplier implements LearningProposalApplier {
     }
 
     @Override
-    public void apply(LearningProposal proposal, String text) throws LearningProposalApplyException {
+    public void apply(LearningProposal proposal, String text)
+            throws LearningProposalApplyException {
         AgentMemoryService service = memory.getIfAvailable();
         if (service == null) {
             throw new LearningProposalApplyException("Memory is not available on this install.");
@@ -66,7 +67,8 @@ public class LessonApplier implements LearningProposalApplier {
             JsonNode payload = JsonMappers.plain().readTree(p.getPayload());
             return UUID.fromString(payload.path("agentId").asText(""));
         } catch (Exception e) {
-            throw new LearningProposalApplyException("This lesson does not say which agent should remember it.");
+            throw new LearningProposalApplyException(
+                    "This lesson does not say which agent should remember it.");
         }
     }
 }

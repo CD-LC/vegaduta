@@ -19,9 +19,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * Save/activate/run-time validation of the two flag-gated wfcontrol constructs. The property that matters: with a
- * flag off, a graph that uses the construct is REJECTED with a clear message - it is never silently skipped (a
- * Wait that does not wait) or silently run as something else (a form that is just a webhook).
+ * Save/activate/run-time validation of the two flag-gated wfcontrol constructs. The property that
+ * matters: with a flag off, a graph that uses the construct is REJECTED with a clear message - it
+ * is never silently skipped (a Wait that does not wait) or silently run as something else (a form
+ * that is just a webhook).
  */
 class OrchestratorServiceWfControlTest {
 
@@ -30,8 +31,12 @@ class OrchestratorServiceWfControlTest {
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
-        orchestrator = new OrchestratorService(mock(AgentService.class), mock(HumanApprovalGateService.class),
-            new ObjectMapper(), mock(ObjectProvider.class));
+        orchestrator =
+                new OrchestratorService(
+                        mock(AgentService.class),
+                        mock(HumanApprovalGateService.class),
+                        new ObjectMapper(),
+                        mock(ObjectProvider.class));
     }
 
     private static WorkflowNodeDto node(String id, String type, Map<String, Object> config) {
@@ -40,8 +45,10 @@ class OrchestratorServiceWfControlTest {
 
     private static WorkflowGraphDto waitGraph(Map<String, Object> waitConfig) {
         return new WorkflowGraphDto(
-            List.of(node("t", "trigger", Map.of("channel", "WEBHOOK")), node("w", "wait", waitConfig)),
-            List.of(new WorkflowEdgeDto("e1", "t", "w", null, null)));
+                List.of(
+                        node("t", "trigger", Map.of("channel", "WEBHOOK")),
+                        node("w", "wait", waitConfig)),
+                List.of(new WorkflowEdgeDto("e1", "t", "w", null, null)));
     }
 
     private static Map<String, Object> formTrigger() {
@@ -59,25 +66,39 @@ class OrchestratorServiceWfControlTest {
     }
 
     private List<String> errors(WorkflowGraphDto graph) {
-        return assertThrows(WorkflowValidationException.class, () -> orchestrator.validate(graph)).getErrors();
+        return assertThrows(WorkflowValidationException.class, () -> orchestrator.validate(graph))
+                .getErrors();
     }
 
-    // ---- wait ---------------------------------------------------------------------------------------------------------
+    // ---- wait
+    // ---------------------------------------------------------------------------------------------------------
 
     @Test
     void aWaitNodeIsRejectedClearlyWhenTheFeatureIsOff() {
         List<String> errors = errors(waitGraph(Map.of("mode", "duration", "duration", "5m")));
 
-        assertTrue(errors.stream().anyMatch(e -> e.contains("Wait node 'w'") && e.contains("app.workflow.wait-node.enabled")),
-            errors.toString());
+        assertTrue(
+                errors.stream()
+                        .anyMatch(
+                                e ->
+                                        e.contains("Wait node 'w'")
+                                                && e.contains("app.workflow.wait-node.enabled")),
+                errors.toString());
     }
 
     @Test
     void aValidWaitNodePassesWhenTheFeatureIsOn() {
         orchestrator.setWaitNodeEnabled(true);
 
-        assertDoesNotThrow(() -> orchestrator.validate(waitGraph(Map.of("mode", "duration", "duration", "5m"))));
-        assertDoesNotThrow(() -> orchestrator.validate(waitGraph(Map.of("mode", "until", "until", "{{ $trigger.when }}"))));
+        assertDoesNotThrow(
+                () ->
+                        orchestrator.validate(
+                                waitGraph(Map.of("mode", "duration", "duration", "5m"))));
+        assertDoesNotThrow(
+                () ->
+                        orchestrator.validate(
+                                waitGraph(
+                                        Map.of("mode", "until", "until", "{{ $trigger.when }}"))));
         assertDoesNotThrow(() -> orchestrator.validate(waitGraph(Map.of("mode", "webhook"))));
     }
 
@@ -85,21 +106,34 @@ class OrchestratorServiceWfControlTest {
     void aBadWaitConfigIsRejectedAtSaveTimeWhenTheFeatureIsOn() {
         orchestrator.setWaitNodeEnabled(true);
 
-        assertTrue(errors(waitGraph(Map.of("mode", "duration"))).stream().anyMatch(e -> e.contains("no duration")));
-        assertTrue(errors(waitGraph(Map.of("duration", "90d"))).stream().anyMatch(e -> e.contains("exceeds the maximum")));
-        assertTrue(errors(waitGraph(Map.of("mode", "until", "until", "tomorrow-ish"))).stream()
-            .anyMatch(e -> e.contains("ISO-8601")));
-        assertTrue(errors(waitGraph(Map.of("mode", "sometimes"))).stream().anyMatch(e -> e.contains("unknown wait mode")));
+        assertTrue(
+                errors(waitGraph(Map.of("mode", "duration"))).stream()
+                        .anyMatch(e -> e.contains("no duration")));
+        assertTrue(
+                errors(waitGraph(Map.of("duration", "90d"))).stream()
+                        .anyMatch(e -> e.contains("exceeds the maximum")));
+        assertTrue(
+                errors(waitGraph(Map.of("mode", "until", "until", "tomorrow-ish"))).stream()
+                        .anyMatch(e -> e.contains("ISO-8601")));
+        assertTrue(
+                errors(waitGraph(Map.of("mode", "sometimes"))).stream()
+                        .anyMatch(e -> e.contains("unknown wait mode")));
     }
 
-    // ---- form trigger ---------------------------------------------------------------------------------------------------
+    // ---- form trigger
+    // ---------------------------------------------------------------------------------------------------
 
     @Test
     void aFormTriggerIsRejectedClearlyWhenTheFeatureIsOff() {
         List<String> errors = errors(formGraph(formTrigger()));
 
-        assertTrue(errors.stream().anyMatch(e -> e.contains("hosted form") && e.contains("app.workflow.form-trigger.enabled")),
-            errors.toString());
+        assertTrue(
+                errors.stream()
+                        .anyMatch(
+                                e ->
+                                        e.contains("hosted form")
+                                                && e.contains("app.workflow.form-trigger.enabled")),
+                errors.toString());
     }
 
     @Test
@@ -117,12 +151,19 @@ class OrchestratorServiceWfControlTest {
 
         List<String> errors = errors(formGraph(config));
 
-        assertTrue(errors.stream().anyMatch(e -> e.contains("form:") && e.contains("must start with a letter")), errors.toString());
+        assertTrue(
+                errors.stream()
+                        .anyMatch(
+                                e -> e.contains("form:") && e.contains("must start with a letter")),
+                errors.toString());
     }
 
     @Test
     void anOrdinaryTriggerIsUntouchedByEitherFlag() {
         assertDoesNotThrow(() -> orchestrator.validate(formGraph(Map.of("channel", "WEBHOOK"))));
-        assertDoesNotThrow(() -> orchestrator.validate(formGraph(Map.of("channel", "WEBHOOK", "triggerType", "webhook"))));
+        assertDoesNotThrow(
+                () ->
+                        orchestrator.validate(
+                                formGraph(Map.of("channel", "WEBHOOK", "triggerType", "webhook"))));
     }
 }

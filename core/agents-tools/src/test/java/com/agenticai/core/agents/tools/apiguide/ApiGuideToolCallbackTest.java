@@ -49,13 +49,16 @@ class ApiGuideToolCallbackTest {
         assertEquals("string", r.at("/body/schema/properties/name/type").asText());
         assertEquals("name", r.at("/body/schema/required/0").asText());
         assertTrue(r.path("showItLive").asText().contains("\"type\":\"apiCall\""));
-        JsonNode get = call("{\"action\":\"describe\",\"method\":\"GET\",\"path\":\"/api/agents\"}");
+        JsonNode get =
+                call("{\"action\":\"describe\",\"method\":\"GET\",\"path\":\"/api/agents\"}");
         assertEquals("array", get.at("/response/type").asText());
         assertEquals("page", get.at("/parameters/0/name").asText());
     }
 
     @Test
     void describeOfAnUnknownEndpointSaysSo() throws Exception {
-        assertTrue(call("{\"action\":\"describe\",\"method\":\"GET\",\"path\":\"/api/nope\"}").has("error"));
+        assertTrue(
+                call("{\"action\":\"describe\",\"method\":\"GET\",\"path\":\"/api/nope\"}")
+                        .has("error"));
     }
 }

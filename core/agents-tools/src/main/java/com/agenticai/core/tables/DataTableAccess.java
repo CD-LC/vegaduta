@@ -204,8 +204,7 @@ final class DataTableAccess {
         }
     }
 
-    static void requireFilterOrConfirm(
-            List<Condition> filter, boolean confirmAll, String verb) {
+    static void requireFilterOrConfirm(List<Condition> filter, boolean confirmAll, String verb) {
         if ((filter == null || filter.isEmpty()) && !confirmAll) {
             throw new IllegalArgumentException(
                     "Refusing to "

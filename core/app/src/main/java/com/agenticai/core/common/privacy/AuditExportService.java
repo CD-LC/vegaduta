@@ -25,8 +25,8 @@ import org.springframework.web.server.ResponseStatusException;
  * request runs in, so one tenant's export cannot contain another's events. Streams row by row; the
  * range is capped so one request cannot be asked to scan years of history.
  *
- * <p>Exporting is itself audited. The audit log is append-only (tenant V75), so the file is a
- * read of what was recorded, not something this service can alter.
+ * <p>Exporting is itself audited. The audit log is append-only (tenant V75), so the file is a read
+ * of what was recorded, not something this service can alter.
  */
 @Service
 public class AuditExportService {
@@ -53,12 +53,17 @@ public class AuditExportService {
         }
         if (Duration.between(from, to).compareTo(MAX_RANGE) > 0) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "The range may not be longer than " + MAX_RANGE.toDays() + " days");
+                    HttpStatus.BAD_REQUEST,
+                    "The range may not be longer than " + MAX_RANGE.toDays() + " days");
         }
     }
 
-    /** CSV with a header row. Cells starting with = + - @ are prefixed with ' (spreadsheet formula injection). */
-    public long exportCsv(Instant from, Instant to, OutputStream out, String actor) throws IOException {
+    /**
+     * CSV with a header row. Cells starting with = + - @ are prefixed with ' (spreadsheet formula
+     * injection).
+     */
+    public long exportCsv(Instant from, Instant to, OutputStream out, String actor)
+            throws IOException {
         validate(from, to);
         AtomicLong rows = new AtomicLong();
         Writer w = new OutputStreamWriter(out, StandardCharsets.UTF_8);
@@ -86,8 +91,12 @@ public class AuditExportService {
         return rows.get();
     }
 
-    /** JSON object: tenant range metadata, the entries, and the signed audit seals covering the range. */
-    public long exportJson(Instant from, Instant to, OutputStream out, String actor) throws IOException {
+    /**
+     * JSON object: tenant range metadata, the entries, and the signed audit seals covering the
+     * range.
+     */
+    public long exportJson(Instant from, Instant to, OutputStream out, String actor)
+            throws IOException {
         validate(from, to);
         AtomicLong rows = new AtomicLong();
         try (JsonGenerator g = MAPPER.getFactory().createGenerator(out)) {
@@ -102,7 +111,8 @@ public class AuditExportService {
                         try {
                             g.writeStartObject();
                             g.writeStringField("id", String.valueOf(rs.getObject(1)));
-                            g.writeStringField("createdAt", rs.getTimestamp(2).toInstant().toString());
+                            g.writeStringField(
+                                    "createdAt", rs.getTimestamp(2).toInstant().toString());
                             g.writeStringField("actorId", rs.getString(3));
                             g.writeStringField("actionType", rs.getString(4));
                             g.writeStringField("targetType", rs.getString(5));
@@ -127,8 +137,10 @@ public class AuditExportService {
                         try {
                             g.writeStartObject();
                             g.writeNumberField("seq", rs.getLong(1));
-                            g.writeStringField("firstRowAt", rs.getTimestamp(2).toInstant().toString());
-                            g.writeStringField("lastRowAt", rs.getTimestamp(3).toInstant().toString());
+                            g.writeStringField(
+                                    "firstRowAt", rs.getTimestamp(2).toInstant().toString());
+                            g.writeStringField(
+                                    "lastRowAt", rs.getTimestamp(3).toInstant().toString());
                             g.writeNumberField("rowCount", rs.getInt(4));
                             g.writeStringField("sealHash", rs.getString(5));
                             g.writeStringField("prevSealHash", rs.getString(6));
@@ -157,7 +169,14 @@ public class AuditExportService {
                 "audit_log",
                 format,
                 AuditOutcome.SUCCESS,
-                "Exported " + rows + " audit event(s) from " + from + " to " + to + " as " + format);
+                "Exported "
+                        + rows
+                        + " audit event(s) from "
+                        + from
+                        + " to "
+                        + to
+                        + " as "
+                        + format);
     }
 
     static String cell(Object value) {

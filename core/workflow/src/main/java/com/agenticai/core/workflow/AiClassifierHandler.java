@@ -1,5 +1,6 @@
 package com.agenticai.core.workflow;
 
+import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.fence;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.intConfig;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.listOfMaps;
@@ -7,6 +8,7 @@ import static com.agenticai.core.workflow.WorkflowAiNodeSupport.oneLine;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.present;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.str;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.unitConfig;
+
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
@@ -21,13 +23,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.ObjectProvider;
-import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
 
 /**
- * The {@code question_classifier} node: a constrained, temperature-0 JSON model call that picks exactly ONE of the
- * author's classes and routes down the matching edge. The reply is validated strictly; anything else (provider
- * failure, unparseable text, unknown class, low confidence) routes to the default class. Extracted from
- * {@link WorkflowAiNodeHandler}.
+ * The {@code question_classifier} node: a constrained, temperature-0 JSON model call that picks
+ * exactly ONE of the author's classes and routes down the matching edge. The reply is validated
+ * strictly; anything else (provider failure, unparseable text, unknown class, low confidence)
+ * routes to the default class. Extracted from {@link WorkflowAiNodeHandler}.
  */
 final class AiClassifierHandler {
 
@@ -50,7 +51,9 @@ final class AiClassifierHandler {
         this.defaultMinConfidence = defaultMinConfidence;
     }
 
-    /** The classifier's {@link AskAndValidate}: one call, strict class validation, never a repair. */
+    /**
+     * The classifier's {@link AskAndValidate}: one call, strict class validation, never a repair.
+     */
     private final class Asker extends AskAndValidate<Classification> {
         private final List<AiClass> classes;
         private final String defaultHandle;

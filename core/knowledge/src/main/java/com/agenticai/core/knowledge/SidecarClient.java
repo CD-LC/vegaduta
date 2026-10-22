@@ -253,9 +253,9 @@ public class SidecarClient {
 
     /**
      * {@code app.sidecar.enabled} (default true). False = the deployment runs without the Python
-     * sidecar (personal profile): sidecar-only capabilities answer with a clear
-     * {@link FeatureUnavailableException} (or fail open, for rerank) instead of waiting on a
-     * connection that can never succeed. Setter-injected so every constructor is unchanged.
+     * sidecar (personal profile): sidecar-only capabilities answer with a clear {@link
+     * FeatureUnavailableException} (or fail open, for rerank) instead of waiting on a connection
+     * that can never succeed. Setter-injected so every constructor is unchanged.
      */
     private volatile boolean sidecarEnabled = true;
 
@@ -266,11 +266,13 @@ public class SidecarClient {
     }
 
     /**
-     * {@code app.embeddings.provider=auto} with no Ollama in the environment: lets an Ollama registered at
-     * run time take over from the sidecar. Setter-injected and optional, so every constructor is unchanged.
+     * {@code app.embeddings.provider=auto} with no Ollama in the environment: lets an Ollama
+     * registered at run time take over from the sidecar. Setter-injected and optional, so every
+     * constructor is unchanged.
      */
     @Autowired(required = false)
-    void setRegisteredOllamaResolver(com.agenticai.core.knowledge.embedding.RegisteredOllamaEmbeddingResolver resolver) {
+    void setRegisteredOllamaResolver(
+            com.agenticai.core.knowledge.embedding.RegisteredOllamaEmbeddingResolver resolver) {
         this.embeddings.setDynamicEmbedder(resolver::resolve);
     }
 
@@ -282,7 +284,8 @@ public class SidecarClient {
     private void requireSidecar(String capability) {
         if (!sidecarEnabled) {
             throw new FeatureUnavailableException(
-                    capability + " needs the Python sidecar, which is disabled (app.sidecar.enabled=false)."
+                    capability
+                            + " needs the Python sidecar, which is disabled (app.sidecar.enabled=false)."
                             + " Start the sidecar and set app.sidecar.enabled=true to use it.");
         }
     }
@@ -443,7 +446,8 @@ public class SidecarClient {
      */
     public float[] embedQuery(String text, String embeddingModel) {
         if (embeddings.hasExternalEmbedder()) {
-            // No sidecar round trip and no boxed List<Double> detour: straight float[] to the caller.
+            // No sidecar round trip and no boxed List<Double> detour: straight float[] to the
+            // caller.
             return embeddings.embedQueryVector(text, embeddingModel, QUERY_CHUNK_SIZE);
         }
         SidecarEmbedResponse response =
@@ -489,7 +493,8 @@ public class SidecarClient {
      */
     public String extractText(String filename, byte[] content, ActiveOcrConfig ocrConfig) {
         if (!sidecarEnabled) {
-            // In-process fallback for the formats that need no native libraries (html, docx); PDF and
+            // In-process fallback for the formats that need no native libraries (html, docx); PDF
+            // and
             // images (OCR) answer "feature unavailable" rather than a bad-gateway error.
             return InProcessTextExtractor.extract(filename, content);
         }

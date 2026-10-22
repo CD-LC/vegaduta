@@ -101,7 +101,8 @@ public class SkillRegistryClient {
         return cachedSearch(q, Math.max(1, Math.min(page, 50)), () -> fetchSearch(query, page));
     }
 
-    SearchResult cachedSearch(String q, int page, java.util.function.Supplier<SearchResult> loader) {
+    SearchResult cachedSearch(
+            String q, int page, java.util.function.Supplier<SearchResult> loader) {
         String key = page + "|" + q.toLowerCase(java.util.Locale.ROOT);
         long now = nanoClock.getAsLong();
         CachedSearch hit = searchCache.get(key);

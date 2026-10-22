@@ -53,16 +53,16 @@ import org.springframework.stereotype.Service;
  *
  * <p>When on, it runs entirely off the request thread. The tenant is captured as data when the turn
  * finishes ({@code TurnOutcome#scope}) and re-applied on the worker (AGENTS.md rule 12); the queue
- * is small and drops work when full, because a missed lesson costs nothing and a stalled chat
- * costs a lot. It also records, for every finished turn that loaded a custom skill, whether that
- * turn went well, which feeds the skill's effectiveness score.
+ * is small and drops work when full, because a missed lesson costs nothing and a stalled chat costs
+ * a lot. It also records, for every finished turn that loaded a custom skill, whether that turn
+ * went well, which feeds the skill's effectiveness score.
  *
  * <p>Bounds on spend and review debt: a per-agent cooldown, a per-agent daily draft cap, the
- * workspace's pending-draft cap ({@link SkillService#MAX_PENDING_PROPOSALS}), and a transcript
- * size cap. The daily cap counts drafting attempts (model calls), not stored drafts: most attempts
- * decline, and it is the call that costs money. Both the transcript sent to the model and the draft it returns are scrubbed of secrets
- * and personal data; a draft that needed heavy scrubbing was about one specific case and is
- * dropped.
+ * workspace's pending-draft cap ({@link SkillService#MAX_PENDING_PROPOSALS}), and a transcript size
+ * cap. The daily cap counts drafting attempts (model calls), not stored drafts: most attempts
+ * decline, and it is the call that costs money. Both the transcript sent to the model and the draft
+ * it returns are scrubbed of secrets and personal data; a draft that needed heavy scrubbing was
+ * about one specific case and is dropped.
  */
 @Service
 @ConditionalOnProperty(name = "app.skills.learning.enabled", havingValue = "true")
@@ -117,6 +117,7 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
     private final Map<UUID, Deque<Instant>> draftsToday = new ConcurrentHashMap<>();
     private volatile Executor executor;
     private final ThreadPoolExecutor ownPool;
+
     /** Present only when {@code app.skills.learning.self-check.enabled=true}. */
     private volatile SkillSelfChecker selfChecker;
 
@@ -154,7 +155,9 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
         this.executor = ownPool;
     }
 
-    /** Optional: without it a draft is queued unchecked, exactly as before the self-check existed. */
+    /**
+     * Optional: without it a draft is queued unchecked, exactly as before the self-check existed.
+     */
     @Autowired(required = false)
     void setSelfChecker(SkillSelfChecker checker) {
         this.selfChecker = checker;
@@ -191,8 +194,12 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
     @Override
     public void onTurn(SkillLearningGateway.TurnOutcome outcome) {
         Executor worker = executor;
-        if (!props.enabled() || outcome == null || outcome.agentId() == null
-                || outcome.cancelled() || worker == null || outcome.scope().isEmpty()) {
+        if (!props.enabled()
+                || outcome == null
+                || outcome.agentId() == null
+                || outcome.cancelled()
+                || worker == null
+                || outcome.scope().isEmpty()) {
             return;
         }
         try {
@@ -211,12 +218,16 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
             List<ToolCallLog> calls =
                     // Bounded read: only this turn's calls, never the session's whole history.
                     toolCalls.findSince(o.agentId(), o.sessionId(), o.startedAt()).stream()
-                            .filter(c -> c.getStartedAt() != null
-                                    && !c.getStartedAt().isBefore(o.startedAt()))
+                            .filter(
+                                    c ->
+                                            c.getStartedAt() != null
+                                                    && !c.getStartedAt().isBefore(o.startedAt()))
                             .toList();
             Set<String> loaded = loadedSkills(calls);
             List<ToolCallLog> work =
-                    calls.stream().filter(c -> !SKILL_META_TOOLS.contains(c.getToolName())).toList();
+                    calls.stream()
+                            .filter(c -> !SKILL_META_TOOLS.contains(c.getToolName()))
+                            .toList();
             long failed = work.stream().filter(SkillLearningService::failed).count();
             boolean good = o.completed() && failed * 2 <= work.size();
             if (!loaded.isEmpty()) {
@@ -248,9 +259,12 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
                 // A skill already covered this turn; fixing it is improve_skill's job.
                 && loaded.isEmpty()
                 // The agent already wrote (or amended) a skill itself during the turn.
-                && calls.stream().noneMatch(c ->
-                        ProposeSkillToolCallback.NAME.equals(c.getToolName())
-                                || ImproveSkillToolCallback.NAME.equals(c.getToolName()))
+                && calls.stream()
+                        .noneMatch(
+                                c ->
+                                        ProposeSkillToolCallback.NAME.equals(c.getToolName())
+                                                || ImproveSkillToolCallback.NAME.equals(
+                                                        c.getToolName()))
                 && work.size() >= props.minToolCalls()
                 // A turn that mostly failed teaches what to avoid, not a method.
                 && failed * 4 <= work.size();
@@ -260,8 +274,7 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
     boolean claimDraftSlot(UUID agentId) {
         Instant now = Instant.now();
         Instant last = lastAttempt.get(agentId);
-        if (last != null
-                && Duration.between(last, now).toMinutes() < props.cooldownMinutes()) {
+        if (last != null && Duration.between(last, now).toMinutes() < props.cooldownMinutes()) {
             return false;
         }
         Deque<Instant> today = draftsToday.computeIfAbsent(agentId, k -> new ArrayDeque<>());
@@ -277,7 +290,9 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
         }
         lastAttempt.put(agentId, now);
         if (lastAttempt.size() > 5_000) {
-            lastAttempt.entrySet().removeIf(e -> e.getValue().isBefore(now.minus(Duration.ofDays(1))));
+            lastAttempt
+                    .entrySet()
+                    .removeIf(e -> e.getValue().isBefore(now.minus(Duration.ofDays(1))));
             draftsToday.entrySet().removeIf(e -> e.getValue().isEmpty());
         }
         return true;
@@ -311,7 +326,10 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
             if (AgentLabCompletionService.isLimitFailure(e)) {
                 log.debug("Skill learning skipped for agent {}: {}", o.agentId(), e.getMessage());
             } else {
-                log.warn("Skill-learning model call failed for agent {}: {}", o.agentId(), e.getMessage());
+                log.warn(
+                        "Skill-learning model call failed for agent {}: {}",
+                        o.agentId(),
+                        e.getMessage());
             }
             return;
         }
@@ -345,10 +363,12 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
             lifecycle.markPending(
                     d.name(),
                     o.agentId(),
-                    scrubber.scrub("Drafted automatically from a successful turn. " + d.rationale()));
+                    scrubber.scrub(
+                            "Drafted automatically from a successful turn. " + d.rationale()));
             check.ifPresent(
                     c -> lifecycle.recordSelfCheck(d.name(), c.verdict().name(), c.reason()));
-            log.info("Skill-learning stored pending draft '{}' for agent {}", d.name(), o.agentId());
+            log.info(
+                    "Skill-learning stored pending draft '{}' for agent {}", d.name(), o.agentId());
         } catch (SkillValidationException e) {
             // Name taken, pending cap reached, or a field the platform rules refuse.
             log.debug("Skill draft {} not stored: {}", d.name(), e.getMessage());
@@ -363,7 +383,13 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
         }
         try {
             return checker.check(
-                    o.agentId(), o.sessionId(), o.userMessage(), o.answer(), name, instructions, subject);
+                    o.agentId(),
+                    o.sessionId(),
+                    o.userMessage(),
+                    o.answer(),
+                    name,
+                    instructions,
+                    subject);
         } catch (RuntimeException e) {
             log.debug("Skill self-check failed for draft {}: {}", name, e.getMessage());
             return Optional.empty();
@@ -379,7 +405,12 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
         int n = 1;
         for (ToolCallLog c : work) {
             String line =
-                    n++ + ". " + c.getToolName() + "(" + field(c.getToolInput(), PER_FIELD_CHARS) + ") -> "
+                    n++
+                            + ". "
+                            + c.getToolName()
+                            + "("
+                            + field(c.getToolInput(), PER_FIELD_CHARS)
+                            + ") -> "
                             + (failed(c)
                                     ? "ERROR " + field(c.getErrorMessage(), PER_FIELD_CHARS)
                                     : field(c.getToolOutput(), PER_FIELD_CHARS))
@@ -427,9 +458,9 @@ public class SkillLearningService implements SkillLearningGateway.Observer {
     }
 
     /**
-     * One transcript field: cut to a generous bound (tool output can be megabytes and the
-     * scrubbers are regexes), scrubbed WHOLE, then cut to its final size. Scrubbing after the
-     * final cut would let a secret that straddles the cut survive as an unrecognisable prefix.
+     * One transcript field: cut to a generous bound (tool output can be megabytes and the scrubbers
+     * are regexes), scrubbed WHOLE, then cut to its final size. Scrubbing after the final cut would
+     * let a secret that straddles the cut survive as an unrecognisable prefix.
      */
     private String field(String text, int max) {
         return clip(scrubber.scrub(clip(text, max * 8)), max);

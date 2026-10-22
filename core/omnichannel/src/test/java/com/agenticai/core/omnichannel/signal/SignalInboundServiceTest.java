@@ -1,6 +1,5 @@
 package com.agenticai.core.omnichannel.signal;
 
-import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -25,6 +24,7 @@ import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.omnichannel.session.ConversationHeldByHumanException;
 import com.agenticai.core.omnichannel.session.InboundChannelExecutor;
 import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
+import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import com.agenticai.core.security.TenantContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,25 +76,34 @@ class SignalInboundServiceTest {
     }
 
     private SignalInboundService newService(InboundChannelExecutor executor) {
-        return new SignalInboundService(sessions, contacts, agentChat, gate, audit, dedup, api, executor);
+        return new SignalInboundService(
+                sessions, contacts, agentChat, gate, audit, dedup, api, executor);
     }
 
-    private static SignalConnection connection(UnknownSenderPolicy senders, SignalGroupMode groups) {
+    private static SignalConnection connection(
+            UnknownSenderPolicy senders, SignalGroupMode groups) {
         return new SignalConnection("http://signal-cli:8080", ACCOUNT, null, senders, groups);
     }
 
     private static JsonNode direct(String text) throws Exception {
-        return MAPPER.readTree("""
+        return MAPPER.readTree(
+                """
                 {"envelope":{"sourceNumber":"%s","timestamp":11,
-                 "dataMessage":{"timestamp":11,"message":"%s"}}}""".formatted(SENDER, text));
+                 "dataMessage":{"timestamp":11,"message":"%s"}}}"""
+                        .formatted(SENDER, text));
     }
 
     private static JsonNode group(String text, boolean mention) throws Exception {
-        return MAPPER.readTree("""
+        return MAPPER.readTree(
+                """
                 {"envelope":{"sourceNumber":"%s","timestamp":12,
                  "dataMessage":{"timestamp":12,"message":"%s","groupInfo":{"groupId":"%s"},
-                 "mentions":[%s]}}}""".formatted(SENDER, text, GROUP,
-                mention ? "{\"number\":\"" + ACCOUNT + "\"}" : ""));
+                 "mentions":[%s]}}}"""
+                        .formatted(
+                                SENDER,
+                                text,
+                                GROUP,
+                                mention ? "{\"number\":\"" + ACCOUNT + "\"}" : ""));
     }
 
     private ChannelSession session(boolean paired, boolean noticeSent, String externalId) {
@@ -110,21 +119,32 @@ class SignalInboundServiceTest {
     }
 
     private void agentReplies(String reply) {
-        when(agentChat.chat(any(TurnContext.class), any(ChatTurnRequest.class))).thenReturn(Flux.just(reply));
+        when(agentChat.chat(any(TurnContext.class), any(ChatTurnRequest.class)))
+                .thenReturn(Flux.just(reply));
     }
 
     private String lastGatePayload() {
         ArgumentCaptor<String> payload = ArgumentCaptor.forClass(String.class);
-        verify(gate).evaluate(eq(SignalChannelAdapter.ACTION_TYPE), anyString(), payload.capture(), anyString());
+        verify(gate)
+                .evaluate(
+                        eq(SignalChannelAdapter.ACTION_TYPE),
+                        anyString(),
+                        payload.capture(),
+                        anyString());
         return payload.getValue();
     }
 
     @Test
     void anUnknownSenderGetsOnePairingCodeAndTheAgentStaysSilent() throws Exception {
         ChannelSession unpaired = session(false, false, SENDER);
-        when(sessions.resolveOrCreate(eq(ChannelType.SIGNAL), eq(SENDER), eq("hi"), eq(SENDER))).thenReturn(unpaired);
+        when(sessions.resolveOrCreate(eq(ChannelType.SIGNAL), eq(SENDER), eq("hi"), eq(SENDER)))
+                .thenReturn(unpaired);
 
-        assertThat(service.accept(connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE), direct("hi"))).isTrue();
+        assertThat(
+                        service.accept(
+                                connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE),
+                                direct("hi")))
+                .isTrue();
 
         assertThat(lastGatePayload()).contains("pairing code is 123456").contains(SENDER);
         verify(sessions).markPairingNoticeSent(unpaired.getId());
@@ -135,9 +155,11 @@ class SignalInboundServiceTest {
     void aStillUnpairedSenderIsNotNotifiedAgain() throws Exception {
         ChannelSession unpaired = session(false, true, SENDER);
         when(sessions.peek(ChannelType.SIGNAL, SENDER)).thenReturn(Optional.of(unpaired));
-        when(sessions.resolveOrCreate(eq(ChannelType.SIGNAL), eq(SENDER), anyString(), any())).thenReturn(unpaired);
+        when(sessions.resolveOrCreate(eq(ChannelType.SIGNAL), eq(SENDER), anyString(), any()))
+                .thenReturn(unpaired);
 
-        service.accept(connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE), direct("hello??"));
+        service.accept(
+                connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE), direct("hello??"));
 
         verify(gate, never()).evaluate(anyString(), anyString(), anyString(), anyString());
         verify(agentChat, never()).chat(any(), any());
@@ -146,14 +168,20 @@ class SignalInboundServiceTest {
     @Test
     void aPairedSenderGetsTheAgentsReplyThroughTheApprovalGate() throws Exception {
         ChannelSession paired = session(true, false, SENDER);
-        when(sessions.resolveOrCreate(eq(ChannelType.SIGNAL), eq(SENDER), eq("what time is it"), eq(SENDER)))
+        when(sessions.resolveOrCreate(
+                        eq(ChannelType.SIGNAL), eq(SENDER), eq("what time is it"), eq(SENDER)))
                 .thenReturn(paired);
         agentReplies("half past nine");
 
-        assertThat(service.accept(connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE), direct("what time is it")))
+        assertThat(
+                        service.accept(
+                                connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE),
+                                direct("what time is it")))
                 .isTrue();
 
-        assertThat(lastGatePayload()).contains("half past nine").contains("\"to\":\"" + SENDER + "\"");
+        assertThat(lastGatePayload())
+                .contains("half past nine")
+                .contains("\"to\":\"" + SENDER + "\"");
         verify(api).sendTypingIndicator(any(), eq(SENDER));
     }
 
@@ -171,7 +199,10 @@ class SignalInboundServiceTest {
 
     @Test
     void groupsAreIgnoredByDefaultBeforeAnythingIsStored() throws Exception {
-        assertThat(service.accept(connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE), group("hi all", true)))
+        assertThat(
+                        service.accept(
+                                connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE),
+                                group("hi all", true)))
                 .isTrue();
 
         verify(dedup, never()).tryClaim(any(ChannelType.class), anyString());
@@ -182,7 +213,8 @@ class SignalInboundServiceTest {
     @Test
     void mentionModeAnswersOnlyWhenTheAgentIsMentioned() throws Exception {
         ChannelSession paired = session(true, false, "group:" + GROUP);
-        when(sessions.resolveOrCreate(eq(ChannelType.SIGNAL), eq("group:" + GROUP), anyString(), isNull()))
+        when(sessions.resolveOrCreate(
+                        eq(ChannelType.SIGNAL), eq("group:" + GROUP), anyString(), isNull()))
                 .thenReturn(paired);
         agentReplies("here");
         SignalConnection mention = connection(UnknownSenderPolicy.PAIR, SignalGroupMode.MENTION);
@@ -197,10 +229,12 @@ class SignalInboundServiceTest {
     @Test
     void allModeRoutesEveryGroupMessageButTheGroupMustStillBePaired() throws Exception {
         ChannelSession unpaired = session(false, false, "group:" + GROUP);
-        when(sessions.resolveOrCreate(eq(ChannelType.SIGNAL), eq("group:" + GROUP), anyString(), isNull()))
+        when(sessions.resolveOrCreate(
+                        eq(ChannelType.SIGNAL), eq("group:" + GROUP), anyString(), isNull()))
                 .thenReturn(unpaired);
 
-        service.accept(connection(UnknownSenderPolicy.PAIR, SignalGroupMode.ALL), group("hello", false));
+        service.accept(
+                connection(UnknownSenderPolicy.PAIR, SignalGroupMode.ALL), group("hello", false));
 
         assertThat(lastGatePayload()).contains("pairing code").contains("group:" + GROUP);
         verify(agentChat, never()).chat(any(), any());
@@ -211,7 +245,10 @@ class SignalInboundServiceTest {
         when(sessions.peek(any(), any())).thenReturn(Optional.empty());
         when(sessions.isAutoApproveNewSenders(ChannelType.SIGNAL)).thenReturn(false);
 
-        assertThat(service.accept(connection(UnknownSenderPolicy.IGNORE, SignalGroupMode.IGNORE), direct("hello")))
+        assertThat(
+                        service.accept(
+                                connection(UnknownSenderPolicy.IGNORE, SignalGroupMode.IGNORE),
+                                direct("hello")))
                 .isTrue();
 
         verify(sessions, never()).resolveOrCreate(any(), any(), any(), any());
@@ -223,9 +260,11 @@ class SignalInboundServiceTest {
         ChannelSession paired = session(true, false, SENDER);
         when(sessions.resolveOrCreate(any(), any(), any(), any())).thenReturn(paired);
         agentReplies("hi back");
-        when(contacts.findForInbound(ChannelType.SIGNAL, SENDER, SENDER)).thenReturn(Optional.of(mock(ChannelContact.class)));
+        when(contacts.findForInbound(ChannelType.SIGNAL, SENDER, SENDER))
+                .thenReturn(Optional.of(mock(ChannelContact.class)));
 
-        service.accept(connection(UnknownSenderPolicy.IGNORE, SignalGroupMode.IGNORE), direct("hello"));
+        service.accept(
+                connection(UnknownSenderPolicy.IGNORE, SignalGroupMode.IGNORE), direct("hello"));
 
         assertThat(lastGatePayload()).contains("hi back");
     }
@@ -237,7 +276,8 @@ class SignalInboundServiceTest {
         when(sessions.resolveOrCreate(any(), any(), any(), any())).thenReturn(paired);
         agentReplies("known");
 
-        service.accept(connection(UnknownSenderPolicy.IGNORE, SignalGroupMode.IGNORE), direct("hello"));
+        service.accept(
+                connection(UnknownSenderPolicy.IGNORE, SignalGroupMode.IGNORE), direct("hello"));
 
         assertThat(lastGatePayload()).contains("known");
     }
@@ -246,7 +286,10 @@ class SignalInboundServiceTest {
     void aRedeliveredMessageIsANoOp() throws Exception {
         when(dedup.tryClaim(eq(ChannelType.SIGNAL), any())).thenReturn(false);
 
-        assertThat(service.accept(connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE), direct("again")))
+        assertThat(
+                        service.accept(
+                                connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE),
+                                direct("again")))
                 .isTrue();
 
         verify(sessions, never()).resolveOrCreate(any(), any(), any(), any());
@@ -254,9 +297,17 @@ class SignalInboundServiceTest {
 
     @Test
     void receiptsAndTypingEventsNeverTouchThePipeline() throws Exception {
-        JsonNode receipt = MAPPER.readTree("{\"envelope\":{\"sourceNumber\":\"" + SENDER + "\",\"receiptMessage\":{}}}");
+        JsonNode receipt =
+                MAPPER.readTree(
+                        "{\"envelope\":{\"sourceNumber\":\""
+                                + SENDER
+                                + "\",\"receiptMessage\":{}}}");
 
-        assertThat(service.accept(connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE), receipt)).isTrue();
+        assertThat(
+                        service.accept(
+                                connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE),
+                                receipt))
+                .isTrue();
 
         verify(dedup, never()).tryClaim(any(ChannelType.class), anyString());
     }
@@ -267,7 +318,11 @@ class SignalInboundServiceTest {
         ConversationHeldByHumanException heldException = new ConversationHeldByHumanException(held);
         when(sessions.resolveOrCreate(any(), any(), any(), any())).thenThrow(heldException);
 
-        assertThat(service.accept(connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE), direct("hi"))).isTrue();
+        assertThat(
+                        service.accept(
+                                connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE),
+                                direct("hi")))
+                .isTrue();
 
         verify(agentChat, never()).chat(any(), any());
         verify(gate, never()).evaluate(anyString(), anyString(), anyString(), anyString());
@@ -279,7 +334,11 @@ class SignalInboundServiceTest {
         when(full.acquire("signal")).thenReturn(null);
         SignalInboundService shedding = newService(full);
 
-        assertThat(shedding.accept(connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE), direct("hi"))).isFalse();
+        assertThat(
+                        shedding.accept(
+                                connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE),
+                                direct("hi")))
+                .isFalse();
 
         verify(dedup).release(eq(ChannelType.SIGNAL), anyString());
         verify(sessions, never()).resolveOrCreate(any(), any(), any(), any());
@@ -295,7 +354,14 @@ class SignalInboundServiceTest {
         service.accept(connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE), direct("hi"));
 
         assertThat(lastGatePayload()).contains("no longer available");
-        verify(audit).record(anyString(), eq("channel.signal.agent_not_found"), anyString(), anyString(), any(), anyString());
+        verify(audit)
+                .record(
+                        anyString(),
+                        eq("channel.signal.agent_not_found"),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString());
     }
 
     @Test
@@ -304,7 +370,11 @@ class SignalInboundServiceTest {
         when(sessions.resolveOrCreate(any(), any(), any(), any())).thenReturn(paired);
         when(agentChat.chat(any(), any())).thenThrow(new IllegalStateException("model down"));
 
-        assertThat(service.accept(connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE), direct("hi"))).isTrue();
+        assertThat(
+                        service.accept(
+                                connection(UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE),
+                                direct("hi")))
+                .isTrue();
 
         verify(dedup, never()).release(any(), any());
     }

@@ -29,8 +29,8 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * workflow created in the console. The draft is never activated, scheduled or run here. The
  * generator runs first, so a failed generation leaves no empty draft behind.
  *
- * <p>Identity never travels as an argument: the owner is the tenant context's subject. Failures come
- * back as an {@code {"error": ...}} envelope for the model to relay, never as exceptions.
+ * <p>Identity never travels as an argument: the owner is the tenant context's subject. Failures
+ * come back as an {@code {"error": ...}} envelope for the model to relay, never as exceptions.
  */
 public class CreateWorkflowToolCallback implements ToolCallback {
 
@@ -93,7 +93,8 @@ public class CreateWorkflowToolCallback implements ToolCallback {
             name = text(args, "name");
             instruction = text(args, "instruction");
         } catch (Exception e) {
-            return error("could not parse the input - expected {\"name\":\"...\",\"instruction\":\"...\"}");
+            return error(
+                    "could not parse the input - expected {\"name\":\"...\",\"instruction\":\"...\"}");
         }
         if (name.isEmpty()) {
             return error("name is required");
@@ -150,7 +151,9 @@ public class CreateWorkflowToolCallback implements ToolCallback {
         return out.toString();
     }
 
-    /** Problems the saved draft still has, from the same check the console's Validate button runs. */
+    /**
+     * Problems the saved draft still has, from the same check the console's Validate button runs.
+     */
     private List<String> warnings(WorkflowDefinition saved) {
         try {
             ValidationResult result = crud.validate(saved.getId());

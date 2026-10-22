@@ -17,10 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * One conversation of this platform's own export ({@link ChatExportRenderer}'s JSON): {@code {id, source, title,
- * createdAt, truncated, messages[{role, content, timestamp, attachments[]}]}}. Messages are already in order; the same
- * rules as the other formats apply - only {@code user} / {@code assistant} text is kept, attachments are names only,
- * text is cleaned and capped. An export file is as untrusted as any other upload.
+ * One conversation of this platform's own export ({@link ChatExportRenderer}'s JSON): {@code {id,
+ * source, title, createdAt, truncated, messages[{role, content, timestamp, attachments[]}]}}.
+ * Messages are already in order; the same rules as the other formats apply - only {@code user} /
+ * {@code assistant} text is kept, attachments are names only, text is cleaned and capped. An export
+ * file is as untrusted as any other upload.
  */
 final class VegaDutaImportFormat implements ChatImportFormat {
 
@@ -30,13 +31,15 @@ final class VegaDutaImportFormat implements ChatImportFormat {
     }
 
     /**
-     * A conversation that was itself imported from ChatGPT / Claude keeps that source (and so de-duplicates against
-     * the original import); a conversation held here is "vegaduta".
+     * A conversation that was itself imported from ChatGPT / Claude keeps that source (and so
+     * de-duplicates against the original import); a conversation held here is "vegaduta".
      */
     @Override
     public String source(JsonNode conv) {
         String declared = text(conv, "source");
-        return SOURCE_CHATGPT.equals(declared) || SOURCE_CLAUDE.equals(declared) ? declared : SOURCE_VEGADUTA;
+        return SOURCE_CHATGPT.equals(declared) || SOURCE_CLAUDE.equals(declared)
+                ? declared
+                : SOURCE_VEGADUTA;
     }
 
     @Override
@@ -45,7 +48,8 @@ final class VegaDutaImportFormat implements ChatImportFormat {
     }
 
     @Override
-    public ParsedChat convert(JsonNode conv, String key, String source, String sourceId, ChatImportCollector c) {
+    public ParsedChat convert(
+            JsonNode conv, String key, String source, String sourceId, ChatImportCollector c) {
         JsonNode msgs = conv.get("messages");
         if (msgs == null || !msgs.isArray()) {
             return null;
@@ -81,7 +85,13 @@ final class VegaDutaImportFormat implements ChatImportFormat {
             return null;
         }
         String title = cleanTitle(text(conv, "title"), b.firstUserText());
-        return b.build(key, source, sourceId, title, parseIso(text(conv, "createdAt")), null,
-            conv.path("truncated").asBoolean(false));
+        return b.build(
+                key,
+                source,
+                sourceId,
+                title,
+                parseIso(text(conv, "createdAt")),
+                null,
+                conv.path("truncated").asBoolean(false));
     }
 }

@@ -34,20 +34,33 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
-/** The wave-E flags on {@link LlmModelSupport}: every one is the identity when off, and shapes the request when on. */
+/**
+ * The wave-E flags on {@link LlmModelSupport}: every one is the identity when off, and shapes the
+ * request when on.
+ */
 class LlmModelSupportStructuredFlagsTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String SCHEMA =
-        "{\"type\":\"object\",\"properties\":{\"verdict\":{\"type\":\"string\"}},\"required\":[\"verdict\"]}";
+            "{\"type\":\"object\",\"properties\":{\"verdict\":{\"type\":\"string\"}},\"required\":[\"verdict\"]}";
 
     @SuppressWarnings("unchecked")
     private static LlmModelSupport support() {
         ObjectProvider<ObservationRegistry> registryProvider = mock(ObjectProvider.class);
         when(registryProvider.getIfAvailable(any())).thenReturn(ObservationRegistry.NOOP);
         ObjectProvider<DefaultAgentAdvisor> advisorProvider = mock(ObjectProvider.class);
-        return new LlmModelSupport(registryProvider, advisorProvider, 2, Duration.ofMillis(1), Duration.ofMillis(2),
-            true, "MISTRAL", "low", 16, Duration.ofMinutes(30), false);
+        return new LlmModelSupport(
+                registryProvider,
+                advisorProvider,
+                2,
+                Duration.ofMillis(1),
+                Duration.ofMillis(2),
+                true,
+                "MISTRAL",
+                "low",
+                16,
+                Duration.ofMinutes(30),
+                false);
     }
 
     private static Map<String, Object> spec(String schema) {
@@ -61,7 +74,10 @@ class LlmModelSupportStructuredFlagsTest {
         LlmModelSupport s = support();
         ChatModel model = mock(ChatModel.class);
         assertThat(s.anthropicToolForcing).isFalse();
-        assertThat(s.applyAnthropicStructuredSchema(model, "claude-sonnet-4-5", false, spec(SCHEMA))).isSameAs(model);
+        assertThat(
+                        s.applyAnthropicStructuredSchema(
+                                model, "claude-sonnet-4-5", false, spec(SCHEMA)))
+                .isSameAs(model);
     }
 
     @Test
@@ -70,11 +86,15 @@ class LlmModelSupportStructuredFlagsTest {
         s.anthropicToolForcing = true;
         ChatModel model = mock(ChatModel.class);
 
-        assertThat(s.applyAnthropicStructuredSchema(model, "claude-sonnet-4-5", false, spec(SCHEMA)))
-            .isInstanceOf(AnthropicStructuredToolChatModel.class);
+        assertThat(
+                        s.applyAnthropicStructuredSchema(
+                                model, "claude-sonnet-4-5", false, spec(SCHEMA)))
+                .isInstanceOf(AnthropicStructuredToolChatModel.class);
         // no schema requested
-        assertThat(s.applyAnthropicStructuredSchema(model, "claude-sonnet-4-5", false, Map.of())).isSameAs(model);
-        assertThat(s.applyAnthropicStructuredSchema(model, "claude-sonnet-4-5", false, null)).isSameAs(model);
+        assertThat(s.applyAnthropicStructuredSchema(model, "claude-sonnet-4-5", false, Map.of()))
+                .isSameAs(model);
+        assertThat(s.applyAnthropicStructuredSchema(model, "claude-sonnet-4-5", false, null))
+                .isSameAs(model);
     }
 
     @Test
@@ -84,15 +104,28 @@ class LlmModelSupportStructuredFlagsTest {
         ChatModel model = mock(ChatModel.class);
 
         // extended thinking on for this client -> never build a forced-tool_choice request
-        assertThat(s.applyAnthropicStructuredSchema(model, "claude-sonnet-4-5", true, spec(SCHEMA))).isSameAs(model);
+        assertThat(s.applyAnthropicStructuredSchema(model, "claude-sonnet-4-5", true, spec(SCHEMA)))
+                .isSameAs(model);
         // model without forced tool choice support
-        assertThat(s.applyAnthropicStructuredSchema(model, "claude-2.1", false, spec(SCHEMA))).isSameAs(model);
-        assertThat(s.applyAnthropicStructuredSchema(model, null, false, spec(SCHEMA))).isSameAs(model);
+        assertThat(s.applyAnthropicStructuredSchema(model, "claude-2.1", false, spec(SCHEMA)))
+                .isSameAs(model);
+        assertThat(s.applyAnthropicStructuredSchema(model, null, false, spec(SCHEMA)))
+                .isSameAs(model);
         // schema not representable as a tool input schema (array root, union at the root)
-        assertThat(s.applyAnthropicStructuredSchema(model, "claude-sonnet-4-5", false,
-            spec("{\"type\":\"array\",\"items\":{\"type\":\"string\"}}"))).isSameAs(model);
-        assertThat(s.applyAnthropicStructuredSchema(model, "claude-sonnet-4-5", false,
-            spec("{\"anyOf\":[{\"type\":\"object\"}]}"))).isSameAs(model);
+        assertThat(
+                        s.applyAnthropicStructuredSchema(
+                                model,
+                                "claude-sonnet-4-5",
+                                false,
+                                spec("{\"type\":\"array\",\"items\":{\"type\":\"string\"}}")))
+                .isSameAs(model);
+        assertThat(
+                        s.applyAnthropicStructuredSchema(
+                                model,
+                                "claude-sonnet-4-5",
+                                false,
+                                spec("{\"anyOf\":[{\"type\":\"object\"}]}")))
+                .isSameAs(model);
     }
 
     // ----------------------------------------------------------- Ollama format
@@ -141,23 +174,30 @@ class LlmModelSupportStructuredFlagsTest {
     @BeforeEach
     void startServer() throws IOException {
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/v1/chat/completions", exchange -> {
-            String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-            requests.add(body);
-            boolean stream = body.contains("\"stream\":true");
-            String payload = stream
-                ? "data: {\"id\":\"c1\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-4o\","
-                    + "\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"hi\"},\"finish_reason\":\"stop\"}]}\n\n"
-                    + "data: [DONE]\n\n"
-                : "{\"id\":\"c1\",\"object\":\"chat.completion\",\"created\":1,\"model\":\"gpt-4o\","
-                    + "\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"hi\"},\"finish_reason\":\"stop\"}],"
-                    + "\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"total_tokens\":2}}";
-            byte[] out = payload.getBytes(StandardCharsets.UTF_8);
-            exchange.getResponseHeaders().add("Content-Type", stream ? "text/event-stream" : "application/json");
-            exchange.sendResponseHeaders(200, out.length);
-            exchange.getResponseBody().write(out);
-            exchange.close();
-        });
+        server.createContext(
+                "/v1/chat/completions",
+                exchange -> {
+                    String body =
+                            new String(
+                                    exchange.getRequestBody().readAllBytes(),
+                                    StandardCharsets.UTF_8);
+                    requests.add(body);
+                    boolean stream = body.contains("\"stream\":true");
+                    String payload =
+                            stream
+                                    ? "data: {\"id\":\"c1\",\"object\":\"chat.completion.chunk\",\"created\":1,\"model\":\"gpt-4o\","
+                                            + "\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"hi\"},\"finish_reason\":\"stop\"}]}\n\n"
+                                            + "data: [DONE]\n\n"
+                                    : "{\"id\":\"c1\",\"object\":\"chat.completion\",\"created\":1,\"model\":\"gpt-4o\","
+                                            + "\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"hi\"},\"finish_reason\":\"stop\"}],"
+                                            + "\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"total_tokens\":2}}";
+                    byte[] out = payload.getBytes(StandardCharsets.UTF_8);
+                    exchange.getResponseHeaders()
+                            .add("Content-Type", stream ? "text/event-stream" : "application/json");
+                    exchange.sendResponseHeaders(200, out.length);
+                    exchange.getResponseBody().write(out);
+                    exchange.close();
+                });
         server.start();
     }
 
@@ -178,26 +218,38 @@ class LlmModelSupportStructuredFlagsTest {
         }
     }
 
-    private static final String STRICT_SCHEMA = "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}},"
-        + "\"required\":[\"city\"],\"additionalProperties\":false}";
-    private static final String OPEN_SCHEMA = "{\"type\":\"object\",\"properties\":{\"q\":{\"type\":\"string\"}},\"required\":[\"q\"]}";
+    private static final String STRICT_SCHEMA =
+            "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}},"
+                    + "\"required\":[\"city\"],\"additionalProperties\":false}";
+    private static final String OPEN_SCHEMA =
+            "{\"type\":\"object\",\"properties\":{\"q\":{\"type\":\"string\"}},\"required\":[\"q\"]}";
 
     private ChatClient openAiClient(LlmModelSupport s) {
-        OpenAiApi api = OpenAiApi.builder()
-            .baseUrl("http://127.0.0.1:" + server.getAddress().getPort())
-            .apiKey("test-key")
-            .restClientBuilder(s.withToolStrict(RestClient.builder()))
-            .webClientBuilder(s.withToolStrict(WebClient.builder()))
-            .build();
-        OpenAiChatModel model = OpenAiChatModel.builder().openAiApi(api)
-            .defaultOptions(OpenAiChatOptions.builder().model("gpt-4o").build()).build();
+        OpenAiApi api =
+                OpenAiApi.builder()
+                        .baseUrl("http://127.0.0.1:" + server.getAddress().getPort())
+                        .apiKey("test-key")
+                        .restClientBuilder(s.withToolStrict(RestClient.builder()))
+                        .webClientBuilder(s.withToolStrict(WebClient.builder()))
+                        .build();
+        OpenAiChatModel model =
+                OpenAiChatModel.builder()
+                        .openAiApi(api)
+                        .defaultOptions(OpenAiChatOptions.builder().model("gpt-4o").build())
+                        .build();
         return ChatClient.builder(model).build();
     }
 
     private void callAndStream(ChatClient client) {
         // internal tool execution off: the tool definitions go out, nothing is run
-        ChatOptions options = OpenAiChatOptions.builder().internalToolExecutionEnabled(false)
-            .toolCallbacks(List.of(new SchemaTool("closed", STRICT_SCHEMA), new SchemaTool("open", OPEN_SCHEMA))).build();
+        ChatOptions options =
+                OpenAiChatOptions.builder()
+                        .internalToolExecutionEnabled(false)
+                        .toolCallbacks(
+                                List.of(
+                                        new SchemaTool("closed", STRICT_SCHEMA),
+                                        new SchemaTool("open", OPEN_SCHEMA)))
+                        .build();
         client.prompt().user("hi").options(options).call().content();
         client.prompt().user("hi").options(options).stream().content().collectList().block();
     }
@@ -213,7 +265,8 @@ class LlmModelSupportStructuredFlagsTest {
     }
 
     @Test
-    void withTheFlagOnOnlyTheEligibleToolIsStrictOnBothTheBlockingAndStreamingPaths() throws Exception {
+    void withTheFlagOnOnlyTheEligibleToolIsStrictOnBothTheBlockingAndStreamingPaths()
+            throws Exception {
         LlmModelSupport s = support();
         s.strictTools = true;
 
@@ -246,19 +299,40 @@ class LlmModelSupportStructuredFlagsTest {
 
     @Test
     void anAgentsThinkingEffortOverridesTheOperatorDefaultAndBlankInheritsIt() {
-        assertThat(AnthropicThinking.resolveEffort(Map.of(ThinkingEffort.OPTION_KEY, "high"), "low")).isEqualTo("high");
+        assertThat(
+                        AnthropicThinking.resolveEffort(
+                                Map.of(ThinkingEffort.OPTION_KEY, "high"), "low"))
+                .isEqualTo("high");
         assertThat(AnthropicThinking.resolveEffort(Map.of(), "low")).isEqualTo("low");
         assertThat(AnthropicThinking.resolveEffort(null, "")).isEqualTo("");
         // per-agent effort turns thinking on where the operator default is blank ...
-        assertThat(AnthropicThinking.budgetFor("claude-sonnet-4-5",
-            AnthropicThinking.resolveEffort(Map.of(ThinkingEffort.OPTION_KEY, "medium"), ""), 20000)).isEqualTo(8192);
+        assertThat(
+                        AnthropicThinking.budgetFor(
+                                "claude-sonnet-4-5",
+                                AnthropicThinking.resolveEffort(
+                                        Map.of(ThinkingEffort.OPTION_KEY, "medium"), ""),
+                                20000))
+                .isEqualTo(8192);
         // ... and stays off for an unsupported model or no effort at all
-        assertThat(AnthropicThinking.budgetFor("claude-sonnet-5",
-            AnthropicThinking.resolveEffort(Map.of(ThinkingEffort.OPTION_KEY, "medium"), ""), 16000)).isNull();
-        assertThat(AnthropicThinking.budgetFor("claude-sonnet-4-5", AnthropicThinking.resolveEffort(Map.of(), ""), 16000)).isNull();
-        // keep the import honest: a thinking-configured options object is what the factory builds from a budget
-        AnthropicChatOptions built = AnthropicAgentChatClientFactory
-            .samplingBuilder("claude-sonnet-4-5", 16000, 0.2, 1.0, SamplingOptions.NONE, 8192).build();
+        assertThat(
+                        AnthropicThinking.budgetFor(
+                                "claude-sonnet-5",
+                                AnthropicThinking.resolveEffort(
+                                        Map.of(ThinkingEffort.OPTION_KEY, "medium"), ""),
+                                16000))
+                .isNull();
+        assertThat(
+                        AnthropicThinking.budgetFor(
+                                "claude-sonnet-4-5",
+                                AnthropicThinking.resolveEffort(Map.of(), ""),
+                                16000))
+                .isNull();
+        // keep the import honest: a thinking-configured options object is what the factory builds
+        // from a budget
+        AnthropicChatOptions built =
+                AnthropicAgentChatClientFactory.samplingBuilder(
+                                "claude-sonnet-4-5", 16000, 0.2, 1.0, SamplingOptions.NONE, 8192)
+                        .build();
         assertThat(built.getThinking()).isNotNull();
         assertThat(built.getTemperature()).isNull();
     }

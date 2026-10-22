@@ -11,14 +11,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 final class LlmJson {
 
-    private LlmJson() {
-    }
+    private LlmJson() {}
 
     static String stripFence(String raw) {
         return StructuredOutput.stripCodeFence(raw);
     }
 
-    /** @return the parsed object, or null when {@code raw} holds no parseable JSON object. */
+    /**
+     * @return the parsed object, or null when {@code raw} holds no parseable JSON object.
+     */
     static JsonNode parseObject(ObjectMapper mapper, String raw) {
         return StructuredOutput.readObject(mapper, raw).orElse(null);
     }

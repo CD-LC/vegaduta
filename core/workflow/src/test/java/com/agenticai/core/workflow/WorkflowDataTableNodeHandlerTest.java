@@ -53,7 +53,8 @@ class WorkflowDataTableNodeHandlerTest {
     }
 
     private static WorkflowNodeDto node(Map<String, Object> config) {
-        return new WorkflowNodeDto("n1", "data_table", null, Map.of("label", "Orders table", "config", config));
+        return new WorkflowNodeDto(
+                "n1", "data_table", null, Map.of("label", "Orders table", "config", config));
     }
 
     private static Map<String, Object> config(Object... kv) {
@@ -74,7 +75,17 @@ class WorkflowDataTableNodeHandlerTest {
     void withTheFlagOffTheNodeIsSkippedAndTheInputPassesThroughUntouched() {
         when(service.isEnabled()).thenReturn(false);
 
-        NodeExecutionResult r = handler.executeResolved(node(config("table", "orders", "operation", "delete_rows", "confirmAll", true)), "{\"in\":1}");
+        NodeExecutionResult r =
+                handler.executeResolved(
+                        node(
+                                config(
+                                        "table",
+                                        "orders",
+                                        "operation",
+                                        "delete_rows",
+                                        "confirmAll",
+                                        true)),
+                        "{\"in\":1}");
 
         assertThat(r.status()).isEqualTo("SKIPPED");
         assertThat(r.output()).isEqualTo("{\"in\":1}");
@@ -89,8 +100,9 @@ class WorkflowDataTableNodeHandlerTest {
         ObjectProvider<DataTableService> none = mock(ObjectProvider.class);
         when(none.getIfAvailable()).thenReturn(null);
 
-        NodeExecutionResult r = new WorkflowDataTableNodeHandler(none, MAPPER)
-            .executeResolved(node(config("table", "orders")), "in");
+        NodeExecutionResult r =
+                new WorkflowDataTableNodeHandler(none, MAPPER)
+                        .executeResolved(node(config("table", "orders")), "in");
 
         assertThat(r.status()).isEqualTo("SKIPPED");
         assertThat(r.output()).isEqualTo("in");
@@ -101,13 +113,40 @@ class WorkflowDataTableNodeHandlerTest {
     @Test
     void getRowsPassesFilterSortAndLimitAndFlattensTheRows() throws Exception {
         UUID id = UUID.randomUUID();
-        when(service.queryRows(eq("orders"), any(RowQuery.class))).thenReturn(
-            new RowPage(List.of(new RowView(id, Map.of("email", "a@b.co"), Instant.now(), Instant.now())), 40, 25, 0));
+        when(service.queryRows(eq("orders"), any(RowQuery.class)))
+                .thenReturn(
+                        new RowPage(
+                                List.of(
+                                        new RowView(
+                                                id,
+                                                Map.of("email", "a@b.co"),
+                                                Instant.now(),
+                                                Instant.now())),
+                                40,
+                                25,
+                                0));
 
-        NodeExecutionResult r = handler.executeResolved(node(config(
-            "table", "orders", "operation", "get_rows",
-            "filter", List.of(Map.of("column", "qty", "op", "gt", "value", "2"), Map.of("column", "", "op", "eq", "value", "dropped")),
-            "sortColumn", "qty", "sortDirection", "desc", "limit", "25")), "ignored");
+        NodeExecutionResult r =
+                handler.executeResolved(
+                        node(
+                                config(
+                                        "table",
+                                        "orders",
+                                        "operation",
+                                        "get_rows",
+                                        "filter",
+                                        List.of(
+                                                Map.of("column", "qty", "op", "gt", "value", "2"),
+                                                Map.of(
+                                                        "column", "", "op", "eq", "value",
+                                                        "dropped")),
+                                        "sortColumn",
+                                        "qty",
+                                        "sortDirection",
+                                        "desc",
+                                        "limit",
+                                        "25")),
+                        "ignored");
 
         ArgumentCaptor<RowQuery> q = ArgumentCaptor.forClass(RowQuery.class);
         verify(service).queryRows(eq("orders"), q.capture());
@@ -126,7 +165,8 @@ class WorkflowDataTableNodeHandlerTest {
 
     @Test
     void getRowsIsTheDefaultOperationAndTheLimitIsClamped() {
-        when(service.queryRows(eq("orders"), any(RowQuery.class))).thenReturn(new RowPage(List.of(), 0, 100, 0));
+        when(service.queryRows(eq("orders"), any(RowQuery.class)))
+                .thenReturn(new RowPage(List.of(), 0, 100, 0));
 
         handler.executeResolved(node(config("table", "orders", "limit", "999999")), "");
         handler.executeResolved(node(config("table", "orders", "limit", "junk")), "");
@@ -139,9 +179,11 @@ class WorkflowDataTableNodeHandlerTest {
 
     @Test
     void theFilterMayBeAJsonStringOrAnObject() {
-        when(service.queryRows(eq("orders"), any(RowQuery.class))).thenReturn(new RowPage(List.of(), 0, 100, 0));
+        when(service.queryRows(eq("orders"), any(RowQuery.class)))
+                .thenReturn(new RowPage(List.of(), 0, 100, 0));
 
-        handler.executeResolved(node(config("table", "orders", "filter", "{\"status\":\"open\"}")), "");
+        handler.executeResolved(
+                node(config("table", "orders", "filter", "{\"status\":\"open\"}")), "");
 
         ArgumentCaptor<RowQuery> q = ArgumentCaptor.forClass(RowQuery.class);
         verify(service).queryRows(eq("orders"), q.capture());
@@ -152,7 +194,8 @@ class WorkflowDataTableNodeHandlerTest {
     void countReturnsTheNumber() throws Exception {
         when(service.count(eq("orders"), anyList())).thenReturn(12L);
 
-        NodeExecutionResult r = handler.executeResolved(node(config("table", "orders", "operation", "count")), "");
+        NodeExecutionResult r =
+                handler.executeResolved(node(config("table", "orders", "operation", "count")), "");
 
         assertThat(json(r).get("count").asLong()).isEqualTo(12L);
     }
@@ -162,16 +205,30 @@ class WorkflowDataTableNodeHandlerTest {
     @Test
     void insertRowUsesValuesJsonOtherwiseTheUpstreamObject() throws Exception {
         UUID id = UUID.randomUUID();
-        when(service.insertRow(eq("orders"), anyMap())).thenReturn(new RowView(id, Map.of("email", "a"), Instant.now(), Instant.now()));
+        when(service.insertRow(eq("orders"), anyMap()))
+                .thenReturn(new RowView(id, Map.of("email", "a"), Instant.now(), Instant.now()));
 
-        NodeExecutionResult explicit = handler.executeResolved(node(config(
-            "table", "orders", "operation", "insert_row", "valuesJson", "{\"email\":\"a\",\"qty\":\"3\"}")), "ignored");
-        handler.executeResolved(node(config("table", "orders", "operation", "insert_row")), "{\"email\":\"from-input\"}");
+        NodeExecutionResult explicit =
+                handler.executeResolved(
+                        node(
+                                config(
+                                        "table",
+                                        "orders",
+                                        "operation",
+                                        "insert_row",
+                                        "valuesJson",
+                                        "{\"email\":\"a\",\"qty\":\"3\"}")),
+                        "ignored");
+        handler.executeResolved(
+                node(config("table", "orders", "operation", "insert_row")),
+                "{\"email\":\"from-input\"}");
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> values = ArgumentCaptor.forClass(Map.class);
         verify(service, org.mockito.Mockito.times(2)).insertRow(eq("orders"), values.capture());
-        assertThat(values.getAllValues().get(0)).containsEntry("email", "a").containsEntry("qty", "3");
+        assertThat(values.getAllValues().get(0))
+                .containsEntry("email", "a")
+                .containsEntry("qty", "3");
         assertThat(values.getAllValues().get(1)).containsEntry("email", "from-input");
         assertThat(json(explicit).get("inserted").asInt()).isEqualTo(1);
         assertThat(json(explicit).get("row").get("_id").asText()).isEqualTo(id.toString());
@@ -179,12 +236,41 @@ class WorkflowDataTableNodeHandlerTest {
 
     @Test
     void insertWithNoValuesAnywhereFailsTheNode() {
-        assertThatThrownBy(() -> handler.executeResolved(node(config("table", "orders", "operation", "insert_row")), "plain text"))
-            .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("valuesJson");
-        assertThatThrownBy(() -> handler.executeResolved(node(config("table", "orders", "operation", "insert_row", "valuesJson", "[1]")), ""))
-            .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("JSON object");
-        assertThatThrownBy(() -> handler.executeResolved(node(config("table", "orders", "operation", "insert_row", "valuesJson", "{oops")), ""))
-            .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("not valid JSON");
+        assertThatThrownBy(
+                        () ->
+                                handler.executeResolved(
+                                        node(config("table", "orders", "operation", "insert_row")),
+                                        "plain text"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("valuesJson");
+        assertThatThrownBy(
+                        () ->
+                                handler.executeResolved(
+                                        node(
+                                                config(
+                                                        "table",
+                                                        "orders",
+                                                        "operation",
+                                                        "insert_row",
+                                                        "valuesJson",
+                                                        "[1]")),
+                                        ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("JSON object");
+        assertThatThrownBy(
+                        () ->
+                                handler.executeResolved(
+                                        node(
+                                                config(
+                                                        "table",
+                                                        "orders",
+                                                        "operation",
+                                                        "insert_row",
+                                                        "valuesJson",
+                                                        "{oops")),
+                                        ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("not valid JSON");
         verify(service, never()).insertRow(any(), anyMap());
     }
 
@@ -192,11 +278,27 @@ class WorkflowDataTableNodeHandlerTest {
     void updateRowsNeedsExplicitValuesAndForwardsConfirmAll() throws Exception {
         when(service.updateRows(eq("orders"), anyList(), anyMap(), eq(true))).thenReturn(9);
 
-        assertThatThrownBy(() -> handler.executeResolved(node(config("table", "orders", "operation", "update_rows")), "{\"qty\":1}"))
-            .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("valuesJson");
+        assertThatThrownBy(
+                        () ->
+                                handler.executeResolved(
+                                        node(config("table", "orders", "operation", "update_rows")),
+                                        "{\"qty\":1}"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("valuesJson");
 
-        NodeExecutionResult r = handler.executeResolved(node(config(
-            "table", "orders", "operation", "update_rows", "valuesJson", "{\"qty\":1}", "confirmAll", "true")), "");
+        NodeExecutionResult r =
+                handler.executeResolved(
+                        node(
+                                config(
+                                        "table",
+                                        "orders",
+                                        "operation",
+                                        "update_rows",
+                                        "valuesJson",
+                                        "{\"qty\":1}",
+                                        "confirmAll",
+                                        "true")),
+                        "");
 
         assertThat(json(r).get("updated").asInt()).isEqualTo(9);
     }
@@ -204,28 +306,67 @@ class WorkflowDataTableNodeHandlerTest {
     @Test
     void deleteWithoutAFilterFailsTheNodeWithTheServicesReasonUnlessConfirmAll() throws Exception {
         when(service.deleteRows(eq("orders"), anyList(), eq(false)))
-            .thenThrow(new IllegalArgumentException("Refusing to delete every row: give a filter"));
+                .thenThrow(
+                        new IllegalArgumentException(
+                                "Refusing to delete every row: give a filter"));
         when(service.deleteRows(eq("orders"), anyList(), eq(true))).thenReturn(5);
 
-        assertThatThrownBy(() -> handler.executeResolved(node(config("table", "orders", "operation", "delete_rows")), ""))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Data table delete_rows failed: Refusing to delete every row: give a filter");
+        assertThatThrownBy(
+                        () ->
+                                handler.executeResolved(
+                                        node(config("table", "orders", "operation", "delete_rows")),
+                                        ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(
+                        "Data table delete_rows failed: Refusing to delete every row: give a filter");
 
-        NodeExecutionResult confirmed = handler.executeResolved(
-            node(config("table", "orders", "operation", "delete_rows", "confirmAll", true)), "");
+        NodeExecutionResult confirmed =
+                handler.executeResolved(
+                        node(
+                                config(
+                                        "table",
+                                        "orders",
+                                        "operation",
+                                        "delete_rows",
+                                        "confirmAll",
+                                        true)),
+                        "");
         assertThat(json(confirmed).get("deleted").asInt()).isEqualTo(5);
     }
 
     @Test
     void upsertNeedsAKeyColumnAndReportsCreatedOrUpdated() throws Exception {
-        when(service.upsertRow(eq("orders"), eq("email"), anyMap())).thenReturn(new UpsertResult(false, 2, null));
+        when(service.upsertRow(eq("orders"), eq("email"), anyMap()))
+                .thenReturn(new UpsertResult(false, 2, null));
 
-        assertThatThrownBy(() -> handler.executeResolved(node(config(
-            "table", "orders", "operation", "upsert_row", "valuesJson", "{\"email\":\"a\"}")), ""))
-            .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("keyColumn");
+        assertThatThrownBy(
+                        () ->
+                                handler.executeResolved(
+                                        node(
+                                                config(
+                                                        "table",
+                                                        "orders",
+                                                        "operation",
+                                                        "upsert_row",
+                                                        "valuesJson",
+                                                        "{\"email\":\"a\"}")),
+                                        ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("keyColumn");
 
-        NodeExecutionResult r = handler.executeResolved(node(config(
-            "table", "orders", "operation", "upsert_row", "keyColumn", "email", "valuesJson", "{\"email\":\"a\"}")), "");
+        NodeExecutionResult r =
+                handler.executeResolved(
+                        node(
+                                config(
+                                        "table",
+                                        "orders",
+                                        "operation",
+                                        "upsert_row",
+                                        "keyColumn",
+                                        "email",
+                                        "valuesJson",
+                                        "{\"email\":\"a\"}")),
+                        "");
 
         assertThat(json(r).get("created").asBoolean()).isFalse();
         assertThat(json(r).get("affected").asInt()).isEqualTo(2);
@@ -237,26 +378,36 @@ class WorkflowDataTableNodeHandlerTest {
     @Test
     void aMissingTableOrAnUnknownOperationFailsTheNode() {
         assertThatThrownBy(() -> handler.executeResolved(node(config("operation", "get_rows")), ""))
-            .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("no table configured");
-        assertThatThrownBy(() -> handler.executeResolved(node(config("table", "orders", "operation", "truncate")), ""))
-            .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("unknown operation 'truncate'");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no table configured");
+        assertThatThrownBy(
+                        () ->
+                                handler.executeResolved(
+                                        node(config("table", "orders", "operation", "truncate")),
+                                        ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("unknown operation 'truncate'");
     }
 
     @Test
     void aServiceRefusalSurfacesAsAnIllegalArgumentWithItsReason() {
         when(service.queryRows(eq("ghost"), any(RowQuery.class)))
-            .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Data table not found: ghost"));
+                .thenThrow(
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND, "Data table not found: ghost"));
 
         assertThatThrownBy(() -> handler.executeResolved(node(config("table", "ghost")), ""))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Data table get_rows failed: Data table not found: ghost");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Data table get_rows failed: Data table not found: ghost");
     }
 
     @Test
     void operationNamesAreForgivingAboutCaseAndSeparators() {
         when(service.count(eq("orders"), anyList())).thenReturn(1L);
 
-        NodeExecutionResult r = handler.executeResolved(node(config("table", "orders", "operation", " COUNT ")), "");
+        NodeExecutionResult r =
+                handler.executeResolved(
+                        node(config("table", "orders", "operation", " COUNT ")), "");
 
         assertThat(r.status()).isEqualTo("OK");
     }

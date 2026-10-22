@@ -89,15 +89,11 @@ final class QuickTaskDelivery {
         if (channel == QuickTaskChannel.LOG) {
             deliveryNote = "Logged only - result recorded, nothing sent to WhatsApp/SMS/call.";
         } else {
-            Optional<String> thirdPartyNumber =
-                    extractThirdPartyNumber(message, phoneNumber);
+            Optional<String> thirdPartyNumber = extractThirdPartyNumber(message, phoneNumber);
             deliveryNote =
                     thirdPartyNumber.isPresent()
                             ? dispatchToThirdParty(
-                                    channel,
-                                    thirdPartyNumber.get(),
-                                    resultText,
-                                    keycloakUserId)
+                                    channel, thirdPartyNumber.get(), resultText, keycloakUserId)
                             : switch (channel) {
                                 case WHATSAPP ->
                                         whatsAppDispatchService.send(phoneNumber, resultText);

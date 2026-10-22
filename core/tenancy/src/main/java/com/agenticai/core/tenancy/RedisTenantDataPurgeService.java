@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
  * platform's ~12 rate-limit/quota/session services scatter across a tenant's lifetime. None of
  * these keys are durable data (every family here carries its own TTL and would self-expire
  * eventually) so a miss on any one family never aborts the caller's larger deletion - same
- * fail-open posture {@link com.agenticai.core.agents.quota.FreeTierUsageLimiterService#increment} already
- * takes for this exact class of state on a Redis outage.
+ * fail-open posture {@link com.agenticai.core.agents.quota.FreeTierUsageLimiterService#increment}
+ * already takes for this exact class of state on a Redis outage.
  *
  * <p><b>Deliberately excluded (researched, not forgotten):</b> {@code SignupRateLimiter} and {@code
  * DemoSessionRateLimiter}/{@code DemoChannelRateLimiter}'s six families are keyed by client IP or

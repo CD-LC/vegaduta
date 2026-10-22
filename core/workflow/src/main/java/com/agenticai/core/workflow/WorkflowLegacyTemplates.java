@@ -14,8 +14,7 @@ import java.util.regex.Pattern;
  */
 final class WorkflowLegacyTemplates {
 
-    static final Pattern CRM_PLACEHOLDER =
-        Pattern.compile("\\{\\{\\s*([A-Za-z0-9_.-]+)\\s*}}");
+    static final Pattern CRM_PLACEHOLDER = Pattern.compile("\\{\\{\\s*([A-Za-z0-9_.-]+)\\s*}}");
 
     private final ObjectMapper objectMapper;
 
@@ -37,8 +36,14 @@ final class WorkflowLegacyTemplates {
         try {
             JsonNode root = objectMapper.readTree(raw.isBlank() ? "{}" : raw);
             if (root.isObject()) {
-                root.fields().forEachRemaining(e ->
-                    values.put(e.getKey(), e.getValue().isTextual() ? e.getValue().asText() : e.getValue().toString()));
+                root.fields()
+                        .forEachRemaining(
+                                e ->
+                                        values.put(
+                                                e.getKey(),
+                                                e.getValue().isTextual()
+                                                        ? e.getValue().asText()
+                                                        : e.getValue().toString()));
             }
         } catch (Exception ignored) {
             // Not JSON: only "input" resolves.

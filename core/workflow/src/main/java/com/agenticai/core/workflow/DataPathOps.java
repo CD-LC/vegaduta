@@ -8,11 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Field-path reading and writing ({@code a.b[0].c}, {@code ["odd key"]}): {@link #get} never throws on a missing
- * step, {@link #setPath} creates intermediate objects. Extracted from {@link WorkflowDataOps}.
+ * Field-path reading and writing ({@code a.b[0].c}, {@code ["odd key"]}): {@link #get} never throws
+ * on a missing step, {@link #setPath} creates intermediate objects. Extracted from {@link
+ * WorkflowDataOps}.
  */
 final class DataPathOps {
-    /** Reads a (dot / bracket) path; MissingNode when any step is absent. A blank path is the node itself. */
+    /**
+     * Reads a (dot / bracket) path; MissingNode when any step is absent. A blank path is the node
+     * itself.
+     */
     static JsonNode get(JsonNode root, String path) {
         if (root == null) {
             return MissingNode.getInstance();
@@ -38,7 +42,10 @@ final class DataPathOps {
         return cur == null ? MissingNode.getInstance() : cur;
     }
 
-    /** Assigns {@code value} at a dotted path, creating intermediate objects. Array steps must already exist. */
+    /**
+     * Assigns {@code value} at a dotted path, creating intermediate objects. Array steps must
+     * already exist.
+     */
     static void setPath(ObjectNode root, String path, JsonNode value) {
         List<Object> tokens = tokenize(path.strip());
         if (tokens.isEmpty()) {
@@ -50,12 +57,14 @@ final class DataPathOps {
             boolean lastToken = i == tokens.size() - 1;
             if (token instanceof Integer idx) {
                 if (!cur.isArray()) {
-                    throw new IllegalArgumentException("Cannot set '" + path + "': '[" + idx + "]' is not inside a list.");
+                    throw new IllegalArgumentException(
+                            "Cannot set '" + path + "': '[" + idx + "]' is not inside a list.");
                 }
                 ArrayNode arr = (ArrayNode) cur;
                 int at = idx < 0 ? arr.size() + idx : idx;
                 if (at < 0 || at >= arr.size()) {
-                    throw new IllegalArgumentException("Cannot set '" + path + "': index " + idx + " does not exist.");
+                    throw new IllegalArgumentException(
+                            "Cannot set '" + path + "': index " + idx + " does not exist.");
                 }
                 if (lastToken) {
                     arr.set(at, value);
@@ -65,7 +74,8 @@ final class DataPathOps {
             } else {
                 String key = (String) token;
                 if (!cur.isObject()) {
-                    throw new IllegalArgumentException("Cannot set '" + path + "': '" + key + "' is not inside an object.");
+                    throw new IllegalArgumentException(
+                            "Cannot set '" + path + "': '" + key + "' is not inside an object.");
                 }
                 ObjectNode obj = (ObjectNode) cur;
                 if (lastToken) {
@@ -124,12 +134,13 @@ final class DataPathOps {
     }
 
     private static String unquote(String s) {
-        if (s.length() >= 2 && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
+        if (s.length() >= 2
+                && ((s.startsWith("\"") && s.endsWith("\""))
+                        || (s.startsWith("'") && s.endsWith("'")))) {
             return s.substring(1, s.length() - 1);
         }
         return s;
     }
 
-    private DataPathOps() {
-    }
+    private DataPathOps() {}
 }

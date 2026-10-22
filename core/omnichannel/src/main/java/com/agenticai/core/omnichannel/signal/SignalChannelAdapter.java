@@ -62,13 +62,16 @@ public class SignalChannelAdapter implements ApprovalActionExecutor {
                 apiClient.send(connection, recipient, part, List.of());
             }
             log.info("Sent Signal message to {}", SignalAddress.mask(payload.to()));
-            outboundLogger.recordSent(ChannelType.SIGNAL, payload.to(), payload.body(), request.getRequestedBy());
+            outboundLogger.recordSent(
+                    ChannelType.SIGNAL, payload.to(), payload.body(), request.getRequestedBy());
         } catch (SignalApiException e) {
             // 4xx (unknown recipient, bad request) can never succeed on retry; network and 5xx can.
             if (e.retryable()) {
-                throw new RetryableChannelDeliveryException("signal", "Signal send failed: " + e.getMessage(), e);
+                throw new RetryableChannelDeliveryException(
+                        "signal", "Signal send failed: " + e.getMessage(), e);
             }
-            throw new ChannelDeliveryException("signal", "Signal send failed: " + e.getMessage(), e);
+            throw new ChannelDeliveryException(
+                    "signal", "Signal send failed: " + e.getMessage(), e);
         } catch (ChannelConfigurationException e) {
             throw new ChannelDeliveryException("signal", e.getMessage(), e);
         } catch (SignalNotConfiguredException e) {
@@ -83,13 +86,15 @@ public class SignalChannelAdapter implements ApprovalActionExecutor {
         try {
             SendPayload payload = MAPPER.readValue(payloadJson, SendPayload.class);
             if (payload.to() == null || payload.body() == null || payload.body().isBlank()) {
-                throw new ChannelDeliveryException("signal", "Signal send payload needs a recipient and a body");
+                throw new ChannelDeliveryException(
+                        "signal", "Signal send payload needs a recipient and a body");
             }
             return payload;
         } catch (ChannelDeliveryException e) {
             throw e;
         } catch (Exception e) {
-            throw new ChannelDeliveryException("signal", "Could not parse Signal send payload: " + e.getMessage(), e);
+            throw new ChannelDeliveryException(
+                    "signal", "Could not parse Signal send payload: " + e.getMessage(), e);
         }
     }
 
@@ -125,6 +130,5 @@ public class SignalChannelAdapter implements ApprovalActionExecutor {
     }
 
     /** {@code to} is a number, a UUID or {@code group:<id>} (see {@link SignalAddress}). */
-    public record SendPayload(String to, String body) {
-    }
+    public record SendPayload(String to, String body) {}
 }

@@ -39,7 +39,8 @@ class MatrixSyncParserTest {
 
         assertThat(batch.nextBatch()).isEqualTo("s2");
         assertThat(batch.invites())
-                .containsExactly(new MatrixSyncParser.Invite("!inv:example.org", "@alice:example.org"));
+                .containsExactly(
+                        new MatrixSyncParser.Invite("!inv:example.org", "@alice:example.org"));
         assertThat(batch.joinedCounts()).containsEntry("!room:example.org", 2);
         assertThat(batch.events()).hasSize(2);
         assertThat(batch.events().get(0).type()).isEqualTo("m.room.encryption");

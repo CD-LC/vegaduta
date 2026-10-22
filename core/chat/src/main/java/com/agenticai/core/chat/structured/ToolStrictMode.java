@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
+import org.reactivestreams.Publisher;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpRequest;
@@ -19,7 +20,6 @@ import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 /**
@@ -43,23 +43,53 @@ public final class ToolStrictMode {
      * Keywords outside the strict-mode subset (OpenAI "Supported schemas" docs) plus anything that
      * would make us guess: a schema using any of them is left non-strict.
      */
-    static final Set<String> UNSUPPORTED_KEYWORDS = Set.of(
-        "patternProperties", "unevaluatedProperties", "unevaluatedItems", "propertyNames",
-        "minProperties", "maxProperties", "contains", "minContains", "maxContains", "uniqueItems",
-        "not", "if", "then", "else", "dependentRequired", "dependentSchemas", "dependencies",
-        "oneOf", "allOf", "prefixItems", "minItems", "maxItems", "minLength", "maxLength",
-        "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf",
-        "pattern", "format", "default", "const", "$anchor", "$dynamicRef", "$dynamicAnchor");
+    static final Set<String> UNSUPPORTED_KEYWORDS =
+            Set.of(
+                    "patternProperties",
+                    "unevaluatedProperties",
+                    "unevaluatedItems",
+                    "propertyNames",
+                    "minProperties",
+                    "maxProperties",
+                    "contains",
+                    "minContains",
+                    "maxContains",
+                    "uniqueItems",
+                    "not",
+                    "if",
+                    "then",
+                    "else",
+                    "dependentRequired",
+                    "dependentSchemas",
+                    "dependencies",
+                    "oneOf",
+                    "allOf",
+                    "prefixItems",
+                    "minItems",
+                    "maxItems",
+                    "minLength",
+                    "maxLength",
+                    "minimum",
+                    "maximum",
+                    "exclusiveMinimum",
+                    "exclusiveMaximum",
+                    "multipleOf",
+                    "pattern",
+                    "format",
+                    "default",
+                    "const",
+                    "$anchor",
+                    "$dynamicRef",
+                    "$dynamicAnchor");
 
-    private ToolStrictMode() {
-    }
+    private ToolStrictMode() {}
 
     /**
      * True when {@code parameters} meets the strict-mode subset: an object root; every object
-     * closed ({@code additionalProperties:false}) with all its properties required (reusing
-     * {@link StructuredOutput#isStrictCompatible}); and no keyword from {@link #UNSUPPORTED_KEYWORDS}
-     * anywhere in a schema position (property NAMES that collide with a keyword are fine).
-     * A no-argument tool with an empty {@code properties} object that is already closed qualifies.
+     * closed ({@code additionalProperties:false}) with all its properties required (reusing {@link
+     * StructuredOutput#isStrictCompatible}); and no keyword from {@link #UNSUPPORTED_KEYWORDS}
+     * anywhere in a schema position (property NAMES that collide with a keyword are fine). A
+     * no-argument tool with an empty {@code properties} object that is already closed qualifies.
      */
     public static boolean eligible(JsonNode parameters) {
         if (parameters == null || !parameters.isObject()) {
@@ -104,8 +134,8 @@ public final class ToolStrictMode {
     /**
      * The request body with {@code strict: true} added to every eligible function tool that does
      * not already carry a {@code strict} value; the original array is returned (same bytes) when
-     * nothing qualifies, the body is not a JSON object, or it cannot be parsed. {@code $schema}
-     * is dropped from a strictified tool's parameters copy.
+     * nothing qualifies, the body is not a JSON object, or it cannot be parsed. {@code $schema} is
+     * dropped from a strictified tool's parameters copy.
      */
     public static byte[] rewrite(byte[] body) {
         if (body == null || body.length == 0) {
@@ -164,8 +194,9 @@ public final class ToolStrictMode {
     public static ExchangeFilterFunction webFilter() {
         return (ClientRequest request, ExchangeFunction next) -> {
             BodyInserter<?, ? super ClientHttpRequest> original = request.body();
-            BodyInserter<Object, ClientHttpRequest> wrapped = (outputMessage, context) ->
-                original.insert(new StrictRewritingRequest(outputMessage), context);
+            BodyInserter<Object, ClientHttpRequest> wrapped =
+                    (outputMessage, context) ->
+                            original.insert(new StrictRewritingRequest(outputMessage), context);
             return next.exchange(ClientRequest.from(request).body(wrapped).build());
         };
     }
@@ -178,16 +209,19 @@ public final class ToolStrictMode {
 
         @Override
         public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-            return DataBufferUtils.join(body).flatMap(joined -> {
-                byte[] bytes = new byte[joined.readableByteCount()];
-                joined.read(bytes);
-                DataBufferUtils.release(joined);
-                byte[] out = rewrite(bytes);
-                if (out != bytes) {
-                    getHeaders().setContentLength(out.length);
-                }
-                return super.writeWith(Mono.just(bufferFactory().wrap(out)));
-            }).switchIfEmpty(Mono.defer(() -> super.writeWith(Mono.<DataBuffer>empty())));
+            return DataBufferUtils.join(body)
+                    .flatMap(
+                            joined -> {
+                                byte[] bytes = new byte[joined.readableByteCount()];
+                                joined.read(bytes);
+                                DataBufferUtils.release(joined);
+                                byte[] out = rewrite(bytes);
+                                if (out != bytes) {
+                                    getHeaders().setContentLength(out.length);
+                                }
+                                return super.writeWith(Mono.just(bufferFactory().wrap(out)));
+                            })
+                    .switchIfEmpty(Mono.defer(() -> super.writeWith(Mono.<DataBuffer>empty())));
         }
     }
 }

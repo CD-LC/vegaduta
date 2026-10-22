@@ -117,8 +117,7 @@ class DeepResearchJobFlowTest {
         DeepResearchConfig config = new DeepResearchConfig(true, 6, 8, 12000, 3, 2, 6, 45, 2);
         // The web tools are core/agents-browser's BuiltInWebTools behind the kernel's WebToolPort.
         BuiltInWebTools webTools =
-                new BuiltInWebTools(
-                        agents, credentialProvider, mock(ObjectProvider.class), config);
+                new BuiltInWebTools(agents, credentialProvider, mock(ObjectProvider.class), config);
         ObjectProvider<WebToolPort> port = mock(ObjectProvider.class);
         when(port.getIfAvailable()).thenReturn(webTools);
         resolver =

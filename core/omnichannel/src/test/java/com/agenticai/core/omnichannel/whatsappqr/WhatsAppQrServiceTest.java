@@ -99,7 +99,10 @@ class WhatsAppQrServiceTest {
         verify(repository).save(row.capture());
         assertThat(row.getValue().getStatus()).isEqualTo(WhatsAppQrStatus.PAIRING);
         verify(resolution)
-                .link(eq(ExternalAccountProvider.WHATSAPP_QR), eq(row.getValue().getSessionKey()), eq(SCHEMA));
+                .link(
+                        eq(ExternalAccountProvider.WHATSAPP_QR),
+                        eq(row.getValue().getSessionKey()),
+                        eq(SCHEMA));
         // The receiver starts only after the row is committed, so its own thread can read it.
         verify(receive, org.mockito.Mockito.never()).ensureReceiving(any(), any());
         commit();

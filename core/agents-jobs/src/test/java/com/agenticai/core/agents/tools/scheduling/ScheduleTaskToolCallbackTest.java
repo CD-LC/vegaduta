@@ -105,7 +105,18 @@ class ScheduleTaskToolCallbackTest {
                 .containsExactly("daily", "weekdays", "weekly", "monthly", "custom");
         assertThat(schema.at("/properties/delivery/enum"))
                 .extracting(JsonNode::asText)
-                .containsExactly("in_app", "email", "whatsapp", "whatsapp_qr", "telegram", "slack", "signal", "matrix", "imessage", "a2a", "voice");
+                .containsExactly(
+                        "in_app",
+                        "email",
+                        "whatsapp",
+                        "whatsapp_qr",
+                        "telegram",
+                        "slack",
+                        "signal",
+                        "matrix",
+                        "imessage",
+                        "a2a",
+                        "voice");
         // Identity is never an argument.
         assertThat(schema.at("/properties").has("agentId")).isFalse();
         assertThat(schema.at("/properties").has("owner")).isFalse();

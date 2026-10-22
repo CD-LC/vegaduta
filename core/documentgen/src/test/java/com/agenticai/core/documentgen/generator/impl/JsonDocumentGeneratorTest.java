@@ -14,14 +14,12 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link JsonDocumentGenerator} has one load-bearing branch: {@link
- * DocumentContent#json()} is serialized VERBATIM as the whole file, and only
- * when it is null does the generator fall back to serializing the entire
- * {@link DocumentContent}. Getting that backwards would wrap every agent-
- * produced JSON payload in a spurious {@code {"title":..., "json":...}}
- * envelope. Assertions parse the output back with Jackson rather than
- * string-matching, so the pretty-printer's whitespace choices can change
- * freely without breaking the suite.
+ * {@link JsonDocumentGenerator} has one load-bearing branch: {@link DocumentContent#json()} is
+ * serialized VERBATIM as the whole file, and only when it is null does the generator fall back to
+ * serializing the entire {@link DocumentContent}. Getting that backwards would wrap every agent-
+ * produced JSON payload in a spurious {@code {"title":..., "json":...}} envelope. Assertions parse
+ * the output back with Jackson rather than string-matching, so the pretty-printer's whitespace
+ * choices can change freely without breaking the suite.
  */
 class JsonDocumentGeneratorTest {
 
@@ -36,7 +34,8 @@ class JsonDocumentGeneratorTest {
     @Test
     void jsonPayloadIsSerializedVerbatimAsTheEntireFile() throws Exception {
         Map<String, Object> payload = Map.of("orders", List.of(Map.of("id", 1, "total", 99.5)));
-        DocumentContent content = new DocumentContent("ignored", List.of(), null, "ignored", payload);
+        DocumentContent content =
+                new DocumentContent("ignored", List.of(), null, "ignored", payload);
 
         JsonNode parsed = parse(generator.generate(request(content)));
 
@@ -49,9 +48,13 @@ class JsonDocumentGeneratorTest {
 
     @Test
     void withoutAJsonPayloadTheWholeContentIsSerialized() throws Exception {
-        DocumentContent content = new DocumentContent("Report", List.of(
-            new DocumentContent.Section("H", List.of("p1"), List.of("b1"))
-        ), null, null, null);
+        DocumentContent content =
+                new DocumentContent(
+                        "Report",
+                        List.of(new DocumentContent.Section("H", List.of("p1"), List.of("b1"))),
+                        null,
+                        null,
+                        null);
 
         JsonNode parsed = parse(generator.generate(request(content)));
 

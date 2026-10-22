@@ -9,23 +9,19 @@ import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
 
 /**
- * "implement openrouter, grok and gemini so that consumers can use them" -
- * OpenRouter (openrouter.ai) is a routing gateway in front of dozens of
- * models from many labs, but its own API is OpenAI-chat-completions-
- * compatible, so this reuses Spring AI's {@code spring-ai-starter-model-openai}
- * module ({@link OpenAiApi}/{@link OpenAiChatModel}) rather than a dedicated
- * starter (none exists) - only {@code baseUrl} differs from a real OpenAI
- * call. Same "fresh client per call, BYOK, no static application.yml key"
- * shape as {@link AnthropicAgentChatClientFactory} - see that class's javadoc
- * for the reasoning this mirrors, including why {@code
- * OpenAiChatAutoConfiguration} is excluded in {@code CoreApplication}.
+ * "implement openrouter, grok and gemini so that consumers can use them" - OpenRouter
+ * (openrouter.ai) is a routing gateway in front of dozens of models from many labs, but its own API
+ * is OpenAI-chat-completions- compatible, so this reuses Spring AI's {@code
+ * spring-ai-starter-model-openai} module ({@link OpenAiApi}/{@link OpenAiChatModel}) rather than a
+ * dedicated starter (none exists) - only {@code baseUrl} differs from a real OpenAI call. Same
+ * "fresh client per call, BYOK, no static application.yml key" shape as {@link
+ * AnthropicAgentChatClientFactory} - see that class's javadoc for the reasoning this mirrors,
+ * including why {@code OpenAiChatAutoConfiguration} is excluded in {@code CoreApplication}.
  *
- * <p>An agent's {@code model} field is a free-text string for every provider
- * (see {@code AgentsPanel.js}'s model input) - for OpenRouter this is the
- * OpenRouter model id, e.g. {@code "anthropic/claude-sonnet-4.5"} or
- * {@code "x-ai/grok-4"} (OpenRouter also proxies Grok - {@link
- * GrokAgentChatClientFactory} is for calling xAI directly with an xAI key
- * instead).
+ * <p>An agent's {@code model} field is a free-text string for every provider (see {@code
+ * AgentsPanel.js}'s model input) - for OpenRouter this is the OpenRouter model id, e.g. {@code
+ * "anthropic/claude-sonnet-4.5"} or {@code "x-ai/grok-4"} (OpenRouter also proxies Grok - {@link
+ * GrokAgentChatClientFactory} is for calling xAI directly with an xAI key instead).
  */
 @Component
 public class OpenRouterAgentChatClientFactory implements AgentChatClientFactory {
@@ -55,16 +51,18 @@ public class OpenRouterAgentChatClientFactory implements AgentChatClientFactory 
     // Bounded retries, real ObservationRegistry, default advisors, stream usage -
     // see LlmModelSupport.
     private final LlmModelSupport modelSupport;
-    // Shared OpenAI-compatible transport/model construction (ADR-0012 P1b) - see OpenAiCompatModelBuilder.
+    // Shared OpenAI-compatible transport/model construction (ADR-0012 P1b) - see
+    // OpenAiCompatModelBuilder.
     private final OpenAiCompatModelBuilder modelBuilder;
 
     public OpenRouterAgentChatClientFactory(
-        LlmCallMetricsService llmCallMetricsService, LlmCallLogService llmCallLogService,
-        MeterRegistry meterRegistry, LlmPricingCatalog pricingCatalog,
-        LlmHttpClientFactory llmHttpClientFactory,
-        ResilientToolCallingManagerFactory toolCallingManagers,
-        LlmModelSupport modelSupport
-    ) {
+            LlmCallMetricsService llmCallMetricsService,
+            LlmCallLogService llmCallLogService,
+            MeterRegistry meterRegistry,
+            LlmPricingCatalog pricingCatalog,
+            LlmHttpClientFactory llmHttpClientFactory,
+            ResilientToolCallingManagerFactory toolCallingManagers,
+            LlmModelSupport modelSupport) {
         this.modelSupport = modelSupport;
         this.llmCallMetricsService = llmCallMetricsService;
         this.llmCallLogService = llmCallLogService;
@@ -72,7 +70,9 @@ public class OpenRouterAgentChatClientFactory implements AgentChatClientFactory 
         this.pricingCatalog = pricingCatalog;
         this.llmHttpClientFactory = llmHttpClientFactory;
         this.toolCallingManagers = toolCallingManagers;
-        this.modelBuilder = new OpenAiCompatModelBuilder(llmHttpClientFactory, toolCallingManagers, modelSupport);
+        this.modelBuilder =
+                new OpenAiCompatModelBuilder(
+                        llmHttpClientFactory, toolCallingManagers, modelSupport);
     }
 
     @Override
@@ -81,16 +81,23 @@ public class OpenRouterAgentChatClientFactory implements AgentChatClientFactory 
     }
 
     @Override
-    public ChatClient create(String apiKey, String model, int maxTokens, double temperature, double topP) {
+    public ChatClient create(
+            String apiKey, String model, int maxTokens, double temperature, double topP) {
         return create(apiKey, model, maxTokens, temperature, topP, java.util.Map.of());
     }
 
-    /** Applies the optional {@link SamplingOptions} the provider's API supports; unsupported fields are omitted. */
+    /**
+     * Applies the optional {@link SamplingOptions} the provider's API supports; unsupported fields
+     * are omitted.
+     */
     @Override
     public ChatClient create(
-        String apiKey, String model, int maxTokens, double temperature, double topP,
-        java.util.Map<String, Object> providerOptions
-    ) {
+            String apiKey,
+            String model,
+            int maxTokens,
+            double temperature,
+            double topP,
+            java.util.Map<String, Object> providerOptions) {
         SamplingOptions sampling = SamplingOptions.from(providerOptions);
         OpenAiApi openAiApi = modelBuilder.api(BASE_URL).apiKey(apiKey).build();
 
@@ -98,14 +105,28 @@ public class OpenRouterAgentChatClientFactory implements AgentChatClientFactory 
         // "openai/gpt-5*" / "openai/o*" ids are OpenAI reasoning models behind
         // OpenRouter and carry the same max_completion_tokens / no-temperature rules.
         LlmModelSupport.applyOpenAiTokensAndSampling(
-            optionsBuilder, ProviderName.OPENROUTER, model, maxTokens, temperature, topP, sampling);
+                optionsBuilder,
+                ProviderName.OPENROUTER,
+                model,
+                maxTokens,
+                temperature,
+                topP,
+                sampling);
         OpenAiChatOptions options = optionsBuilder.build();
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
-        return modelSupport.chatClientBuilder(chatModel)
-            .defaultAdvisors(modelSupport.advisors(
-                new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.OPENROUTER, model, meterRegistry, pricingCatalog)))
-            .build();
+        return modelSupport
+                .chatClientBuilder(chatModel)
+                .defaultAdvisors(
+                        modelSupport.advisors(
+                                new LlmMetricsAdvisor(
+                                        llmCallMetricsService,
+                                        llmCallLogService,
+                                        ProviderName.OPENROUTER,
+                                        model,
+                                        meterRegistry,
+                                        pricingCatalog)))
+                .build();
     }
 }

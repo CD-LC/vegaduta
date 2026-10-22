@@ -21,10 +21,17 @@ final class GraphMemoryAgtype {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-    /** AGE annotates vertices/edges/paths in agtype text, e.g. {@code {...}::vertex}; JSON once removed. */
-    private static final Pattern AGTYPE_ANNOTATION = Pattern.compile("(?<=[}\\]])::(vertex|edge|path)");
+    /**
+     * AGE annotates vertices/edges/paths in agtype text, e.g. {@code {...}::vertex}; JSON once
+     * removed.
+     */
+    private static final Pattern AGTYPE_ANNOTATION =
+            Pattern.compile("(?<=[}\\]])::(vertex|edge|path)");
 
-    /** AGE returns a plain-integer agtype scalar (e.g. {@code 3}) for {@code count(n)} - no quotes, unlike a string scalar. */
+    /**
+     * AGE returns a plain-integer agtype scalar (e.g. {@code 3}) for {@code count(n)} - no quotes,
+     * unlike a string scalar.
+     */
     static int parseAgtypeInt(String agtypeValue) {
         if (agtypeValue == null) {
             return 0;
@@ -34,12 +41,12 @@ final class GraphMemoryAgtype {
     }
 
     /**
-     * Turns one agtype path ({@code [vertex, edge, vertex, ...]::path}) into the facts on it, in the
-     * direction each edge was written, or an empty list when ANY edge on the path is not valid
+     * Turns one agtype path ({@code [vertex, edge, vertex, ...]::path}) into the facts on it, in
+     * the direction each edge was written, or an empty list when ANY edge on the path is not valid
      * ({@code asOfMillis == null}: not closed; otherwise: valid at that instant). Pure.
      */
     static List<GraphFact> parsePathFacts(String agtypePath, Long asOfMillis)
-        throws com.fasterxml.jackson.core.JsonProcessingException {
+            throws com.fasterxml.jackson.core.JsonProcessingException {
         if (agtypePath == null || agtypePath.isBlank()) {
             return List.of();
         }
@@ -53,7 +60,9 @@ final class GraphMemoryAgtype {
             if (element.has("start_id")) {
                 edges.add(element);
             } else if (element.has("id")) {
-                names.put(element.get("id").asLong(), element.path("properties").path("name").asText(""));
+                names.put(
+                        element.get("id").asLong(),
+                        element.path("properties").path("name").asText(""));
             }
         }
         List<GraphFact> facts = new ArrayList<>();
@@ -65,7 +74,11 @@ final class GraphMemoryAgtype {
             String subject = names.get(edge.get("start_id").asLong());
             String object = names.get(edge.get("end_id").asLong());
             String type = props.path("type").asText("");
-            facts.add(new GraphFact(subject == null ? "" : subject, type.isEmpty() ? "RELATED_TO" : type, object == null ? "" : object));
+            facts.add(
+                    new GraphFact(
+                            subject == null ? "" : subject,
+                            type.isEmpty() ? "RELATED_TO" : type,
+                            object == null ? "" : object));
         }
         return facts;
     }
@@ -78,17 +91,21 @@ final class GraphMemoryAgtype {
         if (asOfMillis == null) {
             return !hasTo;
         }
-        return (!hasFrom || validFrom.asLong() <= asOfMillis) && (!hasTo || validTo.asLong() > asOfMillis);
+        return (!hasFrom || validFrom.asLong() <= asOfMillis)
+                && (!hasTo || validTo.asLong() > asOfMillis);
     }
 
-    /** AGE returns agtype-encoded string scalars wrapped in quotes (e.g. {@code "Priya"}) - strips them. */
+    /**
+     * AGE returns agtype-encoded string scalars wrapped in quotes (e.g. {@code "Priya"}) - strips
+     * them.
+     */
     static String stripAgtypeQuotes(String agtypeValue) {
         if (agtypeValue == null) {
             return "";
         }
         String trimmed = agtypeValue.trim();
         return trimmed.length() >= 2 && trimmed.startsWith("\"") && trimmed.endsWith("\"")
-            ? trimmed.substring(1, trimmed.length() - 1)
-            : trimmed;
+                ? trimmed.substring(1, trimmed.length() - 1)
+                : trimmed;
     }
 }

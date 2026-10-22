@@ -4,10 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -22,6 +18,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests for the reflection-based OpenAPI generator: structural checks over the REAL controller set
@@ -109,7 +107,8 @@ class OpenApiSpecGeneratorTest {
                     String[] parts = r.substring(prefix.length()).split("/", 2);
                     ok =
                             parts.length == 2
-                                    && List.of("schemas", "responses", "headers", "parameters").contains(parts[0])
+                                    && List.of("schemas", "responses", "headers", "parameters")
+                                            .contains(parts[0])
                                     && root.path("components").path(parts[0]).has(parts[1]);
                 }
                 if (!ok) {
@@ -264,6 +263,7 @@ class OpenApiSpecGeneratorTest {
         assertThat(edit.indexOf("APP_CHAT_BRANCHING_ENABLED"))
                 .isLessThan(edit.indexOf("Server-Sent Events"));
     }
+
     // ================================================================== small helpers
 
     @Test

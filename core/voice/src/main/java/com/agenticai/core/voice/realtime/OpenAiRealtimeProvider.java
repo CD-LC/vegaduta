@@ -18,16 +18,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * OpenAI Realtime API provider - {@code wss://api.openai.com/v1/realtime}
- * with a bearer key, {@code session.update} configuration, and
- * {@code input_audio_buffer.append}/{@code response.audio.delta} audio
- * frames. Audio is PCM16 @ 24 kHz in both directions.
+ * OpenAI Realtime API provider - {@code wss://api.openai.com/v1/realtime} with a bearer key, {@code
+ * session.update} configuration, and {@code input_audio_buffer.append}/{@code response.audio.delta}
+ * audio frames. Audio is PCM16 @ 24 kHz in both directions.
  *
- * <p>Handshake is considered done when the provider answers the connect
- * with {@code session.created}, so a bad key fails at session-create time.
- * Server-side VAD ({@code turn_detection: server_vad}) is enabled by
- * default so the caller never has to send explicit commits; {@link
- * RealtimeVoiceSession#interrupt} maps to {@code response.cancel}.
+ * <p>Handshake is considered done when the provider answers the connect with {@code
+ * session.created}, so a bad key fails at session-create time. Server-side VAD ({@code
+ * turn_detection: server_vad}) is enabled by default so the caller never has to send explicit
+ * commits; {@link RealtimeVoiceSession#interrupt} maps to {@code response.cancel}.
  */
 @Component
 public class OpenAiRealtimeProvider implements RealtimeVoiceProvider {
@@ -57,27 +55,32 @@ public class OpenAiRealtimeProvider implements RealtimeVoiceProvider {
 
     @Override
     public RealtimeVoiceSession open(RealtimeSessionConfig config, RealtimeVoiceListener listener) {
-        String model = config.model() == null || config.model().isBlank() ? DEFAULT_MODEL : config.model();
+        String model =
+                config.model() == null || config.model().isBlank() ? DEFAULT_MODEL : config.model();
         CountDownLatch ready = new CountDownLatch(1);
         OpenAiSession session = new OpenAiSession(listener, ready);
 
         WebSocket ws;
         try {
-            ws = httpClient.newWebSocketBuilder()
-                .header("Authorization", "Bearer " + config.apiKey())
-                .header("OpenAI-Beta", "realtime=v1")
-                .buildAsync(URI.create(ENDPOINT + "?model=" + model), session)
-                .orTimeout(CONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)
-                .join();
+            ws =
+                    httpClient
+                            .newWebSocketBuilder()
+                            .header("Authorization", "Bearer " + config.apiKey())
+                            .header("OpenAI-Beta", "realtime=v1")
+                            .buildAsync(URI.create(ENDPOINT + "?model=" + model), session)
+                            .orTimeout(CONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)
+                            .join();
         } catch (RuntimeException e) {
-            throw new RealtimeVoiceException("OpenAI Realtime connect failed: " + e.getMessage(), e);
+            throw new RealtimeVoiceException(
+                    "OpenAI Realtime connect failed: " + e.getMessage(), e);
         }
         session.webSocket = ws;
 
         try {
             if (!ready.await(CONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
                 ws.abort();
-                throw new RealtimeVoiceException("OpenAI Realtime timed out waiting for session.created");
+                throw new RealtimeVoiceException(
+                        "OpenAI Realtime timed out waiting for session.created");
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -86,7 +89,8 @@ public class OpenAiRealtimeProvider implements RealtimeVoiceProvider {
         }
         if (session.setupError != null) {
             ws.abort();
-            throw new RealtimeVoiceException("OpenAI Realtime rejected the session: " + session.setupError);
+            throw new RealtimeVoiceException(
+                    "OpenAI Realtime rejected the session: " + session.setupError);
         }
 
         // session.created arrived - now configure the session.
@@ -104,7 +108,9 @@ public class OpenAiRealtimeProvider implements RealtimeVoiceProvider {
         if (config.systemPrompt() != null && !config.systemPrompt().isBlank()) {
             session.put("instructions", config.systemPrompt());
         }
-        session.put("voice", config.voice() == null || config.voice().isBlank() ? "alloy" : config.voice());
+        session.put(
+                "voice",
+                config.voice() == null || config.voice().isBlank() ? "alloy" : config.voice());
         session.put("input_audio_format", "pcm16");
         session.put("output_audio_format", "pcm16");
         session.putObject("turn_detection").put("type", "server_vad");
@@ -202,7 +208,9 @@ public class OpenAiRealtimeProvider implements RealtimeVoiceProvider {
                             listener.onError(msg);
                         }
                     }
-                    default -> { /* rate_limits, response.done, etc. - informational only */ }
+                    default -> {
+                        /* rate_limits, response.done, etc. - informational only */
+                    }
                 }
             } catch (Exception e) {
                 log.warn("Undecodable OpenAI Realtime frame: {}", e.getMessage());

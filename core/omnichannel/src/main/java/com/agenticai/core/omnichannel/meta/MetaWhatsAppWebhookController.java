@@ -249,7 +249,9 @@ public class MetaWhatsAppWebhookController {
 
         TenantContext.set(
                 TenantContext.of(
-                        tenantSchema.get(), MetaWhatsAppReplyFlow.REQUESTED_BY_PREFIX + phoneNumberId, Set.of()));
+                        tenantSchema.get(),
+                        MetaWhatsAppReplyFlow.REQUESTED_BY_PREFIX + phoneNumberId,
+                        Set.of()));
         try {
             // resolveActive() throws MetaWhatsAppNotConfiguredException (mapped
             // to 400, caught below) if this tenant's credential was somehow

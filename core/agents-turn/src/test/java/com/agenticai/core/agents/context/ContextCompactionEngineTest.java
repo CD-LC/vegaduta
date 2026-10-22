@@ -27,19 +27,23 @@ import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 
 /**
- * The engine over real Spring AI messages: clearing with restorable placeholders, compaction through a
- * summariser, and the guarantees around them (never touch what the model has not seen, system messages,
- * pinned items; never mutate the input; idempotent; summariser failure keeps every turn).
+ * The engine over real Spring AI messages: clearing with restorable placeholders, compaction
+ * through a summariser, and the guarantees around them (never touch what the model has not seen,
+ * system messages, pinned items; never mutate the input; idempotent; summariser failure keeps every
+ * turn).
  *
- * <p>Token maths: the estimate is chars / 4 for ASCII plus 4 per message, so a 8_000-char body is ~2_004
- * tokens.
+ * <p>Token maths: the estimate is chars / 4 for ASCII plus 4 per message, so a 8_000-char body is
+ * ~2_004 tokens.
  */
 class ContextCompactionEngineTest {
 
     private static final ObjectMapper JSON = new ObjectMapper();
     private final ContextCompactionEngine engine = new ContextCompactionEngine();
 
-    /** window 10_000, clear above 6_000, compact above 8_500, keep 2 tool results, keep 2 recent messages. */
+    /**
+     * window 10_000, clear above 6_000, compact above 8_500, keep 2 tool results, keep 2 recent
+     * messages.
+     */
     private static final Params PARAMS = new Params(10_000, 0.6, 0.85, 2, 2, 100, true);
 
     /** A fresh mutable metadata map flagging a message as pinned. */
@@ -55,15 +59,15 @@ class ContextCompactionEngineTest {
 
     private static AssistantMessage call(String id, String tool, String args) {
         return AssistantMessage.builder()
-            .content("")
-            .toolCalls(List.of(new AssistantMessage.ToolCall(id, "function", tool, args)))
-            .build();
+                .content("")
+                .toolCalls(List.of(new AssistantMessage.ToolCall(id, "function", tool, args)))
+                .build();
     }
 
     private static ToolResponseMessage result(String id, String tool, String data) {
         return ToolResponseMessage.builder()
-            .responses(List.of(new ToolResponseMessage.ToolResponse(id, tool, data)))
-            .build();
+                .responses(List.of(new ToolResponseMessage.ToolResponse(id, tool, data)))
+                .build();
     }
 
     private static String data(Message toolMessage) {
@@ -98,7 +102,8 @@ class ContextCompactionEngineTest {
     void aWindowOfZeroLeavesEverythingAlone() {
         List<Message> messages = toolRun(6);
 
-        Result result = engine.apply(messages, 0, new Params(0, 0.6, 0.85, 2, 2, 100, true), failing());
+        Result result =
+                engine.apply(messages, 0, new Params(0, 0.6, 0.85, 2, 2, 100, true), failing());
 
         assertSame(messages, result.messages());
     }
@@ -113,16 +118,22 @@ class ContextCompactionEngineTest {
         assertEquals(0, result.compactedMessages());
         assertTrue(result.tokensAfter() < result.tokensBefore());
         List<Message> out = result.messages();
-        assertEquals(messages.size(), out.size(), "clearing keeps every message, tool-call pairing included");
+        assertEquals(
+                messages.size(),
+                out.size(),
+                "clearing keeps every message, tool-call pairing included");
         for (int round = 1; round <= 3; round++) {
-            assertTrue(data(out.get(1 + 2 * round)).startsWith("{\"context_cleared\":true"), "round " + round);
+            assertTrue(
+                    data(out.get(1 + 2 * round)).startsWith("{\"context_cleared\":true"),
+                    "round " + round);
         }
         assertEquals("x".repeat(8_000), data(out.get(9)), "second newest result stays");
         assertEquals("x".repeat(8_000), data(out.get(11)), "newest result stays");
     }
 
     @Test
-    void thePlaceholderIsAJsonObjectCarryingToolArgsDigestStatusSizeAndRestorePointer() throws Exception {
+    void thePlaceholderIsAJsonObjectCarryingToolArgsDigestStatusSizeAndRestorePointer()
+            throws Exception {
         List<Message> messages = toolRun(5);
 
         String placeholder = data(engine.apply(messages, 0, PARAMS, failing()).messages().get(3));
@@ -130,7 +141,8 @@ class ContextCompactionEngineTest {
         JsonNode node = JSON.readTree(placeholder);
         assertTrue(node.path("context_cleared").asBoolean());
         assertEquals("search", node.path("tool").asText());
-        assertEquals(ToolResultRestoreIds.digest("{\"q\":\"topic 1\"}"), node.path("args").asText());
+        assertEquals(
+                ToolResultRestoreIds.digest("{\"q\":\"topic 1\"}"), node.path("args").asText());
         assertEquals("ok", node.path("status").asText());
         assertEquals(8_000, node.path("chars").asInt());
         String stepId = ToolResultRestoreIds.stepId("search", "{\"q\":\"topic 1\"}");
@@ -142,7 +154,8 @@ class ContextCompactionEngineTest {
     void withoutTheRestoreToolThePointerSaysToRunTheToolAgain() throws Exception {
         Params noRestore = new Params(10_000, 0.6, 0.85, 2, 2, 100, false);
 
-        String placeholder = data(engine.apply(toolRun(5), 0, noRestore, failing()).messages().get(3));
+        String placeholder =
+                data(engine.apply(toolRun(5), 0, noRestore, failing()).messages().get(3));
 
         String restore = JSON.readTree(placeholder).path("restore").asText();
         assertFalse(restore.contains("restore_tool_result"));
@@ -197,10 +210,15 @@ class ContextCompactionEngineTest {
     @Test
     void pinnedToolResultsAreNeverCleared() {
         List<Message> messages = toolRun(5);
-        messages.set(3, ToolResponseMessage.builder()
-            .responses(List.of(new ToolResponseMessage.ToolResponse("c1", "search", "x".repeat(8_000))))
-            .metadata(pinned())
-            .build());
+        messages.set(
+                3,
+                ToolResponseMessage.builder()
+                        .responses(
+                                List.of(
+                                        new ToolResponseMessage.ToolResponse(
+                                                "c1", "search", "x".repeat(8_000))))
+                        .metadata(pinned())
+                        .build());
 
         List<Message> out = engine.apply(messages, 0, PARAMS, failing()).messages();
 
@@ -211,7 +229,8 @@ class ContextCompactionEngineTest {
     @Test
     void placeholdersFromTheCharacterThresholdClearingCountAsAlreadyCleared() {
         List<Message> messages = toolRun(5);
-        String legacy = "[tool result cleared to save context: search 8000 chars; re-call if needed]";
+        String legacy =
+                "[tool result cleared to save context: search 8000 chars; re-call if needed]";
         messages.set(3, result("c1", "search", legacy));
 
         List<Message> out = engine.apply(messages, 0, PARAMS, failing()).messages();
@@ -235,28 +254,46 @@ class ContextCompactionEngineTest {
     void aToolMessageWithSeveralResponsesClearsEachOneIndependently() {
         List<Message> messages = new ArrayList<>();
         messages.add(new UserMessage("go"));
-        messages.add(AssistantMessage.builder().content("").toolCalls(List.of(
-            new AssistantMessage.ToolCall("a", "function", "t1", "{}"),
-            new AssistantMessage.ToolCall("b", "function", "t2", "{}"))).build());
-        messages.add(ToolResponseMessage.builder().responses(List.of(
-            new ToolResponseMessage.ToolResponse("a", "t1", "x".repeat(8_000)),
-            new ToolResponseMessage.ToolResponse("b", "t2", "x".repeat(8_000)))).build());
+        messages.add(
+                AssistantMessage.builder()
+                        .content("")
+                        .toolCalls(
+                                List.of(
+                                        new AssistantMessage.ToolCall("a", "function", "t1", "{}"),
+                                        new AssistantMessage.ToolCall("b", "function", "t2", "{}")))
+                        .build());
+        messages.add(
+                ToolResponseMessage.builder()
+                        .responses(
+                                List.of(
+                                        new ToolResponseMessage.ToolResponse(
+                                                "a", "t1", "x".repeat(8_000)),
+                                        new ToolResponseMessage.ToolResponse(
+                                                "b", "t2", "x".repeat(8_000))))
+                        .build());
         for (int i = 3; i <= 5; i++) {
             messages.add(call("c" + i, "t" + i, "{}"));
             messages.add(result("c" + i, "t" + i, "x".repeat(8_000)));
         }
 
-        ToolResponseMessage first = (ToolResponseMessage) engine.apply(messages, 0, PARAMS, failing()).messages().get(2);
+        ToolResponseMessage first =
+                (ToolResponseMessage)
+                        engine.apply(messages, 0, PARAMS, failing()).messages().get(2);
 
         assertEquals(2, first.getResponses().size());
         assertEquals("a", first.getResponses().get(0).id());
-        assertTrue(first.getResponses().get(0).responseData().startsWith("{\"context_cleared\":true"));
-        assertTrue(first.getResponses().get(1).responseData().startsWith("{\"context_cleared\":true"));
+        assertTrue(
+                first.getResponses().get(0).responseData().startsWith("{\"context_cleared\":true"));
+        assertTrue(
+                first.getResponses().get(1).responseData().startsWith("{\"context_cleared\":true"));
     }
 
     // -------------------------------------------------------------- compaction
 
-    /** A memory-block system message followed by {@code exchanges} user/assistant pairs of ~754 tokens each message. */
+    /**
+     * A memory-block system message followed by {@code exchanges} user/assistant pairs of ~754
+     * tokens each message.
+     */
     private static List<Message> longChat(int exchanges) {
         List<Message> messages = new ArrayList<>();
         messages.add(new SystemMessage("memory block"));
@@ -272,18 +309,22 @@ class ContextCompactionEngineTest {
         List<Message> messages = longChat(8); // 1 + 16 messages, ~12_000 tokens > 8_500
         AtomicReference<String> existing = new AtomicReference<>("untouched");
         AtomicReference<List<Message>> seenTurns = new AtomicReference<>();
-        Summarizer summarizer = (prior, turns) -> {
-            existing.set(prior);
-            seenTurns.set(turns);
-            return Optional.of("- goal: research X\n- file: notes.md");
-        };
+        Summarizer summarizer =
+                (prior, turns) -> {
+                    existing.set(prior);
+                    seenTurns.set(turns);
+                    return Optional.of("- goal: research X\n- file: notes.md");
+                };
 
         Result result = engine.apply(messages, 0, PARAMS, summarizer);
 
         assertEquals(10, result.compactedMessages());
         assertNull(existing.get(), "no earlier summary was rolled in");
         assertEquals(10, seenTurns.get().size());
-        assertSame(messages.get(1), seenTurns.get().get(0), "the summariser sees the oldest turn first");
+        assertSame(
+                messages.get(1),
+                seenTurns.get().get(0),
+                "the summariser sees the oldest turn first");
         List<Message> out = result.messages();
         assertEquals(8, out.size());
         assertSame(messages.get(0), out.get(0), "the memory block stays first");
@@ -320,9 +361,14 @@ class ContextCompactionEngineTest {
     void aSummariserThatThrowsKeepsEveryTurn() {
         List<Message> messages = longChat(8);
 
-        Result result = engine.apply(messages, 0, PARAMS, (prior, turns) -> {
-            throw new IllegalStateException("provider down");
-        });
+        Result result =
+                engine.apply(
+                        messages,
+                        0,
+                        PARAMS,
+                        (prior, turns) -> {
+                            throw new IllegalStateException("provider down");
+                        });
 
         assertSame(messages, result.messages());
     }
@@ -348,34 +394,55 @@ class ContextCompactionEngineTest {
     @Test
     void anEarlierSummaryIsRolledIntoTheNextOne() {
         List<Message> messages = longChat(8);
-        messages.add(1, new SystemMessage(ContextCompactionEngine.SUMMARY_PREFIX + "earlier: user wants X"));
+        messages.add(
+                1,
+                new SystemMessage(
+                        ContextCompactionEngine.SUMMARY_PREFIX + "earlier: user wants X"));
         AtomicReference<String> existing = new AtomicReference<>();
 
-        Result result = engine.apply(messages, 0, PARAMS, (prior, turns) -> {
-            existing.set(prior);
-            return Optional.of("merged summary");
-        });
+        Result result =
+                engine.apply(
+                        messages,
+                        0,
+                        PARAMS,
+                        (prior, turns) -> {
+                            existing.set(prior);
+                            return Optional.of("merged summary");
+                        });
 
         assertEquals("earlier: user wants X", existing.get());
-        long summaries = result.messages().stream()
-            .filter(m -> m instanceof SystemMessage && m.getText().startsWith(ContextCompactionEngine.SUMMARY_PREFIX))
-            .count();
+        long summaries =
+                result.messages().stream()
+                        .filter(
+                                m ->
+                                        m instanceof SystemMessage
+                                                && m.getText()
+                                                        .startsWith(
+                                                                ContextCompactionEngine
+                                                                        .SUMMARY_PREFIX))
+                        .count();
         assertEquals(1, summaries, "one summary, never a growing stack of them");
     }
 
     @Test
     void aPinnedTurnSurvivesCompactionInPlace() {
         List<Message> messages = longChat(8);
-        Message pinned = UserMessage.builder()
-            .text("u1 " + "q".repeat(3_000))
-            .metadata(pinned())
-            .build();
+        Message pinned =
+                UserMessage.builder().text("u1 " + "q".repeat(3_000)).metadata(pinned()).build();
         messages.set(1, pinned);
 
-        List<Message> out = engine.apply(messages, 0, PARAMS, (prior, turns) -> {
-            assertFalse(turns.contains(pinned), "a pinned turn is never handed to the summariser");
-            return Optional.of("summary");
-        }).messages();
+        List<Message> out =
+                engine.apply(
+                                messages,
+                                0,
+                                PARAMS,
+                                (prior, turns) -> {
+                                    assertFalse(
+                                            turns.contains(pinned),
+                                            "a pinned turn is never handed to the summariser");
+                                    return Optional.of("summary");
+                                })
+                        .messages();
 
         assertTrue(out.contains(pinned));
     }
@@ -386,7 +453,9 @@ class ContextCompactionEngineTest {
         Message latestUser = messages.get(15);
         Message latestReply = messages.get(16);
 
-        List<Message> out = engine.apply(messages, 0, PARAMS, (prior, turns) -> Optional.of("summary")).messages();
+        List<Message> out =
+                engine.apply(messages, 0, PARAMS, (prior, turns) -> Optional.of("summary"))
+                        .messages();
 
         assertSame(latestUser, out.get(out.size() - 2));
         assertSame(latestReply, out.get(out.size() - 1));
@@ -396,7 +465,9 @@ class ContextCompactionEngineTest {
     void summaryTextIsCappedToItsTokenBudget() {
         List<Message> messages = longChat(8);
 
-        List<Message> out = engine.apply(messages, 0, PARAMS, (prior, turns) -> Optional.of("w".repeat(40_000))).messages();
+        List<Message> out =
+                engine.apply(messages, 0, PARAMS, (prior, turns) -> Optional.of("w".repeat(40_000)))
+                        .messages();
 
         String text = out.get(1).getText();
         assertTrue(text.length() < 1_000, "capped to ~100 tokens, was " + text.length() + " chars");
@@ -406,10 +477,11 @@ class ContextCompactionEngineTest {
     void compactionTwiceYieldsTheSameView() {
         List<Message> messages = longChat(8);
         AtomicInteger calls = new AtomicInteger();
-        Summarizer summarizer = (prior, turns) -> {
-            calls.incrementAndGet();
-            return Optional.of("a short summary");
-        };
+        Summarizer summarizer =
+                (prior, turns) -> {
+                    calls.incrementAndGet();
+                    return Optional.of("a short summary");
+                };
 
         Result first = engine.apply(messages, 0, PARAMS, summarizer);
         Result second = engine.apply(first.messages(), 0, PARAMS, summarizer);
@@ -444,7 +516,11 @@ class ContextCompactionEngineTest {
         messages.add(new UserMessage("go"));
         for (int i = 1; i <= 3; i++) {
             messages.add(call("c" + i, "search", "{}"));
-            messages.add(result("c" + i, "search", "x".repeat(6_000))); // ~1_500 tokens each, ~4_600 in all
+            messages.add(
+                    result(
+                            "c" + i,
+                            "search",
+                            "x".repeat(6_000))); // ~1_500 tokens each, ~4_600 in all
         }
 
         assertFalse(engine.apply(messages, 0, PARAMS, failing()).changed());
@@ -464,7 +540,8 @@ class ContextCompactionEngineTest {
         assertEquals(sum, engine.apply(messages, 0, PARAMS, failing()).tokensBefore());
     }
 
-    // ------------------------------------------- providers that give calls and responses a blank id
+    // ------------------------------------------- providers that give calls and responses a blank
+    // id
 
     @Test
     void blankToolCallIdsStillPairEachPlaceholderWithItsOwnArguments() throws Exception {
@@ -480,10 +557,17 @@ class ContextCompactionEngineTest {
 
         for (int round = 1; round <= 3; round++) {
             JsonNode node = JSON.readTree(data(out.get(1 + 2 * round)));
-            assertEquals(ToolResultRestoreIds.digest("{\"q\":\"topic " + round + "\"}"), node.path("args").asText(),
-                "round " + round + " must keep its own arguments, not the last call's");
-            assertTrue(node.path("restore").asText().contains(
-                ToolResultRestoreIds.stepId("search", "{\"q\":\"topic " + round + "\"}")), "round " + round);
+            assertEquals(
+                    ToolResultRestoreIds.digest("{\"q\":\"topic " + round + "\"}"),
+                    node.path("args").asText(),
+                    "round " + round + " must keep its own arguments, not the last call's");
+            assertTrue(
+                    node.path("restore")
+                            .asText()
+                            .contains(
+                                    ToolResultRestoreIds.stepId(
+                                            "search", "{\"q\":\"topic " + round + "\"}")),
+                    "round " + round);
         }
     }
 
@@ -491,23 +575,40 @@ class ContextCompactionEngineTest {
     void blankIdsInOneMessageWithTwoCallsOfTheSameToolPairByPosition() throws Exception {
         List<Message> messages = new ArrayList<>();
         messages.add(new UserMessage("go"));
-        messages.add(AssistantMessage.builder().content("").toolCalls(List.of(
-            new AssistantMessage.ToolCall("", "function", "search", "{\"q\":\"first\"}"),
-            new AssistantMessage.ToolCall("", "function", "search", "{\"q\":\"second\"}"))).build());
-        messages.add(ToolResponseMessage.builder().responses(List.of(
-            new ToolResponseMessage.ToolResponse("", "search", "x".repeat(8_000)),
-            new ToolResponseMessage.ToolResponse("", "search", "x".repeat(8_000)))).build());
+        messages.add(
+                AssistantMessage.builder()
+                        .content("")
+                        .toolCalls(
+                                List.of(
+                                        new AssistantMessage.ToolCall(
+                                                "", "function", "search", "{\"q\":\"first\"}"),
+                                        new AssistantMessage.ToolCall(
+                                                "", "function", "search", "{\"q\":\"second\"}")))
+                        .build());
+        messages.add(
+                ToolResponseMessage.builder()
+                        .responses(
+                                List.of(
+                                        new ToolResponseMessage.ToolResponse(
+                                                "", "search", "x".repeat(8_000)),
+                                        new ToolResponseMessage.ToolResponse(
+                                                "", "search", "x".repeat(8_000))))
+                        .build());
         for (int i = 3; i <= 5; i++) {
             messages.add(call("", "t" + i, "{}"));
             messages.add(result("", "t" + i, "x".repeat(8_000)));
         }
 
-        ToolResponseMessage first = (ToolResponseMessage) engine.apply(messages, 0, PARAMS, failing()).messages().get(2);
+        ToolResponseMessage first =
+                (ToolResponseMessage)
+                        engine.apply(messages, 0, PARAMS, failing()).messages().get(2);
 
-        assertEquals(ToolResultRestoreIds.digest("{\"q\":\"first\"}"),
-            JSON.readTree(first.getResponses().get(0).responseData()).path("args").asText());
-        assertEquals(ToolResultRestoreIds.digest("{\"q\":\"second\"}"),
-            JSON.readTree(first.getResponses().get(1).responseData()).path("args").asText());
+        assertEquals(
+                ToolResultRestoreIds.digest("{\"q\":\"first\"}"),
+                JSON.readTree(first.getResponses().get(0).responseData()).path("args").asText());
+        assertEquals(
+                ToolResultRestoreIds.digest("{\"q\":\"second\"}"),
+                JSON.readTree(first.getResponses().get(1).responseData()).path("args").asText());
     }
 
     // ------------------------------------------------------------- hostile markers
@@ -515,7 +616,12 @@ class ContextCompactionEngineTest {
     @Test
     void aLongToolOutputThatOnlyOpensWithTheClearedMarkerIsStillCleared() {
         List<Message> messages = toolRun(5);
-        messages.set(3, result("c1", "search", "{\"context_cleared\":true,\"note\":\"" + "x".repeat(8_000)));
+        messages.set(
+                3,
+                result(
+                        "c1",
+                        "search",
+                        "{\"context_cleared\":true,\"note\":\"" + "x".repeat(8_000)));
 
         List<Message> out = engine.apply(messages, 0, PARAMS, failing()).messages();
 

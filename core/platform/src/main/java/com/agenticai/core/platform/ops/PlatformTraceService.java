@@ -34,24 +34,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Maps Langfuse's public API onto the platform console's trace contract
- * (see {@link PlatformTraceDtos}). Every failure to reach Langfuse becomes
- * {@code available=false} plus a reason - never a 5xx - because "Langfuse is
- * not deployed here" is a normal state for some environments.
+ * Maps Langfuse's public API onto the platform console's trace contract (see {@link
+ * PlatformTraceDtos}). Every failure to reach Langfuse becomes {@code available=false} plus a
+ * reason - never a 5xx - because "Langfuse is not deployed here" is a normal state for some
+ * environments.
  *
- * <p><b>Tenant attribution.</b> {@code LlmMetricsAdvisor} (core/chat) puts the
- * tenant SCHEMA name on every LLM span as {@code langfuse.trace.metadata.tenantId}
- * (Langfuse lifts it into trace {@code metadata.tenantId}) and also as the raw
- * span attribute {@code vegaduta.tenant.id}. Langfuse's trace-list API has no
- * metadata filter that works across the versions this platform may run, so a
- * {@code tenantId} filter is applied HERE, over the most recent
- * {@link #TENANT_SCAN_PAGES} x {@link #TENANT_SCAN_PAGE_SIZE} traces matching
- * the other filters, and the response says so in {@code reason}. The filter
- * accepts the tenant's UUID (what the roster links with) or its schema name.
+ * <p><b>Tenant attribution.</b> {@code LlmMetricsAdvisor} (core/chat) puts the tenant SCHEMA name
+ * on every LLM span as {@code langfuse.trace.metadata.tenantId} (Langfuse lifts it into trace
+ * {@code metadata.tenantId}) and also as the raw span attribute {@code vegaduta.tenant.id}.
+ * Langfuse's trace-list API has no metadata filter that works across the versions this platform may
+ * run, so a {@code tenantId} filter is applied HERE, over the most recent {@link
+ * #TENANT_SCAN_PAGES} x {@link #TENANT_SCAN_PAGE_SIZE} traces matching the other filters, and the
+ * response says so in {@code reason}. The filter accepts the tenant's UUID (what the roster links
+ * with) or its schema name.
  *
- * <p><b>Fields Langfuse does not provide at trace level.</b> Token counts and
- * a level exist only on observations, so list rows carry {@code null} for
- * them (never 0); the detail view sums/derives them from the observations.
+ * <p><b>Fields Langfuse does not provide at trace level.</b> Token counts and a level exist only on
+ * observations, so list rows carry {@code null} for them (never 0); the detail view sums/derives
+ * them from the observations.
  */
 @Service
 public class PlatformTraceService {
@@ -72,11 +71,15 @@ public class PlatformTraceService {
     private final Clock clock;
 
     @Autowired
-    public PlatformTraceService(LangfuseApiClient langfuse, ObjectProvider<TenantRepository> tenantRepository) {
+    public PlatformTraceService(
+            LangfuseApiClient langfuse, ObjectProvider<TenantRepository> tenantRepository) {
         this(langfuse, tenantRepository, Clock.systemUTC());
     }
 
-    PlatformTraceService(LangfuseApiClient langfuse, ObjectProvider<TenantRepository> tenantRepository, Clock clock) {
+    PlatformTraceService(
+            LangfuseApiClient langfuse,
+            ObjectProvider<TenantRepository> tenantRepository,
+            Clock clock) {
         this.langfuse = langfuse;
         this.tenantRepository = tenantRepository;
         this.clock = clock;
@@ -84,12 +87,19 @@ public class PlatformTraceService {
 
     // ------------------------------------------------------------------ list
 
-    public TraceListResponse list(String from, String to, String tenantId, String userId, String name,
-                                  Integer page, Integer limit) {
+    public TraceListResponse list(
+            String from,
+            String to,
+            String tenantId,
+            String userId,
+            String name,
+            Integer page,
+            Integer limit) {
         int safePage = page == null || page < 1 ? 1 : page;
         int safeLimit = limit == null || limit < 1 ? DEFAULT_LIMIT : Math.min(limit, MAX_LIMIT);
         if (!langfuse.isConfigured()) {
-            return TraceListResponse.unavailable(langfuse.notConfiguredReason(), safePage, safeLimit);
+            return TraceListResponse.unavailable(
+                    langfuse.notConfiguredReason(), safePage, safeLimit);
         }
         Instant fromTs = parseInstant(from, "from", false);
         Instant toTs = parseInstant(to, "to", true);
@@ -110,9 +120,15 @@ public class PlatformTraceService {
                     rows.add(row(t));
                 }
                 JsonNode meta = body.path("meta");
-                return new TraceListResponse(true, null, rows, new TraceListMeta(
-                    meta.path("page").asInt(safePage), meta.path("limit").asInt(safeLimit),
-                    meta.path("totalItems").asLong(rows.size()), meta.path("totalPages").asInt(rows.isEmpty() ? 0 : 1)));
+                return new TraceListResponse(
+                        true,
+                        null,
+                        rows,
+                        new TraceListMeta(
+                                meta.path("page").asInt(safePage),
+                                        meta.path("limit").asInt(safeLimit),
+                                meta.path("totalItems").asLong(rows.size()),
+                                        meta.path("totalPages").asInt(rows.isEmpty() ? 0 : 1)));
             }
             return listForTenant(query, tenantId.trim(), safePage, safeLimit);
         } catch (LangfuseUnavailableException e) {
@@ -120,8 +136,12 @@ public class PlatformTraceService {
         }
     }
 
-    /** Client-side tenant filter over a bounded window of the newest matching traces (see class javadoc). */
-    private TraceListResponse listForTenant(Map<String, String> query, String tenantId, int page, int limit) {
+    /**
+     * Client-side tenant filter over a bounded window of the newest matching traces (see class
+     * javadoc).
+     */
+    private TraceListResponse listForTenant(
+            Map<String, String> query, String tenantId, int page, int limit) {
         Set<String> wanted = tenantKeys(tenantId);
         List<TraceRow> matched = new ArrayList<>();
         int scanned = 0;
@@ -150,14 +170,24 @@ public class PlatformTraceService {
         int fromIndex = Math.min((page - 1) * limit, matched.size());
         int toIndex = Math.min(fromIndex + limit, matched.size());
         int totalPages = matched.isEmpty() ? 0 : (matched.size() + limit - 1) / limit;
-        String reason = "Langfuse cannot filter traces by tenant server-side; this tenant was matched against the "
-            + scanned + " most recent trace(s) for the other filters"
-            + (more ? " (older traces were not scanned - narrow the time range to see them)." : ".");
-        return new TraceListResponse(true, reason, List.copyOf(matched.subList(fromIndex, toIndex)),
-            new TraceListMeta(page, limit, matched.size(), totalPages));
+        String reason =
+                "Langfuse cannot filter traces by tenant server-side; this tenant was matched against the "
+                        + scanned
+                        + " most recent trace(s) for the other filters"
+                        + (more
+                                ? " (older traces were not scanned - narrow the time range to see them)."
+                                : ".");
+        return new TraceListResponse(
+                true,
+                reason,
+                List.copyOf(matched.subList(fromIndex, toIndex)),
+                new TraceListMeta(page, limit, matched.size(), totalPages));
     }
 
-    /** The schema name a trace carries, plus the raw filter value (a UUID is resolved to its schema). */
+    /**
+     * The schema name a trace carries, plus the raw filter value (a UUID is resolved to its
+     * schema).
+     */
     Set<String> tenantKeys(String tenantId) {
         Set<String> keys = new HashSet<>();
         keys.add(tenantId);
@@ -170,7 +200,8 @@ public class PlatformTraceService {
         } catch (IllegalArgumentException notAUuid) {
             // already a schema name
         } catch (RuntimeException e) {
-            log.warn("Trace tenant filter: tenant lookup failed ({})", e.getClass().getSimpleName());
+            log.warn(
+                    "Trace tenant filter: tenant lookup failed ({})", e.getClass().getSimpleName());
         }
         return keys;
     }
@@ -189,7 +220,8 @@ public class PlatformTraceService {
             t = langfuse.get("/api/public/traces/" + LangfuseApiClient.pathSegment(id), Map.of());
         } catch (LangfuseUnavailableException e) {
             if (e.status() == 404) {
-                return new TraceDetailResponse(true, "Trace not found in Langfuse.", null, List.of());
+                return new TraceDetailResponse(
+                        true, "Trace not found in Langfuse.", null, List.of());
             }
             return TraceDetailResponse.unavailable(e.getMessage());
         }
@@ -218,9 +250,22 @@ public class PlatformTraceService {
         Long in = sum(observations.stream().map(ObservationRow::inputTokens).toList());
         Long out = sum(observations.stream().map(ObservationRow::outputTokens).toList());
         String level = worstLevel(observations.stream().map(ObservationRow::level).toList());
-        TraceDetail detail = new TraceDetail(base.id(), base.name(), base.timestamp(), base.userId(), base.sessionId(),
-            base.tenantId(), base.latencyMs(), base.totalCostUsd(), in, out, level, base.tags(),
-            truncate(text(t.path("input"))), truncate(text(t.path("output"))));
+        TraceDetail detail =
+                new TraceDetail(
+                        base.id(),
+                        base.name(),
+                        base.timestamp(),
+                        base.userId(),
+                        base.sessionId(),
+                        base.tenantId(),
+                        base.latencyMs(),
+                        base.totalCostUsd(),
+                        in,
+                        out,
+                        level,
+                        base.tags(),
+                        truncate(text(t.path("input"))),
+                        truncate(text(t.path("output"))));
         return new TraceDetailResponse(true, null, detail, List.copyOf(observations));
     }
 
@@ -238,7 +283,8 @@ public class PlatformTraceService {
             throw new IllegalArgumentException("from must be before to.");
         }
         if (Duration.between(start, end).compareTo(MAX_METRICS_RANGE) > 0) {
-            throw new IllegalArgumentException("The metrics range can be at most " + MAX_METRICS_RANGE.toDays() + " days.");
+            throw new IllegalArgumentException(
+                    "The metrics range can be at most " + MAX_METRICS_RANGE.toDays() + " days.");
         }
         JsonNode daily;
         try {
@@ -258,8 +304,13 @@ public class PlatformTraceService {
             String date = d.path("date").asText("");
             String day = date.length() >= 10 ? date.substring(0, 10) : date;
             Long[] lat = latency.get(day);
-            byDay.add(new TraceDayMetric(day, longOrNull(d.path("countTraces")), doubleOrNull(d.path("totalCost")),
-                lat == null ? null : lat[0], lat == null ? null : lat[1]));
+            byDay.add(
+                    new TraceDayMetric(
+                            day,
+                            longOrNull(d.path("countTraces")),
+                            doubleOrNull(d.path("totalCost")),
+                            lat == null ? null : lat[0],
+                            lat == null ? null : lat[1]));
             for (JsonNode u : d.path("usage")) {
                 String model = u.path("model").asText(null);
                 if (model == null || model.isBlank()) {
@@ -277,23 +328,35 @@ public class PlatformTraceService {
         }
         byDay.sort((a, b) -> a.date().compareTo(b.date()));
         List<TraceModelMetric> byModel = new ArrayList<>();
-        models.forEach((model, acc) -> byModel.add(new TraceModelMetric(model, (long) acc[0],
-            modelHasCost.containsKey(model) ? acc[1] : null, (long) acc[2], (long) acc[3])));
+        models.forEach(
+                (model, acc) ->
+                        byModel.add(
+                                new TraceModelMetric(
+                                        model,
+                                        (long) acc[0],
+                                        modelHasCost.containsKey(model) ? acc[1] : null,
+                                        (long) acc[2],
+                                        (long) acc[3])));
         byModel.sort((a, b) -> Double.compare(nz(b.costUsd()), nz(a.costUsd())));
         return new TraceMetricsResponse(true, null, byDay, byModel);
     }
 
     /**
-     * Daily p50/p95 trace latency (ms) from Langfuse's v2 metrics query API, keyed by
-     * yyyy-MM-dd. Best effort: older Langfuse versions do not have this API, in which
-     * case the latency columns are simply null and the rest of the metrics still render.
+     * Daily p50/p95 trace latency (ms) from Langfuse's v2 metrics query API, keyed by yyyy-MM-dd.
+     * Best effort: older Langfuse versions do not have this API, in which case the latency columns
+     * are simply null and the rest of the metrics still render.
      */
     Map<String, Long[]> latencyPercentiles(Instant start, Instant end) {
         Map<String, Long[]> out = new LinkedHashMap<>();
-        String query = "{\"view\":\"traces\",\"dimensions\":[],\"filters\":[],"
-            + "\"metrics\":[{\"measure\":\"latency\",\"aggregation\":\"p50\"},{\"measure\":\"latency\",\"aggregation\":\"p95\"}],"
-            + "\"timeDimension\":{\"granularity\":\"day\"},"
-            + "\"fromTimestamp\":\"" + start + "\",\"toTimestamp\":\"" + end + "\"}";
+        String query =
+                "{\"view\":\"traces\",\"dimensions\":[],\"filters\":[],"
+                        + "\"metrics\":[{\"measure\":\"latency\",\"aggregation\":\"p50\"},{\"measure\":\"latency\",\"aggregation\":\"p95\"}],"
+                        + "\"timeDimension\":{\"granularity\":\"day\"},"
+                        + "\"fromTimestamp\":\""
+                        + start
+                        + "\",\"toTimestamp\":\""
+                        + end
+                        + "\"}";
         try {
             JsonNode body = langfuse.get("/api/public/metrics", Map.of("query", query));
             for (JsonNode r : body.path("data")) {
@@ -301,8 +364,11 @@ public class PlatformTraceService {
                 if (t.length() < 10) {
                     continue;
                 }
-                out.put(t.substring(0, 10), new Long[] {
-                    roundOrNull(r.path("p50_latency")), roundOrNull(r.path("p95_latency"))});
+                out.put(
+                        t.substring(0, 10),
+                        new Long[] {
+                            roundOrNull(r.path("p50_latency")), roundOrNull(r.path("p95_latency"))
+                        });
             }
         } catch (LangfuseUnavailableException e) {
             log.debug("Trace metrics: latency percentiles unavailable: {}", e.getMessage());
@@ -327,9 +393,19 @@ public class PlatformTraceService {
         }
         JsonNode latency = t.path("latency");
         Long latencyMs = latency.isNumber() ? Math.round(latency.asDouble() * 1000d) : null;
-        return new TraceRow(t.path("id").asText(), textOrNull(t.path("name")), textOrNull(t.path("timestamp")),
-            textOrNull(t.path("userId")), textOrNull(t.path("sessionId")), tenant, latencyMs,
-            doubleOrNull(t.path("totalCost")), null, null, null, tags);
+        return new TraceRow(
+                t.path("id").asText(),
+                textOrNull(t.path("name")),
+                textOrNull(t.path("timestamp")),
+                textOrNull(t.path("userId")),
+                textOrNull(t.path("sessionId")),
+                tenant,
+                latencyMs,
+                doubleOrNull(t.path("totalCost")),
+                null,
+                null,
+                null,
+                tags);
     }
 
     static ObservationRow observation(JsonNode o) {
@@ -354,9 +430,18 @@ public class PlatformTraceService {
         if (cost == null) {
             cost = doubleOrNull(o.path("totalPrice"));
         }
-        return new ObservationRow(o.path("id").asText(), textOrNull(o.path("type")), textOrNull(o.path("name")),
-            textOrNull(o.path("startTime")), textOrNull(o.path("endTime")), textOrNull(o.path("model")),
-            in, out, cost, textOrNull(o.path("level")), truncate(textOrNull(o.path("statusMessage"))));
+        return new ObservationRow(
+                o.path("id").asText(),
+                textOrNull(o.path("type")),
+                textOrNull(o.path("name")),
+                textOrNull(o.path("startTime")),
+                textOrNull(o.path("endTime")),
+                textOrNull(o.path("model")),
+                in,
+                out,
+                cost,
+                textOrNull(o.path("level")),
+                truncate(textOrNull(o.path("statusMessage"))));
     }
 
     /** ERROR > WARNING > DEFAULT > DEBUG; null when no observation has a level. */
@@ -433,7 +518,10 @@ public class PlatformTraceService {
         return s == null || s.isBlank() ? null : s.trim();
     }
 
-    /** ISO instant, or a yyyy-MM-dd date (start of day UTC; with {@code endOfDay}, the start of the NEXT day). */
+    /**
+     * ISO instant, or a yyyy-MM-dd date (start of day UTC; with {@code endOfDay}, the start of the
+     * NEXT day).
+     */
     static Instant parseInstant(String raw, String field, boolean endOfDay) {
         if (raw == null || raw.isBlank()) {
             return null;
@@ -444,9 +532,12 @@ public class PlatformTraceService {
         } catch (DateTimeParseException notInstant) {
             try {
                 LocalDate date = LocalDate.parse(value);
-                return (endOfDay ? date.plusDays(1) : date).atStartOfDay(ZoneOffset.UTC).toInstant();
+                return (endOfDay ? date.plusDays(1) : date)
+                        .atStartOfDay(ZoneOffset.UTC)
+                        .toInstant();
             } catch (DateTimeParseException notDate) {
-                throw new IllegalArgumentException(field + " must be an ISO-8601 instant or a yyyy-MM-dd date.");
+                throw new IllegalArgumentException(
+                        field + " must be an ISO-8601 instant or a yyyy-MM-dd date.");
             }
         }
     }

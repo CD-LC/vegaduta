@@ -33,9 +33,9 @@ import org.springframework.stereotype.Component;
 
 /**
  * Client for the BlueBubbles server REST API ({@code /api/v1/...}), the macOS bridge that exposes
- * the Mac's Messages app. BlueBubbles authenticates every call with the server password as a
- * {@code password} query parameter, so a request URL is a credential: it is never logged, never
- * put in an exception message, and error text is scrubbed of the password before it leaves here.
+ * the Mac's Messages app. BlueBubbles authenticates every call with the server password as a {@code
+ * password} query parameter, so a request URL is a credential: it is never logged, never put in an
+ * exception message, and error text is scrubbed of the password before it leaves here.
  *
  * <p><b>SSRF.</b> The server URL is tenant-supplied and is nearly always a private address (a Mac
  * on the LAN, a tailnet name). Every call goes through {@link SsrfGuard}: {@link
@@ -71,13 +71,17 @@ public class ImessageApiClient {
         this.guardSupplier = guardSupplier;
     }
 
-    /** What the server reports about itself; shown on the Channels card and proves URL + password work. */
+    /**
+     * What the server reports about itself; shown on the Channels card and proves URL + password
+     * work.
+     */
     public record ServerInfo(
             String serverVersion, String osVersion, boolean privateApi, boolean helperConnected) {}
 
     /** Validates the URL and password with a real call - "prove it before persisting". */
     public ServerInfo fetchServerInfo(String serverUrl, String password) {
-        JsonNode data = call(serverUrl, password, "GET", "/api/v1/server/info", null, VALIDATE_TIMEOUT);
+        JsonNode data =
+                call(serverUrl, password, "GET", "/api/v1/server/info", null, VALIDATE_TIMEOUT);
         return new ServerInfo(
                 data.path("server_version").asText(null),
                 data.path("os_version").asText(null),
@@ -86,19 +90,29 @@ public class ImessageApiClient {
     }
 
     /**
-     * Sends a text. {@code to} is a chat GUID ({@code iMessage;-;+15550100100}, groups use
-     * {@code ;+;}) or a bare phone/email, which is mapped to the direct chat GUID and, when that
-     * chat does not exist yet, created.
+     * Sends a text. {@code to} is a chat GUID ({@code iMessage;-;+15550100100}, groups use {@code
+     * ;+;}) or a bare phone/email, which is mapped to the direct chat GUID and, when that chat does
+     * not exist yet, created.
      *
      * @return a short, human-readable log line describing what happened (no recipient detail).
      */
     public String sendText(String serverUrl, String password, String to, String text) {
         String chatGuid = toChatGuid(to);
         try {
-            call(serverUrl, password, "POST", "/api/v1/message/text", textBody(chatGuid, text), DEFAULT_TIMEOUT);
+            call(
+                    serverUrl,
+                    password,
+                    "POST",
+                    "/api/v1/message/text",
+                    textBody(chatGuid, text),
+                    DEFAULT_TIMEOUT);
             return "Sent iMessage to chat " + ImessageAddress.mask(chatGuid) + ".";
         } catch (ImessageHttpException e) {
-            if (!isBareHandle(to) || e.status < 400 || e.status >= 500 || e.status == 401 || e.status == 403) {
+            if (!isBareHandle(to)
+                    || e.status < 400
+                    || e.status >= 500
+                    || e.status == 401
+                    || e.status == 403) {
                 throw new ChannelDeliveryException("imessage", e.getMessage());
             }
             // No chat with this handle yet: ask BlueBubbles to open one with the first message.
@@ -176,7 +190,8 @@ public class ImessageApiClient {
      * Messages newer than {@code afterMs} (epoch ms), oldest first, each with its chat and handle
      * embedded. Used by the polling fallback.
      */
-    public List<JsonNode> queryMessages(String serverUrl, String password, long afterMs, int limit) {
+    public List<JsonNode> queryMessages(
+            String serverUrl, String password, long afterMs, int limit) {
         ObjectNode body = objectMapper.createObjectNode();
         body.put("limit", limit);
         body.put("offset", 0);
@@ -186,7 +201,8 @@ public class ImessageApiClient {
         with.add("chat");
         with.add("handle");
         with.add("attachment");
-        JsonNode data = call(serverUrl, password, "POST", "/api/v1/message/query", body, DEFAULT_TIMEOUT);
+        JsonNode data =
+                call(serverUrl, password, "POST", "/api/v1/message/query", body, DEFAULT_TIMEOUT);
         List<JsonNode> out = new ArrayList<>();
         if (data.isArray()) {
             data.forEach(out::add);
@@ -230,13 +246,26 @@ public class ImessageApiClient {
     private static void part(ByteArrayOutputStream out, String boundary, String name, String value)
             throws IOException {
         out.write(
-                ("--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + name + "\"\r\n\r\n" + value + "\r\n")
+                ("--"
+                                + boundary
+                                + "\r\nContent-Disposition: form-data; name=\""
+                                + name
+                                + "\"\r\n\r\n"
+                                + value
+                                + "\r\n")
                         .getBytes(StandardCharsets.UTF_8));
     }
 
-    /** Header value built from caller text: anything but a plain {@code type/subtype} becomes octet-stream. */
+    /**
+     * Header value built from caller text: anything but a plain {@code type/subtype} becomes
+     * octet-stream.
+     */
     private static String safeContentType(String contentType) {
-        return contentType != null && contentType.strip().matches("[A-Za-z0-9.+-]+/[A-Za-z0-9.+-]+(\\s*;\\s*[A-Za-z0-9=._ \"-]+)?")
+        return contentType != null
+                        && contentType
+                                .strip()
+                                .matches(
+                                        "[A-Za-z0-9.+-]+/[A-Za-z0-9.+-]+(\\s*;\\s*[A-Za-z0-9=._ \"-]+)?")
                 ? contentType.strip()
                 : "application/octet-stream";
     }
@@ -248,7 +277,10 @@ public class ImessageApiClient {
 
     // ---------------------------------------------------------------- transport
 
-    /** Thrown for a non-2xx answer; carries the HTTP status so callers can tell "no such chat" from "bad password". */
+    /**
+     * Thrown for a non-2xx answer; carries the HTTP status so callers can tell "no such chat" from
+     * "bad password".
+     */
     private static final class ImessageHttpException extends ChannelConfigurationException {
         private static final long serialVersionUID = 1L;
         final int status;
@@ -260,7 +292,12 @@ public class ImessageApiClient {
     }
 
     private JsonNode call(
-            String serverUrl, String password, String method, String path, JsonNode body, Duration timeout) {
+            String serverUrl,
+            String password,
+            String method,
+            String path,
+            JsonNode body,
+            Duration timeout) {
         StringEntity entity = null;
         if (body != null) {
             entity = new StringEntity(body.toString(), ContentType.APPLICATION_JSON);
@@ -304,7 +341,9 @@ public class ImessageApiClient {
                                 byte[] raw =
                                         response.getEntity() == null
                                                 ? new byte[0]
-                                                : response.getEntity().getContent().readNBytes(MAX_BODY_BYTES);
+                                                : response.getEntity()
+                                                        .getContent()
+                                                        .readNBytes(MAX_BODY_BYTES);
                                 JsonNode node;
                                 try {
                                     node = objectMapper.readTree(raw);
@@ -321,7 +360,8 @@ public class ImessageApiClient {
         } catch (ChannelConfigurationException e) {
             throw e;
         } catch (IOException e) {
-            // Deliberately the exception CLASS only: messages from the HTTP stack can echo the request line.
+            // Deliberately the exception CLASS only: messages from the HTTP stack can echo the
+            // request line.
             throw new ChannelConfigurationException(
                     "imessage",
                     "Could not reach the BlueBubbles server ("
@@ -333,14 +373,17 @@ public class ImessageApiClient {
     private static URI buildUri(String serverUrl, String path, String password) {
         String base = serverUrl.strip();
         if (base.indexOf('?') >= 0 || base.indexOf('#') >= 0) {
-            // A query or fragment would swallow the API path (and the password), sending it to the wrong place.
+            // A query or fragment would swallow the API path (and the password), sending it to the
+            // wrong place.
             throw new ChannelConfigurationException(
-                    "imessage", "The server address must be just the base URL, for example http://192.168.1.20:1234");
+                    "imessage",
+                    "The server address must be just the base URL, for example http://192.168.1.20:1234");
         }
         while (base.endsWith("/")) {
             base = base.substring(0, base.length() - 1);
         }
-        return URI.create(base + path + "?password=" + URLEncoder.encode(password, StandardCharsets.UTF_8));
+        return URI.create(
+                base + path + "?password=" + URLEncoder.encode(password, StandardCharsets.UTF_8));
     }
 
     private static String describeFailure(int code, JsonNode node, String password) {
@@ -357,7 +400,8 @@ public class ImessageApiClient {
         if (detail == null || detail.isBlank()) {
             return "The BlueBubbles server answered HTTP " + code + ".";
         }
-        String scrubbed = password == null || password.isEmpty() ? detail : detail.replace(password, "***");
+        String scrubbed =
+                password == null || password.isEmpty() ? detail : detail.replace(password, "***");
         if (scrubbed.length() > MAX_ERROR_CHARS) {
             scrubbed = scrubbed.substring(0, MAX_ERROR_CHARS);
         }

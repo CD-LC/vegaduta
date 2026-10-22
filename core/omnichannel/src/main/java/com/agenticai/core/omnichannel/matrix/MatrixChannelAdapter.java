@@ -12,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-/** {@link ApprovalActionExecutor} for {@link #ACTION_TYPE}: the Matrix counterpart to the Telegram adapter. */
+/**
+ * {@link ApprovalActionExecutor} for {@link #ACTION_TYPE}: the Matrix counterpart to the Telegram
+ * adapter.
+ */
 @Component
 public class MatrixChannelAdapter implements ApprovalActionExecutor {
 
@@ -61,11 +64,14 @@ public class MatrixChannelAdapter implements ApprovalActionExecutor {
         } catch (MatrixApiException e) {
             if (e.isPermanentClientError()) {
                 // The homeserver will answer the same way next time (not in the room, forbidden).
-                throw new ChannelDeliveryException("matrix", "Matrix send failed: " + e.getMessage(), e);
+                throw new ChannelDeliveryException(
+                        "matrix", "Matrix send failed: " + e.getMessage(), e);
             }
-            throw new RetryableChannelDeliveryException("matrix", "Matrix send failed: " + e.getMessage(), e);
+            throw new RetryableChannelDeliveryException(
+                    "matrix", "Matrix send failed: " + e.getMessage(), e);
         } catch (RuntimeException e) {
-            throw new RetryableChannelDeliveryException("matrix", "Matrix send failed: " + e.getMessage(), e);
+            throw new RetryableChannelDeliveryException(
+                    "matrix", "Matrix send failed: " + e.getMessage(), e);
         }
     }
 
@@ -76,13 +82,15 @@ public class MatrixChannelAdapter implements ApprovalActionExecutor {
         try {
             SendPayload payload = MAPPER.readValue(payloadJson, SendPayload.class);
             if (payload.to() == null || payload.to().isBlank() || payload.body() == null) {
-                throw new ChannelDeliveryException("matrix", "Matrix send payload needs a room id and a body");
+                throw new ChannelDeliveryException(
+                        "matrix", "Matrix send payload needs a room id and a body");
             }
             return payload;
         } catch (ChannelDeliveryException e) {
             throw e;
         } catch (Exception e) {
-            throw new ChannelDeliveryException("matrix", "Could not parse Matrix send payload: " + e.getMessage(), e);
+            throw new ChannelDeliveryException(
+                    "matrix", "Could not parse Matrix send payload: " + e.getMessage(), e);
         }
     }
 
@@ -94,5 +102,6 @@ public class MatrixChannelAdapter implements ApprovalActionExecutor {
      * {@code to} is a Matrix room id ({@code !abc:example.org}). {@code replyToEventId} and {@code
      * threadRootEventId} are optional: set when answering a specific message or a thread.
      */
-    public record SendPayload(String to, String body, String replyToEventId, String threadRootEventId) {}
+    public record SendPayload(
+            String to, String body, String replyToEventId, String threadRootEventId) {}
 }

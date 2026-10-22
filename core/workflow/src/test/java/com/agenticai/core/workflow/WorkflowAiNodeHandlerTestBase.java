@@ -17,7 +17,10 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.ObjectProvider;
 
-/** Shared fixture of the {@link WorkflowAiNodeHandler} tests: a scripted fake model and node/config builders. */
+/**
+ * Shared fixture of the {@link WorkflowAiNodeHandler} tests: a scripted fake model and node/config
+ * builders.
+ */
 abstract class WorkflowAiNodeHandlerTestBase {
 
     static final ObjectMapper MAPPER = new ObjectMapper();

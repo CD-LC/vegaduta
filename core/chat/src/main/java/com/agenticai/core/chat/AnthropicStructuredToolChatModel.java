@@ -11,26 +11,27 @@ import org.springframework.ai.chat.prompt.Prompt;
 import reactor.core.publisher.Flux;
 
 /**
- * Anthropic native structured output by forced tool use. Only built (by
- * {@link LlmModelSupport#applyAnthropicStructuredSchema}) when
- * {@code app.llm.structured-output.anthropic-tool-forcing.enabled} is on, the caller asked for a
- * schema ({@link com.agenticai.core.chat.structured.StructuredSchemaSpec}) and the schema is
- * representable as a tool input schema.
+ * Anthropic native structured output by forced tool use. Only built (by {@link
+ * LlmModelSupport#applyAnthropicStructuredSchema}) when {@code
+ * app.llm.structured-output.anthropic-tool-forcing.enabled} is on, the caller asked for a schema
+ * ({@link com.agenticai.core.chat.structured.StructuredSchemaSpec}) and the schema is representable
+ * as a tool input schema.
  *
- * <p>{@link #call} rewrites each blocking request through
- * {@link StructuredOutput#withAnthropicForcedTool} (the schema becomes a pseudo tool's
- * {@code input_schema}, forced with {@code tool_choice}) and turns the {@code tool_use} input
- * back into the reply text ({@link StructuredOutput#unwrapForcedTool}), so callers keep parsing
- * a JSON reply exactly as before. Every case that cannot be forced - extended thinking on, the
- * request already carries tools - passes through byte-for-byte, and a model that answers in text
- * instead of calling the tool yields that text unchanged: both are the prompt-and-validate path
- * callers already implement.
+ * <p>{@link #call} rewrites each blocking request through {@link
+ * StructuredOutput#withAnthropicForcedTool} (the schema becomes a pseudo tool's {@code
+ * input_schema}, forced with {@code tool_choice}) and turns the {@code tool_use} input back into
+ * the reply text ({@link StructuredOutput#unwrapForcedTool}), so callers keep parsing a JSON reply
+ * exactly as before. Every case that cannot be forced - extended thinking on, the request already
+ * carries tools - passes through byte-for-byte, and a model that answers in text instead of calling
+ * the tool yields that text unchanged: both are the prompt-and-validate path callers already
+ * implement.
  *
  * <p>Streaming is passed through untouched: structured utility calls are blocking.
  */
 final class AnthropicStructuredToolChatModel implements ChatModel {
 
-    private static final Logger log = LoggerFactory.getLogger(AnthropicStructuredToolChatModel.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(AnthropicStructuredToolChatModel.class);
 
     private final ChatModel delegate;
     private final String toolName;
@@ -48,10 +49,12 @@ final class AnthropicStructuredToolChatModel implements ChatModel {
             return delegate.call(prompt);
         }
         ChatOptions options = prompt.getOptions();
-        ChatOptions forced = StructuredOutput.withAnthropicForcedTool(options, toolName, inputSchema);
+        ChatOptions forced =
+                StructuredOutput.withAnthropicForcedTool(options, toolName, inputSchema);
         if (forced == options) {
-            log.debug("Anthropic forced-tool structured output skipped for this request "
-                + "(thinking on / tools present / unsupported model); using prompt-and-validate");
+            log.debug(
+                    "Anthropic forced-tool structured output skipped for this request "
+                            + "(thinking on / tools present / unsupported model); using prompt-and-validate");
             return delegate.call(prompt);
         }
         ChatResponse response = delegate.call(new Prompt(prompt.getInstructions(), forced));

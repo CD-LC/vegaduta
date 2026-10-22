@@ -28,7 +28,8 @@ class JsonNodesTest {
 
     @Test
     void iteratesEntriesInInsertionOrderLikeFields() throws Exception {
-        JsonNode node = JsonMappers.plain().readTree("{\"z\":1,\"a\":{\"n\":2},\"m\":[3],\"b\":null}");
+        JsonNode node =
+                JsonMappers.plain().readTree("{\"z\":1,\"a\":{\"n\":2},\"m\":[3],\"b\":null}");
         assertEquals(viaFields(node), viaHelper(node));
         assertEquals(List.of("z=1", "a={\"n\":2}", "m=[3]", "b=null"), viaHelper(node));
     }

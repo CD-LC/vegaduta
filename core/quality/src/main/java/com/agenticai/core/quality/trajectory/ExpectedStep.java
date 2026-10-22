@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * One step of an expected trajectory: a tool name and, optionally, matchers for some of its arguments.
- * A step with no matchers accepts any arguments. Argument keys are dotted object paths ({@code opts.limit});
- * only the listed arguments are checked - extra arguments on the actual call are fine.
+ * One step of an expected trajectory: a tool name and, optionally, matchers for some of its
+ * arguments. A step with no matchers accepts any arguments. Argument keys are dotted object paths
+ * ({@code opts.limit}); only the listed arguments are checked - extra arguments on the actual call
+ * are fine.
  */
 final class ExpectedStep {
 
@@ -41,7 +42,10 @@ final class ExpectedStep {
         return tool.equals(actual.tool()) && mismatchedArgs(actual.args()).isEmpty();
     }
 
-    /** Names of the listed arguments whose matcher failed on this call's arguments (empty = all pass). */
+    /**
+     * Names of the listed arguments whose matcher failed on this call's arguments (empty = all
+     * pass).
+     */
     List<String> mismatchedArgs(JsonNode actualArgs) {
         List<String> failed = new ArrayList<>();
         for (Map.Entry<String, ArgMatcher> e : matchers.entrySet()) {
@@ -52,13 +56,17 @@ final class ExpectedStep {
         return failed;
     }
 
-    /** Walks a dotted object path; null when any segment is missing or the container is not an object. */
+    /**
+     * Walks a dotted object path; null when any segment is missing or the container is not an
+     * object.
+     */
     static JsonNode valueAt(JsonNode root, String dottedPath) {
         JsonNode node = root;
         int start = 0;
         while (node != null && start <= dottedPath.length()) {
             int dot = dottedPath.indexOf('.', start);
-            String segment = dot < 0 ? dottedPath.substring(start) : dottedPath.substring(start, dot);
+            String segment =
+                    dot < 0 ? dottedPath.substring(start) : dottedPath.substring(start, dot);
             if (node.isObject() && node.has(segment)) {
                 node = node.get(segment);
             } else {

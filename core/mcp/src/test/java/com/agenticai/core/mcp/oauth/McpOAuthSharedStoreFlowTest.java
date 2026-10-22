@@ -17,8 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Two {@link McpOAuthService} instances over ONE {@link InMemoryMcpOAuthSharedStore} and ONE
- * {@link InMemoryMcpOAuthConnectionStore} stand in for two replicas (the shared store is what a
+ * Two {@link McpOAuthService} instances over ONE {@link InMemoryMcpOAuthSharedStore} and ONE {@link
+ * InMemoryMcpOAuthConnectionStore} stand in for two replicas (the shared store is what a
  * Valkey-backed {@link RedisMcpOAuthSharedStore} gives the real multi-replica deployment): a state
  * consumed on one "replica" must be rejected on the other, and a token cached on one must serve the
  * other without a second token-endpoint call.
@@ -32,10 +32,15 @@ class McpOAuthSharedStoreFlowTest {
     private static final String PRM =
             "https://mcp.example.com/.well-known/oauth-protected-resource/mcp";
     private static final String AS_DOC =
-            "{\"issuer\":\"" + ISSUER + "\",\"authorization_endpoint\":\"" + ISSUER
-                + "/authorize\",\"token_endpoint\":\"" + ISSUER
-                + "/token\",\"registration_endpoint\":\"" + ISSUER
-                + "/register\",\"code_challenge_methods_supported\":[\"S256\"]}";
+            "{\"issuer\":\""
+                    + ISSUER
+                    + "\",\"authorization_endpoint\":\""
+                    + ISSUER
+                    + "/authorize\",\"token_endpoint\":\""
+                    + ISSUER
+                    + "/token\",\"registration_endpoint\":\""
+                    + ISSUER
+                    + "/register\",\"code_challenge_methods_supported\":[\"S256\"]}";
 
     private FakeMcpOAuthHttp http;
     private InMemoryMcpOAuthConnectionStore store;
@@ -49,13 +54,23 @@ class McpOAuthSharedStoreFlowTest {
     void setUp() {
         encryption = OAuthProviderTestSupport.encryption((byte) 4);
         clock = new OAuthProviderTestSupport.MutableClock(Instant.parse("2026-10-05T10:00:00Z"));
-        http = new FakeMcpOAuthHttp()
-            .on("GET", PRM, 200,
-                "{\"resource\":\"" + MCP + "\",\"authorization_servers\":[\"" + ISSUER
-                    + "\"],\"scopes_supported\":[\"read\"]}")
-            .on("GET", ISSUER + "/.well-known/oauth-authorization-server", 200, AS_DOC)
-            .on("POST", ISSUER + "/register", 201,
-                "{\"client_id\":\"cid\",\"client_secret\":\"client-secret-plain\",\"token_endpoint_auth_method\":\"client_secret_basic\"}");
+        http =
+                new FakeMcpOAuthHttp()
+                        .on(
+                                "GET",
+                                PRM,
+                                200,
+                                "{\"resource\":\""
+                                        + MCP
+                                        + "\",\"authorization_servers\":[\""
+                                        + ISSUER
+                                        + "\"],\"scopes_supported\":[\"read\"]}")
+                        .on("GET", ISSUER + "/.well-known/oauth-authorization-server", 200, AS_DOC)
+                        .on(
+                                "POST",
+                                ISSUER + "/register",
+                                201,
+                                "{\"client_id\":\"cid\",\"client_secret\":\"client-secret-plain\",\"token_endpoint_auth_method\":\"client_secret_basic\"}");
         store = new InMemoryMcpOAuthConnectionStore();
         shared = new InMemoryMcpOAuthSharedStore(clock);
         replicaA = newService();
@@ -70,9 +85,19 @@ class McpOAuthSharedStoreFlowTest {
 
     private McpOAuthService newService() {
         ObjectMapper om = new ObjectMapper();
-        return new McpOAuthService(new McpOAuthDiscovery(http, om), new McpOAuthClient(http, om), store,
-            encryption, null, new McpRemoteUrlGuard(), true, CB, new OAuthRedirectPolicy(CONSOLE, ""), clock,
-            600, shared);
+        return new McpOAuthService(
+                new McpOAuthDiscovery(http, om),
+                new McpOAuthClient(http, om),
+                store,
+                encryption,
+                null,
+                new McpRemoteUrlGuard(),
+                true,
+                CB,
+                new OAuthRedirectPolicy(CONSOLE, ""),
+                clock,
+                600,
+                shared);
     }
 
     private static String stateFrom(String authorizationUrl) {
@@ -87,21 +112,29 @@ class McpOAuthSharedStoreFlowTest {
     @Test
     void aStateConsumedOnOneReplicaIsRejectedOnTheOther() {
         McpOAuthService.AuthorizationStart start = replicaA.beginAuthorization(MCP, null);
-        http.on("POST", ISSUER + "/token", 200,
-            "{\"access_token\":\"at-1\",\"refresh_token\":\"rt-1\",\"expires_in\":3600}");
+        http.on(
+                "POST",
+                ISSUER + "/token",
+                200,
+                "{\"access_token\":\"at-1\",\"refresh_token\":\"rt-1\",\"expires_in\":3600}");
         String state = stateFrom(start.authorizationUrl());
         replicaA.completeAuthorization("code-1", state);
 
-        OAuthStateException replay = assertThrows(OAuthStateException.class,
-            () -> replicaB.completeAuthorization("code-1", state));
+        OAuthStateException replay =
+                assertThrows(
+                        OAuthStateException.class,
+                        () -> replicaB.completeAuthorization("code-1", state));
         assertEquals(OAuthStateException.REPLAYED, replay.reason());
     }
 
     @Test
     void anAccessTokenCachedOnOneReplicaServesTheOther() {
         McpOAuthService.AuthorizationStart start = replicaA.beginAuthorization(MCP, null);
-        http.on("POST", ISSUER + "/token", 200,
-            "{\"access_token\":\"at-1\",\"refresh_token\":\"rt-1\",\"expires_in\":3600}");
+        http.on(
+                "POST",
+                ISSUER + "/token",
+                200,
+                "{\"access_token\":\"at-1\",\"refresh_token\":\"rt-1\",\"expires_in\":3600}");
         replicaA.completeAuthorization("code-1", stateFrom(start.authorizationUrl()));
         assertEquals(1, http.count("POST", ISSUER + "/token"));
 
@@ -113,8 +146,11 @@ class McpOAuthSharedStoreFlowTest {
     @Test
     void aDisconnectOnOneReplicaDropsTheSharedCachedToken() {
         McpOAuthService.AuthorizationStart start = replicaA.beginAuthorization(MCP, null);
-        http.on("POST", ISSUER + "/token", 200,
-            "{\"access_token\":\"at-1\",\"refresh_token\":\"rt-1\",\"expires_in\":3600}");
+        http.on(
+                "POST",
+                ISSUER + "/token",
+                200,
+                "{\"access_token\":\"at-1\",\"refresh_token\":\"rt-1\",\"expires_in\":3600}");
         replicaA.completeAuthorization("code-1", stateFrom(start.authorizationUrl()));
         assertEquals("at-1", shared.token("tenant-a", MCP).orElseThrow().accessToken());
 

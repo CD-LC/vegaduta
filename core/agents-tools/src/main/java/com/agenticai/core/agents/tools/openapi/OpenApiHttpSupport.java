@@ -25,15 +25,14 @@ import org.springframework.util.StringUtils;
 
 /**
  * Request assembly, header checks, the cancel-on-close response wrapper and the small encode /
- * parse / redact helpers behind {@link OpenApiToolExecutor}. Stateless and static; split out of
- * the executor only to keep each file reviewable - the security rules are unchanged and still
+ * parse / redact helpers behind {@link OpenApiToolExecutor}. Stateless and static; split out of the
+ * executor only to keep each file reviewable - the security rules are unchanged and still
  * documented on the executor.
  */
 final class OpenApiHttpSupport {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
-    static final String USER_AGENT =
-            "VegaDuta-Agent/1.0 (+https://github.com/CD-LC/vegaduta)";
+    static final String USER_AGENT = "VegaDuta-Agent/1.0 (+https://github.com/CD-LC/vegaduta)";
     static final String REDACTED = "[redacted]";
 
     /**
@@ -288,5 +287,6 @@ final class OpenApiHttpSupport {
             return null;
         }
     }
+
     private OpenApiHttpSupport() {}
 }

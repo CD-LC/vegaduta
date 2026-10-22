@@ -19,7 +19,10 @@ class McpWorkflowInputSchemaTest {
         return MAPPER.readTree(json);
     }
 
-    /** key, value, key, value ... - explicit Map&lt;String, Object&gt; so nested literals never trip generic inference. */
+    /**
+     * key, value, key, value ... - explicit Map&lt;String, Object&gt; so nested literals never trip
+     * generic inference.
+     */
     private static Map<String, Object> m(Object... keysAndValues) {
         Map<String, Object> map = new LinkedHashMap<>();
         for (int i = 0; i < keysAndValues.length; i += 2) {
@@ -34,11 +37,13 @@ class McpWorkflowInputSchemaTest {
 
     @Test
     void noDeclaredInputsIsAnOpenObject() throws Exception {
-        for (String json : new String[] {
-            McpWorkflowInputSchema.fromTriggerConfig(null),
-            McpWorkflowInputSchema.fromTriggerConfig(m()),
-            McpWorkflowInputSchema.fromTriggerConfig(m("unrelated", "x")),
-            McpWorkflowInputSchema.openSchemaJson()}) {
+        for (String json :
+                new String[] {
+                    McpWorkflowInputSchema.fromTriggerConfig(null),
+                    McpWorkflowInputSchema.fromTriggerConfig(m()),
+                    McpWorkflowInputSchema.fromTriggerConfig(m("unrelated", "x")),
+                    McpWorkflowInputSchema.openSchemaJson()
+                }) {
             JsonNode schema = parse(json);
             assertEquals("object", schema.get("type").asText());
             assertTrue(schema.get("additionalProperties").asBoolean());
@@ -48,9 +53,17 @@ class McpWorkflowInputSchemaTest {
 
     @Test
     void aDeclaredInputSchemaIsUsedWithItsRequiredList() throws Exception {
-        Map<String, Object> config = m("inputSchema", m(
-            "properties", m("customer", m("type", "string"), "amount", m("type", "number")),
-            "required", list("customer")));
+        Map<String, Object> config =
+                m(
+                        "inputSchema",
+                        m(
+                                "properties",
+                                        m(
+                                                "customer",
+                                                m("type", "string"),
+                                                "amount",
+                                                m("type", "number")),
+                                "required", list("customer")));
         JsonNode schema = parse(McpWorkflowInputSchema.fromTriggerConfig(config));
         assertEquals("object", schema.get("type").asText());
         assertEquals("string", schema.get("properties").get("customer").get("type").asText());
@@ -60,11 +73,22 @@ class McpWorkflowInputSchemaTest {
 
     @Test
     void aFieldsListIsMappedToTypedProperties() throws Exception {
-        Map<String, Object> config = m("fields", list(
-            m("key", "email", "type", "string", "label", "Customer email", "required", Boolean.TRUE),
-            m("name", "count", "type", "integer"),
-            m("key", "flag", "type", "bool"),
-            m("type", "string")));
+        Map<String, Object> config =
+                m(
+                        "fields",
+                        list(
+                                m(
+                                        "key",
+                                        "email",
+                                        "type",
+                                        "string",
+                                        "label",
+                                        "Customer email",
+                                        "required",
+                                        Boolean.TRUE),
+                                m("name", "count", "type", "integer"),
+                                m("key", "flag", "type", "bool"),
+                                m("type", "string")));
         JsonNode schema = parse(McpWorkflowInputSchema.fromTriggerConfig(config));
         JsonNode properties = schema.get("properties");
         assertEquals(3, properties.size());
@@ -78,7 +102,8 @@ class McpWorkflowInputSchemaTest {
 
     @Test
     void aMalformedDeclarationFallsBackToOpenInsteadOfThrowing() throws Exception {
-        JsonNode schema = parse(McpWorkflowInputSchema.fromTriggerConfig(m("fields", list("not-a-map", 42))));
+        JsonNode schema =
+                parse(McpWorkflowInputSchema.fromTriggerConfig(m("fields", list("not-a-map", 42))));
         assertTrue(schema.get("additionalProperties").asBoolean());
         JsonNode other = parse(McpWorkflowInputSchema.fromTriggerConfig(m("inputSchema", "nope")));
         assertTrue(other.get("additionalProperties").asBoolean());
@@ -86,13 +111,19 @@ class McpWorkflowInputSchemaTest {
 
     @Test
     void aLoneInputStringIsPassedThroughVerbatim() throws Exception {
-        assertEquals("hello world", McpWorkflowInputSchema.toRunInput(parse("{\"input\": \"hello world\"}")));
+        assertEquals(
+                "hello world",
+                McpWorkflowInputSchema.toRunInput(parse("{\"input\": \"hello world\"}")));
     }
 
     @Test
     void otherArgumentsArePassedAsJsonText() throws Exception {
-        assertEquals("{\"a\":1,\"b\":\"x\"}", McpWorkflowInputSchema.toRunInput(parse("{\"a\":1,\"b\":\"x\"}")));
-        assertEquals("{\"input\":{\"k\":1}}", McpWorkflowInputSchema.toRunInput(parse("{\"input\": {\"k\": 1}}")));
+        assertEquals(
+                "{\"a\":1,\"b\":\"x\"}",
+                McpWorkflowInputSchema.toRunInput(parse("{\"a\":1,\"b\":\"x\"}")));
+        assertEquals(
+                "{\"input\":{\"k\":1}}",
+                McpWorkflowInputSchema.toRunInput(parse("{\"input\": {\"k\": 1}}")));
     }
 
     @Test

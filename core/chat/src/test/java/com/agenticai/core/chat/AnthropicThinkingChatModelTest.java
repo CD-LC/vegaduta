@@ -16,8 +16,8 @@ import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.function.FunctionToolCallback;
 import reactor.core.publisher.Flux;
@@ -26,14 +26,17 @@ class AnthropicThinkingChatModelTest {
 
     private static Generation thinking(String text) {
         return new Generation(
-            AssistantMessage.builder().content(text).properties(Map.of("signature", "sig")).build(),
-            ChatGenerationMetadata.builder().finishReason("end_turn").build());
+                AssistantMessage.builder()
+                        .content(text)
+                        .properties(Map.of("signature", "sig"))
+                        .build(),
+                ChatGenerationMetadata.builder().finishReason("end_turn").build());
     }
 
     private static Generation text(String text) {
         return new Generation(
-            AssistantMessage.builder().content(text).build(),
-            ChatGenerationMetadata.builder().finishReason("end_turn").build());
+                AssistantMessage.builder().content(text).build(),
+                ChatGenerationMetadata.builder().finishReason("end_turn").build());
     }
 
     /** ChatModel stub returning a fixed response and counting calls. */
@@ -87,15 +90,23 @@ class AnthropicThinkingChatModelTest {
 
     @Test
     void redactedThinkingIsAlsoRemoved() {
-        Generation redacted = new Generation(
-            AssistantMessage.builder().content("").properties(Map.of("data", "opaque")).build());
-        ChatResponse out = AnthropicThinkingChatModel.stripThinking(new ChatResponse(List.of(redacted, text("ok"))));
+        Generation redacted =
+                new Generation(
+                        AssistantMessage.builder()
+                                .content("")
+                                .properties(Map.of("data", "opaque"))
+                                .build());
+        ChatResponse out =
+                AnthropicThinkingChatModel.stripThinking(
+                        new ChatResponse(List.of(redacted, text("ok"))));
         assertThat(out.getResult().getOutput().getText()).isEqualTo("ok");
     }
 
     @Test
     void thinkingOnlyResponseKeepsAnEmptyGenerationWithMetadata() {
-        ChatResponse out = AnthropicThinkingChatModel.stripThinking(new ChatResponse(List.of(thinking("cut off"))));
+        ChatResponse out =
+                AnthropicThinkingChatModel.stripThinking(
+                        new ChatResponse(List.of(thinking("cut off"))));
         assertThat(out.getResults()).hasSize(1);
         assertThat(out.getResult().getOutput().getText()).isEmpty();
         assertThat(out.getResult().getMetadata().getFinishReason()).isEqualTo("end_turn");
@@ -111,7 +122,8 @@ class AnthropicThinkingChatModelTest {
     void streamingChunksAreStripped() {
         ChatResponse raw = new ChatResponse(List.of(thinking("reasoning"), text("final")));
         var model = new AnthropicThinkingChatModel(new Stub(raw), new Stub(raw));
-        List<ChatResponse> chunks = model.stream(new Prompt(new UserMessage("hi"))).collectList().block();
+        List<ChatResponse> chunks =
+                model.stream(new Prompt(new UserMessage("hi"))).collectList().block();
         assertThat(chunks).hasSize(1);
         assertThat(chunks.get(0).getResult().getOutput().getText()).isEqualTo("final");
     }
@@ -119,12 +131,15 @@ class AnthropicThinkingChatModelTest {
     @Test
     void toolCarryingRequestRoutesToThinkingOffModelAndIsNotStripped() {
         ChatResponse toolTurn = new ChatResponse(List.of(text("tool turn reply")));
-        Stub thinkingModel = new Stub(new ChatResponse(List.of(thinking("x"), text("should not be used"))));
+        Stub thinkingModel =
+                new Stub(new ChatResponse(List.of(thinking("x"), text("should not be used"))));
         Stub plainModel = new Stub(toolTurn);
         var model = new AnthropicThinkingChatModel(thinkingModel, plainModel);
 
-        Prompt withTools = new Prompt(
-            List.of(new UserMessage("hi")), ToolCallingChatOptions.builder().toolNames("web_search").build());
+        Prompt withTools =
+                new Prompt(
+                        List.of(new UserMessage("hi")),
+                        ToolCallingChatOptions.builder().toolNames("web_search").build());
         assertThat(AnthropicThinkingChatModel.hasTools(withTools)).isTrue();
         assertThat(model.call(withTools)).isSameAs(toolTurn);
         assertThat(model.stream(withTools).blockFirst()).isSameAs(toolTurn);
@@ -134,8 +149,9 @@ class AnthropicThinkingChatModelTest {
 
     @Test
     void noToolsMeansThinkingModelIsUsed() {
-        Prompt noTools = new Prompt(
-            List.of(new UserMessage("hi")), ToolCallingChatOptions.builder().build());
+        Prompt noTools =
+                new Prompt(
+                        List.of(new UserMessage("hi")), ToolCallingChatOptions.builder().build());
         assertThat(AnthropicThinkingChatModel.hasTools(noTools)).isFalse();
         assertThat(AnthropicThinkingChatModel.hasTools(new Prompt("plain"))).isFalse();
     }
@@ -146,8 +162,10 @@ class AnthropicThinkingChatModelTest {
         // options builder must be exactly the pre-existing temperature/top_p behaviour.
         assertThat(AnthropicThinking.budgetFor("claude-sonnet-4-5", "", 16000)).isNull();
         assertThat(AnthropicThinking.budgetFor("claude-sonnet-4-5", null, 16000)).isNull();
-        var off = AnthropicAgentChatClientFactory
-            .samplingBuilder("claude-sonnet-4-5", 16000, 0.3, 1.0, SamplingOptions.NONE, null).build();
+        var off =
+                AnthropicAgentChatClientFactory.samplingBuilder(
+                                "claude-sonnet-4-5", 16000, 0.3, 1.0, SamplingOptions.NONE, null)
+                        .build();
         assertThat(off.getThinking()).isNull();
         assertThat(off.getTemperature()).isEqualTo(0.3);
         assertThat(off.getMaxTokens()).isEqualTo(16000);
@@ -159,20 +177,35 @@ class AnthropicThinkingChatModelTest {
     }
 
     private static AnthropicChatOptions thinkingDefaults() {
-        return AnthropicChatOptions.builder().model("m").maxTokens(20000)
-            .thinking(AnthropicApi.ThinkingType.ENABLED, 1024).build();
+        return AnthropicChatOptions.builder()
+                .model("m")
+                .maxTokens(20000)
+                .thinking(AnthropicApi.ThinkingType.ENABLED, 1024)
+                .build();
     }
 
-    /** Drives a real ChatClient so the default-options copy (the path that defeated routing) runs. */
+    /**
+     * Drives a real ChatClient so the default-options copy (the path that defeated routing) runs.
+     */
     @Test
     void chatClientWithToolsReachesPlainModelWithThinkingCleared() {
-        Stub thinkingModel = new Stub(new ChatResponse(List.of(thinking("x"), text("no"))), thinkingDefaults());
+        Stub thinkingModel =
+                new Stub(new ChatResponse(List.of(thinking("x"), text("no"))), thinkingDefaults());
         Stub plainModel = new Stub(new ChatResponse(List.of(text("tool turn"))), plainDefaults());
         var wrapper = new AnthropicThinkingChatModel(thinkingModel, plainModel);
 
-        var tool = FunctionToolCallback.<String, String>builder("echo", in -> in)
-            .description("echo").inputType(String.class).build();
-        ChatClient.builder(wrapper).build().prompt().user("hi").toolCallbacks(tool).call().chatResponse();
+        var tool =
+                FunctionToolCallback.<String, String>builder("echo", in -> in)
+                        .description("echo")
+                        .inputType(String.class)
+                        .build();
+        ChatClient.builder(wrapper)
+                .build()
+                .prompt()
+                .user("hi")
+                .toolCallbacks(tool)
+                .call()
+                .chatResponse();
 
         assertThat(thinkingModel.calls.get()).isZero();
         assertThat(plainModel.calls.get()).isEqualTo(1);
@@ -183,7 +216,10 @@ class AnthropicThinkingChatModelTest {
 
     @Test
     void chatClientWithoutToolsReachesThinkingModelWithThinkingAndNoSampling() {
-        Stub thinkingModel = new Stub(new ChatResponse(List.of(thinking("r"), text("final"))), thinkingDefaults());
+        Stub thinkingModel =
+                new Stub(
+                        new ChatResponse(List.of(thinking("r"), text("final"))),
+                        thinkingDefaults());
         Stub plainModel = new Stub(new ChatResponse(List.of(text("no"))), plainDefaults());
         var wrapper = new AnthropicThinkingChatModel(thinkingModel, plainModel);
 
@@ -199,27 +235,43 @@ class AnthropicThinkingChatModelTest {
 
     @Test
     void defaultOptionsAreThePlainThinkingOffOptions() {
-        var wrapper = new AnthropicThinkingChatModel(
-            new Stub(new ChatResponse(List.of(text("a"))), thinkingDefaults()),
-            new Stub(new ChatResponse(List.of(text("b"))), plainDefaults()));
+        var wrapper =
+                new AnthropicThinkingChatModel(
+                        new Stub(new ChatResponse(List.of(text("a"))), thinkingDefaults()),
+                        new Stub(new ChatResponse(List.of(text("b"))), plainDefaults()));
         assertThat(((AnthropicChatOptions) wrapper.getDefaultOptions()).getThinking()).isNull();
     }
 
-    /** Pins the real 1.1.7 metadata keys: THINKING/THINKING_DELTA use "signature", redacted uses "data". */
+    /**
+     * Pins the real 1.1.7 metadata keys: THINKING/THINKING_DELTA use "signature", redacted uses
+     * "data".
+     */
     @Test
     void streamingThinkingChunkWithEmptySignatureIsStillStripped() {
         var props = new java.util.HashMap<String, Object>();
-        props.put("signature", ""); // 1.1.7 always puts the key even for a thinking_delta chunk (value may be empty)
-        Generation delta = new Generation(AssistantMessage.builder().content("partial reasoning").properties(props).build());
+        props.put(
+                "signature",
+                ""); // 1.1.7 always puts the key even for a thinking_delta chunk (value may be
+        // empty)
+        Generation delta =
+                new Generation(
+                        AssistantMessage.builder()
+                                .content("partial reasoning")
+                                .properties(props)
+                                .build());
         assertThat(AnthropicThinkingChatModel.isThinkingGeneration(delta)).isTrue();
     }
 
     @Test
     void flagOffOptionsAreDeterministicAndCarryNoThinking() {
-        var a = AnthropicAgentChatClientFactory
-            .samplingBuilder("claude-sonnet-4-5", 16000, 0.3, 1.0, SamplingOptions.NONE, null).build();
-        var b = AnthropicAgentChatClientFactory
-            .samplingBuilder("claude-sonnet-4-5", 16000, 0.3, 1.0, SamplingOptions.NONE, null).build();
+        var a =
+                AnthropicAgentChatClientFactory.samplingBuilder(
+                                "claude-sonnet-4-5", 16000, 0.3, 1.0, SamplingOptions.NONE, null)
+                        .build();
+        var b =
+                AnthropicAgentChatClientFactory.samplingBuilder(
+                                "claude-sonnet-4-5", 16000, 0.3, 1.0, SamplingOptions.NONE, null)
+                        .build();
         assertThat(a).isEqualTo(b);
         assertThat(a.getThinking()).isNull();
     }

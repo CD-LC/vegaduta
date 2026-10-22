@@ -20,14 +20,16 @@ class ChatOptionsCopyAndSchemaJsonTest {
 
     @Test
     void copiesAreDistinctInstancesOfTheSameTypeWithTheSameValues() {
-        OpenAiChatOptions openAi = OpenAiChatOptions.builder().model("gpt-4o").maxTokens(10).temperature(0.2).build();
+        OpenAiChatOptions openAi =
+                OpenAiChatOptions.builder().model("gpt-4o").maxTokens(10).temperature(0.2).build();
         OpenAiChatOptions copy = ChatOptionsCopy.of(openAi);
         assertNotSame(openAi, copy);
         assertEquals("gpt-4o", copy.getModel());
         assertEquals(10, copy.getMaxTokens());
         assertEquals(0.2, copy.getTemperature());
 
-        GoogleGenAiChatOptions gemini = GoogleGenAiChatOptions.builder().model("gemini-2.5-flash").topP(0.5).build();
+        GoogleGenAiChatOptions gemini =
+                GoogleGenAiChatOptions.builder().model("gemini-2.5-flash").topP(0.5).build();
         GoogleGenAiChatOptions geminiCopy = ChatOptionsCopy.of(gemini);
         assertNotSame(gemini, geminiCopy);
         assertEquals("gemini-2.5-flash", geminiCopy.getModel());
@@ -56,14 +58,20 @@ class ChatOptionsCopyAndSchemaJsonTest {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("b", 1);
         map.put("a", java.util.List.of("x"));
-        assertEquals(ModelOptionsUtils.OBJECT_MAPPER.writeValueAsString(map), SchemaJson.write(map));
+        assertEquals(
+                ModelOptionsUtils.OBJECT_MAPPER.writeValueAsString(map), SchemaJson.write(map));
     }
 
     @Test
     void schemaJsonReadsAValidGeminiSchemaAndRejectsAnInvalidOne() throws JsonProcessingException {
-        Schema ok = SchemaJson.read("{\"type\":\"OBJECT\",\"properties\":{\"a\":{\"type\":\"STRING\"}}}", Schema.class);
+        Schema ok =
+                SchemaJson.read(
+                        "{\"type\":\"OBJECT\",\"properties\":{\"a\":{\"type\":\"STRING\"}}}",
+                        Schema.class);
         assertEquals(1, ok.properties().orElseThrow().size());
-        assertThrows(JsonProcessingException.class, () -> SchemaJson.read("{\"properties\":5}", Schema.class));
+        assertThrows(
+                JsonProcessingException.class,
+                () -> SchemaJson.read("{\"properties\":5}", Schema.class));
         assertNull(SchemaJson.read("null", Schema.class));
     }
 }

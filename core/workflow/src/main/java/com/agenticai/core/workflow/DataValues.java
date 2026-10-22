@@ -9,8 +9,9 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import java.util.Locale;
 
 /**
- * Value-level helpers every data operation shares: absent/empty tests, the text a value compares as, the
- * stable identity used for grouping and de-duplication. Extracted from {@link WorkflowDataOps}.
+ * Value-level helpers every data operation shares: absent/empty tests, the text a value compares
+ * as, the stable identity used for grouping and de-duplication. Extracted from {@link
+ * WorkflowDataOps}.
  */
 final class DataValues {
     static boolean isAbsent(JsonNode v) {
@@ -40,7 +41,10 @@ final class DataValues {
         return false;
     }
 
-    /** The text a value compares / concatenates as: empty for absent, plain text for strings, compact JSON for containers. */
+    /**
+     * The text a value compares / concatenates as: empty for absent, plain text for strings,
+     * compact JSON for containers.
+     */
     static String text(JsonNode v) {
         if (isAbsent(v)) {
             return "";
@@ -57,12 +61,18 @@ final class DataValues {
         return v.toString();
     }
 
-    /** The text a node's output carries for a value: strings unquoted (like every other node), JSON otherwise. */
+    /**
+     * The text a node's output carries for a value: strings unquoted (like every other node), JSON
+     * otherwise.
+     */
     static String outputText(JsonNode v) {
         return v.isTextual() ? v.asText() : v.toString();
     }
 
-    /** Stable identity of a value for grouping / deduping. Types are distinct ("1" and 1 are different values). */
+    /**
+     * Stable identity of a value for grouping / deduping. Types are distinct ("1" and 1 are
+     * different values).
+     */
     static String canonical(JsonNode v, boolean ignoreCase) {
         if (isAbsent(v)) {
             return "z:";
@@ -87,9 +97,10 @@ final class DataValues {
         try {
             // Strict: trailing text means "not JSON", so 'true story' / '12 apples' stay free text
             // (same stance as expression/Values.java).
-            JsonNode n = mapper.readerFor(JsonNode.class)
-                .with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
-                .readTree(text);
+            JsonNode n =
+                    mapper.readerFor(JsonNode.class)
+                            .with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+                            .readTree(text);
             return n == null || n.isMissingNode() ? null : n;
         } catch (Exception e) {
             return null;
@@ -100,6 +111,5 @@ final class DataValues {
         return s.length() <= max ? s : s.substring(0, max) + "...";
     }
 
-    private DataValues() {
-    }
+    private DataValues() {}
 }

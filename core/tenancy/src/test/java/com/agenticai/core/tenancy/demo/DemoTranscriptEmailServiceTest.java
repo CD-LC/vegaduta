@@ -27,18 +27,18 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 
 /**
- * SEC-004 (demo half): an anonymous caller holding a demo token could previously have
- * any chat session's history mailed to themselves by passing its UUID - the service
- * read {@code agentic:session:<uuid>} verbatim. The key is now derived from the
- * CALLER'S demo session, so only that sandbox's own web-chat history is reachable.
+ * SEC-004 (demo half): an anonymous caller holding a demo token could previously have any chat
+ * session's history mailed to themselves by passing its UUID - the service read {@code
+ * agentic:session:<uuid>} verbatim. The key is now derived from the CALLER'S demo session, so only
+ * that sandbox's own web-chat history is reachable.
  */
 class DemoTranscriptEmailServiceTest {
 
     private static final String PREFIX = "agentic:session:";
     private static final String NOTHING_TO_SEND =
-        "There's no conversation to send yet - chat with your agent first, then email the transcript.";
+            "There's no conversation to send yet - chat with your agent first, then email the transcript.";
     private static final String MAIL_UNAVAILABLE =
-        "Email sending isn't available right now. Your address is saved - your sandbox keeps working.";
+            "Email sending isn't available right now. Your address is saved - your sandbox keeps working.";
 
     private final Map<String, List<String>> redisLists = new HashMap<>();
     private ListOperations<String, String> listOps;
@@ -51,7 +51,7 @@ class DemoTranscriptEmailServiceTest {
         listOps = mock(ListOperations.class);
         when(redis.opsForList()).thenReturn(listOps);
         when(listOps.range(anyString(), anyLong(), anyLong()))
-            .thenAnswer(inv -> redisLists.getOrDefault(inv.getArgument(0), List.of()));
+                .thenAnswer(inv -> redisLists.getOrDefault(inv.getArgument(0), List.of()));
         ObjectProvider<StringRedisTemplate> redisProvider = mock(ObjectProvider.class);
         when(redisProvider.getIfAvailable()).thenReturn(redis);
         // No mail sender: a transcript that WAS found ends in MAIL_UNAVAILABLE, one that was
@@ -61,18 +61,34 @@ class DemoTranscriptEmailServiceTest {
         PlatformSettingsService settings = mock(PlatformSettingsService.class);
         when(settings.getInt(anyString(), anyInt())).thenAnswer(inv -> inv.getArgument(1));
         DemoChannelMessageRepository mirror = mock(DemoChannelMessageRepository.class);
-        when(mirror.findByDemoSessionIdOrderByCreatedAtAsc(org.mockito.ArgumentMatchers.any())).thenReturn(List.of());
+        when(mirror.findByDemoSessionIdOrderByCreatedAtAsc(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(List.of());
 
-        service = new DemoTranscriptEmailService(
-            mock(DemoSessionRecorder.class), mirror, settings, redisProvider, mailProvider,
-            new ObjectMapper(), "no-reply@example.com", "https://app.example", 2);
+        service =
+                new DemoTranscriptEmailService(
+                        mock(DemoSessionRecorder.class),
+                        mirror,
+                        settings,
+                        redisProvider,
+                        mailProvider,
+                        new ObjectMapper(),
+                        "no-reply@example.com",
+                        "https://app.example",
+                        2);
     }
 
     private static DemoSession sandbox(String schema) throws Exception {
         Instant now = Instant.now();
-        DemoSession session = new DemoSession(
-            "hash-" + UUID.randomUUID(), UUID.randomUUID(), schema, null, "203.0.113.7", null,
-            now, now.plus(5, ChronoUnit.DAYS));
+        DemoSession session =
+                new DemoSession(
+                        "hash-" + UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        schema,
+                        null,
+                        "203.0.113.7",
+                        null,
+                        now,
+                        now.plus(5, ChronoUnit.DAYS));
         Field id = DemoSession.class.getDeclaredField("id");
         id.setAccessible(true);
         id.set(session, UUID.randomUUID());
@@ -93,13 +109,20 @@ class DemoTranscriptEmailServiceTest {
         storeTurn(PREFIX + victimChatId);
         storeTurn(PREFIX + DemoTranscriptEmailService.webChatMemoryId(victim, victimChatId));
 
-        DemoTranscriptEmailService.Result result = service.send(attacker, "attacker@example.com", victimChatId);
+        DemoTranscriptEmailService.Result result =
+                service.send(attacker, "attacker@example.com", victimChatId);
 
         assertThat(result.sent()).isFalse();
         assertThat(result.message()).isEqualTo(NOTHING_TO_SEND);
         verify(listOps, never()).range(eq(PREFIX + victimChatId), anyLong(), anyLong());
-        verify(listOps, never()).range(eq(PREFIX + DemoTranscriptEmailService.webChatMemoryId(victim, victimChatId)),
-            anyLong(), anyLong());
+        verify(listOps, never())
+                .range(
+                        eq(
+                                PREFIX
+                                        + DemoTranscriptEmailService.webChatMemoryId(
+                                                victim, victimChatId)),
+                        anyLong(),
+                        anyLong());
     }
 
     @Test
@@ -118,8 +141,14 @@ class DemoTranscriptEmailServiceTest {
     void theScopedIdMatchesWhatTheDemoChatWritesUnder() throws Exception {
         DemoSession own = sandbox("demo_shared");
         String chatId = UUID.randomUUID().toString();
-        // DemoChatController: tenant = sandbox schema, agent = seeded agent, subject = "demo:" + session id.
-        assertThat(DemoTranscriptEmailService.webChatMemoryId(own, chatId)).isEqualTo(
-            DemoTranscriptEmailService.scopedSessionId(own.getTenantSchema(), own.getAgentId(), "demo:" + own.getId(), chatId));
+        // DemoChatController: tenant = sandbox schema, agent = seeded agent, subject = "demo:" +
+        // session id.
+        assertThat(DemoTranscriptEmailService.webChatMemoryId(own, chatId))
+                .isEqualTo(
+                        DemoTranscriptEmailService.scopedSessionId(
+                                own.getTenantSchema(),
+                                own.getAgentId(),
+                                "demo:" + own.getId(),
+                                chatId));
     }
 }

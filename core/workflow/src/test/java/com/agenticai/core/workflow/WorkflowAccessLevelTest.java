@@ -26,9 +26,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * {@code WorkflowResponse.accessLevel} is the canvas's hint for hiding the Run controls from callers the server
- * would refuse (a draft run needs EDITOR). It must come from the SAME rules as {@code requireAccess}, so it is
- * derived by probing that call from the top down instead of re-implementing owner/admin/grant logic.
+ * {@code WorkflowResponse.accessLevel} is the canvas's hint for hiding the Run controls from
+ * callers the server would refuse (a draft run needs EDITOR). It must come from the SAME rules as
+ * {@code requireAccess}, so it is derived by probing that call from the top down instead of
+ * re-implementing owner/admin/grant logic.
  */
 class WorkflowAccessLevelTest {
 
@@ -40,15 +41,29 @@ class WorkflowAccessLevelTest {
     @SuppressWarnings("unchecked")
     void setUp() throws Exception {
         access = mock(ResourceAccessService.class);
-        ObjectProvider<TemporalWorkflowExecutionEngine> temporalProvider = mock(ObjectProvider.class);
-        service = WorkflowServiceFixture.of(
-            mock(WorkflowDefinitionRepository.class), mock(WorkflowRunRepository.class), mock(OrchestratorService.class),
-            mock(WorkflowExecutionEngine.class), new ObjectMapper(), mock(TenantResolutionService.class),
-            mock(TenantSchemaResolver.class), mock(TenantLimits.class), mock(WorkflowTriggerNodeService.class),
-            temporalProvider, mock(EncryptionService.class), mock(WorkflowRunCancellationService.class),
-            mock(WorkflowRunPauseService.class), access, mock(WorkflowExecutionParamsInferenceService.class),
-            mock(WorkflowVersionService.class));
-        definition = new WorkflowDefinition("WF", "d", "{\"nodes\":[],\"edges\":[]}", WorkflowStatus.DRAFT);
+        ObjectProvider<TemporalWorkflowExecutionEngine> temporalProvider =
+                mock(ObjectProvider.class);
+        service =
+                WorkflowServiceFixture.of(
+                        mock(WorkflowDefinitionRepository.class),
+                        mock(WorkflowRunRepository.class),
+                        mock(OrchestratorService.class),
+                        mock(WorkflowExecutionEngine.class),
+                        new ObjectMapper(),
+                        mock(TenantResolutionService.class),
+                        mock(TenantSchemaResolver.class),
+                        mock(TenantLimits.class),
+                        mock(WorkflowTriggerNodeService.class),
+                        temporalProvider,
+                        mock(EncryptionService.class),
+                        mock(WorkflowRunCancellationService.class),
+                        mock(WorkflowRunPauseService.class),
+                        access,
+                        mock(WorkflowExecutionParamsInferenceService.class),
+                        mock(WorkflowVersionService.class));
+        definition =
+                new WorkflowDefinition(
+                        "WF", "d", "{\"nodes\":[],\"edges\":[]}", WorkflowStatus.DRAFT);
         java.lang.reflect.Field id = WorkflowDefinition.class.getDeclaredField("id");
         id.setAccessible(true);
         id.set(definition, UUID.randomUUID());
@@ -57,8 +72,9 @@ class WorkflowAccessLevelTest {
     private void allow(PermissionLevel highest) {
         for (PermissionLevel level : PermissionLevel.values()) {
             if (level.compareTo(highest) > 0) {
-                doThrow(new ResourceAccessDeniedException()).when(access)
-                    .requireAccess(eq(ResourceType.WORKFLOW), any(), any(), eq(level));
+                doThrow(new ResourceAccessDeniedException())
+                        .when(access)
+                        .requireAccess(eq(ResourceType.WORKFLOW), any(), any(), eq(level));
             }
         }
     }
@@ -77,14 +93,16 @@ class WorkflowAccessLevelTest {
 
     @Test
     void viewerGrantIsViewer() {
-        // A VIEWER grant also satisfies the RUNNER check (levels are cumulative), so only EDITOR is refused.
+        // A VIEWER grant also satisfies the RUNNER check (levels are cumulative), so only EDITOR is
+        // refused.
         allow(PermissionLevel.VIEWER);
         assertEquals("VIEWER", service.accessLevelOf(definition));
     }
 
     @Test
     void responseCarriesTheLevelAndInternalCallersDefaultToEditor() {
-        WorkflowResponse viaService = WorkflowResponse.from(definition, new ObjectMapper(), true, "RUNNER");
+        WorkflowResponse viaService =
+                WorkflowResponse.from(definition, new ObjectMapper(), true, "RUNNER");
         assertEquals("RUNNER", viaService.accessLevel());
         assertEquals("EDITOR", WorkflowResponse.from(definition, new ObjectMapper()).accessLevel());
     }
@@ -92,8 +110,9 @@ class WorkflowAccessLevelTest {
     @Test
     void toResponseUsesTheProbedLevel() {
         allow(PermissionLevel.RUNNER);
-        when(access.requireAccess(eq(ResourceType.WORKFLOW), any(), any(), eq(PermissionLevel.RUNNER)))
-            .thenReturn(com.agenticai.core.sharing.AccessCheckResult.GRANTED);
+        when(access.requireAccess(
+                        eq(ResourceType.WORKFLOW), any(), any(), eq(PermissionLevel.RUNNER)))
+                .thenReturn(com.agenticai.core.sharing.AccessCheckResult.GRANTED);
         assertEquals("RUNNER", service.toResponse(definition).accessLevel());
     }
 }

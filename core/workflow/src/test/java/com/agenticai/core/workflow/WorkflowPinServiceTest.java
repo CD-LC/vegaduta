@@ -38,8 +38,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Who may list, write and read pins (RUNNER lists without data, EDITOR does everything), the server-side
- * config hash, audit logging, and the exact JSON of the pin DTOs.
+ * Who may list, write and read pins (RUNNER lists without data, EDITOR does everything), the
+ * server-side config hash, audit logging, and the exact JSON of the pin DTOs.
  */
 class WorkflowPinServiceTest {
 
@@ -63,7 +63,10 @@ class WorkflowPinServiceTest {
         return new WorkflowNodeDto(id, type, Map.of(), Map.of("label", id, "config", config));
     }
 
-    /** The caller holds {@code highest} and every level below it (the ladder is RUNNER < VIEWER < EDITOR). */
+    /**
+     * The caller holds {@code highest} and every level below it (the ladder is RUNNER < VIEWER <
+     * EDITOR).
+     */
     private void grant(PermissionLevel highest) {
         org.mockito.Mockito.reset(workflowService);
         WorkflowDefinition def = mock(WorkflowDefinition.class);
@@ -71,11 +74,18 @@ class WorkflowPinServiceTest {
             if (level.compareTo(highest) <= 0) {
                 org.mockito.Mockito.doReturn(def).when(workflowService).requireAccess(WF, level);
             } else {
-                org.mockito.Mockito.doThrow(new ResourceAccessDeniedException()).when(workflowService).requireAccess(WF, level);
+                org.mockito.Mockito.doThrow(new ResourceAccessDeniedException())
+                        .when(workflowService)
+                        .requireAccess(WF, level);
             }
         }
-        when(workflowService.graph(WF)).thenReturn(new WorkflowGraphDto(
-            List.of(node("n1", "http", Map.of("url", "https://example.com")), node("n2", "code", Map.of())), List.of()));
+        when(workflowService.graph(WF))
+                .thenReturn(
+                        new WorkflowGraphDto(
+                                List.of(
+                                        node("n1", "http", Map.of("url", "https://example.com")),
+                                        node("n2", "code", Map.of())),
+                                List.of()));
     }
 
     private void asEditor() {
@@ -138,20 +148,42 @@ class WorkflowPinServiceTest {
         assertThrows(ResourceAccessDeniedException.class, () -> put("n2", "{}"));
         assertTrue(store.find(WF, "n2").isEmpty());
         assertTrue(store.find(WF, "n1").isPresent(), "the denied delete left the pin alone");
-        verify(audit, times(1)).record(anyString(), eq("WORKFLOW_PIN_SET"), anyString(), anyString(), any(), anyString());
-        verify(audit, never()).record(anyString(), eq("WORKFLOW_PIN_DELETE"), anyString(), anyString(), any(), anyString());
+        verify(audit, times(1))
+                .record(
+                        anyString(),
+                        eq("WORKFLOW_PIN_SET"),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString());
+        verify(audit, never())
+                .record(
+                        anyString(),
+                        eq("WORKFLOW_PIN_DELETE"),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        anyString());
     }
 
     @Test
     void theServerComputesTheConfigHashWhenTheClientSendsNone() {
         WorkflowPinResponse p = put("n1", "{}");
-        assertEquals(WorkflowPinService.configHash(node("n1", "http", Map.of("url", "https://example.com"))), p.configHash());
+        assertEquals(
+                WorkflowPinService.configHash(
+                        node("n1", "http", Map.of("url", "https://example.com"))),
+                p.configHash());
         assertEquals(32, p.configHash().length());
     }
 
     @Test
     void aClientSuppliedConfigHashIsKept() {
-        WorkflowPinResponse p = service.put(WF, "n1", new WorkflowPinRequest("{}", "manual", null, "client-hash"), "ann");
+        WorkflowPinResponse p =
+                service.put(
+                        WF,
+                        "n1",
+                        new WorkflowPinRequest("{}", "manual", null, "client-hash"),
+                        "ann");
         assertEquals("client-hash", p.configHash());
     }
 
@@ -163,34 +195,50 @@ class WorkflowPinServiceTest {
         Map<String, Object> b = new LinkedHashMap<>();
         b.put("method", "GET");
         b.put("url", "https://x");
-        WorkflowNodeDto relabelled = new WorkflowNodeDto("z", "http", Map.of("x", 5), Map.of("label", "Other", "config", b));
+        WorkflowNodeDto relabelled =
+                new WorkflowNodeDto(
+                        "z", "http", Map.of("x", 5), Map.of("label", "Other", "config", b));
 
-        assertEquals(WorkflowPinService.configHash(node("n1", "http", a)), WorkflowPinService.configHash(relabelled));
-        assertNotEquals(WorkflowPinService.configHash(node("n1", "http", a)),
-            WorkflowPinService.configHash(node("n1", "http", Map.of("url", "https://y", "method", "GET"))));
-        assertNotEquals(WorkflowPinService.configHash(node("n1", "http", a)),
-            WorkflowPinService.configHash(node("n1", "code", a)));
+        assertEquals(
+                WorkflowPinService.configHash(node("n1", "http", a)),
+                WorkflowPinService.configHash(relabelled));
+        assertNotEquals(
+                WorkflowPinService.configHash(node("n1", "http", a)),
+                WorkflowPinService.configHash(
+                        node("n1", "http", Map.of("url", "https://y", "method", "GET"))));
+        assertNotEquals(
+                WorkflowPinService.configHash(node("n1", "http", a)),
+                WorkflowPinService.configHash(node("n1", "code", a)));
     }
 
     @Test
     void aNodeThatIsNotInTheSavedGraphCannotBePinned() {
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> put("ghost", "{}"));
+        ResponseStatusException ex =
+                assertThrows(ResponseStatusException.class, () -> put("ghost", "{}"));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         assertTrue(store.list(WF).isEmpty());
     }
 
     @Test
     void limitViolationsSurfaceAsBadRequestWithTheMessage() {
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> put("n1", "x".repeat(256_001)));
+        ResponseStatusException ex =
+                assertThrows(ResponseStatusException.class, () -> put("n1", "x".repeat(256_001)));
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         assertTrue(ex.getReason().contains("256000"));
     }
 
     @Test
     void aMissingBodyIsBadRequestAndAMissingSourceMeansManual() {
-        assertEquals(HttpStatus.BAD_REQUEST,
-            assertThrows(ResponseStatusException.class, () -> service.put(WF, "n1", null, "ann")).getStatusCode());
-        assertEquals("manual", service.put(WF, "n1", new WorkflowPinRequest("{}", null, null, null), "ann").source());
+        assertEquals(
+                HttpStatus.BAD_REQUEST,
+                assertThrows(
+                                ResponseStatusException.class,
+                                () -> service.put(WF, "n1", null, "ann"))
+                        .getStatusCode());
+        assertEquals(
+                "manual",
+                service.put(WF, "n1", new WorkflowPinRequest("{}", null, null, null), "ann")
+                        .source());
     }
 
     @Test
@@ -199,19 +247,38 @@ class WorkflowPinServiceTest {
         service.delete(WF, "n1", "ann");
         service.delete(WF, "n1", "ann"); // idempotent, and nothing to audit the second time
 
-        verify(audit).record(eq("ann"), eq("WORKFLOW_PIN_SET"), eq("Workflow"), eq(WF.toString()),
-            eq(AuditOutcome.SUCCESS), contains("n1"));
-        verify(audit).record(eq("ann"), eq("WORKFLOW_PIN_DELETE"), eq("Workflow"), eq(WF.toString()),
-            eq(AuditOutcome.SUCCESS), contains("n1"));
-        verify(audit, times(2)).record(anyString(), anyString(), anyString(), anyString(), any(),
-            org.mockito.ArgumentMatchers.argThat(detail -> !detail.contains("do-not-log")));
+        verify(audit)
+                .record(
+                        eq("ann"),
+                        eq("WORKFLOW_PIN_SET"),
+                        eq("Workflow"),
+                        eq(WF.toString()),
+                        eq(AuditOutcome.SUCCESS),
+                        contains("n1"));
+        verify(audit)
+                .record(
+                        eq("ann"),
+                        eq("WORKFLOW_PIN_DELETE"),
+                        eq("Workflow"),
+                        eq(WF.toString()),
+                        eq(AuditOutcome.SUCCESS),
+                        contains("n1"));
+        verify(audit, times(2))
+                .record(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
+                        org.mockito.ArgumentMatchers.argThat(
+                                detail -> !detail.contains("do-not-log")));
         assertTrue(store.find(WF, "n1").isEmpty());
     }
 
     @Test
     void aFailingAuditWriteDoesNotUndoThePin() {
         when(audit.record(anyString(), anyString(), anyString(), anyString(), any(), anyString()))
-            .thenThrow(new IllegalStateException("audit db down"));
+                .thenThrow(new IllegalStateException("audit db down"));
         assertEquals("{}", put("n1", "{}").data());
         assertTrue(store.find(WF, "n1").isPresent());
     }
@@ -222,27 +289,42 @@ class WorkflowPinServiceTest {
     void thePinResponseSerialisesWithExactlyTheContractFieldNames() throws Exception {
         ObjectMapper mapper = PinTestSupport.appMapper();
         JsonNode full = mapper.readTree(mapper.writeValueAsString(put("n1", "{\"a\":1}")));
-        assertEquals(new TreeSet<>(Set.of("nodeId", "source", "sourceRunId", "pinnedBy", "pinnedAt", "sizeChars",
-            "configHash", "data")), fieldNames(full));
+        assertEquals(
+                new TreeSet<>(
+                        Set.of(
+                                "nodeId",
+                                "source",
+                                "sourceRunId",
+                                "pinnedBy",
+                                "pinnedAt",
+                                "sizeChars",
+                                "configHash",
+                                "data")),
+                fieldNames(full));
         assertEquals("n1", full.get("nodeId").asText());
         assertEquals("test", full.get("source").asText());
         assertEquals("run-1", full.get("sourceRunId").asText());
         assertEquals("ann", full.get("pinnedBy").asText());
-        assertTrue(full.get("pinnedAt").isTextual(), "pinnedAt is an ISO string, not an epoch number");
+        assertTrue(
+                full.get("pinnedAt").isTextual(), "pinnedAt is an ISO string, not an epoch number");
         assertTrue(java.time.Instant.parse(full.get("pinnedAt").asText()) != null);
         assertEquals(7, full.get("sizeChars").asInt());
         assertEquals("{\"a\":1}", full.get("data").asText());
 
         asRunner();
         JsonNode hidden = mapper.readTree(mapper.writeValueAsString(service.list(WF).get(0)));
-        assertTrue(hidden.has("data") && hidden.get("data").isNull(), "data is present and null for a runner");
+        assertTrue(
+                hidden.has("data") && hidden.get("data").isNull(),
+                "data is present and null for a runner");
     }
 
     @Test
     void thePinRequestReadsTheContractBodyAndIgnoresUnknownFields() throws Exception {
-        WorkflowPinRequest r = PinTestSupport.appMapper().readValue(
-            "{\"data\":\"{}\",\"source\":\"trigger_sample\",\"sourceRunId\":\"r1\",\"configHash\":\"h\",\"extra\":1}",
-            WorkflowPinRequest.class);
+        WorkflowPinRequest r =
+                PinTestSupport.appMapper()
+                        .readValue(
+                                "{\"data\":\"{}\",\"source\":\"trigger_sample\",\"sourceRunId\":\"r1\",\"configHash\":\"h\",\"extra\":1}",
+                                WorkflowPinRequest.class);
         assertEquals("{}", r.data());
         assertEquals("trigger_sample", r.source());
         assertEquals("r1", r.sourceRunId());

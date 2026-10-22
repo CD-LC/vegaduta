@@ -54,7 +54,8 @@ class WhatsAppQrOutboundTest {
         verify(client).send(KEY, "4915100000000", "hello there");
         ArgumentCaptor<String> to = ArgumentCaptor.forClass(String.class);
         verify(outboundLogger)
-                .recordSent(eq(ChannelType.WHATSAPP_QR), to.capture(), eq("hello there"), eq("admin"));
+                .recordSent(
+                        eq(ChannelType.WHATSAPP_QR), to.capture(), eq("hello there"), eq("admin"));
         assertThat(to.getValue()).isEqualTo("4915100000000");
     }
 

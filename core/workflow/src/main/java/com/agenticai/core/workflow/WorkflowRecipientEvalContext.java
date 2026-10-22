@@ -8,7 +8,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Map;
 
-/** The node context with the input's top-level fields replaced by one bulk_email recipient's fields. */
+/**
+ * The node context with the input's top-level fields replaced by one bulk_email recipient's fields.
+ */
 final class WorkflowRecipientEvalContext implements EvalContext {
 
     private final ObjectMapper objectMapper;
@@ -17,7 +19,11 @@ final class WorkflowRecipientEvalContext implements EvalContext {
     private final int index;
     private JsonNode tree;
 
-    WorkflowRecipientEvalContext(ObjectMapper objectMapper, WorkflowNodeEvalContext base, Map<String, String> vars, int index) {
+    WorkflowRecipientEvalContext(
+            ObjectMapper objectMapper,
+            WorkflowNodeEvalContext base,
+            Map<String, String> vars,
+            int index) {
         this.objectMapper = objectMapper;
         this.base = base;
         this.vars = vars;

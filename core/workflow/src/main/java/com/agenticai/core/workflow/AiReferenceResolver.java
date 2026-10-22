@@ -1,6 +1,8 @@
 package com.agenticai.core.workflow;
 
+import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.str;
+
 import com.agenticai.core.agents.tools.web.HttpRequestExecutor;
 import com.agenticai.core.agents.tools.web.HttpRequestResult;
 import com.agenticai.core.agents.tools.web.HttpRequestSpec;
@@ -19,12 +21,12 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
 
 /**
- * Resolves the {@code document_extractor} source (config text, or the node input) to a classified reference - URL,
- * uploaded-file key or raw text - and reads it safely: the storage key shape is checked, size caps apply, and a URL
- * containing a template reference is refused. Extracted from {@link WorkflowAiNodeHandler}.
+ * Resolves the {@code document_extractor} source (config text, or the node input) to a classified
+ * reference - URL, uploaded-file key or raw text - and reads it safely: the storage key shape is
+ * checked, size caps apply, and a URL containing a template reference is refused. Extracted from
+ * {@link WorkflowAiNodeHandler}.
  */
 final class AiReferenceResolver {
     private static final Logger log = LoggerFactory.getLogger(AiReferenceResolver.class);

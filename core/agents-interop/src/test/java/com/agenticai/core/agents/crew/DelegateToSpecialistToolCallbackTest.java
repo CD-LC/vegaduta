@@ -33,7 +33,8 @@ class DelegateToSpecialistToolCallbackTest {
     private final HandoffChain chain = HandoffChain.root("session-1", rootAgentId);
 
     private DelegateToSpecialistToolCallback callback() {
-        return new DelegateToSpecialistToolCallback(chatService, List.of("billing", "legal-review"), chain);
+        return new DelegateToSpecialistToolCallback(
+                chatService, List.of("billing", "legal-review"), chain);
     }
 
     @Test
@@ -47,21 +48,26 @@ class DelegateToSpecialistToolCallbackTest {
 
     @Test
     void callParsesArgumentsAndDelegatesWithTheBoundChain() throws Exception {
-        when(chatService.delegateToSpecialist(eq(chain), eq("billing"), eq("refund question"), eq("prior context")))
-            .thenReturn("Refund approved.");
+        when(chatService.delegateToSpecialist(
+                        eq(chain), eq("billing"), eq("refund question"), eq("prior context")))
+                .thenReturn("Refund approved.");
 
-        String out = callback().call(
-            "{\"capability\":\"billing\",\"subTask\":\"refund question\",\"contextSummary\":\"prior context\"}");
+        String out =
+                callback()
+                        .call(
+                                "{\"capability\":\"billing\",\"subTask\":\"refund question\",\"contextSummary\":\"prior context\"}");
 
         JsonNode root = MAPPER.readTree(out);
         assertEquals("billing", root.get("capability").asText());
         assertEquals("Refund approved.", root.get("answer").asText());
-        verify(chatService).delegateToSpecialist(chain, "billing", "refund question", "prior context");
+        verify(chatService)
+                .delegateToSpecialist(chain, "billing", "refund question", "prior context");
     }
 
     @Test
     void callToleratesAMissingOptionalContextSummary() {
-        when(chatService.delegateToSpecialist(eq(chain), eq("billing"), eq("q"), eq(null))).thenReturn("ok");
+        when(chatService.delegateToSpecialist(eq(chain), eq("billing"), eq("q"), eq(null)))
+                .thenReturn("ok");
 
         callback().call("{\"capability\":\"billing\",\"subTask\":\"q\"}");
 
@@ -88,7 +94,7 @@ class DelegateToSpecialistToolCallbackTest {
     @Test
     void callSurfacesADelegationFailureAsAToolResultRatherThanThrowing() {
         when(chatService.delegateToSpecialist(eq(chain), eq("billing"), eq("q"), eq(null)))
-            .thenThrow(new RuntimeException("provider down"));
+                .thenThrow(new RuntimeException("provider down"));
 
         String out = callback().call("{\"capability\":\"billing\",\"subTask\":\"q\"}");
 

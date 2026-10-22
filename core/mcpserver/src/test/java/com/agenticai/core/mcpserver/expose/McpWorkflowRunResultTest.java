@@ -21,14 +21,32 @@ class McpWorkflowRunResultTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static NodeTraceEntry step(String label, String output, String cost) {
-        NodeTraceEntry entry = new NodeTraceEntry("id-" + label, "agent", label, "COMPLETED", "summary " + label, null, null)
-            .withPayloads("{\"secret\":\"input\"}", false, output, false);
+        NodeTraceEntry entry =
+                new NodeTraceEntry(
+                                "id-" + label,
+                                "agent",
+                                label,
+                                "COMPLETED",
+                                "summary " + label,
+                                null,
+                                null)
+                        .withPayloads("{\"secret\":\"input\"}", false, output, false);
         return cost == null ? entry : entry.withUsage(1L, 1L, new BigDecimal(cost));
     }
 
     private static WorkflowRunResponse run(WorkflowRunStatus status, List<NodeTraceEntry> trace) {
-        return new WorkflowRunResponse(UUID.randomUUID(), UUID.randomUUID(), "Flow", status, "x", null, trace,
-            Instant.now(), null, null, 1);
+        return new WorkflowRunResponse(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "Flow",
+                status,
+                "x",
+                null,
+                trace,
+                Instant.now(),
+                null,
+                null,
+                1);
     }
 
     @Test
@@ -44,14 +62,25 @@ class McpWorkflowRunResultTest {
 
     @Test
     void costIsTheSumOfRecordedStepCostsOrAbsent() {
-        WorkflowRunResponse run = run(WorkflowRunStatus.COMPLETED, List.of(step("a", "\"1\"", "0.01"), step("b", "\"2\"", null), step("c", "\"3\"", "0.02")));
+        WorkflowRunResponse run =
+                run(
+                        WorkflowRunStatus.COMPLETED,
+                        List.of(
+                                step("a", "\"1\"", "0.01"),
+                                step("b", "\"2\"", null),
+                                step("c", "\"3\"", "0.02")));
         assertEquals(new BigDecimal("0.03"), McpWorkflowRunResult.totalCostUsd(run));
-        assertNull(McpWorkflowRunResult.totalCostUsd(run(WorkflowRunStatus.COMPLETED, List.of(step("a", "\"1\"", null)))));
+        assertNull(
+                McpWorkflowRunResult.totalCostUsd(
+                        run(WorkflowRunStatus.COMPLETED, List.of(step("a", "\"1\"", null)))));
     }
 
     @Test
     void jsonCarriesStatusLastOutputAndTrimmedStepsButNeverNodeInputs() throws Exception {
-        WorkflowRunResponse run = run(WorkflowRunStatus.COMPLETED, List.of(step("first", "\"one\"", null), step("last", "\"final\"", "0.5")));
+        WorkflowRunResponse run =
+                run(
+                        WorkflowRunStatus.COMPLETED,
+                        List.of(step("first", "\"one\"", null), step("last", "\"final\"", "0.5")));
 
         String json = McpWorkflowRunResult.toJson(run, 1000, null);
         JsonNode body = MAPPER.readTree(json);
@@ -66,7 +95,8 @@ class McpWorkflowRunResultTest {
 
     @Test
     void outputsAreTruncatedAndAHintIsCarriedWhenGiven() throws Exception {
-        WorkflowRunResponse run = run(WorkflowRunStatus.RUNNING, List.of(step("a", "x".repeat(500), null)));
+        WorkflowRunResponse run =
+                run(WorkflowRunStatus.RUNNING, List.of(step("a", "x".repeat(500), null)));
 
         JsonNode body = MAPPER.readTree(McpWorkflowRunResult.toJson(run, 100, "poll me"));
 
@@ -77,7 +107,10 @@ class McpWorkflowRunResultTest {
 
     @Test
     void aRunWithNoTraceStillMapsCleanly() throws Exception {
-        JsonNode body = MAPPER.readTree(McpWorkflowRunResult.toJson(run(WorkflowRunStatus.RUNNING, List.of()), 100, null));
+        JsonNode body =
+                MAPPER.readTree(
+                        McpWorkflowRunResult.toJson(
+                                run(WorkflowRunStatus.RUNNING, List.of()), 100, null));
 
         assertEquals("RUNNING", body.get("status").asText());
         assertFalse(body.has("output"));

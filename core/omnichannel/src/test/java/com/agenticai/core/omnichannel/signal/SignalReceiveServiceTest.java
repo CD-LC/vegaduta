@@ -1,6 +1,5 @@
 package com.agenticai.core.omnichannel.signal;
 
-import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -9,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.crypto.EncryptionService;
+import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
@@ -25,7 +25,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
 
-/** The receiver against a fake signal-cli: long polling, the json-rpc websocket, tenant scoping and recovery. */
+/**
+ * The receiver against a fake signal-cli: long polling, the json-rpc websocket, tenant scoping and
+ * recovery.
+ */
 class SignalReceiveServiceTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -48,28 +51,46 @@ class SignalReceiveServiceTest {
         EncryptionService encryption = mock(EncryptionService.class);
         when(encryption.decrypt("enc")).thenReturn("tok");
         SignalCredential credential =
-                new SignalCredential(cli.baseUrl(), NUMBER, null, UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE);
+                new SignalCredential(
+                        cli.baseUrl(),
+                        NUMBER,
+                        null,
+                        UnknownSenderPolicy.PAIR,
+                        SignalGroupMode.IGNORE);
         when(repository.findFirstByOrderByCreatedAtAsc()).thenReturn(Optional.of(credential));
         inbound = mock(SignalInboundService.class);
-        when(inbound.accept(any(), any())).thenAnswer(inv -> {
-            tenantsSeen.add(TenantContext.current().map(TenantContext::getTenantId).orElse(null));
-            return true;
-        });
+        when(inbound.accept(any(), any()))
+                .thenAnswer(
+                        inv -> {
+                            tenantsSeen.add(
+                                    TenantContext.current()
+                                            .map(TenantContext::getTenantId)
+                                            .orElse(null));
+                            return true;
+                        });
     }
 
     private void newService(String mode) {
         SignalApiClient api = new SignalApiClient(MAPPER, cli::guard);
         @SuppressWarnings("unchecked")
         ObjectProvider<SignalReceiveService> self = mock(ObjectProvider.class);
-        SignalCredentialService credentials = new SignalCredentialService(
-                repository,
-                mock(EncryptionService.class),
-                mock(TenantResolutionService.class),
-                mock(TenantSchemaResolver.class),
-                api,
-                self);
-        service = new SignalReceiveService(
-                mock(TenantResolutionService.class), repository, credentials, api, inbound, mode, 1);
+        SignalCredentialService credentials =
+                new SignalCredentialService(
+                        repository,
+                        mock(EncryptionService.class),
+                        mock(TenantResolutionService.class),
+                        mock(TenantSchemaResolver.class),
+                        api,
+                        self);
+        service =
+                new SignalReceiveService(
+                        mock(TenantResolutionService.class),
+                        repository,
+                        credentials,
+                        api,
+                        inbound,
+                        mode,
+                        1);
     }
 
     @AfterEach
@@ -90,9 +111,21 @@ class SignalReceiveServiceTest {
 
         ArgumentCaptor<JsonNode> messages = ArgumentCaptor.forClass(JsonNode.class);
         verify(inbound, timeout(5000).atLeast(2)).accept(any(), messages.capture());
-        assertThat(messages.getAllValues().get(0).path("envelope").path("dataMessage").path("message").asText())
+        assertThat(
+                        messages.getAllValues()
+                                .get(0)
+                                .path("envelope")
+                                .path("dataMessage")
+                                .path("message")
+                                .asText())
                 .isEqualTo("one");
-        assertThat(messages.getAllValues().get(1).path("envelope").path("dataMessage").path("message").asText())
+        assertThat(
+                        messages.getAllValues()
+                                .get(1)
+                                .path("envelope")
+                                .path("dataMessage")
+                                .path("message")
+                                .asText())
                 .isEqualTo("two");
         assertThat(tenantsSeen).containsOnly("tenant_abc");
         assertThat(service.problem(NUMBER)).isNull();
@@ -135,7 +168,8 @@ class SignalReceiveServiceTest {
         cli.dropConnections(); // a signal-cli restart
         // Backoff is one second; the next connection must carry a frame again.
         long deadline = System.currentTimeMillis() + 10_000;
-        while (System.currentTimeMillis() < deadline && cli.requestLines.stream().filter(l -> l.contains("/v1/receive/")).count() < 2) {
+        while (System.currentTimeMillis() < deadline
+                && cli.requestLines.stream().filter(l -> l.contains("/v1/receive/")).count() < 2) {
             Thread.sleep(50);
         }
         cli.wsFrames.add(ONE);
@@ -156,7 +190,8 @@ class SignalReceiveServiceTest {
             final int expected = connections;
             long deadline = System.currentTimeMillis() + 10_000;
             while (System.currentTimeMillis() < deadline
-                    && cli.requestLines.stream().filter(l -> l.contains("/v1/receive/")).count() < expected) {
+                    && cli.requestLines.stream().filter(l -> l.contains("/v1/receive/")).count()
+                            < expected) {
                 Thread.sleep(50);
             }
             assertThat(cli.requestLines.stream().filter(l -> l.contains("/v1/receive/")).count())
@@ -173,12 +208,14 @@ class SignalReceiveServiceTest {
     void aMessageThatCannotBeHandledDoesNotStopTheReceiver() {
         cli.receiveBatches.add("[" + ONE + "," + TWO + "]");
         AtomicInteger calls = new AtomicInteger();
-        when(inbound.accept(any(), any())).thenAnswer(inv -> {
-            if (calls.incrementAndGet() == 1) {
-                throw new IllegalStateException("no default agent configured");
-            }
-            return true;
-        });
+        when(inbound.accept(any(), any()))
+                .thenAnswer(
+                        inv -> {
+                            if (calls.incrementAndGet() == 1) {
+                                throw new IllegalStateException("no default agent configured");
+                            }
+                            return true;
+                        });
         newService("poll");
 
         service.ensureReceiving(NUMBER, "tenant_abc");
@@ -203,7 +240,12 @@ class SignalReceiveServiceTest {
     @Test
     void stopsWhenTheConnectionIsNoLongerActive() throws Exception {
         SignalCredential disconnected =
-                new SignalCredential(cli.baseUrl(), NUMBER, null, UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE);
+                new SignalCredential(
+                        cli.baseUrl(),
+                        NUMBER,
+                        null,
+                        UnknownSenderPolicy.PAIR,
+                        SignalGroupMode.IGNORE);
         disconnected.disconnect();
         when(repository.findFirstByOrderByCreatedAtAsc()).thenReturn(Optional.of(disconnected));
         newService("poll");
@@ -220,13 +262,24 @@ class SignalReceiveServiceTest {
         cli.receiveBatches.add("[" + ONE + "]");
         TenantResolutionService resolution = mock(TenantResolutionService.class);
         when(resolution.listAccounts(ExternalAccountProvider.SIGNAL))
-                .thenReturn(List.of(new TenantResolutionService.AccountTenant(NUMBER, "tenant_restored")));
+                .thenReturn(
+                        List.of(
+                                new TenantResolutionService.AccountTenant(
+                                        NUMBER, "tenant_restored")));
         SignalApiClient api = new SignalApiClient(MAPPER, cli::guard);
         @SuppressWarnings("unchecked")
         ObjectProvider<SignalReceiveService> self = mock(ObjectProvider.class);
-        SignalCredentialService credentials = new SignalCredentialService(
-                repository, mock(EncryptionService.class), resolution, mock(TenantSchemaResolver.class), api, self);
-        service = new SignalReceiveService(resolution, repository, credentials, api, inbound, "poll", 1);
+        SignalCredentialService credentials =
+                new SignalCredentialService(
+                        repository,
+                        mock(EncryptionService.class),
+                        resolution,
+                        mock(TenantSchemaResolver.class),
+                        api,
+                        self);
+        service =
+                new SignalReceiveService(
+                        resolution, repository, credentials, api, inbound, "poll", 1);
 
         service.startAll();
 
@@ -234,11 +287,14 @@ class SignalReceiveServiceTest {
         assertThat(tenantsSeen).contains("tenant_restored");
 
         TenantResolutionService broken = mock(TenantResolutionService.class);
-        when(broken.listAccounts(ExternalAccountProvider.SIGNAL)).thenThrow(new IllegalStateException("db down"));
-        new SignalReceiveService(broken, repository, credentials, api, inbound, "poll", 1).startAll(); // must not throw
+        when(broken.listAccounts(ExternalAccountProvider.SIGNAL))
+                .thenThrow(new IllegalStateException("db down"));
+        new SignalReceiveService(broken, repository, credentials, api, inbound, "poll", 1)
+                .startAll(); // must not throw
     }
 
-    private static void waitFor(java.util.function.BooleanSupplier condition) throws InterruptedException {
+    private static void waitFor(java.util.function.BooleanSupplier condition)
+            throws InterruptedException {
         long deadline = System.currentTimeMillis() + 5000;
         while (!condition.getAsBoolean() && System.currentTimeMillis() < deadline) {
             Thread.sleep(25);

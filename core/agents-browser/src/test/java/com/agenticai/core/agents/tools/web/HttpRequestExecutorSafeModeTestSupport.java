@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import com.agenticai.core.secrets.SecretRedactor;
 import com.agenticai.core.secrets.SecretReferenceResolver;
 import com.agenticai.core.secrets.SecretVaultService;
@@ -27,7 +28,10 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.ObjectProvider;
 
-/** Shared doubles and builders for the {@link HttpRequestExecutor} safe-mode tests. Split from the former HttpRequestExecutorSafeModeTest. */
+/**
+ * Shared doubles and builders for the {@link HttpRequestExecutor} safe-mode tests. Split from the
+ * former HttpRequestExecutorSafeModeTest.
+ */
 abstract class HttpRequestExecutorSafeModeTestSupport {
 
     static final String HOST = "203.0.113.10";

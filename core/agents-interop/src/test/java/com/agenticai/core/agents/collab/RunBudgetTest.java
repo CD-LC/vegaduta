@@ -51,7 +51,8 @@ class RunBudgetTest {
         RunBudget b = budget("2");
         b.recordDelegate("q", "a"); // tiny text, but a delegate ran a whole loop: floor = $0.018
         assertEquals(0, new BigDecimal("0.018").compareTo(b.spentUsd()));
-        b.recordDelegate("x".repeat(40_000), "y".repeat(40_000)); // 10k in + 10k out = $0.06 > floor
+        b.recordDelegate(
+                "x".repeat(40_000), "y".repeat(40_000)); // 10k in + 10k out = $0.06 > floor
         assertEquals(0, new BigDecimal("0.078").compareTo(b.spentUsd()));
     }
 
@@ -62,13 +63,23 @@ class RunBudgetTest {
         UUID b = UUID.randomUUID();
         when(chat.delegateCall(eq(a), any(), any(), any())).thenReturn("A");
         when(chat.delegateCall(eq(b), any(), any(), any())).thenReturn("B");
-        DelegateToTeamToolCallback team = new DelegateToTeamToolCallback(chat, List.of(
-            new DelegateToTeamToolCallback.Member(a, "Researcher", "researcher"),
-            new DelegateToTeamToolCallback.Member(b, "Writer", "writer")), null, budget("0"));
+        DelegateToTeamToolCallback team =
+                new DelegateToTeamToolCallback(
+                        chat,
+                        List.of(
+                                new DelegateToTeamToolCallback.Member(
+                                        a, "Researcher", "researcher"),
+                                new DelegateToTeamToolCallback.Member(b, "Writer", "writer")),
+                        null,
+                        budget("0"));
 
-        JsonNode root = new ObjectMapper().readTree(team.call("{\"tasks\":["
-            + "{\"agent\":\"researcher\",\"question\":\"q1\"},"
-            + "{\"agent\":\"writer\",\"question\":\"q2\"}]}"));
+        JsonNode root =
+                new ObjectMapper()
+                        .readTree(
+                                team.call(
+                                        "{\"tasks\":["
+                                                + "{\"agent\":\"researcher\",\"question\":\"q1\"},"
+                                                + "{\"agent\":\"writer\",\"question\":\"q2\"}]}"));
 
         assertFalse(root.has("costEstimate"));
         assertFalse(root.has("stopReason"));
@@ -88,13 +99,23 @@ class RunBudgetTest {
         UUID b = UUID.randomUUID();
         when(chat.delegateCall(eq(a), any(), any(), any())).thenReturn("A");
         when(chat.delegateCall(eq(b), any(), any(), any())).thenReturn("B");
-        DelegateToTeamToolCallback team = new DelegateToTeamToolCallback(chat, List.of(
-            new DelegateToTeamToolCallback.Member(a, "Researcher", "researcher"),
-            new DelegateToTeamToolCallback.Member(b, "Writer", "writer")), null, budget("0.02"));
+        DelegateToTeamToolCallback team =
+                new DelegateToTeamToolCallback(
+                        chat,
+                        List.of(
+                                new DelegateToTeamToolCallback.Member(
+                                        a, "Researcher", "researcher"),
+                                new DelegateToTeamToolCallback.Member(b, "Writer", "writer")),
+                        null,
+                        budget("0.02"));
 
-        JsonNode root = new ObjectMapper().readTree(team.call("{\"tasks\":["
-            + "{\"agent\":\"researcher\",\"question\":\"q1\"},"
-            + "{\"agent\":\"writer\",\"question\":\"q2\"}]}"));
+        JsonNode root =
+                new ObjectMapper()
+                        .readTree(
+                                team.call(
+                                        "{\"tasks\":["
+                                                + "{\"agent\":\"researcher\",\"question\":\"q1\"},"
+                                                + "{\"agent\":\"writer\",\"question\":\"q2\"}]}"));
 
         assertTrue(root.get("costEstimate").asText().contains("estimated cost"));
         assertEquals(RunBudget.STOP_REASON, root.get("stopReason").asText());

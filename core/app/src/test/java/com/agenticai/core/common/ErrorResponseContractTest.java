@@ -191,12 +191,12 @@ class ErrorResponseContractTest {
                                     jsonPath("$.error")
                                             .value(
                                                     "No agent found with id"
-                                                        + " 00000000-0000-0000-0000-000000000001"))
+                                                            + " 00000000-0000-0000-0000-000000000001"))
                             .andExpect(
                                     jsonPath("$.detail")
                                             .value(
                                                     "No agent found with id"
-                                                        + " 00000000-0000-0000-0000-000000000001"))
+                                                            + " 00000000-0000-0000-0000-000000000001"))
                             .andReturn();
             JsonNode b = body(r);
             assertEquals(true, keys(b).containsAll(LEGACY_BASE));
@@ -324,7 +324,7 @@ class ErrorResponseContractTest {
                                     jsonPath("$.error")
                                             .value(
                                                     "No agent found with id"
-                                                        + " 00000000-0000-0000-0000-000000000001"))
+                                                            + " 00000000-0000-0000-0000-000000000001"))
                             .andExpect(jsonPath("$.type").doesNotExist())
                             .andExpect(jsonPath("$.requestId").doesNotExist())
                             .andReturn();

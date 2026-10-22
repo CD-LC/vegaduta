@@ -17,11 +17,11 @@ import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
  * {@code vegaduta_setup_guide}: how the Assistant turns "I want X" or "why can't you do X" into the
- * exact console page that sets X up. Read-only. It matches the request to a setup topic, reports the
- * install's live state for that topic where a module can tell (connected, failing, not set up), adds
- * the matching passages of the bundled documentation and, for MCP, the catalogue servers that fit the
- * request. The model answers with a link, the steps and "try again once it is on" - it never configures
- * anything itself, so nothing here can change the install.
+ * exact console page that sets X up. Read-only. It matches the request to a setup topic, reports
+ * the install's live state for that topic where a module can tell (connected, failing, not set up),
+ * adds the matching passages of the bundled documentation and, for MCP, the catalogue servers that
+ * fit the request. The model answers with a link, the steps and "try again once it is on" - it
+ * never configures anything itself, so nothing here can change the install.
  */
 public class SetupGuideToolCallback implements ToolCallback {
 
@@ -42,7 +42,8 @@ public class SetupGuideToolCallback implements ToolCallback {
     private final Supplier<Map<String, Status>> statuses;
     private final McpAdvisor mcp;
 
-    public SetupGuideToolCallback(PlatformGuide guide, Supplier<Map<String, Status>> statuses, McpAdvisor mcp) {
+    public SetupGuideToolCallback(
+            PlatformGuide guide, Supplier<Map<String, Status>> statuses, McpAdvisor mcp) {
         this.guide = guide;
         this.statuses = statuses;
         this.mcp = mcp;
@@ -78,7 +79,8 @@ public class SetupGuideToolCallback implements ToolCallback {
     @Override
     public String call(String toolInput) {
         try {
-            JsonNode args = MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
+            JsonNode args =
+                    MAPPER.readTree(toolInput == null || toolInput.isBlank() ? "{}" : toolInput);
             String action = args.path("action").asText("help");
             String query = args.path("query").asText("");
             ObjectNode out = MAPPER.createObjectNode();
@@ -88,7 +90,10 @@ public class SetupGuideToolCallback implements ToolCallback {
                     String id = args.path("id").asText("");
                     var topic = guide.topic(id);
                     if (topic.isEmpty()) {
-                        return error("No topic '" + id + "'. Use action=help with a query to find the id.");
+                        return error(
+                                "No topic '"
+                                        + id
+                                        + "'. Use action=help with a query to find the id.");
                     }
                     ArrayNode arr = out.putArray("topics");
                     arr.add(topicNode(topic.get(), statuses.get(), query, true));
@@ -127,8 +132,10 @@ public class SetupGuideToolCallback implements ToolCallback {
         }
         docsInto(out, query);
         if (hits.isEmpty()) {
-            out.put("note", "No setup topic matched. Answer from the docs below if they fit; otherwise say you could not find it and "
-                    + "point the user to the Help page (/help/docs). For an API question use vegaduta_api_guide.");
+            out.put(
+                    "note",
+                    "No setup topic matched. Answer from the docs below if they fit; otherwise say you could not find it and "
+                            + "point the user to the Help page (/help/docs). For an API question use vegaduta_api_guide.");
         }
         out.put("how_to_answer", HOW_TO_ANSWER);
     }
@@ -136,17 +143,27 @@ public class SetupGuideToolCallback implements ToolCallback {
     private void docsInto(ObjectNode out, String query) {
         ArrayNode docs = out.putArray("docs");
         for (PlatformGuide.DocHit d : guide.searchDocs(query, MAX_DOCS)) {
-            docs.addObject().put("doc", d.doc()).put("section", d.heading()).put("text", d.excerpt());
+            docs.addObject()
+                    .put("doc", d.doc())
+                    .put("section", d.heading())
+                    .put("text", d.excerpt());
         }
     }
 
-    private ObjectNode topicNode(SetupTopic t, Map<String, Status> live, String query, boolean full) {
+    private ObjectNode topicNode(
+            SetupTopic t, Map<String, Status> live, String query, boolean full) {
         ObjectNode n = MAPPER.createObjectNode();
-        n.put("id", t.id()).put("title", t.title()).put("summary", t.summary()).put("link", t.path());
+        n.put("id", t.id())
+                .put("title", t.title())
+                .put("summary", t.summary())
+                .put("link", t.path());
         Status s = live.get(t.id());
         ObjectNode st = n.putObject("status");
         if (s == null) {
-            st.put("state", "UNKNOWN").put("detail", "This install cannot tell from here; ask the user to open the page.");
+            st.put("state", "UNKNOWN")
+                    .put(
+                            "detail",
+                            "This install cannot tell from here; ask the user to open the page.");
         } else {
             st.put("state", s.state().name()).put("detail", s.detail());
         }
@@ -158,12 +175,16 @@ public class SetupGuideToolCallback implements ToolCallback {
         if (full) {
             ArrayNode also = n.putArray("also_check");
             for (String id : t.also()) {
-                guide.topic(id).ifPresent(o -> {
-                    ObjectNode a = also.addObject();
-                    a.put("id", o.id()).put("title", o.title()).put("link", o.path());
-                    Status os = live.get(o.id());
-                    a.put("state", os == null ? "UNKNOWN" : os.state().name());
-                });
+                guide.topic(id)
+                        .ifPresent(
+                                o -> {
+                                    ObjectNode a = also.addObject();
+                                    a.put("id", o.id())
+                                            .put("title", o.title())
+                                            .put("link", o.path());
+                                    Status os = live.get(o.id());
+                                    a.put("state", os == null ? "UNKNOWN" : os.state().name());
+                                });
             }
             if (!t.apiHints().isEmpty()) {
                 ArrayNode api = n.putArray("rest_api_lookup");

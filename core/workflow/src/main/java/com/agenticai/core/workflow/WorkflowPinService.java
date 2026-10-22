@@ -1,8 +1,8 @@
 package com.agenticai.core.workflow;
 
-import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
@@ -24,23 +24,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The permission-checked side of data pinning (spec section 5): list, create and delete the pinned output of
- * a node on the draft graph.
+ * The permission-checked side of data pinning (spec section 5): list, create and delete the pinned
+ * output of a node on the draft graph.
  *
  * <p>Permissions (the existing {@link PermissionLevel} ladder RUNNER &lt; VIEWER &lt; EDITOR):
+ *
  * <ul>
- *   <li>create / replace / delete a pin, and read the pinned data: EDITOR, the level that edits the graph;</li>
- *   <li>list pins: RUNNER or above, but {@code data} is null unless the caller is an EDITOR. A VIEWER (who may
- *       read the graph configuration) gets metadata only, because pins are run data - often real customer
- *       data - not configuration. Nobody below EDITOR gets a 403 for listing: the UI needs the "pinned" badges
- *       to label a draft run honestly.</li>
+ *   <li>create / replace / delete a pin, and read the pinned data: EDITOR, the level that edits the
+ *       graph;
+ *   <li>list pins: RUNNER or above, but {@code data} is null unless the caller is an EDITOR. A
+ *       VIEWER (who may read the graph configuration) gets metadata only, because pins are run data
+ *       - often real customer data - not configuration. Nobody below EDITOR gets a 403 for listing:
+ *       the UI needs the "pinned" badges to label a draft run honestly.
  * </ul>
- * Draft runs and persisted-pin step tests need EDITOR (a RUNNER runs the PRODUCTION version only), so a pin is
- * only ever consumed by someone who could read it. What this does NOT hide: the trace of a draft run shows the
- * pinned output and the inputs of nodes after it (redacted and capped like any trace payload, readable at
- * VIEWER like any run trace).
- * Every create and delete is audit-logged (who, which node, source, size - never the pinned data itself).
- * The engine does not come through here: it reads {@link WorkflowPinStore} directly for the run it serves.
+ *
+ * Draft runs and persisted-pin step tests need EDITOR (a RUNNER runs the PRODUCTION version only),
+ * so a pin is only ever consumed by someone who could read it. What this does NOT hide: the trace
+ * of a draft run shows the pinned output and the inputs of nodes after it (redacted and capped like
+ * any trace payload, readable at VIEWER like any run trace). Every create and delete is
+ * audit-logged (who, which node, source, size - never the pinned data itself). The engine does not
+ * come through here: it reads {@link WorkflowPinStore} directly for the run it serves.
  */
 @Service
 public class WorkflowPinService {
@@ -58,7 +61,10 @@ public class WorkflowPinService {
     private final WorkflowPinStore store;
     private final AuditLogService auditLogService;
 
-    public WorkflowPinService(WorkflowService workflowService, WorkflowPinStore store, AuditLogService auditLogService) {
+    public WorkflowPinService(
+            WorkflowService workflowService,
+            WorkflowPinStore store,
+            AuditLogService auditLogService) {
         this.workflowService = workflowService;
         this.store = store;
         this.auditLogService = auditLogService;
@@ -70,24 +76,49 @@ public class WorkflowPinService {
         return store.list(workflowId).stream().map(p -> toResponse(p, canRead)).toList();
     }
 
-    public WorkflowPinResponse put(UUID workflowId, String nodeId, WorkflowPinRequest request, String actor) {
+    public WorkflowPinResponse put(
+            UUID workflowId, String nodeId, WorkflowPinRequest request, String actor) {
         workflowService.requireAccess(workflowId, PermissionLevel.EDITOR);
         if (request == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A pin needs a body with the data to pin.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "A pin needs a body with the data to pin.");
         }
         WorkflowNodeDto node = findNode(workflowService.graph(workflowId), nodeId);
         if (node == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Node '" + nodeId + "' is not in this workflow's saved graph - save the canvas first.");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Node '"
+                            + nodeId
+                            + "' is not in this workflow's saved graph - save the canvas first.");
         }
-        String source = request.source() == null || request.source().isBlank() ? "manual" : request.source().strip();
-        String hash = request.configHash() != null && !request.configHash().isBlank()
-            ? request.configHash().strip()
-            : configHash(node);
-        WorkflowNodePin saved = store.save(workflowId, nodeId, request.data(), source,
-            blankToNull(request.sourceRunId()), actor, hash);
-        audit(actor, AUDIT_SET, workflowId, "Pinned node '" + nodeId + "' (source " + source + ", "
-            + saved.getSizeChars() + " chars).");
+        String source =
+                request.source() == null || request.source().isBlank()
+                        ? "manual"
+                        : request.source().strip();
+        String hash =
+                request.configHash() != null && !request.configHash().isBlank()
+                        ? request.configHash().strip()
+                        : configHash(node);
+        WorkflowNodePin saved =
+                store.save(
+                        workflowId,
+                        nodeId,
+                        request.data(),
+                        source,
+                        blankToNull(request.sourceRunId()),
+                        actor,
+                        hash);
+        audit(
+                actor,
+                AUDIT_SET,
+                workflowId,
+                "Pinned node '"
+                        + nodeId
+                        + "' (source "
+                        + source
+                        + ", "
+                        + saved.getSizeChars()
+                        + " chars).");
         return toResponse(saved, true);
     }
 
@@ -100,9 +131,9 @@ public class WorkflowPinService {
     }
 
     /**
-     * A stable hash of what makes the node produce its output: its type and config (not its label or
-     * position). Recorded when a pin is created and compared by the linter (STALE_PIN) to flag pinned data
-     * that predates a config change.
+     * A stable hash of what makes the node produce its output: its type and config (not its label
+     * or position). Recorded when a pin is created and compared by the linter (STALE_PIN) to flag
+     * pinned data that predates a config change.
      */
     public static String configHash(WorkflowNodeDto node) {
         Map<String, Object> shape = new LinkedHashMap<>();
@@ -124,9 +155,15 @@ public class WorkflowPinService {
     }
 
     static WorkflowPinResponse toResponse(WorkflowNodePin pin, boolean withData) {
-        return new WorkflowPinResponse(pin.getNodeId(), pin.getSource(), pin.getSourceRunId(), pin.getPinnedBy(),
-            pin.getPinnedAt() == null ? null : pin.getPinnedAt().toString(), pin.getSizeChars(), pin.getConfigHash(),
-            withData ? pin.getDataText() : null);
+        return new WorkflowPinResponse(
+                pin.getNodeId(),
+                pin.getSource(),
+                pin.getSourceRunId(),
+                pin.getPinnedBy(),
+                pin.getPinnedAt() == null ? null : pin.getPinnedAt().toString(),
+                pin.getSizeChars(),
+                pin.getConfigHash(),
+                withData ? pin.getDataText() : null);
     }
 
     private boolean canEdit(UUID workflowId) {
@@ -150,8 +187,13 @@ public class WorkflowPinService {
     /** Best effort: a failure writing the audit row must not undo or fail the pin change itself. */
     private void audit(String actor, String action, UUID workflowId, String detail) {
         try {
-            auditLogService.record(actor == null ? "unknown" : actor, action, AUDIT_TARGET, workflowId.toString(),
-                AuditOutcome.SUCCESS, detail);
+            auditLogService.record(
+                    actor == null ? "unknown" : actor,
+                    action,
+                    AUDIT_TARGET,
+                    workflowId.toString(),
+                    AuditOutcome.SUCCESS,
+                    detail);
         } catch (RuntimeException e) {
             log.warn("Could not record audit entry {} for workflow {}", action, workflowId, e);
         }

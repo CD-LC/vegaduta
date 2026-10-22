@@ -61,9 +61,11 @@ import reactor.core.publisher.Mono;
  */
 public final class TextToolCallRecoveringChatModel implements ChatModel {
 
-    private static final Logger log = LoggerFactory.getLogger(TextToolCallRecoveringChatModel.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(TextToolCallRecoveringChatModel.class);
 
     static final String RECOVERY_METRIC = "chat.tool.text_call_recovery";
+
     /** Marker on the converted assistant message, for step-event consumers and tests. */
     static final String RECOVERED_PROPERTY = "recoveredFromText";
 
@@ -78,9 +80,12 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
     private final MeterRegistry meterRegistry;
 
     public TextToolCallRecoveringChatModel(
-        ChatModel delegate, ToolCallingManager toolCallingManager, ObjectMapper objectMapper,
-        int maxRecoveries, int holdBackChars, MeterRegistry meterRegistry
-    ) {
+            ChatModel delegate,
+            ToolCallingManager toolCallingManager,
+            ObjectMapper objectMapper,
+            int maxRecoveries,
+            int holdBackChars,
+            MeterRegistry meterRegistry) {
         this.delegate = delegate;
         this.toolCallingManager = toolCallingManager;
         this.objectMapper = objectMapper;
@@ -115,7 +120,8 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
         if (known.isEmpty() || response == null || hasToolCalls(response)) {
             return response;
         }
-        List<AssistantMessage.ToolCall> calls = TextToolCallParser.parse(textOf(response), known, objectMapper);
+        List<AssistantMessage.ToolCall> calls =
+                TextToolCallParser.parse(textOf(response), known, objectMapper);
         if (calls.isEmpty()) {
             return response;
         }
@@ -128,7 +134,10 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
         if (result.returnDirect()) {
             return direct(converted, result);
         }
-        return callWithRecovery(new Prompt(result.conversationHistory(), prompt.getOptions()), round + 1, converted);
+        return callWithRecovery(
+                new Prompt(result.conversationHistory(), prompt.getOptions()),
+                round + 1,
+                converted);
     }
 
     // --- streaming --------------------------------------------------------------
@@ -142,20 +151,24 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
         return streamWithRecovery(prompt, known, 0, null);
     }
 
-    private Flux<ChatResponse> streamWithRecovery(Prompt prompt, Set<String> known, int round, ChatResponse previous) {
-        return Flux.defer(() -> {
-            HoldBack hold = new HoldBack();
-            Flux<ChatResponse> upstream = delegate.stream(prompt);
-            if (previous != null) {
-                upstream = upstream.map(chunk -> withCumulativeUsage(chunk, previous));
-            }
-            return upstream
-                .concatMap(hold::onNext)
-                // A provider failure mid-reply: whatever was held is released first, so the
-                // partial text reaches the caller exactly as it did before this wrapper existed.
-                .onErrorResume(error -> hold.release(null).concatWith(Flux.error(error)))
-                .concatWith(Flux.defer(() -> hold.onComplete(prompt, known, round)));
-        });
+    private Flux<ChatResponse> streamWithRecovery(
+            Prompt prompt, Set<String> known, int round, ChatResponse previous) {
+        return Flux.defer(
+                () -> {
+                    HoldBack hold = new HoldBack();
+                    Flux<ChatResponse> upstream = delegate.stream(prompt);
+                    if (previous != null) {
+                        upstream = upstream.map(chunk -> withCumulativeUsage(chunk, previous));
+                    }
+                    return upstream.concatMap(hold::onNext)
+                            // A provider failure mid-reply: whatever was held is released first, so
+                            // the
+                            // partial text reaches the caller exactly as it did before this wrapper
+                            // existed.
+                            .onErrorResume(
+                                    error -> hold.release(null).concatWith(Flux.error(error)))
+                            .concatWith(Flux.defer(() -> hold.onComplete(prompt, known, round)));
+                });
     }
 
     /**
@@ -191,7 +204,8 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
             if (passthrough) {
                 return Flux.empty();
             }
-            List<AssistantMessage.ToolCall> calls = TextToolCallParser.parse(text.toString(), known, objectMapper);
+            List<AssistantMessage.ToolCall> calls =
+                    TextToolCallParser.parse(text.toString(), known, objectMapper);
             if (calls.isEmpty()) {
                 return release(null);
             }
@@ -201,11 +215,18 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
             }
             ChatResponse converted = convert(last, calls, round);
             return Mono.fromCallable(() -> toolCallingManager.executeToolCalls(prompt, converted))
-                .subscribeOn(TenantAwareSchedulers.boundedElastic())
-                .flatMapMany(result -> result.returnDirect()
-                    ? Flux.just(direct(converted, result))
-                    : streamWithRecovery(
-                        new Prompt(result.conversationHistory(), prompt.getOptions()), known, round + 1, converted));
+                    .subscribeOn(TenantAwareSchedulers.boundedElastic())
+                    .flatMapMany(
+                            result ->
+                                    result.returnDirect()
+                                            ? Flux.just(direct(converted, result))
+                                            : streamWithRecovery(
+                                                    new Prompt(
+                                                            result.conversationHistory(),
+                                                            prompt.getOptions()),
+                                                    known,
+                                                    round + 1,
+                                                    converted));
         }
 
         Flux<ChatResponse> release(ChatResponse andThen) {
@@ -222,19 +243,25 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
     // --- shared ------------------------------------------------------------------
 
     /** The text reply re-expressed as the structured tool-call response the loop expects. */
-    private ChatResponse convert(ChatResponse source, List<AssistantMessage.ToolCall> calls, int round) {
+    private ChatResponse convert(
+            ChatResponse source, List<AssistantMessage.ToolCall> calls, int round) {
         List<String> names = calls.stream().map(AssistantMessage.ToolCall::name).toList();
         log.info(
-            "Model answered with a text-form tool call instead of a structured one - executing it "
-                + "(round={} tools={})", round + 1, names);
+                "Model answered with a text-form tool call instead of a structured one - executing it "
+                        + "(round={} tools={})",
+                round + 1,
+                names);
         increment("outcome", "recovered");
-        AssistantMessage assistant = AssistantMessage.builder()
-            .content("")
-            .properties(Map.of(RECOVERED_PROPERTY, Boolean.TRUE))
-            .toolCalls(calls)
-            .build();
-        Generation generation = new Generation(
-            assistant, ChatGenerationMetadata.builder().finishReason("TOOL_CALLS").build());
+        AssistantMessage assistant =
+                AssistantMessage.builder()
+                        .content("")
+                        .properties(Map.of(RECOVERED_PROPERTY, Boolean.TRUE))
+                        .toolCalls(calls)
+                        .build();
+        Generation generation =
+                new Generation(
+                        assistant,
+                        ChatGenerationMetadata.builder().finishReason("TOOL_CALLS").build());
         ChatResponse.Builder builder = ChatResponse.builder();
         if (source != null) {
             builder.from(source);
@@ -244,15 +271,17 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
 
     private static ChatResponse direct(ChatResponse converted, ToolExecutionResult result) {
         return ChatResponse.builder()
-            .from(converted)
-            .generations(ToolExecutionResult.buildGenerations(result))
-            .build();
+                .from(converted)
+                .generations(ToolExecutionResult.buildGenerations(result))
+                .build();
     }
 
     private void giveUp(int round, List<AssistantMessage.ToolCall> calls) {
         log.warn(
-            "Model still answers with text-form tool calls after {} recovered round(s) - releasing the "
-                + "reply as text (tools={})", round, calls.stream().map(AssistantMessage.ToolCall::name).toList());
+                "Model still answers with text-form tool calls after {} recovered round(s) - releasing the "
+                        + "reply as text (tools={})",
+                round,
+                calls.stream().map(AssistantMessage.ToolCall::name).toList());
         increment("outcome", "limit");
     }
 
@@ -266,14 +295,17 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
             return chunk;
         }
         ChatResponseMetadata metadata = chunk.getMetadata();
-        Usage current = metadata == null || metadata.getUsage() == null ? new EmptyUsage() : metadata.getUsage();
+        Usage current =
+                metadata == null || metadata.getUsage() == null
+                        ? new EmptyUsage()
+                        : metadata.getUsage();
         Usage cumulative = UsageCalculator.getCumulativeUsage(current, previous);
         ChatResponseMetadata.Builder builder = ChatResponseMetadata.builder().usage(cumulative);
         if (metadata != null) {
             builder.id(metadata.getId())
-                .model(metadata.getModel())
-                .rateLimit(metadata.getRateLimit())
-                .promptMetadata(metadata.getPromptMetadata());
+                    .model(metadata.getModel())
+                    .rateLimit(metadata.getRateLimit())
+                    .promptMetadata(metadata.getPromptMetadata());
             for (Map.Entry<String, Object> entry : metadata.entrySet()) {
                 builder.keyValue(entry.getKey(), entry.getValue());
             }
@@ -307,7 +339,9 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
             return false;
         }
         for (Generation generation : response.getResults()) {
-            if (generation != null && generation.getOutput() != null && generation.getOutput().hasToolCalls()) {
+            if (generation != null
+                    && generation.getOutput() != null
+                    && generation.getOutput().hasToolCalls()) {
                 return true;
             }
         }
@@ -320,7 +354,9 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
         }
         StringBuilder text = new StringBuilder();
         for (Generation generation : response.getResults()) {
-            if (generation != null && generation.getOutput() != null && generation.getOutput().getText() != null) {
+            if (generation != null
+                    && generation.getOutput() != null
+                    && generation.getOutput().getText() != null) {
                 text.append(generation.getOutput().getText());
             }
         }

@@ -29,17 +29,19 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * The seam every OpenAI-compatible / Anthropic factory builds through (ADR-0012 P1b). The wire-level
- * equivalence with the old inline construction is {@link LlmFactoryWireParityTest}; this pins the
- * builder's own contract: options base, transport selection (guarded vs plain vs overridden) and
- * model wiring.
+ * The seam every OpenAI-compatible / Anthropic factory builds through (ADR-0012 P1b). The
+ * wire-level equivalence with the old inline construction is {@link LlmFactoryWireParityTest}; this
+ * pins the builder's own contract: options base, transport selection (guarded vs plain vs
+ * overridden) and model wiring.
  */
 class OpenAiCompatModelBuilderTest {
 
     private final LlmHttpClientFactory http = mock(LlmHttpClientFactory.class);
-    private final ResilientToolCallingManagerFactory tools = new ResilientToolCallingManagerFactory(JsonMappers.plain());
+    private final ResilientToolCallingManagerFactory tools =
+            new ResilientToolCallingManagerFactory(JsonMappers.plain());
     private final LlmModelSupport support = support("MISTRAL");
-    private final OpenAiCompatModelBuilder builder = new OpenAiCompatModelBuilder(http, tools, support);
+    private final OpenAiCompatModelBuilder builder =
+            new OpenAiCompatModelBuilder(http, tools, support);
 
     @SuppressWarnings("unchecked")
     private static LlmModelSupport support(String streamUsageDisabled) {
@@ -47,8 +49,18 @@ class OpenAiCompatModelBuilderTest {
         when(obs.getIfAvailable(any())).thenReturn(ObservationRegistry.NOOP);
         ObjectProvider<DefaultAgentAdvisor> adv = mock(ObjectProvider.class);
         when(adv.orderedStream()).thenAnswer(i -> Stream.<DefaultAgentAdvisor>empty());
-        return new LlmModelSupport(obs, adv, 2, Duration.ofMillis(1), Duration.ofMillis(2), true,
-            streamUsageDisabled, "low", 16, Duration.ofMinutes(30), false);
+        return new LlmModelSupport(
+                obs,
+                adv,
+                2,
+                Duration.ofMillis(1),
+                Duration.ofMillis(2),
+                true,
+                streamUsageDisabled,
+                "low",
+                16,
+                Duration.ofMinutes(30),
+                false);
     }
 
     private void stubTransports() {
@@ -71,8 +83,12 @@ class OpenAiCompatModelBuilderTest {
 
     @Test
     void baseOptionsMirrorsTheStreamUsageFlagVerbatim() {
-        assertEquals(Boolean.TRUE, OpenAiCompatModelBuilder.baseOptions("m", true).build().getStreamUsage());
-        assertEquals(Boolean.FALSE, OpenAiCompatModelBuilder.baseOptions("m", false).build().getStreamUsage());
+        assertEquals(
+                Boolean.TRUE,
+                OpenAiCompatModelBuilder.baseOptions("m", true).build().getStreamUsage());
+        assertEquals(
+                Boolean.FALSE,
+                OpenAiCompatModelBuilder.baseOptions("m", false).build().getStreamUsage());
         assertEquals("m", OpenAiCompatModelBuilder.baseOptions("m", true).build().getModel());
     }
 
@@ -102,7 +118,11 @@ class OpenAiCompatModelBuilderTest {
         stubTransports();
         RestClient.Builder rest = RestClient.builder();
         WebClient.Builder web = WebClient.builder();
-        builder.api("https://api.example.com").apiKey("k").restClientBuilder(rest).webClientBuilder(web).build();
+        builder.api("https://api.example.com")
+                .apiKey("k")
+                .restClientBuilder(rest)
+                .webClientBuilder(web)
+                .build();
         verify(http, never()).restClientBuilder();
         verify(http, never()).webClientBuilder();
     }
@@ -112,16 +132,26 @@ class OpenAiCompatModelBuilderTest {
         stubTransports();
         LinkedMultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add("api-key", "x");
-        assertNotNull(builder.api("https://r.openai.azure.com").noApiKey().headers(headers)
-            .completionsPath("/openai/deployments/d/chat/completions?api-version=1").guarded().build());
-        assertNotNull(builder.api("https://api.example.com").apiKey("k").completionsPath(null).build());
+        assertNotNull(
+                builder.api("https://r.openai.azure.com")
+                        .noApiKey()
+                        .headers(headers)
+                        .completionsPath("/openai/deployments/d/chat/completions?api-version=1")
+                        .guarded()
+                        .build());
+        assertNotNull(
+                builder.api("https://api.example.com").apiKey("k").completionsPath(null).build());
     }
 
     @Test
     void chatModelKeepsTheGivenDefaultOptions() {
         stubTransports();
         OpenAiApi api = builder.api("https://api.example.com").apiKey("k").build();
-        OpenAiChatOptions options = builder.options(ProviderName.OPENAI, "gpt-4o").maxTokens(77).temperature(0.3).build();
+        OpenAiChatOptions options =
+                builder.options(ProviderName.OPENAI, "gpt-4o")
+                        .maxTokens(77)
+                        .temperature(0.3)
+                        .build();
         OpenAiChatModel model = builder.chatModel(api, options);
         OpenAiChatOptions defaults = (OpenAiChatOptions) model.getDefaultOptions();
         assertEquals("gpt-4o", defaults.getModel());
@@ -135,7 +165,8 @@ class OpenAiCompatModelBuilderTest {
         when(http.restClientBuilder()).thenAnswer(i -> RestClient.builder());
         RestClient.Builder a = builder.restClientBuilder();
         RestClient.Builder b = builder.restClientBuilder();
-        assertFalse(a == b, "Spring AI *Api builders mutate the builder, so each call must be fresh");
+        assertFalse(
+                a == b, "Spring AI *Api builders mutate the builder, so each call must be fresh");
         assertTrue(a != null && b != null);
     }
 
@@ -147,7 +178,8 @@ class OpenAiCompatModelBuilderTest {
         AnthropicModelBuilder anthropic = new AnthropicModelBuilder(http, tools, support);
         AnthropicApi api = anthropic.api("sk-an");
         assertNotNull(api);
-        AnthropicChatOptions options = AnthropicChatOptions.builder().model("claude-sonnet-4").maxTokens(99).build();
+        AnthropicChatOptions options =
+                AnthropicChatOptions.builder().model("claude-sonnet-4").maxTokens(99).build();
         AnthropicChatModel model = anthropic.chatModel(api, options);
         AnthropicChatOptions defaults = (AnthropicChatOptions) model.getDefaultOptions();
         assertEquals("claude-sonnet-4", defaults.getModel());

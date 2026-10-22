@@ -1,12 +1,12 @@
 package com.agenticai.core.mcpserver.tools;
 
-import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.agents.a2a.A2aError;
 import com.agenticai.core.agents.a2a.A2aTask;
 import com.agenticai.core.agents.a2a.A2aTaskService;
 import com.agenticai.core.agents.a2a.A2aVersion;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.mcpserver.McpCallerContext;
 import com.agenticai.core.security.TenantContext;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,39 +24,36 @@ import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.util.StringUtils;
 
 /**
- * Task-style (start / poll / cancel) variants of {@code call_agent} for work
- * that outlives one MCP request: {@code start_agent_task} returns a task id
- * immediately, {@code get_task} polls it, {@code cancel_task} stops it.
+ * Task-style (start / poll / cancel) variants of {@code call_agent} for work that outlives one MCP
+ * request: {@code start_agent_task} returns a task id immediately, {@code get_task} polls it,
+ * {@code cancel_task} stops it.
  *
- * <p><b>Why tools and not the MCP spec's native Tasks utility:</b> the spec's
- * task-augmented {@code tools/call} + {@code tasks/get|result|cancel} methods
- * need protocol support from the server SDK (Spring AI 1.1.7's MCP server
- * starter, SYNC type, does not expose them) and hand-rolling them would mean
- * owning the streamable transport. The tool trio here carries the same
- * lifecycle in plain tool results any MCP client can call today, using the
- * spec's state vocabulary: {@code working} (this server also reports
- * {@code submitted} for the instant before the turn starts), {@code completed},
- * {@code failed}, {@code cancelled}. When the SDK gains native Tasks these
- * tools can stay as the fallback.
+ * <p><b>Why tools and not the MCP spec's native Tasks utility:</b> the spec's task-augmented {@code
+ * tools/call} + {@code tasks/get|result|cancel} methods need protocol support from the server SDK
+ * (Spring AI 1.1.7's MCP server starter, SYNC type, does not expose them) and hand-rolling them
+ * would mean owning the streamable transport. The tool trio here carries the same lifecycle in
+ * plain tool results any MCP client can call today, using the spec's state vocabulary: {@code
+ * working} (this server also reports {@code submitted} for the instant before the turn starts),
+ * {@code completed}, {@code failed}, {@code cancelled}. When the SDK gains native Tasks these tools
+ * can stay as the fallback.
  *
- * <p>Backed by {@link A2aTaskService}/{@code A2aTaskStore} - the SAME task
- * records the A2A endpoint uses, so the store's TTL ({@code app.a2a.task-ttl}),
- * capacity cap and optional Redis mirroring ({@code app.a2a.task-store=redis})
- * apply unchanged. Ownership is the {@code TenantContext} the MCP auth filter
- * binds (tenant + {@code mcp-external:<grantId>}), so a task id is only
- * readable/cancelable by the grant that started it; anyone else gets the same
- * "not found" as for an unknown id. Agent authorization is the same per-grant
- * exposed-agent check {@code call_agent} performs, BEFORE any turn starts.
+ * <p>Backed by {@link A2aTaskService}/{@code A2aTaskStore} - the SAME task records the A2A endpoint
+ * uses, so the store's TTL ({@code app.a2a.task-ttl}), capacity cap and optional Redis mirroring
+ * ({@code app.a2a.task-store=redis}) apply unchanged. Ownership is the {@code TenantContext} the
+ * MCP auth filter binds (tenant + {@code mcp-external:<grantId>}), so a task id is only
+ * readable/cancelable by the grant that started it; anyone else gets the same "not found" as for an
+ * unknown id. Agent authorization is the same per-grant exposed-agent check {@code call_agent}
+ * performs, BEFORE any turn starts.
  *
- * <p><b>Limits:</b> at most {@code app.mcpserver.async-tasks.max-concurrent-per-tenant}
- * (default {@value #DEFAULT_MAX_CONCURRENT_PER_TENANT}) non-terminal tasks per tenant on this
- * JVM, so one tenant cannot take the whole shared async pool; the count is per replica
- * (document: with N replicas the effective cap is N times that). {@code get_task} polls draw
- * from a separate, larger rate-limit bucket (see {@code McpServerRateLimiter#allowPoll}) and
- * the result carries {@code poll_after_seconds} while the task is still running.
+ * <p><b>Limits:</b> at most {@code app.mcpserver.async-tasks.max-concurrent-per-tenant} (default
+ * {@value #DEFAULT_MAX_CONCURRENT_PER_TENANT}) non-terminal tasks per tenant on this JVM, so one
+ * tenant cannot take the whole shared async pool; the count is per replica (document: with N
+ * replicas the effective cap is N times that). {@code get_task} polls draw from a separate, larger
+ * rate-limit bucket (see {@code McpServerRateLimiter#allowPoll}) and the result carries {@code
+ * poll_after_seconds} while the task is still running.
  *
- * <p>Errors are returned as {@code {"error": "..."}} JSON, never thrown, same as
- * {@code call_agent}.
+ * <p>Errors are returned as {@code {"error": "..."}} JSON, never thrown, same as {@code
+ * call_agent}.
  */
 public final class McpAgentTaskToolCallbacks {
 
@@ -64,6 +61,7 @@ public final class McpAgentTaskToolCallbacks {
     private static final ObjectMapper MAPPER = JsonMappers.plain();
     static final String AUDIT_ACTION = "mcp.grant.start_agent_task";
     public static final int DEFAULT_MAX_CONCURRENT_PER_TENANT = 4;
+
     /** Suggested delay before the next get_task while a task is non-terminal. */
     static final int POLL_AFTER_SECONDS = 3;
 
@@ -71,47 +69,64 @@ public final class McpAgentTaskToolCallbacks {
         // factory only
     }
 
-    public static List<ToolCallback> create(A2aTaskService taskService, AuditLogService auditLogService) {
+    public static List<ToolCallback> create(
+            A2aTaskService taskService, AuditLogService auditLogService) {
         return create(taskService, auditLogService, DEFAULT_MAX_CONCURRENT_PER_TENANT);
     }
 
-    /** @param maxConcurrentPerTenant in-flight task cap per tenant on this JVM; {@code <= 0} disables the cap. */
+    /**
+     * @param maxConcurrentPerTenant in-flight task cap per tenant on this JVM; {@code <= 0}
+     *     disables the cap.
+     */
     public static List<ToolCallback> create(
-        A2aTaskService taskService, AuditLogService auditLogService, int maxConcurrentPerTenant
-    ) {
+            A2aTaskService taskService,
+            AuditLogService auditLogService,
+            int maxConcurrentPerTenant) {
         return List.of(
-            new StartAgentTask(taskService, auditLogService, new TenantTaskCap(maxConcurrentPerTenant)),
-            new GetTask(taskService),
-            new CancelTask(taskService));
+                new StartAgentTask(
+                        taskService, auditLogService, new TenantTaskCap(maxConcurrentPerTenant)),
+                new GetTask(taskService),
+                new CancelTask(taskService));
     }
 
     // -------------------------------------------------------------- tenant cap
 
-    /** Counts non-terminal tasks per tenant; a slot is held from {@link #tryAcquire} until the task completes. */
+    /**
+     * Counts non-terminal tasks per tenant; a slot is held from {@link #tryAcquire} until the task
+     * completes.
+     */
     static final class TenantTaskCap {
 
         private final int max;
-        /** Entries are removed when their count returns to zero, so the map never outgrows the live tenants. */
+
+        /**
+         * Entries are removed when their count returns to zero, so the map never outgrows the live
+         * tenants.
+         */
         private final ConcurrentHashMap<String, Integer> inFlight = new ConcurrentHashMap<>();
 
         TenantTaskCap(int max) {
             this.max = max;
         }
 
-        /** @return a releaser (idempotent), or null when the tenant is at its cap. */
+        /**
+         * @return a releaser (idempotent), or null when the tenant is at its cap.
+         */
         Runnable tryAcquire(String tenantId) {
             if (max <= 0) {
-                return () -> { };
+                return () -> {};
             }
             boolean[] acquired = {false};
-            inFlight.compute(tenantId, (k, n) -> {
-                int current = n == null ? 0 : n;
-                if (current >= max) {
-                    return n;
-                }
-                acquired[0] = true;
-                return current + 1;
-            });
+            inFlight.compute(
+                    tenantId,
+                    (k, n) -> {
+                        int current = n == null ? 0 : n;
+                        if (current >= max) {
+                            return n;
+                        }
+                        acquired[0] = true;
+                        return current + 1;
+                    });
             if (!acquired[0]) {
                 return null;
             }
@@ -140,7 +155,8 @@ public final class McpAgentTaskToolCallbacks {
         private final AuditLogService auditLogService;
         private final TenantTaskCap cap;
 
-        StartAgentTask(A2aTaskService taskService, AuditLogService auditLogService, TenantTaskCap cap) {
+        StartAgentTask(
+                A2aTaskService taskService, AuditLogService auditLogService, TenantTaskCap cap) {
             this.taskService = taskService;
             this.auditLogService = auditLogService;
             this.cap = cap;
@@ -149,14 +165,14 @@ public final class McpAgentTaskToolCallbacks {
         @Override
         public ToolDefinition getToolDefinition() {
             return ToolDefinition.builder()
-                .name("start_agent_task")
-                .description(
-                    "Starts a long-running message to one of your organization's agents WITHOUT waiting for the reply. "
-                        + "Returns a task_id immediately; poll get_task with it until state is completed, failed or "
-                        + "cancelled, or stop it with cancel_task. Use this instead of call_agent when the agent may "
-                        + "take minutes. Pass the same session_id on a follow-up to continue the conversation."
-                )
-                .inputSchema("""
+                    .name("start_agent_task")
+                    .description(
+                            "Starts a long-running message to one of your organization's agents WITHOUT waiting for the reply. "
+                                    + "Returns a task_id immediately; poll get_task with it until state is completed, failed or "
+                                    + "cancelled, or stop it with cancel_task. Use this instead of call_agent when the agent may "
+                                    + "take minutes. Pass the same session_id on a follow-up to continue the conversation.")
+                    .inputSchema(
+                            """
                     {
                         "type": "object",
                         "properties": {
@@ -167,7 +183,7 @@ public final class McpAgentTaskToolCallbacks {
                         "required": ["agent_id", "message"]
                     }
                     """)
-                .build();
+                    .build();
         }
 
         @Override
@@ -185,42 +201,74 @@ public final class McpAgentTaskToolCallbacks {
                 try {
                     agentId = UUID.fromString(agentIdRaw);
                 } catch (IllegalArgumentException e) {
-                    return errorJson("agent_id is not a valid id - call list_my_agents to see valid ids.");
+                    return errorJson(
+                            "agent_id is not a valid id - call list_my_agents to see valid ids.");
                 }
                 if (!caller.isAgentExposed(agentId)) {
-                    log.warn("MCP grant {} attempted to start a task on agent {} outside its exposed-agent set - rejected",
-                        caller.grantId(), agentId);
-                    recordAudit(caller.grantId(), agentIdRaw, AuditOutcome.FAILURE,
-                        "MCP grant " + caller.grantId() + " attempted to start a task on agent " + agentIdRaw
-                            + ", which is outside its exposed-agent set.");
-                    return errorJson("This API key is not authorized to call that agent - call list_my_agents to see which agents you can use.");
+                    log.warn(
+                            "MCP grant {} attempted to start a task on agent {} outside its exposed-agent set - rejected",
+                            caller.grantId(),
+                            agentId);
+                    recordAudit(
+                            caller.grantId(),
+                            agentIdRaw,
+                            AuditOutcome.FAILURE,
+                            "MCP grant "
+                                    + caller.grantId()
+                                    + " attempted to start a task on agent "
+                                    + agentIdRaw
+                                    + ", which is outside its exposed-agent set.");
+                    return errorJson(
+                            "This API key is not authorized to call that agent - call list_my_agents to see which agents you can use.");
                 }
-                String sessionId = StringUtils.hasText(sessionIdRaw)
-                    ? sessionIdRaw
-                    : "mcp-" + caller.grantId() + "-" + UUID.randomUUID();
-                String tenantKey = TenantContext.current().map(TenantContext::getTenantId).orElse("_none");
+                String sessionId =
+                        StringUtils.hasText(sessionIdRaw)
+                                ? sessionIdRaw
+                                : "mcp-" + caller.grantId() + "-" + UUID.randomUUID();
+                String tenantKey =
+                        TenantContext.current().map(TenantContext::getTenantId).orElse("_none");
                 Runnable release = cap.tryAcquire(tenantKey);
                 if (release == null) {
-                    return errorJson("Too many tasks are already running for your organization (limit "
-                        + cap.max() + " at once) - wait for one to finish or cancel_task one, then retry.");
+                    return errorJson(
+                            "Too many tasks are already running for your organization (limit "
+                                    + cap.max()
+                                    + " at once) - wait for one to finish or cancel_task one, then retry.");
                 }
                 A2aTask task;
                 try {
-                    task = taskService.create(agentId, sessionId, UUID.randomUUID().toString(), message, null);
+                    task =
+                            taskService.create(
+                                    agentId,
+                                    sessionId,
+                                    UUID.randomUUID().toString(),
+                                    message,
+                                    null);
                 } catch (RuntimeException e) {
                     release.run();
                     throw e;
                 }
-                // Every terminal path (completed, failed, canceled, aborted, TTL-swept) completes this future.
+                // Every terminal path (completed, failed, canceled, aborted, TTL-swept) completes
+                // this future.
                 task.completion().whenComplete((ignored, err) -> release.run());
                 try {
                     taskService.runAsync(task);
                 } catch (A2aError busy) {
-                    return errorJson("Too many tasks are in flight on this server - retry shortly.");
+                    return errorJson(
+                            "Too many tasks are in flight on this server - retry shortly.");
                 }
-                recordAudit(caller.grantId(), agentId.toString(), AuditOutcome.SUCCESS,
-                    "MCP grant " + caller.grantId() + " started task " + task.id() + " on agent " + agentId
-                        + " (session " + sessionId + ").");
+                recordAudit(
+                        caller.grantId(),
+                        agentId.toString(),
+                        AuditOutcome.SUCCESS,
+                        "MCP grant "
+                                + caller.grantId()
+                                + " started task "
+                                + task.id()
+                                + " on agent "
+                                + agentId
+                                + " (session "
+                                + sessionId
+                                + ").");
                 return MAPPER.writeValueAsString(taskJson(task));
             } catch (Exception e) {
                 log.warn("start_agent_task failed for grant {}", caller.grantId(), e);
@@ -228,11 +276,21 @@ public final class McpAgentTaskToolCallbacks {
             }
         }
 
-        private void recordAudit(UUID grantId, String agentIdOrNull, AuditOutcome outcome, String detail) {
+        private void recordAudit(
+                UUID grantId, String agentIdOrNull, AuditOutcome outcome, String detail) {
             try {
-                auditLogService.record("mcp-external:" + grantId, AUDIT_ACTION, "Agent", agentIdOrNull, outcome, detail);
+                auditLogService.record(
+                        "mcp-external:" + grantId,
+                        AUDIT_ACTION,
+                        "Agent",
+                        agentIdOrNull,
+                        outcome,
+                        detail);
             } catch (RuntimeException auditFailure) {
-                log.warn("Failed to record audit log entry for MCP grant {} start_agent_task", grantId, auditFailure);
+                log.warn(
+                        "Failed to record audit log entry for MCP grant {} start_agent_task",
+                        grantId,
+                        auditFailure);
             }
         }
     }
@@ -250,14 +308,14 @@ public final class McpAgentTaskToolCallbacks {
         @Override
         public ToolDefinition getToolDefinition() {
             return ToolDefinition.builder()
-                .name("get_task")
-                .description(
-                    "Returns the current state of a task started with start_agent_task: state is one of submitted, "
-                        + "working, completed, failed, cancelled. reply holds the agent's output (partial while working "
-                        + "on the server that runs it); error is set when failed. While the task is still running the result "
-                        + "carries poll_after_seconds - wait that long before polling again."
-                )
-                .inputSchema("""
+                    .name("get_task")
+                    .description(
+                            "Returns the current state of a task started with start_agent_task: state is one of submitted, "
+                                    + "working, completed, failed, cancelled. reply holds the agent's output (partial while working "
+                                    + "on the server that runs it); error is set when failed. While the task is still running the result "
+                                    + "carries poll_after_seconds - wait that long before polling again.")
+                    .inputSchema(
+                            """
                     {
                         "type": "object",
                         "properties": {
@@ -266,7 +324,7 @@ public final class McpAgentTaskToolCallbacks {
                         "required": ["task_id"]
                     }
                     """)
-                .build();
+                    .build();
         }
 
         @Override
@@ -279,7 +337,8 @@ public final class McpAgentTaskToolCallbacks {
                 }
                 return MAPPER.writeValueAsString(taskJson(taskService.get(taskId, null)));
             } catch (A2aError notFound) {
-                return errorJson("Task not found (unknown, expired, or not started by this API key).");
+                return errorJson(
+                        "Task not found (unknown, expired, or not started by this API key).");
             } catch (Exception e) {
                 log.warn("get_task failed", e);
                 return errorJson("Could not read the task: " + e.getMessage());
@@ -300,9 +359,11 @@ public final class McpAgentTaskToolCallbacks {
         @Override
         public ToolDefinition getToolDefinition() {
             return ToolDefinition.builder()
-                .name("cancel_task")
-                .description("Cancels a still-running task started with start_agent_task. A task that already finished cannot be cancelled.")
-                .inputSchema("""
+                    .name("cancel_task")
+                    .description(
+                            "Cancels a still-running task started with start_agent_task. A task that already finished cannot be cancelled.")
+                    .inputSchema(
+                            """
                     {
                         "type": "object",
                         "properties": {
@@ -311,7 +372,7 @@ public final class McpAgentTaskToolCallbacks {
                         "required": ["task_id"]
                     }
                     """)
-                .build();
+                    .build();
         }
 
         @Override
@@ -325,9 +386,11 @@ public final class McpAgentTaskToolCallbacks {
                 return MAPPER.writeValueAsString(taskJson(taskService.cancel(taskId, null)));
             } catch (A2aError e) {
                 if (e.getCode() == A2aError.TASK_NOT_CANCELABLE) {
-                    return errorJson("Task already finished and cannot be cancelled - call get_task for its result.");
+                    return errorJson(
+                            "Task already finished and cannot be cancelled - call get_task for its result.");
                 }
-                return errorJson("Task not found (unknown, expired, or not started by this API key).");
+                return errorJson(
+                        "Task not found (unknown, expired, or not started by this API key).");
             } catch (Exception e) {
                 log.warn("cancel_task failed", e);
                 return errorJson("Could not cancel the task: " + e.getMessage());
@@ -338,12 +401,19 @@ public final class McpAgentTaskToolCallbacks {
     // ---------------------------------------------------------------- helpers
 
     private static McpCallerContext requireCaller(String tool) {
-        return McpCallerContext.current().orElseThrow(() -> new IllegalStateException(
-            tool + " invoked with no McpCallerContext set - McpApiKeyAuthFilter should have rejected this "
-                + "request before it ever reached tool dispatch."));
+        return McpCallerContext.current()
+                .orElseThrow(
+                        () ->
+                                new IllegalStateException(
+                                        tool
+                                                + " invoked with no McpCallerContext set - McpApiKeyAuthFilter should have rejected this "
+                                                + "request before it ever reached tool dispatch."));
     }
 
-    /** Spec-vocabulary state names: the A2A 0.3 wire form is already lower-case "canceled"; MCP spells it "cancelled". */
+    /**
+     * Spec-vocabulary state names: the A2A 0.3 wire form is already lower-case "canceled"; MCP
+     * spells it "cancelled".
+     */
     static String stateName(A2aTask task) {
         String wire = task.snapshot().state().wire(A2aVersion.V0_3);
         return "canceled".equals(wire) ? "cancelled" : wire;

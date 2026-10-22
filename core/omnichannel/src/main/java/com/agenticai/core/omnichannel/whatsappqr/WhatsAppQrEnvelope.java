@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Optional;
 
 /**
- * One inbound message as the bridge queues it (see {@code services/whatsapp-qr/server.js}):
- * a direct chat's text (or an attachment note). Groups, broadcasts and the account's own echoes
- * are dropped on the bridge; anything still malformed or unsendable-to is dropped here too, so
- * the rest of the pipeline only sees a message a person sent to the linked number.
+ * One inbound message as the bridge queues it (see {@code services/whatsapp-qr/server.js}): a
+ * direct chat's text (or an attachment note). Groups, broadcasts and the account's own echoes are
+ * dropped on the bridge; anything still malformed or unsendable-to is dropped here too, so the rest
+ * of the pipeline only sees a message a person sent to the linked number.
  *
  * @param externalId session/send key - digits, or {@code <digits>@lid} for a hidden-number sender
  * @param senderNumber the dialable digits when known (null for a LID sender)
@@ -24,7 +24,9 @@ public record WhatsAppQrEnvelope(
     /** Longest text handed to the agent; the bridge caps at 8000, this is a second abuse cap. */
     static final int MAX_TEXT_CHARS = 8_000;
 
-    /** Idempotency key: the bridge drains its queue once, but Baileys can redeliver on reconnect. */
+    /**
+     * Idempotency key: the bridge drains its queue once, but Baileys can redeliver on reconnect.
+     */
     public String dedupKey() {
         return externalId + ":" + messageId;
     }

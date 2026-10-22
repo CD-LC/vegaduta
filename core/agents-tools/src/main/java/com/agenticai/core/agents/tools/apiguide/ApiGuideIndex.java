@@ -15,8 +15,8 @@ import java.util.Optional;
 
 /**
  * A searchable, read-only view of the platform's OpenAPI document. Everything it returns is copied
- * out of the spec (never invented); schemas are summarised to a few levels so a small model can read
- * them.
+ * out of the spec (never invented); schemas are summarised to a few levels so a small model can
+ * read them.
  */
 final class ApiGuideIndex {
 
@@ -24,9 +24,27 @@ final class ApiGuideIndex {
     private static final int MAX_SCHEMA_DEPTH = 3;
     private static final List<String> VERBS = List.of("get", "post", "put", "patch", "delete");
 
-    private record Op(String method, String path, String tag, String summary, String description, String operationId, JsonNode node) {
+    private record Op(
+            String method,
+            String path,
+            String tag,
+            String summary,
+            String description,
+            String operationId,
+            JsonNode node) {
         String haystack() {
-            return (method + " " + path + " " + tag + " " + summary + " " + description + " " + operationId).toLowerCase(Locale.ROOT);
+            return (method
+                            + " "
+                            + path
+                            + " "
+                            + tag
+                            + " "
+                            + summary
+                            + " "
+                            + description
+                            + " "
+                            + operationId)
+                    .toLowerCase(Locale.ROOT);
         }
     }
 
@@ -43,9 +61,19 @@ final class ApiGuideIndex {
             for (String verb : VERBS) {
                 JsonNode op = p.getValue().path(verb);
                 if (op.isObject()) {
-                    String tag = op.path("tags").isArray() && !op.path("tags").isEmpty() ? op.path("tags").get(0).asText("") : "";
-                    ops.add(new Op(verb.toUpperCase(Locale.ROOT), p.getKey(), tag, op.path("summary").asText(""),
-                            shorten(op.path("description").asText(""), 200), op.path("operationId").asText(""), op));
+                    String tag =
+                            op.path("tags").isArray() && !op.path("tags").isEmpty()
+                                    ? op.path("tags").get(0).asText("")
+                                    : "";
+                    ops.add(
+                            new Op(
+                                    verb.toUpperCase(Locale.ROOT),
+                                    p.getKey(),
+                                    tag,
+                                    op.path("summary").asText(""),
+                                    shorten(op.path("description").asText(""), 200),
+                                    op.path("operationId").asText(""),
+                                    op));
                 }
             }
         }
@@ -56,7 +84,10 @@ final class ApiGuideIndex {
     }
 
     ObjectNode search(String query, String method) {
-        String[] terms = query == null ? new String[0] : query.toLowerCase(Locale.ROOT).trim().split("[^a-z0-9_/{}-]+");
+        String[] terms =
+                query == null
+                        ? new String[0]
+                        : query.toLowerCase(Locale.ROOT).trim().split("[^a-z0-9_/{}-]+");
         record Scored(Op op, int score) {}
         List<Scored> scored = new ArrayList<>();
         for (Op op : ops) {
@@ -72,7 +103,8 @@ final class ApiGuideIndex {
                 if (op.path().toLowerCase(Locale.ROOT).contains(t)) {
                     score += 3;
                 }
-                if (op.summary().toLowerCase(Locale.ROOT).contains(t) || op.tag().toLowerCase(Locale.ROOT).contains(t)) {
+                if (op.summary().toLowerCase(Locale.ROOT).contains(t)
+                        || op.tag().toLowerCase(Locale.ROOT).contains(t)) {
                     score += 2;
                 }
                 if (hay.contains(t)) {
@@ -83,7 +115,10 @@ final class ApiGuideIndex {
                 scored.add(new Scored(op, score));
             }
         }
-        scored.sort(Comparator.comparingInt(Scored::score).reversed().thenComparing(s -> s.op().path()));
+        scored.sort(
+                Comparator.comparingInt(Scored::score)
+                        .reversed()
+                        .thenComparing(s -> s.op().path()));
         ObjectNode out = mapper.createObjectNode();
         ArrayNode results = out.putArray("results");
         for (Scored s : scored.stream().limit(MAX_RESULTS).toList()) {
@@ -97,9 +132,11 @@ final class ApiGuideIndex {
             }
         }
         out.put("matches", scored.size());
-        out.put("next", scored.isEmpty()
-                ? "Nothing matched. Try other words (a noun from the task, e.g. 'agents', 'jobs', 'knowledge')."
-                : "Call again with action=describe, method and path for the one you need.");
+        out.put(
+                "next",
+                scored.isEmpty()
+                        ? "Nothing matched. Try other words (a noun from the task, e.g. 'agents', 'jobs', 'knowledge')."
+                        : "Call again with action=describe, method and path for the one you need.");
         return out;
     }
 
@@ -147,14 +184,22 @@ final class ApiGuideIndex {
         if (ok != null) {
             JsonNode content = ok.path("content");
             if (content.isObject() && content.fields().hasNext()) {
-                out.set("response", summarise(content.fields().next().getValue().path("schema"), 0));
+                out.set(
+                        "response",
+                        summarise(content.fields().next().getValue().path("schema"), 0));
             }
         }
-        out.put("showItLive", "Embed this in your reply as a ```json_ui block so the user sees the live result: "
-                + "{\"version\":\"v1\",\"root\":{\"type\":\"apiCall\",\"props\":{\"method\":\"" + op.method()
-                + "\",\"path\":\"" + op.path() + "\",\"title\":\"" + op.summary().replace("\"", "'")
-                + "\"}}}. GET runs on its own; anything else waits for the user to press Send. Put {id}-style values "
-                + "into path, ?query into query (object) and the JSON body into body (object).");
+        out.put(
+                "showItLive",
+                "Embed this in your reply as a ```json_ui block so the user sees the live result: "
+                        + "{\"version\":\"v1\",\"root\":{\"type\":\"apiCall\",\"props\":{\"method\":\""
+                        + op.method()
+                        + "\",\"path\":\""
+                        + op.path()
+                        + "\",\"title\":\""
+                        + op.summary().replace("\"", "'")
+                        + "\"}}}. GET runs on its own; anything else waits for the user to press Send. Put {id}-style values "
+                        + "into path, ?query into query (object) and the JSON body into body (object).");
         return out;
     }
 
@@ -169,7 +214,11 @@ final class ApiGuideIndex {
             out.set("enum", s.get("enum"));
         }
         if ("array".equals(type)) {
-            out.set("items", depth >= MAX_SCHEMA_DEPTH ? mapper.createObjectNode() : summarise(s.path("items"), depth + 1));
+            out.set(
+                    "items",
+                    depth >= MAX_SCHEMA_DEPTH
+                            ? mapper.createObjectNode()
+                            : summarise(s.path("items"), depth + 1));
         }
         JsonNode props = s.path("properties");
         if (props.isObject() && depth < MAX_SCHEMA_DEPTH) {

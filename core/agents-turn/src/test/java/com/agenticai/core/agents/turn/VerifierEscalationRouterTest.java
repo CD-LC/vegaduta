@@ -40,7 +40,8 @@ class VerifierEscalationRouterTest {
 
     @Test
     void killSwitchWinsOverEnabled() {
-        VerifierEscalationRouter r = new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, "", 2, 0.2);
+        VerifierEscalationRouter r =
+                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, "", 2, 0.2);
         assertFalse(r.isActive());
         assertTrue(r.shouldEscalate(new Signals(false, false, false, 0, true)).isEmpty());
     }
@@ -65,7 +66,8 @@ class VerifierEscalationRouterTest {
         assertTrue(r.inspect("", null, 0).emptyReply());
         assertTrue(r.inspect("plain prose", "{\"type\":\"object\"}", 0).parseFailure());
         assertFalse(r.inspect("{\"a\":1}", "{\"type\":\"object\"}", 0).parseFailure());
-        assertFalse(r.inspect("```json\n{\"a\":1}\n```", "{\"type\":\"object\"}", 0).parseFailure());
+        assertFalse(
+                r.inspect("```json\n{\"a\":1}\n```", "{\"type\":\"object\"}", 0).parseFailure());
         assertFalse(r.inspect("prose is fine without a schema", null, 0).parseFailure());
         assertTrue(r.inspect("Honestly, I'm not sure about that.", null, 0).lowConfidence());
         assertFalse(r.inspect("The capital is Paris.", null, 0).lowConfidence());
@@ -74,17 +76,27 @@ class VerifierEscalationRouterTest {
     @Test
     void escalationPriorityAndToolErrorThreshold() {
         VerifierEscalationRouter r = on(new SimpleMeterRegistry());
-        assertEquals(Optional.of(Reason.TOOL_ERROR_LOOP), r.shouldEscalate(new Signals(false, false, false, 2, false)));
+        assertEquals(
+                Optional.of(Reason.TOOL_ERROR_LOOP),
+                r.shouldEscalate(new Signals(false, false, false, 2, false)));
         assertTrue(r.shouldEscalate(new Signals(false, false, false, 1, false)).isEmpty());
-        assertEquals(Optional.of(Reason.PARSE_FAILURE), r.shouldEscalate(new Signals(true, false, true, 5, false)));
-        assertEquals(Optional.of(Reason.GUARDRAIL_FLAG), r.shouldEscalate(new Signals(false, true, true, 0, false)));
-        assertEquals(Optional.of(Reason.LOW_CONFIDENCE), r.shouldEscalate(new Signals(false, false, true, 0, false)));
+        assertEquals(
+                Optional.of(Reason.PARSE_FAILURE),
+                r.shouldEscalate(new Signals(true, false, true, 5, false)));
+        assertEquals(
+                Optional.of(Reason.GUARDRAIL_FLAG),
+                r.shouldEscalate(new Signals(false, true, true, 0, false)));
+        assertEquals(
+                Optional.of(Reason.LOW_CONFIDENCE),
+                r.shouldEscalate(new Signals(false, false, true, 0, false)));
         assertTrue(r.shouldEscalate(Signals.none()).isEmpty());
     }
 
     @Test
     void customMarkersReplaceDefaults() {
-        VerifierEscalationRouter r = new VerifierEscalationRouter(new SimpleMeterRegistry(), true, false, "maybe, perhaps", 2, 0.2);
+        VerifierEscalationRouter r =
+                new VerifierEscalationRouter(
+                        new SimpleMeterRegistry(), true, false, "maybe, perhaps", 2, 0.2);
         assertTrue(r.inspect("Perhaps.", null, 0).lowConfidence());
         assertFalse(r.inspect("I'm not sure", null, 0).lowConfidence());
     }
@@ -96,18 +108,29 @@ class VerifierEscalationRouterTest {
         UUID agent = UUID.randomUUID();
         r.recordDecision(agent, Optional.empty(), 400); // 100 tokens kept cheap -> 80 saved
         r.recordDecision(agent, Optional.of(Reason.LOW_CONFIDENCE), 400); // 100 tokens -> 20 wasted
-        assertEquals(1.0, reg.get(VerifierEscalationRouter.DECISION_METRIC)
-            .tags("outcome", "kept_cheap", "reason", "none").counter().count());
-        assertEquals(1.0, reg.get(VerifierEscalationRouter.DECISION_METRIC)
-            .tags("outcome", "escalated", "reason", "low_confidence").counter().count());
+        assertEquals(
+                1.0,
+                reg.get(VerifierEscalationRouter.DECISION_METRIC)
+                        .tags("outcome", "kept_cheap", "reason", "none")
+                        .counter()
+                        .count());
+        assertEquals(
+                1.0,
+                reg.get(VerifierEscalationRouter.DECISION_METRIC)
+                        .tags("outcome", "escalated", "reason", "low_confidence")
+                        .counter()
+                        .count());
         assertEquals(80.0, reg.get(VerifierEscalationRouter.SAVED_METRIC).counter().count(), 1e-9);
         assertEquals(20.0, reg.get(VerifierEscalationRouter.WASTED_METRIC).counter().count(), 1e-9);
     }
 
     private static Path findGoldenDataset() {
         for (Path dir = Path.of("").toAbsolutePath(); dir != null; dir = dir.getParent()) {
-            for (String rel : new String[] {"quality/src/main/resources/golden-dataset.json",
-                "core/quality/src/main/resources/golden-dataset.json"}) {
+            for (String rel :
+                    new String[] {
+                        "quality/src/main/resources/golden-dataset.json",
+                        "core/quality/src/main/resources/golden-dataset.json"
+                    }) {
                 Path candidate = dir.resolve(rel);
                 if (Files.exists(candidate)) {
                     return candidate;
@@ -120,13 +143,25 @@ class VerifierEscalationRouterTest {
     @Test
     void lowConfidenceMarkerInsideALongAnswerIsNotAFalsePositive() {
         VerifierEscalationRouter r = on(new SimpleMeterRegistry());
-        String body = "The migration has three phases and each one is described in detail below. ".repeat(12);
+        String body =
+                "The migration has three phases and each one is described in detail below. "
+                        .repeat(12);
         // marker buried deep in a long, substantive answer: not low confidence
-        assertFalse(r.inspect(body + "Some teams say I don't know where to start, but here is a plan.", null, 0).lowConfidence());
+        assertFalse(
+                r.inspect(
+                                body
+                                        + "Some teams say I don't know where to start, but here is a plan.",
+                                null,
+                                0)
+                        .lowConfidence());
         // marker at the opening of a LONG (>= 400 chars) answer: substantive, stays cheap
-        assertFalse(r.inspect("I'm not sure, but here is my best attempt. " + body, null, 0).lowConfidence());
+        assertFalse(
+                r.inspect("I'm not sure, but here is my best attempt. " + body, null, 0)
+                        .lowConfidence());
         // a short reply is only low confidence when the marker is in its opening window
-        assertTrue(r.inspect("I'm not sure, but here is my best attempt. " + "x".repeat(200), null, 0).lowConfidence());
+        assertTrue(
+                r.inspect("I'm not sure, but here is my best attempt. " + "x".repeat(200), null, 0)
+                        .lowConfidence());
         assertFalse(r.inspect("y".repeat(250) + " I don't know.", null, 0).lowConfidence());
         // a reply built on tool results is reporting what the tool said: never low confidence
         assertFalse(r.inspect("I don't know.", null, 0, 1).lowConfidence());
@@ -141,7 +176,8 @@ class VerifierEscalationRouterTest {
     void replaySafeOnlyForReadOnlyToolNames() {
         VerifierEscalationRouter r = on(new SimpleMeterRegistry());
         assertTrue(r.replaySafe(java.util.List.of()));
-        assertTrue(r.replaySafe(java.util.List.of("search_flights", "get_calendar", "list_events")));
+        assertTrue(
+                r.replaySafe(java.util.List.of("search_flights", "get_calendar", "list_events")));
         assertFalse(r.replaySafe(java.util.List.of("search_flights", "send_email")));
         assertFalse(r.replaySafe(java.util.List.of("create_invoice")));
         assertFalse(r.replaySafe(java.util.List.of("unknown_tool")));
@@ -163,20 +199,25 @@ class VerifierEscalationRouterTest {
     @Test
     void classificationOverridesTheNameHeuristic() {
         VerifierEscalationRouter r = on(new SimpleMeterRegistry());
-        r.useClassification(name -> switch (name) {
-            case "get_report" -> Optional.of(false);      // looks read-only, classified durable
-            case "do_thing" -> Optional.of(true);         // looks mutating, classified replay-safe
-            default -> Optional.empty();
-        });
+        r.useClassification(
+                name ->
+                        switch (name) {
+                            case "get_report" ->
+                                    Optional.of(false); // looks read-only, classified durable
+                            case "do_thing" ->
+                                    Optional.of(true); // looks mutating, classified replay-safe
+                            default -> Optional.empty();
+                        });
         assertFalse(r.replaySafe(java.util.List.of("get_report")));
         assertTrue(r.replaySafe(java.util.List.of("do_thing")));
         // unclassified falls back to the name heuristic
         assertTrue(r.replaySafe(java.util.List.of("list_events")));
         assertFalse(r.replaySafe(java.util.List.of("send_email")));
         // a failing lookup fails safe to the name heuristic, never throws
-        r.useClassification(name -> {
-            throw new IllegalStateException("db down");
-        });
+        r.useClassification(
+                name -> {
+                    throw new IllegalStateException("db down");
+                });
         assertFalse(r.replaySafe(java.util.List.of("send_email")));
         assertTrue(r.replaySafe(java.util.List.of("get_x")));
     }
@@ -193,25 +234,32 @@ class VerifierEscalationRouterTest {
         SimpleMeterRegistry reg = new SimpleMeterRegistry();
         VerifierEscalationRouter r = on(reg);
         r.recordSkippedForSideEffects(UUID.randomUUID(), Reason.LOW_CONFIDENCE);
-        assertEquals(1.0, reg.get(VerifierEscalationRouter.SKIPPED_METRIC).tags("reason", "low_confidence").counter().count());
+        assertEquals(
+                1.0,
+                reg.get(VerifierEscalationRouter.SKIPPED_METRIC)
+                        .tags("reason", "low_confidence")
+                        .counter()
+                        .count());
         SimpleMeterRegistry offReg = new SimpleMeterRegistry();
         new VerifierEscalationRouter(offReg, false, false, "", 2, 0.2)
-            .recordSkippedForSideEffects(UUID.randomUUID(), Reason.LOW_CONFIDENCE);
+                .recordSkippedForSideEffects(UUID.randomUUID(), Reason.LOW_CONFIDENCE);
         assertTrue(offReg.getMeters().isEmpty());
     }
 
     /**
-     * Offline harness over core/quality's golden dataset (fixtures only; no model, no
-     * network). A scripted "cheap model" answers each case; the router must escalate exactly
-     * the cases whose scripted answer is unsafe and keep the rest, and savings must be
-     * recorded for the kept ones.
+     * Offline harness over core/quality's golden dataset (fixtures only; no model, no network). A
+     * scripted "cheap model" answers each case; the router must escalate exactly the cases whose
+     * scripted answer is unsafe and keep the rest, and savings must be recorded for the kept ones.
      */
     @Test
     void offlineHarnessOverGoldenDatasetFixtures() throws Exception {
         Path fixture = findGoldenDataset();
-        // Walks up from the working directory (module dir under Maven, repo root under an IDE), so a
+        // Walks up from the working directory (module dir under Maven, repo root under an IDE), so
+        // a
         // different cwd no longer skips this silently. Skips only if the fixture is truly absent.
-        Assumptions.assumeTrue(fixture != null, "eval fixture golden-dataset.json not found above " + Path.of("").toAbsolutePath());
+        Assumptions.assumeTrue(
+                fixture != null,
+                "eval fixture golden-dataset.json not found above " + Path.of("").toAbsolutePath());
         JsonNode cases = new ObjectMapper().readTree(Files.readString(fixture));
         assertTrue(cases.size() > 10);
 
@@ -233,8 +281,10 @@ class VerifierEscalationRouterTest {
             } else {
                 answer = "Here is a confident answer.";
             }
-            boolean unsafe = answer.isEmpty()
-                || category.equals("tool-judgment") || category.equals("long-context");
+            boolean unsafe =
+                    answer.isEmpty()
+                            || category.equals("tool-judgment")
+                            || category.equals("long-context");
             if (unsafe) {
                 expectedEscalations++;
             }
@@ -270,15 +320,21 @@ class VerifierEscalationRouterTest {
         assertEquals(Optional.of(Reason.PARSE_FAILURE), reason);
 
         r.recordDecision(agent, reason, 40);
-        assertEquals(1.0, reg.get(VerifierEscalationRouter.DECISION_METRIC)
-            .tags("outcome", "escalated", "reason", "parse_failure").counter().count());
+        assertEquals(
+                1.0,
+                reg.get(VerifierEscalationRouter.DECISION_METRIC)
+                        .tags("outcome", "escalated", "reason", "parse_failure")
+                        .counter()
+                        .count());
     }
 
     @Test
     void parseCheckOnlyAppliesWhenTheTurnHasAnOutputSchema() {
         VerifierEscalationRouter r = on(new SimpleMeterRegistry());
         for (String schema : new String[] {null, "", "   "}) {
-            assertFalse(r.inspect("plain prose, not json", schema, 0).parseFailure(), "schema=[" + schema + "]");
+            assertFalse(
+                    r.inspect("plain prose, not json", schema, 0).parseFailure(),
+                    "schema=[" + schema + "]");
         }
         assertTrue(r.shouldEscalate(r.inspect("plain prose, not json", null, 0)).isEmpty());
     }
@@ -286,12 +342,17 @@ class VerifierEscalationRouterTest {
     @Test
     void parseFailureShapesTruncatedScalarAndProseWrappedJson() {
         VerifierEscalationRouter r = on(new SimpleMeterRegistry());
-        assertTrue(r.inspect("{\"a\":1,", OBJECT_SCHEMA, 0).parseFailure());          // truncated
-        assertTrue(r.inspect("42", OBJECT_SCHEMA, 0).parseFailure());                  // valid JSON, not object/array
+        assertTrue(r.inspect("{\"a\":1,", OBJECT_SCHEMA, 0).parseFailure()); // truncated
+        assertTrue(
+                r.inspect("42", OBJECT_SCHEMA, 0).parseFailure()); // valid JSON, not object/array
         assertTrue(r.inspect("\"just a string\"", OBJECT_SCHEMA, 0).parseFailure());
-        assertTrue(r.inspect("Here you go: {\"a\":1}", OBJECT_SCHEMA, 0).parseFailure()); // prose-wrapped
-        assertFalse(r.inspect("[1,2,3]", OBJECT_SCHEMA, 0).parseFailure());           // arrays parse
-        assertFalse(r.inspect("  {\"a\":1}\n", OBJECT_SCHEMA, 0).parseFailure());     // whitespace tolerated
+        assertTrue(
+                r.inspect("Here you go: {\"a\":1}", OBJECT_SCHEMA, 0)
+                        .parseFailure()); // prose-wrapped
+        assertFalse(r.inspect("[1,2,3]", OBJECT_SCHEMA, 0).parseFailure()); // arrays parse
+        assertFalse(
+                r.inspect("  {\"a\":1}\n", OBJECT_SCHEMA, 0)
+                        .parseFailure()); // whitespace tolerated
         assertFalse(r.inspect("```json\n{\"a\":1}\n```", OBJECT_SCHEMA, 0).parseFailure());
     }
 
@@ -312,17 +373,24 @@ class VerifierEscalationRouterTest {
     void validStructuredReplyIsKeptCheap() {
         SimpleMeterRegistry reg = new SimpleMeterRegistry();
         VerifierEscalationRouter r = on(reg);
-        Optional<Reason> reason = r.shouldEscalate(r.inspect("{\"verdict\":\"pass\"}", OBJECT_SCHEMA, 0));
+        Optional<Reason> reason =
+                r.shouldEscalate(r.inspect("{\"verdict\":\"pass\"}", OBJECT_SCHEMA, 0));
         assertTrue(reason.isEmpty());
         r.recordDecision(UUID.randomUUID(), reason, 20);
-        assertEquals(1.0, reg.get(VerifierEscalationRouter.DECISION_METRIC)
-            .tags("outcome", "kept_cheap", "reason", "none").counter().count());
+        assertEquals(
+                1.0,
+                reg.get(VerifierEscalationRouter.DECISION_METRIC)
+                        .tags("outcome", "kept_cheap", "reason", "none")
+                        .counter()
+                        .count());
     }
 
     @Test
     void parseFailureDoesNotEscalateWhenTheFlagIsOffOrKilled() {
-        VerifierEscalationRouter off = new VerifierEscalationRouter(new SimpleMeterRegistry(), false, false, "", 2, 0.2);
-        VerifierEscalationRouter killed = new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, "", 2, 0.2);
+        VerifierEscalationRouter off =
+                new VerifierEscalationRouter(new SimpleMeterRegistry(), false, false, "", 2, 0.2);
+        VerifierEscalationRouter killed =
+                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, "", 2, 0.2);
         for (VerifierEscalationRouter r : new VerifierEscalationRouter[] {off, killed}) {
             Signals s = r.inspect("not json", OBJECT_SCHEMA, 0);
             assertTrue(s.parseFailure()); // the verifier itself is pure ...

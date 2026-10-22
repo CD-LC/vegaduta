@@ -1,17 +1,20 @@
 package com.agenticai.core.workflow;
 
-
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import org.springframework.stereotype.Component;
 
-/** Pure data nodes (set, filter, sort, aggregate, limit, dedupe, switch, merge); logic lives in WorkflowDataOps. */
+/**
+ * Pure data nodes (set, filter, sort, aggregate, limit, dedupe, switch, merge); logic lives in
+ * WorkflowDataOps.
+ */
 @Component
 class DataNodeAdapter implements NodeHandler {
 
     private final WorkflowDataNodeHandler dataNodeHandler;
+
     DataNodeAdapter(ObjectMapper objectMapper) {
         this.dataNodeHandler = new WorkflowDataNodeHandler(objectMapper);
     }
@@ -37,6 +40,4 @@ class DataNodeAdapter implements NodeHandler {
             default -> throw new IllegalStateException("Not a data node: " + node.type());
         };
     }
-
-
 }

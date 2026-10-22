@@ -47,11 +47,20 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
     private final int maxTimeoutSeconds;
     private final boolean approvalRequired;
 
-    public LocalShellToolCallback(ShellRunner runner, boolean readOnly, int defaultTimeoutSeconds, int maxTimeoutSeconds) {
+    public LocalShellToolCallback(
+            ShellRunner runner,
+            boolean readOnly,
+            int defaultTimeoutSeconds,
+            int maxTimeoutSeconds) {
         this(runner, readOnly, defaultTimeoutSeconds, maxTimeoutSeconds, true);
     }
 
-    public LocalShellToolCallback(ShellRunner runner, boolean readOnly, int defaultTimeoutSeconds, int maxTimeoutSeconds, boolean approvalRequired) {
+    public LocalShellToolCallback(
+            ShellRunner runner,
+            boolean readOnly,
+            int defaultTimeoutSeconds,
+            int maxTimeoutSeconds,
+            boolean approvalRequired) {
         this.runner = runner;
         this.readOnly = readOnly;
         this.defaultTimeoutSeconds = Math.max(1, defaultTimeoutSeconds);
@@ -61,7 +70,9 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
 
     @Override
     public ToolDefinition getToolDefinition() {
-        String where = runner.environmentNote() + " stdout and stderr come back together with the exit code.";
+        String where =
+                runner.environmentNote()
+                        + " stdout and stderr come back together with the exit code.";
         String description =
                 readOnly
                         ? "Runs a read-only inspection command without asking: ls, cat, head, tail, wc, grep, find, "
@@ -104,10 +115,18 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
         if (command == null) {
             return null;
         }
-        String shown = command.length() > SUMMARY_CHARS ? command.substring(0, SUMMARY_CHARS) + "..." : command;
+        String shown =
+                command.length() > SUMMARY_CHARS
+                        ? command.substring(0, SUMMARY_CHARS) + "..."
+                        : command;
         String folder = folderOf(toolInput);
         String where = folder == null ? runner.workspace() : runner.workspace() + "/" + folder;
-        return "Run this command (sandboxed; it can only write inside " + runner.workspace() + ") in " + where + ":\n" + shown;
+        return "Run this command (sandboxed; it can only write inside "
+                + runner.workspace()
+                + ") in "
+                + where
+                + ":\n"
+                + shown;
     }
 
     @Override
@@ -126,21 +145,28 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
                             "Not run: "
                                     + notReadOnly.get()
                                     + ". Use local_shell for this"
-                                    + (approvalRequired ? "; the user is asked before it runs." : "."));
+                                    + (approvalRequired
+                                            ? "; the user is asked before it runs."
+                                            : "."));
                 }
             }
             if (args.path("background").asBoolean(false) && !readOnly) {
                 String bgFolder = args.path("folder").asText("");
-                ShellRunner.Server server = runner.runBackground(withoutRedundantCd(command, bgFolder), bgFolder);
+                ShellRunner.Server server =
+                        runner.runBackground(withoutRedundantCd(command, bgFolder), bgFolder);
                 ObjectNode bg = MAPPER.createObjectNode();
                 bg.put("running", server.running());
                 bg.put("output", server.output());
                 if (server.running()) {
                     bg.put("preview_port", server.port());
-                    bg.put("note", "The server keeps running. Tell the person it is in the Preview pane (top right of the Assistant).");
+                    bg.put(
+                            "note",
+                            "The server keeps running. Tell the person it is in the Preview pane (top right of the Assistant).");
                 } else {
                     bg.put("exit_code", server.exitCode() == null ? -1 : server.exitCode());
-                    bg.put("note", "The server stopped on its own; read the output, fix it and start it again.");
+                    bg.put(
+                            "note",
+                            "The server stopped on its own; read the output, fix it and start it again.");
                 }
                 return MAPPER.writeValueAsString(bg);
             }
@@ -159,7 +185,11 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
                 out.put("folder", folder);
             }
             if (result.timedOut()) {
-                out.put("note", "Stopped after " + timeout + " s. Raise timeout_seconds or run it in smaller steps.");
+                out.put(
+                        "note",
+                        "Stopped after "
+                                + timeout
+                                + " s. Raise timeout_seconds or run it in smaller steps.");
             }
             return MAPPER.writeValueAsString(out);
         } catch (StdioSandboxException e) {
@@ -186,7 +216,8 @@ public final class LocalShellToolCallback implements ToolCallback, ToolConfirmat
             return command;
         }
         String f = java.util.regex.Pattern.quote(folder.strip().replaceAll("/+$", ""));
-        return command.replaceFirst("^\\s*cd\\s+(?:\\./)?([\"']?)" + f + "/?\\1\\s*(?:&&|;)\\s*", "");
+        return command.replaceFirst(
+                "^\\s*cd\\s+(?:\\./)?([\"']?)" + f + "/?\\1\\s*(?:&&|;)\\s*", "");
     }
 
     private static String folderOf(String toolInput) {

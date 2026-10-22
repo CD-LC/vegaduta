@@ -29,10 +29,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 /**
- * A hosted-form trigger node reuses the node's webhook token for its form URL, so that same token must not also
- * work as a raw webhook (it would skip the form's schema validation, honeypot and limits). The guard is
- * setter-injected: a controller built without it - and a deployment with the form feature off - behave exactly as
- * before.
+ * A hosted-form trigger node reuses the node's webhook token for its form URL, so that same token
+ * must not also work as a raw webhook (it would skip the form's schema validation, honeypot and
+ * limits). The guard is setter-injected: a controller built without it - and a deployment with the
+ * form feature off - behave exactly as before.
  */
 class WorkflowWebhookControllerFormGuardTest {
 
@@ -46,18 +46,29 @@ class WorkflowWebhookControllerFormGuardTest {
     @BeforeEach
     void setUp() {
         TenantResolutionService tenantResolutionService = mock(TenantResolutionService.class);
-        WorkflowDefinitionRepository definitionRepository = mock(WorkflowDefinitionRepository.class);
+        WorkflowDefinitionRepository definitionRepository =
+                mock(WorkflowDefinitionRepository.class);
         WorkflowTriggerNodeService triggerNodes = mock(WorkflowTriggerNodeService.class);
         workflowService = mock(WorkflowService.class);
         InboundMessageDedupService dedup = mock(InboundMessageDedupService.class);
         @SuppressWarnings("unchecked")
         ObjectProvider<JwtDecoder> jwt = mock(ObjectProvider.class);
-        controller = new WorkflowWebhookController(
-            tenantResolutionService, definitionRepository, triggerNodes, workflowService, new ObjectMapper(), jwt, dedup);
+        controller =
+                new WorkflowWebhookController(
+                        tenantResolutionService,
+                        definitionRepository,
+                        triggerNodes,
+                        workflowService,
+                        new ObjectMapper(),
+                        jwt,
+                        dedup);
 
-        when(tenantResolutionService.resolveTenantSchema(ExternalAccountProvider.WORKFLOW_WEBHOOK,
-            WebhookTokenHasher.sha256Hex(TOKEN))).thenReturn(Optional.of("tenant_schema"));
-        WorkflowTriggerNode node = new WorkflowTriggerNode(WORKFLOW_ID, "node-1", WorkflowTriggerChannel.WEBHOOK);
+        when(tenantResolutionService.resolveTenantSchema(
+                        ExternalAccountProvider.WORKFLOW_WEBHOOK,
+                        WebhookTokenHasher.sha256Hex(TOKEN)))
+                .thenReturn(Optional.of("tenant_schema"));
+        WorkflowTriggerNode node =
+                new WorkflowTriggerNode(WORKFLOW_ID, "node-1", WorkflowTriggerChannel.WEBHOOK);
         node.enableWebhook("cipher", WebhookTokenHasher.sha256Hex(TOKEN));
         when(triggerNodes.findByWebhookTokenHash(anyString())).thenReturn(Optional.of(node));
         definition = mock(WorkflowDefinition.class);
@@ -65,7 +76,8 @@ class WorkflowWebhookControllerFormGuardTest {
         when(definition.getStatus()).thenReturn(WorkflowStatus.ACTIVE);
         when(definitionRepository.findById(WORKFLOW_ID)).thenReturn(Optional.of(definition));
         when(dedup.tryClaim(anyString(), anyString())).thenReturn(true);
-        when(workflowService.run(any(), anyString(), anyString(), anyString())).thenReturn(mock(WorkflowRunResponse.class));
+        when(workflowService.run(any(), anyString(), anyString(), anyString()))
+                .thenReturn(mock(WorkflowRunResponse.class));
     }
 
     @AfterEach
@@ -88,7 +100,7 @@ class WorkflowWebhookControllerFormGuardTest {
         controller.setFormService(forms);
 
         ResponseEntity<?> response =
-            controller.trigger(TOKEN, new HttpHeaders(), json(Map.of("input", "hi")));
+                controller.trigger(TOKEN, new HttpHeaders(), json(Map.of("input", "hi")));
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         verify(workflowService, never()).run(any(), anyString(), anyString(), anyString());
@@ -100,13 +112,19 @@ class WorkflowWebhookControllerFormGuardTest {
         when(forms.isFormTriggerNode(definition, "node-1")).thenReturn(false);
         controller.setFormService(forms);
 
-        assertEquals(HttpStatus.OK,
-            controller.trigger(TOKEN, new HttpHeaders(), json(Map.of("input", "hi"))).getStatusCode());
+        assertEquals(
+                HttpStatus.OK,
+                controller
+                        .trigger(TOKEN, new HttpHeaders(), json(Map.of("input", "hi")))
+                        .getStatusCode());
     }
 
     @Test
     void aControllerWithoutTheGuardBehavesAsBefore() {
-        assertEquals(HttpStatus.OK,
-            controller.trigger(TOKEN, new HttpHeaders(), json(Map.of("input", "hi"))).getStatusCode());
+        assertEquals(
+                HttpStatus.OK,
+                controller
+                        .trigger(TOKEN, new HttpHeaders(), json(Map.of("input", "hi")))
+                        .getStatusCode());
     }
 }

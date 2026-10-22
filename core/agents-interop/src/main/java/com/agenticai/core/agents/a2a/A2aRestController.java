@@ -50,8 +50,8 @@ import org.springframework.web.bind.annotation.RestController;
  * failure is HTTP 200. The wire dialect is always 1.0: the 0.3 REST binding used different paths,
  * so a request without {@code A2A-Version} is treated as 1.0 here (a documented deviation from the
  * spec's "empty means 0.3" rule, which exists for JSON-RPC clients that predate the header).
- * Business logic is shared with {@link A2aJsonRpcController}: same RUNNER check, same task
- * service, same SSE frame order.
+ * Business logic is shared with {@link A2aJsonRpcController}: same RUNNER check, same task service,
+ * same SSE frame order.
  */
 @RestController
 @ConditionalOnProperty(
@@ -136,7 +136,8 @@ public class A2aRestController {
                     // Validates and RUNNER-checks before any byte of the stream is written, so a
                     // bad request is a normal HTTP error, not a half-open event stream.
                     shared.parseInbound(agentId, request);
-                    shared.streamMessage(agentId, request, A2aVersion.V1_0, principal, null, response);
+                    shared.streamMessage(
+                            agentId, request, A2aVersion.V1_0, principal, null, response);
                 },
                 versionHeader);
     }
@@ -262,8 +263,7 @@ public class A2aRestController {
                 versionHeader);
     }
 
-    @GetMapping(
-            value = {PLATFORM_BASE + "/extendedAgentCard", AGENT_BASE + "/extendedAgentCard"})
+    @GetMapping(value = {PLATFORM_BASE + "/extendedAgentCard", AGENT_BASE + "/extendedAgentCard"})
     public void extendedAgentCard(
             @RequestHeader(value = A2aVersion.HEADER, required = false) String versionHeader,
             HttpServletResponse response)
@@ -295,7 +295,11 @@ public class A2aRestController {
         } catch (AgentNotFoundException | ResourceAccessDeniedException e) {
             // "No such agent" and "not yours" are indistinguishable, as in the JSON-RPC binding.
             writeStatusError(
-                    response, HttpStatus.NOT_FOUND, "NOT_FOUND", "AGENT_NOT_FOUND", "unknown agentId");
+                    response,
+                    HttpStatus.NOT_FOUND,
+                    "NOT_FOUND",
+                    "AGENT_NOT_FOUND",
+                    "unknown agentId");
         } catch (RuntimeException e) {
             log.warn("A2A REST request failed unexpectedly", e);
             writeStatusError(
@@ -360,8 +364,7 @@ public class A2aRestController {
                     new Mapping(HttpStatus.BAD_REQUEST, "INVALID_ARGUMENT", "INVALID_ARGUMENT");
             case A2aError.METHOD_NOT_FOUND ->
                     new Mapping(HttpStatus.NOT_FOUND, "NOT_FOUND", "NOT_FOUND");
-            default ->
-                    new Mapping(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL", "INTERNAL");
+            default -> new Mapping(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL", "INTERNAL");
         };
     }
 

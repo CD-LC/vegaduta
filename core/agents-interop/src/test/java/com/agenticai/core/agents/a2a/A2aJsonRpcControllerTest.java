@@ -252,8 +252,8 @@ class A2aJsonRpcControllerTest {
         replyWith(Flux.just("ok"));
         String body =
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SendMessage\",\"params\":{"
-                    + "\"message\":{\"messageId\":\"m\",\"role\":\"ROLE_USER\",\"contextId\":\"conv-42\",\"parts\":[{\"text\":\"again\"}]},"
-                    + "\"configuration\":{\"historyLength\":1},\"metadata\":{\"agentId\":\""
+                        + "\"message\":{\"messageId\":\"m\",\"role\":\"ROLE_USER\",\"contextId\":\"conv-42\",\"parts\":[{\"text\":\"again\"}]},"
+                        + "\"configuration\":{\"historyLength\":1},\"metadata\":{\"agentId\":\""
                         + AGENT_ID
                         + "\"}}}";
 
@@ -377,8 +377,8 @@ class A2aJsonRpcControllerTest {
     void filePartsAreContentTypeNotSupported() {
         String body =
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SendMessage\",\"params\":{"
-                    + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"parts\":[{\"kind\":\"file\",\"file\":{\"uri\":\"https://x/y.pdf\"}}]},"
-                    + "\"metadata\":{\"agentId\":\""
+                        + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"parts\":[{\"kind\":\"file\",\"file\":{\"uri\":\"https://x/y.pdf\"}}]},"
+                        + "\"metadata\":{\"agentId\":\""
                         + AGENT_ID
                         + "\"}}}";
         assertError(rpc(null, "1.0", body), A2aError.CONTENT_TYPE_NOT_SUPPORTED);
@@ -430,8 +430,8 @@ class A2aJsonRpcControllerTest {
     void multiTurnTaskContinuationIsRejectedWithGuidance() {
         String body =
                 "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"SendMessage\",\"params\":{"
-                    + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"taskId\":\"t-1\",\"parts\":[{\"text\":\"more\"}]},"
-                    + "\"metadata\":{\"agentId\":\""
+                        + "\"message\":{\"messageId\":\"m\",\"role\":\"user\",\"taskId\":\"t-1\",\"parts\":[{\"text\":\"more\"}]},"
+                        + "\"metadata\":{\"agentId\":\""
                         + AGENT_ID
                         + "\"}}}";
         JsonNode envelope = rpc(null, "1.0", body);

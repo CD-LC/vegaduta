@@ -14,19 +14,18 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /**
- * Canonical JSON for {@link CommerceMandate} signatures - the same contract
- * as {@code MandateCanonicalizer}: deterministic by construction (fixed
- * insertion order into Jackson {@link ObjectNode}s, compact serialization),
- * and the stored {@code canonical_json} is verified verbatim at execution
- * time rather than re-derived.
+ * Canonical JSON for {@link CommerceMandate} signatures - the same contract as {@code
+ * MandateCanonicalizer}: deterministic by construction (fixed insertion order into Jackson {@link
+ * ObjectNode}s, compact serialization), and the stored {@code canonical_json} is verified verbatim
+ * at execution time rather than re-derived.
  *
  * <p>Two document shapes, both versioned:
+ *
  * <ul>
- *   <li>{@code vegaduta-commerce-mandate/1} - the mandate itself (kind,
- *       agent, buyer, amounts, items/payee or ceiling/categories, validity).
- *   <li>{@code vegaduta-buyer-auth/1} - the buyer's authorization of one
- *       cart, bound to the cart's canonical hash so the signature cannot be
- *       transplanted onto a different cart.
+ *   <li>{@code vegaduta-commerce-mandate/1} - the mandate itself (kind, agent, buyer, amounts,
+ *       items/payee or ceiling/categories, validity).
+ *   <li>{@code vegaduta-buyer-auth/1} - the buyer's authorization of one cart, bound to the cart's
+ *       canonical hash so the signature cannot be transplanted onto a different cart.
  * </ul>
  */
 @Component
@@ -39,11 +38,20 @@ public class CommerceMandateCanonicalizer {
 
     /** Canonical mandate document (both kinds). */
     public String canonicalizeMandate(
-        UUID mandateId, CommerceMandateKind kind, UUID intentMandateId,
-        String tenantId, UUID agentId, String buyerUserId, String currency,
-        Long maxTotalMinor, Long cartTotalMinor, String itemsJson,
-        String payee, List<String> categories, String intentText, Instant expiresAt
-    ) {
+            UUID mandateId,
+            CommerceMandateKind kind,
+            UUID intentMandateId,
+            String tenantId,
+            UUID agentId,
+            String buyerUserId,
+            String currency,
+            Long maxTotalMinor,
+            Long cartTotalMinor,
+            String itemsJson,
+            String payee,
+            List<String> categories,
+            String intentText,
+            Instant expiresAt) {
         ObjectNode root = objectMapper.createObjectNode();
         root.put("version", MANDATE_VERSION);
         ObjectNode m = root.putObject("mandate");
@@ -77,13 +85,17 @@ public class CommerceMandateCanonicalizer {
     }
 
     /**
-     * The buyer-authorization sub-document a CART mandate carries: proof the
-     * buyer signed THIS cart (its canonical hash) at THIS instant.
+     * The buyer-authorization sub-document a CART mandate carries: proof the buyer signed THIS cart
+     * (its canonical hash) at THIS instant.
      */
     public String canonicalizeBuyerAuth(
-        UUID cartMandateId, UUID intentMandateId, String cartCanonicalHash,
-        String buyerUserId, long cartTotalMinor, String currency, Instant authorizedAt
-    ) {
+            UUID cartMandateId,
+            UUID intentMandateId,
+            String cartCanonicalHash,
+            String buyerUserId,
+            long cartTotalMinor,
+            String currency,
+            Instant authorizedAt) {
         ObjectNode root = objectMapper.createObjectNode();
         root.put("version", BUYER_AUTH_VERSION);
         ObjectNode auth = root.putObject("authorization");
@@ -100,8 +112,9 @@ public class CommerceMandateCanonicalizer {
     /** SHA-256 hex - cart items hash inside the mandate, and the review hash shown to signers. */
     public String canonicalHash(String json) {
         try {
-            byte[] digest = MessageDigest.getInstance("SHA-256")
-                .digest(json.getBytes(StandardCharsets.UTF_8));
+            byte[] digest =
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(json.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(digest);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 unavailable", e);

@@ -19,17 +19,17 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
- * The one place a hook list is parsed, validated, normalised and serialised. Strict by design:
- * an unknown field, an action that makes no sense at its point, an out-of-range number or an
- * oversized text is a 400 ({@link IllegalArgumentException}) with a message that names the
- * offending hook ({@code hooks[2]: ...}), never a silently-ignored typo - a typo in a
- * <i>governance</i> rule that quietly does nothing is worse than a rejected save.
+ * The one place a hook list is parsed, validated, normalised and serialised. Strict by design: an
+ * unknown field, an action that makes no sense at its point, an out-of-range number or an oversized
+ * text is a 400 ({@link IllegalArgumentException}) with a message that names the offending hook
+ * ({@code hooks[2]: ...}), never a silently-ignored typo - a typo in a <i>governance</i> rule that
+ * quietly does nothing is worse than a rejected save.
  *
- * <p>Caps: at most {@value #MAX_HOOKS} hooks per scope, at most {@value #MAX_JSON_CHARS}
- * characters of serialised JSON, and per-field size caps below.
+ * <p>Caps: at most {@value #MAX_HOOKS} hooks per scope, at most {@value #MAX_JSON_CHARS} characters
+ * of serialised JSON, and per-field size caps below.
  *
- * <p>{@code parse} applies an optional webhook-URL check (the allow-list) at save time; the
- * runtime checks again on every call, because the allow-list and DNS can change after a save.
+ * <p>{@code parse} applies an optional webhook-URL check (the allow-list) at save time; the runtime
+ * checks again on every call, because the allow-list and DNS can change after a save.
  */
 public final class HookSchema {
 
@@ -51,21 +51,24 @@ public final class HookSchema {
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
     private static final Set<String> HOOK_FIELDS =
-        Set.of("id", "enabled", "point", "match", "action", "params", "failMode", "timeoutMs");
-    private static final Set<String> MATCH_FIELDS = Set.of("tool", "trust", "sensitivity", "irreversible");
+            Set.of("id", "enabled", "point", "match", "action", "params", "failMode", "timeoutMs");
+    private static final Set<String> MATCH_FIELDS =
+            Set.of("tool", "trust", "sensitivity", "irreversible");
 
-    private HookSchema() {
-    }
+    private HookSchema() {}
 
     // ------------------------------------------------------------------ parse
 
     /**
-     * @param hooksNode a JSON array of hook objects; {@code null} / JSON null / missing means no hooks
+     * @param hooksNode a JSON array of hook objects; {@code null} / JSON null / missing means no
+     *     hooks
      * @param webhookUrlCheck returns an error message for a webhook URL that is not allowed, or
-     *     {@code null} when it is; may itself be {@code null} to skip the check (stored data re-read)
+     *     {@code null} when it is; may itself be {@code null} to skip the check (stored data
+     *     re-read)
      * @throws IllegalArgumentException with a field-level message when anything is invalid
      */
-    public static List<HookDefinition> parse(JsonNode hooksNode, Function<String, String> webhookUrlCheck) {
+    public static List<HookDefinition> parse(
+            JsonNode hooksNode, Function<String, String> webhookUrlCheck) {
         if (hooksNode == null || hooksNode.isNull() || hooksNode.isMissingNode()) {
             return List.of();
         }
@@ -73,19 +76,22 @@ public final class HookSchema {
             throw new IllegalArgumentException("hooks must be an array");
         }
         if (hooksNode.size() > MAX_HOOKS) {
-            throw new IllegalArgumentException("at most " + MAX_HOOKS + " hooks are allowed (got " + hooksNode.size() + ")");
+            throw new IllegalArgumentException(
+                    "at most " + MAX_HOOKS + " hooks are allowed (got " + hooksNode.size() + ")");
         }
         List<HookDefinition> out = new ArrayList<>(hooksNode.size());
         Set<String> seen = new HashSet<>();
         for (int i = 0; i < hooksNode.size(); i++) {
             HookDefinition def = parseOne(hooksNode.get(i), "hooks[" + i + "]", webhookUrlCheck);
             if (!seen.add(def.id())) {
-                throw new IllegalArgumentException("hooks[" + i + "]: duplicate id '" + def.id() + "'");
+                throw new IllegalArgumentException(
+                        "hooks[" + i + "]: duplicate id '" + def.id() + "'");
             }
             out.add(def);
         }
         if (toJson(out).length() > MAX_JSON_CHARS) {
-            throw new IllegalArgumentException("the hook list is too large (over " + MAX_JSON_CHARS + " characters)");
+            throw new IllegalArgumentException(
+                    "the hook list is too large (over " + MAX_JSON_CHARS + " characters)");
         }
         return List.copyOf(out);
     }
@@ -104,7 +110,8 @@ public final class HookSchema {
         }
     }
 
-    private static HookDefinition parseOne(JsonNode node, String at, Function<String, String> urlCheck) {
+    private static HookDefinition parseOne(
+            JsonNode node, String at, Function<String, String> urlCheck) {
         if (node == null || !node.isObject()) {
             throw new IllegalArgumentException(at + ": each hook must be an object");
         }
@@ -112,7 +119,9 @@ public final class HookSchema {
 
         String id = text(node, "id", at, true);
         if (!ID_PATTERN.matcher(id).matches()) {
-            throw new IllegalArgumentException(at + ".id: use 1-40 characters of a-z, 0-9, '-' and '_', starting with a letter or digit");
+            throw new IllegalArgumentException(
+                    at
+                            + ".id: use 1-40 characters of a-z, 0-9, '-' and '_', starting with a letter or digit");
         }
         at = at + " ('" + id + "')";
 
@@ -126,15 +135,26 @@ public final class HookSchema {
 
         HookPoint point = HookPoint.parse(text(node, "point", at, true));
         if (point == null) {
-            throw new IllegalArgumentException(at + ".point: must be one of BEFORE_MODEL, AFTER_MODEL, BEFORE_TOOL, AFTER_TOOL, ON_ERROR, ON_RUN_END");
+            throw new IllegalArgumentException(
+                    at
+                            + ".point: must be one of BEFORE_MODEL, AFTER_MODEL, BEFORE_TOOL, AFTER_TOOL, ON_ERROR, ON_RUN_END");
         }
         HookActionType action = HookActionType.parse(text(node, "action", at, true));
         if (action == null) {
-            throw new IllegalArgumentException(at + ".action: must be one of block, require_approval, redact, limit, append_context, webhook, log");
+            throw new IllegalArgumentException(
+                    at
+                            + ".action: must be one of block, require_approval, redact, limit, append_context, webhook, log");
         }
         if (!HookActionType.allowedAt(point).contains(action)) {
-            throw new IllegalArgumentException(at + ": the '" + action.wire() + "' action cannot be used at " + point
-                + " (allowed there: " + wireList(HookActionType.allowedAt(point)) + ")");
+            throw new IllegalArgumentException(
+                    at
+                            + ": the '"
+                            + action.wire()
+                            + "' action cannot be used at "
+                            + point
+                            + " (allowed there: "
+                            + wireList(HookActionType.allowedAt(point))
+                            + ")");
         }
 
         HookMatch match = parseMatch(node.get("match"), point, at);
@@ -143,7 +163,8 @@ public final class HookSchema {
         FailMode failMode = null;
         if (node.has("failMode") && !node.get("failMode").isNull()) {
             if (action != HookActionType.WEBHOOK) {
-                throw new IllegalArgumentException(at + ".failMode: only webhook hooks have a fail mode");
+                throw new IllegalArgumentException(
+                        at + ".failMode: only webhook hooks have a fail mode");
             }
             failMode = FailMode.parse(node.get("failMode").asText());
             if (failMode == null) {
@@ -151,15 +172,20 @@ public final class HookSchema {
             }
         }
         if (failMode == null) {
-            failMode = (point == HookPoint.BEFORE_TOOL || point == HookPoint.BEFORE_MODEL) ? FailMode.CLOSED : FailMode.OPEN;
+            failMode =
+                    (point == HookPoint.BEFORE_TOOL || point == HookPoint.BEFORE_MODEL)
+                            ? FailMode.CLOSED
+                            : FailMode.OPEN;
         }
 
         int timeoutMs = DEFAULT_TIMEOUT_MS;
         if (node.has("timeoutMs") && !node.get("timeoutMs").isNull()) {
             if (action != HookActionType.WEBHOOK) {
-                throw new IllegalArgumentException(at + ".timeoutMs: only webhook hooks have a timeout");
+                throw new IllegalArgumentException(
+                        at + ".timeoutMs: only webhook hooks have a timeout");
             }
-            timeoutMs = intIn(node.get("timeoutMs"), at + ".timeoutMs", MIN_TIMEOUT_MS, MAX_TIMEOUT_MS);
+            timeoutMs =
+                    intIn(node.get("timeoutMs"), at + ".timeoutMs", MIN_TIMEOUT_MS, MAX_TIMEOUT_MS);
         }
         return new HookDefinition(id, enabled, point, match, action, params, failMode, timeoutMs);
     }
@@ -172,19 +198,25 @@ public final class HookSchema {
             throw new IllegalArgumentException(at + ".match: must be an object");
         }
         if (!point.isToolPoint() && point != HookPoint.ON_ERROR) {
-            throw new IllegalArgumentException(at + ".match: a matcher only applies to tool hooks and ON_ERROR; leave it out at " + point);
+            throw new IllegalArgumentException(
+                    at
+                            + ".match: a matcher only applies to tool hooks and ON_ERROR; leave it out at "
+                            + point);
         }
         rejectUnknown(node, MATCH_FIELDS, at + ".match");
         String tool = optText(node, "tool", at + ".match");
         if (tool != null && !TOOL_GLOB_PATTERN.matcher(tool).matches()) {
-            throw new IllegalArgumentException(at + ".match.tool: a tool name glob of letters, digits and _ . : - with * and ? wildcards (max 128)");
+            throw new IllegalArgumentException(
+                    at
+                            + ".match.tool: a tool name glob of letters, digits and _ . : - with * and ? wildcards (max 128)");
         }
         String trust = enumText(node, "trust", at + ".match", trustNames());
         String sensitivity = enumText(node, "sensitivity", at + ".match", sensitivityNames());
         Boolean irreversible = null;
         if (node.has("irreversible") && !node.get("irreversible").isNull()) {
             if (!node.get("irreversible").isBoolean()) {
-                throw new IllegalArgumentException(at + ".match.irreversible: must be true or false");
+                throw new IllegalArgumentException(
+                        at + ".match.irreversible: must be true or false");
             }
             irreversible = node.get("irreversible").asBoolean();
         }
@@ -193,8 +225,11 @@ public final class HookSchema {
     }
 
     private static Map<String, Object> parseParams(
-        JsonNode node, HookActionType action, HookPoint point, String at, Function<String, String> urlCheck
-    ) {
+            JsonNode node,
+            HookActionType action,
+            HookPoint point,
+            String at,
+            Function<String, String> urlCheck) {
         String where = at + ".params";
         if (node != null && !node.isNull() && !node.isObject()) {
             throw new IllegalArgumentException(where + ": must be an object");
@@ -219,30 +254,57 @@ public final class HookSchema {
                 boolean any = false;
                 if (p.has("maxPerRun") && !p.get("maxPerRun").isNull()) {
                     if (point == HookPoint.BEFORE_MODEL) {
-                        throw new IllegalArgumentException(where + ".maxPerRun: a model-call limit is per minute only; use maxPerMinute");
+                        throw new IllegalArgumentException(
+                                where
+                                        + ".maxPerRun: a model-call limit is per minute only; use maxPerMinute");
                     }
-                    out.put("maxPerRun", intIn(p.get("maxPerRun"), where + ".maxPerRun", 1, MAX_LIMIT_PER_RUN));
+                    out.put(
+                            "maxPerRun",
+                            intIn(p.get("maxPerRun"), where + ".maxPerRun", 1, MAX_LIMIT_PER_RUN));
                     any = true;
                 }
                 if (p.has("maxPerMinute") && !p.get("maxPerMinute").isNull()) {
-                    out.put("maxPerMinute", intIn(p.get("maxPerMinute"), where + ".maxPerMinute", 1, MAX_LIMIT_PER_MINUTE));
+                    out.put(
+                            "maxPerMinute",
+                            intIn(
+                                    p.get("maxPerMinute"),
+                                    where + ".maxPerMinute",
+                                    1,
+                                    MAX_LIMIT_PER_MINUTE));
                     any = true;
                 }
                 if (!any) {
-                    throw new IllegalArgumentException(where + ": set maxPerMinute" + (point == HookPoint.BEFORE_MODEL ? "" : " and/or maxPerRun"));
+                    throw new IllegalArgumentException(
+                            where
+                                    + ": set maxPerMinute"
+                                    + (point == HookPoint.BEFORE_MODEL ? "" : " and/or maxPerRun"));
                 }
                 putText(out, p, "message", where, MAX_REASON_CHARS, false);
             }
             case REDACT -> {
                 rejectUnknown(p, Set.of("patterns", "regex", "replacement"), where);
-                List<String> patterns = textList(p.get("patterns"), where + ".patterns", HookRedactor.builtinNames().size());
+                List<String> patterns =
+                        textList(
+                                p.get("patterns"),
+                                where + ".patterns",
+                                HookRedactor.builtinNames().size());
                 for (String name : patterns) {
                     if (!HookRedactor.builtinNames().contains(name)) {
-                        throw new IllegalArgumentException(where + ".patterns: unknown pattern '" + name + "' (known: "
-                            + String.join(", ", new java.util.TreeSet<>(HookRedactor.builtinNames())) + ")");
+                        throw new IllegalArgumentException(
+                                where
+                                        + ".patterns: unknown pattern '"
+                                        + name
+                                        + "' (known: "
+                                        + String.join(
+                                                ", ",
+                                                new java.util.TreeSet<>(
+                                                        HookRedactor.builtinNames()))
+                                        + ")");
                     }
                 }
-                List<String> regex = textList(p.get("regex"), where + ".regex", HookRedactor.MAX_CUSTOM_PATTERNS);
+                List<String> regex =
+                        textList(
+                                p.get("regex"), where + ".regex", HookRedactor.MAX_CUSTOM_PATTERNS);
                 for (String r : regex) {
                     String problem = HookRedactor.validateRegex(r);
                     if (problem != null) {
@@ -250,7 +312,8 @@ public final class HookSchema {
                     }
                 }
                 if (patterns.isEmpty() && regex.isEmpty()) {
-                    throw new IllegalArgumentException(where + ": give at least one built-in pattern or one regex");
+                    throw new IllegalArgumentException(
+                            where + ": give at least one built-in pattern or one regex");
                 }
                 if (!patterns.isEmpty()) {
                     out.put("patterns", List.copyOf(patterns));
@@ -279,7 +342,8 @@ public final class HookSchema {
                 out.put("url", url);
                 if (p.has("includeData") && !p.get("includeData").isNull()) {
                     if (!p.get("includeData").isBoolean()) {
-                        throw new IllegalArgumentException(where + ".includeData: must be true or false");
+                        throw new IllegalArgumentException(
+                                where + ".includeData: must be true or false");
                     }
                     out.put("includeData", p.get("includeData").asBoolean());
                 }
@@ -288,7 +352,10 @@ public final class HookSchema {
         return out;
     }
 
-    /** Shape-only URL check (https, a host, no credentials). The allow-list and SSRF guard run elsewhere. */
+    /**
+     * Shape-only URL check (https, a host, no credentials). The allow-list and SSRF guard run
+     * elsewhere.
+     */
     public static String structuralUrlProblem(String url) {
         if (url == null || url.isBlank()) {
             return "must not be blank";
@@ -430,12 +497,25 @@ public final class HookSchema {
         }
         String upper = v.toUpperCase(Locale.ROOT);
         if (!allowed.contains(upper)) {
-            throw new IllegalArgumentException(at + "." + field + ": '" + v + "' is not one of " + new java.util.TreeSet<>(allowed));
+            throw new IllegalArgumentException(
+                    at
+                            + "."
+                            + field
+                            + ": '"
+                            + v
+                            + "' is not one of "
+                            + new java.util.TreeSet<>(allowed));
         }
         return upper;
     }
 
-    private static void putText(Map<String, Object> out, JsonNode p, String field, String where, int max, boolean required) {
+    private static void putText(
+            Map<String, Object> out,
+            JsonNode p,
+            String field,
+            String where,
+            int max,
+            boolean required) {
         String v = optText(p, field, where);
         if (v == null) {
             if (required) {
@@ -444,11 +524,13 @@ public final class HookSchema {
             return;
         }
         if (v.length() > max) {
-            throw new IllegalArgumentException(where + "." + field + ": at most " + max + " characters");
+            throw new IllegalArgumentException(
+                    where + "." + field + ": at most " + max + " characters");
         }
         for (int i = 0; i < v.length(); i++) {
             if (Character.isISOControl(v.charAt(i))) {
-                throw new IllegalArgumentException(where + "." + field + ": must be a single line of plain text");
+                throw new IllegalArgumentException(
+                        where + "." + field + ": must be a single line of plain text");
             }
         }
         out.put(field, v);
@@ -456,7 +538,8 @@ public final class HookSchema {
 
     private static int intIn(JsonNode v, String at, int min, int max) {
         if (v == null || !v.isIntegralNumber() || !v.canConvertToInt()) {
-            throw new IllegalArgumentException(at + ": must be a whole number between " + min + " and " + max);
+            throw new IllegalArgumentException(
+                    at + ": must be a whole number between " + min + " and " + max);
         }
         int n = v.asInt();
         if (n < min || n > max) {

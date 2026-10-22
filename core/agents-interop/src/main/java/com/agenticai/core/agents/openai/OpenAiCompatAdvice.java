@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * Renders every failure of {@link OpenAiCompatController} and
- * {@link OpenResponsesController} in OpenAI's error shape instead of the
- * platform's own. Scoped to those two controllers only, and
+ * Renders every failure of {@link OpenAiCompatController} and {@link OpenResponsesController} in
+ * OpenAI's error shape instead of the platform's own. Scoped to those two controllers only, and
  * ordered ahead of {@code GlobalExceptionHandler}, so no other endpoint changes.
  */
-@RestControllerAdvice(assignableTypes = {OpenAiCompatController.class, OpenResponsesController.class})
+@RestControllerAdvice(
+        assignableTypes = {OpenAiCompatController.class, OpenResponsesController.class})
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ConditionalOnProperty(prefix = "app.openai-compat", name = "enabled", havingValue = "true")
 public class OpenAiCompatAdvice {
@@ -37,8 +37,9 @@ public class OpenAiCompatAdvice {
         if (info.status() >= 500) {
             log.error("OpenAI-compatible endpoint failed", e);
         }
-        ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatusCode.valueOf(info.status()))
-            .contentType(MediaType.APPLICATION_JSON);
+        ResponseEntity.BodyBuilder builder =
+                ResponseEntity.status(HttpStatusCode.valueOf(info.status()))
+                        .contentType(MediaType.APPLICATION_JSON);
         if (info.retryAfterSeconds() > 0) {
             builder.header("Retry-After", String.valueOf(info.retryAfterSeconds()));
         }

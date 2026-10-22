@@ -71,8 +71,8 @@ public class SkillLifecycleService {
     }
 
     /**
-     * What the console shows next to a custom skill. {@code effectiveness} is null until an
-     * outcome was observed; {@code stale} only ever applies to an ACTIVE skill.
+     * What the console shows next to a custom skill. {@code effectiveness} is null until an outcome
+     * was observed; {@code stale} only ever applies to an ACTIVE skill.
      */
     public record SkillView(
             UUID id,
@@ -90,7 +90,9 @@ public class SkillLifecycleService {
             UUID learnedForAgentId,
             SelfCheck selfCheck) {}
 
-    /** The learning loop's check of a drafted skill (V653); null in a view when it was not checked. */
+    /**
+     * The learning loop's check of a drafted skill (V653); null in a view when it was not checked.
+     */
     public record SelfCheck(String verdict, String reason, Instant checkedAt) {}
 
     /**
@@ -116,7 +118,12 @@ public class SkillLifecycleService {
     @Transactional(readOnly = true)
     public Optional<SkillView> viewOf(UUID id) {
         return skills.findById(id)
-                .map(s -> view(s, agentsBySkillName().getOrDefault(s.getName(), List.of()), Instant.now()));
+                .map(
+                        s ->
+                                view(
+                                        s,
+                                        agentsBySkillName().getOrDefault(s.getName(), List.of()),
+                                        Instant.now()));
     }
 
     SkillView view(Skill s, List<UUID> agentIds, Instant now) {
@@ -140,7 +147,9 @@ public class SkillLifecycleService {
                 s.getSelfCheckVerdict() == null
                         ? null
                         : new SelfCheck(
-                                s.getSelfCheckVerdict(), s.getSelfCheckReason(), s.getSelfCheckedAt()));
+                                s.getSelfCheckVerdict(),
+                                s.getSelfCheckReason(),
+                                s.getSelfCheckedAt()));
     }
 
     /**
@@ -252,8 +261,8 @@ public class SkillLifecycleService {
     }
 
     /**
-     * Makes {@code agentIds} exactly the agents whose allow-list names this skill. An agent with
-     * an empty allow-list already sees every enabled skill, so adding to it would silently
+     * Makes {@code agentIds} exactly the agents whose allow-list names this skill. An agent with an
+     * empty allow-list already sees every enabled skill, so adding to it would silently
      * <em>narrow</em> it to this one skill: those agents are left alone and reported in {@link
      * AgentBinding#unrestricted}. Removing the last name from an allow-list would do the opposite
      * (widen the agent to every skill), so that case is refused.
@@ -284,7 +293,8 @@ public class SkillLifecycleService {
             }
         }
         for (AgentSkillConfig config : configs.values()) {
-            if (desired.contains(config.getAgentId()) || !config.getAllowedSkillNames().contains(name)) {
+            if (desired.contains(config.getAgentId())
+                    || !config.getAllowedSkillNames().contains(name)) {
                 continue;
             }
             Set<String> next = new HashSet<>(config.getAllowedSkillNames());
@@ -305,7 +315,8 @@ public class SkillLifecycleService {
 
     public record AgentBinding(List<UUID> agentIds, List<UUID> unrestricted) {}
 
-    // ---------------------------------------------------------------- write-side hooks (SkillService)
+    // ---------------------------------------------------------------- write-side hooks
+    // (SkillService)
 
     /**
      * After a skill row was written: snapshot the live content. A draft is not versioned until it
@@ -337,7 +348,10 @@ public class SkillLifecycleService {
                             note));
             prune(saved.getId());
         } catch (RuntimeException e) {
-            log.warn("Could not snapshot skill {}: {}", saved == null ? null : saved.getName(), e.getMessage());
+            log.warn(
+                    "Could not snapshot skill {}: {}",
+                    saved == null ? null : saved.getName(),
+                    e.getMessage());
         }
     }
 
@@ -347,8 +361,7 @@ public class SkillLifecycleService {
      */
     @Transactional
     public void markPending(String name, UUID learnedForAgentId, String note) {
-        Skill skill =
-                skills.findByName(name).orElseThrow(() -> new SkillNotFoundException(name));
+        Skill skill = skills.findByName(name).orElseThrow(() -> new SkillNotFoundException(name));
         skill.markPending(SkillOrigin.LEARNED, learnedForAgentId, truncate(note, 1000));
         skills.save(skill);
         // SkillService#create snapshots every new row while it is still ACTIVE for a moment. A
@@ -358,8 +371,8 @@ public class SkillLifecycleService {
     }
 
     /**
-     * Stores the learning loop's self-check next to a PENDING draft. Review information only;
-     * never throws.
+     * Stores the learning loop's self-check next to a PENDING draft. Review information only; never
+     * throws.
      */
     @Transactional
     public void recordSelfCheck(String name, String verdict, String reason) {

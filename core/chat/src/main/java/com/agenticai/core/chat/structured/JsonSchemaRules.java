@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * JSON Schema checks and rewrites behind {@link StructuredOutput}'s native structured-output switches: parsing a
- * caller's schema, OpenAI strict-mode compatibility, the Gemini keyword strip, Anthropic's local-{@code $ref} rule
- * and the provider-safe schema/tool name. Schema-aware walks: a property NAMED like a keyword is never a keyword.
+ * JSON Schema checks and rewrites behind {@link StructuredOutput}'s native structured-output
+ * switches: parsing a caller's schema, OpenAI strict-mode compatibility, the Gemini keyword strip,
+ * Anthropic's local-{@code $ref} rule and the provider-safe schema/tool name. Schema-aware walks: a
+ * property NAMED like a keyword is never a keyword.
  */
 final class JsonSchemaRules {
 
-    private JsonSchemaRules() {
-    }
+    private JsonSchemaRules() {}
 
     static JsonNode parseSchema(String jsonSchema) {
         if (jsonSchema == null || jsonSchema.isBlank()) {
@@ -33,7 +33,10 @@ final class JsonSchemaRules {
         return n.length() > 64 ? n.substring(0, 64) : n;
     }
 
-    /** OpenAI strict mode: every object has additionalProperties:false and lists all its properties as required. */
+    /**
+     * OpenAI strict mode: every object has additionalProperties:false and lists all its properties
+     * as required.
+     */
     static boolean isStrictCompatible(JsonNode node) {
         if (node == null || !node.isObject()) {
             return true;
@@ -93,7 +96,10 @@ final class JsonSchemaRules {
         return false;
     }
 
-    /** Schemas nested under the applicator keywords other than "properties": items, anyOf/allOf/oneOf, $defs. */
+    /**
+     * Schemas nested under the applicator keywords other than "properties": items,
+     * anyOf/allOf/oneOf, $defs.
+     */
     static List<JsonNode> subSchemas(JsonNode schema) {
         List<JsonNode> out = new ArrayList<>();
         JsonNode items = schema.get("items");
@@ -131,7 +137,9 @@ final class JsonSchemaRules {
         return false;
     }
 
-    /** Removes the JSON-Schema-only keywords Gemini rejects, walking schemas (not property names). */
+    /**
+     * Removes the JSON-Schema-only keywords Gemini rejects, walking schemas (not property names).
+     */
     static void stripKeys(JsonNode node) {
         if (!(node instanceof ObjectNode obj)) {
             return;

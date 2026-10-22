@@ -13,13 +13,12 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * {@code run_in_code_workspace} - runs a shell command inside an EXISTING
- * code-intel scratch workspace (see {@code create_code_workspace}). Same
- * consequential-write posture as {@link ApplyCodeChangesToolCallback} - see
- * that class's javadoc for the full gate design (this tool ALWAYS routes
- * through {@link HumanApprovalGateService#evaluate} first, for {@link
- * RunCodeWorkspaceApprovalExecutor#ACTION_TYPE}, unconditionally, and never
- * returns command output inline).
+ * {@code run_in_code_workspace} - runs a shell command inside an EXISTING code-intel scratch
+ * workspace (see {@code create_code_workspace}). Same consequential-write posture as {@link
+ * ApplyCodeChangesToolCallback} - see that class's javadoc for the full gate design (this tool
+ * ALWAYS routes through {@link HumanApprovalGateService#evaluate} first, for {@link
+ * RunCodeWorkspaceApprovalExecutor#ACTION_TYPE}, unconditionally, and never returns command output
+ * inline).
  */
 public class RunInCodeWorkspaceToolCallback implements ToolCallback {
 
@@ -35,13 +34,13 @@ public class RunInCodeWorkspaceToolCallback implements ToolCallback {
     }
 
     /**
-     * @param allowedRepoIds the calling agent's {@code
-     *     Agent.allowedCodeIntelRepoIds} - EMPTY means deny-all here, same
-     *     reasoning as {@link ApplyCodeChangesToolCallback}. Enforced
-     *     BEFORE {@code gateService.evaluate} is ever called, so a
-     *     disallowed repo never even files an approval request.
+     * @param allowedRepoIds the calling agent's {@code Agent.allowedCodeIntelRepoIds} - EMPTY means
+     *     deny-all here, same reasoning as {@link ApplyCodeChangesToolCallback}. Enforced BEFORE
+     *     {@code gateService.evaluate} is ever called, so a disallowed repo never even files an
+     *     approval request.
      */
-    public RunInCodeWorkspaceToolCallback(HumanApprovalGateService gateService, Set<String> allowedRepoIds) {
+    public RunInCodeWorkspaceToolCallback(
+            HumanApprovalGateService gateService, Set<String> allowedRepoIds) {
         this.gateService = gateService;
         this.allowedRepoIds = allowedRepoIds == null ? Set.of() : allowedRepoIds;
     }
@@ -49,15 +48,16 @@ public class RunInCodeWorkspaceToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("run_in_code_workspace")
-            .description(
-                "Runs a shell command (e.g. a test suite or a build) inside an EXISTING code workspace "
-                    + "created by create_code_workspace. This ALWAYS requires a tenant-admin's sign-off "
-                    + "on this platform's Approvals screen before anything runs - this call only files "
-                    + "the request and returns immediately; it does not run anything itself and does not "
-                    + "return exit code/stdout/stderr. After a human approves, the command runs "
-                    + "automatically.")
-            .inputSchema("""
+                .name("run_in_code_workspace")
+                .description(
+                        "Runs a shell command (e.g. a test suite or a build) inside an EXISTING code workspace "
+                                + "created by create_code_workspace. This ALWAYS requires a tenant-admin's sign-off "
+                                + "on this platform's Approvals screen before anything runs - this call only files "
+                                + "the request and returns immediately; it does not run anything itself and does not "
+                                + "return exit code/stdout/stderr. After a human approves, the command runs "
+                                + "automatically.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -85,7 +85,7 @@ public class RunInCodeWorkspaceToolCallback implements ToolCallback {
                     "required": ["repo_id", "workspace_id", "command"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -112,21 +112,41 @@ public class RunInCodeWorkspaceToolCallback implements ToolCallback {
             Integer attemptsArg = asInteger(args.get("attempts"));
             int attempts = attemptsArg == null ? 1 : attemptsArg;
 
-            RunCodeWorkspaceApprovalExecutor.RunPayload payload = new RunCodeWorkspaceApprovalExecutor.RunPayload(
-                repoId.toString(), workspaceId.toString(), command.toString(), timeout, attempts, true);
+            RunCodeWorkspaceApprovalExecutor.RunPayload payload =
+                    new RunCodeWorkspaceApprovalExecutor.RunPayload(
+                            repoId.toString(),
+                            workspaceId.toString(),
+                            command.toString(),
+                            timeout,
+                            attempts,
+                            true);
             String payloadJson = MAPPER.writeValueAsString(payload);
             String cmd = command.toString();
-            String summary = "Run in code workspace " + workspaceId + " (repo " + repoId + "): "
-                + (cmd.length() > SUMMARY_COMMAND_CHARS ? cmd.substring(0, SUMMARY_COMMAND_CHARS) + "..." : cmd);
-            String requestedBy = TenantContext.current().map(TenantContext::getSubject).orElse(null);
+            String summary =
+                    "Run in code workspace "
+                            + workspaceId
+                            + " (repo "
+                            + repoId
+                            + "): "
+                            + (cmd.length() > SUMMARY_COMMAND_CHARS
+                                    ? cmd.substring(0, SUMMARY_COMMAND_CHARS) + "..."
+                                    : cmd);
+            String requestedBy =
+                    TenantContext.current().map(TenantContext::getSubject).orElse(null);
 
-            ApprovalEvaluation evaluation = gateService.evaluate(
-                RunCodeWorkspaceApprovalExecutor.ACTION_TYPE, summary, payloadJson, requestedBy);
+            ApprovalEvaluation evaluation =
+                    gateService.evaluate(
+                            RunCodeWorkspaceApprovalExecutor.ACTION_TYPE,
+                            summary,
+                            payloadJson,
+                            requestedBy);
 
             return responseJson(evaluation);
         } catch (Exception e) {
             log.warn("run_in_code_workspace tool call failed", e);
-            return "{\"error\": \"run_in_code_workspace failed: " + SearchCodeToolCallback.safe(e.getMessage()) + "\"}";
+            return "{\"error\": \"run_in_code_workspace failed: "
+                    + SearchCodeToolCallback.safe(e.getMessage())
+                    + "\"}";
         }
     }
 
@@ -147,14 +167,16 @@ public class RunInCodeWorkspaceToolCallback implements ToolCallback {
     private String responseJson(ApprovalEvaluation evaluation) {
         if (evaluation.approved()) {
             return "{\"status\": \"auto_approved_and_executed\", "
-                + "\"message\": \"This tenant's policy does not require approval for this action type, "
-                + "so it already ran. This tool does not return live stdout/stderr/exit code - call "
-                + "diff_code_workspace to see any resulting file changes.\"}";
+                    + "\"message\": \"This tenant's policy does not require approval for this action type, "
+                    + "so it already ran. This tool does not return live stdout/stderr/exit code - call "
+                    + "diff_code_workspace to see any resulting file changes.\"}";
         }
         return "{\"status\": \"pending_approval\", "
-            + "\"approval_request_id\": \"" + evaluation.pendingRequestId() + "\", "
-            + "\"message\": \"This run requires a tenant-admin's approval on the platform's Approvals "
-            + "screen before it executes. It will run automatically once approved - no further tool call "
-            + "is needed.\"}";
+                + "\"approval_request_id\": \""
+                + evaluation.pendingRequestId()
+                + "\", "
+                + "\"message\": \"This run requires a tenant-admin's approval on the platform's Approvals "
+                + "screen before it executes. It will run automatically once approved - no further tool call "
+                + "is needed.\"}";
     }
 }

@@ -66,14 +66,27 @@ class LocalUnlockHttpTest {
         ctx.setServletContext(new MockServletContext());
         ctx.getEnvironment()
                 .getPropertySources()
-                .addFirst(new MapPropertySource("t", Map.of("app.auth.mode", "local", "app.auth.local.data-dir", dir.toString())));
-        ctx.register(LocalAuthHttpTest.Web.class, SecurityConfig.class, LocalAuthSecurityConfig.class);
+                .addFirst(
+                        new MapPropertySource(
+                                "t",
+                                Map.of(
+                                        "app.auth.mode",
+                                        "local",
+                                        "app.auth.local.data-dir",
+                                        dir.toString())));
+        ctx.register(
+                LocalAuthHttpTest.Web.class, SecurityConfig.class, LocalAuthSecurityConfig.class);
         ctx.refresh();
         accounts = ctx.getBean(InMemoryLocalAccountStore.class);
         credentials = ctx.getBean(InMemoryLocalCredentialStore.class);
-        owner = InMemoryLocalAccountStore.account(EMAIL, PASSWORD, ctx.getBean(LocalPasswords.class));
+        owner =
+                InMemoryLocalAccountStore.account(
+                        EMAIL, PASSWORD, ctx.getBean(LocalPasswords.class));
         accounts.insert(owner);
-        mvc = MockMvcBuilders.webAppContextSetup(ctx).addFilters(ctx.getBean("springSecurityFilterChain", Filter.class)).build();
+        mvc =
+                MockMvcBuilders.webAppContextSetup(ctx)
+                        .addFilters(ctx.getBean("springSecurityFilterChain", Filter.class))
+                        .build();
     }
 
     @AfterEach
@@ -83,7 +96,9 @@ class LocalUnlockHttpTest {
 
     // ------------------------------------------------------------------ helpers
 
-    private Resp send(MockHttpServletRequestBuilder request, String bearer, Object body, String... headers) throws Exception {
+    private Resp send(
+            MockHttpServletRequestBuilder request, String bearer, Object body, String... headers)
+            throws Exception {
         if (bearer != null) {
             request.header("Authorization", "Bearer " + bearer);
         }
@@ -91,7 +106,8 @@ class LocalUnlockHttpTest {
             request.header(headers[i], headers[i + 1]);
         }
         if (body != null) {
-            request.contentType(MediaType.APPLICATION_JSON).content(body instanceof String s ? s : JSON.writeValueAsString(body));
+            request.contentType(MediaType.APPLICATION_JSON)
+                    .content(body instanceof String s ? s : JSON.writeValueAsString(body));
         }
         MockHttpServletResponse raw = mvc.perform(request).andReturn().getResponse();
         String text = raw.getContentAsString();
@@ -102,13 +118,18 @@ class LocalUnlockHttpTest {
         return new Resp(raw.getStatus(), parsed, raw);
     }
 
-    private Resp postJson(String path, String bearer, Object body, String... headers) throws Exception {
+    private Resp postJson(String path, String bearer, Object body, String... headers)
+            throws Exception {
         return send(post(path), bearer, body, headers);
     }
 
     /** A password sign-in: a token whose auth_time is now. */
     private String bearer() throws Exception {
-        Resp r = postJson("/api/auth/local/login", null, Map.of("identifier", EMAIL, "password", PASSWORD));
+        Resp r =
+                postJson(
+                        "/api/auth/local/login",
+                        null,
+                        Map.of("identifier", EMAIL, "password", PASSWORD));
         assertThat(r.status()).isEqualTo(200);
         return r.text("accessToken");
     }
@@ -116,8 +137,17 @@ class LocalUnlockHttpTest {
     /** A validly signed token whose sign-in is two hours old. */
     private String staleBearer() {
         LocalJwtService tokens = ctx.getBean(LocalJwtService.class);
-        return tokens
-                .issue(new AccessTokenRequest(owner.id(), owner.email(), "Ada", "Lovelace", "t_abc", Set.of("tenant-admin"), UUID.randomUUID().toString(), Instant.now().minus(Duration.ofHours(2)), "pwd"))
+        return tokens.issue(
+                        new AccessTokenRequest(
+                                owner.id(),
+                                owner.email(),
+                                "Ada",
+                                "Lovelace",
+                                "t_abc",
+                                Set.of("tenant-admin"),
+                                UUID.randomUUID().toString(),
+                                Instant.now().minus(Duration.ofHours(2)),
+                                "pwd"))
                 .token();
     }
 
@@ -129,7 +159,9 @@ class LocalUnlockHttpTest {
     }
 
     private String pendingSetupToken() {
-        LocalAccount fresh = InMemoryLocalAccountStore.account("first@example.test", null, ctx.getBean(LocalPasswords.class));
+        LocalAccount fresh =
+                InMemoryLocalAccountStore.account(
+                        "first@example.test", null, ctx.getBean(LocalPasswords.class));
         LocalAccount pending = fresh.withPassword(null, false, true);
         accounts.insert(pending);
         return ctx.getBean(LocalAuthService.class).issueSetupToken(pending);
@@ -142,7 +174,9 @@ class LocalUnlockHttpTest {
         Resp r = send(get("/api/auth/local/config"), null, null);
 
         assertThat(r.status()).isEqualTo(200);
-        assertThat(r.body().get("credentialTypes")).extracting(JsonNode::asText).containsExactly("password", "pin", "passkey", "recovery");
+        assertThat(r.body().get("credentialTypes"))
+                .extracting(JsonNode::asText)
+                .containsExactly("password", "pin", "passkey", "recovery");
     }
 
     @Test
@@ -151,12 +185,28 @@ class LocalUnlockHttpTest {
         List<Resp> responses =
                 List.of(
                         send(get(U + "/methods"), token, null),
-                        postJson(U + "/login", null, Map.of("type", "pin", "identifier", UUID.randomUUID().toString(), "credentials", Map.of("pin", PIN, "deviceSecret", "x"))),
-                        postJson(U + "/passkey/login-options", null, null, "X-Vegaduta-Origin", ORIGIN),
+                        postJson(
+                                U + "/login",
+                                null,
+                                Map.of(
+                                        "type",
+                                        "pin",
+                                        "identifier",
+                                        UUID.randomUUID().toString(),
+                                        "credentials",
+                                        Map.of("pin", PIN, "deviceSecret", "x"))),
+                        postJson(
+                                U + "/passkey/login-options",
+                                null,
+                                null,
+                                "X-Vegaduta-Origin",
+                                ORIGIN),
                         postJson(U + "/devices", token, Map.of("pin", PIN, "label", "x")),
                         postJson(U + "/recovery-codes", token, null));
 
-        assertThat(responses).allSatisfy(r -> assertThat(r.raw().getHeader("Cache-Control")).contains("no-store"));
+        assertThat(responses)
+                .allSatisfy(
+                        r -> assertThat(r.raw().getHeader("Cache-Control")).contains("no-store"));
     }
 
     // ------------------------------------------------------------------ bearer required
@@ -175,7 +225,8 @@ class LocalUnlockHttpTest {
 
         String tampered = bearer() + "x";
         assertThat(send(get(U + "/methods"), tampered, null).status()).isEqualTo(401);
-        assertThat(send(get(U + "/methods"), "eyJhbGciOiJub25lIn0.e30.", null).status()).isEqualTo(401);
+        assertThat(send(get(U + "/methods"), "eyJhbGciOiJub25lIn0.e30.", null).status())
+                .isEqualTo(401);
     }
 
     @Test
@@ -193,27 +244,52 @@ class LocalUnlockHttpTest {
     void enrollingADevicedThenSigningInWithItsPinAndSecret() throws Exception {
         String token = bearer();
 
-        Resp enrolled = postJson(U + "/devices", token, Map.of("pin", PIN, "label", "Kitchen laptop"));
+        Resp enrolled =
+                postJson(U + "/devices", token, Map.of("pin", PIN, "label", "Kitchen laptop"));
         assertThat(enrolled.status()).isEqualTo(200);
         assertThat(enrolled.text("deviceId")).isNotBlank();
         assertThat(enrolled.text("deviceSecret")).hasSize(43);
 
         Resp methods = send(get(U + "/methods"), token, null);
-        assertThat(methods.body().get("devices").get(0).get("label").asText()).isEqualTo("Kitchen laptop");
+        assertThat(methods.body().get("devices").get(0).get("label").asText())
+                .isEqualTo("Kitchen laptop");
         assertThat(methods.body().toString()).doesNotContain(enrolled.text("deviceSecret"));
 
-        Resp login = postJson(U + "/login", null, Map.of("type", "pin", "identifier", enrolled.text("deviceId"), "credentials", Map.of("pin", PIN, "deviceSecret", enrolled.text("deviceSecret"))));
+        Resp login =
+                postJson(
+                        U + "/login",
+                        null,
+                        Map.of(
+                                "type",
+                                "pin",
+                                "identifier",
+                                enrolled.text("deviceId"),
+                                "credentials",
+                                Map.of("pin", PIN, "deviceSecret", enrolled.text("deviceSecret"))));
         assertThat(login.status()).isEqualTo(200);
         assertThat(login.text("tokenType")).isEqualTo("Bearer");
         assertThat(login.body().get("user").get("email").asText()).isEqualTo(EMAIL);
-        assertThat(ctx.getBean(LocalJwtService.class).decoder().decode(login.text("accessToken")).getClaimAsStringList("amr")).containsExactly("pin");
-        assertThat(send(get("/api/probe/any"), login.text("accessToken"), null).status()).as("the token opens the rest of the API").isEqualTo(200);
+        assertThat(
+                        ctx.getBean(LocalJwtService.class)
+                                .decoder()
+                                .decode(login.text("accessToken"))
+                                .getClaimAsStringList("amr"))
+                .containsExactly("pin");
+        assertThat(send(get("/api/probe/any"), login.text("accessToken"), null).status())
+                .as("the token opens the rest of the API")
+                .isEqualTo(200);
     }
 
     @Test
     void aWeakPinIsA400WithItsOwnCode() throws Exception {
-        assertRefusal(postJson(U + "/devices", bearer(), Map.of("pin", "123456", "label", "x")), 400, "weak_pin");
-        assertRefusal(postJson(U + "/devices", bearer(), Map.of("pin", "12ab56", "label", "x")), 400, "weak_pin");
+        assertRefusal(
+                postJson(U + "/devices", bearer(), Map.of("pin", "123456", "label", "x")),
+                400,
+                "weak_pin");
+        assertRefusal(
+                postJson(U + "/devices", bearer(), Map.of("pin", "12ab56", "label", "x")),
+                400,
+                "weak_pin");
     }
 
     @Test
@@ -221,11 +297,17 @@ class LocalUnlockHttpTest {
         String stale = staleBearer();
         String id = UUID.randomUUID().toString();
 
-        assertRefusal(postJson(U + "/devices", stale, Map.of("pin", PIN, "label", "x")), 403, "reauth_required");
+        assertRefusal(
+                postJson(U + "/devices", stale, Map.of("pin", PIN, "label", "x")),
+                403,
+                "reauth_required");
         assertRefusal(postJson(U + "/recovery-codes", stale, null), 403, "reauth_required");
         assertRefusal(send(delete(U + "/devices/" + id), stale, null), 403, "reauth_required");
         assertRefusal(send(delete(U + "/passkeys/" + id), stale, null), 403, "reauth_required");
-        assertRefusal(postJson(U + "/passkey/register-options", stale, null, "X-Vegaduta-Origin", ORIGIN), 403, "reauth_required");
+        assertRefusal(
+                postJson(U + "/passkey/register-options", stale, null, "X-Vegaduta-Origin", ORIGIN),
+                403,
+                "reauth_required");
         assertThat(send(get(U + "/methods"), stale, null).status()).isEqualTo(200);
     }
 
@@ -234,14 +316,21 @@ class LocalUnlockHttpTest {
         String token = bearer();
         Resp device = postJson(U + "/devices", token, Map.of("pin", PIN, "label", "x"));
 
-        assertThat(send(delete(U + "/devices/" + device.text("deviceId")), token, null).status()).isEqualTo(204);
-        assertRefusal(send(delete(U + "/devices/" + device.text("deviceId")), token, null), 404, "not_found");
+        assertThat(send(delete(U + "/devices/" + device.text("deviceId")), token, null).status())
+                .isEqualTo(204);
+        assertRefusal(
+                send(delete(U + "/devices/" + device.text("deviceId")), token, null),
+                404,
+                "not_found");
         assertRefusal(send(delete(U + "/passkeys/not-a-uuid"), token, null), 404, "not_found");
 
         // A passwordless account cannot remove its only way in.
         accounts.update(owner.withPassword(null, false, false));
         Resp only = postJson(U + "/devices", token, Map.of("pin", PIN, "label", "only"));
-        assertRefusal(send(delete(U + "/devices/" + only.text("deviceId")), token, null), 409, "last_credential");
+        assertRefusal(
+                send(delete(U + "/devices/" + only.text("deviceId")), token, null),
+                409,
+                "last_credential");
     }
 
     @Test
@@ -251,24 +340,74 @@ class LocalUnlockHttpTest {
         assertThat(made.body().get("codes")).hasSize(8);
         String code = made.body().get("codes").get(0).asText();
         assertThat(code).matches("[A-HJ-NP-Z2-9]{4}(-[A-HJ-NP-Z2-9]{4}){3}");
-        assertThat(send(get(U + "/methods"), bearer(), null).body().get("recoveryCodesRemaining").asInt()).isEqualTo(8);
+        assertThat(
+                        send(get(U + "/methods"), bearer(), null)
+                                .body()
+                                .get("recoveryCodesRemaining")
+                                .asInt())
+                .isEqualTo(8);
 
-        Resp used = postJson(U + "/login", null, Map.of("type", "recovery", "identifier", "recovery", "credentials", Map.of("code", code)));
+        Resp used =
+                postJson(
+                        U + "/login",
+                        null,
+                        Map.of(
+                                "type",
+                                "recovery",
+                                "identifier",
+                                "recovery",
+                                "credentials",
+                                Map.of("code", code)));
         assertThat(used.status()).isEqualTo(200);
-        assertThat(ctx.getBean(LocalJwtService.class).decoder().decode(used.text("accessToken")).getClaimAsStringList("amr")).containsExactly("rec");
-        assertRefusal(postJson(U + "/login", null, Map.of("type", "recovery", "identifier", "recovery", "credentials", Map.of("code", code))), 401, "invalid_credentials");
+        assertThat(
+                        ctx.getBean(LocalJwtService.class)
+                                .decoder()
+                                .decode(used.text("accessToken"))
+                                .getClaimAsStringList("amr"))
+                .containsExactly("rec");
+        assertRefusal(
+                postJson(
+                        U + "/login",
+                        null,
+                        Map.of(
+                                "type",
+                                "recovery",
+                                "identifier",
+                                "recovery",
+                                "credentials",
+                                Map.of("code", code))),
+                401,
+                "invalid_credentials");
     }
 
-    // ------------------------------------------------------------------ public paths ignore a stale Authorization header
+    // ------------------------------------------------------------------ public paths ignore a
+    // stale Authorization header
 
     @Test
     void aStaleAuthorizationHeaderDoesNotBreakAPublicSignIn() throws Exception {
         Resp enrolled = postJson(U + "/devices", bearer(), Map.of("pin", PIN, "label", "x"));
-        Map<String, Object> pinLogin = Map.of("type", "pin", "identifier", enrolled.text("deviceId"), "credentials", Map.of("pin", PIN, "deviceSecret", enrolled.text("deviceSecret")));
+        Map<String, Object> pinLogin =
+                Map.of(
+                        "type",
+                        "pin",
+                        "identifier",
+                        enrolled.text("deviceId"),
+                        "credentials",
+                        Map.of("pin", PIN, "deviceSecret", enrolled.text("deviceSecret")));
 
         Resp login = postJson(U + "/login", "expired.token.value", pinLogin);
-        Resp options = postJson(U + "/passkey/login-options", "expired.token.value", null, "X-Vegaduta-Origin", ORIGIN);
-        Resp setup = postJson(U + "/setup/pin", "expired.token.value", Map.of("token", pendingSetupToken(), "pin", "739105"));
+        Resp options =
+                postJson(
+                        U + "/passkey/login-options",
+                        "expired.token.value",
+                        null,
+                        "X-Vegaduta-Origin",
+                        ORIGIN);
+        Resp setup =
+                postJson(
+                        U + "/setup/pin",
+                        "expired.token.value",
+                        Map.of("token", pendingSetupToken(), "pin", "739105"));
 
         assertThat(login.status()).isEqualTo(200);
         assertThat(options.status()).isEqualTo(200);
@@ -280,15 +419,37 @@ class LocalUnlockHttpTest {
     @Test
     void theLoginBodyIsValidated() throws Exception {
         assertThat(postJson(U + "/login", null, "{}").status()).isEqualTo(400);
-        assertThat(postJson(U + "/login", null, Map.of("type", "password", "identifier", EMAIL, "credentials", Map.of("password", PASSWORD))).status())
+        assertThat(
+                        postJson(
+                                        U + "/login",
+                                        null,
+                                        Map.of(
+                                                "type",
+                                                "password",
+                                                "identifier",
+                                                EMAIL,
+                                                "credentials",
+                                                Map.of("password", PASSWORD)))
+                                .status())
                 .as("passwords have their own endpoint")
                 .isEqualTo(400);
-        assertThat(postJson(U + "/login", null, Map.of("type", "pin", "identifier", "x")).status()).isEqualTo(400);
+        assertThat(postJson(U + "/login", null, Map.of("type", "pin", "identifier", "x")).status())
+                .isEqualTo(400);
     }
 
     @Test
     void wrongCredentialsAreA401WithAStableCodeAndNoToken() throws Exception {
-        Resp r = postJson(U + "/login", null, Map.of("type", "pin", "identifier", UUID.randomUUID().toString(), "credentials", Map.of("pin", PIN, "deviceSecret", "abc")));
+        Resp r =
+                postJson(
+                        U + "/login",
+                        null,
+                        Map.of(
+                                "type",
+                                "pin",
+                                "identifier",
+                                UUID.randomUUID().toString(),
+                                "credentials",
+                                Map.of("pin", PIN, "deviceSecret", "abc")));
 
         assertRefusal(r, 401, "invalid_credentials");
         assertThat(r.body().has("accessToken")).isFalse();
@@ -299,10 +460,20 @@ class LocalUnlockHttpTest {
         String token = bearer();
         Resp device = postJson(U + "/devices", token, Map.of("pin", PIN, "label", "x"));
         Resp second = postJson(U + "/devices", token, Map.of("pin", PIN, "label", "y"));
-        assertThat(send(delete(U + "/devices/" + device.text("deviceId")), token, null).status()).isEqualTo(204);
+        assertThat(send(delete(U + "/devices/" + device.text("deviceId")), token, null).status())
+                .isEqualTo(204);
 
         assertRefusal(
-                postJson(U + "/login", null, Map.of("type", "pin", "identifier", device.text("deviceId"), "credentials", Map.of("pin", PIN, "deviceSecret", device.text("deviceSecret")))),
+                postJson(
+                        U + "/login",
+                        null,
+                        Map.of(
+                                "type",
+                                "pin",
+                                "identifier",
+                                device.text("deviceId"),
+                                "credentials",
+                                Map.of("pin", PIN, "deviceSecret", device.text("deviceSecret")))),
                 401,
                 "device_revoked");
         assertThat(second.text("deviceId")).isNotEqualTo(device.text("deviceId"));
@@ -312,14 +483,23 @@ class LocalUnlockHttpTest {
 
     @Test
     void loginOptionsComeFromTheForwardedOriginOrTheOriginHeader() throws Exception {
-        Resp forwarded = postJson(U + "/passkey/login-options", null, null, "X-Vegaduta-Origin", ORIGIN, "Origin", "http://core.internal:8080");
+        Resp forwarded =
+                postJson(
+                        U + "/passkey/login-options",
+                        null,
+                        null,
+                        "X-Vegaduta-Origin",
+                        ORIGIN,
+                        "Origin",
+                        "http://core.internal:8080");
         Resp direct = postJson(U + "/passkey/login-options", null, null, "Origin", ORIGIN);
 
         for (Resp r : List.of(forwarded, direct)) {
             assertThat(r.status()).isEqualTo(200);
             assertThat(r.text("challengeId")).matches("[0-9a-f]{32}");
             assertThat(r.body().get("publicKey").get("rpId").asText()).isEqualTo(RP_ID);
-            assertThat(r.body().get("publicKey").get("userVerification").asText()).isEqualTo("required");
+            assertThat(r.body().get("publicKey").get("userVerification").asText())
+                    .isEqualTo("required");
             assertThat(r.body().get("publicKey").get("allowCredentials")).isEmpty();
             assertThat(r.body().get("publicKey").get("challenge").asText()).hasSize(43);
         }
@@ -327,89 +507,223 @@ class LocalUnlockHttpTest {
 
     @Test
     void anIpAddressOrMissingOriginIsA400PasskeyOriginUnsupported() throws Exception {
-        assertRefusal(postJson(U + "/passkey/login-options", null, null, "X-Vegaduta-Origin", "https://192.168.1.20:3000"), 400, "passkey_origin_unsupported");
-        assertRefusal(postJson(U + "/passkey/login-options", null, null), 400, "passkey_origin_unsupported");
-        assertRefusal(postJson(U + "/passkey/register-options", bearer(), null, "X-Vegaduta-Origin", "http://10.0.0.5"), 400, "passkey_origin_unsupported");
+        assertRefusal(
+                postJson(
+                        U + "/passkey/login-options",
+                        null,
+                        null,
+                        "X-Vegaduta-Origin",
+                        "https://192.168.1.20:3000"),
+                400,
+                "passkey_origin_unsupported");
+        assertRefusal(
+                postJson(U + "/passkey/login-options", null, null),
+                400,
+                "passkey_origin_unsupported");
+        assertRefusal(
+                postJson(
+                        U + "/passkey/register-options",
+                        bearer(),
+                        null,
+                        "X-Vegaduta-Origin",
+                        "http://10.0.0.5"),
+                400,
+                "passkey_origin_unsupported");
     }
 
-    // ------------------------------------------------------------------ registration: bearer or setup token
+    // ------------------------------------------------------------------ registration: bearer or
+    // setup token
 
     @Test
     void registrationOptionsWithoutABearerNeedAValidSetupToken() throws Exception {
-        assertRefusal(postJson(U + "/passkey/register-options", null, null, "X-Vegaduta-Origin", ORIGIN), 401, "invalid_setup_token");
-        assertRefusal(postJson(U + "/passkey/register-options", null, Map.of("setupToken", "vdls_forged"), "X-Vegaduta-Origin", ORIGIN), 401, "invalid_setup_token");
+        assertRefusal(
+                postJson(U + "/passkey/register-options", null, null, "X-Vegaduta-Origin", ORIGIN),
+                401,
+                "invalid_setup_token");
+        assertRefusal(
+                postJson(
+                        U + "/passkey/register-options",
+                        null,
+                        Map.of("setupToken", "vdls_forged"),
+                        "X-Vegaduta-Origin",
+                        ORIGIN),
+                401,
+                "invalid_setup_token");
 
-        Resp ok = postJson(U + "/passkey/register-options", null, Map.of("setupToken", pendingSetupToken()), "X-Vegaduta-Origin", ORIGIN);
+        Resp ok =
+                postJson(
+                        U + "/passkey/register-options",
+                        null,
+                        Map.of("setupToken", pendingSetupToken()),
+                        "X-Vegaduta-Origin",
+                        ORIGIN);
         assertThat(ok.status()).isEqualTo(200);
         assertThat(ok.body().get("publicKey").get("rp").get("id").asText()).isEqualTo(RP_ID);
-        assertThat(ok.body().get("publicKey").get("authenticatorSelection").get("residentKey").asText()).isEqualTo("required");
+        assertThat(
+                        ok.body()
+                                .get("publicKey")
+                                .get("authenticatorSelection")
+                                .get("residentKey")
+                                .asText())
+                .isEqualTo("required");
         assertThat(ok.body().get("publicKey").get("attestation").asText()).isEqualTo("none");
     }
 
     @Test
     void registrationOptionsWithABearerNameTheSignedInUser() throws Exception {
-        Resp r = postJson(U + "/passkey/register-options", bearer(), null, "X-Vegaduta-Origin", ORIGIN);
+        Resp r =
+                postJson(
+                        U + "/passkey/register-options",
+                        bearer(),
+                        null,
+                        "X-Vegaduta-Origin",
+                        ORIGIN);
 
         assertThat(r.status()).isEqualTo(200);
         assertThat(r.body().get("publicKey").get("user").get("name").asText()).isEqualTo(EMAIL);
         assertThat(r.body().get("publicKey").get("excludeCredentials")).isEmpty();
-        assertThat(postJson(U + "/passkey/register-options", bearer() + "x", null, "X-Vegaduta-Origin", ORIGIN).status())
+        assertThat(
+                        postJson(
+                                        U + "/passkey/register-options",
+                                        bearer() + "x",
+                                        null,
+                                        "X-Vegaduta-Origin",
+                                        ORIGIN)
+                                .status())
                 .as("a bearer, when sent, must be valid")
                 .isEqualTo(401);
     }
 
     private String registrationJson(SoftAuthenticator key, Resp options, String origin) {
-        return key.registration(options.body().get("publicKey").get("challenge").asText(), origin, RP_ID, SoftAuthenticator.UP | SoftAuthenticator.UV | SoftAuthenticator.AT);
+        return key.registration(
+                options.body().get("publicKey").get("challenge").asText(),
+                origin,
+                RP_ID,
+                SoftAuthenticator.UP | SoftAuthenticator.UV | SoftAuthenticator.AT);
     }
 
     @Test
     void aSignedInPersonRegistersAPasskeyThenSignsInWithIt() throws Exception {
         SoftAuthenticator key = new SoftAuthenticator();
         String token = bearer();
-        Resp options = postJson(U + "/passkey/register-options", token, null, "X-Vegaduta-Origin", ORIGIN);
+        Resp options =
+                postJson(U + "/passkey/register-options", token, null, "X-Vegaduta-Origin", ORIGIN);
 
-        Resp registered = postJson(U + "/passkey/register", token, Map.of("challengeId", options.text("challengeId"), "credential", registrationJson(key, options, ORIGIN), "label", "MacBook"));
+        Resp registered =
+                postJson(
+                        U + "/passkey/register",
+                        token,
+                        Map.of(
+                                "challengeId",
+                                options.text("challengeId"),
+                                "credential",
+                                registrationJson(key, options, ORIGIN),
+                                "label",
+                                "MacBook"));
         assertThat(registered.status()).isEqualTo(200);
         assertThat(registered.body().get("passkey").get("label").asText()).isEqualTo("MacBook");
         assertThat(registered.body().get("passkey").get("backedUp").asBoolean()).isFalse();
-        assertThat(registered.body().has("session")).as("a signed-in person already has a session").isFalse();
+        assertThat(registered.body().has("session"))
+                .as("a signed-in person already has a session")
+                .isFalse();
         assertThat(registered.body().has("recoveryCodes")).isFalse();
 
-        Resp loginOptions = postJson(U + "/passkey/login-options", null, null, "X-Vegaduta-Origin", ORIGIN);
-        String assertion = key.assertion(loginOptions.body().get("publicKey").get("challenge").asText(), ORIGIN, RP_ID, SoftAuthenticator.UP | SoftAuthenticator.UV, 1, null, false);
-        Resp login = postJson(U + "/login", null, Map.of("type", "passkey", "identifier", loginOptions.text("challengeId"), "credentials", Map.of("assertion", assertion)));
+        Resp loginOptions =
+                postJson(U + "/passkey/login-options", null, null, "X-Vegaduta-Origin", ORIGIN);
+        String assertion =
+                key.assertion(
+                        loginOptions.body().get("publicKey").get("challenge").asText(),
+                        ORIGIN,
+                        RP_ID,
+                        SoftAuthenticator.UP | SoftAuthenticator.UV,
+                        1,
+                        null,
+                        false);
+        Resp login =
+                postJson(
+                        U + "/login",
+                        null,
+                        Map.of(
+                                "type",
+                                "passkey",
+                                "identifier",
+                                loginOptions.text("challengeId"),
+                                "credentials",
+                                Map.of("assertion", assertion)));
 
         assertThat(login.status()).isEqualTo(200);
-        assertThat(ctx.getBean(LocalJwtService.class).decoder().decode(login.text("accessToken")).getClaimAsStringList("amr")).containsExactly("hwk");
+        assertThat(
+                        ctx.getBean(LocalJwtService.class)
+                                .decoder()
+                                .decode(login.text("accessToken"))
+                                .getClaimAsStringList("amr"))
+                .containsExactly("hwk");
         assertThat(send(get(U + "/methods"), token, null).body().get("passkeys")).hasSize(1);
     }
 
     @Test
     void aBadRegistrationIsA400PasskeyInvalid() throws Exception {
         String token = bearer();
-        Resp options = postJson(U + "/passkey/register-options", token, null, "X-Vegaduta-Origin", ORIGIN);
+        Resp options =
+                postJson(U + "/passkey/register-options", token, null, "X-Vegaduta-Origin", ORIGIN);
 
         assertRefusal(
-                postJson(U + "/passkey/register", token, Map.of("challengeId", options.text("challengeId"), "credential", registrationJson(new SoftAuthenticator(), options, "https://evil.example.test"))),
+                postJson(
+                        U + "/passkey/register",
+                        token,
+                        Map.of(
+                                "challengeId",
+                                options.text("challengeId"),
+                                "credential",
+                                registrationJson(
+                                        new SoftAuthenticator(),
+                                        options,
+                                        "https://evil.example.test"))),
                 400,
                 "passkey_invalid");
         assertThat(credentials.passkeys).isEmpty();
     }
 
     @Test
-    void firstRunSetupWithAPasskeyNeedsNoBearerAndReturnsASessionAndRecoveryCodes() throws Exception {
+    void firstRunSetupWithAPasskeyNeedsNoBearerAndReturnsASessionAndRecoveryCodes()
+            throws Exception {
         SoftAuthenticator key = new SoftAuthenticator();
         String setup = pendingSetupToken();
-        Resp options = postJson(U + "/passkey/register-options", null, Map.of("setupToken", setup), "X-Vegaduta-Origin", ORIGIN);
+        Resp options =
+                postJson(
+                        U + "/passkey/register-options",
+                        null,
+                        Map.of("setupToken", setup),
+                        "X-Vegaduta-Origin",
+                        ORIGIN);
 
-        Resp done = postJson(U + "/passkey/register", null, Map.of("challengeId", options.text("challengeId"), "credential", registrationJson(key, options, ORIGIN), "setupToken", setup));
+        Resp done =
+                postJson(
+                        U + "/passkey/register",
+                        null,
+                        Map.of(
+                                "challengeId",
+                                options.text("challengeId"),
+                                "credential",
+                                registrationJson(key, options, ORIGIN),
+                                "setupToken",
+                                setup));
 
         assertThat(done.status()).isEqualTo(200);
         assertThat(done.body().get("session").get("accessToken").asText()).isNotBlank();
-        assertThat(done.body().get("session").get("user").get("email").asText()).isEqualTo("first@example.test");
+        assertThat(done.body().get("session").get("user").get("email").asText())
+                .isEqualTo("first@example.test");
         assertThat(done.body().get("recoveryCodes")).hasSize(8);
         assertThat(done.body().get("passkey").get("id").asText()).isNotBlank();
-        assertRefusal(postJson(U + "/passkey/register-options", null, Map.of("setupToken", setup), "X-Vegaduta-Origin", ORIGIN), 401, "invalid_setup_token");
+        assertRefusal(
+                postJson(
+                        U + "/passkey/register-options",
+                        null,
+                        Map.of("setupToken", setup),
+                        "X-Vegaduta-Origin",
+                        ORIGIN),
+                401,
+                "invalid_setup_token");
     }
 
     // ------------------------------------------------------------------ setup with a PIN
@@ -418,30 +732,54 @@ class LocalUnlockHttpTest {
     void setupWithAPinReturnsTheSessionTheDeviceAndRecoveryCodes() throws Exception {
         String setup = pendingSetupToken();
 
-        Resp done = postJson(U + "/setup/pin", null, Map.of("token", setup, "pin", "739105", "label", "Study"));
+        Resp done =
+                postJson(
+                        U + "/setup/pin",
+                        null,
+                        Map.of("token", setup, "pin", "739105", "label", "Study"));
 
         assertThat(done.status()).isEqualTo(200);
         assertThat(done.body().get("session").get("accessToken").asText()).isNotBlank();
-        assertThat(done.body().get("session").get("refreshToken").asText()).startsWith(LocalTokens.REFRESH_PREFIX);
+        assertThat(done.body().get("session").get("refreshToken").asText())
+                .startsWith(LocalTokens.REFRESH_PREFIX);
         assertThat(done.text("deviceId")).isNotBlank();
         assertThat(done.text("deviceSecret")).hasSize(43);
         assertThat(done.body().get("recoveryCodes")).hasSize(8);
-        assertThat(send(get("/api/probe/any"), done.body().get("session").get("accessToken").asText(), null).status()).isEqualTo(200);
-        assertRefusal(postJson(U + "/setup/pin", null, Map.of("token", setup, "pin", "739105")), 401, "invalid_setup_token");
+        assertThat(
+                        send(
+                                        get("/api/probe/any"),
+                                        done.body().get("session").get("accessToken").asText(),
+                                        null)
+                                .status())
+                .isEqualTo(200);
+        assertRefusal(
+                postJson(U + "/setup/pin", null, Map.of("token", setup, "pin", "739105")),
+                401,
+                "invalid_setup_token");
     }
 
     @Test
     void setupWithAWeakPinIsA400AndKeepsTheLink() throws Exception {
         String setup = pendingSetupToken();
 
-        assertRefusal(postJson(U + "/setup/pin", null, Map.of("token", setup, "pin", "111111")), 400, "weak_pin");
+        assertRefusal(
+                postJson(U + "/setup/pin", null, Map.of("token", setup, "pin", "111111")),
+                400,
+                "weak_pin");
 
-        assertThat(postJson(U + "/setup/pin", null, Map.of("token", setup, "pin", "739105")).status()).isEqualTo(200);
+        assertThat(
+                        postJson(U + "/setup/pin", null, Map.of("token", setup, "pin", "739105"))
+                                .status())
+                .isEqualTo(200);
     }
 
     @Test
     void setupWithAPinNeedsAToken() throws Exception {
-        assertRefusal(postJson(U + "/setup/pin", null, Map.of("token", "vdls_forged", "pin", "739105")), 401, "invalid_setup_token");
-        assertThat(postJson(U + "/setup/pin", null, Map.of("pin", "739105")).status()).isEqualTo(400);
+        assertRefusal(
+                postJson(U + "/setup/pin", null, Map.of("token", "vdls_forged", "pin", "739105")),
+                401,
+                "invalid_setup_token");
+        assertThat(postJson(U + "/setup/pin", null, Map.of("pin", "739105")).status())
+                .isEqualTo(400);
     }
 }

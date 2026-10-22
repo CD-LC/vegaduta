@@ -28,35 +28,29 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Authenticates every inbound request to the MCP server endpoint (see
- * {@code McpServerToolConfig} for exactly how this is registered, scoped
- * only to that path - NOT a global filter). Not registered into Spring
- * Security's own filter chain (that chain has no concept of "authenticate
- * via a hashed platform-generated API key" - only JWT/OAuth2 resource
- * server support), so {@code /mcp/**} is {@code permitAll()} at the Spring
- * Security layer (see {@code SecurityConfig}'s comment there, same posture
- * as {@code /webhook/**}) and this filter does the actual authentication
- * itself, running as a plain servlet filter positioned after Spring
- * Security's own chain.
+ * Authenticates every inbound request to the MCP server endpoint (see {@code McpServerToolConfig}
+ * for exactly how this is registered, scoped only to that path - NOT a global filter). Not
+ * registered into Spring Security's own filter chain (that chain has no concept of "authenticate
+ * via a hashed platform-generated API key" - only JWT/OAuth2 resource server support), so {@code
+ * /mcp/**} is {@code permitAll()} at the Spring Security layer (see {@code SecurityConfig}'s
+ * comment there, same posture as {@code /webhook/**}) and this filter does the actual
+ * authentication itself, running as a plain servlet filter positioned after Spring Security's own
+ * chain.
  *
- * <p><b>Resolution mirrors {@code WorkflowWebhookController} exactly</b>
- * (no parallel tenant-resolution logic, per this build's explicit ask):
- * step 1 resolves which tenant schema a caller's raw key belongs to via
- * {@code control_plane.channel_account_link} (no {@code TenantContext} can
- * be set yet - that lookup IS how the schema gets picked); step 2, only
- * once {@code TenantContext} is set to that schema, loads the actual grant
- * row and re-verifies it (hash match + enabled) from inside the correct
- * tenant schema. A grant disabled or deleted the instant its
- * {@code channel_account_link} row would otherwise still resolve is
- * therefore still rejected - step 2 is not just a formality.
+ * <p><b>Resolution mirrors {@code WorkflowWebhookController} exactly</b> (no parallel
+ * tenant-resolution logic, per this build's explicit ask): step 1 resolves which tenant schema a
+ * caller's raw key belongs to via {@code control_plane.channel_account_link} (no {@code
+ * TenantContext} can be set yet - that lookup IS how the schema gets picked); step 2, only once
+ * {@code TenantContext} is set to that schema, loads the actual grant row and re-verifies it (hash
+ * match + enabled) from inside the correct tenant schema. A grant disabled or deleted the instant
+ * its {@code channel_account_link} row would otherwise still resolve is therefore still rejected -
+ * step 2 is not just a formality.
  *
- * <p>On success, populates BOTH {@link TenantContext} (so
- * {@code AgentChatService#chat}'s existing tenant kill-switch check and
- * Hibernate's schema routing work exactly as they do for a JWT-authenticated
- * request) and {@link McpCallerContext} (so this module's own tool
- * callbacks know which agent ids this specific key is allowed to touch) -
- * both cleared in the {@code finally} block, same discipline {@code
- * TenantContextFilter}/{@code WorkflowWebhookController} already use.
+ * <p>On success, populates BOTH {@link TenantContext} (so {@code AgentChatService#chat}'s existing
+ * tenant kill-switch check and Hibernate's schema routing work exactly as they do for a
+ * JWT-authenticated request) and {@link McpCallerContext} (so this module's own tool callbacks know
+ * which agent ids this specific key is allowed to touch) - both cleared in the {@code finally}
+ * block, same discipline {@code TenantContextFilter}/{@code WorkflowWebhookController} already use.
  */
 public class McpApiKeyAuthFilter extends OncePerRequestFilter {
 
@@ -64,42 +58,56 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
     private static final String AUTH_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final ObjectMapper MAPPER = JsonMappers.plain();
+
     /** Only small, length-declared JSON-RPC bodies are inspected for the get_task poll bucket. */
     private static final int MAX_SNIFF_BYTES = 16 * 1024;
 
     private final McpServerAccessGrantService grantService;
     private final McpServerRateLimiter rateLimiter;
+
     /**
      * When false (async-tasks flag off, the default) the request body is never read or wrapped, so
      * the live /mcp path is byte-identical to before the get_task poll bucket existed.
      */
     private final boolean pollBucketEnabled;
+
     /** Null unless app.mcp-server.expose-agents.enabled - see the six-argument constructor. */
     private final McpExposureRpcHandler exposureHandler;
+
     private final int exposureMaxBodyBytes;
 
-    /** Literal prefix every grant key carries (see {@link McpApiKeyHasher}); lets the OpenAI-compat mode tell a key from a JWT. */
+    /**
+     * Literal prefix every grant key carries (see {@link McpApiKeyHasher}); lets the OpenAI-compat
+     * mode tell a key from a JWT.
+     */
     static final String KEY_PREFIX = "vmcp_";
 
     /**
      * {@code true} for the OpenAI-compatible {@code /v1/*} registration: a request whose bearer is
      * NOT a {@code vmcp_} key (a platform JWT, already authenticated by Spring Security's chain)
-     * passes through untouched, and rejections use OpenAI's error envelope instead of {@code {"error":"..."}}.
+     * passes through untouched, and rejections use OpenAI's error envelope instead of {@code
+     * {"error":"..."}}.
      */
     private final boolean openAiMode;
 
-    /** Null unless {@code app.mcpserver.oauth.enabled}: the OAuth 2.1 option next to the grant keys. */
+    /**
+     * Null unless {@code app.mcpserver.oauth.enabled}: the OAuth 2.1 option next to the grant keys.
+     */
     private McpOAuthAuthenticator oauth;
+
     private String resourceMetadataUrl;
     private static final int OAUTH_MAX_BODY_BYTES = 256 * 1024;
 
-    /** Turns on the OAuth 2.1 bearer option; a {@code vmcp_} key keeps working exactly as before. */
+    /**
+     * Turns on the OAuth 2.1 bearer option; a {@code vmcp_} key keeps working exactly as before.
+     */
     void enableOAuth(McpOAuthAuthenticator authenticator, String resourceMetadataUrl) {
         this.oauth = authenticator;
         this.resourceMetadataUrl = resourceMetadataUrl;
     }
 
-    public McpApiKeyAuthFilter(McpServerAccessGrantService grantService, McpServerRateLimiter rateLimiter) {
+    public McpApiKeyAuthFilter(
+            McpServerAccessGrantService grantService, McpServerRateLimiter rateLimiter) {
         this(grantService, rateLimiter, false, false);
     }
 
@@ -109,30 +117,34 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
      * fall back to the general bucket. The retry hint is the poll_after_seconds field in the
      * get_task result, not an HTTP Retry-After header.
      *
-     * @param openAiMode        true for the OpenAI-compatible /v1/* registration
-     * @param pollBucketEnabled true when the async-tasks flag is on (enables the get_task poll bucket)
+     * @param openAiMode true for the OpenAI-compatible /v1/* registration
+     * @param pollBucketEnabled true when the async-tasks flag is on (enables the get_task poll
+     *     bucket)
      */
     public McpApiKeyAuthFilter(
-        McpServerAccessGrantService grantService, McpServerRateLimiter rateLimiter,
-        boolean openAiMode, boolean pollBucketEnabled
-    ) {
+            McpServerAccessGrantService grantService,
+            McpServerRateLimiter rateLimiter,
+            boolean openAiMode,
+            boolean pollBucketEnabled) {
         this(grantService, rateLimiter, openAiMode, pollBucketEnabled, null, 0);
     }
 
     /**
-     * As above, plus the optional "agents and workflows as MCP tools" hook (app.mcp-server.expose-agents).
-     * With a {@code null} handler (the default - flag off) the request body handling is exactly the
-     * four-argument constructor's. With a handler, a POSTed JSON-RPC body of at most {@code
-     * exposureMaxBodyBytes} is read once (and replayed for the MCP transport), and once the caller is
-     * authenticated, rate limited and its grant loaded, the handler may answer {@code tools/list} /
-     * a dynamic {@code tools/call} itself; a larger body is rejected with 413 rather than silently
-     * bypassing the hook.
+     * As above, plus the optional "agents and workflows as MCP tools" hook
+     * (app.mcp-server.expose-agents). With a {@code null} handler (the default - flag off) the
+     * request body handling is exactly the four-argument constructor's. With a handler, a POSTed
+     * JSON-RPC body of at most {@code exposureMaxBodyBytes} is read once (and replayed for the MCP
+     * transport), and once the caller is authenticated, rate limited and its grant loaded, the
+     * handler may answer {@code tools/list} / a dynamic {@code tools/call} itself; a larger body is
+     * rejected with 413 rather than silently bypassing the hook.
      */
     public McpApiKeyAuthFilter(
-        McpServerAccessGrantService grantService, McpServerRateLimiter rateLimiter,
-        boolean openAiMode, boolean pollBucketEnabled,
-        McpExposureRpcHandler exposureHandler, int exposureMaxBodyBytes
-    ) {
+            McpServerAccessGrantService grantService,
+            McpServerRateLimiter rateLimiter,
+            boolean openAiMode,
+            boolean pollBucketEnabled,
+            McpExposureRpcHandler exposureHandler,
+            int exposureMaxBodyBytes) {
         this.exposureHandler = exposureHandler;
         this.exposureMaxBodyBytes = exposureMaxBodyBytes;
         this.grantService = grantService;
@@ -142,12 +154,14 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-        throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         String rawKey = extractRawKey(request);
         if (openAiMode && (rawKey == null || !rawKey.startsWith(KEY_PREFIX))) {
             // JWT caller: Spring Security already authenticated it (and TenantContextFilter set the
-            // tenant). A request with no usable credential never gets here - the /v1/** rule rejects it.
+            // tenant). A request with no usable credential never gets here - the /v1/** rule
+            // rejects it.
             filterChain.doFilter(request, response);
             return;
         }
@@ -156,7 +170,10 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
             return;
         }
         if (rawKey == null) {
-            reject(response, HttpServletResponse.SC_UNAUTHORIZED, "Missing or malformed Authorization: Bearer <api-key> header.");
+            reject(
+                    response,
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Missing or malformed Authorization: Bearer <api-key> header.");
             return;
         }
 
@@ -169,11 +186,16 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
 
         // Same "no browser session, mirror the BYOK-credential auth shape" posture the task asks
         // for: subject is a synthetic identity naming the key, never a Keycloak principal.
-        TenantContext.set(TenantContext.of(tenantSchema.get(), "mcp-external-key", Set.of("ROLE_mcp-external")));
+        TenantContext.set(
+                TenantContext.of(
+                        tenantSchema.get(), "mcp-external-key", Set.of("ROLE_mcp-external")));
         try {
-            Optional<McpServerAccessGrant> grant = grantService.findByRawKeyWithinCurrentTenant(rawKey);
+            Optional<McpServerAccessGrant> grant =
+                    grantService.findByRawKeyWithinCurrentTenant(rawKey);
             if (grant.isEmpty()) {
-                log.warn("Inbound MCP call rejected - API key resolved a tenant schema but no enabled grant (***{})", lastFour(rawKey));
+                log.warn(
+                        "Inbound MCP call rejected - API key resolved a tenant schema but no enabled grant (***{})",
+                        lastFour(rawKey));
                 reject(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid API key.");
                 return;
             }
@@ -183,27 +205,35 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
         }
     }
 
-
-    /** The authenticated part of the request, shared by the grant-key and OAuth paths. {@code TenantContext} is set by the caller. */
+    /**
+     * The authenticated part of the request, shared by the grant-key and OAuth paths. {@code
+     * TenantContext} is set by the caller.
+     */
     private void serve(
-        HttpServletRequest request, HttpServletResponse response, FilterChain filterChain,
-        String tenantSchema, McpServerAccessGrant grant
-    ) throws ServletException, IOException {
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain,
+            String tenantSchema,
+            McpServerAccessGrant grant)
+            throws ServletException, IOException {
         UUID grantId = grant.getId();
         HttpServletRequest downstream = request;
         boolean taskPoll = false;
         byte[] exposureBody = null;
         if (exposureHandler != null && "POST".equalsIgnoreCase(request.getMethod())) {
-            // Agents/workflows-as-MCP-tools is ON: read the (bounded) body once so the hook below can
-            // inspect it, and replay it for the MCP transport. Chunked bodies are read up to the cap too.
+            // Agents/workflows-as-MCP-tools is ON: read the (bounded) body once so the hook below
+            // can
+            // inspect it, and replay it for the MCP transport. Chunked bodies are read up to the
+            // cap too.
             int declared = request.getContentLength();
             if (declared > exposureMaxBodyBytes) {
                 reject(response, 413, "Request body too large.");
                 return;
             }
-            byte[] body = declared >= 0
-                ? request.getInputStream().readAllBytes()
-                : request.getInputStream().readNBytes(exposureMaxBodyBytes + 1);
+            byte[] body =
+                    declared >= 0
+                            ? request.getInputStream().readAllBytes()
+                            : request.getInputStream().readNBytes(exposureMaxBodyBytes + 1);
             if (body.length > exposureMaxBodyBytes) {
                 reject(response, 413, "Request body too large.");
                 return;
@@ -211,8 +241,10 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
             downstream = new ReplayableRequest(request, body);
             exposureBody = body;
             taskPoll = pollBucketEnabled && body.length <= MAX_SNIFF_BYTES && isGetTaskCall(body);
-        } else if (pollBucketEnabled && "POST".equalsIgnoreCase(request.getMethod())
-            && request.getContentLength() > 0 && request.getContentLength() <= MAX_SNIFF_BYTES) {
+        } else if (pollBucketEnabled
+                && "POST".equalsIgnoreCase(request.getMethod())
+                && request.getContentLength() > 0
+                && request.getContentLength() <= MAX_SNIFF_BYTES) {
             byte[] body = request.getInputStream().readAllBytes();
             downstream = new ReplayableRequest(request, body);
             taskPoll = isGetTaskCall(body);
@@ -230,7 +262,8 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
         // known, so its subject carries the specific grantId rather than the generic literal
         // "mcp-external-key". Anything downstream that reads TenantContext.current().getSubject()
         // as an actor/requestedBy identity - e.g. ApplyCodeChangesToolCallback/
-        // RunInCodeWorkspaceToolCallback's `requestedBy` passed into HumanApprovalGateService.evaluate,
+        // RunInCodeWorkspaceToolCallback's `requestedBy` passed into
+        // HumanApprovalGateService.evaluate,
         // which is persisted verbatim on ApprovalRequest.requestedBy - is now traceable back to the
         // exact MCP grant that triggered it, without a new table or column. Same rationale as
         // McpCallAgentToolCallback's own "mcp-external:" + grantId subjectKey.
@@ -243,18 +276,23 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
         // every action MCP grant X caused" is a real query, not string-parsing session_id or
         // subject. Populated here, at the exact point grantId first becomes known - the only
         // place this filter (or McpCallAgentToolCallback) needs to change for that to work.
-        TenantContext.set(TenantContext.of(
-            tenantSchema, "mcp-external:" + grantId, Set.of("ROLE_mcp-external"), grantId.toString()));
+        TenantContext.set(
+                TenantContext.of(
+                        tenantSchema,
+                        "mcp-external:" + grantId,
+                        Set.of("ROLE_mcp-external"),
+                        grantId.toString()));
         McpCallerContext.set(
-            grantId,
-            grantService.parseExposedAgentIds(grant),
-            grantService.parseExposedWorkflowIds(grant),
-            grantService.parseExposedKnowledgeCollectionIds(grant)
-        );
+                grantId,
+                grantService.parseExposedAgentIds(grant),
+                grantService.parseExposedWorkflowIds(grant),
+                grantService.parseExposedKnowledgeCollectionIds(grant));
         try {
             if (exposureHandler != null && exposureBody != null) {
-                // Per-caller dynamic tools (tools/list + tools/call of agent_*/workflow_*/get_run) - see
-                // McpExposureRpcHandler. Empty means "not ours": fall through to the normal MCP transport.
+                // Per-caller dynamic tools (tools/list + tools/call of agent_*/workflow_*/get_run)
+                // - see
+                // McpExposureRpcHandler. Empty means "not ours": fall through to the normal MCP
+                // transport.
                 java.util.Optional<String> answered = exposureHandler.tryHandle(exposureBody);
                 if (answered.isPresent()) {
                     response.setStatus(HttpServletResponse.SC_OK);
@@ -264,7 +302,8 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
                     return;
                 }
             }
-            // B11: an error body from the MCP transport must never carry a serialized Java exception.
+            // B11: an error body from the MCP transport must never carry a serialized Java
+            // exception.
             McpErrorScrubbingResponse scrubbed = new McpErrorScrubbingResponse(response);
             filterChain.doFilter(downstream, scrubbed);
             scrubbed.finish();
@@ -274,14 +313,17 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
     }
 
     /**
-     * OAuth 2.1 path: validate the access token (signature, issuer, audience == this server), check the
-     * scopes the JSON-RPC body needs, then serve with the same grant-confined context a {@code vmcp_} key
-     * gets. The inbound {@code Authorization} header is hidden from everything downstream, so the token
-     * can never be passed through to an upstream service.
+     * OAuth 2.1 path: validate the access token (signature, issuer, audience == this server), check
+     * the scopes the JSON-RPC body needs, then serve with the same grant-confined context a {@code
+     * vmcp_} key gets. The inbound {@code Authorization} header is hidden from everything
+     * downstream, so the token can never be passed through to an upstream service.
      */
     private void authenticateOAuth(
-        HttpServletRequest request, HttpServletResponse response, FilterChain filterChain, String token
-    ) throws ServletException, IOException {
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain,
+            String token)
+            throws ServletException, IOException {
         McpOAuthAuthenticator.Result result = oauth.authenticate(token);
         if (result.rejection() != null) {
             McpOAuthAuthenticator.Rejection r = result.rejection();
@@ -306,28 +348,53 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
         }
         java.util.Set<String> missing = McpOAuthScopes.missing(principal.scopes(), required);
         if (!missing.isEmpty()) {
-            challenge(response, HttpServletResponse.SC_FORBIDDEN, "insufficient_scope",
-                "The token lacks a scope this request needs.", String.join(" ", required));
+            challenge(
+                    response,
+                    HttpServletResponse.SC_FORBIDDEN,
+                    "insufficient_scope",
+                    "The token lacks a scope this request needs.",
+                    String.join(" ", required));
             return;
         }
-        TenantContext.set(TenantContext.of(principal.tenantId(), "mcp-oauth", Set.of("ROLE_mcp-external")));
+        TenantContext.set(
+                TenantContext.of(principal.tenantId(), "mcp-oauth", Set.of("ROLE_mcp-external")));
         try {
-            Optional<McpServerAccessGrant> grant = grantService.findEnabledByIdWithinCurrentTenant(principal.grantId());
+            Optional<McpServerAccessGrant> grant =
+                    grantService.findEnabledByIdWithinCurrentTenant(principal.grantId());
             if (grant.isEmpty()) {
-                log.warn("Inbound MCP OAuth call rejected - grant {} is missing or disabled", principal.grantId());
-                challenge(response, HttpServletResponse.SC_UNAUTHORIZED, "invalid_token",
-                    "The access token is invalid, expired or not issued for this server.", null);
+                log.warn(
+                        "Inbound MCP OAuth call rejected - grant {} is missing or disabled",
+                        principal.grantId());
+                challenge(
+                        response,
+                        HttpServletResponse.SC_UNAUTHORIZED,
+                        "invalid_token",
+                        "The access token is invalid, expired or not issued for this server.",
+                        null);
                 return;
             }
-            serve(new WithoutAuthorizationRequest(downstream), response, filterChain, principal.tenantId(), grant.get());
+            serve(
+                    new WithoutAuthorizationRequest(downstream),
+                    response,
+                    filterChain,
+                    principal.tenantId(),
+                    grant.get());
         } finally {
             TenantContext.clear();
         }
     }
 
-    /** RFC 6750 / RFC 9728 challenge: error, optional required scope, and where the resource metadata lives. */
-    private void challenge(HttpServletResponse response, int status, String error, String description, String scope)
-        throws IOException {
+    /**
+     * RFC 6750 / RFC 9728 challenge: error, optional required scope, and where the resource
+     * metadata lives.
+     */
+    private void challenge(
+            HttpServletResponse response,
+            int status,
+            String error,
+            String description,
+            String scope)
+            throws IOException {
         StringBuilder header = new StringBuilder("Bearer error=\"").append(error).append('"');
         header.append(", error_description=\"").append(description.replace("\"", "'")).append('"');
         if (scope != null && !scope.isBlank()) {
@@ -351,13 +418,17 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
 
         @Override
         public java.util.Enumeration<String> getHeaders(String name) {
-            return AUTH_HEADER.equalsIgnoreCase(name) ? java.util.Collections.emptyEnumeration() : super.getHeaders(name);
+            return AUTH_HEADER.equalsIgnoreCase(name)
+                    ? java.util.Collections.emptyEnumeration()
+                    : super.getHeaders(name);
         }
 
         @Override
         public java.util.Enumeration<String> getHeaderNames() {
-            return java.util.Collections.enumeration(java.util.Collections.list(super.getHeaderNames()).stream()
-                .filter(n -> !AUTH_HEADER.equalsIgnoreCase(n)).toList());
+            return java.util.Collections.enumeration(
+                    java.util.Collections.list(super.getHeaderNames()).stream()
+                            .filter(n -> !AUTH_HEADER.equalsIgnoreCase(n))
+                            .toList());
         }
     }
 
@@ -365,9 +436,10 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
     static boolean isGetTaskCall(byte[] body) {
         try {
             JsonNode node = MAPPER.readTree(body);
-            return node != null && node.isObject()
-                && "tools/call".equals(node.path("method").asText())
-                && "get_task".equals(node.path("params").path("name").asText());
+            return node != null
+                    && node.isObject()
+                    && "tools/call".equals(node.path("method").asText())
+                    && "get_task".equals(node.path("params").path("name").asText());
         } catch (IOException | RuntimeException e) {
             return false;
         }
@@ -419,17 +491,22 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
 
     private String extractRawKey(HttpServletRequest request) {
         String header = request.getHeader(AUTH_HEADER);
-        if (!StringUtils.hasText(header) || !header.regionMatches(true, 0, BEARER_PREFIX, 0, BEARER_PREFIX.length())) {
+        if (!StringUtils.hasText(header)
+                || !header.regionMatches(true, 0, BEARER_PREFIX, 0, BEARER_PREFIX.length())) {
             return null;
         }
         String token = header.substring(BEARER_PREFIX.length()).trim();
         return token.isEmpty() ? null : token;
     }
 
-    private void reject(HttpServletResponse response, int status, String message) throws IOException {
+    private void reject(HttpServletResponse response, int status, String message)
+            throws IOException {
         response.setStatus(status);
-        if (oauth != null && status == HttpServletResponse.SC_UNAUTHORIZED && response.getHeader("WWW-Authenticate") == null) {
-            response.setHeader("WWW-Authenticate", "Bearer resource_metadata=\"" + resourceMetadataUrl + "\"");
+        if (oauth != null
+                && status == HttpServletResponse.SC_UNAUTHORIZED
+                && response.getHeader("WWW-Authenticate") == null) {
+            response.setHeader(
+                    "WWW-Authenticate", "Bearer resource_metadata=\"" + resourceMetadataUrl + "\"");
         }
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         String safe = message.replace("\"", "'");
@@ -438,9 +515,15 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
             if (limited) {
                 response.setHeader("Retry-After", "1");
             }
-            response.getWriter().write("{\"error\":{\"message\":\"" + safe + "\",\"type\":\""
-                + (limited ? "rate_limit_exceeded" : "invalid_request_error") + "\",\"param\":null,\"code\":\""
-                + (limited ? "rate_limit_exceeded" : "invalid_api_key") + "\"}}");
+            response.getWriter()
+                    .write(
+                            "{\"error\":{\"message\":\""
+                                    + safe
+                                    + "\",\"type\":\""
+                                    + (limited ? "rate_limit_exceeded" : "invalid_request_error")
+                                    + "\",\"param\":null,\"code\":\""
+                                    + (limited ? "rate_limit_exceeded" : "invalid_api_key")
+                                    + "\"}}");
             return;
         }
         response.getWriter().write("{\"error\":\"" + safe + "\"}");

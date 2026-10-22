@@ -1,10 +1,10 @@
 package com.agenticai.core.agents.trust;
 
-import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.agents.a2a.A2aCardSigningService;
 import com.agenticai.core.agents.a2a.A2aProperties;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
@@ -28,27 +28,24 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 /**
- * Mints, introspects and verifies <b>delegation tokens</b>: Ed25519 JWTs in
- * which an agent acts on behalf of a named user toward a named audience -
- * RFC 8693 token-exchange semantics ({@code sub}=agent, {@code act}=delegator)
- * plus audience binding ({@code aud}) so a token minted for one service cannot
- * be replayed against another.
+ * Mints, introspects and verifies <b>delegation tokens</b>: Ed25519 JWTs in which an agent acts on
+ * behalf of a named user toward a named audience - RFC 8693 token-exchange semantics ({@code
+ * sub}=agent, {@code act}=delegator) plus audience binding ({@code aud}) so a token minted for one
+ * service cannot be replayed against another.
  *
- * <p>Signed by the deployment's A2A operator key ({@link A2aCardSigningService})
- * - the same {@code kid} resolves at {@code /.well-known/jwks.json}, so a
- * counterparty that already trusts our agent cards can verify delegation
- * tokens with zero new key distribution.
+ * <p>Signed by the deployment's A2A operator key ({@link A2aCardSigningService}) - the same {@code
+ * kid} resolves at {@code /.well-known/jwks.json}, so a counterparty that already trusts our agent
+ * cards can verify delegation tokens with zero new key distribution.
  *
- * <p><b>Revocation model:</b> the {@link DelegationGrant} is the revocable
- * unit; each minted token is additionally recorded as a {@link
- * DelegationTokenRecord} keyed by {@code jti}. Stateless verification
- * (signature + claims only) is offered by {@link #verifySignatureAndClaims}
- * for offline/edge use; {@link #verify} and {@link #introspect} also consult
- * the recorded state and are the honest answer to "is this token still good".
+ * <p><b>Revocation model:</b> the {@link DelegationGrant} is the revocable unit; each minted token
+ * is additionally recorded as a {@link DelegationTokenRecord} keyed by {@code jti}. Stateless
+ * verification (signature + claims only) is offered by {@link #verifySignatureAndClaims} for
+ * offline/edge use; {@link #verify} and {@link #introspect} also consult the recorded state and are
+ * the honest answer to "is this token still good".
  *
- * <p><b>Scope contract:</b> scopes are space-separated OAuth-style strings.
- * {@code pay:*} scopes require the grant to bind a {@code wallet_id} - a
- * payment delegation cannot later be aimed at a different wallet.
+ * <p><b>Scope contract:</b> scopes are space-separated OAuth-style strings. {@code pay:*} scopes
+ * require the grant to bind a {@code wallet_id} - a payment delegation cannot later be aimed at a
+ * different wallet.
  */
 @Service
 public class DelegationTokenService {
@@ -72,27 +69,32 @@ public class DelegationTokenService {
 
     @Autowired
     public DelegationTokenService(
-        DelegationGrantRepository grantRepository,
-        DelegationTokenRepository tokenRepository,
-        ObjectProvider<A2aCardSigningService> signingService,
-        ObjectProvider<AuditLogService> auditLogService,
-        A2aProperties a2aProperties,
-        @Value("${app.delegation.issuer:}") String issuer,
-        @Value("${app.delegation.max-ttl-seconds:3600}") long maxTtlSeconds
-    ) {
-        this(grantRepository, tokenRepository, signingService, auditLogService,
-            StringUtils.hasText(issuer) ? issuer : a2aProperties.getPublicBaseUrl(),
-            maxTtlSeconds, Clock.systemUTC());
+            DelegationGrantRepository grantRepository,
+            DelegationTokenRepository tokenRepository,
+            ObjectProvider<A2aCardSigningService> signingService,
+            ObjectProvider<AuditLogService> auditLogService,
+            A2aProperties a2aProperties,
+            @Value("${app.delegation.issuer:}") String issuer,
+            @Value("${app.delegation.max-ttl-seconds:3600}") long maxTtlSeconds) {
+        this(
+                grantRepository,
+                tokenRepository,
+                signingService,
+                auditLogService,
+                StringUtils.hasText(issuer) ? issuer : a2aProperties.getPublicBaseUrl(),
+                maxTtlSeconds,
+                Clock.systemUTC());
     }
 
     /** Test seam - fixed clock. */
     DelegationTokenService(
-        DelegationGrantRepository grantRepository,
-        DelegationTokenRepository tokenRepository,
-        ObjectProvider<A2aCardSigningService> signingService,
-        ObjectProvider<AuditLogService> auditLogService,
-        String issuer, long maxTtlSeconds, Clock clock
-    ) {
+            DelegationGrantRepository grantRepository,
+            DelegationTokenRepository tokenRepository,
+            ObjectProvider<A2aCardSigningService> signingService,
+            ObjectProvider<AuditLogService> auditLogService,
+            String issuer,
+            long maxTtlSeconds,
+            Clock clock) {
         this.grantRepository = grantRepository;
         this.tokenRepository = tokenRepository;
         this.signingService = signingService;
@@ -105,41 +107,50 @@ public class DelegationTokenService {
     // ---------------------------------------------------------------- grants
 
     /**
-     * Record a delegation grant. {@code grantedBy} is the delegating user's
-     * subject - the controller resolves it from {@link TenantContext}, never
-     * from the request body.
+     * Record a delegation grant. {@code grantedBy} is the delegating user's subject - the
+     * controller resolves it from {@link TenantContext}, never from the request body.
      */
     @Transactional
     public DelegationGrant createGrant(
-        UUID agentId, String grantedBy, String audience, List<String> scopes,
-        long requestedMaxTtlSeconds, Instant expiresAt, UUID walletId, Long spendCapMinor
-    ) {
+            UUID agentId,
+            String grantedBy,
+            String audience,
+            List<String> scopes,
+            long requestedMaxTtlSeconds,
+            Instant expiresAt,
+            UUID walletId,
+            Long spendCapMinor) {
         if (!StringUtils.hasText(audience)) {
-            throw new DelegationException("AUDIENCE_REQUIRED",
-                "audience is required - an unscoped delegation token can be replayed anywhere");
+            throw new DelegationException(
+                    "AUDIENCE_REQUIRED",
+                    "audience is required - an unscoped delegation token can be replayed anywhere");
         }
-        if (scopes == null || scopes.isEmpty() || scopes.stream().anyMatch(s -> !StringUtils.hasText(s))) {
-            throw new DelegationException("SCOPES_REQUIRED", "at least one non-blank scope is required");
+        if (scopes == null
+                || scopes.isEmpty()
+                || scopes.stream().anyMatch(s -> !StringUtils.hasText(s))) {
+            throw new DelegationException(
+                    "SCOPES_REQUIRED", "at least one non-blank scope is required");
         }
         boolean pays = scopes.stream().anyMatch(s -> s.startsWith(SCOPE_PAY_PREFIX));
         if (pays && walletId == null) {
-            throw new DelegationException("WALLET_REQUIRED",
-                "a pay:* scope must bind a wallet_id at grant time");
+            throw new DelegationException(
+                    "WALLET_REQUIRED", "a pay:* scope must bind a wallet_id at grant time");
         }
         if (spendCapMinor != null && spendCapMinor <= 0) {
             throw new DelegationException("SPEND_CAP_INVALID", "spendCapMinor must be positive");
         }
         if (spendCapMinor != null && !pays) {
-            throw new DelegationException("SPEND_CAP_NEEDS_PAY",
-                "spendCapMinor only has meaning with a pay:* scope");
+            throw new DelegationException(
+                    "SPEND_CAP_NEEDS_PAY", "spendCapMinor only has meaning with a pay:* scope");
         }
         Instant now = clock.instant();
         if (expiresAt == null || !expiresAt.isAfter(now)) {
             throw new DelegationException("EXPIRES_IN_PAST", "expiresAt must be in the future");
         }
-        long cappedTtl = requestedMaxTtlSeconds > 0
-            ? Math.min(requestedMaxTtlSeconds, maxTtlSeconds)
-            : maxTtlSeconds;
+        long cappedTtl =
+                requestedMaxTtlSeconds > 0
+                        ? Math.min(requestedMaxTtlSeconds, maxTtlSeconds)
+                        : maxTtlSeconds;
         if (cappedTtl <= 0) {
             throw new DelegationException("TTL_INVALID", "maxTokenTtlSeconds must be positive");
         }
@@ -155,32 +166,39 @@ public class DelegationTokenService {
         grant.setWalletId(walletId);
         grant.setSpendCapMinor(spendCapMinor);
         DelegationGrant saved = grantRepository.save(grant);
-        audit("delegation.grant.created", saved.getId().toString(), AuditOutcome.APPROVED,
-            "agent=" + agentId + " aud=" + audience + " scopes=" + scopes);
+        audit(
+                "delegation.grant.created",
+                saved.getId().toString(),
+                AuditOutcome.APPROVED,
+                "agent=" + agentId + " aud=" + audience + " scopes=" + scopes);
         return saved;
     }
 
     /**
-     * Mint a token under an ACTIVE grant. The token's {@code exp} is the
-     * min of (requested ttl, the grant's ttl cap, the grant's own expiry) -
-     * a token can never outlive its grant.
+     * Mint a token under an ACTIVE grant. The token's {@code exp} is the min of (requested ttl, the
+     * grant's ttl cap, the grant's own expiry) - a token can never outlive its grant.
      */
     @Transactional
     public MintedToken mintToken(UUID grantId, Long requestedTtlSeconds) {
-        DelegationGrant grant = grantRepository.findById(grantId)
-            .orElseThrow(() -> new DelegationException("GRANT_NOT_FOUND", "no such grant"));
+        DelegationGrant grant =
+                grantRepository
+                        .findById(grantId)
+                        .orElseThrow(
+                                () -> new DelegationException("GRANT_NOT_FOUND", "no such grant"));
         assertGrantUsable(grant, clock.instant());
 
         A2aCardSigningService signer = signingService.getIfAvailable();
         if (signer == null || !signer.isEnabled()) {
-            throw new DelegationException("SIGNING_DISABLED",
-                "delegation tokens need a2a signing enabled (app.a2a.signing.*)");
+            throw new DelegationException(
+                    "SIGNING_DISABLED",
+                    "delegation tokens need a2a signing enabled (app.a2a.signing.*)");
         }
 
         Instant now = clock.instant();
-        long ttl = requestedTtlSeconds != null && requestedTtlSeconds > 0
-            ? Math.min(requestedTtlSeconds, grant.getMaxTokenTtlSeconds())
-            : grant.getMaxTokenTtlSeconds();
+        long ttl =
+                requestedTtlSeconds != null && requestedTtlSeconds > 0
+                        ? Math.min(requestedTtlSeconds, grant.getMaxTokenTtlSeconds())
+                        : grant.getMaxTokenTtlSeconds();
         Instant exp = now.plusSeconds(ttl);
         if (exp.isAfter(grant.getExpiresAt())) {
             exp = grant.getExpiresAt();
@@ -226,59 +244,61 @@ public class DelegationTokenService {
         record.setExpiresAt(exp);
         record.setWalletId(pays ? grant.getWalletId() : null);
         tokenRepository.save(record);
-        audit("delegation.token.minted", jti, AuditOutcome.APPROVED,
-            "grant=" + grantId + " exp=" + exp);
+        audit(
+                "delegation.token.minted",
+                jti,
+                AuditOutcome.APPROVED,
+                "grant=" + grantId + " exp=" + exp);
         return new MintedToken(token, jti, exp);
     }
-
-
 
     // ------------------------------------------------------------ verification
 
     /**
-     * Full verification for a programmatic caller: signature, claims, expiry,
-     * audience, required scope, AND recorded revocation state. Fails closed:
-     * any problem throws {@link DelegationException} with a stable code.
+     * Full verification for a programmatic caller: signature, claims, expiry, audience, required
+     * scope, AND recorded revocation state. Fails closed: any problem throws {@link
+     * DelegationException} with a stable code.
      *
-     * <p><b>Tenant note:</b> the recorded checks query tenant-scoped tables in
-     * the CURRENT TenantContext - callers on a public/tenant-less path must
-     * either run inside the token's tenant (see {@link #verifyStateless} +
-     * {@link #verifyRecorded}, which exist exactly for that hop) or accept
-     * that only same-tenant introspection works here.
+     * <p><b>Tenant note:</b> the recorded checks query tenant-scoped tables in the CURRENT
+     * TenantContext - callers on a public/tenant-less path must either run inside the token's
+     * tenant (see {@link #verifyStateless} + {@link #verifyRecorded}, which exist exactly for that
+     * hop) or accept that only same-tenant introspection works here.
      */
-    public VerifiedDelegation verify(String token, String requiredAudience, String requiredScopePrefix) {
+    public VerifiedDelegation verify(
+            String token, String requiredAudience, String requiredScopePrefix) {
         VerifiedDelegation v = verifyStateless(token, requiredAudience, requiredScopePrefix);
         verifyRecorded(v);
         return v;
     }
 
     /**
-     * Signature + claims + expiry + audience + scope - NO database access.
-     * Safe to call with any (or no) TenantContext; the recorded-state half is
-     * {@link #verifyRecorded}, which the caller runs inside the token's own
-     * tenant schema ({@code v.tenantId()}).
+     * Signature + claims + expiry + audience + scope - NO database access. Safe to call with any
+     * (or no) TenantContext; the recorded-state half is {@link #verifyRecorded}, which the caller
+     * runs inside the token's own tenant schema ({@code v.tenantId()}).
      */
-    public VerifiedDelegation verifyStateless(String token, String requiredAudience, String requiredScopePrefix) {
+    public VerifiedDelegation verifyStateless(
+            String token, String requiredAudience, String requiredScopePrefix) {
         VerifiedDelegation v = verifySignatureAndClaims(token);
         Instant now = clock.instant();
         if (v.expiresAt().isBefore(now)) {
             throw new DelegationException("TOKEN_EXPIRED", "token expired");
         }
         if (requiredAudience != null && !requiredAudience.equals(v.audience())) {
-            throw new DelegationException("AUDIENCE_MISMATCH",
-                "token aud does not match this resource");
+            throw new DelegationException(
+                    "AUDIENCE_MISMATCH", "token aud does not match this resource");
         }
-        if (requiredScopePrefix != null && v.scopes().stream().noneMatch(s -> s.startsWith(requiredScopePrefix))) {
-            throw new DelegationException("SCOPE_MISSING", "token lacks scope " + requiredScopePrefix);
+        if (requiredScopePrefix != null
+                && v.scopes().stream().noneMatch(s -> s.startsWith(requiredScopePrefix))) {
+            throw new DelegationException(
+                    "SCOPE_MISSING", "token lacks scope " + requiredScopePrefix);
         }
         return v;
     }
 
     /**
-     * The recorded-state half of {@link #verify}: the {@code jti} row must be
-     * ACTIVE and its grant ACTIVE + unexpired. MUST run inside the token's
-     * tenant schema (it queries tenant tables). Returns the grant so callers
-     * that enforce spend ({@link #recordSpend}) see the same row.
+     * The recorded-state half of {@link #verify}: the {@code jti} row must be ACTIVE and its grant
+     * ACTIVE + unexpired. MUST run inside the token's tenant schema (it queries tenant tables).
+     * Returns the grant so callers that enforce spend ({@link #recordSpend}) see the same row.
      */
     @Transactional
     public DelegationGrant verifyRecorded(VerifiedDelegation v) {
@@ -288,19 +308,20 @@ public class DelegationTokenService {
             throw new DelegationException("TOKEN_REVOKED", "token is revoked or unknown");
         }
         DelegationGrant grant = grantRepository.findById(record.getGrantId()).orElse(null);
-        if (grant == null || grant.getStatus() != DelegationStatus.ACTIVE
-            || !grant.getExpiresAt().isAfter(now)) {
-            throw new DelegationException("GRANT_INACTIVE", "the backing grant is revoked or expired");
+        if (grant == null
+                || grant.getStatus() != DelegationStatus.ACTIVE
+                || !grant.getExpiresAt().isAfter(now)) {
+            throw new DelegationException(
+                    "GRANT_INACTIVE", "the backing grant is revoked or expired");
         }
         return grant;
     }
 
     /**
-     * Recorded checks + cumulative spend, atomically under the grant's
-     * {@code SELECT ... FOR UPDATE} row lock (V406). MUST run inside the
-     * payer's tenant schema. Throws {@code SPEND_CAP_EXCEEDED} when
-     * {@code spent + amount} would cross {@code spend_cap_minor}; a NULL cap
-     * means only the wallet balance bounds spend.
+     * Recorded checks + cumulative spend, atomically under the grant's {@code SELECT ... FOR
+     * UPDATE} row lock (V406). MUST run inside the payer's tenant schema. Throws {@code
+     * SPEND_CAP_EXCEEDED} when {@code spent + amount} would cross {@code spend_cap_minor}; a NULL
+     * cap means only the wallet balance bounds spend.
      */
     @Transactional
     public DelegationGrant recordSpend(String jti, long amountMinor) {
@@ -313,28 +334,41 @@ public class DelegationTokenService {
             throw new DelegationException("TOKEN_REVOKED", "token is revoked or unknown");
         }
         DelegationGrant grant = grantRepository.findByIdForUpdate(record.getGrantId()).orElse(null);
-        if (grant == null || grant.getStatus() != DelegationStatus.ACTIVE
-            || !grant.getExpiresAt().isAfter(now)) {
-            throw new DelegationException("GRANT_INACTIVE", "the backing grant is revoked or expired");
+        if (grant == null
+                || grant.getStatus() != DelegationStatus.ACTIVE
+                || !grant.getExpiresAt().isAfter(now)) {
+            throw new DelegationException(
+                    "GRANT_INACTIVE", "the backing grant is revoked or expired");
         }
         if (grant.getSpendCapMinor() != null
-            && Math.addExact(grant.getSpentMinor(), amountMinor) > grant.getSpendCapMinor()) {
-            throw new DelegationException("SPEND_CAP_EXCEEDED",
-                "grant spend " + grant.getSpentMinor() + " + " + amountMinor
-                    + " exceeds cap " + grant.getSpendCapMinor());
+                && Math.addExact(grant.getSpentMinor(), amountMinor) > grant.getSpendCapMinor()) {
+            throw new DelegationException(
+                    "SPEND_CAP_EXCEEDED",
+                    "grant spend "
+                            + grant.getSpentMinor()
+                            + " + "
+                            + amountMinor
+                            + " exceeds cap "
+                            + grant.getSpendCapMinor());
         }
         grant.applySpend(amountMinor, now);
-        audit("delegation.spend.recorded", jti, AuditOutcome.APPROVED,
-            "grant=" + grant.getId() + " amount=" + amountMinor
-                + " spent=" + grant.getSpentMinor());
+        audit(
+                "delegation.spend.recorded",
+                jti,
+                AuditOutcome.APPROVED,
+                "grant="
+                        + grant.getId()
+                        + " amount="
+                        + amountMinor
+                        + " spent="
+                        + grant.getSpentMinor());
         return grant;
     }
 
     /**
-     * Compensating release for {@link #recordSpend} when the settlement leg it
-     * guarded is reversed (x402 credit leg failed / refund). Runs under the
-     * same row lock; clamps at zero rather than throwing - the release must
-     * never fail and leave the cap permanently consumed.
+     * Compensating release for {@link #recordSpend} when the settlement leg it guarded is reversed
+     * (x402 credit leg failed / refund). Runs under the same row lock; clamps at zero rather than
+     * throwing - the release must never fail and leave the cap permanently consumed.
      */
     @Transactional
     public void releaseSpend(String jti, long amountMinor) {
@@ -349,9 +383,9 @@ public class DelegationTokenService {
     }
 
     /**
-     * Signature + claims only - no DB state. For offline/edge verification
-     * where the recorded-revocation table is unreachable; callers that can
-     * reach the DB should prefer {@link #verify}.
+     * Signature + claims only - no DB state. For offline/edge verification where the
+     * recorded-revocation table is unreachable; callers that can reach the DB should prefer {@link
+     * #verify}.
      */
     public VerifiedDelegation verifySignatureAndClaims(String token) {
         A2aCardSigningService signer = signingService.getIfAvailable();
@@ -363,12 +397,15 @@ public class DelegationTokenService {
             throw new DelegationException("WRONG_TOKEN_USE", "not a delegation token");
         }
         return new VerifiedDelegation(
-            str(claims.get("jti")), str(claims.get("grant_id")),
-            uuid(str(claims.get("agent_id"))), str(claims.get("tenant_id")),
-            delegator(claims.get("act")), str(claims.get("aud")),
-            splitScopes(str(claims.get("scope"))),
-            uuidOrNull(str(claims.get("wallet_id"))),
-            Instant.ofEpochSecond(num(claims.get("exp"))));
+                str(claims.get("jti")),
+                str(claims.get("grant_id")),
+                uuid(str(claims.get("agent_id"))),
+                str(claims.get("tenant_id")),
+                delegator(claims.get("act")),
+                str(claims.get("aud")),
+                splitScopes(str(claims.get("scope"))),
+                uuidOrNull(str(claims.get("wallet_id"))),
+                Instant.ofEpochSecond(num(claims.get("exp"))));
     }
 
     /** RFC 7662-style introspection - active flag + claims or a reason code. */
@@ -405,18 +442,25 @@ public class DelegationTokenService {
         String actor = currentSubject();
         grant.markRevoked(actor, reason, clock.instant());
         int tokens = tokenRepository.revokeAllForGrant(grantId);
-        audit("delegation.grant.revoked", grantId.toString(), AuditOutcome.APPROVED,
-            "tokens_revoked=" + tokens + " reason=" + reason);
+        audit(
+                "delegation.grant.revoked",
+                grantId.toString(),
+                AuditOutcome.APPROVED,
+                "tokens_revoked=" + tokens + " reason=" + reason);
         return grant;
     }
 
     @Transactional
     public boolean revokeToken(String jti) {
-        return tokenRepository.findById(jti).map(record -> {
-            record.setStatus(DelegationStatus.REVOKED);
-            audit("delegation.token.revoked", jti, AuditOutcome.APPROVED, null);
-            return true;
-        }).orElse(false);
+        return tokenRepository
+                .findById(jti)
+                .map(
+                        record -> {
+                            record.setStatus(DelegationStatus.REVOKED);
+                            audit("delegation.token.revoked", jti, AuditOutcome.APPROVED, null);
+                            return true;
+                        })
+                .orElse(false);
     }
 
     public List<DelegationGrant> listGrants(UUID agentId) {
@@ -451,19 +495,20 @@ public class DelegationTokenService {
             if (!verifier.verify(Base64.getUrlDecoder().decode(parts[2]))) {
                 throw new DelegationException("BAD_SIGNATURE", "signature does not verify");
             }
-            Map<String, Object> header = objectMapper.readValue(
-                Base64.getUrlDecoder().decode(parts[0]), Map.class);
+            Map<String, Object> header =
+                    objectMapper.readValue(Base64.getUrlDecoder().decode(parts[0]), Map.class);
             if (!"EdDSA".equals(header.get("alg"))) {
                 throw new DelegationException("WRONG_ALG", "unexpected alg");
             }
             @SuppressWarnings("unchecked")
-            Map<String, Object> claims = objectMapper.readValue(
-                Base64.getUrlDecoder().decode(parts[1]), Map.class);
+            Map<String, Object> claims =
+                    objectMapper.readValue(Base64.getUrlDecoder().decode(parts[1]), Map.class);
             return claims;
         } catch (DelegationException e) {
             throw e;
         } catch (GeneralSecurityException | java.io.IOException | IllegalArgumentException e) {
-            throw new DelegationException("MALFORMED", "token did not parse or verify: " + e.getMessage());
+            throw new DelegationException(
+                    "MALFORMED", "token did not parse or verify: " + e.getMessage());
         }
     }
 
@@ -479,7 +524,8 @@ public class DelegationTokenService {
         try {
             AuditLogService audit = auditLogService.getIfAvailable();
             if (audit != null) {
-                audit.record(currentSubject(), action, "agent_delegation", targetId, outcome, detail);
+                audit.record(
+                        currentSubject(), action, "agent_delegation", targetId, outcome, detail);
             }
         } catch (RuntimeException e) {
             log.warn("Audit write failed for {}: {}", action, e.toString());
@@ -507,7 +553,9 @@ public class DelegationTokenService {
     }
 
     private static String delegator(Object act) {
-        if (act instanceof Map<?, ?> m && m.get("sub") instanceof String s && s.startsWith("user:")) {
+        if (act instanceof Map<?, ?> m
+                && m.get("sub") instanceof String s
+                && s.startsWith("user:")) {
             return s.substring(5);
         }
         return "";
@@ -530,13 +578,17 @@ public class DelegationTokenService {
     }
 
     /** Result of {@link #mintToken}: the compact JWT plus its registry fields. */
-    public record MintedToken(String token, String jti, Instant expiresAt) {
-    }
+    public record MintedToken(String token, String jti, Instant expiresAt) {}
 
     /** Verified token contents - the claims a relying party acts on. */
     public record VerifiedDelegation(
-        String jti, String grantId, UUID agentId, String tenantId,
-        String delegator, String audience, List<String> scopes,
-        UUID walletId, Instant expiresAt) {
-    }
+            String jti,
+            String grantId,
+            UUID agentId,
+            String tenantId,
+            String delegator,
+            String audience,
+            List<String> scopes,
+            UUID walletId,
+            Instant expiresAt) {}
 }

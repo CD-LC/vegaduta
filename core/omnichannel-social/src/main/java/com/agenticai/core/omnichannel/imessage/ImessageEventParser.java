@@ -74,12 +74,14 @@ final class ImessageEventParser {
             return Optional.empty();
         }
         String text = message.path("text").asText("");
-        boolean attachments = message.path("attachments").isArray() && !message.path("attachments").isEmpty();
+        boolean attachments =
+                message.path("attachments").isArray() && !message.path("attachments").isEmpty();
         if (text.isBlank()) {
             return Optional.empty();
         }
         boolean group = chat.path("style").asInt(0) == STYLE_GROUP || chatGuid.contains(";+;");
-        String sender = ImessageAddress.normalize(message.path("handle").path("address").asText(null));
+        String sender =
+                ImessageAddress.normalize(message.path("handle").path("address").asText(null));
         if (sender == null && !group) {
             // The handle is the chat identifier for a direct chat ("iMessage;-;+15550100100").
             int cut = chatGuid.lastIndexOf(';');
@@ -90,6 +92,12 @@ final class ImessageEventParser {
         }
         return Optional.of(
                 new Inbound(
-                        guid, chatGuid, sender, text, group, attachments, message.path("dateCreated").asLong(0)));
+                        guid,
+                        chatGuid,
+                        sender,
+                        text,
+                        group,
+                        attachments,
+                        message.path("dateCreated").asLong(0)));
     }
 }

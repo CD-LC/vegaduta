@@ -1,10 +1,10 @@
 package com.agenticai.core.tutor;
 
-import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.agents.assist.AssistService;
 import com.agenticai.core.agents.demo.studio.DemoStudioModerationService;
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.chat.structured.StructuredOutputException;
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tutor.StudyPlanDocs.Curriculum;
 import com.agenticai.core.tutor.StudyPlanDocs.Lesson;
@@ -39,20 +39,20 @@ import org.springframework.web.server.ResponseStatusException;
  * Turns any topic into a course, and any lesson of that course into an explanation plus a quiz - in
  * the learner's language.
  *
- * <p><b>Two bounded model calls, never a standing cost.</b> {@link #generatePlan} asks for an outline
- * only (module and lesson titles with one-line objectives). {@link #generateLesson} writes ONE lesson
- * the first time the learner opens it and caches it on the plan; every later open is a plain read.
- * Both go through {@link AssistService#complete}, so FREE-tier hosted-pool routing, BYOK and model
- * resolution behave exactly like Ask-AI.
+ * <p><b>Two bounded model calls, never a standing cost.</b> {@link #generatePlan} asks for an
+ * outline only (module and lesson titles with one-line objectives). {@link #generateLesson} writes
+ * ONE lesson the first time the learner opens it and caches it on the plan; every later open is a
+ * plain read. Both go through {@link AssistService#complete}, so FREE-tier hosted-pool routing,
+ * BYOK and model resolution behave exactly like Ask-AI.
  *
  * <p><b>The model's output is untrusted.</b> It is located and bound by {@link StructuredOutput}
- * (one repair turn), then run through the same {@link StudyPlanValidation} a hand-written plan gets:
- * ids are assigned here, text is capped, and a quiz whose answer key does not point at a real option
- * is rejected. Grading later happens in pure code against that stored key.
+ * (one repair turn), then run through the same {@link StudyPlanValidation} a hand-written plan
+ * gets: ids are assigned here, text is capped, and a quiz whose answer key does not point at a real
+ * option is rejected. Grading later happens in pure code against that stored key.
  *
  * <p><b>The learner's topic is untrusted too.</b> It passes the deterministic moderation term list,
- * is fenced in the prompt and declared to be data. The system prompts are byte-stable constants; the
- * teaching language travels in the user turn.
+ * is fenced in the prompt and declared to be data. The system prompts are byte-stable constants;
+ * the teaching language travels in the user turn.
  */
 @Service
 @ConditionalOnProperty(prefix = "app.tutor", name = "enabled", havingValue = "true")
@@ -69,15 +69,16 @@ public class StudyPlanGenerator {
     private static final int MAX_ECHOED_REPLY_CHARS = 2_000;
 
     static final String BLOCKED_MESSAGE =
-        "The tutor can't build a course on that topic. Please rephrase it and try again.";
+            "The tutor can't build a course on that topic. Please rephrase it and try again.";
     static final String BLOCKED_LESSON_MESSAGE =
-        "The tutor can't write a lesson on that. Please change the course topic or lesson title and try again.";
+            "The tutor can't write a lesson on that. Please change the course topic or lesson title and try again.";
     static final String FAILED_PLAN_MESSAGE =
-        "The tutor could not build a course for that topic just now. Please try again.";
+            "The tutor could not build a course for that topic just now. Please try again.";
     static final String FAILED_LESSON_MESSAGE =
-        "The tutor could not write this lesson just now. Please try again.";
+            "The tutor could not write this lesson just now. Please try again.";
 
-    static final String OUTLINE_SYSTEM = """
+    static final String OUTLINE_SYSTEM =
+            """
         You are an expert teacher and curriculum designer. You design a short course for ONE learner on the topic they give.
 
         Rules:
@@ -95,7 +96,8 @@ public class StudyPlanGenerator {
         Reply with ONLY one JSON object - no markdown fences, no commentary:
         {"modules":[{"title":"...","lessons":[{"title":"...","objective":"..."}]}]}""";
 
-    static final String LESSON_SYSTEM = """
+    static final String LESSON_SYSTEM =
+            """
         You are a patient, expert tutor writing ONE lesson of a course for ONE learner.
 
         Rules:
@@ -136,16 +138,19 @@ public class StudyPlanGenerator {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    record OutlineDraft(List<ModuleInput> modules) {
-    }
+    record OutlineDraft(List<ModuleInput> modules) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     record LessonDraft(
-        String explanation, List<String> keyPoints, String workedExample, List<QuizInput> quiz, Boolean refused
-    ) {
-    }
+            String explanation,
+            List<String> keyPoints,
+            String workedExample,
+            List<QuizInput> quiz,
+            Boolean refused) {}
 
-    /** {@code content} is null when the model used its refusal channel ({@code {"refused":true}}). */
+    /**
+     * {@code content} is null when the model used its refusal channel ({@code {"refused":true}}).
+     */
     private record GeneratedLesson(LessonContent content, List<QuizItem> quiz) {
         boolean refused() {
             return content == null;
@@ -156,23 +161,31 @@ public class StudyPlanGenerator {
     private final StudyPlanService plans;
     private final TutorRateLimiter rateLimiter;
     private final TopicFilter topicFilter;
+
     /** Per-lesson in-process lock so a double-click writes (and pays for) one lesson, not two. */
     private final ConcurrentHashMap<String, ReentrantLock> lessonLocks = new ConcurrentHashMap<>();
 
     @Autowired
     public StudyPlanGenerator(
-        AssistService assistService,
-        StudyPlanService plans,
-        TutorRateLimiter rateLimiter,
-        ObjectProvider<DemoStudioModerationService> moderation
-    ) {
-        this(assistService::complete, plans, rateLimiter, text -> {
-            DemoStudioModerationService service = moderation.getIfAvailable();
-            return service != null && service.prefilterBlocks(text);
-        });
+            AssistService assistService,
+            StudyPlanService plans,
+            TutorRateLimiter rateLimiter,
+            ObjectProvider<DemoStudioModerationService> moderation) {
+        this(
+                assistService::complete,
+                plans,
+                rateLimiter,
+                text -> {
+                    DemoStudioModerationService service = moderation.getIfAvailable();
+                    return service != null && service.prefilterBlocks(text);
+                });
     }
 
-    StudyPlanGenerator(Completion completion, StudyPlanService plans, TutorRateLimiter rateLimiter, TopicFilter topicFilter) {
+    StudyPlanGenerator(
+            Completion completion,
+            StudyPlanService plans,
+            TutorRateLimiter rateLimiter,
+            TopicFilter topicFilter) {
         this.completion = completion;
         this.plans = plans;
         this.rateLimiter = rateLimiter;
@@ -181,7 +194,9 @@ public class StudyPlanGenerator {
 
     // ------------------------------------------------------------------ course outline
 
-    /** Validates, moderates, rate-limits, asks the model for an outline and stores it as a new plan. */
+    /**
+     * Validates, moderates, rate-limits, asks the model for an outline and stores it as a new plan.
+     */
     public PlanView generatePlan(String subject, GeneratePlanRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Tell the tutor what you want to learn.");
@@ -190,12 +205,17 @@ public class StudyPlanGenerator {
         String language = StudyPlanValidation.language(request.language());
         String level = StudyPlanValidation.level(request.level());
         String goal = StudyPlanValidation.goal(request.goal());
-        Integer weeklyMinutes = request.weeklyMinutes() == null
-            ? null : Math.max(MIN_WEEKLY_MINUTES, Math.min(MAX_WEEKLY_MINUTES, request.weeklyMinutes()));
+        Integer weeklyMinutes =
+                request.weeklyMinutes() == null
+                        ? null
+                        : Math.max(
+                                MIN_WEEKLY_MINUTES,
+                                Math.min(MAX_WEEKLY_MINUTES, request.weeklyMinutes()));
         if (topicFilter.blocks(topic) || (goal != null && topicFilter.blocks(goal))) {
             throw new IllegalArgumentException(BLOCKED_MESSAGE);
         }
-        // Cheap refusals first: no model call for a member who is at the plan cap or over the hourly window.
+        // Cheap refusals first: no model call for a member who is at the plan cap or over the
+        // hourly window.
         plans.assertCanCreate(subject);
         rateLimiter.assertGenerationAllowed(tenantId(), subject);
 
@@ -208,7 +228,8 @@ public class StudyPlanGenerator {
         return plans.createFrom(subject, topic, language, level, goal, curriculum);
     }
 
-    static String outlineUserPrompt(String topic, String language, String level, String goal, Integer weeklyMinutes) {
+    static String outlineUserPrompt(
+            String topic, String language, String level, String goal, Integer weeklyMinutes) {
         StringBuilder sb = new StringBuilder();
         sb.append("Write in: ").append(languageName(language)).append('\n');
         sb.append("<<<LEARNER_INPUT\n");
@@ -221,11 +242,16 @@ public class StudyPlanGenerator {
             sb.append("Time available: about ").append(weeklyMinutes).append(" minutes a week\n");
         }
         sb.append("LEARNER_INPUT>>>\n");
-        sb.append("Design the course now. Remember: every title and objective in ").append(languageName(language)).append('.');
+        sb.append("Design the course now. Remember: every title and objective in ")
+                .append(languageName(language))
+                .append('.');
         return sb.toString();
     }
 
-    /** Model outline -> stored curriculum. Over-long outlines are trimmed, not failed; anything else invalid asks for a repair. */
+    /**
+     * Model outline -> stored curriculum. Over-long outlines are trimmed, not failed; anything else
+     * invalid asks for a repair.
+     */
     private Curriculum parseOutline(String raw) {
         OutlineDraft draft = StructuredOutput.parse(MAPPER, raw, OutlineDraft.class);
         if (draft == null || draft.modules() == null || draft.modules().isEmpty()) {
@@ -248,7 +274,8 @@ public class StudyPlanGenerator {
                 if (lesson == null) {
                     continue;
                 }
-                // Outline only: any lesson body the model volunteered here is dropped, lessons are written lazily.
+                // Outline only: any lesson body the model volunteered here is dropped, lessons are
+                // written lazily.
                 lessons.add(new LessonInput(lesson.title(), lesson.objective(), null, null));
                 budget--;
             }
@@ -259,16 +286,17 @@ public class StudyPlanGenerator {
         try {
             return StudyPlanValidation.curriculum(modules, plans.maxLessonsPerPlan());
         } catch (IllegalArgumentException e) {
-            throw new StructuredOutputException("The course outline is not usable: " + e.getMessage(), raw);
+            throw new StructuredOutputException(
+                    "The course outline is not usable: " + e.getMessage(), raw);
         }
     }
 
     // ------------------------------------------------------------------ one lesson
 
     /**
-     * Idempotent: a lesson that already has content is returned from the plan without a model call or a
-     * rate-limit hit. Otherwise the lesson is written once, validated, cached and returned - quiz
-     * questions without their answer key.
+     * Idempotent: a lesson that already has content is returned from the plan without a model call
+     * or a rate-limit hit. Otherwise the lesson is written once, validated, cached and returned -
+     * quiz questions without their answer key.
      */
     public LessonView generateLesson(String subject, UUID planId, String lessonId) {
         Lesson existing = plans.requireLesson(subject, planId, lessonId);
@@ -284,31 +312,46 @@ public class StudyPlanGenerator {
                 return StudyPlanService.lessonView(lesson);
             }
             PlanView plan = plans.get(subject, planId);
-            // A hand-made plan (POST /plans) never went through generatePlan's filter, so everything
+            // A hand-made plan (POST /plans) never went through generatePlan's filter, so
+            // everything
             // learner-authored that this prompt carries is moderated here, before any spend.
             if (blocksLessonInputs(plan, lesson)) {
                 throw new IllegalArgumentException(BLOCKED_LESSON_MESSAGE);
             }
             rateLimiter.assertGenerationAllowed(tenantId(), subject);
             String user = lessonUserPrompt(plan, lesson);
-            GeneratedLesson generated = ask(LESSON_SYSTEM, user, StudyPlanGenerator::parseLesson, FAILED_LESSON_MESSAGE);
+            GeneratedLesson generated =
+                    ask(
+                            LESSON_SYSTEM,
+                            user,
+                            StudyPlanGenerator::parseLesson,
+                            FAILED_LESSON_MESSAGE);
             if (generated.refused()) {
-                // The model's own refusal channel - nothing is cached, the lesson stays un-generated.
+                // The model's own refusal channel - nothing is cached, the lesson stays
+                // un-generated.
                 throw new IllegalArgumentException(BLOCKED_LESSON_MESSAGE);
             }
-            return plans.storeLessonContent(subject, planId, lessonId, generated.content(), generated.quiz());
+            return plans.storeLessonContent(
+                    subject, planId, lessonId, generated.content(), generated.quiz());
         } finally {
             lock.unlock();
             lessonLocks.remove(lockKey, lock);
         }
     }
 
-    /** True when any learner-authored text {@link #lessonUserPrompt} sends to the model is refused by the term list. */
+    /**
+     * True when any learner-authored text {@link #lessonUserPrompt} sends to the model is refused
+     * by the term list.
+     */
     private boolean blocksLessonInputs(PlanView plan, Lesson lesson) {
-        if (blocked(plan.topic()) || blocked(plan.goal()) || blocked(lesson.title()) || blocked(lesson.objective())) {
+        if (blocked(plan.topic())
+                || blocked(plan.goal())
+                || blocked(lesson.title())
+                || blocked(lesson.objective())) {
             return true;
         }
-        // Module titles and the titles of earlier lessons ("Already covered") travel in the prompt too.
+        // Module titles and the titles of earlier lessons ("Already covered") travel in the prompt
+        // too.
         for (ModuleView module : plan.modules()) {
             if (blocked(module.title())) {
                 return true;
@@ -362,7 +405,9 @@ public class StudyPlanGenerator {
             sb.append("Already covered: ").append(fence(String.join("; ", recent))).append('\n');
         }
         sb.append("LEARNER_INPUT>>>\n");
-        sb.append("Write the lesson now. Remember: everything in ").append(languageName(plan.language())).append('.');
+        sb.append("Write the lesson now. Remember: everything in ")
+                .append(languageName(plan.language()))
+                .append('.');
         return sb.toString();
     }
 
@@ -375,11 +420,14 @@ public class StudyPlanGenerator {
             return new GeneratedLesson(null, List.of());
         }
         try {
-            LessonContent content = StudyPlanValidation.lessonContent(
-                new LessonContentInput(draft.explanation(), draft.keyPoints(), draft.workedExample()));
+            LessonContent content =
+                    StudyPlanValidation.lessonContent(
+                            new LessonContentInput(
+                                    draft.explanation(), draft.keyPoints(), draft.workedExample()));
             List<QuizInput> questions = draft.quiz() == null ? List.of() : draft.quiz();
             if (questions.size() < MIN_QUIZ_QUESTIONS) {
-                throw new IllegalArgumentException("the quiz needs at least " + MIN_QUIZ_QUESTIONS + " questions.");
+                throw new IllegalArgumentException(
+                        "the quiz needs at least " + MIN_QUIZ_QUESTIONS + " questions.");
             }
             if (questions.size() > MAX_QUIZ_QUESTIONS) {
                 questions = questions.subList(0, MAX_QUIZ_QUESTIONS);
@@ -394,15 +442,27 @@ public class StudyPlanGenerator {
 
     /**
      * One model turn plus at most one repair turn. A second unusable reply is a 422 the page shows
-     * inline with a retry - deliberately not a 5xx: a model that wrote bad JSON is an expected outcome,
-     * and every 5xx is logged with a stack trace and filed in the admin Issues portal.
+     * inline with a retry - deliberately not a 5xx: a model that wrote bad JSON is an expected
+     * outcome, and every 5xx is logged with a stack trace and filed in the admin Issues portal.
      */
-    private <T> T ask(String system, String user, java.util.function.Function<String, T> parser, String failureMessage) {
+    private <T> T ask(
+            String system,
+            String user,
+            java.util.function.Function<String, T> parser,
+            String failureMessage) {
         String raw = completion.complete(system, user);
         try {
-            return StructuredOutput.parseWithRepair(raw, parser, (previous, error) ->
-                completion.complete(system, user + "\n\nYour previous reply was:\n" + truncate(previous)
-                    + "\n\n" + StructuredOutput.repairPrompt(error, null)));
+            return StructuredOutput.parseWithRepair(
+                    raw,
+                    parser,
+                    (previous, error) ->
+                            completion.complete(
+                                    system,
+                                    user
+                                            + "\n\nYour previous reply was:\n"
+                                            + truncate(previous)
+                                            + "\n\n"
+                                            + StructuredOutput.repairPrompt(error, null)));
         } catch (StructuredOutputException e) {
             log.warn("Tutor generation produced unusable output twice: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, failureMessage);
@@ -412,22 +472,28 @@ public class StudyPlanGenerator {
     /** "Hindi (hi)", "Portuguese (Brazil) (pt-BR)"; an unknown tag is passed through as-is. */
     static String languageName(String tag) {
         String name = Locale.forLanguageTag(tag).getDisplayName(Locale.ENGLISH);
-        return name == null || name.isBlank() || name.equalsIgnoreCase(tag) ? tag : name + " (" + tag + ")";
+        return name == null || name.isBlank() || name.equalsIgnoreCase(tag)
+                ? tag
+                : name + " (" + tag + ")";
     }
 
     /** The learner cannot close the data fence early. */
     private static String fence(String text) {
-        return text == null ? "" : text
-            .replace("<<<LEARNER_INPUT", "< < <LEARNER_INPUT")
-            .replace("LEARNER_INPUT>>>", "LEARNER_INPUT> > >")
-            .replace('\r', ' ').replace('\n', ' ');
+        return text == null
+                ? ""
+                : text.replace("<<<LEARNER_INPUT", "< < <LEARNER_INPUT")
+                        .replace("LEARNER_INPUT>>>", "LEARNER_INPUT> > >")
+                        .replace('\r', ' ')
+                        .replace('\n', ' ');
     }
 
     private static String truncate(String text) {
         if (text == null) {
             return "";
         }
-        return text.length() > MAX_ECHOED_REPLY_CHARS ? text.substring(0, MAX_ECHOED_REPLY_CHARS) : text;
+        return text.length() > MAX_ECHOED_REPLY_CHARS
+                ? text.substring(0, MAX_ECHOED_REPLY_CHARS)
+                : text;
     }
 
     private static String tenantId() {

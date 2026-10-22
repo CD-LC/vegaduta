@@ -36,9 +36,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 /**
- * The public form's resolution, validation, honeypot, rate limits and run start. The token is the SAME opaque
- * webhook token the shared-secret webhook trigger uses; every "this form does not exist" cause collapses into one
- * indistinguishable outcome.
+ * The public form's resolution, validation, honeypot, rate limits and run start. The token is the
+ * SAME opaque webhook token the shared-secret webhook trigger uses; every "this form does not
+ * exist" cause collapses into one indistinguishable outcome.
  */
 class WorkflowFormServiceTest {
 
@@ -69,26 +69,40 @@ class WorkflowFormServiceTest {
         when(rateLimiter.tryAcquire(anyString(), anyString(), anyLong())).thenReturn(true);
         service = newService(true);
 
-        when(tenantResolution.resolveTenantSchema(ExternalAccountProvider.WORKFLOW_WEBHOOK, TOKEN_HASH))
-            .thenReturn(Optional.of("tenant_a"));
-        when(triggerNodes.findByWebhookTokenHash(TOKEN_HASH)).thenReturn(Optional.of(enabledTriggerNode()));
+        when(tenantResolution.resolveTenantSchema(
+                        ExternalAccountProvider.WORKFLOW_WEBHOOK, TOKEN_HASH))
+                .thenReturn(Optional.of("tenant_a"));
+        when(triggerNodes.findByWebhookTokenHash(TOKEN_HASH))
+                .thenReturn(Optional.of(enabledTriggerNode()));
         definition = definition(WorkflowStatus.ACTIVE);
         when(definitions.findById(WORKFLOW_ID)).thenReturn(Optional.of(definition));
         when(workflowService.resolveRunGraph(definition)).thenReturn(formGraph());
     }
 
     private WorkflowFormService newService(boolean enabled) {
-        return new WorkflowFormService(tenantResolution, triggerNodes, definitions, workflowService, triggerPort,
-            rateLimiter, new ObjectMapper(), enabled, 30, 8, 2_000);
+        return new WorkflowFormService(
+                tenantResolution,
+                triggerNodes,
+                definitions,
+                workflowService,
+                triggerPort,
+                rateLimiter,
+                new ObjectMapper(),
+                enabled,
+                30,
+                8,
+                2_000);
     }
 
     private static WorkflowTriggerNode enabledTriggerNode() {
-        WorkflowTriggerNode node = new WorkflowTriggerNode(WORKFLOW_ID, NODE_ID, WorkflowTriggerChannel.WEBHOOK);
+        WorkflowTriggerNode node =
+                new WorkflowTriggerNode(WORKFLOW_ID, NODE_ID, WorkflowTriggerChannel.WEBHOOK);
         node.enableWebhook("encrypted", TOKEN_HASH);
         return node;
     }
 
-    private static WorkflowDefinition definition(WorkflowStatus status) throws ReflectiveOperationException {
+    private static WorkflowDefinition definition(WorkflowStatus status)
+            throws ReflectiveOperationException {
         WorkflowDefinition d = new WorkflowDefinition("Contact form", "d", "{}", status);
         java.lang.reflect.Field idField = WorkflowDefinition.class.getDeclaredField("id");
         idField.setAccessible(true);
@@ -103,9 +117,11 @@ class WorkflowFormServiceTest {
         form.put("submitLabel", "Send");
         form.put("successMessage", "Thanks - we got it.");
         form.put("redirectUrl", "https://example.com/thanks");
-        form.put("fields", List.of(
-            Map.of("key", "name", "type", "text", "label", "Name", "required", true),
-            Map.of("key", "agree", "type", "checkbox", "required", true)));
+        form.put(
+                "fields",
+                List.of(
+                        Map.of("key", "name", "type", "text", "label", "Name", "required", true),
+                        Map.of("key", "agree", "type", "checkbox", "required", true)));
         Map<String, Object> config = new HashMap<>();
         config.put("triggerType", "form");
         config.put("form", form);
@@ -113,10 +129,18 @@ class WorkflowFormServiceTest {
     }
 
     private static WorkflowGraphDto graphWith(Map<String, Object> triggerConfig) {
-        WorkflowNodeDto trigger = new WorkflowNodeDto(NODE_ID, "trigger", Map.of(),
-            Map.of("config", triggerConfig, "label", "Form"));
-        WorkflowNodeDto agent = new WorkflowNodeDto("a1", "agent", Map.of(), Map.of("config", Map.of(), "label", "A"));
-        return new WorkflowGraphDto(List.of(trigger, agent), List.of(new WorkflowEdgeDto("e1", NODE_ID, "a1", null, null)));
+        WorkflowNodeDto trigger =
+                new WorkflowNodeDto(
+                        NODE_ID,
+                        "trigger",
+                        Map.of(),
+                        Map.of("config", triggerConfig, "label", "Form"));
+        WorkflowNodeDto agent =
+                new WorkflowNodeDto(
+                        "a1", "agent", Map.of(), Map.of("config", Map.of(), "label", "A"));
+        return new WorkflowGraphDto(
+                List.of(trigger, agent),
+                List.of(new WorkflowEdgeDto("e1", NODE_ID, "a1", null, null)));
     }
 
     private static WorkflowGraphDto formGraph() {
@@ -132,14 +156,19 @@ class WorkflowFormServiceTest {
     }
 
     private static Map<String, Object> validBody() {
-        return body("values", body("name", "Asha", "agree", true), WorkflowFormSchema.HONEYPOT_FIELD, "");
+        return body(
+                "values",
+                body("name", "Asha", "agree", true),
+                WorkflowFormSchema.HONEYPOT_FIELD,
+                "");
     }
 
     private static void assertNoTenantLeak() {
         assertFalse(TenantContext.current().isPresent(), "TenantContext must always be cleared");
     }
 
-    // ---- view -----------------------------------------------------------------------------------------------------
+    // ---- view
+    // -----------------------------------------------------------------------------------------------------
 
     @Test
     void viewReturnsThePublicDefinitionWithoutInternals() {
@@ -162,17 +191,22 @@ class WorkflowFormServiceTest {
         // malformed token
         assertTrue(service.view("short").isEmpty());
         // unknown token
-        when(tenantResolution.resolveTenantSchema(ExternalAccountProvider.WORKFLOW_WEBHOOK, TOKEN_HASH))
-            .thenReturn(Optional.empty());
+        when(tenantResolution.resolveTenantSchema(
+                        ExternalAccountProvider.WORKFLOW_WEBHOOK, TOKEN_HASH))
+                .thenReturn(Optional.empty());
         assertTrue(service.view(TOKEN).isEmpty());
         assertNoTenantLeak();
     }
 
     @Test
-    void aDisabledWebhookOAuthModeInactiveWorkflowOrNonFormNodeAreAllUnavailable() throws Exception {
+    void aDisabledWebhookOAuthModeInactiveWorkflowOrNonFormNodeAreAllUnavailable()
+            throws Exception {
         // webhook not enabled
-        when(triggerNodes.findByWebhookTokenHash(TOKEN_HASH)).thenReturn(
-            Optional.of(new WorkflowTriggerNode(WORKFLOW_ID, NODE_ID, WorkflowTriggerChannel.WEBHOOK)));
+        when(triggerNodes.findByWebhookTokenHash(TOKEN_HASH))
+                .thenReturn(
+                        Optional.of(
+                                new WorkflowTriggerNode(
+                                        WORKFLOW_ID, NODE_ID, WorkflowTriggerChannel.WEBHOOK)));
         assertTrue(service.view(TOKEN).isEmpty());
         assertNoTenantLeak();
 
@@ -183,22 +217,27 @@ class WorkflowFormServiceTest {
         assertTrue(service.view(TOKEN).isEmpty());
 
         // workflow not active
-        when(triggerNodes.findByWebhookTokenHash(TOKEN_HASH)).thenReturn(Optional.of(enabledTriggerNode()));
-        when(definitions.findById(WORKFLOW_ID)).thenReturn(Optional.of(definition(WorkflowStatus.DRAFT)));
+        when(triggerNodes.findByWebhookTokenHash(TOKEN_HASH))
+                .thenReturn(Optional.of(enabledTriggerNode()));
+        when(definitions.findById(WORKFLOW_ID))
+                .thenReturn(Optional.of(definition(WorkflowStatus.DRAFT)));
         assertTrue(service.view(TOKEN).isEmpty());
 
         // not a form trigger
         when(definitions.findById(WORKFLOW_ID)).thenReturn(Optional.of(definition));
-        when(workflowService.resolveRunGraph(definition)).thenReturn(graphWith(Map.of("channel", "WEBHOOK")));
+        when(workflowService.resolveRunGraph(definition))
+                .thenReturn(graphWith(Map.of("channel", "WEBHOOK")));
         assertTrue(service.view(TOKEN).isEmpty());
 
         // unusable schema
-        when(workflowService.resolveRunGraph(definition)).thenReturn(graphWith(Map.of("triggerType", "form")));
+        when(workflowService.resolveRunGraph(definition))
+                .thenReturn(graphWith(Map.of("triggerType", "form")));
         assertTrue(service.view(TOKEN).isEmpty());
         assertNoTenantLeak();
     }
 
-    // ---- submit: the happy path -----------------------------------------------------------------------------------
+    // ---- submit: the happy path
+    // -----------------------------------------------------------------------------------
 
     @Test
     void aValidSubmissionStartsTheRunWithTheValidatedValuesAsInput() throws Exception {
@@ -209,7 +248,12 @@ class WorkflowFormServiceTest {
         assertEquals("https://example.com/thanks", result.redirectUrl());
 
         ArgumentCaptor<String> input = ArgumentCaptor.forClass(String.class);
-        verify(triggerPort).triggerAsync(eq(WORKFLOW_ID), eq(NODE_ID), input.capture(), startsWith("workflow-form:"));
+        verify(triggerPort)
+                .triggerAsync(
+                        eq(WORKFLOW_ID),
+                        eq(NODE_ID),
+                        input.capture(),
+                        startsWith("workflow-form:"));
         JsonNode sent = new ObjectMapper().readTree(input.getValue());
         assertEquals("Asha", sent.get("name").asText());
         assertTrue(sent.get("agree").asBoolean());
@@ -222,46 +266,58 @@ class WorkflowFormServiceTest {
         service.submit(TOKEN, validBody(), "203.0.113.9");
 
         ArgumentCaptor<String> requestedBy = ArgumentCaptor.forClass(String.class);
-        verify(triggerPort).triggerAsync(any(UUID.class), anyString(), anyString(), requestedBy.capture());
-        assertEquals("workflow-form:" + TOKEN.substring(TOKEN.length() - 4), requestedBy.getValue());
+        verify(triggerPort)
+                .triggerAsync(any(UUID.class), anyString(), anyString(), requestedBy.capture());
+        assertEquals(
+                "workflow-form:" + TOKEN.substring(TOKEN.length() - 4), requestedBy.getValue());
     }
 
-    // ---- submit: validation -----------------------------------------------------------------------------------------
+    // ---- submit: validation
+    // -----------------------------------------------------------------------------------------
 
     @Test
     void anInvalidSubmissionIsRejectedPerFieldAndNeverStartsARun() {
-        WorkflowFormService.Submission result = service.submit(TOKEN,
-            body("values", body("name", "", "agree", false)), "203.0.113.9");
+        WorkflowFormService.Submission result =
+                service.submit(
+                        TOKEN, body("values", body("name", "", "agree", false)), "203.0.113.9");
 
         assertEquals(WorkflowFormService.Status.INVALID, result.status());
         assertEquals("required", result.errors().get("name"));
         assertEquals("required", result.errors().get("agree"));
-        verify(triggerPort, never()).triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
+        verify(triggerPort, never())
+                .triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
         assertNoTenantLeak();
     }
 
     @Test
     void aMalformedBodyIsInvalidNotAnError() {
-        WorkflowFormService.Submission notAMap = service.submit(TOKEN, body("values", "oops"), "203.0.113.9");
+        WorkflowFormService.Submission notAMap =
+                service.submit(TOKEN, body("values", "oops"), "203.0.113.9");
         assertEquals(WorkflowFormService.Status.INVALID, notAMap.status());
         assertEquals("invalid_body", notAMap.errors().get("_form"));
 
         WorkflowFormService.Submission noBody = service.submit(TOKEN, null, "203.0.113.9");
-        assertEquals(WorkflowFormService.Status.INVALID, noBody.status(), "a missing body validates as all-missing");
+        assertEquals(
+                WorkflowFormService.Status.INVALID,
+                noBody.status(),
+                "a missing body validates as all-missing");
         assertEquals("required", noBody.errors().get("name"));
     }
 
     @Test
     void anOversizedPayloadIsRefusedBeforeAnyLookup() {
-        WorkflowFormService.Submission result = service.submit(TOKEN,
-            body("values", body("name", "x".repeat(5_000))), "203.0.113.9");
+        WorkflowFormService.Submission result =
+                service.submit(
+                        TOKEN, body("values", body("name", "x".repeat(5_000))), "203.0.113.9");
 
         assertEquals(WorkflowFormService.Status.TOO_LARGE, result.status());
         verify(tenantResolution, never()).resolveTenantSchema(any(), anyString());
-        verify(triggerPort, never()).triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
+        verify(triggerPort, never())
+                .triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
     }
 
-    // ---- submit: honeypot ---------------------------------------------------------------------------------------------
+    // ---- submit: honeypot
+    // ---------------------------------------------------------------------------------------------
 
     @Test
     void aFilledHoneypotLooksLikeSuccessButStartsNothingAndLooksNothingUp() {
@@ -272,11 +328,13 @@ class WorkflowFormServiceTest {
 
         assertEquals(WorkflowFormService.Status.OK, result.status(), "the bot is told it worked");
         assertNull(result.redirectUrl());
-        verify(triggerPort, never()).triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
+        verify(triggerPort, never())
+                .triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
         verify(tenantResolution, never()).resolveTenantSchema(any(), anyString());
     }
 
-    // ---- submit: rate limits --------------------------------------------------------------------------------------------
+    // ---- submit: rate limits
+    // --------------------------------------------------------------------------------------------
 
     @Test
     void thePerTokenLimitStopsASubmissionBeforeAnyWork() {
@@ -286,7 +344,8 @@ class WorkflowFormServiceTest {
 
         assertEquals(WorkflowFormService.Status.RATE_LIMITED, result.status());
         verify(tenantResolution, never()).resolveTenantSchema(any(), anyString());
-        verify(triggerPort, never()).triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
+        verify(triggerPort, never())
+                .triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -296,7 +355,8 @@ class WorkflowFormServiceTest {
         WorkflowFormService.Submission result = service.submit(TOKEN, validBody(), "203.0.113.9");
 
         assertEquals(WorkflowFormService.Status.RATE_LIMITED, result.status());
-        verify(triggerPort, never()).triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
+        verify(triggerPort, never())
+                .triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -313,35 +373,52 @@ class WorkflowFormServiceTest {
     void viewsHaveTheirOwnGenerousPerIpLimit() {
         service.allowView("203.0.113.9");
 
-        verify(rateLimiter).tryAcquire(eq("agentic:workflow-form-view-rate:"), anyString(), eq(64L));
+        verify(rateLimiter)
+                .tryAcquire(eq("agentic:workflow-form-view-rate:"), anyString(), eq(64L));
     }
 
-    // ---- submit: not found -----------------------------------------------------------------------------------------
+    // ---- submit: not found
+    // -----------------------------------------------------------------------------------------
 
     @Test
     void submittingToAnUnknownMalformedOrDisabledFormIsNotFound() {
-        assertEquals(WorkflowFormService.Status.NOT_FOUND, service.submit("short", validBody(), "1.2.3.4").status());
-        assertEquals(WorkflowFormService.Status.NOT_FOUND, newService(false).submit(TOKEN, validBody(), "1.2.3.4").status());
+        assertEquals(
+                WorkflowFormService.Status.NOT_FOUND,
+                service.submit("short", validBody(), "1.2.3.4").status());
+        assertEquals(
+                WorkflowFormService.Status.NOT_FOUND,
+                newService(false).submit(TOKEN, validBody(), "1.2.3.4").status());
 
-        when(tenantResolution.resolveTenantSchema(ExternalAccountProvider.WORKFLOW_WEBHOOK, TOKEN_HASH))
-            .thenReturn(Optional.empty());
-        assertEquals(WorkflowFormService.Status.NOT_FOUND, service.submit(TOKEN, validBody(), "1.2.3.4").status());
-        verify(triggerPort, never()).triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
+        when(tenantResolution.resolveTenantSchema(
+                        ExternalAccountProvider.WORKFLOW_WEBHOOK, TOKEN_HASH))
+                .thenReturn(Optional.empty());
+        assertEquals(
+                WorkflowFormService.Status.NOT_FOUND,
+                service.submit(TOKEN, validBody(), "1.2.3.4").status());
+        verify(triggerPort, never())
+                .triggerAsync(any(UUID.class), anyString(), anyString(), anyString());
         assertNoTenantLeak();
     }
 
-    // ---- the raw webhook guard --------------------------------------------------------------------------------------
+    // ---- the raw webhook guard
+    // --------------------------------------------------------------------------------------
 
     @Test
     void aFormTriggerNodeIsRecognisedSoItsRawWebhookCanBeRefused() {
         assertTrue(service.isFormTriggerNode(definition, NODE_ID));
         assertFalse(service.isFormTriggerNode(definition, "some-other-node"));
-        assertFalse(newService(false).isFormTriggerNode(definition, NODE_ID), "always false while the feature is off");
+        assertFalse(
+                newService(false).isFormTriggerNode(definition, NODE_ID),
+                "always false while the feature is off");
 
-        when(workflowService.resolveRunGraph(definition)).thenReturn(graphWith(Map.of("channel", "WEBHOOK")));
+        when(workflowService.resolveRunGraph(definition))
+                .thenReturn(graphWith(Map.of("channel", "WEBHOOK")));
         assertFalse(service.isFormTriggerNode(definition, NODE_ID));
 
-        when(workflowService.resolveRunGraph(definition)).thenThrow(new RuntimeException("db down"));
-        assertFalse(service.isFormTriggerNode(definition, NODE_ID), "never blocks the webhook on an internal error");
+        when(workflowService.resolveRunGraph(definition))
+                .thenThrow(new RuntimeException("db down"));
+        assertFalse(
+                service.isFormTriggerNode(definition, NODE_ID),
+                "never blocks the webhook on an internal error");
     }
 }

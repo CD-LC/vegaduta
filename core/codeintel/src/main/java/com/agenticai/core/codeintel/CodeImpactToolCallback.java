@@ -10,11 +10,10 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * {@code code_impact} - the transitive blast radius of changing a symbol or
- * file: its callers-of-callers, inheritors, and importers, level by level,
- * from the deterministic code graph. Read-only. The single most useful tool
- * for "if I change this, what could break?" - the question every refactor or
- * modernization task is gated on.
+ * {@code code_impact} - the transitive blast radius of changing a symbol or file: its
+ * callers-of-callers, inheritors, and importers, level by level, from the deterministic code graph.
+ * Read-only. The single most useful tool for "if I change this, what could break?" - the question
+ * every refactor or modernization task is gated on.
  */
 public class CodeImpactToolCallback implements ToolCallback {
 
@@ -30,7 +29,10 @@ public class CodeImpactToolCallback implements ToolCallback {
         this(client, Set.of());
     }
 
-    /** EMPTY {@code allowedRepoIds} = unrestricted - see {@code SearchCodeToolCallback}'s constructor javadoc for why. */
+    /**
+     * EMPTY {@code allowedRepoIds} = unrestricted - see {@code SearchCodeToolCallback}'s
+     * constructor javadoc for why.
+     */
     public CodeImpactToolCallback(CodeIntelClient client, Set<String> allowedRepoIds) {
         this.client = client;
         this.allowedRepoIds = allowedRepoIds == null ? Set.of() : allowedRepoIds;
@@ -39,13 +41,14 @@ public class CodeImpactToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("code_impact")
-            .description(
-                "Computes the transitive blast radius of changing a symbol or file - everything that "
-                    + "(directly or indirectly) calls it, inherits from it, or imports it, grouped by "
-                    + "level. Use this before proposing a refactor, rename, or migration to understand "
-                    + "what a change could affect. Requires the repo_id.")
-            .inputSchema("""
+                .name("code_impact")
+                .description(
+                        "Computes the transitive blast radius of changing a symbol or file - everything that "
+                                + "(directly or indirectly) calls it, inherits from it, or imports it, grouped by "
+                                + "level. Use this before proposing a refactor, rename, or migration to understand "
+                                + "what a change could affect. Requires the repo_id.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -65,7 +68,7 @@ public class CodeImpactToolCallback implements ToolCallback {
                     "required": ["symbol", "repo_id"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -92,7 +95,9 @@ public class CodeImpactToolCallback implements ToolCallback {
             return client.impact(repoId.toString(), symbol.toString(), depth);
         } catch (Exception e) {
             log.warn("code_impact tool call failed", e);
-            return "{\"error\": \"code_impact failed: " + SearchCodeToolCallback.safe(e.getMessage()) + "\"}";
+            return "{\"error\": \"code_impact failed: "
+                    + SearchCodeToolCallback.safe(e.getMessage())
+                    + "\"}";
         }
     }
 }

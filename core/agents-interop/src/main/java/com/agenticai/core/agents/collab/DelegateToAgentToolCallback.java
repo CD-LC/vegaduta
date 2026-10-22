@@ -12,11 +12,10 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * Multi-agent delegation - "specialists working
- * together." One instance per collaborator agent, built fresh per chat turn by {@code
- * AgentToolProvider#resolveCollaboratorTools} (same "plain in-process ToolCallback, wrapped by
- * AgentToolProvider exactly like every other tool" pattern {@code RememberFactToolCallback}/
- * {@code GraphRecallToolCallback} already established).
+ * Multi-agent delegation - "specialists working together." One instance per collaborator agent,
+ * built fresh per chat turn by {@code AgentToolProvider#resolveCollaboratorTools} (same "plain
+ * in-process ToolCallback, wrapped by AgentToolProvider exactly like every other tool" pattern
+ * {@code RememberFactToolCallback}/ {@code GraphRecallToolCallback} already established).
  *
  * <p>All the actual work - and the entire delegation-depth cap that keeps this from being able to
  * form a cycle - happens in {@link AgentChatService#delegateCall}. This class is deliberately a
@@ -35,12 +34,11 @@ public class DelegateToAgentToolCallback implements ToolCallback {
     private final String collaboratorDescription;
 
     public DelegateToAgentToolCallback(
-        AgentChatService agentChatService,
-        UUID collaboratorAgentId,
-        String toolName,
-        String collaboratorName,
-        String collaboratorDescription
-    ) {
+            AgentChatService agentChatService,
+            UUID collaboratorAgentId,
+            String toolName,
+            String collaboratorName,
+            String collaboratorDescription) {
         this.agentChatService = agentChatService;
         this.collaboratorAgentId = collaboratorAgentId;
         this.toolName = toolName;
@@ -51,16 +49,21 @@ public class DelegateToAgentToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name(toolName)
-            .description(
-                "Delegates a specific question to \"" + collaboratorName + "\", a specialist agent"
-                    + (collaboratorDescription == null || collaboratorDescription.isBlank() ? "." : ": " + collaboratorDescription + ".")
-                    + " Use this when part of the user's request falls squarely in this specialist's area rather "
-                    + "than your own - ask it a focused, self-contained question and use its answer. It will NOT "
-                    + "see this conversation's history, only the exact question you send plus, if you provide one, "
-                    + "a short context summary."
-            )
-            .inputSchema("""
+                .name(toolName)
+                .description(
+                        "Delegates a specific question to \""
+                                + collaboratorName
+                                + "\", a specialist agent"
+                                + (collaboratorDescription == null
+                                                || collaboratorDescription.isBlank()
+                                        ? "."
+                                        : ": " + collaboratorDescription + ".")
+                                + " Use this when part of the user's request falls squarely in this specialist's area rather "
+                                + "than your own - ask it a focused, self-contained question and use its answer. It will NOT "
+                                + "see this conversation's history, only the exact question you send plus, if you provide one, "
+                                + "a short context summary.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -76,7 +79,7 @@ public class DelegateToAgentToolCallback implements ToolCallback {
                     "required": ["question"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -89,11 +92,15 @@ public class DelegateToAgentToolCallback implements ToolCallback {
                 return "{\"error\": \"question is required\"}";
             }
             Object contextSummaryValue = args.get("contextSummary");
-            String contextSummary = (contextSummaryValue == null || contextSummaryValue.toString().isBlank())
-                ? null
-                : contextSummaryValue.toString();
-            String answer = agentChatService.delegateCall(collaboratorAgentId, questionValue.toString(), contextSummary);
-            return MAPPER.writeValueAsString(Map.of("answeredBy", collaboratorName, "answer", answer));
+            String contextSummary =
+                    (contextSummaryValue == null || contextSummaryValue.toString().isBlank())
+                            ? null
+                            : contextSummaryValue.toString();
+            String answer =
+                    agentChatService.delegateCall(
+                            collaboratorAgentId, questionValue.toString(), contextSummary);
+            return MAPPER.writeValueAsString(
+                    Map.of("answeredBy", collaboratorName, "answer", answer));
         } catch (Exception e) {
             // Full technical detail (stack trace included) goes to the server
             // log line below; only the plain-language consumer message goes
@@ -102,11 +109,20 @@ public class DelegateToAgentToolCallback implements ToolCallback {
             // model tells the end user - same "don't leak the raw provider
             // detail past this layer" posture as QuickTaskService#runStream's
             // SSE error event and GlobalExceptionHandler#handleUpstreamProvider.
-            log.warn("Delegation to agent {} ('{}') failed", collaboratorAgentId, collaboratorName, e);
-            String detail = e instanceof UpstreamProviderException upstreamEx
-                ? upstreamEx.getConsumerMessage()
-                : "The specialist agent could not be reached right now.";
-            return "{\"error\": \"Delegation to " + collaboratorName.replace("\"", "'") + " failed: " + detail.replace("\"", "'") + "\"}";
+            log.warn(
+                    "Delegation to agent {} ('{}') failed",
+                    collaboratorAgentId,
+                    collaboratorName,
+                    e);
+            String detail =
+                    e instanceof UpstreamProviderException upstreamEx
+                            ? upstreamEx.getConsumerMessage()
+                            : "The specialist agent could not be reached right now.";
+            return "{\"error\": \"Delegation to "
+                    + collaboratorName.replace("\"", "'")
+                    + " failed: "
+                    + detail.replace("\"", "'")
+                    + "\"}";
         }
     }
 }

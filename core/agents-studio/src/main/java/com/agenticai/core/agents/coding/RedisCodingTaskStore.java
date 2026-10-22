@@ -27,7 +27,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class RedisCodingTaskStore implements CodingTaskStore {
 
     private static final Logger log = LoggerFactory.getLogger(RedisCodingTaskStore.class);
-    private static final RateLimitedLog REDIS_DOWN_LOG = new RateLimitedLog(log, Duration.ofMinutes(1));
+    private static final RateLimitedLog REDIS_DOWN_LOG =
+            new RateLimitedLog(log, Duration.ofMinutes(1));
 
     static final Duration TASK_TTL = Duration.ofHours(6);
     static final Duration LOCK_TTL = Duration.ofMinutes(75);
@@ -35,9 +36,10 @@ public class RedisCodingTaskStore implements CodingTaskStore {
     static final Duration DECISION_TTL = Duration.ofHours(2);
     static final int INDEX_MAX = 200;
 
-    private static final DefaultRedisScript<Long> RELEASE_LOCK = new DefaultRedisScript<>(
-        "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
-        Long.class);
+    private static final DefaultRedisScript<Long> RELEASE_LOCK =
+            new DefaultRedisScript<>(
+                    "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
+                    Long.class);
 
     private final StringRedisTemplate redis;
     private final ObjectMapper mapper;
@@ -51,18 +53,24 @@ public class RedisCodingTaskStore implements CodingTaskStore {
         try {
             return op.get();
         } catch (org.springframework.dao.DataAccessException e) {
-            REDIS_DOWN_LOG.warn("coding-task", "Coding task store unavailable (Redis error: "
-                + e.getClass().getSimpleName() + ")");
+            REDIS_DOWN_LOG.warn(
+                    "coding-task",
+                    "Coding task store unavailable (Redis error: "
+                            + e.getClass().getSimpleName()
+                            + ")");
             throw new ResponseStatusException(
-                HttpStatus.SERVICE_UNAVAILABLE, "Coding tasks are temporarily unavailable. Try again shortly.", e);
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Coding tasks are temporarily unavailable. Try again shortly.",
+                    e);
         }
     }
 
     private static void guardedVoid(Runnable op) {
-        guarded(() -> {
-            op.run();
-            return null;
-        });
+        guarded(
+                () -> {
+                    op.run();
+                    return null;
+                });
     }
 
     static String taskKey(String tenant, String id) {
@@ -99,9 +107,13 @@ public class RedisCodingTaskStore implements CodingTaskStore {
         try {
             json = mapper.writeValueAsString(doc);
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Could not serialise coding task " + doc.task().taskId(), e);
+            throw new IllegalStateException(
+                    "Could not serialise coding task " + doc.task().taskId(), e);
         }
-        guardedVoid(() -> redis.opsForValue().set(taskKey(tenantId, doc.task().taskId()), json, TASK_TTL));
+        guardedVoid(
+                () ->
+                        redis.opsForValue()
+                                .set(taskKey(tenantId, doc.task().taskId()), json, TASK_TTL));
     }
 
     @Override
@@ -131,7 +143,8 @@ public class RedisCodingTaskStore implements CodingTaskStore {
 
     @Override
     public Optional<String> findDiff(String tenantId, String taskId) {
-        return Optional.ofNullable(guarded(() -> redis.opsForValue().get(diffKey(tenantId, taskId))));
+        return Optional.ofNullable(
+                guarded(() -> redis.opsForValue().get(diffKey(tenantId, taskId))));
     }
 
     @Override
@@ -141,8 +154,12 @@ public class RedisCodingTaskStore implements CodingTaskStore {
 
     @Override
     public boolean acquireLock(String tenantId, String subject, String taskId) {
-        return Boolean.TRUE.equals(guarded(() ->
-            redis.opsForValue().setIfAbsent(lockKey(tenantId, subject), taskId, LOCK_TTL)));
+        return Boolean.TRUE.equals(
+                guarded(
+                        () ->
+                                redis.opsForValue()
+                                        .setIfAbsent(
+                                                lockKey(tenantId, subject), taskId, LOCK_TTL)));
     }
 
     @Override
@@ -152,7 +169,8 @@ public class RedisCodingTaskStore implements CodingTaskStore {
 
     @Override
     public Optional<String> lockHolder(String tenantId, String subject) {
-        return Optional.ofNullable(guarded(() -> redis.opsForValue().get(lockKey(tenantId, subject))));
+        return Optional.ofNullable(
+                guarded(() -> redis.opsForValue().get(lockKey(tenantId, subject))));
     }
 
     @Override
@@ -167,12 +185,16 @@ public class RedisCodingTaskStore implements CodingTaskStore {
 
     @Override
     public void setDecision(String tenantId, String taskId, String decision) {
-        guardedVoid(() -> redis.opsForValue().set(decisionKey(tenantId, taskId), decision, DECISION_TTL));
+        guardedVoid(
+                () ->
+                        redis.opsForValue()
+                                .set(decisionKey(tenantId, taskId), decision, DECISION_TTL));
     }
 
     @Override
     public Optional<String> decision(String tenantId, String taskId) {
-        return Optional.ofNullable(guarded(() -> redis.opsForValue().get(decisionKey(tenantId, taskId))));
+        return Optional.ofNullable(
+                guarded(() -> redis.opsForValue().get(decisionKey(tenantId, taskId))));
     }
 
     @Override
@@ -192,25 +214,40 @@ public class RedisCodingTaskStore implements CodingTaskStore {
 
     @Override
     public void index(String tenantId, String subject, String taskId) {
-        guardedVoid(() -> {
-            String key = indexKey(tenantId, subject);
-            redis.opsForList().remove(key, 0, taskId);
-            redis.opsForList().leftPush(key, taskId);
-            redis.opsForList().trim(key, 0, INDEX_MAX - 1);
-            redis.expire(key, TASK_TTL);
-        });
+        guardedVoid(
+                () -> {
+                    String key = indexKey(tenantId, subject);
+                    redis.opsForList().remove(key, 0, taskId);
+                    redis.opsForList().leftPush(key, taskId);
+                    redis.opsForList().trim(key, 0, INDEX_MAX - 1);
+                    redis.expire(key, TASK_TTL);
+                });
     }
 
     @Override
     public List<String> recent(String tenantId, String subject, int limit) {
-        List<String> ids = guarded(() -> redis.opsForList().range(indexKey(tenantId, subject), 0, Math.max(0, limit - 1)));
+        List<String> ids =
+                guarded(
+                        () ->
+                                redis.opsForList()
+                                        .range(
+                                                indexKey(tenantId, subject),
+                                                0,
+                                                Math.max(0, limit - 1)));
         return ids == null ? List.of() : ids;
     }
 
     @Override
     public List<String> recent(String tenantId, String subject, int offset, int limit) {
         long from = Math.max(0, offset);
-        List<String> ids = guarded(() -> redis.opsForList().range(indexKey(tenantId, subject), from, from + Math.max(1, limit) - 1));
+        List<String> ids =
+                guarded(
+                        () ->
+                                redis.opsForList()
+                                        .range(
+                                                indexKey(tenantId, subject),
+                                                from,
+                                                from + Math.max(1, limit) - 1));
         return ids == null ? List.of() : ids;
     }
 

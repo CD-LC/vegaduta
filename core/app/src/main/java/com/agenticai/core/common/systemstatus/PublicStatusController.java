@@ -88,8 +88,11 @@ public class PublicStatusController {
             HealthContributorRegistry healthContributorRegistry,
             @Value("${app.workflow-events.enabled:false}") boolean workflowEventsEnabled,
             ObjectProvider<KafkaAdmin> kafkaAdmin,
-            // app.sidecar.enabled=false reads as "no sidecar configured" (NOT_CONFIGURED / UNKNOWN), not as an outage.
-            @Value("#{'${app.sidecar.enabled:true}'.equalsIgnoreCase('false') ? '' : '${app.sidecar.base-url:}'}") String sidecarBaseUrl,
+            // app.sidecar.enabled=false reads as "no sidecar configured" (NOT_CONFIGURED /
+            // UNKNOWN), not as an outage.
+            @Value(
+                            "#{'${app.sidecar.enabled:true}'.equalsIgnoreCase('false') ? '' : '${app.sidecar.base-url:}'}")
+                    String sidecarBaseUrl,
             ObjectProvider<PlatformBroadcastService> broadcast) {
         this.broadcast = broadcast;
         this.healthContributorRegistry = healthContributorRegistry;

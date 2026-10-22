@@ -7,16 +7,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-/** Test helper: loads the realistic export fixtures under {@code src/test/resources/agent-import}. */
+/**
+ * Test helper: loads the realistic export fixtures under {@code src/test/resources/agent-import}.
+ */
 final class AgentImportFixtures {
 
     static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private AgentImportFixtures() {
-    }
+    private AgentImportFixtures() {}
 
     static String text(String name) {
-        try (InputStream in = AgentImportFixtures.class.getResourceAsStream("/agent-import/" + name)) {
+        try (InputStream in =
+                AgentImportFixtures.class.getResourceAsStream("/agent-import/" + name)) {
             if (in == null) {
                 throw new IllegalStateException("missing fixture " + name);
             }
@@ -38,7 +40,10 @@ final class AgentImportFixtures {
         }
     }
 
-    /** The whole report flattened to one lowercase string, for "this text must not appear anywhere" checks. */
+    /**
+     * The whole report flattened to one lowercase string, for "this text must not appear anywhere"
+     * checks.
+     */
     static String flat(ConversionReport report) {
         return report.toString().toLowerCase();
     }

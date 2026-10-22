@@ -9,8 +9,8 @@ import java.util.Map;
 /**
  * A small, forgiving JSON Schema check for the prompt-and-validate fallback ({@code
  * OllamaStructuredFallbackChatModel}): is a model's reply the shape the caller's schema describes?
- * Supports {@code type} (one name or a list), {@code enum}, {@code const}, {@code required},
- * {@code properties}, {@code items}, {@code anyOf}/{@code oneOf}/{@code allOf} and {@code
+ * Supports {@code type} (one name or a list), {@code enum}, {@code const}, {@code required}, {@code
+ * properties}, {@code items}, {@code anyOf}/{@code oneOf}/{@code allOf} and {@code
  * additionalProperties: false}. Anything else (formats, patterns, numeric bounds, remote or local
  * {@code $ref}) is ignored, so a schema feature this does not know can only make the check more
  * lenient, never reject a reply the real schema would accept.
@@ -34,8 +34,12 @@ public final class JsonSchemaCheck {
         return out;
     }
 
-    private static void check(JsonNode schema, JsonNode value, String path, List<String> out, int depth) {
-        if (out.size() >= MAX_PROBLEMS || depth > MAX_DEPTH || schema == null || !schema.isObject()) {
+    private static void check(
+            JsonNode schema, JsonNode value, String path, List<String> out, int depth) {
+        if (out.size() >= MAX_PROBLEMS
+                || depth > MAX_DEPTH
+                || schema == null
+                || !schema.isObject()) {
             return;
         }
         if (schema.has("anyOf") || schema.has("oneOf")) {
@@ -65,7 +69,9 @@ public final class JsonSchemaCheck {
             out.add(path + " must be " + describe(schema.get("type")) + " but is " + kind(value));
             return;
         }
-        if (schema.has("enum") && schema.get("enum").isArray() && !contains(schema.get("enum"), value)) {
+        if (schema.has("enum")
+                && schema.get("enum").isArray()
+                && !contains(schema.get("enum"), value)) {
             out.add(path + " must be one of " + schema.get("enum"));
             return;
         }
@@ -82,7 +88,8 @@ public final class JsonSchemaCheck {
         }
     }
 
-    private static void checkObject(JsonNode schema, JsonNode value, String path, List<String> out, int depth) {
+    private static void checkObject(
+            JsonNode schema, JsonNode value, String path, List<String> out, int depth) {
         JsonNode required = schema.get("required");
         if (required != null && required.isArray()) {
             for (JsonNode name : required) {
@@ -97,7 +104,12 @@ public final class JsonSchemaCheck {
             while (fields.hasNext() && out.size() < MAX_PROBLEMS) {
                 Map.Entry<String, JsonNode> field = fields.next();
                 if (value.has(field.getKey())) {
-                    check(field.getValue(), value.get(field.getKey()), path + "." + field.getKey(), out, depth + 1);
+                    check(
+                            field.getValue(),
+                            value.get(field.getKey()),
+                            path + "." + field.getKey(),
+                            out,
+                            depth + 1);
                 }
             }
             JsonNode additional = schema.get("additionalProperties");
@@ -131,7 +143,10 @@ public final class JsonSchemaCheck {
             case "string" -> value.isTextual();
             case "boolean" -> value.isBoolean();
             case "null" -> value.isNull();
-            case "integer" -> value.isIntegralNumber() || (value.isNumber() && value.asDouble() == Math.rint(value.asDouble()));
+            case "integer" ->
+                    value.isIntegralNumber()
+                            || (value.isNumber()
+                                    && value.asDouble() == Math.rint(value.asDouble()));
             case "number" -> value.isNumber();
             default -> true;
         };

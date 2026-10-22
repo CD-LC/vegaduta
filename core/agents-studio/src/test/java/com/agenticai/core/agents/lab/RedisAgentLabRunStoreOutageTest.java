@@ -17,7 +17,10 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-/** Agent Lab lives only in Redis; with Redis down every entry point answers 503, not an unmapped exception. */
+/**
+ * Agent Lab lives only in Redis; with Redis down every entry point answers 503, not an unmapped
+ * exception.
+ */
 class RedisAgentLabRunStoreOutageTest {
 
     private RedisAgentLabRunStore store;
@@ -27,7 +30,8 @@ class RedisAgentLabRunStoreOutageTest {
     void setUp() {
         StringRedisTemplate redis = mock(StringRedisTemplate.class);
         ValueOperations<String, String> ops = mock(ValueOperations.class);
-        RedisConnectionFailureException down = new RedisConnectionFailureException("Unable to connect to Redis");
+        RedisConnectionFailureException down =
+                new RedisConnectionFailureException("Unable to connect to Redis");
         when(redis.opsForValue()).thenReturn(ops);
         when(ops.get(anyString())).thenThrow(down);
         when(ops.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenThrow(down);
@@ -37,25 +41,27 @@ class RedisAgentLabRunStoreOutageTest {
 
     private static void assertServiceUnavailable(Throwable e) {
         assertThat(e).isInstanceOf(ResponseStatusException.class);
-        assertThat(((ResponseStatusException) e).getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+        assertThat(((ResponseStatusException) e).getStatusCode())
+                .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @Test
     void pollingARunIsAServiceUnavailable() {
-        assertThatThrownBy(() -> store.find("tenant", "run")).satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
+        assertThatThrownBy(() -> store.find("tenant", "run"))
+                .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
     }
 
     @Test
     void startingARunIsAServiceUnavailable() {
         assertThatThrownBy(() -> store.acquireLock("tenant", "user", "run"))
-            .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
+                .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
     }
 
     @Test
     void livenessAndCancelChecksAreAServiceUnavailable() {
         assertThatThrownBy(() -> store.isAlive("tenant", "run"))
-            .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
+                .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
         assertThatThrownBy(() -> store.isCancelRequested("tenant", "run"))
-            .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
+                .satisfies(RedisAgentLabRunStoreOutageTest::assertServiceUnavailable);
     }
 }

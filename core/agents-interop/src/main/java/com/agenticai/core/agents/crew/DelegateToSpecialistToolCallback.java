@@ -17,21 +17,22 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * AgentToolProvider#resolveToolsForSpecialistHandoff}), built fresh by {@code
  * AgentToolProvider#resolveSpecialistDelegationTools}.
  *
- * <p>Where {@code DelegateToAgentToolCallback} addresses one pre-wired collaborator by id (one
- * tool per collaborator, capped at a structural depth of 1), this is a SINGLE tool per turn that
- * picks its target dynamically by role/capability tag via {@link SpecialistRegistry}, and may
- * itself be re-offered to the specialist it dispatches to - up to {@link HandoffChain#MAX_DEPTH}
- * hops total, with cycle detection - so a chain can go A -&gt; B -&gt; C in one user-facing turn.
+ * <p>Where {@code DelegateToAgentToolCallback} addresses one pre-wired collaborator by id (one tool
+ * per collaborator, capped at a structural depth of 1), this is a SINGLE tool per turn that picks
+ * its target dynamically by role/capability tag via {@link SpecialistRegistry}, and may itself be
+ * re-offered to the specialist it dispatches to - up to {@link HandoffChain#MAX_DEPTH} hops total,
+ * with cycle detection - so a chain can go A -&gt; B -&gt; C in one user-facing turn.
  *
  * <p>All the actual dispatch logic - specialist lookup, the depth/cycle guard, running the
  * specialist's bounded sub-conversation, and the audit trail - lives in {@code
  * AgentChatService#delegateToSpecialist}. This class is deliberately a thin adapter, exactly like
- * {@code DelegateToAgentToolCallback}: parse the model's arguments, hand them off, wrap the
- * answer back into a small JSON envelope.
+ * {@code DelegateToAgentToolCallback}: parse the model's arguments, hand them off, wrap the answer
+ * back into a small JSON envelope.
  */
 public class DelegateToSpecialistToolCallback implements ToolCallback {
 
-    private static final Logger log = LoggerFactory.getLogger(DelegateToSpecialistToolCallback.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(DelegateToSpecialistToolCallback.class);
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
     public static final String TOOL_NAME = "delegate_to_specialist";
@@ -40,7 +41,8 @@ public class DelegateToSpecialistToolCallback implements ToolCallback {
     private final List<String> capabilityTags;
     private final HandoffChain chain;
 
-    public DelegateToSpecialistToolCallback(AgentChatService agentChatService, List<String> capabilityTags, HandoffChain chain) {
+    public DelegateToSpecialistToolCallback(
+            AgentChatService agentChatService, List<String> capabilityTags, HandoffChain chain) {
         this.agentChatService = agentChatService;
         this.capabilityTags = capabilityTags;
         this.chain = chain;
@@ -50,18 +52,26 @@ public class DelegateToSpecialistToolCallback implements ToolCallback {
     public ToolDefinition getToolDefinition() {
         String roster = String.join(", ", capabilityTags);
         return ToolDefinition.builder()
-            .name(TOOL_NAME)
-            .description(
-                "Hands off a focused sub-task to a specialist agent, chosen by capability/role rather than by name."
-                    + " Available capabilities in this workspace: " + roster + "."
-                    + " Use this when part of the request falls squarely in one of those specialties rather than your"
-                    + " own. The specialist will NOT see this conversation's history, only the sub-task you send plus,"
-                    + " if you provide one, a short context summary. It may itself hand off to ANOTHER specialist if"
-                    + " its own sub-task needs one, up to " + HandoffChain.MAX_DEPTH + " hops total in this chain"
-                    + " (currently at hop " + chain.depth() + " of " + HandoffChain.MAX_DEPTH + ") - it can never hand"
-                    + " back to an agent already in this chain."
-            )
-            .inputSchema("""
+                .name(TOOL_NAME)
+                .description(
+                        "Hands off a focused sub-task to a specialist agent, chosen by capability/role rather than by name."
+                                + " Available capabilities in this workspace: "
+                                + roster
+                                + "."
+                                + " Use this when part of the request falls squarely in one of those specialties rather than your"
+                                + " own. The specialist will NOT see this conversation's history, only the sub-task you send plus,"
+                                + " if you provide one, a short context summary. It may itself hand off to ANOTHER specialist if"
+                                + " its own sub-task needs one, up to "
+                                + HandoffChain.MAX_DEPTH
+                                + " hops total in this chain"
+                                + " (currently at hop "
+                                + chain.depth()
+                                + " of "
+                                + HandoffChain.MAX_DEPTH
+                                + ") - it can never hand"
+                                + " back to an agent already in this chain.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -81,7 +91,7 @@ public class DelegateToSpecialistToolCallback implements ToolCallback {
                     "required": ["capability", "subTask"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -91,28 +101,37 @@ public class DelegateToSpecialistToolCallback implements ToolCallback {
             Map<String, Object> args = MAPPER.readValue(toolInput, Map.class);
             Object capabilityValue = args.get("capability");
             if (capabilityValue == null || capabilityValue.toString().isBlank()) {
-                return "{\"error\": \"capability is required - one of: " + String.join(", ", capabilityTags) + "\"}";
+                return "{\"error\": \"capability is required - one of: "
+                        + String.join(", ", capabilityTags)
+                        + "\"}";
             }
             Object subTaskValue = args.get("subTask");
             if (subTaskValue == null || subTaskValue.toString().isBlank()) {
                 return "{\"error\": \"subTask is required\"}";
             }
             Object contextSummaryValue = args.get("contextSummary");
-            String contextSummary = (contextSummaryValue == null || contextSummaryValue.toString().isBlank())
-                ? null
-                : contextSummaryValue.toString();
-            String answer = agentChatService.delegateToSpecialist(
-                chain, capabilityValue.toString(), subTaskValue.toString(), contextSummary);
-            return MAPPER.writeValueAsString(Map.of("capability", capabilityValue.toString(), "answer", answer));
+            String contextSummary =
+                    (contextSummaryValue == null || contextSummaryValue.toString().isBlank())
+                            ? null
+                            : contextSummaryValue.toString();
+            String answer =
+                    agentChatService.delegateToSpecialist(
+                            chain,
+                            capabilityValue.toString(),
+                            subTaskValue.toString(),
+                            contextSummary);
+            return MAPPER.writeValueAsString(
+                    Map.of("capability", capabilityValue.toString(), "answer", answer));
         } catch (Exception e) {
             // Same "don't leak raw provider detail past this layer" posture as
             // DelegateToAgentToolCallback#call - the message flows back into
             // the calling model's context and often straight into what the
             // model tells the end user.
             log.warn("Specialist handoff failed at chain depth {}", chain.depth(), e);
-            String detail = e instanceof UpstreamProviderException upstreamEx
-                ? upstreamEx.getConsumerMessage()
-                : "The specialist agent could not be reached right now.";
+            String detail =
+                    e instanceof UpstreamProviderException upstreamEx
+                            ? upstreamEx.getConsumerMessage()
+                            : "The specialist agent could not be reached right now.";
             return "{\"error\": \"Delegation failed: " + detail.replace("\"", "'") + "\"}";
         }
     }

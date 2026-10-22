@@ -224,7 +224,7 @@ public class DemoWhatsAppWebhookController {
                 bot.sendText(
                         from,
                         "The VegaDuta sandbox WhatsApp number is paused right now. You can still"
-                            + " try an agent in your browser, and creating an account is free.");
+                                + " try an agent in your browser, and creating an account is free.");
             }
             return;
         }
@@ -333,7 +333,7 @@ public class DemoWhatsAppWebhookController {
                 bot.sendText(
                         from,
                         "That sandbox has ended. Everything in it is still there - create a free"
-                            + " account to carry on, or start a fresh sandbox from the website.");
+                                + " account to carry on, or start a fresh sandbox from the website.");
                 return true;
             }
             case UNKNOWN_CODE -> {
@@ -343,8 +343,8 @@ public class DemoWhatsAppWebhookController {
                 bot.sendText(
                         from,
                         "I couldn't match that code. Codes look like VD-7F3K and can only be used"
-                            + " once - open your sandbox in the browser and tap \"Get code\" on the"
-                            + " WhatsApp card for a fresh one.");
+                                + " once - open your sandbox in the browser and tap \"Get code\" on the"
+                                + " WhatsApp card for a fresh one.");
                 return true;
             }
         }

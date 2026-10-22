@@ -11,10 +11,9 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * Characterisation of the traversal/retry rules as seen through
- * {@link WorkflowGraphSupport}, written BEFORE they were moved into
- * {@link WorkflowTraversalRules} / {@link RetryPolicy} / {@link BackoffCalculator}. It must pass
- * unchanged before and after that move.
+ * Characterisation of the traversal/retry rules as seen through {@link WorkflowGraphSupport},
+ * written BEFORE they were moved into {@link WorkflowTraversalRules} / {@link RetryPolicy} / {@link
+ * BackoffCalculator}. It must pass unchanged before and after that move.
  */
 class WorkflowGraphSupportCharacterisationTest {
 
@@ -32,7 +31,10 @@ class WorkflowGraphSupportCharacterisationTest {
     void nextNodeIdWithoutBranchSkipsErrorEdgesAndTakesFirst() {
         var n = node(Map.of());
         assertNull(support.nextNodeId(n, List.of(), null));
-        assertEquals("b", support.nextNodeId(n, List.of(edge("a", "error"), edge("b", null), edge("c", null)), null));
+        assertEquals(
+                "b",
+                support.nextNodeId(
+                        n, List.of(edge("a", "error"), edge("b", null), edge("c", null)), null));
         assertNull(support.nextNodeId(n, List.of(edge("a", "error")), null));
     }
 
@@ -62,7 +64,8 @@ class WorkflowGraphSupportCharacterisationTest {
     @Test
     void resolveLoopItemsShapes() {
         var n = node(Map.of());
-        assertEquals(List.of("a", "{\"k\":1}", "2"), support.resolveLoopItems(n, "[\"a\",{\"k\":1},2]"));
+        assertEquals(
+                List.of("a", "{\"k\":1}", "2"), support.resolveLoopItems(n, "[\"a\",{\"k\":1},2]"));
         assertEquals(List.of(), support.resolveLoopItems(n, null));
         assertEquals(List.of(), support.resolveLoopItems(n, "  "));
         assertEquals(List.of(), support.resolveLoopItems(n, "{\"x\":1}"));
@@ -79,7 +82,9 @@ class WorkflowGraphSupportCharacterisationTest {
         assertEquals(0, WorkflowGraphSupport.nodeMaxAttempts(node(Map.of()), -2));
         assertEquals(5, WorkflowGraphSupport.nodeMaxAttempts(node(Map.of("retryAttempts", 99)), 1));
         assertEquals(0, WorkflowGraphSupport.nodeMaxAttempts(node(Map.of("retryAttempts", -1)), 1));
-        assertEquals(2, WorkflowGraphSupport.nodeMaxAttempts(node(Map.of("retryAttempts", " 2 ")), 1));
-        assertEquals(4, WorkflowGraphSupport.nodeMaxAttempts(node(Map.of("retryAttempts", "x")), 4));
+        assertEquals(
+                2, WorkflowGraphSupport.nodeMaxAttempts(node(Map.of("retryAttempts", " 2 ")), 1));
+        assertEquals(
+                4, WorkflowGraphSupport.nodeMaxAttempts(node(Map.of("retryAttempts", "x")), 4));
     }
 }

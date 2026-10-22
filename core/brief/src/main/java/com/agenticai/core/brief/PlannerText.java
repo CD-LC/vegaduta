@@ -8,8 +8,7 @@ import java.util.Locale;
 /** Null-tolerant readers for the planner's LLM JSON replies, and small string helpers. */
 final class PlannerText {
 
-    private PlannerText() {
-    }
+    private PlannerText() {}
 
     static List<String> strings(JsonNode array) {
         List<String> out = new ArrayList<>();
@@ -44,7 +43,11 @@ final class PlannerText {
         if (raw == null) {
             return null;
         }
-        String name = raw.strip().toUpperCase(Locale.ROOT).replaceAll("[^A-Z0-9]+", "_").replaceAll("^_+|_+$", "");
+        String name =
+                raw.strip()
+                        .toUpperCase(Locale.ROOT)
+                        .replaceAll("[^A-Z0-9]+", "_")
+                        .replaceAll("^_+|_+$", "");
         if (name.length() > 64) {
             name = name.substring(0, 64);
         }

@@ -66,7 +66,8 @@ public class WorkflowInputRequestController {
     public ResponseEntity<List<InputRequestView>> list(
             @RequestParam(required = false) WorkflowInputRequestStatus status,
             @RequestParam(required = false) UUID runId,
-            @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         // Default to the actionable queue - a bare GET means "what needs a human".
         WorkflowInputRequestStatus effective =
                 status == null && runId == null ? WorkflowInputRequestStatus.PENDING : status;

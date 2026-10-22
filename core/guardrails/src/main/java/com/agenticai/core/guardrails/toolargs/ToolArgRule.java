@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * One constraint on one argument of a tool call (JSON-schema-lite). Immutable; built and validated by
- * {@link #parse(JsonNode)}.
+ * One constraint on one argument of a tool call (JSON-schema-lite). Immutable; built and validated
+ * by {@link #parse(JsonNode)}.
  *
  * <pre>
  *   {"path":"url",   "urlHostIn":["example.com","*.docs.example.com"], "maxLength":2048, "required":true}
@@ -25,21 +25,26 @@ import java.util.regex.PatternSyntaxException;
  *   {"path":"debug", "forbidden":true}
  * </pre>
  *
- * Every key is validated and an UNKNOWN key is rejected: a typo such as {@code "maxLenght"} must never
- * become a policy that silently enforces nothing.
+ * Every key is validated and an UNKNOWN key is rejected: a typo such as {@code "maxLenght"} must
+ * never become a policy that silently enforces nothing.
  */
 public final class ToolArgRule {
 
     /** JSON value kinds a rule can require. */
     public enum ArgType {
-        STRING, INTEGER, NUMBER, BOOLEAN, ARRAY, OBJECT;
+        STRING,
+        INTEGER,
+        NUMBER,
+        BOOLEAN,
+        ARRAY,
+        OBJECT;
 
         static ArgType parse(String text) {
             try {
                 return valueOf(text.trim().toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException(
-                    "'type' must be one of string, integer, number, boolean, array, object.");
+                        "'type' must be one of string, integer, number, boolean, array, object.");
             }
         }
 
@@ -71,9 +76,21 @@ public final class ToolArgRule {
         }
     }
 
-    static final Set<String> KNOWN_KEYS = Set.of(
-        "path", "required", "forbidden", "type", "enum", "minLength", "maxLength", "min", "max",
-        "pattern", "urlHostIn", "pathUnder", "maxItems");
+    static final Set<String> KNOWN_KEYS =
+            Set.of(
+                    "path",
+                    "required",
+                    "forbidden",
+                    "type",
+                    "enum",
+                    "minLength",
+                    "maxLength",
+                    "min",
+                    "max",
+                    "pattern",
+                    "urlHostIn",
+                    "pathUnder",
+                    "maxItems");
 
     private final ToolArgPathSpec path;
     private final boolean required;
@@ -90,10 +107,19 @@ public final class ToolArgRule {
     private final Integer maxItems;
 
     private ToolArgRule(
-        ToolArgPathSpec path, boolean required, boolean forbidden, ArgType type, List<JsonNode> enumValues,
-        Integer minLength, Integer maxLength, BigDecimal min, BigDecimal max, Pattern pattern,
-        List<String> urlHostIn, List<NormalizedPath> pathUnder, Integer maxItems
-    ) {
+            ToolArgPathSpec path,
+            boolean required,
+            boolean forbidden,
+            ArgType type,
+            List<JsonNode> enumValues,
+            Integer minLength,
+            Integer maxLength,
+            BigDecimal min,
+            BigDecimal max,
+            Pattern pattern,
+            List<String> urlHostIn,
+            List<NormalizedPath> pathUnder,
+            Integer maxItems) {
         this.path = path;
         this.required = required;
         this.forbidden = forbidden;
@@ -163,8 +189,16 @@ public final class ToolArgRule {
 
     /** True when the rule has anything to check on a PRESENT value (beyond {@code forbidden}). */
     boolean hasValueConstraints() {
-        return type != null || enumValues != null || minLength != null || maxLength != null || min != null
-            || max != null || pattern != null || urlHostIn != null || pathUnder != null || maxItems != null;
+        return type != null
+                || enumValues != null
+                || minLength != null
+                || maxLength != null
+                || min != null
+                || max != null
+                || pattern != null
+                || urlHostIn != null
+                || pathUnder != null
+                || maxItems != null;
     }
 
     // ------------------------------------------------------------------
@@ -172,18 +206,22 @@ public final class ToolArgRule {
     // ------------------------------------------------------------------
 
     /**
-     * @throws IllegalArgumentException naming the offending key when the rule is malformed, unknown, or
-     *     exceeds a size cap
+     * @throws IllegalArgumentException naming the offending key when the rule is malformed,
+     *     unknown, or exceeds a size cap
      */
     public static ToolArgRule parse(JsonNode node) {
         if (node == null || !node.isObject()) {
             throw new IllegalArgumentException("Each rule must be a JSON object.");
         }
-        for (Iterator<String> it = node.fieldNames(); it.hasNext();) {
+        for (Iterator<String> it = node.fieldNames(); it.hasNext(); ) {
             String key = it.next();
             if (!KNOWN_KEYS.contains(key)) {
-                throw new IllegalArgumentException("Unknown rule key '" + clip(key) + "'. Allowed keys: "
-                    + String.join(", ", new java.util.TreeSet<>(KNOWN_KEYS)) + ".");
+                throw new IllegalArgumentException(
+                        "Unknown rule key '"
+                                + clip(key)
+                                + "'. Allowed keys: "
+                                + String.join(", ", new java.util.TreeSet<>(KNOWN_KEYS))
+                                + ".");
             }
         }
         JsonNode pathNode = node.get("path");
@@ -210,16 +248,24 @@ public final class ToolArgRule {
                 throw new IllegalArgumentException(where + "'enum' must be a non-empty array.");
             }
             if (e.size() > ToolArgPolicySet.MAX_ENUM_VALUES) {
-                throw new IllegalArgumentException(where + "'enum' is limited to " + ToolArgPolicySet.MAX_ENUM_VALUES + " values.");
+                throw new IllegalArgumentException(
+                        where
+                                + "'enum' is limited to "
+                                + ToolArgPolicySet.MAX_ENUM_VALUES
+                                + " values.");
             }
             enumValues = new ArrayList<>();
             for (JsonNode v : e) {
                 if (!(v.isTextual() || v.isNumber() || v.isBoolean())) {
-                    throw new IllegalArgumentException(where + "'enum' values must be strings, numbers or booleans.");
+                    throw new IllegalArgumentException(
+                            where + "'enum' values must be strings, numbers or booleans.");
                 }
                 if (v.isTextual() && v.asText().length() > ToolArgPolicySet.MAX_LITERAL_LENGTH) {
-                    throw new IllegalArgumentException(where + "an 'enum' value is longer than "
-                        + ToolArgPolicySet.MAX_LITERAL_LENGTH + " characters.");
+                    throw new IllegalArgumentException(
+                            where
+                                    + "an 'enum' value is longer than "
+                                    + ToolArgPolicySet.MAX_LITERAL_LENGTH
+                                    + " characters.");
                 }
                 enumValues.add(v);
             }
@@ -245,14 +291,20 @@ public final class ToolArgRule {
                 throw new IllegalArgumentException(where + "'pattern' must be non-empty text.");
             }
             if (p.asText().length() > ToolArgPolicySet.MAX_PATTERN_LENGTH) {
-                throw new IllegalArgumentException(where + "'pattern' is limited to "
-                    + ToolArgPolicySet.MAX_PATTERN_LENGTH + " characters.");
+                throw new IllegalArgumentException(
+                        where
+                                + "'pattern' is limited to "
+                                + ToolArgPolicySet.MAX_PATTERN_LENGTH
+                                + " characters.");
             }
             try {
                 pattern = Pattern.compile(p.asText());
             } catch (PatternSyntaxException ex) {
-                throw new IllegalArgumentException(where + "'pattern' is not a valid regular expression: "
-                    + ex.getDescription() + ".");
+                throw new IllegalArgumentException(
+                        where
+                                + "'pattern' is not a valid regular expression: "
+                                + ex.getDescription()
+                                + ".");
             }
         }
 
@@ -271,10 +323,13 @@ public final class ToolArgRule {
             for (String p : stringList(node, "pathUnder", where)) {
                 NormalizedPath n = normalizePath(p);
                 if (n == null) {
-                    throw new IllegalArgumentException(where + "'pathUnder' entries must be plain paths.");
+                    throw new IllegalArgumentException(
+                            where + "'pathUnder' entries must be plain paths.");
                 }
                 if (n.segments().contains("..")) {
-                    throw new IllegalArgumentException(where + "'pathUnder' entries must not climb above their own root ('..').");
+                    throw new IllegalArgumentException(
+                            where
+                                    + "'pathUnder' entries must not climb above their own root ('..').");
                 }
                 prefixes.add(n);
             }
@@ -283,22 +338,58 @@ public final class ToolArgRule {
 
         if (forbidden) {
             if (required) {
-                throw new IllegalArgumentException(where + "'forbidden' and 'required' cannot both be set.");
+                throw new IllegalArgumentException(
+                        where + "'forbidden' and 'required' cannot both be set.");
             }
-            if (type != null || enumValues != null || minLength != null || maxLength != null || min != null
-                || max != null || pattern != null || hosts != null || prefixes != null || maxItems != null) {
-                throw new IllegalArgumentException(where + "'forbidden' cannot be combined with value constraints.");
+            if (type != null
+                    || enumValues != null
+                    || minLength != null
+                    || maxLength != null
+                    || min != null
+                    || max != null
+                    || pattern != null
+                    || hosts != null
+                    || prefixes != null
+                    || maxItems != null) {
+                throw new IllegalArgumentException(
+                        where + "'forbidden' cannot be combined with value constraints.");
             }
         }
         if (required && path.hasWildcard()) {
-            throw new IllegalArgumentException(where + "'required' cannot be used with a [*] path; require the array itself instead.");
+            throw new IllegalArgumentException(
+                    where
+                            + "'required' cannot be used with a [*] path; require the array itself instead.");
         }
-        if (!forbidden && !required && type == null && enumValues == null && minLength == null && maxLength == null
-            && min == null && max == null && pattern == null && hosts == null && prefixes == null && maxItems == null) {
-            throw new IllegalArgumentException(where + "the rule constrains nothing - add 'type', 'enum', 'pattern' or another constraint.");
+        if (!forbidden
+                && !required
+                && type == null
+                && enumValues == null
+                && minLength == null
+                && maxLength == null
+                && min == null
+                && max == null
+                && pattern == null
+                && hosts == null
+                && prefixes == null
+                && maxItems == null) {
+            throw new IllegalArgumentException(
+                    where
+                            + "the rule constrains nothing - add 'type', 'enum', 'pattern' or another constraint.");
         }
-        return new ToolArgRule(path, required, forbidden, type, enumValues, minLength, maxLength, min, max,
-            pattern, hosts, prefixes, maxItems);
+        return new ToolArgRule(
+                path,
+                required,
+                forbidden,
+                type,
+                enumValues,
+                minLength,
+                maxLength,
+                min,
+                max,
+                pattern,
+                hosts,
+                prefixes,
+                maxItems);
     }
 
     private static boolean optionalBoolean(JsonNode node, String key, String where) {
@@ -317,7 +408,8 @@ public final class ToolArgRule {
         }
         JsonNode v = node.get(key);
         if (!v.isIntegralNumber() || !v.canConvertToInt() || v.asInt() < 0) {
-            throw new IllegalArgumentException(where + "'" + key + "' must be a whole number of at least 0.");
+            throw new IllegalArgumentException(
+                    where + "'" + key + "' must be a whole number of at least 0.");
         }
         return v.asInt();
     }
@@ -336,54 +428,82 @@ public final class ToolArgRule {
     private static List<String> stringList(JsonNode node, String key, String where) {
         JsonNode a = node.get(key);
         if (!a.isArray() || a.isEmpty()) {
-            throw new IllegalArgumentException(where + "'" + key + "' must be a non-empty array of text.");
+            throw new IllegalArgumentException(
+                    where + "'" + key + "' must be a non-empty array of text.");
         }
         if (a.size() > ToolArgPolicySet.MAX_STRING_LIST) {
-            throw new IllegalArgumentException(where + "'" + key + "' is limited to " + ToolArgPolicySet.MAX_STRING_LIST + " entries.");
+            throw new IllegalArgumentException(
+                    where
+                            + "'"
+                            + key
+                            + "' is limited to "
+                            + ToolArgPolicySet.MAX_STRING_LIST
+                            + " entries.");
         }
         List<String> out = new ArrayList<>();
         for (JsonNode v : a) {
             if (!v.isTextual() || v.asText().isBlank()) {
-                throw new IllegalArgumentException(where + "'" + key + "' entries must be non-empty text.");
+                throw new IllegalArgumentException(
+                        where + "'" + key + "' entries must be non-empty text.");
             }
             if (v.asText().length() > ToolArgPolicySet.MAX_LITERAL_LENGTH) {
-                throw new IllegalArgumentException(where + "a '" + key + "' entry is longer than "
-                    + ToolArgPolicySet.MAX_LITERAL_LENGTH + " characters.");
+                throw new IllegalArgumentException(
+                        where
+                                + "a '"
+                                + key
+                                + "' entry is longer than "
+                                + ToolArgPolicySet.MAX_LITERAL_LENGTH
+                                + " characters.");
             }
             out.add(v.asText());
         }
         return out;
     }
 
-    /** Host patterns are an exact lower-case host, or {@code *.suffix} (subdomains only, not the apex). */
+    /**
+     * Host patterns are an exact lower-case host, or {@code *.suffix} (subdomains only, not the
+     * apex).
+     */
     private static String validateHostPattern(String raw, String where) {
         String h = raw.trim().toLowerCase(Locale.ROOT);
         String body = h.startsWith("*.") ? h.substring(2) : h;
-        boolean ok = !body.isEmpty() && body.length() <= 253 && !body.startsWith(".") && !body.endsWith(".")
-            && !body.contains("..");
+        boolean ok =
+                !body.isEmpty()
+                        && body.length() <= 253
+                        && !body.startsWith(".")
+                        && !body.endsWith(".")
+                        && !body.contains("..");
         if (ok) {
             for (int i = 0; i < body.length(); i++) {
                 char c = body.charAt(i);
-                // IPv6 literals are written with their brackets stripped ("::1" style) - allow ':' for them.
-                if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '.' || c == ':')) {
+                // IPv6 literals are written with their brackets stripped ("::1" style) - allow ':'
+                // for them.
+                if (!((c >= 'a' && c <= 'z')
+                        || (c >= '0' && c <= '9')
+                        || c == '-'
+                        || c == '.'
+                        || c == ':')) {
                     ok = false;
                     break;
                 }
             }
         }
         if (!ok) {
-            throw new IllegalArgumentException(where + "'urlHostIn' entry \"" + clip(raw)
-                + "\" must be a host name like example.com or a subdomain wildcard like *.example.com.");
+            throw new IllegalArgumentException(
+                    where
+                            + "'urlHostIn' entry \""
+                            + clip(raw)
+                            + "\" must be a host name like example.com or a subdomain wildcard like *.example.com.");
         }
         return h;
     }
 
     /**
-     * Lexical path normalisation shared by the {@code pathUnder} prefixes and the values they are checked
-     * against. {@code \} counts as a separator, {@code .} and empty segments vanish, {@code ..} pops (and on a
-     * relative path that cannot pop stays as a leading {@code ..}, so it can never satisfy a prefix).
-     * Returns null for a value containing NUL. It does not resolve symlinks or decode percent escapes - it is a
-     * pre-dispatch screen, not a sandbox.
+     * Lexical path normalisation shared by the {@code pathUnder} prefixes and the values they are
+     * checked against. {@code \} counts as a separator, {@code .} and empty segments vanish, {@code
+     * ..} pops (and on a relative path that cannot pop stays as a leading {@code ..}, so it can
+     * never satisfy a prefix). Returns null for a value containing NUL. It does not resolve
+     * symlinks or decode percent escapes - it is a pre-dispatch screen, not a sandbox.
      */
     static NormalizedPath normalizePath(String raw) {
         if (raw == null || raw.indexOf('\0') >= 0) {
@@ -406,8 +526,11 @@ public final class ToolArgRule {
             }
             out.add(part);
         }
-        if (!absolute && !out.isEmpty() && out.get(0).length() == 2 && out.get(0).charAt(1) == ':'
-            && Character.isLetter(out.get(0).charAt(0))) {
+        if (!absolute
+                && !out.isEmpty()
+                && out.get(0).length() == 2
+                && out.get(0).charAt(1) == ':'
+                && Character.isLetter(out.get(0).charAt(0))) {
             // Drive-letter path (C:/x): absolute, drive compared case-insensitively.
             absolute = true;
             out.set(0, out.get(0).toLowerCase(Locale.ROOT));

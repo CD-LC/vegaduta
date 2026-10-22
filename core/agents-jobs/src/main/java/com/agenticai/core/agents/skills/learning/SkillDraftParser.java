@@ -6,9 +6,9 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * Turns the reflective model call's reply into a skill draft. The model's output is untrusted
- * text: it is only ever read as JSON data, every field is bounded, and the result still goes
- * through {@code SkillService.propose}'s own validation before anything is stored.
+ * Turns the reflective model call's reply into a skill draft. The model's output is untrusted text:
+ * it is only ever read as JSON data, every field is bounded, and the result still goes through
+ * {@code SkillService.propose}'s own validation before anything is stored.
  */
 final class SkillDraftParser {
 
@@ -22,7 +22,9 @@ final class SkillDraftParser {
 
     private SkillDraftParser() {}
 
-    /** The draft, or empty when the model declined, replied with something else, or was too thin. */
+    /**
+     * The draft, or empty when the model declined, replied with something else, or was too thin.
+     */
     static Optional<Draft> parse(String reply) {
         if (reply == null || reply.isBlank()) {
             return Optional.empty();

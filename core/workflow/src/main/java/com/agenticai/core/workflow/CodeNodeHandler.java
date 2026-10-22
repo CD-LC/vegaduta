@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 class CodeNodeHandler implements NodeHandler {
 
     private final ObjectMapper objectMapper;
+
     CodeNodeHandler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }

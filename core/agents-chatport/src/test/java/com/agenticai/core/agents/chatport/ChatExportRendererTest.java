@@ -16,15 +16,31 @@ import org.junit.jupiter.api.Test;
 
 class ChatExportRendererTest {
 
-    private static final Instant T0 = Instant.ofEpochSecond(1_700_000_000L); // 2023-11-14 22:13:20 UTC
+    private static final Instant T0 =
+            Instant.ofEpochSecond(1_700_000_000L); // 2023-11-14 22:13:20 UTC
     private static final Instant EXPORTED = Instant.parse("2026-10-04T08:00:00Z");
 
     private static Conversation sample() {
-        return new Conversation("conv-1", "chatgpt", "Trip planning", null, T0, Instant.parse("2026-10-01T00:00:00Z"),
-            List.of(
-                new Message("user", "Plan a trip to Kyoto.", T0, List.of("map.png", "notes.pdf")),
-                new Message("assistant", "Day 1: Fushimi Inari.\n\n```\ncode\n```", T0.plusSeconds(60), List.of())),
-            false, List.of("Older turns may be missing."));
+        return new Conversation(
+                "conv-1",
+                "chatgpt",
+                "Trip planning",
+                null,
+                T0,
+                Instant.parse("2026-10-01T00:00:00Z"),
+                List.of(
+                        new Message(
+                                "user",
+                                "Plan a trip to Kyoto.",
+                                T0,
+                                List.of("map.png", "notes.pdf")),
+                        new Message(
+                                "assistant",
+                                "Day 1: Fushimi Inari.\n\n```\ncode\n```",
+                                T0.plusSeconds(60),
+                                List.of())),
+                false,
+                List.of("Older turns may be missing."));
     }
 
     @Test
@@ -32,10 +48,17 @@ class ChatExportRendererTest {
         String md = ChatExportRenderer.render(Format.MARKDOWN, List.of(sample()), EXPORTED);
 
         assertTrue(md.startsWith("# Trip planning\n\n"), md);
-        assertTrue(md.contains("*Source: ChatGPT · Started 2023-11-14 22:13 UTC · Imported 2026-10-01 00:00 UTC · Exported 2026-10-04 08:00 UTC*"), md);
+        assertTrue(
+                md.contains(
+                        "*Source: ChatGPT · Started 2023-11-14 22:13 UTC · Imported 2026-10-01 00:00 UTC · Exported 2026-10-04 08:00 UTC*"),
+                md);
         assertTrue(md.contains("> Older turns may be missing."), md);
-        assertTrue(md.contains("### You · 2023-11-14 22:13 UTC\n\nPlan a trip to Kyoto.\n\n> Attachments: map.png, notes.pdf\n\n"), md);
-        assertTrue(md.contains("### Assistant · 2023-11-14 22:14 UTC\n\nDay 1: Fushimi Inari."), md);
+        assertTrue(
+                md.contains(
+                        "### You · 2023-11-14 22:13 UTC\n\nPlan a trip to Kyoto.\n\n> Attachments: map.png, notes.pdf\n\n"),
+                md);
+        assertTrue(
+                md.contains("### Assistant · 2023-11-14 22:14 UTC\n\nDay 1: Fushimi Inari."), md);
         assertTrue(md.indexOf("### You") < md.indexOf("### Assistant"));
     }
 
@@ -43,7 +66,10 @@ class ChatExportRendererTest {
     void plainTextIsReadableWithoutMarkdown() {
         String txt = ChatExportRenderer.render(Format.TEXT, List.of(sample()), EXPORTED);
         assertTrue(txt.startsWith("Trip planning\n=============\n"), txt);
-        assertTrue(txt.contains("You [2023-11-14 22:13 UTC]:\nPlan a trip to Kyoto.\n(Attachments: map.png, notes.pdf)\n"), txt);
+        assertTrue(
+                txt.contains(
+                        "You [2023-11-14 22:13 UTC]:\nPlan a trip to Kyoto.\n(Attachments: map.png, notes.pdf)\n"),
+                txt);
         assertTrue(txt.contains("Assistant [2023-11-14 22:14 UTC]:\n"), txt);
         assertFalse(txt.contains("###"));
     }
@@ -72,8 +98,17 @@ class ChatExportRendererTest {
 
     @Test
     void severalConversationsAreSeparatedAndKeptInOrder() {
-        Conversation second = new Conversation("c2", "claude", "Second", "Helper", null, null,
-            List.of(new Message("user", "hi", null, List.of())), true, List.of());
+        Conversation second =
+                new Conversation(
+                        "c2",
+                        "claude",
+                        "Second",
+                        "Helper",
+                        null,
+                        null,
+                        List.of(new Message("user", "hi", null, List.of())),
+                        true,
+                        List.of());
         String md = ChatExportRenderer.render(Format.MARKDOWN, List.of(sample(), second), EXPORTED);
         assertTrue(md.indexOf("# Trip planning") < md.indexOf("# Second"));
         assertTrue(md.contains("\n---\n\n# Second"));
@@ -93,7 +128,17 @@ class ChatExportRendererTest {
 
     @Test
     void aMultiLineTitleCannotInjectHeadings() {
-        Conversation c = new Conversation("x", "claude", "Line one\n## Injected", null, null, null, List.of(), false, List.of());
+        Conversation c =
+                new Conversation(
+                        "x",
+                        "claude",
+                        "Line one\n## Injected",
+                        null,
+                        null,
+                        null,
+                        List.of(),
+                        false,
+                        List.of());
         String md = ChatExportRenderer.render(Format.MARKDOWN, List.of(c), EXPORTED);
         assertTrue(md.startsWith("# Line one ## Injected\n"), md);
     }
@@ -110,16 +155,19 @@ class ChatExportRendererTest {
 
     @Test
     void attachmentNotesAreSplitOffUserTurns() {
-        ChatExportRenderer.SplitMessage s = ChatExportRenderer.splitAttachmentNotes(
-            "Look at this\n[attached: report.pdf (application/pdf)]\n[attached: chart.png (image/png)]");
+        ChatExportRenderer.SplitMessage s =
+                ChatExportRenderer.splitAttachmentNotes(
+                        "Look at this\n[attached: report.pdf (application/pdf)]\n[attached: chart.png (image/png)]");
         assertEquals("Look at this", s.content());
         assertEquals(List.of("report.pdf", "chart.png"), s.attachments());
 
-        ChatExportRenderer.SplitMessage bare = ChatExportRenderer.splitAttachmentNotes("[attached: image/png]");
+        ChatExportRenderer.SplitMessage bare =
+                ChatExportRenderer.splitAttachmentNotes("[attached: image/png]");
         assertEquals("", bare.content());
         assertEquals(List.of("image/png"), bare.attachments());
 
-        ChatExportRenderer.SplitMessage none = ChatExportRenderer.splitAttachmentNotes("no notes here [attached: inline] text");
+        ChatExportRenderer.SplitMessage none =
+                ChatExportRenderer.splitAttachmentNotes("no notes here [attached: inline] text");
         assertEquals("no notes here [attached: inline] text", none.content());
         assertTrue(none.attachments().isEmpty());
         assertEquals("", ChatExportRenderer.splitAttachmentNotes(null).content());
@@ -127,11 +175,17 @@ class ChatExportRendererTest {
 
     @Test
     void filenamesAreSafeAndDated() {
-        assertEquals("Trip-planning-20261004.md", ChatExportRenderer.filename("Trip planning", EXPORTED, Format.MARKDOWN));
-        assertEquals("rm--rf-20261004.json", ChatExportRenderer.filename("../..\"; rm -rf", EXPORTED, Format.JSON));
+        assertEquals(
+                "Trip-planning-20261004.md",
+                ChatExportRenderer.filename("Trip planning", EXPORTED, Format.MARKDOWN));
+        assertEquals(
+                "rm--rf-20261004.json",
+                ChatExportRenderer.filename("../..\"; rm -rf", EXPORTED, Format.JSON));
         assertEquals("chat-20261004.txt", ChatExportRenderer.filename(null, EXPORTED, Format.TEXT));
         String longName = ChatExportRenderer.filename("a".repeat(200), EXPORTED, Format.MARKDOWN);
         assertTrue(longName.length() <= 60 + "-20261004.md".length());
-        assertFalse(ChatExportRenderer.filename("a/b\\c:d", EXPORTED, Format.MARKDOWN).matches(".*[/\\\\:\"].*"));
+        assertFalse(
+                ChatExportRenderer.filename("a/b\\c:d", EXPORTED, Format.MARKDOWN)
+                        .matches(".*[/\\\\:\"].*"));
     }
 }

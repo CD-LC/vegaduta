@@ -10,12 +10,11 @@ import java.util.Map;
  */
 public final class JsonNodes {
 
-    private JsonNodes() {
-    }
+    private JsonNodes() {}
 
     /**
-     * The object node's entries in insertion order; empty for non-object nodes. Exactly
-     * {@code node.fields()} (a live iterator over the same entries in the same order).
+     * The object node's entries in insertion order; empty for non-object nodes. Exactly {@code
+     * node.fields()} (a live iterator over the same entries in the same order).
      */
     @SuppressWarnings("deprecation")
     public static Iterator<Map.Entry<String, JsonNode>> fields(JsonNode node) {

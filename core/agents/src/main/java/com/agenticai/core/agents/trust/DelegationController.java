@@ -123,11 +123,17 @@ public class DelegationController {
     }
 
     @GetMapping("/{agentId}/delegations")
-    public ResponseEntity<List<GrantResponse>> list(@PathVariable UUID agentId, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    public ResponseEntity<List<GrantResponse>> list(
+            @PathVariable UUID agentId,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
         return ListPaging.window(
-            delegationService.listGrants(agentId).stream().map(this::toResponse).toList(),
-            limit, offset, 50, 500);
+                delegationService.listGrants(agentId).stream().map(this::toResponse).toList(),
+                limit,
+                offset,
+                50,
+                500);
     }
 
     @PostMapping("/{agentId}/delegations/{grantId}/revoke")

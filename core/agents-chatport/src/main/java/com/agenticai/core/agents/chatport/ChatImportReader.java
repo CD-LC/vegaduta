@@ -25,27 +25,32 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * The container and stream layer of {@link ChatImportParser}: unwraps the export .zip under an entry, inflated-size and
- * compression-ratio budget, streams the JSON one conversation at a time under Jackson read constraints, and reads each
- * conversation into a tree under a node/character budget before handing it to the {@link ChatImportCollector}. Knows
- * nothing about any source format.
+ * The container and stream layer of {@link ChatImportParser}: unwraps the export .zip under an
+ * entry, inflated-size and compression-ratio budget, streams the JSON one conversation at a time
+ * under Jackson read constraints, and reads each conversation into a tree under a node/character
+ * budget before handing it to the {@link ChatImportCollector}. Knows nothing about any source
+ * format.
  */
 final class ChatImportReader {
 
     /** The array field of {@link ChatExportRenderer}'s JSON envelope. */
     private static final String ENVELOPE_CONVERSATIONS = "conversations";
-    private static final Pattern CONVERSATIONS_ENTRY = Pattern.compile("conversations(?:-\\d{1,6})?\\.json");
 
-    private static final ObjectMapper MAPPER = JsonMappers.withFactory(JsonFactory.builder()
-        .streamReadConstraints(StreamReadConstraints.builder()
-            .maxNestingDepth(MAX_NESTING_DEPTH)
-            .maxStringLength(MAX_STRING_CHARS)
-            .maxNumberLength(64)
-            .build())
-        .build());
+    private static final Pattern CONVERSATIONS_ENTRY =
+            Pattern.compile("conversations(?:-\\d{1,6})?\\.json");
 
-    private ChatImportReader() {
-    }
+    private static final ObjectMapper MAPPER =
+            JsonMappers.withFactory(
+                    JsonFactory.builder()
+                            .streamReadConstraints(
+                                    StreamReadConstraints.builder()
+                                            .maxNestingDepth(MAX_NESTING_DEPTH)
+                                            .maxStringLength(MAX_STRING_CHARS)
+                                            .maxNumberLength(64)
+                                            .build())
+                            .build());
+
+    private ChatImportReader() {}
 
     /** Reads {@code data} (a zip or bare JSON) into {@code c}. */
     static void read(byte[] data, ChatImportCollector c) throws IOException {
@@ -73,16 +78,19 @@ final class ChatImportReader {
 
     private static void readZip(byte[] data, ChatImportCollector c) throws IOException {
         Limits limits = c.limits;
-        long ratioBudget = Math.max(1_048_576L, (long) data.length * Math.max(1, limits.maxZipRatio()));
+        long ratioBudget =
+                Math.max(1_048_576L, (long) data.length * Math.max(1, limits.maxZipRatio()));
         long budget = Math.min(limits.maxUncompressedBytes(), ratioBudget);
         Counter counter = new Counter(budget);
-        try (ZipInputStream zin = new ZipInputStream(new ByteArrayInputStream(data), StandardCharsets.UTF_8)) {
+        try (ZipInputStream zin =
+                new ZipInputStream(new ByteArrayInputStream(data), StandardCharsets.UTF_8)) {
             int entries = 0;
             ZipEntry entry;
             while ((entry = zin.getNextEntry()) != null) {
                 entries++;
                 if (entries > limits.maxZipEntries()) {
-                    throw new LimitExceededException("That .zip holds too many files to import safely.");
+                    throw new LimitExceededException(
+                            "That .zip holds too many files to import safely.");
                 }
                 InputStream in = new CountingInputStream(zin, counter);
                 if (!entry.isDirectory() && isConversationsEntry(entry.getName()) && !c.done()) {
@@ -106,7 +114,8 @@ final class ChatImportReader {
     private static void drain(InputStream in) throws IOException {
         byte[] buf = new byte[8192];
         while (in.read(buf) >= 0) {
-            // discard: every inflated byte is counted against the zip-bomb budget by CountingInputStream
+            // discard: every inflated byte is counted against the zip-bomb budget by
+            // CountingInputStream
         }
     }
 
@@ -122,7 +131,8 @@ final class ChatImportReader {
         void add(int n) throws LimitExceededException {
             used += n;
             if (used > budget) {
-                throw new LimitExceededException("That .zip expands to far more data than a chat export should; it was not imported.");
+                throw new LimitExceededException(
+                        "That .zip expands to far more data than a chat export should; it was not imported.");
             }
         }
     }
@@ -162,7 +172,8 @@ final class ChatImportReader {
     // ---- streamed JSON ----
 
     /** Streams the top-level array (or a single conversation object) one element at a time. */
-    private static void readConversations(InputStream in, ChatImportCollector c) throws IOException {
+    private static void readConversations(InputStream in, ChatImportCollector c)
+            throws IOException {
         try (JsonParser p = MAPPER.createParser(in)) {
             JsonToken first = p.nextToken();
             if (first == JsonToken.START_ARRAY) {
@@ -182,23 +193,25 @@ final class ChatImportReader {
                 readTopLevelObject(p, c);
             } else {
                 throw new LimitExceededException(
-                    "That file does not look like a ChatGPT, Claude or VegaDuta conversations export "
-                        + "(expected a JSON list of conversations).");
+                        "That file does not look like a ChatGPT, Claude or VegaDuta conversations export "
+                                + "(expected a JSON list of conversations).");
             }
         }
     }
 
     /**
-     * A top-level JSON object is either ONE conversation (a single ChatGPT / Claude conversation saved on its own)
-     * or an export envelope: this platform's own JSON export is {@code {"schema": "vegaduta.chat-export",
-     * "version": 1, "exportedAt": ..., "conversations": [...]}} ({@link ChatExportRenderer}). The envelope used to be
-     * read as one conversation, matched neither known shape and was skipped - so the app's own export answered
-     * "No importable conversations were found" on re-import (prod, 2026-10-05).
+     * A top-level JSON object is either ONE conversation (a single ChatGPT / Claude conversation
+     * saved on its own) or an export envelope: this platform's own JSON export is {@code {"schema":
+     * "vegaduta.chat-export", "version": 1, "exportedAt": ..., "conversations": [...]}} ({@link
+     * ChatExportRenderer}). The envelope used to be read as one conversation, matched neither known
+     * shape and was skipped - so the app's own export answered "No importable conversations were
+     * found" on re-import (prod, 2026-10-05).
      *
-     * <p>Streamed like the top-level array: each element of {@code conversations} is read under its own
-     * per-conversation budget, so an export of many chats is never held as one tree. Every other field of the
-     * object is read under one shared budget; when no {@code conversations} array turns up, those fields ARE the
-     * single conversation and go to the collector exactly as before.
+     * <p>Streamed like the top-level array: each element of {@code conversations} is read under its
+     * own per-conversation budget, so an export of many chats is never held as one tree. Every
+     * other field of the object is read under one shared budget; when no {@code conversations}
+     * array turns up, those fields ARE the single conversation and go to the collector exactly as
+     * before.
      */
     private static void readTopLevelObject(JsonParser p, ChatImportCollector c) throws IOException {
         TreeBudget budget = new TreeBudget(c.limits.maxTreeNodes(), c.limits.maxTreeChars());
@@ -243,11 +256,13 @@ final class ChatImportReader {
     }
 
     /**
-     * Reads the conversation object the parser is positioned on into a tree under a node and character budget
-     * ({@link Limits#maxTreeNodes()} / {@link Limits#maxTreeChars()}), then hands it to the collector. Over budget the
-     * rest of the object is read past token by token (nothing is retained) and the conversation is counted as skipped.
-     * This replaces {@code ObjectMapper.readTree}, which would build any object, however wide, in full before a single
-     * cap ran (nesting depth and string length are limited by the Jackson read constraints, width was not).
+     * Reads the conversation object the parser is positioned on into a tree under a node and
+     * character budget ({@link Limits#maxTreeNodes()} / {@link Limits#maxTreeChars()}), then hands
+     * it to the collector. Over budget the rest of the object is read past token by token (nothing
+     * is retained) and the conversation is counted as skipped. This replaces {@code
+     * ObjectMapper.readTree}, which would build any object, however wide, in full before a single
+     * cap ran (nesting depth and string length are limited by the Jackson read constraints, width
+     * was not).
      */
     private static void acceptBounded(JsonParser p, ChatImportCollector c) throws IOException {
         TreeBudget budget = new TreeBudget(c.limits.maxTreeNodes(), c.limits.maxTreeChars());
@@ -263,7 +278,9 @@ final class ChatImportReader {
         c.accept(node);
     }
 
-    /** Consumes tokens until the {@code open} containers that are still open have all been closed. */
+    /**
+     * Consumes tokens until the {@code open} containers that are still open have all been closed.
+     */
     private static void skipRest(JsonParser p, int open) throws IOException {
         int depth = open;
         while (depth > 0) {
@@ -286,7 +303,11 @@ final class ChatImportReader {
         private final long maxChars;
         private int nodes;
         private long chars;
-        /** Containers entered and not yet left; on a budget failure, how many the caller must still close. */
+
+        /**
+         * Containers entered and not yet left; on a budget failure, how many the caller must still
+         * close.
+         */
         int depth;
 
         TreeBudget(int maxNodes, long maxChars) {
@@ -339,7 +360,8 @@ final class ChatImportReader {
             ArrayNode arr = f.arrayNode();
             while (p.nextToken() != JsonToken.END_ARRAY) {
                 if (p.currentToken() == null) {
-                    throw new LimitExceededException("That file ended in the middle of a conversation.");
+                    throw new LimitExceededException(
+                            "That file ended in the middle of a conversation.");
                 }
                 arr.add(readBounded(p, budget));
             }

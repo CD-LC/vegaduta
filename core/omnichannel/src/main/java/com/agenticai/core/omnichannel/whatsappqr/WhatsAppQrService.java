@@ -16,9 +16,9 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * The tenant-facing lifecycle of a WhatsApp QR connection: "link my number" (start a bridge
- * session and hand the console its QR), "what is it now" (status + live QR while pairing), and
- * "unlink" (log out on the bridge and mark the row DISCONNECTED).
+ * The tenant-facing lifecycle of a WhatsApp QR connection: "link my number" (start a bridge session
+ * and hand the console its QR), "what is it now" (status + live QR while pairing), and "unlink"
+ * (log out on the bridge and mark the row DISCONNECTED).
  *
  * <p>State split: this service owns the {@code whatsapp_qr_connection} row; the bridge owns the
  * session socket and its credentials. The row's PAIRING -&gt; ACTIVE transition is driven by what
@@ -49,7 +49,9 @@ public class WhatsAppQrService {
         this.receiveService = receiveService;
     }
 
-    /** The channel exists only when the operator configured a bridge - the console hides it else. */
+    /**
+     * The channel exists only when the operator configured a bridge - the console hides it else.
+     */
     public boolean configured() {
         return client.configured();
     }
@@ -67,7 +69,9 @@ public class WhatsAppQrService {
         String sessionKey = UUID.randomUUID().toString();
 
         WhatsAppQrConnection row =
-                repository.findFirstByOrderByCreatedAtAsc().orElseGet(() -> new WhatsAppQrConnection(sessionKey));
+                repository
+                        .findFirstByOrderByCreatedAtAsc()
+                        .orElseGet(() -> new WhatsAppQrConnection(sessionKey));
         String previousKey = row.getId() == null ? null : row.getSessionKey();
         if (previousKey != null) {
             // Best effort: the old session may already be gone; the row update still proceeds.
@@ -164,7 +168,8 @@ public class WhatsAppQrService {
     /** Like {@link #resolveActive} but non-throwing for "is this channel live" checks. */
     @Transactional(readOnly = true)
     public Optional<WhatsAppQrHandle> active() {
-        return activeRow().map(row -> new WhatsAppQrHandle(row.getSessionKey(), row.getPhoneNumber()));
+        return activeRow()
+                .map(row -> new WhatsAppQrHandle(row.getSessionKey(), row.getPhoneNumber()));
     }
 
     /** Receiver-side transition, keyed by session key: the bridge says the scan completed. */
@@ -177,9 +182,7 @@ public class WhatsAppQrService {
                         row -> {
                             row.markActive(phoneNumber);
                             repository.save(row);
-                            log.info(
-                                    "WhatsApp QR linked: {}",
-                                    WhatsAppQrAddress.mask(phoneNumber));
+                            log.info("WhatsApp QR linked: {}", WhatsAppQrAddress.mask(phoneNumber));
                         });
     }
 
@@ -211,7 +214,8 @@ public class WhatsAppQrService {
         } else if ("LOGGED_OUT".equals(bridgeStatus)) {
             row.markDisconnected();
             repository.save(row);
-            tenantResolutionService.unlink(ExternalAccountProvider.WHATSAPP_QR, row.getSessionKey());
+            tenantResolutionService.unlink(
+                    ExternalAccountProvider.WHATSAPP_QR, row.getSessionKey());
         }
     }
 

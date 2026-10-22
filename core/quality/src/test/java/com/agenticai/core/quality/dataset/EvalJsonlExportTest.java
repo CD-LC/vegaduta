@@ -9,10 +9,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * Verifies the NDJSON renderings: every line parses standalone, the header
- * carries run/dataset provenance (version binding, hashes, judge), case lines
- * embed JSON columns as parsed values (never double-encoded), and errored
- * cases keep their status rather than being silently dropped.
+ * Verifies the NDJSON renderings: every line parses standalone, the header carries run/dataset
+ * provenance (version binding, hashes, judge), case lines embed JSON columns as parsed values
+ * (never double-encoded), and errored cases keep their status rather than being silently dropped.
  */
 class EvalJsonlExportTest {
 
@@ -27,12 +26,22 @@ class EvalJsonlExportTest {
     }
 
     private EvalRunCaseResult scoredCase(int position) {
-        EvalDatasetCase source = new EvalDatasetCase(
-            datasetId, "question " + position, "expected " + position, "[\"search\"]", position);
+        EvalDatasetCase source =
+                new EvalDatasetCase(
+                        datasetId,
+                        "question " + position,
+                        "expected " + position,
+                        "[\"search\"]",
+                        position);
         return EvalRunCaseResult.scored(
-            runId, source, "answer " + position,
-            "[{\"toolName\":\"search\",\"input\":\"q\",\"output\":\"r\"}]",
-            "{\"ACCURACY\":{\"score\":0.9}}", 0.9, Boolean.TRUE, Boolean.TRUE);
+                runId,
+                source,
+                "answer " + position,
+                "[{\"toolName\":\"search\",\"input\":\"q\",\"output\":\"r\"}]",
+                "{\"ACCURACY\":{\"score\":0.9}}",
+                0.9,
+                Boolean.TRUE,
+                Boolean.TRUE);
     }
 
     private static List<JsonNode> lines(String body) throws Exception {
@@ -47,7 +56,8 @@ class EvalJsonlExportTest {
 
     @Test
     void runExportIsHeaderThenOneLinePerCase() throws Exception {
-        EvalRun run = new EvalRun(datasetId, agentId, "tenant", "tester", "ROLE_tenant-admin", 0.7, 2);
+        EvalRun run =
+                new EvalRun(datasetId, agentId, "tenant", "tester", "ROLE_tenant-admin", 0.7, 2);
         // Ids are generated on persist; set one so the header carries it.
         org.springframework.test.util.ReflectionTestUtils.setField(run, "id", runId);
         String body = EvalJsonlExport.run(dataset(), run, List.of(scoredCase(0), scoredCase(1)));
@@ -77,12 +87,21 @@ class EvalJsonlExportTest {
     void runExportKeepsErroredCasesAndUnparseableColumns() throws Exception {
         EvalDatasetCase source = new EvalDatasetCase(datasetId, "q", null, null, 0);
         EvalRunCaseResult errored = EvalRunCaseResult.errored(runId, source, "replay blew up");
-        EvalRunCaseResult corrupt = EvalRunCaseResult.scored(
-            runId, new EvalDatasetCase(datasetId, "q2", null, null, 1),
-            "a", "not-json", "also-not-json", 0.5, null, Boolean.FALSE);
-        EvalRun run = new EvalRun(datasetId, agentId, "tenant", "tester", "ROLE_tenant-admin", 0.7, 2);
+        EvalRunCaseResult corrupt =
+                EvalRunCaseResult.scored(
+                        runId,
+                        new EvalDatasetCase(datasetId, "q2", null, null, 1),
+                        "a",
+                        "not-json",
+                        "also-not-json",
+                        0.5,
+                        null,
+                        Boolean.FALSE);
+        EvalRun run =
+                new EvalRun(datasetId, agentId, "tenant", "tester", "ROLE_tenant-admin", 0.7, 2);
 
-        List<JsonNode> parsed = lines(EvalJsonlExport.run(dataset(), run, List.of(errored, corrupt)));
+        List<JsonNode> parsed =
+                lines(EvalJsonlExport.run(dataset(), run, List.of(errored, corrupt)));
 
         assertThat(parsed).hasSize(3);
         assertThat(parsed.get(1).get("status").asText()).isEqualTo("ERROR");
@@ -99,7 +118,8 @@ class EvalJsonlExportTest {
         withGrader.applyGraderSpec("{\"type\":\"exact\",\"expected\":\"a1\"}");
         EvalDatasetCase plain = new EvalDatasetCase(datasetId, "q2", null, "[\"t\"]", 1);
 
-        List<JsonNode> parsed = lines(EvalJsonlExport.dataset(dataset(), List.of(withGrader, plain)));
+        List<JsonNode> parsed =
+                lines(EvalJsonlExport.dataset(dataset(), List.of(withGrader, plain)));
 
         assertThat(parsed).hasSize(3);
         JsonNode head = parsed.get(0);

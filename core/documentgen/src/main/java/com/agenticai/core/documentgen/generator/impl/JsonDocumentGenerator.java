@@ -10,10 +10,10 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.stereotype.Component;
 
 /**
- * Renders a {@link DocumentContent} into pretty-printed JSON bytes. Prefers
- * {@link DocumentContent#json()} when present - that value is serialized
- * verbatim as the entire file; otherwise falls back to pretty-printing the
- * whole {@link DocumentContent} (title/sections/table/rawText) as JSON.
+ * Renders a {@link DocumentContent} into pretty-printed JSON bytes. Prefers {@link
+ * DocumentContent#json()} when present - that value is serialized verbatim as the entire file;
+ * otherwise falls back to pretty-printing the whole {@link DocumentContent}
+ * (title/sections/table/rawText) as JSON.
  */
 @Component
 public class JsonDocumentGenerator implements DocumentGenerator {

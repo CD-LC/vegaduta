@@ -22,8 +22,7 @@ import java.util.Map;
  */
 public final class BriefJsonPatch {
 
-    private BriefJsonPatch() {
-    }
+    private BriefJsonPatch() {}
 
     public static List<ObjectNode> diff(JsonNode from, JsonNode to) {
         List<ObjectNode> ops = new ArrayList<>();
@@ -102,7 +101,10 @@ public final class BriefJsonPatch {
 
     // ------------------------------------------------------------------ apply
 
-    /** Replays {@code ops} onto a deep copy of {@code doc}; throws IllegalArgumentException on a bad path. */
+    /**
+     * Replays {@code ops} onto a deep copy of {@code doc}; throws IllegalArgumentException on a bad
+     * path.
+     */
     public static JsonNode apply(JsonNode doc, List<? extends JsonNode> ops) {
         JsonNode current = doc.deepCopy();
         for (JsonNode op : ops) {
@@ -123,7 +125,8 @@ public final class BriefJsonPatch {
                 case "add" -> put(parent, key, value.deepCopy(), true);
                 case "replace" -> put(parent, key, value.deepCopy(), false);
                 case "remove" -> remove(parent, key);
-                default -> throw new IllegalArgumentException("Unsupported patch op '" + name + "'.");
+                default ->
+                        throw new IllegalArgumentException("Unsupported patch op '" + name + "'.");
             }
         }
         return current;
