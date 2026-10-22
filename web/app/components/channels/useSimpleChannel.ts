@@ -12,6 +12,18 @@ export interface ChannelUi {
   refreshStatus: () => void;
 }
 
+/**
+ * A credential getter that is already settled with "nothing connected". The hooks below stay unconditional
+ * (rules of hooks); a channel this install does not offer hands them this instead of the API call, so mounting
+ * the panel fires no GET /api/channels/<key>/credential for it.
+ */
+export const noCredential = (): Promise<null> => Promise.resolve(null);
+
+/** {@code getter} when the channel is offered on this install, else {@link noCredential} (a stable reference). */
+export function credentialGetter<T extends () => Promise<unknown>>(offered: boolean, getter: T): T | typeof noCredential {
+  return offered ? getter : noCredential;
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function useSimpleChannel({
   getCredential,
