@@ -1,11 +1,10 @@
 package com.agenticai.core.chat.structured;
 
-import tools.jackson.databind.JsonNode;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * A small, forgiving JSON Schema check for the prompt-and-validate fallback ({@code

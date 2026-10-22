@@ -1,13 +1,6 @@
 package com.agenticai.core.quality.trajectory;
 
 import com.agenticai.core.json.JsonMappers;
-
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,6 +10,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A dataset case's expected trajectory plus how to score it - stored as the case's {@code

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.workflow.expression.BuiltIn;
 import com.agenticai.core.workflow.expression.BuiltIns;
-
 import org.junit.jupiter.api.Test;
 
 /**

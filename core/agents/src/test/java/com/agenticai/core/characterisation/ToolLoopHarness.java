@@ -4,17 +4,14 @@ import com.agenticai.core.chat.DefaultAgentAdvisor;
 import com.agenticai.core.chat.LlmModelSupport;
 import com.agenticai.core.chat.ResilientToolCallingManagerFactory;
 import com.agenticai.core.chat.ToolResultClearing;
-
 import io.micrometer.observation.ObservationRegistry;
-
+import java.time.Duration;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
-
-import java.time.Duration;
 
 /**
  * P0 characterisation harness (ADR-0012): builds a {@link ChatClient} the way the provider

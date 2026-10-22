@@ -5,7 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.agenticai.core.chat.CallerRunsToolLoop;
 import com.anthropic.models.messages.ToolChoice;
 import com.anthropic.models.messages.ToolChoiceTool;
-
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -15,12 +16,8 @@ import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.tool.function.FunctionToolCallback;
-
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Anthropic forced-tool structured output and Ollama {@code format}: option shaping, schema gating,
@@ -31,7 +28,7 @@ class StructuredOutputToolForcingTest {
     private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     private static final String SCHEMA =
             "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\","
-                + "\"properties\":{\"verdict\":{\"type\":\"string\"}},\"required\":[\"verdict\"]}";
+                    + "\"properties\":{\"verdict\":{\"type\":\"string\"}},\"required\":[\"verdict\"]}";
 
     private static AnthropicChatOptions anthropic(String model) {
         return AnthropicChatOptions.builder().model(model).maxTokens(512).build();
@@ -67,7 +64,8 @@ class StructuredOutputToolForcingTest {
                 .isFalse();
         assertThat(StructuredOutput.supportsAnthropicToolForcing(anthropic("gpt-4o"))).isFalse();
         assertThat(StructuredOutput.supportsAnthropicToolForcing(null)).isFalse();
-        // Spring AI 2 fills in a default Claude model when none is set, so unset options qualify too.
+        // Spring AI 2 fills in a default Claude model when none is set, so unset options qualify
+        // too.
         assertThat(
                         StructuredOutput.supportsAnthropicToolForcing(
                                 AnthropicChatOptions.builder().build()))

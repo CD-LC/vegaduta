@@ -12,10 +12,6 @@ import com.agenticai.core.workflow.portability.N8nImportModel.Level;
 import com.agenticai.core.workflow.portability.N8nImportModel.NodeCtx;
 import com.agenticai.core.workflow.portability.N8nImportModel.Outputs;
 import com.agenticai.core.workflow.portability.N8nImportModel.Src;
-
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Best-effort import of an n8n workflow export (JSON) into a {@link PortableWorkflow}, with an
@@ -152,7 +150,7 @@ public final class N8nImportMapper {
                 wf.report.unsupported(
                         "Sticky note '" + AgentImportText.inline(name, 60) + "'",
                         "Sticky notes are canvas annotations, not steps, so they are not"
-                            + " imported.");
+                                + " imported.");
                 continue;
             }
             if (byName.containsKey(name)) {
@@ -308,7 +306,7 @@ public final class N8nImportMapper {
         if (s.raw().path("disabled").asBoolean(false)) {
             c.lose(
                     "The node was disabled in n8n (n8n passes data straight through a disabled"
-                        + " node), so it was imported as a pass-through.");
+                            + " node), so it was imported as a pass-through.");
             return passthrough(c, "[Disabled] ", Level.APPROXIMATE);
         }
         switch (shortType) {
@@ -336,16 +334,16 @@ public final class N8nImportMapper {
                 config.put("channel", "log");
                 c.lose(
                         "The HTTP response (status, headers, body shaping) is not reproduced; this"
-                            + " platform returns the run's result. The step was imported as a log"
-                            + " Output node.");
+                                + " platform returns the run's result. The step was imported as a log"
+                                + " Output node.");
                 return finish(c, "output", s.name(), config, Level.APPROXIMATE, Outputs.PLAIN);
             }
             case "splitInBatches" -> {
                 c.lose(
                         "n8n walks the nodes after the 'loop' output once per batch and returns to"
-                            + " this node; here the next node runs once per item and results are"
-                            + " collected, then flow continues. Batch size and multi-step loop"
-                            + " bodies are not preserved.");
+                                + " this node; here the next node runs once per item and results are"
+                                + " collected, then flow continues. Batch size and multi-step loop"
+                                + " bodies are not preserved.");
                 return finish(
                         c,
                         "loop",
@@ -385,7 +383,7 @@ public final class N8nImportMapper {
                 return placeholder(
                         c,
                         "Set / Edit Fields assigns typed fields; the Transform node cannot"
-                            + " reproduce that exactly, so it was not guessed.",
+                                + " reproduce that exactly, so it was not guessed.",
                         Outputs.PLAIN);
             }
             default -> {
@@ -438,9 +436,9 @@ public final class N8nImportMapper {
                 wf.report.needsManual(
                         what,
                         "n8n exports only a credential's name and id, never its secret, and the"
-                            + " import never carries one.",
+                                + " import never carries one.",
                         "Create the matching integration or vault secret on this platform and"
-                            + " attach it to the node (placeholder "
+                                + " attach it to the node (placeholder "
                                 + key
                                 + ").");
             }
@@ -577,8 +575,8 @@ public final class N8nImportMapper {
         config.put("expression", translation.expression());
         c.lose(
                 "Comparison details (type coercion, case sensitivity) are not preserved: the"
-                    + " condition was rewritten as an expression, and the true/false outputs keep"
-                    + " their order.");
+                        + " condition was rewritten as an expression, and the true/false outputs keep"
+                        + " their order.");
         return finish(c, "condition", c.src.name(), config, Level.APPROXIMATE, Outputs.CONDITION);
     }
 
@@ -602,14 +600,14 @@ public final class N8nImportMapper {
             return placeholder(
                     c,
                     "Python code cannot run on this platform. The original source is kept in the"
-                        + " node's importedSource field.",
+                            + " node's importedSource field.",
                     Outputs.PLAIN,
                     config);
         }
         c.lose(
                 "JavaScript is never executed on this platform. The original source is kept in the"
-                    + " node's importedSource field and the node passes its input through unchanged"
-                    + " until you replace it with a Transform, Agent or Tool step.");
+                        + " node's importedSource field and the node passes its input through unchanged"
+                        + " until you replace it with a Transform, Agent or Tool step.");
         Built b =
                 finish(
                         c,
@@ -682,8 +680,8 @@ public final class N8nImportMapper {
         if (c.expression) {
             notes.add(
                     "It carried n8n expressions. They were translated where VegaDuta has the same"
-                        + " accessor ($json, $node[...]) and are otherwise kept as written; n8n"
-                        + " expressions are JavaScript, so check them.");
+                            + " accessor ($json, $node[...]) and are otherwise kept as written; n8n"
+                            + " expressions are JavaScript, so check them.");
         }
         Built b = new Built();
         b.level = effective;
@@ -732,7 +730,7 @@ public final class N8nImportMapper {
                             "Node '" + name + "'",
                             String.join(" ", b.notes),
                             "Open the node on the canvas and check it before activating the"
-                                + " workflow.");
+                                    + " workflow.");
                 }
                 default -> {
                     wf.fidelity.placeholders++;
@@ -751,7 +749,7 @@ public final class N8nImportMapper {
         if (root.path("active").asBoolean(false)) {
             wf.report.warn(
                     "The workflow was active in n8n. It is imported as a DRAFT and is never"
-                        + " activated.");
+                            + " activated.");
         }
         JsonNode pinData = root.get("pinData");
         if (pinData != null && pinData.isObject() && pinData.size() > 0) {
@@ -764,7 +762,7 @@ public final class N8nImportMapper {
                 || root.has("staticData")) {
             wf.report.warn(
                     "Workflow-level n8n settings, tags and static data (timezone, error workflow,"
-                        + " execution order) are not imported.");
+                            + " execution order) are not imported.");
         }
     }
 }

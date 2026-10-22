@@ -1,16 +1,6 @@
 package com.agenticai.core.quality.calibration;
 
 import com.agenticai.core.json.JsonMappers;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
-
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -18,6 +8,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The production {@link JudgeCalibrationStore}: JSON documents in Redis hashes, no SQL table (this
@@ -52,7 +49,7 @@ public class RedisJudgeCalibrationStore implements JudgeCalibrationStore {
         if (this.redis == null) {
             log.warn(
                     "No Redis available: judge calibration sets and history are held in memory only"
-                        + " (lost on restart, not shared between replicas).");
+                            + " (lost on restart, not shared between replicas).");
         }
     }
 

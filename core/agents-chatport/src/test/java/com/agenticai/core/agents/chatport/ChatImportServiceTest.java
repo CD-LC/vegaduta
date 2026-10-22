@@ -47,9 +47,29 @@ class ChatImportServiceTest {
         when(memoryProvider.getIfAvailable()).thenReturn(memoryImport);
         when(auditProvider.getIfAvailable()).thenReturn(audit);
         when(repository.save(any(ImportedChat.class))).thenAnswer(inv -> inv.getArgument(0));
-        return new ChatImportService(repository, memoryProvider, auditProvider, enabled, true, 1_000_000L, 500, 5000, 2000,
-            50_000, 500_000, 20_000_000L, maxStored, 20_000, 10_000, 209_715_200L, 100, 1_000_000, 16_000_000L,
-            262_144_000L, 200, 26_214_400L);
+        return new ChatImportService(
+                repository,
+                memoryProvider,
+                auditProvider,
+                enabled,
+                true,
+                1_000_000L,
+                500,
+                5000,
+                2000,
+                50_000,
+                500_000,
+                20_000_000L,
+                maxStored,
+                20_000,
+                10_000,
+                209_715_200L,
+                100,
+                1_000_000,
+                16_000_000L,
+                262_144_000L,
+                200,
+                26_214_400L);
     }
 
     private ChatImportService service() {
@@ -70,7 +90,8 @@ class ChatImportServiceTest {
         UUID id = UUID.randomUUID();
 
         assertStatus(HttpStatus.NOT_FOUND, () -> off.preview("alice", file));
-        assertStatus(HttpStatus.NOT_FOUND, () -> off.importChats("alice", file, List.of("conv-gpt-1")));
+        assertStatus(
+                HttpStatus.NOT_FOUND, () -> off.importChats("alice", file, List.of("conv-gpt-1")));
         assertStatus(HttpStatus.NOT_FOUND, () -> off.list("alice"));
         assertStatus(HttpStatus.NOT_FOUND, () -> off.get("alice", id));
         assertStatus(HttpStatus.NOT_FOUND, () -> off.delete("alice", id));
@@ -116,19 +137,37 @@ class ChatImportServiceTest {
     }
 
     /**
-     * Prod 2026-10-05 (bug 4): POST /api/chat-import/preview with the file the app's own Export > JSON had just
-     * produced answered 400 "No importable conversations were found".
+     * Prod 2026-10-05 (bug 4): POST /api/chat-import/preview with the file the app's own Export >
+     * JSON had just produced answered 400 "No importable conversations were found".
      */
     @Test
     void previewAcceptsTheAppsOwnJsonExport() {
         ChatImportService svc = service();
-        String file = ChatExportRenderer.render(ChatExportRenderer.Format.JSON, List.of(
-            new ChatExportRenderer.Conversation("session-abc", "vegaduta", "Say hi", "e2e-agent",
-                java.time.Instant.parse("2026-10-05T09:00:00Z"), null,
-                List.of(
-                    new ChatExportRenderer.Message("user", "Say hi in three words.", null, List.of()),
-                    new ChatExportRenderer.Message("assistant", "Hi there, friend!", null, List.of())),
-                false, List.of())), java.time.Instant.parse("2026-10-05T10:00:00Z"));
+        String file =
+                ChatExportRenderer.render(
+                        ChatExportRenderer.Format.JSON,
+                        List.of(
+                                new ChatExportRenderer.Conversation(
+                                        "session-abc",
+                                        "vegaduta",
+                                        "Say hi",
+                                        "e2e-agent",
+                                        java.time.Instant.parse("2026-10-05T09:00:00Z"),
+                                        null,
+                                        List.of(
+                                                new ChatExportRenderer.Message(
+                                                        "user",
+                                                        "Say hi in three words.",
+                                                        null,
+                                                        List.of()),
+                                                new ChatExportRenderer.Message(
+                                                        "assistant",
+                                                        "Hi there, friend!",
+                                                        null,
+                                                        List.of())),
+                                        false,
+                                        List.of())),
+                        java.time.Instant.parse("2026-10-05T10:00:00Z"));
 
         PreviewResponse p = svc.preview("alice", bytes(file));
 
@@ -144,18 +183,24 @@ class ChatImportServiceTest {
     void previewFlagsConversationsTheUserAlreadyImported() {
         ChatImportService svc = service();
         when(repository.findSourceIds("alice", "chatgpt")).thenReturn(List.of("conv-gpt-1"));
-        assertTrue(svc.preview("alice", bytes(ChatPortFixtures.CHATGPT_ONE)).conversations().get(0).alreadyImported());
+        assertTrue(
+                svc.preview("alice", bytes(ChatPortFixtures.CHATGPT_ONE))
+                        .conversations()
+                        .get(0)
+                        .alreadyImported());
     }
 
     @Test
     void previewNeverEchoesASecretOrAnOverlongSnippet() {
-        String json = """
+        String json =
+                """
             [{"uuid": "s1", "name": "My password is hunter2abc", "chat_messages": [
               {"sender": "human", "text": "My password is hunter2abc and my token follows"},
               {"sender": "assistant", "text": "ok"}]},
              {"uuid": "s2", "name": "Long", "chat_messages": [
               {"sender": "human", "text": "%s"}]}]
-            """.formatted("word ".repeat(100));
+            """
+                        .formatted("word ".repeat(100));
         PreviewResponse p = service().preview("alice", bytes(json));
 
         assertEquals("[hidden]", p.conversations().get(0).title());
@@ -167,8 +212,16 @@ class ChatImportServiceTest {
 
     @Test
     void previewOfAMixedFileReportsMixedAndRejectsAnEmptyResult() {
-        String mixed = "[" + ChatPortFixtures.CHATGPT_ONE.strip().substring(1, ChatPortFixtures.CHATGPT_ONE.strip().length() - 1) + ","
-            + ChatPortFixtures.CLAUDE_ONE.strip().substring(1, ChatPortFixtures.CLAUDE_ONE.strip().length() - 1) + "]";
+        String mixed =
+                "["
+                        + ChatPortFixtures.CHATGPT_ONE
+                                .strip()
+                                .substring(1, ChatPortFixtures.CHATGPT_ONE.strip().length() - 1)
+                        + ","
+                        + ChatPortFixtures.CLAUDE_ONE
+                                .strip()
+                                .substring(1, ChatPortFixtures.CLAUDE_ONE.strip().length() - 1)
+                        + "]";
         assertEquals("mixed", service().preview("alice", bytes(mixed)).source());
         assertStatus(HttpStatus.BAD_REQUEST, () -> service().preview("alice", bytes("[]")));
     }
@@ -178,14 +231,16 @@ class ChatImportServiceTest {
         ChatImportService svc = service();
         byte[] big = new byte[1_000_001];
         assertStatus(HttpStatus.CONTENT_TOO_LARGE, () -> svc.preview("alice", big));
-        assertStatus(HttpStatus.CONTENT_TOO_LARGE, () -> svc.importChats("alice", big, List.of("x")));
+        assertStatus(
+                HttpStatus.CONTENT_TOO_LARGE, () -> svc.importChats("alice", big, List.of("x")));
         assertStatus(HttpStatus.BAD_REQUEST, () -> svc.preview("alice", new byte[0]));
     }
 
     @Test
     void hostileInputIsA400NotAServerError() {
         ChatImportService svc = service();
-        assertThrows(IllegalArgumentException.class, () -> svc.preview("alice", bytes("{{{ not json")));
+        assertThrows(
+                IllegalArgumentException.class, () -> svc.preview("alice", bytes("{{{ not json")));
         String deep = "[{\"mapping\":{\"x\":" + "[".repeat(300) + "]".repeat(300) + "}}]";
         assertThrows(IllegalArgumentException.class, () -> svc.preview("alice", bytes(deep)));
     }
@@ -196,7 +251,11 @@ class ChatImportServiceTest {
     void importStoresSelectedChatsAsReadOnlyRecordsAndCallsNothingElse() {
         ChatImportService svc = service();
 
-        ImportResponse r = svc.importChats("alice", bytes(ChatPortFixtures.CHATGPT_TWO_CONVERSATIONS), List.of("conv-b"));
+        ImportResponse r =
+                svc.importChats(
+                        "alice",
+                        bytes(ChatPortFixtures.CHATGPT_TWO_CONVERSATIONS),
+                        List.of("conv-b"));
 
         assertEquals(1, r.imported());
         assertEquals("Second", r.chats().get(0).title());
@@ -211,13 +270,16 @@ class ChatImportServiceTest {
         assertEquals("conv-b", chat.getSourceId());
         assertEquals("Second", chat.getTitle());
         assertEquals(2, chat.getMessageCount());
-        assertEquals(java.time.Instant.ofEpochSecond(1_700_001_000L), chat.getSourceCreatedAt()); // source time preserved
+        assertEquals(
+                java.time.Instant.ofEpochSecond(1_700_001_000L),
+                chat.getSourceCreatedAt()); // source time preserved
         assertNull(chat.getSourceUpdatedAt());
         assertEquals("user", chat.getMessages().get(0).get("role"));
         assertEquals("Hello B", chat.getMessages().get(0).get("content"));
         assertEquals(List.of(), chat.getMessages().get(0).get("attachments"));
 
-        // no model / tool / memory path is reachable from an import; the only collaborator touched is the audit log
+        // no model / tool / memory path is reachable from an import; the only collaborator touched
+        // is the audit log
         verifyNoInteractions(memoryImport);
         verify(audit).record(anyString(), anyString(), anyString(), any(), any(), anyString());
     }
@@ -228,7 +290,8 @@ class ChatImportServiceTest {
         byte[] file = bytes(ChatPortFixtures.CHATGPT_ONE);
         assertStatus(HttpStatus.BAD_REQUEST, () -> svc.importChats("alice", file, List.of()));
         assertStatus(HttpStatus.BAD_REQUEST, () -> svc.importChats("alice", file, null));
-        List<String> many = java.util.stream.IntStream.range(0, 501).mapToObj(i -> "id" + i).toList();
+        List<String> many =
+                java.util.stream.IntStream.range(0, 501).mapToObj(i -> "id" + i).toList();
         assertStatus(HttpStatus.BAD_REQUEST, () -> svc.importChats("alice", file, many));
         verify(repository, never()).save(any(ImportedChat.class));
     }
@@ -238,20 +301,30 @@ class ChatImportServiceTest {
         ChatImportService svc = service();
         when(repository.findSourceIds("alice", "chatgpt")).thenReturn(List.of("conv-a"));
 
-        ImportResponse r = svc.importChats("alice", bytes(ChatPortFixtures.CHATGPT_TWO_CONVERSATIONS),
-            List.of("conv-a", "conv-b", "ghost"));
+        ImportResponse r =
+                svc.importChats(
+                        "alice",
+                        bytes(ChatPortFixtures.CHATGPT_TWO_CONVERSATIONS),
+                        List.of("conv-a", "conv-b", "ghost"));
 
         assertEquals(1, r.imported());
         assertEquals(2, r.skipped().size());
-        assertTrue(r.skipped().stream().anyMatch(s -> s.id().equals("conv-a") && s.reason().equals("duplicate")));
-        assertTrue(r.skipped().stream().anyMatch(s -> s.id().equals("ghost") && s.reason().equals("not_found")));
+        assertTrue(
+                r.skipped().stream()
+                        .anyMatch(s -> s.id().equals("conv-a") && s.reason().equals("duplicate")));
+        assertTrue(
+                r.skipped().stream()
+                        .anyMatch(s -> s.id().equals("ghost") && s.reason().equals("not_found")));
     }
 
     @Test
     void aConcurrentDuplicateLosingTheUniqueIndexIsReportedNotThrown() {
         ChatImportService svc = service();
-        when(repository.save(any(ImportedChat.class))).thenThrow(new DataIntegrityViolationException("uq_imported_chat_source"));
-        ImportResponse r = svc.importChats("alice", bytes(ChatPortFixtures.CHATGPT_ONE), List.of("conv-gpt-1"));
+        when(repository.save(any(ImportedChat.class)))
+                .thenThrow(new DataIntegrityViolationException("uq_imported_chat_source"));
+        ImportResponse r =
+                svc.importChats(
+                        "alice", bytes(ChatPortFixtures.CHATGPT_ONE), List.of("conv-gpt-1"));
         assertEquals(0, r.imported());
         assertEquals("duplicate", r.skipped().get(0).reason());
     }
@@ -260,10 +333,20 @@ class ChatImportServiceTest {
     void theStoredChatCapIsEnforcedPerUser() {
         ChatImportService svc = service(true, 1);
         when(repository.countByOwnerSubject("alice")).thenReturn(1L);
-        assertStatus(HttpStatus.CONFLICT, () -> svc.importChats("alice", bytes(ChatPortFixtures.CHATGPT_ONE), List.of("conv-gpt-1")));
+        assertStatus(
+                HttpStatus.CONFLICT,
+                () ->
+                        svc.importChats(
+                                "alice",
+                                bytes(ChatPortFixtures.CHATGPT_ONE),
+                                List.of("conv-gpt-1")));
 
         when(repository.countByOwnerSubject("bob")).thenReturn(0L);
-        ImportResponse r = svc.importChats("bob", bytes(ChatPortFixtures.CHATGPT_TWO_CONVERSATIONS), List.of("conv-a", "conv-b"));
+        ImportResponse r =
+                svc.importChats(
+                        "bob",
+                        bytes(ChatPortFixtures.CHATGPT_TWO_CONVERSATIONS),
+                        List.of("conv-a", "conv-b"));
         assertEquals(1, r.imported());
         assertEquals("limit_reached", r.skipped().get(0).reason());
     }
@@ -272,12 +355,20 @@ class ChatImportServiceTest {
     void theStoredBytesCapIsEnforcedPerUser() {
         ChatImportService svc = service(true, 2000);
         when(repository.sumStoredBytes("alice")).thenReturn(262_144_000L);
-        assertStatus(HttpStatus.CONFLICT, () -> svc.importChats("alice", bytes(ChatPortFixtures.CHATGPT_ONE), List.of("conv-gpt-1")));
+        assertStatus(
+                HttpStatus.CONFLICT,
+                () ->
+                        svc.importChats(
+                                "alice",
+                                bytes(ChatPortFixtures.CHATGPT_ONE),
+                                List.of("conv-gpt-1")));
         verify(repository, never()).save(any(ImportedChat.class));
 
-        // just under the cap: the first chat that would cross it is skipped as limit_reached, not stored
+        // just under the cap: the first chat that would cross it is skipped as limit_reached, not
+        // stored
         when(repository.sumStoredBytes("bob")).thenReturn(262_144_000L - 10L);
-        ImportResponse r = svc.importChats("bob", bytes(ChatPortFixtures.CHATGPT_ONE), List.of("conv-gpt-1"));
+        ImportResponse r =
+                svc.importChats("bob", bytes(ChatPortFixtures.CHATGPT_ONE), List.of("conv-gpt-1"));
         assertEquals(0, r.imported());
         assertEquals("limit_reached", r.skipped().get(0).reason());
     }
@@ -291,12 +382,32 @@ class ChatImportServiceTest {
         try {
             when(limits.plan("t1")).thenReturn(TenantPlan.FREE);
             when(repository.countByOwnerSubject("alice")).thenReturn(200L);
-            assertStatus(HttpStatus.CONFLICT, () -> svc.importChats("alice", bytes(ChatPortFixtures.CHATGPT_ONE), List.of("conv-gpt-1")));
-            assertEquals(200, svc.preview("alice", bytes(ChatPortFixtures.CHATGPT_ONE)).capacity().maxStoredChats());
+            assertStatus(
+                    HttpStatus.CONFLICT,
+                    () ->
+                            svc.importChats(
+                                    "alice",
+                                    bytes(ChatPortFixtures.CHATGPT_ONE),
+                                    List.of("conv-gpt-1")));
+            assertEquals(
+                    200,
+                    svc.preview("alice", bytes(ChatPortFixtures.CHATGPT_ONE))
+                            .capacity()
+                            .maxStoredChats());
 
             when(limits.plan("t1")).thenReturn(TenantPlan.PREMIUM);
-            assertEquals(2000, svc.preview("alice", bytes(ChatPortFixtures.CHATGPT_ONE)).capacity().maxStoredChats());
-            assertEquals(1, svc.importChats("alice", bytes(ChatPortFixtures.CHATGPT_ONE), List.of("conv-gpt-1")).imported());
+            assertEquals(
+                    2000,
+                    svc.preview("alice", bytes(ChatPortFixtures.CHATGPT_ONE))
+                            .capacity()
+                            .maxStoredChats());
+            assertEquals(
+                    1,
+                    svc.importChats(
+                                    "alice",
+                                    bytes(ChatPortFixtures.CHATGPT_ONE),
+                                    List.of("conv-gpt-1"))
+                            .imported());
         } finally {
             TenantContext.clear();
         }
@@ -312,7 +423,9 @@ class ChatImportServiceTest {
         try {
             byte[] file = bytes(ChatPortFixtures.CHATGPT_ONE);
             assertStatus(HttpStatus.NOT_FOUND, () -> svc.preview("visitor", file));
-            assertStatus(HttpStatus.NOT_FOUND, () -> svc.importChats("visitor", file, List.of("conv-gpt-1")));
+            assertStatus(
+                    HttpStatus.NOT_FOUND,
+                    () -> svc.importChats("visitor", file, List.of("conv-gpt-1")));
             verify(repository, never()).save(any(ImportedChat.class));
             assertFalse(svc.features().importEnabled());
         } finally {
@@ -344,14 +457,22 @@ class ChatImportServiceTest {
         assertEquals(3, v.messages().size());
         assertEquals("Plan a 3-day trip to Kyoto.", v.messages().get(0).content());
         assertEquals(List.of("image", "map.png"), v.messages().get(2).attachments());
-        assertEquals(java.time.Instant.ofEpochMilli(1_700_000_001_000L), v.messages().get(0).timestamp());
+        assertEquals(
+                java.time.Instant.ofEpochMilli(1_700_000_001_000L),
+                v.messages().get(0).timestamp());
 
         svc.delete("alice", id);
         verify(repository).delete(stored);
     }
 
     private static ChatImportParser.ParsedChat firstParsed() {
-        return ChatImportParser.parse(bytes(ChatPortFixtures.CHATGPT_ONE), ChatImportParser.Limits.defaults(), true, null).chats().get(0);
+        return ChatImportParser.parse(
+                        bytes(ChatPortFixtures.CHATGPT_ONE),
+                        ChatImportParser.Limits.defaults(),
+                        true,
+                        null)
+                .chats()
+                .get(0);
     }
 
     // ---- optional memory step ----
@@ -360,44 +481,61 @@ class ChatImportServiceTest {
     void memoryCandidatesProposeFirstPersonLinesThroughTheMemoryImportPreviewOnly() {
         ChatImportService svc = service();
         UUID id = UUID.randomUUID();
-        String json = """
+        String json =
+                """
             [{"uuid": "m1", "name": "About me", "chat_messages": [
               {"sender": "human", "text": "I live in Pune. What is the weather like? My stack is Spring and Postgres."},
               {"sender": "assistant", "text": "I live in the cloud, as a model."}]}]
             """;
-        ImportedChat stored = ChatImportService.toEntity("alice", ChatImportParser.parse(bytes(json),
-            ChatImportParser.Limits.defaults(), true, null).chats().get(0));
+        ImportedChat stored =
+                ChatImportService.toEntity(
+                        "alice",
+                        ChatImportParser.parse(
+                                        bytes(json), ChatImportParser.Limits.defaults(), true, null)
+                                .chats()
+                                .get(0));
         when(repository.findByIdAndOwnerSubject(id, "alice")).thenReturn(Optional.of(stored));
         when(memoryImport.limits()).thenReturn(new MemoryImportDtos.ImportLimits(200, 20_000));
-        MemoryImportDtos.PreviewResponse expected = new MemoryImportDtos.PreviewResponse(List.of(),
-            new MemoryImportDtos.PreviewStats(2, 2, 0, 0), new MemoryImportDtos.Capacity(50, 25), "claude");
-        when(memoryImport.preview(anyString(), any(MemoryImportDtos.PreviewRequest.class))).thenReturn(expected);
+        MemoryImportDtos.PreviewResponse expected =
+                new MemoryImportDtos.PreviewResponse(
+                        List.of(),
+                        new MemoryImportDtos.PreviewStats(2, 2, 0, 0),
+                        new MemoryImportDtos.Capacity(50, 25),
+                        "claude");
+        when(memoryImport.preview(anyString(), any(MemoryImportDtos.PreviewRequest.class)))
+                .thenReturn(expected);
 
         MemoryImportDtos.PreviewResponse r = svc.memoryCandidates("alice", List.of(id));
 
         assertEquals(expected, r);
-        ArgumentCaptor<MemoryImportDtos.PreviewRequest> req = ArgumentCaptor.forClass(MemoryImportDtos.PreviewRequest.class);
+        ArgumentCaptor<MemoryImportDtos.PreviewRequest> req =
+                ArgumentCaptor.forClass(MemoryImportDtos.PreviewRequest.class);
         verify(memoryImport).preview(anyString(), req.capture());
         assertEquals("claude", req.getValue().sourceHint());
-        assertEquals("- I live in Pune.\n- My stack is Spring and Postgres.\n", req.getValue().text());
+        assertEquals(
+                "- I live in Pune.\n- My stack is Spring and Postgres.\n", req.getValue().text());
         // proposing is not saving: nothing was persisted or audited
         verify(repository, never()).save(any(ImportedChat.class));
-        verify(memoryImport, never()).importFacts(anyString(), any(MemoryImportDtos.ImportRequest.class));
+        verify(memoryImport, never())
+                .importFacts(anyString(), any(MemoryImportDtos.ImportRequest.class));
     }
 
     @Test
     void memoryCandidatesAreEmptyWhenNothingLooksLikeAFactAndNeedMemoryImportOn() {
         ChatImportService svc = service();
         UUID id = UUID.randomUUID();
-        when(repository.findByIdAndOwnerSubject(id, "alice")).thenReturn(Optional.of(ChatImportService.toEntity("alice", firstParsed())));
+        when(repository.findByIdAndOwnerSubject(id, "alice"))
+                .thenReturn(Optional.of(ChatImportService.toEntity("alice", firstParsed())));
         when(memoryImport.limits()).thenReturn(new MemoryImportDtos.ImportLimits(200, 20_000));
 
         MemoryImportDtos.PreviewResponse r = svc.memoryCandidates("alice", List.of(id));
         assertTrue(r.facts().isEmpty());
-        verify(memoryImport, never()).preview(anyString(), any(MemoryImportDtos.PreviewRequest.class));
+        verify(memoryImport, never())
+                .preview(anyString(), any(MemoryImportDtos.PreviewRequest.class));
 
         // memory import switched off: its own limits() answers 404 and that is passed through
-        when(memoryImport.limits()).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "off"));
+        when(memoryImport.limits())
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "off"));
         assertStatus(HttpStatus.NOT_FOUND, () -> svc.memoryCandidates("alice", List.of(id)));
         assertStatus(HttpStatus.BAD_REQUEST, () -> svc.memoryCandidates("alice", List.of()));
     }

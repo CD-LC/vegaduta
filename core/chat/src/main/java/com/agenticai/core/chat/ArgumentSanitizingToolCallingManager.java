@@ -1,7 +1,11 @@
 package com.agenticai.core.chat;
 
 import io.micrometer.core.instrument.MeterRegistry;
-
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -17,14 +21,7 @@ import org.springframework.ai.model.tool.ToolExecutionResult;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.execution.ToolExecutionException;
-
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Wraps a {@link ToolCallingManager} to repair tool-call {@code arguments} that aren't valid JSON
@@ -111,8 +108,8 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
 
     static final String HARD_STOP_REPLY =
             "I had to stop here: this request needed more tool calls than a single reply is allowed"
-                + " to make. Please narrow the request, or ask me to continue from where I left"
-                + " off.";
+                    + " to make. Please narrow the request, or ask me to continue from where I left"
+                    + " off.";
 
     private final ToolCallingManager delegate;
     private final ObjectMapper objectMapper;
@@ -310,8 +307,8 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         if (!softStopAlreadySent) {
             log.warn(
                     "Tool loop limit reached (reason={} round={} maxRounds={} unknownCalls={}"
-                        + " maxUnknown={}) - answering {} tool call(s) with a budget-exhausted"
-                        + " result instead of executing them",
+                            + " maxUnknown={}) - answering {} tool call(s) with a budget-exhausted"
+                            + " result instead of executing them",
                     reason,
                     round,
                     maxToolRounds,
@@ -333,7 +330,7 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
 
         log.warn(
                 "Model kept calling tools after the budget-exhausted notice (reason={} round={}) -"
-                    + " ending the tool loop with returnDirect",
+                        + " ending the tool loop with returnDirect",
                 reason,
                 round);
         increment(LOOP_LIMIT_METRIC, 1, "stage", "hard", "reason", reason);
@@ -467,7 +464,7 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
     private void onArgumentsRejected(String toolName, ToolArgumentValidator.Result result) {
         log.warn(
                 "Tool call rejected before execution, the model gets the schema back: tool={}"
-                    + " problems={} unknownKeys={}",
+                        + " problems={} unknownKeys={}",
                 toolName,
                 result.problems(),
                 result.unknownKeys());
@@ -568,8 +565,8 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             UnavailableToolCallback fallback = UnavailableToolCallback.forToolName(name);
             log.warn(
                     "Model requested a tool that was not offered to it: name={} knownTools={} -"
-                        + " answering with an explanation instead of failing the turn. Reply to the"
-                        + " model: {}",
+                            + " answering with an explanation instead of failing the turn. Reply to the"
+                            + " model: {}",
                     name,
                     known,
                     fallback.message());
@@ -632,7 +629,7 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             changed = true;
             log.warn(
                     "Repairing non-JSON tool-call arguments before replay: tool={}"
-                        + " argumentsPreview={}",
+                            + " argumentsPreview={}",
                     toolCall.name(),
                     preview(toolCall.arguments()));
             repaired.add(

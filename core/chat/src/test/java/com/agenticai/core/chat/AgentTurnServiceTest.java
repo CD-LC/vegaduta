@@ -21,7 +21,13 @@ import com.agenticai.core.chat.gateway.LlmGatewayContentPolicyViolationException
 import com.agenticai.core.providers.PlatformHostedLlmProvider;
 import com.agenticai.core.providers.PlatformHostedLlmProviderService;
 import com.agenticai.core.providers.PlatformHostedLlmProviderService.HostedProviderSelection;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
@@ -35,14 +41,6 @@ import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 /**
  * Locks in the three things that make this endpoint safe and useful: (1) the model's tool calls

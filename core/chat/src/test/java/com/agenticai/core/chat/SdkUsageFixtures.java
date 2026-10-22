@@ -2,10 +2,8 @@ package com.agenticai.core.chat;
 
 import com.anthropic.models.messages.Usage;
 import com.openai.models.completions.CompletionUsage;
-
-import org.springframework.ai.chat.metadata.DefaultUsage;
-
 import java.util.Optional;
+import org.springframework.ai.chat.metadata.DefaultUsage;
 
 /**
  * Provider usage exactly as Spring AI 2.0's {@code AnthropicChatModel#getDefaultUsage} and {@code

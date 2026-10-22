@@ -16,12 +16,6 @@ import static com.agenticai.core.workflow.WorkflowDataOps.str;
 import com.agenticai.core.workflow.WorkflowDataOps.Condition;
 import com.agenticai.core.workflow.WorkflowDataOps.Items;
 import com.agenticai.core.workflow.WorkflowDataOps.Outcome;
-
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.StringNode;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +24,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * The {@code filter} and {@code switch} data operations and the condition language they share
@@ -350,7 +348,7 @@ final class DataFilterOps {
             if (now - totalDeadline > 0) {
                 throw new IllegalStateException(
                         "Regex evaluation budget exceeded - simplify the pattern or reduce the"
-                            + " input.");
+                                + " input.");
             }
             long deadline = Math.min(now + REGEX_MATCH_BUDGET_NANOS, totalDeadline);
             try {

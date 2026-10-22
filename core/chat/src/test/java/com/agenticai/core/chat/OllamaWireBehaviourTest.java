@@ -27,13 +27,14 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * What the Spring AI 1.x WebClient/RestClient filters did for Ollama, now through the real Spring AI
- * 2 OpenAI model on the shared transport against a local server speaking Ollama's dialect:
+ * What the Spring AI 1.x WebClient/RestClient filters did for Ollama, now through the real Spring
+ * AI 2 OpenAI model on the shared transport against a local server speaking Ollama's dialect:
  *
  * <ul>
- *   <li>a model's thinking text arrives in a {@code reasoning} field (not {@code reasoning_content});
- *       the SDK model must surface it as {@code reasoningContent} metadata, blocking and streamed,
- *       because {@code ReasoningEmitAdvisor} turns that into {@code thinking} step events;
+ *   <li>a model's thinking text arrives in a {@code reasoning} field (not {@code
+ *       reasoning_content}); the SDK model must surface it as {@code reasoningContent} metadata,
+ *       blocking and streamed, because {@code ReasoningEmitAdvisor} turns that into {@code
+ *       thinking} step events;
  *   <li>HTTP 500 "XML syntax error ..." for a malformed model-written tool call is replayed (the
  *       platform retry policy covers blocking and streamed requests alike) and the second answer
  *       wins.
@@ -69,7 +70,9 @@ class OllamaWireBehaviourTest {
                 "/v1/chat/completions",
                 exchange -> {
                     String body =
-                            new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                            new String(
+                                    exchange.getRequestBody().readAllBytes(),
+                                    StandardCharsets.UTF_8);
                     bodies.add(body);
                     boolean stream = body.contains("\"stream\":true");
                     int n = calls.incrementAndGet();

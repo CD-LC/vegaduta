@@ -2,9 +2,13 @@ package com.agenticai.core.chat;
 
 import com.agenticai.core.providers.ToolRouterMode;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
-
 import io.micrometer.core.instrument.MeterRegistry;
-
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -23,22 +27,13 @@ import org.springframework.ai.model.tool.ToolExecutionResult;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * Makes a small model choose between "call this tool with these arguments" and "answer" through a
@@ -158,7 +153,7 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
                 // the turn goes through unrouted and this model is not asked again until restart.
                 log.warn(
                         "{} refused the reply schema ({}); the constrained tool router is off for"
-                            + " this model until core restarts. Message: {}",
+                                + " this model until core restarts. Message: {}",
                         modelName,
                         mode,
                         e.getMessage());
@@ -186,7 +181,7 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
         if (round >= maxRounds) {
             log.warn(
                     "Constrained tool router stopped after {} rounds; releasing the reply (last"
-                        + " call: {}).",
+                            + " call: {}).",
                     round,
                     decision.call.name());
             increment("outcome", "limit");
@@ -396,13 +391,13 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
         StringBuilder text =
                 new StringBuilder(
                         "You can use the tools below. Reply with exactly one JSON object and"
-                            + " nothing else:"
-                            + " {\"action\":\"call\",\"tool\":\"<name>\",\"arguments\":{...}} to"
-                            + " run a tool (arguments must follow that tool's parameters), or"
-                            + " {\"action\":\"answer\",\"answer\":\"<your reply to the user>\"}"
-                            + " when no tool is needed or you already have the results you need."
-                            + " Call one tool at a time; the result comes back as a tool message.\n"
-                            + "Tools:\n");
+                                + " nothing else:"
+                                + " {\"action\":\"call\",\"tool\":\"<name>\",\"arguments\":{...}} to"
+                                + " run a tool (arguments must follow that tool's parameters), or"
+                                + " {\"action\":\"answer\",\"answer\":\"<your reply to the user>\"}"
+                                + " when no tool is needed or you already have the results you need."
+                                + " Call one tool at a time; the result comes back as a tool message.\n"
+                                + "Tools:\n");
         for (ToolCallback tool : tools) {
             ToolDefinition definition = tool.getToolDefinition();
             text.append("- ")
@@ -438,10 +433,10 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
                         .name(FINAL_ANSWER_TOOL)
                         .description(
                                 "Send your reply to the user. Call this when no other tool is"
-                                    + " needed or you have the results you need.")
+                                        + " needed or you have the results you need.")
                         .inputSchema(
                                 "{\"type\":\"object\",\"properties\":{\"answer\":{\"type\":\"string\",\"description\":\"The"
-                                    + " reply, in full.\"}},\"required\":[\"answer\"]}")
+                                        + " reply, in full.\"}},\"required\":[\"answer\"]}")
                         .build();
 
         @Override

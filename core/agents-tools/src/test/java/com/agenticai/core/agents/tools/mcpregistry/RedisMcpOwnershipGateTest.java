@@ -15,18 +15,16 @@ import com.agenticai.core.mcp.McpConnectionPhase;
 import com.agenticai.core.mcp.McpDynamicConnector;
 import com.agenticai.core.mcp.dto.McpConnectionTestResult;
 import com.agenticai.core.security.TenantContext;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.data.redis.RedisConnectionFailureException;
-
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.RedisConnectionFailureException;
 
 class RedisMcpOwnershipGateTest {
 

@@ -3,15 +3,12 @@ package com.agenticai.core.agents.tools.tables;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.tables.DataTableDtos.RowView;
-
-import org.springframework.web.server.ResponseStatusException;
-
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /** Shared argument parsing and failure rendering for the two data-table tools. */
 final class DataTableToolSupport {

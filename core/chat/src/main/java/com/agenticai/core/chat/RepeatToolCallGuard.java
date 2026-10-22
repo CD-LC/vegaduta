@@ -1,7 +1,12 @@
 package com.agenticai.core.chat;
 
 import com.agenticai.core.json.JsonMappers;
-
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
@@ -10,16 +15,8 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolExecutionResult;
-
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Stops a model from asking for the same lookup twice in one reply.
@@ -56,14 +53,14 @@ final class RepeatToolCallGuard {
     /** Default of {@code app.chat.tools.repeat-guard.tools}. */
     static final String DEFAULT_TOOLS =
             "web_search,fetch_web_page,search_knowledge_base,list_knowledge_collections,"
-                + "search_conversation_history,recall_related_facts,vegaduta_api_guide,vegaduta_setup_guide";
+                    + "search_conversation_history,recall_related_facts,vegaduta_api_guide,vegaduta_setup_guide";
 
     static final String DUPLICATE_MARKER = "duplicate_tool_call";
     static final String METRIC = "chat.tool.repeat_blocked";
 
     static final String STOP_REPLY =
             "I stopped here: I kept asking for the same lookup. Please rephrase or narrow the"
-                + " request, or ask me to continue.";
+                    + " request, or ask me to continue.";
 
     private static final RepeatToolCallGuard DISABLED = new RepeatToolCallGuard(Set.of(), false);
 

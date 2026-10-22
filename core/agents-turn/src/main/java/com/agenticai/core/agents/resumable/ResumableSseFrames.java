@@ -1,7 +1,6 @@
 package com.agenticai.core.agents.resumable;
 
 import com.agenticai.core.agents.resumable.ResumableStreamBuffer.Entry;
-
 import org.springframework.http.codec.ServerSentEvent;
 
 /** SSE framing of resumable-stream buffer entries; see {@link ResumableChatStreamService}. */

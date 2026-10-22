@@ -6,15 +6,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.tools.classification.McpAnnotationClassifier;
-
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpSchema;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.ai.tool.ToolCallback;
-
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
+import org.springframework.ai.tool.ToolCallback;
 
 /**
  * With {@code app.tools.mcp-annotations.enabled} the static discovery goes through the provider
@@ -42,7 +39,8 @@ class AgentMcpToolResolverStaticAnnotationNamesTest {
         when(client.getClientCapabilities())
                 .thenReturn(McpSchema.ClientCapabilities.builder().build());
         when(client.getClientInfo()).thenReturn(new McpSchema.Implementation("test", "1.0"));
-        when(client.getCurrentInitializationResult()).thenReturn(mock(McpSchema.InitializeResult.class));
+        when(client.getCurrentInitializationResult())
+                .thenReturn(mock(McpSchema.InitializeResult.class));
         return client;
     }
 

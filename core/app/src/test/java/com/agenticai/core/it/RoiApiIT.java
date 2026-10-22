@@ -17,7 +17,10 @@ import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantMigrationService;
 import com.agenticai.core.tenancy.TenantRepository;
-
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -30,14 +33,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
-
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * Every {@code /api/tenant/roi/**} endpoint against a real Postgres with two tenant schemas, A and
@@ -113,7 +110,7 @@ class RoiApiIT extends AbstractContextIT {
     private void setFreeMode(boolean on) {
         jdbc.update(
                 "UPDATE control_plane.platform_setting SET value = ? WHERE key ="
-                    + " 'platform.free-mode.enabled'",
+                        + " 'platform.free-mode.enabled'",
                 String.valueOf(on));
     }
 

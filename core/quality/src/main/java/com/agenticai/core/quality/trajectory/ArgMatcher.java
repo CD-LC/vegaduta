@@ -1,11 +1,10 @@
 package com.agenticai.core.quality.trajectory;
 
-import tools.jackson.databind.JsonNode;
-
 import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * What one expected argument of an expected tool call must look like. Written in a trajectory spec

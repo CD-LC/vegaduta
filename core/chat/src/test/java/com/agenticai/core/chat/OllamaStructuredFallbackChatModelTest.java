@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -20,12 +23,7 @@ import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
-
 import reactor.core.publisher.Flux;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
 
 /**
  * The structured-output path for an Ollama model whose runner refuses {@code json_schema} (HTTP 400
@@ -37,7 +35,7 @@ class OllamaStructuredFallbackChatModelTest {
     private static final String MODEL = "refuses-schema-model";
     private static final String SCHEMA =
             "{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"},\"score\":{\"type\":\"integer\"}},"
-                + "\"required\":[\"title\",\"score\"]}";
+                    + "\"required\":[\"title\",\"score\"]}";
 
     @AfterEach
     void forget() {

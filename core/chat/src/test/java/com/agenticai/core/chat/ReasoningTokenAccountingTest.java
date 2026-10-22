@@ -7,13 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.genai.types.GenerateContentResponseUsageMetadata;
 import com.openai.models.completions.CompletionUsage;
-
+import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.google.genai.metadata.GoogleGenAiUsage;
-
-import java.math.BigDecimal;
 
 /**
  * Per-provider usage shapes for reasoning tokens, built from the real Spring AI 2 SDK usage /

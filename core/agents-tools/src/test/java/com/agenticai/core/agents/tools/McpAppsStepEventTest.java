@@ -132,7 +132,8 @@ class McpAppsStepEventTest {
                         null,
                         null,
                         Map.of("ui", Map.of("resourceUri", "ui://weather/forecast"))));
-        tools.add(new McpSchema.Tool("plain", null, "d", Map.of("type", "object"), null, null, null));
+        tools.add(
+                new McpSchema.Tool("plain", null, "d", Map.of("type", "object"), null, null, null));
         tools.add(
                 new McpSchema.Tool(
                         "evil",

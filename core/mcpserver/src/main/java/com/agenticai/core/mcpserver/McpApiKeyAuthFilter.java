@@ -3,7 +3,6 @@ package com.agenticai.core.mcpserver;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.mcpserver.expose.McpExposureRpcHandler;
 import com.agenticai.core.security.TenantContext;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletException;
@@ -11,16 +10,6 @@ import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
-import org.springframework.util.StringUtils;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -30,6 +19,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Authenticates every inbound request to the MCP server endpoint (see {@code McpServerToolConfig}
@@ -199,7 +195,7 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
             if (grant.isEmpty()) {
                 log.warn(
                         "Inbound MCP call rejected - API key resolved a tenant schema but no"
-                            + " enabled grant (***{})",
+                                + " enabled grant (***{})",
                         lastFour(rawKey));
                 reject(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid API key.");
                 return;

@@ -1,20 +1,17 @@
 package com.agenticai.core.agents.tools;
 
 import io.modelcontextprotocol.client.transport.customizer.McpSyncHttpClientRequestCustomizer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
-
 import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Streamable HTTP routing headers from MCP revision 2026-07-28: every POST mirrors the JSON-RPC
@@ -100,8 +97,8 @@ class McpRoutingHeaders {
     static void warnSseDeprecated(String serverName) {
         log.warn(
                 "MCP server '{}' uses the deprecated HTTP+SSE transport; re-register it as"
-                    + " STREAMABLE_HTTP (see docs/architecture/mcp-spec-alignment.md for the"
-                    + " deprecation timeline)",
+                        + " STREAMABLE_HTTP (see docs/architecture/mcp-spec-alignment.md for the"
+                        + " deprecation timeline)",
                 serverName);
     }
 }

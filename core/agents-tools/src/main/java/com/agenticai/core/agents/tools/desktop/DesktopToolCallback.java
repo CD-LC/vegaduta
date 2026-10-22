@@ -2,16 +2,13 @@ package com.agenticai.core.agents.tools.desktop;
 
 import com.agenticai.core.guardrails.ToolConfirmationDescriber;
 import com.agenticai.core.json.JsonMappers;
-
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * One {@code local_desktop_*} tool over the desktop-agent sidecar (services/desktop-agent). The
@@ -35,26 +32,26 @@ public final class DesktopToolCallback implements ToolCallback, ToolConfirmation
         SCREEN(
                 "local_desktop_screen",
                 "Take a screenshot of the whole screen and save it as a PNG on the laptop. Returns"
-                    + " the saved path and its size - the person can open it, or you can open it"
-                    + " for them with local_desktop_open. Use it to verify what an earlier action"
-                    + " did.",
+                        + " the saved path and its size - the person can open it, or you can open it"
+                        + " for them with local_desktop_open. Use it to verify what an earlier action"
+                        + " did.",
                 "POST",
                 "/screenshot",
                 true),
         ELEMENTS(
                 "local_desktop_elements",
                 "List the interactive elements (buttons, fields, links, menus) of the frontmost"
-                    + " app, or of `app` when given, with each element's role, label and on-screen"
-                    + " position. The reliable way to act without guessing pixels: find the label,"
-                    + " then press it with local_desktop_press or click its coordinates.",
+                        + " app, or of `app` when given, with each element's role, label and on-screen"
+                        + " position. The reliable way to act without guessing pixels: find the label,"
+                        + " then press it with local_desktop_press or click its coordinates.",
                 "POST",
                 "/ui",
                 true),
         PRESS(
                 "local_desktop_press",
                 "Press the first UI element whose label contains `label` in the frontmost app (or"
-                    + " `app` when given), e.g. \"Save\", \"Send\", \"OK\". Prefer this over raw"
-                    + " coordinates.",
+                        + " `app` when given), e.g. \"Save\", \"Send\", \"OK\". Prefer this over raw"
+                        + " coordinates.",
                 "POST",
                 "/ui/press",
                 false),
@@ -68,42 +65,42 @@ public final class DesktopToolCallback implements ToolCallback, ToolConfirmation
         TYPE(
                 "local_desktop_type",
                 "Type `text` with the keyboard into whatever has focus. Bring the right app or"
-                    + " field to the front first (local_desktop_activate, local_desktop_click).",
+                        + " field to the front first (local_desktop_activate, local_desktop_click).",
                 "POST",
                 "/type",
                 false),
         KEY(
                 "local_desktop_key",
                 "Press one named key: return, enter, tab, space, delete, escape, left, right, down,"
-                    + " up or f1-f12.",
+                        + " up or f1-f12.",
                 "POST",
                 "/key",
                 false),
         OPEN(
                 "local_desktop_open",
                 "Open `target` - an app name, a file path or a URL - in the laptop's normal"
-                    + " handler, or in `application` when given.",
+                        + " handler, or in `application` when given.",
                 "POST",
                 "/open",
                 false),
         ACTIVATE(
                 "local_desktop_activate",
                 "Bring the named application to the front so follow-up typing and clicks land in"
-                    + " it.",
+                        + " it.",
                 "POST",
                 "/activate",
                 false),
         NOTIFY(
                 "local_desktop_notify",
                 "Show the person a system notification with `title` and `body`. The quiet way to"
-                    + " say a background job finished while they were away.",
+                        + " say a background job finished while they were away.",
                 "POST",
                 "/notify",
                 true),
         CLIPBOARD(
                 "local_desktop_clipboard",
                 "Read the laptop's clipboard (no `text`), or replace its contents when `text` is"
-                    + " given.",
+                        + " given.",
                 null,
                 null,
                 true);
@@ -155,7 +152,7 @@ public final class DesktopToolCallback implements ToolCallback, ToolConfirmation
                         action.description
                                 + (approvalRequired && !action.benign
                                         ? " Each call is shown to the user for approval before it"
-                                              + " runs."
+                                                + " runs."
                                         : ""))
                 .inputSchema(schemaFor(action))
                 .build();

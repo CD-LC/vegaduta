@@ -1,9 +1,12 @@
 package com.agenticai.core.chat;
 
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
-
 import io.micrometer.core.instrument.MeterRegistry;
-
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -21,17 +24,9 @@ import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.model.tool.ToolExecutionResult;
 import org.springframework.ai.support.UsageCalculator;
 import org.springframework.ai.tool.ToolCallback;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Wraps any {@link ChatModel} so that a tool call the model wrote as <em>text</em> (see {@link
@@ -253,7 +248,7 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
         List<String> names = calls.stream().map(AssistantMessage.ToolCall::name).toList();
         log.info(
                 "Model answered with a text-form tool call instead of a structured one - executing"
-                    + " it (round={} tools={})",
+                        + " it (round={} tools={})",
                 round + 1,
                 names);
         increment("outcome", "recovered");
@@ -284,7 +279,7 @@ public final class TextToolCallRecoveringChatModel implements ChatModel {
     private void giveUp(int round, List<AssistantMessage.ToolCall> calls) {
         log.warn(
                 "Model still answers with text-form tool calls after {} recovered round(s) -"
-                    + " releasing the reply as text (tools={})",
+                        + " releasing the reply as text (tools={})",
                 round,
                 calls.stream().map(AssistantMessage.ToolCall::name).toList());
         increment("outcome", "limit");

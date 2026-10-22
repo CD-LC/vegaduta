@@ -8,7 +8,12 @@ import com.agenticai.core.chat.AgentTurn.Message;
 import com.agenticai.core.chat.AgentTurn.Tool;
 import com.agenticai.core.chat.AgentTurn.ToolCall;
 import com.sun.net.httpserver.HttpServer;
-
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,13 +22,6 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The seam test in {@link AgentTurnServiceTest} stubs the provider call, so it cannot prove the

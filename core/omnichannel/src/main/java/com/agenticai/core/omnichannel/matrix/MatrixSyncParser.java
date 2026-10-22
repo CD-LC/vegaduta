@@ -1,12 +1,11 @@
 package com.agenticai.core.omnichannel.matrix;
 
-import tools.jackson.databind.JsonNode;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Turns a {@code /sync} response into the three things the channel acts on: room invites addressed

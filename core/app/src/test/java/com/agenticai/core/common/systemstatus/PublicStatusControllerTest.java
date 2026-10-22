@@ -13,13 +13,11 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.platform.ops.PlatformBroadcastService;
 import com.agenticai.core.platform.ops.PlatformBroadcastService.PublicAnnouncement;
 import com.agenticai.core.platform.ops.PlatformBroadcastService.PublicMaintenance;
-
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.boot.health.registry.HealthContributorRegistry;
 import org.springframework.kafka.core.KafkaAdmin;
-
-import java.time.Instant;
 
 class PublicStatusControllerTest {
 

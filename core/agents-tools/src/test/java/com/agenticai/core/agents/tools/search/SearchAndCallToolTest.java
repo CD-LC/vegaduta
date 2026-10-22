@@ -7,17 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.ai.chat.model.ToolContext;
-import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.tool.definition.ToolDefinition;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.model.ToolContext;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
  * search_tools + call_tool against a hand-built {@link ToolSearchState}: activation, dispatch,
@@ -392,7 +391,7 @@ class SearchAndCallToolTest {
 
         callTool.call(
                 "{\"name\":\"google_gmail\",\"argsJson\":\"{\\\"to\\\":\\\"a@b.com\\\"} trailing"
-                    + " garbage\"}");
+                        + " garbage\"}");
 
         assertEquals(List.of("{\"to\":\"a@b.com\"}"), gmail.inputs);
     }
