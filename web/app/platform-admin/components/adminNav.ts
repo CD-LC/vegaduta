@@ -35,6 +35,7 @@ import {
   Eye,
   type LucideIcon,
 } from "lucide-react";
+import { isPersonalEdition, isPersonalPlatformAdminAllowed } from "../../lib/edition";
 
 // Platform-admin rail navigation (extracted from AdminShell). Groups trace an
 // operator's mental model: who uses the platform (Tenancy), what powers it
@@ -165,6 +166,24 @@ export const NAV_SECTIONS: AdminNavSection[] = [
     ],
   },
 ];
+
+/**
+ * The rail a personal install sees: only the destinations in PERSONAL_PLATFORM_ADMIN_ALLOW (LLM pools,
+ * tool credentials, platform settings), so the Overview row goes too (the root redirects to the LLM
+ * pools). Sections left empty drop out. Every other edition keeps the full rail.
+ */
+export function filterEditionNav<S extends { items: readonly { href: string }[] }>(
+  sections: readonly S[],
+  personal = isPersonalEdition(),
+): S[] {
+  if (!personal) return [...sections];
+  return sections
+    .map((s) => ({
+      ...s,
+      items: s.items.filter((i) => i.href !== "/platform-admin" && isPersonalPlatformAdminAllowed(i.href)),
+    }))
+    .filter((s) => s.items.length > 0);
+}
 
 /** Segment-boundary prefix match: "/platform-admin/demo-sandbox" must not
  *  light up on "/platform-admin/demo-sandboxes" unless listed in `also`. */
