@@ -1,6 +1,8 @@
 package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.agents.core.Agent;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,6 +33,7 @@ import org.springframework.util.StringUtils;
  * {@code securitySchemes}/{@code security} advertise exactly what the endpoint
  * enforces (a bearer JWT via the main Spring Security chain) and nothing more.
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @Service
 public class A2aAgentCardService {
 

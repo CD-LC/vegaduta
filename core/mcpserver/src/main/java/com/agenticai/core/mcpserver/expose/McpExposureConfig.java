@@ -6,6 +6,8 @@ import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.approval.ApprovalRequestRepository;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.mcpserver.McpServerRateLimiter;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.workflow.WorkflowBackgroundRunService;
 import com.agenticai.core.workflow.WorkflowService;
 import java.util.List;
@@ -29,6 +31,7 @@ import org.springframework.context.annotation.Profile;
  * <p>The key lives under {@code app.mcp-server} (kebab-case, as named in the feature brief) in
  * {@code application-mcpserver.yml}, next to - not inside - the older {@code app.mcpserver} block.
  */
+@ConditionalOnEditionFeature(EditionFeature.MCP_SERVER_EXPOSURE)
 @Configuration
 @Profile("mcpserver")
 @ConditionalOnProperty(name = "app.mcp-server.expose-agents.enabled", havingValue = "true")
