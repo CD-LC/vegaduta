@@ -31,9 +31,13 @@ change between releases; what 1.x promises is in [Stability from 1.0.0](#stabili
 
 ## What counts as breaking
 
-Removing a route, a response field or an enum value; renaming anything; making an optional request field or parameter
-required; narrowing accepted values; changing a field's type or meaning; changing the success status code. These go
-through the policy above. When a change cannot be made compatibly at all, the replacement is a new route (or, for a
+Removing a route, a response field, a request field, a parameter or an enum value; renaming anything; making an
+optional request field or parameter required; narrowing accepted values (an enum, a length, range or pattern, a
+format, a `oneOf` alternative); requiring authentication, a security scheme, a role or a permission that was not
+required before; changing a field's type or meaning; changing the success status code. These go through the policy
+above. The CI gate (`scripts/ci/openapi-breaking.mjs`, see [the API README](README.md#breaking-change-gate)) checks
+all of these except the success status code and meaning: a 200 that becomes a 201 is compared as the same response,
+so a reviewer has to catch it, and it needs a changelog note like any other break. When a change cannot be made compatibly at all, the replacement is a new route (or, for a
 wholesale redesign, a new `/api/v2` prefix), and the old one is deprecated.
 
 ## Stability from 1.0.0

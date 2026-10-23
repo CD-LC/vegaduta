@@ -7,8 +7,10 @@
 
 First-party TypeScript and Python clients for the VegaDuta REST API. Both are generated from
 [`docs/api/openapi.json`](../docs/api/README.md) by one dependency-free Node script, and both have a
-small hand-written runtime. Package names (`vegaduta-sdk`) and the version (`0.1.0`) are
-placeholders until a registry name is reserved; neither package has any runtime dependency.
+small hand-written runtime. Both are packaged as `vegaduta-sdk` (npm and PyPI) at version `0.1.0`;
+neither is published yet, because the names still have to be reserved on the registries
+([releasing them](../docs/maintainers/releasing-rest-sdks.md)). Neither package has any runtime
+dependency.
 
 ```
 sdk/
@@ -132,11 +134,12 @@ call an endpoint that is not in the consumer contracts under
 field there is missing from `docs/api/openapi.json`. Adding an example that calls a new endpoint
 means adding that interaction to both contracts; core's provider verifier then checks it.
 
-A contract states the status core really sends, which is not always what the spec says: the spec is
-built by reflection and cannot see `ResponseEntity.status(...)`, so it lists 200 for `POST
-/api/agents`, which answers 201. Such operations are recorded in
-`contracts/consumers/tools/spec-status-drift.json`; the consumer check accepts the real status only
-through an entry there and fails once the spec documents it, so the entry gets removed.
+A contract states the status core really sends, which can differ from what the spec says: the spec
+is built by reflection and cannot see a status chosen at run time or two different 2xx statuses on
+one handler, so it documents the default (200, or 204 for an empty `DELETE`). Such operations are
+recorded in `contracts/consumers/tools/spec-status-drift.json`; the consumer check accepts the real
+status only through an entry there and fails once the spec documents it, so the entry gets removed.
+The list is empty today: `POST /api/agents`, the first entry, answers 201 and the spec now says so.
 
 ## Known limits
 
