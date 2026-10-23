@@ -96,6 +96,7 @@ const TOGGLE_ON =
 export default function AssistantPane() {
   const t = useTranslations("assistant");
   const tb = useTranslations("assistantBrowser");
+  const tq = useTranslations("approvalsQueue");
   const searchParams = useSearchParams();
   const router = useRouter();
   const agentState = useAssistantAgent();
@@ -209,6 +210,8 @@ export default function AssistantPane() {
       });
       setWorkKey((n) => n + 1);
     },
+    // "Ask it to carry on" under a continuation that did not start, timed out or broke: an ordinary message.
+    onRetry: () => void dispatcher.send(tq("retryMessage")),
   });
 
   const openThread = useCallback(
