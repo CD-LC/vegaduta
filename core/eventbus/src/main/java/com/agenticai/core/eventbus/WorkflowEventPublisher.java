@@ -2,6 +2,7 @@ package com.agenticai.core.eventbus;
 
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -213,8 +214,8 @@ public class WorkflowEventPublisher {
         } catch (RuntimeException e) {
             log.error(
                     "In-JVM workflow event fan-out failed for {} (run {}) - continuing",
-                    eventType,
-                    runId,
+                    LogSafe.clean(eventType),
+                    LogSafe.clean(runId),
                     e);
         }
 
@@ -229,9 +230,9 @@ public class WorkflowEventPublisher {
             outboxRepository.save(new WorkflowEventOutbox(eventType, runId, envelopeJson));
             log.debug(
                     "Queued workflow event {} (run {}) in the outbox for schema '{}'",
-                    eventType,
-                    runId,
-                    effectiveTenant);
+                    LogSafe.clean(eventType),
+                    LogSafe.clean(runId),
+                    LogSafe.clean(effectiveTenant));
         } catch (JsonProcessingException e) {
             // A serialization failure here means a caller passed a payload
             // Jackson can't handle - fail loudly in logs but never let this
@@ -240,9 +241,9 @@ public class WorkflowEventPublisher {
             // event publishing itself is broken).
             log.error(
                     "Failed to serialize workflow event {} (run {}) for schema '{}' - not queued",
-                    eventType,
-                    runId,
-                    effectiveTenant,
+                    LogSafe.clean(eventType),
+                    LogSafe.clean(runId),
+                    LogSafe.clean(effectiveTenant),
                     e);
         }
     }

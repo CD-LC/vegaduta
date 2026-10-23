@@ -8,6 +8,7 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.omnichannel.session.ChannelSessionService;
 import com.agenticai.core.omnichannel.session.ChannelType;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,7 +50,11 @@ public class WhatsAppBindingPolicy {
     /** {@code PUT /api/channels/whatsapp/default-agent}. */
     @Transactional
     public Outcome bindDefault(UUID agentId, String task, boolean acknowledgeOpenEnded) {
-        return bind(agentId, task, acknowledgeOpenEnded, () -> sessions.setDefaultAgent(ChannelType.WHATSAPP, agentId));
+        return bind(
+                agentId,
+                task,
+                acknowledgeOpenEnded,
+                () -> sessions.setDefaultAgent(ChannelType.WHATSAPP, agentId));
     }
 
     private Outcome bind(UUID agentId, String taskRaw, boolean acknowledge, Runnable save) {
@@ -81,13 +86,15 @@ public class WhatsAppBindingPolicy {
                 AuditOutcome.SUCCESS,
                 "task="
                         + task.get()
-                        + (override ? "; override of warning: " + String.join(" ", assessment.reasons()) : ""));
+                        + (override
+                                ? "; override of warning: " + String.join(" ", assessment.reasons())
+                                : ""));
         if (override) {
             log.warn(
                     "WhatsApp open-ended agent override: agent={} task={} by={}",
-                    agentId,
-                    task.get(),
-                    actor);
+                    LogSafe.clean(agentId),
+                    LogSafe.clean(task.get()),
+                    LogSafe.clean(actor));
         }
         return new Outcome(Status.BOUND, assessment.reasons());
     }

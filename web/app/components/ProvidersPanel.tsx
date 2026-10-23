@@ -14,11 +14,11 @@ import { cn } from "../lib/utils";
 import { useProviderCatalogFilter } from "../providers/ProviderCatalogFilter";
 import { ROUTING_MODES, getRoutingMode, type TenantProviderState } from "../lib/edge/routingState";
 import { errorMessage } from "../lib/errors";
+import { useCloudSpeechOffered } from "../lib/cloudSpeech";
 import { isPersonalInstall, showPlatformPoolToggle } from "../lib/personalInstall";
 import {
   E2B_SPECIAL_CASED,
   ELEVENLABS_SPECIAL_CASED,
-  IMPLEMENTED_PROVIDERS,
   MULTI_FIELD_PROVIDERS,
   OK_BADGE,
   PROVIDERS,
@@ -28,6 +28,8 @@ import {
   WARN_BADGE,
   encodeMultiFieldCredential,
   encodeVertexCredential,
+  offeredImplementedProviders,
+  offeredProviders,
   type ProviderName,
 } from "./providers/providerCatalog";
 import { Alert, Toggle } from "./providers/ProviderUi";
@@ -76,6 +78,11 @@ interface ProvidersPanelProps {
 export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelProps) {
   const { hasPermission } = useAuth();
   const canManageProviders = hasPermission("MANAGE_INTEGRATIONS");
+  // Sarvam and ElevenLabs are core's CLOUD_SPEECH feature: absent on a personal install, where their cards,
+  // credential reads and the voice-cloning section would only be 404s.
+  const speech = useCloudSpeechOffered();
+  const cards = offeredProviders();
+  const implementedCards = offeredImplementedProviders();
   const canManageVoice = hasPermission("MANAGE_CHANNELS"); // ElevenLabs key + voices: server-gated on MANAGE_CHANNELS
   const t = useTranslations("providersPanel");
   const [providerName, setProviderName] = useState<ProviderName | null>(null);
@@ -159,22 +166,26 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
   }
 
   const refreshSarvam = () =>
-    api
-      .getSarvamCredential()
-      .then(setSarvamCredential)
-      .catch(() => setSarvamCredential(null));
+    !speech
+      ? Promise.resolve()
+      : api
+          .getSarvamCredential()
+          .then(setSarvamCredential)
+          .catch(() => setSarvamCredential(null));
   const refreshE2b = () =>
     api
       .getE2bCredential()
       .then(setE2bCredential)
       .catch(() => setE2bCredential(null));
   const refreshElevenLabs = () =>
-    api
-      .getElevenLabsCredential()
-      .then(setElevenLabsCredential)
-      .catch(() => setElevenLabsCredential(null));
+    !speech
+      ? Promise.resolve()
+      : api
+          .getElevenLabsCredential()
+          .then(setElevenLabsCredential)
+          .catch(() => setElevenLabsCredential(null));
   const e2b = useE2bSetup(refreshE2b, setError, setSuccess, t);
-  const el = useElevenLabsVoices(setError, setSuccess, t);
+  const el = useElevenLabsVoices(setError, setSuccess, t, speech);
 
   useEffect(() => {
     void refreshSarvam();
@@ -203,7 +214,7 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
   // helper and tolerate `undefined`.
   const guideFor = (name: ProviderName): LlmProviderGuide | undefined => LLM_PROVIDER_GUIDES[name];
   const catalog = useProviderCatalogFilter(
-    PROVIDERS,
+    cards,
     (n) => t(PROVIDER_INFO[n].labelKey),
     (n) =>
       (n === SARVAM_SPECIAL_CASED
@@ -250,10 +261,10 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
     } else if (!apiKey.trim()) {
       return t("apiKeyRequiredError");
     }
-    if (!IMPLEMENTED_PROVIDERS.has(providerName)) {
+    if (!implementedCards.has(providerName)) {
       return t("notImplementedError", {
         provider: providerName,
-        implementedList: Array.from(IMPLEMENTED_PROVIDERS).join(", "),
+        implementedList: Array.from(implementedCards).join(", "),
       });
     }
     return null;
@@ -367,7 +378,7 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
 
   return (
     <Section
-      title={t("sectionLabel", { active: activeCount, total: PROVIDERS.length })}
+      title={t("sectionLabel", { active: activeCount, total: cards.length })}
       description={t("description")}
       className="space-y-6"
     >
@@ -391,7 +402,13 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
             <p className="text-sm text-muted-foreground">
               {t("freeTierReadOnlyNote")}
               {platformLlmInfo?.available && (
-                <> {t(isPersonalInstall() ? "localModelActiveNote" : "platformHostedActiveNote", { label: platformLlmInfo.label, model: platformLlmInfo.model })}</>
+                <>
+                  {" "}
+                  {t(isPersonalInstall() ? "localModelActiveNote" : "platformHostedActiveNote", {
+                    label: platformLlmInfo.label,
+                    model: platformLlmInfo.model,
+                  })}
+                </>
               )}
             </p>
           </Card>
@@ -488,7 +505,7 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
                 : name === ELEVENLABS_SPECIAL_CASED
                   ? elevenLabsCredential
                   : byName.get(name);
-          const implemented = IMPLEMENTED_PROVIDERS.has(name);
+          const implemented = implementedCards.has(name);
           const selected = providerName === name;
           const canManageCard = name === ELEVENLABS_SPECIAL_CASED ? canManageVoice : canManageProviders;
           const comingSoon = !implemented && !activated;
@@ -586,9 +603,11 @@ export default function ProvidersPanel({ providers, onChanged }: ProvidersPanelP
                 />
               )}
 
-              {canManageCard && !isFreePlan && name === ELEVENLABS_SPECIAL_CASED && activated?.status === "ACTIVE" && (
-                <ElevenLabsVoicesSection el={el} />
-              )}
+              {speech &&
+                canManageCard &&
+                !isFreePlan &&
+                name === ELEVENLABS_SPECIAL_CASED &&
+                activated?.status === "ACTIVE" && <ElevenLabsVoicesSection el={el} />}
             </Card>
           );
         })}
