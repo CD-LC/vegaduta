@@ -112,6 +112,8 @@ jobs:
             node-services:
               - *ci
               - 'services/mcp-stdio-runner/**'
+              - 'services/workspace-runner/**'
+              - 'core/Dockerfile'
               - 'services/piece-host/**'
               - 'examples/mcp-servers/**'
             shell:
@@ -560,7 +562,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: mcp-stdio-runner (node:test)
         working-directory: services/mcp-stdio-runner
-        run: node --test server.test.js
+        run: node --test server.test.js dockerfile-npm.test.js
       # Zero runtime dependencies; the tests need no npm install.
       - name: piece-host (node:test)
         working-directory: services/piece-host

@@ -20,8 +20,19 @@ ARG WITH_BROWSERS=false
 # --build-arg NODE_IMAGE=node:24.21.0-trixie-slim) only with a runner rollout plan.
 ARG NODE_IMAGE=node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa
 
+# NPM_VERSION: the npm CLI bundled with the Node base carries High advisories in its own
+# dependencies (brace-expansion, ip-address, picomatch, pacote, sigstore) that the base tag
+# has not picked up. The runner needs npx at runtime, so npm cannot be removed: it is replaced
+# by this pinned release, whose bundled dependencies are fixed. Keep it in step with
+# services/workspace-runner/Dockerfile and core/Dockerfile (dockerfile-npm.test.js checks that).
+ARG NPM_VERSION=11.21.1
+
 # ---- Base (shared by both variants) ---------------------------------------
 FROM ${NODE_IMAGE} AS base
+
+ARG NPM_VERSION
+RUN npm install -g "npm@${NPM_VERSION}" \
+    && npm cache clean --force
 
 WORKDIR /app
 
@@ -114,7 +125,9 @@ FROM base AS browsers-true
 # because a child otherwise inherits nothing from this container's env.
 ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers \
     PUPPETEER_CACHE_DIR=/opt/puppeteer-cache \
-    PUPPETEER_LAUNCH_OPTIONS={"executablePath":"/opt/puppeteer-cache/chrome/current/chrome-linux64/chrome"}
+    # Single-quoted on purpose: ENV drops unquoted double quotes, which left this value as
+    # `{executablePath:...}` (invalid JSON, "Failed to parse PUPPETEER_LAUNCH_OPTIONS").
+    PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/opt/puppeteer-cache/chrome/current/chrome-linux64/chrome"}'
 
 # This RUN executes as root (HOME=/home/mcprunner only points npm/npx at that
 # directory, it doesn't change the executing uid), so npx fetching the
@@ -173,6 +186,12 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     && rm -rf /opt/puppeteer-cache/chrome/linux-131.0.6778.204 /opt/puppeteer-cache/chrome-headless-shell/linux-131.0.6778.204 \
     && ln -sfn "$(ls -d /opt/puppeteer-cache/chrome/linux-* | sort -V | tail -n 1)" /opt/puppeteer-cache/chrome/current \
     && test -x /opt/puppeteer-cache/chrome/current/chrome-linux64/chrome \
+    # Drop the npx/npm cache the steps above filled. Each connection now runs with its OWN
+    # private npm cache (server.js createSession), so nothing here is ever read at runtime,
+    # while the frozen server-puppeteer/puppeteer trees in it carried High advisories
+    # (@modelcontextprotocol/sdk 1.0.1 GHSA-w48q-cv73-mx4w, basic-ftp 5.3.1 GHSA-c475-qrg2-pj4r)
+    # that no upstream release fixes. The browsers live under /opt, not here.
+    && rm -rf /home/mcprunner/.npm && mkdir -p /home/mcprunner/.npm \
     && rm -rf /var/lib/apt/lists/* \
     && chown -R mcprunner:mcprunner "$PLAYWRIGHT_BROWSERS_PATH" "$PUPPETEER_CACHE_DIR" /home/mcprunner
 
