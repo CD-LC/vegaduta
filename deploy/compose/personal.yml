@@ -465,6 +465,9 @@ services:
       resources:
         limits:
           memory: ${WORKSPACE_RUNNER_MEM_LIMIT:-3g}
+          # Processes and threads together (every thread is a pid): a JVM or Gradle build uses a few
+          # hundred, so this is far above a real build and only stops a runaway command.
+          pids: ${WORKSPACE_RUNNER_PIDS_LIMIT:-2048}
 
 volumes:
   postgres-data:

@@ -12,8 +12,9 @@
 # launcher's WEB_HOST_PORT/CORE_HOST_PORT for machines whose defaults are taken.
 # windows produces vegaduta-setup-windows-amd64.zip (the exe is the whole
 # installer; the zip only adds a first-run README). linux produces per-arch
-# tar.gz. All artifacts are unsigned: Gatekeeper and SmartScreen warn once;
-# every dmg/zip carries a README that says what to click.
+# tar.gz. All artifacts are unsigned (the app is only ad-hoc signed, not
+# notarized): Gatekeeper and SmartScreen warn once; every dmg/zip carries a
+# README that says what to click.
 set -eu
 
 cd "$(dirname "$0")"
@@ -56,9 +57,15 @@ VegaDūta Setup
 
 1. Drag "VegaDuta Setup" to Applications (or anywhere) and double-click it.
    Running it straight from this window works too.
-2. macOS may say the app is from an unidentified developer (this build is not
-   signed yet). If it refuses to open: right-click the app and choose "Open",
-   then "Open" again. You only do this once.
+2. macOS will refuse the first time ("Apple could not verify ... is free of
+   malware"): this build is not notarized by Apple yet. To allow it, once:
+   - macOS 15 (Sequoia) and later: click "Done", open System Settings >
+     Privacy & Security, scroll to the Security section, click "Open Anyway"
+     next to "VegaDuta Setup was blocked", then enter your password and
+     choose "Open Anyway" again. (Right-click > Open no longer works there.)
+   - macOS 14 and earlier: right-click the app, choose "Open", then "Open".
+   - Or, in Terminal: xattr -dr com.apple.quarantine "/Applications/VegaDuta Setup.app"
+     (use the path you copied the app to), then open it normally.
 3. A setup page opens in your browser. Keep it (and the app) open until it
    says done, then follow the "finish setup" link to choose your password.
 
@@ -154,8 +161,10 @@ EOF
 </dict></plist>
 EOF
 
-  # Ad-hoc signature so the bundle is internally consistent (real notarization
-  # is a procurement item); Gatekeeper still warns once - the README covers it.
+  # Ad-hoc signature so the bundle is internally consistent. It is NOT a
+  # Developer ID signature and nothing is notarized (that needs an Apple
+  # Developer ID certificate), so Gatekeeper blocks a quarantined copy until
+  # the person allows it in Privacy & Security - the README covers it.
   codesign --force --deep --sign - "$APP" 2>/dev/null || true
 
   STAGE="$TMP/dmg"

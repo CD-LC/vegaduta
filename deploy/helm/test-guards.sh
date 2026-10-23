@@ -193,6 +193,7 @@ expect_fail "tool-sandbox cloud identity"              "no cloud identity" $U $D
 
 echo "--- structure of the default render"
 render /tmp/def.yaml $U -n vegaduta $D
+check "web console reports the full tier (NEXT_PUBLIC_DEPLOY_ENV=full) by default" sh -c 'grep -A1 "name: NEXT_PUBLIC_DEPLOY_ENV" /tmp/def.yaml | grep -q "value: \"full\""'
 check "password login (default): no DB_AUTH, password from the Secret" sh -c '! grep -q "name: DB_AUTH\|DB_AUTH:" /tmp/def.yaml && grep -q "name: POSTGRES_PASSWORD" /tmp/def.yaml'
 render /tmp/iam.yaml $U -n vegaduta $D $X --set global.postgresql.auth=azure-entra --set global.postgresql.sslMode=verify-full
 check "database IAM login: DB_AUTH set, URL has sslmode, no POSTGRES_PASSWORD" sh -c 'grep -A1 "name: DB_AUTH" /tmp/iam.yaml | grep -q "azure-entra" && grep -q "sslmode=verify-full" /tmp/iam.yaml && ! grep -q "POSTGRES_PASSWORD" /tmp/iam.yaml'

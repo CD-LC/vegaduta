@@ -66,7 +66,7 @@ RUN python -c "import re; t = open('requirements.lock').read(); open('/tmp/torch
 COPY app ./app
 
 # Security review 2026-07-27: no service dir here holds a persistent volume
-# (see deploy/docker-compose.yml's `sidecar` service - no `volumes:` entry),
+# (see deploy/compose/docker-compose.yml's `sidecar` service - no `volumes:` entry),
 # so switching to a non-root runtime user carries no existing-volume
 # ownership migration risk, unlike code-intel/Dockerfile's /data mount.
 #

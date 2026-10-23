@@ -234,6 +234,17 @@
          whole Boot release mid-cycle. -->
     <tomcat.version>10.1.59</tomcat.version>
     <netty.version>4.1.137.Final</netty.version>
+    <!-- Same mechanism for the High advisories grype reports against the jars (fix available): Boot 3.5.16
+         manages older releases of these, so the BOM properties are overridden. DependencyAdvisoryFloorTest
+         (core/app) fails if a later change brings any of them back below the fixed release.
+         jackson-bom 2.21.7 (jackson-core, jackson-databind): GHSA-p6pp-m3f8-5c89, GHSA-7hhh-6rmp-j9qf,
+         GHSA-q4xh-88c3-wmh7, GHSA-cxp5-3px4-pw24, GHSA-wv8q-qhhj-9h54. jackson-annotations stays on the 2.22 pin
+         in dependencyManagement below (the webauthn4j reason). -->
+    <jackson-bom.version>2.21.7</jackson-bom.version>
+    <!-- httpcore5 and httpcore5-h2 5.4.3: GHSA-hf6x-8p5f-cgmf, GHSA-v3jc-474w-2wm6 (pulled by httpclient5 5.5.2) -->
+    <httpcore5.version>5.4.3</httpcore5.version>
+    <!-- PostgreSQL JDBC 42.7.12: GHSA-j92g-9f8w-j867 -->
+    <postgresql.version>42.7.12</postgresql.version>
     <!-- Reproducible builds (JAVA-037): a fixed timestamp for every jar entry, so
          the same source always yields byte-identical jars (maven-jar-plugin and
          spring-boot-maven-plugin both honour it). Bump only when cutting a
@@ -257,6 +268,10 @@
          must use the same one. Managed in dependencyManagement below. -->
     <google-auth.version>1.33.0</google-auth.version>
     <webauthn4j.version>0.31.11.RELEASE</webauthn4j.version>
+    <!-- Apache POI (documentgen writes DOCX/XLSX/PPTX; omnichannel reads the contacts XLSX).
+         One version for both. 5.4.0 fixed the advisories that Dependabot alerts #5 and #6 list
+         (CVE-2025-31672 among them); 5.5.1 is the latest 5.x. -->
+    <poi.version>5.5.1</poi.version>
     <!-- testcontainers.version override removed in P1a (ADR-0012): Boot 3.5.16 manages
          Testcontainers 1.21.4 itself (the first 1.x that speaks to Docker Engine 29). -->
   </properties>
@@ -269,12 +284,13 @@
         <version>${google-auth.version}</version>
       </dependency>
       <!-- Pin commons-io: twilio-sdk (core/omnichannel) pulls 2.14.0 and, being the nearest declaration, shadows the
-           2.16+ that Apache POI 5.3.0 (core/documentgen) calls into (BoundedInputStream.builder()). Reading any
-           .xlsx/.docx then throws NoSuchMethodError at runtime. 2.17.0 satisfies both. -->
+           newer commons-io that Apache POI (core/documentgen) calls into (BoundedInputStream.builder(), 2.16+).
+           Reading any .xlsx/.docx then throws NoSuchMethodError at runtime. Keep this at or above the commons-io
+           that ${poi.version} declares (2.21.0 for POI 5.5.1): twilio is satisfied by any newer 2.x. -->
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.17.0</version>
+        <version>2.21.0</version>
       </dependency>
       <!-- Pin jackson-annotations 2.22: webauthn4j 0.31.x (passkeys, core/admin) parses with Jackson 3.2
            (tools.jackson), which calls JsonTypeInfo.Value.getWriteTypeIdForDefaultImpl(), a method added in
@@ -285,6 +301,13 @@
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
         <version>2.22</version>
+      </dependency>
+      <!-- Pin lz4-java 1.11.4 (GHSA-mcr4-qmvw-px4g): kafka-clients 3.9.2 (spring-kafka, core/eventbus) pulls
+           at.yawk.lz4:lz4-java 1.10.1, which Boot does not manage. Same drop-in fork, same API. -->
+      <dependency>
+        <groupId>at.yawk.lz4</groupId>
+        <artifactId>lz4-java</artifactId>
+        <version>1.11.4</version>
       </dependency>
       <dependency>
         <groupId>org.springframework.ai</groupId>

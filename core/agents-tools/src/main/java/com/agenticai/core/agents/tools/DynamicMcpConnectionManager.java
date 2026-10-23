@@ -6,7 +6,6 @@ import com.agenticai.core.mcp.McpCatalogService;
 import com.agenticai.core.mcp.McpDynamicConnector;
 import com.agenticai.core.mcp.McpRegistryService;
 import com.agenticai.core.mcp.McpRemoteUrlGuard;
-import com.agenticai.core.mcp.McpServerRegistration;
 import com.agenticai.core.mcp.McpStdioCommandGuard;
 import com.agenticai.core.mcp.atlassian.AtlassianOAuthService;
 import com.agenticai.core.mcp.dto.McpConnectionTestResult;
@@ -14,12 +13,9 @@ import com.agenticai.core.mcp.dto.McpDynamicConfig;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.AllowUnlockedSchedule;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.ServerParameters;
-import io.modelcontextprotocol.client.transport.StdioClientTransport;
 import io.modelcontextprotocol.spec.McpClientTransport;
 import java.time.Duration;
 import java.util.List;
@@ -541,8 +537,7 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
      * Outermost wrap: lets a callback hand its call to the owner replica when routing is enabled
      * (pass-through otherwise).
      */
-    List<ToolCallback> routable(
-            List<ToolCallback> wrapped, String tenant, UUID registrationId) {
+    List<ToolCallback> routable(List<ToolCallback> wrapped, String tenant, UUID registrationId) {
         if (toolPins != null) {
             toolPins.observe(tenant, registrationId, wrapped);
         }
@@ -601,6 +596,12 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
         return transports.buildRemoteTransport(config);
     }
 
+    /** Test seam: see {@link McpTransportFactory#setClientBuilders}. */
+    void setRemoteClientBuilders(
+            java.util.function.Supplier<java.net.http.HttpClient.Builder> builders) {
+        transports.setClientBuilders(builders);
+    }
+
     /** See {@link McpTransportFactory#remoteRequestHeaders}. */
     McpRemoteHeaders.PerRequestHeaders remoteRequestHeaders(McpDynamicConfig config) {
         return transports.remoteRequestHeaders(config);
@@ -640,10 +641,10 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
     /**
      * MCP-DOCTOR: the real, bounded connection test behind {@code POST
      * /api/mcp/registrations/{id}/test}. Same guards, transport construction and diagnosis as
-     * {@link #connect} but on a TRANSIENT client (shorter {@link McpConnectionTester#TEST_TIMEOUT}, always closed,
-     * never registered in {@code liveClients}), so testing never disturbs a live connection.
-     * Outcome is persisted either way: pass -&gt; usageStatus READY, fail -&gt; FAILED + structured
-     * diagnosis. Never throws.
+     * {@link #connect} but on a TRANSIENT client (shorter {@link McpConnectionTester#TEST_TIMEOUT},
+     * always closed, never registered in {@code liveClients}), so testing never disturbs a live
+     * connection. Outcome is persisted either way: pass -&gt; usageStatus READY, fail -&gt; FAILED
+     * + structured diagnosis. Never throws.
      */
     @Override
     public McpConnectionTestResult test(UUID registrationId) {

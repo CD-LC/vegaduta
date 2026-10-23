@@ -2,7 +2,7 @@
 voice-agent worker entrypoint.
 
 Registers with the self-hosted LiveKit server (same server
-`deploy/docker-compose.yml`'s `livekit` service and core/voice's
+`deploy/compose/docker-compose.yml`'s `livekit` service and core/voice's
 `LiveKitTokenService` already point at) and, for every call room a browser
 joins via `CallPanel.tsx`/`VoiceCallController#issueToken`, runs an
 `AgentSession` wiring together:
@@ -106,12 +106,12 @@ class RoomTarget:
 def _parse_room_name(room_name: str) -> RoomTarget | None:
     """RoomTarget from the room name, or None if it matches neither the
     authenticated nor the anonymous agent-share shape."""
-    share_match = _SHARE_ROOM_NAME_RE.match(room_name)
+    share_match = _SHARE_ROOM_NAME_RE.fullmatch(room_name)
     if share_match:
         return RoomTarget(
             mode=share_match.group("mode"), agent_id=None, share_id=share_match.group("share_id")
         )
-    match = _ROOM_NAME_RE.match(room_name)
+    match = _ROOM_NAME_RE.fullmatch(room_name)
     if match:
         return RoomTarget(mode=match.group("mode"), agent_id=match.group("agent_id"), share_id=None)
     return None

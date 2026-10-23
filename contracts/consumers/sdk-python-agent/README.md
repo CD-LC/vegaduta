@@ -2,8 +2,9 @@
 
 The Python Agent SDK (`sdk/python-agent`, package `vegaduta_agent`) **makes no HTTP call to core**.
 It runs inside the user's own application. `sdk/python-agent/tests/test_contracts.py` fails if the
-package ever imports an HTTP client, so a first call to core has to start with a new interaction
-here.
+package ever imports a network client (any non-stdlib module, the stdlib's socket, ssl, http, ftp and
+mail modules, or a module loaded by computed name), so a first call to core has to start with a new
+interaction here.
 
 What it does share with core is vocabulary:
 

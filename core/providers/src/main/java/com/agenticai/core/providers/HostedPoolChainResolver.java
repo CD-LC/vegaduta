@@ -25,7 +25,6 @@ final class HostedPoolChainResolver {
     private static final Logger log =
             LoggerFactory.getLogger(PlatformHostedLlmProviderService.class);
 
-
     /**
      * Rows already reported as unusable ({@code <id>:key} / {@code <id>:url}). The pool is resolved
      * on every FREE-tier turn, so without this a bad row would log a WARN per turn. An entry is
@@ -68,6 +67,15 @@ final class HostedPoolChainResolver {
         if (!poolEnabled.getAsBoolean()) {
             return Optional.empty();
         }
+        return enabledSelectionByIdIgnoringPoolSwitch(id);
+    }
+
+    /**
+     * Same checks as {@link #enabledSelectionById} minus the pool's master switch: whether the row
+     * could serve if the pool were on. Lets a repair decide whether switching the pool on would
+     * help before it touches the admin's switch.
+     */
+    Optional<HostedProviderSelection> enabledSelectionByIdIgnoringPoolSwitch(Long id) {
         return repository
                 .findById(id)
                 .filter(PlatformHostedLlmProvider::isEnabled)
@@ -117,13 +125,13 @@ final class HostedPoolChainResolver {
 
     /**
      * Second seam for the SSRF guard (see {@link HostedLlmBaseUrlGuard}'s javadoc) - {@link
-     * PlatformHostedLlmProviderService#create}/{@code update} already block a bad {@code baseUrl} from ever being saved, but this
-     * covers any row that predates the guard, or was written directly against the database outside
-     * the API. A row that now fails the check is silently excluded from the chain (logged once)
-     * rather than thrown - this method's whole contract is "every row here is actually usable", and
-     * a failing row degrading to "not offered" is exactly the same fail-closed posture the
-     * master-switch/enabled-flag checks right above already apply, not a new error path a caller
-     * has to handle.
+     * PlatformHostedLlmProviderService#create}/{@code update} already block a bad {@code baseUrl}
+     * from ever being saved, but this covers any row that predates the guard, or was written
+     * directly against the database outside the API. A row that now fails the check is silently
+     * excluded from the chain (logged once) rather than thrown - this method's whole contract is
+     * "every row here is actually usable", and a failing row degrading to "not offered" is exactly
+     * the same fail-closed posture the master-switch/enabled-flag checks right above already apply,
+     * not a new error path a caller has to handle.
      */
     private boolean passesUrlGuardOrLogAndSkip(PlatformHostedLlmProvider provider) {
         try {
