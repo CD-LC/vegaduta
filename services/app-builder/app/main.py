@@ -21,10 +21,14 @@ Request bodies live in api_models.py and the error mapping (the platform's
 
 from __future__ import annotations
 
+import json
+import queue
+import threading
 import time
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
 from . import (
     assets,
@@ -290,6 +294,73 @@ def generate(project_id: str, body: GenerateRequest, ctx: TenantContext = Depend
     )
 
 
+@app.post("/projects/{project_id}/generate/stream")
+def generate_stream(project_id: str, body: GenerateRequest, ctx: TenantContext = Depends(tenant)):
+    """The same pipeline as POST /generate, streamed as Server-Sent Events
+    so the UI can show live progress ("reading your app…", "writing
+    changes…", "checking it builds…", "publishing…") instead of one
+    opaque 60-120 s spinner — and so the browser can render the new files'
+    preview the moment they are written, while the build/test check is
+    still running.
+
+    Each SSE `data:` line is a JSON object:
+      {"stage": "context"|"writing"|"files"|"checking"|"publishing", ...}
+      - "files" carries {"files", "files_changed"} (the exact applied set —
+        render it in the sandbox preview immediately)
+      - "writing"/"checking" may carry {"attempt", "total"} during the
+        bounded self-repair loop
+      {"stage": "done", "result": {...the same body /generate returns}}
+      {"stage": "error", "status": <http-style code>, "error": "..."}
+
+    The pipeline itself is sync+blocking, so it runs on a worker thread and
+    reports through a queue. Auth/404 errors that would fail the sync route
+    up front (missing project) still fail BEFORE the stream opens."""
+    # Pre-validate what the sync route fails on before any body is sent.
+    _projects.get_or_404(SETTINGS.data_dir, ctx, project_id)
+
+    events_q: queue.Queue = queue.Queue()
+
+    def progress(stage: str, detail: dict | None = None) -> None:
+        events_q.put({"stage": stage, **(detail or {})})
+
+    def work() -> None:
+        try:
+            result = _modify_project(
+                ctx,
+                project_id,
+                body.instruction,
+                context=body.context,
+                images=[i.model_dump() for i in body.images] if body.images else None,
+                settings=SETTINGS,
+                progress=progress,
+            )
+            events_q.put({"stage": "done", "result": result})
+        except HTTPException as e:
+            events_q.put({"stage": "error", "status": e.status_code,
+                          "error": str(e.detail)})
+        except GenerateError as e:
+            events_q.put({"stage": "error", "status": 500, "error": str(e)})
+        except Exception as e:  # noqa: BLE001 - the stream must end cleanly
+            events_q.put({"stage": "error", "status": 500, "error": str(e)})
+        finally:
+            events_q.put(None)
+
+    threading.Thread(target=work, daemon=True).start()
+
+    def events():
+        while True:
+            item = events_q.get()
+            if item is None:
+                return
+            yield "data: " + json.dumps(item, default=str) + "\n\n"
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
 @app.post("/projects/{project_id}/generate/context")
 def generate_context(
     project_id: str, body: EditContextRequest, ctx: TenantContext = Depends(tenant)
@@ -308,7 +379,8 @@ def generate_context(
 @app.post("/projects/{project_id}/generate/apply")
 def generate_apply(project_id: str, body: ApplyFilesRequest, ctx: TenantContext = Depends(tenant)):
     return _apply_files_to_project(
-        ctx, project_id, body.instruction, [f.model_dump() for f in body.files], SETTINGS
+        ctx, project_id, body.instruction, [f.model_dump() for f in body.files], SETTINGS,
+        summary=body.summary,
     )
 
 

@@ -52,6 +52,7 @@ See `docs/APP-BUILDER-BYO-REPO-CONTRACT-2026-07-30.md` §3.
 from __future__ import annotations
 
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 
@@ -80,8 +81,13 @@ class _FilesResult(list):
     produced them. Newer core builds return providerName/model on
     generate-files (so the UI can disclose "powered by ..." for a hosted
     generation); older builds return neither — `powered_by` stays None then
-    and the UI simply shows no hosted-engine label, same as before."""
+    and the UI simply shows no hosted-engine label, same as before.
+
+    `summary` is the model's own plain-English explanation of the change
+    (newer core builds only; None otherwise) — shown as the headline of the
+    chat result so the user knows what changed without reading the diff."""
     powered_by: dict | None = None
+    summary: str | None = None
 
 
 def _generate_files(ctx: TenantContext, instruction: str, passages: list[dict],
@@ -173,6 +179,9 @@ def _generate_files(ctx: TenantContext, instruction: str, passages: list[dict],
     model = data.get("model")
     if provider or model:
         result.powered_by = {"provider": provider, "model": model}
+    summary = data.get("summary")
+    if isinstance(summary, str) and summary.strip():
+        result.summary = summary.strip()
     return result
 
 
@@ -265,9 +274,15 @@ def gather_edit_context(ctx: TenantContext, project, instruction: str,
             continue
         chunks.setdefault(path, []).append(p.get("content") or "")
 
+    # Each whole-file read is one independent HTTP (or disk) call — up to
+    # _MAX_CONTEXT_FILES of them, fetched in parallel; order of `chunks` is
+    # preserved so the model sees the same sequence it always did.
+    paths = list(chunks.keys())
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        wholes = list(pool.map(read, paths))
+
     files: list[dict] = []
-    for path, parts in chunks.items():
-        whole = read(path)
+    for path, parts, whole in zip(paths, chunks.values(), wholes):
         if whole is not None and len(whole) <= _MAX_FULL_FILE_CHARS:
             files.append({"path": path, "content": whole, "full": True})
         else:
@@ -296,23 +311,44 @@ def _as_passages(seen: list[dict]) -> tuple[list[dict], list[str]]:
 def modify_project(ctx: TenantContext, project_id: str, instruction: str,
                    settings: Settings = SETTINGS,
                    *, context: str | None = None,
-                   images: list[dict] | None = None) -> dict:
+                   images: list[dict] | None = None,
+                   progress=None) -> dict:
+    """`progress(stage, detail)` is called at each pipeline step so the
+    SSE route (/generate/stream) can stream what the turn is doing instead
+    of leaving the UI on a dead spinner for the whole call. Stage names:
+    "context" (reading the project), "writing" (model generating),
+    "files" (detail = the file set - emitted right after workspace apply so
+    the client can preview the change while the check still runs),
+    "checking" (detail.attempt = build/test attempt number, starting at 1),
+    "publishing" (commit + reindex). Optional and best-effort - a raising
+    callback never breaks a turn."""
+    def emit(stage: str, detail: dict | None = None) -> None:
+        if progress is None:
+            return
+        try:
+            progress(stage, detail)
+        except Exception:  # noqa: BLE001 - reporting must never fail a turn
+            pass
+
     project = projects.require_live(settings.data_dir, ctx, project_id)
     manifest = project_manifest(ctx, project_id, settings)
     tdir = tenant_root(settings.data_dir, ctx)
 
     # Not indexed yet / transient failure -> no retrieved files, but the
     # project file list still tells the model what exists.
+    emit("context")
     edit_ctx = gather_edit_context(ctx, project, instruction, settings)
     seen = edit_ctx["files"]
     passages, full_paths = _as_passages(seen)
     project_files = edit_ctx["project_files"]
 
+    emit("writing")
     files = _generate_files(ctx, instruction, passages, manifest,
                             context=context, images=images,
                             settings=settings, full_paths=full_paths,
                             project_files=project_files)
     powered_by = getattr(files, "powered_by", None)
+    summary = getattr(files, "summary", None)
     files, dropped = drop_partial_writes(list(files), seen)
     if not files:
         raise GenerateError(
@@ -328,7 +364,13 @@ def modify_project(ctx: TenantContext, project_id: str, instruction: str,
         run_result: dict | None = None
         success = True
         attempts = 0
+        # The exact file set is known now - hand it to the client for the
+        # in-browser preview BEFORE the (slow) build/test check, so the
+        # user sees their change while verification still runs.
+        emit("files", {"files": files,
+                       "files_changed": [f["path"] for f in files]})
         if check_cmd:
+            emit("checking", {"attempt": 1, "total": settings.max_fix_attempts + 1})
             run_result = ci_client.run(ctx, project_id, ws_id, check_cmd)
             success = bool(run_result.get("success"))
             # Bounded self-repair loop: each pass shows the model everything
@@ -338,6 +380,7 @@ def modify_project(ctx: TenantContext, project_id: str, instruction: str,
             # more to write.
             while not success and attempts < settings.max_fix_attempts:
                 attempts += 1
+                emit("writing", {"attempt": attempts + 1})
                 retry_seen = _merge_files(
                     seen, [{**f, "full": True} for f in files])
                 retry_passages, retry_full = _as_passages(retry_seen)
@@ -354,13 +397,18 @@ def modify_project(ctx: TenantContext, project_id: str, instruction: str,
                     break
                 ci_client.apply_files(ctx, project_id, ws_id, retry_files)
                 powered_by = retry_powered or powered_by
+                summary = getattr(retry_files, "summary", None) or summary
                 files = _merge_files(files, retry_files)
+                emit("files", {"files": files,
+                               "files_changed": [f["path"] for f in files]})
+                emit("checking", {"attempt": attempts + 1, "total": settings.max_fix_attempts + 1})
                 run_result = ci_client.run(ctx, project_id, ws_id, check_cmd)
                 success = bool(run_result.get("success"))
 
         diff = ci_client.diff(ctx, project_id, ws_id).get("diff", "")
 
         if success:
+            emit("publishing")
             _promote(ctx, project, files, instruction, settings)
             project.status = "ready"
             project.error = None
@@ -392,6 +440,9 @@ def modify_project(ctx: TenantContext, project_id: str, instruction: str,
             # older core builds). The web client renders it as the
             # "powered by" label on each generated result.
             **({"powered_by": powered_by} if powered_by else {}),
+            # The model's plain-English explanation of the change (absent on
+            # older core builds) - the "what changed" headline in the chat.
+            **({"summary": summary} if summary else {}),
             # Writes refused because the model only saw excerpts of that file.
             **({"skipped_files": dropped} if dropped else {}),
            "fix_attempts": attempts,
@@ -445,13 +496,27 @@ def _validate_apply_files(files: list[dict]) -> list[dict]:
 
 def apply_files_to_project(ctx: TenantContext, project_id: str,
                            instruction: str, files: list[dict],
-                           settings: Settings = SETTINGS) -> dict:
+                           settings: Settings = SETTINGS, *,
+                           summary: str | None = None,
+                           progress=None) -> dict:
     """Apply a client-generated file set through the same
     workspace/verify/promote/audit pipeline as modify_project().
+
+    `summary` is the client-side model's own explanation of the change —
+    echoed back verbatim so the chat result shows it exactly like a hosted
+    turn's summary.
 
     Returns {diff, files_changed, success, check_output?, ...github fields}.
     On a failed check nothing is promoted and `check_output` carries the
     truncated stdout+stderr for the client to feed back to its model."""
+    def emit(stage: str, detail: dict | None = None) -> None:
+        if progress is None:
+            return
+        try:
+            progress(stage, detail)
+        except Exception:  # noqa: BLE001 - reporting must never fail a turn
+            pass
+
     project = projects.require_live(settings.data_dir, ctx, project_id)
     manifest = project_manifest(ctx, project_id, settings)
     tdir = tenant_root(settings.data_dir, ctx)
@@ -461,16 +526,20 @@ def apply_files_to_project(ctx: TenantContext, project_id: str,
     run_result: dict | None = None
     success = True
     try:
+        emit("files", {"files": files,
+                       "files_changed": [f["path"] for f in files]})
         ci_client.apply_files(ctx, project_id, ws_id, files)
 
         check_cmd = manifest.get("test") or manifest.get("build")
         if check_cmd:
+            emit("checking", {"attempt": 1, "total": 1})
             run_result = ci_client.run(ctx, project_id, ws_id, check_cmd)
             success = bool(run_result.get("success"))
 
         diff = ci_client.diff(ctx, project_id, ws_id).get("diff", "")
 
         if success:
+            emit("publishing")
             _promote(ctx, project, files, instruction, settings)
             project.status = "ready"
             project.error = None
@@ -494,6 +563,7 @@ def apply_files_to_project(ctx: TenantContext, project_id: str,
 
     result = {"diff": diff, "files_changed": [f["path"] for f in files],
               "files": files,
+              **({"summary": summary} if summary else {}),
               "success": success, **_github_fields(project)}
     if not success and run_result:
         fin = run_result.get("final", {})

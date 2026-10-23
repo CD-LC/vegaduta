@@ -18,6 +18,9 @@ import java.util.List;
  *     self-healing fallback chain and no single model is knowable before
  *     the call. Consumers must render null as "provider's pick", never
  *     fabricate one.
+ * @param summary      the model's own plain-English explanation of the
+ *     change (null when the reply predates the summary field or the model
+ *     left it blank) - the "what changed" headline in the /build chat.
  */
-public record AppBuilderGeneration(List<AppBuilderFileEdit> files, String providerName, String model) {
+public record AppBuilderGeneration(List<AppBuilderFileEdit> files, String providerName, String model, String summary) {
 }

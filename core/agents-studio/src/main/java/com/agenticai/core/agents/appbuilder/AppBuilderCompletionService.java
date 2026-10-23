@@ -63,7 +63,11 @@ public class AppBuilderCompletionService {
 
         Reply with ONLY a single JSON object, no markdown code fences, no
         prose before or after, matching exactly this shape:
-        {"files": [{"path": "relative/path", "content": "full new file content"}]}
+        {"summary": "one or two plain-English sentences describing what you
+        changed, written for the non-technical user (no file paths, no
+        jargon - e.g. 'I added a dark-blue header with your business name
+        and a contact form under it')",
+         "files": [{"path": "relative/path", "content": "full new file content"}]}
 
         Include the FULL new content of every file you want to create or
         change - never partial diffs, never omit unchanged parts of a file
@@ -159,7 +163,9 @@ public class AppBuilderCompletionService {
                 throw new AppBuilderGenerationException("LLM call failed: " + e2.getMessage(), e2);
             }
         }
-        return new AppBuilderGeneration(parseFiles(raw), target.providerName(), target.model());
+        AppBuilderGenerateFilesResponse parsed = parseResponse(raw);
+        String summary = parsed.summary() == null || parsed.summary().isBlank() ? null : parsed.summary().trim();
+        return new AppBuilderGeneration(parsed.files(), target.providerName(), target.model(), summary);
     }
 
     /**
@@ -268,7 +274,7 @@ public class AppBuilderCompletionService {
             .append(contextBlob.isEmpty() ? "(none found)" : contextBlob);
         if (request.formatRetry()) {
             user.append("\n\nYour previous reply contained no usable file entries. "
-                + "Reply with ONLY the required {\"files\":[...]} JSON object.");
+                + "Reply with ONLY the required {\"summary\":\"...\",\"files\":[...]} JSON object.");
         } else if (request.previousFailure() != null && !request.previousFailure().isBlank()) {
             String failure = request.previousFailure();
             user.append("\n\nThe previous attempt's build/test command FAILED. Output:\n")
@@ -346,7 +352,7 @@ public class AppBuilderCompletionService {
      * rather than failing the whole batch over one malformed entry, matching
      * generate.py's own pre-existing filter.
      */
-    private List<AppBuilderFileEdit> parseFiles(String raw) {
+    private AppBuilderGenerateFilesResponse parseResponse(String raw) {
         if (raw == null || raw.isBlank()) {
             throw new AppBuilderGenerationException("The model returned an empty reply.");
         }
@@ -361,7 +367,7 @@ public class AppBuilderCompletionService {
                     }
                 }
             }
-            return result;
+            return new AppBuilderGenerateFilesResponse(result, parsed.summary());
         } catch (Exception e) {
             throw new AppBuilderGenerationException(
                 "Could not parse the model's reply as the expected {files:[...]} JSON shape.", e
