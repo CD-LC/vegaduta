@@ -11,6 +11,7 @@ import {
   type EdgeToolDefinition,
   type EdgeToolExecuteResult,
 } from "../toolBridge";
+import { edgePrompt, edgePromptOrNull } from "../edgePrompts";
 import { acquireEngine } from "./engineAcquire";
 import { Tier1Error } from "./errors";
 import { TIER1_TURN_CEILING_MS, streamCompletion } from "./generation";
@@ -31,22 +32,20 @@ const MAX_TOOL_ROUNDS = 3;
 const MAX_HISTORY_MESSAGES = 24;
 
 /**
- * Quality pass (2026-08-06): small local models (1B-3B class) get NO
- * chain-of-thought scaffolding today — confirmed by direct code read, this
- * was the entire system prompt before this line existed. A short, honest
- * nudge (never a fake "thinking" tag, never claiming a reasoning mode the
- * model doesn't have) costs a handful of tokens and measurably helps small
- * instruct models avoid one-line non-answers on anything multi-step.
+ * Quality pass (2026-08-06): small local models (1B-3B class) get NO chain-of-thought scaffolding without a short,
+ * honest nudge (never a fake "thinking" tag, never claiming a reasoning mode the model does not have). It costs a
+ * handful of tokens and measurably helps small instruct models avoid one-line non-answers on anything multi-step.
+ *
+ * The wording is not here: the nudge and the "no system prompt" fallback are the registry keys
+ * `edge.reasoning_nudge` and `edge.default_system_prompt` (edgePrompts.ts), so an admin can change them for edge
+ * turns on the instructions console, with the shipped text as the offline default.
+ *
+ * Exported so router/attempts.ts applies the exact same nudge to tier 0 (Chrome built-in) session creation - one
+ * nudge, one source of truth, rather than two copies drifting apart.
  */
-const REASONING_NUDGE =
-  "\n\nAnswer directly and completely. If the question has multiple parts or " +
-  "steps, work through them in order before giving your final answer.";
-
-/** Exported so tierRouter.ts can apply the exact same nudge to tier 0
- * (Chrome built-in) session creation — one nudge, one source of truth,
- * rather than two copies of the same string drifting apart. */
 export function withReasoningNudge(basePrompt: string | undefined): string {
-  return (basePrompt || "You are a helpful assistant.") + REASONING_NUDGE;
+  const nudge = edgePromptOrNull("edge.reasoning_nudge");
+  return (basePrompt || edgePrompt("edge.default_system_prompt")) + (nudge ? `\n\n${nudge}` : "");
 }
 
 /**

@@ -2,6 +2,8 @@ package com.agenticai.core.graphmemory;
 
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -114,36 +116,31 @@ public class MemoryWriteArbitrationService {
     private static final ObjectMapper MAPPER = JsonMappers.plain();
     private static final Set<String> VALID_DECISIONS = Set.of("ADD", "UPDATE", "MERGE", "DISCARD");
 
-    // How many existing-fact sentences get fed into the arbitration prompt as context, across all
-    // subjects in one candidate batch - the same defensive-cap posture GraphMemoryService.
-    // recallRelated's own "LIMIT 20" already uses, so one remember_fact call with a lot of
-    // candidate triples can never blow up the arbitration prompt unboundedly.
-    private static final int MAX_CONTEXT_FACTS = 30;
+    /** Registry key of the system prompt (default text: {@code prompts/en/memory.arbitration.md}). */
+    static final String PROMPT_KEY = "memory.arbitration";
 
-    private static final String ARBITRATION_SYSTEM_PROMPT = """
-        You are deciding how to write new candidate facts into a long-term memory graph, given the
-        facts already known about the same subjects. For EACH candidate fact, decide exactly one
-        action:
+    private final PromptSlot prompts = new PromptSlot();
 
-        - "ADD": a genuinely new fact - no existing fact covers the same (subject, relation) pair.
-        - "UPDATE": an existing fact has the same subject and relation but a DIFFERENT object - the
-          candidate supersedes it (e.g. a changed preference, a changed manager, a changed shop
-          location). The old fact should be replaced, not kept alongside the new one.
-        - "MERGE": the candidate restates or elaborates an existing fact about the same (subject,
-          relation) with an equivalent or compatible object - treat this the same as UPDATE (the
-          newer, more complete wording replaces the older one).
-        - "DISCARD": the candidate is redundant with an existing fact - same subject, relation, AND
-          an equivalent object, or a trivial rewording with no new information.
-
-        Respond with ONLY a JSON array, one entry per candidate fact, in the same order given, in
-        this exact shape - no other text, no markdown fence:
-        [{"subject": "...", "relation": "...", "object": "...", "decision": "ADD"|"UPDATE"|"MERGE"|"DISCARD"}]
-        """;
+    /** The prompt registry, so a tenant or agent override of {@link #PROMPT_KEY} applies; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     @Value("${app.graph-memory.arbitration.enabled:false}")
     private boolean enabled;
 
     private MeterRegistry meterRegistry;
+
+    // app.graph-memory.arbitration.max-context-facts: how many existing-fact sentences get fed into the
+    // arbitration prompt across all subjects in one candidate batch, so one remember_fact call with many
+    // candidate triples can never blow the prompt up unboundedly.
+    private GraphMemoryProperties properties = new GraphMemoryProperties();
+
+    @Autowired(required = false)
+    void setProperties(GraphMemoryProperties properties) {
+        this.properties = properties == null ? new GraphMemoryProperties() : properties;
+    }
 
     @Autowired(required = false)
     void setMeterRegistry(MeterRegistry meterRegistry) {
@@ -215,7 +212,7 @@ public class MemoryWriteArbitrationService {
             + "Candidate facts to decide on:\n" + candidatesBlock;
 
         String response = chatClient.prompt()
-            .system(ARBITRATION_SYSTEM_PROMPT)
+            .system(prompts.text(PROMPT_KEY, agentId))
             .user(userPrompt)
             .call()
             .content();
@@ -232,7 +229,7 @@ public class MemoryWriteArbitrationService {
     /**
      * One {@link GraphMemoryService#recallRelated} lookup per distinct candidate subject
      * (1-hop, mirroring {@code GraphRecallToolCallback}'s own default hop count), deduplicated and
-     * capped at {@link #MAX_CONTEXT_FACTS} total facts.
+     * capped at {@code app.graph-memory.arbitration.max-context-facts} total facts.
      */
     private List<GraphFact> collectExistingFacts(
         GraphMemoryService graphMemoryService, UUID agentId, String subjectKey, List<GraphTriple> candidateTriples
@@ -241,7 +238,7 @@ public class MemoryWriteArbitrationService {
         Set<String> sentences = new LinkedHashSet<>();
         List<GraphFact> facts = new ArrayList<>();
         for (GraphTriple triple : candidateTriples) {
-            if (facts.size() >= MAX_CONTEXT_FACTS) {
+            if (facts.size() >= properties.getArbitration().getMaxContextFacts()) {
                 break;
             }
             String subject = triple.subject();
@@ -257,7 +254,7 @@ public class MemoryWriteArbitrationService {
                     && sentences.add(fact.asSentence())) {
                     facts.add(fact);
                 }
-                if (facts.size() >= MAX_CONTEXT_FACTS) {
+                if (facts.size() >= properties.getArbitration().getMaxContextFacts()) {
                     break;
                 }
             }

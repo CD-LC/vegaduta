@@ -111,11 +111,12 @@ public final class ContextBudgetPlanner {
         int placeholderTokens
     ) {
 
-        public static final double DEFAULT_CLEAR_AT = 0.6;
-        public static final double DEFAULT_COMPACT_AT = 0.85;
-        public static final int DEFAULT_KEEP_RECENT_TOOL_RESULTS = 3;
-        public static final int DEFAULT_SUMMARY_TOKENS = 800;
-        public static final int DEFAULT_PLACEHOLDER_TOKENS = 48;
+        // One definition of each number: ContextCompactionProperties (app.context.compaction.*).
+        public static final double DEFAULT_CLEAR_AT = ContextCompactionProperties.DEFAULT_CLEAR_AT;
+        public static final double DEFAULT_COMPACT_AT = ContextCompactionProperties.DEFAULT_COMPACT_AT;
+        public static final int DEFAULT_KEEP_RECENT_TOOL_RESULTS = ContextCompactionProperties.DEFAULT_KEEP_RECENT_TOOL_RESULTS;
+        public static final int DEFAULT_SUMMARY_TOKENS = ContextCompactionProperties.DEFAULT_SUMMARY_TOKENS;
+        public static final int DEFAULT_PLACEHOLDER_TOKENS = ContextCompactionProperties.DEFAULT_PLACEHOLDER_TOKENS;
 
         public Settings {
             windowTokens = Math.max(windowTokens, 0);

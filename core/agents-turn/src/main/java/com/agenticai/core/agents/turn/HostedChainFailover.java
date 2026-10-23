@@ -138,6 +138,40 @@ final class HostedChainFailover {
             HostedProviderHealth health,
             BiConsumer<HostedChainLink, Throwable> rungFailureListener,
             BiFunction<HostedChainLink, Throwable, HostedChainLink> exhaustedChainSyncHeal) {
+        return attemptHostedChain(
+                chain,
+                index,
+                originalError,
+                attempt,
+                agentId,
+                sessionId,
+                health,
+                rungFailureListener,
+                exhaustedChainSyncHeal,
+                null);
+    }
+
+    /**
+     * As above, with a replay gate. Failing over re-runs the turn on the next rung, tools included, and
+     * "this rung emitted no token" does not mean nothing happened: a tool-calling turn emits no token
+     * while it works. {@code replayBlockedBy} is asked before a retryable failure advances the chain
+     * (and before the synchronous self-heal retry, which replays the turn too); a non-empty answer names
+     * the tools that already ran, and the failure is surfaced as it is instead of replaying them.
+     *
+     * @param replayBlockedBy nullable; returns the tools that stand in the way of a replay, or
+     *     {@code null}/empty when the turn may be run again
+     */
+    static Flux<String> attemptHostedChain(
+            List<HostedChainLink> chain,
+            int index,
+            Throwable originalError,
+            Function<ChatClient, Flux<String>> attempt,
+            UUID agentId,
+            String sessionId,
+            HostedProviderHealth health,
+            BiConsumer<HostedChainLink, Throwable> rungFailureListener,
+            BiFunction<HostedChainLink, Throwable, HostedChainLink> exhaustedChainSyncHeal,
+            Supplier<String> replayBlockedBy) {
         // Captured HERE, on the caller's thread (the request thread for the
         // index-0 call every production path makes), and threaded through the
         // recursion explicitly: every later rung and the self-heal retry run
@@ -153,7 +187,8 @@ final class HostedChainFailover {
                 health,
                 rungFailureListener,
                 exhaustedChainSyncHeal,
-                TenantScope.capture());
+                TenantScope.capture(),
+                replayBlockedBy);
     }
 
     /**
@@ -177,7 +212,8 @@ final class HostedChainFailover {
             HostedProviderHealth health,
             BiConsumer<HostedChainLink, Throwable> rungFailureListener,
             BiFunction<HostedChainLink, Throwable, HostedChainLink> exhaustedChainSyncHeal,
-            TenantScope tenantScope) {
+            TenantScope tenantScope,
+            Supplier<String> replayBlockedBy) {
         HostedChainLink link = chain.get(index);
         // Per-row circuit breaker (app.resilience.circuit-breaker.enabled, default ON; with the
         // flag off the permit is
@@ -206,7 +242,8 @@ final class HostedChainFailover {
                         health,
                         rungFailureListener,
                         exhaustedChainSyncHeal,
-                        tenantScope);
+                        tenantScope,
+                        replayBlockedBy);
             }
             breakerPermit = null;
         }
@@ -318,6 +355,20 @@ final class HostedChainFailover {
                                 agentId,
                                 sessionId,
                                 e.getMessage());
+                        return Flux.error(e);
+                    }
+                    // Replaying the turn on another rung (or on the self-healed rung) runs it again
+                    // from the start. Not after a tool with side effects ran.
+                    String toolsThatRan = replayBlockedBy == null ? null : replayBlockedBy.get();
+                    if (toolsThatRan != null && !toolsThatRan.isEmpty()) {
+                        log.warn(
+                                "Hosted pool provider '{}' failed for agent {} session {} ({}) after the turn ran tools"
+                                        + " ({}) - not failing over, the next provider would run them again",
+                                link.label(),
+                                agentId,
+                                sessionId,
+                                e.getMessage(),
+                                toolsThatRan);
                         return Flux.error(e);
                     }
                     if (terminal) {
@@ -435,7 +486,8 @@ final class HostedChainFailover {
                             health,
                             rungFailureListener,
                             exhaustedChainSyncHeal,
-                            tenantScope);
+                            tenantScope,
+                            replayBlockedBy);
                 });
     }
 
@@ -447,7 +499,12 @@ final class HostedChainFailover {
      * is platform-wide shared state consulted on a failure path, a worst case of one redundant heal
      * attempt per replica per cooldown is the acceptable trade for zero hot-path I/O.
      */
-    private static final long HOSTED_MODEL_SELF_HEAL_COOLDOWN_MS = 10 * 60 * 1000L;
+    private volatile java.time.Duration selfHealCooldown = new ChatResilienceProperties().getHostedSelfHealCooldown();
+
+    /** Sets {@code app.chat.resilience.hosted-self-heal-cooldown}; until it is called the shipped default applies. */
+    void useSelfHealCooldown(java.time.Duration cooldown) {
+        this.selfHealCooldown = cooldown == null ? new ChatResilienceProperties().getHostedSelfHealCooldown() : cooldown;
+    }
 
     /**
      * Last self-heal ATTEMPT (not success) per pool row id - see {@link
@@ -613,7 +670,7 @@ final class HostedChainFailover {
                 rowId,
                 (id, lastAttempt) -> {
                     if (lastAttempt == null
-                            || now - lastAttempt >= HOSTED_MODEL_SELF_HEAL_COOLDOWN_MS) {
+                            || now - lastAttempt >= selfHealCooldown.toMillis()) {
                         claimed.set(true);
                         return now;
                     }

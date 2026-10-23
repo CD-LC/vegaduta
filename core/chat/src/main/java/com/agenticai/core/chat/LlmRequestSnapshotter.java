@@ -29,10 +29,8 @@ final class LlmRequestSnapshotter {
 
     private static final Logger log = LoggerFactory.getLogger(LlmRequestSnapshotter.class);
 
-    private static final int MAX_MESSAGE_CHARS = 40_000;
-    private static final int MAX_TOTAL_CHARS = 300_000;
-    private static final int MAX_SCHEMA_CHARS = 4_000;
-    private static final int MAX_TOOLS = 200;
+    /** The caps in force: {@code app.llm.request-snapshot.*}, set at startup by {@link LlmRequestSnapshotConfiguration}. */
+    private static volatile LlmRequestSnapshotProperties limits = new LlmRequestSnapshotProperties();
 
     /** Same secret shapes the workflow trace redactor strips, kept local because core/chat sits below core/agents. */
     private static final Pattern SECRET = Pattern.compile(
@@ -45,6 +43,11 @@ final class LlmRequestSnapshotter {
     );
 
     private LlmRequestSnapshotter() {}
+
+    /** Replaces the caps; called once at startup with the bound {@code app.llm.request-snapshot.*}. */
+    static void configure(LlmRequestSnapshotProperties properties) {
+        limits = properties == null ? new LlmRequestSnapshotProperties() : properties;
+    }
 
     /** Records the snapshot and returns its id (null when nothing was stored), so usage can be attached to exactly this call. */
     static String capture(ChatClientRequest request, ProviderName provider, String fallbackModel, boolean streaming) {
@@ -67,6 +70,7 @@ final class LlmRequestSnapshotter {
     private static LlmRequestSnapshot build(
         ChatClientRequest request, ProviderName provider, String fallbackModel, boolean streaming, String sessionId
     ) {
+        LlmRequestSnapshotProperties caps = limits;
         Map<String, Object> ctx = request.context();
         ChatOptions opts = request.prompt().getOptions();
 
@@ -87,6 +91,7 @@ final class LlmRequestSnapshotter {
             }
         }
 
+        String blockTenant = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
         int total = 0;
         int fullTotal = 0;
         boolean truncated = false;
@@ -97,9 +102,9 @@ final class LlmRequestSnapshotter {
             int payload = chars + callPayloadChars(m);
             fullTotal += payload;
             String shown = redact(text);
-            if (shown.length() > MAX_MESSAGE_CHARS || total + shown.length() > MAX_TOTAL_CHARS) {
-                int room = Math.max(0, Math.min(MAX_MESSAGE_CHARS, MAX_TOTAL_CHARS - total));
-                shown = shown.substring(0, Math.min(shown.length(), room)) + "\n… [truncated for display]";
+            if (shown.length() > caps.getMaxMessageChars() || total + shown.length() > caps.getMaxTotalChars()) {
+                int room = Math.max(0, Math.min(caps.getMaxMessageChars(), caps.getMaxTotalChars() - total));
+                shown = shown.substring(0, Math.min(shown.length(), room)) + caps.getTruncationMarker();
                 truncated = true;
             }
             total += shown.length();
@@ -107,28 +112,32 @@ final class LlmRequestSnapshotter {
             int media = 0;
             if (m instanceof AssistantMessage a && a.hasToolCalls()) {
                 toolCalls = a.getToolCalls().stream()
-                    .map(tc -> tc.name() + "(" + cap(redact(tc.arguments()), 600) + ")").toList();
+                    .map(tc -> tc.name() + "(" + cap(redact(tc.arguments()), caps.getMaxCallChars()) + ")").toList();
             } else if (m instanceof ToolResponseMessage t) {
                 toolCalls = t.getResponses().stream()
-                    .map(r -> r.name() + " → " + cap(redact(r.responseData()), 600)).toList();
+                    .map(r -> r.name() + " → " + cap(redact(r.responseData()), caps.getMaxCallChars())).toList();
             } else if (m instanceof UserMessage u && u.getMedia() != null) {
                 media = u.getMedia().size();
             }
-            messages.add(new LlmRequestSnapshot.Message(role(m), shown, chars, toolCalls, media, payload));
+            // Which prompt-registry text the standing system messages are made of (empty for everything else).
+            List<PromptBlockTag> blocks = m.getMessageType() == org.springframework.ai.chat.messages.MessageType.SYSTEM
+                ? PromptBlockProvenance.tagsFor(blockTenant, sessionId, text)
+                : List.of();
+            messages.add(new LlmRequestSnapshot.Message(role(m), shown, chars, toolCalls, media, payload, blocks));
         }
 
         List<LlmRequestSnapshot.Tool> tools = new ArrayList<>();
         int schemaTotal = 0;
         if (opts instanceof ToolCallingChatOptions tco && tco.getToolCallbacks() != null) {
             for (ToolCallback cb : tco.getToolCallbacks()) {
-                if (tools.size() >= MAX_TOOLS) {
+                if (tools.size() >= caps.getMaxTools()) {
                     truncated = true;
                     break;
                 }
                 var def = cb.getToolDefinition();
                 int full = def.inputSchema() == null ? 0 : def.inputSchema().length();
                 schemaTotal += full;
-                tools.add(new LlmRequestSnapshot.Tool(def.name(), def.description(), cap(def.inputSchema(), MAX_SCHEMA_CHARS), full));
+                tools.add(new LlmRequestSnapshot.Tool(def.name(), def.description(), cap(def.inputSchema(), caps.getMaxSchemaChars()), full));
             }
         }
         int[] prefix = prefixSize(request);

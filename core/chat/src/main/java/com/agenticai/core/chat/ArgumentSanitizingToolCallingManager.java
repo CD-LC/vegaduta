@@ -1,5 +1,6 @@
 package com.agenticai.core.chat;
 
+import com.agenticai.core.prompts.PromptResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
@@ -94,6 +95,16 @@ import java.util.Set;
  * of calling itself again. Neither stage throws, so a stream whose headers are
  * already flushed still ends cleanly.
  *
+ * <p><b>Rounds are not calls.</b> The cap above counts <em>rounds</em> per model invocation; the budget a
+ * turn is actually given is in <em>calls</em> ({@code app.guardrails.max-tool-calls-per-turn}), counted by
+ * {@code GuardedToolCallback} across every model pass of the turn. That guard answers a call over its
+ * ceiling with the very same {@code tool_budget_exhausted} result this class writes (the marker is
+ * {@link #TOOL_BUDGET_EXHAUSTED}), so the model sees one contract whichever limit trips first, and this
+ * class's hard stop ends the loop if the model ignores either. Because a round makes at least one call,
+ * the round cap is derived from the call ceiling (plus its grace;
+ * {@link ToolLoopProperties#effectiveMaxRounds}) unless an operator sets one, so it never ends a turn
+ * before the call policy has run its course. See {@link ToolLoopProperties}.
+ *
  * <p><b>Runtime exceptions become tool results.</b> See {@link
  * RedactingToolExecutionExceptionProcessor} - Spring AI 1.1.7's manager only
  * catches {@link ToolExecutionException}; when {@code translateToolExceptions}
@@ -106,21 +117,25 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
     private static final Logger log = LoggerFactory.getLogger(ArgumentSanitizingToolCallingManager.class);
     private static final String EMPTY_ARGUMENTS = "{}";
 
-    /** Default cap on tool rounds (model -> tools -> model) inside ONE model invocation. */
+    /**
+     * Round cap of a manager built directly, with no {@link ToolLoopProperties} (tests, tools): a
+     * stand-alone default. Production wiring never uses it - {@link ResilientToolCallingManagerFactory}
+     * derives the cap from the call ceiling unless {@code app.chat.tools.max-rounds-per-invocation} sets one.
+     */
     public static final int DEFAULT_MAX_TOOL_ROUNDS = 25;
-    /** Default cap on calls to never-offered tool names inside ONE model invocation. */
+    /** Cap on calls to never-offered tool names inside ONE model invocation of a manager built directly. */
     public static final int DEFAULT_MAX_UNKNOWN_TOOL_CALLS = 8;
 
-    /** Machine-readable marker in the soft-stop tool result; also how a later round detects it was already sent. */
-    static final String TOOL_BUDGET_EXHAUSTED = "tool_budget_exhausted";
+    /**
+     * Machine-readable marker in the soft-stop tool result; also how a later round detects it was already
+     * sent. {@code GuardedToolCallback} writes the same marker when a turn passes its tool-call ceiling
+     * (core/guardrails cannot depend on this module, so it repeats the string; a test pins that they agree).
+     */
+    public static final String TOOL_BUDGET_EXHAUSTED = "tool_budget_exhausted";
 
     static final String LOOP_LIMIT_METRIC = "chat.tool_loop.limit";
     static final String UNKNOWN_TOOL_METRIC = "chat.tool.unknown_calls";
     static final String ARGUMENT_REJECTED_METRIC = "chat.tool.argument_rejected";
-
-    static final String HARD_STOP_REPLY =
-        "I had to stop here: this request needed more tool calls than a single reply is allowed to make. "
-            + "Please narrow the request, or ask me to continue from where I left off.";
 
     private final ToolCallingManager delegate;
     private final ObjectMapper objectMapper;
@@ -130,6 +145,38 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
     private final MeterRegistry meterRegistry;
     private ToolResultClearing resultClearing = ToolResultClearing.disabled();
     private boolean validateArguments;
+    private String budgetExhaustedMessage = new ToolLoopProperties().getBudgetExhaustedMessage();
+    private String hardStopReply = new ToolLoopProperties().getHardStopReply();
+    private PromptResolver prompts = PromptResolver.defaultsOnly();
+
+    /**
+     * Where the text this class writes comes from: the prompt registry ({@code toolresult.tool_budget.rounds},
+     * {@code message.tool_budget.hard_stop}, {@code toolresult.unavailable.*}), looked up for the agent and tenant of
+     * the run ({@link ToolLoopTranscript#forPrompts}). The {@code app.chat.tools.budget-exhausted-message} /
+     * {@code hard-stop-reply} properties stay as an alias: a registry override wins, then a property an operator
+     * changed, then the shipped text. Null keeps the shipped text.
+     */
+    public ArgumentSanitizingToolCallingManager withPrompts(PromptResolver resolver) {
+        if (resolver != null) {
+            this.prompts = resolver;
+        }
+        return this;
+    }
+
+    /**
+     * The wording of the two stops: the tool result for calls past the round cap ({@code {rounds}} is
+     * filled in) and the closing reply when the model ignores it. Defaults are {@code
+     * app.chat.tools.budget-exhausted-message} / {@code hard-stop-reply}; null keeps the default.
+     */
+    public ArgumentSanitizingToolCallingManager withStopTexts(String budgetExhaustedMessage, String hardStopReply) {
+        if (budgetExhaustedMessage != null) {
+            this.budgetExhaustedMessage = budgetExhaustedMessage;
+        }
+        if (hardStopReply != null) {
+            this.hardStopReply = hardStopReply;
+        }
+        return this;
+    }
 
     /** Enables in-turn tool-result clearing (see {@link ToolResultClearing}); off for direct constructions. */
     public ArgumentSanitizingToolCallingManager withResultClearing(ToolResultClearing clearing) {
@@ -207,36 +254,15 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             }
             result = delegate.executeToolCalls(executable, chatResponse);
         }
+        List<Message> sanitized = sanitizeHistory(result.conversationHistory(), objectMapper);
+        List<Message> history = result.returnDirect()
+            ? sanitized
+            : ToolLoopRunHooks.clearing(prompt, resultClearing).apply(ToolLoopRunHooks.transform(prompt, sanitized));
+        ToolLoopRunHooks.record(prompt, history);
         return ToolExecutionResult.builder()
-            .conversationHistory(result.returnDirect()
-                ? sanitizeHistory(result.conversationHistory(), objectMapper)
-                : resultClearing.apply(applyRunTransform(prompt, sanitizeHistory(result.conversationHistory(), objectMapper))))
+            .conversationHistory(history)
             .returnDirect(result.returnDirect())
             .build();
-    }
-
-    /**
-     * Applies the run's own {@link ToolLoopHistoryTransform} (token-budget tool-result clearing and
-     * compaction, {@code app.context.compaction.*}) when the request carries one in its tool context.
-     * A request without the key - every request while the feature is off - gets {@code history} back
-     * untouched, and a transform that throws or returns nothing never costs the turn.
-     */
-    private static List<Message> applyRunTransform(Prompt prompt, List<Message> history) {
-        if (prompt == null || !(prompt.getOptions() instanceof ToolCallingChatOptions options)) {
-            return history;
-        }
-        Map<String, Object> toolContext = options.getToolContext();
-        Object candidate = toolContext == null ? null : toolContext.get(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY);
-        if (!(candidate instanceof ToolLoopHistoryTransform transform)) {
-            return history;
-        }
-        try {
-            List<Message> transformed = transform.transform(history, options.getModel());
-            return transformed != null ? transformed : history;
-        } catch (RuntimeException e) {
-            log.warn("Tool-loop history transform failed; sending the history unchanged: {}", e.toString());
-            return history;
-        }
     }
 
     // --- per-invocation loop cap -----------------------------------------
@@ -271,7 +297,9 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         unknownCalls += newUnknown;
         int round = priorRounds + 1;
 
-        boolean roundsExceeded = round > maxToolRounds;
+        // A run may carry its own cap (the agent's tool-step ceiling decides how many rounds its backstop needs).
+        int roundCap = ToolLoopRunHooks.maxRounds(prompt, maxToolRounds);
+        boolean roundsExceeded = round > roundCap;
         boolean unknownExceeded = unknownCalls > maxUnknownToolCalls;
         if (!roundsExceeded && !unknownExceeded) {
             return null;
@@ -286,10 +314,10 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             log.warn(
                 "Tool loop limit reached (reason={} round={} maxRounds={} unknownCalls={} maxUnknown={}) - "
                     + "answering {} tool call(s) with a budget-exhausted result instead of executing them",
-                reason, round, maxToolRounds, unknownCalls, maxUnknownToolCalls, calls.size()
+                reason, round, roundCap, unknownCalls, maxUnknownToolCalls, calls.size()
             );
             increment(LOOP_LIMIT_METRIC, 1, "stage", "soft", "reason", reason);
-            String softStop = softStopResult(priorRounds);
+            String softStop = softStopResult(prompt, priorRounds);
             for (AssistantMessage.ToolCall call : calls) {
                 responses.add(new ToolResponseMessage.ToolResponse(call.id(), call.name(), softStop));
             }
@@ -308,22 +336,41 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             // closing message goes on the first response and the rest stay
             // empty rather than repeating it in a multi-generation consumer.
             responses.add(new ToolResponseMessage.ToolResponse(
-                calls.get(i).id(), calls.get(i).name(), i == 0 ? HARD_STOP_REPLY : ""));
+                calls.get(i).id(), calls.get(i).name(), i == 0 ? hardStopReply(prompt) : ""));
         }
         history.add(ToolResponseMessage.builder().responses(responses).build());
         return ToolExecutionResult.builder().conversationHistory(history).returnDirect(true).build();
     }
 
-    private String softStopResult(int roundsUsed) {
-        String instruction = "Tool budget for this reply is exhausted after " + roundsUsed + " tool round(s), so "
-            + "this call was NOT executed. Do not call any more tools. Answer the user now using only what you "
-            + "already have, and say briefly if anything is incomplete.";
+    /** The closing reply (also stored in the history): the registry's, else the operator's property, else the shipped one. */
+    private String hardStopReply(Prompt prompt) {
+        return ChatPrompts.textWithConfiguredAlias(
+            prompts, ChatPrompts.HARD_STOP, ToolLoopRunHooks.promptRun(prompt), hardStopReply);
+    }
+
+    private String softStopResult(Prompt prompt, int roundsUsed) {
+        String instruction = ChatPrompts.textWithConfiguredAlias(
+            prompts, ChatPrompts.TOOL_BUDGET_ROUNDS, ToolLoopRunHooks.promptRun(prompt), budgetExhaustedMessage,
+            "rounds", String.valueOf(roundsUsed));
         try {
-            return objectMapper.writeValueAsString(Map.of("error", TOOL_BUDGET_EXHAUSTED, "result", instruction));
+            // Ordered: error first, the same shape GuardedToolCallback writes for its call ceiling.
+            Map<String, Object> body = new java.util.LinkedHashMap<>();
+            body.put("error", TOOL_BUDGET_EXHAUSTED);
+            body.put("result", instruction);
+            return objectMapper.writeValueAsString(body);
         } catch (Exception e) {
-            return "{\"error\":\"" + TOOL_BUDGET_EXHAUSTED + "\",\"result\":\"Do not call any more tools. "
-                + "Answer the user now.\"}";
+            return fallbackSoftStop(instruction);
         }
+    }
+
+    /**
+     * The soft-stop JSON written by hand, for the case the serializer fails (unreachable for a map of strings). It
+     * carries no English of its own: the instruction is the registry's text.
+     */
+    static String fallbackSoftStop(String instruction) {
+        return "{\"error\":\"" + TOOL_BUDGET_EXHAUSTED + "\",\"result\":\""
+            + new String(com.fasterxml.jackson.core.io.JsonStringEncoder.getInstance().quoteAsString(String.valueOf(instruction)))
+            + "\"}";
     }
 
     private static boolean carriesBudgetMarker(ToolResponseMessage message) {
@@ -398,13 +445,14 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         }
         List<ToolCallback> wrapped = new ArrayList<>(options.getToolCallbacks().size());
         boolean changed = false;
+        ChatPrompts.Run run = ToolLoopRunHooks.promptRun(prompt);
         for (ToolCallback callback : options.getToolCallbacks()) {
             if (callback instanceof ArgumentValidatingToolCallback || callback instanceof UnavailableToolCallback
                 || !ToolArgumentValidator.hasCheckableSchema(callback.getToolDefinition().inputSchema(), objectMapper)) {
                 wrapped.add(callback);
                 continue;
             }
-            wrapped.add(new ArgumentValidatingToolCallback(callback, objectMapper, this::onArgumentsRejected));
+            wrapped.add(new ArgumentValidatingToolCallback(callback, objectMapper, this::onArgumentsRejected, prompts, run));
             changed = true;
         }
         if (!changed) {
@@ -524,7 +572,8 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             if (name == null || name.isBlank() || known.contains(name) || !alreadyAdded.add(name)) {
                 continue;
             }
-            UnavailableToolCallback fallback = UnavailableToolCallback.forToolName(name);
+            UnavailableToolCallback fallback =
+                UnavailableToolCallback.forToolName(name, prompts, ToolLoopRunHooks.promptRun(prompt));
             log.warn(
                 "Model requested a tool that was not offered to it: name={} knownTools={} - answering with an "
                     + "explanation instead of failing the turn. Reply to the model: {}",

@@ -185,4 +185,24 @@ describe("transcriptToTurns", () => {
     expect(turns[2]).toMatchObject({ failed: true, at: 0 });
     expect(transcriptToTurns(null, "s1")).toEqual([]);
   });
+
+  it("leaves out the message the platform stores to hand a decided tool call back to the agent, keeping its reply", () => {
+    const turns = transcriptToTurns(
+      {
+        sessionId: "s1",
+        messages: [
+          { role: "user", content: "email bob" },
+          { role: "assistant", content: "waiting for approval" },
+          { role: "user", content: '<approval_result request="r1" tool="send_email" outcome="completed">\nx\n</approval_result>' },
+          { role: "assistant", content: "Sent." },
+        ],
+      },
+      "s1"
+    );
+    expect(turns.map((t) => [t.role, t.content])).toEqual([
+      ["user", "email bob"],
+      ["assistant", "waiting for approval"],
+      ["assistant", "Sent."],
+    ]);
+  });
 });

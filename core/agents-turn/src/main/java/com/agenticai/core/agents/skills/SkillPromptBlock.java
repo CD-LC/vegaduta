@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.skills;
 
+import com.agenticai.core.prompts.PromptResolver;
 import java.util.List;
 
 /**
@@ -14,51 +15,64 @@ import java.util.List;
  */
 public final class SkillPromptBlock {
 
-    /**
-     * Hard ceiling on Level 1 entries - a backstop so a huge catalog can never crowd out the real
-     * prompt.
-     */
-    public static final int MAX_SKILLS_IN_PROMPT = 60;
+    // The size bounds (skills listed, character budget, names-only headroom, description words, sticky
+    // memory) are app.skills.prompt.* - see SkillPromptProperties.
 
-    /**
-     * Character budget of the whole Level 1 block (about 2,300 tokens). Descriptions are kept
-     * while they fit; see {@link #render}.
-     */
-    public static final int MAX_BLOCK_CHARS = 9_000;
+    /** Registry keys of the wording that opens the block ({@code prompts/en/skills.header*.md}). */
+    public static final String HEADER_KEY = "skills.header";
 
-    /** Extra room, past the budget, that bare names may still use before the list is cut. */
-    private static final int NAMES_ONLY_HEADROOM = 2_000;
+    public static final String COMPACT_HEADER_KEY = "skills.header.compact";
 
     private SkillPromptBlock() {}
 
+    /** The shipped opening of the block (heading line and instruction), full or small-model wording. */
+    public static String defaultHeader(boolean compact) {
+        return PromptResolver.defaultsOnly().catalog().defaultText(compact ? COMPACT_HEADER_KEY : HEADER_KEY);
+    }
+
+    /**
+     * {@code block} (the output of {@link #render} or {@link #renderCompact}) with its opening
+     * replaced by {@code header}: how an owner's reworded {@code skills.header} reaches a block that
+     * is built where no agent or tenant is known. Unchanged when {@code header} is null, equals the
+     * shipped wording, or {@code block} does not start with the shipped opening.
+     */
+    public static String withHeader(String block, String header, boolean compact) {
+        String shipped = defaultHeader(compact);
+        String start = "\n\n" + shipped;
+        if (block == null || header == null || header.equals(shipped) || !block.startsWith(start)) {
+            return block;
+        }
+        return "\n\n" + header + block.substring(start.length());
+    }
+
     /** Empty string when there is nothing to offer - callers can append unconditionally. */
     public static String render(List<SkillService.SkillMetadata> skills) {
+        return render(skills, SkillPromptProperties.active());
+    }
+
+    /** {@link #render(List)} with explicit limits. */
+    public static String render(List<SkillService.SkillMetadata> skills, SkillPromptProperties limits) {
         if (skills == null || skills.isEmpty()) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("\n\n## Skills\n")
-                .append(
-                        "Before you answer, check whether the request matches one of these skills. If it does, your FIRST ")
-                .append(
-                        "action must be to call load_skill(name), then follow its instructions - do not answer from memory first. ")
-                .append(
-                        "Read bundled files with read_skill_file only if needed. Skip skills that do not match and ")
-                .append("do not mention skills to the user unless asked.\n");
+        sb.append("\n\n").append(defaultHeader(false)).append("\n");
         // Level 1 has a size budget, not just an entry ceiling: entries keep their description
-        // while the block is under MAX_BLOCK_CHARS, then shrink to bare names (still loadable),
+        // while the block is under max-block-chars, then shrink to bare names (still loadable),
         // and anything that does not fit is counted instead of silently vanishing.
         int listed = 0;
         boolean namesOnly = false;
         for (SkillService.SkillMetadata skill : skills) {
-            if (listed >= MAX_SKILLS_IN_PROMPT) {
+            if (listed >= limits.getMaxSkills()) {
                 break;
             }
-            String detailed = "- " + skill.name() + ": " + brief(skill.description()) + "\n";
+            String detailed =
+                    "- " + skill.name() + ": " + brief(skill.description(), limits.getMaxDescriptionWords()) + "\n";
             String bare = "- " + skill.name() + "\n";
-            if (!namesOnly && sb.length() + detailed.length() <= MAX_BLOCK_CHARS) {
+            if (!namesOnly && sb.length() + detailed.length() <= limits.getMaxBlockChars()) {
                 sb.append(detailed);
-            } else if (sb.length() + bare.length() <= MAX_BLOCK_CHARS + NAMES_ONLY_HEADROOM) {
+            } else if (sb.length() + bare.length()
+                    <= limits.getMaxBlockChars() + limits.getNamesOnlyHeadroom()) {
                 namesOnly = true;
                 sb.append(bare);
             } else {
@@ -80,14 +94,18 @@ public final class SkillPromptBlock {
      * load_skill} for the one that matches, which brings the full instructions for that skill only.
      */
     public static String renderCompact(List<SkillService.SkillMetadata> skills) {
+        return renderCompact(skills, SkillPromptProperties.active());
+    }
+
+    /** {@link #renderCompact(List)} with explicit limits. */
+    public static String renderCompact(List<SkillService.SkillMetadata> skills, SkillPromptProperties limits) {
         if (skills == null || skills.isEmpty()) {
             return "";
         }
-        StringBuilder sb = new StringBuilder("\n\n## Skills\n")
-                .append("If the request matches one of these skills, first call load_skill(name) and follow it: ");
+        StringBuilder sb = new StringBuilder("\n\n").append(defaultHeader(true)).append(" ");
         sb.append(
                 skills.stream()
-                        .limit(MAX_SKILLS_IN_PROMPT)
+                        .limit(limits.getMaxSkills())
                         .map(SkillService.SkillMetadata::name)
                         .collect(java.util.stream.Collectors.joining(", ")));
         return sb.append(".\n").toString();
@@ -98,21 +116,19 @@ public final class SkillPromptBlock {
      * condition ("...structured brainstorming techniques. Use when the..."), so the model could not
      * tell when a skill applied and answered from its persona instead of calling load_skill.
      */
-    private static final int MAX_DESCRIPTION_WORDS = 30;
-
     private static final java.util.Set<String> STOP =
             java.util.Set.of(
                     "which", "would", "their", "using", "about", "please", "these", "those",
                     "there", "where", "should", "could", "other", "after", "before", "while",
                     "every", "users", "being", "needs");
 
-    /** At most {@link #MAX_DESCRIPTION_WORDS} words, single line. */
-    static String brief(String text) {
+    /** At most {@code maxWords} words, single line. */
+    static String brief(String text, int maxWords) {
         String[] words = singleLine(text == null ? "" : text).split(" ");
-        if (words.length <= MAX_DESCRIPTION_WORDS) {
+        if (words.length <= maxWords) {
             return String.join(" ", words);
         }
-        return String.join(" ", java.util.Arrays.copyOf(words, MAX_DESCRIPTION_WORDS)) + "...";
+        return String.join(" ", java.util.Arrays.copyOf(words, maxWords)) + "...";
     }
 
     private static java.util.Set<String> tokens(String text, int minLen) {
@@ -195,19 +211,27 @@ public final class SkillPromptBlock {
         return false;
     }
 
-    /** Past user turns remembered per session for the sticky gate. */
-    static final int HISTORY_TURNS = 6;
-
-    private static final int MAX_TRACKED_SESSIONS = 2000;
-
     /**
      * Per-session sticky gate: skills stay on for a conversation once they were relevant, so a
      * follow-up like "yes, go ahead" does not drop {@code load_skill} (and churn the cached prompt
-     * prefix) mid-task. Offered when the current message matches, OR any of the last {@link
-     * #HISTORY_TURNS} messages in this session matched, OR a skill was already loaded in it.
+     * prefix) mid-task. Offered when the current message matches, OR any of the last {@code
+     * app.skills.prompt.history-turns} messages in this session matched, OR a skill was already loaded in it.
      * In-memory and bounded (LRU); losing it on restart only costs one un-sticky turn.
      */
     public static final class SessionGate {
+
+        private final java.util.function.Supplier<SkillPromptProperties> limits;
+
+        /** A gate that reads the limits {@link SkillPromptProperties#active()} holds at the time of each call. */
+        public SessionGate() {
+            this(SkillPromptProperties::active);
+        }
+
+        /** A gate over explicit limits. */
+        public SessionGate(java.util.function.Supplier<SkillPromptProperties> limits) {
+            this.limits = limits;
+        }
+
         private static final class State {
             final java.util.ArrayDeque<String> recent = new java.util.ArrayDeque<>();
             boolean loaded;
@@ -217,7 +241,7 @@ public final class SkillPromptBlock {
                 new java.util.LinkedHashMap<>(16, 0.75f, true) {
                     @Override
                     protected boolean removeEldestEntry(java.util.Map.Entry<String, State> eldest) {
-                        return size() > MAX_TRACKED_SESSIONS;
+                        return size() > limits.get().getMaxTrackedSessions();
                     }
                 };
 
@@ -240,7 +264,7 @@ public final class SkillPromptBlock {
                         && !userMessage.isBlank()
                         && !userMessage.equals(st.recent.peekLast())) {
                     st.recent.addLast(userMessage);
-                    while (st.recent.size() > HISTORY_TURNS) {
+                    while (st.recent.size() > limits.get().getHistoryTurns()) {
                         st.recent.removeFirst();
                     }
                 }

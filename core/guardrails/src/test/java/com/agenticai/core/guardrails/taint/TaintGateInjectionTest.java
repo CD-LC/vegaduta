@@ -88,7 +88,7 @@ class TaintGateInjectionTest {
         ApprovalRequest pending = mock(ApprovalRequest.class);
         when(pending.getId()).thenReturn(UUID.randomUUID());
         when(approvals.recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any()))
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
             .thenReturn(pending);
         meters = new SimpleMeterRegistry();
         audits.clear();
@@ -122,7 +122,7 @@ class TaintGateInjectionTest {
         assertTrue(result.contains("requires human approval"));
         verify(approvals).recordToolCallForApproval(
             anyString(), anyString(), contains("flagged: untrusted content from fetch_web_page"), anyString(),
-            anyString(), any(), anyString(), any());
+            anyString(), any(), anyString(), any(), any());
         assertTrue(audits.contains("tool.taint.approval_required|" + AuditOutcome.PENDING_APPROVAL + "|send_email"));
         assertEquals(1.0, meters.counter(TaintGate.SINK_METER, "tool", "send_email", "action", "approval_required").count());
     }
@@ -149,7 +149,7 @@ class TaintGateInjectionTest {
         assertEquals("my note", result, "clean read output is neither blocked nor wrapped");
         assertEquals(1, note.calls);
         verify(approvals, never()).recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any());
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
     }
 
     @Test
@@ -204,7 +204,7 @@ class TaintGateInjectionTest {
         assertTrue(audits.contains("tool.taint.would_block|" + AuditOutcome.WARNING + "|send_email"));
         assertEquals(1.0, meters.counter(TaintGate.SINK_METER, "tool", "send_email", "action", "would_block").count());
         verify(approvals, never()).recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any());
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
     }
 
     @Test

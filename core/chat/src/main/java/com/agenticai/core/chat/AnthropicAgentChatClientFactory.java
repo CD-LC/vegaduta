@@ -204,7 +204,7 @@ public class AnthropicAgentChatClientFactory implements AgentChatClientFactory {
         // LlmMetricsAdvisor is per-call (carries this model's provider/model),
         // so it's constructed fresh here; the DefaultAgentAdvisor beans are
         // shared singletons appended after it (order 0 vs 100+, see each).
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.ANTHROPIC)
             .defaultAdvisors(modelSupport.advisors(
                 new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.ANTHROPIC, model, meterRegistry, pricingCatalog)))
             .build();

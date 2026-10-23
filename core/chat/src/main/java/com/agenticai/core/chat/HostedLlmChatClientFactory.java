@@ -258,7 +258,11 @@ public class HostedLlmChatClientFactory {
         return modelSupport
                 // V500 - a row graded TEXT/NONE on a server that can enforce a schema or
                 // tool_choice=required gets the constrained tool router; null for every other row.
-                .chatClientBuilder(chatModel, provider.effectiveToolRouterMode())
+                .chatClientBuilder(
+                        chatModel,
+                        provider.effectiveToolRouterMode(),
+                        // The text-call recovery is a small-model workaround: by what is known of this row.
+                        modelSupport.capabilityOf(provider.getToolCallGrade(), provider.effectiveSmallModel()))
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 new LlmMetricsAdvisor(
@@ -416,7 +420,10 @@ public class HostedLlmChatClientFactory {
                         .build();
 
         return modelSupport
-                .chatClientBuilder(chatModel)
+                .chatClientBuilder(
+                        chatModel,
+                        null,
+                        modelSupport.capabilityOf(provider.getToolCallGrade(), provider.effectiveSmallModel()))
                 .defaultAdvisors(
                         modelSupport.advisors(
                                 // Gemini rejects >1 system message; the platform routinely sends

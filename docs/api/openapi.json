@@ -105,7 +105,13 @@
       "name": "AgentMemory"
     },
     {
+      "name": "AgentPromptPreview"
+    },
+    {
       "name": "AgentRunBudget"
+    },
+    {
+      "name": "AgentRuntimeLimits"
     },
     {
       "name": "AgentSchedule"
@@ -115,6 +121,9 @@
     },
     {
       "name": "AgentSessionLlmUsage"
+    },
+    {
+      "name": "AgentSettings"
     },
     {
       "name": "AgentShare"
@@ -340,6 +349,9 @@
     },
     {
       "name": "EdgeAgentsConfig"
+    },
+    {
+      "name": "EdgePromptBundle"
     },
     {
       "name": "EdgeRelay"
@@ -654,6 +666,9 @@
       "name": "ProductFeed"
     },
     {
+      "name": "PromptAdmin"
+    },
+    {
       "name": "PromptDirective"
     },
     {
@@ -724,6 +739,9 @@
     },
     {
       "name": "SessionConfig"
+    },
+    {
+      "name": "Settings"
     },
     {
       "name": "Share"
@@ -841,6 +859,9 @@
     },
     {
       "name": "TenantFeatureFlag"
+    },
+    {
+      "name": "TenantRuntimeLimits"
     },
     {
       "name": "TenantSettings"
@@ -4763,6 +4784,122 @@
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/agent-runtime/limits": {
+      "get": {
+        "tags": [
+          "TenantRuntimeLimits"
+        ],
+        "summary": "Get",
+        "operationId": "TenantRuntimeLimitsController_get",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeLimitsView"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "TenantRuntimeLimits"
+        ],
+        "summary": "Put",
+        "operationId": "TenantRuntimeLimitsController_put",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuntimeLimits"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeLimitsView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "TenantRuntimeLimits"
+        ],
+        "summary": "Clear",
+        "operationId": "TenantRuntimeLimitsController_clear",
+        "responses": {
+          "204": {
+            "description": "Successful response."
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -10934,6 +11071,80 @@
         ]
       }
     },
+    "/api/agents/{agentId}/prompt-preview": {
+      "post": {
+        "tags": [
+          "AgentPromptPreview"
+        ],
+        "summary": "Preview",
+        "operationId": "AgentPromptPreviewController_preview",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromptPreviewService_Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptPreviewService_Preview"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
     "/api/agents/{agentId}/prompt/versions": {
       "get": {
         "tags": [
@@ -15379,6 +15590,124 @@
         ]
       }
     },
+    "/api/agents/{agentId}/runtime-limits": {
+      "get": {
+        "tags": [
+          "AgentRuntimeLimits"
+        ],
+        "summary": "Get",
+        "operationId": "AgentRuntimeLimitsController_get",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeLimitsView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "AgentRuntimeLimits"
+        ],
+        "summary": "Put",
+        "operationId": "AgentRuntimeLimitsController_put",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuntimeLimits"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeLimitsView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
     "/api/agents/{agentId}/schedule": {
       "get": {
         "tags": [
@@ -16594,6 +16923,247 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/agents/{agentId}/settings/history": {
+      "get": {
+        "tags": [
+          "AgentSettings"
+        ],
+        "summary": "History",
+        "operationId": "AgentSettingsController_history",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "description": "Every change to this agent's settings, newest first (EDITOR on the agent; an agent of another workspace is a 404). since keeps rows at or after that instant; page with limit and offset.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "X-Has-More": {
+                "$ref": "#/components/headers/X-Has-More"
+              },
+              "X-Total-Count": {
+                "$ref": "#/components/headers/X-Total-Count"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsController_HistoryPageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/agents/{agentId}/settings/{key}": {
+      "put": {
+        "tags": [
+          "AgentSettings"
+        ],
+        "summary": "Put",
+        "operationId": "AgentSettingsController_put",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsController_ValueRequest"
+              }
+            }
+          }
+        },
+        "description": "Set a runtime setting for one agent (EDITOR on the agent; a security key also needs a tenant admin). Same body and rules as the workspace PUT. Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsController_WriteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "AgentSettings"
+        ],
+        "summary": "Delete",
+        "operationId": "AgentSettingsController_delete",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "description": "Remove the agent's override so the workspace value applies again. A high or security key needs a typed reason (?reason=). Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsController_WriteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -18167,6 +18737,87 @@
           },
           "422": {
             "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/agents/{agentId}/turn-journal": {
+      "get": {
+        "tags": [
+          "TurnJournal"
+        ],
+        "summary": "By session",
+        "operationId": "TurnJournalController_bySession",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sessionId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "x-permissions": {
+          "anyOf": [
+            "PERM_VIEW_AUDIT_LOG"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
+        "description": "Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnJournalService_SessionView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -41409,6 +42060,58 @@
         "security": []
       }
     },
+    "/api/edge/prompts": {
+      "get": {
+        "tags": [
+          "EdgePromptBundle"
+        ],
+        "summary": "Bundle",
+        "operationId": "EdgePromptBundleController_bundle",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EdgePromptBundleController_EdgePromptBundle"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
     "/api/edge/tools": {
       "get": {
         "tags": [
@@ -61015,6 +61718,628 @@
         ]
       }
     },
+    "/api/prompts": {
+      "get": {
+        "tags": [
+          "PromptAdmin"
+        ],
+        "summary": "List",
+        "operationId": "PromptAdminController_list",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "family",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "X-Has-More": {
+                "$ref": "#/components/headers/X-Has-More"
+              },
+              "X-Total-Count": {
+                "$ref": "#/components/headers/X-Total-Count"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PromptOverrideService_PromptView"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/prompts/{key}": {
+      "get": {
+        "tags": [
+          "PromptAdmin"
+        ],
+        "summary": "Get",
+        "operationId": "PromptAdminController_get",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptOverrideService_PromptView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/prompts/{key}/history": {
+      "get": {
+        "tags": [
+          "PromptAdmin"
+        ],
+        "summary": "History",
+        "operationId": "PromptAdminController_history",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "tenant"
+            }
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PromptHistoryEntry"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/prompts/{key}/overrides/{scope}": {
+      "put": {
+        "tags": [
+          "PromptAdmin"
+        ],
+        "summary": "Put",
+        "operationId": "PromptAdminController_put",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromptAdminController_OverrideRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptOverrideService_Applied"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "PromptAdmin"
+        ],
+        "summary": "Revert",
+        "operationId": "PromptAdminController_revert",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expectedVersion",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptOverrideService_Applied"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/prompts/{key}/overrides/{scope}/restore": {
+      "post": {
+        "tags": [
+          "PromptAdmin"
+        ],
+        "summary": "Restore",
+        "operationId": "PromptAdminController_restore",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromptAdminController_RestoreRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptOverrideService_Applied"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/prompts/{key}/validate": {
+      "post": {
+        "tags": [
+          "PromptAdmin"
+        ],
+        "summary": "Validate",
+        "operationId": "PromptAdminController_validate",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromptAdminController_ValidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptOverrideService_Validation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
     "/api/providers": {
       "get": {
         "tags": [
@@ -65310,6 +66635,410 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/settings/catalog": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Catalog",
+        "operationId": "SettingsController_catalog",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsController_CatalogResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/settings/effective": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Effective",
+        "operationId": "SettingsController_effective",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsController_EffectiveResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/settings/history": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "History all",
+        "operationId": "SettingsController_historyAll",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "all"
+            }
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "description": "The change history of every setting in one call, newest first. scope=all (default) is the workspace's own changes plus every agent's (tenant admin), scope=tenant the workspace's only, scope=agent every agent's (tenant admin), scope=agent with agentId one agent's (EDITOR on it). since (ISO-8601 instant) keeps rows at or after it; page with limit and offset, the body carries total and hasMore.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "X-Has-More": {
+                "$ref": "#/components/headers/X-Has-More"
+              },
+              "X-Total-Count": {
+                "$ref": "#/components/headers/X-Total-Count"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsController_HistoryPageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/settings/tenant/{key}": {
+      "put": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Put tenant",
+        "operationId": "SettingsController_putTenant",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsController_ValueRequest"
+              }
+            }
+          }
+        },
+        "description": "Set a runtime setting for the whole workspace (tenant admin). Body {value, reason}: a high or security key needs a typed reason, and a security key can only be made stricter than the value it inherits. Answers 409 SETTING_LOCKED when the operator pinned the key (app.settings.locked) and 409 SETTING_CONFLICT when another writer changed the same key at the same moment (reload and retry).",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsController_WriteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Delete tenant",
+        "operationId": "SettingsController_deleteTenant",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "description": "Remove the workspace override so the platform value applies again (tenant admin). A high or security key needs a typed reason (?reason=), like a PUT. Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsController_WriteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/settings/{key}/history": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "History",
+        "operationId": "SettingsController_history",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "tenant"
+            }
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "description": "The change history of one setting, newest first. scope=tenant needs a tenant admin; scope=agent with agentId needs EDITOR on the agent. For every key at once use GET /api/settings/history.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SettingHistoryEntry"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -88543,8 +90272,7 @@
           "maxTokens": {
             "type": "integer",
             "format": "int32",
-            "exclusiveMinimum": 0,
-            "maximum": 8192
+            "exclusiveMinimum": 0
           },
           "temperature": {
             "type": "number",
@@ -88922,8 +90650,7 @@
           "maxTokens": {
             "type": "integer",
             "format": "int32",
-            "exclusiveMinimum": 0,
-            "maximum": 8192
+            "exclusiveMinimum": 0
           },
           "temperature": {
             "type": "number",
@@ -89693,6 +91420,10 @@
             "type": "integer",
             "format": "int32",
             "default": 0
+          },
+          "withToolsAvailable": {
+            "type": "boolean",
+            "default": false
           }
         },
         "required": [
@@ -89701,7 +91432,8 @@
           "maxCallsPerRun",
           "maxSystemPrompts",
           "maxSimilarityCells",
-          "runTtlMinutes"
+          "runTtlMinutes",
+          "withToolsAvailable"
         ]
       },
       "AgentLabDtos_LabCellRequest": {
@@ -89800,6 +91532,9 @@
           },
           "similarity": {
             "type": "string"
+          },
+          "withTools": {
+            "type": "boolean"
           }
         }
       },
@@ -90353,6 +92088,9 @@
           },
           "accessLevel": {
             "type": "string"
+          },
+          "runtimeLimits": {
+            "$ref": "#/components/schemas/RuntimeLimits"
           }
         },
         "required": [
@@ -90431,6 +92169,25 @@
         "required": [
           "overrideEnabled",
           "estimate"
+        ]
+      },
+      "AgentRuntimeProperties_Range": {
+        "type": "object",
+        "properties": {
+          "max": {
+            "type": "number",
+            "format": "double",
+            "default": 0
+          },
+          "min": {
+            "type": "number",
+            "format": "double",
+            "default": 0
+          }
+        },
+        "required": [
+          "max",
+          "min"
         ]
       },
       "AgentScheduleRequest": {
@@ -93526,6 +95283,76 @@
           }
         }
       },
+      "CatalogEntry": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "labelKey": {
+            "type": "string"
+          },
+          "descriptionKey": {
+            "type": "string"
+          },
+          "helpKey": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SettingType"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/SettingUnit"
+          },
+          "min": {
+            "type": "number"
+          },
+          "max": {
+            "type": "number"
+          },
+          "step": {
+            "type": "number"
+          },
+          "enumValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "risk": {
+            "$ref": "#/components/schemas/SettingRisk"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingScope"
+            }
+          },
+          "default": {},
+          "minRole": {
+            "$ref": "#/components/schemas/SettingRole"
+          },
+          "restartRequired": {
+            "type": "boolean",
+            "default": false
+          },
+          "docsAnchor": {
+            "type": "string"
+          },
+          "strictness": {
+            "type": "string"
+          },
+          "platformProperty": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "restartRequired"
+        ]
+      },
       "ChannelContactController_ContactRequest": {
         "type": "object",
         "properties": {
@@ -94633,6 +96460,13 @@
           "stepEvents": {
             "type": "boolean",
             "default": false
+          },
+          "toolNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 200
           }
         },
         "required": [
@@ -98469,6 +100303,52 @@
           }
         }
       },
+      "EdgePromptBundleController_EdgePrompt": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "switchable": {
+            "type": "boolean",
+            "default": false
+          },
+          "source": {
+            "$ref": "#/components/schemas/PromptSource"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "hash": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "switchable",
+          "version"
+        ]
+      },
+      "EdgePromptBundleController_EdgePromptBundle": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "prompts": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/EdgePromptBundleController_EdgePrompt"
+            }
+          }
+        }
+      },
       "EdgeRelayController_FailRequest": {
         "type": "object",
         "properties": {
@@ -99323,6 +101203,10 @@
             "type": "boolean",
             "default": false
           },
+          "autoApproveTools": {
+            "type": "boolean",
+            "default": false
+          },
           "caseCount": {
             "type": "integer",
             "format": "int64",
@@ -99346,6 +101230,7 @@
         "required": [
           "passThreshold",
           "toolExecutionEnabled",
+          "autoApproveTools",
           "caseCount"
         ]
       },
@@ -99416,6 +101301,9 @@
             "type": "string"
           },
           "output": {
+            "type": "string"
+          },
+          "status": {
             "type": "string"
           }
         }
@@ -99501,6 +101389,10 @@
             "type": "boolean",
             "default": false
           },
+          "autoApproved": {
+            "type": "boolean",
+            "default": false
+          },
           "repeats": {
             "type": "integer",
             "format": "int32",
@@ -99557,6 +101449,7 @@
           "failedAssertionCount",
           "erroredCaseCount",
           "strictJudge",
+          "autoApproved",
           "repeats",
           "cancelRequested"
         ]
@@ -99614,6 +101507,9 @@
             "format": "double"
           },
           "toolExecutionEnabled": {
+            "type": "boolean"
+          },
+          "autoApproveTools": {
             "type": "boolean"
           }
         }
@@ -103439,6 +105335,12 @@
             "type": "integer",
             "format": "int32",
             "default": 0
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromptBlockTag"
+            }
           }
         },
         "required": [
@@ -111629,6 +113531,160 @@
           "RUNTIME"
         ]
       },
+      "PromptAdminController_OverrideRequest": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "acknowledgeRisk": {
+            "type": "boolean",
+            "default": false
+          },
+          "reason": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "acknowledgeRisk"
+        ]
+      },
+      "PromptAdminController_RestoreRequest": {
+        "type": "object",
+        "properties": {
+          "toVersion": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "acknowledgeRisk": {
+            "type": "boolean",
+            "default": false
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "toVersion",
+          "acknowledgeRisk"
+        ]
+      },
+      "PromptAdminController_ValidateRequest": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PromptBlockTag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "hash": {
+            "type": "string"
+          },
+          "chars": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "estimatedTokens": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          }
+        },
+        "required": [
+          "version",
+          "chars",
+          "estimatedTokens"
+        ]
+      },
+      "PromptDefinition": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "riskClass": {
+            "$ref": "#/components/schemas/PromptRiskClass"
+          },
+          "securityCritical": {
+            "type": "boolean",
+            "default": false
+          },
+          "disableable": {
+            "type": "boolean",
+            "default": false
+          },
+          "retired": {
+            "type": "boolean",
+            "default": false
+          },
+          "strictPlaceholders": {
+            "type": "boolean",
+            "default": false
+          },
+          "placeholders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromptPlaceholder"
+            }
+          },
+          "minLength": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "maxLength": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          }
+        },
+        "required": [
+          "securityCritical",
+          "disableable",
+          "retired",
+          "strictPlaceholders",
+          "minLength",
+          "maxLength"
+        ]
+      },
       "PromptDirectiveAdminService_CustomInstructions": {
         "type": "object",
         "properties": {
@@ -111704,6 +113760,12 @@
           },
           "assembledPreview": {
             "type": "string"
+          },
+          "assembledPreviewNote": {
+            "type": "string"
+          },
+          "promptPreviewPath": {
+            "type": "string"
           }
         }
       },
@@ -111740,6 +113802,403 @@
         "required": [
           "enabled",
           "acknowledgeRisk"
+        ]
+      },
+      "PromptHistoryEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "default": 0
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PromptScope"
+          },
+          "scopeId": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "action": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "previousText": {
+            "type": "string"
+          },
+          "previousEnabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "reason": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "enabled",
+          "previousEnabled"
+        ]
+      },
+      "PromptOverride": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/PromptScope"
+          },
+          "scopeId": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "enabled",
+          "version"
+        ]
+      },
+      "PromptOverrideService_Applied": {
+        "type": "object",
+        "properties": {
+          "override": {
+            "$ref": "#/components/schemas/PromptOverride"
+          },
+          "history": {
+            "$ref": "#/components/schemas/PromptHistoryEntry"
+          },
+          "unchanged": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "unchanged"
+        ]
+      },
+      "PromptOverrideService_OverrideView": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/PromptScope"
+          },
+          "scopeId": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "enabled",
+          "version"
+        ]
+      },
+      "PromptOverrideService_PromptView": {
+        "type": "object",
+        "properties": {
+          "definition": {
+            "$ref": "#/components/schemas/PromptDefinition"
+          },
+          "defaultText": {
+            "type": "string"
+          },
+          "effective": {
+            "$ref": "#/components/schemas/ResolvedPrompt"
+          },
+          "overrides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromptOverrideService_OverrideView"
+            }
+          }
+        }
+      },
+      "PromptOverrideService_Validation": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "default": false
+          },
+          "problems": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "securityCritical": {
+            "type": "boolean",
+            "default": false
+          },
+          "requiresAcknowledgement": {
+            "type": "boolean",
+            "default": false
+          },
+          "length": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          }
+        },
+        "required": [
+          "valid",
+          "securityCritical",
+          "requiresAcknowledgement",
+          "length"
+        ]
+      },
+      "PromptPlaceholder": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "required"
+        ]
+      },
+      "PromptPreviewService_BlockView": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "estimatedTokens": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "estimatedTokens"
+        ]
+      },
+      "PromptPreviewService_Preview": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "smallModel": {
+            "type": "boolean",
+            "default": false
+          },
+          "systemPrompt": {
+            "type": "string"
+          },
+          "memoryBlock": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromptPreviewService_BlockView"
+            }
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromptPreviewService_ToolView"
+            }
+          },
+          "promptEstimatedTokens": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "toolsEstimatedTokens": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "tokenBudget": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "overBudget": {
+            "type": "boolean",
+            "default": false
+          },
+          "tokenEstimateNote": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "smallModel",
+          "promptEstimatedTokens",
+          "toolsEstimatedTokens",
+          "tokenBudget",
+          "overBudget"
+        ]
+      },
+      "PromptPreviewService_Request": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "smallModel": {
+            "type": "boolean"
+          },
+          "includeMemoryRecall": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PromptPreviewService_ToolView": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "inputSchema": {
+            "type": "string"
+          },
+          "estimatedTokens": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          }
+        },
+        "required": [
+          "estimatedTokens"
+        ]
+      },
+      "PromptRiskClass": {
+        "type": "string",
+        "enum": [
+          "STEERS_EVERY_TURN",
+          "SECONDARY_CALL",
+          "USER_VISIBLE",
+          "TOOL_DESCRIPTION"
+        ]
+      },
+      "PromptScope": {
+        "type": "string",
+        "enum": [
+          "AGENT",
+          "TENANT",
+          "PLATFORM"
+        ]
+      },
+      "PromptSource": {
+        "type": "string",
+        "enum": [
+          "DEFAULT",
+          "PLATFORM",
+          "TENANT",
+          "AGENT",
+          "FALLBACK"
         ]
       },
       "PromptVersionResponse": {
@@ -114061,6 +116520,53 @@
           "freeModeMeteringOnly"
         ]
       },
+      "ResolvedPrompt": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/PromptSource"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PromptScope"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "locale": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "known": {
+            "type": "boolean",
+            "default": false
+          },
+          "hash": {
+            "type": "string"
+          },
+          "estimatedTokens": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          }
+        },
+        "required": [
+          "version",
+          "enabled",
+          "known",
+          "estimatedTokens"
+        ]
+      },
       "ResourceType": {
         "type": "string",
         "enum": [
@@ -115236,6 +117742,111 @@
           "summedLatencyMs"
         ]
       },
+      "RuntimeLimits": {
+        "type": "object",
+        "properties": {
+          "continuationPasses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxToolSteps": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "retrievalMinScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "retrievalTopK": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "toolOutputMaxChars": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "toolTimeoutSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "turnTimeoutSeconds": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RuntimeLimitsView": {
+        "type": "object",
+        "properties": {
+          "overrides": {
+            "$ref": "#/components/schemas/RuntimeLimits"
+          },
+          "effective": {
+            "$ref": "#/components/schemas/RuntimeLimitsView_Effective"
+          },
+          "bounds": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AgentRuntimeProperties_Range"
+            }
+          }
+        }
+      },
+      "RuntimeLimitsView_Effective": {
+        "type": "object",
+        "properties": {
+          "maxToolSteps": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "turnTimeoutSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "default": 0
+          },
+          "toolTimeoutSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "default": 0
+          },
+          "toolOutputMaxChars": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "retrievalTopK": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "retrievalMinScore": {
+            "type": "number",
+            "format": "double",
+            "default": 0
+          },
+          "continuationPasses": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "layers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "maxToolSteps",
+          "turnTimeoutSeconds",
+          "toolTimeoutSeconds",
+          "toolOutputMaxChars",
+          "retrievalTopK",
+          "retrievalMinScore",
+          "continuationPasses"
+        ]
+      },
       "SampleUnit": {
         "type": "string",
         "enum": [
@@ -116042,6 +118653,250 @@
         },
         "required": [
           "roles"
+        ]
+      },
+      "SettingHistoryEntry": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "action": {
+            "type": "string"
+          },
+          "value": {},
+          "previousValue": {},
+          "reason": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "SettingHistoryRow": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/SettingScope"
+          },
+          "agentId": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "action": {
+            "type": "string"
+          },
+          "value": {},
+          "previousValue": {},
+          "reason": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "SettingRisk": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "security"
+        ]
+      },
+      "SettingRole": {
+        "type": "string",
+        "enum": [
+          "VIEWER",
+          "EDITOR",
+          "TENANT_ADMIN"
+        ]
+      },
+      "SettingScope": {
+        "type": "string",
+        "enum": [
+          "tenant",
+          "agent"
+        ]
+      },
+      "SettingSource": {
+        "type": "string",
+        "enum": [
+          "default",
+          "platform",
+          "tenant",
+          "agent"
+        ]
+      },
+      "SettingType": {
+        "type": "string",
+        "enum": [
+          "int",
+          "long",
+          "decimal",
+          "duration",
+          "bool",
+          "enum",
+          "string",
+          "text",
+          "percent"
+        ]
+      },
+      "SettingUnit": {
+        "type": "string",
+        "enum": [
+          "chars",
+          "tokens",
+          "ms",
+          "s",
+          "count",
+          "usd",
+          "percent"
+        ]
+      },
+      "SettingValue": {
+        "type": "object",
+        "properties": {
+          "value": {},
+          "source": {
+            "$ref": "#/components/schemas/SettingSource"
+          },
+          "locked": {
+            "type": "boolean",
+            "default": false
+          },
+          "lockedReason": {
+            "type": "string"
+          },
+          "inherited": {
+            "$ref": "#/components/schemas/SettingValue_Inherited"
+          }
+        },
+        "required": [
+          "locked"
+        ]
+      },
+      "SettingValue_Inherited": {
+        "type": "object",
+        "properties": {
+          "value": {},
+          "source": {
+            "$ref": "#/components/schemas/SettingSource"
+          }
+        }
+      },
+      "SettingsController_CatalogResponse": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogEntry"
+            }
+          }
+        }
+      },
+      "SettingsController_EffectiveResponse": {
+        "type": "object",
+        "properties": {
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SettingValue"
+            }
+          }
+        }
+      },
+      "SettingsController_HistoryPageResponse": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingHistoryRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64",
+            "default": 0
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "hasMore": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "total",
+          "offset",
+          "limit",
+          "hasMore"
+        ]
+      },
+      "SettingsController_ValueRequest": {
+        "type": "object",
+        "properties": {
+          "value": {},
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "SettingsController_WriteResponse": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "effective": {
+            "$ref": "#/components/schemas/SettingValue"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unchanged": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "unchanged"
         ]
       },
       "ShareController_GrantRequest": {
@@ -120810,6 +123665,56 @@
         "required": [
           "chainIntact",
           "brokenAtSeq"
+        ]
+      },
+      "TurnJournalService_SessionView": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "turns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TurnSummary"
+            }
+          }
+        }
+      },
+      "TurnSummary": {
+        "type": "object",
+        "properties": {
+          "turnId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastEventAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "events": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "events"
         ]
       },
       "TutorDtos_CreatePlanRequest": {

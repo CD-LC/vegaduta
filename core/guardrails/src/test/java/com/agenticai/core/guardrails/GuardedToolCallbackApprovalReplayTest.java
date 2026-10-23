@@ -86,7 +86,7 @@ class GuardedToolCallbackApprovalReplayTest {
         // argument list is Mockito's unfinished-stubbing trap.
         ApprovalRequest pending = pendingRequest(requestId);
         when(approvalGateService.recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any()))
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
             .thenReturn(pending);
 
         String result = guarded.call(TOOL_INPUT);
@@ -97,7 +97,7 @@ class GuardedToolCallbackApprovalReplayTest {
         verify(approvalGateService).recordToolCallForApproval(
             eq(ACTION_TYPE), eq(TOOL_NAME), eq("Tool call: " + TOOL_NAME), eq(TOOL_INPUT),
             eq("agent:" + AGENT_ID + ":session:" + SESSION_ID), eq(AGENT_ID), eq(SESSION_ID),
-            org.mockito.ArgumentMatchers.notNull());
+            org.mockito.ArgumentMatchers.notNull(), any());
         assertTrue(result.contains(requestId.toString()));
         assertTrue(result.contains("NOT executed"));
     }
@@ -108,7 +108,7 @@ class GuardedToolCallbackApprovalReplayTest {
         UUID requestId = UUID.randomUUID();
         ApprovalRequest pending = pendingRequest(requestId);
         when(approvalGateService.recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any()))
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
             .thenReturn(pending);
 
         ApprovalReplayGrant.grant(ACTION_TYPE);
@@ -127,7 +127,7 @@ class GuardedToolCallbackApprovalReplayTest {
         when(approvalPolicyService.requiresApproval(ACTION_TYPE)).thenReturn(true);
         ApprovalRequest pending = pendingRequest(UUID.randomUUID());
         when(approvalGateService.recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any()))
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
             .thenReturn(pending);
 
         ApprovalReplayGrant.grant("mcp_tool.some_other_tool");

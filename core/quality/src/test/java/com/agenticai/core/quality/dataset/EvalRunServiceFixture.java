@@ -70,7 +70,9 @@ abstract class EvalRunServiceFixture {
         judgeChatClientFactory = mock(JudgeChatClientFactory.class);
         agentDefinitionLookup = mock(AgentDefinitionLookup.class);
         headVersionLookup = mock(AgentHeadVersionLookup.class);
-        replayer = mock(AgentTurnReplayer.class);
+        // Real default methods: the runner calls replay(ReplayRequest), whose default delegates to the six-argument form
+        // these tests stub.
+        replayer = mock(AgentTurnReplayer.class, org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.Mockito.CALLS_REAL_METHODS));
         llmCallLogService = mock(LlmCallLogService.class);
         @SuppressWarnings("unchecked")
         ObjectProvider<LlmCallLogService> llmLogProvider = mock(ObjectProvider.class);

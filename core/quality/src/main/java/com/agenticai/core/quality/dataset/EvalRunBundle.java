@@ -80,6 +80,12 @@ public final class EvalRunBundle {
         runDoc.put("judgeModel", run.getJudgeModel());
         runDoc.put("requestedJudgeModel", run.getRequestedJudgeModel());
         runDoc.put("strictJudge", run.isStrictJudge());
+        runDoc.put("mode", run.getEvalMode().name());
+        // Only when true, so the digest of every bundle exported before the sandbox auto-approval existed
+        // is unchanged: a run whose tool calls no person decided must say so.
+        if (run.isAutoApproved()) {
+            runDoc.put("autoApproved", true);
+        }
         runDoc.put("datasetHashAtRun", run.getDatasetHash());
         runDoc.put("agentVersionId", str(run.getAgentVersionId()));
         runDoc.put("budgetUsd", run.getBudgetUsd() != null ? run.getBudgetUsd().toPlainString() : null);
@@ -108,7 +114,7 @@ public final class EvalRunBundle {
         Map<String, Object> live = new LinkedHashMap<>();
         live.put("name", dataset.getName());
         live.put("passThreshold", dataset.getPassThreshold());
-        live.put("toolExecutionEnabled", dataset.isToolExecutionEnabled());
+        live.put("toolExecutionEnabled", dataset.getToolExecutionEnabled());
         live.put("currentContentHash", dataset.getContentHash());
         live.put("changedSinceRun",
             run.getDatasetHash() != null && dataset.getContentHash() != null

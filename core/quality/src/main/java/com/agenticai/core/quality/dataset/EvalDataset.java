@@ -58,16 +58,29 @@ public class EvalDataset {
     private double passThreshold;
 
     /**
-     * Whether replays run through the FULL agent pipeline (tools included)
-     * or tool-less ({@code AgentChatService#chatTextOnly}). Defaults to
-     * {@code false}: a replayed case with tools attached re-executes REAL
-     * side-effecting tools (send_channel_message, generate_document, any
-     * mcp_tool.*) - an offline eval that sends actual customer messages is
-     * an incident, not a test run. Datasets asserting on tool usage opt in
-     * explicitly.
+     * The dataset's OWN replay mode, when it has one: {@code TRUE} pins the full pipeline (the agent's tools run in
+     * the eval sandbox), {@code FALSE} pins a quick text-only replay (the tools are withheld), and {@code NULL}
+     * (the default of a dataset created without a choice) pins nothing - the run takes the workspace's default
+     * ({@code quality.eval.defaultMode} over {@code app.quality.eval.default-mode}, the full pipeline as shipped).
+     * A run that names a mode itself overrides the pin. V670 made the column nullable and set every dataset that
+     * held the old default (FALSE) to NULL, so existing datasets follow the new default instead of staying
+     * tool-less by accident.
      */
-    @Column(name = "tool_execution_enabled", nullable = false)
-    private boolean toolExecutionEnabled;
+    @Column(name = "tool_execution_enabled")
+    private Boolean toolExecutionEnabled;
+
+    /**
+     * For a run in the full pipeline: whether a tool call that would wait
+     * for a human is approved by the eval sandbox instead (never for the
+     * excluded tools, and only for tenants the operator declared
+     * non-production; see {@link EvalSandboxPolicy}). Without it a gated call
+     * is held exactly as in production and the case sees an unanswered
+     * approval (no approval request is recorded and nobody is notified).
+     * Meaningless for a quick run, which has no tool calls. V667; false for
+     * every earlier dataset.
+     */
+    @Column(name = "auto_approve_tools", nullable = false)
+    private boolean autoApproveTools;
 
     /**
      * Keycloak subject of the author. Opaque string, never FK'd - same
@@ -107,7 +120,7 @@ public class EvalDataset {
         String name,
         String description,
         double passThreshold,
-        boolean toolExecutionEnabled,
+        Boolean toolExecutionEnabled,
         String createdBy
     ) {
         this.agentId = agentId;
@@ -120,18 +133,40 @@ public class EvalDataset {
         this.updatedAt = this.createdAt;
     }
 
+    public EvalDataset(
+        UUID agentId,
+        String name,
+        String description,
+        double passThreshold,
+        Boolean toolExecutionEnabled,
+        boolean autoApproveTools,
+        String createdBy
+    ) {
+        this(agentId, name, description, passThreshold, toolExecutionEnabled, createdBy);
+        this.autoApproveTools = autoApproveTools;
+    }
+
     /**
      * Intention-named update (house style: behavior on the entity, not
      * anemic setters) - the only mutation the console offers. Bumps
      * {@code updatedAt} itself so no caller can forget to.
      */
     public void updateDefinition(
-        String name, String description, double passThreshold, boolean toolExecutionEnabled
+        String name, String description, double passThreshold, Boolean toolExecutionEnabled
+    ) {
+        updateDefinition(name, description, passThreshold, toolExecutionEnabled, this.autoApproveTools);
+    }
+
+    /** As above, also setting the sandbox auto-approval of the dataset's tool replays. */
+    public void updateDefinition(
+        String name, String description, double passThreshold, Boolean toolExecutionEnabled,
+        boolean autoApproveTools
     ) {
         this.name = name;
         this.description = description;
         this.passThreshold = passThreshold;
         this.toolExecutionEnabled = toolExecutionEnabled;
+        this.autoApproveTools = autoApproveTools;
         this.updatedAt = Instant.now();
     }
 
@@ -172,8 +207,22 @@ public class EvalDataset {
         return passThreshold;
     }
 
-    public boolean isToolExecutionEnabled() {
+    /** The dataset's own mode choice as stored: {@code TRUE} full, {@code FALSE} quick, {@code null} none. */
+    public Boolean getToolExecutionEnabled() {
         return toolExecutionEnabled;
+    }
+
+    /** The mode this dataset pins, or empty when it follows the workspace's default; see the field's javadoc. */
+    public java.util.Optional<EvalMode> pinnedMode() {
+        if (toolExecutionEnabled == null) {
+            return java.util.Optional.empty();
+        }
+        return java.util.Optional.of(toolExecutionEnabled ? EvalMode.FULL : EvalMode.QUICK);
+    }
+
+    /** See the field's javadoc; only meaningful for a run in the full pipeline (the dataset must not pin quick). */
+    public boolean isAutoApproveTools() {
+        return autoApproveTools;
     }
 
     public String getCreatedBy() {

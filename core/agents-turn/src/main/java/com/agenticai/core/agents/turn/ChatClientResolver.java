@@ -47,6 +47,13 @@ final class ChatClientResolver {
         this.queryComplexityClassifier = queryComplexityClassifier;
     }
 
+    /** {@code app.chat.limits.*}: the clamp of an economy auxiliary call's output; the shipped defaults until set. */
+    private volatile ChatLimitsProperties limits = new ChatLimitsProperties();
+
+    void useLimits(ChatLimitsProperties limits) {
+        this.limits = limits == null ? new ChatLimitsProperties() : limits;
+    }
+
     void useHotpath(ChatHotpath hotpath) {
         this.hotpath = hotpath;
     }
@@ -111,6 +118,25 @@ final class ChatClientResolver {
             TenantPlan plan,
             double effTemperature,
             double effTopP) {
+        return buildChatClientFor(
+                agent, userMessage, rlModelOverride, tenantId, plan, effTemperature, effTopP, false);
+    }
+
+    /**
+     * As above; {@code keepPrimaryModel} says the turn is a short follow-up in the middle of a tool task
+     * (see {@link FollowUpTools}), so cost routing is not consulted and the agent's own model runs it.
+     * The follow-up's text ("yes", "continue") says nothing about how hard the task is, and switching
+     * model mid-task changes the answer's quality and discards the provider's prompt cache.
+     */
+    ChatClient buildChatClientFor(
+            Agent agent,
+            String userMessage,
+            String rlModelOverride,
+            String tenantId,
+            TenantPlan plan,
+            double effTemperature,
+            double effTopP,
+            boolean keepPrimaryModel) {
         // Live bug (direct report): a non-FREE tenant whose AGENT was created
         // with providerName=PLATFORM_HOSTED (the per-agent "Use Platform LLM"
         // choice - see AgentService#create's isFreePlan branch, which persists
@@ -211,9 +237,10 @@ final class ChatClientResolver {
                         e.getMessage());
             }
         } else if (agent.isCostRoutingEnabled()
+                && !keepPrimaryModel
                 && agent.getEconomyProviderName() != null
                 && queryComplexityClassifier.isSimple(
-                        userMessage, agent.getCostRoutingJevThreshold())) {
+                        userMessage, agent.getCostRoutingJevThreshold(), agent.getId())) {
             effectiveProvider = agent.getEconomyProviderName();
             effectiveModel = agent.getEconomyModel();
             routedToEconomy = true;
@@ -307,7 +334,9 @@ final class ChatClientResolver {
                             provider,
                             apiKey,
                             agent.getEconomyModel(),
-                            Math.min(Math.max(agent.getMaxTokens(), 256), 1024),
+                            Math.min(
+                                    Math.max(agent.getMaxTokens(), limits.getEconomyAuxMinTokens()),
+                                    limits.getEconomyAuxMaxTokens()),
                             0.0,
                             1.0,
                             null,

@@ -14,7 +14,8 @@ import { GenerativeUiRenderer } from "../generative-ui/GenerativeUiRenderer";
 import { extractUiSpec } from "../generative-ui/extractUiSpec";
 import { TurnAttachments } from "../ChatAttachments";
 import PendingToolApprovals from "../agents/PendingToolApprovals";
-import type { ToolApprovalOutcome } from "../agents/toolApprovalMatching";
+import ApprovalContinuationStatus from "../agents/ApprovalContinuationStatus";
+import type { ApprovalContinuationWatch } from "../agents/useApprovalContinuation";
 import TurnStopNotice from "../agents/TurnStopNotice";
 import ConnectCard from "./ConnectCard";
 import RequestInspector from "../agents/RequestInspector";
@@ -41,7 +42,7 @@ export default function AssistantTranscript({
   onResumeHeld,
   onBackground,
   onSuggestion,
-  onApprovalDecided,
+  approvalContinuation,
   showThinking = false,
   speakReplies = false,
   task,
@@ -63,8 +64,8 @@ export default function AssistantTranscript({
   /** "Keep going in the background" under a turn the step cap stopped. */
   onBackground: (index: number) => void;
   onSuggestion: (text: string) => void;
-  /** A parked tool call on this thread was decided (approved and ran, failed, or rejected). */
-  onApprovalDecided?: (outcome: ToolApprovalOutcome) => void;
+  /** Follows the Assistant carrying on after a parked tool call on this thread is decided (core continues the task itself). */
+  approvalContinuation: ApprovalContinuationWatch;
   /** Show the model's raw reasoning in the work trace (default hides it). */
   showThinking?: boolean;
   /** Read each finished reply aloud (on-device Kokoro, browser voice as fallback). */
@@ -125,9 +126,10 @@ export default function AssistantTranscript({
             agentId={agentId}
             sessionId={sessionId}
             turnInFlight={sending}
-            onDecided={onApprovalDecided}
+            onDecided={(_outcome, requestId) => approvalContinuation.watch(requestId)}
           />
         )}
+        <ApprovalContinuationStatus continuation={approvalContinuation} />
       </div>
     </div>
   );

@@ -54,6 +54,7 @@
 // deployment with the edge stack compiled out has no tier to run on at all.
 
 import { detectCapabilities, edgeEnabled } from "../edge/capabilities";
+import { edgePrompt } from "../edge/edgePrompts";
 import { createTier0Session, Tier0Error, tier0Availability, type Tier0Session } from "../edge/tier0";
 import {
   computeTier1PromptBudget,
@@ -134,13 +135,14 @@ export interface AskLocalCodeOptions {
  */
 const RETRIEVAL_K = 12;
 
-const SYSTEM_PROMPT =
-  "You answer questions about a codebase using only the excerpts you are " +
-  "given. Each excerpt is labelled with its file path and line range. Cite " +
-  "the path and line range for every claim you make. If the excerpts do not " +
-  "contain the answer, say so plainly instead of guessing — the reader can " +
-  "see the same excerpts you can, so an invented file name is worse than a " +
-  "short admission that it was not in what you were shown.";
+/**
+ * The instruction for the on-device model: the registry key `edge.localcode_ask.system` (edgePrompts.ts), shipped
+ * wording as the default. Read, never fetched, here: this feature only ever runs on the device and sends nothing
+ * off it, so it uses whatever wording the edge runtime already holds (the shipped text when none has been fetched).
+ */
+function systemPrompt(): string {
+  return edgePrompt("edge.localcode_ask.system");
+}
 
 const NO_MODEL_DETAIL =
   "No on-device model is ready in this browser. Open VegaDūta Edge (/edge) and download a " +
@@ -197,7 +199,7 @@ function fitChunks(question: string, ranked: RetrievedChunk[], budgetTokens: num
   for (const chunk of ranked) {
     const candidate = [...kept, chunk];
     const tokens =
-      estimateTier1Tokens(SYSTEM_PROMPT) + estimateTier1Tokens(buildUserPrompt(question, candidate));
+      estimateTier1Tokens(systemPrompt()) + estimateTier1Tokens(buildUserPrompt(question, candidate));
     if (tokens > budgetTokens) break;
     kept.push(chunk);
   }
@@ -393,7 +395,7 @@ export async function askLocalCode(
 
     let raw: string;
     try {
-      const session = await ready.open(SYSTEM_PROMPT);
+      const session = await ready.open(systemPrompt());
       try {
         raw = await session.prompt(buildUserPrompt(q, cited), onToken, signal);
       } finally {

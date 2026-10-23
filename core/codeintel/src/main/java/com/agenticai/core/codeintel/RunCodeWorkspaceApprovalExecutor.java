@@ -190,6 +190,7 @@ public class RunCodeWorkspaceApprovalExecutor implements ApprovalActionExecutor 
 
     /** {@code adminOnly} is read by {@code ApprovalController#enforceApproverAuthorization}
      *  straight off the stored payload JSON - see {@link RunInCodeWorkspaceToolCallback}. */
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
     public record RunPayload(
         String repoId, String workspaceId, String command, Integer timeout, int attempts, boolean adminOnly) {
     }

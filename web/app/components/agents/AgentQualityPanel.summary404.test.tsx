@@ -18,6 +18,12 @@ vi.mock("../../lib/academyUrl", () => ({
   hasAcademy: () => false,
 }));
 vi.mock("../ui/upgrade-lock", () => ({ UpgradeLock: (): null => null }));
+// The panel now also shows the (read-only) background-judge sampling rate: its text and its settings read are
+// outside what this file is about, so both are stubbed at their module boundary.
+vi.mock("../../lib/i18n", () => ({ useTranslations: () => (key: string) => key }));
+vi.mock("../../lib/api/settings", () => ({
+  settingsApi: { getEffective: vi.fn().mockResolvedValue({ values: {} }) },
+}));
 
 import AgentQualityPanel from "./AgentQualityPanel";
 

@@ -61,7 +61,9 @@
     "railSecrets": "লোনথোকপশিং",
     "railBrand": "ব্রান্ডিং",
     "railLearn": "তম্মু",
-    "railGuard": "ঙাকশেলশিং"
+    "railGuard": "ঙাকশেলশিং",
+    "railRuntimeSettings": "রনটাইম সেটিংশিং",
+    "railControls": "ঐ করি কন্ট্রোল তৌবগে...?"
   },
   "languageSwitcher": {
     "label": "লোন",
@@ -754,7 +756,142 @@
     "edgeTier0Badge": "দিভাইসতা লৈবা · ক্রোমদা অপুনবা",
     "edgeTier0BadgeTitle": "ক্রোমগী অপুনবা মোদেল (জেমিনি নেনো) অসিনা পাউখুম পিখ্রে - থুনা অমসুং মপুং ফানা প্রাইভেৎ ওই, অদুবু চেৎ খক্তমক: মসিনা তুলশিং শীজিন্নবা ঙমদে অমসুং অরুবা থবকশিংদা অচু্ম্বা ওইদবা য়াই। প্লান খুদিংদা লেম্না ফংই।",
     "edgeTier1Badge": "দিভাইসতা লৈবা · লোকেল মোদেল",
-    "edgeTier1BadgeTitle": "দাউনলোদ তৌরবা দিভাইস মোদেল অমনা পাউখুম পিখ্রে - প্রাইভেৎ ওই, অমসুং মসিনা তুলশিং শীজিন্নবা ঙম্মি (হোস্তেদ তর্ন অমনা শীজিন্নবা ঙম্বা ঙাকশেল লৈবা তুলশিংগা মান্নৈ)। হোস্তেদ পুলদগী হেন্না পিকপা মোদেল ওইরি, মরম অদুনা অরুবা ৱাহংশিংদা অচু্ম্বা ওইদবা য়াই। প্লান খুদিংদা লেম্না ফংই।"
+    "edgeTier1BadgeTitle": "দাউনলোদ তৌরবা দিভাইস মোদেল অমনা পাউখুম পিখ্রে - প্রাইভেৎ ওই, অমসুং মসিনা তুলশিং শীজিন্নবা ঙম্মি (হোস্তেদ তর্ন অমনা শীজিন্নবা ঙম্বা ঙাকশেল লৈবা তুলশিংগা মান্নৈ)। হোস্তেদ পুলদগী হেন্না পিকপা মোদেল ওইরি, মরম অদুনা অরুবা ৱাহংশিংদা অচু্ম্বা ওইদবা য়াই। প্লান খুদিংদা লেম্না ফংই।",
+    "viewTurn": "টর্নশিং য়েংরো",
+    "viewTurnTitle": "বাতচা অসিগী টর্নশিংগী চরণ অসি চরণ অসিগী টাইমলাইন ফিদোকপা",
+    "headerRunning": "টর্ন অমা চত্থরি",
+    "headerReady": "ফজরে",
+    "clearContext": "প্রসঙ্গ মান্নরো",
+    "clearContextTitle": "বাতচা অমত্তা ইন্থৌরো। মসি চ্যাট অসিগী ডিভাইসতা অমসুং সার্ভরগী সেসন মেমোরি মান্নরি।",
+    "stopRun": "জবাব অসি মেন্তলরো",
+    "fallbackSendToPlatform": "প্লাটফর্মদা থাগৎরো",
+    "chipsLabel": "এজেন্টনা ঙসি করি তৌরিবা",
+    "chipPreparing": "ফজরে",
+    "chipModelCall": "মডেলগী থাজবা",
+    "chipThinking": "ঈশিনবা তৌরি",
+    "chipWriting": "জবাব ঙাকলি",
+    "chipTool": "টুল চত্থরি: {tool}",
+    "chipToolUnnamed": "টুল অমা চত্থরি",
+    "chipWaitingApproval": "নহাক্কী অনুমোদনগীদমক ঙৈরি ({count})",
+    "chipContinuing": "জবাব ইন্থৌনা চত্থরি",
+    "chipContinuingPass": "জবাব ইন্থৌনা চত্থরি ({max}গী মনুংদগী পাস {pass})",
+    "chipContinuingApproval": "নহাক্কী ফৈসালা ফংবগী মনা ইন্থৌনা চত্থরি",
+    "chipRetrying": "অসুক নত্তনা কোশিশ তৌরি",
+    "chipRetryingReason": "অসুক নত্তনা কোশিশ তৌরি: {reason}",
+    "chipRetryingAttempt": "অসুক নত্তনা কোশিশ তৌরি (কোশিশ {attempt}/{max})",
+    "chipRetryingAttemptReason": "অসুক নত্তনা কোশিশ তৌরি (কোশিশ {attempt}/{max}): {reason}",
+    "chipFailover": "বেকআপ মডেলদা সোইখ্রে",
+    "chipFailoverReason": "বেকআপ মডেলদা সোইখ্রে: {reason}",
+    "chipFailoverTo": "{model}দা সোইখ্রে",
+    "chipFailoverToReason": "{model}দা সোইখ্রে: {reason}",
+    "outcomeTruncated": "জবাব অসি অচৌবা ফোকপগী মমাংদা চেক্থ্রে।",
+    "outcomeContinue": "ইন্থৌনা চত্থরো",
+    "outcomeLongerReplies": "ফাওবা জবাবগী অনুমতি পীরো",
+    "continueMessage": "ফাওদোকপা মফমগীদগী ইন্থৌনা চত্থরো, মমাংদা ঙাকখিবসু অসুক নত্তনা।",
+    "outcomeRefused": "সুরক্ষাগী মরমদা মডেল প্রোভাইডরনা জবাব অসি মেন্তলখ্রে, অদুগা য়েংদোকপগীদমক জবাব লৈদে। অনুরোধ সোইনা অসুক কোশিশ তৌরো।",
+    "outcomeRefusedReason": "সুরক্ষাগী মরমদা ({reason}) মডেল প্রোভাইডরনা জবাব অসি মেন্তলখ্রে, অদুগা য়েংদোকপগীদমক জবাব লৈদে। অনুরোধ সোইনা অসুক কোশিশ তৌরো।",
+    "outcomeMalformedToolCall": "মডেলনা টুল ব্যবহার তৌবা কোশিশ তৌখ্রে নখোইগী অনুরোধ ফজদে, অদুগা করিসু চত্থদে। অসুক কোশিশ তৌরো।",
+    "outcomeEmpty": "মডেলনা খল্লিবা জবাব পীখ্রে। অসুক কোশিশ তৌরো।",
+    "stopRaiseSteps": "টুল-কলগী মেহুৎ হাপহনরো",
+    "stopRaiseBudget": "খর্চাগী মেহুৎ সোইরো",
+    "stopAskEditor": "এজেন্ট অসি সম্পাদনা তৌবা ঙম্বা মী অমদা মেহুৎ হাপহনবা হায়রো।",
+    "rsOpen": "রন সেটিংশিং",
+    "rsTitle": "রন সেটিংশিং",
+    "rsClose": "রন সেটিংশিং মেন্তলরো",
+    "rsBack": "রন সেটিংশিংদা ঊৎলকরো",
+    "rsIntro": "{name}গীদমক মতাংগী খবর করিনা চত্থগদ্রিবনো। মখোই অসি এজেন্টকী ব্যবহার ট্যাবদা সোইরো।",
+    "rsLoading": "লোড তৌরি",
+    "rsRetry": "অসুক কোশিশ তৌরো",
+    "rsOpenBehavior": "ব্যবহারদা সম্পাদনা তৌরো",
+    "rsModelHeading": "মডেল অমসুং নমুনা থীবা",
+    "rsModel": "মডেল",
+    "rsModelNotSet": "সেট তৌদ্রে",
+    "rsModelDefault": "মডেলগী ডিফল্ট",
+    "rsDepth": "যুক্তিগী মনুং-অপাইবা",
+    "rsSourceAgent": "এজেন্ট অসিদা সেট তৌখ্রে",
+    "rsParam_temperature": "তাপমাত্রা",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "জবাবগী ফাওবা অচৌবা (টোকেন)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "অসুক অসুক ফংবগী দণ্ড",
+    "rsParam_presencePenalty": "লৈবগী দণ্ড",
+    "rsParam_seed": "সিড",
+    "rsParam_stopSequences": "মেন্তলবগী ক্রম",
+    "rsParamDropped": "{param} এজেন্ট অসিদা সেট তৌখ্রে, নত্তে {provider}না {model}গীদমক মসি পাংদে, অদুগা মসিগী ফংসন লৈদে।",
+    "rsToolsRunHeading": "Tools for this run",
+    "rsToolsRunOnly": "This run only",
+    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
+    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
+    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
+    "rsToolsReset": "Use the agent's tools",
+    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
+    "rsToolsEditAgent": "Change the agent's saved tools",
+    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsEmpty": "এজেন্ট অসিগীদমক টুল লৈদে।",
+    "rsToolsSummary": "টুল {total}গী মনুংদগী {on} শিন্থৌরে",
+    "rsToolsFailed": "টুলশিং লোড তৌবা ঙম্দ্রে।",
+    "rsLimitsHeading": "টর্ন প্রত্যেকগী মেহুৎ",
+    "rsLimitsChange": "মেহুৎ সোইরো",
+    "rsLimitsView": "মেহুৎ য়েংরো",
+    "rsLimitsFailed": "মেহুৎশিং লোড তৌবা ঙম্দ্রে।",
+    "rsLimitsEmpty": "এজেন্ট অসিগীদমক য়েংদোকপগী মেহুৎ লৈদে।",
+    "rsNoLimit": "মেহুৎ লৈদে",
+    "rsScoreAll": "মিলনবা প্রত্যেক",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "অক্ষর {n}",
+    "rsLimitRange": "অনুমতি: {min}দগী {max}সিং",
+    "rsLayer_AGENT": "এজেন্ট অসিদা সেট তৌখ্রে",
+    "rsLayer_TENANT": "ওয়ার্কস্পেস ডিফল্ট",
+    "rsLayer_PLATFORM": "প্লাটফর্ম ডিফল্ট",
+    "rsLayer_REQUEST": "অনুরোধ অসিগীদমক সেট তৌখ্রে",
+    "rsLimit_maxToolSteps": "টর্ন প্রত্যেকদা টুল কল",
+    "rsLimit_turnTimeoutSeconds": "টর্ন অমগী মতম",
+    "rsLimit_toolTimeoutSeconds": "টুল কল অমগী মতম",
+    "rsLimit_toolOutputMaxChars": "টুল ফংসনগী অচৌবা",
+    "rsLimit_retrievalTopK": "বিচার প্রত্যেকদা জ্ঞানগী ফংসন",
+    "rsLimit_retrievalMinScore": "জ্ঞান মিলনবগী ঙাক্তুনা প্রাসঙ্গিকতা",
+    "rsLimit_continuationPasses": "জবাব অচৌবা ফোকপগীদমক থেংনবা পাস",
+    "rsLimitHelp_maxToolSteps": "জবাব অমনা ফাওবা টুল কল করিগুম্বা তৌবা ঙম্লিবনো। মেহুৎদা ফাওবদি টর্ন মেন্তলরি অমসুং মসি হায়রি।",
+    "rsLimitHelp_turnTimeoutSeconds": "টর্ন অমা মেন্তলবগী মমাংদা কয়াগুম্বা মতম চত্থবা ঙম্লিবনো।",
+    "rsLimitHelp_toolTimeoutSeconds": "টুল কল অমা মেন্তলবগী মমাংদা কয়াগুম্বা মতম চত্থবা ঙম্লিবনো।",
+    "rsLimitHelp_toolOutputMaxChars": "টুল ফংসন অমগী করিগুম্বা অংশ মডেলনা ফংবা ঙম্লিবনো। বাকী চেক্লরি।",
+    "rsLimitHelp_retrievalTopK": "বিচার অমনা জ্ঞান ভাণ্ডারগীদগী টুকরা করিগুম্বা ঊৎলকপনো।",
+    "rsLimitHelp_retrievalMinScore": "মসিগীদগী খম্না মিলনবা টুকরাশিং ঊৎকোক্লরি। শূন্যনা প্রত্যেক মিলনবা থম্লরি।",
+    "rsLimitHelp_continuationPasses": "হায়দোকখ্রবসু তৌদ্রবা চরণদা ঙৈবা জবাব অচৌবা ফোকপগীদমক থেংনবা কোশিশ।",
+    "rsPreviewButton": "প্রোম্পট পূর্বদৃশ্য",
+    "rsPreviewTitle": "প্রোম্পট পূর্বদৃশ্য",
+    "rsPreviewIntro": "এজেন্ট অসিনা থাগৎলিবা সিস্টেম প্রোম্পট অমসুং টুল তালিকা, মরম অসেংবা টর্নগুম্না শেমখ্রবা। মডেলদা করিসু থাগৎপা লৈদে।",
+    "rsPreviewBuilding": "পূর্বদৃশ্য শেমখি",
+    "rsPreviewFailed": "পূর্বদৃশ্য শেমবা ঙম্দ্রে।",
+    "rsPreviewTotals": "সিস্টেম লিখাকগীদমক টোকেন ~{prompt} অমসুং টুল সংজ্ঞাগীদমক টোকেন {tools} (অনুমান)।",
+    "rsPreviewOverBudgetTitle": "টোকেন বাজেটগীদগী অপুনবা",
+    "rsPreviewOverBudget": "অশেংবা সিস্টেম লিখাক কনফিগার তৌখ্রবা টোকেন {budget}গী বাজেটগীদগী অপুনবনি। করিসু চেক্লদ্রে; প্রোম্পট অমা অনৌবা তৌবা ঈশিনরো।",
+    "rsPreviewNoBlocks": "য়েংদোকপগীদমক প্রোম্পট ব্লক লৈদে।",
+    "rsPreviewMessage": "খবর: {message}",
+    "rsPreviewTokens": "টোকেন ~{tokens}",
+    "rsPreviewShowText": "লিখাক য়েংহনরো",
+    "rsPreviewTools": "টুল ({count})",
+    "rsPreviewNoTools": "এজেন্ট অসিনা টুল করিসু পীদে।",
+    "rsPreviewNotes": "পূর্বদৃশ্য অসিনা ফংদ্রবা",
+    "rsPreviewOpenAdmin": "প্রোম্পট প্রত্যেকগী খুৎলুপ্ত য়েংনা সোইরো",
+    "rsOriginDefault": "ডিফল্টকীদুনা লৈবা",
+    "rsOriginOverride": "{scope} ওভারাইড v{version}",
+    "rsOriginAgentConfig": "এজেন্টকী মখোইগী সিস্টেম প্রোম্পট",
+    "rsOriginCode": "প্লাটফর্ম কোড",
+    "rsRunBudget": "রন প্রত্যেকগী খর্চাগী মেহুৎ",
+    "rsNoCap": "মেহুৎ লৈদে",
+    "rsRunBudgetHelp": "রন অমনা এজেন্ট অনৌবাশিংদা ফংসন পীবা নত্রবদি অপাইবা অনুসন্ধান চত্থহনবদা ফাওবা করিগুম্বা খর্চ তৌবা ঙম্লিবনো। মসি অনুমানবনি, বিল নত্তে।",
+    "chipToolsOff": "টুল লৈদ্রনা অসুক কোশিশ তৌরি",
+    "chipFailoverBlocked": "বেকআপ মডেল ব্যবহার তৌদ্রে: টুলশিং অদোম্না চত্থ্রে",
+    "rsLimitChangeOne": "সোইরো",
+    "reasonRateLimited": "rate limited",
+    "reasonTimeout": "timed out",
+    "reasonProviderUnavailable": "provider unavailable",
+    "reasonAuthFailed": "provider rejected the credentials",
+    "reasonBilling": "provider billing problem",
+    "reasonModelNotFound": "model not available",
+    "reasonProviderError": "provider error",
+    "reasonMalformedToolCall": "the tool call could not be used"
   },
   "nodeDefs": {
     "triggerLabel": "হৌদোকপা",
@@ -1400,7 +1537,35 @@
     "ttsProviderUpdatedSuccess": "TTS প্রোভাইডার অপডেট তৌখ্রে।",
     "updateTtsProviderError": "এজেন্ট অসিগী TTS প্রোভাইডার অপডেট তৌবা ঙমখিদ্রে।",
     "ttsProviderFreePlanTooltip": "TTS প্রোভাইডার সিলেকশন অসি প্রিমিয়াম ফিচার অমনি।",
-    "ttsProviderNotSet": "প্ল্যাটফর্মগী ডিফল্ট শীজিন্নরি"
+    "ttsProviderNotSet": "প্ল্যাটফর্মগী ডিফল্ট শীজিন্নরি",
+    "samplingTitle": "ফাওবা নমুনা থীবা",
+    "samplingIntro": "মডেলনা খুৎলুপ্ত করিনা থীবনো মসি সরুকসরুকনা মিলনহনরো। মডেলগী ডিফল্ট ব্যবহার তৌবগীদমক বক্স অসি খল্লি তুনা থম্মো। ক্ষেত্র অমা ঙাক্তুনা ফংদ্রবা প্রোভাইডরনা মসি পাংদোকলি।",
+    "samplingIgnored": "মডেল অসিগী প্রোভাইডরনা সেটিং অসি পাংদে, অদুগা মসি সোইবদা ফংসন লৈদে।",
+    "samplingSaving": "সেভ তৌরি…",
+    "samplingSaved": "সেভ তৌখ্রে",
+    "samplingNotSaved": "সেভ তৌদ্রে",
+    "samplingSaveFailed": "সেটিং অদু সেভ তৌবা ঙম্দ্রে।",
+    "samplingErrorWhole": "{label} {min}দগী {max}সিং পূর্ণ সংখ্যা ওইনা লৈগনি, নত্রবদি মেন্তলবগীদমক খল্লি তুনা থম্মো।",
+    "samplingErrorNumber": "{label} {min}দগী {max}সিং সংখ্যা ওইনা লৈগনি, নত্রবদি মেন্তলবগীদমক খল্লি তুনা থম্মো।",
+    "samplingStopTooLong": "মেন্তলবগী ক্রম অমা ফাওবা অক্ষর {max}গী ওইবা ঙম্লি।",
+    "samplingStopTooMany": "ফাওবা মেন্তলবগী ক্রম {max}।",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "ফাওবা ফংবা মতাংগী খুৎলুপ্ত K খরাদা ঈশিনরো। অনৌবা ওইনা অমনা ফজবা সুরক্ষিত, অনুমান তৌবা ঙমবা লিখাক। ১দগী ১০০০সিং।",
+    "samplingSeed": "সিড",
+    "samplingSeedHelp": "প্রোম্পট অমত্তাগীদমক জবাবশিং অসুক অসুক ফংবা ঙমহনবগীদমক সংখ্যা অমা সেট তৌরো। প্রোভাইডর মাপুংনা মসিগী নিশ্চয়তা পীদে।",
+    "samplingFrequency": "অসুক অসুক ফংবগী দণ্ড",
+    "samplingFrequencyHelp": "ধনাত্মক মানশিংনা খুৎলুপ্ত অমত্তা অসুক অসুক ব্যবহার তৌবা ফাদোকপি। -২দগী ২সিং।",
+    "samplingPresence": "লৈবগী দণ্ড",
+    "samplingPresenceHelp": "ধনাত্মক মানশিংনা মডেল অসি বিষয় অমদা ঙৈবগীদগী অনৌবা বিষয়শিংদা মরোইহনরি। -২দগী ২সিং।",
+    "samplingPlaceholderDefault": "ডিফল্ট",
+    "samplingPlaceholderRandom": "যাদৃচ্ছিক",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "মেন্তলবগী ক্রম",
+    "samplingStopPlaceholder": "বাক্যাংশ অমা ঙাকরো, Enter থেংনো",
+    "samplingStopHelp": "মডেলনা মসিগী মনুংদগী অমা ঙাক্লবদি জবাব মরক্কি। ফাওবা {count}, প্রত্যেকশিং ফাওবা অক্ষর {max}গী।",
+    "samplingStopCurrent": "দিনগী মেন্তলবগী ক্রম",
+    "samplingStopRemove": "মেন্তলবগী ক্রম {value} ঊৎকোক্লো",
+    "samplingAdd": "থেংনরো"
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "কনফিগার তৌনবা নোড অমা খনবীউ, নত্রগা অৱাং থংবদা লৈবা পেলেটতগী অনৌবা অমা চিংথোকপীউ।",
@@ -13038,7 +13203,7 @@
   },
   "adminAccessPage": {
     "pageTitle": "Team access",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "প্রশাসন",
     "matrixTitle": "Access matrix",
     "matrixHint": "Every member's effective scopes at a glance - tick a cell to grant or revoke that scope for that person.",
     "memberColumn": "MEMBER",
@@ -13053,7 +13218,7 @@
   "adminPaymentsPage": {
     "pageTitle": "Agent payments",
     "pageSubtitle": "Signed UPI mandates, spend caps and payment history for each agent.",
-    "agentPickerLabel": "Agent",
+    "agentPickerLabel": "এজেন্ট",
     "noAgents": "No agents in this workspace",
     "loadFailed": "Could not load payment data for this agent.",
     "mandatesHeading": "Payment mandates",
@@ -13081,9 +13246,9 @@
     "thresholdRequired": "Set the approval threshold amount.",
     "previewFailed": "Could not build the mandate preview.",
     "reviewMandate": "Review mandate",
-    "back": "Back",
+    "back": "ঊৎলকরো",
     "signAndGrant": "Sign & grant",
-    "cancel": "Cancel",
+    "cancel": "তাঙ্খৎলো",
     "canonicalReviewLabel": "Canonical mandate document",
     "canonicalReviewHint": "This exact JSON is what gets Ed25519-signed. Verify the caps, scope and validity before granting.",
     "grantSuccess": "Mandate granted and signed.",
@@ -13109,7 +13274,7 @@
     "colStatus": "Status",
     "colVpa": "Payee VPA",
     "colDescription": "Description",
-    "colCreated": "Created",
+    "colCreated": "শেমখ্রে",
     "detailId": "Transaction",
     "detailMandate": "Mandate",
     "detailGatewayPayment": "Gateway payment",
@@ -13153,7 +13318,7 @@
     "restoreTooltip": "Make this version the agent's current configuration.",
     "restoreConfirmTitle": "Restore v{version}?",
     "restoreConfirmBody": "The agent's current configuration is replaced by this version's. The restore itself is saved as a new version, so it can be undone.",
-    "cancelButton": "Cancel",
+    "cancelButton": "তাঙ্খৎলো",
     "restoredNotice": "Restored - the agent now runs this configuration.",
     "restoreError": "Couldn't restore that version.",
     "labelUpdatedNotice": "Label updated.",
@@ -13166,18 +13331,18 @@
     "forceReasonLabel": "Override reason (required, written to the audit log)",
     "forceReasonPlaceholder": "Why is this safe to promote without a passing eval?",
     "forcePromoteButton": "Promote anyway",
-    "fieldModel": "Model",
+    "fieldModel": "মডেল",
     "fieldFallback": "Fallback",
     "fieldGeneration": "Generation",
     "fieldModes": "Modes",
-    "fieldTools": "Tools",
+    "fieldTools": "টুল",
     "toolsUnrestricted": "All resolved tools",
     "toolsNone": "None",
     "toolsCount": "{count} allowed",
-    "fieldGuardrails": "Guardrails",
+    "fieldGuardrails": "গার্ডরেল",
     "fieldFlags": "Enabled",
     "fieldPrompt": "System prompt",
-    "flagKnowledge": "Knowledge",
+    "flagKnowledge": "জ্ঞান",
     "flagSarvam": "Sarvam",
     "flagSandbox": "Sandbox",
     "flagCodeWorkspace": "Code workspace",
@@ -13198,18 +13363,18 @@
       "AUTONOMOUS": "Autonomous"
     },
     "state": {
-      "READY": "Ready",
+      "READY": "ফজরে",
       "MISSING": "Missing",
       "WAITING_ON_ADMIN": "Waiting on admin",
       "GATED": "Not on your plan",
       "SIMULATED": "Simulated"
     },
     "kind": {
-      "agent": "Agent",
+      "agent": "এজেন্ট",
       "workflow": "Workflow",
       "tool": "Tool",
       "mcp": "MCP server",
-      "knowledge": "Knowledge",
+      "knowledge": "জ্ঞান",
       "procedure": "Procedure",
       "secret": "Secret",
       "channel": "Channel"
@@ -13249,7 +13414,7 @@
     },
     "narrative": {
       "aria": "About {name}",
-      "close": "Close",
+      "close": "মেন্তলরো",
       "why": "Why it is here",
       "tune": "If results are wrong",
       "proof": "How you will know it works",
@@ -13266,14 +13431,14 @@
       "step": {
         "PENDING": "Waiting",
         "DONE": "Done",
-        "FAILED": "Failed",
+        "FAILED": "বায়ফম",
         "COMPENSATED": "Rolled back"
       },
       "failedAt": "Step {step} failed: {name}.",
       "failedGeneric": "The apply did not finish.",
       "nothingKept": "Nothing was kept. Everything created in this run was rolled back.",
       "someKept": "Some steps were already saved and are shown above. Check them before trying again.",
-      "retry": "Try again",
+      "retry": "অসুক কোশিশ তৌরো",
       "doneBody": "Your envoy is in place and starts under watch. Fill in what is still missing on the right."
     },
     "plan": {
@@ -13290,7 +13455,7 @@
       "stepsLabel": "Steps",
       "step": {
         "preview": "Preview",
-        "ready": "Ready",
+        "ready": "ফজরে",
         "applying": "Apply"
       },
       "toReady": "Check what it needs",
@@ -13379,7 +13544,7 @@
         "other": "setting"
       },
       "op": {
-        "changed": "Changed",
+        "changed": "সোইখ্রে",
         "added": "Added",
         "removed": "Removed"
       },
@@ -13417,8 +13582,8 @@
       "entityAdded": "{where} is added",
       "entityRemoved": "{where} is removed",
       "showFull": "Show the full text",
-      "before": "Before:",
-      "after": "After:",
+      "before": "মমাংদা:",
+      "after": "মতাংদা:",
       "apply": "Apply this change",
       "discard": "Discard"
     },
@@ -13427,7 +13592,7 @@
       "placeholder": "For example: the reminders sound too harsh, soften the first one",
       "propose": "Show me the change",
       "proposing": "Working out the change...",
-      "saving": "Saving...",
+      "saving": "সেভ তৌরি...",
       "applying": "Applying...",
       "failed": "Could not work out a change. Try saying it another way.",
       "done": "Applied. Scoring has been asked for; the new score appears in the ledger when it finishes.",
@@ -13446,7 +13611,7 @@
       "noCards": "Nothing stands out yet. Suggestions appear once something has scored low.",
       "cardsLabel": "Suggestions",
       "scored": "{dimension} {score}",
-      "open": "Open",
+      "open": "ফিদোকরো",
       "notApplied": "Available once the envoy is applied.",
       "dimension": {
         "helpfulness": "Helpfulness",
@@ -13531,11 +13696,11 @@
       "demoteNone": "Demote",
       "demoteConfirm": "Demote to {rung}? Approvals return to every risky step immediately.",
       "demoteConfirmYes": "Yes, demote",
-      "demoteConfirmCancel": "Cancel",
+      "demoteConfirmCancel": "তাঙ্খৎলো",
       "demoteHint": "Always available. It puts the approvals back straight away.",
       "demoteNeedsAdmin": "Only a workspace admin can change the trust level.",
       "atBottom": "Already at the lowest level.",
-      "history": "History",
+      "history": "ইতিহাস",
       "noHistory": "No trust changes yet.",
       "showEvidence": "Show the evidence",
       "diffKind": {
@@ -13566,7 +13731,7 @@
       "runError": "This run could not finish.",
       "transcriptFailed": "Could not load this transcript.",
       "showTranscript": "Read the conversation ({count} turns)",
-      "agent": "Agent",
+      "agent": "এজেন্ট",
       "verdict": {
         "PASSED": "The agent handled it well",
         "FAILED": "The agent was talked out of its rules",
@@ -13597,7 +13762,7 @@
   },
   "contactsPage": {
     "pageTitle": "Contacts & routing",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "প্রশাসন",
     "pageSubtitle": "A contact is a sender your agents already know. Approving a new sender makes them a contact and routes their messages to an agent.",
     "routingTitle": "Channel routing",
     "routingHint": "Pick the agent new conversations go to, and whether a sender you've never seen needs your approval first or goes straight through.",
@@ -13617,16 +13782,16 @@
     "contactsTitle": "Contacts",
     "contactsHint": "Known senders skip approval entirely - a contact here is pre-approved and routes by contact agent → group agent → channel default.",
     "allChannels": "All channels",
-    "allGroups": "All groups",
-    "filterByGroupLabel": "Filter by group",
+    "allGroups": "সমূহ মাপুং",
+    "filterByGroupLabel": "সমূহনা ঊৎলরো",
     "searchPlaceholder": "Search number, chat id or name…",
     "identifierPlaceholder": "Phone / chat id / email *",
     "namePlaceholder": "Name (optional)",
     "groupPlaceholder": "Group",
     "noGroup": "No group",
-    "agentPlaceholder": "Agent",
+    "agentPlaceholder": "এজেন্ট",
     "channelDefault": "Channel default",
-    "addButton": "Add",
+    "addButton": "থেংনরো",
     "contactAdded": "Contact added.",
     "statusLinked": "Live",
     "statusDirectory": "Directory",
@@ -13638,7 +13803,7 @@
     "groupsTitle": "Contact groups",
     "groupsHint": "Group contacts to route them together - a group's agent answers every member without their own override.",
     "groupNamePlaceholder": "Group name",
-    "groupAgentPlaceholder": "Agent",
+    "groupAgentPlaceholder": "এজেন্ট",
     "createGroupButton": "Create",
     "groupCreated": "Group created.",
     "groupMeta": "{count} member(s) · routes to {agent}",
@@ -13668,10 +13833,10 @@
     "colContact": "Contact",
     "colStatus": "Status",
     "colGroup": "Group",
-    "colAgent": "Agent",
+    "colAgent": "এজেন্ট",
     "colRoutesVia": "Routes via",
-    "selectedCount": "{count} selected",
-    "approveN": "Approve {count}",
+    "selectedCount": "{count} থীখ্রে",
+    "approveN": "অনুমোদন তৌরো {count}",
     "rejectN": "Reject {count}",
     "clearSelection": "Clear",
     "bulkProgress": "{done} of {total} done…",
@@ -13687,7 +13852,7 @@
     "contactsEmptyImport": "Import a sheet",
     "contactsNoMatch": "No contacts match these filters.",
     "addContactButton": "Add contact",
-    "cancelButton": "Cancel",
+    "cancelButton": "তাঙ্খৎলো",
     "statusLinkedHint": "Has an active conversation",
     "statusDirectoryHint": "Known sender, no conversation yet",
     "justNow": "just now",
@@ -13758,7 +13923,7 @@
     "deactivating": "Removing…",
     "deactivateTitle": "Remove your {provider} key?",
     "deactivateBody": "Decision calls for this workspace will fall back to the platform key (when configured) or local heuristics.",
-    "cancel": "Cancel",
+    "cancel": "তাঙ্খৎলো",
     "policyTitle": "Decision controls",
     "policySubtitle": "Where the decision model may act for this workspace — and how sure it must be. Inherit uses the platform default; changes propagate within ~30 seconds.",
     "policyLoading": "Loading policy…",
@@ -13768,17 +13933,17 @@
     "policy_agentRoutingHelp": "Let the decision model pick the best-fit agent for a Quick Task by intent, instead of keyword matching.",
     "policyOpt_inherit": "Inherit",
     "policyOpt_on": "On",
-    "policyOpt_off": "Off",
+    "policyOpt_off": "মেন্তল",
     "policyThreshold": "“Simple turn” confidence bar",
     "policyThresholdHelp": "0.5–0.99 — higher means the decision model must be more sure before a turn is called simple. Blank inherits.",
     "policySave": "Save policy",
-    "saving": "Saving…",
+    "saving": "সেভ তৌরি…",
     "policyPropagation": "Agents can set their own stricter bar in their cost-routing settings — per-agent wins over this workspace value.",
     "playgroundTitle": "Playground",
     "playgroundSubtitle": "Ask the active decision provider a typed question against your resolved key. Bounded to one question per run — see the raw answer, model and token usage.",
     "stateLabel": "State",
     "statePlaceholder": "The facts the decision model reasons over, e.g. a user message or a task description…",
-    "instructionsLabel": "Instructions",
+    "instructionsLabel": "নির্দেশনা",
     "typeHelp_noul": "noul — a calibrated yes/no probability (0–1).",
     "typeHelp_choice": "choice — pick a winner from 2+ options, with per-option probabilities.",
     "typeHelp_score": "score — a probability-weighted score over 2–10 ordered levels.",
@@ -13818,7 +13983,7 @@
     "headerEyebrow": "Sales pipeline",
     "pageSubtitle": "Every lead in one place - move them through the pipeline, log calls and emails, and let workflows keep the stages up to date.",
     "newLead": "New lead",
-    "close": "Close",
+    "close": "মেন্তলরো",
     "fieldName": "Name",
     "fieldEmail": "Email",
     "fieldPhone": "Phone",
@@ -13849,7 +14014,7 @@
     "daysAgo": "{n}d ago",
     "lastContacted": "Last contacted {when}",
     "lastReplied": "Last replied {when}",
-    "saveButton": "Save changes",
+    "saveButton": "সোইবা সেভ তৌরো",
     "createButton": "Create lead",
     "deleteButton": "Delete",
     "timelineTitle": "Activity",
@@ -13902,7 +14067,7 @@
   "schedulePanel": {
     "noAgentsTitle": "No agents yet",
     "noAgentsBody": "Create an agent first — a schedule is a recurring job for one specific agent.",
-    "agent": "Agent",
+    "agent": "এজেন্ট",
     "loading": "Loading schedule…",
     "enabled": "Enabled",
     "paused": "Paused",
@@ -13922,8 +14087,8 @@
     "cadenceInterval": "Every N minutes / hours / days",
     "cadenceCron": "Cron expression",
     "intervalEvery": "Every",
-    "unitMinutes": "minutes",
-    "unitHours": "hours",
+    "unitMinutes": "মিনিট",
+    "unitHours": "ঘণ্টা",
     "unitDays": "days",
     "intervalHint": "At least 1 minute. The scheduler checks once a minute.",
     "cronLabel": "Cron",
@@ -13979,7 +14144,7 @@
     "builtInReadOnly": "Built-in skills can't be edited. To customise one, export it, change its name, and upload it as your own.",
     "badgeBuiltIn": "Built-in",
     "badgeCustom": "Custom",
-    "badgeOff": "Off",
+    "badgeOff": "মেন্তল",
     "fileCount": "{count} bundled file(s)",
     "toggleAria": "Enable skill {name}",
     "selectPrompt": "Select a skill to read its instructions.",
@@ -13987,8 +14152,8 @@
     "editButton": "Edit",
     "deleteButton": "Delete",
     "saveButton": "Save skill",
-    "savingButton": "Saving…",
-    "cancelButton": "Cancel",
+    "savingButton": "সেভ তৌরি…",
+    "cancelButton": "তাঙ্খৎলো",
     "replaceButton": "Replace",
     "newHeading": "New skill",
     "editHeading": "Edit {name}",
@@ -14003,5 +14168,1279 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "ওয়ার্কস্পেস সেটিংশিং",
+      "agent": "এজেন্ট সেটিংশিং"
+    },
+    "agentMissing": "এজেন্ট অমগী সেটিংশিং য়েংবগীদমক মসি থীরো।",
+    "scopeNote": {
+      "agent": "মানশিং অসি এজেন্ট অসিদাগী লাগু ওইরি। নহাক্না অসিদা ওভারাইড তৌদ্রবা মখোই নহাক্কী ওয়ার্কস্পেস সেটিংশিংগীদগী ওইনা লাকপা ওইরি।"
+    },
+    "loading": "সেটিংশিং লোড তৌরি",
+    "loadError": "সেটিংশিং লোড তৌবা ঙম্দ্রে। {message}",
+    "retry": "অসুক কোশিশ তৌরো",
+    "filters": {
+      "label": "সেটিংশিং ঊৎলরো",
+      "search": "সেটিংশিং বিচার তৌরো",
+      "searchPlaceholder": "মুং নত্রবদি বিবরণনা বিচার তৌরো",
+      "group": "সমূহনা ঊৎলরো",
+      "allGroups": "সমূহ মাপুং",
+      "risk": "ঝুঁকিনা ঊৎলরো",
+      "allRisks": "ঝুঁকিগী স্তর মাপুং",
+      "clear": "ঊৎলবা মান্নরো"
+    },
+    "empty": {
+      "none": "অসিদা নহাক্না সোইবা ঙমবা সেটিং লৈদে।",
+      "filtered": "সেটিং করিসু নহাক্কী ঊৎলবা অসিদা মিলনদে।"
+    },
+    "saved": "সেভ তৌখ্রে। নৌবা তৌখ্রবা সেটিংশিং: {count}।",
+    "saveFailed": "সেভ তৌদ্রে। বায়খ্রবা সেটিংশিং: {count}। নহাক্কী সোইবা ফর্মদা লৈরি।",
+    "resetDone": "{label}না ঙসি ঊৎপীবা মান ব্যবহার তৌরি।",
+    "resetFailed": "সেটিং রিসেট তৌবা ঙম্দ্রে।",
+    "unsaved": "সেভ তৌদ্রবা সোইবা",
+    "discardOne": "সোইবা তাঙ্খৎলো",
+    "restartRequired": "রিস্টার্ট গনি",
+    "source": {
+      "default": "ডিফল্ট",
+      "platform": "প্লাটফর্ম",
+      "tenant": "ওয়ার্কস্পেস",
+      "agent": "এজেন্ট",
+      "tenantInherited": "ওয়ার্কস্পেসগীদগী ঊৎপীবা",
+      "aria": "মানগী উৎস: {source}"
+    },
+    "sourceHelp": {
+      "default": "কমনাসু মসি সোইদ্রে। মসিনা প্রোডাক্টনা লাকপা মান ব্যবহার তৌরি।",
+      "platform": "নহাক্কী প্লাটফর্ম অপারেটরনা মসি অচৌবা ডিপ্লয়মেন্টগীদমক সেট তৌখ্রে।",
+      "tenant": "নহাক্কী ওয়ার্কস্পেসনা ডিফল্ট ওভারাইড তৌরি। ঊৎপীবা মানদা ঊৎলকবগীদমক রিসেট তৌরো।",
+      "agent": "এজেন্ট অসিনা ওয়ার্কস্পেসগী মান ওভারাইড তৌরি। ওয়ার্কস্পেসগী মান অসুক ঊৎপীনা ফংবগীদমক রিসেট তৌরো।",
+      "tenantInherited": "এজেন্ট অসিগী মখোইগী ওভারাইড লৈদে, অদুগা মসিনা ওয়ার্কস্পেসগী মান ব্যবহার তৌরি। মসি সোইবদা এজেন্ট অসিগীদমকনো ওভারাইড শেমরি।",
+      "lockedSuffix": "মসি তালা পাংখ্রে, অদুগা অসিদা সোইবা ঙম্দে।"
+    },
+    "risk": {
+      "low": "ঝুঁকি অনৌবা",
+      "medium": "ঝুঁকি মনুংবা",
+      "high": "ঝুঁকি অপুনবা",
+      "security": "সুরক্ষা"
+    },
+    "bool": {
+      "on": "On",
+      "off": "মেন্তল"
+    },
+    "value": {
+      "unset": "সেট তৌদ্রে",
+      "empty": "খল্লিবা"
+    },
+    "select": {
+      "placeholder": "বিকল্প অমা থীরো"
+    },
+    "slider": {
+      "label": "{label} (স্লাইডার)"
+    },
+    "duration": {
+      "unitLabel": "{label}গী একক"
+    },
+    "units": {
+      "chars": "অক্ষর",
+      "tokens": "টোকেন",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "সেকেন্ড",
+      "min": "মিনিট",
+      "h": "ঘণ্টা"
+    },
+    "groups": {
+      "agent": "এজেন্ট রনটাইম",
+      "approvals": "অনুমোদন",
+      "quality": "গুণ নাজাবা",
+      "guardrails": "গার্ডরেল",
+      "chat": "চ্যাট",
+      "tools": "টুল",
+      "memory": "মেমোরি",
+      "knowledge": "জ্ঞান",
+      "delegation": "ফংসন পীবা",
+      "aux": "সহায়ক মডেল",
+      "routing": "মডেল রুটিং"
+    },
+    "errors": {
+      "required": "মান অমা পীরো।",
+      "notNumber": "সংখ্যা অমা পীরো।",
+      "notInteger": "পূর্ণ সংখ্যা অমা পীরো।",
+      "belowMin": "ঙাক্তুনা {min} ওইগনি।",
+      "aboveMax": "ফাওবা {max} ওইগনি।",
+      "notAllowed": "তালিকাদা লৈবা বিকল্পশিংগী মনুংদগী অমা থীরো।",
+      "tooShort": "অনৌবা মরি। ঙাক্তুনা {min} ব্যবহার তৌরো।",
+      "tooLong": "ফাওবা মরি। ফাওবা {max} ব্যবহার তৌরো।",
+      "precision": "একক অসিনা মসি ঠিক ফোকপা ঙম্দে। অনৌবা একক অসিগী পূর্ণ সংখ্যা ব্যবহার তৌরো নত্রবদি অনৌবা একক থীরো।",
+      "serverRange": "অনুমতি পীখ্রবা পরিধি: {min}দগী {max}সিং।",
+      "serverOptions": "অনুমতি পীখ্রবা মান: {options}।",
+      "server": {
+        "invalid": "সার্ভরনা মান অসি লৌদে: {message}",
+        "locked": "সেটিং অসি নহাক্কী এডমিননা তালা পাংখ্রে, অদুগা নহাক্কী সোইবা সেভ তৌদ্রে।",
+        "notFound": "সেটিং অসি ঙসি লৈদে।",
+        "forbidden": "সেটিং অসি সোইবগীদমক নহাকতা অনুমতি লৈদে।",
+        "reasonRequired": "সোইবা অসিগীদমক মরম গনি। অমা পীনা অসুক কোশিশ তৌরো।",
+        "network": "সার্ভরদা ফাওবা ঙম্দ্রে, অদুগা নহাক্কী সোইবা সেভ তৌদ্রে। {message}",
+        "other": "সোইবা সেভ তৌবা ঙম্দ্রে: {message}"
+      }
+    },
+    "effective": "ঙসি লাগু: {value}",
+    "hint": {
+      "range": "অনুমতি: {min}দগী {max}সিং।",
+      "min": "ঙাক্তুনা: {min}।",
+      "max": "ফাওবা: {max}।",
+      "default": "ডিফল্ট: {value}।",
+      "securityStricter": "সুরক্ষা সেটিং অমা প্লাটফর্মগী মানগীদগী অকনবা ওইনা ফংবা ঙম্লি, মতমদাসু অকম্বা ওইদে।",
+      "inherited": "নহাক্না মসি রিসেট তৌবদি মসি অসিদা ঊৎলকগনি: {value}।"
+    },
+    "locked": {
+      "withReason": "নহাক্কী এডমিননা তালা পাংখ্রে: {reason}",
+      "noReason": "নহাক্কী এডমিননা তালা পাংখ্রে। অসিদা সোইবা ঙম্দে।"
+    },
+    "blocked": {
+      "role": "নহাক্কী ভূমিকানা সেটিং অসি সোইবা ঙম্দে। ওয়ার্কস্পেস এডমিন অমদা খোংনো।",
+      "scope": "সেটিং অসি অসিদা ওভারাইড তৌবা ঙম্দে।",
+      "readOnly": "সেটিংশিং ঙসি ফংবগীদমকনি।",
+      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+    },
+    "reset": {
+      "button": "ঊৎপীবা মানদা রিসেট তৌরো",
+      "aria": "ঊৎপীবা মানদা রিসেট তৌরো: {label}"
+    },
+    "help": {
+      "show": "থেংনবা বিবরণ",
+      "hide": "বিবরণ ওয়ায়রো"
+    },
+    "history": {
+      "button": "ইতিহাস",
+      "open": "ইতিহাস: {label}",
+      "title": "ইতিহাস: {label}",
+      "scopeTenant": "ওয়ার্কস্পেসগী সোইবাশিং",
+      "scopeAgent": "এজেন্ট অসিগী সোইবাশিং",
+      "close": "ইতিহাস মেন্তলরো",
+      "loading": "ইতিহাস লোড তৌরি",
+      "error": "ইতিহাস লোড তৌবা ঙম্দ্রে। {message}",
+      "empty": "ঙসিগা সোইবা করিসু রেকর্ড তৌদ্রে।",
+      "listLabel": "সোইবগী ইতিহাস, অনৌবা মমাংদা",
+      "version": "সংস্করণ {version}",
+      "before": "মমাংদা:",
+      "after": "মতাংদা:",
+      "by": "সোইবা",
+      "unknownActor": "খংদ্রবা",
+      "reason": "মরম:"
+    },
+    "savebar": {
+      "count": "সেভ তৌদ্রবা সোইবা: {count}।",
+      "invalid": "সেভ তৌবগী মমাংদা হাইলাইট তৌখ্রবা ক্ষেত্রশিং ফজহনরো। ফজহনবা গনবা ক্ষেত্র: {count}।",
+      "discard": "সোইবা তাঙ্খৎলো",
+      "save": "সোইবা সেভ তৌরো",
+      "saving": "সেভ তৌরি"
+    },
+    "risky": {
+      "title": "ঝুঁকি লৈবা সোইবা নিশ্চিত তৌরো ({count})",
+      "description": "সেটিংশিং অসিনা নহাক্কী এজেন্টশিংনা করিনা ব্যবহার তৌরিবনো নত্রবদি মখোইদা করি তৌবা অনুমতি লৈবনো মসি সোইরি। সোইবা প্রত্যেক নাজারো অমসুং নহাক্না করিগী মসি তৌরিবনো হায়রো। মরম অসি অডিট লগদা সেভ তৌরি।",
+      "descriptionSecurity": "মসিগী মনুংদা ঙাক্তুনা সুরক্ষা সেটিং অমা লৈ। মসি প্লাটফর্মগী মানগীদগী অকনবা ওইনা ফংবা ঙম্লি। সোইবা প্রত্যেক নাজারো অমসুং নহাক্না করিগী মসি তৌরিবনো হায়রো। মরম অসি অডিট লগদা সেভ তৌরি।",
+      "listLabel": "নিশ্চিত তৌবগীদমক সোইবা",
+      "from": "দগী",
+      "to": "to",
+      "securityNote": "সুরক্ষা সেটিং: মসি প্লাটফর্মগী মানগীদগী অকম্বা ওইবা ঙম্দে।",
+      "consequence": "মসিনা করি সোইরিবনো:",
+      "reasonLabel": "সোইবা অসিগী মরম",
+      "reasonPlaceholder": "নমুনা: সাপোর্ট টিমগী অপাইবা অনুসন্ধানগীদমক মেহুৎ হাপহনবা",
+      "reasonHint": "গনি, ঙাক্তুনা অক্ষর {min}। সোইবা, মমাংগী অমসুং অনৌবা মান নখোইনা সেভ তৌরি।",
+      "acknowledge": "ঐনা সুরক্ষা সোইবা অসিগী ফল খংলি।",
+      "cancel": "তাঙ্খৎলো",
+      "confirm": "নিশ্চিত তৌনা সেভ তৌরো",
+      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+    },
+    "strictness": {
+      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
+      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
+      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "ঙৈবা",
+    "status_APPROVED": "অনুমোদিত",
+    "status_REJECTED": "য়েংদোকখ্রে",
+    "status_EXPIRED": "মতম ফাওখ্রে",
+    "status_EXECUTION_FAILED": "কার্যকর বায়ফম",
+    "status_DEAD_LETTERED": "ডেড লেটর",
+    "filtersLabel": "অনুরোধ ঊৎলরো",
+    "filterAgentLabel": "এজেন্টনা ঊৎলরো",
+    "filterToolLabel": "টুলনা ঊৎলরো",
+    "filterAgeLabel": "বয়সনা ঊৎলরো",
+    "filterAnyAgent": "এজেন্ট করিসু",
+    "filterAnyTool": "টুল করিসু",
+    "filterAnyAge": "বয়স করিসু",
+    "age_newer1h": "ঘণ্টা ১গীদগী অনৌবা",
+    "age_older1h": "ঘণ্টা ১গীদগী মমাংবা",
+    "age_older24h": "নুমিৎ ১গীদগী মমাংবা",
+    "age_older7d": "নুমিৎ ৭গীদগী মমাংবা",
+    "filtersClear": "ঊৎলবা মান্নরো",
+    "filterWindowNote": "অনৌবা অনুরোধ {count} ঊৎলরি। মমাংবাশিং অসিদা ঙৈদে।",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time}দা মতম ফাওগনি",
+    "expiresAt": "কমনাসু ফৈসালা তৌদ্রবদি {time}দা মখোইনা মেন্তল ওইগনি",
+    "overdue": "মতম-মেহুৎ ফাওখ্রে, মতাংগী সাফাইদা মেন্তল ওইগনি",
+    "neverExpires": "ওয়ার্কস্পেস অসিনা ঙৈবা অনুরোধশিংগী মতম ফাওহনদে।",
+    "expiredNote": "{time}দা মতম ফাওখ্রে: মতমদা কমনাসু ফৈসালা তৌদ্রে",
+    "expiredReasonPrefix": "মতম ফাওখ্রে:",
+    "auditExpired": "মতম ফাওখ্রে, মতমদা কমনাসু ফৈসালা তৌদ্রে",
+    "riskLow": "ঝুঁকি অনৌবা",
+    "riskMedium": "ঝুঁকি মনুংবা",
+    "riskHigh": "ঝুঁকি অপুনবা",
+    "riskEstimateNote": "ঝুঁকি অসি টুলগী মুংগীদগী তৌখ্রবা অনুমান অমনি। প্লাটফর্মনা টুলশিংগী শ্রেণী শেমদে, অদুগা অনুমোদন তৌবগী মমাংদা আর্গুমেন্ট ফংরো।",
+    "riskWhoDecides": "অনুমোদনগীদমক করি ঙৈগনো হায়বা কনানা ঠিক তৌরিবনো?",
+    "previewGoal": "মহাক্না তৌরিবা ফংসনদা:",
+    "previewArguments": "আর্গুমেন্ট",
+    "previewNoArguments": "কল অসিগীদমক আর্গুমেন্ট রেকর্ড তৌদ্রে।",
+    "previewRedacted": "গোপন লৈবগুম্বা মান {count} অসিদা ওয়ায়খ্রে। নহাক্না অনুমোদন তৌবদি মসি টুলদা থাগৎলি।",
+    "previewTruncated": "আর্গুমেন্টশিং অসি অচৌনা য়েংহনবগীদমক অপাইনি, অদুগা অনুরোধ অসি অসিগীদগী অনুমোদন তৌবা ঙম্দে।",
+    "approveBlockedTooLong": "নহাক্না অনুরোধ অচৌনা নাজাবা ঙম্দ্রবগা অনুমোদন মেন্তল ওইরি। নহাক্না মসি ঙসিসু য়েংদোকপা ঙম্লি।",
+    "ifApproveLabel": "নহাক্না অনুমোদন তৌবদি:",
+    "ifApprove": "{tool} মমাংগী আর্গুমেন্ট নখোইনা ঙসিনো চত্থরি, অদুগা এজেন্টনা মসিগী ফংসন ব্যবহার তৌনা ফংবা ইন্থৌনা চত্থরি।",
+    "ifDenyLabel": "নহাক্না য়েংদোকপদি:",
+    "ifDeny": "{tool} চত্থদে। এজেন্টদা নহাক্না নত্তে হায়খিবা হায়রি, মরম পীবদি মহাক্তা, অদুগা মসি মসি লৈদ্রনা মমাংদা চত্থরি।",
+    "whyGated": "এজেন্টনা {tool} ব্যবহার তৌবা ইচ্ছা তৌখ্রে। এজেন্ট অসি তত্ত্বাবধানদা সেট তৌখ্রবগীদমক নত্রবদি ওয়ার্কস্পেস অসিনা টুল অদুগীদমক অনুমোদন গনবা তৌখ্রবগীদমক মসি নহাক্কী ফৈসালাগীদমক ঙৈহনখ্রে।",
+    "denyReasonLabel": "য়েংদোকপগী মরম (ঙম্লে)",
+    "denyReasonPlaceholder": "নমুনা: ফজদ্রবা গ্রহণকারী, থাগৎপগী মমাংদা ঐদা খোংনো",
+    "denyReasonHelp": "নহাক্না য়েংদোকপদি, এজেন্টনা মরম অসি য়েংদোকখ্রবা কলগী ফংসন ওইনা ফংরি অমসুং মহাক মখোই সোইরি। মরম লৈদ্রনা য়েংদোকপগীদমক খল্লি তুনা থম্মো।",
+    "denyButton": "য়েংদোকরো",
+    "detailRegionLabel": "অনুরোধগী বিবরণ",
+    "sessionLabel": "বাতচা",
+    "linkOpenAgent": "এজেন্ট ফিদোকরো",
+    "linkInspectTurns": "মহাক্কী টর্নশিং নাজারো",
+    "continuationLabel": "মসিগী মতাংদা এজেন্টনা করি তৌখ্রিবনো",
+    "continuationCompleted": "এজেন্টনা ইন্থৌনা চত্থবা অচৌখ্রে।",
+    "continuationFailed": "ফৈসালা অসিগী মতাংদা এজেন্টনা ইন্থৌনা চত্থবা ঙম্দ্রে।",
+    "continuationRetry": "মহাকতা ইন্থৌনা চত্থবগীদমক হায়রো",
+    "retryMessage": "ফজনা ফংসন ইন্থৌনা চত্থরো।",
+    "lastDecisionTitle": "নহাক্কী মতাংগী ফৈসালা: {tool}",
+    "lastDecisionClose": "মেন্তলরো",
+    "deepLinkNotFound": "অনুমোদনগী অনুরোধ অদু ফংদ্রে, নত্রবদি নহাক্না মসি য়েংবা ঙম্দে।",
+    "selectAllLabel": "পেজ অসিগী বাকী টুল কল মাপুং থীরো",
+    "selectRowLabel": "{tool}গী বাকী কলশিং থীরো",
+    "bulkSelected": "{count} থীখ্রে",
+    "bulkApprove": "থীখ্রবা অনুমোদন তৌরো",
+    "bulkDeny": "থীখ্রবা য়েংদোকরো",
+    "bulkClear": "থীবা মান্নরো",
+    "bulkCancel": "তাঙ্খৎলো",
+    "bulkDismiss": "ঊৎকোক্লো",
+    "bulkMixedTools": "সমূহ ফৈসালাগীদমক থীখ্রবা অনুরোধ মাপুং টুল অমগী ওইগনি।",
+    "bulkNotLowRisk": "সমূহ অনুমোদন ঝুঁকি অনৌবা টুল (লুকআপ)শিংগীদমকনি। য়েংদোকপা টুল করিসুদা চত্থি, নত্রবদি মখোইশিং অমা অমা ওইনা ফৈসালা তৌরো।",
+    "bulkNotToolCall": "সমূহ ফৈসালাশিংনা এজেন্ট টুল কল ফংবনো থেংনি।",
+    "bulkNotPending": "সমূহ ফৈসালাশিংনা ঙসিগা বাকী লৈবা অনুরোধশিংনো থেংনি।",
+    "bulkConfirmApproveTitle": "{tool}গী কল {count} অনুমোদন তৌবনি?",
+    "bulkConfirmApproveBody": "মখোইগী মনুংদগী প্রত্যেকনা ঙসিনো {tool} চত্থহনরি, মমাংদা তালিকা তৌখ্রবা মখোইগী আর্গুমেন্ট নখোইনা, অদুগা এজেন্টনা ফংসন ব্যবহার তৌনা ইন্থৌনা চত্থরি। মসি অসুক ঊৎলকবা ঙম্দে।",
+    "bulkConfirmDenyTitle": "{tool}গী কল {count} য়েংদোকপনি?",
+    "bulkConfirmDenyBody": "মখোইগী মনুংদগী করিসু চত্থদে। এজেন্টদা কল প্রত্যেক য়েংদোকখ্রে হায়রি, মরম পীবদি মহাক্তা।",
+    "bulkConfirmApprove": "অনুমোদন তৌরো {count}",
+    "bulkConfirmDeny": "য়েংদোকরো {count}",
+    "bulkMore": "অমসুং {count} থেংনবা",
+    "bulkProgress": "{count}গী মনুংদগী {done} অচৌখ্রে",
+    "bulkResult": "{done} ফৈসালা ওইখ্রে, {failed} বায়খ্রে।",
+    "notifyOff": "ঐদা হায়রো",
+    "notifyOn": "নোটিফিকেসন শিন্থৌরো",
+    "notifyHelp": "ট্যাব অসি পিছোকতা লৈবগী মতমদা অনৌবা অনুরোধ লাকপদি ব্রাউজর নোটিফিকেসন য়েংহনরো",
+    "notifyUnsupported": "ব্রাউজর অসিনা নোটিফিকেসন য়েংহনবা ঙম্দে।",
+    "notifyBlocked": "নোটিফিকেসন ফাদোকখ্রে। মসি শিন্থৌবগীদমক নহাক্কী ব্রাউজরগী সাইট সেটিংশিংদা অনুমতি পীরো।",
+    "notifyTitle": "এজেন্ট অমা অনুমোদনগীদমক ঙৈরি",
+    "notifyBodyOne": "{tool}দা নহাক্কী ফৈসালা গনি।",
+    "notifyBodyMany": "অনুরোধ {count}দা নহাক্কী ফৈসালা গনি।",
+    "newArrived": "অনৌবা অনুমোদনগী অনুরোধ {count} লাকখ্রে।",
+    "rulesTitle": "টুল অমগীদমক নিয়ম",
+    "rulesIntro": "টুল অমনা মতমদাসু মী অমা ঙৈবনো নত্রবদি মতমদাসু ঙৈদ্রবনো থীরো। নিয়ম অসি অর্ধ-স্বায়ত্ত সেট তৌখ্রবা এজেন্ট প্রত্যেকদা লাগু ওইরি।",
+    "rulesNeedsScope": "নিয়ম সোইবগীদমক নহাকতা অনুমোদনগী অনুমতি গনি।",
+    "rulesToolLabel": "টুলগী মুং",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "অনুরোধদা টুল অসি করিনা য়েংহনরিবনো মসিগুম্নাদি, নমুনা ওইনা send_email।",
+    "rulesToolNameInvalid": "টুলগী মুংদা খল্লিবা জায়গা লৈদে।",
+    "rulesModeLabel": "করি ওইগনো",
+    "rulesAskName": "মতমদাসু খোংনো",
+    "rulesAskHint": "টুল অসিগী কল প্রত্যেকনা মী অমগী অনুমোদনগীদমক ঙৈরি।",
+    "rulesNeverName": "মতমদাসু খোংদ্রো",
+    "rulesNeverHint": "টুল অসিগী কলশিং কমনাসুগী অনুমোদন লৈদ্রনা ঙসিনো চত্থরি।",
+    "rulesNeverRiskyWarn": "টুল অসি জিনিস সোইবা মতেংদা য়েংরি। নিশ্চিত ওইরো।",
+    "rulesScopeNote": "নিয়ম অসি ওয়ার্কস্পেস অচৌবাদা লাগু ওইরি, এজেন্ট অমদাগী নত্তে। তত্ত্বাবধানদা লৈবা এজেন্টনা ঙসিসু প্রত্যেকতা খোংরি, অদুগা পূর্ণ স্বায়ত্ত এজেন্টনা নিয়মনা করি হায়বসু মতমদাসু খোংদে। নহাক্না সেট তৌখ্রবা নিয়মশিং ঙসিগা অসিদা তালিকা তৌদ্রে।",
+    "rulesSave": "নিয়ম সেভ তৌরো",
+    "rulesSaveFailed": "নিয়ম সেভ তৌবা ঙম্দ্রে।",
+    "rulesSavedAsk": "{tool}না মতমদাসু অনুমোদন খোংগনি।",
+    "rulesSavedNever": "{tool}না ঙসিগীদগী অনুমোদন খোংদ্রগনি।",
+    "rulesNeverConfirmTitle": "{tool} চত্থবগী মমাংদা খোংবা মেন্তলবনি?",
+    "rulesNeverConfirmBody": "অর্ধ-স্বায়ত্ত এজেন্ট প্রত্যেকনা কমনাসুগী অনুমোদন লৈদ্রনা {tool} চত্থহনগনি। মসি জিনিস সোইবা নত্রবদি থাগৎপা মতেংদা য়েংরি, অদুগা ভুল অদু ঊৎলকহনবা ঙম্দে।",
+    "rulesNeverConfirmBodyLow": "অর্ধ-স্বায়ত্ত এজেন্ট প্রত্যেকনা খোংদ্রনা {tool} চত্থহনগনি। মসি লুকআপ মতেংদা য়েংরি, অদুগা মসি শাঙনা সুরক্ষিতনি।",
+    "rulesNeverConfirm": "খোংবা মেন্তলরো",
+    "tiersTitle": "অনুমোদনগীদমক করি ঙৈগনো হায়বা কনানা ঠিক তৌরিবনো?",
+    "tiersIntro": "এজেন্ট প্রত্যেকতা স্বায়ত্ততাগী স্তর অমা লৈ। ওয়ার্কস্পেসগী অনুমোদন নিয়মশিং বাতিলনা ব্যবহার তৌগনি নত্রবদি তৌদ্রগনি মসিনা ঠিক তৌরি।",
+    "tierCurrent": "এজেন্ট অসি",
+    "tierConsequenceLabel": "ব্যবহারদা:",
+    "tierSupervisedName": "তত্ত্বাবধানদা",
+    "tierSupervisedWhat": "ওয়ার্কস্পেসগী নিয়মনা করি হায়বসু, টুল কল প্রত্যেকনা মী অমা ঙৈরি। মসিদা টর্ন প্রত্যেকদা টুল চরণগী অনৌবা মেহুৎসু পীরি।",
+    "tierSupervisedConsequence": "অতিসু সুরক্ষিত, নত্তনা লাইনদা অনুরোধ অপুনবা অমসুং এজেন্ট ঙাক্লবা ফংবা ঙৈরো।",
+    "tierSemiName": "অর্ধ-স্বায়ত্ত",
+    "tierSemiWhat": "ওয়ার্কস্পেসগী নিয়মনা টুল প্রত্যেকগীদমক ঠিক তৌরি: থাগৎপা, ডিলিট অমসুং পেমেন্ট মতেংগী ঝুঁকি লৈবা টুলশিংনা ডিফল্টকীদুনা খোংরি, বাকীশিং চত্থরি।",
+    "tierSemiConsequence": "ফজবা ডিফল্ট অমা। নহাক্কী টুল-প্রত্যেকগী নিয়মশিং অসিদা কার্যকর ওইরি।",
+    "tierFullName": "পূর্ণ স্বায়ত্ত",
+    "tierFullWhat": "টুল কল করিসু মতমদাসু অনুমোদনগীদমক ঙৈদে অমসুং এজেন্টনা টুল চরণগী অপুনবা মেহুৎ ফংরি। টুল-প্রত্যেকগী নিয়মশিং পাংদোকলি।",
+    "tierFullConsequence": "মসিনা খোংদ্রনা তৌরি। মখোইগী ভুলশিং শুজনা ঊৎলকহনবা ঙমবা এজেন্টগীদমকনো ব্যবহার তৌরো।",
+    "tiersRuleNote": "টুল নিয়ম (মতমদাসু খোংনো, মতমদাসু খোংদ্রো) অর্ধ-স্বায়ত্ত এজেন্টশিংগীদমকনো গনি।",
+    "agentModeTitle": "এজেন্ট অসিদা অনুমোদন করিগা গনবনো?",
+    "agentModeSupervised": "এজেন্ট অসি তত্ত্বাবধানদা লৈ: টুল কল প্রত্যেকনা মী অমা ঙৈরি, অদুগা টুল-প্রত্যেকগী নিয়মশিং পাংদোকলি।",
+    "agentModeSemi": "এজেন্ট অসি অর্ধ-স্বায়ত্ত: টুল প্রত্যেকনা ওয়ার্কস্পেসগী নিয়ম ফীরি। থাগৎপা, ডিলিট অমসুং পেমেন্টনা ডিফল্টকীদুনা খোংরি।",
+    "agentModeFull": "এজেন্ট অসি পূর্ণ স্বায়ত্ত: মসিনা মতমদাসু অনুমোদনগীদমক ঙৈদে, অদুগা টুল-প্রত্যেকগী নিয়মশিং পাংদোকলি।",
+    "agentModeQueueLink": "এজেন্ট অসিগী অনুরোধ য়েংরো",
+    "agentModeRulesLink": "টুল অমগীদমক নিয়ম সেট তৌরো",
+    "agentModeShowTiers": "স্তর অহুম তুলনা তৌরো",
+    "agentModeHideTiers": "তুলনা ওয়ায়রো",
+    "agentModeScopeNote": "মপাংগী স্বায়ত্ততা থীবানা স্তর সোইরো। টুল নিয়মশিং ওয়ার্কস্পেস অচৌবাগীনি, এজেন্ট প্রত্যেকগী নত্তে।",
+    "policyThenApprovalNote": "নিয়মশিং অসিগীদগী ওংখ্রবা কলনা ঙসিসু মী অমা ঙৈবা ঙম্লি। মসি এজেন্টকী স্বায়ত্ততাগী স্তরদা থিংনরি, মসি মমাংদা ফোঙদোকখ্রে।",
+    "chatReasonToggle": "মরম অমা থেংনরো",
+    "chatReviewInQueue": "লাইনদা নাজারো"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "ইভেন্ট ঊৎলরো",
+    "tlFilterCategories": "ইভেন্টকী ধরণ",
+    "tlCatIntake": "ইনটেক",
+    "tlCatModel": "মডেল",
+    "tlCatTool": "টুল",
+    "tlCatApproval": "অনুমোদন",
+    "tlCatContinuation": "নিরন্তরতা",
+    "tlCatRetry": "অসুক কোশিশ অমসুং ফেলওভার",
+    "tlCatGuardrail": "গার্ডরেল",
+    "tlCatCache": "ক্যাশ",
+    "tlCatVerify": "নাজাবা",
+    "tlCatFinish": "অচৌবা",
+    "tlProblemsOnly": "সমস্যাশিং ফংবনি",
+    "tlSearch": "ইভেন্ট বিচার তৌরো",
+    "tlSearchPlaceholder": "টুল, মডেল, গার্ড নত্রবদি অবস্থা",
+    "tlClearFilters": "ঊৎলবা মান্নরো",
+    "tlShowing": "ইভেন্ট {total}গী মনুংদগী {shown} য়েংহনরি",
+    "tlNoMatch": "ইভেন্ট করিসু ঊৎলবা অসিদা মিলনদে।",
+    "tlSevOk": "সফল",
+    "tlSevInfo": "তথ্য",
+    "tlSevWarn": "ঈশিনবা গনি",
+    "tlSevError": "বায়ফম",
+    "tlIntake": "টর্ন ইন্থৌখ্রে: অক্ষর {chars}, টুল {tools}, সংযুক্তি {attachments}",
+    "tlRunTools": "Tools for this run",
+    "tlRunToolsNone": "none (text only)",
+    "tlModelCall": "{model} ({provider})দা মডেল কল, রুট {route}",
+    "tlFailover": "{model} ({provider})দা ফেলওভার ওইখ্রে",
+    "tlRetryModel": "{model} ({provider})দা অসুক কোশিশ তৌখ্রে, রুট {route}",
+    "tlRetry": "অসুক কোশিশ: {guard} ({outcome})",
+    "tlCacheHit": "রেস্পন্স ক্যাশগীদগী জবাব পীখ্রে",
+    "tlToolCall": "টুল কল {tool}: {status}",
+    "tlApprovalRequested": "{tool} চত্থবগী মমাংদা অনুমোদন খোংখ্রে",
+    "tlApprovalDecided": "{tool}গীদমক অনুমোদনগী ফৈসালা ওইখ্রে: {decision}",
+    "tlContinuation": "নিরন্তরতা: {guard} ({outcome})",
+    "tlGuard": "গার্ডরেল {guard}: {outcome}",
+    "tlVerifyPassed": "নাজাবা পাস: {check}",
+    "tlVerifyFailed": "নাজাবা ফেল: {check}",
+    "tlFinish": "অচৌবা: {status} (জবাবদা অক্ষর {chars})",
+    "tlOther": "ইভেন্ট {type}",
+    "reasonFallbackProvider": "মুখ্য মডেল বায়খ্রে, অদুগা টর্ন অসি এজেন্টকী ফলব্যাক প্রোভাইডরদা চত্থ্রে।",
+    "reasonToolsDisabledRetry": "প্রোভাইডরনা টুল-কল ইতিহাস য়েংদোকখ্রে, অদুগা টর্নগী জবাব অসি টুল লৈদ্রনা অমসুক পীখ্রে।",
+    "reasonRetryOther": "মডেল কল অসুক তৌখ্রে।",
+    "reasonToolCallRetry": "মডেলনা মখোইগী জবাব ফজদ্রবা টুল কলনা অচৌবা ফোকখ্রে, অদুগা মসি অসুক খোংখ্রে।",
+    "reasonCutOff": "জবাব অসি অচৌবগী মেহুৎদা চেক্থ্রে, অদুগা মডেল অসি ইন্থৌনা চত্থহনবগীদমক হায়খ্রে।",
+    "reasonToolsContinue": "টুল কলগী মতাংদা মডেলগীদমক চরণ থেংনবা ফাগৎখ্রে, অদুগা টর্ন অসি ইন্থৌনা চত্থ্রে।",
+    "reasonToolBlocked": "টুলগী মফমদা গার্ড, নীতি, হুক নত্রবদি মেহুৎনা জবাব পীখ্রে, অদুগা মসি চত্থদে।",
+    "reasonToolParked": "কল অসি মী অমগী অনুমোদনগীদমক ঙৈরি; টুল চত্থদে।",
+    "reasonGuardAction": "গার্ডরেল অমনা জবাব অসি সোইখ্রে নত্রবদি ফাদোকখ্রে।",
+    "tlAtStart": "ইন্থৌবগীদগী",
+    "tlGap": "মমাংগী ইভেন্টগীদগী",
+    "tlDuration": "মতম-মেহুৎ",
+    "tlTokens": "ইনপুট / আউটপুট টোকেন",
+    "tlCost": "খর্চা",
+    "tlDetails": "হ্যাশ অমসুং অশেংবা সার",
+    "tlArgsHash": "আর্গুমেন্টশিংগী হ্যাশ",
+    "tlResultDigest": "ফংসনগী ডাইজেস্ট",
+    "tlContentNote": "আর্গুমেন্ট অমসুং ফংসন মতমদাসু সেভ তৌদ্রে। টুল কলগীদমক টাইমলাইনদা মসিগী অবস্থা, মতম, অমসুং মসিগী আর্গুমেন্ট ফংসনগী হ্যাশ য়েংহনরি, মখোইগী বিষয়বস্তু নত্তে।",
+    "tlStatFinish": "অচৌবগী মরম",
+    "tlStillOpen": "ফোকখ্রদে",
+    "tlProblemCount": "ইভেন্ট {count}দা ঈশিনবা গনি",
+    "tlStatRetries": "অসুক কোশিশ অমসুং ফেলওভার",
+    "tlStatContinuations": "নিরন্তরতা",
+    "tlStatApprovals": "অনুমোদন",
+    "tlStatTokens": "ইনপুট / আউটপুট টোকেন",
+    "tlTokensNotRecorded": "টর্ন অসিগীদমক রেকর্ড তৌদ্রে",
+    "tlTokensInOut": "ইনপুট / আউটপুট",
+    "tlCopyTurnId": "টর্ন ID কপি তৌরো",
+    "tlCopyTurnIdShort": "ID কপি তৌরো",
+    "tlCopied": "টর্ন ID কপি ওইখ্রে।",
+    "tlCopyFailed": "কপি তৌবা ঙম্দ্রে। ID থীনা খুৎকী কপি তৌরো।",
+    "sessTitle": "সেসন অমগী টর্নশিং",
+    "sessSubtitle": "রেকর্ড তৌখ্রবা টর্নশিং অনৌবা মখল য়েংবগীদমক চ্যাট সেসন অমা থীরো। চ্যাট খবরগী টর্ন য়েংরো লিংক ফিদোকখ্রবদি মসি নহাকতা মখোইনা পুরি।",
+    "sessionIdLabel": "সেসন ID",
+    "sessionIdPlaceholder": "চ্যাট সেসন ID",
+    "sessFind": "টর্ন বিচার তৌবা",
+    "sessInvalid": "এজেন্ট ID (UUID অমা) অমসুং সেসন ID পীরো।",
+    "sessLoading": "সেসনগী টর্নশিং লোড তৌরি...",
+    "sessUnavailableTitle": "সেসন বিচার ফংদ্রে",
+    "sessUnavailableBody": "সার্ভর অসিনা সেসন অমগী টর্নশিং তালিকা শেমবা ঙম্দে। মসিগী মফমদা মমাংদা ID নখোইনা টর্ন অমা ফিদোকরো।",
+    "sessErrorTitle": "সেসনগী টর্নশিং লোড তৌবা ঙম্দ্রে",
+    "sessEmptyTitle": "সেসন অসিদা জার্নেল তৌখ্রবা টর্ন লৈদে",
+    "sessEmptyBody": "সেসনা করিসু রেকর্ড তৌদ্রে। সেসন ID ফজদ্রবনি নত্রবদি মসিগী টর্নশিং চত্থিবগী মতমদা টর্ন জার্নেল মেন্তল ওইখ্রে।",
+    "sessListLabel": "জার্নেল তৌখ্রবা টর্ন {count}",
+    "sessEvents": "ইভেন্ট {count}",
+    "sessStatusOpen": "ফিদোকরো",
+    "sessOpen": "টাইমলাইন ফিদোকরো",
+    "sessOpened": "মমাংদা য়েংহনখ্রে"
+  },
+  "evalControls": {
+    "cancel": "তাঙ্খৎলো",
+    "saving": "সেভ তৌরি...",
+    "saved": "সেভ তৌখ্রে।",
+    "saveMode": "রিপ্লে মোড সেভ তৌরো",
+    "discard": "সোইবা তাঙ্খৎলো",
+    "saveFailed": "রিপ্লে মোড সেভ তৌবা ঙম্দ্রে।",
+    "unsavedChanges": "সেভ তৌদ্রবা সোইবা",
+    "modeTitle": "ডেটাসেট অসি করিনা রিপ্লে ওইরিবনো",
+    "modeHelp": "রিপ্লেনা এজেন্টকী টুল ব্যবহার তৌবা ঙম্লিবনো ঙম্দ্রিবনো থীরো। মসিনা মতাংগী রনশিংনা করি মাপবনো মসি সোইরি।",
+    "modeTextOnly": "লিখাক ফংবনি",
+    "modeTextOnlyHelp": "এজেন্টনা মখোইগী টুল লৈদ্রনা জবাব পীরি। সুরক্ষিত: মরম অসেংবা মতেংদা করিসু চত্থদে। অনুমান তৌখ্রবা টুল নাজাবা অচৌহনবা ঙম্দে।",
+    "modeFull": "টুলশিং নখোইনা অচৌবা পাইপলাইন",
+    "modeFullHelp": "মরম অসেংবা ব্যবহারকারী অমদা ফংবা টুল, গার্ডরেল অমসুং চরণগী মেহুৎশিং মহাক্তা। অনুমান তৌখ্রবা টুল অমসুং ট্রাজেক্টরি নাজাবাশিংগীদমক গনি।",
+    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "autoApproveLabel": "ইভ্যাল স্যান্ডবক্সদা টুল কল মখোইনা অনুমোদন তৌরো",
+    "autoApproveHelp": "শাঙনা মী অমা ঙৈবা টুল কলশিং ইভ্যাল স্যান্ডবক্সনা অনুমোদন তৌরি, কেস অসি অচৌহনবগীদমক। মসি লৈদ্রনা কেস অসি প্রোডাকসনদা ওইবগুম্না জবাব ফংদ্রবা অনুমোদনদা অচৌরি।",
+    "autoApproveWarnTitle": "প্রোডাকসন নত্তবা ওয়ার্কস্পেসশিংগীদমকনি",
+    "autoApproveWarnBody": "টুলশিংনা মরম অসেংবা গ্রাহক নত্রবদি ডেটা থেংবা ঙমবা মফমদা মসি মতমদাসু শিন্থৌহনদ্রো। শেল, কোডিং, সময়সূচী, এজেন্ট-গীদগী-এজেন্ট, পেমেন্ট অমসুং ডিলিট টুলশিং মতমদাসু মখোইনা অনুমোদন তৌদে। নহাক্কী এডমিননা ওয়ার্কস্পেস অসি প্রোডাকসন নত্তবা ওইনা চিন্ন তৌখ্রগনি।",
+    "autoApproveNeedsFull": "মমাংদা অচৌবা পাইপলাইন শিন্থৌরো: মখোইনা অনুমোদন তৌবা টুলশিং চত্থবদাগী লাগু ওইরি।",
+    "autoApproveRefused": "ওয়ার্কস্পেস অসিদা অনুমতি লৈদে: {reason}",
+    "autoApproveConfirmTitle": "ইভ্যালদা টুল কল মখোইনা অনুমোদন তৌবনি?",
+    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirm": "মখোইনা অনুমোদন শিন্থৌরো",
+    "trajectoryLabel": "ট্রাজেক্টরি নাজাবাশিং",
+    "trajectoryOn": "On",
+    "trajectoryOff": "ফংদে",
+    "trajectoryHelpOn": "অনুমান তৌখ্রবা ট্রাজেক্টরি লৈবা কেসশিংদা এজেন্টনা টুল করি ক্রমদা কল তৌখিবনো মসিগী মতেংদা নম্বর পীরি। মসি নহাক্কী এডমিননা অচৌবা ডিপ্লয়মেন্টগীদমক শিন্থৌরি, ডেটাসেট প্রত্যেকগীদমক নত্তে।",
+    "trajectoryHelpOff": "ট্রাজেক্টরি নাজাবাশিং অসিদা ফংদে। মখোই অসি নহাক্কী এডমিননা অচৌবা ডিপ্লয়মেন্টগীদমক শিন্থৌরি, অমসুং ইভ্যাল লৈবা প্ল্যান গনি।",
+    "trajectoryNeedsFull": "ডেটাসেট অসি লিখাক ফংবনি, অদুগা অনুমান তৌখ্রবা ট্রাজেক্টরি লৈবা কেসশিংদা নম্বর ফংগদে। অচৌবা পাইপলাইন শিন্থৌরো।",
+    "runAutoApproved": "মখোইনা অনুমোদন ওইখ্রে",
+    "runAutoApprovedTitle": "রন অসিগী টুল কল করিসুগী ফৈসালা মীনা তৌদ্রে; ইভ্যাল স্যান্ডবক্সনা মখোইশিং অনুমোদন তৌখ্রে।",
+    "toolCallsLabel": "রিপ্লে অসিদা টুল কল",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "বায়ফম",
+    "toolStatusNotRun": "চত্থদ্রে",
+    "toolStatusAwaitingApproval": "অনুমোদনগীদমক ঙৈরি",
+    "toolStatusReplayed": "রিপ্লে ওইখ্রে",
+    "samplingTitle": "পিছোকগী গুণ নম্বর",
+    "samplingLoading": "নম্বর পীবগী হার লোড তৌরি...",
+    "samplingUnavailable": "পিছোকগী জজনা লাইভ টর্ন কয়া নম্বর পীবনো মসি নহাক্কী প্লাটফর্ম এডমিননা ঠিক তৌরি অদুগা অসিদা য়েংহনদে।",
+    "samplingValue": "লাইভ টর্নগী আসুম্বা {percent}% পিছোক গুণ জজনা নম্বর পীরি।",
+    "samplingHelp": "খম্না হারনা খর্চা অনৌ তৌরি অমসুং মপাংগী প্রবৃত্তিদা অনৌ নম্বর থম্মি। মান অসি অসিদা ফংবগীদমকনি।",
+    "samplingSource_default": "ডিফল্ট",
+    "samplingSource_platform": "প্লাটফর্মনা সেট তৌখ্রে",
+    "samplingSource_tenant": "নহাক্কী ওয়ার্কস্পেসগীদমক সেট তৌখ্রে",
+    "samplingSource_agent": "এজেন্ট অসিগীদমক সেট তৌখ্রে",
+    "modeDefault": "ওয়ার্কস্পেস ডিফল্ট",
+    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
+    "modeDefaultCurrent": "Currently: {mode}",
+    "modeNameFull": "Full pipeline",
+    "modeNameQuick": "Quick (text only)",
+    "badgeFull": "full pipeline",
+    "badgeQuick": "quick",
+    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
+    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
+    "runModeLabel": "Replay mode for the next run",
+    "runModeInherit": "Use the dataset's setting",
+    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
+    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
+    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
+    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
+    "toolStatusSimulated": "simulated, not executed"
+  },
+  "agentLab": {
+    "wtLabel": "এজেন্টকী টুলশিং নখোইনা চত্থবা",
+    "wtHelp": "মেন্তল: লাকপা প্রত্যেক ওইবা ফংদোকপা মনুংদা মডেল কল অমা। শিন্থল: ফংদোকপাশিং অসি চ্যাট টর্ন ব্যবহার তৌবা টুল পাইপলাইনগীদগী লাকপা ওইরি, অদুগা টুলশিং চত্থরি, গার্ডরেলশিং লাগু ওইরি অমসুং চরণগী মেহুৎশিং ঙাক্লি। মী অমাগী অনুমোদন থৌবা কলশিং অসি বাকী অনুমোদন ওইনা ফাওখ্রি।",
+    "wtUnavailable": "ইন্স্টলেসন অসিদা টুলশিং নখোইনা ল্যাব চত্থবা মেন্তল্লে। শিন্থল্লকপগীদমক এডমিন অমদা হায়রো।",
+    "wtRefused": "রন অসি য়েংদোকখ্রে: {reason}",
+    "wtActive": "রন অসিদা টুলশিং ঙাক্লিবা মতেংদা চত্থগনি, মখোইগী মরোম্পা ফংসনশিং নখোইনা।",
+    "wtConfirmTitle": "এজেন্টকী টুলশিং নখোইনা ল্যাব চত্থহনবা ঙসি?",
+    "wtConfirmBody": "নমুনা প্রত্যেকনা এজেন্টকী মরম অসেংবা টুলশিং কল তৌবা ঙম্লি, অমসুং কলশিংগী মরম অসেংবা ফংসন লৈনি, মফম ফাঙবা খবর থাগৎপা নত্রবদি ডেটা ঙাকপা। অনুমোদন থৌবা কলশিংনা মী অমা ফাওবা ফংগনি। মসি টেস্ট এজেন্ট নত্রবদি টেস্ট ডেটা নখোইনা ব্যবহার তৌরো।",
+    "wtConfirm": "টুল ব্যবহার তৌরো"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "এজেন্টকী মেহুৎশিং",
+        "description": "মেন্তলবগী মমাংদা এজেন্ট টর্ন অমনা কয়াগুম্বা ফংসন তৌবা ঙম্লিবনো।"
+      },
+      "approvals": {
+        "label": "অনুমোদন",
+        "description": "মী অমনা ফংসন অনুমোদন নত্রবদি য়েংদোকপগী মতাংদা করি ওইরিবনো, অনুরোধনা কয়া মতম ঙৈরিবনো।"
+      },
+      "chat": {
+        "label": "বাতচাগী ব্যবহার",
+        "description": "জবাব করিনা অচৌরিবনো, অসুক কোশিশ, ক্যাশ অমসুং ইন্থৌনা চত্থবা।"
+      },
+      "routing": {
+        "label": "মডেল রুটিং",
+        "description": "করি খবরনা ফাঙবা মডেলগীদমক ফজবা ওইনা শাংখ্রিবনো।"
+      },
+      "memory": {
+        "label": "মেমোরি",
+        "description": "এজেন্টনা কয়া স্মৃতি থম্মি অমসুং ঈশিন্নবনো।"
+      },
+      "aux": {
+        "label": "পিছোকগী মডেল কল",
+        "description": "সার, সহায়তা অমসুং কম্প্রেসননা করি মডেল ব্যবহার তৌরিবনো।"
+      },
+      "guardrails": {
+        "label": "সুরক্ষা নাজাবা",
+        "description": "মখোইনা তৌবা সুরক্ষা নাজাবাশিং কয়াগুম্বা কঠোরনো। মখোই প্লাটফর্ম সেটিংগীদগী অকনবা ওইনা ফংবা ঙম্লি।"
+      },
+      "quality": {
+        "label": "মূল্যায়ন",
+        "description": "টেস্ট রন অমসুং AI জজ করিনা ব্যবহার তৌরিবনো।"
+      },
+      "delegation": {
+        "label": "ফংসন পীবা",
+        "description": "এজেন্ট অমনা মতম অমদা অনৌবা এজেন্টশিংদা কয়াগুম্বা ফংসন পীবা ঙম্লিবনো।"
+      },
+      "knowledge": {
+        "label": "জ্ঞান বিচার",
+        "description": "ফজবা অংশ থীবগী মমাংদা নহাক্না আপলোড তৌখ্রবা দস্তাবেজশিংগী বিচারনা প্রার্থী কয়াগুম্বা অপাইনা কেংহনরিবনো।"
+      },
+      "learning": {
+        "label": "ফোঙদোক",
+        "description": "এজেন্টকী ফোঙদোক নীতিনা বিকল্পশিং করিনা নাজারিবনো।"
+      },
+      "providers": {
+        "label": "AI প্রোভাইডর",
+        "description": "সংযোগ তৌখ্রবা AI প্রোভাইডরগী মনুংদগী অমা ফংসন তৌবা মেন্তলবদি মখোই করিনা ব্যবহার তৌরিবনো।"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "টর্ন প্রত্যেকদা ফাওবা টুল কল",
+          "description": "টর্ন অমা মেন্তলনা মহাকতা লৈবা নখোইনা জবাব পীবগীদমক হায়বগী মমাংদা মহাক্না ফাওবা টুল কল কয়া তৌবা ঙম্লিবনো।",
+          "help": "অপাইবা, চরণ অপুনবা ফংসন লৈবা এজেন্টশিংগীদমক হাপহনরো। কন্ট্রোলগী ওংখ্রবা লুপশিং ফাদোকপগীদমক অমসুং খর্চা অনুমান তৌবা ঙমহনবগীদমক অনৌ তৌরো। ওয়ার্কস্পেস নত্রবদি প্লাটফর্মগীদমক য়েংহনখ্রবা মান অসি মুখ্য সংখ্যা অমনি: এজেন্টকী স্বায়ত্ততাগী স্তরনা রনগী মতমদা মসি মপাং-মমাং তৌরি, অদুগা অপুনবা নত্রবদি অনৌবা স্বায়ত্ত এজেন্টশিংনা অমনীবা সংখ্যা ব্যবহার তৌবা ঙম্লি। এজেন্টকী মখোইগী মান সেট তৌখ্রবদি মসি মসিগুম্নাদিনো ব্যবহার তৌরি।"
+        },
+        "turnTimeoutSeconds": {
+          "label": "টর্ন প্রত্যেকদা ফাওবা মতম",
+          "description": "টর্ন অমা মেন্তলবগী মমাংদা কয়াগুম্বা মতম চত্থবা ঙম্লিবনো।",
+          "help": "ঙাক্লবা অনুসন্ধান নত্রবদি কোড ফংসনগীদমক হাপহনরো। মতম ফাওখ্রবা টর্ন অসি ঙসিগা তৌখ্রবা ফংসন নখোইনা অচৌরি।"
+        },
+        "toolTimeoutSeconds": {
+          "label": "টুল কল প্রত্যেকদা ফাওবা মতম",
+          "description": "টুল কল অমা মেন্তলবগী মমাংদা কয়া মতম চত্থবা ঙম্লিবনো। প্লাটফর্ম ডিফল্টদা মেহুৎ লৈদে; অদুদা টুল প্রত্যেকনা মখোইগী টাইমআউট থম্মি।",
+          "help": "ঙাক্লবা টুল অমনা বাতচা অচৌবা ফাদোকপা ঙমবদি মেহুৎ সেট তৌরো। মেন্তলখ্রবা কলকী ফংসন লৈখিবনো লৈদ্রিবনো খংদে, অদুগা এজেন্টদা কল অসি সফল ওইখিবনো হায়দ্রনা মনুংদা শাংনা হায়রি।"
+        },
+        "toolOutputMaxChars": {
+          "label": "অপাইবা টুল ফংসন",
+          "description": "টুল ফংসন অমগী অক্ষর কয়া মডেলদা পীরিবনো; বাকী চেক্লরি।",
+          "help": "এজেন্টনা অপাইবা দস্তাবেজ নত্রবদি API জবাব অচৌনা ফংবা গনবদি হাপহনরো, টর্ন প্রত্যেকদা টোকেন অপুনবা মরমদা। খর্চা তেংনগীদমক অনৌ তৌরো।"
+        },
+        "retrievalTopK": {
+          "label": "বিচার প্রত্যেকদা জ্ঞানগী টুকরা",
+          "description": "জ্ঞান ভাণ্ডার বিচার অমনা এজেন্টদা টুকরা কয়া ঊৎলকপনো।",
+          "help": "টুকরা অপুনবনা এজেন্টদা ফংসন তৌবগীদমক থেংনবা সামগ্রী পীরি নখোইনা টোকেন অপুনবা খর্চা তৌরি অমসুং ওইনা-ওইনা হাপহনবা ঙম্লি। টুকরা অনৌবনা ফাঙবা অমসুং সস্তা ওইরি।"
+        },
+        "retrievalMinScore": {
+          "label": "টুকরা অমগী ঙাক্তুনা প্রাসঙ্গিকতা",
+          "description": "জ্ঞান টুকরা অমা ঊৎলকপগীদমক কয়াগুম্বা প্রাসঙ্গিক ওইগনো। ০না হিট প্রত্যেক ঊৎলকপি।",
+          "help": "এজেন্টনা অপ্রাসঙ্গিক টুকরাশিং উদ্ধৃত তৌরিবদি হাপহনরো। অপুনবা হাপহনবদি মহাকতা করিসু ফংদ্রবা ঙম্লি।"
+        },
+        "continuationPasses": {
+          "label": "অসম্পূর্ণ জবাবগী মতাংদা থেংনবা পাস",
+          "description": "মডেলগী জবাবনা হায়দোকখ্রবসু তৌদ্রবা চরণদা ঙৈবদি মহাক কয়া মতম ইন্থৌনা চত্থবগীদমক হায়রিবনো।",
+          "help": "চরণ অমা হায়দোকনা ঙৈরিবা এজেন্টগীদমক হাপহনরো। থেংনবা পাস প্রত্যেকনা মডেল কল অমা খর্চা তৌরি।"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "অনুমোদনগী মতাংদা ইন্থৌনা চত্থরো",
+          "description": "মী অমনা ফংসন অনুমোদন তৌবদি এজেন্টনা অনৌবা খবরগীদমক ঙৈদ্রনা মখোইনা ফংসন অচৌরি।",
+          "help": "অনুমোদন তৌখ্রবা ফংসন প্রত্যেকনা টর্ন অচৌহনবা অমসুং ফলো-আপ খুৎকীনা ওইবগীদমক নহাক্না ইচ্ছা তৌবদি মসি মেন্তলরো।"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "য়েংদোকপগী মতাংদাসু পিছোকগী জব ইন্থৌনা চত্থরি",
+          "description": "পিছোকগী জবদা মী অমনা ফংসন য়েংদোকপদি, জব অসি মেন্তল ওইদ্রনা য়েংদোকপা অসি দর্জ তৌনা ইন্থৌনা চত্থরি।",
+          "help": "য়েংদোকপনা জব মেন্তলহনগনি হায়বদি মসি মেন্তল থম্মো। য়েংদোকখ্রবা চরণ লৈদ্রনা জব অসি শাঙনা অচৌবা ঙম্বদি শিন্থৌরো।"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "অনুমোদনগী অনুরোধগী মতম ফাওরি",
+          "description": "অনুমোদনগী অনুরোধ অমনা মতম ফাওবগী মমাংদা ফৈসালাগীদমক কয়া মতম ঙৈরিবনো। ০গী অর্থ অনুরোধগী মতম মতমদাসু ফাওদে।",
+          "help": "মতম-মেহুৎ লৈদ্রবদি, ফাঙখ্রবা অনুরোধশিং অনির্দিষ্ট মতম ফাওবা ফিদোকনা লৈরি অমসুং এজেন্টনা ঙৈনা লৈরি। মতম ফাওখ্রবা অনুরোধ অনুমোদন তৌদ্রবা মতেংদা শাংরি।"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "চেক্থ্রবা জবাব অচৌহনরো",
+          "description": "মডেলগী ফাওবা অচৌবা মেহুৎনা জবাব চেক্লবদা নত্রবদি ফজদ্রবা টুল কলনা অচৌবদা, মডেলদা ইন্থৌনা চত্থবগা নত্রবদি অসুক কোশিশ তৌবগীদমক হায়রো।",
+          "help": "মডেলগী সমস্যা নিদান তৌবগীদমকনো মসি মেন্তলরো; অদুদা মীশিংনা চেক্থ্রবা জবাব অসি অদুগুম্নাদিনো য়েংরি।"
+        },
+        "maxContinuations": {
+          "label": "চেক্থ্রবা জবাবগী ফাওবা নিরন্তরতা",
+          "description": "জবাব চেক্লবগী মতাংদা মডেলদা কয়া মতম ইন্থৌনা চত্থবগীদমক হায়রিবনো।",
+          "help": "নিরন্তরতা প্রত্যেক অসুক মডেল কল অমনি। অপাইবা জবাবশিংগীদমক হাপহনরো, খর্চা তেংনগীদমক অনৌ তৌরো।"
+        },
+        "maxToolCallRetries": {
+          "label": "ফজদ্রবা টুল কলগী ফাওবা অসুক কোশিশ",
+          "description": "ব্যবহার তৌবা ঙমদ্রবা আর্গুমেন্ট নখোইনা লাকপা টুল কল অসুক তৌবগীদমক মডেলদা কয়া মতম হায়রিবনো।",
+          "help": "অসুক কোশিশ অমনা মডেল কল অমা খর্চা তৌরি। ০না ইন্থৌবা ফজদ্রবা কলদাগী য়াম্না ঊরি।"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "মডেল কল প্রত্যেকগী কোশিশ",
+          "description": "প্রোভাইডর বায়বা নত্রবদি ব্যস্ত ওইবদা, ইন্থৌবা কোশিশ নখোইনা, মডেল কল অমা কয়া মতম কোশিশ তৌরিবনো।",
+          "help": "কোশিশ অপুনবনা প্রোভাইডরগী অনৌবা ফাদোকপশিং ওয়ায়রি নখোইনা বায়ফম ওইবা অনুরোধনা ভুল য়েংহনবগীদমক মতম অপুনবা ফাওরি।"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "টুল লৈবা এজেন্টশিংগীদমক জবাব অসুক ব্যবহার তৌরো",
+          "description": "টুল লৈবা এজেন্টশিংগীদমক সেভ তৌখ্রবা জবাব অসুক ব্যবহার তৌবগীদমক অনুমতি পীরো। টুলনা মতাংগী মতমদা অমনীবা ঊৎলকপা ঙম্লিবগীদমক ডিফল্টকীদুনা মেন্তল ওইরি।",
+          "help": "টুলশিং ফংবগীদমকনো অমসুং শুজনা সোইরিবদি, অমসুং নহাক্না ফাঙবা, সস্তা অসুক অসুক জবাব ইচ্ছা তৌবদিনো শিন্থৌরো। মীশিংনা নৌ ওইদ্রবা জবাব য়েংবা ঙম্লি।"
+        },
+        "contextTurns": {
+          "label": "অসুক অসুক ওইবা খঙবগীদমক মমাংগী টর্ন",
+          "description": "খবর অমসু সেভ তৌখ্রবা জবাব অসুক ব্যবহার তৌবা ঙমবা অসুক অসুক ওইবনো ওইদ্রবনো ঠিক তৌবগীদমক মমাংগী টর্ন কয়া তুলনা তৌরিবনো।",
+          "help": "টর্ন অপুনবনা মিলনবা কঠোর তৌরি অমসুং ক্যাশ হিট অনৌ তৌরি।"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "ফলো-আপদা টুল প্রস্তাব তৌনা থম্মো",
+          "description": "মতাংগী খবর অসি গিদিম ফলো-আপ ওইবদা বাতচানা অদোম্না ব্যবহার তৌখ্রবা টুল প্রস্তাব তৌনা থম্মো।",
+          "help": "\"হোই\" গুম্বা গিদিম জবাবশিং শাঙনা টুল থীবগীদগী ইন্থৌগদবনি হায়বদি মসি মেন্তলরো।"
+        },
+        "stickyToolsWindow": {
+          "label": "ফলো-আপ টুল কয়া মতম প্রস্তাব ওইনা লৈরিবনো",
+          "description": "ব্যবহার তৌবগী মতাংদা গিদিম ফলো-আপ খবরশিংগীদমক টুল অমা কয়া মতম প্রস্তাব ওইনা লৈরিবনো।",
+          "help": "অপাইবা উইন্ডোনা অপাইবা ফংসনগী সেসনশিংদা তেংনরি, গিদিমবনা টুল তালিকা গিদিম থম্মি।"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "অসম্পূর্ণ খুৎলুপ্তদা ঈশিন্নবা",
+          "description": "জবাবনা তৌগনি হায়খ্রবা ফংসন তৌবগীদমক সিন্দোকখ্রবগুম্বা য়েংবদি মডেলদা ইন্থৌনা চত্থবগীদমক হায়রো।",
+          "help": "অদুদাগী অচৌগদবা জবাবশিংদা ঈশিন্নবা সক্রিয় ওইবদি মসি মেন্তলরো।"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "মমাংগী টুল ফংসন মান্নরো",
+            "description": "অপাইবা টুল রনশিংদা, বাতচা অসি মডেলগী মেহুৎশিংগী মনুংদা থম্বগীদমক মমাংগী টুল ফংসনশিং গিদিমবা প্লেসহোল্ডর অমনা সোইরো।",
+            "help": "এজেন্টনা মমাংগী ফংসন প্রত্যেক য়েংবা গনবদি মসি মেন্তলরো; অদুদা অপাইবা রনশিং মডেলগী অচৌবা মেহুৎদা ফাওবা ঙম্লি।"
+          },
+          "thresholdChars": {
+            "label": "মান্নবগী অচৌবা ইন্থৌবা",
+            "description": "মমাংদাশিং মান্নবগী মমাংদা টর্ন অমগী টুল ফংসন কয়াগুম্বা অচৌবা ওইবা ঙম্লিবনো।",
+            "help": "ফংসন অপুনবা য়েংহনবা থম্বগীদমক হাপহনরো, অপাইবা রনশিং গিদিম অমসুং সস্তা থম্বগীদমক অনৌ তৌরো।"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "অপাইবা সরল খবর",
+          "description": "মসিগীদগী অপাইবা খবর মতমদাসু সরল ওইনা শাংদে। সরল খবরশিং ফাঙবা, সস্তা মডেলদা চত্থবা ঙম্লি।",
+          "help": "গুণগীদমক খবর অপুনবা মুখ্য মডেলদা থাগৎবগীদমক অনৌ তৌরো; খর্চা তেংনবগীদমক হাপহনরো।"
+        },
+        "maxClauses": {
+          "label": "সরল খবর অমদা ফাওবা বাক্য",
+          "description": "মসিগীদগী বাক্য অপুনবা লৈবা খবর মতমদাসু সরল ওইনা শাংদে।",
+          "help": "গুণগীদমক খবর অপুনবা মুখ্য মডেলদা থাগৎবগীদমক অনৌ তৌরো।"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "টর্ন প্রত্যেকদা ঈশিন্নবা এজেন্টকী স্মৃতিশিং",
+          "description": "খবর প্রত্যেকগীদমক এজেন্টকী মখোইগী স্মৃতিশিংগী মনুংদগী কয়া য়েংরিবনো।",
+          "help": "স্মৃতি অপুনবনা প্রসঙ্গ অপুনবা পীরি নখোইনা টোকেন অপুনবা ব্যবহার তৌরি।"
+        },
+        "tenantTopK": {
+          "label": "টর্ন প্রত্যেকদা ঈশিন্নবা ভাগ-বাঁটা স্মৃতিশিং",
+          "description": "খবর প্রত্যেকগীদমক ওয়ার্কস্পেসদা ভাগ-বাঁটা তৌখ্রবা স্মৃতিশিংগী মনুংদগী কয়া য়েংরিবনো।",
+          "help": "স্মৃতি অপুনবনা প্রসঙ্গ অপুনবা পীরি নখোইনা টোকেন অপুনবা ব্যবহার তৌরি।"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "এজেন্ট প্রত্যেকগী ফাওবা স্মৃতিশিং",
+          "description": "এজেন্ট অমনা স্মৃতি কয়া থম্বা ঙম্লিবনো। মসিগীদগী অপুনবদি মমাংবা অমসুং অনৌবা ব্যবহার তৌবা স্মৃতিশিং ঊৎকোক্লরি।",
+          "help": "মীশিংগী বিষয়দা অপুনবা ঈশিন্নবা গনবা সহায়কগীদমক হাপহনরো; মসিনা সেভ তৌবা অমসুং ঈশিন্নবগী খর্চাসু হাপহনরি।"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "গ্রাফ মেমোরিগীদগী ঈশিন্নবা তথ্য",
+          "description": "লুকআপ অমদা এজেন্টদা মহাকগী সম্পর্ক মেমোরিগীদগী য়েংহনবা ফাওবা তথ্য।",
+          "help": "তথ্য অপুনবনা এজেন্টদা মী অমা নত্রবদি বিষয় অমগী মতেংদা পিছোক অপুনবা পীরি নখোইনা মহাকপা ফংসন তৌবা জায়গাগী অংশ অপুনবা ব্যবহার তৌরি। তথ্য অনৌবনা জবাব অসি মনুংদা থম্মি। মসি ওয়ার্কস্পেস অচৌবাগীদমক, নত্রবদি অপুনবা নত্রবদি অনৌবা গনবা এজেন্ট অমগীদমক সেট তৌরো।"
+        },
+        "recallMaxPaths": {
+          "label": "লুকআপ প্রত্যেকদা ফংবা গ্রাফ পথ",
+          "description": "লুকআপ অমগী তথ্য বিচার তৌবগীদমক মেমোরি গ্রাফকী সংযোগ কয়া ফংরিবনো।",
+          "help": "সংযোগ কয়ানা তথ্য অমত্তা ফাওবা ঙম্লি, অদুগা অসংযুক্তনা সংযুক্ত স্মৃতিশিংদা মাপুং বিচার তৌবগীদমক সংখ্যা অপুনবা গনবা ঙম্লি। সংখ্যা অপুনবনা লুকআপ প্রত্যেক ঙাক্লহনরি।"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "পিছোকগী কলশিংনা এজেন্টকী মডেল ব্যবহার তৌরি",
+        "description": "মখোইগীদমক মডেল করিসু থীদ্রবদি, সার, সহায়তা অমসুং প্রসঙ্গ কম্প্রেসননা এজেন্টগীদমক ফংসন তৌরিবা মডেল অদুনো ব্যবহার তৌরি।",
+        "help": "কলশিং অসিগীদমক প্লাটফর্মনা মডেল থীবগীদমক মসি মেন্তলরো, মসি সস্তা নত্রবদি অমনীবা প্রোভাইডরগী ওইবা ঙম্লি।"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "সুরক্ষা নাজাবা বায়ফম ওইবদা",
+        "description": "সুরক্ষা নাজাবা মখোই বায়ফম ওইবদা করি ওইরিবনো, নমুনা ওইনা জজ মডেল মেন্তল ওইবদা। মেন্তলনা ফংসন য়েংদোকপি; শিন্থৌনা মসি ওংহনরি।",
+        "help": "নহাক্না মসি প্লাটফর্ম সেটিংগীদগী কঠোর তৌবা ঙম্লি। মেন্তলনা কমনাসুনা ইচ্ছা তৌনা নাজাবা বায়হনবগী ফানদ্রবা সুরক্ষা পীরি, বিপদগী মতমদা ফংসন য়েংদোকপগী মরমদা।",
+        "options": {
+          "open": "শিন্থৌরে: ফংসন ওংহনরো",
+          "closed": "মেন্তলরে: ফংসন য়েংদোকরো"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "টুল-কল নাজাবা বায়ফম ওইবদা",
+          "description": "ঝুঁকি লৈবা টুল কল নাজারিবা নাজাবানা ফৈসালা তৌবা ঙমদ্রবদা করি তৌরিবনো। ঊৎপীবনা মপাংগী সুরক্ষা নাজাবা সেটিং ফীরি।",
+          "help": "নহাক্না মসি প্লাটফর্ম সেটিংগীদগী কঠোর তৌবা ঙম্লি। নাজাবা বায়বদি মেন্তলনা টুল কল য়েংদোকপি।",
+          "options": {
+            "open": "শিন্থৌরে: টুল কল ওংহনরো",
+            "inherit": "সুরক্ষা-নাজাবা সেটিং ফীরো",
+            "closed": "মেন্তলরে: টুল কল য়েংদোকরো"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "ফাদোকপগী বিষাক্ততাগী নম্বর",
+          "description": "জজগী ০দগী ১০০সিং বিষাক্ততাগী মাপদা মসি নত্রবদি মসিগীদগী অপুনবা নম্বর ফংবা বিষয়বস্তু ফাদোকপি। সংখ্যা অনৌবনা অপুনবা ফাদোকপি।",
+          "help": "নহাক্না মসি অনৌ তৌবা ঙম্লি, প্লাটফর্মগী মানগীদগী মপাংদা মতমদাসু হাপহনবা ঙম্দে। অতি অনৌবা মানশিংনা শাঙনা স্পষ্ট খুৎলুপ্তশিংসু ফাদোকপি।"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "জেলব্রেক কোশিশগীদমক স্ক্যান তৌখ্রবা লিখাক",
+          "description": "জেলব্রেক আর্হিগীদমক খবর নত্রবদি জবাব অমগী কয়া অংশ স্ক্যান তৌরিবনো। মসিগীদগী অপুনবা লিখাক স্ক্যান তৌদে।",
+          "help": "নহাক্না মসি প্লাটফর্মগী মানগীদগী মপাংদা হাপহনবা ঙম্লি। অহৌবা উইন্ডোনা প্যাডিংগী মতাংদা ওয়ায়খ্রবা আক্রমণশিং ফাদোকপি, প্রক্রিয়াকরণ অনৌবা অপুনবগী মরমদা।"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "সুরক্ষা জজদা য়েংহনখ্রবা লিখাক",
+          "description": "নাজাবা লিখাকগী কয়া অংশ AI সুরক্ষা জজনা ফংরিবনো। মসিগীদগী অপুনবা লিখাকগী বিচার তৌদে।",
+          "help": "নহাক্না মসি প্লাটফর্মগী মানগীদগী মপাংদা হাপহনবা ঙম্লি। হাপহনবনা অপাইবা টুল ফংসনশিংগী অচৌবা বিচার তৌবা ঙম্লি নক্তনা জজ কল প্রত্যেক অচৌবা ওইরি।"
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI জজগীদমক মডেল",
+          "description": "মূল্যায়ন রনশিংগী বিচার তৌবগীদমক ব্যবহার তৌবা মডেল। নহাক্কী ওয়ার্কস্পেসনা অদোম্না ব্যবহার তৌখ্রবা মডেলশিংগী মনুংদগী প্লাটফর্মনা থীবগীদমক খল্লি তুনা থম্মো।",
+          "help": "বিশ্বাসযোগ্য গ্রেডগীদমক অপুনবা শক্তিশালী মডেল নত্রবদি খর্চা তেংনগীদমক সস্তা মডেল ব্যবহার তৌরো। মডেল অসি নহাক্কী সংযুক্ত প্রোভাইডরদা লৈগনি।"
+        },
+        "callTimeoutSeconds": {
+          "label": "জজ কল প্রত্যেকদা ফাওবা মতম",
+          "description": "জজ কল অমা বায়ফম ওইনা শাংবগী মমাংদা কয়া মতম লোইরিবনো।",
+          "help": "ঙাক্লবা মডেলনা ওয়ায়না টাইমআউট ওইবদি হাপহনরো; বায়ফম কলশিংনা মূল্যায়নগী ফংসন অসম্পূর্ণ তৌরি।"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "টেস্ট কেস প্রত্যেকগী অসুক অসুক",
+          "description": "রন কপি তৌখ্রদবদি টেস্ট কেস প্রত্যেক কয়া মতম চত্থহনরিবনো। অসুক অসুক অপুনবনা এজেন্ট কয়াগুম্বা স্থির ওইরিবনো য়েংহনরি।",
+          "help": "অসুক অসুক প্রত্যেকনা রন অমগী খর্চা অমসুং মতম গুণ তৌরি।"
+        },
+        "defaultMode": {
+          "label": "How evaluations run",
+          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
+          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "options": {
+            "full": "Full pipeline in a sandbox",
+            "quick": "Quick: text answers only"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "ফাওবা সমান্তরাল উপ-ফংসন",
+        "description": "ফংসন পীবানা মতম অমদা উপ-ফংসন নত্রবদি সহায়ক এজেন্ট কয়া ইন্থৌবা ঙম্লিবনো। থেংনবাশিং মেহুৎ ওংখ্রে হায়না হায়দোকলি।",
+        "help": "অপাইবা অনুসন্ধান ফংসনগীদমক হাপহনরো, খর্চা অমসুং ভার অনৌ তৌবগীদমক অনৌ তৌরো।"
+      },
+      "branchTimeoutSeconds": {
+        "label": "উপ-ফংসন প্রত্যেকদা ফাওবা মতম",
+        "description": "পীখ্রবা উপ-ফংসন অমা টাইমআউট হায়না হায়দোকবগী মমাংদা কয়া মতম চত্থবা ঙম্লিবনো।",
+        "help": "ঙাক্লবা উপ-ফংসনশিংগীদমক হাপহনরো। ঙৈখ্রবা উপ-ফংসন অমনা মতম অসিগীদগী অপুনবা অচৌবা জবাব মতমদাসু ফাদোকনা থম্দে।"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "ফংসন প্রত্যেকগীদমক বিচারগী অকনবা",
+          "description": "জ্ঞান বিচারনা মতাংদা ঊৎলকখ্রবা টুকরা প্রত্যেকগীদমক প্রার্থী টুকরা কয়া কেংহনরিবনো।",
+          "help": "সংখ্যা অপুনবনা র‍্যাঙ্কিং থীবগীদমক অপুনবা পীরি, মসি দস্তাবেজ অপুনবা অমত্তা ওইবদা তেংনরি, নখোইনা বিচার প্রত্যেকদা মতম অমসুং কম্পিউট অপুনবা গনরি। বিচার ঙাক্লবগুম্বা য়েংবদি অনৌ তৌরো। এজেন্টনা য়েংবা টুকরাগী সংখ্যা মসিনা সোইদে।"
+        },
+        "candidatePoolMax": {
+          "label": "বিচার প্রত্যেকদা ফাওবা প্রার্থী",
+          "description": "ফংসন কয়া খোংখ্রিবনো মসি করি ওইবসু, জ্ঞান বিচার অমনা কেংহনবা প্রার্থী টুকরাশিংগী মপাংগী মেহুৎ।",
+          "help": "এজেন্টনা মতম অমদা ফংসন অপুনবা খোংবদি মসিনা গতি অমসুং খর্চা ফানরি। অচৌবা জ্ঞান ভাণ্ডারদা জবাবনা প্রাসঙ্গিক টুকরাশিং ঊৎকোক্লবদাগী হাপহনরো।"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "অনৌবা নাজাখ্রবা বিকল্প কোশিশ তৌবগী ইচ্ছা",
+          "description": "বিশ্বাস-মেহুৎ পদ্ধতি ব্যবহার তৌবা ফোঙদোক নীতিনা মহাকনা অনৌ নাজাখ্রবা বিকল্পশিংদা কয়াগুম্বা অগ্রাধিকার পীরিবনো।",
+          "help": "শূন্যনা ঙসি ফাওবা অপুনবা গড় লৈবা বিকল্প মতমদাসু থীরি। মান অপুনবনা অমনীবা বিকল্পশিং স্থির ওইবগী মমাংদা মতম অপুনবা নাজা-নাজা তৌরি। ডিফল্ট পাঠ্যপুস্তকগী সন্তুলন। পদ্ধতি অসি ব্যবহার তৌবা নীতিশিংদানো অসর ওইরি।"
+        },
+        "defaultExplorationRate": {
+          "label": "অনৌবা নীতিশিংগীদমক ইন্থৌবা অন্বেষণ হার",
+          "description": "নৌবা শেমখ্রবা ফোঙদোক নীতিনা যাদৃচ্ছিক বিকল্প নাজাবদা টর্নশিংগী কয়া অংশ খর্চা তৌরিবনো।",
+          "help": "মসিনা ঙসিগীদগী শেমগদবা নীতিশিংগী ইন্থৌবা বিন্দু সেট তৌরি। লৈবা নীতিশিংনা মখোইগী হার থম্মি, মসি নহাক্না নীতি সামলবা জায়গাদা এজেন্ট প্রত্যেকদা সোইরি। শূন্যগী অর্থ অনৌবা নীতিশিংনা ইন্থৌবদা অন্বেষণ তৌদে।"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "প্রোভাইডরনা কী য়েংদোকপগী মতাংদা বিরাম",
+          "description": "প্রোভাইডরনা সংযুক্ত কী য়েংদোকখ্রবগী মতাংদা পিছোকগী ফংসননা মসি কয়া মতম ঊৎকোক্লরিবনো।",
+          "help": "বিরামগী মতমদা, সময়সূচী তৌখ্রবা অমসুং মখোইনা চত্থিবা জবশিংনা অসুক অসুক বায়বা কী কল তৌবগী মফমদা অমনীবা সংযুক্ত প্রোভাইডর ব্যবহার তৌরি, নত্রবদি ঙৈরি। চ্যাট তৌবা মীশিং মতমদাসু ফাদোকপদে অমসুং মতমদাসু প্রোভাইডরগী মরম অসেংবা ভুল য়েংরি। বিরাম অচৌবদি, কী ফজখিবনো ফজদ্রবনো নাজাবগীদমক কল অমা চত্থহনরি। শূন্যনা বিরাম মেন্তলরি।"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "প্রশাসন",
+    "title": "রনটাইম সেটিংশিং",
+    "subtitle": "ওয়ার্কস্পেস অসিগী এজেন্ট প্রত্যেকনা করিনা ব্যবহার তৌরিবনো মসি মিলনহনরো: মেহুৎ, অনুমোদন, গুণ নাজাবা, গার্ডরেল, মেমোরি অমসুং মডেল। অনুমতি লৈবা মফমদা এজেন্টকী মালিকনা ঙসিসু এজেন্ট অমগীদমক সেটিং ওভারাইড তৌবা ঙম্লি।",
+    "docsLink": "সহায়তা অমসুং দস্তাবেজ",
+    "tabs": {
+      "label": "রনটাইম সেটিংগী দৃশ্য",
+      "settings": "সেটিংশিং",
+      "history": "সোইবগী ইতিহাস"
+    },
+    "readOnly": {
+      "title": "য়েংবগীদমকনো",
+      "body": "ওয়ার্কস্পেস এডমিনশিংনাদাগী সেটিংশিং অসি সোইবা ঙম্লি। নহাক্না সেটিং প্রত্যেকগী লাগু ওইবা মান অমসুং মসি করি দগী লাকপনো য়েংবা ঙম্লি।"
+    },
+    "summary": "ওয়ার্কস্পেস অসিদা সেটিং {total}গী মনুংদগী {changed} সোইখ্রে। বাকীশিংনা প্লাটফর্মগী মান ব্যবহার তৌরি।",
+    "export": {
+      "button": "ওভারাইড এক্সপোর্ট তৌরো",
+      "done": "ওয়ার্কস্পেস ওভারাইড {count} ফাইল অমদা এক্সপোর্ট তৌখ্রে।",
+      "none": "এক্সপোর্ট তৌবগীদমক করিসু লৈদে: ওয়ার্কস্পেস অসিনা সেটিং করিসু সোইদ্রে।"
+    },
+    "filters": {
+      "changedOnly": "ওয়ার্কস্পেস অসিদা সোইখ্রবা ফংবনি"
+    },
+    "jump": {
+      "label": "সমূহ অমদা চত্থরো"
+    },
+    "anchor": {
+      "unknown": "ওয়ার্কস্পেস অসিদা \"{key}\" মুং লৈবা সেটিং লৈদে। মসিগী মুং সোইখ্রে নত্রবদি মসি ওয়ার্কস্পেস স্তরদা ফংদে।"
+    },
+    "empty": {
+      "noneChanged": "ওয়ার্কস্পেস অসিদা ঙসিগা সেটিং করিসু সোইদ্রে। মাপুংনা প্লাটফর্মগী মান ব্যবহার তৌরি।"
+    },
+    "risk": {
+      "high": "ঝুঁকি অপুনবা",
+      "security": "সুরক্ষা সেটিংশিং"
+    },
+    "security": {
+      "title": "সুরক্ষা সেটিংশিং",
+      "body": "সেটিংশিং অসিনা নহাক্কী ওয়ার্কস্পেস সুরক্ষা পীরি। মখোই প্লাটফর্মগী মানগীদগী কঠোর ওইনা ফংবা ঙম্লি, মতমদাসু অকম্বা ওইদে। সোইবা প্রত্যেকগীদমক মরম গনি অমসুং অডিট লগদা রেকর্ড তৌরি।"
+    },
+    "resetGroup": {
+      "count": "সমূহ অসিদা {count} সোইখ্রে",
+      "button": "{group} ঊৎপীবা মানদা রিসেট তৌরো",
+      "confirmTitle": "{group} ঊৎপীবা মানদা রিসেট তৌবনি?",
+      "confirmBody": "মসিনা সমূহ অসিগী ওয়ার্কস্পেস ওভারাইড {count} ঊৎকোক্লরি। মখোইগী ওভারাইড লৈদ্রবা এজেন্ট প্রত্যেকগীদমক সেটিংশিং ঙসিনো প্লাটফর্মগী মানদা ঊৎলকরি। রিসেট প্রত্যেক অডিট লগদা রেকর্ড তৌরি।",
+      "confirm": "ঊৎপীবা মানদা রিসেট তৌরো",
+      "cancel": "তাঙ্খৎলো",
+      "done": "সেটিং {count} মখোইগী ঊৎপীবা মানদা রিসেট তৌরো।",
+      "partial": "সেটিং {done} রিসেট তৌখ্রে; {failed} রিসেট তৌবা ঙম্দ্রে। বায়বা সেটিংশিংগী খবর য়েংরো।",
+      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+    },
+    "import": {
+      "button": "ওভারাইড ইম্পোর্ট তৌরো",
+      "title": "ওয়ার্কস্পেস ওভারাইড ইম্পোর্ট তৌরো",
+      "intro": "পেজ অসিদগী এক্সপোর্ট তৌখ্রবা ফাইল অমা থীরো, নত্রবদি মসিগী বিষয়বস্তু পেস্ট তৌরো। করিসু সেভ তৌবগী মমাংদা করি সোইগনো নহাক্না ঠিকনা য়েংগনি।",
+      "reviewIntro": "ফাইল অসিনা করি সোইগনো নাজারো। ঙসিগা করিসু সেভ তৌদ্রে।",
+      "fileLabel": "ওভারাইড ফাইল (JSON)",
+      "pasteLabel": "নত্রবদি ফাইলগী বিষয়বস্তু পেস্ট তৌরো",
+      "fileError": {
+        "empty": "মমাংদা ফাইল অমা থীরো নত্রবদি মসিগী বিষয়বস্তু পেস্ট তৌরো।",
+        "invalidJson": "মসি বৈধ JSON নত্তে। অচৌবা ফাইল কপি তৌখ্রিবনো নাজারো।",
+        "wrongFormat": "মসি পেজ অসিদগী এক্সপোর্ট তৌখ্রবা সেটিং ওভারাইড ফাইল নত্তে।",
+        "unsupportedVersion": "ফাইল অসি এক্সপোর্টকী অমনীবা সংস্করণনা শেমখ্রে অদুগা ফংবা ঙম্দে।",
+        "noOverrides": "ফাইলদা ওভারাইড অংশ লৈদে।",
+        "unreadable": "ফাইল ফংবা ঙম্দ্রে।"
+      },
+      "summary": "সোইবা গনবা {changes}, অদোম্না লাগু ওইখ্রবা {unchanged}, লাগু তৌবা ঙমদ্রবা {problems}।",
+      "changesHeading": "সোইবাশিং ({count})",
+      "before": "ঙসি:",
+      "after": "ইম্পোর্টগী মতাংদা:",
+      "resetMissing": "ফাইলদা লৈদ্রবা ওয়ার্কস্পেস ওভারাইডসু ঊৎকোক্লো",
+      "resetMissingHelp": "অসিদা সোইখ্রবসু ফাইলদা লৈদ্রবা সেটিংশিং প্লাটফর্মগী মানদা ঊৎলকরি। থেংনবা নত্রবদি অনৌ তৌবগীদমকনো মসি মেন্তল থম্মো।",
+      "resetsHeading": "ঊৎকোকগদবা ওভারাইড ({count})",
+      "resetFrom": "ঙসি {value}; ঊৎপীবা মানদা ঊৎলকরি।",
+      "problemsHeading": "লাগু তৌবা ঙমদ্রবা ({count})",
+      "problem": {
+        "unknownKey": "কী অসি লৈবা সেটিং লৈদে।",
+        "notWorkspaceSetting": "সেটিং অসি ওয়ার্কস্পেস অচৌবাগীদমক সোইবা ঙম্দে।",
+        "locked": "প্লাটফর্ম অপারেটরনা সেটিং অসি পিন তৌখ্রে, অদুগা মসি সোইবা ঙম্দে।",
+        "wrongType": "সেটিং অসিগীদমক মানগী ধরণ ফজদে।",
+        "required": "মান অমা গনি।",
+        "notNumber": "মান সংখ্যা অমা ওইগনি।",
+        "notInteger": "মান পূর্ণ সংখ্যা অমা ওইগনি।",
+        "belowMin": "মান অতি অনৌ। ঙাক্তুনা {min}।",
+        "aboveMax": "মান অতি অপুন। ফাওবা {max}।",
+        "notAllowed": "মসি অনুমতি পীখ্রবা বিকল্পশিংদা লৈদে।",
+        "tooShort": "লিখাক অতি গিদিম। ঙাক্তুনা অচৌবা {min}।",
+        "tooLong": "লিখাক অতি অপাই। ফাওবা অচৌবা {max}।",
+        "precision": "মান অসি সেটিং অসিনা অনুমতি পীবগীদগী অপুনবা সঠিক।"
+      },
+      "nothing": "ফাইল অসিগী করিসুনা সেটিং করিসু সোইদে।",
+      "reasonNote": "সেটিংশিং অসিগী মনুংদগী খরা অপুনবা ঝুঁকি লৈ। লাগু তৌবগী মতাংদা নহাকতা মরম অমা খোংগনি, মসি অডিট লগদা রেকর্ড তৌরি।",
+      "back": "ঊৎলকরো",
+      "cancel": "তাঙ্খৎলো",
+      "review": "সোইবা নাজারো",
+      "apply": "সোইবা {count} লাগু তৌরো",
+      "cancelled": "ইম্পোর্ট তাঙ্খৎখ্রে। সেটিং করিসু সোইদ্রে।",
+      "done": "ইম্পোর্ট অচৌখ্রে: সেটিং {applied} নৌ ওইখ্রে।",
+      "donePartial": "ইম্পোর্ট অর্ধেক অচৌখ্রে: সেটিং {applied} নৌ ওইখ্রে, {failed} লাগু তৌবা ঙম্দ্রে। নাজাবানা ঙসিগা করি ঙৈরিবনো য়েংহনরি।"
+    },
+    "history": {
+      "adminOnly": "ওয়ার্কস্পেস সেটিংগী সোইবগী ইতিহাস ওয়ার্কস্পেস এডমিনশিংনাদাগী য়েংবা ঙম্লি।",
+      "loading": "সোইবগী ইতিহাস লোড তৌরি",
+      "partial": "সেটিং {count}গী ইতিহাস লোড তৌবা ঙম্দ্রে, অদুগা তালিকা অসি অসম্পূর্ণ ওইবা ঙম্লি।",
+      "retry": "অসুক কোশিশ তৌরো",
+      "search": "সোইবগী ইতিহাস বিচার তৌরো",
+      "searchPlaceholder": "সেটিং, মী নত্রবদি মরমনা বিচার তৌরো",
+      "empty": "ওয়ার্কস্পেস অসিদা ঙসিগা সেটিং করিসু সোইদ্রে।",
+      "noMatch": "সোইবা করিসু নহাক্কী বিচারদা মিলনদে।",
+      "count": "সোইবা {total}গী মনুংদগী {shown} য়েংহনরি, অনৌবা মমাংদা।",
+      "tableLabel": "ওয়ার্কস্পেস সেটিংগী সোইবগী ইতিহাস",
+      "when": "করিগা",
+      "setting": "সেটিং",
+      "change": "সোইরো",
+      "by": "সোইবা",
+      "reason": "মরম",
+      "before": "মমাংদা:",
+      "after": "মতাংদা:",
+      "inherited": "ঊৎপীবা মান",
+      "unknownActor": "খংদ্রবা",
+      "noReason": "মরম করিসু পীদ্রে",
+      "showMore": "থেংনবা য়েংহনরো",
+      "scope": "Level",
+      "scopeWorkspace": "ওয়ার্কস্পেস",
+      "scopeAgent": "Agent {id}",
+      "scopeFilter": "Show changes at",
+      "filterAll": "All levels",
+      "filterWorkspace": "Workspace only",
+      "filterAgents": "Agents only",
+      "searchLoadedOnly": "The search covers the changes loaded so far.",
+      "loadError": "The change history could not be loaded. {message}",
+      "moreFailed": "More changes could not be loaded. {message}",
+      "loadingMore": "লোড তৌরি"
+    }
+  },
+  "agentBehavior": {
+    "title": "ব্যবহার অমসুং মেহুৎশিং",
+    "intro": "এজেন্ট অসিনা টর্ন অমদা কয়া অপুনবা চত্থবা ঙম্লিবনো মসি কন্ট্রোল তৌরো: টুল কল কয়া তৌবা ঙম্লিবনো, কয়া মতম চত্থবা ঙম্লিবনো অমসুং কয়া মমাংদা ফংরিবনো। নহাক্না অসিদা সোইদ্রবা মখোই নহাক্কী ওয়ার্কস্পেসগীদগী ঊৎপীনা লাকপা ওইরি।",
+    "saveFirst": "মমাংদা এজেন্ট সেভ তৌরো। শেমখ্রবগী মতাংদা মহাক্কী ব্যবহার অমসুং মেহুৎশিং সেট তৌবা ঙম্লি।",
+    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "tabs": {
+      "label": "এজেন্ট কনফিগারেসন",
+      "setup": "সেটআপ",
+      "behavior": "ব্যবহার অমসুং মেহুৎশিং",
+      "unsaved": "সেভ তৌদ্রবা সোইবা"
+    },
+    "links": {
+      "label": "সম্পর্ক লৈবা পেজশিং",
+      "tenant": "ওয়ার্কস্পেস ডিফল্ট সোইরো",
+      "playground": "প্লেগ্রাউন্ডদা নাজারো",
+      "prompts": "This agent's prompts",
+      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
+      "approvals": "This agent's approvals",
+      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
+      "turns": "Turn timeline",
+      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+    },
+    "readOnly": {
+      "locked": "এজেন্ট অসি সোইবগীদমক তালা পাংখ্রে, অদুগা মানশিং অসি ফংবগীদমকনি।",
+      "access": "নহাক্না মানশিং অসি য়েংবা ঙম্লি নক্তনা এজেন্ট অসিদা নহাক্কী প্রবেশনা মসি সোইবা পীদে।"
+    },
+    "unsaved": "ট্যাব অসিদা নহাক্কী সেভ তৌদ্রবা সোইবাশিং লৈ। চত্থবগী মমাংদা মমাংদা মখোই সেভ নত্রবদি তাঙ্খৎলো।",
+    "inheritNote": "সেটিং প্রত্যেকনা মসিগী মান করি দগী লাকপনো য়েংহনরি। অসিদা অমা সোইবদি এজেন্ট অসিগীদমক ওভারাইড ওইরি; ওয়ার্কস্পেসগী মান অসুক ঊৎপীনা ফংবগীদমক রিসেট তৌরো।",
+    "others": {
+      "title": "এজেন্ট অসিগী অমনীবা কন্ট্রোলশিং",
+      "intro": "কন্ট্রোলশিং অসি মপাংগী সেটিংশিংগী অংশ নত্তে, অদুগা মখোই সেটআপ ট্যাবদা লৈ।",
+      "generation": "জবাবগী সৃজনশীলতা অমসুং অচৌবা (তাপমাত্রা, top-p, ফাওবা টোকেন) অমসুং থেংনবা নমুনা থীবগী বিকল্প।",
+      "generationLink": "জেনারেসন টিউনিংদা চত্থরো",
+      "autonomy": "স্বায়ত্ততাগী স্তর, রন প্রত্যেকগী খর্চাগী মেহুৎ, টুল নিয়ম অমসুং মী অমনা করিগা অনুমোদন তৌগনো।",
+      "autonomyLink": "যুক্তি অমসুং স্বায়ত্ততাদা চত্থরো"
+    },
+    "discard": {
+      "title": "সেভ তৌদ্রনা এরোক্কী?",
+      "description": "এজেন্ট অসিগী ব্যবহার অমসুং মেহুৎদা নহাক্কী সেভ তৌদ্রবা সোইবা লৈ। ঙসি এরোক্কবদি মখোই মান্নগনি।",
+      "stay": "অসিদনো ঙৈনা সোইবা ইন্থৌনা চত্থরো",
+      "leave": "এরোক্কনা সোইবা তাঙ্খৎলো"
+    },
+    "summary": {
+      "title": "এজেন্ট অসিনা ঙসি করিনা ব্যবহার তৌরিবনো",
+      "subtitle": "এজেন্টকী মখোইগী ওভারাইড, নহাক্কী ওয়ার্কস্পেস সেটিং অমসুং প্লাটফর্ম সেটিং লাগু ওইবগী মতাংদা এজেন্ট অসিগীদমক লাগু ওইবা মানশিং।",
+      "loading": "ঙসিগী ব্যবহার লোড তৌরি",
+      "error": "ঙসিগী ব্যবহার লোড তৌবা ঙম্দ্রে। {message}",
+      "retry": "অসুক কোশিশ তৌরো",
+      "empty": "এজেন্ট অসিগীদমক ঙসিগা ব্যবহার সেটিং ফংদে।",
+      "facts": {
+        "steps": "টর্ন প্রত্যেকদা টুল কল",
+        "turnTimeout": "টর্ন প্রত্যেকগী মতম",
+        "toolTimeout": "টুল কল প্রত্যেকগী মতম",
+        "outputCap": "থম্খ্রবা টুল আউটপুট",
+        "continuation": "নিরন্তরতা পাস",
+        "approvals": "অনুমোদন",
+        "judge": "গুণ জজ মডেল",
+        "model": "মডেল"
+      },
+      "tier": {
+        "SUPERVISED": "তত্ত্বাবধানদা: টুল কল প্রত্যেকনা মী অমা ঙৈরি",
+        "SEMI_AUTONOMOUS": "অর্ধ-স্বায়ত্ত: নহাক্কী ওয়ার্কস্পেস নিয়মনা ঠিক তৌরি",
+        "FULLY_AUTONOMOUS": "পূর্ণ স্বায়ত্ত: টুল কলনা মতমদাসু ঙৈদে"
+      },
+      "approvalResumes": "অনুমোদনগী মতাংদা মখোইনা ইন্থৌনা চত্থরি",
+      "approvalStops": "অনুমোদনগী মতাংদা অনৌবা খবরগীদমক ঙৈরি",
+      "judgeDefault": "প্লাটফর্মনা থীখ্রবা",
+      "overrides": {
+        "none": "এজেন্ট অসিনা মাপুংদা নহাক্কী ওয়ার্কস্পেসগী মান ব্যবহার তৌরি।",
+        "some": "এজেন্ট অসিগীদমক ওভারাইড তৌখ্রবা সেটিংশিং: {count}।"
+      }
+    },
+    "impact": {
+      "title": "মসিগী অর্থ করিনো",
+      "steps": "এজেন্ট অসিনা টর্ন অমদা ফাওবা টুল কল {count} তৌবা ঙম্লি। মসিগী মতাংদা মহাকতা লৈবা নখোইনা জবাব পীবগীদমক হায়রি।",
+      "stepsTierSupervised": "এজেন্ট অসি তত্ত্বাবধানদা লৈ, অদুগা মসিগী মরম অসেংবা মপাংগী মেহুৎ মুখ্য সংখ্যা অদুগীদগী অনৌ। সঠিক সংখ্যা ব্যবহার তৌবগীদমক এজেন্ট অসিগীদমক নহাক্কী মখোইগী মান সেট তৌরো।",
+      "stepsTierFull": "এজেন্ট অসি পূর্ণ স্বায়ত্ত, অদুগা মসিগী মরম অসেংবা মপাংগী মেহুৎ মুখ্য সংখ্যা অদুগীদগী অপুন। সঠিক সংখ্যা ব্যবহার তৌবগীদমক এজেন্ট অসিগীদমক নহাক্কী মখোইগী মান সেট তৌরো।",
+      "turnTimeout": "টর্ন অমা {duration}গী মতাংদা চেক্লরি।",
+      "turnTimeoutNone": "টর্নগী মতম-মেহুৎ লৈদে।",
+      "toolTimeout": "টুল কল অমা {duration}গী মতাংদা চেক্লরি।",
+      "toolTimeoutNone": "টুল কলগী মতম-মেহুৎ লৈদে।",
+      "outputCap": "{chars}গীদগী অপাইবা টুল ফংসনশিং এজেন্টনা ফংবগী মমাংদা গিদিম তৌরি।",
+      "continuation": "জবাব চেক্লবদি, এজেন্টনা মসি ফাওবা থেংনবা {count} মতম ইন্থৌনা চত্থহনবা ঙম্লি।",
+      "continuationNone": "চেক্থ্রবা জবাবশিং ইন্থৌনা চত্থহনদে।",
+      "retrieval": "খোংবা প্রত্যেকগীদমক মসিনা ফজবা জ্ঞান মিলনবা {count} ফংরি।",
+      "retrievalScored": "খোংবা প্রত্যেকগীদমক মসিনা ফজবা জ্ঞান মিলনবা {count} ফংরি অমসুং {score}গীদগী অনৌবা নম্বর লৈবা মিলনবাশিং পাংদোকলি।",
+      "approvalContinuationOn": "মী অমনা ঙৈবা ফংসন অনুমোদন তৌবগীদা, এজেন্টনা মখোইনা ফংসন অচৌরি।",
+      "approvalContinuationOff": "মী অমনা ঙৈবা ফংসন অনুমোদন তৌবগীদা, টর্ন অসি অচৌরি অমসুং ফলো-আপ খুৎকীনা তৌগনি।",
+      "guardClosed": "সুরক্ষা নাজাবা বায়বদা, ফংসন য়েংদোকপা ওইরি।",
+      "guardOpen": "সুরক্ষা নাজাবা বায়বদা, ফংসন ওংহনরি।",
+      "branches": "ফংসন পীবানা মতম অমদা ফাওবা উপ-ফংসন {count} ইন্থৌবা ঙম্লি।"
+    }
+  },
+  "controls": {
+    "eyebrow": "সহায়তা",
+    "title": "ঐ করি কন্ট্রোল তৌবগে...?",
+    "subtitle": "নহাক্কী এজেন্টকী ব্যবহার শেমদোকপা কন্ট্রোল প্রত্যেক, অমসুং মখোই লৈবা পেজ। নহাক্না সোইবা ইচ্ছা তৌবা নখোইনা বিচার তৌরো।",
+    "breadcrumb": {
+      "label": "ব্রেডক্রাম্ব",
+      "console": "কনসোল",
+      "controls": "কন্ট্রোলশিং"
+    },
+    "related": {
+      "label": "অমনীবা কন্ট্রোলশিং"
+    },
+    "search": {
+      "label": "কন্ট্রোল বিচার তৌরো",
+      "placeholder": "নমুনা: টাইমআউট, অনুমোদন, প্রোম্পট, মেমোরি",
+      "count": "মিলনবা কন্ট্রোল {count}",
+      "none": "\"{query}\" নখোইনা করিসু মিলনদে। গিদিম খুৎলুপ্ত নাজারো।",
+      "noSettings": "সেটিং করিসু নহাক্কী বিচারদা মিলনদে।"
+    },
+    "areasHeading": "কন্ট্রোল ক্ষেত্র",
+    "areasIntro": "পেজশিং অসিদা সংখ্যা অমত্তা নত্তবা কন্ট্রোলশিং লৈ: নির্দেশনা, অনুমোদনগী নিয়ম, সুরক্ষাগী নিয়ম অমসুং টর্ন অমনা করি তৌখ্রিবনো মসিগী রেকর্ড।",
+    "openArea": "ফিদোকরো",
+    "needsAccess": "পেজ অসিদা প্রবেশগীদমক ওয়ার্কস্পেস এডমিন অমদা হায়রো।",
+    "settingsHeading": "রনটাইম সেটিং প্রত্যেক",
+    "settingsIntro": "সেটিং প্রত্যেক ওয়ার্কস্পেস অচৌবাগীদমক, এজেন্ট অমগীদমক, নত্রবদি অনীগীদমক সোইবা ঙম্লি। এজেন্টকী মখোইগী মান ওয়ার্কস্পেসগী মানগীদগী মপাংদা লৈ। সেটিংদা ঙসিনো চত্থবগীদমক লিংক অমা থীরো।",
+    "loading": "সেটিংগী তালিকা লোড তৌরি",
+    "loadFailed": "সেটিংগী তালিকা লোড তৌবা ঙম্দ্রে। {message}",
+    "retry": "অসুক কোশিশ তৌরো",
+    "emptyCatalog": "ওয়ার্কস্পেস অসিদা য়েংহনবগীদমক রনটাইম সেটিং লৈদে।",
+    "changeWorkspace": "ওয়ার্কস্পেসগীদমক সোইরো",
+    "changeAgent": "এজেন্ট অমদা সোইরো",
+    "workspaceOnly": "ওয়ার্কস্পেস-অচৌবাগীদমকনো",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "এজেন্ট রনটাইম মেহুৎশিং",
+        "intro": "টর্ন অমনা কয়া ফংসন তৌবা ঙম্লিবনো: টুল কল, মতম, ফংসনগী অচৌবা অমসুং অসুক ফংবা।"
+      },
+      "behaviour-settings": {
+        "title": "ব্যবহার সেটিংশিং",
+        "intro": "জবাব করিনা অচৌরি অমসুং ক্যাশ তৌরিবনো, অনুমোদন করিনা ইন্থৌনা চত্থরিবনো, সুরক্ষা নাজাবানা করিনা ব্যবহার তৌরিবনো, অমসুং মেমোরি, বিচার অমসুং ফংসন পীবানা করিনা ফংসন তৌরিবনো।"
+      },
+      "other": {
+        "title": "অমনীবা সেটিংশিং",
+        "intro": "মখোইগী অংশ লৈদ্রবা সেটিংশিং।"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "রনটাইম সেটিংশিং",
+        "summary": "ওয়ার্কস্পেস অচৌবাগীদমক মেহুৎ, অনুমোদন, গুণ নাজাবা, সুরক্ষাগী কঠোরতা, মেমোরি অমসুং ফংসন পীবা।",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers মেহুৎ টাইমআউট টুল চরণ অসুক কোশিশ ক্যাশ মেমোরি ফংসন পীবা গুণ জজ সেটিং সংখ্যা"
+      },
+      "prompts": {
+        "title": "নির্দেশনা",
+        "summary": "প্লাটফর্মনা মডেলদা পীরিবা প্রোম্পট: প্রত্যেক য়েংরো, ওয়ার্কস্পেস নত্রবদি এজেন্ট অমগীদমক ওভারাইড তৌরো, অমসুং ফংসনগী পূর্বদৃশ্য য়েংরো।",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry প্রোম্পট নির্দেশনা সিস্টেম প্রোম্পট ওভারাইড পূর্বদৃশ্য রেজিস্ট্রি"
+      },
+      "approvals": {
+        "title": "অনুমোদন",
+        "summary": "মী অমা ঙৈবা ফংসনশিংগী লাইন, করি টুলদা অনুমোদন গনবনো মসিগী নিয়ম, অমসুং নহাক্কী ফৈসালাগী মতাংদা করি ওইরিবনো।",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation অনুমোদন য়েংদোকপা লাইন হিউম্যান ইন দ্য লুপ টুল নিয়ম মতম ফাওবা নিরন্তরতা"
+      },
+      "guardrails": {
+        "title": "গার্ডরেল",
+        "summary": "ওয়ার্কস্পেস অসিনা ওংহনবা য়েংদোকপা আর্হি, অমসুং টুল ফংসনশিংদা লাগু ওইবা বিষয়বস্তু নীতি।",
+        "keywords": "safety rules block filter policy content patterns সুরক্ষা নিয়ম ফাদোকপা ঊৎলবা নীতি বিষয়বস্তু আর্হি"
+      },
+      "turns": {
+        "title": "টর্ন পরিদর্শক",
+        "summary": "এজেন্ট টর্ন অমগী রেকর্ড তৌখ্রবা টাইমলাইন: করি খোংখিবনো, টুল করি চত্থখিবনো, চরণ প্রত্যেকদা খর্চা কয়া ওইখিবনো অমসুং মসি করিগী ঙৈখিবনো।",
+        "keywords": "turn timeline journal trace replay history steps debug টর্ন টাইমলাইন জার্নেল ট্রেস রিপ্লে ইতিহাস চরণ ডিবাগ"
+      },
+      "agentBehavior": {
+        "title": "এজেন্টকী ব্যবহার অমসুং মেহুৎশিং",
+        "summary": "এজেন্ট অমগী পেজদা: মখোইগী মেহুৎ অমসুং ব্যবহার সেটিংশিং, মান প্রত্যেক করি দগী লাকপনো অমসুং ওয়ার্কস্পেসগী মানদা রিসেট নখোইনা।",
+        "keywords": "agent override per agent behavior limits tab এজেন্ট ওভারাইড এজেন্ট প্রত্যেক ব্যবহার মেহুৎ ট্যাব"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "মসি প্রোম্পট ব্লকশিংগী মফমদা শেমখ্রে",
+    "blocksCount": "ব্লক {n}",
+    "blockDefault": "ডিফল্টকীদুনা লৈবা",
+    "blockOverride": "{scope} ওভারাইড v{version}",
+    "blockAgentConfig": "এজেন্টকী মখোইগী প্রোম্পট",
+    "blockCode": "প্লাটফর্ম কোড",
+    "blockTokens": "টোকেন ~{tokens}",
+    "blockHash": "খুৎলুপ্তগী হ্যাশ"
+  },
+  "toolApproval": {
+    "continuing": "এজেন্টনা ফংবা ইন্থৌনা চত্থরি।",
+    "continueNotStarted": "ফৈসালা অসিগী মতাংদা এজেন্ট অসি অসুক শিন্থৌদ্রে। মসি অগোয়বা চত্থহনবগীদমক খবর অমা থাগৎরো।",
+    "continueTimedOut": "এজেন্টনা ইন্থৌনা চত্থবা অচৌবা ফোকখ্রদে। ফোকখ্রবদি মখোইগী জবাব বাতচাদা য়েংগনি; নাজাবগীদমক রিলোড তৌরো।"
+  },
+  "promptDirectives": {
+    "tabRegistry": "প্রোম্পট মাপুং",
+    "tabAgentPreview": "মতাংগী প্রোম্পটকী পূর্বদৃশ্য",
+    "regTitle": "প্রোম্পট প্রত্যেক",
+    "regIntro": "মডেলগীদমক প্লাটফর্মনা ঙাকখ্রবা লিখাক মাপুং, ঙসি লাগু ওইবা খুৎলুপ্ত, মখোইগী উৎস অমসুং সংস্করণ নখোইনা। পরিধি অমা থীরো, সোইবগীদমক প্রোম্পট অমা ফিদোকরো, অমসুং মমাংগী সংস্করণ প্রত্যেক য়েংরো। সোইবা অসি আসুম্বা নুংথিল অমগী মনুংদা সার্ভর মাপুংদা ফাওরি।",
+    "regScopeLabel": "করি পরিধিদা সোইবনো",
+    "regScope_tenant": "ওয়ার্কস্পেস অসি",
+    "regScope_agent": "এজেন্ট অমা",
+    "regScope_platform": "প্লাটফর্ম অচৌবা",
+    "regAgentLabel": "এজেন্ট",
+    "regAgentPlaceholder": "এজেন্ট অমা থীরো",
+    "regAgentsFailed": "নহাক্কী এজেন্টশিং লোড তৌবা ঙম্দ্রে।",
+    "regPickAgent": "এজেন্ট অমগী প্রোম্পটশিং য়েংবগা সোইবগীদমক মসি থীরো।",
+    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regSearchLabel": "প্রোম্পট বিচার তৌরো",
+    "regSearchPlaceholder": "করি, শিরোনাম নত্রবদি বিবরণ",
+    "regRiskLabel": "ঝুঁকিগী শ্রেণী",
+    "regRiskAll": "ঝুঁকিগী শ্রেণী মাপুং",
+    "regRisk_STEERS_EVERY_TURN": "টর্ন প্রত্যেক চঙনা য়েংরি",
+    "regRisk_SECONDARY_CALL": "অনীবা মডেল কল",
+    "regRisk_USER_VISIBLE": "মীদা য়েংহনরি",
+    "regRisk_TOOL_DESCRIPTION": "টুলগী বিবরণ",
+    "regOnlyCustomised": "কাস্টমাইজ তৌখ্রবা ফংবনি",
+    "regPlatformReadOnly": "প্লাটফর্ম-অচৌবা প্রোম্পটশিং অসিদা ফংবা ঙম্লি; প্লাটফর্ম এডমিনশিংনাদাগী মখোই সোইবা ঙম্লি।",
+    "regLoadFailed": "প্রোম্পটশিং লোড তৌবা ঙম্দ্রে।",
+    "regCount": "প্রোম্পট {total}গী মনুংদগী {shown} য়েংহনরি।",
+    "regEmptyTitle": "প্রোম্পট করিসু মিলনদে",
+    "regEmptyBody": "বিচার নত্রবদি ঊৎলবা সোইরো।",
+    "regSource_DEFAULT": "ডিফল্টকীদুনা লৈবা",
+    "regSource_FALLBACK": "ডিফল্টকীদুনা লৈবা (ওভারাইড ফংদে)",
+    "regSource_PLATFORM": "প্লাটফর্ম",
+    "regSource_TENANT": "ওয়ার্কস্পেস",
+    "regSource_AGENT": "এজেন্ট",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "ফাওখ্রে",
+    "regRetiredBody": "প্রোম্পট অসিনা লিখাক করিসু থাগৎদে, অদুগা সোইবগীদমক করিসু লৈদে।",
+    "regEffectiveOff": "মেন্তল: করিসু থাগৎদে।",
+    "regEffectiveTokens": "ঙসি লাগু ওইরি, টোকেন আসুম্বা {tokens}।",
+    "regEffectiveLabel": "{title}গীদমক লাগু ওইবা খুৎলুপ্ত",
+    "regOpenEditor": "{title} সোইরো",
+    "regCloseEditor": "{title} মেন্তলরো",
+    "regEditingOverride": "{scope} সংস্করণ সোইরি, ঙসি v{version}।",
+    "regEditingNone": "ঙসিগা {scope} সংস্করণ লৈদে। মসি মসিগী মমাংগী খুৎলুপ্তগীদগী ইন্থৌরি: {below}।",
+    "regPlaceholders": "রনটাইমদা পুরি:",
+    "regRequired": "(গনি)",
+    "regProblemsTitle": "সেভ তৌবগী মমাংদা মসি ফজহনরো",
+    "regReasonLabel": "সোইবগী মরম (ইতিহাসদা থম্মি)",
+    "regReasonPlaceholder": "ঙম্লে",
+    "regConflict": "নহাক্না সম্পাদনা তৌরিবগী মতমদা মী অমনা প্রোম্পট অসি সোইখ্রে। মহাক্কী সংস্করণ য়েংবগীদমক মসি মেন্তলনা অসুক ফিদোকরো, মতাংদা অসুক কোশিশ তৌরো।",
+    "regRevert": "{to}দা ঊৎলকরো",
+    "regShowHistory": "ইতিহাস",
+    "regHideHistory": "ইতিহাস ওয়ায়রো",
+    "regHistoryLoading": "ইতিহাস লোড তৌরি…",
+    "regHistoryFailed": "ইতিহাস লোড তৌবা ঙম্দ্রে।",
+    "regHistoryEmpty": "পরিধি অসিদা ঙসিগা সংস্করণ লৈদে।",
+    "regVersion": "সংস্করণ {version}",
+    "regAction_CREATE": "শেমখ্রে",
+    "regAction_UPDATE": "সোইখ্রে",
+    "regAction_REVERT": "ঊৎলকহনখ্রে",
+    "regAction_MIGRATE": "সোইনা চত্থ্রে",
+    "regCurrent": "ঙসিগী",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "খংদ্রবা",
+    "regReason": "মরম: {reason}",
+    "regShowDiff": "সংস্করণ {version}গী সোইবা য়েংহনরো",
+    "regHideDiff": "সংস্করণ {version}গী সোইবা ওয়ায়রো",
+    "regDiffLabel": "সংস্করণ {version}না তৌখ্রবা সোইবা",
+    "regNoDiff": "সংস্করণ অসিদা লিখাক করিসু সোইদ্রে।",
+    "regRestore": "সংস্করণ {version} অসুক থমরো",
+    "regRestoreReason": "সংস্করণ {version}গী খুৎলুপ্ত অসুক থমখ্রে",
+    "regRestoreFailed": "সংস্করণ অদু অসুক থমবা ঙম্দ্রে।",
+    "regRestoreAck": "ঐনা খংলি {title}গী সংস্করণ অমা অসুক থমবদি সুরক্ষা অকম্বা ওইবা ঙম্লিবনো।",
+    "regPreviewTitle": "মতাংগী প্রোম্পটকী পূর্বদৃশ্য",
+    "regPreviewIntro": "মডেলদা কল তৌদ্রনা, টর্ন অমনা তৌগদবগুম্না এজেন্টকী মরম অসেংবা সিস্টেম প্রোম্পট অমসুং টুল তালিকা শেমরি। ব্লক প্রত্যেকনা প্রোম্পট অসি করিনো, মসিগী পরিধি, অমসুং মসিগী খুৎলুপ্ত করি সংস্করণগীদগী লাকপনো য়েংহনরি।",
+    "regPreviewMessageLabel": "নমুনা ব্যবহারকারীগী খবর (ঙম্লে)",
+    "regPreviewMessagePlaceholder": "মরম অসেংবা খবরগুম্না টুল অমসুং ঈশিনখ্রবা মেমোরি থীবগীদমক ব্যবহার তৌরি।",
+    "regPreviewSmallModel": "অনৌবা মডেলগীদমক পূর্বদৃশ্য",
+    "regPreviewBuild": "পূর্বদৃশ্য শেমরো",
+    "regPreviewBuilding": "শেমরি…",
+    "regPreviewFailed": "পূর্বদৃশ্য শেমবা ঙম্দ্রে।",
+    "regPreviewTotals": "সিস্টেম লিখাকগীদমক টোকেন ~{prompt} অমসুং টুল সংজ্ঞাগীদমক টোকেন {tools} (অনুমান)।",
+    "regPreviewOverBudgetTitle": "টোকেন বাজেটগীদগী অপুনবা",
+    "regPreviewOverBudget": "অশেংবা সিস্টেম লিখাক কনফিগার তৌখ্রবা টোকেন {budget}গী বাজেটগীদগী অপুনবনি। করিসু চেক্লদ্রে; প্রোম্পট অমা অনৌবা তৌবা ঈশিনরো।",
+    "regPreviewMessageHeading": "খবর: {message}",
+    "regPreviewTokens": "টোকেন ~{tokens}",
+    "regPreviewTools": "টুল ({count})",
+    "regPreviewNoTools": "এজেন্ট অসিনা টুল করিসু পীদে।",
+    "regPreviewNotes": "পূর্বদৃশ্য অসিনা ফংদ্রবা",
+    "regOriginDefault": "ডিফল্টকীদুনা লৈবা",
+    "regOriginOverride": "{scope} ওভারাইড v{version}",
+    "regOriginAgentConfig": "এজেন্টকী মখোইগী সিস্টেম প্রোম্পট",
+    "regOriginCode": "প্লাটফর্ম কোড"
   }
 }

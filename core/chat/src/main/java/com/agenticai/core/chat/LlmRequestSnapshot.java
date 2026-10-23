@@ -10,10 +10,10 @@ import java.util.Map;
  * every directive, memory block, skill block and governance rewrite. Powers the
  * "What was sent" inspector in the playground and the workflow run viewer.
  *
- * <p>Held in memory only ({@link LlmRequestSnapshotStore}), tenant-scoped, text
- * redacted for secret shapes and size-capped. {@code totalChars} is the size of the
- * (capped) text shown; {@code fullTotalChars} is the real size sent, including tool-call and
- * tool-result payloads. Never persisted and never logged:
+ * <p>Held in {@link LlmRequestSnapshotStore}: in memory and, with {@code app.llm.request-snapshot-store.mode=redis},
+ * in Redis for the same time-to-live, tenant-scoped, text redacted for secret shapes and size-capped.
+ * {@code totalChars} is the size of the (capped) text shown; {@code fullTotalChars} is the real size sent,
+ * including tool-call and tool-result payloads. Never written to a database and never logged:
  * {@code spring.ai.chat.observations.log-prompt} stays false on purpose.
  */
 public record LlmRequestSnapshot(
@@ -64,10 +64,26 @@ public record LlmRequestSnapshot(
             context, totalChars, truncated, toolSchemaChars, prefixChars, prefixTokensEstimate, tokens, fullTotalChars);
     }
 
-    /** One prompt message. {@code role} is system | user | assistant | tool. */
-    public record Message(String role, String text, int chars, List<String> toolCalls, int mediaCount, int payloadChars) {
+    /**
+     * One prompt message. {@code role} is system | user | assistant | tool. {@code blocks} says where the parts
+     * of a system message came from (prompt-registry key, scope, version); empty for the other roles and when
+     * nothing could be matched.
+     */
+    public record Message(
+        String role, String text, int chars, List<String> toolCalls, int mediaCount, int payloadChars,
+        List<PromptBlockTag> blocks
+    ) {
+        public Message {
+            blocks = blocks == null ? List.of() : List.copyOf(blocks);
+        }
+
+        /** Pre-provenance constructor. */
+        public Message(String role, String text, int chars, List<String> toolCalls, int mediaCount, int payloadChars) {
+            this(role, text, chars, toolCalls, mediaCount, payloadChars, List.of());
+        }
+
         public Message(String role, String text, int chars, List<String> toolCalls, int mediaCount) {
-            this(role, text, chars, toolCalls, mediaCount, chars);
+            this(role, text, chars, toolCalls, mediaCount, chars, List.of());
         }
     }
 

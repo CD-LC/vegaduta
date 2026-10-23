@@ -1,13 +1,12 @@
 package com.agenticai.core.agents.memory;
 
+import com.agenticai.core.agents.auxiliary.AuxiliaryModelResolver;
+import com.agenticai.core.agents.auxiliary.AuxiliaryPurpose;
 import com.agenticai.core.agents.hosted.FreeTierChatClientService;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
-import com.agenticai.core.providers.ProviderCredentialResolver;
-import com.agenticai.core.providers.ProviderModelCatalogEmptyException;
-import com.agenticai.core.providers.ProviderModelCatalogService;
-import com.agenticai.core.providers.ProviderModelResponse;
-import com.agenticai.core.providers.ProviderName;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
@@ -17,12 +16,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -113,33 +114,21 @@ public class SessionSummaryService {
         FOLD_EXECUTOR.shutdown();
     }
 
-    private static final String SUMMARY_SYSTEM_PROMPT =
-            """
-        You maintain a running summary of a long conversation between a user and an AI assistant.
-        The oldest turns are being dropped to keep the conversation within its memory budget, and
-        your summary is the only thing that will survive to represent them.
+    /** Registry key of the rolling-summary system prompt (default text: {@code prompts/en/summarizer.session.md}). */
+    static final String PROMPT_KEY = "summarizer.session";
 
-        You will be given the existing running summary (if any) and the turns being dropped.
-        Produce ONE updated running summary that merges them.
+    private final PromptSlot prompts = new PromptSlot();
 
-        Rules:
-        - Preserve durable facts: who the user is, what they are working on, stated goals,
-          constraints, preferences, decisions already made, identifiers, names, numbers, and
-          anything the assistant promised or committed to.
-        - Preserve unresolved threads - open questions, pending steps, things left half-done.
-        - Drop pleasantries, restatements, and anything already superseded by a later turn.
-        - Never invent anything that is not in the material you were given.
-        - Write plain prose or short bullets in the third person ("the user ...", "the assistant ...").
+    /** The prompt registry, so a tenant or agent override of {@link #PROMPT_KEY} applies; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
-        Respond with ONLY the updated summary text - no preamble, no headings, no markdown fences.
-        """;
-
-    private final ProviderCredentialResolver credentialResolver;
+    private final AuxiliaryModelResolver auxiliaryModels;
     private final LlmGatewayService llmGatewayService;
-    private final ProviderModelCatalogService providerModelCatalogService;
     private final TenantLimits tenantLimits;
     private final FreeTierChatClientService freeTierChatClientService;
-    private final String defaultModel;
     private final boolean enabled;
     private final int maxTokens;
     private final int maxSummaryChars;
@@ -147,23 +136,19 @@ public class SessionSummaryService {
     private final int maxPromptChars;
 
     public SessionSummaryService(
-            ProviderCredentialResolver credentialResolver,
+            AuxiliaryModelResolver auxiliaryModels,
             LlmGatewayService llmGatewayService,
-            ProviderModelCatalogService providerModelCatalogService,
             TenantLimits tenantLimits,
             FreeTierChatClientService freeTierChatClientService,
-            @Value("${app.agents.default-model}") String defaultModel,
             @Value("${app.chat.history-summary-enabled:true}") boolean enabled,
             @Value("${app.chat.history-summary-max-tokens:600}") int maxTokens,
             @Value("${app.chat.history-summary-max-chars:4000}") int maxSummaryChars,
             @Value("${app.chat.history-summary-turn-excerpt-chars:800}") int maxTurnExcerptChars,
             @Value("${app.chat.history-summary-max-prompt-chars:24000}") int maxPromptChars) {
-        this.credentialResolver = credentialResolver;
+        this.auxiliaryModels = auxiliaryModels;
         this.llmGatewayService = llmGatewayService;
-        this.providerModelCatalogService = providerModelCatalogService;
         this.tenantLimits = tenantLimits;
         this.freeTierChatClientService = freeTierChatClientService;
-        this.defaultModel = defaultModel;
         this.enabled = enabled;
         this.maxTokens = maxTokens;
         this.maxSummaryChars = maxSummaryChars;
@@ -217,6 +202,23 @@ public class SessionSummaryService {
             String existingSummary,
             List<ChatTurn> evictedTurns,
             Consumer<String> persist) {
+        foldAsync(sessionId, null, tenantSnapshot, existingSummary, evictedTurns, persist);
+    }
+
+    /**
+     * As {@link #foldAsync(String, Optional, String, List, Consumer)}, for a session whose agent is known: with
+     * no model chosen in configuration or by the tenant, the summary is written by that agent's own provider and
+     * model ({@link AuxiliaryModelResolver}). Without an agent it is the provider's catalog default model.
+     *
+     * @param agentId the agent the session belongs to; may be null
+     */
+    public void foldAsync(
+            String sessionId,
+            UUID agentId,
+            Optional<TenantContext> tenantSnapshot,
+            String existingSummary,
+            List<ChatTurn> evictedTurns,
+            Consumer<String> persist) {
         if (!enabled || persist == null || evictedTurns == null || evictedTurns.isEmpty()) {
             return;
         }
@@ -242,7 +244,7 @@ public class SessionSummaryService {
                 tenant.wrapRunnable(
                         () -> {
                             try {
-                                fold(sessionId, existingSummary, turns, persist);
+                                fold(sessionId, agentId, existingSummary, turns, persist);
                             } catch (Exception e) {
                                 // Exception, not RuntimeException - the same breadth
                                 // LlmQualityJudgeService#sampleAsync catches, because a
@@ -262,14 +264,15 @@ public class SessionSummaryService {
 
     private void fold(
             String sessionId,
+            UUID agentId,
             String existingSummary,
             List<ChatTurn> turns,
             Consumer<String> persist) {
-        ChatClient chatClient = buildChatClient();
+        ChatClient chatClient = buildChatClient(agentId);
         String folded =
                 chatClient
                         .prompt()
-                        .system(SUMMARY_SYSTEM_PROMPT)
+                        .system(prompts.text(PROMPT_KEY, agentId))
                         .user(buildFoldPrompt(existingSummary, turns))
                         .call()
                         .content();
@@ -354,10 +357,11 @@ public class SessionSummaryService {
     }
 
     /**
-     * Copy of {@code AssistService#buildChatClient} — platform-pool tenants (the default for every
-     * tenant, via {@code TenantLimits#usesPlatformPool}) through the platform-hosted pool,
-     * explicit-BYOK tenants through their own credential — see the class javadoc for why this is
-     * duplicated rather than shared.
+     * Platform-pool tenants (the default for every tenant, via {@code TenantLimits#usesPlatformPool}) through the
+     * platform-hosted pool, explicit-BYOK tenants through their own credential on the model {@link
+     * AuxiliaryModelResolver} chooses for the session summary (the tenant's preference, {@code
+     * app.auxiliary-model.session-summary.*}, the agent's own model, the provider's catalog default; never the
+     * first alphabetical catalog entry, which is what this used to take).
      *
      * <p>{@code temperature 0.0} and a small {@code maxTokens}: a rolling summary is an extraction
      * task, not a creative one, and the same numbers {@code JudgeChatClientFactory} uses for the
@@ -372,40 +376,24 @@ public class SessionSummaryService {
      * quota is already exhausted the limiter throws, the fold is caught and logged, and eviction
      * degrades to today's behaviour.
      */
-    private ChatClient buildChatClient() {
+    private ChatClient buildChatClient(UUID agentId) {
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
         TenantPlan plan = tenantId != null ? tenantLimits.plan(tenantId) : null;
         if (tenantLimits.usesPlatformPool(tenantId, plan)) {
             return freeTierChatClientService.buildClientForFreeTenant(
                     tenantId, plan, maxTokens, 0.0, 1.0);
         }
-        ProviderCredentialResolver.ActiveProvider active = credentialResolver.resolveAnyActiveKey();
+        AuxiliaryModelResolver.Selection model =
+                auxiliaryModels.select(AuxiliaryPurpose.SESSION_SUMMARY, agentId, false);
         return llmGatewayService.resolveClient(
                 tenantId,
                 new GatewayCallSpec(
-                        active.providerName(),
-                        active.apiKey(),
-                        resolveModelFor(active.providerName()),
+                        model.provider(),
+                        model.apiKey(),
+                        model.model(),
                         maxTokens,
                         0.0,
-                        1.0));
-    }
-
-    /**
-     * Same model-selection fix {@code AssistService#resolveModelFor} carries: {@code
-     * app.agents.default-model} is an Anthropic model id, and passing it to whichever provider
-     * happens to hold the active BYOK credential produced a 404 "model not found" at the gateway.
-     * Look the model up in the provider's own catalog; only fall back to the configured default
-     * when the catalog is unexpectedly empty AND the provider is actually Anthropic.
-     */
-    private String resolveModelFor(ProviderName provider) {
-        List<ProviderModelResponse> models = providerModelCatalogService.listModels(provider);
-        if (!models.isEmpty()) {
-            return models.get(0).modelId();
-        }
-        if (provider == ProviderName.ANTHROPIC) {
-            return defaultModel;
-        }
-        throw new ProviderModelCatalogEmptyException(provider);
+                        1.0,
+                        AuxiliaryPurpose.SESSION_SUMMARY.featureKey()));
     }
 }

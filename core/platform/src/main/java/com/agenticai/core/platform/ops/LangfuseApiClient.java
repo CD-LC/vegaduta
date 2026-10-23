@@ -93,7 +93,7 @@ public class LangfuseApiClient {
     @Autowired
     public LangfuseApiClient(
         @Value("${app.langfuse.base-url:}") String explicitBaseUrl,
-        @Value("${management.otlp.tracing.endpoint:}") String otlpTracesEndpoint,
+        @Value("${management.otlp.tracing.endpoint:http://langfuse-web:3000/api/public/otel/v1/traces}") String otlpTracesEndpoint,
         @Value("${app.langfuse.auth-header:${LANGFUSE_OTEL_AUTH_HEADER:}}") String authHeader
     ) {
         this(LangfuseEndpoints.baseUrl(explicitBaseUrl, otlpTracesEndpoint), authHeader, defaultTransport(),

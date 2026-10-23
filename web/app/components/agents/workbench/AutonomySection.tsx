@@ -9,6 +9,7 @@ import AgentHooksCard from "../AgentHooksCard";
 import AgentSafetyControls from "../AgentSafetyControls";
 import AgentSkillsCard from "../AgentSkillsCard";
 import AgentSpecialistsCard from "../AgentSpecialistsCard";
+import { BEHAVIOR_ANCHORS } from "../AgentWorkbench/behaviorModel";
 import { useWorkbench } from "./context";
 import { WorkbenchSection } from "./WorkbenchSection";
 
@@ -41,6 +42,7 @@ export default function AutonomySection() {
         />
       ) : (
         <WorkbenchSection
+          anchorId={BEHAVIOR_ANCHORS.autonomy}
           icon={<ShieldCheck size={13} />}
           label="Reasoning & autonomy"
           cat="var(--cat-analysis)"

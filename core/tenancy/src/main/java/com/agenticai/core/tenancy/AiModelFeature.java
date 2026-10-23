@@ -46,7 +46,18 @@ public enum AiModelFeature {
 
     MCP_SELF_HEAL("mcp-self-heal", "MCP connection self-heal"),
 
-    EVAL_JUDGE("eval-judge", "Evals / LLM-as-judge");
+    EVAL_JUDGE("eval-judge", "Evals / LLM-as-judge"),
+
+    /**
+     * The summary that folds the older turns of a long prompt into one (context compaction). Read by {@code
+     * AuxiliaryModelResolver} (core/agents-turn), whose first choice for the background call is this row; with none it
+     * falls through to the platform's {@code app.auxiliary-model.compaction.*}, the agent's own model and the provider
+     * default.
+     */
+    COMPACTION("compaction", "Context compaction (long-conversation summaries)"),
+
+    /** The rolling summary of turns that left a session's replay window; read by {@code AuxiliaryModelResolver} like {@link #COMPACTION}. */
+    SESSION_SUMMARY("session-summary", "Session summary (older turns of a conversation)");
 
     private final String key;
     private final String label;

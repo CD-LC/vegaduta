@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.tools;
 
+import com.agenticai.core.guardrails.TurnApprovalState;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
@@ -69,15 +70,31 @@ final class StepEventToolCallback implements ToolCallback {
      */
     private final McpAppStepHook appHook;
 
+    /**
+     * Nullable: the turn's approval state. When a call of this tool was recorded as a pending approval,
+     * an {@code approval_required} event follows its {@code tool_result} (see {@link
+     * TurnLifecycleStepEvents}). Null leaves the stream as it was.
+     */
+    private final TurnApprovalState approval;
+
     StepEventToolCallback(ToolCallback delegate, AgentStepEventEmitter emitter) {
         this(delegate, emitter, null);
     }
 
     StepEventToolCallback(
             ToolCallback delegate, AgentStepEventEmitter emitter, McpAppStepHook appHook) {
+        this(delegate, emitter, appHook, null);
+    }
+
+    StepEventToolCallback(
+            ToolCallback delegate,
+            AgentStepEventEmitter emitter,
+            McpAppStepHook appHook,
+            TurnApprovalState approval) {
         this.delegate = delegate;
         this.emitter = emitter;
         this.appHook = appHook;
+        this.approval = approval;
     }
 
     @Override
@@ -111,6 +128,7 @@ final class StepEventToolCallback implements ToolCallback {
                     output,
                     elapsedMillis(startedAt),
                     appPointer(toolName, toolInput, output));
+            announceApprovalHold(toolName, toolInput);
             return output;
         } catch (RuntimeException e) {
             // Rethrown untouched - see the class javadoc's transparency note.
@@ -122,6 +140,25 @@ final class StepEventToolCallback implements ToolCallback {
                             : e.getClass().getSimpleName();
             emitter.toolError(stepId, toolName, detail, elapsedMillis(startedAt));
             throw e;
+        }
+    }
+
+    /**
+     * Tells the client that this call is now waiting for a person: the turn's approval state holds a
+     * pending request for exactly this call. After the {@code tool_result} (the model's "waiting for
+     * approval" text), so a client that closes the wait on a later result keeps it open. Never throws.
+     */
+    private void announceApprovalHold(String toolName, String toolInput) {
+        if (approval == null) {
+            return;
+        }
+        try {
+            String requestId = approval.requestIdFor(toolName, toolInput);
+            if (requestId != null) {
+                TurnLifecycleStepEvents.on(emitter).approvalRequired(toolName, requestId);
+            }
+        } catch (RuntimeException e) {
+            // A trace never fails a turn.
         }
     }
 

@@ -13,6 +13,9 @@
 # names other tranche areas read are in the first block):
 #   - auth: local accounts in core instead of Keycloak (app.auth.mode)
 #   - agent taint tracking enforced, not just observed (app.agents.taint.mode)
+#   - agent hooks, tool argument policies and skill supply-chain enforcement OFF where the base profile has them on
+#     (app.agent-hooks.enabled, app.tool-arg-policies.enabled, app.skills.supply-chain.enforce)
+#   (context compaction and the job step journal are on in the base profile too, so they are inherited, not set here)
 #   - STDIO MCP servers run under an OS sandbox (app.mcp.stdio.sandbox)
 #   - skills learning on (app.skills.learning.enabled)
 #   - learning proposals on (app.learning.proposals.enabled): the assistant proposes, you approve
@@ -85,6 +88,17 @@ app:
       # A drafted skill is replayed against its own turn before it is queued; a FAIL is dropped.
       self-check:
         enabled: ${APP_SKILLS_LEARNING_SELF_CHECK_ENABLED:true}
+    supply-chain:
+      # The base profile withholds a changed or unapproved high-risk custom skill until an admin re-approves it
+      # (since 2026-10-23). Here the one person is also the author and the approver, and skill learning drafts
+      # skills continuously, so the scan and the pins stay on (app.skills.supply-chain.enabled) but nothing is withheld.
+      enforce: ${SKILLS_SUPPLY_CHAIN_ENFORCE:false}
+  # The base profile ships agent hooks and tool argument policies ON (2026-10-23): they do nothing until someone
+  # defines one. Nobody on a personal install authors either, so they stay off here (saving one answers 409).
+  agent-hooks:
+    enabled: ${AGENT_HOOKS_ENABLED:false}
+  tool-arg-policies:
+    enabled: ${TOOL_ARG_POLICIES_ENABLED:false}
   learning:
     proposals:
       # What the assistant proposes to learn (lessons, preferences, routines) waits here for approval.
@@ -171,6 +185,12 @@ app:
     # shared-server cap (15) stopped it mid-way. Commands still each need an approval unless
     # APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED=false (this profile's default) lifts the pin.
     max-tool-calls-per-turn: ${GUARDRAILS_MAX_TOOL_CALLS_PER_TURN:150}
+    # One person who is also the approver: a SUPERVISED agent no longer stops for a search or a lookup (every read-only
+    # prompt was the main reason a task felt stalled). Only tools with an explicit read-only classification qualify;
+    # writes, sends, unclassified tools and an agent that holds the lethal trifecta are still gated. The base value is
+    # true (gate every call).
+    supervised:
+      gate-read-only: ${APP_GUARDRAILS_SUPERVISED_GATE_READ_ONLY:false}
   omnichannel:
     rate-limit:
       # Off everywhere else (opt-in); a personal install is a new surface with strangers

@@ -458,6 +458,85 @@ free rows) still reserves tokens and dollars up front and refunds the zero-cost 
 `ANTHROPIC_API_KEY` is read only by the evaluation runner (`core/quality`, `eval-harness.md`) and by
 optional services (app builder, RL trainer), not by core's chat path.
 
+### Provider endpoints, model defaults, retrieval and learning tuning
+
+Work package 3d-2. These values were constants in the code; each is now a typed property (a class in the module
+named in the first column) with the same default in `application.yml`, so an unset key behaves as before.
+`ModelRetrievalLearningDefaultsTest` (core/app) binds the real `application.yml` and checks it equals the code defaults.
+
+**Vendor endpoints** (`ProviderEndpoints`, core/providers). One base URL per vendor, read by the key validators, the
+live model-list fetcher, the model catalog's OpenRouter fetch and the hosted pool's "pick a provider, paste a key" flow.
+Point a vendor at a corporate proxy, a regional endpoint or a mock server with one key. The value must be an `http(s)` URL
+(anything else fails startup); a blank value falls back to the default; a trailing slash is removed. Write the base URL the
+way the vendor's chat-completions client appends `/v1/chat/completions` (Groq `https://api.groq.com/openai`, OpenRouter
+`https://openrouter.ai/api`), never with a trailing `/v1`. The chat-client factories in `core/chat` still carry their own
+literal and are not yet switched to `ProviderEndpoints.baseUrl(...)` (listed in the change log entry for this change).
+
+| Property | Env | Default |
+|---|---|---|
+| `app.llm.endpoints.anthropic.base-url` | `APP_LLM_ENDPOINTS_ANTHROPIC_BASE_URL` | `https://api.anthropic.com` |
+| `app.llm.endpoints.openai.base-url` | `APP_LLM_ENDPOINTS_OPENAI_BASE_URL` | `https://api.openai.com` |
+| `app.llm.endpoints.grok.base-url` | `APP_LLM_ENDPOINTS_GROK_BASE_URL` | `https://api.x.ai` |
+| `app.llm.endpoints.gemini.base-url` | `APP_LLM_ENDPOINTS_GEMINI_BASE_URL` | `https://generativelanguage.googleapis.com` |
+| `app.llm.endpoints.mistral.base-url` | `APP_LLM_ENDPOINTS_MISTRAL_BASE_URL` | `https://api.mistral.ai` |
+| `app.llm.endpoints.deepseek.base-url` | `APP_LLM_ENDPOINTS_DEEPSEEK_BASE_URL` | `https://api.deepseek.com` |
+| `app.llm.endpoints.groq.base-url` | `APP_LLM_ENDPOINTS_GROQ_BASE_URL` | `https://api.groq.com/openai` |
+| `app.llm.endpoints.meta.base-url` | `APP_LLM_ENDPOINTS_META_BASE_URL` | `https://api.meta.ai` |
+| `app.llm.endpoints.openrouter.base-url` | `APP_LLM_ENDPOINTS_OPENROUTER_BASE_URL` | `https://openrouter.ai/api` |
+| `app.llm.endpoints.sarvam.base-url` | `APP_LLM_ENDPOINTS_SARVAM_BASE_URL` | `https://api.sarvam.ai` |
+| `app.llm.endpoints.<vendor>.models-path` | (none) | `/v1/models` (Gemini `/v1beta/models`) |
+| `app.llm.endpoints.gemini.completions-path` | (none) | `/v1beta/openai/chat/completions` (hosted-pool default; other vendors use `/v1/chat/completions`) |
+| `app.llm.endpoints.grok-language-models-path` | (none) | `/v1/language-models` |
+| `app.llm.endpoints.openrouter-auth-key-path` | (none) | `/v1/auth/key` |
+
+**Model defaults** (`ProviderModelDefaultsProperties`, core/providers). The maps are merged with the built-ins
+(set one key to change one entry; a blank value withdraws it). A key with a dot is written `"[grok-4.20]": ...` in YAML.
+
+| Property | Default | Was |
+|---|---|---|
+| `app.models.defaults.<provider>` | anthropic `claude-haiku-4-5-20251001`, openai `gpt-4o-mini`, gemini `gemini-2.5-flash`, grok `grok-4-1-fast-non-reasoning`, sarvam `sarvam-30b`, mistral `mistral-small-latest`, deepseek `deepseek-v4-flash`, groq `llama-3.1-8b-instant`, meta `muse-spark-1.3`, ollama `qwen3.5:4b` | `ProviderModelCatalogService.PREFERRED_DEFAULT_MODELS` |
+| `app.models.retired.<model-id>` | `grok-3` to `grok-4.3`, `grok-3-mini` to `grok-4.20-0309-non-reasoning`, `grok-4` to `grok-4.5`, `grok-4-fast` to `grok-4.3`, `deepseek-chat` to `deepseek-v4-flash`, `deepseek-reasoner` to `deepseek-v4-pro`, `gemma2-9b-it` to `llama-3.1-8b-instant` | `ProviderModelCatalogService.RETIRED_MODEL_REPLACEMENTS` |
+| `app.models.context-windows.<model-id>` | empty (the catalog value stands) | new: replaces the catalog's window for that model in the model list |
+| `app.models.default-preference-keywords` | `flash-lite,flash,mini,haiku,lite,8b,instant,non-reasoning` | `ProviderModelCatalogService.DEFAULT_MODEL_PREFERENCE_KEYWORDS` |
+| `app.models.hosted-pool-auto-keywords` | `flash-lite,flash,mini,haiku,lite,8b,instant` | `HostedPoolRequestResolver.AUTO_MODEL_PREFERENCE_KEYWORDS` |
+
+**Knowledge retrieval pool** (`KnowledgeSearchProperties`, core/knowledge). How many chunks a search returns is the caller's
+top-k (the agent's retrieval setting). The pool is `min(candidate-pool-max, max(candidate-pool-min, top-k * candidate-pool-multiplier))`.
+
+| Property | Env | Default | Was |
+|---|---|---|---|
+| `app.knowledge.search.rrf-k` | `APP_KNOWLEDGE_SEARCH_RRF_K` | `60` | `KnowledgeSearchService.RRF_K` |
+| `app.knowledge.search.candidate-pool-min` | `APP_KNOWLEDGE_SEARCH_CANDIDATE_POOL_MIN` | `20` | `MIN_CANDIDATE_POOL` |
+| `app.knowledge.search.candidate-pool-max` | `APP_KNOWLEDGE_SEARCH_CANDIDATE_POOL_MAX` | `50` | `MAX_CANDIDATE_POOL` |
+| `app.knowledge.search.candidate-pool-multiplier` | `APP_KNOWLEDGE_SEARCH_CANDIDATE_POOL_MULTIPLIER` | `4` | `CANDIDATE_POOL_MULTIPLIER` |
+
+**Graph memory limits** (`GraphMemoryProperties`, core/graphmemory; only with the `graph-memory` profile).
+
+| Property | Env | Default | Was |
+|---|---|---|---|
+| `app.graph-memory.recall.max-facts` | `GRAPH_MEMORY_RECALL_MAX_FACTS` | `20` | `GraphMemoryService.MAX_RECALL_FACTS` |
+| `app.graph-memory.recall.max-paths` | `GRAPH_MEMORY_RECALL_MAX_PATHS` | `200` | `GraphMemoryService.MAX_RECALL_PATHS` |
+| `app.graph-memory.arbitration.max-context-facts` | `GRAPH_MEMORY_ARBITRATION_MAX_CONTEXT_FACTS` | `30` | `MemoryWriteArbitrationService.MAX_CONTEXT_FACTS` |
+| `app.graph-memory.forget.scan-page` | `GRAPH_MEMORY_FORGET_SCAN_PAGE` | `500` | `GraphMemoryService.FORGET_SCAN_PAGE` |
+| `app.graph-memory.forget.scan-max-pages` | `GRAPH_MEMORY_FORGET_SCAN_MAX_PAGES` | `20` | `GraphMemoryService.FORGET_SCAN_MAX_PAGES` |
+
+**Reinforcement learning** (`RlPolicyProperties`, `RlRewardProperties`, `RlFeedbackProperties`, core/rl). The `rl.policy.*` and
+`rl.reward.*` keys were bound but absent from `application.yml` (the module table below lists them with empty defaults); their
+effective defaults are the ones in this table and now in the yml. Seeding keys apply when a policy is created; existing policies keep their rows.
+
+| Property | Default | Was |
+|---|---|---|
+| `rl.policy.default-exploration-rate` | `0.1` | `PolicyStore.DEFAULT_EXPLORATION_RATE` |
+| `rl.policy.reasoning-depth-arms` | `FAST,CAREFUL,RIGOROUS` | arms hardcoded in `PolicyStore.ensureDefaultArms` |
+| `rl.policy.gen-param-presets.<name>.temperature` / `.top-p` | `PRECISE 0.2/0.8`, `BALANCED 0.7/0.9`, `CREATIVE 1.0/0.95` (a configured set replaces all three) | arms hardcoded in `PolicyStore.ensureDefaultArms` |
+| `rl.policy.ucb1-exploration-constant` | `2.0` | literal `2.0` in `ContextualBanditService.selectByUcb1` |
+| `rl.reward.clip-min` / `clip-max` / `safety-veto-cap` | `0.0` / `1.0` / `0.1` | unchanged (now also in the yml) |
+| `rl.reward.human-weight` / `judge-weight` / `task-success-weight` / `cost-weight` / `latency-weight` | `1.0` / `0.6` / `1.0` / `0.2` / `0.2` | unchanged (now also in the yml) |
+| `rl.feedback.thumbs-up-reward` / `thumbs-down-reward` | `1.0` / `0.0` | `FeedbackService.signalToReward` |
+| `rl.feedback.resolved-reward` / `unresolved-reward` / `edit-reward` | `1.0` / `0.0` / `0.0` | `FeedbackService.signalToReward` |
+| `rl.feedback.default-rating` | `3` (stars assumed for a rating signal without one) | literal in `FeedbackService` |
+| `rl.feedback.export-desirable-min-rating` / `export-undesirable-max-rating` | `4` / `2` | `RlExportService.RATING_DESIRABLE_MIN` / `RATING_UNDESIRABLE_MAX` |
+
 ## Feature flags for optional services
 
 | Env | Default | Enables | Also set |
@@ -514,7 +593,6 @@ passed through by `deploy/compose/docker-compose.yml` (set them in
 | `APP_MCPSERVER_ASYNC_TASKS_ENABLED` | MCP async tasks on the platform MCP server | |
 | `MCP_OAUTH_ENABLED` | generic MCP OAuth (RFC 9728/8414/7591 + PKCE), API only; see `docs/architecture/ADR-mcp-generic-oauth.md`. `MCP_OAUTH_STORE` (`memory`/`redis`, default `memory`) chooses where the single-use state set, the token cache and the refresh single-flight live — `redis` is required when the API runs more than one replica (replica-strict boot refuses otherwise; the Helm chart sets it via `core.replicaReadiness.mcpOAuthStoreRedis`) | `MCP_OAUTH_REDIRECT_URI` |
 | `APP_MCP_REGISTRY_ROUTE_TOOL_CALLS` | route stdio MCP tool calls to the owning replica over Redis | Redis with auth/TLS |
-| `AGENT_JOB_STEP_JOURNAL_ENABLED` | durable step journal for resumable agent jobs (`AGENT_JOB_RESUME_FROM_JOURNAL`, `AGENT_JOB_RESUME_RERUN_INCOMPLETE_TURN`, `AGENT_JOB_STEP_JOURNAL_RETENTION_DAYS`) | |
 | `CHAT_ESCALATION_ENABLED` | verifier-escalated model routing; `CHAT_ESCALATION_KILL_SWITCH` wins | |
 | `SWARM_VERIFIER_ENABLED` | goal verifier for `delegate_parallel` swarms | |
 | `CODING_HARNESS_ENABLED` | limits for the coding-agent harness (stage 0, nothing reads them yet) | |
@@ -564,12 +642,9 @@ Same conventions as above (Spring property shown as its env name, defaults in
 
 | Env | Enables |
 |---|---|
-| `AGENT_HOOKS_ENABLED` | declarative agent lifecycle hooks in the tool guard chain and the chat turn |
-| `TOOL_ARG_POLICIES_ENABLED` | per-agent tool argument policies, evaluated before a tool runs |
 | `TOOL_SEARCH_ENABLED` | on-demand tool loading through `search_tools` / `call_tool` |
 | `TOOL_MCP_ANNOTATIONS_ENABLED` | classify MCP tools from their safety annotations |
 | `TOOL_HTTP_REQUEST_SAFE_MODE` | `http_request` safe mode: https only, allow-lists, named credentials, gated writes |
-| `APP_CONTEXT_COMPACTION_ENABLED` | context budget planner and compaction in the chat turn (`restore_tool_result` stays on with it) |
 | `APP_CHAT_RESUMABLE_STREAMS_ENABLED` (Helm: `core.resumableStreamsEnabled`) | chat streams that resume after a drop, sleep, refresh or navigation. `APP_CHAT_RESUMABLE_STREAMS_STORE=redis` (set by the chart for 2+ replicas) has no effect while this is off |
 | `APP_CHAT_BRANCHING_ENABLED` (Helm: `core.branchingEnabled`) | keep chat history: each message is stored in Postgres for `app.chat.branching.retention-days` (30) instead of expiring from Redis after 24 h; edit, regenerate and switch between conversation branches. Also powers `/api/chat/threads` (the signed-in user's session list, which the Assistant merges into its thread rail) and the stored-tree fallback of the transcript reload after the 24 h Redis window; those routes answer 404 while off. On by default in `lite.yml`, `docker-compose.yml`, the chart and the `personal` Spring profile (`application-personal.yml`, since 0.1.9; `APP_CHAT_BRANCHING_ENABLED=false` in `deploy/compose/core.env` turns it off there); the core property itself defaults to off |
 | `APP_CHAT_DIRECTIVES_ARTIFACTS_ENABLED` | prompt directive for the chat artifacts pane |
@@ -603,6 +678,23 @@ and `TOOL_HTTP_REQUEST_WRITE_TOOL_ENABLED`, `PLATFORM_RELIABILITY_ENABLED` and
 `PLATFORM_NORTH_STAR_ENABLED` (admin Reliability and North Star pages), and the
 per-provider `MCP_OAUTH_<PROVIDER>_ENABLED` switches (inert while
 `MCP_OAUTH_PROVIDERS_ENABLED` is off).
+
+**Agent-runtime defaults set on 2026-10-23.** Owner decision from the
+[agent runtime defaults review](engineering/agent-runtime-defaults-review.md). The
+base profile (`application.yml`, inherited by lite, full and team deployments) and the
+`personal` profile (`application-personal.yml`) differ on purpose. Every one is still an
+ordinary environment override; nothing else in the review changed (the turn journal,
+moderation, pinning, trifecta, unclassified-tool action, escalation, the swarm verifier,
+job resume, rerun and ownership, reasoning depth and injection screening keep their values).
+
+| Env | Property | Base | `personal` | What it does and what it costs |
+|---|---|---|---|---|
+| `AGENT_HOOKS_ENABLED` | `app.agent-hooks.enabled` | `true` | `false` | declarative agent lifecycle hooks in the tool guard chain and the chat turn. Inert until someone defines a hook (one cached 15 s lookup per tool call). Set `app.agent-hooks.webhook.allowed-hosts` and `signing-secret` before defining a webhook hook. |
+| `TOOL_ARG_POLICIES_ENABLED` | `app.tool-arg-policies.enabled` | `true` | `false` | per-agent tool argument policies, evaluated before a tool runs. Inert until a policy exists; a policy lookup that throws follows `app.guardrails.fail-mode`. |
+| `APP_AGENTS_TAINT_MODE` | `app.agents.taint.mode` | `observe` | `enforce` (as before) | after a turn read content an outsider could write, count and audit the consequential calls that WOULD need approval. Behaviour unchanged; one audit row and one WARN per tool per tainted turn. `enforce` is the next step once the audit rows have been reviewed; `off` switches the layer off. |
+| `SKILLS_SUPPLY_CHAIN_ENFORCE` | `app.skills.supply-chain.enforce` | `true` | `false` | a custom skill whose content changed since an admin approved it, or that scans HIGH and was never approved, is withheld from `load_skill` and the skill list until an admin re-approves it on the Skills page or in the platform-admin Skill security page. Built-in skills are never withheld. The scan and the pins (`SKILLS_SUPPLY_CHAIN_ENABLED`) stay on in personal. |
+| `APP_CONTEXT_COMPACTION_ENABLED` | `app.context.compaction.enabled` | `true` | `true` | context budget planner and compaction in the chat turn (`restore_tool_result` stays on with it). A prompt inside the model's window is untouched; above 60% old tool results become restorable placeholders, above 85% the oldest turns become one summary written by the agent's own model unless `app.auxiliary-model.compaction` names another (a failed summary call is skipped). Costs: a compaction changes the prompt prefix, so a provider prompt cache misses once. |
+| `AGENT_JOB_STEP_JOURNAL_ENABLED` | `app.agent-jobs.durability.step-journal-enabled` | `true` | `true` | durable step journal of agent-job turns (observability only; fail-soft; rows purged after `AGENT_JOB_STEP_JOURNAL_RETENTION_DAYS`, 14). `AGENT_JOB_RESUME_FROM_JOURNAL`, `AGENT_JOB_RESUME_RERUN_INCOMPLETE_TURN` and `AGENT_JOB_OWNERSHIP_ENABLED` stay `false`. |
 
 Other new settings:
 
@@ -644,11 +736,34 @@ Other new settings:
   the work on the streaming thread, nothing is dropped), `app.chat.stream-end.drain-timeout`
   (`10s`; queued work is run on a graceful stop). A hard kill loses what is still queued. See
   [Hot-path performance](architecture/HOT-PATH-PERFORMANCE.md).
-- `app.turn-journal.enabled` (`false`): write a hash-chained journal of each chat turn's stages
-  (intake, model call, tool calls, outbound guard, verify, commit) to the tenant table
-  `turn_journal_event`. Hashes and short redacted summaries only, never prompts or tool payloads.
-  Off, behaviour is unchanged. Read one turn with `GET /api/agents/{agentId}/turns/{turnId}/journal`
-  (needs the audit-log permission). See [ADR-0020](architecture/ADR-0020-turn-journal.md).
+- `app.turn-journal.enabled` (`false`, env `APP_TURN_JOURNAL_ENABLED`): write a hash-chained journal of each chat
+  turn's stages (intake, model call, tool calls, approvals, outbound guard, verify, commit) to the tenant table
+  `turn_journal_event`. It covers every reasoning depth (streamed, CAREFUL, RIGOROUS, PLANNED) and the turns a
+  delegated agent or a specialist runs for another agent's tool call (each its own record; its INTAKE names the
+  parent turn). A tool call is journaled as `ok`, `error`, `blocked` (a guard, policy, hook, breaker or budget
+  answered instead of the tool) or `parked` (held for a human; it also writes an `APPROVAL` event with the approval
+  request id, and the turn that continues the task after the decision writes the matching `decided:...` event).
+  Hashes and short redacted summaries only, never prompts or tool payloads. Off, behaviour is unchanged. While on,
+  the chat response carries the turn's id in `X-Journal-Turn-Id`. Read one turn with
+  `GET /api/agents/{agentId}/turns/{turnId}/journal`, or list a session's turns with
+  `GET /api/agents/{agentId}/turn-journal?sessionId=...&limit=...` (both need the audit-log permission and VIEWER on
+  the agent). Only a digest of the session id is stored (tenant migration V666), so turns written before that
+  migration cannot be found by session. See [ADR-0020](architecture/ADR-0020-turn-journal.md).
+- `app.turn-journal.max-list` (`100`, env `APP_TURN_JOURNAL_MAX_LIST`): the most turns one by-session listing
+  returns; a request's `limit` is clamped to it.
+- `app.turn-journal.retention-days` (`90`, env `APP_TURN_JOURNAL_RETENTION_DAYS`): a sweep deletes whole turns (every
+  event of a turn, so a kept turn's hash chain is never missing its head) whose newest event is older than this, in
+  every tenant schema. `0` keeps the journal for ever (no sweep). Inert while `app.turn-journal.enabled` is off. Before
+  this setting nothing purged `turn_journal_event`; a deployment that turned the journal on and wants the old
+  keep-everything behaviour sets `0`. `app.turn-journal.purge-interval` (`6h`, env `APP_TURN_JOURNAL_PURGE_INTERVAL`)
+  is how often it runs; `app.turn-journal.purge-batch-turns` (`500`, env `APP_TURN_JOURNAL_PURGE_BATCH_TURNS`) turns are
+  deleted per statement and at most `app.turn-journal.purge-max-batches` (`40`, env
+  `APP_TURN_JOURNAL_PURGE_MAX_BATCHES`) statements run per tenant per sweep, so one sweep is bounded.
+- `app.wiring.strict-gateways` (`false`, env `APP_WIRING_STRICT_GATEWAYS`): at readiness the application checks that the
+  static holders a switched-on feature needs (the turn journal and the four learning loops) were installed by the
+  feature's bean. A holder that was not installed is logged as an ERROR naming the feature and the flag; with this on,
+  the start fails instead. Turn it on in an environment where a feature that is switched on but silently inert would be
+  worse than a failed deploy.
 - A2A signing keys: `APP_A2A_SIGNING_ENABLED` (`true`) signs Agent Cards (Ed25519) and, with the same key,
   delegation tokens and audit seals (`AUDIT_SEAL_ENABLED`). With `APP_A2A_SIGNING_PRIVATE_KEY`,
   `APP_A2A_SIGNING_PUBLIC_KEY` (PEM) and `APP_A2A_SIGNING_KEY_ID` empty (the default) each boot, and each
@@ -695,8 +810,16 @@ Verified against `application.yml` and `application-workflow.yml`. Spring proper
 | `app.llm.http.read-timeout` | `LLM_HTTP_READ_TIMEOUT` | `10m` | time until the provider starts responding, not a limit on the whole answer: a hang detector |
 | `app.llm.http.idle-connection-timeout` | `LLM_HTTP_IDLE_CONNECTION_TIMEOUT` | `120s` | how long an idle pooled provider connection may live; keep it below a NAT idle window (about 4 minutes on Azure). `0s` keeps the JDK default |
 | `app.llm.http.stream-timeouts-enabled` | `LLM_HTTP_STREAM_TIMEOUTS_ENABLED` | `true` | escape hatch: `false` hands back the auto-detected streaming connector and gives up streaming-path timeouts |
-| `app.llm.http.stream-idle-timeout` | `LLM_HTTP_STREAM_IDLE_TIMEOUT` | `90s` | no new token for this long ends the fast-depth stream with a timeout |
-| `app.llm.http.buffered-turn-timeout` | `LLM_HTTP_BUFFERED_TURN_TIMEOUT` | `240s` | total ceiling for one buffered-depth turn (careful, rigorous, planned) |
+| `app.llm.http.stream-idle-timeout` | `LLM_HTTP_STREAM_IDLE_TIMEOUT` | `90s` | the model may be silent this long before the fast-depth stream ends with a timeout. It counts model silence only: while a tool runs (a browser task, a coding task, an agent-to-agent call) the timer is suspended, up to `app.chat.resilience.tool-idle-ceiling`, and it starts again when the tool finishes. The `personal` profile sets `240s` because a local model can spend that long evaluating a prompt before its first token |
+| `app.llm.http.buffered-turn-timeout` | `LLM_HTTP_BUFFERED_TURN_TIMEOUT` | `240s` | total ceiling for one buffered-depth turn (careful, rigorous, planned). A turn that carries an enclosing deadline longer than this (an agent job's own `timeoutSeconds`) runs until that deadline instead, so a job given 30 minutes is not cut at four. When it is reached after tools ran, the turn is reported with the steps that ran (see `app.chat.resilience`); it is no longer answered again at fast depth without its tools |
+| `app.llm.retry.max-attempts` | `LLM_RETRY_MAX_ATTEMPTS` | `2` | Group `app.llm.retry`. Attempts per model call, the first one included, for a transient failure: HTTP 5xx, HTTP 429, a connection that failed before a response. Applies to every non-streaming call (per HTTP round trip: a tool loop is never replayed by it) and, with `stream-pre-first-token`, to a streaming turn that fails before its first token and before any tool ran. A read timeout, a refused model-server URL and any other 4xx are never retried. `1` never retries |
+| `app.llm.retry.initial-backoff` | `LLM_RETRY_INITIAL_BACKOFF` | `1s` | Wait before the first retry; each further retry doubles it |
+| `app.llm.retry.max-backoff` | `LLM_RETRY_MAX_BACKOFF` | `10s` | The longest the exponential backoff grows to |
+| `app.llm.retry.jitter` | `LLM_RETRY_JITTER` | `0.5` | Fraction (0 to 1) of each backoff that is randomised away so callers that failed together do not retry together: wait = exponential x (1 - jitter x random). `0` is deterministic |
+| `app.llm.retry.retry-rate-limited` | `LLM_RETRY_RATE_LIMITED` | `true` | Retry HTTP 429. `false` sends a rate limit straight to the caller's provider fallback, as before this setting existed |
+| `app.llm.retry.honor-retry-after` | `LLM_RETRY_HONOR_RETRY_AFTER` | `true` | Wait at least what the provider asked for. Read from the `Retry-After` / `retry-after-ms` header where the client still has it (the streaming client), otherwise from the wait the provider states in its error body ("try again in 3.5s", Gemini's `retryDelay`): Spring AI's default error handler drops the headers of a blocking call |
+| `app.llm.retry.max-retry-after` | `LLM_RETRY_MAX_RETRY_AFTER` | `30s` | A provider asking to wait longer than this is not retried here, so the fallback provider (BYOK fallback, hosted pool) takes over instead of the turn sitting idle |
+| `app.llm.retry.stream-pre-first-token` | `LLM_RETRY_STREAM_PRE_FIRST_TOKEN` | `true` | Retry a streaming turn that fails before its first token, under the same attempts and backoff. Never once a token was sent or a tool ran (the retry would replay both) |
 | `app.http.hcaptcha.connect-timeout` / `read-timeout` | `HCAPTCHA_CONNECT_TIMEOUT` / `HCAPTCHA_READ_TIMEOUT` | `3s` / `5s` | the hCaptcha verification call |
 | `spring.mail.properties.mail.smtp.connectiontimeout` / `timeout` / `writetimeout` | `SMTP_CONNECT_TIMEOUT_MS` / `SMTP_READ_TIMEOUT_MS` / `SMTP_WRITE_TIMEOUT_MS` | `15000` / `60000` / `60000` | milliseconds; the workflow Output node's email relay (`workflow` profile). JavaMail's own default is no timeout |
 | `app.tools.search.enabled` / `threshold` | `TOOL_SEARCH_ENABLED` / `TOOL_SEARCH_THRESHOLD` | `false` / `25` | on-demand tool loading ([flag](#flags-added-in-the-october-2026-sync)); deferral applies only to an agent with more tools than the threshold |
@@ -705,7 +828,322 @@ Verified against `application.yml` and `application-workflow.yml`. Spring proper
 | `app.tools.run-subtasks.enabled` | `TOOL_RUN_SUBTASKS_ENABLED` | `true` | offers `run_subtasks` to every agent that may delegate: up to 8 independent briefs run in parallel as throwaway copies of the agent (no delegation, scheduling, human-request or terminal-write tools inside a branch). `false` removes the tool |
 | `app.tools.create-workflow.enabled` | `TOOL_CREATE_WORKFLOW_ENABLED` | `true` | offers `create_workflow` to an agent that lists it in its tool allow-list (the Assistant does): drafts a workflow graph from a plain-language instruction and saves it as a DRAFT. It is never activated or run. `false` removes the tool |
 
+### Timeouts, failover and retries when tools are involved
+
+The tool loop runs inside the model call, so from the outside a turn that is working looks like a turn that is stuck: no token arrives while a tool runs. Four rules follow from that, each with the settings above.
+
+- **The idle timeout counts the model, not the tools.** `app.llm.http.stream-idle-timeout` (90 s) is the longest the model may be silent. A running tool suspends it, up to `app.chat.resilience.tool-idle-ceiling` since the tool last started, finished or reported progress, and it starts again when the tool returns. Only tools the platform wraps for logging report their activity (every tool the agent resolves does; a raw tool a caller passes in as an extra tool does not).
+- **A buffered turn that runs out of time says what ran.** `app.llm.http.buffered-turn-timeout` (240 s) ends a careful, rigorous or planned turn. If tools had run, the person gets the steps that completed and the ones still running, the report is kept in the transcript (so a follow-up does not run them again) and is never cached. If no tool had run, the turn is answered again at fast depth with its tools on offer. A turn carrying an enclosing deadline, an agent job's `timeoutSeconds`, runs until that deadline when it is longer than 240 s.
+- **A turn that ran a tool is not replayed on another provider unless that is safe.** Failing over to the BYOK fallback provider or to the next rung of the hosted pool runs the whole turn again. It is refused when a tool is still running, when a tool with side effects ran without an effect-journal record, or when an unclassified tool with a mutating name ran; read-only tools, and write/send tools the journal recorded, do not block it (`app.chat.resilience.replay-after-journaled-effects`). A refusal is reported as the provider's own failure, counted in `chat.failover.blocked`, and noted on the step-event channel.
+- **Transient failures are retried before another provider is tried.** `app.llm.retry.*`: HTTP 429 and 5xx, with exponential backoff, jitter and the provider's Retry-After. `POST /api/completions/agent-turn` goes to the next pool row only for a failure that is the row's own (key, billing, model, capacity, 5xx); an input-shaped failure (413/422, context length, content policy) is answered at once.
+
+**What the effect journal covers.** The journal (`app.tools.effect-journal.*`, on by default, in memory per node unless `store=redis`) records the result of a successful call of a tool the tool classification marks `DURABLE`: the built-in write/send tools (for example `google_gmail`, `google_calendar` and its move/cancel tools, `google_drive`, `google_sheets`, `upload_video_to_youtube`, `data_table_write`, `http_request_write`, `a2a_call_agent`, `add_to_knowledge_base`, `remember_fact`, `local_shell`, `generate_document`), any tool a tenant classified `DURABLE`, and, when `app.tools.mcp-annotations.enabled` is on, an MCP tool whose annotations do not say it is idempotent. (For the failover decision an MCP annotation alone is not trusted: such a tool counts as unclassified and is judged by its name.) A repeat of the same tool with the same arguments in the same turn (key: tenant, session, turn, tool, arguments hash), within `ttl-minutes`, returns the recorded result and does not reach the provider; in an agent job session with the durable step journal on, the key ignores the turn so the repeat is recognised after a restart. It does not cover: a call that threw (a failure after the provider acted looks the same as one before it, so it is not recorded and a replay is blocked by the gate above); the same tool with different arguments; tools classified `SIDE_EFFECT` or not classified at all (those are judged by their classification's replay verdict, then by a name rule that treats unknown names as mutating); a repeat in a later turn of an ordinary chat session; and calls that do not pass through the platform's tool wrapper.
+
+### Tool calls: budget, rounds and result size
+
+Three different limits apply to a turn that uses tools. They count different things and are read in this order. The settings below are three groups: `app.guardrails.step-limit` (calls), `app.chat.tools` (rounds, the wording of the stops, result clearing) and `app.tools.output` (result size).
+
+**Calls.** A *call* is one tool invocation. The budget a turn is given is in calls, counted once across every model pass of the turn (parallel calls each count). `app.guardrails.max-tool-calls-per-turn` is the ceiling for an agent on the default autonomy tier; the `SUPERVISED` and `FULLY_AUTONOMOUS` tiers scale it by the `app.guardrails.step-limit.*` settings below. The first calls over the ceiling are not run: the model is handed the structured result `{"error":"tool_budget_exhausted","result":"..."}` (the same one the tool loop below uses) and can write its final answer. A model that ignores it and keeps calling is stopped with an error (HTTP 429 on a non-streaming endpoint).
+
+**Rounds.** A *round* is one model-then-tools iteration inside a single model invocation of Spring AI's tool loop. `app.chat.tools.max-rounds-per-invocation` is only a backstop for loops that make no countable calls (a model inventing tool names). Every executed round makes at least one call, so the default `0` derives the cap from the call ceiling instead of giving it a number of its own: the highest per-turn ceiling (`max-tool-calls-per-turn` times `autonomous-multiplier`) plus `grace-calls` plus one, so the call policy always decides first. Before, a hidden constant of 25 rounds ended turns early: a turn configured for 30 calls (a `FULLY_AUTONOMOUS` agent) or 150 (the `personal` profile) never got past round 25. An explicit positive number wins, and the log warns at startup if it is below the call ceiling. A per-agent or per-tenant call ceiling above the platform's highest one raises the cap for that agent's turns (see *Agent runtime limits* below); an explicit positive number still wins.
+
+**Result size.** `app.tools.output.max-chars` is the most characters one tool result may hand to the model, for built-in and MCP tools alike. A longer result is *truncated*: the head is kept, followed by a marker that states how much was cut and how to ask for a narrower slice; the total, marker included, never exceeds the cap. It used to be discarded outright ("failed validation"), and plain text that merely started with `[` or `{` (a log line, a numbered list) was withheld as "malformed JSON"; neither happens now. `app.tools.output.per-tool.<tool name>` gives one tool its own cap.
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.guardrails.max-tool-calls-per-turn` | `GUARDRAILS_MAX_TOOL_CALLS_PER_TURN` | `15` (`150` in the `personal` profile) | the call ceiling for one turn on the default autonomy tier |
+| `app.guardrails.step-limit.grace-calls` | `APP_GUARDRAILS_STEP_LIMIT_GRACE_CALLS` | `10` | calls past the ceiling that are answered with the `tool_budget_exhausted` result before the turn is stopped with an error. Parallel calls of the round that crossed the ceiling count here. `0` stops the turn at the first call over |
+| `app.guardrails.step-limit.supervised-divisor` | `APP_GUARDRAILS_STEP_LIMIT_SUPERVISED_DIVISOR` | `2` | a `SUPERVISED` agent gets the ceiling divided by this |
+| `app.guardrails.step-limit.supervised-min-steps` | `APP_GUARDRAILS_STEP_LIMIT_SUPERVISED_MIN_STEPS` | `3` | and never fewer than this, so it can still finish a trivial multi-step task |
+| `app.guardrails.step-limit.autonomous-multiplier` | `APP_GUARDRAILS_STEP_LIMIT_AUTONOMOUS_MULTIPLIER` | `2` | a `FULLY_AUTONOMOUS` agent gets the ceiling times this |
+| `app.guardrails.step-limit.exhausted-message` | (none) | text in `application.yml` | model-facing. The `result` of the budget-exhausted tool result for a call over the ceiling; `{limit}` is the ceiling that applied A registry override of `toolresult.tool_budget.calls` ([prompts](prompts.md)) wins over this value; changing this value still works and is used when no override exists. |
+| `app.chat.tools.max-rounds-per-invocation` | `CHAT_TOOL_MAX_ROUNDS_PER_INVOCATION` | `0` | rounds one model invocation may run before the soft stop (every call answered with the budget-exhausted result, then a closing message if the model ignores it). `0` = derived from the call ceiling as described above |
+| `app.chat.tools.max-unknown-calls-per-invocation` | `CHAT_TOOL_MAX_UNKNOWN_CALLS_PER_INVOCATION` | `8` | calls to tool names the model was never offered, per model invocation, before the soft stop |
+| `app.chat.tools.budget-exhausted-message` | (none) | text in `application.yml` | model-facing. The `result` of the round-cap soft stop; `{rounds}` is the rounds used A registry override of `toolresult.tool_budget.rounds` ([prompts](prompts.md)) wins over this value; changing this value still works and is used when no override exists. |
+| `app.chat.tools.hard-stop-reply` | (none) | text in `application.yml` | the closing reply when the model keeps calling tools after the round-cap soft stop A registry override of `message.tool_budget.hard_stop` ([prompts](prompts.md)) wins over this value; changing this value still works and is used when no override exists. |
+| `app.chat.tools.result-clearing.enabled` / `threshold-chars` / `keep-last` | `CHAT_TOOL_RESULT_CLEARING_ENABLED` / `_THRESHOLD_CHARS` / `_KEEP_LAST` | `true` / `24000` / `3` | once the tool results of one reply total more than the threshold, older results beyond the newest `keep-last` are replaced by a placeholder on the next loop iteration. The placeholder is a JSON object (`{"context_cleared":true,"tool":...,"chars":...,"restore":...}`): Spring AI's Gemini adapter parses every tool result as JSON and failed the turn on the earlier plain-text form |
+| `app.chat.tools.result-clearing.restore-hint` | (none) | `call the tool again if you need this result` | model-facing. The `restore` field of that placeholder |
+| `app.tools.output.max-chars` | `APP_TOOLS_OUTPUT_MAX_CHARS` | `20000` | characters one tool result may hand to the model, truncation marker included |
+| `app.tools.output.per-tool.<tool name>` | (none) | empty | a tool's own cap in place of `max-chars`, for a tool that pages its output (more room) or a noisy one (less); zero or negative entries are ignored. Example: `app.tools.output.per-tool.workspace_read: 60000` |
+| `app.tools.output.truncation-marker` | (none) | text in `application.yml` | model-facing. Appended to a cut result; `{total}` is the original length, `{dropped}` what was cut, `{limit}` the cap that applied |
+
+Caps that look similar and are not this one:
+
+| Where | Cap | Why it is separate |
+|---|---|---|
+| `workspace_read` (file tool) | pages to fit `app.tools.output.max-chars` (or its `per-tool` entry) | the tool stops early enough that the whole JSON answer, including its "read on with offset=N" note, fits; it used to read up to 200,000 characters and have the middle of the JSON cut off by the guard |
+| MCP client (`McpToolOutputSanitizer`) | 64 KB, fixed | a security ceiling on what the platform will hold and scan from an untrusted server. The result is then cut to `app.tools.output.*` |
+| OpenAPI tools | 16,000 characters, fixed | the tool shapes its own answer; below the cap |
+| Knowledge search, data tables, tool search | 12,000 characters, fixed | the same |
+| Step journal | 64,000 characters, fixed | what is stored for durable replay; the model never sees more than the cap above |
+| Approval record (`AgentToolCallApprovalExecutor`) | 32 KB, fixed | what is stored on the approval request; the continuation hands the model at most `app.approvals.continuation.max-result-chars` |
+
 The edge relay ([Edge relay](edge-relay.md)) has its own table of settings (`EDGE_RELAY_*`, on by default).
+
+### Agent runtime limits: platform, tenant and agent
+
+Seven limits of a turn can be set per tenant and per agent instead of only for the whole deployment: tool calls per turn, wall-clock time of a turn, wall-clock time of one tool call, characters of one tool result, knowledge-search top-k and min-score, and continuation passes. One resolver (`AgentRuntimeSettingsResolver`) decides them, and every path reads its answer: the streamed (FAST) and buffered (CAREFUL, RIGOROUS, PLANNED) turns, the hosted pool, agent jobs and the turn the platform starts after an approval. An agent job's own tool budget and timeout are enforced inside its turn, not only between turns. (Agent Lab runs a single tool-less completion, so none of the seven applies to it.)
+
+The settings group is `app.agent-runtime` (with the sub-groups `app.agent-runtime.defaults` and `app.agent-runtime.bounds`).
+
+**Layers, lowest first:** the platform (`application*.yml`), the tenant (`/api/agent-runtime/limits`, tenant admin), the agent (`/api/agents/{id}/runtime-limits`, an editor of the agent) and the request (a cap one run carries, such as an agent job's remaining tool budget; it can only tighten a value, never raise it). A layer that does not set a value leaves it to the layer below. `GET` on either endpoint returns the layer being edited, the values a turn runs under, which layer set each of them and the allowed range of each.
+
+| Setting (API name) | Platform value comes from | Meaning |
+|---|---|---|
+| `maxToolSteps` | `app.guardrails.max-tool-calls-per-turn`, scaled by the autonomy tier | tool calls one turn may make. A tenant value is a base the autonomy tier scales like the platform's; an agent's own value is the ceiling itself and is not scaled again. The tool loop's round backstop follows it (never below the platform's) |
+| `turnTimeoutSeconds` | `app.llm.http.buffered-turn-timeout` (240 s) | wall-clock limit of a turn. A buffered turn always has one. A FAST stream has none unless a tenant or agent sets one or an agent job gives it its deadline. A job deadline sooner than the limit ends the turn at the deadline; a later one extends the platform default but not an explicit tenant or agent limit |
+| `toolTimeoutSeconds` | `app.agent-runtime.defaults.tool-timeout-seconds` (`0` = none) | wall-clock limit of one tool call. A call that outlives it is interrupted and the model is told (`app.agent-runtime.tool-timeout-message`); it counts as a tool failure for the circuit breaker. Runs the call on its own virtual thread (the tenant, version pin and MDC are carried over); a tool that ignores the interrupt keeps running in the background but no longer holds the turn |
+| `toolOutputMaxChars` | `app.tools.output.max-chars` | characters of one tool result that reach the model. Replaces the default every tool gets; a tool the operator gave its own `app.tools.output.per-tool.*` cap keeps it |
+| `retrievalTopK` | `app.agent-runtime.defaults.retrieval-top-k` (3) | chunks one `search_knowledge_base` call returns |
+| `retrievalMinScore` | `app.agent-runtime.defaults.retrieval-min-score` (`0` = every hit) | least relevance a returned chunk needs, where relevance is the negated distance the hybrid search reports: the fused (reciprocal-rank) score, a few hundredths, or the reranker's score on its own scale |
+| `continuationPasses` | `app.chat.continuation.max-passes` | extra model passes after a reply that stopped at a step it announced and did not take (`0` = never). Does not cover `app.chat.finish.max-continuations`, the passes that finish a reply cut off at the output limit |
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.agent-runtime.cache-ttl` | `APP_AGENT_RUNTIME_CACHE_TTL` | `10s` | how long a tenant's defaults are cached; a change reaches other replicas within it |
+| `app.agent-runtime.tool-timeout-message` | (none) | text in `application.yml` | model-facing. What the model is told when a tool call is stopped; `{tool}` and `{seconds}` are filled in |
+| `app.agent-runtime.defaults.tool-timeout-seconds` | `APP_AGENT_RUNTIME_DEFAULT_TOOL_TIMEOUT_SECONDS` | `0` | platform per-call tool limit; `0` = no limit, each tool keeps its own timeout |
+| `app.agent-runtime.defaults.retrieval-top-k` | `APP_AGENT_RUNTIME_DEFAULT_RETRIEVAL_TOP_K` | `3` | platform top-k of the knowledge-search tool |
+| `app.agent-runtime.defaults.retrieval-min-score` | `APP_AGENT_RUNTIME_DEFAULT_RETRIEVAL_MIN_SCORE` | `0.0` | platform min-score; `0` = no cut-off |
+| `app.agent-runtime.bounds.<setting>.min` / `.max` | (none) | `max-tool-steps` 1-500, `turn-timeout-seconds` 10-3600, `tool-timeout-seconds` 1-1800, `tool-output-max-chars` 500-200000, `retrieval-top-k` 1-50, `retrieval-min-score` 0-1, `continuation-passes` 0-16 | the least and most a tenant or an agent may set a value to (inclusive). `<setting>` is the kebab-case API name. A write outside the range is a 400 naming every offending setting and its range; a value stored earlier is clamped into the range when read, so tightening a bound tightens the overrides already stored. The platform layer is never clamped |
+
+The persisted layers are nullable columns on `agent` and one row of `tenant_runtime_limits` (migration V662); `null` means "not overridden here", so no existing agent or tenant changes behaviour. The agent's overrides are also returned as `runtimeLimits` on the agent (`GET /api/agents/{id}`), omitted when the agent overrides nothing, and are not part of the agent's version snapshot (a hidden A/B treatment clone runs under its control agent's limits, like the run cap).
+
+### Conversation-aware turns: follow-ups, continuation and routing
+
+A turn is not judged on its last message alone. Three behaviours read the conversation, and each has its own settings: the groups `app.chat.follow-up`, `app.chat.continuation` and `app.routing.simple` (plus the keys listed after them).
+
+**A short follow-up keeps the task's tools and its model.** "yes", "continue" and "try again" share no word with any tool, so tool selection used to cut the agent to the four tools that match nothing (the tool set then changed in the middle of a task, which also changes the request prefix a provider's prompt cache is keyed on), and a cost-routing agent sent the message, which reads as trivial, to its economy model. A message of at most `app.chat.follow-up.short-message-chars` characters (Unicode code points, so it is language-neutral) is a follow-up: the tools the session already used in the last `sticky-tools-window` (at most `max-sticky-tools`, most recent first, read from the tool-call log) stay on offer, and if the session used tools the turn is not sent to the economy model (`keep-primary-model`). A message with real content is selected by its own words, as before. The first 200 logged calls in the window are read, so keep the window short on a session that makes hundreds of calls.
+
+**A reply that stops at a step it announced is continued the same way on every reasoning depth.** The provider's tool loop ends when the model returns no tool call, so "Let me create the file:" followed by nothing looks like a finished turn. The continuation pass is sent the real conversation: the model's own tool calls and the tool results as tool messages (with their ids and provider metadata), and the original request with its attachments. It is never made for a turn parked on a human approval, a pass after the first must have called a tool, and `app.chat.continuation.max-passes` bounds the passes. Whether a reply *reads* as unfinished is a wording check on its last sentence, so it runs by default only for a weak tool caller (`heuristic-scope: SMALL_MODELS`): a platform-hosted row in small-model mode or measured at a `heuristic-tool-grades` grade, or a bring-your-own provider in `heuristic-providers`. A frontier model's text-only reply is an answer, and "Let me know if you need anything else" is a closing, not a step. The patterns and the nudge are per language tag (`intent`, `closing`, `done`, `asks`, `unfinished-ending`, `nudge`); a reply is checked against every language and the one that matched picks the nudge, so a language is added by adding its keys. `ALL_MODELS` applies the wording check to every model; `heuristic-enabled: false` turns it off.
+
+**Cost routing and tool selection work in any script.** Words are matched in any script (text written without spaces is matched as pairs of characters), so tools described in the message's own language are found. Tool names and descriptions are in Latin script, so a message in another script that matches no tool says nothing about relevance: with `app.tools.auto-selection.unscorable-uses-full-budget` it gets the full per-turn tool budget rather than the small no-match one. The "simple message" heuristic behind cost routing reads `app.routing.simple.*` (length, number of sentences, where a sentence ends, signal words per language) and, with `non-latin-simple: false`, never calls a message in a script its signal words do not cover simple.
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.chat.follow-up.sticky-tools-enabled` | `APP_CHAT_FOLLOW_UP_STICKY_TOOLS_ENABLED` | `true` | keep the tools the session already used on offer for a short follow-up |
+| `app.chat.follow-up.short-message-chars` | `APP_CHAT_FOLLOW_UP_SHORT_MESSAGE_CHARS` | `40` | a message of at most this many characters is a follow-up; `0` turns the follow-up rules off |
+| `app.chat.follow-up.sticky-tools-window` | `APP_CHAT_FOLLOW_UP_STICKY_TOOLS_WINDOW` | `PT2H` | how far back in the tool-call log "tools the session already used" looks |
+| `app.chat.follow-up.max-sticky-tools` | `APP_CHAT_FOLLOW_UP_MAX_STICKY_TOOLS` | `12` | the most tools kept on offer this way, most recently used first |
+| `app.chat.follow-up.keep-primary-model` | `APP_CHAT_FOLLOW_UP_KEEP_PRIMARY_MODEL` | `true` | a follow-up in a session that used tools is never routed to the economy model |
+| `app.chat.continuation.heuristic-enabled` | `APP_CHAT_CONTINUATION_HEURISTIC_ENABLED` | `true` | `false` never re-prompts on the wording of a reply |
+| `app.chat.continuation.heuristic-scope` | `APP_CHAT_CONTINUATION_HEURISTIC_SCOPE` | `SMALL_MODELS` | `SMALL_MODELS` = only a weak tool caller; `ALL_MODELS` = every model |
+| `app.chat.continuation.heuristic-providers` | `APP_CHAT_CONTINUATION_HEURISTIC_PROVIDERS` | `OLLAMA,LOCAL_OPENAI` | bring-your-own providers treated as weak tool callers |
+| `app.chat.continuation.heuristic-tool-grades` | `APP_CHAT_CONTINUATION_HEURISTIC_TOOL_GRADES` | `TEXT,NONE` | a platform-hosted pool row measured at one of these tool-calling grades is a weak tool caller (so is a row in small-model mode) |
+| `app.chat.continuation.tail-chars` | `APP_CHAT_CONTINUATION_TAIL_CHARS` | `400` | how much of the end of the reply the wording check reads |
+| `app.chat.continuation.default-locale` | (none) | `en` | the language whose nudge is used when none matched |
+| `app.chat.continuation.intent.en`, `app.chat.continuation.closing.en`, `app.chat.continuation.done.en`, `app.chat.continuation.asks.en`, `app.chat.continuation.unfinished-ending.en` (one key per language tag: `.es`, `.hi`, ...) | (none) | regular expressions in `application.yml` (English) | the wording check: the model says what it will do (last sentence only) / an offer of further help / finished or a summary / ends with a question / stops where a list was about to start. Case-insensitive, Unicode |
+| `app.chat.continuation.nudge.en` (and one key per further language tag) | (none) | the shipped prompt `nudge.continue_unfinished` | **Deprecated alias.** The nudge is the prompt-registry key `nudge.continue_unfinished` (Admin > Instructions > All prompts; one file per language under `prompts/<lang>/`). A value set here that differs from the shipped text is applied as that prompt's PLATFORM-scope default and logged as deprecated at startup; a stored override (agent, workspace, platform) always beats it. A language with no entry uses the `default-locale` entry, then the shipped text. Not set in `application.yml` |
+| `app.routing.simple.max-chars` | `APP_ROUTING_SIMPLE_MAX_CHARS` | `160` | a longer message is never simple, so never sent to the economy model by the heuristic |
+| `app.routing.simple.max-clauses` | `APP_ROUTING_SIMPLE_MAX_CLAUSES` | `2` | more sentences than this is never simple |
+| `app.routing.simple.clause-boundary` | (none) | regular expression in `application.yml` | where one sentence ends and the next begins (ASCII terminators need a space after them; the full stops of Chinese, Japanese, Hindi and Arabic do not) |
+| `app.routing.simple.non-latin-simple` | `APP_ROUTING_SIMPLE_NON_LATIN_SIMPLE` | `false` | `false`: a message with letters outside the Latin script is never simple; `true`: it is judged by length, sentences and the signal words configured for its language |
+| `app.routing.simple.accented-latin-simple` | `APP_ROUTING_SIMPLE_ACCENTED_LATIN_SIMPLE` | `false` | `false`: a message with accented Latin letters (Spanish, French, German, Vietnamese, ...) is never simple, because the shipped signal words are English and cannot say whether it is a hard question; `true`: it is judged by length, sentences and the signal words configured for its language. A plain-ASCII message in another Latin-script language is still judged by the English words: add that language's signal words to cover it |
+| `app.routing.simple.signal-words.en` (and one key per further language tag) | (none) | English list in `application.yml` | comma-separated phrases that mean analysis, generation or multi-step work |
+| `app.tools.auto-selection.unscorable-uses-full-budget` | `TOOL_AUTO_SELECTION_UNSCORABLE_USES_FULL_BUDGET` | `true` | a message with letters outside the Latin script that matches no tool gets `max-tools-per-turn` tools instead of `no-match-max-tools` |
+| `app.chat.resilience.thought-signature-degrade` | `APP_CHAT_RESILIENCE_THOUGHT_SIGNATURE_DEGRADE` | `false` | Gemini refuses the request that follows a tool call when the model's own function call goes back without its thought signature. The platform sends it back intact, so this should not happen; if the provider refuses anyway the error is reported (default). `true` is a last resort: the turn is answered once more WITHOUT tools: the reply opens with `thought-signature-notice` (which steps had already run), the model is shown what the tools returned (`thought-signature-evidence-note`, at most `thought-signature-evidence-chars` characters, default `8000`), the tools are not run again, and the reply is not cached. Counted in `chat.degraded.tools_disabled` |
+| `app.chat.resilience.thought-signature-evidence-chars` | `APP_CHAT_RESILIENCE_THOUGHT_SIGNATURE_EVIDENCE_CHARS` | `8000` | the most characters of tool results shown to the model in that reply |
+| `app.chat.resilience.thought-signature-notice` / `thought-signature-evidence-note` | (none) | text in `application.yml` | shown to the person at the start of that reply (`{tools}` = steps already run) / model-facing (`{evidence}` = what the tools returned) |
+
+The request to a hosted agent-turn client (`POST /api/completions/agent-turn`) is stateless and does not carry the signatures back to the platform, so that endpoint is not covered by the signature fix.
+
+### The model of background calls: compaction, session summary, assist, judges
+
+When a workspace uses its own provider key, four background calls need a model that is not the agent's answer: the summary that context compaction writes, the rolling summary of a long session, the "Ask AI" assist and judges. They used to take the first model of the first active credential's catalog listing, which is alphabetical, so what they cost and how well they summarised followed sort order. The model is now chosen in this order, and the first usable choice wins; the one used is logged at INFO (`Auxiliary model for <purpose>: <provider> <model> (chosen by <layer>)`).
+
+1. The workspace's own AI Model Control preference for the purpose (`assist`, `eval-judge`; the workspace default row, applied by the gateway when it names the provider in use, covers the others).
+2. The platform choice, `app.auxiliary-model.<purpose>.provider` and `.model`. A provider without a model means that provider's catalog default model; a model without a provider is ignored and logged once. A provider with no active credential in the workspace is skipped.
+3. The provider and model of the agent the call is made for (`use-agent-model`). Compaction always knows its agent; the session summary does too when the caller passes it, and otherwise goes to step 4.
+4. The workspace's best active credential and that provider's catalog default model (the same explicit, reviewable choice new agents get), never the first alphabetical entry.
+
+Workspaces on the platform pool are not affected: the pool picks its own model.
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.auxiliary-model.use-agent-model` | `APP_AUXILIARY_MODEL_USE_AGENT_MODEL` | `true` | `false` skips step 3: a call made for an agent no longer follows that agent's model |
+| `app.auxiliary-model.compaction.provider`, `app.auxiliary-model.compaction.model` | `APP_AUXILIARY_MODEL_COMPACTION_PROVIDER`, `APP_AUXILIARY_MODEL_COMPACTION_MODEL` | empty | provider (a `ProviderName`, for example `GEMINI`) and model of the summary context compaction writes |
+| `app.auxiliary-model.session-summary.provider`, `app.auxiliary-model.session-summary.model` | `APP_AUXILIARY_MODEL_SESSION_SUMMARY_PROVIDER`, `APP_AUXILIARY_MODEL_SESSION_SUMMARY_MODEL` | empty | the same for the rolling summary of a long session |
+| `app.auxiliary-model.assist.provider`, `app.auxiliary-model.assist.model` | `APP_AUXILIARY_MODEL_ASSIST_PROVIDER`, `APP_AUXILIARY_MODEL_ASSIST_MODEL` | empty | the same for the "Ask AI" assist and the studio's one-off completions |
+| `app.auxiliary-model.judge.provider`, `app.auxiliary-model.judge.model` | `APP_AUXILIARY_MODEL_JUDGE_PROVIDER`, `APP_AUXILIARY_MODEL_JUDGE_MODEL` | empty | the same for judges and verifiers (the setting and its resolver exist; the quality judges still pick their own model until they are moved onto the resolver) |
+
+Behaviour change from the earlier alphabetical pick: with nothing configured, compaction now runs on the model of the agent being compacted, and a call without an agent runs on the best credential's catalog default model. Set `use-agent-model=false` or a platform choice to keep a cheaper model for these calls.
+
+### Session history, stream versus buffered parity, and response caches
+
+Three groups of settings make the agent behave the same whichever way a turn is run: `app.chat.tool-ledger` (what the model is told about earlier turns' tools), `app.chat.parity` (where the streamed and the buffered turn deliberately differ) and `app.chat.cache` (what the response caches may serve and what they key on). `app.chat.tools.text-call-recovery.scope` (above) decides which models the small-model text-call workaround wraps.
+
+**Session history keeps a compact tool ledger.** The tool loop runs inside the model client, so history used to carry only the model's prose: on the next turn it could not see the file id a tool had returned, which write calls it had already made, or that an action was still waiting on a person. Each assistant turn that called tools now stores a record with it (`ChatTurn.tools`, serialised in the same Redis entry under the same tenant-scoped session key): one entry per call with the tool, an arguments summary, a result summary, a status (`ok`, `failed`, `not run`, `awaiting human approval`, `repeat`) and, for a call held for a human, the approval request id. Arguments and results are masked like the tool-call log and the model-facing tool result (credentials, and personal data when the tenant's gateway policy asks), compacted to one line and cut to the limits below. The stored reply text is untouched, so the transcript, exports and the failed/interrupted markers read as before; only the model's view of history folds the record in, ahead of the reply, as plain text (a replayed tool-use/tool-result pair would need provider ids and thought signatures that a summary cannot recreate). The newest `replay-turns` assistant turns that carry a record show it; the history window's character and token limits are measured on the text the model will be sent, so a bulky record costs the oldest turns, not the newest; turns that leave the window reach the rolling summary with their record in it, and context compaction handles the text like any other. A system note tells the model the record is the platform's, that it counts as tool use in this conversation (the tool-trust rule forbids claiming tool use that did not happen in it, and these calls did), and that it must never write one itself. A reply that failed after tools ran keeps its record and is shown to the model as the record plus a failure note, never as the error text. A call held for approval is recorded as `awaiting human approval` with its request id; how it was decided is in the approval-outcome note the platform appends to the history when a person decides (the ledger of the turn that parks cannot know it). Editing or regenerating a message keeps the record of the turns before it.
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.chat.tool-ledger.enabled` | `APP_CHAT_TOOL_LEDGER_ENABLED` | `true` | `false` records and stores nothing: history is text only, as before |
+| `app.chat.tool-ledger.replay-enabled` | `APP_CHAT_TOOL_LEDGER_REPLAY_ENABLED` | `true` | `false` still stores the record but does not show it to the model |
+| `app.chat.tool-ledger.max-entries-per-turn` | `APP_CHAT_TOOL_LEDGER_MAX_ENTRIES_PER_TURN` | `20` | entries kept for one turn; calls past it are counted ("...and N more") |
+| `app.chat.tool-ledger.max-argument-chars` / `max-result-chars` | `APP_CHAT_TOOL_LEDGER_MAX_ARGUMENT_CHARS` / `APP_CHAT_TOOL_LEDGER_MAX_RESULT_CHARS` | `160` / `200` | an entry's arguments and result are cut to this many characters; at most 500 (the credential scrub's own cap) |
+| `app.chat.tool-ledger.max-replay-chars-per-turn` | `APP_CHAT_TOOL_LEDGER_MAX_REPLAY_CHARS_PER_TURN` | `2000` | the rendered block of one turn is cut to this many characters |
+| `app.chat.tool-ledger.replay-turns` | `APP_CHAT_TOOL_LEDGER_REPLAY_TURNS` | `6` | only the newest this-many assistant turns that carry a record show it; older ones are left to the rolling summary and compaction |
+| `app.chat.tool-ledger.cut-marker`, `header`, `line`, `detail`, `approval-detail`, `omitted-line`, `status-ok`, `status-failed`, `status-not-run`, `status-awaiting-approval`, `status-replayed`, `failed-reply-note`, `trust-note` | (none) | text in `application.yml` | model-facing wording of the record and of the note that tells the model it may rely on it. `{tool}` `{arguments}` `{status}` `{detail}` `{result}` `{approval}` `{count}` are filled in by the code |
+
+**Streamed and buffered turns behave the same except where it is a setting.** Both paths share one continuation policy for a reply that stops at an announced step (the person's message is never edited to nudge the model; the real conversation is replayed), the provider's finish-reason handling, the thought-signature fallback, the failover replay gate, the tool-call ledger, and one stable tool order (the buffered depths used the resolution order, so the tools and the prompt-cache prefix changed with the reasoning depth). The differences that remain, and why:
+
+| Difference | Why it exists | Setting |
+|---|---|---|
+| A FAST turn that offers a generation tool or an MCP tool is buffered (held, checked, sent as one piece), not streamed | a fabricated result link must be replaced before it reaches the person; it cannot be recalled once streamed | `app.chat.parity.fast-buffering-triggers` (`GENERATION_TOOLS`, `MCP_TOOLS`; empty = never buffer a FAST turn) |
+| Output guardrails withhold a buffered reply but only audit a streamed one | the tokens of a streamed reply have already been delivered | add `OUTPUT_GUARDRAILS` to `fast-buffering-triggers`: a FAST turn of an agent with output guardrails is then held, a violating reply is withheld and the replacement is what is stored. Pattern-based guardrails only on FAST (the semantic toxicity check is a blocking model call); the buffered depths run it too |
+| The buffered verifiers (self-consistency, Reflexion) rewrite a flagged answer without tools | re-running the tools could repeat a side effect | the rewrite is accepted only if it is not a fraction of the answer it replaces, and the evidence it is shown is bounded: `app.chat.parity.verifier-min-revision-ratio`, `verifier-ratio-applies-above-chars`, `verifier-max-evidence-chars` |
+| Reasoning depth itself (verification passes, planning, no live streaming) | that is what CAREFUL, RIGOROUS and PLANNED are for | the agent's reasoning depth |
+| No difference: the turn journal records every depth (FAST, CAREFUL, RIGOROUS, PLANNED) and delegated or specialist turns, with approval events | the journal is written by the shared turn code, not by one path | `app.turn-journal.enabled` (off by default); old turns are purged by `app.turn-journal.retention-days` (default 90, `0` = keep) |
+| Small-model workarounds (text-call recovery, its hold-back of a reply starting with `{`) | only a weak tool caller needs them | `app.chat.tools.text-call-recovery.scope` (above) |
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.chat.parity.fast-buffering-triggers` | `APP_CHAT_PARITY_FAST_BUFFERING_TRIGGERS` | `GENERATION_TOOLS,MCP_TOOLS` | what makes a FAST turn buffer its reply instead of streaming it |
+| `app.chat.parity.verifier-max-evidence-chars` | `APP_CHAT_PARITY_VERIFIER_MAX_EVIDENCE_CHARS` | `12000` | the buffered verifiers see the newest this-many characters of the turn's tool results; `0` = all |
+| `app.chat.parity.verifier-min-revision-ratio` | `APP_CHAT_PARITY_VERIFIER_MIN_REVISION_RATIO` | `0.3` | a verifier's rewrite shorter than this fraction of the answer is not accepted; `0` accepts any |
+| `app.chat.parity.verifier-ratio-applies-above-chars` | `APP_CHAT_PARITY_VERIFIER_RATIO_APPLIES_ABOVE_CHARS` | `400` | the ratio check applies to answers longer than this |
+
+**Response caches are keyed on the conversation and closed to tool turns.** The exact-match cache (`caching` on the agent) and the semantic cache (`semantic caching`) are opt-in per agent. They keyed on the single message and served and stored any turn, so "yes" or "continue" returned the answer cached for a different conversation, and an answer built from live tool data could be served to the next asker. Now the key includes a digest of the newest `context-turns` turns before the message (a first message keys on the message alone, so an FAQ still hits; the semantic cache folds the same digest into the row's `subject_hash`, so rows stored before keep matching a first message), and an agent that offers tools is not cacheable at all: its turns are neither read from nor written to either cache, and a turn whose model called a tool is never stored. Branching's regenerate drops the entry of the conversation it regenerates. The workflow step cache is a separate, workflow-level opt-in and is unchanged.
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.chat.cache.eligible-with-tools` | `APP_CHAT_CACHE_ELIGIBLE_WITH_TOOLS` | `false` | `true` lets the caches serve and store the turns of an agent that offers tools (the old behaviour; only for tools whose results never change) |
+| `app.chat.cache.key-on-conversation` | `APP_CHAT_CACHE_KEY_ON_CONVERSATION` | `true` | `false` keys on the message alone, as before |
+| `app.chat.cache.context-turns` | `APP_CHAT_CACHE_CONTEXT_TURNS` | `2` | how many of the newest earlier turns go into the key |
+
+### Limits that used to be constants (package 3c-1)
+
+**Which of these a workspace can change without the operator.** A property listed here that is an owner-visible product control
+is also a settings catalog key (an admin changes it in Admin > Runtime settings; the property stays the platform value, the
+default, and the pinned value when the key is locked): `app.guardrails.step-limit.{grace-calls,supervised-divisor,supervised-min-steps,autonomous-multiplier}`,
+`app.chat.semantic-cache.*`, `app.chat.follow-up.{max-sticky-tools,keep-primary-model}`, `app.chat.tool-ledger.*` (workspace-wide
+keys, not per agent), `app.chat.limits.attachments.*` (the catalog value is whole megabytes; the upload is still capped by
+`spring.servlet.multipart.max-file-size`), `app.memory.limits.{tenant-max-memories,edge-memory-max-facts}` and
+`app.skills.prompt.{max-skills,max-block-chars}` (workspace-wide). The background model of each purpose is chosen per workspace on
+the AI Model Control page. The decision for every other property of this work, with the reason, is the triage table in
+[settings.md](settings.md#triage-of-the-properties-that-had-no-control).
+
+These numbers were `static final` constants of the turn, memory, skills and context classes. Each is now a typed setting
+whose default is the old constant, so nothing changes until an operator sets one. The code default and the value in
+`application.yml` are pinned together by a test. Not every value is a free choice: a few are bounds that other limits
+lean on (the notes say which).
+
+**Memory** (`app.memory.limits.*`)
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.memory.limits.agent-max-memories` | `APP_MEMORY_LIMITS_AGENT_MAX_MEMORIES` | `50` | long-term memories one agent keeps across every subject; the oldest are pruned past it |
+| `app.memory.limits.tenant-max-memories` | `APP_MEMORY_LIMITS_TENANT_MAX_MEMORIES` | `300` | shared memories one tenant keeps (memory blocks excluded); the oldest are pruned past it |
+| `app.memory.limits.agent-recall-top-k` | `APP_MEMORY_LIMITS_AGENT_RECALL_TOP_K` | `5` | memories an agent's automatic recall puts into a turn |
+| `app.memory.limits.tenant-recall-top-k` | `APP_MEMORY_LIMITS_TENANT_RECALL_TOP_K` | `5` | shared memories a turn's automatic recall puts into it |
+| `app.memory.limits.session-max-stored-entries` | `APP_MEMORY_LIMITS_SESSION_MAX_STORED_ENTRIES` | `400` | turns kept in a session's Redis list: the hard storage bound, and the ceiling of the replay window `app.chat.history-max-turns` (the platform setting that edits the window still validates against 400; see the guide's note on history) |
+| `app.memory.limits.session-fold-batch` | `APP_MEMORY_LIMITS_SESSION_FOLD_BATCH` | `40` | out-of-window turns folded into the rolling summary at a time (one summarisation call per this many); used as at most `session-max-stored-entries - 1` |
+| `app.memory.limits.edge-memory-max-facts` | `APP_MEMORY_LIMITS_EDGE_MEMORY_MAX_FACTS` | `24` | facts the edge (on-device) memory endpoint returns; they go into a 4k to 8k context window |
+
+**Skills in the prompt and skill distillation** (`app.skills.prompt.*`, `app.skills.distillation.*`)
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.skills.prompt.max-skills` | `APP_SKILLS_PROMPT_MAX_SKILLS` | `60` | skills listed in the system prompt; the rest are counted ("N more skills are installed but not listed here") |
+| `app.skills.prompt.max-block-chars` | `APP_SKILLS_PROMPT_MAX_BLOCK_CHARS` | `9000` | character budget of the skill index (about 2,300 tokens); entries keep their description while it fits |
+| `app.skills.prompt.names-only-headroom` | `APP_SKILLS_PROMPT_NAMES_ONLY_HEADROOM` | `2000` | extra room, past the budget, that bare names may still use before the list is cut |
+| `app.skills.prompt.max-description-words` | `APP_SKILLS_PROMPT_MAX_DESCRIPTION_WORDS` | `30` | words of a skill's description kept in the index (long enough to keep a "Use when..." trigger) |
+| `app.skills.prompt.history-turns` | `APP_SKILLS_PROMPT_HISTORY_TURNS` | `6` | earlier user messages the sticky "skills stay on" gate remembers per session |
+| `app.skills.prompt.max-tracked-sessions` | `APP_SKILLS_PROMPT_MAX_TRACKED_SESSIONS` | `2000` | sessions the gate tracks before the least recently used are forgotten |
+| `app.skills.distillation.min-distinct-runs` | `APP_SKILLS_DISTILLATION_MIN_DISTINCT_RUNS` | `3` | distinct sessions a tool sequence must appear in before it can be distilled |
+| `app.skills.distillation.min-sequence-length` | `APP_SKILLS_DISTILLATION_MIN_SEQUENCE_LENGTH` | `2` | sequences shorter than this are ignored |
+| `app.skills.distillation.max-sequence-length` | `APP_SKILLS_DISTILLATION_MAX_SEQUENCE_LENGTH` | `8` | sequences longer than this are ignored |
+| `app.skills.distillation.max-jobs-scanned` | `APP_SKILLS_DISTILLATION_MAX_JOBS_SCANNED` | `500` | most recent succeeded jobs read per pass |
+| `app.skills.distillation.max-episodes-scanned` | `APP_SKILLS_DISTILLATION_MAX_EPISODES_SCANNED` | `500` | most recent rewarded episodes read per pass |
+| `app.skills.distillation.min-episode-reward` | `APP_SKILLS_DISTILLATION_MIN_EPISODE_REWARD` | `0.60` | an episode counts as a success when its reward is at least this |
+| `app.skills.distillation.max-proposals-per-run` | `APP_SKILLS_DISTILLATION_MAX_PROPOSALS_PER_RUN` | `5` | draft skills staged per pass; the rest are reported as skipped |
+| `app.skills.distillation.max-sample-goals` | `APP_SKILLS_DISTILLATION_MAX_SAMPLE_GOALS` | `3` | example goals kept per pattern |
+| `app.skills.distillation.max-goal-chars` | `APP_SKILLS_DISTILLATION_MAX_GOAL_CHARS` | `160` | characters of one example goal |
+
+**Small-model mode** (`app.chat.small-model.*`): how the few tools of a weak tool caller are chosen.
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.chat.small-model.tool-cap` | `APP_CHAT_SMALL_MODEL_TOOL_CAP` | `6` | tools offered on one small-model turn |
+| `app.chat.small-model.browser-family-quota` | `APP_CHAT_SMALL_MODEL_BROWSER_FAMILY_QUOTA` | `4` | tools a browsing request keeps (navigate, read, click and type only work as a set) |
+| `app.chat.small-model.intent-boost` | `APP_CHAT_SMALL_MODEL_INTENT_BOOST` | `50` | score of a tool that serves a signalled intent; beats word overlap, loses to a tool named in the message |
+| `app.chat.small-model.named-tool-score` | `APP_CHAT_SMALL_MODEL_NAMED_TOOL_SCORE` | `1000` | score of a tool the message names outright |
+
+**Turn limits** (`app.chat.limits.*`, `app.chat.semantic-cache.*`, and additions to `app.chat.parity.*` and `app.chat.resilience.*`)
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.chat.limits.escalation.low-confidence-max-chars` | `APP_CHAT_LIMITS_ESCALATION_LOW_CONFIDENCE_MAX_CHARS` | `400` | a low-confidence marker counts only in a reply shorter than this (see `app.chat.escalation.*`) |
+| `app.chat.limits.escalation.low-confidence-leading-chars` | `APP_CHAT_LIMITS_ESCALATION_LOW_CONFIDENCE_LEADING_CHARS` | `240` | ... and only within the first this-many characters of it |
+| `app.chat.limits.escalation.registration-ttl` | `APP_CHAT_LIMITS_ESCALATION_REGISTRATION_TTL` | `PT10M` | how long a cheap client stays registered as escalatable |
+| `app.chat.limits.attachments.max-image-bytes` | `APP_CHAT_LIMITS_ATTACHMENTS_MAX_IMAGE_BYTES` | `8388608` | largest chat image (8 MiB) |
+| `app.chat.limits.attachments.max-audio-bytes` | `APP_CHAT_LIMITS_ATTACHMENTS_MAX_AUDIO_BYTES` | `15728640` | largest chat audio file (15 MiB) |
+| `app.chat.limits.attachments.max-video-bytes` | `APP_CHAT_LIMITS_ATTACHMENTS_MAX_VIDEO_BYTES` | `26214400` | largest chat video (25 MiB) |
+| `app.chat.limits.attachments.max-document-bytes` | `APP_CHAT_LIMITS_ATTACHMENTS_MAX_DOCUMENT_BYTES` | `10485760` | largest document or spreadsheet (10 MiB); the inline path's own ceiling is separate |
+| `app.chat.limits.directive-cache.ttl` | `APP_CHAT_LIMITS_DIRECTIVE_CACHE_TTL` | `PT30S` | Superseded by `app.prompts.cache.ttl`: the prompt registry now caches the overrides and nothing reads this key |
+| `app.chat.limits.directive-cache.failure-ttl` | `APP_CHAT_LIMITS_DIRECTIVE_CACHE_FAILURE_TTL` | `PT5S` | Superseded by `app.prompts.cache.failure-ttl`: the prompt registry now caches the overrides and nothing reads this key |
+| `app.chat.limits.directive-cache.max-tenants` | `APP_CHAT_LIMITS_DIRECTIVE_CACHE_MAX_TENANTS` | `10000` | Superseded by `app.prompts.cache.max-tenants`: the prompt registry now caches the overrides and nothing reads this key |
+| `app.chat.limits.share-turn-timeout` | `APP_CHAT_LIMITS_SHARE_TURN_TIMEOUT` | `PT45S` | how long a visitor of a shared agent waits for the reply of one turn |
+| `app.chat.limits.economy-aux-min-tokens` | `APP_CHAT_LIMITS_ECONOMY_AUX_MIN_TOKENS` | `256` | the economy model's auxiliary calls (such as the swarm goal verifier) get the agent's max tokens, but at least this |
+| `app.chat.limits.economy-aux-max-tokens` | `APP_CHAT_LIMITS_ECONOMY_AUX_MAX_TOKENS` | `1024` | ... and at most this |
+| `app.chat.limits.completed-event-excerpt-chars` | `APP_CHAT_LIMITS_COMPLETED_EVENT_EXCERPT_CHARS` | `500` | characters of the answer carried by the "agent message completed" workflow event (tenant webhooks) |
+| `app.chat.semantic-cache.similarity-threshold` | `APP_CHAT_SEMANTIC_CACHE_SIMILARITY_THRESHOLD` | `0.95` | cosine similarity a stored question needs to be served for a new one (the keys were read before; they are now in `application.yml`) |
+| `app.chat.semantic-cache.ttl-hours` | `APP_CHAT_SEMANTIC_CACHE_TTL_HOURS` | `6` | hours a stored answer is served |
+| `app.chat.semantic-cache.max-entries-per-agent` | `APP_CHAT_SEMANTIC_CACHE_MAX_ENTRIES_PER_AGENT` | `200` | stored answers kept per agent |
+| `app.chat.parity.verifier-history-window` | `APP_CHAT_PARITY_VERIFIER_HISTORY_WINDOW` | `6` | earlier messages the buffered verifiers see as grounding |
+| `app.chat.resilience.structured-call-timeout` | `APP_CHAT_RESILIENCE_STRUCTURED_CALL_TIMEOUT` | `PT2M` | how long a structured (typed input and output) agent call, such as a workflow node, waits for the reply |
+| `app.chat.resilience.hosted-self-heal-cooldown` | `APP_CHAT_RESILIENCE_HOSTED_SELF_HEAL_COOLDOWN` | `PT10M` | least time between two repair attempts for the same hosted-pool row whose model id the provider reports gone |
+
+The prompt registry's own settings, `app.prompts.*`, are in "Prompt registry" further down; see [prompts.md](prompts.md).
+
+**Context compaction estimates** (`app.context.compaction.*`, next to the keys documented with the context settings)
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.context.compaction.message-overhead-tokens` | `APP_CONTEXT_COMPACTION_MESSAGE_OVERHEAD_TOKENS` | `4` | tokens every message costs beyond its text |
+| `app.context.compaction.media-tokens` | `APP_CONTEXT_COMPACTION_MEDIA_TOKENS` | `1000` | tokens one attached image, audio or video costs |
+| `app.context.compaction.response-overhead-tokens` | `APP_CONTEXT_COMPACTION_RESPONSE_OVERHEAD_TOKENS` | `6` | tokens a tool call or tool response costs beyond its name, arguments and text |
+| `app.context.compaction.summary-frame-tokens` | `APP_CONTEXT_COMPACTION_SUMMARY_FRAME_TOKENS` | `40` | tokens of a summary message beyond its body |
+| `app.context.compaction.placeholder-tokens` | `APP_CONTEXT_COMPACTION_PLACEHOLDER_TOKENS` | `48` | estimated tokens of one cleared-result placeholder; a result smaller than twice this is never cleared |
+| `app.context.compaction.restore-result-max-chars` | `APP_CONTEXT_COMPACTION_RESTORE_RESULT_MAX_CHARS` | `16384` | characters of one tool result `restore_tool_result` returns; the rest is cut with a marker |
+| `app.context.compaction.window-rules` | | claude 200000, gemini 200000, gpt-5 / gpt-4o / gpt-4.1 / gpt-4-turbo / o1 / o3 / o4 128000 | context window by model name for a model the provider catalog gives none. Each rule has `tokens`, `contains` and `starts-with`; the first rule matching the lower-cased model id wins; a list set here replaces the shipped one. These are conservative floors and differ from the figures in the model seed catalog (Gemini 1M, GPT-5 400k); that mismatch is known and was not changed here |
+
+### Evals, the Agent Lab, the quality judge and RL exploration on the real pipeline
+
+An eval replay used to reach the chat service through a reflective bridge and ran text-only (`chatTextOnly`), so a green eval said little about how the agent behaves with its tools. A run now replays through the same turn pipeline a person's message takes (`ReplayTurnRunner`, in `agents-turn`; the typed bridge `AgentChatServiceTurnReplayer` in `app` hands it to the eval runner), in one of two **modes**, shown on every run in the console and in its API response (`mode`):
+
+| Mode | What the run measures |
+|---|---|
+| **`FULL`** (the default) | **The production pipeline in the eval sandbox.** Same reasoning depth, tool selection, guardrails, argument policies, output caps, step ceiling and approval gate as a person's message, and the run consumes its budget cap. A tool runs for real only if its classification says it only reads (see below); every other call is answered with a simulated result. A call that needs a person is held exactly as in production (the case sees an unanswered approval), but no approval request is recorded, so nothing reaches an approver. |
+| **`QUICK`** | **Text only.** The agent's tool set is withheld; the model can only answer. Cheaper and faster, and it says nothing about tool use. Budget, moderation, memory and the kill switch still apply. Chosen explicitly. |
+
+**Which mode a run takes**, first match wins: the `mode` named when the run is triggered (`POST .../runs`, `{"mode":"QUICK"}`; the console's run options), else the mode its dataset pins (`mode` on the dataset: `FULL`, `QUICK`, or none), else the workspace's setting `quality.eval.defaultMode` (a workspace admin can switch the default back to `quick`), else the platform property `app.quality.eval.default-mode` (`full`). The mode is frozen on the run row (`eval_mode`, V670), so a finished run always says what it measured. Datasets that held the old default (V670 turned their `tool_execution_enabled` from `FALSE` into "no pin") follow the new default.
+
+**What may really run in a `FULL` run.** The decision is made per call from the tool's classification (`tool_classification`, never from the tool's name), and it fails closed:
+
+- A tool runs for real only if it is declared a reader (`READ_PUBLIC`, `READ_TENANT`, or `CREDENTIALED` for a read with a stored credential) and is neither `DURABLE` nor irreversible. `http_request` also needs a read method (GET, HEAD, OPTIONS).
+- Everything else is **simulated**: the tool is never reached, the model is told the call was accepted and nothing was changed or sent (`toolresult.eval_sandbox.simulated` in the prompt registry), the ledger and the turn journal record the call as `SIMULATED` / `simulated`, the case stores it with status `SIMULATED`, and the run detail lists the simulated tools (`simulatedTools`) as the part of the agent's tool use the run could not really exercise. That covers writes (memory, knowledge, data tables, workspace files), everything that leaves the tenant (mail, calendar, channels, webhooks, uploads), shell, code and scheduling, payments, and delegation to other agents (a delegated agent runs its own turn, outside this turn's sandbox).
+- A tool with **no classification** (an MCP or custom tool nobody classified), a quarantined one, and a classification that cannot be read are simulated too. A classification derived only from an MCP server's own `readOnlyHint` does not count: it is a claim by a third party. To let an unclassified reader run, classify it, or list it in `app.quality.eval.sandbox.read-only-tools`; that list never overrides a declared classification.
+- A `FULL` replay refuses to start when the effect policy is not available: running the agent's tools unsandboxed is never a fallback.
+
+Every call of a `FULL` case is reported with the status the turn itself recorded for it (ran, failed, not run, held for approval, replayed, simulated), not read from the wording of its output; trajectory evals assert on that record, and a simulated call counts as made (the agent chose the tool; only its effect was withheld). The status is stored with the case's tool calls and shown in the run detail.
+
+**Approvals in an eval auto-resolve only through the sandbox auto-approval** (the dataset's `autoApproveTools`, below). Without it a gated call is held, as in production. With it, a held call is approved by the eval sandbox, counted per case, and journaled as `decided:eval-approved` (never as a person's decision); the approved tool is still subject to the effect rule above, so an approved write is simulated, not executed.
+
+**Auto-approval is a sandbox, not a shortcut.** It skips only the "needs a person, record it and stop" step. The dispatch gate, procedure rules, the verifier, the step ceiling, argument policies, output caps and guardrails all still apply. It is granted to one turn at a time under a request id the server makes, so a chat request cannot ask for it; it is counted per case; the run row is flagged `auto_approved` (V667) and says so in its API response and export bundle; and it is checked against the operator's list when a dataset sets it, when a `FULL` run is triggered, and again at every replay, so removing a tenant from the list stops a run that is already queued. A `QUICK` run has no tool calls, so it neither uses nor needs it. A dataset with auto-approval has a different content hash from the same dataset without it, so a run of one cannot satisfy the eval gate for the other.
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.quality.eval.default-mode` | `EVAL_DEFAULT_MODE` | `full` | The mode of an eval run that names none and whose dataset pins none. `full` = the production pipeline in the eval sandbox; `quick` = the agent's tools are withheld, text only. A workspace overrides it with the setting `quality.eval.defaultMode` (a non-security setting, tenant scope); a run can always name its own mode. Replaces `app.quality.eval.default-tool-execution` |
+| `app.quality.eval.sandbox.read-only-tools` | `EVAL_SANDBOX_READ_ONLY_TOOLS` | empty | Tool names or `*` globs the operator vouches are read-only, so they run for real in a `FULL` run although nobody classified them (an MCP or custom tool). Applies only to a tool with no declared classification; it can never make a declared write, send or delete run. Empty = every unclassified tool is simulated |
+| `app.quality.eval.auto-approve.tenant-ids` | `EVAL_AUTO_APPROVE_TENANT_IDS` | empty | Comma-separated tenant ids the operator declares **non-production**. Only these tenants may set `autoApproveTools`, trigger a run that uses it, or have such a run replay. Empty = no tenant. There is no per-tenant "production" flag to infer this from, so it is an explicit list |
+| `app.quality.eval.auto-approve.actor` | `EVAL_AUTO_APPROVE_ACTOR` | `eval-auto-approve` | The name the auto-approvals are attributed to in logs (never a person) |
+| `app.quality.eval.auto-approve.excluded-tools` | `EVAL_AUTO_APPROVE_EXCLUDED_TOOLS` | `local_shell,coding_task,schedule_task,a2a_call_agent,run_in_code_workspace,apply_code_changes,*payment*,*refund*,*charge*,*transfer*,*delete*` | Tool names or `*` globs that are never auto-approved: a gated call to one still parks, whatever the dataset says |
+| `app.quality.trajectory-eval.enabled` | `QUALITY_TRAJECTORY_EVAL_ENABLED` | `false` | Trajectory specs (a case `grader_spec` of type `trajectory`). Still opt-in. When on, a case whose dataset replays text-only reports its `TRAJECTORY` dimension as `UNAVAILABLE` (it made no tool calls) and is neither passed nor failed on it, instead of the spec being ignored silently |
+| `app.agent-lab.with-tools.enabled` | `AGENT_LAB_WITH_TOOLS_ENABLED` | `false` | Lets an Agent Lab run ask for the agent's real tools (`withTools` on the run request): the answers then come from the chat turn's tool pipeline, and a call that needs a person parks as a pending approval for the lab's session. `false` = the lab stays one tool-less completion and a run asking for tools is refused with a 400. Lessons, skill learning, the score judge and the coding seams stay tool-less whatever this says |
+| `app.llm.judge.sample-rate` | `APP_LLM_JUDGE_SAMPLE_RATE` | `0.05` | The fraction of live turns the background quality judge samples (monitoring only; it never changes a reply). Also settable **at run time, without a restart**, through the platform setting `platform.quality.judge.sample-rate` (0 to 1, the admin settings API): a stored value overrides this one, an unset or unparseable one falls back to it, and the result is clamped to 0..1 |
+| `app.llm.judge.sample-rate-cache-ms` | (none) | `10000` | How long a read of that platform setting is reused (it is read on every turn) |
+| `app.llm.judge.max-excerpt-length` | (none) | `600` | Characters of the user message and answer echoed into the judge prompt and the recorded issue |
+| `rl.selection.server-turn-ref` | `RL_SELECTION_SERVER_TURN_REF` | `false` | Which chat turns the bandits (model route, tool subset, prompt variant, generation parameters, reasoning depth) may vary. `false` = only a turn whose client sent a `turnRef`, the Playground, so exploration stays on test traffic. `true` = the console chat endpoint also gives an untagged turn a `srv:` reference of its own, so exploration reaches real conversations. Only that endpoint: agent jobs, evals, the lab, channels and an approval's continuation turn never explore. A client does not know a server-made reference, so a thumbs-up cannot reward it |
 
 ### Settings that do not exist
 
@@ -909,7 +1347,7 @@ Registers a local Ollama (or any OpenAI-compatible local server) as the FREE-tie
 ## Personal agent settings
 
 Settings added with [personal mode](personal-mode.md). Every default below leaves an existing install
-unchanged; the `personal` profile (`application-personal.yml`) flips five of them, listed first. All are
+unchanged (except the six agent-runtime defaults set on 2026-10-23, see [Agent and platform feature flags](#agent-and-platform-feature-flags)); the `personal` profile (`application-personal.yml`) flips several of them, listed first. All are
 Spring properties, so the environment variable is the relaxed-binding name (`app.auth.mode` is
 `APP_AUTH_MODE`). Compose passes only the ones named in `deploy/compose/personal.yml`; put the rest in
 `deploy/compose/core.env`.
@@ -919,7 +1357,10 @@ Spring properties, so the environment variable is the relaxed-binding name (`app
 | Property | Env | Without `personal` | With `personal` |
 |---|---|---|---|
 | `app.auth.mode` | `APP_AUTH_MODE` | `keycloak` | `local` |
-| `app.agents.taint.mode` | `APP_AGENTS_TAINT_MODE` | `off` | `enforce` |
+| `app.agents.taint.mode` | `APP_AGENTS_TAINT_MODE` | `observe` (`off` before 2026-10-23) | `enforce` |
+| `app.agent-hooks.enabled` | `AGENT_HOOKS_ENABLED` | `true` (`false` before 2026-10-23) | `false` (nobody there authors hooks) |
+| `app.tool-arg-policies.enabled` | `TOOL_ARG_POLICIES_ENABLED` | `true` (`false` before 2026-10-23) | `false` (nobody there authors policies) |
+| `app.skills.supply-chain.enforce` | `SKILLS_SUPPLY_CHAIN_ENFORCE` | `true` (`false` before 2026-10-23) | `false` (scan and pins stay on) |
 | `app.mcp.stdio.sandbox` | `APP_MCP_STDIO_SANDBOX` | `none` | `os` (the container stack sets `none`, see [Personal mode](personal-mode.md#sandbox-levels)) |
 | `app.skills.learning.enabled` | `APP_SKILLS_LEARNING_ENABLED` | `false` | `true` |
 | `app.skills.learning.self-check.enabled` | `APP_SKILLS_LEARNING_SELF_CHECK_ENABLED` | `false` | `true` |
@@ -1043,7 +1484,7 @@ See [Add-ons](personal-mode.md#add-ons) and the [console guide](console/add-ons.
 
 | Property | Env | Default | Meaning |
 |---|---|---|---|
-| `app.agents.taint.mode` | `APP_AGENTS_TAINT_MODE` | `off` (`enforce` in `personal`) | `off`, `observe` (opt-in: track, count and audit what would need approval, one audit row and one WARN per tool per tainted turn; behaviour unchanged, but it classifies every guarded tool call and writes `audit_log_entry` rows) or `enforce` (untrusted tool output is delimited as data and, once a turn is tainted, a tool that writes tenant data, uses stored credentials or sends data out needs approval) |
+| `app.agents.taint.mode` | `APP_AGENTS_TAINT_MODE` | `observe` (`enforce` in `personal`; `off` before 2026-10-23, owner decision) | `off`, `observe` (the base default: track, count and audit what would need approval, one audit row and one WARN per tool per tainted turn; behaviour unchanged, but it classifies every guarded tool call and writes `audit_log_entry` rows) or `enforce` (untrusted tool output is delimited as data and, once a turn is tainted, a tool that writes tenant data, uses stored credentials or sends data out needs approval) |
 | `app.agents.taint.http-get-allow-hosts` | `APP_AGENTS_TAINT_HTTP_GET_ALLOW_HOSTS` | empty | comma-separated hosts (and their subdomains) a tainted turn may `GET` through `http_request` / `fetch_web_page`; empty means no restriction on GET. Only consulted while a turn is tainted |
 
 Metrics: `agent.taint.marked{tool}`, `agent.taint.tainted_turns{mode}`, `agent.taint.sink_calls{tool,action}`. Audit entries
@@ -1100,8 +1541,30 @@ when `enabled` is true, this is a one-person install and the OS sandbox above is
 | `app.assistant.local-shell.runner-url` | `APP_ASSISTANT_LOCAL_SHELL_RUNNER_URL` | empty | The workspace-runner (`services/workspace-runner`). When set, commands run there instead of the OS sandbox; the launcher's `--profile workspace` sets it to `http://workspace-runner:8090` |
 | `app.assistant.local-shell.runner-secret` | `APP_ASSISTANT_LOCAL_SHELL_RUNNER_SECRET` | empty | Bearer secret the runner checks (Compose passes `WORKSPACE_RUNNER_SECRET`, generated by `scripts/vegaduta secrets`) |
 | `app.assistant.local-shell.workspace-host-path` | `APP_ASSISTANT_LOCAL_SHELL_WORKSPACE_HOST_PATH` | empty | Where the projects folder is on the host, shown in the Assistant's folder picker |
-| `app.guardrails.max-tool-calls-per-turn` | `GUARDRAILS_MAX_TOOL_CALLS_PER_TURN` | `15` (`150` in the `personal` profile) | Tool calls one turn may make |
-| `app.chat.continuation.max-passes` | `APP_CHAT_CONTINUATION_MAX_PASSES` | `8` | Extra model passes a streamed turn may run when a reply stops at an announced-but-undone step ("Let me create the file:"); a pass that makes no tool call ends it. `0` turns it off |
+| `app.guardrails.max-tool-calls-per-turn` | `GUARDRAILS_MAX_TOOL_CALLS_PER_TURN` | `15` (`150` in the `personal` profile) | Tool calls one turn may make (see [Tool calls: budget, rounds and result size](#tool-calls-budget-rounds-and-result-size)) |
+| `app.chat.continuation.max-passes` | `APP_CHAT_CONTINUATION_MAX_PASSES` | `8` | Extra model passes a turn (any reasoning depth) may run when a reply stops at an announced-but-undone step ("Let me create the file:"); a pass that makes no tool call ends it. `0` turns it off. When a reply counts as unfinished is described under [conversation-aware turns](#conversation-aware-turns-follow-ups-continuation-and-routing) |
+| `app.chat.finish.enabled` | `APP_CHAT_FINISH_ENABLED` | `true` | Group `app.chat.finish`. Act on the provider's finish reason (Anthropic `stop_reason`, OpenAI `finish_reason`, Gemini `finishReason`, Ollama `done_reason`): continue a reply cut off at the output limit, say so when the provider's safety system stopped a reply, retry an unusable tool call once. `false` ignores finish reasons, as before. An empty reply or one closed after a failure is never cached or stored as an answer whatever this says |
+| `app.chat.finish.max-continuations` | `APP_CHAT_FINISH_MAX_CONTINUATIONS` | `2` | Extra model passes allowed to finish a reply cut off at the output limit (`length` / `max_tokens`). Each is billed like any call and offers no tools. The pieces are joined; if the reply is still cut off the person gets `truncated-notice` and the reply is kept in the transcript as cut off (not cached). `0` never continues |
+| `app.chat.finish.max-tool-call-retries` | `APP_CHAT_FINISH_MAX_TOOL_CALL_RETRIES` | `1` | Extra passes after a tool call the provider could not use (Gemini `MALFORMED_FUNCTION_CALL`), tools on offer. Only when no tool has run yet in the turn (the retry cannot see this turn's tool results, so it must not repeat a side effect); otherwise the person gets `malformed-tool-call-notice`. `0` never retries |
+| `app.chat.finish.continue-nudge` | (none) | the shipped prompt `nudge.reply_cut_off` | **Deprecated alias** of the prompt `nudge.reply_cut_off` (sent as the next user message to make the model continue a reply cut off at the limit "exactly where it stopped"). Applied as the prompt's PLATFORM-scope default only when it differs from the shipped text, with a deprecation warning at startup; any stored override beats it. Not set in `application.yml` |
+| `app.chat.finish.retry-tool-call-nudge` | (none) | the shipped prompt `nudge.retry_tool_call` | **Deprecated alias** of the prompt `nudge.retry_tool_call` (sent after a malformed tool call). Same rule as `continue-nudge`: the platform default only, warned at startup, beaten by any stored override. Not set in `application.yml` |
+| `app.chat.finish.truncated-notice` | (none) | (none; the prompt `message.finish.truncated`) | Deprecated alias for the platform default of the prompt `message.finish.truncated`: shown after a reply that is still cut off when the continuation passes are used up. A value that differs from the shipped text is applied (and logged); a tenant or agent override of the prompt wins |
+| `app.chat.finish.refusal-notice` | (none) | (none; the prompt `message.finish.refusal`) | Deprecated alias for the platform default of the prompt `message.finish.refusal`: shown when the provider's safety system stopped the reply (`{reason}` is the provider's own finish reason). Replaces the old "could you try rephrasing" line, which blamed the wording of the request for a block it did not cause |
+| `app.chat.finish.malformed-tool-call-notice` | (none) | (none; the prompt `message.finish.malformed_tool_call`) | Deprecated alias for the platform default of the prompt `message.finish.malformed_tool_call`: shown when the model's tool call was unusable and the retries did not fix it: nothing was run |
+| `app.chat.finish.empty-reply-message` | (none) | (none; the prompt `message.finish.empty_reply`) | Deprecated alias for the platform default of the prompt `message.finish.empty_reply`: shown when the model returned nothing at all and gave no reason (was the hard-coded "I don't have a response for that - could you try rephrasing your message?"). The reply is stored as a failed reply, not as something the agent said, and is never cached |
+| `app.chat.resilience.tool-idle-ceiling` | `APP_CHAT_RESILIENCE_TOOL_IDLE_CEILING` | `PT30M` | Group `app.chat.resilience`. How long ONE tool may run before the stream idle timer counts it as hung, measured from the tool's last start, finish or progress. While a tool is in flight this replaces `app.llm.http.stream-idle-timeout`. The tools have their own timeouts; this is the backstop. Only tools wrapped by the platform's tool logging report their activity: a tool added by a caller as a raw extra tool is still timed like silence |
+| `app.chat.resilience.replay-after-journaled-effects` | `APP_CHAT_RESILIENCE_REPLAY_AFTER_JOURNALED_EFFECTS` | `true` | A turn that already ran tools is replayed on another provider (the BYOK fallback provider, the next rung of the hosted pool) only when every tool that reached its implementation is read-only or was recorded by the effect journal, so that an identical repeat is served from the journal instead of the provider. A tool still running, a write/send tool that ran without a journal record (journal off, or the call threw after the provider may have acted) and an unclassified tool with a mutating name all block the replay; the provider's failure is then reported as it is. The journal protects an IDENTICAL repeat only (same tool and arguments within the turn): a replayed model that sends with different arguments is not protected, which is why `false` exists, meaning never replay after a tool with side effects ran. Counted in `chat.failover.blocked` |
+| `app.chat.resilience.retry-at-fast-when-no-tool-ran` | `APP_CHAT_RESILIENCE_RETRY_AT_FAST_WHEN_NO_TOOL_RAN` | `true` | A careful / rigorous / planned turn that hits its time limit BEFORE any tool ran is answered again at fast depth with its tools on offer (nothing is lost; counted in `chat.degraded.depth_timeout`). `false` reports the timeout instead. A turn that hit the limit AFTER a tool ran is always reported with the steps that ran (`chat.degraded.depth_timeout_partial`), kept in the transcript so the next turn sees them, and is never cached |
+| `app.chat.resilience.list-none` | (none) | `none` | Stands in for an empty list in the timeout notice |
+| `app.chat.resilience.depth-timeout-partial-notice` | (none) | text in `application.yml` | Shown when a buffered-depth turn ran out of time after tools ran. `{depth}`, `{seconds}`, `{completed}` (tools that ran, with repeat counts) and `{running}` (tools still running) are filled in. Not shown to the model |
+| `app.chat.resilience.depth-timeout-degraded-notice` | (none) | text in `application.yml` | Step-event note (`guardrail` event, subject `depth`) when a timed-out turn is answered again at fast depth; `{depth}` |
+| `app.chat.resilience.replay-blocked-notice` | (none) | text in `application.yml` | Step-event note (`guardrail` event, subject `failover`) when a provider failure was not retried elsewhere because tools had run; `{tools}` |
+| `app.agent-turn.repair.max-attempts` | `APP_AGENT_TURN_REPAIR_MAX_ATTEMPTS` | `1` | Group `app.agent-turn.repair`. `POST /api/completions/agent-turn` (hosted model for a client-side tool loop): extra model calls one turn may spend when a tool call arrives with unusable arguments (invalid or cut-off JSON). The model is handed the error as the call's result and asked again; usage of every call is summed at settlement and the reservation covers one call, so a repaired turn can cost up to `1 + max-attempts` calls. `0` never asks again. If the calls are still unusable they are dropped (never returned with empty arguments) and the reply text says so, with `finishReason` `length` or `malformed_tool_call` |
+| `app.agent-turn.repair.invalid-arguments-message` | (none) | text in `application.yml` | Model-facing. The result handed to the model for the call whose arguments were unusable (`{tool}`, `{reason}`) |
+| `app.agent-turn.repair.skipped-message` | (none) | text in `application.yml` | Model-facing. The result handed to the model for every other call of the same reply (none of them was run) (`{tool}`) |
+| `app.agent-turn.repair.invalid-reason-cut-off` | (none) | text in `application.yml` | The `{reason}` when the arguments were cut off because the reply hit the output length limit |
+| `app.agent-turn.repair.invalid-reason-malformed` | (none) | text in `application.yml` | The `{reason}` when the arguments were not valid JSON for another reason |
+| `app.agent-turn.repair.unusable-calls-notice` | (none) | text in `application.yml` | Client-facing text returned when the calls are still unusable after the last attempt (`{tool}`, `{reason}`) |
 
 The file tools `workspace_list`, `workspace_read`, `workspace_search`, `workspace_write` and `workspace_edit` are offered under the same
 conditions as the terminal (enabled, one-person install) when the workspace folder exists in core's process. The
@@ -1112,6 +1575,48 @@ Compose (`--profile workspace`): `VEGADUTA_PROJECTS_DIR` (default `~/VegaDuta-Pr
 
 Network from the terminal follows the sandbox's per-server list: add `local-shell` (or `*`) to
 `app.mcp.stdio.sandbox-network-allow`.
+
+#### Limits that were constants (package 3c-2)
+
+These were literals in the Java code; each is a setting now with the same default, so nothing changes until an operator sets one. The defaults are also in a `.properties` file in the owning module (the fallback when `application.yml` is not loaded); the two are kept equal.
+
+**Agent max-tokens ceiling.** `app.agents.max-tokens-ceiling` is the one definition of "the most output tokens an agent's reply may be given". It bounds `POST /api/agents` and `PUT /api/agents/{id}/generation-params` (a larger `maxTokens` is a 400 whose message names the configured limit), the Simple-mode tuning that infers a value from the system prompt, and what one hosted-pool turn reserves of the tenant's monthly token budget (a stored value above the ceiling is reserved as the ceiling, so lowering it only ever tightens). It used to be the literal `8192` in `AgentCreateRequest`, `AgentGenerationParamsUpdateRequest`, `GenerationParamsInferenceService` and `FreeTierUsageLimiterService`. The web screens (`GenerationTuningSection.tsx`, `blueprintFields.ts`) still slide up to 8192: no existing API the console loads carries the ceiling, so raising it needs a new endpoint to follow. Lowering it is safe at once, because the server rejects the larger value and says why. Other copies of 8192 are not covered by this setting: `core/brief` (`BriefValidator`, `EnvoyAgentPorts`) and `ResearchRunPlan.AGENT_MAX_TOKENS`.
+
+| Key | Env var | Default | Effect |
+|---|---|---|---|
+| `app.agents.max-tokens-ceiling` | `APP_AGENTS_MAX_TOKENS_CEILING` | `8192` | most output tokens an agent may be given (create, update, Simple-mode tuning, hosted-pool reservation) |
+| `app.agents.inferred-max-tokens-floor` | `APP_AGENTS_INFERRED_MAX_TOKENS_FLOOR` | `128` | least value the Simple-mode tuning proposes (was `MIN_MAX_TOKENS`) |
+| `app.agents.collaboration.max-branches` | `APP_AGENTS_COLLABORATION_MAX_BRANCHES` | `8` | branches one `delegate_parallel` or `run_subtasks` call may start; the rest come back as "over the limit" entries, and the swarm verifier re-dispatches at most this many per repair round. Was `MAX_BRANCHES` in `DelegateToTeamToolCallback` and `RunSubtasksToolCallback`. This is the platform value of the setting `delegation.maxBranches`: a workspace or an agent can override it in the console (docs/settings.md) |
+| `app.agents.collaboration.branch-timeout-seconds` | `APP_AGENTS_COLLABORATION_BRANCH_TIMEOUT_SECONDS` | `240` | wall-clock limit of one branch (`BRANCH_TIMEOUT_SECONDS`, duplicated in both tools). The platform value of the setting `delegation.branchTimeoutSeconds` (workspace or agent override, 10-3600) |
+| `app.agents.collaboration.max-answer-chars` | `APP_AGENTS_COLLABORATION_MAX_ANSWER_CHARS` | `4000` | characters of one branch's answer handed back to the calling model; a longer one is cut and ends with "…" (`MAX_ANSWER_CHARS`, duplicated in both tools) |
+| `app.agents.collaboration.max-role-chars` | `APP_AGENTS_COLLABORATION_MAX_ROLE_CHARS` | `80` | characters kept of a `run_subtasks` worker's role label (`MAX_ROLE_CHARS`) |
+| `app.agent-turn.limits.max-messages` | `APP_AGENT_TURN_LIMITS_MAX_MESSAGES` | `400` | messages in one `POST /api/completions/agent-turn` conversation; more is a 400 (`AgentTurnController.MAX_MESSAGES`) |
+| `app.agent-turn.limits.max-total-chars` | `APP_AGENT_TURN_LIMITS_MAX_TOTAL_CHARS` | `600000` | characters of message content in that conversation; more is a 413 (`MAX_TOTAL_CHARS`) |
+| `app.agent-turn.limits.max-tools` | `APP_AGENT_TURN_LIMITS_MAX_TOOLS` | `40` | tool definitions the client may offer; more is a 400 (`MAX_TOOLS`) |
+| `app.agent-turn.limits.max-tool-calls-per-message` | `APP_AGENT_TURN_LIMITS_MAX_TOOL_CALLS_PER_MESSAGE` | `32` | tool calls on one assistant message; more is a 400 (`MAX_TOOL_CALLS_PER_MESSAGE`) |
+| `app.llm.request-snapshot.max-message-chars` | `APP_LLM_REQUEST_SNAPSHOT_MAX_MESSAGE_CHARS` | `40000` | LLM request inspector: characters of one message kept (display only; was `LlmRequestSnapshotter.MAX_MESSAGE_CHARS`) |
+| `app.llm.request-snapshot.max-total-chars` | `APP_LLM_REQUEST_SNAPSHOT_MAX_TOTAL_CHARS` | `300000` | characters of all messages kept (`MAX_TOTAL_CHARS`) |
+| `app.llm.request-snapshot.max-schema-chars` | `APP_LLM_REQUEST_SNAPSHOT_MAX_SCHEMA_CHARS` | `4000` | characters of one tool's input schema kept (`MAX_SCHEMA_CHARS`) |
+| `app.llm.request-snapshot.max-tools` | `APP_LLM_REQUEST_SNAPSHOT_MAX_TOOLS` | `200` | tool definitions kept (`MAX_TOOLS`) |
+| `app.llm.request-snapshot.max-call-chars` | `APP_LLM_REQUEST_SNAPSHOT_MAX_CALL_CHARS` | `600` | characters of one tool call's arguments or one tool result kept (the literal `600`) |
+| `app.llm.request-snapshot.truncation-marker` | (none) | `\n… [truncated for display]` | appended to a message that was cut |
+| `app.llm.request-snapshot-store.mode` | `APP_LLM_REQUEST_SNAPSHOT_STORE_MODE` | `redis` | where the request inspector keeps its redacted copies of recent model requests: `redis` also writes each copy to Redis (the one the rate limiter uses), so any replica can answer "what was sent" for a turn another replica ran and the copies survive a restart for the ttl; `memory` is this JVM only (the behaviour before 2026-10). With `redis` and no Redis connection the store logs it and keeps memory only. Copies hold user text (redacted and capped), so they expire after the ttl in both places and are never written to a database |
+| `app.llm.request-snapshot-store.ttl` | `APP_LLM_REQUEST_SNAPSHOT_STORE_TTL` | `6h` | how long a copy is kept, in memory and in Redis (was `LlmRequestSnapshotStore.TTL`) |
+| `app.llm.request-snapshot-store.max-sessions` | `APP_LLM_REQUEST_SNAPSHOT_STORE_MAX_SESSIONS` | `300` | sessions kept in memory; the least recently used leave first (was `MAX_SESSIONS`) |
+| `app.llm.request-snapshot-store.max-per-session` | `APP_LLM_REQUEST_SNAPSHOT_STORE_MAX_PER_SESSION` | `80` | model calls kept per session, in memory and in Redis (was `MAX_PER_SESSION`) |
+| `app.llm.request-snapshot-store.write-queue-size` | `APP_LLM_REQUEST_SNAPSHOT_STORE_WRITE_QUEUE_SIZE` | `256` | copies waiting to be written to Redis; when full the oldest waiting copy is skipped (it stays in memory on the replica that took it), so a slow Redis never slows a model call |
+| `app.llm.request-snapshot-store.key-prefix` | `APP_LLM_REQUEST_SNAPSHOT_STORE_KEY_PREFIX` | `agentic:llm-request-snapshots:` | Redis key prefix; the key is the prefix, the tenant, `\|` and the session id |
+| `app.tools.mcp.request-timeout-seconds` | `APP_TOOLS_MCP_REQUEST_TIMEOUT_SECONDS` | `60` | seconds one request to a tenant's registered MCP server (tool call, `tools/list`, initialize, health check) may wait (`DynamicMcpConnectionManager.REQUEST_TIMEOUT`). Applies to connections opened after the change. Separate from `app.agent-runtime`'s per-call tool timeout, which stops a call from outside |
+| `app.tools.mcp.test-timeout-seconds` | `APP_TOOLS_MCP_TEST_TIMEOUT_SECONDS` | `20` | the same for the "test connection" action (`McpConnectionTester.TEST_TIMEOUT`) |
+| `app.tools.openapi.connect-timeout-seconds` | `APP_TOOLS_OPENAPI_CONNECT_TIMEOUT_SECONDS` | `10` | seconds an OpenAPI tool call, token call or spec fetch may take to connect (`OpenApiToolExecutor.CONNECT_TIMEOUT`) |
+| `app.tools.openapi.request-timeout-seconds` | `APP_TOOLS_OPENAPI_REQUEST_TIMEOUT_SECONDS` | `30` | seconds such a call may take to get its reply (`REQUEST_TIMEOUT`) |
+| `app.tools.openapi.max-response-bytes` | `APP_TOOLS_OPENAPI_MAX_RESPONSE_BYTES` | `1048576` | bytes of an API reply that are read (`MAX_RESPONSE_BYTES`) |
+| `app.tools.openapi.max-result-chars` | `APP_TOOLS_OPENAPI_MAX_RESULT_CHARS` | `16000` | characters of an API reply handed to the model; a longer one is clipped and the result says so (`MAX_RESULT_CHARS`) |
+| `app.tools.openapi.max-spec-redirects` | `APP_TOOLS_OPENAPI_MAX_SPEC_REDIRECTS` | `3` | redirects followed when fetching a spec; each hop is re-checked against the SSRF guard (`MAX_SPEC_REDIRECTS`) |
+
+The groups above are `app.agents` (`max-tokens-ceiling`, `inferred-max-tokens-floor`), `app.agents.collaboration`, `app.agent-turn.limits`, `app.llm.request-snapshot`, `app.llm.request-snapshot-store`, `app.tools.mcp` and `app.tools.openapi`.
+
+The tool-call ceiling per turn and its autonomy-tier scaling (supervised divisor and floor, autonomous multiplier) are `app.guardrails.max-tool-calls-per-turn` and `app.guardrails.step-limit.*`, and the knowledge-search top-k and minimum score are `app.agent-runtime.defaults.retrieval-top-k` / `retrieval-min-score` (and the agent and tenant overrides of them); both were made settings by earlier packages and are unchanged here.
 
 ### The Assistant's desktop tools
 
@@ -1231,8 +1736,57 @@ homeserver).
 |---|---|---|---|
 | `app.voice.realtime.allowed-origins` | (none) | `${app.web.allowed-origins}` plus same-origin | origins that may open the browser realtime-voice socket; `*` allows any |
 | `app.voice.relay.allowed-origins` | (none) | empty | origins on the Twilio ConversationRelay socket; empty is a same-origin check only, which admits Twilio (it sends no `Origin`) and refuses browser pages |
-| `app.guardrails.fail-mode` | `APP_GUARDRAILS_FAIL_MODE` | `closed` | `closed`: a guardrail check that itself fails refuses the call or withholds the output. `open` restores the old fail-open behaviour and logs a warning |
+| `app.guardrails.fail-mode` | `APP_GUARDRAILS_FAIL_MODE` | `closed` | `closed`: a guardrail check that itself fails refuses the call or withholds the output. `open` restores the old fail-open behaviour and logs a warning. **Behaviour change:** a per-agent tool-argument policy lookup that throws (`app.tool-arg-policies`) used to let the call through in every mode; it now follows this setting, so with the default a failing policy store refuses the agent's tool calls with a "could not be checked" result instead of silently dropping the policies |
+| `app.guardrails.judge.max-input-chars` | `APP_GUARDRAILS_JUDGE_MAX_INPUT_CHARS` | `4000` | Group `app.guardrails.judge`. Characters of the checked text (a tool result, a user message, tool-call arguments) put in front of an LLM judge: the tool-output injection judge, the toxicity judge, the RIGOROUS tool-call verifier and the moderation policy-pack classifier. The rest is not judged. Was a constant in each of the four classes |
+| `app.guardrails.judge.truncation-marker` | (none) | ` …[truncated]` | Appended to judge input cut at `max-input-chars` (model-facing; the leading space is part of the value) |
+| `app.guardrails.judge.temperature` | `APP_GUARDRAILS_JUDGE_TEMPERATURE` | empty (inherit) | Sampling temperature of judge calls. Empty keeps the calling agent's own setting, which is what the judges used before this existed (an agent at 0.9 gets a noisy verdict); `0.0` pins judges. Sent as per-call options |
+| `app.guardrails.judge.max-tokens` | `APP_GUARDRAILS_JUDGE_MAX_TOKENS` | empty (inherit) | Output-token cap of judge calls. Empty keeps the agent's own cap (an agent with a very small cap can truncate a verdict); the verdicts are one line |
+| `app.guardrails.judge.model` | `APP_GUARDRAILS_JUDGE_MODEL` | empty (agent's model) | Model id for judge calls, a per-call override on the same provider and credentials as the agent's chat client. It does not switch provider. Not yet applied to the answer-consistency and Reflexion judges, which live in `core/agents-turn` |
+| `app.guardrails.jailbreak.max-scanned-chars` | `APP_GUARDRAILS_JAILBREAK_MAX_SCANNED_CHARS` | `16000` | Characters of a message or reply the jailbreak patterns scan. Text beyond it is ignored, not rejected, so a payload padded past the window is not seen; raise it to close that (the patterns are bounded, the cost is linear). The chat gateway's prompt-injection screener has its own window |
+| `app.guardrails.toxicity.block-score` | `APP_GUARDRAILS_TOXICITY_BLOCK_SCORE` | `60` | The toxicity judge's 0-100 score at or above which content is blocked. Lower blocks more |
+| `app.guardrails.tool-verifier.fail-mode` | `APP_GUARDRAILS_TOOL_VERIFIER_FAIL_MODE` | `inherit` | What the RIGOROUS tool-call verifier does when its model call errors or answers nothing. `inherit`: follow `app.guardrails.fail-mode` (`closed` unless changed), so the verifier agrees with the injection judge and the dispatch gate; `open`: approve the call; `closed`: refuse it. **Behaviour change:** the verifier used to fail open always (including on a blank answer); with the default it now refuses the call. A missing chat client is "not configured" and approves in every mode |
+| `app.guardrails.tool-verifier.unavailable-reason` | (none) | `the tool-call check could not be completed - failed closed` | Model-facing. The reason the verifier gives for refusing a call it could not check (fail-closed only) |
+| `app.guardrails.tool-verifier.context-messages` | `APP_GUARDRAILS_TOOL_VERIFIER_CONTEXT_MESSAGES` | `6` | How many of the latest messages of the conversation (user and assistant, oldest first, within `app.guardrails.judge.max-input-chars`) the RIGOROUS verifier is shown in front of the current user message, read from the turn's session memory under its scoped id. A follow-up such as "yes, send it" used to be judged against "yes". `0` = the current message alone (the old behaviour). The framing line is the prompt key `judge.tool_verifier.context` |
+| `app.guardrails.supervised.gate-read-only` | `APP_GUARDRAILS_SUPERVISED_GATE_READ_ONLY` | `true` (`false` in the `personal` profile) | Group `app.guardrails.supervised`. `true`: the `SUPERVISED` autonomy tier asks a human before every tool call, a search or a lookup included (the behaviour before this existed). `false`: a call runs without approval only when ALL hold: the tool has an explicit classification row that says read-only (a stored row or a compiled-in declaration; never an unclassified tool, a quarantined one, or an MCP server's own read-only hint), the agent is positively judged not to hold the lethal trifecta (`app.tools.classification.trifecta-*`; an agent that does, or that cannot be judged, keeps full gating), and nothing else asks for approval (taint, a procedure, a hook, the confirmation gate). Argument policies, hooks, budget and step limits, the circuit breaker and every other guard still run on the call. Each such call is written to the audit log (`tool.supervised.auto_allowed`) and to the turn journal as `auto-allowed: read-only under SUPERVISED`, and counted in `agent.tool.supervised.auto_allowed`. A security setting (`guardrails.supervised.readOnlyCalls` in the [settings catalog](settings.md)): a workspace administrator or an agent can only choose `gate`, never loosen a platform `true`. An Auto-select agent (empty tool allow-list) is judged by the trifecta analysis only when `app.tools.classification.trifecta-analyse-auto-select` is `true` |
+| `app.guardrails.approval-park.awaiting-message` | (none) | text in `application.yml` | Group `app.guardrails.approval-park` (model-facing instructions, editable). What the model reads when its tool call is held for human approval: the action is awaiting approval and was not run, the task resumes automatically once it is decided, tell the user briefly and end the turn without abandoning the goal. `{tool}` and `{requestId}` are filled in Compatibility alias of the prompt `toolresult.park.awaiting` ([prompts](prompts.md)): an override of the key at any scope wins, then this value when it differs from the shipped wording, then the shipped wording. |
+| `app.guardrails.approval-park.queued-message` | (none) | text in `application.yml` | What the model reads for a tool call it makes after the turn parked: the call was not run, was recorded as its own pending approval and runs once approved. `{tool}`, `{requestId}`, `{parkedTool}` Alias of `toolresult.park.queued`, same order. |
+| `app.guardrails.approval-park.queue-full-message` | (none) | text in `application.yml` | The same, when `max-queued-calls` calls are already queued: the call was neither run nor queued Alias of `toolresult.park.queue_full`, same order. |
+| `app.guardrails.approval-park.record-failed-message` | (none) | text in `application.yml` | What the model reads when the approval request itself could not be recorded (database error): nothing is waiting, the call was not run, the turn is not parked. `{tool}` Alias of `toolresult.park.record_failed`, same order. |
+| `app.guardrails.approval-park.max-queued-calls` | `APP_GUARDRAILS_APPROVAL_PARK_MAX_QUEUED_CALLS` | `5` | Calls made after a turn parked on an approval that are recorded as their own pending approvals (so they run once approved instead of being lost). Further calls are refused unrecorded; `0` queues none |
+| `app.guardrails.approval-park.max-goal-chars` | `APP_GUARDRAILS_APPROVAL_PARK_MAX_GOAL_CHARS` | `4000` | How much of the user message that started a turn parked on an approval is stored in the approval's replay envelope, so the task can be continued with its goal restated after the decision. Longer messages are cut with a marker. `0` stores no goal: the request stays replayable but the platform does not continue the task |
+| `app.guardrails.approval-park.goal-cut-marker` | (none) | ` [...message shortened]` | Appended to a recorded goal cut at `max-goal-chars` (model-facing; the leading space is part of the value), so the agent knows the message it is shown was shortened |
+| `app.approvals.expiry.ttl` | `APP_APPROVALS_EXPIRY_TTL` | `0` (off) | How long an approval request may stay pending, from its creation. `0` (default): never expires, as before. When set, a sweep closes older pending requests: stored as `REJECTED` by `system:approval-expiry` with `expired-reason` as the reason (no new status value, so the API, SDK and UI contracts are unchanged), audited as `EXPIRED`, announced as `approval.resolved` with decision `expired`. A later approve is refused as already decided, so a stale action can no longer be approved into running; an executor with rejection cleanup (a halted workflow node) is told; a parked agent job fails as `APPROVAL_TIMEOUT` (or, with `jobs-continue-after-denial`, resumes with the expiry as the result). Keep it at least as long as `app.agent-jobs.approval.park-timeout` if the job should time out first |
+| `app.approvals.expiry.sweep-interval` | `APP_APPROVALS_EXPIRY_SWEEP_INTERVAL` | `PT5M` | How often the expiry sweep runs (one replica at a time, every tenant schema). Does nothing while `ttl` is `0` |
+| `app.approvals.expiry.initial-delay` | `APP_APPROVALS_EXPIRY_INITIAL_DELAY` | `PT1M` | Delay after startup before the first sweep |
+| `app.approvals.expiry.batch-size` | `APP_APPROVALS_EXPIRY_BATCH_SIZE` | `200` | Most requests expired per tenant per sweep; the rest wait for the next tick |
+| `app.approvals.expiry.expired-reason` | (none) | text in `application.yml` | Model-facing. The rejection reason recorded on an expired request and read back by the agent that asked: the action was not performed, the request can no longer be approved, ask again or take another route. `{ttl}` is the wait, for example `24 hours` |
+| `app.approvals.continuation.enabled` | `APP_APPROVALS_CONTINUATION_ENABLED` | `true` | After a human approves, fails or denies a gated tool call the platform continues the original task by itself: for a chat session it starts a turn (same agent, session and person) that restates the user's goal and hands the agent the tool's result; an agent job's resumed turn is built from the same message. `false`: a decision only runs or refuses the tool and writes the history note |
+| `app.approvals.continuation.max-result-chars` | `APP_APPROVALS_CONTINUATION_MAX_RESULT_CHARS` | `16000` | Longest tool output (or failure text, or denial reason) put into the continuation message; longer output is cut and says how much was left out. The approval request itself keeps up to 32 KiB. The continuation message is stored in the conversation like any other turn, so what it carries is replayed to the model on later turns while it stays inside the history window: keep this as small as the tools you gate allow. `0` sends no output |
+| `app.approvals.continuation.max-arguments-chars` | `APP_APPROVALS_CONTINUATION_MAX_ARGUMENTS_CHARS` | `2000` | Longest argument JSON shown in the continuation message |
+| `app.approvals.continuation.max-sticky-tools` | `APP_APPROVALS_CONTINUATION_MAX_STICKY_TOOLS` | `20` | Tools the conversation already used (plus the approved one) that stay on offer for the continuation turn whatever the goal matches, so the next step's tools are not trimmed away |
+| `app.approvals.continuation.sticky-tools-window` | `APP_APPROVALS_CONTINUATION_STICKY_TOOLS_WINDOW` | `PT24H` | How far back in the tool-call log "tools already used" looks |
+| `app.approvals.continuation.claim-ttl` | `APP_APPROVALS_CONTINUATION_CLAIM_TTL` | `P7D` | How long "this decision was already continued" is remembered in Redis; a repeat of the decision (retry, duplicate event, second replica) inside it starts nothing |
+| `app.approvals.continuation.turn-timeout` | `APP_APPROVALS_CONTINUATION_TURN_TIMEOUT` | `PT10M` | Wall-clock limit of the continuation turn started for a chat session |
+| `app.approvals.continuation.max-other-pending` | `APP_APPROVALS_CONTINUATION_MAX_OTHER_PENDING` | `10` | How many other still-pending actions of the same conversation are listed to the agent, so it does not request them again |
+| `app.approvals.continuation.jobs-continue-after-denial` | `APP_APPROVALS_CONTINUATION_JOBS_CONTINUE_AFTER_DENIAL` | `false` | Agent jobs. `false`: a denied approval ends the job as `APPROVAL_REJECTED`. `true`: the job resumes with the denial as the call's result so the agent can reach the goal another way (still bounded by `app.agent-jobs.approval.max-parks-per-job`). Chat sessions always continue after a denial |
+| `app.approvals.continuation.result-shortened-suffix` | (none) | text in `application.yml` | Group `app.approvals.continuation` (model-facing, editable). Appended to a shortened result; `{omitted}` is the number of characters left out |
+| `app.approvals.continuation.approver-unknown` | (none) | `a reviewer` | Group `app.approvals.continuation` (model-facing). Names the decider in the continuation message and the denial note when none is recorded |
+| `app.approvals.continuation.no-reason-text` | (none) | `no reason was given` | Stands in for the reviewer's reason when a call is denied without one |
+| `app.approvals.continuation.result-not-recorded-text` | (none) | text in `application.yml` | The result given to a resumed agent job for an approved call whose output was never recorded (the replay may have been interrupted) |
+| `app.approvals.continuation.denied-note` | (none) | text in `application.yml` | The bracketed note appended to the conversation history when a call is denied, the counterpart of the "approved action ... completed" note. `{tool}`, `{approver}`, `{reason}` |
+| `app.approvals.continuation.completed-note` | (none) | text in `application.yml` | The bracketed note appended to the conversation history when an approved call ran, whichever executor ran it (tool replay, code-workspace run or apply, channel send). `{tool}`, `{result}` |
+| `app.approvals.continuation.failed-note` | (none) | text in `application.yml` | The note appended when an approved call failed for good (not for a failure that will be retried). `{tool}`, `{failure}` |
+| `app.approvals.continuation.completed-no-output-text` | (none) | text in `application.yml` | What the agent is told for an approved call that ran but produced no output (a message sent, say) |
+| `app.approvals.continuation.max-note-result-chars` | `APP_APPROVALS_CONTINUATION_MAX_NOTE_RESULT_CHARS` | `500` | Longest output or failure text put into a history note. A note is re-sent on every later turn of the conversation, so it is much tighter than `max-result-chars`, which governs the one continuation message that carries the full result |
+| `app.approvals.continuation.other-pending-header` | (none) | text in `application.yml` | Introduces the list of other actions of the task still waiting for a decision |
+| `app.approvals.continuation.completed-message` | (none) | text in `application.yml` | The body of the message the agent is sent when the approved call ran: it was approved and has run, the user's original request is unchanged (`{goal}`), the call (`{tool}`, `{arguments}`), its output in `<tool_result>` (`{result}`, treated as data), `{otherPending}`, and to continue the original task. The `<approval_result ...>` tag around it and the `<tool_result>` wrapper are written by the code |
+| `app.approvals.continuation.failed-message` | (none) | text in `application.yml` | The same when the approved call could not be completed: the action did not take effect; correct the cause, take another route or tell the user |
+| `app.approvals.continuation.denied-message` | (none) | text in `application.yml` | The same when a human denied the call (`{result}` is the reviewer's reason): it did not run; do not ask again with the same arguments; reach the goal another way or tell the user |
 | `app.tools.classification.unclassified-action` | `TOOL_UNCLASSIFIED_ACTION` | `allow` | what a tool with no classification row gets: `allow` (counted), `require-approval` or `deny` |
+
+**Which approvals continue the task.** The platform carries the original task on after a human decides (or the request expires) for every action an agent turn asked for, not only a replayed MCP tool: the `mcp_tool.*` executor (which includes the Assistant's folder tools and local shell) does it itself; for everything else `HumanApprovalGateService` reports the outcome through `ApprovalOutcomePort` and `ApprovalOutcomeFollowUp` writes the history note and starts the turn. That covers `codeintel.workspace.run`, `codeintel.workspace.apply` and the channel sends an agent asks for (`channel_send_message`); the request must have been recorded by a tool through `evaluateInTurn` (it then carries the goal and the scoped history id). Not continued, on purpose: actions raised from an admin screen, a webhook, an inbound channel flow or the scheduler (no agent turn waits for them), a request the tenant's policy auto-approves (it ran inside the turn that asked), workflow approval nodes (they resume their own run), payment mandates (the result is a payment link the person completes later), agent proposals (`agent.proposal` starts a job), agent-job sessions (the job machinery resumes the job) and the embeddable SDK's executors (the host owns the conversation). A failure that will be retried is reported only when the last attempt fails.
+
+**Browser follower for approval continuations (not configurable).** After a person decides a parked tool call, the chat surfaces (Playground, Agent Lab chat, Assistant) follow the continuation turn core starts by polling the stored conversation (`GET /api/agents/{id}/sessions/{sid}/transcript`) and hold their input back meanwhile. The cadence lives in `web/app/components/agents/approvalContinuation.ts`, not in a core property: poll every 2 s (`CONTINUATION_POLL_MS`); give up waiting for the continuation to start after 20 s (`CONTINUATION_START_WAIT_MS`: core starts it inside the approve/reject call, so a task that was not restarted - a job session, `app.approvals.continuation.enabled=false`, a retryable failure - is reported instead of waited on); stop following a started continuation after 10 min (`CONTINUATION_MAX_WAIT_MS`, kept equal to the default of `app.approvals.continuation.turn-timeout`; raise it together with that property). The three user-facing lines it shows are in `web/messages/en.json` under `toolApproval` (`continuing`, `continueNotStarted`, `continueTimedOut`).
 
 ## Scale and reliability limits
 
@@ -1263,6 +1817,34 @@ small install behaves as before; the two **off by default** features are opt-in.
 List endpoints for workflow runs, channel contacts, knowledge documents and approvals accept
 optional `limit` and `offset` parameters with a default cap and a hard maximum; internal callers
 stay unbounded. See [List endpoint paging](api/LIST-ENDPOINT-PAGING.md).
+
+### Keys the code reads that this guide did not name
+
+<!-- config-docs-sweep: keys found in code with no row in this guide; defaults are those of the code. `make config-docs` lists drift. -->
+
+| Property | Default | Meaning |
+|---|---|---|
+| `app.knowledge.vector-index.initial-delay-ms` | `180000` | Delay after startup before the first pgvector index maintenance pass (kept off the startup path). |
+| `app.knowledge.vector-index.interval-ms` | `21600000` | Time between pgvector index maintenance passes (6 hours). |
+| `app.llm.spend-counter.reconcile-initial-delay-ms` | `120000` | Delay after startup before the first tick of the spend-counter reconciler (the pass itself runs every `app.llm.spend-counter.reconcile-interval`). |
+| `app.llm.spend-counter.reconcile-tick-ms` | `60000` | How often the reconciler checks whether a pass is due; a pass in progress continues on each tick. |
+| `app.mcp.max-stdio-connections-per-tenant` | `5` | How many local (STDIO) MCP servers one workspace may keep connected at once; the next one is refused with a message to disable another or ask the operator to raise this. |
+| `app.mcp.registry-store` | `memory` | `memory`: each replica connects MCP servers on its own. `redis`: replicas share an ownership registry so one registration has one live client (set this when running more than one replica). |
+| `app.mcp.registry-heartbeat-ms` | `15000` | With `registry-store=redis`: how often a replica renews its leases and its own registration. |
+| `app.mcp.registry-poll-ms` | `250` | With `registry-store=redis`: how often a replica drains its command queue from the other replicas. |
+| `app.mcp.registry-adopt-interval-ms` | `60000` | With `registry-store=redis` and exclusive clients: how often connected registrations with no live owner (the owner died, its lease expired) are adopted by a replica. |
+| `app.sandbox.data-analysis.artifact-sweep-ms` | `600000` | How often charts, workbooks and scripts older than `app.sandbox.data-analysis.artifact-ttl-hours` are deleted from object storage. |
+| `app.agent.share.report-revoke-threshold` | `3` | Reports after which a public agent share link is revoked automatically. |
+| `app.x402.allowed-payees` | empty (every payment refused) | Comma-separated EVM addresses an x402 payment may be made to; the payee comes from the server the model called, so nothing is paid until you list the addresses you trust. |
+| `app.x402.tenant-daily-budget-usdc` | `5` | Most USDC one workspace may spend through x402 in a rolling 24 hours. A value that is not a number refuses every payment. |
+| `app.sidecar.shared-secret` | empty (falls back to `SIDECAR_SHARED_SECRET`) | Shared secret the knowledge sidecar expects from the platform (the value is not reproduced here). |
+| `app.agents.default-guardrails` | `${APP_AGENTS_DEFAULT_GUARDRAILS:jailbreak}` | Guardrails a new agent starts with, comma-separated; empty means none. |
+| `app.chat.directives.memory.enabled` | `${APP_CHAT_DIRECTIVES_MEMORY_ENABLED:true}` | Operator kill switch for the standing memory directive in the system prompt; there is no per-agent or per-tenant override because the standing directives are safety rails. |
+| `app.tools.auto-selection.max-tools-per-turn` | `${TOOL_AUTO_SELECTION_MAX_TOOLS:12}` | Most tools offered to the model in one turn when automatic tool selection is on (`24` in the `personal` profile). |
+| `app.tools.effect-journal.enabled` | `${TOOL_EFFECT_JOURNAL_ENABLED:true}` | Records write and send tool calls while they are in flight, so a job resumed after a restart does not repeat them. Off disables resume-from-journal. |
+| `app.guardrails.run-budget.usd` | `${AGENT_RUN_BUDGET_USD:2.0}` | Platform cap, in USD, on what one agent run may spend; `0` means no platform cap. The code default is the same `2.0`, so a context without `application.yml` is capped too. |
+| `app.memory.blocks.enabled` | `${APP_MEMORY_BLOCKS_ENABLED:true}` | Whether memory blocks (short named notes, including per-project blocks) are read and given to agents; the size limits are `app.memory.blocks.max-chars-per-block`, `max-project-blocks` and `max-total-chars`. |
+| `app.context.compaction.enabled` | `${APP_CONTEXT_COMPACTION_ENABLED:true}` | Whether a long prompt is compacted (older turns folded into a summary) before it overflows the model's window. On by default since 2026-10-23 (owner decision; a prompt inside the window is untouched); see `app.auxiliary-model.compaction` for the model that writes the summary. |
 
 ## Compose-only variables
 
@@ -1295,6 +1877,8 @@ is [CONFIG-REFERENCE.generated.md](engineering/CONFIG-REFERENCE.generated.md). C
 
 Keep this appendix current: when you add a property, document it in the section that fits, or add it here; `gen-config-reference.py --check` (run by `make gates`) fails on an undocumented new property.
 
+The Default column is read from the code, not typed: `make config-docs` (`scripts/docs/gen-config-tables.py`) lists every default in this guide that renders broken (`"`, `" + CONST + "`, `(set in source)` for a key whose default the code knows), differs from `application*.yml` / `@Value` / `@ConfigurationProperties`, or is missing, and every key no document names; `make config-docs-check` fails on them; `make config-docs-write` rewrites only the default cell of the offending Appendix rows. Credential-like defaults are never reproduced.
+
 ### Module `admin` (3)
 
 | Property | Default | Applies to | Meaning |
@@ -1308,30 +1892,30 @@ Keep this appendix current: when you add a property, document it in the section 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
 | `app.a2a` |  | shapes that load the module | The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController, A2aJsonRpcController). |
-| `app.a2a.client.allow-insecure-loopback` |  | shapes that load the module | Permit plain http to a loopback host. |
-| `app.a2a.client.allowed-hosts` |  | shapes that load the module | Egress allow-list of hosts (exact agents.example.com or *.example.com for subdomains only). |
+| `app.a2a.client.allow-insecure-loopback` | `${APP_A2A_CLIENT_ALLOW_INSECURE_LOOPBACK:false}` | shapes that load the module | Permit plain http to a loopback host. |
+| `app.a2a.client.allowed-hosts` | `${APP_A2A_CLIENT_ALLOWED_HOSTS:}` | shapes that load the module | Egress allow-list of hosts (exact agents.example.com or *.example.com for subdomains only). |
 | `app.a2a.blocking-timeout` |  | shapes that load the module | Upper bound a BLOCKING SendMessage (and each streamed chunk wait) holds the request thread for. |
-| `app.a2a.client.connect-timeout` |  | shapes that load the module | Group `app.a2a`: The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController,... (see source: `core/agents/src/main/java/com/agenticai/core/agents/a2a/A2aProperties.java`) |
-| `app.a2a.enabled` |  | shapes that load the module | Platform-wide kill switch. |
+| `app.a2a.client.connect-timeout` | `${APP_A2A_CLIENT_CONNECT_TIMEOUT:5s}` | shapes that load the module | Group `app.a2a`: The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController,... (see source: `core/agents/src/main/java/com/agenticai/core/agents/a2a/A2aProperties.java`) |
+| `app.a2a.enabled` | `true` | shapes that load the module | Platform-wide kill switch. |
 | `app.a2a.heartbeat-interval` | `${APP_A2A_HEARTBEAT_INTERVAL:10s}` | all shapes | Redis mode only: how often the owning replica refreshes the heartbeat of its non-terminal task records and checks them for a remote cancel. |
 | `app.a2a.heartbeat-stale-after` | `${APP_A2A_HEARTBEAT_STALE_AFTER:60s}` | all shapes | Redis mode only: a non-terminal record whose heartbeat is older than this and that belongs to ANOTHER instance id (a previous boot or a dead replica) is marked FAILED with "interrupted by restart". |
-| `app.a2a.client.max-calls-per-turn` |  | shapes that load the module | Most a2a_call_agent calls one agent turn may make (OWASP ASI07/ASI08: a looping or injected agent must not fan out to remote agents without bound). |
-| `app.a2a.max-concurrent-async-tasks` |  | shapes that load the module | How many non-blocking (returnImmediately/blocking:false) turns may run concurrently. |
-| `app.a2a.client.max-response-bytes` |  | shapes that load the module | Hard cap on any single remote response body. |
-| `app.a2a.client.max-result-chars` |  | shapes that load the module | Cap on the text handed back to the model. |
-| `app.a2a.max-tasks` |  | shapes that load the module | Hard cap on tasks held in memory (across all tenants). |
-| `app.a2a.client.max-wait` |  | shapes that load the module | Total time one tool call may wait for the remote task to finish. |
-| `app.a2a.client.poll-interval` |  | shapes that load the module | Group `app.a2a`: The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController,... (see source: `core/agents/src/main/java/com/agenticai/core/agents/a2a/A2aProperties.java`) |
+| `app.a2a.client.max-calls-per-turn` | `${APP_A2A_CLIENT_MAX_CALLS_PER_TURN:5}` | shapes that load the module | Most a2a_call_agent calls one agent turn may make (OWASP ASI07/ASI08: a looping or injected agent must not fan out to remote agents without bound). |
+| `app.a2a.max-concurrent-async-tasks` | `32` | shapes that load the module | How many non-blocking (returnImmediately/blocking:false) turns may run concurrently. |
+| `app.a2a.client.max-response-bytes` | `${APP_A2A_CLIENT_MAX_RESPONSE_BYTES:1048576}` | shapes that load the module | Hard cap on any single remote response body. |
+| `app.a2a.client.max-result-chars` | `${APP_A2A_CLIENT_MAX_RESULT_CHARS:20000}` | shapes that load the module | Cap on the text handed back to the model. |
+| `app.a2a.max-tasks` | `10000` | shapes that load the module | Hard cap on tasks held in memory (across all tenants). |
+| `app.a2a.client.max-wait` | `${APP_A2A_CLIENT_MAX_WAIT:120s}` | shapes that load the module | Total time one tool call may wait for the remote task to finish. |
+| `app.a2a.client.poll-interval` | `${APP_A2A_CLIENT_POLL_INTERVAL:2s}` | shapes that load the module | Group `app.a2a`: The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController,... (see source: `core/agents/src/main/java/com/agenticai/core/agents/a2a/A2aProperties.java`) |
 | `app.a2a.public-base-url` |  | shapes that load the module | The externally reachable origin of THIS core service, e.g. |
-| `app.a2a.client.request-timeout` |  | shapes that load the module | Per HTTP request (card, JWKS, send, poll). |
-| `app.a2a.require-pinned-key` |  | shapes that load the module | When true, boot FAILS if signing is enabled but no signing.private-key-pem is pinned - an ephemeral per-boot key gives every replica a different marketplace identity. |
-| `app.a2a.client.require-signed-card` |  | shapes that load the module | Refuse remote cards whose detached JWS does not verify (default true). |
+| `app.a2a.client.request-timeout` | `${APP_A2A_CLIENT_REQUEST_TIMEOUT:30s}` | shapes that load the module | Per HTTP request (card, JWKS, send, poll). |
+| `app.a2a.require-pinned-key` | `false` | shapes that load the module | When true, boot FAILS if signing is enabled but no signing.private-key-pem is pinned - an ephemeral per-boot key gives every replica a different marketplace identity. |
+| `app.a2a.client.require-signed-card` | `${APP_A2A_CLIENT_REQUIRE_SIGNED_CARD:true}` | shapes that load the module | Refuse remote cards whose detached JWS does not verify (default true). |
 | `app.a2a.signing` |  | shapes that load the module | Card signing - see A2aCardSigningService's javadoc. |
 | `app.a2a.task-store` | `${APP_A2A_TASK_STORE:memory}` | all shapes | Where A2aTaskStore keeps task records: memory (default, per-JVM, today's behaviour) or redis (a tenant-scoped JSON snapshot mirrored to Redis with #taskTtl, so GetTask / CancelTask work from any core replica). |
 | `app.a2a.task-ttl` | `${APP_A2A_TASK_TTL:24h}` | all shapes | How long a finished task stays retrievable via GetTask / tasks/get. |
 | `app.a2a.version` |  | shapes that load the module | The version field of the Agent Card. |
 | `app.agent-hooks.cache-ttl-ms` | `15000` | all shapes | How long a resolved hook set is cached per tenant+agent (a save invalidates it at once on this replica). |
-| `app.agent-hooks.enabled` | `false` | all shapes | Group `app.agent-hooks`: Declarative agent lifecycle hooks (core/agents com.agenticai.core.agents.hooks): per-agent and... (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/hooks/AgentHookConfigService.java`) |
+| `app.agent-hooks.enabled` | `true` (`false` in `personal`; was `false` before 2026-10-23) | all shapes | Group `app.agent-hooks`: Declarative agent lifecycle hooks (core/agents com.agenticai.core.agents.hooks): per-agent and... (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/hooks/AgentHookConfigService.java`) |
 | `app.agent-hooks.hard-cap-ms` | `5000` | all shapes | Absolute ceiling on any single webhook hook's timeout, whatever the hook says. |
 | `app.agent-hooks.latency-budget-ms` | `2000` | all shapes | Shared wall-clock budget for the synchronous hooks of one hook point (webhooks included). |
 | `app.agent-hooks.webhook.allowed-hosts` | `${AGENT_HOOKS_WEBHOOK_ALLOWED_HOSTS:}` | all shapes | Comma-separated hosts a webhook hook may call, in addition to each workspace's own list (exact host, or *.suffix for subdomains). |
@@ -1340,6 +1924,9 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.agent-import.max-payload-bytes` | `1048576` | all shapes | Largest accepted payload (UTF-8 bytes of the exported JSON). |
 | `app.agent-jobs` |  | shapes that load the module | The app.agent-jobs.* block (see application.yml). |
 | `app.agent-jobs.approval` |  | shapes that load the module | Read by the APPROVAL-PARKING half. |
+| `app.agent-jobs.approval.replay-grace` | `${AGENT_JOB_APPROVAL_REPLAY_GRACE:PT90S}` | `PT90S` | How long an approved-but-not-yet-executed approval (no result recorded) is left alone before the sweep resumes the parked job anyway. `approve` commits the decision and replays the tool afterwards, so resuming inside that window re-asks for the same gate or races the replay into a duplicate side effect. Raise it for tools that replay slowly. Was a constant |
+| `app.agent-jobs.approval.expired-failure-message` | (none) | text in `application.yml` | The failure message of a job whose blocking approval request expired (`app.approvals.expiry`) while `jobs-continue-after-denial` is `false`; the job fails as `APPROVAL_TIMEOUT`. `{label}` is the `requested_by` label of the request |
+| `app.agent-jobs.quiesce-worker-wait` | `${AGENT_JOB_QUIESCE_WORKER_WAIT:PT3S}` | `PT3S` | How long a shutting-down replica waits for its interrupted job workers to unwind before it releases their ownership leases. Keep well inside the SIGTERM grace period (30 s). Was a constant |
 | `app.agent-jobs.deadline-sweep-interval` | `15s` | all shapes | Backs BOTH the deadline sweep and the orphan sweep. |
 | `app.agent-jobs.default-timeout` | `10m` | all shapes | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
 | `app.agent-jobs.durability` |  | shapes that load the module | Read by the DURABILITY half (orphan recovery). |
@@ -1356,11 +1943,11 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.agent-jobs.progress` |  | shapes that load the module | Read by the OBSERVABILITY half (progress notes + the report_progress tool). |
 | `app.agent-jobs.queue-capacity` | `8` | all shapes | Hand-off queue depth in front of the pool. |
 | `app.agent-jobs.queue-ttl` | `1h` | all shapes | A job left QUEUED longer than this is FAILED rather than run. |
-| `app.agent-jobs.durability.requeue-zero-work-orphans` |  | shapes that load the module | Whether an orphan that provably did ZERO chargeable work (no turns used, no tool calls logged for its session) may be re-queued instead of failed. |
+| `app.agent-jobs.durability.requeue-zero-work-orphans` | `true` | shapes that load the module | Whether an orphan that provably did ZERO chargeable work (no turns used, no tool calls logged for its session) may be re-queued instead of failed. |
 | `app.agent-jobs.schedule` |  | shapes that load the module | Read by the SCHEDULES half. |
-| `app.agent-jobs.durability.step-journal-enabled` |  | shapes that load the module | L1 step journal master switch (default OFF): job turns, DURABLE tool effects and delegate_parallel branches are journaled in Postgres (agent_step_journal, V376). |
+| `app.agent-jobs.durability.step-journal-enabled` | `${AGENT_JOB_STEP_JOURNAL_ENABLED:true}` | shapes that load the module | L1 step journal master switch (default ON since 2026-10-23; resume, rerun and ownership stay OFF): job turns, DURABLE tool effects and delegate_parallel branches are journaled in Postgres (agent_step_journal, V376). |
 | `app.agent-jobs.trigger` |  | shapes that load the module | Read by the EVENT-TRIGGERS half. |
-| `app.agent-lab.free-plan-enabled` | `true` | shapes that load the module | see source: `core/agents-studio/src/main/java/com/agenticai/core/agents/lab/AgentLabRunService.java` |
+| `app.agent-lab.free-plan-enabled` | `${AGENT_LAB_FREE_PLAN_ENABLED:true}` | shapes that load the module | Same ungating for Agent Lab knockout/consistency runs (stored-FREE tenants get AgentLabRunService's FREE_* caps - 12 cells / 24 calls / 4 prompts - instead of a 403). |
 | `app.agent.share.max-chats-per-minute-per-ip` | `12` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/share/AgentShareService.java` |
 | `app.agent.share.max-vision-sessions-per-minute-per-ip` | `6` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/share/AgentShareService.java` |
 | `app.agent.share.max-voice-sessions-per-minute-per-ip` | `4` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/share/AgentShareService.java` |
@@ -1397,7 +1984,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.browser.recipes.max-replay-seconds` | `120` | all shapes | Group `app.browser`: Browser agent (core/agents-browser tools/browseruse). (see source: `core/agents-browser/src/main/java/com/agenticai/core/agents/tools/browseruse/BrowserRecipeService.java`) |
 | `app.browser.recipes.step-timeout-ms` | `15000` | all shapes | Group `app.browser`: Browser agent (core/agents-browser tools/browseruse). (see source: `core/agents-browser/src/main/java/com/agenticai/core/agents/tools/browseruse/BrowserRecipeService.java`) |
 | `app.browser.secret-domains` | `${BROWSER_SECRET_DOMAINS:}` | all shapes | Vault secret -> domain binding for {{secret.NAME}} in browser_type_into: NAME=host,host;NAME2=host. |
-| `app.browser.secret-name-prefix` | `(set in source)` | all shapes | profiles / TOTP / recipes (browser persistence and replay; see BrowserProfileService, BrowserTotpToolCallback, BrowserRecipeService) --- Vault secrets that browser_totp and recipe {{secret.X}} / {{totp.X}}... |
+| `app.browser.secret-name-prefix` | `${BROWSER_SECRET_NAME_PREFIX:BROWSER_}` | all shapes | profiles / TOTP / recipes (browser persistence and replay; see BrowserProfileService, BrowserTotpToolCallback, BrowserRecipeService) --- Vault secrets that browser_totp and recipe {{secret.X}} / {{totp.X}}... |
 | `app.browser.takeover.enabled` | `false` | all shapes | Human takeover: the agent asks (browser_request_user) or the person pauses, then the person sees a live JPEG view of the SAME headless page and drives it (click / key / type / scroll relayed server-side) while every... |
 | `app.browser.takeover.idle-action` | `return` | all shapes | Group `app.browser`: Browser agent (core/agents-browser tools/browseruse). (see source: `core/agents-browser/src/main/java/com/agenticai/core/agents/tools/browseruse/BrowserTakeoverSettings.java`) |
 | `app.browser.takeover.idle-timeout-seconds` | `300` | all shapes | Seconds without a person's input in USER_CONTROL before control is returned (idle-action=return) or the session is ended (idle-action=expire). |
@@ -1456,7 +2043,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.chat-import.max-zip-ratio` | `100` | api | see source: `core/agents-chatport/src/main/java/com/agenticai/core/agents/chatport/ChatImportService.java` |
 | `app.chat.branching.max-nodes-per-session` | `1000` | all shapes | Hard cap on stored messages per session (all branches); past it new turns are not recorded in the tree and edit/regenerate answer 409. |
 | `app.chat.branching.retention-days` | `30` | all shapes | The tree keeps message TEXT in the database, longer than the 24h Redis history (app.chat.session-ttl-hours). |
-| `app.chat.directives.artifacts.agent-ids` |  | shapes that load the module | Group `app.chat.directives`: Standing per-turn system-prompt directives ("block 2" in Request X-ray) - ops kill-switches, boot-time,... (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/AgentChatService.java`) |
+| `app.chat.directives.artifacts.agent-ids` | `${APP_CHAT_DIRECTIVES_ARTIFACTS_AGENT_IDS:}` | shapes that load the module | Group `app.chat.directives`: Standing per-turn system-prompt directives ("block 2" in Request X-ray) - ops kill-switches, boot-time,... (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/AgentChatService.java`) |
 | `app.chat.directives.artifacts.all-agents` | `false` | shapes that load the module | Group `app.chat.directives`: Standing per-turn system-prompt directives ("block 2" in Request X-ray) - ops kill-switches, boot-time,... (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/AgentChatService.java`) |
 | `app.chat.directives.browser-v2.enabled` | `true` | all shapes | "Browser tools: call browser_snapshot, then act with the [index]..." - only sent on turns where browser_snapshot is on the resolved tool list (app.browser.v2.enabled). |
 | `app.chat.directives.context-compaction.enabled` | `true` | shapes that load the module | Group `app.chat.directives`: Standing per-turn system-prompt directives ("block 2" in Request X-ray) - ops kill-switches, boot-time,... (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/AgentChatService.java`) |
@@ -1466,7 +2053,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.chat.escalation.economy-cost-ratio` | `0.2` | all shapes | Economy model cost as a fraction of the primary's; only sizes the savings estimate. |
 | `app.chat.escalation.enabled` | `false` | all shapes | Group `app.chat.escalation`: L4 verifier-escalated model router (VerifierEscalationRouter). (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/VerifierEscalationRouter.java`) |
 | `app.chat.escalation.kill-switch` | `false` | all shapes | Group `app.chat.escalation`: L4 verifier-escalated model router (VerifierEscalationRouter). (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/VerifierEscalationRouter.java`) |
-| `app.chat.escalation.low-confidence-markers` | `${CHAT_ESCALATION_LOW_CONFIDENCE_MARKERS:}` | all shapes | Comma-separated, case-insensitive substrings; blank = built-in defaults. |
+| `app.chat.escalation.low-confidence-markers` | `${CHAT_ESCALATION_LOW_CONFIDENCE_MARKERS:}` | all shapes | **Deprecated alias** of the prompt-registry list `detector.escalation.low_confidence_markers` (see `docs/prompts.md`). Comma-separated, case-insensitive substrings; when set, applied as the list's PLATFORM-scope default (replacing the shipped English list) with a deprecation warning at startup. Unlike before, a stored workspace/agent override of the list now beats it. Blank = the shipped list. |
 | `app.chat.escalation.max-tool-errors` | `2` | all shapes | Tool calls with an error in ONE turn at/above this count = tool-error loop. |
 | `app.chat.history-config-cache-ms` | `10000` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/memory/SessionMemoryService.java` |
 | `app.chat.history-max-chars` | `32000` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/memory/SessionMemoryService.java` |
@@ -1491,9 +2078,9 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.chat.resumable-streams.max-total-bytes` | `268435456` | all shapes | Group `app.chat.resumable-streams`: Resumable chat streams (ResumableChatStreamService): a long answer survives a page refresh, a sleeping... (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/resumable/ResumableChatStreamService.java`) |
 | `app.chat.resumable-streams.store` | `memory` | all shapes | memory (default, per JVM: a resume must reach the replica that is generating the turn; fine for one replica) or redis (entries are also mirrored to Redis, tenant-first keys, so any replica can serve a resume; Redis... |
 | `app.chat.resumable-streams.ttl-seconds` | `600` | all shapes | How long a finished turn stays resumable. |
-| `app.chat.semantic-cache.max-entries-per-agent` | `" + DEFAULT_MAX_ENTRIES_PER_AGENT + "` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/cache/SemanticResponseCacheService.java` |
-| `app.chat.semantic-cache.similarity-threshold` | `" + DEFAULT_SIMILARITY_THRESHOLD + "` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/cache/SemanticResponseCacheService.java` |
-| `app.chat.semantic-cache.ttl-hours` | `" + DEFAULT_TTL_HOURS + "` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/cache/SemanticResponseCacheService.java` |
+| `app.chat.semantic-cache.max-entries-per-agent` | `200` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/cache/SemanticResponseCacheService.java` |
+| `app.chat.semantic-cache.similarity-threshold` | `0.95` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/cache/SemanticResponseCacheService.java` |
+| `app.chat.semantic-cache.ttl-hours` | `6` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/cache/SemanticResponseCacheService.java` |
 | `app.chat.sse.buffered-keepalive-interval` | `20s` | all shapes | How often a BUFFERED-depth chat turn (CAREFUL/RIGOROUS/PLANNED) writes an empty SSE chunk while it works - 2026-09-17 reasoning-depth audit. |
 | `app.chat.sse.memory-events.enabled` | `true` | all shapes | One "memory used" step event per step-event turn; read through a supplier by ChatMemoryRecall. |
 | `app.chat.sse.step-heartbeat-interval` | `15s` | all shapes | How often a STEP-EVENT turn (ChatRequest.stepEvents=true - the web console's opt-in activity trace) writes a {"type":"heartbeat"} step event while the turn is open - 2026-09-25 latency audit. |
@@ -1575,13 +2162,13 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.hosted-pool.order-by-cost` | `true` | all shapes | Escape hatch for an operator who wants the chain tried in exactly the order they typed into Platform Admin: false = pure `priority` ASC, ignoring cost and latency entirely (the pre-hardening behaviour). |
 | `app.hosted-pool.reasoning-config-cache-ms` | `10000` | shapes that load the module | Same 10s time-box FreeTierUsageLimiterService's quota-config cache uses, for the same reason: the effort is read on every chain build (the chat hot path), an uncached read would add a Postgres round trip per message. |
 | `app.jev.agent-routing.enabled` | `true` | all shapes | Quick Task agent selection (AgentRelevanceSelector): Jev `choice` for the primary pick, one batched `noul` call for additional relevant agents. |
-| `app.jev.base-url` | `" + JevDecisionService.DEFAULT_BASE_URL + "` | all shapes | Group `app.jev`: Jev - TypeSafe AI's System One decision model (JevDecisionService, core/agents/decision). (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/decision/JevCredentialValidator.java`) |
+| `app.jev.base-url` | `${APP_JEV_BASE_URL:https://api.typesafe.ai}` | all shapes | Group `app.jev`: Jev - TypeSafe AI's System One decision model (JevDecisionService, core/agents/decision). (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/decision/JevCredentialValidator.java`) |
 | `app.jev.complexity.enabled` | `true` | all shapes | Cost-routing second opinion (QueryComplexityClassifier): only a heuristic "not simple" is offered to Jev - a heuristic "simple" keeps its zero-latency path. |
 | `app.jev.complexity.simple-threshold` | `0.75` | all shapes | Group `app.jev`: Jev - TypeSafe AI's System One decision model (JevDecisionService, core/agents/decision). (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/quality/QueryComplexityClassifier.java`) |
 | `app.jev.connect-timeout` | `2s` | all shapes | Tight by design: a decision model slower than this is worth less than the heuristic it replaces, and Jev sits in front of real user turns. |
 | `app.jev.enabled` | `true` | all shapes | Group `app.jev`: Jev - TypeSafe AI's System One decision model (JevDecisionService, core/agents/decision). (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/decision/JevDecisionService.java`) |
 | `app.jev.key-cache-ttl` | `30s` | all shapes | Bounds how long an admin's credential rotate/remove takes to reach every pod - the resolved key (including "none") is cached this long. |
-| `app.jev.model` | `" + JevDecisionService.DEFAULT_MODEL + "` | all shapes | Group `app.jev`: Jev - TypeSafe AI's System One decision model (JevDecisionService, core/agents/decision). (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/decision/JevCredentialValidator.java`) |
+| `app.jev.model` | `${APP_JEV_MODEL:jev-latest}` | all shapes | Group `app.jev`: Jev - TypeSafe AI's System One decision model (JevDecisionService, core/agents/decision). (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/decision/JevCredentialValidator.java`) |
 | `app.jev.read-timeout` | `3s` | all shapes | Group `app.jev`: Jev - TypeSafe AI's System One decision model (JevDecisionService, core/agents/decision). (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/decision/JevDecisionService.java`) |
 | `app.knowledge.query-rewrite.allow-byok-tenants` | `false` | all shapes | Group `app.knowledge.query-rewrite`: query-rewrite: ONE bounded cheap-model call per search (multi = alternative queries, hyde = one... (see source: `core/agents-studio/src/main/java/com/agenticai/core/agents/ragquality/PlatformQueryRewriteModel.java`) |
 | `app.llm.judge.max-excerpt-length` | `600` | all shapes | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/turn/quality/LlmQualityJudgeService.java` |
@@ -1662,7 +2249,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.sandbox.platform-e2b.paid-daily-runs` | `200` | all shapes | Group `app.sandbox.platform-e2b`: Per-tenant gating (no key): uploads, mounting and the tool all require the tenant to have an ACTIVE E2B... (see source: `core/agents-tools/src/main/java/com/agenticai/core/agents/tools/e2b/PlatformSandboxRunQuota.java`) |
 | `app.sandbox.platform-e2b.quota-store` | `memory` | all shapes | memory (default) or redis; field-injected so the test-built constructors keep the default. |
 | `app.scheduled-tasks.catch-up-window-minutes` | `720` | all shapes | A run that was due while the service was down still fires (once) if it is at most this old; older ones are recorded as missed. |
-| `app.scheduled-tasks.delivery-channels` | `in_app,email,whatsapp,telegram,slack` | all shapes | Where a result may be delivered. |
+| `app.scheduled-tasks.delivery-channels` | `${SCHEDULED_TASKS_DELIVERY_CHANNELS:in_app,email,whatsapp,whatsapp_qr,telegram,slack,signal,matrix,imessage,a2a,voice}` | all shapes | Where a result may be delivered. |
 | `app.scheduled-tasks.enabled` | `false` | all shapes | Group `app.scheduled-tasks`: Scheduled tasks (core/agents scheduledtask) - "every weekday at 8am summarise my unread email and send me... (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/scheduledtask/ScheduledTaskSettings.java`) |
 | `app.scheduled-tasks.free-max-per-tenant` | `3` | all shapes | Group `app.scheduled-tasks`: Scheduled tasks (core/agents scheduledtask) - "every weekday at 8am summarise my unread email and send me... (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/scheduledtask/ScheduledTaskSettings.java`) |
 | `app.scheduled-tasks.free-plan-enabled` | `true` | all shapes | FREE-plan workspaces may schedule (at the tighter cap below) unless this is false. |
@@ -1676,7 +2263,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.skills.registry.api-key` |  | shapes that load the module | Group `app.skills`: Skill supply chain (core/agents com.agenticai.core.agents.skills): skills are third-party text that... (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/skills/SkillRegistryClient.java`) |
 | `app.skills.registry.github-token` |  | shapes that load the module | Group `app.skills`: Skill supply chain (core/agents com.agenticai.core.agents.skills): skills are third-party text that... (see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/skills/SkillRegistryClient.java`) |
 | `app.skills.supply-chain.enabled` | `true` | all shapes | Scan, report and record pins. |
-| `app.skills.supply-chain.enforce` | `false` | all shapes | false = scan + report + warn only. |
+| `app.skills.supply-chain.enforce` | `true` (`false` in `personal`; was `false` before 2026-10-23) | all shapes | false = scan + report + warn only. true = a changed or unapproved high-risk custom skill is withheld until an admin re-approves it; built-in skills are never withheld. |
 | `app.startup.background-warmup.enabled` | `false` | all shapes | Cold-start lane: this runner executes on the main thread on EVERY boot, before the ApplicationReadyEvent and therefore before readiness, and does a findAll() of every agent (with its eager collections) in every... |
 | `app.swarm.verifier.brief-chars` | `1200` | all shapes | Group `app.swarm`: Swarm goal verifier for delegate_parallel (docs/plans/adr/swarm-goal-verifier.md). (see source: `core/agents-tools/src/main/java/com/agenticai/core/agents/tools/ToolResolverConfiguration.java`) |
 | `app.swarm.verifier.max-repair-rounds` | `1` | all shapes | Group `app.swarm`: Swarm goal verifier for delegate_parallel (docs/plans/adr/swarm-goal-verifier.md). (see source: `core/agents-tools/src/main/java/com/agenticai/core/agents/tools/ToolResolverConfiguration.java`) |
@@ -1692,7 +2279,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.tools.auto-selection.semantic-enabled` | `true` | shapes that load the module | see source: `core/agents/src/main/java/com/agenticai/core/agents/tools/ToolRelevanceSelector.java` |
 | `app.tools.classification.trifecta-analyse-auto-select` | `false` | all shapes | true: an agent with an EMPTY allow-list (Auto-select = every tool it could be offered) is analysed over the tools it would actually be offered instead of reporting no legs. |
 | `app.tools.classification.trifecta-overrides-exempt` | `true` | all shapes | true: the confirmation-gate-exempt tools above are NOT exempt for an agent that currently holds all three legs (decided per agent, cached 60s and dropped on a save/restore/capability toggle; fails safe = no exemption... |
-| `app.tools.code.generate.max-tokens` | `2048` | shapes that load the module | Own config key, not app.agents.default-max-tokens (1024, tuned for a short conversational reply) - a real Java/Python program routinely needs more headroom than a paragraph of prose without running into the... |
+| `app.tools.code.generate.max-tokens` | `2048` | shapes that load the module | Own config key, not app.agents.default-max-tokens (4096, sized for a conversational reply) - a real Java/Python program routinely needs more headroom than a paragraph of prose without running into the... |
 | `app.tools.effect-journal.max-entries` | `5000` | all shapes | Group `app.tools.effect-journal`: Gap-analysis item 7 (EffectJournal): DURABLE (write/send) tools called again with the same... (see source: `core/agents/src/main/java/com/agenticai/core/agents/tools/EffectJournal.java`) |
 | `app.tools.effect-journal.store` | `memory` | all shapes | Group `app.tools.effect-journal`: Gap-analysis item 7 (EffectJournal): DURABLE (write/send) tools called again with the same... (see source: `core/agents/src/main/java/com/agenticai/core/agents/tools/EffectJournal.java`) |
 | `app.tools.effect-journal.ttl-minutes` | `30` | all shapes | Group `app.tools.effect-journal`: Gap-analysis item 7 (EffectJournal): DURABLE (write/send) tools called again with the same... (see source: `core/agents/src/main/java/com/agenticai/core/agents/tools/EffectJournal.java`) |
@@ -1710,7 +2297,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.tools.http-request.safe-mode` | `false` | all shapes | Group `app.tools.http-request`: Built-in http_request ("call any HTTP API"). (see source: `core/agents-browser/src/main/java/com/agenticai/core/agents/tools/web/HttpRequestSafetyConfig.java`) |
 | `app.tools.http-request.write-tool-enabled` | `true` | all shapes | Group `app.tools.http-request`: Built-in http_request ("call any HTTP API"). (see source: `core/agents-browser/src/main/java/com/agenticai/core/agents/tools/web/HttpRequestSafetyConfig.java`) |
 | `app.tools.mcp-annotations.enabled` | `false` | all shapes | Group `app.tools.mcp-annotations`: MCP tool annotations (readOnlyHint / destructiveHint / idempotentHint / openWorldHint, MCP spec 2025-06-18). (see source: `core/agents/src/main/java/com/agenticai/core/agents/tools/classification/McpAnnotationClassifier.java`) |
-| `app.tools.mcp-discovery-cache-ttl-seconds` | `20` | all shapes | Direct feedback: "mcp tools in agents screen are loading so slow" - AgentToolProvider.cachedRawToolCallbacks() was falling back to AgentToolProvider's own hardcoded default of 20s whenever this wasn't set (it never was). |
+| `app.tools.mcp-discovery-cache-ttl-seconds` | `${TOOL_MCP_DISCOVERY_CACHE_TTL_SECONDS:300}` | all shapes | Direct feedback: "mcp tools in agents screen are loading so slow" - AgentToolProvider.cachedRawToolCallbacks() was falling back to AgentToolProvider's own hardcoded default of 20s whenever this wasn't set (it never was). |
 | `app.tools.search.threshold` | `25` | all shapes | Group `app.tools.search`: On-demand tool loading (ToolSearchDeferral, core/agents-tools). (see source: `core/agents-tools/src/main/java/com/agenticai/core/agents/tools/ToolResolverConfiguration.java`) |
 | `app.tutor.generate.max-per-user-per-hour` | `10` | all shapes | Course + lesson generations per member per hour (each is one or two model calls); 429 beyond it. |
 | `app.tutor.max-curriculum-bytes` | `400000` | all shapes | Upper bound on one plan's stored curriculum JSON (lesson text + quizzes are cached in it). |
@@ -1740,14 +2327,14 @@ Keep this appendix current: when you add a property, document it in the section 
 | `mcp-stdio-sidecar.address` | `${MCP_STDIO_SIDECAR_URL:mcp-stdio-runner:8097}` | all shapes | host:port of the mcp-stdio-runner service, e.g. |
 | `mcp-stdio-sidecar.shared-secret` | `${MCP_STDIO_SIDECAR_SHARED_SECRET:}` | all shapes | Shared secret the relay presents to the sidecar on every spawn request. |
 | `tool-sandbox.base-url` | `${TOOL_SANDBOX_BASE_URL:http://tool-sandbox:8095}` | all shapes | Root URL of the tool-sandbox service, e.g. |
-| `tool-sandbox.connect-timeout-millis` |  | shapes that load the module | TCP connect budget (ms). |
-| `tool-sandbox.default-memory-mb` |  | shapes that load the module | Per-call memory ceiling applied when a tool does not specify one. |
-| `tool-sandbox.default-timeout-ms` |  | shapes that load the module | Per-call wall clock applied when a tool does not specify one. |
+| `tool-sandbox.connect-timeout-millis` | `5000` | shapes that load the module | TCP connect budget (ms). |
+| `tool-sandbox.default-memory-mb` | `128` | shapes that load the module | Per-call memory ceiling applied when a tool does not specify one. |
+| `tool-sandbox.default-timeout-ms` | `5000` | shapes that load the module | Per-call wall clock applied when a tool does not specify one. |
 | `tool-sandbox.enabled` | `${TOOL_SANDBOX_ENABLED:false}` | all shapes | see source: `core/agents/src/main/java/com/agenticai/core/agents/tools/code/ToolSandboxProperties.java` |
 | `tool-sandbox.internal-token` | `${TOOL_SANDBOX_INTERNAL_TOKEN:}` | all shapes | Shared secret sent as X-Internal-Token on every call. |
-| `tool-sandbox.max-memory-mb` |  | shapes that load the module | Hard ceiling a tenant's requested memory is clamped into. |
-| `tool-sandbox.max-source-bytes` |  | shapes that load the module | Largest tenant-authored program core will accept, in UTF-8 bytes. |
-| `tool-sandbox.max-timeout-ms` |  | shapes that load the module | Hard ceiling a tenant's requested timeout is clamped into. |
+| `tool-sandbox.max-memory-mb` | `512` | shapes that load the module | Hard ceiling a tenant's requested memory is clamped into. |
+| `tool-sandbox.max-source-bytes` | `65536` | shapes that load the module | Largest tenant-authored program core will accept, in UTF-8 bytes. |
+| `tool-sandbox.max-timeout-ms` | `15000` | shapes that load the module | Hard ceiling a tenant's requested timeout is clamped into. |
 | `tool-sandbox.max-tools-per-tenant` | `${TOOL_SANDBOX_MAX_TOOLS_PER_TENANT:25}` | all shapes | Standing cap on saved custom code tools per tenant schema. |
 | `tool-sandbox.request-timeout-millis` | `${TOOL_SANDBOX_REQUEST_TIMEOUT_MS:30000}` | all shapes | Whole-call budget (ms). |
 
@@ -1773,7 +2360,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `fraud-detection.auto-block-duration-minutes` | `60` | shapes that load the module | see source: `core/app/src/main/java/com/agenticai/core/common/security/AbuseDetectionService.java` |
 | `fraud-detection.enforce` | `false` | shapes that load the module | see source: `core/app/src/main/java/com/agenticai/core/common/security/FraudDetectionInterceptor.java` |
 | `fraud-detection.hcaptcha` |  | shapes that load the module | Configuration properties for hCaptcha integration. |
-| `fraud-detection.hcaptcha.enabled` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
+| `fraud-detection.hcaptcha.enabled` | `true` | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
 | `fraud-detection.hcaptcha.secret-key` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
 | `fraud-detection.hcaptcha.site-key` |  | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |
 | `fraud-detection.vpn.score-threshold` | `0.7` | shapes that load the module | see source: `core/app/src/main/java/com/agenticai/core/common/security/AbuseDetectionService.java` |
@@ -1856,10 +2443,9 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.billing.stripe.price-id-unlimited` | `${STRIPE_PRICE_ID_UNLIMITED:}` | all shapes | Injected builder for the same reason PhonePeGatewayClient's constructor documents: a hand-built RestClient bypasses Spring's timeout configuration, which parks a checkout request forever on a gateway outage. |
 | `app.chat.branching.retention-purge-interval` | `${APP_CHAT_BRANCHING_RETENTION_PURGE_INTERVAL:6h}` | all shapes | Group `app.chat.branching`: Chat branching (ChatBranchService, core/agents): edit an earlier user message, regenerate a reply, and... (see source: `core/app-config/src/main/resources/application.yml:1228`) |
 | `app.chat.tools.result-clearing.enabled` | `true` | all shapes | Group `app.chat.tools.result-clearing`: In-turn tool-result clearing (gap analysis item 4): once the tool results accumulated in ONE turn exceed... (see source: `core/chat/src/main/java/com/agenticai/core/chat/ResilientToolCallingManagerFactory.java`) |
-| `app.chat.tools.result-clearing.keep-last` | `" + ToolResultClearing.DEFAULT_KEEP_LAST
-            + "` | all shapes | Group `app.chat.tools.result-clearing`: In-turn tool-result clearing (gap analysis item 4): once the tool results accumulated in ONE turn exceed... (see source: `core/chat/src/main/java/com/agenticai/core/chat/ResilientToolCallingManagerFactory.java`) |
-| `app.chat.tools.result-clearing.threshold-chars` | `" + ToolResultClearing.DEFAULT_THRESHOLD_CHARS
-          ...` | all shapes | Group `app.chat.tools.result-clearing`: In-turn tool-result clearing (gap analysis item 4): once the tool results accumulated in ONE turn exceed... (see source: `core/chat/src/main/java/com/agenticai/core/chat/ResilientToolCallingManagerFactory.java`) |
+| `app.chat.tools.result-clearing.keep-last` | `3` | all shapes | Group `app.chat.tools.result-clearing`: the newest tool results of one reply that are never cleared (see [Tool calls: budget, rounds and result size](#tool-calls-budget-rounds-and-result-size)) |
+| `app.chat.tools.result-clearing.restore-hint` | `call the tool again if you need this result` | all shapes | Group `app.chat.tools.result-clearing`: the model-facing `restore` field of the JSON placeholder that replaces a cleared result |
+| `app.chat.tools.result-clearing.threshold-chars` | `24000` | all shapes | Group `app.chat.tools.result-clearing`: total tool-result characters of one reply above which older results are cleared |
 | `app.coding-harness.allow-local-runner` | `false` | all shapes | see source: `core/sdlc/src/main/java/com/agenticai/core/sdlc/harness/CodingSandboxFactory.java` |
 | `app.coding-harness.allow-platform-e2b` | `false` | all shapes | The workspace's own E2B key is always used; the platform fallback key only when this is true (it is metered per short run_code call, a multi-minute task would bypass that). |
 | `app.coding-harness.allowed-runners` | `mvn,gradle,npm,pytest,go` | all shapes | Test runners a task may use (subset of mvn,gradle,npm,pytest,go - it can only be narrowed). |
@@ -1870,7 +2456,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.datasource.aws.region` | `${DB_AWS_REGION:}` | all shapes | see source: `core/app-config/src/main/resources/application.yml:489` |
 | `app.datasource.azure.scope` | `${DB_AZURE_SCOPE:https://ossrdbms-aad.database.windows.ne...` | all shapes | see source: `core/app-config/src/main/resources/application.yml:491` |
 | `app.datasource.gcp.scope` | `${DB_GCP_SCOPE:https://www.googleapis.com/auth/sqlservice...` | all shapes | see source: `core/app-config/src/main/resources/application.yml:493` |
-| `app.datasource.token-refresh-skew` | `(set in source)` | all shapes | Fetch a new token this long before the cached one expires. |
+| `app.datasource.token-refresh-skew` | `${DB_TOKEN_REFRESH_SKEW:2m}` | all shapes | Fetch a new token this long before the cached one expires. |
 | `app.demo.whatsapp.access-token` | `${DEMO_WHATSAPP_ACCESS_TOKEN:}` | all shapes | see source: `core/omnichannel/src/main/java/com/agenticai/core/omnichannel/demo/DemoWhatsAppBot.java` |
 | `app.demo.whatsapp.app-secret` | `${DEMO_WHATSAPP_APP_SECRET:}` | all shapes | see source: `core/omnichannel/src/main/java/com/agenticai/core/omnichannel/demo/DemoWhatsAppBot.java` |
 | `app.demo.whatsapp.business-number-e164` | `${DEMO_WHATSAPP_BUSINESS_NUMBER_E164:}` | all shapes | see source: `core/omnichannel/src/main/java/com/agenticai/core/omnichannel/demo/DemoWhatsAppBot.java` |
@@ -1916,10 +2502,8 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.knowledge.reembed.max-jobs-per-tenant-per-tick` | `1` | all shapes | see source: `core/knowledge/src/main/java/com/agenticai/core/knowledge/KnowledgeReembedJobRunner.java` |
 | `app.knowledge.reembed.tick-budget-seconds` | `300` | all shapes | see source: `core/knowledge/src/main/java/com/agenticai/core/knowledge/KnowledgeReembedJobRunner.java` |
 | `app.knowledge.span-citations.enabled` | `false` | all shapes | Group `app.knowledge.span-citations`: Span-level citations: search_knowledge_base hits gain startChar/endChar (offsets into the hit's chunk... (see source: `core/knowledge/src/main/java/com/agenticai/core/knowledge/KnowledgeSearchService.java`) |
-| `app.llm.agent-lab.free-plan-enabled` | `${AGENT_LAB_FREE_PLAN_ENABLED:true}` | all shapes | Same ungating for Agent Lab knockout/consistency runs (stored-FREE tenants get AgentLabRunService's FREE_* caps - 12 cells / 24 calls / 4 prompts - instead of a 403). |
 | `app.llm.anthropic.thinking.effort` | `${LLM_ANTHROPIC_THINKING_EFFORT:}` | all shapes | see source: `core/chat/src/main/java/com/agenticai/core/chat/AnthropicAgentChatClientFactory.java` |
 | `app.llm.anthropic.thinking.enabled` | `true` | all shapes | see source: `core/chat/src/main/java/com/agenticai/core/chat/AnthropicAgentChatClientFactory.java` |
-| `app.llm.evals.free-plan-enabled` | `${EVALS_FREE_PLAN_ENABLED:true}` | all shapes | 2026-10-02 research ungating (gap-analysis differentiators): opens the read-only quality surface (QualityController summary/history/ statistics/config) and the reliability endpoints (pass^k, Wilson intervals, paired... |
 | `app.llm.gateway.budget.free-monthly-cap-usd` | `0` | all shapes | see source: `core/chat/src/main/java/com/agenticai/core/chat/gateway/LlmGatewayBudgetService.java` |
 | `app.llm.gateway.rate-limit.free-max-calls-per-minute` | `30` | all shapes | Infra audit (2026-07-27) - was a single flat 120/min for every tenant regardless of plan; now plan-scoped (see LlmGatewayRateLimiterService's javadoc), same "FREE baseline, PREMIUM mid, UNLIMITED... |
 | `app.llm.gateway.rate-limit.premium-max-calls-per-minute` | `150` | all shapes | Group `app.llm.gateway.rate-limit`: 848 (LLM gateway seam) - see LlmGatewayService's javadoc. (see source: `core/chat/src/main/java/com/agenticai/core/chat/gateway/LlmGatewayRateLimiterService.java`) |
@@ -1941,12 +2525,12 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.mcp.oauth.cimd.client-name` | `VegaDuta` | all shapes | Group `app.mcp.oauth.cimd`: OAuth Client ID Metadata Document (CIMD): the platform publishes ONE client metadata document at a stable... (see source: `core/mcp/src/main/java/com/agenticai/core/mcp/oauth/McpOAuthClientMetadata.java`) |
 | `app.mcp.oauth.cimd.client-uri` | `${MCP_OAUTH_CIMD_CLIENT_URI:}` | all shapes | Group `app.mcp.oauth.cimd`: OAuth Client ID Metadata Document (CIMD): the platform publishes ONE client metadata document at a stable... (see source: `core/mcp/src/main/java/com/agenticai/core/mcp/oauth/McpOAuthClientMetadata.java`) |
 | `app.mcp.oauth.cimd.enabled` | `false` | all shapes | Group `app.mcp.oauth.cimd`: OAuth Client ID Metadata Document (CIMD): the platform publishes ONE client metadata document at a stable... (see source: `core/mcp/src/main/java/com/agenticai/core/mcp/oauth/McpOAuthClientMetadata.java`) |
-| `app.mcp.oauth.cimd.path` | `" + DEFAULT_PATH + "` | all shapes | Group `app.mcp.oauth.cimd`: OAuth Client ID Metadata Document (CIMD): the platform publishes ONE client metadata document at a stable... (see source: `core/mcp/src/main/java/com/agenticai/core/mcp/oauth/McpOAuthClientMetadata.java`) |
+| `app.mcp.oauth.cimd.path` | `${MCP_OAUTH_CIMD_PATH:/oauth/mcp/remote/client-metadata.json}` | all shapes | Group `app.mcp.oauth.cimd`: OAuth Client ID Metadata Document (CIMD): the platform publishes ONE client metadata document at a stable... (see source: `core/mcp/src/main/java/com/agenticai/core/mcp/oauth/McpOAuthClientMetadata.java`) |
 | `app.mcp.oauth.max-response-bytes` | `262144` | all shapes | see source: `core/mcp/src/main/java/com/agenticai/core/mcp/oauth/JdkMcpOAuthHttp.java` |
 | `app.mcp.oauth.provider-allowed-return-origins` | `${MCP_OAUTH_PROVIDER_ALLOWED_RETURN_ORIGINS:}` | all shapes | Same console as the provider flow: no localhost default (RULE 0) - blank keeps the feature unusable. |
 | `app.mcp.oauth.provider-callback-base-url` | `${MCP_OAUTH_PROVIDER_CALLBACK_BASE_URL:}` | all shapes | see source: `core/app-config/src/main/resources/application.yml:1950` |
 | `app.mcp.oauth.provider-console-redirect-uri` | `${MCP_OAUTH_PROVIDER_CONSOLE_REDIRECT_URI:}` | all shapes | Same console as the provider flow: no localhost default (RULE 0) - blank keeps the feature unusable. |
-| `app.mcp.oauth.provider-state-ttl-seconds` | `" + DEFAULT_STATE_TTL_SECONDS + "` | all shapes | Same console as the provider flow: no localhost default (RULE 0) - blank keeps the feature unusable. |
+| `app.mcp.oauth.provider-state-ttl-seconds` | `${MCP_OAUTH_PROVIDER_STATE_TTL_SECONDS:600}` | all shapes | Same console as the provider flow: no localhost default (RULE 0) - blank keeps the feature unusable. |
 | `app.mcp.oauth.providers-enabled` | `${MCP_OAUTH_PROVIDERS_ENABLED:false}` | all shapes | One-click "Connect" for popular SaaS tools (OAuthProviderRegistry / OAuthProviderService): authorization-code + PKCE, tokens encrypted per tenant (table mcp_oauth_connection, V424), automatic refresh, revoke on... |
 | `app.mcp.oauth.providers.asana.client-id` | `${MCP_OAUTH_ASANA_CLIENT_ID:}` | all shapes | see source: `core/app-config/src/main/resources/application.yml:2012` |
 | `app.mcp.oauth.providers.asana.client-secret` | `${MCP_OAUTH_ASANA_CLIENT_SECRET:}` | all shapes | see source: `core/app-config/src/main/resources/application.yml:2013` |
@@ -2056,7 +2640,9 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.quality.eval.calibration.set-max-examples` | `30` | all shapes | Ceiling on items per stored set. |
 | `app.quality.eval.calibration.set-min-examples` | `20` | all shapes | Hard floor on a stored set before it may be run: fewer items says nothing about the judge. |
 | `app.quality.eval.code-graders.enabled` | `true` | all shapes | Whether a case's deterministic code grader (V375 grader_spec) is applied during a run. |
-| `app.quality.eval.default-repeats` | `3` | all shapes | Repetitions per case when the trigger names none. |
+| `app.quality.eval.default-mode` | `full` | all shapes | How an eval run replays its cases when it names no mode and its dataset pins none: `full` = the production pipeline in the eval sandbox, `quick` = the agent's tools withheld. The platform value of the setting `quality.eval.defaultMode` (a workspace can override it). |
+| `app.quality.eval.default-repeats` | `3` | all shapes | Repetitions per case when the trigger names none. The platform value of the setting `quality.eval.defaultRepeats` (a workspace can override it). |
+| `app.quality.eval.sandbox.read-only-tools` | `${EVAL_SANDBOX_READ_ONLY_TOOLS:}` | all shapes | Tool names or `*` globs the operator vouches are read-only, so they run for real in a full eval run although nobody classified them; never overrides a declared classification. |
 | `app.quality.eval.snapshot.enabled` | `true` | all shapes | Whether trigger records the agent-config snapshot (model, temperature, seed, prompt hash, tool allow-list - V375) on the run row. |
 | `app.quality.gate.pass-hat-k.enabled` | `true` | all shapes | When true, a qualifying run with repeats > 1 must also clear the pass^k bar (PassHatKGate) - the Wilson lower bound of "cases whose every repetition passed" - on top of the mean-based verdict. |
 | `app.quality.gate.pass-hat-k.min-lower-bound` | `0.5` | all shapes | Required Wilson lower bound for the pass^k check; see PassHatKGate. |
@@ -2085,8 +2671,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.retention.purge.tool-call-log.enabled` | `false` | all shapes | Group `app.retention.purge.tool-call-log`: tool_call_log is opt-in: per-agent all-time call counts and the MCP-grant forensic view read it. (see source: `core/platform/src/main/java/com/agenticai/core/platform/retention/DataRetentionPurge.java`) |
 | `app.retention.purge.webhook-delivery-days` | `30` | all shapes | only DELIVERED/DEAD, never PENDING |
 | `app.sandbox.platform-e2b.enabled` | `false` | all shapes | Group `app.sandbox.platform-e2b`: Per-tenant gating (no key): uploads, mounting and the tool all require the tenant to have an ACTIVE E2B... (see source: `core/sdlc/src/main/java/com/agenticai/core/sdlc/E2bAccessResolver.java`) |
-| `app.scheduling.max-concurrent-locked-jobs` | `"
-                                    + DEFAULT_MAX_CONCU...` | all shapes | Soft cap on @Scheduled jobs wrapped in PgAdvisoryJobLock that may hold their lock at once PER JVM. |
+| `app.scheduling.max-concurrent-locked-jobs` | `${APP_SCHEDULING_MAX_CONCURRENT_LOCKED_JOBS:4}` | all shapes | Soft cap on @Scheduled jobs wrapped in PgAdvisoryJobLock that may hold their lock at once PER JVM. |
 | `app.sdlc.e2b.restrict-public-traffic` | `true` | all shapes | Create every E2B sandbox with network.allowPublicTraffic=false and reach it with the e2b-traffic-access-token header (https://docs.e2b.dev/network/restrict-public-access). |
 | `app.signup.disposable-email-block.allowlist` | `${SIGNUP_DISPOSABLE_EMAIL_BLOCK_ALLOWLIST:}` | all shapes | Narrow, exact-match exemption from the blocklist above - exists solely to unblock e2e/helpers/test-tenant.ts's signUpFreshTenant() fixture, which needs mailinator.com's real, Playwright-scrapable inbox for Keycloak's... |
 | `app.signup.disposable-email-block.enabled` | `true` | all shapes | Group `app.signup.disposable-email-block`: Disposable-email blocklist (PRICING-MONETIZATION-AUDIT-2026-07-31.md §7 item 1 / E1) -... (see source: `core/tenancy/src/main/java/com/agenticai/core/tenancy/DisposableEmailDomainService.java`) |
@@ -2110,13 +2695,6 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.telegram.polling.enabled` | `${TELEGRAM_POLLING_ENABLED:true}` (profile `lite`; off elsewhere) | profile `lite` | Receive Telegram messages by long polling instead of a webhook, so a bot works with no public URL. Ignored when `app.telegram.webhook-base-url` is set. Run it in one process per bot: two pollers on one bot get HTTP 409. |
 | `app.telegram.webhook-base-url` | `${TELEGRAM_WEBHOOK_BASE_URL:}` | profile `lite`, profile `workflow`, shapes that load the module | Public HTTPS base URL this backend is reachable at, used to register each tenant's Telegram webhook (TelegramCredentialService#activate -> POST https://api.telegram.org/bot/setWebhook). |
 | `app.tenancy.migrate-skip-up-to-date` | `false` | all shapes | true = the boot-time tenant-schema migration sweep skips a schema whose flyway_schema_history already lists every tenant migration on the classpath as successfully applied (one cheap query instead of a Flyway... |
-| `app.tenancy.reliability.cache-ttl-seconds` | `${PLATFORM_RELIABILITY_CACHE_TTL_SECONDS:30}` | all shapes | Group `app.tenancy.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3185`) |
-| `app.tenancy.reliability.enabled` | `${PLATFORM_RELIABILITY_ENABLED:true}` | all shapes | Group `app.tenancy.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3184`) |
-| `app.tenancy.reliability.probe-timeout-ms` | `${PLATFORM_RELIABILITY_PROBE_TIMEOUT_MS:2000}` | all shapes | Group `app.tenancy.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3186`) |
-| `app.tenancy.reliability.slo.aggregate-via-redis` | `${PLATFORM_RELIABILITY_SLO_REDIS:false}` | all shapes | Group `app.tenancy.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3190`) |
-| `app.tenancy.reliability.slo.redis-publish-seconds` | `${PLATFORM_RELIABILITY_SLO_REDIS_PUBLISH_SECONDS:300}` | all shapes | Group `app.tenancy.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3191`) |
-| `app.tenancy.reliability.slo.retention-hours` | `${PLATFORM_RELIABILITY_SLO_RETENTION_HOURS:48}` | all shapes | Group `app.tenancy.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3189`) |
-| `app.tenancy.reliability.slo.sample-interval-seconds` | `${PLATFORM_RELIABILITY_SLO_SAMPLE_INTERVAL_SECONDS:60}` | all shapes | Group `app.tenancy.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3188`) |
 | `app.tenant.comp.service-token` | `${CORE_COMP_SERVICE_TOKEN:}` | all shapes | Academy Fast-Track Scholarship one-click fulfilment (see CORE-COMP-GRANT-CONTRACT.md). |
 | `app.tenant.idle-skip.enabled` | `false` | all shapes | Group `app.tenant.idle-skip`: Idle back-off for the hot short-interval tenant pollers (webhook delivery relay, knowledge ingestion,... (see source: `core/tenancy/src/main/java/com/agenticai/core/tenancy/TenantSchemaIterator.java`) |
 | `app.tenant.idle-skip.max-skip-duration` | `60s` | all shapes | Group `app.tenant.idle-skip`: Idle back-off for the hot short-interval tenant pollers (webhook delivery relay, knowledge ingestion,... (see source: `core/tenancy/src/main/java/com/agenticai/core/tenancy/TenantSchemaIterator.java`) |
@@ -2146,7 +2724,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.workflow.form-trigger.max-submissions-per-minute-per-ip` | `8` | all shapes | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/WorkflowFormService.java` |
 | `app.workflow.form-trigger.max-submissions-per-minute-per-token` | `30` | all shapes | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/WorkflowFormService.java` |
 | `app.workflow.generator.enforce-approval-before-send` | `true` | all shapes | On (the safe value) = WorkflowSendApprovalGuard runs on every generated graph, so a node that messages someone is never handed back without an approval step in front of it - enforced in code after generation, not... |
-| `app.workflow.generator.max-tokens` | `4096` | all shapes | Deliberately its OWN config key, not app.agents.default-max-tokens (1024) - that default is tuned for a conversational chat reply, not a full JSON workflow graph. |
+| `app.workflow.generator.max-tokens` | `4096` | all shapes | Deliberately its OWN config key, not app.agents.default-max-tokens (4096) - that default is sized for a conversational chat reply, not a full JSON workflow graph. |
 | `app.workflow.node-error-strategy.enabled` | `false` | all shapes | Per-node error strategy (onError / retry, see NodeErrorStrategy). |
 | `app.workflow.wait-node.enabled` | `false` | all shapes | false (default): a graph containing a Wait node fails validation (clear message), never silently skips it. |
 | `app.workflow.wait-node.max-duration-days` | `7` | all shapes | Longest wait (and webhook-mode timeout) a node may ask for; a longer one is refused, not clamped. |
@@ -2208,7 +2786,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `spring.data.redis.port` | `${REDIS_PORT:6379}` | all shapes | see source: `core/app-config/src/main/resources/application.yml:385` |
 | `spring.data.redis.username` | `${REDIS_USERNAME:}` | all shapes | Managed Redis-protocol services (ElastiCache, Azure Cache for Redis, Memorystore) require TLS and, with ACLs, a user name. |
 | `spring.datasource.hikari.connection-timeout` | `${DB_HIKARI_CONNECTION_TIMEOUT_MS:20000}` | all shapes | Group `spring.datasource.hikari`: Infra audit (2026-07-27) - explicit HikariCP sizing; previously absent, so this ran on Spring Boot's bare... (see source: `core/app-config/src/main/resources/application.yml:263`) |
-| `spring.datasource.hikari.maximum-pool-size` | `" + DEFAULT_POOL_SIZE + "` | all shapes | Group `spring.datasource.hikari`: Infra audit (2026-07-27) - explicit HikariCP sizing; previously absent, so this ran on Spring Boot's bare... (see source: `core/tenancy/src/main/java/com/agenticai/core/tenancy/TenantMigrationService.java`) |
+| `spring.datasource.hikari.maximum-pool-size` | `${DB_HIKARI_MAX_POOL_SIZE:10}` | all shapes | Group `spring.datasource.hikari`: Infra audit (2026-07-27) - explicit HikariCP sizing; previously absent, so this ran on Spring Boot's bare... (see source: `core/tenancy/src/main/java/com/agenticai/core/tenancy/TenantMigrationService.java`) |
 | `spring.datasource.hikari.minimum-idle` | `${DB_HIKARI_MIN_IDLE:5}` | all shapes | Group `spring.datasource.hikari`: Infra audit (2026-07-27) - explicit HikariCP sizing; previously absent, so this ran on Spring Boot's bare... (see source: `core/app-config/src/main/resources/application.yml:262`) |
 | `spring.datasource.password` | `${POSTGRES_PASSWORD:}` | all shapes | Required in the default `password` mode (app.datasource.auth, below); unused in the token modes. |
 | `spring.datasource.username` | `${POSTGRES_USER:agentic}` | all shapes | see source: `core/app-config/src/main/resources/application.yml:281` |
@@ -2265,7 +2843,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.billing.invoice.seller` |  | shapes that load the module | The seller (supplier-of-record) block printed on every tax invoice - app.billing.invoice.seller.* config keys, registered via InvoiceConfiguration (same per-module @EnableConfigurationProperties pattern as... |
 | `app.billing.invoice.seller.address` |  | shapes that load the module | Group `app.billing.invoice.seller`: The seller (supplier-of-record) block printed on every tax invoice - app.billing.invoice.seller.* config... (see source: `core/billing/src/main/java/com/agenticai/core/billing/invoice/InvoiceSellerProperties.java`) |
 | `app.billing.invoice.seller.gstin` |  | shapes that load the module | Group `app.billing.invoice.seller`: The seller (supplier-of-record) block printed on every tax invoice - app.billing.invoice.seller.* config... (see source: `core/billing/src/main/java/com/agenticai/core/billing/invoice/InvoiceSellerProperties.java`) |
-| `app.billing.invoice.seller.name` |  | shapes that load the module | Group `app.billing.invoice.seller`: The seller (supplier-of-record) block printed on every tax invoice - app.billing.invoice.seller.* config... (see source: `core/billing/src/main/java/com/agenticai/core/billing/invoice/InvoiceSellerProperties.java`) |
+| `app.billing.invoice.seller.name` | `Cloudspace Learning and Development Pvt Ltd` | shapes that load the module | Group `app.billing.invoice.seller`: The seller (supplier-of-record) block printed on every tax invoice - app.billing.invoice.seller.* config... (see source: `core/billing/src/main/java/com/agenticai/core/billing/invoice/InvoiceSellerProperties.java`) |
 | `app.billing.razorpay` |  | shapes that load the module | PRICING-MONETIZATION-AUDIT-2026-07-31 B1 (multi-currency), B2 (annual plans), D4 (coupons via Razorpay offer_id) - the config-backed catalog of Razorpay dashboard Plan ids per (tier, currency, period), plus the... |
 | `app.billing.razorpay.plans` |  | shapes that load the module | PRICING-MONETIZATION-AUDIT-2026-07-31 B1 (multi-currency) + B2 (annual plans): one dashboard-created Razorpay Plan id per tier x currency x billing period, bound by RazorpayPlanCatalog. |
 | `app.commerce.checkout.expiry-hours` | `24` | shapes that load the module | App-side expiry (see package-info's "known v0 limits") - matches the audit's proposed 24h expire_by for the gateway link. |
@@ -2294,12 +2872,14 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.agent-turn.max-tokens.default` | `2048` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/AgentTurnService.java` |
 | `app.agent-turn.temperature` | `0.2` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/AgentTurnService.java` |
 | `app.chat.tools.argument-validation.enabled` | `true` | shapes that load the module | A tool call whose arguments are not a JSON object or miss a property the tool's schema lists as `required` is not run; the model gets a tool result naming the problems, the keys the tool does not know and the schema, and tries again. Property types are not checked. See source: `core/chat/src/main/java/com/agenticai/core/chat/ToolArgumentValidator.java` |
-| `app.chat.tools.max-rounds-per-invocation` | `"
+| `app.chat.tools.max-rounds-per-invocation` | `0` | shapes that load the module | Tool rounds one model invocation may run before the soft stop; `0` derives it from the call ceiling. See [Tool calls: budget, rounds and result size](#tool-calls-budget-rounds-and-result-size) |
 | `app.chat.tools.repeat-guard.tools` | `web_search,fetch_web_page,search_knowledge_base,list_knowledge_collections,search_conversation_history,recall_related_facts,vegaduta_api_guide,vegaduta_setup_guide` | idempotent lookups a model may not repeat verbatim inside one reply: the repeat is answered with "use the earlier result" instead of running; repeating again after that ends the loop. Comma-separated tool names, `*` for every tool, blank to turn it off. State-reading tools (browser, terminal, workspace, job status) are not in the default list because asking twice there is legitimate |
-            + ArgumentSanitizingToolCallingManager.DEFA...` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/ResilientToolCallingManagerFactory.java` |
-| `app.chat.tools.max-unknown-calls-per-invocation` | `"
-            + ArgumentSanitizingToolCallingManager.DEFA...` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/ResilientToolCallingManagerFactory.java` |
-| `app.chat.tools.text-call-recovery.enabled` | `true` | shapes that load the module | A reply that is a tool call written as text (`{"name": ..., "parameters": ...}`, `<tool_call>`, `<function=...>`, `[TOOL_CALLS]`, with or without a code fence) to a tool the request offered is executed through the normal tool loop and the model is called again with the result, for every provider. Replies that are not such a call are untouched. See [Run free with local models](local-models.md#tool-calls-from-small-models). |
+| `app.chat.tools.max-unknown-calls-per-invocation` | `8` | shapes that load the module | Calls to tool names the model was never offered, per model invocation, before the soft stop |
+| `app.chat.tools.text-call-recovery.enabled` | `true` | shapes that load the module | A reply that is a tool call written as text (`{"name": ..., "parameters": ...}`, `<tool_call>`, `<function=...>`, `[TOOL_CALLS]`, with or without a code fence) to a tool the request offered is executed through the normal tool loop and the model is called again with the result. Replies that are not such a call are untouched. Applied to the models `scope` covers (below). See [Run free with local models](local-models.md#tool-calls-from-small-models). |
+| `app.chat.tools.text-call-recovery.scope` | `WEAK_TOOL_CALLERS` | shapes that load the module | `WEAK_TOOL_CALLERS`: only a model known to be a weak tool caller, or one of unknown capability (see the next rows); a frontier provider and a pool row measured `STRUCTURED` are not wrapped and keep live streaming of a reply that starts with `{` or a code fence. `ALL_MODELS`: every model. |
+| `app.chat.tools.text-call-recovery.providers` | `OLLAMA,LOCAL_OPENAI,OPENROUTER,GROQ,META,SARVAM` | shapes that load the module | Bring-your-own providers whose models are local or open-weight and so treated as weak tool callers. Keep in step with `app.chat.continuation.heuristic-providers`, which uses the same idea for the unfinished-reply check. |
+| `app.chat.tools.text-call-recovery.tool-grades` | `TEXT,NONE` | shapes that load the module | A platform-hosted pool row measured at one of these tool-calling grades is a weak tool caller (so is a row in small-model mode). A row measured at a grade not listed is taken as capable. |
+| `app.chat.tools.text-call-recovery.apply-to-unmeasured-rows` | `true` | shapes that load the module | A pool row that was never measured (and is not in small-model mode) is of unknown capability: `true` wraps it, `false` leaves it unwrapped. |
 | `app.chat.tools.text-call-recovery.max-per-invocation` | `3` | shapes that load the module | Text-form tool calls recovered in one model invocation before the reply is released as text. |
 | `app.chat.tools.text-call-recovery.hold-back-chars` | `16384` | shapes that load the module | While streaming, how many characters of a reply that still looks like a tool call (first character `{`, `[`, a code fence or a known tag) are held back before the reply is released as text anyway. A reply that starts with a letter is never held. |
 | `app.chat.tools.constrained-router.enabled` | `true` | shapes that load the module | Constrained tool router for hosted-pool rows whose measured tool-call grade is TEXT or NONE and whose server can enforce a constraint (Ollama and llama.cpp: a JSON schema on the reply; vLLM: `tool_choice=required`). The model chooses `{action: call|answer, tool, arguments, answer}` under that constraint and the chosen call runs through the shared tool loop; rows graded STRUCTURED, and rows with the per-row override off, are untouched. See [Run free with local models](local-models.md#tool-calls-from-small-models). |
@@ -2325,19 +2905,16 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.llm.mistral.prompt-caching.enabled` | `true` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/MistralProviderCachingStrategy.java` |
 | `app.llm.observations.enabled` | `true` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/LlmModelSupport.java` |
 | `app.llm.openai.prompt-caching.enabled` | `true` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/OpenAIProviderCachingStrategy.java` |
-| `app.llm.retry.initial-backoff` | `1s` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/LlmModelSupport.java` |
-| `app.llm.retry.max-attempts` | `2` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/LlmModelSupport.java` |
-| `app.llm.retry.max-backoff` | `10s` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/LlmModelSupport.java` |
 | `app.llm.spend-counter.reconcile-max-tick-seconds` | `30` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/LlmSpendCounterReconciler.java` |
 | `app.llm.stream-usage.disabled-providers` | `MISTRAL` | shapes that load the module | Mistral is off by default: its API documents no stream_options field and validates request bodies strictly, so asking could 4xx every streamed turn. |
 | `app.llm.vertex.prompt-caching.enabled` | `false` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/VertexProviderCachingStrategy.java` |
-| `app.providers.sarvam.max-tokens-ceiling` | `(set in source)` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/SarvamAgentChatClientFactory.java` |
+| `app.providers.sarvam.max-tokens-ceiling` | `4096` | shapes that load the module | see source: `core/chat/src/main/java/com/agenticai/core/chat/SarvamAgentChatClientFactory.java` |
 
 ### Module `codeintel` (1)
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
-| `code-intel.timeout-millis` |  | shapes that load the module | Per-call timeout (ms) for retrieval/graph reads. |
+| `code-intel.timeout-millis` | `15000` | shapes that load the module | Per-call timeout (ms) for retrieval/graph reads. |
 
 ### Module `dbauth` (5)
 
@@ -2407,7 +2984,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
 | `app.embeddings` |  | shapes that load the module | app.embeddings.* - opt-in replacement of the Python sidecar for text embeddings. |
-| `app.evals.free-plan-enabled` | `true` | shapes that load the module | see source: `core/knowledge/src/main/java/com/agenticai/core/knowledge/rag/RagEvalService.java` |
+| `app.evals.free-plan-enabled` | `${EVALS_FREE_PLAN_ENABLED:true}` | shapes that load the module | 2026-10-02 research ungating (gap-analysis differentiators): opens the read-only quality surface (QualityController summary/history/ statistics/config) and the reliability endpoints (pass^k, Wilson intervals, paired... |
 | `app.knowledge.reembed.batch-size` | `64` | shapes that load the module | see source: `core/knowledge/src/main/java/com/agenticai/core/knowledge/KnowledgeReembedService.java` |
 | `app.knowledge.vector-index.ef-search` | `100` | shapes that load the module | pgvector's default is 40; the candidate pool here is up to 50 rows AND is post-filtered by collection_id, so the default would starve the LIMIT. |
 | `app.knowledge.vector-index.enabled` | `true` | shapes that load the module | see source: `core/knowledge/src/main/java/com/agenticai/core/knowledge/VectorSchemaInitializer.java` |
@@ -2421,17 +2998,17 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.mcp.remote-url-denylist` |  | shapes that load the module | @Autowired is required: with a no-arg constructor also present Spring would pick THAT one and silently ignore app.mcp.remote-url-denylist. |
 | `app.mcp.stdio-launcher-allowlist` |  | shapes that load the module | @Autowired: with the no-arg ctor above also present, Spring would otherwise fall back to it and silently ignore app.mcp.stdio-launcher-allowlist. |
 | `mcp.registry` |  | shapes that load the module | mcp.registry.* - how core reaches the official public MCP Registry (registry.modelcontextprotocol.io) for the "Browse registry" search. |
-| `mcp.registry.base-url` |  | shapes that load the module | Base URL of the official registry. |
-| `mcp.registry.cache-ttl-seconds` |  | shapes that load the module | How long (seconds) an identical search's result page is cached, so paging back and forth or repeat searches don't re-hit the registry on every keystroke-debounced call. |
-| `mcp.registry.catalog-max-pages` |  | shapes that load the module | Safety cap on pages walked per refresh, so a broken cursor can't loop forever. |
-| `mcp.registry.catalog-max-servers` |  | shapes that load the module | Safety cap on servers held in memory. |
-| `mcp.registry.catalog-page-size` |  | shapes that load the module | Page size used when walking the whole catalog in the background. |
-| `mcp.registry.catalog-ttl-seconds` |  | shapes that load the module | How long (seconds) a fetched catalog snapshot is considered fresh. |
-| `mcp.registry.enabled` |  | shapes that load the module | Master switch for the "Browse registry" search. |
-| `mcp.registry.page-size` |  | shapes that load the module | How many results one page of the browse UI shows. |
-| `mcp.registry.read-timeout-millis` |  | shapes that load the module | Read timeout (ms) for one registry page. |
-| `mcp.registry.timeout-millis` |  | shapes that load the module | TCP connect timeout (ms). |
-| `mcp.registry.warm-on-startup` |  | shapes that load the module | Whether to start the first catalog fetch at application startup, so the first person to open the browse tab gets an instant, already-warm search instead of paying the cold-fetch cost themselves. |
+| `mcp.registry.base-url` | `https://registry.modelcontextprotocol.io` | shapes that load the module | Base URL of the official registry. |
+| `mcp.registry.cache-ttl-seconds` | `120` | shapes that load the module | How long (seconds) an identical search's result page is cached, so paging back and forth or repeat searches don't re-hit the registry on every keystroke-debounced call. |
+| `mcp.registry.catalog-max-pages` | `300` | shapes that load the module | Safety cap on pages walked per refresh, so a broken cursor can't loop forever. |
+| `mcp.registry.catalog-max-servers` | `30000` | shapes that load the module | Safety cap on servers held in memory. |
+| `mcp.registry.catalog-page-size` | `100` | shapes that load the module | Page size used when walking the whole catalog in the background. |
+| `mcp.registry.catalog-ttl-seconds` | `21600` | shapes that load the module | How long (seconds) a fetched catalog snapshot is considered fresh. |
+| `mcp.registry.enabled` | `true` | shapes that load the module | Master switch for the "Browse registry" search. |
+| `mcp.registry.page-size` | `30` | shapes that load the module | How many results one page of the browse UI shows. |
+| `mcp.registry.read-timeout-millis` | `60000` | shapes that load the module | Read timeout (ms) for one registry page. |
+| `mcp.registry.timeout-millis` | `8000` | shapes that load the module | TCP connect timeout (ms). |
+| `mcp.registry.warm-on-startup` | `true` | shapes that load the module | Whether to start the first catalog fetch at application startup, so the first person to open the browse tab gets an instant, already-warm search instead of paying the cold-fetch cost themselves. |
 
 ### Module `omnichannel` (13)
 
@@ -2479,18 +3056,18 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.landing-events.buffer-capacity` | `10000` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/LandingEventBuffer.java` |
 | `app.landing-events.max-batch-size` | `500` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/LandingEventBuffer.java` |
 | `app.langfuse.base-url` |  | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/ops/LangfuseApiClient.java` |
-| `app.platform.jobs.run-now-allowlist` | `" + DEFAULT_ALLOWLIST + "` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/ops/ScheduledJobRegistryService.java` |
+| `app.platform.jobs.run-now-allowlist` | `com.agenticai.core.platform.LlmUsageRollupScheduler#rollupYesterday,com.agenticai.core.tenancy.demo.DemoSessionExpiryJob#tick,com.agenticai.core.tenancy.StalePendingUpgradeCleanup#clearStalePendingUpgrades,com.agenticai.core.providers.ProviderModelCatalogService#scheduledRefresh` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/ops/ScheduledJobRegistryService.java` |
 | `app.platform.ops.academy-base-url` |  | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/ops/PlatformVersionService.java` |
 | `app.platform.ops.app-builder-base-url` |  | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/ops/PlatformVersionService.java` |
 | `app.platform.ops.web-admin-base-url` |  | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/ops/PlatformVersionService.java` |
 | `app.platform.ops.web-base-url` |  | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/ops/PlatformVersionService.java` |
-| `app.platform.reliability.cache-ttl-seconds` | `30` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/reliability/DependencyHealthService.java` |
-| `app.platform.reliability.enabled` | `true` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/reliability/DependencyHealthService.java` |
-| `app.platform.reliability.probe-timeout-ms` | `2000` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/reliability/DependencyHealthService.java` |
-| `app.platform.reliability.slo.aggregate-via-redis` | `false` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/reliability/SloSampler.java` |
-| `app.platform.reliability.slo.redis-publish-seconds` | `300` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/reliability/SloSampler.java` |
-| `app.platform.reliability.slo.retention-hours` | `48` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/reliability/SloSampler.java` |
-| `app.platform.reliability.slo.sample-interval-seconds` | `60` | shapes that load the module | see source: `core/platform/src/main/java/com/agenticai/core/platform/reliability/SloSampler.java` |
+| `app.platform.reliability.cache-ttl-seconds` | `${PLATFORM_RELIABILITY_CACHE_TTL_SECONDS:30}` | shapes that load the module | Group `app.platform.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3185`) |
+| `app.platform.reliability.enabled` | `${PLATFORM_RELIABILITY_ENABLED:true}` | shapes that load the module | Group `app.platform.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3184`) |
+| `app.platform.reliability.probe-timeout-ms` | `${PLATFORM_RELIABILITY_PROBE_TIMEOUT_MS:2000}` | shapes that load the module | Group `app.platform.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3186`) |
+| `app.platform.reliability.slo.aggregate-via-redis` | `${PLATFORM_RELIABILITY_SLO_REDIS:false}` | shapes that load the module | Group `app.platform.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3190`) |
+| `app.platform.reliability.slo.redis-publish-seconds` | `${PLATFORM_RELIABILITY_SLO_REDIS_PUBLISH_SECONDS:300}` | shapes that load the module | Group `app.platform.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3191`) |
+| `app.platform.reliability.slo.retention-hours` | `${PLATFORM_RELIABILITY_SLO_RETENTION_HOURS:48}` | shapes that load the module | Group `app.platform.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3189`) |
+| `app.platform.reliability.slo.sample-interval-seconds` | `${PLATFORM_RELIABILITY_SLO_SAMPLE_INTERVAL_SECONDS:60}` | shapes that load the module | Group `app.platform.reliability`: Reliability console (platform-admin only, read-only): GET /api/platform/health/dependencies... (see source: `core/app-config/src/main/resources/application.yml:3188`) |
 
 ### Module `providers` (5)
 
@@ -2510,7 +3087,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `LANGFUSE_INIT_PROJECT_ID` |  | shapes that load the module | see source: `core/quality/src/main/java/com/agenticai/core/quality/dataset/EvalDatasetService.java` |
 | `app.quality.eval.judge-budget-seconds` | `120` | shapes that load the module | Overall time budget for one judge run (seconds): a calibration or eval run stops spending past it. |
 | `app.quality.eval.judge-call-timeout-seconds` | `20` | shapes that load the module | Hard wall-clock limit for one judge call (seconds). |
-| `app.quality.eval.judge-model` |  | shapes that load the module | Explicit deployment-wide judge model (MODEL on the best provider, or PROVIDER/MODEL when the first segment names a provider). |
+| `app.quality.eval.judge-model` |  | shapes that load the module | Explicit deployment-wide judge model (MODEL on the best provider, or PROVIDER/MODEL when the first segment names a provider). The platform value of the setting `quality.judge.model` (a workspace can override it). |
 | `app.quality.eval.judge-preflight.enabled` | `true` | shapes that load the module | Ask the judge one tiny question before the case loop and fail the run at once - "Judge model unavailable: reason" - when it cannot answer, instead of replaying every case against a dead judge. |
 
 ### Module `rl` (11)
@@ -2520,14 +3097,14 @@ Keep this appendix current: when you add a property, document it in the section 
 | `rl.policy` |  | shapes that load the module | rl.policy.* - seeding config for PolicyStore's default arms. |
 | `rl.policy.model-route-arms` |  | shapes that load the module | The candidate model keys a MODEL_ROUTE policy explores between. |
 | `rl.reward` |  | shapes that load the module | rl.reward.* - how RewardService blends the per-source rl_reward_record components into one verifiable composite reward. |
-| `rl.reward.clip-max` |  | shapes that load the module | Upper clip bound for the composite reward fed to the bandit. |
-| `rl.reward.clip-min` |  | shapes that load the module | Lower clip bound for the composite reward fed to the bandit. |
-| `rl.reward.cost-weight` |  | shapes that load the module | Default weight for a COST-efficiency reward component. |
-| `rl.reward.human-weight` |  | shapes that load the module | Default weight for a HUMAN reward component. |
-| `rl.reward.judge-weight` |  | shapes that load the module | Default weight for a JUDGE (LLM-as-judge) reward component. |
-| `rl.reward.latency-weight` |  | shapes that load the module | Default weight for a LATENCY-efficiency reward component. |
-| `rl.reward.safety-veto-cap` |  | shapes that load the module | The hard ceiling a SAFETY violation imposes on the final reward. |
-| `rl.reward.task-success-weight` |  | shapes that load the module | Default weight for a TASK_SUCCESS reward component. |
+| `rl.reward.clip-max` | `1.0` | shapes that load the module | Upper clip bound for the composite reward fed to the bandit. |
+| `rl.reward.clip-min` | `0.0` | shapes that load the module | Lower clip bound for the composite reward fed to the bandit. |
+| `rl.reward.cost-weight` | `0.2` | shapes that load the module | Default weight for a COST-efficiency reward component. |
+| `rl.reward.human-weight` | `1.0` | shapes that load the module | Default weight for a HUMAN reward component. |
+| `rl.reward.judge-weight` | `0.6` | shapes that load the module | Default weight for a JUDGE (LLM-as-judge) reward component. |
+| `rl.reward.latency-weight` | `0.2` | shapes that load the module | Default weight for a LATENCY-efficiency reward component. |
+| `rl.reward.safety-veto-cap` | `0.1` | shapes that load the module | The hard ceiling a SAFETY violation imposes on the final reward. |
+| `rl.reward.task-success-weight` | `1.0` | shapes that load the module | Default weight for a TASK_SUCCESS reward component. |
 
 ### Module `security` (5)
 
@@ -2552,7 +3129,7 @@ Keep this appendix current: when you add a property, document it in the section 
 |---|---|---|---|
 | `app.storage` |  | shapes that load the module | app.storage.* - the only config surface that changes between a local MinIO deployment and production AWS S3/Cloudflare R2. |
 | `app.storage.azure` |  | shapes that load the module | Settings for type=azure-blob; ignored by the other implementations. |
-| `app.storage.legacy-unprefixed-fallback` |  | shapes that load the module | Whether S3FileStorageService#get/S3FileStorageService#exists may retry the BARE (un-tenant-prefixed) key after the tenant-scoped key misses - the compatibility path for objects written before tenant prefixing landed... |
+| `app.storage.legacy-unprefixed-fallback` | `true` | shapes that load the module | Whether S3FileStorageService#get/S3FileStorageService#exists may retry the BARE (un-tenant-prefixed) key after the tenant-scoped key misses - the compatibility path for objects written before tenant prefixing landed... |
 | `app.storage.local` |  | shapes that load the module | Settings for type=local; ignored by the S3 implementation. |
 
 ### Module `templates` (2)
@@ -2616,7 +3193,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.workflow.expressions.enabled` | `true` | shapes that load the module | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/WorkflowExpressionResolver.java` |
 | `app.workflow.expressions.rate-limit-per-minute` | `120` | shapes that load the module | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/WorkflowExpressionRateLimiter.java` |
 | `app.workflow.expressions.strict` | `false` | shapes that load the module | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/WorkflowExpressionResolver.java` |
-| `app.workflow.output-dedup.ttl-minutes` | `" + DEFAULT_TTL_MINUTES + "` | shapes that load the module | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/output/WorkflowOutputDedupGuard.java` |
+| `app.workflow.output-dedup.ttl-minutes` | `10` | shapes that load the module | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/output/WorkflowOutputDedupGuard.java` |
 | `app.workflow.poll` |  | shapes that load the module | app.workflow.poll.* - the HTTP polling trigger's limits. |
 | `app.workflow.recovery.stale-after-minutes` | `120` | shapes that load the module | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/WorkflowRunRecoveryJob.java` |
 | `app.workflow.run-data.ttl-days` | `14` | shapes that load the module | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/RunDataCleanupJob.java` |
@@ -2624,14 +3201,90 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.workflow.share.max-voice-turns-per-minute` | `20` | shapes that load the module | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/share/WorkflowShareService.java` |
 | `app.workflow.share.report-revoke-threshold` | `3` | shapes that load the module | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/share/WorkflowShareService.java` |
 | `app.workflow.temporal.activity-heartbeat-seconds` | `10` | shapes that load the module | see source: `core/workflow/src/main/java/com/agenticai/core/workflow/temporal/WorkflowNodeActivitiesImpl.java` |
+### Further keys reconciled with the code (WP 3b)
+
+Keys the code reads that had no row above, added so `ConfigurationDriftTest` (core/app) can hold the whole key set to this document. Defaults are the code's; where a key is also in `application.yml` the two are equal.
+
+| Property | Default | Applies to | Meaning |
+|---|---|---|---|
+| `app.agent-runtime.bounds.max-tool-steps.min` / `app.agent-runtime.bounds.max-tool-steps.max` | `1` / `500` | all shapes | Smallest and largest value a tenant, an agent or one request may set for the tool calls one turn may make (an override outside the range is clamped into it when read; the platform value is never clamped). |
+| `app.agent-runtime.bounds.turn-timeout-seconds.min` / `app.agent-runtime.bounds.turn-timeout-seconds.max` | `10` / `3600` | all shapes | Smallest and largest value a tenant, an agent or one request may set for the wall-clock limit of one turn (an override outside the range is clamped into it when read; the platform value is never clamped). |
+| `app.agent-runtime.bounds.tool-timeout-seconds.min` / `app.agent-runtime.bounds.tool-timeout-seconds.max` | `1` / `1800` | all shapes | Smallest and largest value a tenant, an agent or one request may set for the wall-clock limit of one tool call (an override outside the range is clamped into it when read; the platform value is never clamped). |
+| `app.agent-runtime.bounds.tool-output-max-chars.min` / `app.agent-runtime.bounds.tool-output-max-chars.max` | `500` / `200000` | all shapes | Smallest and largest value a tenant, an agent or one request may set for the characters of one tool result the model sees (an override outside the range is clamped into it when read; the platform value is never clamped). |
+| `app.agent-runtime.bounds.retrieval-top-k.min` / `app.agent-runtime.bounds.retrieval-top-k.max` | `1` / `50` | all shapes | Smallest and largest value a tenant, an agent or one request may set for the chunks one knowledge-search call returns (an override outside the range is clamped into it when read; the platform value is never clamped). |
+| `app.agent-runtime.bounds.retrieval-min-score.min` / `app.agent-runtime.bounds.retrieval-min-score.max` | `0` / `1` | all shapes | Smallest and largest value a tenant, an agent or one request may set for the least relevance a returned chunk needs (an override outside the range is clamped into it when read; the platform value is never clamped). |
+| `app.agent-runtime.bounds.continuation-passes.min` / `app.agent-runtime.bounds.continuation-passes.max` | `0` / `16` | all shapes | Smallest and largest value a tenant, an agent or one request may set for the extra passes to finish a reply that stopped at a step it announced (an override outside the range is clamped into it when read; the platform value is never clamped). |
+| `app.llm.endpoints.anthropic.models-path` / `app.llm.endpoints.anthropic.completions-path` | `/v1/models` / blank | all shapes | Path appended to `app.llm.endpoints.anthropic.base-url` to list the vendor's models (also what a key is validated against), and the chat-completions path when it is not the conventional `/v1/chat/completions` (blank = conventional). A blank value falls back to the default; a path always starts with a slash. |
+| `app.llm.endpoints.openai.models-path` / `app.llm.endpoints.openai.completions-path` | `/v1/models` / blank | all shapes | Path appended to `app.llm.endpoints.openai.base-url` to list the vendor's models (also what a key is validated against), and the chat-completions path when it is not the conventional `/v1/chat/completions` (blank = conventional). A blank value falls back to the default; a path always starts with a slash. |
+| `app.llm.endpoints.grok.models-path` / `app.llm.endpoints.grok.completions-path` | `/v1/models` / blank | all shapes | Path appended to `app.llm.endpoints.grok.base-url` to list the vendor's models (also what a key is validated against), and the chat-completions path when it is not the conventional `/v1/chat/completions` (blank = conventional). A blank value falls back to the default; a path always starts with a slash. |
+| `app.llm.endpoints.gemini.models-path` / `app.llm.endpoints.gemini.completions-path` | `/v1beta/models` / `/v1beta/openai/chat/completions` | all shapes | Path appended to `app.llm.endpoints.gemini.base-url` to list the vendor's models (also what a key is validated against), and the chat-completions path when it is not the conventional `/v1/chat/completions` (blank = conventional). A blank value falls back to the default; a path always starts with a slash. |
+| `app.llm.endpoints.mistral.models-path` / `app.llm.endpoints.mistral.completions-path` | `/v1/models` / blank | all shapes | Path appended to `app.llm.endpoints.mistral.base-url` to list the vendor's models (also what a key is validated against), and the chat-completions path when it is not the conventional `/v1/chat/completions` (blank = conventional). A blank value falls back to the default; a path always starts with a slash. |
+| `app.llm.endpoints.deepseek.models-path` / `app.llm.endpoints.deepseek.completions-path` | `/v1/models` / blank | all shapes | Path appended to `app.llm.endpoints.deepseek.base-url` to list the vendor's models (also what a key is validated against), and the chat-completions path when it is not the conventional `/v1/chat/completions` (blank = conventional). A blank value falls back to the default; a path always starts with a slash. |
+| `app.llm.endpoints.groq.models-path` / `app.llm.endpoints.groq.completions-path` | `/v1/models` / blank | all shapes | Path appended to `app.llm.endpoints.groq.base-url` to list the vendor's models (also what a key is validated against), and the chat-completions path when it is not the conventional `/v1/chat/completions` (blank = conventional). A blank value falls back to the default; a path always starts with a slash. |
+| `app.llm.endpoints.meta.models-path` / `app.llm.endpoints.meta.completions-path` | `/v1/models` / blank | all shapes | Path appended to `app.llm.endpoints.meta.base-url` to list the vendor's models (also what a key is validated against), and the chat-completions path when it is not the conventional `/v1/chat/completions` (blank = conventional). A blank value falls back to the default; a path always starts with a slash. |
+| `app.llm.endpoints.openrouter.models-path` / `app.llm.endpoints.openrouter.completions-path` | `/v1/models` / blank | all shapes | Path appended to `app.llm.endpoints.openrouter.base-url` to list the vendor's models (also what a key is validated against), and the chat-completions path when it is not the conventional `/v1/chat/completions` (blank = conventional). A blank value falls back to the default; a path always starts with a slash. |
+| `app.llm.endpoints.sarvam.models-path` / `app.llm.endpoints.sarvam.completions-path` | `/v1/models` / blank | all shapes | Path appended to `app.llm.endpoints.sarvam.base-url` to list the vendor's models (also what a key is validated against), and the chat-completions path when it is not the conventional `/v1/chat/completions` (blank = conventional). A blank value falls back to the default; a path always starts with a slash. |
+| `app.a2a.client.enabled` | `${APP_A2A_CLIENT_ENABLED:false}` | all shapes | Master switch of the outbound A2A client (this platform calling external agents through the `a2a_call_agent` tool). Off by default; with an empty `app.a2a.client.allowed-hosts` no host is reachable even when on. |
+| `app.agent-jobs.run-now-mode` | `inline` (profile `shape-api`: `enqueue`) | all shapes | Where a freshly submitted job first runs: `inline` hands the row to this JVM's own worker pool, `enqueue` only writes the durable QUEUED row for the poller of another deployment shape. The `shape-api` profile sets `enqueue` so no agent turn runs on an interactive-chat JVM. |
+| `app.chat.directives.artifacts.enabled` | `${APP_CHAT_DIRECTIVES_ARTIFACTS_ENABLED:false}` | all shapes | Adds the Artifacts convention directive to the system prompt. Off by default because it costs prompt tokens; an agent opts in through `app.chat.directives.artifacts.agent-ids` or the all-agents switch. |
+| `app.coding-harness.enabled` | `${CODING_HARNESS_ENABLED:false}` | all shapes | Master switch of the coding-task harness (a sandboxed fix-and-test loop over a repository or archive). Off by default. |
+| `app.coding-harness.network-enabled` | `${CODING_HARNESS_NETWORK_ENABLED:false}` | all shapes | `false`: test commands run in an empty network namespace. `true`: they keep the sandbox network (dependency downloads) - weaker, the operator's call. |
+| `app.crypto.kms.aws.region` |  | all shapes | AWS region of the KMS key named by `app.crypto.kms.aws.key-id`; blank = the AWS SDK default region chain. |
+| `app.crypto.kms.azure.algorithm` | `RSA-OAEP-256` | all shapes | Key-wrap algorithm used with the Azure Key Vault key `app.crypto.kms.azure.key-id`. Each wrapped key records the algorithm it used, so changing this never strands old data. |
+| `app.crypto.kms.gcp.endpoint` | `https://cloudkms.googleapis.com` | all shapes | Cloud KMS API endpoint used with `app.crypto.kms.gcp.key-name`; only changed for a private-service-connect or test endpoint (a non-Google endpoint is refused unless `app.crypto.kms.gcp.allow-insecure-test-endpoint` is true). |
+| `app.delegation.issuer` | `${APP_DELEGATION_ISSUER:}` | all shapes | `iss` claim of the delegation tokens the platform issues to agents; blank = the A2A public base URL (`app.a2a.public-base-url`). |
+| `app.demo.studio.max-workflows-per-session` | `10` | all shapes | Workflows one anonymous demo Studio session may create. |
+| `app.demo.telegram.webhook-base-url` | `${app.telegram.webhook-base-url:}` | all shapes | Public HTTPS base URL Telegram calls for the demo bot; falls back to `app.telegram.webhook-base-url` (same backend, same hostname). |
+| `app.devices.claim.rate-limit.max-attempts-per-ip` | `10` | all shapes | Claim attempts one IP address may make inside `app.devices.claim.rate-limit.ip-window-minutes` before further attempts are refused (a platform setting overrides it at run time). |
+| `app.embeddings.model` | `${APP_EMBEDDINGS_MODEL:}` | all shapes | Model id sent in the request body of the OpenAI-compatible embeddings provider (for example `text-embedding-3-small`); the native width of the model is `app.embeddings.dimensions`. |
+| `app.embeddings.ollama.document-prefix` |  | all shapes | Prefix put before each stored passage sent to Ollama; unset = the model's documented default, empty string = none. |
+| `app.encryption.key` | `${APP_ENCRYPTION_KEY:}` | all shapes | Deployment secret from which stored tenant credentials are encrypted (`EncryptionService`); it must be identical on every core replica. Never log it. |
+| `app.guardrails.implementation` | `${GUARDRAILS_IMPLEMENTATION:semantic}` | all shapes | `semantic` (the default: pattern layer plus an LLM judge) or `pattern` (regex only, no extra model call per tool result). |
+| `app.guardrails.tenant-rules.max-regex-steps` | `5000000` | all shapes | Upper bound on characters a tenant guardrail regex may read in one evaluation (guards against catastrophic backtracking). |
+| `app.guardrails.tenant-rules.regex-timeout-ms` | `250` | all shapes | Wall-clock bound, in milliseconds, of one tenant guardrail regex evaluation. |
+| `app.keycloak.allowed-azp` | `agentic-ai-web,agentic-ai-platform-admin,agentic-ai-mobile,agentic-ai-app,agentic-ai-ios,agentic-ai-ide,agentic-ai-core` | all shapes | Comma-separated Keycloak client ids (`azp`) whose tokens core accepts. Set it to add a first-party client; setting it EMPTY switches the check off (emergency lever only). |
+| `app.landing-events.batch-enabled` | `false` | all shapes | `true` buffers the landing-page beacon in memory and writes it behind the request; `false` keeps the synchronous Redis path. |
+| `app.langfuse.auth-header` | `${LANGFUSE_OTEL_AUTH_HEADER:}` | all shapes | `Authorization` value the Langfuse public API client sends (`Basic base64(public:secret)`); defaults to the header the OTLP exporter already uses. |
+| `app.mcp-server.expose-agents.enabled` | `${APP_MCP_SERVER_EXPOSE_AGENTS_ENABLED:false}` | all shapes | Exposes agents and workflows as MCP tools on the inbound MCP server. Needs the `mcpserver` profile too; off by default. |
+| `app.mcp.oauth.enabled` | `${MCP_OAUTH_ENABLED:false}` | all shapes | Enables the OAuth connect flow for remote MCP servers (dynamic client registration or client-metadata document, PKCE). Off: the endpoints answer 404. |
+| `app.mcp.oauth.store` | `${MCP_OAUTH_STORE:memory}` | all shapes | Where pending OAuth state lives: `memory` (per JVM, single replica) or `redis` (required with `app.replica-mode=multi`). |
+| `app.mcp.registry-route-tool-calls` | `${APP_MCP_REGISTRY_ROUTE_TOOL_CALLS:false}` | all shapes | `true` routes a tenant MCP tool call to the replica that owns the connection (multi-replica); `false` runs it on the replica that took the turn. |
+| `app.mcp.registry-tool-call-timeout` | `${APP_MCP_REGISTRY_TOOL_CALL_TIMEOUT:PT60S}` | all shapes | How long a routed MCP tool call waits for the owning replica to answer. |
+| `app.mcpserver.async-tasks.enabled` | `${APP_MCPSERVER_ASYNC_TASKS_ENABLED:false}` | all shapes | Adds the long-running task tools (`start_agent_task`, `get_task`, `cancel_task`) to the inbound MCP server `tools/list`. |
+| `app.memory.import.enabled` | `${APP_MEMORY_IMPORT_ENABLED:true}` | all shapes | Lets a member import memory facts exported from another assistant. Also needs `app.memory.self-service.enabled`; either off answers 404. |
+| `app.observability.genai-attrs` | `${OTEL_GENAI_ATTRS:both}` | all shapes | OpenTelemetry GenAI attribute names on model-call spans: `legacy` (`gen_ai.system`), `new` (`gen_ai.provider.name`) or `both`. |
+| `app.quality.eval.calibration.enabled` | `${EVAL_JUDGE_CALIBRATION_ENABLED:false}` | all shapes | Enables judge calibration (two judge calls per labelled example, reports Cohen's kappa and order-swap consistency). Off by default because it costs model calls. |
+| `app.replica-mode` | `${APP_REPLICA_MODE:single}` | all shapes | `single` or `multi`. `multi` makes the startup safety check warn (or fail, with `app.replica-mode-strict`) about per-JVM state that breaks with two or more replicas. |
+| `app.replica-mode-strict` | `false` | all shapes | In `multi` replica mode, turns the startup warnings about unsafe per-JVM settings into a boot failure. `app.replica-mode.strict` is honoured as an alias. |
+| `app.swarm.verifier.enabled` | `${SWARM_VERIFIER_ENABLED:false}` | all shapes | Enables the swarm goal verifier (one extra model call checks the joined branch results and may order a repair round). Off by default. |
+| `app.teams.service-url-allowed-hosts` | `smba.trafficmanager.net,*.botframework.com,*.teams.microsoft.com,*.teams.microsoft.us,*.botframework.azure.us,*.botframework.azure.cn` | all shapes | Hosts a Microsoft Teams `serviceUrl` may point to before the bot token is sent to it (`*.example.com` matches strict subdomains, anything else is an exact host). |
+| `app.tool-arg-policies.enabled` | `${TOOL_ARG_POLICIES_ENABLED:true}` | all shapes | Enables per-agent tool argument policies (a call whose arguments break a declared constraint is refused before the tool runs). On by default since 2026-10-23 (`false` in `personal`). Off: the wrapper is never installed and a PUT answers 409. |
+| `app.tools.classification.confirmation-gate` | `${TOOL_CONFIRMATION_GATE:true}` | all shapes | Routes a classified tool that is both irreversible and consequential to the human approval gate. `false` opts out. |
+| `app.tools.classification.confirmation-gate-exempt-tools` | `${TOOL_CONFIRMATION_GATE_EXEMPT:channel_send_message,run_code,run_in_code_workspace,browser_click,browser_type,google_gmail,google_calendar}` | all shapes | Tools exempt from `app.tools.classification.confirmation-gate` (they have their own approval or sandbox). |
+| `app.tools.classification.trifecta-enforcement` | `${TOOL_TRIFECTA_ENFORCEMENT:warn}` | all shapes | What happens to an agent that holds private-data access, untrusted content and an outbound channel at once: `off`, `warn`, `require-approval` or `block`. |
+| `app.tutor.enabled` | `${APP_TUTOR_ENABLED:false}` | all shapes | Maps the Learn Anything tutor routes under `/api/tutor`. Off: every call answers 404 and the console hides the feature. |
+| `app.tutor.reminders.enabled` | `${APP_TUTOR_REMINDERS_ENABLED:false}` | all shapes | Turns on the spaced-repetition review reminders for tutor study plans (also reported by `/api/tutor/status`). |
+| `app.vision.enabled` | `${APP_VISION_ENABLED:true}` | all shapes | Platform-wide switch for server-side vision (snapshot frames and sessions). Off: `POST /api/vision/sessions` answers 503. |
+| `app.workflow.portability.enabled` | `${WORKFLOW_PORTABILITY_ENABLED:false}` | all shapes | Enables importing workflows from other tools (n8n, Dify) and exporting them. Off by default. |
+| `app.workflow.portability.max-payload-bytes` | `${WORKFLOW_PORTABILITY_MAX_PAYLOAD_BYTES:2097152}` | all shapes | Largest workflow document accepted for import, in bytes. |
+| `openai.api-key` |  | all shapes | OpenAI key used by the deployment-level Whisper video transcription provider (environment variable `OPENAI_API_KEY`); unset, the provider bean is not created. |
+| `privacy.retention.enabled` | `true` | all shapes | Nightly data-retention purge. `false` switches the job off; tenants with no retention rule lose nothing either way. |
+| `rl.feedback.edit-reward` | `0.0` | all shapes | Reward credited to a policy arm when the person edited the reply instead of accepting it. |
+| `rl.feedback.thumbs-down-reward` | `0.0` | all shapes | Reward credited to a policy arm on a thumbs-down. |
+| `rl.feedback.unresolved-reward` | `0.0` | all shapes | Reward credited to a policy arm when the person marks the conversation as not resolved. |
+| `rl.feedback.export-undesirable-max-rating` | `2` | all shapes | Highest rating an exported training example may carry to be labelled undesirable (`rl.feedback.export-desirable-min-rating` is the matching lower bound). |
+| `tool-sandbox.e2b-execution` | `${TOOL_SANDBOX_E2B_EXECUTION:false}` | all shapes | Runs Python custom tools in the tenant's own E2B sandbox instead of the tool-sandbox service. Validation still uses tool-sandbox; Java tools and tools holding vault secrets still run there. |
+
 ### Prompt directives per tenant (`/api/prompt-directives`)
 
 The platform's built-in standing prompt directives (current date, memory usage, tool trust, untrusted
 MCP data, tool search, context compaction, browser tools, artifacts) can be switched off or reworded
 per tenant, and a free-text block can be appended for every agent. This is stored data, not
-configuration: table `prompt_directive_setting` in each tenant schema (migration V654), changed
-through the console page `/admin/instructions` or the API below (tenant admin only). With no
-settings the prompt is byte-identical to the built-in one. The `app.chat.directives.*` flags above
+configuration: tenant-scope rows of the prompt registry (table `prompt_override` in each tenant schema,
+migration V664; the older `prompt_directive_setting` of V654 was copied there and is no longer read),
+changed through the console page `/admin/instructions` or the API below (tenant admin only). The same
+texts can also be set per agent and platform-wide, with a version history, through `/api/prompts` (see
+[prompts.md](prompts.md)). With no settings the prompt is byte-identical to the built-in one. The `app.chat.directives.*` flags above
 stay ops kill-switches: a directive the platform does not send on a turn is never revived by a
 setting.
 
@@ -2645,11 +3298,47 @@ setting.
 `tool_trust` and `mcp_untrusted` are security directives: switching them off or rewording them is
 rejected with 400 unless `acknowledgeRisk` is `true`. `current_date` accepts the placeholder `{date}`
 (UTC date of the turn). `media_honesty` and `agentic_completion` are retired (their rule lives in
-`tool_trust`) and take no text. Small-model compact mode uses an override of `tool_trust` as well.
-The delegation and specialist-handoff prompts keep sending the built-in text. Settings are cached
-in-process for 30 seconds (evicted at once on the node that handled the write), so another node can
-take up to 30 seconds to see a change. Writes are audited as `PROMPT_DIRECTIVE_UPDATED` /
-`PROMPT_DIRECTIVE_RESET` with the key but never the text.
+`tool_trust`) and take no text. A directive with two wordings (`tool_trust` full and compact, `context_compaction` with and
+without the restore tool) is two registry keys; this API writes both. The delegation and specialist-handoff
+prompts resolve through the delegate agent's overrides like any other turn. Overrides are cached in-process
+for `app.prompts.cache.ttl` (30 seconds; evicted at once on the node that handled the write), so another node
+can take up to that long to see a change. Writes are audited as `PROMPT_OVERRIDE_UPDATED` /
+`PROMPT_OVERRIDE_REVERTED` with the key, version, hashes and the old-to-new diff of the wording. The
+`assembledPreview` field is illustrative only (the tenant-wide directives with a sample date); the real
+prompt of an agent is `POST /api/agents/{agentId}/prompt-preview`.
+
+### Prompt registry (`app.prompts.*`)
+
+Typed by `PromptProperties` (module `prompts`). The defaults below are the values in `application.yml` and in the class.
+
+| Property | Default | Applies to | Meaning |
+|---|---|---|---|
+| `app.prompts.default-locale` | `${APP_PROMPTS_DEFAULT_LOCALE:en}` | all shapes | Locale of the built-in prompt texts, and of a context that names none. |
+| `app.prompts.default-max-length` | `${APP_PROMPTS_DEFAULT_MAX_LENGTH:8000}` | all shapes | Longest override accepted for a key whose resource file declares no `maxLength`. A value below 1 falls back to `8000`. |
+| `app.prompts.chars-per-token` | `${APP_PROMPTS_CHARS_PER_TOKEN:4.0}` | all shapes | Characters per token for the estimate shown next to each block of the prompt preview. A rule of thumb, not a tokenizer. A value of 0 or less falls back to `4.0`. |
+| `app.prompts.system-prompt-token-budget` | `${APP_PROMPTS_SYSTEM_PROMPT_TOKEN_BUDGET:0}` | all shapes | Token budget of the standing system text; the prompt preview flags a prompt over it. `0` = no budget. |
+| `app.prompts.history-default-limit` | `${APP_PROMPTS_HISTORY_DEFAULT_LIMIT:50}` | all shapes | Rows of override history returned when the caller names no limit. |
+| `app.prompts.history-max-limit` | `${APP_PROMPTS_HISTORY_MAX_LIMIT:500}` | all shapes | Most rows of override history one call returns. |
+| `app.prompts.list-max-limit` | `${APP_PROMPTS_LIST_MAX_LIMIT:500}` | all shapes | Most rows one `GET /api/prompts` call returns when the caller names a `limit` (`limit` is clamped to `[1, this]`; `offset` windows the list; `X-Total-Count` and `X-Has-More` are sent). With no `limit` the call returns the whole registry. A value below 1 falls back to `500`. |
+| `app.prompts.cache.ttl` | `${APP_PROMPTS_CACHE_TTL:30s}` | all shapes | How long a tenant's (or the platform's) stored overrides are served from memory. A write evicts the replica that handled it at once; every other replica serves its cached copy for at most this long. |
+| `app.prompts.cache.failure-ttl` | `${APP_PROMPTS_CACHE_FAILURE_TTL:5s}` | all shapes | How long the built-in defaults stand in after a failed override load, before the next attempt. |
+| `app.prompts.cache.max-tenants` | `${APP_PROMPTS_CACHE_MAX_TENANTS:10000}` | all shapes | Tenants cached before the cache is cleared. |
+
+### Settings catalog (`app.settings.*`)
+
+The curated behaviour settings a tenant admin or an agent editor may change in the console (`/api/settings/*`, see [settings.md](settings.md)) resolve agent over tenant over the platform value over the code default. The platform value of each is the property the runtime already reads (the entry names it); `app.settings.*` configures the catalog itself.
+
+| Property | Default | Applies to | Meaning |
+|---|---|---|---|
+| `app.settings.cache-ttl` | `${APP_SETTINGS_CACHE_TTL:10s}` | all shapes | How long a tenant's (or an agent's) stored overrides are served from memory. A write evicts the replica that handled it at once; every other replica serves its cached copy for at most this long. |
+| `app.settings.cache-max-entries` | `${APP_SETTINGS_CACHE_MAX_ENTRIES:20000}` | all shapes | (tenant, agent) override sets cached before the cache is cleared. |
+| `app.settings.history-default-limit` | `${APP_SETTINGS_HISTORY_DEFAULT_LIMIT:50}` | all shapes | Rows of setting history returned when the caller names no limit. |
+| `app.settings.history-max-limit` | `${APP_SETTINGS_HISTORY_MAX_LIMIT:200}` | all shapes | Most rows of setting history one call returns. |
+| `app.settings.bulk-history-default-limit` | `${APP_SETTINGS_BULK_HISTORY_DEFAULT_LIMIT:100}` | all shapes | Rows of the all-keys setting history (`GET /api/settings/history`, `GET /api/agents/{id}/settings/history`) returned when the caller names no `limit`. Capped by the next property. |
+| `app.settings.bulk-history-max-limit` | `${APP_SETTINGS_BULK_HISTORY_MAX_LIMIT:500}` | all shapes | Most rows one all-keys history call returns; a larger `limit` is clamped to it (page on with `offset`). |
+| `app.settings.reason-max-length` | `${APP_SETTINGS_REASON_MAX_LENGTH:500}` | all shapes | Longest reason a change may carry; a longer one is cut. |
+| `app.settings.locked.<key>` |  | all shapes | `true` pins the catalog key (for example `guardrails.failMode`) to the platform value for every tenant and agent: the console shows it read-only with the reason, a write is a 409 `SETTING_LOCKED`, and a stored override is ignored. Key matching ignores case, dots, dashes and underscores. |
+| `app.settings.locked-reasons.<key>` |  | all shapes | The text shown next to a pinned key; defaults to "Pinned by the platform operator". |
 
 ### Meter-keyed histogram settings (`application-latency-histograms.yml`)
 

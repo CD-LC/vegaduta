@@ -60,7 +60,9 @@
     "railJobs": "کام",
     "railSecrets": "خفیہ",
     "railBrand": "برانڈنگ",
-    "railLearn": "سیکھیں"
+    "railLearn": "سیکھیں",
+    "railRuntimeSettings": "رن ٹائم سیٹنگز",
+    "railControls": "میں کہاں کنٹرول کروں...؟"
   },
   "languageSwitcher": {
     "label": "زبان",
@@ -753,7 +755,142 @@
     "edgeTier0Badge": "آن ڈیوائس · کروم بلٹ ان",
     "edgeTier0BadgeTitle": "اس کا جواب کروم کے بلٹ ان ماڈل (Gemini Nano) نے دیا - تیز اور مکمل طور پر نجی، لیکن صرف چیٹ کے لیے: یہ ٹولز استعمال نہیں کر سکتا اور پیچیدہ چیزوں پر کسی حقیقی پرووائیڈر سے کم درست ہو سکتا ہے۔ ہر پلان پر مفت۔",
     "edgeTier1Badge": "آن ڈیوائس · مقامی ماڈل",
-    "edgeTier1BadgeTitle": "اس کا جواب ایک ڈاؤن لوڈ کردہ آن ڈیوائس ماڈل نے دیا - نجی، اور یہ ٹولز استعمال کر سکتا ہے (وہی محفوظ ٹولز جو ایک ہوسٹڈ ٹرن کر سکتا ہے)۔ پھر بھی ہوسٹڈ پول سے بہت چھوٹا ماڈل ہے، اس لیے یہ پیچیدہ درخواستوں پر کم درست ہو سکتا ہے۔ ہر پلان پر مفت۔"
+    "edgeTier1BadgeTitle": "اس کا جواب ایک ڈاؤن لوڈ کردہ آن ڈیوائس ماڈل نے دیا - نجی، اور یہ ٹولز استعمال کر سکتا ہے (وہی محفوظ ٹولز جو ایک ہوسٹڈ ٹرن کر سکتا ہے)۔ پھر بھی ہوسٹڈ پول سے بہت چھوٹا ماڈل ہے، اس لیے یہ پیچیدہ درخواستوں پر کم درست ہو سکتا ہے۔ ہر پلان پر مفت۔",
+    "viewTurn": "ٹرن دیکھیں",
+    "viewTurnTitle": "اس گفتگو کے ٹرنز کی مرحلہ وار ٹائم لائن کھولیں",
+    "headerRunning": "ایک ٹرن چل رہا ہے",
+    "headerReady": "تیار",
+    "clearContext": "سیاق صاف کریں",
+    "clearContextTitle": "نئی گفتگو شروع کریں۔ یہ اس چیٹ کی ڈیوائس پر اور سرور کی طرف کی سیشن میموری صاف کر دیتا ہے۔",
+    "stopRun": "یہ جواب روکیں",
+    "fallbackSendToPlatform": "پلیٹ فارم کو بھیجیں",
+    "chipsLabel": "ایجنٹ ابھی کیا کر رہا ہے",
+    "chipPreparing": "تیار ہو رہا ہے",
+    "chipModelCall": "ماڈل کا انتظار",
+    "chipThinking": "سوچ رہا ہے",
+    "chipWriting": "جواب لکھ رہا ہے",
+    "chipTool": "ٹول چل رہا ہے: {tool}",
+    "chipToolUnnamed": "ایک ٹول چل رہا ہے",
+    "chipWaitingApproval": "آپ کی منظوری کا انتظار ({count})",
+    "chipContinuing": "جواب جاری ہے",
+    "chipContinuingPass": "جواب جاری ہے ({max} میں سے پاس {pass})",
+    "chipContinuingApproval": "آپ کے فیصلے کے بعد جاری ہے",
+    "chipRetrying": "دوبارہ کوشش ہو رہی ہے",
+    "chipRetryingReason": "دوبارہ کوشش ہو رہی ہے: {reason}",
+    "chipRetryingAttempt": "دوبارہ کوشش ہو رہی ہے (کوشش {attempt}/{max})",
+    "chipRetryingAttemptReason": "دوبارہ کوشش ہو رہی ہے (کوشش {attempt}/{max}): {reason}",
+    "chipFailover": "بیک اپ ماڈل پر سوئچ کیا گیا",
+    "chipFailoverReason": "بیک اپ ماڈل پر سوئچ کیا گیا: {reason}",
+    "chipFailoverTo": "{model} پر سوئچ کیا گیا",
+    "chipFailoverToReason": "{model} پر سوئچ کیا گیا: {reason}",
+    "outcomeTruncated": "یہ جواب مکمل ہونے سے پہلے کٹ گیا۔",
+    "outcomeContinue": "جاری رکھیں",
+    "outcomeLongerReplies": "طویل جوابات کی اجازت دیں",
+    "continueMessage": "بالکل وہیں سے جاری رکھیں جہاں رکے تھے، جو پہلے لکھ چکے ہیں اسے دہرائے بغیر۔",
+    "outcomeRefused": "ماڈل فراہم کنندہ نے حفاظتی وجوہات کی بنا پر یہ جواب روک دیا، اس لیے دکھانے کے لیے کوئی جواب نہیں۔ درخواست بدلیں اور دوبارہ کوشش کریں۔",
+    "outcomeRefusedReason": "ماڈل فراہم کنندہ نے حفاظتی وجوہات ({reason}) کی بنا پر یہ جواب روک دیا، اس لیے دکھانے کے لیے کوئی جواب نہیں۔ درخواست بدلیں اور دوبارہ کوشش کریں۔",
+    "outcomeMalformedToolCall": "ماڈل نے ٹول استعمال کرنے کی کوشش کی لیکن اس کی درخواست غلط تھی، اس لیے کچھ نہیں چلا۔ دوبارہ کوشش کریں۔",
+    "outcomeEmpty": "ماڈل نے خالی جواب لوٹایا۔ دوبارہ کوشش کریں۔",
+    "stopRaiseSteps": "ٹول کال کی حد بڑھائیں",
+    "stopRaiseBudget": "اخراجات کی حد تبدیل کریں",
+    "stopAskEditor": "اس ایجنٹ میں ترمیم کر سکنے والے کسی شخص سے حد بڑھانے کو کہیں۔",
+    "rsOpen": "رن سیٹنگز",
+    "rsTitle": "رن سیٹنگز",
+    "rsClose": "رن سیٹنگز بند کریں",
+    "rsBack": "رن سیٹنگز پر واپس جائیں",
+    "rsIntro": "{name} کو اگلا پیغام کیسے چلے گا۔ انہیں ایجنٹ کے رویہ ٹیب میں بدلیں۔",
+    "rsLoading": "لوڈ ہو رہا ہے",
+    "rsRetry": "دوبارہ کوشش کریں",
+    "rsOpenBehavior": "رویہ میں ترمیم کریں",
+    "rsModelHeading": "ماڈل اور سیمپلنگ",
+    "rsModel": "ماڈل",
+    "rsModelNotSet": "سیٹ نہیں",
+    "rsModelDefault": "ماڈل کا ڈیفالٹ",
+    "rsDepth": "استدلال کی گہرائی",
+    "rsSourceAgent": "اس ایجنٹ پر سیٹ کیا گیا",
+    "rsParam_temperature": "درجہ حرارت",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "جواب کی زیادہ سے زیادہ لمبائی (ٹوکن)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "تعدد جرمانہ",
+    "rsParam_presencePenalty": "موجودگی جرمانہ",
+    "rsParam_seed": "سیڈ",
+    "rsParam_stopSequences": "روکنے والے سلسلے",
+    "rsParamDropped": "{param} اس ایجنٹ پر سیٹ ہے، لیکن {provider} اسے {model} کے لیے نظر انداز کرتا ہے، اس لیے اس کا کوئی اثر نہیں۔",
+    "rsToolsRunHeading": "Tools for this run",
+    "rsToolsRunOnly": "This run only",
+    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
+    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
+    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
+    "rsToolsReset": "Use the agent's tools",
+    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
+    "rsToolsEditAgent": "Change the agent's saved tools",
+    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsEmpty": "اس ایجنٹ کے لیے کوئی ٹول دستیاب نہیں۔",
+    "rsToolsSummary": "{total} میں سے {on} ٹولز آن ہیں",
+    "rsToolsFailed": "ٹولز لوڈ نہیں ہو سکے۔",
+    "rsLimitsHeading": "ہر ٹرن کی حدیں",
+    "rsLimitsChange": "حدیں تبدیل کریں",
+    "rsLimitsView": "حدیں دیکھیں",
+    "rsLimitsFailed": "حدیں لوڈ نہیں ہو سکیں۔",
+    "rsLimitsEmpty": "اس ایجنٹ کے لیے دکھانے کو کوئی حد نہیں۔",
+    "rsNoLimit": "کوئی حد نہیں",
+    "rsScoreAll": "ہر مماثلت",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} حروف",
+    "rsLimitRange": "اجازت یافتہ: {min} سے {max}",
+    "rsLayer_AGENT": "اس ایجنٹ پر سیٹ کیا گیا",
+    "rsLayer_TENANT": "ورک اسپیس ڈیفالٹ",
+    "rsLayer_PLATFORM": "پلیٹ فارم ڈیفالٹ",
+    "rsLayer_REQUEST": "اس درخواست کے لیے سیٹ",
+    "rsLimit_maxToolSteps": "فی ٹرن ٹول کالز",
+    "rsLimit_turnTimeoutSeconds": "ایک ٹرن کا وقت",
+    "rsLimit_toolTimeoutSeconds": "ایک ٹول کال کا وقت",
+    "rsLimit_toolOutputMaxChars": "ٹول نتیجے کا سائز",
+    "rsLimit_retrievalTopK": "فی تلاش علم کے نتائج",
+    "rsLimit_retrievalMinScore": "علم کی مماثلت کی کم از کم مطابقت",
+    "rsLimit_continuationPasses": "جواب مکمل کرنے کے لیے اضافی پاس",
+    "rsLimitHelp_maxToolSteps": "ایک جواب زیادہ سے زیادہ کتنی ٹول کالیں کر سکتا ہے۔ حد پر پہنچنے پر ٹرن رک جاتا ہے اور یہ بتاتا ہے۔",
+    "rsLimitHelp_turnTimeoutSeconds": "ایک ٹرن روکے جانے سے پہلے کتنی دیر چل سکتا ہے۔",
+    "rsLimitHelp_toolTimeoutSeconds": "ایک ٹول کال روکے جانے سے پہلے کتنی دیر چل سکتی ہے۔",
+    "rsLimitHelp_toolOutputMaxChars": "ماڈل ایک ٹول نتیجے کا کتنا حصہ پڑھ سکتا ہے۔ باقی کاٹ دیا جاتا ہے۔",
+    "rsLimitHelp_retrievalTopK": "ایک تلاش علمی ذخیرے کے کتنے ٹکڑے واپس لاتی ہے۔",
+    "rsLimitHelp_retrievalMinScore": "اس سے کم مماثل ٹکڑے چھوڑ دیے جاتے ہیں۔ صفر ہر مماثلت کو رکھتا ہے۔",
+    "rsLimitHelp_continuationPasses": "اعلان شدہ مگر نہ اٹھائے گئے مرحلے پر رک جانے والے جواب کو مکمل کرنے کی اضافی کوششیں۔",
+    "rsPreviewButton": "پرامپٹ کا پیش منظر",
+    "rsPreviewTitle": "پرامپٹ پیش منظر",
+    "rsPreviewIntro": "وہ سسٹم پرامپٹ اور ٹول فہرست جو یہ ایجنٹ بھیجے گا، اسی طرح بنائی گئی جیسے اصل ٹرن بناتا ہے۔ کسی ماڈل کو کچھ نہیں بھیجا جاتا۔",
+    "rsPreviewBuilding": "پیش منظر بن رہا ہے",
+    "rsPreviewFailed": "پیش منظر نہیں بن سکا۔",
+    "rsPreviewTotals": "تقریباً {prompt} ٹوکن سسٹم ٹیکسٹ اور {tools} ٹوکن ٹول تعریفیں (اندازے)۔",
+    "rsPreviewOverBudgetTitle": "ٹوکن بجٹ سے زیادہ",
+    "rsPreviewOverBudget": "مستقل سسٹم ٹیکسٹ ترتیب دیے گئے {budget} ٹوکن کے بجٹ سے زیادہ ہے۔ کچھ نہیں کاٹا جاتا؛ کسی پرامپٹ کو مختصر کرنے پر غور کریں۔",
+    "rsPreviewNoBlocks": "دکھانے کے لیے کوئی پرامپٹ بلاک نہیں۔",
+    "rsPreviewMessage": "پیغام: {message}",
+    "rsPreviewTokens": "~{tokens} ٹوکن",
+    "rsPreviewShowText": "ٹیکسٹ دکھائیں",
+    "rsPreviewTools": "ٹولز ({count})",
+    "rsPreviewNoTools": "یہ ایجنٹ کوئی ٹول پیش نہیں کرتا۔",
+    "rsPreviewNotes": "یہ پیش منظر جو نہیں جان سکتا",
+    "rsPreviewOpenAdmin": "ہر پرامپٹ کی عبارت دیکھیں اور بدلیں",
+    "rsOriginDefault": "ڈیفالٹ کے طور پر فراہم کردہ",
+    "rsOriginOverride": "{scope} اوور رائیڈ v{version}",
+    "rsOriginAgentConfig": "ایجنٹ کا اپنا سسٹم پرامپٹ",
+    "rsOriginCode": "پلیٹ فارم کوڈ",
+    "rsRunBudget": "فی رن اخراجات کی حد",
+    "rsNoCap": "کوئی حد نہیں",
+    "rsRunBudgetHelp": "ایک رن جب دوسرے ایجنٹس کو کام سونپتا ہے یا گہری تحقیق چلاتا ہے تو زیادہ سے زیادہ کتنا خرچ کر سکتا ہے۔ یہ اندازہ ہے، بلنگ نہیں۔",
+    "chipToolsOff": "ٹولز کے بغیر دوبارہ کوشش ہو رہی ہے",
+    "chipFailoverBlocked": "بیک اپ ماڈل استعمال نہیں ہوا: ٹولز پہلے ہی چل چکے تھے",
+    "rsLimitChangeOne": "تبدیل کریں",
+    "reasonRateLimited": "rate limited",
+    "reasonTimeout": "timed out",
+    "reasonProviderUnavailable": "provider unavailable",
+    "reasonAuthFailed": "provider rejected the credentials",
+    "reasonBilling": "provider billing problem",
+    "reasonModelNotFound": "model not available",
+    "reasonProviderError": "provider error",
+    "reasonMalformedToolCall": "the tool call could not be used"
   },
   "nodeDefs": {
     "triggerLabel": "ٹرگر",
@@ -1399,7 +1536,35 @@
     "ttsProviderUpdatedSuccess": "TTS پرووائیڈر اپ ڈیٹ ہو گیا۔",
     "updateTtsProviderError": "اس ایجنٹ کا TTS پرووائیڈر اپ ڈیٹ نہیں ہو سکا۔",
     "ttsProviderFreePlanTooltip": "TTS پرووائیڈر کا انتخاب ایک پریمیم فیچر ہے۔",
-    "ttsProviderNotSet": "پلیٹ فارم کا ڈیفالٹ استعمال ہو رہا ہے"
+    "ttsProviderNotSet": "پلیٹ فارم کا ڈیفالٹ استعمال ہو رہا ہے",
+    "samplingTitle": "جدید سیمپلنگ",
+    "samplingIntro": "ماڈل الفاظ کیسے چنتا ہے اسے باریکی سے ٹھیک کریں۔ ماڈل ڈیفالٹ استعمال کرنے کے لیے خانہ خالی چھوڑیں۔ جو فراہم کنندگان کسی فیلڈ کو سپورٹ نہیں کرتے وہ اسے بس نظر انداز کر دیتے ہیں۔",
+    "samplingIgnored": "اس ماڈل کا فراہم کنندہ اس سیٹنگ کو نظر انداز کرتا ہے، اس لیے اسے بدلنے کا کوئی اثر نہیں۔",
+    "samplingSaving": "محفوظ ہو رہا ہے…",
+    "samplingSaved": "محفوظ ہو گیا",
+    "samplingNotSaved": "محفوظ نہیں ہوا",
+    "samplingSaveFailed": "وہ سیٹنگ محفوظ نہیں ہو سکی۔",
+    "samplingErrorWhole": "{label} {min} سے {max} تک پورا عدد ہونا چاہیے، یا بند کرنے کے لیے خالی۔",
+    "samplingErrorNumber": "{label} {min} سے {max} تک عدد ہونا چاہیے، یا بند کرنے کے لیے خالی۔",
+    "samplingStopTooLong": "روکنے والا سلسلہ زیادہ سے زیادہ {max} حروف کا ہو سکتا ہے۔",
+    "samplingStopTooMany": "زیادہ سے زیادہ {max} روکنے والے سلسلے۔",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "صرف سب سے زیادہ ممکنہ K اگلے الفاظ پر غور کریں۔ کم کا مطلب زیادہ محفوظ، قابل پیش گوئی ٹیکسٹ۔ 1 سے 1000۔",
+    "samplingSeed": "سیڈ",
+    "samplingSeedHelp": "ایک ہی پرامپٹ کے لیے جوابات کو زیادہ دہرائے جانے کے قابل بنانے کے لیے ایک عدد سیٹ کریں۔ ہر فراہم کنندہ اس کی ضمانت نہیں دیتا۔",
+    "samplingFrequency": "تعدد جرمانہ",
+    "samplingFrequencyHelp": "مثبت قدریں ایک ہی الفاظ بار بار استعمال کرنے کی حوصلہ شکنی کرتی ہیں۔ -2 سے 2۔",
+    "samplingPresence": "موجودگی جرمانہ",
+    "samplingPresenceHelp": "مثبت قدریں ماڈل کو ایک ہی موضوع پر رہنے کے بجائے نئے موضوعات کی طرف دھکیلتی ہیں۔ -2 سے 2۔",
+    "samplingPlaceholderDefault": "ڈیفالٹ",
+    "samplingPlaceholderRandom": "بے ترتیب",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "روکنے والے سلسلے",
+    "samplingStopPlaceholder": "ایک فقرہ ٹائپ کریں، Enter دبائیں",
+    "samplingStopHelp": "ماڈل ان میں سے کوئی لکھتے ہی جواب ختم ہو جاتا ہے۔ زیادہ سے زیادہ {count}، ہر ایک زیادہ سے زیادہ {max} حروف کا۔",
+    "samplingStopCurrent": "موجودہ روکنے والے سلسلے",
+    "samplingStopRemove": "روکنے والا سلسلہ {value} ہٹائیں",
+    "samplingAdd": "شامل کریں"
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "کنفیگر کرنے کے لیے ایک نوڈ منتخب کریں، یا بائیں جانب پیلیٹ سے ایک نیا نوڈ گھسیٹ کر لائیں۔",
@@ -12979,7 +13144,7 @@
   },
   "adminAccessPage": {
     "pageTitle": "Team access",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "انتظامیہ",
     "matrixTitle": "Access matrix",
     "matrixHint": "Every member's effective scopes at a glance - tick a cell to grant or revoke that scope for that person.",
     "memberColumn": "MEMBER",
@@ -12994,7 +13159,7 @@
   "adminPaymentsPage": {
     "pageTitle": "Agent payments",
     "pageSubtitle": "Signed UPI mandates, spend caps and payment history for each agent.",
-    "agentPickerLabel": "Agent",
+    "agentPickerLabel": "ایجنٹ",
     "noAgents": "No agents in this workspace",
     "loadFailed": "Could not load payment data for this agent.",
     "mandatesHeading": "Payment mandates",
@@ -13022,9 +13187,9 @@
     "thresholdRequired": "Set the approval threshold amount.",
     "previewFailed": "Could not build the mandate preview.",
     "reviewMandate": "Review mandate",
-    "back": "Back",
+    "back": "واپس",
     "signAndGrant": "Sign & grant",
-    "cancel": "Cancel",
+    "cancel": "منسوخ کریں",
     "canonicalReviewLabel": "Canonical mandate document",
     "canonicalReviewHint": "This exact JSON is what gets Ed25519-signed. Verify the caps, scope and validity before granting.",
     "grantSuccess": "Mandate granted and signed.",
@@ -13050,7 +13215,7 @@
     "colStatus": "Status",
     "colVpa": "Payee VPA",
     "colDescription": "Description",
-    "colCreated": "Created",
+    "colCreated": "بنایا گیا",
     "detailId": "Transaction",
     "detailMandate": "Mandate",
     "detailGatewayPayment": "Gateway payment",
@@ -13094,7 +13259,7 @@
     "restoreTooltip": "Make this version the agent's current configuration.",
     "restoreConfirmTitle": "Restore v{version}?",
     "restoreConfirmBody": "The agent's current configuration is replaced by this version's. The restore itself is saved as a new version, so it can be undone.",
-    "cancelButton": "Cancel",
+    "cancelButton": "منسوخ کریں",
     "restoredNotice": "Restored - the agent now runs this configuration.",
     "restoreError": "Couldn't restore that version.",
     "labelUpdatedNotice": "Label updated.",
@@ -13107,18 +13272,18 @@
     "forceReasonLabel": "Override reason (required, written to the audit log)",
     "forceReasonPlaceholder": "Why is this safe to promote without a passing eval?",
     "forcePromoteButton": "Promote anyway",
-    "fieldModel": "Model",
+    "fieldModel": "ماڈل",
     "fieldFallback": "Fallback",
     "fieldGeneration": "Generation",
     "fieldModes": "Modes",
-    "fieldTools": "Tools",
+    "fieldTools": "ٹولز",
     "toolsUnrestricted": "All resolved tools",
     "toolsNone": "None",
     "toolsCount": "{count} allowed",
-    "fieldGuardrails": "Guardrails",
+    "fieldGuardrails": "گارڈ ریلز",
     "fieldFlags": "Enabled",
     "fieldPrompt": "System prompt",
-    "flagKnowledge": "Knowledge",
+    "flagKnowledge": "علم",
     "flagSarvam": "Sarvam",
     "flagSandbox": "Sandbox",
     "flagCodeWorkspace": "Code workspace",
@@ -13139,18 +13304,18 @@
       "AUTONOMOUS": "Autonomous"
     },
     "state": {
-      "READY": "Ready",
+      "READY": "تیار",
       "MISSING": "Missing",
       "WAITING_ON_ADMIN": "Waiting on admin",
       "GATED": "Not on your plan",
       "SIMULATED": "Simulated"
     },
     "kind": {
-      "agent": "Agent",
+      "agent": "ایجنٹ",
       "workflow": "Workflow",
       "tool": "Tool",
       "mcp": "MCP server",
-      "knowledge": "Knowledge",
+      "knowledge": "علم",
       "procedure": "Procedure",
       "secret": "Secret",
       "channel": "Channel"
@@ -13190,7 +13355,7 @@
     },
     "narrative": {
       "aria": "About {name}",
-      "close": "Close",
+      "close": "بند کریں",
       "why": "Why it is here",
       "tune": "If results are wrong",
       "proof": "How you will know it works",
@@ -13207,14 +13372,14 @@
       "step": {
         "PENDING": "Waiting",
         "DONE": "Done",
-        "FAILED": "Failed",
+        "FAILED": "ناکام",
         "COMPENSATED": "Rolled back"
       },
       "failedAt": "Step {step} failed: {name}.",
       "failedGeneric": "The apply did not finish.",
       "nothingKept": "Nothing was kept. Everything created in this run was rolled back.",
       "someKept": "Some steps were already saved and are shown above. Check them before trying again.",
-      "retry": "Try again",
+      "retry": "دوبارہ کوشش کریں",
       "doneBody": "Your envoy is in place and starts under watch. Fill in what is still missing on the right."
     },
     "plan": {
@@ -13231,7 +13396,7 @@
       "stepsLabel": "Steps",
       "step": {
         "preview": "Preview",
-        "ready": "Ready",
+        "ready": "تیار",
         "applying": "Apply"
       },
       "toReady": "Check what it needs",
@@ -13320,7 +13485,7 @@
         "other": "setting"
       },
       "op": {
-        "changed": "Changed",
+        "changed": "تبدیل کیا گیا",
         "added": "Added",
         "removed": "Removed"
       },
@@ -13358,8 +13523,8 @@
       "entityAdded": "{where} is added",
       "entityRemoved": "{where} is removed",
       "showFull": "Show the full text",
-      "before": "Before:",
-      "after": "After:",
+      "before": "پہلے:",
+      "after": "بعد:",
       "apply": "Apply this change",
       "discard": "Discard"
     },
@@ -13368,7 +13533,7 @@
       "placeholder": "For example: the reminders sound too harsh, soften the first one",
       "propose": "Show me the change",
       "proposing": "Working out the change...",
-      "saving": "Saving...",
+      "saving": "محفوظ ہو رہا ہے...",
       "applying": "Applying...",
       "failed": "Could not work out a change. Try saying it another way.",
       "done": "Applied. Scoring has been asked for; the new score appears in the ledger when it finishes.",
@@ -13387,7 +13552,7 @@
       "noCards": "Nothing stands out yet. Suggestions appear once something has scored low.",
       "cardsLabel": "Suggestions",
       "scored": "{dimension} {score}",
-      "open": "Open",
+      "open": "کھولیں",
       "notApplied": "Available once the envoy is applied.",
       "dimension": {
         "helpfulness": "Helpfulness",
@@ -13472,11 +13637,11 @@
       "demoteNone": "Demote",
       "demoteConfirm": "Demote to {rung}? Approvals return to every risky step immediately.",
       "demoteConfirmYes": "Yes, demote",
-      "demoteConfirmCancel": "Cancel",
+      "demoteConfirmCancel": "منسوخ کریں",
       "demoteHint": "Always available. It puts the approvals back straight away.",
       "demoteNeedsAdmin": "Only a workspace admin can change the trust level.",
       "atBottom": "Already at the lowest level.",
-      "history": "History",
+      "history": "تاریخ",
       "noHistory": "No trust changes yet.",
       "showEvidence": "Show the evidence",
       "diffKind": {
@@ -13507,7 +13672,7 @@
       "runError": "This run could not finish.",
       "transcriptFailed": "Could not load this transcript.",
       "showTranscript": "Read the conversation ({count} turns)",
-      "agent": "Agent",
+      "agent": "ایجنٹ",
       "verdict": {
         "PASSED": "The agent handled it well",
         "FAILED": "The agent was talked out of its rules",
@@ -13538,7 +13703,7 @@
   },
   "contactsPage": {
     "pageTitle": "Contacts & routing",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "انتظامیہ",
     "pageSubtitle": "A contact is a sender your agents already know. Approving a new sender makes them a contact and routes their messages to an agent.",
     "routingTitle": "Channel routing",
     "routingHint": "Pick the agent new conversations go to, and whether a sender you've never seen needs your approval first or goes straight through.",
@@ -13558,16 +13723,16 @@
     "contactsTitle": "Contacts",
     "contactsHint": "Known senders skip approval entirely - a contact here is pre-approved and routes by contact agent → group agent → channel default.",
     "allChannels": "All channels",
-    "allGroups": "All groups",
-    "filterByGroupLabel": "Filter by group",
+    "allGroups": "تمام گروپس",
+    "filterByGroupLabel": "گروپ کے مطابق فلٹر کریں",
     "searchPlaceholder": "Search number, chat id or name…",
     "identifierPlaceholder": "Phone / chat id / email *",
     "namePlaceholder": "Name (optional)",
     "groupPlaceholder": "Group",
     "noGroup": "No group",
-    "agentPlaceholder": "Agent",
+    "agentPlaceholder": "ایجنٹ",
     "channelDefault": "Channel default",
-    "addButton": "Add",
+    "addButton": "شامل کریں",
     "contactAdded": "Contact added.",
     "statusLinked": "Live",
     "statusDirectory": "Directory",
@@ -13579,7 +13744,7 @@
     "groupsTitle": "Contact groups",
     "groupsHint": "Group contacts to route them together - a group's agent answers every member without their own override.",
     "groupNamePlaceholder": "Group name",
-    "groupAgentPlaceholder": "Agent",
+    "groupAgentPlaceholder": "ایجنٹ",
     "createGroupButton": "Create",
     "groupCreated": "Group created.",
     "groupMeta": "{count} member(s) · routes to {agent}",
@@ -13609,10 +13774,10 @@
     "colContact": "Contact",
     "colStatus": "Status",
     "colGroup": "Group",
-    "colAgent": "Agent",
+    "colAgent": "ایجنٹ",
     "colRoutesVia": "Routes via",
-    "selectedCount": "{count} selected",
-    "approveN": "Approve {count}",
+    "selectedCount": "{count} منتخب",
+    "approveN": "{count} منظور کریں",
     "rejectN": "Reject {count}",
     "clearSelection": "Clear",
     "bulkProgress": "{done} of {total} done…",
@@ -13628,7 +13793,7 @@
     "contactsEmptyImport": "Import a sheet",
     "contactsNoMatch": "No contacts match these filters.",
     "addContactButton": "Add contact",
-    "cancelButton": "Cancel",
+    "cancelButton": "منسوخ کریں",
     "statusLinkedHint": "Has an active conversation",
     "statusDirectoryHint": "Known sender, no conversation yet",
     "justNow": "just now",
@@ -13699,7 +13864,7 @@
     "deactivating": "Removing…",
     "deactivateTitle": "Remove your {provider} key?",
     "deactivateBody": "Decision calls for this workspace will fall back to the platform key (when configured) or local heuristics.",
-    "cancel": "Cancel",
+    "cancel": "منسوخ کریں",
     "policyTitle": "Decision controls",
     "policySubtitle": "Where the decision model may act for this workspace — and how sure it must be. Inherit uses the platform default; changes propagate within ~30 seconds.",
     "policyLoading": "Loading policy…",
@@ -13709,17 +13874,17 @@
     "policy_agentRoutingHelp": "Let the decision model pick the best-fit agent for a Quick Task by intent, instead of keyword matching.",
     "policyOpt_inherit": "Inherit",
     "policyOpt_on": "On",
-    "policyOpt_off": "Off",
+    "policyOpt_off": "بند",
     "policyThreshold": "“Simple turn” confidence bar",
     "policyThresholdHelp": "0.5–0.99 — higher means the decision model must be more sure before a turn is called simple. Blank inherits.",
     "policySave": "Save policy",
-    "saving": "Saving…",
+    "saving": "محفوظ ہو رہا ہے…",
     "policyPropagation": "Agents can set their own stricter bar in their cost-routing settings — per-agent wins over this workspace value.",
     "playgroundTitle": "Playground",
     "playgroundSubtitle": "Ask the active decision provider a typed question against your resolved key. Bounded to one question per run — see the raw answer, model and token usage.",
     "stateLabel": "State",
     "statePlaceholder": "The facts the decision model reasons over, e.g. a user message or a task description…",
-    "instructionsLabel": "Instructions",
+    "instructionsLabel": "ہدایات",
     "typeHelp_noul": "noul — a calibrated yes/no probability (0–1).",
     "typeHelp_choice": "choice — pick a winner from 2+ options, with per-option probabilities.",
     "typeHelp_score": "score — a probability-weighted score over 2–10 ordered levels.",
@@ -13805,7 +13970,7 @@
     "headerEyebrow": "Sales pipeline",
     "pageSubtitle": "Every lead in one place - move them through the pipeline, log calls and emails, and let workflows keep the stages up to date.",
     "newLead": "New lead",
-    "close": "Close",
+    "close": "بند کریں",
     "fieldName": "Name",
     "fieldEmail": "Email",
     "fieldPhone": "Phone",
@@ -13836,7 +14001,7 @@
     "daysAgo": "{n}d ago",
     "lastContacted": "Last contacted {when}",
     "lastReplied": "Last replied {when}",
-    "saveButton": "Save changes",
+    "saveButton": "تبدیلیاں محفوظ کریں",
     "createButton": "Create lead",
     "deleteButton": "Delete",
     "timelineTitle": "Activity",
@@ -13892,7 +14057,7 @@
     "adminOnlyToast": "Only workspace admins can import an API.",
     "readOnlyNote": "Only workspace admins can import, refresh, or change API sources. Every agent in the workspace can already call the tools listed here.",
     "loadError": "Could not load imported APIs.",
-    "retryButton": "Try again",
+    "retryButton": "دوبارہ کوشش کریں",
     "emptyTitle": "No APIs imported yet",
     "emptyBody": "Point the platform at an OpenAPI 3 or Swagger 2 document and every operation in it becomes a tool your agents can call - no code to write.",
     "importTitle": "Import an API from its OpenAPI document",
@@ -13952,9 +14117,9 @@
     "importingEllipsis": "Importing…",
     "importFailed": "The import failed.",
     "importedToast": "\"{name}\" imported - {count} tools are live for your agents.",
-    "backButton": "Back",
-    "cancelButton": "Cancel",
-    "closeButton": "Close",
+    "backButton": "واپس",
+    "cancelButton": "منسوخ کریں",
+    "closeButton": "بند کریں",
     "toolCountLabel": "{enabled} of {total} tools enabled",
     "refreshedAtLabel": "refreshed {when}",
     "statusEnabled": "Enabled",
@@ -13964,7 +14129,7 @@
     "refreshAriaLabel": "Refresh {name}",
     "refreshTitle": "Re-read the document and update the tools",
     "editAriaLabel": "Edit settings of {name}",
-    "editTitle": "Settings",
+    "editTitle": "سیٹنگز",
     "deleteAriaLabel": "Delete {name}",
     "deleteTitle": "Delete",
     "toggleAriaLabel": "Toggle {name}",
@@ -13987,7 +14152,7 @@
     "nameAndBaseUrlRequired": "Name and base URL are both required.",
     "prefixImmutableNote": "The tool prefix ({prefix}) cannot change - agents may already rely on the generated tool names. To re-read the document itself, use Refresh.",
     "saveSettingsButton": "Save settings",
-    "savingEllipsis": "Saving…",
+    "savingEllipsis": "محفوظ ہو رہا ہے…",
     "saveFailed": "Could not save the settings.",
     "settingsSavedToast": "\"{name}\" settings saved.",
     "deleteDialogTitle": "Delete \"{name}\"?",
@@ -14001,7 +14166,7 @@
   "schedulePanel": {
     "noAgentsTitle": "No agents yet",
     "noAgentsBody": "Create an agent first — a schedule is a recurring job for one specific agent.",
-    "agent": "Agent",
+    "agent": "ایجنٹ",
     "loading": "Loading schedule…",
     "enabled": "Enabled",
     "paused": "Paused",
@@ -14021,8 +14186,8 @@
     "cadenceInterval": "Every N minutes / hours / days",
     "cadenceCron": "Cron expression",
     "intervalEvery": "Every",
-    "unitMinutes": "minutes",
-    "unitHours": "hours",
+    "unitMinutes": "منٹ",
+    "unitHours": "گھنٹے",
     "unitDays": "days",
     "intervalHint": "At least 1 minute. The scheduler checks once a minute.",
     "cronLabel": "Cron",
@@ -14078,7 +14243,7 @@
     "builtInReadOnly": "Built-in skills can't be edited. To customise one, export it, change its name, and upload it as your own.",
     "badgeBuiltIn": "Built-in",
     "badgeCustom": "Custom",
-    "badgeOff": "Off",
+    "badgeOff": "بند",
     "fileCount": "{count} bundled file(s)",
     "toggleAria": "Enable skill {name}",
     "selectPrompt": "Select a skill to read its instructions.",
@@ -14086,8 +14251,8 @@
     "editButton": "Edit",
     "deleteButton": "Delete",
     "saveButton": "Save skill",
-    "savingButton": "Saving…",
-    "cancelButton": "Cancel",
+    "savingButton": "محفوظ ہو رہا ہے…",
+    "cancelButton": "منسوخ کریں",
     "replaceButton": "Replace",
     "newHeading": "New skill",
     "editHeading": "Edit {name}",
@@ -14102,5 +14267,1279 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "ورک اسپیس سیٹنگز",
+      "agent": "ایجنٹ سیٹنگز"
+    },
+    "agentMissing": "کسی ایجنٹ کی سیٹنگز دیکھنے کے لیے اسے منتخب کریں۔",
+    "scopeNote": {
+      "agent": "یہ قدریں صرف اس ایجنٹ پر لاگو ہوتی ہیں۔ جو آپ یہاں اوور رائیڈ نہیں کرتے وہ سب آپ کی ورک اسپیس سیٹنگز سے وراثت میں آتا ہے۔"
+    },
+    "loading": "سیٹنگز لوڈ ہو رہی ہیں",
+    "loadError": "سیٹنگز لوڈ نہیں ہو سکیں۔ {message}",
+    "retry": "دوبارہ کوشش کریں",
+    "filters": {
+      "label": "سیٹنگز فلٹر کریں",
+      "search": "سیٹنگز تلاش کریں",
+      "searchPlaceholder": "نام یا تفصیل سے تلاش کریں",
+      "group": "گروپ کے مطابق فلٹر کریں",
+      "allGroups": "تمام گروپس",
+      "risk": "خطرے کے مطابق فلٹر کریں",
+      "allRisks": "تمام خطرے کی سطحیں",
+      "clear": "فلٹر صاف کریں"
+    },
+    "empty": {
+      "none": "یہاں کوئی سیٹنگ نہیں جسے آپ بدل سکیں۔",
+      "filtered": "کوئی سیٹنگ آپ کے فلٹرز سے مماثل نہیں۔"
+    },
+    "saved": "محفوظ ہو گیا۔ اپ ڈیٹ ہونے والی سیٹنگز: {count}۔",
+    "saveFailed": "محفوظ نہیں ہوا۔ ناکام سیٹنگز: {count}۔ آپ کی ترامیم اب بھی فارم میں ہیں۔",
+    "resetDone": "{label} اب وراثت میں ملی قدر استعمال کرتی ہے۔",
+    "resetFailed": "سیٹنگ ری سیٹ نہیں ہو سکی۔",
+    "unsaved": "غیر محفوظ شدہ تبدیلی",
+    "discardOne": "تبدیلی رد کریں",
+    "restartRequired": "ری اسٹارٹ درکار",
+    "source": {
+      "default": "ڈیفالٹ",
+      "platform": "پلیٹ فارم",
+      "tenant": "ورک اسپیس",
+      "agent": "ایجنٹ",
+      "tenantInherited": "ورک اسپیس سے وراثت میں",
+      "aria": "قدر کا ماخذ: {source}"
+    },
+    "sourceHelp": {
+      "default": "کسی نے اسے نہیں بدلا۔ یہ وہ قدر استعمال کرتی ہے جو پروڈکٹ کے ساتھ آتی ہے۔",
+      "platform": "آپ کے پلیٹ فارم آپریٹر نے اسے پوری تعیناتی کے لیے سیٹ کیا ہے۔",
+      "tenant": "آپ کا ورک اسپیس ڈیفالٹ کو اوور رائیڈ کرتا ہے۔ وراثت میں ملی قدر پر لوٹنے کے لیے ری سیٹ کریں۔",
+      "agent": "یہ ایجنٹ ورک اسپیس کی قدر کو اوور رائیڈ کرتا ہے۔ ورک اسپیس کی قدر دوبارہ وراثت میں لینے کے لیے ری سیٹ کریں۔",
+      "tenantInherited": "اس ایجنٹ کا اپنا کوئی اوور رائیڈ نہیں، اس لیے یہ ورک اسپیس کی قدر استعمال کرتا ہے۔ اس میں ترمیم سے صرف اس ایجنٹ کے لیے اوور رائیڈ بنتا ہے۔",
+      "lockedSuffix": "یہ مقفل ہے، اس لیے یہاں بدلا نہیں جا سکتا۔"
+    },
+    "risk": {
+      "low": "کم خطرہ",
+      "medium": "درمیانہ خطرہ",
+      "high": "زیادہ خطرہ",
+      "security": "سیکیورٹی"
+    },
+    "bool": {
+      "on": "On",
+      "off": "بند"
+    },
+    "value": {
+      "unset": "سیٹ نہیں",
+      "empty": "خالی"
+    },
+    "select": {
+      "placeholder": "ایک اختیار منتخب کریں"
+    },
+    "slider": {
+      "label": "{label} (سلائیڈر)"
+    },
+    "duration": {
+      "unitLabel": "{label} کی اکائی"
+    },
+    "units": {
+      "chars": "حروف",
+      "tokens": "ٹوکن",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "سیکنڈ",
+      "min": "منٹ",
+      "h": "گھنٹے"
+    },
+    "groups": {
+      "agent": "ایجنٹ رن ٹائم",
+      "approvals": "منظوریاں",
+      "quality": "معیار کی جانچیں",
+      "guardrails": "گارڈ ریلز",
+      "chat": "چیٹ",
+      "tools": "ٹولز",
+      "memory": "میموری",
+      "knowledge": "علم",
+      "delegation": "کام سونپنا",
+      "aux": "معاون ماڈل",
+      "routing": "ماڈل روٹنگ"
+    },
+    "errors": {
+      "required": "ایک قدر درج کریں۔",
+      "notNumber": "ایک عدد درج کریں۔",
+      "notInteger": "ایک پورا عدد درج کریں۔",
+      "belowMin": "کم از کم {min} ہونا چاہیے۔",
+      "aboveMax": "زیادہ سے زیادہ {max} ہونا چاہیے۔",
+      "notAllowed": "فہرست میں سے کوئی ایک اختیار منتخب کریں۔",
+      "tooShort": "بہت چھوٹا۔ کم از کم {min} استعمال کریں۔",
+      "tooLong": "بہت لمبا۔ زیادہ سے زیادہ {max} استعمال کریں۔",
+      "precision": "یہ اکائی اسے درست طور پر ظاہر نہیں کر سکتی۔ سب سے چھوٹی اکائی کا پورا عدد استعمال کریں یا چھوٹی اکائی منتخب کریں۔",
+      "serverRange": "اجازت یافتہ حد: {min} سے {max}۔",
+      "serverOptions": "اجازت یافتہ قدریں: {options}۔",
+      "server": {
+        "invalid": "سرور نے یہ قدر قبول نہیں کی: {message}",
+        "locked": "یہ سیٹنگ آپ کے منتظم نے مقفل کی ہے، اس لیے آپ کی تبدیلی محفوظ نہیں ہوئی۔",
+        "notFound": "یہ سیٹنگ اب موجود نہیں۔",
+        "forbidden": "آپ کو یہ سیٹنگ بدلنے کی اجازت نہیں۔",
+        "reasonRequired": "اس تبدیلی کے لیے وجہ درکار ہے۔ ایک درج کریں اور دوبارہ کوشش کریں۔",
+        "network": "سرور تک رسائی نہیں ہو سکی، اس لیے آپ کی تبدیلی محفوظ نہیں ہوئی۔ {message}",
+        "other": "تبدیلی محفوظ نہیں ہو سکی: {message}"
+      }
+    },
+    "effective": "اس وقت نافذ: {value}",
+    "hint": {
+      "range": "اجازت یافتہ: {min} سے {max}۔",
+      "min": "کم از کم: {min}۔",
+      "max": "زیادہ سے زیادہ: {max}۔",
+      "default": "ڈیفالٹ: {value}۔",
+      "securityStricter": "سیکیورٹی سیٹنگ کو صرف پلیٹ فارم کی قدر سے سخت بنایا جا سکتا ہے، کبھی کمزور نہیں۔",
+      "inherited": "اگر آپ اسے ری سیٹ کریں گے تو یہ اس پر لوٹ جائے گی: {value}۔"
+    },
+    "locked": {
+      "withReason": "آپ کے منتظم کی طرف سے مقفل: {reason}",
+      "noReason": "آپ کے منتظم کی طرف سے مقفل۔ یہاں بدلا نہیں جا سکتا۔"
+    },
+    "blocked": {
+      "role": "آپ کا کردار یہ سیٹنگ نہیں بدل سکتا۔ کسی ورک اسپیس منتظم سے پوچھیں۔",
+      "scope": "یہ سیٹنگ یہاں اوور رائیڈ نہیں کی جا سکتی۔",
+      "readOnly": "سیٹنگز ابھی صرف پڑھنے کے لیے ہیں۔",
+      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+    },
+    "reset": {
+      "button": "وراثتی قدر پر ری سیٹ کریں",
+      "aria": "وراثتی قدر پر ری سیٹ کریں: {label}"
+    },
+    "help": {
+      "show": "مزید تفصیلات",
+      "hide": "تفصیلات چھپائیں"
+    },
+    "history": {
+      "button": "تاریخ",
+      "open": "تاریخ: {label}",
+      "title": "تاریخ: {label}",
+      "scopeTenant": "ورک اسپیس کی تبدیلیاں",
+      "scopeAgent": "اس ایجنٹ کی تبدیلیاں",
+      "close": "تاریخ بند کریں",
+      "loading": "تاریخ لوڈ ہو رہی ہے",
+      "error": "تاریخ لوڈ نہیں ہو سکی۔ {message}",
+      "empty": "ابھی تک کوئی تبدیلی ریکارڈ نہیں ہوئی۔",
+      "listLabel": "تبدیلی کی تاریخ، نئی پہلے",
+      "version": "ورژن {version}",
+      "before": "پہلے:",
+      "after": "بعد:",
+      "by": "تبدیل کرنے والا",
+      "unknownActor": "نامعلوم",
+      "reason": "وجہ:"
+    },
+    "savebar": {
+      "count": "غیر محفوظ شدہ تبدیلیاں: {count}۔",
+      "invalid": "محفوظ کرنے سے پہلے نمایاں کیے گئے فیلڈز درست کریں۔ درست کرنے والے فیلڈز: {count}۔",
+      "discard": "تبدیلیاں رد کریں",
+      "save": "تبدیلیاں محفوظ کریں",
+      "saving": "محفوظ ہو رہا ہے"
+    },
+    "risky": {
+      "title": "خطرناک تبدیلیوں کی تصدیق کریں ({count})",
+      "description": "یہ سیٹنگز بدلتی ہیں کہ آپ کے ایجنٹس کیسے برتاؤ کرتے ہیں یا انہیں کیا کرنے کی اجازت ہے۔ ہر تبدیلی کا جائزہ لیں اور بتائیں کہ آپ یہ کیوں کر رہے ہیں۔ وجہ آڈٹ لاگ میں محفوظ کی جاتی ہے۔",
+      "descriptionSecurity": "ان میں سے کم از کم ایک سیکیورٹی سیٹنگ ہے۔ اسے صرف پلیٹ فارم کی قدر سے سخت بنایا جا سکتا ہے۔ ہر تبدیلی کا جائزہ لیں اور بتائیں کہ آپ یہ کیوں کر رہے ہیں۔ وجہ آڈٹ لاگ میں محفوظ کی جاتی ہے۔",
+      "listLabel": "تصدیق کے لیے تبدیلیاں",
+      "from": "سے",
+      "to": "to",
+      "securityNote": "سیکیورٹی سیٹنگ: یہ پلیٹ فارم کی قدر سے کمزور نہیں ہو سکتی۔",
+      "consequence": "اس سے کیا بدلتا ہے:",
+      "reasonLabel": "اس تبدیلی کی وجہ",
+      "reasonPlaceholder": "مثال: سپورٹ ٹیم کی طویل تحقیقات کے لیے حد بڑھانا",
+      "reasonHint": "ضروری، کم از کم {min} حروف۔ تبدیلی کرنے والے اور پرانی و نئی قدروں کے ساتھ محفوظ کی جاتی ہے۔",
+      "acknowledge": "میں اس سیکیورٹی تبدیلی کے نتائج سمجھتا/سمجھتی ہوں۔",
+      "cancel": "منسوخ کریں",
+      "confirm": "تصدیق کریں اور محفوظ کریں",
+      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+    },
+    "strictness": {
+      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
+      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
+      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "زیر التوا",
+    "status_APPROVED": "منظور شدہ",
+    "status_REJECTED": "مسترد",
+    "status_EXPIRED": "میعاد ختم",
+    "status_EXECUTION_FAILED": "عملدرآمد ناکام",
+    "status_DEAD_LETTERED": "ڈیڈ لیٹر",
+    "filtersLabel": "درخواستیں فلٹر کریں",
+    "filterAgentLabel": "ایجنٹ کے مطابق فلٹر کریں",
+    "filterToolLabel": "ٹول کے مطابق فلٹر کریں",
+    "filterAgeLabel": "عمر کے مطابق فلٹر کریں",
+    "filterAnyAgent": "کوئی بھی ایجنٹ",
+    "filterAnyTool": "کوئی بھی ٹول",
+    "filterAnyAge": "کوئی بھی عمر",
+    "age_newer1h": "1 گھنٹے سے نئی",
+    "age_older1h": "1 گھنٹے سے پرانی",
+    "age_older24h": "1 دن سے پرانی",
+    "age_older7d": "7 دن سے پرانی",
+    "filtersClear": "فلٹر صاف کریں",
+    "filterWindowNote": "تازہ ترین {count} درخواستیں فلٹر ہو رہی ہیں۔ پرانی شامل نہیں۔",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time} میں میعاد ختم ہوگی",
+    "expiresAt": "اگر کوئی فیصلہ نہ کرے تو {time} پر خود بخود بند ہو جائے گی",
+    "overdue": "وقت کی حد گزر چکی، اگلی صفائی میں بند ہوگی",
+    "neverExpires": "یہ ورک اسپیس انتظار کرنے والی درخواستوں کی میعاد ختم نہیں کرتا۔",
+    "expiredNote": "{time} میعاد ختم: وقت پر کسی نے فیصلہ نہیں کیا",
+    "expiredReasonPrefix": "میعاد ختم:",
+    "auditExpired": "میعاد ختم، وقت پر کسی نے فیصلہ نہیں کیا",
+    "riskLow": "کم خطرہ",
+    "riskMedium": "درمیانہ خطرہ",
+    "riskHigh": "زیادہ خطرہ",
+    "riskEstimateNote": "خطرہ ٹول کے نام سے لگایا گیا اندازہ ہے۔ پلیٹ فارم ٹولز کی درجہ بندی نہیں کرتا، اس لیے منظور کرنے سے پہلے آرگومنٹس پڑھیں۔",
+    "riskWhoDecides": "کون طے کرتا ہے کہ کس چیز کو منظوری کا انتظار کرنا ہے؟",
+    "previewGoal": "وہ کام جس پر یہ کام کر رہا تھا:",
+    "previewArguments": "آرگومنٹس",
+    "previewNoArguments": "اس کال کے لیے کوئی آرگومنٹ ریکارڈ نہیں ہوا۔",
+    "previewRedacted": "{count} حساس نظر آنے والی قدر(یں) یہاں چھپائی گئی ہیں۔ اگر آپ منظور کریں تو وہ پھر بھی ٹول کو بھیجی جاتی ہیں۔",
+    "previewTruncated": "یہ آرگومنٹس پورے دکھانے کے لیے بہت لمبے ہیں، اس لیے یہ درخواست یہاں سے منظور نہیں کی جا سکتی۔",
+    "approveBlockedTooLong": "منظوری بند ہے کیونکہ آپ پوری درخواست کا جائزہ نہیں لے سکتے۔ آپ پھر بھی اسے مسترد کر سکتے ہیں۔",
+    "ifApproveLabel": "اگر آپ منظور کریں:",
+    "ifApprove": "{tool} اوپر دیے گئے آرگومنٹس کے ساتھ ابھی چلتا ہے، اور ایجنٹ اس کے نتیجے کو استعمال کر کے کام جاری رکھتا ہے۔",
+    "ifDenyLabel": "اگر آپ مسترد کریں:",
+    "ifDeny": "{tool} نہیں چلتا۔ ایجنٹ کو بتایا جاتا ہے کہ آپ نے انکار کیا، وجہ دی ہو تو اس کے ساتھ، اور وہ اس کے بغیر آگے بڑھتا ہے۔",
+    "whyGated": "ایجنٹ نے {tool} استعمال کرنے کو کہا۔ اسے آپ کے فیصلے کے لیے روکا گیا کیونکہ ایجنٹ نگرانی شدہ پر سیٹ ہے، یا یہ ورک اسپیس اس ٹول کے لیے منظوری ضروری قرار دیتا ہے۔",
+    "denyReasonLabel": "مسترد کرنے پر وجہ (اختیاری)",
+    "denyReasonPlaceholder": "مثال: غلط وصول کنندہ، بھیجنے سے پہلے مجھ سے پوچھیں",
+    "denyReasonHelp": "اگر آپ مسترد کریں تو ایجنٹ اس وجہ کو مسترد شدہ کال کے نتیجے کے طور پر پڑھتا ہے اور خود کو ایڈجسٹ کرتا ہے۔ وجہ کے بغیر مسترد کرنے کے لیے خالی چھوڑیں۔",
+    "denyButton": "مسترد کریں",
+    "detailRegionLabel": "درخواست کی تفصیلات",
+    "sessionLabel": "گفتگو",
+    "linkOpenAgent": "ایجنٹ کھولیں",
+    "linkInspectTurns": "اس کے ٹرنز کا معائنہ کریں",
+    "continuationLabel": "ایجنٹ نے آگے کیا کیا",
+    "continuationCompleted": "ایجنٹ نے کام جاری رکھنا مکمل کر لیا۔",
+    "continuationFailed": "اس فیصلے کے بعد ایجنٹ آگے نہیں بڑھ سکا۔",
+    "continuationRetry": "اسے آگے بڑھنے کو کہیں",
+    "retryMessage": "براہ کرم کام جاری رکھیں۔",
+    "lastDecisionTitle": "آپ کا پچھلا فیصلہ: {tool}",
+    "lastDecisionClose": "بند کریں",
+    "deepLinkNotFound": "وہ منظوری کی درخواست نہیں ملی، یا آپ اسے نہیں دیکھ سکتے۔",
+    "selectAllLabel": "اس صفحے کی تمام زیر التوا ٹول کالز منتخب کریں",
+    "selectRowLabel": "{tool} کی زیر التوا کال منتخب کریں",
+    "bulkSelected": "{count} منتخب",
+    "bulkApprove": "منتخب شدہ منظور کریں",
+    "bulkDeny": "منتخب شدہ مسترد کریں",
+    "bulkClear": "انتخاب صاف کریں",
+    "bulkCancel": "منسوخ کریں",
+    "bulkDismiss": "برخاست کریں",
+    "bulkMixedTools": "اجتماعی فیصلوں کے لیے ضروری ہے کہ منتخب تمام درخواستیں ایک ہی ٹول کی ہوں۔",
+    "bulkNotLowRisk": "اجتماعی منظوری صرف کم خطرے والے ٹولز (لُک اَپ) کے لیے ہے۔ مسترد کرنا کسی بھی ایک ٹول کے لیے کام کرتا ہے، یا انہیں ایک ایک کر کے طے کریں۔",
+    "bulkNotToolCall": "اجتماعی فیصلے صرف ایجنٹ ٹول کالز کا احاطہ کرتے ہیں۔",
+    "bulkNotPending": "اجتماعی فیصلے صرف ان درخواستوں کا احاطہ کرتے ہیں جو ابھی زیر التوا ہیں۔",
+    "bulkConfirmApproveTitle": "{tool} کی {count} کالز منظور کریں؟",
+    "bulkConfirmApproveBody": "ان میں سے ہر ایک نیچے درج اپنے آرگومنٹس کے ساتھ ابھی {tool} چلاتی ہے، اور ایجنٹ نتائج استعمال کر کے آگے بڑھتا ہے۔ اسے واپس نہیں کیا جا سکتا۔",
+    "bulkConfirmDenyTitle": "{tool} کی {count} کالز مسترد کریں؟",
+    "bulkConfirmDenyBody": "ان میں سے کوئی نہیں چلتی۔ ایجنٹ کو بتایا جاتا ہے کہ ہر کال مسترد ہوئی، وجہ دی ہو تو اس کے ساتھ۔",
+    "bulkConfirmApprove": "{count} منظور کریں",
+    "bulkConfirmDeny": "{count} مسترد کریں",
+    "bulkMore": "اور {count} مزید",
+    "bulkProgress": "{count} میں سے {done} مکمل",
+    "bulkResult": "{done} کا فیصلہ ہوا، {failed} ناکام۔",
+    "notifyOff": "مجھے مطلع کریں",
+    "notifyOn": "اطلاعات آن",
+    "notifyHelp": "جب یہ ٹیب پس منظر میں ہو اور نئی درخواست آئے تو براؤزر اطلاع دکھائیں",
+    "notifyUnsupported": "یہ براؤزر اطلاعات نہیں دکھا سکتا۔",
+    "notifyBlocked": "اطلاعات بلاک ہیں۔ اسے آن کرنے کے لیے اپنے براؤزر کی سائٹ سیٹنگز میں انہیں اجازت دیں۔",
+    "notifyTitle": "ایک ایجنٹ منظوری کا انتظار کر رہا ہے",
+    "notifyBodyOne": "{tool} کو آپ کے فیصلے کی ضرورت ہے۔",
+    "notifyBodyMany": "{count} درخواستوں کو آپ کے فیصلے کی ضرورت ہے۔",
+    "newArrived": "{count} نئی منظوری کی درخواست(یں) آئیں۔",
+    "rulesTitle": "ایک ٹول کے لیے اصول",
+    "rulesIntro": "منتخب کریں کہ ٹول ہمیشہ کسی شخص کا انتظار کرے یا کبھی نہیں۔ یہ اصول نیم خودمختار پر سیٹ ہر ایجنٹ پر لاگو ہوتا ہے۔",
+    "rulesNeedsScope": "اصول بدلنے کے لیے آپ کو منظوریوں کی اجازت درکار ہے۔",
+    "rulesToolLabel": "ٹول کا نام",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "بالکل اسی طرح جیسے ٹول درخواست میں نظر آتا ہے، مثلاً send_email۔",
+    "rulesToolNameInvalid": "ٹول کے نام میں خالی جگہ نہیں ہوتی۔",
+    "rulesModeLabel": "کیا ہونا چاہیے",
+    "rulesAskName": "ہمیشہ پوچھیں",
+    "rulesAskHint": "اس ٹول کی ہر کال کسی شخص کی منظوری کا انتظار کرتی ہے۔",
+    "rulesNeverName": "کبھی نہ پوچھیں",
+    "rulesNeverHint": "اس ٹول کی کالیں کسی کی منظوری کے بغیر فوراً چلتی ہیں۔",
+    "rulesNeverRiskyWarn": "یہ ٹول چیزیں بدلتا ہوا لگتا ہے۔ یقینی بنائیں۔",
+    "rulesScopeNote": "اصول پورے ورک اسپیس پر لاگو ہوتے ہیں، کسی ایک ایجنٹ پر نہیں۔ نگرانی شدہ ایجنٹس پھر بھی ہر چیز کے لیے پوچھتے ہیں، اور مکمل خودمختار ایجنٹس اصول جو بھی کہے کبھی نہیں پوچھتے۔ آپ کے سیٹ کیے ہوئے اصول ابھی یہاں فہرست میں نہیں آتے۔",
+    "rulesSave": "اصول محفوظ کریں",
+    "rulesSaveFailed": "اصول محفوظ نہیں ہو سکا۔",
+    "rulesSavedAsk": "{tool} ہمیشہ منظوری مانگے گا۔",
+    "rulesSavedNever": "{tool} اب منظوری نہیں مانگے گا۔",
+    "rulesNeverConfirmTitle": "{tool} چلنے سے پہلے پوچھنا بند کریں؟",
+    "rulesNeverConfirmBody": "ہر نیم خودمختار ایجنٹ کسی کی منظوری کے بغیر {tool} چلائے گا۔ یہ چیزیں بدل یا بھیج سکتا لگتا ہے، اور غلطی واپس نہیں لی جا سکتی۔",
+    "rulesNeverConfirmBodyLow": "ہر نیم خودمختار ایجنٹ پوچھے بغیر {tool} چلائے گا۔ یہ لُک اَپ جیسا لگتا ہے، اس لیے یہ عموماً محفوظ ہے۔",
+    "rulesNeverConfirm": "پوچھنا بند کریں",
+    "tiersTitle": "کون طے کرتا ہے کہ کس چیز کو منظوری کا انتظار کرنا ہے؟",
+    "tiersIntro": "ہر ایجنٹ کی ایک خودمختاری کی سطح ہوتی ہے۔ یہ طے کرتی ہے کہ ورک اسپیس کے منظوری اصول استعمال ہوں یا نہیں۔",
+    "tierCurrent": "یہ ایجنٹ",
+    "tierConsequenceLabel": "عملاً:",
+    "tierSupervisedName": "نگرانی شدہ",
+    "tierSupervisedWhat": "ورک اسپیس کے اصول جو بھی کہیں، ہر ٹول کال کسی شخص کا انتظار کرتی ہے۔ اسے فی ٹرن ٹول مراحل کی کم حد بھی ملتی ہے۔",
+    "tierSupervisedConsequence": "سب سے محفوظ، لیکن قطار میں بہت سی درخواستوں اور سست ایجنٹ کی توقع رکھیں۔",
+    "tierSemiName": "نیم خودمختار",
+    "tierSemiWhat": "ہر ٹول کے لیے ورک اسپیس کا اصول طے کرتا ہے: بھیجنے، حذف کرنے اور ادائیگیوں جیسے خطرناک ٹولز بطور ڈیفالٹ پوچھتے ہیں، باقی چلتے ہیں۔",
+    "tierSemiConsequence": "ایک اچھا ڈیفالٹ۔ آپ کے فی ٹول اصول یہاں مؤثر ہوتے ہیں۔",
+    "tierFullName": "مکمل خودمختار",
+    "tierFullWhat": "کوئی ٹول کال کبھی منظوری کا انتظار نہیں کرتی اور ایجنٹ کو ٹول مراحل کی زیادہ حد ملتی ہے۔ فی ٹول اصول نظر انداز کیے جاتے ہیں۔",
+    "tierFullConsequence": "یہ پوچھے بغیر کام کرتا ہے۔ اسے صرف ان ایجنٹس کے لیے استعمال کریں جن کی غلطیاں آسانی سے واپس کی جا سکیں۔",
+    "tiersRuleNote": "ٹول اصول (ہمیشہ پوچھیں، کبھی نہ پوچھیں) صرف نیم خودمختار ایجنٹس کے لیے معنی رکھتے ہیں۔",
+    "agentModeTitle": "اس ایجنٹ کو منظوری کب درکار ہے؟",
+    "agentModeSupervised": "یہ ایجنٹ نگرانی شدہ ہے: ہر ٹول کال کسی شخص کا انتظار کرتی ہے، اور فی ٹول اصول نظر انداز کیے جاتے ہیں۔",
+    "agentModeSemi": "یہ ایجنٹ نیم خودمختار ہے: ہر ٹول ورک اسپیس کے اصول کی پیروی کرتا ہے۔ بھیجنا، حذف کرنا اور ادائیگیاں بطور ڈیفالٹ پوچھتے ہیں۔",
+    "agentModeFull": "یہ ایجنٹ مکمل خودمختار ہے: یہ کبھی منظوری کا انتظار نہیں کرتا، اور فی ٹول اصول نظر انداز کیے جاتے ہیں۔",
+    "agentModeQueueLink": "اس ایجنٹ کی درخواستیں دیکھیں",
+    "agentModeRulesLink": "کسی ٹول کے لیے اصول سیٹ کریں",
+    "agentModeShowTiers": "تینوں سطحوں کا موازنہ کریں",
+    "agentModeHideTiers": "موازنہ چھپائیں",
+    "agentModeScopeNote": "اوپر خودمختاری کے انتخاب سے سطح بدلیں۔ ٹول اصول پورے ورک اسپیس کے ہیں، فی ایجنٹ نہیں۔",
+    "policyThenApprovalNote": "جو کال ان اصولوں سے گزر جائے وہ پھر بھی کسی شخص کا انتظار کر سکتی ہے۔ یہ ایجنٹ کی خودمختاری کی سطح پر منحصر ہے، جو نیچے بیان کی گئی ہے۔",
+    "chatReasonToggle": "وجہ شامل کریں",
+    "chatReviewInQueue": "قطار میں جائزہ لیں"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "ایونٹس فلٹر کریں",
+    "tlFilterCategories": "ایونٹ کی اقسام",
+    "tlCatIntake": "انٹیک",
+    "tlCatModel": "ماڈل",
+    "tlCatTool": "ٹولز",
+    "tlCatApproval": "منظوریاں",
+    "tlCatContinuation": "تسلسل",
+    "tlCatRetry": "دوبارہ کوششیں اور فیل اوور",
+    "tlCatGuardrail": "گارڈ ریلز",
+    "tlCatCache": "کیش",
+    "tlCatVerify": "جانچیں",
+    "tlCatFinish": "اختتام",
+    "tlProblemsOnly": "صرف مسائل",
+    "tlSearch": "ایونٹس تلاش کریں",
+    "tlSearchPlaceholder": "ٹول، ماڈل، گارڈ یا حالت",
+    "tlClearFilters": "فلٹر صاف کریں",
+    "tlShowing": "{total} ایونٹس میں سے {shown} دکھائے جا رہے ہیں",
+    "tlNoMatch": "کوئی ایونٹ ان فلٹرز سے مماثل نہیں۔",
+    "tlSevOk": "کامیاب",
+    "tlSevInfo": "معلومات",
+    "tlSevWarn": "توجہ درکار",
+    "tlSevError": "ناکام",
+    "tlIntake": "ٹرن شروع ہوا: {chars} حروف، {tools} ٹولز، {attachments} منسلکات",
+    "tlRunTools": "Tools for this run",
+    "tlRunToolsNone": "none (text only)",
+    "tlModelCall": "{model} ({provider}) کو ماڈل کال، روٹ {route}",
+    "tlFailover": "{model} ({provider}) پر فیل اوور ہوا",
+    "tlRetryModel": "{model} ({provider}) پر دوبارہ کوشش کی گئی، روٹ {route}",
+    "tlRetry": "دوبارہ کوشش: {guard} ({outcome})",
+    "tlCacheHit": "ریسپانس کیش سے جواب دیا گیا",
+    "tlToolCall": "ٹول کال {tool}: {status}",
+    "tlApprovalRequested": "{tool} چلنے سے پہلے منظوری مانگی گئی",
+    "tlApprovalDecided": "{tool} کے لیے منظوری کا فیصلہ ہوا: {decision}",
+    "tlContinuation": "تسلسل: {guard} ({outcome})",
+    "tlGuard": "گارڈ ریل {guard}: {outcome}",
+    "tlVerifyPassed": "جانچ کامیاب: {check}",
+    "tlVerifyFailed": "جانچ ناکام: {check}",
+    "tlFinish": "مکمل: {status} (جواب میں {chars} حروف)",
+    "tlOther": "ایونٹ {type}",
+    "reasonFallbackProvider": "بنیادی ماڈل ناکام ہو گیا، اس لیے ٹرن ایجنٹ کے فال بیک فراہم کنندہ پر چلا گیا۔",
+    "reasonToolsDisabledRetry": "فراہم کنندہ نے ٹول کال کی تاریخ مسترد کر دی، اس لیے ٹرن کا ایک بار پھر ٹولز کے بغیر جواب دیا گیا۔",
+    "reasonRetryOther": "ماڈل کال دہرائی گئی۔",
+    "reasonToolCallRetry": "ماڈل نے اپنا جواب بگڑی ہوئی ٹول کال پر ختم کیا، اس لیے اس سے دوبارہ پوچھا گیا۔",
+    "reasonCutOff": "جواب لمبائی کی حد پر کٹ گیا، اس لیے ماڈل سے جاری رکھنے کو کہا گیا۔",
+    "reasonToolsContinue": "ٹول کالوں کے بعد ماڈل کو مزید مراحل کی ضرورت تھی، اس لیے ٹرن جاری رہا۔",
+    "reasonToolBlocked": "ٹول کی جگہ کسی گارڈ، پالیسی، ہک یا حد نے جواب دیا، اس لیے وہ نہیں چلا۔",
+    "reasonToolParked": "کال کسی شخص کی منظوری کا انتظار کر رہی ہے؛ ٹول نہیں چلا۔",
+    "reasonGuardAction": "ایک گارڈ ریل نے جواب بدل دیا یا روک لیا۔",
+    "tlAtStart": "آغاز سے",
+    "tlGap": "پچھلے ایونٹ سے",
+    "tlDuration": "دورانیہ",
+    "tlTokens": "ان پٹ / آؤٹ پٹ ٹوکن",
+    "tlCost": "لاگت",
+    "tlDetails": "ہیش اور خام خلاصہ",
+    "tlArgsHash": "آرگومنٹس کا ہیش",
+    "tlResultDigest": "نتیجے کا ڈائجسٹ",
+    "tlContentNote": "آرگومنٹس اور نتائج کبھی محفوظ نہیں کیے جاتے۔ ٹول کال کے لیے ٹائم لائن اس کی حالت، دورانیہ اور اس کے آرگومنٹس و نتیجے کے ہیش دکھاتی ہے، مواد نہیں۔",
+    "tlStatFinish": "اختتام کی وجہ",
+    "tlStillOpen": "مکمل نہیں ہوا",
+    "tlProblemCount": "{count} ایونٹس پر توجہ درکار ہے",
+    "tlStatRetries": "دوبارہ کوششیں اور فیل اوورز",
+    "tlStatContinuations": "تسلسل",
+    "tlStatApprovals": "منظوریاں",
+    "tlStatTokens": "ان پٹ / آؤٹ پٹ ٹوکن",
+    "tlTokensNotRecorded": "اس ٹرن کے لیے ریکارڈ نہیں",
+    "tlTokensInOut": "ان پٹ / آؤٹ پٹ",
+    "tlCopyTurnId": "ٹرن ID کاپی کریں",
+    "tlCopyTurnIdShort": "ID کاپی کریں",
+    "tlCopied": "ٹرن ID کاپی ہو گئی۔",
+    "tlCopyFailed": "کاپی نہیں ہو سکی۔ ID منتخب کریں اور ہاتھ سے کاپی کریں۔",
+    "sessTitle": "ایک سیشن کے ٹرنز",
+    "sessSubtitle": "ریکارڈ شدہ ٹرنز نئے سے پہلے دیکھنے کے لیے کوئی چیٹ سیشن منتخب کریں۔ چیٹ پیغام کا ٹرن دیکھیں لنک کھولنے سے یہ آپ کے لیے خود بھر جاتا ہے۔",
+    "sessionIdLabel": "سیشن ID",
+    "sessionIdPlaceholder": "چیٹ سیشن ID",
+    "sessFind": "ٹرنز تلاش کریں",
+    "sessInvalid": "ایجنٹ ID (ایک UUID) اور سیشن ID درج کریں۔",
+    "sessLoading": "سیشن کے ٹرنز لوڈ ہو رہے ہیں...",
+    "sessUnavailableTitle": "سیشن تلاش دستیاب نہیں",
+    "sessUnavailableBody": "یہ سرور کسی سیشن کے ٹرنز کی فہرست نہیں بنا سکتا۔ اس کی جگہ نیچے ID سے ٹرن کھولیں۔",
+    "sessErrorTitle": "سیشن کے ٹرنز لوڈ نہیں ہو سکے",
+    "sessEmptyTitle": "اس سیشن میں کوئی جرنل شدہ ٹرن نہیں",
+    "sessEmptyBody": "سیشن نے کچھ ریکارڈ نہیں کیا۔ یا تو سیشن ID غلط ہے، یا اس کے ٹرنز چلتے وقت ٹرن جرنل بند تھا۔",
+    "sessListLabel": "{count} جرنل شدہ ٹرنز",
+    "sessEvents": "{count} ایونٹس",
+    "sessStatusOpen": "کھولیں",
+    "sessOpen": "ٹائم لائن کھولیں",
+    "sessOpened": "نیچے دکھایا گیا"
+  },
+  "evalControls": {
+    "cancel": "منسوخ کریں",
+    "saving": "محفوظ ہو رہا ہے...",
+    "saved": "محفوظ ہو گیا۔",
+    "saveMode": "ری پلے موڈ محفوظ کریں",
+    "discard": "تبدیلیاں رد کریں",
+    "saveFailed": "ری پلے موڈ محفوظ نہیں ہو سکا۔",
+    "unsavedChanges": "غیر محفوظ شدہ تبدیلیاں",
+    "modeTitle": "یہ ڈیٹا سیٹ کیسے ری پلے ہوتا ہے",
+    "modeHelp": "منتخب کریں کہ ری پلے ایجنٹ کے ٹولز استعمال کر سکتا ہے یا نہیں۔ یہ بدلتا ہے کہ اگلا رن کیا ناپتا ہے۔",
+    "modeTextOnly": "صرف ٹیکسٹ",
+    "modeTextOnlyHelp": "ایجنٹ اپنے ٹولز کے بغیر جواب دیتا ہے۔ محفوظ: کچھ حقیقی نہیں ہوتا۔ متوقع ٹول جانچیں پوری نہیں ہو سکتیں۔",
+    "modeFull": "ٹولز کے ساتھ مکمل پائپ لائن",
+    "modeFullHelp": "وہی ٹولز، گارڈ ریلز اور مراحل کی حدیں جو حقیقی صارف کو ملتی ہیں۔ متوقع ٹول اور ٹریجیکٹری جانچوں کے لیے ضروری۔",
+    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "autoApproveLabel": "ایول سینڈ باکس میں ٹول کالز خود بخود منظور کریں",
+    "autoApproveHelp": "جو ٹول کال عام طور پر کسی شخص کا انتظار کرتی اسے ایول سینڈ باکس منظور کر دیتا ہے تاکہ کیس مکمل ہو سکے۔ اس کے بغیر کیس پروڈکشن کی طرح بے جواب منظوری پر ہی ختم ہوتا ہے۔",
+    "autoApproveWarnTitle": "صرف غیر پروڈکشن ورک اسپیسز کے لیے",
+    "autoApproveWarnBody": "اسے کبھی وہاں آن نہ کریں جہاں ٹولز حقیقی صارفین یا ڈیٹا تک پہنچتے ہیں۔ شیل، کوڈنگ، شیڈولنگ، ایجنٹ سے ایجنٹ، ادائیگی اور حذف کرنے والے ٹولز کبھی خود بخود منظور نہیں ہوتے۔ آپ کے منتظم نے اس ورک اسپیس کو غیر پروڈکشن نشان زد کیا ہونا چاہیے۔",
+    "autoApproveNeedsFull": "پہلے مکمل پائپ لائن آن کریں: خود کار منظوری صرف تب لاگو ہوتی ہے جب ٹولز چلیں۔",
+    "autoApproveRefused": "اس ورک اسپیس میں اجازت نہیں: {reason}",
+    "autoApproveConfirmTitle": "ایولز میں ٹول کالز خود بخود منظور کریں؟",
+    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirm": "خود کار منظوری آن کریں",
+    "trajectoryLabel": "ٹریجیکٹری جانچیں",
+    "trajectoryOn": "On",
+    "trajectoryOff": "دستیاب نہیں",
+    "trajectoryHelpOn": "متوقع ٹریجیکٹری والے کیسز کو اس بنیاد پر اسکور ملتا ہے کہ ایجنٹ نے کون سے ٹولز کس ترتیب سے کال کیے۔ اسے آپ کا منتظم پوری تعیناتی کے لیے آن کرتا ہے، ہر ڈیٹا سیٹ کے لیے نہیں۔",
+    "trajectoryHelpOff": "ٹریجیکٹری جانچیں یہاں دستیاب نہیں۔ انہیں آپ کا منتظم پوری تعیناتی کے لیے آن کرتا ہے، اور ان کے لیے ایولز والا پلان درکار ہے۔",
+    "trajectoryNeedsFull": "یہ ڈیٹا سیٹ صرف ٹیکسٹ ہے، اس لیے متوقع ٹریجیکٹری والے کیسز کو اسکور نہیں ملے گا۔ مکمل پائپ لائن آن کریں۔",
+    "runAutoApproved": "خود بخود منظور شدہ",
+    "runAutoApprovedTitle": "اس رن کی کسی ٹول کال کا فیصلہ کسی شخص نے نہیں کیا؛ ایول سینڈ باکس نے انہیں منظور کیا۔",
+    "toolCallsLabel": "اس ری پلے میں ٹول کالز",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "ناکام",
+    "toolStatusNotRun": "نہیں چلا",
+    "toolStatusAwaitingApproval": "منظوری کا انتظار",
+    "toolStatusReplayed": "ری پلے کیا گیا",
+    "samplingTitle": "پس منظر معیار اسکورنگ",
+    "samplingLoading": "اسکورنگ کی شرح لوڈ ہو رہی ہے...",
+    "samplingUnavailable": "پس منظر کا جج لائیو ٹرنز کے کتنے حصے کو اسکور کرتا ہے یہ آپ کا پلیٹ فارم منتظم طے کرتا ہے اور یہاں نہیں دکھایا جاتا۔",
+    "samplingValue": "تقریباً {percent}% لائیو ٹرنز کو پس منظر کا معیار جج اسکور کرتا ہے۔",
+    "samplingHelp": "کم شرح کی لاگت کم ہوتی ہے اور اوپر کے رجحان میں اسکور کم ہوتے ہیں۔ یہ قدر یہاں صرف پڑھنے کے لیے ہے۔",
+    "samplingSource_default": "ڈیفالٹ",
+    "samplingSource_platform": "پلیٹ فارم کی طرف سے سیٹ",
+    "samplingSource_tenant": "آپ کے ورک اسپیس کے لیے سیٹ",
+    "samplingSource_agent": "اس ایجنٹ کے لیے سیٹ",
+    "modeDefault": "Workspace default",
+    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
+    "modeDefaultCurrent": "Currently: {mode}",
+    "modeNameFull": "Full pipeline",
+    "modeNameQuick": "Quick (text only)",
+    "badgeFull": "full pipeline",
+    "badgeQuick": "quick",
+    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
+    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
+    "runModeLabel": "Replay mode for the next run",
+    "runModeInherit": "Use the dataset's setting",
+    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
+    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
+    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
+    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
+    "toolStatusSimulated": "simulated, not executed"
+  },
+  "agentLab": {
+    "wtLabel": "ایجنٹ کے ٹولز کے ساتھ چلائیں",
+    "wtHelp": "بند: ہر جواب ایک سادہ ماڈل کال ہے۔ آن: جواب اسی ٹول پائپ لائن سے آتے ہیں جو چیٹ ٹرن استعمال کرتا ہے، لہٰذا ٹولز چلتے ہیں، گارڈ ریلز لاگو ہوتے ہیں اور مراحل کی حدیں مانی جاتی ہیں۔ جس کال کو کسی شخص کی منظوری درکار ہو وہ زیر التوا منظوری کے طور پر انتظار کرتی ہے۔",
+    "wtUnavailable": "اس انسٹالیشن پر ٹولز کے ساتھ لیب چلانا بند ہے۔ اسے فعال کرنے کے لیے کسی منتظم سے کہیں۔",
+    "wtRefused": "یہ رن مسترد کر دیا گیا: {reason}",
+    "wtActive": "اس رن میں ٹولز واقعی چلیں گے، ان کے ضمنی اثرات سمیت۔",
+    "wtConfirmTitle": "ایجنٹ کے ٹولز کے ساتھ لیب چلائیں؟",
+    "wtConfirmBody": "ہر نمونہ ایجنٹ کے اصل ٹولز کو کال کر سکتا ہے، اور ان کالوں کے حقیقی اثرات ہو سکتے ہیں جیسے پیغام بھیجنا یا ڈیٹا لکھنا۔ جن کالوں کو منظوری درکار ہو وہ کسی شخص کا انتظار کریں گی۔ اسے صرف ٹیسٹ ایجنٹ یا ٹیسٹ ڈیٹا کے ساتھ استعمال کریں۔",
+    "wtConfirm": "ٹولز استعمال کریں"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "ایجنٹ کی حدیں",
+        "description": "روکے جانے سے پہلے ایک ایجنٹ ٹرن کتنا کام کر سکتا ہے۔"
+      },
+      "approvals": {
+        "label": "منظوریاں",
+        "description": "کسی شخص کے کسی کارروائی کو منظور یا مسترد کرنے کے بعد کیا ہوتا ہے، اور درخواست کتنی دیر انتظار کرتی ہے۔"
+      },
+      "chat": {
+        "label": "گفتگو کا رویہ",
+        "description": "جواب کیسے مکمل، دوبارہ کوشش، کیش اور جاری کیا جاتا ہے۔"
+      },
+      "routing": {
+        "label": "ماڈل روٹنگ",
+        "description": "کون سے پیغامات تیز ماڈل کے لیے کافی سادہ مانے جاتے ہیں۔"
+      },
+      "memory": {
+        "label": "میموری",
+        "description": "ایجنٹ کتنی یادیں رکھتا اور یاد کرتا ہے۔"
+      },
+      "aux": {
+        "label": "پس منظر ماڈل کالز",
+        "description": "خلاصے، معاونتیں اور کمپیکشن کون سا ماڈل استعمال کرتے ہیں۔"
+      },
+      "guardrails": {
+        "label": "حفاظتی جانچیں",
+        "description": "خودکار حفاظتی جانچیں کتنی سخت ہیں۔ انہیں صرف پلیٹ فارم سیٹنگ سے سخت بنایا جا سکتا ہے۔"
+      },
+      "quality": {
+        "label": "تشخیص",
+        "description": "ٹیسٹ رن اور AI جج کیسے برتاؤ کرتے ہیں۔"
+      },
+      "delegation": {
+        "label": "کام سونپنا",
+        "description": "ایک ایجنٹ ایک وقت میں دوسرے ایجنٹس کو کتنا کام سونپ سکتا ہے۔"
+      },
+      "knowledge": {
+        "label": "علم کی تلاش",
+        "description": "بہترین اقتباسات چننے سے پہلے آپ کے اپ لوڈ کردہ دستاویزات کی تلاش امیدواروں کو کتنی وسعت سے جمع کرتی ہے۔"
+      },
+      "learning": {
+        "label": "سیکھنا",
+        "description": "ایجنٹ کی سیکھنے کی پالیسیاں مختلف اختیارات کیسے آزماتی ہیں۔"
+      },
+      "providers": {
+        "label": "AI فراہم کنندگان",
+        "description": "جب کوئی منسلک AI فراہم کنندہ کلید کام کرنا بند کر دے تو وہ کیسے استعمال ہوتی ہیں۔"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "فی ٹرن زیادہ سے زیادہ ٹول کالز",
+          "description": "ٹرن کو روکنے اور جو اس کے پاس ہے اس سے جواب دینے کو کہنے سے پہلے وہ زیادہ سے زیادہ کتنی ٹول کالز کر سکتا ہے۔",
+          "help": "طویل کثیر مرحلہ کام کرنے والے ایجنٹس کے لیے بڑھائیں۔ بے قابو لوپس روکنے اور لاگت قابل پیش گوئی رکھنے کے لیے کم کریں۔ ورک اسپیس یا پلیٹ فارم کے لیے دکھائی گئی قدر معیاری ایجنٹ کا بنیادی عدد ہے: ایجنٹ کی خودمختاری کی سطح رن کے وقت اسے گھٹاتی بڑھاتی ہے، اس لیے کم یا زیادہ خودمختار ایجنٹ مختلف عدد استعمال کر سکتا ہے۔ ایجنٹ کی اپنی قدر ویسے ہی استعمال ہوتی ہے جیسے سیٹ کی گئی۔"
+        },
+        "turnTimeoutSeconds": {
+          "label": "فی ٹرن زیادہ سے زیادہ وقت",
+          "description": "ایک ٹرن روکے جانے سے پہلے کتنی دیر چل سکتا ہے۔",
+          "help": "سست تحقیق یا کوڈ کے کاموں کے لیے بڑھائیں۔ جس ٹرن کا وقت ختم ہو جائے وہ اب تک جو کیا گیا اس کے ساتھ ختم ہوتا ہے۔"
+        },
+        "toolTimeoutSeconds": {
+          "label": "فی ٹول کال زیادہ سے زیادہ وقت",
+          "description": "ایک ٹول کال روکے جانے سے پہلے کتنی دیر چل سکتی ہے۔ پلیٹ فارم ڈیفالٹ میں کوئی حد نہیں؛ پھر ہر ٹول اپنا ٹائم آؤٹ رکھتا ہے۔",
+          "help": "اگر کوئی سست ٹول پوری گفتگو روک سکتا ہے تو حد سیٹ کریں۔ یہ معلوم نہیں کہ روکی گئی کال کا کوئی اثر ہوا یا نہیں، اس لیے ایجنٹ کو بتایا جاتا ہے کہ یہ نہ مانے کہ وہ کامیاب ہوئی۔"
+        },
+        "toolOutputMaxChars": {
+          "label": "سب سے لمبا ٹول نتیجہ",
+          "description": "ایک ٹول نتیجے کے کتنے حروف ماڈل کو دیے جاتے ہیں؛ باقی کاٹ دیے جاتے ہیں۔",
+          "help": "جب ایجنٹ کو طویل دستاویزات یا API جوابات پورے پڑھنے ہوں تو بڑھائیں، فی ٹرن زیادہ ٹوکن کی قیمت پر۔ لاگت بچانے کے لیے کم کریں۔"
+        },
+        "retrievalTopK": {
+          "label": "فی تلاش علم کے اقتباسات",
+          "description": "ایک علمی ذخیرہ تلاش ایجنٹ کو کتنے اقتباسات واپس کرتی ہے۔",
+          "help": "زیادہ اقتباسات ایجنٹ کو کام کے لیے زیادہ مواد دیتے ہیں لیکن زیادہ ٹوکن خرچ ہوتے ہیں اور شور بڑھا سکتے ہیں۔ کم اقتباسات تیز اور سستے ہیں۔"
+        },
+        "retrievalMinScore": {
+          "label": "اقتباس کی کم از کم مطابقت",
+          "description": "علمی اقتباس کو واپس کیے جانے کے لیے کتنا متعلقہ ہونا چاہیے۔ 0 ہر ہٹ واپس کرتا ہے۔",
+          "help": "اگر ایجنٹ غیر متعلقہ اقتباسات پیش کرے تو بڑھائیں۔ بہت زیادہ ہو تو اسے کچھ نہ ملے۔"
+        },
+        "continuationPasses": {
+          "label": "نامکمل جواب کے بعد اضافی پاس",
+          "description": "جب ماڈل کا جواب اعلان شدہ مگر نہ اٹھائے گئے مرحلے پر رک جائے تو اسے مزید کتنی بار جاری رکھنے کو کہا جاتا ہے۔",
+          "help": "ان ایجنٹس کے لیے بڑھائیں جو اکثر کسی مرحلے کا اعلان کر کے رک جاتے ہیں۔ ہر اضافی پاس ایک ماڈل کال خرچ کرتا ہے۔"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "منظوری کے بعد جاری رکھیں",
+          "description": "جب کوئی شخص کارروائی منظور کرتا ہے تو ایجنٹ نئے پیغام کا انتظار کرنے کے بجائے کام خود مکمل کرتا ہے۔",
+          "help": "اگر آپ چاہتے ہیں کہ ہر منظور شدہ کارروائی ٹرن ختم کرے اور ہاتھ سے فالو اپ ہو تو اسے بند کریں۔"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "مسترد کرنے کے بعد بھی پس منظر کے جابز جاری رہتے ہیں",
+          "description": "جب کوئی شخص پس منظر کے جاب میں کارروائی مسترد کرتا ہے تو جاب رکنے کے بجائے مسترد کرنے کو نوٹ کر کے جاری رہتا ہے۔",
+          "help": "اگر مسترد کرنے سے جاب رکنا چاہیے تو اسے بند رکھیں۔ جب جاب عموماً مسترد شدہ مرحلے کے بغیر مکمل ہو سکے تو آن کریں۔"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "منظوری کی درخواستوں کی میعاد ختم ہوتی ہے",
+          "description": "منظوری کی درخواست میعاد ختم ہونے سے پہلے فیصلے کا کتنی دیر انتظار کرتی ہے۔ 0 کا مطلب ہے درخواستوں کی میعاد کبھی ختم نہیں ہوتی۔",
+          "help": "میعاد نہ ہو تو بھولی ہوئی درخواستیں غیر معینہ مدت تک کھلی رہتی ہیں اور ایجنٹ انتظار کرتا رہتا ہے۔ میعاد ختم درخواست غیر منظور شدہ شمار ہوتی ہے۔"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "کٹے ہوئے جوابات مکمل کریں",
+          "description": "جب جواب ماڈل کی لمبائی کی حد سے کٹ جائے یا بگڑی ہوئی ٹول کال پر ختم ہو تو ماڈل سے جاری رکھنے یا دوبارہ کوشش کرنے کو کہیں۔",
+          "help": "اسے صرف ماڈل کا مسئلہ تشخیص کرنے کے لیے بند کریں؛ تب لوگ کٹے ہوئے جوابات جیسے ہیں ویسے دیکھتے ہیں۔"
+        },
+        "maxContinuations": {
+          "label": "کٹے جواب کے زیادہ سے زیادہ تسلسل",
+          "description": "جواب کٹنے کے بعد ماڈل کو کتنی بار جاری رکھنے کو کہا جاتا ہے۔",
+          "help": "ہر تسلسل ایک اور ماڈل کال ہے۔ طویل جوابات کے لیے بڑھائیں، لاگت بچانے کے لیے کم کریں۔"
+        },
+        "maxToolCallRetries": {
+          "label": "بگڑی ٹول کال کی زیادہ سے زیادہ دوبارہ کوششیں",
+          "description": "ناقابل استعمال آرگومنٹس کے ساتھ آنے والی ٹول کال کو دہرانے کے لیے ماڈل سے کتنی بار کہا جاتا ہے۔",
+          "help": "ایک دوبارہ کوشش ایک ماڈل کال خرچ کرتی ہے۔ 0 پہلی بگڑی کال پر ہی ہار مان لیتا ہے۔"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "فی ماڈل کال کوششیں",
+          "description": "جب فراہم کنندہ ناکام ہو یا مصروف ہو تو ماڈل کال کتنی بار آزمائی جاتی ہے، پہلی کوشش سمیت۔",
+          "help": "زیادہ کوششیں فراہم کنندہ کی مختصر بندشیں چھپاتی ہیں لیکن ناکام ہوتی درخواست غلطی بتانے میں زیادہ وقت لیتی ہے۔"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "ٹولز والے ایجنٹس کے لیے جوابات دوبارہ استعمال کریں",
+          "description": "ٹولز رکھنے والے ایجنٹس کے لیے محفوظ شدہ جوابات کے دوبارہ استعمال کی اجازت دیں۔ بطور ڈیفالٹ بند ہے کیونکہ ٹول اگلی بار کچھ مختلف لوٹا سکتا ہے۔",
+          "help": "اسے صرف تب آن کریں جب ٹولز صرف پڑھنے والے اور آہستہ بدلنے والے ہوں، اور آپ کو تیز، سستے دہرائے گئے جوابات چاہییں۔ لوگ ایسا جواب دیکھ سکتے ہیں جو تازہ ترین نہیں۔"
+        },
+        "contextTurns": {
+          "label": "تکرار پہچاننے والے پچھلے ٹرنز",
+          "description": "یہ طے کرنے کے لیے کہ پیغام محفوظ شدہ جواب دوبارہ استعمال کر سکنے والی تکرار ہے یا نہیں، کتنے پچھلے ٹرنز کا موازنہ کیا جاتا ہے۔",
+          "help": "زیادہ ٹرنز مماثلت کو سخت اور کیش ہٹس کو نایاب بناتے ہیں۔"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "فالو اپس میں ٹولز پیش کرتے رہیں",
+          "description": "جب اگلا پیغام مختصر فالو اپ ہو تو وہ ٹولز پیش کرتے رہیں جو گفتگو پہلے ہی استعمال کر چکی ہے۔",
+          "help": "اگر \"ہاں\" جیسے مختصر جوابات عام ٹول انتخاب سے شروع ہونے چاہییں تو اسے بند کریں۔"
+        },
+        "stickyToolsWindow": {
+          "label": "فالو اپ ٹولز کتنی دیر پیش رہتے ہیں",
+          "description": "استعمال کے بعد مختصر فالو اپ پیغامات کے لیے ٹول کتنی دیر پیش رہتا ہے۔",
+          "help": "لمبی کھڑکی طویل کام کے سیشنز میں مدد کرتی ہے، چھوٹی ٹول فہرست کو مختصر رکھتی ہے۔"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "نامکمل عبارت پر یاد دہانی",
+          "description": "جب جواب ایسا لگے کہ وہ جو کرنے کا کہہ چکا اسے کرنے سے پہلے رک گیا، تو ماڈل سے جاری رکھنے کو کہیں۔",
+          "help": "اگر یاد دہانیاں ان جوابات پر چلتی ہیں جنہیں وہیں ختم ہونا تھا تو اسے بند کریں۔"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "پرانے ٹول نتائج صاف کریں",
+            "description": "طویل ٹول رن میں پرانے ٹول نتائج کو مختصر پلیس ہولڈر سے بدلیں تاکہ گفتگو ماڈل کی حد کے اندر رہے۔",
+            "help": "اگر ایجنٹ کو ہر پچھلا نتیجہ دیکھنا ضروری ہو تو اسے بند کریں؛ طویل رن تب ماڈل کی سائز حد تک پہنچ سکتے ہیں۔"
+          },
+          "thresholdChars": {
+            "label": "صفائی شروع کرنے والا سائز",
+            "description": "پرانے نتائج صاف ہونے سے پہلے ایک ٹرن کے ٹول نتائج کتنے بڑے ہو سکتے ہیں۔",
+            "help": "زیادہ نتائج نظر آنے کے لیے بڑھائیں، طویل رن کو چھوٹا اور سستا رکھنے کے لیے کم کریں۔"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "سب سے لمبا سادہ پیغام",
+          "description": "اس سے لمبا پیغام کبھی سادہ نہیں مانا جاتا۔ سادہ پیغامات تیز، سستے ماڈل کو جا سکتے ہیں۔",
+          "help": "معیار کے لیے زیادہ پیغامات مرکزی ماڈل کو بھیجنے کے لیے کم کریں؛ لاگت بچانے کے لیے بڑھائیں۔"
+        },
+        "maxClauses": {
+          "label": "سادہ پیغام میں زیادہ سے زیادہ جملے",
+          "description": "اس سے زیادہ جملوں والا پیغام کبھی سادہ نہیں مانا جاتا۔",
+          "help": "معیار کے لیے زیادہ پیغامات مرکزی ماڈل کو بھیجنے کے لیے کم کریں۔"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "فی ٹرن یاد کی گئی ایجنٹ کی یادیں",
+          "description": "ہر پیغام کے لیے ایجنٹ کی اپنی کتنی یادیں دیکھی جاتی ہیں۔",
+          "help": "زیادہ یادیں زیادہ سیاق دیتی ہیں لیکن زیادہ ٹوکن استعمال کرتی ہیں۔"
+        },
+        "tenantTopK": {
+          "label": "فی ٹرن یاد کی گئی مشترکہ یادیں",
+          "description": "ہر پیغام کے لیے ورک اسپیس میں مشترکہ کتنی یادیں دیکھی جاتی ہیں۔",
+          "help": "زیادہ یادیں زیادہ سیاق دیتی ہیں لیکن زیادہ ٹوکن استعمال کرتی ہیں۔"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "فی ایجنٹ زیادہ سے زیادہ یادیں",
+          "description": "ایک ایجنٹ کتنی یادیں رکھ سکتا ہے۔ اس سے آگے سب سے پرانی اور سب سے کم استعمال شدہ چھوڑ دی جاتی ہیں۔",
+          "help": "ان معاونین کے لیے بڑھائیں جنہیں لوگوں کے بارے میں بہت کچھ یاد رکھنا چاہیے؛ اس سے اسٹوریج اور یاد کرنے کی لاگت بھی بڑھتی ہے۔"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "گراف میموری سے یاد کیے گئے حقائق",
+          "description": "ایک لُک اَپ میں ایجنٹ کو اس کی تعلقات کی میموری سے زیادہ سے زیادہ کتنے حقائق دکھائے جاتے ہیں۔",
+          "help": "زیادہ حقائق ایجنٹ کو کسی شخص یا موضوع کا زیادہ پس منظر دیتے ہیں لیکن اس کی کام کی جگہ کا زیادہ حصہ استعمال کرتے ہیں۔ کم حقائق جوابات کو مرکوز رکھتے ہیں۔ اسے پورے ورک اسپیس کے لیے، یا ایسے ایک ایجنٹ کے لیے سیٹ کریں جسے زیادہ یا کم چاہیے۔"
+        },
+        "recallMaxPaths": {
+          "label": "فی لُک اَپ پڑھے گئے گراف راستے",
+          "description": "ایک لُک اَپ کے حقائق تلاش کرنے کے لیے میموری گراف کے کتنے کنکشن پڑھے جاتے ہیں۔",
+          "help": "کئی کنکشن ایک ہی حقیقت تک لے جا سکتے ہیں، اس لیے گھنے جڑی یادوں میں سب کچھ ڈھونڈنے کے لیے زیادہ عدد درکار ہو سکتا ہے۔ زیادہ عدد ہر لُک اَپ کو سست کرتا ہے۔"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "پس منظر کالز ایجنٹ کا ماڈل استعمال کرتی ہیں",
+        "description": "جب ان کے لیے کوئی ماڈل منتخب نہ ہو تو خلاصے، معاونتیں اور سیاق کمپیکشن اسی ایجنٹ کا ماڈل استعمال کرتے ہیں جس کے لیے وہ کام کرتے ہیں۔",
+        "help": "اسے بند کریں تاکہ پلیٹ فارم ان کالز کے لیے ماڈل چنے، جو سستا یا کسی اور فراہم کنندہ کا ہو سکتا ہے۔"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "جب حفاظتی جانچ خراب ہو جائے",
+        "description": "جب حفاظتی جانچ خود ناکام ہو جائے، مثلاً جج ماڈل بند ہو، تو کیا ہوتا ہے۔ بند کارروائی کو مسترد کرتا ہے؛ کھلا اسے گزرنے دیتا ہے۔",
+        "help": "آپ اسے صرف پلیٹ فارم سیٹنگ سے سخت بنا سکتے ہیں۔ بند اس سے بچاتا ہے کہ کوئی جان بوجھ کر جانچ ناکام کروائے، بندش کے دوران کام مسترد ہونے کی قیمت پر۔",
+        "options": {
+          "open": "کھلا: کارروائی کو گزرنے دیں",
+          "closed": "بند: کارروائی مسترد کریں"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "جب ٹول کال کی جانچ خراب ہو جائے",
+          "description": "خطرناک ٹول کالز کا جائزہ لینے والی جانچ جب فیصلہ نہ دے سکے تو کیا کرتی ہے۔ وراثت اوپر کی حفاظتی جانچ سیٹنگ کی پیروی کرتی ہے۔",
+          "help": "آپ اسے صرف پلیٹ فارم سیٹنگ سے سخت بنا سکتے ہیں۔ جانچ ناکام ہو تو بند ٹول کال کو مسترد کرتا ہے۔",
+          "options": {
+            "open": "کھلا: ٹول کال کو گزرنے دیں",
+            "inherit": "حفاظتی جانچ سیٹنگ کی پیروی کریں",
+            "closed": "بند: ٹول کال مسترد کریں"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "روکنے والا زہریلے پن کا اسکور",
+          "description": "جج کے 0 سے 100 زہریلے پن کے پیمانے پر اس یا اس سے زیادہ اسکور والا مواد روک دیا جاتا ہے۔ کم عدد زیادہ روکتا ہے۔",
+          "help": "آپ اسے صرف کم کر سکتے ہیں، پلیٹ فارم کی قدر سے اوپر کبھی نہیں بڑھا سکتے۔ بہت کم قدر عام صاف گو عبارت کو بھی روکتی ہے۔"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "جیل بریک کوششوں کے لیے اسکین کیا گیا ٹیکسٹ",
+          "description": "جیل بریک پیٹرنز کے لیے پیغام یا جواب کا کتنا حصہ اسکین ہوتا ہے۔ اس سے آگے کا ٹیکسٹ اسکین نہیں ہوتا۔",
+          "help": "آپ اسے صرف پلیٹ فارم کی قدر سے اوپر بڑھا سکتے ہیں۔ چوڑی کھڑکی پیڈنگ کے پیچھے چھپے حملوں کو روکتی ہے، تھوڑی زیادہ پروسیسنگ کی قیمت پر۔"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "حفاظتی جج کو دکھایا گیا ٹیکسٹ",
+          "description": "جانچے گئے ٹیکسٹ کا کتنا حصہ AI حفاظتی جج پڑھتے ہیں۔ اس سے آگے کے ٹیکسٹ کا فیصلہ نہیں ہوتا۔",
+          "help": "آپ اسے صرف پلیٹ فارم کی قدر سے اوپر بڑھا سکتے ہیں۔ بڑھانے سے طویل ٹول نتائج کا مکمل فیصلہ ہوتا ہے لیکن ہر جج کال بڑی ہو جاتی ہے۔"
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI جج کے لیے ماڈل",
+          "description": "تشخیصی رنز کا فیصلہ کرنے کے لیے استعمال ہونے والا ماڈل۔ پلیٹ فارم کو اس میں سے چننے دینے کے لیے خالی چھوڑیں جو آپ کا ورک اسپیس پہلے ہی استعمال کرتا ہے۔",
+          "help": "زیادہ قابل اعتماد گریڈز کے لیے زیادہ طاقتور ماڈل یا لاگت بچانے کے لیے سستا ماڈل استعمال کریں۔ ماڈل آپ کے منسلک فراہم کنندہ پر دستیاب ہونا چاہیے۔"
+        },
+        "callTimeoutSeconds": {
+          "label": "فی جج کال زیادہ سے زیادہ وقت",
+          "description": "جج کال کو ناکام شمار کیے جانے سے پہلے کتنا وقت لگ سکتا ہے۔",
+          "help": "اگر سست ماڈل اکثر ٹائم آؤٹ ہوتا ہے تو بڑھائیں؛ ناکام کالز تشخیصی نتائج کو نامکمل بناتی ہیں۔"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "فی ٹیسٹ کیس تکرار",
+          "description": "جب رن نہ بتائے تو ہر ٹیسٹ کیس کتنی بار چلایا جاتا ہے۔ زیادہ تکرار دکھاتی ہے کہ ایجنٹ کتنا مستقل ہے۔",
+          "help": "ہر تکرار رن کی لاگت اور وقت کو ضرب دیتی ہے۔"
+        },
+        "defaultMode": {
+          "label": "How evaluations run",
+          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
+          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "options": {
+            "full": "Full pipeline in a sandbox",
+            "quick": "Quick: text answers only"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "زیادہ سے زیادہ متوازی ذیلی کام",
+        "description": "ایک کام سونپنے والی کال ایک وقت میں کتنے ذیلی کام یا معاون ایجنٹس شروع کر سکتی ہے۔ اضافی کو حد سے زیادہ بتایا جاتا ہے۔",
+        "help": "وسیع تحقیقی کاموں کے لیے بڑھائیں، لاگت اور بوجھ کم رکھنے کے لیے کم کریں۔"
+      },
+      "branchTimeoutSeconds": {
+        "label": "فی ذیلی کام زیادہ سے زیادہ وقت",
+        "description": "سونپا گیا ایک ذیلی کام ٹائم آؤٹ کے طور پر رپورٹ ہونے سے پہلے کتنی دیر چل سکتا ہے۔",
+        "help": "سست ذیلی کاموں کے لیے بڑھائیں۔ اٹکا ہوا ذیلی کام اس وقت سے آگے پورے جواب کو کبھی نہیں روکتا۔"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "فی نتیجہ تلاش کی وسعت",
+          "description": "علمی تلاش آخر میں واپس کیے جانے والے ہر اقتباس کے لیے کتنے امیدوار اقتباسات جمع کرتی ہے۔",
+          "help": "زیادہ عدد درجہ بندی کو چننے کے لیے زیادہ دیتا ہے، جو تب مدد کرتا ہے جب بہت سی دستاویزات ملتی جلتی ہوں، لیکن ہر تلاش میں زیادہ وقت اور کمپیوٹ لگتا ہے۔ اگر تلاشیں سست لگیں تو کم کریں۔ یہ ایجنٹ کے دیکھے جانے والے اقتباسات کی تعداد نہیں بدلتا۔"
+        },
+        "candidatePoolMax": {
+          "label": "فی تلاش زیادہ سے زیادہ امیدوار",
+          "description": "چاہے کتنے ہی نتائج مانگے جائیں، ایک علمی تلاش کتنے امیدوار اقتباسات جمع کرتی ہے اس کی بالائی حد۔",
+          "help": "یہ رفتار اور لاگت کی حفاظت کرتا ہے جب ایجنٹ ایک ساتھ بہت سے نتائج مانگتا ہے۔ اسے صرف تب بڑھائیں جب بڑے علمی ذخیروں میں جوابات متعلقہ اقتباسات چھوڑ رہے ہوں۔"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "کم آزمائے گئے اختیارات آزمانے کی آمادگی",
+          "description": "اعتماد-حد طریقہ استعمال کرنے والی سیکھنے کی پالیسی ان اختیارات کو کتنی ترجیح دیتی ہے جنہیں اس نے کم آزمایا ہے۔",
+          "help": "صفر ہمیشہ اب تک بہترین اوسط والا اختیار چنتا ہے۔ زیادہ قدریں ٹھہرنے سے پہلے دوسرے اختیارات کو زیادہ دیر آزماتی رہتی ہیں۔ ڈیفالٹ نصابی کتب والا توازن ہے۔ صرف وہ پالیسیاں متاثر ہوتی ہیں جو یہ طریقہ استعمال کرتی ہیں۔"
+        },
+        "defaultExplorationRate": {
+          "label": "نئی پالیسیوں کے لیے ابتدائی دریافت کی شرح",
+          "description": "نئی بنائی گئی سیکھنے کی پالیسی ٹرنز کا کتنا حصہ بے ترتیب اختیار آزمانے میں صرف کرتی ہے۔",
+          "help": "یہ صرف اب سے بننے والی پالیسیوں کا نقطہ آغاز سیٹ کرتا ہے۔ موجودہ پالیسیاں اپنی شرح رکھتی ہیں، جسے آپ وہاں فی ایجنٹ بدلتے ہیں جہاں پالیسی کا انتظام ہوتا ہے۔ صفر کا مطلب ہے نئی پالیسی شروع میں دریافت نہیں کرتی۔"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "فراہم کنندہ کے کلید مسترد کرنے کے بعد وقفہ",
+          "description": "فراہم کنندہ کے منسلک فراہم کنندہ کلید مسترد کرنے کے بعد پس منظر کا کام اسے کتنی دیر چھوڑ دیتا ہے۔",
+          "help": "وقفے کے دوران، شیڈول اور خودکار جابز بار بار ناکام ہوتی کلید کو کال کرنے کے بجائے کسی اور منسلک فراہم کنندہ کو استعمال کرتے ہیں، یا انتظار کرتے ہیں۔ چیٹ کرنے والے لوگ کبھی بلاک نہیں ہوتے اور ہمیشہ فراہم کنندہ کی اصل غلطی دیکھتے ہیں۔ وقفہ ختم ہونے پر یہ جانچنے کے لیے ایک کال گزرنے دی جاتی ہے کہ کلید ٹھیک ہوئی یا نہیں۔ صفر وقفہ بند کر دیتا ہے۔"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "انتظامیہ",
+    "title": "رن ٹائم سیٹنگز",
+    "subtitle": "ٹھیک کریں کہ اس ورک اسپیس میں ایجنٹس کیسے برتاؤ کرتے ہیں: حدیں، منظوریاں، معیار کی جانچیں، گارڈ ریلز، میموری اور ماڈلز۔ جہاں اجازت ہو ایجنٹ کا مالک پھر بھی ایک ایجنٹ کے لیے سیٹنگ اوور رائیڈ کر سکتا ہے۔",
+    "docsLink": "مدد اور دستاویزات",
+    "tabs": {
+      "label": "رن ٹائم سیٹنگز کے منظر",
+      "settings": "سیٹنگز",
+      "history": "تبدیلی کی تاریخ"
+    },
+    "readOnly": {
+      "title": "صرف دیکھیں",
+      "body": "صرف ورک اسپیس منتظمین یہ سیٹنگز بدل سکتے ہیں۔ آپ ہر سیٹنگ کی نافذ قدر اور وہ کہاں سے آتی ہے دیکھ سکتے ہیں۔"
+    },
+    "summary": "اس ورک اسپیس میں {total} میں سے {changed} سیٹنگز بدلی گئی ہیں۔ باقی پلیٹ فارم کی قدریں استعمال کرتی ہیں۔",
+    "export": {
+      "button": "اوور رائیڈز برآمد کریں",
+      "done": "{count} ورک اسپیس اوور رائیڈز فائل میں برآمد کیے گئے۔",
+      "none": "برآمد کرنے کو کچھ نہیں: اس ورک اسپیس نے کوئی سیٹنگ نہیں بدلی۔"
+    },
+    "filters": {
+      "changedOnly": "صرف اس ورک اسپیس میں بدلی گئی"
+    },
+    "jump": {
+      "label": "کسی گروپ پر جائیں"
+    },
+    "anchor": {
+      "unknown": "اس ورک اسپیس میں \"{key}\" نام کی کوئی سیٹنگ نہیں۔ ہو سکتا ہے اس کا نام بدل گیا ہو یا وہ ورک اسپیس سطح پر دستیاب نہ ہو۔"
+    },
+    "empty": {
+      "noneChanged": "اس ورک اسپیس میں ابھی کوئی سیٹنگ نہیں بدلی گئی۔ سب کچھ پلیٹ فارم کی قدریں استعمال کرتا ہے۔"
+    },
+    "risk": {
+      "high": "زیادہ خطرہ",
+      "security": "سیکیورٹی سیٹنگ"
+    },
+    "security": {
+      "title": "سیکیورٹی سیٹنگز",
+      "body": "یہ سیٹنگز آپ کے ورک اسپیس کی حفاظت کرتی ہیں۔ انہیں صرف پلیٹ فارم کی قدر سے سخت بنایا جا سکتا ہے، کبھی کمزور نہیں۔ ہر تبدیلی کے لیے وجہ درکار ہے اور وہ آڈٹ لاگ میں درج ہوتی ہے۔"
+    },
+    "resetGroup": {
+      "count": "اس گروپ میں {count} بدلی گئیں",
+      "button": "{group} کو وراثتی قدروں پر ری سیٹ کریں",
+      "confirmTitle": "{group} کو وراثتی قدروں پر ری سیٹ کریں؟",
+      "confirmBody": "یہ اس گروپ میں {count} ورک اسپیس اوور رائیڈز ہٹا دیتا ہے۔ ہر اس ایجنٹ کے لیے جس کا اپنا اوور رائیڈ نہیں، سیٹنگز فوراً پلیٹ فارم کی قدروں پر لوٹ جاتی ہیں۔ ہر ری سیٹ آڈٹ لاگ میں درج ہوتا ہے۔",
+      "confirm": "وراثتی قدر پر ری سیٹ کریں",
+      "cancel": "منسوخ کریں",
+      "done": "{count} سیٹنگز کو ان کی وراثتی قدروں پر ری سیٹ کریں۔",
+      "partial": "{done} سیٹنگز ری سیٹ ہوئیں؛ {failed} ری سیٹ نہیں ہو سکیں۔ ناکام سیٹنگز پر پیغامات دیکھیں۔",
+      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+    },
+    "import": {
+      "button": "اوور رائیڈز درآمد کریں",
+      "title": "ورک اسپیس اوور رائیڈز درآمد کریں",
+      "intro": "اس صفحے سے برآمد کی گئی فائل منتخب کریں، یا اس کا مواد پیسٹ کریں۔ کچھ بھی محفوظ کرنے سے پہلے آپ بالکل دیکھیں گے کہ کیا بدلے گا۔",
+      "reviewIntro": "جائزہ لیں کہ یہ فائل کیا بدلے گی۔ ابھی کچھ محفوظ نہیں ہوا۔",
+      "fileLabel": "اوور رائیڈز فائل (JSON)",
+      "pasteLabel": "یا فائل کا مواد پیسٹ کریں",
+      "fileError": {
+        "empty": "پہلے کوئی فائل منتخب کریں یا اس کا مواد پیسٹ کریں۔",
+        "invalidJson": "یہ درست JSON نہیں ہے۔ جانچیں کہ پوری فائل کاپی ہوئی ہے۔",
+        "wrongFormat": "یہ اس صفحے سے برآمد کی گئی سیٹنگ اوور رائیڈز فائل نہیں ہے۔",
+        "unsupportedVersion": "یہ فائل برآمد کے کسی مختلف ورژن سے بنی تھی اور پڑھی نہیں جا سکتی۔",
+        "noOverrides": "فائل میں اوور رائیڈز کا سیکشن نہیں۔",
+        "unreadable": "فائل پڑھی نہیں جا سکی۔"
+      },
+      "summary": "{changes} بدلنے ہیں، {unchanged} پہلے سے نافذ، {problems} لاگو نہیں ہو سکتے۔",
+      "changesHeading": "تبدیلیاں ({count})",
+      "before": "ابھی:",
+      "after": "درآمد کے بعد:",
+      "resetMissing": "فائل میں موجود نہ ہونے والے ورک اسپیس اوور رائیڈز بھی ہٹائیں",
+      "resetMissingHelp": "یہاں بدلی گئی لیکن فائل میں موجود نہ ہونے والی سیٹنگز پلیٹ فارم کی قدر پر لوٹ جاتی ہیں۔ صرف شامل کرنے یا اپ ڈیٹ کرنے کے لیے اسے بند رکھیں۔",
+      "resetsHeading": "ہٹانے والے اوور رائیڈز ({count})",
+      "resetFrom": "فی الحال {value}؛ وراثتی قدر پر لوٹتی ہے۔",
+      "problemsHeading": "لاگو نہیں ہو سکتے ({count})",
+      "problem": {
+        "unknownKey": "اس کلید کی کوئی سیٹنگ نہیں۔",
+        "notWorkspaceSetting": "یہ سیٹنگ پورے ورک اسپیس کے لیے نہیں بدلی جا سکتی۔",
+        "locked": "پلیٹ فارم آپریٹر نے یہ سیٹنگ پن کر دی ہے، اس لیے اسے بدلا نہیں جا سکتا۔",
+        "wrongType": "اس سیٹنگ کے لیے قدر کی قسم غلط ہے۔",
+        "required": "ایک قدر ضروری ہے۔",
+        "notNumber": "قدر ایک عدد ہونی چاہیے۔",
+        "notInteger": "قدر ایک پورا عدد ہونی چاہیے۔",
+        "belowMin": "قدر بہت کم ہے۔ کم از کم {min} ہے۔",
+        "aboveMax": "قدر بہت زیادہ ہے۔ زیادہ سے زیادہ {max} ہے۔",
+        "notAllowed": "یہ اجازت یافتہ اختیارات میں سے نہیں۔",
+        "tooShort": "ٹیکسٹ بہت چھوٹا ہے۔ کم از کم لمبائی {min} ہے۔",
+        "tooLong": "ٹیکسٹ بہت لمبا ہے۔ زیادہ سے زیادہ لمبائی {max} ہے۔",
+        "precision": "قدر اس سیٹنگ کی اجازت سے زیادہ درست ہے۔"
+      },
+      "nothing": "اس فائل میں کچھ بھی کوئی سیٹنگ نہیں بدلے گا۔",
+      "reasonNote": "ان میں سے کچھ سیٹنگز زیادہ خطرے والی ہیں۔ لاگو کرنے کے بعد آپ سے وجہ پوچھی جائے گی جو آڈٹ لاگ میں درج ہوتی ہے۔",
+      "back": "واپس",
+      "cancel": "منسوخ کریں",
+      "review": "تبدیلیوں کا جائزہ لیں",
+      "apply": "{count} تبدیلیاں لاگو کریں",
+      "cancelled": "درآمد منسوخ کر دی گئی۔ کوئی سیٹنگ نہیں بدلی گئی۔",
+      "done": "درآمد مکمل: {applied} سیٹنگز اپ ڈیٹ ہوئیں۔",
+      "donePartial": "درآمد جزوی طور پر مکمل: {applied} سیٹنگز اپ ڈیٹ ہوئیں، {failed} لاگو نہیں ہو سکیں۔ جائزہ دکھاتا ہے کہ ابھی کیا باقی ہے۔"
+    },
+    "history": {
+      "adminOnly": "ورک اسپیس سیٹنگز کی تبدیلی کی تاریخ صرف ورک اسپیس منتظمین کو نظر آتی ہے۔",
+      "loading": "تبدیلی کی تاریخ لوڈ ہو رہی ہے",
+      "partial": "{count} سیٹنگز کی تاریخ لوڈ نہیں ہو سکی، اس لیے یہ فہرست نامکمل ہو سکتی ہے۔",
+      "retry": "دوبارہ کوشش کریں",
+      "search": "تبدیلی کی تاریخ تلاش کریں",
+      "searchPlaceholder": "سیٹنگ، شخص یا وجہ سے تلاش کریں",
+      "empty": "اس ورک اسپیس میں ابھی کوئی سیٹنگ نہیں بدلی گئی۔",
+      "noMatch": "کوئی تبدیلی آپ کی تلاش سے مماثل نہیں۔",
+      "count": "{total} تبدیلیوں میں سے {shown} دکھائی جا رہی ہیں، نئی پہلے۔",
+      "tableLabel": "ورک اسپیس سیٹنگز کی تبدیلی کی تاریخ",
+      "when": "کب",
+      "setting": "سیٹنگ",
+      "change": "تبدیل کریں",
+      "by": "تبدیل کرنے والا",
+      "reason": "وجہ",
+      "before": "پہلے:",
+      "after": "بعد:",
+      "inherited": "وراثتی قدر",
+      "unknownActor": "نامعلوم",
+      "noReason": "کوئی وجہ نہیں دی گئی",
+      "showMore": "مزید دکھائیں",
+      "scope": "Level",
+      "scopeWorkspace": "ورک اسپیس",
+      "scopeAgent": "Agent {id}",
+      "scopeFilter": "Show changes at",
+      "filterAll": "All levels",
+      "filterWorkspace": "Workspace only",
+      "filterAgents": "Agents only",
+      "searchLoadedOnly": "The search covers the changes loaded so far.",
+      "loadError": "The change history could not be loaded. {message}",
+      "moreFailed": "More changes could not be loaded. {message}",
+      "loadingMore": "لوڈ ہو رہا ہے"
+    }
+  },
+  "agentBehavior": {
+    "title": "رویہ اور حدیں",
+    "intro": "کنٹرول کریں کہ یہ ایجنٹ ایک ٹرن میں کتنا آگے جا سکتا ہے: کتنے ٹولز کال کر سکتا ہے، کتنی دیر چل سکتا ہے اور کتنا واپس پڑھتا ہے۔ جو آپ یہاں نہیں بدلتے وہ آپ کے ورک اسپیس سے وراثت میں آتا ہے۔",
+    "saveFirst": "پہلے ایجنٹ کو محفوظ کریں۔ اس کا رویہ اور حدیں اس کے وجود میں آنے کے بعد سیٹ کی جا سکتی ہیں۔",
+    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "tabs": {
+      "label": "ایجنٹ کنفیگریشن",
+      "setup": "سیٹ اپ",
+      "behavior": "رویہ اور حدیں",
+      "unsaved": "غیر محفوظ شدہ تبدیلیاں"
+    },
+    "links": {
+      "label": "متعلقہ صفحات",
+      "tenant": "ورک اسپیس ڈیفالٹس بدلیں",
+      "playground": "پلے گراؤنڈ میں آزمائیں",
+      "prompts": "This agent's prompts",
+      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
+      "approvals": "This agent's approvals",
+      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
+      "turns": "Turn timeline",
+      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+    },
+    "readOnly": {
+      "locked": "یہ ایجنٹ ترمیم کے لیے مقفل ہے، اس لیے یہ قدریں صرف پڑھنے کے لیے ہیں۔",
+      "access": "آپ یہ قدریں دیکھ سکتے ہیں لیکن اس ایجنٹ تک آپ کی رسائی انہیں بدلنے کی اجازت نہیں دیتی۔"
+    },
+    "unsaved": "اس ٹیب میں آپ کی غیر محفوظ شدہ تبدیلیاں ہیں۔ جانے سے پہلے نیچے انہیں محفوظ کریں یا رد کریں۔",
+    "inheritNote": "ہر سیٹنگ دکھاتی ہے کہ اس کی قدر کہاں سے آتی ہے۔ یہاں ایک کو بدلنا اسے صرف اس ایجنٹ کے لیے اوور رائیڈ کرتا ہے؛ ورک اسپیس کی قدر دوبارہ وراثت میں لینے کے لیے ری سیٹ کریں۔",
+    "others": {
+      "title": "اس ایجنٹ کے دیگر کنٹرولز",
+      "intro": "یہ کنٹرولز اوپر کی سیٹنگز کا حصہ نہیں، اس لیے یہ سیٹ اپ ٹیب پر رہتے ہیں۔",
+      "generation": "جوابات کی تخلیقی صلاحیت اور لمبائی (درجہ حرارت، top-p، زیادہ سے زیادہ ٹوکن) اور اضافی سیمپلنگ اختیارات۔",
+      "generationLink": "جنریشن ٹیوننگ پر جائیں",
+      "autonomy": "خودمختاری کی سطح، فی رن اخراجات کی حد، ٹول اصول اور کب کسی شخص کو منظور کرنا ہوگا۔",
+      "autonomyLink": "استدلال اور خودمختاری پر جائیں"
+    },
+    "discard": {
+      "title": "بغیر محفوظ کیے چھوڑ دیں؟",
+      "description": "اس ایجنٹ کے رویے اور حدوں میں آپ کی غیر محفوظ شدہ تبدیلیاں ہیں۔ اب چھوڑیں گے تو وہ ضائع ہو جائیں گی۔",
+      "stay": "یہیں رہ کر ترمیم جاری رکھیں",
+      "leave": "چھوڑیں اور تبدیلیاں رد کریں"
+    },
+    "summary": {
+      "title": "یہ ایجنٹ ابھی کیسے برتاؤ کرتا ہے",
+      "subtitle": "ایجنٹ کے اپنے اوور رائیڈز، آپ کی ورک اسپیس سیٹنگز اور پلیٹ فارم سیٹنگز لاگو ہونے کے بعد اس ایجنٹ کے لیے نافذ قدریں۔",
+      "loading": "موجودہ رویہ لوڈ ہو رہا ہے",
+      "error": "موجودہ رویہ لوڈ نہیں ہو سکا۔ {message}",
+      "retry": "دوبارہ کوشش کریں",
+      "empty": "اس ایجنٹ کے لیے ابھی کوئی رویہ سیٹنگز دستیاب نہیں۔",
+      "facts": {
+        "steps": "فی ٹرن ٹول کالز",
+        "turnTimeout": "فی ٹرن وقت",
+        "toolTimeout": "فی ٹول کال وقت",
+        "outputCap": "رکھا گیا ٹول آؤٹ پٹ",
+        "continuation": "تسلسل کے پاس",
+        "approvals": "منظوریاں",
+        "judge": "معیار جج ماڈل",
+        "model": "ماڈل"
+      },
+      "tier": {
+        "SUPERVISED": "نگرانی شدہ: ہر ٹول کال کسی شخص کا انتظار کرتی ہے",
+        "SEMI_AUTONOMOUS": "نیم خودمختار: آپ کے ورک اسپیس کے اصول طے کرتے ہیں",
+        "FULLY_AUTONOMOUS": "مکمل خودمختار: ٹول کالز کبھی انتظار نہیں کرتیں"
+      },
+      "approvalResumes": "منظوری کے بعد خود جاری رکھتا ہے",
+      "approvalStops": "منظوری کے بعد نئے پیغام کا انتظار کرتا ہے",
+      "judgeDefault": "پلیٹ فارم کا منتخب کردہ",
+      "overrides": {
+        "none": "یہ ایجنٹ ہر جگہ آپ کے ورک اسپیس کی قدریں استعمال کرتا ہے۔",
+        "some": "اس ایجنٹ کے لیے اوور رائیڈ کی گئی سیٹنگز: {count}۔"
+      }
+    },
+    "impact": {
+      "title": "اس کا کیا مطلب ہے",
+      "steps": "یہ ایجنٹ ایک ٹرن میں زیادہ سے زیادہ {count} ٹولز کال کر سکتا ہے۔ اس کے بعد اسے جو اس کے پاس ہے اس سے جواب دینے کو کہا جاتا ہے۔",
+      "stepsTierSupervised": "یہ ایجنٹ نگرانی شدہ ہے، اس لیے اس کی اصل بالائی حد اس بنیادی عدد سے کم ہے۔ درست عدد استعمال کرنے کے لیے اس ایجنٹ کے لیے اپنی قدر سیٹ کریں۔",
+      "stepsTierFull": "یہ ایجنٹ مکمل خودمختار ہے، اس لیے اس کی اصل بالائی حد اس بنیادی عدد سے زیادہ ہے۔ درست عدد استعمال کرنے کے لیے اس ایجنٹ کے لیے اپنی قدر سیٹ کریں۔",
+      "turnTimeout": "ایک ٹرن {duration} کے بعد کاٹ دیا جاتا ہے۔",
+      "turnTimeoutNone": "ٹرن کی کوئی وقت کی حد نہیں۔",
+      "toolTimeout": "ایک ٹول کال {duration} کے بعد کاٹ دی جاتی ہے۔",
+      "toolTimeoutNone": "ٹول کال کی کوئی وقت کی حد نہیں۔",
+      "outputCap": "{chars} سے لمبا ٹول نتیجہ ایجنٹ کے پڑھنے سے پہلے مختصر کر دیا جاتا ہے۔",
+      "continuation": "اگر جواب کٹ جائے تو ایجنٹ اسے مزید زیادہ سے زیادہ {count} بار جاری رکھ سکتا ہے۔",
+      "continuationNone": "کٹا ہوا جواب جاری نہیں رکھا جاتا۔",
+      "retrieval": "ہر سوال کے لیے یہ بہترین {count} علمی مماثلتیں پڑھتا ہے۔",
+      "retrievalScored": "ہر سوال کے لیے یہ بہترین {count} علمی مماثلتیں پڑھتا ہے اور {score} سے کم اسکور والی مماثلتوں کو نظر انداز کرتا ہے۔",
+      "approvalContinuationOn": "جب کوئی شخص انتظار کرتی کارروائی منظور کرتا ہے تو ایجنٹ کام خود مکمل کرتا ہے۔",
+      "approvalContinuationOff": "جب کوئی شخص انتظار کرتی کارروائی منظور کرتا ہے تو ٹرن ختم ہو جاتا ہے اور ہاتھ سے فالو اپ کرنا پڑتا ہے۔",
+      "guardClosed": "اگر کوئی حفاظتی جانچ خراب ہو جائے تو کارروائی مسترد کر دی جاتی ہے۔",
+      "guardOpen": "اگر کوئی حفاظتی جانچ خراب ہو جائے تو کارروائی کو گزرنے دیا جاتا ہے۔",
+      "branches": "ایک کام سونپنے والی کال ایک وقت میں زیادہ سے زیادہ {count} ذیلی کام شروع کر سکتی ہے۔"
+    }
+  },
+  "controls": {
+    "eyebrow": "مدد",
+    "title": "میں کہاں کنٹرول کروں...؟",
+    "subtitle": "ہر کنٹرول جو آپ کے ایجنٹس کے رویے کو شکل دیتا ہے، اور وہ صفحہ جہاں وہ ہے۔ جو بدلنا چاہتے ہیں اس سے تلاش کریں۔",
+    "breadcrumb": {
+      "label": "بریڈ کرمب",
+      "console": "کنسول",
+      "controls": "کنٹرولز"
+    },
+    "related": {
+      "label": "دیگر کنٹرولز"
+    },
+    "search": {
+      "label": "کنٹرولز تلاش کریں",
+      "placeholder": "مثال: ٹائم آؤٹ، منظوری، پرامپٹ، میموری",
+      "count": "{count} مماثل کنٹرولز",
+      "none": "\"{query}\" سے کچھ مماثل نہیں۔ چھوٹا لفظ آزمائیں۔",
+      "noSettings": "کوئی سیٹنگ آپ کی تلاش سے مماثل نہیں۔"
+    },
+    "areasHeading": "کنٹرول کے شعبے",
+    "areasIntro": "ان صفحات میں وہ کنٹرولز ہیں جو ایک عدد نہیں: ہدایات، منظوری کے اصول، حفاظتی اصول اور اس کا ریکارڈ کہ ٹرن نے کیا کیا۔",
+    "openArea": "کھولیں",
+    "needsAccess": "اس صفحے تک رسائی کے لیے کسی ورک اسپیس منتظم سے کہیں۔",
+    "settingsHeading": "ہر رن ٹائم سیٹنگ",
+    "settingsIntro": "ہر سیٹنگ پورے ورک اسپیس کے لیے، ایک ایجنٹ کے لیے، یا دونوں کے لیے بدلی جا سکتی ہے۔ ایجنٹ کی اپنی قدر ورک اسپیس کی قدر پر غالب آتی ہے۔ سیٹنگ تک پہنچنے کے لیے کوئی لنک منتخب کریں۔",
+    "loading": "سیٹنگز کی فہرست لوڈ ہو رہی ہے",
+    "loadFailed": "سیٹنگز کی فہرست لوڈ نہیں ہو سکی۔ {message}",
+    "retry": "دوبارہ کوشش کریں",
+    "emptyCatalog": "اس ورک اسپیس میں دکھانے کے لیے کوئی رن ٹائم سیٹنگ نہیں۔",
+    "changeWorkspace": "ورک اسپیس کے لیے بدلیں",
+    "changeAgent": "ایجنٹ پر بدلیں",
+    "workspaceOnly": "صرف ورک اسپیس بھر",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "ایجنٹ رن ٹائم حدیں",
+        "intro": "ایک ٹرن کتنا کام کر سکتا ہے: ٹول کالز، وقت، نتیجے کا سائز اور بازیافت۔"
+      },
+      "behaviour-settings": {
+        "title": "رویہ سیٹنگز",
+        "intro": "جوابات کیسے مکمل اور کیش ہوتے ہیں، منظوریاں کیسے جاری رہتی ہیں، حفاظتی جانچیں کیسے برتاؤ کرتی ہیں، اور میموری، تلاش اور کام سونپنا کیسے کام کرتے ہیں۔"
+      },
+      "other": {
+        "title": "دیگر سیٹنگز",
+        "intro": "وہ سیٹنگز جن کا اپنا سیکشن نہیں۔"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "رن ٹائم سیٹنگز",
+        "summary": "پورے ورک اسپیس کے لیے حدیں، منظوریاں، معیار کی جانچیں، حفاظتی سختی، میموری اور کام سونپنا۔",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers حدیں ٹائم آؤٹ ٹول مراحل دوبارہ کوششیں کیش میموری کام سونپنا معیار جج سیٹنگز اعداد"
+      },
+      "prompts": {
+        "title": "ہدایات",
+        "summary": "وہ پرامپٹس جو پلیٹ فارم ماڈل کو دیتا ہے: ہر ایک دیکھیں، ورک اسپیس یا کسی ایجنٹ کے لیے اوور رائیڈ کریں، اور نتیجے کا پیش منظر دیکھیں۔",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry پرامپٹس ہدایات سسٹم پرامپٹ اوور رائیڈ پیش منظر رجسٹری"
+      },
+      "approvals": {
+        "title": "منظوریاں",
+        "summary": "کسی شخص کا انتظار کرتی کارروائیوں کی قطار، کن ٹولز کو منظوری چاہیے اس کے اصول، اور آپ کے فیصلے کے بعد کیا ہوتا ہے۔",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation منظور مسترد قطار ہیومن اِن دی لوپ ٹول اصول میعاد تسلسل"
+      },
+      "guardrails": {
+        "title": "گارڈ ریلز",
+        "summary": "وہ پیٹرنز جنہیں یہ ورک اسپیس گزرنے دینے سے انکار کرتا ہے، اور ٹول نتائج پر لاگو مواد کی پالیسی۔",
+        "keywords": "safety rules block filter policy content patterns حفاظتی اصول بلاک فلٹر پالیسی مواد پیٹرنز"
+      },
+      "turns": {
+        "title": "ٹرن انسپکٹر",
+        "summary": "ایک ایجنٹ ٹرن کی ریکارڈ شدہ ٹائم لائن: کیا پوچھا گیا، کون سے ٹولز چلے، ہر مرحلے کی لاگت کیا رہی اور وہ کیوں رکا۔",
+        "keywords": "turn timeline journal trace replay history steps debug ٹرن ٹائم لائن جرنل ٹریس ری پلے تاریخ مراحل ڈیبگ"
+      },
+      "agentBehavior": {
+        "title": "ایجنٹ کا رویہ اور حدیں",
+        "summary": "ایجنٹ کے صفحے پر: اس کی اپنی حدیں اور رویہ سیٹنگز، ہر قدر کے ماخذ اور ورک اسپیس کی قدر پر ری سیٹ کے ساتھ۔",
+        "keywords": "agent override per agent behavior limits tab ایجنٹ اوور رائیڈ فی ایجنٹ رویہ حدیں ٹیب"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "ان پرامپٹ بلاکس سے بنا",
+    "blocksCount": "{n} بلاک",
+    "blockDefault": "ڈیفالٹ کے طور پر فراہم کردہ",
+    "blockOverride": "{scope} اوور رائیڈ v{version}",
+    "blockAgentConfig": "ایجنٹ کا اپنا پرامپٹ",
+    "blockCode": "پلیٹ فارم کوڈ",
+    "blockTokens": "~{tokens} ٹوکن",
+    "blockHash": "عبارت کا ہیش"
+  },
+  "toolApproval": {
+    "continuing": "ایجنٹ کام جاری رکھے ہوئے ہے۔",
+    "continueNotStarted": "اس فیصلے کے بعد ایجنٹ خود بخود دوبارہ شروع نہیں ہوا۔ اسے آگے بڑھانے کے لیے پیغام بھیجیں۔",
+    "continueTimedOut": "ایجنٹ نے ابھی جاری رکھنا مکمل نہیں کیا۔ مکمل ہونے پر اس کا جواب گفتگو میں آئے گا؛ جانچنے کے لیے ری لوڈ کریں۔"
+  },
+  "promptDirectives": {
+    "tabRegistry": "تمام پرامپٹس",
+    "tabAgentPreview": "حتمی پرامپٹ کا پیش منظر",
+    "regTitle": "ہر پرامپٹ",
+    "regIntro": "ماڈل کے لیے پلیٹ فارم جو بھی ٹیکسٹ لکھتا ہے، اس وقت نافذ عبارت، اس کے ماخذ اور ورژن کے ساتھ۔ ایک دائرہ منتخب کریں، بدلنے کے لیے کوئی پرامپٹ کھولیں، اور ہر پچھلا ورژن دیکھیں۔ تبدیلی تقریباً آدھے منٹ میں تمام سرورز تک پہنچ جاتی ہے۔",
+    "regScopeLabel": "جس دائرے میں بدلنا ہے",
+    "regScope_tenant": "یہ ورک اسپیس",
+    "regScope_agent": "ایک ایجنٹ",
+    "regScope_platform": "پورا پلیٹ فارم",
+    "regAgentLabel": "ایجنٹ",
+    "regAgentPlaceholder": "ایجنٹ منتخب کریں",
+    "regAgentsFailed": "آپ کے ایجنٹس لوڈ نہیں ہو سکے۔",
+    "regPickAgent": "کسی ایجنٹ کے پرامپٹس دیکھنے اور بدلنے کے لیے اسے منتخب کریں۔",
+    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regSearchLabel": "پرامپٹس تلاش کریں",
+    "regSearchPlaceholder": "کلید، عنوان یا تفصیل",
+    "regRiskLabel": "خطرے کی قسم",
+    "regRiskAll": "تمام خطرے کی اقسام",
+    "regRisk_STEERS_EVERY_TURN": "ہر ٹرن کی رہنمائی کرتا ہے",
+    "regRisk_SECONDARY_CALL": "ثانوی ماڈل کال",
+    "regRisk_USER_VISIBLE": "لوگوں کو دکھایا جاتا ہے",
+    "regRisk_TOOL_DESCRIPTION": "ٹول کی تفصیل",
+    "regOnlyCustomised": "صرف حسب ضرورت بنائے گئے",
+    "regPlatformReadOnly": "پلیٹ فارم بھر کے پرامپٹس یہاں پڑھے جا سکتے ہیں؛ انہیں صرف پلیٹ فارم منتظم بدل سکتا ہے۔",
+    "regLoadFailed": "پرامپٹس لوڈ نہیں ہو سکے۔",
+    "regCount": "{total} پرامپٹس میں سے {shown} دکھائے جا رہے ہیں۔",
+    "regEmptyTitle": "کوئی پرامپٹ مماثل نہیں",
+    "regEmptyBody": "تلاش یا فلٹر بدلیں۔",
+    "regSource_DEFAULT": "ڈیفالٹ کے طور پر فراہم کردہ",
+    "regSource_FALLBACK": "ڈیفالٹ کے طور پر فراہم کردہ (اوور رائیڈ دستیاب نہیں)",
+    "regSource_PLATFORM": "پلیٹ فارم",
+    "regSource_TENANT": "ورک اسپیس",
+    "regSource_AGENT": "ایجنٹ",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "ریٹائرڈ",
+    "regRetiredBody": "یہ پرامپٹ اب کوئی ٹیکسٹ نہیں بھیجتا، اس لیے بدلنے کو کچھ نہیں۔",
+    "regEffectiveOff": "بند: کچھ نہیں بھیجا جاتا۔",
+    "regEffectiveTokens": "اس وقت نافذ، تقریباً {tokens} ٹوکن۔",
+    "regEffectiveLabel": "{title} کے لیے نافذ عبارت",
+    "regOpenEditor": "{title} میں ترمیم کریں",
+    "regCloseEditor": "{title} بند کریں",
+    "regEditingOverride": "{scope} ورژن میں ترمیم ہو رہی ہے، اس وقت v{version}۔",
+    "regEditingNone": "ابھی کوئی {scope} ورژن نہیں۔ یہ اس سے نیچے کی عبارت سے شروع ہوتا ہے: {below}۔",
+    "regPlaceholders": "رن ٹائم پر بھرا جاتا ہے:",
+    "regRequired": "(ضروری)",
+    "regProblemsTitle": "محفوظ کرنے سے پہلے اسے درست کریں",
+    "regReasonLabel": "تبدیلی کی وجہ (تاریخ میں رکھی جاتی ہے)",
+    "regReasonPlaceholder": "اختیاری",
+    "regConflict": "آپ کے ترمیم کرتے وقت کسی نے یہ پرامپٹ بدل دیا۔ ان کا ورژن دیکھنے کے لیے اسے بند کر کے دوبارہ کھولیں، پھر کوشش کریں۔",
+    "regRevert": "{to} پر واپس کریں",
+    "regShowHistory": "تاریخ",
+    "regHideHistory": "تاریخ چھپائیں",
+    "regHistoryLoading": "تاریخ لوڈ ہو رہی ہے…",
+    "regHistoryFailed": "تاریخ لوڈ نہیں ہو سکی۔",
+    "regHistoryEmpty": "اس دائرے میں ابھی کوئی ورژن نہیں۔",
+    "regVersion": "ورژن {version}",
+    "regAction_CREATE": "بنایا گیا",
+    "regAction_UPDATE": "تبدیل کیا گیا",
+    "regAction_REVERT": "واپس کیا گیا",
+    "regAction_MIGRATE": "منتقل کیا گیا",
+    "regCurrent": "موجودہ",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "نامعلوم",
+    "regReason": "وجہ: {reason}",
+    "regShowDiff": "ورژن {version} میں تبدیلیاں دکھائیں",
+    "regHideDiff": "ورژن {version} میں تبدیلیاں چھپائیں",
+    "regDiffLabel": "ورژن {version} کی کی گئی تبدیلیاں",
+    "regNoDiff": "اس ورژن میں کوئی ٹیکسٹ تبدیل نہیں ہوا۔",
+    "regRestore": "ورژن {version} بحال کریں",
+    "regRestoreReason": "ورژن {version} کی عبارت بحال کر دی گئی",
+    "regRestoreFailed": "وہ ورژن بحال نہیں ہو سکا۔",
+    "regRestoreAck": "میں سمجھتا/سمجھتی ہوں کہ {title} کا کوئی ورژن بحال کرنے سے حفاظت کمزور ہو سکتی ہے۔",
+    "regPreviewTitle": "حتمی پرامپٹ کا پیش منظر",
+    "regPreviewIntro": "ماڈل کو کال کیے بغیر، کسی ایجنٹ کا اصل سسٹم پرامپٹ اور ٹول فہرست بالکل اسی طرح بناتا ہے جیسے ٹرن بناتا۔ ہر بلاک پرامپٹ کلید، دائرہ اور وہ ورژن دکھاتا ہے جہاں سے اس کی عبارت آتی ہے۔",
+    "regPreviewMessageLabel": "نمونہ صارف پیغام (اختیاری)",
+    "regPreviewMessagePlaceholder": "اصل پیغام کی طرح ٹولز اور یاد کی گئی میموری چننے کے لیے استعمال ہوتا ہے۔",
+    "regPreviewSmallModel": "چھوٹے ماڈل کے لیے پیش منظر",
+    "regPreviewBuild": "پیش منظر بنائیں",
+    "regPreviewBuilding": "بن رہا ہے…",
+    "regPreviewFailed": "پیش منظر نہیں بن سکا۔",
+    "regPreviewTotals": "تقریباً {prompt} ٹوکن سسٹم ٹیکسٹ اور {tools} ٹوکن ٹول تعریفیں (اندازے)۔",
+    "regPreviewOverBudgetTitle": "ٹوکن بجٹ سے زیادہ",
+    "regPreviewOverBudget": "مستقل سسٹم ٹیکسٹ ترتیب دیے گئے {budget} ٹوکن کے بجٹ سے زیادہ ہے۔ کچھ نہیں کاٹا جاتا؛ کسی پرامپٹ کو مختصر کرنے پر غور کریں۔",
+    "regPreviewMessageHeading": "پیغام: {message}",
+    "regPreviewTokens": "~{tokens} ٹوکن",
+    "regPreviewTools": "ٹولز ({count})",
+    "regPreviewNoTools": "یہ ایجنٹ کوئی ٹول پیش نہیں کرتا۔",
+    "regPreviewNotes": "یہ پیش منظر جو نہیں جان سکتا",
+    "regOriginDefault": "ڈیفالٹ کے طور پر فراہم کردہ",
+    "regOriginOverride": "{scope} اوور رائیڈ v{version}",
+    "regOriginAgentConfig": "ایجنٹ کا اپنا سسٹم پرامپٹ",
+    "regOriginCode": "پلیٹ فارم کوڈ"
   }
 }

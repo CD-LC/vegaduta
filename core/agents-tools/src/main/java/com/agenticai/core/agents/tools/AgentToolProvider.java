@@ -7,8 +7,10 @@ import com.agenticai.core.agents.skills.SkillService;
 import com.agenticai.core.agents.skills.tools.LoadSkillToolCallback;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.guardrails.GuardedToolCallback;
+import com.agenticai.core.guardrails.TurnApprovalState;
 import com.agenticai.core.security.TenantContext;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
@@ -250,7 +252,27 @@ public class AgentToolProvider implements AgentToolPort {
                                 chatClient,
                                 emitter,
                                 effectiveDepth);
-        return context == null ? resolve.get() : context.scope().get(resolve);
+        if (context == null) {
+            return resolve.get();
+        }
+        // The turn's approval state rides to AgentToolGuard#guardAndLog on this thread (see
+        // TURN_APPROVAL_SCOPE) so every guard built for the turn shares the one instance the turn
+        // loop also holds; removed in the finally so a pooled thread never leaks it to another turn.
+        return context.scope()
+                .get(
+                        () -> {
+                            AgentToolGuard.TURN_APPROVAL_SCOPE.set(context.approval());
+                            AgentToolGuard.TURN_ACTIVITY_SCOPE.set(context.toolActivity());
+                            AgentToolGuard.TURN_RUNTIME_SCOPE.set(
+                                    new AgentToolGuard.TurnRuntimeScope(agentId, context.runtimeSettings()));
+                            try {
+                                return resolve.get();
+                            } finally {
+                                AgentToolGuard.TURN_APPROVAL_SCOPE.remove();
+                                AgentToolGuard.TURN_ACTIVITY_SCOPE.remove();
+                                AgentToolGuard.TURN_RUNTIME_SCOPE.remove();
+                            }
+                        });
     }
 
     /**
@@ -364,6 +386,10 @@ public class AgentToolProvider implements AgentToolPort {
         ReasoningDepth depth =
                 effectiveDepth != null ? effectiveDepth : agentService.getReasoningDepth(agentId);
         boolean rigorous = depth == ReasoningDepth.RIGOROUS && hasVerifiableUserIntent(userMessage);
+        // The continuation turn after an approval carries the tools its conversation already used
+        // (see ToolResolver#alwaysRelevant); the turn's approval state is on this thread only for
+        // the duration of the context overload of resolveToolsFor.
+        TurnApprovalState turnApproval = AgentToolGuard.TURN_APPROVAL_SCOPE.get();
         return toolResolver.resolve(
                 new ToolResolutionContext(
                         agentId,
@@ -375,10 +401,27 @@ public class AgentToolProvider implements AgentToolPort {
                         rigorous,
                         allowDelegation,
                         mainChatTurn,
-                        List.of()),
+                        List.of(),
+                        mainChatTurn && turnApproval != null ? keptOnOffer(turnApproval) : Set.of()),
                 applyRelevanceSelection);
     }
 
+
+    /**
+     * The tools relevance selection must not trim on a main chat turn: the tools the conversation already used
+     * (the continuation after an approval, a short follow-up) and the tools the person picked for this run
+     * ({@code ChatRequest.toolNames}) - a tool they switched on is not dropped for failing to match the message.
+     * Keeping a tool from being trimmed only keeps it in the list; the run's own narrowing still removes whatever
+     * it did not name, and nothing here adds a tool the agent does not resolve.
+     */
+    private static Set<String> keptOnOffer(TurnApprovalState state) {
+        if (state.runToolNames() == null || state.runToolNames().isEmpty()) {
+            return state.stickyTools();
+        }
+        Set<String> names = new java.util.HashSet<>(state.stickyTools());
+        names.addAll(state.runToolNames());
+        return names;
+    }
 
     // Duplicated literal, not shared via a constant: core/agents cannot depend
     // on core/workflow (dependency runs the other way - workflow calls

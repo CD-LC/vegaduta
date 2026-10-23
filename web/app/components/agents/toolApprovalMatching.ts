@@ -61,15 +61,50 @@ export function matchSessionApprovals<T extends ToolApprovalRow>(
       (row) =>
         !!row &&
         typeof row.id === "string" &&
-        row.requestedBy === requester &&
         typeof row.actionType === "string" &&
-        row.actionType.startsWith(TOOL_CALL_ACTION_PREFIX)
+        ((row.requestedBy === requester && row.actionType.startsWith(TOOL_CALL_ACTION_PREFIX)) ||
+          selfGatedInConversation(row, agentId, sessionId))
     )
     .sort((a, b) => String(a.createdAt ?? "").localeCompare(String(b.createdAt ?? "")));
 }
 
+/**
+ * The conversation envelope core records on an action a tool gated ITSELF on (a code-workspace run or apply, a
+ * channel send): `payload.replay` with the tool, the agent and session, and the user's goal. Null for anything
+ * else, including a legacy tool-call payload (whose `replay` key, if any, is model-authored) - only an envelope
+ * that names a tool AND carries a goal counts, which core writes and the model cannot.
+ */
+function conversationEnvelope(row: ToolApprovalRow): { toolName: string; agentIds: string[]; sessionId: string } | null {
+  if (typeof row.payload !== "string" || !row.payload.includes('"replay"')) return null;
+  try {
+    const parsed = JSON.parse(row.payload);
+    const replay = parsed && typeof parsed === "object" ? parsed.replay : null;
+    if (!replay || typeof replay !== "object") return null;
+    if (typeof replay.toolName !== "string" || !replay.toolName) return null;
+    if (typeof replay.goal !== "string" || !replay.goal) return null;
+    if (typeof replay.sessionId !== "string" || !replay.sessionId) return null;
+    const agentIds = [replay.agentId, replay.requestedAgentId].filter((id): id is string => typeof id === "string" && !!id);
+    return { toolName: replay.toolName, agentIds, sessionId: replay.sessionId };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A self-gated action (not an `mcp_tool.*` call) that belongs to this conversation. Its requestedBy is the person,
+ * not the agent/session label a guarded call has, so the envelope is what places it. Exact match on the session and
+ * on the agent the conversation was requested under or the routed one - never a prefix match.
+ */
+function selfGatedInConversation(row: ToolApprovalRow, agentId: string, sessionId: string): boolean {
+  if (typeof row.actionType !== "string" || row.actionType.startsWith(TOOL_CALL_ACTION_PREFIX)) return false;
+  const envelope = conversationEnvelope(row);
+  return !!envelope && envelope.sessionId === sessionId && envelope.agentIds.includes(agentId);
+}
+
 /** "Tool call: send_email" -> "send_email"; falls back to the action type, then the raw summary. */
 export function toolNameOf(row: ToolApprovalRow): string {
+  const envelope = typeof row.actionType === "string" && !row.actionType.startsWith(TOOL_CALL_ACTION_PREFIX) ? conversationEnvelope(row) : null;
+  if (envelope) return envelope.toolName;
   const summary = typeof row.summary === "string" ? row.summary : "";
   if (summary.startsWith(SUMMARY_PREFIX) && summary.length > SUMMARY_PREFIX.length) {
     return summary.slice(SUMMARY_PREFIX.length).trim();
@@ -117,7 +152,11 @@ export function approvalArgsText(payload: string | null | undefined): string | n
       } else if (typeof parsed.argumentsRaw === "string") {
         text = parsed.argumentsRaw;
       } else {
-        return null;
+        // An action a tool gated itself on keeps its own fields (repo, command, files, recipient...) at the top
+        // level next to the envelope: they are what would run, so they are what the card shows.
+        const { replay: _envelope, ...own } = parsed as Record<string, unknown>;
+        if (Object.keys(own).length === 0) return null;
+        text = JSON.stringify(own, null, 2);
       }
     } else {
       text = JSON.stringify(parsed, null, 2);

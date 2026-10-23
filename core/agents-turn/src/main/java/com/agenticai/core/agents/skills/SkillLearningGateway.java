@@ -52,6 +52,11 @@ public final class SkillLearningGateway {
         observer = installed;
     }
 
+    /** True once an observer is installed, whether or not it reports itself enabled (the startup wiring check). */
+    public static boolean installed() {
+        return observer != null;
+    }
+
     public static boolean active() {
         Observer o = observer;
         return o != null && o.enabled();

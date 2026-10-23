@@ -50,8 +50,20 @@ public record HostedChainLink(
     com.agenticai.core.chat.SamplingOptions sampling,
     // V501 - the row's small-model mode (PlatformHostedLlmProvider#effectiveSmallModel): the
     // turn offers at most six tools, uses the compact directives and runs at FAST depth.
-    boolean smallModel
+    boolean smallModel,
+    // The row's measured tool-calling grade (PlatformHostedLlmProvider#getToolCallGrade), null when not
+    // measured: a TEXT or NONE row is a weak tool caller whose tool-less reply may be an announced step.
+    com.agenticai.core.providers.ToolCallGrade toolCallGrade
 ) {
+
+    /** Pre-grade shape (no tool-calling grade), kept so every existing call site still compiles. */
+    public HostedChainLink(
+        ChatClient client, String healthKey, String label, String model, int priority,
+        long reservedTokens, long reservedMicroCents, TurnReservationGuards guards,
+        com.agenticai.core.chat.SamplingOptions sampling, boolean smallModel
+    ) {
+        this(client, healthKey, label, model, priority, reservedTokens, reservedMicroCents, guards, sampling, smallModel, null);
+    }
 
     /** Pre-V501 shape (no small-model flag), kept so every existing call site still compiles. */
     public HostedChainLink(
@@ -59,7 +71,7 @@ public record HostedChainLink(
         long reservedTokens, long reservedMicroCents, TurnReservationGuards guards,
         com.agenticai.core.chat.SamplingOptions sampling
     ) {
-        this(client, healthKey, label, model, priority, reservedTokens, reservedMicroCents, guards, sampling, false);
+        this(client, healthKey, label, model, priority, reservedTokens, reservedMicroCents, guards, sampling, false, null);
     }
 
     public HostedChainLink {

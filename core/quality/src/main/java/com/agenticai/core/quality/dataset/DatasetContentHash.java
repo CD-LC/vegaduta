@@ -21,8 +21,8 @@ import java.util.Locale;
  * else.
  *
  * <h2>Canonical form</h2>
- * {@code v1} {@link #FS} threshold({@code %.3f}) {@link #FS} tools(0/1),
- * then per case {@link #RS} position {@link #FS} sha256(userMessage)
+ * {@code v1} {@link #FS} threshold({@code %.3f}) {@link #FS} tools(0/1)
+ * [{@link #FS} {@code a} when tool calls are auto-approved], then per case {@link #RS} position {@link #FS} sha256(userMessage)
  * {@link #FS} sha256(expectedOutput-or-NUL) {@link #FS}
  * sha256(expectedTools-or-NUL). Each free-text field is pre-hashed so a
  * user message containing a separator byte can never collide with a
@@ -43,7 +43,15 @@ public final class DatasetContentHash {
     public static String of(EvalDataset dataset, List<EvalDatasetCase> cases) {
         StringBuilder sb = new StringBuilder("v1");
         sb.append(FS).append(String.format(Locale.ROOT, "%.3f", dataset.getPassThreshold()));
-        sb.append(FS).append(dataset.isToolExecutionEnabled() ? '1' : '0');
+        // Only a dataset that pins the full pipeline hashes '1'; one that pins quick or pins nothing (the V670 NULL,
+        // which every dataset holding the old FALSE default became) keeps the '0' its existing runs and gate
+        // bindings carry. The mode a run actually used is recorded on the run, not folded into the dataset hash.
+        sb.append(FS).append(Boolean.TRUE.equals(dataset.getToolExecutionEnabled()) ? '1' : '0');
+        // V667: only when tool calls are auto-approved, so every dataset that never used it keeps the exact
+        // hash its existing runs and gate bindings carry. Auto-approving changes what a run measures.
+        if (!Boolean.FALSE.equals(dataset.getToolExecutionEnabled()) && dataset.isAutoApproveTools()) {
+            sb.append(FS).append('a');
+        }
         for (EvalDatasetCase c : cases) {
             sb.append(RS)
                 .append(c.getPosition())

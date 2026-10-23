@@ -86,6 +86,14 @@ public class EvalDatasetService {
     @Value("${app.quality.trajectory-eval.enabled:false}")
     boolean trajectoryEvalEnabled = false;
 
+    /**
+     * Platform defaults for the replay mode of new datasets and the rules for the sandbox
+     * auto-approval ({@link EvalSandboxPolicy}). Field-injected, like the flag above, so the
+     * constructor stays as tests build it; a context without the bean keeps the shipped defaults.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    EvalSandboxPolicy sandboxPolicy = EvalSandboxPolicy.defaults();
+
     private final EvalDatasetRepository datasetRepository;
     private final EvalDatasetCaseRepository caseRepository;
     private final EvalRunRepository runRepository;
@@ -99,8 +107,8 @@ public class EvalDatasetService {
      *     test slice without core/chat's beans still constructs this service.
      * @param applicationContext used ONLY for the best-effort reflective lookup of a persisted
      *     Playground turn in core/rl (see {@link #importTurnCase}) - same
-     *     runtime-lookup-against-the-merged-context trick {@link ReflectiveAgentChatTurnReplayer}
-     *     already uses, for the same pom-boundary reason.
+     *     runtime-lookup-against-the-merged-context trick {@link PersistedTurnLookup}
+     *     uses, for the same pom-boundary reason.
      * @param langfuseHost with {@code otlpTracesEndpoint}, {@code langfuseAuthHeader} and {@code
      *     langfuseProjectId}: the Langfuse trace-link settings, see {@link EvalTraceLinks}.
      */
@@ -148,22 +156,64 @@ public class EvalDatasetService {
             String description,
             Double passThreshold,
             Boolean toolExecutionEnabled) {
+        return createDataset(agentId, name, description, passThreshold, toolExecutionEnabled, null);
+    }
+
+    /**
+     * @param toolExecutionEnabled the dataset's own replay mode: {@code true} pins the full pipeline, {@code false}
+     *     pins a quick text-only replay, {@code null} pins nothing - runs then take the workspace's default
+     *     ({@code quality.eval.defaultMode} over {@code app.quality.eval.default-mode}, full as shipped)
+     * @param autoApproveTools whether a tool call that would wait for a person is approved by the eval
+     *     sandbox instead; {@code null} = no. Needs a dataset that does not pin quick mode, and a tenant the
+     *     operator declared non-production ({@link EvalSandboxPolicy}), else a 400
+     */
+    @Transactional
+    public EvalDataset createDataset(
+            UUID agentId,
+            String name,
+            String description,
+            Double passThreshold,
+            Boolean toolExecutionEnabled,
+            Boolean autoApproveTools) {
         String validName = EvalCaseInputs.requireName(name);
         double threshold = EvalCaseInputs.normalizeThreshold(passThreshold);
         String createdBy = TenantContext.current().map(TenantContext::getSubject).orElse(null);
+        boolean autoApprove = Boolean.TRUE.equals(autoApproveTools);
+        requireCoherentSandbox(toolExecutionEnabled, autoApprove);
         EvalDataset dataset =
                 new EvalDataset(
                         agentId,
                         validName,
                         description,
                         threshold,
-                        Boolean.TRUE.equals(toolExecutionEnabled),
+                        toolExecutionEnabled,
+                        autoApprove,
                         createdBy);
         // Content hash over the (empty) case set - see DatasetContentHash.
         // Computing it eagerly keeps "created but never run" datasets
         // indistinguishable from "edited" ones for the gate's staleness read.
         dataset.markContentHash(DatasetContentHash.of(dataset, List.of()));
         return datasetRepository.save(dataset);
+    }
+
+    /**
+     * Auto-approval only means something with tools, and only a tenant the operator declared
+     * non-production may set it: refused here, at the edit, so the author hears it before a run is
+     * triggered (the trigger and every replay check it again).
+     *
+     * @param modePin the dataset's pinned mode ({@code false} = quick, which has no tool calls to approve)
+     */
+    private void requireCoherentSandbox(Boolean modePin, boolean autoApproveTools) {
+        if (!autoApproveTools) {
+            return;
+        }
+        if (Boolean.FALSE.equals(modePin)) {
+            throw new IllegalArgumentException(
+                    "autoApproveTools needs the full pipeline: a dataset pinned to quick (text-only) mode has no tool"
+                            + " calls to approve.");
+        }
+        sandboxPolicy.requireAutoApproveAllowed(
+                TenantContext.current().map(TenantContext::getTenantId).orElse(null));
     }
 
     /**
@@ -198,16 +248,65 @@ public class EvalDatasetService {
             String description,
             Double passThreshold,
             Boolean toolExecutionEnabled) {
+        return updateDataset(
+                agentId, datasetId, name, description, passThreshold, toolExecutionEnabled, null);
+    }
+
+    /**
+     * As above; a {@code null} {@code autoApproveTools} keeps the stored choice, except that pinning quick mode
+     * also turns auto-approval off (it cannot outlive the tools it approves). A {@code null}
+     * {@code toolExecutionEnabled} keeps the stored mode pin.
+     */
+    @Transactional
+    public EvalDataset updateDataset(
+            UUID agentId,
+            UUID datasetId,
+            String name,
+            String description,
+            Double passThreshold,
+            Boolean toolExecutionEnabled,
+            Boolean autoApproveTools) {
+        return updateDataset(
+                agentId, datasetId, name, description, passThreshold, toolExecutionEnabled, autoApproveTools, false);
+    }
+
+    /**
+     * As above; with {@code clearModePin} the dataset stops pinning a mode and follows the workspace's default
+     * again (a {@code null} {@code toolExecutionEnabled} alone cannot say this, it means "unchanged").
+     */
+    @Transactional
+    public EvalDataset updateDataset(
+            UUID agentId,
+            UUID datasetId,
+            String name,
+            String description,
+            Double passThreshold,
+            Boolean toolExecutionEnabled,
+            Boolean autoApproveTools,
+            boolean clearModePin) {
         EvalDataset dataset = requireDataset(agentId, datasetId);
+        Boolean pin =
+                clearModePin
+                        ? null
+                        : toolExecutionEnabled != null
+                                ? toolExecutionEnabled
+                                : dataset.getToolExecutionEnabled();
+        boolean autoApprove =
+                !Boolean.FALSE.equals(pin)
+                        && (autoApproveTools != null
+                                ? autoApproveTools
+                                : dataset.isAutoApproveTools());
+        if (autoApproveTools != null && autoApproveTools) {
+            requireCoherentSandbox(pin, true);
+        }
         dataset.updateDefinition(
                 EvalCaseInputs.requireName(name),
                 description,
                 passThreshold != null
                         ? EvalCaseInputs.normalizeThreshold(passThreshold)
                         : dataset.getPassThreshold(),
-                toolExecutionEnabled != null
-                        ? toolExecutionEnabled
-                        : dataset.isToolExecutionEnabled());
+                pin,
+                autoApprove);
         // Threshold/tool-flag changes alter what a run measures - the hash
         // covers them, so a definition edit invalidates prior runs for the
         // gate exactly like a case edit does.
@@ -545,7 +644,8 @@ public class EvalDatasetService {
                                 + "against this agent's own prompt - so cases written for a different persona are expected to "
                                 + "fail. Prune to the cases that fit this agent, then run.",
                         null,
-                        false);
+                        // No pinned mode: the dataset follows the workspace's default, like any other.
+                        null);
 
         List<EvalDatasetCase> cases = new ArrayList<>(golden.size());
         int position = 0;

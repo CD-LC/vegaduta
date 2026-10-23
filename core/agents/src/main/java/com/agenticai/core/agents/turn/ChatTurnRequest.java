@@ -2,6 +2,7 @@ package com.agenticai.core.agents.turn;
 
 import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.agents.dto.ChatInlineAttachment;
+import com.agenticai.core.agents.runtime.RuntimeLimits;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +40,18 @@ import org.springframework.ai.tool.ToolCallback;
  * @param suppressAgentTools withhold the agent's resolved tool set (text-only turn); set by {@link
  *     AgentChatService#chatTextOnly} and by {@code AgentJobTurns}' structured-output repair turn,
  *     which builds the same request itself to pass its own {@link TurnContext}
+ * @param continuation set only on the turn the platform starts after a human decided a gated tool
+ *     call: {@code userMessage} is then the platform-written continuation message and this carries
+ *     what the pipeline must not derive from it (the original goal, the tools to keep on offer);
+ *     {@code null} on every ordinary turn
+ * @param caps runtime limits this one run carries with it (an agent job's remaining tool-call budget);
+ *     the request layer of the runtime settings, which can only tighten what the platform, tenant and
+ *     agent layers allow, never loosen it; {@code null} on every ordinary turn
+ * @param toolNames the run-scoped tool selection (the playground's "this run only" tool switches): the
+ *     run may use only these of the agent's tools. It can only NARROW the set the agent resolves for the
+ *     caller - a name that is not among those tools refuses the request, and a tool kept is still wrapped
+ *     by its approval, autonomy and guardrail gates. {@code null} means no selection (every ordinary turn),
+ *     an empty list a run without tools. The continuation after an approval carries the same selection
  */
 public record ChatTurnRequest(
         UUID agentId,
@@ -53,7 +66,116 @@ public record ChatTurnRequest(
         String visionSessionId,
         boolean forceFastDepth,
         AgentStepEventEmitter stepEvents,
-        boolean suppressAgentTools) {
+        boolean suppressAgentTools,
+        ApprovalContinuation continuation,
+        RuntimeLimits caps,
+        List<String> toolNames) {
+
+    /** A request with no run-scoped tool selection (every caller but the chat endpoint and its continuation). */
+    public ChatTurnRequest(
+            UUID agentId,
+            String sessionId,
+            String subjectKey,
+            String userMessage,
+            String attachmentKey,
+            String attachmentMimeType,
+            List<ChatInlineAttachment> inlineAttachments,
+            List<ToolCallback> extraTools,
+            String turnRef,
+            String visionSessionId,
+            boolean forceFastDepth,
+            AgentStepEventEmitter stepEvents,
+            boolean suppressAgentTools,
+            ApprovalContinuation continuation,
+            RuntimeLimits caps) {
+        this(
+                agentId,
+                sessionId,
+                subjectKey,
+                userMessage,
+                attachmentKey,
+                attachmentMimeType,
+                inlineAttachments,
+                extraTools,
+                turnRef,
+                visionSessionId,
+                forceFastDepth,
+                stepEvents,
+                suppressAgentTools,
+                continuation,
+                caps,
+                null);
+    }
+
+    /** A request with no run-level caps (every caller but an agent job). */
+    public ChatTurnRequest(
+            UUID agentId,
+            String sessionId,
+            String subjectKey,
+            String userMessage,
+            String attachmentKey,
+            String attachmentMimeType,
+            List<ChatInlineAttachment> inlineAttachments,
+            List<ToolCallback> extraTools,
+            String turnRef,
+            String visionSessionId,
+            boolean forceFastDepth,
+            AgentStepEventEmitter stepEvents,
+            boolean suppressAgentTools,
+            ApprovalContinuation continuation) {
+        this(
+                agentId,
+                sessionId,
+                subjectKey,
+                userMessage,
+                attachmentKey,
+                attachmentMimeType,
+                inlineAttachments,
+                extraTools,
+                turnRef,
+                visionSessionId,
+                forceFastDepth,
+                stepEvents,
+                suppressAgentTools,
+                continuation,
+                null);
+    }
+
+    /** The request every existing caller builds: an ordinary turn, no approval continuation. */
+    public ChatTurnRequest(
+            UUID agentId,
+            String sessionId,
+            String subjectKey,
+            String userMessage,
+            String attachmentKey,
+            String attachmentMimeType,
+            List<ChatInlineAttachment> inlineAttachments,
+            List<ToolCallback> extraTools,
+            String turnRef,
+            String visionSessionId,
+            boolean forceFastDepth,
+            AgentStepEventEmitter stepEvents,
+            boolean suppressAgentTools) {
+        this(
+                agentId,
+                sessionId,
+                subjectKey,
+                userMessage,
+                attachmentKey,
+                attachmentMimeType,
+                inlineAttachments,
+                extraTools,
+                turnRef,
+                visionSessionId,
+                forceFastDepth,
+                stepEvents,
+                suppressAgentTools,
+                null);
+    }
+
+    public ChatTurnRequest {
+        toolNames = toolNames == null ? null : List.copyOf(toolNames);
+    }
 
     /** Starts a request with the four fields every turn has; the rest default as documented. */
     public static Builder builder(
@@ -76,6 +198,9 @@ public record ChatTurnRequest(
         private boolean forceFastDepth;
         private AgentStepEventEmitter stepEvents = AgentStepEventEmitter.disabled();
         private boolean suppressAgentTools;
+        private ApprovalContinuation continuation;
+        private RuntimeLimits caps;
+        private List<String> toolNames;
 
         private Builder(UUID agentId, String sessionId, String subjectKey, String userMessage) {
             this.agentId = agentId;
@@ -125,6 +250,30 @@ public record ChatTurnRequest(
             return this;
         }
 
+        /** Marks this as the continuation turn after a human decided a gated tool call. */
+        public Builder continuation(ApprovalContinuation value) {
+            this.continuation = value;
+            return this;
+        }
+
+        /**
+         * Caps this run carries (an agent job's remaining tool-call budget): applied as the request
+         * layer of the runtime settings, so they can lower a limit but never raise it.
+         */
+        public Builder caps(RuntimeLimits value) {
+            this.caps = value;
+            return this;
+        }
+
+        /**
+         * Narrows this run to {@code value} of the agent's tools (see {@link ChatTurnRequest#toolNames()});
+         * {@code null} leaves the agent's tools as they are.
+         */
+        public Builder toolNames(List<String> value) {
+            this.toolNames = value;
+            return this;
+        }
+
         public ChatTurnRequest build() {
             return new ChatTurnRequest(
                     agentId,
@@ -139,7 +288,10 @@ public record ChatTurnRequest(
                     visionSessionId,
                     forceFastDepth,
                     stepEvents,
-                    suppressAgentTools);
+                    suppressAgentTools,
+                    continuation,
+                    caps,
+                    toolNames);
         }
     }
 }

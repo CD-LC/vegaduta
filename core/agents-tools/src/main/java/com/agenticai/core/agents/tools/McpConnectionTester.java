@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * MCP-DOCTOR: the real, bounded connection test behind {@code POST
  * /api/mcp/registrations/{id}/test}. Same guards, transport construction and diagnosis as a normal
- * connect but on a TRANSIENT client (shorter {@link #TEST_TIMEOUT}, always closed, never registered
+ * connect but on a TRANSIENT client (shorter timeout, {@code app.tools.mcp.test-timeout-seconds}, always closed, never registered
  * as live), so testing never disturbs a live connection. Outcome is persisted either way: pass
  * -&gt; usageStatus READY, fail -&gt; FAILED + structured diagnosis. Never throws. Replica routing
  * ({@code ownership.routeTest}) stays in the manager.
@@ -32,12 +32,6 @@ import org.slf4j.LoggerFactory;
 final class McpConnectionTester {
 
     private static final Logger log = LoggerFactory.getLogger(McpConnectionTester.class);
-
-    /**
-     * Bounded timeout for the explicit /test flow - deliberately shorter than the live request
-     * timeout (a UI is waiting on it).
-     */
-    static final Duration TEST_TIMEOUT = Duration.ofSeconds(20);
 
     private final McpRegistryService registryService;
     private final McpRemoteUrlGuard remoteUrlGuard;
@@ -50,6 +44,12 @@ final class McpConnectionTester {
     private final Function<McpDynamicConfig, ServerParameters> stdioParams;
     private final Supplier<String> tenantKey;
 
+    /**
+     * Bounded timeout for the explicit /test flow - deliberately shorter than the live request
+     * timeout (a UI is waiting on it).
+     */
+    private final Supplier<Duration> testTimeout;
+
     McpConnectionTester(
             McpRegistryService registryService,
             McpRemoteUrlGuard remoteUrlGuard,
@@ -60,7 +60,8 @@ final class McpConnectionTester {
             McpDiagnostics diagnostics,
             Supplier<McpTransportFactory> transportFactory,
             Function<McpDynamicConfig, ServerParameters> stdioParams,
-            Supplier<String> tenantKey) {
+            Supplier<String> tenantKey,
+            Supplier<Duration> testTimeout) {
         this.registryService = registryService;
         this.remoteUrlGuard = remoteUrlGuard;
         this.stdioCommandGuard = stdioCommandGuard;
@@ -71,6 +72,7 @@ final class McpConnectionTester {
         this.transportFactory = transportFactory;
         this.stdioParams = stdioParams;
         this.tenantKey = tenantKey;
+        this.testTimeout = testTimeout;
     }
 
     private McpTransportFactory transports() {
@@ -173,7 +175,7 @@ final class McpConnectionTester {
                                     config.name(),
                                     stderrTail,
                                     config.env() == null ? Map.of() : config.env());
-            client = McpClient.sync(transport).requestTimeout(TEST_TIMEOUT).build();
+            client = McpClient.sync(transport).requestTimeout(testTimeout.get()).build();
             client.initialize();
             var toolsResult = client.listTools();
             int toolCount =

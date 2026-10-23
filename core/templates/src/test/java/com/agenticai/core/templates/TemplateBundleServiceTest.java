@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** Shareable agent files: a bundle is untrusted, so import lowers autonomy and rejects junk. */
 class TemplateBundleServiceTest extends CommunityTemplateServiceTestBase {
@@ -127,6 +129,80 @@ class TemplateBundleServiceTest extends CommunityTemplateServiceTestBase {
         verify(agentService, never()).create(any());
     }
 
+    /**
+     * The original defect: the shipped examples said {@code "reasoningDepth": "BALANCED"}, which is
+     * not a {@code ReasoningDepth} value, and the server silently turned it into FAST. An unknown
+     * enum value must now be rejected, naming the field, the bad value and the allowed values.
+     */
+    @Test
+    void import_rejectsAnUnknownReasoningDepthInsteadOfSilentlyDefaulting() {
+        ObjectNode agent = design("SUPERVISED");
+        agent.put("reasoningDepth", "BALANCED");
+
+        assertThatThrownBy(() -> bundles.importBundle(bundle(TemplateBundleService.FORMAT, agent)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("reasoningDepth")
+                .hasMessageContaining("'BALANCED'")
+                .hasMessageContaining("FAST, CAREFUL, RIGOROUS, PLANNED");
+        assertThatThrownBy(() -> bundles.preview(bundle(TemplateBundleService.FORMAT, agent)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("reasoningDepth");
+        verify(agentService, never()).create(any());
+        verify(agentService, never()).setAutonomyTier(any(), any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "reasoningDepth",
+                "autonomyTier",
+                "tuningMode",
+                "experienceMode",
+                "providerName",
+                "economyProviderName",
+                "fallbackProviderName",
+                "voiceModelProvider",
+                "videoModelProvider"
+            })
+    void import_rejectsAnUnknownValueForEveryEnumField(String field) {
+        ObjectNode agent = design("SUPERVISED");
+        agent.put(field, "NOT_A_REAL_VALUE");
+
+        assertThatThrownBy(() -> bundles.importBundle(bundle(TemplateBundleService.FORMAT, agent)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining(field)
+                .hasMessageContaining("'NOT_A_REAL_VALUE'")
+                .hasMessageContaining("allowed:");
+        verify(agentService, never()).create(any());
+    }
+
+    @Test
+    void import_reportsEveryBadEnumAtOnce() {
+        ObjectNode agent = design("SUPERVISED");
+        agent.put("reasoningDepth", "BALANCED");
+        agent.put("tuningMode", "AUTO");
+
+        assertThatThrownBy(() -> bundles.preview(bundle(TemplateBundleService.FORMAT, agent)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("reasoningDepth")
+                .hasMessageContaining("tuningMode");
+    }
+
+    @Test
+    void import_acceptsEveryRealValueOfTheEnumFieldsAndAbsentOnes() {
+        for (var depth : com.agenticai.core.agents.core.ReasoningDepth.values()) {
+            ObjectNode agent = design("SUPERVISED");
+            agent.put("reasoningDepth", depth.name());
+            agent.put("tuningMode", "SIMPLE");
+            agent.putNull("experienceMode");
+            assertThat(bundles.preview(bundle(TemplateBundleService.FORMAT, agent)).autonomyTier())
+                    .isEqualTo("SUPERVISED");
+        }
+        // No enum fields at all (design() sets none of them) stays valid: absent means "use default".
+        assertThat(bundles.preview(bundle(TemplateBundleService.FORMAT, design("SUPERVISED"))))
+                .isNotNull();
+    }
+
     @Test
     void import_rejectsAnOversizedDesign() {
         ObjectNode big = design("SUPERVISED");
@@ -166,6 +242,50 @@ class TemplateBundleServiceTest extends CommunityTemplateServiceTestBase {
                 assertThat(preview.tools()).as(f.getFileName().toString()).isNotEmpty();
                 assertThat(preview.autonomyTier()).as(f.getFileName().toString()).isEqualTo("SUPERVISED");
                 assertThat(preview.adjustments()).as(f.getFileName().toString()).isEmpty();
+                // Every enum-typed value in a shipped file is a real enum constant (preview would
+                // have thrown otherwise); pin the depth so a typo like BALANCED cannot come back.
+                assertThat(b.agent().path("reasoningDepth").asText())
+                        .as(f.getFileName().toString())
+                        .isIn("FAST", "CAREFUL", "RIGOROUS", "PLANNED");
+            }
+        }
+    }
+
+    /** The offline checker's enum table must list exactly the constants the server accepts. */
+    @Test
+    void validatePy_listsExactlyTheEnumConstantsTheServerAccepts() throws Exception {
+        String py =
+                java.nio.file.Files.readString(
+                        java.nio.file.Path.of("..", "..", "examples", "agent-bundles", "validate.py"));
+        String block = py.substring(py.indexOf("TIERS = {"), py.indexOf("ENUM_FIELDS[\"economyProviderName\"]"));
+        java.util.Set<String> inPy = new java.util.TreeSet<>();
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"([A-Z][A-Z0-9_]+)\"").matcher(block);
+        while (m.find()) {
+            inPy.add(m.group(1));
+        }
+        java.util.Set<String> inJava = new java.util.TreeSet<>();
+        for (Class<? extends Enum<?>> type : TemplateSnapshotService.AGENT_ENUM_FIELDS.values()) {
+            for (Enum<?> c : type.getEnumConstants()) {
+                inJava.add(c.name());
+            }
+        }
+        assertThat(inPy).isEqualTo(inJava);
+        assertThat(py).contains("\"voiceModelProvider\"", "\"videoModelProvider\"", "\"reasoningDepth\"");
+    }
+
+    /** The console serves copies of the examples; they must validate too and stay identical. */
+    @Test
+    void theConsoleCopiesOfTheExamplesAreIdenticalAndValid() throws Exception {
+        java.nio.file.Path examples = java.nio.file.Path.of("..", "..", "examples", "agent-bundles");
+        java.nio.file.Path web = java.nio.file.Path.of("..", "..", "web", "public", "agent-bundles");
+        try (var files = java.nio.file.Files.list(examples)) {
+            for (java.nio.file.Path f : files.filter(p -> p.toString().endsWith(".json")).toList()) {
+                java.nio.file.Path copy = web.resolve(f.getFileName());
+                assertThat(java.nio.file.Files.exists(copy)).as(copy.toString()).isTrue();
+                assertThat(mapper.readTree(copy.toFile()))
+                        .as(f.getFileName().toString())
+                        .isEqualTo(mapper.readTree(f.toFile()));
+                bundles.preview(mapper.readValue(copy.toFile(), AgentBundle.class));
             }
         }
     }

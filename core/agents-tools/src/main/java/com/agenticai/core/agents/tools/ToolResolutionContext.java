@@ -19,6 +19,9 @@ import org.springframework.ai.tool.ToolCallback;
  *     run)
  * @param resolvedSoFar the allow-list-filtered tools resolved before a {@link
  *     ToolSource.Kind#POST_ALLOW_LIST} source runs; empty for every other kind
+ * @param stickyTools tool names relevance selection must keep on offer whatever the message says:
+ *     the tools the conversation already used, on the continuation turn after an approval (empty on
+ *     every other turn)
  */
 record ToolResolutionContext(
         UUID agentId,
@@ -30,7 +33,38 @@ record ToolResolutionContext(
         boolean rigorous,
         boolean allowDelegation,
         boolean mainChatTurn,
-        List<ToolCallback> resolvedSoFar) {
+        List<ToolCallback> resolvedSoFar,
+        java.util.Set<String> stickyTools) {
+
+    ToolResolutionContext {
+        stickyTools = stickyTools == null ? java.util.Set.of() : java.util.Set.copyOf(stickyTools);
+    }
+
+    /** A context with no sticky tools (every turn but the continuation after an approval). */
+    ToolResolutionContext(
+            UUID agentId,
+            String sessionId,
+            String subjectKey,
+            AtomicInteger stepCounter,
+            String userMessage,
+            ChatClient chatClient,
+            boolean rigorous,
+            boolean allowDelegation,
+            boolean mainChatTurn,
+            List<ToolCallback> resolvedSoFar) {
+        this(
+                agentId,
+                sessionId,
+                subjectKey,
+                stepCounter,
+                userMessage,
+                chatClient,
+                rigorous,
+                allowDelegation,
+                mainChatTurn,
+                resolvedSoFar,
+                java.util.Set.of());
+    }
 
     ToolResolutionContext withResolved(List<ToolCallback> resolved) {
         return new ToolResolutionContext(
@@ -43,6 +77,7 @@ record ToolResolutionContext(
                 rigorous,
                 allowDelegation,
                 mainChatTurn,
-                resolved);
+                resolved,
+                stickyTools);
     }
 }

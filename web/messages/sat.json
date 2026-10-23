@@ -61,7 +61,9 @@
     "railSecrets": "ᱩᱠᱩᱠᱚ",
     "railBrand": "ᱪᱤᱱᱦᱟᱹ",
     "railLearn": "ᱪᱮᱫᱚᱜ",
-    "railGuard": "ᱨᱮਖᱟ"
+    "railGuard": "ᱨᱮਖᱟ",
+    "railRuntimeSettings": "Runtime settings",
+    "railControls": "Where do I control...?"
   },
   "signup": {
     "fieldPassword": "ᱯᱟᱥᱣᱚᱨᱰ",
@@ -750,7 +752,142 @@
     "edgeTier0Badge": "ᱚᱱ-ᱰᱤᱵᱷᱟᱭᱤᱥ · ᱠᱨᱚᱢ ᱨᱮᱭᱟᱜ ᱵᱷᱤᱛᱨᱤ ᱨᱮ",
     "edgeTier0BadgeTitle": "ᱠᱨᱚᱢ ᱨᱮᱭᱟᱜ ᱵᱷᱤᱛᱨᱤ ᱢᱚᱰᱮᱞ (ᱡᱮᱢᱤᱱᱤ ᱱᱟᱱᱚ) ᱱᱚᱣᱟᱭ ᱛᱮᱞᱟ ᱠᱮᱫᱟ - ᱞᱚᱜᱚᱱ ᱟᱨ ᱯᱩᱨᱟᱹ ᱱᱤᱡᱮᱨᱟᱜ, ᱢᱮᱱᱠᱷᱟᱱ ᱠᱷᱟᱹᱞᱤ ᱜᱟᱞᱢᱟᱨᱟᱣ ᱞᱟᱹᱜᱤᱫ: ᱱᱚᱣᱟ ᱴᱩᱞᱥ ᱵᱟᱭ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱟᱨ ᱮᱴᱠᱮᱴᱚᱬᱮ ᱡᱤᱱᱤᱥ ᱨᱮ ᱥᱟᱹᱨᱤ ᱯᱨᱚᱵᱷᱟᱭᱰᱟᱨ ᱠᱷᱚᱱ ᱠᱚᱢ ᱥᱟᱹᱴᱤᱠ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾ ᱡᱚᱛᱚ ᱯᱞᱟᱱ ᱨᱮ ᱯᱷᱨᱤ᱾",
     "edgeTier1Badge": "ᱚᱱ-ᱰᱤᱵᱷᱟᱭᱤᱥ · ᱞᱚᱠᱟᱞ ᱢᱚᱰᱮᱞ",
-    "edgeTier1BadgeTitle": "ᱰᱟᱣᱩᱱᱞᱚᱰ ᱟᱠᱟᱱ ᱚᱱ-ᱰᱤᱵᱷᱟᱭᱤᱥ ᱢᱚᱰᱮᱞ ᱱᱚᱣᱟᱭ ᱛᱮᱞᱟ ᱠᱮᱫᱟ - ᱱᱤᱡᱮᱨᱟᱜ, ᱟᱨ ᱱᱚᱣᱟ ᱴᱩᱞᱥ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ (ᱦᱚᱥᱴᱮᱰ ᱴᱟᱨᱱ ᱞᱮᱠᱟ ᱜᱮ ᱥᱩᱨᱟᱹᱠᱪᱷᱤᱛ ᱴᱩᱞᱥ)᱾ ᱛᱚᱵᱮ ᱦᱚᱸ ᱦᱚᱥᱴᱮᱰ ᱯᱩᱞ ᱠᱷᱚᱱ ᱟᱹᱰᱤ ᱦᱩᱰᱤᱧ ᱢᱚᱰᱮᱞ ᱠᱟᱱᱟ, ᱚᱱᱟᱛᱮ ᱮᱴᱠᱮᱴᱚᱬᱮ ᱠᱟᱹᱢᱤ ᱨᱮ ᱠᱚᱢ ᱥᱟᱹᱴᱤᱠ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾ ᱡᱚᱛᱚ ᱯᱞᱟᱱ ᱨᱮ ᱯᱷᱨᱤ᱾"
+    "edgeTier1BadgeTitle": "ᱰᱟᱣᱩᱱᱞᱚᱰ ᱟᱠᱟᱱ ᱚᱱ-ᱰᱤᱵᱷᱟᱭᱤᱥ ᱢᱚᱰᱮᱞ ᱱᱚᱣᱟᱭ ᱛᱮᱞᱟ ᱠᱮᱫᱟ - ᱱᱤᱡᱮᱨᱟᱜ, ᱟᱨ ᱱᱚᱣᱟ ᱴᱩᱞᱥ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ (ᱦᱚᱥᱴᱮᱰ ᱴᱟᱨᱱ ᱞᱮᱠᱟ ᱜᱮ ᱥᱩᱨᱟᱹᱠᱪᱷᱤᱛ ᱴᱩᱞᱥ)᱾ ᱛᱚᱵᱮ ᱦᱚᱸ ᱦᱚᱥᱴᱮᱰ ᱯᱩᱞ ᱠᱷᱚᱱ ᱟᱹᱰᱤ ᱦᱩᱰᱤᱧ ᱢᱚᱰᱮᱞ ᱠᱟᱱᱟ, ᱚᱱᱟᱛᱮ ᱮᱴᱠᱮᱴᱚᱬᱮ ᱠᱟᱹᱢᱤ ᱨᱮ ᱠᱚᱢ ᱥᱟᱹᱴᱤᱠ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾ ᱡᱚᱛᱚ ᱯᱞᱟᱱ ᱨᱮ ᱯᱷᱨᱤ᱾",
+    "viewTurn": "View turn",
+    "viewTurnTitle": "Open the step-by-step timeline of this conversation's turns",
+    "headerRunning": "Running a turn",
+    "headerReady": "Ready",
+    "clearContext": "Clear context",
+    "clearContextTitle": "Start a fresh conversation. This clears the on-device and server-side session memory for this chat.",
+    "stopRun": "Stop this reply",
+    "fallbackSendToPlatform": "Send to platform",
+    "chipsLabel": "What the agent is doing now",
+    "chipPreparing": "Getting ready",
+    "chipModelCall": "Waiting for the model",
+    "chipThinking": "Thinking",
+    "chipWriting": "Writing the reply",
+    "chipTool": "Running tool: {tool}",
+    "chipToolUnnamed": "Running a tool",
+    "chipWaitingApproval": "Waiting for your approval ({count})",
+    "chipContinuing": "Continuing the reply",
+    "chipContinuingPass": "Continuing the reply (pass {pass} of {max})",
+    "chipContinuingApproval": "Carrying on after your decision",
+    "chipRetrying": "Trying again",
+    "chipRetryingReason": "Trying again: {reason}",
+    "chipRetryingAttempt": "Trying again (attempt {attempt} of {max})",
+    "chipRetryingAttemptReason": "Trying again (attempt {attempt} of {max}): {reason}",
+    "chipFailover": "Switched to a backup model",
+    "chipFailoverReason": "Switched to a backup model: {reason}",
+    "chipFailoverTo": "Switched to {model}",
+    "chipFailoverToReason": "Switched to {model}: {reason}",
+    "outcomeTruncated": "This reply was cut off before it finished.",
+    "outcomeContinue": "Continue",
+    "outcomeLongerReplies": "Allow longer replies",
+    "continueMessage": "Please continue exactly where you stopped, without repeating what you already wrote.",
+    "outcomeRefused": "The model provider stopped this reply for safety reasons, so there is no answer to show. Change the request and try again.",
+    "outcomeRefusedReason": "The model provider stopped this reply for safety reasons ({reason}), so there is no answer to show. Change the request and try again.",
+    "outcomeMalformedToolCall": "The model tried to use a tool but its request was invalid, so nothing ran. Try again.",
+    "outcomeEmpty": "The model returned an empty reply. Try again.",
+    "stopRaiseSteps": "Raise the tool-call limit",
+    "stopRaiseBudget": "Change the spending cap",
+    "stopAskEditor": "Ask someone who can edit this agent to raise the limit.",
+    "rsOpen": "Run settings",
+    "rsTitle": "Run settings",
+    "rsClose": "Close run settings",
+    "rsBack": "Back to run settings",
+    "rsIntro": "How the next message to {name} will run. Change these on the agent's Behavior tab.",
+    "rsLoading": "Loading",
+    "rsRetry": "Try again",
+    "rsOpenBehavior": "Edit in Behavior",
+    "rsModelHeading": "Model and sampling",
+    "rsModel": "Model",
+    "rsModelNotSet": "Not set",
+    "rsModelDefault": "Model default",
+    "rsDepth": "Reasoning depth",
+    "rsSourceAgent": "Set on this agent",
+    "rsParam_temperature": "Temperature",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "Max reply length (tokens)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "Frequency penalty",
+    "rsParam_presencePenalty": "Presence penalty",
+    "rsParam_seed": "Seed",
+    "rsParam_stopSequences": "Stop sequences",
+    "rsParamDropped": "{param} is set on this agent, but {provider} ignores it for {model}, so it has no effect.",
+    "rsToolsRunHeading": "Tools for this run",
+    "rsToolsRunOnly": "This run only",
+    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
+    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
+    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
+    "rsToolsReset": "Use the agent's tools",
+    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
+    "rsToolsEditAgent": "Change the agent's saved tools",
+    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsEmpty": "This agent has no tools available.",
+    "rsToolsSummary": "{on} of {total} tools on",
+    "rsToolsFailed": "Could not load the tools.",
+    "rsLimitsHeading": "Limits for each turn",
+    "rsLimitsChange": "Change limits",
+    "rsLimitsView": "See limits",
+    "rsLimitsFailed": "Could not load the limits.",
+    "rsLimitsEmpty": "No limits to show for this agent.",
+    "rsNoLimit": "No limit",
+    "rsScoreAll": "Every match",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} characters",
+    "rsLimitRange": "Allowed: {min} to {max}",
+    "rsLayer_AGENT": "Set on this agent",
+    "rsLayer_TENANT": "Workspace default",
+    "rsLayer_PLATFORM": "Platform default",
+    "rsLayer_REQUEST": "Set for this request",
+    "rsLimit_maxToolSteps": "Tool calls per turn",
+    "rsLimit_turnTimeoutSeconds": "Time for one turn",
+    "rsLimit_toolTimeoutSeconds": "Time for one tool call",
+    "rsLimit_toolOutputMaxChars": "Tool result size",
+    "rsLimit_retrievalTopK": "Knowledge results per search",
+    "rsLimit_retrievalMinScore": "Least relevant knowledge match",
+    "rsLimit_continuationPasses": "Extra passes to finish a reply",
+    "rsLimitHelp_maxToolSteps": "The most tool calls one reply may make. When it is reached the turn stops and says so.",
+    "rsLimitHelp_turnTimeoutSeconds": "How long one turn may run before it is stopped.",
+    "rsLimitHelp_toolTimeoutSeconds": "How long a single tool call may run before it is stopped.",
+    "rsLimitHelp_toolOutputMaxChars": "How much of one tool result the model gets to read. The rest is cut.",
+    "rsLimitHelp_retrievalTopK": "How many pieces of the knowledge base one search brings back.",
+    "rsLimitHelp_retrievalMinScore": "Pieces that match less well than this are left out. Zero keeps every match.",
+    "rsLimitHelp_continuationPasses": "Extra tries to finish a reply that stopped at a step it announced and did not take.",
+    "rsPreviewButton": "Preview prompt",
+    "rsPreviewTitle": "Prompt preview",
+    "rsPreviewIntro": "The system prompt and tool list this agent would send, built the same way a real turn builds them. Nothing is sent to a model.",
+    "rsPreviewBuilding": "Building the preview",
+    "rsPreviewFailed": "Could not build the preview.",
+    "rsPreviewTotals": "About {prompt} tokens of system text and {tools} tokens of tool definitions (estimates).",
+    "rsPreviewOverBudgetTitle": "Over the token budget",
+    "rsPreviewOverBudget": "The standing system text is over the configured budget of {budget} tokens. Nothing is cut; consider shortening a prompt.",
+    "rsPreviewNoBlocks": "No prompt blocks to show.",
+    "rsPreviewMessage": "Message: {message}",
+    "rsPreviewTokens": "~{tokens} tokens",
+    "rsPreviewShowText": "Show the text",
+    "rsPreviewTools": "Tools ({count})",
+    "rsPreviewNoTools": "This agent offers no tools.",
+    "rsPreviewNotes": "What this preview cannot know",
+    "rsPreviewOpenAdmin": "See and change the wording of every prompt",
+    "rsOriginDefault": "shipped default",
+    "rsOriginOverride": "{scope} override v{version}",
+    "rsOriginAgentConfig": "agent's own system prompt",
+    "rsOriginCode": "platform code",
+    "rsRunBudget": "Spending cap per run",
+    "rsNoCap": "No cap",
+    "rsRunBudgetHelp": "The most one run may spend when it delegates to other agents or runs deep research. An estimate, not billing.",
+    "chipToolsOff": "Trying again without tools",
+    "chipFailoverBlocked": "No backup model used: tools already ran",
+    "rsLimitChangeOne": "Change",
+    "reasonRateLimited": "rate limited",
+    "reasonTimeout": "timed out",
+    "reasonProviderUnavailable": "provider unavailable",
+    "reasonAuthFailed": "provider rejected the credentials",
+    "reasonBilling": "provider billing problem",
+    "reasonModelNotFound": "model not available",
+    "reasonProviderError": "provider error",
+    "reasonMalformedToolCall": "the tool call could not be used"
   },
   "nodeDefs": {
     "triggerLabel": "ᱮᱛᱚᱦᱚᱵ",
@@ -1356,7 +1493,35 @@
     "ttsProviderUpdatedSuccess": "TTS ᱯᱨᱚᱵᱷᱟᱭᱰᱚᱨ ᱟᱹᱯᱰᱮᱴᱮᱱᱟ᱾",
     "updateTtsProviderError": "ᱱᱩᱭ ᱮᱡᱮᱱᱴᱟᱜ TTS ᱯᱨᱚᱵᱷᱟᱭᱰᱚᱨ ᱵᱟᱝ ᱟᱹᱯᱰᱮᱴ ᱞᱮᱱᱟ᱾",
     "ttsProviderFreePlanTooltip": "TTS ᱯᱨᱚᱵᱷᱟᱭᱰᱚᱨ ᱵᱟᱪᱷᱟᱣ ᱫᱚ ᱢᱤᱫ ᱯᱨᱤᱢᱤᱭᱚᱢ ᱯᱷᱤᱪᱟᱹᱨ ᱠᱟᱱᱟ᱾",
-    "ttsProviderNotSet": "ᱯᱞᱮᱴᱯᱷᱚᱨᱢ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱮᱵᱷᱟᱨᱚᱜ ᱠᱟᱱᱟ"
+    "ttsProviderNotSet": "ᱯᱞᱮᱴᱯᱷᱚᱨᱢ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱮᱵᱷᱟᱨᱚᱜ ᱠᱟᱱᱟ",
+    "samplingTitle": "Advanced sampling",
+    "samplingIntro": "Fine-tune how the model picks words. Leave a box empty to use the model default. Providers that do not support a field simply ignore it.",
+    "samplingIgnored": "This model's provider ignores this setting, so changing it has no effect.",
+    "samplingSaving": "Saving…",
+    "samplingSaved": "Saved",
+    "samplingNotSaved": "Not saved",
+    "samplingSaveFailed": "Could not save that setting.",
+    "samplingErrorWhole": "{label} must be a whole number from {min} to {max}, or empty to turn it off.",
+    "samplingErrorNumber": "{label} must be a number from {min} to {max}, or empty to turn it off.",
+    "samplingStopTooLong": "A stop sequence can be at most {max} characters.",
+    "samplingStopTooMany": "At most {max} stop sequences.",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "Only consider the K most likely next words. Lower means safer, more predictable text. 1 to 1000.",
+    "samplingSeed": "Seed",
+    "samplingSeedHelp": "Set a number to make replies more repeatable for the same prompt. Not every provider guarantees it.",
+    "samplingFrequency": "Frequency penalty",
+    "samplingFrequencyHelp": "Positive values discourage repeating the same words again and again. -2 to 2.",
+    "samplingPresence": "Presence penalty",
+    "samplingPresenceHelp": "Positive values nudge the model toward new topics instead of staying on one. -2 to 2.",
+    "samplingPlaceholderDefault": "Default",
+    "samplingPlaceholderRandom": "Random",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "Stop sequences",
+    "samplingStopPlaceholder": "Type a phrase, press Enter",
+    "samplingStopHelp": "The reply ends as soon as the model writes one of these. Up to {count}, each up to {max} characters.",
+    "samplingStopCurrent": "Current stop sequences",
+    "samplingStopRemove": "Remove stop sequence {value}",
+    "samplingAdd": "Add"
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "ᱱᱚᱰ ᱥᱮᱞᱮᱠᱴ ᱢᱮ ᱠᱚᱱᱯᱷᱤᱜᱟᱹᱨ ᱞᱟᱹᱜᱤᱫ, ᱥᱮ ᱞᱮᱸᱜᱟ ᱥᱮᱡᱟᱜ ᱯᱮᱞᱮᱴ ᱠᱷᱚᱱ ᱱᱟᱣᱟ ᱢᱤᱫᱴᱟᱝ ᱚᱨ ᱟᱹᱜᱩᱭ ᱢᱮ᱾",
@@ -13981,5 +14146,1279 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "Workspace settings",
+      "agent": "Agent settings"
+    },
+    "agentMissing": "Choose an agent to see its settings.",
+    "scopeNote": {
+      "agent": "These values apply to this agent only. Anything you do not override here is inherited from your workspace settings."
+    },
+    "loading": "Loading settings",
+    "loadError": "Settings could not be loaded. {message}",
+    "retry": "Try again",
+    "filters": {
+      "label": "Filter settings",
+      "search": "Search settings",
+      "searchPlaceholder": "Search by name or description",
+      "group": "Filter by group",
+      "allGroups": "All groups",
+      "risk": "Filter by risk",
+      "allRisks": "All risk levels",
+      "clear": "Clear filters"
+    },
+    "empty": {
+      "none": "There are no settings you can change here.",
+      "filtered": "No settings match your filters."
+    },
+    "saved": "Saved. Settings updated: {count}.",
+    "saveFailed": "Not saved. Settings that failed: {count}. Your edits are still in the form.",
+    "resetDone": "{label} now uses the inherited value.",
+    "resetFailed": "The setting could not be reset.",
+    "unsaved": "Unsaved change",
+    "discardOne": "Discard change",
+    "restartRequired": "Needs restart",
+    "source": {
+      "default": "Default",
+      "platform": "Platform",
+      "tenant": "Workspace",
+      "agent": "Agent",
+      "tenantInherited": "Inherited from workspace",
+      "aria": "Value source: {source}"
+    },
+    "sourceHelp": {
+      "default": "Nobody has changed this. It uses the value the product ships with.",
+      "platform": "Your platform operator set this for the whole deployment.",
+      "tenant": "Your workspace overrides the default. Reset it to go back to the inherited value.",
+      "agent": "This agent overrides the workspace value. Reset it to inherit the workspace value again.",
+      "tenantInherited": "This agent has no override of its own, so it uses the workspace value. Editing it creates an override for this agent only.",
+      "lockedSuffix": "It is locked, so it cannot be changed here."
+    },
+    "risk": {
+      "low": "Low risk",
+      "medium": "Medium risk",
+      "high": "High risk",
+      "security": "Security"
+    },
+    "bool": {
+      "on": "On",
+      "off": "Off"
+    },
+    "value": {
+      "unset": "Not set",
+      "empty": "Empty"
+    },
+    "select": {
+      "placeholder": "Choose an option"
+    },
+    "slider": {
+      "label": "{label} (slider)"
+    },
+    "duration": {
+      "unitLabel": "Unit for {label}"
+    },
+    "units": {
+      "chars": "characters",
+      "tokens": "tokens",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "seconds",
+      "min": "minutes",
+      "h": "hours"
+    },
+    "groups": {
+      "agent": "Agent runtime",
+      "approvals": "Approvals",
+      "quality": "Quality checks",
+      "guardrails": "Guardrails",
+      "chat": "Chat",
+      "tools": "Tools",
+      "memory": "Memory",
+      "knowledge": "Knowledge",
+      "delegation": "Delegation",
+      "aux": "Helper model",
+      "routing": "Model routing"
+    },
+    "errors": {
+      "required": "Enter a value.",
+      "notNumber": "Enter a number.",
+      "notInteger": "Enter a whole number.",
+      "belowMin": "Must be at least {min}.",
+      "aboveMax": "Must be at most {max}.",
+      "notAllowed": "Choose one of the listed options.",
+      "tooShort": "Too short. Use at least {min}.",
+      "tooLong": "Too long. Use at most {max}.",
+      "precision": "This unit cannot express that precisely. Use a whole number of the smallest unit or pick a smaller unit.",
+      "serverRange": "Allowed range: {min} to {max}.",
+      "serverOptions": "Allowed values: {options}.",
+      "server": {
+        "invalid": "The server did not accept this value: {message}",
+        "locked": "This setting was locked by your administrator, so your change was not saved.",
+        "notFound": "This setting no longer exists.",
+        "forbidden": "You do not have permission to change this setting.",
+        "reasonRequired": "A reason is required for this change. Enter one and try again.",
+        "network": "Could not reach the server, so your change was not saved. {message}",
+        "other": "The change could not be saved: {message}"
+      }
+    },
+    "effective": "In effect now: {value}",
+    "hint": {
+      "range": "Allowed: {min} to {max}.",
+      "min": "Minimum: {min}.",
+      "max": "Maximum: {max}.",
+      "default": "Default: {value}.",
+      "securityStricter": "A security setting can only be made stricter than the platform value, never weaker.",
+      "inherited": "If you reset it, it returns to: {value}."
+    },
+    "locked": {
+      "withReason": "Locked by your administrator: {reason}",
+      "noReason": "Locked by your administrator. It cannot be changed here."
+    },
+    "blocked": {
+      "role": "Your role cannot change this setting. Ask a workspace admin.",
+      "scope": "This setting cannot be overridden here.",
+      "readOnly": "Settings are read-only right now.",
+      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+    },
+    "reset": {
+      "button": "Reset to inherited",
+      "aria": "Reset to inherited: {label}"
+    },
+    "help": {
+      "show": "More details",
+      "hide": "Hide details"
+    },
+    "history": {
+      "button": "History",
+      "open": "History: {label}",
+      "title": "History: {label}",
+      "scopeTenant": "Workspace changes",
+      "scopeAgent": "Changes for this agent",
+      "close": "Close history",
+      "loading": "Loading history",
+      "error": "History could not be loaded. {message}",
+      "empty": "No changes have been recorded yet.",
+      "listLabel": "Change history, newest first",
+      "version": "Version {version}",
+      "before": "Before:",
+      "after": "After:",
+      "by": "Changed by",
+      "unknownActor": "unknown",
+      "reason": "Reason:"
+    },
+    "savebar": {
+      "count": "Unsaved changes: {count}.",
+      "invalid": "Fix the highlighted fields before saving. Fields to fix: {count}.",
+      "discard": "Discard changes",
+      "save": "Save changes",
+      "saving": "Saving"
+    },
+    "risky": {
+      "title": "Confirm risky changes ({count})",
+      "description": "These settings change how your agents behave or what they are allowed to do. Review each change and explain why you are making it. The reason is stored in the audit log.",
+      "descriptionSecurity": "At least one of these is a security setting. It can only be made stricter than the platform value. Review each change and explain why you are making it. The reason is stored in the audit log.",
+      "listLabel": "Changes to confirm",
+      "from": "From",
+      "to": "to",
+      "securityNote": "Security setting: it cannot be weaker than the platform value.",
+      "consequence": "What this changes:",
+      "reasonLabel": "Reason for this change",
+      "reasonPlaceholder": "For example: raising the limit for the support team's long investigations",
+      "reasonHint": "Required, at least {min} characters. Saved with who made the change and the old and new values.",
+      "acknowledge": "I understand the consequences of this security change.",
+      "cancel": "Cancel",
+      "confirm": "Confirm and save",
+      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+    },
+    "strictness": {
+      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
+      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
+      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "PENDING",
+    "status_APPROVED": "APPROVED",
+    "status_REJECTED": "REJECTED",
+    "status_EXPIRED": "EXPIRED",
+    "status_EXECUTION_FAILED": "EXECUTION FAILED",
+    "status_DEAD_LETTERED": "DEAD LETTERED",
+    "filtersLabel": "Filter requests",
+    "filterAgentLabel": "Filter by agent",
+    "filterToolLabel": "Filter by tool",
+    "filterAgeLabel": "Filter by age",
+    "filterAnyAgent": "Any agent",
+    "filterAnyTool": "Any tool",
+    "filterAnyAge": "Any age",
+    "age_newer1h": "Newer than 1 hour",
+    "age_older1h": "Older than 1 hour",
+    "age_older24h": "Older than 1 day",
+    "age_older7d": "Older than 7 days",
+    "filtersClear": "Clear filters",
+    "filterWindowNote": "Filtering the newest {count} requests. Older ones are not included.",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "Expires in {time}",
+    "expiresAt": "Closes automatically at {time} if nobody decides",
+    "overdue": "Past its time limit, closes at the next sweep",
+    "neverExpires": "This workspace does not expire waiting requests.",
+    "expiredNote": "Expired {time}: nobody decided in time",
+    "expiredReasonPrefix": "Expired:",
+    "auditExpired": "expired, nobody decided in time",
+    "riskLow": "Low risk",
+    "riskMedium": "Medium risk",
+    "riskHigh": "High risk",
+    "riskEstimateNote": "Risk is an estimate from the tool's name. The platform does not classify tools, so read the arguments before you approve.",
+    "riskWhoDecides": "Who decides what waits for approval?",
+    "previewGoal": "The task it was working on:",
+    "previewArguments": "Arguments",
+    "previewNoArguments": "No arguments were recorded for this call.",
+    "previewRedacted": "{count} sensitive-looking value(s) are hidden here. They are still sent to the tool if you approve.",
+    "previewTruncated": "These arguments are too long to show in full, so this request cannot be approved from here.",
+    "approveBlockedTooLong": "Approving is turned off because you cannot review the whole request. You can still deny it.",
+    "ifApproveLabel": "If you approve:",
+    "ifApprove": "{tool} runs right now with the arguments above, and the agent carries on with the task using its result.",
+    "ifDenyLabel": "If you deny:",
+    "ifDeny": "{tool} does not run. The agent is told you said no, with your reason if you give one, and carries on without it.",
+    "whyGated": "The agent asked to use {tool}. It was held for your decision because the agent is set to Supervised, or because this workspace requires approval for that tool.",
+    "denyReasonLabel": "Reason if you deny (optional)",
+    "denyReasonPlaceholder": "For example: wrong recipient, ask me before sending",
+    "denyReasonHelp": "If you deny, the agent reads this reason as the result of the refused call and adjusts. Leave it empty to deny without one.",
+    "denyButton": "Deny",
+    "detailRegionLabel": "Request details",
+    "sessionLabel": "Conversation",
+    "linkOpenAgent": "Open the agent",
+    "linkInspectTurns": "Inspect its turns",
+    "continuationLabel": "What the agent did next",
+    "continuationCompleted": "The agent finished carrying on with the task.",
+    "continuationFailed": "The agent could not carry on after this decision.",
+    "continuationRetry": "Ask it to carry on",
+    "retryMessage": "Please carry on with the task.",
+    "lastDecisionTitle": "Your last decision: {tool}",
+    "lastDecisionClose": "Close",
+    "deepLinkNotFound": "That approval request could not be found, or you cannot see it.",
+    "selectAllLabel": "Select all pending tool calls on this page",
+    "selectRowLabel": "Select the pending call to {tool}",
+    "bulkSelected": "{count} selected",
+    "bulkApprove": "Approve selected",
+    "bulkDeny": "Deny selected",
+    "bulkClear": "Clear selection",
+    "bulkCancel": "Cancel",
+    "bulkDismiss": "Dismiss",
+    "bulkMixedTools": "Bulk decisions need every selected request to be for the same tool.",
+    "bulkNotLowRisk": "Bulk approve is only for low-risk tools (lookups). Deny works for any one tool, or decide these one by one.",
+    "bulkNotToolCall": "Bulk decisions only cover agent tool calls.",
+    "bulkNotPending": "Bulk decisions only cover requests that are still pending.",
+    "bulkConfirmApproveTitle": "Approve {count} calls to {tool}?",
+    "bulkConfirmApproveBody": "Each of these runs {tool} right now with its own arguments, listed below, and the agent carries on using the results. This cannot be undone.",
+    "bulkConfirmDenyTitle": "Deny {count} calls to {tool}?",
+    "bulkConfirmDenyBody": "None of these run. The agent is told each call was refused, with your reason if you give one.",
+    "bulkConfirmApprove": "Approve {count}",
+    "bulkConfirmDeny": "Deny {count}",
+    "bulkMore": "and {count} more",
+    "bulkProgress": "{done} of {count} done",
+    "bulkResult": "{done} decided, {failed} failed.",
+    "notifyOff": "Notify me",
+    "notifyOn": "Notifications on",
+    "notifyHelp": "Show a browser notification when a new request arrives while this tab is in the background",
+    "notifyUnsupported": "This browser cannot show notifications.",
+    "notifyBlocked": "Notifications are blocked. Allow them in your browser's site settings to turn this on.",
+    "notifyTitle": "An agent is waiting for approval",
+    "notifyBodyOne": "{tool} needs your decision.",
+    "notifyBodyMany": "{count} requests need your decision.",
+    "newArrived": "{count} new approval request(s) arrived.",
+    "rulesTitle": "Rule for one tool",
+    "rulesIntro": "Choose whether a tool always waits for a person or never does. The rule applies to every agent set to Semi-autonomous.",
+    "rulesNeedsScope": "You need the approvals permission to change rules.",
+    "rulesToolLabel": "Tool name",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "Exactly as the tool appears in the request, for example send_email.",
+    "rulesToolNameInvalid": "A tool name has no spaces.",
+    "rulesModeLabel": "What should happen",
+    "rulesAskName": "Always ask",
+    "rulesAskHint": "Every call to this tool waits for a person to approve it.",
+    "rulesNeverName": "Never ask",
+    "rulesNeverHint": "Calls to this tool run straight away, without anyone approving them.",
+    "rulesNeverRiskyWarn": "This tool looks like it changes things. Be sure.",
+    "rulesScopeNote": "Rules cover the whole workspace, not one agent. Supervised agents still ask for everything, and Fully autonomous agents never ask, whatever a rule says. Rules you set are not listed back here yet.",
+    "rulesSave": "Save rule",
+    "rulesSaveFailed": "Could not save the rule.",
+    "rulesSavedAsk": "{tool} will always ask for approval.",
+    "rulesSavedNever": "{tool} will no longer ask for approval.",
+    "rulesNeverConfirmTitle": "Stop asking before {tool} runs?",
+    "rulesNeverConfirmBody": "Every Semi-autonomous agent will run {tool} without anyone approving it. It looks like it can change or send things, and a mistake cannot be taken back.",
+    "rulesNeverConfirmBodyLow": "Every Semi-autonomous agent will run {tool} without asking. It reads like a lookup, so this is usually safe.",
+    "rulesNeverConfirm": "Stop asking",
+    "tiersTitle": "Who decides what waits for approval?",
+    "tiersIntro": "Each agent has an autonomy level. It decides whether the workspace's approval rules are used at all.",
+    "tierCurrent": "This agent",
+    "tierConsequenceLabel": "In practice:",
+    "tierSupervisedName": "Supervised",
+    "tierSupervisedWhat": "Every tool call waits for a person, whatever the workspace rules say. It also gets a lower limit on tool steps per turn.",
+    "tierSupervisedConsequence": "Safest, but expect a lot of requests in the queue and a slower agent.",
+    "tierSemiName": "Semi-autonomous",
+    "tierSemiWhat": "The workspace's rule for each tool decides: risky tools such as sending, deleting and payments ask by default, the rest run.",
+    "tierSemiConsequence": "A good default. Your per-tool rules take effect here.",
+    "tierFullName": "Fully autonomous",
+    "tierFullWhat": "No tool call ever waits for approval and the agent gets a higher limit on tool steps. Per-tool rules are ignored.",
+    "tierFullConsequence": "It acts without asking. Only use it for agents whose mistakes are cheap to undo.",
+    "tiersRuleNote": "Tool rules (Always ask, Never ask) only matter for Semi-autonomous agents.",
+    "agentModeTitle": "When does this agent need approval?",
+    "agentModeSupervised": "This agent is Supervised: every tool call waits for a person, and per-tool rules are ignored.",
+    "agentModeSemi": "This agent is Semi-autonomous: each tool follows the workspace's rule. Sending, deleting and payments ask by default.",
+    "agentModeFull": "This agent is Fully autonomous: it never waits for approval, and per-tool rules are ignored.",
+    "agentModeQueueLink": "See this agent's requests",
+    "agentModeRulesLink": "Set a rule for a tool",
+    "agentModeShowTiers": "Compare the three levels",
+    "agentModeHideTiers": "Hide the comparison",
+    "agentModeScopeNote": "Change the level with the autonomy choice above. Tool rules are workspace-wide, not per agent.",
+    "policyThenApprovalNote": "A call that passes these rules can still wait for a person. That depends on the agent's autonomy level, explained below.",
+    "chatReasonToggle": "Add a reason",
+    "chatReviewInQueue": "Review in the queue"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "Filter events",
+    "tlFilterCategories": "Event types",
+    "tlCatIntake": "Intake",
+    "tlCatModel": "Model",
+    "tlCatTool": "Tools",
+    "tlCatApproval": "Approvals",
+    "tlCatContinuation": "Continuations",
+    "tlCatRetry": "Retries and failover",
+    "tlCatGuardrail": "Guardrails",
+    "tlCatCache": "Cache",
+    "tlCatVerify": "Checks",
+    "tlCatFinish": "Finish",
+    "tlProblemsOnly": "Only problems",
+    "tlSearch": "Search events",
+    "tlSearchPlaceholder": "Tool, model, guard or status",
+    "tlClearFilters": "Clear filters",
+    "tlShowing": "Showing {shown} of {total} events",
+    "tlNoMatch": "No events match these filters.",
+    "tlSevOk": "Succeeded",
+    "tlSevInfo": "Information",
+    "tlSevWarn": "Needs attention",
+    "tlSevError": "Failed",
+    "tlIntake": "Turn started: {chars} characters, {tools} tools, {attachments} attachments",
+    "tlRunTools": "Tools for this run",
+    "tlRunToolsNone": "none (text only)",
+    "tlModelCall": "Model call to {model} ({provider}), route {route}",
+    "tlFailover": "Failed over to {model} ({provider})",
+    "tlRetryModel": "Retried on {model} ({provider}), route {route}",
+    "tlRetry": "Retry: {guard} ({outcome})",
+    "tlCacheHit": "Answered from the response cache",
+    "tlToolCall": "Tool call {tool}: {status}",
+    "tlApprovalRequested": "Approval requested before running {tool}",
+    "tlApprovalDecided": "Approval decided for {tool}: {decision}",
+    "tlContinuation": "Continuation: {guard} ({outcome})",
+    "tlGuard": "Guardrail {guard}: {outcome}",
+    "tlVerifyPassed": "Check passed: {check}",
+    "tlVerifyFailed": "Check failed: {check}",
+    "tlFinish": "Finished: {status} ({chars} characters in the answer)",
+    "tlOther": "Event {type}",
+    "reasonFallbackProvider": "The primary model failed, so the turn moved to the agent's fallback provider.",
+    "reasonToolsDisabledRetry": "The provider refused the tool-call history, so the turn was answered once more without tools.",
+    "reasonRetryOther": "The model call was repeated.",
+    "reasonToolCallRetry": "The model ended its answer with a malformed tool call, so it was asked again.",
+    "reasonCutOff": "The answer was cut off at the length limit, so the model was asked to continue.",
+    "reasonToolsContinue": "The model needed more steps after its tool calls, so the turn continued.",
+    "reasonToolBlocked": "A guard, policy, hook or limit answered instead of the tool, so it did not run.",
+    "reasonToolParked": "The call is waiting for a person to approve it; the tool has not run.",
+    "reasonGuardAction": "A guardrail changed or withheld the answer.",
+    "tlAtStart": "From start",
+    "tlGap": "Since previous event",
+    "tlDuration": "Duration",
+    "tlTokens": "Tokens in / out",
+    "tlCost": "Cost",
+    "tlDetails": "Hashes and raw summary",
+    "tlArgsHash": "Arguments hash",
+    "tlResultDigest": "Result digest",
+    "tlContentNote": "Arguments and results are never stored. For a tool call the timeline shows its status, duration and the hashes of its arguments and result, not their content.",
+    "tlStatFinish": "Finish reason",
+    "tlStillOpen": "Not finished",
+    "tlProblemCount": "{count} events need attention",
+    "tlStatRetries": "Retries and failovers",
+    "tlStatContinuations": "Continuations",
+    "tlStatApprovals": "Approvals",
+    "tlStatTokens": "Tokens in / out",
+    "tlTokensNotRecorded": "Not recorded for this turn",
+    "tlTokensInOut": "Input / output",
+    "tlCopyTurnId": "Copy turn ID",
+    "tlCopyTurnIdShort": "Copy ID",
+    "tlCopied": "Turn ID copied.",
+    "tlCopyFailed": "Could not copy. Select the ID and copy it by hand.",
+    "sessTitle": "Turns in a session",
+    "sessSubtitle": "Pick a chat session to see its recorded turns, newest first. Opening a chat message's view-turn link fills this in for you.",
+    "sessionIdLabel": "Session ID",
+    "sessionIdPlaceholder": "Chat session ID",
+    "sessFind": "Find turns",
+    "sessInvalid": "Enter the agent ID (a UUID) and the session ID.",
+    "sessLoading": "Loading the session's turns...",
+    "sessUnavailableTitle": "Session lookup is not available",
+    "sessUnavailableBody": "This server cannot list the turns of a session. Open a turn by its ID below instead.",
+    "sessErrorTitle": "Could not load the session's turns",
+    "sessEmptyTitle": "No journaled turns in this session",
+    "sessEmptyBody": "The session recorded nothing. Either the session ID is wrong, or the turn journal was off when its turns ran.",
+    "sessListLabel": "{count} journaled turns",
+    "sessEvents": "{count} events",
+    "sessStatusOpen": "Open",
+    "sessOpen": "Open timeline",
+    "sessOpened": "Shown below"
+  },
+  "evalControls": {
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "saved": "Saved.",
+    "saveMode": "Save replay mode",
+    "discard": "Discard changes",
+    "saveFailed": "Could not save the replay mode.",
+    "unsavedChanges": "Unsaved changes",
+    "modeTitle": "How this dataset is replayed",
+    "modeHelp": "Choose whether a replay may use the agent's tools. This changes what the next run measures.",
+    "modeTextOnly": "Text only",
+    "modeTextOnlyHelp": "The agent answers without its tools. Safe: nothing real happens. Expected-tool checks cannot be met.",
+    "modeFull": "Full pipeline with tools",
+    "modeFullHelp": "The same tools, guardrails and step limits a live user gets. Needed for expected-tool and trajectory checks.",
+    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "autoApproveLabel": "Auto-approve tool calls in the eval sandbox",
+    "autoApproveHelp": "A tool call that would normally wait for a person is approved by the eval sandbox, so the case can finish. Without this the case ends at the unanswered approval, as it would in production.",
+    "autoApproveWarnTitle": "For non-production workspaces only",
+    "autoApproveWarnBody": "Never turn this on where tools reach real customers or data. Shell, coding, scheduling, agent-to-agent, payment and delete tools are never auto-approved. Your administrator must have marked this workspace as non-production.",
+    "autoApproveNeedsFull": "Switch on the full pipeline first: auto-approval only applies when tools run.",
+    "autoApproveRefused": "Not allowed in this workspace: {reason}",
+    "autoApproveConfirmTitle": "Auto-approve tool calls in evals?",
+    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirm": "Turn on auto-approval",
+    "trajectoryLabel": "Trajectory checks",
+    "trajectoryOn": "On",
+    "trajectoryOff": "Not available",
+    "trajectoryHelpOn": "Cases with an expected trajectory are scored on which tools the agent called and in what order. This is switched on for the whole deployment by your administrator, not per dataset.",
+    "trajectoryHelpOff": "Trajectory checks are not available here. They are switched on for the whole deployment by your administrator, and need a plan that includes evals.",
+    "trajectoryNeedsFull": "This dataset is text only, so cases with an expected trajectory will not be scored. Switch on the full pipeline.",
+    "runAutoApproved": "auto-approved",
+    "runAutoApprovedTitle": "A person decided none of this run's tool calls; the eval sandbox approved them.",
+    "toolCallsLabel": "Tool calls in this replay",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "failed",
+    "toolStatusNotRun": "did not run",
+    "toolStatusAwaitingApproval": "waiting for approval",
+    "toolStatusReplayed": "replayed",
+    "samplingTitle": "Background quality scoring",
+    "samplingLoading": "Loading the scoring rate...",
+    "samplingUnavailable": "The share of live turns scored by the background judge is set by your platform administrator and is not shown here.",
+    "samplingValue": "About {percent}% of live turns are scored by the background quality judge.",
+    "samplingHelp": "A lower rate costs less and means fewer scores in the trend above. This value is read-only here.",
+    "samplingSource_default": "Default",
+    "samplingSource_platform": "Set by the platform",
+    "samplingSource_tenant": "Set for your workspace",
+    "samplingSource_agent": "Set for this agent",
+    "modeDefault": "Workspace default",
+    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
+    "modeDefaultCurrent": "Currently: {mode}",
+    "modeNameFull": "Full pipeline",
+    "modeNameQuick": "Quick (text only)",
+    "badgeFull": "full pipeline",
+    "badgeQuick": "quick",
+    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
+    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
+    "runModeLabel": "Replay mode for the next run",
+    "runModeInherit": "Use the dataset's setting",
+    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
+    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
+    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
+    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
+    "toolStatusSimulated": "simulated, not executed"
+  },
+  "agentLab": {
+    "wtLabel": "Run with the agent's tools",
+    "wtHelp": "Off: each answer is one plain model call. On: answers come from the same tool pipeline a chat turn uses, so tools run, guardrails apply and step limits hold. A call that needs a person's approval waits as a pending approval.",
+    "wtUnavailable": "Running the lab with tools is turned off on this install. Ask an administrator to enable it.",
+    "wtRefused": "This run was refused: {reason}",
+    "wtActive": "Tools will run for real in this run, including any side effects.",
+    "wtConfirmTitle": "Run the lab with the agent's tools?",
+    "wtConfirmBody": "Every sample can call the agent's real tools, and those calls can have real effects such as sending a message or writing data. Calls that need approval will wait for a person. Use this only with a test agent or test data.",
+    "wtConfirm": "Use tools"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "Agent limits",
+        "description": "How much work one agent turn may do before it is stopped."
+      },
+      "approvals": {
+        "label": "Approvals",
+        "description": "What happens after a person approves or denies an action, and how long a request waits."
+      },
+      "chat": {
+        "label": "Conversation behaviour",
+        "description": "How a reply is finished, retried, cached and continued."
+      },
+      "routing": {
+        "label": "Model routing",
+        "description": "Which messages count as simple enough for the faster model."
+      },
+      "memory": {
+        "label": "Memory",
+        "description": "How many memories an agent keeps and recalls."
+      },
+      "aux": {
+        "label": "Background model calls",
+        "description": "Which model summaries, assists and compaction use."
+      },
+      "guardrails": {
+        "label": "Safety checks",
+        "description": "How strict the automatic safety checks are. These can only be made stricter than the platform setting."
+      },
+      "quality": {
+        "label": "Evaluation",
+        "description": "How test runs and the AI judge behave."
+      },
+      "delegation": {
+        "label": "Delegation",
+        "description": "How much work an agent may hand to other agents at once."
+      },
+      "knowledge": {
+        "label": "Knowledge search",
+        "description": "How widely a search of your uploaded documents gathers candidates before it picks the best passages."
+      },
+      "learning": {
+        "label": "Learning",
+        "description": "How the agent's learning policies try out different options."
+      },
+      "providers": {
+        "label": "AI providers",
+        "description": "How connected AI provider keys are used when one stops working."
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "Most tool calls per turn",
+          "description": "The most tool calls one turn may make before it is stopped and asked to answer with what it has.",
+          "help": "Raise it for agents that do long multi-step jobs. Lower it to stop runaway loops and keep cost predictable. The value shown for a workspace or the platform is the base figure for a standard agent: an agent's autonomy tier scales it at run time, so a more or less autonomous agent may use a different number. An agent's own value is used exactly as set."
+        },
+        "turnTimeoutSeconds": {
+          "label": "Longest time per turn",
+          "description": "How long one turn may run before it is stopped.",
+          "help": "Raise it for slow research or code tasks. A turn that runs out of time ends with what was done so far."
+        },
+        "toolTimeoutSeconds": {
+          "label": "Longest time per tool call",
+          "description": "How long a single tool call may run before it is stopped. The platform default has no limit; each tool then keeps its own timeout.",
+          "help": "Set a limit if one slow tool can hold up whole conversations. Whether a stopped call had any effect is unknown, so the agent is told not to assume it worked."
+        },
+        "toolOutputMaxChars": {
+          "label": "Longest tool result",
+          "description": "How many characters of one tool result are passed to the model; the rest is cut.",
+          "help": "Raise it when the agent needs to read long documents or API responses in full, at the price of more tokens per turn. Lower it to save cost."
+        },
+        "retrievalTopK": {
+          "label": "Knowledge passages per search",
+          "description": "How many passages one knowledge-base search returns to the agent.",
+          "help": "More passages give the agent more to work with but cost more tokens and can add noise. Fewer are faster and cheaper."
+        },
+        "retrievalMinScore": {
+          "label": "Least relevance for a passage",
+          "description": "How relevant a knowledge passage must be to be returned. 0 returns every hit.",
+          "help": "Raise it if the agent quotes irrelevant passages. Too high and it may find nothing."
+        },
+        "continuationPasses": {
+          "label": "Extra passes after an unfinished reply",
+          "description": "How many more times the model is asked to carry on when its reply stopped at a step it announced but did not take.",
+          "help": "Raise it for agents that often announce a step and stop. Each extra pass costs a model call."
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "Carry on after an approval",
+          "description": "When a person approves an action, the agent finishes the task by itself instead of waiting for a new message.",
+          "help": "Turn it off if you want every approved action to end the turn and be followed up manually."
+        },
+        "jobsContinueAfterDenial": {
+          "label": "Background jobs continue after a denial",
+          "description": "When a person denies an action in a background job, the job carries on with the denial noted instead of stopping.",
+          "help": "Leave it off if a denial should stop the job. Turn it on when the job can usually finish without the denied step."
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "Approval requests expire after",
+          "description": "How long an approval request waits for a decision before it expires. 0 means requests never expire.",
+          "help": "With no expiry, forgotten requests stay open indefinitely and the agent keeps waiting. An expired request counts as not approved."
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "Finish cut-off replies",
+          "description": "When a reply is cut off by the model's length limit or ends in a broken tool call, ask the model to carry on or retry.",
+          "help": "Turn it off only to diagnose a model problem; people then see cut-off replies as they are."
+        },
+        "maxContinuations": {
+          "label": "Most continuations of a cut-off reply",
+          "description": "How many times the model is asked to carry on after its reply was cut off.",
+          "help": "Each continuation is another model call. Raise it for long answers, lower it to save cost."
+        },
+        "maxToolCallRetries": {
+          "label": "Most retries of a broken tool call",
+          "description": "How many times the model is asked to repeat a tool call that arrived with unusable arguments.",
+          "help": "A retry costs a model call. 0 gives up at the first broken call."
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "Attempts per model call",
+          "description": "How many times a model call is tried when the provider fails or is busy, including the first try.",
+          "help": "More attempts hide short provider outages but make a failing request slower to report an error."
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "Reuse replies for agents with tools",
+          "description": "Allow stored replies to be reused for agents that have tools. Off by default because a tool may return something different next time.",
+          "help": "Turn it on only when the tools are read-only and slow-changing, and you want faster, cheaper repeat answers. People may see an answer that is not current."
+        },
+        "contextTurns": {
+          "label": "Earlier turns that identify a repeat",
+          "description": "How many earlier turns are compared when deciding whether a message is a repeat that can reuse a stored reply.",
+          "help": "More turns make a match stricter and cache hits rarer."
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "Keep tools on offer in follow-ups",
+          "description": "Keep offering the tools the conversation already used when the next message is a short follow-up.",
+          "help": "Turn it off if short replies such as 'yes' should start from the normal tool selection."
+        },
+        "stickyToolsWindow": {
+          "label": "How long follow-up tools stay on offer",
+          "description": "How long after use a tool stays on offer for short follow-up messages.",
+          "help": "A longer window helps long working sessions, a shorter one keeps the tool list small."
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "Nudge on unfinished wording",
+          "description": "Ask the model to carry on when a reply sounds as if it stopped before doing what it said it would.",
+          "help": "Turn it off if the nudges trigger on replies that were meant to end."
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "Clear old tool results",
+            "description": "In a long tool run, replace older tool results with a short placeholder so the conversation stays within the model's limit.",
+            "help": "Turn it off if the agent must see every earlier result; long runs may then hit the model's size limit."
+          },
+          "thresholdChars": {
+            "label": "Size that triggers clearing",
+            "description": "How large the tool results in a turn may grow before older ones are cleared.",
+            "help": "Raise it to keep more results visible, lower it to keep long runs small and cheap."
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "Longest simple message",
+          "description": "A message longer than this is never treated as simple. Simple messages can go to a faster, cheaper model.",
+          "help": "Lower it to send more messages to the main model for quality; raise it to save cost."
+        },
+        "maxClauses": {
+          "label": "Most sentences in a simple message",
+          "description": "A message with more sentences than this is never treated as simple.",
+          "help": "Lower it to send more messages to the main model for quality."
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "Agent memories recalled per turn",
+          "description": "How many of the agent's own memories are looked up for each message.",
+          "help": "More memories give more context but use more tokens."
+        },
+        "tenantTopK": {
+          "label": "Shared memories recalled per turn",
+          "description": "How many memories shared across the workspace are looked up for each message.",
+          "help": "More memories give more context but use more tokens."
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "Most memories per agent",
+          "description": "How many memories one agent may keep. The oldest and least used are dropped beyond this.",
+          "help": "Raise it for assistants that should remember a lot about people; this also raises storage and recall cost."
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "Facts recalled from graph memory",
+          "description": "The most facts an agent is shown from its relationship memory in one lookup.",
+          "help": "More facts give the agent more background about a person or topic but use more of its working space. Fewer keep answers focused. Set it for the whole workspace, or for one agent that needs more or less."
+        },
+        "recallMaxPaths": {
+          "label": "Graph paths read per lookup",
+          "description": "How many connections in the memory graph are read to find the facts for one lookup.",
+          "help": "Several connections can lead to the same fact, so densely linked memories may need a higher number to find everything. A higher number makes each lookup slower."
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "Background calls use the agent's model",
+        "description": "Summaries, assists and context compaction use the same model as the agent they work for, when no model is chosen for them.",
+        "help": "Turn it off to let the platform choose a model for these calls, which may be cheaper or a different provider."
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "When a safety check breaks",
+        "description": "What happens when a safety check itself fails, for example the judge model is down. Closed refuses the action; open lets it through.",
+        "help": "You can only make this stricter than the platform setting. Closed protects against someone making a check fail on purpose, at the price of refusing work during an outage.",
+        "options": {
+          "open": "Open: let the action through",
+          "closed": "Closed: refuse the action"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "When the tool-call check breaks",
+          "description": "What the check that reviews risky tool calls does when it cannot give a verdict. Inherit follows the setting for safety checks above.",
+          "help": "You can only make this stricter than the platform setting. Closed refuses the tool call if the check fails.",
+          "options": {
+            "open": "Open: let the tool call through",
+            "inherit": "Follow the safety-check setting",
+            "closed": "Closed: refuse the tool call"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "Toxicity score that blocks",
+          "description": "Content scoring at or above this on the judge's 0 to 100 toxicity scale is blocked. A lower number blocks more.",
+          "help": "You can only lower this, never raise it above the platform value. A very low value blocks ordinary frank wording."
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "Text scanned for jailbreak attempts",
+          "description": "How much of a message or reply is scanned for jailbreak patterns. Text beyond it is not scanned.",
+          "help": "You can only raise this above the platform value. A wider window stops attacks hidden behind padding at the cost of a little more processing."
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "Text shown to the safety judge",
+          "description": "How much of the checked text the AI safety judges read. Text beyond it is not judged.",
+          "help": "You can only raise this above the platform value. Raising it judges long tool results in full but makes each judge call larger."
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "Model for the AI judge",
+          "description": "The model used to judge evaluation runs. Leave blank to let the platform choose from what your workspace already uses.",
+          "help": "Use a stronger model for more reliable grades or a cheaper one to save cost. The model must be available on your connected provider."
+        },
+        "callTimeoutSeconds": {
+          "label": "Longest time per judge call",
+          "description": "How long one judge call may take before it counts as failed.",
+          "help": "Raise it if a slower model often times out; failed calls make evaluation results incomplete."
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "Repeats per test case",
+          "description": "How many times each test case is run when a run does not say. More repeats show how consistent the agent is.",
+          "help": "Every repeat multiplies the cost and time of a run."
+        },
+        "defaultMode": {
+          "label": "How evaluations run",
+          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
+          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "options": {
+            "full": "Full pipeline in a sandbox",
+            "quick": "Quick: text answers only"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "Most parallel sub-tasks",
+        "description": "How many sub-tasks or helper agents one delegation call may start at once. Extra ones are reported as over the limit.",
+        "help": "Raise it for broad research jobs, lower it to keep cost and load down."
+      },
+      "branchTimeoutSeconds": {
+        "label": "Longest time per sub-task",
+        "description": "How long one delegated sub-task may run before it is reported as timed out.",
+        "help": "Raise it for slow sub-tasks. A hung sub-task never holds up the whole answer past this time."
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "Search breadth per result",
+          "description": "How many candidate passages a knowledge search gathers for every passage it finally returns.",
+          "help": "A higher number gives the ranking more to choose from, which helps when many documents are similar, but every search takes more time and compute. Lower it if searches feel slow. This does not change how many passages the agent sees."
+        },
+        "candidatePoolMax": {
+          "label": "Most candidates per search",
+          "description": "The ceiling on how many candidate passages one knowledge search gathers, however many results are requested.",
+          "help": "This protects speed and cost when an agent asks for many results at once. Raise it only if answers miss relevant passages in large knowledge bases."
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "Willingness to try less-tested options",
+          "description": "How strongly a learning policy that uses the confidence-bound method favours options it has tried less often.",
+          "help": "Zero always picks the option with the best average so far. Higher values keep trying other options for longer before settling. The default is the textbook balance. Only policies that use this method are affected."
+        },
+        "defaultExplorationRate": {
+          "label": "Starting exploration rate for new policies",
+          "description": "The share of turns a newly created learning policy spends trying a random option.",
+          "help": "This only sets the starting point for policies created from now on. Existing policies keep their own rate, which you change per agent where the policy is managed. Zero means a new policy never explores at the start."
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "Pause after a provider refuses a key",
+          "description": "How long background work skips a connected provider key after the provider refused it.",
+          "help": "While paused, scheduled and automatic jobs use another connected provider, or wait, instead of calling a key that keeps failing. People chatting are never blocked and always see the provider's real error. When the pause ends, one call is let through to check whether the key was fixed. Zero turns the pause off."
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "Administration",
+    "title": "Runtime settings",
+    "subtitle": "Tune how agents behave across this workspace: limits, approvals, quality checks, guardrails, memory and models. An agent's owner can still override a setting for one agent where that is allowed.",
+    "docsLink": "Help and docs",
+    "tabs": {
+      "label": "Runtime settings views",
+      "settings": "Settings",
+      "history": "Change history"
+    },
+    "readOnly": {
+      "title": "View only",
+      "body": "Only workspace admins can change these settings. You can see the value in force for each setting and where it comes from."
+    },
+    "summary": "{changed} of {total} settings are changed in this workspace. The rest use the platform values.",
+    "export": {
+      "button": "Export overrides",
+      "done": "Exported {count} workspace overrides to a file.",
+      "none": "Nothing to export: this workspace has not changed any setting."
+    },
+    "filters": {
+      "changedOnly": "Changed in this workspace only"
+    },
+    "jump": {
+      "label": "Jump to a group"
+    },
+    "anchor": {
+      "unknown": "There is no setting called \"{key}\" in this workspace. It may have been renamed or it is not available at workspace level."
+    },
+    "empty": {
+      "noneChanged": "No setting has been changed in this workspace yet. Everything uses the platform values."
+    },
+    "risk": {
+      "high": "High risk",
+      "security": "Security setting"
+    },
+    "security": {
+      "title": "Security settings",
+      "body": "These settings protect your workspace. They can only be made stricter than the platform value, never weaker. Each change needs a reason and is recorded in the audit log."
+    },
+    "resetGroup": {
+      "count": "{count} changed in this group",
+      "button": "Reset {group} to inherited",
+      "confirmTitle": "Reset {group} to inherited values?",
+      "confirmBody": "This removes {count} workspace overrides in this group. The settings go back to the platform values straight away, for every agent that does not have its own override. Each reset is recorded in the audit log.",
+      "confirm": "Reset to inherited",
+      "cancel": "Cancel",
+      "done": "Reset {count} settings to their inherited values.",
+      "partial": "Reset {done} settings; {failed} could not be reset. See the messages on the settings that failed.",
+      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+    },
+    "import": {
+      "button": "Import overrides",
+      "title": "Import workspace overrides",
+      "intro": "Choose a file exported from this page, or paste its contents. You will see exactly what would change before anything is saved.",
+      "reviewIntro": "Review what this file would change. Nothing has been saved yet.",
+      "fileLabel": "Overrides file (JSON)",
+      "pasteLabel": "Or paste the file contents",
+      "fileError": {
+        "empty": "Choose a file or paste its contents first.",
+        "invalidJson": "This is not valid JSON. Check that the whole file was copied.",
+        "wrongFormat": "This is not a settings overrides file exported from this page.",
+        "unsupportedVersion": "This file was made by a different version of the export and cannot be read.",
+        "noOverrides": "The file has no overrides section.",
+        "unreadable": "The file could not be read."
+      },
+      "summary": "{changes} to change, {unchanged} already in force, {problems} cannot be applied.",
+      "changesHeading": "Changes ({count})",
+      "before": "Now:",
+      "after": "After import:",
+      "resetMissing": "Also remove workspace overrides that are not in the file",
+      "resetMissingHelp": "Settings changed here but missing from the file go back to the platform value. Leave this off to only add or update.",
+      "resetsHeading": "Overrides to remove ({count})",
+      "resetFrom": "Currently {value}; goes back to the inherited value.",
+      "problemsHeading": "Cannot be applied ({count})",
+      "problem": {
+        "unknownKey": "There is no setting with this key.",
+        "notWorkspaceSetting": "This setting cannot be changed for the whole workspace.",
+        "locked": "The platform operator has pinned this setting, so it cannot be changed.",
+        "wrongType": "The value has the wrong type for this setting.",
+        "required": "A value is required.",
+        "notNumber": "The value must be a number.",
+        "notInteger": "The value must be a whole number.",
+        "belowMin": "The value is too low. The minimum is {min}.",
+        "aboveMax": "The value is too high. The maximum is {max}.",
+        "notAllowed": "This is not one of the allowed options.",
+        "tooShort": "The text is too short. The minimum length is {min}.",
+        "tooLong": "The text is too long. The maximum length is {max}.",
+        "precision": "The value is more precise than this setting allows."
+      },
+      "nothing": "Nothing in this file would change a setting.",
+      "reasonNote": "Some of these settings are high risk. After you apply, you will be asked for a reason that is recorded in the audit log.",
+      "back": "Back",
+      "cancel": "Cancel",
+      "review": "Review changes",
+      "apply": "Apply {count} changes",
+      "cancelled": "Import cancelled. No settings were changed.",
+      "done": "Import finished: {applied} settings updated.",
+      "donePartial": "Import partly done: {applied} settings updated, {failed} could not be applied. The review shows what is still left."
+    },
+    "history": {
+      "adminOnly": "The change history of workspace settings is only visible to workspace admins.",
+      "loading": "Loading change history",
+      "partial": "The history of {count} settings could not be loaded, so this list may be incomplete.",
+      "retry": "Try again",
+      "search": "Search the change history",
+      "searchPlaceholder": "Search by setting, person or reason",
+      "empty": "No setting has been changed in this workspace yet.",
+      "noMatch": "No change matches your search.",
+      "count": "Showing {shown} of {total} changes, newest first.",
+      "tableLabel": "Change history of workspace settings",
+      "when": "When",
+      "setting": "Setting",
+      "change": "Change",
+      "by": "Changed by",
+      "reason": "Reason",
+      "before": "Before:",
+      "after": "After:",
+      "inherited": "inherited value",
+      "unknownActor": "Unknown",
+      "noReason": "No reason given",
+      "showMore": "Show more",
+      "scope": "Level",
+      "scopeWorkspace": "Workspace",
+      "scopeAgent": "Agent {id}",
+      "scopeFilter": "Show changes at",
+      "filterAll": "All levels",
+      "filterWorkspace": "Workspace only",
+      "filterAgents": "Agents only",
+      "searchLoadedOnly": "The search covers the changes loaded so far.",
+      "loadError": "The change history could not be loaded. {message}",
+      "moreFailed": "More changes could not be loaded. {message}",
+      "loadingMore": "Loading"
+    }
+  },
+  "agentBehavior": {
+    "title": "Behavior and limits",
+    "intro": "Control how far this agent may go on a turn: how many tools it can call, how long it may run and how much it reads back. Anything you do not change here is inherited from your workspace.",
+    "saveFirst": "Save the agent first. Its behavior and limits can be set once it exists.",
+    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "tabs": {
+      "label": "Agent configuration",
+      "setup": "Setup",
+      "behavior": "Behavior & limits",
+      "unsaved": "Unsaved changes"
+    },
+    "links": {
+      "label": "Related pages",
+      "tenant": "Change workspace defaults",
+      "playground": "Try it in the playground",
+      "prompts": "This agent's prompts",
+      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
+      "approvals": "This agent's approvals",
+      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
+      "turns": "Turn timeline",
+      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+    },
+    "readOnly": {
+      "locked": "This agent is locked for editing, so these values are read-only.",
+      "access": "You can view these values but your access to this agent does not allow changing them."
+    },
+    "unsaved": "You have unsaved changes in this tab. Save or discard them below before you leave.",
+    "inheritNote": "Each setting shows where its value comes from. Changing one here overrides it for this agent only; reset it to inherit the workspace value again.",
+    "others": {
+      "title": "Other controls for this agent",
+      "intro": "These controls are not part of the settings above, so they stay on the Setup tab.",
+      "generation": "Creativity and length of replies (temperature, top-p, maximum tokens) and extra sampling options.",
+      "generationLink": "Go to generation tuning",
+      "autonomy": "Autonomy level, spending cap per run, tool rules and when a person must approve.",
+      "autonomyLink": "Go to reasoning and autonomy"
+    },
+    "discard": {
+      "title": "Leave without saving?",
+      "description": "You have unsaved changes to this agent's behavior and limits. If you leave now they are lost.",
+      "stay": "Stay and keep editing",
+      "leave": "Leave and discard changes"
+    },
+    "summary": {
+      "title": "How this agent behaves right now",
+      "subtitle": "The values in force for this agent after its own overrides, your workspace settings and the platform settings are applied.",
+      "loading": "Loading the current behavior",
+      "error": "The current behavior could not be loaded. {message}",
+      "retry": "Try again",
+      "empty": "No behavior settings are available for this agent yet.",
+      "facts": {
+        "steps": "Tool calls per turn",
+        "turnTimeout": "Time per turn",
+        "toolTimeout": "Time per tool call",
+        "outputCap": "Tool output kept",
+        "continuation": "Continuation passes",
+        "approvals": "Approvals",
+        "judge": "Quality judge model",
+        "model": "Model"
+      },
+      "tier": {
+        "SUPERVISED": "Supervised: every tool call waits for a person",
+        "SEMI_AUTONOMOUS": "Semi-autonomous: your workspace rules decide",
+        "FULLY_AUTONOMOUS": "Fully autonomous: tool calls never wait"
+      },
+      "approvalResumes": "Carries on by itself after an approval",
+      "approvalStops": "Waits for a new message after an approval",
+      "judgeDefault": "Chosen by the platform",
+      "overrides": {
+        "none": "This agent uses your workspace values everywhere.",
+        "some": "Settings overridden for this agent: {count}."
+      }
+    },
+    "impact": {
+      "title": "What this means",
+      "steps": "This agent may call up to {count} tools in one turn. After that it is asked to answer with what it has.",
+      "stepsTierSupervised": "This agent is Supervised, so its real ceiling is lower than that base figure. Set your own value for this agent to use an exact number.",
+      "stepsTierFull": "This agent is Fully autonomous, so its real ceiling is higher than that base figure. Set your own value for this agent to use an exact number.",
+      "turnTimeout": "One turn is cut off after {duration}.",
+      "turnTimeoutNone": "A turn has no time limit.",
+      "toolTimeout": "One tool call is cut off after {duration}.",
+      "toolTimeoutNone": "A tool call has no time limit.",
+      "outputCap": "A tool result longer than {chars} is shortened before the agent reads it.",
+      "continuation": "If a reply is cut off, the agent may continue it up to {count} more times.",
+      "continuationNone": "A reply that is cut off is not continued.",
+      "retrieval": "For each question it reads the best {count} knowledge matches.",
+      "retrievalScored": "For each question it reads the best {count} knowledge matches and ignores matches that score below {score}.",
+      "approvalContinuationOn": "After a person approves a waiting action, the agent finishes the task by itself.",
+      "approvalContinuationOff": "After a person approves a waiting action, the turn ends and has to be followed up manually.",
+      "guardClosed": "If a safety check breaks, the action is refused.",
+      "guardOpen": "If a safety check breaks, the action is let through.",
+      "branches": "One delegation call may start up to {count} sub-tasks at once."
+    }
+  },
+  "controls": {
+    "eyebrow": "Help",
+    "title": "Where do I control...?",
+    "subtitle": "Every control that shapes how your agents behave, and the page it lives on. Search by what you want to change.",
+    "breadcrumb": {
+      "label": "Breadcrumb",
+      "console": "Console",
+      "controls": "Controls"
+    },
+    "related": {
+      "label": "Other controls"
+    },
+    "search": {
+      "label": "Search controls",
+      "placeholder": "For example: timeout, approval, prompt, memory",
+      "count": "{count} matching controls",
+      "none": "Nothing matches \"{query}\". Try a shorter word.",
+      "noSettings": "No setting matches your search."
+    },
+    "areasHeading": "Control areas",
+    "areasIntro": "These pages hold the controls that are not a single number: instructions, approval rules, safety rules and the record of what a turn did.",
+    "openArea": "Open",
+    "needsAccess": "Ask a workspace admin for access to this page.",
+    "settingsHeading": "Every runtime setting",
+    "settingsIntro": "Each setting can be changed for the whole workspace, for one agent, or both. An agent's own value wins over the workspace value. Pick a link to land on the setting itself.",
+    "loading": "Loading the list of settings",
+    "loadFailed": "The list of settings could not be loaded. {message}",
+    "retry": "Try again",
+    "emptyCatalog": "This workspace has no runtime settings to show.",
+    "changeWorkspace": "Change for the workspace",
+    "changeAgent": "Change on an agent",
+    "workspaceOnly": "Workspace-wide only",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "Agent runtime limits",
+        "intro": "How much work one turn may do: tool calls, time, result size and retrieval."
+      },
+      "behaviour-settings": {
+        "title": "Behaviour settings",
+        "intro": "How replies are finished and cached, how approvals continue, how safety checks behave, and how memory, search and delegation work."
+      },
+      "other": {
+        "title": "Other settings",
+        "intro": "Settings that have no section of their own."
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "Runtime settings",
+        "summary": "Limits, approvals, quality checks, safety strictness, memory and delegation for the whole workspace.",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers"
+      },
+      "prompts": {
+        "title": "Instructions",
+        "summary": "The prompts the platform gives the model: view every one, override it for the workspace or an agent, and preview the result.",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry"
+      },
+      "approvals": {
+        "title": "Approvals",
+        "summary": "The queue of actions waiting for a person, the rules for which tools need approval, and what happens after you decide.",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation"
+      },
+      "guardrails": {
+        "title": "Guardrails",
+        "summary": "Patterns this workspace refuses to pass through, and the content policy applied to tool results.",
+        "keywords": "safety rules block filter policy content patterns"
+      },
+      "turns": {
+        "title": "Turn inspector",
+        "summary": "The recorded timeline of one agent turn: what was asked, which tools ran, what each step cost and why it stopped.",
+        "keywords": "turn timeline journal trace replay history steps debug"
+      },
+      "agentBehavior": {
+        "title": "Agent behavior and limits",
+        "summary": "On an agent's page: its own limits and behaviour settings, with where each value comes from and a reset to the workspace value.",
+        "keywords": "agent override per agent behavior limits tab"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "Made of these prompt blocks",
+    "blocksCount": "{n} block(s)",
+    "blockDefault": "shipped default",
+    "blockOverride": "{scope} override v{version}",
+    "blockAgentConfig": "agent's own prompt",
+    "blockCode": "platform code",
+    "blockTokens": "~{tokens} tokens",
+    "blockHash": "wording hash"
+  },
+  "toolApproval": {
+    "continuing": "The agent is carrying on with the task.",
+    "continueNotStarted": "The agent was not restarted automatically after this decision. Send a message to have it carry on.",
+    "continueTimedOut": "The agent has not finished carrying on yet. Its reply will be in the conversation when it does; reload to check."
+  },
+  "promptDirectives": {
+    "tabRegistry": "All prompts",
+    "tabAgentPreview": "Preview final prompt",
+    "regTitle": "Every prompt",
+    "regIntro": "All text the platform writes for a model, with the wording in force now, where it comes from and its version. Pick a scope, open a prompt to change it, and see every earlier version. A change reaches all servers within about half a minute.",
+    "regScopeLabel": "Change at scope",
+    "regScope_tenant": "This workspace",
+    "regScope_agent": "One agent",
+    "regScope_platform": "Whole platform",
+    "regAgentLabel": "Agent",
+    "regAgentPlaceholder": "Choose an agent",
+    "regAgentsFailed": "Could not load your agents.",
+    "regPickAgent": "Choose an agent to see and change its prompts.",
+    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regSearchLabel": "Search prompts",
+    "regSearchPlaceholder": "Key, title or description",
+    "regRiskLabel": "Risk class",
+    "regRiskAll": "All risk classes",
+    "regRisk_STEERS_EVERY_TURN": "Steers every turn",
+    "regRisk_SECONDARY_CALL": "Secondary model call",
+    "regRisk_USER_VISIBLE": "Shown to people",
+    "regRisk_TOOL_DESCRIPTION": "Tool description",
+    "regOnlyCustomised": "Only customised",
+    "regPlatformReadOnly": "Platform-wide prompts can be read here; only a platform admin can change them.",
+    "regLoadFailed": "Could not load the prompts.",
+    "regCount": "Showing {shown} of {total} prompts.",
+    "regEmptyTitle": "No prompts match",
+    "regEmptyBody": "Change the search or the filters.",
+    "regSource_DEFAULT": "Shipped default",
+    "regSource_FALLBACK": "Shipped default (overrides unavailable)",
+    "regSource_PLATFORM": "Platform",
+    "regSource_TENANT": "Workspace",
+    "regSource_AGENT": "Agent",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "Retired",
+    "regRetiredBody": "This prompt no longer sends any text, so there is nothing to change.",
+    "regEffectiveOff": "Switched off: nothing is sent.",
+    "regEffectiveTokens": "In force now, about {tokens} tokens.",
+    "regEffectiveLabel": "Wording in force for {title}",
+    "regOpenEditor": "Edit {title}",
+    "regCloseEditor": "Close {title}",
+    "regEditingOverride": "Editing the {scope} version, currently v{version}.",
+    "regEditingNone": "No {scope} version yet. It starts from the wording below it: {below}.",
+    "regPlaceholders": "Filled in at runtime:",
+    "regRequired": "(required)",
+    "regProblemsTitle": "Fix this before saving",
+    "regReasonLabel": "Reason for the change (kept in the history)",
+    "regReasonPlaceholder": "Optional",
+    "regConflict": "Someone changed this prompt while you were editing. Close and reopen it to see their version, then try again.",
+    "regRevert": "Revert to {to}",
+    "regShowHistory": "History",
+    "regHideHistory": "Hide history",
+    "regHistoryLoading": "Loading history…",
+    "regHistoryFailed": "Could not load the history.",
+    "regHistoryEmpty": "No versions yet at this scope.",
+    "regVersion": "Version {version}",
+    "regAction_CREATE": "Created",
+    "regAction_UPDATE": "Changed",
+    "regAction_REVERT": "Reverted",
+    "regAction_MIGRATE": "Migrated",
+    "regCurrent": "Current",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "unknown",
+    "regReason": "Reason: {reason}",
+    "regShowDiff": "Show changes in version {version}",
+    "regHideDiff": "Hide changes in version {version}",
+    "regDiffLabel": "Changes made by version {version}",
+    "regNoDiff": "No text changed in this version.",
+    "regRestore": "Restore version {version}",
+    "regRestoreReason": "Restored the wording of version {version}",
+    "regRestoreFailed": "Could not restore that version.",
+    "regRestoreAck": "I understand that restoring a version of {title} can weaken safety.",
+    "regPreviewTitle": "Preview final prompt",
+    "regPreviewIntro": "Builds the real system prompt and tool list of an agent exactly as a turn would, without calling a model. Each block shows the prompt key, the scope and the version its wording comes from.",
+    "regPreviewMessageLabel": "Sample user message (optional)",
+    "regPreviewMessagePlaceholder": "Used to choose tools and recalled memory, as for a real message.",
+    "regPreviewSmallModel": "Preview for a small model",
+    "regPreviewBuild": "Build preview",
+    "regPreviewBuilding": "Building…",
+    "regPreviewFailed": "Could not build the preview.",
+    "regPreviewTotals": "About {prompt} tokens of system text and {tools} tokens of tool definitions (estimates).",
+    "regPreviewOverBudgetTitle": "Over the token budget",
+    "regPreviewOverBudget": "The standing system text is over the configured budget of {budget} tokens. Nothing is cut; consider shortening a prompt.",
+    "regPreviewMessageHeading": "Message: {message}",
+    "regPreviewTokens": "~{tokens} tokens",
+    "regPreviewTools": "Tools ({count})",
+    "regPreviewNoTools": "This agent offers no tools.",
+    "regPreviewNotes": "What this preview cannot know",
+    "regOriginDefault": "shipped default",
+    "regOriginOverride": "{scope} override v{version}",
+    "regOriginAgentConfig": "agent's own system prompt",
+    "regOriginCode": "platform code"
   }
 }

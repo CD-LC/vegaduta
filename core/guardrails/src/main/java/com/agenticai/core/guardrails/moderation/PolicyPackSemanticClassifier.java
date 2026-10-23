@@ -1,8 +1,13 @@
 package com.agenticai.core.guardrails.moderation;
 
+import com.agenticai.core.guardrails.GuardrailPrompts;
+import com.agenticai.core.guardrails.GuardrailSettings;
+import com.agenticai.core.guardrails.GuardrailTuningProperties;
+import com.agenticai.core.prompts.PromptResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,28 +35,34 @@ public class PolicyPackSemanticClassifier {
     private static final Logger log = LoggerFactory.getLogger(PolicyPackSemanticClassifier.class);
 
     /**
-     * Cap on how much of the content is embedded into the judge prompt. Same
-     * rationale and value as {@code ToxicityGuardrail}'s cap - an oversized
-     * payload could otherwise push this call's own classification
-     * instructions out of the model's effective attention window.
+     * The judge window and sampling ({@code app.guardrails.judge.*}): an oversized payload could
+     * otherwise push this call's own classification instructions out of the model's effective
+     * attention window.
      */
-    private static final int MAX_JUDGE_INPUT_CHARS = 4000;
+    private final GuardrailTuningProperties tuning;
 
-    private static final String SYSTEM_PROMPT_TEMPLATE = """
-        You are an independent content-safety classifier. You are given a piece of content and ONE
-        category to assess. Decide how confident you are that the content violates that specific
-        category, on a 0-100 scale, where 0 = definitely does not, 100 = definitely does.
+    /** Code defaults (no {@link GuardrailTuningProperties} bean). */
+    public PolicyPackSemanticClassifier() {
+        this(new GuardrailTuningProperties());
+    }
 
-        Category: %s
-        What this category means: %s
+    @Autowired
+    public PolicyPackSemanticClassifier(GuardrailTuningProperties tuning) {
+        this.tuning = tuning;
+    }
 
-        Judge ONLY this category. Do not flag content that merely mentions or discusses the topic in a
-        neutral, educational, journalistic, or clearly fictional way - only content that actually
-        exhibits the harmful category itself.
+    /**
+     * Where the judge prompt ({@code judge.policy_pack}) and the category meanings ({@code
+     * judge.policy_pack.<category>}) come from; the shipped texts unless the application wires the registry.
+     */
+    private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
 
-        Respond with EXACTLY one line in this format, no other text:
-        SCORE: <integer 0-100>
-        """;
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        if (resolver != null) {
+            this.prompts = resolver;
+        }
+    }
 
     /**
      * @param chatClient the turn's ChatClient - nullable; null means "no
@@ -64,10 +75,11 @@ public class PolicyPackSemanticClassifier {
             return 0;
         }
         try {
-            String system = String.format(SYSTEM_PROMPT_TEMPLATE, pack.configKey(), describe(pack));
-            String verdict = chatClient.prompt()
+            String system = GuardrailPrompts.scopedText(
+                prompts, GuardrailPrompts.JUDGE_POLICY_PACK, "category", pack.configKey(), "description", describe(pack));
+            String verdict = tuning.getJudge().apply(chatClient.prompt()
                 .system(system)
-                .user("Content to assess:\n" + truncateForJudge(content))
+                .user("Content to assess:\n" + GuardrailSettings.truncateForJudge(tuning, content)))
                 .call()
                 .content();
             return parseScore(verdict);
@@ -91,22 +103,15 @@ public class PolicyPackSemanticClassifier {
         return Math.max(0, Math.min(100, score));
     }
 
-    private static String truncateForJudge(String text) {
-        if (text.length() <= MAX_JUDGE_INPUT_CHARS) {
-            return text;
-        }
-        return text.substring(0, MAX_JUDGE_INPUT_CHARS) + " …[truncated]";
-    }
-
     private String describe(ModerationPolicyPack pack) {
         return switch (pack) {
-            case FOUL_LANGUAGE -> "profanity, obscene or vulgar language";
-            case RESTRICTED_CONTENT -> "content a business would restrict for brand-safety reasons, such as explicit adult content, gambling promotion, or weapons sales";
-            case PII -> "personally identifiable information such as real names tied to contact details, emails, phone numbers, government IDs, or payment card numbers";
-            case HARASSMENT -> "harassment, bullying, threats, or targeted abuse of a person";
-            case EXTREMISM -> "hate speech or violent-extremist rhetoric targeting people by a protected characteristic (this is about rhetoric, not a specific credible terrorism threat)";
-            case SELF_HARM -> "content expressing intent to self-harm or suicide, or encouraging others to do so";
-            case ILLEGAL -> "solicitation or facilitation of clearly illegal activity - judge intent, not topic; reporting, research and fiction must not score";
+            case FOUL_LANGUAGE -> categoryText("foul_language");
+            case RESTRICTED_CONTENT -> categoryText("restricted_content");
+            case PII -> categoryText("pii");
+            case HARASSMENT -> categoryText("harassment");
+            case EXTREMISM -> categoryText("extremism");
+            case SELF_HARM -> categoryText("self_harm");
+            case ILLEGAL -> categoryText("illegal");
             // This branch exists ONLY to keep the switch total (it has no
             // default, deliberately, so a new pack is a compile error here
             // rather than a silent no-op). It is unreachable: CSAM's
@@ -116,5 +121,10 @@ public class PolicyPackSemanticClassifier {
             // classifier seam, designed with counsel, never an LLM judge.
             case CSAM -> "unreachable - legally gated pack, never enabled (see ModerationPolicyPack.CSAM)";
         };
+    }
+
+    /** What the category means, from {@code judge.policy_pack.<category>}. */
+    private String categoryText(String category) {
+        return GuardrailPrompts.scopedText(prompts, GuardrailPrompts.JUDGE_POLICY_PACK_CATEGORY_PREFIX + category);
     }
 }

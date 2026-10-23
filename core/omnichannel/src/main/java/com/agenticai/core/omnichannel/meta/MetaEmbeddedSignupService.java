@@ -66,10 +66,10 @@ public class MetaEmbeddedSignupService {
     public MetaEmbeddedSignupService(
         MetaGraphApiClient graphApiClient,
         MetaWhatsAppCredentialService credentialService,
-        @Value("${app.omnichannel.meta.embedded-signup.app-id:}") String appId,
-        @Value("${app.omnichannel.meta.embedded-signup.app-secret:}") String appSecret,
-        @Value("${app.omnichannel.meta.embedded-signup.config-id:}") String configId,
-        @Value("${app.omnichannel.meta.embedded-signup.redirect-uri:}") String redirectUri
+        @Value("${app.omnichannel.meta.embedded-signup.app-id:${app.meta.embedded-signup.app-id:}}") String appId,
+        @Value("${app.omnichannel.meta.embedded-signup.app-secret:${app.meta.embedded-signup.app-secret:}}") String appSecret,
+        @Value("${app.omnichannel.meta.embedded-signup.config-id:${app.meta.embedded-signup.config-id:}}") String configId,
+        @Value("${app.omnichannel.meta.embedded-signup.redirect-uri:${app.meta.embedded-signup.redirect-uri:}}") String redirectUri
     ) {
         this.graphApiClient = graphApiClient;
         this.credentialService = credentialService;

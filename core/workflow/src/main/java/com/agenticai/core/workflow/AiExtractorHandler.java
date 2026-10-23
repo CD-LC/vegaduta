@@ -7,6 +7,7 @@ import static com.agenticai.core.workflow.WorkflowAiNodeSupport.listOfStrings;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.oneLine;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.str;
 import com.agenticai.core.chat.structured.StructuredOutput;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,6 +33,13 @@ import java.util.regex.Pattern;
 final class AiExtractorHandler {
 
     private static final Pattern PARAM_NAME = Pattern.compile("[A-Za-z][A-Za-z0-9_]{0,63}");
+
+    /** The registry slot of the owning node handler; shipped text until it is wired. */
+    private PromptSlot prompts = new PromptSlot();
+
+    void usePrompts(PromptSlot slot) {
+        this.prompts = slot;
+    }
 
     private final ObjectProvider<WorkflowAiModel> modelProvider;
     private final ObjectMapper objectMapper;
@@ -59,7 +67,7 @@ final class AiExtractorHandler {
 
         @Override
         String system() {
-            return EXTRACTOR_SYSTEM;
+            return prompts.text(EXTRACTOR_KEY);
         }
 
         @Override
@@ -81,10 +89,10 @@ final class AiExtractorHandler {
         @Override
         String repairPrompt(String user, List<String> issues) {
             return user
-                    + "\n\nYour previous reply could not be used: "
-                    + String.join("; ", issues)
-                    + ".\nReply again with ONLY the corrected JSON object - no markdown fences, no commentary. "
-                    + "Use null for any value the text does not state.";
+                    + prompts.text(
+                            EXTRACTOR_REPAIR_KEY,
+                            null,
+                            java.util.Map.of("issues", String.join("; ", issues)));
         }
 
         @Override

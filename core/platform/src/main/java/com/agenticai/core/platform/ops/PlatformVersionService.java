@@ -87,7 +87,7 @@ public class PlatformVersionService {
         @Value("${BUILD_TIME:}") String buildTime,
         @Value("${app.sidecar.base-url:}") String sidecarBaseUrl,
         @Value("${code-intel.enabled:false}") boolean codeIntelEnabled,
-        @Value("${code-intel.base-url:}") String codeIntelBaseUrl,
+        @Value("${code-intel.base-url:http://localhost:8090}") String codeIntelBaseUrl,
         @Value("${app.platform.ops.academy-base-url:}") String academyBaseUrl,
         @Value("${app.platform.ops.app-builder-base-url:}") String appBuilderBaseUrl,
         @Value("${app.platform.ops.web-base-url:}") String webBaseUrl,

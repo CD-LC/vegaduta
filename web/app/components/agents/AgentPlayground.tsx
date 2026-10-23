@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "../../lib/i18n";
 import { Card } from "../ui/card";
 import OnDeviceSetupNudge from "../edge/OnDeviceSetupNudge";
@@ -13,6 +13,9 @@ import { useRequestLifecycle, type RequestLifecycleController } from "../../lib/
 import { EdgeOptInBanner } from "./playground/EdgeOptInBanner";
 import { Composer } from "./playground/Composer";
 import { LabOverlayHost } from "./playground/LabOverlayHost";
+import { LiveStatusBar } from "./playground/LiveStatusBar";
+import { deriveLiveChips } from "./playground/liveStatus";
+import { RunSettingsDrawer } from "./playground/runSettings/RunSettingsDrawer";
 import { MessageList } from "./playground/MessageList";
 import { PlaygroundHeader } from "./playground/PlaygroundHeader";
 import { SessionSidebar } from "./playground/SessionSidebar";
@@ -21,6 +24,7 @@ import type { PlaygroundContext } from "./playground/sendContext";
 import type { PlaygroundAgent, VisionFallbackOffer } from "./playground/types";
 import { useAttachments } from "./playground/useAttachments";
 import { useChatStream } from "./playground/useChatStream";
+import { useApprovalContinuation } from "./useApprovalContinuation";
 import { useEdgeState } from "./playground/useEdgeState";
 import { useEdgeTurns } from "./playground/useEdgeTurns";
 import { useFaceRecognition } from "./playground/useFaceRecognition";
@@ -64,12 +68,15 @@ export { PLAYGROUND_STORAGE_PREFIX } from "./playground/persistence";
 export default function AgentPlayground({
   agent,
   initialLabOpen,
+  initialRunSettingsOpen,
 }: {
   agent: PlaygroundAgent | null;
   // Deep-link entry (?lab=open via /agents - see AgentWorkbench): starts the
   // lab overlay open so a quality-page link lands inside the lab, not next
   // to it. Read once at mount; closing the lab stays local state.
   initialLabOpen?: boolean;
+  // Starts with the "Run settings" drawer open (previews, deep links). Read once at mount.
+  initialRunSettingsOpen?: boolean;
 }) {
   const t = useTranslations("agentPlayground");
   // WebMCP (E-2b): publish this agent's edge-safe tools to the browser's
@@ -86,6 +93,18 @@ export default function AgentPlayground({
 
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  // A decided tool approval: core carries the task on itself; its reply is appended to the transcript here and
+  // the composer stays off until it has (a message typed meanwhile would race the agent's own turn).
+  const approvalContinuation = useApprovalContinuation({
+    agentId: agent?.id ?? null,
+    sessionId,
+    onReply: (reply) =>
+      setTurns((prev) => [
+        ...prev,
+        reply.failed ? { role: "assistant", content: reply.content, failed: true } : { role: "assistant", content: reply.content },
+      ]),
+  });
+  const busy = sending || approvalContinuation.continuing;
   // Artifacts pane (flag-gated, default off), the same hook ChatPanel uses, so
   // a reply gets the same code block and "Open as artifact" offer whichever
   // path produced it. Inert when the flag is off.
@@ -97,6 +116,17 @@ export default function AgentPlayground({
       inputRef.current?.focus();
     },
   });
+  // "Run settings" drawer, and how many parked tool calls are waiting for a decision (feeds the status chips).
+  const [runSettingsOpen, setRunSettingsOpen] = useState(!!initialRunSettingsOpen);
+  // The tool switches of the Run settings drawer: a selection for the runs of THIS playground session only. It
+  // is sent with each message as `toolNames` (narrowing the agent's own tools for that run) and is never saved to
+  // the agent. Kept with the agent id so a selection made for one agent can never ride a message to another.
+  const [runToolsState, setRunToolsState] = useState<{ agentId: string; names: string[] } | null>(null);
+  const runToolNames = runToolsState && runToolsState.agentId === agent?.id ? runToolsState.names : null;
+  const runSettingsButtonRef = useRef<HTMLButtonElement | null>(null);
+  // False until this component has run its agent effect once (the mount itself is not a switch).
+  const agentSwitchSeenRef = useRef(false);
+  const [waitingApprovals, setWaitingApprovals] = useState(0);
   const [labOpen, setLabOpen] = useState(!!initialLabOpen);
   // useState's initial value only applies at mount - a client-side
   // navigation to /agents?lab=open while already on /agents must also open
@@ -173,11 +203,47 @@ export default function AgentPlayground({
     setSending(false);
     edge.setEdgePhase(null);
     edge.setEdgeWarmingPercent(null);
+    // The drawer shows the previous agent's settings; close it rather than leave a stale panel over the new one
+    // (not on the first run: a drawer opened at mount stays open).
+    if (agentSwitchSeenRef.current) setRunSettingsOpen(false);
+    setRunToolsState(null);
+    agentSwitchSeenRef.current = true;
+    setWaitingApprovals(0);
     // Re-running on agent change is the whole point.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agent?.id]);
 
   usePersistTranscript(agent?.id, sessionId, turns, sending);
+
+  // The live status chips: derived from the turn in flight (its step events), the approvals waiting for a person
+  // and the request lifecycle's retry counter. An on-device turn has its own indicator, so it adds no chips.
+  const lastTurn = turns[turns.length - 1];
+  const liveSteps = lastTurn?.role === "assistant" && lastTurn.pending ? lastTurn.steps : undefined;
+  const liveHasText = Boolean(lastTurn?.role === "assistant" && lastTurn.pending && lastTurn.content);
+  const liveChips = useMemo(
+    () =>
+      edge.edgePhase
+        ? []
+        : deriveLiveChips({
+            steps: liveSteps,
+            sending,
+            hasText: liveHasText,
+            waitingApprovals,
+            approvalContinuing: approvalContinuation.continuing,
+            attempt: chatSnapshot?.attempt,
+            maxAttempts: chatSnapshot?.maxAttempts,
+          }),
+    [
+      edge.edgePhase,
+      liveSteps,
+      sending,
+      liveHasText,
+      waitingApprovals,
+      approvalContinuation.continuing,
+      chatSnapshot?.attempt,
+      chatSnapshot?.maxAttempts,
+    ]
+  );
 
   function newSession() {
     setSessionId(null);
@@ -231,6 +297,7 @@ export default function AgentPlayground({
     matchRecognizedFace: face.matchRecognizedFace,
     withRecognizedName: face.withRecognizedName,
     tryEnrollFaceFromNameIntroduction: face.tryEnrollFaceFromNameIntroduction,
+    runToolNames,
   };
   const { sendServerTurn } = useServerTurn(ctx);
   const { sendViaEdge, sendFramesLocally } = useEdgeTurns(ctx);
@@ -258,7 +325,7 @@ export default function AgentPlayground({
 
   return (
     <ArtifactLayout enabled={artifacts.enabled} pane={artifacts.pane}>
-      <Card className="flex h-full min-h-[32rem] flex-col gap-0 overflow-hidden p-0">
+      <Card className="relative flex h-full min-h-[32rem] flex-col gap-0 overflow-hidden p-0">
         <PlaygroundHeader
           agent={agent}
           sessionId={sessionId}
@@ -268,6 +335,10 @@ export default function AgentPlayground({
           stopSpeaking={voice.stopSpeaking}
           onOpenLab={() => setLabOpen(true)}
           onNewSession={newSession}
+          runSettingsOpen={runSettingsOpen}
+          onToggleRunSettings={() => setRunSettingsOpen((open) => !open)}
+          runSettingsButtonRef={runSettingsButtonRef}
+          runToolsLimited={runToolNames !== null}
         />
         <EdgeOptInBanner
           edgeTier0Ready={edge.edgeTier0Ready}
@@ -285,7 +356,7 @@ export default function AgentPlayground({
           capsLoading={attach.capsLoading}
           edgeOptIn={edge.edgeOptIn}
           edgeVisionReady={edge.edgeVisionReady}
-          busy={sending || attach.attaching}
+          busy={busy || attach.attaching}
           stagedFrames={stagedFrames}
           onStagedFramesChange={setStagedFrames}
           visionOnDevice={visionOnDevice}
@@ -297,10 +368,12 @@ export default function AgentPlayground({
             withRecognizedName: face.withRecognizedName,
           }}
         />
+        <LiveStatusBar chips={liveChips} />
         <MessageList
           agent={agent}
           sessionId={sessionId}
           sending={sending}
+          approvalContinuation={approvalContinuation}
           error={error}
           turns={turns}
           visibleTurns={transcript.visibleTurns}
@@ -331,6 +404,7 @@ export default function AgentPlayground({
             expandedReplyTriggerRef.current = trigger;
             setExpandedTurnIndex(index);
           }}
+          onWaitingApprovalsChange={setWaitingApprovals}
         />
         <Composer
           agent={agent}
@@ -338,7 +412,7 @@ export default function AgentPlayground({
           onInputChange={setInput}
           inputRef={inputRef}
           onSend={(e) => void send.handleSend(e)}
-          sending={sending}
+          sending={busy}
           attaching={attach.attaching}
           stagedFrames={stagedFrames}
           chatSnapshot={chatSnapshot}
@@ -370,7 +444,7 @@ export default function AgentPlayground({
           agent={agent}
           sessionId={sessionId}
           turns={turns}
-          busy={sending || attach.attaching}
+          busy={busy || attach.attaching}
           expandedTurnIndex={expandedTurnIndex}
           onCloseExpanded={() => {
             setExpandedTurnIndex(null);
@@ -384,6 +458,16 @@ export default function AgentPlayground({
           }}
           onForkRerun={forkRerun}
         />
+        {runSettingsOpen && agent && (
+          <RunSettingsDrawer
+            agent={agent}
+            sessionId={sessionId}
+            onClose={() => setRunSettingsOpen(false)}
+            returnFocusRef={runSettingsButtonRef}
+            runTools={runToolNames}
+            onRunToolsChange={(names) => setRunToolsState(names ? { agentId: agent.id, names } : null)}
+          />
+        )}
       </Card>
     </ArtifactLayout>
   );

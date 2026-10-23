@@ -67,7 +67,7 @@ class AgentLabControllerTest {
 
     @Test
     void capabilitiesDelegate() {
-        LabCapabilitiesResponse caps = new LabCapabilitiesResponse(false, "PLAN", 60, 120, 16, 8, 60);
+        LabCapabilitiesResponse caps = new LabCapabilitiesResponse(false, "PLAN", 60, 120, 16, 8, 60, false);
         when(runService.capabilities(agentId)).thenReturn(caps);
 
         assertSame(caps, controller.capabilities(agentId));

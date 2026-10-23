@@ -49,4 +49,9 @@ export interface PlaygroundContext {
   matchRecognizedFace: (dataUrl: string) => Promise<string | null>;
   withRecognizedName: (baseMessage: string, personName: string | null) => string;
   tryEnrollFaceFromNameIntroduction: (userMessage: string, sentFrames: StagedFrame[]) => Promise<void>;
+  /**
+   * The run-scoped tool selection from the Run settings drawer, sent as `toolNames` with each hosted message: the
+   * run may use only these of the agent's tools. `null`/absent = the agent's own tools (nothing is sent).
+   */
+  runToolNames?: string[] | null;
 }

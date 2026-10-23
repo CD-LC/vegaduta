@@ -1,5 +1,8 @@
 package com.agenticai.core.guardrails.procedures;
 
+import com.agenticai.core.guardrails.GuardrailPrompts;
+import com.agenticai.core.prompts.PromptContext;
+import com.agenticai.core.prompts.PromptResolver;
 import java.util.List;
 
 /**
@@ -28,17 +31,28 @@ public final class ProcedurePromptBlock {
     private ProcedurePromptBlock() {
     }
 
-    /** Empty string when the agent has no active procedures - callers append unconditionally. */
+    /**
+     * Empty string when the agent has no active procedures - callers append unconditionally. The shipped wording
+     * (no registry overrides); see {@link #render(List, PromptResolver, PromptContext)}.
+     */
     public static String render(List<ProcedureService.ResolvedProcedure> procedures) {
+        return render(procedures, PromptResolver.defaultsOnly(), PromptContext.none());
+    }
+
+    /**
+     * As {@link #render(List)}, with the wording from the prompt registry ({@code procedures.header}, {@code
+     * procedures.marker.*}) resolved for {@code context}, so a tenant's or an agent's override applies. The layout
+     * (the "Operating procedures" heading, numbering, [enforced: ...] brackets) is code.
+     */
+    public static String render(
+            List<ProcedureService.ResolvedProcedure> procedures, PromptResolver prompts, PromptContext context) {
         if (procedures == null || procedures.isEmpty()) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
         sb.append("\n\n## Operating procedures\n")
-            .append("This workspace requires you to follow the procedures below. Treat them as binding ")
-            .append("business rules, not suggestions: they sit above your general instructions. Rules ")
-            .append("marked [enforced: ...] are checked mechanically by the platform - calls that violate ")
-            .append("them are blocked before they run.\n");
+            .append(GuardrailPrompts.text(prompts, GuardrailPrompts.PROCEDURES_HEADER, context.agentId()))
+            .append('\n');
         int emitted = 0;
         for (ProcedureService.ResolvedProcedure resolved : procedures) {
             if (emitted >= MAX_RULES_IN_PROMPT) {
@@ -57,7 +71,7 @@ public final class ProcedurePromptBlock {
                 n++;
                 emitted++;
                 sb.append(n).append(". ").append(singleLine(rule.getInstruction()));
-                String marker = enforcementMarker(rule);
+                String marker = enforcementMarker(rule, prompts, context);
                 if (marker != null) {
                     sb.append(" [enforced: ").append(marker).append(']');
                 }
@@ -67,15 +81,16 @@ public final class ProcedurePromptBlock {
         return sb.toString();
     }
 
-    private static String enforcementMarker(ProcedureRule rule) {
+    private static String enforcementMarker(ProcedureRule rule, PromptResolver prompts, PromptContext context) {
         if (rule.getGuardKind() == null || rule.getGuardTool() == null) {
             return null;
         }
-        return switch (rule.getGuardKind()) {
-            case FORBID_TOOL -> "tool '" + rule.getGuardTool() + "' is blocked";
-            case REQUIRE_APPROVAL -> "tool '" + rule.getGuardTool() + "' requires human approval";
-            case REQUIRE_TOOL_BEFORE -> "tool '" + rule.getGuardTool() + "' only after its prerequisite tool";
+        String key = switch (rule.getGuardKind()) {
+            case FORBID_TOOL -> GuardrailPrompts.PROCEDURE_MARKER_FORBID_TOOL;
+            case REQUIRE_APPROVAL -> GuardrailPrompts.PROCEDURE_MARKER_REQUIRE_APPROVAL;
+            case REQUIRE_TOOL_BEFORE -> GuardrailPrompts.PROCEDURE_MARKER_REQUIRE_TOOL_BEFORE;
         };
+        return GuardrailPrompts.text(prompts, key, context.agentId(), "tool", rule.getGuardTool());
     }
 
     /** An instruction is one list item; a newline inside it must not be able to start a fake new section. */

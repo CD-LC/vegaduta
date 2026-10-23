@@ -90,6 +90,10 @@
     </dependency>
     <dependency>
       <groupId>com.agenticai</groupId>
+      <artifactId>prompts</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
       <artifactId>secrets</artifactId>
     </dependency>
     <dependency>

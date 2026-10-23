@@ -19,6 +19,8 @@ import { Badge } from "../../../components/ui/badge";
 import { Button, buttonVariants } from "../../../components/ui/button";
 import type { EvalDatasetSummary } from "../evalDatasetsApi";
 import { pct } from "./evalBadges";
+import { effectiveModeOf } from "./datasetMode";
+import { useTranslations } from "../../../lib/i18n";
 
 export function DatasetCardHeader({
   dataset,
@@ -39,6 +41,10 @@ export function DatasetCardHeader({
   onExportJsonl: () => void;
   onDelete: () => void;
 }) {
+  const t = useTranslations("evalControls");
+  // What a run of this dataset does right now when nobody names a mode: its pin, else the workspace default.
+  const mode = effectiveModeOf(dataset);
+  const pinned = dataset.toolExecutionEnabled != null;
   return (
     <div className="flex flex-wrap items-center gap-3">
       <button
@@ -57,7 +63,17 @@ export function DatasetCardHeader({
         {dataset.caseCount} case{dataset.caseCount === 1 ? "" : "s"}
       </Badge>
       <Badge variant="outline">bar {pct(dataset.passThreshold)}</Badge>
-      {dataset.toolExecutionEnabled && <Badge variant="accent">tools live</Badge>}
+      <Badge
+        variant={mode === "FULL" ? "accent" : "outline"}
+        title={t(pinned ? "datasetModePinnedTitle" : "datasetModeDefaultTitle")}
+      >
+        {t(mode === "FULL" ? "badgeFull" : "badgeQuick")}
+      </Badge>
+      {mode === "FULL" && dataset.autoApproveTools && (
+        <Badge variant="outline" title="Tool calls that would wait for a person are approved by the eval sandbox">
+          auto-approve
+        </Badge>
+      )}
       <div className="ml-auto flex items-center gap-2">
         <Button
           size="sm"

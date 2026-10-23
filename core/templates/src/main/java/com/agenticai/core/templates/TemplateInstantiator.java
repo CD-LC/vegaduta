@@ -114,9 +114,10 @@ final class TemplateInstantiator {
             try {
                 agentService.setAutonomyTier(agentId, AgentAutonomyTier.valueOf(tierName));
             } catch (IllegalArgumentException unknownTier) {
-                // Snapshot from a different version of this enum - same
-                // degrade-rather-than-fail posture as parseEnumNullable.
-                log.warn(
+                // Unreachable for a template that went through toAgentCreateRequest, which
+                // rejects unknown enum values BEFORE the agent is created. Kept as a loud
+                // failure rather than a silent default.
+                log.error(
                         "Template {} declares autonomyTier '{}', which is not a value of"
                                 + " AgentAutonomyTier - agent {} keeps the default tier",
                         template.getId(),

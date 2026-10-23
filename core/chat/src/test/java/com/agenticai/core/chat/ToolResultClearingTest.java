@@ -54,10 +54,15 @@ class ToolResultClearingTest {
     void clearsOlderBeyondLastNAndKeepsLatest() {
         List<Message> h = history(6, 10_000);
         List<Message> out = new ToolResultClearing(true, 24_000, 3).apply(h);
-        // tool messages at indices 2,4,6,8,10,12 -> first three cleared
-        assertEquals("[tool result cleared to save context: t1 10000 chars; re-call if needed]", data(out, 2));
-        assertTrue(data(out, 4).startsWith("[tool result cleared"));
-        assertTrue(data(out, 6).startsWith("[tool result cleared"));
+        // tool messages at indices 2,4,6,8,10,12 -> first three cleared. The placeholder is a JSON object
+        // (Gemini replays every tool result as one); it used to be a bracketed sentence that Spring AI's
+        // Gemini adapter could not parse, see ToolResultClearingGeminiReplayTest.
+        assertEquals(
+            "{\"context_cleared\":true,\"tool\":\"t1\",\"chars\":10000,\"restore\":\""
+                + new ToolLoopProperties.ResultClearing().getRestoreHint() + "\"}",
+            data(out, 2));
+        assertTrue(data(out, 4).startsWith(ToolResultClearing.CONTEXT_CLEARED_JSON_PREFIX));
+        assertTrue(data(out, 6).startsWith(ToolResultClearing.CONTEXT_CLEARED_JSON_PREFIX));
         assertEquals(10_000, data(out, 8).length());
         assertEquals(10_000, data(out, 10).length());
         assertEquals(10_000, data(out, 12).length());
@@ -70,8 +75,8 @@ class ToolResultClearingTest {
     void latestRoundIsNeverClearedEvenWithKeepZero() {
         List<Message> h = history(3, 20_000);
         List<Message> out = new ToolResultClearing(true, 24_000, 0).apply(h);
-        assertTrue(data(out, 2).startsWith("[tool result cleared"));
-        assertTrue(data(out, 4).startsWith("[tool result cleared"));
+        assertTrue(data(out, 2).startsWith(ToolResultClearing.CONTEXT_CLEARED_JSON_PREFIX));
+        assertTrue(data(out, 4).startsWith(ToolResultClearing.CONTEXT_CLEARED_JSON_PREFIX));
         assertEquals(20_000, data(out, 6).length());
     }
 
@@ -114,7 +119,25 @@ class ToolResultClearingTest {
         h.add(round("b", body(10)));
         h.add(round("c", body(10)));
         List<Message> out = new ToolResultClearing(true, 24_000, 1).apply(h);
-        assertTrue(data(out, 1).startsWith("[tool result cleared"), data(out, 1));
+        assertTrue(data(out, 1).startsWith(ToolResultClearing.CONTEXT_CLEARED_JSON_PREFIX), data(out, 1));
+    }
+
+    @Test
+    void aPlainTextPlaceholderFromBeforeTheJsonFormIsStillRecognisedAsCleared() {
+        String legacy = ToolResultClearing.PLACEHOLDER_PREFIX + "a 12000 chars; re-call if needed]";
+        List<Message> h = new ArrayList<>();
+        h.add(new UserMessage("go"));
+        h.add(round("a", legacy));
+        h.add(round("b", body(30_000)));
+        h.add(round("c", body(10)));
+        List<Message> out = new ToolResultClearing(true, 24_000, 1).apply(h);
+        assertEquals(legacy, data(out, 1));
+    }
+
+    @Test
+    void theRestoreHintIsConfigurable() {
+        List<Message> out = new ToolResultClearing(true, 24_000, 3, "ask again").apply(history(6, 10_000));
+        assertTrue(data(out, 2).contains("\"restore\":\"ask again\""), data(out, 2));
     }
 
     @Test

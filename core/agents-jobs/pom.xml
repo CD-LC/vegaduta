@@ -79,6 +79,12 @@
       <groupId>com.agenticai</groupId>
       <artifactId>security</artifactId>
     </dependency>
+    <!-- The settings catalog: approvals.continuation.* decide per workspace and agent whether a decided approval is carried
+         into the parked job's resumed turn. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>settings</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.agenticai</groupId>
       <artifactId>sharing</artifactId>
@@ -124,6 +130,17 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- The end-to-end approval harness (com.agenticai.core.agents.e2e) lives in agents-tools'
+         test classes; the parked-job resume test runs the real job execution over it. Test scope
+         only, and agents-jobs already depends on agents-tools through agents-browser, so no new
+         module edge appears in the main dependency graph. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>agents-tools</artifactId>
+      <version>${project.version}</version>
+      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
   </dependencies>

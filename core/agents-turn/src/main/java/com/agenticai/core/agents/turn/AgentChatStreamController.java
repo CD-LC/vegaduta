@@ -60,6 +60,12 @@ public class AgentChatStreamController {
         this.chatStream = new AgentChatStreamResponder(agentChatService, stepHeartbeatInterval);
     }
 
+    /** The setting that decides whether untagged console turns can be explored by the RL bandits. Absent = no. */
+    @Autowired(required = false)
+    public void setRlTurnRefPolicy(RlTurnRefPolicy policy) {
+        chatStream.useRlTurnRefPolicy(policy);
+    }
+
     @Autowired(required = false)
     public void setResumableChatStreams(ResumableChatStreamService resumableChatStreams) {
         this.resumableChatStreams = resumableChatStreams;

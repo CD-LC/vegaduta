@@ -60,7 +60,9 @@
     "railSecrets": "രഹസ്യങ്ങൾ",
     "railBrand": "ബ്രാൻഡിംഗ്",
     "railLearn": "പഠിക്കുക",
-    "brandIdentityAriaLabel": "VegaDūta ബ്രാൻഡ് ഐഡൻ്റിറ്റി"
+    "brandIdentityAriaLabel": "VegaDūta ബ്രാൻഡ് ഐഡൻ്റിറ്റി",
+    "railRuntimeSettings": "റൺടൈം ക്രമീകരണങ്ങൾ",
+    "railControls": "ഞാൻ എവിടെ നിയന്ത്രിക്കണം...?"
   },
   "languageSwitcher": {
     "label": "ഭാഷ",
@@ -753,7 +755,142 @@
     "edgeTier0Badge": "ഓൺ-ഡിവൈസ് · Chrome ബിൽറ്റ്-ഇൻ",
     "edgeTier0BadgeTitle": "Chrome-ൻ്റെ ബിൽറ്റ്-ഇൻ മോഡലാണ് (Gemini Nano) ഇതിന് ഉത്തരം നൽകിയത് - വേഗതയേറിയതും പൂർണ്ണമായും സ്വകാര്യവുമാണ്, പക്ഷേ ചാറ്റിന് മാത്രം: ഇതിന് ടൂളുകൾ ഉപയോഗിക്കാൻ കഴിയില്ല, സങ്കീർണ്ണമായ കാര്യങ്ങളിൽ ഒരു യഥാർത്ഥ പ്രൊവൈഡറെക്കാൾ കൃത്യത കുറവായിരിക്കാം. എല്ലാ പ്ലാനുകളിലും സൗജന്യം.",
     "edgeTier1Badge": "ഓൺ-ഡിവൈസ് · ലോക്കൽ മോഡൽ",
-    "edgeTier1BadgeTitle": "ഡൗൺലോഡ് ചെയ്ത ഒരു ഓൺ-ഡിവൈസ് മോഡലാണ് ഇതിന് ഉത്തരം നൽകിയത് - സ്വകാര്യമാണ്, കൂടാതെ ഇതിന് ടൂളുകൾ ഉപയോഗിക്കാൻ കഴിയും (ഹോസ്റ്റഡ് ടേണിന് ഉപയോഗിക്കാവുന്ന അതേ സുരക്ഷിത ടൂളുകൾ). ഹോസ്റ്റഡ് പൂളിനേക്കാൾ വളരെ ചെറിയ മോഡലായതിനാൽ, സങ്കീർണ്ണമായ അഭ്യർത്ഥനകളിൽ ഇതിന് കൃത്യത കുറവായിരിക്കാം. എല്ലാ പ്ലാനുകളിലും സൗജന്യം."
+    "edgeTier1BadgeTitle": "ഡൗൺലോഡ് ചെയ്ത ഒരു ഓൺ-ഡിവൈസ് മോഡലാണ് ഇതിന് ഉത്തരം നൽകിയത് - സ്വകാര്യമാണ്, കൂടാതെ ഇതിന് ടൂളുകൾ ഉപയോഗിക്കാൻ കഴിയും (ഹോസ്റ്റഡ് ടേണിന് ഉപയോഗിക്കാവുന്ന അതേ സുരക്ഷിത ടൂളുകൾ). ഹോസ്റ്റഡ് പൂളിനേക്കാൾ വളരെ ചെറിയ മോഡലായതിനാൽ, സങ്കീർണ്ണമായ അഭ്യർത്ഥനകളിൽ ഇതിന് കൃത്യത കുറവായിരിക്കാം. എല്ലാ പ്ലാനുകളിലും സൗജന്യം.",
+    "viewTurn": "ടേൺ കാണുക",
+    "viewTurnTitle": "ഈ സംഭാഷണത്തിലെ ടേണുകളുടെ ഘട്ടം ഘട്ടമായുള്ള ടൈംലൈൻ തുറക്കുക",
+    "headerRunning": "ഒരു ടേൺ പ്രവർത്തിക്കുന്നു",
+    "headerReady": "തയ്യാർ",
+    "clearContext": "സന്ദർഭം മായ്ക്കുക",
+    "clearContextTitle": "പുതിയ സംഭാഷണം ആരംഭിക്കുക. ഇത് ഈ ചാറ്റിന്റെ ഉപകരണത്തിലെയും സെർവർ വശത്തെയും സെഷൻ മെമ്മറി മായ്ക്കുന്നു.",
+    "stopRun": "ഈ മറുപടി നിർത്തുക",
+    "fallbackSendToPlatform": "പ്ലാറ്റ്ഫോമിലേക്ക് അയയ്ക്കുക",
+    "chipsLabel": "ഏജന്റ് ഇപ്പോൾ എന്ത് ചെയ്യുന്നു",
+    "chipPreparing": "തയ്യാറെടുക്കുന്നു",
+    "chipModelCall": "മോഡലിനായി കാത്തിരിക്കുന്നു",
+    "chipThinking": "ചിന്തിക്കുന്നു",
+    "chipWriting": "മറുപടി എഴുതുന്നു",
+    "chipTool": "ടൂൾ പ്രവർത്തിക്കുന്നു: {tool}",
+    "chipToolUnnamed": "ഒരു ടൂൾ പ്രവർത്തിക്കുന്നു",
+    "chipWaitingApproval": "നിങ്ങളുടെ അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു ({count})",
+    "chipContinuing": "മറുപടി തുടരുന്നു",
+    "chipContinuingPass": "മറുപടി തുടരുന്നു ({max}-ൽ പാസ് {pass})",
+    "chipContinuingApproval": "നിങ്ങളുടെ തീരുമാനത്തിന് ശേഷം തുടരുന്നു",
+    "chipRetrying": "വീണ്ടും ശ്രമിക്കുന്നു",
+    "chipRetryingReason": "വീണ്ടും ശ്രമിക്കുന്നു: {reason}",
+    "chipRetryingAttempt": "വീണ്ടും ശ്രമിക്കുന്നു (ശ്രമം {attempt}/{max})",
+    "chipRetryingAttemptReason": "വീണ്ടും ശ്രമിക്കുന്നു (ശ്രമം {attempt}/{max}): {reason}",
+    "chipFailover": "ബാക്കപ്പ് മോഡലിലേക്ക് മാറി",
+    "chipFailoverReason": "ബാക്കപ്പ് മോഡലിലേക്ക് മാറി: {reason}",
+    "chipFailoverTo": "{model}-ലേക്ക് മാറി",
+    "chipFailoverToReason": "{model}-ലേക്ക് മാറി: {reason}",
+    "outcomeTruncated": "ഈ മറുപടി പൂർത്തിയാകുന്നതിന് മുമ്പ് മുറിഞ്ഞുപോയി.",
+    "outcomeContinue": "തുടരുക",
+    "outcomeLongerReplies": "ദൈർഘ്യമേറിയ മറുപടികൾ അനുവദിക്കുക",
+    "continueMessage": "നിങ്ങൾ നിർത്തിയിടത്ത് നിന്ന് തന്നെ, ഇതിനകം എഴുതിയത് ആവർത്തിക്കാതെ തുടരുക.",
+    "outcomeRefused": "സുരക്ഷാ കാരണങ്ങളാൽ മോഡൽ ദാതാവ് ഈ മറുപടി നിർത്തി, അതിനാൽ കാണിക്കാൻ ഉത്തരമില്ല. അഭ്യർത്ഥന മാറ്റി വീണ്ടും ശ്രമിക്കുക.",
+    "outcomeRefusedReason": "സുരക്ഷാ കാരണങ്ങളാൽ ({reason}) മോഡൽ ദാതാവ് ഈ മറുപടി നിർത്തി, അതിനാൽ കാണിക്കാൻ ഉത്തരമില്ല. അഭ്യർത്ഥന മാറ്റി വീണ്ടും ശ്രമിക്കുക.",
+    "outcomeMalformedToolCall": "മോഡൽ ഒരു ടൂൾ ഉപയോഗിക്കാൻ ശ്രമിച്ചെങ്കിലും അതിന്റെ അഭ്യർത്ഥന അസാധുവായിരുന്നു, അതിനാൽ ഒന്നും പ്രവർത്തിച്ചില്ല. വീണ്ടും ശ്രമിക്കുക.",
+    "outcomeEmpty": "മോഡൽ ഒരു ശൂന്യമായ മറുപടി നൽകി. വീണ്ടും ശ്രമിക്കുക.",
+    "stopRaiseSteps": "ടൂൾ-കോൾ പരിധി ഉയർത്തുക",
+    "stopRaiseBudget": "ചെലവ് പരിധി മാറ്റുക",
+    "stopAskEditor": "ഈ ഏജന്റിനെ എഡിറ്റ് ചെയ്യാൻ കഴിയുന്ന ഒരാളോട് പരിധി ഉയർത്താൻ ആവശ്യപ്പെടുക.",
+    "rsOpen": "റൺ ക്രമീകരണങ്ങൾ",
+    "rsTitle": "റൺ ക്രമീകരണങ്ങൾ",
+    "rsClose": "റൺ ക്രമീകരണങ്ങൾ അടയ്ക്കുക",
+    "rsBack": "റൺ ക്രമീകരണങ്ങളിലേക്ക് മടങ്ങുക",
+    "rsIntro": "{name}-ലേക്കുള്ള അടുത്ത സന്ദേശം എങ്ങനെ പ്രവർത്തിക്കും. ഇവ ഏജന്റിന്റെ പെരുമാറ്റം ടാബിൽ മാറ്റുക.",
+    "rsLoading": "ലോഡ് ചെയ്യുന്നു",
+    "rsRetry": "വീണ്ടും ശ്രമിക്കുക",
+    "rsOpenBehavior": "പെരുമാറ്റത്തിൽ എഡിറ്റ് ചെയ്യുക",
+    "rsModelHeading": "മോഡലും സാമ്പിളിംഗും",
+    "rsModel": "മോഡൽ",
+    "rsModelNotSet": "സജ്ജമാക്കിയിട്ടില്ല",
+    "rsModelDefault": "മോഡലിന്റെ ഡിഫോൾട്ട്",
+    "rsDepth": "ചിന്തയുടെ ആഴം",
+    "rsSourceAgent": "ഈ ഏജന്റിൽ സജ്ജമാക്കി",
+    "rsParam_temperature": "താപനില",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "മറുപടിയുടെ പരമാവധി നീളം (ടോക്കണുകൾ)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "ആവൃത്തി പിഴ",
+    "rsParam_presencePenalty": "സാന്നിധ്യ പിഴ",
+    "rsParam_seed": "സീഡ്",
+    "rsParam_stopSequences": "നിർത്തൽ ശ്രേണികൾ",
+    "rsParamDropped": "{param} ഈ ഏജന്റിൽ സജ്ജമാക്കിയിട്ടുണ്ട്, എന്നാൽ {provider} അത് {model}-ന് അവഗണിക്കുന്നു, അതിനാൽ അതിന് ഫലമില്ല.",
+    "rsToolsRunHeading": "Tools for this run",
+    "rsToolsRunOnly": "This run only",
+    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
+    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
+    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
+    "rsToolsReset": "Use the agent's tools",
+    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
+    "rsToolsEditAgent": "Change the agent's saved tools",
+    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsEmpty": "ഈ ഏജന്റിന് ടൂളുകളൊന്നും ലഭ്യമല്ല.",
+    "rsToolsSummary": "{total}-ൽ {on} ടൂളുകൾ ഓണാണ്",
+    "rsToolsFailed": "ടൂളുകൾ ലോഡ് ചെയ്യാനായില്ല.",
+    "rsLimitsHeading": "ഓരോ ടേണിനുമുള്ള പരിധികൾ",
+    "rsLimitsChange": "പരിധികൾ മാറ്റുക",
+    "rsLimitsView": "പരിധികൾ കാണുക",
+    "rsLimitsFailed": "പരിധികൾ ലോഡ് ചെയ്യാനായില്ല.",
+    "rsLimitsEmpty": "ഈ ഏജന്റിന് കാണിക്കാൻ പരിധികളൊന്നുമില്ല.",
+    "rsNoLimit": "പരിധിയില്ല",
+    "rsScoreAll": "എല്ലാ പൊരുത്തങ്ങളും",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} പ്രതീകങ്ങൾ",
+    "rsLimitRange": "അനുവദനീയം: {min} മുതൽ {max} വരെ",
+    "rsLayer_AGENT": "ഈ ഏജന്റിൽ സജ്ജമാക്കി",
+    "rsLayer_TENANT": "വർക്ക്സ്പേസ് ഡിഫോൾട്ട്",
+    "rsLayer_PLATFORM": "പ്ലാറ്റ്ഫോം ഡിഫോൾട്ട്",
+    "rsLayer_REQUEST": "ഈ അഭ്യർത്ഥനയ്ക്കായി സജ്ജമാക്കി",
+    "rsLimit_maxToolSteps": "ഓരോ ടേണിലെയും ടൂൾ കോളുകൾ",
+    "rsLimit_turnTimeoutSeconds": "ഒരു ടേണിനുള്ള സമയം",
+    "rsLimit_toolTimeoutSeconds": "ഒരു ടൂൾ കോളിനുള്ള സമയം",
+    "rsLimit_toolOutputMaxChars": "ടൂൾ ഫലത്തിന്റെ വലുപ്പം",
+    "rsLimit_retrievalTopK": "ഓരോ തിരച്ചിലിലെയും അറിവ് ഫലങ്ങൾ",
+    "rsLimit_retrievalMinScore": "അറിവ് പൊരുത്തത്തിന്റെ ഏറ്റവും കുറഞ്ഞ പ്രസക്തി",
+    "rsLimit_continuationPasses": "മറുപടി പൂർത്തിയാക്കാനുള്ള അധിക പാസുകൾ",
+    "rsLimitHelp_maxToolSteps": "ഒരു മറുപടിക്ക് ചെയ്യാവുന്ന പരമാവധി ടൂൾ കോളുകൾ. അത് എത്തുമ്പോൾ ടേൺ നിൽക്കുകയും അക്കാര്യം അറിയിക്കുകയും ചെയ്യുന്നു.",
+    "rsLimitHelp_turnTimeoutSeconds": "ഒരു ടേൺ നിർത്തുന്നതിന് മുമ്പ് എത്ര നേരം പ്രവർത്തിക്കാം.",
+    "rsLimitHelp_toolTimeoutSeconds": "ഒരൊറ്റ ടൂൾ കോൾ നിർത്തുന്നതിന് മുമ്പ് എത്ര നേരം പ്രവർത്തിക്കാം.",
+    "rsLimitHelp_toolOutputMaxChars": "ഒരു ടൂൾ ഫലത്തിന്റെ എത്ര ഭാഗം മോഡലിന് വായിക്കാം. ബാക്കി മുറിച്ചുകളയുന്നു.",
+    "rsLimitHelp_retrievalTopK": "ഒരു തിരച്ചിൽ അറിവ് ശേഖരത്തിലെ എത്ര ഭാഗങ്ങൾ തിരികെ കൊണ്ടുവരുന്നു.",
+    "rsLimitHelp_retrievalMinScore": "ഇതിലും കുറച്ച് പൊരുത്തപ്പെടുന്ന ഭാഗങ്ങൾ ഒഴിവാക്കുന്നു. പൂജ്യം എല്ലാ പൊരുത്തങ്ങളും നിലനിർത്തുന്നു.",
+    "rsLimitHelp_continuationPasses": "പ്രഖ്യാപിച്ചിട്ടും എടുക്കാത്ത ഘട്ടത്തിൽ നിന്നുപോയ മറുപടി പൂർത്തിയാക്കാനുള്ള അധിക ശ്രമങ്ങൾ.",
+    "rsPreviewButton": "പ്രോംപ്റ്റ് പ്രിവ്യൂ",
+    "rsPreviewTitle": "പ്രോംപ്റ്റ് പ്രിവ്യൂ",
+    "rsPreviewIntro": "ഈ ഏജന്റ് അയയ്ക്കുന്ന സിസ്റ്റം പ്രോംപ്റ്റും ടൂൾ പട്ടികയും, യഥാർത്ഥ ടേൺ നിർമ്മിക്കുന്ന അതേ രീതിയിൽ നിർമ്മിച്ചത്. ഒരു മോഡലിലേക്കും ഒന്നും അയയ്ക്കുന്നില്ല.",
+    "rsPreviewBuilding": "പ്രിവ്യൂ നിർമ്മിക്കുന്നു",
+    "rsPreviewFailed": "പ്രിവ്യൂ നിർമ്മിക്കാനായില്ല.",
+    "rsPreviewTotals": "ഏകദേശം {prompt} ടോക്കൺ സിസ്റ്റം ടെക്സ്റ്റും {tools} ടോക്കൺ ടൂൾ നിർവചനങ്ങളും (കണക്കുകൾ).",
+    "rsPreviewOverBudgetTitle": "ടോക്കൺ ബജറ്റ് കവിഞ്ഞു",
+    "rsPreviewOverBudget": "സ്ഥിരമായ സിസ്റ്റം ടെക്സ്റ്റ് ക്രമീകരിച്ച {budget} ടോക്കൺ ബജറ്റ് കവിഞ്ഞു. ഒന്നും മുറിക്കുന്നില്ല; ഒരു പ്രോംപ്റ്റ് ചുരുക്കുന്നത് പരിഗണിക്കുക.",
+    "rsPreviewNoBlocks": "കാണിക്കാൻ പ്രോംപ്റ്റ് ബ്ലോക്കുകളില്ല.",
+    "rsPreviewMessage": "സന്ദേശം: {message}",
+    "rsPreviewTokens": "~{tokens} ടോക്കണുകൾ",
+    "rsPreviewShowText": "ടെക്സ്റ്റ് കാണിക്കുക",
+    "rsPreviewTools": "ടൂളുകൾ ({count})",
+    "rsPreviewNoTools": "ഈ ഏജന്റ് ടൂളുകളൊന്നും നൽകുന്നില്ല.",
+    "rsPreviewNotes": "ഈ പ്രിവ്യൂവിന് അറിയാൻ കഴിയാത്തത്",
+    "rsPreviewOpenAdmin": "ഓരോ പ്രോംപ്റ്റിന്റെയും പദപ്രയോഗം കാണുകയും മാറ്റുകയും ചെയ്യുക",
+    "rsOriginDefault": "ഡിഫോൾട്ടായി ലഭിച്ചത്",
+    "rsOriginOverride": "{scope} ഓവർറൈഡ് v{version}",
+    "rsOriginAgentConfig": "ഏജന്റിന്റെ സ്വന്തം സിസ്റ്റം പ്രോംപ്റ്റ്",
+    "rsOriginCode": "പ്ലാറ്റ്ഫോം കോഡ്",
+    "rsRunBudget": "ഓരോ റണ്ണിനുമുള്ള ചെലവ് പരിധി",
+    "rsNoCap": "പരിധിയില്ല",
+    "rsRunBudgetHelp": "ഒരു റൺ മറ്റ് ഏജന്റുമാരെ ഏൽപ്പിക്കുമ്പോഴോ ആഴത്തിലുള്ള ഗവേഷണം നടത്തുമ്പോഴോ പരമാവധി എത്ര ചെലവഴിക്കാം. ഇത് ഒരു കണക്കാണ്, ബില്ലിംഗ് അല്ല.",
+    "chipToolsOff": "ടൂളുകൾ ഇല്ലാതെ വീണ്ടും ശ്രമിക്കുന്നു",
+    "chipFailoverBlocked": "ബാക്കപ്പ് മോഡൽ ഉപയോഗിച്ചില്ല: ടൂളുകൾ ഇതിനകം പ്രവർത്തിച്ചു",
+    "rsLimitChangeOne": "മാറ്റുക",
+    "reasonRateLimited": "rate limited",
+    "reasonTimeout": "timed out",
+    "reasonProviderUnavailable": "provider unavailable",
+    "reasonAuthFailed": "provider rejected the credentials",
+    "reasonBilling": "provider billing problem",
+    "reasonModelNotFound": "model not available",
+    "reasonProviderError": "provider error",
+    "reasonMalformedToolCall": "the tool call could not be used"
   },
   "nodeDefs": {
     "triggerLabel": "ട്രിഗർ",
@@ -1399,7 +1536,35 @@
     "ttsProviderUpdatedSuccess": "TTS പ്രൊവൈഡർ അപ്ഡേറ്റ് ചെയ്തു.",
     "updateTtsProviderError": "ഈ ഏജൻ്റിൻ്റെ TTS പ്രൊവൈഡർ അപ്ഡേറ്റ് ചെയ്യാൻ കഴിഞ്ഞില്ല.",
     "ttsProviderFreePlanTooltip": "TTS പ്രൊവൈഡർ തിരഞ്ഞെടുക്കുന്നത് ഒരു പ്രീമിയം ഫീച്ചറാണ്.",
-    "ttsProviderNotSet": "പ്ലാറ്റ്‌ഫോം ഡിഫോൾട്ട് ഉപയോഗിക്കുന്നു"
+    "ttsProviderNotSet": "പ്ലാറ്റ്‌ഫോം ഡിഫോൾട്ട് ഉപയോഗിക്കുന്നു",
+    "samplingTitle": "വിപുലമായ സാമ്പിളിംഗ്",
+    "samplingIntro": "മോഡൽ വാക്കുകൾ തിരഞ്ഞെടുക്കുന്ന രീതി സൂക്ഷ്മമായി ക്രമീകരിക്കുക. മോഡൽ ഡിഫോൾട്ട് ഉപയോഗിക്കാൻ ബോക്സ് ശൂന്യമായി വിടുക. ഒരു ഫീൽഡ് പിന്തുണയ്ക്കാത്ത ദാതാക്കൾ അത് അവഗണിക്കും.",
+    "samplingIgnored": "ഈ മോഡലിന്റെ ദാതാവ് ഈ ക്രമീകരണം അവഗണിക്കുന്നു, അതിനാൽ ഇത് മാറ്റുന്നതിന് ഫലമില്ല.",
+    "samplingSaving": "സംരക്ഷിക്കുന്നു…",
+    "samplingSaved": "സംരക്ഷിച്ചു",
+    "samplingNotSaved": "സംരക്ഷിച്ചിട്ടില്ല",
+    "samplingSaveFailed": "ആ ക്രമീകരണം സംരക്ഷിക്കാനായില്ല.",
+    "samplingErrorWhole": "{label} {min} മുതൽ {max} വരെയുള്ള പൂർണ്ണസംഖ്യ ആയിരിക്കണം, അല്ലെങ്കിൽ ഓഫ് ആക്കാൻ ശൂന്യമായി വിടുക.",
+    "samplingErrorNumber": "{label} {min} മുതൽ {max} വരെയുള്ള സംഖ്യ ആയിരിക്കണം, അല്ലെങ്കിൽ ഓഫ് ആക്കാൻ ശൂന്യമായി വിടുക.",
+    "samplingStopTooLong": "ഒരു നിർത്തൽ ശ്രേണിക്ക് പരമാവധി {max} പ്രതീകങ്ങൾ ആകാം.",
+    "samplingStopTooMany": "പരമാവധി {max} നിർത്തൽ ശ്രേണികൾ.",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "ഏറ്റവും സാധ്യതയുള്ള K അടുത്ത വാക്കുകൾ മാത്രം പരിഗണിക്കുക. കുറഞ്ഞാൽ കൂടുതൽ സുരക്ഷിതവും പ്രവചനീയവുമായ ടെക്സ്റ്റ്. 1 മുതൽ 1000 വരെ.",
+    "samplingSeed": "സീഡ്",
+    "samplingSeedHelp": "ഒരേ പ്രോംപ്റ്റിന് മറുപടികൾ കൂടുതൽ ആവർത്തിക്കാവുന്നതാക്കാൻ ഒരു സംഖ്യ സജ്ജമാക്കുക. എല്ലാ ദാതാക്കളും ഇത് ഉറപ്പ് നൽകുന്നില്ല.",
+    "samplingFrequency": "ആവൃത്തി പിഴ",
+    "samplingFrequencyHelp": "പോസിറ്റീവ് മൂല്യങ്ങൾ ഒരേ വാക്കുകൾ വീണ്ടും വീണ്ടും ഉപയോഗിക്കുന്നത് നിരുത്സാഹപ്പെടുത്തുന്നു. -2 മുതൽ 2 വരെ.",
+    "samplingPresence": "സാന്നിധ്യ പിഴ",
+    "samplingPresenceHelp": "പോസിറ്റീവ് മൂല്യങ്ങൾ മോഡലിനെ ഒരു വിഷയത്തിൽ തങ്ങിനിൽക്കാതെ പുതിയ വിഷയങ്ങളിലേക്ക് നയിക്കുന്നു. -2 മുതൽ 2 വരെ.",
+    "samplingPlaceholderDefault": "ഡിഫോൾട്ട്",
+    "samplingPlaceholderRandom": "ക്രമരഹിതം",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "നിർത്തൽ ശ്രേണികൾ",
+    "samplingStopPlaceholder": "ഒരു വാക്യം ടൈപ്പ് ചെയ്ത് Enter അമർത്തുക",
+    "samplingStopHelp": "ഇവയിലേതെങ്കിലും മോഡൽ എഴുതിയാലുടൻ മറുപടി അവസാനിക്കും. {count} വരെ, ഓരോന്നും {max} പ്രതീകങ്ങൾ വരെ.",
+    "samplingStopCurrent": "നിലവിലെ നിർത്തൽ ശ്രേണികൾ",
+    "samplingStopRemove": "നിർത്തൽ ശ്രേണി {value} നീക്കം ചെയ്യുക",
+    "samplingAdd": "ചേർക്കുക"
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "കോൺഫിഗർ ചെയ്യാൻ ഒരു നോഡ് തിരഞ്ഞെടുക്കുക, അല്ലെങ്കിൽ ഇടതുവശത്തുള്ള പാലറ്റിൽ നിന്ന് പുതിയൊരെണ്ണം വലിച്ചിടുക.",
@@ -13130,7 +13295,7 @@
   },
   "adminAccessPage": {
     "pageTitle": "Team access",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "ഭരണം",
     "matrixTitle": "Access matrix",
     "matrixHint": "Every member's effective scopes at a glance - tick a cell to grant or revoke that scope for that person.",
     "memberColumn": "MEMBER",
@@ -13145,7 +13310,7 @@
   "adminPaymentsPage": {
     "pageTitle": "Agent payments",
     "pageSubtitle": "Signed UPI mandates, spend caps and payment history for each agent.",
-    "agentPickerLabel": "Agent",
+    "agentPickerLabel": "ഏജന്റ്",
     "noAgents": "No agents in this workspace",
     "loadFailed": "Could not load payment data for this agent.",
     "mandatesHeading": "Payment mandates",
@@ -13173,9 +13338,9 @@
     "thresholdRequired": "Set the approval threshold amount.",
     "previewFailed": "Could not build the mandate preview.",
     "reviewMandate": "Review mandate",
-    "back": "Back",
+    "back": "പിന്നോട്ട്",
     "signAndGrant": "Sign & grant",
-    "cancel": "Cancel",
+    "cancel": "റദ്ദാക്കുക",
     "canonicalReviewLabel": "Canonical mandate document",
     "canonicalReviewHint": "This exact JSON is what gets Ed25519-signed. Verify the caps, scope and validity before granting.",
     "grantSuccess": "Mandate granted and signed.",
@@ -13201,7 +13366,7 @@
     "colStatus": "Status",
     "colVpa": "Payee VPA",
     "colDescription": "Description",
-    "colCreated": "Created",
+    "colCreated": "സൃഷ്ടിച്ചു",
     "detailId": "Transaction",
     "detailMandate": "Mandate",
     "detailGatewayPayment": "Gateway payment",
@@ -13245,7 +13410,7 @@
     "restoreTooltip": "Make this version the agent's current configuration.",
     "restoreConfirmTitle": "Restore v{version}?",
     "restoreConfirmBody": "The agent's current configuration is replaced by this version's. The restore itself is saved as a new version, so it can be undone.",
-    "cancelButton": "Cancel",
+    "cancelButton": "റദ്ദാക്കുക",
     "restoredNotice": "Restored - the agent now runs this configuration.",
     "restoreError": "Couldn't restore that version.",
     "labelUpdatedNotice": "Label updated.",
@@ -13258,18 +13423,18 @@
     "forceReasonLabel": "Override reason (required, written to the audit log)",
     "forceReasonPlaceholder": "Why is this safe to promote without a passing eval?",
     "forcePromoteButton": "Promote anyway",
-    "fieldModel": "Model",
+    "fieldModel": "മോഡൽ",
     "fieldFallback": "Fallback",
     "fieldGeneration": "Generation",
     "fieldModes": "Modes",
-    "fieldTools": "Tools",
+    "fieldTools": "ടൂളുകൾ",
     "toolsUnrestricted": "All resolved tools",
     "toolsNone": "None",
     "toolsCount": "{count} allowed",
-    "fieldGuardrails": "Guardrails",
+    "fieldGuardrails": "ഗാർഡ്‌റെയിലുകൾ",
     "fieldFlags": "Enabled",
     "fieldPrompt": "System prompt",
-    "flagKnowledge": "Knowledge",
+    "flagKnowledge": "അറിവ്",
     "flagSarvam": "Sarvam",
     "flagSandbox": "Sandbox",
     "flagCodeWorkspace": "Code workspace",
@@ -13290,18 +13455,18 @@
       "AUTONOMOUS": "Autonomous"
     },
     "state": {
-      "READY": "Ready",
+      "READY": "തയ്യാർ",
       "MISSING": "Missing",
       "WAITING_ON_ADMIN": "Waiting on admin",
       "GATED": "Not on your plan",
       "SIMULATED": "Simulated"
     },
     "kind": {
-      "agent": "Agent",
+      "agent": "ഏജന്റ്",
       "workflow": "Workflow",
       "tool": "Tool",
       "mcp": "MCP server",
-      "knowledge": "Knowledge",
+      "knowledge": "അറിവ്",
       "procedure": "Procedure",
       "secret": "Secret",
       "channel": "Channel"
@@ -13341,7 +13506,7 @@
     },
     "narrative": {
       "aria": "About {name}",
-      "close": "Close",
+      "close": "അടയ്ക്കുക",
       "why": "Why it is here",
       "tune": "If results are wrong",
       "proof": "How you will know it works",
@@ -13358,14 +13523,14 @@
       "step": {
         "PENDING": "Waiting",
         "DONE": "Done",
-        "FAILED": "Failed",
+        "FAILED": "പരാജയപ്പെട്ടു",
         "COMPENSATED": "Rolled back"
       },
       "failedAt": "Step {step} failed: {name}.",
       "failedGeneric": "The apply did not finish.",
       "nothingKept": "Nothing was kept. Everything created in this run was rolled back.",
       "someKept": "Some steps were already saved and are shown above. Check them before trying again.",
-      "retry": "Try again",
+      "retry": "വീണ്ടും ശ്രമിക്കുക",
       "doneBody": "Your envoy is in place and starts under watch. Fill in what is still missing on the right."
     },
     "plan": {
@@ -13382,7 +13547,7 @@
       "stepsLabel": "Steps",
       "step": {
         "preview": "Preview",
-        "ready": "Ready",
+        "ready": "തയ്യാർ",
         "applying": "Apply"
       },
       "toReady": "Check what it needs",
@@ -13471,7 +13636,7 @@
         "other": "setting"
       },
       "op": {
-        "changed": "Changed",
+        "changed": "മാറ്റി",
         "added": "Added",
         "removed": "Removed"
       },
@@ -13509,8 +13674,8 @@
       "entityAdded": "{where} is added",
       "entityRemoved": "{where} is removed",
       "showFull": "Show the full text",
-      "before": "Before:",
-      "after": "After:",
+      "before": "മുമ്പ്:",
+      "after": "ശേഷം:",
       "apply": "Apply this change",
       "discard": "Discard"
     },
@@ -13519,7 +13684,7 @@
       "placeholder": "For example: the reminders sound too harsh, soften the first one",
       "propose": "Show me the change",
       "proposing": "Working out the change...",
-      "saving": "Saving...",
+      "saving": "സംരക്ഷിക്കുന്നു...",
       "applying": "Applying...",
       "failed": "Could not work out a change. Try saying it another way.",
       "done": "Applied. Scoring has been asked for; the new score appears in the ledger when it finishes.",
@@ -13538,7 +13703,7 @@
       "noCards": "Nothing stands out yet. Suggestions appear once something has scored low.",
       "cardsLabel": "Suggestions",
       "scored": "{dimension} {score}",
-      "open": "Open",
+      "open": "തുറക്കുക",
       "notApplied": "Available once the envoy is applied.",
       "dimension": {
         "helpfulness": "Helpfulness",
@@ -13623,11 +13788,11 @@
       "demoteNone": "Demote",
       "demoteConfirm": "Demote to {rung}? Approvals return to every risky step immediately.",
       "demoteConfirmYes": "Yes, demote",
-      "demoteConfirmCancel": "Cancel",
+      "demoteConfirmCancel": "റദ്ദാക്കുക",
       "demoteHint": "Always available. It puts the approvals back straight away.",
       "demoteNeedsAdmin": "Only a workspace admin can change the trust level.",
       "atBottom": "Already at the lowest level.",
-      "history": "History",
+      "history": "ചരിത്രം",
       "noHistory": "No trust changes yet.",
       "showEvidence": "Show the evidence",
       "diffKind": {
@@ -13658,7 +13823,7 @@
       "runError": "This run could not finish.",
       "transcriptFailed": "Could not load this transcript.",
       "showTranscript": "Read the conversation ({count} turns)",
-      "agent": "Agent",
+      "agent": "ഏജന്റ്",
       "verdict": {
         "PASSED": "The agent handled it well",
         "FAILED": "The agent was talked out of its rules",
@@ -13689,7 +13854,7 @@
   },
   "contactsPage": {
     "pageTitle": "Contacts & routing",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "ഭരണം",
     "pageSubtitle": "A contact is a sender your agents already know. Approving a new sender makes them a contact and routes their messages to an agent.",
     "routingTitle": "Channel routing",
     "routingHint": "Pick the agent new conversations go to, and whether a sender you've never seen needs your approval first or goes straight through.",
@@ -13709,16 +13874,16 @@
     "contactsTitle": "Contacts",
     "contactsHint": "Known senders skip approval entirely - a contact here is pre-approved and routes by contact agent → group agent → channel default.",
     "allChannels": "All channels",
-    "allGroups": "All groups",
-    "filterByGroupLabel": "Filter by group",
+    "allGroups": "എല്ലാ ഗ്രൂപ്പുകളും",
+    "filterByGroupLabel": "ഗ്രൂപ്പ് അനുസരിച്ച് ഫിൽട്ടർ ചെയ്യുക",
     "searchPlaceholder": "Search number, chat id or name…",
     "identifierPlaceholder": "Phone / chat id / email *",
     "namePlaceholder": "Name (optional)",
     "groupPlaceholder": "Group",
     "noGroup": "No group",
-    "agentPlaceholder": "Agent",
+    "agentPlaceholder": "ഏജന്റ്",
     "channelDefault": "Channel default",
-    "addButton": "Add",
+    "addButton": "ചേർക്കുക",
     "contactAdded": "Contact added.",
     "statusLinked": "Live",
     "statusDirectory": "Directory",
@@ -13730,7 +13895,7 @@
     "groupsTitle": "Contact groups",
     "groupsHint": "Group contacts to route them together - a group's agent answers every member without their own override.",
     "groupNamePlaceholder": "Group name",
-    "groupAgentPlaceholder": "Agent",
+    "groupAgentPlaceholder": "ഏജന്റ്",
     "createGroupButton": "Create",
     "groupCreated": "Group created.",
     "groupMeta": "{count} member(s) · routes to {agent}",
@@ -13760,10 +13925,10 @@
     "colContact": "Contact",
     "colStatus": "Status",
     "colGroup": "Group",
-    "colAgent": "Agent",
+    "colAgent": "ഏജന്റ്",
     "colRoutesVia": "Routes via",
-    "selectedCount": "{count} selected",
-    "approveN": "Approve {count}",
+    "selectedCount": "{count} തിരഞ്ഞെടുത്തു",
+    "approveN": "{count} അംഗീകരിക്കുക",
     "rejectN": "Reject {count}",
     "clearSelection": "Clear",
     "bulkProgress": "{done} of {total} done…",
@@ -13779,7 +13944,7 @@
     "contactsEmptyImport": "Import a sheet",
     "contactsNoMatch": "No contacts match these filters.",
     "addContactButton": "Add contact",
-    "cancelButton": "Cancel",
+    "cancelButton": "റദ്ദാക്കുക",
     "statusLinkedHint": "Has an active conversation",
     "statusDirectoryHint": "Known sender, no conversation yet",
     "justNow": "just now",
@@ -13850,7 +14015,7 @@
     "deactivating": "Removing…",
     "deactivateTitle": "Remove your {provider} key?",
     "deactivateBody": "Decision calls for this workspace will fall back to the platform key (when configured) or local heuristics.",
-    "cancel": "Cancel",
+    "cancel": "റദ്ദാക്കുക",
     "policyTitle": "Decision controls",
     "policySubtitle": "Where the decision model may act for this workspace — and how sure it must be. Inherit uses the platform default; changes propagate within ~30 seconds.",
     "policyLoading": "Loading policy…",
@@ -13860,17 +14025,17 @@
     "policy_agentRoutingHelp": "Let the decision model pick the best-fit agent for a Quick Task by intent, instead of keyword matching.",
     "policyOpt_inherit": "Inherit",
     "policyOpt_on": "On",
-    "policyOpt_off": "Off",
+    "policyOpt_off": "ഓഫ്",
     "policyThreshold": "“Simple turn” confidence bar",
     "policyThresholdHelp": "0.5–0.99 — higher means the decision model must be more sure before a turn is called simple. Blank inherits.",
     "policySave": "Save policy",
-    "saving": "Saving…",
+    "saving": "സംരക്ഷിക്കുന്നു…",
     "policyPropagation": "Agents can set their own stricter bar in their cost-routing settings — per-agent wins over this workspace value.",
     "playgroundTitle": "Playground",
     "playgroundSubtitle": "Ask the active decision provider a typed question against your resolved key. Bounded to one question per run — see the raw answer, model and token usage.",
     "stateLabel": "State",
     "statePlaceholder": "The facts the decision model reasons over, e.g. a user message or a task description…",
-    "instructionsLabel": "Instructions",
+    "instructionsLabel": "നിർദ്ദേശങ്ങൾ",
     "typeHelp_noul": "noul — a calibrated yes/no probability (0–1).",
     "typeHelp_choice": "choice — pick a winner from 2+ options, with per-option probabilities.",
     "typeHelp_score": "score — a probability-weighted score over 2–10 ordered levels.",
@@ -13910,7 +14075,7 @@
     "headerEyebrow": "Sales pipeline",
     "pageSubtitle": "Every lead in one place - move them through the pipeline, log calls and emails, and let workflows keep the stages up to date.",
     "newLead": "New lead",
-    "close": "Close",
+    "close": "അടയ്ക്കുക",
     "fieldName": "Name",
     "fieldEmail": "Email",
     "fieldPhone": "Phone",
@@ -13941,7 +14106,7 @@
     "daysAgo": "{n}d ago",
     "lastContacted": "Last contacted {when}",
     "lastReplied": "Last replied {when}",
-    "saveButton": "Save changes",
+    "saveButton": "മാറ്റങ്ങൾ സംരക്ഷിക്കുക",
     "createButton": "Create lead",
     "deleteButton": "Delete",
     "timelineTitle": "Activity",
@@ -13994,7 +14159,7 @@
   "schedulePanel": {
     "noAgentsTitle": "No agents yet",
     "noAgentsBody": "Create an agent first — a schedule is a recurring job for one specific agent.",
-    "agent": "Agent",
+    "agent": "ഏജന്റ്",
     "loading": "Loading schedule…",
     "enabled": "Enabled",
     "paused": "Paused",
@@ -14014,8 +14179,8 @@
     "cadenceInterval": "Every N minutes / hours / days",
     "cadenceCron": "Cron expression",
     "intervalEvery": "Every",
-    "unitMinutes": "minutes",
-    "unitHours": "hours",
+    "unitMinutes": "മിനിറ്റുകൾ",
+    "unitHours": "മണിക്കൂറുകൾ",
     "unitDays": "days",
     "intervalHint": "At least 1 minute. The scheduler checks once a minute.",
     "cronLabel": "Cron",
@@ -14071,7 +14236,7 @@
     "builtInReadOnly": "Built-in skills can't be edited. To customise one, export it, change its name, and upload it as your own.",
     "badgeBuiltIn": "Built-in",
     "badgeCustom": "Custom",
-    "badgeOff": "Off",
+    "badgeOff": "ഓഫ്",
     "fileCount": "{count} bundled file(s)",
     "toggleAria": "Enable skill {name}",
     "selectPrompt": "Select a skill to read its instructions.",
@@ -14079,8 +14244,8 @@
     "editButton": "Edit",
     "deleteButton": "Delete",
     "saveButton": "Save skill",
-    "savingButton": "Saving…",
-    "cancelButton": "Cancel",
+    "savingButton": "സംരക്ഷിക്കുന്നു…",
+    "cancelButton": "റദ്ദാക്കുക",
     "replaceButton": "Replace",
     "newHeading": "New skill",
     "editHeading": "Edit {name}",
@@ -14095,5 +14260,1279 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "വർക്ക്സ്പേസ് ക്രമീകരണങ്ങൾ",
+      "agent": "ഏജന്റ് ക്രമീകരണങ്ങൾ"
+    },
+    "agentMissing": "ഒരു ഏജന്റിന്റെ ക്രമീകരണങ്ങൾ കാണാൻ അതിനെ തിരഞ്ഞെടുക്കുക.",
+    "scopeNote": {
+      "agent": "ഈ മൂല്യങ്ങൾ ഈ ഏജന്റിന് മാത്രമേ ബാധകമാകൂ. നിങ്ങൾ ഇവിടെ ഓവർറൈഡ് ചെയ്യാത്തതെല്ലാം നിങ്ങളുടെ വർക്ക്സ്പേസ് ക്രമീകരണങ്ങളിൽ നിന്ന് അനന്തരമായി ലഭിക്കും."
+    },
+    "loading": "ക്രമീകരണങ്ങൾ ലോഡ് ചെയ്യുന്നു",
+    "loadError": "ക്രമീകരണങ്ങൾ ലോഡ് ചെയ്യാനായില്ല. {message}",
+    "retry": "വീണ്ടും ശ്രമിക്കുക",
+    "filters": {
+      "label": "ക്രമീകരണങ്ങൾ ഫിൽട്ടർ ചെയ്യുക",
+      "search": "ക്രമീകരണങ്ങൾ തിരയുക",
+      "searchPlaceholder": "പേര് അല്ലെങ്കിൽ വിവരണം ഉപയോഗിച്ച് തിരയുക",
+      "group": "ഗ്രൂപ്പ് അനുസരിച്ച് ഫിൽട്ടർ ചെയ്യുക",
+      "allGroups": "എല്ലാ ഗ്രൂപ്പുകളും",
+      "risk": "അപകടം അനുസരിച്ച് ഫിൽട്ടർ ചെയ്യുക",
+      "allRisks": "എല്ലാ അപകട നിലകളും",
+      "clear": "ഫിൽട്ടറുകൾ മായ്ക്കുക"
+    },
+    "empty": {
+      "none": "ഇവിടെ നിങ്ങൾക്ക് മാറ്റാൻ കഴിയുന്ന ക്രമീകരണങ്ങളൊന്നുമില്ല.",
+      "filtered": "നിങ്ങളുടെ ഫിൽട്ടറുകളുമായി ഒരു ക്രമീകരണവും പൊരുത്തപ്പെടുന്നില്ല."
+    },
+    "saved": "സംരക്ഷിച്ചു. അപ്ഡേറ്റ് ചെയ്ത ക്രമീകരണങ്ങൾ: {count}.",
+    "saveFailed": "സംരക്ഷിച്ചില്ല. പരാജയപ്പെട്ട ക്രമീകരണങ്ങൾ: {count}. നിങ്ങളുടെ തിരുത്തലുകൾ ഇപ്പോഴും ഫോമിൽ ഉണ്ട്.",
+    "resetDone": "{label} ഇപ്പോൾ അനന്തരമായി ലഭിച്ച മൂല്യം ഉപയോഗിക്കുന്നു.",
+    "resetFailed": "ക്രമീകരണം റീസെറ്റ് ചെയ്യാനായില്ല.",
+    "unsaved": "സംരക്ഷിക്കാത്ത മാറ്റം",
+    "discardOne": "മാറ്റം ഉപേക്ഷിക്കുക",
+    "restartRequired": "റീസ്റ്റാർട്ട് ആവശ്യമാണ്",
+    "source": {
+      "default": "ഡിഫോൾട്ട്",
+      "platform": "പ്ലാറ്റ്ഫോം",
+      "tenant": "വർക്ക്സ്പേസ്",
+      "agent": "ഏജന്റ്",
+      "tenantInherited": "വർക്ക്സ്പേസിൽ നിന്ന് അനന്തരമായി ലഭിച്ചത്",
+      "aria": "മൂല്യത്തിന്റെ ഉറവിടം: {source}"
+    },
+    "sourceHelp": {
+      "default": "ആരും ഇത് മാറ്റിയിട്ടില്ല. ഉൽപ്പന്നത്തോടൊപ്പം വരുന്ന മൂല്യം ഉപയോഗിക്കുന്നു.",
+      "platform": "നിങ്ങളുടെ പ്ലാറ്റ്ഫോം ഓപ്പറേറ്റർ ഇത് മുഴുവൻ വിന്യാസത്തിനായി സജ്ജമാക്കി.",
+      "tenant": "നിങ്ങളുടെ വർക്ക്സ്പേസ് ഡിഫോൾട്ടിനെ ഓവർറൈഡ് ചെയ്യുന്നു. അനന്തരമായി ലഭിച്ച മൂല്യത്തിലേക്ക് മടങ്ങാൻ റീസെറ്റ് ചെയ്യുക.",
+      "agent": "ഈ ഏജന്റ് വർക്ക്സ്പേസ് മൂല്യത്തെ ഓവർറൈഡ് ചെയ്യുന്നു. വർക്ക്സ്പേസ് മൂല്യം വീണ്ടും അനന്തരമായി ലഭിക്കാൻ റീസെറ്റ് ചെയ്യുക.",
+      "tenantInherited": "ഈ ഏജന്റിന് സ്വന്തമായി ഓവർറൈഡ് ഇല്ല, അതിനാൽ അത് വർക്ക്സ്പേസ് മൂല്യം ഉപയോഗിക്കുന്നു. ഇത് എഡിറ്റ് ചെയ്യുന്നത് ഈ ഏജന്റിന് മാത്രമായി ഒരു ഓവർറൈഡ് സൃഷ്ടിക്കുന്നു.",
+      "lockedSuffix": "ഇത് ലോക്ക് ചെയ്തിരിക്കുന്നു, അതിനാൽ ഇവിടെ മാറ്റാൻ കഴിയില്ല."
+    },
+    "risk": {
+      "low": "കുറഞ്ഞ അപകടം",
+      "medium": "ഇടത്തരം അപകടം",
+      "high": "ഉയർന്ന അപകടം",
+      "security": "സുരക്ഷ"
+    },
+    "bool": {
+      "on": "On",
+      "off": "ഓഫ്"
+    },
+    "value": {
+      "unset": "സജ്ജമാക്കിയിട്ടില്ല",
+      "empty": "ശൂന്യം"
+    },
+    "select": {
+      "placeholder": "ഒരു ഓപ്ഷൻ തിരഞ്ഞെടുക്കുക"
+    },
+    "slider": {
+      "label": "{label} (സ്ലൈഡർ)"
+    },
+    "duration": {
+      "unitLabel": "{label}-ന്റെ യൂണിറ്റ്"
+    },
+    "units": {
+      "chars": "പ്രതീകങ്ങൾ",
+      "tokens": "ടോക്കണുകൾ",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "സെക്കൻഡുകൾ",
+      "min": "മിനിറ്റുകൾ",
+      "h": "മണിക്കൂറുകൾ"
+    },
+    "groups": {
+      "agent": "ഏജന്റ് റൺടൈം",
+      "approvals": "അംഗീകാരങ്ങൾ",
+      "quality": "ഗുണനിലവാര പരിശോധനകൾ",
+      "guardrails": "ഗാർഡ്‌റെയിലുകൾ",
+      "chat": "ചാറ്റ്",
+      "tools": "ടൂളുകൾ",
+      "memory": "മെമ്മറി",
+      "knowledge": "അറിവ്",
+      "delegation": "ചുമതല ഏൽപ്പിക്കൽ",
+      "aux": "സഹായ മോഡൽ",
+      "routing": "മോഡൽ റൂട്ടിംഗ്"
+    },
+    "errors": {
+      "required": "ഒരു മൂല്യം നൽകുക.",
+      "notNumber": "ഒരു സംഖ്യ നൽകുക.",
+      "notInteger": "ഒരു പൂർണ്ണസംഖ്യ നൽകുക.",
+      "belowMin": "കുറഞ്ഞത് {min} ആയിരിക്കണം.",
+      "aboveMax": "പരമാവധി {max} ആയിരിക്കണം.",
+      "notAllowed": "പട്ടികപ്പെടുത്തിയ ഓപ്ഷനുകളിൽ ഒന്ന് തിരഞ്ഞെടുക്കുക.",
+      "tooShort": "വളരെ ചെറുത്. കുറഞ്ഞത് {min} ഉപയോഗിക്കുക.",
+      "tooLong": "വളരെ നീളം. പരമാവധി {max} ഉപയോഗിക്കുക.",
+      "precision": "ഈ യൂണിറ്റിന് ഇത് കൃത്യമായി പ്രകടിപ്പിക്കാൻ കഴിയില്ല. ഏറ്റവും ചെറിയ യൂണിറ്റിന്റെ പൂർണ്ണസംഖ്യ ഉപയോഗിക്കുക അല്ലെങ്കിൽ ചെറിയ യൂണിറ്റ് തിരഞ്ഞെടുക്കുക.",
+      "serverRange": "അനുവദനീയ പരിധി: {min} മുതൽ {max} വരെ.",
+      "serverOptions": "അനുവദനീയ മൂല്യങ്ങൾ: {options}.",
+      "server": {
+        "invalid": "സെർവർ ഈ മൂല്യം സ്വീകരിച്ചില്ല: {message}",
+        "locked": "ഈ ക്രമീകരണം നിങ്ങളുടെ അഡ്മിനിസ്ട്രേറ്റർ ലോക്ക് ചെയ്തു, അതിനാൽ നിങ്ങളുടെ മാറ്റം സംരക്ഷിച്ചില്ല.",
+        "notFound": "ഈ ക്രമീകരണം ഇനി നിലവിലില്ല.",
+        "forbidden": "ഈ ക്രമീകരണം മാറ്റാൻ നിങ്ങൾക്ക് അനുമതിയില്ല.",
+        "reasonRequired": "ഈ മാറ്റത്തിന് ഒരു കാരണം ആവശ്യമാണ്. ഒന്ന് നൽകി വീണ്ടും ശ്രമിക്കുക.",
+        "network": "സെർവറിൽ എത്താനായില്ല, അതിനാൽ നിങ്ങളുടെ മാറ്റം സംരക്ഷിച്ചില്ല. {message}",
+        "other": "മാറ്റം സംരക്ഷിക്കാനായില്ല: {message}"
+      }
+    },
+    "effective": "ഇപ്പോൾ പ്രാബല്യത്തിൽ: {value}",
+    "hint": {
+      "range": "അനുവദനീയം: {min} മുതൽ {max} വരെ.",
+      "min": "കുറഞ്ഞത്: {min}.",
+      "max": "പരമാവധി: {max}.",
+      "default": "ഡിഫോൾട്ട്: {value}.",
+      "securityStricter": "ഒരു സുരക്ഷാ ക്രമീകരണം പ്ലാറ്റ്ഫോം മൂല്യത്തേക്കാൾ കർശനമാക്കാൻ മാത്രമേ കഴിയൂ, ഒരിക്കലും ദുർബലമാക്കാൻ കഴിയില്ല.",
+      "inherited": "നിങ്ങൾ ഇത് റീസെറ്റ് ചെയ്താൽ, ഇതിലേക്ക് മടങ്ങും: {value}."
+    },
+    "locked": {
+      "withReason": "നിങ്ങളുടെ അഡ്മിനിസ്ട്രേറ്റർ ലോക്ക് ചെയ്തത്: {reason}",
+      "noReason": "നിങ്ങളുടെ അഡ്മിനിസ്ട്രേറ്റർ ലോക്ക് ചെയ്തത്. ഇവിടെ മാറ്റാൻ കഴിയില്ല."
+    },
+    "blocked": {
+      "role": "നിങ്ങളുടെ റോളിന് ഈ ക്രമീകരണം മാറ്റാൻ കഴിയില്ല. ഒരു വർക്ക്സ്പേസ് അഡ്മിനോട് ചോദിക്കുക.",
+      "scope": "ഈ ക്രമീകരണം ഇവിടെ ഓവർറൈഡ് ചെയ്യാൻ കഴിയില്ല.",
+      "readOnly": "ക്രമീകരണങ്ങൾ ഇപ്പോൾ വായന-മാത്രമാണ്.",
+      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+    },
+    "reset": {
+      "button": "അനന്തരമായി ലഭിച്ചതിലേക്ക് റീസെറ്റ് ചെയ്യുക",
+      "aria": "അനന്തരമായി ലഭിച്ചതിലേക്ക് റീസെറ്റ് ചെയ്യുക: {label}"
+    },
+    "help": {
+      "show": "കൂടുതൽ വിശദാംശങ്ങൾ",
+      "hide": "വിശദാംശങ്ങൾ മറയ്ക്കുക"
+    },
+    "history": {
+      "button": "ചരിത്രം",
+      "open": "ചരിത്രം: {label}",
+      "title": "ചരിത്രം: {label}",
+      "scopeTenant": "വർക്ക്സ്പേസ് മാറ്റങ്ങൾ",
+      "scopeAgent": "ഈ ഏജന്റിനുള്ള മാറ്റങ്ങൾ",
+      "close": "ചരിത്രം അടയ്ക്കുക",
+      "loading": "ചരിത്രം ലോഡ് ചെയ്യുന്നു",
+      "error": "ചരിത്രം ലോഡ് ചെയ്യാനായില്ല. {message}",
+      "empty": "ഇതുവരെ മാറ്റങ്ങളൊന്നും രേഖപ്പെടുത്തിയിട്ടില്ല.",
+      "listLabel": "മാറ്റ ചരിത്രം, ഏറ്റവും പുതിയത് ആദ്യം",
+      "version": "പതിപ്പ് {version}",
+      "before": "മുമ്പ്:",
+      "after": "ശേഷം:",
+      "by": "മാറ്റിയത്",
+      "unknownActor": "അജ്ഞാതം",
+      "reason": "കാരണം:"
+    },
+    "savebar": {
+      "count": "സംരക്ഷിക്കാത്ത മാറ്റങ്ങൾ: {count}.",
+      "invalid": "സംരക്ഷിക്കുന്നതിന് മുമ്പ് ഹൈലൈറ്റ് ചെയ്ത ഫീൽഡുകൾ ശരിയാക്കുക. ശരിയാക്കേണ്ട ഫീൽഡുകൾ: {count}.",
+      "discard": "മാറ്റങ്ങൾ ഉപേക്ഷിക്കുക",
+      "save": "മാറ്റങ്ങൾ സംരക്ഷിക്കുക",
+      "saving": "സംരക്ഷിക്കുന്നു"
+    },
+    "risky": {
+      "title": "അപകടസാധ്യതയുള്ള മാറ്റങ്ങൾ സ്ഥിരീകരിക്കുക ({count})",
+      "description": "ഈ ക്രമീകരണങ്ങൾ നിങ്ങളുടെ ഏജന്റുമാർ എങ്ങനെ പെരുമാറുന്നുവെന്നോ അവർക്ക് എന്ത് ചെയ്യാൻ അനുവാദമുണ്ടെന്നോ മാറ്റുന്നു. ഓരോ മാറ്റവും അവലോകനം ചെയ്ത് എന്തുകൊണ്ട് ചെയ്യുന്നുവെന്ന് വിശദീകരിക്കുക. കാരണം ഓഡിറ്റ് ലോഗിൽ സംഭരിക്കുന്നു.",
+      "descriptionSecurity": "ഇവയിൽ കുറഞ്ഞത് ഒന്ന് സുരക്ഷാ ക്രമീകരണമാണ്. അത് പ്ലാറ്റ്ഫോം മൂല്യത്തേക്കാൾ കർശനമാക്കാൻ മാത്രമേ കഴിയൂ. ഓരോ മാറ്റവും അവലോകനം ചെയ്ത് എന്തുകൊണ്ട് ചെയ്യുന്നുവെന്ന് വിശദീകരിക്കുക. കാരണം ഓഡിറ്റ് ലോഗിൽ സംഭരിക്കുന്നു.",
+      "listLabel": "സ്ഥിരീകരിക്കേണ്ട മാറ്റങ്ങൾ",
+      "from": "ഇതിൽ നിന്ന്",
+      "to": "to",
+      "securityNote": "സുരക്ഷാ ക്രമീകരണം: ഇത് പ്ലാറ്റ്ഫോം മൂല്യത്തേക്കാൾ ദുർബലമാകാൻ പാടില്ല.",
+      "consequence": "ഇത് എന്ത് മാറ്റുന്നു:",
+      "reasonLabel": "ഈ മാറ്റത്തിന്റെ കാരണം",
+      "reasonPlaceholder": "ഉദാഹരണം: സപ്പോർട്ട് ടീമിന്റെ ദീർഘമായ അന്വേഷണങ്ങൾക്കായി പരിധി ഉയർത്തുന്നു",
+      "reasonHint": "ആവശ്യമാണ്, കുറഞ്ഞത് {min} പ്രതീകങ്ങൾ. മാറ്റം വരുത്തിയ ആളിനും പഴയതും പുതിയതുമായ മൂല്യങ്ങൾക്കുമൊപ്പം സംരക്ഷിക്കുന്നു.",
+      "acknowledge": "ഈ സുരക്ഷാ മാറ്റത്തിന്റെ അനന്തരഫലങ്ങൾ ഞാൻ മനസ്സിലാക്കുന്നു.",
+      "cancel": "റദ്ദാക്കുക",
+      "confirm": "സ്ഥിരീകരിച്ച് സംരക്ഷിക്കുക",
+      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+    },
+    "strictness": {
+      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
+      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
+      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "തീർപ്പാകാത്തത്",
+    "status_APPROVED": "അംഗീകരിച്ചു",
+    "status_REJECTED": "നിരസിച്ചു",
+    "status_EXPIRED": "കാലഹരണപ്പെട്ടു",
+    "status_EXECUTION_FAILED": "നിർവ്വഹണം പരാജയപ്പെട്ടു",
+    "status_DEAD_LETTERED": "ഡെഡ് ലെറ്റർ",
+    "filtersLabel": "അഭ്യർത്ഥനകൾ ഫിൽട്ടർ ചെയ്യുക",
+    "filterAgentLabel": "ഏജന്റ് അനുസരിച്ച് ഫിൽട്ടർ ചെയ്യുക",
+    "filterToolLabel": "ടൂൾ അനുസരിച്ച് ഫിൽട്ടർ ചെയ്യുക",
+    "filterAgeLabel": "പഴക്കം അനുസരിച്ച് ഫിൽട്ടർ ചെയ്യുക",
+    "filterAnyAgent": "ഏതെങ്കിലും ഏജന്റ്",
+    "filterAnyTool": "ഏതെങ്കിലും ടൂൾ",
+    "filterAnyAge": "ഏതെങ്കിലും പഴക്കം",
+    "age_newer1h": "1 മണിക്കൂറിൽ പുതിയത്",
+    "age_older1h": "1 മണിക്കൂറിൽ പഴയത്",
+    "age_older24h": "1 ദിവസത്തിൽ പഴയത്",
+    "age_older7d": "7 ദിവസത്തിൽ പഴയത്",
+    "filtersClear": "ഫിൽട്ടറുകൾ മായ്ക്കുക",
+    "filterWindowNote": "ഏറ്റവും പുതിയ {count} അഭ്യർത്ഥനകൾ ഫിൽട്ടർ ചെയ്യുന്നു. പഴയവ ഉൾപ്പെടുന്നില്ല.",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time}-ൽ കാലഹരണപ്പെടും",
+    "expiresAt": "ആരും തീരുമാനിച്ചില്ലെങ്കിൽ {time}-ന് സ്വയമേവ അടയ്ക്കും",
+    "overdue": "സമയപരിധി കഴിഞ്ഞു, അടുത്ത തൂത്തുവാരലിൽ അടയ്ക്കും",
+    "neverExpires": "ഈ വർക്ക്സ്പേസ് കാത്തിരിക്കുന്ന അഭ്യർത്ഥനകൾ കാലഹരണപ്പെടുത്തുന്നില്ല.",
+    "expiredNote": "{time} കാലഹരണപ്പെട്ടു: സമയത്തിനുള്ളിൽ ആരും തീരുമാനിച്ചില്ല",
+    "expiredReasonPrefix": "കാലഹരണപ്പെട്ടു:",
+    "auditExpired": "കാലഹരണപ്പെട്ടു, സമയത്തിനുള്ളിൽ ആരും തീരുമാനിച്ചില്ല",
+    "riskLow": "കുറഞ്ഞ അപകടം",
+    "riskMedium": "ഇടത്തരം അപകടം",
+    "riskHigh": "ഉയർന്ന അപകടം",
+    "riskEstimateNote": "അപകടസാധ്യത ടൂളിന്റെ പേരിൽ നിന്നുള്ള ഒരു കണക്കാണ്. പ്ലാറ്റ്ഫോം ടൂളുകളെ തരംതിരിക്കുന്നില്ല, അതിനാൽ അംഗീകരിക്കുന്നതിന് മുമ്പ് ആർഗ്യുമെന്റുകൾ വായിക്കുക.",
+    "riskWhoDecides": "അംഗീകാരത്തിനായി എന്ത് കാത്തിരിക്കണമെന്ന് ആരാണ് തീരുമാനിക്കുന്നത്?",
+    "previewGoal": "അത് ചെയ്തുകൊണ്ടിരുന്ന ടാസ്ക്:",
+    "previewArguments": "ആർഗ്യുമെന്റുകൾ",
+    "previewNoArguments": "ഈ കോളിന് ആർഗ്യുമെന്റുകളൊന്നും രേഖപ്പെടുത്തിയിട്ടില്ല.",
+    "previewRedacted": "{count} സെൻസിറ്റീവ് എന്ന് തോന്നുന്ന മൂല്യം(ങ്ങൾ) ഇവിടെ മറച്ചിരിക്കുന്നു. നിങ്ങൾ അംഗീകരിച്ചാൽ അവ ഇപ്പോഴും ടൂളിലേക്ക് അയയ്ക്കും.",
+    "previewTruncated": "ഈ ആർഗ്യുമെന്റുകൾ പൂർണ്ണമായി കാണിക്കാൻ കഴിയാത്തത്ര നീളമുള്ളതാണ്, അതിനാൽ ഈ അഭ്യർത്ഥന ഇവിടെ നിന്ന് അംഗീകരിക്കാൻ കഴിയില്ല.",
+    "approveBlockedTooLong": "മുഴുവൻ അഭ്യർത്ഥനയും അവലോകനം ചെയ്യാൻ കഴിയാത്തതിനാൽ അംഗീകരിക്കൽ ഓഫാണ്. നിങ്ങൾക്ക് ഇപ്പോഴും അത് നിരസിക്കാം.",
+    "ifApproveLabel": "നിങ്ങൾ അംഗീകരിച്ചാൽ:",
+    "ifApprove": "{tool} മുകളിലെ ആർഗ്യുമെന്റുകളോടെ ഇപ്പോൾ തന്നെ പ്രവർത്തിക്കുന്നു, ഏജന്റ് അതിന്റെ ഫലം ഉപയോഗിച്ച് ടാസ്ക് തുടരുന്നു.",
+    "ifDenyLabel": "നിങ്ങൾ നിരസിച്ചാൽ:",
+    "ifDeny": "{tool} പ്രവർത്തിക്കുന്നില്ല. നിങ്ങൾ ഇല്ല എന്ന് പറഞ്ഞതായി ഏജന്റിനെ അറിയിക്കും, കാരണം നൽകിയാൽ അതോടൊപ്പം, അത് ഇല്ലാതെ തുടരും.",
+    "whyGated": "ഏജന്റ് {tool} ഉപയോഗിക്കാൻ ആവശ്യപ്പെട്ടു. ഏജന്റ് മേൽനോട്ടത്തിലുള്ളതായി സജ്ജമാക്കിയതിനാലോ ഈ വർക്ക്സ്പേസ് ആ ടൂളിന് അംഗീകാരം ആവശ്യപ്പെടുന്നതിനാലോ ഇത് നിങ്ങളുടെ തീരുമാനത്തിനായി തടഞ്ഞുവച്ചു.",
+    "denyReasonLabel": "നിരസിച്ചാൽ കാരണം (ഓപ്ഷണൽ)",
+    "denyReasonPlaceholder": "ഉദാഹരണം: തെറ്റായ സ്വീകർത്താവ്, അയയ്ക്കുന്നതിന് മുമ്പ് എന്നോട് ചോദിക്കുക",
+    "denyReasonHelp": "നിങ്ങൾ നിരസിച്ചാൽ, ഏജന്റ് ഈ കാരണം നിരസിച്ച കോളിന്റെ ഫലമായി വായിച്ച് ക്രമീകരിക്കും. കാരണം കൂടാതെ നിരസിക്കാൻ ശൂന്യമായി വിടുക.",
+    "denyButton": "നിരസിക്കുക",
+    "detailRegionLabel": "അഭ്യർത്ഥനയുടെ വിശദാംശങ്ങൾ",
+    "sessionLabel": "സംഭാഷണം",
+    "linkOpenAgent": "ഏജന്റ് തുറക്കുക",
+    "linkInspectTurns": "അതിന്റെ ടേണുകൾ പരിശോധിക്കുക",
+    "continuationLabel": "ഏജന്റ് അടുത്തതായി എന്ത് ചെയ്തു",
+    "continuationCompleted": "ഏജന്റ് ടാസ്ക് തുടരുന്നത് പൂർത്തിയാക്കി.",
+    "continuationFailed": "ഈ തീരുമാനത്തിന് ശേഷം ഏജന്റിന് തുടരാനായില്ല.",
+    "continuationRetry": "തുടരാൻ ആവശ്യപ്പെടുക",
+    "retryMessage": "ദയവായി ടാസ്ക് തുടരുക.",
+    "lastDecisionTitle": "നിങ്ങളുടെ അവസാന തീരുമാനം: {tool}",
+    "lastDecisionClose": "അടയ്ക്കുക",
+    "deepLinkNotFound": "ആ അംഗീകാര അഭ്യർത്ഥന കണ്ടെത്താനായില്ല, അല്ലെങ്കിൽ നിങ്ങൾക്ക് അത് കാണാൻ കഴിയില്ല.",
+    "selectAllLabel": "ഈ പേജിലെ തീർപ്പാകാത്ത എല്ലാ ടൂൾ കോളുകളും തിരഞ്ഞെടുക്കുക",
+    "selectRowLabel": "{tool}-ലേക്കുള്ള തീർപ്പാകാത്ത കോൾ തിരഞ്ഞെടുക്കുക",
+    "bulkSelected": "{count} തിരഞ്ഞെടുത്തു",
+    "bulkApprove": "തിരഞ്ഞെടുത്തവ അംഗീകരിക്കുക",
+    "bulkDeny": "തിരഞ്ഞെടുത്തവ നിരസിക്കുക",
+    "bulkClear": "തിരഞ്ഞെടുപ്പ് മായ്ക്കുക",
+    "bulkCancel": "റദ്ദാക്കുക",
+    "bulkDismiss": "തള്ളിക്കളയുക",
+    "bulkMixedTools": "കൂട്ടായ തീരുമാനങ്ങൾക്ക് തിരഞ്ഞെടുത്ത എല്ലാ അഭ്യർത്ഥനകളും ഒരേ ടൂളിനുള്ളതായിരിക്കണം.",
+    "bulkNotLowRisk": "കൂട്ടായ അംഗീകാരം കുറഞ്ഞ അപകടസാധ്യതയുള്ള ടൂളുകൾക്ക് (ലുക്കപ്പുകൾ) മാത്രമാണ്. നിരസിക്കൽ ഏത് ഒരു ടൂളിനും പ്രവർത്തിക്കും, അല്ലെങ്കിൽ ഇവ ഓരോന്നായി തീരുമാനിക്കുക.",
+    "bulkNotToolCall": "കൂട്ടായ തീരുമാനങ്ങൾ ഏജന്റ് ടൂൾ കോളുകൾ മാത്രമേ ഉൾക്കൊള്ളൂ.",
+    "bulkNotPending": "കൂട്ടായ തീരുമാനങ്ങൾ ഇപ്പോഴും തീർപ്പാകാത്ത അഭ്യർത്ഥനകൾ മാത്രമേ ഉൾക്കൊള്ളൂ.",
+    "bulkConfirmApproveTitle": "{tool}-ലേക്കുള്ള {count} കോളുകൾ അംഗീകരിക്കണോ?",
+    "bulkConfirmApproveBody": "ഇവയിൽ ഓരോന്നും താഴെ പട്ടികപ്പെടുത്തിയ സ്വന്തം ആർഗ്യുമെന്റുകളോടെ ഇപ്പോൾ തന്നെ {tool} പ്രവർത്തിപ്പിക്കുന്നു, ഏജന്റ് ഫലങ്ങൾ ഉപയോഗിച്ച് തുടരുന്നു. ഇത് പഴയപടിയാക്കാൻ കഴിയില്ല.",
+    "bulkConfirmDenyTitle": "{tool}-ലേക്കുള്ള {count} കോളുകൾ നിരസിക്കണോ?",
+    "bulkConfirmDenyBody": "ഇവയിലൊന്നും പ്രവർത്തിക്കില്ല. ഓരോ കോളും നിരസിച്ചതായി ഏജന്റിനെ അറിയിക്കും, കാരണം നൽകിയാൽ അതോടൊപ്പം.",
+    "bulkConfirmApprove": "{count} അംഗീകരിക്കുക",
+    "bulkConfirmDeny": "{count} നിരസിക്കുക",
+    "bulkMore": "കൂടാതെ {count} എണ്ണം കൂടി",
+    "bulkProgress": "{count}-ൽ {done} പൂർത്തിയായി",
+    "bulkResult": "{done} തീരുമാനിച്ചു, {failed} പരാജയപ്പെട്ടു.",
+    "notifyOff": "എന്നെ അറിയിക്കുക",
+    "notifyOn": "അറിയിപ്പുകൾ ഓൺ",
+    "notifyHelp": "ഈ ടാബ് പശ്ചാത്തലത്തിൽ ഇരിക്കുമ്പോൾ പുതിയ അഭ്യർത്ഥന വന്നാൽ ബ്രൗസർ അറിയിപ്പ് കാണിക്കുക",
+    "notifyUnsupported": "ഈ ബ്രൗസറിന് അറിയിപ്പുകൾ കാണിക്കാൻ കഴിയില്ല.",
+    "notifyBlocked": "അറിയിപ്പുകൾ തടഞ്ഞിരിക്കുന്നു. ഇത് ഓൺ ചെയ്യാൻ നിങ്ങളുടെ ബ്രൗസറിന്റെ സൈറ്റ് ക്രമീകരണങ്ങളിൽ അവ അനുവദിക്കുക.",
+    "notifyTitle": "ഒരു ഏജന്റ് അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു",
+    "notifyBodyOne": "{tool}-ന് നിങ്ങളുടെ തീരുമാനം ആവശ്യമാണ്.",
+    "notifyBodyMany": "{count} അഭ്യർത്ഥനകൾക്ക് നിങ്ങളുടെ തീരുമാനം ആവശ്യമാണ്.",
+    "newArrived": "{count} പുതിയ അംഗീകാര അഭ്യർത്ഥന(കൾ) എത്തി.",
+    "rulesTitle": "ഒരു ടൂളിനുള്ള നിയമം",
+    "rulesIntro": "ഒരു ടൂൾ എപ്പോഴും ഒരു വ്യക്തിക്കായി കാത്തിരിക്കണോ അതോ ഒരിക്കലും വേണ്ടയോ എന്ന് തിരഞ്ഞെടുക്കുക. അർദ്ധ-സ്വയംഭരണം എന്ന് സജ്ജമാക്കിയ ഓരോ ഏജന്റിനും നിയമം ബാധകമാണ്.",
+    "rulesNeedsScope": "നിയമങ്ങൾ മാറ്റാൻ നിങ്ങൾക്ക് അംഗീകാരങ്ങളുടെ അനുമതി വേണം.",
+    "rulesToolLabel": "ടൂളിന്റെ പേര്",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "അഭ്യർത്ഥനയിൽ ടൂൾ കാണുന്നതുപോലെ തന്നെ, ഉദാഹരണത്തിന് send_email.",
+    "rulesToolNameInvalid": "ടൂൾ പേരിൽ സ്പേസുകൾ ഉണ്ടാകില്ല.",
+    "rulesModeLabel": "എന്ത് സംഭവിക്കണം",
+    "rulesAskName": "എപ്പോഴും ചോദിക്കുക",
+    "rulesAskHint": "ഈ ടൂളിലേക്കുള്ള ഓരോ കോളും ഒരു വ്യക്തിയുടെ അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു.",
+    "rulesNeverName": "ഒരിക്കലും ചോദിക്കരുത്",
+    "rulesNeverHint": "ഈ ടൂളിലേക്കുള്ള കോളുകൾ ആരും അംഗീകരിക്കാതെ ഉടൻ പ്രവർത്തിക്കുന്നു.",
+    "rulesNeverRiskyWarn": "ഈ ടൂൾ കാര്യങ്ങൾ മാറ്റുന്നതായി തോന്നുന്നു. ഉറപ്പാക്കുക.",
+    "rulesScopeNote": "നിയമങ്ങൾ ഒരു ഏജന്റിനല്ല, മുഴുവൻ വർക്ക്സ്പേസിനും ബാധകമാണ്. മേൽനോട്ടത്തിലുള്ള ഏജന്റുമാർ ഇപ്പോഴും എല്ലാത്തിനും ചോദിക്കും, പൂർണ്ണ സ്വയംഭരണ ഏജന്റുമാർ നിയമം എന്ത് പറഞ്ഞാലും ഒരിക്കലും ചോദിക്കില്ല. നിങ്ങൾ സജ്ജമാക്കുന്ന നിയമങ്ങൾ ഇവിടെ ഇതുവരെ പട്ടികപ്പെടുത്തുന്നില്ല.",
+    "rulesSave": "നിയമം സംരക്ഷിക്കുക",
+    "rulesSaveFailed": "നിയമം സംരക്ഷിക്കാനായില്ല.",
+    "rulesSavedAsk": "{tool} എപ്പോഴും അംഗീകാരം ചോദിക്കും.",
+    "rulesSavedNever": "{tool} ഇനി അംഗീകാരം ചോദിക്കില്ല.",
+    "rulesNeverConfirmTitle": "{tool} പ്രവർത്തിക്കുന്നതിന് മുമ്പ് ചോദിക്കുന്നത് നിർത്തണോ?",
+    "rulesNeverConfirmBody": "ഓരോ അർദ്ധ-സ്വയംഭരണ ഏജന്റും ആരും അംഗീകരിക്കാതെ {tool} പ്രവർത്തിപ്പിക്കും. ഇതിന് കാര്യങ്ങൾ മാറ്റാനോ അയയ്ക്കാനോ കഴിയുന്നതായി തോന്നുന്നു, തെറ്റ് പിൻവലിക്കാൻ കഴിയില്ല.",
+    "rulesNeverConfirmBodyLow": "ഓരോ അർദ്ധ-സ്വയംഭരണ ഏജന്റും ചോദിക്കാതെ {tool} പ്രവർത്തിപ്പിക്കും. ഇത് ലുക്കപ്പ് പോലെ തോന്നുന്നു, അതിനാൽ ഇത് സാധാരണയായി സുരക്ഷിതമാണ്.",
+    "rulesNeverConfirm": "ചോദിക്കുന്നത് നിർത്തുക",
+    "tiersTitle": "അംഗീകാരത്തിനായി എന്ത് കാത്തിരിക്കണമെന്ന് ആരാണ് തീരുമാനിക്കുന്നത്?",
+    "tiersIntro": "ഓരോ ഏജന്റിനും ഒരു സ്വയംഭരണ നിലയുണ്ട്. വർക്ക്സ്പേസിന്റെ അംഗീകാര നിയമങ്ങൾ ഉപയോഗിക്കുമോ എന്ന് അത് തീരുമാനിക്കുന്നു.",
+    "tierCurrent": "ഈ ഏജന്റ്",
+    "tierConsequenceLabel": "പ്രായോഗികമായി:",
+    "tierSupervisedName": "മേൽനോട്ടത്തിലുള്ളത്",
+    "tierSupervisedWhat": "വർക്ക്സ്പേസ് നിയമങ്ങൾ എന്ത് പറഞ്ഞാലും ഓരോ ടൂൾ കോളും ഒരു വ്യക്തിക്കായി കാത്തിരിക്കുന്നു. ഓരോ ടേണിലെയും ടൂൾ ഘട്ടങ്ങൾക്ക് കുറഞ്ഞ പരിധിയും ലഭിക്കുന്നു.",
+    "tierSupervisedConsequence": "ഏറ്റവും സുരക്ഷിതം, പക്ഷേ ക്യൂവിൽ ധാരാളം അഭ്യർത്ഥനകളും വേഗത കുറഞ്ഞ ഏജന്റും പ്രതീക്ഷിക്കുക.",
+    "tierSemiName": "അർദ്ധ-സ്വയംഭരണം",
+    "tierSemiWhat": "ഓരോ ടൂളിനും വർക്ക്സ്പേസിന്റെ നിയമം തീരുമാനിക്കുന്നു: അയയ്ക്കൽ, ഇല്ലാതാക്കൽ, പേയ്മെന്റുകൾ പോലുള്ള അപകടസാധ്യതയുള്ള ടൂളുകൾ ഡിഫോൾട്ടായി ചോദിക്കുന്നു, ബാക്കിയുള്ളവ പ്രവർത്തിക്കുന്നു.",
+    "tierSemiConsequence": "ഒരു നല്ല ഡിഫോൾട്ട്. നിങ്ങളുടെ ഓരോ ടൂളിനുമുള്ള നിയമങ്ങൾ ഇവിടെ പ്രാബല്യത്തിൽ വരുന്നു.",
+    "tierFullName": "പൂർണ്ണ സ്വയംഭരണം",
+    "tierFullWhat": "ഒരു ടൂൾ കോളും ഒരിക്കലും അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നില്ല, ഏജന്റിന് ടൂൾ ഘട്ടങ്ങളുടെ ഉയർന്ന പരിധി ലഭിക്കുന്നു. ഓരോ ടൂളിനുമുള്ള നിയമങ്ങൾ അവഗണിക്കപ്പെടുന്നു.",
+    "tierFullConsequence": "ഇത് ചോദിക്കാതെ പ്രവർത്തിക്കുന്നു. തെറ്റുകൾ പഴയപടിയാക്കാൻ എളുപ്പമുള്ള ഏജന്റുമാർക്ക് മാത്രം ഉപയോഗിക്കുക.",
+    "tiersRuleNote": "ടൂൾ നിയമങ്ങൾ (എപ്പോഴും ചോദിക്കുക, ഒരിക്കലും ചോദിക്കരുത്) അർദ്ധ-സ്വയംഭരണ ഏജന്റുമാർക്ക് മാത്രമേ പ്രസക്തമാകൂ.",
+    "agentModeTitle": "ഈ ഏജന്റിന് എപ്പോഴാണ് അംഗീകാരം വേണ്ടത്?",
+    "agentModeSupervised": "ഈ ഏജന്റ് മേൽനോട്ടത്തിലുള്ളതാണ്: ഓരോ ടൂൾ കോളും ഒരു വ്യക്തിക്കായി കാത്തിരിക്കുന്നു, ഓരോ ടൂളിനുമുള്ള നിയമങ്ങൾ അവഗണിക്കപ്പെടുന്നു.",
+    "agentModeSemi": "ഈ ഏജന്റ് അർദ്ധ-സ്വയംഭരണമാണ്: ഓരോ ടൂളും വർക്ക്സ്പേസിന്റെ നിയമം പിന്തുടരുന്നു. അയയ്ക്കൽ, ഇല്ലാതാക്കൽ, പേയ്മെന്റുകൾ ഡിഫോൾട്ടായി ചോദിക്കുന്നു.",
+    "agentModeFull": "ഈ ഏജന്റ് പൂർണ്ണ സ്വയംഭരണമാണ്: ഇത് ഒരിക്കലും അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നില്ല, ഓരോ ടൂളിനുമുള്ള നിയമങ്ങൾ അവഗണിക്കപ്പെടുന്നു.",
+    "agentModeQueueLink": "ഈ ഏജന്റിന്റെ അഭ്യർത്ഥനകൾ കാണുക",
+    "agentModeRulesLink": "ഒരു ടൂളിന് നിയമം സജ്ജമാക്കുക",
+    "agentModeShowTiers": "മൂന്ന് നിലകളും താരതമ്യം ചെയ്യുക",
+    "agentModeHideTiers": "താരതമ്യം മറയ്ക്കുക",
+    "agentModeScopeNote": "മുകളിലെ സ്വയംഭരണ തിരഞ്ഞെടുപ്പ് ഉപയോഗിച്ച് നില മാറ്റുക. ടൂൾ നിയമങ്ങൾ മുഴുവൻ വർക്ക്സ്പേസിനുള്ളതാണ്, ഓരോ ഏജന്റിനുമല്ല.",
+    "policyThenApprovalNote": "ഈ നിയമങ്ങൾ കടന്നുപോകുന്ന കോളും ഇപ്പോഴും ഒരു വ്യക്തിക്കായി കാത്തിരിക്കാം. അത് ഏജന്റിന്റെ സ്വയംഭരണ നിലയെ ആശ്രയിച്ചിരിക്കുന്നു, താഴെ വിശദീകരിച്ചിരിക്കുന്നു.",
+    "chatReasonToggle": "ഒരു കാരണം ചേർക്കുക",
+    "chatReviewInQueue": "ക്യൂവിൽ അവലോകനം ചെയ്യുക"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "ഇവന്റുകൾ ഫിൽട്ടർ ചെയ്യുക",
+    "tlFilterCategories": "ഇവന്റ് തരങ്ങൾ",
+    "tlCatIntake": "ഇൻടേക്ക്",
+    "tlCatModel": "മോഡൽ",
+    "tlCatTool": "ടൂളുകൾ",
+    "tlCatApproval": "അംഗീകാരങ്ങൾ",
+    "tlCatContinuation": "തുടർച്ചകൾ",
+    "tlCatRetry": "വീണ്ടും ശ്രമങ്ങളും ഫെയിൽഓവറും",
+    "tlCatGuardrail": "ഗാർഡ്‌റെയിലുകൾ",
+    "tlCatCache": "കാഷെ",
+    "tlCatVerify": "പരിശോധനകൾ",
+    "tlCatFinish": "പൂർത്തീകരണം",
+    "tlProblemsOnly": "പ്രശ്നങ്ങൾ മാത്രം",
+    "tlSearch": "ഇവന്റുകൾ തിരയുക",
+    "tlSearchPlaceholder": "ടൂൾ, മോഡൽ, ഗാർഡ് അല്ലെങ്കിൽ നില",
+    "tlClearFilters": "ഫിൽട്ടറുകൾ മായ്ക്കുക",
+    "tlShowing": "{total} ഇവന്റുകളിൽ {shown} കാണിക്കുന്നു",
+    "tlNoMatch": "ഈ ഫിൽട്ടറുകളുമായി പൊരുത്തപ്പെടുന്ന ഇവന്റുകളൊന്നുമില്ല.",
+    "tlSevOk": "വിജയിച്ചു",
+    "tlSevInfo": "വിവരം",
+    "tlSevWarn": "ശ്രദ്ധ ആവശ്യമാണ്",
+    "tlSevError": "പരാജയപ്പെട്ടു",
+    "tlIntake": "ടേൺ ആരംഭിച്ചു: {chars} പ്രതീകങ്ങൾ, {tools} ടൂളുകൾ, {attachments} അറ്റാച്ച്‌മെന്റുകൾ",
+    "tlRunTools": "Tools for this run",
+    "tlRunToolsNone": "none (text only)",
+    "tlModelCall": "{model} ({provider})-ലേക്കുള്ള മോഡൽ കോൾ, റൂട്ട് {route}",
+    "tlFailover": "{model} ({provider})-ലേക്ക് ഫെയിൽഓവർ ചെയ്തു",
+    "tlRetryModel": "{model} ({provider})-ൽ വീണ്ടും ശ്രമിച്ചു, റൂട്ട് {route}",
+    "tlRetry": "വീണ്ടും ശ്രമം: {guard} ({outcome})",
+    "tlCacheHit": "റെസ്പോൺസ് കാഷെയിൽ നിന്ന് ഉത്തരം നൽകി",
+    "tlToolCall": "ടൂൾ കോൾ {tool}: {status}",
+    "tlApprovalRequested": "{tool} പ്രവർത്തിക്കുന്നതിന് മുമ്പ് അംഗീകാരം അഭ്യർത്ഥിച്ചു",
+    "tlApprovalDecided": "{tool}-ന്റെ അംഗീകാരത്തിൽ തീരുമാനമായി: {decision}",
+    "tlContinuation": "തുടർച്ച: {guard} ({outcome})",
+    "tlGuard": "ഗാർഡ്‌റെയിൽ {guard}: {outcome}",
+    "tlVerifyPassed": "പരിശോധന വിജയിച്ചു: {check}",
+    "tlVerifyFailed": "പരിശോധന പരാജയപ്പെട്ടു: {check}",
+    "tlFinish": "പൂർത്തിയായി: {status} (ഉത്തരത്തിൽ {chars} പ്രതീകങ്ങൾ)",
+    "tlOther": "ഇവന്റ് {type}",
+    "reasonFallbackProvider": "പ്രാഥമിക മോഡൽ പരാജയപ്പെട്ടു, അതിനാൽ ടേൺ ഏജന്റിന്റെ ഫാൾബാക്ക് ദാതാവിലേക്ക് മാറി.",
+    "reasonToolsDisabledRetry": "ദാതാവ് ടൂൾ-കോൾ ചരിത്രം നിരസിച്ചു, അതിനാൽ ടേണിന് ടൂളുകളില്ലാതെ ഒരിക്കൽ കൂടി ഉത്തരം നൽകി.",
+    "reasonRetryOther": "മോഡൽ കോൾ ആവർത്തിച്ചു.",
+    "reasonToolCallRetry": "മോഡൽ അതിന്റെ ഉത്തരം വികലമായ ടൂൾ കോളിൽ അവസാനിപ്പിച്ചു, അതിനാൽ വീണ്ടും ചോദിച്ചു.",
+    "reasonCutOff": "ഉത്തരം നീള പരിധിയിൽ മുറിഞ്ഞു, അതിനാൽ തുടരാൻ മോഡലിനോട് ആവശ്യപ്പെട്ടു.",
+    "reasonToolsContinue": "ടൂൾ കോളുകൾക്ക് ശേഷം മോഡലിന് കൂടുതൽ ഘട്ടങ്ങൾ ആവശ്യമായിരുന്നു, അതിനാൽ ടേൺ തുടർന്നു.",
+    "reasonToolBlocked": "ടൂളിന് പകരം ഒരു ഗാർഡ്, നയം, ഹുക്ക് അല്ലെങ്കിൽ പരിധി ഉത്തരം നൽകി, അതിനാൽ അത് പ്രവർത്തിച്ചില്ല.",
+    "reasonToolParked": "കോൾ ഒരു വ്യക്തിയുടെ അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു; ടൂൾ പ്രവർത്തിച്ചിട്ടില്ല.",
+    "reasonGuardAction": "ഒരു ഗാർഡ്‌റെയിൽ ഉത്തരം മാറ്റുകയോ തടഞ്ഞുവയ്ക്കുകയോ ചെയ്തു.",
+    "tlAtStart": "ആരംഭം മുതൽ",
+    "tlGap": "മുൻ ഇവന്റ് മുതൽ",
+    "tlDuration": "ദൈർഘ്യം",
+    "tlTokens": "ഇൻപുട്ട് / ഔട്ട്പുട്ട് ടോക്കണുകൾ",
+    "tlCost": "ചെലവ്",
+    "tlDetails": "ഹാഷുകളും അസംസ്കൃത സംഗ്രഹവും",
+    "tlArgsHash": "ആർഗ്യുമെന്റുകളുടെ ഹാഷ്",
+    "tlResultDigest": "ഫലത്തിന്റെ ഡൈജസ്റ്റ്",
+    "tlContentNote": "ആർഗ്യുമെന്റുകളും ഫലങ്ങളും ഒരിക്കലും സംഭരിക്കുന്നില്ല. ഒരു ടൂൾ കോളിന് ടൈംലൈൻ അതിന്റെ നില, ദൈർഘ്യം, അതിന്റെ ആർഗ്യുമെന്റുകളുടെയും ഫലത്തിന്റെയും ഹാഷുകൾ എന്നിവ കാണിക്കുന്നു, ഉള്ളടക്കമല്ല.",
+    "tlStatFinish": "അവസാനിച്ചതിന്റെ കാരണം",
+    "tlStillOpen": "പൂർത്തിയായിട്ടില്ല",
+    "tlProblemCount": "{count} ഇവന്റുകൾക്ക് ശ്രദ്ധ ആവശ്യമാണ്",
+    "tlStatRetries": "വീണ്ടും ശ്രമങ്ങളും ഫെയിൽഓവറുകളും",
+    "tlStatContinuations": "തുടർച്ചകൾ",
+    "tlStatApprovals": "അംഗീകാരങ്ങൾ",
+    "tlStatTokens": "ഇൻപുട്ട് / ഔട്ട്പുട്ട് ടോക്കണുകൾ",
+    "tlTokensNotRecorded": "ഈ ടേണിന് രേഖപ്പെടുത്തിയിട്ടില്ല",
+    "tlTokensInOut": "ഇൻപുട്ട് / ഔട്ട്പുട്ട്",
+    "tlCopyTurnId": "ടേൺ ID പകർത്തുക",
+    "tlCopyTurnIdShort": "ID പകർത്തുക",
+    "tlCopied": "ടേൺ ID പകർത്തി.",
+    "tlCopyFailed": "പകർത്താനായില്ല. ID തിരഞ്ഞെടുത്ത് കൈകൊണ്ട് പകർത്തുക.",
+    "sessTitle": "ഒരു സെഷനിലെ ടേണുകൾ",
+    "sessSubtitle": "രേഖപ്പെടുത്തിയ ടേണുകൾ, ഏറ്റവും പുതിയത് ആദ്യം, കാണാൻ ഒരു ചാറ്റ് സെഷൻ തിരഞ്ഞെടുക്കുക. ചാറ്റ് സന്ദേശത്തിലെ ടേൺ കാണുക ലിങ്ക് തുറന്നാൽ ഇത് നിങ്ങൾക്കായി സ്വയം പൂരിപ്പിക്കും.",
+    "sessionIdLabel": "സെഷൻ ID",
+    "sessionIdPlaceholder": "ചാറ്റ് സെഷൻ ID",
+    "sessFind": "ടേണുകൾ കണ്ടെത്തുക",
+    "sessInvalid": "ഏജന്റ് ID (ഒരു UUID), സെഷൻ ID എന്നിവ നൽകുക.",
+    "sessLoading": "സെഷന്റെ ടേണുകൾ ലോഡ് ചെയ്യുന്നു...",
+    "sessUnavailableTitle": "സെഷൻ തിരയൽ ലഭ്യമല്ല",
+    "sessUnavailableBody": "ഈ സെർവറിന് ഒരു സെഷനിലെ ടേണുകൾ പട്ടികപ്പെടുത്താൻ കഴിയില്ല. പകരം താഴെ ID ഉപയോഗിച്ച് ഒരു ടേൺ തുറക്കുക.",
+    "sessErrorTitle": "സെഷന്റെ ടേണുകൾ ലോഡ് ചെയ്യാനായില്ല",
+    "sessEmptyTitle": "ഈ സെഷനിൽ ജേണൽ ചെയ്ത ടേണുകളില്ല",
+    "sessEmptyBody": "സെഷൻ ഒന്നും രേഖപ്പെടുത്തിയില്ല. ഒന്നുകിൽ സെഷൻ ID തെറ്റാണ്, അല്ലെങ്കിൽ അതിന്റെ ടേണുകൾ പ്രവർത്തിച്ചപ്പോൾ ടേൺ ജേണൽ ഓഫായിരുന്നു.",
+    "sessListLabel": "{count} ജേണൽ ചെയ്ത ടേണുകൾ",
+    "sessEvents": "{count} ഇവന്റുകൾ",
+    "sessStatusOpen": "തുറക്കുക",
+    "sessOpen": "ടൈംലൈൻ തുറക്കുക",
+    "sessOpened": "താഴെ കാണിച്ചിരിക്കുന്നു"
+  },
+  "evalControls": {
+    "cancel": "റദ്ദാക്കുക",
+    "saving": "സംരക്ഷിക്കുന്നു...",
+    "saved": "സംരക്ഷിച്ചു.",
+    "saveMode": "റീപ്ലേ മോഡ് സംരക്ഷിക്കുക",
+    "discard": "മാറ്റങ്ങൾ ഉപേക്ഷിക്കുക",
+    "saveFailed": "റീപ്ലേ മോഡ് സംരക്ഷിക്കാനായില്ല.",
+    "unsavedChanges": "സംരക്ഷിക്കാത്ത മാറ്റങ്ങൾ",
+    "modeTitle": "ഈ ഡാറ്റാസെറ്റ് എങ്ങനെ റീപ്ലേ ചെയ്യുന്നു",
+    "modeHelp": "ഒരു റീപ്ലേയ്ക്ക് ഏജന്റിന്റെ ടൂളുകൾ ഉപയോഗിക്കാമോ എന്ന് തിരഞ്ഞെടുക്കുക. ഇത് അടുത്ത റൺ എന്ത് അളക്കുന്നു എന്നത് മാറ്റുന്നു.",
+    "modeTextOnly": "ടെക്സ്റ്റ് മാത്രം",
+    "modeTextOnlyHelp": "ഏജന്റ് ടൂളുകളില്ലാതെ ഉത്തരം നൽകുന്നു. സുരക്ഷിതം: യഥാർത്ഥത്തിൽ ഒന്നും സംഭവിക്കില്ല. പ്രതീക്ഷിത-ടൂൾ പരിശോധനകൾ നിറവേറ്റാനാകില്ല.",
+    "modeFull": "ടൂളുകളോടെ പൂർണ്ണ പൈപ്പ്‌ലൈൻ",
+    "modeFullHelp": "ഒരു യഥാർത്ഥ ഉപയോക്താവിന് ലഭിക്കുന്ന അതേ ടൂളുകൾ, ഗാർഡ്‌റെയിലുകൾ, ഘട്ട പരിധികൾ. പ്രതീക്ഷിത-ടൂൾ, ട്രാജക്ടറി പരിശോധനകൾക്ക് ആവശ്യം.",
+    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "autoApproveLabel": "ഇവാൽ സാൻഡ്‌ബോക്സിൽ ടൂൾ കോളുകൾ സ്വയം അംഗീകരിക്കുക",
+    "autoApproveHelp": "സാധാരണയായി ഒരു വ്യക്തിക്കായി കാത്തിരിക്കുമായിരുന്ന ടൂൾ കോൾ ഇവാൽ സാൻഡ്‌ബോക്സ് അംഗീകരിക്കുന്നു, അങ്ങനെ കേസ് പൂർത്തിയാക്കാം. ഇതില്ലെങ്കിൽ പ്രൊഡക്ഷനിൽ സംഭവിക്കുന്നതുപോലെ കേസ് മറുപടി ലഭിക്കാത്ത അംഗീകാരത്തിൽ അവസാനിക്കും.",
+    "autoApproveWarnTitle": "നോൺ-പ്രൊഡക്ഷൻ വർക്ക്സ്പേസുകൾക്ക് മാത്രം",
+    "autoApproveWarnBody": "ടൂളുകൾ യഥാർത്ഥ ഉപഭോക്താക്കളിലേക്കോ ഡാറ്റയിലേക്കോ എത്തുന്നിടത്ത് ഇത് ഒരിക്കലും ഓൺ ചെയ്യരുത്. ഷെൽ, കോഡിംഗ്, ഷെഡ്യൂളിംഗ്, ഏജന്റ്-ടു-ഏജന്റ്, പേയ്മെന്റ്, ഡിലീറ്റ് ടൂളുകൾ ഒരിക്കലും സ്വയം അംഗീകരിക്കപ്പെടില്ല. നിങ്ങളുടെ അഡ്മിനിസ്ട്രേറ്റർ ഈ വർക്ക്സ്പേസ് നോൺ-പ്രൊഡക്ഷൻ ആയി അടയാളപ്പെടുത്തിയിരിക്കണം.",
+    "autoApproveNeedsFull": "ആദ്യം പൂർണ്ണ പൈപ്പ്‌ലൈൻ ഓൺ ചെയ്യുക: ടൂളുകൾ പ്രവർത്തിക്കുമ്പോൾ മാത്രമേ സ്വയം-അംഗീകാരം ബാധകമാകൂ.",
+    "autoApproveRefused": "ഈ വർക്ക്സ്പേസിൽ അനുവദനീയമല്ല: {reason}",
+    "autoApproveConfirmTitle": "ഇവാലുകളിൽ ടൂൾ കോളുകൾ സ്വയം അംഗീകരിക്കണോ?",
+    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirm": "സ്വയം-അംഗീകാരം ഓൺ ചെയ്യുക",
+    "trajectoryLabel": "ട്രാജക്ടറി പരിശോധനകൾ",
+    "trajectoryOn": "On",
+    "trajectoryOff": "ലഭ്യമല്ല",
+    "trajectoryHelpOn": "പ്രതീക്ഷിത ട്രാജക്ടറിയുള്ള കേസുകൾക്ക് ഏജന്റ് ഏതൊക്കെ ടൂളുകൾ ഏത് ക്രമത്തിൽ വിളിച്ചു എന്നതനുസരിച്ച് സ്കോർ ചെയ്യുന്നു. ഇത് ഡാറ്റാസെറ്റ് അനുസരിച്ചല്ല, നിങ്ങളുടെ അഡ്മിനിസ്ട്രേറ്റർ മുഴുവൻ വിന്യാസത്തിനും ഓൺ ചെയ്യുന്നു.",
+    "trajectoryHelpOff": "ട്രാജക്ടറി പരിശോധനകൾ ഇവിടെ ലഭ്യമല്ല. അവ നിങ്ങളുടെ അഡ്മിനിസ്ട്രേറ്റർ മുഴുവൻ വിന്യാസത്തിനും ഓൺ ചെയ്യുന്നു, ഇവാലുകൾ ഉൾപ്പെടുന്ന പ്ലാൻ ആവശ്യമാണ്.",
+    "trajectoryNeedsFull": "ഈ ഡാറ്റാസെറ്റ് ടെക്സ്റ്റ് മാത്രമാണ്, അതിനാൽ പ്രതീക്ഷിത ട്രാജക്ടറിയുള്ള കേസുകൾ സ്കോർ ചെയ്യില്ല. പൂർണ്ണ പൈപ്പ്‌ലൈൻ ഓൺ ചെയ്യുക.",
+    "runAutoApproved": "സ്വയം അംഗീകരിച്ചത്",
+    "runAutoApprovedTitle": "ഈ റണ്ണിലെ ടൂൾ കോളുകളൊന്നും ഒരു വ്യക്തി തീരുമാനിച്ചില്ല; ഇവാൽ സാൻഡ്‌ബോക്സ് അവ അംഗീകരിച്ചു.",
+    "toolCallsLabel": "ഈ റീപ്ലേയിലെ ടൂൾ കോളുകൾ",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "പരാജയപ്പെട്ടു",
+    "toolStatusNotRun": "പ്രവർത്തിച്ചില്ല",
+    "toolStatusAwaitingApproval": "അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു",
+    "toolStatusReplayed": "റീപ്ലേ ചെയ്തു",
+    "samplingTitle": "പശ്ചാത്തല ഗുണനിലവാര സ്കോറിംഗ്",
+    "samplingLoading": "സ്കോറിംഗ് നിരക്ക് ലോഡ് ചെയ്യുന്നു...",
+    "samplingUnavailable": "പശ്ചാത്തല വിധികർത്താവ് സ്കോർ ചെയ്യുന്ന ലൈവ് ടേണുകളുടെ പങ്ക് നിങ്ങളുടെ പ്ലാറ്റ്ഫോം അഡ്മിനിസ്ട്രേറ്റർ നിശ്ചയിക്കുന്നു, ഇവിടെ കാണിക്കില്ല.",
+    "samplingValue": "ലൈവ് ടേണുകളുടെ ഏകദേശം {percent}% പശ്ചാത്തല ഗുണനിലവാര വിധികർത്താവ് സ്കോർ ചെയ്യുന്നു.",
+    "samplingHelp": "കുറഞ്ഞ നിരക്ക് ചെലവ് കുറയ്ക്കുകയും മുകളിലെ ട്രെൻഡിൽ കുറച്ച് സ്കോറുകൾ മാത്രമാക്കുകയും ചെയ്യുന്നു. ഈ മൂല്യം ഇവിടെ വായന-മാത്രമാണ്.",
+    "samplingSource_default": "ഡിഫോൾട്ട്",
+    "samplingSource_platform": "പ്ലാറ്റ്ഫോം സജ്ജമാക്കിയത്",
+    "samplingSource_tenant": "നിങ്ങളുടെ വർക്ക്സ്പേസിനായി സജ്ജമാക്കിയത്",
+    "samplingSource_agent": "ഈ ഏജന്റിനായി സജ്ജമാക്കിയത്",
+    "modeDefault": "Workspace default",
+    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
+    "modeDefaultCurrent": "Currently: {mode}",
+    "modeNameFull": "Full pipeline",
+    "modeNameQuick": "Quick (text only)",
+    "badgeFull": "full pipeline",
+    "badgeQuick": "quick",
+    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
+    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
+    "runModeLabel": "Replay mode for the next run",
+    "runModeInherit": "Use the dataset's setting",
+    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
+    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
+    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
+    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
+    "toolStatusSimulated": "simulated, not executed"
+  },
+  "agentLab": {
+    "wtLabel": "ഏജന്റിന്റെ ടൂളുകൾ ഉപയോഗിച്ച് പ്രവർത്തിപ്പിക്കുക",
+    "wtHelp": "ഓഫ്: ഓരോ ഉത്തരവും ഒരു ലളിതമായ മോഡൽ കോൾ ആണ്. ഓൺ: ഉത്തരങ്ങൾ ചാറ്റ് ടേൺ ഉപയോഗിക്കുന്ന അതേ ടൂൾ പൈപ്പ്‌ലൈനിൽ നിന്നാണ് വരുന്നത്, അതിനാൽ ടൂളുകൾ പ്രവർത്തിക്കും, ഗാർഡ്‌റെയിലുകൾ ബാധകമാകും, ഘട്ട പരിധികൾ പാലിക്കപ്പെടും. ഒരു വ്യക്തിയുടെ അംഗീകാരം ആവശ്യമുള്ള കോൾ തീർപ്പാകാത്ത അംഗീകാരമായി കാത്തിരിക്കും.",
+    "wtUnavailable": "ഈ ഇൻസ്റ്റലേഷനിൽ ടൂളുകളോടെ ലാബ് പ്രവർത്തിപ്പിക്കുന്നത് ഓഫ് ആക്കിയിരിക്കുന്നു. ഇത് പ്രവർത്തനക്ഷമമാക്കാൻ ഒരു അഡ്മിനിസ്ട്രേറ്ററോട് ആവശ്യപ്പെടുക.",
+    "wtRefused": "ഈ റൺ നിരസിച്ചു: {reason}",
+    "wtActive": "ഈ റണ്ണിൽ ടൂളുകൾ യഥാർത്ഥത്തിൽ പ്രവർത്തിക്കും, പാർശ്വഫലങ്ങൾ ഉൾപ്പെടെ.",
+    "wtConfirmTitle": "ഏജന്റിന്റെ ടൂളുകൾ ഉപയോഗിച്ച് ലാബ് പ്രവർത്തിപ്പിക്കണോ?",
+    "wtConfirmBody": "ഓരോ സാമ്പിളിനും ഏജന്റിന്റെ യഥാർത്ഥ ടൂളുകൾ വിളിക്കാം, ആ കോളുകൾക്ക് സന്ദേശം അയയ്ക്കുകയോ ഡാറ്റ എഴുതുകയോ പോലുള്ള യഥാർത്ഥ ഫലങ്ങൾ ഉണ്ടാകാം. അംഗീകാരം ആവശ്യമുള്ള കോളുകൾ ഒരു വ്യക്തിക്കായി കാത്തിരിക്കും. ഇത് ടെസ്റ്റ് ഏജന്റിലോ ടെസ്റ്റ് ഡാറ്റയിലോ മാത്രം ഉപയോഗിക്കുക.",
+    "wtConfirm": "ടൂളുകൾ ഉപയോഗിക്കുക"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "ഏജന്റ് പരിധികൾ",
+        "description": "നിർത്തുന്നതിന് മുമ്പ് ഒരു ഏജന്റ് ടേണിന് എത്ര ജോലി ചെയ്യാം."
+      },
+      "approvals": {
+        "label": "അംഗീകാരങ്ങൾ",
+        "description": "ഒരു വ്യക്തി ഒരു പ്രവൃത്തി അംഗീകരിക്കുകയോ നിരസിക്കുകയോ ചെയ്തതിന് ശേഷം എന്ത് സംഭവിക്കും, ഒരു അഭ്യർത്ഥന എത്ര നേരം കാത്തിരിക്കും."
+      },
+      "chat": {
+        "label": "സംഭാഷണ പെരുമാറ്റം",
+        "description": "ഒരു മറുപടി എങ്ങനെ പൂർത്തിയാക്കുന്നു, വീണ്ടും ശ്രമിക്കുന്നു, കാഷെ ചെയ്യുന്നു, തുടരുന്നു."
+      },
+      "routing": {
+        "label": "മോഡൽ റൂട്ടിംഗ്",
+        "description": "വേഗതയേറിയ മോഡലിന് മതിയായത്ര ലളിതമെന്ന് ഏത് സന്ദേശങ്ങളെ കണക്കാക്കുന്നു."
+      },
+      "memory": {
+        "label": "മെമ്മറി",
+        "description": "ഒരു ഏജന്റ് എത്ര ഓർമ്മകൾ സൂക്ഷിക്കുകയും ഓർത്തെടുക്കുകയും ചെയ്യുന്നു."
+      },
+      "aux": {
+        "label": "പശ്ചാത്തല മോഡൽ കോളുകൾ",
+        "description": "സംഗ്രഹങ്ങൾ, സഹായങ്ങൾ, കോംപാക്ഷൻ എന്നിവ ഏത് മോഡൽ ഉപയോഗിക്കുന്നു."
+      },
+      "guardrails": {
+        "label": "സുരക്ഷാ പരിശോധനകൾ",
+        "description": "സ്വയമേവയുള്ള സുരക്ഷാ പരിശോധനകൾ എത്ര കർശനമാണ്. ഇവ പ്ലാറ്റ്ഫോം ക്രമീകരണത്തേക്കാൾ കർശനമാക്കാൻ മാത്രമേ കഴിയൂ."
+      },
+      "quality": {
+        "label": "മൂല്യനിർണ്ണയം",
+        "description": "ടെസ്റ്റ് റണ്ണുകളും AI വിധികർത്താവും എങ്ങനെ പെരുമാറുന്നു."
+      },
+      "delegation": {
+        "label": "ചുമതല ഏൽപ്പിക്കൽ",
+        "description": "ഒരു ഏജന്റിന് ഒരേസമയം മറ്റ് ഏജന്റുമാരെ എത്ര ജോലി ഏൽപ്പിക്കാം."
+      },
+      "knowledge": {
+        "label": "അറിവ് തിരയൽ",
+        "description": "മികച്ച ഭാഗങ്ങൾ തിരഞ്ഞെടുക്കുന്നതിന് മുമ്പ് നിങ്ങൾ അപ്‌ലോഡ് ചെയ്ത രേഖകളിലെ തിരയൽ സ്ഥാനാർത്ഥികളെ എത്ര വിശാലമായി ശേഖരിക്കുന്നു."
+      },
+      "learning": {
+        "label": "പഠനം",
+        "description": "ഏജന്റിന്റെ പഠന നയങ്ങൾ വ്യത്യസ്ത ഓപ്ഷനുകൾ എങ്ങനെ പരീക്ഷിക്കുന്നു."
+      },
+      "providers": {
+        "label": "AI ദാതാക്കൾ",
+        "description": "ബന്ധിപ്പിച്ച AI ദാതാവിന്റെ കീകളിൽ ഒന്ന് പ്രവർത്തനം നിർത്തുമ്പോൾ അവ എങ്ങനെ ഉപയോഗിക്കുന്നു."
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "ഓരോ ടേണിലെയും പരമാവധി ടൂൾ കോളുകൾ",
+          "description": "ഒരു ടേൺ നിർത്തി തന്റെ കൈവശമുള്ളത് ഉപയോഗിച്ച് ഉത്തരം നൽകാൻ ആവശ്യപ്പെടുന്നതിന് മുമ്പ് അതിന് ചെയ്യാവുന്ന പരമാവധി ടൂൾ കോളുകൾ.",
+          "help": "ദീർഘമായ ബഹു-ഘട്ട ജോലികൾ ചെയ്യുന്ന ഏജന്റുമാർക്ക് ഉയർത്തുക. നിയന്ത്രണം വിട്ട ലൂപ്പുകൾ നിർത്താനും ചെലവ് പ്രവചനീയമായി നിലനിർത്താനും കുറയ്ക്കുക. ഒരു വർക്ക്സ്പേസിനോ പ്ലാറ്റ്ഫോമിനോ കാണിക്കുന്ന മൂല്യം ഒരു സാധാരണ ഏജന്റിന്റെ അടിസ്ഥാന സംഖ്യയാണ്: ഏജന്റിന്റെ സ്വയംഭരണ നില റൺ സമയത്ത് അതിനെ സ്കെയിൽ ചെയ്യുന്നു, അതിനാൽ കൂടുതലോ കുറവോ സ്വയംഭരണമുള്ള ഏജന്റ് മറ്റൊരു സംഖ്യ ഉപയോഗിച്ചേക്കാം. ഒരു ഏജന്റിന്റെ സ്വന്തം മൂല്യം സജ്ജമാക്കിയതുപോലെ തന്നെ ഉപയോഗിക്കുന്നു."
+        },
+        "turnTimeoutSeconds": {
+          "label": "ഓരോ ടേണിലെയും പരമാവധി സമയം",
+          "description": "ഒരു ടേൺ നിർത്തുന്നതിന് മുമ്പ് എത്ര നേരം പ്രവർത്തിക്കാം.",
+          "help": "മന്ദഗതിയിലുള്ള ഗവേഷണ അല്ലെങ്കിൽ കോഡ് ടാസ്കുകൾക്ക് ഉയർത്തുക. സമയം തീരുന്ന ടേൺ ഇതുവരെ ചെയ്തതോടെ അവസാനിക്കുന്നു."
+        },
+        "toolTimeoutSeconds": {
+          "label": "ഓരോ ടൂൾ കോളിലെയും പരമാവധി സമയം",
+          "description": "ഒരു ടൂൾ കോൾ നിർത്തുന്നതിന് മുമ്പ് എത്ര നേരം പ്രവർത്തിക്കാം. പ്ലാറ്റ്ഫോം ഡിഫോൾട്ടിന് പരിധിയില്ല; അപ്പോൾ ഓരോ ടൂളും സ്വന്തം ടൈംഔട്ട് നിലനിർത്തുന്നു.",
+          "help": "ഒരു വേഗത കുറഞ്ഞ ടൂളിന് മുഴുവൻ സംഭാഷണങ്ങളും തടഞ്ഞുനിർത്താൻ കഴിയുമെങ്കിൽ ഒരു പരിധി സജ്ജമാക്കുക. നിർത്തിയ കോളിന് എന്തെങ്കിലും ഫലമുണ്ടായോ എന്ന് അറിയില്ല, അതിനാൽ അത് വിജയിച്ചതായി കരുതരുതെന്ന് ഏജന്റിനോട് പറയുന്നു."
+        },
+        "toolOutputMaxChars": {
+          "label": "ഏറ്റവും നീളമുള്ള ടൂൾ ഫലം",
+          "description": "ഒരു ടൂൾ ഫലത്തിന്റെ എത്ര പ്രതീകങ്ങൾ മോഡലിന് കൈമാറുന്നു; ബാക്കി മുറിച്ചുകളയുന്നു.",
+          "help": "ഏജന്റിന് നീണ്ട രേഖകളോ API പ്രതികരണങ്ങളോ പൂർണ്ണമായി വായിക്കേണ്ടിവരുമ്പോൾ ഉയർത്തുക, ഓരോ ടേണിനും കൂടുതൽ ടോക്കണുകൾ ചെലവാക്കി. ചെലവ് ലാഭിക്കാൻ കുറയ്ക്കുക."
+        },
+        "retrievalTopK": {
+          "label": "ഓരോ തിരയലിലെയും അറിവ് ഭാഗങ്ങൾ",
+          "description": "ഒരു അറിവ് ശേഖര തിരയൽ ഏജന്റിന് എത്ര ഭാഗങ്ങൾ തിരികെ നൽകുന്നു.",
+          "help": "കൂടുതൽ ഭാഗങ്ങൾ ഏജന്റിന് പ്രവർത്തിക്കാൻ കൂടുതൽ നൽകുന്നു, പക്ഷേ കൂടുതൽ ടോക്കണുകൾ ചെലവാകുകയും ശബ്ദം കൂട്ടുകയും ചെയ്യാം. കുറവ് വേഗതയേറിയതും വിലകുറഞ്ഞതുമാണ്."
+        },
+        "retrievalMinScore": {
+          "label": "ഒരു ഭാഗത്തിന്റെ കുറഞ്ഞ പ്രസക്തി",
+          "description": "ഒരു അറിവ് ഭാഗം തിരികെ നൽകാൻ അത് എത്ര പ്രസക്തമായിരിക്കണം. 0 എല്ലാ ഹിറ്റുകളും തിരികെ നൽകുന്നു.",
+          "help": "ഏജന്റ് അപ്രസക്തമായ ഭാഗങ്ങൾ ഉദ്ധരിക്കുകയാണെങ്കിൽ ഉയർത്തുക. വളരെ ഉയർന്നാൽ അതിന് ഒന്നും കണ്ടെത്താനായേക്കില്ല."
+        },
+        "continuationPasses": {
+          "label": "അപൂർണ്ണമായ മറുപടിക്ക് ശേഷമുള്ള അധിക പാസുകൾ",
+          "description": "പ്രഖ്യാപിച്ചിട്ടും എടുക്കാത്ത ഘട്ടത്തിൽ മോഡലിന്റെ മറുപടി നിന്നുപോയാൽ തുടരാൻ അതിനോട് എത്ര തവണ കൂടി ആവശ്യപ്പെടുന്നു.",
+          "help": "പലപ്പോഴും ഒരു ഘട്ടം പ്രഖ്യാപിച്ച് നിർത്തുന്ന ഏജന്റുമാർക്ക് ഉയർത്തുക. ഓരോ അധിക പാസിനും ഒരു മോഡൽ കോൾ ചെലവാകുന്നു."
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "അംഗീകാരത്തിന് ശേഷം തുടരുക",
+          "description": "ഒരു വ്യക്തി ഒരു പ്രവൃത്തി അംഗീകരിക്കുമ്പോൾ, ഏജന്റ് പുതിയ സന്ദേശത്തിനായി കാത്തിരിക്കാതെ ടാസ്ക് സ്വയം പൂർത്തിയാക്കുന്നു.",
+          "help": "അംഗീകരിച്ച ഓരോ പ്രവൃത്തിയും ടേൺ അവസാനിപ്പിക്കുകയും കൈകൊണ്ട് പിന്തുടരുകയും വേണമെന്ന് നിങ്ങൾ ആഗ്രഹിക്കുന്നെങ്കിൽ ഇത് ഓഫ് ആക്കുക."
+        },
+        "jobsContinueAfterDenial": {
+          "label": "നിരസിച്ചതിന് ശേഷവും പശ്ചാത്തല ജോലികൾ തുടരുന്നു",
+          "description": "ഒരു പശ്ചാത്തല ജോലിയിൽ ഒരു വ്യക്തി ഒരു പ്രവൃത്തി നിരസിക്കുമ്പോൾ, ജോലി നിൽക്കാതെ നിരസിക്കൽ രേഖപ്പെടുത്തി തുടരുന്നു.",
+          "help": "നിരസിക്കൽ ജോലി നിർത്തണമെങ്കിൽ ഇത് ഓഫ് ആക്കി വയ്ക്കുക. നിരസിച്ച ഘട്ടമില്ലാതെ ജോലി സാധാരണയായി പൂർത്തിയാക്കാൻ കഴിയുമെങ്കിൽ ഓൺ ആക്കുക."
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "അംഗീകാര അഭ്യർത്ഥനകൾ കാലഹരണപ്പെടുന്നത്",
+          "description": "ഒരു അംഗീകാര അഭ്യർത്ഥന കാലഹരണപ്പെടുന്നതിന് മുമ്പ് തീരുമാനത്തിനായി എത്ര നേരം കാത്തിരിക്കുന്നു. 0 എന്നാൽ അഭ്യർത്ഥനകൾ ഒരിക്കലും കാലഹരണപ്പെടില്ല.",
+          "help": "കാലഹരണപ്പെടൽ ഇല്ലെങ്കിൽ, മറന്നുപോയ അഭ്യർത്ഥനകൾ അനിശ്ചിതമായി തുറന്നിരിക്കുകയും ഏജന്റ് കാത്തിരിക്കുകയും ചെയ്യുന്നു. കാലഹരണപ്പെട്ട അഭ്യർത്ഥന അംഗീകരിക്കാത്തതായി കണക്കാക്കുന്നു."
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "മുറിഞ്ഞ മറുപടികൾ പൂർത്തിയാക്കുക",
+          "description": "മോഡലിന്റെ നീള പരിധി കാരണം മറുപടി മുറിയുമ്പോഴോ വികലമായ ടൂൾ കോളിൽ അവസാനിക്കുമ്പോഴോ, തുടരാനോ വീണ്ടും ശ്രമിക്കാനോ മോഡലിനോട് ആവശ്യപ്പെടുക.",
+          "help": "ഒരു മോഡൽ പ്രശ്നം കണ്ടെത്താൻ മാത്രം ഇത് ഓഫ് ആക്കുക; അപ്പോൾ ആളുകൾ മുറിഞ്ഞ മറുപടികൾ അതേപടി കാണും."
+        },
+        "maxContinuations": {
+          "label": "മുറിഞ്ഞ മറുപടിയുടെ പരമാവധി തുടർച്ചകൾ",
+          "description": "മറുപടി മുറിഞ്ഞതിന് ശേഷം തുടരാൻ മോഡലിനോട് എത്ര തവണ ആവശ്യപ്പെടുന്നു.",
+          "help": "ഓരോ തുടർച്ചയും മറ്റൊരു മോഡൽ കോളാണ്. ദീർഘമായ ഉത്തരങ്ങൾക്ക് ഉയർത്തുക, ചെലവ് ലാഭിക്കാൻ കുറയ്ക്കുക."
+        },
+        "maxToolCallRetries": {
+          "label": "വികലമായ ടൂൾ കോളിന്റെ പരമാവധി വീണ്ടും ശ്രമങ്ങൾ",
+          "description": "ഉപയോഗയോഗ്യമല്ലാത്ത ആർഗ്യുമെന്റുകളോടെ എത്തിയ ടൂൾ കോൾ ആവർത്തിക്കാൻ മോഡലിനോട് എത്ര തവണ ആവശ്യപ്പെടുന്നു.",
+          "help": "ഒരു വീണ്ടും ശ്രമത്തിന് ഒരു മോഡൽ കോൾ ചെലവാകുന്നു. 0 ആദ്യത്തെ വികലമായ കോളിൽ തന്നെ ഉപേക്ഷിക്കുന്നു."
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "ഓരോ മോഡൽ കോളിനുമുള്ള ശ്രമങ്ങൾ",
+          "description": "ദാതാവ് പരാജയപ്പെടുമ്പോഴോ തിരക്കിലായിരിക്കുമ്പോഴോ, ആദ്യ ശ്രമം ഉൾപ്പെടെ, ഒരു മോഡൽ കോൾ എത്ര തവണ ശ്രമിക്കുന്നു.",
+          "help": "കൂടുതൽ ശ്രമങ്ങൾ ദാതാവിന്റെ ചെറിയ തടസ്സങ്ങൾ മറയ്ക്കുന്നു, പക്ഷേ പരാജയപ്പെടുന്ന അഭ്യർത്ഥന പിശക് റിപ്പോർട്ട് ചെയ്യാൻ കൂടുതൽ സമയമെടുക്കുന്നു."
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "ടൂളുകളുള്ള ഏജന്റുമാർക്ക് മറുപടികൾ വീണ്ടും ഉപയോഗിക്കുക",
+          "description": "ടൂളുകളുള്ള ഏജന്റുമാർക്ക് സംഭരിച്ച മറുപടികൾ വീണ്ടും ഉപയോഗിക്കാൻ അനുവദിക്കുക. ഒരു ടൂൾ അടുത്ത തവണ വ്യത്യസ്തമായത് തിരികെ നൽകിയേക്കാം എന്നതിനാൽ ഡിഫോൾട്ടായി ഓഫ്.",
+          "help": "ടൂളുകൾ വായന-മാത്രവും സാവധാനം മാറുന്നവയും ആയിരിക്കുകയും, നിങ്ങൾക്ക് വേഗതയേറിയതും വിലകുറഞ്ഞതുമായ ആവർത്തന ഉത്തരങ്ങൾ വേണ്ടിവരികയും ചെയ്യുമ്പോൾ മാത്രം ഓൺ ആക്കുക. ആളുകൾ കാലികമല്ലാത്ത ഉത്തരം കണ്ടേക്കാം."
+        },
+        "contextTurns": {
+          "label": "ആവർത്തനം തിരിച്ചറിയുന്ന മുൻ ടേണുകൾ",
+          "description": "ഒരു സന്ദേശം സംഭരിച്ച മറുപടി വീണ്ടും ഉപയോഗിക്കാവുന്ന ആവർത്തനമാണോ എന്ന് തീരുമാനിക്കാൻ എത്ര മുൻ ടേണുകൾ താരതമ്യം ചെയ്യുന്നു.",
+          "help": "കൂടുതൽ ടേണുകൾ പൊരുത്തം കൂടുതൽ കർശനമാക്കുകയും കാഷെ ഹിറ്റുകൾ അപൂർവമാക്കുകയും ചെയ്യുന്നു."
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "തുടർചോദ്യങ്ങളിൽ ടൂളുകൾ വാഗ്ദാനം ചെയ്യുന്നത് തുടരുക",
+          "description": "അടുത്ത സന്ദേശം ഒരു ചെറിയ തുടർചോദ്യമാകുമ്പോൾ സംഭാഷണം ഇതിനകം ഉപയോഗിച്ച ടൂളുകൾ വാഗ്ദാനം ചെയ്യുന്നത് തുടരുക.",
+          "help": "\"അതെ\" പോലുള്ള ചെറിയ മറുപടികൾ സാധാരണ ടൂൾ തിരഞ്ഞെടുപ്പിൽ നിന്ന് ആരംഭിക്കണമെങ്കിൽ ഇത് ഓഫ് ആക്കുക."
+        },
+        "stickyToolsWindow": {
+          "label": "തുടർചോദ്യ ടൂളുകൾ എത്ര നേരം ലഭ്യമായി തുടരുന്നു",
+          "description": "ഉപയോഗത്തിന് ശേഷം ചെറിയ തുടർസന്ദേശങ്ങൾക്കായി ഒരു ടൂൾ എത്ര നേരം വാഗ്ദാനം ചെയ്യപ്പെടുന്നു.",
+          "help": "ദൈർഘ്യമേറിയ ജാലകം നീണ്ട ജോലി സെഷനുകളെ സഹായിക്കുന്നു, ചെറുത് ടൂൾ പട്ടിക ചെറുതാക്കി നിലനിർത്തുന്നു."
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "അപൂർണ്ണമായ പദപ്രയോഗത്തിൽ ഓർമ്മപ്പെടുത്തൽ",
+          "description": "ഒരു മറുപടി താൻ ചെയ്യുമെന്ന് പറഞ്ഞത് ചെയ്യുന്നതിന് മുമ്പ് നിന്നുപോയതുപോലെ തോന്നുമ്പോൾ തുടരാൻ മോഡലിനോട് ആവശ്യപ്പെടുക.",
+          "help": "അവസാനിക്കേണ്ടിയിരുന്ന മറുപടികളിൽ ഓർമ്മപ്പെടുത്തലുകൾ പ്രവർത്തിക്കുന്നുവെങ്കിൽ ഇത് ഓഫ് ആക്കുക."
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "പഴയ ടൂൾ ഫലങ്ങൾ മായ്ക്കുക",
+            "description": "ദീർഘമായ ടൂൾ റണ്ണിൽ, സംഭാഷണം മോഡലിന്റെ പരിധിക്കുള്ളിൽ നിൽക്കാൻ പഴയ ടൂൾ ഫലങ്ങൾ ഒരു ചെറിയ പ്ലേസ്‌ഹോൾഡർ ഉപയോഗിച്ച് മാറ്റിസ്ഥാപിക്കുക.",
+            "help": "ഏജന്റിന് മുമ്പത്തെ ഓരോ ഫലവും കാണേണ്ടതുണ്ടെങ്കിൽ ഇത് ഓഫ് ആക്കുക; അപ്പോൾ ദീർഘ റണ്ണുകൾ മോഡലിന്റെ വലുപ്പ പരിധിയിൽ എത്തിയേക്കാം."
+          },
+          "thresholdChars": {
+            "label": "മായ്ക്കലിന് കാരണമാകുന്ന വലുപ്പം",
+            "description": "പഴയവ മായ്ക്കുന്നതിന് മുമ്പ് ഒരു ടേണിലെ ടൂൾ ഫലങ്ങൾ എത്ര വലുതാകാം.",
+            "help": "കൂടുതൽ ഫലങ്ങൾ ദൃശ്യമാക്കാൻ ഉയർത്തുക, ദീർഘ റണ്ണുകൾ ചെറുതും വിലകുറഞ്ഞതുമായി നിലനിർത്താൻ കുറയ്ക്കുക."
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "ഏറ്റവും നീളമുള്ള ലളിതമായ സന്ദേശം",
+          "description": "ഇതിൽ കൂടുതൽ നീളമുള്ള സന്ദേശം ഒരിക്കലും ലളിതമായി കണക്കാക്കില്ല. ലളിതമായ സന്ദേശങ്ങൾ വേഗതയേറിയ, വിലകുറഞ്ഞ മോഡലിലേക്ക് പോകാം.",
+          "help": "ഗുണനിലവാരത്തിനായി കൂടുതൽ സന്ദേശങ്ങൾ പ്രധാന മോഡലിലേക്ക് അയയ്ക്കാൻ കുറയ്ക്കുക; ചെലവ് ലാഭിക്കാൻ ഉയർത്തുക."
+        },
+        "maxClauses": {
+          "label": "ലളിതമായ സന്ദേശത്തിലെ പരമാവധി വാക്യങ്ങൾ",
+          "description": "ഇതിൽ കൂടുതൽ വാക്യങ്ങളുള്ള സന്ദേശം ഒരിക്കലും ലളിതമായി കണക്കാക്കില്ല.",
+          "help": "ഗുണനിലവാരത്തിനായി കൂടുതൽ സന്ദേശങ്ങൾ പ്രധാന മോഡലിലേക്ക് അയയ്ക്കാൻ കുറയ്ക്കുക."
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "ഓരോ ടേണിലും ഓർത്തെടുക്കുന്ന ഏജന്റ് ഓർമ്മകൾ",
+          "description": "ഓരോ സന്ദേശത്തിനും ഏജന്റിന്റെ സ്വന്തം ഓർമ്മകളിൽ എത്ര എണ്ണം പരിശോധിക്കുന്നു.",
+          "help": "കൂടുതൽ ഓർമ്മകൾ കൂടുതൽ സന്ദർഭം നൽകുന്നു, പക്ഷേ കൂടുതൽ ടോക്കണുകൾ ഉപയോഗിക്കുന്നു."
+        },
+        "tenantTopK": {
+          "label": "ഓരോ ടേണിലും ഓർത്തെടുക്കുന്ന പങ്കിട്ട ഓർമ്മകൾ",
+          "description": "ഓരോ സന്ദേശത്തിനും വർക്ക്സ്പേസിലുടനീളം പങ്കിട്ട ഓർമ്മകളിൽ എത്ര എണ്ണം പരിശോധിക്കുന്നു.",
+          "help": "കൂടുതൽ ഓർമ്മകൾ കൂടുതൽ സന്ദർഭം നൽകുന്നു, പക്ഷേ കൂടുതൽ ടോക്കണുകൾ ഉപയോഗിക്കുന്നു."
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "ഓരോ ഏജന്റിനുമുള്ള പരമാവധി ഓർമ്മകൾ",
+          "description": "ഒരു ഏജന്റിന് എത്ര ഓർമ്മകൾ സൂക്ഷിക്കാം. ഇതിനപ്പുറം ഏറ്റവും പഴയതും ഏറ്റവും കുറച്ച് ഉപയോഗിച്ചതും ഒഴിവാക്കുന്നു.",
+          "help": "ആളുകളെക്കുറിച്ച് ധാരാളം ഓർക്കേണ്ട അസിസ്റ്റന്റുമാർക്ക് ഉയർത്തുക; ഇത് സംഭരണ, ഓർത്തെടുക്കൽ ചെലവും വർദ്ധിപ്പിക്കുന്നു."
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "ഗ്രാഫ് മെമ്മറിയിൽ നിന്ന് ഓർത്തെടുത്ത വസ്തുതകൾ",
+          "description": "ഒരു ലുക്കപ്പിൽ ഏജന്റിന് അതിന്റെ ബന്ധ മെമ്മറിയിൽ നിന്ന് കാണിക്കുന്ന പരമാവധി വസ്തുതകൾ.",
+          "help": "കൂടുതൽ വസ്തുതകൾ ഒരു വ്യക്തിയെക്കുറിച്ചോ വിഷയത്തെക്കുറിച്ചോ ഏജന്റിന് കൂടുതൽ പശ്ചാത്തലം നൽകുന്നു, പക്ഷേ അതിന്റെ പ്രവർത്തന ഇടത്തിൽ കൂടുതൽ ഉപയോഗിക്കുന്നു. കുറവ് ഉത്തരങ്ങളെ കേന്ദ്രീകൃതമായി നിലനിർത്തുന്നു. മുഴുവൻ വർക്ക്സ്പേസിനും, അല്ലെങ്കിൽ കൂടുതലോ കുറവോ വേണ്ട ഒരു ഏജന്റിനും ഇത് സജ്ജമാക്കുക."
+        },
+        "recallMaxPaths": {
+          "label": "ഓരോ ലുക്കപ്പിലും വായിക്കുന്ന ഗ്രാഫ് പാതകൾ",
+          "description": "ഒരു ലുക്കപ്പിനായുള്ള വസ്തുതകൾ കണ്ടെത്താൻ മെമ്മറി ഗ്രാഫിലെ എത്ര കണക്ഷനുകൾ വായിക്കുന്നു.",
+          "help": "ഒന്നിലധികം കണക്ഷനുകൾ ഒരേ വസ്തുതയിലേക്ക് നയിച്ചേക്കാം, അതിനാൽ ഇടതൂർന്ന് ബന്ധിപ്പിച്ച ഓർമ്മകൾക്ക് എല്ലാം കണ്ടെത്താൻ ഉയർന്ന സംഖ്യ വേണ്ടിവന്നേക്കാം. ഉയർന്ന സംഖ്യ ഓരോ ലുക്കപ്പിനെയും മന്ദഗതിയിലാക്കുന്നു."
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "പശ്ചാത്തല കോളുകൾ ഏജന്റിന്റെ മോഡൽ ഉപയോഗിക്കുന്നു",
+        "description": "അവയ്ക്ക് ഒരു മോഡലും തിരഞ്ഞെടുത്തിട്ടില്ലെങ്കിൽ, സംഗ്രഹങ്ങൾ, സഹായങ്ങൾ, സന്ദർഭ കോംപാക്ഷൻ എന്നിവ അവ പ്രവർത്തിക്കുന്ന ഏജന്റിന്റെ അതേ മോഡൽ ഉപയോഗിക്കുന്നു.",
+        "help": "ഈ കോളുകൾക്കായി പ്ലാറ്റ്ഫോം ഒരു മോഡൽ തിരഞ്ഞെടുക്കട്ടെ എന്നതിന് ഇത് ഓഫ് ആക്കുക, അത് വിലകുറഞ്ഞതോ മറ്റൊരു ദാതാവിന്റേതോ ആകാം."
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "ഒരു സുരക്ഷാ പരിശോധന തകരാറിലാകുമ്പോൾ",
+        "description": "സുരക്ഷാ പരിശോധന തന്നെ പരാജയപ്പെടുമ്പോൾ എന്ത് സംഭവിക്കുന്നു, ഉദാഹരണത്തിന് വിധികർത്താവ് മോഡൽ പ്രവർത്തനരഹിതമാണെങ്കിൽ. അടച്ചത് പ്രവൃത്തി നിരസിക്കുന്നു; തുറന്നത് അത് കടന്നുപോകാൻ അനുവദിക്കുന്നു.",
+        "help": "നിങ്ങൾക്ക് ഇത് പ്ലാറ്റ്ഫോം ക്രമീകരണത്തേക്കാൾ കർശനമാക്കാൻ മാത്രമേ കഴിയൂ. ആരെങ്കിലും ബോധപൂർവം ഒരു പരിശോധന പരാജയപ്പെടുത്തുന്നതിനെതിരെ അടച്ചത് സംരക്ഷിക്കുന്നു, തടസ്സ സമയത്ത് ജോലി നിരസിക്കുന്നതിന്റെ ചെലവിൽ.",
+        "options": {
+          "open": "തുറന്നത്: പ്രവൃത്തി കടന്നുപോകാൻ അനുവദിക്കുക",
+          "closed": "അടച്ചത്: പ്രവൃത്തി നിരസിക്കുക"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "ടൂൾ-കോൾ പരിശോധന തകരാറിലാകുമ്പോൾ",
+          "description": "അപകടസാധ്യതയുള്ള ടൂൾ കോളുകൾ അവലോകനം ചെയ്യുന്ന പരിശോധനയ്ക്ക് വിധി നൽകാൻ കഴിയാത്തപ്പോൾ അത് എന്ത് ചെയ്യുന്നു. അനന്തരാവകാശം മുകളിലെ സുരക്ഷാ പരിശോധനകളുടെ ക്രമീകരണം പിന്തുടരുന്നു.",
+          "help": "നിങ്ങൾക്ക് ഇത് പ്ലാറ്റ്ഫോം ക്രമീകരണത്തേക്കാൾ കർശനമാക്കാൻ മാത്രമേ കഴിയൂ. പരിശോധന പരാജയപ്പെട്ടാൽ അടച്ചത് ടൂൾ കോൾ നിരസിക്കുന്നു.",
+          "options": {
+            "open": "തുറന്നത്: ടൂൾ കോൾ കടന്നുപോകാൻ അനുവദിക്കുക",
+            "inherit": "സുരക്ഷാ-പരിശോധനാ ക്രമീകരണം പിന്തുടരുക",
+            "closed": "അടച്ചത്: ടൂൾ കോൾ നിരസിക്കുക"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "തടയുന്ന വിഷാംശ സ്കോർ",
+          "description": "വിധികർത്താവിന്റെ 0 മുതൽ 100 വരെയുള്ള വിഷാംശ സ്കെയിലിൽ ഈ സ്കോറോ അതിൽ കൂടുതലോ നേടുന്ന ഉള്ളടക്കം തടയുന്നു. കുറഞ്ഞ സംഖ്യ കൂടുതൽ തടയുന്നു.",
+          "help": "നിങ്ങൾക്ക് ഇത് കുറയ്ക്കാൻ മാത്രമേ കഴിയൂ, പ്ലാറ്റ്ഫോം മൂല്യത്തിന് മുകളിൽ ഒരിക്കലും ഉയർത്താൻ കഴിയില്ല. വളരെ കുറഞ്ഞ മൂല്യം സാധാരണ തുറന്ന പദപ്രയോഗത്തെയും തടയുന്നു."
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "ജയിൽബ്രേക്ക് ശ്രമങ്ങൾക്കായി സ്കാൻ ചെയ്യുന്ന ടെക്സ്റ്റ്",
+          "description": "ജയിൽബ്രേക്ക് പാറ്റേണുകൾക്കായി ഒരു സന്ദേശത്തിന്റെയോ മറുപടിയുടെയോ എത്ര ഭാഗം സ്കാൻ ചെയ്യുന്നു. അതിനപ്പുറമുള്ള ടെക്സ്റ്റ് സ്കാൻ ചെയ്യുന്നില്ല.",
+          "help": "നിങ്ങൾക്ക് ഇത് പ്ലാറ്റ്ഫോം മൂല്യത്തിന് മുകളിൽ ഉയർത്താൻ മാത്രമേ കഴിയൂ. വിശാലമായ ജാലകം പാഡിംഗിന് പിന്നിൽ ഒളിപ്പിച്ച ആക്രമണങ്ങളെ തടയുന്നു, അല്പം കൂടുതൽ പ്രോസസ്സിംഗിന്റെ ചെലവിൽ."
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "സുരക്ഷാ വിധികർത്താവിന് കാണിക്കുന്ന ടെക്സ്റ്റ്",
+          "description": "പരിശോധിച്ച ടെക്സ്റ്റിന്റെ എത്ര ഭാഗം AI സുരക്ഷാ വിധികർത്താക്കൾ വായിക്കുന്നു. അതിനപ്പുറമുള്ള ടെക്സ്റ്റ് വിധിക്കുന്നില്ല.",
+          "help": "നിങ്ങൾക്ക് ഇത് പ്ലാറ്റ്ഫോം മൂല്യത്തിന് മുകളിൽ ഉയർത്താൻ മാത്രമേ കഴിയൂ. ഉയർത്തുന്നത് നീണ്ട ടൂൾ ഫലങ്ങൾ പൂർണ്ണമായി വിധിക്കുന്നു, പക്ഷേ ഓരോ വിധികർത്താവ് കോളും വലുതാക്കുന്നു."
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI വിധികർത്താവിനുള്ള മോഡൽ",
+          "description": "മൂല്യനിർണ്ണയ റണ്ണുകൾ വിധിക്കാൻ ഉപയോഗിക്കുന്ന മോഡൽ. നിങ്ങളുടെ വർക്ക്സ്പേസ് ഇതിനകം ഉപയോഗിക്കുന്നവയിൽ നിന്ന് പ്ലാറ്റ്ഫോം തിരഞ്ഞെടുക്കാൻ ശൂന്യമായി വിടുക.",
+          "help": "കൂടുതൽ വിശ്വസനീയമായ ഗ്രേഡുകൾക്ക് ശക്തമായ മോഡലും ചെലവ് ലാഭിക്കാൻ വിലകുറഞ്ഞതും ഉപയോഗിക്കുക. മോഡൽ നിങ്ങളുടെ ബന്ധിപ്പിച്ച ദാതാവിൽ ലഭ്യമായിരിക്കണം."
+        },
+        "callTimeoutSeconds": {
+          "label": "ഓരോ വിധികർത്താവ് കോളിലെയും പരമാവധി സമയം",
+          "description": "ഒരു വിധികർത്താവ് കോൾ പരാജയപ്പെട്ടതായി കണക്കാക്കുന്നതിന് മുമ്പ് എത്ര സമയമെടുക്കാം.",
+          "help": "വേഗത കുറഞ്ഞ മോഡൽ പലപ്പോഴും ടൈംഔട്ട് ആകുന്നുവെങ്കിൽ ഉയർത്തുക; പരാജയപ്പെടുന്ന കോളുകൾ മൂല്യനിർണ്ണയ ഫലങ്ങളെ അപൂർണ്ണമാക്കുന്നു."
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "ഓരോ ടെസ്റ്റ് കേസിനുമുള്ള ആവർത്തനങ്ങൾ",
+          "description": "ഒരു റൺ വ്യക്തമാക്കാത്തപ്പോൾ ഓരോ ടെസ്റ്റ് കേസും എത്ര തവണ പ്രവർത്തിപ്പിക്കുന്നു. കൂടുതൽ ആവർത്തനങ്ങൾ ഏജന്റ് എത്ര സ്ഥിരതയുള്ളതാണെന്ന് കാണിക്കുന്നു.",
+          "help": "ഓരോ ആവർത്തനവും ഒരു റണ്ണിന്റെ ചെലവും സമയവും ഗുണിക്കുന്നു."
+        },
+        "defaultMode": {
+          "label": "How evaluations run",
+          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
+          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "options": {
+            "full": "Full pipeline in a sandbox",
+            "quick": "Quick: text answers only"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "പരമാവധി സമാന്തര ഉപ-ടാസ്കുകൾ",
+        "description": "ഒരു ചുമതല ഏൽപ്പിക്കൽ കോളിന് ഒരേസമയം എത്ര ഉപ-ടാസ്കുകളോ സഹായി ഏജന്റുമാരെയോ ആരംഭിക്കാം. അധികമുള്ളവ പരിധിക്ക് മുകളിലെന്ന് റിപ്പോർട്ട് ചെയ്യുന്നു.",
+        "help": "വിശാലമായ ഗവേഷണ ജോലികൾക്ക് ഉയർത്തുക, ചെലവും ലോഡും കുറയ്ക്കാൻ കുറയ്ക്കുക."
+      },
+      "branchTimeoutSeconds": {
+        "label": "ഓരോ ഉപ-ടാസ്കിനുമുള്ള പരമാവധി സമയം",
+        "description": "ഏൽപ്പിച്ച ഒരു ഉപ-ടാസ്ക് ടൈംഔട്ടായി റിപ്പോർട്ട് ചെയ്യുന്നതിന് മുമ്പ് എത്ര നേരം പ്രവർത്തിക്കാം.",
+        "help": "വേഗത കുറഞ്ഞ ഉപ-ടാസ്കുകൾക്ക് ഉയർത്തുക. തൂങ്ങിക്കിടക്കുന്ന ഉപ-ടാസ്ക് ഈ സമയത്തിനപ്പുറം മുഴുവൻ ഉത്തരത്തെയും ഒരിക്കലും പിടിച്ചുനിർത്തുന്നില്ല."
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "ഓരോ ഫലത്തിനുമുള്ള തിരയൽ വ്യാപ്തി",
+          "description": "ഒരു അറിവ് തിരയൽ ഒടുവിൽ തിരികെ നൽകുന്ന ഓരോ ഭാഗത്തിനും എത്ര സ്ഥാനാർത്ഥി ഭാഗങ്ങൾ ശേഖരിക്കുന്നു.",
+          "help": "ഉയർന്ന സംഖ്യ റാങ്കിംഗിന് തിരഞ്ഞെടുക്കാൻ കൂടുതൽ നൽകുന്നു, ഇത് പല രേഖകളും സമാനമാകുമ്പോൾ സഹായിക്കുന്നു, പക്ഷേ ഓരോ തിരയലിനും കൂടുതൽ സമയവും കംപ്യൂട്ടും വേണം. തിരയലുകൾ മന്ദഗതിയിലാണെന്ന് തോന്നിയാൽ കുറയ്ക്കുക. ഇത് ഏജന്റ് കാണുന്ന ഭാഗങ്ങളുടെ എണ്ണം മാറ്റുന്നില്ല."
+        },
+        "candidatePoolMax": {
+          "label": "ഓരോ തിരയലിലെയും പരമാവധി സ്ഥാനാർത്ഥികൾ",
+          "description": "എത്ര ഫലങ്ങൾ ആവശ്യപ്പെട്ടാലും, ഒരു അറിവ് തിരയൽ ശേഖരിക്കുന്ന സ്ഥാനാർത്ഥി ഭാഗങ്ങളുടെ ഉയർന്ന പരിധി.",
+          "help": "ഒരു ഏജന്റ് ഒരേസമയം ധാരാളം ഫലങ്ങൾ ആവശ്യപ്പെടുമ്പോൾ ഇത് വേഗതയും ചെലവും സംരക്ഷിക്കുന്നു. വലിയ അറിവ് ശേഖരങ്ങളിൽ ഉത്തരങ്ങൾ പ്രസക്തമായ ഭാഗങ്ങൾ വിട്ടുപോകുന്നുവെങ്കിൽ മാത്രം ഉയർത്തുക."
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "കുറച്ച് പരീക്ഷിച്ച ഓപ്ഷനുകൾ പരീക്ഷിക്കാനുള്ള സന്നദ്ധത",
+          "description": "ആത്മവിശ്വാസ-പരിധി രീതി ഉപയോഗിക്കുന്ന പഠന നയം, താൻ കുറച്ച് തവണ പരീക്ഷിച്ച ഓപ്ഷനുകൾക്ക് എത്ര മുൻഗണന നൽകുന്നു.",
+          "help": "പൂജ്യം ഇതുവരെ ഏറ്റവും മികച്ച ശരാശരിയുള്ള ഓപ്ഷൻ എപ്പോഴും തിരഞ്ഞെടുക്കുന്നു. ഉയർന്ന മൂല്യങ്ങൾ ഉറയ്ക്കുന്നതിന് മുമ്പ് മറ്റ് ഓപ്ഷനുകൾ കൂടുതൽ നേരം പരീക്ഷിച്ചുകൊണ്ടിരിക്കുന്നു. ഡിഫോൾട്ട് പാഠപുസ്തക സന്തുലനമാണ്. ഈ രീതി ഉപയോഗിക്കുന്ന നയങ്ങളെ മാത്രമേ ബാധിക്കൂ."
+        },
+        "defaultExplorationRate": {
+          "label": "പുതിയ നയങ്ങൾക്കുള്ള പ്രാരംഭ പര്യവേക്ഷണ നിരക്ക്",
+          "description": "പുതുതായി സൃഷ്ടിച്ച ഒരു പഠന നയം ഒരു ക്രമരഹിത ഓപ്ഷൻ പരീക്ഷിക്കാൻ ചെലവഴിക്കുന്ന ടേണുകളുടെ പങ്ക്.",
+          "help": "ഇത് ഇനി മുതൽ സൃഷ്ടിക്കുന്ന നയങ്ങളുടെ ആരംഭ ബിന്ദു മാത്രമാണ് സജ്ജമാക്കുന്നത്. നിലവിലുള്ള നയങ്ങൾ അവയുടെ സ്വന്തം നിരക്ക് നിലനിർത്തുന്നു, നയം കൈകാര്യം ചെയ്യുന്നിടത്ത് ഓരോ ഏജന്റിനും നിങ്ങൾ അത് മാറ്റുന്നു. പൂജ്യം എന്നാൽ പുതിയ നയം തുടക്കത്തിൽ പര്യവേക്ഷണം ചെയ്യുന്നില്ല."
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "ദാതാവ് കീ നിരസിച്ചതിന് ശേഷമുള്ള ഇടവേള",
+          "description": "ദാതാവ് ബന്ധിപ്പിച്ച ദാതാവ് കീ നിരസിച്ചതിന് ശേഷം പശ്ചാത്തല ജോലി അത് എത്ര നേരം ഒഴിവാക്കുന്നു.",
+          "help": "ഇടവേള സമയത്ത്, ഷെഡ്യൂൾ ചെയ്തതും സ്വയമേവയുള്ളതുമായ ജോലികൾ പരാജയപ്പെട്ടുകൊണ്ടിരിക്കുന്ന കീ വിളിക്കുന്നതിന് പകരം മറ്റൊരു ബന്ധിപ്പിച്ച ദാതാവിനെ ഉപയോഗിക്കുന്നു, അല്ലെങ്കിൽ കാത്തിരിക്കുന്നു. ചാറ്റ് ചെയ്യുന്ന ആളുകളെ ഒരിക്കലും തടയുന്നില്ല, അവർ എപ്പോഴും ദാതാവിന്റെ യഥാർത്ഥ പിശക് കാണുന്നു. ഇടവേള അവസാനിക്കുമ്പോൾ, കീ ശരിയാക്കിയോ എന്ന് പരിശോധിക്കാൻ ഒരു കോൾ കടത്തിവിടുന്നു. പൂജ്യം ഇടവേള ഓഫ് ആക്കുന്നു."
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "ഭരണം",
+    "title": "റൺടൈം ക്രമീകരണങ്ങൾ",
+    "subtitle": "ഈ വർക്ക്സ്പേസിലുടനീളം ഏജന്റുമാർ എങ്ങനെ പെരുമാറുന്നു എന്ന് ക്രമീകരിക്കുക: പരിധികൾ, അംഗീകാരങ്ങൾ, ഗുണനിലവാര പരിശോധനകൾ, ഗാർഡ്‌റെയിലുകൾ, മെമ്മറി, മോഡലുകൾ. അനുവദനീയമായിടത്ത് ഏജന്റിന്റെ ഉടമയ്ക്ക് ഇപ്പോഴും ഒരു ഏജന്റിനായി ക്രമീകരണം ഓവർറൈഡ് ചെയ്യാം.",
+    "docsLink": "സഹായവും ഡോക്യുമെന്റേഷനും",
+    "tabs": {
+      "label": "റൺടൈം ക്രമീകരണങ്ങളുടെ കാഴ്ചകൾ",
+      "settings": "ക്രമീകരണങ്ങൾ",
+      "history": "മാറ്റ ചരിത്രം"
+    },
+    "readOnly": {
+      "title": "കാണാൻ മാത്രം",
+      "body": "വർക്ക്സ്പേസ് അഡ്മിൻമാർക്ക് മാത്രമേ ഈ ക്രമീകരണങ്ങൾ മാറ്റാൻ കഴിയൂ. ഓരോ ക്രമീകരണത്തിന്റെയും പ്രാബല്യത്തിലുള്ള മൂല്യവും അത് എവിടെ നിന്ന് വരുന്നു എന്നതും നിങ്ങൾക്ക് കാണാം."
+    },
+    "summary": "ഈ വർക്ക്സ്പേസിൽ {total} ക്രമീകരണങ്ങളിൽ {changed} എണ്ണം മാറ്റിയിട്ടുണ്ട്. ബാക്കിയുള്ളവ പ്ലാറ്റ്ഫോം മൂല്യങ്ങൾ ഉപയോഗിക്കുന്നു.",
+    "export": {
+      "button": "ഓവർറൈഡുകൾ കയറ്റുമതി ചെയ്യുക",
+      "done": "{count} വർക്ക്സ്പേസ് ഓവർറൈഡുകൾ ഒരു ഫയലിലേക്ക് കയറ്റുമതി ചെയ്തു.",
+      "none": "കയറ്റുമതി ചെയ്യാൻ ഒന്നുമില്ല: ഈ വർക്ക്സ്പേസ് ഒരു ക്രമീകരണവും മാറ്റിയിട്ടില്ല."
+    },
+    "filters": {
+      "changedOnly": "ഈ വർക്ക്സ്പേസിൽ മാത്രം മാറ്റിയത്"
+    },
+    "jump": {
+      "label": "ഒരു ഗ്രൂപ്പിലേക്ക് പോകുക"
+    },
+    "anchor": {
+      "unknown": "ഈ വർക്ക്സ്പേസിൽ \"{key}\" എന്ന പേരിൽ ക്രമീകരണമില്ല. അതിന്റെ പേര് മാറ്റിയിരിക്കാം അല്ലെങ്കിൽ അത് വർക്ക്സ്പേസ് തലത്തിൽ ലഭ്യമല്ല."
+    },
+    "empty": {
+      "noneChanged": "ഈ വർക്ക്സ്പേസിൽ ഇതുവരെ ഒരു ക്രമീകരണവും മാറ്റിയിട്ടില്ല. എല്ലാം പ്ലാറ്റ്ഫോം മൂല്യങ്ങൾ ഉപയോഗിക്കുന്നു."
+    },
+    "risk": {
+      "high": "ഉയർന്ന അപകടം",
+      "security": "സുരക്ഷാ ക്രമീകരണം"
+    },
+    "security": {
+      "title": "സുരക്ഷാ ക്രമീകരണങ്ങൾ",
+      "body": "ഈ ക്രമീകരണങ്ങൾ നിങ്ങളുടെ വർക്ക്സ്പേസിനെ സംരക്ഷിക്കുന്നു. അവ പ്ലാറ്റ്ഫോം മൂല്യത്തേക്കാൾ കർശനമാക്കാൻ മാത്രമേ കഴിയൂ, ഒരിക്കലും ദുർബലമാക്കാൻ കഴിയില്ല. ഓരോ മാറ്റത്തിനും ഒരു കാരണം ആവശ്യമാണ്, അത് ഓഡിറ്റ് ലോഗിൽ രേഖപ്പെടുത്തുന്നു."
+    },
+    "resetGroup": {
+      "count": "ഈ ഗ്രൂപ്പിൽ {count} എണ്ണം മാറ്റി",
+      "button": "{group} അനന്തരമായി ലഭിച്ച മൂല്യങ്ങളിലേക്ക് റീസെറ്റ് ചെയ്യുക",
+      "confirmTitle": "{group} അനന്തരമായി ലഭിച്ച മൂല്യങ്ങളിലേക്ക് റീസെറ്റ് ചെയ്യണോ?",
+      "confirmBody": "ഇത് ഈ ഗ്രൂപ്പിലെ {count} വർക്ക്സ്പേസ് ഓവർറൈഡുകൾ നീക്കം ചെയ്യുന്നു. സ്വന്തമായി ഓവർറൈഡ് ഇല്ലാത്ത എല്ലാ ഏജന്റുമാർക്കും ക്രമീകരണങ്ങൾ ഉടൻ പ്ലാറ്റ്ഫോം മൂല്യങ്ങളിലേക്ക് മടങ്ങുന്നു. ഓരോ റീസെറ്റും ഓഡിറ്റ് ലോഗിൽ രേഖപ്പെടുത്തുന്നു.",
+      "confirm": "അനന്തരമായി ലഭിച്ചതിലേക്ക് റീസെറ്റ് ചെയ്യുക",
+      "cancel": "റദ്ദാക്കുക",
+      "done": "{count} ക്രമീകരണങ്ങൾ അവയുടെ അനന്തരമായി ലഭിച്ച മൂല്യങ്ങളിലേക്ക് റീസെറ്റ് ചെയ്യുക.",
+      "partial": "{done} ക്രമീകരണങ്ങൾ റീസെറ്റ് ചെയ്തു; {failed} എണ്ണം റീസെറ്റ് ചെയ്യാനായില്ല. പരാജയപ്പെട്ട ക്രമീകരണങ്ങളിലെ സന്ദേശങ്ങൾ കാണുക.",
+      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+    },
+    "import": {
+      "button": "ഓവർറൈഡുകൾ ഇറക്കുമതി ചെയ്യുക",
+      "title": "വർക്ക്സ്പേസ് ഓവർറൈഡുകൾ ഇറക്കുമതി ചെയ്യുക",
+      "intro": "ഈ പേജിൽ നിന്ന് കയറ്റുമതി ചെയ്ത ഒരു ഫയൽ തിരഞ്ഞെടുക്കുക, അല്ലെങ്കിൽ അതിന്റെ ഉള്ളടക്കം ഒട്ടിക്കുക. എന്തെങ്കിലും സംരക്ഷിക്കുന്നതിന് മുമ്പ് എന്ത് മാറുമെന്ന് നിങ്ങൾ കൃത്യമായി കാണും.",
+      "reviewIntro": "ഈ ഫയൽ എന്ത് മാറ്റുമെന്ന് അവലോകനം ചെയ്യുക. ഇതുവരെ ഒന്നും സംരക്ഷിച്ചിട്ടില്ല.",
+      "fileLabel": "ഓവർറൈഡ് ഫയൽ (JSON)",
+      "pasteLabel": "അല്ലെങ്കിൽ ഫയൽ ഉള്ളടക്കം ഒട്ടിക്കുക",
+      "fileError": {
+        "empty": "ആദ്യം ഒരു ഫയൽ തിരഞ്ഞെടുക്കുക അല്ലെങ്കിൽ അതിന്റെ ഉള്ളടക്കം ഒട്ടിക്കുക.",
+        "invalidJson": "ഇത് സാധുവായ JSON അല്ല. മുഴുവൻ ഫയലും പകർത്തിയിട്ടുണ്ടോ എന്ന് പരിശോധിക്കുക.",
+        "wrongFormat": "ഇത് ഈ പേജിൽ നിന്ന് കയറ്റുമതി ചെയ്ത ക്രമീകരണ ഓവർറൈഡ് ഫയൽ അല്ല.",
+        "unsupportedVersion": "ഈ ഫയൽ കയറ്റുമതിയുടെ മറ്റൊരു പതിപ്പ് നിർമ്മിച്ചതാണ്, വായിക്കാൻ കഴിയില്ല.",
+        "noOverrides": "ഫയലിൽ ഓവർറൈഡ് വിഭാഗമില്ല.",
+        "unreadable": "ഫയൽ വായിക്കാനായില്ല."
+      },
+      "summary": "{changes} മാറ്റേണ്ടത്, {unchanged} ഇതിനകം പ്രാബല്യത്തിൽ, {problems} പ്രയോഗിക്കാൻ കഴിയില്ല.",
+      "changesHeading": "മാറ്റങ്ങൾ ({count})",
+      "before": "ഇപ്പോൾ:",
+      "after": "ഇറക്കുമതിക്ക് ശേഷം:",
+      "resetMissing": "ഫയലിൽ ഇല്ലാത്ത വർക്ക്സ്പേസ് ഓവർറൈഡുകളും നീക്കം ചെയ്യുക",
+      "resetMissingHelp": "ഇവിടെ മാറ്റിയതും ഫയലിൽ ഇല്ലാത്തതുമായ ക്രമീകരണങ്ങൾ പ്ലാറ്റ്ഫോം മൂല്യത്തിലേക്ക് മടങ്ങുന്നു. ചേർക്കാനോ അപ്ഡേറ്റ് ചെയ്യാനോ മാത്രം ഇത് ഓഫ് ആക്കി വയ്ക്കുക.",
+      "resetsHeading": "നീക്കം ചെയ്യേണ്ട ഓവർറൈഡുകൾ ({count})",
+      "resetFrom": "നിലവിൽ {value}; അനന്തരമായി ലഭിച്ച മൂല്യത്തിലേക്ക് മടങ്ങുന്നു.",
+      "problemsHeading": "പ്രയോഗിക്കാൻ കഴിയില്ല ({count})",
+      "problem": {
+        "unknownKey": "ഈ കീ ഉള്ള ക്രമീകരണമില്ല.",
+        "notWorkspaceSetting": "ഈ ക്രമീകരണം മുഴുവൻ വർക്ക്സ്പേസിനും മാറ്റാൻ കഴിയില്ല.",
+        "locked": "പ്ലാറ്റ്ഫോം ഓപ്പറേറ്റർ ഈ ക്രമീകരണം പിൻ ചെയ്തിരിക്കുന്നു, അതിനാൽ ഇത് മാറ്റാൻ കഴിയില്ല.",
+        "wrongType": "ഈ ക്രമീകരണത്തിന് മൂല്യത്തിന്റെ തരം തെറ്റാണ്.",
+        "required": "ഒരു മൂല്യം ആവശ്യമാണ്.",
+        "notNumber": "മൂല്യം ഒരു സംഖ്യ ആയിരിക്കണം.",
+        "notInteger": "മൂല്യം ഒരു പൂർണ്ണസംഖ്യ ആയിരിക്കണം.",
+        "belowMin": "മൂല്യം വളരെ കുറവാണ്. കുറഞ്ഞത് {min} ആണ്.",
+        "aboveMax": "മൂല്യം വളരെ കൂടുതലാണ്. പരമാവധി {max} ആണ്.",
+        "notAllowed": "ഇത് അനുവദനീയമായ ഓപ്ഷനുകളിൽ ഒന്നല്ല.",
+        "tooShort": "ടെക്സ്റ്റ് വളരെ ചെറുതാണ്. കുറഞ്ഞ നീളം {min} ആണ്.",
+        "tooLong": "ടെക്സ്റ്റ് വളരെ നീളമുള്ളതാണ്. പരമാവധി നീളം {max} ആണ്.",
+        "precision": "ഈ ക്രമീകരണം അനുവദിക്കുന്നതിനേക്കാൾ കൃത്യമാണ് മൂല്യം."
+      },
+      "nothing": "ഈ ഫയലിലെ ഒന്നും ഒരു ക്രമീകരണവും മാറ്റില്ല.",
+      "reasonNote": "ഈ ക്രമീകരണങ്ങളിൽ ചിലത് ഉയർന്ന അപകടസാധ്യതയുള്ളതാണ്. പ്രയോഗിച്ച ശേഷം, ഓഡിറ്റ് ലോഗിൽ രേഖപ്പെടുത്തുന്ന ഒരു കാരണം നിങ്ങളോട് ചോദിക്കും.",
+      "back": "പിന്നോട്ട്",
+      "cancel": "റദ്ദാക്കുക",
+      "review": "മാറ്റങ്ങൾ അവലോകനം ചെയ്യുക",
+      "apply": "{count} മാറ്റങ്ങൾ പ്രയോഗിക്കുക",
+      "cancelled": "ഇറക്കുമതി റദ്ദാക്കി. ക്രമീകരണങ്ങളൊന്നും മാറ്റിയിട്ടില്ല.",
+      "done": "ഇറക്കുമതി പൂർത്തിയായി: {applied} ക്രമീകരണങ്ങൾ അപ്ഡേറ്റ് ചെയ്തു.",
+      "donePartial": "ഇറക്കുമതി ഭാഗികമായി പൂർത്തിയായി: {applied} ക്രമീകരണങ്ങൾ അപ്ഡേറ്റ് ചെയ്തു, {failed} എണ്ണം പ്രയോഗിക്കാനായില്ല. ഇനിയും എന്ത് ബാക്കിയുണ്ടെന്ന് അവലോകനം കാണിക്കുന്നു."
+    },
+    "history": {
+      "adminOnly": "വർക്ക്സ്പേസ് ക്രമീകരണങ്ങളുടെ മാറ്റ ചരിത്രം വർക്ക്സ്പേസ് അഡ്മിൻമാർക്ക് മാത്രമേ ദൃശ്യമാകൂ.",
+      "loading": "മാറ്റ ചരിത്രം ലോഡ് ചെയ്യുന്നു",
+      "partial": "{count} ക്രമീകരണങ്ങളുടെ ചരിത്രം ലോഡ് ചെയ്യാനായില്ല, അതിനാൽ ഈ പട്ടിക അപൂർണ്ണമായിരിക്കാം.",
+      "retry": "വീണ്ടും ശ്രമിക്കുക",
+      "search": "മാറ്റ ചരിത്രം തിരയുക",
+      "searchPlaceholder": "ക്രമീകരണം, വ്യക്തി അല്ലെങ്കിൽ കാരണം ഉപയോഗിച്ച് തിരയുക",
+      "empty": "ഈ വർക്ക്സ്പേസിൽ ഇതുവരെ ഒരു ക്രമീകരണവും മാറ്റിയിട്ടില്ല.",
+      "noMatch": "നിങ്ങളുടെ തിരയലുമായി ഒരു മാറ്റവും പൊരുത്തപ്പെടുന്നില്ല.",
+      "count": "{total} മാറ്റങ്ങളിൽ {shown} കാണിക്കുന്നു, ഏറ്റവും പുതിയത് ആദ്യം.",
+      "tableLabel": "വർക്ക്സ്പേസ് ക്രമീകരണങ്ങളുടെ മാറ്റ ചരിത്രം",
+      "when": "എപ്പോൾ",
+      "setting": "ക്രമീകരണം",
+      "change": "മാറ്റുക",
+      "by": "മാറ്റിയത്",
+      "reason": "കാരണം",
+      "before": "മുമ്പ്:",
+      "after": "ശേഷം:",
+      "inherited": "അനന്തരമായി ലഭിച്ച മൂല്യം",
+      "unknownActor": "അജ്ഞാതം",
+      "noReason": "കാരണം നൽകിയിട്ടില്ല",
+      "showMore": "കൂടുതൽ കാണിക്കുക",
+      "scope": "Level",
+      "scopeWorkspace": "വർക്ക്സ്പേസ്",
+      "scopeAgent": "Agent {id}",
+      "scopeFilter": "Show changes at",
+      "filterAll": "All levels",
+      "filterWorkspace": "Workspace only",
+      "filterAgents": "Agents only",
+      "searchLoadedOnly": "The search covers the changes loaded so far.",
+      "loadError": "The change history could not be loaded. {message}",
+      "moreFailed": "More changes could not be loaded. {message}",
+      "loadingMore": "ലോഡ് ചെയ്യുന്നു"
+    }
+  },
+  "agentBehavior": {
+    "title": "പെരുമാറ്റവും പരിധികളും",
+    "intro": "ഈ ഏജന്റിന് ഒരു ടേണിൽ എത്ര ദൂരം പോകാമെന്ന് നിയന്ത്രിക്കുക: എത്ര ടൂളുകൾ വിളിക്കാം, എത്ര നേരം പ്രവർത്തിക്കാം, എത്ര തിരികെ വായിക്കുന്നു. നിങ്ങൾ ഇവിടെ മാറ്റാത്തതെല്ലാം നിങ്ങളുടെ വർക്ക്സ്പേസിൽ നിന്ന് അനന്തരമായി ലഭിക്കുന്നു.",
+    "saveFirst": "ആദ്യം ഏജന്റിനെ സംരക്ഷിക്കുക. അത് നിലവിൽ വന്നതിന് ശേഷം അതിന്റെ പെരുമാറ്റവും പരിധികളും സജ്ജമാക്കാം.",
+    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "tabs": {
+      "label": "ഏജന്റ് കോൺഫിഗറേഷൻ",
+      "setup": "സെറ്റപ്പ്",
+      "behavior": "പെരുമാറ്റവും പരിധികളും",
+      "unsaved": "സംരക്ഷിക്കാത്ത മാറ്റങ്ങൾ"
+    },
+    "links": {
+      "label": "ബന്ധപ്പെട്ട പേജുകൾ",
+      "tenant": "വർക്ക്സ്പേസ് ഡിഫോൾട്ടുകൾ മാറ്റുക",
+      "playground": "പ്ലേഗ്രൗണ്ടിൽ പരീക്ഷിക്കുക",
+      "prompts": "This agent's prompts",
+      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
+      "approvals": "This agent's approvals",
+      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
+      "turns": "Turn timeline",
+      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+    },
+    "readOnly": {
+      "locked": "ഈ ഏജന്റ് എഡിറ്റിംഗിനായി ലോക്ക് ചെയ്തിരിക്കുന്നു, അതിനാൽ ഈ മൂല്യങ്ങൾ വായന-മാത്രമാണ്.",
+      "access": "നിങ്ങൾക്ക് ഈ മൂല്യങ്ങൾ കാണാം, പക്ഷേ ഈ ഏജന്റിലേക്കുള്ള നിങ്ങളുടെ ആക്സസ് അവ മാറ്റാൻ അനുവദിക്കുന്നില്ല."
+    },
+    "unsaved": "ഈ ടാബിൽ നിങ്ങൾക്ക് സംരക്ഷിക്കാത്ത മാറ്റങ്ങളുണ്ട്. പോകുന്നതിന് മുമ്പ് താഴെ അവ സംരക്ഷിക്കുക അല്ലെങ്കിൽ ഉപേക്ഷിക്കുക.",
+    "inheritNote": "ഓരോ ക്രമീകരണവും അതിന്റെ മൂല്യം എവിടെ നിന്ന് വരുന്നു എന്ന് കാണിക്കുന്നു. ഇവിടെ ഒന്ന് മാറ്റുന്നത് ഈ ഏജന്റിന് മാത്രമായി ഓവർറൈഡ് ചെയ്യുന്നു; വർക്ക്സ്പേസ് മൂല്യം വീണ്ടും അനന്തരമായി ലഭിക്കാൻ റീസെറ്റ് ചെയ്യുക.",
+    "others": {
+      "title": "ഈ ഏജന്റിനുള്ള മറ്റ് നിയന്ത്രണങ്ങൾ",
+      "intro": "ഈ നിയന്ത്രണങ്ങൾ മുകളിലെ ക്രമീകരണങ്ങളുടെ ഭാഗമല്ല, അതിനാൽ അവ സെറ്റപ്പ് ടാബിൽ തുടരുന്നു.",
+      "generation": "മറുപടികളുടെ സർഗ്ഗാത്മകതയും നീളവും (താപനില, top-p, പരമാവധി ടോക്കണുകൾ), അധിക സാമ്പിളിംഗ് ഓപ്ഷനുകൾ.",
+      "generationLink": "ജനറേഷൻ ട്യൂണിംഗിലേക്ക് പോകുക",
+      "autonomy": "സ്വയംഭരണ നില, ഓരോ റണ്ണിനുമുള്ള ചെലവ് പരിധി, ടൂൾ നിയമങ്ങൾ, ഒരു വ്യക്തി എപ്പോൾ അംഗീകരിക്കണം.",
+      "autonomyLink": "ചിന്തയിലേക്കും സ്വയംഭരണത്തിലേക്കും പോകുക"
+    },
+    "discard": {
+      "title": "സംരക്ഷിക്കാതെ പോകണോ?",
+      "description": "ഈ ഏജന്റിന്റെ പെരുമാറ്റത്തിലും പരിധികളിലും നിങ്ങൾക്ക് സംരക്ഷിക്കാത്ത മാറ്റങ്ങളുണ്ട്. ഇപ്പോൾ പോയാൽ അവ നഷ്ടപ്പെടും.",
+      "stay": "ഇവിടെ തുടർന്ന് എഡിറ്റ് ചെയ്യുക",
+      "leave": "പോയി മാറ്റങ്ങൾ ഉപേക്ഷിക്കുക"
+    },
+    "summary": {
+      "title": "ഈ ഏജന്റ് ഇപ്പോൾ എങ്ങനെ പെരുമാറുന്നു",
+      "subtitle": "ഏജന്റിന്റെ സ്വന്തം ഓവർറൈഡുകൾ, നിങ്ങളുടെ വർക്ക്സ്പേസ് ക്രമീകരണങ്ങൾ, പ്ലാറ്റ്ഫോം ക്രമീകരണങ്ങൾ എന്നിവ പ്രയോഗിച്ച ശേഷം ഈ ഏജന്റിന് പ്രാബല്യത്തിലുള്ള മൂല്യങ്ങൾ.",
+      "loading": "നിലവിലെ പെരുമാറ്റം ലോഡ് ചെയ്യുന്നു",
+      "error": "നിലവിലെ പെരുമാറ്റം ലോഡ് ചെയ്യാനായില്ല. {message}",
+      "retry": "വീണ്ടും ശ്രമിക്കുക",
+      "empty": "ഈ ഏജന്റിന് ഇതുവരെ പെരുമാറ്റ ക്രമീകരണങ്ങളൊന്നും ലഭ്യമല്ല.",
+      "facts": {
+        "steps": "ഓരോ ടേണിലെയും ടൂൾ കോളുകൾ",
+        "turnTimeout": "ഓരോ ടേണിലെയും സമയം",
+        "toolTimeout": "ഓരോ ടൂൾ കോളിലെയും സമയം",
+        "outputCap": "സൂക്ഷിക്കുന്ന ടൂൾ ഔട്ട്പുട്ട്",
+        "continuation": "തുടർച്ചാ പാസുകൾ",
+        "approvals": "അംഗീകാരങ്ങൾ",
+        "judge": "ഗുണനിലവാര വിധികർത്താവ് മോഡൽ",
+        "model": "മോഡൽ"
+      },
+      "tier": {
+        "SUPERVISED": "മേൽനോട്ടത്തിലുള്ളത്: ഓരോ ടൂൾ കോളും ഒരു വ്യക്തിക്കായി കാത്തിരിക്കുന്നു",
+        "SEMI_AUTONOMOUS": "അർദ്ധ-സ്വയംഭരണം: നിങ്ങളുടെ വർക്ക്സ്പേസ് നിയമങ്ങൾ തീരുമാനിക്കുന്നു",
+        "FULLY_AUTONOMOUS": "പൂർണ്ണ സ്വയംഭരണം: ടൂൾ കോളുകൾ ഒരിക്കലും കാത്തിരിക്കുന്നില്ല"
+      },
+      "approvalResumes": "അംഗീകാരത്തിന് ശേഷം സ്വയം തുടരുന്നു",
+      "approvalStops": "അംഗീകാരത്തിന് ശേഷം പുതിയ സന്ദേശത്തിനായി കാത്തിരിക്കുന്നു",
+      "judgeDefault": "പ്ലാറ്റ്ഫോം തിരഞ്ഞെടുത്തത്",
+      "overrides": {
+        "none": "ഈ ഏജന്റ് എല്ലായിടത്തും നിങ്ങളുടെ വർക്ക്സ്പേസ് മൂല്യങ്ങൾ ഉപയോഗിക്കുന്നു.",
+        "some": "ഈ ഏജന്റിനായി ഓവർറൈഡ് ചെയ്ത ക്രമീകരണങ്ങൾ: {count}."
+      }
+    },
+    "impact": {
+      "title": "ഇതിന്റെ അർത്ഥം",
+      "steps": "ഈ ഏജന്റിന് ഒരു ടേണിൽ പരമാവധി {count} ടൂളുകൾ വിളിക്കാം. അതിന് ശേഷം അതിന്റെ കൈവശമുള്ളത് ഉപയോഗിച്ച് ഉത്തരം നൽകാൻ ആവശ്യപ്പെടുന്നു.",
+      "stepsTierSupervised": "ഈ ഏജന്റ് മേൽനോട്ടത്തിലുള്ളതാണ്, അതിനാൽ അതിന്റെ യഥാർത്ഥ പരിധി ആ അടിസ്ഥാന സംഖ്യയേക്കാൾ കുറവാണ്. കൃത്യമായ സംഖ്യ ഉപയോഗിക്കാൻ ഈ ഏജന്റിന് നിങ്ങളുടെ സ്വന്തം മൂല്യം സജ്ജമാക്കുക.",
+      "stepsTierFull": "ഈ ഏജന്റ് പൂർണ്ണ സ്വയംഭരണമാണ്, അതിനാൽ അതിന്റെ യഥാർത്ഥ പരിധി ആ അടിസ്ഥാന സംഖ്യയേക്കാൾ കൂടുതലാണ്. കൃത്യമായ സംഖ്യ ഉപയോഗിക്കാൻ ഈ ഏജന്റിന് നിങ്ങളുടെ സ്വന്തം മൂല്യം സജ്ജമാക്കുക.",
+      "turnTimeout": "ഒരു ടേൺ {duration} കഴിഞ്ഞ് മുറിച്ചുകളയുന്നു.",
+      "turnTimeoutNone": "ഒരു ടേണിന് സമയപരിധിയില്ല.",
+      "toolTimeout": "ഒരു ടൂൾ കോൾ {duration} കഴിഞ്ഞ് മുറിച്ചുകളയുന്നു.",
+      "toolTimeoutNone": "ഒരു ടൂൾ കോളിന് സമയപരിധിയില്ല.",
+      "outputCap": "{chars}-ൽ കൂടുതൽ നീളമുള്ള ടൂൾ ഫലം ഏജന്റ് വായിക്കുന്നതിന് മുമ്പ് ചുരുക്കുന്നു.",
+      "continuation": "ഒരു മറുപടി മുറിഞ്ഞാൽ, ഏജന്റിന് അത് ഇനിയും പരമാവധി {count} തവണ തുടരാം.",
+      "continuationNone": "മുറിഞ്ഞ മറുപടി തുടരുന്നില്ല.",
+      "retrieval": "ഓരോ ചോദ്യത്തിനും അത് ഏറ്റവും മികച്ച {count} അറിവ് പൊരുത്തങ്ങൾ വായിക്കുന്നു.",
+      "retrievalScored": "ഓരോ ചോദ്യത്തിനും അത് ഏറ്റവും മികച്ച {count} അറിവ് പൊരുത്തങ്ങൾ വായിക്കുകയും {score}-ൽ താഴെ സ്കോർ ചെയ്യുന്ന പൊരുത്തങ്ങൾ അവഗണിക്കുകയും ചെയ്യുന്നു.",
+      "approvalContinuationOn": "ഒരു വ്യക്തി കാത്തിരിക്കുന്ന പ്രവൃത്തി അംഗീകരിച്ചതിന് ശേഷം, ഏജന്റ് ടാസ്ക് സ്വയം പൂർത്തിയാക്കുന്നു.",
+      "approvalContinuationOff": "ഒരു വ്യക്തി കാത്തിരിക്കുന്ന പ്രവൃത്തി അംഗീകരിച്ചതിന് ശേഷം, ടേൺ അവസാനിക്കുകയും കൈകൊണ്ട് പിന്തുടരേണ്ടിവരികയും ചെയ്യുന്നു.",
+      "guardClosed": "ഒരു സുരക്ഷാ പരിശോധന തകരാറിലായാൽ, പ്രവൃത്തി നിരസിക്കുന്നു.",
+      "guardOpen": "ഒരു സുരക്ഷാ പരിശോധന തകരാറിലായാൽ, പ്രവൃത്തി കടന്നുപോകാൻ അനുവദിക്കുന്നു.",
+      "branches": "ഒരു ചുമതല ഏൽപ്പിക്കൽ കോളിന് ഒരേസമയം പരമാവധി {count} ഉപ-ടാസ്കുകൾ ആരംഭിക്കാം."
+    }
+  },
+  "controls": {
+    "eyebrow": "സഹായം",
+    "title": "ഞാൻ എവിടെ നിയന്ത്രിക്കണം...?",
+    "subtitle": "നിങ്ങളുടെ ഏജന്റുമാരുടെ പെരുമാറ്റം രൂപപ്പെടുത്തുന്ന ഓരോ നിയന്ത്രണവും, അത് ഇരിക്കുന്ന പേജും. നിങ്ങൾ മാറ്റാൻ ആഗ്രഹിക്കുന്നത് ഉപയോഗിച്ച് തിരയുക.",
+    "breadcrumb": {
+      "label": "ബ്രെഡ്ക്രംബ്",
+      "console": "കൺസോൾ",
+      "controls": "നിയന്ത്രണങ്ങൾ"
+    },
+    "related": {
+      "label": "മറ്റ് നിയന്ത്രണങ്ങൾ"
+    },
+    "search": {
+      "label": "നിയന്ത്രണങ്ങൾ തിരയുക",
+      "placeholder": "ഉദാഹരണം: ടൈംഔട്ട്, അംഗീകാരം, പ്രോംപ്റ്റ്, മെമ്മറി",
+      "count": "{count} പൊരുത്തപ്പെടുന്ന നിയന്ത്രണങ്ങൾ",
+      "none": "\"{query}\"-മായി ഒന്നും പൊരുത്തപ്പെടുന്നില്ല. ചെറിയ വാക്ക് പരീക്ഷിക്കുക.",
+      "noSettings": "നിങ്ങളുടെ തിരയലുമായി ഒരു ക്രമീകരണവും പൊരുത്തപ്പെടുന്നില്ല."
+    },
+    "areasHeading": "നിയന്ത്രണ മേഖലകൾ",
+    "areasIntro": "ഈ പേജുകളിൽ ഒറ്റ സംഖ്യയല്ലാത്ത നിയന്ത്രണങ്ങളുണ്ട്: നിർദ്ദേശങ്ങൾ, അംഗീകാര നിയമങ്ങൾ, സുരക്ഷാ നിയമങ്ങൾ, ഒരു ടേൺ എന്ത് ചെയ്തു എന്നതിന്റെ രേഖ.",
+    "openArea": "തുറക്കുക",
+    "needsAccess": "ഈ പേജിലേക്കുള്ള ആക്സസിനായി ഒരു വർക്ക്സ്പേസ് അഡ്മിനോട് ചോദിക്കുക.",
+    "settingsHeading": "എല്ലാ റൺടൈം ക്രമീകരണങ്ങളും",
+    "settingsIntro": "ഓരോ ക്രമീകരണവും മുഴുവൻ വർക്ക്സ്പേസിനും, ഒരു ഏജന്റിനും, അല്ലെങ്കിൽ രണ്ടിനും മാറ്റാം. ഏജന്റിന്റെ സ്വന്തം മൂല്യം വർക്ക്സ്പേസ് മൂല്യത്തെ മറികടക്കുന്നു. ക്രമീകരണത്തിൽ നേരിട്ട് എത്താൻ ഒരു ലിങ്ക് തിരഞ്ഞെടുക്കുക.",
+    "loading": "ക്രമീകരണ പട്ടിക ലോഡ് ചെയ്യുന്നു",
+    "loadFailed": "ക്രമീകരണ പട്ടിക ലോഡ് ചെയ്യാനായില്ല. {message}",
+    "retry": "വീണ്ടും ശ്രമിക്കുക",
+    "emptyCatalog": "ഈ വർക്ക്സ്പേസിൽ കാണിക്കാൻ റൺടൈം ക്രമീകരണങ്ങളൊന്നുമില്ല.",
+    "changeWorkspace": "വർക്ക്സ്പേസിനായി മാറ്റുക",
+    "changeAgent": "ഒരു ഏജന്റിൽ മാറ്റുക",
+    "workspaceOnly": "വർക്ക്സ്പേസ്-വ്യാപകം മാത്രം",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "ഏജന്റ് റൺടൈം പരിധികൾ",
+        "intro": "ഒരു ടേണിന് എത്ര ജോലി ചെയ്യാം: ടൂൾ കോളുകൾ, സമയം, ഫലത്തിന്റെ വലുപ്പം, വീണ്ടെടുക്കൽ."
+      },
+      "behaviour-settings": {
+        "title": "പെരുമാറ്റ ക്രമീകരണങ്ങൾ",
+        "intro": "മറുപടികൾ എങ്ങനെ പൂർത്തിയാക്കുകയും കാഷെ ചെയ്യുകയും ചെയ്യുന്നു, അംഗീകാരങ്ങൾ എങ്ങനെ തുടരുന്നു, സുരക്ഷാ പരിശോധനകൾ എങ്ങനെ പെരുമാറുന്നു, മെമ്മറി, തിരയൽ, ചുമതല ഏൽപ്പിക്കൽ എങ്ങനെ പ്രവർത്തിക്കുന്നു."
+      },
+      "other": {
+        "title": "മറ്റ് ക്രമീകരണങ്ങൾ",
+        "intro": "സ്വന്തമായി വിഭാഗമില്ലാത്ത ക്രമീകരണങ്ങൾ."
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "റൺടൈം ക്രമീകരണങ്ങൾ",
+        "summary": "മുഴുവൻ വർക്ക്സ്പേസിനുമുള്ള പരിധികൾ, അംഗീകാരങ്ങൾ, ഗുണനിലവാര പരിശോധനകൾ, സുരക്ഷാ കർശനത, മെമ്മറി, ചുമതല ഏൽപ്പിക്കൽ.",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers പരിധികൾ ടൈംഔട്ട് ടൂൾ ഘട്ടങ്ങൾ വീണ്ടും ശ്രമങ്ങൾ കാഷെ മെമ്മറി ചുമതല ഏൽപ്പിക്കൽ ഗുണനിലവാരം വിധികർത്താവ് ക്രമീകരണങ്ങൾ സംഖ്യകൾ"
+      },
+      "prompts": {
+        "title": "നിർദ്ദേശങ്ങൾ",
+        "summary": "പ്ലാറ്റ്ഫോം മോഡലിന് നൽകുന്ന പ്രോംപ്റ്റുകൾ: ഓരോന്നും കാണുക, വർക്ക്സ്പേസിനോ ഒരു ഏജന്റിനോ ഓവർറൈഡ് ചെയ്യുക, ഫലം പ്രിവ്യൂ ചെയ്യുക.",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry പ്രോംപ്റ്റുകൾ നിർദ്ദേശങ്ങൾ സിസ്റ്റം പ്രോംപ്റ്റ് ഓവർറൈഡ് പ്രിവ്യൂ രജിസ്ട്രി"
+      },
+      "approvals": {
+        "title": "അംഗീകാരങ്ങൾ",
+        "summary": "ഒരു വ്യക്തിക്കായി കാത്തിരിക്കുന്ന പ്രവൃത്തികളുടെ ക്യൂ, ഏത് ടൂളുകൾക്ക് അംഗീകാരം വേണമെന്നതിന്റെ നിയമങ്ങൾ, നിങ്ങളുടെ തീരുമാനത്തിന് ശേഷം എന്ത് സംഭവിക്കുന്നു.",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation അംഗീകരിക്കുക നിരസിക്കുക ക്യൂ ഹ്യൂമൻ ഇൻ ദ ലൂപ്പ് ടൂൾ നിയമങ്ങൾ കാലഹരണം തുടർച്ച"
+      },
+      "guardrails": {
+        "title": "ഗാർഡ്‌റെയിലുകൾ",
+        "summary": "ഈ വർക്ക്സ്പേസ് കടത്തിവിടാൻ വിസമ്മതിക്കുന്ന പാറ്റേണുകൾ, ടൂൾ ഫലങ്ങൾക്ക് ബാധകമായ ഉള്ളടക്ക നയം.",
+        "keywords": "safety rules block filter policy content patterns സുരക്ഷാ നിയമങ്ങൾ തടയുക ഫിൽട്ടർ നയം ഉള്ളടക്കം പാറ്റേണുകൾ"
+      },
+      "turns": {
+        "title": "ടേൺ ഇൻസ്പെക്ടർ",
+        "summary": "ഒരു ഏജന്റ് ടേണിന്റെ രേഖപ്പെടുത്തിയ ടൈംലൈൻ: എന്ത് ചോദിച്ചു, ഏത് ടൂളുകൾ പ്രവർത്തിച്ചു, ഓരോ ഘട്ടത്തിനും എത്ര ചെലവായി, എന്തുകൊണ്ട് നിന്നു.",
+        "keywords": "turn timeline journal trace replay history steps debug ടേൺ ടൈംലൈൻ ജേണൽ ട്രേസ് റീപ്ലേ ചരിത്രം ഘട്ടങ്ങൾ ഡീബഗ്"
+      },
+      "agentBehavior": {
+        "title": "ഏജന്റ് പെരുമാറ്റവും പരിധികളും",
+        "summary": "ഒരു ഏജന്റിന്റെ പേജിൽ: അതിന്റെ സ്വന്തം പരിധികളും പെരുമാറ്റ ക്രമീകരണങ്ങളും, ഓരോ മൂല്യവും എവിടെ നിന്ന് വരുന്നു എന്നതും വർക്ക്സ്പേസ് മൂല്യത്തിലേക്കുള്ള റീസെറ്റും സഹിതം.",
+        "keywords": "agent override per agent behavior limits tab ഏജന്റ് ഓവർറൈഡ് ഓരോ ഏജന്റിനും പെരുമാറ്റം പരിധികൾ ടാബ്"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "ഈ പ്രോംപ്റ്റ് ബ്ലോക്കുകൾ കൊണ്ട് നിർമ്മിച്ചത്",
+    "blocksCount": "{n} ബ്ലോക്ക്(കൾ)",
+    "blockDefault": "ഡിഫോൾട്ടായി ലഭിച്ചത്",
+    "blockOverride": "{scope} ഓവർറൈഡ് v{version}",
+    "blockAgentConfig": "ഏജന്റിന്റെ സ്വന്തം പ്രോംപ്റ്റ്",
+    "blockCode": "പ്ലാറ്റ്ഫോം കോഡ്",
+    "blockTokens": "~{tokens} ടോക്കണുകൾ",
+    "blockHash": "പദപ്രയോഗ ഹാഷ്"
+  },
+  "toolApproval": {
+    "continuing": "ഏജന്റ് ടാസ്ക് തുടരുകയാണ്.",
+    "continueNotStarted": "ഈ തീരുമാനത്തിന് ശേഷം ഏജന്റ് സ്വയമേവ പുനരാരംഭിച്ചില്ല. തുടരാൻ ഒരു സന്ദേശം അയയ്ക്കുക.",
+    "continueTimedOut": "ഏജന്റ് തുടരുന്നത് ഇതുവരെ പൂർത്തിയാക്കിയിട്ടില്ല. പൂർത്തിയാകുമ്പോൾ അതിന്റെ മറുപടി സംഭാഷണത്തിൽ കാണും; പരിശോധിക്കാൻ റീലോഡ് ചെയ്യുക."
+  },
+  "promptDirectives": {
+    "tabRegistry": "എല്ലാ പ്രോംപ്റ്റുകളും",
+    "tabAgentPreview": "അന്തിമ പ്രോംപ്റ്റിന്റെ പ്രിവ്യൂ",
+    "regTitle": "എല്ലാ പ്രോംപ്റ്റും",
+    "regIntro": "ഒരു മോഡലിനായി പ്ലാറ്റ്ഫോം എഴുതുന്ന എല്ലാ ടെക്സ്റ്റും, ഇപ്പോൾ പ്രാബല്യത്തിലുള്ള പദപ്രയോഗം, അതിന്റെ ഉറവിടം, പതിപ്പ് എന്നിവയോടെ. ഒരു വ്യാപ്തി തിരഞ്ഞെടുക്കുക, മാറ്റാൻ ഒരു പ്രോംപ്റ്റ് തുറക്കുക, മുൻ പതിപ്പുകളെല്ലാം കാണുക. ഒരു മാറ്റം ഏകദേശം അര മിനിറ്റിനുള്ളിൽ എല്ലാ സെർവറുകളിലും എത്തും.",
+    "regScopeLabel": "മാറ്റേണ്ട വ്യാപ്തി",
+    "regScope_tenant": "ഈ വർക്ക്സ്പേസ്",
+    "regScope_agent": "ഒരു ഏജന്റ്",
+    "regScope_platform": "മുഴുവൻ പ്ലാറ്റ്ഫോം",
+    "regAgentLabel": "ഏജന്റ്",
+    "regAgentPlaceholder": "ഒരു ഏജന്റിനെ തിരഞ്ഞെടുക്കുക",
+    "regAgentsFailed": "നിങ്ങളുടെ ഏജന്റുമാരെ ലോഡ് ചെയ്യാനായില്ല.",
+    "regPickAgent": "അതിന്റെ പ്രോംപ്റ്റുകൾ കാണാനും മാറ്റാനും ഒരു ഏജന്റിനെ തിരഞ്ഞെടുക്കുക.",
+    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regSearchLabel": "പ്രോംപ്റ്റുകൾ തിരയുക",
+    "regSearchPlaceholder": "കീ, ശീർഷകം അല്ലെങ്കിൽ വിവരണം",
+    "regRiskLabel": "അപകട വിഭാഗം",
+    "regRiskAll": "എല്ലാ അപകട വിഭാഗങ്ങളും",
+    "regRisk_STEERS_EVERY_TURN": "ഓരോ ടേണിനെയും നയിക്കുന്നു",
+    "regRisk_SECONDARY_CALL": "ദ്വിതീയ മോഡൽ കോൾ",
+    "regRisk_USER_VISIBLE": "ആളുകൾക്ക് കാണിക്കുന്നു",
+    "regRisk_TOOL_DESCRIPTION": "ടൂൾ വിവരണം",
+    "regOnlyCustomised": "ഇഷ്ടാനുസൃതമാക്കിയവ മാത്രം",
+    "regPlatformReadOnly": "പ്ലാറ്റ്ഫോം-വ്യാപകമായ പ്രോംപ്റ്റുകൾ ഇവിടെ വായിക്കാം; പ്ലാറ്റ്ഫോം അഡ്മിൻ മാത്രമേ അവ മാറ്റാൻ കഴിയൂ.",
+    "regLoadFailed": "പ്രോംപ്റ്റുകൾ ലോഡ് ചെയ്യാനായില്ല.",
+    "regCount": "{total} പ്രോംപ്റ്റുകളിൽ {shown} കാണിക്കുന്നു.",
+    "regEmptyTitle": "പ്രോംപ്റ്റുകളൊന്നും പൊരുത്തപ്പെടുന്നില്ല",
+    "regEmptyBody": "തിരയലോ ഫിൽട്ടറുകളോ മാറ്റുക.",
+    "regSource_DEFAULT": "ഡിഫോൾട്ടായി ലഭിച്ചത്",
+    "regSource_FALLBACK": "ഡിഫോൾട്ടായി ലഭിച്ചത് (ഓവർറൈഡുകൾ ലഭ്യമല്ല)",
+    "regSource_PLATFORM": "പ്ലാറ്റ്ഫോം",
+    "regSource_TENANT": "വർക്ക്സ്പേസ്",
+    "regSource_AGENT": "ഏജന്റ്",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "വിരമിച്ചത്",
+    "regRetiredBody": "ഈ പ്രോംപ്റ്റ് ഇനി ടെക്സ്റ്റ് ഒന്നും അയയ്ക്കുന്നില്ല, അതിനാൽ മാറ്റാൻ ഒന്നുമില്ല.",
+    "regEffectiveOff": "ഓഫ്: ഒന്നും അയയ്ക്കുന്നില്ല.",
+    "regEffectiveTokens": "ഇപ്പോൾ പ്രാബല്യത്തിൽ, ഏകദേശം {tokens} ടോക്കണുകൾ.",
+    "regEffectiveLabel": "{title}-ന് പ്രാബല്യത്തിലുള്ള പദപ്രയോഗം",
+    "regOpenEditor": "{title} എഡിറ്റ് ചെയ്യുക",
+    "regCloseEditor": "{title} അടയ്ക്കുക",
+    "regEditingOverride": "{scope} പതിപ്പ് എഡിറ്റ് ചെയ്യുന്നു, നിലവിൽ v{version}.",
+    "regEditingNone": "ഇതുവരെ {scope} പതിപ്പില്ല. ഇത് അതിന് താഴെയുള്ള പദപ്രയോഗത്തിൽ നിന്ന് ആരംഭിക്കുന്നു: {below}.",
+    "regPlaceholders": "റൺടൈമിൽ പൂരിപ്പിക്കുന്നത്:",
+    "regRequired": "(ആവശ്യമാണ്)",
+    "regProblemsTitle": "സംരക്ഷിക്കുന്നതിന് മുമ്പ് ഇത് ശരിയാക്കുക",
+    "regReasonLabel": "മാറ്റത്തിന്റെ കാരണം (ചരിത്രത്തിൽ സൂക്ഷിക്കുന്നു)",
+    "regReasonPlaceholder": "ഓപ്ഷണൽ",
+    "regConflict": "നിങ്ങൾ എഡിറ്റ് ചെയ്യുമ്പോൾ ആരോ ഈ പ്രോംപ്റ്റ് മാറ്റി. അവരുടെ പതിപ്പ് കാണാൻ ഇത് അടച്ച് വീണ്ടും തുറക്കുക, എന്നിട്ട് വീണ്ടും ശ്രമിക്കുക.",
+    "regRevert": "{to}-ലേക്ക് തിരികെ മാറ്റുക",
+    "regShowHistory": "ചരിത്രം",
+    "regHideHistory": "ചരിത്രം മറയ്ക്കുക",
+    "regHistoryLoading": "ചരിത്രം ലോഡ് ചെയ്യുന്നു…",
+    "regHistoryFailed": "ചരിത്രം ലോഡ് ചെയ്യാനായില്ല.",
+    "regHistoryEmpty": "ഈ വ്യാപ്തിയിൽ ഇതുവരെ പതിപ്പുകളില്ല.",
+    "regVersion": "പതിപ്പ് {version}",
+    "regAction_CREATE": "സൃഷ്ടിച്ചു",
+    "regAction_UPDATE": "മാറ്റി",
+    "regAction_REVERT": "തിരികെ മാറ്റി",
+    "regAction_MIGRATE": "മൈഗ്രേറ്റ് ചെയ്തു",
+    "regCurrent": "നിലവിലെ",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "അജ്ഞാതം",
+    "regReason": "കാരണം: {reason}",
+    "regShowDiff": "പതിപ്പ് {version}-ലെ മാറ്റങ്ങൾ കാണിക്കുക",
+    "regHideDiff": "പതിപ്പ് {version}-ലെ മാറ്റങ്ങൾ മറയ്ക്കുക",
+    "regDiffLabel": "പതിപ്പ് {version} വരുത്തിയ മാറ്റങ്ങൾ",
+    "regNoDiff": "ഈ പതിപ്പിൽ ടെക്സ്റ്റ് ഒന്നും മാറിയിട്ടില്ല.",
+    "regRestore": "പതിപ്പ് {version} പുനഃസ്ഥാപിക്കുക",
+    "regRestoreReason": "പതിപ്പ് {version}-ന്റെ പദപ്രയോഗം പുനഃസ്ഥാപിച്ചു",
+    "regRestoreFailed": "ആ പതിപ്പ് പുനഃസ്ഥാപിക്കാനായില്ല.",
+    "regRestoreAck": "{title}-ന്റെ ഒരു പതിപ്പ് പുനഃസ്ഥാപിക്കുന്നത് സുരക്ഷയെ ദുർബലപ്പെടുത്തിയേക്കാം എന്ന് ഞാൻ മനസ്സിലാക്കുന്നു.",
+    "regPreviewTitle": "അന്തിമ പ്രോംപ്റ്റിന്റെ പ്രിവ്യൂ",
+    "regPreviewIntro": "മോഡലിനെ വിളിക്കാതെ, ഒരു ടേൺ ചെയ്യുന്ന അതേ രീതിയിൽ ഒരു ഏജന്റിന്റെ യഥാർത്ഥ സിസ്റ്റം പ്രോംപ്റ്റും ടൂൾ പട്ടികയും നിർമ്മിക്കുന്നു. ഓരോ ബ്ലോക്കും പ്രോംപ്റ്റ് കീ, വ്യാപ്തി, അതിന്റെ പദപ്രയോഗം വരുന്ന പതിപ്പ് എന്നിവ കാണിക്കുന്നു.",
+    "regPreviewMessageLabel": "സാമ്പിൾ ഉപയോക്തൃ സന്ദേശം (ഓപ്ഷണൽ)",
+    "regPreviewMessagePlaceholder": "യഥാർത്ഥ സന്ദേശത്തിലെന്ന പോലെ ടൂളുകളും ഓർത്തെടുത്ത മെമ്മറിയും തിരഞ്ഞെടുക്കാൻ ഉപയോഗിക്കുന്നു.",
+    "regPreviewSmallModel": "ചെറിയ മോഡലിനുള്ള പ്രിവ്യൂ",
+    "regPreviewBuild": "പ്രിവ്യൂ നിർമ്മിക്കുക",
+    "regPreviewBuilding": "നിർമ്മിക്കുന്നു…",
+    "regPreviewFailed": "പ്രിവ്യൂ നിർമ്മിക്കാനായില്ല.",
+    "regPreviewTotals": "ഏകദേശം {prompt} ടോക്കൺ സിസ്റ്റം ടെക്സ്റ്റും {tools} ടോക്കൺ ടൂൾ നിർവചനങ്ങളും (കണക്കുകൾ).",
+    "regPreviewOverBudgetTitle": "ടോക്കൺ ബജറ്റ് കവിഞ്ഞു",
+    "regPreviewOverBudget": "സ്ഥിരമായ സിസ്റ്റം ടെക്സ്റ്റ് ക്രമീകരിച്ച {budget} ടോക്കൺ ബജറ്റ് കവിഞ്ഞു. ഒന്നും മുറിക്കുന്നില്ല; ഒരു പ്രോംപ്റ്റ് ചുരുക്കുന്നത് പരിഗണിക്കുക.",
+    "regPreviewMessageHeading": "സന്ദേശം: {message}",
+    "regPreviewTokens": "~{tokens} ടോക്കണുകൾ",
+    "regPreviewTools": "ടൂളുകൾ ({count})",
+    "regPreviewNoTools": "ഈ ഏജന്റ് ടൂളുകളൊന്നും നൽകുന്നില്ല.",
+    "regPreviewNotes": "ഈ പ്രിവ്യൂവിന് അറിയാൻ കഴിയാത്തത്",
+    "regOriginDefault": "ഡിഫോൾട്ടായി ലഭിച്ചത്",
+    "regOriginOverride": "{scope} ഓവർറൈഡ് v{version}",
+    "regOriginAgentConfig": "ഏജന്റിന്റെ സ്വന്തം സിസ്റ്റം പ്രോംപ്റ്റ്",
+    "regOriginCode": "പ്ലാറ്റ്ഫോം കോഡ്"
   }
 }

@@ -6,6 +6,7 @@ import { api } from "../lib/api";
 import { useTranslations } from "../lib/i18n";
 import { edgeEnabled, edgeFallbackLabel } from "../lib/edge/capabilities";
 import { routeTurn, resetEdgeSession } from "../lib/edge/tierRouter";
+import { edgePrompt, primeEdgePrompts } from "../lib/edge/edgePrompts";
 import { getEffectiveEdgeOptIn } from "./agents/IntelligenceSourceControl";
 import { errorMessage } from "../lib/errors";
 
@@ -92,16 +93,9 @@ export function buildAskAiEdgePrompt({
   instruction: string;
   currentValue?: string | null;
 }): { system: string; user: string } {
-  const system =
-    "You help an admin of an AI agent SaaS platform write clear, " +
-    "effective text for one specific form field. You will be told the " +
-    "field's purpose, the admin's rough instruction, and (maybe) what " +
-    "they've already typed. Reply with ONLY the finished text for that " +
-    "field - no preamble, no markdown code fences, no explanation, no " +
-    "quotation marks around it. If a current draft is given, improve or " +
-    "extend it rather than ignoring it. Keep length appropriate to the " +
-    "field (a system prompt can be a paragraph or two; a short " +
-    "description field should be one or two sentences).";
+  // The registry key `edge.ask_ai.system` (edgePrompts.ts): the one wording AssistService also reads, so a change on
+  // the instructions console reaches the on-device draft too. The shipped text is the fallback.
+  const system = edgePrompt("edge.ask_ai.system");
   const user =
     `Field: ${fieldLabel}\nInstruction: ${instruction}` +
     (currentValue && currentValue.trim() ? `\nCurrent draft:\n${currentValue}` : "");
@@ -165,6 +159,8 @@ export default function AskAiHelper({ fieldLabel, currentValue, onApply, placeho
         // across repeated "Regenerate" clicks on the same field.
         const sessionKey = `ask-ai:${fieldLabel}`;
         resetEdgeSession(sessionKey);
+        // The effective wording for this workspace; never throws, and the shipped text stands when it cannot be fetched.
+        await primeEdgePrompts();
         const { system, user } = buildAskAiEdgePrompt({
           fieldLabel,
           instruction,

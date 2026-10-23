@@ -100,7 +100,7 @@ that ticks in the API shape.
 
 ### Also run in the API shape
 
-These tick in the API pod as well. <!-- gen-shapes:begin alsolocked -->All 20<!-- gen-shapes:end alsolocked --> take the Postgres advisory lock, so one pod wins each tick; they
+These tick in the API pod as well. <!-- gen-shapes:begin alsolocked -->All 22<!-- gen-shapes:end alsolocked --> take the Postgres advisory lock, so one pod wins each tick; they
 still borrow a pinned database connection in a chat pod, and each can move to the jobs family once its owner
 confirms it depends on no API-pod state. `AbuseSignalService` is the exception: it writes into the API JVM's
 throttle map, which the API's request filters read, so it stays on the API pods.
@@ -111,6 +111,7 @@ throttle map, which the API's request filters read, so it stays on the API pods.
 | `AbuseSignalService` | platform | yes | - | - | advisory lock |
 | `AgentSentinelSweep` | agents-jobs | yes | yes | - | advisory lock |
 | `AgentSupervisorSweep` | app | yes | yes | - | advisory lock |
+| `ApprovalExpiryJob` | approval | yes | yes | - | advisory lock |
 | `BriefTrustWatcher` | brief | yes | yes | - | advisory lock |
 | `ChatBranchRetentionPurge` | agents-turn | yes | yes | - | advisory lock |
 | `CompGrantReminderJob` | tenancy | yes | yes, unless its pool is on | billing | advisory lock |
@@ -125,6 +126,7 @@ throttle map, which the API's request filters read, so it stays on the API pods.
 | `StalePendingUpgradeCleanup` | tenancy | yes | yes, unless its pool is on | billing | advisory lock |
 | `StepJournalRetentionPurge` | agents-jobs | yes | yes | - | advisory lock |
 | `StudyReviewReminderSweep` | app | yes | yes | - | advisory lock |
+| `TurnJournalRetentionPurge` | agents-turn | yes | yes | - | advisory lock |
 | `VectorSchemaInitializer` | knowledge | yes | yes | - | advisory lock |
 | `WorkflowPollTriggerTicker` | workflow | yes | yes | - | advisory lock |
 | `WorkflowWaitWakeJob` | workflow | yes | yes | - | advisory lock |

@@ -153,6 +153,12 @@
   <modules>
     <module>json</module>
     <module>audit</module>
+    <!-- The prompt registry (keys, resource defaults, scoped versioned overrides, PromptResolver). Needs only
+         security and audit, so every module that sends model-facing text can depend on it. -->
+    <module>prompts</module>
+    <!-- The settings catalog (typed, bounded, risk-classed behaviour settings with tenant and agent overrides, audit
+         and SettingsResolver). Needs only security and audit, like prompts, so any module can read a setting. -->
+    <module>settings</module>
     <module>billing</module>
     <module>crypto</module>
     <module>crypto-kms</module>
@@ -321,6 +327,16 @@
       <dependency>
         <groupId>com.agenticai</groupId>
         <artifactId>audit</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>prompts</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.agenticai</groupId>
+        <artifactId>settings</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

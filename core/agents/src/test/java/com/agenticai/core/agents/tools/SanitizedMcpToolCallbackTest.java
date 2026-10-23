@@ -111,6 +111,20 @@ class SanitizedMcpToolCallbackTest {
     }
 
     @Test
+    void blockedResultIsMarkedAsThePlatformsAnswer_soTheJsonWrapperDoesNotHideItFromTheJournals() {
+        // The wrapped JSON starts with {"result": - no refusal wording first - so the old prefix check took a
+        // blocked MCP call for an executed one.
+        ToolCallback delegate = fakeDelegate("read_file");
+        SanitizedMcpToolCallback wrapped = new SanitizedMcpToolCallback(delegate);
+
+        String result = wrapped.call("{\"path\": \"../../../etc/passwd\"}");
+
+        assertEquals(
+                com.agenticai.core.guardrails.ToolResultMarker.Kind.BLOCKED,
+                com.agenticai.core.guardrails.ToolResultMarker.kindOf(result).orElseThrow());
+    }
+
+    @Test
     void aThrownExceptionFromTheDelegatePropagatesRatherThanBeingSwallowed() {
         // 2026-08-13 correction (see class javadoc): catching here used to hide every MCP
         // failure from LoggingToolCallback (which wraps THIS class), silently breaking

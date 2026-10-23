@@ -206,8 +206,9 @@ services:
       # NEVER change after first boot (stored secrets become undecryptable).
       APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:?run scripts/vegaduta secrets}
       PLATFORM_MASTER_KEY: ${PLATFORM_MASTER_KEY:-}
-      # app.auth.mode / taint / billing defaults come from application-personal.yml;
-      # set APP_AUTH_MODE etc. in core.env to change them.
+      # app.auth.mode / taint / billing defaults come from application-personal.yml (so do hooks, argument
+      # policies and skill supply-chain enforcement, off here, and context compaction and the job step
+      # journal, on); set APP_AUTH_MODE etc. in core.env to change them.
       #
       # STDIO MCP sandbox: the personal profile defaults to `os`, which needs macOS sandbox-exec or
       # Linux bubblewrap. Inside this container neither exists (the slim image has no bwrap and

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.quality.dataset.AgentTurnReplayer.ReplayedToolCall;
+import com.agenticai.core.quality.dataset.AgentTurnReplayer.ToolStatus;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -86,5 +87,33 @@ class TrajectoryExtractorTest {
             many.add(new TrajectoryExtractor.RawCall("t", "{}", "ok"));
         }
         assertEquals(TrajectoryExtractor.MAX_STEPS, TrajectoryExtractor.fromRaw(many).size());
+    }
+
+    @Test
+    void theStatusTheTurnRecordedBeatsTheWordingOfTheOutput() {
+        List<TrajectoryToolCall> steps = TrajectoryExtractor.fromReplayed(List.of(
+            // Ordinary-looking output, but the turn says the call never ran.
+            new ReplayedToolCall("a", "{}", "queued", ToolStatus.AWAITING_APPROVAL),
+            new ReplayedToolCall("b", "{}", "queued", ToolStatus.NOT_RUN),
+            new ReplayedToolCall("c", "{}", "queued", ToolStatus.FAILED),
+            // Wording that looks like a refusal, but the turn says the tool ran and returned it.
+            new ReplayedToolCall("d", "{}", "This tool call (x) is how the page spells a heading", ToolStatus.OK),
+            new ReplayedToolCall("e", "{}", "cached", ToolStatus.REPLAYED),
+            // No record: the wording decides, as before.
+            new ReplayedToolCall("f", "{}", "This tool call failed: boom", ToolStatus.UNKNOWN),
+            new ReplayedToolCall("g", "{}", "fine")));
+
+        assertEquals(List.of(false, false, false, true, true, false, true), steps.stream().map(TrajectoryToolCall::ok).toList());
+    }
+
+    @Test
+    void theStoredStatusIsReadBackAndAnOldRowWithNoneStillWorks() {
+        String stored = "[{\"toolName\":\"a\",\"input\":\"{}\",\"output\":\"queued\",\"status\":\"AWAITING_APPROVAL\"},"
+            + "{\"toolName\":\"b\",\"input\":\"{}\",\"output\":\"fine\"},"
+            + "{\"toolName\":\"c\",\"input\":\"{}\",\"output\":\"queued\",\"status\":\"SOMETHING_NEW\"}]";
+
+        List<TrajectoryToolCall> steps = TrajectoryExtractor.fromToolCallsJson(stored);
+
+        assertEquals(List.of(false, true, true), steps.stream().map(TrajectoryToolCall::ok).toList());
     }
 }

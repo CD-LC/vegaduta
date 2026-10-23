@@ -81,7 +81,7 @@ public class A2aCardSigningService {
      * one replica. Only used to decide whether an ephemeral signing key is
      * worth a startup WARN.
      */
-    @Value("${app.replica-mode:}")
+    @Value("${app.replica-mode:single}")
     private String replicaMode = "";
 
     public A2aCardSigningService(A2aProperties properties) {

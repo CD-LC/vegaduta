@@ -88,6 +88,7 @@ import {
   type TurnComplexitySignal,
 } from "./capabilities";
 import { fetchEdgeAgentPolicy, type EdgeAgentPolicyInfo } from "./agentPolicy";
+import { primeEdgePrompts } from "./edgePrompts";
 import { prepareHostedFallthrough, screenInput, screenOutput } from "./edgeGuardrails";
 import { modelRedactionReady, redactForHosted, redactPatterns } from "./redactor";
 import { getTier1RunModel, isTier1EngineWarm } from "./tier1";
@@ -192,9 +193,12 @@ async function routeTurnCore(
     // (no agent id, anonymous caller, pre-Wave-2 server, fetch failure) is
     // the documented degrade-to-old-behavior state, never an error.
     const policyAgentId = options.agentId ?? (isLikelyAgentId(options.sessionKey) ? options.sessionKey : null);
-    const policyInfo: EdgeAgentPolicyInfo | null = policyAgentId
-      ? await fetchEdgeAgentPolicy(policyAgentId)
-      : null;
+    // The prompt wording (fallback prompt, reasoning nudge, refusals) is fetched alongside the policy, bounded and
+    // cached; it never throws and falls back to the bundled defaults (edgePrompts.ts).
+    const [policyInfo]: [EdgeAgentPolicyInfo | null, void] = await Promise.all([
+      policyAgentId ? fetchEdgeAgentPolicy(policyAgentId) : Promise.resolve(null),
+      primeEdgePrompts(policyAgentId),
+    ]);
     const policy = policyInfo?.policy ?? null;
     const edgeOnly = policy === "EDGE_ONLY";
     const guardrailsActive = policyInfo?.guardrailsEnabled === true;

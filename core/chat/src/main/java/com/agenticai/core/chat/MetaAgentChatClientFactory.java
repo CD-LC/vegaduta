@@ -151,7 +151,7 @@ public class MetaAgentChatClientFactory implements AgentChatClientFactory {
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.META)
             .defaultAdvisors(modelSupport.advisors(
                 new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.META, model, meterRegistry, pricingCatalog)))
             .build();

@@ -8,7 +8,12 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { useTranslations } from "../../lib/i18n";
 import ApprovalStatusBadge from "./ApprovalStatusBadge";
+import ApprovalContinuationPanel from "./ApprovalContinuationPanel";
+import ExpiryCountdown from "./ExpiryCountdown";
+import ToolCallPreview, { argsTooLongToReview } from "./ToolCallPreview";
+import { isExpiredRequest, isToolCallRequest, requestToolName, requesterIds } from "./approvalsQueueModel";
 import {
   actionLabel,
   fmtTime,
@@ -45,6 +50,8 @@ export interface ApprovalDetailProps {
   formValues: Record<string, string>;
   onFormValueChange: (field: string, v: string) => void;
   busy: boolean;
+  /** Seconds a pending request may wait before core closes it (0 = never, null = not known). */
+  ttlSeconds?: number | null;
   onApprove: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onReject: (e: React.MouseEvent<HTMLButtonElement>) => void;
   t: Translate;
@@ -58,10 +65,17 @@ export default function ApprovalDetail({
   formValues,
   onFormValueChange,
   busy,
+  ttlSeconds = null,
   onApprove,
   onReject,
   t,
 }: ApprovalDetailProps) {
+  const q = useTranslations("approvalsQueue");
+  const toolCall = isToolCallRequest(item);
+  const tool = toolCall ? requestToolName(item) : "";
+  const ids = requesterIds(item.requestedBy);
+  const expired = isExpiredRequest(item);
+  const tooLong = toolCall && item.status === "PENDING" && argsTooLongToReview(item);
   const payload = prettyPayload(item.payload);
   const pay = paymentContext(item.payload);
   const proposal = item.actionType === "agent.proposal" ? proposalContext(item.payload) : null;
@@ -73,18 +87,44 @@ export default function ApprovalDetail({
       <CardHeader className="gap-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="min-w-0 break-words text-base">{actionLabel(item.actionType, t)}</CardTitle>
-          <ApprovalStatusBadge status={item.status} />
+          <ApprovalStatusBadge status={item.status} decidedBy={item.decidedBy} />
         </div>
         <p className="text-sm text-muted-foreground">
           {t("requestedByRow", { name: item.requestedBy || t("unknownActor") })} &middot; {fmtTime(item.createdAt)}
         </p>
+        <ExpiryCountdown item={item} ttlSeconds={ttlSeconds} showWhenNever />
+        {ids && (
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground" data-testid="approval-links">
+            <span>
+              {q("sessionLabel")} <code className="font-mono">{ids.sessionId}</code>
+            </span>
+            <a
+              className="font-medium text-foreground underline underline-offset-2"
+              href={`/playground?agent=${encodeURIComponent(ids.agentId)}`}
+              data-testid="approval-link-agent"
+            >
+              {q("linkOpenAgent")}
+            </a>
+            <a
+              className="font-medium text-foreground underline underline-offset-2"
+              href={`/agents/turns?agentId=${encodeURIComponent(ids.agentId)}`}
+              data-testid="approval-link-turns"
+            >
+              {q("linkInspectTurns")}
+            </a>
+          </p>
+        )}
       </CardHeader>
       <CardContent className="grid gap-5">
         <Section label={t("policyTriggeredLabel")}>
-          <p className="text-sm">
-            {t("policyTriggeredPrefix")} <code className="font-mono text-xs">{item.actionType}</code>{" "}
-            {t("policyTriggeredSuffix")}
-          </p>
+          {toolCall ? (
+            <p className="text-sm">{q("whyGated", { tool })}</p>
+          ) : (
+            <p className="text-sm">
+              {t("policyTriggeredPrefix")} <code className="font-mono text-xs">{item.actionType}</code>{" "}
+              {t("policyTriggeredSuffix")}
+            </p>
+          )}
         </Section>
 
         <Section label={t("whyAgentAskedLabel")}>
@@ -118,16 +158,22 @@ export default function ApprovalDetail({
           </Section>
         )}
 
-        {payload && (
+        {toolCall ? (
           <Section label={t("proposedActionLabel")}>
-            <Code>{payload}</Code>
+            <ToolCallPreview item={item} />
           </Section>
+        ) : (
+          payload && (
+            <Section label={t("proposedActionLabel")}>
+              <Code>{payload}</Code>
+            </Section>
+          )
         )}
 
         {item.rejectionReason && (
           <Alert variant="error">
             <AlertDescription>
-              {t("reasonPrefix")} {item.rejectionReason}
+              {expired ? q("expiredReasonPrefix") : t("reasonPrefix")} {item.rejectionReason}
             </AlertDescription>
           </Alert>
         )}
@@ -165,24 +211,42 @@ export default function ApprovalDetail({
         )}
 
         {item.status === "PENDING" && (
-          <Section label={t("decisionNoteLabel")}>
+          <Section label={toolCall ? q("denyReasonLabel") : t("decisionNoteLabel")}>
             <Textarea
               value={note}
               onChange={(e) => onNoteChange(e.target.value)}
-              placeholder={t("decisionNotePlaceholder")}
-              aria-label={t("decisionNoteLabel")}
+              placeholder={toolCall ? q("denyReasonPlaceholder") : t("decisionNotePlaceholder")}
+              aria-label={toolCall ? q("denyReasonLabel") : t("decisionNoteLabel")}
+              aria-describedby={toolCall ? "approval-deny-reason-help" : undefined}
+              maxLength={2000}
               className="min-h-16"
             />
+            {toolCall && (
+              <p id="approval-deny-reason-help" className="text-xs text-muted-foreground">
+                {q("denyReasonHelp")}
+              </p>
+            )}
+            {tooLong && (
+              <p className="text-xs font-medium text-destructive" role="alert" data-testid="approve-blocked-too-long">
+                {q("approveBlockedTooLong")}
+              </p>
+            )}
             <div className="flex flex-wrap justify-end gap-2" aria-busy={busy}>
               <Button type="button" variant="destructive" size="sm" disabled={busy} onClick={onReject}>
                 {busy && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
-                {t("reject")}
+                {toolCall ? q("denyButton") : t("reject")}
               </Button>
-              <Button type="button" size="sm" disabled={busy} onClick={onApprove}>
+              <Button type="button" size="sm" disabled={busy || tooLong} onClick={onApprove}>
                 {busy && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
                 {t("approve")}
               </Button>
             </div>
+          </Section>
+        )}
+
+        {toolCall && item.status !== "PENDING" && (
+          <Section label={q("continuationLabel")}>
+            <ApprovalContinuationPanel item={item} />
           </Section>
         )}
 
@@ -196,7 +260,7 @@ export default function ApprovalDetail({
               <li className="flex gap-3">
                 <time className="w-40 shrink-0 text-xs text-muted-foreground">{fmtTime(item.decidedAt)}</time>
                 <span>
-                  {item.status.toLowerCase()} {t("byActorSuffix", { name: item.decidedBy || t("unknownActor") })}
+                  {expired ? q("auditExpired") : item.status.toLowerCase()} {t("byActorSuffix", { name: item.decidedBy || t("unknownActor") })}
                 </span>
               </li>
             )}

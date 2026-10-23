@@ -8,7 +8,7 @@ import java.util.Locale;
  * <ul>
  *   <li>{@link #OFF} - the layer is inert: no state is kept, nothing is counted, tool output is
  *       never touched.
- *   <li>{@link #OBSERVE} (opt-in; the property default is {@link #OFF}) - taint is tracked and a call that WOULD have needed approval is
+ *   <li>{@link #OBSERVE} (the base-profile default since 2026-10-23; the {@code personal} profile enforces) - taint is tracked and a call that WOULD have needed approval is
  *       counted, logged and audited, but the call runs exactly as it did before and the model sees
  *       exactly the bytes it saw before. Zero behaviour change; the evidence an operator needs to
  *       decide whether to flip to {@link #ENFORCE}.

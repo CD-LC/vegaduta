@@ -95,7 +95,7 @@ public class LocalOpenAiAgentChatClientFactory implements AgentChatClientFactory
         LlmModelSupport.logDroppedSampling(ProviderName.LOCAL_OPENAI, model, sampling, "topK");
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, optionsBuilder.build());
 
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.LOCAL_OPENAI)
             .defaultAdvisors(modelSupport.advisors(new LlmMetricsAdvisor(
                 llmCallMetricsService, llmCallLogService, ProviderName.LOCAL_OPENAI, model, meterRegistry,
                 zeroCostPricing)))

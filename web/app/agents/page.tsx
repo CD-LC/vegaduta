@@ -8,6 +8,7 @@ import { api } from "../lib/api";
 import AppShell from "../components/AppShell";
 import AgentWorkbench from "../components/agents/AgentWorkbench";
 import AgentsIndex from "../components/agents/AgentsIndex";
+import { openAgentHref } from "../components/agents/AgentWorkbench/agentLinks";
 import { Skeleton } from "../components/ui/skeleton";
 import PageHeader from "../components/ax/PageHeader";
 import { Button } from "../components/ui/button";
@@ -29,6 +30,7 @@ function AgentsPageInner() {
   // The index labels, subtitles and errors live in the shared agentsUi bundle (AgentsIndex uses it
   // too); only the eyebrow and title are this page's own.
   const tu = useTranslations("agentsUi");
+  const tb = useTranslations("agentBehavior");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -116,7 +118,11 @@ function AgentsPageInner() {
     [pathname, router, searchParams]
   );
 
-  const agentHref = (id: string) => `/agents?agentId=${encodeURIComponent(id)}`;
+  // A link that arrived here without an agent but asking for a place inside one (?section=behavior&focus=<setting>,
+  // from the "Where do I control...?" page) keeps that request through the choice of agent.
+  const wantedSection = searchParams.get("section");
+  const wantedFocus = searchParams.get("focus");
+  const agentHref = (id: string) => openAgentHref(id, { section: wantedSection, focus: wantedFocus });
 
   return (
     <AppShell eyebrow={t("eyebrow")}>
@@ -185,15 +191,22 @@ function AgentsPageInner() {
           />
         </>
       ) : (
-        <AgentsIndex
-          agents={agents}
-          loaded={loaded}
-          error={loadError}
-          onRetry={() => void refresh()}
-          onChanged={() => void refresh()}
-          agentHref={agentHref}
-          newHref="/agents?new=1"
-        />
+        <>
+          {wantedSection === "behavior" ? (
+            <p className="mb-3 text-sm text-muted-foreground" data-testid="agents-pick-for-behavior">
+              {tb("pickAgent")}
+            </p>
+          ) : null}
+          <AgentsIndex
+            agents={agents}
+            loaded={loaded}
+            error={loadError}
+            onRetry={() => void refresh()}
+            onChanged={() => void refresh()}
+            agentHref={agentHref}
+            newHref="/agents?new=1"
+          />
+        </>
       )}
     </AppShell>
   );

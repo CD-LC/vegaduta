@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.core;
 
+import com.agenticai.core.agents.runtime.RuntimeLimits;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
@@ -37,19 +38,23 @@ record AgentProjection(
         Set<UUID> allowedKnowledgeCollectionIds,
         Set<String> allowedCodeIntelRepoIds,
         Set<UUID> allowedKnowledgeWriteCollectionIds,
-        Set<UUID> collaboratorAgentIds) {
+        Set<UUID> collaboratorAgentIds,
+        RuntimeLimits runtimeLimits) {
 
     /**
      * Builds the snapshot from a loaded agent. {@code lookup} finds another agent by id: a hidden
-     * A/B treatment clone runs under its CONTROL agent's run cap, which is the one field that needs
+     * A/B treatment clone runs under its CONTROL agent's run cap, which (with the runtime limits) needs
      * a second row.
      */
     static AgentProjection from(Agent agent, Function<UUID, Optional<Agent>> lookup) {
         BigDecimal runBudget = agent.getRunBudgetUsd();
+        RuntimeLimits runtimeLimits = agent.getRuntimeLimits();
         UUID controlId = agent.getExperimentCloneOf();
         if (controlId != null) {
-            // A treatment clone is built from the config snapshot, which leaves this field out.
-            runBudget = lookup.apply(controlId).map(Agent::getRunBudgetUsd).orElse(runBudget);
+            // A treatment clone is built from the config snapshot, which leaves these fields out.
+            Optional<Agent> control = lookup.apply(controlId);
+            runBudget = control.map(Agent::getRunBudgetUsd).orElse(runBudget);
+            runtimeLimits = control.map(Agent::getRuntimeLimits).orElse(runtimeLimits);
         }
         return new AgentProjection(
                 agent.getReasoningDepth(),
@@ -67,6 +72,7 @@ record AgentProjection(
                 Set.copyOf(agent.getAllowedKnowledgeCollectionIds()),
                 Set.copyOf(agent.getAllowedCodeIntelRepoIds()),
                 Set.copyOf(agent.getAllowedKnowledgeWriteCollectionIds()),
-                Set.copyOf(agent.getCollaboratorAgentIds()));
+                Set.copyOf(agent.getCollaboratorAgentIds()),
+                runtimeLimits);
     }
 }

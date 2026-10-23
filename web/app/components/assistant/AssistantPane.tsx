@@ -19,7 +19,6 @@ import ThreadList from "./ThreadList";
 import WorkRail from "./WorkRail";
 import { useLearned } from "./useLearned";
 import { transcriptToTurns } from "./threadIndex";
-import { approvalOutcomeLines } from "./needs";
 import { useAssistantAgent } from "./useAssistantAgent";
 import { useAssistantDispatch, useDispatchCapabilities } from "./useAssistantDispatch";
 import { useAssistantThreads } from "./useAssistantThreads";
@@ -59,7 +58,7 @@ import { useWorkspaceFolder } from "./useWorkspaceFolder";
 import { useAssistantFiles } from "./useAssistantFiles";
 import CameraCapture from "./CameraCapture";
 import CallOverlay from "./CallOverlay";
-import type { ToolApprovalOutcome } from "../agents/toolApprovalMatching";
+import { useApprovalContinuation } from "../agents/useApprovalContinuation";
 import { useActiveAgent } from "./useActiveAgent";
 import { useQuickTask } from "./useQuickTask";
 import ComposerModeBar from "./ComposerModeBar";
@@ -109,8 +108,6 @@ export default function AssistantPane() {
   const [dragging, setDragging] = useState(false);
   const callSession = useRef<string | null>(null);
   usePlatformBusyFlag("assistant-turn", turn.sending);
-  const sendingRef = useRef(false);
-  sendingRef.current = turn.sending;
   const [input, setInput] = useState("");
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -176,18 +173,24 @@ export default function AssistantPane() {
     folder: workspace.latest,
   });
 
-  // A long task in an attached folder stops at every command for the person's approval; once they
-  // decide, the Assistant is told to carry on, so "build this project" keeps going without a
-  // "continue" message after each command. Ordinary chat (no folder) is left as it was.
-  const onApprovalDecided = useCallback(
-    (outcome: ToolApprovalOutcome) => {
-      if (!workspace.latest.current || sendingRef.current) return;
-      void dispatcher.send(outcome.kind === "rejected" ? t("continueAfterReject") : t("continueAfterApproval"), {
-        contextLines: approvalOutcomeLines(outcome),
+  // A task stops at every gated tool call (a command in an attached folder, an email, ...) for the person's
+  // approval. Once they decide, core carries the task on by itself, with or without a folder: it starts a turn
+  // for this thread that restates the request and delivers the tool's result. The pane sends nothing; it follows
+  // that turn through the stored thread, keeps the box off meanwhile, and appends the reply.
+  const approvalContinuation = useApprovalContinuation({
+    agentId: active?.id ?? null,
+    sessionId: turn.sessionId,
+    onReply: (reply) => {
+      turn.appendTurns({
+        id: nextTurnId("a"),
+        role: "assistant",
+        content: reply.content,
+        at: Date.now(),
+        ...(reply.failed ? { failed: true } : {}),
       });
+      setWorkKey((n) => n + 1);
     },
-    [workspace.latest, dispatcher, t]
-  );
+  });
 
   const openThread = useCallback(
     async (id: string, force = false) => {
@@ -579,7 +582,7 @@ export default function AssistantPane() {
           onResumeHeld={(id, force) => void dispatcher.resumeHeld(id, force)}
           onBackground={(index) => void dispatcher.continueInBackground(index)}
           onSuggestion={setInput}
-          onApprovalDecided={onApprovalDecided}
+          approvalContinuation={approvalContinuation}
           showThinking={prefs.showThinking}
           speakReplies={prefs.speakReplies}
         />
@@ -599,7 +602,7 @@ export default function AssistantPane() {
           onStop={turn.cancel}
           onBackground={caps.jobs && ready ? () => void dispatcher.continueInBackground() : null}
           sending={turn.sending}
-          disabled={!ready}
+          disabled={!ready || approvalContinuation.continuing}
           attachments={{
             modalities: composerAttachments.modalities,
             searchable: files.searchable,

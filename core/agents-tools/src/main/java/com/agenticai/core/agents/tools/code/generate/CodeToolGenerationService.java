@@ -68,7 +68,7 @@ public class CodeToolGenerationService {
             FreeTierChatClientService freeTierChatClientService,
             ObjectProvider<ToolSandboxClient> sandboxClient,
             @Value("${app.agents.default-model}") String defaultModel,
-            // Own config key, not app.agents.default-max-tokens (1024, tuned for
+            // Own config key, not app.agents.default-max-tokens (4096, sized for
             // a short conversational reply) - a real Java/Python program routinely
             // needs more headroom than a paragraph of prose without running into
             // the truncated-output failure WorkflowGraphGeneratorService's own

@@ -4,6 +4,8 @@ import com.agenticai.core.imagegen.GeneratedImageService;
 import com.agenticai.core.imagegen.ImageGenNotConfiguredException;
 import com.agenticai.core.imagegen.ImageGenerationOrchestratorService;
 import com.agenticai.core.imagegen.ImageGenerationQuotaExceededException;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.providers.ProviderNotActiveException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
@@ -30,6 +32,31 @@ public class GenerateImageToolCallback implements ToolCallback {
 
     private final ImageGenerationOrchestratorService orchestrator;
     private final GeneratedImageService imageService;
+    private final PromptSlot prompts = new PromptSlot();
+    private volatile UUID agentId;
+
+    /**
+     * Registry keys of the text this tool returns to the model. {@link #NOT_CONFIGURED_KEY} is this tool's own
+     * answer when no image provider is active; the chat module's stand-in for a tool that was never offered has a
+     * separate key ({@code toolresult.unavailable.generate_image}).
+     */
+    public static final String NOT_CONFIGURED_KEY = "toolresult.image_generation.not_configured";
+
+    public static final String FAILED_KEY = "toolresult.image_generation.failed";
+    public static final String QUOTA_SUFFIX_KEY = "toolresult.image_generation.quota_suffix";
+    public static final String SUCCESS_INSTRUCTIONS_KEY = "toolresult.image_generation.success_instructions";
+
+    /** Reads the text this tool returns from the prompt registry (agent and tenant of the call); null keeps the shipped text. */
+    public GenerateImageToolCallback withPrompts(PromptResolver resolver) {
+        prompts.use(resolver);
+        return this;
+    }
+
+    /** The agent this tool instance serves, so an agent-scope override of its text applies; null = tenant-wide only. */
+    public GenerateImageToolCallback forAgent(UUID agent) {
+        this.agentId = agent;
+        return this;
+    }
 
     public GenerateImageToolCallback(
             ImageGenerationOrchestratorService orchestrator, GeneratedImageService imageService) {
@@ -90,10 +117,10 @@ public class GenerateImageToolCallback implements ToolCallback {
                             "model",
                             result.model(),
                             "instructions",
-                            "The image was generated successfully. To show it to the user you MUST include this "
-                                    + "exact URL on its own line in your reply: /api/imagegen/images/"
-                                    + imageId
-                                    + " — the chat renders it inline as the image. Do NOT claim you cannot generate images."));
+                            prompts.text(
+                                    SUCCESS_INSTRUCTIONS_KEY,
+                                    agentId,
+                                    Map.of("image_url", "/api/imagegen/images/" + imageId))));
         } catch (Exception e) {
             log.warn("generate_image tool call failed", e);
             return errorJson(consumerReason(e));
@@ -116,20 +143,16 @@ public class GenerateImageToolCallback implements ToolCallback {
      * <p>Written at the model, not the user: the return value is a tool result, so the person only
      * ever sees the model's own rendering of it in whatever language they are speaking.
      */
-    private static String consumerReason(Exception e) {
+    private String consumerReason(Exception e) {
         if (e instanceof ImageGenerationQuotaExceededException quota) {
             // Already written for a person by ImageGenerationQuotaService - pass it through.
-            return quota.getMessage() + " Tell the user this and do not retry the tool.";
+            return quota.getMessage() + prompts.text(QUOTA_SUFFIX_KEY, agentId);
         }
         if (e instanceof ProviderNotActiveException
                 || e instanceof ImageGenNotConfiguredException) {
-            return "Image generation is not switched on for this workspace. It needs an OpenAI or Google Vertex "
-                    + "AI credential to be added and activated on the Providers page of the console (image generation "
-                    + "reuses whichever of those keys is already active for chat). Tell the user exactly that, and do "
-                    + "not retry the tool.";
+            return prompts.text(NOT_CONFIGURED_KEY, agentId);
         }
-        return "Image generation could not be completed just now. Tell the user the image could not be "
-                + "generated and that they can try again in a moment; answer the rest of their message normally.";
+        return prompts.text(FAILED_KEY, agentId);
     }
 
     // Same bug class fixed in KnowledgeSearchToolCallback - hand-built

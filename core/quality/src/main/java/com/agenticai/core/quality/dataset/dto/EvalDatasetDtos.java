@@ -25,17 +25,43 @@ public final class EvalDatasetDtos {
     // ------------------------------------------------------------------
 
     /**
-     * Create/update payload for a dataset. {@code passThreshold} and
-     * {@code toolExecutionEnabled} are nullable so a create can omit them
-     * (defaults 0.7 / false, applied in the service where the validation
-     * rules live).
+     * Create/update payload for a dataset. {@code passThreshold}, {@code toolExecutionEnabled} and {@code mode}
+     * are nullable so a create can omit them (threshold 0.7, no pinned mode: the dataset follows the workspace's
+     * default, the full pipeline as shipped; applied in the service where the validation rules live).
+     *
+     * <p>{@code mode} is the dataset's own replay mode: {@code FULL} pins the production pipeline in the eval
+     * sandbox, {@code QUICK} pins a text-only replay, {@code DEFAULT} (an update only) removes the pin so the
+     * dataset follows the workspace default again; null leaves it unchanged. {@code toolExecutionEnabled} is the
+     * older boolean spelling of the same choice (true = FULL, false = QUICK) and is used only when {@code mode}
+     * is null. A run may still name its own mode.
+     *
+     * <p>{@code autoApproveTools} (null = no / unchanged) lets the eval sandbox approve tool calls that would
+     * wait for a person; it needs a dataset that does not pin quick mode and a tenant the operator declared
+     * non-production.
      */
     public record UpsertDatasetRequest(
         String name,
         String description,
         Double passThreshold,
-        Boolean toolExecutionEnabled
+        Boolean toolExecutionEnabled,
+        Boolean autoApproveTools,
+        String mode
     ) {
+
+        /** The request as it was before a dataset could pin a mode by name. */
+        public UpsertDatasetRequest(
+            String name, String description, Double passThreshold, Boolean toolExecutionEnabled,
+            Boolean autoApproveTools
+        ) {
+            this(name, description, passThreshold, toolExecutionEnabled, autoApproveTools, null);
+        }
+
+        /** The request as it was before the sandbox auto-approval existed. */
+        public UpsertDatasetRequest(
+            String name, String description, Double passThreshold, Boolean toolExecutionEnabled
+        ) {
+            this(name, description, passThreshold, toolExecutionEnabled, null, null);
+        }
     }
 
     /**
@@ -85,13 +111,23 @@ public final class EvalDatasetDtos {
      * (strict majority pass per case); {@code budgetUsd} (default $5) cancels
      * the run once observed replay spend exceeds it. The CI hook's
      * {@code Idempotency-Key} travels as a header, not a body field.
+     *
+     * <p>{@code mode} is {@code FULL} (the production pipeline in the eval sandbox: the default) or {@code QUICK}
+     * (the agent's tools are withheld, text only); null takes the dataset's pinned mode, else the workspace's
+     * default ({@code quality.eval.defaultMode}, then {@code app.quality.eval.default-mode}).
      */
     public record TriggerRunRequest(
         String judgeModel,
         Boolean strictJudge,
         Integer repeats,
-        java.math.BigDecimal budgetUsd
+        java.math.BigDecimal budgetUsd,
+        String mode
     ) {
+
+        /** The request as it was before a run could name its mode. */
+        public TriggerRunRequest(String judgeModel, Boolean strictJudge, Integer repeats, java.math.BigDecimal budgetUsd) {
+            this(judgeModel, strictJudge, repeats, budgetUsd, null);
+        }
     }
 
     // ------------------------------------------------------------------
@@ -104,7 +140,13 @@ public final class EvalDatasetDtos {
         String name,
         String description,
         double passThreshold,
-        boolean toolExecutionEnabled,
+        /** The dataset's pinned mode as a boolean (true FULL, false QUICK); null = it pins none. Prefer {@code mode}. */
+        Boolean toolExecutionEnabled,
+        boolean autoApproveTools,
+        /** The mode the dataset pins: FULL or QUICK; null = none, runs take the workspace default. */
+        String mode,
+        /** The mode a run of this dataset takes when it names none right now: the pin, else the workspace default. */
+        String effectiveMode,
         long caseCount,
         String contentHash,
         String createdBy,
@@ -154,6 +196,13 @@ public final class EvalDatasetDtos {
         String datasetHash,
         String requestedJudgeModel,
         boolean strictJudge,
+        /**
+         * How the run replayed its cases: FULL (the production pipeline in the eval sandbox) or QUICK (the agent's
+         * tools withheld, text only). Frozen when the run was triggered.
+         */
+        String mode,
+        /** The run replayed under the eval sandbox's auto-approval of tool calls (a person decided none of them). */
+        boolean autoApproved,
         int repeats,
         java.math.BigDecimal budgetUsd,
         java.math.BigDecimal costUsd,
@@ -183,8 +232,18 @@ public final class EvalDatasetDtos {
 
     public record RunDetailResponse(
         RunResponse run,
-        List<CaseResultResponse> caseResults
+        List<CaseResultResponse> caseResults,
+        /**
+         * The tools the eval sandbox answered with a simulated result in at least one case of this run (they could
+         * change data or reach outside the platform, so they never ran), by name, each once; empty for a quick run
+         * and for a run where every tool was safe to run. The report of what this run could not really exercise.
+         */
+        List<String> simulatedTools
     ) {
+
+        public RunDetailResponse(RunResponse run, List<CaseResultResponse> caseResults) {
+            this(run, caseResults, List.of());
+        }
     }
 
     /** One dimension's judge outcome inside {@link CaseResultResponse#scores}. */
@@ -198,8 +257,19 @@ public final class EvalDatasetDtos {
     public record ReplayedToolCallResponse(
         String toolName,
         String input,
-        String output
+        String output,
+        /**
+         * How the turn recorded the call's end: OK, FAILED, NOT_RUN, AWAITING_APPROVAL, REPLAYED or SIMULATED (the
+         * eval sandbox withheld the tool's effect). Omitted when the turn recorded none (older results), so those
+         * responses are unchanged.
+         */
+        @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+        String status
     ) {
+
+        public ReplayedToolCallResponse(String toolName, String input, String output) {
+            this(toolName, input, output, null);
+        }
     }
 
     /**

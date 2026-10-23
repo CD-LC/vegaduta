@@ -31,6 +31,14 @@ How this was verified, and its limits, are in [What was not verified](#what-was-
 | Content parts | Partial - text only |
 | Errors and versioning | Met for JSON-RPC; REST has one documented deviation |
 
+**The generated table agrees on these two.** [docs/api/conformance.md](../api/conformance.md) is produced by
+`scripts/ci/conformance-report.py`, which checks that the source contains evidence for each row. Its `ListTasks` and
+`SubscribeToTask` rows used to read `partial` and `implemented` because a plain search for the operation name also
+found the dispatcher arm that refuses it; both operations are refused with `UnsupportedOperationError` on JSON-RPC and
+REST (`A2aJsonRpcController`, `A2aRestController`), and the checks now require an arm that answers instead of
+throwing, so both read `missing`. This page stays the place for the reasoning. The ROADMAP therefore lists A2A as in
+progress, not done. No external A2A client and no TCK has been run against this server.
+
 ## Requirement table
 
 Status key: **Met** = implemented and covered by a test; **Partial** = implemented with a

@@ -6,6 +6,8 @@ import static com.agenticai.core.workflow.WorkflowNodeSupport.truncate;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
@@ -21,6 +23,19 @@ import org.springframework.stereotype.Component;
 /** "supervisor": asks an agent to pick one of the configured routes (branch = route handle). */
 @Component
 class SupervisorNodeHandler implements NodeHandler {
+
+    /** Registry keys of the routing request (default text: {@code prompts/en/workflow.supervisor.*.md}). */
+    static final String ROUTE_KEY = "workflow.supervisor.route";
+
+    static final String INSTRUCTIONS_KEY = "workflow.supervisor.instructions";
+
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so a tenant or agent override of the routing request applies; absent = shipped text. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     private final AgentChatService agentChatService;
     private final NodeConfigResolver configResolver;
@@ -92,17 +107,18 @@ class SupervisorNodeHandler implements NodeHandler {
                     .append(route.get("label"))
                     .append("\n");
         }
+        String instructionsBlock =
+                instructions != null
+                        ? prompts.text(INSTRUCTIONS_KEY, agentId, Map.of("instructions", instructions))
+                        : "";
         String routingPrompt =
-                "You are a routing supervisor. Read the input below and choose exactly ONE route"
-                        + " from the list that best handles it. Reply with ONLY the route's handle"
-                        + " text, nothing else - no punctuation, no explanation.\n\n"
-                        + "Routes:\n"
-                        + routesBlock
-                        + (instructions != null
-                                ? "\nAdditional instructions: " + instructions + "\n"
-                                : "")
-                        + "\nInput:\n"
-                        + input;
+                prompts.text(
+                        ROUTE_KEY,
+                        agentId,
+                        Map.of(
+                                "routes", routesBlock.toString(),
+                                "instructions", instructionsBlock,
+                                "input", input == null ? "null" : input));
 
         List<String> logLines = new ArrayList<>();
         logLines.add(

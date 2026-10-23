@@ -106,4 +106,5 @@ const DISALLOW = [
   "/workflows",
   "/signup/complete",
   "/help/docs",
+  "/help/controls",
 ];

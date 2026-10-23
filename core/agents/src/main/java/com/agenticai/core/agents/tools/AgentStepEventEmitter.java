@@ -659,7 +659,7 @@ public final class AgentStepEventEmitter {
      * failure means one event is missing from a trace. Neither is worth failing a turn over - see
      * the class javadoc's fail-open note.
      */
-    private synchronized void emit(Map<String, Object> event) {
+    synchronized void emit(Map<String, Object> event) {
         String json;
         try {
             json = AgentStepEventPayloads.toJson(event);

@@ -20,6 +20,13 @@ final class ChatFailedReply {
 
     private final SessionMemoryService sessionMemoryService;
 
+    /**
+     * The prompt registry's view for an agent, for the sentence stored when a failure has no message of
+     * its own; the shipped text until {@link ChatServiceParts} wires the settings bean.
+     */
+    volatile java.util.function.Function<UUID, ResolvedDirectives> prompts =
+            ResolvedDirectives.DEFAULTS_FOR_AGENT;
+
     ChatFailedReply(SessionMemoryService sessionMemoryService) {
         this.sessionMemoryService = sessionMemoryService;
     }
@@ -38,8 +45,12 @@ final class ChatFailedReply {
      * then. A cancelled turn completes rather than errors, so it writes nothing either.
      * Persistence must never mask the original error.
      */
-    Flux<String> withFailedReplyPersistence(Flux<String> stream, UUID agentId, String sessionId) {
+    Flux<String> withFailedReplyPersistence(
+            Flux<String> stream, UUID agentId, String sessionId, Supplier<ToolLedger> toolRecord) {
         AtomicBoolean emittedText = new AtomicBoolean(false);
+        // Taken here, on the request thread: the error callback below has no tenant of its own, and
+        // the object keeps this one for its lookup.
+        ResolvedDirectives pd = prompts.apply(agentId);
         return stream.doOnNext(
                         chunk -> {
                             if (chunk != null && !chunk.isBlank()) {
@@ -51,7 +62,7 @@ final class ChatFailedReply {
                             if (emittedText.get()) {
                                 return;
                             }
-                            persistFailedReply(agentId, sessionId, error);
+                            persistFailedReply(agentId, sessionId, error, toolRecord.get(), pd);
                         });
     }
 
@@ -65,17 +76,25 @@ final class ChatFailedReply {
         try {
             return build.get();
         } catch (RuntimeException e) {
-            persistFailedReply(agentId, sessionId, e);
+            persistFailedReply(agentId, sessionId, e, null, prompts.apply(agentId));
             throw e;
         }
     }
 
     /** Appends the failed assistant entry; never throws. */
-    private void persistFailedReply(UUID agentId, String sessionId, Throwable error) {
+    private void persistFailedReply(
+            UUID agentId,
+            String sessionId,
+            Throwable error,
+            ToolLedger toolRecord,
+            ResolvedDirectives pd) {
         try {
+            String generic = pd.textOrShipped(AgentChatStreamResponder.GENERIC_FAILURE_KEY);
             sessionMemoryService.appendTurn(
                     sessionId,
-                    ChatTurn.failedAssistant(AgentChatStreamResponder.midStreamFailureMessage(error)));
+                    ChatTurn.failedAssistant(
+                                    AgentChatStreamResponder.midStreamFailureMessage(error, generic), generic)
+                            .withTools(toolRecord));
         } catch (RuntimeException persistFailure) {
             log.warn(
                     "Could not persist the failed reply for agent {} session {}",

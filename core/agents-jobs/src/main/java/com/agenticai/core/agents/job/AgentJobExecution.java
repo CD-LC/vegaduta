@@ -108,6 +108,16 @@ public class AgentJobExecution {
     }
 
     /**
+     * Builds the first turn of a job resumed after an approval park from the decisions it was
+     * parked on. Optional setter, like the journal: null (unit tests, slim contexts) => a resumed
+     * job re-sends its goal, as before.
+     */
+    @Autowired(required = false)
+    public void setApprovalResume(AgentJobApprovalResumption approvalResume) {
+        turns.setApprovalResume(approvalResume);
+    }
+
+    /**
      * Cross-replica ownership (app.agent-jobs.ownership.*). Optional setter, like the journal: null
      * or disabled => owner id, terminal writes and interrupt handling are exactly the pre-ownership
      * behaviour.
@@ -266,6 +276,9 @@ public class AgentJobExecution {
         // 0).
         boolean orphanRequeue =
                 job.getStatus() == AgentJobStatus.QUEUED && job.getAttemptCount() >= 1;
+        // A park resume: the job waited on a human and this run follows the decision. Read before the
+        // claim for the same reason as orphanRequeue (the claim moves the row to RUNNING).
+        boolean resumedFromPark = job.getStatus() == AgentJobStatus.AWAITING_APPROVAL;
         boolean freshRun =
                 job.getStatus() == AgentJobStatus.QUEUED
                         && job.getAttemptCount() == 0
@@ -307,7 +320,7 @@ public class AgentJobExecution {
             // "caused by this turn" boundary back to when the resumed turn first STARTED, per the
             // journal.
             Instant parkBoundary = turns.resumedTurnStart(job, orphanRequeue, startedAt);
-            String rawResult = turns.runTurns(job, deadlineAt, orphanRequeue);
+            String rawResult = turns.runTurns(job, deadlineAt, orphanRequeue, resumedFromPark);
 
             if (terminal.observedCancel(jobId)) {
                 if (terminal.countable(terminal.finish(jobId, j -> j.markCancelled(Instant.now())))) {

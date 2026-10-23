@@ -597,9 +597,11 @@ host.
 autonomous agent - `local_shell` is on the tool guard's always-confirm list. The `personal` profile sets
 `app.assistant.local-shell.approval-required=false` (`APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED`), which lifts
 that pin: commands run inside the sandbox without asking, still logged to the tool-call audit. Two guardrails are
-untouched: a `SUPERVISED`-tier agent still asks before every tool call, and commands that leave the workspace (or a
-turn carrying content an outsider authored, under taint enforcement) can still be gated. Set it `=true` to restore
-per-command approval. Every key is in [Configuration](configuration.md#the-assistants-terminal).
+untouched: a `SUPERVISED`-tier agent still asks before every tool call that is not an explicitly classified read-only
+one (this profile sets `app.guardrails.supervised.gate-read-only=false`, so a search or a lookup no longer stops a
+supervised agent; a shell command, a write, an unclassified tool and an agent that holds the lethal trifecta are still
+asked), and commands that leave the workspace (or a turn carrying content an outsider authored, under taint
+enforcement) can still be gated. Set it `=true` to restore per-command approval. Every key is in [Configuration](configuration.md#the-assistants-terminal).
 
 **What you are accepting** when the approval pin is lifted. A command still runs only inside the sandbox or the
 workspace-runner container, and that container holds no platform secrets and mounts nothing but the projects

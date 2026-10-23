@@ -5,6 +5,7 @@ import com.agenticai.core.agents.core.AgentController;
 import com.agenticai.core.agents.dto.ChatInlineAttachment;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.AgentChatStreamResponder;
+import com.agenticai.core.agents.turn.ChatLimitsProperties;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.providers.ProviderModelCatalogService;
@@ -59,7 +60,8 @@ import reactor.core.publisher.Flux;
 public class AgentShareController {
 
     private static final Logger log = LoggerFactory.getLogger(AgentShareController.class);
-    private static final Duration TURN_TIMEOUT = Duration.ofSeconds(45);
+    /** {@code app.chat.limits.share-turn-timeout}; a hand-built controller keeps the shipped default. */
+    private volatile Duration turnTimeout = new ChatLimitsProperties().getShareTurnTimeout();
     private static final String REQUESTED_BY_PREFIX = "system:agent-share:";
 
     private final AgentShareService shareService;
@@ -67,6 +69,12 @@ public class AgentShareController {
     private final TenantLimits tenantLimits;
     private final ProviderModelCatalogService providerModelCatalogService;
     private final ShareVisitorSessions visitorSessions;
+
+    /** Sets {@code app.chat.limits.share-turn-timeout}; until it is called the shipped default applies. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void useLimits(ChatLimitsProperties limits) {
+        this.turnTimeout = (limits == null ? new ChatLimitsProperties() : limits).getShareTurnTimeout();
+    }
 
     public AgentShareController(
             AgentShareService shareService,
@@ -395,7 +403,7 @@ public class AgentShareController {
                                 agentChatService
                                         .chat(turnContext, chatTurn)
                                         .collect(Collectors.joining())
-                                        .block(TURN_TIMEOUT);
+                                        .block(turnTimeout);
                         if (reply == null || reply.isBlank()) {
                             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                                     .body(Map.of("error", "no_reply"));

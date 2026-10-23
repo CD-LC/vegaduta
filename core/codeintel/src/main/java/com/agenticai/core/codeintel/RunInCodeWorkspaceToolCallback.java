@@ -120,8 +120,11 @@ public class RunInCodeWorkspaceToolCallback implements ToolCallback {
                 + (cmd.length() > SUMMARY_COMMAND_CHARS ? cmd.substring(0, SUMMARY_COMMAND_CHARS) + "..." : cmd);
             String requestedBy = TenantContext.current().map(TenantContext::getSubject).orElse(null);
 
-            ApprovalEvaluation evaluation = gateService.evaluate(
-                RunCodeWorkspaceApprovalExecutor.ACTION_TYPE, summary, payloadJson, requestedBy);
+            // evaluateInTurn: the request carries the conversation it came from, so the human's decision
+            // puts the outcome back into it and the agent carries on (see ApprovalOutcomePort).
+            ApprovalEvaluation evaluation = gateService.evaluateInTurn(
+                RunCodeWorkspaceApprovalExecutor.ACTION_TYPE, "run_in_code_workspace", summary, payloadJson,
+                requestedBy);
 
             return responseJson(evaluation);
         } catch (Exception e) {

@@ -40,6 +40,18 @@
       <groupId>com.agenticai</groupId>
       <artifactId>json</artifactId>
     </dependency>
+    <!-- The prompt registry: the model-facing text of this module is a registry key with a shipped default
+         under src/main/resources/prompts/ and tenant/agent overrides (docs/prompts.md). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>prompts</artifactId>
+    </dependency>
+    <!-- The settings catalog: this module's entries (SettingsContributor) and SettingsResolver for its use sites
+         (docs/settings.md). settings depends only on security and audit, so this adds no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>settings</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.agenticai</groupId>
       <artifactId>reliability</artifactId>

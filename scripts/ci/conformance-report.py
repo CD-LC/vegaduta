@@ -60,6 +60,23 @@ MCPSERVER = "core/mcpserver/src/main/java/com/agenticai/core/mcpserver"
 MCP = "core/mcp/src/main/java/com/agenticai/core/mcp"
 APPCONFIG = "core/app-config/src/main/resources"
 
+
+
+def served(op: str) -> str:
+    """Regex: the dispatcher has a `case ... "<op>" ... ->` arm whose body is not a `throw`.
+
+    A bare grep for the operation name also matches the arm that refuses it
+    (`case "ListTasks", "SubscribeToTask" -> throw A2aError.unsupportedOperation(...)`), which
+    used to count an operation the server answers with UnsupportedOperationError as implemented.
+    """
+    return rf'case\s+[^>]*"{op}"[^>]*->\s*(?!\s|throw\b)'
+
+
+def not_refused(op: str) -> str:
+    """Regex that matches only a file that never refuses `<op>` via A2aError.unsupportedOperation."""
+    return rf'\A(?![\s\S]*unsupportedOperation\("{op}"\))'
+
+
 # fmt: off
 CAPABILITIES = [
     # ------------------------------------------------------------- MCP ----
@@ -304,7 +321,8 @@ CAPABILITIES = [
         "capability": "`ListTasks` (JSON-RPC and REST `GET /tasks`) returns tasks instead of an unsupported error",
         "claimed": "not claimed",
         "checks": [
-            (f"{A2A}/A2aJsonRpcController.java", [r'"ListTasks"']),
+            (f"{A2A}/A2aJsonRpcController.java", [served("ListTasks"), not_refused("ListTasks")]),
+            (f"{A2A}/A2aRestController.java", [not_refused("ListTasks")]),
             (f"{A2A}/A2aTaskStore.java", [r"listFor|list\("]),
         ],
         "see": [f"{A2A}/A2aRestController.java"],
@@ -314,7 +332,8 @@ CAPABILITIES = [
         "capability": "`SubscribeToTask` (re-attach to a running task's stream)",
         "claimed": "not claimed",
         "checks": [
-            (f"{A2A}/A2aJsonRpcController.java", [r'"SubscribeToTask"']),
+            (f"{A2A}/A2aJsonRpcController.java", [served("SubscribeToTask"), not_refused("SubscribeToTask")]),
+            (f"{A2A}/A2aRestController.java", [not_refused("SubscribeToTask")]),
         ],
         "see": [f"{A2A}/A2aRestController.java"],
     },

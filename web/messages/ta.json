@@ -159,7 +159,9 @@
     "railJobs": "பணிகள்",
     "railSecrets": "ரகசியங்கள்",
     "railBrand": "பிராண்டிங்",
-    "railLearn": "கற்க"
+    "railLearn": "கற்க",
+    "railRuntimeSettings": "இயக்கநேர அமைப்புகள்",
+    "railControls": "எதை எங்கே கட்டுப்படுத்துவது...?"
   },
   "languageSwitcher": {
     "label": "மொழி",
@@ -851,7 +853,142 @@
     "edgeTier0Badge": "சாதனத்தில் · Chrome உள்ளமைந்தது",
     "edgeTier0BadgeTitle": "Chrome-இன் உள்ளமைந்த மாடல் (Gemini Nano) இதற்குப் பதிலளித்தது - வேகமானது மற்றும் முழுமையான தனிப்பட்டது, ஆனால் அரட்டைக்கு மட்டும்: இது கருவிகளைப் பயன்படுத்த முடியாது மற்றும் சிக்கலான விஷயங்களில் ஒரு உண்மையான வழங்குநரை விட துல்லியம் குறைவாக இருக்கலாம். ஒவ்வொரு திட்டத்திலும் இலவசம்.",
     "edgeTier1Badge": "சாதனத்தில் · உள்ளூர் மாடல்",
-    "edgeTier1BadgeTitle": "பதிவிறக்கம் செய்யப்பட்ட சாதனத்தில் உள்ள மாடல் இதற்குப் பதிலளித்தது - தனிப்பட்டது, மற்றும் இது கருவிகளைப் பயன்படுத்த முடியும் (ஹோஸ்ட் செய்யப்பட்ட மாடல் பயன்படுத்தும் அதே பாதுகாக்கப்பட்ட கருவிகள்). இருப்பினும் ஹோஸ்ட் செய்யப்பட்ட மாடல்களை விட இது மிகவும் சிறியது, எனவே சிக்கலான கோரிக்கைகளில் துல்லியம் குறைவாக இருக்கலாம். ஒவ்வொரு திட்டத்திலும் இலவசம்."
+    "edgeTier1BadgeTitle": "பதிவிறக்கம் செய்யப்பட்ட சாதனத்தில் உள்ள மாடல் இதற்குப் பதிலளித்தது - தனிப்பட்டது, மற்றும் இது கருவிகளைப் பயன்படுத்த முடியும் (ஹோஸ்ட் செய்யப்பட்ட மாடல் பயன்படுத்தும் அதே பாதுகாக்கப்பட்ட கருவிகள்). இருப்பினும் ஹோஸ்ட் செய்யப்பட்ட மாடல்களை விட இது மிகவும் சிறியது, எனவே சிக்கலான கோரிக்கைகளில் துல்லியம் குறைவாக இருக்கலாம். ஒவ்வொரு திட்டத்திலும் இலவசம்.",
+    "viewTurn": "சுற்றைப் பார்",
+    "viewTurnTitle": "இந்த உரையாடலின் சுற்றுகளின் படிப்படியான காலவரிசையைத் திற",
+    "headerRunning": "ஒரு சுற்று இயங்குகிறது",
+    "headerReady": "தயார்",
+    "clearContext": "சூழலை அழி",
+    "clearContextTitle": "புதிய உரையாடலைத் தொடங்கு. இது இந்த அரட்டையின் சாதனத்திலும் சேவையகத்திலும் உள்ள அமர்வு நினைவகத்தை அழிக்கும்.",
+    "stopRun": "இந்தப் பதிலை நிறுத்து",
+    "fallbackSendToPlatform": "தளத்திற்கு அனுப்பு",
+    "chipsLabel": "முகவர் இப்போது என்ன செய்கிறது",
+    "chipPreparing": "தயாராகிறது",
+    "chipModelCall": "மாடலுக்காகக் காத்திருக்கிறது",
+    "chipThinking": "சிந்திக்கிறது",
+    "chipWriting": "பதிலை எழுதுகிறது",
+    "chipTool": "கருவி இயங்குகிறது: {tool}",
+    "chipToolUnnamed": "ஒரு கருவி இயங்குகிறது",
+    "chipWaitingApproval": "உங்கள் ஒப்புதலுக்காகக் காத்திருக்கிறது ({count})",
+    "chipContinuing": "பதிலைத் தொடர்கிறது",
+    "chipContinuingPass": "பதிலைத் தொடர்கிறது ({max}-இல் சுற்று {pass})",
+    "chipContinuingApproval": "உங்கள் முடிவுக்குப் பிறகு தொடர்கிறது",
+    "chipRetrying": "மீண்டும் முயல்கிறது",
+    "chipRetryingReason": "மீண்டும் முயல்கிறது: {reason}",
+    "chipRetryingAttempt": "மீண்டும் முயல்கிறது (முயற்சி {attempt}/{max})",
+    "chipRetryingAttemptReason": "மீண்டும் முயல்கிறது (முயற்சி {attempt}/{max}): {reason}",
+    "chipFailover": "காப்பு மாடலுக்கு மாறியது",
+    "chipFailoverReason": "காப்பு மாடலுக்கு மாறியது: {reason}",
+    "chipFailoverTo": "{model}-க்கு மாறியது",
+    "chipFailoverToReason": "{model}-க்கு மாறியது: {reason}",
+    "outcomeTruncated": "இந்தப் பதில் முடிவதற்குள் துண்டிக்கப்பட்டது.",
+    "outcomeContinue": "தொடர்",
+    "outcomeLongerReplies": "நீண்ட பதில்களை அனுமதி",
+    "continueMessage": "நீங்கள் நிறுத்திய இடத்திலிருந்தே, ஏற்கெனவே எழுதியதை மீண்டும் எழுதாமல் தொடருங்கள்.",
+    "outcomeRefused": "பாதுகாப்புக் காரணங்களுக்காக மாடல் வழங்குநர் இந்தப் பதிலை நிறுத்தினார், எனவே காட்ட பதில் இல்லை. கோரிக்கையை மாற்றி மீண்டும் முயலுங்கள்.",
+    "outcomeRefusedReason": "பாதுகாப்புக் காரணங்களுக்காக ({reason}) மாடல் வழங்குநர் இந்தப் பதிலை நிறுத்தினார், எனவே காட்ட பதில் இல்லை. கோரிக்கையை மாற்றி மீண்டும் முயலுங்கள்.",
+    "outcomeMalformedToolCall": "மாடல் ஒரு கருவியைப் பயன்படுத்த முயன்றது, ஆனால் அதன் கோரிக்கை செல்லாதது, எனவே எதுவும் இயங்கவில்லை. மீண்டும் முயலுங்கள்.",
+    "outcomeEmpty": "மாடல் காலியான பதிலைத் தந்தது. மீண்டும் முயலுங்கள்.",
+    "stopRaiseSteps": "கருவி அழைப்பு வரம்பை உயர்த்து",
+    "stopRaiseBudget": "செலவு வரம்பை மாற்று",
+    "stopAskEditor": "இந்த முகவரைத் திருத்தக்கூடிய ஒருவரிடம் வரம்பை உயர்த்தச் சொல்லுங்கள்.",
+    "rsOpen": "இயக்க அமைப்புகள்",
+    "rsTitle": "இயக்க அமைப்புகள்",
+    "rsClose": "இயக்க அமைப்புகளை மூடு",
+    "rsBack": "இயக்க அமைப்புகளுக்குத் திரும்பு",
+    "rsIntro": "{name}-க்கான அடுத்த செய்தி எவ்வாறு இயங்கும். இவற்றை முகவரின் நடத்தை தாவலில் மாற்றுங்கள்.",
+    "rsLoading": "ஏற்றுகிறது",
+    "rsRetry": "மீண்டும் முயல்",
+    "rsOpenBehavior": "நடத்தையில் திருத்து",
+    "rsModelHeading": "மாடலும் மாதிரியெடுப்பும்",
+    "rsModel": "மாடல்",
+    "rsModelNotSet": "அமைக்கப்படவில்லை",
+    "rsModelDefault": "மாடலின் இயல்புநிலை",
+    "rsDepth": "பகுத்தறிவு ஆழம்",
+    "rsSourceAgent": "இந்த முகவரில் அமைக்கப்பட்டது",
+    "rsParam_temperature": "வெப்பநிலை",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "பதிலின் அதிகபட்ச நீளம் (டோக்கன்கள்)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "அதிர்வெண் தண்டனை",
+    "rsParam_presencePenalty": "இருப்புத் தண்டனை",
+    "rsParam_seed": "விதை",
+    "rsParam_stopSequences": "நிறுத்த வரிசைகள்",
+    "rsParamDropped": "{param} இந்த முகவரில் அமைக்கப்பட்டுள்ளது, ஆனால் {provider} அதை {model}-க்கு புறக்கணிக்கிறது, எனவே அதற்கு விளைவு இல்லை.",
+    "rsToolsRunHeading": "Tools for this run",
+    "rsToolsRunOnly": "This run only",
+    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
+    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
+    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
+    "rsToolsReset": "Use the agent's tools",
+    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
+    "rsToolsEditAgent": "Change the agent's saved tools",
+    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsEmpty": "இந்த முகவருக்கு கருவிகள் எதுவும் இல்லை.",
+    "rsToolsSummary": "{total}-இல் {on} கருவிகள் இயக்கத்தில்",
+    "rsToolsFailed": "கருவிகளை ஏற்ற முடியவில்லை.",
+    "rsLimitsHeading": "ஒவ்வொரு சுற்றுக்குமான வரம்புகள்",
+    "rsLimitsChange": "வரம்புகளை மாற்று",
+    "rsLimitsView": "வரம்புகளைப் பார்",
+    "rsLimitsFailed": "வரம்புகளை ஏற்ற முடியவில்லை.",
+    "rsLimitsEmpty": "இந்த முகவருக்குக் காட்ட வரம்புகள் இல்லை.",
+    "rsNoLimit": "வரம்பு இல்லை",
+    "rsScoreAll": "ஒவ்வொரு பொருத்தமும்",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} எழுத்துகள்",
+    "rsLimitRange": "அனுமதிக்கப்பட்டது: {min} முதல் {max} வரை",
+    "rsLayer_AGENT": "இந்த முகவரில் அமைக்கப்பட்டது",
+    "rsLayer_TENANT": "பணியிட இயல்புநிலை",
+    "rsLayer_PLATFORM": "தள இயல்புநிலை",
+    "rsLayer_REQUEST": "இந்தக் கோரிக்கைக்கு அமைக்கப்பட்டது",
+    "rsLimit_maxToolSteps": "ஒரு சுற்றுக்கு கருவி அழைப்புகள்",
+    "rsLimit_turnTimeoutSeconds": "ஒரு சுற்றுக்கான நேரம்",
+    "rsLimit_toolTimeoutSeconds": "ஒரு கருவி அழைப்புக்கான நேரம்",
+    "rsLimit_toolOutputMaxChars": "கருவி முடிவின் அளவு",
+    "rsLimit_retrievalTopK": "ஒவ்வொரு தேடலுக்கும் அறிவு முடிவுகள்",
+    "rsLimit_retrievalMinScore": "அறிவுப் பொருத்தத்தின் குறைந்தபட்ச தொடர்பு",
+    "rsLimit_continuationPasses": "பதிலை முடிக்க கூடுதல் சுற்றுகள்",
+    "rsLimitHelp_maxToolSteps": "ஒரு பதில் செய்யக்கூடிய அதிகபட்ச கருவி அழைப்புகள். அதை எட்டியதும் சுற்று நின்று அதைத் தெரிவிக்கும்.",
+    "rsLimitHelp_turnTimeoutSeconds": "ஒரு சுற்று நிறுத்தப்படுவதற்கு முன் எவ்வளவு நேரம் இயங்கலாம்.",
+    "rsLimitHelp_toolTimeoutSeconds": "ஒரு கருவி அழைப்பு நிறுத்தப்படுவதற்கு முன் எவ்வளவு நேரம் இயங்கலாம்.",
+    "rsLimitHelp_toolOutputMaxChars": "ஒரு கருவி முடிவின் எவ்வளவு பகுதியை மாடல் படிக்கலாம். மீதம் வெட்டப்படும்.",
+    "rsLimitHelp_retrievalTopK": "ஒரு தேடல் அறிவுத் தளத்தின் எத்தனை துண்டுகளைத் திருப்பித் தருகிறது.",
+    "rsLimitHelp_retrievalMinScore": "இதைவிடக் குறைவாகப் பொருந்தும் துண்டுகள் விலக்கப்படும். பூஜ்ஜியம் ஒவ்வொரு பொருத்தத்தையும் வைத்திருக்கும்.",
+    "rsLimitHelp_continuationPasses": "அறிவித்தும் செய்யாத படியில் நின்றுபோன பதிலை முடிக்க கூடுதல் முயற்சிகள்.",
+    "rsPreviewButton": "ப்ராம்ப்ட் முன்னோட்டம்",
+    "rsPreviewTitle": "ப்ராம்ப்ட் முன்னோட்டம்",
+    "rsPreviewIntro": "இந்த முகவர் அனுப்பும் சிஸ்டம் ப்ராம்ப்ட்டும் கருவிப் பட்டியலும், உண்மையான சுற்று உருவாக்குவது போலவே உருவாக்கப்பட்டது. எந்த மாடலுக்கும் எதுவும் அனுப்பப்படாது.",
+    "rsPreviewBuilding": "முன்னோட்டத்தை உருவாக்குகிறது",
+    "rsPreviewFailed": "முன்னோட்டத்தை உருவாக்க முடியவில்லை.",
+    "rsPreviewTotals": "சுமார் {prompt} டோக்கன் சிஸ்டம் உரையும் {tools} டோக்கன் கருவி வரையறைகளும் (மதிப்பீடுகள்).",
+    "rsPreviewOverBudgetTitle": "டோக்கன் வரவுசெலவைத் தாண்டியது",
+    "rsPreviewOverBudget": "நிலையான சிஸ்டம் உரை உள்ளமைக்கப்பட்ட {budget} டோக்கன் வரவுசெலவைத் தாண்டியுள்ளது. எதுவும் வெட்டப்படாது; ஒரு ப்ராம்ப்ட்டைச் சுருக்குவதைப் பரிசீலியுங்கள்.",
+    "rsPreviewNoBlocks": "காட்ட ப்ராம்ப்ட் தொகுதிகள் இல்லை.",
+    "rsPreviewMessage": "செய்தி: {message}",
+    "rsPreviewTokens": "~{tokens} டோக்கன்கள்",
+    "rsPreviewShowText": "உரையைக் காட்டு",
+    "rsPreviewTools": "கருவிகள் ({count})",
+    "rsPreviewNoTools": "இந்த முகவர் எந்தக் கருவியையும் வழங்கவில்லை.",
+    "rsPreviewNotes": "இந்த முன்னோட்டம் அறிய முடியாதவை",
+    "rsPreviewOpenAdmin": "ஒவ்வொரு ப்ராம்ப்ட்டின் சொற்றொடரையும் பார்த்து மாற்றவும்",
+    "rsOriginDefault": "இயல்புநிலையாக வழங்கப்பட்டது",
+    "rsOriginOverride": "{scope} மேலெழுதல் v{version}",
+    "rsOriginAgentConfig": "முகவரின் சொந்த சிஸ்டம் ப்ராம்ப்ட்",
+    "rsOriginCode": "தளக் குறியீடு",
+    "rsRunBudget": "ஒவ்வொரு இயக்கத்திற்கும் செலவு வரம்பு",
+    "rsNoCap": "வரம்பு இல்லை",
+    "rsRunBudgetHelp": "ஒரு இயக்கம் பிற முகவர்களுக்குப் பணியை ஒப்படைக்கும்போது அல்லது ஆழ்ந்த ஆய்வை இயக்கும்போது அதிகபட்சமாகச் செலவிடக்கூடியது. இது மதிப்பீடு, பில்லிங் அல்ல.",
+    "chipToolsOff": "கருவிகள் இல்லாமல் மீண்டும் முயல்கிறது",
+    "chipFailoverBlocked": "காப்பு மாடல் பயன்படுத்தப்படவில்லை: கருவிகள் ஏற்கெனவே இயங்கிவிட்டன",
+    "rsLimitChangeOne": "மாற்று",
+    "reasonRateLimited": "rate limited",
+    "reasonTimeout": "timed out",
+    "reasonProviderUnavailable": "provider unavailable",
+    "reasonAuthFailed": "provider rejected the credentials",
+    "reasonBilling": "provider billing problem",
+    "reasonModelNotFound": "model not available",
+    "reasonProviderError": "provider error",
+    "reasonMalformedToolCall": "the tool call could not be used"
   },
   "nodeDefs": {
     "triggerLabel": "தூண்டுதல்",
@@ -1497,7 +1634,35 @@
     "ttsProviderUpdatedSuccess": "TTS வழங்குநர் புதுப்பிக்கப்பட்டது.",
     "updateTtsProviderError": "இந்த ஏஜென்ட்டின் TTS வழங்குநரைப் புதுப்பிக்க முடியவில்லை.",
     "ttsProviderFreePlanTooltip": "TTS வழங்குநர் தேர்வு ஒரு பிரீமியம் அம்சம்.",
-    "ttsProviderNotSet": "தள இயல்புநிலை"
+    "ttsProviderNotSet": "தள இயல்புநிலை",
+    "samplingTitle": "மேம்பட்ட மாதிரியெடுப்பு",
+    "samplingIntro": "மாடல் சொற்களைத் தேர்ந்தெடுக்கும் முறையை நுணுக்கமாக மாற்றுங்கள். மாடலின் இயல்புநிலையைப் பயன்படுத்த பெட்டியைக் காலியாக விடுங்கள். ஒரு புலத்தை ஆதரிக்காத வழங்குநர்கள் அதை வெறுமனே புறக்கணிப்பார்கள்.",
+    "samplingIgnored": "இந்த மாடலின் வழங்குநர் இந்த அமைப்பைப் புறக்கணிக்கிறார், எனவே அதை மாற்றினால் விளைவு இல்லை.",
+    "samplingSaving": "சேமிக்கிறது…",
+    "samplingSaved": "சேமிக்கப்பட்டது",
+    "samplingNotSaved": "சேமிக்கப்படவில்லை",
+    "samplingSaveFailed": "அந்த அமைப்பைச் சேமிக்க முடியவில்லை.",
+    "samplingErrorWhole": "{label} என்பது {min} முதல் {max} வரையிலான முழு எண்ணாக இருக்க வேண்டும், அல்லது அணைக்க காலியாக விடவும்.",
+    "samplingErrorNumber": "{label} என்பது {min} முதல் {max} வரையிலான எண்ணாக இருக்க வேண்டும், அல்லது அணைக்க காலியாக விடவும்.",
+    "samplingStopTooLong": "ஒரு நிறுத்த வரிசை அதிகபட்சம் {max} எழுத்துகள் இருக்கலாம்.",
+    "samplingStopTooMany": "அதிகபட்சம் {max} நிறுத்த வரிசைகள்.",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "அடுத்து வர வாய்ப்புள்ள K சொற்களை மட்டும் கருத்தில் கொள்ளுங்கள். குறைவு என்றால் பாதுகாப்பான, கணிக்கக்கூடிய உரை. 1 முதல் 1000 வரை.",
+    "samplingSeed": "விதை",
+    "samplingSeedHelp": "ஒரே ப்ராம்ப்ட்டுக்கு பதில்கள் மீண்டும் மீண்டும் அதேபோல் வர ஒரு எண்ணை அமையுங்கள். எல்லா வழங்குநர்களும் இதற்கு உத்தரவாதம் தருவதில்லை.",
+    "samplingFrequency": "அதிர்வெண் தண்டனை",
+    "samplingFrequencyHelp": "நேர்மறை மதிப்புகள் அதே சொற்களை மீண்டும் மீண்டும் பயன்படுத்துவதைத் தடுக்கின்றன. -2 முதல் 2 வரை.",
+    "samplingPresence": "இருப்புத் தண்டனை",
+    "samplingPresenceHelp": "நேர்மறை மதிப்புகள் ஒரே தலைப்பில் நிற்காமல் புதிய தலைப்புகளை நோக்கி மாடலைத் தள்ளுகின்றன. -2 முதல் 2 வரை.",
+    "samplingPlaceholderDefault": "இயல்புநிலை",
+    "samplingPlaceholderRandom": "சீரற்றது",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "நிறுத்த வரிசைகள்",
+    "samplingStopPlaceholder": "ஒரு சொற்றொடரைத் தட்டச்சு செய்து Enter அழுத்தவும்",
+    "samplingStopHelp": "இவற்றில் ஒன்றை மாடல் எழுதியவுடன் பதில் முடிந்துவிடும். அதிகபட்சம் {count}, ஒவ்வொன்றும் அதிகபட்சம் {max} எழுத்துகள்.",
+    "samplingStopCurrent": "தற்போதைய நிறுத்த வரிசைகள்",
+    "samplingStopRemove": "நிறுத்த வரிசை {value}-ஐ அகற்று",
+    "samplingAdd": "சேர்"
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "ஒரு நோடை உள்ளமைக்க அதைத் தேர்ந்தெடுக்கவும், அல்லது இடதுபுறத்தில் உள்ள பேலட்டிலிருந்து புதிய ஒன்றை இழுத்து வரவும்.",
@@ -13345,7 +13510,7 @@
   },
   "adminAccessPage": {
     "pageTitle": "Team access",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "நிர்வாகம்",
     "matrixTitle": "Access matrix",
     "matrixHint": "Every member's effective scopes at a glance - tick a cell to grant or revoke that scope for that person.",
     "memberColumn": "MEMBER",
@@ -13360,7 +13525,7 @@
   "adminPaymentsPage": {
     "pageTitle": "Agent payments",
     "pageSubtitle": "Signed UPI mandates, spend caps and payment history for each agent.",
-    "agentPickerLabel": "Agent",
+    "agentPickerLabel": "முகவர்",
     "noAgents": "No agents in this workspace",
     "loadFailed": "Could not load payment data for this agent.",
     "mandatesHeading": "Payment mandates",
@@ -13388,9 +13553,9 @@
     "thresholdRequired": "Set the approval threshold amount.",
     "previewFailed": "Could not build the mandate preview.",
     "reviewMandate": "Review mandate",
-    "back": "Back",
+    "back": "பின்",
     "signAndGrant": "Sign & grant",
-    "cancel": "Cancel",
+    "cancel": "ரத்துசெய்",
     "canonicalReviewLabel": "Canonical mandate document",
     "canonicalReviewHint": "This exact JSON is what gets Ed25519-signed. Verify the caps, scope and validity before granting.",
     "grantSuccess": "Mandate granted and signed.",
@@ -13416,7 +13581,7 @@
     "colStatus": "Status",
     "colVpa": "Payee VPA",
     "colDescription": "Description",
-    "colCreated": "Created",
+    "colCreated": "உருவாக்கப்பட்டது",
     "detailId": "Transaction",
     "detailMandate": "Mandate",
     "detailGatewayPayment": "Gateway payment",
@@ -13460,7 +13625,7 @@
     "restoreTooltip": "Make this version the agent's current configuration.",
     "restoreConfirmTitle": "Restore v{version}?",
     "restoreConfirmBody": "The agent's current configuration is replaced by this version's. The restore itself is saved as a new version, so it can be undone.",
-    "cancelButton": "Cancel",
+    "cancelButton": "ரத்துசெய்",
     "restoredNotice": "Restored - the agent now runs this configuration.",
     "restoreError": "Couldn't restore that version.",
     "labelUpdatedNotice": "Label updated.",
@@ -13473,18 +13638,18 @@
     "forceReasonLabel": "Override reason (required, written to the audit log)",
     "forceReasonPlaceholder": "Why is this safe to promote without a passing eval?",
     "forcePromoteButton": "Promote anyway",
-    "fieldModel": "Model",
+    "fieldModel": "மாடல்",
     "fieldFallback": "Fallback",
     "fieldGeneration": "Generation",
     "fieldModes": "Modes",
-    "fieldTools": "Tools",
+    "fieldTools": "கருவிகள்",
     "toolsUnrestricted": "All resolved tools",
     "toolsNone": "None",
     "toolsCount": "{count} allowed",
-    "fieldGuardrails": "Guardrails",
+    "fieldGuardrails": "பாதுகாப்புத் தடுப்புகள்",
     "fieldFlags": "Enabled",
     "fieldPrompt": "System prompt",
-    "flagKnowledge": "Knowledge",
+    "flagKnowledge": "அறிவு",
     "flagSarvam": "Sarvam",
     "flagSandbox": "Sandbox",
     "flagCodeWorkspace": "Code workspace",
@@ -13505,18 +13670,18 @@
       "AUTONOMOUS": "Autonomous"
     },
     "state": {
-      "READY": "Ready",
+      "READY": "தயார்",
       "MISSING": "Missing",
       "WAITING_ON_ADMIN": "Waiting on admin",
       "GATED": "Not on your plan",
       "SIMULATED": "Simulated"
     },
     "kind": {
-      "agent": "Agent",
+      "agent": "முகவர்",
       "workflow": "Workflow",
       "tool": "Tool",
       "mcp": "MCP server",
-      "knowledge": "Knowledge",
+      "knowledge": "அறிவு",
       "procedure": "Procedure",
       "secret": "Secret",
       "channel": "Channel"
@@ -13556,7 +13721,7 @@
     },
     "narrative": {
       "aria": "About {name}",
-      "close": "Close",
+      "close": "மூடு",
       "why": "Why it is here",
       "tune": "If results are wrong",
       "proof": "How you will know it works",
@@ -13573,14 +13738,14 @@
       "step": {
         "PENDING": "Waiting",
         "DONE": "Done",
-        "FAILED": "Failed",
+        "FAILED": "தோல்வி",
         "COMPENSATED": "Rolled back"
       },
       "failedAt": "Step {step} failed: {name}.",
       "failedGeneric": "The apply did not finish.",
       "nothingKept": "Nothing was kept. Everything created in this run was rolled back.",
       "someKept": "Some steps were already saved and are shown above. Check them before trying again.",
-      "retry": "Try again",
+      "retry": "மீண்டும் முயல்",
       "doneBody": "Your envoy is in place and starts under watch. Fill in what is still missing on the right."
     },
     "plan": {
@@ -13597,7 +13762,7 @@
       "stepsLabel": "Steps",
       "step": {
         "preview": "Preview",
-        "ready": "Ready",
+        "ready": "தயார்",
         "applying": "Apply"
       },
       "toReady": "Check what it needs",
@@ -13686,7 +13851,7 @@
         "other": "setting"
       },
       "op": {
-        "changed": "Changed",
+        "changed": "மாற்றப்பட்டது",
         "added": "Added",
         "removed": "Removed"
       },
@@ -13724,8 +13889,8 @@
       "entityAdded": "{where} is added",
       "entityRemoved": "{where} is removed",
       "showFull": "Show the full text",
-      "before": "Before:",
-      "after": "After:",
+      "before": "முன்:",
+      "after": "பின்:",
       "apply": "Apply this change",
       "discard": "Discard"
     },
@@ -13734,7 +13899,7 @@
       "placeholder": "For example: the reminders sound too harsh, soften the first one",
       "propose": "Show me the change",
       "proposing": "Working out the change...",
-      "saving": "Saving...",
+      "saving": "சேமிக்கிறது...",
       "applying": "Applying...",
       "failed": "Could not work out a change. Try saying it another way.",
       "done": "Applied. Scoring has been asked for; the new score appears in the ledger when it finishes.",
@@ -13753,7 +13918,7 @@
       "noCards": "Nothing stands out yet. Suggestions appear once something has scored low.",
       "cardsLabel": "Suggestions",
       "scored": "{dimension} {score}",
-      "open": "Open",
+      "open": "திற",
       "notApplied": "Available once the envoy is applied.",
       "dimension": {
         "helpfulness": "Helpfulness",
@@ -13838,11 +14003,11 @@
       "demoteNone": "Demote",
       "demoteConfirm": "Demote to {rung}? Approvals return to every risky step immediately.",
       "demoteConfirmYes": "Yes, demote",
-      "demoteConfirmCancel": "Cancel",
+      "demoteConfirmCancel": "ரத்துசெய்",
       "demoteHint": "Always available. It puts the approvals back straight away.",
       "demoteNeedsAdmin": "Only a workspace admin can change the trust level.",
       "atBottom": "Already at the lowest level.",
-      "history": "History",
+      "history": "வரலாறு",
       "noHistory": "No trust changes yet.",
       "showEvidence": "Show the evidence",
       "diffKind": {
@@ -13873,7 +14038,7 @@
       "runError": "This run could not finish.",
       "transcriptFailed": "Could not load this transcript.",
       "showTranscript": "Read the conversation ({count} turns)",
-      "agent": "Agent",
+      "agent": "முகவர்",
       "verdict": {
         "PASSED": "The agent handled it well",
         "FAILED": "The agent was talked out of its rules",
@@ -13904,7 +14069,7 @@
   },
   "contactsPage": {
     "pageTitle": "Contacts & routing",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "நிர்வாகம்",
     "pageSubtitle": "A contact is a sender your agents already know. Approving a new sender makes them a contact and routes their messages to an agent.",
     "routingTitle": "Channel routing",
     "routingHint": "Pick the agent new conversations go to, and whether a sender you've never seen needs your approval first or goes straight through.",
@@ -13924,16 +14089,16 @@
     "contactsTitle": "Contacts",
     "contactsHint": "Known senders skip approval entirely - a contact here is pre-approved and routes by contact agent → group agent → channel default.",
     "allChannels": "All channels",
-    "allGroups": "All groups",
-    "filterByGroupLabel": "Filter by group",
+    "allGroups": "அனைத்துக் குழுக்களும்",
+    "filterByGroupLabel": "குழு வாரியாக வடிகட்டு",
     "searchPlaceholder": "Search number, chat id or name…",
     "identifierPlaceholder": "Phone / chat id / email *",
     "namePlaceholder": "Name (optional)",
     "groupPlaceholder": "Group",
     "noGroup": "No group",
-    "agentPlaceholder": "Agent",
+    "agentPlaceholder": "முகவர்",
     "channelDefault": "Channel default",
-    "addButton": "Add",
+    "addButton": "சேர்",
     "contactAdded": "Contact added.",
     "statusLinked": "Live",
     "statusDirectory": "Directory",
@@ -13945,7 +14110,7 @@
     "groupsTitle": "Contact groups",
     "groupsHint": "Group contacts to route them together - a group's agent answers every member without their own override.",
     "groupNamePlaceholder": "Group name",
-    "groupAgentPlaceholder": "Agent",
+    "groupAgentPlaceholder": "முகவர்",
     "createGroupButton": "Create",
     "groupCreated": "Group created.",
     "groupMeta": "{count} member(s) · routes to {agent}",
@@ -13975,10 +14140,10 @@
     "colContact": "Contact",
     "colStatus": "Status",
     "colGroup": "Group",
-    "colAgent": "Agent",
+    "colAgent": "முகவர்",
     "colRoutesVia": "Routes via",
-    "selectedCount": "{count} selected",
-    "approveN": "Approve {count}",
+    "selectedCount": "{count} தேர்ந்தெடுக்கப்பட்டன",
+    "approveN": "{count}-ஐ ஒப்புக்கொள்",
     "rejectN": "Reject {count}",
     "clearSelection": "Clear",
     "bulkProgress": "{done} of {total} done…",
@@ -13994,7 +14159,7 @@
     "contactsEmptyImport": "Import a sheet",
     "contactsNoMatch": "No contacts match these filters.",
     "addContactButton": "Add contact",
-    "cancelButton": "Cancel",
+    "cancelButton": "ரத்துசெய்",
     "statusLinkedHint": "Has an active conversation",
     "statusDirectoryHint": "Known sender, no conversation yet",
     "justNow": "just now",
@@ -14065,7 +14230,7 @@
     "deactivating": "Removing…",
     "deactivateTitle": "Remove your {provider} key?",
     "deactivateBody": "Decision calls for this workspace will fall back to the platform key (when configured) or local heuristics.",
-    "cancel": "Cancel",
+    "cancel": "ரத்துசெய்",
     "policyTitle": "Decision controls",
     "policySubtitle": "Where the decision model may act for this workspace — and how sure it must be. Inherit uses the platform default; changes propagate within ~30 seconds.",
     "policyLoading": "Loading policy…",
@@ -14075,17 +14240,17 @@
     "policy_agentRoutingHelp": "Let the decision model pick the best-fit agent for a Quick Task by intent, instead of keyword matching.",
     "policyOpt_inherit": "Inherit",
     "policyOpt_on": "On",
-    "policyOpt_off": "Off",
+    "policyOpt_off": "அணைப்பு",
     "policyThreshold": "“Simple turn” confidence bar",
     "policyThresholdHelp": "0.5–0.99 — higher means the decision model must be more sure before a turn is called simple. Blank inherits.",
     "policySave": "Save policy",
-    "saving": "Saving…",
+    "saving": "சேமிக்கிறது…",
     "policyPropagation": "Agents can set their own stricter bar in their cost-routing settings — per-agent wins over this workspace value.",
     "playgroundTitle": "Playground",
     "playgroundSubtitle": "Ask the active decision provider a typed question against your resolved key. Bounded to one question per run — see the raw answer, model and token usage.",
     "stateLabel": "State",
     "statePlaceholder": "The facts the decision model reasons over, e.g. a user message or a task description…",
-    "instructionsLabel": "Instructions",
+    "instructionsLabel": "அறிவுறுத்தல்கள்",
     "typeHelp_noul": "noul — a calibrated yes/no probability (0–1).",
     "typeHelp_choice": "choice — pick a winner from 2+ options, with per-option probabilities.",
     "typeHelp_score": "score — a probability-weighted score over 2–10 ordered levels.",
@@ -14171,7 +14336,7 @@
     "headerEyebrow": "Sales pipeline",
     "pageSubtitle": "Every lead in one place - move them through the pipeline, log calls and emails, and let workflows keep the stages up to date.",
     "newLead": "New lead",
-    "close": "Close",
+    "close": "மூடு",
     "fieldName": "Name",
     "fieldEmail": "Email",
     "fieldPhone": "Phone",
@@ -14202,7 +14367,7 @@
     "daysAgo": "{n}d ago",
     "lastContacted": "Last contacted {when}",
     "lastReplied": "Last replied {when}",
-    "saveButton": "Save changes",
+    "saveButton": "மாற்றங்களைச் சேமி",
     "createButton": "Create lead",
     "deleteButton": "Delete",
     "timelineTitle": "Activity",
@@ -14258,7 +14423,7 @@
     "adminOnlyToast": "Only workspace admins can import an API.",
     "readOnlyNote": "Only workspace admins can import, refresh, or change API sources. Every agent in the workspace can already call the tools listed here.",
     "loadError": "Could not load imported APIs.",
-    "retryButton": "Try again",
+    "retryButton": "மீண்டும் முயல்",
     "emptyTitle": "No APIs imported yet",
     "emptyBody": "Point the platform at an OpenAPI 3 or Swagger 2 document and every operation in it becomes a tool your agents can call - no code to write.",
     "importTitle": "Import an API from its OpenAPI document",
@@ -14318,9 +14483,9 @@
     "importingEllipsis": "Importing…",
     "importFailed": "The import failed.",
     "importedToast": "\"{name}\" imported - {count} tools are live for your agents.",
-    "backButton": "Back",
-    "cancelButton": "Cancel",
-    "closeButton": "Close",
+    "backButton": "பின்",
+    "cancelButton": "ரத்துசெய்",
+    "closeButton": "மூடு",
     "toolCountLabel": "{enabled} of {total} tools enabled",
     "refreshedAtLabel": "refreshed {when}",
     "statusEnabled": "Enabled",
@@ -14330,7 +14495,7 @@
     "refreshAriaLabel": "Refresh {name}",
     "refreshTitle": "Re-read the document and update the tools",
     "editAriaLabel": "Edit settings of {name}",
-    "editTitle": "Settings",
+    "editTitle": "அமைப்புகள்",
     "deleteAriaLabel": "Delete {name}",
     "deleteTitle": "Delete",
     "toggleAriaLabel": "Toggle {name}",
@@ -14353,7 +14518,7 @@
     "nameAndBaseUrlRequired": "Name and base URL are both required.",
     "prefixImmutableNote": "The tool prefix ({prefix}) cannot change - agents may already rely on the generated tool names. To re-read the document itself, use Refresh.",
     "saveSettingsButton": "Save settings",
-    "savingEllipsis": "Saving…",
+    "savingEllipsis": "சேமிக்கிறது…",
     "saveFailed": "Could not save the settings.",
     "settingsSavedToast": "\"{name}\" settings saved.",
     "deleteDialogTitle": "Delete \"{name}\"?",
@@ -14367,7 +14532,7 @@
   "schedulePanel": {
     "noAgentsTitle": "No agents yet",
     "noAgentsBody": "Create an agent first — a schedule is a recurring job for one specific agent.",
-    "agent": "Agent",
+    "agent": "முகவர்",
     "loading": "Loading schedule…",
     "enabled": "Enabled",
     "paused": "Paused",
@@ -14387,8 +14552,8 @@
     "cadenceInterval": "Every N minutes / hours / days",
     "cadenceCron": "Cron expression",
     "intervalEvery": "Every",
-    "unitMinutes": "minutes",
-    "unitHours": "hours",
+    "unitMinutes": "நிமிடங்கள்",
+    "unitHours": "மணிநேரங்கள்",
     "unitDays": "days",
     "intervalHint": "At least 1 minute. The scheduler checks once a minute.",
     "cronLabel": "Cron",
@@ -14444,7 +14609,7 @@
     "builtInReadOnly": "Built-in skills can't be edited. To customise one, export it, change its name, and upload it as your own.",
     "badgeBuiltIn": "Built-in",
     "badgeCustom": "Custom",
-    "badgeOff": "Off",
+    "badgeOff": "அணைப்பு",
     "fileCount": "{count} bundled file(s)",
     "toggleAria": "Enable skill {name}",
     "selectPrompt": "Select a skill to read its instructions.",
@@ -14452,8 +14617,8 @@
     "editButton": "Edit",
     "deleteButton": "Delete",
     "saveButton": "Save skill",
-    "savingButton": "Saving…",
-    "cancelButton": "Cancel",
+    "savingButton": "சேமிக்கிறது…",
+    "cancelButton": "ரத்துசெய்",
     "replaceButton": "Replace",
     "newHeading": "New skill",
     "editHeading": "Edit {name}",
@@ -14468,5 +14633,1279 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "பணியிட அமைப்புகள்",
+      "agent": "முகவர் அமைப்புகள்"
+    },
+    "agentMissing": "ஒரு முகவரின் அமைப்புகளைப் பார்க்க அதைத் தேர்ந்தெடுங்கள்.",
+    "scopeNote": {
+      "agent": "இந்த மதிப்புகள் இந்த முகவருக்கு மட்டுமே பொருந்தும். நீங்கள் இங்கே மேலெழுதாத அனைத்தும் உங்கள் பணியிட அமைப்புகளிலிருந்து பெறப்படும்."
+    },
+    "loading": "அமைப்புகளை ஏற்றுகிறது",
+    "loadError": "அமைப்புகளை ஏற்ற முடியவில்லை. {message}",
+    "retry": "மீண்டும் முயல்",
+    "filters": {
+      "label": "அமைப்புகளை வடிகட்டு",
+      "search": "அமைப்புகளைத் தேடு",
+      "searchPlaceholder": "பெயர் அல்லது விளக்கத்தால் தேடுங்கள்",
+      "group": "குழு வாரியாக வடிகட்டு",
+      "allGroups": "அனைத்துக் குழுக்களும்",
+      "risk": "இடர் வாரியாக வடிகட்டு",
+      "allRisks": "அனைத்து இடர் நிலைகளும்",
+      "clear": "வடிகட்டிகளை அழி"
+    },
+    "empty": {
+      "none": "இங்கே நீங்கள் மாற்றக்கூடிய அமைப்புகள் இல்லை.",
+      "filtered": "உங்கள் வடிகட்டிகளுக்குப் பொருந்தும் அமைப்புகள் இல்லை."
+    },
+    "saved": "சேமிக்கப்பட்டது. புதுப்பிக்கப்பட்ட அமைப்புகள்: {count}.",
+    "saveFailed": "சேமிக்கப்படவில்லை. தோல்வியடைந்த அமைப்புகள்: {count}. உங்கள் திருத்தங்கள் இன்னும் படிவத்தில் உள்ளன.",
+    "resetDone": "{label} இப்போது பெறப்பட்ட மதிப்பைப் பயன்படுத்துகிறது.",
+    "resetFailed": "அமைப்பை மீட்டமைக்க முடியவில்லை.",
+    "unsaved": "சேமிக்கப்படாத மாற்றம்",
+    "discardOne": "மாற்றத்தை நிராகரி",
+    "restartRequired": "மறுதொடக்கம் தேவை",
+    "source": {
+      "default": "இயல்புநிலை",
+      "platform": "தளம்",
+      "tenant": "பணியிடம்",
+      "agent": "முகவர்",
+      "tenantInherited": "பணியிடத்திலிருந்து பெறப்பட்டது",
+      "aria": "மதிப்பின் மூலம்: {source}"
+    },
+    "sourceHelp": {
+      "default": "யாரும் இதை மாற்றவில்லை. தயாரிப்புடன் வரும் மதிப்பைப் பயன்படுத்துகிறது.",
+      "platform": "உங்கள் தள இயக்குநர் இதை முழு வரிசைப்படுத்தலுக்கும் அமைத்துள்ளார்.",
+      "tenant": "உங்கள் பணியிடம் இயல்புநிலையை மேலெழுதுகிறது. பெறப்பட்ட மதிப்புக்குத் திரும்ப மீட்டமையுங்கள்.",
+      "agent": "இந்த முகவர் பணியிட மதிப்பை மேலெழுதுகிறது. பணியிட மதிப்பை மீண்டும் பெற மீட்டமையுங்கள்.",
+      "tenantInherited": "இந்த முகவருக்குச் சொந்த மேலெழுதல் இல்லை, எனவே பணியிட மதிப்பைப் பயன்படுத்துகிறது. இதைத் திருத்தினால் இந்த முகவருக்கு மட்டும் மேலெழுதல் உருவாகும்.",
+      "lockedSuffix": "இது பூட்டப்பட்டுள்ளது, எனவே இங்கே மாற்ற முடியாது."
+    },
+    "risk": {
+      "low": "குறைந்த இடர்",
+      "medium": "நடுத்தர இடர்",
+      "high": "அதிக இடர்",
+      "security": "பாதுகாப்பு"
+    },
+    "bool": {
+      "on": "On",
+      "off": "அணைப்பு"
+    },
+    "value": {
+      "unset": "அமைக்கப்படவில்லை",
+      "empty": "காலி"
+    },
+    "select": {
+      "placeholder": "ஒரு விருப்பத்தைத் தேர்ந்தெடுங்கள்"
+    },
+    "slider": {
+      "label": "{label} (ஸ்லைடர்)"
+    },
+    "duration": {
+      "unitLabel": "{label}-க்கான அலகு"
+    },
+    "units": {
+      "chars": "எழுத்துகள்",
+      "tokens": "டோக்கன்கள்",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "வினாடிகள்",
+      "min": "நிமிடங்கள்",
+      "h": "மணிநேரங்கள்"
+    },
+    "groups": {
+      "agent": "முகவர் இயக்கநேரம்",
+      "approvals": "ஒப்புதல்கள்",
+      "quality": "தரச் சரிபார்ப்புகள்",
+      "guardrails": "பாதுகாப்புத் தடுப்புகள்",
+      "chat": "அரட்டை",
+      "tools": "கருவிகள்",
+      "memory": "நினைவகம்",
+      "knowledge": "அறிவு",
+      "delegation": "பணி ஒப்படைப்பு",
+      "aux": "உதவி மாடல்",
+      "routing": "மாடல் வழிசெலுத்தல்"
+    },
+    "errors": {
+      "required": "ஒரு மதிப்பை உள்ளிடுங்கள்.",
+      "notNumber": "ஒரு எண்ணை உள்ளிடுங்கள்.",
+      "notInteger": "ஒரு முழு எண்ணை உள்ளிடுங்கள்.",
+      "belowMin": "குறைந்தது {min} இருக்க வேண்டும்.",
+      "aboveMax": "அதிகபட்சம் {max} இருக்க வேண்டும்.",
+      "notAllowed": "பட்டியலிடப்பட்ட விருப்பங்களில் ஒன்றைத் தேர்ந்தெடுங்கள்.",
+      "tooShort": "மிகக் குறுகியது. குறைந்தது {min} பயன்படுத்துங்கள்.",
+      "tooLong": "மிக நீளமானது. அதிகபட்சம் {max} பயன்படுத்துங்கள்.",
+      "precision": "இந்த அலகால் இதைத் துல்லியமாக வெளிப்படுத்த முடியாது. சிறிய அலகின் முழு எண்ணைப் பயன்படுத்துங்கள் அல்லது சிறிய அலகைத் தேர்ந்தெடுங்கள்.",
+      "serverRange": "அனுமதிக்கப்பட்ட வரம்பு: {min} முதல் {max} வரை.",
+      "serverOptions": "அனுமதிக்கப்பட்ட மதிப்புகள்: {options}.",
+      "server": {
+        "invalid": "சேவையகம் இந்த மதிப்பை ஏற்கவில்லை: {message}",
+        "locked": "இந்த அமைப்பை உங்கள் நிர்வாகி பூட்டியுள்ளார், எனவே உங்கள் மாற்றம் சேமிக்கப்படவில்லை.",
+        "notFound": "இந்த அமைப்பு இனி இல்லை.",
+        "forbidden": "இந்த அமைப்பை மாற்ற உங்களுக்கு அனுமதி இல்லை.",
+        "reasonRequired": "இந்த மாற்றத்துக்கு ஒரு காரணம் தேவை. ஒன்றை உள்ளிட்டு மீண்டும் முயலுங்கள்.",
+        "network": "சேவையகத்தை அடைய முடியவில்லை, எனவே உங்கள் மாற்றம் சேமிக்கப்படவில்லை. {message}",
+        "other": "மாற்றத்தைச் சேமிக்க முடியவில்லை: {message}"
+      }
+    },
+    "effective": "இப்போது நடைமுறையில்: {value}",
+    "hint": {
+      "range": "அனுமதிக்கப்பட்டது: {min} முதல் {max} வரை.",
+      "min": "குறைந்தபட்சம்: {min}.",
+      "max": "அதிகபட்சம்: {max}.",
+      "default": "இயல்புநிலை: {value}.",
+      "securityStricter": "ஒரு பாதுகாப்பு அமைப்பைத் தளத்தின் மதிப்பைவிடக் கடுமையாக மட்டுமே ஆக்க முடியும், ஒருபோதும் பலவீனமாக அல்ல.",
+      "inherited": "மீட்டமைத்தால், இது இதற்குத் திரும்பும்: {value}."
+    },
+    "locked": {
+      "withReason": "உங்கள் நிர்வாகியால் பூட்டப்பட்டது: {reason}",
+      "noReason": "உங்கள் நிர்வாகியால் பூட்டப்பட்டது. இங்கே மாற்ற முடியாது."
+    },
+    "blocked": {
+      "role": "உங்கள் பங்கால் இந்த அமைப்பை மாற்ற முடியாது. பணியிட நிர்வாகியைக் கேளுங்கள்.",
+      "scope": "இந்த அமைப்பை இங்கே மேலெழுத முடியாது.",
+      "readOnly": "அமைப்புகள் இப்போது படிக்க மட்டும்.",
+      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+    },
+    "reset": {
+      "button": "பெறப்பட்ட மதிப்புக்கு மீட்டமை",
+      "aria": "பெறப்பட்ட மதிப்புக்கு மீட்டமை: {label}"
+    },
+    "help": {
+      "show": "மேலும் விவரங்கள்",
+      "hide": "விவரங்களை மறை"
+    },
+    "history": {
+      "button": "வரலாறு",
+      "open": "வரலாறு: {label}",
+      "title": "வரலாறு: {label}",
+      "scopeTenant": "பணியிட மாற்றங்கள்",
+      "scopeAgent": "இந்த முகவருக்கான மாற்றங்கள்",
+      "close": "வரலாற்றை மூடு",
+      "loading": "வரலாற்றை ஏற்றுகிறது",
+      "error": "வரலாற்றை ஏற்ற முடியவில்லை. {message}",
+      "empty": "இன்னும் மாற்றங்கள் பதிவு செய்யப்படவில்லை.",
+      "listLabel": "மாற்ற வரலாறு, புதியது முதலில்",
+      "version": "பதிப்பு {version}",
+      "before": "முன்:",
+      "after": "பின்:",
+      "by": "மாற்றியவர்",
+      "unknownActor": "தெரியாதது",
+      "reason": "காரணம்:"
+    },
+    "savebar": {
+      "count": "சேமிக்கப்படாத மாற்றங்கள்: {count}.",
+      "invalid": "சேமிக்கும் முன் சிறப்பித்துக் காட்டப்பட்ட புலங்களைச் சரிசெய்யுங்கள். சரிசெய்ய வேண்டிய புலங்கள்: {count}.",
+      "discard": "மாற்றங்களை நிராகரி",
+      "save": "மாற்றங்களைச் சேமி",
+      "saving": "சேமிக்கிறது"
+    },
+    "risky": {
+      "title": "இடர் நிறைந்த மாற்றங்களை உறுதிசெய் ({count})",
+      "description": "இந்த அமைப்புகள் உங்கள் முகவர்கள் எப்படி நடந்துகொள்கின்றன அல்லது அவை எதைச் செய்ய அனுமதிக்கப்படுகின்றன என்பதை மாற்றுகின்றன. ஒவ்வொரு மாற்றத்தையும் மதிப்பாய்வு செய்து, ஏன் செய்கிறீர்கள் என்பதை விளக்குங்கள். காரணம் தணிக்கைப் பதிவில் சேமிக்கப்படும்.",
+      "descriptionSecurity": "இவற்றில் குறைந்தது ஒன்று பாதுகாப்பு அமைப்பு. அதைத் தளத்தின் மதிப்பைவிடக் கடுமையாக மட்டுமே ஆக்க முடியும். ஒவ்வொரு மாற்றத்தையும் மதிப்பாய்வு செய்து, ஏன் செய்கிறீர்கள் என்பதை விளக்குங்கள். காரணம் தணிக்கைப் பதிவில் சேமிக்கப்படும்.",
+      "listLabel": "உறுதிசெய்ய வேண்டிய மாற்றங்கள்",
+      "from": "இதிலிருந்து",
+      "to": "to",
+      "securityNote": "பாதுகாப்பு அமைப்பு: இது தளத்தின் மதிப்பைவிடப் பலவீனமாக இருக்க முடியாது.",
+      "consequence": "இது எதை மாற்றுகிறது:",
+      "reasonLabel": "இந்த மாற்றத்திற்கான காரணம்",
+      "reasonPlaceholder": "எடுத்துக்காட்டு: ஆதரவுக் குழுவின் நீண்ட விசாரணைகளுக்காக வரம்பை உயர்த்துதல்",
+      "reasonHint": "தேவை, குறைந்தது {min} எழுத்துகள். மாற்றியவர் மற்றும் பழைய, புதிய மதிப்புகளுடன் சேமிக்கப்படும்.",
+      "acknowledge": "இந்தப் பாதுகாப்பு மாற்றத்தின் விளைவுகளை நான் புரிந்துகொள்கிறேன்.",
+      "cancel": "ரத்துசெய்",
+      "confirm": "உறுதிசெய்து சேமி",
+      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+    },
+    "strictness": {
+      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
+      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
+      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "நிலுவையில்",
+    "status_APPROVED": "ஒப்புக்கொள்ளப்பட்டது",
+    "status_REJECTED": "நிராகரிக்கப்பட்டது",
+    "status_EXPIRED": "காலாவதியானது",
+    "status_EXECUTION_FAILED": "செயல்படுத்தல் தோல்வி",
+    "status_DEAD_LETTERED": "டெட் லெட்டர்",
+    "filtersLabel": "கோரிக்கைகளை வடிகட்டு",
+    "filterAgentLabel": "முகவர் வாரியாக வடிகட்டு",
+    "filterToolLabel": "கருவி வாரியாக வடிகட்டு",
+    "filterAgeLabel": "வயது வாரியாக வடிகட்டு",
+    "filterAnyAgent": "எந்த முகவரும்",
+    "filterAnyTool": "எந்தக் கருவியும்",
+    "filterAnyAge": "எந்த வயதும்",
+    "age_newer1h": "1 மணிநேரத்தைவிடப் புதியது",
+    "age_older1h": "1 மணிநேரத்தைவிடப் பழையது",
+    "age_older24h": "1 நாளைவிடப் பழையது",
+    "age_older7d": "7 நாட்களைவிடப் பழையது",
+    "filtersClear": "வடிகட்டிகளை அழி",
+    "filterWindowNote": "புதிய {count} கோரிக்கைகள் வடிகட்டப்படுகின்றன. பழையவை சேர்க்கப்படவில்லை.",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time}-இல் காலாவதியாகும்",
+    "expiresAt": "யாரும் முடிவு செய்யாவிட்டால் {time}-க்குத் தானாக மூடப்படும்",
+    "overdue": "நேர வரம்பைக் கடந்துவிட்டது, அடுத்த துடைப்பில் மூடப்படும்",
+    "neverExpires": "இந்தப் பணியிடம் காத்திருக்கும் கோரிக்கைகளைக் காலாவதியாக்குவதில்லை.",
+    "expiredNote": "{time} காலாவதியானது: நேரத்துக்குள் யாரும் முடிவு செய்யவில்லை",
+    "expiredReasonPrefix": "காலாவதியானது:",
+    "auditExpired": "காலாவதியானது, நேரத்துக்குள் யாரும் முடிவு செய்யவில்லை",
+    "riskLow": "குறைந்த இடர்",
+    "riskMedium": "நடுத்தர இடர்",
+    "riskHigh": "அதிக இடர்",
+    "riskEstimateNote": "இடர் என்பது கருவியின் பெயரிலிருந்து செய்த மதிப்பீடு. தளம் கருவிகளை வகைப்படுத்தாது, எனவே ஒப்புக்கொள்வதற்கு முன் வாதங்களைப் படியுங்கள்.",
+    "riskWhoDecides": "எது ஒப்புதலுக்காகக் காத்திருக்கும் என்பதை யார் முடிவு செய்கிறார்?",
+    "previewGoal": "அது செய்துகொண்டிருந்த பணி:",
+    "previewArguments": "வாதங்கள்",
+    "previewNoArguments": "இந்த அழைப்புக்கு வாதங்கள் எதுவும் பதிவு செய்யப்படவில்லை.",
+    "previewRedacted": "{count} உணர்திறன் மிக்கதாகத் தோன்றும் மதிப்பு(கள்) இங்கே மறைக்கப்பட்டுள்ளன. நீங்கள் ஒப்புக்கொண்டால் அவை இன்னும் கருவிக்கு அனுப்பப்படும்.",
+    "previewTruncated": "இந்த வாதங்கள் முழுமையாகக் காட்ட முடியாத அளவு நீளமானவை, எனவே இந்தக் கோரிக்கையை இங்கிருந்து ஒப்புக்கொள்ள முடியாது.",
+    "approveBlockedTooLong": "முழுக் கோரிக்கையையும் உங்களால் மதிப்பாய்வு செய்ய முடியாததால் ஒப்புதல் அணைக்கப்பட்டுள்ளது. இன்னும் அதை மறுக்கலாம்.",
+    "ifApproveLabel": "நீங்கள் ஒப்புக்கொண்டால்:",
+    "ifApprove": "{tool} மேலுள்ள வாதங்களுடன் இப்போதே இயங்கும், முகவர் அதன் முடிவைப் பயன்படுத்தி பணியைத் தொடரும்.",
+    "ifDenyLabel": "நீங்கள் மறுத்தால்:",
+    "ifDeny": "{tool} இயங்காது. நீங்கள் வேண்டாம் என்றீர்கள் என்று முகவருக்குத் தெரிவிக்கப்படும், காரணம் தந்தால் அதனுடன், அது இல்லாமல் தொடரும்.",
+    "whyGated": "முகவர் {tool}-ஐப் பயன்படுத்தக் கேட்டது. முகவர் மேற்பார்வைக்கு அமைக்கப்பட்டிருப்பதால், அல்லது இந்தப் பணியிடம் அந்தக் கருவிக்கு ஒப்புதலை வலியுறுத்துவதால் அது உங்கள் முடிவுக்காக நிறுத்தி வைக்கப்பட்டது.",
+    "denyReasonLabel": "மறுத்தால் காரணம் (விருப்பமானது)",
+    "denyReasonPlaceholder": "எடுத்துக்காட்டு: தவறான பெறுநர், அனுப்புவதற்கு முன் என்னிடம் கேளுங்கள்",
+    "denyReasonHelp": "நீங்கள் மறுத்தால், முகவர் இந்தக் காரணத்தை மறுக்கப்பட்ட அழைப்பின் முடிவாகப் படித்து அதற்கேற்ப மாற்றிக்கொள்ளும். காரணம் இல்லாமல் மறுக்க காலியாக விடுங்கள்.",
+    "denyButton": "மறு",
+    "detailRegionLabel": "கோரிக்கை விவரங்கள்",
+    "sessionLabel": "உரையாடல்",
+    "linkOpenAgent": "முகவரைத் திற",
+    "linkInspectTurns": "அதன் சுற்றுகளை ஆய்வு செய்",
+    "continuationLabel": "முகவர் அடுத்து என்ன செய்தது",
+    "continuationCompleted": "முகவர் பணியைத் தொடர்ந்து முடித்தது.",
+    "continuationFailed": "இந்த முடிவுக்குப் பிறகு முகவரால் தொடர முடியவில்லை.",
+    "continuationRetry": "தொடருமாறு கேள்",
+    "retryMessage": "தயவுசெய்து பணியைத் தொடருங்கள்.",
+    "lastDecisionTitle": "உங்கள் கடைசி முடிவு: {tool}",
+    "lastDecisionClose": "மூடு",
+    "deepLinkNotFound": "அந்த ஒப்புதல் கோரிக்கை கிடைக்கவில்லை, அல்லது அதை உங்களால் பார்க்க முடியாது.",
+    "selectAllLabel": "இந்தப் பக்கத்தில் நிலுவையில் உள்ள அனைத்துக் கருவி அழைப்புகளையும் தேர்ந்தெடு",
+    "selectRowLabel": "{tool}-க்கான நிலுவை அழைப்பைத் தேர்ந்தெடு",
+    "bulkSelected": "{count} தேர்ந்தெடுக்கப்பட்டன",
+    "bulkApprove": "தேர்ந்தவற்றை ஒப்புக்கொள்",
+    "bulkDeny": "தேர்ந்தவற்றை மறு",
+    "bulkClear": "தேர்வை அழி",
+    "bulkCancel": "ரத்துசெய்",
+    "bulkDismiss": "நிராகரி",
+    "bulkMixedTools": "மொத்த முடிவுகளுக்குத் தேர்ந்தெடுத்த எல்லாக் கோரிக்கைகளும் ஒரே கருவிக்கானவையாக இருக்க வேண்டும்.",
+    "bulkNotLowRisk": "மொத்த ஒப்புதல் குறைந்த இடர் கருவிகளுக்கு (தேடல்கள்) மட்டும். மறுப்பு எந்த ஒரு கருவிக்கும் வேலை செய்யும், அல்லது இவற்றை ஒவ்வொன்றாக முடிவு செய்யுங்கள்.",
+    "bulkNotToolCall": "மொத்த முடிவுகள் முகவர் கருவி அழைப்புகளை மட்டுமே உள்ளடக்கும்.",
+    "bulkNotPending": "மொத்த முடிவுகள் இன்னும் நிலுவையில் உள்ள கோரிக்கைகளை மட்டுமே உள்ளடக்கும்.",
+    "bulkConfirmApproveTitle": "{tool}-க்கான {count} அழைப்புகளை ஒப்புக்கொள்ளவா?",
+    "bulkConfirmApproveBody": "இவற்றில் ஒவ்வொன்றும் கீழே பட்டியலிடப்பட்ட தமது சொந்த வாதங்களுடன் இப்போதே {tool}-ஐ இயக்கும், முகவர் முடிவுகளைப் பயன்படுத்தித் தொடரும். இதைச் செயல்தவிர்க்க முடியாது.",
+    "bulkConfirmDenyTitle": "{tool}-க்கான {count} அழைப்புகளை மறுக்கவா?",
+    "bulkConfirmDenyBody": "இவற்றில் எதுவும் இயங்காது. ஒவ்வொரு அழைப்பும் மறுக்கப்பட்டதாக முகவருக்குத் தெரிவிக்கப்படும், காரணம் தந்தால் அதனுடன்.",
+    "bulkConfirmApprove": "{count}-ஐ ஒப்புக்கொள்",
+    "bulkConfirmDeny": "{count}-ஐ மறு",
+    "bulkMore": "மேலும் {count}",
+    "bulkProgress": "{count}-இல் {done} முடிந்தன",
+    "bulkResult": "{done} முடிவு செய்யப்பட்டன, {failed} தோல்வி.",
+    "notifyOff": "எனக்குத் தெரிவி",
+    "notifyOn": "அறிவிப்புகள் இயக்கத்தில்",
+    "notifyHelp": "இந்தத் தாவல் பின்னணியில் இருக்கும்போது புதிய கோரிக்கை வந்தால் உலாவி அறிவிப்பைக் காட்டு",
+    "notifyUnsupported": "இந்த உலாவியால் அறிவிப்புகளைக் காட்ட முடியாது.",
+    "notifyBlocked": "அறிவிப்புகள் தடுக்கப்பட்டுள்ளன. இதை இயக்க உங்கள் உலாவியின் தள அமைப்புகளில் அனுமதியுங்கள்.",
+    "notifyTitle": "ஒரு முகவர் ஒப்புதலுக்காகக் காத்திருக்கிறது",
+    "notifyBodyOne": "{tool}-க்கு உங்கள் முடிவு தேவை.",
+    "notifyBodyMany": "{count} கோரிக்கைகளுக்கு உங்கள் முடிவு தேவை.",
+    "newArrived": "{count} புதிய ஒப்புதல் கோரிக்கை(கள்) வந்தன.",
+    "rulesTitle": "ஒரு கருவிக்கான விதி",
+    "rulesIntro": "ஒரு கருவி எப்போதும் ஒருவருக்காகக் காத்திருக்குமா அல்லது ஒருபோதும் இல்லையா என்பதைத் தேர்ந்தெடுங்கள். இந்த விதி அரை-தன்னாட்சி என அமைக்கப்பட்ட ஒவ்வொரு முகவருக்கும் பொருந்தும்.",
+    "rulesNeedsScope": "விதிகளை மாற்ற உங்களுக்கு ஒப்புதல்கள் அனுமதி வேண்டும்.",
+    "rulesToolLabel": "கருவியின் பெயர்",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "கோரிக்கையில் கருவி தோன்றுவது போலவே, எடுத்துக்காட்டாக send_email.",
+    "rulesToolNameInvalid": "கருவிப் பெயரில் இடைவெளிகள் இருக்காது.",
+    "rulesModeLabel": "என்ன நடக்க வேண்டும்",
+    "rulesAskName": "எப்போதும் கேள்",
+    "rulesAskHint": "இந்தக் கருவிக்கான ஒவ்வொரு அழைப்பும் ஒருவரின் ஒப்புதலுக்காகக் காத்திருக்கும்.",
+    "rulesNeverName": "ஒருபோதும் கேட்காதே",
+    "rulesNeverHint": "இந்தக் கருவிக்கான அழைப்புகள் யாரும் ஒப்புக்கொள்ளாமல் உடனே இயங்கும்.",
+    "rulesNeverRiskyWarn": "இந்தக் கருவி விஷயங்களை மாற்றுவது போல் தெரிகிறது. உறுதியாக இருங்கள்.",
+    "rulesScopeNote": "விதிகள் ஒரு முகவருக்கு அல்ல, முழுப் பணியிடத்துக்கும் பொருந்தும். மேற்பார்வை முகவர்கள் இன்னும் எல்லாவற்றுக்கும் கேட்கின்றன, முழு தன்னாட்சி முகவர்கள் விதி என்ன சொன்னாலும் ஒருபோதும் கேட்பதில்லை. நீங்கள் அமைக்கும் விதிகள் இன்னும் இங்கே பட்டியலிடப்படுவதில்லை.",
+    "rulesSave": "விதியைச் சேமி",
+    "rulesSaveFailed": "விதியைச் சேமிக்க முடியவில்லை.",
+    "rulesSavedAsk": "{tool} எப்போதும் ஒப்புதல் கேட்கும்.",
+    "rulesSavedNever": "{tool} இனி ஒப்புதல் கேட்காது.",
+    "rulesNeverConfirmTitle": "{tool} இயங்கும் முன் கேட்பதை நிறுத்தவா?",
+    "rulesNeverConfirmBody": "ஒவ்வொரு அரை-தன்னாட்சி முகவரும் யாரும் ஒப்புக்கொள்ளாமல் {tool}-ஐ இயக்கும். இது விஷயங்களை மாற்றவோ அனுப்பவோ கூடியது போல் தெரிகிறது, தவறைத் திரும்பப் பெற முடியாது.",
+    "rulesNeverConfirmBodyLow": "ஒவ்வொரு அரை-தன்னாட்சி முகவரும் கேட்காமல் {tool}-ஐ இயக்கும். இது தேடல் போல் தெரிகிறது, எனவே இது பொதுவாகப் பாதுகாப்பானது.",
+    "rulesNeverConfirm": "கேட்பதை நிறுத்து",
+    "tiersTitle": "எது ஒப்புதலுக்காகக் காத்திருக்கும் என்பதை யார் முடிவு செய்கிறார்?",
+    "tiersIntro": "ஒவ்வொரு முகவருக்கும் ஒரு தன்னாட்சி நிலை உண்டு. பணியிடத்தின் ஒப்புதல் விதிகள் பயன்படுத்தப்படுமா என்பதை அது தீர்மானிக்கிறது.",
+    "tierCurrent": "இந்த முகவர்",
+    "tierConsequenceLabel": "நடைமுறையில்:",
+    "tierSupervisedName": "மேற்பார்வை",
+    "tierSupervisedWhat": "பணியிட விதிகள் என்ன சொன்னாலும் ஒவ்வொரு கருவி அழைப்பும் ஒருவருக்காகக் காத்திருக்கும். ஒரு சுற்றுக்கான கருவிப் படிகளின் வரம்பும் குறைவாக இருக்கும்.",
+    "tierSupervisedConsequence": "மிகவும் பாதுகாப்பானது, ஆனால் வரிசையில் பல கோரிக்கைகளையும் மெதுவான முகவரையும் எதிர்பாருங்கள்.",
+    "tierSemiName": "அரை-தன்னாட்சி",
+    "tierSemiWhat": "ஒவ்வொரு கருவிக்கும் பணியிடத்தின் விதி தீர்மானிக்கும்: அனுப்புதல், நீக்குதல், கட்டணங்கள் போன்ற இடர்மிக்க கருவிகள் இயல்பாகக் கேட்கும், மற்றவை இயங்கும்.",
+    "tierSemiConsequence": "ஒரு நல்ல இயல்புநிலை. உங்கள் ஒவ்வொரு கருவிக்குமான விதிகள் இங்கே செயல்படும்.",
+    "tierFullName": "முழு தன்னாட்சி",
+    "tierFullWhat": "எந்தக் கருவி அழைப்பும் ஒருபோதும் ஒப்புதலுக்காகக் காத்திருக்காது, முகவருக்குக் கருவிப் படிகளின் உயர் வரம்பு கிடைக்கும். ஒவ்வொரு கருவிக்குமான விதிகள் புறக்கணிக்கப்படும்.",
+    "tierFullConsequence": "இது கேட்காமல் செயல்படும். தவறுகளைச் செயல்தவிர்க்க எளிதான முகவர்களுக்கு மட்டும் பயன்படுத்துங்கள்.",
+    "tiersRuleNote": "கருவி விதிகள் (எப்போதும் கேள், ஒருபோதும் கேட்காதே) அரை-தன்னாட்சி முகவர்களுக்கு மட்டுமே முக்கியம்.",
+    "agentModeTitle": "இந்த முகவருக்கு எப்போது ஒப்புதல் தேவை?",
+    "agentModeSupervised": "இந்த முகவர் மேற்பார்வையில் உள்ளது: ஒவ்வொரு கருவி அழைப்பும் ஒருவருக்காகக் காத்திருக்கும், ஒவ்வொரு கருவிக்குமான விதிகள் புறக்கணிக்கப்படும்.",
+    "agentModeSemi": "இந்த முகவர் அரை-தன்னாட்சி: ஒவ்வொரு கருவியும் பணியிடத்தின் விதியைப் பின்பற்றும். அனுப்புதல், நீக்குதல், கட்டணங்கள் இயல்பாகக் கேட்கும்.",
+    "agentModeFull": "இந்த முகவர் முழு தன்னாட்சி: அது ஒருபோதும் ஒப்புதலுக்காகக் காத்திருக்காது, ஒவ்வொரு கருவிக்குமான விதிகள் புறக்கணிக்கப்படும்.",
+    "agentModeQueueLink": "இந்த முகவரின் கோரிக்கைகளைப் பார்",
+    "agentModeRulesLink": "ஒரு கருவிக்கு விதியை அமை",
+    "agentModeShowTiers": "மூன்று நிலைகளையும் ஒப்பிடு",
+    "agentModeHideTiers": "ஒப்பீட்டை மறை",
+    "agentModeScopeNote": "மேலுள்ள தன்னாட்சித் தேர்வு மூலம் நிலையை மாற்றுங்கள். கருவி விதிகள் முழுப் பணியிடத்துக்கானவை, ஒவ்வொரு முகவருக்கானவை அல்ல.",
+    "policyThenApprovalNote": "இந்த விதிகளைக் கடந்து செல்லும் அழைப்பும் ஒருவருக்காகக் காத்திருக்கக்கூடும். அது முகவரின் தன்னாட்சி நிலையைப் பொறுத்தது, கீழே விளக்கப்பட்டுள்ளது.",
+    "chatReasonToggle": "காரணத்தைச் சேர்",
+    "chatReviewInQueue": "வரிசையில் மதிப்பாய்வு செய்"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "நிகழ்வுகளை வடிகட்டு",
+    "tlFilterCategories": "நிகழ்வு வகைகள்",
+    "tlCatIntake": "உள்வாங்கல்",
+    "tlCatModel": "மாடல்",
+    "tlCatTool": "கருவிகள்",
+    "tlCatApproval": "ஒப்புதல்கள்",
+    "tlCatContinuation": "தொடர்ச்சிகள்",
+    "tlCatRetry": "மறுமுயற்சிகளும் தோல்வி மாற்றமும்",
+    "tlCatGuardrail": "பாதுகாப்புத் தடுப்புகள்",
+    "tlCatCache": "தற்காலிகச் சேமிப்பு",
+    "tlCatVerify": "சரிபார்ப்புகள்",
+    "tlCatFinish": "முடிவு",
+    "tlProblemsOnly": "சிக்கல்கள் மட்டும்",
+    "tlSearch": "நிகழ்வுகளைத் தேடு",
+    "tlSearchPlaceholder": "கருவி, மாடல், காவலர் அல்லது நிலை",
+    "tlClearFilters": "வடிகட்டிகளை அழி",
+    "tlShowing": "{total} நிகழ்வுகளில் {shown} காட்டப்படுகின்றன",
+    "tlNoMatch": "இந்த வடிகட்டிகளுக்குப் பொருந்தும் நிகழ்வுகள் இல்லை.",
+    "tlSevOk": "வெற்றி",
+    "tlSevInfo": "தகவல்",
+    "tlSevWarn": "கவனம் தேவை",
+    "tlSevError": "தோல்வி",
+    "tlIntake": "சுற்று தொடங்கியது: {chars} எழுத்துகள், {tools} கருவிகள், {attachments} இணைப்புகள்",
+    "tlRunTools": "Tools for this run",
+    "tlRunToolsNone": "none (text only)",
+    "tlModelCall": "{model} ({provider})-க்கு மாடல் அழைப்பு, வழி {route}",
+    "tlFailover": "{model} ({provider})-க்குத் தோல்வி மாற்றம் நடந்தது",
+    "tlRetryModel": "{model} ({provider})-இல் மீண்டும் முயன்றது, வழி {route}",
+    "tlRetry": "மறுமுயற்சி: {guard} ({outcome})",
+    "tlCacheHit": "பதில் தற்காலிகச் சேமிப்பிலிருந்து வழங்கப்பட்டது",
+    "tlToolCall": "கருவி அழைப்பு {tool}: {status}",
+    "tlApprovalRequested": "{tool} இயங்குவதற்கு முன் ஒப்புதல் கோரப்பட்டது",
+    "tlApprovalDecided": "{tool}-க்கான ஒப்புதல் முடிவு செய்யப்பட்டது: {decision}",
+    "tlContinuation": "தொடர்ச்சி: {guard} ({outcome})",
+    "tlGuard": "பாதுகாப்புத் தடுப்பு {guard}: {outcome}",
+    "tlVerifyPassed": "சரிபார்ப்பு தேறியது: {check}",
+    "tlVerifyFailed": "சரிபார்ப்பு தோல்வி: {check}",
+    "tlFinish": "முடிந்தது: {status} (பதிலில் {chars} எழுத்துகள்)",
+    "tlOther": "நிகழ்வு {type}",
+    "reasonFallbackProvider": "முதன்மை மாடல் தோல்வியடைந்தது, எனவே சுற்று முகவரின் மாற்று வழங்குநருக்கு மாறியது.",
+    "reasonToolsDisabledRetry": "வழங்குநர் கருவி அழைப்பு வரலாற்றை மறுத்தார், எனவே சுற்றுக்கு கருவிகள் இல்லாமல் மீண்டும் ஒருமுறை பதிலளிக்கப்பட்டது.",
+    "reasonRetryOther": "மாடல் அழைப்பு மீண்டும் செய்யப்பட்டது.",
+    "reasonToolCallRetry": "மாடல் தன் பதிலை சிதைந்த கருவி அழைப்புடன் முடித்தது, எனவே மீண்டும் கேட்கப்பட்டது.",
+    "reasonCutOff": "பதில் நீள வரம்பில் துண்டிக்கப்பட்டது, எனவே தொடருமாறு மாடலிடம் கேட்கப்பட்டது.",
+    "reasonToolsContinue": "கருவி அழைப்புகளுக்குப் பிறகு மாடலுக்கு மேலும் படிகள் தேவைப்பட்டன, எனவே சுற்று தொடர்ந்தது.",
+    "reasonToolBlocked": "கருவிக்குப் பதிலாக ஒரு காவலர், கொள்கை, ஹூக் அல்லது வரம்பு பதிலளித்தது, எனவே கருவி இயங்கவில்லை.",
+    "reasonToolParked": "அழைப்பு ஒருவரின் ஒப்புதலுக்காகக் காத்திருக்கிறது; கருவி இயங்கவில்லை.",
+    "reasonGuardAction": "ஒரு பாதுகாப்புத் தடுப்பு பதிலை மாற்றியது அல்லது நிறுத்தி வைத்தது.",
+    "tlAtStart": "தொடக்கத்திலிருந்து",
+    "tlGap": "முந்தைய நிகழ்விலிருந்து",
+    "tlDuration": "கால அளவு",
+    "tlTokens": "உள்ளீடு / வெளியீடு டோக்கன்கள்",
+    "tlCost": "செலவு",
+    "tlDetails": "ஹேஷ்களும் மூல சுருக்கமும்",
+    "tlArgsHash": "வாதங்களின் ஹேஷ்",
+    "tlResultDigest": "முடிவின் சுருக்கம்",
+    "tlContentNote": "வாதங்களும் முடிவுகளும் ஒருபோதும் சேமிக்கப்படுவதில்லை. ஒரு கருவி அழைப்புக்கு, காலவரிசை அதன் நிலை, கால அளவு மற்றும் அதன் வாதங்கள், முடிவின் ஹேஷ்களைக் காட்டுகிறது, உள்ளடக்கத்தை அல்ல.",
+    "tlStatFinish": "முடிவுக்கான காரணம்",
+    "tlStillOpen": "முடியவில்லை",
+    "tlProblemCount": "{count} நிகழ்வுகளுக்குக் கவனம் தேவை",
+    "tlStatRetries": "மறுமுயற்சிகளும் தோல்வி மாற்றங்களும்",
+    "tlStatContinuations": "தொடர்ச்சிகள்",
+    "tlStatApprovals": "ஒப்புதல்கள்",
+    "tlStatTokens": "உள்ளீடு / வெளியீடு டோக்கன்கள்",
+    "tlTokensNotRecorded": "இந்தச் சுற்றுக்குப் பதிவு செய்யப்படவில்லை",
+    "tlTokensInOut": "உள்ளீடு / வெளியீடு",
+    "tlCopyTurnId": "சுற்று ID-ஐ நகலெடு",
+    "tlCopyTurnIdShort": "ID-ஐ நகலெடு",
+    "tlCopied": "சுற்று ID நகலெடுக்கப்பட்டது.",
+    "tlCopyFailed": "நகலெடுக்க முடியவில்லை. ID-ஐத் தேர்ந்தெடுத்து கையால் நகலெடுங்கள்.",
+    "sessTitle": "ஒரு அமர்வின் சுற்றுகள்",
+    "sessSubtitle": "பதிவு செய்யப்பட்ட சுற்றுகளைப் புதியது முதலில் பார்க்க ஒரு அரட்டை அமர்வைத் தேர்ந்தெடுங்கள். அரட்டைச் செய்தியின் சுற்றைப் பார் இணைப்பைத் திறந்தால் இது தானாக நிரம்பும்.",
+    "sessionIdLabel": "அமர்வு ID",
+    "sessionIdPlaceholder": "அரட்டை அமர்வு ID",
+    "sessFind": "சுற்றுகளைக் கண்டுபிடி",
+    "sessInvalid": "முகவர் ID (ஒரு UUID) மற்றும் அமர்வு ID-ஐ உள்ளிடுங்கள்.",
+    "sessLoading": "அமர்வின் சுற்றுகளை ஏற்றுகிறது...",
+    "sessUnavailableTitle": "அமர்வுத் தேடல் கிடைக்கவில்லை",
+    "sessUnavailableBody": "இந்தச் சேவையகம் ஒரு அமர்வின் சுற்றுகளைப் பட்டியலிட முடியாது. அதற்குப் பதிலாக கீழே ID மூலம் ஒரு சுற்றைத் திறவுங்கள்.",
+    "sessErrorTitle": "அமர்வின் சுற்றுகளை ஏற்ற முடியவில்லை",
+    "sessEmptyTitle": "இந்த அமர்வில் பதிவான சுற்றுகள் இல்லை",
+    "sessEmptyBody": "அமர்வு எதையும் பதிவு செய்யவில்லை. அமர்வு ID தவறாக இருக்கலாம், அல்லது அதன் சுற்றுகள் இயங்கியபோது சுற்றுப் பதிவேடு அணைக்கப்பட்டிருந்திருக்கலாம்.",
+    "sessListLabel": "{count} பதிவான சுற்றுகள்",
+    "sessEvents": "{count} நிகழ்வுகள்",
+    "sessStatusOpen": "திற",
+    "sessOpen": "காலவரிசையைத் திற",
+    "sessOpened": "கீழே காட்டப்பட்டது"
+  },
+  "evalControls": {
+    "cancel": "ரத்துசெய்",
+    "saving": "சேமிக்கிறது...",
+    "saved": "சேமிக்கப்பட்டது.",
+    "saveMode": "மறுஇயக்க முறையைச் சேமி",
+    "discard": "மாற்றங்களை நிராகரி",
+    "saveFailed": "மறுஇயக்க முறையைச் சேமிக்க முடியவில்லை.",
+    "unsavedChanges": "சேமிக்கப்படாத மாற்றங்கள்",
+    "modeTitle": "இந்தத் தரவுத்தொகுப்பு எவ்வாறு மறுஇயக்கப்படுகிறது",
+    "modeHelp": "மறுஇயக்கம் முகவரின் கருவிகளைப் பயன்படுத்தலாமா என்பதைத் தேர்ந்தெடுங்கள். இது அடுத்த இயக்கம் எதை அளக்கிறது என்பதை மாற்றும்.",
+    "modeTextOnly": "உரை மட்டும்",
+    "modeTextOnlyHelp": "முகவர் தன் கருவிகள் இல்லாமல் பதிலளிக்கிறது. பாதுகாப்பானது: உண்மையில் எதுவும் நடக்காது. எதிர்பார்த்த கருவிச் சரிபார்ப்புகளை நிறைவேற்ற முடியாது.",
+    "modeFull": "கருவிகளுடன் முழுக் குழாய்",
+    "modeFullHelp": "உண்மையான பயனர் பெறும் அதே கருவிகள், பாதுகாப்புத் தடுப்புகள் மற்றும் படிநிலை வரம்புகள். எதிர்பார்த்த கருவி மற்றும் பாதைச் சரிபார்ப்புகளுக்குத் தேவை.",
+    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "autoApproveLabel": "மதிப்பீட்டு மணல்பெட்டியில் கருவி அழைப்புகளைத் தானாக ஒப்புக்கொள்",
+    "autoApproveHelp": "பொதுவாக ஒருவருக்காகக் காத்திருக்கும் கருவி அழைப்பை மதிப்பீட்டு மணல்பெட்டி ஒப்புக்கொள்கிறது, இதனால் வழக்கு முடிவடைய முடியும். இது இல்லாவிட்டால், உற்பத்தியில் நடப்பது போலவே வழக்கு பதிலளிக்கப்படாத ஒப்புதலில் முடிவடையும்.",
+    "autoApproveWarnTitle": "உற்பத்தி அல்லாத பணியிடங்களுக்கு மட்டும்",
+    "autoApproveWarnBody": "கருவிகள் உண்மையான வாடிக்கையாளர்களையோ தரவையோ சென்றடையும் இடத்தில் இதை ஒருபோதும் இயக்காதீர்கள். ஷெல், குறியீடு, திட்டமிடல், முகவர்-முகவர், கட்டணம் மற்றும் நீக்கக் கருவிகள் ஒருபோதும் தானாக ஒப்புக்கொள்ளப்படாது. உங்கள் நிர்வாகி இந்தப் பணியிடத்தை உற்பத்தி அல்லாதது எனக் குறித்திருக்க வேண்டும்.",
+    "autoApproveNeedsFull": "முதலில் முழுக் குழாயை இயக்குங்கள்: தானியங்கு ஒப்புதல் கருவிகள் இயங்கும்போது மட்டுமே பொருந்தும்.",
+    "autoApproveRefused": "இந்தப் பணியிடத்தில் அனுமதிக்கப்படவில்லை: {reason}",
+    "autoApproveConfirmTitle": "மதிப்பீடுகளில் கருவி அழைப்புகளைத் தானாக ஒப்புக்கொள்ளவா?",
+    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirm": "தானியங்கு ஒப்புதலை இயக்கு",
+    "trajectoryLabel": "பாதைச் சரிபார்ப்புகள்",
+    "trajectoryOn": "On",
+    "trajectoryOff": "கிடைக்கவில்லை",
+    "trajectoryHelpOn": "எதிர்பார்த்த பாதை உள்ள வழக்குகள், முகவர் எந்தக் கருவிகளை எந்த வரிசையில் அழைத்தது என்பதன் அடிப்படையில் மதிப்பெண் பெறுகின்றன. இதை உங்கள் நிர்வாகி முழு வரிசைப்படுத்தலுக்கும் இயக்குகிறார், ஒவ்வொரு தரவுத்தொகுப்புக்கும் அல்ல.",
+    "trajectoryHelpOff": "பாதைச் சரிபார்ப்புகள் இங்கே கிடைக்கவில்லை. அவற்றை உங்கள் நிர்வாகி முழு வரிசைப்படுத்தலுக்கும் இயக்குகிறார், மேலும் மதிப்பீடுகள் அடங்கிய திட்டம் தேவை.",
+    "trajectoryNeedsFull": "இந்தத் தரவுத்தொகுப்பு உரை மட்டும், எனவே எதிர்பார்த்த பாதை உள்ள வழக்குகள் மதிப்பெண் பெறாது. முழுக் குழாயை இயக்குங்கள்.",
+    "runAutoApproved": "தானாக ஒப்புக்கொள்ளப்பட்டது",
+    "runAutoApprovedTitle": "இந்த இயக்கத்தின் கருவி அழைப்புகள் எதையும் ஒருவர் முடிவு செய்யவில்லை; மதிப்பீட்டு மணல்பெட்டி அவற்றை ஒப்புக்கொண்டது.",
+    "toolCallsLabel": "இந்த மறுஇயக்கத்தில் கருவி அழைப்புகள்",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "தோல்வி",
+    "toolStatusNotRun": "இயங்கவில்லை",
+    "toolStatusAwaitingApproval": "ஒப்புதலுக்காகக் காத்திருக்கிறது",
+    "toolStatusReplayed": "மறுஇயக்கப்பட்டது",
+    "samplingTitle": "பின்னணித் தர மதிப்பெண்",
+    "samplingLoading": "மதிப்பெண் விகிதத்தை ஏற்றுகிறது...",
+    "samplingUnavailable": "பின்னணி நடுவர் மதிப்பிடும் நேரடிச் சுற்றுகளின் பங்கை உங்கள் தள நிர்வாகி அமைக்கிறார், அது இங்கே காட்டப்படாது.",
+    "samplingValue": "நேரடிச் சுற்றுகளில் சுமார் {percent}% பின்னணித் தர நடுவரால் மதிப்பிடப்படுகின்றன.",
+    "samplingHelp": "குறைந்த விகிதம் செலவைக் குறைக்கும், மேலே உள்ள போக்கில் மதிப்பெண்கள் குறைவாக இருக்கும். இந்த மதிப்பு இங்கே படிக்க மட்டும்.",
+    "samplingSource_default": "இயல்புநிலை",
+    "samplingSource_platform": "தளத்தால் அமைக்கப்பட்டது",
+    "samplingSource_tenant": "உங்கள் பணியிடத்திற்கு அமைக்கப்பட்டது",
+    "samplingSource_agent": "இந்த முகவருக்கு அமைக்கப்பட்டது",
+    "modeDefault": "Workspace default",
+    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
+    "modeDefaultCurrent": "Currently: {mode}",
+    "modeNameFull": "Full pipeline",
+    "modeNameQuick": "Quick (text only)",
+    "badgeFull": "full pipeline",
+    "badgeQuick": "quick",
+    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
+    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
+    "runModeLabel": "Replay mode for the next run",
+    "runModeInherit": "Use the dataset's setting",
+    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
+    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
+    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
+    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
+    "toolStatusSimulated": "simulated, not executed"
+  },
+  "agentLab": {
+    "wtLabel": "முகவரின் கருவிகளுடன் இயக்கு",
+    "wtHelp": "அணைப்பு: ஒவ்வொரு பதிலும் ஒரு எளிய மாடல் அழைப்பு. இயக்கம்: பதில்கள் அரட்டைச் சுற்று பயன்படுத்தும் அதே கருவிக் குழாய் வழியாக வருகின்றன, எனவே கருவிகள் இயங்கும், பாதுகாப்புத் தடுப்புகள் செயல்படும், படிநிலை வரம்புகள் பின்பற்றப்படும். ஒருவரின் ஒப்புதல் தேவைப்படும் அழைப்பு நிலுவை ஒப்புதலாகக் காத்திருக்கும்.",
+    "wtUnavailable": "இந்த நிறுவலில் கருவிகளுடன் ஆய்வகத்தை இயக்குவது அணைக்கப்பட்டுள்ளது. இயக்க நிர்வாகியிடம் கேளுங்கள்.",
+    "wtRefused": "இந்த இயக்கம் நிராகரிக்கப்பட்டது: {reason}",
+    "wtActive": "இந்த இயக்கத்தில் கருவிகள் உண்மையாகவே இயங்கும், பக்க விளைவுகளுடன்.",
+    "wtConfirmTitle": "முகவரின் கருவிகளுடன் ஆய்வகத்தை இயக்கவா?",
+    "wtConfirmBody": "ஒவ்வொரு மாதிரியும் முகவரின் உண்மையான கருவிகளை அழைக்கலாம், அந்த அழைப்புகளுக்கு செய்தி அனுப்புதல் அல்லது தரவு எழுதுதல் போன்ற உண்மையான விளைவுகள் இருக்கலாம். ஒப்புதல் தேவைப்படும் அழைப்புகள் ஒருவருக்காகக் காத்திருக்கும். சோதனை முகவர் அல்லது சோதனைத் தரவுடன் மட்டும் பயன்படுத்துங்கள்.",
+    "wtConfirm": "கருவிகளைப் பயன்படுத்து"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "முகவர் வரம்புகள்",
+        "description": "நிறுத்தப்படுவதற்கு முன் ஒரு முகவர் சுற்று எவ்வளவு வேலை செய்யலாம்."
+      },
+      "approvals": {
+        "label": "ஒப்புதல்கள்",
+        "description": "ஒருவர் ஒரு செயலை ஒப்புக்கொண்ட அல்லது மறுத்த பிறகு என்ன நடக்கும், ஒரு கோரிக்கை எவ்வளவு நேரம் காத்திருக்கும்."
+      },
+      "chat": {
+        "label": "உரையாடல் நடத்தை",
+        "description": "ஒரு பதில் எவ்வாறு முடிக்கப்படுகிறது, மீண்டும் முயலப்படுகிறது, தற்காலிகமாகச் சேமிக்கப்படுகிறது, தொடரப்படுகிறது."
+      },
+      "routing": {
+        "label": "மாடல் வழிசெலுத்தல்",
+        "description": "வேகமான மாடலுக்குப் போதுமான எளிமையானவை எனக் கருதப்படும் செய்திகள் எவை."
+      },
+      "memory": {
+        "label": "நினைவகம்",
+        "description": "ஒரு முகவர் எத்தனை நினைவுகளை வைத்திருந்து நினைவுகூர்கிறது."
+      },
+      "aux": {
+        "label": "பின்னணி மாடல் அழைப்புகள்",
+        "description": "சுருக்கங்கள், உதவிகள், சுருக்கியொடுக்கம் எந்த மாடலைப் பயன்படுத்துகின்றன."
+      },
+      "guardrails": {
+        "label": "பாதுகாப்புச் சரிபார்ப்புகள்",
+        "description": "தானியங்கு பாதுகாப்புச் சரிபார்ப்புகள் எவ்வளவு கடுமையானவை. இவற்றைத் தள அமைப்பைவிடக் கடுமையாக மட்டுமே ஆக்க முடியும்."
+      },
+      "quality": {
+        "label": "மதிப்பீடு",
+        "description": "சோதனை இயக்கங்களும் AI நடுவரும் எப்படி நடந்துகொள்கின்றன."
+      },
+      "delegation": {
+        "label": "பணி ஒப்படைப்பு",
+        "description": "ஒரு முகவர் ஒரே நேரத்தில் பிற முகவர்களுக்கு எவ்வளவு வேலையை ஒப்படைக்கலாம்."
+      },
+      "knowledge": {
+        "label": "அறிவுத் தேடல்",
+        "description": "சிறந்த பத்திகளைத் தேர்ந்தெடுக்கும் முன், நீங்கள் பதிவேற்றிய ஆவணங்களில் தேடல் எவ்வளவு விரிவாக வேட்பாளர்களைச் சேகரிக்கிறது."
+      },
+      "learning": {
+        "label": "கற்றல்",
+        "description": "முகவரின் கற்றல் கொள்கைகள் வெவ்வேறு விருப்பங்களை எப்படி முயன்று பார்க்கின்றன."
+      },
+      "providers": {
+        "label": "AI வழங்குநர்கள்",
+        "description": "இணைக்கப்பட்ட AI வழங்குநர் விசைகளில் ஒன்று செயல்படாமல் போனால் அவை எப்படிப் பயன்படுத்தப்படுகின்றன."
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "ஒரு சுற்றுக்கு அதிகபட்ச கருவி அழைப்புகள்",
+          "description": "ஒரு சுற்று நிறுத்தப்பட்டு, தன்னிடம் உள்ளதைக் கொண்டு பதிலளிக்கச் சொல்லப்படுவதற்கு முன் அது செய்யக்கூடிய அதிகபட்ச கருவி அழைப்புகள்.",
+          "help": "நீண்ட பல-படி வேலைகள் செய்யும் முகவர்களுக்கு இதை உயர்த்துங்கள். கட்டுப்பாடற்ற சுழற்சிகளை நிறுத்தவும் செலவை முன்கூட்டியே கணிக்கவும் குறையுங்கள். ஒரு பணியிடம் அல்லது தளத்திற்குக் காட்டப்படும் மதிப்பு ஒரு நிலையான முகவருக்கான அடிப்படை எண்: ஒரு முகவரின் தன்னாட்சி நிலை இயக்கநேரத்தில் அதை அளவிடுகிறது, எனவே அதிகமாகவோ குறைவாகவோ தன்னாட்சி கொண்ட முகவர் வேறு எண்ணைப் பயன்படுத்தலாம். ஒரு முகவரின் சொந்த மதிப்பு அமைத்தபடியே பயன்படுத்தப்படும்."
+        },
+        "turnTimeoutSeconds": {
+          "label": "ஒரு சுற்றுக்கு அதிகபட்ச நேரம்",
+          "description": "ஒரு சுற்று நிறுத்தப்படுவதற்கு முன் எவ்வளவு நேரம் இயங்கலாம்.",
+          "help": "மெதுவான ஆய்வு அல்லது குறியீட்டுப் பணிகளுக்கு இதை உயர்த்துங்கள். நேரம் முடிந்த சுற்று இதுவரை செய்தவற்றுடன் முடியும்."
+        },
+        "toolTimeoutSeconds": {
+          "label": "ஒரு கருவி அழைப்புக்கு அதிகபட்ச நேரம்",
+          "description": "ஒரு கருவி அழைப்பு நிறுத்தப்படுவதற்கு முன் எவ்வளவு நேரம் இயங்கலாம். தள இயல்புநிலைக்கு வரம்பு இல்லை; அப்போது ஒவ்வொரு கருவியும் தன் சொந்த நேரமுடிவை வைத்திருக்கும்.",
+          "help": "ஒரு மெதுவான கருவி முழு உரையாடல்களையும் தடுத்து நிறுத்தக்கூடும் என்றால் வரம்பை அமையுங்கள். நிறுத்தப்பட்ட அழைப்புக்கு ஏதேனும் விளைவு இருந்ததா என்பது தெரியாது, எனவே அது வேலை செய்தது என்று கருத வேண்டாம் என்று முகவருக்குச் சொல்லப்படும்."
+        },
+        "toolOutputMaxChars": {
+          "label": "நீளமான கருவி முடிவு",
+          "description": "ஒரு கருவி முடிவின் எத்தனை எழுத்துகள் மாடலுக்கு அனுப்பப்படுகின்றன; மீதம் வெட்டப்படும்.",
+          "help": "முகவர் நீண்ட ஆவணங்களையோ API பதில்களையோ முழுமையாகப் படிக்க வேண்டியிருந்தால் இதை உயர்த்துங்கள், ஒரு சுற்றுக்கு அதிக டோக்கன்கள் செலவாகும். செலவைச் சேமிக்க குறையுங்கள்."
+        },
+        "retrievalTopK": {
+          "label": "ஒவ்வொரு தேடலுக்கும் அறிவுப் பத்திகள்",
+          "description": "ஒரு அறிவுத் தளத் தேடல் முகவருக்கு எத்தனை பத்திகளைத் திருப்பித் தருகிறது.",
+          "help": "அதிகப் பத்திகள் முகவருக்கு வேலை செய்ய அதிகம் தரும் ஆனால் அதிக டோக்கன்கள் செலவாகும், இரைச்சலையும் சேர்க்கலாம். குறைவானவை வேகமானவை, மலிவானவை."
+        },
+        "retrievalMinScore": {
+          "label": "ஒரு பத்தியின் குறைந்தபட்ச தொடர்பு",
+          "description": "ஒரு அறிவுப் பத்தி திருப்பித் தரப்பட எவ்வளவு தொடர்புடையதாக இருக்க வேண்டும். 0 ஒவ்வொரு பொருத்தத்தையும் தரும்.",
+          "help": "முகவர் தொடர்பற்ற பத்திகளை மேற்கோள் காட்டினால் இதை உயர்த்துங்கள். மிக அதிகமாக இருந்தால் அதற்கு எதுவும் கிடைக்காமல் போகலாம்."
+        },
+        "continuationPasses": {
+          "label": "முடிவடையாத பதிலுக்குப் பிறகு கூடுதல் சுற்றுகள்",
+          "description": "அறிவித்தும் செய்யாத படியில் மாடலின் பதில் நின்றுபோனால், தொடருமாறு மாடலிடம் இன்னும் எத்தனை முறை கேட்கப்படுகிறது.",
+          "help": "ஒரு படியை அறிவித்துவிட்டு அடிக்கடி நின்றுவிடும் முகவர்களுக்கு இதை உயர்த்துங்கள். ஒவ்வொரு கூடுதல் சுற்றும் ஒரு மாடல் அழைப்பைச் செலவழிக்கும்."
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "ஒப்புதலுக்குப் பிறகு தொடர்",
+          "description": "ஒருவர் ஒரு செயலை ஒப்புக்கொண்டதும், புதிய செய்திக்காகக் காத்திருக்காமல் முகவர் தானே பணியை முடிக்கிறது.",
+          "help": "ஒப்புக்கொள்ளப்பட்ட ஒவ்வொரு செயலும் சுற்றை முடித்து கையால் பின்தொடரப்பட வேண்டுமென்றால் இதை அணையுங்கள்."
+        },
+        "jobsContinueAfterDenial": {
+          "label": "மறுப்புக்குப் பிறகும் பின்னணிப் பணிகள் தொடர்கின்றன",
+          "description": "பின்னணிப் பணியில் ஒருவர் ஒரு செயலை மறுத்தால், பணி நிற்காமல் மறுப்பைக் குறித்துக்கொண்டு தொடர்கிறது.",
+          "help": "மறுப்பு பணியை நிறுத்த வேண்டுமென்றால் இதை அணைத்தே வையுங்கள். மறுக்கப்பட்ட படி இல்லாமலே பணி பொதுவாக முடிந்துவிடும் என்றால் இதை இயக்குங்கள்."
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "ஒப்புதல் கோரிக்கைகள் இதற்குப் பிறகு காலாவதியாகும்",
+          "description": "ஒரு ஒப்புதல் கோரிக்கை காலாவதியாவதற்கு முன் முடிவுக்காக எவ்வளவு நேரம் காத்திருக்கிறது. 0 என்றால் கோரிக்கைகள் ஒருபோதும் காலாவதியாகாது.",
+          "help": "காலாவதி இல்லையென்றால், மறக்கப்பட்ட கோரிக்கைகள் காலவரையின்றித் திறந்தே இருக்கும், முகவர் காத்திருந்துகொண்டே இருக்கும். காலாவதியான கோரிக்கை ஒப்புக்கொள்ளப்படாததாகக் கருதப்படும்."
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "துண்டிக்கப்பட்ட பதில்களை முடி",
+          "description": "ஒரு பதில் மாடலின் நீள வரம்பில் துண்டிக்கப்பட்டாலோ சிதைந்த கருவி அழைப்பில் முடிந்தாலோ, தொடருமாறு அல்லது மீண்டும் முயலுமாறு மாடலிடம் கேளுங்கள்.",
+          "help": "மாடல் சிக்கலைக் கண்டறிய மட்டுமே இதை அணையுங்கள்; அப்போது மக்கள் துண்டிக்கப்பட்ட பதில்களை அப்படியே பார்ப்பார்கள்."
+        },
+        "maxContinuations": {
+          "label": "துண்டிக்கப்பட்ட பதிலின் அதிகபட்ச தொடர்ச்சிகள்",
+          "description": "பதில் துண்டிக்கப்பட்ட பிறகு தொடருமாறு மாடலிடம் எத்தனை முறை கேட்கப்படுகிறது.",
+          "help": "ஒவ்வொரு தொடர்ச்சியும் இன்னொரு மாடல் அழைப்பு. நீண்ட பதில்களுக்கு உயர்த்துங்கள், செலவைச் சேமிக்க குறையுங்கள்."
+        },
+        "maxToolCallRetries": {
+          "label": "சிதைந்த கருவி அழைப்பின் அதிகபட்ச மறுமுயற்சிகள்",
+          "description": "பயன்படுத்த முடியாத வாதங்களுடன் வந்த கருவி அழைப்பை மீண்டும் செய்யுமாறு மாடலிடம் எத்தனை முறை கேட்கப்படுகிறது.",
+          "help": "ஒரு மறுமுயற்சி ஒரு மாடல் அழைப்பைச் செலவழிக்கும். 0 என்றால் முதல் சிதைந்த அழைப்பிலேயே கைவிடும்."
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "ஒரு மாடல் அழைப்புக்கு முயற்சிகள்",
+          "description": "வழங்குநர் தோல்வியடையும்போது அல்லது பரபரப்பாக இருக்கும்போது, முதல் முயற்சி உட்பட, ஒரு மாடல் அழைப்பு எத்தனை முறை முயலப்படுகிறது.",
+          "help": "அதிக முயற்சிகள் வழங்குநரின் குறுகிய செயலிழப்புகளை மறைக்கும் ஆனால் தோல்வியடையும் கோரிக்கை பிழையைத் தெரிவிக்க அதிக நேரம் எடுக்கும்."
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "கருவிகள் உள்ள முகவர்களுக்குப் பதில்களை மீண்டும் பயன்படுத்து",
+          "description": "கருவிகள் உள்ள முகவர்களுக்குச் சேமிக்கப்பட்ட பதில்களை மீண்டும் பயன்படுத்த அனுமதி. ஒரு கருவி அடுத்த முறை வேறொன்றைத் தரக்கூடும் என்பதால் இயல்பாக அணைந்திருக்கும்.",
+          "help": "கருவிகள் படிக்க மட்டும் உள்ளவையாகவும் மெதுவாக மாறுபவையாகவும் இருந்து, வேகமான, மலிவான மறுபடியான பதில்கள் வேண்டுமென்றால் மட்டும் இயக்குங்கள். மக்கள் நடப்பில் இல்லாத பதிலைப் பார்க்கலாம்."
+        },
+        "contextTurns": {
+          "label": "மறுபடியை அடையாளம் காணும் முந்தைய சுற்றுகள்",
+          "description": "ஒரு செய்தி சேமிக்கப்பட்ட பதிலை மீண்டும் பயன்படுத்தக்கூடிய மறுபடியா என்பதைத் தீர்மானிக்க எத்தனை முந்தைய சுற்றுகள் ஒப்பிடப்படுகின்றன.",
+          "help": "அதிகச் சுற்றுகள் பொருத்தத்தை கடுமையாக்கி, தற்காலிகச் சேமிப்புப் பொருத்தங்களை அரிதாக்குகின்றன."
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "தொடர் கேள்விகளில் கருவிகளை வழங்கிக்கொண்டிரு",
+          "description": "அடுத்த செய்தி குறுகிய தொடர் கேள்வியாக இருக்கும்போது, உரையாடல் ஏற்கெனவே பயன்படுத்திய கருவிகளை வழங்கிக்கொண்டே இருங்கள்.",
+          "help": "\"ஆம்\" போன்ற குறுகிய பதில்கள் வழக்கமான கருவித் தேர்விலிருந்து தொடங்க வேண்டுமென்றால் இதை அணையுங்கள்."
+        },
+        "stickyToolsWindow": {
+          "label": "தொடர் கேள்விக் கருவிகள் எவ்வளவு நேரம் வழங்கப்படும்",
+          "description": "பயன்படுத்திய பிறகு குறுகிய தொடர் செய்திகளுக்கு ஒரு கருவி எவ்வளவு நேரம் வழங்கப்பட்டிருக்கும்.",
+          "help": "நீண்ட சாளரம் நீண்ட வேலை அமர்வுகளுக்கு உதவும், குறுகியது கருவிப் பட்டியலைச் சிறியதாக வைக்கும்."
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "முடிவடையாத சொற்றொடருக்கு நினைவூட்டல்",
+          "description": "ஒரு பதில் தான் செய்வதாகச் சொன்னதைச் செய்வதற்கு முன் நின்றுவிட்டது போல் ஒலித்தால், தொடருமாறு மாடலிடம் கேளுங்கள்.",
+          "help": "முடிந்திருக்க வேண்டிய பதில்களில் நினைவூட்டல்கள் தூண்டப்பட்டால் இதை அணையுங்கள்."
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "பழைய கருவி முடிவுகளை அழி",
+            "description": "நீண்ட கருவி இயக்கத்தில், உரையாடல் மாடலின் வரம்புக்குள் இருக்க பழைய கருவி முடிவுகளை ஒரு சிறிய இடஒதுக்கீட்டால் மாற்றுங்கள்.",
+            "help": "முகவர் முந்தைய ஒவ்வொரு முடிவையும் பார்க்க வேண்டியிருந்தால் இதை அணையுங்கள்; நீண்ட இயக்கங்கள் மாடலின் அளவு வரம்பை எட்டக்கூடும்."
+          },
+          "thresholdChars": {
+            "label": "அழிப்பைத் தூண்டும் அளவு",
+            "description": "பழையவை அழிக்கப்படுவதற்கு முன் ஒரு சுற்றில் கருவி முடிவுகள் எவ்வளவு பெரிதாக வளரலாம்.",
+            "help": "அதிக முடிவுகளைக் காணும்படி வைக்க உயர்த்துங்கள், நீண்ட இயக்கங்களைச் சிறியதாகவும் மலிவாகவும் வைக்க குறையுங்கள்."
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "நீளமான எளிய செய்தி",
+          "description": "இதைவிட நீளமான செய்தி ஒருபோதும் எளியதாகக் கருதப்படாது. எளிய செய்திகள் வேகமான, மலிவான மாடலுக்குச் செல்லலாம்.",
+          "help": "தரத்திற்காக அதிகச் செய்திகளை முதன்மை மாடலுக்கு அனுப்ப குறையுங்கள்; செலவைச் சேமிக்க உயர்த்துங்கள்."
+        },
+        "maxClauses": {
+          "label": "ஓர் எளிய செய்தியில் அதிகபட்ச வாக்கியங்கள்",
+          "description": "இதைவிட அதிக வாக்கியங்கள் கொண்ட செய்தி ஒருபோதும் எளியதாகக் கருதப்படாது.",
+          "help": "தரத்திற்காக அதிகச் செய்திகளை முதன்மை மாடலுக்கு அனுப்ப குறையுங்கள்."
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "ஒரு சுற்றுக்கு நினைவுகூரப்படும் முகவர் நினைவுகள்",
+          "description": "ஒவ்வொரு செய்திக்கும் முகவரின் சொந்த நினைவுகளில் எத்தனை தேடப்படுகின்றன.",
+          "help": "அதிக நினைவுகள் அதிகச் சூழலைத் தரும் ஆனால் அதிக டோக்கன்களைப் பயன்படுத்தும்."
+        },
+        "tenantTopK": {
+          "label": "ஒரு சுற்றுக்கு நினைவுகூரப்படும் பகிர்ந்த நினைவுகள்",
+          "description": "ஒவ்வொரு செய்திக்கும் பணியிடம் முழுவதும் பகிரப்பட்ட நினைவுகளில் எத்தனை தேடப்படுகின்றன.",
+          "help": "அதிக நினைவுகள் அதிகச் சூழலைத் தரும் ஆனால் அதிக டோக்கன்களைப் பயன்படுத்தும்."
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "ஒரு முகவருக்கு அதிகபட்ச நினைவுகள்",
+          "description": "ஒரு முகவர் எத்தனை நினைவுகளை வைத்திருக்கலாம். இதற்கு மேல் பழையவையும் குறைவாகப் பயன்படுத்தப்பட்டவையும் நீக்கப்படும்.",
+          "help": "மக்களைப் பற்றி நிறைய நினைவில் வைத்திருக்க வேண்டிய உதவியாளர்களுக்கு இதை உயர்த்துங்கள்; இது சேமிப்பு மற்றும் நினைவுகூரல் செலவையும் உயர்த்தும்."
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "வரைபட நினைவகத்திலிருந்து நினைவுகூரப்படும் உண்மைகள்",
+          "description": "ஒரு தேடலில் முகவரின் உறவு நினைவகத்திலிருந்து அதற்குக் காட்டப்படும் அதிகபட்ச உண்மைகள்.",
+          "help": "அதிக உண்மைகள் ஒரு நபர் அல்லது தலைப்பைப் பற்றி முகவருக்கு அதிகப் பின்னணியைத் தரும் ஆனால் அதன் பணியிடத்தில் அதிக இடத்தைப் பயன்படுத்தும். குறைவானவை பதில்களைக் கவனம் செலுத்தியதாக வைக்கும். முழுப் பணியிடத்துக்கும், அல்லது கூடுதல் அல்லது குறைவு தேவைப்படும் ஒரு முகவருக்கு அமையுங்கள்."
+        },
+        "recallMaxPaths": {
+          "label": "ஒரு தேடலுக்குப் படிக்கப்படும் வரைபடப் பாதைகள்",
+          "description": "ஒரு தேடலின் உண்மைகளைக் கண்டுபிடிக்க நினைவக வரைபடத்தில் எத்தனை இணைப்புகள் படிக்கப்படுகின்றன.",
+          "help": "பல இணைப்புகள் ஒரே உண்மைக்கு இட்டுச் செல்லலாம், எனவே அடர்த்தியாக இணைந்த நினைவுகளில் எல்லாவற்றையும் கண்டுபிடிக்க அதிக எண் தேவைப்படலாம். அதிக எண் ஒவ்வொரு தேடலையும் மெதுவாக்கும்."
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "பின்னணி அழைப்புகள் முகவரின் மாடலைப் பயன்படுத்துகின்றன",
+        "description": "அவற்றுக்கு மாடல் எதுவும் தேர்ந்தெடுக்கப்படாதபோது, சுருக்கங்கள், உதவிகள், சூழல் சுருக்கியொடுக்கம் அவை யாருக்காக வேலை செய்கிறதோ அந்த முகவரின் அதே மாடலைப் பயன்படுத்துகின்றன.",
+        "help": "இந்த அழைப்புகளுக்குத் தளம் ஒரு மாடலைத் தேர்ந்தெடுக்க விட, இதை அணையுங்கள்; அது மலிவானதாகவோ வேறு வழங்குநருடையதாகவோ இருக்கலாம்."
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "ஒரு பாதுகாப்புச் சரிபார்ப்பு பழுதடையும்போது",
+        "description": "பாதுகாப்புச் சரிபார்ப்பே தோல்வியடையும்போது என்ன நடக்கும், எடுத்துக்காட்டாக நடுவர் மாடல் செயலிழந்தால். மூடியது செயலை மறுக்கும்; திறந்தது அதை அனுமதிக்கும்.",
+        "help": "இதைத் தள அமைப்பைவிடக் கடுமையாக மட்டுமே ஆக்க முடியும். ஒருவர் வேண்டுமென்றே ஒரு சரிபார்ப்பைத் தோல்வியடையச் செய்வதிலிருந்து மூடியது பாதுகாக்கும், செயலிழப்பின்போது வேலையை மறுக்கும் விலையில்.",
+        "options": {
+          "open": "திறந்தது: செயலை அனுமதி",
+          "closed": "மூடியது: செயலை மறு"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "கருவி-அழைப்புச் சரிபார்ப்பு பழுதடையும்போது",
+          "description": "இடர்மிக்க கருவி அழைப்புகளை மதிப்பாய்வு செய்யும் சரிபார்ப்பு தீர்ப்பு வழங்க முடியாதபோது என்ன செய்யும். பெறு என்பது மேலுள்ள பாதுகாப்புச் சரிபார்ப்பு அமைப்பைப் பின்பற்றும்.",
+          "help": "இதைத் தள அமைப்பைவிடக் கடுமையாக மட்டுமே ஆக்க முடியும். சரிபார்ப்பு தோல்வியடைந்தால் மூடியது கருவி அழைப்பை மறுக்கும்.",
+          "options": {
+            "open": "திறந்தது: கருவி அழைப்பை அனுமதி",
+            "inherit": "பாதுகாப்புச் சரிபார்ப்பு அமைப்பைப் பின்பற்று",
+            "closed": "மூடியது: கருவி அழைப்பை மறு"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "தடுக்கும் நச்சுத்தன்மை மதிப்பெண்",
+          "description": "நடுவரின் 0 முதல் 100 வரையிலான நச்சுத்தன்மை அளவுகோலில் இந்த மதிப்பெண் அல்லது அதற்கு மேல் பெறும் உள்ளடக்கம் தடுக்கப்படும். குறைந்த எண் அதிகம் தடுக்கும்.",
+          "help": "இதைக் குறைக்க மட்டுமே முடியும், தள மதிப்பைவிட ஒருபோதும் உயர்த்த முடியாது. மிகக் குறைந்த மதிப்பு சாதாரண வெளிப்படையான சொற்றொடரையும் தடுக்கும்."
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "ஜெயில்பிரேக் முயற்சிகளுக்காக ஸ்கேன் செய்யப்படும் உரை",
+          "description": "ஜெயில்பிரேக் வடிவங்களுக்காக ஒரு செய்தி அல்லது பதிலில் எவ்வளவு ஸ்கேன் செய்யப்படுகிறது. அதற்கு அப்பால் உள்ள உரை ஸ்கேன் செய்யப்படாது.",
+          "help": "இதைத் தள மதிப்பைவிட உயர்த்த மட்டுமே முடியும். பரந்த சாளரம் நிரப்பிகளுக்குப் பின்னால் மறைந்த தாக்குதல்களைத் தடுக்கும், சற்று அதிகச் செயலாக்கத்தின் விலையில்."
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "பாதுகாப்பு நடுவருக்குக் காட்டப்படும் உரை",
+          "description": "சரிபார்க்கப்படும் உரையில் எவ்வளவை AI பாதுகாப்பு நடுவர்கள் படிக்கிறார்கள். அதற்கு அப்பால் உள்ள உரை மதிப்பிடப்படாது.",
+          "help": "இதைத் தள மதிப்பைவிட உயர்த்த மட்டுமே முடியும். இதை உயர்த்தினால் நீண்ட கருவி முடிவுகள் முழுமையாக மதிப்பிடப்படும் ஆனால் ஒவ்வொரு நடுவர் அழைப்பும் பெரிதாகும்."
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI நடுவருக்கான மாடல்",
+          "description": "மதிப்பீட்டு இயக்கங்களை மதிப்பிடப் பயன்படுத்தப்படும் மாடல். உங்கள் பணியிடம் ஏற்கெனவே பயன்படுத்துவதிலிருந்து தளம் தேர்ந்தெடுக்க காலியாக விடுங்கள்.",
+          "help": "மேலும் நம்பகமான தரங்களுக்கு வலிமையான மாடலையோ செலவைச் சேமிக்க மலிவானதையோ பயன்படுத்துங்கள். மாடல் உங்கள் இணைக்கப்பட்ட வழங்குநரிடம் கிடைக்க வேண்டும்."
+        },
+        "callTimeoutSeconds": {
+          "label": "ஒரு நடுவர் அழைப்புக்கு அதிகபட்ச நேரம்",
+          "description": "ஒரு நடுவர் அழைப்பு தோல்வியாகக் கருதப்படுவதற்கு முன் எவ்வளவு நேரம் எடுக்கலாம்.",
+          "help": "மெதுவான மாடல் அடிக்கடி நேரமுடிவடைந்தால் இதை உயர்த்துங்கள்; தோல்வியடையும் அழைப்புகள் மதிப்பீட்டு முடிவுகளை முழுமையற்றதாக்கும்."
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "ஒரு சோதனை வழக்குக்கு மறுபடிகள்",
+          "description": "ஓர் இயக்கம் குறிப்பிடாதபோது ஒவ்வொரு சோதனை வழக்கும் எத்தனை முறை இயக்கப்படுகிறது. அதிக மறுபடிகள் முகவர் எவ்வளவு சீரானது என்பதைக் காட்டும்.",
+          "help": "ஒவ்வொரு மறுபடியும் ஓர் இயக்கத்தின் செலவையும் நேரத்தையும் பெருக்கும்."
+        },
+        "defaultMode": {
+          "label": "How evaluations run",
+          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
+          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "options": {
+            "full": "Full pipeline in a sandbox",
+            "quick": "Quick: text answers only"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "அதிகபட்ச இணை துணைப்பணிகள்",
+        "description": "ஒரு ஒப்படைப்பு அழைப்பு ஒரே நேரத்தில் எத்தனை துணைப்பணிகள் அல்லது உதவி முகவர்களைத் தொடங்கலாம். கூடுதல் உள்ளவை வரம்பைத் தாண்டியவை எனத் தெரிவிக்கப்படும்.",
+        "help": "பரந்த ஆய்வுப் பணிகளுக்கு உயர்த்துங்கள், செலவையும் சுமையையும் குறைக்க குறையுங்கள்."
+      },
+      "branchTimeoutSeconds": {
+        "label": "ஒரு துணைப்பணிக்கு அதிகபட்ச நேரம்",
+        "description": "ஒப்படைக்கப்பட்ட ஒரு துணைப்பணி நேரமுடிந்தது எனத் தெரிவிக்கப்படுவதற்கு முன் எவ்வளவு நேரம் இயங்கலாம்.",
+        "help": "மெதுவான துணைப்பணிகளுக்கு உயர்த்துங்கள். தொங்கிய துணைப்பணி இந்த நேரத்தைத் தாண்டி முழுப் பதிலையும் ஒருபோதும் தடுக்காது."
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "ஒவ்வொரு முடிவுக்கும் தேடல் அகலம்",
+          "description": "ஓர் அறிவுத் தேடல் இறுதியாகத் திருப்பித் தரும் ஒவ்வொரு பத்திக்கும் எத்தனை வேட்பாளர் பத்திகளைச் சேகரிக்கிறது.",
+          "help": "அதிக எண் தரவரிசைக்குத் தேர்ந்தெடுக்க அதிகம் தரும், பல ஆவணங்கள் ஒத்திருக்கும்போது இது உதவும், ஆனால் ஒவ்வொரு தேடலும் அதிக நேரமும் கணினி வளமும் எடுக்கும். தேடல்கள் மெதுவாகத் தோன்றினால் குறையுங்கள். முகவர் காணும் பத்திகளின் எண்ணிக்கையை இது மாற்றாது."
+        },
+        "candidatePoolMax": {
+          "label": "ஒரு தேடலுக்கு அதிகபட்ச வேட்பாளர்கள்",
+          "description": "எத்தனை முடிவுகள் கோரப்பட்டாலும், ஓர் அறிவுத் தேடல் சேகரிக்கும் வேட்பாளர் பத்திகளின் மேல்வரம்பு.",
+          "help": "ஒரு முகவர் ஒரே நேரத்தில் பல முடிவுகளைக் கேட்கும்போது இது வேகத்தையும் செலவையும் காக்கும். பெரிய அறிவுத் தளங்களில் பதில்கள் தொடர்புடைய பத்திகளைத் தவறவிட்டால் மட்டுமே உயர்த்துங்கள்."
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "குறைவாகச் சோதிக்கப்பட்ட விருப்பங்களை முயல விருப்பம்",
+          "description": "நம்பிக்கை-எல்லை முறையைப் பயன்படுத்தும் கற்றல் கொள்கை, தான் குறைவாக முயன்ற விருப்பங்களை எவ்வளவு விரும்புகிறது.",
+          "help": "பூஜ்ஜியம் இதுவரை சிறந்த சராசரி கொண்ட விருப்பத்தை எப்போதும் தேர்ந்தெடுக்கும். அதிக மதிப்புகள் நிலைபெறுவதற்கு முன் மற்ற விருப்பங்களை நீண்ட நேரம் முயன்றுகொண்டே இருக்கும். இயல்புநிலை பாடநூல் சமநிலை. இந்த முறையைப் பயன்படுத்தும் கொள்கைகள் மட்டுமே பாதிக்கப்படும்."
+        },
+        "defaultExplorationRate": {
+          "label": "புதிய கொள்கைகளுக்கான தொடக்க ஆய்வு விகிதம்",
+          "description": "புதிதாக உருவாக்கப்பட்ட கற்றல் கொள்கை சீரற்ற விருப்பத்தை முயல்வதற்குச் செலவிடும் சுற்றுகளின் பங்கு.",
+          "help": "இது இப்போதிலிருந்து உருவாக்கப்படும் கொள்கைகளுக்கான தொடக்கப் புள்ளியை மட்டுமே அமைக்கிறது. ஏற்கெனவே உள்ள கொள்கைகள் தம் சொந்த விகிதத்தை வைத்திருக்கும், அதைக் கொள்கை நிர்வகிக்கப்படும் இடத்தில் ஒவ்வொரு முகவருக்கும் மாற்றலாம். பூஜ்ஜியம் என்றால் புதிய கொள்கை தொடக்கத்தில் ஆராயாது."
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "வழங்குநர் விசையை மறுத்த பிறகு இடைநிறுத்தம்",
+          "description": "வழங்குநர் ஒரு இணைக்கப்பட்ட வழங்குநர் விசையை மறுத்த பிறகு, பின்னணிப் பணி அதை எவ்வளவு நேரம் தவிர்க்கிறது.",
+          "help": "இடைநிறுத்தத்தின்போது, திட்டமிட்ட மற்றும் தானியங்கு பணிகள் தொடர்ந்து தோல்வியடையும் விசையை அழைப்பதற்குப் பதிலாக வேறு இணைக்கப்பட்ட வழங்குநரைப் பயன்படுத்தும், அல்லது காத்திருக்கும். அரட்டையடிக்கும் மக்கள் ஒருபோதும் தடுக்கப்படுவதில்லை, எப்போதும் வழங்குநரின் உண்மையான பிழையைக் காண்பார்கள். இடைநிறுத்தம் முடிந்ததும், விசை சரிசெய்யப்பட்டதா என்று சோதிக்க ஓர் அழைப்பு அனுமதிக்கப்படும். பூஜ்ஜியம் இடைநிறுத்தத்தை அணைக்கும்."
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "நிர்வாகம்",
+    "title": "இயக்கநேர அமைப்புகள்",
+    "subtitle": "இந்தப் பணியிடம் முழுவதும் முகவர்கள் எப்படி நடந்துகொள்கிறார்கள் என்பதை நுணுக்கமாக அமையுங்கள்: வரம்புகள், ஒப்புதல்கள், தரச் சரிபார்ப்புகள், பாதுகாப்புத் தடுப்புகள், நினைவகம், மாடல்கள். அனுமதிக்கப்படும் இடங்களில் ஒரு முகவரின் உரிமையாளர் இன்னும் ஒரு முகவருக்கு ஓர் அமைப்பை மேலெழுதலாம்.",
+    "docsLink": "உதவியும் ஆவணங்களும்",
+    "tabs": {
+      "label": "இயக்கநேர அமைப்புகளின் காட்சிகள்",
+      "settings": "அமைப்புகள்",
+      "history": "மாற்ற வரலாறு"
+    },
+    "readOnly": {
+      "title": "பார்வை மட்டும்",
+      "body": "பணியிட நிர்வாகிகள் மட்டுமே இந்த அமைப்புகளை மாற்ற முடியும். ஒவ்வொரு அமைப்புக்கும் நடைமுறையில் உள்ள மதிப்பையும் அது எங்கிருந்து வருகிறது என்பதையும் நீங்கள் காணலாம்."
+    },
+    "summary": "இந்தப் பணியிடத்தில் {total} அமைப்புகளில் {changed} மாற்றப்பட்டுள்ளன. மீதமுள்ளவை தள மதிப்புகளைப் பயன்படுத்துகின்றன.",
+    "export": {
+      "button": "மேலெழுதல்களை ஏற்றுமதி செய்",
+      "done": "{count} பணியிட மேலெழுதல்கள் ஒரு கோப்புக்கு ஏற்றுமதி செய்யப்பட்டன.",
+      "none": "ஏற்றுமதி செய்ய எதுவும் இல்லை: இந்தப் பணியிடம் எந்த அமைப்பையும் மாற்றவில்லை."
+    },
+    "filters": {
+      "changedOnly": "இந்தப் பணியிடத்தில் மட்டும் மாற்றப்பட்டவை"
+    },
+    "jump": {
+      "label": "ஒரு குழுவுக்குச் செல்"
+    },
+    "anchor": {
+      "unknown": "இந்தப் பணியிடத்தில் \"{key}\" என்ற பெயரில் அமைப்பு இல்லை. அதன் பெயர் மாற்றப்பட்டிருக்கலாம் அல்லது அது பணியிட அளவில் கிடைக்காது."
+    },
+    "empty": {
+      "noneChanged": "இந்தப் பணியிடத்தில் இன்னும் எந்த அமைப்பும் மாற்றப்படவில்லை. எல்லாம் தள மதிப்புகளைப் பயன்படுத்துகிறது."
+    },
+    "risk": {
+      "high": "அதிக இடர்",
+      "security": "பாதுகாப்பு அமைப்பு"
+    },
+    "security": {
+      "title": "பாதுகாப்பு அமைப்புகள்",
+      "body": "இந்த அமைப்புகள் உங்கள் பணியிடத்தைப் பாதுகாக்கின்றன. அவற்றைத் தள மதிப்பைவிடக் கடுமையாக மட்டுமே ஆக்க முடியும், ஒருபோதும் பலவீனமாக அல்ல. ஒவ்வொரு மாற்றத்துக்கும் ஒரு காரணம் தேவை, அது தணிக்கைப் பதிவில் பதிவாகும்."
+    },
+    "resetGroup": {
+      "count": "இந்தக் குழுவில் {count} மாற்றப்பட்டன",
+      "button": "{group}-ஐப் பெறப்பட்ட மதிப்புகளுக்கு மீட்டமை",
+      "confirmTitle": "{group}-ஐப் பெறப்பட்ட மதிப்புகளுக்கு மீட்டமைக்கவா?",
+      "confirmBody": "இது இந்தக் குழுவில் உள்ள {count} பணியிட மேலெழுதல்களை நீக்குகிறது. சொந்த மேலெழுதல் இல்லாத ஒவ்வொரு முகவருக்கும் அமைப்புகள் உடனே தள மதிப்புகளுக்குத் திரும்பும். ஒவ்வொரு மீட்டமைப்பும் தணிக்கைப் பதிவில் பதிவாகும்.",
+      "confirm": "பெறப்பட்ட மதிப்புக்கு மீட்டமை",
+      "cancel": "ரத்துசெய்",
+      "done": "{count} அமைப்புகளை அவற்றின் பெறப்பட்ட மதிப்புகளுக்கு மீட்டமை.",
+      "partial": "{done} அமைப்புகள் மீட்டமைக்கப்பட்டன; {failed}-ஐ மீட்டமைக்க முடியவில்லை. தோல்வியடைந்த அமைப்புகளின் செய்திகளைப் பாருங்கள்.",
+      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+    },
+    "import": {
+      "button": "மேலெழுதல்களை இறக்குமதி செய்",
+      "title": "பணியிட மேலெழுதல்களை இறக்குமதி செய்",
+      "intro": "இந்தப் பக்கத்திலிருந்து ஏற்றுமதி செய்த கோப்பைத் தேர்ந்தெடுங்கள், அல்லது அதன் உள்ளடக்கத்தை ஒட்டுங்கள். எதுவும் சேமிக்கப்படுவதற்கு முன் எது மாறும் என்பதை நீங்கள் துல்லியமாகப் பார்ப்பீர்கள்.",
+      "reviewIntro": "இந்தக் கோப்பு எதை மாற்றும் என்பதை மதிப்பாய்வு செய்யுங்கள். இன்னும் எதுவும் சேமிக்கப்படவில்லை.",
+      "fileLabel": "மேலெழுதல் கோப்பு (JSON)",
+      "pasteLabel": "அல்லது கோப்பின் உள்ளடக்கத்தை ஒட்டுங்கள்",
+      "fileError": {
+        "empty": "முதலில் ஒரு கோப்பைத் தேர்ந்தெடுங்கள் அல்லது அதன் உள்ளடக்கத்தை ஒட்டுங்கள்.",
+        "invalidJson": "இது செல்லுபடியாகும் JSON அல்ல. முழுக் கோப்பும் நகலெடுக்கப்பட்டதா எனச் சரிபாருங்கள்.",
+        "wrongFormat": "இது இந்தப் பக்கத்திலிருந்து ஏற்றுமதி செய்யப்பட்ட அமைப்பு மேலெழுதல் கோப்பு அல்ல.",
+        "unsupportedVersion": "இந்தக் கோப்பு ஏற்றுமதியின் வேறு பதிப்பால் உருவாக்கப்பட்டது, படிக்க முடியாது.",
+        "noOverrides": "கோப்பில் மேலெழுதல் பிரிவு இல்லை.",
+        "unreadable": "கோப்பைப் படிக்க முடியவில்லை."
+      },
+      "summary": "{changes} மாற்ற, {unchanged} ஏற்கெனவே நடைமுறையில், {problems} பயன்படுத்த முடியாதவை.",
+      "changesHeading": "மாற்றங்கள் ({count})",
+      "before": "இப்போது:",
+      "after": "இறக்குமதிக்குப் பிறகு:",
+      "resetMissing": "கோப்பில் இல்லாத பணியிட மேலெழுதல்களையும் நீக்கு",
+      "resetMissingHelp": "இங்கே மாற்றப்பட்டு கோப்பில் இல்லாத அமைப்புகள் தள மதிப்புக்குத் திரும்பும். சேர்க்க அல்லது புதுப்பிக்க மட்டும் இதை அணைத்தே வையுங்கள்.",
+      "resetsHeading": "நீக்க வேண்டிய மேலெழுதல்கள் ({count})",
+      "resetFrom": "தற்போது {value}; பெறப்பட்ட மதிப்புக்குத் திரும்பும்.",
+      "problemsHeading": "பயன்படுத்த முடியாதவை ({count})",
+      "problem": {
+        "unknownKey": "இந்த விசையுடன் அமைப்பு எதுவும் இல்லை.",
+        "notWorkspaceSetting": "இந்த அமைப்பை முழுப் பணியிடத்துக்கும் மாற்ற முடியாது.",
+        "locked": "தள இயக்குநர் இந்த அமைப்பைப் பொருத்திவிட்டார், எனவே இதை மாற்ற முடியாது.",
+        "wrongType": "இந்த அமைப்புக்கு மதிப்பின் வகை தவறானது.",
+        "required": "ஒரு மதிப்பு தேவை.",
+        "notNumber": "மதிப்பு ஓர் எண்ணாக இருக்க வேண்டும்.",
+        "notInteger": "மதிப்பு ஒரு முழு எண்ணாக இருக்க வேண்டும்.",
+        "belowMin": "மதிப்பு மிகக் குறைவு. குறைந்தபட்சம் {min}.",
+        "aboveMax": "மதிப்பு மிக அதிகம். அதிகபட்சம் {max}.",
+        "notAllowed": "இது அனுமதிக்கப்பட்ட விருப்பங்களில் ஒன்றல்ல.",
+        "tooShort": "உரை மிகக் குறுகியது. குறைந்தபட்ச நீளம் {min}.",
+        "tooLong": "உரை மிக நீளமானது. அதிகபட்ச நீளம் {max}.",
+        "precision": "இந்த அமைப்பு அனுமதிப்பதைவிட மதிப்பு அதிகத் துல்லியமானது."
+      },
+      "nothing": "இந்தக் கோப்பில் எதுவும் எந்த அமைப்பையும் மாற்றாது.",
+      "reasonNote": "இந்த அமைப்புகளில் சில அதிக இடர் கொண்டவை. பயன்படுத்திய பிறகு தணிக்கைப் பதிவில் பதிவாகும் ஒரு காரணம் கேட்கப்படும்.",
+      "back": "பின்",
+      "cancel": "ரத்துசெய்",
+      "review": "மாற்றங்களை மதிப்பாய்வு செய்",
+      "apply": "{count} மாற்றங்களைப் பயன்படுத்து",
+      "cancelled": "இறக்குமதி ரத்து செய்யப்பட்டது. எந்த அமைப்பும் மாற்றப்படவில்லை.",
+      "done": "இறக்குமதி முடிந்தது: {applied} அமைப்புகள் புதுப்பிக்கப்பட்டன.",
+      "donePartial": "இறக்குமதி பகுதியாக முடிந்தது: {applied} அமைப்புகள் புதுப்பிக்கப்பட்டன, {failed}-ஐப் பயன்படுத்த முடியவில்லை. இன்னும் எது மீதமுள்ளது என்பதை மதிப்பாய்வு காட்டுகிறது."
+    },
+    "history": {
+      "adminOnly": "பணியிட அமைப்புகளின் மாற்ற வரலாறு பணியிட நிர்வாகிகளுக்கு மட்டுமே தெரியும்.",
+      "loading": "மாற்ற வரலாற்றை ஏற்றுகிறது",
+      "partial": "{count} அமைப்புகளின் வரலாற்றை ஏற்ற முடியவில்லை, எனவே இந்தப் பட்டியல் முழுமையற்றதாக இருக்கலாம்.",
+      "retry": "மீண்டும் முயல்",
+      "search": "மாற்ற வரலாற்றில் தேடு",
+      "searchPlaceholder": "அமைப்பு, நபர் அல்லது காரணத்தால் தேடுங்கள்",
+      "empty": "இந்தப் பணியிடத்தில் இன்னும் எந்த அமைப்பும் மாற்றப்படவில்லை.",
+      "noMatch": "உங்கள் தேடலுக்குப் பொருந்தும் மாற்றம் இல்லை.",
+      "count": "{total} மாற்றங்களில் {shown} காட்டப்படுகின்றன, புதியது முதலில்.",
+      "tableLabel": "பணியிட அமைப்புகளின் மாற்ற வரலாறு",
+      "when": "எப்போது",
+      "setting": "அமைப்பு",
+      "change": "மாற்று",
+      "by": "மாற்றியவர்",
+      "reason": "காரணம்",
+      "before": "முன்:",
+      "after": "பின்:",
+      "inherited": "பெறப்பட்ட மதிப்பு",
+      "unknownActor": "தெரியாதது",
+      "noReason": "காரணம் தரப்படவில்லை",
+      "showMore": "மேலும் காட்டு",
+      "scope": "Level",
+      "scopeWorkspace": "பணியிடம்",
+      "scopeAgent": "Agent {id}",
+      "scopeFilter": "Show changes at",
+      "filterAll": "All levels",
+      "filterWorkspace": "Workspace only",
+      "filterAgents": "Agents only",
+      "searchLoadedOnly": "The search covers the changes loaded so far.",
+      "loadError": "The change history could not be loaded. {message}",
+      "moreFailed": "More changes could not be loaded. {message}",
+      "loadingMore": "ஏற்றுகிறது"
+    }
+  },
+  "agentBehavior": {
+    "title": "நடத்தையும் வரம்புகளும்",
+    "intro": "இந்த முகவர் ஒரு சுற்றில் எவ்வளவு தூரம் செல்லலாம் என்பதைக் கட்டுப்படுத்துங்கள்: எத்தனை கருவிகளை அழைக்கலாம், எவ்வளவு நேரம் இயங்கலாம், எவ்வளவு திரும்பப் படிக்கிறது. இங்கே நீங்கள் மாற்றாதவை உங்கள் பணியிடத்திலிருந்து பெறப்படும்.",
+    "saveFirst": "முதலில் முகவரைச் சேமியுங்கள். அது உருவான பிறகு அதன் நடத்தையையும் வரம்புகளையும் அமைக்கலாம்.",
+    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "tabs": {
+      "label": "முகவர் உள்ளமைவு",
+      "setup": "அமைவு",
+      "behavior": "நடத்தையும் வரம்புகளும்",
+      "unsaved": "சேமிக்கப்படாத மாற்றங்கள்"
+    },
+    "links": {
+      "label": "தொடர்புடைய பக்கங்கள்",
+      "tenant": "பணியிட இயல்புநிலைகளை மாற்று",
+      "playground": "விளையாட்டுமைதானத்தில் முயன்று பார்",
+      "prompts": "This agent's prompts",
+      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
+      "approvals": "This agent's approvals",
+      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
+      "turns": "Turn timeline",
+      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+    },
+    "readOnly": {
+      "locked": "இந்த முகவர் திருத்துவதற்குப் பூட்டப்பட்டுள்ளது, எனவே இந்த மதிப்புகள் படிக்க மட்டும்.",
+      "access": "இந்த மதிப்புகளை நீங்கள் பார்க்கலாம் ஆனால் இந்த முகவருக்கான உங்கள் அணுகல் அவற்றை மாற்ற அனுமதிக்காது."
+    },
+    "unsaved": "இந்தத் தாவலில் உங்களுக்குச் சேமிக்கப்படாத மாற்றங்கள் உள்ளன. வெளியேறும் முன் கீழே சேமியுங்கள் அல்லது நிராகரியுங்கள்.",
+    "inheritNote": "ஒவ்வொரு அமைப்பும் அதன் மதிப்பு எங்கிருந்து வருகிறது எனக் காட்டுகிறது. இங்கே ஒன்றை மாற்றினால் அது இந்த முகவருக்கு மட்டும் மேலெழுதப்படும்; பணியிட மதிப்பை மீண்டும் பெற மீட்டமையுங்கள்.",
+    "others": {
+      "title": "இந்த முகவருக்கான பிற கட்டுப்பாடுகள்",
+      "intro": "இந்தக் கட்டுப்பாடுகள் மேலுள்ள அமைப்புகளின் பகுதி அல்ல, எனவே அவை அமைவு தாவலில் இருக்கும்.",
+      "generation": "பதில்களின் படைப்பாற்றலும் நீளமும் (வெப்பநிலை, top-p, அதிகபட்ச டோக்கன்கள்) மற்றும் கூடுதல் மாதிரியெடுப்பு விருப்பங்கள்.",
+      "generationLink": "உருவாக்க மெருகூட்டலுக்குச் செல்",
+      "autonomy": "தன்னாட்சி நிலை, ஒவ்வொரு இயக்கத்திற்குமான செலவு வரம்பு, கருவி விதிகள், எப்போது ஒருவர் ஒப்புக்கொள்ள வேண்டும்.",
+      "autonomyLink": "பகுத்தறிவுக்கும் தன்னாட்சிக்கும் செல்"
+    },
+    "discard": {
+      "title": "சேமிக்காமல் வெளியேறவா?",
+      "description": "இந்த முகவரின் நடத்தை மற்றும் வரம்புகளில் உங்களுக்குச் சேமிக்கப்படாத மாற்றங்கள் உள்ளன. இப்போது வெளியேறினால் அவை இழக்கப்படும்.",
+      "stay": "இங்கேயே இருந்து திருத்தத்தைத் தொடர்",
+      "leave": "வெளியேறி மாற்றங்களை நிராகரி"
+    },
+    "summary": {
+      "title": "இந்த முகவர் இப்போது எப்படி நடந்துகொள்கிறது",
+      "subtitle": "இந்த முகவரின் சொந்த மேலெழுதல்கள், உங்கள் பணியிட அமைப்புகள் மற்றும் தள அமைப்புகள் பயன்படுத்தப்பட்ட பிறகு இதற்கு நடைமுறையில் உள்ள மதிப்புகள்.",
+      "loading": "தற்போதைய நடத்தையை ஏற்றுகிறது",
+      "error": "தற்போதைய நடத்தையை ஏற்ற முடியவில்லை. {message}",
+      "retry": "மீண்டும் முயல்",
+      "empty": "இந்த முகவருக்கு இன்னும் நடத்தை அமைப்புகள் எதுவும் கிடைக்கவில்லை.",
+      "facts": {
+        "steps": "ஒரு சுற்றுக்கு கருவி அழைப்புகள்",
+        "turnTimeout": "ஒரு சுற்றுக்கான நேரம்",
+        "toolTimeout": "ஒரு கருவி அழைப்புக்கான நேரம்",
+        "outputCap": "வைத்திருக்கும் கருவி வெளியீடு",
+        "continuation": "தொடர்ச்சிச் சுற்றுகள்",
+        "approvals": "ஒப்புதல்கள்",
+        "judge": "தர நடுவர் மாடல்",
+        "model": "மாடல்"
+      },
+      "tier": {
+        "SUPERVISED": "மேற்பார்வை: ஒவ்வொரு கருவி அழைப்பும் ஒருவருக்காகக் காத்திருக்கும்",
+        "SEMI_AUTONOMOUS": "அரை-தன்னாட்சி: உங்கள் பணியிட விதிகள் தீர்மானிக்கும்",
+        "FULLY_AUTONOMOUS": "முழு தன்னாட்சி: கருவி அழைப்புகள் ஒருபோதும் காத்திருக்காது"
+      },
+      "approvalResumes": "ஒப்புதலுக்குப் பிறகு தானாகத் தொடர்கிறது",
+      "approvalStops": "ஒப்புதலுக்குப் பிறகு புதிய செய்திக்காகக் காத்திருக்கிறது",
+      "judgeDefault": "தளத்தால் தேர்ந்தெடுக்கப்பட்டது",
+      "overrides": {
+        "none": "இந்த முகவர் எல்லா இடங்களிலும் உங்கள் பணியிட மதிப்புகளைப் பயன்படுத்துகிறது.",
+        "some": "இந்த முகவருக்கு மேலெழுதப்பட்ட அமைப்புகள்: {count}."
+      }
+    },
+    "impact": {
+      "title": "இதன் பொருள்",
+      "steps": "இந்த முகவர் ஒரு சுற்றில் அதிகபட்சம் {count} கருவிகளை அழைக்கலாம். அதன் பிறகு தன்னிடம் உள்ளதைக் கொண்டு பதிலளிக்கச் சொல்லப்படும்.",
+      "stepsTierSupervised": "இந்த முகவர் மேற்பார்வையில் உள்ளது, எனவே அதன் உண்மையான உச்சவரம்பு அந்த அடிப்படை எண்ணைவிடக் குறைவு. துல்லியமான எண்ணைப் பயன்படுத்த இந்த முகவருக்கு உங்கள் சொந்த மதிப்பை அமையுங்கள்.",
+      "stepsTierFull": "இந்த முகவர் முழு தன்னாட்சி கொண்டது, எனவே அதன் உண்மையான உச்சவரம்பு அந்த அடிப்படை எண்ணைவிட அதிகம். துல்லியமான எண்ணைப் பயன்படுத்த இந்த முகவருக்கு உங்கள் சொந்த மதிப்பை அமையுங்கள்.",
+      "turnTimeout": "ஒரு சுற்று {duration} பிறகு துண்டிக்கப்படும்.",
+      "turnTimeoutNone": "ஒரு சுற்றுக்கு நேர வரம்பு இல்லை.",
+      "toolTimeout": "ஒரு கருவி அழைப்பு {duration} பிறகு துண்டிக்கப்படும்.",
+      "toolTimeoutNone": "ஒரு கருவி அழைப்புக்கு நேர வரம்பு இல்லை.",
+      "outputCap": "{chars}-ஐ விட நீளமான கருவி முடிவு முகவர் படிக்கும் முன் சுருக்கப்படும்.",
+      "continuation": "ஒரு பதில் துண்டிக்கப்பட்டால், முகவர் அதை மேலும் {count} முறை வரை தொடரலாம்.",
+      "continuationNone": "துண்டிக்கப்பட்ட பதில் தொடரப்படாது.",
+      "retrieval": "ஒவ்வொரு கேள்விக்கும் அது சிறந்த {count} அறிவுப் பொருத்தங்களைப் படிக்கிறது.",
+      "retrievalScored": "ஒவ்வொரு கேள்விக்கும் அது சிறந்த {count} அறிவுப் பொருத்தங்களைப் படித்து {score}-க்குக் கீழ் மதிப்பெண் பெறும் பொருத்தங்களைப் புறக்கணிக்கிறது.",
+      "approvalContinuationOn": "காத்திருக்கும் செயலை ஒருவர் ஒப்புக்கொண்ட பிறகு, முகவர் தானே பணியை முடிக்கிறது.",
+      "approvalContinuationOff": "காத்திருக்கும் செயலை ஒருவர் ஒப்புக்கொண்ட பிறகு, சுற்று முடிந்துவிடும், கையால் பின்தொடர வேண்டும்.",
+      "guardClosed": "ஒரு பாதுகாப்புச் சரிபார்ப்பு பழுதடைந்தால், செயல் மறுக்கப்படும்.",
+      "guardOpen": "ஒரு பாதுகாப்புச் சரிபார்ப்பு பழுதடைந்தால், செயல் அனுமதிக்கப்படும்.",
+      "branches": "ஒரு ஒப்படைப்பு அழைப்பு ஒரே நேரத்தில் அதிகபட்சம் {count} துணைப்பணிகளைத் தொடங்கலாம்."
+    }
+  },
+  "controls": {
+    "eyebrow": "உதவி",
+    "title": "எதை எங்கே கட்டுப்படுத்துவது...?",
+    "subtitle": "உங்கள் முகவர்களின் நடத்தையை வடிவமைக்கும் ஒவ்வொரு கட்டுப்பாடும், அது இருக்கும் பக்கமும். நீங்கள் எதை மாற்ற விரும்புகிறீர்களோ அதைக் கொண்டு தேடுங்கள்.",
+    "breadcrumb": {
+      "label": "வழிச்சுவடு",
+      "console": "கன்சோல்",
+      "controls": "கட்டுப்பாடுகள்"
+    },
+    "related": {
+      "label": "பிற கட்டுப்பாடுகள்"
+    },
+    "search": {
+      "label": "கட்டுப்பாடுகளைத் தேடு",
+      "placeholder": "எடுத்துக்காட்டு: நேரமுடிவு, ஒப்புதல், ப்ராம்ப்ட், நினைவகம்",
+      "count": "{count} பொருந்தும் கட்டுப்பாடுகள்",
+      "none": "\"{query}\"-க்குப் பொருந்துவது எதுவும் இல்லை. குறுகிய சொல்லை முயலுங்கள்.",
+      "noSettings": "உங்கள் தேடலுக்குப் பொருந்தும் அமைப்பு இல்லை."
+    },
+    "areasHeading": "கட்டுப்பாட்டுப் பகுதிகள்",
+    "areasIntro": "இந்தப் பக்கங்களில் ஒற்றை எண் அல்லாத கட்டுப்பாடுகள் உள்ளன: அறிவுறுத்தல்கள், ஒப்புதல் விதிகள், பாதுகாப்பு விதிகள், ஒரு சுற்று என்ன செய்தது என்பதன் பதிவு.",
+    "openArea": "திற",
+    "needsAccess": "இந்தப் பக்கத்தை அணுக பணியிட நிர்வாகியைக் கேளுங்கள்.",
+    "settingsHeading": "ஒவ்வொரு இயக்கநேர அமைப்பும்",
+    "settingsIntro": "ஒவ்வொரு அமைப்பையும் முழுப் பணியிடத்துக்கும், ஒரு முகவருக்கும், அல்லது இரண்டுக்கும் மாற்றலாம். ஒரு முகவரின் சொந்த மதிப்பு பணியிட மதிப்பை விட மேலோங்கும். அமைப்பிலேயே சென்றடைய ஒரு இணைப்பைத் தேர்ந்தெடுங்கள்.",
+    "loading": "அமைப்புகளின் பட்டியலை ஏற்றுகிறது",
+    "loadFailed": "அமைப்புகளின் பட்டியலை ஏற்ற முடியவில்லை. {message}",
+    "retry": "மீண்டும் முயல்",
+    "emptyCatalog": "இந்தப் பணியிடத்தில் காட்ட இயக்கநேர அமைப்புகள் இல்லை.",
+    "changeWorkspace": "பணியிடத்துக்கு மாற்று",
+    "changeAgent": "ஒரு முகவரில் மாற்று",
+    "workspaceOnly": "பணியிடம் முழுவதற்கும் மட்டும்",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "முகவர் இயக்கநேர வரம்புகள்",
+        "intro": "ஒரு சுற்று எவ்வளவு வேலை செய்யலாம்: கருவி அழைப்புகள், நேரம், முடிவின் அளவு, மீட்டெடுப்பு."
+      },
+      "behaviour-settings": {
+        "title": "நடத்தை அமைப்புகள்",
+        "intro": "பதில்கள் எப்படி முடிக்கப்பட்டுத் தற்காலிகமாகச் சேமிக்கப்படுகின்றன, ஒப்புதல்கள் எப்படித் தொடர்கின்றன, பாதுகாப்புச் சரிபார்ப்புகள் எப்படி நடந்துகொள்கின்றன, நினைவகம், தேடல், ஒப்படைப்பு எப்படி வேலை செய்கின்றன."
+      },
+      "other": {
+        "title": "பிற அமைப்புகள்",
+        "intro": "தனியான பிரிவு இல்லாத அமைப்புகள்."
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "இயக்கநேர அமைப்புகள்",
+        "summary": "முழுப் பணியிடத்துக்கான வரம்புகள், ஒப்புதல்கள், தரச் சரிபார்ப்புகள், பாதுகாப்புக் கடுமை, நினைவகம், ஒப்படைப்பு.",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers வரம்புகள் நேரமுடிவு கருவிப் படிகள் மறுமுயற்சிகள் தற்காலிகச் சேமிப்பு நினைவகம் ஒப்படைப்பு தரம் நடுவர் அமைப்புகள் எண்கள்"
+      },
+      "prompts": {
+        "title": "அறிவுறுத்தல்கள்",
+        "summary": "தளம் மாடலுக்குத் தரும் ப்ராம்ப்ட்கள்: ஒவ்வொன்றையும் பாருங்கள், பணியிடத்துக்கோ ஒரு முகவருக்கோ மேலெழுதுங்கள், முடிவை முன்னோட்டமிடுங்கள்.",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry ப்ராம்ப்ட் வழிகாட்டுதல்கள் சிஸ்டம் ப்ராம்ப்ட் அறிவுறுத்தல்கள் மேலெழுதல் முன்னோட்டம் பதிவகம்"
+      },
+      "approvals": {
+        "title": "ஒப்புதல்கள்",
+        "summary": "ஒருவருக்காகக் காத்திருக்கும் செயல்களின் வரிசை, எந்தக் கருவிகளுக்கு ஒப்புதல் தேவை என்ற விதிகள், உங்கள் முடிவுக்குப் பிறகு என்ன நடக்கும்.",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation ஒப்புதல் மறுப்பு வரிசை மனித மேற்பார்வை கருவி விதிகள் காலாவதி தொடர்ச்சி"
+      },
+      "guardrails": {
+        "title": "பாதுகாப்புத் தடுப்புகள்",
+        "summary": "இந்தப் பணியிடம் கடந்து செல்ல மறுக்கும் வடிவங்கள், கருவி முடிவுகளுக்குப் பயன்படுத்தப்படும் உள்ளடக்கக் கொள்கை.",
+        "keywords": "safety rules block filter policy content patterns பாதுகாப்பு விதிகள் தடுப்பு வடிகட்டி கொள்கை உள்ளடக்கம் வடிவங்கள்"
+      },
+      "turns": {
+        "title": "சுற்று ஆய்வாளர்",
+        "summary": "ஒரு முகவர் சுற்றின் பதிவு செய்யப்பட்ட காலவரிசை: என்ன கேட்கப்பட்டது, எந்தக் கருவிகள் இயங்கின, ஒவ்வொரு படியும் எவ்வளவு செலவானது, ஏன் நின்றது.",
+        "keywords": "turn timeline journal trace replay history steps debug சுற்று காலவரிசை பதிவேடு தடம் மறுஇயக்கம் வரலாறு படிகள் பிழைதிருத்தம்"
+      },
+      "agentBehavior": {
+        "title": "முகவர் நடத்தையும் வரம்புகளும்",
+        "summary": "ஒரு முகவரின் பக்கத்தில்: அதன் சொந்த வரம்புகள் மற்றும் நடத்தை அமைப்புகள், ஒவ்வொரு மதிப்பின் மூலமும் பணியிட மதிப்புக்கான மீட்டமைப்பும் உடன்.",
+        "keywords": "agent override per agent behavior limits tab முகவர் மேலெழுதல் ஒவ்வொரு முகவருக்கும் நடத்தை வரம்புகள் தாவல்"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "இந்த ப்ராம்ப்ட் தொகுதிகளால் ஆனது",
+    "blocksCount": "{n} தொகுதி(கள்)",
+    "blockDefault": "இயல்புநிலையாக வழங்கப்பட்டது",
+    "blockOverride": "{scope} மேலெழுதல் v{version}",
+    "blockAgentConfig": "முகவரின் சொந்த ப்ராம்ப்ட்",
+    "blockCode": "தளக் குறியீடு",
+    "blockTokens": "~{tokens} டோக்கன்கள்",
+    "blockHash": "சொற்றொடர் ஹேஷ்"
+  },
+  "toolApproval": {
+    "continuing": "முகவர் பணியைத் தொடர்கிறது.",
+    "continueNotStarted": "இந்த முடிவுக்குப் பிறகு முகவர் தானாக மறுதொடக்கம் செய்யப்படவில்லை. தொடர ஒரு செய்தி அனுப்புங்கள்.",
+    "continueTimedOut": "முகவர் இன்னும் தொடர்வதை முடிக்கவில்லை. முடிந்ததும் அதன் பதில் உரையாடலில் வரும்; சரிபார்க்க மீண்டும் ஏற்றுங்கள்."
+  },
+  "promptDirectives": {
+    "tabRegistry": "அனைத்து ப்ராம்ப்ட்களும்",
+    "tabAgentPreview": "இறுதி ப்ராம்ப்ட்டை முன்னோட்டமிடு",
+    "regTitle": "ஒவ்வொரு ப்ராம்ப்ட்டும்",
+    "regIntro": "ஒரு மாடலுக்காகத் தளம் எழுதும் அனைத்து உரையும், தற்போது நடைமுறையில் உள்ள சொற்றொடர், அதன் மூலம் மற்றும் பதிப்புடன். ஒரு நோக்கத்தைத் தேர்ந்தெடுங்கள், மாற்ற ஒரு ப்ராம்ப்ட்டைத் திறவுங்கள், முந்தைய ஒவ்வொரு பதிப்பையும் பாருங்கள். ஒரு மாற்றம் ஏறக்குறைய அரை நிமிடத்தில் எல்லாச் சேவையகங்களையும் சென்றடையும்.",
+    "regScopeLabel": "மாற்றும் நோக்கம்",
+    "regScope_tenant": "இந்தப் பணியிடம்",
+    "regScope_agent": "ஒரு முகவர்",
+    "regScope_platform": "முழுத் தளம்",
+    "regAgentLabel": "முகவர்",
+    "regAgentPlaceholder": "ஒரு முகவரைத் தேர்ந்தெடுங்கள்",
+    "regAgentsFailed": "உங்கள் முகவர்களை ஏற்ற முடியவில்லை.",
+    "regPickAgent": "ஒரு முகவரின் ப்ராம்ப்ட்களைப் பார்க்கவும் மாற்றவும் அதைத் தேர்ந்தெடுங்கள்.",
+    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regSearchLabel": "ப்ராம்ப்ட்களைத் தேடு",
+    "regSearchPlaceholder": "விசை, தலைப்பு அல்லது விளக்கம்",
+    "regRiskLabel": "இடர் வகை",
+    "regRiskAll": "அனைத்து இடர் வகைகளும்",
+    "regRisk_STEERS_EVERY_TURN": "ஒவ்வொரு சுற்றையும் வழிநடத்துகிறது",
+    "regRisk_SECONDARY_CALL": "இரண்டாம் நிலை மாடல் அழைப்பு",
+    "regRisk_USER_VISIBLE": "மக்களுக்குக் காட்டப்படும்",
+    "regRisk_TOOL_DESCRIPTION": "கருவி விளக்கம்",
+    "regOnlyCustomised": "தனிப்பயனாக்கியவை மட்டும்",
+    "regPlatformReadOnly": "தளம் முழுவதற்கான ப்ராம்ப்ட்களை இங்கே படிக்கலாம்; தள நிர்வாகி மட்டுமே அவற்றை மாற்ற முடியும்.",
+    "regLoadFailed": "ப்ராம்ப்ட்களை ஏற்ற முடியவில்லை.",
+    "regCount": "{total} ப்ராம்ப்ட்களில் {shown} காட்டப்படுகின்றன.",
+    "regEmptyTitle": "பொருந்தும் ப்ராம்ப்ட்கள் இல்லை",
+    "regEmptyBody": "தேடலையோ வடிகட்டிகளையோ மாற்றுங்கள்.",
+    "regSource_DEFAULT": "இயல்புநிலையாக வழங்கப்பட்டது",
+    "regSource_FALLBACK": "இயல்புநிலையாக வழங்கப்பட்டது (மேலெழுதல்கள் கிடைக்கவில்லை)",
+    "regSource_PLATFORM": "தளம்",
+    "regSource_TENANT": "பணியிடம்",
+    "regSource_AGENT": "முகவர்",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "ஓய்வுபெற்றது",
+    "regRetiredBody": "இந்த ப்ராம்ப்ட் இனி எந்த உரையையும் அனுப்புவதில்லை, எனவே மாற்றுவதற்கு எதுவும் இல்லை.",
+    "regEffectiveOff": "அணைக்கப்பட்டது: எதுவும் அனுப்பப்படாது.",
+    "regEffectiveTokens": "இப்போது நடைமுறையில், சுமார் {tokens} டோக்கன்கள்.",
+    "regEffectiveLabel": "{title}-க்கான நடைமுறைச் சொற்றொடர்",
+    "regOpenEditor": "{title}-ஐத் திருத்து",
+    "regCloseEditor": "{title}-ஐ மூடு",
+    "regEditingOverride": "{scope} பதிப்பைத் திருத்துகிறது, தற்போது v{version}.",
+    "regEditingNone": "இன்னும் {scope} பதிப்பு இல்லை. இது அதன் கீழுள்ள சொற்றொடரிலிருந்து தொடங்குகிறது: {below}.",
+    "regPlaceholders": "இயக்கநேரத்தில் நிரப்பப்படுவது:",
+    "regRequired": "(தேவை)",
+    "regProblemsTitle": "சேமிக்கும் முன் இதைச் சரிசெய்யுங்கள்",
+    "regReasonLabel": "மாற்றத்திற்கான காரணம் (வரலாற்றில் வைக்கப்படும்)",
+    "regReasonPlaceholder": "விருப்பமானது",
+    "regConflict": "நீங்கள் திருத்திக்கொண்டிருந்தபோது யாரோ இந்த ப்ராம்ப்ட்டை மாற்றினர். அவர்களின் பதிப்பைப் பார்க்க இதை மூடி மீண்டும் திறந்து, பிறகு முயலுங்கள்.",
+    "regRevert": "{to}-க்குத் திரும்பு",
+    "regShowHistory": "வரலாறு",
+    "regHideHistory": "வரலாற்றை மறை",
+    "regHistoryLoading": "வரலாற்றை ஏற்றுகிறது…",
+    "regHistoryFailed": "வரலாற்றை ஏற்ற முடியவில்லை.",
+    "regHistoryEmpty": "இந்த நோக்கத்தில் இன்னும் பதிப்புகள் இல்லை.",
+    "regVersion": "பதிப்பு {version}",
+    "regAction_CREATE": "உருவாக்கப்பட்டது",
+    "regAction_UPDATE": "மாற்றப்பட்டது",
+    "regAction_REVERT": "திரும்பப் பெறப்பட்டது",
+    "regAction_MIGRATE": "நகர்த்தப்பட்டது",
+    "regCurrent": "தற்போதையது",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "தெரியாதது",
+    "regReason": "காரணம்: {reason}",
+    "regShowDiff": "பதிப்பு {version}-இல் மாற்றங்களைக் காட்டு",
+    "regHideDiff": "பதிப்பு {version}-இல் மாற்றங்களை மறை",
+    "regDiffLabel": "பதிப்பு {version} செய்த மாற்றங்கள்",
+    "regNoDiff": "இந்தப் பதிப்பில் எந்த உரையும் மாறவில்லை.",
+    "regRestore": "பதிப்பு {version}-ஐ மீட்டமை",
+    "regRestoreReason": "பதிப்பு {version}-இன் சொற்றொடர் மீட்டமைக்கப்பட்டது",
+    "regRestoreFailed": "அந்தப் பதிப்பை மீட்டமைக்க முடியவில்லை.",
+    "regRestoreAck": "{title}-இன் ஒரு பதிப்பை மீட்டமைப்பது பாதுகாப்பைப் பலவீனப்படுத்தக்கூடும் என்பதை நான் புரிந்துகொள்கிறேன்.",
+    "regPreviewTitle": "இறுதி ப்ராம்ப்ட்டை முன்னோட்டமிடு",
+    "regPreviewIntro": "மாடலை அழைக்காமல், ஒரு சுற்று செய்வது போலவே ஒரு முகவரின் உண்மையான சிஸ்டம் ப்ராம்ப்ட்டையும் கருவிப் பட்டியலையும் உருவாக்குகிறது. ஒவ்வொரு தொகுதியும் ப்ராம்ப்ட் விசை, நோக்கம் மற்றும் அதன் சொற்றொடர் வரும் பதிப்பைக் காட்டுகிறது.",
+    "regPreviewMessageLabel": "மாதிரிப் பயனர் செய்தி (விருப்பமானது)",
+    "regPreviewMessagePlaceholder": "உண்மையான செய்தியைப் போலவே கருவிகளையும் நினைவுகூரப்படும் நினைவகத்தையும் தேர்ந்தெடுக்கப் பயன்படுகிறது.",
+    "regPreviewSmallModel": "சிறிய மாடலுக்கான முன்னோட்டம்",
+    "regPreviewBuild": "முன்னோட்டத்தை உருவாக்கு",
+    "regPreviewBuilding": "உருவாக்குகிறது…",
+    "regPreviewFailed": "முன்னோட்டத்தை உருவாக்க முடியவில்லை.",
+    "regPreviewTotals": "சுமார் {prompt} டோக்கன் சிஸ்டம் உரையும் {tools} டோக்கன் கருவி வரையறைகளும் (மதிப்பீடுகள்).",
+    "regPreviewOverBudgetTitle": "டோக்கன் வரவுசெலவைத் தாண்டியது",
+    "regPreviewOverBudget": "நிலையான சிஸ்டம் உரை உள்ளமைக்கப்பட்ட {budget} டோக்கன் வரவுசெலவைத் தாண்டியுள்ளது. எதுவும் வெட்டப்படாது; ஒரு ப்ராம்ப்ட்டைச் சுருக்குவதைப் பரிசீலியுங்கள்.",
+    "regPreviewMessageHeading": "செய்தி: {message}",
+    "regPreviewTokens": "~{tokens} டோக்கன்கள்",
+    "regPreviewTools": "கருவிகள் ({count})",
+    "regPreviewNoTools": "இந்த முகவர் எந்தக் கருவியையும் வழங்கவில்லை.",
+    "regPreviewNotes": "இந்த முன்னோட்டம் அறிய முடியாதவை",
+    "regOriginDefault": "இயல்புநிலையாக வழங்கப்பட்டது",
+    "regOriginOverride": "{scope} மேலெழுதல் v{version}",
+    "regOriginAgentConfig": "முகவரின் சொந்த சிஸ்டம் ப்ராம்ப்ட்",
+    "regOriginCode": "தளக் குறியீடு"
   }
 }

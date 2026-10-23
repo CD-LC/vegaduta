@@ -120,12 +120,12 @@ public class DependencyHealthService {
             @Value("${app.meta.embedded-signup.app-id:}") String metaAppId,
             @Value("${app.meta.embedded-signup.app-secret:}") String metaAppSecret,
             Environment environment,
-            @Value("${app.workflow.temporal.target:}") String temporalTarget,
+            @Value("${app.workflow.temporal.target:127.0.0.1:7233}") String temporalTarget,
             @Value("${code-intel.enabled:false}") boolean codeIntelEnabled,
-            @Value("${code-intel.base-url:}") String codeIntelBaseUrl,
-            @Value("${app.storage.endpoint:}") String storageEndpoint,
+            @Value("${code-intel.base-url:http://localhost:8090}") String codeIntelBaseUrl,
+            @Value("${app.storage.endpoint:http://localhost:9000}") String storageEndpoint,
             @Value("${app.langfuse.base-url:}") String langfuseBaseUrl,
-            @Value("${management.otlp.tracing.endpoint:}") String otlpTracesEndpoint,
+            @Value("${management.otlp.tracing.endpoint:http://langfuse-web:3000/api/public/otel/v1/traces}") String otlpTracesEndpoint,
             @Value("${app.platform.ops.academy-base-url:}") String academyBaseUrl,
             @Value("${app.platform.ops.app-builder-base-url:}") String appBuilderBaseUrl) {
         this.enabled = enabled;

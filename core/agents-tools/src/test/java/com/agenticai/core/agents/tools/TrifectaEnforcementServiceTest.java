@@ -529,6 +529,43 @@ class TrifectaEnforcementServiceTest {
         assertFalse(service.exemptionHolds(agentId));
     }
 
+    // ---- dispatch time: relaxing a gate on the verdict ---------------------
+
+    @Test
+    void anAgentPositivelyJudgedNotATrifectaIsDefinitelyNotLethal() {
+        when(agents.getAllowedToolNames(agentId)).thenReturn(Set.of(READ, SEND));
+
+        assertTrue(service("warn", true, false, true).definitelyNotLethal(agentId));
+    }
+
+    @Test
+    void anAgentHoldingTheTrifectaIsNotDefinitelyNotLethalInAnyMode() {
+        when(agents.getAllowedToolNames(agentId)).thenReturn(Set.of(READ, WEB, SEND));
+
+        for (String mode : new String[] {"off", "warn", "require-approval", "block"}) {
+            assertFalse(
+                    service(mode, true, false, true).definitelyNotLethal(agentId),
+                    "mode " + mode + " is about saves; a relaxation of a gate still needs the agent to be safe");
+        }
+    }
+
+    @Test
+    void anAgentThatCannotBeJudgedIsNotDefinitelyNotLethal() {
+        when(agents.getAllowedToolNames(agentId)).thenThrow(new IllegalStateException("db down"));
+        TrifectaEnforcementService service = service("warn", true, false, true);
+
+        assertFalse(service.definitelyNotLethal(agentId));
+        assertFalse(service.definitelyNotLethal(null));
+    }
+
+    @Test
+    void aClassificationLookupFailureIsNotDefinitelyNotLethal() {
+        when(agents.getAllowedToolNames(agentId)).thenReturn(Set.of(READ, SEND));
+        when(registry.resolveAll(anyCollection())).thenThrow(new IllegalStateException("db down"));
+
+        assertFalse(service("warn", true, false, true).definitelyNotLethal(agentId));
+    }
+
     // ---- helpers -----------------------------------------------------------
 
     private TrifectaEnforcementService service(

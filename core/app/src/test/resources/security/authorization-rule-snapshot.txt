@@ -93,6 +93,7 @@ Deferred [Mvc [pattern='/api/agents/*/tool-policies', PUT], Ant [pattern='/api/a
 Deferred [Mvc [pattern='/api/audit-log'], Ant [pattern='/api/audit-log']] => --------Y----------Y-
 Deferred [Mvc [pattern='/api/audit-log/**'], Ant [pattern='/api/audit-log/**']] => --------Y----------Y-
 Deferred [Mvc [pattern='/api/agents/*/turns/*/journal', GET], Ant [pattern='/api/agents/*/turns/*/journal', GET]] => --------Y----------Y-
+Deferred [Mvc [pattern='/api/agents/*/turn-journal', GET], Ant [pattern='/api/agents/*/turn-journal', GET]] => --------Y----------Y-
 Deferred [Mvc [pattern='/api/mcp/registry', POST], Ant [pattern='/api/mcp/registry', POST]] => -----Y-------------Y-
 Deferred [Mvc [pattern='/api/mcp/registry/*/connect', POST], Ant [pattern='/api/mcp/registry/*/connect', POST]] => -----Y-------------Y-
 Deferred [Mvc [pattern='/api/mcp/registry/**', PATCH], Ant [pattern='/api/mcp/registry/**', PATCH]] => -----Y-------------Y-
