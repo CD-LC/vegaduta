@@ -93,8 +93,8 @@ POST /api/agents/{agentId}/versions  # HANDLER: AgentVersionService (EDITOR + as
 POST /api/agents/{agentId}/versions/rollback  # HANDLER: AgentVersionService (EDITOR + assertEditable)
 POST /api/agents/{agentId}/versions/{versionId}/promote  # HANDLER: AgentVersionService (EDITOR); gate force needs MANAGE_AGENTS
 POST /api/agents/{agentId}/versions/{versionId}/restore  # HANDLER: AgentVersionService (EDITOR + assertEditable)
-POST /api/approvals/{id}/approve  # FIX: tool-call and adminOnly approvals need PERM_MANAGE_APPROVALS and workflow-node approvals need RUNNER on the workflow (review step 8), but channel-send and agent.proposal approvals can still be decided by any member except the requester - who should decide them is a product decision
-POST /api/approvals/{id}/reject  # FIX: same as approve: channel-send and agent.proposal approvals can still be decided by any member except the requester
+POST /api/approvals/{id}/approve  # FIX: tool-call and adminOnly approvals need PERM_MANAGE_APPROVALS, workflow-node approvals need RUNNER on the workflow (review step 8) and agent.proposal approvals need RUNNER on the proposal's agent (SentinelProposalDecisionAuthorizer), but channel-send approvals can still be decided by any member except the requester - their payload names no agent, so who should decide them is a product decision
+POST /api/approvals/{id}/reject  # FIX: same as approve: channel-send approvals can still be decided by any member except the requester
 POST /api/budget/top-up  # MEMBER: the caller's own prepaid budget (BudgetTopUpController requireUserKey = principal; review 2026-10-10)
 POST /api/budget/top-up/confirm  # MEMBER: confirms the caller's own top-up (BudgetTopUpController requireUserKey = principal)
 POST /api/completions/fim  # MEMBER: editor code completion for any member, entitlement- and per-user-budgeted (FimCompletionService)
@@ -104,7 +104,7 @@ POST /api/knowledge/search  # MEMBER: read-only search; collections have no per-
 POST /api/mcp-apps/{appId}/tools/call  # HANDLER: McpAppsController requireAccess RUNNER on the app's agent
 POST /api/model-pricing  # MEMBER: read-only pricing calculation, no side effects
 POST /api/notifications/read-all  # MEMBER: marks the caller's visible notifications read (NotificationController)
-POST /api/notifications/{id}/read  # MEMBER: marks one notification read; no recipient check by design (NotificationService), changes only a read flag
+POST /api/notifications/{id}/read  # HANDLER: NotificationService.markRead (only a notification the caller can see: theirs, or a broadcast for a tenant admin; any other id is a no-op)
 POST /api/onboarding  # MEMBER: a tenant-less signup creates its own tenant; OnboardingController rejects a caller that already has one
 POST /api/payments/mandates/preview  # MEMBER: computes a draft mandate; signs and stores nothing (granting is PERM_MANAGE_BILLING)
 POST /api/quick-task  # HANDLER: QuickTaskService resolves the agent with VIEWER, stricter than chat's RUNNER (RUNNER is the lowest level)
