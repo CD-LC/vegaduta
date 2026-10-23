@@ -99,6 +99,12 @@ that scaffold.py/generate.py/preview.py all read from:
 | `python-fastapi` | FastAPI, one `/` route | `pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000` |
 | `static-html` | plain HTML/CSS, no build step | `python -m http.server 8000` |
 
+The Node templates pin their build tool past the published advisories: `vite` `^7.3.7` (`node-react`,
+`capacitor-app`; `@vitejs/plugin-react` `^4.7.0` supports it) and `astro` `~7.3.8`. Astro is held to the 7.3
+line on purpose: 7.4.2 and later declare `node >=22.23.4` and refuse to run on older Node (the workspace
+runner image has 22.23.3), while 7.3 needs 22.12. Widen it to `^7` when the runner's Node is bumped past that.
+The starters carry no lockfile, so a new project resolves the newest allowed version when it installs.
+
 Optional manifest keys:
 
 - `preview_dir` — build output that publishes to the repo's own GitHub
