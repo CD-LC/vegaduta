@@ -89,7 +89,8 @@ shutdown before this service existed.
   The child's working directory is still the image `WORKDIR` (`/app`).
   **Cost:** nothing is cached between connections, so every spawn downloads
   its package again, and the browser image's build-time npx pre-warm is no
-  longer used (watch the 60s MCP init timeout for heavy packages such as
+  longer used (the image deletes that cache, so its frozen server-puppeteer
+  tree no longer ships; watch the 60s MCP init timeout for heavy packages such as
   `server-puppeteer`). All sandboxes share the `/tmp` volume (512Mi emptyDir
   in the helm chart), so size it for concurrent connections × package size.
 - **Per-child uid (optional, `MCP_RUNNER_UID_RANGE`, e.g.
