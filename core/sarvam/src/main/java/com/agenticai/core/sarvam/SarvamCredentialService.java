@@ -1,9 +1,11 @@
 package com.agenticai.core.sarvam;
 
-import com.agenticai.core.security.HotpathLookups;
 import com.agenticai.core.crypto.EncryptionService;
 import com.agenticai.core.sarvam.dto.SarvamCredentialActivationRequest;
 import com.agenticai.core.sarvam.dto.SarvamCredentialResponse;
+import com.agenticai.core.security.HotpathLookups;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  * the service enforces itself (same as {@code TwilioCredentialService}'s repository calls).
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamCredentialService {
 
     private final SarvamCredentialRepository repository;

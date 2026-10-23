@@ -1,5 +1,7 @@
 package com.agenticai.core.elevenlabs;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.speech.call.CallSpeechQuotaExceededException;
 import com.agenticai.core.speech.call.CallSpeechSynthesizer;
 import java.util.List;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
  * the same message.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class ElevenLabsCallSpeechSynthesizer implements CallSpeechSynthesizer {
 
     /**
