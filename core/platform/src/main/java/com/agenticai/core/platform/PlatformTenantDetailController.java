@@ -7,6 +7,8 @@ import com.agenticai.core.chat.LlmCallLogRepository;
 import com.agenticai.core.security.DataResidencyRegion;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.AppUserRepository;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantRepository;
@@ -50,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Each metric is fetched independently; a failure is reported in {@code unavailable} rather than as
  * a fabricated zero.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/tenant-detail")
 @Profile("security")

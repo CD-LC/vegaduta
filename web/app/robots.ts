@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { AI_CRAWLERS } from "./lib/ai-crawlers";
+import { isPersonalEdition } from "./lib/edition";
 import { siteUrl } from "./lib/site-url";
 
 // robots.txt (SEO foundations pass, 2026-07-25). Served by Next's Metadata
@@ -63,6 +64,12 @@ import { siteUrl } from "./lib/site-url";
 export const dynamic = "force-dynamic";
 
 export default function robots(): MetadataRoute.Robots {
+  // A personal install is one person's private console: nothing on it is meant to be indexed, and
+  // there is no public funnel to point a crawler at. Disallow everything for every agent, AI crawlers
+  // included (a named group would otherwise ignore the "*" one - see THE TRAP above), and name no sitemap.
+  if (isPersonalEdition()) {
+    return { rules: [{ userAgent: "*", disallow: "/" }] };
+  }
   return {
     rules: [
       { userAgent: "*", allow: "/", disallow: DISALLOW },

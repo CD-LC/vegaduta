@@ -6,6 +6,8 @@ import com.agenticai.core.omnichannel.discord.dto.DiscordCredentialResponse;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  * channels/discord} Node service (see its README).
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class DiscordCredentialService {
 
     private final DiscordCredentialRepository repository;

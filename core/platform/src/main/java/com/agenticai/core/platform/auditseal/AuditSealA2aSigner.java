@@ -3,6 +3,8 @@ package com.agenticai.core.platform.auditseal;
 import com.agenticai.core.agents.a2a.A2aCardSigningService;
 import com.agenticai.core.agents.a2a.A2aProperties;
 import com.agenticai.core.audit.seal.AuditSealSigner;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -10,16 +12,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * Signs audit seals with the platform's existing Ed25519 identity ({@link A2aCardSigningService}, the key
- * published at {@code /.well-known/jwks.json}). Lives here, not in core/audit, because audit is a leaf module
- * and the signing service belongs to core/agents.
+ * Signs audit seals with the platform's existing Ed25519 identity ({@link A2aCardSigningService},
+ * the key published at {@code /.well-known/jwks.json}). Lives here, not in core/audit, because
+ * audit is a leaf module and the signing service belongs to core/agents.
  *
- * <p>Seals are immutable, so one signed with an ephemeral key could never be re-signed later. With no pinned
- * {@code app.a2a.signing.private-key-pem} the signing service mints an EPHEMERAL key per boot (per replica),
- * and an offline verifier could not pin a single published key for those seals. This signer therefore
- * reports itself UNAVAILABLE (no seal is created) until the key is pinned (APP_A2A_SIGNING_PRIVATE_KEY +
- * APP_A2A_SIGNING_PUBLIC_KEY).
+ * <p>Seals are immutable, so one signed with an ephemeral key could never be re-signed later. With
+ * no pinned {@code app.a2a.signing.private-key-pem} the signing service mints an EPHEMERAL key per
+ * boot (per replica), and an offline verifier could not pin a single published key for those seals.
+ * This signer therefore reports itself UNAVAILABLE (no seal is created) until the key is pinned
+ * (APP_A2A_SIGNING_PRIVATE_KEY + APP_A2A_SIGNING_PUBLIC_KEY).
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class AuditSealA2aSigner implements AuditSealSigner {
 

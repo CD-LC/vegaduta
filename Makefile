@@ -80,6 +80,10 @@ spring-wiring: ## Startup-only Spring wiring checks without a context: construct
 boot-check: ## Boot the real core jar against throwaway pgvector+AGE Postgres and Redis (about 3 min; needs Docker and JAVA_HOME on a JDK 21+)
 	bash scripts/ci/boot-check.sh
 
+.PHONY: boot-check-personal
+boot-check-personal: ## Same as boot-check but with the one-person profile set (security,knowledge,graph-memory,personal) and start-up profiling; prints the phase table (about 3 min; needs Docker and JDK 21+)
+	bash scripts/ci/boot-check.sh --personal --profile-startup
+
 .PHONY: test-web
 test-web: ## web: vitest
 	cd web && $(NPM) test
