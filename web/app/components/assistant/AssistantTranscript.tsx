@@ -249,14 +249,17 @@ function TurnEntry({
         startedAt={turn.startedAt}
         endedAt={live ? null : (turn.endedAt ?? turn.at)}
         showThinking={showThinking}
+        hasText={!!text}
+        lastEventAt={turn.lastEventAt ?? null}
       />
-      {(text || live) && (
+      {text && (
         <div
           className={cn(
-            "asst-bubble-agent max-w-[85%] py-2.5 pl-5 pr-4 text-sm leading-relaxed text-foreground"
+            "asst-bubble-agent max-w-[85%] py-2.5 pl-5 pr-4 text-sm leading-relaxed text-foreground",
+            live && "asst-streaming"
           )}
         >
-          {text ? <MediaCard text={text} /> : <span aria-label={t("thinking")}>…</span>}
+          <MediaCard text={text} />
         </div>
       )}
       {/* Request X-ray: the exact prompt, sampling options and tool list this
