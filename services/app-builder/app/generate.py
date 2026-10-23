@@ -52,6 +52,7 @@ See `docs/APP-BUILDER-BYO-REPO-CONTRACT-2026-07-30.md` §3.
 from __future__ import annotations
 
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 
@@ -80,17 +81,29 @@ class _FilesResult(list):
     produced them. Newer core builds return providerName/model on
     generate-files (so the UI can disclose "powered by ..." for a hosted
     generation); older builds return neither — `powered_by` stays None then
-    and the UI simply shows no hosted-engine label, same as before."""
+    and the UI simply shows no hosted-engine label, same as before.
+
+    `summary` is the model's own plain-English explanation of the change
+    (newer core builds only; None otherwise) — shown as the headline of the
+    chat result so the user knows what changed without reading the diff."""
+
     powered_by: dict | None = None
+    summary: str | None = None
 
 
-def _generate_files(ctx: TenantContext, instruction: str, passages: list[dict],
-                    manifest: dict, prior_failure: dict | None = None,
-                    context: str | None = None,
-                    images: list[dict] | None = None,
-                    settings: Settings = SETTINGS, *,
-                    full_paths: list[str] | None = None,
-                    project_files: list[str] | None = None) -> list[dict]:
+def _generate_files(
+    ctx: TenantContext,
+    instruction: str,
+    passages: list[dict],
+    manifest: dict,
+    prior_failure: dict | None = None,
+    context: str | None = None,
+    images: list[dict] | None = None,
+    settings: Settings = SETTINGS,
+    *,
+    full_paths: list[str] | None = None,
+    project_files: list[str] | None = None,
+) -> list[dict]:
     """Calls core's `POST /api/internal/app-builder/generate-files` — the
     same platform-hosted-pool/BYOK routing every other LLM call in this
     platform already uses (AssistService's resolution pattern; see
@@ -103,8 +116,8 @@ def _generate_files(ctx: TenantContext, instruction: str, passages: list[dict],
     it. Isolated so tests can monkeypatch this single function instead of
     the network, same as the pre-fix Anthropic call was."""
     retrieved_files = [
-        {"path": p.get("path"), "content": p.get("content") or ""}
-        for p in (passages or [])]
+        {"path": p.get("path"), "content": p.get("content") or ""} for p in (passages or [])
+    ]
 
     previous_failure = None
     if prior_failure and not prior_failure.get("success"):
@@ -126,9 +139,15 @@ def _generate_files(ctx: TenantContext, instruction: str, passages: list[dict],
         # Core's record is camelCase (retrievedFiles/previousFailure) —
         # match it here; our own route takes snake_case and converts.
         "images": [
-            {"name": i.get("name"), "mediaType": i.get("media_type"),
-             "dataBase64": i.get("data_base64")}
-            for i in images] if images else None,
+            {
+                "name": i.get("name"),
+                "mediaType": i.get("media_type"),
+                "dataBase64": i.get("data_base64"),
+            }
+            for i in images
+        ]
+        if images
+        else None,
         # 2026-09-29: which retrievedFiles are WHOLE files (the rest are
         # code-intel excerpts the model must not rewrite) and the project's
         # file list. Older core builds ignore both.
@@ -148,11 +167,10 @@ def _generate_files(ctx: TenantContext, instruction: str, passages: list[dict],
     # (GenerateError here, CodeIntelClientError there).
     try:
         resp = httpx.request(
-            "POST", url, headers=headers, json=body,
-            timeout=settings.core_timeout_seconds)
+            "POST", url, headers=headers, json=body, timeout=settings.core_timeout_seconds
+        )
     except httpx.TimeoutException as e:
-        raise GenerateError(
-            f"core generate-files request timed out: {url}") from e
+        raise GenerateError(f"core generate-files request timed out: {url}") from e
     except httpx.TransportError as e:
         raise GenerateError(f"core unreachable at {url}: {e}") from e
 
@@ -161,18 +179,22 @@ def _generate_files(ctx: TenantContext, instruction: str, passages: list[dict],
             error_body = resp.json()
         except ValueError:
             error_body = {"error": resp.text[:500]}
-        raise GenerateError(
-            error_body.get("error", f"core returned {resp.status_code}"))
+        raise GenerateError(error_body.get("error", f"core returned {resp.status_code}"))
 
     data = resp.json() if resp.content else {}
     files = data.get("files", [])
-    result = _FilesResult(f for f in files
-                          if isinstance(f, dict) and f.get("path") is not None
-                          and f.get("content") is not None)
+    result = _FilesResult(
+        f
+        for f in files
+        if isinstance(f, dict) and f.get("path") is not None and f.get("content") is not None
+    )
     provider = data.get("providerName")
     model = data.get("model")
     if provider or model:
         result.powered_by = {"provider": provider, "model": model}
+    summary = data.get("summary")
+    if isinstance(summary, str) and summary.strip():
+        result.summary = summary.strip()
     return result
 
 
@@ -216,6 +238,7 @@ def _project_reader(ctx: TenantContext, project, settings: Settings):
                 return [e["path"] for e in client.list_tree(repo, branch)]
             except GitHubError:
                 return []
+
         return read_gh, list_gh
 
     pdir = os.path.realpath(project_root(settings.data_dir, ctx, project.project_id))
@@ -239,19 +262,22 @@ def _project_reader(ctx: TenantContext, project, settings: Settings):
                 if len(out) >= _MAX_PROJECT_FILES:
                     return out
         return out
+
     return read_local, list_local
 
 
-def gather_edit_context(ctx: TenantContext, project, instruction: str,
-                        settings: Settings = SETTINGS) -> dict:
+def gather_edit_context(
+    ctx: TenantContext, project, instruction: str, settings: Settings = SETTINGS
+) -> dict:
     """{files:[{path, content, full}], project_files:[...]} for one edit.
 
     Paths come from code-intel search (relevance), content from the project
     itself (completeness). Used by the hosted generate() and handed to the
     on-device path via POST /projects/{id}/generate/context."""
     try:
-        passages = ci_client.search(ctx, project.project_id, instruction,
-                                    top_k=_MAX_CONTEXT_FILES * 2)
+        passages = ci_client.search(
+            ctx, project.project_id, instruction, top_k=_MAX_CONTEXT_FILES * 2
+        )
     except CodeIntelClientError:
         passages = []
     read, list_files = _project_reader(ctx, project, settings)
@@ -265,9 +291,15 @@ def gather_edit_context(ctx: TenantContext, project, instruction: str,
             continue
         chunks.setdefault(path, []).append(p.get("content") or "")
 
+    # Each whole-file read is one independent HTTP (or disk) call — up to
+    # _MAX_CONTEXT_FILES of them, fetched in parallel; order of `chunks` is
+    # preserved so the model sees the same sequence it always did.
+    paths = list(chunks.keys())
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        wholes = list(pool.map(read, paths))
+
     files: list[dict] = []
-    for path, parts in chunks.items():
-        whole = read(path)
+    for path, parts, whole in zip(paths, chunks.values(), wholes):
         if whole is not None and len(whole) <= _MAX_FULL_FILE_CHARS:
             files.append({"path": path, "content": whole, "full": True})
         else:
@@ -287,38 +319,77 @@ def drop_partial_writes(files: list[dict], seen: list[dict]) -> tuple[list[dict]
 
 
 def _as_passages(seen: list[dict]) -> tuple[list[dict], list[str]]:
-    return ([{"path": f["path"], "content": f["content"]} for f in seen],
-            [f["path"] for f in seen if f.get("full")])
+    return (
+        [{"path": f["path"], "content": f["content"]} for f in seen],
+        [f["path"] for f in seen if f.get("full")],
+    )
 
 
 # --------------------------------------------------------------------- #
 
-def modify_project(ctx: TenantContext, project_id: str, instruction: str,
-                   settings: Settings = SETTINGS,
-                   *, context: str | None = None,
-                   images: list[dict] | None = None) -> dict:
+
+def modify_project(
+    ctx: TenantContext,
+    project_id: str,
+    instruction: str,
+    settings: Settings = SETTINGS,
+    *,
+    context: str | None = None,
+    images: list[dict] | None = None,
+    progress=None,
+) -> dict:
+    """`progress(stage, detail)` is called at each pipeline step so the
+    SSE route (/generate/stream) can stream what the turn is doing instead
+    of leaving the UI on a dead spinner for the whole call. Stage names:
+    "context" (reading the project), "writing" (model generating),
+    "files" (detail = the file set - emitted right after workspace apply so
+    the client can preview the change while the check still runs),
+    "checking" (detail.attempt = build/test attempt number, starting at 1),
+    "publishing" (commit + reindex). Optional and best-effort - a raising
+    callback never breaks a turn."""
+
+    def emit(stage: str, detail: dict | None = None) -> None:
+        if progress is None:
+            return
+        try:
+            progress(stage, detail)
+        except Exception:  # noqa: BLE001 - reporting must never fail a turn
+            pass
+
     project = projects.require_live(settings.data_dir, ctx, project_id)
     manifest = project_manifest(ctx, project_id, settings)
     tdir = tenant_root(settings.data_dir, ctx)
 
     # Not indexed yet / transient failure -> no retrieved files, but the
     # project file list still tells the model what exists.
+    emit("context")
     edit_ctx = gather_edit_context(ctx, project, instruction, settings)
     seen = edit_ctx["files"]
     passages, full_paths = _as_passages(seen)
     project_files = edit_ctx["project_files"]
 
-    files = _generate_files(ctx, instruction, passages, manifest,
-                            context=context, images=images,
-                            settings=settings, full_paths=full_paths,
-                            project_files=project_files)
+    emit("writing")
+    files = _generate_files(
+        ctx,
+        instruction,
+        passages,
+        manifest,
+        context=context,
+        images=images,
+        settings=settings,
+        full_paths=full_paths,
+        project_files=project_files,
+    )
     powered_by = getattr(files, "powered_by", None)
+    summary = getattr(files, "summary", None)
     files, dropped = drop_partial_writes(list(files), seen)
     if not files:
         raise GenerateError(
             "the model only rewrote files too large to edit safely "
             f"({', '.join(dropped)}) — ask for a smaller, more specific change"
-            if dropped else "model returned no files to write")
+            if dropped
+            else "model returned no files to write"
+        )
 
     ws_id = ci_client.create_workspace(ctx, project_id)["workspace_id"]
     try:
@@ -328,7 +399,12 @@ def modify_project(ctx: TenantContext, project_id: str, instruction: str,
         run_result: dict | None = None
         success = True
         attempts = 0
+        # The exact file set is known now - hand it to the client for the
+        # in-browser preview BEFORE the (slow) build/test check, so the
+        # user sees their change while verification still runs.
+        emit("files", {"files": files, "files_changed": [f["path"] for f in files]})
         if check_cmd:
+            emit("checking", {"attempt": 1, "total": settings.max_fix_attempts + 1})
             run_result = ci_client.run(ctx, project_id, ws_id, check_cmd)
             success = bool(run_result.get("success"))
             # Bounded self-repair loop: each pass shows the model everything
@@ -338,64 +414,89 @@ def modify_project(ctx: TenantContext, project_id: str, instruction: str,
             # more to write.
             while not success and attempts < settings.max_fix_attempts:
                 attempts += 1
-                retry_seen = _merge_files(
-                    seen, [{**f, "full": True} for f in files])
+                emit("writing", {"attempt": attempts + 1})
+                retry_seen = _merge_files(seen, [{**f, "full": True} for f in files])
                 retry_passages, retry_full = _as_passages(retry_seen)
                 retry_files = _generate_files(
-                    ctx, instruction, retry_passages, manifest,
-                    prior_failure=run_result, context=context, images=images,
-                    settings=settings, full_paths=retry_full,
-                    project_files=project_files)
+                    ctx,
+                    instruction,
+                    retry_passages,
+                    manifest,
+                    prior_failure=run_result,
+                    context=context,
+                    images=images,
+                    settings=settings,
+                    full_paths=retry_full,
+                    project_files=project_files,
+                )
                 retry_powered = getattr(retry_files, "powered_by", None)
-                retry_files, retry_dropped = drop_partial_writes(
-                    list(retry_files), retry_seen)
+                retry_files, retry_dropped = drop_partial_writes(list(retry_files), retry_seen)
                 dropped += retry_dropped
                 if not retry_files:
                     break
                 ci_client.apply_files(ctx, project_id, ws_id, retry_files)
                 powered_by = retry_powered or powered_by
+                summary = getattr(retry_files, "summary", None) or summary
                 files = _merge_files(files, retry_files)
+                emit("files", {"files": files, "files_changed": [f["path"] for f in files]})
+                emit("checking", {"attempt": attempts + 1, "total": settings.max_fix_attempts + 1})
                 run_result = ci_client.run(ctx, project_id, ws_id, check_cmd)
                 success = bool(run_result.get("success"))
 
         diff = ci_client.diff(ctx, project_id, ws_id).get("diff", "")
 
         if success:
+            emit("publishing")
             _promote(ctx, project, files, instruction, settings)
             project.status = "ready"
             project.error = None
         else:
             project.error = (
                 "generate() applied but the build/test command still "
-                f"failed after {attempts} fix attempt(s): {check_cmd!r}")
+                f"failed after {attempts} fix attempt(s): {check_cmd!r}"
+            )
         projects.upsert(settings.data_dir, ctx, project)
     finally:
         try:
             ci_client.delete_workspace(ctx, project_id, ws_id)
         except CodeIntelClientError:
             pass  # best-effort cleanup; the TTL reaper on code-intel's
-                  # side will eventually collect it regardless.
+            # side will eventually collect it regardless.
 
-    audit.record(tdir, {
-        "kind": "generate", "project_id": project_id, "actor": ctx.subject,
-        "instruction": instruction[:2000],
+    audit.record(
+        tdir,
+        {
+            "kind": "generate",
+            "project_id": project_id,
+            "actor": ctx.subject,
+            "instruction": instruction[:2000],
+            "files_changed": [f["path"] for f in files],
+            "success": success,
+            "fix_attempts": attempts,
+            "diff_bytes": len(diff),
+        },
+    )
+
+    return {
+        "diff": diff,
         "files_changed": [f["path"] for f in files],
-        "success": success, "fix_attempts": attempts,
-        "diff_bytes": len(diff)})
-
-    return {"diff": diff, "files_changed": [f["path"] for f in files],
-            # The applied file set is echoed back so the client can render
-            # an instant in-browser preview (SandboxPreview) without
-            # waiting for the Pages deploy — the "next-gen designer" loop.
-            "files": files,
-            # Which engine generated this change (provider/model; absent on
-            # older core builds). The web client renders it as the
-            # "powered by" label on each generated result.
-            **({"powered_by": powered_by} if powered_by else {}),
-            # Writes refused because the model only saw excerpts of that file.
-            **({"skipped_files": dropped} if dropped else {}),
-           "fix_attempts": attempts,
-           "success": success, **_github_fields(project)}
+        # The applied file set is echoed back so the client can render
+        # an instant in-browser preview (SandboxPreview) without
+        # waiting for the Pages deploy — the "next-gen designer" loop.
+        "files": files,
+        # Which engine generated this change (provider/model; absent on
+        # older core builds). The web client renders it as the
+        # "powered by" label on each generated result.
+        **({"powered_by": powered_by} if powered_by else {}),
+        # The model's plain-English explanation of the change (absent on
+        # older core builds) - the "what changed" headline in the chat.
+        **({"summary": summary} if summary else {}),
+        # Writes refused because the model only saw excerpts of that file.
+        **({"skipped_files": dropped} if dropped else {}),
+        "fix_attempts": attempts,
+        "success": success,
+        **_github_fields(project),
+    }
 
 
 # --------------------------------------------------------------------- #
@@ -425,33 +526,55 @@ def _validate_apply_files(files: list[dict]) -> list[dict]:
     if len(files) > _MAX_APPLY_FILES:
         raise GenerateError(
             f"too many files ({len(files)} > {_MAX_APPLY_FILES}) — split the "
-            "change into smaller instructions")
+            "change into smaller instructions"
+        )
     out: list[dict] = []
     for f in files:
-        if not isinstance(f, dict) or not isinstance(f.get("path"), str) \
-                or not isinstance(f.get("content"), str):
-            raise GenerateError(
-                "every file must be {path: str, content: str}")
+        if (
+            not isinstance(f, dict)
+            or not isinstance(f.get("path"), str)
+            or not isinstance(f.get("content"), str)
+        ):
+            raise GenerateError("every file must be {path: str, content: str}")
         try:
             path = github_client.safe_repo_path(f["path"])
         except GitHubError as e:
             raise GenerateError(f"bad file path {f['path']!r}: {e}")
-        if len(f["content"].encode("utf-8", errors="replace")) \
-                > _MAX_APPLY_FILE_BYTES:
+        if len(f["content"].encode("utf-8", errors="replace")) > _MAX_APPLY_FILE_BYTES:
             raise GenerateError(f"file too large (>512KB): {path!r}")
         out.append({"path": path, "content": f["content"]})
     return out
 
 
-def apply_files_to_project(ctx: TenantContext, project_id: str,
-                           instruction: str, files: list[dict],
-                           settings: Settings = SETTINGS) -> dict:
+def apply_files_to_project(
+    ctx: TenantContext,
+    project_id: str,
+    instruction: str,
+    files: list[dict],
+    settings: Settings = SETTINGS,
+    *,
+    summary: str | None = None,
+    progress=None,
+) -> dict:
     """Apply a client-generated file set through the same
     workspace/verify/promote/audit pipeline as modify_project().
+
+    `summary` is the client-side model's own explanation of the change —
+    echoed back verbatim so the chat result shows it exactly like a hosted
+    turn's summary.
 
     Returns {diff, files_changed, success, check_output?, ...github fields}.
     On a failed check nothing is promoted and `check_output` carries the
     truncated stdout+stderr for the client to feed back to its model."""
+
+    def emit(stage: str, detail: dict | None = None) -> None:
+        if progress is None:
+            return
+        try:
+            progress(stage, detail)
+        except Exception:  # noqa: BLE001 - reporting must never fail a turn
+            pass
+
     project = projects.require_live(settings.data_dir, ctx, project_id)
     manifest = project_manifest(ctx, project_id, settings)
     tdir = tenant_root(settings.data_dir, ctx)
@@ -461,23 +584,24 @@ def apply_files_to_project(ctx: TenantContext, project_id: str,
     run_result: dict | None = None
     success = True
     try:
+        emit("files", {"files": files, "files_changed": [f["path"] for f in files]})
         ci_client.apply_files(ctx, project_id, ws_id, files)
 
         check_cmd = manifest.get("test") or manifest.get("build")
         if check_cmd:
+            emit("checking", {"attempt": 1, "total": 1})
             run_result = ci_client.run(ctx, project_id, ws_id, check_cmd)
             success = bool(run_result.get("success"))
 
         diff = ci_client.diff(ctx, project_id, ws_id).get("diff", "")
 
         if success:
+            emit("publishing")
             _promote(ctx, project, files, instruction, settings)
             project.status = "ready"
             project.error = None
         else:
-            project.error = (
-                "generate/apply ran but the build/test command failed: "
-                f"{check_cmd!r}")
+            project.error = f"generate/apply ran but the build/test command failed: {check_cmd!r}"
         projects.upsert(settings.data_dir, ctx, project)
     finally:
         try:
@@ -485,20 +609,31 @@ def apply_files_to_project(ctx: TenantContext, project_id: str,
         except CodeIntelClientError:
             pass  # best-effort cleanup; code-intel's TTL reaper collects it.
 
-    audit.record(tdir, {
-        "kind": "generate_apply", "project_id": project_id,
-        "actor": ctx.subject, "origin": "client",
-        "instruction": (instruction or "")[:2000],
-        "files_changed": [f["path"] for f in files],
-        "success": success, "diff_bytes": len(diff)})
+    audit.record(
+        tdir,
+        {
+            "kind": "generate_apply",
+            "project_id": project_id,
+            "actor": ctx.subject,
+            "origin": "client",
+            "instruction": (instruction or "")[:2000],
+            "files_changed": [f["path"] for f in files],
+            "success": success,
+            "diff_bytes": len(diff),
+        },
+    )
 
-    result = {"diff": diff, "files_changed": [f["path"] for f in files],
-              "files": files,
-              "success": success, **_github_fields(project)}
+    result = {
+        "diff": diff,
+        "files_changed": [f["path"] for f in files],
+        "files": files,
+        **({"summary": summary} if summary else {}),
+        "success": success,
+        **_github_fields(project),
+    }
     if not success and run_result:
         fin = run_result.get("final", {})
-        result["check_output"] = (
-            fin.get("stdout", "") + fin.get("stderr", ""))[:4000]
+        result["check_output"] = (fin.get("stdout", "") + fin.get("stderr", ""))[:4000]
     return result
 
 
@@ -506,8 +641,12 @@ def _github_fields(project) -> dict:
     """The branch/PR/Pages pointers the UI shows after a generate turn.
     Empty for a legacy local project (no github state at all)."""
     gh = project.github or {}
-    return {"branch": gh.get("branch"), "pr_url": gh.get("pr_url"),
-            "pr_number": gh.get("pr_number"), "pages_url": gh.get("pages_url")}
+    return {
+        "branch": gh.get("branch"),
+        "pr_url": gh.get("pr_url"),
+        "pr_number": gh.get("pr_number"),
+        "pages_url": gh.get("pages_url"),
+    }
 
 
 def _merge_files(base: list[dict], overrides: list[dict]) -> list[dict]:
@@ -520,20 +659,21 @@ def _merge_files(base: list[dict], overrides: list[dict]) -> list[dict]:
     return list(by_path.values())
 
 
-def _promote(ctx: TenantContext, project, files: list[dict],
-             instruction: str, settings: Settings) -> None:
+def _promote(
+    ctx: TenantContext, project, files: list[dict], instruction: str, settings: Settings
+) -> None:
     """Promote a verified file set into the project for real. Dispatches on
     whether the project lives in the tenant's GitHub repo (the default) or in
     a legacy local checkout."""
     if project.github:
         _promote_to_branch(ctx, project, files, instruction, settings)
     else:
-        _promote_to_local_checkout(
-            ctx, project.project_id, files, instruction, settings)
+        _promote_to_local_checkout(ctx, project.project_id, files, instruction, settings)
 
 
-def _promote_to_branch(ctx: TenantContext, project, files: list[dict],
-                       instruction: str, settings: Settings) -> None:
+def _promote_to_branch(
+    ctx: TenantContext, project, files: list[dict], instruction: str, settings: Settings
+) -> None:
     """Commit the file set onto the project's branch in the tenant's repo, as
     ONE commit, over GitHub's Git Data API — nothing is written to this
     host's filesystem. Path-escape safety that used to be a
@@ -548,14 +688,15 @@ def _promote_to_branch(ctx: TenantContext, project, files: list[dict],
     branch = gh_state.get("branch")
     if not repo or not branch:
         raise GenerateError(
-            "project is marked as a GitHub project but has no repo/branch "
-            "recorded — recreate it")
+            "project is marked as a GitHub project but has no repo/branch recorded — recreate it"
+        )
 
     conn = github_credentials.require(ctx, settings)
     token = github_credentials.token_for(conn, settings)
     try:
         commit_sha = GitHubClient(token, settings).commit_files(
-            repo, branch, files, f"AI: {instruction[:72]}")
+            repo, branch, files, f"AI: {instruction[:72]}"
+        )
     except GitHubError as e:
         # GitHubError messages are already token-scrubbed (see
         # github_client.redact) so this is safe to surface to the caller.
@@ -571,18 +712,22 @@ def _promote_to_branch(ctx: TenantContext, project, files: list[dict],
         # scaffold and this call would otherwise leave it unable to fetch a
         # private repo. POST /repos upserts, so this is cheap and idempotent.
         ci_client.register_repo(
-            ctx, project.project_id, source_type="git",
-            git_url=f"https://github.com/{repo}.git", git_ref=branch,
-            auth_token=token)
+            ctx,
+            project.project_id,
+            source_type="git",
+            git_url=f"https://github.com/{repo}.git",
+            git_ref=branch,
+            auth_token=token,
+        )
         ci_client.index_repo(ctx, project.project_id)
     except CodeIntelClientError:
         pass  # the commit is already on the branch, which is the durable
-              # result; a later /generate or /index call re-syncs the index.
+        # result; a later /generate or /index call re-syncs the index.
 
 
-def _promote_to_local_checkout(ctx: TenantContext, project_id: str,
-                               files: list[dict], instruction: str,
-                               settings: Settings) -> None:
+def _promote_to_local_checkout(
+    ctx: TenantContext, project_id: str, files: list[dict], instruction: str, settings: Settings
+) -> None:
     """Pre-pivot behaviour, unchanged: write into the local checkout and
     commit. Legacy path — see the module docstring."""
     pdir = os.path.realpath(project_root(settings.data_dir, ctx, project_id))
@@ -606,11 +751,13 @@ def _promote_to_local_checkout(ctx: TenantContext, project_id: str,
         ci_client.index_repo(ctx, project_id)
     except CodeIntelClientError:
         pass  # the checkout is still correct on disk; a later /generate or
-              # /index call will pick up the fresh state either way.
+        # /index call will pick up the fresh state either way.
 
 
 def _run_git(args: list[str], cwd: str, capture: bool = False) -> str:
     import subprocess
-    r = subprocess.run(["git", *args], cwd=cwd, check=True,
-                       capture_output=True, text=True, timeout=60)
+
+    r = subprocess.run(
+        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True, timeout=60
+    )
     return r.stdout if capture else ""

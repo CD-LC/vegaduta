@@ -57,6 +57,19 @@ function stripFence(s: string): string {
   return s.replace(/^```[a-zA-Z]*\n/, "").replace(/\n```\s*$/, "");
 }
 
+/** The model's own one-sentence explanation, when it ended its reply with
+ * the `NOTE:` line EDIT_SYSTEM asks for. Tolerant of case, spacing and the
+ * note appearing anywhere (small models rarely respect "after the last
+ * block" exactly); the LAST NOTE wins. Null when absent — callers fall
+ * back to the mechanical "N changes applied" line. */
+export function extractEditNote(reply: string): string | null {
+  let note: string | null = null;
+  for (const m of String(reply || "").matchAll(/^\s*NOTE\s*:\s*(.+?)\s*$/gim)) {
+    note = m[1];
+  }
+  return note;
+}
+
 /** Pull a full HTML document out of a reply, or null. Used when the model
  * (or the caller) chose a full rewrite instead of edit blocks. */
 export function extractHtmlDocument(reply: string): string | null {
