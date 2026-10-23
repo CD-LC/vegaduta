@@ -1,5 +1,7 @@
 package com.agenticai.core.sarvam;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.speech.WavConcatenator;
 import com.agenticai.core.speech.call.CallSpeechQuota;
 import com.agenticai.core.speech.call.CallSpeechSynthesizer;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
  * configured", returns {@code null} so callers fall through to text-only.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamCallSpeechSynthesizer implements CallSpeechSynthesizer {
 
     private static final Logger log = LoggerFactory.getLogger(SarvamCallSpeechSynthesizer.class);

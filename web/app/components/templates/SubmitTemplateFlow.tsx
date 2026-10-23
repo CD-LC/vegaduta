@@ -12,6 +12,7 @@ import type {
   TemplateRequirement,
 } from "../../lib/api";
 import { toast } from "../../lib/toastBus";
+import { isPersonalEdition } from "../../lib/edition";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -48,17 +49,22 @@ interface Pickable {
 // front (contract requirement) - nothing a member submits goes public
 // unreviewed. Rendered as a modal so it can be launched from the Agents
 // screen (via ShareAsTemplateButton) and from /templates/mine alike.
-export default function SubmitTemplateFlow({
-  open,
-  onClose,
-  onSubmitted,
-  presetSource,
-}: {
+export default function SubmitTemplateFlow(props: SubmitTemplateFlowProps) {
+  // Community templates are submitted to a shared gallery with a moderation queue; a personal install has
+  // neither (/templates/mine is a denied route there), so the flow is not mounted and loads nothing. The
+  // edition is fixed for the page's life, so the hook order inside SubmitTemplateFlowInner never changes.
+  if (isPersonalEdition()) return null;
+  return <SubmitTemplateFlowInner {...props} />;
+}
+
+interface SubmitTemplateFlowProps {
   open: boolean;
   onClose: () => void;
   onSubmitted?: (submission: CommunityTemplateSubmission) => void;
   presetSource?: PresetSource | null;
-}) {
+}
+
+function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: SubmitTemplateFlowProps) {
   const [sources, setSources] = useState<Pickable[] | null>(null);
   const [sourcesError, setSourcesError] = useState<string | null>(null);
   const [sourceId, setSourceId] = useState<string>(presetSource?.id ?? "");

@@ -18,6 +18,7 @@ import {
   HardDrive,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { CLOUD_SPEECH_PROVIDERS, cloudSpeechOffered } from "../../lib/cloudSpeech";
 
 // ACTIVE stays on the shared --success-* tokens so it keeps meaning regardless
 // of the tenant's accent palette. Any other credential state (INACTIVE,
@@ -105,6 +106,22 @@ export const IMPLEMENTED_PROVIDERS: Set<ProviderName> = new Set([
   "META",
   "LOCAL_OPENAI",
 ]);
+
+/**
+ * The cards this install offers: every entry of {@link PROVIDERS}, minus the hosted speech vendors
+ * (SARVAM, ELEVENLABS) when core runs without CLOUD_SPEECH (a personal install). Evaluated per call, not at
+ * module load, so it follows the edition the console was told it is.
+ */
+export function offeredProviders(): readonly ProviderName[] {
+  return cloudSpeechOffered() ? PROVIDERS : PROVIDERS.filter((n) => !CLOUD_SPEECH_PROVIDERS.has(n));
+}
+
+/** {@link IMPLEMENTED_PROVIDERS} for this install: the same set without the hosted speech vendors where those are off. */
+export function offeredImplementedProviders(): ReadonlySet<ProviderName> {
+  return cloudSpeechOffered()
+    ? IMPLEMENTED_PROVIDERS
+    : new Set([...IMPLEMENTED_PROVIDERS].filter((n) => !CLOUD_SPEECH_PROVIDERS.has(n)));
+}
 
 // Provider fan-out (July 2026): OLLAMA/AZURE_OPENAI/AWS_BEDROCK all need
 // more than a single API-key field, the same "encode a small {field: value}
