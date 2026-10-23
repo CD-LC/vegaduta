@@ -14650,6 +14650,8 @@
     "moreSteps": "+{n} more",
     "sourcesLabel": "Sources",
     "closePanel": "Close the panel",
+    "conversationLabel": "Conversation",
+    "copiedReply": "Copied",
     "jumpToLatest": "Jump to the latest message",
     "statusGuardrails": "Checking safety…",
     "statusRouting": "Choosing a model…",
