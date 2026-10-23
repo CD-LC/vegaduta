@@ -1407,6 +1407,12 @@ app:
       # withheld and the replacement is what is stored; pattern-based guardrails only - the semantic toxicity check
       # needs a model call and runs on the buffered depths). Empty = a FAST turn is always streamed.
       fast-buffering-triggers: ${APP_CHAT_PARITY_FAST_BUFFERING_TRIGGERS:GENERATION_TOOLS,MCP_TOOLS}
+      # How a turn that matches a trigger reaches the person. FROM_FIRST_LINK: streamed live, only the part from the
+      # first link on (fast-hold-markers) is held until the reply is complete, then sent or replaced. WHOLE_REPLY: the
+      # whole reply is held (the behaviour before 2026-10-23). An OUTPUT_GUARDRAILS hold is always whole.
+      fast-buffering-mode: ${APP_CHAT_PARITY_FAST_BUFFERING_MODE:FROM_FIRST_LINK}
+      # Text that starts the held part, ignoring case; the invented-link guard's host markers are always added.
+      fast-hold-markers: ${APP_CHAT_PARITY_FAST_HOLD_MARKERS:http,www.}
       # The buffered verifiers see the newest this-many characters of the turn's tool results. 0 = all of it.
       verifier-max-evidence-chars: ${APP_CHAT_PARITY_VERIFIER_MAX_EVIDENCE_CHARS:12000}
       # A verifier rewrites a flagged answer WITHOUT tools (re-running them could repeat a side effect). A rewrite
@@ -1433,6 +1439,16 @@ app:
     # the properties class - ChatLimitsDefaultsTest pins each to this file). Every default is the old constant. ---
     # Small-model mode (a weak tool caller: a small or text-graded hosted row, or a local model): how many tools a
     # turn offers and how they are ranked (SmallModelProperties).
+    # A model served on the person's own machine (the install's Ollama pool row, or a bring-your-own provider listed
+    # in providers) reads its prompt slowly (a few hundred tokens a second on a laptop GPU, far fewer on a CPU) and its
+    # server keeps one prompt cache, with tool definitions ahead of the system prompt (LocalModelTurnProperties).
+    local-model:
+      # true = offer a local model the agent's tools unchanged and in a fixed order on every turn (no per-message
+      # trimming), so every turn after the first is answered from the server's cache and a tool the message did not
+      # name is never missing. A model in small-model mode keeps its short list. false = per-message selection.
+      stable-tools: ${APP_CHAT_LOCAL_MODEL_STABLE_TOOLS:true}
+      # Bring-your-own providers that are servers on the person's machine.
+      providers: ${APP_CHAT_LOCAL_MODEL_PROVIDERS:OLLAMA,LOCAL_OPENAI}
     small-model:
       # Tools offered on one small-model turn. Six is what 3B-8B models route between reliably.
       tool-cap: ${APP_CHAT_SMALL_MODEL_TOOL_CAP:6}
@@ -2245,6 +2261,11 @@ app:
       # A member is reminded at most once per this many hours.
       min-gap-hours: ${APP_TUTOR_REMINDERS_MIN_GAP_HOURS:20}
   # [WP 3d-2] Model choice defaults (typed: ProviderModelDefaultsProperties, core/providers).
+  providers:
+    # A pool row whose model has this many billions of parameters or fewer runs in small-model mode (few tools,
+    # compact directives, fast depth) unless the row's "Small-model mode" control says otherwise. Negative = never by
+    # size (only rows switched on by hand).
+    small-model-max-billions: ${APP_PROVIDERS_SMALL_MODEL_MAX_BILLIONS:8.0}
   models:
     # The model a brand-new agent starts on per provider (lower-case provider name). Used only when present in the
     # provider's current catalog; a stale pick degrades to the keyword scan below, never to a dead id. Generally the

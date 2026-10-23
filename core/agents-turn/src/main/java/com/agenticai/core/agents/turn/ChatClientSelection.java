@@ -55,11 +55,40 @@ final class ChatClientSelection {
     private final AgentChatService svc;
     private final FollowUpTools followUp;
     private final ContinuationProperties continuation;
+    private final LocalModelTurnProperties localModel;
 
     ChatClientSelection(AgentChatService svc, FollowUpTools followUp, ContinuationProperties continuation) {
+        this(svc, followUp, continuation, new LocalModelTurnProperties());
+    }
+
+    ChatClientSelection(
+            AgentChatService svc,
+            FollowUpTools followUp,
+            ContinuationProperties continuation,
+            LocalModelTurnProperties localModel) {
         this.svc = svc;
         this.followUp = followUp;
         this.continuation = continuation;
+        this.localModel = localModel == null ? new LocalModelTurnProperties() : localModel;
+    }
+
+    /**
+     * Whether this turn offers the agent's tool set unchanged (see {@link TurnModelTraits#stableToolSet}): the model it
+     * starts on is served on the person's own machine (the install's local pool row, or a bring-your-own provider in
+     * {@code app.chat.local-model.providers}), {@code app.chat.local-model.stable-tools} is on, and the model is not
+     * in small-model mode (that mode's short tool list matters more than a cached prompt on a slow machine).
+     */
+    boolean stableToolSet(Agent agent, List<HostedChainLink> hostedChain) {
+        if (!localModel.isStableTools()) {
+            return false;
+        }
+        if (hostedChain != null && !hostedChain.isEmpty()) {
+            HostedChainLink head = hostedChain.get(0);
+            return head.localModel() && !head.smallModel();
+        }
+        return agent != null
+                && agent.getProviderName() != null
+                && localModel.isLocalProvider(agent.getProviderName().name());
     }
 
     /**
@@ -181,6 +210,7 @@ final class ChatClientSelection {
             hostedChain = null;
         }
         context.modelTraits().weakToolCaller(weakToolCaller(agent, hostedChain));
+        context.modelTraits().stableToolSet(stableToolSet(agent, hostedChain));
         // A short follow-up ("yes", "continue") carries no words to select tools or a model by: it keeps
         // the tools the conversation already used and stays on the model that started the task. The
         // continuation after an approval has its own goal and tool list.

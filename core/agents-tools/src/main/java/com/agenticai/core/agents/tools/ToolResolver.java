@@ -110,12 +110,22 @@ final class ToolResolver {
     }
 
     ResolvedToolList resolve(ToolResolutionContext ctx, boolean applyRelevanceSelection) {
-        // Bound for the whole building of the list, so a tool that renders its own description
-        // template when it is constructed (ToolPromptTexts.current()) answers for this agent.
-        return toolDescriptions.within(ctx.agentId(), () -> resolveList(ctx, applyRelevanceSelection));
+        return resolve(ctx, applyRelevanceSelection, false);
     }
 
-    private ResolvedToolList resolveList(ToolResolutionContext ctx, boolean applyRelevanceSelection) {
+    /**
+     * As above; {@code stableToolSet} (a turn on a model served from the person's own machine, see {@code
+     * TurnModelTraits#stableToolSet}) skips the per-message relevance trimming so the model sees the same tools on
+     * every turn and its server's prompt cache holds. The hard cap and on-demand tool loading still apply.
+     */
+    ResolvedToolList resolve(ToolResolutionContext ctx, boolean applyRelevanceSelection, boolean stableToolSet) {
+        // Bound for the whole building of the list, so a tool that renders its own description
+        // template when it is constructed (ToolPromptTexts.current()) answers for this agent.
+        return toolDescriptions.within(ctx.agentId(), () -> resolveList(ctx, applyRelevanceSelection, stableToolSet));
+    }
+
+    private ResolvedToolList resolveList(
+            ToolResolutionContext ctx, boolean applyRelevanceSelection, boolean stableToolSet) {
         UUID agentId = ctx.agentId();
         // Captured separately (not just folded into `tools`) so ToolRelevanceSelector can tell
         // "one step of an MCP server's multi-step chain" apart from a built-in tool that happens
@@ -194,11 +204,13 @@ final class ToolResolver {
             }
         }
         List<ToolCallback> selected =
-                toolRelevanceSelector.select(
-                        ctx.userMessage(),
-                        allowed,
-                        alwaysRelevant(ctx),
-                        mcpToolNames);
+                stableToolSet
+                        ? allowed
+                        : toolRelevanceSelector.select(
+                                ctx.userMessage(),
+                                allowed,
+                                alwaysRelevant(ctx),
+                                mcpToolNames);
         return new ResolvedToolList(
                 AgentToolSelection.capToHardLimit(selected, hardCapPerTurn, mcpToolNames, agentId),
                 anyMcp);

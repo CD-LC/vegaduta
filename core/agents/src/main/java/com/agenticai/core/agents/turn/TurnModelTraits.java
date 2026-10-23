@@ -16,6 +16,8 @@ public final class TurnModelTraits {
 
     private volatile boolean weakToolCaller;
 
+    private volatile boolean stableToolSet;
+
     /** True for a model whose tool-less reply may be an announced step it never took. */
     public boolean weakToolCaller() {
         return weakToolCaller;
@@ -23,5 +25,19 @@ public final class TurnModelTraits {
 
     public void weakToolCaller(boolean weak) {
         this.weakToolCaller = weak;
+    }
+
+    /**
+     * True when the turn offers the agent's whole tool set in a fixed order instead of a per-message selection:
+     * a local model server keeps one prompt cache and renders tools ahead of the system prompt, so a tool set that
+     * changes with the message re-reads the whole prompt (seconds per thousand tokens on a laptop) where a stable
+     * one is answered from cache. Set from {@code app.chat.local-model.stable-tools}.
+     */
+    public boolean stableToolSet() {
+        return stableToolSet;
+    }
+
+    public void stableToolSet(boolean stable) {
+        this.stableToolSet = stable;
     }
 }

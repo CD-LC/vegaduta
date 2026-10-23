@@ -431,6 +431,11 @@ Ask-AI assist, Evals / LLM-as-judge), which `AuxiliaryModelResolver` reads befor
 | `app.chat.limits.escalation.registration-ttl` | B | cache: how long a cheap client stays registered as escalatable (PT10M); bookkeeping of the escalation mechanism |
 | `app.chat.limits.share-turn-timeout` | B | timeout: how long a visitor of a shared agent waits for one reply (PT45S); a visitor of a shared agent is not a member of the workspace, so the operator bounds how long the turn may hold a worker (the owner-facing turn limit is `agent.limits.turnTimeoutSeconds`) |
 | `app.chat.parity.fast-buffering-triggers` | B | algorithm constant: which tool families make a FAST turn buffer its reply instead of streaming it (`GENERATION_TOOLS,MCP_TOOLS`); an internal rule of the streaming path |
+| `app.chat.parity.fast-buffering-mode` | B | algorithm constant: whether a held FAST turn streams up to its first link (`FROM_FIRST_LINK`) or is held whole (`WHOLE_REPLY`); an internal rule of the streaming path |
+| `app.chat.parity.fast-hold-markers` | B | detector data: text that starts the held part of a streamed reply (`http,www.`); must cover the invented-link guard |
+| `app.chat.local-model.stable-tools` | B | deployment fact: whether a model on the person's own machine sees an unchanged tool set every turn (true); depends on how the install serves its models |
+| `app.chat.local-model.providers` | B | deployment fact: bring-your-own providers that run on the person's machine (`OLLAMA,LOCAL_OPENAI`) |
+| `app.providers.small-model-max-billions` | B | sizing heuristic: parameter size at or below which a pool row runs in small-model mode (8.0); the row's own control overrides it |
 | `app.chat.parity.verifier-history-window` | D | deferred: cleanup-owned (RIGOROUS verifier context) |
 | `app.chat.parity.verifier-max-evidence-chars` | D | deferred: cleanup-owned (RIGOROUS verifier context) |
 | `app.chat.parity.verifier-min-revision-ratio` | D | deferred: cleanup-owned (RIGOROUS verifier context) |

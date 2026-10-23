@@ -192,6 +192,22 @@ public class AgentToolProvider implements AgentToolPort {
             ChatClient chatClient,
             AgentStepEventEmitter emitter,
             ReasoningDepth effectiveDepth) {
+        return resolveToolsFor(agentId, sessionId, subjectKey, userMessage, chatClient, emitter, effectiveDepth, false);
+    }
+
+    /**
+     * As above; {@code stableToolSet} offers the model the agent's whole allowed set, unchanged from one message to the
+     * next (no per-message relevance trimming; the hard cap and on-demand tool loading still apply).
+     */
+    private List<ToolCallback> resolveToolsFor(
+            UUID agentId,
+            String sessionId,
+            String subjectKey,
+            String userMessage,
+            ChatClient chatClient,
+            AgentStepEventEmitter emitter,
+            ReasoningDepth effectiveDepth,
+            boolean stableToolSet) {
         if (emitter == null || !emitter.isEnabled()) {
             return resolveToolsFor(
                     agentId,
@@ -202,7 +218,8 @@ public class AgentToolProvider implements AgentToolPort {
                     true,
                     true,
                     effectiveDepth,
-                    true);
+                    true,
+                    stableToolSet);
         }
         AgentToolGuard.STEP_EVENT_SCOPE.set(emitter);
         try {
@@ -215,7 +232,8 @@ public class AgentToolProvider implements AgentToolPort {
                     true,
                     true,
                     effectiveDepth,
-                    true);
+                    true,
+                    stableToolSet);
         } finally {
             // remove(), not set(null): resolution can run on a pooled/virtual
             // carrier thread, and a stale emitter left behind here would attach
@@ -242,6 +260,10 @@ public class AgentToolProvider implements AgentToolPort {
             ChatClient chatClient,
             AgentStepEventEmitter emitter,
             ReasoningDepth effectiveDepth) {
+        // A turn on a model served from the person's own machine keeps its tool set unchanged from one message to
+        // the next (TurnModelTraits#stableToolSet), so the local server's prompt cache holds across turns.
+        boolean stableToolSet =
+                context != null && context.modelTraits() != null && context.modelTraits().stableToolSet();
         java.util.function.Supplier<List<ToolCallback>> resolve =
                 () ->
                         resolveToolsFor(
@@ -251,7 +273,8 @@ public class AgentToolProvider implements AgentToolPort {
                                 userMessage,
                                 chatClient,
                                 emitter,
-                                effectiveDepth);
+                                effectiveDepth,
+                                stableToolSet);
         if (context == null) {
             return resolve.get();
         }
@@ -370,6 +393,30 @@ public class AgentToolProvider implements AgentToolPort {
             boolean applyRelevanceSelection,
             ReasoningDepth effectiveDepth,
             boolean mainChatTurn) {
+        return resolveToolsFor(
+                agentId,
+                sessionId,
+                subjectKey,
+                userMessage,
+                chatClient,
+                allowDelegation,
+                applyRelevanceSelection,
+                effectiveDepth,
+                mainChatTurn,
+                false);
+    }
+
+    private List<ToolCallback> resolveToolsFor(
+            UUID agentId,
+            String sessionId,
+            String subjectKey,
+            String userMessage,
+            ChatClient chatClient,
+            boolean allowDelegation,
+            boolean applyRelevanceSelection,
+            ReasoningDepth effectiveDepth,
+            boolean mainChatTurn,
+            boolean stableToolSet) {
         AtomicInteger stepCounter = new AtomicInteger(0);
         turnRunBudgets.bindAgent(stepCounter, agentId);
         // 2026-08-16 fix: RIGOROUS's tool-call verifier judges each call ONLY against this turn's
@@ -403,7 +450,8 @@ public class AgentToolProvider implements AgentToolPort {
                         mainChatTurn,
                         List.of(),
                         mainChatTurn && turnApproval != null ? keptOnOffer(turnApproval) : Set.of()),
-                applyRelevanceSelection);
+                applyRelevanceSelection,
+                stableToolSet);
     }
 
 
