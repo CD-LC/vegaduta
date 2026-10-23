@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  * {@code /api/mcp/registry}, {@code /api/providers}, {@code /api/channels/*}, etc.
  */
 @RestController
+@Conditional(McpServerSurfaceCondition.class)
 @RequestMapping("/api/mcpserver/grants")
 public class McpServerAccessController {
 
