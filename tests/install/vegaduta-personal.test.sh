@@ -26,6 +26,7 @@ new_home
 out="$("$CLI" personal --build --cloud --dry-run </dev/null 2>&1)"
 check "plan names the personal tier" "$(has "$out" 'plan: tier=personal native_core=0 profiles=none local_ai=none'; echo $?)" "$out"
 check "plan uses personal.yml and its build overlay, not lite or full" "$(has "$out" 'personal.yml' && has "$out" 'personal.build.yml' && ! has "$out" '/lite.yml' && ! has "$out" '/docker-compose.yml'; echo $?)" "$out"
+check "the edition switch is written to .env once, as personal" "$([ "$(grep -c '^VEGADUTA_EDITION=' "$VEGADUTA_ENV_FILE")" = 1 ] && [ "$(sed -n 's/^VEGADUTA_EDITION=//p' "$VEGADUTA_ENV_FILE")" = personal ]; echo $?)" "$(grep EDITION "$VEGADUTA_ENV_FILE")"
 check "state remembers the tier" "$([ "$(state tier)" = personal ] && [ "$(state native_core)" = 0 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
 check "secrets were generated, none printed" "$(! has "$out" "$(sed -n 's/^APP_ENCRYPTION_KEY=//p' "$VEGADUTA_ENV_FILE")"; echo $?)"
 
@@ -229,6 +230,15 @@ new_home
 SHIM2="$WORK/shim"; mkdir -p "$SHIM2"; cp "$SHIM/docker" "$SHIM2/docker"; : > "$DOCKER_LOG"
 out="$(PATH="$SHIM2:$PATH" DOCKER_LOG="$DOCKER_LOG" "$CLI" personal --build --cloud --dry-run </dev/null 2>&1)"
 check "a dry run never stops or removes a container" "$(! grep -qE '^(stop|rm|kill|down|compose .* (down|stop|rm))' "$DOCKER_LOG"; echo $?)" "$(cat "$DOCKER_LOG")"
+
+# The edition switch: a value the owner set is never replaced by a later run, and personal.yml feeds core and the
+# console from that one variable.
+new_home
+"$CLI" personal --dry-run </dev/null >/dev/null 2>&1
+sed -i.bak 's/^VEGADUTA_EDITION=.*/VEGADUTA_EDITION=full/' "$VEGADUTA_ENV_FILE" && rm -f "$VEGADUTA_ENV_FILE.bak"
+"$CLI" personal --dry-run </dev/null >/dev/null 2>&1
+check "an edition the owner chose survives a later run" "$([ "$(sed -n 's/^VEGADUTA_EDITION=//p' "$VEGADUTA_ENV_FILE")" = full ] && [ "$(grep -c '^VEGADUTA_EDITION=' "$VEGADUTA_ENV_FILE")" = 1 ]; echo $?)" "$(grep EDITION "$VEGADUTA_ENV_FILE")"
+check "personal.yml derives core's tier and the console's edition from VEGADUTA_EDITION alone" "$(grep -q 'APP_EDITION_TIER: \${VEGADUTA_EDITION:-personal}' "$ROOT/deploy/compose/personal.yml" && grep -q 'NEXT_PUBLIC_EDITION: \${VEGADUTA_EDITION:-personal}' "$ROOT/deploy/compose/personal.yml"; echo $?)"
 
 printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

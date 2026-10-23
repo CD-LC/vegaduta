@@ -2,6 +2,7 @@
 
 import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
 import { Button } from "../../components/ui/button";
+import { channelOffered } from "../../lib/edition";
 import { useTranslations } from "../../lib/i18n";
 
 /** Channels a contact or a retention rule can be filed under (core ChannelType). */
@@ -19,6 +20,11 @@ export const CHANNELS = [
   "SMS",
   "SIGNAL",
 ];
+
+/** CHANNELS minus the ones this edition does not run (Slack, Discord, X and Teams on a personal install). */
+export function offeredChannels(): string[] {
+  return CHANNELS.filter((c) => channelOffered(c));
+}
 
 export function fmtTime(iso: string | null | undefined): string {
   return iso ? new Date(iso).toLocaleString() : "-";

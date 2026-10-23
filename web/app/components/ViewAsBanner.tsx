@@ -15,6 +15,7 @@ import {
   updateViewAsSession,
 } from "../lib/viewAs";
 import { checkViewAsSession } from "../lib/api/viewAsSession";
+import { isPersonalEdition } from "../lib/edition";
 
 // Persistent red bar for a read-only view-as tab (viewAs.ts). Mounted once in
 // the root layout, above AuthProvider, for two reasons:
@@ -34,7 +35,18 @@ function endedUrl(reason: "expired" | "exited" | "invalid"): string {
   return `/view-as?ended=${reason}`;
 }
 
+/**
+ * Impersonation is a platform-operator tool over other tenants' accounts; a personal install has one owner
+ * and no operator, and /view-as itself is a denied route there. So the banner (and the fragment capture and
+ * revalidation timers behind it) is not mounted at all. The edition is fixed for the life of the page, so
+ * the hook order of {@link ViewAsBannerActive} never changes between renders.
+ */
 export default function ViewAsBanner() {
+  if (isPersonalEdition()) return null;
+  return <ViewAsBannerActive />;
+}
+
+function ViewAsBannerActive() {
   const t = useTranslations("viewAs");
   const { state } = useViewAs();
   const [now, setNow] = useState(() => Date.now());
