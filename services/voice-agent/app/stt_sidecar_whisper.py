@@ -19,6 +19,7 @@ calls `_recognize_impl` below) exactly once per utterance. That VAD-driven
 utterance boundary - not a manual button release - is the actual latency win
 over today's push-to-talk `VoiceCallController#turn`.
 """
+
 from __future__ import annotations
 
 import base64
@@ -45,8 +46,8 @@ _UPLOAD_FILENAME = "utterance.wav"
 
 # Sidecar internal auth (2026-08-07): sidecar/app/main.py now requires
 # X-Internal-Token on every endpoint except /health. Same env var name the
-# `core` and `sidecar` services read (see deploy/docker-compose.yml), so one
-# deploy/.env value covers all three - mirroring how SIDECAR_BASE_URL is
+# `core` and `sidecar` services read (see deploy/compose/docker-compose.yml), so one
+# deploy/compose/.env value covers all three - mirroring how SIDECAR_BASE_URL is
 # shared. Read here rather than config.py because this file is the ONLY
 # sidecar caller in this worker; empty means "send no header", which only
 # works against a sidecar running with SIDECAR_AUTH_REQUIRED=false.
@@ -63,9 +64,7 @@ class SidecarWhisperSTT(stt.STT):
         http_session: aiohttp.ClientSession | None = None,
         room: rtc.Room | None = None,
     ) -> None:
-        super().__init__(
-            capabilities=stt.STTCapabilities(streaming=False, interim_results=False)
-        )
+        super().__init__(capabilities=stt.STTCapabilities(streaming=False, interim_results=False))
         self._base_url = (base_url or config.SIDECAR_BASE_URL).rstrip("/")
         self._session = http_session
         self._owns_session = http_session is None
@@ -140,9 +139,7 @@ class SidecarWhisperSTT(stt.STT):
                 url,
                 json=payload,
                 headers=(
-                    {"X-Internal-Token": _SIDECAR_SHARED_SECRET}
-                    if _SIDECAR_SHARED_SECRET
-                    else None
+                    {"X-Internal-Token": _SIDECAR_SHARED_SECRET} if _SIDECAR_SHARED_SECRET else None
                 ),
                 timeout=aiohttp.ClientTimeout(total=effective_timeout, sock_connect=10),
             ) as resp:

@@ -222,11 +222,12 @@ All via env vars (`app/settings.py`):
 # local dev (no auth, no LLM key -> /train/dpo works, LLM endpoints 503)
 RL_TRAINER_AUTH_MODE=none uvicorn app.main:app --port 8095
 
-# in the platform stack (OFF by default): set RL_TRAINER_ENABLED=true and a
-# real RL_TRAINER_INTERNAL_TOKEN + ANTHROPIC_API_KEY in deploy/.env, then
-docker compose up rl-trainer
+# in the platform stack (OFF by default): the compose profile `rl` starts it. Put
+# ANTHROPIC_API_KEY in deploy/compose/.env (RL_TRAINER_INTERNAL_TOKEN is filled by
+# `scripts/vegaduta secrets`), then
+scripts/vegaduta up --full --profile rl
 ```
 
-The service is wired into `deploy/docker-compose.yml` with a profile so it is
-**off by default** (mirroring how `code-intel` is gated), enabled by
-`RL_TRAINER_ENABLED=true`.
+The service is wired into `deploy/compose/docker-compose.yml` with the compose profile `rl`, so
+it is **off by default** (mirroring how `code-intel` is gated) and starts only when that
+profile is enabled. There is no `RL_TRAINER_ENABLED` switch.

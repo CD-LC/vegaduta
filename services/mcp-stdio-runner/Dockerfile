@@ -194,7 +194,7 @@ FROM browsers-${WITH_BROWSERS}
 
 USER mcprunner
 
-# No EXPOSE/ports published to the host - see deploy/docker-compose.yml's
+# No EXPOSE/ports published to the host - see deploy/compose/docker-compose.yml's
 # service comment: only `core`, over the isolated mcp-stdio-net network,
 # ever talks to this container.
 

@@ -158,7 +158,9 @@ python -m pytest tests/ -q
    change. "Compiled" is not "tested", and "tested" is not "ran it on a stack".
 
 A maintainer reviews every pull request. Two checks must be green before
-merge, and they are the only ones branch protection requires:
+merge, and they are the only ones the branch ruleset is meant to require (the
+ruleset is described in `docs/maintainers/branch-protection.md`; until it is
+configured on GitHub, the maintainer enforces this by hand):
 
 - **`CI OK`** aggregates everything in `ci.yml`: the component builds and tests
   that the change's paths trigger, the static gates and secret scan
