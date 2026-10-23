@@ -106,7 +106,8 @@ export default function TrustStrip({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="state-pill hidden sm:inline-flex"
+          className="state-pill topbar-status hidden sm:inline-flex"
+          title={coreHealthy ? tNav("systemHealthy") : tNav("systemOffline")}
           style={{
             ["--state" as string]: coreHealthy ? "var(--state-success)" : "var(--state-error)",
             border: "none",
@@ -114,10 +115,12 @@ export default function TrustStrip({
           }}
         >
           <span className={`state-dot ${coreHealthy ? "state-dot-live" : ""}`} aria-hidden="true" />
-          <span className="topbar-label">{coreHealthy ? tNav("systemHealthy") : tNav("systemOffline")}</span>
+          <span className="topbar-label topbar-status-label">
+            {coreHealthy ? tNav("systemHealthy") : tNav("systemOffline")}
+          </span>
           {countdown && (
             <span
-              className="topbar-label ml-1.5 font-mono text-[10.5px] tabular-nums"
+              className="topbar-label topbar-status-label ml-1.5 font-mono text-[10.5px] tabular-nums"
               style={{ color: "var(--text-faint)" }}
             >
               {countdown}

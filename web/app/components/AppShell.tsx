@@ -79,6 +79,11 @@ interface AppShellBodyProps {
    * `bleed`. The page owns all scrolling inside its own panels.
    */
   fillViewport?: boolean;
+  /**
+   * Conversation pages (the Assistant): the top bar's status chips (system health, browser models) show as
+   * quiet icons with their words in a tooltip and for screen readers, so they do not compete with the chat.
+   */
+  quietStatus?: boolean;
 }
 
 function AppShellBody({
@@ -92,6 +97,7 @@ function AppShellBody({
   // Default true (2026-09-18): the whole rail collapses to icons everywhere,
   // not just on the workflow editor.
   collapsibleRail = true,
+  quietStatus = false,
 }: AppShellBodyProps) {
   const bleed = bleedProp || fillViewport;
   const pathname = usePathname();
@@ -358,6 +364,7 @@ function AppShellBody({
           profileHref={profileHref}
           coreHealthy={coreHealthy}
           status={status}
+          quietStatus={quietStatus}
         />
 
         <motion.main

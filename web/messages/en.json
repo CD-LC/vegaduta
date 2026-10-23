@@ -14649,6 +14649,8 @@
     "chipFailed": "failed",
     "moreSteps": "+{n} more",
     "sourcesLabel": "Sources",
+    "closePanel": "Close the panel",
+    "jumpToLatest": "Jump to the latest message",
     "statusGuardrails": "Checking safety…",
     "statusRouting": "Choosing a model…",
     "statusContext": "Gathering context…",
