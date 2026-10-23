@@ -336,8 +336,7 @@ def generate_stream(project_id: str, body: GenerateRequest, ctx: TenantContext =
             )
             events_q.put({"stage": "done", "result": result})
         except HTTPException as e:
-            events_q.put({"stage": "error", "status": e.status_code,
-                          "error": str(e.detail)})
+            events_q.put({"stage": "error", "status": e.status_code, "error": str(e.detail)})
         except GenerateError as e:
             events_q.put({"stage": "error", "status": 500, "error": str(e)})
         except Exception as e:  # noqa: BLE001 - the stream must end cleanly
@@ -379,7 +378,11 @@ def generate_context(
 @app.post("/projects/{project_id}/generate/apply")
 def generate_apply(project_id: str, body: ApplyFilesRequest, ctx: TenantContext = Depends(tenant)):
     return _apply_files_to_project(
-        ctx, project_id, body.instruction, [f.model_dump() for f in body.files], SETTINGS,
+        ctx,
+        project_id,
+        body.instruction,
+        [f.model_dump() for f in body.files],
+        SETTINGS,
         summary=body.summary,
     )
 
