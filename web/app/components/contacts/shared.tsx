@@ -3,6 +3,7 @@
 import { timeAgo as sharedTimeAgo } from "../../lib/format";
 import { useTranslations } from "../../lib/i18n";
 import { CHANNEL_BRAND, CHANNEL_ICON } from "../BrandIcons";
+import { channelOffered } from "../../lib/edition";
 
 // Shared pieces of the contacts & request-mapping screen (ContactsPanel.tsx).
 
@@ -22,7 +23,9 @@ export const CHANNEL_META: Record<string, { label: string; color: string }> = {
   voice: { label: "Voice", color: CHANNEL_BRAND.voice.color },
   signal: { label: "Signal", color: CHANNEL_BRAND.signal.color },
 };
-export const CHANNEL_ORDER = Object.keys(CHANNEL_META);
+// The channels the "add contact" / routing pickers offer. CHANNEL_META stays complete so an existing row for an
+// unoffered channel still gets its label and colour; only the choices shrink (no Slack/Discord/X on a personal install).
+export const CHANNEL_ORDER = Object.keys(CHANNEL_META).filter(channelOffered);
 
 // How many per-session approve/reject calls run at once during a bulk action.
 export const BULK_CONCURRENCY = 4;
