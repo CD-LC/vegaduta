@@ -695,7 +695,9 @@ Boot project with a REST endpoint and tests" runs for as long as it takes:
   `local_shell` runs without a per-command approval (`APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED=false`; set it to
   `true` to ask each time). After any approval it does get, the Assistant carries on by itself while a folder
   is attached, so a long build needs no "continue" messages. A command may run up to 30
-  minutes (`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS`); Maven, Gradle and npm caches live in the runner's own volume.
+  minutes (`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS`); Maven, Gradle and npm caches live in the runner's own volume. The container is
+  limited to 3 GB of memory (`WORKSPACE_RUNNER_MEM_LIMIT`) and 2048 processes and threads (`WORKSPACE_RUNNER_PIDS_LIMIT`), so a runaway
+  command cannot take the computer down with it.
 - **Model.** A turn may use up to 150 tool calls in the personal profile (`GUARDRAILS_MAX_TOOL_CALLS_PER_TURN`), and core waits up to 240 s for a local
   model's first token (`LLM_HTTP_STREAM_IDLE_TIMEOUT`; 90 s elsewhere). Building a real project needs a capable model:
   add a provider key (Anthropic, OpenAI, Gemini) for this. The 4B local default can make small edits but stalls on a
