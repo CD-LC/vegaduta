@@ -1,5 +1,7 @@
 package com.agenticai.core.platform;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.Tenant;
 import com.agenticai.core.tenancy.TenantDataErasureService;
 import com.agenticai.core.tenancy.TenantNotFoundByIdException;
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Service;
  * DemoSandboxDataPurger} removes its {@code demo_session}-keyed control-plane rows and media
  * objects.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 @Profile("security")
 public class DemoSandboxReclaimService {
@@ -112,11 +115,11 @@ public class DemoSandboxReclaimService {
         List<ReclaimableSandbox> rows =
                 jdbc.query(
                         "SELECT t.id, t.name, t.schema_name, t.status, t.created_at, s.last_at FROM"
-                            + " control_plane.tenant t LEFT JOIN (SELECT tenant_id,"
-                            + " MAX(last_activity_at) AS last_at FROM control_plane.demo_session"
-                            + " GROUP BY tenant_id) s ON s.tenant_id = t.id WHERE t.is_demo AND"
-                            + " t.status <> 'ERASED' AND t.schema_name <> ? ORDER BY t.created_at"
-                            + " LIMIT "
+                                + " control_plane.tenant t LEFT JOIN (SELECT tenant_id,"
+                                + " MAX(last_activity_at) AS last_at FROM control_plane.demo_session"
+                                + " GROUP BY tenant_id) s ON s.tenant_id = t.id WHERE t.is_demo AND"
+                                + " t.status <> 'ERASED' AND t.schema_name <> ? ORDER BY t.created_at"
+                                + " LIMIT "
                                 + MAX_LISTED,
                         (rs, i) ->
                                 new ReclaimableSandbox(

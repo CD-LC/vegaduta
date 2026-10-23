@@ -5,6 +5,8 @@ import com.agenticai.core.sarvam.SarvamGeneratedAudioService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import java.time.Duration;
 import java.time.Instant;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
  * everyone" can never become an unbounded bill.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class AudioGenerationQuotaService {
 
     private final SarvamGeneratedAudioService audioService;

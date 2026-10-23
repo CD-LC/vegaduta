@@ -1,6 +1,8 @@
 package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.agents.core.Agent;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,28 +11,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
- * Builds the two Agent Cards this server publishes: the PLATFORM card at
- * {@code /.well-known/agent-card.json} (what an external agent discovers
- * first - "VegaDuta speaks A2A, here is the endpoint and the auth scheme, no
- * skills at this level") and a PER-AGENT card at
- * {@code /api/agents/{agentId}/a2a/agent-card.json} (one skill, id = the
- * agent id, whose {@code url} is the agent-scoped JSON-RPC route so a client
- * that discovered THAT card never has to pass {@code metadata.agentId}).
+ * Builds the two Agent Cards this server publishes: the PLATFORM card at {@code
+ * /.well-known/agent-card.json} (what an external agent discovers first - "VegaDuta speaks A2A,
+ * here is the endpoint and the auth scheme, no skills at this level") and a PER-AGENT card at
+ * {@code /api/agents/{agentId}/a2a/agent-card.json} (one skill, id = the agent id, whose {@code
+ * url} is the agent-scoped JSON-RPC route so a client that discovered THAT card never has to pass
+ * {@code metadata.agentId}).
  *
- * <p>Why skills are empty on the platform card: the well-known path is
- * unauthenticated by necessity (discovery precedes auth), and every agent on
- * this platform belongs to a tenant. Listing agents there would leak tenant
- * data to anyone on the internet; listing "the caller's agents" is impossible
- * before the caller has authenticated. The per-agent card is the honest
- * middle: it sits behind the same RUNNER access check as chatting with that
- * agent, so whoever can fetch it can also use it.
+ * <p>Why skills are empty on the platform card: the well-known path is unauthenticated by necessity
+ * (discovery precedes auth), and every agent on this platform belongs to a tenant. Listing agents
+ * there would leak tenant data to anyone on the internet; listing "the caller's agents" is
+ * impossible before the caller has authenticated. The per-agent card is the honest middle: it sits
+ * behind the same RUNNER access check as chatting with that agent, so whoever can fetch it can also
+ * use it.
  *
- * <p>Both cards carry the 0.3 fields ({@code url}, {@code preferredTransport})
- * AND the 1.0 ones ({@code supportedInterfaces}) so a client of either
- * generation finds what it parses - the two are non-conflicting and cheap.
- * {@code securitySchemes}/{@code security} advertise exactly what the endpoint
- * enforces (a bearer JWT via the main Spring Security chain) and nothing more.
+ * <p>Both cards carry the 0.3 fields ({@code url}, {@code preferredTransport}) AND the 1.0 ones
+ * ({@code supportedInterfaces}) so a client of either generation finds what it parses - the two are
+ * non-conflicting and cheap. {@code securitySchemes}/{@code security} advertise exactly what the
+ * endpoint enforces (a bearer JWT via the main Spring Security chain) and nothing more.
  */
+@ConditionalOnEditionFeature(EditionFeature.A2A_DIRECTORY)
 @Service
 public class A2aAgentCardService {
 
@@ -52,13 +52,12 @@ public class A2aAgentCardService {
     public Map<String, Object> platformCard(String publicBaseUrl) {
         String endpoint = publicBaseUrl + PLATFORM_JSONRPC_PATH;
         return card(
-            PLATFORM_NAME,
-            "VegaDuta agentic AI platform. Authenticate with a bearer token, then send messages to a specific agent "
-                + "by setting metadata.agentId - or discover one agent's own card at "
-                + "/api/agents/{agentId}/a2a/agent-card.json and use its agent-scoped endpoint.",
-            endpoint,
-            List.of()
-        );
+                PLATFORM_NAME,
+                "VegaDuta agentic AI platform. Authenticate with a bearer token, then send messages to a specific agent "
+                        + "by setting metadata.agentId - or discover one agent's own card at "
+                        + "/api/agents/{agentId}/a2a/agent-card.json and use its agent-scoped endpoint.",
+                endpoint,
+                List.of());
     }
 
     public Map<String, Object> agentCard(Agent agent, String publicBaseUrl) {
@@ -75,7 +74,8 @@ public class A2aAgentCardService {
         return card(PLATFORM_NAME + " - " + agent.getName(), description, endpoint, List.of(skill));
     }
 
-    private Map<String, Object> card(String name, String description, String endpoint, List<Object> skills) {
+    private Map<String, Object> card(
+            String name, String description, String endpoint, List<Object> skills) {
         Map<String, Object> card = new LinkedHashMap<>();
         card.put("name", name);
         card.put("description", description);
@@ -86,10 +86,23 @@ public class A2aAgentCardService {
         card.put("preferredTransport", "JSONRPC");
         // JSON-RPC stays first (the preferred interface, and what 0.3 clients read);
         // the HTTP+JSON/REST binding (spec section 11) lives under <endpoint>/rest.
-        card.put("supportedInterfaces", List.of(
-            Map.of("url", endpoint, "protocolBinding", "JSONRPC", "protocolVersion", PROTOCOL_VERSION),
-            Map.of("url", endpoint + "/rest", "protocolBinding", "HTTP+JSON", "protocolVersion", PROTOCOL_VERSION)
-        ));
+        card.put(
+                "supportedInterfaces",
+                List.of(
+                        Map.of(
+                                "url",
+                                endpoint,
+                                "protocolBinding",
+                                "JSONRPC",
+                                "protocolVersion",
+                                PROTOCOL_VERSION),
+                        Map.of(
+                                "url",
+                                endpoint + "/rest",
+                                "protocolBinding",
+                                "HTTP+JSON",
+                                "protocolVersion",
+                                PROTOCOL_VERSION)));
         card.put("provider", Map.of("organization", PLATFORM_NAME, "url", PROVIDER_URL));
         Map<String, Object> capabilities = new LinkedHashMap<>();
         capabilities.put("streaming", true);
@@ -99,11 +112,14 @@ public class A2aAgentCardService {
         card.put("capabilities", capabilities);
         card.put("defaultInputModes", List.of("text/plain"));
         card.put("defaultOutputModes", List.of("text/plain"));
-        card.put("securitySchemes", Map.of("bearer", Map.of(
-            "type", "http",
-            "scheme", "bearer",
-            "bearerFormat", "JWT"
-        )));
+        card.put(
+                "securitySchemes",
+                Map.of(
+                        "bearer",
+                        Map.of(
+                                "type", "http",
+                                "scheme", "bearer",
+                                "bearerFormat", "JWT")));
         card.put("security", List.of(Map.of("bearer", List.of())));
         card.put("skills", skills);
         // JWS signatures go on LAST: they cover the card exactly as built
@@ -116,10 +132,10 @@ public class A2aAgentCardService {
     }
 
     /**
-     * {@code app.a2a.public-base-url} when set, else the origin of the current
-     * request. {@code fromContextPath} honors {@code X-Forwarded-*} because
-     * {@code server.forward-headers-strategy=native} is on (application.yml),
-     * so behind Caddy this yields the public https origin, not the container's.
+     * {@code app.a2a.public-base-url} when set, else the origin of the current request. {@code
+     * fromContextPath} honors {@code X-Forwarded-*} because {@code
+     * server.forward-headers-strategy=native} is on (application.yml), so behind Caddy this yields
+     * the public https origin, not the container's.
      */
     public String resolvePublicBaseUrl(HttpServletRequest request) {
         return A2aPublicBaseUrl.resolve(properties, request);
@@ -135,11 +151,10 @@ public class A2aAgentCardService {
     }
 
     /**
-     * Agents have no separate description column; the system prompt IS the
-     * persona. A card description is a one-line summary for a directory
-     * listing, so: first paragraph, whitespace-collapsed, capped - never the
-     * whole prompt (which can be pages long and may contain instructions the
-     * tenant considers proprietary).
+     * Agents have no separate description column; the system prompt IS the persona. A card
+     * description is a one-line summary for a directory listing, so: first paragraph,
+     * whitespace-collapsed, capped - never the whole prompt (which can be pages long and may
+     * contain instructions the tenant considers proprietary).
      */
     static String describe(Agent agent) {
         String prompt = agent.getSystemPrompt();
