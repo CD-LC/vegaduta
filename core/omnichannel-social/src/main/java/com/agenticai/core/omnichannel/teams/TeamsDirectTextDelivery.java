@@ -2,6 +2,8 @@ package com.agenticai.core.omnichannel.teams;
 
 import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.omnichannel.outbound.DirectTextDelivery;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
  * conversation's Bot Framework serviceUrl, which this platform only learns from inbound activity.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class TeamsDirectTextDelivery implements DirectTextDelivery {
 
     private final TeamsCredentialService credentialService;

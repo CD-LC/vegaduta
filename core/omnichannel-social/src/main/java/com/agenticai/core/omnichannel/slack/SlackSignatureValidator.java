@@ -1,5 +1,7 @@
 package com.agenticai.core.omnichannel.slack;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
@@ -21,6 +23,7 @@ import org.springframework.util.StringUtils;
  * expires on its own.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class SlackSignatureValidator {
 
     private static final String HMAC_ALGORITHM = "HmacSHA256";
