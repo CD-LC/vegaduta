@@ -7,7 +7,8 @@ come from `global` and are documented there.
 
 - Migrations: `templates/migrate-job.yaml` runs the API image with `APP_TENANCY_MIGRATE_ONLY=true`
   as a `post-install,pre-upgrade` hook (exit 0 ok, 1 fails the release, 75 = another migrator holds
-  the advisory lock and is retried). API pods then run with `APP_TENANCY_MIGRATE_ON_BOOT=false`.
+  the advisory lock; the Job's `podFailurePolicy` ignores that pod and starts another one without
+  spending `migrate.backoffLimit`, until `activeDeadlineSeconds`). API pods then run with `APP_TENANCY_MIGRATE_ON_BOOT=false`.
 - Replicas: pinned to 1 until every `replicaReadiness` flag is true (render fails otherwise). With
   `replicaCount > 1` or `hpa.enabled` the chart also sets `APP_REPLICA_MODE=multi` (and
   `APP_REPLICA_MODE_STRICT` with `replicaStrict`), puts every per-pod store in Valkey and lets
