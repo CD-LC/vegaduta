@@ -62,3 +62,22 @@ Still open:
   boundary snapshot), and a shorter prefix (the schema budget counts only input schemas, not descriptions; always-kept tools are uncapped).
 - The per-turn memory/date block (message B) sits before the history; moving it after the history would keep more of the prompt cacheable.
 - Hosted (non-local) turns still drop web_search on messages that do not mention it (no-match budget); the small-model intent table is not used there.
+
+### Part 6 measured end to end (2026-10-23, personal install rebuilt from main + fixes, 24 GB M5, qwen3.5:9b)
+Timed in the console (time from send to the first visible word; the stream is captured in the page):
+| Message | 0.1.8 | rebuilt |
+|---|---|---|
+| New chat, first message after the model loads (cold, 12K-token prompt) | 6.1 s, one chunk | 27.2 s, then streamed |
+| Warm follow-up | 13.2 s, one chunk | 1.35 s, streamed (58 pieces) |
+| Time tool, new chat | 11.5 s, one chunk | 5.5 s, streamed (tool call 3.6 s) |
+| Time tool, follow-up | - | 10.8 s (re-read 4,249 tokens, see below) |
+Found and fixed on the way (all on main after this push): the core image did not build (agents-jobs test-jar), core did not start
+(two V662 migrations), every MCP tool call hung (tool context forwarded to the MCP server).
+Still open, in order of effect:
+1. Per-turn system block (date, recalled memories, trust note) sits BEFORE the history, so every turn diverges right after the system
+   prompt; Ollama's MLX runner can only resume at whole-state snapshots (every 8192 tokens, prompt end, branch points), so a turn
+   re-reads up to ~4K tokens. Put the per-turn block after the history (or in the latest user turn) for local models; check how
+   Ollama's qwen35 renderer places a non-leading system message first.
+2. Cold first message after a model load reads the whole ~12K prefix (27 s here). Warm the cache in the background when core starts
+   and when a chat opens: send the agent's real prefix twice with user messages that differ at the first token, num_predict 1.
+3. Shorter prefix: tool descriptions are not counted by the schema budget; the stable set offers every allowed tool (~12K tokens).
