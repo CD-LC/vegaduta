@@ -40,7 +40,7 @@ Defaults by where core runs:
 | core-full image (`MCP_TOOLCHAIN=full`) | `security,knowledge,workflow,graph-memory,mcp` |
 | Lite (`deploy/compose/lite.yml`) | `security,knowledge,graph-memory,lite` (plus `,mcp` with `CORE_IMAGE_VARIANT=-full` if built-in STDIO servers should spawn in core instead of the runner) |
 | Personal (`deploy/compose/personal.yml`, `scripts/vegaduta personal`) | `security,knowledge,graph-memory,personal` (override with `PERSONAL_SPRING_PROFILES`) |
-| Full (`deploy/compose/docker-compose.yml`) | `security,knowledge,graph-memory,mcpserver` plus `CORE_MCP_PROFILE` (the CLI sets `,mcp` for the `tools`, `browser` and `sandbox` profiles) plus `CORE_PROFILES_EXTRA` (the CLI adds `,workflow` or `,workflow,temporal` for those profiles) |
+| Full (`deploy/compose/docker-compose.yml`) | `security,knowledge,graph-memory,mcpserver` plus `CORE_MCP_PROFILE` (the CLI sets `,mcp` for the `tools`, `browser` and `sandbox` profiles) plus `CORE_PROFILES_EXTRA` (the CLI adds `,workflow` or `,workflow,temporal` for those profiles) plus `CORE_SHAPE_PROFILE` (set it to `,shape-api` yourself when you start the `jobs` profile so the API leaves the background work to `core-jobs`; empty by default) |
 | Helm (`charts/vegaduta`) | `global.core.springProfiles` (`security,knowledge,workflow,graph-memory,mcpserver`); `,mcp` is added when `global.components.mcpStdioRunner=true` (every core role) or `global.core.mcpToolchain=full` (API only) |
 
 ## Core shapes
@@ -53,11 +53,17 @@ One image, one reactor, four ways to run it. Build with
 | api | `app` / `CoreApplication` | REST, SSE, WebSocket, MCP server, webhooks; the chat path |
 | jobs | `app-jobs` / `JobsApplication` | scheduled sweeps and pollers; run exactly one |
 | worker | `app-worker` / `WorkerApplication` | Temporal workflow worker |
-| migrate | `app` with `app.tenancy.migrate-only=true` | runs Flyway for the control plane and every tenant schema, then exits |
+| migrate | `app` with `app.tenancy.migrate-only=true` | runs Flyway for the control plane and every tenant schema, then exits; no `@Scheduled` job, Kafka consumer or Temporal worker runs in it |
 
 `app.tenancy.migrate-on-boot` (default `true`) makes the API migrate tenant
 schemas at start-up; set it to `false` when a separate migrate step runs (Helm
 does this). Env names: `APP_TENANCY_MIGRATE_ON_BOOT`, `APP_TENANCY_MIGRATE_ONLY`.
+
+The migrate shape exits 0 when every tenant is current, 1 when a tenant failed (the Job fails
+the release) and 75 when another migrator holds the advisory lock `tenant-schema-migrate-only`
+(a second concurrent Job; the Helm Job ignores the pod and starts a new one, without spending
+`migrate.backoffLimit`). A 75 with no other migrator running is a bug, not a lock: report it.
+Compose has no separate migrate step; core migrates on boot there.
 
 ## Essential vs plug-and-play services
 
@@ -269,7 +275,7 @@ credentials, or on a cluster with the NetworkPolicies enforced has been done.
 All three cloud SDKs are on the classpath of every core shape, including
 password-mode images.
 
-## Authentication (OIDC / Keycloak)
+## Authentication (OIDC and Keycloak)
 
 This section is the Keycloak (`app.auth.mode=keycloak`, default) setup. For the single-owner alternative that needs no identity server, see [Local sign-in](#local-sign-in-appauthmodelocal).
 
@@ -470,6 +476,7 @@ optional services (app builder, RL trainer), not by core's chat path.
 | `WORKFLOW_KAFKA_ENABLED` | unset: `true` if a bootstrap server resolved, else `false` | `false` keeps the `workflow` profile but starts no Kafka topic admin, outbox relay or consumers, and makes `WORKFLOW_EVENTS_ENABLED` default to `false` (an explicit value still wins). When unset, core decides at start-up: Kafka is on exactly when `spring.kafka.bootstrap-servers` is non-blank, whatever supplied it (`WORKFLOW_KAFKA_BOOTSTRAP_SERVERS`, `SPRING_KAFKA_BOOTSTRAP_SERVERS`, a key in the app Secret, `extraEnvFromSecrets`, `envFrom`, ...); with none it starts no Kafka client and logs one INFO line. The Helm chart never sets this flag (it cannot read Secret contents), so a Secret-held bootstrap is honoured. Only the literal `false` turns it off. The one-shot migrate process always runs with it off. There is no longer an implicit `localhost:9092` default: set `WORKFLOW_KAFKA_BOOTSTRAP_SERVERS` (Compose and `core/.env.example` do). | `WORKFLOW_KAFKA_BOOTSTRAP_SERVERS` |
 | `KNOWLEDGE_RERANK_ENABLED` | `false` | reranking via the sidecar | |
 | `GRAPH_MEMORY_ARBITRATION_ENABLED` | `false` | graph-memory conflict arbitration | |
+| `APP_A2A_ENABLED` | `true` | the inbound A2A surface: agent cards, `/api/a2a` JSON-RPC and REST. `false` turns the whole surface off | |
 | `APP_A2A_SIGNING_ENABLED` | `true` | Ed25519-signed A2A agent cards | |
 | `TOOL_AUTO_SELECTION_ENABLED` | `true` | automatic tool selection per turn | |
 | `APP_VISION_ENABLED` | `true` | image inputs in chat | |
@@ -865,7 +872,7 @@ to `core.env` or the Helm `core.env` map when you need them.
 
 | Property | Environment variable | Default |
 |---|---|---|
-| `app.security.outbound.allowed-private-hosts` | `APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS` | empty; comma-separated `host` or `host:port` that tenant-configured outbound calls (BYOK, OpenAPI, A2A, webhooks) may reach on a private address, e.g. `ollama:11434`. Also needed for a `LOCAL_OPENAI` server, a Signal `signal-cli` service, a BlueBubbles Mac and a LAN Matrix homeserver |
+| `app.security.outbound.allowed-private-hosts` | `APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS` | empty; comma-separated `host` or `host:port` that tenant-configured outbound calls (BYOK, OpenAPI, A2A, webhooks) may reach on a private address, e.g. `ollama:11434`. Also needed for a `LOCAL_OPENAI` server, a Signal `signal-cli` service, a BlueBubbles Mac, a LAN Matrix homeserver and an email (IMAP) mailbox on a private address |
 | `app.security.outbound.egress-allow-list` | `APP_SECURITY_OUTBOUND_EGRESS_ALLOW_LIST` | empty (any public host); comma-separated `host` or `*.suffix`. When set, tenant-configured outbound calls (BYOK, OpenAPI, MCP URLs, web fetch, webhooks) may reach only these hosts; the private-address checks still apply and `allowed-private-hosts` entries are exempt. Platform-wide, not per agent |
 | `app.tenancy.fail-on-missing-context` | `APP_TENANCY_FAIL_ON_MISSING_CONTEXT` | `true`; `false` restores the shared-schema fallback (logged) |
 | `app.security.jwt.required-audience` | `APP_SECURITY_JWT_REQUIRED_AUDIENCE` | empty (off); needs a Keycloak audience mapper first |
@@ -1009,7 +1016,7 @@ Read by `scripts/vegaduta personal` and the personal profile; see
 
 | Variable / property | Default | Meaning |
 |---|---|---|
-| `VEGADUTA_SEARCH` | unset (on for a fresh personal install) | `0`, `off`, `false` or `no` in `.env` or the environment turns private web search off; `1`, `on`, `true` or `yes` forces it on. A `--search` / `--no-search` flag wins for that run; this wins over the remembered answer (`search=` in `.vegaduta-state`). Read by the launcher only |
+| `VEGADUTA_SEARCH` | unset (on for a fresh personal install) | `0`, `off`, `false` or `no` in `.env` or the environment turns private web search off; `1`, `on`, `true` or `yes` forces it on. A `--search` / `--no-search` flag wins for that run; this wins over the remembered answer (`search=` in `.vegaduta-state`). Read by the launcher only (`scripts\vegaduta.ps1` too, where web search is off unless `-Search` or this asks for it) |
 | `VEGADUTA_TOOLS` | unset (on for a fresh personal install) | the same for the MCP runner (compose profile `tools`). Not used with `--native-core` |
 | `VEGADUTA_VALKEY` | unset (always on) | `0` leaves the Valkey container out of a **personal** install; rate limits, budget windows and spend counters run in core's bounded in-process fallback (they stay enforced and fail closed). `--no-valkey` / `--valkey` wins for that run; this wins over the remembered answer (`valkey=` in `.vegaduta-state`). Ignored on lite/full - shared installs keep the shared store |
 | `app.mcp.starter.enabled` / `APP_MCP_STARTER_ENABLED` | `true` in the `personal` profile (the class is not loaded elsewhere) | `false` registers no starter connectors even when the runner is on. They are also registered only when `MCP_STDIO_SIDECAR_ENABLED=true` |
@@ -1097,7 +1104,7 @@ when `enabled` is true, this is a one-person install and the OS sandbox above is
 | `app.assistant.local-shell.enabled` | `APP_ASSISTANT_LOCAL_SHELL_ENABLED` | `false` (`true` in the `personal` profile) | Offer the two tools |
 | `app.assistant.local-shell.approval-required` | `APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED` | `true` (`false` in the `personal` profile) | Park every `local_shell` call for the person's approval. `false` lifts the always-confirm pin and the classification confirmation gate for `local_shell` only - commands run inside the sandbox, still logged; a `SUPERVISED`-tier agent is still gated on every call |
 | `app.assistant.local-shell.acknowledge-shared-host` | `APP_ASSISTANT_LOCAL_SHELL_ACKNOWLEDGE_SHARED_HOST` | `false` | Allow it outside the `personal` profile; any tenant's agent then runs commands on this host |
-| `app.assistant.api-guide.enabled` | `APP_ASSISTANT_API_GUIDE_ENABLED` | `true` | Offer the read-only `vegaduta_api_guide` tool (searches this install's OpenAPI spec) on every install |
+| `app.assistant.api-guide.enabled` | `APP_ASSISTANT_API_GUIDE_ENABLED` | `true` | Offer the read-only `vegaduta_api_guide` tool (searches this install's OpenAPI spec) on every install. The spec is served by the API shape, so the jobs and worker shapes never offer the tool |
 | `app.assistant.platform-guide.enabled` | `APP_ASSISTANT_PLATFORM_GUIDE_ENABLED` | `true` | Offer the read-only `vegaduta_setup_guide` tool: matches a request to the console page that sets it up, reports live status (MCP servers, channels, Google) and searches the bundled docs |
 | `app.assistant.local-shell.workspace` | `APP_ASSISTANT_LOCAL_SHELL_WORKSPACE` | `~/vegaduta-workspace` | Start folder and the only writable path |
 | `app.assistant.local-shell.default-timeout-seconds` | `APP_ASSISTANT_LOCAL_SHELL_DEFAULT_TIMEOUT_SECONDS` | `60` | Time limit when the call names none |
@@ -1114,7 +1121,9 @@ conditions as the terminal (enabled, one-person install) when the workspace fold
 personal profile raises `max-timeout-seconds` to `1800`.
 
 Compose (`--profile workspace`): `VEGADUTA_PROJECTS_DIR` (default `~/VegaDuta-Projects`), `WORKSPACE_RUNNER_SECRET`,
-`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS` (`1800`), `WORKSPACE_RUNNER_MEM_LIMIT` (`3g`).
+`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS` (`1800`), `WORKSPACE_RUNNER_MEM_LIMIT` (`3g`),
+`WORKSPACE_RUNNER_PIDS_LIMIT` (`2048`: the most processes and threads the container may have at once, so a runaway command is stopped by the
+container and not by the host; a Maven, Gradle or Next.js build peaks below 200; raise it only for a very large parallel build).
 
 Network from the terminal follows the sandbox's per-server list: add `local-shell` (or `*`) to
 `app.mcp.stdio.sandbox-network-allow`.
@@ -1216,8 +1225,8 @@ Rules of the road: a gated bean is only injected by beans gated by the same feat
 | Property | Env | Default | Meaning |
 |---|---|---|---|
 | `app.local-models.ollama-base-url` | (none) | `app.local-llm.bootstrap.base-url`, then `http://ollama:11434` | the only Ollama the local-model API talks to; no request parameter can change it. A loopback or Compose-DNS address must also be in `APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS` |
-| `app.local-models.host-ram-gb` | `HOST_RAM_GB` | `0` | the host's memory in GB, set by `scripts/vegaduta personal` for a containerised core (which would otherwise report its own cgroup limit). `0` measures what core sees |
-| `app.local-models.host-accelerator` | `HOST_ACCELERATOR` | blank | `apple`, or `nvidia:NAME:VRAM_GB`: what the host has, for the same reason. Blank detects from inside core |
+| `app.local-models.host-ram-gb` | `HOST_RAM_GB` | `0` | the host's memory in GB, set by `scripts/vegaduta personal` (and `scripts\vegaduta.ps1 personal` on Windows, from the computer, not the WSL2 VM) for a containerised core (which would otherwise report its own cgroup limit). `0` measures what core sees |
+| `app.local-models.host-accelerator` | `HOST_ACCELERATOR` | blank | `apple`, or `nvidia:NAME:VRAM_GB` (from `nvidia-smi`, also on Windows): what the host has, for the same reason. Blank detects from inside core |
 | `app.local-models.allow-uncataloged-pull` | (none) | `false` | allow pulling tags that are not in the catalog |
 | `app.local-models.keep-alive` | `APP_LOCAL_MODELS_KEEP_ALIVE` | `30m`; the Compose `local-ai` overlay sets it and Ollama's own `OLLAMA_KEEP_ALIVE` from `OLLAMA_KEEP_ALIVE` (default `-1`) | Ollama `keep_alive` sent by `POST /api/local-models/warm` (and by the warm-ups core runs itself after a pull, a `/use` switch and the local-LLM bootstrap): how long the loaded model stays in memory. Ollama's own default is five minutes, after which the next chat pays the whole weight load again; `-1` keeps it forever. A chat request sent without the field resets the timer to the server's default, so for a host Ollama also set `OLLAMA_KEEP_ALIVE` on the server (the Compose `local-ai` overlay already does) |
 | `app.llm.ollama.reasoning-effort` | `APP_LLM_OLLAMA_REASONING_EFFORT` | `none` for the install's own local model (the platform-pool row Providers -> Local model manages, which can override it per row); blank for agents on an `OLLAMA` provider. The Compose `local-ai` overlay sets `none` (`LOCAL_LLM_REASONING_EFFORT`) | `reasoning_effort` sent to Ollama's OpenAI-compat endpoint: `none` skips the hidden thinking pass of reasoning models (qwen3.5, qwen3, deepseek-r1, gpt-oss), which on a laptop is most of the wait (a one-line question took 40+ s on `qwen3.5:4b` against about 5 s with it off); `low`/`medium`/`high` leave it on at that effort; blank sends nothing (the model's default). An unsupported name falls back to the model's default, so it cannot fail a call |
@@ -1254,9 +1263,10 @@ runs in Docker), and `app.llm.tool-call-probe.enabled` (default `true`) governs 
 | `app.omnichannel.rate-limit.per-channel-per-minute` | (none) | `600` | per tenant and channel; `0` disables |
 
 An over-limit message is dropped without a reply on the channel, costs no session write or model call, and the API
-answers `429` with `Retry-After`. Signal, Matrix, iMessage and the WhatsApp QR bridge reach private hosts only through
+answers `429` with `Retry-After`. Signal, Matrix, iMessage, the WhatsApp QR bridge and an email (IMAP) mailbox reach private hosts only through
 `app.security.outbound.allowed-private-hosts` (for example `signal-cli:8080`, `whatsapp-qr:8080`, the Mac's `host:port`, a LAN
-homeserver).
+homeserver, a mail server on your own network). The IMAP host and port a tenant enters are checked before any connection
+is opened and again on every poll; a stored mailbox that is no longer allowed is skipped with a WARN naming it.
 
 ### Voice sockets and guardrails
 
@@ -1297,6 +1307,141 @@ List endpoints for workflow runs, channel contacts, knowledge documents and appr
 optional `limit` and `offset` parameters with a default cap and a hard maximum; internal callers
 stay unbounded. See [List endpoint paging](api/LIST-ENDPOINT-PAGING.md).
 
+## Service environment
+
+Environment variables read by the Python and Node services in `services/` (not by `core`). On/off
+switches and service URLs are in [Feature flags for optional services](#feature-flags-for-optional-services);
+this section lists the tuning, capacity and isolation settings. The defaults are the ones in each service's
+settings module (`app/settings.py`, `app/config.py` or `server.js`) and the Compose file sets only a few of
+them. Set one in `deploy/compose/.env` only if the Compose service passes it through; otherwise add it to
+that service's `environment:` block (or the chart's `env` for Helm). Each service's own README has the
+full list for it, including the auth and URL variables; the rows here are the ones that were not written
+down before. Names ending in `_KEY`, `_PASSWORD` or `_TOKEN` are secrets: set them from the secret store,
+never in a tracked file.
+
+### sidecar (ML helper, port 8001)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `SIDECAR_LOG_LEVEL` | `INFO` | Python log level |
+| `EMBED_QUEUE_TIMEOUT_S` | `30` | how long an embed request waits for a free slot before the sidecar fails it fast (a 503-shaped error the caller retries) |
+| `RERANK_MAX_CONCURRENT` / `RERANK_QUEUE_TIMEOUT_S` | `1` / `30` | concurrent rerank passes and how long one waits for a slot; raise the first only with spare CPU |
+| `WHISPER_CPU_THREADS` / `WHISPER_NUM_WORKERS` | `1` / `2` | speech-to-text CPU threads per transcription and concurrent transcriptions |
+| `WHISPER_LIVE_RESERVED_WORKERS` | `1` | transcription workers kept for live calls so document ingestion cannot starve them; ignored (0) when `WHISPER_NUM_WORKERS` is 1 |
+| `TESSERACT_CMD` | unset | path to the Tesseract executable for OCR when it is not on `PATH` |
+| `FFMPEG_BINARY` / `FFPROBE_BINARY` | `ffmpeg` / `ffprobe` | executables used by the render endpoints |
+| `RENDER_TIMEOUT_S` | `3600` | wall-clock limit for one render |
+| `RENDER_MAX_FETCH_MB` | `512` | largest remote media file a render will download |
+| `SARVAM_SPEAKER` | empty | Sarvam voice; empty lets Sarvam pick the default for the model. Speaker names are per model, so clear it when changing `SARVAM_MODEL` |
+| `SARVAM_MAX_CHARS_PER_REQUEST` | `1400` | text is split into chunks of at most this many characters per Sarvam request |
+| `SARVAM_MAX_CONCURRENT` / `SARVAM_TIMEOUT_S` | `1` / `60` | concurrent Sarvam requests and the per-request timeout |
+
+### code-intel (repository indexing, port 8090)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `CODE_INTEL_GIT_ALLOWED_SCHEMES` | `https` | URL schemes a tenant-supplied `git_url` may use (comma-separated). `file`, `ssh` and `git` would reach this container's own disk or internal hosts; widen only for a trusted install |
+| `CODE_INTEL_ALLOWED_AUTH_ENV` | empty | extra environment variable names a repository may name as `auth_env`; `CODE_INTEL_GIT_TOKEN` is always allowed |
+| `CODE_INTEL_AUTH_ENV_URL_PREFIXES` | empty | `git_url` prefixes to which an `auth_env` credential may be sent; empty means `auth_env` is unusable, so a tenant cannot make the operator's token travel to their own remote |
+| `CODE_INTEL_ENFORCE_REPO_LIMITS` | empty (off) | `true` enforces the two repository limits below; off keeps existing repositories working |
+| `CODE_INTEL_MAX_REPO_MB` / `CODE_INTEL_MAX_REPO_FILES` | `500` / `50000` | per-repository size and file count, enforced only when the switch above is `true` |
+| `CODE_INTEL_TENANT_QUOTA_MB` | `0` (off) | total checkout size per tenant |
+| `CODE_INTEL_GITDIR_ROOT` | `<system temp dir>/code-intel-gitdirs` | where git directories are kept, apart from the checkouts (tests, operators) |
+| `CODE_INTEL_GIT_TIMEOUT` | `300` | seconds allowed for one git operation |
+| `CODE_INTEL_MAX_HEAVY_JOBS` / `CODE_INTEL_MAX_TENANT_HEAVY_JOBS` | `4` / `2` | concurrent index, clone and graph-build jobs in total and per tenant |
+| `CODE_INTEL_MAX_QUEUED_HEAVY_JOBS` / `CODE_INTEL_HEAVY_QUEUE_WAIT` | `8` / `900` | background jobs allowed to wait for a slot, and how many seconds each waits |
+| `CODE_INTEL_HEAVY_RETRY_AFTER` | `30` | seconds in the `Retry-After` answered to a refused heavy job |
+| `CODE_INTEL_EMBED_MODEL` | `BAAI/bge-small-en-v1.5` | default embedding model (with `CODE_INTEL_EMBEDDER`) |
+| `CODE_INTEL_ALLOWED_EMBED_MODELS` | empty | models a repository may request besides the default; empty means no per-repository overrides |
+| `CODE_INTEL_EMBEDDER_CACHE` | `2` | embedder models kept loaded |
+| `OPENAI_API_KEY` | `not-needed-for-local` placeholder | read only when the `openai` embedder is selected; a secret |
+| `CODE_INTEL_RERANK_ENABLED` | `false` | cross-encoder reranking of search results |
+| `CODE_INTEL_RERANK_MODEL` | `cross-encoder/ms-marco-MiniLM-L-6-v2` | the reranking model |
+| `CODE_INTEL_RERANK_MAX_CONCURRENT` / `CODE_INTEL_RERANK_QUEUE_TIMEOUT_S` | `1` / `30` | the same pair as in the sidecar |
+| `CODE_INTEL_DOCKER_USER` | `auto` | user of the sandbox container in run mode `docker`: `auto` is this process's own non-root uid:gid (never root), an explicit `uid:gid` needs the workspaces writable by that uid, empty means the image default (root, not recommended) |
+| `CODE_INTEL_DOCKER_READ_ONLY` | `true` | read-only root filesystem in the sandbox container |
+| `CODE_INTEL_DOCKER_TMPFS_SIZE` / `CODE_INTEL_DOCKER_TMPFS_EXEC` | `512m` / `true` | size of the RAM-backed `/tmp` and whether it allows execution (build tools need it) |
+| `CODE_INTEL_DOCKER_CAP_DROP` | `ALL` | capabilities dropped from the sandbox container |
+| `CODE_INTEL_DOCKER_NO_NEW_PRIVILEGES` | `true` | `no-new-privileges` on the sandbox container |
+| `CODE_INTEL_DOCKER_NANO_CPUS` | `1000000000` | CPU limit of the sandbox container in billionths of a CPU (1 CPU) |
+| `CODE_INTEL_E2B_TEMPLATE` | `base` | E2B template when the run mode is `e2b` (needs `E2B_API_KEY`, a secret) |
+
+### app-builder (port 8091)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `APP_BUILDER_KEYCLOAK_AUDIENCE` | unset | required `aud` of a Keycloak token; the audience is not checked while unset |
+| `APP_BUILDER_KEYCLOAK_ALLOWED_AZP` | `agentic-ai-core,agentic-ai-web` | Keycloak clients whose tokens are accepted (`azp`). Empty refuses every bearer token; there is no wildcard. The internal-token path does not use it |
+| `APP_BUILDER_CODE_INTEL_TIMEOUT` | `60` | seconds to wait for a code-intel call |
+| `APP_BUILDER_MAX_FIX_ATTEMPTS` | `3` | automatic repair attempts after a failed build or test (0 to 6); each is one more model call |
+| `APP_BUILDER_PUBLIC_URL` | empty | public base URL shown to users for the generated apps' data API; set it in production, because the request's own URL is unreliable behind a proxy |
+| `APP_BUILDER_DATA_API_ENABLED` | `true` | operator switch for the generated apps' data API |
+| `APP_BUILDER_DATA_API_MAX_CONNS` | `8` | database connections the data API proxy may use at once (1 to 12); beyond it, 503 |
+| `APP_BUILDER_DATA_API_STATEMENT_TIMEOUT_MS` | `5000` | statement timeout of the data API (500 to 30000) |
+| `APP_BUILDER_DATA_API_ANON_RPM` / `APP_BUILDER_DATA_API_ANON_RPM_PER_IP` | `600` / `120` | requests per minute for an anonymous key, and per client IP (best effort, the IP comes from proxy headers) |
+| `APP_BUILDER_DATA_API_SERVICE_RPM` | `1200` | requests per minute for a service key |
+| `APP_BUILDER_PREVIEW_DOMAIN` | `preview.localhost` | domain under which previews are served (`<project>.<domain>`); wildcard DNS and a tunnel hostname are a manual step |
+| `APP_BUILDER_IMPORT_MAX_FILES` / `APP_BUILDER_IMPORT_MAX_BYTES` | `5000` / `104857600` | size limits when importing an existing repository; a larger tree is refused with 413 and a hint to use `subdir` |
+
+Android builds of a generated Capacitor app read `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`,
+`ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` (the upload signing key; secrets) and `VERSION_CODE` (default
+`1`) and `VERSION_NAME` (default `1.0.0`) in the build environment, through
+`scripts/android-release-config.mjs` of the template.
+
+### tool-sandbox (port 8095)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `TOOL_SANDBOX_RUN_UID` / `TOOL_SANDBOX_RUN_GID` | unset (the image sets `5001`) | the one unprivileged uid and gid tenant code runs as |
+| `TOOL_SANDBOX_RUN_UID_RANGE` | unset | inclusive range such as `20000-29999`; each run gets its own uid from it, so two concurrent runs cannot signal or read each other. Unset or malformed falls back to the single uid and logs a warning |
+| `TOOL_SANDBOX_ALLOW_MISSING_CAP_KILL` | `false` | without `CAP_KILL` a timed-out run cannot be killed, so the service refuses to start; `true` starts it anyway with weaker enforcement |
+| `TOOL_SANDBOX_WORK_ROOT` / `TOOL_SANDBOX_CACHE_ROOT` / `TOOL_SANDBOX_HARNESS_ROOT` | `/tmp/sandbox-work` / `/tmp/sandbox-cache` / `/opt/tool-sandbox` (the image uses `/var/sandbox/work` and `/var/sandbox/cache`) | per-run working directories, the compiled-artifact cache and the harness files |
+| `TOOL_SANDBOX_MAX_INPUT_BYTES` / `TOOL_SANDBOX_MAX_OUTPUT_BYTES` / `TOOL_SANDBOX_MAX_RESULT_BYTES` | `262144` / `65536` / `262144` | size limits for the input, captured output and result |
+| `TOOL_SANDBOX_DEFAULT_TIMEOUT_MS` / `TOOL_SANDBOX_DEFAULT_MEMORY_MB` | `5000` / `128` | defaults for a run that does not ask for more |
+| `TOOL_SANDBOX_COMPILE_TIMEOUT_MS` / `TOOL_SANDBOX_COMPILE_MEMORY_MB` | `30000` / `512` | separate, larger budget for compiling Java |
+| `TOOL_SANDBOX_MAX_CACHE_ENTRIES` | `64` | compiled artifacts kept per tenant, oldest evicted first |
+| `TOOL_SANDBOX_JAVAC` / `TOOL_SANDBOX_JAVA` / `TOOL_SANDBOX_PYTHON` | `javac` / `java` / `python3` | toolchain executables |
+
+### workspace-runner (the Assistant's build container, port 8090)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `WORKSPACE_RUNNER_PORT` | `8090` | listen port |
+| `WORKSPACE_ROOT` | `/workspace` | the projects folder inside the container |
+| `WORKSPACE_RUNNER_SECRET_FILE` | unset | file holding the shared secret (preferred, so it is never in an environment); `WORKSPACE_RUNNER_SECRET` is the fallback. The service refuses to start without one |
+| `WORKSPACE_RUNNER_MAX_CONCURRENT` | `4` | commands running at once |
+| `WORKSPACE_RUNNER_MAX_OUTPUT_CHARS` | `200000` | output kept per command |
+| `WORKSPACE_RUNNER_KILL_GRACE_MS` | `5000` | wait between the termination signal and a forced kill |
+| `WORKSPACE_RUNNER_SETTLE_MS` | `4000` | how long a started dev server is watched for its first output before the call returns |
+| `WORKSPACE_RUNNER_PREVIEW_PORT_FIRST` / `WORKSPACE_RUNNER_PREVIEW_PORT_COUNT` | `13210` / `10` | the port range dev servers get. **Keep it equal to the range Compose publishes** (`13210-13219` in `personal.yml` and `lite.yml`); changing one side only breaks previews silently |
+| `MAVEN_OPTS` / `GRADLE_USER_HOME` | empty | passed through to the commands the Assistant runs (`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS` is in `.env.example`) |
+
+### voice-agent (LiveKit worker, port 8081)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `LIVEKIT_AGENT_NAME` | empty | leave empty: the worker uses implicit dispatch; setting it without changing how tokens are minted means the worker is never offered a job |
+| `ELEVEN_API_KEY` | unset | fallback for `ELEVENLABS_API_KEY` (a secret) |
+| `ELEVENLABS_MODEL` | `eleven_turbo_v2_5` | ElevenLabs model |
+| `SARVAM_SPEAKER` | empty | as in the sidecar |
+| `PERCEPTION_SCENE_DIFF_THRESHOLD` | `0.10` | how much a camera frame must change (0 to 1, mean grayscale difference) before the agent looks again; raise it for less chatter |
+| `VOICE_AGENT_VAD_MIN_SILENCE_DURATION_S` | `0.35` | silence that ends a turn; raise for slow speakers or noisy rooms |
+| `VOICE_AGENT_LOG_LEVEL` | `INFO` | log level |
+| `VOICE_AGENT_DEV_STATIC_BEARER_TOKEN` | empty | local testing only: **never set it in a deployment**, it makes every call authenticate as one account |
+
+### rl-trainer (port 8095)
+
+| Variable | Default | Effect |
+|---|---|---|
+| `RL_TRAINER_KEYCLOAK_AUDIENCE` | unset | required `aud` of a Keycloak token; not checked while unset |
+| `RL_TRAINER_KEYCLOAK_ALLOWED_AZP` | `agentic-ai-core,agentic-ai-web` | accepted Keycloak clients; empty refuses every bearer token |
+
+### mcp-stdio-runner
+
+| Variable | Default | Effect |
+|---|---|---|
+| `MCP_STDIO_RUNNER_SWEEP_INTERVAL_MS` | `30000` | how often the runner checks for children past `MCP_STDIO_RUNNER_IDLE_TTL_MS` or `MCP_STDIO_RUNNER_MAX_LIFETIME_MS`; `0` turns the check off, so neither limit is enforced |
+
 ## Compose-only variables
 
 `deploy/compose/.env.example` is the complete, grouped reference for the
@@ -1311,7 +1456,7 @@ there.
 | Console flags | `WEB_MCP_APPS`, `WEB_TRUSTED_IMAGE_HOSTS`, `WEB_EDGE_AGENTS`, `WEB_FREE_MODE`, `WEB_DEPLOY_ENV` | mapped to the matching `NEXT_PUBLIC_*` at runtime |
 | Tracing | `LANGFUSE_*` | the `tracing` profile |
 | Resource limits | `*_MEM_LIMIT`, `CODE_INTEL_DOCKER_PIDS_LIMIT` | per-container memory ceilings |
-| Network | `BIND_ADDR` (default `127.0.0.1`), `*_HOST_PORT` | host port bindings |
+| Network | `BIND_ADDR` (default `127.0.0.1`), `*_HOST_PORT` | host port bindings. Lite and Personal publish core directly with no reverse proxy: with `BIND_ADDR=0.0.0.0` anyone on the network can read `/actuator/prometheus` (request rates per endpoint, LLM usage per provider and model; no secrets) unless you set `APP_ACTUATOR_SCRAPE_TOKEN` and `APP_ACTUATOR_SCRAPE_TOKEN_REQUIRED=true` in `deploy/compose/core.env` |
 
 ## Appendix: configuration property reference by module
 
@@ -1345,7 +1490,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.a2a.client.allowed-hosts` |  | shapes that load the module | Egress allow-list of hosts (exact agents.example.com or *.example.com for subdomains only). |
 | `app.a2a.blocking-timeout` |  | shapes that load the module | Upper bound a BLOCKING SendMessage (and each streamed chunk wait) holds the request thread for. |
 | `app.a2a.client.connect-timeout` |  | shapes that load the module | Group `app.a2a`: The app.a2a.* config block for the inbound Agent2Agent (A2A) server surface (A2aAgentCardController,... (see source: `core/agents/src/main/java/com/agenticai/core/agents/a2a/A2aProperties.java`) |
-| `app.a2a.enabled` |  | shapes that load the module | Platform-wide kill switch. |
+| `app.a2a.enabled` | `${APP_A2A_ENABLED:true}` | shapes that load the module | Platform-wide kill switch for the inbound A2A surface (agent cards, `/api/a2a`, REST). On by default; `false` removes all three controllers. |
 | `app.a2a.heartbeat-interval` | `${APP_A2A_HEARTBEAT_INTERVAL:10s}` | all shapes | Redis mode only: how often the owning replica refreshes the heartbeat of its non-terminal task records and checks them for a remote cancel. |
 | `app.a2a.heartbeat-stale-after` | `${APP_A2A_HEARTBEAT_STALE_AFTER:60s}` | all shapes | Redis mode only: a non-terminal record whose heartbeat is older than this and that belongs to ANOTHER instance id (a previous boot or a dead replica) is marked FAILED with "interrupted by restart". |
 | `app.a2a.client.max-calls-per-turn` |  | shapes that load the module | Most a2a_call_agent calls one agent turn may make (OWASP ASI07/ASI08: a looping or injected agent must not fan out to remote agents without bound). |
@@ -2042,7 +2187,7 @@ Keep this appendix current: when you add a property, document it in the section 
 | `app.observability.tail-sampling.max-buffered-traces` | `500` | all shapes | Group `app.observability.tail-sampling`: In-process "always keep errors and slow agent runs" tail sampling (no OTel Collector needed). (see source: `core/app/src/main/java/com/agenticai/core/common/tracing/TailSamplingConfiguration.java`) |
 | `app.observability.tail-sampling.max-spans-per-trace` | `512` | all shapes | Group `app.observability.tail-sampling`: In-process "always keep errors and slow agent runs" tail sampling (no OTel Collector needed). (see source: `core/app/src/main/java/com/agenticai/core/common/tracing/TailSamplingConfiguration.java`) |
 | `app.observability.tail-sampling.ttl-seconds` | `300` | all shapes | Group `app.observability.tail-sampling`: In-process "always keep errors and slow agent runs" tail sampling (no OTel Collector needed). (see source: `core/app/src/main/java/com/agenticai/core/common/tracing/TailSamplingConfiguration.java`) |
-| `app.omnichannel.discord.base-url` | `${DISCORD_GATEWAY_SERVICE_URL:}` | all shapes | Discord bot Gateway bridge (channels/discord Node service). |
+| `app.omnichannel.discord.base-url` | `${DISCORD_GATEWAY_SERVICE_URL:}` | all shapes | Discord bot Gateway bridge: a separate Node service that is not in this repository (contract in [Discord](channels/discord.md)). |
 | `app.omnichannel.discord.shared-secret` | `${DISCORD_GATEWAY_SHARED_SECRET:}` | all shapes | Authenticates BOTH directions of that internal link (this app's activation-time call to the Node service, and the Node service's inbound MESSAGE_CREATE callbacks to DiscordWebhookController) - generate one with... |
 | `app.omnichannel.inbound-executor.max-concurrent` | `64` | all shapes | Group `app.omnichannel.inbound-executor`: Bounded executor for the blocking LLM round trip behind inbound channel webhooks (WhatsApp QR / Meta /... (see source: `core/omnichannel/src/main/java/com/agenticai/core/omnichannel/session/InboundChannelExecutor.java`) |
 | `app.omnichannel.inbound-executor.overflow-max` | `64` | all shapes | Group `app.omnichannel.inbound-executor`: Bounded executor for the blocking LLM round trip behind inbound channel webhooks (WhatsApp QR / Meta /... (see source: `core/omnichannel/src/main/java/com/agenticai/core/omnichannel/session/InboundChannelExecutor.java`) |
@@ -2566,7 +2711,8 @@ Keep this appendix current: when you add a property, document it in the section 
 
 | Property | Default | Applies to | Meaning |
 |---|---|---|---|
-| `app.actuator.scrape-token` |  | shapes that load the module | see source: `core/security/src/main/java/com/agenticai/core/security/ActuatorEdgeGuardFilter.java` |
+| `app.actuator.scrape-token` | `${APP_ACTUATOR_SCRAPE_TOKEN:}` | shapes that load the module | Shared secret a scraper presents as `Authorization: Bearer <token>` to read `/actuator/prometheus` through a proxy, or directly when `app.actuator.scrape-token-required` is on. Empty: no token accepted. See `ActuatorEdgeGuardFilter`. |
+| `app.actuator.scrape-token-required` | `${APP_ACTUATOR_SCRAPE_TOKEN_REQUIRED:false}` | shapes that load the module | `true`: every non-public actuator path (`/actuator/prometheus`) needs the scrape token, even for a request with no proxy in front. Set it with a token when core is published straight onto a network (Lite or Personal with `BIND_ADDR` other than `127.0.0.1`). Off by default because the Full stack's Prometheus scrapes `core:8080` without a token. |
 | `app.executor.platform.max-concurrency` | `512` | shapes that load the module | see source: `core/security/src/main/java/com/agenticai/core/security/concurrent/PlatformExecutorConfiguration.java` |
 | `app.http.max-body-bytes` | `16777216` | shapes that load the module | Group `app.http`: Per-dependency outbound timeouts for clients that build their own transport (everything else is bounded by... (see source: `core/security/src/main/java/com/agenticai/core/security/RequestBodySizeLimitFilter.java`) |
 | `app.http.small-body-max-bytes` | `65536` | shapes that load the module | Group `app.http`: Per-dependency outbound timeouts for clients that build their own transport (everything else is bounded by... (see source: `core/security/src/main/java/com/agenticai/core/security/RequestBodySizeLimitFilter.java`) |

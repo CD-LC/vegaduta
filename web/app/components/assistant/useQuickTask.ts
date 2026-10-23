@@ -61,6 +61,17 @@ export function useQuickTask(turn: Turn, onSettled: (firstUserLine: string) => v
 
   const setChannel = useCallback((cardId: string, channel: TaskChannel) => patchTask(cardId, { channel }), [patchTask]);
 
+  /** Save the delivery number, then unlock the channels on every card that was waiting for one. */
+  const savePhone = useCallback(
+    async (phone: string) => {
+      await api.setAccountPhoneNumber(phone);
+      turn.setTurns((list) =>
+        list.map((x) => (x.task?.needsPhone ? { ...x, task: { ...x.task, needsPhone: false } } : x))
+      );
+    },
+    [turn]
+  );
+
   const cancel = useCallback(
     (cardId: string) => {
       turn.setTurns((list) => list.filter((x) => x.id !== cardId));
@@ -88,10 +99,30 @@ export function useQuickTask(turn: Turn, onSettled: (firstUserLine: string) => v
               const id = ++stepId;
               steps = [
                 ...steps,
-                { type: "tool_call", id, tool: event.toolName ?? "tool", args: event.toolInput ?? undefined, origin: "server" },
+                {
+                  type: "tool_call",
+                  id,
+                  tool: event.toolName ?? "tool",
+                  args: event.toolInput ?? undefined,
+                  origin: "server",
+                },
                 event.errorMessage
-                  ? { type: "error", id, tool: event.toolName ?? "tool", message: event.errorMessage, ms: event.durationMs, origin: "server" }
-                  : { type: "tool_result", id, tool: event.toolName ?? "tool", preview: event.toolOutput ?? undefined, ms: event.durationMs, origin: "server" },
+                  ? {
+                      type: "error",
+                      id,
+                      tool: event.toolName ?? "tool",
+                      message: event.errorMessage,
+                      ms: event.durationMs,
+                      origin: "server",
+                    }
+                  : {
+                      type: "tool_result",
+                      id,
+                      tool: event.toolName ?? "tool",
+                      preview: event.toolOutput ?? undefined,
+                      ms: event.durationMs,
+                      origin: "server",
+                    },
               ];
               patchTask(cardId, {}, { steps });
             } else if (event.type === "done") {
@@ -101,7 +132,11 @@ export function useQuickTask(turn: Turn, onSettled: (firstUserLine: string) => v
                 { content: event.resultText ?? "", endedAt: Date.now() }
               );
             } else if (event.type === "error") {
-              patchTask(cardId, { status: "failed", error: event.message || "The task failed." }, { endedAt: Date.now() });
+              patchTask(
+                cardId,
+                { status: "failed", error: event.message || "The task failed." },
+                { endedAt: Date.now() }
+              );
             }
           },
           agentId ?? ""
@@ -109,7 +144,11 @@ export function useQuickTask(turn: Turn, onSettled: (firstUserLine: string) => v
         // A stream that closed without `done` or `error` is a cut connection, not a result.
         const after = turnsRef.current.find((x) => x.id === cardId)?.task;
         if (after?.status === "running") {
-          patchTask(cardId, { status: "failed", error: "The task stopped before it reported a result." }, { endedAt: Date.now() });
+          patchTask(
+            cardId,
+            { status: "failed", error: "The task stopped before it reported a result." },
+            { endedAt: Date.now() }
+          );
         }
       } catch (err) {
         patchTask(cardId, { status: "failed", error: errorMessage(err) }, { endedAt: Date.now() });
@@ -119,7 +158,7 @@ export function useQuickTask(turn: Turn, onSettled: (firstUserLine: string) => v
     [patchTask, onSettled]
   );
 
-  return { start, confirm, cancel, setChannel };
+  return { start, confirm, cancel, setChannel, savePhone };
 }
 
 function mergePreview(

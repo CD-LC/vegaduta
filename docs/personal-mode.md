@@ -163,9 +163,10 @@ and `uvx` resolve a version, not a hash, so the runner does not refuse a downloa
 remembered in the state file, and the choice is remembered (`search=` and `tools=` in `.vegaduta-state`). The Setup
 app passes `--no-search` itself when you untick web search. An install that **already existed** keeps what it had:
 with no remembered answer it is left alone until you pass `--search` or `--profile tools` once. Declining the
-interactive web-search question is now remembered as an explicit no. On Windows `scripts\vegaduta.ps1` has no
-search flag, so a Windows install does not get web search by default; it adds the connector runner when you pass
-`-Profile tools`.
+interactive web-search question is now remembered as an explicit no. On Windows `scripts\vegaduta.ps1` takes
+`-Search` / `-NoSearch` (and `VEGADUTA_SEARCH`), remembered in `search=` like the bash launcher, but a Windows
+install does **not** get web search by default: it is off until you pass `-Search` once (the Setup app does not
+offer it on Windows yet). It adds the connector runner when you pass `-Profile tools`.
 
 **What it costs.** Two more images to pull on the first start (SearXNG, and the runner with Node, uv and Python)
 and about 1.3 GB more of memory limits (512 MB + 768 MB; limits, not measured use), which takes the personal budget
@@ -249,7 +250,7 @@ How switching works, because core runs in a container and cannot start container
   app and ticking it in its Extras step, or by running the command the page shows. The command line can only add:
   `./scripts/vegaduta personal --profile ...` adds to the remembered profile list (it does not replace it), so
   switching an add-on **off** is done in the Setup app, which stops the container (it does not delete volumes,
-  projects, documents, sign-ins or downloaded models). PowerShell has no `--search` option.
+  projects, documents, sign-ins or downloaded models). On Windows the PowerShell form of `--search` is `-Search`.
 - **An add-on you already had** (documents installed with the checkbox, a model pulled with Ollama) is recognised
   automatically: core sees the sidecar enabled, the SearXNG URL set, the workspace runner URL set or the model in
   Ollama, and treats it as wanted.
@@ -695,7 +696,9 @@ Boot project with a REST endpoint and tests" runs for as long as it takes:
   `local_shell` runs without a per-command approval (`APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED=false`; set it to
   `true` to ask each time). After any approval it does get, the Assistant carries on by itself while a folder
   is attached, so a long build needs no "continue" messages. A command may run up to 30
-  minutes (`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS`); Maven, Gradle and npm caches live in the runner's own volume.
+  minutes (`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS`); Maven, Gradle and npm caches live in the runner's own volume. The container is
+  limited to 3 GB of memory (`WORKSPACE_RUNNER_MEM_LIMIT`) and 2048 processes and threads (`WORKSPACE_RUNNER_PIDS_LIMIT`), so a runaway
+  command cannot take the computer down with it.
 - **Model.** A turn may use up to 150 tool calls in the personal profile (`GUARDRAILS_MAX_TOOL_CALLS_PER_TURN`), and core waits up to 240 s for a local
   model's first token (`LLM_HTTP_STREAM_IDLE_TIMEOUT`; 90 s elsewhere). Building a real project needs a capable model:
   add a provider key (Anthropic, OpenAI, Gemini) for this. The 4B local default can make small edits but stalls on a
@@ -714,7 +717,7 @@ scripts/vegaduta personal --browser        # PowerShell: .\scripts\vegaduta.ps1 
 scripts/vegaduta personal --no-browser     # turn it off again (the choice is remembered)
 ```
 
-This adds one container, `browser-runner` (`services/browser-runner`, a Playwright 1.49.0 server with Chromium; about 2 GB to download, 3.4 GB on disk, a 2 GB memory limit you can change with `BROWSER_RUNNER_MEM_LIMIT`). Core stays on the slim image and attaches to it (`APP_BROWSERUSE_REMOTE_URL=ws://browser-runner:3000/`). A host JVM (`--native-core`) does not use it: install Chromium on the host and set `APP_BROWSERUSE_CHROMIUM_EXECUTABLE_PATH` instead. The older route still works and needs none of this: `CORE_IMAGE_VARIANT=-full` (the 6 GB `core-full` image with Chromium inside core; raise `CORE_MEM_LIMIT=2560m`).
+This adds one container, `browser-runner` (`services/browser-runner`, a Playwright 1.63.0 server with Chromium; about 2 GB to download, 3.4 GB on disk, a 2 GB memory limit you can change with `BROWSER_RUNNER_MEM_LIMIT`). Core stays on the slim image and attaches to it (`APP_BROWSERUSE_REMOTE_URL=ws://browser-runner:3000/`). A host JVM (`--native-core`) does not use it: install Chromium on the host and set `APP_BROWSERUSE_CHROMIUM_EXECUTABLE_PATH` instead. The older route still works and needs none of this: `CORE_IMAGE_VARIANT=-full` (the 6 GB `core-full` image with Chromium inside core; raise `CORE_MEM_LIMIT=2560m`).
 
 To let the agent sign in to a site, name it in `deploy/compose/.env`: `BROWSER_ALLOWED_DOMAINS=github.com,*.github.com`.
 

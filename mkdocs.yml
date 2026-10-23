@@ -71,6 +71,9 @@ hooks:
 validation:
   nav:
     omitted_files: ignore
+  # A link to a heading that mkdocs slugs differently from GitHub (" / " keeps a
+  # double dash on GitHub, one dash here) only logged INFO; warn makes --strict fail.
+  anchors: warn
 
 nav:
   - Home: README.md
@@ -81,18 +84,29 @@ nav:
       - Personal mode (one person, one laptop): personal-mode.md
       - Free local models: local-models.md
       - Share an agent as a file: agent-bundles.md
-      - SMS conversations: sms-channel.md
-      - Signal: channels/signal.md
-      - WhatsApp QR: channels/whatsapp-qr.md
-      - WhatsApp policy limits: channels/whatsapp-policy.md
-      - Matrix: matrix-channel.md
-      - iMessage (BlueBubbles): imessage-channel.md
       - Edge relay: edge-relay.md
       - Cost and ROI: cost-and-roi.md
       - Running a 30-day pilot: pilots/README.md
       - Pilot case-study template: pilots/case-study-template.md
       - Configuration: configuration.md
       - Site modes and public pages: site-modes.md
+  - Channels:
+      - Channels overview: channels/README.md
+      - WhatsApp (Meta and Twilio): channels/whatsapp.md
+      - WhatsApp QR: channels/whatsapp-qr.md
+      - WhatsApp policy limits: channels/whatsapp-policy.md
+      - Messenger and Instagram: channels/messenger-instagram.md
+      - Slack: channels/slack.md
+      - Discord: channels/discord.md
+      - Telegram: channels/telegram.md
+      - Microsoft Teams: channels/teams.md
+      - Email (IMAP): channels/email.md
+      - X (Twitter) DMs: channels/x.md
+      - Voice (phone calls): channels/voice.md
+      - SMS conversations: sms-channel.md
+      - Signal: channels/signal.md
+      - Matrix: matrix-channel.md
+      - iMessage (BlueBubbles): imessage-channel.md
   - Console guide:
       - Overview and sidebar: console/README.md
       - Assistant: console/assistant.md
@@ -228,6 +242,7 @@ nav:
       - Repository setup: maintainers/repo-setup.md
       - Branch protection: maintainers/branch-protection.md
       - Releasing: maintainers/releasing.md
+      - Dependabot pull requests: maintainers/dependabot-prs.md
       - v1.0.0 definition of done: maintainers/v1.0.0-definition-of-done.md
       - Agent coordination: maintainers/agent-coordination.md
       - Releasing the Java Agent SDK: maintainers/releasing-sdk.md

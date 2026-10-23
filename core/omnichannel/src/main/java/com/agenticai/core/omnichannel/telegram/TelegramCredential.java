@@ -12,17 +12,17 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * A tenant's own Telegram Bot connection - BYOK, one active row per tenant
- * schema, ciphertext-only bot token, same shape as {@code DiscordCredential}.
+ * A tenant's own Telegram Bot connection - BYOK, one active row per tenant schema, ciphertext-only
+ * bot token, same shape as {@code DiscordCredential}.
  *
- * <p>Unlike Discord, Telegram's Bot API has a real public webhook (no
- * persistent Gateway connection needed) - see {@link
- * com.agenticai.core.omnichannel.telegram.TelegramWebhookController}. {@code
- * webhookSecret} is a platform-generated opaque token (not something the
- * tenant types in) that Telegram echoes back on every webhook POST via the
- * {@code X-Telegram-Bot-Api-Secret-Token} header - it doesn't need
- * encryption at rest the way the bot token does, since knowing it alone
- * only lets someone POST fake Telegram-shaped payloads, not act as the bot.
+ * <p>Unlike Discord, Telegram's Bot API has a real public webhook (no persistent Gateway connection
+ * needed) - see {@link com.agenticai.core.omnichannel.telegram.TelegramWebhookController}. {@code
+ * webhookSecret} is a platform-generated opaque token (not something the tenant types in) that
+ * Telegram echoes back on every webhook POST via the {@code X-Telegram-Bot-Api-Secret-Token}
+ * header. The column holds only the SHA-256 digest of that token ({@link TelegramWebhookSecret}),
+ * not the token itself: whoever holds the token can POST forged inbound messages as any chat,
+ * including an already-paired one, so a database copy must not yield it. The field and column keep
+ * their original names (persisted identifiers).
  */
 @Entity
 @Table(name = "telegram_credential")
@@ -61,7 +61,8 @@ public class TelegramCredential {
         // JPA
     }
 
-    public TelegramCredential(String botUserId, String botUsername, String encryptedBotToken, String webhookSecret) {
+    public TelegramCredential(
+            String botUserId, String botUsername, String encryptedBotToken, String webhookSecret) {
         this.botUserId = botUserId;
         this.botUsername = botUsername;
         this.encryptedBotToken = encryptedBotToken;
@@ -73,7 +74,8 @@ public class TelegramCredential {
         this.lastValidatedAt = now;
     }
 
-    public void reactivate(String botUserId, String botUsername, String encryptedBotToken, String webhookSecret) {
+    public void reactivate(
+            String botUserId, String botUsername, String encryptedBotToken, String webhookSecret) {
         this.botUserId = botUserId;
         this.botUsername = botUsername;
         this.encryptedBotToken = encryptedBotToken;
@@ -83,7 +85,10 @@ public class TelegramCredential {
         this.lastValidatedAt = Instant.now();
     }
 
-    /** Tenant-initiated disconnect - keeps the row so the console can still show what was connected; every consumer resolves ACTIVE-only, so this alone stops all use. */
+    /**
+     * Tenant-initiated disconnect - keeps the row so the console can still show what was connected;
+     * every consumer resolves ACTIVE-only, so this alone stops all use.
+     */
     public void disconnect() {
         this.status = TelegramCredentialStatus.DISCONNECTED;
         this.updatedAt = Instant.now();

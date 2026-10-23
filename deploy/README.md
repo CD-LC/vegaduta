@@ -63,7 +63,7 @@ The bare `up --full` core set: `postgres`, `pgbouncer`, `valkey`, `seaweedfs`, `
 |---|---|---|
 | `events` | redpanda (Kafka API, BSL-1.1 — see NOTICE) | `CORE_PROFILES_EXTRA=,workflow` |
 | `temporal` | temporal, temporal-postgresql, temporal-ui, core-worker (implies `events`) | `CORE_PROFILES_EXTRA=,workflow,temporal`, `WORKFLOW_EXECUTION_ENGINE=temporal` |
-| `jobs` | core-jobs (implies `temporal`) | — |
+| `jobs` | core-jobs (implies `temporal`) | `CORE_SHAPE_PROFILE=,shape-api` so the API leaves the sweeps and pollers to core-jobs |
 | `observability` | prometheus, grafana, loki, promtail, alertmanager, valkey-exporter | — |
 | `tracing` | langfuse web+worker, its postgres, clickhouse, valkey, S3 | `TRACING_SAMPLING_PROBABILITY=0.1` to start sending |
 | `voice` | livekit, voice-agent | `LIVEKIT_BIND_ADDR=0.0.0.0` + UDP 50000-50100 for remote callers (`LIVEKIT_RTC_PORT_RANGE_START` / `_END` move the range) |

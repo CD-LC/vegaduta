@@ -16,7 +16,7 @@
 # block in that change - ruff uses the NEAREST config, so it would shadow a
 # root one silently.
 #
-# WHY py312: the Dockerfile's runtime is python:3.12.x-slim-bookworm. Dev
+# WHY py312: the Dockerfile's runtime is python:3.12.x-slim-trixie. Dev
 # machines have been observed on cp311 - the image, not the laptop, is the
 # deployment truth.
 

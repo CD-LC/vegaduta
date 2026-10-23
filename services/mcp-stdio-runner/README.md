@@ -61,7 +61,7 @@ shutdown before this service existed.
 
 ## Threat model / what's actually enforced
 
-- **No inbound `ports:`** in `deploy/docker-compose.yml` — only `core`, over
+- **No inbound `ports:`** in `deploy/compose/docker-compose.yml` — only `core`, over
   the isolated `mcp-stdio-net` network, can ever reach this service.
 - **`cap_drop: ALL` + `no-new-privileges`** on the container (see that
   service's compose block). By default every MCP server runs as the one
@@ -89,7 +89,8 @@ shutdown before this service existed.
   The child's working directory is still the image `WORKDIR` (`/app`).
   **Cost:** nothing is cached between connections, so every spawn downloads
   its package again, and the browser image's build-time npx pre-warm is no
-  longer used (watch the 60s MCP init timeout for heavy packages such as
+  longer used (the image deletes that cache, so its frozen server-puppeteer
+  tree no longer ships; watch the 60s MCP init timeout for heavy packages such as
   `server-puppeteer`). All sandboxes share the `/tmp` volume (512Mi emptyDir
   in the helm chart), so size it for concurrent connections × package size.
 - **Per-child uid (optional, `MCP_RUNNER_UID_RANGE`, e.g.
@@ -143,7 +144,19 @@ shutdown before this service existed.
   risk explicitly in scope: a compromised package can still reach the public
   internet from this container. It cannot reach anything else in the stack.
 - **Custom seccomp deny-list profile** (`seccomp-profile.json`, wired via
-  `security_opt` in `deploy/docker-compose.yml`). Derived mechanically from
+  `security_opt` in `deploy/compose/docker-compose.yml`, `lite.yml` and
+  `personal.yml`). **Where it is applied:** by those Compose files only. A plain
+  `docker run` of the image does not get it (add
+  `--security-opt seccomp=services/mcp-stdio-runner/seccomp-profile.json` yourself),
+  and **the Helm chart does not ship it**: pods get the library default
+  `seccompProfile: RuntimeDefault`, which allows `ptrace` on kernels >= 4.8 and `unshare`
+  for non-cap-holders, the two things this profile closes. On Kubernetes the chart relies on
+  a different control instead: it refuses to render without a VM-isolating
+  `runtimeClassName` (Kata or gVisor; `requireRuntimeClass: true`), and that boundary is what
+  contains a spawned child. To apply the profile on Kubernetes too, install the JSON under
+  the kubelet's seccomp directory on every node and set `securityContext.seccompProfile` to
+  `{type: Localhost, localhostProfile: <path>}` in the chart values. The profile is
+  derived mechanically from
   the moby v28 default baseline, with the dangerous set made
   capability-independent and explicit: `ptrace`/`process_vm_*`/`kcmp`/
   `pidfd_getfd`/`process_madvise` (cross-process memory reads — protects

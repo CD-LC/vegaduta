@@ -99,6 +99,12 @@ that scaffold.py/generate.py/preview.py all read from:
 | `python-fastapi` | FastAPI, one `/` route | `pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000` |
 | `static-html` | plain HTML/CSS, no build step | `python -m http.server 8000` |
 
+The Node templates pin their build tool past the published advisories: `vite` `^7.3.7` (`node-react`,
+`capacitor-app`; `@vitejs/plugin-react` `^4.7.0` supports it) and `astro` `~7.3.8`. Astro is held to the 7.3
+line on purpose: 7.4.2 and later declare `node >=22.23.4` and refuse to run on older Node (the workspace
+runner image has 22.23.3), while 7.3 needs 22.12. Widen it to `^7` when the runner's Node is bumped past that.
+The starters carry no lockfile, so a new project resolves the newest allowed version when it installs.
+
 Optional manifest keys:
 
 - `preview_dir` — build output that publishes to the repo's own GitHub
@@ -198,6 +204,14 @@ dependencies: `POST /projects/{id}/preview/start` then reads the project's
 manifest, registers a code-intel workspace from the real checkout, starts
 the install+run command as a long-running process, and returns a URL.
 
+Preview routes are namespaced per tenant, because project ids are unique
+only within a tenant: the Caddy route id is `preview-<tenant_key>-<project_id>`
+and the URL is `<base>/preview/<tenant_key>/<project_id>/` (or, in
+`subdomain` mode, `https://<tenant_key>-<project_id>.<preview domain>`), where
+`<tenant_key>` is 16 hex characters derived from the tenant id. A preview
+started before this change keeps working and is removed by `preview/stop` as
+before; only its URL has the old, un-namespaced shape.
+
 ## BaaS (optional per-project Postgres)
 
 `POST /projects/{id}/backend/provision` creates a Postgres schema
@@ -206,7 +220,10 @@ schema-scoped `DATABASE_URL` (via `options=-csearch_path=<schema>`).
 Fully optional — a project scaffolds and previews with no database at
 all; if `APP_BUILDER_ADMIN_DATABASE_URL` isn't configured,
 `provision_backend()` returns a clear `{"provisioned": false, "reason":
-...}` instead of crashing the service. See `app/baas.py`'s module
+...}` instead of crashing the service. A database error is logged by the
+service and reported to the caller as a generic reason with the SQLSTATE
+code (for example `schema apply failed (SQLSTATE 42601); see the app-builder
+service log`), never the driver's message. See `app/baas.py`'s module
 docstring for the isolation caveat (below).
 
 ## Run
@@ -229,12 +246,12 @@ python3 -m tests.test_github_credentials  # encrypted PAT store
 python3 -m tests.test_github_routes       # the connect/status/disconnect API
 python3 -m tests.test_byo_repo            # ACCEPTANCE GATE: create->generate->push->PR
 
-# docker, alongside the existing stack + code-intel (deploy/ untouched)
-echo "APP_BUILDER_INTERNAL_TOKEN=$(openssl rand -hex 24)" >> deploy/.env
-docker compose -f deploy/docker-compose.yml \
-               -f code-intel/docker-compose.code-intel.yml \
-               -f app-builder/docker-compose.app-builder.yml \
-               up -d --build app-builder
+# docker: app-builder is a service of the platform stack, compose profile `builder`
+# (deploy/compose/docker-compose.yml); it pulls in code-intel. The launcher fills the
+# app-builder secrets in deploy/compose/.env.
+scripts/vegaduta up --full --profile builder
+# Do not layer services/app-builder/docker-compose.app-builder.yml on the platform stack:
+# it is superseded and is only for running app-builder standalone.
 ```
 
 ## Required environment variables

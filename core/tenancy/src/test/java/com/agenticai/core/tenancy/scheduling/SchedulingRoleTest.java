@@ -168,6 +168,51 @@ class SchedulingRoleTest {
         }
     }
 
+    // Migrate-only: the one-shot Job must not run background jobs at all (a scheduled tick that
+    // holds an advisory-lock permit made the Job exit 75 without migrating).
+
+    @Test
+    void aMigrateOnlyProcessSchedulesNothingWithNoSkipListConfigured() {
+        try (AnnotationConfigApplicationContext ctx =
+                migrateOnlyContext("app.tenancy.migrate-only=true")) {
+            ScheduledAnnotationBeanPostProcessor processor =
+                    ctx.getBean(ScheduledAnnotationBeanPostProcessor.class);
+            assertEquals(
+                    RoleFilteringScheduledAnnotationBeanPostProcessor.class, processor.getClass());
+            assertEquals(0, processor.getScheduledTasks().size());
+        }
+    }
+
+    @Test
+    void aMigrateOnlyProcessBoundFromTheEnvVarSchedulesNothingEvenWithAKeepList() {
+        try (AnnotationConfigApplicationContext ctx =
+                migrateOnlyContext(
+                        "APP_TENANCY_MIGRATE_ONLY=true",
+                        "app.scheduling.keep-bean-classes=" + KeptJob.class.getName())) {
+            assertEquals(
+                    0,
+                    ctx.getBean(ScheduledAnnotationBeanPostProcessor.class)
+                            .getScheduledTasks()
+                            .size(),
+                    "a keep list is for pool pods; migrate-only runs no job at all");
+        }
+    }
+
+    @Test
+    void migrateOnlyFalseLeavesSchedulingExactlyAsItWas() {
+        try (AnnotationConfigApplicationContext ctx =
+                migrateOnlyContext("app.tenancy.migrate-only=false")) {
+            ScheduledAnnotationBeanPostProcessor processor =
+                    ctx.getBean(ScheduledAnnotationBeanPostProcessor.class);
+            assertEquals(ScheduledAnnotationBeanPostProcessor.class, processor.getClass());
+            assertEquals(3, processor.getScheduledTasks().size());
+        }
+    }
+
+    private static AnnotationConfigApplicationContext migrateOnlyContext(String... settings) {
+        return poolContext(settings);
+    }
+
     // The pool wiring end to end: the real environment (OS env var names, relaxed binding) through
     // SchedulingRoleRegistrar into the real post-processor.
 

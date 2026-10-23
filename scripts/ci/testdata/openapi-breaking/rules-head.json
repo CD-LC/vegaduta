@@ -1,0 +1,525 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "fixture",
+    "version": "2"
+  },
+  "paths": {
+    "/api/was-public": {
+      "get": {
+        "operationId": "Sec_wasPublic",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/api/lost-scheme": {
+      "get": {
+        "operationId": "Sec_lostScheme",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/api/now-public": {
+      "get": {
+        "operationId": "Sec_nowPublic",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/api/more-schemes": {
+      "get": {
+        "operationId": "Sec_moreSchemes",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/api/role-added": {
+      "get": {
+        "operationId": "Acc_roleAdded",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        },
+        "x-roles": [
+          "tenant-admin"
+        ]
+      }
+    },
+    "/api/role-lost": {
+      "get": {
+        "operationId": "Acc_roleLost",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        },
+        "x-roles": [
+          "tenant-admin"
+        ]
+      }
+    },
+    "/api/role-dropped": {
+      "get": {
+        "operationId": "Acc_roleDropped",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/api/perm-any-lost": {
+      "get": {
+        "operationId": "Acc_permAnyLost",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        },
+        "x-permissions": {
+          "anyOf": [
+            "PERM_A"
+          ]
+        }
+      }
+    },
+    "/api/perm-any-added": {
+      "get": {
+        "operationId": "Acc_permAnyAdded",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        },
+        "x-permissions": {
+          "anyOf": [
+            "PERM_A",
+            "PERM_B"
+          ]
+        }
+      }
+    },
+    "/api/perm-all-added": {
+      "get": {
+        "operationId": "Acc_permAllAdded",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        },
+        "x-permissions": {
+          "allOf": [
+            "PERM_A",
+            "PERM_B"
+          ]
+        }
+      }
+    },
+    "/api/search": {
+      "get": {
+        "operationId": "Par_search",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        },
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/things": {
+      "post": {
+        "operationId": "Thing_create",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ThingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/open-things": {
+      "post": {
+        "operationId": "Thing_createOpen",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenThingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/api/payloads": {
+      "post": {
+        "operationId": "Payload_in",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/api/results": {
+      "get": {
+        "operationId": "Result_get",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/extended": {
+      "get": {
+        "operationId": "Ext_get",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Extended"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/relaxed": {
+      "post": {
+        "operationId": "Relax_in",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelaxedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ThingRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 5
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "when": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "note": {
+            "type": "string",
+            "minLength": 0
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "OpenThingRequest": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ThingResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "stamp": {
+            "type": "string",
+            "format": "date"
+          },
+          "big": {
+            "type": "integer"
+          },
+          "small": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "capped": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "precise": {
+            "type": "number",
+            "format": "date"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "PayloadA": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "string"
+          }
+        }
+      },
+      "PayloadB": {
+        "type": "object",
+        "properties": {
+          "b": {
+            "type": "string"
+          }
+        }
+      },
+      "Payload": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PayloadA"
+          }
+        ]
+      },
+      "Result": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PayloadA"
+          },
+          {
+            "$ref": "#/components/schemas/PayloadB"
+          }
+        ]
+      },
+      "RelaxedRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PayloadA"
+          },
+          {
+            "$ref": "#/components/schemas/PayloadB"
+          }
+        ]
+      },
+      "Identified": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "Extended": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Identified"
+          },
+          {
+            "type": "object",
+            "properties": {}
+          }
+        ]
+      }
+    }
+  }
+}

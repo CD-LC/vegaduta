@@ -3,7 +3,7 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "vegaduta-sdk"  # placeholder name until a package name is reserved
+name = "vegaduta-sdk"  # not on PyPI yet: reserve the name first (docs/maintainers/releasing-rest-sdks.md)
 version = "0.1.0"
 description = "Python client for the VegaDūta REST API, generated from the platform's OpenAPI spec with a zero-dependency standard-library runtime (SSE streams, retries, timeouts)."
 readme = "README.md"

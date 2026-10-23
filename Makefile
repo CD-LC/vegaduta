@@ -66,7 +66,7 @@ images: ## Build the Full-tier images from source (compose build overlay); PROFI
 ## ---- Test and lint -----------------------------------------------------------
 
 .PHONY: test
-test: test-core test-web test-python test-sdk-clients ## All unit/integration tests
+test: test-core test-web test-python test-node-services test-sdk-clients ## All unit/integration tests
 
 .PHONY: test-core
 test-core: ## mvn verify (context tests need Postgres with pgvector+AGE on DB_HOST:DB_PORT, else they skip)
@@ -74,10 +74,10 @@ test-core: ## mvn verify (context tests need Postgres with pgvector+AGE on DB_HO
 
 .PHONY: spring-wiring
 spring-wiring: ## Startup-only Spring wiring checks without a context: constructor choice, duplicate bean/entity names (part of test-core too)
-	cd core && $(MVN) -B -ntp -pl app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest='InjectableConstructorTest,UniqueBeanNamesTest' test
+	cd core && $(MVN) -B -ntp -pl app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest='InjectableConstructorTest,UniqueBeanNamesTest,ShapeInjectionPointsTest' test
 
 .PHONY: boot-check
-boot-check: ## Boot the real core jar against throwaway pgvector+AGE Postgres and Redis (about 3 min; needs Docker and JAVA_HOME on a JDK 21+)
+boot-check: ## Boot the real core jars (api, migrate-only, jobs, worker) against throwaway pgvector+AGE Postgres and Redis (about 6 min; needs Docker and JAVA_HOME on a JDK 21+)
 	bash scripts/ci/boot-check.sh
 
 .PHONY: boot-check-personal
@@ -95,18 +95,24 @@ contracts: ## Consumer-driven contracts (ADR-0025): web contract is current, the
 	cd core && $(MVN) -B -ntp -pl app -am test -Dsurefire.failIfNoSpecifiedTests=false -Dtest='ConsumerContractVerificationTest,OpenApiSpecFreshnessTest'
 
 .PHONY: test-python
-test-python: ## sidecar (pytest) and code-intel (script harness); needs their requirements installed
+test-python: ## sidecar and rl-trainer (pytest), code-intel (script harness, every tests/test_*.py); needs their requirements installed
 	cd services/sidecar && $(PYTHON) -m pytest tests/ -q
-	cd services/code-intel && for m in test_auth test_service test_guardrails test_agent \
-	    test_approval_reconcile test_exec_and_mcp test_gitops_auth_token \
-	    test_gitops_confinement test_run_modes test_store_search; do \
-	  $(PYTHON) -m "tests.$$m" || exit 1; done
+	cd services/rl-trainer && $(PYTHON) -m pytest tests/ -q
+	cd services/code-intel && for f in tests/test_*.py; do \
+	  $(PYTHON) -m "tests.$$(basename $$f .py)" || exit 1; done
+
+.PHONY: test-node-services
+test-node-services: ## node:test suites of mcp-stdio-runner, piece-host, workspace-runner, whatsapp-qr, desktop-agent
+	for d in mcp-stdio-runner workspace-runner whatsapp-qr desktop-agent; do \
+	  (cd services/$$d && node --test) || exit 1; done
+	cd services/piece-host && npm test
 
 .PHONY: test-sdk-clients
 test-sdk-clients: ## SDK REST clients + python-agent, incl. consumer contracts (contracts/consumers); python-agent needs pytest
 	node --test sdk/test/*.test.mjs
 	cd sdk/python && $(PYTHON) -m unittest discover -s tests
 	cd sdk/python-agent && PYTHONPATH=. $(PYTHON) -m pytest tests/ -q
+	$(PYTHON) -m unittest discover -s contracts/consumers/tools -p 'test_*.py'
 
 .PHONY: lint
 lint: ## ESLint + tsc for the console, ruff for Python, shellcheck
@@ -147,6 +153,9 @@ gates: ## The static gates (static-gates.yml runs them when CI is triggered; run
 	sh scripts/ci/check-module-size.sh
 	sh scripts/ci/dockerfile-poms.sh
 	sh scripts/ci/web-image-deps.sh
+	sh scripts/ci/postgres-portable-build.sh
+	bash scripts/ci/check-browser-runner-version.sh
+	bash scripts/ci/check-browser-runner-version.sh --self-test
 	python3 core/tools/module-graph/gen_module_graph.py --check
 	node sdk/generate.mjs --check
 	node scripts/docs/asyncapi.mjs --check
@@ -157,9 +166,12 @@ gates: ## The static gates (static-gates.yml runs them when CI is triggered; run
 	python3 scripts/ci/conformance-report.py --check
 	bash tests/install/vegaduta-install.test.sh
 	bash scripts/ci/docs-link-check.sh
+	bash scripts/ci/channel-docs-check.sh
 	bash scripts/ci/internal-reference-lint.sh
 	bash scripts/ci/no-telemetry-check.sh
 	bash scripts/ci/test-internal-reference-lint.sh
+	bash scripts/ci/dependabot-coverage.sh
+	bash scripts/ci/test-gates-parity.sh
 	python3 deploy/helm/scripts/check-values-docs.py
 	bash scripts/ci/secret-scan.sh
 
