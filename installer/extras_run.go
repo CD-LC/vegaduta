@@ -117,18 +117,25 @@ func (x extrasRun) beforeUp(root string, emit func(Event)) error {
 func (x extrasRun) args(tier string) []string { return upArgs(tier, x.plan, x.caps) }
 
 // afterUp stops what was switched off (data kept), downloads picked models and
-// records the choice so the next run of Setup shows it.
-func (x extrasRun) afterUp(ctx context.Context, root string, emit func(Event)) {
+// records the choice so the next run of Setup shows it. A model whose download
+// failed is not recorded, so the next run still offers it; those packs are
+// returned for the caller to say so at the end.
+func (x extrasRun) afterUp(ctx context.Context, root string, emit func(Event)) (failedPulls []Pull) {
 	if !x.active {
-		return
+		return nil
 	}
 	if len(x.plan.Turned) > 0 {
 		StopTurnedOff(ctx, root, x.plan.Turned, emit)
 	}
-	PullModels(ctx, root, x.plan.Pulls, emit)
-	if err := saveChoice(root, x.cat, x.sel); err != nil {
+	failedPulls = PullModels(ctx, root, x.goos, x.plan.Pulls, emit)
+	rec := x.sel.clone()
+	for _, p := range failedPulls {
+		delete(rec, p.ID)
+	}
+	if err := saveChoice(root, x.cat, rec); err != nil {
 		emit(Event{Line: "could not remember your extras choice: " + err.Error()})
 	}
+	return failedPulls
 }
 
 // printExtras is --list-extras: the catalog as Setup will apply it.

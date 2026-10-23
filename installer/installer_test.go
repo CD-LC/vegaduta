@@ -156,15 +156,20 @@ func TestUnpackReleaseRejectsTraversal(t *testing.T) {
 }
 
 func TestResolveVersionValidation(t *testing.T) {
-	for _, bad := range []string{"x.y.z", "1.2", "../etc", "latest", "1.2.3.4.5"} {
+	for _, bad := range []string{"x.y.z", "1.2", "../etc", "latest", "1.2.3.4.5",
+		"1.0.0-", "1.0.0--", "1.0.0-rc..1", "1.0.0-rc/../x", "1.0.0+build", "1.0.0-rc.1/", "1.0.0-.rc"} {
 		c := config{version: bad}
 		if _, err := resolveVersion(t.Context(), c); err == nil {
 			t.Errorf("resolveVersion(%q): expected an error", bad)
 		}
 	}
-	c := config{version: "v1.2.3"}
-	if v, err := resolveVersion(t.Context(), c); err != nil || v != "1.2.3" {
-		t.Errorf("resolveVersion(v1.2.3)=%q,%v want 1.2.3", v, err)
+	// Pre-releases are installable by an explicit version, as release.yml and install.sh allow.
+	for in, want := range map[string]string{
+		"v1.2.3": "1.2.3", "1.2.3": "1.2.3", "1.0.0-rc.1": "1.0.0-rc.1", "v1.0.0-rc.1": "1.0.0-rc.1", "2.0.0-beta": "2.0.0-beta",
+	} {
+		if v, err := resolveVersion(t.Context(), config{version: in}); err != nil || v != want {
+			t.Errorf("resolveVersion(%q)=%q,%v want %q", in, v, err, want)
+		}
 	}
 }
 
@@ -212,6 +217,28 @@ func TestTierArgsAndNeeds(t *testing.T) {
 		mem, disk, ports := tierNeeds(tier)
 		if mem <= 0 || disk <= 0 || len(ports) == 0 {
 			t.Errorf("tierNeeds(%q) returned empty requirements", tier)
+		}
+	}
+}
+
+// The .dmg's READ ME FIRST is what a macOS user follows when Gatekeeper blocks
+// the app. Right-click > Open stopped working in macOS 15; the steps that do
+// work must stay in it.
+func TestDmgReadmeHasTheCurrentGatekeeperSteps(t *testing.T) {
+	b, err := os.ReadFile("package.sh")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(b)
+	i := strings.Index(s, "readme_darwin()")
+	j := strings.Index(s, "readme_windows()")
+	if i < 0 || j < i {
+		t.Fatal("readme_darwin not found in package.sh")
+	}
+	readme := s[i:j]
+	for _, want := range []string{"System Settings", "Privacy & Security", "Open Anyway", "macOS 15", "xattr -dr com.apple.quarantine"} {
+		if !strings.Contains(readme, want) {
+			t.Errorf("READ ME FIRST misses %q", want)
 		}
 	}
 }

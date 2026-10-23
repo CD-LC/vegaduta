@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -23,47 +24,151 @@ import (
 	"time"
 )
 
+// semverRe is a stable release version: what "latest" may resolve to.
 var semverRe = regexp.MustCompile(`^\d+\.\d+\.\d+$`)
 
-var httpClient = &http.Client{Timeout: 10 * time.Minute}
+// releaseVersionRe is what --version accepts: a stable version or a pre-release
+// such as 1.0.0-rc.1, as release.yml publishes and install.sh installs. The
+// suffix is dot-separated alphanumeric identifiers, so nothing that could
+// change the download URL (a slash, "..", a query) gets through.
+var releaseVersionRe = regexp.MustCompile(`^\d+\.\d+\.\d+(-[0-9A-Za-z]+(\.[0-9A-Za-z]+)*)?$`)
 
-// resolveVersion returns the X.Y.Z to install: an explicit --version, else the
-// tag of the repo's latest published release (same redirect trick install.sh
-// uses, over the GitHub API).
+// githubWeb and githubAPI are vars so tests can point them at a fake GitHub.
+var (
+	githubWeb = "https://github.com"
+	githubAPI = "https://api.github.com"
+)
+
+var httpClient = &http.Client{Timeout: 10 * time.Minute, Transport: newTransport()}
+
+// noRedirectClient reads a redirect's Location without following it.
+var noRedirectClient = &http.Client{
+	Timeout:       30 * time.Second,
+	Transport:     httpClient.Transport,
+	CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
+}
+
+// validateVersion normalises an explicit --version ("v1.2.3" -> "1.2.3") and
+// rejects anything else; "" (the latest release) is fine.
+func validateVersion(v string) (string, error) {
+	if v == "" {
+		return "", nil
+	}
+	n := strings.TrimPrefix(v, "v")
+	if !releaseVersionRe.MatchString(n) {
+		return "", fmt.Errorf("invalid version %q (expected X.Y.Z or a pre-release such as X.Y.Z-rc.1)", v)
+	}
+	return n, nil
+}
+
+// resolveVersion returns the version to install: an explicit --version, else
+// the newest stable VegaDuta release of the repo.
 func resolveVersion(ctx context.Context, c config) (string, error) {
 	if c.version != "" {
-		v := strings.TrimPrefix(c.version, "v")
-		if !semverRe.MatchString(v) {
-			return "", fmt.Errorf("invalid version %q (expected X.Y.Z)", c.version)
-		}
+		return validateVersion(c.version)
+	}
+	return latestRelease(ctx, c.repo)
+}
+
+// stableTag returns the version of a tag that is a VegaDuta stable release
+// (vX.Y.Z). Other tags in the repo - the SDK releases (sdk-v0.1.0), pre-releases
+// (v1.0.0-rc.1) - are not what "latest" means.
+func stableTag(tag string) (string, bool) {
+	v, ok := strings.CutPrefix(tag, "v")
+	if !ok || !semverRe.MatchString(v) {
+		return "", false
+	}
+	return v, true
+}
+
+// latestRelease resolves "latest" the way install.sh does: the Location of
+// https://github.com/<repo>/releases/latest, which costs no API quota (the API
+// allows an unauthenticated address 60 requests an hour, and a shared office or
+// campus address runs out). Only when that does not name a vX.Y.Z tag - GitHub
+// once marked the Java SDK release the Latest - is the release list read from
+// the API and filtered.
+func latestRelease(ctx context.Context, repo string) (string, error) {
+	tag, redirErr := latestTagFromRedirect(ctx, repo)
+	if v, ok := stableTag(tag); ok {
 		return v, nil
 	}
-	req, err := http.NewRequestWithContext(ctx, "GET",
-		fmt.Sprintf("https://api.github.com/repos/%s/releases/latest", c.repo), nil)
+	v, apiErr := latestFromAPI(ctx, repo)
+	if apiErr == nil {
+		return v, nil
+	}
+	var why []string
+	switch {
+	case tag != "":
+		why = append(why, fmt.Sprintf("GitHub's Latest release of %s is %q, which is not a VegaDuta release (those are tagged vX.Y.Z)", repo, tag))
+	case redirErr != nil:
+		why = append(why, redirErr.Error())
+	}
+	why = append(why, apiErr.Error())
+	return "", fmt.Errorf("could not work out the latest release of %s: %s; pass --version X.Y.Z to choose one", repo, strings.Join(why, "; "))
+}
+
+func latestTagFromRedirect(ctx context.Context, repo string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, fmt.Sprintf("%s/%s/releases/latest", githubWeb, repo), nil)
+	if err != nil {
+		return "", err
+	}
+	resp, err := noRedirectClient.Do(req)
+	if err != nil {
+		return "", withProxyHint(fmt.Errorf("could not reach GitHub: %w", err))
+	}
+	resp.Body.Close()
+	loc := resp.Header.Get("Location")
+	i := strings.LastIndex(loc, "/releases/tag/")
+	if resp.StatusCode < 300 || resp.StatusCode >= 400 || i < 0 {
+		return "", fmt.Errorf("%s/%s/releases/latest answered HTTP %d without a release", githubWeb, repo, resp.StatusCode)
+	}
+	tag, err := url.PathUnescape(loc[i+len("/releases/tag/"):])
+	if err != nil {
+		return "", err
+	}
+	return tag, nil
+}
+
+// latestFromAPI reads the newest published stable vX.Y.Z release from the API.
+func latestFromAPI(ctx context.Context, repo string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/repos/%s/releases?per_page=30", githubAPI, repo), nil)
 	if err != nil {
 		return "", err
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("could not resolve the latest release of %s: %w", c.repo, err)
+		return "", withProxyHint(fmt.Errorf("could not reach GitHub's API: %w", err))
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("no published release of %s (GET %s -> %d); pass --version X.Y.Z",
-			c.repo, req.URL, resp.StatusCode)
+	switch {
+	case resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusTooManyRequests:
+		return "", fmt.Errorf("GitHub's API is rate-limiting this network (HTTP %d; unauthenticated callers get 60 requests an hour) - try again later", resp.StatusCode)
+	case resp.StatusCode == http.StatusNotFound:
+		return "", fmt.Errorf("no published release of %s was found (is the repository name right?)", repo)
+	case resp.StatusCode != http.StatusOK:
+		return "", fmt.Errorf("GitHub's API answered HTTP %d", resp.StatusCode)
 	}
-	var body struct {
-		Tag string `json:"tag_name"`
+	var rels []struct {
+		Tag        string `json:"tag_name"`
+		Draft      bool   `json:"draft"`
+		Prerelease bool   `json:"prerelease"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
-		return "", err
+	if err := json.NewDecoder(resp.Body).Decode(&rels); err != nil {
+		return "", fmt.Errorf("could not read GitHub's release list: %w", err)
 	}
-	v := strings.TrimPrefix(body.Tag, "v")
-	if !semverRe.MatchString(v) {
-		return "", fmt.Errorf("latest release tag %q is not X.Y.Z", body.Tag)
+	var seen []string
+	for _, r := range rels {
+		if v, ok := stableTag(r.Tag); ok && !r.Draft && !r.Prerelease {
+			return v, nil
+		}
+		seen = append(seen, r.Tag)
 	}
-	return v, nil
+	if len(rels) == 0 {
+		return "", fmt.Errorf("no published release of %s was found", repo)
+	}
+	return "", fmt.Errorf("none of the %d newest releases of %s is a stable VegaDuta release (tagged vX.Y.Z); saw %s",
+		len(rels), repo, strings.Join(seen, ", "))
 }
 
 // fetchRelease downloads and verifies the tarball, returning its path inside a
@@ -202,7 +307,7 @@ func download(ctx context.Context, url, dest string, progress func(done, total i
 	}
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return err
+		return withProxyHint(err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {

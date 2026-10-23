@@ -35,8 +35,9 @@ go build -o vegaduta-setup .
 ```
 
 Flags: `--dir` (default `~/VegaDuta` or `$VEGADUTA_HOME`), `--tier personal|lite|full`
-(default `personal`), `--version X.Y.Z` (default: latest published release),
-`--repo owner/name` (default `CD-LC/vegaduta`), `--port N`, `--extras id,id` and `--list-extras` (see [Extras](#extras-personal-tier)); `--documents` and `--browser` still work and mean `--extras ...,documents` / `...,browser`.
+(default `personal`), `--version X.Y.Z` (or a pre-release such as `1.0.0-rc.1`; default: the
+newest published stable `vX.Y.Z` release),
+`--repo owner/name` (default `CD-LC/vegaduta`), `--port N`, `--allow-docker-restart` (Windows, see below), `--extras id,id` and `--list-extras` (see [Extras](#extras-personal-tier)); `--documents` and `--browser` still work and mean `--extras ...,documents` / `...,browser`.
 
 ## Extras (personal tier)
 
@@ -66,9 +67,14 @@ Planned add-ons are shown but cannot be ticked.
   packs; so a change made on the command line or in the console is kept. The
   launcher only ever *adds* `--profile` values to the ones it remembers, so Setup
   first rewrites the `profiles=` line of `deploy/compose/.vegaduta-state` to the
-  chosen set. Model packs are pulled with `scripts/vegaduta models pull TAG`
-  after the stack is up (a failed pull is reported and does not fail the
-  install).
+  chosen set. Model packs are pulled after the stack is up: on macOS and Linux with
+  `scripts/vegaduta models pull TAG`; on Windows (`vegaduta.ps1` has no `models`
+  command) by Setup itself, through the Ollama the install uses - the container's
+  `ollama pull` when the launcher state says `local_ai=container`, else the one on
+  this computer (`POST /api/pull`). A pull counts only when Ollama reports it
+  finished. A failed one is reported in the log and on the done page and does not
+  fail the install, but the pack is **not** remembered as installed, so the next
+  run of Setup offers it again.
 - **Re-run it.** Running Setup again on an existing install shows the extras it
   has now (from `deploy/compose/.vegaduta-addons.json`, or rebuilt from the
   launcher state and `.env` for installs that predate Extras) and applies
@@ -77,10 +83,43 @@ Planned add-ons are shown but cannot be ticked.
   (`docker stop`, nothing removed); volumes, projects, documents, saved
   sign-ins and downloaded models stay, so ticking it again resumes with its data.
 - **Windows.** `vegaduta.ps1` takes profiles but no flags, so add-ons that need a
-  flag (web search) are shown as unavailable there.
+  flag (web search) are shown as unavailable there. It keeps every profile,
+  `tools` included, in `profiles=` of its state file (the bash launcher writes
+  `tools=1`); Setup reads both.
 - **Headless.** `--extras workspace,search` installs exactly those, `--extras
   none` none; without it a re-run keeps what is installed and a fresh install
   gets the recommended set. `--list-extras` prints the catalog.
+
+## Re-running on an existing install, and versions
+
+A tree already in the install folder (`~/VegaDuta`, `--dir`) is **reused as it is**: Setup
+applies the Extras to it and starts it, it never replaces it with a newer release. So the
+plan (`--dry-run`, and the wizard's Release line) shows the version that is installed -
+the `VEGADUTA_VERSION` its `.env` pins, else the one stamped in `.env.example` - and never
+says "latest" for something that will not be downloaded. When a newer stable release exists
+(or `--version` asks for another one) Setup says so, with the exact command in the install
+folder that does it (`scripts/vegaduta upgrade --version X.Y.Z`, `.\scripts\vegaduta.ps1
+upgrade -Version X.Y.Z` on Windows). Upgrading is the launcher's job because it takes a
+database backup first.
+
+"Latest" is the newest published **stable** release tagged `vX.Y.Z`: Setup reads the
+Location of `https://github.com/<repo>/releases/latest` (as `install.sh` does; no API
+quota), and only if that is not a `vX.Y.Z` tag (the SDK releases are tagged `sdk-v...`)
+reads the release list from the GitHub API and skips drafts, pre-releases and other tags.
+Errors say which of these happened (rate limiting, nothing published, no network) and to
+pass `--version`. `--version` is checked when Setup starts (and in `--dry-run`).
+
+## Behind a proxy
+
+Setup reads `HTTPS_PROXY` (`HTTP_PROXY` for plain http), `ALL_PROXY` (either, as a
+fallback; `http://`, `https://` and `socks5://` URLs, or `host:port`) and `NO_PROXY`
+(host names and `.suffixes`, IPs, CIDR ranges, `host:port`, `*`) - **not** the Windows or
+macOS system proxy settings, which a double-clicked app does not see in its environment
+even when the browser uses them. Start Setup from a terminal that has them set, for
+example `set HTTPS_PROXY=http://proxy.example:8080` and then `vegaduta-setup.exe` in a
+Windows Command Prompt. A download that fails to connect says this. The wizard's own
+page and the console (this computer) are never sent through a proxy. `vegaduta.ps1` and
+`scripts/vegaduta` run their own downloads with their own proxy rules.
 
 ## When Docker is missing or stopped
 
@@ -91,7 +130,14 @@ Two wizard buttons call `POST /api/docker/install` and `POST /api/docker/start`:
   is polled for up to 3 minutes.
 - **Windows**: `winget install -e --id Docker.DockerDesktop`; start is pointed
   at `Docker Desktop.exe`. WSL2 activation still needs one admin command the
-  wizard prints (`wsl --install` + reboot).
+  wizard prints (`wsl --install` + reboot). When Docker has less memory than the
+  tier wants, giving it more means restarting Docker Desktop and running
+  `wsl --shutdown`, which closes every WSL window the person has open: Setup does
+  that **only when the wizard's "Let Setup restart Docker" box is ticked** (or
+  `--allow-docker-restart` is passed). Otherwise it says what it did not do and
+  how to raise the memory in Docker Desktop. When it does, the person's own
+  `~/.wslconfig` is first kept as `.wslconfig.vegaduta.bak` (the first copy is
+  never overwritten).
 - **Linux**: no silent privilege escalation — the wizard prints the
   get.docker.com command for the user to run with sudo.
 
@@ -114,7 +160,8 @@ Two layers, both optional and on-device:
 | `main.go` | flags, dispatch: wizard vs `--yes` vs `--dry-run` |
 | `preflight.go` + `platform_{darwin,linux,windows}.go` + `diskfree_*.go` | doctor-style machine checks, per-OS fix hints |
 | `dockerbootstrap.go` | install/start Docker per OS, daemon-wait loop |
-| `release.go` | latest-tag resolution, download, SHA256SUMS/cosign verify, safe untar |
+| `release.go` + `proxy.go` + `version.go` | latest-tag resolution (redirect, then API), download through the env proxy, SHA256SUMS/cosign verify, safe untar; the installed version and the upgrade advice |
+| `models_pull.go` | model packs: launcher on POSIX, Ollama (container or host) on Windows |
 | `runner.go` | run `scripts/vegaduta` / `.ps1`, stream its output |
 | `addons.go` + `addons/catalog.json` + `sync-addons-catalog.sh` | the embedded add-on catalog, its validation and the sync with core |
 | `extras.go` | selection, dependencies, plan (profiles/flags/env/pulls), disk and memory totals |
@@ -140,12 +187,17 @@ Two layers, both optional and on-device:
   `CORE_HOST_PORT` into the launcher for machines whose default ports are taken.
   With `--payload`, the tarball plus its `SHA256SUMS` sit in the app's
   `Resources/` and the launcher passes `--release-url file://…`, so no published
-  release is needed. The app is ad-hoc signed and packed in a `.dmg` next to a
-  "READ ME FIRST" that explains right-click → Open.
+  release is needed. The app is ad-hoc signed (not notarized) and packed in a
+  `.dmg` next to a "READ ME FIRST" with the current steps for opening it:
+  System Settings → Privacy & Security → **Open Anyway** on macOS 15 and later
+  (right-click → Open only works up to macOS 14), or
+  `xattr -dr com.apple.quarantine "VegaDuta Setup.app"` in Terminal.
 - **Windows**: the exe is already the whole installer; the zip adds a
   `READ-ME-FIRST.txt` explaining SmartScreen's "More info → Run anyway".
-- **Unsigned**: Gatekeeper and SmartScreen warn once until Apple notarization
-  and a code-signing cert are wired (procurement, not engineering). Every
+- **Unsigned**: Gatekeeper blocks the quarantined app and SmartScreen warns,
+  once per machine, until a Developer ID signature with Apple notarization
+  and a Windows code-signing certificate are wired (they need certificates the
+  project does not hold yet; the ad-hoc signature does not replace them). Every
   artifact is still covered by the release's `SHA256SUMS`.
 
 CI: `installer.yml`'s `dist` job (manual dispatch) builds linux/windows on

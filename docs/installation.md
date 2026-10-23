@@ -12,6 +12,16 @@ changing code.
 | Command | `./scripts/vegaduta up --lite` | `./scripts/vegaduta up --full [--profile ...]` | `helm install ...` |
 | Details | [deploy/README.md](../deploy/README.md) | [deploy/README.md](../deploy/README.md) | [deploy/helm/README.md](../deploy/helm/README.md) |
 
+### Opening the Setup app the first time
+
+The Setup app is not yet signed with a Developer ID or notarized, so macOS and Windows warn once. On macOS 15 and later,
+double-click `VegaDuta Setup`, click **Done** on the "Apple could not verify..." message, open **System Settings > Privacy &
+Security**, scroll to *Security*, click **Open Anyway** next to "VegaDuta Setup was blocked" and confirm with your password.
+(Right-click > Open only works up to macOS 14.) In Terminal, `xattr -dr com.apple.quarantine "/Applications/VegaDuta Setup.app"`
+does the same. On Windows choose **More info**, then **Run anyway**. Behind a proxy, set `HTTPS_PROXY` before starting Setup (it
+does not read the system proxy settings); see [installer/README.md](../installer/README.md#behind-a-proxy). Running Setup again on
+an existing install keeps the version that is installed and tells you the `upgrade` command when a newer release exists.
+
 ## Images and verification
 
 Release images are multi-arch (`linux/amd64`, `linux/arm64`) and published as

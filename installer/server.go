@@ -148,6 +148,8 @@ func serveWizard(ctx context.Context, c config) error {
 	// must not start a parallel one.
 	var installMu sync.Mutex
 	installRunning := false
+	var upgradeOnce sync.Once
+	var upgradeNote string
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -162,9 +164,16 @@ func serveWizard(ctx context.Context, c config) error {
 		writeJSON(w, runPreflight(c))
 	})
 	mux.HandleFunc("GET /api/plan", func(w http.ResponseWriter, r *http.Request) {
+		installed := ""
+		if c.from != "" {
+			installed = installedVersion(c.from)
+		}
+		// The release lookup behind the upgrade note is one network call: do it once per run of Setup.
+		upgradeOnce.Do(func() { upgradeNote = upgradeAdvice(r.Context(), c, installed, runtime.GOOS) })
 		writeJSON(w, map[string]string{
 			"tier": c.tier, "dir": c.dir, "repo": c.repo,
-			"version": orLatest(c.version), "build": buildVersion,
+			"version": planVersion(c, installed, c.from != ""), "installed": installed,
+			"upgrade": upgradeNote, "build": buildVersion, "goos": runtime.GOOS,
 		})
 	})
 	var dockerBusy atomic.Bool
@@ -191,10 +200,12 @@ func serveWizard(ctx context.Context, c config) error {
 	mux.HandleFunc("POST /api/docker/start", dockerAction(dockerStart))
 	mux.HandleFunc("POST /api/install", func(w http.ResponseWriter, r *http.Request) {
 		var body struct {
-			Locale    string    `json:"locale"`
-			Documents bool      `json:"documents"`
-			Browser   bool      `json:"browser"`
-			Extras    *[]string `json:"extras"` // the Extras step's final list; absent from older pages
+			Locale    string `json:"locale"`
+			Documents bool   `json:"documents"`
+			Browser   bool   `json:"browser"`
+			// RestartDocker is the wizard's consent box (Windows): raising Docker's memory restarts Docker Desktop and WSL.
+			RestartDocker bool      `json:"restartDocker"`
+			Extras        *[]string `json:"extras"` // the Extras step's final list; absent from older pages
 		}
 		_ = json.NewDecoder(r.Body).Decode(&body) // empty body is fine
 		var pageSel Selection
@@ -223,6 +234,7 @@ func serveWizard(ctx context.Context, c config) error {
 		}
 		cc.documents = body.Documents || cc.documents
 		cc.browser = body.Browser || cc.browser
+		cc.dockerRAM = body.RestartDocker || cc.dockerRAM
 		if body.Extras != nil {
 			cc.extraSel, cc.extraSet = pageSel, true
 		}
@@ -341,10 +353,20 @@ func runInstall(ctx context.Context, c config, emit func(Event)) error {
 		ensureOllama(ctx, emit)
 	}
 	emit(Event{Phase: "docker", Line: "Checking Docker"})
-	if err := ensureDocker(ctx, c.tier, emit); err != nil {
+	if err := ensureDocker(ctx, c.tier, c.dockerRAM, emit); err != nil {
 		return err
 	}
 	root := c.from
+	if root != "" {
+		// A tree is already there (a re-run): it is used as it is, and its version is said out loud.
+		installed := installedVersion(root)
+		if installed != "" {
+			emit(Event{Line: "Using the VegaDuta " + installed + " that is already in " + root})
+		}
+		if adv := upgradeAdvice(ctx, c, installed, runtime.GOOS); adv != "" {
+			emit(Event{Line: adv})
+		}
+	}
 	if root == "" {
 		ver := "custom"
 		if c.releaseURL == "" {
@@ -398,10 +420,10 @@ func runInstall(ctx context.Context, c config, emit func(Event)) error {
 	}
 	emit(Event{Phase: "up", Line: upLine})
 	start := func(onLine func(string)) error { return runCLI(ctx, root, onLine, argv...) }
-	if err := upWithRepair(ctx, start, emit, emitLine); err != nil {
+	if err := upWithRepair(ctx, start, emit, emitLine, hostPorts(root, c.tier)); err != nil {
 		return fmt.Errorf("up: %w", err)
 	}
-	x.afterUp(ctx, root, emit)
+	failedPulls := x.afterUp(ctx, root, emit)
 	url := consoleURL(root)
 	emit(Event{Phase: "wait", Line: "Waiting for the console at " + url})
 	if err := waitHTTP(ctx, url, 3*time.Minute); err != nil {
@@ -410,7 +432,15 @@ func runInstall(ctx context.Context, c config, emit func(Event)) error {
 	if setupLink != "" {
 		url = setupLink
 	}
-	emit(Event{Phase: "done", Line: "VegaDuta is up.", URL: url})
+	done := "VegaDuta is up."
+	if len(failedPulls) > 0 {
+		tags := make([]string, len(failedPulls))
+		for i, p := range failedPulls {
+			tags[i] = p.Tag
+		}
+		done = "VegaDuta is up, but the model " + strings.Join(tags, ", ") + " was NOT downloaded (see the log above). Click Install again to retry it."
+	}
+	emit(Event{Phase: "done", Line: done, URL: url})
 	return nil
 }
 
