@@ -9,6 +9,13 @@ describe("channel adapter registry", () => {
     }
   });
 
+  it("keeps an adapter for the channels a personal install hides (they are hidden at render, not unregistered)", () => {
+    for (const key of ["slack", "discord", "teams", "x"]) {
+      expect(CHANNEL_ORDER, key).toContain(key);
+      expect(adapterFor(key), key).toBeDefined();
+    }
+  });
+
   it("registers each key once", () => {
     const keys = CHANNEL_ADAPTERS.flatMap((a) => a.keys);
     expect(new Set(keys).size).toBe(keys.length);

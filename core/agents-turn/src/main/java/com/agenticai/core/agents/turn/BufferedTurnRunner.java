@@ -22,6 +22,7 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -98,7 +99,8 @@ final class BufferedTurnRunner {
      */
     private final Scheduler bufferedDepthScheduler =
             TenantAwareSchedulers.fromExecutorService(
-                    TenantAwareExecutors.newVirtualThreadPerTaskExecutor("buffered-turn-runner-"), "buffered-depth");
+                    TenantAwareExecutors.newVirtualThreadPerTaskExecutor("buffered-turn-runner-"),
+                    "buffered-depth");
 
     BufferedTurnRunner(
             BufferedTurnCalls calls,
@@ -166,9 +168,6 @@ final class BufferedTurnRunner {
         return schema;
     }
 
-
-
-
     /**
      * Buffered-depth counterpart to {@code streamFast}'s {@code EMPTY_REPLY_FALLBACK} {@code
      * concatWith} operator and its fabricated-generation-URL correction - both were FAST-only
@@ -197,10 +196,10 @@ final class BufferedTurnRunner {
      * operator could never arm (its timer starts at {@code onSubscribe}), and nothing could
      * interleave a keepalive onto a stream whose only thread was blocked inside it. {@link
      * TenantContext} (ADR-0022: the turn's explicit {@link TurnContext#scope()}, equal to the
-     * subscribing request thread's value) is re-applied around {@code work} - the
-     * schema-per-tenant reads inside a turn (session memory, tool-call log, guardrail config)
-     * resolve the tenant from that ThreadLocal, so this is load-bearing, not hygiene. Same
-     * save/restore shape as {@link #supplyPreTurn}.
+     * subscribing request thread's value) is re-applied around {@code work} - the schema-per-tenant
+     * reads inside a turn (session memory, tool-call log, guardrail config) resolve the tenant from
+     * that ThreadLocal, so this is load-bearing, not hygiene. Same save/restore shape as {@link
+     * #supplyPreTurn}.
      *
      * <p>{@code timeout} failures arrive as {@link java.util.concurrent.TimeoutException}, already
      * a recognized category in {@code ProviderErrorTranslator.translate} - handled identically to a
@@ -247,9 +246,9 @@ final class BufferedTurnRunner {
                         e ->
                                 log.error(
                                         "{} failed for agent {} session {}",
-                                        logLabel,
-                                        agentId,
-                                        sessionId,
+                                        LogSafe.clean(logLabel),
+                                        LogSafe.clean(agentId),
+                                        LogSafe.clean(sessionId),
                                         e));
     }
 
@@ -283,8 +282,8 @@ final class BufferedTurnRunner {
         if (answer == null || answer.isBlank()) {
             log.warn(
                     "Agent {} session {} completed with a genuinely empty response - no text, no error",
-                    agentId,
-                    sessionId);
+                    LogSafe.clean(agentId),
+                    LogSafe.clean(sessionId));
             return EMPTY_REPLY_FALLBACK;
         }
         if (containsFabricatedGenerationUrl(answer)
@@ -550,8 +549,8 @@ final class BufferedTurnRunner {
                                 log.warn(
                                         "PLANNED re-plan retry failed for agent {} session {} - keeping the "
                                                 + "answer the first attempt already produced",
-                                        agentId,
-                                        sessionId,
+                                        LogSafe.clean(agentId),
+                                        LogSafe.clean(sessionId),
                                         e);
                             }
                         }
@@ -583,5 +582,4 @@ final class BufferedTurnRunner {
                     return answer;
                 });
     }
-
 }
