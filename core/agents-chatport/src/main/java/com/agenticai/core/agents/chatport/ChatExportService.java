@@ -131,7 +131,8 @@ public class ChatExportService {
         List<Message> messages = new ArrayList<>(turns.size());
         Instant first = null;
         for (ChatTurn t : turns) {
-            if (t == null) {
+            // A record-only turn (a decided action's outcome, kept for the model) is not a message.
+            if (t == null || ChatTurn.isToolRecordOnly(t)) {
                 continue;
             }
             if (first == null) {
