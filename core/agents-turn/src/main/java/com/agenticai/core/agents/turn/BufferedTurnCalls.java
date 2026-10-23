@@ -12,6 +12,7 @@ import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.chat.gateway.LlmGatewayContentPolicyViolationException;
 import com.agenticai.core.guardrails.GuardrailViolationException;
 import com.agenticai.core.guardrails.ToolStepLimitExceededException;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -161,8 +162,8 @@ final class BufferedTurnCalls {
                 && turns.collectToolEvidenceSince(agentId, sessionId, callStartedAt) == null) {
             log.warn(
                     "Agent {} session {} announced work without calling a tool - re-running once with a nudge",
-                    agentId,
-                    sessionId);
+                    LogSafe.clean(agentId),
+                    LogSafe.clean(sessionId));
             try {
                 String retry =
                         callBufferedTurnOn(
@@ -183,8 +184,8 @@ final class BufferedTurnCalls {
             } catch (RuntimeException e) {
                 log.warn(
                         "Announce-nudge retry failed for agent {} session {} - keeping first reply",
-                        agentId,
-                        sessionId,
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(sessionId),
                         e);
             }
         }
@@ -282,9 +283,9 @@ final class BufferedTurnCalls {
             }
             log.info(
                     "Escalating agent {} session {} to primary model (reason {})",
-                    agentId,
-                    sessionId,
-                    reason.get());
+                    LogSafe.clean(agentId),
+                    LogSafe.clean(sessionId),
+                    LogSafe.clean(reason.get()));
             ChatClient strong = target.get().get();
             Instant strongStartedAt = Instant.now();
             String better =
@@ -311,8 +312,8 @@ final class BufferedTurnCalls {
             // destroy that answer (same fail-open posture as the re-plan retry).
             log.warn(
                     "Verifier escalation failed for agent {} session {} - keeping the cheap answer",
-                    agentId,
-                    sessionId,
+                    LogSafe.clean(agentId),
+                    LogSafe.clean(sessionId),
                     e);
             return new BufferedTurnRunner.Draft(answer, chatClient);
         }
@@ -380,9 +381,9 @@ final class BufferedTurnCalls {
                                         + "thought_signature bug (spring-projects/spring-ai#5466) on a buffered "
                                         + "reasoning depth - retrying once on the same provider/model with tools "
                                         + "disabled for this turn",
-                                agent.getProviderName(),
-                                agentId,
-                                sessionId);
+                                LogSafe.clean(agent.getProviderName()),
+                                LogSafe.clean(agentId),
+                                LogSafe.clean(sessionId));
                         return bufferedCall(
                                         client,
                                         agentId,

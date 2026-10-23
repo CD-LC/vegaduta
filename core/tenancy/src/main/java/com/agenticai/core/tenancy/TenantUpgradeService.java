@@ -8,6 +8,8 @@ import com.agenticai.core.billing.gateway.PaymentGatewayClient;
 import com.agenticai.core.billing.gateway.PaymentGatewayRegistry;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.dto.TenantUpgradeOptionsResponse;
 import com.agenticai.core.tenancy.dto.TenantUpgradeResponse;
 import java.util.List;
@@ -46,6 +48,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class TenantUpgradeService {
 
     private final TenantRepository tenantRepository;

@@ -32,7 +32,7 @@ cat > ~/Library/LaunchAgents/ai.vegaduta.desktop-agent.plist <<EOF
   <key>Label</key><string>ai.vegaduta.desktop-agent</string>
   <key>ProgramArguments</key><array>
     <string>/usr/local/bin/node</string>
-    <string>$HOME/Documents/GitHub/vegaduta-oss/services/desktop-agent/server.js</string>
+    <string>/path/to/vegaduta/services/desktop-agent/server.js</string>
   </array>
   <key>EnvironmentVariables</key><dict>
     <key>DESKTOP_AGENT_SECRET</key><string>paste-the-secret-here</string>

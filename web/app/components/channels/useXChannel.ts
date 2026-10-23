@@ -10,8 +10,16 @@ import type { ChannelUi } from "./useSimpleChannel";
 /**
  * X channel state for ChannelsPanel: the BYOK app registration, the OAuth
  * connect redirect (and its ?x=connected|error return), and disconnect.
+ * {@code offered=false} (a personal install) keeps the hook mounted but makes it inert: no credential GET.
  */
-export function useXChannel({ t, setError, setSuccess, setBusy, refreshStatus }: ChannelUi) {
+export function useXChannel({
+  t,
+  setError,
+  setSuccess,
+  setBusy,
+  refreshStatus,
+  offered = true,
+}: ChannelUi & { offered?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   // X - two-step BYOK-then-OAuth (see XCredential's javadoc).
@@ -21,12 +29,13 @@ export function useXChannel({ t, setError, setSuccess, setBusy, refreshStatus }:
   const [xClientSecret, setXClientSecret] = useState("");
   const [xDefaultAgentId, setXDefaultAgentId] = useState("");
   const refreshX = useCallback(() => {
-    return api
-      .getXCredential()
+    // Not offered on this install: settle as "nothing connected" without calling the API.
+    const credential: Promise<any> = offered ? api.getXCredential() : Promise.resolve(null);
+    return credential
       .then(setX)
       .catch(() => setX(null))
       .finally(() => setXLoaded(true));
-  }, []);
+  }, [offered]);
   useEffect(() => {
     void refreshX();
   }, [refreshX]);
