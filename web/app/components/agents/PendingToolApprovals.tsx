@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ShieldQuestion, X } from "lucide-react";
 import { api } from "../../lib/api";
 import { useTranslations } from "../../lib/i18n";
+import { useToolLabel } from "../../lib/toolLabels";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import ExpiryCountdown from "../approvals/ExpiryCountdown";
@@ -22,6 +23,7 @@ import {
   type ToolApprovalOutcome,
   type ToolApprovalRow,
 } from "./toolApprovalMatching";
+import ToolApprovalBulkBar, { type BulkProgress, type BulkStop } from "./ToolApprovalBulkBar";
 
 /**
  * Inline tool-confirmation cards for a chat surface (ChatPanel and
@@ -35,6 +37,10 @@ import {
  *
  * A card also shows an estimated risk, a countdown when the workspace expires waiting requests, and an optional
  * reason for rejecting that the agent reads as the result of the refused call.
+ *
+ * When several calls wait, "Approve all N" / "Reject all" (ToolApprovalBulkBar) decides them one after another
+ * with the same per-request calls, stopping at the first problem; a call whose arguments are too long to show is
+ * never approved that way (decideAll).
  *
  * Deliberately small in scope: no auto-approve and no "always allow". The
  * server stays the only authority - deciding a tool call needs
@@ -120,6 +126,7 @@ export default function PendingToolApprovals({
 }) {
   const t = useTranslations("toolApproval");
   const q = useTranslations("approvalsQueue");
+  const labelOf = useToolLabel();
   const ttlSeconds = useApprovalExpiryTtl();
   // Optional reason per request for a rejection, and which cards have the reason field open.
   const [reasons, setReasons] = useState<Record<string, string>>({});
@@ -127,6 +134,9 @@ export default function PendingToolApprovals({
   const [cards, setCards] = useState<ToolApprovalRow[]>([]);
   const [outcomes, setOutcomes] = useState<Record<string, LocalOutcome>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  // An "Approve all" / "Reject all" run in progress (which call it is on), and why the last one stopped early.
+  const [bulk, setBulk] = useState<BulkProgress | null>(null);
+  const [bulkStop, setBulkStop] = useState<BulkStop | null>(null);
   const [needsAdmin, setNeedsAdmin] = useState(false);
   // Cards the person closed (or that closed themselves). Per conversation.
   const [dismissed, setDismissed] = useState<Set<string>>(() => new Set());
@@ -187,6 +197,8 @@ export default function PendingToolApprovals({
     setCards([]);
     setOutcomes({});
     setBusyId(null);
+    setBulk(null);
+    setBulkStop(null);
     setNeedsAdmin(false);
     setDismissed(new Set());
     setReasons({});
@@ -269,9 +281,58 @@ export default function PendingToolApprovals({
   }, [waiting, scope, refresh]);
 
   async function decide(card: ToolApprovalRow, approve: boolean) {
-    if (busyId) return;
-    const requestScope = scope;
+    if (busyId || bulk) return;
+    setBulkStop(null);
     setBusyId(card.id);
+    try {
+      await decideOne(card, approve);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  /**
+   * "Approve all N" / "Reject all": the waiting calls, oldest first, one request at a time through the same
+   * approve/reject calls a single card uses. Stops at the first result that is not the expected one (an error, a
+   * failed run, a 403, a call someone else decided differently) and - approving only - at a call whose arguments
+   * are too long to show here: that one is never approved in bulk and is left for the person to decide.
+   */
+  async function decideAll(approve: boolean, queue: ToolApprovalRow[]) {
+    if (busyId || bulk || queue.length === 0) return;
+    const requestScope = scope;
+    setBulkStop(null);
+    try {
+      for (let i = 0; i < queue.length; i++) {
+        const card = queue[i];
+        if (scopeRef.current !== requestScope) return;
+        if (approve && approvalArgsTruncated(card.payload)) {
+          setBulkStop("truncated");
+          return;
+        }
+        setBulk({ approve, position: i + 1, total: queue.length });
+        setBusyId(card.id);
+        const result = await decideOne(card, approve);
+        if (result === null || result === "needsAdmin") return;
+        if (result.kind !== (approve ? "done" : "rejected")) {
+          setBulkStop("error");
+          return;
+        }
+      }
+    } finally {
+      if (scopeRef.current === requestScope) {
+        setBusyId(null);
+        setBulk(null);
+      }
+    }
+  }
+
+  /**
+   * Decides one call and records its outcome. Returns what happened so a bulk run can stop on anything but a
+   * clean result: the outcome, "needsAdmin" for a 403, or null when the conversation changed underneath (or the
+   * call was decided elsewhere and its state could not be read yet).
+   */
+  async function decideOne(card: ToolApprovalRow, approve: boolean): Promise<LocalOutcome | "needsAdmin" | null> {
+    const requestScope = scope;
     try {
       let latest: ToolApprovalRow = approve
         ? await api.approveRequest(card.id, undefined, undefined, QUIET_DECIDE)
@@ -286,16 +347,17 @@ export default function PendingToolApprovals({
           /* keep the approve response */
         }
       }
-      if (scopeRef.current !== requestScope) return;
+      if (scopeRef.current !== requestScope) return null;
       const outcome: ToolApprovalOutcome =
         outcomeOf(latest) ?? (approve ? { kind: "done", detail: null } : { kind: "rejected", detail: null });
       setOutcomes((prev) => ({ ...prev, [card.id]: outcome }));
       onDecided?.(outcome, card.id);
+      return outcome;
     } catch (err: any) {
-      if (scopeRef.current !== requestScope) return;
+      if (scopeRef.current !== requestScope) return null;
       if (err?.status === 403) {
         setNeedsAdmin(true);
-        return;
+        return "needsAdmin";
       }
       // Any other failure: ask the server what state the request is really in
       // before saying anything. 404/409 mean someone else already decided it.
@@ -309,7 +371,7 @@ export default function PendingToolApprovals({
       } catch {
         /* state unknown - handled below */
       }
-      if (scopeRef.current !== requestScope) return;
+      if (scopeRef.current !== requestScope) return null;
       let outcome: LocalOutcome | null = outcomeOf(latest);
       if (outcome && outcome.kind === "done" && approve && !alreadyDecided && !latest?.executionResult) {
         // Recorded as approved, but this call failed and no result is
@@ -326,8 +388,7 @@ export default function PendingToolApprovals({
         setOutcomes((prev) => ({ ...prev, [card.id]: resolved }));
         if (resolved.kind !== "error") onDecided?.(resolved, card.id);
       }
-    } finally {
-      setBusyId(null);
+      return outcome;
     }
   }
 
@@ -342,6 +403,8 @@ export default function PendingToolApprovals({
 
   const renderCard = (card: ToolApprovalRow) => {
     const tool = toolNameOf(card);
+    // What the person reads ("Search the web"); the wire name stays one click away for experts.
+    const named = labelOf(tool);
     const shownArgs = redactedArguments(card.payload, ARGS_PREVIEW_MAX_CHARS);
     const args = shownArgs.text;
     // The card shows less than what would run: no Approve from here.
@@ -353,8 +416,8 @@ export default function PendingToolApprovals({
       <div key={card.id} data-testid={`tool-approval-${card.id}`} className="px-3 py-2.5 text-sm text-card-foreground">
         <div className="flex items-center gap-2">
           <ShieldQuestion size={14} className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-          <span className="min-w-0 flex-1 truncate font-medium text-foreground">
-            {decided ? t("decidedTitle", { tool }) : t("title", { tool })}
+          <span className="min-w-0 flex-1 truncate font-medium text-foreground" title={named.raw}>
+            {decided ? t("decidedTitle", { tool: named.label }) : t("title", { tool: named.label })}
           </span>
           {!decided && <RiskBadge risk={toolRisk(tool)} />}
           {decided && (
@@ -370,7 +433,18 @@ export default function PendingToolApprovals({
             </button>
           )}
         </div>
+        {!decided && named.description && (
+          <p className="mt-1 text-xs text-foreground" data-testid="tool-approval-does">
+            {named.description}
+          </p>
+        )}
         {!decided && <p className="mt-1 text-xs text-muted-foreground">{t("notRunYet")}</p>}
+        {!decided && named.label !== named.raw && (
+          <details className="mt-1 text-xs text-muted-foreground" data-testid="tool-approval-raw-name">
+            <summary className="cursor-pointer hover:text-foreground">{t("rawName")}</summary>
+            <code className="font-mono text-[11px]">{named.raw}</code>
+          </details>
+        )}
         {!decided && (
           <ExpiryCountdown
             className="mt-1"
@@ -530,6 +604,17 @@ export default function PendingToolApprovals({
             </p>
           )}
           {renderCard(current)}
+          {!needsAdmin && (waitingCards.length > 1 || bulk || bulkStop) && (
+            <ToolApprovalBulkBar
+              waiting={waitingCards}
+              canApproveAll={!approvalArgsTruncated(current.payload)}
+              busy={busyId != null}
+              progress={bulk}
+              stopped={bulkStop}
+              onApproveAll={() => void decideAll(true, waitingCards)}
+              onRejectAll={() => void decideAll(false, waitingCards)}
+            />
+          )}
         </div>
       )}
       {receipts.map(renderCard)}
