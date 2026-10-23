@@ -35,7 +35,10 @@ CI checks every commit of a pull request, and it is part of the required
 `CI OK` check, so pull requests with unsigned commits cannot be merged. To fix
 a branch: `git rebase --signoff main` and force-push. The DCO applies from the
 first public commit; commits imported before the repository was published
-predate it.
+predate it. Dependabot and GitHub Actions bot commits on the bots' own pull
+requests are skipped (they never sign off); a human commit pushed onto such a
+branch is still checked. The check is `scripts/ci/dco-check.sh`, tested by
+`scripts/ci/test-dco-check.sh`; see [Dependabot pull requests](docs/maintainers/dependabot-prs.md).
 
 ## Development setup
 
