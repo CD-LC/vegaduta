@@ -14,7 +14,9 @@ maintainer's machine.
 2. Move the `## [Unreleased]` entries in `CHANGELOG.md` under
    `## [<version>] - <date>` and merge that change. The release notes are taken
    from this section; without one, GitHub generates notes from pull request
-   titles (categories in `.github/release.yml`).
+   titles (categories in `.github/release.yml`). In the same change set `version`
+   and `date-released` in `CITATION.cff` to the release (`sdk/test/citation.test.mjs`
+   fails when they name a version that has no section in `CHANGELOG.md`).
 3. Tag and push (an annotated, signed tag is preferred):
    ```sh
    git tag -s v0.1.0 -m "v0.1.0"
@@ -53,6 +55,12 @@ commands reject.
 Images and charts are signed by digest, so the floating tags added at the end
 are covered by the same signatures. Verification commands are in
 [SECURITY.md](../../SECURITY.md#verifying-releases).
+
+The `postgres` images compile pgvector from source on the release runner. They must stay
+portable: `deploy/postgres/Dockerfile*` builds it with `OPTFLAGS=""`, because pgvector's
+default `-march=native` bakes the runner's CPU into `vector.so` and the database then dies
+with `SIGILL` (illegal instruction) on a host CPU that lacks one of those instructions.
+`scripts/ci/postgres-portable-build.sh` (part of `make gates`) fails if that flag goes missing.
 
 ## All or nothing
 

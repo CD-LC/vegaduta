@@ -30,7 +30,7 @@ from the Actions tab: it has no tag-push trigger (see [Releasing](releasing.md))
 4. Actions tab → **SDK release** → **Run workflow**, with **Use workflow from** set to the tag
    `sdk-v0.1.0`. The workflow verifies that the tag equals the pom version and that nothing is a `-SNAPSHOT`,
    runs the whole build on JDK 17, attests SLSA provenance for every jar, attaches jars, sources,
-   javadoc, SBOMs and `SHA256SUMS` to a GitHub Release (a pre-release for `-rc` versions), and,
+   javadoc, SBOMs, the runnable scanner CLI (`vegaduta-agent-scanner-<version>-cli.jar`, a shaded jar with the SDK's API and core, SLF4J's API and RE2/J inside) and `SHA256SUMS` to a GitHub Release (a pre-release for `-rc` versions), and,
    if enabled, uploads signed artifacts to the Central Portal.
 5. In the Central Portal, check the validated deployment and press **Publish** (`autoPublish` is
    deliberately off).

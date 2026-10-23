@@ -31,16 +31,16 @@ def _env_float(name: str, default: float) -> float:
 
 # --- LiveKit worker registration -------------------------------------------
 # Same three var names core/voice's LiveKitTokenService and
-# deploy/docker-compose.yml's `core` service already use
+# deploy/compose/docker-compose.yml's `core` service already use
 # (LIVEKIT_URL/LIVEKIT_API_KEY/LIVEKIT_API_SECRET), and also exactly what
 # livekit-agents' own WorkerOptions/AgentServer reads from the environment
 # when a value isn't passed explicitly - so simply exporting these three in
-# deploy/.env (already true today for `core`) is enough to wire this worker
+# deploy/compose/.env (already true today for `core`) is enough to wire this worker
 # up too, no new secret plumbing needed.
 #
 # The default below is deliberately the in-network compose DNS name
 # (ws://livekit:7880), NOT core's own LIVEKIT_URL default
-# (ws://localhost:7880, see deploy/docker-compose.yml's comment on that var -
+# (ws://localhost:7880, see deploy/compose/docker-compose.yml's comment on that var -
 # it's the BROWSER-facing address baked into issued tokens). This worker
 # never hands its URL to a browser; it only ever dials LiveKit itself as a
 # second server-side client, same network relationship LiveKitEgressService
@@ -82,7 +82,7 @@ def require_livekit_credentials(api_key: str | None = None, api_secret: str | No
         raise ConfigError(
             f"{' and '.join(missing)} must be set: the voice-agent worker has no "
             "default LiveKit credentials. Use the same key/secret pair as the "
-            "LiveKit server's LIVEKIT_KEYS (deploy/.env)."
+            "LiveKit server's LIVEKIT_KEYS (deploy/compose/.env)."
         )
     if key in _KNOWN_PLACEHOLDER_KEYS or secret in _KNOWN_PLACEHOLDER_SECRETS:
         raise ConfigError(
@@ -118,15 +118,15 @@ AGENT_NAME = _env("LIVEKIT_AGENT_NAME", "")
 
 # --- sidecar (Whisper STT) ---------------------------------------------------
 # Same var name `SIDECAR_BASE_URL` core already uses to reach the sidecar
-# (see deploy/docker-compose.yml's `core` service env block) - kept
+# (see deploy/compose/docker-compose.yml's `core` service env block) - kept
 # byte-identical rather than inventing a `SIDECAR_URL` so one env value in
-# deploy/.env covers both callers.
+# deploy/compose/.env covers both callers.
 SIDECAR_BASE_URL = _env("SIDECAR_BASE_URL", "http://sidecar:8001")
 
 # --- core (bridged "LLM" leg) ------------------------------------------------
 # Mirrors NEXT_PUBLIC_API_BASE_URL's PURPOSE (where to find core's API), but
 # NOT its default: that var is browser-facing (defaults to
-# http://localhost:8080, see deploy/docker-compose.yml's WEB_PUBLIC_API_BASE_URL)
+# http://localhost:8080, see deploy/compose/docker-compose.yml's WEB_PUBLIC_API_BASE_URL)
 # and per RULE 0 must never point a browser at localhost on a real
 # deployment. This worker is server-to-server only - it never runs in a
 # browser - so the correct default is the in-network compose DNS name core
@@ -166,7 +166,7 @@ SARVAM_TARGET_LANGUAGE_CODE = _env("SARVAM_TARGET_LANGUAGE_CODE", "en-IN")
 # deprecated. Please use 'bulbul:v3' instead." Confirmed live 2026-09-17,
 # not inferred. core/sarvam's SarvamTextToSpeechClient.DEFAULT_MODEL,
 # core/providers' TtsModelProvider and V196__agent_tts_provider.sql had all
-# moved to v3 already - the Python services and deploy/docker-compose.yml
+# moved to v3 already - the Python services and deploy/compose/docker-compose.yml
 # were missed, which left every Sarvam TTS call from them failing.
 # NOTE: speaker names are per-model (anushka is v2, shubh is v3), so an
 # explicit SARVAM_SPEAKER carried over from v2 will also 400. Leaving it

@@ -15,13 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Notification bell - tenant-facing sibling of {@link PlatformIssueController}'s
- * admin Issues portal. Falls under {@code SecurityConfig}'s default {@code
- * anyRequest().authenticated()} rule (not {@code /api/admin/**}), same as
- * {@code SessionConfigController} - any authenticated tenant member can call
- * these, and the "mine or broadcast-if-admin" visibility narrowing happens at
- * the query level in {@link NotificationRepository}, not via a security-config
- * role gate.
+ * Notification bell - tenant-facing sibling of {@link PlatformIssueController}'s admin Issues
+ * portal. Falls under {@code SecurityConfig}'s default {@code anyRequest().authenticated()} rule
+ * (not {@code /api/admin/**}), same as {@code SessionConfigController} - any authenticated tenant
+ * member can call these, and the "mine or broadcast-if-admin" visibility narrowing happens at the
+ * query level in {@link NotificationRepository}, not via a security-config role gate.
  */
 @RestController
 public class NotificationController {
@@ -42,11 +40,10 @@ public class NotificationController {
 
     @GetMapping("/api/notifications")
     public ResponseEntity<List<NotificationResponse>> list(
-        @RequestParam(required = false, defaultValue = "false") boolean unreadOnly,
-        @RequestParam(required = false, defaultValue = "" + DEFAULT_PAGE_SIZE) int limit,
-        @RequestParam(required = false) Long offset,
-        Authentication authentication
-    ) {
+            @RequestParam(required = false, defaultValue = "false") boolean unreadOnly,
+            @RequestParam(required = false, defaultValue = "" + DEFAULT_PAGE_SIZE) int limit,
+            @RequestParam(required = false) Long offset,
+            Authentication authentication) {
         if (isTenantlessPlatformAdmin(authentication)) {
             return AuditPaging.respondWithTotal(List.of(), 0, 0);
         }
@@ -55,12 +52,12 @@ public class NotificationController {
         String user = userId(authentication);
         boolean admin = isTenantAdmin(authentication);
         Pageable pageable = AuditPaging.offsetLimit(skip, size, Sort.unsorted());
-        List<NotificationResponse> rows = notificationService
-            .listVisible(user, admin, unreadOnly, pageable)
-            .stream()
-            .map(NotificationResponse::from)
-            .toList();
-        return AuditPaging.respond(rows, size, skip, () -> notificationService.countVisible(user, admin, unreadOnly));
+        List<NotificationResponse> rows =
+                notificationService.listVisible(user, admin, unreadOnly, pageable).stream()
+                        .map(NotificationResponse::from)
+                        .toList();
+        return AuditPaging.respond(
+                rows, size, skip, () -> notificationService.countVisible(user, admin, unreadOnly));
     }
 
     /** Backs a cheap, frequently-polled unread-count badge on the bell icon. */
@@ -69,12 +66,16 @@ public class NotificationController {
         if (isTenantlessPlatformAdmin(authentication)) {
             return 0;
         }
-        return notificationService.countUnread(userId(authentication), isTenantAdmin(authentication));
+        return notificationService.countUnread(
+                userId(authentication), isTenantAdmin(authentication));
     }
 
     @PostMapping("/api/notifications/{id}/read")
-    public void markRead(@PathVariable UUID id) {
-        notificationService.markRead(id);
+    public void markRead(@PathVariable UUID id, Authentication authentication) {
+        if (isTenantlessPlatformAdmin(authentication)) {
+            return;
+        }
+        notificationService.markRead(id, userId(authentication), isTenantAdmin(authentication));
     }
 
     @PostMapping("/api/notifications/read-all")
@@ -110,8 +111,13 @@ public class NotificationController {
     }
 
     private boolean isTenantAdmin(Authentication authentication) {
-        return authentication != null && authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .anyMatch(a -> a != null && (a.startsWith(PERM_PREFIX) || PLATFORM_ADMIN_AUTHORITY.equals(a)));
+        return authentication != null
+                && authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .anyMatch(
+                                a ->
+                                        a != null
+                                                && (a.startsWith(PERM_PREFIX)
+                                                        || PLATFORM_ADMIN_AUTHORITY.equals(a)));
     }
 }

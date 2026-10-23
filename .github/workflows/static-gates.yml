@@ -14,13 +14,21 @@ name: Static gates
 #   skip-expiry           test skips carrying an expired `expires:` token
 #   check-file-size       ratchet: 700-line hard cap, fails over 665 (5% margin);
 #                         baseline only shrinks
+#   postgres-portable-build
+#                         deploy/postgres builds pgvector with OPTFLAGS="" (its default
+#                         -march=native makes the image SIGILL on other CPUs)
 #   check-module-size     ratchet (ADR-0023): at most 300 main files per core/*
 #                         module, no classes in com.agenticai.core.agents;
 #                         baseline only shrinks
+#   check-browser-runner-version
+#                         services/browser-runner's Playwright version (package.json,
+#                         lock, Dockerfile base image tag) equals the Java client's in
+#                         core/agents-browser/pom.xml (a mismatch is a 428 at connect)
 #   openapi-breaking     docs/api/openapi.json against the merge base: removed
 #                         paths/operations/response properties, renamed operationIds,
 #                         newly required inputs, narrowed enums, changed types
 #                         (escape hatch: scripts/ci/openapi-breaking-allowlist.txt)
+#   channel-docs-check    every ChannelType value has a row in docs/channels/README.md
 #   docs-link-check       relative links and #anchors in README, CONTRIBUTING and docs/
 #                         (offline; ci.yml also runs lychee over the same files)
 #                         must stay byte-identical
@@ -30,6 +38,14 @@ name: Static gates
 #   no-telemetry-check    no analytics / tracking / crash-report hosts or SDKs in web, core,
 #                         services (empty allow-list)
 #   check-values-docs     deploy/helm VALUES.md lists every umbrella values.yaml key
+#   asyncapi              docs/api/asyncapi.json matches scripts/docs/asyncapi.mjs
+#   sync-platform-guide-docs
+#                         the Assistant's bundled docs copy matches docs/
+#   dependabot-coverage   every package.json, go.mod and Dockerfile directory is in
+#                         .github/dependabot.yml (or exempted with a reason)
+#   test-gates-parity     every `make gates` command has a step here
+#   test-compose-up-wait  (Docker only, not in `make gates`) the CI stack boot helper
+#                         tolerates a one-shot container exiting while it waits
 #   secret-scan           gitleaks over the commits being added (the whole
 #                         history on a first push, force-push or manual run)
 #
@@ -68,6 +84,10 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
+      - name: Platform-guide docs bundle is current
+        if: always()
+        run: bash scripts/ci/sync-platform-guide-docs.sh --check
+
       - name: Entity / table / bean / path namespace lint
         if: always()
         run: bash scripts/ci/entity-name-lint.sh
@@ -92,6 +112,21 @@ jobs:
         if: always()
         run: sh scripts/ci/web-image-deps.sh
 
+      - name: Postgres image builds pgvector portably
+        if: always()
+        run: sh scripts/ci/postgres-portable-build.sh
+
+      # Playwright refuses a client of another major.minor, and the browser-runner
+      # healthcheck only tests the port: package.json, its lock, the Dockerfile base
+      # image tag and the Java client in core/agents-browser must name one version.
+      - name: browser-runner Playwright version is consistent
+        if: always()
+        run: bash scripts/ci/check-browser-runner-version.sh
+
+      - name: browser-runner version check self-test
+        if: always()
+        run: bash scripts/ci/check-browser-runner-version.sh --self-test
+
       # Generated documents must match their sources (ADR-0011 module graph,
       # the SDKs under sdk/ from docs/api/openapi.json, the ownership tables in
       # docs/deploy/DEPLOYMENT-SHAPES.md from the @Scheduled sources + shape profiles).
@@ -102,6 +137,10 @@ jobs:
       - name: SDKs match docs/api/openapi.json
         if: always()
         run: node sdk/generate.mjs --check
+
+      - name: AsyncAPI document is current
+        if: always()
+        run: node scripts/docs/asyncapi.mjs --check
 
       # PR: the merge base with the PR base (GITHUB_BASE_REF). Push: the push's
       # "before" sha; the script ignores an all-zeros sha and falls back to main.
@@ -133,12 +172,25 @@ jobs:
       - name: Docs links and anchors
         if: always()
         run: bash scripts/ci/docs-link-check.sh
+      - name: Every channel type is in the channels overview
+        if: always()
+        run: bash scripts/ci/channel-docs-check.sh
       - name: Internal planning jargon ratchet
         run: bash scripts/ci/internal-reference-lint.sh
       - name: No telemetry
         run: bash scripts/ci/no-telemetry-check.sh
       - name: Lint self-tests
         run: bash scripts/ci/test-internal-reference-lint.sh
+      - name: Dependabot covers every manifest
+        if: always()
+        run: bash scripts/ci/dependabot-coverage.sh
+      - name: make gates and this workflow run the same checks
+        if: always()
+        run: bash scripts/ci/test-gates-parity.sh
+      # Boots a toy Compose stack (alpine); ubuntu-latest has Docker.
+      - name: CI stack boot helper self-test
+        if: always()
+        run: bash scripts/ci/test-compose-up-wait.sh
       - name: Helm VALUES.md lists every umbrella value
         if: always()
         run: python3 deploy/helm/scripts/check-values-docs.py

@@ -40,13 +40,13 @@ class TenantContext:
 
 
 def validate_tenant_id(tenant_id: str) -> str:
-    if not tenant_id or not _TENANT_ID_RX.match(tenant_id):
+    if not tenant_id or not _TENANT_ID_RX.fullmatch(tenant_id):
         raise TenantValidationError(f"invalid tenant id: {tenant_id!r}")
     return tenant_id
 
 
 def validate_repo_id(repo_id: str) -> str:
-    if not repo_id or not _REPO_ID_RX.match(repo_id) or ".." in repo_id:
+    if not repo_id or not _REPO_ID_RX.fullmatch(repo_id) or ".." in repo_id:
         raise TenantValidationError(f"invalid repo id: {repo_id!r}")
     return repo_id
 

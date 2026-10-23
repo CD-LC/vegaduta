@@ -6,6 +6,7 @@ import com.agenticai.core.mcp.atlassian.AtlassianOAuthService;
 import com.agenticai.core.mcp.dto.McpDynamicConfig;
 import com.agenticai.core.mcp.oauth.McpOAuthTokenSource;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.net.GuardedHttpClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
 import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport;
@@ -13,6 +14,7 @@ import io.modelcontextprotocol.client.transport.ServerParameters;
 import io.modelcontextprotocol.client.transport.StdioClientTransport;
 import io.modelcontextprotocol.spec.McpClientTransport;
 import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
@@ -30,10 +32,25 @@ final class McpTransportFactory {
     private static final Logger log = LoggerFactory.getLogger(McpTransportFactory.class);
     private static final ObjectMapper JSON_MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
+    /**
+     * Longest a remote MCP connection may sit silent between two packets: an SSE stream that gets
+     * no event and no keep-alive for this long, or a reply that stalls this long, is treated as
+     * dead. Far above the client's own 60 s request timeout.
+     */
+    static final Duration REMOTE_SOCKET_TIMEOUT = Duration.ofMinutes(15);
+
     private final AtlassianOAuthService atlassianOAuthService;
     private final ObjectProvider<AgentAttestationService> agentAttestation;
     private final Supplier<McpRoutingHeaders> routing;
     private final Supplier<McpOAuthTokenSource> providerTokens;
+
+    /**
+     * Where the SDK transports get their {@code HttpClient}: the SSRF-guarded client, so the
+     * address a connection goes to is the one the guard resolved and validated. Replaceable in
+     * tests only.
+     */
+    private Supplier<HttpClient.Builder> clientBuilders =
+            () -> new GuardedHttpClientBuilder(REMOTE_SOCKET_TIMEOUT);
 
     McpTransportFactory(
             AtlassianOAuthService atlassianOAuthService,
@@ -44,6 +61,11 @@ final class McpTransportFactory {
         this.agentAttestation = agentAttestation;
         this.routing = routing;
         this.providerTokens = providerTokens;
+    }
+
+    /** Test seam: the client builder handed to the SDK transports. */
+    void setClientBuilders(Supplier<HttpClient.Builder> clientBuilders) {
+        this.clientBuilders = clientBuilders;
     }
 
     /** SSE or streamable-HTTP transport for a remote registration (see the manager's history). */
@@ -76,13 +98,21 @@ final class McpTransportFactory {
                     .httpRequestCustomizer(
                             McpOriginPinning.requestCustomizer(
                                     url, routingHeaders.wrap(requestHeaders)))
-                    // Pentest M4: the SDK builds its OWN HttpClient - never follow redirects.
+                    // SEC-026 / MCP07: the SDK would build its OWN java.net.http.HttpClient, which
+                    // resolves the host again at connect time (a DNS-rebinding window after
+                    // McpRemoteUrlGuard#checkResolved). Hand it the guarded client instead: every
+                    // connect, and every reconnect of the long-lived stream, resolves through
+                    // SsrfGuard and goes to the address it validated.
+                    .clientBuilder(clientBuilders.get())
+                    // Pentest M4: never follow redirects.
                     .customizeClient(cb -> cb.followRedirects(HttpClient.Redirect.NEVER))
                     .build();
         }
         return HttpClientStreamableHttpTransport.builder(url)
                 .httpRequestCustomizer(
-                        McpOriginPinning.requestCustomizer(url, routingHeaders.wrap(requestHeaders)))
+                        McpOriginPinning.requestCustomizer(
+                                url, routingHeaders.wrap(requestHeaders)))
+                .clientBuilder(clientBuilders.get())
                 .customizeClient(cb -> cb.followRedirects(HttpClient.Redirect.NEVER))
                 .build();
     }

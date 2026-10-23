@@ -28,11 +28,12 @@ var buildVersion = "dev"
 type config struct {
 	dir        string // where the release is unpacked and run
 	tier       string // lite | full | personal
-	version    string // X.Y.Z; empty = latest published release
+	version    string // X.Y.Z or X.Y.Z-rc.1; empty = latest published release
 	repo       string // GitHub owner/repo
 	from       string // existing checkout/tarball dir to use instead of downloading
 	releaseURL string // custom tarball URL (install.sh's VEGADUTA_RELEASE_URL)
 	releaseSHA string // its expected SHA-256, or "" to consult a sidecar SHA256SUMS
+	dockerRAM  bool   // consent to restart Docker (and every WSL distro) to give it more memory (Windows)
 	port       int
 	locale     string    // console language chosen in the wizard (APP_LOCALE)
 	documents  bool      // personal: also start the ML sidecar (PDF/scan reading, ~2 GB)
@@ -68,7 +69,7 @@ func parseFlags() config {
 	var c config
 	flag.StringVar(&c.dir, "dir", defaultInstallDir(), "install directory")
 	flag.StringVar(&c.tier, "tier", envOr("VEGADUTA_TIER", "personal"), "install tier: personal | lite | full")
-	flag.StringVar(&c.version, "version", os.Getenv("VEGADUTA_VERSION"), "release to install, X.Y.Z (default: latest published)")
+	flag.StringVar(&c.version, "version", os.Getenv("VEGADUTA_VERSION"), "release to install, X.Y.Z or a pre-release such as X.Y.Z-rc.1 (default: latest published stable release)")
 	flag.StringVar(&c.repo, "repo", envOr("VEGADUTA_REPO", "CD-LC/vegaduta"), "GitHub owner/repo for releases")
 	flag.StringVar(&c.releaseURL, "release-url", os.Getenv("VEGADUTA_RELEASE_URL"), "install from this tarball URL instead (file:// for a bundled payload)")
 	flag.StringVar(&c.releaseSHA, "release-sha256", os.Getenv("VEGADUTA_RELEASE_SHA256"), "expected SHA-256 of --release-url (hex); empty = read SHA256SUMS next to it")
@@ -81,7 +82,13 @@ func parseFlags() config {
 	flag.BoolVar(&c.noBrowser, "no-browser", false, "serve the wizard but do not open a browser")
 	flag.BoolVar(&c.headless, "yes", false, "install without the wizard (no interaction)")
 	flag.BoolVar(&c.dryRun, "dry-run", false, "preflight and print the plan; change nothing")
+	flag.BoolVar(&c.dockerRAM, "allow-docker-restart", false, "Windows: let Setup restart Docker Desktop and WSL (closing every open WSL window) to give Docker more memory")
 	flag.Parse()
+	v, err := validateVersion(c.version)
+	if err != nil {
+		fatalf("--version: %v", err)
+	}
+	c.version = v
 	return c
 }
 
@@ -147,7 +154,14 @@ func main() {
 	rep := runPreflight(c)
 	printReport(rep)
 	if c.dryRun {
-		fmt.Printf("plan: tier=%s dir=%s version=%s repo=%s\n", c.tier, c.dir, orLatest(c.version), c.repo)
+		installed := ""
+		if c.from != "" {
+			installed = installedVersion(c.from)
+		}
+		fmt.Printf("plan: tier=%s dir=%s version=%s repo=%s\n", c.tier, c.dir, planVersion(c, installed, c.from != ""), c.repo)
+		if adv := upgradeAdvice(ctx, c, installed, runtime.GOOS); adv != "" {
+			fmt.Println(adv)
+		}
 		for _, l := range prepareExtras(installRoot(c), c, runtime.GOOS, func(e Event) { fmt.Println(e.Line) }).describe() {
 			fmt.Println(l)
 		}

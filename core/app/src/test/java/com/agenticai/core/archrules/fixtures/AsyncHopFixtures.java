@@ -51,6 +51,10 @@ public class AsyncHopFixtures {
         Mono.just(1).subscribeOn(Schedulers.boundedElastic()).publishOn(Schedulers.parallel());
     }
 
+    void reactorTimeout() {
+        Mono.just(1).timeout(java.time.Duration.ofSeconds(1));
+    }
+
     void wrappedHop(ExecutorService executor) {
         TenantScope scope = TenantScope.capture();
         executor.submit(scope.wrapRunnable(() -> {}));

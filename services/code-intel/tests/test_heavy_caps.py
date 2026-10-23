@@ -21,6 +21,7 @@ try:
     import numpy  # noqa: F401
 except ImportError:  # pragma: no cover - only on boxes without numpy
     import types
+
     _np = types.ModuleType("numpy")
     _np.ndarray = object
     _np.float32 = float
@@ -28,10 +29,10 @@ except ImportError:  # pragma: no cover - only on boxes without numpy
 
 os.environ["CODE_INTEL_ENFORCE_REPO_LIMITS"] = "true"  # limits are opt-in
 
-from app import gitops                                   # noqa: E402
+from app import gitops
 from app.heavy_gate import HeavyGate as _HeavyGate
-from app.service import HeavyJobBusyError                # noqa: E402
-from codebase_rag import embedders                       # noqa: E402
+from app.service import HeavyJobBusyError
+from codebase_rag import embedders
 
 
 def _raises(fn, exc) -> bool:
@@ -53,6 +54,7 @@ def _wait_for(pred, secs=3.0) -> bool:
 
 # --------------------------------------------------------------- gate
 
+
 def test_gate_caps_and_retry_after():
     g = _HeavyGate(max_jobs=2, max_per_tenant=1, max_queued=1, retry_after=7)
     g.acquire("a")
@@ -60,7 +62,7 @@ def test_gate_caps_and_retry_after():
     g.acquire("b")
     try:
         g.acquire("c")
-        assert False, "global cap should reject"
+        raise AssertionError("global cap should reject")
     except HeavyJobBusyError as e:
         assert e.retry_after == 7
     g.release("a")
@@ -102,17 +104,16 @@ def test_gate_waiters_are_fifo_and_sync_cannot_barge():
 def test_gate_new_arrival_blocked_by_admissible_waiter():
     g = _HeavyGate(1, 1, 4, 1)
     tok = object()
-    g._queue.append((tok, "t1"))      # a waiter that could run right now
+    g._queue.append((tok, "t1"))  # a waiter that could run right now
     assert g._blocked_by_earlier(None)
     assert _raises(lambda: g.acquire("t3"), HeavyJobBusyError)
-    assert not g._blocked_by_earlier(tok)   # the waiter itself is first
+    assert not g._blocked_by_earlier(tok)  # the waiter itself is first
 
 
 def test_gate_queue_limit_and_timeout():
     g = _HeavyGate(1, 1, 1, 1)
     g.acquire("a")
-    t = threading.Thread(target=lambda: _raises(
-        lambda: g.acquire("b", wait=1), HeavyJobBusyError))
+    t = threading.Thread(target=lambda: _raises(lambda: g.acquire("b", wait=1), HeavyJobBusyError))
     t.start()
     assert _wait_for(lambda: g._queued == 1)
     assert _raises(lambda: g.acquire("c", wait=1), HeavyJobBusyError)
@@ -122,6 +123,7 @@ def test_gate_queue_limit_and_timeout():
 
 
 # ---------------------------------------------------- embedder cache
+
 
 class _Cfg:
     def __init__(self, model):
@@ -157,17 +159,16 @@ def test_embedder_cache_is_bounded_lru_and_serialized():
         a = embedders.make_embedder(_Cfg("a"))
         assert embedders.make_embedder(_Cfg("a")) is a
         embedders.make_embedder(_Cfg("b"))
-        embedders.make_embedder(_Cfg("a"))        # a is now most recent
-        embedders.make_embedder(_Cfg("c"))        # evicts b
+        embedders.make_embedder(_Cfg("a"))  # a is now most recent
+        embedders.make_embedder(_Cfg("c"))  # evicts b
         assert len(embedders._EMBEDDER_CACHE) == 2
         keys = [k[1] for k in embedders._EMBEDDER_CACHE]
         assert keys == ["a", "c"]
-        embedders.make_embedder(_Cfg("b"))        # rebuilt
+        embedders.make_embedder(_Cfg("b"))  # rebuilt
         assert built.count("b") == 2
         # concurrent encode on one shared instance is serialized
         inner = a._inner
-        ts = [threading.Thread(target=lambda: a.embed(["x"]))
-              for _ in range(6)]
+        ts = [threading.Thread(target=lambda: a.embed(["x"])) for _ in range(6)]
         [t.start() for t in ts]
         [t.join() for t in ts]
         assert inner.max_active == 1
@@ -180,17 +181,21 @@ def test_embedder_cache_is_bounded_lru_and_serialized():
 
 # ------------------------------------------------------ size limits
 
+
 def _git(cwd, *args):
-    subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
-                    *args], cwd=cwd, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "-c", "user.email=t@t", "-c", "user.name=t", *args],
+        cwd=cwd,
+        check=True,
+        capture_output=True,
+    )
 
 
 def test_tenant_quota_off_by_default_and_limits_ignore_dot_git():
     os.environ.pop("CODE_INTEL_TENANT_QUOTA_MB", None)
     assert gitops._limits()[2] == 0
     tmp = tempfile.mkdtemp(prefix="codeintel-caps-")
-    old = {k: os.environ.get(k) for k in
-           ("CODE_INTEL_MAX_REPO_FILES", "CODE_INTEL_MAX_REPO_MB")}
+    old = {k: os.environ.get(k) for k in ("CODE_INTEL_MAX_REPO_FILES", "CODE_INTEL_MAX_REPO_MB")}
     try:
         os.makedirs(os.path.join(tmp, ".git"))
         with open(os.path.join(tmp, ".git", "big"), "wb") as f:
@@ -202,8 +207,7 @@ def test_tenant_quota_off_by_default_and_limits_ignore_dot_git():
         os.environ["CODE_INTEL_MAX_REPO_MB"] = "1"
         gitops._check_repo_size(tmp)
         os.environ["CODE_INTEL_MAX_REPO_FILES"] = "3"
-        assert _raises(lambda: gitops._check_repo_size(tmp),
-                       gitops.RepoTooLargeError)
+        assert _raises(lambda: gitops._check_repo_size(tmp), gitops.RepoTooLargeError)
         os.environ["CODE_INTEL_MAX_REPO_FILES"] = "0"
         os.environ["CODE_INTEL_MAX_REPO_MB"] = "0"
         gitops._check_repo_size(tmp)
@@ -229,8 +233,7 @@ def test_update_checkout_skips_walk_when_unchanged_and_rolls_back_oversize():
             f.write("a")
         _git(origin, "add", ".")
         _git(origin, "commit", "-qm", "1")
-        subprocess.run(["git", "clone", "-q", origin, co], check=True,
-                       capture_output=True)
+        subprocess.run(["git", "clone", "-q", origin, co], check=True, capture_output=True)
         os.environ["CODE_INTEL_MAX_REPO_FILES"] = "3"
         calls = []
         orig = gitops._check_repo_size
@@ -247,11 +250,10 @@ def test_update_checkout_skips_walk_when_unchanged_and_rolls_back_oversize():
             _git(origin, "commit", "-qm", "2")
             _git(co, "fetch", "-q", "origin")
             assert _raises(
-                lambda: gitops._update_checkout(co, "origin/main", 30),
-                gitops.RepoTooLargeError)
+                lambda: gitops._update_checkout(co, "origin/main", 30), gitops.RepoTooLargeError
+            )
             # rejected before reset --hard: checkout still the old tree
-            assert sorted(f for f in os.listdir(co) if f != ".git") == \
-                ["a.txt"]
+            assert sorted(f for f in os.listdir(co) if f != ".git") == ["a.txt"]
             assert calls == []  # file-count refusal needed no tree walk
         finally:
             gitops._check_repo_size = orig
@@ -265,8 +267,7 @@ def test_update_checkout_skips_walk_when_unchanged_and_rolls_back_oversize():
 
 def test_update_checkout_byte_limit_resets_back():
     tmp = tempfile.mkdtemp(prefix="codeintel-upd2-")
-    saved = {k: os.environ.get(k) for k in
-             ("CODE_INTEL_MAX_REPO_FILES", "CODE_INTEL_MAX_REPO_MB")}
+    saved = {k: os.environ.get(k) for k in ("CODE_INTEL_MAX_REPO_FILES", "CODE_INTEL_MAX_REPO_MB")}
     try:
         origin = os.path.join(tmp, "origin")
         co = os.path.join(tmp, "co")
@@ -276,8 +277,7 @@ def test_update_checkout_byte_limit_resets_back():
             f.write("a")
         _git(origin, "add", ".")
         _git(origin, "commit", "-qm", "1")
-        subprocess.run(["git", "clone", "-q", origin, co], check=True,
-                       capture_output=True)
+        subprocess.run(["git", "clone", "-q", origin, co], check=True, capture_output=True)
         os.environ["CODE_INTEL_MAX_REPO_MB"] = "1"
         os.environ["CODE_INTEL_MAX_REPO_FILES"] = "0"
         with open(os.path.join(origin, "big.bin"), "wb") as f:
@@ -286,8 +286,8 @@ def test_update_checkout_byte_limit_resets_back():
         _git(origin, "commit", "-qm", "2")
         _git(co, "fetch", "-q", "origin")
         assert _raises(
-            lambda: gitops._update_checkout(co, "origin/main", 30),
-            gitops.RepoTooLargeError)
+            lambda: gitops._update_checkout(co, "origin/main", 30), gitops.RepoTooLargeError
+        )
         assert not os.path.exists(os.path.join(co, "big.bin"))
     finally:
         for k, v in saved.items():
@@ -305,7 +305,7 @@ if __name__ == "__main__":
             try:
                 fn()
                 print("  ok   ", name)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 fails += 1
                 print("  FAIL ", name, repr(e))
     raise SystemExit(1 if fails else 0)

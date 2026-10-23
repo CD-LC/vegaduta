@@ -72,10 +72,11 @@ jobs:
 
       - name: Boot the stack
         env:
-          ARGS: ${{ steps.files.outputs.args }}
+          COMPOSE_ARGS: ${{ steps.files.outputs.args }}
         run: |
-          # shellcheck disable=SC2086
-          docker compose $ARGS --env-file "$RUNNER_TEMP/ci.env" up -d --build --wait --wait-timeout 600
+          # Not a plain `up --wait`: it exits 1 when the keycloak-reconcile
+          # one-shot exits (0) while it waits (runs 39570883969, 39749611372).
+          bash scripts/ci/compose-up-wait.sh "$RUNNER_TEMP/ci.env" --build
 
       - name: Health gate
         run: bash scripts/ci/stack-health-gate.sh

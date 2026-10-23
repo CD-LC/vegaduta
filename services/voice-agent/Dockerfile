@@ -34,10 +34,9 @@ USER voiceagent
 # AgentServer's own health-check HTTP server (see livekit/agents/worker.py's
 # `run()`: a plain HttpServer exposing GET / and GET /worker) - defaults to
 # port 8081 in production mode (`start`, used below), 0 (disabled/random) in
-# `dev` mode. Not wired into deploy/docker-compose.yml yet - see README.md's
-# "Known gaps" section; a parallel/follow-up change owns adding the actual
-# `voice-agent` service block there (out of this pass's scope, which is
-# voice-agent/ only).
+# `dev` mode. Wired into deploy/compose/docker-compose.yml as the `voice-agent`
+# service (compose profile `voice`, health check on this port) and into the Helm
+# chart deploy/helm/charts/voice-agent.
 EXPOSE 8081
 
 # "start" = production mode (see livekit/agents/cli/_legacy.py's `start`

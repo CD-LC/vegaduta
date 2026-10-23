@@ -56,7 +56,27 @@ class PlatformPoolWarmerTest {
         assertTrue(warmer(true, 240, Instant.EPOCH).warmNow().isPresent());
 
         verify(clients).create(eq(row), eq("key"), eq(1), anyDouble(), anyDouble());
-        verify(client.prompt().user("hi").call()).content();
+        verify(client.prompt().advisors(any(java.util.function.Consumer.class)).user("hi").call())
+                .content();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void theProbeIsMarkedSoItIsNeverBookedToTheMembersTenant() {
+        ChatClient client = mock(ChatClient.class, RETURNS_DEEP_STUBS);
+        when(pool.resolveTopPriorityEnabled())
+                .thenReturn(Optional.of(new HostedProviderSelection(row, "key")));
+        when(clients.create(eq(row), eq("key"), eq(1), anyDouble(), anyDouble()))
+                .thenReturn(client);
+
+        warmer(true, 240, Instant.EPOCH).warmNow();
+
+        org.mockito.ArgumentCaptor<java.util.function.Consumer<ChatClient.AdvisorSpec>> marker =
+                org.mockito.ArgumentCaptor.forClass(java.util.function.Consumer.class);
+        verify(client.prompt()).advisors(marker.capture());
+        ChatClient.AdvisorSpec spec = mock(ChatClient.AdvisorSpec.class);
+        marker.getValue().accept(spec);
+        verify(spec).param(LlmMetricsAdvisor.SKIP_OBSERVATION_PARAM, true);
     }
 
     @Test
