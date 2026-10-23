@@ -47,3 +47,17 @@ ignore:
   - vulnerability: CVE-2026-40962
     package:
       name: ffmpeg
+  # MCP Java SDK (io.modelcontextprotocol.sdk:mcp-core 0.18.3, pulled by Spring AI 1.1.8):
+  # GHSA-8jxr-pr72-r468, DNS rebinding because the SDK's server transport did not validate
+  # Origin before 1.0.0. The only patched release is 1.0.0, which drops classes core's own
+  # code needs (the SSE endpoint origin pin and the Jackson 2 JSON mapper), so it cannot be
+  # pinned under Spring AI 1.1.x. Accepted by the maintainer on 2026-10-22 until the
+  # Spring AI 2 / Spring Boot 4 migration. Mitigation in core: /mcp is guarded by
+  # McpOriginValidationFilter (mode enforce by default, app.mcpserver.origin.mode; test
+  # McpOriginValidationFilterTest; docs/architecture/mcp-spec-alignment.md row T2), which
+  # answers 403 to a present, unlisted Origin before any credential lookup. Re-evaluate on
+  # the Spring AI 2 migration, or if that default changes.
+  - vulnerability: GHSA-8jxr-pr72-r468
+    package:
+      name: mcp-core
+      version: 0.18.3

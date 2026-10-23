@@ -17,6 +17,15 @@ export const ACADEMY_BASE_URL = trim(process.env.E2E_ACADEMY_URL || "http://loca
 /** Canonical site URL the web app was built/run with (SITE_URL / NEXT_PUBLIC_SITE_URL). */
 export const SITE_URL = trim(process.env.E2E_SITE_URL || APP_BASE_URL);
 
+/**
+ * Which signed-out landing the web build serves (its NEXT_PUBLIC_SITE_MODE). The default "oss" is what the
+ * compose stack and the nightly run serve (OssLanding); set E2E_SITE_MODE=classic when the target runs
+ * NEXT_PUBLIC_SITE_MODE=classic (the hosted marketing site, DemoLanding). Specs that only apply to one
+ * landing skip themselves under the other.
+ */
+export type SiteMode = "oss" | "classic";
+export const SITE_MODE: SiteMode = (process.env.E2E_SITE_MODE || "oss").toLowerCase() === "classic" ? "classic" : "oss";
+
 export const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** Host (hostname[:port]) of a URL. */

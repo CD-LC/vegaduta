@@ -17,7 +17,10 @@ Third-party software
 ==============================================================================
 
 The Java SDK declares, but does not bundle, these dependencies (resolved by
-Maven/Gradle from their upstream sources):
+Maven/Gradle from their upstream sources), with one exception: the runnable
+agent-scanner jar (vegaduta-agent-scanner-<version>-cli.jar) bundles the SDK's
+API and core modules, SLF4J's API (MIT) and Google RE2/J, and carries their
+licence texts in META-INF:
 
   - JSpecify 1.0.0 (Apache-2.0)                annotations
   - Google RE2/J 1.8 (Go-style license)        linear-time regex for guardrails

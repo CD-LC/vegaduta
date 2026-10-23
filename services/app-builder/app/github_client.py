@@ -61,12 +61,15 @@ from .settings import SETTINGS, Settings
 # interpolated into any API path so a crafted value cannot traverse into a
 # different endpoint (e.g. "a/b/../../user").
 _REPO_FULL_NAME_RX = re.compile(
-    r"^[A-Za-z0-9][A-Za-z0-9._\-]{0,99}/[A-Za-z0-9][A-Za-z0-9._\-]{0,99}$")
+    r"^[A-Za-z0-9][A-Za-z0-9._\-]{0,99}/[A-Za-z0-9][A-Za-z0-9._\-]{0,99}$"
+)
 # git branch names we are willing to create. Deliberately narrower than git's
 # own rules (no "/" beyond the prefix separator handled by the caller, no
 # "..", no leading "-") for the same interpolation-safety reason.
-_BRANCH_RX = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._\-]{0,100}"
-                        r"(/[A-Za-z0-9][A-Za-z0-9._\-]{0,100})*$")
+_BRANCH_RX = re.compile(
+    r"^[A-Za-z0-9][A-Za-z0-9._\-]{0,100}"
+    r"(/[A-Za-z0-9][A-Za-z0-9._\-]{0,100})*$"
+)
 
 _API_VERSION = "2022-11-28"
 _BLOB_MODE = "100644"
@@ -78,8 +81,6 @@ _BLOB_MODE = "100644"
 BUILDER_AUTHOR_NAME = "VegaDuta App Builder"
 BUILDER_AUTHOR_EMAIL = "app-builder@example.com"
 BUILDER_MESSAGE_PREFIX = "app-builder:"
-
-
 
 
 class GitHubError(RuntimeError):
@@ -109,16 +110,16 @@ class InvalidRepoNameError(ValueError):
 
 def validate_repo_full_name(repo_full_name: str) -> str:
     name = (repo_full_name or "").strip().strip("/")
-    if ".." in name or not _REPO_FULL_NAME_RX.match(name):
+    if ".." in name or not _REPO_FULL_NAME_RX.fullmatch(name):
         raise InvalidRepoNameError(
-            f"not a valid GitHub repository (expected owner/repo): "
-            f"{repo_full_name!r}")
+            f"not a valid GitHub repository (expected owner/repo): {repo_full_name!r}"
+        )
     return name
 
 
 def validate_branch(branch: str) -> str:
     b = (branch or "").strip()
-    if ".." in b or not _BRANCH_RX.match(b):
+    if ".." in b or not _BRANCH_RX.fullmatch(b):
         raise InvalidRepoNameError(f"not a valid branch name: {branch!r}")
     return b
 
@@ -179,22 +180,32 @@ class GitHubClient:
     def _url(self, path: str) -> str:
         return self.settings.github_api_url.rstrip("/") + path
 
-    def _request(self, method: str, path: str, *,
-                 json_body: dict | None = None,
-                 params: dict | None = None,
-                 allow_404: bool = False,
-                 allow_empty_repo: bool = False) -> dict | None:
+    def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        json_body: dict | None = None,
+        params: dict | None = None,
+        allow_404: bool = False,
+        allow_empty_repo: bool = False,
+    ) -> dict | None:
         url = self._url(path)
         try:
             resp = httpx.request(
-                method, url, headers=self._headers(), json=json_body,
-                params=params, timeout=self.settings.github_timeout_seconds)
+                method,
+                url,
+                headers=self._headers(),
+                json=json_body,
+                params=params,
+                timeout=self.settings.github_timeout_seconds,
+            )
         except httpx.TimeoutException as e:
-            raise GitHubError(504, redact(
-                f"GitHub request timed out: {method} {path}", self._token)) from e
+            raise GitHubError(
+                504, redact(f"GitHub request timed out: {method} {path}", self._token)
+            ) from e
         except httpx.TransportError as e:
-            raise GitHubError(0, redact(
-                f"GitHub unreachable at {url}: {e}", self._token)) from e
+            raise GitHubError(0, redact(f"GitHub unreachable at {url}: {e}", self._token)) from e
 
         if resp.status_code == 404 and allow_404:
             return None
@@ -208,9 +219,13 @@ class GitHubClient:
         if resp.status_code == 409 and allow_empty_repo:
             return None
         if resp.status_code >= 400:
-            raise GitHubError(resp.status_code, redact(
-                f"GitHub {resp.status_code} on {method} {path}: "
-                f"{self._error_message(resp)}", self._token))
+            raise GitHubError(
+                resp.status_code,
+                redact(
+                    f"GitHub {resp.status_code} on {method} {path}: {self._error_message(resp)}",
+                    self._token,
+                ),
+            )
         if not resp.content:
             return {}
         try:
@@ -248,18 +263,24 @@ class GitHubClient:
         exist (including when the repo has no commits at all yet)."""
         name = validate_repo_full_name(repo_full_name)
         ref = validate_branch(branch)
-        body = self._request("GET", f"/repos/{name}/git/ref/heads/{ref}",
-                             allow_404=True, allow_empty_repo=True)
+        body = self._request(
+            "GET", f"/repos/{name}/git/ref/heads/{ref}", allow_404=True, allow_empty_repo=True
+        )
         if not body:
             return None
         return ((body.get("object") or {}).get("sha")) or None
 
-    def create_branch(self, repo_full_name: str, branch: str,
-                      from_sha: str) -> str:
+    def create_branch(self, repo_full_name: str, branch: str, from_sha: str) -> str:
         name = validate_repo_full_name(repo_full_name)
         ref = validate_branch(branch)
-        body = self._request("POST", f"/repos/{name}/git/refs", json_body={
-            "ref": f"refs/heads/{ref}", "sha": from_sha}) or {}
+        body = (
+            self._request(
+                "POST",
+                f"/repos/{name}/git/refs",
+                json_body={"ref": f"refs/heads/{ref}", "sha": from_sha},
+            )
+            or {}
+        )
         return ((body.get("object") or {}).get("sha")) or from_sha
 
     def _update_ref(self, repo_full_name: str, branch: str, sha: str) -> None:
@@ -268,14 +289,16 @@ class GitHubClient:
         # force=False: a fast-forward-only ref update. If someone else moved
         # the branch since we read its tip we want GitHub's 422, not a silent
         # overwrite of the tenant's commit.
-        self._request("PATCH", f"/repos/{name}/git/refs/heads/{ref}",
-                      json_body={"sha": sha, "force": False})
+        self._request(
+            "PATCH", f"/repos/{name}/git/refs/heads/{ref}", json_body={"sha": sha, "force": False}
+        )
 
     # ------------------------------------------------------------------ #
     # commit N files as ONE commit (blobs -> tree -> commit -> ref)
 
-    def commit_files(self, repo_full_name: str, branch: str,
-                     files: list[dict], message: str) -> str:
+    def commit_files(
+        self, repo_full_name: str, branch: str, files: list[dict], message: str
+    ) -> str:
         """Commit `files` ([{path, content}], content str or bytes) onto the
         tip of `branch` as a single commit. Returns the new commit sha.
 
@@ -297,27 +320,40 @@ class GitHubClient:
         tree_entries = []
         for f in files:
             path = safe_repo_path(f["path"])
-            blob = self._request("POST", f"/repos/{name}/git/blobs", json_body={
-                "content": _b64(f.get("content", "")),
-                "encoding": "base64"}) or {}
+            blob = (
+                self._request(
+                    "POST",
+                    f"/repos/{name}/git/blobs",
+                    json_body={"content": _b64(f.get("content", "")), "encoding": "base64"},
+                )
+                or {}
+            )
             blob_sha = blob.get("sha")
             if not blob_sha:
                 raise GitHubError(502, f"GitHub returned no blob sha for {path}")
-            tree_entries.append({"path": path, "mode": _BLOB_MODE,
-                                 "type": "blob", "sha": blob_sha})
+            tree_entries.append({"path": path, "mode": _BLOB_MODE, "type": "blob", "sha": blob_sha})
 
         tree_body: dict = {"tree": tree_entries}
         if base_tree:
             tree_body["base_tree"] = base_tree
-        tree = self._request("POST", f"/repos/{name}/git/trees",
-                             json_body=tree_body) or {}
+        tree = self._request("POST", f"/repos/{name}/git/trees", json_body=tree_body) or {}
         tree_sha = tree.get("sha")
         if not tree_sha:
             raise GitHubError(502, "GitHub returned no tree sha")
 
-        commit = self._request("POST", f"/repos/{name}/git/commits", json_body={
-            "message": message, "tree": tree_sha,
-            "parents": [parent_sha], "author": _builder_author()}) or {}
+        commit = (
+            self._request(
+                "POST",
+                f"/repos/{name}/git/commits",
+                json_body={
+                    "message": message,
+                    "tree": tree_sha,
+                    "parents": [parent_sha],
+                    "author": _builder_author(),
+                },
+            )
+            or {}
+        )
         commit_sha = commit.get("sha")
         if not commit_sha:
             raise GitHubError(502, "GitHub returned no commit sha")
@@ -325,8 +361,7 @@ class GitHubClient:
         self._update_ref(name, ref, commit_sha)
         return commit_sha
 
-    def delete_files(self, repo_full_name: str, branch: str,
-                     paths: list[str], message: str) -> str:
+    def delete_files(self, repo_full_name: str, branch: str, paths: list[str], message: str) -> str:
         """Delete `paths` from the branch tip as ONE commit. Same
         blobs->tree->commit->ref walk as commit_files; a tree entry with
         `sha: null` removes that path from the new tree."""
@@ -338,22 +373,41 @@ class GitHubClient:
         parent_sha = self.get_ref_sha(name, ref)
         if not parent_sha:
             raise GitHubError(404, f"branch does not exist: {ref}")
-        parent = self._request(
-            "GET", f"/repos/{name}/git/commits/{parent_sha}") or {}
+        parent = self._request("GET", f"/repos/{name}/git/commits/{parent_sha}") or {}
         base_tree = (parent.get("tree") or {}).get("sha")
         if not base_tree:
             raise GitHubError(502, "GitHub returned no base tree sha")
 
-        tree = self._request("POST", f"/repos/{name}/git/trees", json_body={
-            "base_tree": base_tree,
-            "tree": [{"path": safe_repo_path(p), "mode": _BLOB_MODE,
-                      "type": "blob", "sha": None} for p in paths]}) or {}
+        tree = (
+            self._request(
+                "POST",
+                f"/repos/{name}/git/trees",
+                json_body={
+                    "base_tree": base_tree,
+                    "tree": [
+                        {"path": safe_repo_path(p), "mode": _BLOB_MODE, "type": "blob", "sha": None}
+                        for p in paths
+                    ],
+                },
+            )
+            or {}
+        )
         tree_sha = tree.get("sha")
         if not tree_sha:
             raise GitHubError(502, "GitHub returned no tree sha")
-        commit = self._request("POST", f"/repos/{name}/git/commits", json_body={
-            "message": message, "tree": tree_sha,
-            "parents": [parent_sha], "author": _builder_author()}) or {}
+        commit = (
+            self._request(
+                "POST",
+                f"/repos/{name}/git/commits",
+                json_body={
+                    "message": message,
+                    "tree": tree_sha,
+                    "parents": [parent_sha],
+                    "author": _builder_author(),
+                },
+            )
+            or {}
+        )
         commit_sha = commit.get("sha")
         if not commit_sha:
             raise GitHubError(502, "GitHub returned no commit sha")
@@ -368,34 +422,34 @@ class GitHubClient:
         sha = self.get_ref_sha(name, ref)
         if not sha:
             return []
-        commit = self._request(
-            "GET", f"/repos/{name}/git/commits/{sha}") or {}
+        commit = self._request("GET", f"/repos/{name}/git/commits/{sha}") or {}
         tree_sha = (commit.get("tree") or {}).get("sha")
         if not tree_sha:
             return []
-        body = self._request(
-            "GET", f"/repos/{name}/git/trees/{tree_sha}",
-            params={"recursive": "1"}) or {}
-        return [{"path": e.get("path"), "size": e.get("size"),
-                 "sha": e.get("sha")}
-                for e in (body.get("tree") or [])
-                if e.get("type") == "blob" and e.get("path")]
+        body = (
+            self._request("GET", f"/repos/{name}/git/trees/{tree_sha}", params={"recursive": "1"})
+            or {}
+        )
+        return [
+            {"path": e.get("path"), "size": e.get("size"), "sha": e.get("sha")}
+            for e in (body.get("tree") or [])
+            if e.get("type") == "blob" and e.get("path")
+        ]
 
     # ------------------------------------------------------------------ #
     # file read (used to re-read .appbuilder.json from the branch)
 
-    def get_file_text(self, repo_full_name: str, ref: str,
-                      path: str) -> str | None:
+    def get_file_text(self, repo_full_name: str, ref: str, path: str) -> str | None:
         name = validate_repo_full_name(repo_full_name)
         rel = safe_repo_path(path)
-        body = self._request("GET", f"/repos/{name}/contents/{rel}",
-                             params={"ref": ref}, allow_404=True)
+        body = self._request(
+            "GET", f"/repos/{name}/contents/{rel}", params={"ref": ref}, allow_404=True
+        )
         if not body or body.get("type") != "file":
             return None
         if body.get("encoding") == "base64":
             try:
-                return base64.b64decode(body.get("content") or "").decode(
-                    "utf-8", errors="replace")
+                return base64.b64decode(body.get("content") or "").decode("utf-8", errors="replace")
             except (ValueError, TypeError):
                 return None
         content = body.get("content")
@@ -410,19 +464,18 @@ class GitHubClient:
         `commits` are oldest-first as GitHub returns them."""
         name = validate_repo_full_name(repo_full_name)
         b, h = validate_branch(base), validate_branch(head)
-        body = self._request("GET", f"/repos/{name}/compare/{b}...{h}",
-                             params={"per_page": 100}) or {}
+        body = (
+            self._request("GET", f"/repos/{name}/compare/{b}...{h}", params={"per_page": 100}) or {}
+        )
         return {
             "status": body.get("status") or "identical",
             "ahead_by": int(body.get("ahead_by") or 0),
             "behind_by": int(body.get("behind_by") or 0),
             "commits": [_norm_commit(c) for c in (body.get("commits") or [])],
-            "files": [f.get("filename") for f in (body.get("files") or [])
-                      if f.get("filename")],
+            "files": [f.get("filename") for f in (body.get("files") or []) if f.get("filename")],
         }
 
-    def merge_branch(self, repo_full_name: str, into: str, source: str,
-                     message: str) -> dict:
+    def merge_branch(self, repo_full_name: str, into: str, source: str, message: str) -> dict:
         """Merge `source` into `into` server-side (the merge API is atomic:
         it either creates the merge commit or changes nothing).
         Returns {merged: bool, sha}; merged=False means already up to date.
@@ -431,12 +484,14 @@ class GitHubClient:
         name = validate_repo_full_name(repo_full_name)
         tgt, src = validate_branch(into), validate_branch(source)
         try:
-            body = self._request("POST", f"/repos/{name}/merges", json_body={
-                "base": tgt, "head": src, "commit_message": message})
+            body = self._request(
+                "POST",
+                f"/repos/{name}/merges",
+                json_body={"base": tgt, "head": src, "commit_message": message},
+            )
         except GitHubError as e:
             if e.status == 409:
-                raise MergeConflictError(
-                    e.message, self._conflict_paths(name, tgt, src)) from None
+                raise MergeConflictError(e.message, self._conflict_paths(name, tgt, src)) from None
             raise
         if not body:
             return {"merged": False, "sha": self.get_ref_sha(name, tgt)}
@@ -468,35 +523,46 @@ class GitHubClient:
         PR), never a reason to fail a scaffold."""
         name = validate_repo_full_name(repo_full_name)
         try:
-            self._request("POST", f"/repos/{name}/pages", json_body={
-                "build_type": "workflow"})
+            self._request("POST", f"/repos/{name}/pages", json_body={"build_type": "workflow"})
             return {"enabled": True, "pages_url": pages_url(name)}
         except GitHubError as e:
             if e.status == 409:
                 # Site already exists — the workflow deploy job works the
                 # same either way, so this counts as enabled.
-                return {"enabled": True, "pages_url": pages_url(name),
-                        "already": True}
+                return {"enabled": True, "pages_url": pages_url(name), "already": True}
             if e.status in (401, 403, 404, 422):
-                return {"enabled": False,
-                        "reason": "the token cannot manage Pages on this "
-                                  "repo (fine-grained PATs need Pages: "
-                                  "read/write, or enable Pages manually "
-                                  "with 'GitHub Actions' as the source)"}
+                return {
+                    "enabled": False,
+                    "reason": "the token cannot manage Pages on this "
+                    "repo (fine-grained PATs need Pages: "
+                    "read/write, or enable Pages manually "
+                    "with 'GitHub Actions' as the source)",
+                }
             raise
 
-    def create_pull(self, repo_full_name: str, *, head: str, base: str,
-                    title: str, body: str) -> dict:
+    def create_pull(
+        self, repo_full_name: str, *, head: str, base: str, title: str, body: str
+    ) -> dict:
         name = validate_repo_full_name(repo_full_name)
-        result = self._request("POST", f"/repos/{name}/pulls", json_body={
-            "title": title, "body": body,
-            "head": validate_branch(head), "base": validate_branch(base)}) or {}
-        return {"pr_number": result.get("number"),
-                "pr_url": result.get("html_url")}
+        result = (
+            self._request(
+                "POST",
+                f"/repos/{name}/pulls",
+                json_body={
+                    "title": title,
+                    "body": body,
+                    "head": validate_branch(head),
+                    "base": validate_branch(base),
+                },
+            )
+            or {}
+        )
+        return {"pr_number": result.get("number"), "pr_url": result.get("html_url")}
 
 
 # --------------------------------------------------------------------- #
 # helpers
+
 
 def safe_repo_path(path: str) -> str:
     """Normalize a project-relative path and refuse anything that could
@@ -518,8 +584,12 @@ def safe_repo_path(path: str) -> str:
 
 def _builder_author() -> dict:
     import time
-    return {"name": BUILDER_AUTHOR_NAME, "email": BUILDER_AUTHOR_EMAIL,
-            "date": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+
+    return {
+        "name": BUILDER_AUTHOR_NAME,
+        "email": BUILDER_AUTHOR_EMAIL,
+        "date": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
 
 
 def _first_line(text) -> str:
@@ -530,13 +600,15 @@ def _first_line(text) -> str:
 def _norm_commit(c: dict) -> dict:
     commit = c.get("commit") or {}
     author = commit.get("author") or {}
-    return {"sha": c.get("sha"),
-            "message": _first_line(commit.get("message")),
-            "author_name": author.get("name") or "",
-            "author_email": author.get("email") or "",
-            "author_login": (c.get("author") or {}).get("login") or "",
-            "date": author.get("date") or "",
-            "parents": len(c.get("parents") or [])}
+    return {
+        "sha": c.get("sha"),
+        "message": _first_line(commit.get("message")),
+        "author_name": author.get("name") or "",
+        "author_email": author.get("email") or "",
+        "author_login": (c.get("author") or {}).get("login") or "",
+        "date": author.get("date") or "",
+        "parents": len(c.get("parents") or []),
+    }
 
 
 def is_builder_commit(c: dict) -> bool:
@@ -544,14 +616,15 @@ def is_builder_commit(c: dict) -> bool:
     Commits made before the author stamp existed are recognised by the
     message shapes generate/assets/scaffold have always used (heuristic)."""
     msg = c.get("message") or ""
-    return (c.get("author_email") == BUILDER_AUTHOR_EMAIL
-            or c.get("author_name") == BUILDER_AUTHOR_NAME
-            or msg.startswith(BUILDER_MESSAGE_PREFIX)
-            or msg.startswith(_LEGACY_MESSAGE_PREFIXES))
+    return (
+        c.get("author_email") == BUILDER_AUTHOR_EMAIL
+        or c.get("author_name") == BUILDER_AUTHOR_NAME
+        or msg.startswith(BUILDER_MESSAGE_PREFIX)
+        or msg.startswith(_LEGACY_MESSAGE_PREFIXES)
+    )
 
 
-_LEGACY_MESSAGE_PREFIXES = ("AI: ", "Scaffold from template ", "Asset: ",
-                            "Remove asset: ")
+_LEGACY_MESSAGE_PREFIXES = ("AI: ", "Scaffold from template ", "Asset: ", "Remove asset: ")
 
 
 def _b64(content: object) -> str:
@@ -559,8 +632,7 @@ def _b64(content: object) -> str:
     return base64.b64encode(raw).decode("ascii")
 
 
-def validate_repo_access(token: str, repo_full_name: str,
-                         settings: Settings = SETTINGS) -> dict:
+def validate_repo_access(token: str, repo_full_name: str, settings: Settings = SETTINGS) -> dict:
     """Prove the token can actually do the job BEFORE we store it, so a
     typo'd or under-scoped PAT is rejected at connect time instead of
     failing on the tenant's first real build.
@@ -576,14 +648,17 @@ def validate_repo_access(token: str, repo_full_name: str,
         repo = client.get_repo(name)
     except GitHubError as e:
         if e.status == 401:
-            raise GitHubError(401, "GitHub rejected this token. Check it was "
-                                   "copied whole and has not expired.") from None
+            raise GitHubError(
+                401, "GitHub rejected this token. Check it was copied whole and has not expired."
+            ) from None
         if e.status in (403, 404):
             raise GitHubError(
-                404, f"This token cannot see {name}. For a fine-grained "
-                     "token, confirm the repository is selected under "
-                     "'Repository access' and that it grants Contents: "
-                     "read/write and Pull requests: read/write.") from None
+                404,
+                f"This token cannot see {name}. For a fine-grained "
+                "token, confirm the repository is selected under "
+                "'Repository access' and that it grants Contents: "
+                "read/write and Pull requests: read/write.",
+            ) from None
         raise
 
     perms = repo.get("permissions")
@@ -593,9 +668,11 @@ def validate_repo_access(token: str, repo_full_name: str,
     # GitHub's own wording if write access truly is absent.
     if isinstance(perms, dict) and not perms.get("push"):
         raise GitHubError(
-            403, f"This token can read {name} but not write to it. Grant "
-                 "Contents: read/write (and Pull requests: read/write) and "
-                 "reconnect.")
+            403,
+            f"This token can read {name} but not write to it. Grant "
+            "Contents: read/write (and Pull requests: read/write) and "
+            "reconnect.",
+        )
 
     return {
         "repo_full_name": repo.get("full_name") or name,

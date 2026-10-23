@@ -1,11 +1,12 @@
 # Code owners are requested for review automatically. See GOVERNANCE.md and
 # MAINTAINERS.md. Later rules win over earlier ones.
 #
-# TODO(maintainers): placeholder team. Teams exist only in GitHub
-# organizations: create the organization and its `maintainers` team, or, for a
-# user-owned repository, use a username. Change it everywhere with
-#   bash scripts/dev/set-repo-identity.sh --team @<org>/maintainers   (or @<user>)
-# See docs/maintainers/repo-setup.md.
+# The owner is the `maintainers` team of the CD-LC organization. GitHub ignores
+# a rule whose owner it cannot resolve, so the team must exist, be public and
+# have Write access to this repository (docs/maintainers/repo-setup.md). Check:
+#   gh api repos/CD-LC/vegaduta/codeowners/errors --jq '.errors | length'   # 0
+# To use another owner, run
+#   bash scripts/dev/set-repo-identity.sh --team @<org>/<team>   (or @<user>)
 
 *                                           @CD-LC/maintainers
 
