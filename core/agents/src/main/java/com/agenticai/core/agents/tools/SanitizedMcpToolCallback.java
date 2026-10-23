@@ -116,7 +116,11 @@ final class SanitizedMcpToolCallback implements ToolCallback {
         if (blocked.isPresent()) {
             return blockedResult(blocked.get());
         }
-        return McpToolOutputSanitizer.sanitizeResult(delegate.call(toolInput, toolContext));
+        // The tool context is the platform's own per-turn state (the tool-loop transcript, ...), never meant for
+        // the MCP server: Spring AI's MCP callback copies it into the request's _meta, which leaks internal state
+        // to a third-party server and fails outright on an entry Jackson cannot write (seen 2026-10-23: the
+        // ToolLoopTranscript made every MCP call hang - the transport dropped the request and no result came back).
+        return McpToolOutputSanitizer.sanitizeResult(delegate.call(toolInput));
     }
 
     /**
