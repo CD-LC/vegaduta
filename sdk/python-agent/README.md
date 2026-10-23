@@ -119,7 +119,8 @@ lc_tools = to_langchain_tools(governance.scan(my_tools_module), context=ctx)
 # pass to create_react_agent / bind_tools as usual
 ```
 
-`pip install vegaduta-agent[langchain]`. The pipeline is unchanged — the
+Install the extra with `pip install './sdk/python-agent[langchain]'` (quote it: zsh expands the
+brackets; the name `vegaduta-agent[langchain]` works once the package is on PyPI). The pipeline is unchanged — the
 adapter only translates the call surface, so governance behaves identically
 across frameworks.
 
@@ -173,7 +174,7 @@ test `test_sdk_makes_no_http_call_to_core` enforces it). Three lines of
 
 ## Observability
 
-`pip install vegaduta-agent[otel]` adds `OtelToolCallObserver`, emitting one
+`pip install './sdk/python-agent[otel]'` (once on PyPI: `vegaduta-agent[otel]`) adds `OtelToolCallObserver`, emitting one
 `execute_tool` span per call with `gen_ai.*` attributes — the same convention
 the platform's `core/chat` module uses, so platform and embedded agents land
 in one trace view.
@@ -203,4 +204,5 @@ cd sdk/python-agent
 python -m venv .venv && .venv/bin/pip install -e '.[dev]'
 .venv/bin/python -m pytest tests/ -q
 .venv/bin/ruff check vegaduta_agent tests
+.venv/bin/ruff format --check vegaduta_agent tests   # `ruff format vegaduta_agent tests` fixes it
 ```

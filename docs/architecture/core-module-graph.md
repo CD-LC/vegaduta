@@ -32,7 +32,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | agents-budget | kernel | 11 | audit, chat, providers, security, tenancy |  |
 | agents-chatport | kernel | 21 | agents, agents-turn, audit, json, security, sharing, tenancy |  |
 | agents-interop | kernel | 54 | agents, agents-budget, agents-turn, audit, chat, json, providers, security, sharing, tenancy |  |
-| agents-jobs | kernel | 171 | agents, agents-browser, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, sharing, tenancy |  |
+| agents-jobs | kernel | 172 | agents, agents-browser, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, sharing, tenancy |  |
 | agents-studio | kernel | 100 | agents, agents-tools (test), agents-turn, approval, chat, guardrails, json, knowledge, mcp, providers, rl, sdlc, security, sharing, tenancy |  |
 | agents-tools | kernel | 247 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
 | agents-turn | kernel | 307 | agents, agents-budget, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, providers, rl, security, sharing, storage, tenancy |  |
@@ -62,7 +62,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | knowledge | kernel (hosts vendor code) | 128 | crypto, json, security, storage, tenancy | embeddings / OCR / sidecar clients |
 | mcp | kernel | 92 | crypto, json, secrets, security |  |
 | mcpserver | kernel | 45 | agents, agents-interop, agents-turn, audit, chat, json, knowledge, security, tenancy, workflow |  |
-| omnichannel | kernel (hosts vendor code) | 310 | agents, agents-turn, approval, audit, chat, crypto, devices, eventbus, guardrails, json, **sarvam** (test), security, speech, tenancy | 11 channel types + Twilio sub-packages (closed ChannelType) |
+| omnichannel | kernel (hosts vendor code) | 312 | agents, agents-turn, approval, audit, chat, crypto, devices, eventbus, guardrails, json, **sarvam** (test), security, speech, tenancy | 11 channel types + Twilio sub-packages (closed ChannelType) |
 | omnichannel-social | kernel | 94 | omnichannel |  |
 | payments | vendor | 55 | agents (test), agents-tools (test), agentspi, approval, audit, billing, crypto, eventbus, json, security, tenancy | UPI mandate payments |
 | platform | kernel | 153 | admin, agents, agents-turn, audit, chat, codeintel, crypto, guardrails, json, providers, security, tenancy, workflow |  |
@@ -73,7 +73,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | sarvam | vendor | 46 | agents, agentspi, crypto, providers, security, speech, storage, tenancy | Sarvam AI (LLM, STT/TTS, translate) |
 | sdlc | kernel | 44 | crypto, security, tenancy |  |
 | secrets | kernel | 15 | audit, crypto |  |
-| security | kernel | 95 | json |  |
+| security | kernel | 96 | json |  |
 | sharing | kernel | 13 | admin, audit, security |  |
 | speech | kernel | 11 | (none) |  |
 | storage | kernel | 9 | security |  |

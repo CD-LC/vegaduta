@@ -17,6 +17,8 @@
 # test; delete it. The entry exempts the whole class, so keep reasons specific and review a second hop
 # added to a listed class by hand.
 com.agenticai.core.agents.turn.BufferedTurnRunner | keep-alive Flux.interval emits empty chunks only; the turn itself is hopped in bufferedTurn() under TenantScope
+com.agenticai.core.agents.turn.FastStreamRecovery | the stream-idle .timeout() continuation runs on Reactor's timer thread: retryOnFallbackProvider re-applies the turn's TenantScope around resolveFallbackClient and passes the tenant context to the issue recorder as data; the other recovery branches only rebuild a prompt or emit a marker
+com.agenticai.core.agents.turn.FastStreamTurn | the stream-idle .timeout() continuation runs on Reactor's timer thread: its error handlers are the FastStreamRecovery branches (hand-scoped), the interrupted-turn persistence writes tenant-keyed session memory (Redis), TurnRecorder.commit runs under its captured scope, and the continuation pass subscribes under TenantScopedFlux
 com.agenticai.core.agents.a2a.A2aClientService | body-read watchdog that closes an HTTP stream; no tenant state
 com.agenticai.core.agents.a2a.A2aTaskService | store.save is Redis/in-memory keyed by the task tenant id; runAsync sets the captured TenantContext on its fresh virtual thread and clears it in finally; the terminal audit callbacks use TenantScope in run()
 com.agenticai.core.agents.agui.AgUiRunController | keep-alive heartbeat Flux.interval only; the run buffer is keyed by an explicit tenantKey captured at request time
@@ -25,6 +27,7 @@ com.agenticai.core.agents.coding.CodingTaskService | heartbeat and reaper timers
 com.agenticai.core.agents.demo.studio.DemoStudioConnectorService | discovery task sets the caller TenantContext on its fresh virtual thread and clears it in finally
 com.agenticai.core.agents.demo.studio.DemoStudioController | Mono.delay used only as a timeout signal; no tenant work
 com.agenticai.core.agents.demo.studio.DemoStudioModerationService | anonymous sandbox classifier on the platform pool: no tenant data, and the request thread has no tenant either
+com.agenticai.core.agents.demo.studio.DemoStudioService | runMission's mission .timeout() only relays the TimeoutException to the SSE response; the turn's tenant work ran inside inDemoTenantContextAs before it, and no handler after the timer touches a tenant table
 com.agenticai.core.agents.hooks.HookWebhookClient | SSRF DNS check only; no tenant state
 com.agenticai.core.agents.job.AgentJobExecutor | workers run AgentJobExecution.run(jobId, tenantId), which sets the tenant from data and clears it; the heartbeat tick sets and restores the tenant per job
 com.agenticai.core.agents.lab.AgentLabExecutor | run body gets a TenantContext snapshot taken on the request thread (AgentLabRunService.runWorker sets it, clears it in finally)

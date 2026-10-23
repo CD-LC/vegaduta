@@ -5,8 +5,10 @@ name: CodeQL
 # build-mode "none": CodeQL extracts Java without running Maven, so a broken or
 # slow reactor build cannot make the security scan fail.
 #
-# No paths-ignore: a required check that never reports leaves docs-only pull
-# requests stuck at "Expected - waiting", and build-mode none is cheap. The
+# No workflow-level paths-ignore: a required check that never reports leaves
+# docs-only pull requests stuck at "Expected - waiting", and build-mode none is
+# cheap. Test, tooling and sample code is excluded from the analysis itself by
+# .github/codeql/codeql-config.yml (the check still runs on every PR). The
 # `CodeQL OK` job aggregates the language matrix into one stable check name
 # for branch protection (docs/maintainers/branch-protection.md).
 
@@ -77,6 +79,7 @@ jobs:
           languages: ${{ matrix.language }}
           build-mode: none
           queries: security-extended
+          config-file: ./.github/codeql/codeql-config.yml
       - uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
         with:
           category: "/language:${{ matrix.language }}"

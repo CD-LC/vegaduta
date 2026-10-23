@@ -17,9 +17,14 @@ import java.util.Set;
  * Command line entry point.
  *
  * <pre>
- * java -cp app.jar:vegaduta-agent-scanner.jar io.vegaduta.agent.scanner.Main \
+ * java -jar vegaduta-agent-scanner-&lt;version&gt;-cli.jar --jar app.jar \
  *     --package com.acme.tools --format md --fail-under 70
  * </pre>
+ *
+ * <p>Run the {@code -cli} jar (it bundles the SDK, SLF4J's API and RE2/J); the plain jar is the
+ * library and needs them on the class path. With {@code -cp} instead of {@code -jar}, put the
+ * {@code -cli} jar and the application's classes on it: {@code java -cp app.jar:...-cli.jar
+ * io.vegaduta.agent.scanner.Main --package ...}.
  *
  * <p>Sources (at least one): {@code --package <prefix>} (repeatable), {@code --jar <path>} (jar or
  * class directory, repeatable), {@code --class <fqcn>} (repeatable). Options: {@code --format

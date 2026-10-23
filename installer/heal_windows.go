@@ -38,7 +38,8 @@ func wslReady(ctx context.Context) bool {
 }
 
 // raiseDockerMemory sets the WSL2 VM's memory in %USERPROFILE%\.wslconfig and
-// restarts WSL and Docker Desktop so it takes effect.
+// restarts WSL and Docker Desktop so it takes effect. Callers ask the person
+// first (raiseDockerMemoryWithConsent): `wsl --shutdown` ends every running distro.
 func raiseDockerMemory(ctx context.Context, gb int64, emit func(Event)) (bool, error) {
 	out, _ := exec.CommandContext(ctx, "docker", "info", "--format", "{{.KernelVersion}}").Output()
 	if !strings.Contains(strings.ToLower(string(out)), "wsl") {
@@ -57,10 +58,13 @@ func raiseDockerMemory(ctx context.Context, gb int64, emit func(Event)) (bool, e
 	if !changed {
 		return false, nil
 	}
+	if err := backupWSLConfig(path, old); err != nil {
+		return false, err
+	}
 	if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
 		return false, err
 	}
-	emit(Event{Line: fmt.Sprintf("Giving Docker %d GB of memory - restarting Docker (about a minute)…", gb)})
+	emit(Event{Line: fmt.Sprintf("Giving Docker %d GB of memory - restarting Docker and WSL (about a minute); open WSL windows are closed. Your old .wslconfig is kept as .wslconfig.vegaduta.bak.", gb)})
 	_ = exec.CommandContext(ctx, "taskkill", "/IM", "Docker Desktop.exe", "/F").Run()
 	_ = exec.CommandContext(ctx, "wsl.exe", "--shutdown").Run()
 	if err := dockerStart(ctx, emit); err != nil {

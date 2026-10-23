@@ -1,5 +1,5 @@
 // Instructions console against a mocked API; the translator reads the real messages/en.json.
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import en from "../../../messages/en.json";
 
@@ -10,14 +10,26 @@ const api = vi.hoisted(() => ({
   saveCustomInstructions: vi.fn(),
 }));
 vi.mock("../../lib/api", () => ({ api }));
+// Like the real hook, hand back the SAME translator for a namespace on every render: a fresh function per
+// render makes `t` a changing effect dependency (page.tsx loads on [allowed, t]) and re-runs the load each render.
+const translators = new Map<string, (key: string, values?: Record<string, unknown>) => string>();
 vi.mock("../../lib/i18n", () => ({
-  useTranslations: (namespace: string) => (key: string, values?: Record<string, unknown>) => {
-    const template = (en as unknown as Record<string, Record<string, string>>)[namespace]?.[key];
-    if (typeof template !== "string") return `${namespace}.${key}`;
-    return template.replace(/\{(\w+)\}/g, (m, n) => (values && n in values ? String(values[n]) : m));
+  useTranslations: (namespace: string) => {
+    let t = translators.get(namespace);
+    if (!t) {
+      t = (key, values) => {
+        const template = (en as unknown as Record<string, Record<string, string>>)[namespace]?.[key];
+        if (typeof template !== "string") return `${namespace}.${key}`;
+        return template.replace(/\{(\w+)\}/g, (m, n) => (values && n in values ? String(values[n]) : m));
+      };
+      translators.set(namespace, t);
+    }
+    return t;
   },
 }));
-vi.mock("../../components/AppShell", () => ({ default: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
+vi.mock("../../components/AppShell", () => ({
+  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
 vi.mock("../../components/useRequireScope", () => ({ useRequireScope: () => true }));
 
 import AdminInstructionsPage from "./page";
@@ -25,14 +37,28 @@ import type { PromptDirective } from "../../lib/api/promptDirectives";
 
 const t = en.promptDirectives;
 const plain: PromptDirective = {
-  key: "date", title: "Current date", description: "Tells the model today's date.", securityCritical: false,
-  placeholders: ["{date}"], enabled: true, overridden: false,
-  defaultText: "Today is {date}.", overrideText: null, effectiveText: "Today is {date}.",
+  key: "date",
+  title: "Current date",
+  description: "Tells the model today's date.",
+  securityCritical: false,
+  placeholders: ["{date}"],
+  enabled: true,
+  overridden: false,
+  defaultText: "Today is {date}.",
+  overrideText: null,
+  effectiveText: "Today is {date}.",
 };
 const critical: PromptDirective = {
-  key: "safety", title: "Safety rules", description: "Refuse harmful requests.", securityCritical: true,
-  placeholders: [], enabled: true, overridden: true,
-  defaultText: "Refuse harm.", overrideText: "Refuse harm, politely.", effectiveText: "Refuse harm, politely.",
+  key: "safety",
+  title: "Safety rules",
+  description: "Refuse harmful requests.",
+  securityCritical: true,
+  placeholders: [],
+  enabled: true,
+  overridden: true,
+  defaultText: "Refuse harm.",
+  overrideText: "Refuse harm, politely.",
+  effectiveText: "Refuse harm, politely.",
 };
 const overview = {
   directives: [plain, critical],
@@ -71,13 +97,22 @@ describe("AdminInstructionsPage", () => {
   it("saves custom instructions with the typed body, disabled until changed", async () => {
     render(<AdminInstructionsPage />);
     await screen.findByText(plain.title);
+    // findByText resolves as soon as the title is in the DOM, which can be before React has flushed the card's
+    // mount effect (it re-syncs the textarea from the server value). Typing first lets that effect overwrite the
+    // text, so settle pending effects before interacting.
+    await act(async () => {});
     const save = screen.getAllByRole("button", { name: t.save })[0] as HTMLButtonElement;
     expect(save.disabled).toBe(true);
     fireEvent.change(screen.getByLabelText(t.customLabel), { target: { value: "Be very brief." } });
     expect(save.disabled).toBe(false);
-    api.getPromptDirectives.mockResolvedValue({ ...overview, customInstructions: { enabled: true, text: "Be very brief." } });
+    api.getPromptDirectives.mockResolvedValue({
+      ...overview,
+      customInstructions: { enabled: true, text: "Be very brief." },
+    });
     fireEvent.click(save);
-    await waitFor(() => expect(api.saveCustomInstructions).toHaveBeenCalledWith({ enabled: true, text: "Be very brief." }));
+    await waitFor(() =>
+      expect(api.saveCustomInstructions).toHaveBeenCalledWith({ enabled: true, text: "Be very brief." })
+    );
     expect(await screen.findByText(t.saved)).toBeTruthy();
   });
 
@@ -86,7 +121,11 @@ describe("AdminInstructionsPage", () => {
     fireEvent.change(card.querySelector("textarea") as HTMLElement, { target: { value: "It is {date}." } });
     fireEvent.click(within(card).getByRole("button", { name: t.save }));
     await waitFor(() =>
-      expect(api.savePromptDirective).toHaveBeenCalledWith("date", { enabled: true, text: "It is {date}.", acknowledgeRisk: false }),
+      expect(api.savePromptDirective).toHaveBeenCalledWith("date", {
+        enabled: true,
+        text: "It is {date}.",
+        acknowledgeRisk: false,
+      })
     );
   });
 
@@ -105,7 +144,11 @@ describe("AdminInstructionsPage", () => {
     expect(save.disabled).toBe(false);
     fireEvent.click(save);
     await waitFor(() =>
-      expect(api.savePromptDirective).toHaveBeenCalledWith("safety", { enabled: true, text: "Refuse nothing.", acknowledgeRisk: true }),
+      expect(api.savePromptDirective).toHaveBeenCalledWith("safety", {
+        enabled: true,
+        text: "Refuse nothing.",
+        acknowledgeRisk: true,
+      })
     );
   });
 

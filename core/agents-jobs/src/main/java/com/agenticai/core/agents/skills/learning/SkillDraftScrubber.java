@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.skills.learning;
 
+import com.agenticai.core.security.TextRedaction;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -44,17 +45,17 @@ public interface SkillDraftScrubber {
 
         private static final List<Pattern> SECRETS =
                 List.of(
-                        Pattern.compile(
-                                "-----BEGIN [A-Z ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE KEY-----"),
                         Pattern.compile("AKIA[0-9A-Z]{16}"),
                         Pattern.compile("AIza[0-9A-Za-z\\-_]{35}"),
                         Pattern.compile("gh[pousr]_[A-Za-z0-9]{36,}"),
                         Pattern.compile("xox[baprs]-[A-Za-z0-9-]{10,}"),
                         Pattern.compile("sk-[A-Za-z0-9_-]{20,}"),
-                        Pattern.compile("eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}"),
+                        Pattern.compile(
+                                "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}"),
                         Pattern.compile("(?i)\\b(?:bearer|basic)\\s+[A-Za-z0-9._~+/=-]{16,}"),
                         Pattern.compile("(?i)\\bauthorization\\s*[:=]\\s*\\S+(?:\\s+\\S+)?"),
-                        // Any long opaque run (hex digests, base64 blobs, ids) is never general guidance.
+                        // Any long opaque run (hex digests, base64 blobs, ids) is never general
+                        // guidance.
                         Pattern.compile("\\b[A-Za-z0-9_+]{40,}={0,2}"));
 
         private static final Pattern KEY_VALUE =
@@ -63,8 +64,6 @@ public interface SkillDraftScrubber {
                                 + "(\\s*[:=]\\s*)(\"[^\"]*\"|'[^']*'|[^\\s,;]+)");
         private static final Pattern URL_CREDENTIALS =
                 Pattern.compile("(?i)\\b([a-z][a-z0-9+.-]*://)[^\\s/:@]+:[^\\s/@]+@");
-        private static final Pattern EMAIL =
-                Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b");
         private static final Pattern CARD_LIKE = Pattern.compile("\\b\\d(?:[ -]?\\d){12,18}\\b");
 
         private Basic() {}
@@ -74,13 +73,15 @@ public interface SkillDraftScrubber {
             if (text == null || text.isEmpty()) {
                 return text;
             }
-            String out = text;
+            // Private-key blocks and e-mail addresses are found in code, not by a regular
+            // expression: both patterns are quadratic on hostile text (TextRedaction).
+            String out = TextRedaction.redactPrivateKeyBlocks(text, "[REDACTED]");
             for (Pattern p : SECRETS) {
                 out = p.matcher(out).replaceAll("[REDACTED]");
             }
             out = KEY_VALUE.matcher(out).replaceAll("$1$2[REDACTED]");
             out = URL_CREDENTIALS.matcher(out).replaceAll("$1[REDACTED]@");
-            out = EMAIL.matcher(out).replaceAll("[EMAIL]");
+            out = TextRedaction.redactEmails(out, "[EMAIL]");
             return CARD_LIKE.matcher(out).replaceAll("[REDACTED]");
         }
     }

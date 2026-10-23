@@ -13,7 +13,10 @@ For servers and Kubernetes, see [installation.md](installation.md).
 > up). `./scripts/vegaduta personal` — see [personal-mode.md](personal-mode.md).
 > Not a developer? The Setup app from the
 > [Releases](https://github.com/CD-LC/vegaduta/releases) page does it all
-> without a terminal. The rest of this guide covers Lite.
+> without a terminal (it is not notarized yet: on macOS 15+ allow it once under
+> System Settings > Privacy & Security > Open Anyway; see
+> [installation.md](installation.md#opening-the-setup-app-the-first-time)).
+> The rest of this guide covers Lite.
 
 ## 1. Prerequisites
 

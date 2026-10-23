@@ -119,6 +119,10 @@ env:
   NEXT_PUBLIC_DOCS_URL: ""
   # Absolute URL of a hosted/commercial offering; "" = the OSS pages show no such link.
   NEXT_PUBLIC_COMMERCIAL_URL: ""
+  # Install tier: "full" = the multi-tenant shape where every add-on ships (the console
+  # leaves /add-ons out of the rail). Other values: "production" / "staging" show an
+  # environment pill in the top bar and do not count as the full tier.
+  NEXT_PUBLIC_DEPLOY_ENV: "full"
   # Absolute URL of the Academy (a separate, proprietary deployable); defaults
   # to the hosted academy.vegaduta.ai. Set your own Academy origin, or "" to
   # hide the links on a fork.

@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.hooks;
 
+import com.agenticai.core.security.TextRedaction;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,24 +11,23 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * The {@code redact} hook action: built-in PII patterns plus a few author-supplied
- * regexes, applied to tool arguments, a tool result, or the model's reply.
+ * The {@code redact} hook action: built-in PII patterns plus a few author-supplied regexes, applied
+ * to tool arguments, a tool result, or the model's reply.
  *
- * <p>The built-in patterns are an independent copy of the shapes
- * {@code LlmGatewayPiiRedactor} (core/chat, package-private) and {@code PiiGuardrail}
- * (core/guardrails) already use - email, phone (NANP and the India 5-5 grouping),
- * credit card, US SSN, India Aadhaar and PAN - kept equivalent on purpose and
- * duplicated for the same reason that class duplicates {@code PiiGuardrail}: neither
- * module may depend on the other without a cycle, and this one is not allowed to widen
- * a package-private helper in another lane's module.
+ * <p>The built-in patterns are an independent copy of the shapes {@code LlmGatewayPiiRedactor}
+ * (core/chat, package-private) and {@code PiiGuardrail} (core/guardrails) already use - email,
+ * phone (NANP and the India 5-5 grouping), credit card, US SSN, India Aadhaar and PAN - kept
+ * equivalent on purpose and duplicated for the same reason that class duplicates {@code
+ * PiiGuardrail}: neither module may depend on the other without a cycle, and this one is not
+ * allowed to widen a package-private helper in another lane's module.
  *
- * <p><b>Author-supplied regexes are run under a time budget.</b> The text being
- * redacted can be attacker-influenced (a tool result from the open web), so a
- * catastrophic-backtracking pattern must not be able to hold a request thread. Matching
- * runs over a {@link CharSequence} that checks a deadline as the engine reads it and
- * aborts with {@link RedactionException}; callers treat that as "redaction did not
- * happen" and fail closed. A pattern that matches the empty string is rejected at save
- * time (it would "match" everywhere) and its empty matches are skipped at run time.
+ * <p><b>Author-supplied regexes are run under a time budget.</b> The text being redacted can be
+ * attacker-influenced (a tool result from the open web), so a catastrophic-backtracking pattern
+ * must not be able to hold a request thread. Matching runs over a {@link CharSequence} that checks
+ * a deadline as the engine reads it and aborts with {@link RedactionException}; callers treat that
+ * as "redaction did not happen" and fail closed. A pattern that matches the empty string is
+ * rejected at save time (it would "match" everywhere) and its empty matches are skipped at run
+ * time.
  */
 public final class HookRedactor {
 
@@ -35,30 +35,41 @@ public final class HookRedactor {
     public static final int MAX_CUSTOM_PATTERNS = 5;
     public static final int MAX_PATTERN_LENGTH = 200;
     public static final int MAX_REPLACEMENT_LENGTH = 40;
-    /** Hard stop on matches per pattern, so a pathological pattern cannot build an unbounded result. */
+
+    /**
+     * Hard stop on matches per pattern, so a pathological pattern cannot build an unbounded result.
+     */
     private static final int MAX_MATCHES_PER_PATTERN = 5_000;
+
     private static final int MAX_COMPILED_CACHE = 256;
 
-    private static final Pattern EMAIL = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b");
-    private static final Pattern PHONE = Pattern.compile(
-        "(?<!\\d)(?:\\+?\\d{1,3}[-. ]?)?"
-            + "(?:"
-            + "(?:\\(\\d{3}\\)|\\d{3})[-. ]?\\d{3}[-. ]?\\d{4}"
-            + "|\\d{5}[-. ]?\\d{5}"
-            + ")(?!\\d)");
-    private static final Pattern CREDIT_CARD = Pattern.compile("\\b\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}\\b");
+    private static final Pattern PHONE =
+            Pattern.compile(
+                    "(?<!\\d)(?:\\+?\\d{1,3}[-. ]?)?"
+                            + "(?:"
+                            + "(?:\\(\\d{3}\\)|\\d{3})[-. ]?\\d{3}[-. ]?\\d{4}"
+                            + "|\\d{5}[-. ]?\\d{5}"
+                            + ")(?!\\d)");
+    private static final Pattern CREDIT_CARD =
+            Pattern.compile("\\b\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}\\b");
     private static final Pattern SSN = Pattern.compile("\\b\\d{3}-\\d{2}-\\d{4}\\b");
-    private static final Pattern AADHAAR = Pattern.compile("(?<!\\d)\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}(?!\\d)");
+    private static final Pattern AADHAAR =
+            Pattern.compile("(?<!\\d)\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}(?!\\d)");
     private static final Pattern PAN = Pattern.compile("\\b[A-Za-z]{5}\\d{4}[A-Za-z]\\b");
 
-    private record Builtin(Pattern pattern, String placeholder) {
-    }
+    /**
+     * {@code pattern} is null for the e-mail entry, which {@link TextRedaction} finds in linear
+     * time.
+     */
+    private record Builtin(Pattern pattern, String placeholder) {}
 
-    /** Application order matters only in that the longer digit patterns run before the shorter ones. */
+    /**
+     * Application order matters only in that the longer digit patterns run before the shorter ones.
+     */
     private static final Map<String, Builtin> BUILTINS = new LinkedHashMap<>();
 
     static {
-        BUILTINS.put("email", new Builtin(EMAIL, "[REDACTED_EMAIL]"));
+        BUILTINS.put("email", new Builtin(null, "[REDACTED_EMAIL]"));
         BUILTINS.put("credit_card", new Builtin(CREDIT_CARD, "[REDACTED_CARD]"));
         BUILTINS.put("ssn", new Builtin(SSN, "[REDACTED_GOVERNMENT_ID]"));
         BUILTINS.put("aadhaar", new Builtin(AADHAAR, "[REDACTED_GOVERNMENT_ID]"));
@@ -68,8 +79,7 @@ public final class HookRedactor {
 
     private static final Map<String, Pattern> COMPILED = new ConcurrentHashMap<>();
 
-    private HookRedactor() {
-    }
+    private HookRedactor() {}
 
     /** The accepted names for the {@code patterns} parameter. */
     public static Set<String> builtinNames() {
@@ -80,8 +90,7 @@ public final class HookRedactor {
      * @param text what was redacted (the input when nothing matched)
      * @param count how many substrings were replaced
      */
-    public record Result(String text, int count) {
-    }
+    public record Result(String text, int count) {}
 
     /** Redaction could not be completed safely (time budget exceeded or a runaway match count). */
     public static final class RedactionException extends RuntimeException {
@@ -93,16 +102,20 @@ public final class HookRedactor {
     }
 
     /**
-     * @param builtinNames names from {@link #builtinNames()}; unknown names are ignored here (save-time
-     *     validation already rejected them)
-     * @param customRegex author regexes; one that no longer compiles is skipped here for the same reason
+     * @param builtinNames names from {@link #builtinNames()}; unknown names are ignored here
+     *     (save-time validation already rejected them)
+     * @param customRegex author regexes; one that no longer compiles is skipped here for the same
+     *     reason
      * @param replacement overrides every placeholder when non-blank
      * @param budgetMillis wall-clock budget for the whole call
      * @throws RedactionException when the budget is exceeded
      */
     public static Result redact(
-        String text, List<String> builtinNames, List<String> customRegex, String replacement, long budgetMillis
-    ) {
+            String text,
+            List<String> builtinNames,
+            List<String> customRegex,
+            String replacement,
+            long budgetMillis) {
         if (text == null || text.isEmpty()) {
             return new Result(text, 0);
         }
@@ -115,8 +128,11 @@ public final class HookRedactor {
                 if (!builtinNames.contains(entry.getKey())) {
                     continue;
                 }
-                Result r = apply(current, entry.getValue().pattern(),
-                    override ? replacement : entry.getValue().placeholder(), deadline);
+                String placeholder = override ? replacement : entry.getValue().placeholder();
+                Result r =
+                        entry.getValue().pattern() == null
+                                ? applyEmails(current, placeholder, deadline)
+                                : apply(current, entry.getValue().pattern(), placeholder, deadline);
                 current = r.text();
                 total += r.count();
             }
@@ -127,7 +143,8 @@ public final class HookRedactor {
                 if (p == null) {
                     continue;
                 }
-                Result r = apply(current, p, override ? replacement : DEFAULT_REPLACEMENT, deadline);
+                Result r =
+                        apply(current, p, override ? replacement : DEFAULT_REPLACEMENT, deadline);
                 current = r.text();
                 total += r.count();
             }
@@ -135,7 +152,27 @@ public final class HookRedactor {
         return new Result(current, total);
     }
 
-    private static Result apply(String input, Pattern pattern, String replacement, long deadlineNanos) {
+    private static Result applyEmails(String input, String replacement, long deadlineNanos) {
+        List<int[]> spans =
+                TextRedaction.emailSpans(new DeadlineCharSequence(input, deadlineNanos));
+        if (spans.isEmpty()) {
+            return new Result(input, 0);
+        }
+        if (spans.size() > MAX_MATCHES_PER_PATTERN) {
+            throw new RedactionException("too many matches");
+        }
+        StringBuilder out = new StringBuilder(input.length() + 16);
+        int last = 0;
+        for (int[] span : spans) {
+            out.append(input, last, span[0]).append(replacement);
+            last = span[1];
+        }
+        out.append(input, last, input.length());
+        return new Result(out.toString(), spans.size());
+    }
+
+    private static Result apply(
+            String input, Pattern pattern, String replacement, long deadlineNanos) {
         Matcher m = pattern.matcher(new DeadlineCharSequence(input, deadlineNanos));
         StringBuilder out = null;
         int last = 0;

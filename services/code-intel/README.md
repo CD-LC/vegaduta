@@ -288,10 +288,11 @@ python3 tests/test_service.py
 python3 tests/test_exec_and_mcp.py
 python3 tests/test_run_modes.py   # RUN_MODE dispatch: local regression + docker/e2b via mocked SDKs
 
-# docker, alongside the existing stack (deploy/ untouched)
-echo "CODE_INTEL_INTERNAL_TOKEN=$(openssl rand -hex 24)" >> deploy/.env
-docker compose -f deploy/docker-compose.yml \
-               -f code-intel/docker-compose.code-intel.yml up -d --build code-intel
+# docker: code-intel is a service of the platform stack, compose profile `code-intel`
+# (deploy/compose/docker-compose.yml). The launcher fills CODE_INTEL_INTERNAL_TOKEN in
+# deploy/compose/.env and sets CODE_INTEL_ENABLED=true for the profile.
+scripts/vegaduta up --full --profile code-intel
+# standalone, without the platform stack: services/code-intel/docker-compose.code-intel.yml
 ```
 
 

@@ -136,6 +136,7 @@
       <span>Language <select id="langSel"></select></span>
       <span class="dir">Install to <span id="pDir"></span></span>
     </div>
+    <p class="xwarn hidden" id="upgradeNote"></p>
     <div id="extrasBox" class="hidden">
       <h2 style="font-size:15px;margin:14px 0 4px">Extras</h2>
       <p class="fix" id="extrasIntro" style="margin:0 0 6px"></p>
@@ -148,6 +149,10 @@
       <div id="extrasWarn"></div>
       <p class="fix" id="extrasKept" style="margin:6px 0 0"></p>
     </div>
+    <div class="hidden" id="restartBox" style="margin-top:10px"><label class="xwarn">
+      <input type="checkbox" id="restartOk"> Let Setup restart Docker. Docker has less memory than VegaDūta wants; giving it more
+      restarts Docker Desktop and WSL, which closes every WSL window you have open (terminals, editors).
+      Leave this unticked to keep them open and raise the memory yourself in Docker Desktop &gt; Settings &gt; Resources.</label></div>
     <div class="cta">
       <button id="installBtn">Install VegaDūta</button>
       <span class="fix" id="blockedMsg" style="display:none;color:var(--fail)">
@@ -172,6 +177,7 @@
     <pre id="log"></pre>
     <p class="done hidden" id="doneBox">
       <b>VegaDūta is up.</b> <a id="consoleLink" href="#">Open it to finish setup →</a><br>
+      <span class="xwarn" id="doneNote"></span><br>
       <span class="fix">The account lives in this install, not on a server. Stop the stack later with
       <code>scripts/vegaduta down</code> in the install folder.</span></p>
     <p class="err hidden" id="errBox"></p>
@@ -223,6 +229,10 @@ async function preflight() {
   $('pTier').textContent = plan.tier;
   $('pDir').textContent = plan.dir;
   $('pVer').textContent = plan.version;
+  $('upgradeNote').textContent = plan.upgrade || '';
+  $('upgradeNote').classList.toggle('hidden', !plan.upgrade);
+  $('restartBox').classList.toggle('hidden', !(plan.goos === 'windows' &&
+    rep.checks.some(c => c.name === 'Memory' && c.warn)));
   await loadExtras();
   $('planCard').classList.remove('hidden');
   $('installBtn').disabled = blocked;
@@ -367,7 +377,7 @@ const PLAYBOOK = [
    'From a source checkout, run "scripts/vegaduta personal --build" instead.'],
   [/i\/o timeout|ETIMEDOUT|ENOTFOUND|TLS handshake|certificate|proxy|network is unreachable/i,
    'A download failed - network, proxy, VPN or TLS inspection.',
-   'Check the connection/VPN/proxy, then press Install again (the run is safe to repeat).'],
+   'Check the connection/VPN, then press Install again (the run is safe to repeat). Behind a proxy, set HTTPS_PROXY (or ALL_PROXY) to http://host:port and start Setup again from that same window: Setup does not read the system proxy settings.'],
   [/Flyway|migration.*fail|psql.*error/i,
    'A database migration failed during first start.',
    'Look at the log above for the exact migration. If this is an existing install, restore the backup rather than retrying blindly.'],
@@ -565,6 +575,7 @@ function connectEvents() {
     if (e.phase === 'done' && e.url) {
       $('consoleLink').href = e.url;
       $('consoleLink').textContent = 'Open it to finish setup →';
+      $('doneNote').textContent = (e.line && e.line !== 'VegaDuta is up.') ? e.line : '';
       $('doneBox').classList.remove('hidden');
       $('workHint').classList.add('hidden');
       $('dltext').style.display = 'none';
@@ -619,7 +630,8 @@ async function startInstall() {
     const r = await fetch(api('/api/install'), {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({locale: $('langSel').value, extras: (ex && ex.applicable) ? ex.selected : undefined}),
+      body: JSON.stringify({locale: $('langSel').value, extras: (ex && ex.applicable) ? ex.selected : undefined,
+        restartDocker: $('restartOk').checked}),
     });
     const txt = await r.text();
     let res = {};
