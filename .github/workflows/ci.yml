@@ -713,7 +713,10 @@ jobs:
 
   # Developer Certificate of Origin: every non-merge commit in the pull request
   # carries a "Signed-off-by:" trailer with the commit author's email
-  # (`git commit -s`). See CONTRIBUTING.md.
+  # (`git commit -s`). See CONTRIBUTING.md. Commits by Dependabot and the GitHub
+  # Actions bot on their own pull requests are skipped (the bots never sign off);
+  # a human commit pushed onto such a branch is still checked.
+  # The logic lives in scripts/ci/dco-check.sh, tested by scripts/ci/test-dco-check.sh.
   dco:
     name: DCO sign-off
     if: github.event_name == 'pull_request'
@@ -724,25 +727,14 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: DCO check self-test
+        run: bash scripts/ci/test-dco-check.sh
       - name: Check Signed-off-by trailers
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          bad=0
-          while read -r sha; do
-            email="$(git log -1 --format=%ae "$sha")"
-            if git log -1 --format=%B "$sha" | grep -i '^Signed-off-by: ' | grep -qiF "<${email}>"; then
-              echo "ok      ${sha:0:12} $(git log -1 --format=%s "$sha")"
-            else
-              echo "::error::commit ${sha:0:12} has no 'Signed-off-by:' trailer for its author <${email}>"
-              bad=1
-            fi
-          done < <(git rev-list --no-merges "${BASE_SHA}..${HEAD_SHA}")
-          if [ "$bad" -ne 0 ]; then
-            echo "Sign off every commit: git rebase --signoff ${BASE_SHA:0:12} && git push --force-with-lease"
-            exit 1
-          fi
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: bash scripts/ci/dco-check.sh "$BASE_SHA" "$HEAD_SHA" "$PR_AUTHOR"
 
   # Blocks a pull request that adds a dependency with a known high/critical
   # vulnerability, or one under a license incompatible with shipping the
