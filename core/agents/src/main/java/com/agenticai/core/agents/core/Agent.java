@@ -78,7 +78,7 @@ public class Agent extends AgentConfigColumns {
     @Embedded
     private BudgetPolicy budget = BudgetPolicy.none();
 
-    // Per-agent overrides of the runtime limits (migration V662): tool-step ceiling, timeouts, tool-output
+    // Per-agent overrides of the runtime limits (migration V671): tool-step ceiling, timeouts, tool-output
     // cap, retrieval top-k/min-score, continuation passes. Null (every column null) = nothing overridden,
     // the tenant defaults and then the platform settings apply, so the column's existence changes no
     // pre-existing agent. Like the run cap, deliberately NOT part of AgentConfigSnapshot: a hidden A/B
