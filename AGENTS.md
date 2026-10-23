@@ -68,8 +68,9 @@ contracts/            API/contract files;  docs/  documentation
 | sdk/python-agent | `cd sdk/python-agent && pip install -e '.[dev]'` (Python 3.10+) | `python -m pytest tests/ -q` | `ruff check vegaduta_agent tests && ruff format --check vegaduta_agent tests` |
 | web | `cd web && npm ci && npm run build` | `npm test` (vitest) | `npm run lint && npm run typecheck` |
 | services/sidecar | `pip install -r requirements.txt -r requirements-dev.txt` | `python -m pytest tests/ -q` | `ruff check services/sidecar` |
-| services/code-intel | `pip install -r requirements.txt` | `python -m tests.<module>` per module (**not pytest**) | `ruff check services/code-intel` |
-| services/mcp-stdio-runner | none | `node --test server.test.js` | |
+| services/code-intel | `pip install -r requirements.txt` | `for f in tests/test_*.py; do python -m tests.$(basename $f .py); done` (**not pytest**; `make test-python`) | `ruff check services/code-intel` |
+| services/rl-trainer | `pip install -r requirements.txt -r requirements-dev.txt` | `python -m pytest tests/ -q` | |
+| services/mcp-stdio-runner, workspace-runner, whatsapp-qr, desktop-agent | none | `node --test` (`make test-node-services`) | |
 | deploy | | `make compose-validate`, `make helm-lint` | `make shellcheck` |
 | everything | `make build` | `make test` | `make lint`, `make gates` |
 
