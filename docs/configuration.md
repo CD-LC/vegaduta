@@ -866,7 +866,7 @@ to `core.env` or the Helm `core.env` map when you need them.
 
 | Property | Environment variable | Default |
 |---|---|---|
-| `app.security.outbound.allowed-private-hosts` | `APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS` | empty; comma-separated `host` or `host:port` that tenant-configured outbound calls (BYOK, OpenAPI, A2A, webhooks) may reach on a private address, e.g. `ollama:11434`. Also needed for a `LOCAL_OPENAI` server, a Signal `signal-cli` service, a BlueBubbles Mac and a LAN Matrix homeserver |
+| `app.security.outbound.allowed-private-hosts` | `APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS` | empty; comma-separated `host` or `host:port` that tenant-configured outbound calls (BYOK, OpenAPI, A2A, webhooks) may reach on a private address, e.g. `ollama:11434`. Also needed for a `LOCAL_OPENAI` server, a Signal `signal-cli` service, a BlueBubbles Mac, a LAN Matrix homeserver and an email (IMAP) mailbox on a private address |
 | `app.security.outbound.egress-allow-list` | `APP_SECURITY_OUTBOUND_EGRESS_ALLOW_LIST` | empty (any public host); comma-separated `host` or `*.suffix`. When set, tenant-configured outbound calls (BYOK, OpenAPI, MCP URLs, web fetch, webhooks) may reach only these hosts; the private-address checks still apply and `allowed-private-hosts` entries are exempt. Platform-wide, not per agent |
 | `app.tenancy.fail-on-missing-context` | `APP_TENANCY_FAIL_ON_MISSING_CONTEXT` | `true`; `false` restores the shared-schema fallback (logged) |
 | `app.security.jwt.required-audience` | `APP_SECURITY_JWT_REQUIRED_AUDIENCE` | empty (off); needs a Keycloak audience mapper first |
@@ -1257,9 +1257,10 @@ runs in Docker), and `app.llm.tool-call-probe.enabled` (default `true`) governs 
 | `app.omnichannel.rate-limit.per-channel-per-minute` | (none) | `600` | per tenant and channel; `0` disables |
 
 An over-limit message is dropped without a reply on the channel, costs no session write or model call, and the API
-answers `429` with `Retry-After`. Signal, Matrix, iMessage and the WhatsApp QR bridge reach private hosts only through
+answers `429` with `Retry-After`. Signal, Matrix, iMessage, the WhatsApp QR bridge and an email (IMAP) mailbox reach private hosts only through
 `app.security.outbound.allowed-private-hosts` (for example `signal-cli:8080`, `whatsapp-qr:8080`, the Mac's `host:port`, a LAN
-homeserver).
+homeserver, a mail server on your own network). The IMAP host and port a tenant enters are checked before any connection
+is opened and again on every poll; a stored mailbox that is no longer allowed is skipped with a WARN naming it.
 
 ### Voice sockets and guardrails
 

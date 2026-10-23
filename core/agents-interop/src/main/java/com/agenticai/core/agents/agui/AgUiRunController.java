@@ -129,6 +129,10 @@ public class AgUiRunController {
                         : UUID.randomUUID().toString();
         String runId =
                 StringUtils.hasText(input.runId()) ? input.runId() : UUID.randomUUID().toString();
+        if (!AgUiRunEventBuffer.RUN_ID_PATTERN.matcher(runId).matches()) {
+            throw new IllegalArgumentException(
+                    "runId may only contain letters, digits, '-' and '_' (128 characters maximum)");
+        }
         // Long-term memory subject key - identical derivation to
         // AgentController#chat so an AG-UI client and the console share one
         // memory for the same person.
@@ -176,16 +180,19 @@ public class AgUiRunController {
         // its seq stamped as the SSE `id:` - that is what lets
         // GET .../runs/{runId}/events rejoin this stream by seq afterwards.
         // finish() marks the run terminated however it ends.
+        // The buffer is keyed on the run as scoped to this agent and caller (see
+        // AgUiRunEventBuffer#scopedRunId), not on the bare client-chosen runId.
         String tenantKey = AgUiRunEventBuffer.currentTenantKey();
-        runBuffer.open(tenantKey, runId);
+        String bufferId = AgUiRunEventBuffer.scopedRunId(agentId, subjectOf(principal), runId);
+        runBuffer.open(tenantKey, bufferId);
         Flux<ServerSentEvent<String>> events =
                 mapper.map(merged, threadId, runId, agentId)
                         .map(
                                 event -> {
                                     String json = event.toJson();
-                                    return toSse(runBuffer.record(tenantKey, runId, json), json);
+                                    return toSse(runBuffer.record(tenantKey, bufferId, json), json);
                                 })
-                        .doFinally(signal -> runBuffer.finish(tenantKey, runId));
+                        .doFinally(signal -> runBuffer.finish(tenantKey, bufferId));
         return withHeartbeat(events);
     }
 
@@ -216,18 +223,24 @@ public class AgUiRunController {
             @RequestHeader(name = "Last-Event-ID", required = false) String lastEventId,
             Principal principal) {
         agentService.requireAccess(agentId, PermissionLevel.RUNNER);
+        if (!AgUiRunEventBuffer.RUN_ID_PATTERN.matcher(runId).matches()) {
+            throw new IllegalArgumentException("invalid runId");
+        }
         String tenantKey = AgUiRunEventBuffer.currentTenantKey();
+        // Only the caller that started the run, on this agent, resolves to its buffer; anyone else
+        // gets the same empty answer as for a run that does not exist.
+        String bufferId = AgUiRunEventBuffer.scopedRunId(agentId, subjectOf(principal), runId);
         long resumeAfter = after != null ? after : parseLastEventId(lastEventId);
 
-        List<BufferedEvent> buffered = runBuffer.readAfter(tenantKey, runId, resumeAfter);
+        List<BufferedEvent> buffered = runBuffer.readAfter(tenantKey, bufferId, resumeAfter);
         long lastSeq = buffered.isEmpty() ? resumeAfter : buffered.get(buffered.size() - 1).seq();
         Flux<ServerSentEvent<String>> replay =
                 Flux.fromIterable(buffered).map(e -> toSse(e.seq(), e.json()));
 
-        if (runBuffer.isFinished(tenantKey, runId)) {
+        if (runBuffer.isFinished(tenantKey, bufferId)) {
             return replay;
         }
-        Sinks.Many<BufferedEvent> tail = runBuffer.liveTail(tenantKey, runId);
+        Sinks.Many<BufferedEvent> tail = runBuffer.liveTail(tenantKey, bufferId);
         if (tail == null) {
             // Not executing on this pod - the buffer above is the honest
             // answer; the client re-polls with its new last seq.
@@ -248,6 +261,12 @@ public class AgUiRunController {
             builder.id(String.valueOf(seq));
         }
         return builder.build();
+    }
+
+    private static String subjectOf(Principal principal) {
+        return principal != null && StringUtils.hasText(principal.getName())
+                ? principal.getName()
+                : "";
     }
 
     private static long parseLastEventId(String lastEventId) {

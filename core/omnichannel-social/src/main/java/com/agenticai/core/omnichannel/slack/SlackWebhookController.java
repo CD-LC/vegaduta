@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -65,6 +66,8 @@ public class SlackWebhookController {
     private static final Logger log = LoggerFactory.getLogger(SlackWebhookController.class);
     private static final ObjectMapper MAPPER = JsonMappers.plain();
     private static final String REQUESTED_BY_PREFIX = "system:slack-inbound:";
+    private static final int MAX_CHALLENGE_LENGTH = 256;
+    private static final Pattern CHALLENGE = Pattern.compile("[A-Za-z0-9._-]+");
 
     private final SlackSignatureValidator signatureValidator;
     private final SlackCredentialService credentialService;
@@ -117,6 +120,15 @@ public class SlackWebhookController {
             return ResponseEntity.ok().build();
         }
 
+        // Slack's Request URL handshake carries {token, challenge, type} and NO team_id, and it
+        // arrives before any tenant has a Signing Secret to check it against, so it cannot be
+        // tenant-resolved or signature-verified. It changes no state and only echoes the
+        // challenge back (Slack documents it as exactly that); everything else below still
+        // resolves the tenant and verifies the signature first.
+        if ("url_verification".equals(root.path("type").asText())) {
+            return urlVerificationResponse(root.path("challenge"));
+        }
+
         String teamId = root.path("team_id").asText(null);
         if (teamId == null) {
             log.info(
@@ -140,11 +152,6 @@ public class SlackWebhookController {
             signatureValidator.validateOrThrow(
                     rawBody, timestampHeader, signatureHeader, credential.signingSecret());
 
-            if ("url_verification".equals(root.path("type").asText())) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .body(root.path("challenge").asText(""));
-            }
             if ("event_callback".equals(root.path("type").asText())) {
                 // Master-Roadmap-2026.md item #1, gap (b)#3 - the same fix
                 // every other inbound controller here carries. Slack retries
@@ -180,6 +187,20 @@ public class SlackWebhookController {
             TenantContext.clear();
         }
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Echoes Slack's handshake challenge only when it looks like one (a short token), so this
+     * unauthenticated endpoint cannot be used to reflect arbitrary content.
+     */
+    private static ResponseEntity<String> urlVerificationResponse(JsonNode challenge) {
+        String value = challenge.isTextual() ? challenge.asText() : "";
+        if (value.isEmpty()
+                || value.length() > MAX_CHALLENGE_LENGTH
+                || !CHALLENGE.matcher(value).matches()) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN).body(value);
     }
 
     private void handleEvent(
