@@ -101226,12 +101226,17 @@
             "default": 0
           },
           "toolExecutionEnabled": {
-            "type": "boolean",
-            "default": false
+            "type": "boolean"
           },
           "autoApproveTools": {
             "type": "boolean",
             "default": false
+          },
+          "mode": {
+            "type": "string"
+          },
+          "effectiveMode": {
+            "type": "string"
           },
           "caseCount": {
             "type": "integer",
@@ -101255,7 +101260,6 @@
         },
         "required": [
           "passThreshold",
-          "toolExecutionEnabled",
           "autoApproveTools",
           "caseCount"
         ]
@@ -101345,6 +101349,12 @@
             "items": {
               "$ref": "#/components/schemas/EvalDatasetDtos_CaseResultResponse"
             }
+          },
+          "simulatedTools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -101414,6 +101424,9 @@
           "strictJudge": {
             "type": "boolean",
             "default": false
+          },
+          "mode": {
+            "type": "string"
           },
           "autoApproved": {
             "type": "boolean",
@@ -101495,6 +101508,9 @@
           },
           "budgetUsd": {
             "type": "number"
+          },
+          "mode": {
+            "type": "string"
           }
         }
       },
@@ -101537,6 +101553,9 @@
           },
           "autoApproveTools": {
             "type": "boolean"
+          },
+          "mode": {
+            "type": "string"
           }
         }
       },

@@ -1,6 +1,8 @@
 package com.agenticai.core.platform.ops;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -48,6 +50,7 @@ import org.springframework.stereotype.Component;
  * failure class (HTTP status, timeout, connection refused), never the header,
  * response bodies or the upstream URL.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class LangfuseApiClient {
 

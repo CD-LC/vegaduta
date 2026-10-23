@@ -2140,6 +2140,9 @@
     "noFilesUploadedHint": "Sube archivos a esta colección para que tus agentes puedan buscarlos.",
     "ocrComingSoonTooltip": "Aún no disponible. Las subidas usarían el OCR Tesseract integrado como alternativa."
   },
+  "tutorPage": {
+    "backToHelp": "Volver a la ayuda"
+  },
   "knowledgePage": {
     "knowledgeLabel": "Conocimiento",
     "buildEyebrow": "Construir",
@@ -5892,6 +5895,8 @@
     "welcomeBody": "One minute, three steps: open Agents, name it, save. Skip anytime — you can replay this from Help.",
     "welcomePrimary": "Create my first agent",
     "welcomeSkip": "Skip, I'll explore",
+    "channelsPersonalBody": "Conecte WhatsApp, Telegram, Signal, iMessage o el correo electrónico y elija qué agente personalizado responde en cada canal.",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage y correo electrónico",
     "skip": "Skip",
     "back": "Back",
     "next": "Next",
@@ -14614,6 +14619,11 @@
     "runModeQuickTitle": "Esta ejecución fue una repetición rápida solo de texto: se retuvieron las herramientas del agente.",
     "runSimulatedTools": "Simuladas, no ejecutadas en esta ejecución (podrían cambiar datos o llegar fuera de la plataforma): {tools}.",
     "toolStatusSimulated": "simulada, no ejecutada"
+  },
+  "assistant": {
+    "taskPhoneLabel": "Su número de teléfono",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "No se pudo guardar ese número."
   },
   "agentLab": {
     "wtLabel": "Ejecutar con las herramientas del agente",

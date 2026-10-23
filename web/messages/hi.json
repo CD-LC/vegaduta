@@ -2140,6 +2140,9 @@
     "noFilesUploadedHint": "इस संग्रह में फ़ाइलें अपलोड करें ताकि आपके एजेंट उन्हें खोज सकें।",
     "ocrComingSoonTooltip": "अभी उपलब्ध नहीं है - अपलोड बिल्ट-इन टेसरैक्ट ओसीआर पर वापस आ जाएँगे।"
   },
+  "tutorPage": {
+    "backToHelp": "सहायता पर वापस जाएँ"
+  },
   "knowledgePage": {
     "knowledgeLabel": "ज्ञान",
     "buildEyebrow": "बनाएँ",
@@ -6108,6 +6111,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ईमेल और बहुत कुछ कनेक्ट करें, फिर चुनें कि प्रत्येक पर कौन सा एजेंट जवाब देता है।",
     "channelsPoint1": "मुफ़्त प्लान पर WhatsApp, Telegram और ईमेल",
     "channelsPoint2": "एक नया प्रेषक पहले आपकी स्वीकृति की प्रतीक्षा करता है",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage या ईमेल जोड़ें, फिर चुनें कि हर चैनल पर कौन-सा कस्टम एजेंट जवाब दे।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage और ईमेल",
     "toolsTitle": "एकीकरण एजेंटों को उपकरण देते हैं",
     "toolsBody": "बातचीत के बीच में एजेंट क्या उपयोग कर सकता है उसे चालू करें: वेब खोज, डेटाबेस, MCP सर्वर, और आपकी अपनी स्क्रिप्ट।",
     "toolsPoint1": "यहाँ सक्षम करें, फिर प्रति एजेंट इसकी अनुमति दें",
@@ -15125,6 +15130,11 @@
     "runModeQuickTitle": "यह रन केवल-टेक्स्ट वाला तेज़ रीप्ले था: एजेंट के टूल रोक लिए गए थे।",
     "runSimulatedTools": "इस रन में सिम्युलेट किए गए, चलाए नहीं गए (वे डेटा बदल सकते थे या प्लेटफ़ॉर्म के बाहर पहुँच सकते थे): {tools}।",
     "toolStatusSimulated": "सिम्युलेट किया गया, चलाया नहीं गया"
+  },
+  "assistant": {
+    "taskPhoneLabel": "आपका फ़ोन नंबर",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "वह नंबर सहेजा नहीं जा सका।"
   },
   "agentLab": {
     "wtLabel": "एजेंट के टूल के साथ चलाएँ",

@@ -2140,6 +2140,9 @@
     "noFilesUploadedHint": "将文件上传到此集合，以便您的智能体可以搜索它们。",
     "ocrComingSoonTooltip": "暂不可用 - 上传的文件将回退使用内置的 Tesseract OCR。"
   },
+  "tutorPage": {
+    "backToHelp": "返回帮助"
+  },
   "knowledgePage": {
     "knowledgeLabel": "知识库",
     "buildEyebrow": "构建",
@@ -6108,6 +6111,8 @@
     "channelsBody": "连接 WhatsApp、Telegram、Instagram、Slack、电子邮件等渠道，然后为每个渠道选择应答的代理。",
     "channelsPoint1": "免费方案支持 WhatsApp、Telegram 和电子邮件。",
     "channelsPoint2": "新的发件人需经您批准。",
+    "channelsPersonalBody": "连接 WhatsApp、Telegram、Signal、iMessage 或电子邮件,然后选择每个渠道由哪个自定义智能体应答。",
+    "channelsPersonalPoint1": "WhatsApp、Telegram、Signal、iMessage 和电子邮件",
     "toolsTitle": "集成为代理提供工具",
     "toolsBody": "开启代理在对话中可用的功能：网络搜索、数据库、MCP 服务器和您自己的脚本。",
     "toolsPoint1": "在此启用，再按代理授权。",
@@ -15126,6 +15131,11 @@
     "runModeQuickTitle": "本次运行是仅文字的快速重放:智能体的工具未被提供。",
     "runSimulatedTools": "本次运行中仅模拟,未执行(它们可能更改数据或影响平台之外):{tools}。",
     "toolStatusSimulated": "已模拟,未执行"
+  },
+  "assistant": {
+    "taskPhoneLabel": "你的电话号码",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "无法保存该号码。"
   },
   "agentLab": {
     "wtLabel": "使用智能体的工具运行",

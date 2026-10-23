@@ -2042,6 +2042,9 @@
     "noFilesUploadedHint": "कारकाणाम् अन्वेषणार्थं सञ्चिकाः आरोपयत।",
     "ocrComingSoonTooltip": "अद्यापि न उपलब्धम् - आरोपणानि अन्तर्निर्मित-Tesseract OCR इत्यस्य उपयोगं करिष्यन्ति।"
   },
+  "tutorPage": {
+    "backToHelp": "साहाय्यं प्रति प्रतिगच्छतु"
+  },
   "knowledgePage": {
     "knowledgeLabel": "ज्ञानम्",
     "buildEyebrow": "निर्माणम्",
@@ -5924,6 +5927,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, email इत्यादीनि योजयतु, ततः प्रत्येकस्मिन् कः दूतः उत्तरं ददाति इति चिनोतु।",
     "channelsPoint1": "निःशुल्कयोजनायां WhatsApp, Telegram, तथा email।",
     "channelsPoint2": "नूतनः प्रेषकः प्रथमं भवतः अनुमोदनं प्रतीक्षते।",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage अथवा ईमेल् सम्बध्नातु, ततः प्रत्येकस्मिन् चैनले कः स्वनिर्मितः अभिकर्ता उत्तरं ददाति इति चिनोतु।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage ईमेल् च",
     "toolsTitle": "एकीकारणानि दूतेभ्यः साधनानि ददति।",
     "toolsBody": "यत् दूतः सम्भाषणमध्ये प्रयोक्तुं शक्नोति तत् प्रवर्तयतु: जाल-अन्वेषणम्, दत्तांश-कोशान्, MCP सर्वर्स्, तथा च भवतः स्व-स्क्रिप्ट्स्।",
     "toolsPoint1": "अत्र सक्षमीकरोतु, ततः प्रतिदूतम् अनुमन्यताम्।",
@@ -14705,6 +14710,11 @@
     "runModeQuickTitle": "अयं रनः केवलं पाठ्यस्य द्रुतं पुनर्वादनम् आसीत्: अभिकर्तुः साधनानि निरुद्धानि आसन्।",
     "runSimulatedTools": "अस्मिन् रने अनुकृतानि, न चालितानि (तानि दत्तांशं परिवर्तयितुं वा मञ्चात् बहिः गन्तुं वा शक्नुवन्ति स्म): {tools}।",
     "toolStatusSimulated": "अनुकृतम्, न चालितम्"
+  },
+  "assistant": {
+    "taskPhoneLabel": "भवतः दूरभाष-सङ्ख्या",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "सा सङ्ख्या रक्षितुं न शक्ता।"
   },
   "agentLab": {
     "wtLabel": "अभिकर्तुः साधनैः सह चालयतु",

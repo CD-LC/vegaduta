@@ -2002,6 +2002,9 @@
     "noFilesUploadedHint": "इस संग्रह च फाइलां अपलोड करो तां जे तु'आडे एजेंट उ'नेंगी खोजी सकन।",
     "ocrComingSoonTooltip": "अजे उपलब्ध नेईं ऐ - अपलोड अंतर्निर्मित Tesseract OCR पर वापस आई जंदे।"
   },
+  "tutorPage": {
+    "backToHelp": "मदद पर परतो"
+  },
   "knowledgePage": {
     "knowledgeLabel": "ज्ञान",
     "buildEyebrow": "बनाओ",
@@ -5889,6 +5892,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ईमेल ते होर जोड़ो, ते फिर चुनो जे कुस एजेंट हर इक पर जवाब दिंदा ऐ।",
     "channelsPoint1": "मुफ्त प्लान पर WhatsApp, Telegram ते ईमेल",
     "channelsPoint2": "इक नमां भेजने आह् ला पैह्ले तुंदी मंजूरी दी प्रतीक्षा करदा ऐ",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage जां ईमेल जोड़ो, फी चुनो जे हर चैनल पर कुन सा कस्टम एजेंट जवाब देग।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage ते ईमेल",
     "toolsTitle": "इंटीग्रेशन एजेंटें गी औजार दिंदे न",
     "toolsBody": "चालू करो जे इक एजेंट गल्लबात दे बिच क्या इस्तेमाल करी सकदा ऐ: वेब खोज, डेटाबेस, MCP सर्वर, ते तुंदी अपनी स्क्रिप्ट।",
     "toolsPoint1": "इत्थें सक्षम करो, ते फिर हर एजेंट लेई इसदी इजाजत देओ",
@@ -14646,6 +14651,11 @@
     "runModeQuickTitle": "ये रन सिर्फ लिखत आला तेज रीप्ले हा: एजेंट दे टूल रोके गेदे हे।",
     "runSimulatedTools": "इस रन च सिमुलेट कीते गे, चलाए नेईं गे (ओह् डेटा बदली सकदे हे जां प्लेटफॉर्म थमां बाह्र पुज्जी सकदे हे): {tools}।",
     "toolStatusSimulated": "सिमुलेट कीता, चलाया नेईं"
+  },
+  "assistant": {
+    "taskPhoneLabel": "तुंʼदा फोन नंबर",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "ओह् नंबर सेव नेईं होई सकेआ।"
   },
   "agentLab": {
     "wtLabel": "एजेंट दे टूलें कन्नै चलाओ",

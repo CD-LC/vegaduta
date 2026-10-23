@@ -3578,6 +3578,8 @@ export interface EvalDatasetDtos_DatasetResponse {
   passThreshold?: number;
   toolExecutionEnabled?: boolean;
   autoApproveTools?: boolean;
+  mode?: string;
+  effectiveMode?: string;
   caseCount?: number;
   contentHash?: string;
   createdBy?: string;
@@ -3616,6 +3618,7 @@ export interface EvalDatasetDtos_ReplayedToolCallResponse {
 export interface EvalDatasetDtos_RunDetailResponse {
   run?: EvalDatasetDtos_RunResponse;
   caseResults?: EvalDatasetDtos_CaseResultResponse[];
+  simulatedTools?: string[];
 }
 
 export interface EvalDatasetDtos_RunResponse {
@@ -3635,6 +3638,7 @@ export interface EvalDatasetDtos_RunResponse {
   datasetHash?: string;
   requestedJudgeModel?: string;
   strictJudge?: boolean;
+  mode?: string;
   autoApproved?: boolean;
   repeats?: number;
   budgetUsd?: number;
@@ -3656,6 +3660,7 @@ export interface EvalDatasetDtos_TriggerRunRequest {
   strictJudge?: boolean;
   repeats?: number;
   budgetUsd?: number;
+  mode?: string;
 }
 
 export interface EvalDatasetDtos_UpsertCaseRequest {
@@ -3671,6 +3676,7 @@ export interface EvalDatasetDtos_UpsertDatasetRequest {
   passThreshold?: number;
   toolExecutionEnabled?: boolean;
   autoApproveTools?: boolean;
+  mode?: string;
 }
 
 export interface EvalGateDtos_GateEvaluationResponse {

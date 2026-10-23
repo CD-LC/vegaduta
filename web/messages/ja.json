@@ -2041,6 +2041,9 @@
     "noFilesUploadedHint": "このコレクションにファイルをアップロードすると、エージェントが検索できるようになります。",
     "ocrComingSoonTooltip": "まだ利用できません。アップロードは内蔵の Tesseract OCR にフォールバックします。"
   },
+  "tutorPage": {
+    "backToHelp": "ヘルプに戻る"
+  },
   "knowledgePage": {
     "knowledgeLabel": "ナレッジ",
     "buildEyebrow": "ビルド",
@@ -5928,6 +5931,8 @@
     "channelsBody": "WhatsApp、Telegram、Instagram、Slack、メールなどを接続し、それぞれでどのエージェントが応答するかを選択します。",
     "channelsPoint1": "無料プランでWhatsApp、Telegram、メールを利用",
     "channelsPoint2": "新しい送信者はまず承認が必要です",
+    "channelsPersonalBody": "WhatsApp、Telegram、Signal、iMessage、またはメールを接続し、チャンネルごとにどのカスタムエージェントが応答するかを選びます。",
+    "channelsPersonalPoint1": "WhatsApp、Telegram、Signal、iMessage、メール",
     "toolsTitle": "統合でエージェントにツールを提供",
     "toolsBody": "エージェントが会話中に使用できるウェブ検索、データベース、MCPサーバー、独自のスクリプトなどのツールを有効にします。",
     "toolsPoint1": "ここで有効化し、エージェントごとに許可",
@@ -14765,6 +14770,11 @@
     "runModeQuickTitle": "この実行はテキストのみのクイックリプレイでした: エージェントのツールは使われませんでした。",
     "runSimulatedTools": "この実行ではシミュレートのみで実行されませんでした(データを変更したりプラットフォーム外に影響したりし得るため): {tools}。",
     "toolStatusSimulated": "シミュレート済み、未実行"
+  },
+  "assistant": {
+    "taskPhoneLabel": "あなたの電話番号",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "その番号を保存できませんでした。"
   },
   "agentLab": {
     "wtLabel": "エージェントのツールで実行",

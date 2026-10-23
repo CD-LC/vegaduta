@@ -2140,6 +2140,9 @@
     "noFilesUploadedHint": "Téléversez des fichiers dans cette collection pour les rendre consultables par vos agents.",
     "ocrComingSoonTooltip": "Pas encore disponible - les téléversements utiliseraient l'OCR Tesseract intégré par défaut."
   },
+  "tutorPage": {
+    "backToHelp": "Retour à l'aide"
+  },
   "knowledgePage": {
     "knowledgeLabel": "Connaissances",
     "buildEyebrow": "Construction",
@@ -6108,6 +6111,8 @@
     "channelsBody": "Connectez WhatsApp, Telegram, Instagram, Slack, e-mail et plus, puis choisissez quel agent répond sur chacun.",
     "channelsPoint1": "WhatsApp, Telegram et e-mail sur le forfait gratuit",
     "channelsPoint2": "Un nouvel expéditeur attend votre approbation.",
+    "channelsPersonalBody": "Connectez WhatsApp, Telegram, Signal, iMessage ou l'e-mail, puis choisissez quel agent personnalisé répond sur chaque canal.",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage et e-mail",
     "toolsTitle": "Les intégrations donnent des outils aux agents",
     "toolsBody": "Activez ce qu'un agent peut utiliser en cours de conversation : recherche web, bases de données, serveurs MCP et vos propres scripts.",
     "toolsPoint1": "Activez ici, puis autorisez par agent",
@@ -15126,6 +15131,11 @@
     "runModeQuickTitle": "Cette exécution était un rejeu rapide en texte seul : les outils de l'agent ont été retenus.",
     "runSimulatedTools": "Simulés, non exécutés dans cette exécution (ils pourraient modifier des données ou agir hors de la plateforme) : {tools}.",
     "toolStatusSimulated": "simulé, non exécuté"
+  },
+  "assistant": {
+    "taskPhoneLabel": "Votre numéro de téléphone",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "Impossible d'enregistrer ce numéro."
   },
   "agentLab": {
     "wtLabel": "Exécuter avec les outils de l'agent",

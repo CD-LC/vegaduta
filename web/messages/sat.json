@@ -2002,6 +2002,9 @@
     "noFilesUploadedHint": "ᱮᱡᱮᱱᱴᱠᱚ ᱫ୍ଵାରᱟ ᱥᱮᱸᱫᱽᱨᱟ ᱜᱟᱱᱚᱜ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱣᱟ ᱥᱟᱢᱩᱝ ᱨᱮ ᱯᱷᱟᱭᱤᱞ ᱨᱟᱠᱟᱵᱽ ᱢᱮ᱾",
     "ocrComingSoonTooltip": "ད་ལྟ་ ᱵᱟᱹᱱᱩᱜᱼᱟ - ᱟᱯᱞᱚᱰ ᱠᱚᱫᱚ ᱵᱷᱤᱛᱤᱨ ᱨᱮᱭᱟᱜ Tesseract OCR ᱨᱮ ᱨᱩᱣᱟᱹᱲᱚᱜᱼᱟ᱾"
   },
+  "tutorPage": {
+    "backToHelp": "ᱜᱚᱲᱚ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ"
+  },
   "knowledgePage": {
     "knowledgeLabel": "ᱡᱟᱱᱠᱟᱨᱤ",
     "buildEyebrow": "ᱵᱮᱱᱟᱣ",
@@ -5884,6 +5887,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ᱤᱢᱮᱞ ᱟᱨ ᱟᱨᱦᱚᱸ ᱡᱚᱲᱟᱣ ᱢᱮ, ᱤᱱᱟᱹ ᱯᱚᱨᱮ ᱵᱟᱪᱷᱟᱣ ᱢᱮ ᱡᱮ ᱚᱠᱚᱭ ᱮᱡᱮᱱᱴ ᱚᱠᱟ ᱨᱮᱭ ᱛᱮᱞᱟᱭᱟ᱾",
     "channelsPoint1": "ᱯᱷᱨᱤ ᱯᱞᱟᱱ ᱨᱮ WhatsApp, Telegram ᱟᱨ ᱤᱢᱮᱞ",
     "channelsPoint2": "ᱢᱤᱫ ᱱᱟᱣᱟ ᱵᱷᱮᱡᱟᱣᱤᱡ ᱞᱟᱦᱟ ᱨᱮ ᱟᱢᱟᱜ ᱮᱯᱨᱩᱵᱷᱟᱞ ᱞᱟᱹᱜᱤᱫᱮ ᱛᱟᱺᱜᱤᱭᱟ",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage ᱥᱮ ᱤᱢᱮᱞ ᱡᱚᱰᱟᱣ ᱢᱮ, ᱚᱱᱟ ᱛᱟᱭᱚᱢ ᱥᱟᱱᱟᱢ ᱪᱮᱱᱮᱞ ᱨᱮ ᱪᱮᱫ ᱠᱚᱥᱴᱚᱢ ᱮᱡᱮᱱᱴ ᱡᱚᱵᱟᱵ ᱮᱢ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage ᱟᱨ ᱤᱢᱮᱞ",
     "toolsTitle": "ᱤᱱᱴᱤᱜᱽᱨᱮᱥᱚᱱ ᱠᱚ ᱮᱡᱮᱱᱴ ᱠᱚ ᱴᱩᱞᱥ ᱠᱚ ᱮᱢᱟᱠᱚᱣᱟ",
     "toolsBody": "ᱮᱡᱮᱱᱴ ᱜᱟᱞᱢᱟᱨᱟᱣ ᱛᱟᱞᱟ ᱨᱮ ᱪᱮᱫᱼᱪᱮᱫᱮ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱚᱱᱟ ᱮᱛᱚᱦᱚᱵᱽ ᱢᱮ: ᱣᱮᱵᱽ ᱥᱟᱨᱪ, ᱰᱟᱴᱟᱵᱮᱥ, MCP ᱥᱟᱨᱵᱷᱟᱨ, ᱟᱨ ᱟᱢᱟᱜ ᱥᱠᱨᱤᱯᱴ ᱠᱚ᱾",
     "toolsPoint1": "ᱱᱚᱰᱮ ᱮᱛᱚᱦᱚᱵᱽ ᱢᱮ, ᱤᱱᱟᱹ ᱛᱟᱭᱚᱢ ᱮᱡᱮᱱᱴ ᱯᱤᱪᱷᱤ ᱨᱮ ᱟᱹᱱᱩᱢᱟᱹᱛᱤ ᱮᱢᱚᱜ ᱢᱮ᱾",
@@ -14636,6 +14641,11 @@
     "runModeQuickTitle": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱫᱚ ᱠᱷᱟᱞᱤ ᱚᱞ ᱨᱮᱭᱟᱜ ᱥᱮᱛᱟ ᱨᱤᱯᱞᱮ ᱛᱟᱦᱮᱱᱟ: ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱛᱟᱞᱟ ᱨᱮ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ।",
     "runSimulatedTools": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱨᱮ ᱱᱚᱠᱚᱞ ᱞᱮᱱᱟ, ᱪᱟᱞᱟᱣ ᱵᱟᱝ ᱞᱮᱱᱟ (ᱚᱱᱟ ᱠᱚ ᱰᱮᱴᱟ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ ᱛᱟᱦᱮᱱᱟ ᱥᱮ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱵᱟᱦᱨᱮ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱛᱟᱦᱮᱱᱟ): {tools}।",
     "toolStatusSimulated": "ᱱᱚᱠᱚᱞ ᱞᱮᱱᱟ, ᱪᱟᱞᱟᱣ ᱵᱟᱝ ᱞᱮᱱᱟ"
+  },
+  "assistant": {
+    "taskPhoneLabel": "ᱟᱢᱟᱜ ᱯᱷᱚᱱ ᱱᱚᱢᱵᱚᱨ",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "ᱚᱱᱟ ᱱᱚᱢᱵᱚᱨ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।"
   },
   "agentLab": {
     "wtLabel": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱪᱟᱞᱟᱣ ᱢᱮ",

@@ -2042,6 +2042,9 @@
     "noFilesUploadedHint": "নহাক্কী এজেন্টশিংনা সার্চ তৌবা ঙম্নবগীদমক কালেকশন অসিদা ফাইলশিং অপলোড তৌবীয়ু।",
     "ocrComingSoonTooltip": "হৌজিক ফাওবদা ফংদ্রি - অপলোডশিং অদু বিল্ট-ইন Tesseract OCR দা হন্নগনি।"
   },
+  "tutorPage": {
+    "backToHelp": "মরহায়দা ঊৎলকরো"
+  },
   "knowledgePage": {
     "knowledgeLabel": "নলেজ",
     "buildEyebrow": "শেমগৎপা",
@@ -5924,6 +5927,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ইমেল অমসুং অতৈ শম্নহনবীয়ু, অদুগা মখোয় খুদিংদা করম্বা এজেন্টনা পাউখুম পিরি হায়বদু খনবীয়ু।",
     "channelsPoint1": "লেমজবা প্লেনদা WhatsApp, Telegram অমসুং ইমেল ফংই।",
     "channelsPoint2": "অনৌবা সেন্দর অমনা অহানবদা নহাক্কী অয়াবা ফংনবা ঙাইরি।",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage নত্রবদি ইমেইল সংযোগ তৌরো, মতাংদা চ্যানেল প্রত্যেকদা কোন কাস্টম এজেন্টনা জবাব পীগনো থীরো।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage অমসুং ইমেইল",
     "toolsTitle": "ইন্টিগ্রেশনশিংনা এজেন্টশিংদা খুৎলাইশিং পীরি।",
     "toolsBody": "এজেন্ট অমনা ৱারী শানরিঙৈদা শীজিন্নবা ঙম্বা পোৎশকশিং ওন তৌবীয়ু: ওয়েব থীজিন্নবা, দেটাবেসশিং, MCP সর্ভরশিং, অমসুং নহাক্কী স্ক্রিপ্টশিং।",
     "toolsPoint1": "মফম অসিদা ইনেবল তৌবীয়ু, অদুগা এজেন্ট খুদিংগীদমক অয়াবা পীবীয়ু।",
@@ -14658,6 +14663,11 @@
     "runModeQuickTitle": "রন অসি লিখাক অমত্তা ফাঙবা রিপ্লে অমনি: এজেন্টকী টুলশিং ফাদোকখ্রে।",
     "runSimulatedTools": "রন অসিদা অনুকরণ তৌখ্রে, চত্থহনদ্রে (মখোইনা ডেটা সোইবা নত্রবদি প্লাটফর্মগী ফাওবা ঙম্লি): {tools}।",
     "toolStatusSimulated": "অনুকরণ তৌখ্রে, চত্থহনদ্রে"
+  },
+  "assistant": {
+    "taskPhoneLabel": "নহাক্কী ফোন নম্বর",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "নম্বর অদু সেভ তৌবা ঙম্দ্রে।"
   },
   "agentLab": {
     "wtLabel": "এজেন্টকী টুলশিং নখোইনা চত্থবা",
