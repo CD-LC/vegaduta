@@ -2,6 +2,8 @@
 
 import { Loader2, X } from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
+import { usePagination } from "../../lib/usePagination";
+import PaginationControls from "../PaginationControls";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import type { FaceEnrollmentItem } from "./knowledgeFormat";
@@ -37,6 +39,9 @@ export default function FaceEnrollmentControls({
   setForgetTarget: (enrollment: FaceEnrollmentItem) => void;
 }) {
   const tFace = useTranslations("faceRecognition");
+  // One chip per enrolled person in this collection - unbounded, so the same
+  // shared client-side pagination as the other record lists applies.
+  const enrollmentsPg = usePagination(faceEnrollments);
   return (
     <>
       {/* Face recognition (task #15) - consent banner shown only when
@@ -96,7 +101,7 @@ export default function FaceEnrollmentControls({
             {tFace("enrollmentsLabel")}
           </div>
           <div className="flex flex-wrap gap-2">
-            {faceEnrollments.map((enrollment) => (
+            {enrollmentsPg.pageItems.map((enrollment) => (
               <span
                 key={enrollment.id}
                 className="flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs text-foreground"
@@ -115,6 +120,15 @@ export default function FaceEnrollmentControls({
               </span>
             ))}
           </div>
+          <PaginationControls
+            page={enrollmentsPg.page}
+            totalPages={enrollmentsPg.totalPages}
+            totalItems={enrollmentsPg.totalItems}
+            pageSize={enrollmentsPg.pageSize}
+            onPageChange={enrollmentsPg.setPage}
+            onPageSizeChange={enrollmentsPg.setPageSize}
+            itemLabel={tFace("enrollmentsLabel")}
+          />
         </div>
       )}
     </>
