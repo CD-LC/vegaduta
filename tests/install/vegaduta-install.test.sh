@@ -6,12 +6,30 @@
 # first-run model question on a real pseudo-terminal, what is remembered between runs, and that the
 # compose files it picks merge into a valid project. A step that needs Docker is skipped without it.
 #
+# Hermetic: the result must not depend on the machine it runs on. A curl shim hides any Ollama
+# answering on 127.0.0.1:11434 (a developer's own), and the checks below that need one provide it
+# with FAKE_OLLAMA=1. Compose files are copied, not symlinked, into the one skeleton install, because
+# BSD grep -r (macOS) does not descend into a symlinked directory argument. Runs under bash 3.2.
+#
 # usage: bash tests/install/vegaduta-install.test.sh
 set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CLI="$ROOT/scripts/vegaduta"
 PTY="$ROOT/tests/install/pty_run.py"
 PASS=0; FAIL=0
+
+# curl shim, first on PATH: a request for Ollama's port (11434) fails like a closed port, or, with
+# FAKE_OLLAMA=1, answers with one pulled model. Everything else goes to the real curl.
+REAL_CURL="$(command -v curl || true)"
+SHIMS="$(mktemp -d)"; trap 'rm -rf "$SHIMS"' EXIT
+cat > "$SHIMS/curl" <<SHIM
+#!/bin/sh
+case "\$*" in
+  *:11434*) [ "\${FAKE_OLLAMA:-0}" = 1 ] && { printf '%s' '{"models":[{"name":"qwen3.5:2b"}]}'; exit 0; }; exit 7 ;;
+esac
+exec "$REAL_CURL" "\$@"
+SHIM
+chmod +x "$SHIMS/curl"; export PATH="$SHIMS:$PATH"
 
 new_home() { WORK="$(mktemp -d)"; export VEGADUTA_ENV_FILE="$WORK/.env" VEGADUTA_STATE_FILE="$WORK/state" VEGADUTA_SECRETS_KEEP="$WORK/kept-secrets.env"; }
 check() { # check NAME CONDITION-EXIT-CODE [DETAIL]
@@ -93,6 +111,9 @@ out="$("$CLI" personal --build --dry-run </dev/null 2>&1)"
 check "no terminal still gets the local model container" "$(has "$out" 'local_ai=container local_model=qwen3.5:' && has "$out" 'docker-compose.local-ai.yml --profile local-ai'; echo $?)" "$out"
 check "it is remembered" "$([ "$(state local_ai)" = container ] && [ -n "$(state local_model)" ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
 new_home
+out="$(FAKE_OLLAMA=1 "$CLI" personal --build --dry-run </dev/null 2>&1)"
+check "an Ollama answering on this machine is used instead of the container" "$(has "$out" 'local_ai=host local_model=qwen3.5:' && ! has "$out" '--profile local-ai'; echo $?)" "$out"
+new_home
 out="$("$CLI" personal --build --cloud --dry-run </dev/null 2>&1)"
 check "--cloud opts out" "$(has "$out" 'local_ai=none'; echo $?)" "$out"
 out="$("$CLI" personal --build --dry-run </dev/null 2>&1)"
@@ -125,7 +146,7 @@ required_secrets="$(grep -rhoE '\$\{[A-Z0-9_]+:\?' "$ROOT/deploy/compose" --incl
 empty=""; for n in $required_secrets; do [ -n "$(sed -n "s/^$n=//p" "$VEGADUTA_ENV_FILE")" ] || empty="$empty $n"; done
 check "every secret any compose file requires has a value after secrets" "$([ -n "$required_secrets" ] && [ -z "$empty" ]; echo $?)" "empty:$empty"
 check "the per-user copy holds them too" "$(grep -q '^WHATSAPP_QR_BRIDGE_SECRET=.' "$VEGADUTA_SECRETS_KEEP" && grep -q '^DD_SECRET_KEY=.' "$VEGADUTA_SECRETS_KEEP"; echo $?)"
-skel="$(mktemp -d)"; mkdir -p "$skel/scripts" "$skel/deploy"; ln -s "$ROOT/deploy/compose" "$skel/deploy/compose"
+skel="$(mktemp -d)"; mkdir -p "$skel/scripts" "$skel/deploy/compose"; cp "$ROOT"/deploy/compose/*.yml "$ROOT/deploy/compose/.env.example" "$skel/deploy/compose/"
 sed '/^WORKSPACE_RUNNER_SECRET:hex32$/d' "$CLI" > "$skel/scripts/vegaduta"; chmod +x "$skel/scripts/vegaduta"
 new_home; "$skel/scripts/vegaduta" secrets >/dev/null 2>&1
 check "a secret the table forgot is still generated from the compose files" "$(grep -q '^WORKSPACE_RUNNER_SECRET=.' "$VEGADUTA_ENV_FILE"; echo $?)" "$(grep WORKSPACE_RUNNER "$VEGADUTA_ENV_FILE")"
@@ -143,7 +164,8 @@ case " $* " in
 esac
 FAKE
 chmod +x "$fake/docker"
-heal() { PATH="$fake:$PATH" VEGADUTA_NO_MAIN=1 bash -c 'source "$1"; COMPOSE_ARGS=(); dc_up_heal up -d' _ "$CLI" 2>&1; }
+# COMPOSE_ARGS is never empty in a real run; "${COMPOSE_ARGS[@]}" on an empty array dies under set -u in bash 3.2.
+heal() { PATH="$fake:$PATH" VEGADUTA_NO_MAIN=1 bash -c 'source "$1"; COMPOSE_ARGS=(-p heal-test); dc_up_heal up -d' _ "$CLI" 2>&1; }
 out="$(FAKE_REQUIRE="EXTRA_BRIDGE_SECRET NEW_SERVICE_PASSWORD" heal)"
 check "secrets compose reports missing are generated before up, then up runs" "$(grep -q '^EXTRA_BRIDGE_SECRET=.' "$VEGADUTA_ENV_FILE" && grep -q '^NEW_SERVICE_PASSWORD=.' "$VEGADUTA_ENV_FILE" && has "$out" 'generated 2 secret' && has "$out" 'fake up'; echo $?)" "$out"
 check "they are kept for the next install" "$(grep -q '^EXTRA_BRIDGE_SECRET=.' "$VEGADUTA_SECRETS_KEEP"; echo $?)"

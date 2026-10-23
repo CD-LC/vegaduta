@@ -30,12 +30,14 @@ result instead of raising — this must never crash the service.
 from __future__ import annotations
 
 import hashlib
+import logging
 import re
 import secrets
 import time
 from urllib.parse import quote, urlparse, urlunparse
 
 from . import audit, projects
+from .logsafe import clean
 from .settings import SETTINGS, Settings
 from .tenancy import TenantContext, tenant_root, validate_project_id
 
@@ -49,6 +51,8 @@ from .tenancy import TenantContext, tenant_root, validate_project_id
 # provision a backend in this pass.
 _SCHEMA_SAFE_RX = re.compile(r"^[a-z][a-z0-9_]{0,58}$")
 
+log = logging.getLogger(__name__)
+
 
 class BackendProvisionError(RuntimeError):
     pass
@@ -59,13 +63,14 @@ def _schema_name(ctx: TenantContext, project_id: str) -> str:
     tenant_tag = hashlib.sha1(ctx.tenant_id.encode()).hexdigest()[:8]
     candidate = f"app_{tenant_tag}_{project_id}".lower()
     # "u_" role prefix must still fit Postgres' 63-byte identifier limit.
-    if not _SCHEMA_SAFE_RX.match(candidate) or len(candidate) > 58:
+    if not _SCHEMA_SAFE_RX.fullmatch(candidate) or len(candidate) > 58:
         raise BackendProvisionError(
             f"project_id {project_id!r} is not safe to use as a Postgres "
             "schema name unquoted (only a-z0-9_ allowed, must start with a "
             "letter, at most ~45 characters) — dashes in particular are "
             "rejected here even though they're valid in project ids "
-            "elsewhere")
+            "elsewhere"
+        )
     return candidate
 
 
@@ -104,8 +109,17 @@ def _unavailable(reason: str) -> dict:
     return {"provisioned": False, "reason": reason}
 
 
-def provision_backend(ctx: TenantContext, project_id: str,
-                      settings: Settings = SETTINGS) -> dict:
+def _sqlstate(exc: BaseException) -> str:
+    """The 5-character SQLSTATE of a database error, as " (SQLSTATE 42601)",
+    or "". Only that validated code ever leaves the service; the driver's
+    message (which can name roles, schemas and connection details) is logged."""
+    code = getattr(exc, "sqlstate", None)
+    if isinstance(code, str) and re.fullmatch(r"[0-9A-Z]{5}", code):
+        return f" (SQLSTATE {code})"
+    return ""
+
+
+def provision_backend(ctx: TenantContext, project_id: str, settings: Settings = SETTINGS) -> dict:
     """Idempotent. First call creates the project's role + schema and stores
     the role-scoped database_url on the project; later calls return that
     record untouched (rotating the password would break a running app).
@@ -115,7 +129,8 @@ def provision_backend(ctx: TenantContext, project_id: str,
         return _unavailable(
             "APP_BUILDER_ADMIN_DATABASE_URL is not configured on this "
             "deployment — backend provisioning is an optional feature, "
-            "scaffolding/preview work without it")
+            "scaffolding/preview work without it"
+        )
 
     project = projects.get(settings.data_dir, ctx, project_id)
     if project is None:
@@ -129,7 +144,7 @@ def provision_backend(ctx: TenantContext, project_id: str,
 
     try:
         schema = existing.get("schema") or _schema_name(ctx, project_id)
-        if not _SCHEMA_SAFE_RX.match(schema):
+        if not _SCHEMA_SAFE_RX.fullmatch(schema):
             raise BackendProvisionError(f"unsafe stored schema name {schema!r}")
     except BackendProvisionError as e:
         return _unavailable(str(e))
@@ -138,11 +153,14 @@ def provision_backend(ctx: TenantContext, project_id: str,
 
     psycopg = _driver()
     if psycopg is None:
-        return _unavailable("psycopg is not installed on this deployment "
-                            "(pip install 'psycopg[binary]')")
+        return _unavailable(
+            "psycopg is not installed on this deployment (pip install 'psycopg[binary]')"
+        )
 
-    role_attrs = (f"LOGIN PASSWORD '{password}' NOSUPERUSER NOCREATEDB "
-                  f"NOCREATEROLE NOINHERIT CONNECTION LIMIT {_CONNECTION_LIMIT}")
+    role_attrs = (
+        f"LOGIN PASSWORD '{password}' NOSUPERUSER NOCREATEDB "
+        f"NOCREATEROLE NOINHERIT CONNECTION LIMIT {_CONNECTION_LIMIT}"
+    )
     try:
         with psycopg.connect(settings.admin_database_url, autocommit=True) as conn:
             with conn.cursor() as cur:
@@ -151,7 +169,8 @@ def provision_backend(ctx: TenantContext, project_id: str,
                     f"IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{role}') THEN "
                     f'CREATE ROLE "{role}" {role_attrs}; '
                     f'ELSE ALTER ROLE "{role}" {role_attrs}; '
-                    "END IF; END $$")
+                    "END IF; END $$"
+                )
                 # PG16: a CREATEROLE admin that is not a superuser gets ADMIN
                 # OPTION on the roles it creates but NOT the right to SET ROLE
                 # to them, and both `CREATE SCHEMA ... AUTHORIZATION role` and
@@ -168,23 +187,35 @@ def provision_backend(ctx: TenantContext, project_id: str,
                 cur.execute(
                     "DO $$ DECLARE t record; BEGIN "
                     f"FOR t IN SELECT tablename FROM pg_tables WHERE schemaname = '{schema}' LOOP "
-                    f"EXECUTE format('ALTER TABLE %I.%I OWNER TO %I', '{schema}', t.tablename, '{role}'); "
-                    "END LOOP; END $$")
+                    "EXECUTE format('ALTER TABLE %I.%I OWNER TO %I', "
+                    f"'{schema}', t.tablename, '{role}'); "
+                    "END LOOP; END $$"
+                )
                 cur.execute(f'REVOKE ALL ON SCHEMA public FROM "{role}"')
                 cur.execute(f'ALTER ROLE "{role}" SET search_path = "{schema}"')
     except Exception as e:
-        return _unavailable(f"provisioning failed: {str(e)[:500]}")
+        log.exception("backend provisioning failed project_id=%s", clean(project_id))
+        return _unavailable(f"provisioning failed{_sqlstate(e)}; see the app-builder service log")
 
-    record = {"schema": schema, "role": role,
-              "database_url": _project_url(settings.admin_database_url,
-                                           role, password, schema),
-              "provisioned_at": time.time()}
+    record = {
+        "schema": schema,
+        "role": role,
+        "database_url": _project_url(settings.admin_database_url, role, password, schema),
+        "provisioned_at": time.time(),
+    }
     project.backend = record
     projects.upsert(settings.data_dir, ctx, project)
 
-    audit.record(tenant_root(settings.data_dir, ctx), {
-        "kind": "backend_provisioned", "project_id": project_id,
-        "actor": ctx.subject, "schema": schema, "role": role})
+    audit.record(
+        tenant_root(settings.data_dir, ctx),
+        {
+            "kind": "backend_provisioned",
+            "project_id": project_id,
+            "actor": ctx.subject,
+            "schema": schema,
+            "role": role,
+        },
+    )
 
     return {"provisioned": True, **record}
 
@@ -205,8 +236,9 @@ def _project_conn(ctx: TenantContext, project_id: str, settings: Settings):
     return psycopg, project
 
 
-def apply_schema(ctx: TenantContext, project_id: str, sql: str,
-                 settings: Settings = SETTINGS) -> dict:
+def apply_schema(
+    ctx: TenantContext, project_id: str, sql: str, settings: Settings = SETTINGS
+) -> dict:
     """Run migration SQL AS THE PROJECT'S ROLE, in one transaction. Postgres'
     own privileges are the sandbox: the role can only alter its schema."""
     if not sql or not sql.strip():
@@ -224,15 +256,24 @@ def apply_schema(ctx: TenantContext, project_id: str, sql: str,
                 cur.execute(sql)
             conn.commit()
     except Exception as e:
-        return {"applied": False, "reason": f"schema apply failed: {str(e)[:500]}"}
-    audit.record(tenant_root(settings.data_dir, ctx), {
-        "kind": "backend_schema_applied", "project_id": project_id,
-        "actor": ctx.subject, "sql_bytes": len(sql)})
+        log.exception("schema apply failed project_id=%s", clean(project_id))
+        return {
+            "applied": False,
+            "reason": f"schema apply failed{_sqlstate(e)}; see the app-builder service log",
+        }
+    audit.record(
+        tenant_root(settings.data_dir, ctx),
+        {
+            "kind": "backend_schema_applied",
+            "project_id": project_id,
+            "actor": ctx.subject,
+            "sql_bytes": len(sql),
+        },
+    )
     return {"applied": True, **list_tables(ctx, project_id, settings)}
 
 
-def list_tables(ctx: TenantContext, project_id: str,
-                settings: Settings = SETTINGS) -> dict:
+def list_tables(ctx: TenantContext, project_id: str, settings: Settings = SETTINGS) -> dict:
     """{tables:[{name, rls, columns:[{name,type,nullable}]}]} for the
     project's schema, read as the project's role."""
     got = _project_conn(ctx, project_id, settings)
@@ -250,13 +291,17 @@ def list_tables(ctx: TenantContext, project_id: str,
                     "LEFT JOIN pg_tables t ON t.schemaname = c.table_schema "
                     "AND t.tablename = c.table_name "
                     f"WHERE c.table_schema = '{schema}' "
-                    "ORDER BY c.table_name, c.ordinal_position")
+                    "ORDER BY c.table_name, c.ordinal_position"
+                )
                 rows = cur.fetchall()
     except Exception as e:
-        return {"tables": [], "reason": f"introspection failed: {str(e)[:500]}"}
+        log.exception("table introspection failed project_id=%s", clean(project_id))
+        return {
+            "tables": [],
+            "reason": f"introspection failed{_sqlstate(e)}; see the app-builder service log",
+        }
     tables: dict[str, dict] = {}
     for name, col, typ, nullable, rls in rows:
         t = tables.setdefault(name, {"name": name, "rls": bool(rls), "columns": []})
-        t["columns"].append({"name": col, "type": typ,
-                             "nullable": nullable == "YES"})
+        t["columns"].append({"name": col, "type": typ, "nullable": nullable == "YES"})
     return {"tables": list(tables.values())}

@@ -1,12 +1,11 @@
 package com.agenticai.core;
 
+import java.util.Map;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.util.StringUtils;
-
-import java.util.Map;
 
 /**
  * Quiets the background consumers when {@code app.tenancy.migrate-only=true} (the one-shot
@@ -18,8 +17,8 @@ import java.util.Map;
  * #defaultWorkflowKafkaFromBootstrap}).
  *
  * <p>Added at LOWEST precedence, so an explicit env var still wins. The migrate-only part has no
- * effect unless the flag is true. Not covered: {@code @Scheduled} beans (no property switch exists)
- * - see {@code docs/plans/CORE-MIGRATE-JOB.md}.
+ * effect unless the flag is true. {@code @Scheduled} beans have no property switch; {@code
+ * SchedulingRoleRegistrar} (core/tenancy) registers none of them when the flag is true.
  */
 public class MigrateOnlyEnvironmentPostProcessor implements EnvironmentPostProcessor {
 

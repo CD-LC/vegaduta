@@ -29,10 +29,10 @@ import reactor.util.context.ContextView;
 
 /**
  * Cross-cutting advisor that times every real LLM call made through any {@link
- * org.springframework.ai.chat.client.ChatClient} this app builds and reports it. Registered once, in
- * {@code AnthropicAgentChatClientFactory.create()} - the single chokepoint every call site (agent
- * chat, quick task, guardrails, reflexion, graph memory, workflow graph generation, Ask-AI assist)
- * already goes through via {@code ChatClientRegistry}.
+ * org.springframework.ai.chat.client.ChatClient} this app builds and reports it. Registered once,
+ * in {@code AnthropicAgentChatClientFactory.create()} - the single chokepoint every call site
+ * (agent chat, quick task, guardrails, reflexion, graph memory, workflow graph generation, Ask-AI
+ * assist) already goes through via {@code ChatClientRegistry}.
  *
  * <p><b>Observer structure.</b> The advisor only measures (clock, tenant, MDC request id and span
  * captured on the calling thread, usage merged across stream chunks) and builds one {@link
@@ -49,8 +49,8 @@ import reactor.util.context.ContextView;
  * </ul>
  *
  * plus {@link StreamFinalizer} for the streaming terminal signals, and the in-memory {@link
- * LlmCallMetricsService} counters fed directly. {@code providerName}/{@code model} are supplied once
- * per {@code ChatClient} construction; {@code agentId}/{@code sessionId} come from {@code
+ * LlmCallMetricsService} counters fed directly. {@code providerName}/{@code model} are supplied
+ * once per {@code ChatClient} construction; {@code agentId}/{@code sessionId} come from {@code
  * chatClientRequest.context()}, populated by call sites that opt in via {@code
  * ChatClient.prompt().advisors(a -> a.param(AGENT_ID_PARAM, agentId)...)} (see {@link
  * #attributeTo}); absent attribution still gets a full row, just with a null agent/session.
@@ -105,14 +105,22 @@ public class LlmMetricsAdvisor implements CallAdvisor, StreamAdvisor {
     public static final String PROMPT_VERSION_PARAM = "llmCallLog.promptVersion";
 
     /**
+     * Set to {@code true} via {@code .advisors(a -> a.param(SKIP_OBSERVATION_PARAM, true))} on a
+     * platform-initiated probe that is nobody's usage (the model warm-up): the call is made but no
+     * {@code llm_call_log} row, spend counter or metric is recorded for it, so a probe that runs on
+     * a member's request thread is never booked to that member's tenant.
+     */
+    public static final String SKIP_OBSERVATION_PARAM = "llmCallLog.skipObservation";
+
+    /**
      * The attribution block every side-call in a chat turn should carry, in one place (2026-09-17
      * reasoning-depth audit). The extra completions the non-FAST reasoning depths add (consistency
      * check, Reflexion critique, plan, re-plan) are precisely the calls that make up the COST of a
      * deeper depth, and used to land in {@code llm_call_log} with a null agent and session.
      *
-     * <p>Null-tolerant on purpose: {@code AdvisorSpec#param} asserts its value non-null, so a caller
-     * without an agent or session simply records nothing for that key. C1: the agent-version pin
-     * rides along too, read off {@code AgentVersionPin} at spec-build time.
+     * <p>Null-tolerant on purpose: {@code AdvisorSpec#param} asserts its value non-null, so a
+     * caller without an agent or session simply records nothing for that key. C1: the agent-version
+     * pin rides along too, read off {@code AgentVersionPin} at spec-build time.
      */
     public static java.util.function.Consumer<
                     org.springframework.ai.chat.client.ChatClient.AdvisorSpec>
@@ -248,7 +256,8 @@ public class LlmMetricsAdvisor implements CallAdvisor, StreamAdvisor {
         long startNanos = System.nanoTime();
         Instant startedAt = Instant.now();
         // Captured defensively (see class javadoc) - adviseCall runs synchronously on the calling
-        // thread in every known path, but this keeps all three captures symmetric with adviseStream.
+        // thread in every known path, but this keeps all three captures symmetric with
+        // adviseStream.
         Optional<TenantContext> capturedContext = TenantContext.current();
         String capturedRequestId = MDC.get(RequestCorrelationFilter.MDC_KEY);
         // Span.current() never returns null (Span.getInvalid() when no span is active).
@@ -349,15 +358,15 @@ public class LlmMetricsAdvisor implements CallAdvisor, StreamAdvisor {
      * The streaming half of the #599 fix. Unlike {@link #adviseCall}, {@code
      * streamAdvisorChain.nextStream(...)} returns a cold {@link Flux} immediately - the real work
      * happens as it's subscribed to and drained downstream, so the call is recorded from a {@code
-     * doFinally} on the returned Flux ({@link StreamFinalizer}), guarded by an {@link AtomicBoolean}
-     * so a subscription is recorded exactly once no matter how the complete/error/cancel signals
-     * race.
+     * doFinally} on the returned Flux ({@link StreamFinalizer}), guarded by an {@link
+     * AtomicBoolean} so a subscription is recorded exactly once no matter how the
+     * complete/error/cancel signals race.
      *
      * <p><b>Usage is merged across chunks, not read off the last one.</b> Providers split the
      * tally: Anthropic reports input tokens on its opening {@code message_start} event and output
      * tokens on the closing {@code message_delta}; OpenAI sends one usage-only chunk at the very
-     * end; a cancelled stream never reaches the end at all. {@link StreamUsageAccumulator} keeps the
-     * max prompt and max completion count over every chunk that reported a non-empty usage.
+     * end; a cancelled stream never reaches the end at all. {@link StreamUsageAccumulator} keeps
+     * the max prompt and max completion count over every chunk that reported a non-empty usage.
      *
      * <p><b>Span.</b> The span to tag is resolved once per subscription, never re-read in the
      * finalizer (which runs on an unrelated thread). Preference order: the ChatClient's own
@@ -563,5 +572,4 @@ public class LlmMetricsAdvisor implements CallAdvisor, StreamAdvisor {
             return chatResponse.getMetadata().getUsage();
         }
     }
-
 }

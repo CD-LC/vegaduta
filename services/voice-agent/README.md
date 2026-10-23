@@ -38,7 +38,7 @@ turn-taking instead of hold-to-talk.
  browser (CallPanel.tsx)                    voice-agent (this package)
  ─────────────────────────                  ──────────────────────────
  livekit-client Room.connect()  ───────►    LiveKit server (self-hosted,
-                                             deploy/docker-compose.yml)
+                                             deploy/compose/docker-compose.yml)
                                                        │
                                           AgentSession (main.py)
                                           ┌────────────┴────────────┐
@@ -93,8 +93,8 @@ python -m app.main start   # production mode (what the Dockerfile's CMD runs)
 ```
 
 Needs `LIVEKIT_URL`/`LIVEKIT_API_KEY`/`LIVEKIT_API_SECRET` pointed at a real
-LiveKit server (the same three vars `core`/`deploy/.env` already set for
-`deploy/docker-compose.yml`'s `livekit` service), `SIDECAR_BASE_URL`
+LiveKit server (the same three vars `core`/`deploy/compose/.env` already set for
+`deploy/compose/docker-compose.yml`'s `livekit` service), `SIDECAR_BASE_URL`
 reachable, `CORE_API_BASE_URL` reachable, and an `ELEVENLABS_API_KEY`. See
 `app/config.py` for every var and its default.
 
@@ -137,11 +137,11 @@ to be "verified working":
   call uses ONE platform-level key/voice, not the tenant's own cloned voice
   the push-to-talk path already supports.
 
-- **Not wired into `deploy/docker-compose.yml`.** Per the build brief, that
-  file is owned by a parallel session right now; adding a `voice-agent`
-  service block (image build, `agent-io` network membership so it can reach
-  `livekit`, env vars per `app/config.py`) is a small, mechanical follow-up
-  once this file lands, not done here to avoid a merge collision.
+- **Wired into Compose and Helm, off by default.** `deploy/compose/docker-compose.yml` has a
+  `voice-agent` service in the compose profile `voice` (`scripts/vegaduta up --full --profile voice`;
+  it depends on `livekit` and `core` being healthy) and the Helm chart is
+  `deploy/helm/charts/voice-agent`. The variables the compose block sets are a subset of the
+  ones in `app/config.py`; the others keep their defaults.
 
 - **The real LiveKit Agents SDK could not be *imported* on the machine this
   was built on** (a Windows host) - `livekit-agents` 1.6.8 bundles a native

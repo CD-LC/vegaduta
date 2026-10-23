@@ -28,6 +28,19 @@ afterEach(() => {
   delete window.__ENV;
 });
 
+describe("OSS landing accessibility", () => {
+  it("makes every scrollable code block keyboard-focusable and named", () => {
+    const { container } = render(<OssLanding />);
+    const blocks = Array.from(container.querySelectorAll("pre"));
+    expect(blocks.length).toBeGreaterThan(0);
+    for (const pre of blocks) {
+      expect(pre.getAttribute("tabindex"), pre.textContent?.slice(0, 40)).toBe("0");
+      expect(pre.getAttribute("role")).toBe("region");
+      expect(pre.getAttribute("aria-label")).toBeTruthy();
+    }
+  });
+});
+
 describe("OSS landing wiring", () => {
   it("links docs to the in-app help and the SDK to GitHub when no docs site is configured", () => {
     render(<OssLanding />);
@@ -68,7 +81,15 @@ describe("OSS landing wiring", () => {
   it("lists every surface from the single status source, including mobile", () => {
     render(<OssLanding />);
     const text = document.getElementById("surfaces")?.textContent ?? "";
-    for (const name of ["VS Code", "JetBrains IDEs", "Chrome", "Android app", "Wear OS watch", "iPhone app", "MCP server"]) {
+    for (const name of [
+      "VS Code",
+      "JetBrains IDEs",
+      "Chrome",
+      "Android app",
+      "Wear OS watch",
+      "iPhone app",
+      "MCP server",
+    ]) {
       expect(text).toContain(name);
     }
     expect(text).toContain("In development");

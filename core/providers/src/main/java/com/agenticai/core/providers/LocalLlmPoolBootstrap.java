@@ -416,7 +416,7 @@ public class LocalLlmPoolBootstrap {
      */
     private boolean repairUnusable(
             PlatformHostedLlmProvider row, String normalizedBase, boolean onDemand) {
-        boolean repaired = false;
+        boolean switchPoolOn = false;
         HostedLlmPoolSettingsResponse settings = service.getPoolSettings();
         if (settings != null && !settings.enabled()) {
             // Nothing an admin switched off is switched on because core restarted: the pool comes
@@ -439,16 +439,17 @@ public class LocalLlmPoolBootstrap {
                                 + " the admin set it.");
                 return false;
             }
-            service.setPoolEnabled(true, "local-llm-pool-bootstrap");
-            log.warn(
-                    "The platform LLM pool was switched off, so no chat could use the local model;"
-                            + " switched it back on.");
-            repaired = true;
+            // The switch is flipped only once the row is known to serve (or has just been
+            // repaired): a refused host or a blank key must not leave an admin's deliberate
+            // "off" turned on for nothing.
+            switchPoolOn = true;
         }
         java.util.Optional<HostedProviderSelection> usable =
-                service.resolveEnabledSelectionById(row.getId());
+                switchPoolOn
+                        ? service.resolveEnabledSelectionByIdIgnoringPoolSwitch(row.getId())
+                        : service.resolveEnabledSelectionById(row.getId());
         if (usable != null && usable.isPresent()) {
-            return repaired;
+            return switchPoolOn && switchPoolBackOn();
         }
         if (!row.isEnabled()) {
             // A disabled local row is re-enabled only when nothing else in the pool can serve;
@@ -460,7 +461,7 @@ public class LocalLlmPoolBootstrap {
                                 + " it as the admin set it.",
                         row.getLabel(),
                         chain.size());
-                return repaired;
+                return false;
             }
         }
         try {
@@ -474,7 +475,7 @@ public class LocalLlmPoolBootstrap {
                     normalizedBase,
                     e.getMessage(),
                     hostPort(normalizedBase));
-            return repaired;
+            return false;
         }
         if (!StringUtils.hasText(apiKey)) {
             log.warn(
@@ -482,7 +483,7 @@ public class LocalLlmPoolBootstrap {
                             + " decrypts) and app.local-llm.bootstrap.api-key is blank, so it was"
                             + " not rewritten. Re-enter the row in Platform Admin.",
                     row.getLabel());
-            return repaired;
+            return false;
         }
         String keepModel = StringUtils.hasText(row.getModel()) ? row.getModel() : model;
         service.update(
@@ -511,6 +512,18 @@ public class LocalLlmPoolBootstrap {
                         ? "its key was encrypted with an APP_ENCRYPTION_KEY this install no longer"
                                 + " has"
                         : "it was disabled");
+        if (switchPoolOn) {
+            switchPoolBackOn();
+        }
+        return true;
+    }
+
+    /** The on-demand repair's one use of the pool's master switch. Always true. */
+    private boolean switchPoolBackOn() {
+        service.setPoolEnabled(true, "local-llm-pool-bootstrap");
+        log.warn(
+                "The platform LLM pool was switched off, so no chat could use the local model;"
+                        + " switched it back on.");
         return true;
     }
 
