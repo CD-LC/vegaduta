@@ -205,6 +205,23 @@ class ChatThreadServiceTest {
         assertNull(ChatThreadService.titleOf(null));
     }
 
+    @Test
+    void theTitleIsThePersonsOwnWordsNotTheAppContextBlockTheConsolePutsAheadOfThem() {
+        String stored =
+                "<app_context>\nAdded by the app, not typed by the user.\nConnected: none.\n</app_context>\n\n"
+                        + "Find flights to Lisbon next week";
+
+        assertEquals("Find flights to Lisbon next week", ChatThreadService.titleOf(stored));
+        // A thread stored before this fix is titled the same way: the title is derived when read.
+        assertEquals("plain", ChatThreadService.titleOf("plain"));
+        // Only app text (a block never closed, or nothing after it): no title rather than the tag.
+        assertNull(ChatThreadService.titleOf("<app_context>\nConnected: none."));
+        assertNull(ChatThreadService.titleOf("<app_context>x</app_context>\n  "));
+        // The tag inside what the person typed is theirs.
+        assertEquals(
+                "explain <app_context> tags", ChatThreadService.titleOf("explain <app_context> tags"));
+    }
+
     private static void assertNotFound(org.junit.jupiter.api.function.Executable call) {
         ResponseStatusException e = assertThrows(ResponseStatusException.class, call);
         assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());

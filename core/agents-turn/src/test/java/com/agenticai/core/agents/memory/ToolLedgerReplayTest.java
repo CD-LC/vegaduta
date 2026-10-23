@@ -181,4 +181,44 @@ class ToolLedgerReplayTest {
         assertNull(assistantWith("hi", ToolLedger.EMPTY).tools());
         assertNull(ChatTurn.assistant("hi", null).tools());
     }
+
+    @Test
+    void aRecordOnlyTurnIsAlwaysShownToTheModelAndTakesNoPlaceInTheReplayCount() {
+        ChatTurn outcome =
+                ChatTurn.toolRecord(
+                        ledger(
+                                entry(
+                                        "web_search",
+                                        "{\"q\":\"x\"}",
+                                        "[approved action 'web_search' completed: CONF-1]",
+                                        Status.OK,
+                                        "req-1, decided by alice")));
+        assertTrue(ChatTurn.isToolRecordOnly(outcome));
+        assertFalse(ChatTurn.isToolRecordOnly(assistantWith("text", outcome.tools())));
+        assertFalse(ChatTurn.isToolRecordOnly(ChatTurn.assistant("")));
+
+        // Replay switched off and no slot left: the record is still what the model reads for this turn.
+        props.setReplayEnabled(false);
+        props.setReplayTurns(0);
+        List<ChatTurn> view = ToolLedgerReplay.modelView(List.of(ChatTurn.user("go"), outcome), props);
+
+        assertEquals(2, view.size());
+        String text = view.get(1).content();
+        assertTrue(text.startsWith(props.getHeader()), text);
+        assertTrue(text.contains("- web_search({\"q\":\"x\"}) -> ok: [approved action 'web_search' completed: CONF-1]"), text);
+        assertTrue(text.contains("approval request req-1, decided by alice"), text);
+        assertNotNull(view.get(1).tools(), "folded in, so the caller adds the trust note");
+    }
+
+    @Test
+    void aRecordOnlyTurnDoesNotPushAnOrdinaryTurnsRecordOutOfTheReplayWindow() {
+        props.setReplayTurns(1);
+        ChatTurn worked = assistantWith("Done.", ledger(entry("create_file", "{}", "f1", Status.OK, null)));
+        ChatTurn outcome = ChatTurn.toolRecord(ledger(entry("send_mail", "{}", "[sent]", Status.OK, "r")));
+
+        List<ChatTurn> view = ToolLedgerReplay.modelView(List.of(worked, outcome), props);
+
+        assertTrue(view.get(0).content().contains("create_file"), view.get(0).content());
+        assertTrue(view.get(1).content().contains("send_mail"), view.get(1).content());
+    }
 }
