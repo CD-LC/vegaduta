@@ -37,7 +37,17 @@ import {
 const OS_ICON = { macOS: Apple, Windows: AppWindow, Linux: Terminal } as const;
 const SUITE_ICON = [Server, Braces, Puzzle] as const;
 
-function Section({ id, title, lead, children }: { id: string; title: string; lead?: string; children: React.ReactNode }) {
+function Section({
+  id,
+  title,
+  lead,
+  children,
+}: {
+  id: string;
+  title: string;
+  lead?: string;
+  children: React.ReactNode;
+}) {
   return (
     <section id={id} className="border-t border-border py-14">
       <div className="mx-auto max-w-6xl px-4">
@@ -49,9 +59,16 @@ function Section({ id, title, lead, children }: { id: string; title: string; lea
   );
 }
 
-function Code({ children }: { children: string }) {
+function Code({ children, label = "Code sample" }: { children: string; label?: string }) {
   return (
-    <pre className="m-0 overflow-x-auto rounded-lg border border-border bg-muted p-4 text-sm leading-relaxed text-foreground">
+    // Scrollable, so it must be reachable by keyboard (axe scrollable-region-focusable): a focusable, named region.
+    <pre
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+      tabIndex={0}
+      role="region"
+      aria-label={label}
+      className="m-0 overflow-x-auto rounded-lg border border-border bg-muted p-4 text-sm leading-relaxed text-foreground"
+    >
       <code>{children}</code>
     </pre>
   );
@@ -81,9 +98,9 @@ export default function OssLanding() {
               <BrandName />: the complete suite for AI agents
             </h1>
             <p className="mb-0 mt-5 max-w-xl text-lg text-muted-foreground">
-              Run governed agents on your laptop, your team&rsquo;s server or Kubernetes — then reach them from
-              your IDE, browser, phone and your own code. One repository ships the platform, the governance SDKs,
-              the plugins, the apps and the installers.
+              Run governed agents on your laptop, your team&rsquo;s server or Kubernetes — then reach them from your
+              IDE, browser, phone and your own code. One repository ships the platform, the governance SDKs, the
+              plugins, the apps and the installers.
             </p>
             <div className="mt-7 flex flex-wrap gap-3 text-sm">
               <Link
@@ -102,13 +119,18 @@ export default function OssLanding() {
               <Link href="/try" className="rounded-md border border-border px-4 py-2 font-medium hover:bg-muted">
                 Try it live
               </Link>
-              <SmartLink href={docsHref()} className="rounded-md border border-border px-4 py-2 font-medium hover:bg-muted">
+              <SmartLink
+                href={docsHref()}
+                className="rounded-md border border-border px-4 py-2 font-medium hover:bg-muted"
+              >
                 Read the docs
               </SmartLink>
             </div>
           </div>
           <div className="min-w-0">
-            <p className="m-0 mb-2 text-xs uppercase tracking-wide text-muted-foreground">On this machine, in minutes</p>
+            <p className="m-0 mb-2 text-xs uppercase tracking-wide text-muted-foreground">
+              On this machine, in minutes
+            </p>
             <Code>{INSTALL_COMMANDS}</Code>
             <p className="mb-0 mt-2 text-xs text-muted-foreground">
               {GETTING_STARTED} Needs Docker with Compose v2 and an LLM provider key or a local Ollama — or none at all:
@@ -150,7 +172,10 @@ export default function OssLanding() {
                   <ul className="m-0 mt-4 list-none space-y-1.5 p-0 text-sm">
                     {s.links.map((l) => (
                       <li key={l.label}>
-                        <SmartLink href={l.href} className="inline-flex items-center gap-1.5 text-primary hover:underline">
+                        <SmartLink
+                          href={l.href}
+                          className="inline-flex items-center gap-1.5 text-primary hover:underline"
+                        >
                           {l.label} <ArrowRight className="size-3" aria-hidden="true" />
                         </SmartLink>
                       </li>
@@ -216,7 +241,11 @@ export default function OssLanding() {
                   <p className="m-0 mt-1 font-mono text-xs text-muted-foreground">{d.file}</p>
                   <p className="m-0 mt-2 flex-1 text-sm text-muted-foreground">{d.note}</p>
                   <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-                    Download <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                    Download{" "}
+                    <ArrowRight
+                      className="size-3.5 transition-transform group-hover:translate-x-0.5"
+                      aria-hidden="true"
+                    />
                   </span>
                 </Link>
               );
@@ -251,8 +280,8 @@ export default function OssLanding() {
               <p className="m-0 text-sm text-muted-foreground">
                 The Java Agent SDK wraps the tools you already have (Spring AI today, any framework through its
                 framework-free core) so that a risky call waits for a human, a run has a budget, a retried turn never
-                repeats a payment, and every action leaves an audit event tagged with the OWASP agentic risk it
-                relates to.
+                repeats a payment, and every action leaves an audit event tagged with the OWASP agentic risk it relates
+                to.
               </p>
               <Code>{SDK_MAVEN_SNIPPET}</Code>
               <Code>{SDK_JAVA_SNIPPET}</Code>
@@ -267,10 +296,17 @@ export default function OssLanding() {
                 >
                   Java Agent SDK docs
                 </SmartLink>
-                <SmartLink href={docPageHref("sdkOverview")} className="rounded-md border border-border px-4 py-2 font-medium hover:bg-muted">
+                <SmartLink
+                  href={docPageHref("sdkOverview")}
+                  className="rounded-md border border-border px-4 py-2 font-medium hover:bg-muted"
+                >
                   All SDKs
                 </SmartLink>
-                <a href={`${REPO_URL}/tree/main/sdk`} rel="noopener noreferrer" className="rounded-md border border-border px-4 py-2 font-medium hover:bg-muted">
+                <a
+                  href={`${REPO_URL}/tree/main/sdk`}
+                  rel="noopener noreferrer"
+                  className="rounded-md border border-border px-4 py-2 font-medium hover:bg-muted"
+                >
                   sdk/ on GitHub
                 </a>
               </div>
@@ -323,7 +359,11 @@ export default function OssLanding() {
           </div>
         </Section>
 
-        <Section id="stack" title="Architecture and stack" lead="A modular monolith core with optional services for async work and untrusted code.">
+        <Section
+          id="stack"
+          title="Architecture and stack"
+          lead="A modular monolith core with optional services for async work and untrusted code."
+        >
           <dl className="m-0 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2">
             {STACK.map((s) => (
               <div key={s.name} className="bg-background p-4">
@@ -334,7 +374,11 @@ export default function OssLanding() {
           </dl>
         </Section>
 
-        <Section id="standards" title="Open standards" lead="Interoperable by default, so you are not locked to one client or vendor.">
+        <Section
+          id="standards"
+          title="Open standards"
+          lead="Interoperable by default, so you are not locked to one client or vendor."
+        >
           <ul className="m-0 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
             {STANDARDS.map((s) => (
               <li key={s.name} className="rounded-lg border border-border p-4 text-sm">
@@ -351,23 +395,43 @@ export default function OssLanding() {
           lead={`Licensed ${LICENSE_NAME} — free to run, fork and build on, including commercially; the restriction is offering it as a competing hosted service. Every version converts to Apache-2.0 four years after release. Issues, pull requests and discussion happen on GitHub.`}
         >
           <div className="flex flex-wrap gap-3 text-sm">
-            <a href={`${REPO_URL}/blob/main/CONTRIBUTING.md`} rel="noopener noreferrer" className="rounded-md border border-border px-4 py-2 hover:bg-muted">
+            <a
+              href={`${REPO_URL}/blob/main/CONTRIBUTING.md`}
+              rel="noopener noreferrer"
+              className="rounded-md border border-border px-4 py-2 hover:bg-muted"
+            >
               Contributing guide
             </a>
-            <a href={`${REPO_URL}/blob/main/ROADMAP.md`} rel="noopener noreferrer" className="rounded-md border border-border px-4 py-2 hover:bg-muted">
+            <a
+              href={`${REPO_URL}/blob/main/ROADMAP.md`}
+              rel="noopener noreferrer"
+              className="rounded-md border border-border px-4 py-2 hover:bg-muted"
+            >
               Roadmap
             </a>
             <Link href="/changelog" className="rounded-md border border-border px-4 py-2 hover:bg-muted">
               Changelog
             </Link>
-            <a href={`${REPO_URL}/issues`} rel="noopener noreferrer" className="rounded-md border border-border px-4 py-2 hover:bg-muted">
+            <a
+              href={`${REPO_URL}/issues`}
+              rel="noopener noreferrer"
+              className="rounded-md border border-border px-4 py-2 hover:bg-muted"
+            >
               Open issues
             </a>
-            <a href={`${REPO_URL}/blob/main/SECURITY.md`} rel="noopener noreferrer" className="rounded-md border border-border px-4 py-2 hover:bg-muted">
+            <a
+              href={`${REPO_URL}/blob/main/SECURITY.md`}
+              rel="noopener noreferrer"
+              className="rounded-md border border-border px-4 py-2 hover:bg-muted"
+            >
               Report a vulnerability
             </a>
             {hosted && (
-              <a href={hosted} rel="noopener noreferrer" className="rounded-md border border-border px-4 py-2 hover:bg-muted">
+              <a
+                href={hosted}
+                rel="noopener noreferrer"
+                className="rounded-md border border-border px-4 py-2 hover:bg-muted"
+              >
                 Hosted version
               </a>
             )}
