@@ -269,6 +269,28 @@ export interface AppBuilderGenerateResult {
   // Writes the server refused because the model only saw excerpts of
   // those files (too large to send whole).
   skipped_files?: string[];
+  // The model's own plain-English explanation of what it changed (hosted
+  // route: core's new contract field; apply route: the client-side model's
+  // own summary echoed back). Absent on older builds — render the file
+  // list + diff as before.
+  summary?: string | null;
+}
+
+/** One Server-Sent-Events line from POST /projects/{id}/generate/stream. */
+export interface AppBuilderGenerateEvent {
+  stage: "context" | "writing" | "files" | "checking" | "publishing" | "done" | "error";
+  // "files": the exact applied set — render it in the sandbox preview
+  // immediately, before the build/test check finishes.
+  files?: AppBuilderFileWrite[];
+  files_changed?: string[];
+  // "checking"/"writing": the self-repair loop's attempt bookkeeping.
+  attempt?: number;
+  total?: number;
+  // "done": identical to the POST /generate body.
+  result?: AppBuilderGenerateResult;
+  // "error": pipeline failure mid-turn.
+  status?: number;
+  error?: string;
 }
 
 // POST /projects/{id}/generate/context - what an edit should see of the
@@ -372,6 +394,123 @@ export const appBuilder = {
       images: opts?.images,
     }, LONG_TIMEOUT_MS),
 
+  // The streamed variant of /generate: identical request + final result,
+  // but the turn's stages arrive as SSE events while it runs — live stage
+  // labels instead of a dead spinner, and the "files" event carries the
+  // applied set EARLY so the preview updates before the build check ends.
+  // onStage is optional/best-effort. Deployments whose app-builder predates
+  // the route answer 404/405 — call sites fall back to `generate()`.
+  generateStream: async (
+    id: string,
+    instruction: string,
+    opts?: { context?: string; images?: AppBuilderImage[] },
+    onStage?: (stage: AppBuilderGenerateEvent["stage"], event: AppBuilderGenerateEvent) => void
+  ): Promise<AppBuilderGenerateResult> => {
+    if (!APP_BUILDER_CONFIGURED) {
+      throw Object.assign(
+        new Error("App Builder is not available on this deployment."),
+        { status: 0, notConfigured: true }
+      );
+    }
+    const settle = warming.begin();
+    const controller = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, LONG_TIMEOUT_MS);
+    try {
+      const token = await auth.getToken();
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Accept: "text/event-stream",
+      };
+      if (token) headers.Authorization = `Bearer ${token}`;
+      let res: Response;
+      try {
+        res = await fetch(
+          `${APP_BUILDER_URL}/projects/${encodeURIComponent(id)}/generate/stream`,
+          {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              instruction,
+              context: opts?.context,
+              images: opts?.images,
+            }),
+            signal: controller.signal,
+          }
+        );
+      } catch (e) {
+        if (timedOut) {
+          throw Object.assign(
+            new Error(
+              `The App Builder service took too long to respond (over ${Math.round(LONG_TIMEOUT_MS / 1000)}s). ` +
+                "It may still be working - check again in a moment before retrying."
+            ),
+            { status: 0, timeout: true }
+          );
+        }
+        throw Object.assign(
+          new Error("Can't reach the App Builder service. Check your connection and try again."),
+          { status: 0, network: true, cause: e }
+        );
+      }
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        let data: any = null;
+        try {
+          data = text ? JSON.parse(text) : null;
+        } catch {
+          data = { error: text };
+        }
+        const message = (data && (data.error || data.detail)) || `Request failed (${res.status})`;
+        throw Object.assign(new Error(message), { status: res.status, body: data });
+      }
+      const reader = res.body?.getReader();
+      if (!reader) {
+        throw new Error("The builder closed the stream before replying.");
+      }
+      const decoder = new TextDecoder();
+      let buf = "";
+      let result: AppBuilderGenerateResult | null = null;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let idx: number;
+        while ((idx = buf.indexOf("\n\n")) >= 0) {
+          const chunk = buf.slice(0, idx);
+          buf = buf.slice(idx + 2);
+          for (const line of chunk.split("\n")) {
+            if (!line.startsWith("data: ")) continue;
+            let evt: AppBuilderGenerateEvent;
+            try {
+              evt = JSON.parse(line.slice(6)) as AppBuilderGenerateEvent;
+            } catch {
+              continue;
+            }
+            if (!evt || typeof evt.stage !== "string") continue;
+            onStage?.(evt.stage, evt);
+            if (evt.stage === "done") result = evt.result ?? null;
+            if (evt.stage === "error") {
+              throw Object.assign(new Error(evt.error || "Generate failed."), {
+                status: evt.status ?? 500,
+              });
+            }
+          }
+        }
+      }
+      if (!result) {
+        throw new Error("The builder ended the stream without a result.");
+      }
+      return result;
+    } finally {
+      clearTimeout(timer);
+      settle();
+    }
+  },
+
   // The existing files an on-device edit should see (same retrieval as the
   // hosted route). Older app-builder builds 404 - callers skip the edge
   // path then rather than let a local model write files blind.
@@ -384,7 +523,7 @@ export const appBuilder = {
   // failure feeds the client-side corrective retry.
   applyEdits: (
     id: string,
-    body: { instruction: string; files: AppBuilderFileWrite[] }
+    body: { instruction: string; files: AppBuilderFileWrite[]; summary?: string | null }
   ): Promise<AppBuilderGenerateResult> =>
     call("POST", `/projects/${encodeURIComponent(id)}/generate/apply`, body, LONG_TIMEOUT_MS),
 
