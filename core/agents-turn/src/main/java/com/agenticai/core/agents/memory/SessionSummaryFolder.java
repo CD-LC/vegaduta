@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.memory;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -93,12 +94,14 @@ final class SessionSummaryFolder {
      */
     String readSummary(String sessionId) {
         try {
-            return redisTemplate.opsForValue().getAndExpire(SessionMemoryService.summaryKey(sessionId), sessionTtl);
+            return redisTemplate
+                    .opsForValue()
+                    .getAndExpire(SessionMemoryService.summaryKey(sessionId), sessionTtl);
         } catch (RuntimeException e) {
             log.warn(
                     "Could not read the rolling summary for session {} - replaying the window"
                             + " without it",
-                    sessionId,
+                    LogSafe.clean(sessionId),
                     e);
             return null;
         }
@@ -118,20 +121,22 @@ final class SessionSummaryFolder {
 
     /**
      * The fold window: how many newest stored turns count as "still replayed" for folding purposes
-     * - the effective {@code history-max-turns}, capped at {@code SessionMemoryService.MAX_STORED_ENTRIES -
-     * SessionMemoryService.SUMMARY_FOLD_BATCH}.
+     * - the effective {@code history-max-turns}, capped at {@code
+     * SessionMemoryService.MAX_STORED_ENTRIES - SessionMemoryService.SUMMARY_FOLD_BATCH}.
      *
      * <p>The cap is what guarantees the storage trim never discards an unfolded turn. A batch is
-     * claimed as soon as {@value SessionMemoryService#SUMMARY_FOLD_BATCH} unfolded turns sit outside the fold window,
-     * so at most {@code window + SessionMemoryService.SUMMARY_FOLD_BATCH - 1} newest entries are ever unfolded; with the
-     * window capped as above that is always fewer than the {@value SessionMemoryService#MAX_STORED_ENTRIES} the trim
-     * keeps. Without the cap, an admin window of 400 would make the fold fire only after the trim
-     * had already thrown the turns away. The price, for an admin window above the cap, is that the
-     * oldest few replayed turns may also appear in the summary - a harmless overlap, not a hole.
+     * claimed as soon as {@value SessionMemoryService#SUMMARY_FOLD_BATCH} unfolded turns sit
+     * outside the fold window, so at most {@code window + SessionMemoryService.SUMMARY_FOLD_BATCH -
+     * 1} newest entries are ever unfolded; with the window capped as above that is always fewer
+     * than the {@value SessionMemoryService#MAX_STORED_ENTRIES} the trim keeps. Without the cap, an
+     * admin window of 400 would make the fold fire only after the trim had already thrown the turns
+     * away. The price, for an admin window above the cap, is that the oldest few replayed turns may
+     * also appear in the summary - a harmless overlap, not a hole.
      */
     int foldWindowTurns() {
         return Math.min(
-                windowSettings.current().maxTurns(), SessionMemoryService.MAX_STORED_ENTRIES - SessionMemoryService.SUMMARY_FOLD_BATCH);
+                windowSettings.current().maxTurns(),
+                SessionMemoryService.MAX_STORED_ENTRIES - SessionMemoryService.SUMMARY_FOLD_BATCH);
     }
 
     /**
@@ -169,7 +174,7 @@ final class SessionSummaryFolder {
             log.warn(
                     "Could not claim the session-history summarisation fold for session {} - "
                             + "appending without summarising, exactly as before this feature",
-                    sessionId,
+                    LogSafe.clean(sessionId),
                     e);
         }
     }
@@ -211,17 +216,17 @@ final class SessionSummaryFolder {
         } catch (RuntimeException e) {
             log.warn(
                     "Could not hand the claimed fold batch for session {} to the summariser",
-                    sessionId,
+                    LogSafe.clean(sessionId),
                     e);
         }
     }
 
     /**
      * The storage trim for sessions with a live summariser: {@link SessionAppendScript#TRIM_SCRIPT}
-     * trims to {@value SessionMemoryService#MAX_STORED_ENTRIES} and shifts the fold marker in one atomic step. If
-     * scripting fails, falls back to the plain LTRIM so the storage ceiling holds regardless - the
-     * marker may then point a few turns too far, which can only cause a few turns to be skipped by
-     * a later fold, never folded twice.
+     * trims to {@value SessionMemoryService#MAX_STORED_ENTRIES} and shifts the fold marker in one
+     * atomic step. If scripting fails, falls back to the plain LTRIM so the storage ceiling holds
+     * regardless - the marker may then point a few turns too far, which can only cause a few turns
+     * to be skipped by a later fold, never folded twice.
      */
     void trimKeepingFoldMarkerAligned(String sessionId, String redisKey) {
         try {
@@ -234,7 +239,7 @@ final class SessionSummaryFolder {
             log.warn(
                     "Marker-aware storage trim failed for session {} - falling back to the plain"
                             + " trim",
-                    sessionId,
+                    LogSafe.clean(sessionId),
                     e);
             redisTemplate.opsForList().trim(redisKey, -SessionMemoryService.MAX_STORED_ENTRIES, -1);
         }
@@ -248,12 +253,14 @@ final class SessionSummaryFolder {
      */
     void writeSummary(String sessionId, String summary) {
         try {
-            redisTemplate.opsForValue().set(SessionMemoryService.summaryKey(sessionId), summary, sessionTtl);
+            redisTemplate
+                    .opsForValue()
+                    .set(SessionMemoryService.summaryKey(sessionId), summary, sessionTtl);
         } catch (RuntimeException e) {
             log.warn(
                     "Could not store the rolling summary for session {} - the previous one (if any)"
                             + " stands",
-                    sessionId,
+                    LogSafe.clean(sessionId),
                     e);
         }
     }

@@ -1,5 +1,7 @@
 package com.agenticai.core.sarvam;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.speech.voicenote.VoiceSpeechException;
 import com.agenticai.core.speech.voicenote.VoiceSpeechGateway;
 import java.time.Instant;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
  * languages).
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 @ConditionalOnProperty(
         prefix = "app.omnichannel.whatsapp.voice-notes",
         name = "enabled",

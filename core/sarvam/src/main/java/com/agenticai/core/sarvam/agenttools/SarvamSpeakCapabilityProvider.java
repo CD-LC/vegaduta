@@ -5,6 +5,8 @@ import com.agenticai.core.agentspi.SpeakCapabilityProvider;
 import com.agenticai.core.sarvam.SarvamCredentialService;
 import com.agenticai.core.sarvam.SarvamGeneratedAudioService;
 import com.agenticai.core.sarvam.SarvamTextToSpeechClient;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Optional;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
  * key, so there is no uncapped platform spend here.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamSpeakCapabilityProvider implements SpeakCapabilityProvider {
 
     private final ObjectProvider<SarvamCredentialService> credentialService;
