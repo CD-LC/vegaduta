@@ -228,6 +228,7 @@ nav:
       - Repository setup: maintainers/repo-setup.md
       - Branch protection: maintainers/branch-protection.md
       - Releasing: maintainers/releasing.md
+      - v1.0.0 definition of done: maintainers/v1.0.0-definition-of-done.md
       - Agent coordination: maintainers/agent-coordination.md
       - Releasing the Java Agent SDK: maintainers/releasing-sdk.md
       - Publishing these docs: maintainers/docs-site.md
