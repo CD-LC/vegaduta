@@ -57,6 +57,17 @@ describe("useApprovalContinuation", () => {
     expect(fetchTranscript.mock.calls.length).toBe(reads);
   });
 
+  it("reports where the continuation is: waiting, then running once core's message is stored, with a start time", async () => {
+    const running = [...BASE, { role: "user", content: MARKER("r1") }];
+    const { result } = setup([BASE, BASE, running], { maxWaitMs: 60_000, startWaitMs: 60_000 });
+    const before = Date.now();
+    act(() => result.current.watch("r1"));
+    expect(result.current.phase).toBe("waiting");
+    expect(result.current.since).toBeGreaterThanOrEqual(before);
+    await waitFor(() => expect(result.current.phase).toBe("running"));
+    expect(result.current.continuing).toBe(true);
+  });
+
   it("watches one request once, however often it is reported", async () => {
     const { result, onReply, fetchTranscript } = setup([
       [...BASE, { role: "user", content: MARKER("r1") }, { role: "assistant", content: "Done." }],

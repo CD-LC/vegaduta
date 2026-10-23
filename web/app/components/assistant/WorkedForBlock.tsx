@@ -6,7 +6,11 @@ import { useTranslations } from "../../lib/i18n";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import { buildTraceRows, describeMemoryUse, type ActivityStep } from "../agents/AgentActivityTrace";
-import { formatDuration, isVisibleStep, liveStatusKey, skippedReason, summarizeWork } from "./workedFor";
+import { formatDuration, isVisibleStep, liveStatusKey, siteOf, skippedReason, summarizeWork } from "./workedFor";
+import ToolStepChips from "./ToolStepChips";
+
+/** A live turn with no event (not even a heartbeat) for this long says it is still waiting on the model. */
+export const QUIET_AFTER_MS = 20_000;
 
 /**
  * One collapsed "Working for 2 m 10 s · 6 tool calls, 1 failed" row per assistant turn (the OpenClaw
@@ -48,10 +52,25 @@ const TOOL_STATUS_KEYS: Record<string, string> = {
   recall_related_facts: "checkingMemory",
 };
 
+/** Tools whose open call reads better with what it is about: "Searching the web for “x”…". */
+const TOOL_TARGET_KEYS: Record<string, string> = {
+  web_search: "searchingWebFor",
+  fetch_web_page: "readingPageAt",
+  deep_research: "researchingTopic",
+  web_task: "researchingTopic",
+};
+
 function liveStatusLabel(
   status: NonNullable<ReturnType<typeof liveStatusKey>>,
-  t: (key: string, vars?: Record<string, unknown>) => string
+  t: (key: string, vars?: Record<string, unknown>) => string,
+  hasText = false
 ): string {
+  // Text is arriving and no tool is open: the model is writing the answer, whatever came before.
+  if (hasText && status.key !== "tool") return t("statusWriting");
+  if (status.key === "tool" && status.tool && status.target && TOOL_TARGET_KEYS[status.tool]) {
+    const target = /^https?:/.test(status.target) ? siteOf(status.target) : status.target;
+    return t(TOOL_TARGET_KEYS[status.tool], { target });
+  }
   switch (status.key) {
     case "starting":
       return t("statusStarting");
@@ -95,11 +114,17 @@ export default function WorkedForBlock({
   endedAt,
   className,
   showThinking = false,
+  hasText = false,
+  lastEventAt = null,
 }: {
   steps: readonly ActivityStep[] | null | undefined;
   startedAt?: number | null;
   endedAt?: number | null;
   className?: string;
+  /** Reply text is already streaming (the live line then says the answer is being written). */
+  hasText?: boolean;
+  /** When the stream last said anything (a chunk, a step or a heartbeat); drives the "still waiting" note. */
+  lastEventAt?: number | null;
   /** False hides the model's raw reasoning (the live ticker line and the
    * `thinking` rows in the expanded trace); the working summary and other
    * step types are unaffected. */
@@ -119,14 +144,17 @@ export default function WorkedForBlock({
   const visible = mergeThinkingSteps((steps ?? []).filter(isVisibleStep)).filter(
     (s) => showThinking || s.type !== "thinking"
   );
-  // A live turn with only phase events (nothing to list yet) still gets the heading and the
-  // status line: that is the whole point of the pre-token phases. A settled turn with no rows
-  // renders nothing, so a plain answer looks like a plain answer.
-  if (visible.length === 0 && !(live && (steps?.length ?? 0) > 0)) return null;
+  // A live turn shows the heading and the status line from its first moment, events or not: the silent
+  // minute before a local model's first token is exactly when the person needs to see it working. Once a
+  // plain answer's text streams, the text is the activity. A settled turn with no rows renders nothing,
+  // so a plain answer looks like a plain answer.
+  if (visible.length === 0 && !(live && !hasText)) return null;
   const summary = summarizeWork(steps, startedAt, endedAt, now);
   const rows = buildTraceRows(visible);
   const duration = formatDuration(summary.durationMs);
   const status = live ? liveStatusKey(steps) : null;
+  const heardAt = lastEventAt ?? startedAt ?? null;
+  const quietMs = live && heardAt != null ? now - heardAt : 0;
   const parts: string[] = [];
   if (summary.toolCalls > 0)
     parts.push(summary.toolCalls === 1 ? t("oneToolCall") : t("toolCalls", { n: summary.toolCalls }));
@@ -145,16 +173,22 @@ export default function WorkedForBlock({
         className="h-auto gap-1 px-1.5 py-0.5 text-xs font-normal text-muted-foreground"
       >
         <ChevronRight size={12} className={cn("size-3 transition-transform", open && "rotate-90")} aria-hidden="true" />
-        {live && <span className="size-1.5 animate-pulse rounded-full bg-primary" aria-hidden="true" />}
+        {live && <span className="size-1.5 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden="true" />}
         <span className="font-medium text-foreground">{heading}</span>
         {parts.length > 0 && <span>· {parts.join(", ")}</span>}
       </Button>
       {live && status && (
-        <div className="mt-1 flex items-center gap-1.5 px-1.5 text-xs text-muted-foreground" data-testid="live-status">
-          <Loader2 size={12} className="animate-spin text-primary" aria-hidden="true" />
-          <span className="animate-pulse font-medium">{liveStatusLabel(status, t)}</span>
+        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 px-1.5 text-xs text-muted-foreground" data-testid="live-status">
+          <Loader2 size={12} className="motion-safe:animate-spin text-primary" aria-hidden="true" />
+          <span role="status" className="asst-shimmer font-medium">
+            {liveStatusLabel(status, t, hasText)}
+          </span>
+          {quietMs >= QUIET_AFTER_MS && (
+            <span data-testid="live-quiet">· {t("quietFor", { duration: formatDuration(quietMs) })}</span>
+          )}
         </div>
       )}
+      {!open && <ToolStepChips rows={rows} live={live} />}
       {live && showThinking && status?.thinking && (
         <p
           className="mt-0.5 max-w-full truncate px-1.5 text-xs italic text-muted-foreground/80"
