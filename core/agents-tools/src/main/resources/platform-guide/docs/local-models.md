@@ -230,6 +230,10 @@ last two only to platform-pool rows that need them.
    The grade is shown as a badge in Platform Admin, LLM providers.
    `./scripts/vegaduta models pull TAG` measures the same thing after a pull,
    and `models list` shows the catalog's expected value in its TOOLS column.
+   `scripts/vegaduta personal` measures the model once on the first start and records the
+   result in `.env` as `LOCAL_MODEL_GRADE`; a restart reuses it until the model changes, so it
+   does not load the model cold on every start. `VEGADUTA_REPROBE=1 scripts/vegaduta personal`
+   measures again.
    The probe is short and permissive by design: `llama3.2:3b` passes it
    (STRUCTURED on Ollama 0.19) yet narrates tool runs once it sees a real
    agent prompt with a dozen tools, which is why the catalog marks it chat

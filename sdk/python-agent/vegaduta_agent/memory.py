@@ -66,11 +66,7 @@ class InMemoryMemoryStore:
     def search(self, query: str, limit: int = 10) -> list[MemoryEntry]:
         words = [w.lower() for w in query.split() if w]
         with self._lock:
-            hits = [
-                e
-                for e in self._entries.values()
-                if all(w in e.content.lower() for w in words)
-            ]
+            hits = [e for e in self._entries.values() if all(w in e.content.lower() for w in words)]
         return hits[:limit]
 
     def delete(self, entry_id: str) -> bool:
@@ -106,9 +102,7 @@ def poison_probe(content: str, extra_patterns: Iterable[re.Pattern] = ()) -> Pro
     """Screens memory content for instruction-shaped text. Returns a report;
     the caller decides whether to refuse. False positives are expected — this
     is a tripwire, not a verdict."""
-    matched = tuple(
-        p.pattern for p in (*_POISON_PATTERNS, *extra_patterns) if p.search(content)
-    )
+    matched = tuple(p.pattern for p in (*_POISON_PATTERNS, *extra_patterns) if p.search(content))
     return ProbeReport(bool(matched), matched)
 
 
@@ -146,9 +140,7 @@ class GovernedMemoryStore:
 
         with self._lock:
             if self._writes >= self._write_cap:
-                raise MemoryWriteCapExceededException(
-                    f"memory write cap {self._write_cap} reached"
-                )
+                raise MemoryWriteCapExceededException(f"memory write cap {self._write_cap} reached")
             self._writes += 1
         checked = self._run_guardrails(content, self._stage, self._guardrails)
         content = checked.content

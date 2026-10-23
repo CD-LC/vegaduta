@@ -27,6 +27,10 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 |---|---|---|
 | Release / install agent | cloud session, branch `claude/why-the-hell-k4tttl` | installer (`installer/`), launchers (`scripts/vegaduta`, `scripts/vegaduta.ps1`), `deploy/compose/` personal and local-AI overlays, `.github/workflows/release.yml`, releases and tags; PR #13 (platform-model warm-up: `core/chat/PlatformPoolWarm*`, `web/app/lib/warmPlatformModel.ts`, `web/app/components/chat/ModelWakingUpNotice.tsx`) |
 | Local-model agent | cloud session, branches `ccr-*`, `feat/chat-threads-list` | local-model performance (`docker-compose.local-ai.yml` keep-alive, Ollama options, `web/app/components/assistant/LocalModelTip.tsx`); chat history kept by default (#15); the Assistant's stored history (branch `feat/chat-threads-list`: `core/agents-turn/.../branching/ChatThreads*`, `ChatBranchFlagGate`, `ChatTranscriptService`, tenant migration V661, `web/app/components/assistant/useAssistantThreads.ts`, `useAssistantTurn.ts`, `web/app/lib/api/assistant.ts`, regenerated OpenAPI/SDK/contract files), through PRs |
+| Reels / marketing agent | cloud session, branch `claude/great-ptolemy-qcq7ve`, continuing on a local machine | `docs/marketing/reels/` (promo reel scripts, recorder, assembler, demo data); touches nothing else |
+| Personal start-up agent | local session on this machine, working tree of branch `claude/great-ptolemy-qcq7ve` (the PR will come from a clean branch off `main`) | personal-tier start time and first-install size: the health checks and JVM flags in `deploy/compose/personal.yml` and `docker-compose.search.yml`, the model-probe step of `scripts/vegaduta`, the `core/Dockerfile` jar layer, and the start-up switches in `core/app-config/.../application-personal.yml`. These overlap the release / install agent's launcher and compose files, so the change goes through a PR the release / install agent reviews before it merges |
+| Release-readiness lead (v1.0.0) | local editor (Claude Code on the maintainer's Mac), branches `rr/*` | the v0.1.9 → v1.0.0 readiness audit and its fixes, one small PR per area, each listing its files: image dependency CVEs (`core/pom.xml` dependency management, `web/package.json` and `web/Dockerfile`, the Node runner and browser-runner Dockerfiles and `package.json` files, and only the Node toolchain stages of `core/Dockerfile`); `web/proxy.js`, `web/app/**` fixes and `tests/e2e/tests/**`; channel and webhook hardening in `core/omnichannel*`, `core/security`, `core/tenancy` (erasure), `core/audit`, `core/agents-tools` (MCP URL checks), `core/agents-interop`; `.github/workflows/{ci,zap,static-gates,pypi-release}.yml`, `.github/dependabot.yml`, `scripts/ci/**`, `Makefile`; `sdk/**`, `CITATION.cff`, `contracts/`; documentation under `docs/`, root policy files and `docs/maintainers/v1.0.0-definition-of-done.md`. Files claimed by the release / install agent and the personal start-up agent (`installer/`, `scripts/vegaduta*`, `install.sh`, `release.yml`, `deploy/compose` personal and local-AI overlays, `core/Dockerfile` apart from the Node toolchain stages, `tests/install/`) are only touched in PRs that say so in their title and wait for that owner's review before merging. Never tags, dispatches or re-runs a release; merges nothing. Runs stacks only under its own Compose project names (`rr-*`) |
+| Lean personal edition agent | local session, branches `lean/*` merged into `feat/personal-lean-edition` (a pull request off `main` follows; nothing is pushed yet) | the edition switch and what a personal install leaves out: `core/security/.../edition/` (`@ConditionalOnEditionFeature`, `EditionFeature`, `EditionInfo`) and the one-line class annotations it adds across `core/tenancy`, `core/payments`, `core/billing`, `core/platform`, `core/templates`, `core/admin` (SCIM), `core/omnichannel` (Slack, Discord, Teams, X), `core/mcpserver`, `core/agents-interop` (A2A, directory), `core/sarvam`, `core/elevenlabs`, `core/voice`, `core/workflow` (share voice), `core/imagegen` (video and demo media); `PublicStatusController` (the `edition` object); `web/app/lib/edition.ts` and the route table, `web/proxy.js`, the channel, card and platform-admin allowlist changes; `VEGADUTA_EDITION` in `deploy/compose/personal.yml`, `.env.example` and `scripts/vegaduta`; `scripts/ci/boot-check.sh` / `startup-profile.sh`; `CHANGELOG.md`, `docs/configuration.md`, `docs/personal-mode.md`. Overlaps the personal start-up agent's `application-personal.yml` and the release / install agent's launcher and compose files: the change goes through a PR they review before it merges. `ci.yml` (a personal boot-check job) and the release workflows stay with the release agent |
 | Production agent | local editor | the production deployment: which release it runs, its configuration and its verification. Does not change application code without a PR |
 
 ## What production must run
@@ -94,6 +98,27 @@ and can serve beside the old one while Container Apps switches traffic.
 ## Log
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
+
+- 2026-10-23 09:44, release-readiness lead: merged the v1.0.0 readiness pull requests at the maintainer's
+  request, each squash-merged with `CI OK` and `CodeQL OK` green on its head: #27, #100, #105, #91, #103,
+  #113, #90, #87, #108, #106, #102, #95, #98, #96, #109, #89, #110, #111, #112, #115, #117, #94, #104, #107,
+  #114, #97, #93, #92, #88, and the release-notes PR #134 (the readiness PRs' CHANGELOG bullets, taken out of
+  them so they stopped conflicting). Not merged: the Spring Boot 4 port #99 (draft, waits for the soak
+  decision), Dependabot and other agents' PRs. No tag and no release in flight. Generated docs (module
+  graph, config reference, bundled platform guide) had drifted on `main` and were regenerated inside #92,
+  #93 and #97.
+- 2026-10-23 02:37, release-readiness lead: merged #118 (`next` 16.4.2: two critical RCE advisories and a DoS
+  published 2026-10-22, main and the published 0.1.9 web image shipped 16.3.6) at the maintainer's request,
+  after `CI OK` and `CodeQL OK` were green on its head `5293fa37`; result `56e3411f`. No tag and no release
+  in flight. A patch release of the web image is still needed for installs to get the fix: the release
+  agent decides. #88 also bumps `next` and needs a trivial rebase.
+- 2026-10-22, lean personal edition agent: nothing pushed or merged to `main` yet. Claimed the areas in the row above (tenancy, payments, billing, platform, omnichannel, mcpserver, web, deploy/compose personal files, the three docs). The work sits on local branches `lean/*` merged into `feat/personal-lean-edition`; the release / install agent and the personal start-up agent are asked to review it before the pull request merges. Not run on a stack yet; see the CHANGELOG entry for what was verified.
+- 2026-10-22 11:52 UTC, personal start-up agent: merged #83 (`personal --minimal` and `--no-valkey` no
+  longer exit in silence) and #86 (plan page for a lighter personal install) after green CI. Open and
+  waiting on CI: #82 (start-up budget), #84 (preparing an install never stops another install), #85
+  (core image stores the jar once). Claimed the files in the row above; the release / install agent's
+  review of #82 and #84 is welcome. Measured on one laptop with Docker Desktop, empty database, local
+  Ollama: published 0.1.9 took 39-64 s from launcher start to a healthy console, the branch 23-28 s.
 
 - 2026-10-21 15:05, release agent: the v0.1.9 Release run on `3c3ce0b` stopped at the voice-agent
   image scan (critical GHSA-6q48-6c7w-9gw2 in certifi 2026.7.22, published after 0.1.8); nothing was

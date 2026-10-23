@@ -40,9 +40,14 @@ import org.springframework.stereotype.Component;
 public class SkillRegistryClient {
 
     private static final String SEARCH_URL = "https://skillsmp.com/api/v1/skills/search";
-    private static final Pattern GITHUB_TREE =
+    static final Pattern GITHUB_TREE =
             Pattern.compile(
-                    "^https://github\\.com/([A-Za-z0-9_.-]{1,100})/([A-Za-z0-9_.-]{1,100})/tree/([A-Za-z0-9_./-]{1,100}?)/((?:[A-Za-z0-9_. -]+/?)+)$");
+                    "^https://github\\.com/([A-Za-z0-9_.-]{1,100})/([A-Za-z0-9_.-]{1,100})/tree/([A-Za-z0-9_./-]{1,100}?)/([A-Za-z0-9_."
+                            + " -]+(?:/[A-Za-z0-9_. -]+)*/?)$");
+
+    /** A GitHub folder link is short; longer text is refused before any matching. */
+    private static final int MAX_GITHUB_URL_CHARS = 400;
+
     private static final int MAX_DEPTH = 4;
 
     // Guarded transport; defaults() resolves the process-wide SsrfGuard lazily at
@@ -101,7 +106,8 @@ public class SkillRegistryClient {
         return cachedSearch(q, Math.max(1, Math.min(page, 50)), () -> fetchSearch(query, page));
     }
 
-    SearchResult cachedSearch(String q, int page, java.util.function.Supplier<SearchResult> loader) {
+    SearchResult cachedSearch(
+            String q, int page, java.util.function.Supplier<SearchResult> loader) {
         String key = page + "|" + q.toLowerCase(java.util.Locale.ROOT);
         long now = nanoClock.getAsLong();
         CachedSearch hit = searchCache.get(key);
@@ -144,7 +150,7 @@ public class SkillRegistryClient {
         List<RegistrySkill> out = new ArrayList<>();
         for (JsonNode s : data.path("skills")) {
             String github = s.path("githubUrl").asText("");
-            if (!GITHUB_TREE.matcher(github).matches()) {
+            if (github.length() > MAX_GITHUB_URL_CHARS || !GITHUB_TREE.matcher(github).matches()) {
                 continue;
             }
             out.add(
@@ -170,7 +176,8 @@ public class SkillRegistryClient {
      * reads.
      */
     public byte[] fetchAsArchive(String githubUrl) {
-        Matcher m = GITHUB_TREE.matcher(githubUrl == null ? "" : githubUrl.trim());
+        String link = githubUrl == null ? "" : githubUrl.trim();
+        Matcher m = GITHUB_TREE.matcher(link.length() > MAX_GITHUB_URL_CHARS ? "" : link);
         if (!m.matches() || githubUrl.contains("..")) {
             throw new SkillValidationException("That is not a GitHub skill folder link.");
         }
@@ -191,7 +198,8 @@ public class SkillRegistryClient {
                     "SKILL.md",
                     getBytes(
                             raw(owner, repo, ref, path + "/SKILL.md"),
-                            "Could not download that skill from GitHub. Try again in a few minutes."));
+                            "Could not download that skill from GitHub. Try again in a few"
+                                    + " minutes."));
         }
         if (!files.containsKey("SKILL.md")) {
             throw new SkillValidationException(

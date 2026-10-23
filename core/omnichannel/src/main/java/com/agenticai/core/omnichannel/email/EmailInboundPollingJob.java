@@ -163,6 +163,19 @@ public class EmailInboundPollingJob {
         props.put("mail." + protocol + ".timeout", "15000");
 
         String password = encryptionService.decrypt(credential.getEncryptedImapPassword());
+        try {
+            // The stored host is re-checked on every poll: the allow-list may have changed since it
+            // was saved, and the addresses it resolves to are pinned for this connection.
+            ImapEndpoint.apply(props, protocol, credential.getImapHost(), credential.getImapPort());
+        } catch (RuntimeException e) {
+            // The refusal text can name the tenant-typed host, so only its class is logged.
+            log.warn(
+                    "Skipping email poll for mailbox {}: the IMAP host was refused by the outbound"
+                            + " request policy ({})",
+                    com.agenticai.core.security.LogMasking.email(credential.getImapUsername()),
+                    e.getClass().getSimpleName());
+            return;
+        }
         Session session = Session.getInstance(props);
         try (Store store = session.getStore(protocol)) {
             store.connect(

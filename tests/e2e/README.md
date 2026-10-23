@@ -87,6 +87,7 @@ deliberately whenever the landing page or login theme changes on purpose.
 | `E2E_API_BASE_URL` | `http://localhost:8080` | Core API origin (specs that call the backend directly). |
 | `E2E_ADMIN_BASE_URL` | `http://localhost:3000/platform-admin` | platform-admin console URL (was web-admin). |
 | `E2E_ACADEMY_URL` | `http://localhost:4100` | Expected target of the landing page's Academy link. |
+| `E2E_SITE_MODE` | `oss` | Which signed-out landing the target serves: `oss` (the default, what compose and the nightly run) or `classic` (web built/run with `NEXT_PUBLIC_SITE_MODE=classic`). `landing.spec.ts` runs the describe for that mode and skips the other. |
 | `E2E_SITE_URL` | `E2E_BASE_URL` | Canonical site URL the web app was configured with (sitemap assertions). |
 | `CI` | unset | When set, `forbidOnly` is enabled (a stray `.only()` fails the run instead of silently narrowing it). |
 

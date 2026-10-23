@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.memory;
 
 import com.agenticai.core.knowledge.SidecarClient;
+import com.agenticai.core.security.logging.LogSafe;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -358,8 +359,9 @@ public class TenantMemoryService {
     }
 
     /**
-     * Up to {@code limit} distinct people (subject keys) who have a shared fact in the current tenant; the
-     * user-visible memory blocks (a different key) are left out. For background reviews, not request paths.
+     * Up to {@code limit} distinct people (subject keys) who have a shared fact in the current
+     * tenant; the user-visible memory blocks (a different key) are left out. For background
+     * reviews, not request paths.
      */
     public List<String> listFactSubjects(int limit) {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
@@ -567,8 +569,8 @@ public class TenantMemoryService {
         log.debug(
                 "Recalled {} shared memories for subject '{}' (query='{}')",
                 results.size(),
-                subjectKey,
-                query);
+                LogSafe.clean(subjectKey),
+                LogSafe.clean(query));
         return results;
     }
 

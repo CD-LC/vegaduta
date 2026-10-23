@@ -253,6 +253,30 @@ class PgAdvisoryJobLockTest {
         assertTrue(capped.tryRunExclusive("not-exempt", () -> {}));
     }
 
+    /**
+     * The migrate-only Job reads a skipped tick as "another migrator holds the lock" and exits 75
+     * without migrating, so its lock must never be subject to the held-lock cap: scheduled jobs
+     * that tick while the context starts would otherwise fail the Job at random.
+     */
+    @Test
+    void theMigrateOnlyLockIsExemptFromTheCapSoACapSkipCannotLookLikeAHeldLock()
+            throws SQLException {
+        when(lockResult.getBoolean(1)).thenReturn(true);
+        PgAdvisoryJobLock capped =
+                new PgAdvisoryJobLock(
+                        jdbcTemplate, 1, (io.micrometer.core.instrument.MeterRegistry) null);
+        boolean[] migrateRan = new boolean[1];
+
+        capped.tryRunExclusive(
+                "some-scheduled-job",
+                () ->
+                        migrateRan[0] =
+                                capped.tryRunExclusive(
+                                        TenantMigrateOnlyRunner.LOCK_NAME, () -> {}));
+
+        assertTrue(migrateRan[0], "the only permit is held, the migration must still run");
+    }
+
     @Test
     void concurrentHoldersBlockTheNextJobAcrossThreads() throws Exception {
         when(lockResult.getBoolean(1)).thenReturn(true);

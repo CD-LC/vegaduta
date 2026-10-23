@@ -106,7 +106,7 @@
   (<code>id</code>, <code>role</code>, <code>content</code>, <code>toolCalls</code>, <code>toolCallId</code>, <code>name</code>),
   <code>tools[]</code>, <code>context[]</code>, <code>forwardedProps</code>; unknown fields are ignored. The controller runs the
   <em>last user message's text</em> (string content, or the joined <code>text</code> parts of an array). No user text: 400.
-  Over the controller's maximum message length: 400. Missing <code>threadId</code>/<code>runId</code> are generated as UUIDs.
+  Over the controller's maximum message length: 400. Missing <code>threadId</code>/<code>runId</code> are generated as UUIDs. A supplied <code>runId</code> must be 1 to 128 letters, digits, <code>-</code> or <code>_</code> (otherwise 400).
   In the controller code read for this page, only the last user message and the ids are passed to the turn; <code>tools</code> and <code>state</code> are not forwarded to it.
 </p>
 <h3>Event sequence</h3>
@@ -134,7 +134,7 @@ RUN_FINISHED{threadId,runId}   or   RUN_ERROR{message,code}   (never both)</pre>
   <code>GET /api/agents/{agentId}/agui/runs/{runId}/events</code> replays buffered events after a position, then attaches to the live
   tail if the run executes on this pod. Position: <code>?after=&lt;seq&gt;</code> or the standard <code>Last-Event-ID</code> header
   (<code>after</code> wins). If the run is on another pod or its live window passed you receive the buffered history and a clean
-  end of stream; poll again until the buffer contains <code>RUN_FINISHED</code> or <code>RUN_ERROR</code>.
+  end of stream; poll again until the buffer contains <code>RUN_FINISHED</code> or <code>RUN_ERROR</code>. A rejoin is scoped to the agent in the path and to the signed-in user who started the run: for anyone else, or another agent, the stream is empty, exactly as for a run that does not exist.
   Companion: <code>GET /api/agents/{agentId}/agui/tools</code> (JSON, <code>VIEWER</code>) lists the agent's tools as AG-UI
   <code>Tool</code> objects (<code>name</code>, <code>description</code>, permissive <code>parameters</code> schema).
 </p>

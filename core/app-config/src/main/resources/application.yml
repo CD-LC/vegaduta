@@ -909,7 +909,19 @@ app:
       # for the primary pick, one batched `noul` call for additional
       # relevant agents. Any Jev failure falls back to lexical overlap.
       enabled: ${APP_JEV_AGENT_ROUTING_ENABLED:true}
+  actuator:
+    # /actuator/prometheus is permitAll (a Prometheus server scrapes without a JWT). The edge
+    # guard (ActuatorEdgeGuardFilter) 404s it for any request that came through a proxy, but a
+    # core published straight onto a network (Lite/Personal with BIND_ADDR=0.0.0.0) has no proxy.
+    # Set a scrape token and scrape-token-required=true there: every non-public actuator path
+    # then needs `Authorization: Bearer <token>` (Prometheus: `authorization.credentials`).
+    # Default off: the Full stack's Prometheus scrapes core:8080 without a token.
+    scrape-token: ${APP_ACTUATOR_SCRAPE_TOKEN:}
+    scrape-token-required: ${APP_ACTUATOR_SCRAPE_TOKEN_REQUIRED:false}
   a2a:
+    # Platform-wide kill switch for the inbound A2A surface (agent cards, /api/a2a JSON-RPC, REST).
+    # ON by default; false removes all three controllers.
+    enabled: ${APP_A2A_ENABLED:true}
     # Task record store (A2aTaskStore): memory (default, per-JVM) or redis (tenant-scoped
     # JSON snapshot mirrored to Redis so GetTask/CancelTask and the MCP get_task/cancel_task
     # tools work from any replica; falls back to memory if Redis errors or is absent).
@@ -2444,7 +2456,8 @@ app:
     # (Twilio requires a public HTTPS URL). Example: https://abcd1234.ngrok.io
     public-base-url: ${OMNICHANNEL_PUBLIC_BASE_URL:}
     discord:
-      # Discord bot Gateway bridge (channels/discord Node service). Outbound
+      # Discord bot Gateway bridge (a separate Node service that is NOT in this
+      # repository; contract in docs/channels/discord.md). Outbound
       # sends still go straight from DiscordApiClient to Discord's REST API
       # (no Java -> Node call needed for that), but Java DOES call the Node
       # service once, at credential-activation time (DiscordGatewayClient),

@@ -6,7 +6,14 @@ authors:
   - name: "The VegaDūta Authors"
 repository-code: "https://github.com/CD-LC/vegaduta"
 url: "https://github.com/CD-LC/vegaduta"
-license: Apache-2.0
+# The platform is Business Source License 1.1 (see LICENSE). Only the sdk/ directory is Apache-2.0
+# (sdk/LICENSE); each version converts to Apache-2.0 on its change date.
+license: BUSL-1.1
+license-url: "https://github.com/CD-LC/vegaduta/blob/main/LICENSE"
+# version and date-released: the latest release in CHANGELOG.md (bumped with each release, see
+# docs/maintainers/releasing.md; sdk/test/citation.test.mjs checks the pair against CHANGELOG.md).
+version: 0.1.9
+date-released: "2026-10-21"
 abstract: >-
   VegaDūta is a self-hostable, multi-tenant platform for building AI agents,
   orchestrating them in workflows with human approval, grounding them in

@@ -58,7 +58,5 @@ def teams_message(request: ApprovalRequest) -> dict:
         "summary": f"Approval needed: {request.summary}",
         "themeColor": "E59400",
         "title": f"Approval needed: {request.action_type}",
-        "text": "<br>".join(
-            line.replace("*", "**") for line in _summary_lines(request)
-        ),
+        "text": "<br>".join(line.replace("*", "**") for line in _summary_lines(request)),
     }

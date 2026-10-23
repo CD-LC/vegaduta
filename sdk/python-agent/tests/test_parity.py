@@ -66,22 +66,16 @@ CTX = RunContext(run_id="run-1", agent_id="agent-a", tenant_id="t1")
 
 
 def _cls(risk=RiskLabel.MEDIUM, side_effecting=True, requires_approval=False):
-    return ToolClassification(
-        risk=risk, side_effecting=side_effecting, requires_approval=requires_approval
-    )
+    return ToolClassification(risk=risk, side_effecting=side_effecting, requires_approval=requires_approval)
 
 
 def test_autonomy_levels():
     # read-only tools pass at L1; any side-effecting call needs L3+
-    assert autonomy_evaluate(
-        AutonomyLevel.L1_OBSERVE, _cls(side_effecting=False)
-    ).outcome is Outcome.ALLOW
+    assert autonomy_evaluate(AutonomyLevel.L1_OBSERVE, _cls(side_effecting=False)).outcome is Outcome.ALLOW
     denied = autonomy_evaluate(AutonomyLevel.L1_OBSERVE, _cls())
     assert denied.outcome is Outcome.DENY
     # L2 turns side effects into approvals
-    assert (
-        autonomy_evaluate(AutonomyLevel.L2_RECOMMEND, _cls()).outcome is Outcome.REQUIRE_APPROVAL
-    )
+    assert autonomy_evaluate(AutonomyLevel.L2_RECOMMEND, _cls()).outcome is Outcome.REQUIRE_APPROVAL
     # L3: low/medium run; HIGH needs approval; CRITICAL denied
     assert autonomy_evaluate(AutonomyLevel.L3_ACT_BOUNDED, _cls()).allowed
     assert (
@@ -89,8 +83,7 @@ def test_autonomy_levels():
         is Outcome.REQUIRE_APPROVAL
     )
     assert (
-        autonomy_evaluate(AutonomyLevel.L3_ACT_BOUNDED, _cls(risk=RiskLabel.CRITICAL)).outcome
-        is Outcome.DENY
+        autonomy_evaluate(AutonomyLevel.L3_ACT_BOUNDED, _cls(risk=RiskLabel.CRITICAL)).outcome is Outcome.DENY
     )
     # L4: high runs, critical still gated
     assert autonomy_evaluate(AutonomyLevel.L4_ACT_AUTONOMOUS, _cls(risk=RiskLabel.HIGH)).allowed
@@ -176,7 +169,9 @@ def test_mandate_derive_attenuates_only():
         )
     with pytest.raises(ValueError):
         root.derive(
-            "agent-x", {"refund"}, RiskLabel.CRITICAL,  # risk above parent's
+            "agent-x",
+            {"refund"},
+            RiskLabel.CRITICAL,  # risk above parent's
             datetime.now(timezone.utc) + timedelta(minutes=5),
         )
 
@@ -191,9 +186,9 @@ def test_mandate_encode_roundtrip_and_gate():
     assert gate.evaluate(ToolCall.of("refund"), _cls(risk=RiskLabel.HIGH), ctx).allowed
     denied = gate.evaluate(ToolCall.of("nuke"), _cls(risk=RiskLabel.LOW), ctx)
     assert not denied.allowed and "tool-not-permitted" in denied.reason
-    assert (
-        gate.evaluate(ToolCall.of("refund"), _cls(risk=RiskLabel.CRITICAL), ctx).reason
-    ).startswith("mandate:risk-exceeded")
+    assert (gate.evaluate(ToolCall.of("refund"), _cls(risk=RiskLabel.CRITICAL), ctx).reason).startswith(
+        "mandate:risk-exceeded"
+    )
     missing = gate.evaluate(ToolCall.of("refund"), _cls(), CTX)
     assert missing.reason == "mandate:missing"
 
@@ -201,7 +196,9 @@ def test_mandate_encode_roundtrip_and_gate():
 def test_mandate_chain_verification_detects_tamper():
     root = _root()
     child = root.derive(
-        "agent-child", {"refund"}, RiskLabel.MEDIUM,
+        "agent-child",
+        {"refund"},
+        RiskLabel.MEDIUM,
         datetime.now(timezone.utc) + timedelta(minutes=30),
     )
     tampered = Mandate.decode(child.encode())
@@ -397,9 +394,7 @@ def test_policy_replay_diffs_and_shadow_gate_allows():
     assert report.total == 2 and report.changed == 1
     assert report.diffs[0].kind.name == "NEWLY_DENIED"
     shadow = ShadowGate(DenyHigh(), Allow())
-    verdict = shadow.evaluate(
-        ToolCall.of("refund"), _cls(risk=RiskLabel.HIGH), RunContext.anonymous()
-    )
+    verdict = shadow.evaluate(ToolCall.of("refund"), _cls(risk=RiskLabel.HIGH), RunContext.anonymous())
     assert verdict.allowed  # the delegate still governs
     assert len(shadow.diffs) == 1
 
@@ -464,7 +459,7 @@ def test_async_tool_runs_the_pipeline():
     result = asyncio.run(tool.acall('{"url": "https://x"}', context=CTX))
     assert result == "got https://x"
     with pytest.raises(TypeError):
-        tool('{}')  # sync call on an async tool must say so
+        tool("{}")  # sync call on an async tool must say so
 
 
 def test_async_approval_gate_blocks_until_decided():
@@ -528,9 +523,7 @@ def test_risk_map_scores_and_flags_trifecta():
     def helper():
         return "undeclared"
 
-    mod = types.SimpleNamespace(
-        read_mail=read_mail, fetch_page=fetch_page, send=send, helper=helper
-    )
+    mod = types.SimpleNamespace(read_mail=read_mail, fetch_page=fetch_page, send=send, helper=helper)
     rm = __import__("vegaduta_agent").risk_map(mod)
     assert rm.trifecta_holds
     assert "helper" in rm.unclassified

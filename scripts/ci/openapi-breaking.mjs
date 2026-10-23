@@ -7,14 +7,30 @@
 //   operation-removed          a verb on a surviving path is gone
 //   operation-id-changed       an operation's operationId changed (the SDK method name derives from it)
 //   parameter-required         a parameter is new and required, or was optional and is now required
+//   parameter-removed          a query, header or cookie parameter is gone (its feature is lost)
+//   security-tightened         an operation that needed no credentials now needs some, or stops accepting
+//                              a security scheme it accepted (`security`, falling back to the document's)
+//   access-tightened           an operation now needs a role or permission it did not (`x-roles`,
+//                              `x-permissions`), or a role/permission that sufficed no longer does
 //   request-body-required      a request body is now required
 //   request-media-type-removed the request body no longer accepts a media type it accepted
 //   request-property-required  a request property is newly required (one with a `default` is exempt:
 //                              the server fills it, e.g. a Java primitive)
+//   request-property-removed   a request property is gone (the server now ignores what clients send),
+//                              unless the schema says `additionalProperties: true`
+//   constraint-tightened       an input gained or tightened minLength/maxLength, minimum/maximum, minItems/
+//                              maxItems, pattern or format
+//   composition-narrowed       an input's oneOf/anyOf lost an alternative
 //   response-body-removed      a success (2xx) response no longer has the body it had
 //   response-property-removed  a success-response property is gone
+//   response-required-relaxed  a success-response property that was always present may now be missing
+//   constraint-loosened        a success response lost or loosened a bound or pattern, or changed format
+//   composition-widened        a success response's oneOf/anyOf gained an alternative
 //   enum-narrowed              an enum lost values (anywhere), or an input gained an enum it lacked
 //   type-changed               a schema's `type` changed (an input may widen, an output may narrow)
+//
+// Not gated: a success status that moves within 2xx (200 to 201) is compared as the same response, so the
+// body rules above still apply to it; docs/api/DEPRECATION.md says so.
 //
 //   node scripts/ci/openapi-breaking.mjs                    # against the merge base with the base branch
 //   node scripts/ci/openapi-breaking.mjs --base <ref>       # against the merge base with <ref>
@@ -85,8 +101,13 @@ function compareOperation(ctx, before, after) {
   const newId = after.op.operationId;
   if (oldId && oldId !== newId) add(ctx, "operation-id-changed", where, `${oldId} -> ${newId ?? "(none)"}`);
 
+  compareAccess(ctx, before, after, where);
+
   const oldParams = parameterIndex(ctx.oldSpec, before);
   const newParams = parameterIndex(ctx.newSpec, after);
+  for (const key of oldParams.keys()) {
+    if (!newParams.has(key) && !key.startsWith("path:")) add(ctx, "parameter-removed", `${where} parameter ${key}`, "no longer in the operation");
+  }
   for (const [key, param] of newParams) {
     const prior = oldParams.get(key);
     const label = `${where} parameter ${key}`;
@@ -126,6 +147,40 @@ function compareOperation(ctx, before, after) {
       compareSchema(ctx, content.schema, next.schema, label, "out");
     }
   }
+}
+
+/** Credentials: `null` when anyone may call (no `security`, `[]`, or an alternative that is `{}`), else the scheme names. */
+function requiredSchemes(spec, op) {
+  const security = op.security ?? spec.security;
+  if (!Array.isArray(security) || security.length === 0 || security.some((r) => Object.keys(r ?? {}).length === 0)) return null;
+  return new Set(security.flatMap((r) => Object.keys(r)));
+}
+
+function compareAccess(ctx, before, after, where) {
+  const was = requiredSchemes(ctx.oldSpec, before.op);
+  const now = requiredSchemes(ctx.newSpec, after.op);
+  if (!was && now) {
+    add(ctx, "security-tightened", where, `was public, now requires ${[...now].join(" or ")}`);
+  } else if (was && now) {
+    const lost = [...was].filter((n) => !now.has(n));
+    if (lost.length) add(ctx, "security-tightened", where, `no longer accepts ${lost.join(", ")}`);
+  }
+
+  // x-roles is any-of; x-permissions is { anyOf, allOf }: allowed = holds every allOf and, when anyOf is set, one of it.
+  const reasons = [];
+  const roles = [before.op["x-roles"] ?? [], after.op["x-roles"] ?? []];
+  const lostRoles = roles[0].filter((r) => !roles[1].includes(r));
+  if (roles[1].length && (!roles[0].length || lostRoles.length)) {
+    reasons.push(roles[0].length ? `role ${lostRoles.join(", ")} no longer suffices` : `now needs role ${roles[1].join(" or ")}`);
+  }
+  const [oldPerm, newPerm] = [before.op, after.op].map((o) => ({ any: o["x-permissions"]?.anyOf ?? [], all: o["x-permissions"]?.allOf ?? [] }));
+  const extra = newPerm.all.filter((p) => !oldPerm.all.includes(p));
+  if (extra.length) reasons.push(`now also needs ${extra.join(", ")}`);
+  const lostAny = oldPerm.any.filter((p) => !newPerm.any.includes(p));
+  if (newPerm.any.length && (!oldPerm.any.length || lostAny.length)) {
+    reasons.push(oldPerm.any.length ? `permission ${lostAny.join(", ")} no longer suffices` : `now needs one of ${newPerm.any.join(", ")}`);
+  }
+  if (reasons.length) add(ctx, "access-tightened", where, reasons.join("; "));
 }
 
 function successCodes(op) {
@@ -180,8 +235,8 @@ function compareSchema(ctx, oldNode, newNode, where, dir) {
     if (oldName) ctx.compared.add(memo);
     where = `schemas.${newName}`;
   }
-  const a = deref(ctx.oldSpec, oldNode);
-  const b = deref(ctx.newSpec, newNode);
+  const a = flatten(ctx.oldSpec, oldNode);
+  const b = flatten(ctx.newSpec, newNode);
   if (!a || !b || typeof a !== "object" || typeof b !== "object") return;
 
   const ta = typeSet(a);
@@ -204,14 +259,26 @@ function compareSchema(ctx, oldNode, newNode, where, dir) {
     }
   }
 
+  compareConstraints(ctx, a, b, where, dir);
+  compareComposition(ctx, a, b, where, dir);
+
   const pa = a.properties ?? {};
   const pb = b.properties ?? {};
   if (dir === "out" && (b.properties || b.type === "object")) {
     for (const name of Object.keys(pa)) {
       if (!(name in pb)) add(ctx, "response-property-removed", `${where}.${name}`, "property is gone from the response");
     }
+    const after = new Set(b.required ?? []);
+    for (const name of a.required ?? []) {
+      if (name in pb && !after.has(name)) add(ctx, "response-required-relaxed", `${where}.${name}`, "was always present, now optional");
+    }
   }
   if (dir === "in") {
+    if (b.additionalProperties !== true && !isObj(b.additionalProperties) && (b.properties || b.type === "object")) {
+      for (const name of Object.keys(pa)) {
+        if (!(name in pb)) add(ctx, "request-property-removed", `${where}.${name}`, "the server no longer reads this property");
+      }
+    }
     const before = new Set(a.required ?? []);
     for (const name of b.required ?? []) {
       if (before.has(name) || deref(ctx.newSpec, pb[name])?.default !== undefined) continue;
@@ -225,6 +292,78 @@ function compareSchema(ctx, oldNode, newNode, where, dir) {
   if (isObj(a.additionalProperties) && isObj(b.additionalProperties)) {
     compareSchema(ctx, a.additionalProperties, b.additionalProperties, `${where}{}`, dir);
   }
+}
+
+const LOWER_BOUNDS = ["minLength", "minimum", "exclusiveMinimum", "minItems", "minProperties"];
+const UPPER_BOUNDS = ["maxLength", "maximum", "exclusiveMaximum", "maxItems", "maxProperties"];
+// A format that only widens an input (or only narrows an output) is not a break.
+const FORMAT_WIDENS = new Set(["int32>int64", "float>double"]);
+
+/** An input must not accept less than it did; an output must not promise less than it did. */
+function compareConstraints(ctx, a, b, where, dir) {
+  const num = (v) => (typeof v === "number" ? v : undefined);
+  const [rule, verb] = dir === "in" ? ["constraint-tightened", "tightened"] : ["constraint-loosened", "loosened"];
+  const stricter = (oldV, newV, lower) => {
+    if (oldV === undefined && newV === undefined) return false;
+    // `from` is what the side that is allowed to be strict promised; `to` what it promises now.
+    const [from, to] = dir === "in" ? [oldV, newV] : [newV, oldV];
+    if (to === undefined) return false;
+    return from === undefined || (lower ? to > from : to < from);
+  };
+  for (const [keys, lower] of [[LOWER_BOUNDS, true], [UPPER_BOUNDS, false]]) {
+    for (const key of keys) {
+      if (stricter(num(a[key]), num(b[key]), lower)) add(ctx, rule, `${where} ${key}`, `${key} ${a[key] ?? "unset"} -> ${b[key] ?? "unset"} (${verb})`);
+    }
+  }
+  const changed = (oldV, newV) => (dir === "in" ? newV !== undefined && newV !== oldV : oldV !== undefined && newV !== oldV);
+  if (typeof a.pattern === "string" || typeof b.pattern === "string") {
+    if (changed(a.pattern, b.pattern)) add(ctx, rule, `${where} pattern`, `pattern ${a.pattern ?? "unset"} -> ${b.pattern ?? "unset"} (${verb})`);
+  }
+  if (typeof a.format === "string" || typeof b.format === "string") {
+    const widened = dir === "in" ? FORMAT_WIDENS.has(`${a.format}>${b.format}`) : FORMAT_WIDENS.has(`${b.format}>${a.format}`);
+    if (changed(a.format, b.format) && !widened) add(ctx, rule, `${where} format`, `format ${a.format ?? "unset"} -> ${b.format ?? "unset"} (${verb})`);
+  }
+}
+
+/** oneOf/anyOf alternatives, matched by `$ref` name or `type`: an input may gain some, an output may lose some. */
+function compareComposition(ctx, a, b, where, dir) {
+  const id = (spec, n) => refName(n) ?? JSON.stringify(deref(spec, n)?.type ?? n);
+  for (const key of ["oneOf", "anyOf"]) {
+    if (!Array.isArray(a[key]) && !Array.isArray(b[key])) continue;
+    const oldIds = new Set((a[key] ?? []).map((n) => id(ctx.oldSpec, n)));
+    const newIds = new Set((b[key] ?? []).map((n) => id(ctx.newSpec, n)));
+    if (dir === "in" && Array.isArray(a[key])) {
+      const lost = [...oldIds].filter((x) => !newIds.has(x));
+      if (lost.length) add(ctx, "composition-narrowed", where, `${key} no longer accepts ${lost.join(", ")}`);
+    }
+    if (dir === "out" && Array.isArray(b[key])) {
+      const gained = [...newIds].filter((x) => !oldIds.has(x));
+      if (gained.length) add(ctx, "composition-widened", where, `${key} now also answers ${gained.join(", ")}`);
+    }
+    for (const x of oldIds) {
+      const na = a[key].find((n) => id(ctx.oldSpec, n) === x);
+      const nb = (b[key] ?? []).find((n) => id(ctx.newSpec, n) === x);
+      if (na && nb) compareSchema(ctx, na, nb, `${where}<${x.replace(/"/g, "")}>`, dir);
+    }
+  }
+}
+
+/** The schema with `$ref` resolved and `allOf` members merged in (properties and required are unions). */
+function flatten(spec, node, depth = 0) {
+  const s = deref(spec, node);
+  if (!isObj(s) || !Array.isArray(s.allOf) || depth > 16) return s;
+  const { allOf, ...rest } = s;
+  const out = { ...rest };
+  for (const member of allOf) {
+    const m = flatten(spec, member, depth + 1);
+    if (!isObj(m)) continue;
+    for (const [k, v] of Object.entries(m)) {
+      if (k === "properties") out.properties = { ...v, ...out.properties };
+      else if (k === "required") out.required = [...new Set([...(out.required ?? []), ...v])];
+      else if (!(k in out)) out[k] = v;
+    }
+  }
+  return out;
 }
 
 function isObj(v) {

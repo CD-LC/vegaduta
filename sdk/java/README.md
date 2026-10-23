@@ -11,9 +11,11 @@ Lives in `sdk/java/` next to the generated TypeScript and Python REST clients (`
 runs inside your own application. Apache-2.0. Java 17+. Group `io.github.cd-lc`. Design record:
 [ADR-0013](../../docs/architecture/ADR-0013-embeddable-agent-sdk.md).
 
-> Status: `0.1.0-SNAPSHOT`, not yet on Maven Central. Build it locally with
-> `mvn -f sdk/java/pom.xml install` and depend on the snapshot. The public API is annotated
-> and checked by japicmp from the first release on; anything marked `@Experimental` may move.
+> Status: `0.1.0`, released as the GitHub Release `sdk-v0.1.0` (jars, sources, javadoc, CycloneDX
+> SBOMs, `SHA256SUMS` and SLSA provenance), not yet on Maven Central. Until it is, take the jars from
+> that release or build them with `mvn -f sdk/java/pom.xml install` and depend on `0.1.0`. The public
+> API is annotated and checked by japicmp from the first release on; anything marked `@Experimental`
+> may move.
 
 ## What's new
 
@@ -67,10 +69,26 @@ classification or `UNCLASSIFIED`, approval coverage, lethal-trifecta combination
 Agentic Top 10 exposure, and a readiness score with the deductions that explain it.
 
 ```bash
-java -cp build/libs/app.jar:vegaduta-agent-scanner-0.1.0.jar \
+java -cp build/libs/app.jar:vegaduta-agent-scanner-<version>-cli.jar \
     io.vegaduta.agent.scanner.Main --package com.acme.agent --format md
-java -jar vegaduta-agent-scanner-0.1.0.jar --jar build/libs/app.jar --format json
-java -jar vegaduta-agent-scanner-0.1.0.jar --jar app.jar --fail-under 80   # exit 2 below 80
+java -jar vegaduta-agent-scanner-<version>-cli.jar --jar build/libs/app.jar --format json
+java -jar vegaduta-agent-scanner-<version>-cli.jar --jar app.jar --fail-under 80   # exit 2 below 80
+```
+
+The `-cli` jar (a release asset from the first release after 0.1.0, and the `cli` classifier on Maven
+Central) bundles the SDK's API and core, SLF4J's API and RE2/J, so `java -jar` runs it with nothing
+else on the class path. The plain `vegaduta-agent-scanner-<version>.jar` is the library for
+`new RiskMapScanner(policy).scan(classes)` and cannot be run with `java -jar`. SLF4J prints a "no
+providers" notice on stderr; it is harmless, and `-Dslf4j.internal.verbosity=ERROR` before `-jar`
+silences it.
+
+**0.1.0 shipped only the plain jar.** Run it with every jar it needs on the class path (the `-cp` form,
+not `-jar`; the scanner, core and api jars are release assets, `slf4j-api` and `re2j` come from Maven
+Central):
+
+```bash
+java -cp app.jar:vegaduta-agent-scanner-0.1.0.jar:vegaduta-agent-core-0.1.0.jar:vegaduta-agent-api-0.1.0.jar:slf4j-api-2.0.17.jar:re2j-1.8.jar \
+    io.vegaduta.agent.scanner.Main --package com.acme.agent --fail-under 80
 ```
 
 Pass `--approval-from MEDIUM` or `--mode STRICT` to score against the policy you intend to
@@ -82,7 +100,7 @@ run with. From Java: `new RiskMapScanner(policy).scan(classes).toMarkdown()`.
 <dependency>
   <groupId>io.github.cd-lc</groupId>
   <artifactId>vegaduta-agent-spring-boot-starter</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
 </dependency>
 ```
 

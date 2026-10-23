@@ -1,20 +1,27 @@
-import { getPublicEnv } from "./env";
+import { isPersonalEdition } from "./edition";
+import { getPublicPolicy } from "./env";
 
 // Billing switch (OSS default, 2026-09-29). Self-hosted installs have no
 // plans, prices or payment processor, so every plans/prices/upgrade/billing
 // surface is hidden unless the operator sets NEXT_PUBLIC_BILLING_ENABLED=1
-// (the hosted SaaS does). Read at RUNTIME through getPublicEnv (window.__ENV
+// (the hosted SaaS does). Read at RUNTIME through getPublicPolicy (window.__ENV
 // > build-time value), so one image serves both postures.
 //
 // Unset / anything other than "1" = OFF. When ON, every gated call site takes
 // the exact code path it took before this flag existed.
+//
+// A personal install (lib/edition.ts) has no billing whatever this variable says: core's
+// app.edition.billing-enabled is false there, so isBillingEnabled() is false for it and the redirect,
+// the rail rows and every upgrade link follow the edition rather than a second switch that a stray
+// WEB_BILLING_ENABLED=1 could flip. lite and full read the variable exactly as before.
 //
 // Independent of FREE_MODE (lib/freeMode.ts): FREE_MODE changes what the
 // pricing surfaces SAY; this flag decides whether they exist at all.
 
 /** Live read - use in components and tests (re-evaluates per call). */
 export function isBillingEnabled(): boolean {
-  return getPublicEnv("NEXT_PUBLIC_BILLING_ENABLED") === "1";
+  if (isPersonalEdition()) return false;
+  return getPublicPolicy("NEXT_PUBLIC_BILLING_ENABLED") === "1";
 }
 
 /** Module-load snapshot, for module-level constants. Prefer isBillingEnabled(). */

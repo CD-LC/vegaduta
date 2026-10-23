@@ -6,6 +6,8 @@ import com.agenticai.core.elevenlabs.ElevenLabsClient;
 import com.agenticai.core.elevenlabs.ElevenLabsCredentialService;
 import com.agenticai.core.elevenlabs.ElevenLabsGeneratedAudioService;
 import com.agenticai.core.elevenlabs.ElevenLabsVoiceService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Optional;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
  * resolveActiveApiKey()}/{@code mostRecent()}, which throw.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class ElevenLabsSpeakCapabilityProvider implements SpeakCapabilityProvider {
 
     private final ObjectProvider<ElevenLabsCredentialService> credentialService;

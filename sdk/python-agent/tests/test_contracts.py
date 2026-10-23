@@ -48,8 +48,57 @@ CONSUMER = "sdk-python-agent"
 PACKAGE_DIR = Path(__file__).resolve().parents[1] / "vegaduta_agent"
 ALIGNMENT = json.loads((cc.CONSUMERS_DIR / CONSUMER / "outbound-alignment.json").read_text(encoding="utf-8"))
 
-# Modules that would let the SDK talk to core over the network.
-HTTP_MODULES = {"urllib.request", "http.client", "requests", "httpx", "aiohttp", "urllib3", "socket"}
+# The package is dependency-free, so the rule is an allowlist rather than a list of known HTTP
+# clients: a top-level import must be the standard library (minus the network modules below), the
+# package itself, or one of the two optional extras that are imported lazily. Anything else - requests,
+# httpx, websockets, grpc, a client nobody has heard of yet - fails until it is added here on purpose.
+OPTIONAL_THIRD_PARTY = {"opentelemetry", "langchain_core"}
+
+# Standard-library modules that open a connection or serve one. ``asyncio`` is imported by the package
+# (locks, tasks), so its network entry points are caught by name in ``_NETWORK_CALLS`` instead.
+NETWORK_STDLIB = {
+    "socket", "ssl", "select", "selectors", "socketserver", "http", "urllib.request", "urllib.response",
+    "urllib.error", "ftplib", "smtplib", "poplib", "imaplib", "nntplib", "telnetlib", "xmlrpc",
+    "wsgiref", "webbrowser", "asyncio.streams", "asyncio.sslproto",
+}  # fmt: skip
+_NETWORK_CALLS = {
+    "open_connection", "open_unix_connection", "start_server", "start_unix_server", "create_connection",
+    "create_datagram_endpoint", "create_server",
+}  # fmt: skip
+# Importing by a computed name hides the module from this scan, so it is refused outright.
+_DYNAMIC_IMPORT_NAMES = {"importlib", "__import__", "import_module"}
+
+
+def _under(name: str, modules: set[str]) -> bool:
+    return any(name == m or name.startswith(m + ".") for m in modules)
+
+
+def _import_offenders(source: str, filename: str = "<snippet>") -> list[str]:
+    """Imports and calls in ``source`` that the no-HTTP-client rule refuses, as ``line: reason``."""
+    own = {"vegaduta_agent"}
+    offenders = []
+    for node in ast.walk(ast.parse(source, filename=filename)):
+        names: list[str] = []
+        if isinstance(node, ast.Import):
+            names = [a.name for a in node.names]
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            names = [node.module] + [f"{node.module}.{a.name}" for a in node.names]
+        for name in names:
+            root = name.split(".")[0]
+            if _under(name, NETWORK_STDLIB):
+                offenders.append(f"{node.lineno}: imports the network module {name}")
+            elif _under(name, _DYNAMIC_IMPORT_NAMES):
+                offenders.append(f"{node.lineno}: imports {name}, which loads modules by computed name")
+            elif root not in sys.stdlib_module_names and root not in own | OPTIONAL_THIRD_PARTY:
+                offenders.append(f"{node.lineno}: imports {name}, which is not stdlib or an allowed extra")
+        if isinstance(node, ast.Call):
+            fn = node.func
+            called = fn.id if isinstance(fn, ast.Name) else fn.attr if isinstance(fn, ast.Attribute) else ""
+            if called in _DYNAMIC_IMPORT_NAMES:
+                offenders.append(f"{node.lineno}: calls {called}(), which loads modules by computed name")
+            elif called in _NETWORK_CALLS:
+                offenders.append(f"{node.lineno}: calls {called}(), which opens a network connection")
+    return offenders
 
 
 # ---- the contract files ------------------------------------------------------------------------
@@ -71,21 +120,58 @@ def test_every_interaction_is_declared_in_the_openapi_document():
 
 
 def test_sdk_makes_no_http_call_to_core():
-    """No endpoint outside the contract can be called while the package imports no HTTP client.
+    """No endpoint outside the contract can be called while the package imports no network client.
     Calling core is a new interaction: add it to contracts/consumers/sdk-python-agent first."""
     offenders = []
     for path in sorted(PACKAGE_DIR.rglob("*.py")):
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        for node in ast.walk(tree):
-            names = []
-            if isinstance(node, ast.Import):
-                names = [a.name for a in node.names]
-            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
-                names = [node.module] + [f"{node.module}.{a.name}" for a in node.names]
-            for name in names:
-                if any(name == m or name.startswith(m + ".") for m in HTTP_MODULES):
-                    offenders.append(f"{path.relative_to(PACKAGE_DIR.parent)}:{node.lineno} imports {name}")
+        rel = path.relative_to(PACKAGE_DIR.parent)
+        found = _import_offenders(path.read_text(encoding="utf-8"), filename=str(path))
+        offenders += [f"{rel}:{line}" for line in found]
     assert offenders == [], offenders
+
+
+@pytest.mark.parametrize(
+    "snippet",
+    [
+        "import urllib.request",
+        "from urllib import request",
+        "from http import client",
+        "import http.server",
+        "import socket",
+        "import ssl",
+        "import ftplib",
+        "import smtplib",
+        "import xmlrpc.client",
+        "import requests",
+        "import httpx",
+        "import websockets",
+        "import grpc",
+        "import importlib",
+        "from importlib import import_module",
+        "__import__('requests')",
+        "import asyncio\nasyncio.open_connection('h', 80)",
+        "import asyncio\nasyncio.get_event_loop().create_connection(f, 'h', 80)",
+        "try:\n    import aiohttp\nexcept ImportError:\n    aiohttp = None",
+    ],
+)
+def test_the_no_http_rule_refuses_every_way_to_reach_the_network(snippet):
+    assert _import_offenders(snippet), snippet
+
+
+@pytest.mark.parametrize(
+    "snippet",
+    [
+        "import asyncio, sqlite3, hashlib, hmac, json, logging, threading, uuid",
+        "from urllib.parse import quote_plus, unquote_plus",
+        "from vegaduta_agent import governed",
+        "from . import audit",
+        "from opentelemetry import trace",
+        "from langchain_core.tools import StructuredTool",
+        "import asyncio\nasyncio.sleep(0)\nasyncio.Lock()",
+    ],
+)
+def test_the_no_http_rule_allows_what_the_package_needs(snippet):
+    assert _import_offenders(snippet) == [], snippet
 
 
 # ---- audit events ------------------------------------------------------------------------------

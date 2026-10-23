@@ -44,14 +44,13 @@ _LEGACY_META_MAX_BYTES = 64 * 1024
 
 
 def _ws_path(workspaces_dir: str, ws_id: str) -> str:
-    if not _WS_ID_RE.match(ws_id or ""):
+    if not _WS_ID_RE.fullmatch(ws_id or ""):
         raise WorkspaceError(f"invalid workspace id: {ws_id!r}")
     return os.path.join(os.path.realpath(workspaces_dir), ws_id)
 
 
 def _meta_file(workspaces_dir: str, ws_id: str) -> str:
-    return os.path.join(os.path.realpath(workspaces_dir), _META_DIRNAME,
-                        f"{ws_id}.json")
+    return os.path.join(os.path.realpath(workspaces_dir), _META_DIRNAME, f"{ws_id}.json")
 
 
 def _write_meta(workspaces_dir: str, meta: dict[str, Any]) -> None:
@@ -67,6 +66,7 @@ def _source_common_gitdir(source_checkout: str) -> str | None:
     """The source checkout's own git dir (service-managed, never mounted
     into a sandbox): `.git` dir, or a --separate-git-dir gitlink target."""
     from .gitops import _existing_git_dir
+
     gd = _existing_git_dir(source_checkout)
     return os.path.realpath(gd) if gd else None
 
@@ -99,13 +99,22 @@ def _find_worktree_admin(source_checkout: str, ws_path: str) -> str | None:
 def _ws_git(meta: dict[str, Any], *args: str) -> list[str]:
     """Hardened host-side git argv for a workspace (see SEC-015 note)."""
     ws_path = meta["path"]
-    return ["git",
-            "-c", "core.fsmonitor=false",
-            "-c", f"core.hooksPath={os.devnull}",
-            "-c", f"safe.directory={os.path.realpath(meta['source'])}",
-            "-c", f"safe.directory={ws_path}",
-            "-c", f"safe.directory={meta['gitdir']}",
-            f"--git-dir={meta['gitdir']}", f"--work-tree={ws_path}", *args]
+    return [
+        "git",
+        "-c",
+        "core.fsmonitor=false",
+        "-c",
+        f"core.hooksPath={os.devnull}",
+        "-c",
+        f"safe.directory={os.path.realpath(meta['source'])}",
+        "-c",
+        f"safe.directory={ws_path}",
+        "-c",
+        f"safe.directory={meta['gitdir']}",
+        f"--git-dir={meta['gitdir']}",
+        f"--work-tree={ws_path}",
+        *args,
+    ]
 
 
 def create_workspace(source_checkout: str, workspaces_dir: str) -> dict:
@@ -125,11 +134,27 @@ def create_workspace(source_checkout: str, workspaces_dir: str) -> dict:
             # otherwise refused as "dubious ownership". Whitelist BOTH the
             # repo we run in and the worktree path being created - the check
             # can fire on either during worktree add.
-            ["git", "-c", f"safe.directory={os.path.realpath(source_checkout)}",
-             "-c", f"safe.directory={ws_path}",
-             "-c", "core.fsmonitor=false", "-c", f"core.hooksPath={os.devnull}",
-             "-C", source_checkout, "worktree", "add", "--detach",
-             ws_path], capture_output=True, text=True, timeout=120)
+            [
+                "git",
+                "-c",
+                f"safe.directory={os.path.realpath(source_checkout)}",
+                "-c",
+                f"safe.directory={ws_path}",
+                "-c",
+                "core.fsmonitor=false",
+                "-c",
+                f"core.hooksPath={os.devnull}",
+                "-C",
+                source_checkout,
+                "worktree",
+                "add",
+                "--detach",
+                ws_path,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
         if r.returncode != 0:
             raise WorkspaceError(f"git worktree add failed: {r.stderr[:300]}")
         # Recorded NOW, before any tenant code has run in the workspace.
@@ -138,18 +163,27 @@ def create_workspace(source_checkout: str, workspaces_dir: str) -> dict:
             shutil.rmtree(ws_path, ignore_errors=True)
             raise WorkspaceError("git worktree add: admin dir not found")
     else:
+        # fmt: off
+        # Kept as it was before the formatter pass: CodeQL fingerprints an alert by
+        # the text of its line, so reformatting this call would re-report the
+        # existing path-injection alert on it as new.
         shutil.copytree(source_checkout, ws_path, symlinks=True,
                         ignore=shutil.ignore_patterns(".git", ".coderag",
                                                       "node_modules"))
-    meta = {"workspace_id": ws_id, "path": ws_path, "git": is_git,
-            "source": source_checkout, "gitdir": gitdir,
-            "created_at": time.time(), "iterations": 0}
+    meta = {
+        "workspace_id": ws_id,
+        "path": ws_path,
+        "git": is_git,
+        "source": source_checkout,
+        "gitdir": gitdir,
+        "created_at": time.time(),
+        "iterations": 0,
+    }
     _write_meta(workspaces_dir, meta)
     return meta
 
 
-def _migrate_legacy_meta(workspaces_dir: str, ws_id: str,
-                         ws_path: str) -> dict[str, Any] | None:
+def _migrate_legacy_meta(workspaces_dir: str, ws_id: str, ws_path: str) -> dict[str, Any] | None:
     """Pre-SEC-015 workspaces kept metadata INSIDE the workspace, so every
     field is tenant-controlled. Rebuild a trusted record: path recomputed;
     source trusted only if it is this repo's own service-managed checkout
@@ -167,21 +201,24 @@ def _migrate_legacy_meta(workspaces_dir: str, ws_id: str,
     if not isinstance(raw, dict):
         return None
     now = time.time()
-    expected_source = os.path.join(
-        os.path.dirname(os.path.realpath(workspaces_dir)), "checkout")
+    expected_source = os.path.join(os.path.dirname(os.path.realpath(workspaces_dir)), "checkout")
     source = raw.get("source")
     gitdir = None
-    if (isinstance(source, str)
-            and os.path.realpath(source) == os.path.realpath(expected_source)):
+    if isinstance(source, str) and os.path.realpath(source) == os.path.realpath(expected_source):
         gitdir = _find_worktree_admin(expected_source, ws_path)
     created = raw.get("created_at")
     iterations = raw.get("iterations")
-    meta = {"workspace_id": ws_id, "path": ws_path, "git": gitdir is not None,
-            "source": expected_source, "gitdir": gitdir,
-            "created_at": (min(float(created), now)
-                           if isinstance(created, int | float) else now),
-            "iterations": (iterations if isinstance(iterations, int)
-                           and 0 <= iterations < 10_000 else 0)}
+    meta = {
+        "workspace_id": ws_id,
+        "path": ws_path,
+        "git": gitdir is not None,
+        "source": expected_source,
+        "gitdir": gitdir,
+        "created_at": (min(float(created), now) if isinstance(created, int | float) else now),
+        "iterations": (
+            iterations if isinstance(iterations, int) and 0 <= iterations < 10_000 else 0
+        ),
+    }
     _write_meta(workspaces_dir, meta)
     try:
         os.remove(legacy)
@@ -220,20 +257,30 @@ def delete_workspace(workspaces_dir: str, ws_id: str) -> None:
     # symlinks planted inside the workspace.
     shutil.rmtree(meta["path"], ignore_errors=True)
     if meta.get("git"):
-        subprocess.run(["git", "-c",
-                        f"safe.directory={os.path.realpath(meta['source'])}",
-                        "-c", "core.fsmonitor=false",
-                        "-c", f"core.hooksPath={os.devnull}",
-                        "-C", meta["source"], "worktree", "prune"],
-                       capture_output=True, timeout=60)
+        subprocess.run(
+            [
+                "git",
+                "-c",
+                f"safe.directory={os.path.realpath(meta['source'])}",
+                "-c",
+                "core.fsmonitor=false",
+                "-c",
+                f"core.hooksPath={os.devnull}",
+                "-C",
+                meta["source"],
+                "worktree",
+                "prune",
+            ],
+            capture_output=True,
+            timeout=60,
+        )
     try:
         os.remove(_meta_file(workspaces_dir, ws_id))
     except OSError:
         pass
 
 
-def apply_files(workspaces_dir: str, ws_id: str,
-                files: list[dict]) -> dict:
+def apply_files(workspaces_dir: str, ws_id: str, files: list[dict]) -> dict:
     """Apply full-content file writes (the rework step). Paths are
     repo-relative and confined to the workspace."""
     meta = load_workspace(workspaces_dir, ws_id)
@@ -255,8 +302,12 @@ def apply_files(workspaces_dir: str, ws_id: str,
         written.append(rel)
     meta["iterations"] += 1
     _write_meta(workspaces_dir, meta)
-    return {"workspace_id": ws_id, "written": written, "deleted": deleted,
-            "iteration": meta["iterations"]}
+    return {
+        "workspace_id": ws_id,
+        "written": written,
+        "deleted": deleted,
+        "iteration": meta["iterations"],
+    }
 
 
 def diff_workspace(workspaces_dir: str, ws_id: str) -> str:
@@ -265,6 +316,9 @@ def diff_workspace(workspaces_dir: str, ws_id: str) -> str:
     meta = load_workspace(workspaces_dir, ws_id)
     if not meta["git"]:
         return ""
+    # fmt: off
+    # Kept as it was before the formatter pass (see create_workspace): the
+    # existing command-line-injection alert on this call is matched by its text.
     r = subprocess.run(_ws_git(meta, "diff"),
                        capture_output=True, text=True, timeout=60)
     return tail(r.stdout, 60_000)

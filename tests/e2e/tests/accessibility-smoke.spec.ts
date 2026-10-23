@@ -10,15 +10,17 @@ import { test, expect, type Page } from "@playwright/test";
 //   3. every <button> has a non-empty accessible name (an icon-only
 //      button with no aria-label is unusable by a screen-reader user)
 
+// Both element checks run in ONE page.evaluate over a snapshot of the DOM, not as a
+// locator.count() followed by locator.nth(i) round trips: the page re-renders as it
+// hydrates, so an index that existed at count() time could be gone by the time it was
+// read and the check timed out on a locator instead of reporting a real defect.
 async function assertImagesHaveAlt(page: Page) {
-  const imgs = page.locator("img");
-  const count = await imgs.count();
-  for (let i = 0; i < count; i++) {
-    const img = imgs.nth(i);
-    const alt = await img.getAttribute("alt");
-    const src = await img.getAttribute("src");
-    expect(alt, `<img src="${src}"> is missing an alt attribute`).not.toBeNull();
-  }
+  const missing = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("img"))
+      .filter((img) => !img.hasAttribute("alt"))
+      .map((img) => img.getAttribute("src") ?? "(no src)")
+  );
+  expect(missing, `<img> without an alt attribute: ${missing.join(", ")}`).toEqual([]);
 }
 
 async function assertExactlyOneH1(page: Page) {
@@ -26,11 +28,8 @@ async function assertExactlyOneH1(page: Page) {
 }
 
 async function assertButtonsHaveAccessibleNames(page: Page) {
-  const buttons = page.locator("button");
-  const count = await buttons.count();
-  for (let i = 0; i < count; i++) {
-    const button = buttons.nth(i);
-    const name = await button.evaluate((el) => {
+  const unnamed = await page.evaluate(() => {
+    const nameOf = (el: Element): string => {
       const ariaLabel = el.getAttribute("aria-label");
       if (ariaLabel && ariaLabel.trim()) return ariaLabel.trim();
 
@@ -51,10 +50,12 @@ async function assertButtonsHaveAccessibleNames(page: Page) {
       if (title && title.trim()) return title.trim();
 
       return "";
-    });
-    const outerHtmlSnippet = await button.evaluate((el) => el.outerHTML.slice(0, 120));
-    expect(name, `Button has no accessible name: ${outerHtmlSnippet}`).not.toBe("");
-  }
+    };
+    return Array.from(document.querySelectorAll("button"))
+      .filter((button) => nameOf(button) === "")
+      .map((button) => button.outerHTML.slice(0, 120));
+  });
+  expect(unnamed, `Buttons with no accessible name: ${unnamed.join(" | ")}`).toEqual([]);
 }
 
 const PAGES = [

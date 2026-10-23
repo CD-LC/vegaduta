@@ -157,9 +157,7 @@ class HaltGate:
         self._switch = switch
         self._delegate = delegate
 
-    def evaluate(
-        self, call: ToolCall, classification: ToolClassification, context: RunContext
-    ) -> Verdict:
+    def evaluate(self, call: ToolCall, classification: ToolClassification, context: RunContext) -> Verdict:
         for record in self._switch.active():
             if record.scope.matches(call, context):
                 return Verdict.deny(f"halted:{record.scope.kind.value}:{record.reason}")
@@ -190,8 +188,10 @@ def halt_drill(switch: HaltSwitch, tool_name: str, engaged_by: str = "halt-drill
         switch.release(record.id, engaged_by)
         allowed = gate.evaluate(call, ToolClassification(), RunContext.anonymous()).allowed
         detail = (
-            "ok" if denied and allowed
-            else "halt did not deny" if not denied
+            "ok"
+            if denied and allowed
+            else "halt did not deny"
+            if not denied
             else "release did not clear the halt"
         )
         return DrillReport(tool_name, denied, allowed, detail)
