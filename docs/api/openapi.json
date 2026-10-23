@@ -98712,6 +98712,30 @@
           }
         }
       },
+      "EditionInfo": {
+        "type": "object",
+        "properties": {
+          "tier": {
+            "type": "string"
+          },
+          "billingEnabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "authMode": {
+            "type": "string"
+          },
+          "features": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "boolean"
+            }
+          }
+        },
+        "required": [
+          "billingEnabled"
+        ]
+      },
       "ElevenLabsCredentialActivationRequest": {
         "type": "object",
         "properties": {
@@ -112004,6 +112028,9 @@
           },
           "announcement": {
             "$ref": "#/components/schemas/PlatformBroadcastService_PublicAnnouncement"
+          },
+          "edition": {
+            "$ref": "#/components/schemas/EditionInfo"
           }
         }
       },
