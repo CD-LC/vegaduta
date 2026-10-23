@@ -110,6 +110,9 @@ public class PlatformPoolWarmer {
         try {
             clients.create(selection.provider(), selection.decryptedApiKey(), 1, 0.0, 1.0)
                     .prompt()
+                    // A probe on a member's request thread is nobody's usage: no call-log row in
+                    // that member's tenant, no spend counter, no metric.
+                    .advisors(a -> a.param(LlmMetricsAdvisor.SKIP_OBSERVATION_PARAM, true))
                     .user("hi")
                     .call()
                     .content();

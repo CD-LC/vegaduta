@@ -40,7 +40,7 @@ Defaults by where core runs:
 | core-full image (`MCP_TOOLCHAIN=full`) | `security,knowledge,workflow,graph-memory,mcp` |
 | Lite (`deploy/compose/lite.yml`) | `security,knowledge,graph-memory,lite` (plus `,mcp` with `CORE_IMAGE_VARIANT=-full` if built-in STDIO servers should spawn in core instead of the runner) |
 | Personal (`deploy/compose/personal.yml`, `scripts/vegaduta personal`) | `security,knowledge,graph-memory,personal` (override with `PERSONAL_SPRING_PROFILES`) |
-| Full (`deploy/compose/docker-compose.yml`) | `security,knowledge,graph-memory,mcpserver` plus `CORE_MCP_PROFILE` (the CLI sets `,mcp` for the `tools`, `browser` and `sandbox` profiles) plus `CORE_PROFILES_EXTRA` (the CLI adds `,workflow` or `,workflow,temporal` for those profiles) |
+| Full (`deploy/compose/docker-compose.yml`) | `security,knowledge,graph-memory,mcpserver` plus `CORE_MCP_PROFILE` (the CLI sets `,mcp` for the `tools`, `browser` and `sandbox` profiles) plus `CORE_PROFILES_EXTRA` (the CLI adds `,workflow` or `,workflow,temporal` for those profiles) plus `CORE_SHAPE_PROFILE` (set it to `,shape-api` yourself when you start the `jobs` profile so the API leaves the background work to `core-jobs`; empty by default) |
 | Helm (`charts/vegaduta`) | `global.core.springProfiles` (`security,knowledge,workflow,graph-memory,mcpserver`); `,mcp` is added when `global.components.mcpStdioRunner=true` (every core role) or `global.core.mcpToolchain=full` (API only) |
 
 ## Core shapes

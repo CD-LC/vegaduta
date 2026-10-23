@@ -53,11 +53,11 @@ public class PlatformHostedLlmProviderService {
      * OpenAI-chat-completions-compatible with plain bearer-token auth same as the original four
      * (see {@code MistralAgentChatClientFactory} /{@code DeepSeekAgentChatClientFactory}/{@code
      * GroqAgentChatClientFactory}'s own BASE_URL constants, mirrored into {@link
-     * HostedPoolKnownEndpoints#KNOWN_PROVIDER_ENDPOINTS}). {@code META} added 2026-09-17 on the same basis - Meta
-     * Model API ({@code api.meta.ai}) is OpenAI-chat-completions-compatible with plain bearer auth,
-     * see {@code MetaAgentChatClientFactory}. {@code ANTHROPIC}/{@code AZURE_OPENAI}/{@code
-     * GOOGLE_VERTEX}/ {@code AWS_BEDROCK}/{@code OLLAMA} remain excluded - each needs a
-     * fundamentally different auth mechanism (Anthropic's own header shape, Azure's
+     * HostedPoolKnownEndpoints#KNOWN_PROVIDER_ENDPOINTS}). {@code META} added 2026-09-17 on the
+     * same basis - Meta Model API ({@code api.meta.ai}) is OpenAI-chat-completions-compatible with
+     * plain bearer auth, see {@code MetaAgentChatClientFactory}. {@code ANTHROPIC}/{@code
+     * AZURE_OPENAI}/{@code GOOGLE_VERTEX}/ {@code AWS_BEDROCK}/{@code OLLAMA} remain excluded -
+     * each needs a fundamentally different auth mechanism (Anthropic's own header shape, Azure's
      * endpoint+deployment+api-version, Vertex's GCP ADC/service-account, Bedrock's AWS SigV4
      * signing, Ollama's no-key local setup) that this bearer-token-only {@code
      * HostedLlmChatClientFactory} cannot express - adding any of them here would silently break
@@ -79,7 +79,6 @@ public class PlatformHostedLlmProviderService {
     // KNOWN_PROVIDER_ENDPOINTS (default base URL per generic provider) lives in
     // HostedPoolKnownEndpoints since 2026-10-14 (file-size ratchet).
 
-
     private final PlatformHostedLlmProviderRepository repository;
     private final HostedLlmPoolSettingsRepository poolSettingsRepository;
     private final EncryptionService encryptionService;
@@ -94,7 +93,8 @@ public class PlatformHostedLlmProviderService {
      */
     private SsrfGuard ssrfGuard;
 
-    // V499 - measures a row's tool-calling grade on save; a no-op until the chat module's probe arrives.
+    // V499 - measures a row's tool-calling grade on save; a no-op until the chat module's probe
+    // arrives.
     private HostedPoolToolCallGrading grading = new HostedPoolToolCallGrading(null);
 
     public PlatformHostedLlmProviderService(
@@ -107,7 +107,8 @@ public class PlatformHostedLlmProviderService {
         this.poolSettingsRepository = poolSettingsRepository;
         this.encryptionService = encryptionService;
         this.providerModelCatalogService = providerModelCatalogService;
-        this.endpointProbe = new HostedPoolEndpointProbe(restClientBuilder.build(), this::ssrfGuard);
+        this.endpointProbe =
+                new HostedPoolEndpointProbe(restClientBuilder.build(), this::ssrfGuard);
         this.requestResolver = new HostedPoolRequestResolver(providerModelCatalogService);
         this.chain =
                 new HostedPoolChainResolver(
@@ -167,13 +168,15 @@ public class PlatformHostedLlmProviderService {
     /**
      * V484 - true when the pool has at least one enabled row and every enabled row is {@link
      * PlatformHostedLlmProvider#isZeroCost() zero-cost}. {@code FreeTierChatClientService} uses it
-     * to skip the token and dollar reservations of a turn that cannot cost anyone money. Deliberately
-     * ignores the master switch and the SSRF guard: a false positive only means a reservation is
-     * skipped for a turn that then fails with an empty pool, which costs nothing.
+     * to skip the token and dollar reservations of a turn that cannot cost anyone money.
+     * Deliberately ignores the master switch and the SSRF guard: a false positive only means a
+     * reservation is skipped for a turn that then fails with an empty pool, which costs nothing.
      */
     public boolean allEnabledRowsZeroCost() {
-        List<PlatformHostedLlmProvider> enabled = repository.findAllByEnabledTrueOrderByPriorityAsc();
-        return !enabled.isEmpty() && enabled.stream().allMatch(PlatformHostedLlmProvider::isZeroCost);
+        List<PlatformHostedLlmProvider> enabled =
+                repository.findAllByEnabledTrueOrderByPriorityAsc();
+        return !enabled.isEmpty()
+                && enabled.stream().allMatch(PlatformHostedLlmProvider::isZeroCost);
     }
 
     /**
@@ -212,6 +215,15 @@ public class PlatformHostedLlmProviderService {
      */
     public Optional<HostedProviderSelection> resolveEnabledSelectionById(Long id) {
         return chain.enabledSelectionById(id);
+    }
+
+    /**
+     * {@link #resolveEnabledSelectionById} without the master-switch check: would this row serve if
+     * the pool were switched on (enabled, base URL passes the SSRF guard, key decrypts).
+     */
+    public Optional<HostedProviderSelection> resolveEnabledSelectionByIdIgnoringPoolSwitch(
+            Long id) {
+        return chain.enabledSelectionByIdIgnoringPoolSwitch(id);
     }
 
     public record HostedProviderSelection(
@@ -295,13 +307,13 @@ public class PlatformHostedLlmProviderService {
     /**
      * The {@code VERTEX_ADC}/{@code VERTEX_SERVICE_ACCOUNT} counterpart to {@link #create} -
      * deliberately does not go through {@link HostedPoolRequestResolver#resolve} (that method's
-     * provider/base-URL
-     * derivation is entirely about the OpenAI-chat-completions-compatible path {@link
-     * com.agenticai.core.chat.HostedLlmChatClientFactory}'s non-Vertex branch builds against; a
-     * Vertex row is driven by project/location/credentials instead - see that factory's Vertex
-     * branch). No live key-validation probe either: there is no generic "does this service-account
-     * JSON or ADC actually work" endpoint to hit ahead of a real chat call, the same reason {@link
-     * VertexAiChatClientFactory} never validates a tenant's BYOK Vertex credential eagerly either.
+     * provider/base-URL derivation is entirely about the OpenAI-chat-completions-compatible path
+     * {@link com.agenticai.core.chat.HostedLlmChatClientFactory}'s non-Vertex branch builds
+     * against; a Vertex row is driven by project/location/credentials instead - see that factory's
+     * Vertex branch). No live key-validation probe either: there is no generic "does this
+     * service-account JSON or ADC actually work" endpoint to hit ahead of a real chat call, the
+     * same reason {@link VertexAiChatClientFactory} never validates a tenant's BYOK Vertex
+     * credential eagerly either.
      */
     private PlatformHostedLlmProviderResponse createVertex(
             String authType, PlatformHostedLlmProviderUpsertRequest request) {
@@ -368,12 +380,15 @@ public class PlatformHostedLlmProviderService {
 
         String newEncryptedApiKeyOrNull = null;
         if (StringUtils.hasText(request.apiKey())) {
-            endpointProbe.validateKey(resolved.baseUrl(), request.apiKey(), resolved.completionsPath());
+            endpointProbe.validateKey(
+                    resolved.baseUrl(), request.apiKey(), resolved.completionsPath());
             newEncryptedApiKeyOrNull = encryptionService.encrypt(request.apiKey());
         }
         // V499/V500 - re-measured only when (endpoint, model) changed or never measured.
         String keyForProbe =
-                StringUtils.hasText(request.apiKey()) ? request.apiKey() : chain.decryptSecretOrNull(entity);
+                StringUtils.hasText(request.apiKey())
+                        ? request.apiKey()
+                        : chain.decryptSecretOrNull(entity);
         grading.forUpdateInto(entity, resolved, keyForProbe);
 
         entity.apply(
@@ -399,12 +414,12 @@ public class PlatformHostedLlmProviderService {
     }
 
     /**
-     * Changes ONLY a row's model - the runtime switch the local-model surface needs
-     * ({@code POST /api/local-models/use}, "use this model" on /troubleshoot). Label, base URL,
-     * stored key, enabled flag, priority and the per-row overrides are kept exactly as stored;
-     * because (endpoint, model) changed, {@link HostedPoolToolCallGrading} re-measures the
-     * tool-call grade, and the model is marked hand-picked ({@code modelAutoSelected=false}) so
-     * the invalid-model self-heal never rewrites an operator's deliberate choice.
+     * Changes ONLY a row's model - the runtime switch the local-model surface needs ({@code POST
+     * /api/local-models/use}, "use this model" on /troubleshoot). Label, base URL, stored key,
+     * enabled flag, priority and the per-row overrides are kept exactly as stored; because
+     * (endpoint, model) changed, {@link HostedPoolToolCallGrading} re-measures the tool-call grade,
+     * and the model is marked hand-picked ({@code modelAutoSelected=false}) so the invalid-model
+     * self-heal never rewrites an operator's deliberate choice.
      */
     public PlatformHostedLlmProviderResponse updateModel(Long id, String model) {
         PlatformHostedLlmProvider entity =
@@ -443,8 +458,8 @@ public class PlatformHostedLlmProviderService {
 
     /**
      * The {@code VERTEX_ADC}/{@code VERTEX_SERVICE_ACCOUNT} counterpart to {@link #update} - see
-     * {@link #createVertex}'s javadoc for why this bypasses {@link HostedPoolRequestResolver}/{@link
-     * HostedPoolEndpointProbe#validateKey}.
+     * {@link #createVertex}'s javadoc for why this bypasses {@link
+     * HostedPoolRequestResolver}/{@link HostedPoolEndpointProbe#validateKey}.
      */
     private PlatformHostedLlmProviderResponse updateVertex(
             PlatformHostedLlmProvider entity,
@@ -510,12 +525,12 @@ public class PlatformHostedLlmProviderService {
 
     /**
      * Hosted-pool invalid-model SELF-HEAL (2026-08-05) - re-runs {@link
-     * HostedPoolRequestResolver#autoSelectModel} for one
-     * existing row whose stored model id the upstream just rejected as unknown/retired (the
-     * "gemini-2.5-flash-lite / no longer available to new users" incident shape, without waiting
-     * for an admin to blank the model by hand - see the comment inside {@link #update}). Called
-     * asynchronously (and per-row rate-limited) by {@code core.agents}' {@code AgentChatService}
-     * when a pool rung fails with an invalid-model error.
+     * HostedPoolRequestResolver#autoSelectModel} for one existing row whose stored model id the
+     * upstream just rejected as unknown/retired (the "gemini-2.5-flash-lite / no longer available
+     * to new users" incident shape, without waiting for an admin to blank the model by hand - see
+     * the comment inside {@link #update}). Called asynchronously (and per-row rate-limited) by
+     * {@code core.agents}' {@code AgentChatService} when a pool rung fails with an invalid-model
+     * error.
      *
      * <p>Deliberately conservative - the row is only ever touched when ALL of:
      *
@@ -626,11 +641,10 @@ public class PlatformHostedLlmProviderService {
      * same data {@link HostedPoolRequestResolver#autoSelectModel} uses).
      *
      * <p>Reuses the same models-URL derivation {@link HostedPoolEndpointProbe#validateKey} already
-     * uses, so this always
-     * probes the exact same endpoint a save's validation would - no separate discovery path to keep
-     * in sync. Returns an empty list (never throws) when the provider has no conventional models
-     * endpoint to probe or the call fails, so the admin form degrades to manual model entry rather
-     * than blocking the screen.
+     * uses, so this always probes the exact same endpoint a save's validation would - no separate
+     * discovery path to keep in sync. Returns an empty list (never throws) when the provider has no
+     * conventional models endpoint to probe or the call fails, so the admin form degrades to manual
+     * model entry rather than blocking the screen.
      */
     public List<String> discoverModels(String baseUrl, String apiKey, String completionsPath) {
         return endpointProbe.discoverModels(baseUrl, apiKey, completionsPath);
