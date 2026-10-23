@@ -1,6 +1,8 @@
 package com.agenticai.core.platform;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.MasterKeyInvalidException;
 import com.agenticai.core.tenancy.MasterKeyMissingException;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  * work to {@link PlatformTenantDeletionOrchestrationService}, which is the one class that actually
  * knows about every system a tenant's data can live in.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/tenants")
 public class TenantDeletionController {
