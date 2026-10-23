@@ -99,6 +99,11 @@ and can serve beside the old one while Container Apps switches traffic.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-23 02:37, release-readiness lead: merged #118 (`next` 16.4.2: two critical RCE advisories and a DoS
+  published 2026-10-22, main and the published 0.1.9 web image shipped 16.3.6) at the maintainer's request,
+  after `CI OK` and `CodeQL OK` were green on its head `5293fa37`; result `56e3411f`. No tag and no release
+  in flight. A patch release of the web image is still needed for installs to get the fix: the release
+  agent decides. #88 also bumps `next` and needs a trivial rebase.
 - 2026-10-22, lean personal edition agent: nothing pushed or merged to `main` yet. Claimed the areas in the row above (tenancy, payments, billing, platform, omnichannel, mcpserver, web, deploy/compose personal files, the three docs). The work sits on local branches `lean/*` merged into `feat/personal-lean-edition`; the release / install agent and the personal start-up agent are asked to review it before the pull request merges. Not run on a stack yet; see the CHANGELOG entry for what was verified.
 - 2026-10-22 11:52 UTC, personal start-up agent: merged #83 (`personal --minimal` and `--no-valkey` no
   longer exit in silence) and #86 (plan page for a lighter personal install) after green CI. Open and
