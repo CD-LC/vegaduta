@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Security
+
+- **The console moves to Next.js 16.4.2.** Next.js 16.0.0 through 16.4.0 are affected by two critical advisories, unauthenticated remote code execution in the Image Optimization API when SVG files are used ([GHSA-2464-fhr4-w9xw](https://github.com/advisories/GHSA-2464-fhr4-w9xw)) and in `'use cache'` functions that return typed arrays ([GHSA-673q-mjm6-r5xr](https://github.com/advisories/GHSA-673q-mjm6-r5xr)), and by a high-severity denial of service in the App Router with Server Actions ([GHSA-p3m5-59mp-jv5r](https://github.com/advisories/GHSA-p3m5-59mp-jv5r), CVE-2026-94482); the first patched release is 16.4.1. The console, published up to 0.1.9, shipped 16.3.6. `web/package.json` now asks for `^16.4.2` and the lockfile resolves `next` and its `@next/*` packages to 16.4.2; no application code changed.
+
 ### Changed
 
 - **Platform trace filters are validated.** `GET /api/platform/traces` now answers 400 when `userId` or `name` contains a character outside letters, digits and `. _ : -` (plus `@ +` for `userId` and a space for `name`) or is longer than 128 characters; before, the value was URL-encoded and forwarded to Langfuse unchanged. Ordinary user ids, e-mail addresses and trace names such as `agent.turn` are unaffected.
