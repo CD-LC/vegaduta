@@ -81,8 +81,8 @@ While any compose add-on waits for the host, a panel says what is waiting and ho
   the token and the Setup app does not poll yet, so the panel shows "Setup is not linked" and the commands below
   are the way to apply a change. Re-running Setup and ticking the extra in its Extras step works too.
 - A **copyable command** for the whole wanted set, to run in the install folder. On Windows the page leads with the
-  PowerShell form (`scripts\vegaduta.ps1 personal -Profile a,b`) and says that `--search` has no PowerShell option, so
-  web search must be turned on from Setup there.
+  PowerShell form (`scripts\vegaduta.ps1 personal -Profile a,b`); the launcher's own `-Search` switch turns web search
+  on there, but the panel does not add it to that command yet, so on Windows turn web search on with the switch.
 - Extra **`.env` lines** (for example the Assistant browser's `CORE_IMAGE_VARIANT=-full`) to add to
   `deploy/compose/.env`, with a copy button.
 - For a turn-off, the panel does **not** offer a command: the launcher only adds things. It tells you to open
