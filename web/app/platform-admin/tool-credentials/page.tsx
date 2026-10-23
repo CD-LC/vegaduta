@@ -12,6 +12,8 @@ import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { useConfirm } from "../components/admin/ConfirmDialog";
+import { isPersonalEdition } from "../../lib/edition";
+import { useCloudSpeechOffered } from "../../lib/cloudSpeech";
 
 // Platform-admin-settable credentials for tool-capability providers that were
 // previously BYOK-only with zero admin path - 2026-08-03, "even I should be
@@ -96,6 +98,8 @@ const TOOLS = [
 
 export default function ToolCredentialsPage() {
   const askConfirm = useConfirm();
+  // The ElevenLabs voice credential is a CLOUD_SPEECH feature: no card where core has it off.
+  const speech = useCloudSpeechOffered();
   const [statuses, setStatuses] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [formState, setFormState] = useState<Record<string, { apiKey?: string; extraConfig?: string }>>({});
@@ -178,25 +182,28 @@ export default function ToolCredentialsPage() {
         fallback.
       </p>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Plug size={16} className="text-primary" /> MCP Catalog
-          </CardTitle>
-          <p className="text-xs text-muted-foreground">
-            See the curated MCP server catalog every tenant browses from Tools → MCP Servers, and search the public MCP
-            Registry.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <Link
-            href="/platform-admin/mcp-catalog"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-          >
-            Open MCP Catalog <ChevronRight size={13} />
-          </Link>
-        </CardContent>
-      </Card>
+      {/* /platform-admin/mcp-catalog is outside the personal allowlist (a real 404 there): no card to it. */}
+      {!isPersonalEdition() && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Plug size={16} className="text-primary" /> MCP Catalog
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">
+              See the curated MCP server catalog every tenant browses from Tools → MCP Servers, and search the public
+              MCP Registry.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/platform-admin/mcp-catalog"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+            >
+              Open MCP Catalog <ChevronRight size={13} />
+            </Link>
+          </CardContent>
+        </Card>
+      )}
 
       {searchStatus && (
         <Card className="mb-6" data-testid="web-search-providers">
@@ -239,7 +246,7 @@ export default function ToolCredentialsPage() {
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {TOOLS.map((tool) => {
+        {TOOLS.filter((tool) => speech || tool.key !== "ELEVENLABS").map((tool) => {
           const status = statuses[tool.key];
           const configured = !!status?.configured;
           const form = formState[tool.key] || {};

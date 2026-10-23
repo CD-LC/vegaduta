@@ -3,6 +3,8 @@ package com.agenticai.core.elevenlabs;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.speech.call.CallSpeechQuota;
 import com.agenticai.core.speech.call.CallSpeechQuotaExceededException;
 import java.time.Instant;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
  * only happens for internal/test callers, never a real tenant request.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class ElevenLabsCallSpeechQuota implements CallSpeechQuota {
 
     private final VoiceQuotaService voiceQuotaService;

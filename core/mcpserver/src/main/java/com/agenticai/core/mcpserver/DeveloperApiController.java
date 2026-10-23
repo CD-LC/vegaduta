@@ -9,6 +9,8 @@ import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.mcpserver.tools.McpListAgentsToolCallback;
 import com.agenticai.core.mcpserver.tools.McpListMyWorkflowsToolCallback;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.workflow.WorkflowRunNotFoundException;
 import com.agenticai.core.workflow.WorkflowService;
 import com.agenticai.core.workflow.dto.WorkflowRunResponse;
@@ -46,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
  * /api/dev/*} path, alongside {@code /mcp/*}). Same {@code "mcpserver"} profile gate as the rest of
  * this module - inert with zero risk when that profile is off.
  */
+@ConditionalOnEditionFeature(EditionFeature.MCP_SERVER_EXPOSURE)
 @RestController
 @RequestMapping("/api/dev/v1")
 public class DeveloperApiController {
@@ -370,8 +373,8 @@ public class DeveloperApiController {
                         () ->
                                 new IllegalStateException(
                                         "Developer API endpoint invoked with no McpCallerContext"
-                                            + " set - McpApiKeyAuthFilter should have rejected this"
-                                            + " request already."));
+                                                + " set - McpApiKeyAuthFilter should have rejected this"
+                                                + " request already."));
     }
 
     /**
