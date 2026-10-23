@@ -11,7 +11,9 @@ type Translate = (key: string, values?: Record<string, any>) => string;
 export function useElevenLabsVoices(
   setError: (m: string | null) => void,
   setSuccess: (m: string | null) => void,
-  t: Translate
+  t: Translate,
+  /** False where core has no ElevenLabs (a personal install): the voice list is not fetched. */
+  enabled = true
 ) {
   const [voices, setVoices] = useState<any[]>([]);
   const [voiceName, setVoiceName] = useState("");
@@ -24,10 +26,12 @@ export function useElevenLabsVoices(
   const pagination = usePagination(voices);
 
   const refreshVoices = () =>
-    api
-      .listElevenLabsVoices()
-      .then(setVoices)
-      .catch(() => setVoices([]));
+    !enabled
+      ? Promise.resolve()
+      : api
+          .listElevenLabsVoices()
+          .then(setVoices)
+          .catch(() => setVoices([]));
 
   useEffect(() => {
     void refreshVoices();

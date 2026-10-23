@@ -1,6 +1,7 @@
 // The things a person typically wants their agent connected to, with the existing page that does
 // each one. Pure data and one pure function: no React, no network. Copy lives in en.json under
 // "connectHub" (items.<id>.*).
+import { channelOffered } from "../lib/edition";
 
 export type ConnectKind = "channel" | "google" | "page";
 
@@ -27,6 +28,16 @@ export const CONNECT_ITEMS: readonly ConnectItem[] = [
   { id: "sms", kind: "channel", channelKey: "sms", href: "/admin/channels?channel=sms", needsPublicUrl: true },
   { id: "knowledge", kind: "page", href: "/knowledge" },
 ];
+
+/** True when this install offers the item: a channel item whose channel the edition does not run (Slack on a personal install) is not. */
+export function connectItemOffered(item: ConnectItem): boolean {
+  return !item.channelKey || channelOffered(item.channelKey);
+}
+
+/** CONNECT_ITEMS minus what this edition does not offer; every surface that lists or advertises connections reads this. */
+export function offeredConnectItems(): readonly ConnectItem[] {
+  return CONNECT_ITEMS.filter(connectItemOffered);
+}
 
 export type ConnectState = "connected" | "not-connected" | "unknown";
 

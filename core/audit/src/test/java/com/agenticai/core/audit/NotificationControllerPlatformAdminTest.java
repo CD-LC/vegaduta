@@ -14,7 +14,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-/** The tenant-less web-admin token must get an empty bell, not a query against a schema with no notification table. */
+/**
+ * The tenant-less web-admin token must get an empty bell, not a query against a schema with no
+ * notification table.
+ */
 class NotificationControllerPlatformAdminTest {
 
     private final NotificationService service = mock(NotificationService.class);
@@ -30,7 +33,17 @@ class NotificationControllerPlatformAdminTest {
         assertTrue(controller.list(false, 50, null, platformAdmin).getBody().isEmpty());
         assertEquals(0, controller.unreadCount(platformAdmin));
         controller.markAllRead(platformAdmin);
+        controller.markRead(java.util.UUID.randomUUID(), platformAdmin);
         verifyNoInteractions(service);
+    }
+
+    @Test
+    void markReadPassesTheCallersIdentityAndAdminFlagToTheService() {
+        java.util.UUID id = java.util.UUID.randomUUID();
+        controller.markRead(id, auth("ROLE_member"));
+        org.mockito.Mockito.verify(service).markRead(id, "op", false);
+        controller.markRead(id, auth("ROLE_tenant-admin", "PERM_MANAGE_USERS"));
+        org.mockito.Mockito.verify(service).markRead(id, "op", true);
     }
 
     @Test
@@ -41,7 +54,8 @@ class NotificationControllerPlatformAdminTest {
 
     @Test
     void ordinaryMemberStillQueriesTheStore() {
-        when(service.listVisible(any(), anyBoolean(), anyBoolean(), any(Pageable.class))).thenReturn(List.of());
+        when(service.listVisible(any(), anyBoolean(), anyBoolean(), any(Pageable.class)))
+                .thenReturn(List.of());
         assertTrue(controller.list(false, 50, null, auth("ROLE_member")).getBody().isEmpty());
     }
 }

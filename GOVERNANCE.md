@@ -28,8 +28,12 @@ listed in [MAINTAINERS.md](MAINTAINERS.md).
    pull request once the required checks are green and it has been open for
    at least 48 hours (24 hours for fixes to security issues or broken `main`),
    so that others can comment. Every change still goes through a pull request.
-   The branch ruleset matches this (docs/maintainers/branch-protection.md);
-   the rule ends when a second maintainer is appointed.
+   The ruleset described in [docs/maintainers/branch-protection.md](docs/maintainers/branch-protection.md)
+   is written to match this rule. **As of 2026-10-22 that ruleset is not yet
+   configured on `main`**: the two checks are required by convention and
+   enforced by the maintainer, not by GitHub, until the repository owner
+   creates the ruleset (the page lists the steps and how to verify it). The
+   rule ends when a second maintainer is appointed.
 2. **Significant changes** (a new public API, a new service, a breaking change,
    a new required dependency, a change to the data model or to the install
    tiers) start as a GitHub Discussion or an issue labeled `proposal`

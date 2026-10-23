@@ -11,6 +11,7 @@ import com.agenticai.core.providers.PlatformHostedLlmProviderService;
 import com.agenticai.core.resilience.CircuitBreaker;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -229,9 +230,9 @@ final class HostedChainFailover {
             if (index < chain.size() - 1) {
                 log.debug(
                         "Hosted pool provider '{}' skipped for agent {} session {}: circuit open",
-                        link.label(),
-                        agentId,
-                        sessionId);
+                        LogSafe.clean(link.label()),
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(sessionId));
                 return attemptHostedChain(
                         chain,
                         index + 1,
@@ -349,12 +350,12 @@ final class HostedChainFailover {
                     if (!HostedFailoverPolicy.isRetryable(e)) {
                         log.warn(
                                 "Hosted pool provider '{}' failed for agent {} session {} with a"
-                                    + " non-retryable error ({}) - failing fast, another provider"
-                                    + " would reject this the same way",
-                                link.label(),
-                                agentId,
-                                sessionId,
-                                e.getMessage());
+                                        + " non-retryable error ({}) - failing fast, another provider"
+                                        + " would reject this the same way",
+                                LogSafe.clean(link.label()),
+                                LogSafe.clean(agentId),
+                                LogSafe.clean(sessionId),
+                                LogSafe.clean(e.getMessage()));
                         return Flux.error(e);
                     }
                     // Replaying the turn on another rung (or on the self-healed rung) runs it again
@@ -376,13 +377,13 @@ final class HostedChainFailover {
                                 () -> {
                                     log.error(
                                             "Hosted pool fallback chain exhausted for agent {}"
-                                                + " session {}: all {} enabled provider(s) failed"
-                                                + " (last was '{}': {})",
-                                            agentId,
-                                            sessionId,
+                                                    + " session {}: all {} enabled provider(s) failed"
+                                                    + " (last was '{}': {})",
+                                            LogSafe.clean(agentId),
+                                            LogSafe.clean(sessionId),
                                             chain.size(),
-                                            link.label(),
-                                            e.getMessage());
+                                            LogSafe.clean(link.label()),
+                                            LogSafe.clean(e.getMessage()));
                                     return Flux.error(
                                             new HostedPoolExhaustedException(chain, firstError));
                                 };
@@ -416,13 +417,13 @@ final class HostedChainFailover {
                                         healed -> {
                                             log.warn(
                                                     "Hosted pool provider '{}' self-healed to model"
-                                                        + " '{}' for agent {} session {} - retrying"
-                                                        + " this turn once against the freshly"
-                                                        + " auto-selected model before giving up",
-                                                    link.label(),
-                                                    healed.model(),
-                                                    agentId,
-                                                    sessionId);
+                                                            + " '{}' for agent {} session {} - retrying"
+                                                            + " this turn once against the freshly"
+                                                            + " auto-selected model before giving up",
+                                                    LogSafe.clean(link.label()),
+                                                    LogSafe.clean(healed.model()),
+                                                    LogSafe.clean(agentId),
+                                                    LogSafe.clean(sessionId));
                                             AtomicBoolean retryEmitted = new AtomicBoolean(false);
                                             long retryStartedAtNanos = System.nanoTime();
                                             return subscribeInScope(
@@ -449,15 +450,18 @@ final class HostedChainFailover {
                                                                 }
                                                                 log.error(
                                                                         "Hosted pool fallback chain"
-                                                                            + " exhausted for agent"
-                                                                            + " {} session {} even"
-                                                                            + " after a self-healed"
-                                                                            + " retry against '{}':"
-                                                                            + " {}",
-                                                                        agentId,
-                                                                        sessionId,
-                                                                        healed.label(),
-                                                                        retryFailure.getMessage());
+                                                                                + " exhausted for agent"
+                                                                                + " {} session {} even"
+                                                                                + " after a self-healed"
+                                                                                + " retry against '{}':"
+                                                                                + " {}",
+                                                                        LogSafe.clean(agentId),
+                                                                        LogSafe.clean(sessionId),
+                                                                        LogSafe.clean(
+                                                                                healed.label()),
+                                                                        LogSafe.clean(
+                                                                                retryFailure
+                                                                                        .getMessage()));
                                                                 return Flux.error(
                                                                         new HostedPoolExhaustedException(
                                                                                 chain, firstError));
@@ -469,13 +473,13 @@ final class HostedChainFailover {
                             "Hosted pool provider '{}' (model {}, #{} of {}) failed for agent {}"
                                     + " session {} ({}) - falling over to the next provider in the"
                                     + " chain",
-                            link.label(),
-                            link.model(),
-                            index + 1,
+                            LogSafe.clean(link.label()),
+                            LogSafe.clean(link.model()),
+                            LogSafe.clean(index + 1),
                             chain.size(),
-                            agentId,
-                            sessionId,
-                            e.getMessage());
+                            LogSafe.clean(agentId),
+                            LogSafe.clean(sessionId),
+                            LogSafe.clean(e.getMessage()));
                     return attemptHostedChain(
                             chain,
                             index + 1,

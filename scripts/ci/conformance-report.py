@@ -312,7 +312,7 @@ CAPABILITIES = [
         "claimed": "not claimed",
         "checks": [
             (f"{A2A}/A2aAgentCardService.java",
-             [r'"protocolBinding", "JSONRPC"', r'"protocolBinding", "HTTP\+JSON"', r'"protocolVersion"']),
+             [r'"protocolBinding",\s*"JSONRPC"', r'"protocolBinding",\s*"HTTP\+JSON"', r'"protocolVersion"']),
         ],
         "see": [],
     },

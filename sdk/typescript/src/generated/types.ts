@@ -3372,6 +3372,13 @@ export interface EdgeTurnTelemetryController_EdgeTurnReportRequest {
   latencyMs?: number;
 }
 
+export interface EditionInfo {
+  tier?: string;
+  billingEnabled?: boolean;
+  authMode?: string;
+  features?: Record<string, boolean>;
+}
+
 export interface ElevenLabsCredentialActivationRequest {
   apiKey: string;
 }
@@ -7508,6 +7515,7 @@ export interface PublicStatusController_PublicStatusResponse {
   components?: PublicStatusController_Component[];
   maintenance?: PlatformBroadcastService_PublicMaintenance;
   announcement?: PlatformBroadcastService_PublicAnnouncement;
+  edition?: EditionInfo;
 }
 
 export interface QualityController_QualityConfigResponse {

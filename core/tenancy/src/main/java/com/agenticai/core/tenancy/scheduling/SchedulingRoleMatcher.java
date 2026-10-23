@@ -63,6 +63,15 @@ public final class SchedulingRoleMatcher {
     }
 
     /**
+     * A matcher that names every class: the bean list of a process that must run no scheduled job
+     * at all (the migrate-only Job). {@link #except} still carves exceptions out of it, but the
+     * callers that want "nothing runs" simply do not pass a keep list.
+     */
+    public static SchedulingRoleMatcher everything() {
+        return new SchedulingRoleMatcher(List.of(), List.of(""), null);
+    }
+
+    /**
      * Reads {@code key} through the {@link Binder}, so a comma-separated string, a YAML list and a
      * relaxed environment variable ({@code APP_SCHEDULING_SKIP_BEAN_CLASSES}) all work.
      */

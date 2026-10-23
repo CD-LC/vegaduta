@@ -100592,6 +100592,30 @@
           }
         }
       },
+      "EditionInfo": {
+        "type": "object",
+        "properties": {
+          "tier": {
+            "type": "string"
+          },
+          "billingEnabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "authMode": {
+            "type": "string"
+          },
+          "features": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "boolean"
+            }
+          }
+        },
+        "required": [
+          "billingEnabled"
+        ]
+      },
       "ElevenLabsCredentialActivationRequest": {
         "type": "object",
         "properties": {
@@ -100685,7 +100709,9 @@
           },
           "imapPort": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 65535
           },
           "imapUsername": {
             "type": "string",
@@ -114463,6 +114489,9 @@
           },
           "announcement": {
             "$ref": "#/components/schemas/PlatformBroadcastService_PublicAnnouncement"
+          },
+          "edition": {
+            "$ref": "#/components/schemas/EditionInfo"
           }
         }
       },

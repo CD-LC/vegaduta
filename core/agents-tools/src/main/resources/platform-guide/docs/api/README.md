@@ -212,8 +212,13 @@ generated on a machine with JDK 21+ and Node. They are intentionally not hand-wr
 | `path-removed`, `operation-removed` | a route or a verb is gone (renaming a path variable, `{id}` to `{agentId}`, is not a break) |
 | `operation-id-changed` | `AgentController_reliability` became `AgentChatSessionController_reliability` after a controller split; the SDK method name derives from it |
 | `parameter-required`, `request-body-required`, `request-property-required` | an input is new and required, or was optional; a property with a `default` (a Java primitive) is exempt |
+| `parameter-removed`, `request-property-removed` | a query/header parameter or a request property is gone, so the server ignores what clients send (a schema with `additionalProperties: true` is exempt) |
+| `security-tightened`, `access-tightened` | an operation that was public now needs credentials, stops accepting a security scheme, or now needs a role or permission (`x-roles`, `x-permissions`), or one that sufficed no longer does |
+| `constraint-tightened` | an input gained or tightened `minLength`/`maxLength`, `minimum`/`maximum`, `minItems`/`maxItems`, `pattern` or `format` (`int32` to `int64` and `float` to `double` widen, so they pass) |
+| `composition-narrowed` | an input's `oneOf`/`anyOf` lost an alternative |
 | `request-media-type-removed` | the request body no longer accepts a content type it accepted |
-| `response-body-removed`, `response-property-removed` | a 2xx body or one of its properties is gone (a 200 that became 201 is compared as the same response) |
+| `response-body-removed`, `response-property-removed` | a 2xx body or one of its properties is gone (a 200 that became 201 is compared as the same response: the gate does not flag the code itself) |
+| `response-required-relaxed`, `constraint-loosened`, `composition-widened` | a response property that was always present may now be missing; a response lost or loosened a bound or `pattern`, or changed `format`; a response `oneOf`/`anyOf` gained an alternative |
 | `enum-narrowed` | an enum lost a value, or an input gained an enum it did not have |
 | `type-changed` | a schema `type` changed; an input may widen (`string` to `string\|null`) and an output may narrow |
 

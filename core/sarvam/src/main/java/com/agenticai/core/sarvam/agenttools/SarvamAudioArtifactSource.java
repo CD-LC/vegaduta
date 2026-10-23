@@ -2,6 +2,8 @@ package com.agenticai.core.sarvam.agenttools;
 
 import com.agenticai.core.agentspi.GeneratedArtifactSource;
 import com.agenticai.core.sarvam.SarvamGeneratedAudioService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
  * GeneratedArtifactSource}.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamAudioArtifactSource implements GeneratedArtifactSource {
 
     private final SarvamGeneratedAudioService audioService;

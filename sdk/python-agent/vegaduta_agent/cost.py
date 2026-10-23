@@ -32,10 +32,7 @@ class ModelPrice:
     usd_per_output_token: Decimal
 
     def cost(self, input_tokens: int, output_tokens: int) -> Decimal:
-        return (
-            self.usd_per_input_token * input_tokens
-            + self.usd_per_output_token * output_tokens
-        )
+        return self.usd_per_input_token * input_tokens + self.usd_per_output_token * output_tokens
 
 
 class CostModel:
