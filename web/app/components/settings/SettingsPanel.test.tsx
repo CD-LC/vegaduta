@@ -675,6 +675,7 @@ describe("security settings for someone who is not a workspace admin", () => {
     cleanup();
     renderSettings(
       <AuthContext.Provider value={asSession(true) as never}>
+        {/* eslint-disable-next-line jsx-a11y/aria-role -- "role" here is SettingsPanel's prop, not the ARIA attribute */}
         <SettingsPanel scope="agent" agentId="ag-1" client={makeClient()} role="VIEWER" />
       </AuthContext.Provider>
     );
