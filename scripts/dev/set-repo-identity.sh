@@ -173,5 +173,4 @@ if [ "$DRY" = 0 ]; then
   set_env SECURITY_EMAIL "$TO_SEC"
   set_env CONDUCT_EMAIL "$TO_CONDUCT"
   echo "updated $ENV_FILE; review with: git diff"
-  echo "remaining TODO markers for the identity: grep -rn 'TODO(maintainers)' --include='*.md' ."
 fi
