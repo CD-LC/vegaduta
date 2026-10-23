@@ -1,0 +1,6 @@
+{"name":"Refund decision with manager approval","description":"A support agent drafts the refund decision from the Northwind policy; a manager approves before the customer is told.","graph":{"nodes":[
+ {"id":"trigger-1","type":"trigger","position":{"x":80,"y":160},"data":{"label":"Refund request comes in","config":{}}},
+ {"id":"agent-1","type":"agent","position":{"x":380,"y":160},"data":{"label":"Draft the refund decision","config":{"agentId":"ab90575e-bc7c-4f7d-9f2b-0ffe4da2fb6b"}}},
+ {"id":"approval-1","type":"approval","position":{"x":680,"y":160},"data":{"label":"Manager approval","config":{"message":"Refunds above USD 500 need a manager. Approve to send this decision to the customer.","adminOnly":true}}},
+ {"id":"output-1","type":"output","position":{"x":980,"y":160},"data":{"label":"Reply to customer","config":{"channel":"log"}}}],
+ "edges":[{"id":"e1","source":"trigger-1","target":"agent-1","sourceHandle":null,"targetHandle":null},{"id":"e2","source":"agent-1","target":"approval-1","sourceHandle":null,"targetHandle":null},{"id":"e3","source":"approval-1","target":"output-1","sourceHandle":null,"targetHandle":null}]}}

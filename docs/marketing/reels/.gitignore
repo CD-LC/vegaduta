@@ -1,0 +1,5 @@
+out/
+recorder/node_modules/
+stack/owner-password.txt
+stack/owner-state.json
+stack/.token
