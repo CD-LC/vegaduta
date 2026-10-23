@@ -6148,7 +6148,10 @@
     "close": "Close",
     "continuing": "The agent is carrying on with the task.",
     "continueNotStarted": "The agent was not restarted automatically after this decision. Send a message to have it carry on.",
-    "continueTimedOut": "The agent has not finished carrying on yet. Its reply will be in the conversation when it does; reload to check."
+    "continueTimedOut": "The agent has not finished carrying on yet. Its reply will be in the conversation when it does; reload to check.",
+    "panelLabel": "Tool approvals",
+    "queuePosition": "Approval {position} of {total}",
+    "queueMore": "{count} more waiting. The next one appears when you decide this one."
   },
   "approvalsPanel": {
     "channelWildcardOption": "All channels (wildcard policy)",
