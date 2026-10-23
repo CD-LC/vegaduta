@@ -1,5 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
-import { ACADEMY_BASE_URL, AUTH_HOST } from "../helpers/e2e-env";
+import { ACADEMY_BASE_URL, AUTH_HOST, SITE_MODE } from "../helpers/e2e-env";
 
 // Clicks a header nav-anchor link and asserts it lands on the right #hash
 // AND that the target section is actually in the viewport - retrying the
@@ -27,25 +27,25 @@ async function clickAnchorAndAssertInViewport(page: Page, link: Locator, hash: s
 // 2026-09-17: clickScenarioTabAndAssertVisible (WhatsApp "Demo scenario"
 // tablist helper) removed - the ChannelDemoTabs band it drove is unmounted.
 
-// Logged-out root ("/") is DemoLanding (web/app/components/demo-landing/DemoLanding.tsx),
-// rendered via GenesisExperience for every unauthenticated visitor. Everything on
-// this page is a client-side simulation (no backend calls) - see that file's own
-// top-of-file comment. These tests exercise the sticky nav, the Capability Atlas
-// (the page's actual interactive, content-switching widget - see the note above
-// that test for why it replaced the WhatsApp scenario tabs), and the
-// historically-buggy "Get started" CTA.
+// Logged-out root ("/") has two landings, picked by the web build's
+// NEXT_PUBLIC_SITE_MODE (web/app/lib/siteMode.ts, rendered by GenesisExperience):
+//   - "oss" (the default, and what the compose stack / nightly serve): OssLanding
+//     (web/app/components/oss-landing/): the technical open-source page.
+//   - "classic": DemoLanding (web/app/components/demo-landing/): the hosted
+//     marketing page - hero-outcome, sticky nav, Capability Atlas.
+// The two describes below each run only against their own mode; set
+// E2E_SITE_MODE=classic when the target serves the classic landing (see
+// helpers/e2e-env.ts). Everything on either page is static or a client-side
+// simulation - no backend calls.
 //
-// 2026-08-30: the hero's HeroLanguageDemo.tsx (Hindi/Tamil chips re-rendering a
-// transcript) was replaced by HeroUniversalAgent.tsx in the 2026-08-03 hero
-// rebuild and is dead code - not imported anywhere.
-// 2026-09-17: the landing was rebuilt again - the hero is now HeroOutcome.tsx
-// (`[data-testid=hero-outcome]`, h1 "An AI employee for your business, hired in
-// one sentence."), the ChannelDemoTabs / WhatsAppDemo band is unmounted, and the
-// content-switching widget is CapabilityAtlas.tsx (`[data-testid=capability-atlas]`).
+// The "Get started" CTA is the historically-buggy one: it once routed to the
+// Keycloak sign-in instead of the self-service signup wizard.
 
-test.describe("Landing page", () => {
-  // The nav's text links (Live demo / How it works / Pricing / Docs as of
-  // 2026-09-17 - DemoLanding.tsx NAV_LINK_ITEMS) are NOT a fixed-breakpoint `hidden lg:flex`
+test.describe("Landing page (classic site mode)", () => {
+  test.skip(SITE_MODE !== "classic", "serves the classic landing only (E2E_SITE_MODE=classic)");
+
+  // The nav's text links (Live demo / How it works / Docs, LandingNav.tsx
+  // NAV_LINK_ITEMS) are NOT a fixed-breakpoint `hidden lg:flex`
   // row - they're measured (DemoLanding.tsx's linksFit useLayoutEffect)
   // against the real rendered width of the row, and only shown inline when
   // they verifiably fit; anything else falls back to a "Menu" hamburger
@@ -73,11 +73,11 @@ test.describe("Landing page", () => {
   test("renders the hero and sticky nav", async ({ page }) => {
     await expect(page.getByRole("link", { name: "VegaDūta home" })).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    // 2026-09-17: hero rebuilt as HeroOutcome.tsx - assert its testid and the h1 copy ("An AI employee ...").
+    // HeroOutcome.tsx: its testid and the h1 copy (messages/en.json landing h5_h1).
     await expect(page.getByTestId("hero-outcome")).toBeVisible();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(/AI employee/i);
-    // 2026-09-17: header row is now Live demo / How it works / Pricing / Docs
-    // (NAV_LINK_ITEMS); "Who it's for" and "Security" live only in the Menu
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(/Agents that act on their own/i);
+    // Header row is Live demo / How it works / Docs (LandingNav.tsx NAV_LINK_ITEMS;
+    // Docs is icon-only with an sr-only label); "Who it's for" and "Security" live only in the Menu
     // sheet now, so they are no longer asserted here. Scoped to the header so
     // we don't also match identical-text footer links. No hamburger click
     // needed - the row fits inline at this viewport (see the describe block's
@@ -86,7 +86,6 @@ test.describe("Landing page", () => {
     await expect(header.getByRole("button", { name: "Menu" })).toHaveCount(0);
     await expect(header.getByRole("link", { name: "Live demo" })).toBeVisible();
     await expect(header.getByRole("link", { name: "How it works" })).toBeVisible();
-    await expect(header.getByRole("link", { name: "Pricing" })).toBeVisible();
     await expect(header.getByRole("link", { name: "Docs" })).toBeVisible();
   });
 
@@ -123,8 +122,11 @@ test.describe("Landing page", () => {
     const tiles = page.locator("[data-testid^=atlas-tile-]");
     const search = page.getByTestId("atlas-search");
     await expect(atlas).toBeVisible();
-    // TILES in CapabilityAtlas.tsx has 29 entries; an unfiltered grid shows all of them.
-    await expect(tiles).toHaveCount(29);
+    // An unfiltered grid shows every tile in CapabilityAtlas.tsx's TILES; read the count rather than
+    // pinning it, so adding a tile does not break this test.
+    await expect(tiles.first()).toBeVisible();
+    const total = await tiles.count();
+    expect(total).toBeGreaterThan(1);
 
     // Filter: "guardrail" matches a strict subset (title/body/where/category
     // are all searched - at least the "guardrails" tile itself).
@@ -135,14 +137,14 @@ test.describe("Landing page", () => {
       await search.fill("guardrail");
       const n = await tiles.count();
       expect(n).toBeGreaterThanOrEqual(1);
-      expect(n).toBeLessThan(29);
+      expect(n).toBeLessThan(total);
     }).toPass({ timeout: 30_000 });
 
     // Clear the filter, then open the "Learning from feedback" tile
     // (atlas_learning_title in messages/en.json) and check the detail card
     // actually switched to it.
     await search.fill("");
-    await expect(tiles).toHaveCount(29);
+    await expect(tiles).toHaveCount(total);
     await page.getByTestId("atlas-tile-learning").click();
     await expect(page.locator("#atlas-detail")).toContainText("Learning from feedback");
   });
@@ -170,5 +172,58 @@ test.describe("Landing page", () => {
     const footer = page.locator("footer");
     await expect(footer.getByRole("link", { name: "Terms of Service" })).toBeVisible();
     await expect(footer.getByRole("link", { name: "Privacy Policy" })).toBeVisible();
+  });
+});
+
+// The default landing (OssLanding.tsx + OssChrome.tsx).
+test.describe("Landing page (oss site mode)", () => {
+  test.skip(SITE_MODE !== "oss", "serves the OSS landing only (E2E_SITE_MODE unset or oss)");
+  // The header nav is `hidden md:flex`: pin a desktop viewport so one layout is exercised in both projects.
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+  });
+
+  test("renders the hero, the install commands and the header nav", async ({ page }) => {
+    await expect(page.getByRole("link", { name: "VegaDūta home" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(/the complete suite for AI agents/i);
+    // The hero's install block (ossSite.ts INSTALL_COMMANDS).
+    await expect(page.locator("main pre").first()).toContainText("scripts/vegaduta up --lite");
+    const nav = page.getByRole("navigation", { name: "Primary" });
+    for (const name of ["Docs", "Downloads", "Dependencies", "Plugins & apps", "Changelog", "About", "GitHub"]) {
+      await expect(nav.getByRole("link", { name }), name).toBeVisible();
+    }
+  });
+
+  test("the Dependencies link scrolls to its section", async ({ page }) => {
+    const nav = page.getByRole("navigation", { name: "Primary" });
+    await clickAnchorAndAssertInViewport(page, nav.getByRole("link", { name: "Dependencies" }), "dependencies");
+  });
+
+  test("Academy link points at the academy host, not this app", async ({ page }) => {
+    const academyLink = page.locator("header").getByRole("link", { name: /academy/i });
+    await expect(academyLink).toBeVisible();
+    const href = await academyLink.getAttribute("href");
+    expect(href).toBeTruthy();
+    // The Academy is a separate deployable on its own host (E2E_ACADEMY_URL).
+    expect(href!.replace(/\/$/, "")).toBe(ACADEMY_BASE_URL);
+    expect(href).not.toContain("localhost");
+  });
+
+  test('"Get started" goes to the signup wizard, not the sign-in page', async ({ page }) => {
+    await page.locator("header").getByRole("link", { name: "Get started" }).click();
+
+    await expect(page).toHaveURL(/\/signup$/);
+    // Must NOT have bounced to the Keycloak-hosted login page.
+    expect(page.url()).not.toContain(AUTH_HOST);
+    expect(page.url()).not.toContain("/protocol/openid-connect/");
+    await expect(page.getByRole("heading", { name: /Create your free workspace|Name your workspace/i })).toBeVisible();
+  });
+
+  test("footer renders legal links", async ({ page }) => {
+    const footer = page.locator("footer");
+    await expect(footer.getByRole("link", { name: "Terms", exact: true })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Privacy", exact: true })).toBeVisible();
   });
 });

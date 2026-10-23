@@ -32,6 +32,25 @@ The `license-scan` workflow covers the files we redistribute (vendored JS,
 bundled fonts, the Keycloak theme) and fails when ScanCode detects a license
 id outside `scripts/ci/license-allowlist.txt`.
 
+## What the scanners leave out
+
+Both exclusions live in a file next to the workflow, with the reason beside
+each path, so a report can be read as "what ships".
+
+- **CodeQL** reads `.github/codeql/codeql-config.yml`. Its `paths-ignore`
+  drops test and tooling code (`tests/`, `web/e2e/`, `**/src/test/`,
+  `*.test.ts(x)`, `*.spec.ts`, `web/scripts/`), the bundled documentation
+  assets and `examples/`. The workflow still runs on every pull request (it has
+  no workflow-level path filter, so `CodeQL OK` always reports); only alerts in
+  those paths are not raised. The query suite stays `security-extended`, set in
+  `codeql.yml`.
+- **Trivy** reads `trivy.yaml` (`trivy-config` on both scan steps), which skips
+  `deploy/helm/examples` and `tests/load`: example values files and kind
+  load-test manifests, where a replica count or a missing resource limit is not
+  a finding. `infra/terraform/modules` is scanned on purpose: those are
+  reference modules the operator hardens (see `infra/terraform/README.md`), and
+  their findings are that operator's checklist.
+
 ## DefectDojo (all findings, one dashboard)
 
 [DefectDojo](https://www.defectdojo.com/) is the optional aggregation layer:

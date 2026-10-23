@@ -168,7 +168,7 @@ or <code>.env.production*</code> file was opened to write this page.</p>
 <tr><td><code>NEXT_PUBLIC_ACADEMY_URL</code></td><td>web</td><td>empty</td><td>Link to an optional external learning site; not part of this repository. Leave empty.</td></tr>
 <tr><td><code>NEXT_PUBLIC_APP_BUILDER_URL</code></td><td>web</td><td>empty</td><td>Empty renders "not available on this deployment". Never bake a localhost value into a deployed build.</td></tr>
 <tr><td><code>NEXT_PUBLIC_EDGE_AGENTS</code></td><td>web</td><td>empty</td><td>Edge UI only when exactly <code>1</code>.</td></tr>
-<tr><td><code>NEXT_PUBLIC_DEPLOY_ENV</code></td><td>web</td><td>empty</td><td>Console environment pill (e.g. <code>production</code>, <code>staging</code>); <code>WEB_DEPLOY_ENV</code> in Compose.</td></tr>
+<tr><td><code>NEXT_PUBLIC_DEPLOY_ENV</code></td><td>web</td><td><code>full</code> (Compose full stack, Helm); <code>lite</code> / <code>personal</code> in those stacks</td><td>Install tier (<code>personal</code>, <code>lite</code>, <code>full</code>: selects install behaviour, no pill) or, for any other value such as <code>production</code> or <code>staging</code>, the console environment pill; <code>WEB_DEPLOY_ENV</code> in Compose.</td></tr>
 <tr><td><code>NEXT_PUBLIC_FREE_MODE</code></td><td>web</td><td>empty</td><td>Free-for-everyone mode (<code>1</code>) swaps pricing UI for open-source copy.</td></tr>
 <tr><td><code>NEXT_PUBLIC_COFFEE_URL</code></td><td>web</td><td>empty</td><td>Donation link; not rendered when empty.</td></tr>
 <tr><td><code>NEXT_PUBLIC_BILLING_ENABLED</code></td><td>web, web-admin</td><td>empty</td><td>Plan/billing surfaces appear only when exactly <code>1</code> (hosted operators); off by default.</td></tr>

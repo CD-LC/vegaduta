@@ -74,10 +74,10 @@ test-core: ## mvn verify (context tests need Postgres with pgvector+AGE on DB_HO
 
 .PHONY: spring-wiring
 spring-wiring: ## Startup-only Spring wiring checks without a context: constructor choice, duplicate bean/entity names (part of test-core too)
-	cd core && $(MVN) -B -ntp -pl app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest='InjectableConstructorTest,UniqueBeanNamesTest' test
+	cd core && $(MVN) -B -ntp -pl app -am -Dsurefire.failIfNoSpecifiedTests=false -Dtest='InjectableConstructorTest,UniqueBeanNamesTest,ShapeInjectionPointsTest' test
 
 .PHONY: boot-check
-boot-check: ## Boot the real core jar against throwaway pgvector+AGE Postgres and Redis (about 3 min; needs Docker and JAVA_HOME on a JDK 21+)
+boot-check: ## Boot the real core jars (api, migrate-only, jobs, worker) against throwaway pgvector+AGE Postgres and Redis (about 6 min; needs Docker and JAVA_HOME on a JDK 21+)
 	bash scripts/ci/boot-check.sh
 
 .PHONY: boot-check-personal
@@ -112,6 +112,7 @@ test-sdk-clients: ## SDK REST clients + python-agent, incl. consumer contracts (
 	node --test sdk/test/*.test.mjs
 	cd sdk/python && $(PYTHON) -m unittest discover -s tests
 	cd sdk/python-agent && PYTHONPATH=. $(PYTHON) -m pytest tests/ -q
+	$(PYTHON) -m unittest discover -s contracts/consumers/tools -p 'test_*.py'
 
 .PHONY: lint
 lint: ## ESLint + tsc for the console, ruff for Python, shellcheck
@@ -151,6 +152,8 @@ gates: ## The static gates (static-gates.yml runs them when CI is triggered; run
 	sh scripts/ci/check-file-size.sh
 	sh scripts/ci/check-module-size.sh
 	sh scripts/ci/dockerfile-poms.sh
+	bash scripts/ci/check-browser-runner-version.sh
+	bash scripts/ci/check-browser-runner-version.sh --self-test
 	python3 core/tools/module-graph/gen_module_graph.py --check
 	node sdk/generate.mjs --check
 	node scripts/docs/asyncapi.mjs --check

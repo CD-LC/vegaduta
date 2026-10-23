@@ -128,9 +128,7 @@ class WebhookHook:
                 "detail": event.detail,
             }
         ).encode("utf-8")
-        status, payload = self._sender(
-            self.url, body, {"Content-Type": "application/json", **self.headers}
-        )
+        status, payload = self._sender(self.url, body, {"Content-Type": "application/json", **self.headers})
         if status >= 400:
             return HookDecision.block(f"webhook answered {status}")
         try:

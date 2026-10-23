@@ -17,6 +17,10 @@ name: Static gates
 #   check-module-size     ratchet (ADR-0023): at most 300 main files per core/*
 #                         module, no classes in com.agenticai.core.agents;
 #                         baseline only shrinks
+#   check-browser-runner-version
+#                         services/browser-runner's Playwright version (package.json,
+#                         lock, Dockerfile base image tag) equals the Java client's in
+#                         core/agents-browser/pom.xml (a mismatch is a 428 at connect)
 #   openapi-breaking     docs/api/openapi.json against the merge base: removed
 #                         paths/operations/response properties, renamed operationIds,
 #                         newly required inputs, narrowed enums, changed types
@@ -99,6 +103,17 @@ jobs:
       - name: core/Dockerfile copies every module pom
         if: always()
         run: sh scripts/ci/dockerfile-poms.sh
+
+      # Playwright refuses a client of another major.minor, and the browser-runner
+      # healthcheck only tests the port: package.json, its lock, the Dockerfile base
+      # image tag and the Java client in core/agents-browser must name one version.
+      - name: browser-runner Playwright version is consistent
+        if: always()
+        run: bash scripts/ci/check-browser-runner-version.sh
+
+      - name: browser-runner version check self-test
+        if: always()
+        run: bash scripts/ci/check-browser-runner-version.sh --self-test
 
       # Generated documents must match their sources (ADR-0011 module graph,
       # the SDKs under sdk/ from docs/api/openapi.json, the ownership tables in

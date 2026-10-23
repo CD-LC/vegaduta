@@ -128,10 +128,12 @@ func composeFromState(root string, c Catalog) (sel Selection, ok bool) {
 		cs := a.Compose
 		on := true
 		for _, p := range cs.Profiles {
-			// The launcher keeps tools/browser in their own state keys, not in profiles=.
+			// The bash launcher keeps tools/browser in their own state keys (tools=1);
+			// vegaduta.ps1 keeps every profile, those two included, in profiles=.
+			// Either spelling means on.
 			switch p {
 			case "tools", "browser":
-				on = on && kv[p] == "1"
+				on = on && (kv[p] == "1" || contains(profiles, p))
 			default:
 				on = on && contains(profiles, p)
 			}
@@ -461,17 +463,4 @@ func workingDirs(root string) []string {
 		dirs = append(dirs, r)
 	}
 	return dirs
-}
-
-// PullModels downloads the picked models through the launcher's own
-// `models pull`, after the stack is up. A failed pull is reported and does not
-// fail the install: the console's Extras page can retry it.
-func PullModels(ctx context.Context, root string, pulls []Pull, emit func(Event)) {
-	for _, p := range pulls {
-		emit(Event{Phase: "models", Line: "Downloading model " + p.Tag + " (this can take a while)"})
-		if err := runCLI(ctx, root, func(s string) { emit(Event{Line: s}) }, "models", "pull", p.Tag); err != nil {
-			emit(Event{Line: "Could not download " + p.Tag + ": " + err.Error() +
-				". The install itself is fine; turn the model on later from the console (Extras) or run: scripts/vegaduta models pull " + p.Tag})
-		}
-	}
 }

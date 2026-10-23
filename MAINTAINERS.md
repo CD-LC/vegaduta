@@ -2,12 +2,9 @@
 
 Roles and responsibilities are described in [GOVERNANCE.md](GOVERNANCE.md).
 Review requests are routed by [.github/CODEOWNERS](.github/CODEOWNERS)
-(team `@CD-LC/maintainers`).
-
-<!-- TODO(maintainers): the lead's handle below is a placeholder, and the
-CODEOWNERS team only works once the GitHub owner is an organization with that
-team. Settle both, then run scripts/dev/set-repo-identity.sh --lead <handle>
---team <@org/team or @user>. See docs/maintainers/repo-setup.md. -->
+(team `@CD-LC/maintainers`, which must exist in the GitHub organization with
+Write access to the repository, see
+[docs/maintainers/repo-setup.md](docs/maintainers/repo-setup.md)).
 
 ## Project lead
 
