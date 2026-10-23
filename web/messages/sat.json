@@ -62,8 +62,8 @@
     "railBrand": "ᱪᱤᱱᱦᱟᱹ",
     "railLearn": "ᱪᱮᱫᱚᱜ",
     "railGuard": "ᱨᱮਖᱟ",
-    "railRuntimeSettings": "Runtime settings",
-    "railControls": "Where do I control...?"
+    "railRuntimeSettings": "ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ ᱠᱚ",
+    "railControls": "ᱤᱧ ᱪᱮᱫ ᱠᱷᱟᱛᱨᱟ ᱪᱷᱟᱸᱪᱚ...?"
   },
   "signup": {
     "fieldPassword": "ᱯᱟᱥᱣᱚᱨᱰ",
@@ -753,67 +753,67 @@
     "edgeTier0BadgeTitle": "ᱠᱨᱚᱢ ᱨᱮᱭᱟᱜ ᱵᱷᱤᱛᱨᱤ ᱢᱚᱰᱮᱞ (ᱡᱮᱢᱤᱱᱤ ᱱᱟᱱᱚ) ᱱᱚᱣᱟᱭ ᱛᱮᱞᱟ ᱠᱮᱫᱟ - ᱞᱚᱜᱚᱱ ᱟᱨ ᱯᱩᱨᱟᱹ ᱱᱤᱡᱮᱨᱟᱜ, ᱢᱮᱱᱠᱷᱟᱱ ᱠᱷᱟᱹᱞᱤ ᱜᱟᱞᱢᱟᱨᱟᱣ ᱞᱟᱹᱜᱤᱫ: ᱱᱚᱣᱟ ᱴᱩᱞᱥ ᱵᱟᱭ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱟᱨ ᱮᱴᱠᱮᱴᱚᱬᱮ ᱡᱤᱱᱤᱥ ᱨᱮ ᱥᱟᱹᱨᱤ ᱯᱨᱚᱵᱷᱟᱭᱰᱟᱨ ᱠᱷᱚᱱ ᱠᱚᱢ ᱥᱟᱹᱴᱤᱠ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾ ᱡᱚᱛᱚ ᱯᱞᱟᱱ ᱨᱮ ᱯᱷᱨᱤ᱾",
     "edgeTier1Badge": "ᱚᱱ-ᱰᱤᱵᱷᱟᱭᱤᱥ · ᱞᱚᱠᱟᱞ ᱢᱚᱰᱮᱞ",
     "edgeTier1BadgeTitle": "ᱰᱟᱣᱩᱱᱞᱚᱰ ᱟᱠᱟᱱ ᱚᱱ-ᱰᱤᱵᱷᱟᱭᱤᱥ ᱢᱚᱰᱮᱞ ᱱᱚᱣᱟᱭ ᱛᱮᱞᱟ ᱠᱮᱫᱟ - ᱱᱤᱡᱮᱨᱟᱜ, ᱟᱨ ᱱᱚᱣᱟ ᱴᱩᱞᱥ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ (ᱦᱚᱥᱴᱮᱰ ᱴᱟᱨᱱ ᱞᱮᱠᱟ ᱜᱮ ᱥᱩᱨᱟᱹᱠᱪᱷᱤᱛ ᱴᱩᱞᱥ)᱾ ᱛᱚᱵᱮ ᱦᱚᱸ ᱦᱚᱥᱴᱮᱰ ᱯᱩᱞ ᱠᱷᱚᱱ ᱟᱹᱰᱤ ᱦᱩᱰᱤᱧ ᱢᱚᱰᱮᱞ ᱠᱟᱱᱟ, ᱚᱱᱟᱛᱮ ᱮᱴᱠᱮᱴᱚᱬᱮ ᱠᱟᱹᱢᱤ ᱨᱮ ᱠᱚᱢ ᱥᱟᱹᱴᱤᱠ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾ ᱡᱚᱛᱚ ᱯᱞᱟᱱ ᱨᱮ ᱯᱷᱨᱤ᱾",
-    "viewTurn": "View turn",
-    "viewTurnTitle": "Open the step-by-step timeline of this conversation's turns",
-    "headerRunning": "Running a turn",
-    "headerReady": "Ready",
-    "clearContext": "Clear context",
-    "clearContextTitle": "Start a fresh conversation. This clears the on-device and server-side session memory for this chat.",
-    "stopRun": "Stop this reply",
-    "fallbackSendToPlatform": "Send to platform",
-    "chipsLabel": "What the agent is doing now",
-    "chipPreparing": "Getting ready",
-    "chipModelCall": "Waiting for the model",
-    "chipThinking": "Thinking",
-    "chipWriting": "Writing the reply",
-    "chipTool": "Running tool: {tool}",
-    "chipToolUnnamed": "Running a tool",
-    "chipWaitingApproval": "Waiting for your approval ({count})",
-    "chipContinuing": "Continuing the reply",
-    "chipContinuingPass": "Continuing the reply (pass {pass} of {max})",
-    "chipContinuingApproval": "Carrying on after your decision",
-    "chipRetrying": "Trying again",
-    "chipRetryingReason": "Trying again: {reason}",
-    "chipRetryingAttempt": "Trying again (attempt {attempt} of {max})",
-    "chipRetryingAttemptReason": "Trying again (attempt {attempt} of {max}): {reason}",
-    "chipFailover": "Switched to a backup model",
-    "chipFailoverReason": "Switched to a backup model: {reason}",
-    "chipFailoverTo": "Switched to {model}",
-    "chipFailoverToReason": "Switched to {model}: {reason}",
-    "outcomeTruncated": "This reply was cut off before it finished.",
-    "outcomeContinue": "Continue",
-    "outcomeLongerReplies": "Allow longer replies",
-    "continueMessage": "Please continue exactly where you stopped, without repeating what you already wrote.",
-    "outcomeRefused": "The model provider stopped this reply for safety reasons, so there is no answer to show. Change the request and try again.",
-    "outcomeRefusedReason": "The model provider stopped this reply for safety reasons ({reason}), so there is no answer to show. Change the request and try again.",
-    "outcomeMalformedToolCall": "The model tried to use a tool but its request was invalid, so nothing ran. Try again.",
-    "outcomeEmpty": "The model returned an empty reply. Try again.",
-    "stopRaiseSteps": "Raise the tool-call limit",
-    "stopRaiseBudget": "Change the spending cap",
-    "stopAskEditor": "Ask someone who can edit this agent to raise the limit.",
-    "rsOpen": "Run settings",
-    "rsTitle": "Run settings",
-    "rsClose": "Close run settings",
-    "rsBack": "Back to run settings",
-    "rsIntro": "How the next message to {name} will run. Change these on the agent's Behavior tab.",
-    "rsLoading": "Loading",
-    "rsRetry": "Try again",
-    "rsOpenBehavior": "Edit in Behavior",
-    "rsModelHeading": "Model and sampling",
-    "rsModel": "Model",
-    "rsModelNotSet": "Not set",
-    "rsModelDefault": "Model default",
-    "rsDepth": "Reasoning depth",
-    "rsSourceAgent": "Set on this agent",
-    "rsParam_temperature": "Temperature",
+    "viewTurn": "ᱴᱚᱨᱱ ᱠᱚ ᱧᱮᱞ ᱢᱮ",
+    "viewTurnTitle": "ᱱᱚᱶᱟ ᱵᱟᱛ ᱪᱤᱛ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ ᱟᱜ ᱯᱟᱦᱴᱟ-ᱯᱟᱦᱴᱟ ᱴᱟᱭᱢᱞᱟᱭᱱ ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+    "headerRunning": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
+    "headerReady": "ᱛᱮᱭᱟᱨ",
+    "clearContext": "ᱥᱚᱸᱥᱟᱨ ᱥᱟᱯᱷᱟ ᱢᱮ",
+    "clearContextTitle": "ᱱᱟᱣᱟ ᱵᱟᱛ ᱪᱤᱛ ᱮᱦᱚᱵ ᱢᱮ। ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱴ ᱟᱜ ᱰᱤᱵᱟᱭᱥ ᱟᱨ ᱥᱟᱨᱵᱟᱨ ᱯᱟᱥ ᱟᱜ ᱥᱮᱥᱚᱱ ᱢᱮᱢᱚᱨᱤ ᱥᱟᱯᱷᱟ ᱮᱫᱟ।",
+    "stopRun": "ᱱᱚᱶᱟ ᱡᱚᱵᱟᱵ ᱵᱚᱸᱫ ᱢᱮ",
+    "fallbackSendToPlatform": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱢᱮ",
+    "chipsLabel": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱤᱛᱚᱜ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱮᱫᱟ",
+    "chipPreparing": "ᱛᱮᱭᱟᱨ ᱢᱮᱱᱟᱜᱼᱟ",
+    "chipModelCall": "ᱢᱚᱰᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱠᱟᱱᱟ",
+    "chipThinking": "ᱪᱤᱛᱟ ᱮᱫᱟ",
+    "chipWriting": "ᱡᱚᱵᱟᱵ ᱚᱞ ᱮᱫᱟ",
+    "chipTool": "ᱴᱩᱞ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ: {tool}",
+    "chipToolUnnamed": "ᱢᱤᱫ ᱴᱩᱞ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
+    "chipWaitingApproval": "ᱟᱢᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱠᱟᱱᱟ ({count})",
+    "chipContinuing": "ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
+    "chipContinuingPass": "ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ ({max} ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱯᱟᱥ {pass})",
+    "chipContinuingApproval": "ᱟᱢᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱠᱷᱚᱱ ᱛᱟᱭᱚᱢ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
+    "chipRetrying": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱮᱫᱟ",
+    "chipRetryingReason": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱮᱫᱟ: {reason}",
+    "chipRetryingAttempt": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱮᱫᱟ (ᱪᱮᱥᱴᱟ {attempt}/{max})",
+    "chipRetryingAttemptReason": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱮᱫᱟ (ᱪᱮᱥᱴᱟ {attempt}/{max}): {reason}",
+    "chipFailover": "ᱵᱮᱠᱟᱯ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ",
+    "chipFailoverReason": "ᱵᱮᱠᱟᱯ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ: {reason}",
+    "chipFailoverTo": "{model} ᱥᱮᱱ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ",
+    "chipFailoverToReason": "{model} ᱥᱮᱱ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ: {reason}",
+    "outcomeTruncated": "ᱱᱚᱶᱟ ᱡᱚᱵᱟᱵ ᱯᱩᱨᱟᱹ ᱪᱷᱚᱭ ᱵᱷᱟᱜᱮ ᱠᱟᱴᱟ ᱞᱮᱱᱟ।",
+    "outcomeContinue": "ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+    "outcomeLongerReplies": "ᱞᱟᱢᱟ ᱡᱚᱵᱟᱵ ᱥᱟᱹᱠᱷᱤ ᱮᱢ ᱢᱮ",
+    "continueMessage": "ᱚᱠᱟ ᱪᱷᱚᱭ ᱛᱮ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ ᱚᱸᱰᱮ ᱠᱷᱚᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ, ᱢᱩᱨᱩᱛ ᱚᱞ ᱟᱠᱟᱱ ᱠᱚ ᱵᱟᱝ ᱯᱷᱤᱨ ᱚᱞ ᱠᱟᱛᱮ।",
+    "outcomeRefused": "ᱥᱩᱨᱠᱷᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱰᱮᱞ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱱᱚᱶᱟ ᱡᱚᱵᱟᱵ ᱵᱚᱸᱫ ᱠᱟᱫᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱵᱟᱵ ᱵᱟᱹᱱᱩᱜᱼᱟ। ᱚᱱᱚᱠᱚᱞ ᱵᱚᱫᱚᱞ ᱠᱟᱛᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+    "outcomeRefusedReason": "ᱥᱩᱨᱠᱷᱟ ᱞᱟᱹᱜᱤᱫ ({reason}) ᱢᱚᱰᱮᱞ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱱᱚᱶᱟ ᱡᱚᱵᱟᱵ ᱵᱚᱸᱫ ᱠᱟᱫᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱵᱟᱵ ᱵᱟᱹᱱᱩᱜᱼᱟ। ᱚᱱᱚᱠᱚᱞ ᱵᱚᱫᱚᱞ ᱠᱟᱛᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+    "outcomeMalformedToolCall": "ᱢᱚᱰᱮᱞ ᱫᱚ ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱪᱮᱥᱴᱟ ᱞᱮᱱᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱚᱱᱟ ᱟᱜ ᱚᱱᱚᱠᱚᱞ ᱵᱷᱩᱞ ᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱵᱟᱝ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ। ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+    "outcomeEmpty": "ᱢᱚᱰᱮᱞ ᱫᱚ ᱠᱷᱟᱞᱤ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱮᱱᱟ। ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+    "stopRaiseSteps": "ᱴᱩᱞ-ᱠᱚᱞ ᱥᱤᱢᱟ ᱵᱟᱲᱦᱟᱣ ᱢᱮ",
+    "stopRaiseBudget": "ᱠᱷᱚᱨᱪᱟ ᱥᱤᱢᱟ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "stopAskEditor": "ᱮᱡᱮᱱᱴ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱡᱤᱛᱟᱜ ᱯᱟᱱᱛᱮ ᱥᱮᱱ ᱥᱤᱢᱟ ᱵᱟᱲᱦᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱢᱮ।",
+    "rsOpen": "ᱨᱚᱱ ᱥᱮᱴᱤᱝ ᱠᱚ",
+    "rsTitle": "ᱨᱚᱱ ᱥᱮᱴᱤᱝ ᱠᱚ",
+    "rsClose": "ᱨᱚᱱ ᱥᱮᱴᱤᱝ ᱠᱚ ᱵᱚᱸᱫ ᱢᱮ",
+    "rsBack": "ᱨᱚᱱ ᱥᱮᱴᱤᱝ ᱠᱚ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+    "rsIntro": "{name} ᱞᱟᱹᱜᱤᱫ ᱛᱟᱭᱚᱢ ᱵᱷᱮᱡᱟᱣ ᱪᱮᱠᱟ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ। ᱚᱱᱟ ᱠᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱴᱮᱵ ᱨᱮ ᱵᱚᱫᱚᱞ ᱢᱮ।",
+    "rsLoading": "ᱞᱚᱰ ᱮᱫᱟ",
+    "rsRetry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ",
+    "rsOpenBehavior": "ᱵᱮᱵᱷᱟᱨ ᱨᱮ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "rsModelHeading": "ᱢᱚᱰᱮᱞ ᱟᱨ ᱱᱢᱩᱱᱟ ᱵᱟᱪᱷᱟᱣ",
+    "rsModel": "ᱢᱚᱰᱮᱞ",
+    "rsModelNotSet": "ᱥᱮᱴ ᱵᱟᱝ ᱟᱠᱟᱱᱟ",
+    "rsModelDefault": "ᱢᱚᱰᱮᱞ ᱟᱜ ᱰᱤᱯᱷᱚᱞᱴ",
+    "rsDepth": "ᱨᱤᱡᱚᱱᱤᱝ ᱨᱮᱭᱟᱜ ᱜᱷᱟᱨᱟ",
+    "rsSourceAgent": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
+    "rsParam_temperature": "ᱛᱟᱯᱢᱟᱱ",
     "rsParam_topP": "Top-P",
-    "rsParam_maxTokens": "Max reply length (tokens)",
+    "rsParam_maxTokens": "ᱡᱚᱵᱟᱵ ᱟᱜ ᱵᱟᱲᱛᱤ ᱞᱚᱸᱜᱚ (ᱴᱚᱠᱮᱱ)",
     "rsParam_topK": "Top-K",
-    "rsParam_frequencyPenalty": "Frequency penalty",
-    "rsParam_presencePenalty": "Presence penalty",
-    "rsParam_seed": "Seed",
-    "rsParam_stopSequences": "Stop sequences",
-    "rsParamDropped": "{param} is set on this agent, but {provider} ignores it for {model}, so it has no effect.",
+    "rsParam_frequencyPenalty": "ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱥᱟᱡᱟᱭ",
+    "rsParam_presencePenalty": "ᱢᱮᱱᱟᱜ ᱟᱜ ᱥᱟᱡᱟᱭ",
+    "rsParam_seed": "ᱥᱤᱰ",
+    "rsParam_stopSequences": "ᱵᱚᱸᱫ ᱟᱜ ᱠᱷᱟᱛᱨᱟ",
+    "rsParamDropped": "{param} ᱫᱚ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱥᱮᱴ ᱟᱠᱟᱱᱟ, ᱢᱮᱱᱠᱷᱟᱱ {provider} ᱫᱚ {model} ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱟᱝ ᱢᱟᱱᱟᱣᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱟᱜ ᱪᱮᱫᱽ ᱵᱟᱝ ᱯᱷᱚᱞ ᱢᱮᱱᱟᱜᱼᱟ।",
     "rsToolsRunHeading": "Tools for this run",
     "rsToolsRunOnly": "This run only",
     "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
@@ -823,63 +823,63 @@
     "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
     "rsToolsEditAgent": "Change the agent's saved tools",
     "rsToolsLimitedChip": "Tools limited for this run",
-    "rsToolsEmpty": "This agent has no tools available.",
-    "rsToolsSummary": "{on} of {total} tools on",
-    "rsToolsFailed": "Could not load the tools.",
-    "rsLimitsHeading": "Limits for each turn",
-    "rsLimitsChange": "Change limits",
-    "rsLimitsView": "See limits",
-    "rsLimitsFailed": "Could not load the limits.",
-    "rsLimitsEmpty": "No limits to show for this agent.",
-    "rsNoLimit": "No limit",
-    "rsScoreAll": "Every match",
+    "rsToolsEmpty": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "rsToolsSummary": "{total} ᱴᱩᱞ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {on} ᱪᱟᱹᱞᱩ",
+    "rsToolsFailed": "ᱴᱩᱞ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "rsLimitsHeading": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱟᱜ ᱥᱤᱢᱟ",
+    "rsLimitsChange": "ᱥᱤᱢᱟ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "rsLimitsView": "ᱥᱤᱢᱟ ᱧᱮᱞ ᱢᱮ",
+    "rsLimitsFailed": "ᱥᱤᱢᱟ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "rsLimitsEmpty": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "rsNoLimit": "ᱪᱮᱫᱽ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ",
+    "rsScoreAll": "ᱥᱟᱱᱟᱢ ᱢᱤᱞᱟᱣ",
     "rsUnitSeconds": "{n} s",
-    "rsUnitChars": "{n} characters",
-    "rsLimitRange": "Allowed: {min} to {max}",
-    "rsLayer_AGENT": "Set on this agent",
-    "rsLayer_TENANT": "Workspace default",
-    "rsLayer_PLATFORM": "Platform default",
-    "rsLayer_REQUEST": "Set for this request",
-    "rsLimit_maxToolSteps": "Tool calls per turn",
-    "rsLimit_turnTimeoutSeconds": "Time for one turn",
-    "rsLimit_toolTimeoutSeconds": "Time for one tool call",
-    "rsLimit_toolOutputMaxChars": "Tool result size",
-    "rsLimit_retrievalTopK": "Knowledge results per search",
-    "rsLimit_retrievalMinScore": "Least relevant knowledge match",
-    "rsLimit_continuationPasses": "Extra passes to finish a reply",
-    "rsLimitHelp_maxToolSteps": "The most tool calls one reply may make. When it is reached the turn stops and says so.",
-    "rsLimitHelp_turnTimeoutSeconds": "How long one turn may run before it is stopped.",
-    "rsLimitHelp_toolTimeoutSeconds": "How long a single tool call may run before it is stopped.",
-    "rsLimitHelp_toolOutputMaxChars": "How much of one tool result the model gets to read. The rest is cut.",
-    "rsLimitHelp_retrievalTopK": "How many pieces of the knowledge base one search brings back.",
-    "rsLimitHelp_retrievalMinScore": "Pieces that match less well than this are left out. Zero keeps every match.",
-    "rsLimitHelp_continuationPasses": "Extra tries to finish a reply that stopped at a step it announced and did not take.",
-    "rsPreviewButton": "Preview prompt",
-    "rsPreviewTitle": "Prompt preview",
-    "rsPreviewIntro": "The system prompt and tool list this agent would send, built the same way a real turn builds them. Nothing is sent to a model.",
-    "rsPreviewBuilding": "Building the preview",
-    "rsPreviewFailed": "Could not build the preview.",
-    "rsPreviewTotals": "About {prompt} tokens of system text and {tools} tokens of tool definitions (estimates).",
-    "rsPreviewOverBudgetTitle": "Over the token budget",
-    "rsPreviewOverBudget": "The standing system text is over the configured budget of {budget} tokens. Nothing is cut; consider shortening a prompt.",
-    "rsPreviewNoBlocks": "No prompt blocks to show.",
-    "rsPreviewMessage": "Message: {message}",
-    "rsPreviewTokens": "~{tokens} tokens",
-    "rsPreviewShowText": "Show the text",
-    "rsPreviewTools": "Tools ({count})",
-    "rsPreviewNoTools": "This agent offers no tools.",
-    "rsPreviewNotes": "What this preview cannot know",
-    "rsPreviewOpenAdmin": "See and change the wording of every prompt",
-    "rsOriginDefault": "shipped default",
-    "rsOriginOverride": "{scope} override v{version}",
-    "rsOriginAgentConfig": "agent's own system prompt",
-    "rsOriginCode": "platform code",
-    "rsRunBudget": "Spending cap per run",
-    "rsNoCap": "No cap",
-    "rsRunBudgetHelp": "The most one run may spend when it delegates to other agents or runs deep research. An estimate, not billing.",
-    "chipToolsOff": "Trying again without tools",
-    "chipFailoverBlocked": "No backup model used: tools already ran",
-    "rsLimitChangeOne": "Change",
+    "rsUnitChars": "{n} ᱚᱠᱷᱚᱨ",
+    "rsLimitRange": "ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ: {min} ᱠᱷᱚᱱ {max} ᱦᱟᱹᱵᱤᱡ",
+    "rsLayer_AGENT": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
+    "rsLayer_TENANT": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱰᱤᱯᱷᱚᱞᱴ",
+    "rsLayer_PLATFORM": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱰᱤᱯᱷᱚᱞᱴ",
+    "rsLayer_REQUEST": "ᱱᱚᱶᱟ ᱚᱱᱚᱠᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
+    "rsLimit_maxToolSteps": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ",
+    "rsLimit_turnTimeoutSeconds": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱟᱜ ᱚᱠᱛᱚ",
+    "rsLimit_toolTimeoutSeconds": "ᱢᱤᱫ ᱴᱩᱞ ᱠᱚᱞ ᱟᱜ ᱚᱠᱛᱚ",
+    "rsLimit_toolOutputMaxChars": "ᱴᱩᱞ ᱯᱷᱚᱞ ᱟᱜ ᱚᱠᱛᱚ ᱞᱚᱸᱜᱚ",
+    "rsLimit_retrievalTopK": "ᱠᱷᱚᱡᱮᱛ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱰᱟᱭ ᱯᱷᱚᱞ",
+    "rsLimit_retrievalMinScore": "ᱵᱟᱰᱟᱭ ᱢᱤᱞᱟᱣ ᱟᱜ ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱥᱟᱸᱜᱤᱛ",
+    "rsLimit_continuationPasses": "ᱡᱚᱵᱟᱵ ᱯᱩᱨᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱞᱮᱫ ᱯᱟᱥ",
+    "rsLimitHelp_maxToolSteps": "ᱢᱤᱫ ᱡᱚᱵᱟᱵ ᱵᱟᱲᱛᱤ ᱫᱚ ᱪᱮᱫ ᱴᱩᱞ ᱠᱚᱞ ᱪᱷᱚᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱥᱤᱢᱟ ᱨᱮ ᱥᱮᱫᱚᱜ ᱠᱷᱟᱱ ᱴᱚᱨᱱ ᱵᱚᱸᱫ ᱦᱩᱭᱜᱼᱟ ᱟᱨ ᱚᱱᱟ ᱢᱮᱛ ᱮᱫᱟ।",
+    "rsLimitHelp_turnTimeoutSeconds": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱵᱚᱸᱫ ᱦᱩᱭ ᱠᱷᱚᱱ ᱥᱟᱵᱟᱭ ᱢᱤᱫ ᱪᱷᱚᱭ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rsLimitHelp_toolTimeoutSeconds": "ᱢᱤᱫ ᱴᱩᱞ ᱠᱚᱞ ᱵᱚᱸᱫ ᱦᱩᱭ ᱠᱷᱚᱱ ᱥᱟᱵᱟᱭ ᱢᱤᱫ ᱪᱷᱚᱭ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rsLimitHelp_toolOutputMaxChars": "ᱢᱤᱫ ᱴᱩᱞ ᱯᱷᱚᱞ ᱟᱜ ᱪᱮᱫ ᱚᱠᱛᱚ ᱢᱚᱰᱮᱞ ᱯᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱟᱠᱤ ᱠᱚ ᱠᱟᱴᱟ ᱟᱠᱚᱜᱼᱟ।",
+    "rsLimitHelp_retrievalTopK": "ᱢᱤᱫ ᱠᱷᱚᱡᱮᱛ ᱫᱚ ᱵᱟᱰᱟᱭ ᱵᱷᱟᱱᱰᱟᱨ ᱠᱷᱚᱱ ᱪᱮᱫ ᱴᱩᱠᱨᱟ ᱯᱷᱤᱨ ᱟᱹᱜᱩ ᱮᱫᱟ।",
+    "rsLimitHelp_retrievalMinScore": "ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱠᱚᱢ ᱢᱤᱞᱟᱣ ᱟᱠᱟᱱ ᱴᱩᱠᱨᱟ ᱠᱚ ᱵᱟᱛᱼᱟᱣ ᱟᱠᱚᱜᱼᱟ। ᱥᱩᱱᱱᱟ ᱫᱚ ᱡᱷᱚᱛᱚ ᱢᱤᱞᱟᱣ ᱛᱟᱦᱮᱱ ᱮᱫᱟ।",
+    "rsLimitHelp_continuationPasses": "ᱛᱮᱞᱟ ᱥᱮᱞᱮᱫ ᱟᱠᱟᱱ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱝ ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ ᱡᱚᱵᱟᱵ ᱯᱩᱨᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱞᱮᱫ ᱪᱮᱥᱴᱟ ᱠᱚ।",
+    "rsPreviewButton": "ᱯᱨᱚᱢᱯᱴ ᱯᱩᱨᱟᱹ ᱧᱮᱞ",
+    "rsPreviewTitle": "ᱯᱨᱚᱢᱯᱴ ᱯᱩᱨᱟᱹ ᱧᱮᱞ",
+    "rsPreviewIntro": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱵᱷᱮᱡᱟᱣ ᱟᱜ ᱥᱤᱥᱴᱚᱢ ᱯᱨᱚᱢᱯᱴ ᱟᱨ ᱴᱩᱞ ᱞᱮᱠᱟᱱ, ᱥᱟᱹᱨᱤ ᱴᱚᱨᱱ ᱞᱮᱠᱟ ᱛᱮ ᱵᱟᱱᱟᱣ ᱟᱠᱟᱱᱟ। ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱪᱮᱫᱽ ᱵᱟᱝ ᱵᱷᱮᱡᱟᱜᱼᱟ।",
+    "rsPreviewBuilding": "ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱵᱟᱱᱟᱣ ᱮᱫᱟ",
+    "rsPreviewFailed": "ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱵᱟᱝ ᱵᱟᱱᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "rsPreviewTotals": "ᱥᱤᱥᱴᱚᱢ ᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱚᱞᱟᱜ {prompt} ᱴᱚᱠᱮᱱ ᱟᱨ ᱴᱩᱞ ᱵᱩᱡᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ {tools} ᱴᱚᱠᱮᱱ (ᱟᱱᱟᱡ)।",
+    "rsPreviewOverBudgetTitle": "ᱴᱚᱠᱮᱱ ᱵᱟᱡᱮᱴ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ",
+    "rsPreviewOverBudget": "ᱛᱟᱦᱮᱱ ᱥᱤᱥᱴᱚᱢ ᱚᱞ ᱫᱚ ᱥᱮᱴ ᱟᱠᱟᱱ {budget} ᱴᱚᱠᱮᱱ ᱵᱟᱡᱮᱴ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱱᱟ। ᱪᱮᱫᱽ ᱵᱟᱝ ᱠᱟᱴᱟ ᱞᱮᱱᱟ; ᱢᱤᱫ ᱯᱨᱚᱢᱯᱴ ᱪᱤᱛᱚᱜ ᱢᱮ ᱢᱮᱱ ᱪᱤᱛᱟ ᱢᱮ।",
+    "rsPreviewNoBlocks": "ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱯᱨᱚᱢᱯᱴ ᱵᱞᱚᱠ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "rsPreviewMessage": "ᱵᱷᱮᱡᱟᱣ: {message}",
+    "rsPreviewTokens": "~{tokens} ᱴᱚᱠᱮᱱ",
+    "rsPreviewShowText": "ᱚᱞ ᱧᱮᱞᱟᱹ ᱢᱮ",
+    "rsPreviewTools": "ᱴᱩᱞ ({count})",
+    "rsPreviewNoTools": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱪᱮᱫᱽ ᱴᱩᱞ ᱵᱟᱝ ᱮᱢᱟ।",
+    "rsPreviewNotes": "ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱫᱚ ᱪᱮᱫ ᱵᱟᱝ ᱵᱟᱰᱟᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ",
+    "rsPreviewOpenAdmin": "ᱥᱟᱱᱟᱢ ᱯᱨᱚᱢᱯᱴ ᱟᱜ ᱥᱟᱵᱟᱫ ᱧᱮᱞ ᱟᱨ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "rsOriginDefault": "ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱᱟ",
+    "rsOriginOverride": "{scope} ᱚᱣᱟᱨᱟᱭᱰ v{version}",
+    "rsOriginAgentConfig": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱥᱤᱥᱴᱚᱢ ᱯᱨᱚᱢᱯᱴ",
+    "rsOriginCode": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱠᱳᱰ",
+    "rsRunBudget": "ᱨᱚᱱ ᱥᱟᱱᱟᱢ ᱟᱜ ᱠᱷᱚᱨᱪᱟ ᱥᱤᱢᱟ",
+    "rsNoCap": "ᱪᱮᱫᱽ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ",
+    "rsRunBudgetHelp": "ᱢᱤᱫ ᱨᱚᱱ ᱫᱚ ᱮᱴᱟᱜ ᱮᱡᱮᱱᱴ ᱠᱚ ᱠᱟᱹᱢᱤ ᱮᱢ ᱥᱮ ᱜᱟᱦᱱᱟ ᱥᱚᱫᱷᱚ ᱪᱟᱞᱟᱣ ᱚᱠᱛᱚ ᱵᱟᱲᱛᱤ ᱪᱮᱫ ᱠᱷᱚᱨᱪᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱱᱚᱶᱟ ᱫᱚ ᱟᱱᱟᱡ ᱠᱟᱱᱟ, ᱵᱤᱞ ᱵᱟᱝ।",
+    "chipToolsOff": "ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱮᱫᱟ",
+    "chipFailoverBlocked": "ᱵᱮᱠᱟᱯ ᱢᱚᱰᱮᱞ ᱵᱟᱝ ᱵᱮᱵᱷᱟᱨ ᱞᱮᱱᱟ: ᱴᱩᱞ ᱠᱚ ᱫᱚ ᱫᱚᱦᱚᱜ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
+    "rsLimitChangeOne": "ᱵᱚᱫᱚᱞ ᱢᱮ",
     "reasonRateLimited": "rate limited",
     "reasonTimeout": "timed out",
     "reasonProviderUnavailable": "provider unavailable",
@@ -1494,34 +1494,34 @@
     "updateTtsProviderError": "ᱱᱩᱭ ᱮᱡᱮᱱᱴᱟᱜ TTS ᱯᱨᱚᱵᱷᱟᱭᱰᱚᱨ ᱵᱟᱝ ᱟᱹᱯᱰᱮᱴ ᱞᱮᱱᱟ᱾",
     "ttsProviderFreePlanTooltip": "TTS ᱯᱨᱚᱵᱷᱟᱭᱰᱚᱨ ᱵᱟᱪᱷᱟᱣ ᱫᱚ ᱢᱤᱫ ᱯᱨᱤᱢᱤᱭᱚᱢ ᱯᱷᱤᱪᱟᱹᱨ ᱠᱟᱱᱟ᱾",
     "ttsProviderNotSet": "ᱯᱞᱮᱴᱯᱷᱚᱨᱢ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱮᱵᱷᱟᱨᱚᱜ ᱠᱟᱱᱟ",
-    "samplingTitle": "Advanced sampling",
-    "samplingIntro": "Fine-tune how the model picks words. Leave a box empty to use the model default. Providers that do not support a field simply ignore it.",
-    "samplingIgnored": "This model's provider ignores this setting, so changing it has no effect.",
-    "samplingSaving": "Saving…",
-    "samplingSaved": "Saved",
-    "samplingNotSaved": "Not saved",
-    "samplingSaveFailed": "Could not save that setting.",
-    "samplingErrorWhole": "{label} must be a whole number from {min} to {max}, or empty to turn it off.",
-    "samplingErrorNumber": "{label} must be a number from {min} to {max}, or empty to turn it off.",
-    "samplingStopTooLong": "A stop sequence can be at most {max} characters.",
-    "samplingStopTooMany": "At most {max} stop sequences.",
+    "samplingTitle": "ᱪᱷᱚᱠᱚᱵ ᱱᱢᱩᱱᱟ ᱵᱟᱪᱷᱟᱣ",
+    "samplingIntro": "ᱢᱚᱰᱮᱞ ᱪᱮᱠᱟ ᱛᱮ ᱥᱟᱵᱟᱫ ᱵᱟᱪᱷᱟᱣᱟ ᱚᱱᱟ ᱥᱟᱯᱷᱟ ᱛᱮ ᱥᱚᱡᱷᱮ ᱢᱮ। ᱢᱚᱰᱮᱞ ᱟᱜ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱠᱥᱟ ᱠᱷᱟᱞᱤ ᱛᱟᱦᱮᱱᱟ ᱢᱮ। ᱚᱠᱟ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱪᱮᱫᱽ ᱠᱷᱮᱛᱨᱚ ᱵᱟᱝ ᱵᱩᱡᱷᱟᱣᱟ ᱚᱱᱟ ᱫᱚ ᱚᱱᱟ ᱵᱟᱛᱼᱟᱣ ᱮᱫᱟ।",
+    "samplingIgnored": "ᱱᱚᱶᱟ ᱢᱚᱰᱮᱞ ᱟᱜ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱢᱟᱱᱟᱣᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱨᱮ ᱪᱮᱫᱽ ᱯᱷᱚᱞ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "samplingSaving": "ᱥᱟᱸᱪᱟᱣ ᱮᱫᱟ…",
+    "samplingSaved": "ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ",
+    "samplingNotSaved": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "samplingSaveFailed": "ᱚᱱᱟ ᱥᱮᱴᱤᱝ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "samplingErrorWhole": "{label} ᱫᱚ {min} ᱠᱷᱚᱱ {max} ᱦᱟᱹᱵᱤᱡ ᱯᱩᱨᱟᱹ ᱜᱚᱱᱚᱝ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ, ᱥᱮ ᱵᱚᱸᱫ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱟᱞᱤ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+    "samplingErrorNumber": "{label} ᱫᱚ {min} ᱠᱷᱚᱱ {max} ᱦᱟᱹᱵᱤᱡ ᱜᱚᱱᱚᱝ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ, ᱥᱮ ᱵᱚᱸᱫ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱟᱞᱤ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+    "samplingStopTooLong": "ᱢᱤᱫ ᱵᱚᱸᱫ ᱠᱷᱟᱛᱨᱟ ᱫᱚ ᱵᱟᱲᱛᱤ ᱛᱮ {max} ᱚᱠᱷᱚᱨ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "samplingStopTooMany": "ᱵᱟᱲᱛᱤ ᱛᱮ {max} ᱵᱚᱸᱫ ᱠᱷᱟᱛᱨᱟ।",
     "samplingTopK": "Top-K",
-    "samplingTopKHelp": "Only consider the K most likely next words. Lower means safer, more predictable text. 1 to 1000.",
-    "samplingSeed": "Seed",
-    "samplingSeedHelp": "Set a number to make replies more repeatable for the same prompt. Not every provider guarantees it.",
-    "samplingFrequency": "Frequency penalty",
-    "samplingFrequencyHelp": "Positive values discourage repeating the same words again and again. -2 to 2.",
-    "samplingPresence": "Presence penalty",
-    "samplingPresenceHelp": "Positive values nudge the model toward new topics instead of staying on one. -2 to 2.",
-    "samplingPlaceholderDefault": "Default",
-    "samplingPlaceholderRandom": "Random",
+    "samplingTopKHelp": "ᱠᱷᱟᱞᱤ ᱥᱟᱱᱟᱢ ᱠᱷᱚᱱ ᱥᱟᱸᱜᱤᱛ K ᱛᱟᱭᱚᱢ ᱥᱟᱵᱟᱫ ᱠᱚ ᱪᱤᱱᱛᱟᱣ ᱢᱮ। ᱠᱚᱢ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱲᱛᱤ ᱥᱩᱨᱠᱷᱤᱛ, ᱟᱱᱟᱡ ᱫᱟᱲᱮᱭᱟᱜ ᱚᱞ। 1 ᱠᱷᱚᱱ 1000।",
+    "samplingSeed": "ᱥᱤᱰ",
+    "samplingSeedHelp": "ᱢᱤᱫ ᱯᱨᱚᱢᱯᱴ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱵᱟᱵ ᱠᱚ ᱵᱟᱲᱛᱤ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱦᱩᱭ ᱞᱟᱹᱜᱤᱫ ᱜᱚᱱᱚᱝ ᱥᱮᱴ ᱢᱮ। ᱡᱷᱚᱛᱚ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱚᱱᱟ ᱵᱟᱝ ᱜᱟᱨᱮᱱᱴᱤ ᱮᱢᱟ।",
+    "samplingFrequency": "ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱥᱟᱡᱟᱭ",
+    "samplingFrequencyHelp": "ᱫᱷᱚᱱᱟᱛᱢᱚᱠ ᱢᱟᱱ ᱫᱚ ᱢᱤᱫ ᱥᱟᱵᱟᱫ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱵᱟᱛᱼᱟᱣ ᱮᱫᱟ। -2 ᱠᱷᱚᱱ 2।",
+    "samplingPresence": "ᱢᱮᱱᱟᱜ ᱟᱜ ᱥᱟᱡᱟᱭ",
+    "samplingPresenceHelp": "ᱫᱷᱚᱱᱟᱛᱢᱚᱠ ᱢᱟᱱ ᱫᱚ ᱢᱚᱰᱮᱞ ᱠᱚ ᱢᱤᱫ ᱵᱤᱥᱚᱭ ᱨᱮ ᱛᱟᱦᱮᱱ ᱞᱮᱠᱟ ᱵᱟᱝ ᱱᱟᱣᱟ ᱵᱤᱥᱚᱭ ᱥᱮᱱ ᱥᱟᱡᱟᱣ ᱮᱫᱟ। -2 ᱠᱷᱚᱱ 2।",
+    "samplingPlaceholderDefault": "ᱰᱤᱯᱷᱚᱞᱴ",
+    "samplingPlaceholderRandom": "ᱨᱮᱱᱰᱚᱢ",
     "samplingPlaceholderZero": "0",
-    "samplingStop": "Stop sequences",
-    "samplingStopPlaceholder": "Type a phrase, press Enter",
-    "samplingStopHelp": "The reply ends as soon as the model writes one of these. Up to {count}, each up to {max} characters.",
-    "samplingStopCurrent": "Current stop sequences",
-    "samplingStopRemove": "Remove stop sequence {value}",
-    "samplingAdd": "Add"
+    "samplingStop": "ᱵᱚᱸᱫ ᱟᱜ ᱠᱷᱟᱛᱨᱟ",
+    "samplingStopPlaceholder": "ᱢᱤᱫ ᱥᱟᱵᱟᱫ ᱚᱞ ᱢᱮ, Enter ᱦᱟᱯᱼᱟᱣ ᱢᱮ",
+    "samplingStopHelp": "ᱢᱚᱰᱮᱞ ᱫᱚ ᱱᱚᱶᱟ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱪᱮᱫ ᱚᱞ ᱠᱷᱟᱱ ᱡᱚᱵᱟᱵ ᱪᱷᱚᱭ ᱦᱩᱭᱜᱼᱟ। ᱵᱟᱲᱛᱤ ᱛᱮ {count}, ᱥᱟᱱᱟᱢ ᱵᱟᱲᱛᱤ ᱛᱮ {max} ᱚᱠᱷᱚᱨ।",
+    "samplingStopCurrent": "ᱱᱤᱛᱚᱜ ᱟᱜ ᱵᱚᱸᱫ ᱠᱷᱟᱛᱨᱟ",
+    "samplingStopRemove": "ᱵᱚᱸᱫ ᱠᱷᱟᱛᱨᱟ {value} ᱚᱪᱚᱜ ᱢᱮ",
+    "samplingAdd": "ᱥᱮᱞᱮᱫ ᱢᱮ"
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "ᱱᱚᱰ ᱥᱮᱞᱮᱠᱴ ᱢᱮ ᱠᱚᱱᱯᱷᱤᱜᱟᱹᱨ ᱞᱟᱹᱜᱤᱫ, ᱥᱮ ᱞᱮᱸᱜᱟ ᱥᱮᱡᱟᱜ ᱯᱮᱞᱮᱴ ᱠᱷᱚᱱ ᱱᱟᱣᱟ ᱢᱤᱫᱴᱟᱝ ᱚᱨ ᱟᱹᱜᱩᱭ ᱢᱮ᱾",
@@ -13181,7 +13181,7 @@
   },
   "adminAccessPage": {
     "pageTitle": "Team access",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "ᱯᱨᱚᱥᱟᱥᱚᱱ",
     "matrixTitle": "Access matrix",
     "matrixHint": "Every member's effective scopes at a glance - tick a cell to grant or revoke that scope for that person.",
     "memberColumn": "MEMBER",
@@ -13196,7 +13196,7 @@
   "adminPaymentsPage": {
     "pageTitle": "Agent payments",
     "pageSubtitle": "Signed UPI mandates, spend caps and payment history for each agent.",
-    "agentPickerLabel": "Agent",
+    "agentPickerLabel": "ᱮᱡᱮᱱᱴ",
     "noAgents": "No agents in this workspace",
     "loadFailed": "Could not load payment data for this agent.",
     "mandatesHeading": "Payment mandates",
@@ -13224,9 +13224,9 @@
     "thresholdRequired": "Set the approval threshold amount.",
     "previewFailed": "Could not build the mandate preview.",
     "reviewMandate": "Review mandate",
-    "back": "Back",
+    "back": "ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
     "signAndGrant": "Sign & grant",
-    "cancel": "Cancel",
+    "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
     "canonicalReviewLabel": "Canonical mandate document",
     "canonicalReviewHint": "This exact JSON is what gets Ed25519-signed. Verify the caps, scope and validity before granting.",
     "grantSuccess": "Mandate granted and signed.",
@@ -13252,7 +13252,7 @@
     "colStatus": "Status",
     "colVpa": "Payee VPA",
     "colDescription": "Description",
-    "colCreated": "Created",
+    "colCreated": "ᱵᱟᱱᱟᱣ ᱟᱠᱟᱱ",
     "detailId": "Transaction",
     "detailMandate": "Mandate",
     "detailGatewayPayment": "Gateway payment",
@@ -13296,7 +13296,7 @@
     "restoreTooltip": "Make this version the agent's current configuration.",
     "restoreConfirmTitle": "Restore v{version}?",
     "restoreConfirmBody": "The agent's current configuration is replaced by this version's. The restore itself is saved as a new version, so it can be undone.",
-    "cancelButton": "Cancel",
+    "cancelButton": "ᱵᱟᱛᱤᱞ ᱢᱮ",
     "restoredNotice": "Restored - the agent now runs this configuration.",
     "restoreError": "Couldn't restore that version.",
     "labelUpdatedNotice": "Label updated.",
@@ -13309,18 +13309,18 @@
     "forceReasonLabel": "Override reason (required, written to the audit log)",
     "forceReasonPlaceholder": "Why is this safe to promote without a passing eval?",
     "forcePromoteButton": "Promote anyway",
-    "fieldModel": "Model",
+    "fieldModel": "ᱢᱚᱰᱮᱞ",
     "fieldFallback": "Fallback",
     "fieldGeneration": "Generation",
     "fieldModes": "Modes",
-    "fieldTools": "Tools",
+    "fieldTools": "ᱴᱩᱞ",
     "toolsUnrestricted": "All resolved tools",
     "toolsNone": "None",
     "toolsCount": "{count} allowed",
-    "fieldGuardrails": "Guardrails",
+    "fieldGuardrails": "ᱜᱟᱨᱰᱨᱮᱞ",
     "fieldFlags": "Enabled",
     "fieldPrompt": "System prompt",
-    "flagKnowledge": "Knowledge",
+    "flagKnowledge": "ᱵᱟᱰᱟᱭ",
     "flagSarvam": "Sarvam",
     "flagSandbox": "Sandbox",
     "flagCodeWorkspace": "Code workspace",
@@ -13341,18 +13341,18 @@
       "AUTONOMOUS": "Autonomous"
     },
     "state": {
-      "READY": "Ready",
+      "READY": "ᱛᱮᱭᱟᱨ",
       "MISSING": "Missing",
       "WAITING_ON_ADMIN": "Waiting on admin",
       "GATED": "Not on your plan",
       "SIMULATED": "Simulated"
     },
     "kind": {
-      "agent": "Agent",
+      "agent": "ᱮᱡᱮᱱᱴ",
       "workflow": "Workflow",
       "tool": "Tool",
       "mcp": "MCP server",
-      "knowledge": "Knowledge",
+      "knowledge": "ᱵᱟᱰᱟᱭ",
       "procedure": "Procedure",
       "secret": "Secret",
       "channel": "Channel"
@@ -13392,7 +13392,7 @@
     },
     "narrative": {
       "aria": "About {name}",
-      "close": "Close",
+      "close": "ᱵᱚᱸᱫ ᱢᱮ",
       "why": "Why it is here",
       "tune": "If results are wrong",
       "proof": "How you will know it works",
@@ -13409,14 +13409,14 @@
       "step": {
         "PENDING": "Waiting",
         "DONE": "Done",
-        "FAILED": "Failed",
+        "FAILED": "ᱵᱟᱭᱡᱷᱮᱛ",
         "COMPENSATED": "Rolled back"
       },
       "failedAt": "Step {step} failed: {name}.",
       "failedGeneric": "The apply did not finish.",
       "nothingKept": "Nothing was kept. Everything created in this run was rolled back.",
       "someKept": "Some steps were already saved and are shown above. Check them before trying again.",
-      "retry": "Try again",
+      "retry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ",
       "doneBody": "Your envoy is in place and starts under watch. Fill in what is still missing on the right."
     },
     "plan": {
@@ -13433,7 +13433,7 @@
       "stepsLabel": "Steps",
       "step": {
         "preview": "Preview",
-        "ready": "Ready",
+        "ready": "ᱛᱮᱭᱟᱨ",
         "applying": "Apply"
       },
       "toReady": "Check what it needs",
@@ -13522,7 +13522,7 @@
         "other": "setting"
       },
       "op": {
-        "changed": "Changed",
+        "changed": "ᱵᱚᱫᱚᱞ ᱟᱠᱟᱱ",
         "added": "Added",
         "removed": "Removed"
       },
@@ -13560,8 +13560,8 @@
       "entityAdded": "{where} is added",
       "entityRemoved": "{where} is removed",
       "showFull": "Show the full text",
-      "before": "Before:",
-      "after": "After:",
+      "before": "ᱢᱟᱲᱟᱝ:",
+      "after": "ᱛᱟᱭᱚᱢ:",
       "apply": "Apply this change",
       "discard": "Discard"
     },
@@ -13570,7 +13570,7 @@
       "placeholder": "For example: the reminders sound too harsh, soften the first one",
       "propose": "Show me the change",
       "proposing": "Working out the change...",
-      "saving": "Saving...",
+      "saving": "ᱥᱟᱸᱪᱟᱣ ᱮᱫᱟ...",
       "applying": "Applying...",
       "failed": "Could not work out a change. Try saying it another way.",
       "done": "Applied. Scoring has been asked for; the new score appears in the ledger when it finishes.",
@@ -13589,7 +13589,7 @@
       "noCards": "Nothing stands out yet. Suggestions appear once something has scored low.",
       "cardsLabel": "Suggestions",
       "scored": "{dimension} {score}",
-      "open": "Open",
+      "open": "ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
       "notApplied": "Available once the envoy is applied.",
       "dimension": {
         "helpfulness": "Helpfulness",
@@ -13674,11 +13674,11 @@
       "demoteNone": "Demote",
       "demoteConfirm": "Demote to {rung}? Approvals return to every risky step immediately.",
       "demoteConfirmYes": "Yes, demote",
-      "demoteConfirmCancel": "Cancel",
+      "demoteConfirmCancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
       "demoteHint": "Always available. It puts the approvals back straight away.",
       "demoteNeedsAdmin": "Only a workspace admin can change the trust level.",
       "atBottom": "Already at the lowest level.",
-      "history": "History",
+      "history": "ᱤᱛᱤᱦᱟᱥ",
       "noHistory": "No trust changes yet.",
       "showEvidence": "Show the evidence",
       "diffKind": {
@@ -13709,7 +13709,7 @@
       "runError": "This run could not finish.",
       "transcriptFailed": "Could not load this transcript.",
       "showTranscript": "Read the conversation ({count} turns)",
-      "agent": "Agent",
+      "agent": "ᱮᱡᱮᱱᱴ",
       "verdict": {
         "PASSED": "The agent handled it well",
         "FAILED": "The agent was talked out of its rules",
@@ -13740,7 +13740,7 @@
   },
   "contactsPage": {
     "pageTitle": "Contacts & routing",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "ᱯᱨᱚᱥᱟᱥᱚᱱ",
     "pageSubtitle": "A contact is a sender your agents already know. Approving a new sender makes them a contact and routes their messages to an agent.",
     "routingTitle": "Channel routing",
     "routingHint": "Pick the agent new conversations go to, and whether a sender you've never seen needs your approval first or goes straight through.",
@@ -13760,16 +13760,16 @@
     "contactsTitle": "Contacts",
     "contactsHint": "Known senders skip approval entirely - a contact here is pre-approved and routes by contact agent → group agent → channel default.",
     "allChannels": "All channels",
-    "allGroups": "All groups",
-    "filterByGroupLabel": "Filter by group",
+    "allGroups": "ᱡᱷᱚᱛᱚ ᱡᱩᱛ",
+    "filterByGroupLabel": "ᱡᱩᱛ ᱛᱮ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
     "searchPlaceholder": "Search number, chat id or name…",
     "identifierPlaceholder": "Phone / chat id / email *",
     "namePlaceholder": "Name (optional)",
     "groupPlaceholder": "Group",
     "noGroup": "No group",
-    "agentPlaceholder": "Agent",
+    "agentPlaceholder": "ᱮᱡᱮᱱᱴ",
     "channelDefault": "Channel default",
-    "addButton": "Add",
+    "addButton": "ᱥᱮᱞᱮᱫ ᱢᱮ",
     "contactAdded": "Contact added.",
     "statusLinked": "Live",
     "statusDirectory": "Directory",
@@ -13781,7 +13781,7 @@
     "groupsTitle": "Contact groups",
     "groupsHint": "Group contacts to route them together - a group's agent answers every member without their own override.",
     "groupNamePlaceholder": "Group name",
-    "groupAgentPlaceholder": "Agent",
+    "groupAgentPlaceholder": "ᱮᱡᱮᱱᱴ",
     "createGroupButton": "Create",
     "groupCreated": "Group created.",
     "groupMeta": "{count} member(s) · routes to {agent}",
@@ -13811,10 +13811,10 @@
     "colContact": "Contact",
     "colStatus": "Status",
     "colGroup": "Group",
-    "colAgent": "Agent",
+    "colAgent": "ᱮᱡᱮᱱᱴ",
     "colRoutesVia": "Routes via",
-    "selectedCount": "{count} selected",
-    "approveN": "Approve {count}",
+    "selectedCount": "{count} ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ",
+    "approveN": "{count} ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
     "rejectN": "Reject {count}",
     "clearSelection": "Clear",
     "bulkProgress": "{done} of {total} done…",
@@ -13830,7 +13830,7 @@
     "contactsEmptyImport": "Import a sheet",
     "contactsNoMatch": "No contacts match these filters.",
     "addContactButton": "Add contact",
-    "cancelButton": "Cancel",
+    "cancelButton": "ᱵᱟᱛᱤᱞ ᱢᱮ",
     "statusLinkedHint": "Has an active conversation",
     "statusDirectoryHint": "Known sender, no conversation yet",
     "justNow": "just now",
@@ -13901,7 +13901,7 @@
     "deactivating": "Removing…",
     "deactivateTitle": "Remove your {provider} key?",
     "deactivateBody": "Decision calls for this workspace will fall back to the platform key (when configured) or local heuristics.",
-    "cancel": "Cancel",
+    "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
     "policyTitle": "Decision controls",
     "policySubtitle": "Where the decision model may act for this workspace — and how sure it must be. Inherit uses the platform default; changes propagate within ~30 seconds.",
     "policyLoading": "Loading policy…",
@@ -13911,17 +13911,17 @@
     "policy_agentRoutingHelp": "Let the decision model pick the best-fit agent for a Quick Task by intent, instead of keyword matching.",
     "policyOpt_inherit": "Inherit",
     "policyOpt_on": "On",
-    "policyOpt_off": "Off",
+    "policyOpt_off": "ᱵᱚᱸᱫ",
     "policyThreshold": "“Simple turn” confidence bar",
     "policyThresholdHelp": "0.5–0.99 — higher means the decision model must be more sure before a turn is called simple. Blank inherits.",
     "policySave": "Save policy",
-    "saving": "Saving…",
+    "saving": "ᱥᱟᱸᱪᱟᱣ ᱮᱫᱟ…",
     "policyPropagation": "Agents can set their own stricter bar in their cost-routing settings — per-agent wins over this workspace value.",
     "playgroundTitle": "Playground",
     "playgroundSubtitle": "Ask the active decision provider a typed question against your resolved key. Bounded to one question per run — see the raw answer, model and token usage.",
     "stateLabel": "State",
     "statePlaceholder": "The facts the decision model reasons over, e.g. a user message or a task description…",
-    "instructionsLabel": "Instructions",
+    "instructionsLabel": "ᱱᱤᱨᱫᱮᱥ",
     "typeHelp_noul": "noul — a calibrated yes/no probability (0–1).",
     "typeHelp_choice": "choice — pick a winner from 2+ options, with per-option probabilities.",
     "typeHelp_score": "score — a probability-weighted score over 2–10 ordered levels.",
@@ -13961,7 +13961,7 @@
     "headerEyebrow": "Sales pipeline",
     "pageSubtitle": "Every lead in one place - move them through the pipeline, log calls and emails, and let workflows keep the stages up to date.",
     "newLead": "New lead",
-    "close": "Close",
+    "close": "ᱵᱚᱸᱫ ᱢᱮ",
     "fieldName": "Name",
     "fieldEmail": "Email",
     "fieldPhone": "Phone",
@@ -13992,7 +13992,7 @@
     "daysAgo": "{n}d ago",
     "lastContacted": "Last contacted {when}",
     "lastReplied": "Last replied {when}",
-    "saveButton": "Save changes",
+    "saveButton": "ᱵᱚᱫᱚᱞ ᱥᱟᱸᱪᱟᱣ ᱢᱮ",
     "createButton": "Create lead",
     "deleteButton": "Delete",
     "timelineTitle": "Activity",
@@ -14045,7 +14045,7 @@
   "schedulePanel": {
     "noAgentsTitle": "No agents yet",
     "noAgentsBody": "Create an agent first — a schedule is a recurring job for one specific agent.",
-    "agent": "Agent",
+    "agent": "ᱮᱡᱮᱱᱴ",
     "loading": "Loading schedule…",
     "enabled": "Enabled",
     "paused": "Paused",
@@ -14065,8 +14065,8 @@
     "cadenceInterval": "Every N minutes / hours / days",
     "cadenceCron": "Cron expression",
     "intervalEvery": "Every",
-    "unitMinutes": "minutes",
-    "unitHours": "hours",
+    "unitMinutes": "ᱢᱤᱱᱤᱴ",
+    "unitHours": "ᱜᱷᱚᱱᱴᱟ",
     "unitDays": "days",
     "intervalHint": "At least 1 minute. The scheduler checks once a minute.",
     "cronLabel": "Cron",
@@ -14122,7 +14122,7 @@
     "builtInReadOnly": "Built-in skills can't be edited. To customise one, export it, change its name, and upload it as your own.",
     "badgeBuiltIn": "Built-in",
     "badgeCustom": "Custom",
-    "badgeOff": "Off",
+    "badgeOff": "ᱵᱚᱸᱫ",
     "fileCount": "{count} bundled file(s)",
     "toggleAria": "Enable skill {name}",
     "selectPrompt": "Select a skill to read its instructions.",
@@ -14130,8 +14130,8 @@
     "editButton": "Edit",
     "deleteButton": "Delete",
     "saveButton": "Save skill",
-    "savingButton": "Saving…",
-    "cancelButton": "Cancel",
+    "savingButton": "ᱥᱟᱸᱪᱟᱣ ᱮᱫᱟ…",
+    "cancelButton": "ᱵᱟᱛᱤᱞ ᱢᱮ",
     "replaceButton": "Replace",
     "newHeading": "New skill",
     "editHeading": "Edit {name}",
@@ -14149,190 +14149,190 @@
   },
   "settingsUi": {
     "title": {
-      "tenant": "Workspace settings",
-      "agent": "Agent settings"
+      "tenant": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮᱴᱤᱝ ᱠᱚ",
+      "agent": "ᱮᱡᱮᱱᱴ ᱥᱮᱴᱤᱝ ᱠᱚ"
     },
-    "agentMissing": "Choose an agent to see its settings.",
+    "agentMissing": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱮᱴᱤᱝ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
     "scopeNote": {
-      "agent": "These values apply to this agent only. Anything you do not override here is inherited from your workspace settings."
+      "agent": "ᱱᱚᱶᱟ ᱢᱟᱱ ᱠᱚ ᱫᱚ ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ। ᱟᱢ ᱱᱚᱸᱰᱮ ᱪᱮᱫ ᱵᱟᱝ ᱚᱣᱟᱨᱟᱭᱰ ᱪᱷᱚᱭᱟ ᱚᱱᱟ ᱫᱚ ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮᱴᱤᱝ ᱠᱷᱚᱱ ᱤᱫᱷᱤᱛ ᱟᱹᱜᱩ ᱠᱟᱱᱟ।"
     },
-    "loading": "Loading settings",
-    "loadError": "Settings could not be loaded. {message}",
-    "retry": "Try again",
+    "loading": "ᱥᱮᱴᱤᱝ ᱠᱚ ᱞᱚᱰ ᱮᱫᱟ",
+    "loadError": "ᱥᱮᱴᱤᱝ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+    "retry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ",
     "filters": {
-      "label": "Filter settings",
-      "search": "Search settings",
-      "searchPlaceholder": "Search by name or description",
-      "group": "Filter by group",
-      "allGroups": "All groups",
-      "risk": "Filter by risk",
-      "allRisks": "All risk levels",
-      "clear": "Clear filters"
+      "label": "ᱥᱮᱴᱤᱝ ᱠᱚ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+      "search": "ᱥᱮᱴᱤᱝ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+      "searchPlaceholder": "ᱵᱚᱸᱥᱟ ᱥᱮ ᱵᱩᱡᱷᱟᱣ ᱛᱮ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+      "group": "ᱡᱩᱛ ᱛᱮ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+      "allGroups": "ᱡᱷᱚᱛᱚ ᱡᱩᱛ",
+      "risk": "ᱡᱷᱩᱠᱤ ᱛᱮ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+      "allRisks": "ᱡᱷᱚᱛᱚ ᱡᱷᱩᱠᱤ ᱥᱛᱚᱨ",
+      "clear": "ᱪᱷᱟᱸᱪᱚ ᱥᱟᱯᱷᱟ ᱢᱮ"
     },
     "empty": {
-      "none": "There are no settings you can change here.",
-      "filtered": "No settings match your filters."
+      "none": "ᱱᱚᱸᱰᱮ ᱟᱢ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+      "filtered": "ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱟᱢᱟᱜ ᱪᱷᱟᱸᱪᱚ ᱥᱟᱶ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ।"
     },
-    "saved": "Saved. Settings updated: {count}.",
-    "saveFailed": "Not saved. Settings that failed: {count}. Your edits are still in the form.",
-    "resetDone": "{label} now uses the inherited value.",
-    "resetFailed": "The setting could not be reset.",
-    "unsaved": "Unsaved change",
-    "discardOne": "Discard change",
-    "restartRequired": "Needs restart",
+    "saved": "ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ। ᱱᱟᱣᱟ ᱟᱠᱟᱱ ᱥᱮᱴᱤᱝ ᱠᱚ: {count}।",
+    "saveFailed": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। ᱵᱟᱭᱡᱷᱮᱛ ᱥᱮᱴᱤᱝ ᱠᱚ: {count}। ᱟᱢᱟᱜ ᱵᱚᱫᱚᱞ ᱫᱚ ᱫᱚᱦᱚᱜ ᱯᱷᱚᱨᱢ ᱨᱮ ᱢᱮᱱᱟᱜᱼᱟ।",
+    "resetDone": "{label} ᱫᱚ ᱱᱤᱛᱚᱜ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।",
+    "resetFailed": "ᱥᱮᱴᱤᱝ ᱨᱤᱥᱮᱴ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "unsaved": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ",
+    "discardOne": "ᱵᱚᱫᱚᱞ ᱠᱚ ᱵᱟᱛᱤᱞ ᱢᱮ",
+    "restartRequired": "ᱨᱤᱥᱴᱟᱨᱴ ᱞᱟᱹᱠᱛᱤ",
     "source": {
-      "default": "Default",
-      "platform": "Platform",
-      "tenant": "Workspace",
-      "agent": "Agent",
-      "tenantInherited": "Inherited from workspace",
-      "aria": "Value source: {source}"
+      "default": "ᱰᱤᱯᱷᱚᱞᱴ",
+      "platform": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ",
+      "tenant": "ᱣᱟᱨᱠᱥᱯᱮᱥ",
+      "agent": "ᱮᱡᱮᱱᱴ",
+      "tenantInherited": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱠᱷᱚᱱ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ",
+      "aria": "ᱢᱟᱱ ᱟᱜ ᱥᱚᱨᱥ: {source}"
     },
     "sourceHelp": {
-      "default": "Nobody has changed this. It uses the value the product ships with.",
-      "platform": "Your platform operator set this for the whole deployment.",
-      "tenant": "Your workspace overrides the default. Reset it to go back to the inherited value.",
-      "agent": "This agent overrides the workspace value. Reset it to inherit the workspace value again.",
-      "tenantInherited": "This agent has no override of its own, so it uses the workspace value. Editing it creates an override for this agent only.",
-      "lockedSuffix": "It is locked, so it cannot be changed here."
+      "default": "ᱵᱟᱝ ᱪᱮᱫ ᱠᱚ ᱱᱚᱶᱟ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ। ᱚᱱᱟ ᱫᱚ ᱯᱨᱚᱰᱚᱠᱴ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।",
+      "platform": "ᱟᱢᱟᱜ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱚᱯᱷᱚᱨᱮᱴᱚᱨ ᱫᱚ ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱰᱤᱯᱞᱚᱭᱢᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱠᱟᱫᱼᱟ।",
+      "tenant": "ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱫᱚ ᱰᱤᱯᱷᱚᱞᱴ ᱚᱣᱟᱨᱟᱭᱰ ᱮᱫᱟ। ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱨᱤᱥᱮᱴ ᱢᱮ।",
+      "agent": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱚᱣᱟᱨᱟᱭᱰ ᱮᱫᱟ। ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱯᱷᱤᱨ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱨᱤᱥᱮᱴ ᱢᱮ।",
+      "tenantInherited": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱟᱡ ᱪᱮᱫᱽ ᱚᱣᱟᱨᱟᱭᱰ ᱵᱟᱹᱱᱩᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ। ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱨᱮ ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱚᱣᱟᱨᱟᱭᱰ ᱵᱟᱱᱟᱣ ᱦᱩᱭᱟ।",
+      "lockedSuffix": "ᱱᱚᱶᱟ ᱛᱟᱞᱟ ᱟᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱸᱰᱮ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।"
     },
     "risk": {
-      "low": "Low risk",
-      "medium": "Medium risk",
-      "high": "High risk",
-      "security": "Security"
+      "low": "ᱠᱚᱢ ᱡᱷᱩᱠᱤ",
+      "medium": "ᱢᱟᱞᱟᱢ ᱡᱷᱩᱠᱤ",
+      "high": "ᱵᱟᱲᱛᱤ ᱡᱷᱩᱠᱤ",
+      "security": "ᱥᱩᱨᱠᱷᱟ"
     },
     "bool": {
       "on": "On",
-      "off": "Off"
+      "off": "ᱵᱚᱸᱫ"
     },
     "value": {
-      "unset": "Not set",
-      "empty": "Empty"
+      "unset": "ᱥᱮᱴ ᱵᱟᱝ ᱟᱠᱟᱱᱟ",
+      "empty": "ᱠᱷᱟᱞᱤ"
     },
     "select": {
-      "placeholder": "Choose an option"
+      "placeholder": "ᱢᱤᱫ ᱵᱤᱠᱚᱞᱯᱚ ᱵᱟᱪᱷᱟᱣ ᱢᱮ"
     },
     "slider": {
-      "label": "{label} (slider)"
+      "label": "{label} (ᱥᱞᱟᱭᱰᱟᱨ)"
     },
     "duration": {
-      "unitLabel": "Unit for {label}"
+      "unitLabel": "{label} ᱟᱜ ᱤᱠᱟᱭ"
     },
     "units": {
-      "chars": "characters",
-      "tokens": "tokens",
+      "chars": "ᱚᱠᱷᱚᱨ",
+      "tokens": "ᱴᱚᱠᱮᱱ",
       "usd": "USD",
       "percent": "%"
     },
     "durationUnits": {
       "ms": "ms",
-      "s": "seconds",
-      "min": "minutes",
-      "h": "hours"
+      "s": "ᱥᱮᱠᱮᱱᱰ",
+      "min": "ᱢᱤᱱᱤᱴ",
+      "h": "ᱜᱷᱚᱱᱴᱟ"
     },
     "groups": {
-      "agent": "Agent runtime",
-      "approvals": "Approvals",
-      "quality": "Quality checks",
-      "guardrails": "Guardrails",
-      "chat": "Chat",
-      "tools": "Tools",
-      "memory": "Memory",
-      "knowledge": "Knowledge",
-      "delegation": "Delegation",
-      "aux": "Helper model",
-      "routing": "Model routing"
+      "agent": "ᱮᱡᱮᱱᱴ ᱨᱚᱱᱴᱟᱭᱢ",
+      "approvals": "ᱢᱚᱱᱡᱩᱨᱤ",
+      "quality": "ᱜᱩᱱ ᱪᱮᱠ",
+      "guardrails": "ᱜᱟᱨᱰᱨᱮᱞ",
+      "chat": "ᱪᱮᱴ",
+      "tools": "ᱴᱩᱞ",
+      "memory": "ᱢᱮᱢᱚᱨᱤ",
+      "knowledge": "ᱵᱟᱰᱟᱭ",
+      "delegation": "ᱠᱟᱹᱢᱤ ᱮᱢ",
+      "aux": "ᱜᱚᱲᱚ ᱢᱚᱰᱮᱞ",
+      "routing": "ᱢᱚᱰᱮᱞ ᱨᱩᱴᱤᱝ"
     },
     "errors": {
-      "required": "Enter a value.",
-      "notNumber": "Enter a number.",
-      "notInteger": "Enter a whole number.",
-      "belowMin": "Must be at least {min}.",
-      "aboveMax": "Must be at most {max}.",
-      "notAllowed": "Choose one of the listed options.",
-      "tooShort": "Too short. Use at least {min}.",
-      "tooLong": "Too long. Use at most {max}.",
-      "precision": "This unit cannot express that precisely. Use a whole number of the smallest unit or pick a smaller unit.",
-      "serverRange": "Allowed range: {min} to {max}.",
-      "serverOptions": "Allowed values: {options}.",
+      "required": "ᱢᱤᱫ ᱢᱟᱱ ᱮᱢ ᱢᱮ।",
+      "notNumber": "ᱢᱤᱫ ᱜᱚᱱᱚᱝ ᱮᱢ ᱢᱮ।",
+      "notInteger": "ᱢᱤᱫ ᱯᱩᱨᱟᱹ ᱜᱚᱱᱚᱝ ᱮᱢ ᱢᱮ।",
+      "belowMin": "ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ {min} ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ।",
+      "aboveMax": "ᱵᱟᱲᱛᱤ ᱛᱮ {max} ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ।",
+      "notAllowed": "ᱞᱮᱠᱟ ᱟᱠᱟᱱ ᱵᱤᱠᱚᱞᱯᱚ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱢᱤᱫ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
+      "tooShort": "ᱟᱹᱰᱤ ᱪᱷᱚᱴᱚ। ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ {min} ᱵᱮᱵᱷᱟᱨ ᱢᱮ।",
+      "tooLong": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ। ᱵᱟᱲᱛᱤ ᱛᱮ {max} ᱵᱮᱵᱷᱟᱨ ᱢᱮ।",
+      "precision": "ᱱᱚᱶᱟ ᱤᱠᱟᱭ ᱛᱮ ᱚᱱᱟ ᱴᱷᱤᱠ ᱛᱮ ᱵᱟᱝ ᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱥᱟᱱᱟᱢ ᱠᱷᱚᱱ ᱪᱷᱚᱴᱚ ᱤᱠᱟᱭ ᱟᱜ ᱯᱩᱨᱟᱹ ᱜᱚᱱᱚᱝ ᱵᱮᱵᱷᱟᱨ ᱢᱮ ᱥᱮ ᱪᱷᱚᱴᱚ ᱤᱠᱟᱭ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
+      "serverRange": "ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ ᱥᱤᱢᱟ: {min} ᱠᱷᱚᱱ {max}।",
+      "serverOptions": "ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ ᱢᱟᱱ: {options}।",
       "server": {
-        "invalid": "The server did not accept this value: {message}",
-        "locked": "This setting was locked by your administrator, so your change was not saved.",
-        "notFound": "This setting no longer exists.",
-        "forbidden": "You do not have permission to change this setting.",
-        "reasonRequired": "A reason is required for this change. Enter one and try again.",
-        "network": "Could not reach the server, so your change was not saved. {message}",
-        "other": "The change could not be saved: {message}"
+        "invalid": "ᱥᱟᱨᱵᱟᱨ ᱫᱚ ᱱᱚᱶᱟ ᱢᱟᱱ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱞᱮᱱᱟ: {message}",
+        "locked": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱫᱚ ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱛᱮ ᱛᱟᱞᱟ ᱟᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱟᱢᱟᱜ ᱵᱚᱫᱚᱞ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+        "notFound": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱫᱚ ᱟᱨ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।",
+        "forbidden": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱟᱢ ᱟᱜ ᱵᱟᱛᱟᱣ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+        "reasonRequired": "ᱱᱚᱶᱟ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱨᱚᱱ ᱞᱟᱹᱠᱛᱤ। ᱢᱤᱫ ᱮᱢ ᱠᱟᱛᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+        "network": "ᱥᱟᱨᱵᱟᱨ ᱥᱮᱱ ᱵᱟᱝ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱟᱢᱟᱜ ᱵᱚᱫᱚᱞ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+        "other": "ᱵᱚᱫᱚᱞ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ: {message}"
       }
     },
-    "effective": "In effect now: {value}",
+    "effective": "ᱱᱤᱛᱚᱜ ᱞᱟᱜᱩ: {value}",
     "hint": {
-      "range": "Allowed: {min} to {max}.",
-      "min": "Minimum: {min}.",
-      "max": "Maximum: {max}.",
-      "default": "Default: {value}.",
-      "securityStricter": "A security setting can only be made stricter than the platform value, never weaker.",
-      "inherited": "If you reset it, it returns to: {value}."
+      "range": "ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ: {min} ᱠᱷᱚᱱ {max}।",
+      "min": "ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ: {min}।",
+      "max": "ᱵᱟᱲᱛᱤ ᱛᱮ: {max}।",
+      "default": "ᱰᱤᱯᱷᱚᱞᱴ: {value}।",
+      "securityStricter": "ᱢᱤᱫ ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ ᱫᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱷᱟᱴᱚ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱛᱟᱠᱠᱟᱣ ᱠᱚᱢᱡᱚᱨ ᱵᱟᱝ।",
+      "inherited": "ᱟᱢ ᱱᱚᱶᱟ ᱨᱤᱥᱮᱴ ᱠᱷᱟᱱ ᱚᱱᱟ ᱫᱚ ᱱᱚᱸᱰᱮ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ: {value}।"
     },
     "locked": {
-      "withReason": "Locked by your administrator: {reason}",
-      "noReason": "Locked by your administrator. It cannot be changed here."
+      "withReason": "ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱛᱮ ᱛᱟᱞᱟ ᱟᱠᱟᱱ: {reason}",
+      "noReason": "ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱛᱮ ᱛᱟᱞᱟ ᱟᱠᱟᱱ। ᱱᱚᱸᱰᱮ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।"
     },
     "blocked": {
-      "role": "Your role cannot change this setting. Ask a workspace admin.",
-      "scope": "This setting cannot be overridden here.",
-      "readOnly": "Settings are read-only right now.",
+      "role": "ᱟᱢᱟᱜ ᱵᱷᱩᱢᱤᱠᱟ ᱛᱮ ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ। ᱣᱟᱨᱠᱥᱯᱮᱥ ᱮᱰᱢᱤᱱ ᱥᱮᱱ ᱪᱷᱚᱞ ᱢᱮ।",
+      "scope": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱱᱚᱸᱰᱮ ᱚᱣᱟᱨᱟᱭᱰ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+      "readOnly": "ᱥᱮᱴᱤᱝ ᱫᱚ ᱱᱤᱛᱚᱜ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱱᱟ।",
       "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
     },
     "reset": {
-      "button": "Reset to inherited",
-      "aria": "Reset to inherited: {label}"
+      "button": "ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ",
+      "aria": "ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ: {label}"
     },
     "help": {
-      "show": "More details",
-      "hide": "Hide details"
+      "show": "ᱮᱴᱟᱜ ᱵᱩᱡᱷᱟᱣ",
+      "hide": "ᱵᱩᱡᱷᱟᱣ ᱤᱫᱤ ᱢᱮ"
     },
     "history": {
-      "button": "History",
-      "open": "History: {label}",
-      "title": "History: {label}",
-      "scopeTenant": "Workspace changes",
-      "scopeAgent": "Changes for this agent",
-      "close": "Close history",
-      "loading": "Loading history",
-      "error": "History could not be loaded. {message}",
-      "empty": "No changes have been recorded yet.",
-      "listLabel": "Change history, newest first",
-      "version": "Version {version}",
-      "before": "Before:",
-      "after": "After:",
-      "by": "Changed by",
-      "unknownActor": "unknown",
-      "reason": "Reason:"
+      "button": "ᱤᱛᱤᱦᱟᱥ",
+      "open": "ᱤᱛᱤᱦᱟᱥ: {label}",
+      "title": "ᱤᱛᱤᱦᱟᱥ: {label}",
+      "scopeTenant": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱵᱚᱫᱚᱞ",
+      "scopeAgent": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱚᱫᱚᱞ",
+      "close": "ᱤᱛᱤᱦᱟᱥ ᱵᱚᱸᱫ ᱢᱮ",
+      "loading": "ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱮᱫᱟ",
+      "error": "ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+      "empty": "ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱵᱚᱫᱚᱞ ᱨᱮᱠᱚᱨᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+      "listLabel": "ᱵᱚᱫᱚᱞ ᱟᱜ ᱤᱛᱤᱦᱟᱥ, ᱱᱟᱣᱟ ᱢᱟᱲᱟᱝ",
+      "version": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version}",
+      "before": "ᱢᱟᱲᱟᱝ:",
+      "after": "ᱛᱟᱭᱚᱢ:",
+      "by": "ᱵᱚᱫᱚᱞ ᱠᱟᱹᱢᱤᱭᱟᱹ",
+      "unknownActor": "ᱵᱟᱝ ᱪᱤᱱᱦᱟᱹ ᱟᱠᱟᱱ",
+      "reason": "ᱠᱟᱨᱚᱱ:"
     },
     "savebar": {
-      "count": "Unsaved changes: {count}.",
-      "invalid": "Fix the highlighted fields before saving. Fields to fix: {count}.",
-      "discard": "Discard changes",
-      "save": "Save changes",
-      "saving": "Saving"
+      "count": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ: {count}।",
+      "invalid": "ᱥᱟᱸᱪᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱤᱱᱦᱟᱹ ᱟᱠᱟᱱ ᱠᱷᱮᱛᱨᱚ ᱠᱚ ᱴᱷᱤᱠ ᱢᱮ। ᱴᱷᱤᱠ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱮᱛᱨᱚ: {count}।",
+      "discard": "ᱵᱚᱫᱚᱞ ᱠᱚ ᱵᱟᱛᱤᱞ ᱢᱮ",
+      "save": "ᱵᱚᱫᱚᱞ ᱥᱟᱸᱪᱟᱣ ᱢᱮ",
+      "saving": "ᱥᱟᱸᱪᱟᱣ ᱮᱫᱟ"
     },
     "risky": {
-      "title": "Confirm risky changes ({count})",
-      "description": "These settings change how your agents behave or what they are allowed to do. Review each change and explain why you are making it. The reason is stored in the audit log.",
-      "descriptionSecurity": "At least one of these is a security setting. It can only be made stricter than the platform value. Review each change and explain why you are making it. The reason is stored in the audit log.",
-      "listLabel": "Changes to confirm",
-      "from": "From",
+      "title": "ᱡᱷᱩᱠᱤ ᱵᱚᱫᱚᱞ ᱠᱚ ᱴᱷᱤᱠ ᱢᱮ ({count})",
+      "description": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱠᱚ ᱫᱚ ᱟᱢᱟᱜ ᱮᱡᱮᱱᱴ ᱠᱚ ᱪᱮᱠᱟ ᱛᱮ ᱠᱟᱹᱢᱤ ᱮᱫᱟ ᱥᱮ ᱚᱠᱚᱭ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱛᱟᱣ ᱢᱮᱱᱟᱜᱼᱟ ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱮᱫᱟ। ᱥᱟᱱᱟᱢ ᱵᱚᱫᱚᱞ ᱧᱮᱞ ᱢᱮ ᱟᱨ ᱟᱢ ᱪᱮᱫ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱮᱫᱟ ᱚᱱᱟ ᱵᱟᱛᱟᱣ ᱢᱮ। ᱠᱟᱨᱚᱱ ᱫᱚ ᱚᱰᱤᱴ ᱞᱚᱜ ᱨᱮ ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱜᱼᱟ।",
+      "descriptionSecurity": "ᱱᱚᱶᱟ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱢᱤᱫ ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ ᱢᱮᱱᱟᱜᱼᱟ। ᱚᱱᱟ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱷᱟᱴᱚ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱥᱟᱱᱟᱢ ᱵᱚᱫᱚᱞ ᱧᱮᱞ ᱢᱮ ᱟᱨ ᱟᱢ ᱪᱮᱫ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱮᱫᱟ ᱚᱱᱟ ᱵᱟᱛᱟᱣ ᱢᱮ। ᱠᱟᱨᱚᱱ ᱫᱚ ᱚᱰᱤᱴ ᱞᱚᱜ ᱨᱮ ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱜᱼᱟ।",
+      "listLabel": "ᱴᱷᱤᱠ ᱞᱟᱹᱠᱛᱤ ᱵᱚᱫᱚᱞ",
+      "from": "ᱠᱷᱚᱱ",
       "to": "to",
-      "securityNote": "Security setting: it cannot be weaker than the platform value.",
-      "consequence": "What this changes:",
-      "reasonLabel": "Reason for this change",
-      "reasonPlaceholder": "For example: raising the limit for the support team's long investigations",
-      "reasonHint": "Required, at least {min} characters. Saved with who made the change and the old and new values.",
-      "acknowledge": "I understand the consequences of this security change.",
-      "cancel": "Cancel",
-      "confirm": "Confirm and save",
+      "securityNote": "ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ: ᱚᱱᱟ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱠᱚᱢᱡᱚᱨ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+      "consequence": "ᱱᱚᱶᱟ ᱪᱮᱫ ᱵᱚᱫᱚᱞ ᱮᱫᱟ:",
+      "reasonLabel": "ᱱᱚᱶᱟ ᱵᱚᱫᱚᱞ ᱟᱜ ᱠᱟᱨᱚᱱ",
+      "reasonPlaceholder": "ᱱᱢᱩᱱᱟ: ᱥᱚᱯᱚᱨᱴ ᱴᱤᱢ ᱟᱜ ᱞᱟᱢᱟ ᱥᱚᱫᱷᱚ ᱞᱟᱹᱜᱤᱫ ᱥᱤᱢᱟ ᱵᱟᱲᱦᱟᱣ",
+      "reasonHint": "ᱞᱟᱹᱠᱛᱤ, ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ {min} ᱚᱠᱷᱚᱨ। ᱵᱚᱫᱚᱞ ᱠᱟᱹᱢᱤᱭᱟᱹ ᱟᱨ ᱯᱩᱨᱟᱹᱱᱤ ᱟᱨ ᱱᱟᱣᱟ ᱢᱟᱱ ᱥᱟᱶ ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱟ।",
+      "acknowledge": "ᱤᱧ ᱱᱚᱶᱟ ᱥᱩᱨᱠᱷᱟ ᱵᱚᱫᱚᱞ ᱟᱜ ᱯᱷᱚᱞ ᱵᱩᱡᱷᱟᱣ ᱠᱟᱱᱟ।",
+      "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+      "confirm": "ᱴᱷᱤᱠ ᱠᱟᱛᱮ ᱥᱟᱸᱪᱟᱣ ᱢᱮ",
       "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
     },
     "strictness": {
@@ -14342,284 +14342,285 @@
     }
   },
   "approvalsQueue": {
-    "status_PENDING": "PENDING",
-    "status_APPROVED": "APPROVED",
-    "status_REJECTED": "REJECTED",
-    "status_EXPIRED": "EXPIRED",
-    "status_EXECUTION_FAILED": "EXECUTION FAILED",
-    "status_DEAD_LETTERED": "DEAD LETTERED",
-    "filtersLabel": "Filter requests",
-    "filterAgentLabel": "Filter by agent",
-    "filterToolLabel": "Filter by tool",
-    "filterAgeLabel": "Filter by age",
-    "filterAnyAgent": "Any agent",
-    "filterAnyTool": "Any tool",
-    "filterAnyAge": "Any age",
-    "age_newer1h": "Newer than 1 hour",
-    "age_older1h": "Older than 1 hour",
-    "age_older24h": "Older than 1 day",
-    "age_older7d": "Older than 7 days",
-    "filtersClear": "Clear filters",
-    "filterWindowNote": "Filtering the newest {count} requests. Older ones are not included.",
+    "status_PENDING": "ᱵᱟᱠᱤ",
+    "status_APPROVED": "ᱢᱚᱱᱡᱩᱨ ᱟᱠᱟᱱ",
+    "status_REJECTED": "ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱟᱠᱟᱱ",
+    "status_EXPIRED": "ᱚᱠᱛᱚ ᱪᱷᱚᱭ",
+    "status_EXECUTION_FAILED": "ᱠᱟᱹᱢᱤ ᱵᱟᱭᱡᱷᱮᱛ",
+    "status_DEAD_LETTERED": "ᱰᱮᱰ ᱞᱮᱴᱚᱨ",
+    "filtersLabel": "ᱚᱱᱚᱠᱚᱞ ᱠᱚ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+    "filterAgentLabel": "ᱮᱡᱮᱱᱴ ᱛᱮ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+    "filterToolLabel": "ᱴᱩᱞ ᱛᱮ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+    "filterAgeLabel": "ᱵᱚᱭᱥ ᱛᱮ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+    "filterAnyAgent": "ᱪᱮᱫᱽ ᱮᱡᱮᱱᱴ",
+    "filterAnyTool": "ᱪᱮᱫᱽ ᱴᱩᱞ",
+    "filterAnyAge": "ᱪᱮᱫᱽ ᱵᱚᱭᱥ",
+    "age_newer1h": "1 ᱜᱷᱚᱱᱴᱟ ᱠᱷᱚᱱ ᱱᱟᱣᱟ",
+    "age_older1h": "1 ᱜᱷᱚᱱᱴᱟ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ",
+    "age_older24h": "1 ᱢᱤᱛᱷᱤᱱ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ",
+    "age_older7d": "7 ᱢᱤᱛᱷᱤᱱ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ",
+    "filtersClear": "ᱪᱷᱟᱸᱪᱚ ᱥᱟᱯᱷᱟ ᱢᱮ",
+    "filterWindowNote": "ᱱᱟᱣᱟ {count} ᱚᱱᱚᱠᱚᱞ ᱠᱚ ᱪᱷᱟᱸᱪᱚ ᱮᱫᱟ। ᱯᱩᱨᱟᱹᱱᱤ ᱠᱚ ᱱᱚᱸᱰᱮ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।",
     "durationDaysHours": "{d}d {h}h",
     "durationHoursMinutes": "{h}h {m}m",
     "durationMinutes": "{m}m",
     "durationSeconds": "{s}s",
-    "expiresIn": "Expires in {time}",
-    "expiresAt": "Closes automatically at {time} if nobody decides",
-    "overdue": "Past its time limit, closes at the next sweep",
-    "neverExpires": "This workspace does not expire waiting requests.",
-    "expiredNote": "Expired {time}: nobody decided in time",
-    "expiredReasonPrefix": "Expired:",
-    "auditExpired": "expired, nobody decided in time",
-    "riskLow": "Low risk",
-    "riskMedium": "Medium risk",
-    "riskHigh": "High risk",
-    "riskEstimateNote": "Risk is an estimate from the tool's name. The platform does not classify tools, so read the arguments before you approve.",
-    "riskWhoDecides": "Who decides what waits for approval?",
-    "previewGoal": "The task it was working on:",
-    "previewArguments": "Arguments",
-    "previewNoArguments": "No arguments were recorded for this call.",
-    "previewRedacted": "{count} sensitive-looking value(s) are hidden here. They are still sent to the tool if you approve.",
-    "previewTruncated": "These arguments are too long to show in full, so this request cannot be approved from here.",
-    "approveBlockedTooLong": "Approving is turned off because you cannot review the whole request. You can still deny it.",
-    "ifApproveLabel": "If you approve:",
-    "ifApprove": "{tool} runs right now with the arguments above, and the agent carries on with the task using its result.",
-    "ifDenyLabel": "If you deny:",
-    "ifDeny": "{tool} does not run. The agent is told you said no, with your reason if you give one, and carries on without it.",
-    "whyGated": "The agent asked to use {tool}. It was held for your decision because the agent is set to Supervised, or because this workspace requires approval for that tool.",
-    "denyReasonLabel": "Reason if you deny (optional)",
-    "denyReasonPlaceholder": "For example: wrong recipient, ask me before sending",
-    "denyReasonHelp": "If you deny, the agent reads this reason as the result of the refused call and adjusts. Leave it empty to deny without one.",
-    "denyButton": "Deny",
-    "detailRegionLabel": "Request details",
-    "sessionLabel": "Conversation",
-    "linkOpenAgent": "Open the agent",
-    "linkInspectTurns": "Inspect its turns",
-    "continuationLabel": "What the agent did next",
-    "continuationCompleted": "The agent finished carrying on with the task.",
-    "continuationFailed": "The agent could not carry on after this decision.",
-    "continuationRetry": "Ask it to carry on",
-    "retryMessage": "Please carry on with the task.",
-    "lastDecisionTitle": "Your last decision: {tool}",
-    "lastDecisionClose": "Close",
-    "deepLinkNotFound": "That approval request could not be found, or you cannot see it.",
-    "selectAllLabel": "Select all pending tool calls on this page",
-    "selectRowLabel": "Select the pending call to {tool}",
-    "bulkSelected": "{count} selected",
-    "bulkApprove": "Approve selected",
-    "bulkDeny": "Deny selected",
-    "bulkClear": "Clear selection",
-    "bulkCancel": "Cancel",
-    "bulkDismiss": "Dismiss",
-    "bulkMixedTools": "Bulk decisions need every selected request to be for the same tool.",
-    "bulkNotLowRisk": "Bulk approve is only for low-risk tools (lookups). Deny works for any one tool, or decide these one by one.",
-    "bulkNotToolCall": "Bulk decisions only cover agent tool calls.",
-    "bulkNotPending": "Bulk decisions only cover requests that are still pending.",
-    "bulkConfirmApproveTitle": "Approve {count} calls to {tool}?",
-    "bulkConfirmApproveBody": "Each of these runs {tool} right now with its own arguments, listed below, and the agent carries on using the results. This cannot be undone.",
-    "bulkConfirmDenyTitle": "Deny {count} calls to {tool}?",
-    "bulkConfirmDenyBody": "None of these run. The agent is told each call was refused, with your reason if you give one.",
-    "bulkConfirmApprove": "Approve {count}",
-    "bulkConfirmDeny": "Deny {count}",
-    "bulkMore": "and {count} more",
-    "bulkProgress": "{done} of {count} done",
-    "bulkResult": "{done} decided, {failed} failed.",
-    "notifyOff": "Notify me",
-    "notifyOn": "Notifications on",
-    "notifyHelp": "Show a browser notification when a new request arrives while this tab is in the background",
-    "notifyUnsupported": "This browser cannot show notifications.",
-    "notifyBlocked": "Notifications are blocked. Allow them in your browser's site settings to turn this on.",
-    "notifyTitle": "An agent is waiting for approval",
-    "notifyBodyOne": "{tool} needs your decision.",
-    "notifyBodyMany": "{count} requests need your decision.",
-    "newArrived": "{count} new approval request(s) arrived.",
-    "rulesTitle": "Rule for one tool",
-    "rulesIntro": "Choose whether a tool always waits for a person or never does. The rule applies to every agent set to Semi-autonomous.",
-    "rulesNeedsScope": "You need the approvals permission to change rules.",
-    "rulesToolLabel": "Tool name",
+    "expiresIn": "{time} ᱨᱮ ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭᱜᱼᱟ",
+    "expiresAt": "ᱵᱟᱝ ᱪᱮᱫ ᱠᱚ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱮᱢ ᱠᱷᱟᱱ {time} ᱨᱮ ᱟᱡᱼᱛᱮ ᱵᱚᱸᱫ ᱦᱩᱭᱜᱼᱟ",
+    "overdue": "ᱚᱠᱛᱚ ᱥᱤᱢᱟ ᱯᱟᱨ ᱞᱮᱱᱟ, ᱛᱟᱭᱚᱢ ᱥᱟᱯᱷᱟ ᱨᱮ ᱵᱚᱸᱫ ᱦᱩᱭᱜᱼᱟ",
+    "neverExpires": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱫᱚ ᱡᱚᱜᱟᱣ ᱟᱠᱟᱱ ᱚᱱᱚᱠᱚᱞ ᱟᱜ ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱵᱟᱝ ᱮᱫᱟ।",
+    "expiredNote": "{time} ᱨᱮ ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭᱞᱮᱱᱟ: ᱚᱠᱛᱚ ᱨᱮ ᱪᱮᱫ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "expiredReasonPrefix": "ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭᱞᱮᱱᱟ:",
+    "auditExpired": "ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭᱞᱮᱱᱟ, ᱚᱠᱛᱚ ᱨᱮ ᱪᱮᱫ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "riskLow": "ᱠᱚᱢ ᱡᱷᱩᱠᱤ",
+    "riskMedium": "ᱢᱟᱞᱟᱢ ᱡᱷᱩᱠᱤ",
+    "riskHigh": "ᱵᱟᱲᱛᱤ ᱡᱷᱩᱠᱤ",
+    "riskEstimateNote": "ᱡᱷᱩᱠᱤ ᱫᱚ ᱴᱩᱞ ᱟᱜ ᱵᱚᱸᱥᱟ ᱠᱷᱚᱱ ᱞᱟᱜᱟᱣ ᱟᱠᱟᱱ ᱟᱱᱟᱡ ᱠᱟᱱᱟ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱫᱚ ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱯᱷᱚᱨᱛᱟᱞ ᱵᱟᱝ ᱮᱫᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱯᱟᱲᱦᱟᱣ ᱢᱮ।",
+    "riskWhoDecides": "ᱪᱮᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱟ ᱚᱱᱟ ᱚᱠᱚᱭ ᱴᱷᱤᱠ ᱮᱫᱟ?",
+    "previewGoal": "ᱚᱱᱟ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱨᱮ ᱠᱟᱹᱢᱤ ᱮᱫᱟ:",
+    "previewArguments": "ᱟᱨᱜᱩᱢᱮᱱᱴ",
+    "previewNoArguments": "ᱱᱚᱶᱟ ᱠᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱨᱮᱠᱚᱨᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "previewRedacted": "{count} ᱜᱚᱯᱚᱱ ᱞᱮᱠᱟ ᱢᱟᱱ ᱱᱚᱸᱰᱮ ᱞᱩᱠᱟᱣ ᱟᱠᱟᱱᱟ। ᱟᱢ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚ ᱫᱚ ᱴᱩᱞ ᱥᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱦᱩᱭᱟ।",
+    "previewTruncated": "ᱱᱚᱶᱟ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱠᱚ ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱟᱹᱰᱤ ᱞᱟᱢᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱚᱱᱚᱠᱚᱞ ᱱᱚᱸᱰᱮ ᱠᱷᱚᱱ ᱢᱚᱱᱡᱩᱨ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+    "approveBlockedTooLong": "ᱟᱢ ᱯᱩᱨᱟᱹ ᱚᱱᱚᱠᱚᱞ ᱪᱮᱠ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱵᱚᱸᱫ ᱢᱮᱱᱟᱜᱼᱟ। ᱟᱢ ᱠᱷᱟᱞᱤ ᱚᱱᱟ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "ifApproveLabel": "ᱟᱢ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ:",
+    "ifApprove": "{tool} ᱫᱚ ᱞᱟᱛᱟᱨ ᱨᱮᱭᱟᱜ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱥᱟᱶ ᱱᱤᱛᱚᱜ ᱜᱮ ᱪᱟᱞᱟᱜᱼᱟ, ᱟᱨ ᱮᱡᱮᱱᱴ ᱫᱚ ᱚᱱᱟ ᱟᱜ ᱯᱷᱚᱞ ᱵᱮᱵᱷᱟᱨ ᱠᱟᱛᱮ ᱠᱟᱹᱢᱤ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱣᱟ।",
+    "ifDenyLabel": "ᱟᱢ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ:",
+    "ifDeny": "{tool} ᱵᱟᱝ ᱪᱟᱞᱟᱜᱼᱟ। ᱮᱡᱮᱱᱴ ᱠᱚ ᱢᱮᱛ ᱮᱫᱟ ᱪᱮᱫ ᱟᱢ ᱵᱟᱝ ᱢᱮᱱ ᱠᱟᱫᱼᱟ, ᱠᱟᱨᱚᱱ ᱮᱢ ᱠᱷᱟᱱ ᱚᱱᱟ ᱥᱟᱶ, ᱟᱨ ᱚᱱᱟ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱮᱡᱮᱱᱴ ᱥᱟᱱᱟᱢ ᱥᱮᱱ ᱪᱟᱞᱟᱜᱼᱟ।",
+    "whyGated": "ᱮᱡᱮᱱᱴ ᱫᱚ {tool} ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱪᱟᱦᱟᱭ ᱞᱮᱱᱟ। ᱮᱡᱮᱱᱴ ᱥᱮᱴ ᱟᱠᱟᱱ ᱛᱟᱦᱮᱱ ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱥᱮ ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱫᱚ ᱚᱱᱟ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱠᱛᱤ ᱮᱫᱟ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱟᱢᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱞᱮᱱᱟ।",
+    "denyReasonLabel": "ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱟᱜ ᱠᱟᱨᱚᱱ (ᱪᱷᱚᱠᱟᱛ)",
+    "denyReasonPlaceholder": "ᱱᱢᱩᱱᱟ: ᱵᱷᱩᱞ ᱧᱟᱢᱚᱜᱼᱟ, ᱵᱷᱮᱡᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱤᱧ ᱠᱚ ᱪᱷᱚᱞ ᱢᱮ",
+    "denyReasonHelp": "ᱟᱢ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ, ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱚᱶᱟ ᱠᱟᱨᱚᱱ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱠᱚᱞ ᱟᱜ ᱯᱷᱚᱞ ᱞᱮᱠᱟ ᱯᱟᱲᱦᱟᱣᱟ ᱟᱨ ᱟᱡ ᱠᱚ ᱥᱟᱯᱲᱟᱣᱟ। ᱠᱟᱨᱚᱱ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱟᱞᱤ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+    "denyButton": "ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "detailRegionLabel": "ᱚᱱᱚᱠᱚᱞ ᱟᱜ ᱵᱩᱡᱷᱟᱣ",
+    "sessionLabel": "ᱵᱟᱛ ᱪᱤᱛ",
+    "linkOpenAgent": "ᱮᱡᱮᱱᱴ ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+    "linkInspectTurns": "ᱚᱱᱟ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ ᱪᱮᱠ ᱢᱮ",
+    "continuationLabel": "ᱚᱱᱟ ᱛᱟᱭᱚᱢ ᱮᱡᱮᱱᱴ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱞᱮᱱᱟ",
+    "continuationCompleted": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱠᱟᱹᱢᱤ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱪᱷᱚᱭ ᱠᱟᱫᱼᱟ।",
+    "continuationFailed": "ᱱᱚᱶᱟ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱛᱟᱭᱚᱢ ᱮᱡᱮᱱᱴ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "continuationRetry": "ᱚᱱᱟ ᱠᱚ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱢᱮ",
+    "retryMessage": "ᱫᱟᱭᱟ ᱠᱟᱛᱮ ᱠᱟᱹᱢᱤ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ।",
+    "lastDecisionTitle": "ᱟᱢᱟᱜ ᱢᱩᱨᱩᱛ ᱯᱷᱚᱭᱥᱟᱞᱟ: {tool}",
+    "lastDecisionClose": "ᱵᱚᱸᱫ ᱢᱮ",
+    "deepLinkNotFound": "ᱚᱱᱟ ᱢᱚᱱᱡᱩᱨᱤ ᱚᱱᱚᱠᱚᱞ ᱵᱟᱝ ᱧᱟᱢᱞᱮᱱᱟ, ᱥᱮ ᱟᱢ ᱚᱱᱟ ᱵᱟᱝ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "selectAllLabel": "ᱱᱚᱶᱟ ᱥᱟᱦᱴᱟ ᱟᱜ ᱡᱷᱚᱛᱚ ᱵᱟᱠᱤ ᱴᱩᱞ ᱠᱚᱞ ᱠᱚ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
+    "selectRowLabel": "{tool} ᱟᱜ ᱵᱟᱠᱤ ᱠᱚᱞ ᱠᱚ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
+    "bulkSelected": "{count} ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ",
+    "bulkApprove": "ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "bulkDeny": "ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "bulkClear": "ᱵᱟᱪᱷᱟᱣ ᱥᱟᱯᱷᱟ ᱢᱮ",
+    "bulkCancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+    "bulkDismiss": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+    "bulkMixedTools": "ᱡᱩᱛ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ ᱡᱷᱚᱛᱚ ᱚᱱᱚᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱴᱩᱞ ᱟᱜ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ।",
+    "bulkNotLowRisk": "ᱡᱩᱛ ᱢᱚᱱᱡᱩᱨᱤ ᱫᱚ ᱠᱷᱟᱞᱤ ᱠᱚᱢ ᱡᱷᱩᱠᱤ ᱴᱩᱞ (ᱞᱩᱠᱟᱯ) ᱞᱟᱹᱜᱤᱫ ᱠᱟᱱᱟ। ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱫᱚ ᱪᱮᱫᱽ ᱢᱤᱫ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱹᱢᱤ ᱮᱫᱟ, ᱥᱮ ᱱᱚᱶᱟ ᱠᱚ ᱢᱤᱫ ᱢᱤᱫ ᱠᱟᱛᱮ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱢᱮ।",
+    "bulkNotToolCall": "ᱡᱩᱛ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱫᱚ ᱠᱷᱟᱞᱤ ᱮᱡᱮᱱᱴ ᱴᱩᱞ ᱠᱚᱞ ᱠᱚ ᱥᱮᱞᱮᱫ ᱮᱫᱟ।",
+    "bulkNotPending": "ᱡᱩᱛ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱫᱚ ᱠᱷᱟᱞᱤ ᱱᱤᱛᱚᱜ ᱵᱟᱠᱤ ᱚᱱᱚᱠᱚᱞ ᱠᱚ ᱥᱮᱞᱮᱫ ᱮᱫᱟ।",
+    "bulkConfirmApproveTitle": "{tool} ᱟᱜ {count} ᱠᱚᱞ ᱢᱚᱱᱡᱩᱨ ᱟ?",
+    "bulkConfirmApproveBody": "ᱱᱚᱶᱟ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱥᱟᱱᱟᱢ ᱫᱚ ᱱᱤᱛᱚᱜ ᱜᱮ {tool} ᱪᱟᱞᱟᱣᱟ, ᱞᱟᱛᱟᱨ ᱞᱮᱠᱟ ᱟᱠᱟᱱ ᱟᱡ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱥᱟᱶ, ᱟᱨ ᱮᱡᱮᱱᱴ ᱫᱚ ᱯᱷᱚᱞ ᱵᱮᱵᱷᱟᱨ ᱠᱟᱛᱮ ᱥᱟᱱᱟᱢ ᱥᱮᱱ ᱪᱟᱞᱟᱜᱼᱟ। ᱱᱚᱶᱟ ᱯᱷᱤᱨ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "bulkConfirmDenyTitle": "{tool} ᱟᱜ {count} ᱠᱚᱞ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱟ?",
+    "bulkConfirmDenyBody": "ᱱᱚᱶᱟ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱪᱮᱫᱽ ᱵᱟᱝ ᱪᱟᱞᱟᱜᱼᱟ। ᱮᱡᱮᱱᱴ ᱠᱚ ᱢᱮᱛ ᱮᱫᱟ ᱥᱟᱱᱟᱢ ᱠᱚᱞ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱞᱮᱱᱟ, ᱠᱟᱨᱚᱱ ᱮᱢ ᱠᱷᱟᱱ ᱚᱱᱟ ᱥᱟᱶ।",
+    "bulkConfirmApprove": "{count} ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "bulkConfirmDeny": "{count} ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "bulkMore": "ᱟᱨ {count} ᱮᱴᱟᱜ",
+    "bulkProgress": "{count} ᱛᱟᱞᱟ ᱠᱷᱚᱱ {done} ᱪᱷᱚᱭ",
+    "bulkResult": "{done} ᱯᱷᱚᱭᱥᱟᱞᱟ ᱦᱩᱭᱞᱮᱱᱟ, {failed} ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "notifyOff": "ᱤᱧ ᱠᱚ ᱢᱮᱛ ᱢᱮ",
+    "notifyOn": "ᱥᱩᱪᱚᱱᱟ ᱪᱟᱹᱞᱩ",
+    "notifyHelp": "ᱱᱚᱶᱟ ᱴᱮᱵ ᱥᱚᱨᱮᱥ ᱨᱮ ᱛᱟᱦᱮᱱ ᱚᱠᱛᱚ ᱱᱟᱣᱟ ᱚᱱᱚᱠᱚᱞ ᱦᱩᱭ ᱠᱷᱟᱱ ᱵᱨᱟᱣᱡᱟᱨ ᱥᱩᱪᱚᱱᱟ ᱧᱮᱞᱟᱹ ᱢᱮ",
+    "notifyUnsupported": "ᱱᱚᱶᱟ ᱵᱨᱟᱣᱡᱟᱨ ᱥᱩᱪᱚᱱᱟ ᱧᱮᱞᱟᱹ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "notifyBlocked": "ᱥᱩᱪᱚᱱᱟ ᱵᱚᱸᱫ ᱟᱠᱟᱱᱟ। ᱚᱱᱟ ᱪᱟᱹᱞᱩ ᱞᱟᱹᱜᱤᱫ ᱟᱢᱟᱜ ᱵᱨᱟᱣᱡᱟᱨ ᱥᱟᱭᱴ ᱥᱮᱴᱤᱝ ᱨᱮ ᱵᱟᱛᱟᱣ ᱮᱢ ᱢᱮ।",
+    "notifyTitle": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱫᱚ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱠᱟᱱᱟ",
+    "notifyBodyOne": "{tool} ᱨᱮ ᱟᱢᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱠᱛᱤ।",
+    "notifyBodyMany": "{count} ᱚᱱᱚᱠᱚᱞ ᱨᱮ ᱟᱢᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱠᱛᱤ।",
+    "newArrived": "{count} ᱱᱟᱣᱟ ᱢᱚᱱᱡᱩᱨᱤ ᱚᱱᱚᱠᱚᱞ ᱮᱦᱚᱵ ᱞᱮᱱᱟ।",
+    "rulesTitle": "ᱢᱤᱫ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱱᱤᱭᱚᱢ",
+    "rulesIntro": "ᱢᱤᱫ ᱴᱩᱞ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱟ ᱥᱮ ᱢᱩᱨᱩᱛ ᱵᱟᱝ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ। ᱱᱚᱶᱟ ᱱᱤᱭᱚᱢ ᱫᱚ ᱟᱫᱷᱟ-ᱟᱡ ᱥᱮᱴ ᱟᱠᱟᱱ ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ।",
+    "rulesNeedsScope": "ᱱᱤᱭᱚᱢ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱟᱢᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱟᱜ ᱵᱟᱛᱟᱣ ᱞᱟᱹᱠᱛᱤ।",
+    "rulesToolLabel": "ᱴᱩᱞ ᱟᱜ ᱧᱩᱛᱩᱢ",
     "rulesToolPlaceholder": "send_email",
-    "rulesToolHelp": "Exactly as the tool appears in the request, for example send_email.",
-    "rulesToolNameInvalid": "A tool name has no spaces.",
-    "rulesModeLabel": "What should happen",
-    "rulesAskName": "Always ask",
-    "rulesAskHint": "Every call to this tool waits for a person to approve it.",
-    "rulesNeverName": "Never ask",
-    "rulesNeverHint": "Calls to this tool run straight away, without anyone approving them.",
-    "rulesNeverRiskyWarn": "This tool looks like it changes things. Be sure.",
-    "rulesScopeNote": "Rules cover the whole workspace, not one agent. Supervised agents still ask for everything, and Fully autonomous agents never ask, whatever a rule says. Rules you set are not listed back here yet.",
-    "rulesSave": "Save rule",
-    "rulesSaveFailed": "Could not save the rule.",
-    "rulesSavedAsk": "{tool} will always ask for approval.",
-    "rulesSavedNever": "{tool} will no longer ask for approval.",
-    "rulesNeverConfirmTitle": "Stop asking before {tool} runs?",
-    "rulesNeverConfirmBody": "Every Semi-autonomous agent will run {tool} without anyone approving it. It looks like it can change or send things, and a mistake cannot be taken back.",
-    "rulesNeverConfirmBodyLow": "Every Semi-autonomous agent will run {tool} without asking. It reads like a lookup, so this is usually safe.",
-    "rulesNeverConfirm": "Stop asking",
-    "tiersTitle": "Who decides what waits for approval?",
-    "tiersIntro": "Each agent has an autonomy level. It decides whether the workspace's approval rules are used at all.",
-    "tierCurrent": "This agent",
-    "tierConsequenceLabel": "In practice:",
-    "tierSupervisedName": "Supervised",
-    "tierSupervisedWhat": "Every tool call waits for a person, whatever the workspace rules say. It also gets a lower limit on tool steps per turn.",
-    "tierSupervisedConsequence": "Safest, but expect a lot of requests in the queue and a slower agent.",
-    "tierSemiName": "Semi-autonomous",
-    "tierSemiWhat": "The workspace's rule for each tool decides: risky tools such as sending, deleting and payments ask by default, the rest run.",
-    "tierSemiConsequence": "A good default. Your per-tool rules take effect here.",
-    "tierFullName": "Fully autonomous",
-    "tierFullWhat": "No tool call ever waits for approval and the agent gets a higher limit on tool steps. Per-tool rules are ignored.",
-    "tierFullConsequence": "It acts without asking. Only use it for agents whose mistakes are cheap to undo.",
-    "tiersRuleNote": "Tool rules (Always ask, Never ask) only matter for Semi-autonomous agents.",
-    "agentModeTitle": "When does this agent need approval?",
-    "agentModeSupervised": "This agent is Supervised: every tool call waits for a person, and per-tool rules are ignored.",
-    "agentModeSemi": "This agent is Semi-autonomous: each tool follows the workspace's rule. Sending, deleting and payments ask by default.",
-    "agentModeFull": "This agent is Fully autonomous: it never waits for approval, and per-tool rules are ignored.",
-    "agentModeQueueLink": "See this agent's requests",
-    "agentModeRulesLink": "Set a rule for a tool",
-    "agentModeShowTiers": "Compare the three levels",
-    "agentModeHideTiers": "Hide the comparison",
-    "agentModeScopeNote": "Change the level with the autonomy choice above. Tool rules are workspace-wide, not per agent.",
-    "policyThenApprovalNote": "A call that passes these rules can still wait for a person. That depends on the agent's autonomy level, explained below.",
-    "chatReasonToggle": "Add a reason",
-    "chatReviewInQueue": "Review in the queue"
+    "rulesToolHelp": "ᱚᱱᱚᱠᱚᱞ ᱨᱮ ᱴᱩᱞ ᱪᱮᱠᱟ ᱛᱮ ᱧᱮᱞᱚᱜᱼᱟ ᱚᱱᱟ ᱞᱮᱠᱟᱜ, ᱱᱢᱩᱱᱟ ᱞᱟᱹᱜᱤᱫ send_email।",
+    "rulesToolNameInvalid": "ᱴᱩᱞ ᱧᱩᱛᱩᱢ ᱨᱮ ᱠᱷᱟᱞᱤ ᱴᱷᱟᱸᱣ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+    "rulesModeLabel": "ᱪᱮᱫ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ",
+    "rulesAskName": "ᱛᱟᱠᱠᱟᱣ ᱪᱷᱚᱞ ᱢᱮ",
+    "rulesAskHint": "ᱱᱚᱶᱟ ᱴᱩᱞ ᱟᱜ ᱥᱟᱱᱟᱢ ᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱮᱫᱟ।",
+    "rulesNeverName": "ᱢᱩᱨᱩᱛ ᱵᱟᱝ ᱪᱷᱚᱞ ᱢᱮ",
+    "rulesNeverHint": "ᱱᱚᱶᱟ ᱴᱩᱞ ᱟᱜ ᱠᱚᱞ ᱠᱚ ᱪᱮᱫᱽ ᱵᱟᱹᱱᱩᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱛᱮ ᱱᱤᱛᱚᱜ ᱜᱮ ᱪᱟᱞᱟᱜᱼᱟ।",
+    "rulesNeverRiskyWarn": "ᱱᱚᱶᱟ ᱴᱩᱞ ᱫᱚ ᱪᱤᱡ ᱵᱚᱫᱚᱞ ᱞᱮᱠᱟ ᱧᱮᱞᱚᱜᱼᱟ। ᱴᱷᱤᱠ ᱛᱮ ᱵᱟᱛᱟᱣ ᱢᱮ।",
+    "rulesScopeNote": "ᱱᱤᱭᱚᱢ ᱫᱚ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ, ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱨᱮ ᱵᱟᱝ। ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱛᱟᱦᱮᱱ ᱮᱡᱮᱱᱴ ᱫᱚ ᱫᱚᱦᱚᱜ ᱡᱷᱚᱛᱚ ᱞᱟᱹᱜᱤᱫ ᱪᱷᱚᱞᱟ, ᱟᱨ ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱤᱭᱚᱢ ᱪᱮᱫ ᱢᱮᱱ ᱠᱷᱟᱱ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱪᱷᱚᱞᱟ। ᱟᱢ ᱥᱮᱴ ᱟᱠᱟᱱ ᱱᱤᱭᱚᱢ ᱫᱚ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱱᱚᱸᱰᱮ ᱞᱮᱠᱟ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।",
+    "rulesSave": "ᱱᱤᱭᱚᱢ ᱥᱟᱸᱪᱟᱣ ᱢᱮ",
+    "rulesSaveFailed": "ᱱᱤᱭᱚᱢ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "rulesSavedAsk": "{tool} ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱢᱚᱱᱡᱩᱨᱤ ᱠᱷᱚᱡᱚᱜᱼᱟ।",
+    "rulesSavedNever": "{tool} ᱫᱚ ᱟᱨ ᱢᱚᱱᱡᱩᱨᱤ ᱵᱟᱝ ᱠᱷᱚᱡᱚᱜᱼᱟ।",
+    "rulesNeverConfirmTitle": "{tool} ᱪᱟᱞᱟᱜ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱷᱚᱞ ᱵᱚᱸᱫ ᱟ?",
+    "rulesNeverConfirmBody": "ᱥᱟᱱᱟᱢ ᱟᱫᱷᱟ-ᱟᱡ ᱮᱡᱮᱱᱴ ᱫᱚ ᱪᱮᱫᱽ ᱢᱚᱱᱡᱩᱨᱤ ᱵᱟᱹᱱᱩᱜ ᱛᱮ {tool} ᱪᱟᱞᱟᱣᱟ। ᱚᱱᱟ ᱪᱤᱡ ᱵᱚᱫᱚᱞ ᱥᱮ ᱵᱷᱮᱡᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱞᱮᱠᱟ ᱧᱮᱞᱚᱜᱼᱟ, ᱟᱨ ᱵᱷᱩᱞ ᱯᱷᱤᱨ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rulesNeverConfirmBodyLow": "ᱥᱟᱱᱟᱢ ᱟᱫᱷᱟ-ᱟᱡ ᱮᱡᱮᱱᱴ ᱫᱚ ᱵᱟᱹᱱᱩᱜ ᱪᱷᱚᱞ ᱛᱮ {tool} ᱪᱟᱞᱟᱣᱟ। ᱚᱱᱟ ᱞᱩᱠᱟᱯ ᱞᱮᱠᱟ ᱧᱮᱞᱚᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱛᱮ ᱥᱩᱨᱠᱷᱤᱛ ᱠᱟᱱᱟ।",
+    "rulesNeverConfirm": "ᱪᱷᱚᱞ ᱵᱚᱸᱫ ᱢᱮ",
+    "tiersTitle": "ᱪᱮᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱟ ᱚᱱᱟ ᱚᱠᱚᱭ ᱴᱷᱤᱠ ᱮᱫᱟ?",
+    "tiersIntro": "ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱨᱮ ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱥᱛᱚᱨ ᱢᱮᱱᱟᱜᱼᱟ। ᱚᱱᱟ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱱᱤᱭᱚᱢ ᱠᱚ ᱵᱮᱵᱷᱟᱨ ᱦᱩᱭᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱴᱷᱤᱠ ᱮᱫᱟ।",
+    "tierCurrent": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ",
+    "tierConsequenceLabel": "ᱵᱮᱵᱷᱟᱨ ᱨᱮ:",
+    "tierSupervisedName": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ",
+    "tierSupervisedWhat": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱱᱤᱭᱚᱢ ᱪᱮᱫ ᱢᱮᱱ ᱠᱷᱟᱱ, ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱮᱫᱟ। ᱚᱱᱟ ᱠᱚ ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱴᱩᱞ ᱯᱟᱦᱴᱟ ᱟᱜ ᱠᱚᱢ ᱥᱤᱢᱟ ᱵᱟᱝ ᱮᱢᱟ।",
+    "tierSupervisedConsequence": "ᱟᱹᱰᱤ ᱥᱩᱨᱠᱷᱤᱛ, ᱢᱮᱱᱠᱷᱟᱱ ᱞᱟᱭᱱ ᱨᱮ ᱵᱟᱲᱛᱤ ᱚᱱᱚᱠᱚᱞ ᱟᱨ ᱥᱮᱛᱟ ᱮᱡᱮᱱᱴ ᱥᱟᱢᱟᱨ ᱢᱮ।",
+    "tierSemiName": "ᱟᱫᱷᱟ-ᱟᱡ",
+    "tierSemiWhat": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱱᱤᱭᱚᱢ ᱫᱚ ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱴᱷᱤᱠ ᱮᱫᱟ: ᱵᱷᱮᱡᱟᱣ, ᱰᱤᱞᱤᱴ ᱟᱨ ᱯᱮᱢᱮᱱᱴ ᱞᱮᱠᱟ ᱡᱷᱩᱠᱤ ᱴᱩᱞ ᱫᱚ ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱪᱷᱚᱞᱟ, ᱵᱟᱠᱤ ᱠᱚ ᱪᱟᱞᱟᱜᱼᱟ।",
+    "tierSemiConsequence": "ᱢᱤᱫ ᱪᱷᱚᱠᱟᱛ ᱰᱤᱯᱷᱚᱞᱴ। ᱟᱢᱟᱜ ᱴᱩᱞ-ᱥᱟᱱᱟᱢ ᱱᱤᱭᱚᱢ ᱠᱚ ᱱᱚᱸᱰᱮ ᱯᱷᱚᱞ ᱮᱢᱟ।",
+    "tierFullName": "ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ",
+    "tierFullWhat": "ᱪᱮᱫᱽ ᱴᱩᱞ ᱠᱚᱞ ᱛᱟᱠᱠᱟᱣ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱵᱟᱝ ᱮᱫᱟ ᱟᱨ ᱮᱡᱮᱱᱴ ᱫᱚ ᱴᱩᱞ ᱯᱟᱦᱴᱟ ᱟᱜ ᱞᱟᱢᱟ ᱥᱤᱢᱟ ᱧᱟᱢᱟ। ᱴᱩᱞ-ᱥᱟᱱᱟᱢ ᱱᱤᱭᱚᱢ ᱠᱚ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱮᱫᱟ।",
+    "tierFullConsequence": "ᱚᱱᱟ ᱵᱟᱹᱱᱩᱜ ᱪᱷᱚᱞ ᱛᱮ ᱠᱟᱹᱢᱤ ᱮᱫᱟ। ᱚᱱᱟ ᱠᱷᱟᱞᱤ ᱚᱱᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱵᱮᱵᱷᱟᱨ ᱢᱮ ᱡᱟᱦᱟᱸ ᱟᱜ ᱵᱷᱩᱞ ᱠᱚ ᱥᱚᱡᱷᱮ ᱛᱮ ᱯᱷᱤᱨ ᱨᱩᱣᱟᱹᱲ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "tiersRuleNote": "ᱴᱩᱞ ᱱᱤᱭᱚᱢ (ᱛᱟᱠᱠᱟᱣ ᱪᱷᱚᱞ ᱢᱮ, ᱢᱩᱨᱩᱛ ᱵᱟᱝ ᱪᱷᱚᱞ ᱢᱮ) ᱫᱚ ᱠᱷᱟᱞᱤ ᱟᱫᱷᱟ-ᱟᱡ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱱᱟᱜᱼᱟ।",
+    "agentModeTitle": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱪᱷᱚᱠᱛᱮ ᱞᱟᱹᱠᱛᱤ?",
+    "agentModeSupervised": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜᱼᱟ: ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱮᱫᱟ, ᱟᱨ ᱴᱩᱞ-ᱥᱟᱱᱟᱢ ᱱᱤᱭᱚᱢ ᱠᱚ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱮᱫᱟ।",
+    "agentModeSemi": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱫᱷᱟ-ᱟᱡ ᱠᱟᱱᱟ: ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱱᱤᱭᱚᱢ ᱢᱟᱱᱟᱣᱟ। ᱵᱷᱮᱡᱟᱣ, ᱰᱤᱞᱤᱴ ᱟᱨ ᱯᱮᱢᱮᱱᱴ ᱫᱚ ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱪᱷᱚᱞᱟ।",
+    "agentModeFull": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ ᱠᱟᱱᱟ: ᱚᱱᱟ ᱛᱟᱠᱠᱟᱣ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱵᱟᱝ ᱮᱫᱟ, ᱟᱨ ᱴᱩᱞ-ᱥᱟᱱᱟᱢ ᱱᱤᱭᱚᱢ ᱠᱚ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱮᱫᱟ।",
+    "agentModeQueueLink": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱚᱱᱚᱠᱚᱞ ᱠᱚ ᱧᱮᱞ ᱢᱮ",
+    "agentModeRulesLink": "ᱢᱤᱫ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱱᱤᱭᱚᱢ ᱥᱮᱴ ᱢᱮ",
+    "agentModeShowTiers": "ᱯᱮ ᱥᱛᱚᱨ ᱠᱚ ᱠᱷᱟᱛᱨᱟ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+    "agentModeHideTiers": "ᱠᱷᱟᱛᱨᱟ ᱤᱫᱤ ᱢᱮ",
+    "agentModeScopeNote": "ᱛᱟᱞᱟ ᱨᱮᱭᱟᱜ ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱛᱮ ᱥᱛᱚᱨ ᱵᱚᱫᱚᱞ ᱢᱮ। ᱴᱩᱞ ᱱᱤᱭᱚᱢ ᱫᱚ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ, ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱟᱝ।",
+    "policyThenApprovalNote": "ᱱᱚᱶᱟ ᱱᱤᱭᱚᱢ ᱠᱚ ᱠᱷᱚᱱ ᱯᱟᱨ ᱦᱩᱭ ᱟᱠᱟᱱ ᱠᱚᱞ ᱫᱚ ᱛᱚᱵᱮᱛ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱚᱱᱟ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱥᱛᱚᱨ ᱨᱮ ᱞᱟᱹᱠᱛᱤ, ᱚᱱᱟ ᱞᱟᱛᱟᱨ ᱵᱩᱡᱷᱟᱣ ᱟᱠᱟᱱᱟ।",
+    "chatReasonToggle": "ᱢᱤᱫ ᱠᱟᱨᱚᱱ ᱥᱮᱞᱮᱫ ᱢᱮ",
+    "chatReviewInQueue": "ᱞᱟᱭᱱ ᱨᱮ ᱪᱮᱠ ᱢᱮ"
   },
   "turnInspector": {
-    "tlFilterTitle": "Filter events",
-    "tlFilterCategories": "Event types",
-    "tlCatIntake": "Intake",
-    "tlCatModel": "Model",
-    "tlCatTool": "Tools",
-    "tlCatApproval": "Approvals",
-    "tlCatContinuation": "Continuations",
-    "tlCatRetry": "Retries and failover",
-    "tlCatGuardrail": "Guardrails",
-    "tlCatCache": "Cache",
-    "tlCatVerify": "Checks",
-    "tlCatFinish": "Finish",
-    "tlProblemsOnly": "Only problems",
-    "tlSearch": "Search events",
-    "tlSearchPlaceholder": "Tool, model, guard or status",
-    "tlClearFilters": "Clear filters",
-    "tlShowing": "Showing {shown} of {total} events",
-    "tlNoMatch": "No events match these filters.",
-    "tlSevOk": "Succeeded",
-    "tlSevInfo": "Information",
-    "tlSevWarn": "Needs attention",
-    "tlSevError": "Failed",
-    "tlIntake": "Turn started: {chars} characters, {tools} tools, {attachments} attachments",
+    "tlFilterTitle": "ᱤᱵᱷᱮᱱᱴ ᱪᱷᱟᱸᱪᱚ",
+    "tlFilterCategories": "ᱤᱵᱷᱮᱱᱴ ᱥᱟᱶ",
+    "tlCatIntake": "ᱤᱱᱴᱮᱠ",
+    "tlCatModel": "ᱢᱚᱰᱮᱞ",
+    "tlCatTool": "ᱴᱩᱞ",
+    "tlCatApproval": "ᱢᱚᱱᱡᱩᱨᱤ",
+    "tlCatContinuation": "ᱞᱟᱜᱟᱛᱟᱨ",
+    "tlCatRetry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱟᱨ ᱯᱷᱮᱞᱚᱣᱟᱨ",
+    "tlCatGuardrail": "ᱜᱟᱨᱰᱨᱮᱞ",
+    "tlCatCache": "ᱠᱮᱥ",
+    "tlCatVerify": "ᱪᱮᱠ",
+    "tlCatFinish": "ᱪᱷᱚᱭ",
+    "tlProblemsOnly": "ᱠᱷᱟᱞᱤ ᱥᱚᱢᱥᱭᱟ ᱠᱚ",
+    "tlSearch": "ᱤᱵᱷᱮᱱᱴ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+    "tlSearchPlaceholder": "ᱴᱩᱞ, ᱢᱚᱰᱮᱞ, ᱜᱟᱨᱰ ᱥᱮ ᱚᱵᱚᱥᱛᱷᱟ",
+    "tlClearFilters": "ᱪᱷᱟᱸᱪᱚ ᱥᱟᱯᱷᱟ ᱢᱮ",
+    "tlShowing": "{total} ᱤᱵᱷᱮᱱᱴ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {shown} ᱧᱮᱞᱟᱹ ᱮᱫᱟ",
+    "tlNoMatch": "ᱪᱮᱫᱽ ᱤᱵᱷᱮᱱᱴ ᱱᱚᱶᱟ ᱪᱷᱟᱸᱪᱚ ᱥᱟᱶ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ।",
+    "tlSevOk": "ᱥᱟᱯᱷᱚᱞ",
+    "tlSevInfo": "ᱵᱟᱰᱟᱭ",
+    "tlSevWarn": "ᱱᱚᱨᱚᱡ ᱞᱟᱹᱠᱛᱤ",
+    "tlSevError": "ᱵᱟᱭᱡᱷᱮᱛ",
+    "tlIntake": "ᱴᱚᱨᱱ ᱮᱦᱚᱵ ᱞᱮᱱᱟ: {chars} ᱚᱠᱷᱚᱨ, {tools} ᱴᱩᱞ, {attachments} ᱥᱟᱶᱛᱮ",
     "tlRunTools": "Tools for this run",
     "tlRunToolsNone": "none (text only)",
-    "tlModelCall": "Model call to {model} ({provider}), route {route}",
-    "tlFailover": "Failed over to {model} ({provider})",
-    "tlRetryModel": "Retried on {model} ({provider}), route {route}",
-    "tlRetry": "Retry: {guard} ({outcome})",
-    "tlCacheHit": "Answered from the response cache",
-    "tlToolCall": "Tool call {tool}: {status}",
-    "tlApprovalRequested": "Approval requested before running {tool}",
-    "tlApprovalDecided": "Approval decided for {tool}: {decision}",
-    "tlContinuation": "Continuation: {guard} ({outcome})",
-    "tlGuard": "Guardrail {guard}: {outcome}",
-    "tlVerifyPassed": "Check passed: {check}",
-    "tlVerifyFailed": "Check failed: {check}",
-    "tlFinish": "Finished: {status} ({chars} characters in the answer)",
-    "tlOther": "Event {type}",
-    "reasonFallbackProvider": "The primary model failed, so the turn moved to the agent's fallback provider.",
-    "reasonToolsDisabledRetry": "The provider refused the tool-call history, so the turn was answered once more without tools.",
-    "reasonRetryOther": "The model call was repeated.",
-    "reasonToolCallRetry": "The model ended its answer with a malformed tool call, so it was asked again.",
-    "reasonCutOff": "The answer was cut off at the length limit, so the model was asked to continue.",
-    "reasonToolsContinue": "The model needed more steps after its tool calls, so the turn continued.",
-    "reasonToolBlocked": "A guard, policy, hook or limit answered instead of the tool, so it did not run.",
-    "reasonToolParked": "The call is waiting for a person to approve it; the tool has not run.",
-    "reasonGuardAction": "A guardrail changed or withheld the answer.",
-    "tlAtStart": "From start",
-    "tlGap": "Since previous event",
-    "tlDuration": "Duration",
-    "tlTokens": "Tokens in / out",
-    "tlCost": "Cost",
-    "tlDetails": "Hashes and raw summary",
-    "tlArgsHash": "Arguments hash",
-    "tlResultDigest": "Result digest",
-    "tlContentNote": "Arguments and results are never stored. For a tool call the timeline shows its status, duration and the hashes of its arguments and result, not their content.",
-    "tlStatFinish": "Finish reason",
-    "tlStillOpen": "Not finished",
-    "tlProblemCount": "{count} events need attention",
-    "tlStatRetries": "Retries and failovers",
-    "tlStatContinuations": "Continuations",
-    "tlStatApprovals": "Approvals",
-    "tlStatTokens": "Tokens in / out",
-    "tlTokensNotRecorded": "Not recorded for this turn",
-    "tlTokensInOut": "Input / output",
-    "tlCopyTurnId": "Copy turn ID",
-    "tlCopyTurnIdShort": "Copy ID",
-    "tlCopied": "Turn ID copied.",
-    "tlCopyFailed": "Could not copy. Select the ID and copy it by hand.",
-    "sessTitle": "Turns in a session",
-    "sessSubtitle": "Pick a chat session to see its recorded turns, newest first. Opening a chat message's view-turn link fills this in for you.",
-    "sessionIdLabel": "Session ID",
-    "sessionIdPlaceholder": "Chat session ID",
-    "sessFind": "Find turns",
-    "sessInvalid": "Enter the agent ID (a UUID) and the session ID.",
-    "sessLoading": "Loading the session's turns...",
-    "sessUnavailableTitle": "Session lookup is not available",
-    "sessUnavailableBody": "This server cannot list the turns of a session. Open a turn by its ID below instead.",
-    "sessErrorTitle": "Could not load the session's turns",
-    "sessEmptyTitle": "No journaled turns in this session",
-    "sessEmptyBody": "The session recorded nothing. Either the session ID is wrong, or the turn journal was off when its turns ran.",
-    "sessListLabel": "{count} journaled turns",
-    "sessEvents": "{count} events",
-    "sessStatusOpen": "Open",
-    "sessOpen": "Open timeline",
-    "sessOpened": "Shown below"
+    "tlModelCall": "{model} ({provider}) ᱥᱮᱱ ᱢᱚᱰᱮᱞ ᱠᱚᱞ, ᱨᱩᱴ {route}",
+    "tlFailover": "{model} ({provider}) ᱥᱮᱱ ᱯᱷᱮᱞᱚᱣᱟᱨ ᱦᱩᱭᱞᱮᱱᱟ",
+    "tlRetryModel": "{model} ({provider}) ᱨᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱞᱮᱱᱟ, ᱨᱩᱴ {route}",
+    "tlRetry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ: {guard} ({outcome})",
+    "tlCacheHit": "ᱨᱤᱥᱯᱚᱱᱥ ᱠᱮᱥ ᱠᱷᱚᱱ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱮᱱᱟ",
+    "tlToolCall": "ᱴᱩᱞ ᱠᱚᱞ {tool}: {status}",
+    "tlApprovalRequested": "{tool} ᱪᱟᱞᱟᱜ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱢᱚᱱᱡᱩᱨᱤ ᱠᱷᱚᱡ ᱞᱮᱱᱟ",
+    "tlApprovalDecided": "{tool} ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱦᱩᱭᱞᱮᱱᱟ: {decision}",
+    "tlApprovalAutoAllowed": "{tool} ran without asking: a read-only call under Supervised",
+    "tlContinuation": "ᱞᱟᱜᱟᱛᱟᱨ: {guard} ({outcome})",
+    "tlGuard": "ᱜᱟᱨᱰᱨᱮᱞ {guard}: {outcome}",
+    "tlVerifyPassed": "ᱪᱮᱠ ᱯᱟᱥ: {check}",
+    "tlVerifyFailed": "ᱪᱮᱠ ᱯᱷᱮᱞ: {check}",
+    "tlFinish": "ᱪᱷᱚᱭ: {status} (ᱡᱚᱵᱟᱵ ᱨᱮ {chars} ᱚᱠᱷᱚᱨ)",
+    "tlOther": "ᱤᱵᱷᱮᱱᱴ {type}",
+    "reasonFallbackProvider": "ᱢᱩᱞ ᱢᱚᱰᱮᱞ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱴᱚᱨᱱ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱯᱷᱚᱞᱵᱮᱠ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱥᱮᱱ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ।",
+    "reasonToolsDisabledRetry": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱴᱩᱞ-ᱠᱚᱞ ᱤᱛᱤᱦᱟᱥ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱴᱚᱨᱱ ᱟᱜ ᱡᱚᱵᱟᱵ ᱫᱚ ᱟᱨ ᱢᱤᱫ ᱥᱮᱨᱢᱟ ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱮᱢ ᱞᱮᱱᱟ।",
+    "reasonRetryOther": "ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱣ ᱞᱮᱱᱟ।",
+    "reasonToolCallRetry": "ᱢᱚᱰᱮᱞ ᱫᱚ ᱟᱡ ᱡᱚᱵᱟᱵ ᱵᱷᱩᱞ ᱴᱩᱞ ᱠᱚᱞ ᱥᱟᱶ ᱪᱷᱚᱭ ᱠᱟᱫᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱠᱚ ᱯᱷᱤᱨ ᱪᱷᱚᱞᱮᱱᱟ।",
+    "reasonCutOff": "ᱡᱚᱵᱟᱵ ᱫᱚ ᱞᱚᱸᱜᱚ ᱥᱤᱢᱟ ᱨᱮ ᱠᱟᱴᱟ ᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱞᱮᱱᱟ।",
+    "reasonToolsContinue": "ᱴᱩᱞ ᱠᱚᱞ ᱛᱟᱭᱚᱢ ᱢᱚᱰᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱮᱴᱟᱜ ᱯᱟᱦᱴᱟ ᱞᱟᱹᱠᱛᱤ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱴᱚᱨᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ।",
+    "reasonToolBlocked": "ᱴᱩᱞ ᱢᱚᱱ ᱛᱟᱞᱟ ᱪᱮᱫᱽ ᱜᱟᱨᱰ, ᱱᱤᱛᱤ, ᱦᱩᱠ ᱥᱮ ᱥᱤᱢᱟ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱟᱝ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ।",
+    "reasonToolParked": "ᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱠᱟᱱᱟ; ᱴᱩᱞ ᱵᱟᱝ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ।",
+    "reasonGuardAction": "ᱢᱤᱫ ᱜᱟᱨᱰᱨᱮᱞ ᱫᱚ ᱡᱚᱵᱟᱵ ᱵᱚᱫᱚᱞ ᱠᱟᱫᱼᱟ ᱥᱮ ᱨᱩᱠᱷᱤᱭᱟ ᱠᱟᱫᱼᱟ।",
+    "tlAtStart": "ᱮᱦᱚᱵ ᱠᱷᱚᱱ",
+    "tlGap": "ᱢᱟᱲᱟᱝ ᱤᱵᱷᱮᱱᱴ ᱠᱷᱚᱱ",
+    "tlDuration": "ᱚᱠᱛᱚ ᱥᱤᱢᱟ",
+    "tlTokens": "ᱤᱱᱯᱩᱴ / ᱟᱣᱴᱯᱩᱴ ᱴᱚᱠᱮᱱ",
+    "tlCost": "ᱠᱷᱚᱨᱪᱟ",
+    "tlDetails": "ᱦᱮᱥ ᱟᱨ ᱠᱟᱸᱪᱟ ᱥᱟᱨ",
+    "tlArgsHash": "ᱟᱨᱜᱩᱢᱮᱱᱴ ᱠᱚ ᱟᱜ ᱦᱮᱥ",
+    "tlResultDigest": "ᱯᱷᱚᱞ ᱟᱜ ᱰᱟᱭᱡᱮᱥᱴ",
+    "tlContentNote": "ᱟᱨᱜᱩᱢᱮᱱᱴ ᱟᱨ ᱯᱷᱚᱞ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱟ। ᱴᱩᱞ ᱠᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱴᱟᱭᱢᱞᱟᱭᱱ ᱫᱚ ᱚᱱᱟ ᱟᱜ ᱚᱵᱚᱥᱛᱷᱟ, ᱚᱠᱛᱚ, ᱟᱨ ᱚᱱᱟ ᱟᱜ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱟᱨ ᱯᱷᱚᱞ ᱟᱜ ᱦᱮᱥ ᱧᱮᱞᱟᱹᱭᱟ, ᱚᱱᱟ ᱟᱜ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱵᱟᱝ।",
+    "tlStatFinish": "ᱪᱷᱚᱭ ᱟᱜ ᱠᱟᱨᱚᱱ",
+    "tlStillOpen": "ᱪᱷᱚᱭ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "tlProblemCount": "{count} ᱤᱵᱷᱮᱱᱴ ᱨᱮ ᱱᱚᱨᱚᱡ ᱞᱟᱹᱠᱛᱤ",
+    "tlStatRetries": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱟᱨ ᱯᱷᱮᱞᱚᱣᱟᱨ",
+    "tlStatContinuations": "ᱞᱟᱜᱟᱛᱟᱨ",
+    "tlStatApprovals": "ᱢᱚᱱᱡᱩᱨᱤ",
+    "tlStatTokens": "ᱤᱱᱯᱩᱴ / ᱟᱣᱴᱯᱩᱴ ᱴᱚᱠᱮᱱ",
+    "tlTokensNotRecorded": "ᱱᱚᱶᱟ ᱴᱚᱨᱱ ᱞᱟᱹᱜᱤᱫ ᱨᱮᱠᱚᱨᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "tlTokensInOut": "ᱤᱱᱯᱩᱴ / ᱟᱣᱴᱯᱩᱴ",
+    "tlCopyTurnId": "ᱴᱚᱨᱱ ID ᱠᱚᱯᱤ ᱢᱮ",
+    "tlCopyTurnIdShort": "ID ᱠᱚᱯᱤ ᱢᱮ",
+    "tlCopied": "ᱴᱚᱨᱱ ID ᱠᱚᱯᱤ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "tlCopyFailed": "ᱠᱚᱯᱤ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। ID ᱵᱟᱪᱷᱟᱣ ᱠᱟᱛᱮ ᱦᱟᱛ ᱛᱮ ᱠᱚᱯᱤ ᱢᱮ।",
+    "sessTitle": "ᱢᱤᱫ ᱥᱮᱥᱚᱱ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ",
+    "sessSubtitle": "ᱨᱮᱠᱚᱨᱰ ᱟᱠᱟᱱ ᱴᱚᱨᱱ ᱠᱚ ᱱᱟᱣᱟ ᱢᱟᱲᱟᱝ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱪᱮᱴ ᱥᱮᱥᱚᱱ ᱵᱟᱪᱷᱟᱣ ᱢᱮ। ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱟᱜ ᱴᱚᱨᱱ ᱧᱮᱞ ᱞᱤᱝᱠ ᱠᱷᱩᱞᱟᱹ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱫᱚ ᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱟᱡᱼᱛᱮ ᱯᱩᱨᱟᱹ ᱦᱩᱭᱜᱼᱟ।",
+    "sessionIdLabel": "ᱥᱮᱥᱚᱱ ID",
+    "sessionIdPlaceholder": "ᱪᱮᱴ ᱥᱮᱥᱚᱱ ID",
+    "sessFind": "ᱴᱚᱨᱱ ᱠᱷᱚᱡᱮᱛ",
+    "sessInvalid": "ᱮᱡᱮᱱᱴ ID (ᱢᱤᱫ UUID) ᱟᱨ ᱥᱮᱥᱚᱱ ID ᱮᱢ ᱢᱮ।",
+    "sessLoading": "ᱥᱮᱥᱚᱱ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ ᱞᱚᱰ ᱮᱫᱟ...",
+    "sessUnavailableTitle": "ᱥᱮᱥᱚᱱ ᱠᱷᱚᱡᱮᱛ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ",
+    "sessUnavailableBody": "ᱱᱚᱶᱟ ᱥᱟᱨᱵᱟᱨ ᱫᱚ ᱢᱤᱫ ᱥᱮᱥᱚᱱ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ ᱞᱮᱠᱟ ᱵᱟᱝ ᱵᱟᱱᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱨᱮ ᱞᱟᱛᱟᱨ ID ᱛᱮ ᱢᱤᱫ ᱴᱚᱨᱱ ᱠᱷᱩᱞᱟᱹ ᱢᱮ।",
+    "sessErrorTitle": "ᱥᱮᱥᱚᱱ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "sessEmptyTitle": "ᱱᱚᱶᱟ ᱥᱮᱥᱚᱱ ᱨᱮ ᱪᱮᱫᱽ ᱡᱚᱨᱱᱮᱞ ᱟᱠᱟᱱ ᱴᱚᱨᱱ ᱵᱟᱹᱱᱩᱜᱼᱟ",
+    "sessEmptyBody": "ᱥᱮᱥᱚᱱ ᱫᱚ ᱪᱮᱫᱽ ᱵᱟᱝ ᱨᱮᱠᱚᱨᱰ ᱞᱮᱱᱟ। ᱥᱮ ᱥᱮᱥᱚᱱ ID ᱵᱷᱩᱞ ᱠᱟᱱᱟ, ᱥᱮ ᱚᱱᱟ ᱟᱜ ᱴᱚᱨᱱ ᱪᱟᱞᱟᱜ ᱚᱠᱛᱚ ᱴᱚᱨᱱ ᱡᱚᱨᱱᱮᱞ ᱵᱚᱸᱫ ᱠᱟᱱᱟ।",
+    "sessListLabel": "{count} ᱡᱚᱨᱱᱮᱞ ᱟᱠᱟᱱ ᱴᱚᱨᱱ",
+    "sessEvents": "{count} ᱤᱵᱷᱮᱱᱴ",
+    "sessStatusOpen": "ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+    "sessOpen": "ᱴᱟᱭᱢᱞᱟᱭᱱ ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+    "sessOpened": "ᱞᱟᱛᱟᱨ ᱧᱮᱞᱟᱹ ᱟᱠᱟᱱᱟ"
   },
   "evalControls": {
-    "cancel": "Cancel",
-    "saving": "Saving...",
-    "saved": "Saved.",
-    "saveMode": "Save replay mode",
-    "discard": "Discard changes",
-    "saveFailed": "Could not save the replay mode.",
-    "unsavedChanges": "Unsaved changes",
-    "modeTitle": "How this dataset is replayed",
-    "modeHelp": "Choose whether a replay may use the agent's tools. This changes what the next run measures.",
-    "modeTextOnly": "Text only",
-    "modeTextOnlyHelp": "The agent answers without its tools. Safe: nothing real happens. Expected-tool checks cannot be met.",
-    "modeFull": "Full pipeline with tools",
-    "modeFullHelp": "The same tools, guardrails and step limits a live user gets. Needed for expected-tool and trajectory checks.",
+    "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+    "saving": "ᱥᱟᱸᱪᱟᱣ ᱮᱫᱟ...",
+    "saved": "ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "saveMode": "ᱨᱤᱯᱞᱮ ᱢᱚᱰ ᱥᱟᱸᱪᱟᱣ ᱢᱮ",
+    "discard": "ᱵᱚᱫᱚᱞ ᱠᱚ ᱵᱟᱛᱤᱞ ᱢᱮ",
+    "saveFailed": "ᱨᱤᱯᱞᱮ ᱢᱚᱰ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "unsavedChanges": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ ᱠᱚ",
+    "modeTitle": "ᱱᱚᱶᱟ ᱰᱮᱴᱟᱥᱮᱴ ᱫᱚ ᱪᱮᱠᱟ ᱛᱮ ᱨᱤᱯᱞᱮ ᱦᱩᱭᱜᱼᱟ",
+    "modeHelp": "ᱨᱤᱯᱞᱮ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ। ᱚᱱᱟ ᱫᱚ ᱛᱟᱭᱚᱢ ᱨᱚᱱ ᱠᱚ ᱪᱮᱫ ᱢᱟᱯ ᱮᱫᱟ ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱮᱫᱟ।",
+    "modeTextOnly": "ᱠᱷᱟᱞᱤ ᱚᱞ",
+    "modeTextOnlyHelp": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱡ ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱡᱚᱵᱟᱵ ᱮᱢᱟ। ᱥᱩᱨᱠᱷᱤᱛ: ᱥᱟᱹᱨᱤ ᱨᱮ ᱪᱮᱫᱽ ᱵᱟᱝ ᱪᱟᱞᱟᱜᱼᱟ। ᱟᱱᱟᱡ ᱟᱠᱟᱱ-ᱴᱩᱞ ᱪᱮᱠ ᱠᱚ ᱯᱩᱨᱟᱹ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+    "modeFull": "ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ",
+    "modeFullHelp": "ᱚᱱᱟ ᱞᱮᱠᱟ ᱴᱩᱞ, ᱜᱟᱨᱰᱨᱮᱞ ᱟᱨ ᱯᱟᱦᱴᱟ ᱥᱤᱢᱟ ᱡᱟᱦᱟᱸ ᱢᱤᱫ ᱥᱟᱹᱨᱤ ᱵᱮᱵᱷᱟᱨᱤ ᱠᱚ ᱧᱟᱢᱟ। ᱟᱱᱟᱡ ᱟᱠᱟᱱ-ᱴᱩᱞ ᱟᱨ ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱪᱮᱠ ᱞᱟᱹᱜᱤᱫ ᱞᱟᱹᱠᱛᱤ।",
     "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
-    "autoApproveLabel": "Auto-approve tool calls in the eval sandbox",
-    "autoApproveHelp": "A tool call that would normally wait for a person is approved by the eval sandbox, so the case can finish. Without this the case ends at the unanswered approval, as it would in production.",
-    "autoApproveWarnTitle": "For non-production workspaces only",
-    "autoApproveWarnBody": "Never turn this on where tools reach real customers or data. Shell, coding, scheduling, agent-to-agent, payment and delete tools are never auto-approved. Your administrator must have marked this workspace as non-production.",
-    "autoApproveNeedsFull": "Switch on the full pipeline first: auto-approval only applies when tools run.",
-    "autoApproveRefused": "Not allowed in this workspace: {reason}",
-    "autoApproveConfirmTitle": "Auto-approve tool calls in evals?",
+    "autoApproveLabel": "ᱤᱵᱷᱟᱞ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "autoApproveHelp": "ᱥᱟᱫᱷᱟᱨᱚᱬ ᱛᱮ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱟᱠᱟᱱ ᱴᱩᱞ ᱠᱚᱞ ᱠᱚ ᱤᱵᱷᱟᱞ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱫᱚ ᱢᱚᱱᱡᱩᱨ ᱮᱫᱟ, ᱠᱮᱥ ᱪᱷᱚᱭ ᱞᱟᱹᱜᱤᱫ। ᱚᱱᱟ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱠᱮᱥ ᱫᱚ ᱯᱨᱚᱰᱚᱠᱥᱚᱱ ᱨᱮ ᱪᱮᱠᱟ ᱦᱩᱭᱟ ᱚᱱᱟ ᱞᱮᱠᱟ ᱡᱚᱵᱟᱵ ᱵᱟᱹᱱᱩᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱨᱮ ᱪᱷᱚᱭ ᱦᱩᱭᱟ।",
+    "autoApproveWarnTitle": "ᱠᱷᱟᱞᱤ ᱯᱨᱚᱰᱚᱠᱥᱚᱱ ᱵᱟᱝ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ",
+    "autoApproveWarnBody": "ᱚᱠᱟᱸ ᱴᱩᱞ ᱠᱚ ᱥᱟᱹᱨᱤ ᱜᱨᱟᱦᱚᱠ ᱥᱮ ᱰᱮᱴᱟ ᱵᱩᱞᱟᱹ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱚᱸᱰᱮ ᱱᱚᱶᱟ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱪᱟᱹᱞᱩ ᱢᱮ। ᱥᱮᱞ, ᱠᱳᱰᱤᱝ, ᱥᱮᱰᱭᱩᱞ, ᱮᱡᱮᱱᱴ-ᱠᱷᱚᱱ-ᱮᱡᱮᱱᱴ, ᱯᱮᱢᱮᱱᱴ ᱟᱨ ᱰᱤᱞᱤᱴ ᱴᱩᱞ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱟᱡᱼᱛᱮ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱟ। ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱫᱚ ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱯᱨᱚᱰᱚᱠᱥᱚᱱ ᱵᱟᱝ ᱞᱮᱠᱟ ᱪᱤᱱᱦᱟᱹ ᱟᱠᱟᱱ ᱞᱟᱹᱠᱛᱤ।",
+    "autoApproveNeedsFull": "ᱢᱟᱲᱟᱝ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱪᱟᱹᱞᱩ ᱢᱮ: ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨᱤ ᱫᱚ ᱴᱩᱞ ᱪᱟᱞᱟᱜ ᱚᱠᱛᱚ ᱜᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱜᱼᱟ।",
+    "autoApproveRefused": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱵᱟᱛᱟᱣ ᱵᱟᱹᱱᱩᱜᱼᱟ: {reason}",
+    "autoApproveConfirmTitle": "ᱤᱵᱷᱟᱞ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱟ?",
     "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
-    "autoApproveConfirm": "Turn on auto-approval",
-    "trajectoryLabel": "Trajectory checks",
+    "autoApproveConfirm": "ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨᱤ ᱪᱟᱹᱞᱩ ᱢᱮ",
+    "trajectoryLabel": "ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱪᱮᱠ",
     "trajectoryOn": "On",
-    "trajectoryOff": "Not available",
-    "trajectoryHelpOn": "Cases with an expected trajectory are scored on which tools the agent called and in what order. This is switched on for the whole deployment by your administrator, not per dataset.",
-    "trajectoryHelpOff": "Trajectory checks are not available here. They are switched on for the whole deployment by your administrator, and need a plan that includes evals.",
-    "trajectoryNeedsFull": "This dataset is text only, so cases with an expected trajectory will not be scored. Switch on the full pipeline.",
-    "runAutoApproved": "auto-approved",
-    "runAutoApprovedTitle": "A person decided none of this run's tool calls; the eval sandbox approved them.",
-    "toolCallsLabel": "Tool calls in this replay",
+    "trajectoryOff": "ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ",
+    "trajectoryHelpOn": "ᱟᱱᱟᱡ ᱟᱠᱟᱱ ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱛᱟᱦᱮᱱ ᱠᱮᱥ ᱠᱚ ᱫᱚ ᱮᱡᱮᱱᱴ ᱪᱮᱫ ᱴᱩᱞ ᱪᱮᱫ ᱠᱷᱟᱛᱨᱟ ᱛᱮ ᱠᱚᱞ ᱞᱮᱱᱟ ᱚᱱᱟ ᱟᱹᱲᱟ ᱛᱮ ᱥᱟᱢᱟᱨ ᱮᱢ ᱠᱚᱜᱼᱟ। ᱱᱚᱶᱟ ᱫᱚ ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱯᱩᱨᱟᱹ ᱰᱤᱯᱞᱚᱭᱢᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱪᱟᱹᱞᱩ ᱮᱫᱟ, ᱥᱟᱱᱟᱢ ᱰᱮᱴᱟᱥᱮᱴ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱝ।",
+    "trajectoryHelpOff": "ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱪᱮᱠ ᱠᱚ ᱱᱚᱸᱰᱮ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ। ᱚᱱᱟ ᱠᱚ ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱯᱩᱨᱟᱹ ᱰᱤᱯᱞᱚᱭᱢᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱪᱟᱹᱞᱩ ᱮᱫᱟ, ᱟᱨ ᱤᱵᱷᱟᱞ ᱥᱮᱞᱮᱫ ᱟᱠᱟᱱ ᱯᱞᱟᱱ ᱞᱟᱹᱠᱛᱤ।",
+    "trajectoryNeedsFull": "ᱱᱚᱶᱟ ᱰᱮᱴᱟᱥᱮᱴ ᱫᱚ ᱠᱷᱟᱞᱤ ᱚᱞ ᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱟᱱᱟᱡ ᱟᱠᱟᱱ ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱛᱟᱦᱮᱱ ᱠᱮᱥ ᱠᱚ ᱟᱹᱲᱟ ᱵᱟᱝ ᱧᱟᱢᱚᱜᱼᱟ। ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱪᱟᱹᱞᱩ ᱢᱮ।",
+    "runAutoApproved": "ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱞᱮᱱᱟ",
+    "runAutoApprovedTitle": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱟᱜ ᱪᱮᱫᱽ ᱴᱩᱞ ᱠᱚᱞ ᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱢᱟᱱᱩᱸ ᱵᱟᱝ ᱮᱢ ᱞᱮᱱᱟ; ᱤᱵᱷᱟᱞ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱫᱚ ᱚᱱᱟ ᱠᱚ ᱢᱚᱱᱡᱩᱨ ᱠᱟᱫᱼᱟ।",
+    "toolCallsLabel": "ᱱᱚᱶᱟ ᱨᱤᱯᱞᱮ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ",
     "toolStatusOk": "ok",
-    "toolStatusFailed": "failed",
-    "toolStatusNotRun": "did not run",
-    "toolStatusAwaitingApproval": "waiting for approval",
-    "toolStatusReplayed": "replayed",
-    "samplingTitle": "Background quality scoring",
-    "samplingLoading": "Loading the scoring rate...",
-    "samplingUnavailable": "The share of live turns scored by the background judge is set by your platform administrator and is not shown here.",
-    "samplingValue": "About {percent}% of live turns are scored by the background quality judge.",
-    "samplingHelp": "A lower rate costs less and means fewer scores in the trend above. This value is read-only here.",
-    "samplingSource_default": "Default",
-    "samplingSource_platform": "Set by the platform",
-    "samplingSource_tenant": "Set for your workspace",
-    "samplingSource_agent": "Set for this agent",
-    "modeDefault": "Workspace default",
+    "toolStatusFailed": "ᱵᱟᱭᱡᱷᱮᱛ",
+    "toolStatusNotRun": "ᱵᱟᱝ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ",
+    "toolStatusAwaitingApproval": "ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ",
+    "toolStatusReplayed": "ᱨᱤᱯᱞᱮ ᱦᱩᱭᱞᱮᱱᱟ",
+    "samplingTitle": "ᱥᱚᱨᱮᱥ ᱟᱜ ᱜᱩᱱ ᱥᱠᱳᱨ",
+    "samplingLoading": "ᱥᱠᱳᱨᱤᱝ ᱟᱜ ᱦᱟᱨ ᱞᱚᱰ ᱮᱫᱟ...",
+    "samplingUnavailable": "ᱥᱚᱨᱮᱥ ᱟᱜ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱫᱚ ᱪᱮᱫ ᱞᱟᱭᱣ ᱴᱚᱨᱱ ᱠᱚ ᱥᱠᱳᱨ ᱮᱢᱟ ᱚᱱᱟ ᱟᱢᱟᱜ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱮᱰᱢᱤᱱ ᱴᱷᱤᱠ ᱮᱫᱟ ᱟᱨ ᱱᱚᱸᱰᱮ ᱵᱟᱝ ᱧᱮᱞᱟᱹᱭᱟ।",
+    "samplingValue": "ᱚᱞᱟᱜ {percent}% ᱞᱟᱭᱣ ᱴᱚᱨᱱ ᱠᱚ ᱥᱚᱨᱮᱥ ᱜᱩᱱ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱫᱚ ᱥᱠᱳᱨ ᱮᱢᱟ।",
+    "samplingHelp": "ᱠᱚᱢ ᱦᱟᱨ ᱫᱚ ᱠᱷᱚᱨᱪᱟ ᱠᱚᱢ ᱮᱫᱟ ᱟᱨ ᱪᱮᱛᱟᱱ ᱯᱨᱚᱵᱷᱟᱵ ᱨᱮ ᱠᱚᱢ ᱥᱠᱳᱨ ᱛᱟᱦᱮᱱ ᱮᱫᱟ। ᱱᱚᱶᱟ ᱢᱟᱱ ᱫᱚ ᱱᱚᱸᱰᱮ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱞᱟᱹᱜᱤᱫ।",
+    "samplingSource_default": "ᱰᱤᱯᱷᱚᱞᱴ",
+    "samplingSource_platform": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴ ᱠᱟᱫᱼᱟ",
+    "samplingSource_tenant": "ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
+    "samplingSource_agent": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
+    "modeDefault": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱰᱤᱯᱷᱚᱞᱴ",
     "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
     "modeDefaultCurrent": "Currently: {mode}",
     "modeNameFull": "Full pipeline",
@@ -14637,193 +14638,299 @@
     "toolStatusSimulated": "simulated, not executed"
   },
   "agentLab": {
-    "wtLabel": "Run with the agent's tools",
-    "wtHelp": "Off: each answer is one plain model call. On: answers come from the same tool pipeline a chat turn uses, so tools run, guardrails apply and step limits hold. A call that needs a person's approval waits as a pending approval.",
-    "wtUnavailable": "Running the lab with tools is turned off on this install. Ask an administrator to enable it.",
-    "wtRefused": "This run was refused: {reason}",
-    "wtActive": "Tools will run for real in this run, including any side effects.",
-    "wtConfirmTitle": "Run the lab with the agent's tools?",
-    "wtConfirmBody": "Every sample can call the agent's real tools, and those calls can have real effects such as sending a message or writing data. Calls that need approval will wait for a person. Use this only with a test agent or test data.",
-    "wtConfirm": "Use tools"
+    "wtLabel": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱪᱟᱞᱟᱣ ᱢᱮ",
+    "wtHelp": "ᱵᱚᱸᱫ: ᱥᱟᱱᱟᱢ ᱡᱚᱵᱟᱵ ᱫᱚ ᱢᱤᱫ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱠᱟᱱᱟ। ᱪᱟᱹᱞᱩ: ᱡᱚᱵᱟᱵ ᱠᱚ ᱫᱚ ᱪᱮᱴ ᱴᱚᱨᱱ ᱵᱮᱵᱷᱟᱨ ᱠᱟᱱ ᱴᱩᱞ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱠᱷᱚᱱ ᱛᱟᱦᱮᱱ ᱠᱟᱱᱟ, ᱚᱱᱟ ᱪᱷᱚᱵ ᱴᱩᱞ ᱠᱚ ᱪᱟᱞᱟᱜᱼᱟ, ᱜᱟᱨᱰᱨᱮᱞ ᱠᱚ ᱞᱟᱜᱩ ᱟᱠᱚᱜᱼᱟ ᱟᱨ ᱯᱟᱠᱷᱟᱛ ᱟᱜ ᱥᱤᱢᱟ ᱠᱚ ᱢᱟᱱᱟᱣᱜᱼᱟ। ᱢᱟᱱᱩᱸ ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱥᱮ ᱞᱟᱹᱠᱛᱤᱭᱟᱱ ᱠᱚᱞ ᱠᱚ ᱫᱚ ᱵᱟᱠᱤ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱮᱠᱟ ᱛᱮ ᱵᱚᱸᱫᱷᱚᱜᱼᱟ।",
+    "wtUnavailable": "ᱱᱚᱶᱟ ᱤᱱᱥᱴᱚᱞᱮᱥᱚᱱ ᱨᱮ ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱞᱮᱵ ᱪᱟᱞᱟᱣ ᱫᱚ ᱵᱚᱸᱫ ᱢᱮᱱᱟᱜᱼᱟ। ᱚᱱᱟ ᱪᱟᱹᱞᱩ ᱞᱟᱹᱜᱤᱫ ᱮᱰᱢᱤᱱ ᱥᱮᱱ ᱢᱮ ᱟᱲᱟᱜ ᱢᱮ।",
+    "wtRefused": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱞᱮᱱᱟ: {reason}",
+    "wtActive": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱨᱮ ᱴᱩᱞ ᱠᱚ ᱫᱚ ᱥᱟᱹᱨᱤ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ, ᱚᱱᱟ ᱟᱜ ᱯᱟᱥᱼᱟᱣ ᱠᱚ ᱥᱟᱶ ᱥᱟᱶᱛᱮ।",
+    "wtConfirmTitle": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱞᱮᱵ ᱪᱟᱞᱟᱣ ᱟ?",
+    "wtConfirmBody": "ᱥᱟᱱᱟᱢ ᱱᱢᱩᱱᱟ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱹᱨᱤ ᱴᱩᱞ ᱠᱚ ᱠᱚᱞ ᱪᱷᱚᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱟᱨ ᱚᱱᱟ ᱠᱚᱞ ᱠᱚ ᱟᱜ ᱥᱟᱹᱨᱤ ᱯᱷᱚᱞ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱞᱮᱠᱟ ᱵᱟᱨᱛᱟ ᱵᱷᱮᱡᱟᱣ ᱥᱮ ᱰᱮᱴᱟ ᱚᱞ। ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱠᱛᱤᱭᱟᱱ ᱠᱚᱞ ᱠᱚ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱸᱫᱷᱚᱜᱼᱟ। ᱱᱚᱶᱟ ᱫᱚ ᱴᱮᱥᱴ ᱮᱡᱮᱱᱴ ᱥᱮ ᱴᱮᱥᱴ ᱰᱮᱴᱟ ᱥᱟᱶ ᱜᱮ ᱵᱮᱵᱷᱟᱨ ᱢᱮ।",
+    "wtConfirm": "ᱴᱩᱞ ᱠᱚ ᱵᱮᱵᱷᱟᱨ ᱢᱮ"
   },
   "settings": {
     "groups": {
       "agent-limits": {
-        "label": "Agent limits",
-        "description": "How much work one agent turn may do before it is stopped."
+        "label": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱤᱢᱟ ᱠᱚ",
+        "description": "ᱵᱚᱸᱫ ᱦᱩᱭ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱴᱚᱨᱱ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
       },
       "approvals": {
-        "label": "Approvals",
-        "description": "What happens after a person approves or denies an action, and how long a request waits."
+        "label": "ᱢᱚᱱᱡᱩᱨᱤ",
+        "description": "ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱠᱟᱹᱢᱤ ᱢᱚᱱᱡᱩᱨ ᱥᱮ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱛᱟᱭᱚᱢ ᱪᱮᱫ ᱦᱩᱭᱟ, ᱟᱨ ᱚᱱᱚᱠᱚᱞ ᱪᱮᱫ ᱚᱠᱛᱚ ᱡᱚᱜᱟᱣᱟ।"
       },
       "chat": {
-        "label": "Conversation behaviour",
-        "description": "How a reply is finished, retried, cached and continued."
+        "label": "ᱵᱟᱛ ᱪᱤᱛ ᱟᱜ ᱵᱮᱵᱷᱟᱨ",
+        "description": "ᱡᱚᱵᱟᱵ ᱪᱮᱠᱟ ᱛᱮ ᱪᱷᱚᱭ ᱦᱩᱭᱟ, ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ, ᱠᱮᱥ ᱟᱨ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱠᱚ।"
       },
       "routing": {
-        "label": "Model routing",
-        "description": "Which messages count as simple enough for the faster model."
+        "label": "ᱢᱚᱰᱮᱞ ᱨᱩᱴᱤᱝ",
+        "description": "ᱪᱮᱫ ᱵᱷᱮᱡᱟᱣ ᱫᱚ ᱥᱮᱛᱟ ᱢᱚᱰᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱥᱟᱸᱜᱤᱛ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱢᱟᱱᱟᱣᱟ।"
       },
       "memory": {
-        "label": "Memory",
-        "description": "How many memories an agent keeps and recalls."
+        "label": "ᱢᱮᱢᱚᱨᱤ",
+        "description": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱪᱮᱫ ᱢᱮᱢᱚᱨᱤ ᱛᱟᱦᱮᱱ ᱟᱨ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱮᱫᱟ।"
+      },
+      "attachments": {
+        "label": "Chat uploads",
+        "description": "How large the files people attach to chat messages may be."
+      },
+      "skills": {
+        "label": "Skills",
+        "description": "How much of the agent's instructions the list of installed skills may use."
       },
       "aux": {
-        "label": "Background model calls",
-        "description": "Which model summaries, assists and compaction use."
+        "label": "ᱥᱚᱨᱮᱥ ᱢᱚᱰᱮᱞ ᱠᱚᱞ",
+        "description": "ᱥᱟᱨ, ᱜᱚᱲᱚ ᱟᱨ ᱠᱚᱢᱯᱨᱮᱥᱚᱱ ᱫᱚ ᱚᱠᱟ ᱢᱚᱰᱮᱞ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
       },
       "guardrails": {
-        "label": "Safety checks",
-        "description": "How strict the automatic safety checks are. These can only be made stricter than the platform setting."
+        "label": "ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ",
+        "description": "ᱟᱡᱼᱛᱮ ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱪᱮᱫ ᱠᱟᱲᱟ ᱠᱟᱱᱟ। ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴᱤᱝ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
       },
       "quality": {
-        "label": "Evaluation",
-        "description": "How test runs and the AI judge behave."
+        "label": "ᱢᱩᱞᱭᱟᱸᱠᱚᱱ",
+        "description": "ᱴᱮᱥᱴ ᱨᱚᱱ ᱟᱨ AI ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱪᱮᱠᱟ ᱛᱮ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
       },
       "delegation": {
-        "label": "Delegation",
-        "description": "How much work an agent may hand to other agents at once."
+        "label": "ᱠᱟᱹᱢᱤ ᱮᱢ",
+        "description": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱫᱚ ᱢᱤᱫ ᱚᱠᱛᱚ ᱨᱮ ᱮᱴᱟᱜ ᱮᱡᱮᱱᱴ ᱠᱚ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
       },
       "knowledge": {
-        "label": "Knowledge search",
-        "description": "How widely a search of your uploaded documents gathers candidates before it picks the best passages."
+        "label": "ᱵᱟᱰᱟᱭ ᱠᱷᱚᱡᱮᱛ",
+        "description": "ᱥᱟᱸᱜᱤᱛ ᱵᱷᱟᱜ ᱵᱟᱪᱷᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱟᱢᱟᱜ ᱟᱯᱞᱚᱰ ᱟᱠᱟᱱ ᱫᱚᱠᱩᱢᱮᱱᱴ ᱟᱜ ᱠᱷᱚᱡᱮᱛ ᱪᱮᱫ ᱞᱟᱢᱟ ᱛᱮ ᱠᱷᱚᱡ ᱥᱟᱯᱷᱟ ᱮᱫᱟ।"
       },
       "learning": {
-        "label": "Learning",
-        "description": "How the agent's learning policies try out different options."
+        "label": "ᱥᱮᱪᱮᱫ",
+        "description": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱮᱪᱮᱫ ᱱᱤᱛᱤ ᱫᱚ ᱵᱤᱠᱚᱞᱯᱚ ᱠᱚ ᱪᱮᱠᱟ ᱛᱮ ᱪᱮᱠ ᱮᱫᱟ।"
       },
       "providers": {
-        "label": "AI providers",
-        "description": "How connected AI provider keys are used when one stops working."
+        "label": "AI ᱯᱨᱚᱵᱟᱭᱰᱟᱨ",
+        "description": "ᱡᱚᱰᱟᱣ ᱟᱠᱟᱱ AI ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱢᱤᱫ ᱠᱟᱹᱢᱤ ᱵᱚᱸᱫ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚ ᱪᱮᱠᱟ ᱛᱮ ᱵᱮᱵᱷᱟᱨ ᱦᱩᱭᱟ।"
       }
     },
     "agent": {
       "limits": {
         "maxToolSteps": {
-          "label": "Most tool calls per turn",
-          "description": "The most tool calls one turn may make before it is stopped and asked to answer with what it has.",
-          "help": "Raise it for agents that do long multi-step jobs. Lower it to stop runaway loops and keep cost predictable. The value shown for a workspace or the platform is the base figure for a standard agent: an agent's autonomy tier scales it at run time, so a more or less autonomous agent may use a different number. An agent's own value is used exactly as set."
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱴᱩᱞ ᱠᱚᱞ",
+          "description": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱠᱚ ᱵᱚᱸᱫ ᱠᱟᱛᱮ ᱚᱱᱟ ᱥᱟᱶ ᱢᱮᱱᱟᱜ ᱞᱮᱠᱟ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱮᱫ ᱴᱩᱞ ᱠᱚᱞ ᱠᱚ ᱵᱟᱲᱛᱤ ᱛᱮ ᱠᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱞᱟᱢᱟ, ᱵᱟᱲᱛᱤ ᱯᱟᱦᱴᱟ ᱠᱟᱹᱢᱤ ᱟᱜ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱠᱷᱟᱛᱨᱟ ᱠᱷᱚᱱ ᱵᱟᱦᱨᱮ ᱞᱩᱯ ᱠᱚ ᱨᱩᱠᱷᱤᱭᱟ ᱟᱨ ᱠᱷᱚᱨᱪᱟ ᱟᱱᱟᱡ ᱫᱟᱲᱮᱭᱟᱜ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ। ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱞᱟᱹᱜᱤᱫ ᱧᱮᱞᱟᱹ ᱟᱠᱟᱱ ᱢᱟᱱ ᱫᱚ ᱢᱤᱫ ᱢᱩᱞ ᱜᱚᱱᱚᱝ ᱠᱟᱱᱟ: ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱥᱛᱚᱨ ᱫᱚ ᱨᱚᱱ ᱚᱠᱛᱚ ᱚᱱᱟ ᱪᱮᱛᱟᱱ-ᱞᱟᱛᱟᱨ ᱮᱫᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱥᱮ ᱠᱚᱢ ᱟᱡ ᱮᱡᱮᱱᱴ ᱫᱚ ᱵᱷᱮᱜᱟᱨ ᱜᱚᱱᱚᱝ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱢᱟᱱ ᱥᱮᱴ ᱠᱷᱟᱱ ᱚᱱᱟ ᱪᱮᱠᱟ ᱛᱮ ᱢᱮᱱᱟᱜᱼᱟ ᱚᱱᱟ ᱞᱮᱠᱟ ᱵᱮᱵᱷᱟᱨ ᱦᱩᱭᱟ।"
         },
         "turnTimeoutSeconds": {
-          "label": "Longest time per turn",
-          "description": "How long one turn may run before it is stopped.",
-          "help": "Raise it for slow research or code tasks. A turn that runs out of time ends with what was done so far."
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱚᱠᱛᱚ",
+          "description": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱵᱚᱸᱫ ᱦᱩᱭ ᱠᱷᱚᱱ ᱥᱟᱵᱟᱭ ᱢᱤᱫ ᱪᱷᱚᱭ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱥᱮᱛᱟ ᱥᱚᱫᱷᱚ ᱥᱮ ᱠᱳᱰ ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱟᱠᱟᱱ ᱴᱚᱨᱱ ᱫᱚ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱠᱟᱹᱢᱤ ᱥᱟᱶ ᱪᱷᱚᱭ ᱦᱩᱭᱟ।"
         },
         "toolTimeoutSeconds": {
-          "label": "Longest time per tool call",
-          "description": "How long a single tool call may run before it is stopped. The platform default has no limit; each tool then keeps its own timeout.",
-          "help": "Set a limit if one slow tool can hold up whole conversations. Whether a stopped call had any effect is unknown, so the agent is told not to assume it worked."
+          "label": "ᱴᱩᱞ ᱠᱚᱞ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱚᱠᱛᱚ",
+          "description": "ᱢᱤᱫ ᱴᱩᱞ ᱠᱚᱞ ᱵᱚᱸᱫ ᱦᱩᱭ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱮᱫ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱰᱤᱯᱷᱚᱞᱴ ᱨᱮ ᱪᱮᱫᱽ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ; ᱚᱱᱟ ᱚᱠᱛᱚ ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱟᱡ ᱴᱟᱭᱢᱟᱣᱴ ᱛᱟᱦᱮᱱᱟ।",
+          "help": "ᱢᱤᱫ ᱥᱮᱛᱟ ᱴᱩᱞ ᱫᱚ ᱯᱩᱨᱟᱹ ᱵᱟᱛ ᱪᱤᱛ ᱨᱩᱠᱷᱤᱭᱟ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱷᱟᱱ ᱥᱤᱢᱟ ᱥᱮᱴ ᱢᱮ। ᱵᱚᱸᱫ ᱟᱠᱟᱱ ᱠᱚᱞ ᱟᱜ ᱪᱮᱫᱽ ᱯᱷᱚᱞ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱵᱟᱝ ᱵᱟᱰᱟᱭᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱮᱡᱮᱱᱴ ᱠᱚ ᱢᱮᱛ ᱮᱫᱟ ᱚᱱᱟ ᱥᱟᱯᱷᱚᱞ ᱞᱮᱱᱟ ᱢᱮᱱ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱞᱟᱹᱜᱤᱫ।"
         },
         "toolOutputMaxChars": {
-          "label": "Longest tool result",
-          "description": "How many characters of one tool result are passed to the model; the rest is cut.",
-          "help": "Raise it when the agent needs to read long documents or API responses in full, at the price of more tokens per turn. Lower it to save cost."
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱴᱩᱞ ᱯᱷᱚᱞ",
+          "description": "ᱢᱤᱫ ᱴᱩᱞ ᱯᱷᱚᱞ ᱟᱜ ᱪᱮᱫ ᱚᱠᱷᱚᱨ ᱢᱚᱰᱮᱞ ᱠᱚ ᱮᱢᱚᱜᱼᱟ; ᱵᱟᱠᱤ ᱠᱚ ᱠᱟᱴᱟ ᱟᱠᱚᱜᱼᱟ।",
+          "help": "ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱞᱟᱢᱟ ᱫᱚᱠᱩᱢᱮᱱᱴ ᱥᱮ API ᱡᱚᱵᱟᱵ ᱯᱩᱨᱟᱹ ᱯᱟᱲᱦᱟᱣ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱵᱟᱲᱦᱟᱣ ᱢᱮ, ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱴᱚᱠᱮᱱ ᱟᱜ ᱢᱩᱞ ᱛᱮ। ᱠᱷᱚᱨᱪᱟ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ।"
         },
         "retrievalTopK": {
-          "label": "Knowledge passages per search",
-          "description": "How many passages one knowledge-base search returns to the agent.",
-          "help": "More passages give the agent more to work with but cost more tokens and can add noise. Fewer are faster and cheaper."
+          "label": "ᱠᱷᱚᱡᱮᱛ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱰᱟᱭ ᱴᱩᱠᱨᱟ",
+          "description": "ᱢᱤᱫ ᱵᱟᱰᱟᱭ ᱵᱷᱟᱱᱰᱟᱨ ᱠᱷᱚᱡᱮᱛ ᱫᱚ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱪᱮᱫ ᱴᱩᱠᱨᱟ ᱯᱷᱤᱨ ᱮᱢᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱴᱩᱠᱨᱟ ᱫᱚ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱥᱟᱢᱟᱱ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱲᱛᱤ ᱴᱚᱠᱮᱱ ᱠᱷᱚᱨᱪᱟ ᱟᱨ ᱥᱚᱨ ᱵᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱠᱚᱢ ᱴᱩᱠᱨᱟ ᱫᱚ ᱥᱮᱛᱟ ᱟᱨ ᱥᱚᱥᱛᱟ ᱠᱟᱱᱟ।"
         },
         "retrievalMinScore": {
-          "label": "Least relevance for a passage",
-          "description": "How relevant a knowledge passage must be to be returned. 0 returns every hit.",
-          "help": "Raise it if the agent quotes irrelevant passages. Too high and it may find nothing."
+          "label": "ᱢᱤᱫ ᱴᱩᱠᱨᱟ ᱟᱜ ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱥᱟᱸᱜᱤᱛ",
+          "description": "ᱢᱤᱫ ᱵᱟᱰᱟᱭ ᱴᱩᱠᱨᱟ ᱯᱷᱤᱨ ᱮᱢ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱥᱟᱸᱜᱤᱛ ᱞᱟᱹᱠᱛᱤ। 0 ᱫᱚ ᱥᱟᱱᱟᱢ ᱦᱤᱴ ᱯᱷᱤᱨ ᱮᱢᱟ।",
+          "help": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱵᱟᱝ ᱥᱟᱸᱜᱤᱛ ᱴᱩᱠᱨᱟ ᱠᱚ ᱢᱮᱱᱛᱮ ᱠᱷᱟᱱ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱟᱹᱰᱤ ᱵᱟᱲᱦᱟᱣ ᱠᱷᱟᱱ ᱚᱱᱟ ᱪᱮᱫᱽ ᱵᱟᱝ ᱧᱟᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
         },
         "continuationPasses": {
-          "label": "Extra passes after an unfinished reply",
-          "description": "How many more times the model is asked to carry on when its reply stopped at a step it announced but did not take.",
-          "help": "Raise it for agents that often announce a step and stop. Each extra pass costs a model call."
+          "label": "ᱵᱟᱝ ᱯᱩᱨᱟᱹ ᱡᱚᱵᱟᱵ ᱛᱟᱭᱚᱢ ᱥᱮᱞᱮᱫ ᱯᱟᱥ",
+          "description": "ᱢᱚᱰᱮᱞ ᱟᱜ ᱡᱚᱵᱟᱵ ᱛᱮᱞᱟ ᱥᱮᱞᱮᱫ ᱟᱠᱟᱱ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱝ ᱠᱟᱹᱢᱤ ᱟᱠᱟᱱ ᱯᱟᱦᱴᱟ ᱨᱮ ᱛᱟᱦᱮᱱ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱮᱫᱟ।",
+          "help": "ᱢᱤᱫ ᱯᱟᱦᱴᱟ ᱢᱮᱛ ᱠᱟᱛᱮ ᱛᱟᱦᱮᱱ ᱟᱠᱟᱱ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱥᱟᱱᱟᱢ ᱥᱮᱞᱮᱫ ᱯᱟᱥ ᱫᱚ ᱢᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱠᱷᱚᱨᱪᱟ ᱮᱫᱟ।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "Calls answered after the limit",
+          "description": "How many more tool calls the model may attempt after the turn's tool limit is used up. Each one is refused with a note to answer with what it has; past this number the turn is stopped with an error.",
+          "help": "Raise it if a model needs a few tries to stop calling tools. Lower it to end looping turns sooner. 0 stops the turn at the first call over the limit."
+        },
+        "supervisedDivisor": {
+          "label": "Supervised agents get 1/N of the tool limit",
+          "description": "A supervised agent gets the turn's tool-call limit divided by this number, but never less than the minimum below.",
+          "help": "Raise it to keep supervised agents on a shorter leash. 1 gives them the full limit."
+        },
+        "supervisedMinSteps": {
+          "label": "Least tool calls for a supervised agent",
+          "description": "The smallest tool-call limit a supervised agent gets, however high the number above is.",
+          "help": "Keep it at 3 or more so a supervised agent can still finish a simple job with several steps."
+        },
+        "autonomousMultiplier": {
+          "label": "Fully autonomous agents get N times the limit",
+          "description": "A fully autonomous agent gets the turn's tool-call limit multiplied by this number.",
+          "help": "Raise it for agents that run long jobs without a person watching; they can then spend more calls and money in one turn. 1 gives them the standard limit."
         }
       }
     },
     "approvals": {
       "continuation": {
         "enabled": {
-          "label": "Carry on after an approval",
-          "description": "When a person approves an action, the agent finishes the task by itself instead of waiting for a new message.",
-          "help": "Turn it off if you want every approved action to end the turn and be followed up manually."
+          "label": "ᱢᱚᱱᱡᱩᱨᱤ ᱛᱟᱭᱚᱢ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+          "description": "ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱠᱟᱹᱢᱤ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ, ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱟᱣᱟ ᱵᱷᱮᱡᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱝ ᱡᱚᱜᱟᱣ ᱠᱟᱛᱮ ᱟᱡᱼᱛᱮ ᱠᱟᱹᱢᱤ ᱪᱷᱚᱭᱟ।",
+          "help": "ᱥᱟᱱᱟᱢ ᱢᱚᱱᱡᱩᱨ ᱟᱠᱟᱱ ᱠᱟᱹᱢᱤ ᱴᱚᱨᱱ ᱪᱷᱚᱭ ᱟᱨ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱦᱟᱛ ᱛᱮ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ।"
         },
         "jobsContinueAfterDenial": {
-          "label": "Background jobs continue after a denial",
-          "description": "When a person denies an action in a background job, the job carries on with the denial noted instead of stopping.",
-          "help": "Leave it off if a denial should stop the job. Turn it on when the job can usually finish without the denied step."
+          "label": "ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱛᱟᱭᱚᱢ ᱦᱚᱸ ᱥᱚᱨᱮᱥ ᱡᱚᱵ ᱪᱟᱞᱟᱜᱼᱟ",
+          "description": "ᱥᱚᱨᱮᱥ ᱡᱚᱵ ᱨᱮ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱠᱟᱹᱢᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ, ᱡᱚᱵ ᱵᱚᱸᱫ ᱵᱟᱝ ᱦᱩᱭ, ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱚᱞ ᱠᱟᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ।",
+          "help": "ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱛᱮ ᱡᱚᱵ ᱵᱚᱸᱫ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱛᱟᱦᱮᱱᱟ ᱢᱮ। ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱯᱟᱦᱴᱟ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱡᱚᱵ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱛᱮ ᱪᱷᱚᱭ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱷᱟᱱ ᱪᱟᱹᱞᱩ ᱢᱮ।"
         }
       },
       "expiry": {
         "ttl": {
-          "label": "Approval requests expire after",
-          "description": "How long an approval request waits for a decision before it expires. 0 means requests never expire.",
-          "help": "With no expiry, forgotten requests stay open indefinitely and the agent keeps waiting. An expired request counts as not approved."
+          "label": "ᱢᱚᱱᱡᱩᱨᱤ ᱚᱱᱚᱠᱚᱞ ᱟᱜ ᱚᱠᱛᱚ ᱪᱷᱚᱭ",
+          "description": "ᱢᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱚᱱᱚᱠᱚᱞ ᱫᱚ ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱚᱠᱛᱚ ᱡᱚᱜᱟᱣᱟ। 0 ᱢᱮᱱᱛᱮ ᱚᱱᱚᱠᱚᱞ ᱟᱜ ᱚᱠᱛᱚ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱪᱷᱚᱭᱟ।",
+          "help": "ᱚᱠᱛᱚ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜ ᱛᱮ, ᱵᱷᱩᱞ ᱟᱠᱟᱱ ᱚᱱᱚᱠᱚᱞ ᱫᱚ ᱵᱟᱝ ᱥᱤᱢᱟ ᱚᱠᱛᱚ ᱠᱷᱩᱞᱟᱹ ᱛᱟᱦᱮᱱᱟ ᱟᱨ ᱮᱡᱮᱱᱴ ᱡᱚᱜᱟᱣ ᱛᱟᱦᱮᱱᱟ। ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱟᱠᱟᱱ ᱚᱱᱚᱠᱚᱞ ᱫᱚ ᱢᱚᱱᱡᱩᱨ ᱵᱟᱝ ᱦᱩᱭ ᱞᱮᱠᱟ ᱢᱟᱱᱟᱣ ᱦᱩᱭᱟ।"
         }
       }
     },
     "chat": {
       "finish": {
         "enabled": {
-          "label": "Finish cut-off replies",
-          "description": "When a reply is cut off by the model's length limit or ends in a broken tool call, ask the model to carry on or retry.",
-          "help": "Turn it off only to diagnose a model problem; people then see cut-off replies as they are."
+          "label": "ᱠᱟᱴᱟ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱯᱩᱨᱟᱹ ᱢᱮ",
+          "description": "ᱢᱚᱰᱮᱞ ᱟᱜ ᱞᱚᱸᱜᱚ ᱥᱤᱢᱟ ᱡᱚᱵᱟᱵ ᱠᱟᱴᱟ ᱠᱷᱟᱱ ᱥᱮ ᱵᱷᱩᱞ ᱴᱩᱞ ᱠᱚᱞ ᱨᱮ ᱪᱷᱚᱭ ᱠᱷᱟᱱ, ᱢᱚᱰᱮᱞ ᱠᱚ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱥᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱢᱮ।",
+          "help": "ᱱᱚᱶᱟ ᱠᱷᱟᱞᱤ ᱢᱚᱰᱮᱞ ᱟᱜ ᱥᱚᱢᱥᱭᱟ ᱪᱤᱱᱦᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱸᱫ ᱢᱮ; ᱚᱱᱟ ᱚᱠᱛᱚ ᱢᱟᱱᱩᱸ ᱠᱚ ᱠᱟᱴᱟ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱚᱱᱟ ᱞᱮᱠᱟ ᱜᱮ ᱧᱮᱞᱚᱜᱼᱟ।"
         },
         "maxContinuations": {
-          "label": "Most continuations of a cut-off reply",
-          "description": "How many times the model is asked to carry on after its reply was cut off.",
-          "help": "Each continuation is another model call. Raise it for long answers, lower it to save cost."
+          "label": "ᱠᱟᱴᱟ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱟᱜ ᱵᱟᱲᱛᱤ ᱞᱟᱜᱟᱛᱟᱨ",
+          "description": "ᱡᱚᱵᱟᱵ ᱠᱟᱴᱟ ᱛᱟᱭᱚᱢ ᱢᱚᱰᱮᱞ ᱠᱚ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱮᱫᱟ।",
+          "help": "ᱥᱟᱱᱟᱢ ᱞᱟᱜᱟᱛᱟᱨ ᱫᱚ ᱮᱴᱟᱜ ᱢᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱠᱟᱱᱟ। ᱞᱟᱢᱟ ᱡᱚᱵᱟᱵ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ, ᱠᱷᱚᱨᱪᱟ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ।"
         },
         "maxToolCallRetries": {
-          "label": "Most retries of a broken tool call",
-          "description": "How many times the model is asked to repeat a tool call that arrived with unusable arguments.",
-          "help": "A retry costs a model call. 0 gives up at the first broken call."
+          "label": "ᱵᱷᱩᱞ ᱴᱩᱞ ᱠᱚᱞ ᱟᱜ ᱵᱟᱲᱛᱤ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ",
+          "description": "ᱵᱮᱵᱷᱟᱨ ᱵᱟᱝ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱥᱟᱶ ᱟᱹᱜᱩ ᱴᱩᱞ ᱠᱚᱞ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱢᱮᱛ ᱮᱫᱟ।",
+          "help": "ᱢᱤᱫ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱫᱚ ᱢᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱠᱷᱚᱨᱪᱟ ᱮᱫᱟ। 0 ᱫᱚ ᱢᱟᱲᱟᱝ ᱵᱷᱩᱞ ᱠᱚᱞ ᱨᱮ ᱜᱮ ᱦᱟᱨ ᱢᱟᱱᱟᱣᱟ।"
         }
       },
       "retry": {
         "maxAttempts": {
-          "label": "Attempts per model call",
-          "description": "How many times a model call is tried when the provider fails or is busy, including the first try.",
-          "help": "More attempts hide short provider outages but make a failing request slower to report an error."
+          "label": "ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱥᱟᱱᱟᱢ ᱨᱮ ᱪᱮᱥᱴᱟ",
+          "description": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱵᱟᱭᱡᱷᱮᱛ ᱥᱮ ᱵᱷᱮᱜᱟᱨ ᱠᱷᱟᱱ, ᱢᱟᱲᱟᱝ ᱪᱮᱥᱴᱟ ᱥᱟᱶ, ᱢᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱪᱮᱥᱴᱟ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱪᱮᱥᱴᱟ ᱫᱚ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱪᱷᱚᱴᱚ ᱵᱟᱫᱷᱟ ᱠᱚ ᱞᱩᱠᱟᱣᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱭᱡᱷᱮᱛ ᱚᱱᱚᱠᱚᱞ ᱨᱮ ᱵᱷᱩᱞ ᱧᱮᱞᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱚᱠᱛᱚ ᱞᱟᱜᱟᱣᱟ।"
         }
       },
       "cache": {
         "eligibleWithTools": {
-          "label": "Reuse replies for agents with tools",
-          "description": "Allow stored replies to be reused for agents that have tools. Off by default because a tool may return something different next time.",
-          "help": "Turn it on only when the tools are read-only and slow-changing, and you want faster, cheaper repeat answers. People may see an answer that is not current."
+          "label": "ᱴᱩᱞ ᱛᱟᱦᱮᱱ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱢᱮ",
+          "description": "ᱴᱩᱞ ᱛᱟᱦᱮᱱ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱛᱟᱣ ᱮᱢ ᱢᱮ। ᱴᱩᱞ ᱛᱟᱭᱚᱢ ᱵᱟᱨ ᱮᱴᱟᱜ ᱪᱮᱫ ᱯᱷᱤᱨ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱵᱚᱸᱫ।",
+          "help": "ᱴᱩᱞ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ-ᱞᱟᱹᱜᱤᱫ ᱟᱨ ᱥᱮᱛᱟ ᱵᱚᱫᱚᱞ ᱠᱷᱟᱱ, ᱟᱨ ᱟᱢ ᱥᱮᱛᱟ, ᱥᱚᱥᱛᱟ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱡᱚᱵᱟᱵ ᱪᱟᱦᱟᱭ ᱠᱷᱟᱱ ᱜᱮ ᱪᱟᱹᱞᱩ ᱢᱮ। ᱢᱟᱱᱩᱸ ᱠᱚ ᱵᱟᱝ ᱱᱟᱣᱟ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
         },
         "contextTurns": {
-          "label": "Earlier turns that identify a repeat",
-          "description": "How many earlier turns are compared when deciding whether a message is a repeat that can reuse a stored reply.",
-          "help": "More turns make a match stricter and cache hits rarer."
+          "label": "ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱪᱤᱱᱦᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱢᱟᱲᱟᱝ ᱴᱚᱨᱱ",
+          "description": "ᱢᱤᱫ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱠᱟᱱᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱴᱷᱤᱠ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱢᱟᱲᱟᱝ ᱴᱚᱨᱱ ᱠᱚ ᱪᱷᱟᱸᱪᱚ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱴᱚᱨᱱ ᱫᱚ ᱢᱤᱞᱟᱣ ᱠᱟᱲᱟ ᱟᱨ ᱠᱮᱥ ᱦᱤᱴ ᱠᱚᱢ ᱮᱫᱟ।"
         }
       },
       "followUp": {
         "stickyToolsEnabled": {
-          "label": "Keep tools on offer in follow-ups",
-          "description": "Keep offering the tools the conversation already used when the next message is a short follow-up.",
-          "help": "Turn it off if short replies such as 'yes' should start from the normal tool selection."
+          "label": "ᱯᱷᱚᱞᱚ-ᱟᱯ ᱨᱮ ᱴᱩᱞ ᱥᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱᱟ ᱢᱮ",
+          "description": "ᱛᱟᱭᱚᱢ ᱵᱷᱮᱡᱟᱣ ᱪᱷᱚᱴᱚ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱦᱩᱭ ᱠᱷᱟᱱ, ᱵᱟᱛ ᱪᱤᱛ ᱫᱚ ᱫᱚᱦᱚᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱴᱩᱞ ᱥᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+          "help": "\"ᱦᱚᱭ\" ᱞᱮᱠᱟ ᱪᱷᱚᱴᱚ ᱡᱚᱵᱟᱵ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱴᱩᱞ ᱵᱟᱪᱷᱟᱣ ᱠᱷᱚᱱ ᱮᱦᱚᱵ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ।"
         },
         "stickyToolsWindow": {
-          "label": "How long follow-up tools stay on offer",
-          "description": "How long after use a tool stays on offer for short follow-up messages.",
-          "help": "A longer window helps long working sessions, a shorter one keeps the tool list small."
+          "label": "ᱯᱷᱚᱞᱚ-ᱟᱯ ᱴᱩᱞ ᱪᱮᱫ ᱚᱠᱛᱚ ᱥᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱᱟ",
+          "description": "ᱵᱮᱵᱷᱟᱨ ᱛᱟᱭᱚᱢ ᱪᱷᱚᱴᱚ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱵᱷᱮᱡᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱴᱩᱞ ᱪᱮᱫ ᱚᱠᱛᱚ ᱥᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱᱟ।",
+          "help": "ᱞᱟᱢᱟ ᱤᱱᱰᱚ ᱫᱚ ᱞᱟᱢᱟ ᱠᱟᱹᱢᱤ ᱥᱮᱥᱚᱱ ᱨᱮ ᱜᱚᱲᱚ ᱮᱫᱟ, ᱪᱷᱚᱴᱚ ᱫᱚ ᱴᱩᱞ ᱞᱮᱠᱟ ᱪᱷᱚᱴᱚ ᱛᱟᱦᱮᱱ ᱮᱫᱟ।"
+        },
+        "maxStickyTools": {
+          "label": "Most tools kept on offer in follow-ups",
+          "description": "The most tools carried over into a short follow-up message. 0 keeps none.",
+          "help": "A higher number helps when a task uses many tools, a lower one keeps the tool list small."
+        },
+        "keepPrimaryModel": {
+          "label": "Keep the main model for follow-ups",
+          "description": "A short follow-up in a conversation that already used tools stays on the agent's main model instead of the cheaper one.",
+          "help": "Turn it off to let cost routing send follow-ups such as 'yes' to the cheaper model, at the risk of weaker handling of a task in progress."
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "How alike a question must be to reuse an answer",
+          "description": "For agents that reuse answers to similar questions: how close a new question must be to an earlier one, from 0.85 to 1, for the stored answer to be served.",
+          "help": "A lower number serves more repeats but risks giving an answer meant for a different question. Keep it high when wrong answers are costly. An answer is only reused for the person it was given to."
+        },
+        "ttl": {
+          "label": "How long a reusable answer is kept",
+          "description": "How long a stored answer can be served to a similar question before it is dropped.",
+          "help": "Shorten it when your answers go out of date quickly."
+        },
+        "maxEntriesPerAgent": {
+          "label": "Most stored answers per agent",
+          "description": "How many answers one agent keeps for reuse. The oldest are dropped beyond this.",
+          "help": "A larger store finds more repeats and uses more storage."
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "Keep a record of tool calls in the conversation",
+          "description": "Store a short record of each turn's tool calls with the conversation, so later turns can see what was done.",
+          "help": "Turn it off to keep conversation history text-only; the agent then cannot tell what its tools did in earlier turns. This applies to the whole workspace."
+        },
+        "replayEnabled": {
+          "label": "Show the tool record to the model",
+          "description": "Include the stored record of earlier tool calls when the model is given the conversation.",
+          "help": "Turn it off to keep storing the record without using any of the model's working space for it."
+        },
+        "replayTurns": {
+          "label": "Earlier turns whose tool record is shown",
+          "description": "How many of the most recent turns that used tools have their record shown to the model.",
+          "help": "A larger number helps in long working sessions but uses more of the model's working space."
+        },
+        "maxEntriesPerTurn": {
+          "label": "Tool calls listed per turn",
+          "description": "How many of one turn's tool calls are written into the record. Further calls are only counted.",
+          "help": "Raise it for turns that make many calls and need every one remembered."
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "Longest tool record per turn",
+          "description": "How many characters of one turn's record are shown to the model; the rest is counted, not listed.",
+          "help": "Lower it to save cost on every later turn, raise it to keep more detail."
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "Largest image upload (MB)",
+          "description": "The biggest image a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
+          "help": "Raise it for photos and screenshots; large files are slower to send and use more of the model's allowance."
+        },
+        "maxAudioMb": {
+          "label": "Largest audio upload (MB)",
+          "description": "The biggest audio file a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
+          "help": "Raise it for longer recordings; large files are slower to send and use more of the model's allowance."
+        },
+        "maxVideoMb": {
+          "label": "Largest video upload (MB)",
+          "description": "The biggest video a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
+          "help": "Raise it for longer clips; large files are slower to send and use more of the model's allowance."
+        },
+        "maxDocumentMb": {
+          "label": "Largest document upload (MB)",
+          "description": "The biggest document or spreadsheet a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
+          "help": "Raise it for long reports and large data files; large files are slower to process."
         }
       },
       "continuation": {
         "heuristicEnabled": {
-          "label": "Nudge on unfinished wording",
-          "description": "Ask the model to carry on when a reply sounds as if it stopped before doing what it said it would.",
-          "help": "Turn it off if the nudges trigger on replies that were meant to end."
+          "label": "ᱵᱟᱝ ᱯᱩᱨᱟᱹ ᱥᱟᱵᱟᱫ ᱨᱮ ᱡᱟᱹᱱᱟᱹᱨᱤ",
+          "description": "ᱡᱚᱵᱟᱵ ᱫᱚ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱢᱮᱱ ᱞᱮᱱᱟ ᱚᱱᱟ ᱵᱟᱝ ᱪᱷᱚᱭ ᱠᱟᱛᱮ ᱛᱟᱦᱮᱱ ᱞᱮᱠᱟ ᱧᱮᱞ ᱠᱷᱟᱱ ᱢᱚᱰᱮᱞ ᱠᱚ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱢᱮ।",
+          "help": "ᱚᱱᱚᱸ ᱨᱮ ᱜᱮ ᱪᱷᱚᱭ ᱞᱟᱹᱠᱛᱤ ᱛᱟᱦᱮᱱ ᱡᱚᱵᱟᱵ ᱨᱮ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱥᱠᱨᱤᱭ ᱦᱩᱭ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ।"
         }
       },
       "toolLoop": {
         "resultClearing": {
           "enabled": {
-            "label": "Clear old tool results",
-            "description": "In a long tool run, replace older tool results with a short placeholder so the conversation stays within the model's limit.",
-            "help": "Turn it off if the agent must see every earlier result; long runs may then hit the model's size limit."
+            "label": "ᱯᱩᱨᱟᱹᱱᱤ ᱴᱩᱞ ᱯᱷᱚᱞ ᱥᱟᱯᱷᱟ ᱢᱮ",
+            "description": "ᱞᱟᱢᱟ ᱴᱩᱞ ᱨᱚᱱ ᱨᱮ, ᱵᱟᱛ ᱪᱤᱛ ᱠᱚ ᱢᱚᱰᱮᱞ ᱟᱜ ᱥᱤᱢᱟ ᱛᱟᱞᱟ ᱨᱮ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱯᱩᱨᱟᱹᱱᱤ ᱴᱩᱞ ᱯᱷᱚᱞ ᱠᱚ ᱢᱤᱫ ᱪᱷᱚᱴᱚ ᱯᱞᱮᱥᱦᱚᱞᱰᱟᱨ ᱥᱟᱶ ᱵᱚᱫᱚᱞ ᱢᱮ।",
+            "help": "ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱡᱷᱚᱛᱚ ᱢᱟᱲᱟᱝ ᱯᱷᱚᱞ ᱧᱮᱞ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ; ᱞᱟᱢᱟ ᱨᱚᱱ ᱚᱠᱛᱚ ᱢᱚᱰᱮᱞ ᱟᱜ ᱞᱚᱸᱜᱚ ᱥᱤᱢᱟ ᱨᱮ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
           },
           "thresholdChars": {
-            "label": "Size that triggers clearing",
-            "description": "How large the tool results in a turn may grow before older ones are cleared.",
-            "help": "Raise it to keep more results visible, lower it to keep long runs small and cheap."
+            "label": "ᱥᱟᱯᱷᱟ ᱮᱦᱚᱵ ᱟᱜ ᱞᱚᱸᱜᱚ",
+            "description": "ᱯᱩᱨᱟᱹᱱᱤ ᱥᱟᱯᱷᱟ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱢᱤᱫ ᱴᱚᱨᱱ ᱟᱜ ᱴᱩᱞ ᱯᱷᱚᱞ ᱪᱮᱫ ᱞᱟᱢᱟ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+            "help": "ᱵᱟᱲᱛᱤ ᱯᱷᱚᱞ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ, ᱞᱟᱢᱟ ᱨᱚᱱ ᱪᱷᱚᱴᱚ ᱟᱨ ᱥᱚᱥᱛᱟ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ।"
           }
         }
       }
@@ -14831,119 +14938,158 @@
     "routing": {
       "simple": {
         "maxChars": {
-          "label": "Longest simple message",
-          "description": "A message longer than this is never treated as simple. Simple messages can go to a faster, cheaper model.",
-          "help": "Lower it to send more messages to the main model for quality; raise it to save cost."
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱥᱟᱸᱜᱤᱛ ᱵᱷᱮᱡᱟᱣ",
+          "description": "ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱞᱟᱢᱟ ᱵᱷᱮᱡᱟᱣ ᱠᱚ ᱛᱟᱠᱠᱟᱣ ᱥᱟᱸᱜᱤᱛ ᱵᱟᱝ ᱢᱟᱱᱟᱣᱟ। ᱥᱟᱸᱜᱤᱛ ᱵᱷᱮᱡᱟᱣ ᱫᱚ ᱥᱮᱛᱟ, ᱥᱚᱥᱛᱟ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱜᱩᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱵᱷᱮᱡᱟᱣ ᱢᱩᱞ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ; ᱠᱷᱚᱨᱪᱟ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ।"
         },
         "maxClauses": {
-          "label": "Most sentences in a simple message",
-          "description": "A message with more sentences than this is never treated as simple.",
-          "help": "Lower it to send more messages to the main model for quality."
+          "label": "ᱢᱤᱫ ᱥᱟᱸᱜᱤᱛ ᱵᱷᱮᱡᱟᱣ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱵᱟᱠᱭᱟ",
+          "description": "ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱵᱟᱠᱭᱟ ᱛᱟᱦᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱠᱚ ᱛᱟᱠᱠᱟᱣ ᱥᱟᱸᱜᱤᱛ ᱵᱟᱝ ᱢᱟᱱᱟᱣᱟ।",
+          "help": "ᱜᱩᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱵᱷᱮᱡᱟᱣ ᱢᱩᱞ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ।"
         }
       }
     },
     "memory": {
       "recall": {
         "agentTopK": {
-          "label": "Agent memories recalled per turn",
-          "description": "How many of the agent's own memories are looked up for each message.",
-          "help": "More memories give more context but use more tokens."
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱟᱠᱟᱱ ᱮᱡᱮᱱᱴ ᱢᱮᱢᱚᱨᱤ",
+          "description": "ᱵᱷᱮᱡᱟᱣ ᱥᱟᱱᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱢᱮᱢᱚᱨᱤ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱪᱮᱫ ᱠᱚ ᱧᱮᱞ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱢᱮᱢᱚᱨᱤ ᱫᱚ ᱵᱟᱲᱛᱤ ᱥᱟᱸᱥᱟᱨ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱲᱛᱤ ᱴᱚᱠᱮᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
         },
         "tenantTopK": {
-          "label": "Shared memories recalled per turn",
-          "description": "How many memories shared across the workspace are looked up for each message.",
-          "help": "More memories give more context but use more tokens."
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱟᱠᱟᱱ ᱛᱮᱦᱮᱸ ᱢᱮᱢᱚᱨᱤ",
+          "description": "ᱵᱷᱮᱡᱟᱣ ᱥᱟᱱᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱛᱮᱦᱮᱸ ᱟᱠᱟᱱ ᱢᱮᱢᱚᱨᱤ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱪᱮᱫ ᱠᱚ ᱧᱮᱞ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱢᱮᱢᱚᱨᱤ ᱫᱚ ᱵᱟᱲᱛᱤ ᱥᱟᱸᱥᱟᱨ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱲᱛᱤ ᱴᱚᱠᱮᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
         }
       },
       "agent": {
         "maxMemories": {
-          "label": "Most memories per agent",
-          "description": "How many memories one agent may keep. The oldest and least used are dropped beyond this.",
-          "help": "Raise it for assistants that should remember a lot about people; this also raises storage and recall cost."
+          "label": "ᱮᱡᱮᱱᱴ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱢᱮᱢᱚᱨᱤ",
+          "description": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱪᱮᱫ ᱢᱮᱢᱚᱨᱤ ᱛᱟᱦᱮᱱ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱦᱩᱭ ᱠᱷᱟᱱ ᱡᱷᱚᱛᱚ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ ᱟᱨ ᱠᱚᱢ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱠᱚ ᱵᱟᱛᱼᱟᱣ ᱟᱠᱚᱜᱼᱟ।",
+          "help": "ᱢᱟᱱᱩᱸ ᱨᱮᱭᱟᱜ ᱵᱟᱲᱛᱤ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱞᱟᱹᱠᱛᱤ ᱜᱚᱲᱚᱭᱤᱭᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱱᱚᱶᱟ ᱥᱟᱸᱪᱟᱣ ᱟᱨ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱠᱷᱚᱨᱪᱟ ᱦᱚᱸ ᱵᱟᱲᱦᱟᱣᱟ।"
+        }
+      },
+      "tenant": {
+        "maxMemories": {
+          "label": "Most shared memories",
+          "description": "How many memories shared across the workspace are kept. The oldest are dropped beyond this.",
+          "help": "Raise it for large teams that rely on shared knowledge; it also raises storage and recall cost. This applies to the whole workspace."
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "Memories given to on-device chat",
+          "description": "How many memories are handed to an on-device session when it starts.",
+          "help": "On-device models have a small working space, so keep this low."
         }
       },
       "graph": {
         "recallMaxFacts": {
-          "label": "Facts recalled from graph memory",
-          "description": "The most facts an agent is shown from its relationship memory in one lookup.",
-          "help": "More facts give the agent more background about a person or topic but use more of its working space. Fewer keep answers focused. Set it for the whole workspace, or for one agent that needs more or less."
+          "label": "ᱜᱨᱟᱯᱷ ᱢᱮᱢᱚᱨᱤ ᱠᱷᱚᱱ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱟᱠᱟᱱ ᱛᱷᱚᱠ",
+          "description": "ᱢᱤᱫ ᱞᱩᱠᱟᱯ ᱨᱮ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱚᱱᱟ ᱟᱜ ᱥᱚᱵᱟᱱᱫᱷ ᱢᱮᱢᱚᱨᱤ ᱠᱷᱚᱱ ᱧᱮᱞᱟᱹ ᱟᱠᱟᱱ ᱵᱟᱲᱛᱤ ᱛᱮ ᱛᱷᱚᱠ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱛᱷᱚᱠ ᱫᱚ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱥᱮ ᱵᱤᱥᱚᱭ ᱟᱜ ᱵᱟᱲᱛᱤ ᱥᱚᱨᱮᱥ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱚᱱᱟ ᱟᱜ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱸᱣ ᱟᱜ ᱵᱟᱲᱛᱤ ᱵᱷᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ। ᱠᱚᱢ ᱛᱷᱚᱠ ᱫᱚ ᱡᱚᱵᱟᱵ ᱠᱚ ᱢᱤᱫ ᱴᱷᱟᱸᱣ ᱨᱮ ᱛᱟᱦᱮᱱ ᱮᱫᱟ। ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ, ᱥᱮ ᱵᱟᱲᱛᱤ ᱥᱮ ᱠᱚᱢ ᱞᱟᱹᱠᱛᱤ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱢᱮ।"
         },
         "recallMaxPaths": {
-          "label": "Graph paths read per lookup",
-          "description": "How many connections in the memory graph are read to find the facts for one lookup.",
-          "help": "Several connections can lead to the same fact, so densely linked memories may need a higher number to find everything. A higher number makes each lookup slower."
+          "label": "ᱞᱩᱠᱟᱯ ᱥᱟᱱᱟᱢ ᱨᱮ ᱯᱟᱲᱦᱟᱣ ᱟᱠᱟᱱ ᱜᱨᱟᱯᱷ ᱨᱟᱥᱛᱟ",
+          "description": "ᱢᱤᱫ ᱞᱩᱠᱟᱯ ᱟᱜ ᱛᱷᱚᱠ ᱠᱷᱚᱡ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱢᱚᱨᱤ ᱜᱨᱟᱯᱷ ᱟᱜ ᱪᱮᱫ ᱡᱚᱰᱟᱣ ᱠᱚ ᱯᱟᱲᱦᱟᱣ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱡᱚᱰᱟᱣ ᱫᱚ ᱢᱤᱫ ᱛᱷᱚᱠ ᱥᱮᱱ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱜᱷᱟᱱᱟ ᱡᱚᱰᱟᱣ ᱟᱠᱟᱱ ᱢᱮᱢᱚᱨᱤ ᱨᱮ ᱡᱷᱚᱛᱚ ᱠᱷᱚᱡ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱜᱚᱱᱚᱝ ᱞᱟᱹᱠᱛᱤ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱟᱲᱛᱤ ᱜᱚᱱᱚᱝ ᱫᱚ ᱥᱟᱱᱟᱢ ᱞᱩᱠᱟᱯ ᱥᱮᱛᱟ ᱮᱫᱟ।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "Most skills listed in the prompt",
+          "description": "How many of your skills are named in the agent's instructions so it knows they exist. The rest are counted, not listed.",
+          "help": "Raise it if you have many skills; each listed skill uses a little of the model's working space on every turn. This applies to the whole workspace."
+        },
+        "maxBlockChars": {
+          "label": "Size of the skills list in the prompt",
+          "description": "How many characters the list of skills may take in the agent's instructions. When it is full, later skills are shortened to their names.",
+          "help": "Raise it to keep descriptions for more skills, lower it to save tokens on every turn. This applies to the whole workspace."
         }
       }
     },
     "aux": {
       "useAgentModel": {
-        "label": "Background calls use the agent's model",
-        "description": "Summaries, assists and context compaction use the same model as the agent they work for, when no model is chosen for them.",
-        "help": "Turn it off to let the platform choose a model for these calls, which may be cheaper or a different provider."
+        "label": "ᱥᱚᱨᱮᱥ ᱠᱚᱞ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱢᱚᱰᱮᱞ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ",
+        "description": "ᱚᱱᱟ ᱠᱚ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱢᱚᱰᱮᱞ ᱵᱟᱪᱷᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱠᱷᱟᱱ, ᱥᱟᱨ, ᱜᱚᱲᱚ ᱟᱨ ᱥᱟᱸᱥᱟᱨ ᱠᱚᱢᱯᱨᱮᱥᱚᱱ ᱫᱚ ᱚᱱᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱶ ᱜᱮ ᱢᱚᱰᱮᱞ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ ᱡᱟᱹᱭᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱠᱟᱹᱢᱤ ᱮᱫᱟ।",
+        "help": "ᱱᱚᱶᱟ ᱠᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱢᱚᱰᱮᱞ ᱵᱟᱪᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ, ᱡᱟᱦᱟᱸ ᱥᱚᱥᱛᱟ ᱥᱮ ᱮᱴᱟᱜ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
       }
     },
     "guardrails": {
       "failMode": {
-        "label": "When a safety check breaks",
-        "description": "What happens when a safety check itself fails, for example the judge model is down. Closed refuses the action; open lets it through.",
-        "help": "You can only make this stricter than the platform setting. Closed protects against someone making a check fail on purpose, at the price of refusing work during an outage.",
+        "label": "ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ",
+        "description": "ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱟᱡ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ ᱪᱮᱫ ᱦᱩᱭᱟ, ᱱᱢᱩᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱢᱚᱰᱮᱞ ᱵᱚᱸᱫ ᱛᱟᱦᱮᱱ ᱠᱷᱟᱱ। ᱵᱚᱸᱫ ᱫᱚ ᱠᱟᱹᱢᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱫᱟ; ᱠᱷᱩᱞᱟᱹ ᱫᱚ ᱚᱱᱟ ᱠᱚ ᱯᱟᱨ ᱦᱩᱭ ᱮᱢᱟ।",
+        "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴᱤᱝ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱚᱸᱫ ᱫᱚ ᱪᱮᱫ ᱠᱚ ᱡᱟᱹᱱᱟᱹᱜ ᱛᱮ ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱮᱫᱟ ᱚᱱᱟ ᱵᱷᱮᱛᱟ ᱥᱩᱨᱠᱷᱟ ᱮᱢᱟ, ᱵᱷᱮᱜᱟᱨ ᱚᱠᱛᱚ ᱠᱟᱹᱢᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱫᱟ ᱚᱱᱟ ᱟᱜ ᱢᱩᱞ ᱛᱮ।",
         "options": {
-          "open": "Open: let the action through",
-          "closed": "Closed: refuse the action"
+          "open": "ᱠᱷᱩᱞᱟᱹ: ᱠᱟᱹᱢᱤ ᱯᱟᱨ ᱦᱩᱭ ᱮᱢ ᱢᱮ",
+          "closed": "ᱵᱚᱸᱫ: ᱠᱟᱹᱢᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱢᱮ"
         }
       },
       "toolVerifier": {
         "failMode": {
-          "label": "When the tool-call check breaks",
-          "description": "What the check that reviews risky tool calls does when it cannot give a verdict. Inherit follows the setting for safety checks above.",
-          "help": "You can only make this stricter than the platform setting. Closed refuses the tool call if the check fails.",
+          "label": "ᱴᱩᱞ-ᱠᱚᱞ ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ",
+          "description": "ᱡᱷᱩᱠᱤ ᱴᱩᱞ ᱠᱚᱞ ᱪᱮᱠ ᱮᱫᱟ ᱚᱱᱟ ᱪᱮᱠ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱵᱟᱝ ᱮᱢ ᱫᱟᱲᱮ ᱠᱷᱟᱱ ᱪᱮᱫ ᱦᱩᱭᱟ। ᱤᱫᱷᱤᱛ ᱫᱚ ᱛᱟᱞᱟ ᱨᱮᱭᱟᱜ ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱥᱮᱴᱤᱝ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।",
+          "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴᱤᱝ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ ᱵᱚᱸᱫ ᱫᱚ ᱴᱩᱞ ᱠᱚᱞ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱫᱟ।",
           "options": {
-            "open": "Open: let the tool call through",
-            "inherit": "Follow the safety-check setting",
-            "closed": "Closed: refuse the tool call"
+            "open": "ᱠᱷᱩᱞᱟᱹ: ᱴᱩᱞ ᱠᱚᱞ ᱯᱟᱨ ᱦᱩᱭ ᱮᱢ ᱢᱮ",
+            "inherit": "ᱥᱩᱨᱠᱷᱟ-ᱪᱮᱠ ᱥᱮᱴᱤᱝ ᱢᱟᱱᱟᱣ ᱢᱮ",
+            "closed": "ᱵᱚᱸᱫ: ᱴᱩᱞ ᱠᱚᱞ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱢᱮ"
           }
         }
       },
       "toxicity": {
         "blockScore": {
-          "label": "Toxicity score that blocks",
-          "description": "Content scoring at or above this on the judge's 0 to 100 toxicity scale is blocked. A lower number blocks more.",
-          "help": "You can only lower this, never raise it above the platform value. A very low value blocks ordinary frank wording."
+          "label": "ᱨᱩᱠᱷᱤᱭᱟ ᱟᱜ ᱵᱤᱥ ᱥᱠᱳᱨ",
+          "description": "ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱟᱜ 0 ᱠᱷᱚᱱ 100 ᱵᱤᱥ ᱢᱟᱯ ᱨᱮ ᱱᱚᱶᱟ ᱥᱮ ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱥᱠᱳᱨ ᱧᱟᱢ ᱟᱠᱟᱱ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱨᱩᱠᱷᱤᱭᱟ ᱦᱩᱭᱟ। ᱠᱚᱢ ᱜᱚᱱᱚᱝ ᱫᱚ ᱵᱟᱲᱛᱤ ᱨᱩᱠᱷᱤᱭᱟ ᱮᱫᱟ।",
+          "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱷᱟᱞᱤ ᱠᱚᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱪᱮᱛᱟᱱ ᱛᱮ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱵᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱟᱹᱰᱤ ᱠᱚᱢ ᱢᱟᱱ ᱫᱚ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱥᱟᱯᱷᱟ ᱥᱟᱵᱟᱫ ᱠᱚ ᱦᱚᱸ ᱨᱩᱠᱷᱤᱭᱟ ᱮᱫᱟ।"
         }
       },
       "jailbreak": {
         "maxScannedChars": {
-          "label": "Text scanned for jailbreak attempts",
-          "description": "How much of a message or reply is scanned for jailbreak patterns. Text beyond it is not scanned.",
-          "help": "You can only raise this above the platform value. A wider window stops attacks hidden behind padding at the cost of a little more processing."
+          "label": "ᱡᱮᱞᱵᱨᱮᱠ ᱪᱮᱥᱴᱟ ᱞᱟᱹᱜᱤᱫ ᱥᱠᱮᱱ ᱟᱠᱟᱱ ᱚᱞ",
+          "description": "ᱡᱮᱞᱵᱨᱮᱠ ᱯᱮᱴᱟᱨᱱ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱵᱷᱮᱡᱟᱣ ᱥᱮ ᱡᱚᱵᱟᱵ ᱟᱜ ᱪᱮᱫ ᱵᱷᱟᱜ ᱥᱠᱮᱱ ᱦᱩᱭᱟ। ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱚᱞ ᱥᱠᱮᱱ ᱵᱟᱝ ᱦᱩᱭᱟ।",
+          "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱪᱮᱛᱟᱱ ᱛᱮ ᱵᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱟᱲᱛᱤ ᱨᱟᱯᱟ ᱤᱱᱰᱚ ᱫᱚ ᱯᱮᱰᱤᱝ ᱛᱟᱭᱚᱢ ᱞᱩᱠᱟᱣ ᱟᱠᱟᱱ ᱟᱠᱨᱚᱢᱚᱬ ᱠᱚ ᱨᱩᱠᱷᱤᱭᱟ ᱮᱫᱟ, ᱠᱚᱢ ᱵᱟᱲᱛᱤ ᱯᱨᱚᱥᱮᱥᱤᱝ ᱟᱜ ᱢᱩᱞ ᱛᱮ।"
         }
       },
       "judge": {
         "maxInputChars": {
-          "label": "Text shown to the safety judge",
-          "description": "How much of the checked text the AI safety judges read. Text beyond it is not judged.",
-          "help": "You can only raise this above the platform value. Raising it judges long tool results in full but makes each judge call larger."
+          "label": "ᱥᱩᱨᱠᱷᱟ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱥᱮᱱ ᱧᱮᱞᱟᱹ ᱟᱠᱟᱱ ᱚᱞ",
+          "description": "ᱪᱮᱠ ᱟᱠᱟᱱ ᱚᱞ ᱟᱜ ᱪᱮᱫ ᱵᱷᱟᱜ AI ᱥᱩᱨᱠᱷᱟ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱯᱟᱲᱦᱟᱣᱟ। ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱚᱞ ᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱵᱟᱝ ᱦᱩᱭᱟ।",
+          "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱪᱮᱛᱟᱱ ᱛᱮ ᱵᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱟᱲᱦᱟᱣ ᱫᱚ ᱞᱟᱢᱟ ᱴᱩᱞ ᱯᱷᱚᱞ ᱠᱚ ᱯᱩᱨᱟᱹ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱠᱚᱞ ᱪᱚᱲᱚ ᱦᱩᱭᱟ।"
+        }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "Supervised agents and read-only tools",
+          "description": "Whether an agent on the Supervised autonomy tier still asks you before a tool that only reads, such as a search or a lookup. Writes, sends and tools the platform has not classified always ask.",
+          "help": "You can only make this stricter than the platform setting. Asking every time is the safest choice; letting read-only tools run removes a prompt but also a chance to stop a search you did not expect. An agent that can read private data, take in untrusted content and send data out is asked about every call whatever this says.",
+          "options": {
+            "auto-allow": "Let read-only tools run without asking",
+            "gate": "Ask before every tool call"
+          }
         }
       }
     },
     "quality": {
       "judge": {
         "model": {
-          "label": "Model for the AI judge",
-          "description": "The model used to judge evaluation runs. Leave blank to let the platform choose from what your workspace already uses.",
-          "help": "Use a stronger model for more reliable grades or a cheaper one to save cost. The model must be available on your connected provider."
+          "label": "AI ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱰᱮᱞ",
+          "description": "ᱢᱩᱞᱭᱟᱸᱠᱚᱱ ᱨᱚᱱ ᱠᱚ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱜᱤᱫ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱢᱚᱰᱮᱞ। ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱫᱚᱦᱚᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱢᱚᱰᱮᱞ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱵᱟᱪᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱟᱞᱤ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+          "help": "ᱞᱟᱢᱟ ᱵᱷᱚᱨᱚᱥᱟ ᱟᱜ ᱜᱨᱮᱰ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱞᱟᱜᱩ ᱢᱚᱰᱮᱞ ᱥᱮ ᱠᱷᱚᱨᱪᱟ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱥᱚᱥᱛᱟ ᱢᱚᱰᱮᱞ ᱵᱮᱵᱷᱟᱨ ᱢᱮ। ᱢᱚᱰᱮᱞ ᱫᱚ ᱟᱢᱟᱜ ᱡᱚᱰᱟᱣ ᱟᱠᱟᱱ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱨᱮ ᱢᱮᱱᱟᱜ ᱞᱟᱹᱠᱛᱤ।"
         },
         "callTimeoutSeconds": {
-          "label": "Longest time per judge call",
-          "description": "How long one judge call may take before it counts as failed.",
-          "help": "Raise it if a slower model often times out; failed calls make evaluation results incomplete."
+          "label": "ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱠᱚᱞ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱚᱠᱛᱚ",
+          "description": "ᱢᱤᱫ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱠᱚᱞ ᱵᱟᱭᱡᱷᱮᱛ ᱜᱚᱱᱚᱝ ᱦᱩᱭ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱮᱫ ᱚᱠᱛᱚ ᱞᱟᱜᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱥᱮᱛᱟ ᱢᱚᱰᱮᱞ ᱪᱮᱛᱟᱱ ᱴᱟᱭᱢᱟᱣᱴ ᱦᱩᱭ ᱠᱷᱟᱱ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱵᱟᱭᱡᱷᱮᱛ ᱠᱚᱞ ᱫᱚ ᱢᱩᱞᱭᱟᱸᱠᱚᱱ ᱯᱷᱚᱞ ᱵᱟᱝ ᱯᱩᱨᱟᱹ ᱮᱫᱟ।"
         }
       },
       "eval": {
         "defaultRepeats": {
-          "label": "Repeats per test case",
-          "description": "How many times each test case is run when a run does not say. More repeats show how consistent the agent is.",
-          "help": "Every repeat multiplies the cost and time of a run."
+          "label": "ᱴᱮᱥᱴ ᱠᱮᱥ ᱥᱟᱱᱟᱢ ᱟᱜ ᱯᱷᱤᱨ ᱯᱷᱤᱨ",
+          "description": "ᱨᱚᱱ ᱱᱚᱠᱚᱞ ᱵᱟᱝ ᱟᱠᱟᱱ ᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱴᱮᱥᱴ ᱠᱮᱥ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱪᱟᱞᱟᱣ ᱦᱩᱭᱟ। ᱵᱟᱲᱛᱤ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱫᱚ ᱮᱡᱮᱱᱴ ᱪᱮᱫ ᱥᱟᱢᱟᱱ ᱠᱟᱱᱟ ᱚᱱᱟ ᱧᱮᱞᱟᱹᱭᱟ।",
+          "help": "ᱥᱟᱱᱟᱢ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱫᱚ ᱢᱤᱫ ᱨᱚᱱ ᱟᱜ ᱠᱷᱚᱨᱪᱟ ᱟᱨ ᱚᱠᱛᱚ ᱵᱟᱲᱦᱟᱣᱟ।"
         },
         "defaultMode": {
           "label": "How evaluations run",
@@ -14958,178 +15104,178 @@
     },
     "delegation": {
       "maxBranches": {
-        "label": "Most parallel sub-tasks",
-        "description": "How many sub-tasks or helper agents one delegation call may start at once. Extra ones are reported as over the limit.",
-        "help": "Raise it for broad research jobs, lower it to keep cost and load down."
+        "label": "ᱵᱟᱲᱛᱤ ᱛᱮ ᱥᱟᱶᱛᱮ ᱪᱟᱞᱟᱜ ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ",
+        "description": "ᱢᱤᱫ ᱠᱟᱹᱢᱤ ᱮᱢ ᱫᱚ ᱢᱤᱫ ᱚᱠᱛᱚ ᱨᱮ ᱪᱮᱫ ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱥᱮ ᱜᱚᱲᱚ ᱮᱡᱮᱱᱴ ᱮᱦᱚᱵ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱷᱮᱜᱟᱨ ᱠᱚ ᱥᱤᱢᱟ ᱯᱟᱨ ᱦᱩᱭ ᱞᱮᱠᱟ ᱢᱮᱛ ᱮᱫᱟ।",
+        "help": "ᱞᱟᱢᱟ ᱥᱚᱫᱷᱚ ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ, ᱠᱷᱚᱨᱪᱟ ᱟᱨ ᱵᱚᱡᱷᱟ ᱠᱚᱢ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ।"
       },
       "branchTimeoutSeconds": {
-        "label": "Longest time per sub-task",
-        "description": "How long one delegated sub-task may run before it is reported as timed out.",
-        "help": "Raise it for slow sub-tasks. A hung sub-task never holds up the whole answer past this time."
+        "label": "ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱚᱠᱛᱚ",
+        "description": "ᱮᱢ ᱟᱠᱟᱱ ᱢᱤᱫ ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱴᱟᱭᱢᱟᱣᱴ ᱢᱮᱛ ᱠᱚ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱮᱫ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+        "help": "ᱥᱮᱛᱟ ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱛᱟᱦᱮᱱ ᱟᱠᱟᱱ ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱫᱚ ᱱᱚᱶᱟ ᱚᱠᱛᱚ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱯᱩᱨᱟᱹ ᱡᱚᱵᱟᱵ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱨᱩᱠᱷᱤᱭᱟᱭᱟ।"
       }
     },
     "knowledge": {
       "search": {
         "candidatePoolMultiplier": {
-          "label": "Search breadth per result",
-          "description": "How many candidate passages a knowledge search gathers for every passage it finally returns.",
-          "help": "A higher number gives the ranking more to choose from, which helps when many documents are similar, but every search takes more time and compute. Lower it if searches feel slow. This does not change how many passages the agent sees."
+          "label": "ᱥᱟᱱᱟᱢ ᱯᱷᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱚᱡᱮᱛ ᱟᱜ ᱯᱷᱮᱞᱟᱣ",
+          "description": "ᱵᱟᱰᱟᱭ ᱠᱷᱚᱡᱮᱛ ᱫᱚ ᱢᱩᱨᱩᱛ ᱨᱮ ᱯᱷᱤᱨ ᱮᱢ ᱟᱠᱟᱱ ᱥᱟᱱᱟᱢ ᱴᱩᱠᱨᱟ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱥᱟᱸᱜᱤᱛ ᱴᱩᱠᱨᱟ ᱡᱚᱢᱟ ᱮᱫᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱜᱚᱱᱚᱝ ᱫᱚ ᱨᱮᱱᱠᱤᱝ ᱵᱟᱪᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱮᱢᱟ, ᱡᱟᱦᱟᱸ ᱫᱚ ᱵᱟᱲᱛᱤ ᱫᱚᱠᱩᱢᱮᱱᱴ ᱢᱤᱫ ᱞᱮᱠᱟ ᱠᱷᱟᱱ ᱜᱚᱲᱚ ᱮᱫᱟ, ᱢᱮᱱᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱠᱷᱚᱡᱮᱛ ᱨᱮ ᱵᱟᱲᱛᱤ ᱚᱠᱛᱚ ᱟᱨ ᱠᱚᱢᱯᱩᱴ ᱞᱟᱹᱠᱛᱤ। ᱠᱷᱚᱡᱮᱛ ᱥᱮᱛᱟ ᱧᱮᱞᱚᱜ ᱠᱷᱟᱱ ᱠᱚᱢ ᱢᱮ। ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱧᱮᱞᱟᱹ ᱴᱩᱠᱨᱟ ᱜᱚᱱᱚᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞᱟ।"
         },
         "candidatePoolMax": {
-          "label": "Most candidates per search",
-          "description": "The ceiling on how many candidate passages one knowledge search gathers, however many results are requested.",
-          "help": "This protects speed and cost when an agent asks for many results at once. Raise it only if answers miss relevant passages in large knowledge bases."
+          "label": "ᱠᱷᱚᱡᱮᱛ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱥᱟᱸᱜᱤᱛ",
+          "description": "ᱪᱮᱫ ᱯᱷᱚᱞ ᱠᱷᱚᱡ ᱟᱠᱟᱱᱟ ᱚᱱᱟ ᱪᱮᱫ ᱦᱩᱭ ᱞᱮᱠᱟ, ᱢᱤᱫ ᱵᱟᱰᱟᱭ ᱠᱷᱚᱡᱮᱛ ᱛᱮ ᱡᱚᱢᱟ ᱟᱠᱟᱱ ᱥᱟᱸᱜᱤᱛ ᱴᱩᱠᱨᱟ ᱟᱜ ᱞᱟᱛᱟᱨ ᱥᱤᱢᱟ।",
+          "help": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱢᱤᱫ ᱚᱠᱛᱚ ᱨᱮ ᱵᱟᱲᱛᱤ ᱯᱷᱚᱞ ᱠᱷᱚᱡᱚᱜ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱜᱟᱱᱟ ᱟᱨ ᱠᱷᱚᱨᱪᱟ ᱨᱩᱠᱷᱤᱭᱟ ᱮᱫᱟ। ᱞᱟᱢᱟ ᱵᱟᱰᱟᱭ ᱵᱷᱟᱱᱰᱟᱨ ᱨᱮ ᱡᱚᱵᱟᱵ ᱥᱟᱸᱜᱤᱛ ᱴᱩᱠᱨᱟ ᱵᱟᱛᱼᱟᱣ ᱠᱷᱟᱱ ᱜᱮ ᱵᱟᱲᱦᱟᱣ ᱢᱮ।"
         }
       }
     },
     "rl": {
       "policy": {
         "ucb1ExplorationConstant": {
-          "label": "Willingness to try less-tested options",
-          "description": "How strongly a learning policy that uses the confidence-bound method favours options it has tried less often.",
-          "help": "Zero always picks the option with the best average so far. Higher values keep trying other options for longer before settling. The default is the textbook balance. Only policies that use this method are affected."
+          "label": "ᱠᱚᱢ ᱪᱮᱠ ᱟᱠᱟᱱ ᱵᱤᱠᱚᱞᱯᱚ ᱪᱮᱥᱴᱟ ᱟᱜ ᱤᱪᱷᱟ",
+          "description": "ᱵᱷᱚᱨᱚᱥᱟ-ᱥᱤᱢᱟ ᱵᱤᱫᱷᱤ ᱵᱮᱵᱷᱟᱨ ᱥᱮᱪᱮᱫ ᱱᱤᱛᱤ ᱫᱚ ᱟᱡ ᱠᱚᱢ ᱵᱟᱨ ᱪᱮᱠ ᱟᱠᱟᱱ ᱵᱤᱠᱚᱞᱯᱚ ᱠᱚ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱟᱜᱨᱟᱫᱷᱤᱠᱟᱨ ᱮᱢᱟ।",
+          "help": "ᱥᱩᱱᱱᱟ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱟᱜ ᱟᱹᱰᱤ ᱞᱟᱜᱩ ᱜᱷᱟᱴᱷᱤᱱ ᱥᱟᱶ ᱵᱤᱠᱚᱞᱯᱚ ᱵᱟᱪᱷᱟᱣᱟ। ᱵᱟᱲᱛᱤ ᱢᱟᱱ ᱫᱚ ᱮᱴᱟᱜ ᱵᱤᱠᱚᱞᱯᱚ ᱠᱚ ᱛᱟᱞᱟ ᱥᱮᱛᱟ ᱵᱟᱲᱛᱤ ᱚᱠᱛᱚ ᱪᱮᱠ ᱮᱫᱟ ᱥᱚᱛᱷᱤᱨ ᱦᱩᱭ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ। ᱰᱤᱯᱷᱚᱞᱴ ᱫᱚ ᱯᱟᱲᱦᱟᱣ-ᱯᱩᱛᱷᱤ ᱥᱟᱢᱟᱱ ᱠᱟᱱᱟ। ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱵᱤᱫᱷᱤ ᱵᱮᱵᱷᱟᱨ ᱱᱤᱛᱤ ᱠᱚ ᱵᱚᱫᱚᱞᱟ।"
         },
         "defaultExplorationRate": {
-          "label": "Starting exploration rate for new policies",
-          "description": "The share of turns a newly created learning policy spends trying a random option.",
-          "help": "This only sets the starting point for policies created from now on. Existing policies keep their own rate, which you change per agent where the policy is managed. Zero means a new policy never explores at the start."
+          "label": "ᱱᱟᱣᱟ ᱱᱤᱛᱤ ᱞᱟᱹᱜᱤᱫ ᱢᱟᱲᱟᱝ ᱠᱷᱚᱡ ᱦᱟᱨ",
+          "description": "ᱱᱟᱣᱟ ᱵᱟᱱᱟᱣ ᱟᱠᱟᱱ ᱥᱮᱪᱮᱫ ᱱᱤᱛᱤ ᱫᱚ ᱨᱮᱱᱰᱚᱢ ᱵᱤᱠᱚᱞᱯᱚ ᱪᱮᱠ ᱨᱮ ᱴᱚᱨᱱ ᱟᱜ ᱪᱮᱫ ᱵᱷᱟᱜ ᱠᱷᱚᱨᱪᱟ ᱮᱫᱟ।",
+          "help": "ᱱᱚᱶᱟ ᱫᱚ ᱠᱷᱟᱞᱤ ᱱᱤᱛᱚᱜ ᱠᱷᱚᱱ ᱵᱟᱱᱟᱣ ᱦᱩᱭ ᱱᱤᱛᱤ ᱟᱜ ᱢᱟᱲᱟᱝ ᱵᱤᱱᱫᱩ ᱥᱮᱴ ᱮᱫᱟ। ᱢᱮᱱᱟᱜ ᱱᱤᱛᱤ ᱫᱚ ᱟᱡ ᱦᱟᱨ ᱛᱟᱦᱮᱱᱟ, ᱡᱟᱦᱟᱸ ᱱᱤᱛᱤ ᱥᱟᱸᱢᱟᱞᱟ ᱴᱷᱟᱸᱣ ᱨᱮ ᱟᱢ ᱮᱡᱮᱱᱴ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱚᱫᱚᱞᱟ। ᱥᱩᱱᱱᱟ ᱢᱮᱱᱛᱮ ᱱᱟᱣᱟ ᱱᱤᱛᱤ ᱫᱚ ᱢᱟᱲᱟᱝ ᱨᱮ ᱠᱷᱚᱡ ᱵᱟᱝ ᱮᱫᱟ।"
         }
       }
     },
     "providers": {
       "credential": {
         "rejectedCooldown": {
-          "label": "Pause after a provider refuses a key",
-          "description": "How long background work skips a connected provider key after the provider refused it.",
-          "help": "While paused, scheduled and automatic jobs use another connected provider, or wait, instead of calling a key that keeps failing. People chatting are never blocked and always see the provider's real error. When the pause ends, one call is let through to check whether the key was fixed. Zero turns the pause off."
+          "label": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱪᱟᱵᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱛᱟᱭᱚᱢ ᱵᱷᱮᱛᱟ",
+          "description": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱡᱚᱰᱟᱣ ᱟᱠᱟᱱ ᱪᱟᱵᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱛᱟᱭᱚᱢ ᱥᱚᱨᱮᱥ ᱠᱟᱹᱢᱤ ᱚᱱᱟ ᱠᱚ ᱪᱮᱫ ᱚᱠᱛᱚ ᱵᱟᱛᱼᱟᱣᱟ।",
+          "help": "ᱵᱷᱮᱛᱟ ᱚᱠᱛᱚ ᱨᱮ, ᱥᱮᱰᱭᱩᱞ ᱟᱨ ᱟᱡᱼᱛᱮ ᱡᱚᱵ ᱠᱚ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱵᱟᱭᱡᱷᱮᱛ ᱪᱟᱵᱤ ᱠᱚᱞ ᱵᱟᱛᱼᱟᱣ ᱮᱴᱟᱜ ᱡᱚᱰᱟᱣ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱵᱮᱵᱷᱟᱨᱟ, ᱥᱮ ᱡᱚᱜᱟᱣᱟ। ᱪᱮᱴ ᱢᱟᱱᱩᱸ ᱠᱚ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱨᱩᱠᱷᱤᱭᱟᱜ ᱟᱨ ᱛᱟᱠᱠᱟᱣ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱥᱟᱹᱨᱤ ᱵᱷᱩᱞ ᱧᱮᱞᱚᱜᱼᱟ। ᱵᱷᱮᱛᱟ ᱪᱷᱚᱭ ᱠᱷᱟᱱ, ᱪᱟᱵᱤ ᱴᱷᱤᱠ ᱦᱩᱭᱞᱮᱱᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱪᱮᱠ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱠᱚᱞ ᱪᱟᱞᱟᱜ ᱮᱢ ᱦᱩᱭᱟ। ᱥᱩᱱᱱᱟ ᱫᱚ ᱵᱷᱮᱛᱟ ᱵᱚᱸᱫ ᱮᱫᱟ।"
         }
       }
     }
   },
   "runtimeSettings": {
-    "eyebrow": "Administration",
-    "title": "Runtime settings",
-    "subtitle": "Tune how agents behave across this workspace: limits, approvals, quality checks, guardrails, memory and models. An agent's owner can still override a setting for one agent where that is allowed.",
-    "docsLink": "Help and docs",
+    "eyebrow": "ᱯᱨᱚᱥᱟᱥᱚᱱ",
+    "title": "ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ ᱠᱚ",
+    "subtitle": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮᱭᱟᱜ ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱪᱮᱠᱟ ᱛᱮ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ ᱚᱱᱟ ᱢᱤᱞᱟᱣ ᱢᱮ: ᱥᱤᱢᱟ, ᱢᱚᱱᱡᱩᱨᱤ, ᱜᱩᱱ ᱪᱮᱠ, ᱜᱟᱨᱰᱨᱮᱞ, ᱢᱮᱢᱚᱨᱤ ᱟᱨ ᱢᱚᱰᱮᱞ। ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ ᱴᱷᱟᱸᱣ ᱨᱮ ᱮᱡᱮᱱᱴ ᱟᱜ ᱢᱟᱨᱟᱝ ᱫᱚ ᱫᱚᱦᱚᱜ ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴᱤᱝ ᱚᱣᱟᱨᱟᱭᱰ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "docsLink": "ᱜᱚᱲᱚ ᱟᱨ ᱫᱚᱠᱩᱢᱮᱱᱴ",
     "tabs": {
-      "label": "Runtime settings views",
-      "settings": "Settings",
-      "history": "Change history"
+      "label": "ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ ᱟᱜ ᱧᱮᱞ",
+      "settings": "ᱥᱮᱴᱤᱝ ᱠᱚ",
+      "history": "ᱵᱚᱫᱚᱞ ᱟᱜ ᱤᱛᱤᱦᱟᱥ"
     },
     "readOnly": {
-      "title": "View only",
-      "body": "Only workspace admins can change these settings. You can see the value in force for each setting and where it comes from."
+      "title": "ᱠᱷᱟᱞᱤ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ",
+      "body": "ᱠᱷᱟᱞᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱮᱰᱢᱤᱱ ᱜᱮ ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱠᱚ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱟᱢ ᱥᱟᱱᱟᱢ ᱥᱮᱴᱤᱝ ᱟᱜ ᱞᱟᱜᱩ ᱢᱟᱱ ᱟᱨ ᱚᱱᱟ ᱚᱠᱟᱸ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱠᱟᱱᱟ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
     },
-    "summary": "{changed} of {total} settings are changed in this workspace. The rest use the platform values.",
+    "summary": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ {total} ᱥᱮᱴᱤᱝ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {changed} ᱵᱚᱫᱚᱞ ᱟᱠᱟᱱᱟ। ᱵᱟᱠᱤ ᱠᱚ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।",
     "export": {
-      "button": "Export overrides",
-      "done": "Exported {count} workspace overrides to a file.",
-      "none": "Nothing to export: this workspace has not changed any setting."
+      "button": "ᱚᱣᱟᱨᱟᱭᱰ ᱠᱚ ᱟᱹᱜᱩ ᱢᱮ",
+      "done": "{count} ᱣᱟᱨᱠᱥᱯᱮᱥ ᱚᱣᱟᱨᱟᱭᱰ ᱢᱤᱫ ᱯᱷᱟᱭᱞ ᱨᱮ ᱟᱹᱜᱩ ᱞᱮᱱᱟ।",
+      "none": "ᱟᱹᱜᱩ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱵᱟᱹᱱᱩᱜᱼᱟ: ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ।"
     },
     "filters": {
-      "changedOnly": "Changed in this workspace only"
+      "changedOnly": "ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱵᱚᱫᱚᱞ ᱟᱠᱟᱱ"
     },
     "jump": {
-      "label": "Jump to a group"
+      "label": "ᱢᱤᱫ ᱡᱩᱛ ᱥᱮᱱ ᱪᱟᱞᱟᱜ ᱢᱮ"
     },
     "anchor": {
-      "unknown": "There is no setting called \"{key}\" in this workspace. It may have been renamed or it is not available at workspace level."
+      "unknown": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ \"{key}\" ᱧᱩᱛᱩᱢ ᱟᱜ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱹᱱᱩᱜᱼᱟ। ᱚᱱᱟ ᱟᱜ ᱧᱩᱛᱩᱢ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ ᱥᱮ ᱚᱱᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱛᱚᱨ ᱨᱮ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।"
     },
     "empty": {
-      "noneChanged": "No setting has been changed in this workspace yet. Everything uses the platform values."
+      "noneChanged": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ। ᱡᱷᱚᱛᱚ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
     },
     "risk": {
-      "high": "High risk",
-      "security": "Security setting"
+      "high": "ᱵᱟᱲᱛᱤ ᱡᱷᱩᱠᱤ",
+      "security": "ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ ᱠᱚ"
     },
     "security": {
-      "title": "Security settings",
-      "body": "These settings protect your workspace. They can only be made stricter than the platform value, never weaker. Each change needs a reason and is recorded in the audit log."
+      "title": "ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ ᱠᱚ",
+      "body": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱠᱚ ᱫᱚ ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱩᱠᱷᱤᱭᱟ ᱮᱫᱟ। ᱚᱱᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱛᱟᱠᱠᱟᱣ ᱠᱚᱢᱡᱚᱨ ᱵᱟᱝ। ᱥᱟᱱᱟᱢ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱨᱚᱱ ᱞᱟᱹᱠᱛᱤ ᱟᱨ ᱚᱱᱟ ᱚᱰᱤᱴ ᱞᱚᱜ ᱨᱮ ᱨᱮᱠᱚᱨᱰ ᱦᱩᱭᱟ।"
     },
     "resetGroup": {
-      "count": "{count} changed in this group",
-      "button": "Reset {group} to inherited",
-      "confirmTitle": "Reset {group} to inherited values?",
-      "confirmBody": "This removes {count} workspace overrides in this group. The settings go back to the platform values straight away, for every agent that does not have its own override. Each reset is recorded in the audit log.",
-      "confirm": "Reset to inherited",
-      "cancel": "Cancel",
-      "done": "Reset {count} settings to their inherited values.",
-      "partial": "Reset {done} settings; {failed} could not be reset. See the messages on the settings that failed.",
+      "count": "ᱱᱚᱶᱟ ᱡᱩᱛ ᱨᱮ {count} ᱵᱚᱫᱚᱞ ᱟᱠᱟᱱᱟ",
+      "button": "{group} ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ",
+      "confirmTitle": "{group} ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱟ?",
+      "confirmBody": "ᱱᱚᱶᱟ ᱫᱚ ᱱᱚᱶᱟ ᱡᱩᱛ ᱟᱜ {count} ᱣᱟᱨᱠᱥᱯᱮᱥ ᱚᱣᱟᱨᱟᱭᱰ ᱚᱪᱚᱜᱼᱟ। ᱟᱡ ᱚᱣᱟᱨᱟᱭᱰ ᱵᱟᱹᱱᱩᱜ ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴᱤᱝ ᱱᱤᱛᱚᱜ ᱜᱮ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ। ᱥᱟᱱᱟᱢ ᱨᱤᱥᱮᱴ ᱚᱰᱤᱴ ᱞᱚᱜ ᱨᱮ ᱨᱮᱠᱚᱨᱰ ᱦᱩᱭᱟ।",
+      "confirm": "ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ",
+      "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+      "done": "{count} ᱥᱮᱴᱤᱝ ᱠᱚ ᱚᱱᱟ ᱟᱜ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ।",
+      "partial": "{done} ᱥᱮᱴᱤᱝ ᱨᱤᱥᱮᱴ ᱦᱩᱭᱞᱮᱱᱟ; {failed} ᱨᱤᱥᱮᱴ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। ᱵᱟᱭᱡᱷᱮᱛ ᱥᱮᱴᱤᱝ ᱟᱜ ᱵᱷᱮᱡᱟᱣ ᱧᱮᱞ ᱢᱮ।",
       "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
     },
     "import": {
-      "button": "Import overrides",
-      "title": "Import workspace overrides",
-      "intro": "Choose a file exported from this page, or paste its contents. You will see exactly what would change before anything is saved.",
-      "reviewIntro": "Review what this file would change. Nothing has been saved yet.",
-      "fileLabel": "Overrides file (JSON)",
-      "pasteLabel": "Or paste the file contents",
+      "button": "ᱚᱣᱟᱨᱟᱭᱰ ᱠᱚ ᱟᱹᱜᱩ ᱛᱷᱟᱸᱣ ᱢᱮ",
+      "title": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱚᱣᱟᱨᱟᱭᱰ ᱠᱚ ᱟᱹᱜᱩ ᱛᱷᱟᱸᱣ ᱢᱮ",
+      "intro": "ᱱᱚᱶᱟ ᱥᱟᱦᱴᱟ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱟᱠᱟᱱ ᱢᱤᱫ ᱯᱷᱟᱭᱞ ᱵᱟᱪᱷᱟᱣ ᱢᱮ, ᱥᱮ ᱚᱱᱟ ᱟᱜ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱯᱮᱥᱴ ᱢᱮ। ᱪᱮᱫᱽ ᱥᱟᱸᱪᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱮᱫ ᱵᱚᱫᱚᱞ ᱦᱩᱭᱟ ᱚᱱᱟ ᱟᱢ ᱴᱷᱤᱠ ᱛᱮ ᱧᱮᱞᱟ।",
+      "reviewIntro": "ᱱᱚᱶᱟ ᱯᱷᱟᱭᱞ ᱪᱮᱫ ᱵᱚᱫᱚᱞ ᱟ ᱚᱱᱟ ᱪᱮᱠ ᱢᱮ। ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+      "fileLabel": "ᱚᱣᱟᱨᱟᱭᱰ ᱯᱷᱟᱭᱞ (JSON)",
+      "pasteLabel": "ᱥᱮ ᱯᱷᱟᱭᱞ ᱟᱜ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱯᱮᱥᱴ ᱢᱮ",
       "fileError": {
-        "empty": "Choose a file or paste its contents first.",
-        "invalidJson": "This is not valid JSON. Check that the whole file was copied.",
-        "wrongFormat": "This is not a settings overrides file exported from this page.",
-        "unsupportedVersion": "This file was made by a different version of the export and cannot be read.",
-        "noOverrides": "The file has no overrides section.",
-        "unreadable": "The file could not be read."
+        "empty": "ᱢᱟᱲᱟᱝ ᱢᱤᱫ ᱯᱷᱟᱭᱞ ᱵᱟᱪᱷᱟᱣ ᱢᱮ ᱥᱮ ᱚᱱᱟ ᱟᱜ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱯᱮᱥᱴ ᱢᱮ।",
+        "invalidJson": "ᱱᱚᱶᱟ ᱥᱟᱹᱨᱤ JSON ᱵᱟᱝ ᱠᱟᱱᱟ। ᱯᱩᱨᱟᱹ ᱯᱷᱟᱭᱞ ᱠᱚᱯᱤ ᱦᱩᱭᱞᱮᱱᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱪᱮᱠ ᱢᱮ।",
+        "wrongFormat": "ᱱᱚᱶᱟ ᱫᱚ ᱱᱚᱶᱟ ᱥᱟᱦᱴᱟ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱟᱠᱟᱱ ᱥᱮᱴᱤᱝ ᱚᱣᱟᱨᱟᱭᱰ ᱯᱷᱟᱭᱞ ᱵᱟᱝ ᱠᱟᱱᱟ।",
+        "unsupportedVersion": "ᱱᱚᱶᱟ ᱯᱷᱟᱭᱞ ᱫᱚ ᱟᱹᱜᱩ ᱟᱜ ᱮᱴᱟᱜ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱛᱮ ᱵᱟᱱᱟᱣ ᱟᱠᱟᱱᱟ ᱟᱨ ᱯᱟᱲᱦᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+        "noOverrides": "ᱯᱷᱟᱭᱞ ᱨᱮ ᱚᱣᱟᱨᱟᱭᱰ ᱵᱷᱟᱜ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+        "unreadable": "ᱯᱷᱟᱭᱞ ᱯᱟᱲᱦᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।"
       },
-      "summary": "{changes} to change, {unchanged} already in force, {problems} cannot be applied.",
-      "changesHeading": "Changes ({count})",
-      "before": "Now:",
-      "after": "After import:",
-      "resetMissing": "Also remove workspace overrides that are not in the file",
-      "resetMissingHelp": "Settings changed here but missing from the file go back to the platform value. Leave this off to only add or update.",
-      "resetsHeading": "Overrides to remove ({count})",
-      "resetFrom": "Currently {value}; goes back to the inherited value.",
-      "problemsHeading": "Cannot be applied ({count})",
+      "summary": "{changes} ᱵᱚᱫᱚᱞ ᱞᱟᱹᱠᱛᱤ, {unchanged} ᱫᱚᱦᱚᱜ ᱞᱟᱜᱩ, {problems} ᱞᱟᱜᱩ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+      "changesHeading": "ᱵᱚᱫᱚᱞ ({count})",
+      "before": "ᱱᱤᱛᱚᱜ:",
+      "after": "ᱟᱹᱜᱩ ᱛᱟᱭᱚᱢ:",
+      "resetMissing": "ᱯᱷᱟᱭᱞ ᱨᱮ ᱵᱟᱹᱱᱩᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱚᱣᱟᱨᱟᱭᱰ ᱦᱚᱸ ᱚᱪᱚᱜ ᱢᱮ",
+      "resetMissingHelp": "ᱱᱚᱸᱰᱮ ᱵᱚᱫᱚᱞ ᱢᱮᱱᱠᱷᱟᱱ ᱯᱷᱟᱭᱞ ᱨᱮ ᱵᱟᱹᱱᱩᱜ ᱥᱮᱴᱤᱝ ᱠᱚ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ। ᱠᱷᱟᱞᱤ ᱥᱮᱞᱮᱫ ᱥᱮ ᱱᱟᱣᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+      "resetsHeading": "ᱚᱪᱚᱜ ᱞᱟᱹᱠᱛᱤ ᱚᱣᱟᱨᱟᱭᱰ ({count})",
+      "resetFrom": "ᱱᱤᱛᱚᱜ {value}; ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ।",
+      "problemsHeading": "ᱞᱟᱜᱩ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ({count})",
       "problem": {
-        "unknownKey": "There is no setting with this key.",
-        "notWorkspaceSetting": "This setting cannot be changed for the whole workspace.",
-        "locked": "The platform operator has pinned this setting, so it cannot be changed.",
-        "wrongType": "The value has the wrong type for this setting.",
-        "required": "A value is required.",
-        "notNumber": "The value must be a number.",
-        "notInteger": "The value must be a whole number.",
-        "belowMin": "The value is too low. The minimum is {min}.",
-        "aboveMax": "The value is too high. The maximum is {max}.",
-        "notAllowed": "This is not one of the allowed options.",
-        "tooShort": "The text is too short. The minimum length is {min}.",
-        "tooLong": "The text is too long. The maximum length is {max}.",
-        "precision": "The value is more precise than this setting allows."
+        "unknownKey": "ᱱᱚᱶᱟ ᱪᱟᱵᱤ ᱛᱟᱦᱮᱱ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+        "notWorkspaceSetting": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+        "locked": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱚᱯᱷᱚᱨᱮᱴᱚᱨ ᱫᱚ ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱯᱤᱱ ᱠᱟᱫᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+        "wrongType": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱞᱟᱹᱜᱤᱫ ᱢᱟᱱ ᱟᱜ ᱥᱟᱶ ᱵᱷᱩᱞ ᱠᱟᱱᱟ।",
+        "required": "ᱢᱤᱫ ᱢᱟᱱ ᱞᱟᱹᱠᱛᱤ।",
+        "notNumber": "ᱢᱟᱱ ᱫᱚ ᱢᱤᱫ ᱜᱚᱱᱚᱝ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ।",
+        "notInteger": "ᱢᱟᱱ ᱫᱚ ᱢᱤᱫ ᱯᱩᱨᱟᱹ ᱜᱚᱱᱚᱝ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ।",
+        "belowMin": "ᱢᱟᱱ ᱟᱹᱰᱤ ᱠᱚᱢ। ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ {min}।",
+        "aboveMax": "ᱢᱟᱱ ᱟᱹᱰᱤ ᱵᱟᱲᱛᱤ। ᱵᱟᱲᱛᱤ ᱛᱮ {max}।",
+        "notAllowed": "ᱱᱚᱶᱟ ᱫᱚ ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ ᱵᱤᱠᱚᱞᱯᱚ ᱛᱟᱞᱟ ᱨᱮ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।",
+        "tooShort": "ᱚᱞ ᱟᱹᱰᱤ ᱪᱷᱚᱴᱚ। ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱞᱚᱸᱜᱚ {min}।",
+        "tooLong": "ᱚᱞ ᱟᱹᱰᱤ ᱞᱟᱢᱟ। ᱵᱟᱲᱛᱤ ᱛᱮ ᱞᱚᱸᱜᱚ {max}।",
+        "precision": "ᱢᱟᱱ ᱫᱚ ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱵᱟᱛᱟᱣ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱴᱷᱤᱠ ᱠᱟᱱᱟ।"
       },
-      "nothing": "Nothing in this file would change a setting.",
-      "reasonNote": "Some of these settings are high risk. After you apply, you will be asked for a reason that is recorded in the audit log.",
-      "back": "Back",
-      "cancel": "Cancel",
-      "review": "Review changes",
-      "apply": "Apply {count} changes",
-      "cancelled": "Import cancelled. No settings were changed.",
-      "done": "Import finished: {applied} settings updated.",
-      "donePartial": "Import partly done: {applied} settings updated, {failed} could not be applied. The review shows what is still left."
+      "nothing": "ᱱᱚᱶᱟ ᱯᱷᱟᱭᱞ ᱟᱜ ᱪᱮᱫᱽ ᱛᱮᱞᱟ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞᱟ।",
+      "reasonNote": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱠᱚ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱠᱷᱚᱨᱟ ᱵᱟᱲᱛᱤ ᱡᱷᱩᱠᱤ ᱞᱮᱠᱟᱱ ᱠᱟᱱᱟ। ᱞᱟᱜᱩ ᱛᱟᱭᱚᱢ ᱟᱢ ᱠᱚ ᱢᱤᱫ ᱠᱟᱨᱚᱱ ᱪᱷᱚᱞᱚᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱚᱰᱤᱴ ᱞᱚᱜ ᱨᱮ ᱨᱮᱠᱚᱨᱰ ᱦᱩᱭᱟ।",
+      "back": "ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+      "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+      "review": "ᱵᱚᱫᱚᱞ ᱠᱚ ᱪᱮᱠ ᱢᱮ",
+      "apply": "{count} ᱵᱚᱫᱚᱞ ᱞᱟᱜᱩ ᱢᱮ",
+      "cancelled": "ᱟᱹᱜᱩ ᱵᱟᱛᱤᱞ ᱦᱩᱭᱞᱮᱱᱟ। ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ।",
+      "done": "ᱟᱹᱜᱩ ᱪᱷᱚᱭ: {applied} ᱥᱮᱴᱤᱝ ᱱᱟᱣᱟ ᱦᱩᱭᱞᱮᱱᱟ।",
+      "donePartial": "ᱟᱹᱜᱩ ᱟᱫᱷᱟ ᱪᱷᱚᱭ: {applied} ᱥᱮᱴᱤᱝ ᱱᱟᱣᱟ ᱦᱩᱭᱞᱮᱱᱟ, {failed} ᱞᱟᱜᱩ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। ᱪᱮᱠ ᱫᱚ ᱱᱤᱛᱚᱜ ᱪᱮᱫ ᱵᱟᱠᱤ ᱢᱮᱱᱟᱜᱼᱟ ᱚᱱᱟ ᱧᱮᱞᱟᱹᱭᱟ।"
     },
     "history": {
-      "adminOnly": "The change history of workspace settings is only visible to workspace admins.",
-      "loading": "Loading change history",
-      "partial": "The history of {count} settings could not be loaded, so this list may be incomplete.",
-      "retry": "Try again",
-      "search": "Search the change history",
-      "searchPlaceholder": "Search by setting, person or reason",
-      "empty": "No setting has been changed in this workspace yet.",
-      "noMatch": "No change matches your search.",
-      "count": "Showing {shown} of {total} changes, newest first.",
-      "tableLabel": "Change history of workspace settings",
-      "when": "When",
-      "setting": "Setting",
-      "change": "Change",
-      "by": "Changed by",
-      "reason": "Reason",
-      "before": "Before:",
-      "after": "After:",
-      "inherited": "inherited value",
-      "unknownActor": "Unknown",
-      "noReason": "No reason given",
-      "showMore": "Show more",
+      "adminOnly": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮᱴᱤᱝ ᱟᱜ ᱵᱚᱫᱚᱞ ᱤᱛᱤᱦᱟᱥ ᱠᱷᱟᱞᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱮᱰᱢᱤᱱ ᱛᱮ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+      "loading": "ᱵᱚᱫᱚᱞ ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱮᱫᱟ",
+      "partial": "{count} ᱥᱮᱴᱤᱝ ᱟᱜ ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱞᱮᱠᱟ ᱵᱟᱝ ᱯᱩᱨᱟᱹ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+      "retry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ",
+      "search": "ᱵᱚᱫᱚᱞ ᱤᱛᱤᱦᱟᱥ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+      "searchPlaceholder": "ᱥᱮᱴᱤᱝ, ᱢᱟᱱᱩᱸ ᱥᱮ ᱠᱟᱨᱚᱱ ᱛᱮ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+      "empty": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ।",
+      "noMatch": "ᱪᱮᱫᱽ ᱵᱚᱫᱚᱞ ᱟᱢᱟᱜ ᱠᱷᱚᱡᱮᱛ ᱥᱟᱶ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ।",
+      "count": "{total} ᱵᱚᱫᱚᱞ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {shown} ᱧᱮᱞᱟᱹ ᱮᱫᱟ, ᱱᱟᱣᱟ ᱢᱟᱲᱟᱝ।",
+      "tableLabel": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮᱴᱤᱝ ᱟᱜ ᱵᱚᱫᱚᱞ ᱤᱛᱤᱦᱟᱥ",
+      "when": "ᱪᱤᱠᱟ",
+      "setting": "ᱥᱮᱴᱤᱝ",
+      "change": "ᱵᱚᱫᱚᱞ ᱢᱮ",
+      "by": "ᱵᱚᱫᱚᱞ ᱠᱟᱹᱢᱤᱭᱟᱹ",
+      "reason": "ᱠᱟᱨᱚᱱ",
+      "before": "ᱢᱟᱲᱟᱝ:",
+      "after": "ᱛᱟᱭᱚᱢ:",
+      "inherited": "ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ",
+      "unknownActor": "ᱵᱟᱝ ᱪᱤᱱᱦᱟᱹ ᱟᱠᱟᱱ",
+      "noReason": "ᱪᱮᱫᱽ ᱠᱟᱨᱚᱱ ᱵᱟᱝ ᱮᱢ ᱞᱮᱱᱟ",
+      "showMore": "ᱵᱟᱲᱛᱤ ᱧᱮᱞᱟᱹ ᱢᱮ",
       "scope": "Level",
-      "scopeWorkspace": "Workspace",
+      "scopeWorkspace": "ᱣᱟᱨᱠᱥᱯᱮᱥ",
       "scopeAgent": "Agent {id}",
       "scopeFilter": "Show changes at",
       "filterAll": "All levels",
@@ -15138,24 +15284,24 @@
       "searchLoadedOnly": "The search covers the changes loaded so far.",
       "loadError": "The change history could not be loaded. {message}",
       "moreFailed": "More changes could not be loaded. {message}",
-      "loadingMore": "Loading"
+      "loadingMore": "ᱞᱚᱰ ᱮᱫᱟ"
     }
   },
   "agentBehavior": {
-    "title": "Behavior and limits",
-    "intro": "Control how far this agent may go on a turn: how many tools it can call, how long it may run and how much it reads back. Anything you do not change here is inherited from your workspace.",
-    "saveFirst": "Save the agent first. Its behavior and limits can be set once it exists.",
+    "title": "ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ",
+    "intro": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱢᱤᱫ ᱴᱚᱨᱱ ᱨᱮ ᱪᱮᱫ ᱥᱮᱛᱟ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱚᱱᱟ ᱠᱷᱟᱛᱨᱟ ᱪᱷᱟᱸᱪᱚ ᱢᱮ: ᱪᱮᱫ ᱴᱩᱞ ᱠᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱪᱮᱫ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱟᱨ ᱪᱮᱫ ᱯᱷᱤᱨ ᱯᱟᱲᱦᱟᱣᱟ। ᱟᱢ ᱱᱚᱸᱰᱮ ᱪᱮᱫ ᱵᱟᱝ ᱵᱚᱫᱚᱞᱟ ᱚᱱᱟ ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱠᱷᱚᱱ ᱤᱫᱷᱤᱛ ᱟᱹᱜᱩ ᱠᱟᱱᱟ।",
+    "saveFirst": "ᱢᱟᱲᱟᱝ ᱮᱡᱮᱱᱴ ᱥᱟᱸᱪᱟᱣ ᱢᱮ। ᱚᱱᱟ ᱵᱟᱱᱟᱣ ᱛᱟᱭᱚᱢ ᱚᱱᱟ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ ᱥᱮᱴ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
     "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
     "tabs": {
-      "label": "Agent configuration",
-      "setup": "Setup",
-      "behavior": "Behavior & limits",
-      "unsaved": "Unsaved changes"
+      "label": "ᱮᱡᱮᱱᱴ ᱠᱚᱱᱯᱷᱤᱜᱩᱨᱮᱥᱚᱱ",
+      "setup": "ᱥᱮᱴᱟᱯ",
+      "behavior": "ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ",
+      "unsaved": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ ᱠᱚ"
     },
     "links": {
-      "label": "Related pages",
-      "tenant": "Change workspace defaults",
-      "playground": "Try it in the playground",
+      "label": "ᱥᱚᱵᱟᱱᱫᱷ ᱥᱟᱦᱴᱟ",
+      "tenant": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱚᱫᱚᱞ ᱢᱮ",
+      "playground": "ᱯᱞᱮᱜᱨᱟᱣᱱᱰ ᱨᱮ ᱪᱮᱥᱴᱟ ᱢᱮ",
       "prompts": "This agent's prompts",
       "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
       "approvals": "This agent's approvals",
@@ -15164,261 +15310,261 @@
       "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
     },
     "readOnly": {
-      "locked": "This agent is locked for editing, so these values are read-only.",
-      "access": "You can view these values but your access to this agent does not allow changing them."
+      "locked": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱛᱟᱞᱟ ᱟᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱢᱟᱱ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱱᱟ।",
+      "access": "ᱟᱢ ᱱᱚᱶᱟ ᱢᱟᱱ ᱠᱚ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱟᱢᱟᱜ ᱯᱷᱚᱞᱚ ᱚᱱᱟ ᱠᱚ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱝ ᱮᱢᱟ।"
     },
-    "unsaved": "You have unsaved changes in this tab. Save or discard them below before you leave.",
-    "inheritNote": "Each setting shows where its value comes from. Changing one here overrides it for this agent only; reset it to inherit the workspace value again.",
+    "unsaved": "ᱱᱚᱶᱟ ᱴᱮᱵ ᱨᱮ ᱟᱢᱟᱜ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ ᱢᱮᱱᱟᱜᱼᱟ। ᱪᱟᱞᱟᱜ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱞᱟᱛᱟᱨ ᱚᱱᱟ ᱠᱚ ᱥᱟᱸᱪᱟᱣ ᱥᱮ ᱵᱟᱛᱤᱞ ᱢᱮ।",
+    "inheritNote": "ᱥᱟᱱᱟᱢ ᱥᱮᱴᱤᱝ ᱫᱚ ᱚᱱᱟ ᱟᱜ ᱢᱟᱱ ᱚᱠᱟᱸ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱠᱟᱱᱟ ᱧᱮᱞᱟᱹᱭᱟ। ᱱᱚᱸᱰᱮ ᱢᱤᱫ ᱵᱚᱫᱚᱞ ᱫᱚ ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱚᱣᱟᱨᱟᱭᱰ ᱠᱟᱱᱟ; ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱯᱷᱤᱨ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱨᱤᱥᱮᱴ ᱢᱮ।",
     "others": {
-      "title": "Other controls for this agent",
-      "intro": "These controls are not part of the settings above, so they stay on the Setup tab.",
-      "generation": "Creativity and length of replies (temperature, top-p, maximum tokens) and extra sampling options.",
-      "generationLink": "Go to generation tuning",
-      "autonomy": "Autonomy level, spending cap per run, tool rules and when a person must approve.",
-      "autonomyLink": "Go to reasoning and autonomy"
+      "title": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱮᱴᱟᱜ ᱠᱷᱟᱛᱨᱟ",
+      "intro": "ᱱᱚᱶᱟ ᱠᱷᱟᱛᱨᱟ ᱠᱚ ᱛᱟᱞᱟ ᱨᱮᱭᱟᱜ ᱥᱮᱴᱤᱝ ᱟᱜ ᱵᱷᱟᱜ ᱵᱟᱝ ᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱠᱚ ᱥᱮᱴᱟᱯ ᱴᱮᱵ ᱨᱮ ᱢᱮᱱᱟᱜᱼᱟ।",
+      "generation": "ᱡᱚᱵᱟᱵ ᱟᱜ ᱥᱨᱤᱡᱚᱱᱥᱤᱞᱛᱟ ᱟᱨ ᱞᱚᱸᱜᱚ (ᱛᱟᱯᱢᱟᱱ, top-p, ᱵᱟᱲᱛᱤ ᱴᱚᱠᱮᱱ) ᱟᱨ ᱥᱮᱞᱮᱫ ᱱᱢᱩᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱵᱤᱠᱚᱞᱯᱚ ᱠᱚ।",
+      "generationLink": "ᱡᱮᱱᱮᱨᱮᱥᱚᱱ ᱴᱤᱭᱩᱱᱤᱝ ᱥᱮᱱ ᱪᱟᱞᱟᱜ ᱢᱮ",
+      "autonomy": "ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱥᱛᱚᱨ, ᱨᱚᱱ ᱥᱟᱱᱟᱢ ᱟᱜ ᱠᱷᱚᱨᱪᱟ ᱥᱤᱢᱟ, ᱴᱩᱞ ᱱᱤᱭᱚᱢ ᱟᱨ ᱢᱟᱱᱩᱸ ᱪᱷᱚᱠᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱞᱟᱹᱠᱛᱤ।",
+      "autonomyLink": "ᱨᱤᱡᱚᱱᱤᱝ ᱟᱨ ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱥᱮᱱ ᱪᱟᱞᱟᱜ ᱢᱮ"
     },
     "discard": {
-      "title": "Leave without saving?",
-      "description": "You have unsaved changes to this agent's behavior and limits. If you leave now they are lost.",
-      "stay": "Stay and keep editing",
-      "leave": "Leave and discard changes"
+      "title": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱪᱟᱞᱟᱜ ᱟ?",
+      "description": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ ᱨᱮ ᱟᱢᱟᱜ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ ᱢᱮᱱᱟᱜᱼᱟ। ᱱᱤᱛᱚᱜ ᱪᱟᱞᱟᱜ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚ ᱦᱟᱨᱟᱣᱜᱼᱟ।",
+      "stay": "ᱱᱚᱸᱰᱮ ᱛᱟᱦᱮᱱ ᱠᱟᱛᱮ ᱵᱚᱫᱚᱞ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+      "leave": "ᱪᱟᱞᱟᱜ ᱠᱟᱛᱮ ᱵᱚᱫᱚᱞ ᱵᱟᱛᱤᱞ ᱢᱮ"
     },
     "summary": {
-      "title": "How this agent behaves right now",
-      "subtitle": "The values in force for this agent after its own overrides, your workspace settings and the platform settings are applied.",
-      "loading": "Loading the current behavior",
-      "error": "The current behavior could not be loaded. {message}",
-      "retry": "Try again",
-      "empty": "No behavior settings are available for this agent yet.",
+      "title": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱤᱛᱚᱜ ᱪᱮᱠᱟ ᱛᱮ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ",
+      "subtitle": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱚᱣᱟᱨᱟᱭᱰ, ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮᱴᱤᱝ ᱟᱨ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴᱤᱝ ᱞᱟᱜᱩ ᱛᱟᱭᱚᱢ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱞᱟᱜᱩ ᱢᱟᱱ ᱠᱚ।",
+      "loading": "ᱱᱤᱛᱚᱜ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱞᱚᱰ ᱮᱫᱟ",
+      "error": "ᱱᱤᱛᱚᱜ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+      "retry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ",
+      "empty": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱵᱮᱵᱷᱟᱨ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।",
       "facts": {
-        "steps": "Tool calls per turn",
-        "turnTimeout": "Time per turn",
-        "toolTimeout": "Time per tool call",
-        "outputCap": "Tool output kept",
-        "continuation": "Continuation passes",
-        "approvals": "Approvals",
-        "judge": "Quality judge model",
-        "model": "Model"
+        "steps": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ",
+        "turnTimeout": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱟᱜ ᱚᱠᱛᱚ",
+        "toolTimeout": "ᱴᱩᱞ ᱠᱚᱞ ᱥᱟᱱᱟᱢ ᱟᱜ ᱚᱠᱛᱚ",
+        "outputCap": "ᱛᱟᱦᱮᱱ ᱴᱩᱞ ᱟᱣᱴᱯᱩᱴ",
+        "continuation": "ᱞᱟᱜᱟᱛᱟᱨ ᱯᱟᱥ",
+        "approvals": "ᱢᱚᱱᱡᱩᱨᱤ",
+        "judge": "ᱜᱩᱱ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱢᱚᱰᱮᱞ",
+        "model": "ᱢᱚᱰᱮᱞ"
       },
       "tier": {
-        "SUPERVISED": "Supervised: every tool call waits for a person",
-        "SEMI_AUTONOMOUS": "Semi-autonomous: your workspace rules decide",
-        "FULLY_AUTONOMOUS": "Fully autonomous: tool calls never wait"
+        "SUPERVISED": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ: ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱮᱫᱟ",
+        "SEMI_AUTONOMOUS": "ᱟᱫᱷᱟ-ᱟᱡ: ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱱᱤᱭᱚᱢ ᱴᱷᱤᱠ ᱮᱫᱟ",
+        "FULLY_AUTONOMOUS": "ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ: ᱴᱩᱞ ᱠᱚᱞ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱡᱚᱜᱟᱣᱟ"
       },
-      "approvalResumes": "Carries on by itself after an approval",
-      "approvalStops": "Waits for a new message after an approval",
-      "judgeDefault": "Chosen by the platform",
+      "approvalResumes": "ᱢᱚᱱᱡᱩᱨᱤ ᱛᱟᱭᱚᱢ ᱟᱡᱼᱛᱮ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ",
+      "approvalStops": "ᱢᱚᱱᱡᱩᱨᱤ ᱛᱟᱭᱚᱢ ᱱᱟᱣᱟ ᱵᱷᱮᱡᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣᱟ",
+      "judgeDefault": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱛᱮ ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ",
       "overrides": {
-        "none": "This agent uses your workspace values everywhere.",
-        "some": "Settings overridden for this agent: {count}."
+        "none": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱡᱷᱚᱛᱚ ᱨᱮ ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।",
+        "some": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱚᱣᱟᱨᱟᱭᱰ ᱟᱠᱟᱱ ᱥᱮᱴᱤᱝ ᱠᱚ: {count}।"
       }
     },
     "impact": {
-      "title": "What this means",
-      "steps": "This agent may call up to {count} tools in one turn. After that it is asked to answer with what it has.",
-      "stepsTierSupervised": "This agent is Supervised, so its real ceiling is lower than that base figure. Set your own value for this agent to use an exact number.",
-      "stepsTierFull": "This agent is Fully autonomous, so its real ceiling is higher than that base figure. Set your own value for this agent to use an exact number.",
-      "turnTimeout": "One turn is cut off after {duration}.",
-      "turnTimeoutNone": "A turn has no time limit.",
-      "toolTimeout": "One tool call is cut off after {duration}.",
-      "toolTimeoutNone": "A tool call has no time limit.",
-      "outputCap": "A tool result longer than {chars} is shortened before the agent reads it.",
-      "continuation": "If a reply is cut off, the agent may continue it up to {count} more times.",
-      "continuationNone": "A reply that is cut off is not continued.",
-      "retrieval": "For each question it reads the best {count} knowledge matches.",
-      "retrievalScored": "For each question it reads the best {count} knowledge matches and ignores matches that score below {score}.",
-      "approvalContinuationOn": "After a person approves a waiting action, the agent finishes the task by itself.",
-      "approvalContinuationOff": "After a person approves a waiting action, the turn ends and has to be followed up manually.",
-      "guardClosed": "If a safety check breaks, the action is refused.",
-      "guardOpen": "If a safety check breaks, the action is let through.",
-      "branches": "One delegation call may start up to {count} sub-tasks at once."
+      "title": "ᱱᱚᱶᱟ ᱟᱜ ᱵᱟᱰᱟᱭ ᱪᱮᱫ",
+      "steps": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱢᱤᱫ ᱴᱚᱨᱱ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ {count} ᱴᱩᱞ ᱠᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱚᱱᱟ ᱛᱟᱭᱚᱢ ᱚᱱᱟ ᱠᱚ ᱢᱮᱱᱟᱜ ᱞᱮᱠᱟ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱦᱩᱭᱟ।",
+      "stepsTierSupervised": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱟᱜ ᱥᱟᱹᱨᱤ ᱪᱮᱛᱟᱱ ᱥᱤᱢᱟ ᱚᱱᱟ ᱢᱩᱞ ᱜᱚᱱᱚᱝ ᱠᱷᱚᱱ ᱠᱚᱢ ᱠᱟᱱᱟ। ᱴᱷᱤᱠ ᱜᱚᱱᱚᱝ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱟᱡ ᱢᱟᱱ ᱥᱮᱴ ᱢᱮ।",
+      "stepsTierFull": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ ᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱟᱜ ᱥᱟᱹᱨᱤ ᱪᱮᱛᱟᱱ ᱥᱤᱢᱟ ᱚᱱᱟ ᱢᱩᱞ ᱜᱚᱱᱚᱝ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱱᱟ। ᱴᱷᱤᱠ ᱜᱚᱱᱚᱝ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱟᱡ ᱢᱟᱱ ᱥᱮᱴ ᱢᱮ।",
+      "turnTimeout": "ᱢᱤᱫ ᱴᱚᱨᱱ {duration} ᱛᱟᱭᱚᱢ ᱠᱟᱴᱟ ᱦᱩᱭᱟ।",
+      "turnTimeoutNone": "ᱴᱚᱨᱱ ᱟᱜ ᱚᱠᱛᱚ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+      "toolTimeout": "ᱢᱤᱫ ᱴᱩᱞ ᱠᱚᱞ {duration} ᱛᱟᱭᱚᱢ ᱠᱟᱴᱟ ᱦᱩᱭᱟ।",
+      "toolTimeoutNone": "ᱴᱩᱞ ᱠᱚᱞ ᱟᱜ ᱚᱠᱛᱚ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+      "outputCap": "{chars} ᱠᱷᱚᱱ ᱞᱟᱢᱟ ᱴᱩᱞ ᱯᱷᱚᱞ ᱮᱡᱮᱱᱴ ᱯᱟᱲᱦᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱷᱚᱴᱚ ᱦᱩᱭᱟ।",
+      "continuation": "ᱡᱚᱵᱟᱵ ᱠᱟᱴᱟ ᱠᱷᱟᱱ, ᱮᱡᱮᱱᱴ ᱚᱱᱟ ᱵᱟᱲᱛᱤ ᱛᱮ ᱮᱴᱟᱜ {count} ᱵᱟᱨ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+      "continuationNone": "ᱠᱟᱴᱟ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱵᱟᱝ ᱦᱩᱭᱟ।",
+      "retrieval": "ᱥᱟᱱᱟᱢ ᱠᱷᱚᱡᱮᱛ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱥᱟᱸᱜᱤᱛ {count} ᱵᱟᱰᱟᱭ ᱢᱤᱞᱟᱣ ᱯᱟᱲᱦᱟᱣᱟ।",
+      "retrievalScored": "ᱥᱟᱱᱟᱢ ᱠᱷᱚᱡᱮᱛ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱥᱟᱸᱜᱤᱛ {count} ᱵᱟᱰᱟᱭ ᱢᱤᱞᱟᱣ ᱯᱟᱲᱦᱟᱣᱟ ᱟᱨ {score} ᱠᱷᱚᱱ ᱠᱚᱢ ᱥᱠᱳᱨ ᱢᱤᱞᱟᱣ ᱠᱚ ᱵᱟᱛᱼᱟᱣᱟ।",
+      "approvalContinuationOn": "ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱜᱟᱣ ᱟᱠᱟᱱ ᱠᱟᱹᱢᱤ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱛᱟᱭᱚᱢ, ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱡᱼᱛᱮ ᱠᱟᱹᱢᱤ ᱪᱷᱚᱭᱟ।",
+      "approvalContinuationOff": "ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱜᱟᱣ ᱟᱠᱟᱱ ᱠᱟᱹᱢᱤ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱛᱟᱭᱚᱢ, ᱴᱚᱨᱱ ᱪᱷᱚᱭ ᱦᱩᱭᱟ ᱟᱨ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱦᱟᱛ ᱛᱮ ᱞᱟᱹᱠᱛᱤ।",
+      "guardClosed": "ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ, ᱠᱟᱹᱢᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱟ।",
+      "guardOpen": "ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ, ᱠᱟᱹᱢᱤ ᱯᱟᱨ ᱦᱩᱭ ᱮᱢᱟ।",
+      "branches": "ᱢᱤᱫ ᱠᱟᱹᱢᱤ ᱮᱢ ᱫᱚ ᱢᱤᱫ ᱚᱠᱛᱚ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ {count} ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱮᱦᱚᱵ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
     }
   },
   "controls": {
-    "eyebrow": "Help",
-    "title": "Where do I control...?",
-    "subtitle": "Every control that shapes how your agents behave, and the page it lives on. Search by what you want to change.",
+    "eyebrow": "ᱜᱚᱲᱚ",
+    "title": "ᱤᱧ ᱪᱮᱫ ᱠᱷᱟᱛᱨᱟ ᱪᱷᱟᱸᱪᱚ...?",
+    "subtitle": "ᱟᱢᱟᱜ ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱵᱟᱱᱟᱣ ᱮᱫᱟ ᱚᱱᱟ ᱥᱟᱱᱟᱢ ᱠᱷᱟᱛᱨᱟ, ᱟᱨ ᱚᱱᱟ ᱢᱮᱱᱟᱜ ᱥᱟᱦᱴᱟ। ᱟᱢ ᱪᱮᱫ ᱵᱚᱫᱚᱞ ᱪᱟᱦᱟᱭ ᱚᱱᱟ ᱛᱮ ᱠᱷᱚᱡᱮᱛ ᱢᱮ।",
     "breadcrumb": {
-      "label": "Breadcrumb",
-      "console": "Console",
-      "controls": "Controls"
+      "label": "ᱵᱨᱮᱰᱠᱨᱟᱢᱵ",
+      "console": "ᱠᱚᱱᱥᱳᱞ",
+      "controls": "ᱠᱷᱟᱛᱨᱟ"
     },
     "related": {
-      "label": "Other controls"
+      "label": "ᱮᱴᱟᱜ ᱠᱷᱟᱛᱨᱟ"
     },
     "search": {
-      "label": "Search controls",
-      "placeholder": "For example: timeout, approval, prompt, memory",
-      "count": "{count} matching controls",
-      "none": "Nothing matches \"{query}\". Try a shorter word.",
-      "noSettings": "No setting matches your search."
+      "label": "ᱠᱷᱟᱛᱨᱟ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+      "placeholder": "ᱱᱢᱩᱱᱟ: ᱴᱟᱭᱢᱟᱣᱴ, ᱢᱚᱱᱡᱩᱨᱤ, ᱯᱨᱚᱢᱯᱴ, ᱢᱮᱢᱚᱨᱤ",
+      "count": "{count} ᱢᱤᱞᱟᱣ ᱟᱠᱟᱱ ᱠᱷᱟᱛᱨᱟ",
+      "none": "\"{query}\" ᱥᱟᱶ ᱪᱮᱫᱽ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ। ᱪᱷᱚᱴᱚ ᱥᱟᱵᱟᱫ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+      "noSettings": "ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱟᱢᱟᱜ ᱠᱷᱚᱡᱮᱛ ᱥᱟᱶ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ।"
     },
-    "areasHeading": "Control areas",
-    "areasIntro": "These pages hold the controls that are not a single number: instructions, approval rules, safety rules and the record of what a turn did.",
-    "openArea": "Open",
-    "needsAccess": "Ask a workspace admin for access to this page.",
-    "settingsHeading": "Every runtime setting",
-    "settingsIntro": "Each setting can be changed for the whole workspace, for one agent, or both. An agent's own value wins over the workspace value. Pick a link to land on the setting itself.",
-    "loading": "Loading the list of settings",
-    "loadFailed": "The list of settings could not be loaded. {message}",
-    "retry": "Try again",
-    "emptyCatalog": "This workspace has no runtime settings to show.",
-    "changeWorkspace": "Change for the workspace",
-    "changeAgent": "Change on an agent",
-    "workspaceOnly": "Workspace-wide only",
+    "areasHeading": "ᱠᱷᱟᱛᱨᱟ ᱠᱷᱮᱛᱨᱚ",
+    "areasIntro": "ᱱᱚᱶᱟ ᱥᱟᱦᱴᱟ ᱨᱮ ᱚᱱᱟ ᱠᱷᱟᱛᱨᱟ ᱢᱮᱱᱟᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱢᱤᱫ ᱜᱚᱱᱚᱝ ᱵᱟᱝ ᱠᱟᱱᱟ: ᱱᱤᱨᱫᱮᱥ, ᱢᱚᱱᱡᱩᱨᱤ ᱱᱤᱭᱚᱢ, ᱥᱩᱨᱠᱷᱟ ᱱᱤᱭᱚᱢ ᱟᱨ ᱢᱤᱫ ᱴᱚᱨᱱ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱞᱮᱱᱟ ᱚᱱᱟ ᱟᱜ ᱨᱮᱠᱚᱨᱰ।",
+    "openArea": "ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+    "needsAccess": "ᱱᱚᱶᱟ ᱥᱟᱦᱴᱟ ᱥᱮᱱ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱮᱰᱢᱤᱱ ᱥᱮᱱ ᱪᱷᱚᱞ ᱢᱮ।",
+    "settingsHeading": "ᱥᱟᱱᱟᱢ ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ",
+    "settingsIntro": "ᱥᱟᱱᱟᱢ ᱥᱮᱴᱤᱝ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ, ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ, ᱥᱮ ᱵᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱢᱟᱱ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱪᱮᱛᱟᱱ ᱛᱮ ᱢᱮᱱᱟᱜᱼᱟ। ᱥᱮᱴᱤᱝ ᱥᱮᱱ ᱥᱚᱡᱷᱮ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱞᱤᱝᱠ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
+    "loading": "ᱥᱮᱴᱤᱝ ᱞᱮᱠᱟ ᱞᱚᱰ ᱮᱫᱟ",
+    "loadFailed": "ᱥᱮᱴᱤᱝ ᱞᱮᱠᱟ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+    "retry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ",
+    "emptyCatalog": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "changeWorkspace": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "changeAgent": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱨᱮ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "workspaceOnly": "ᱠᱷᱟᱞᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ-ᱡᱷᱚᱛᱚ",
     "anchors": {
       "agent-runtime-limits": {
-        "title": "Agent runtime limits",
-        "intro": "How much work one turn may do: tool calls, time, result size and retrieval."
+        "title": "ᱮᱡᱮᱱᱴ ᱨᱚᱱᱴᱟᱭᱢ ᱥᱤᱢᱟ",
+        "intro": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ: ᱴᱩᱞ ᱠᱚᱞ, ᱚᱠᱛᱚ, ᱯᱷᱚᱞ ᱞᱚᱸᱜᱚ ᱟᱨ ᱯᱷᱤᱨ ᱧᱟᱢ।"
       },
       "behaviour-settings": {
-        "title": "Behaviour settings",
-        "intro": "How replies are finished and cached, how approvals continue, how safety checks behave, and how memory, search and delegation work."
+        "title": "ᱵᱮᱵᱷᱟᱨ ᱥᱮᱴᱤᱝ",
+        "intro": "ᱡᱚᱵᱟᱵ ᱪᱮᱠᱟ ᱛᱮ ᱪᱷᱚᱭ ᱟᱨ ᱠᱮᱥ ᱦᱩᱭᱟ, ᱢᱚᱱᱡᱩᱨᱤ ᱪᱮᱠᱟ ᱛᱮ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ, ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱪᱮᱠᱟ ᱛᱮ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ, ᱟᱨ ᱢᱮᱢᱚᱨᱤ, ᱠᱷᱚᱡᱮᱛ ᱟᱨ ᱠᱟᱹᱢᱤ ᱮᱢ ᱪᱮᱠᱟ ᱛᱮ ᱠᱟᱹᱢᱤ ᱮᱫᱟ।"
       },
       "other": {
-        "title": "Other settings",
-        "intro": "Settings that have no section of their own."
+        "title": "ᱮᱴᱟᱜ ᱥᱮᱴᱤᱝ",
+        "intro": "ᱥᱮᱴᱤᱝ ᱡᱟᱦᱟᱸ ᱟᱜ ᱟᱡ ᱵᱷᱟᱜ ᱵᱟᱹᱱᱩᱜᱼᱟ।"
       }
     },
     "areas": {
       "runtimeSettings": {
-        "title": "Runtime settings",
-        "summary": "Limits, approvals, quality checks, safety strictness, memory and delegation for the whole workspace.",
-        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers"
+        "title": "ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ ᱠᱚ",
+        "summary": "ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱥᱤᱢᱟ, ᱢᱚᱱᱡᱩᱨᱤ, ᱜᱩᱱ ᱪᱮᱠ, ᱥᱩᱨᱠᱷᱟ ᱠᱟᱲᱟ, ᱢᱮᱢᱚᱨᱤ ᱟᱨ ᱠᱟᱹᱢᱤ ᱮᱢ।",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers ᱥᱤᱢᱟ ᱴᱟᱭᱢᱟᱣᱴ ᱴᱩᱞ ᱯᱟᱦᱴᱟ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱠᱮᱥ ᱢᱮᱢᱚᱨᱤ ᱠᱟᱹᱢᱤ ᱮᱢ ᱜᱩᱱ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱥᱮᱴᱤᱝ ᱜᱚᱱᱚᱝ"
       },
       "prompts": {
-        "title": "Instructions",
-        "summary": "The prompts the platform gives the model: view every one, override it for the workspace or an agent, and preview the result.",
-        "keywords": "prompts prompt directives system prompt instructions override preview registry"
+        "title": "ᱱᱤᱨᱫᱮᱥ",
+        "summary": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱮᱢᱚᱜ ᱯᱨᱚᱢᱯᱴ: ᱥᱟᱱᱟᱢ ᱧᱮᱞ ᱢᱮ, ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮ ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱚᱣᱟᱨᱟᱭᱰ ᱢᱮ, ᱟᱨ ᱯᱷᱚᱞ ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱢᱮ।",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry ᱯᱨᱚᱢᱯᱴ ᱱᱤᱨᱫᱮᱥ ᱥᱤᱥᱴᱚᱢ ᱯᱨᱚᱢᱯᱴ ᱚᱣᱟᱨᱟᱭᱰ ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱨᱮᱡᱤᱥᱴᱨᱤ"
       },
       "approvals": {
-        "title": "Approvals",
-        "summary": "The queue of actions waiting for a person, the rules for which tools need approval, and what happens after you decide.",
-        "keywords": "approve reject queue human in the loop tool rules expiry continuation"
+        "title": "ᱢᱚᱱᱡᱩᱨᱤ",
+        "summary": "ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱟᱠᱟᱱ ᱠᱟᱹᱢᱤ ᱟᱜ ᱞᱟᱭᱱ, ᱪᱮᱫ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱠᱛᱤ ᱚᱱᱟ ᱟᱜ ᱱᱤᱭᱚᱢ, ᱟᱨ ᱟᱢᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱛᱟᱭᱚᱢ ᱪᱮᱫ ᱦᱩᱭᱟ।",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation ᱢᱚᱱᱡᱩᱨᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱞᱟᱭᱱ ᱦᱤᱭᱩᱢᱮᱱ ᱤᱱ ᱫᱷᱮ ᱞᱩᱯ ᱴᱩᱞ ᱱᱤᱭᱚᱢ ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱞᱟᱜᱟᱛᱟᱨ"
       },
       "guardrails": {
-        "title": "Guardrails",
-        "summary": "Patterns this workspace refuses to pass through, and the content policy applied to tool results.",
-        "keywords": "safety rules block filter policy content patterns"
+        "title": "ᱜᱟᱨᱰᱨᱮᱞ",
+        "summary": "ᱚᱱᱟ ᱯᱮᱴᱟᱨᱱ ᱡᱟᱦᱟᱸ ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱯᱟᱨ ᱦᱩᱭ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱫᱟ, ᱟᱨ ᱴᱩᱞ ᱯᱷᱚᱞ ᱨᱮ ᱞᱟᱜᱩ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱱᱤᱛᱤ।",
+        "keywords": "safety rules block filter policy content patterns ᱥᱩᱨᱠᱷᱟ ᱱᱤᱭᱚᱢ ᱨᱩᱠᱷᱤᱭᱟ ᱪᱷᱟᱸᱪᱚ ᱱᱤᱛᱤ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱯᱮᱴᱟᱨᱱ"
       },
       "turns": {
-        "title": "Turn inspector",
-        "summary": "The recorded timeline of one agent turn: what was asked, which tools ran, what each step cost and why it stopped.",
-        "keywords": "turn timeline journal trace replay history steps debug"
+        "title": "ᱴᱚᱨᱱ ᱪᱮᱠᱚᱨ",
+        "summary": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱴᱚᱨᱱ ᱟᱜ ᱨᱮᱠᱚᱨᱰ ᱴᱟᱭᱢᱞᱟᱭᱱ: ᱪᱮᱫ ᱪᱷᱚᱞ ᱞᱮᱱᱟ, ᱪᱮᱫ ᱴᱩᱞ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ, ᱥᱟᱱᱟᱢ ᱯᱟᱦᱴᱟ ᱨᱮ ᱪᱮᱫ ᱠᱷᱚᱨᱪᱟ ᱦᱩᱭᱞᱮᱱᱟ, ᱟᱨ ᱪᱮᱫ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ।",
+        "keywords": "turn timeline journal trace replay history steps debug ᱴᱚᱨᱱ ᱴᱟᱭᱢᱞᱟᱭᱱ ᱡᱚᱨᱱᱮᱞ ᱴᱨᱮᱥ ᱨᱤᱯᱞᱮ ᱤᱛᱤᱦᱟᱥ ᱯᱟᱦᱴᱟ ᱰᱤᱵᱚᱜ"
       },
       "agentBehavior": {
-        "title": "Agent behavior and limits",
-        "summary": "On an agent's page: its own limits and behaviour settings, with where each value comes from and a reset to the workspace value.",
-        "keywords": "agent override per agent behavior limits tab"
+        "title": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ",
+        "summary": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱦᱴᱟ ᱨᱮ: ᱚᱱᱟ ᱟᱜ ᱟᱡ ᱥᱤᱢᱟ ᱟᱨ ᱵᱮᱵᱷᱟᱨ ᱥᱮᱴᱤᱝ, ᱥᱟᱱᱟᱢ ᱢᱟᱱ ᱚᱠᱟᱸ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱠᱟᱱᱟ ᱟᱨ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱥᱟᱶ।",
+        "keywords": "agent override per agent behavior limits tab ᱮᱡᱮᱱᱴ ᱚᱣᱟᱨᱟᱭᱰ ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱵᱮᱵᱷᱟᱨ ᱥᱤᱢᱟ ᱴᱮᱵ"
       }
     }
   },
   "requestInspector": {
-    "blocksHeading": "Made of these prompt blocks",
-    "blocksCount": "{n} block(s)",
-    "blockDefault": "shipped default",
-    "blockOverride": "{scope} override v{version}",
-    "blockAgentConfig": "agent's own prompt",
-    "blockCode": "platform code",
-    "blockTokens": "~{tokens} tokens",
-    "blockHash": "wording hash"
+    "blocksHeading": "ᱱᱚᱶᱟ ᱯᱨᱚᱢᱯᱴ ᱵᱞᱚᱠ ᱠᱚ ᱢᱮᱱ ᱛᱟᱞᱟ ᱛᱮ ᱵᱟᱱᱟᱣ ᱠᱟᱱᱟ",
+    "blocksCount": "{n} ᱵᱞᱚᱠ",
+    "blockDefault": "ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱᱟ",
+    "blockOverride": "{scope} ᱚᱣᱟᱨᱟᱭᱰ v{version}",
+    "blockAgentConfig": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱯᱨᱚᱢᱯᱴ",
+    "blockCode": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱠᱳᱰ",
+    "blockTokens": "~{tokens} ᱴᱚᱠᱮᱱ",
+    "blockHash": "ᱥᱟᱵᱟᱫ ᱟᱜ ᱦᱮᱥ"
   },
   "toolApproval": {
-    "continuing": "The agent is carrying on with the task.",
-    "continueNotStarted": "The agent was not restarted automatically after this decision. Send a message to have it carry on.",
-    "continueTimedOut": "The agent has not finished carrying on yet. Its reply will be in the conversation when it does; reload to check."
+    "continuing": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱠᱟᱹᱢᱤ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱮᱫᱟ।",
+    "continueNotStarted": "ᱱᱚᱶᱟ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱛᱟᱭᱚᱢ ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱡᱼᱛᱮ ᱯᱷᱤᱨ ᱮᱦᱚᱵ ᱵᱟᱝ ᱞᱮᱱᱟ। ᱚᱱᱟ ᱥᱮᱫ ᱥᱮᱱ ᱪᱟᱞᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱵᱷᱮᱡᱟᱣ ᱢᱤᱫ ᱵᱷᱮᱡᱟᱣ ᱢᱮ।",
+    "continueTimedOut": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱫᱚᱦᱚᱜ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱪᱷᱚᱭ ᱵᱟᱝ ᱠᱟᱫᱼᱟ। ᱪᱷᱚᱭ ᱠᱷᱟᱱ ᱚᱱᱟ ᱟᱜ ᱡᱚᱵᱟᱵ ᱵᱟᱛ ᱪᱤᱛ ᱨᱮ ᱧᱮᱞᱚᱜᱼᱟ; ᱪᱮᱠ ᱞᱟᱹᱜᱤᱫ ᱨᱤᱞᱚᱰ ᱢᱮ।"
   },
   "promptDirectives": {
-    "tabRegistry": "All prompts",
-    "tabAgentPreview": "Preview final prompt",
-    "regTitle": "Every prompt",
-    "regIntro": "All text the platform writes for a model, with the wording in force now, where it comes from and its version. Pick a scope, open a prompt to change it, and see every earlier version. A change reaches all servers within about half a minute.",
-    "regScopeLabel": "Change at scope",
-    "regScope_tenant": "This workspace",
-    "regScope_agent": "One agent",
-    "regScope_platform": "Whole platform",
-    "regAgentLabel": "Agent",
-    "regAgentPlaceholder": "Choose an agent",
-    "regAgentsFailed": "Could not load your agents.",
-    "regPickAgent": "Choose an agent to see and change its prompts.",
+    "tabRegistry": "ᱡᱷᱚᱛᱚ ᱯᱨᱚᱢᱯᱴ",
+    "tabAgentPreview": "ᱢᱩᱨᱩᱛ ᱯᱨᱚᱢᱯᱴ ᱯᱩᱨᱟᱹ ᱧᱮᱞ",
+    "regTitle": "ᱥᱟᱱᱟᱢ ᱯᱨᱚᱢᱯᱴ",
+    "regIntro": "ᱢᱚᱰᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱚᱞ ᱟᱠᱟᱱ ᱡᱷᱚᱛᱚ ᱚᱞ, ᱱᱤᱛᱚᱜ ᱞᱟᱜᱩ ᱟᱠᱟᱱ ᱥᱟᱵᱟᱫ, ᱚᱱᱟ ᱟᱜ ᱥᱚᱨᱥ ᱟᱨ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱥᱟᱶ। ᱢᱤᱫ ᱥᱤᱢᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ, ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱯᱨᱚᱢᱯᱴ ᱠᱷᱩᱞᱟᱹ ᱢᱮ, ᱟᱨ ᱥᱟᱱᱟᱢ ᱢᱟᱲᱟᱝ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱧᱮᱞ ᱢᱮ। ᱵᱚᱫᱚᱞ ᱫᱚ ᱚᱞᱟᱜ ᱟᱫᱷᱟ ᱢᱤᱱᱤᱴ ᱨᱮ ᱡᱷᱚᱛᱚ ᱥᱟᱨᱵᱟᱨ ᱨᱮ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱮᱫᱟ।",
+    "regScopeLabel": "ᱚᱠᱟ ᱥᱤᱢᱟ ᱨᱮ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱠᱛᱤ",
+    "regScope_tenant": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ",
+    "regScope_agent": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ",
+    "regScope_platform": "ᱡᱷᱚᱛᱚ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ",
+    "regAgentLabel": "ᱮᱡᱮᱱᱴ",
+    "regAgentPlaceholder": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
+    "regAgentsFailed": "ᱟᱢᱟᱜ ᱮᱡᱮᱱᱴ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "regPickAgent": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱟᱜ ᱯᱨᱚᱢᱯᱴ ᱠᱚ ᱧᱮᱞ ᱟᱨ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
     "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
-    "regSearchLabel": "Search prompts",
-    "regSearchPlaceholder": "Key, title or description",
-    "regRiskLabel": "Risk class",
-    "regRiskAll": "All risk classes",
-    "regRisk_STEERS_EVERY_TURN": "Steers every turn",
-    "regRisk_SECONDARY_CALL": "Secondary model call",
-    "regRisk_USER_VISIBLE": "Shown to people",
-    "regRisk_TOOL_DESCRIPTION": "Tool description",
-    "regOnlyCustomised": "Only customised",
-    "regPlatformReadOnly": "Platform-wide prompts can be read here; only a platform admin can change them.",
-    "regLoadFailed": "Could not load the prompts.",
-    "regCount": "Showing {shown} of {total} prompts.",
-    "regEmptyTitle": "No prompts match",
-    "regEmptyBody": "Change the search or the filters.",
-    "regSource_DEFAULT": "Shipped default",
-    "regSource_FALLBACK": "Shipped default (overrides unavailable)",
-    "regSource_PLATFORM": "Platform",
-    "regSource_TENANT": "Workspace",
-    "regSource_AGENT": "Agent",
+    "regSearchLabel": "ᱯᱨᱚᱢᱯᱴ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+    "regSearchPlaceholder": "ᱪᱮᱫ, ᱢᱩᱲᱩᱫ ᱥᱮ ᱵᱩᱡᱷᱟᱣ",
+    "regRiskLabel": "ᱡᱷᱩᱠᱤ ᱥᱟᱶ",
+    "regRiskAll": "ᱡᱷᱚᱛᱚ ᱡᱷᱩᱠᱤ ᱥᱟᱶ",
+    "regRisk_STEERS_EVERY_TURN": "ᱥᱟᱱᱟᱢ ᱴᱚᱨᱱ ᱠᱚ ᱥᱟᱸᱢᱟᱞᱟ",
+    "regRisk_SECONDARY_CALL": "ᱥᱮᱨᱢᱟ ᱢᱚᱰᱮᱞ ᱠᱚᱞ",
+    "regRisk_USER_VISIBLE": "ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱧᱮᱞᱟᱹᱭᱟ",
+    "regRisk_TOOL_DESCRIPTION": "ᱴᱩᱞ ᱵᱩᱡᱷᱟᱣ",
+    "regOnlyCustomised": "ᱠᱷᱟᱞᱤ ᱠᱚᱥᱴᱚᱢᱟᱭᱡ ᱟᱠᱟᱱ",
+    "regPlatformReadOnly": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ-ᱡᱷᱚᱛᱚ ᱯᱨᱚᱢᱯᱴ ᱠᱚ ᱱᱚᱸᱰᱮ ᱯᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ; ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱮᱰᱢᱤᱱ ᱜᱮ ᱚᱱᱟ ᱠᱚ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "regLoadFailed": "ᱯᱨᱚᱢᱯᱴ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "regCount": "{total} ᱯᱨᱚᱢᱯᱴ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {shown} ᱧᱮᱞᱟᱹ ᱮᱫᱟ।",
+    "regEmptyTitle": "ᱪᱮᱫᱽ ᱯᱨᱚᱢᱯᱴ ᱵᱟᱝ ᱢᱤᱞᱟᱜ ᱞᱮᱱᱟ",
+    "regEmptyBody": "ᱠᱷᱚᱡᱮᱛ ᱥᱮ ᱪᱷᱟᱸᱪᱚ ᱵᱚᱫᱚᱞ ᱢᱮ।",
+    "regSource_DEFAULT": "ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱᱟ",
+    "regSource_FALLBACK": "ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱᱟ (ᱚᱣᱟᱨᱟᱭᱰ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ)",
+    "regSource_PLATFORM": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ",
+    "regSource_TENANT": "ᱣᱟᱨᱠᱥᱯᱮᱥ",
+    "regSource_AGENT": "ᱮᱡᱮᱱᱴ",
     "regSourceVersion": "{source} v{version}",
-    "regRetired": "Retired",
-    "regRetiredBody": "This prompt no longer sends any text, so there is nothing to change.",
-    "regEffectiveOff": "Switched off: nothing is sent.",
-    "regEffectiveTokens": "In force now, about {tokens} tokens.",
-    "regEffectiveLabel": "Wording in force for {title}",
-    "regOpenEditor": "Edit {title}",
-    "regCloseEditor": "Close {title}",
-    "regEditingOverride": "Editing the {scope} version, currently v{version}.",
-    "regEditingNone": "No {scope} version yet. It starts from the wording below it: {below}.",
-    "regPlaceholders": "Filled in at runtime:",
-    "regRequired": "(required)",
-    "regProblemsTitle": "Fix this before saving",
-    "regReasonLabel": "Reason for the change (kept in the history)",
-    "regReasonPlaceholder": "Optional",
-    "regConflict": "Someone changed this prompt while you were editing. Close and reopen it to see their version, then try again.",
-    "regRevert": "Revert to {to}",
-    "regShowHistory": "History",
-    "regHideHistory": "Hide history",
-    "regHistoryLoading": "Loading history…",
-    "regHistoryFailed": "Could not load the history.",
-    "regHistoryEmpty": "No versions yet at this scope.",
-    "regVersion": "Version {version}",
-    "regAction_CREATE": "Created",
-    "regAction_UPDATE": "Changed",
-    "regAction_REVERT": "Reverted",
-    "regAction_MIGRATE": "Migrated",
-    "regCurrent": "Current",
+    "regRetired": "ᱨᱤᱴᱟᱭᱟᱨ ᱟᱠᱟᱱ",
+    "regRetiredBody": "ᱱᱚᱶᱟ ᱯᱨᱚᱢᱯᱴ ᱫᱚ ᱟᱨ ᱚᱞ ᱵᱟᱝ ᱵᱷᱮᱡᱟᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "regEffectiveOff": "ᱵᱚᱸᱫ: ᱪᱮᱫᱽ ᱵᱟᱝ ᱵᱷᱮᱡᱟᱜᱼᱟ।",
+    "regEffectiveTokens": "ᱱᱤᱛᱚᱜ ᱞᱟᱜᱩ, ᱚᱞᱟᱜ {tokens} ᱴᱚᱠᱮᱱ।",
+    "regEffectiveLabel": "{title} ᱞᱟᱹᱜᱤᱫ ᱞᱟᱜᱩ ᱥᱟᱵᱟᱫ",
+    "regOpenEditor": "{title} ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "regCloseEditor": "{title} ᱵᱚᱸᱫ ᱢᱮ",
+    "regEditingOverride": "{scope} ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱵᱚᱫᱚᱞ ᱮᱫᱟ, ᱱᱤᱛᱚᱜ v{version}।",
+    "regEditingNone": "ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ {scope} ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱵᱟᱹᱱᱩᱜᱼᱟ। ᱚᱱᱟ ᱫᱚ ᱚᱱᱟ ᱞᱟᱛᱟᱨ ᱨᱮᱭᱟᱜ ᱥᱟᱵᱟᱫ ᱠᱷᱚᱱ ᱮᱦᱚᱵ ᱮᱫᱟ: {below}।",
+    "regPlaceholders": "ᱨᱚᱱᱴᱟᱭᱢ ᱨᱮ ᱯᱩᱨᱟᱹ ᱦᱩᱭᱟ:",
+    "regRequired": "(ᱞᱟᱹᱠᱛᱤ)",
+    "regProblemsTitle": "ᱥᱟᱸᱪᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱱᱚᱶᱟ ᱴᱷᱤᱠ ᱢᱮ",
+    "regReasonLabel": "ᱵᱚᱫᱚᱞ ᱟᱜ ᱠᱟᱨᱚᱱ (ᱤᱛᱤᱦᱟᱥ ᱨᱮ ᱛᱟᱦᱮᱱᱟ)",
+    "regReasonPlaceholder": "ᱪᱷᱚᱠᱟᱛ",
+    "regConflict": "ᱟᱢ ᱵᱚᱫᱚᱞ ᱮᱫᱟ ᱚᱠᱛᱚ ᱪᱮᱫᱽ ᱡᱤᱛᱟᱜ ᱫᱚ ᱱᱚᱶᱟ ᱯᱨᱚᱢᱯᱴ ᱵᱚᱫᱚᱞ ᱠᱟᱫᱼᱟ। ᱚᱱᱟ ᱟᱜ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱠᱟᱛᱮ ᱯᱷᱤᱨ ᱠᱷᱩᱞᱟᱹ ᱢᱮ, ᱛᱟᱭᱚᱢ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+    "regRevert": "{to} ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+    "regShowHistory": "ᱤᱛᱤᱦᱟᱥ",
+    "regHideHistory": "ᱤᱛᱤᱦᱟᱥ ᱤᱫᱤ ᱢᱮ",
+    "regHistoryLoading": "ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱮᱫᱟ…",
+    "regHistoryFailed": "ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "regHistoryEmpty": "ᱱᱚᱶᱟ ᱥᱤᱢᱟ ᱨᱮ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "regVersion": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version}",
+    "regAction_CREATE": "ᱵᱟᱱᱟᱣ ᱟᱠᱟᱱ",
+    "regAction_UPDATE": "ᱵᱚᱫᱚᱞ ᱟᱠᱟᱱ",
+    "regAction_REVERT": "ᱯᱷᱤᱨ ᱨᱩᱣᱟᱹᱲ ᱟᱠᱟᱱ",
+    "regAction_MIGRATE": "ᱚᱪᱚᱜ ᱟᱠᱟᱱ",
+    "regCurrent": "ᱱᱤᱛᱚᱜ",
     "regBy": "by {who} on {when}",
-    "regUnknownAuthor": "unknown",
-    "regReason": "Reason: {reason}",
-    "regShowDiff": "Show changes in version {version}",
-    "regHideDiff": "Hide changes in version {version}",
-    "regDiffLabel": "Changes made by version {version}",
-    "regNoDiff": "No text changed in this version.",
-    "regRestore": "Restore version {version}",
-    "regRestoreReason": "Restored the wording of version {version}",
-    "regRestoreFailed": "Could not restore that version.",
-    "regRestoreAck": "I understand that restoring a version of {title} can weaken safety.",
-    "regPreviewTitle": "Preview final prompt",
-    "regPreviewIntro": "Builds the real system prompt and tool list of an agent exactly as a turn would, without calling a model. Each block shows the prompt key, the scope and the version its wording comes from.",
-    "regPreviewMessageLabel": "Sample user message (optional)",
-    "regPreviewMessagePlaceholder": "Used to choose tools and recalled memory, as for a real message.",
-    "regPreviewSmallModel": "Preview for a small model",
-    "regPreviewBuild": "Build preview",
-    "regPreviewBuilding": "Building…",
-    "regPreviewFailed": "Could not build the preview.",
-    "regPreviewTotals": "About {prompt} tokens of system text and {tools} tokens of tool definitions (estimates).",
-    "regPreviewOverBudgetTitle": "Over the token budget",
-    "regPreviewOverBudget": "The standing system text is over the configured budget of {budget} tokens. Nothing is cut; consider shortening a prompt.",
-    "regPreviewMessageHeading": "Message: {message}",
-    "regPreviewTokens": "~{tokens} tokens",
-    "regPreviewTools": "Tools ({count})",
-    "regPreviewNoTools": "This agent offers no tools.",
-    "regPreviewNotes": "What this preview cannot know",
-    "regOriginDefault": "shipped default",
-    "regOriginOverride": "{scope} override v{version}",
-    "regOriginAgentConfig": "agent's own system prompt",
-    "regOriginCode": "platform code"
+    "regUnknownAuthor": "ᱵᱟᱝ ᱪᱤᱱᱦᱟᱹ ᱟᱠᱟᱱ",
+    "regReason": "ᱠᱟᱨᱚᱱ: {reason}",
+    "regShowDiff": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version} ᱟᱜ ᱵᱚᱫᱚᱞ ᱧᱮᱞᱟᱹ ᱢᱮ",
+    "regHideDiff": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version} ᱟᱜ ᱵᱚᱫᱚᱞ ᱤᱫᱤ ᱢᱮ",
+    "regDiffLabel": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version} ᱛᱮ ᱠᱟᱱ ᱵᱚᱫᱚᱞ",
+    "regNoDiff": "ᱱᱚᱶᱟ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱨᱮ ᱪᱮᱫᱽ ᱚᱞ ᱵᱟᱝ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ।",
+    "regRestore": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version} ᱯᱷᱤᱨ ᱛᱟᱦᱮᱱ ᱢᱮ",
+    "regRestoreReason": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version} ᱟᱜ ᱥᱟᱵᱟᱫ ᱯᱷᱤᱨ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ",
+    "regRestoreFailed": "ᱚᱱᱟ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱯᱷᱤᱨ ᱛᱟᱦᱮᱱ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "regRestoreAck": "ᱤᱧ ᱵᱩᱡᱷᱟᱣ ᱠᱟᱱᱟ ᱪᱮᱫ {title} ᱟᱜ ᱢᱤᱫ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱯᱷᱤᱨ ᱛᱟᱦᱮᱱ ᱠᱟᱛᱮ ᱥᱩᱨᱠᱷᱟ ᱠᱚᱢᱡᱚᱨ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "regPreviewTitle": "ᱢᱩᱨᱩᱛ ᱯᱨᱚᱢᱯᱴ ᱯᱩᱨᱟᱹ ᱧᱮᱞ",
+    "regPreviewIntro": "ᱢᱚᱰᱮᱞ ᱠᱚ ᱠᱚᱞ ᱵᱟᱝ ᱪᱷᱚᱭ, ᱢᱤᱫ ᱴᱚᱨᱱ ᱪᱮᱠᱟ ᱛᱮ ᱠᱚᱨᱚ ᱚᱱᱟ ᱞᱮᱠᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱹᱨᱤ ᱥᱤᱥᱴᱚᱢ ᱯᱨᱚᱢᱯᱴ ᱟᱨ ᱴᱩᱞ ᱞᱮᱠᱟᱱ ᱵᱟᱱᱟᱣᱟ। ᱥᱟᱱᱟᱢ ᱵᱞᱚᱠ ᱫᱚ ᱯᱨᱚᱢᱯᱴ ᱪᱮᱫ, ᱚᱱᱟ ᱟᱜ ᱥᱤᱢᱟ, ᱟᱨ ᱚᱱᱟ ᱟᱜ ᱥᱟᱵᱟᱫ ᱚᱠᱟ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱠᱟᱱᱟ ᱧᱮᱞᱟᱹᱭᱟ।",
+    "regPreviewMessageLabel": "ᱱᱢᱩᱱᱟ ᱵᱮᱵᱷᱟᱨᱤ ᱵᱷᱮᱡᱟᱣ (ᱪᱷᱚᱠᱟᱛ)",
+    "regPreviewMessagePlaceholder": "ᱥᱟᱹᱨᱤ ᱵᱷᱮᱡᱟᱣ ᱞᱮᱠᱟ ᱴᱩᱞ ᱟᱨ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱢᱮᱢᱚᱨᱤ ᱵᱟᱪᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱵᱮᱵᱷᱟᱨ ᱦᱩᱭᱟ।",
+    "regPreviewSmallModel": "ᱪᱷᱚᱴᱚ ᱢᱚᱰᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱯᱩᱨᱟᱹ ᱧᱮᱞ",
+    "regPreviewBuild": "ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱵᱟᱱᱟᱣ ᱢᱮ",
+    "regPreviewBuilding": "ᱵᱟᱱᱟᱣ ᱮᱫᱟ…",
+    "regPreviewFailed": "ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱵᱟᱝ ᱵᱟᱱᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "regPreviewTotals": "ᱥᱤᱥᱴᱚᱢ ᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱚᱞᱟᱜ {prompt} ᱴᱚᱠᱮᱱ ᱟᱨ ᱴᱩᱞ ᱵᱩᱡᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ {tools} ᱴᱚᱠᱮᱱ (ᱟᱱᱟᱡ)।",
+    "regPreviewOverBudgetTitle": "ᱴᱚᱠᱮᱱ ᱵᱟᱡᱮᱴ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ",
+    "regPreviewOverBudget": "ᱛᱟᱦᱮᱱ ᱥᱤᱥᱴᱚᱢ ᱚᱞ ᱫᱚ ᱥᱮᱴ ᱟᱠᱟᱱ {budget} ᱴᱚᱠᱮᱱ ᱵᱟᱡᱮᱴ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱱᱟ। ᱪᱮᱫᱽ ᱵᱟᱝ ᱠᱟᱴᱟ ᱞᱮᱱᱟ; ᱢᱤᱫ ᱯᱨᱚᱢᱯᱴ ᱪᱤᱛᱚᱜ ᱢᱮ ᱢᱮᱱ ᱪᱤᱛᱟ ᱢᱮ।",
+    "regPreviewMessageHeading": "ᱵᱷᱮᱡᱟᱣ: {message}",
+    "regPreviewTokens": "~{tokens} ᱴᱚᱠᱮᱱ",
+    "regPreviewTools": "ᱴᱩᱞ ({count})",
+    "regPreviewNoTools": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱪᱮᱫᱽ ᱴᱩᱞ ᱵᱟᱝ ᱮᱢᱟ।",
+    "regPreviewNotes": "ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱫᱚ ᱪᱮᱫ ᱵᱟᱝ ᱵᱟᱰᱟᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ",
+    "regOriginDefault": "ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱᱟ",
+    "regOriginOverride": "{scope} ᱚᱣᱟᱨᱟᱭᱰ v{version}",
+    "regOriginAgentConfig": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱥᱤᱥᱴᱚᱢ ᱯᱨᱚᱢᱯᱴ",
+    "regOriginCode": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱠᱳᱰ"
   }
 }

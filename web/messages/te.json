@@ -916,15 +916,15 @@
     "rsParam_seed": "సీడ్",
     "rsParam_stopSequences": "ఆపే క్రమాలు",
     "rsParamDropped": "{param} ఈ ఏజెంట్‌పై సెట్ చేయబడింది, కానీ {provider} దాన్ని {model} కోసం విస్మరిస్తుంది, కాబట్టి దానికి ప్రభావం లేదు.",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "ఈ రన్ కోసం టూల్స్",
+    "rsToolsRunOnly": "ఈ రన్ మాత్రమే",
+    "rsToolsRunNote": "ఈ ప్లేగ్రౌండ్ నుండి మీరు పంపే సందేశాలు ఏజెంట్ యొక్క ఏ టూల్స్‌ను ఉపయోగించవచ్చో ఈ స్విచ్‌లు ఎంచుకుంటాయి. ఏదీ సేవ్ కాదు: మిగతా అందరి కోసం ఏజెంట్ తన సొంత టూల్ యాక్సెస్‌ను ఉంచుకుంటుంది. ఇవి ఏజెంట్ టూల్స్‌ను ఆఫ్ చేయగలవు మాత్రమే, దానికి కొత్త టూల్‌ను ఎప్పటికీ ఇవ్వలేవు.",
+    "rsToolsRunSummary": "ఏజెంట్ యొక్క {total} టూల్స్‌లో {on} ఈ రన్ కోసం ఆన్‌లో ఉన్నాయి",
+    "rsToolsRunNone": "ఈ రన్ కోసం టూల్స్ లేవు: ఏజెంట్ టెక్స్ట్‌లో మాత్రమే జవాబివ్వగలదు.",
+    "rsToolsReset": "ఏజెంట్ టూల్స్‌ను ఉపయోగించండి",
+    "rsToolsNotInAgent": "ఇది ఈ ఏజెంట్ సేవ్ చేసిన టూల్స్‌లో ఒకటి కాదు, కాబట్టి రన్ కోసం ఆన్ చేయడం సాధ్యం కాదు.",
+    "rsToolsEditAgent": "ఏజెంట్ సేవ్ చేసిన టూల్స్‌ను మార్చండి",
+    "rsToolsLimitedChip": "ఈ రన్ కోసం టూల్స్ పరిమితం",
     "rsToolsEmpty": "ఈ ఏజెంట్‌కు టూల్స్ అందుబాటులో లేవు.",
     "rsToolsSummary": "{total}లో {on} టూల్స్ ఆన్‌లో ఉన్నాయి",
     "rsToolsFailed": "టూల్స్‌ను లోడ్ చేయలేకపోయాం.",
@@ -982,14 +982,14 @@
     "chipToolsOff": "టూల్స్ లేకుండా మళ్లీ ప్రయత్నిస్తోంది",
     "chipFailoverBlocked": "బ్యాకప్ మోడల్ వాడలేదు: టూల్స్ ఇప్పటికే నడిచాయి",
     "rsLimitChangeOne": "మార్చండి",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "రేట్ పరిమితి చేరింది",
+    "reasonTimeout": "సమయం ముగిసింది",
+    "reasonProviderUnavailable": "ప్రొవైడర్ అందుబాటులో లేదు",
+    "reasonAuthFailed": "ప్రొవైడర్ ఆధారాలను తిరస్కరించింది",
+    "reasonBilling": "ప్రొవైడర్ బిల్లింగ్ సమస్య",
+    "reasonModelNotFound": "మోడల్ అందుబాటులో లేదు",
+    "reasonProviderError": "ప్రొవైడర్ లోపం",
+    "reasonMalformedToolCall": "టూల్ కాల్‌ను ఉపయోగించలేకపోయింది"
   },
   "nodeDefs": {
     "triggerLabel": "ట్రిగ్గర్",
@@ -13596,7 +13596,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "స్కిల్స్",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14598,7 +14598,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "స్కిల్స్",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14772,7 +14772,7 @@
       "role": "మీ పాత్ర ఈ సెట్టింగ్‌ను మార్చలేదు. వర్క్‌స్పేస్ నిర్వాహకుడిని అడగండి.",
       "scope": "ఈ సెట్టింగ్‌ను ఇక్కడ ఓవర్‌రైడ్ చేయలేరు.",
       "readOnly": "సెట్టింగ్‌లు ప్రస్తుతం చదవడానికి మాత్రమే.",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "ఈ భద్రతా సెట్టింగ్‌ను వర్క్‌స్పేస్ అడ్మిన్ మాత్రమే మార్చగలరు. మీరు దాని విలువను ఇక్కడ చూడవచ్చు, కానీ సవరించలేరు."
     },
     "reset": {
       "button": "వారసత్వ విలువకు రీసెట్ చేయండి",
@@ -14822,12 +14822,12 @@
       "acknowledge": "ఈ భద్రతా మార్పు పర్యవసానాలను నేను అర్థం చేసుకున్నాను.",
       "cancel": "రద్దు చేయండి",
       "confirm": "నిర్ధారించి సేవ్ చేయండి",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "రీసెట్: ఓవర్‌రైడ్ తొలగించబడి సెట్టింగ్ అది పొందే విలువకు తిరిగి వస్తుంది."
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "ఎక్కువ అంటే కఠినం: ఎక్కువ విలువ అంగీకరించబడుతుంది, తక్కువది తిరస్కరించబడుతుంది.",
+      "lower": "తక్కువ అంటే కఠినం: తక్కువ విలువ అంగీకరించబడుతుంది, ఎక్కువది తిరస్కరించబడుతుంది.",
+      "enumOrder": "ఎంపికలు తక్కువ నుండి ఎక్కువ కఠినత్వం వరకు ఉన్నాయి: {options}. మీరు కఠినమైన చివర వైపు మాత్రమే వెళ్లగలరు."
     }
   },
   "approvalsQueue": {
@@ -14996,8 +14996,8 @@
     "tlSevWarn": "శ్రద్ధ అవసరం",
     "tlSevError": "విఫలమైంది",
     "tlIntake": "టర్న్ ప్రారంభమైంది: {chars} అక్షరాలు, {tools} టూల్స్, {attachments} అటాచ్‌మెంట్లు",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "ఈ రన్ కోసం టూల్స్",
+    "tlRunToolsNone": "ఏవీ లేవు (టెక్స్ట్ మాత్రమే)",
     "tlModelCall": "{model} ({provider})కు మోడల్ కాల్, రూట్ {route}",
     "tlFailover": "{model} ({provider})కు ఫెయిల్‌ఓవర్ అయింది",
     "tlRetryModel": "{model} ({provider})లో మళ్లీ ప్రయత్నించింది, రూట్ {route}",
@@ -15006,6 +15006,7 @@
     "tlToolCall": "టూల్ కాల్ {tool}: {status}",
     "tlApprovalRequested": "{tool} నడవడానికి ముందు ఆమోదం కోరబడింది",
     "tlApprovalDecided": "{tool} కోసం ఆమోద నిర్ణయం జరిగింది: {decision}",
+    "tlApprovalAutoAllowed": "{tool} అడగకుండానే నడిచింది: పర్యవేక్షితం కింద చదవడం మాత్రమే చేసే కాల్",
     "tlContinuation": "కొనసాగింపు: {guard} ({outcome})",
     "tlGuard": "గార్డ్‌రెయిల్ {guard}: {outcome}",
     "tlVerifyPassed": "తనిఖీ ఉత్తీర్ణమైంది: {check}",
@@ -15075,7 +15076,7 @@
     "modeTextOnlyHelp": "ఏజెంట్ తన టూల్స్ లేకుండా సమాధానం ఇస్తుంది. సురక్షితం: నిజంగా ఏదీ జరగదు. ఆశించిన-టూల్ తనిఖీలు నెరవేరవు.",
     "modeFull": "టూల్స్‌తో పూర్తి పైప్‌లైన్",
     "modeFullHelp": "నిజమైన వినియోగదారుకు లభించే అవే టూల్స్, గార్డ్‌రెయిల్స్ మరియు దశ పరిమితులు. ఆశించిన-టూల్ మరియు ట్రాజెక్టరీ తనిఖీలకు అవసరం.",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "చదవడం మాత్రమే చేసే టూల్స్ నిజంగా నడుస్తాయి. డేటాను మార్చగల, సందేశం పంపగల లేదా డబ్బు ఖర్చు చేయగల ఏదైనా సిమ్యులేట్ చేయబడి రన్‌లో జాబితా చేయబడుతుంది, కాబట్టి నిజంగా ఏదీ జరగదు. భద్రతా వర్గీకరణ లేని టూల్స్ కూడా సిమ్యులేట్ అవుతాయి.",
     "autoApproveLabel": "ఎవాల్ శాండ్‌బాక్స్‌లో టూల్ కాల్స్‌ను ఆటో-ఆమోదించండి",
     "autoApproveHelp": "సాధారణంగా ఒక వ్యక్తి కోసం వేచి ఉండే టూల్ కాల్‌ను ఎవాల్ శాండ్‌బాక్స్ ఆమోదిస్తుంది, తద్వారా కేసు పూర్తి కాగలదు. ఇది లేకుండా ప్రొడక్షన్‌లో లాగానే కేసు సమాధానం రాని ఆమోదం వద్దే ముగుస్తుంది.",
     "autoApproveWarnTitle": "నాన్-ప్రొడక్షన్ వర్క్‌స్పేస్‌ల కోసం మాత్రమే",
@@ -15083,7 +15084,7 @@
     "autoApproveNeedsFull": "ముందుగా పూర్తి పైప్‌లైన్‌ను ఆన్ చేయండి: టూల్స్ నడిచినప్పుడు మాత్రమే ఆటో-ఆమోదం వర్తిస్తుంది.",
     "autoApproveRefused": "ఈ వర్క్‌స్పేస్‌లో అనుమతి లేదు: {reason}",
     "autoApproveConfirmTitle": "ఎవాల్స్‌లో టూల్ కాల్స్‌ను ఆటో-ఆమోదించాలా?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "ఈ డేటాసెట్ రీప్లేలలో వ్యక్తి కోసం వేచి ఉండే ప్రతి టూల్ కాల్ ఆటోమేటిక్‌గా ఆమోదించబడుతుంది. ఆమోదించబడిన, చదవడం మాత్రమే చేసే టూల్స్ నిజంగా నడుస్తాయి; ఏదైనా మార్చగలవి ఇంకా సిమ్యులేట్ అవుతాయి. దీన్ని టెస్ట్ డేటా ఉన్న వర్క్‌స్పేస్‌లో మాత్రమే చేయండి. అవి ఆటోమేటిక్‌గా ఆమోదించబడ్డాయని రన్‌లు నమోదు చేస్తాయి.",
     "autoApproveConfirm": "ఆటో-ఆమోదాన్ని ఆన్ చేయండి",
     "trajectoryLabel": "ట్రాజెక్టరీ తనిఖీలు",
     "trajectoryOn": "On",
@@ -15108,22 +15109,22 @@
     "samplingSource_platform": "ప్లాట్‌ఫామ్ సెట్ చేసింది",
     "samplingSource_tenant": "మీ వర్క్‌స్పేస్ కోసం సెట్ చేయబడింది",
     "samplingSource_agent": "ఈ ఏజెంట్ కోసం సెట్ చేయబడింది",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "వర్క్‌స్పేస్ డిఫాల్ట్",
+    "modeDefaultHelp": "మీ వర్క్‌స్పేస్ సెట్టింగ్‌ను అనుసరిస్తుంది (అడ్మిన్ మార్చకపోతే పూర్తి పైప్‌లైన్). ప్రతి రన్ ఇంకా తన సొంత మోడ్‌ను ఎంచుకోవచ్చు.",
+    "modeDefaultCurrent": "ప్రస్తుతం: {mode}",
+    "modeNameFull": "పూర్తి పైప్‌లైన్",
+    "modeNameQuick": "త్వరిత (టెక్స్ట్ మాత్రమే)",
+    "badgeFull": "పూర్తి పైప్‌లైన్",
+    "badgeQuick": "త్వరిత",
+    "datasetModePinnedTitle": "ఈ డేటాసెట్ ఎల్లప్పుడూ ఇలాగే రీప్లే అవుతుంది. ఒక్క రన్ ఇంకా వేరే మోడ్‌ను ఎంచుకోవచ్చు.",
+    "datasetModeDefaultTitle": "రన్‌లు ఎలా రీప్లే కావాలనే దానికి ఈ డేటాసెట్ వర్క్‌స్పేస్ డిఫాల్ట్‌ను అనుసరిస్తుంది.",
+    "runModeLabel": "తదుపరి రన్ కోసం రీప్లే మోడ్",
+    "runModeInherit": "డేటాసెట్ సెట్టింగ్‌ను ఉపయోగించండి",
+    "runModeHelp": "పూర్తి పైప్‌లైన్ ఏజెంట్‌ను దాని టూల్స్, గార్డ్‌రెయిల్స్, ఆమోదాలతో సురక్షిత శాండ్‌బాక్స్‌లో నడుపుతుంది: చదవడం మాత్రమే చేసే టూల్స్ నిజంగా నడుస్తాయి, డేటాను మార్చగల లేదా ఏదైనా పంపగల ఏదైనా సిమ్యులేట్ అవుతుంది. త్వరిత మోడ్ టూల్స్‌ను ఆపి ఉంచి, వ్రాసిన జవాబును మాత్రమే పరీక్షిస్తుంది.",
+    "runModeFullTitle": "ఈ రన్ ఎవాల్ శాండ్‌బాక్స్‌లో పూర్తి పైప్‌లైన్‌ను ఉపయోగించింది.",
+    "runModeQuickTitle": "ఈ రన్ టెక్స్ట్ మాత్రమే ఉన్న త్వరిత రీప్లే: ఏజెంట్ టూల్స్ ఆపి ఉంచబడ్డాయి.",
+    "runSimulatedTools": "ఈ రన్‌లో సిమ్యులేట్ చేయబడ్డాయి, అమలు చేయబడలేదు (అవి డేటాను మార్చవచ్చు లేదా ప్లాట్‌ఫారమ్ వెలుపలికి చేరవచ్చు): {tools}.",
+    "toolStatusSimulated": "సిమ్యులేట్ చేయబడింది, అమలు కాలేదు"
   },
   "agentLab": {
     "wtLabel": "ఏజెంట్ టూల్స్‌తో అమలు చేయండి",
@@ -15156,6 +15157,14 @@
       "memory": {
         "label": "మెమరీ",
         "description": "ఒక ఏజెంట్ ఎన్ని జ్ఞాపకాలను ఉంచుకుని గుర్తుచేసుకుంటుంది."
+      },
+      "attachments": {
+        "label": "చాట్ అప్‌లోడ్‌లు",
+        "description": "చాట్ సందేశాలకు ప్రజలు జతచేయగల ఫైళ్లు ఎంత పెద్దవిగా ఉండవచ్చు."
+      },
+      "skills": {
+        "label": "స్కిల్స్",
+        "description": "ఇన్‌స్టాల్ చేసిన స్కిల్స్ జాబితా ఏజెంట్ సూచనలలో ఎంత భాగాన్ని ఉపయోగించవచ్చు."
       },
       "aux": {
         "label": "బ్యాక్‌గ్రౌండ్ మోడల్ కాల్స్",
@@ -15222,6 +15231,28 @@
           "label": "అసంపూర్ణ సమాధానం తర్వాత అదనపు పాస్‌లు",
           "description": "ప్రకటించి కానీ చేయని దశలో మోడల్ సమాధానం ఆగిపోయినప్పుడు, కొనసాగించమని దాన్ని ఇంకా ఎన్నిసార్లు అడుగుతారు.",
           "help": "తరచుగా ఒక దశను ప్రకటించి ఆగిపోయే ఏజెంట్ల కోసం పెంచండి. ప్రతి అదనపు పాస్‌కు ఒక మోడల్ కాల్ ఖర్చవుతుంది."
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "పరిమితి తర్వాత జవాబివ్వబడిన కాల్స్",
+          "description": "టర్న్ యొక్క టూల్ పరిమితి అయిపోయిన తర్వాత మోడల్ ఇంకా ఎన్ని టూల్ కాల్స్‌ను ప్రయత్నించవచ్చు. ప్రతి ఒక్కటి \"నీ దగ్గర ఉన్న దానితో జవాబివ్వు\" అనే గమనికతో తిరస్కరించబడుతుంది; ఈ సంఖ్యను దాటితే టర్న్ లోపంతో ఆగిపోతుంది.",
+          "help": "టూల్స్‌ను పిలవడం ఆపడానికి మోడల్‌కు కొన్ని ప్రయత్నాలు అవసరమైతే దీన్ని పెంచండి. లూప్‌లో ఉన్న టర్న్‌లను త్వరగా ముగించడానికి తగ్గించండి. 0 పరిమితి దాటిన మొదటి కాల్‌లోనే టర్న్‌ను ఆపుతుంది."
+        },
+        "supervisedDivisor": {
+          "label": "పర్యవేక్షిత ఏజెంట్లకు టూల్ పరిమితిలో 1/N లభిస్తుంది",
+          "description": "పర్యవేక్షిత ఏజెంట్‌కు టర్న్ యొక్క టూల్-కాల్ పరిమితిని ఈ సంఖ్యతో భాగించి ఇస్తారు, కానీ కింద ఉన్న కనిష్టం కంటే ఎప్పుడూ తక్కువ కాదు.",
+          "help": "పర్యవేక్షిత ఏజెంట్లను మరింత గట్టిగా ఉంచడానికి దీన్ని పెంచండి. 1 వారికి పూర్తి పరిమితిని ఇస్తుంది."
+        },
+        "supervisedMinSteps": {
+          "label": "పర్యవేక్షిత ఏజెంట్‌కు కనిష్ట టూల్ కాల్స్",
+          "description": "పైన ఉన్న సంఖ్య ఎంత ఎక్కువైనా, పర్యవేక్షిత ఏజెంట్‌కు లభించే అతి చిన్న టూల్-కాల్ పరిమితి.",
+          "help": "పర్యవేక్షిత ఏజెంట్ అనేక దశల సాధారణ పనిని ఇంకా పూర్తి చేయగలిగేలా దీన్ని 3 లేదా అంతకంటే ఎక్కువగా ఉంచండి."
+        },
+        "autonomousMultiplier": {
+          "label": "పూర్తి అటానమస్ ఏజెంట్లకు పరిమితికి N రెట్లు లభిస్తుంది",
+          "description": "పూర్తి అటానమస్ ఏజెంట్‌కు టర్న్ యొక్క టూల్-కాల్ పరిమితిని ఈ సంఖ్యతో గుణించి ఇస్తారు.",
+          "help": "ఎవరూ గమనించకుండా పొడవైన పనులు నడిపే ఏజెంట్ల కోసం పెంచండి; అప్పుడు అవి ఒక టర్న్‌లో ఎక్కువ కాల్స్, డబ్బు ఖర్చు చేయగలవు. 1 వాటికి ప్రామాణిక పరిమితిని ఇస్తుంది."
         }
       }
     },
@@ -15293,6 +15324,82 @@
           "label": "ఫాలో-అప్ టూల్స్ ఎంతసేపు అందించబడతాయి",
           "description": "వాడిన తర్వాత చిన్న ఫాలో-అప్ సందేశాల కోసం ఒక టూల్ ఎంతసేపు అందించబడుతుంది.",
           "help": "పొడవైన విండో సుదీర్ఘ పని సెషన్‌లకు సహాయపడుతుంది, చిన్నది టూల్ జాబితాను చిన్నగా ఉంచుతుంది."
+        },
+        "maxStickyTools": {
+          "label": "ఫాలో-అప్‌లలో సూచిస్తూ ఉంచే గరిష్ట టూల్స్",
+          "description": "చిన్న ఫాలో-అప్ సందేశంలోకి తీసుకెళ్లే గరిష్ట టూల్స్. 0 ఏదీ ఉంచదు.",
+          "help": "ఒక పని అనేక టూల్స్‌ను ఉపయోగిస్తే పెద్ద సంఖ్య సహాయపడుతుంది; చిన్నది టూల్ జాబితాను చిన్నగా ఉంచుతుంది."
+        },
+        "keepPrimaryModel": {
+          "label": "ఫాలో-అప్‌ల కోసం ప్రధాన మోడల్‌ను ఉంచండి",
+          "description": "ఇప్పటికే టూల్స్ ఉపయోగించిన సంభాషణలో చిన్న ఫాలో-అప్ చౌకైన మోడల్‌కు బదులుగా ఏజెంట్ ప్రధాన మోడల్‌పైనే ఉంటుంది.",
+          "help": "దీన్ని ఆఫ్ చేస్తే ఖర్చు రూటింగ్ \"అవును\" వంటి ఫాలో-అప్‌లను చౌకైన మోడల్‌కు పంపుతుంది; అయితే జరుగుతున్న పనిని బలహీనంగా నిర్వహించే ప్రమాదం ఉంది."
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "జవాబును తిరిగి ఉపయోగించడానికి ప్రశ్న ఎంత పోలి ఉండాలి",
+          "description": "ఒకే రకమైన ప్రశ్నలకు జవాబులను తిరిగి ఉపయోగించే ఏజెంట్ల కోసం: సేవ్ చేసిన జవాబును ఇవ్వడానికి కొత్త ప్రశ్న మునుపటి ప్రశ్నకు ఎంత దగ్గరగా ఉండాలి, 0.85 నుండి 1 వరకు.",
+          "help": "తక్కువ సంఖ్య ఎక్కువ పునరావృతాలకు సేవ చేస్తుంది కానీ వేరే ప్రశ్న కోసం ఉద్దేశించిన జవాబును ఇచ్చే ప్రమాదం ఉంటుంది. తప్పు జవాబులు ఖరీదైనప్పుడు దీన్ని ఎక్కువగా ఉంచండి. జవాబు ఎవరికి ఇవ్వబడిందో వారికి మాత్రమే తిరిగి ఉపయోగించబడుతుంది."
+        },
+        "ttl": {
+          "label": "తిరిగి ఉపయోగించదగిన జవాబును ఎంతకాలం ఉంచాలి",
+          "description": "సేవ్ చేసిన జవాబును తొలగించే ముందు ఒకే రకమైన ప్రశ్నకు ఎంతకాలం ఇవ్వవచ్చు.",
+          "help": "మీ జవాబులు త్వరగా పాతబడిపోతే దీన్ని తగ్గించండి."
+        },
+        "maxEntriesPerAgent": {
+          "label": "ఒక్కో ఏజెంట్‌కు గరిష్ట సేవ్ చేసిన జవాబులు",
+          "description": "ఒక ఏజెంట్ తిరిగి ఉపయోగించడానికి ఎన్ని జవాబులను ఉంచుతుంది. దీనికి మించితే పాతవి తొలగించబడతాయి.",
+          "help": "పెద్ద నిల్వ ఎక్కువ పునరావృతాలను కనుగొంటుంది, ఎక్కువ స్టోరేజ్‌ను ఉపయోగిస్తుంది."
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "సంభాషణలో టూల్ కాల్స్ రికార్డును ఉంచండి",
+          "description": "ప్రతి టర్న్ యొక్క టూల్ కాల్స్ చిన్న రికార్డును సంభాషణతో పాటు సేవ్ చేయండి, తద్వారా తర్వాతి టర్న్‌లు ఏం చేశారో చూడగలవు.",
+          "help": "సంభాషణ చరిత్రను టెక్స్ట్ మాత్రమేగా ఉంచడానికి దీన్ని ఆఫ్ చేయండి; అప్పుడు ముందరి టర్న్‌లలో దాని టూల్స్ ఏం చేశాయో ఏజెంట్ తెలుసుకోలేదు. ఇది మొత్తం వర్క్‌స్పేస్‌కు వర్తిస్తుంది."
+        },
+        "replayEnabled": {
+          "label": "మోడల్‌కు టూల్ రికార్డును చూపించండి",
+          "description": "మోడల్‌కు సంభాషణను ఇచ్చేటప్పుడు ముందరి టూల్ కాల్స్ సేవ్ చేసిన రికార్డును చేర్చండి.",
+          "help": "రికార్డును సేవ్ చేస్తూనే దానికి మోడల్ పని స్థలాన్ని ఉపయోగించకుండా ఉండటానికి దీన్ని ఆఫ్ చేయండి."
+        },
+        "replayTurns": {
+          "label": "టూల్ రికార్డు చూపించే ముందరి టర్న్‌లు",
+          "description": "టూల్స్ ఉపయోగించిన అత్యంత ఇటీవలి టర్న్‌లలో ఎన్నింటి రికార్డు మోడల్‌కు చూపబడుతుంది.",
+          "help": "పెద్ద సంఖ్య పొడవైన పని సెషన్లలో సహాయపడుతుంది కానీ మోడల్ పని స్థలాన్ని ఎక్కువగా ఉపయోగిస్తుంది."
+        },
+        "maxEntriesPerTurn": {
+          "label": "ఒక్కో టర్న్‌కు జాబితా చేసే టూల్ కాల్స్",
+          "description": "ఒక టర్న్ యొక్క ఎన్ని టూల్ కాల్స్ రికార్డులో వ్రాయబడతాయి. తర్వాతి కాల్స్ లెక్కించబడతాయి మాత్రమే.",
+          "help": "చాలా కాల్స్ చేసి ప్రతిదాన్నీ గుర్తుంచుకోవాల్సిన టర్న్‌ల కోసం పెంచండి."
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "ఒక్కో టర్న్‌కు అతి పొడవైన టూల్ రికార్డు",
+          "description": "ఒక టర్న్ రికార్డులో ఎన్ని అక్షరాలు మోడల్‌కు చూపబడతాయి; మిగతావి లెక్కించబడతాయి, జాబితా చేయబడవు.",
+          "help": "తర్వాతి ప్రతి టర్న్‌లో ఖర్చు ఆదా చేయడానికి తగ్గించండి, ఎక్కువ వివరాలు ఉంచడానికి పెంచండి."
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "అతి పెద్ద చిత్రం అప్‌లోడ్ (MB)",
+          "description": "చాట్ సందేశానికి ఎవరైనా జతచేయగల అతి పెద్ద చిత్రం, మెగాబైట్లలో. ప్లాట్‌ఫారమ్‌కు మొత్తం ఫైల్ పరిమితి కూడా ఉంది; దీన్ని ఇది దాటలేదు.",
+          "help": "ఫోటోలు, స్క్రీన్‌షాట్‌ల కోసం పెంచండి; పెద్ద ఫైళ్లు పంపడానికి నెమ్మదిగా ఉంటాయి, మోడల్ కోటాను ఎక్కువగా ఉపయోగిస్తాయి."
+        },
+        "maxAudioMb": {
+          "label": "అతి పెద్ద ఆడియో అప్‌లోడ్ (MB)",
+          "description": "చాట్ సందేశానికి ఎవరైనా జతచేయగల అతి పెద్ద ఆడియో ఫైల్, మెగాబైట్లలో. ప్లాట్‌ఫారమ్‌కు మొత్తం ఫైల్ పరిమితి కూడా ఉంది; దీన్ని ఇది దాటలేదు.",
+          "help": "పొడవైన రికార్డింగ్‌ల కోసం పెంచండి; పెద్ద ఫైళ్లు పంపడానికి నెమ్మదిగా ఉంటాయి, మోడల్ కోటాను ఎక్కువగా ఉపయోగిస్తాయి."
+        },
+        "maxVideoMb": {
+          "label": "అతి పెద్ద వీడియో అప్‌లోడ్ (MB)",
+          "description": "చాట్ సందేశానికి ఎవరైనా జతచేయగల అతి పెద్ద వీడియో, మెగాబైట్లలో. ప్లాట్‌ఫారమ్‌కు మొత్తం ఫైల్ పరిమితి కూడా ఉంది; దీన్ని ఇది దాటలేదు.",
+          "help": "పొడవైన క్లిప్‌ల కోసం పెంచండి; పెద్ద ఫైళ్లు పంపడానికి నెమ్మదిగా ఉంటాయి, మోడల్ కోటాను ఎక్కువగా ఉపయోగిస్తాయి."
+        },
+        "maxDocumentMb": {
+          "label": "అతి పెద్ద పత్రం అప్‌లోడ్ (MB)",
+          "description": "చాట్ సందేశానికి ఎవరైనా జతచేయగల అతి పెద్ద పత్రం లేదా స్ప్రెడ్‌షీట్, మెగాబైట్లలో. ప్లాట్‌ఫారమ్‌కు మొత్తం ఫైల్ పరిమితి కూడా ఉంది; దీన్ని ఇది దాటలేదు.",
+          "help": "పొడవైన నివేదికలు, పెద్ద డేటా ఫైళ్ల కోసం పెంచండి; పెద్ద ఫైళ్లు ప్రాసెస్ చేయడానికి నెమ్మదిగా ఉంటాయి."
         }
       },
       "continuation": {
@@ -15351,6 +15458,20 @@
           "help": "ప్రజల గురించి చాలా గుర్తుంచుకోవాల్సిన అసిస్టెంట్ల కోసం పెంచండి; ఇది నిల్వ మరియు గుర్తుచేసుకునే ఖర్చును కూడా పెంచుతుంది."
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "గరిష్ట పంచుకున్న జ్ఞాపకాలు",
+          "description": "వర్క్‌స్పేస్‌లో పంచుకున్న ఎన్ని జ్ఞాపకాలు ఉంచబడతాయి. దీనికి మించితే పాతవి తొలగించబడతాయి.",
+          "help": "పంచుకున్న జ్ఞానంపై ఆధారపడే పెద్ద బృందాల కోసం పెంచండి; ఇది స్టోరేజ్, రీకాల్ ఖర్చును కూడా పెంచుతుంది. ఇది మొత్తం వర్క్‌స్పేస్‌కు వర్తిస్తుంది."
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ఆన్-డివైస్ చాట్‌కు ఇచ్చే జ్ఞాపకాలు",
+          "description": "ఆన్-డివైస్ సెషన్ మొదలైనప్పుడు దానికి ఎన్ని జ్ఞాపకాలు అప్పగించబడతాయి.",
+          "help": "ఆన్-డివైస్ మోడల్స్‌కు చిన్న పని స్థలం ఉంటుంది, కాబట్టి దీన్ని తక్కువగా ఉంచండి."
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "గ్రాఫ్ మెమరీ నుండి గుర్తుచేసుకునే వాస్తవాలు",
@@ -15361,6 +15482,20 @@
           "label": "ప్రతి లుకప్‌కు చదివే గ్రాఫ్ మార్గాలు",
           "description": "ఒక లుకప్ వాస్తవాలను కనుగొనడానికి మెమరీ గ్రాఫ్‌లో ఎన్ని కనెక్షన్‌లు చదవబడతాయి.",
           "help": "అనేక కనెక్షన్‌లు ఒకే వాస్తవానికి దారితీయవచ్చు, కాబట్టి దట్టంగా అనుసంధానమైన జ్ఞాపకాలు అన్నింటినీ కనుగొనడానికి ఎక్కువ సంఖ్య అవసరం కావచ్చు. ఎక్కువ సంఖ్య ప్రతి లుకప్‌ను నెమ్మదిగా చేస్తుంది."
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "ప్రాంప్ట్‌లో జాబితా చేసే గరిష్ట స్కిల్స్",
+          "description": "ఏజెంట్‌కు అవి ఉన్నాయని తెలియడానికి, దాని సూచనలలో మీ ఎన్ని స్కిల్స్ పేర్లు ఇవ్వబడతాయి. మిగతావి లెక్కించబడతాయి, జాబితా చేయబడవు.",
+          "help": "మీకు చాలా స్కిల్స్ ఉంటే పెంచండి; జాబితా చేసిన ప్రతి స్కిల్ ప్రతి టర్న్‌లో మోడల్ పని స్థలంలో కొంత భాగాన్ని ఉపయోగిస్తుంది. ఇది మొత్తం వర్క్‌స్పేస్‌కు వర్తిస్తుంది."
+        },
+        "maxBlockChars": {
+          "label": "ప్రాంప్ట్‌లో స్కిల్స్ జాబితా పరిమాణం",
+          "description": "ఏజెంట్ సూచనలలో స్కిల్స్ జాబితా ఎన్ని అక్షరాలు తీసుకోవచ్చు. నిండిన తర్వాత తర్వాతి స్కిల్స్ పేర్లకు మాత్రమే కుదించబడతాయి.",
+          "help": "ఎక్కువ స్కిల్స్ వివరణలను ఉంచడానికి పెంచండి, ప్రతి టర్న్‌లో టోకెన్లు ఆదా చేయడానికి తగ్గించండి. ఇది మొత్తం వర్క్‌స్పేస్‌కు వర్తిస్తుంది."
         }
       }
     },
@@ -15413,6 +15548,17 @@
           "description": "తనిఖీ చేసిన టెక్స్ట్‌లో ఎంతను AI భద్రతా జడ్జిలు చదువుతారు. దానికి మించిన టెక్స్ట్ తీర్పు చేయబడదు.",
           "help": "మీరు దీన్ని ప్లాట్‌ఫామ్ విలువ కంటే పెంచగలరు మాత్రమే. దీన్ని పెంచితే పొడవైన టూల్ ఫలితాలు పూర్తిగా తీర్పు చేయబడతాయి కానీ ప్రతి జడ్జి కాల్ పెద్దదవుతుంది."
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "పర్యవేక్షిత ఏజెంట్లు మరియు చదవడం మాత్రమే చేసే టూల్స్",
+          "description": "పర్యవేక్షిత స్వయంప్రతిపత్తి స్థాయిలోని ఏజెంట్ శోధన లేదా లుకప్ వంటి చదవడం మాత్రమే చేసే టూల్‌కు ముందు కూడా మిమ్మల్ని అడుగుతుందా. రాయడం, పంపడం, ప్లాట్‌ఫారమ్ వర్గీకరించని టూల్స్ ఎల్లప్పుడూ అడుగుతాయి.",
+          "help": "మీరు దీన్ని ప్లాట్‌ఫారమ్ సెట్టింగ్ కంటే కఠినంగా మాత్రమే చేయగలరు. ప్రతిసారీ అడగడం అత్యంత సురక్షితమైన ఎంపిక; చదవడం మాత్రమే చేసే టూల్స్‌ను నడవనివ్వడం ఒక ప్రశ్నను తగ్గిస్తుంది, కానీ ఊహించని శోధనను ఆపే అవకాశాన్ని కూడా తగ్గిస్తుంది. ప్రైవేట్ డేటాను చదవగల, నమ్మలేని కంటెంట్‌ను స్వీకరించగల, డేటాను బయటకు పంపగల ఏజెంట్‌ను ఈ సెట్టింగ్ ఏమి చెప్పినా ప్రతి కాల్‌లో అడుగుతారు.",
+          "options": {
+            "auto-allow": "చదవడం మాత్రమే చేసే టూల్స్‌ను అడగకుండా నడవనివ్వండి",
+            "gate": "ప్రతి టూల్ కాల్‌కు ముందు అడగండి"
+          }
+        }
       }
     },
     "quality": {
@@ -15435,12 +15581,12 @@
           "help": "ప్రతి పునరావృతం రన్ ఖర్చును, సమయాన్ని గుణిస్తుంది."
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "మూల్యాంకనాలు ఎలా నడుస్తాయి",
+          "description": "రన్ లేదా దాని డేటాసెట్ చెప్పనప్పుడు, మూల్యాంకన రన్ ఏజెంట్‌ను దాని టూల్స్‌తో సురక్షిత శాండ్‌బాక్స్‌లో రీప్లే చేస్తుందా (పూర్తి పైప్‌లైన్) లేదా టెక్స్ట్‌లో మాత్రమే జవాబిస్తుందా (త్వరిత).",
+          "help": "పూర్తి పైప్‌లైన్ మీ వినియోగదారులకు లభించేదాన్ని, టూల్స్ వినియోగంతో సహా, పరీక్షిస్తుంది మరియు ఖర్చు ఎక్కువ. అందులో చదవడం మాత్రమే చేసే టూల్స్ నిజంగా నడుస్తాయి; డేటాను మార్చగల, సందేశం పంపగల లేదా డబ్బు ఖర్చు చేయగల ఏదైనా సిమ్యులేట్ చేయబడి రన్‌లో జాబితా చేయబడుతుంది. త్వరిత చౌక, టూల్స్ వినియోగం గురించి ఏమీ చెప్పదు.",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "శాండ్‌బాక్స్‌లో పూర్తి పైప్‌లైన్",
+            "quick": "త్వరిత: టెక్స్ట్ జవాబులు మాత్రమే"
           }
         }
       }
@@ -15544,7 +15690,7 @@
       "cancel": "రద్దు చేయండి",
       "done": "{count} సెట్టింగ్‌లను వాటి వారసత్వ విలువలకు రీసెట్ చేయండి.",
       "partial": "{done} సెట్టింగ్‌లు రీసెట్ అయ్యాయి; {failed} రీసెట్ కాలేదు. విఫలమైన సెట్టింగ్‌లపై సందేశాలను చూడండి.",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} సెట్టింగ్‌లు రీసెట్ అయ్యాయి. కారణం అవసరమైన {skipped} ఉన్నట్లే వదిలేశారు."
     },
     "import": {
       "button": "ఓవర్‌రైడ్‌లను దిగుమతి చేయండి",
@@ -15617,16 +15763,16 @@
       "unknownActor": "తెలియదు",
       "noReason": "కారణం ఇవ్వలేదు",
       "showMore": "మరిన్ని చూపండి",
-      "scope": "Level",
+      "scope": "స్థాయి",
       "scopeWorkspace": "వర్క్‌స్పేస్",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "ఏజెంట్ {id}",
+      "scopeFilter": "మార్పులను ఈ స్థాయిలో చూపండి",
+      "filterAll": "అన్ని స్థాయిలు",
+      "filterWorkspace": "వర్క్‌స్పేస్ మాత్రమే",
+      "filterAgents": "ఏజెంట్లు మాత్రమే",
+      "searchLoadedOnly": "శోధన ఇప్పటివరకు లోడ్ అయిన మార్పులను కవర్ చేస్తుంది.",
+      "loadError": "మార్పుల చరిత్ర లోడ్ కాలేదు. {message}",
+      "moreFailed": "మరిన్ని మార్పులు లోడ్ కాలేదు. {message}",
       "loadingMore": "లోడ్ అవుతోంది"
     }
   },
@@ -15634,7 +15780,7 @@
     "title": "ప్రవర్తన మరియు పరిమితులు",
     "intro": "ఈ ఏజెంట్ ఒక టర్న్‌లో ఎంత దూరం వెళ్లగలదో నియంత్రించండి: ఎన్ని టూల్స్‌ను కాల్ చేయగలదు, ఎంతసేపు నడవగలదు, ఎంత తిరిగి చదువుతుంది. మీరు ఇక్కడ మార్చని ప్రతిదీ మీ వర్క్‌స్పేస్ నుండి వారసత్వంగా వస్తుంది.",
     "saveFirst": "ముందుగా ఏజెంట్‌ను సేవ్ చేయండి. అది ఉనికిలోకి వచ్చాక దాని ప్రవర్తన మరియు పరిమితులను సెట్ చేయవచ్చు.",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "దాని ప్రవర్తన మరియు పరిమితులు ట్యాబ్‌ను తెరవడానికి కింద ఒక ఏజెంట్‌ను ఎంచుకోండి.",
     "tabs": {
       "label": "ఏజెంట్ కాన్ఫిగరేషన్",
       "setup": "సెటప్",
@@ -15645,12 +15791,12 @@
       "label": "సంబంధిత పేజీలు",
       "tenant": "వర్క్‌స్పేస్ డిఫాల్ట్‌లను మార్చండి",
       "playground": "ప్లేగ్రౌండ్‌లో ప్రయత్నించండి",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "ఈ ఏజెంట్ ప్రాంప్ట్‌లు",
+      "promptsAria": "{name} ప్రాంప్ట్‌లు: ప్రాంప్ట్ రిజిస్ట్రీని ఈ ఏజెంట్ వద్ద తెరవండి",
+      "approvals": "ఈ ఏజెంట్ ఆమోదాలు",
+      "approvalsAria": "{name} ఆమోదాలు: ఈ ఏజెంట్ కోసం ఫిల్టర్ చేసిన ఆమోదాల క్యూను తెరవండి",
+      "turns": "టర్న్ టైమ్‌లైన్",
+      "turnsAria": "{name} టర్న్ టైమ్‌లైన్: ఈ ఏజెంట్ కోసం టర్న్ ఇన్‌స్పెక్టర్‌ను తెరవండి"
     },
     "readOnly": {
       "locked": "ఈ ఏజెంట్ సవరణ కోసం లాక్ చేయబడింది, కాబట్టి ఈ విలువలు చదవడానికి మాత్రమే.",
@@ -15830,7 +15976,7 @@
     "regAgentPlaceholder": "ఒక ఏజెంట్‌ను ఎంచుకోండి",
     "regAgentsFailed": "మీ ఏజెంట్లను లోడ్ చేయలేకపోయాం.",
     "regPickAgent": "ఒక ఏజెంట్ ప్రాంప్ట్‌లను చూడటానికి, మార్చడానికి దాన్ని ఎంచుకోండి.",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "లింక్‌లోని ఏజెంట్ మీకు అందుబాటులో లేదు, ఎందుకంటే అది లేదు లేదా మీరు దాన్ని చూడలేరు. బదులుగా రిజిస్ట్రీ వర్క్‌స్పేస్ పరిధిలో తెరుచుకుంది.",
     "regSearchLabel": "ప్రాంప్ట్‌లను శోధించండి",
     "regSearchPlaceholder": "కీ, శీర్షిక లేదా వివరణ",
     "regRiskLabel": "ప్రమాద తరగతి",

@@ -817,15 +817,15 @@
     "rsParam_seed": "ਸੀਡ",
     "rsParam_stopSequences": "ਰੋਕਣ ਵਾਲੇ ਕ੍ਰਮ",
     "rsParamDropped": "{param} ਇਸ ਏਜੰਟ ਉੱਤੇ ਸੈੱਟ ਹੈ, ਪਰ {provider} {model} ਲਈ ਇਸਨੂੰ ਅਣਡਿੱਠਾ ਕਰਦਾ ਹੈ, ਇਸ ਲਈ ਇਸਦਾ ਕੋਈ ਅਸਰ ਨਹੀਂ।",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "ਇਸ ਰਨ ਲਈ ਟੂਲ",
+    "rsToolsRunOnly": "ਸਿਰਫ਼ ਇਹ ਰਨ",
+    "rsToolsRunNote": "ਇਹ ਸਵਿੱਚ ਤੈਅ ਕਰਦੇ ਹਨ ਕਿ ਇਸ ਪਲੇਗ੍ਰਾਊਂਡ ਤੋਂ ਭੇਜੇ ਸੁਨੇਹੇ ਏਜੰਟ ਦੇ ਕਿਹੜੇ ਟੂਲ ਵਰਤ ਸਕਦੇ ਹਨ। ਕੁਝ ਵੀ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾਂਦਾ: ਬਾਕੀ ਸਭ ਲਈ ਏਜੰਟ ਆਪਣੀ ਟੂਲ ਪਹੁੰਚ ਰੱਖਦਾ ਹੈ। ਇਹ ਏਜੰਟ ਦੇ ਟੂਲ ਸਿਰਫ਼ ਬੰਦ ਕਰ ਸਕਦੇ ਹਨ, ਉਸਨੂੰ ਕਦੇ ਨਵਾਂ ਟੂਲ ਨਹੀਂ ਦੇ ਸਕਦੇ।",
+    "rsToolsRunSummary": "ਏਜੰਟ ਦੇ {total} ਟੂਲਾਂ ਵਿੱਚੋਂ {on} ਇਸ ਰਨ ਲਈ ਚਾਲੂ ਹਨ",
+    "rsToolsRunNone": "ਇਸ ਰਨ ਲਈ ਕੋਈ ਟੂਲ ਨਹੀਂ: ਏਜੰਟ ਸਿਰਫ਼ ਲਿਖਤ ਵਿੱਚ ਜਵਾਬ ਦੇ ਸਕਦਾ ਹੈ।",
+    "rsToolsReset": "ਏਜੰਟ ਦੇ ਟੂਲ ਵਰਤੋ",
+    "rsToolsNotInAgent": "ਇਹ ਇਸ ਏਜੰਟ ਦੇ ਸੰਭਾਲੇ ਟੂਲਾਂ ਵਿੱਚੋਂ ਨਹੀਂ ਹੈ, ਇਸ ਲਈ ਇਸਨੂੰ ਰਨ ਲਈ ਚਾਲੂ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ।",
+    "rsToolsEditAgent": "ਏਜੰਟ ਦੇ ਸੰਭਾਲੇ ਟੂਲ ਬਦਲੋ",
+    "rsToolsLimitedChip": "ਇਸ ਰਨ ਲਈ ਟੂਲ ਸੀਮਿਤ",
     "rsToolsEmpty": "ਇਸ ਏਜੰਟ ਲਈ ਕੋਈ ਟੂਲ ਉਪਲਬਧ ਨਹੀਂ।",
     "rsToolsSummary": "{total} ਵਿੱਚੋਂ {on} ਟੂਲ ਚਾਲੂ",
     "rsToolsFailed": "ਟੂਲ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ।",
@@ -883,14 +883,14 @@
     "chipToolsOff": "ਟੂਲਾਂ ਤੋਂ ਬਿਨਾਂ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਹੋ ਰਹੀ ਹੈ",
     "chipFailoverBlocked": "ਬੈਕਅੱਪ ਮਾਡਲ ਨਹੀਂ ਵਰਤਿਆ ਗਿਆ: ਟੂਲ ਪਹਿਲਾਂ ਹੀ ਚੱਲ ਚੁੱਕੇ ਸਨ",
     "rsLimitChangeOne": "ਬਦਲੋ",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "ਦਰ ਸੀਮਾ ਪਾਰ ਹੋ ਗਈ",
+    "reasonTimeout": "ਸਮਾਂ ਸਮਾਪਤ",
+    "reasonProviderUnavailable": "ਪ੍ਰਦਾਤਾ ਉਪਲਬਧ ਨਹੀਂ",
+    "reasonAuthFailed": "ਪ੍ਰਦਾਤਾ ਨੇ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਰੱਦ ਕਰ ਦਿੱਤੇ",
+    "reasonBilling": "ਪ੍ਰਦਾਤਾ ਦੀ ਬਿਲਿੰਗ ਸਮੱਸਿਆ",
+    "reasonModelNotFound": "ਮਾਡਲ ਉਪਲਬਧ ਨਹੀਂ",
+    "reasonProviderError": "ਪ੍ਰਦਾਤਾ ਦੀ ਗਲਤੀ",
+    "reasonMalformedToolCall": "ਟੂਲ ਕਾਲ ਵਰਤੀ ਨਹੀਂ ਜਾ ਸਕੀ"
   },
   "nodeDefs": {
     "triggerLabel": "ਟ੍ਰਿਗਰ",
@@ -13379,7 +13379,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "ਸਕਿੱਲ",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14223,7 +14223,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "ਸਕਿੱਲ",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14397,7 +14397,7 @@
       "role": "ਤੁਹਾਡੀ ਭੂਮਿਕਾ ਇਹ ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲ ਸਕਦੀ। ਕਿਸੇ ਵਰਕਸਪੇਸ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਪੁੱਛੋ।",
       "scope": "ਇਹ ਸੈਟਿੰਗ ਇੱਥੇ ਓਵਰਰਾਈਡ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।",
       "readOnly": "ਸੈਟਿੰਗਾਂ ਇਸ ਵੇਲੇ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਲਈ ਹਨ।",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "ਇਹ ਸੁਰੱਖਿਆ ਸੈਟਿੰਗ ਸਿਰਫ਼ ਵਰਕਸਪੇਸ ਐਡਮਿਨ ਬਦਲ ਸਕਦਾ ਹੈ। ਤੁਸੀਂ ਇਸਦਾ ਮੁੱਲ ਇੱਥੇ ਦੇਖ ਸਕਦੇ ਹੋ, ਪਰ ਸੰਪਾਦਿਤ ਨਹੀਂ ਕਰ ਸਕਦੇ।"
     },
     "reset": {
       "button": "ਵਿਰਸੇ ਵਾਲੇ ਮੁੱਲ ਉੱਤੇ ਰੀਸੈੱਟ ਕਰੋ",
@@ -14447,12 +14447,12 @@
       "acknowledge": "ਮੈਂ ਇਸ ਸੁਰੱਖਿਆ ਬਦਲਾਅ ਦੇ ਨਤੀਜੇ ਸਮਝਦਾ/ਸਮਝਦੀ ਹਾਂ।",
       "cancel": "ਰੱਦ ਕਰੋ",
       "confirm": "ਪੁਸ਼ਟੀ ਕਰੋ ਅਤੇ ਸੰਭਾਲੋ",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "ਰੀਸੈੱਟ: ਓਵਰਰਾਈਡ ਹਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਸੈਟਿੰਗ ਉਸ ਮੁੱਲ ’ਤੇ ਵਾਪਸ ਆ ਜਾਂਦੀ ਹੈ ਜੋ ਉਸਨੂੰ ਵਿਰਾਸਤ ਵਿੱਚ ਮਿਲਦਾ ਹੈ।"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "ਉੱਚਾ ਵਧੇਰੇ ਸਖ਼ਤ ਹੈ: ਉੱਚਾ ਮੁੱਲ ਸਵੀਕਾਰ ਹੁੰਦਾ ਹੈ, ਨੀਵਾਂ ਰੱਦ।",
+      "lower": "ਨੀਵਾਂ ਵਧੇਰੇ ਸਖ਼ਤ ਹੈ: ਨੀਵਾਂ ਮੁੱਲ ਸਵੀਕਾਰ ਹੁੰਦਾ ਹੈ, ਉੱਚਾ ਰੱਦ।",
+      "enumOrder": "ਵਿਕਲਪ ਸਭ ਤੋਂ ਘੱਟ ਤੋਂ ਸਭ ਤੋਂ ਵੱਧ ਸਖ਼ਤ ਕ੍ਰਮ ਵਿੱਚ ਹਨ: {options}। ਤੁਸੀਂ ਸਿਰਫ਼ ਸਖ਼ਤ ਸਿਰੇ ਵੱਲ ਜਾ ਸਕਦੇ ਹੋ।"
     }
   },
   "approvalsQueue": {
@@ -14621,8 +14621,8 @@
     "tlSevWarn": "ਧਿਆਨ ਦੀ ਲੋੜ",
     "tlSevError": "ਅਸਫਲ",
     "tlIntake": "ਟਰਨ ਸ਼ੁਰੂ ਹੋਇਆ: {chars} ਅੱਖਰ, {tools} ਟੂਲ, {attachments} ਅਟੈਚਮੈਂਟ",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "ਇਸ ਰਨ ਲਈ ਟੂਲ",
+    "tlRunToolsNone": "ਕੋਈ ਨਹੀਂ (ਸਿਰਫ਼ ਲਿਖਤ)",
     "tlModelCall": "{model} ({provider}) ਨੂੰ ਮਾਡਲ ਕਾਲ, ਰੂਟ {route}",
     "tlFailover": "{model} ({provider}) ਉੱਤੇ ਫੇਲਓਵਰ ਹੋਇਆ",
     "tlRetryModel": "{model} ({provider}) ਉੱਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ, ਰੂਟ {route}",
@@ -14631,6 +14631,7 @@
     "tlToolCall": "ਟੂਲ ਕਾਲ {tool}: {status}",
     "tlApprovalRequested": "{tool} ਚੱਲਣ ਤੋਂ ਪਹਿਲਾਂ ਮਨਜ਼ੂਰੀ ਮੰਗੀ ਗਈ",
     "tlApprovalDecided": "{tool} ਲਈ ਮਨਜ਼ੂਰੀ ਦਾ ਫ਼ੈਸਲਾ ਹੋਇਆ: {decision}",
+    "tlApprovalAutoAllowed": "{tool} ਬਿਨਾਂ ਪੁੱਛੇ ਚੱਲਿਆ: ਨਿਗਰਾਨੀ ਅਧੀਨ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਵਾਲੀ ਕਾਲ",
     "tlContinuation": "ਨਿਰੰਤਰਤਾ: {guard} ({outcome})",
     "tlGuard": "ਗਾਰਡਰੇਲ {guard}: {outcome}",
     "tlVerifyPassed": "ਜਾਂਚ ਪਾਸ: {check}",
@@ -14700,7 +14701,7 @@
     "modeTextOnlyHelp": "ਏਜੰਟ ਆਪਣੇ ਟੂਲਾਂ ਤੋਂ ਬਿਨਾਂ ਜਵਾਬ ਦਿੰਦਾ ਹੈ। ਸੁਰੱਖਿਅਤ: ਕੁਝ ਅਸਲੀ ਨਹੀਂ ਹੁੰਦਾ। ਉਮੀਦ-ਕੀਤੇ-ਟੂਲ ਜਾਂਚਾਂ ਪੂਰੀਆਂ ਨਹੀਂ ਹੋ ਸਕਦੀਆਂ।",
     "modeFull": "ਟੂਲਾਂ ਸਮੇਤ ਪੂਰੀ ਪਾਈਪਲਾਈਨ",
     "modeFullHelp": "ਉਹੀ ਟੂਲ, ਗਾਰਡਰੇਲ ਅਤੇ ਕਦਮ ਸੀਮਾਵਾਂ ਜੋ ਅਸਲੀ ਵਰਤੋਂਕਾਰ ਨੂੰ ਮਿਲਦੀਆਂ ਹਨ। ਉਮੀਦ-ਕੀਤੇ-ਟੂਲ ਅਤੇ ਟ੍ਰੈਜੈਕਟਰੀ ਜਾਂਚਾਂ ਲਈ ਲੋੜੀਂਦੀ।",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "ਜੋ ਟੂਲ ਸਿਰਫ਼ ਪੜ੍ਹਦੇ ਹਨ ਉਹ ਅਸਲ ਵਿੱਚ ਚੱਲਦੇ ਹਨ। ਜੋ ਕੁਝ ਡਾਟਾ ਬਦਲ ਸਕਦਾ ਹੈ, ਸੁਨੇਹਾ ਭੇਜ ਸਕਦਾ ਹੈ ਜਾਂ ਪੈਸੇ ਖਰਚ ਸਕਦਾ ਹੈ, ਉਸਨੂੰ ਸਿਮੂਲੇਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਰਨ ਵਿੱਚ ਸੂਚੀਬੱਧ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਇਸ ਲਈ ਕੁਝ ਅਸਲੀ ਨਹੀਂ ਹੁੰਦਾ। ਸੁਰੱਖਿਆ ਵਰਗੀਕਰਨ ਤੋਂ ਬਿਨਾਂ ਟੂਲ ਵੀ ਸਿਮੂਲੇਟ ਹੁੰਦੇ ਹਨ।",
     "autoApproveLabel": "ਇਵੈਲ ਸੈਂਡਬਾਕਸ ਵਿੱਚ ਟੂਲ ਕਾਲਾਂ ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰ ਕਰੋ",
     "autoApproveHelp": "ਜੋ ਟੂਲ ਕਾਲ ਆਮ ਤੌਰ ਉੱਤੇ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਉਡੀਕ ਕਰਦੀ ਉਸਨੂੰ ਇਵੈਲ ਸੈਂਡਬਾਕਸ ਮਨਜ਼ੂਰ ਕਰ ਦਿੰਦਾ ਹੈ ਤਾਂ ਜੋ ਕੇਸ ਪੂਰਾ ਹੋ ਸਕੇ। ਇਸ ਤੋਂ ਬਿਨਾਂ ਕੇਸ ਪ੍ਰੋਡਕਸ਼ਨ ਵਾਂਗ ਬਿਨਾਂ ਜਵਾਬ ਵਾਲੀ ਮਨਜ਼ੂਰੀ ਉੱਤੇ ਹੀ ਖਤਮ ਹੁੰਦਾ ਹੈ।",
     "autoApproveWarnTitle": "ਸਿਰਫ਼ ਨਾਨ-ਪ੍ਰੋਡਕਸ਼ਨ ਵਰਕਸਪੇਸਾਂ ਲਈ",
@@ -14708,7 +14709,7 @@
     "autoApproveNeedsFull": "ਪਹਿਲਾਂ ਪੂਰੀ ਪਾਈਪਲਾਈਨ ਚਾਲੂ ਕਰੋ: ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰੀ ਸਿਰਫ਼ ਉਦੋਂ ਲਾਗੂ ਹੁੰਦੀ ਹੈ ਜਦੋਂ ਟੂਲ ਚੱਲਦੇ ਹਨ।",
     "autoApproveRefused": "ਇਸ ਵਰਕਸਪੇਸ ਵਿੱਚ ਆਗਿਆ ਨਹੀਂ: {reason}",
     "autoApproveConfirmTitle": "ਇਵੈਲ ਵਿੱਚ ਟੂਲ ਕਾਲਾਂ ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰ ਕਰਨੀਆਂ ਹਨ?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "ਇਸ ਡਾਟਾਸੈੱਟ ਦੇ ਰੀਪਲੇਅ ਵਿੱਚ ਹਰ ਉਹ ਟੂਲ ਕਾਲ ਜੋ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਉਡੀਕ ਕਰਦੀ, ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰ ਹੋ ਜਾਵੇਗੀ। ਮਨਜ਼ੂਰ ਹੋਏ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲ ਅਸਲ ਵਿੱਚ ਚੱਲਦੇ ਹਨ; ਜੋ ਕੁਝ ਬਦਲ ਸਕਦੇ ਹਨ ਉਹ ਹਾਲੇ ਵੀ ਸਿਮੂਲੇਟ ਹੁੰਦੇ ਹਨ। ਇਹ ਸਿਰਫ਼ ਟੈਸਟ ਡਾਟਾ ਵਾਲੇ ਵਰਕਸਪੇਸ ਵਿੱਚ ਹੀ ਕਰੋ। ਰਨ ਦਰਜ ਕਰਦੇ ਹਨ ਕਿ ਉਹ ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰ ਹੋਏ ਸਨ।",
     "autoApproveConfirm": "ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰੀ ਚਾਲੂ ਕਰੋ",
     "trajectoryLabel": "ਟ੍ਰੈਜੈਕਟਰੀ ਜਾਂਚਾਂ",
     "trajectoryOn": "On",
@@ -14733,22 +14734,22 @@
     "samplingSource_platform": "ਪਲੇਟਫ਼ਾਰਮ ਦੁਆਰਾ ਸੈੱਟ",
     "samplingSource_tenant": "ਤੁਹਾਡੇ ਵਰਕਸਪੇਸ ਲਈ ਸੈੱਟ",
     "samplingSource_agent": "ਇਸ ਏਜੰਟ ਲਈ ਸੈੱਟ",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "ਵਰਕਸਪੇਸ ਡਿਫ਼ਾਲਟ",
+    "modeDefaultHelp": "ਤੁਹਾਡੇ ਵਰਕਸਪੇਸ ਦੀ ਸੈਟਿੰਗ ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ (ਪੂਰੀ ਪਾਈਪਲਾਈਨ, ਜਦੋਂ ਤੱਕ ਕਿਸੇ ਐਡਮਿਨ ਨੇ ਇਸਨੂੰ ਨਾ ਬਦਲਿਆ ਹੋਵੇ)। ਹਰ ਰਨ ਫਿਰ ਵੀ ਆਪਣਾ ਮੋਡ ਚੁਣ ਸਕਦਾ ਹੈ।",
+    "modeDefaultCurrent": "ਇਸ ਵੇਲੇ: {mode}",
+    "modeNameFull": "ਪੂਰੀ ਪਾਈਪਲਾਈਨ",
+    "modeNameQuick": "ਤੇਜ਼ (ਸਿਰਫ਼ ਲਿਖਤ)",
+    "badgeFull": "ਪੂਰੀ ਪਾਈਪਲਾਈਨ",
+    "badgeQuick": "ਤੇਜ਼",
+    "datasetModePinnedTitle": "ਇਹ ਡਾਟਾਸੈੱਟ ਹਮੇਸ਼ਾ ਇਸੇ ਤਰ੍ਹਾਂ ਰੀਪਲੇਅ ਹੁੰਦਾ ਹੈ। ਕੋਈ ਇੱਕ ਰਨ ਫਿਰ ਵੀ ਹੋਰ ਮੋਡ ਚੁਣ ਸਕਦਾ ਹੈ।",
+    "datasetModeDefaultTitle": "ਰਨ ਕਿਵੇਂ ਰੀਪਲੇਅ ਹੋਣ, ਇਸ ਬਾਰੇ ਇਹ ਡਾਟਾਸੈੱਟ ਵਰਕਸਪੇਸ ਦੇ ਡਿਫੌਲਟ ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ।",
+    "runModeLabel": "ਅਗਲੇ ਰਨ ਲਈ ਰੀਪਲੇਅ ਮੋਡ",
+    "runModeInherit": "ਡਾਟਾਸੈੱਟ ਦੀ ਸੈਟਿੰਗ ਵਰਤੋ",
+    "runModeHelp": "ਪੂਰੀ ਪਾਈਪਲਾਈਨ ਏਜੰਟ ਨੂੰ ਉਸਦੇ ਟੂਲਾਂ, ਗਾਰਡਰੇਲ ਅਤੇ ਮਨਜ਼ੂਰੀਆਂ ਸਮੇਤ ਸੁਰੱਖਿਅਤ ਸੈਂਡਬਾਕਸ ਵਿੱਚ ਚਲਾਉਂਦੀ ਹੈ: ਸਿਰਫ਼ ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲ ਸੱਚਮੁੱਚ ਚੱਲਦੇ ਹਨ, ਅਤੇ ਜੋ ਕੁਝ ਡਾਟਾ ਬਦਲ ਸਕਦਾ ਹੈ ਜਾਂ ਕੁਝ ਭੇਜ ਸਕਦਾ ਹੈ ਉਸਨੂੰ ਸਿਮੂਲੇਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਤੇਜ਼ ਮੋਡ ਟੂਲ ਰੋਕ ਲੈਂਦਾ ਹੈ ਅਤੇ ਸਿਰਫ਼ ਲਿਖੇ ਜਵਾਬ ਨੂੰ ਪਰਖਦਾ ਹੈ।",
+    "runModeFullTitle": "ਇਸ ਰਨ ਨੇ ਇਵਾਲ ਸੈਂਡਬਾਕਸ ਵਿੱਚ ਪੂਰੀ ਪਾਈਪਲਾਈਨ ਵਰਤੀ।",
+    "runModeQuickTitle": "ਇਹ ਰਨ ਸਿਰਫ਼ ਲਿਖਤ ਵਾਲਾ ਤੇਜ਼ ਰੀਪਲੇਅ ਸੀ: ਏਜੰਟ ਦੇ ਟੂਲ ਰੋਕ ਲਏ ਗਏ ਸਨ।",
+    "runSimulatedTools": "ਇਸ ਰਨ ਵਿੱਚ ਸਿਮੂਲੇਟ ਕੀਤੇ ਗਏ, ਚਲਾਏ ਨਹੀਂ ਗਏ (ਉਹ ਡਾਟਾ ਬਦਲ ਸਕਦੇ ਜਾਂ ਪਲੇਟਫਾਰਮ ਤੋਂ ਬਾਹਰ ਪਹੁੰਚ ਸਕਦੇ ਸਨ): {tools}।",
+    "toolStatusSimulated": "ਸਿਮੂਲੇਟ ਕੀਤਾ, ਚਲਾਇਆ ਨਹੀਂ"
   },
   "agentLab": {
     "wtLabel": "ਏਜੰਟ ਦੇ ਟੂਲਾਂ ਨਾਲ ਚਲਾਓ",
@@ -14781,6 +14782,14 @@
       "memory": {
         "label": "ਮੈਮੋਰੀ",
         "description": "ਏਜੰਟ ਕਿੰਨੀਆਂ ਯਾਦਾਂ ਰੱਖਦਾ ਅਤੇ ਯਾਦ ਕਰਦਾ ਹੈ।"
+      },
+      "attachments": {
+        "label": "ਚੈਟ ਅੱਪਲੋਡ",
+        "description": "ਲੋਕ ਚੈਟ ਸੁਨੇਹਿਆਂ ਨਾਲ ਕਿੰਨੀਆਂ ਵੱਡੀਆਂ ਫਾਈਲਾਂ ਜੋੜ ਸਕਦੇ ਹਨ।"
+      },
+      "skills": {
+        "label": "ਸਕਿੱਲ",
+        "description": "ਇੰਸਟਾਲ ਕੀਤੀਆਂ ਸਕਿੱਲਾਂ ਦੀ ਸੂਚੀ ਏਜੰਟ ਦੀਆਂ ਹਦਾਇਤਾਂ ਦਾ ਕਿੰਨਾ ਹਿੱਸਾ ਵਰਤ ਸਕਦੀ ਹੈ।"
       },
       "aux": {
         "label": "ਬੈਕਗ੍ਰਾਊਂਡ ਮਾਡਲ ਕਾਲਾਂ",
@@ -14847,6 +14856,28 @@
           "label": "ਅਧੂਰੇ ਜਵਾਬ ਤੋਂ ਬਾਅਦ ਵਾਧੂ ਪਾਸ",
           "description": "ਐਲਾਨੇ ਪਰ ਨਾ ਚੁੱਕੇ ਕਦਮ ਉੱਤੇ ਮਾਡਲ ਦਾ ਜਵਾਬ ਰੁਕ ਜਾਵੇ ਤਾਂ ਉਸਨੂੰ ਹੋਰ ਕਿੰਨੀ ਵਾਰ ਅੱਗੇ ਵਧਣ ਲਈ ਕਿਹਾ ਜਾਂਦਾ ਹੈ।",
           "help": "ਉਹਨਾਂ ਏਜੰਟਾਂ ਲਈ ਵਧਾਓ ਜੋ ਅਕਸਰ ਕਦਮ ਐਲਾਨ ਕਰਕੇ ਰੁਕ ਜਾਂਦੇ ਹਨ। ਹਰ ਵਾਧੂ ਪਾਸ ਇੱਕ ਮਾਡਲ ਕਾਲ ਖਰਚਦਾ ਹੈ।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "ਸੀਮਾ ਤੋਂ ਬਾਅਦ ਜਵਾਬ ਦਿੱਤੀਆਂ ਕਾਲਾਂ",
+          "description": "ਟਰਨ ਦੀ ਟੂਲ ਸੀਮਾ ਮੁੱਕਣ ਤੋਂ ਬਾਅਦ ਮਾਡਲ ਹੋਰ ਕਿੰਨੀਆਂ ਟੂਲ ਕਾਲਾਂ ਅਜ਼ਮਾ ਸਕਦਾ ਹੈ। ਹਰ ਇੱਕ ਨੂੰ \"ਜੋ ਹੈ ਉਸੇ ਨਾਲ ਜਵਾਬ ਦੇ\" ਨੋਟ ਸਮੇਤ ਰੱਦ ਕੀਤਾ ਜਾਂਦਾ ਹੈ; ਇਸ ਗਿਣਤੀ ਤੋਂ ਅੱਗੇ ਟਰਨ ਗਲਤੀ ਨਾਲ ਰੋਕ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।",
+          "help": "ਜੇ ਮਾਡਲ ਨੂੰ ਟੂਲ ਕਾਲ ਕਰਨੀਆਂ ਬੰਦ ਕਰਨ ਲਈ ਕੁਝ ਕੋਸ਼ਿਸ਼ਾਂ ਚਾਹੀਦੀਆਂ ਹਨ ਤਾਂ ਵਧਾਓ। ਲੂਪ ਵਿੱਚ ਫਸੇ ਟਰਨ ਜਲਦੀ ਖ਼ਤਮ ਕਰਨ ਲਈ ਘਟਾਓ। 0 ਸੀਮਾ ਤੋਂ ਉੱਪਰ ਦੀ ਪਹਿਲੀ ਕਾਲ ’ਤੇ ਟਰਨ ਰੋਕ ਦਿੰਦਾ ਹੈ।"
+        },
+        "supervisedDivisor": {
+          "label": "ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟਾਂ ਨੂੰ ਟੂਲ ਸੀਮਾ ਦਾ 1/N ਮਿਲਦਾ ਹੈ",
+          "description": "ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟ ਨੂੰ ਟਰਨ ਦੀ ਟੂਲ-ਕਾਲ ਸੀਮਾ ਇਸ ਸੰਖਿਆ ਨਾਲ ਭਾਗ ਹੋ ਕੇ ਮਿਲਦੀ ਹੈ, ਪਰ ਹੇਠਲੇ ਘੱਟੋ-ਘੱਟ ਮੁੱਲ ਤੋਂ ਕਦੇ ਘੱਟ ਨਹੀਂ।",
+          "help": "ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟਾਂ ਨੂੰ ਵਧੇਰੇ ਸਖ਼ਤੀ ਨਾਲ ਰੱਖਣ ਲਈ ਵਧਾਓ। 1 ਉਨ੍ਹਾਂ ਨੂੰ ਪੂਰੀ ਸੀਮਾ ਦਿੰਦਾ ਹੈ।"
+        },
+        "supervisedMinSteps": {
+          "label": "ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟ ਲਈ ਘੱਟੋ-ਘੱਟ ਟੂਲ ਕਾਲਾਂ",
+          "description": "ਉੱਪਰਲੀ ਸੰਖਿਆ ਭਾਵੇਂ ਕਿੰਨੀ ਵੀ ਉੱਚੀ ਹੋਵੇ, ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟ ਨੂੰ ਮਿਲਣ ਵਾਲੀ ਸਭ ਤੋਂ ਛੋਟੀ ਟੂਲ-ਕਾਲ ਸੀਮਾ।",
+          "help": "ਇਸਨੂੰ 3 ਜਾਂ ਵੱਧ ਰੱਖੋ ਤਾਂ ਜੋ ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟ ਕਈ ਪੜਾਵਾਂ ਵਾਲਾ ਸਾਧਾਰਨ ਕੰਮ ਫਿਰ ਵੀ ਪੂਰਾ ਕਰ ਸਕੇ।"
+        },
+        "autonomousMultiplier": {
+          "label": "ਪੂਰੀ ਖੁਦਮੁਖਤਿਆਰੀ ਵਾਲੇ ਏਜੰਟਾਂ ਨੂੰ ਸੀਮਾ ਦੇ N ਗੁਣਾ ਮਿਲਦੇ ਹਨ",
+          "description": "ਪੂਰੀ ਖੁਦਮੁਖਤਿਆਰੀ ਵਾਲੇ ਏਜੰਟ ਨੂੰ ਟਰਨ ਦੀ ਟੂਲ-ਕਾਲ ਸੀਮਾ ਇਸ ਸੰਖਿਆ ਨਾਲ ਗੁਣਾ ਹੋ ਕੇ ਮਿਲਦੀ ਹੈ।",
+          "help": "ਉਨ੍ਹਾਂ ਏਜੰਟਾਂ ਲਈ ਵਧਾਓ ਜੋ ਬਿਨਾਂ ਕਿਸੇ ਦੀ ਨਿਗਰਾਨੀ ਦੇ ਲੰਮੇ ਕੰਮ ਚਲਾਉਂਦੇ ਹਨ; ਫਿਰ ਉਹ ਇੱਕ ਟਰਨ ਵਿੱਚ ਵੱਧ ਕਾਲਾਂ ਅਤੇ ਪੈਸੇ ਖਰਚ ਸਕਦੇ ਹਨ। 1 ਉਨ੍ਹਾਂ ਨੂੰ ਮਿਆਰੀ ਸੀਮਾ ਦਿੰਦਾ ਹੈ।"
         }
       }
     },
@@ -14918,6 +14949,82 @@
           "label": "ਫਾਲੋ-ਅੱਪ ਟੂਲ ਕਿੰਨੀ ਦੇਰ ਪੇਸ਼ ਰਹਿੰਦੇ ਹਨ",
           "description": "ਵਰਤੋਂ ਤੋਂ ਬਾਅਦ ਛੋਟੇ ਫਾਲੋ-ਅੱਪ ਸੁਨੇਹਿਆਂ ਲਈ ਟੂਲ ਕਿੰਨੀ ਦੇਰ ਪੇਸ਼ ਰਹਿੰਦਾ ਹੈ।",
           "help": "ਲੰਬੀ ਵਿੰਡੋ ਲੰਬੇ ਕੰਮ ਸੈਸ਼ਨਾਂ ਵਿੱਚ ਮਦਦ ਕਰਦੀ ਹੈ, ਛੋਟੀ ਟੂਲ ਸੂਚੀ ਨੂੰ ਛੋਟਾ ਰੱਖਦੀ ਹੈ।"
+        },
+        "maxStickyTools": {
+          "label": "ਫਾਲੋ-ਅੱਪ ਵਿੱਚ ਸੁਝਾਏ ਜਾਂਦੇ ਵੱਧ ਤੋਂ ਵੱਧ ਟੂਲ",
+          "description": "ਛੋਟੇ ਫਾਲੋ-ਅੱਪ ਸੁਨੇਹੇ ਵਿੱਚ ਅੱਗੇ ਲਿਜਾਏ ਜਾਂਦੇ ਟੂਲਾਂ ਦੀ ਵੱਧ ਤੋਂ ਵੱਧ ਗਿਣਤੀ। 0 ਕੋਈ ਨਹੀਂ ਰੱਖਦਾ।",
+          "help": "ਜਦੋਂ ਕੋਈ ਕੰਮ ਕਈ ਟੂਲ ਵਰਤਦਾ ਹੈ ਤਾਂ ਵੱਡੀ ਸੰਖਿਆ ਮਦਦ ਕਰਦੀ ਹੈ; ਛੋਟੀ ਸੰਖਿਆ ਟੂਲ ਸੂਚੀ ਨੂੰ ਛੋਟੀ ਰੱਖਦੀ ਹੈ।"
+        },
+        "keepPrimaryModel": {
+          "label": "ਫਾਲੋ-ਅੱਪ ਲਈ ਮੁੱਖ ਮਾਡਲ ਰੱਖੋ",
+          "description": "ਉਸ ਗੱਲਬਾਤ ਵਿੱਚ ਛੋਟਾ ਫਾਲੋ-ਅੱਪ ਜਿਸ ਵਿੱਚ ਪਹਿਲਾਂ ਟੂਲ ਵਰਤੇ ਜਾ ਚੁੱਕੇ ਹਨ, ਸਸਤੇ ਮਾਡਲ ਦੀ ਥਾਂ ਏਜੰਟ ਦੇ ਮੁੱਖ ਮਾਡਲ ’ਤੇ ਹੀ ਰਹਿੰਦਾ ਹੈ।",
+          "help": "ਇਸਨੂੰ ਬੰਦ ਕਰੋ ਤਾਂ ਜੋ ਲਾਗਤ ਰੂਟਿੰਗ \"ਹਾਂ\" ਵਰਗੇ ਫਾਲੋ-ਅੱਪ ਸਸਤੇ ਮਾਡਲ ਨੂੰ ਭੇਜੇ, ਪਰ ਚੱਲ ਰਹੇ ਕੰਮ ਨੂੰ ਕਮਜ਼ੋਰ ਢੰਗ ਨਾਲ ਸੰਭਾਲਣ ਦਾ ਜੋਖਮ ਰਹਿੰਦਾ ਹੈ।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "ਜਵਾਬ ਮੁੜ ਵਰਤਣ ਲਈ ਸਵਾਲ ਕਿੰਨਾ ਮਿਲਦਾ-ਜੁਲਦਾ ਹੋਵੇ",
+          "description": "ਉਨ੍ਹਾਂ ਏਜੰਟਾਂ ਲਈ ਜੋ ਮਿਲਦੇ-ਜੁਲਦੇ ਸਵਾਲਾਂ ਦੇ ਜਵਾਬ ਮੁੜ ਵਰਤਦੇ ਹਨ: ਸੰਭਾਲਿਆ ਜਵਾਬ ਦੇਣ ਲਈ ਨਵਾਂ ਸਵਾਲ ਪਿਛਲੇ ਸਵਾਲ ਦੇ ਕਿੰਨਾ ਨੇੜੇ ਹੋਵੇ, 0.85 ਤੋਂ 1।",
+          "help": "ਘੱਟ ਸੰਖਿਆ ਵੱਧ ਦੁਹਰਾਓ ਨੂੰ ਜਵਾਬ ਦਿੰਦੀ ਹੈ ਪਰ ਕਿਸੇ ਹੋਰ ਸਵਾਲ ਲਈ ਬਣਿਆ ਜਵਾਬ ਦੇ ਦੇਣ ਦਾ ਜੋਖਮ ਹੁੰਦਾ ਹੈ। ਗਲਤ ਜਵਾਬ ਮਹਿੰਗੇ ਹੋਣ ਤਾਂ ਇਸਨੂੰ ਉੱਚਾ ਰੱਖੋ। ਜਵਾਬ ਸਿਰਫ਼ ਉਸੇ ਵਿਅਕਤੀ ਲਈ ਮੁੜ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ ਜਿਸਨੂੰ ਉਹ ਦਿੱਤਾ ਗਿਆ ਸੀ।"
+        },
+        "ttl": {
+          "label": "ਮੁੜ ਵਰਤਣਯੋਗ ਜਵਾਬ ਕਿੰਨੀ ਦੇਰ ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ",
+          "description": "ਸੰਭਾਲੇ ਜਵਾਬ ਨੂੰ ਹਟਾਏ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਮਿਲਦੇ-ਜੁਲਦੇ ਸਵਾਲ ਨੂੰ ਕਿੰਨੀ ਦੇਰ ਤੱਕ ਦਿੱਤਾ ਜਾ ਸਕਦਾ ਹੈ।",
+          "help": "ਜੇ ਤੁਹਾਡੇ ਜਵਾਬ ਜਲਦੀ ਪੁਰਾਣੇ ਹੋ ਜਾਂਦੇ ਹਨ ਤਾਂ ਇਸਨੂੰ ਛੋਟਾ ਕਰੋ।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "ਪ੍ਰਤੀ ਏਜੰਟ ਵੱਧ ਤੋਂ ਵੱਧ ਸੰਭਾਲੇ ਜਵਾਬ",
+          "description": "ਇੱਕ ਏਜੰਟ ਮੁੜ ਵਰਤੋਂ ਲਈ ਕਿੰਨੇ ਜਵਾਬ ਰੱਖਦਾ ਹੈ। ਇਸ ਤੋਂ ਵੱਧ ਹੋਣ ’ਤੇ ਸਭ ਤੋਂ ਪੁਰਾਣੇ ਹਟਾ ਦਿੱਤੇ ਜਾਂਦੇ ਹਨ।",
+          "help": "ਵੱਡਾ ਭੰਡਾਰ ਵੱਧ ਦੁਹਰਾਓ ਲੱਭਦਾ ਹੈ ਅਤੇ ਵੱਧ ਸਟੋਰੇਜ ਵਰਤਦਾ ਹੈ।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "ਗੱਲਬਾਤ ਵਿੱਚ ਟੂਲ ਕਾਲਾਂ ਦਾ ਰਿਕਾਰਡ ਰੱਖੋ",
+          "description": "ਹਰ ਟਰਨ ਦੀਆਂ ਟੂਲ ਕਾਲਾਂ ਦਾ ਛੋਟਾ ਰਿਕਾਰਡ ਗੱਲਬਾਤ ਨਾਲ ਸੰਭਾਲੋ, ਤਾਂ ਜੋ ਬਾਅਦ ਦੇ ਟਰਨ ਦੇਖ ਸਕਣ ਕਿ ਕੀ ਕੀਤਾ ਗਿਆ ਸੀ।",
+          "help": "ਗੱਲਬਾਤ ਦਾ ਇਤਿਹਾਸ ਸਿਰਫ਼ ਲਿਖਤ ਰੱਖਣ ਲਈ ਇਸਨੂੰ ਬੰਦ ਕਰੋ; ਤਦ ਏਜੰਟ ਨਹੀਂ ਜਾਣ ਸਕਦਾ ਕਿ ਪਿਛਲੇ ਟਰਨਾਂ ਵਿੱਚ ਉਸਦੇ ਟੂਲਾਂ ਨੇ ਕੀ ਕੀਤਾ। ਇਹ ਪੂਰੇ ਵਰਕਸਪੇਸ ’ਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ।"
+        },
+        "replayEnabled": {
+          "label": "ਮਾਡਲ ਨੂੰ ਟੂਲ ਰਿਕਾਰਡ ਦਿਖਾਓ",
+          "description": "ਮਾਡਲ ਨੂੰ ਗੱਲਬਾਤ ਦਿੰਦੇ ਸਮੇਂ ਪਿਛਲੀਆਂ ਟੂਲ ਕਾਲਾਂ ਦਾ ਸੰਭਾਲਿਆ ਰਿਕਾਰਡ ਸ਼ਾਮਲ ਕਰੋ।",
+          "help": "ਇਸਨੂੰ ਬੰਦ ਕਰੋ ਤਾਂ ਜੋ ਰਿਕਾਰਡ ਸੰਭਾਲਿਆ ਜਾਂਦਾ ਰਹੇ ਪਰ ਉਸ ਲਈ ਮਾਡਲ ਦੀ ਕੰਮ ਵਾਲੀ ਥਾਂ ਨਾ ਵਰਤੀ ਜਾਵੇ।"
+        },
+        "replayTurns": {
+          "label": "ਪਿਛਲੇ ਟਰਨ ਜਿਨ੍ਹਾਂ ਦਾ ਟੂਲ ਰਿਕਾਰਡ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ",
+          "description": "ਟੂਲ ਵਰਤਣ ਵਾਲੇ ਸਭ ਤੋਂ ਹਾਲੀਆ ਕਿੰਨੇ ਟਰਨਾਂ ਦਾ ਰਿਕਾਰਡ ਮਾਡਲ ਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ।",
+          "help": "ਵੱਡੀ ਸੰਖਿਆ ਲੰਮੇ ਕੰਮ ਦੇ ਸੈਸ਼ਨਾਂ ਵਿੱਚ ਮਦਦ ਕਰਦੀ ਹੈ ਪਰ ਮਾਡਲ ਦੀ ਕੰਮ ਵਾਲੀ ਥਾਂ ਵੱਧ ਵਰਤਦੀ ਹੈ।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "ਪ੍ਰਤੀ ਟਰਨ ਸੂਚੀਬੱਧ ਟੂਲ ਕਾਲਾਂ",
+          "description": "ਇੱਕ ਟਰਨ ਦੀਆਂ ਕਿੰਨੀਆਂ ਟੂਲ ਕਾਲਾਂ ਰਿਕਾਰਡ ਵਿੱਚ ਲਿਖੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਅੱਗੇ ਦੀਆਂ ਕਾਲਾਂ ਸਿਰਫ਼ ਗਿਣੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+          "help": "ਉਨ੍ਹਾਂ ਟਰਨਾਂ ਲਈ ਵਧਾਓ ਜੋ ਬਹੁਤ ਕਾਲਾਂ ਕਰਦੇ ਹਨ ਅਤੇ ਜਿੱਥੇ ਹਰ ਇੱਕ ਯਾਦ ਰੱਖਣੀ ਹੋਵੇ।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "ਪ੍ਰਤੀ ਟਰਨ ਸਭ ਤੋਂ ਲੰਮਾ ਟੂਲ ਰਿਕਾਰਡ",
+          "description": "ਇੱਕ ਟਰਨ ਦੇ ਰਿਕਾਰਡ ਦੇ ਕਿੰਨੇ ਅੱਖਰ ਮਾਡਲ ਨੂੰ ਦਿਖਾਏ ਜਾਂਦੇ ਹਨ; ਬਾਕੀ ਗਿਣੇ ਜਾਂਦੇ ਹਨ, ਸੂਚੀਬੱਧ ਨਹੀਂ ਹੁੰਦੇ।",
+          "help": "ਬਾਅਦ ਦੇ ਹਰ ਟਰਨ ’ਤੇ ਲਾਗਤ ਬਚਾਉਣ ਲਈ ਘਟਾਓ, ਵੱਧ ਵੇਰਵਾ ਰੱਖਣ ਲਈ ਵਧਾਓ।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "ਸਭ ਤੋਂ ਵੱਡਾ ਚਿੱਤਰ ਅੱਪਲੋਡ (MB)",
+          "description": "ਚੈਟ ਸੁਨੇਹੇ ਨਾਲ ਕੋਈ ਵਿਅਕਤੀ ਸਭ ਤੋਂ ਵੱਡਾ ਕਿੰਨਾ ਚਿੱਤਰ ਜੋੜ ਸਕਦਾ ਹੈ, ਮੈਗਾਬਾਈਟ ਵਿੱਚ। ਪਲੇਟਫਾਰਮ ਦੀ ਇੱਕ ਸਮੁੱਚੀ ਫਾਈਲ ਸੀਮਾ ਵੀ ਹੈ ਜਿਸਨੂੰ ਇਹ ਪਾਰ ਨਹੀਂ ਕਰ ਸਕਦਾ।",
+          "help": "ਫੋਟੋਆਂ ਅਤੇ ਸਕ੍ਰੀਨਸ਼ਾਟਾਂ ਲਈ ਵਧਾਓ; ਵੱਡੀਆਂ ਫਾਈਲਾਂ ਭੇਜਣ ਵਿੱਚ ਹੌਲੀ ਹੁੰਦੀਆਂ ਹਨ ਅਤੇ ਮਾਡਲ ਦਾ ਵੱਧ ਕੋਟਾ ਵਰਤਦੀਆਂ ਹਨ।"
+        },
+        "maxAudioMb": {
+          "label": "ਸਭ ਤੋਂ ਵੱਡਾ ਆਡੀਓ ਅੱਪਲੋਡ (MB)",
+          "description": "ਚੈਟ ਸੁਨੇਹੇ ਨਾਲ ਕੋਈ ਵਿਅਕਤੀ ਸਭ ਤੋਂ ਵੱਡੀ ਕਿੰਨੀ ਆਡੀਓ ਫਾਈਲ ਜੋੜ ਸਕਦਾ ਹੈ, ਮੈਗਾਬਾਈਟ ਵਿੱਚ। ਪਲੇਟਫਾਰਮ ਦੀ ਇੱਕ ਸਮੁੱਚੀ ਫਾਈਲ ਸੀਮਾ ਵੀ ਹੈ ਜਿਸਨੂੰ ਇਹ ਪਾਰ ਨਹੀਂ ਕਰ ਸਕਦਾ।",
+          "help": "ਲੰਮੀਆਂ ਰਿਕਾਰਡਿੰਗਾਂ ਲਈ ਵਧਾਓ; ਵੱਡੀਆਂ ਫਾਈਲਾਂ ਭੇਜਣ ਵਿੱਚ ਹੌਲੀ ਹੁੰਦੀਆਂ ਹਨ ਅਤੇ ਮਾਡਲ ਦਾ ਵੱਧ ਕੋਟਾ ਵਰਤਦੀਆਂ ਹਨ।"
+        },
+        "maxVideoMb": {
+          "label": "ਸਭ ਤੋਂ ਵੱਡਾ ਵੀਡੀਓ ਅੱਪਲੋਡ (MB)",
+          "description": "ਚੈਟ ਸੁਨੇਹੇ ਨਾਲ ਕੋਈ ਵਿਅਕਤੀ ਸਭ ਤੋਂ ਵੱਡੀ ਕਿੰਨੀ ਵੀਡੀਓ ਜੋੜ ਸਕਦਾ ਹੈ, ਮੈਗਾਬਾਈਟ ਵਿੱਚ। ਪਲੇਟਫਾਰਮ ਦੀ ਇੱਕ ਸਮੁੱਚੀ ਫਾਈਲ ਸੀਮਾ ਵੀ ਹੈ ਜਿਸਨੂੰ ਇਹ ਪਾਰ ਨਹੀਂ ਕਰ ਸਕਦਾ।",
+          "help": "ਲੰਮੀਆਂ ਕਲਿੱਪਾਂ ਲਈ ਵਧਾਓ; ਵੱਡੀਆਂ ਫਾਈਲਾਂ ਭੇਜਣ ਵਿੱਚ ਹੌਲੀ ਹੁੰਦੀਆਂ ਹਨ ਅਤੇ ਮਾਡਲ ਦਾ ਵੱਧ ਕੋਟਾ ਵਰਤਦੀਆਂ ਹਨ।"
+        },
+        "maxDocumentMb": {
+          "label": "ਸਭ ਤੋਂ ਵੱਡਾ ਦਸਤਾਵੇਜ਼ ਅੱਪਲੋਡ (MB)",
+          "description": "ਚੈਟ ਸੁਨੇਹੇ ਨਾਲ ਕੋਈ ਵਿਅਕਤੀ ਸਭ ਤੋਂ ਵੱਡਾ ਕਿੰਨਾ ਦਸਤਾਵੇਜ਼ ਜਾਂ ਸਪ੍ਰੈੱਡਸ਼ੀਟ ਜੋੜ ਸਕਦਾ ਹੈ, ਮੈਗਾਬਾਈਟ ਵਿੱਚ। ਪਲੇਟਫਾਰਮ ਦੀ ਇੱਕ ਸਮੁੱਚੀ ਫਾਈਲ ਸੀਮਾ ਵੀ ਹੈ ਜਿਸਨੂੰ ਇਹ ਪਾਰ ਨਹੀਂ ਕਰ ਸਕਦਾ।",
+          "help": "ਲੰਮੀਆਂ ਰਿਪੋਰਟਾਂ ਅਤੇ ਵੱਡੀਆਂ ਡਾਟਾ ਫਾਈਲਾਂ ਲਈ ਵਧਾਓ; ਵੱਡੀਆਂ ਫਾਈਲਾਂ ਪ੍ਰਕਿਰਿਆ ਕਰਨ ਵਿੱਚ ਹੌਲੀ ਹੁੰਦੀਆਂ ਹਨ।"
         }
       },
       "continuation": {
@@ -14976,6 +15083,20 @@
           "help": "ਉਹਨਾਂ ਸਹਾਇਕਾਂ ਲਈ ਵਧਾਓ ਜਿਨ੍ਹਾਂ ਨੂੰ ਲੋਕਾਂ ਬਾਰੇ ਬਹੁਤ ਕੁਝ ਯਾਦ ਰੱਖਣਾ ਚਾਹੀਦਾ ਹੈ; ਇਹ ਸਟੋਰੇਜ ਅਤੇ ਯਾਦ ਕਰਨ ਦੀ ਲਾਗਤ ਵੀ ਵਧਾਉਂਦਾ ਹੈ।"
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "ਵੱਧ ਤੋਂ ਵੱਧ ਸਾਂਝੀਆਂ ਯਾਦਾਂ",
+          "description": "ਵਰਕਸਪੇਸ ਵਿੱਚ ਸਾਂਝੀਆਂ ਕੀਤੀਆਂ ਕਿੰਨੀਆਂ ਯਾਦਾਂ ਰੱਖੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਇਸ ਤੋਂ ਵੱਧ ਹੋਣ ’ਤੇ ਸਭ ਤੋਂ ਪੁਰਾਣੀਆਂ ਹਟਾ ਦਿੱਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+          "help": "ਸਾਂਝੇ ਗਿਆਨ ’ਤੇ ਨਿਰਭਰ ਵੱਡੀਆਂ ਟੀਮਾਂ ਲਈ ਵਧਾਓ; ਇਸ ਨਾਲ ਸਟੋਰੇਜ ਅਤੇ ਯਾਦ ਕਰਨ ਦੀ ਲਾਗਤ ਵੀ ਵਧਦੀ ਹੈ। ਇਹ ਪੂਰੇ ਵਰਕਸਪੇਸ ’ਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ਆਨ-ਡਿਵਾਈਸ ਚੈਟ ਨੂੰ ਦਿੱਤੀਆਂ ਯਾਦਾਂ",
+          "description": "ਆਨ-ਡਿਵਾਈਸ ਸੈਸ਼ਨ ਦੇ ਸ਼ੁਰੂ ਹੋਣ ’ਤੇ ਉਸਨੂੰ ਕਿੰਨੀਆਂ ਯਾਦਾਂ ਸੌਂਪੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+          "help": "ਆਨ-ਡਿਵਾਈਸ ਮਾਡਲਾਂ ਦੀ ਕੰਮ ਵਾਲੀ ਥਾਂ ਛੋਟੀ ਹੁੰਦੀ ਹੈ, ਇਸ ਲਈ ਇਸਨੂੰ ਘੱਟ ਰੱਖੋ।"
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "ਗ੍ਰਾਫ਼ ਮੈਮੋਰੀ ਤੋਂ ਯਾਦ ਕੀਤੇ ਤੱਥ",
@@ -14986,6 +15107,20 @@
           "label": "ਹਰ ਲੁਕਅੱਪ ਵਿੱਚ ਪੜ੍ਹੇ ਗ੍ਰਾਫ਼ ਮਾਰਗ",
           "description": "ਇੱਕ ਲੁਕਅੱਪ ਦੇ ਤੱਥ ਲੱਭਣ ਲਈ ਮੈਮੋਰੀ ਗ੍ਰਾਫ਼ ਦੇ ਕਿੰਨੇ ਕਨੈਕਸ਼ਨ ਪੜ੍ਹੇ ਜਾਂਦੇ ਹਨ।",
           "help": "ਕਈ ਕਨੈਕਸ਼ਨ ਇੱਕੋ ਤੱਥ ਤੱਕ ਲਿਜਾ ਸਕਦੇ ਹਨ, ਇਸ ਲਈ ਸੰਘਣੇ ਜੁੜੇ ਯਾਦਾਂ ਨੂੰ ਸਭ ਕੁਝ ਲੱਭਣ ਲਈ ਵੱਧ ਸੰਖਿਆ ਚਾਹੀਦੀ ਹੋ ਸਕਦੀ ਹੈ। ਵੱਧ ਸੰਖਿਆ ਹਰ ਲੁਕਅੱਪ ਨੂੰ ਹੌਲੀ ਕਰਦੀ ਹੈ।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "ਪ੍ਰੋਂਪਟ ਵਿੱਚ ਸੂਚੀਬੱਧ ਵੱਧ ਤੋਂ ਵੱਧ ਸਕਿੱਲਾਂ",
+          "description": "ਏਜੰਟ ਨੂੰ ਪਤਾ ਹੋਵੇ ਕਿ ਉਹ ਮੌਜੂਦ ਹਨ, ਇਸ ਲਈ ਉਸਦੀਆਂ ਹਦਾਇਤਾਂ ਵਿੱਚ ਤੁਹਾਡੀਆਂ ਕਿੰਨੀਆਂ ਸਕਿੱਲਾਂ ਦੇ ਨਾਮ ਦਿੱਤੇ ਜਾਂਦੇ ਹਨ। ਬਾਕੀ ਗਿਣੀਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਸੂਚੀਬੱਧ ਨਹੀਂ ਹੁੰਦੀਆਂ।",
+          "help": "ਜੇ ਤੁਹਾਡੇ ਕੋਲ ਬਹੁਤ ਸਕਿੱਲਾਂ ਹਨ ਤਾਂ ਵਧਾਓ; ਸੂਚੀਬੱਧ ਹਰ ਸਕਿੱਲ ਹਰ ਟਰਨ ਵਿੱਚ ਮਾਡਲ ਦੀ ਥੋੜ੍ਹੀ ਕੰਮ ਵਾਲੀ ਥਾਂ ਵਰਤਦੀ ਹੈ। ਇਹ ਪੂਰੇ ਵਰਕਸਪੇਸ ’ਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ।"
+        },
+        "maxBlockChars": {
+          "label": "ਪ੍ਰੋਂਪਟ ਵਿੱਚ ਸਕਿੱਲ ਸੂਚੀ ਦਾ ਆਕਾਰ",
+          "description": "ਏਜੰਟ ਦੀਆਂ ਹਦਾਇਤਾਂ ਵਿੱਚ ਸਕਿੱਲਾਂ ਦੀ ਸੂਚੀ ਕਿੰਨੇ ਅੱਖਰ ਲੈ ਸਕਦੀ ਹੈ। ਭਰ ਜਾਣ ’ਤੇ ਬਾਅਦ ਦੀਆਂ ਸਕਿੱਲਾਂ ਸਿਰਫ਼ ਨਾਮ ਤੱਕ ਛੋਟੀਆਂ ਕਰ ਦਿੱਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+          "help": "ਵੱਧ ਸਕਿੱਲਾਂ ਦੇ ਵੇਰਵੇ ਰੱਖਣ ਲਈ ਵਧਾਓ, ਹਰ ਟਰਨ ਵਿੱਚ ਟੋਕਨ ਬਚਾਉਣ ਲਈ ਘਟਾਓ। ਇਹ ਪੂਰੇ ਵਰਕਸਪੇਸ ’ਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ।"
         }
       }
     },
@@ -15038,6 +15173,17 @@
           "description": "ਜਾਂਚੇ ਟੈਕਸਟ ਦਾ ਕਿੰਨਾ ਹਿੱਸਾ AI ਸੁਰੱਖਿਆ ਜੱਜ ਪੜ੍ਹਦੇ ਹਨ। ਉਸ ਤੋਂ ਪਰੇ ਦੇ ਟੈਕਸਟ ਦਾ ਫ਼ੈਸਲਾ ਨਹੀਂ ਹੁੰਦਾ।",
           "help": "ਤੁਸੀਂ ਇਸਨੂੰ ਸਿਰਫ਼ ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲ ਤੋਂ ਉੱਪਰ ਵਧਾ ਸਕਦੇ ਹੋ। ਵਧਾਉਣ ਨਾਲ ਲੰਬੇ ਟੂਲ ਨਤੀਜਿਆਂ ਦਾ ਪੂਰਾ ਫ਼ੈਸਲਾ ਹੁੰਦਾ ਹੈ ਪਰ ਹਰ ਜੱਜ ਕਾਲ ਵੱਡੀ ਹੋ ਜਾਂਦੀ ਹੈ।"
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟ ਅਤੇ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲ",
+          "description": "ਕੀ ਨਿਗਰਾਨੀ ਅਧੀਨ ਖੁਦਮੁਖਤਿਆਰੀ ਪੱਧਰ ਵਾਲਾ ਏਜੰਟ ਖੋਜ ਜਾਂ ਲੁੱਕਅੱਪ ਵਰਗੇ ਸਿਰਫ਼ ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲ ਤੋਂ ਪਹਿਲਾਂ ਵੀ ਤੁਹਾਨੂੰ ਪੁੱਛਦਾ ਹੈ। ਲਿਖਣਾ, ਭੇਜਣਾ ਅਤੇ ਉਹ ਟੂਲ ਜਿਨ੍ਹਾਂ ਨੂੰ ਪਲੇਟਫਾਰਮ ਨੇ ਸ਼੍ਰੇਣੀਬੱਧ ਨਹੀਂ ਕੀਤਾ, ਹਮੇਸ਼ਾ ਪੁੱਛਦੇ ਹਨ।",
+          "help": "ਤੁਸੀਂ ਇਸਨੂੰ ਸਿਰਫ਼ ਪਲੇਟਫਾਰਮ ਦੀ ਸੈਟਿੰਗ ਨਾਲੋਂ ਵੱਧ ਸਖ਼ਤ ਕਰ ਸਕਦੇ ਹੋ। ਹਰ ਵਾਰ ਪੁੱਛਣਾ ਸਭ ਤੋਂ ਸੁਰੱਖਿਅਤ ਚੋਣ ਹੈ; ਸਿਰਫ਼-ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲਾਂ ਨੂੰ ਚੱਲਣ ਦੇਣ ਨਾਲ ਇੱਕ ਸਵਾਲ ਘੱਟ ਹੁੰਦਾ ਹੈ, ਪਰ ਅਣਕਿਆਸੀ ਖੋਜ ਨੂੰ ਰੋਕਣ ਦਾ ਇੱਕ ਮੌਕਾ ਵੀ ਚਲਾ ਜਾਂਦਾ ਹੈ। ਜੋ ਏਜੰਟ ਨਿੱਜੀ ਡਾਟਾ ਪੜ੍ਹ ਸਕਦਾ ਹੈ, ਅਵਿਸ਼ਵਾਸਯੋਗ ਸਮੱਗਰੀ ਲੈ ਸਕਦਾ ਹੈ ਅਤੇ ਡਾਟਾ ਬਾਹਰ ਭੇਜ ਸਕਦਾ ਹੈ, ਉਸ ਤੋਂ ਇਸ ਸੈਟਿੰਗ ਦੇ ਬਾਵਜੂਦ ਹਰ ਕਾਲ ’ਤੇ ਪੁੱਛਿਆ ਜਾਂਦਾ ਹੈ।",
+          "options": {
+            "auto-allow": "ਸਿਰਫ਼-ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲਾਂ ਨੂੰ ਬਿਨਾਂ ਪੁੱਛੇ ਚੱਲਣ ਦਿਓ",
+            "gate": "ਹਰ ਟੂਲ ਕਾਲ ਤੋਂ ਪਹਿਲਾਂ ਪੁੱਛੋ"
+          }
+        }
       }
     },
     "quality": {
@@ -15060,12 +15206,12 @@
           "help": "ਹਰ ਦੁਹਰਾਓ ਰਨ ਦੀ ਲਾਗਤ ਅਤੇ ਸਮੇਂ ਨੂੰ ਗੁਣਾ ਕਰਦਾ ਹੈ।"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "ਮੁਲਾਂਕਣ ਕਿਵੇਂ ਚੱਲਦੇ ਹਨ",
+          "description": "ਜਦੋਂ ਰਨ ਜਾਂ ਉਸਦਾ ਡਾਟਾਸੈੱਟ ਨਾ ਦੱਸੇ, ਤਾਂ ਮੁਲਾਂਕਣ ਰਨ ਏਜੰਟ ਨੂੰ ਉਸਦੇ ਟੂਲਾਂ ਸਮੇਤ ਸੁਰੱਖਿਅਤ ਸੈਂਡਬਾਕਸ ਵਿੱਚ ਰੀਪਲੇਅ ਕਰਦਾ ਹੈ (ਪੂਰੀ ਪਾਈਪਲਾਈਨ) ਜਾਂ ਸਿਰਫ਼ ਲਿਖਤ ਵਿੱਚ ਜਵਾਬ ਦਿੰਦਾ ਹੈ (ਤੇਜ਼)।",
+          "help": "ਪੂਰੀ ਪਾਈਪਲਾਈਨ ਉਹ ਪਰਖਦੀ ਹੈ ਜੋ ਤੁਹਾਡੇ ਵਰਤੋਂਕਾਰਾਂ ਨੂੰ ਮਿਲਦਾ ਹੈ, ਟੂਲਾਂ ਦੀ ਵਰਤੋਂ ਸਮੇਤ, ਅਤੇ ਵੱਧ ਖਰਚੀਲੀ ਹੈ। ਇਸ ਵਿੱਚ ਸਿਰਫ਼ ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲ ਸੱਚਮੁੱਚ ਚੱਲਦੇ ਹਨ; ਜੋ ਕੁਝ ਡਾਟਾ ਬਦਲ ਸਕਦਾ ਹੈ, ਸੁਨੇਹਾ ਭੇਜ ਸਕਦਾ ਹੈ ਜਾਂ ਪੈਸੇ ਖਰਚ ਸਕਦਾ ਹੈ ਉਸਨੂੰ ਸਿਮੂਲੇਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਰਨ ਵਿੱਚ ਸੂਚੀਬੱਧ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਤੇਜ਼ ਸਸਤਾ ਹੈ ਅਤੇ ਟੂਲਾਂ ਦੀ ਵਰਤੋਂ ਬਾਰੇ ਕੁਝ ਨਹੀਂ ਦੱਸਦਾ।",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "ਸੈਂਡਬਾਕਸ ਵਿੱਚ ਪੂਰੀ ਪਾਈਪਲਾਈਨ",
+            "quick": "ਤੇਜ਼: ਸਿਰਫ਼ ਲਿਖਤ ਜਵਾਬ"
           }
         }
       }
@@ -15169,7 +15315,7 @@
       "cancel": "ਰੱਦ ਕਰੋ",
       "done": "{count} ਸੈਟਿੰਗਾਂ ਨੂੰ ਉਹਨਾਂ ਦੇ ਵਿਰਸੇ ਵਾਲੇ ਮੁੱਲਾਂ ਉੱਤੇ ਰੀਸੈੱਟ ਕਰੋ।",
       "partial": "{done} ਸੈਟਿੰਗਾਂ ਰੀਸੈੱਟ ਹੋਈਆਂ; {failed} ਰੀਸੈੱਟ ਨਹੀਂ ਹੋ ਸਕੀਆਂ। ਅਸਫਲ ਸੈਟਿੰਗਾਂ ਉੱਤੇ ਸੁਨੇਹੇ ਵੇਖੋ।",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} ਸੈਟਿੰਗਾਂ ਰੀਸੈੱਟ ਹੋਈਆਂ। ਜਿਨ੍ਹਾਂ {skipped} ਨੂੰ ਕਾਰਨ ਚਾਹੀਦਾ ਸੀ ਉਹ ਜਿਵੇਂ ਸਨ ਉਵੇਂ ਹੀ ਛੱਡ ਦਿੱਤੀਆਂ ਗਈਆਂ।"
     },
     "import": {
       "button": "ਓਵਰਰਾਈਡ ਆਯਾਤ ਕਰੋ",
@@ -15242,16 +15388,16 @@
       "unknownActor": "ਅਣਜਾਣ",
       "noReason": "ਕੋਈ ਕਾਰਨ ਨਹੀਂ ਦਿੱਤਾ ਗਿਆ",
       "showMore": "ਹੋਰ ਵਿਖਾਓ",
-      "scope": "Level",
+      "scope": "ਪੱਧਰ",
       "scopeWorkspace": "ਵਰਕਸਪੇਸ",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "ਏਜੰਟ {id}",
+      "scopeFilter": "ਤਬਦੀਲੀਆਂ ਇਸ ਪੱਧਰ ’ਤੇ ਦਿਖਾਓ",
+      "filterAll": "ਸਾਰੇ ਪੱਧਰ",
+      "filterWorkspace": "ਸਿਰਫ਼ ਵਰਕਸਪੇਸ",
+      "filterAgents": "ਸਿਰਫ਼ ਏਜੰਟ",
+      "searchLoadedOnly": "ਖੋਜ ਹੁਣ ਤੱਕ ਲੋਡ ਹੋਈਆਂ ਤਬਦੀਲੀਆਂ ਨੂੰ ਕਵਰ ਕਰਦੀ ਹੈ।",
+      "loadError": "ਤਬਦੀਲੀ ਦਾ ਇਤਿਹਾਸ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ। {message}",
+      "moreFailed": "ਹੋਰ ਤਬਦੀਲੀਆਂ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀਆਂ। {message}",
       "loadingMore": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ"
     }
   },
@@ -15259,7 +15405,7 @@
     "title": "ਵਿਹਾਰ ਅਤੇ ਸੀਮਾਵਾਂ",
     "intro": "ਕੰਟਰੋਲ ਕਰੋ ਕਿ ਇਹ ਏਜੰਟ ਇੱਕ ਟਰਨ ਵਿੱਚ ਕਿੰਨੀ ਦੂਰ ਜਾ ਸਕਦਾ ਹੈ: ਕਿੰਨੇ ਟੂਲ ਕਾਲ ਕਰ ਸਕਦਾ ਹੈ, ਕਿੰਨੀ ਦੇਰ ਚੱਲ ਸਕਦਾ ਹੈ ਅਤੇ ਕਿੰਨਾ ਵਾਪਸ ਪੜ੍ਹਦਾ ਹੈ। ਜੋ ਤੁਸੀਂ ਇੱਥੇ ਨਹੀਂ ਬਦਲਦੇ ਉਹ ਤੁਹਾਡੇ ਵਰਕਸਪੇਸ ਤੋਂ ਵਿਰਸੇ ਵਿੱਚ ਆਉਂਦਾ ਹੈ।",
     "saveFirst": "ਪਹਿਲਾਂ ਏਜੰਟ ਨੂੰ ਸੰਭਾਲੋ। ਇਸਦਾ ਵਿਹਾਰ ਅਤੇ ਸੀਮਾਵਾਂ ਇਸਦੇ ਬਣਨ ਤੋਂ ਬਾਅਦ ਸੈੱਟ ਕੀਤੀਆਂ ਜਾ ਸਕਦੀਆਂ ਹਨ।",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "ਇਸਦਾ ਵਿਹਾਰ ਅਤੇ ਸੀਮਾਵਾਂ ਟੈਬ ਖੋਲ੍ਹਣ ਲਈ ਹੇਠਾਂ ਇੱਕ ਏਜੰਟ ਚੁਣੋ।",
     "tabs": {
       "label": "ਏਜੰਟ ਸੰਰਚਨਾ",
       "setup": "ਸੈੱਟਅੱਪ",
@@ -15270,12 +15416,12 @@
       "label": "ਸੰਬੰਧਿਤ ਪੰਨੇ",
       "tenant": "ਵਰਕਸਪੇਸ ਡਿਫ਼ਾਲਟ ਬਦਲੋ",
       "playground": "ਪਲੇਗ੍ਰਾਊਂਡ ਵਿੱਚ ਅਜ਼ਮਾਓ",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "ਇਸ ਏਜੰਟ ਦੇ ਪ੍ਰੋਂਪਟ",
+      "promptsAria": "{name} ਦੇ ਪ੍ਰੋਂਪਟ: ਪ੍ਰੋਂਪਟ ਰਜਿਸਟਰੀ ਇਸ ਏਜੰਟ ’ਤੇ ਖੋਲ੍ਹੋ",
+      "approvals": "ਇਸ ਏਜੰਟ ਦੀਆਂ ਮਨਜ਼ੂਰੀਆਂ",
+      "approvalsAria": "{name} ਦੀਆਂ ਮਨਜ਼ੂਰੀਆਂ: ਇਸ ਏਜੰਟ ਲਈ ਫਿਲਟਰ ਕੀਤੀ ਮਨਜ਼ੂਰੀ ਕਤਾਰ ਖੋਲ੍ਹੋ",
+      "turns": "ਟਰਨ ਟਾਈਮਲਾਈਨ",
+      "turnsAria": "{name} ਦੀ ਟਰਨ ਟਾਈਮਲਾਈਨ: ਇਸ ਏਜੰਟ ਲਈ ਟਰਨ ਇੰਸਪੈਕਟਰ ਖੋਲ੍ਹੋ"
     },
     "readOnly": {
       "locked": "ਇਹ ਏਜੰਟ ਸੰਪਾਦਨ ਲਈ ਲਾਕ ਹੈ, ਇਸ ਲਈ ਇਹ ਮੁੱਲ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਲਈ ਹਨ।",
@@ -15455,7 +15601,7 @@
     "regAgentPlaceholder": "ਇੱਕ ਏਜੰਟ ਚੁਣੋ",
     "regAgentsFailed": "ਤੁਹਾਡੇ ਏਜੰਟ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ।",
     "regPickAgent": "ਕਿਸੇ ਏਜੰਟ ਦੇ ਪ੍ਰੋਂਪਟ ਵੇਖਣ ਅਤੇ ਬਦਲਣ ਲਈ ਉਸਨੂੰ ਚੁਣੋ।",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "ਲਿੰਕ ਵਾਲਾ ਏਜੰਟ ਤੁਹਾਡੇ ਲਈ ਉਪਲਬਧ ਨਹੀਂ, ਕਿਉਂਕਿ ਉਹ ਮੌਜੂਦ ਨਹੀਂ ਜਾਂ ਤੁਸੀਂ ਉਸਨੂੰ ਦੇਖ ਨਹੀਂ ਸਕਦੇ। ਇਸਦੀ ਥਾਂ ਰਜਿਸਟਰੀ ਵਰਕਸਪੇਸ ਦਾਇਰੇ ਵਿੱਚ ਖੁੱਲ੍ਹੀ।",
     "regSearchLabel": "ਪ੍ਰੋਂਪਟ ਖੋਜੋ",
     "regSearchPlaceholder": "ਕੁੰਜੀ, ਸਿਰਲੇਖ ਜਾਂ ਵੇਰਵਾ",
     "regRiskLabel": "ਜੋਖਮ ਸ਼੍ਰੇਣੀ",

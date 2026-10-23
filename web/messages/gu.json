@@ -916,15 +916,15 @@
     "rsParam_seed": "સીડ",
     "rsParam_stopSequences": "રોકવાના ક્રમ",
     "rsParamDropped": "{param} આ એજન્ટ પર સેટ છે, પરંતુ {provider} તેને {model} માટે અવગણે છે, તેથી તેની કોઈ અસર નથી.",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "આ રન માટે ટૂલ્સ",
+    "rsToolsRunOnly": "ફક્ત આ રન",
+    "rsToolsRunNote": "આ સ્વિચ નક્કી કરે છે કે આ પ્લેગ્રાઉન્ડમાંથી મોકલેલા સંદેશા એજન્ટના કયા ટૂલ્સ વાપરી શકે. કંઈ સાચવાતું નથી: બીજા બધા માટે એજન્ટ પોતાનો ટૂલ ઍક્સેસ જાળવે છે. તે એજન્ટના ટૂલ્સ ફક્ત બંધ કરી શકે છે, તેને ક્યારેય નવું ટૂલ આપી શકતા નથી.",
+    "rsToolsRunSummary": "એજન્ટના {total} ટૂલ્સમાંથી {on} આ રન માટે ચાલુ",
+    "rsToolsRunNone": "આ રન માટે કોઈ ટૂલ્સ નથી: એજન્ટ ફક્ત ટેક્સ્ટમાં જવાબ આપી શકે છે.",
+    "rsToolsReset": "એજન્ટના ટૂલ્સ વાપરો",
+    "rsToolsNotInAgent": "આ એજન્ટના સાચવેલા ટૂલ્સમાંનું એક નથી, તેથી તેને રન માટે ચાલુ કરી શકાતું નથી.",
+    "rsToolsEditAgent": "એજન્ટના સાચવેલા ટૂલ્સ બદલો",
+    "rsToolsLimitedChip": "આ રન માટે ટૂલ્સ મર્યાદિત",
     "rsToolsEmpty": "આ એજન્ટ માટે કોઈ ટૂલ્સ ઉપલબ્ધ નથી.",
     "rsToolsSummary": "{total} માંથી {on} ટૂલ્સ ચાલુ",
     "rsToolsFailed": "ટૂલ્સ લોડ થઈ શક્યા નહીં.",
@@ -982,14 +982,14 @@
     "chipToolsOff": "ટૂલ્સ વિના ફરી પ્રયાસ થઈ રહ્યો છે",
     "chipFailoverBlocked": "બેકઅપ મોડેલ વપરાયું નથી: ટૂલ્સ પહેલેથી ચાલી ચૂક્યા હતા",
     "rsLimitChangeOne": "બદલો",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "દર મર્યાદા વટાવી",
+    "reasonTimeout": "સમય સમાપ્ત",
+    "reasonProviderUnavailable": "પ્રદાતા ઉપલબ્ધ નથી",
+    "reasonAuthFailed": "પ્રદાતાએ ક્રેડેન્શિયલ નકાર્યા",
+    "reasonBilling": "પ્રદાતાની બિલિંગ સમસ્યા",
+    "reasonModelNotFound": "મોડેલ ઉપલબ્ધ નથી",
+    "reasonProviderError": "પ્રદાતાની ભૂલ",
+    "reasonMalformedToolCall": "ટૂલ કૉલનો ઉપયોગ થઈ શક્યો નહીં"
   },
   "nodeDefs": {
     "triggerLabel": "ટ્રિગર",
@@ -13236,7 +13236,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "સ્કિલ્સ",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14238,7 +14238,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "સ્કિલ્સ",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14412,7 +14412,7 @@
       "role": "તમારી ભૂમિકા આ સેટિંગ બદલી શકતી નથી. વર્કસ્પેસ એડમિનને પૂછો.",
       "scope": "આ સેટિંગ અહીં ઓવરરાઇડ કરી શકાતી નથી.",
       "readOnly": "સેટિંગ્સ હાલ ફક્ત વાંચવા માટે છે.",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "આ સુરક્ષા સેટિંગ ફક્ત વર્કસ્પેસ ઍડમિન બદલી શકે છે. તમે તેની કિંમત અહીં જોઈ શકો છો, પણ સંપાદિત કરી શકતા નથી."
     },
     "reset": {
       "button": "વારસામાં મળેલા પર રીસેટ કરો",
@@ -14462,12 +14462,12 @@
       "acknowledge": "હું આ સુરક્ષા ફેરફારનાં પરિણામો સમજું છું.",
       "cancel": "રદ કરો",
       "confirm": "પુષ્ટિ કરો અને સાચવો",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "રીસેટ: ઓવરરાઇડ દૂર થાય છે અને સેટિંગ તેને વારસામાં મળતી કિંમત પર પાછું આવે છે."
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "ઊંચું વધુ કડક છે: ઊંચી કિંમત સ્વીકારાય છે, નીચી નકારાય છે.",
+      "lower": "નીચું વધુ કડક છે: નીચી કિંમત સ્વીકારાય છે, ઊંચી નકારાય છે.",
+      "enumOrder": "વિકલ્પો સૌથી ઓછા થી સૌથી વધુ કડક ક્રમમાં છે: {options}. તમે ફક્ત કડક છેડા તરફ જ જઈ શકો છો."
     }
   },
   "approvalsQueue": {
@@ -14636,8 +14636,8 @@
     "tlSevWarn": "ધ્યાન જોઈએ",
     "tlSevError": "નિષ્ફળ",
     "tlIntake": "ટર્ન શરૂ થયો: {chars} અક્ષરો, {tools} ટૂલ્સ, {attachments} જોડાણો",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "આ રન માટે ટૂલ્સ",
+    "tlRunToolsNone": "કોઈ નહીં (ફક્ત ટેક્સ્ટ)",
     "tlModelCall": "{model} ({provider}) ને મોડેલ કૉલ, રૂટ {route}",
     "tlFailover": "{model} ({provider}) પર ફેલઓવર થયું",
     "tlRetryModel": "{model} ({provider}) પર ફરી પ્રયાસ થયો, રૂટ {route}",
@@ -14646,6 +14646,7 @@
     "tlToolCall": "ટૂલ કૉલ {tool}: {status}",
     "tlApprovalRequested": "{tool} ચાલતા પહેલાં મંજૂરી માગી",
     "tlApprovalDecided": "{tool} માટે મંજૂરીનો નિર્ણય થયો: {decision}",
+    "tlApprovalAutoAllowed": "{tool} પૂછ્યા વિના ચાલ્યું: દેખરેખ હેઠળ ફક્ત-વાંચવાનો કૉલ",
     "tlContinuation": "સાતત્ય: {guard} ({outcome})",
     "tlGuard": "ગાર્ડરેઇલ {guard}: {outcome}",
     "tlVerifyPassed": "તપાસ સફળ: {check}",
@@ -14715,7 +14716,7 @@
     "modeTextOnlyHelp": "એજન્ટ તેના ટૂલ્સ વિના જવાબ આપે છે. સુરક્ષિત: કંઈ અસલી બનતું નથી. અપેક્ષિત-ટૂલ તપાસો પૂરી થઈ શકતી નથી.",
     "modeFull": "ટૂલ્સ સાથે પૂર્ણ પાઇપલાઇન",
     "modeFullHelp": "અસલી વપરાશકર્તાને મળે તેવા જ ટૂલ્સ, ગાર્ડરેઇલ અને પગલાંની મર્યાદા. અપેક્ષિત-ટૂલ અને ટ્રેજેક્ટરી તપાસો માટે જરૂરી.",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "જે ટૂલ્સ ફક્ત વાંચે છે તે ખરેખર ચાલે છે. ડેટા બદલી શકે, સંદેશ મોકલી શકે કે પૈસા ખર્ચી શકે તેવું બધું સિમ્યુલેટ થાય છે અને રનમાં યાદી થાય છે, તેથી વાસ્તવમાં કંઈ બનતું નથી. સુરક્ષા વર્ગીકરણ વિનાના ટૂલ્સ પણ સિમ્યુલેટ થાય છે.",
     "autoApproveLabel": "ઇવૅલ સેન્ડબૉક્સમાં ટૂલ કૉલ આપોઆપ મંજૂર કરો",
     "autoApproveHelp": "જે ટૂલ કૉલ સામાન્ય રીતે કોઈ વ્યક્તિની રાહ જુએ તેને ઇવૅલ સેન્ડબૉક્સ મંજૂર કરે છે, જેથી કેસ પૂરો થઈ શકે. આના વિના કેસ પ્રોડક્શનની જેમ જવાબ ન મળેલી મંજૂરી પર જ પૂરો થાય છે.",
     "autoApproveWarnTitle": "ફક્ત નોન-પ્રોડક્શન વર્કસ્પેસ માટે",
@@ -14723,7 +14724,7 @@
     "autoApproveNeedsFull": "પહેલાં પૂર્ણ પાઇપલાઇન ચાલુ કરો: આપોઆપ મંજૂરી ફક્ત ટૂલ્સ ચાલે ત્યારે જ લાગુ પડે છે.",
     "autoApproveRefused": "આ વર્કસ્પેસમાં મંજૂર નથી: {reason}",
     "autoApproveConfirmTitle": "ઇવૅલમાં ટૂલ કૉલ આપોઆપ મંજૂર કરવા છે?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "આ ડેટાસેટના રીપ્લેમાં વ્યક્તિની રાહ જોતો દરેક ટૂલ કૉલ આપમેળે મંજૂર થશે. મંજૂર થયેલા ફક્ત-વાંચતા ટૂલ્સ ખરેખર ચાલે છે; કંઈક બદલી શકે તેવા મંજૂર ટૂલ્સ હજુ પણ સિમ્યુલેટ થાય છે. આ ફક્ત ટેસ્ટ ડેટા ધરાવતા વર્કસ્પેસમાં જ કરો. રન નોંધે છે કે તેમને આપમેળે મંજૂર કરાયા હતા.",
     "autoApproveConfirm": "આપોઆપ મંજૂરી ચાલુ કરો",
     "trajectoryLabel": "ટ્રેજેક્ટરી તપાસો",
     "trajectoryOn": "On",
@@ -14748,22 +14749,22 @@
     "samplingSource_platform": "પ્લેટફોર્મે સેટ કર્યું",
     "samplingSource_tenant": "તમારા વર્કસ્પેસ માટે સેટ કર્યું",
     "samplingSource_agent": "આ એજન્ટ માટે સેટ કર્યું",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "વર્કસ્પેસ ડિફોલ્ટ",
+    "modeDefaultHelp": "તમારા વર્કસ્પેસના સેટિંગને અનુસરે છે (પૂર્ણ પાઇપલાઇન, સિવાય કે ઍડમિને તે બદલ્યું હોય). દરેક રન હજુ પણ પોતાનો મોડ પસંદ કરી શકે છે.",
+    "modeDefaultCurrent": "હાલમાં: {mode}",
+    "modeNameFull": "પૂર્ણ પાઇપલાઇન",
+    "modeNameQuick": "ઝડપી (ફક્ત ટેક્સ્ટ)",
+    "badgeFull": "પૂર્ણ પાઇપલાઇન",
+    "badgeQuick": "ઝડપી",
+    "datasetModePinnedTitle": "આ ડેટાસેટ હંમેશાં આ રીતે રીપ્લે થાય છે. એક રન હજુ પણ બીજો મોડ પસંદ કરી શકે છે.",
+    "datasetModeDefaultTitle": "રન કેવી રીતે રીપ્લે થાય તે માટે આ ડેટાસેટ વર્કસ્પેસના ડિફૉલ્ટને અનુસરે છે.",
+    "runModeLabel": "આગલા રન માટે રીપ્લે મોડ",
+    "runModeInherit": "ડેટાસેટનું સેટિંગ વાપરો",
+    "runModeHelp": "પૂર્ણ પાઇપલાઇન એજન્ટને તેના ટૂલ્સ, ગાર્ડરેઇલ અને મંજૂરીઓ સાથે સુરક્ષિત સેન્ડબૉક્સમાં ચલાવે છે: ફક્ત વાંચતા ટૂલ્સ ખરેખર ચાલે છે, અને ડેટા બદલી શકે કે કંઈ મોકલી શકે તેવું બધું સિમ્યુલેટ થાય છે. ઝડપી મોડ ટૂલ્સ રોકી રાખે છે અને ફક્ત લખેલા જવાબને ચકાસે છે.",
+    "runModeFullTitle": "આ રનમાં ઇવૅલ સેન્ડબૉક્સમાં પૂર્ણ પાઇપલાઇનનો ઉપયોગ થયો.",
+    "runModeQuickTitle": "આ રન ફક્ત ટેક્સ્ટનો ઝડપી રીપ્લે હતો: એજન્ટના ટૂલ્સ રોકી રાખ્યા હતા.",
+    "runSimulatedTools": "આ રનમાં સિમ્યુલેટ થયા, ચલાવાયા નહીં (તે ડેટા બદલી શકતા કે પ્લેટફૉર્મની બહાર પહોંચી શકતા): {tools}.",
+    "toolStatusSimulated": "સિમ્યુલેટ થયું, ચલાવાયું નહીં"
   },
   "agentLab": {
     "wtLabel": "એજન્ટના ટૂલ્સ સાથે ચલાવો",
@@ -14796,6 +14797,14 @@
       "memory": {
         "label": "મેમરી",
         "description": "એજન્ટ કેટલી યાદો રાખે અને યાદ કરે છે."
+      },
+      "attachments": {
+        "label": "ચેટ અપલોડ",
+        "description": "લોકો ચેટ સંદેશા સાથે કેટલી મોટી ફાઇલો જોડી શકે."
+      },
+      "skills": {
+        "label": "સ્કિલ્સ",
+        "description": "ઇન્સ્ટૉલ કરેલી સ્કિલ્સની યાદી એજન્ટની સૂચનાઓનો કેટલો ભાગ વાપરી શકે."
       },
       "aux": {
         "label": "બૅકગ્રાઉન્ડ મોડેલ કૉલ",
@@ -14862,6 +14871,28 @@
           "label": "અધૂરા જવાબ પછી વધારાના પાસ",
           "description": "જાહેર કરેલા પણ ન લીધેલા પગલે મોડેલનો જવાબ અટકે ત્યારે તેને હજી કેટલી વાર આગળ ચલાવવા કહેવાય છે.",
           "help": "જે એજન્ટ ઘણીવાર પગલું જાહેર કરીને અટકી જાય તેમના માટે વધારો. દરેક વધારાના પાસ પર એક મોડેલ કૉલ ખર્ચાય છે."
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "મર્યાદા પછી જવાબ અપાયેલા કૉલ",
+          "description": "ટર્નની ટૂલ મર્યાદા વપરાઈ ગયા પછી મોડેલ બીજા કેટલા ટૂલ કૉલ અજમાવી શકે. દરેકને \"જે છે તેનાથી જવાબ આપ\" એવી નોંધ સાથે નકારાય છે; આ સંખ્યાથી આગળ ટર્ન ભૂલ સાથે અટકાવાય છે.",
+          "help": "મોડેલને ટૂલ કૉલ બંધ કરવા માટે થોડા પ્રયાસ જોઈએ તો વધારો. લૂપમાં ફસાયેલા ટર્ન વહેલા પૂરા કરવા ઘટાડો. 0 મર્યાદાથી ઉપરના પહેલા કૉલ પર ટર્ન અટકાવે છે."
+        },
+        "supervisedDivisor": {
+          "label": "દેખરેખ હેઠળના એજન્ટને ટૂલ મર્યાદાનો 1/N મળે છે",
+          "description": "દેખરેખ હેઠળના એજન્ટને ટર્નની ટૂલ-કૉલ મર્યાદા આ સંખ્યાથી ભાગીને મળે છે, પરંતુ નીચેના ન્યૂનતમથી ક્યારેય ઓછી નહીં.",
+          "help": "દેખરેખ હેઠળના એજન્ટને વધુ કડક રાખવા માટે વધારો. 1 તેમને પૂર્ણ મર્યાદા આપે છે."
+        },
+        "supervisedMinSteps": {
+          "label": "દેખરેખ હેઠળના એજન્ટ માટે ન્યૂનતમ ટૂલ કૉલ",
+          "description": "ઉપરની સંખ્યા ગમે તેટલી ઊંચી હોય, દેખરેખ હેઠળના એજન્ટને મળતી સૌથી નાની ટૂલ-કૉલ મર્યાદા.",
+          "help": "તેને 3 કે વધુ રાખો, જેથી દેખરેખ હેઠળનો એજન્ટ ઘણા પગલાંનું સરળ કામ પૂરું કરી શકે."
+        },
+        "autonomousMultiplier": {
+          "label": "પૂર્ણ સ્વાયત્ત એજન્ટને મર્યાદાના N ગણા મળે છે",
+          "description": "પૂર્ણ સ્વાયત્ત એજન્ટને ટર્નની ટૂલ-કૉલ મર્યાદા આ સંખ્યાથી ગુણીને મળે છે.",
+          "help": "કોઈ જોતું ન હોય તેવા લાંબા કામ ચલાવતા એજન્ટ માટે વધારો; તો તેઓ એક ટર્નમાં વધુ કૉલ અને પૈસા ખર્ચી શકે. 1 તેમને પ્રમાણભૂત મર્યાદા આપે છે."
         }
       }
     },
@@ -14933,6 +14964,82 @@
           "label": "ફૉલો-અપ ટૂલ્સ કેટલો સમય ઓફર રહે છે",
           "description": "વપરાશ પછી ટૂંકા ફૉલો-અપ સંદેશા માટે ટૂલ કેટલો સમય ઓફર રહે છે.",
           "help": "લાંબી વિન્ડો લાંબા કામના સત્રોમાં મદદ કરે છે, ટૂંકી ટૂલ યાદી નાની રાખે છે."
+        },
+        "maxStickyTools": {
+          "label": "ફૉલો-અપમાં સૂચવતા રહેવાના મહત્તમ ટૂલ્સ",
+          "description": "ટૂંકા ફૉલો-અપ સંદેશમાં આગળ લઈ જવાતા ટૂલ્સની મહત્તમ સંખ્યા. 0 એકેય રાખતું નથી.",
+          "help": "કોઈ કામ ઘણા ટૂલ્સ વાપરતું હોય તો મોટી સંખ્યા મદદ કરે છે; નાની સંખ્યા ટૂલ યાદી ટૂંકી રાખે છે."
+        },
+        "keepPrimaryModel": {
+          "label": "ફૉલો-અપ માટે મુખ્ય મોડેલ રાખો",
+          "description": "પહેલાં ટૂલ્સ વાપરેલી વાતચીતમાં ટૂંકો ફૉલો-અપ સસ્તા મોડેલને બદલે એજન્ટના મુખ્ય મોડેલ પર જ રહે છે.",
+          "help": "આને બંધ કરો જેથી ખર્ચ રૂટિંગ \"હા\" જેવા ફૉલો-અપ સસ્તા મોડેલને મોકલે, પણ ચાલુ કામ નબળી રીતે સંભાળાવાનું જોખમ રહે છે."
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "જવાબ ફરી વાપરવા માટે પ્રશ્ન કેટલો મળતો હોવો જોઈએ",
+          "description": "સમાન પ્રશ્નોના જવાબ ફરી વાપરતા એજન્ટ માટે: સાચવેલો જવાબ આપવા નવો પ્રશ્ન પહેલાના પ્રશ્નની કેટલો નજીક હોવો જોઈએ, 0.85 થી 1.",
+          "help": "ઓછી સંખ્યા વધુ પુનરાવર્તનોને જવાબ આપે છે, પણ બીજા પ્રશ્ન માટેનો જવાબ આપી દેવાનું જોખમ રહે છે. ખોટા જવાબો મોંઘા પડતા હોય તો તેને ઊંચું રાખો. જવાબ ફક્ત તે વ્યક્તિ માટે જ ફરી વપરાય છે જેને તે આપ્યો હતો."
+        },
+        "ttl": {
+          "label": "ફરી વાપરી શકાય તેવો જવાબ કેટલો સમય રખાય છે",
+          "description": "સાચવેલા જવાબને કાઢી નખાય તે પહેલાં સમાન પ્રશ્નને કેટલો સમય આપી શકાય.",
+          "help": "તમારા જવાબો ઝડપથી જૂના થઈ જતા હોય તો તેને ટૂંકું કરો."
+        },
+        "maxEntriesPerAgent": {
+          "label": "દરેક એજન્ટ દીઠ મહત્તમ સાચવેલા જવાબ",
+          "description": "એક એજન્ટ ફરી વાપરવા માટે કેટલા જવાબ રાખે છે. આનાથી વધુ થાય તો સૌથી જૂના કાઢી નખાય છે.",
+          "help": "મોટો સંગ્રહ વધુ પુનરાવર્તનો શોધે છે અને વધુ સ્ટોરેજ વાપરે છે."
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "વાતચીતમાં ટૂલ કૉલની નોંધ રાખો",
+          "description": "દરેક ટર્નના ટૂલ કૉલની ટૂંકી નોંધ વાતચીત સાથે સાચવો, જેથી પછીના ટર્ન જોઈ શકે કે શું કરાયું હતું.",
+          "help": "વાતચીતનો ઇતિહાસ ફક્ત ટેક્સ્ટનો રાખવા તેને બંધ કરો; ત્યારે એજન્ટ જાણી શકતો નથી કે અગાઉના ટર્નમાં તેના ટૂલ્સે શું કર્યું. આ સમગ્ર વર્કસ્પેસને લાગુ પડે છે."
+        },
+        "replayEnabled": {
+          "label": "મોડેલને ટૂલ નોંધ બતાવો",
+          "description": "મોડેલને વાતચીત આપતી વખતે અગાઉના ટૂલ કૉલની સાચવેલી નોંધ સામેલ કરો.",
+          "help": "નોંધ સાચવાતી રહે પણ તેના માટે મોડેલની કાર્યજગ્યા વપરાય નહીં તે માટે તેને બંધ કરો."
+        },
+        "replayTurns": {
+          "label": "જેમની ટૂલ નોંધ બતાવાય તે અગાઉના ટર્ન",
+          "description": "ટૂલ્સ વાપરનારા સૌથી તાજેતરના કેટલા ટર્નની નોંધ મોડેલને બતાવાય છે.",
+          "help": "મોટી સંખ્યા લાંબા કામના સત્રોમાં મદદ કરે છે પણ મોડેલની કાર્યજગ્યા વધુ વાપરે છે."
+        },
+        "maxEntriesPerTurn": {
+          "label": "દરેક ટર્ન દીઠ યાદી કરાયેલા ટૂલ કૉલ",
+          "description": "એક ટર્નના કેટલા ટૂલ કૉલ નોંધમાં લખાય છે. વધુ કૉલ ફક્ત ગણાય છે.",
+          "help": "ઘણા કૉલ કરતા અને દરેક યાદ રાખવા પડે તેવા ટર્ન માટે વધારો."
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "દરેક ટર્ન દીઠ સૌથી લાંબી ટૂલ નોંધ",
+          "description": "એક ટર્નની નોંધના કેટલા અક્ષરો મોડેલને બતાવાય છે; બાકીના ગણાય છે, યાદી થતા નથી.",
+          "help": "પછીના દરેક ટર્નનો ખર્ચ બચાવવા ઘટાડો, વધુ વિગત રાખવા વધારો."
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "સૌથી મોટો ઇમેજ અપલોડ (MB)",
+          "description": "ચેટ સંદેશ સાથે કોઈ જોડી શકે તેવી સૌથી મોટી ઇમેજ, મેગાબાઇટમાં. પ્લેટફૉર્મની કુલ ફાઇલ મર્યાદા પણ છે, જેને આ વટાવી શકતું નથી.",
+          "help": "ફોટા અને સ્ક્રીનશૉટ માટે વધારો; મોટી ફાઇલો મોકલવામાં ધીમી હોય છે અને મોડેલનો વધુ ક્વોટા વાપરે છે."
+        },
+        "maxAudioMb": {
+          "label": "સૌથી મોટો ઑડિયો અપલોડ (MB)",
+          "description": "ચેટ સંદેશ સાથે કોઈ જોડી શકે તેવી સૌથી મોટી ઑડિયો ફાઇલ, મેગાબાઇટમાં. પ્લેટફૉર્મની કુલ ફાઇલ મર્યાદા પણ છે, જેને આ વટાવી શકતું નથી.",
+          "help": "લાંબા રેકૉર્ડિંગ માટે વધારો; મોટી ફાઇલો મોકલવામાં ધીમી હોય છે અને મોડેલનો વધુ ક્વોટા વાપરે છે."
+        },
+        "maxVideoMb": {
+          "label": "સૌથી મોટો વિડિયો અપલોડ (MB)",
+          "description": "ચેટ સંદેશ સાથે કોઈ જોડી શકે તેવો સૌથી મોટો વિડિયો, મેગાબાઇટમાં. પ્લેટફૉર્મની કુલ ફાઇલ મર્યાદા પણ છે, જેને આ વટાવી શકતું નથી.",
+          "help": "લાંબી ક્લિપ માટે વધારો; મોટી ફાઇલો મોકલવામાં ધીમી હોય છે અને મોડેલનો વધુ ક્વોટા વાપરે છે."
+        },
+        "maxDocumentMb": {
+          "label": "સૌથી મોટો દસ્તાવેજ અપલોડ (MB)",
+          "description": "ચેટ સંદેશ સાથે કોઈ જોડી શકે તેવો સૌથી મોટો દસ્તાવેજ કે સ્પ્રેડશીટ, મેગાબાઇટમાં. પ્લેટફૉર્મની કુલ ફાઇલ મર્યાદા પણ છે, જેને આ વટાવી શકતું નથી.",
+          "help": "લાંબા અહેવાલો અને મોટી ડેટા ફાઇલો માટે વધારો; મોટી ફાઇલો પ્રક્રિયા કરવામાં ધીમી હોય છે."
         }
       },
       "continuation": {
@@ -14991,6 +15098,20 @@
           "help": "જે સહાયકે લોકો વિશે ઘણું યાદ રાખવું જોઈએ તેમના માટે વધારો; આનાથી સંગ્રહ અને યાદ કરવાનો ખર્ચ પણ વધે છે."
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "મહત્તમ વહેંચાયેલી યાદો",
+          "description": "વર્કસ્પેસમાં વહેંચાયેલી કેટલી યાદો રાખવામાં આવે છે. આનાથી વધુ થાય તો સૌથી જૂની કાઢી નખાય છે.",
+          "help": "વહેંચાયેલા જ્ઞાન પર આધારિત મોટી ટીમો માટે વધારો; તેનાથી સ્ટોરેજ અને સ્મરણનો ખર્ચ પણ વધે છે. આ સમગ્ર વર્કસ્પેસને લાગુ પડે છે."
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ઑન-ડિવાઇસ ચેટને અપાતી યાદો",
+          "description": "ઑન-ડિવાઇસ સત્ર શરૂ થાય ત્યારે તેને કેટલી યાદો સોંપાય છે.",
+          "help": "ઑન-ડિવાઇસ મોડેલ્સની કાર્યજગ્યા નાની હોય છે, તેથી આને ઓછું રાખો."
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "ગ્રાફ મેમરીમાંથી યાદ કરેલા તથ્યો",
@@ -15001,6 +15122,20 @@
           "label": "લુકઅપ દીઠ વંચાતા ગ્રાફ પાથ",
           "description": "એક લુકઅપના તથ્યો શોધવા મેમરી ગ્રાફના કેટલા જોડાણો વંચાય છે.",
           "help": "ઘણા જોડાણો એક જ તથ્ય સુધી લઈ જઈ શકે, તેથી ગાઢ રીતે જોડાયેલી યાદોને બધું શોધવા વધુ સંખ્યા જોઈએ. વધુ સંખ્યા દરેક લુકઅપને ધીમું કરે છે."
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "પ્રોમ્પ્ટમાં યાદી કરાયેલી મહત્તમ સ્કિલ્સ",
+          "description": "એજન્ટને ખબર પડે કે તે છે તે માટે તેની સૂચનાઓમાં તમારી કેટલી સ્કિલ્સના નામ અપાય છે. બાકીની ગણાય છે, યાદી થતી નથી.",
+          "help": "તમારી પાસે ઘણી સ્કિલ્સ હોય તો વધારો; યાદી કરેલી દરેક સ્કિલ દરેક ટર્નમાં મોડેલની થોડી કાર્યજગ્યા વાપરે છે. આ સમગ્ર વર્કસ્પેસને લાગુ પડે છે."
+        },
+        "maxBlockChars": {
+          "label": "પ્રોમ્પ્ટમાં સ્કિલ્સ યાદીનું કદ",
+          "description": "એજન્ટની સૂચનાઓમાં સ્કિલ્સની યાદી કેટલા અક્ષરો લઈ શકે. ભરાઈ જાય ત્યારે પછીની સ્કિલ્સ ફક્ત નામ સુધી ટૂંકી કરાય છે.",
+          "help": "વધુ સ્કિલ્સના વર્ણન રાખવા વધારો, દરેક ટર્નમાં ટોકન બચાવવા ઘટાડો. આ સમગ્ર વર્કસ્પેસને લાગુ પડે છે."
         }
       }
     },
@@ -15053,6 +15188,17 @@
           "description": "તપાસેલા ટેક્સ્ટનો કેટલો ભાગ AI સુરક્ષા ન્યાયાધીશ વાંચે છે. તેની બહારના ટેક્સ્ટનો ચુકાદો અપાતો નથી.",
           "help": "તમે આને ફક્ત પ્લેટફોર્મ મૂલ્યથી ઉપર વધારી શકો છો. વધારવાથી લાંબા ટૂલ પરિણામોનો પૂરો ચુકાદો અપાય છે પણ દરેક ન્યાયાધીશ કૉલ મોટો થાય છે."
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "દેખરેખ હેઠળના એજન્ટ અને ફક્ત-વાંચતા ટૂલ્સ",
+          "description": "દેખરેખ હેઠળ સ્વાયત્તતા સ્તરવાળો એજન્ટ શોધ કે લુકઅપ જેવા ફક્ત વાંચતા ટૂલ પહેલાં પણ તમને પૂછે છે કે નહીં. લખવું, મોકલવું અને પ્લેટફૉર્મે વર્ગીકૃત ન કરેલા ટૂલ્સ હંમેશાં પૂછે છે.",
+          "help": "તમે આને ફક્ત પ્લેટફૉર્મના સેટિંગથી વધુ કડક બનાવી શકો છો. દરેક વખતે પૂછવું સૌથી સુરક્ષિત પસંદગી છે; ફક્ત-વાંચતા ટૂલ્સને ચાલવા દેવાથી એક પ્રશ્ન ઓછો થાય છે, પણ અણધારી શોધ અટકાવવાની એક તક પણ જાય છે. ખાનગી ડેટા વાંચી શકતા, અવિશ્વસનીય સામગ્રી લઈ શકતા અને ડેટા બહાર મોકલી શકતા એજન્ટને આ સેટિંગ ગમે તે કહે, દરેક કૉલ પર પૂછાય છે.",
+          "options": {
+            "auto-allow": "ફક્ત-વાંચતા ટૂલ્સને પૂછ્યા વિના ચાલવા દો",
+            "gate": "દરેક ટૂલ કૉલ પહેલાં પૂછો"
+          }
+        }
       }
     },
     "quality": {
@@ -15075,12 +15221,12 @@
           "help": "દરેક પુનરાવર્તન રનનો ખર્ચ અને સમય ગુણે છે."
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "મૂલ્યાંકન કેવી રીતે ચાલે છે",
+          "description": "રન કે તેનો ડેટાસેટ ન કહે ત્યારે, મૂલ્યાંકન રન એજન્ટને તેના ટૂલ્સ સાથે સુરક્ષિત સેન્ડબૉક્સમાં રીપ્લે કરે છે (પૂર્ણ પાઇપલાઇન) કે ફક્ત ટેક્સ્ટમાં જવાબ આપે છે (ઝડપી).",
+          "help": "પૂર્ણ પાઇપલાઇન તમારા વપરાશકર્તાઓને જે મળે છે તે ચકાસે છે, ટૂલ્સના ઉપયોગ સહિત, અને વધુ ખર્ચાળ છે. તેમાં ફક્ત વાંચતા ટૂલ્સ ખરેખર ચાલે છે; ડેટા બદલી શકે, સંદેશ મોકલી શકે કે પૈસા ખર્ચી શકે તેવું બધું સિમ્યુલેટ થાય છે અને રનમાં યાદી થાય છે. ઝડપી સસ્તું છે અને ટૂલ્સના ઉપયોગ વિશે કંઈ કહેતું નથી.",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "સેન્ડબૉક્સમાં પૂર્ણ પાઇપલાઇન",
+            "quick": "ઝડપી: ફક્ત ટેક્સ્ટ જવાબો"
           }
         }
       }
@@ -15184,7 +15330,7 @@
       "cancel": "રદ કરો",
       "done": "{count} સેટિંગ્સને તેમના વારસામાં મળેલા મૂલ્યો પર રીસેટ કરો.",
       "partial": "{done} સેટિંગ્સ રીસેટ થઈ; {failed} રીસેટ થઈ શકી નહીં. નિષ્ફળ સેટિંગ્સ પરના સંદેશા જુઓ.",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} સેટિંગ્સ રીસેટ થઈ. જેમને કારણ જોઈએ તેવી {skipped} જેમની તેમ રાખી."
     },
     "import": {
       "button": "ઓવરરાઇડ આયાત કરો",
@@ -15257,16 +15403,16 @@
       "unknownActor": "અજ્ઞાત",
       "noReason": "કોઈ કારણ આપ્યું નથી",
       "showMore": "વધુ બતાવો",
-      "scope": "Level",
+      "scope": "સ્તર",
       "scopeWorkspace": "વર્કસ્પેસ",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "એજન્ટ {id}",
+      "scopeFilter": "ફેરફારો આ સ્તરે બતાવો",
+      "filterAll": "બધા સ્તર",
+      "filterWorkspace": "ફક્ત વર્કસ્પેસ",
+      "filterAgents": "ફક્ત એજન્ટ",
+      "searchLoadedOnly": "શોધ અત્યાર સુધી લોડ થયેલા ફેરફારોને આવરી લે છે.",
+      "loadError": "ફેરફારનો ઇતિહાસ લોડ થઈ શક્યો નહીં. {message}",
+      "moreFailed": "વધુ ફેરફારો લોડ થઈ શક્યા નહીં. {message}",
       "loadingMore": "લોડ થઈ રહ્યું છે"
     }
   },
@@ -15274,7 +15420,7 @@
     "title": "વર્તન અને મર્યાદાઓ",
     "intro": "આ એજન્ટ એક ટર્નમાં કેટલું આગળ જઈ શકે તે નિયંત્રિત કરો: કેટલા ટૂલ્સ કૉલ કરી શકે, કેટલો સમય ચાલી શકે અને કેટલું પાછું વાંચે. તમે અહીં જે નથી બદલતા તે તમારા વર્કસ્પેસમાંથી વારસામાં આવે છે.",
     "saveFirst": "પહેલાં એજન્ટ સાચવો. તે અસ્તિત્વમાં આવે પછી તેનું વર્તન અને મર્યાદાઓ સેટ કરી શકાય છે.",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "તેનો વર્તન અને મર્યાદાઓ ટૅબ ખોલવા નીચેથી એક એજન્ટ પસંદ કરો.",
     "tabs": {
       "label": "એજન્ટ રૂપરેખાંકન",
       "setup": "સેટઅપ",
@@ -15285,12 +15431,12 @@
       "label": "સંબંધિત પાનાં",
       "tenant": "વર્કસ્પેસ ડિફોલ્ટ બદલો",
       "playground": "પ્લેગ્રાઉન્ડમાં અજમાવો",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "આ એજન્ટના પ્રોમ્પ્ટ",
+      "promptsAria": "{name} ના પ્રોમ્પ્ટ: પ્રોમ્પ્ટ રજિસ્ટ્રી આ એજન્ટ પર ખોલો",
+      "approvals": "આ એજન્ટની મંજૂરીઓ",
+      "approvalsAria": "{name} ની મંજૂરીઓ: આ એજન્ટ માટે ફિલ્ટર કરેલી મંજૂરી કતાર ખોલો",
+      "turns": "ટર્ન ટાઇમલાઇન",
+      "turnsAria": "{name} ની ટર્ન ટાઇમલાઇન: આ એજન્ટ માટે ટર્ન ઇન્સ્પેક્ટર ખોલો"
     },
     "readOnly": {
       "locked": "આ એજન્ટ સંપાદન માટે લૉક છે, તેથી આ મૂલ્યો ફક્ત વાંચવા માટે છે.",
@@ -15470,7 +15616,7 @@
     "regAgentPlaceholder": "એજન્ટ પસંદ કરો",
     "regAgentsFailed": "તમારા એજન્ટ લોડ થઈ શક્યા નહીં.",
     "regPickAgent": "કોઈ એજન્ટના પ્રોમ્પ્ટ જોવા અને બદલવા તેને પસંદ કરો.",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "લિંકમાંનો એજન્ટ તમારા માટે ઉપલબ્ધ નથી, કારણ કે તે અસ્તિત્વમાં નથી અથવા તમે તેને જોઈ શકતા નથી. તેના બદલે રજિસ્ટ્રી વર્કસ્પેસ સ્કોપમાં ખૂલી.",
     "regSearchLabel": "પ્રોમ્પ્ટ શોધો",
     "regSearchPlaceholder": "કી, શીર્ષક અથવા વર્ણન",
     "regRiskLabel": "જોખમ વર્ગ",

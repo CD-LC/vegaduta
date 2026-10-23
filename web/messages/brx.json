@@ -818,15 +818,15 @@
     "rsParam_seed": "सिड",
     "rsParam_stopSequences": "बन्द खालामनाय क्रम",
     "rsParamDropped": "{param} बे एजेन्टआव सेट खालामनाय दं, नित्ताबो {provider} आ {model} नि थाखाय बेखौ बोलोंया, बेनि थाखाय माबो असर गैया।",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "बे रननि थाखाय टुल",
+    "rsToolsRunOnly": "आबुङै बे रन",
+    "rsToolsRunNote": "बे स्विचफोरआ बे प्लेग्राउन्डनिफ्राय नोंआ सोलायनाय खबरफोरआ एजेन्टनि खंनि टुल बाहाय खालामनो हागोन बेखौ बाछि। माबोयाबो सेभ जाया: बाकि जाबायनि थाखाय एजेन्टआ गोदो टुल प्रवेश थाखो। बे फोरआ एजेन्टनि टुल आबुङै बन्द खालामनो हागोन, बिखौ केन्नाबो नतुन टुल होनो हाया।",
+    "rsToolsRunSummary": "एजेन्टनि {total} टुलनि गेजेरसिन {on} बे रननि थाखाय चालु",
+    "rsToolsRunNone": "बे रननि थाखाय टुल गैया: एजेन्टआ लिरआवनो जाप होनो हागोन।",
+    "rsToolsReset": "एजेन्टनि टुल बाहाय खालाम",
+    "rsToolsNotInAgent": "बेआ बे एजेन्टनि सेभ खालामनाय टुलनि गेजेरआव गैया, बेनि थाखाय रननि थाखाय चालु खालामनो जाया।",
+    "rsToolsEditAgent": "एजेन्टनि सेभ खालामनाय टुल सोलाय",
+    "rsToolsLimitedChip": "बे रननि थाखाय टुल सीमित",
     "rsToolsEmpty": "बे एजेन्टनि थाखाय माबो टुल गैया।",
     "rsToolsSummary": "{total} नि गेजेरसिन {on} टुल चालु",
     "rsToolsFailed": "टुलफोर लोड खालामनो हाया।",
@@ -884,14 +884,14 @@
     "chipToolsOff": "टुल गैया फिन्नो नाजा दं",
     "chipFailoverBlocked": "बेकआप मडेल बाहायनाय जाया: टुल दिनै गोहो जासिनो",
     "rsLimitChangeOne": "सोलाय",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "हार सीमा फैखाना",
+    "reasonTimeout": "सम सिन्दोनाय",
+    "reasonProviderUnavailable": "प्रोभाइडार मोनो हाया",
+    "reasonAuthFailed": "प्रोभाइडारआ क्रेडेन्सियाल फेदारदों",
+    "reasonBilling": "प्रोभाइडारनि बिलिं समस्या",
+    "reasonModelNotFound": "मडेल मोनो हाया",
+    "reasonProviderError": "प्रोभाइडारनि भुल",
+    "reasonMalformedToolCall": "टुल कल बाहाय खालामनो हाया"
   },
   "nodeDefs": {
     "triggerLabel": "ट्रिगार",
@@ -13355,7 +13355,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "स्किल",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14199,7 +14199,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "स्किल",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14373,7 +14373,7 @@
       "role": "नोंनि भूमिकाआ बे सेटिंखौ सोलायनो हाया। मोनसे ओर्कस्पेस अड्मिनखौ खोन्दो।",
       "scope": "बे सेटिंखौ बेआव ओभाराइड खालामनो जाया।",
       "readOnly": "सेटिंफोरआ दिनै आबुङै फरायनायखे।",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "बे सुरक्षा सेटिंखौ आबुङै ओर्कस्पेस अड्मिनआनो सोलायनो हागोन। नोंआ बिनि मानखौ हांखौ नुनो हागोन, नित्ताबो सुनायनो हाया।"
     },
     "reset": {
       "button": "फैगैयो मानआव रिसेट खालाम",
@@ -14423,12 +14423,12 @@
       "acknowledge": "आं बे सुरक्षा सोलायनायनि फलखौ बुजिदों।",
       "cancel": "बाफ्लाइ",
       "confirm": "निश्चित खालामसिन सेभ खालाम",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "रिसेट: ओभाराइड फेदारनाय जाय आरो सेटिंआ बिआ उत्तराधिकारआव मोनाय मानआव फिन्नो थाङो।"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "गोख्रोआ आरो कठोर: गोख्रो मान ग्रहण जाय, खमआ फेदार जाय।",
+      "lower": "खमआ आरो कठोर: खम मान ग्रहण जाय, गोख्रोआ फेदार जाय।",
+      "enumOrder": "बिकल्पफोर खम कठोरनिफ्राय आरो कठोरआव सिमा दं: {options}। नोंआ आबुङै कठोर सिरा आव फैनो हागोन।"
     }
   },
   "approvalsQueue": {
@@ -14597,8 +14597,8 @@
     "tlSevWarn": "नाजा नुनो हानाय",
     "tlSevError": "बायै",
     "tlIntake": "टार्न सोलो जादों: {chars} आखर, {tools} टुल, {attachments} सोमोन्दो",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "बे रननि थाखाय टुल",
+    "tlRunToolsNone": "माबोबो गैया (लिर आबुङै)",
     "tlModelCall": "{model} ({provider}) आव मडेल कल, रुट {route}",
     "tlFailover": "{model} ({provider}) आव फेलओभार जादों",
     "tlRetryModel": "{model} ({provider}) आव फिन्नो नाजा जादों, रुट {route}",
@@ -14607,6 +14607,7 @@
     "tlToolCall": "टुल कल {tool}: {status}",
     "tlApprovalRequested": "{tool} गोहोनायनि सिबा अनुमोदन खोन्दोनाय जादों",
     "tlApprovalDecided": "{tool} नि थाखाय अनुमोदननि फैसाला जादों: {decision}",
+    "tlApprovalAutoAllowed": "{tool} खोन्दो गैयै गोहो जादों: सासिनो थानायाव आबुङै फराय कल",
     "tlContinuation": "हाबा खालामनाय: {guard} ({outcome})",
     "tlGuard": "गार्डरेल {guard}: {outcome}",
     "tlVerifyPassed": "नाजानाय पास: {check}",
@@ -14676,7 +14677,7 @@
     "modeTextOnlyHelp": "एजेन्टआ बिनि टुल गैयै जाबाय हो। सुरक्षित: बेआ दिनै माबोरैबो गोहोया। आसिनो-टुल नाजानाय फोरमायनो हाया।",
     "modeFull": "टुलजों जाबाय पाइपलाइन",
     "modeFullHelp": "मोनसे साबसिन बाहायखालामआ नुनाय टुल, गार्डरेल आरो पदखेपनि सीमा। आसिनो-टुल आरो ट्राजेक्टोरि नाजानायनि थाखाय गोनां।",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "आबुङै फरायनाय टुलफोरआ साबसिन गोहो। डेटा सोलायनो हानाय, खबर सोलाइनो हानाय नंबा डा खर्च खालामनो हानाय माबोबो नकल खालामनाय जाय आरो रनआव तालिका खालामनाय जाय, बेनि थाखाय साबसिन माबोया जाया। सुरक्षा श्रेणी गैया टुलबो नकल जाय।",
     "autoApproveLabel": "इभाल सेन्डबक्सआव टुल कल गोदोनै अनुमोदन खालाम",
     "autoApproveHelp": "सानसे मानसिनि थाखाय बेनावनाय टुल कलखौ इभाल सेन्डबक्सआ अनुमोदन खालामो, केसआ जोबोथ जानो हागोन। बेनि गैया केसआ प्रोडाक्सनआव जायखे बादि जाबाय नुनाय अनुमोदनआवनो जोबोथ जाय।",
     "autoApproveWarnTitle": "प्रोडाक्सन गैया ओर्कस्पेसनि थाखायनो",
@@ -14684,7 +14685,7 @@
     "autoApproveNeedsFull": "गोदानखौ जाबाय पाइपलाइन चालु खालाम: गोदोनै अनुमोदनआ टुल गोहोनायाव दिनै बाहाय जाय।",
     "autoApproveRefused": "बे ओर्कस्पेसआव अनुमति गैया: {reason}",
     "autoApproveConfirmTitle": "इभालआव टुल कल गोदोनै अनुमोदन खालामनो?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "बे डेटासेटनि रिप्लेआव मानसिनि थाखाय बेनावनाय जाबाय टुल कल गोदोनै अनुमोदन जागोन। अनुमोदन जानाय आबुङै फरायनाय टुलफोरआ साबसिन गोहो; मावबो सोलायनो हानाय फोरआ दिनैबो नकल जाय। बेखौ टेस्ट डेटा दंनाय ओर्कस्पेसआवनो खालाम। रनफोरआ बे फोर गोदोनै अनुमोदन जादोंबुंना रेकर्ड खालामो।",
     "autoApproveConfirm": "गोदोनै अनुमोदन चालु खालाम",
     "trajectoryLabel": "ट्राजेक्टोरि नाजानाय",
     "trajectoryOn": "On",
@@ -14709,22 +14710,22 @@
     "samplingSource_platform": "प्लेटफर्मआ सेट खालामनाय",
     "samplingSource_tenant": "नोंनि ओर्कस्पेसनि थाखाय सेट खालामनाय",
     "samplingSource_agent": "बे एजेन्टनि थाखाय सेट खालामनाय",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "ओर्कस्पेस डिफल्ट",
+    "modeDefaultHelp": "नोंनि ओर्कस्पेसनि सेटिंखौ थारो (अड्मिनआ सोलायया जाहोनो पुराय पाइपलाइन)। जाबाय रनआ दिनैबो गोदो मोड बाछिनो हागोन।",
+    "modeDefaultCurrent": "दिनै: {mode}",
+    "modeNameFull": "पुराय पाइपलाइन",
+    "modeNameQuick": "फैसिन (लिर आबुङै)",
+    "badgeFull": "पुराय पाइपलाइन",
+    "badgeQuick": "फैसिन",
+    "datasetModePinnedTitle": "बे डेटासेटआ माबोसोनै बे बादिनो रिप्ले जाय। मोनसे रनआ दिनैबो अन्य मोड बाछिनो हागोन।",
+    "datasetModeDefaultTitle": "रन माबोरै रिप्ले जागोन बेनि बिषयआव बे डेटासेटआ ओर्कस्पेसनि डिफल्टखौ थारो।",
+    "runModeLabel": "फुडोनि रननि थाखाय रिप्ले मोड",
+    "runModeInherit": "डेटासेटनि सेटिं बाहाय खालाम",
+    "runModeHelp": "पुराय पाइपलाइनआ एजेन्टखौ बिनि टुल, गार्डरेल आरो अनुमोदनजों सुरक्षित सेन्डबक्सआव गोहो: आबुङै फरायनाय टुलफोरआ साबसिन गोहो, डेटा सोलायनो हानाय नंबा मावबो बिलाइनो हानाय जाबायआ नकल जाय। फैसिन मोडआ टुलफोरखौ थुनाय आरो लिरनाय जापखौनो नाजा।",
+    "runModeFullTitle": "बे रनआ इभाल सेन्डबक्सआव पुराय पाइपलाइन बाहाय खालामदों।",
+    "runModeQuickTitle": "बे रनआ लिर आबुङै फैसिन रिप्ले आदों: एजेन्टनि टुलफोरखौ थुनाय आदों।",
+    "runSimulatedTools": "बे रनआव नकल खालामनाय जादों, गोहो जाया (बिफोरआ डेटा सोलायनो हागोन नंबा प्लेटफर्मनि फाराव फैनो हागोन): {tools}।",
+    "toolStatusSimulated": "नकल जादों, गोहो जाया"
   },
   "agentLab": {
     "wtLabel": "एजेन्टनि टुलजों गोहो",
@@ -14757,6 +14758,14 @@
       "memory": {
         "label": "मेमोरि",
         "description": "एजेन्टआ माबोरै स्मृति थाय आरो सायाव थाय।"
+      },
+      "attachments": {
+        "label": "चेट अपलोड",
+        "description": "मानसिआ चेट खबरजों माबोरै गोख्रो फाइल जोड़ो हागोन।"
+      },
+      "skills": {
+        "label": "स्किल",
+        "description": "इन्स्टल खालामनाय स्किलनि तालिकाआ एजेन्टनि सुचोवानि माबोरै भाग बाहाय खालामनो हागोन।"
       },
       "aux": {
         "label": "आगानि मडेल कल",
@@ -14823,6 +14832,28 @@
           "label": "जोबोथ जाया जाबायनि उनाव अजाबा पास",
           "description": "मडेलनि जाबाय फोरमायनाय बाहाय खालामया पदखेपआव सिन्दोनायाव बेखौ माबोरै हाबा खालामनो सुनाय।",
           "help": "गोबां समाव मोनसे पदखेप फोरमायसिन सिन्दोनाय एजेन्टनि थाखाय बारा। जाबाय अजाबा पासआ मोनसे मडेल कल खर्च खालामो।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "सीमानि उनाव जाप होनाय कल",
+          "description": "टार्ननि टुल सीमा सोंखांनायनि उनाव मडेलआ आनि माबोरै टुल कल नाजानो हागोन। जाबायखौ \"दंनाय जिनिसजों जाप हो\" बुंनाय टिप्पणिजों फेदार जाय; बे गेजेरनि उनाव टार्न भुलजों थुनाय जाय।",
+          "help": "मडेलआ टुल कल खालामनायखौ सोलायनो खुनै जोबोथ नाजानायनि सानो हानायाव बारा। लुपआव थानाय टार्नफोरखौ फैसिन जोबोथ खालामनो खम खालाम। 0 आ सीमानि फाराव फैनाय गोदान कलआवनो टार्न थुनो।"
+        },
+        "supervisedDivisor": {
+          "label": "सासिनो थानाय एजेन्टफोरआ टुल सीमानि 1/N मोनो",
+          "description": "सासिनो थानाय एजेन्टआ टार्ननि टुल-कल सीमाखौ बे संख्याजों भाग खालामसिन मोनो, नित्ताबो गाहाइनि खम सिमाफ्राय केन्नाबो खम जाया।",
+          "help": "सासिनो थानाय एजेन्टफोरखौ आरो कठोरआव थानायनि थाखाय बारा। 1 आ बिफोरखौ पुराय सीमा हो।"
+        },
+        "supervisedMinSteps": {
+          "label": "सासिनो थानाय एजेन्टनि थाखाय आबुङै खम टुल कल",
+          "description": "गाहाइनि संख्या माबोरै गोख्रो जाबोबो, सासिनो थानाय एजेन्टआ मोनाय आबुङै खम टुल-कल सीमा।",
+          "help": "बेखौ 3 नंबा गोख्रोआव थाखो, ब्लाबा सासिनो थानाय एजेन्टआ गोबां पदखेपनि सरल हाबाखौ पुराय खालामनो हागोन।"
+        },
+        "autonomousMultiplier": {
+          "label": "पुराय स्वायत्त एजेन्टफोरआ सीमानि N गुण मोनो",
+          "description": "पुराय स्वायत्त एजेन्टआ टार्ननि टुल-कल सीमाखौ बे संख्याजों गुण खालामसिन मोनो।",
+          "help": "मावबो नुनायै गैयै गोख्रो हाबा गोहोनाय एजेन्टनि थाखाय बारा; उबादि बिफोरआ मोनसे टार्नआव गोबां कल आरो डा खर्च खालामनो हागोन। 1 आ बिफोरखौ मानक सीमा हो।"
         }
       }
     },
@@ -14894,6 +14925,82 @@
           "label": "उननि टुल माबोरै समा प्रस्तावित थाखो",
           "description": "बाहाय खालामनायनि उनाव गिदिर उननि खबरनि थाखाय मोनसे टुलआ माबोरै समा प्रस्तावित थाखो।",
           "help": "गोख्रो उइन्डोआ गोख्रो हाबानि सेसनआव थुम, गिदिरआ टुल तालिकाखौ गिदिर थाङो।"
+        },
+        "maxStickyTools": {
+          "label": "फलो-अपआव सुजुं थानाय माबोरै टुल",
+          "description": "गिदिर फलो-अप खबरआव थिनिसिन थांनाय माबोरै टुल। 0 आ मावबो थाखोया।",
+          "help": "मोनसे हाबाआ गोबां टुल बाहाय खालामनायाव गोख्रो संख्या थुम; गिदिर संख्याआ टुल तालिकाखौ गिदिर थाखो।"
+        },
+        "keepPrimaryModel": {
+          "label": "फलो-अपनि थाखाय मुख्य मडेल थाखो",
+          "description": "दिनैसोमों टुल बाहाय खालामनाय बातचितआव गिदिर फलो-अपआ सस्ता मडेलनि बदलाआव एजेन्टनि मुख्य मडेलआवनो थाखो।",
+          "help": "बेखौ बन्द खालाम बुंनायनि थाखाय खर्च रुटिंआ \"हो\" बादि फलो-अपखौ सस्ता मडेलआव सोलायनो, नित्ताबो चलिनाय हाबाखौ खम खालाम सम्भालनायनि जोखिम दं।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "जाप फिन्नो बाहाय खालामनो सोंथि माबोरै मिलनो हागोन",
+          "description": "मिलनाय सोंथिनि जाप फिन्नो बाहाय खालामनाय एजेन्टनि थाखाय: सेभ खालामनाय जाप होनो नतुन सोंथिआ गाहाइनि सोंथिनि माबोरै नजिक जानो हागोन, 0.85 निफ्राय 1।",
+          "help": "खम संख्याआ गोबां फिन्नो-फिन्नोखौ जाप हो नित्ताबो अन्य सोंथिनि थाखाय जाबाय जापखौ होनायनि जोखिम दं। भुल जाप महंगा जानायाव बेखौ गोख्रो थाखो। जापआ बिखौ होनाय मानसिनि थाखायनो फिन्नो बाहाय जाय।"
+        },
+        "ttl": {
+          "label": "फिन्नो बाहाय खालामनो हानाय जाप माबोरै समा थाखो",
+          "description": "सेभ खालामनाय जापखौ मेटाइनायनि सिबा मिलनाय सोंथिखौ माबोरै समा होनो हागोन।",
+          "help": "नोंनि जापफोर फैसिन गोजाम जानायाव बेखौ गिदिर खालाम।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "जाबाय एजेन्टनि माबोरै सेभ खालामनाय जाप",
+          "description": "मोनसे एजेन्टआ फिन्नो बाहाय खालामनायनि थाखाय माबोरै जाप थाखो। बेनिफ्राय गोबां जानायाव सुजुं गोजाम फोरखौ फेदार जाय।",
+          "help": "गोख्रो भण्डारआ गोबां फिन्नो-फिन्नो नाजा आरो गोबां स्टोरेज बाहाय खालामो।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "बातचितआव टुल कलनि रेकर्ड थाखो",
+          "description": "जाबाय टार्ननि टुल कलनि गिदिर रेकर्डखौ बातचितजों सेभ खालाम, उबादि फुडलि टार्नफोरआ माखौ खालामदोंबुंना नुनो हागोन।",
+          "help": "बातचितनि इतिहासखौ लिर आबुङै थानायनि थाखाय बेखौ बन्द खालाम; उबादि एजेन्टआ गाहाइनि टार्नफोरआव बिनि टुलफोरआ माखौ खालामदोंबुंना जानो हाया। बेआ जाबाय ओर्कस्पेसआव लागु जाय।"
+        },
+        "replayEnabled": {
+          "label": "मडेलखौ टुल रेकर्ड नुथाय",
+          "description": "मडेलखौ बातचित होनाय समाव गाहाइनि टुल कलनि सेभ खालामनाय रेकर्ड सोमोनाय।",
+          "help": "रेकर्ड सेभ जाबोन थानो नित्ताबो बेनि थाखाय मडेलनि हाबा खालामनाय जायगा बाहाय जानो हाया बुंना बेखौ बन्द खालाम।"
+        },
+        "replayTurns": {
+          "label": "टुल रेकर्ड नुथायनाय गाहाइनि टार्न",
+          "description": "टुल बाहाय खालामनाय आबुङै उनानि कतिनि टार्ननि रेकर्ड मडेलखौ नुथायनाय जाय।",
+          "help": "गोख्रो संख्याआ गोख्रो हाबानि सेसनआव थुम नित्ताबो मडेलनि हाबा खालामनाय जायगा गोबां बाहाय खालामो।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "जाबाय टार्नआव तालिका खालामनाय टुल कल",
+          "description": "मोनसे टार्ननि माबोरै टुल कल रेकर्डआव लिरनाय जाय। उनानि कलफोरआ आबुङै गोनोनाय जाय।",
+          "help": "गोबां कल खालामनाय आरो जाबाय मोनसेखौ सायाव दवरनो हानाय टार्ननि थाखाय बारा।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "जाबाय टार्नआव आबुङै गोख्रो टुल रेकर्ड",
+          "description": "मोनसे टार्ननि रेकर्डनि कतिनि आखर मडेलखौ नुथायनाय जाय; बाकिआ गोनोनाय जाय, तालिका जाया।",
+          "help": "उनानि जाबाय टार्ननि खर्च बांनो गिदिर खालाम, गोबां बिबुथिं थानो बारा।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "आबुङै गोख्रो मुखुसिं अपलोड (MB)",
+          "description": "चेट खबरजों मानसिआ जोड़ो हानाय आबुङै गोख्रो मुखुसिं, मेगाबाइटआव। प्लेटफर्मनि जाबाय फाइल सीमाबो दं जाखौ बेआ फैखानो हाया।",
+          "help": "फटो आरो स्क्रिनसटनि थाखाय बारा; गोख्रो फाइलफोर सोलायनायाव फैसिनाया आरो मडेलनि कोटा गोबां बाहाय खालामो।"
+        },
+        "maxAudioMb": {
+          "label": "आबुङै गोख्रो अडियो अपलोड (MB)",
+          "description": "चेट खबरजों मानसिआ जोड़ो हानाय आबुङै गोख्रो अडियो फाइल, मेगाबाइटआव। प्लेटफर्मनि जाबाय फाइल सीमाबो दं जाखौ बेआ फैखानो हाया।",
+          "help": "गोख्रो रेकर्डिंनि थाखाय बारा; गोख्रो फाइलफोर सोलायनायाव फैसिनाया आरो मडेलनि कोटा गोबां बाहाय खालामो।"
+        },
+        "maxVideoMb": {
+          "label": "आबुङै गोख्रो भिडियो अपलोड (MB)",
+          "description": "चेट खबरजों मानसिआ जोड़ो हानाय आबुङै गोख्रो भिडियो, मेगाबाइटआव। प्लेटफर्मनि जाबाय फाइल सीमाबो दं जाखौ बेआ फैखानो हाया।",
+          "help": "गोख्रो क्लिपनि थाखाय बारा; गोख्रो फाइलफोर सोलायनायाव फैसिनाया आरो मडेलनि कोटा गोबां बाहाय खालामो।"
+        },
+        "maxDocumentMb": {
+          "label": "आबुङै गोख्रो नथि अपलोड (MB)",
+          "description": "चेट खबरजों मानसिआ जोड़ो हानाय आबुङै गोख्रो नथि नंबा स्प्रेडसिट, मेगाबाइटआव। प्लेटफर्मनि जाबाय फाइल सीमाबो दं जाखौ बेआ फैखानो हाया।",
+          "help": "गोख्रो रिपोर्ट आरो गोख्रो डेटा फाइलनि थाखाय बारा; गोख्रो फाइलफोर प्रक्रिया खालामनायाव फैसिनाया।"
         }
       },
       "continuation": {
@@ -14952,6 +15059,20 @@
           "help": "मानसिनि बिषयआव गोबां सायाव थानो हानाय सहायकनि थाखाय बारा; बेआ सेभ आरो सायाव थानायनि खर्चबो बारायो।"
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "माबोरै भाग-बाँटा स्मृति",
+          "description": "ओर्कस्पेसआव भाग-बाँटा खालामनाय कतिनि स्मृति थाखो। बेनिफ्राय गोबां जानायाव सुजुं गोजाम फोरखौ फेदार जाय।",
+          "help": "भाग-बाँटा गियाननि फाराव निर्भर खालामनाय गोख्रो दलनि थाखाय बारा; बेआ स्टोरेज आरो स्मरणनि खर्चखौबो बारायो। बेआ जाबाय ओर्कस्पेसआव लागु जाय।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "अन-डिभाइस चेटखौ होनाय स्मृति",
+          "description": "अन-डिभाइस सेसन सोलो जानायाव बिखौ कतिनि स्मृति हो।",
+          "help": "अन-डिभाइस मडेलनि हाबा खालामनाय जायगा गिदिर, बेनि थाखाय बेखौ खम थाखो।"
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "ग्राफ स्मृतिनिफ्राय सायाव थानाय तथ्य",
@@ -14962,6 +15083,20 @@
           "label": "जाबाय लुकआपआव फरायनाय ग्राफ पथ",
           "description": "मोनसे लुकआपनि तथ्य मोनो हानायनि थाखाय स्मृति ग्राफनि माबोरै सोमोन्दो फरायनाय जाय।",
           "help": "गोबां सोमोन्दोआ मोनसे तथ्यआवनो थां हागोन, बेनि थाखाय गोख्रोआव सोमोन्दो खालामनाय स्मृतिआव जाबायखौ मोनो गोबां संख्या गोनां जानो हागोन। गोबां संख्यायाआ जाबाय लुकआपखौ हाबा खालामो।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "प्रम्प्टआव तालिका खालामनाय माबोरै स्किल",
+          "description": "एजेन्टआ बिफोर दंबुंना जानोनि थाखाय बिनि सुचोवाआव नोंनि कतिनि स्किलनि मुं होनाय जाय। बाकिआ गोनोनाय जाय, तालिका जाया।",
+          "help": "नोंनि फाराव गोबां स्किल दं जाबोन बारा; तालिका खालामनाय जाबाय स्किलआ जाबाय टार्नआव मडेलनि हाबा खालामनाय जायगानि अजाबा बाहाय खालामो। बेआ जाबाय ओर्कस्पेसआव लागु जाय।"
+        },
+        "maxBlockChars": {
+          "label": "प्रम्प्टआव स्किल तालिकानि गेदेमा",
+          "description": "एजेन्टनि सुचोवाआव स्किलनि तालिकाआ कतिनि आखर मोनो हागोन। गेदेमा गाहाइसिनो उनानि स्किलफोरखौ मुंनिफ्राय गिदिर खालामनाय जाय।",
+          "help": "गोबां स्किलनि बिबुथिं थानो बारा, जाबाय टार्नआव टोकेन बांनो खम खालाम। बेआ जाबाय ओर्कस्पेसआव लागु जाय।"
         }
       }
     },
@@ -15014,6 +15149,17 @@
           "description": "नाजानाय लिरनि माबोरै भाग AI सुरक्षा बिचारकआ फरायो। बेनिफ्राय गोबां लिर बिचार खालामनाय जाया।",
           "help": "नोंआ बेखौ आबुङै प्लेटफर्मनि मानफ्राय गोख्रो खालामनो हागोन। बारायनायआ गोख्रो टुल फलाफलनि जाबाय बिचार खालामो नित्ताबो जाबाय बिचारक कलखौ गोख्रो खालामो।"
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "सासिनो थानाय एजेन्ट आरो आबुङै-फरायनाय टुल",
+          "description": "सासिनो थानाय स्वायत्तता स्तरनि एजेन्टआ खोन्दोनाय नंबा लुकअप बादि आबुङै फरायनाय टुलनि सिबाबो नोंखौ खोन्दो नंबा खोन्दोया। लिरनाय, सोलाइनाय आरो प्लेटफर्मआ श्रेणी खालामया टुलफोरआ माबोसोनै खोन्दो।",
+          "help": "नोंआ बेखौ आबुङै प्लेटफर्म सेटिंफ्राय कठोर खालामनो हागोन। जाबाय फावा खोन्दोनाय आबुङै सुरक्षित बाछिनाय; आबुङै-फरायनाय टुलखौ गोहो होनायआ मोनसे सोंथि खम खालामो, नित्ताबो मिजिंगैया खोन्दोनायखौ थुनायनि मोनसे मौका बिलायो। गोदो डेटा फरायनो हानाय, भरोसा गैया बिषय ग्रहण खालामनो हानाय आरो डेटाखौ फाराव सोलायनो हानाय एजेन्टखौ बे सेटिंआ माखौ बुंलाइबो जाबाय कलआव खोन्दो जाय।",
+          "options": {
+            "auto-allow": "आबुङै-फरायनाय टुलखौ खोन्दो गैयै गोहो होनो हो",
+            "gate": "जाबाय टुल कलनि सिबा खोन्दो"
+          }
+        }
       }
     },
     "quality": {
@@ -15036,12 +15182,12 @@
           "help": "जाबाय फिन्नो-फिन्नोआ मोनसे रननि खर्च आरो समखौ गुण खालामो।"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "मूल्यायन माबोरै गोहो जाय",
+          "description": "रन नंबा बिनि डेटासेटआ बुंलाइया जायाव, मूल्यायन रनआ एजेन्टखौ बिनि टुलजों सुरक्षित सेन्डबक्सआव रिप्ले खालामो (पुराय पाइपलाइन) नंबा लिरआवनो जाप होनो (फैसिन)।",
+          "help": "पुराय पाइपलाइनआ नोंनि बाहायखालामगिरिफोरआ मोनोनाय जिनिस, टुल बाहाय खालामनाय सयं, नाजा आरो खर्च गोबां। बेआव आबुङै फरायनाय टुलफोरआ साबसिन गोहो; डेटा सोलायनो हानाय, खबर सोलाइनो हानाय नंबा डा खर्च खालामनो हानाय जाबायआ नकल जाय आरो रनआव तालिका खालामनाय जाय। फैसिनआ सस्ता आरो टुल बाहाय खालामनायनि बिषयआव माबोबो बुंया।",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "सेन्डबक्सआव पुराय पाइपलाइन",
+            "quick": "फैसिन: लिर जाप आबुङै"
           }
         }
       }
@@ -15145,7 +15291,7 @@
       "cancel": "बाफ्लाइ",
       "done": "{count} सेटिंखौ बिनि फैगैयो मानआव रिसेट खालाम।",
       "partial": "{done} सेटिं रिसेट जादों; {failed} रिसेट खालामनो हाया। बायै सेटिंनि खबर नाजा।",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} सेटिं रिसेट जादों। कारण गोनां {skipped} बे बादिनो थाखो।"
     },
     "import": {
       "button": "ओभाराइड आयात खालाम",
@@ -15218,16 +15364,16 @@
       "unknownActor": "मिजिंगैया",
       "noReason": "माबो मावथाइ होनाय जाया",
       "showMore": "गोबां नुथाय",
-      "scope": "Level",
+      "scope": "स्तर",
       "scopeWorkspace": "ओर्कस्पेस",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "एजेन्ट {id}",
+      "scopeFilter": "सोलायनाय बे स्तरआव नुथाय",
+      "filterAll": "जाबाय स्तर",
+      "filterWorkspace": "आबुङै ओर्कस्पेस",
+      "filterAgents": "आबुङै एजेन्ट",
+      "searchLoadedOnly": "खोन्दोनायआ दिनैसोमों लोड जानाय सोलायनायफोरखौ सोमोनाय।",
+      "loadError": "सोलायनायनि इतिहास लोड खालामनो हाया। {message}",
+      "moreFailed": "आरो सोलायनाय लोड खालामनो हाया। {message}",
       "loadingMore": "लोड जादों"
     }
   },
@@ -15235,7 +15381,7 @@
     "title": "आचरण आरो सीमा",
     "intro": "बे एजेन्टआ मोनसे टार्नआव माबोरै सिमा थानो हागोन बेखौ सासि: माबोरै टुल कल खालामनो हागोन, माबोरै समा गोहोनो हागोन, आरो माबोरै फिन्नो फरायनो। नोंआ बेआव माखौ सोलायया बेआ नोंनि ओर्कस्पेसनिफ्राय फैगैयो।",
     "saveFirst": "गोदानखौ एजेन्टखौ सेभ खालाम। बेआ गाहाइनायनि उनाव बिनि आचरण आरो सीमा सेट खालामनो जाय।",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "बिनि आचरण आरो सीमा टेब खेवनो गाहाइनिफ्राय मोनसे एजेन्ट बाछि।",
     "tabs": {
       "label": "एजेन्ट कन्फिगरेसन",
       "setup": "सेटआप",
@@ -15246,12 +15392,12 @@
       "label": "सोमोन्दो पेज",
       "tenant": "ओर्कस्पेस डिफल्ट सोलाय",
       "playground": "प्लेग्राउन्डआव नाजा",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "बे एजेन्टनि प्रम्प्ट",
+      "promptsAria": "{name} नि प्रम्प्ट: प्रम्प्ट रजिस्ट्रिखौ बे एजेन्टआव खेव",
+      "approvals": "बे एजेन्टनि अनुमोदन",
+      "approvalsAria": "{name} नि अनुमोदन: बे एजेन्टनि थाखाय ओंखारनाय अनुमोदन लाइन खेव",
+      "turns": "टार्न टाइमलाइन",
+      "turnsAria": "{name} नि टार्न टाइमलाइन: बे एजेन्टनि थाखाय टार्न निरीक्षक खेव"
     },
     "readOnly": {
       "locked": "बे एजेन्ट सोलायनायनि थाखाय ताला दं, बेनि थाखाय बे मानफोरआ आबुङै फरायनायखे।",
@@ -15431,7 +15577,7 @@
     "regAgentPlaceholder": "मोनसे एजेन्ट बाछि",
     "regAgentsFailed": "नोंनि एजेन्टफोर लोड खालामनो हाया।",
     "regPickAgent": "मोनसे एजेन्टनि प्रम्प्ट नुथायनो आरो सोलायनो बेखौ बाछि।",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "लिंकआवनि एजेन्ट नोंनि थाखाय मोनो हाया, कारण बेआ गैया नंबा नोंआ नुनो हाया। बेनि सुलुं रजिस्ट्रि ओर्कस्पेस सिमाआव खेवदों।",
     "regSearchLabel": "प्रम्प्ट खोन्दो",
     "regSearchPlaceholder": "माखौ, सोंथि नंबा बिबुथिं",
     "regRiskLabel": "जोखिमनि श्रेणी",

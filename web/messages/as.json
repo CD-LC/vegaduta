@@ -817,15 +817,15 @@
     "rsParam_seed": "ছিড",
     "rsParam_stopSequences": "বন্ধ কৰা ক্ৰম",
     "rsParamDropped": "{param} এই এজেণ্টত ছেট কৰা আছে, কিন্তু {provider}য়ে {model}ৰ বাবে ইয়াক অৱজ্ঞা কৰে, সেয়েহে ইয়াৰ কোনো প্ৰভাৱ নাই।",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "এই ৰানৰ বাবে টুল",
+    "rsToolsRunOnly": "কেৱল এই ৰান",
+    "rsToolsRunNote": "এই ছুইচবোৰে ঠিক কৰে যে এই প্লেগ্ৰাউণ্ডৰ পৰা আপুনি পঠোৱা বাৰ্তাই এজেণ্টৰ কোনবোৰ টুল ব্যৱহাৰ কৰিব পাৰে। একো ছেভ নহয়: বাকী সকলোৰে বাবে এজেণ্টে নিজৰ টুল প্ৰৱেশাধিকাৰ ৰাখে। ইহঁতে এজেণ্টৰ টুল কেৱল বন্ধ কৰিব পাৰে, কেতিয়াও নতুন টুল দিব নোৱাৰে।",
+    "rsToolsRunSummary": "এজেণ্টৰ {total}টা টুলৰ ভিতৰত {on}টা এই ৰানৰ বাবে চালু",
+    "rsToolsRunNone": "এই ৰানৰ বাবে কোনো টুল নাই: এজেণ্টে কেৱল লিখনীত উত্তৰ দিব পাৰে।",
+    "rsToolsReset": "এজেণ্টৰ টুল ব্যৱহাৰ কৰক",
+    "rsToolsNotInAgent": "এইটো এই এজেণ্টৰ ছেভ কৰা টুলৰ ভিতৰত নহয়, সেয়েহে ৰানৰ বাবে চালু কৰিব নোৱাৰি।",
+    "rsToolsEditAgent": "এজেণ্টৰ ছেভ কৰা টুল সলনি কৰক",
+    "rsToolsLimitedChip": "এই ৰানৰ বাবে টুল সীমিত",
     "rsToolsEmpty": "এই এজেণ্টৰ বাবে কোনো টুল উপলব্ধ নহয়।",
     "rsToolsSummary": "{total}ৰ ভিতৰত {on}টা টুল চালু",
     "rsToolsFailed": "টুল লোড কৰিব পৰা নগ'ল।",
@@ -883,14 +883,14 @@
     "chipToolsOff": "টুল অবিহনে পুনৰ চেষ্টা কৰি আছে",
     "chipFailoverBlocked": "বেকআপ মডেল ব্যৱহাৰ কৰা হোৱা নাই: টুল আগতেই চলি গৈছিল",
     "rsLimitChangeOne": "সলনি কৰক",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "হাৰ সীমা পাইছে",
+    "reasonTimeout": "সময় শেষ হ'ল",
+    "reasonProviderUnavailable": "প্ৰদানকাৰী উপলব্ধ নহয়",
+    "reasonAuthFailed": "প্ৰদানকাৰীয়ে ক্ৰেডেনশ্বিয়েল প্ৰত্যাখ্যান কৰিলে",
+    "reasonBilling": "প্ৰদানকাৰীৰ বিলিঙৰ সমস্যা",
+    "reasonModelNotFound": "মডেল উপলব্ধ নহয়",
+    "reasonProviderError": "প্ৰদানকাৰীৰ ত্ৰুটি",
+    "reasonMalformedToolCall": "টুল কলটো ব্যৱহাৰ কৰিব পৰা নগ'ল"
   },
   "nodeDefs": {
     "triggerLabel": "ট্ৰিগাৰ",
@@ -13285,7 +13285,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "স্কিল",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14129,7 +14129,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "স্কিল",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14303,7 +14303,7 @@
       "role": "আপোনাৰ ভূমিকাই এই ছেটিং সলনি কৰিব নোৱাৰে। এজন ৱৰ্কস্পেচ প্ৰশাসকক সোধক।",
       "scope": "এই ছেটিং ইয়াত অভাৰৰাইড কৰিব নোৱাৰি।",
       "readOnly": "ছেটিংছ এতিয়া কেৱল পঢ়িবলৈ।",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "এই সুৰক্ষা ছেটিং কেৱল ৱৰ্কস্পেচ প্ৰশাসকেহে সলনি কৰিব পাৰে। আপুনি ইয়াৰ মান ইয়াত চাব পাৰে, কিন্তু সম্পাদনা কৰিব নোৱাৰে।"
     },
     "reset": {
       "button": "উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ ৰিছেট কৰক",
@@ -14353,12 +14353,12 @@
       "acknowledge": "মই এই সুৰক্ষা পৰিৱৰ্তনৰ পৰিণাম বুজি পাওঁ।",
       "cancel": "বাতিল কৰক",
       "confirm": "নিশ্চিত কৰি ছেভ কৰক",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "ৰিছেট: অভাৰৰাইড আঁতৰোৱা হয় আৰু ছেটিং ই উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ উভতি যায়।"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "অধিক মানে অধিক কঠোৰ: অধিক মান গ্ৰহণ কৰা হয়, কম প্ৰত্যাখ্যান কৰা হয়।",
+      "lower": "কম মানে অধিক কঠোৰ: কম মান গ্ৰহণ কৰা হয়, অধিক প্ৰত্যাখ্যান কৰা হয়।",
+      "enumOrder": "বিকল্পবোৰ আটাইতকৈ কম কঠোৰৰ পৰা আটাইতকৈ অধিক কঠোৰ ক্ৰমত আছে: {options}। আপুনি কেৱল কঠোৰ প্ৰান্তৰ ফাললৈহে যাব পাৰে।"
     }
   },
   "approvalsQueue": {
@@ -14527,8 +14527,8 @@
     "tlSevWarn": "মনোযোগ প্ৰয়োজন",
     "tlSevError": "বিফল",
     "tlIntake": "টাৰ্ন আৰম্ভ হ'ল: {chars}টা আখৰ, {tools}টা টুল, {attachments}টা সংলগ্ন",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "এই ৰানৰ বাবে টুল",
+    "tlRunToolsNone": "কোনো নাই (কেৱল লিখনী)",
     "tlModelCall": "{model} ({provider})লৈ মডেল কল, ৰুট {route}",
     "tlFailover": "{model} ({provider})লৈ ফেইলঅভাৰ হ'ল",
     "tlRetryModel": "{model} ({provider})ত পুনৰ চেষ্টা কৰা হ'ল, ৰুট {route}",
@@ -14537,6 +14537,7 @@
     "tlToolCall": "টুল কল {tool}: {status}",
     "tlApprovalRequested": "{tool} চলাৰ আগতে অনুমোদন বিচৰা হ'ল",
     "tlApprovalDecided": "{tool}ৰ বাবে অনুমোদনৰ সিদ্ধান্ত হ'ল: {decision}",
+    "tlApprovalAutoAllowed": "{tool} নুসুধিয়াকৈ চলিল: তত্ত্বাৱধানত কেৱল-পঢ়া কল",
     "tlContinuation": "নিৰন্তৰতা: {guard} ({outcome})",
     "tlGuard": "গাৰ্ডৰেইল {guard}: {outcome}",
     "tlVerifyPassed": "পৰীক্ষা উত্তীৰ্ণ: {check}",
@@ -14606,7 +14607,7 @@
     "modeTextOnlyHelp": "এজেণ্টে তাৰ টুল অবিহনে উত্তৰ দিয়ে। সুৰক্ষিত: প্ৰকৃততে একো নহয়। প্ৰত্যাশিত-টুল পৰীক্ষা পূৰণ কৰিব নোৱাৰি।",
     "modeFull": "টুলৰ সৈতে সম্পূৰ্ণ পাইপলাইন",
     "modeFullHelp": "এজন প্ৰকৃত ব্যৱহাৰকাৰীয়ে পোৱা একেবোৰ টুল, গাৰ্ডৰেইল আৰু পদক্ষেপৰ সীমা। প্ৰত্যাশিত-টুল আৰু ট্ৰেজেক্টৰী পৰীক্ষাৰ বাবে প্ৰয়োজনীয়।",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "যিবোৰ টুলে কেৱল পঢ়ে সেইবোৰ সঁচাকৈয়ে চলে। ডেটা সলনি কৰিব পৰা, বাৰ্তা পঠাব পৰা বা ধন খৰচ কৰিব পৰা যিকোনো কথা অনুকৰণ কৰা হয় আৰু ৰানত তালিকাভুক্ত কৰা হয়, সেয়েহে বাস্তৱত একো নঘটে। সুৰক্ষা শ্ৰেণীবিভাজন নথকা টুলো অনুকৰণ কৰা হয়।",
     "autoApproveLabel": "ইভেল ছেণ্ডবক্সত টুল কল স্বয়ংক্ৰিয়ভাৱে অনুমোদন কৰক",
     "autoApproveHelp": "সাধাৰণতে এজন ব্যক্তিৰ বাবে অপেক্ষা কৰা টুল কলক ইভেল ছেণ্ডবক্সে অনুমোদন কৰে, যাতে কেছটো শেষ হ'ব পাৰে। ইয়াৰ অবিহনে কেছটো প্ৰডাকশ্বনত যেনে হয় তেনে উত্তৰ নোপোৱা অনুমোদনতে শেষ হয়।",
     "autoApproveWarnTitle": "কেৱল অ-প্ৰডাকশ্বন ৱৰ্কস্পেচৰ বাবে",
@@ -14614,7 +14615,7 @@
     "autoApproveNeedsFull": "প্ৰথমে সম্পূৰ্ণ পাইপলাইন চালু কৰক: স্বয়ংক্ৰিয় অনুমোদন কেৱল টুল চলিলেহে প্ৰযোজ্য হয়।",
     "autoApproveRefused": "এই ৱৰ্কস্পেচত অনুমতি নাই: {reason}",
     "autoApproveConfirmTitle": "ইভেলত টুল কল স্বয়ংক্ৰিয়ভাৱে অনুমোদন কৰিব নে?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "এই ডেটাছেটৰ ৰিপ্লেত ব্যক্তিৰ বাবে অপেক্ষা কৰা প্ৰতিটো টুল কল স্বয়ংক্ৰিয়ভাৱে অনুমোদিত হ'ব। অনুমোদিত কেৱল-পঢ়া টুলবোৰ সঁচাকৈয়ে চলে; কিবা সলনি কৰিব পৰাবোৰ এতিয়াও অনুকৰণ কৰা হয়। ইয়াক কেৱল টেষ্ট ডেটা থকা ৱৰ্কস্পেচতহে কৰক। ৰানবোৰে ৰেকৰ্ড কৰে যে সেইবোৰ স্বয়ংক্ৰিয়ভাৱে অনুমোদিত হৈছিল।",
     "autoApproveConfirm": "স্বয়ংক্ৰিয় অনুমোদন চালু কৰক",
     "trajectoryLabel": "ট্ৰেজেক্টৰী পৰীক্ষা",
     "trajectoryOn": "On",
@@ -14639,22 +14640,22 @@
     "samplingSource_platform": "প্লেটফৰ্মে ছেট কৰা",
     "samplingSource_tenant": "আপোনাৰ ৱৰ্কস্পেচৰ বাবে ছেট কৰা",
     "samplingSource_agent": "এই এজেণ্টৰ বাবে ছেট কৰা",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "ৱৰ্কস্পেচ ডিফল্ট",
+    "modeDefaultHelp": "আপোনাৰ ৱৰ্কস্পেচৰ ছেটিং অনুসৰণ কৰে (প্ৰশাসকে সলনি নকৰিলে পূৰ্ণ পাইপলাইন)। প্ৰতিটো ৰানে এতিয়াও নিজৰ মোড বাছনি কৰিব পাৰে।",
+    "modeDefaultCurrent": "বৰ্তমান: {mode}",
+    "modeNameFull": "পূৰ্ণ পাইপলাইন",
+    "modeNameQuick": "দ্ৰুত (কেৱল লিখনী)",
+    "badgeFull": "পূৰ্ণ পাইপলাইন",
+    "badgeQuick": "দ্ৰুত",
+    "datasetModePinnedTitle": "এই ডেটাছেট সদায় এনেদৰেই ৰিপ্লে হয়। এটা ৰানে এতিয়াও আন মোড বাছনি কৰিব পাৰে।",
+    "datasetModeDefaultTitle": "ৰানবোৰ কেনেকৈ ৰিপ্লে হ'ব তাৰ বাবে এই ডেটাছেটে ৱৰ্কস্পেচৰ ডিফল্ট অনুসৰণ কৰে।",
+    "runModeLabel": "পৰৱৰ্তী ৰানৰ বাবে ৰিপ্লে মোড",
+    "runModeInherit": "ডেটাছেটৰ ছেটিং ব্যৱহাৰ কৰক",
+    "runModeHelp": "পূৰ্ণ পাইপলাইনে এজেণ্টক তাৰ টুল, গাৰ্ডৰেইল আৰু অনুমোদনৰ সৈতে সুৰক্ষিত ছেণ্ডবক্সত চলায়: কেৱল পঢ়া টুলবোৰ সঁচাকৈয়ে চলে, আৰু ডেটা সলনি কৰিব পৰা বা কিবা পঠাব পৰা যিকোনো কথা অনুকৰণ কৰা হয়। দ্ৰুত মোডে টুলবোৰ ৰখাই ৰাখে আৰু কেৱল লিখা উত্তৰ পৰীক্ষা কৰে।",
+    "runModeFullTitle": "এই ৰানে ইভাল ছেণ্ডবক্সত পূৰ্ণ পাইপলাইন ব্যৱহাৰ কৰিলে।",
+    "runModeQuickTitle": "এই ৰান কেৱল লিখনীৰ দ্ৰুত ৰিপ্লে আছিল: এজেণ্টৰ টুলবোৰ ৰখাই ৰখা হৈছিল।",
+    "runSimulatedTools": "এই ৰানত অনুকৰণ কৰা হ'ল, চলোৱা নহ'ল (সেইবোৰে ডেটা সলনি কৰিব পাৰিলেহেঁতেন বা প্লেটফৰ্মৰ বাহিৰলৈ পাব পাৰিলেহেঁতেন): {tools}।",
+    "toolStatusSimulated": "অনুকৰণ কৰা হ'ল, চলোৱা নহ'ল"
   },
   "agentLab": {
     "wtLabel": "এজেণ্টৰ টুলৰ সৈতে চলাওক",
@@ -14687,6 +14688,14 @@
       "memory": {
         "label": "মেম'ৰী",
         "description": "এজেণ্টে কিমানটা স্মৃতি ৰাখে আৰু মনত পেলায়।"
+      },
+      "attachments": {
+        "label": "চেট আপলোড",
+        "description": "মানুহে চেট বাৰ্তাৰ সৈতে কিমান ডাঙৰ ফাইল সংলগ্ন কৰিব পাৰে।"
+      },
+      "skills": {
+        "label": "স্কিল",
+        "description": "ইনষ্টল কৰা স্কিলৰ তালিকাই এজেণ্টৰ নিৰ্দেশনাৰ কিমান অংশ ব্যৱহাৰ কৰিব পাৰে।"
       },
       "aux": {
         "label": "পটভূমি মডেল কল",
@@ -14753,6 +14762,28 @@
           "label": "অসম্পূৰ্ণ উত্তৰৰ পিছত অতিৰিক্ত পাছ",
           "description": "ঘোষণা কৰা কিন্তু গ্ৰহণ নকৰা পদক্ষেপত মডেলৰ উত্তৰ ৰৈ গ'লে তাক আৰু কিমানবাৰ অব্যাহত ৰাখিবলৈ কোৱা হয়।",
           "help": "প্ৰায়ে এটা পদক্ষেপ ঘোষণা কৰি ৰৈ যোৱা এজেণ্টৰ বাবে বঢ়াওক। প্ৰতিটো অতিৰিক্ত পাছে এটা মডেল কল খৰচ কৰে।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "সীমাৰ পিছত উত্তৰ দিয়া কল",
+          "description": "টাৰ্নৰ টুল সীমা শেষ হোৱাৰ পিছত মডেলে আৰু কিমান টুল কল চেষ্টা কৰিব পাৰে। প্ৰতিটোকে \"যি আছে তাৰে উত্তৰ দিয়া\" বুলি টোকাৰ সৈতে প্ৰত্যাখ্যান কৰা হয়; এই সংখ্যাৰ পিছত টাৰ্ন ত্ৰুটিৰ সৈতে বন্ধ কৰা হয়।",
+          "help": "মডেলে টুল কল কৰা বন্ধ কৰিবলৈ কেইবাৰো চেষ্টা কৰিব লগা হ'লে ইয়াক বঢ়াওক। লুপত থকা টাৰ্ন সোনকালে শেষ কৰিবলৈ কমাওক। 0 য়ে সীমা অতিক্ৰম কৰা প্ৰথম কলতে টাৰ্ন বন্ধ কৰে।"
+        },
+        "supervisedDivisor": {
+          "label": "তত্ত্বাৱধানত থকা এজেণ্টে টুল সীমাৰ 1/N পায়",
+          "description": "তত্ত্বাৱধানত থকা এজেণ্টে টাৰ্নৰ টুল-কল সীমাক এই সংখ্যাৰে হৰণ কৰি পায়, কিন্তু তলৰ নূন্যতমতকৈ কেতিয়াও কম নহয়।",
+          "help": "তত্ত্বাৱধানত থকা এজেণ্টক অধিক কঠোৰভাৱে ৰাখিবলৈ বঢ়াওক। 1 য়ে তেওঁলোকক পূৰ্ণ সীমা দিয়ে।"
+        },
+        "supervisedMinSteps": {
+          "label": "তত্ত্বাৱধানত থকা এজেণ্টৰ বাবে নূন্যতম টুল কল",
+          "description": "ওপৰৰ সংখ্যা যিমানেই অধিক নহওক, তত্ত্বাৱধানত থকা এজেণ্টে পোৱা আটাইতকৈ সৰু টুল-কল সীমা।",
+          "help": "তত্ত্বাৱধানত থকা এজেণ্টে কেইবাটাও পদক্ষেপৰ সৰল কাম এতিয়াও শেষ কৰিব পৰাকৈ ইয়াক 3 বা অধিক ৰাখক।"
+        },
+        "autonomousMultiplier": {
+          "label": "সম্পূৰ্ণ স্বায়ত্ত এজেণ্টে সীমাৰ N গুণ পায়",
+          "description": "সম্পূৰ্ণ স্বায়ত্ত এজেণ্টে টাৰ্নৰ টুল-কল সীমাক এই সংখ্যাৰে পূৰণ কৰি পায়।",
+          "help": "কোনেও নোচোৱাকৈ দীঘল কাম চলোৱা এজেণ্টৰ বাবে বঢ়াওক; তেতিয়া তেওঁলোকে এটা টাৰ্নত অধিক কল আৰু ধন খৰচ কৰিব পাৰে। 1 য়ে তেওঁলোকক মানক সীমা দিয়ে।"
         }
       }
     },
@@ -14824,6 +14855,82 @@
           "label": "ফলো-আপ টুল কিমান সময় প্ৰস্তাৱিত থাকে",
           "description": "ব্যৱহাৰৰ পিছত চুটি ফলো-আপ বাৰ্তাৰ বাবে এটা টুল কিমান সময় প্ৰস্তাৱিত থাকে।",
           "help": "দীঘল উইণ্ড'ই দীঘল কামৰ ছেশ্বনত সহায় কৰে, চুটিয়ে টুল তালিকা সৰু ৰাখে।"
+        },
+        "maxStickyTools": {
+          "label": "ফলো-আপত প্ৰস্তাৱ কৰি থকা সৰ্বাধিক টুল",
+          "description": "চুটি ফলো-আপ বাৰ্তালৈ কঢ়িয়াই নিয়া সৰ্বাধিক টুল। 0 য়ে একোকে নাৰাখে।",
+          "help": "কোনো কামে বহুত টুল ব্যৱহাৰ কৰিলে ডাঙৰ সংখ্যাই সহায় কৰে; সৰুটোৱে টুল তালিকা চুটি ৰাখে।"
+        },
+        "keepPrimaryModel": {
+          "label": "ফলো-আপৰ বাবে মুখ্য মডেল ৰাখক",
+          "description": "আগতেই টুল ব্যৱহাৰ কৰা বাৰ্তালাপত চুটি ফলো-আপ সস্তীয়া মডেলৰ সলনি এজেণ্টৰ মুখ্য মডেলতে থাকে।",
+          "help": "ইয়াক বন্ধ কৰক যাতে খৰচ ৰাউটিঙে \"হয়\"ৰ দৰে ফলো-আপ সস্তীয়া মডেললৈ পঠায়, কিন্তু চলি থকা কাম দুৰ্বলভাৱে সামৰাৰ আশংকা থাকে।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "উত্তৰ পুনৰ ব্যৱহাৰ কৰিবলৈ প্ৰশ্ন কিমান একে হ'ব লাগে",
+          "description": "একে ধৰণৰ প্ৰশ্নৰ উত্তৰ পুনৰ ব্যৱহাৰ কৰা এজেণ্টৰ বাবে: ছেভ কৰা উত্তৰ দিবলৈ নতুন প্ৰশ্ন আগৰ প্ৰশ্নৰ কিমান ওচৰত হ'ব লাগে, 0.85 ৰ পৰা 1।",
+          "help": "কম সংখ্যাই অধিক পুনৰাবৃত্তিক উত্তৰ দিয়ে কিন্তু আন প্ৰশ্নৰ বাবে হোৱা উত্তৰ দিয়াৰ আশংকা থাকে। ভুল উত্তৰ ব্যয়বহুল হ'লে ইয়াক অধিক ৰাখক। উত্তৰ কেৱল যিজনক দিয়া হৈছিল তেওঁৰ বাবেহে পুনৰ ব্যৱহাৰ হয়।"
+        },
+        "ttl": {
+          "label": "পুনৰ ব্যৱহাৰযোগ্য উত্তৰ কিমান সময় ৰখা হয়",
+          "description": "ছেভ কৰা উত্তৰ বাদ দিয়াৰ আগতে একে ধৰণৰ প্ৰশ্নক কিমান সময় দিব পাৰি।",
+          "help": "আপোনাৰ উত্তৰ সোনকালে পুৰণি হৈ গ'লে ইয়াক চুটি কৰক।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "প্ৰতিজন এজেণ্টৰ সৰ্বাধিক ছেভ কৰা উত্তৰ",
+          "description": "এজন এজেণ্টে পুনৰ ব্যৱহাৰৰ বাবে কিমান উত্তৰ ৰাখে। ইয়াতকৈ অধিক হ'লে আটাইতকৈ পুৰণিবোৰ বাদ দিয়া হয়।",
+          "help": "ডাঙৰ ভঁৰালে অধিক পুনৰাবৃত্তি বিচাৰি পায় আৰু অধিক ষ্ট'ৰেজ ব্যৱহাৰ কৰে।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "বাৰ্তালাপত টুল কলৰ ৰেকৰ্ড ৰাখক",
+          "description": "প্ৰতিটো টাৰ্নৰ টুল কলৰ চুটি ৰেকৰ্ড বাৰ্তালাপৰ সৈতে ছেভ কৰক, যাতে পিছৰ টাৰ্নবোৰে কি কৰা হৈছিল চাব পাৰে।",
+          "help": "বাৰ্তালাপৰ ইতিহাস কেৱল লিখনী ৰাখিবলৈ ইয়াক বন্ধ কৰক; তেতিয়া এজেণ্টে আগৰ টাৰ্নত তাৰ টুলবোৰে কি কৰিছিল জানিব নোৱাৰে। ই সম্পূৰ্ণ ৱৰ্কস্পেচত প্ৰযোজ্য।"
+        },
+        "replayEnabled": {
+          "label": "মডেলক টুল ৰেকৰ্ড দেখুৱাওক",
+          "description": "মডেলক বাৰ্তালাপ দিওঁতে আগৰ টুল কলৰ ছেভ কৰা ৰেকৰ্ড অন্তৰ্ভুক্ত কৰক।",
+          "help": "ৰেকৰ্ড ছেভ হৈ থাকিবলৈ কিন্তু তাৰ বাবে মডেলৰ কামৰ ঠাই ব্যৱহাৰ নহ'বলৈ ইয়াক বন্ধ কৰক।"
+        },
+        "replayTurns": {
+          "label": "যিবোৰ আগৰ টাৰ্নৰ টুল ৰেকৰ্ড দেখুওৱা হয়",
+          "description": "টুল ব্যৱহাৰ কৰা আটাইতকৈ শেহতীয়া কিমানটা টাৰ্নৰ ৰেকৰ্ড মডেলক দেখুওৱা হয়।",
+          "help": "ডাঙৰ সংখ্যাই দীঘল কামৰ ছেশ্বনত সহায় কৰে কিন্তু মডেলৰ কামৰ ঠাই অধিক ব্যৱহাৰ কৰে।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "প্ৰতি টাৰ্নত তালিকাভুক্ত টুল কল",
+          "description": "এটা টাৰ্নৰ কিমান টুল কল ৰেকৰ্ডত লিখা হয়। পিছৰ কলবোৰ কেৱল গণনা কৰা হয়।",
+          "help": "বহুত কল কৰা আৰু প্ৰতিটো মনত ৰাখিব লগা টাৰ্নৰ বাবে বঢ়াওক।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "প্ৰতি টাৰ্নত আটাইতকৈ দীঘল টুল ৰেকৰ্ড",
+          "description": "এটা টাৰ্নৰ ৰেকৰ্ডৰ কিমান আখৰ মডেলক দেখুওৱা হয়; বাকী গণনা কৰা হয়, তালিকাভুক্ত কৰা নহয়।",
+          "help": "পিছৰ প্ৰতিটো টাৰ্নত খৰচ বচাবলৈ কমাওক, অধিক বিৱৰণ ৰাখিবলৈ বঢ়াওক।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "আটাইতকৈ ডাঙৰ ছবি আপলোড (MB)",
+          "description": "চেট বাৰ্তাৰ সৈতে কোনোৱে সংলগ্ন কৰিব পৰা আটাইতকৈ ডাঙৰ ছবি, মেগাবাইটত। প্লেটফৰ্মৰো এটা সামগ্ৰিক ফাইল সীমা আছে যাক ই অতিক্ৰম কৰিব নোৱাৰে।",
+          "help": "ফটো আৰু স্ক্ৰীণশ্বটৰ বাবে বঢ়াওক; ডাঙৰ ফাইল পঠাবলৈ লেহেমীয়া আৰু মডেলৰ অধিক কোটা ব্যৱহাৰ কৰে।"
+        },
+        "maxAudioMb": {
+          "label": "আটাইতকৈ ডাঙৰ অডিঅ' আপলোড (MB)",
+          "description": "চেট বাৰ্তাৰ সৈতে কোনোৱে সংলগ্ন কৰিব পৰা আটাইতকৈ ডাঙৰ অডিঅ' ফাইল, মেগাবাইটত। প্লেটফৰ্মৰো এটা সামগ্ৰিক ফাইল সীমা আছে যাক ই অতিক্ৰম কৰিব নোৱাৰে।",
+          "help": "দীঘল ৰেকৰ্ডিঙৰ বাবে বঢ়াওক; ডাঙৰ ফাইল পঠাবলৈ লেহেমীয়া আৰু মডেলৰ অধিক কোটা ব্যৱহাৰ কৰে।"
+        },
+        "maxVideoMb": {
+          "label": "আটাইতকৈ ডাঙৰ ভিডিঅ' আপলোড (MB)",
+          "description": "চেট বাৰ্তাৰ সৈতে কোনোৱে সংলগ্ন কৰিব পৰা আটাইতকৈ ডাঙৰ ভিডিঅ', মেগাবাইটত। প্লেটফৰ্মৰো এটা সামগ্ৰিক ফাইল সীমা আছে যাক ই অতিক্ৰম কৰিব নোৱাৰে।",
+          "help": "দীঘল ক্লিপৰ বাবে বঢ়াওক; ডাঙৰ ফাইল পঠাবলৈ লেহেমীয়া আৰু মডেলৰ অধিক কোটা ব্যৱহাৰ কৰে।"
+        },
+        "maxDocumentMb": {
+          "label": "আটাইতকৈ ডাঙৰ নথি আপলোড (MB)",
+          "description": "চেট বাৰ্তাৰ সৈতে কোনোৱে সংলগ্ন কৰিব পৰা আটাইতকৈ ডাঙৰ নথি বা স্প্ৰেডশ্বীট, মেগাবাইটত। প্লেটফৰ্মৰো এটা সামগ্ৰিক ফাইল সীমা আছে যাক ই অতিক্ৰম কৰিব নোৱাৰে।",
+          "help": "দীঘল প্ৰতিবেদন আৰু ডাঙৰ ডেটা ফাইলৰ বাবে বঢ়াওক; ডাঙৰ ফাইল প্ৰক্ৰিয়া কৰিবলৈ লেহেমীয়া।"
         }
       },
       "continuation": {
@@ -14882,6 +14989,20 @@
           "help": "মানুহৰ বিষয়ে বহুত মনত ৰাখিব লগা সহায়কৰ বাবে বঢ়াওক; ই সংৰক্ষণ আৰু মনত পেলোৱা খৰচো বঢ়ায়।"
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "সৰ্বাধিক ভাগ-বতৰা কৰা স্মৃতি",
+          "description": "ৱৰ্কস্পেচত ভাগ-বতৰা কৰা কিমান স্মৃতি ৰখা হয়। ইয়াতকৈ অধিক হ'লে আটাইতকৈ পুৰণিবোৰ বাদ দিয়া হয়।",
+          "help": "ভাগ-বতৰা কৰা জ্ঞানৰ ওপৰত নিৰ্ভৰ কৰা ডাঙৰ দলৰ বাবে বঢ়াওক; ইয়ে ষ্ট'ৰেজ আৰু স্মৰণৰ খৰচো বঢ়ায়। ই সম্পূৰ্ণ ৱৰ্কস্পেচত প্ৰযোজ্য।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ডিভাইচৰ চেটক দিয়া স্মৃতি",
+          "description": "ডিভাইচৰ ছেশ্বন আৰম্ভ হোৱাৰ সময়ত তাক কিমান স্মৃতি দিয়া হয়।",
+          "help": "ডিভাইচৰ মডেলৰ কামৰ ঠাই সৰু, সেয়েহে ইয়াক কম ৰাখক।"
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "গ্ৰাফ মেম'ৰীৰ পৰা মনত পেলোৱা তথ্য",
@@ -14892,6 +15013,20 @@
           "label": "প্ৰতি লুকআপত পঢ়া গ্ৰাফ পথ",
           "description": "এটা লুকআপৰ তথ্য বিচাৰি উলিয়াবলৈ মেম'ৰী গ্ৰাফৰ কিমানটা সংযোগ পঢ়া হয়।",
           "help": "একাধিক সংযোগে একেটা তথ্যলৈ লৈ যাব পাৰে, সেয়েহে ঘনভাৱে সংযুক্ত স্মৃতিত সকলো বিচাৰি উলিয়াবলৈ অধিক সংখ্যাৰ প্ৰয়োজন হ'ব পাৰে। অধিক সংখ্যাই প্ৰতিটো লুকআপ লেহেমীয়া কৰে।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "প্ৰম্পটত তালিকাভুক্ত সৰ্বাধিক স্কিল",
+          "description": "এজেণ্টে সেইবোৰ আছে বুলি জানিবলৈ তাৰ নিৰ্দেশনাত আপোনাৰ কিমান স্কিলৰ নাম দিয়া হয়। বাকী গণনা কৰা হয়, তালিকাভুক্ত কৰা নহয়।",
+          "help": "আপোনাৰ বহুত স্কিল থাকিলে বঢ়াওক; তালিকাভুক্ত প্ৰতিটো স্কিলে প্ৰতিটো টাৰ্নত মডেলৰ কামৰ ঠাইৰ অলপ ব্যৱহাৰ কৰে। ই সম্পূৰ্ণ ৱৰ্কস্পেচত প্ৰযোজ্য।"
+        },
+        "maxBlockChars": {
+          "label": "প্ৰম্পটত স্কিল তালিকাৰ আকাৰ",
+          "description": "এজেণ্টৰ নিৰ্দেশনাত স্কিলৰ তালিকাই কিমান আখৰ ল'ব পাৰে। ভৰি পৰিলে পিছৰ স্কিলবোৰ কেৱল নামলৈ চুটি কৰা হয়।",
+          "help": "অধিক স্কিলৰ বিৱৰণ ৰাখিবলৈ বঢ়াওক, প্ৰতিটো টাৰ্নত টোকেন বচাবলৈ কমাওক। ই সম্পূৰ্ণ ৱৰ্কস্পেচত প্ৰযোজ্য।"
         }
       }
     },
@@ -14944,6 +15079,17 @@
           "description": "পৰীক্ষা কৰা লিখনীৰ কিমান অংশ AI সুৰক্ষা বিচাৰকে পঢ়ে। তাতকৈ বেছি লিখনীৰ বিচাৰ কৰা নহয়।",
           "help": "আপুনি ইয়াক কেৱল প্লেটফৰ্মৰ মানতকৈ ওপৰলৈ বঢ়াব পাৰে। বঢ়ালে দীঘল টুল ফলাফলৰ সম্পূৰ্ণ বিচাৰ হয় কিন্তু প্ৰতিটো বিচাৰক কল ডাঙৰ হয়।"
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "তত্ত্বাৱধানত থকা এজেণ্ট আৰু কেৱল-পঢ়া টুল",
+          "description": "তত্ত্বাৱধান স্বায়ত্ততাৰ স্তৰৰ এজেণ্টে সন্ধান বা লুকআপৰ দৰে কেৱল পঢ়া টুলৰ আগতো আপোনাক সোধে নে নাই। লিখা, পঠোৱা আৰু প্লেটফৰ্মে শ্ৰেণীবিভাজন নকৰা টুলে সদায় সোধে।",
+          "help": "আপুনি ইয়াক কেৱল প্লেটফৰ্ম ছেটিংতকৈ অধিক কঠোৰ কৰিব পাৰে। প্ৰতিবাৰ সোধাটো আটাইতকৈ সুৰক্ষিত বাছনি; কেৱল-পঢ়া টুল চলিবলৈ দিলে এটা প্ৰশ্ন কমে, কিন্তু অপ্ৰত্যাশিত সন্ধান ৰোধ কৰাৰ এটা সুযোগো যায়। যি এজেণ্টে ব্যক্তিগত ডেটা পঢ়িব পাৰে, অবিশ্বাসযোগ্য বিষয়বস্তু ল'ব পাৰে আৰু ডেটা বাহিৰলৈ পঠাব পাৰে, এই ছেটিঙে যিয়েই নকওক তাক প্ৰতিটো কলত সোধা হয়।",
+          "options": {
+            "auto-allow": "কেৱল-পঢ়া টুল নুসুধিয়াকৈ চলিবলৈ দিয়ক",
+            "gate": "প্ৰতিটো টুল কলৰ আগতে সোধক"
+          }
+        }
       }
     },
     "quality": {
@@ -14966,12 +15112,12 @@
           "help": "প্ৰতিটো পুনৰাবৃত্তিয়ে এটা ৰানৰ খৰচ আৰু সময় গুণ কৰে।"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "মূল্যায়ন কেনেকৈ চলে",
+          "description": "ৰান বা তাৰ ডেটাছেটে নকলে, মূল্যায়ন ৰানে এজেণ্টক তাৰ টুলৰ সৈতে সুৰক্ষিত ছেণ্ডবক্সত ৰিপ্লে কৰে নে (পূৰ্ণ পাইপলাইন) কেৱল লিখনীত উত্তৰ দিয়ে (দ্ৰুত)।",
+          "help": "পূৰ্ণ পাইপলাইনে আপোনাৰ ব্যৱহাৰকাৰীয়ে যি পায় সেয়া, টুল ব্যৱহাৰকে ধৰি, পৰীক্ষা কৰে আৰু খৰচ অধিক। ইয়াত কেৱল পঢ়া টুলবোৰ সঁচাকৈয়ে চলে; ডেটা সলনি কৰিব পৰা, বাৰ্তা পঠাব পৰা বা ধন খৰচ কৰিব পৰা যিকোনো কথা অনুকৰণ কৰা হয় আৰু ৰানত তালিকাভুক্ত কৰা হয়। দ্ৰুত সস্তীয়া আৰু টুল ব্যৱহাৰৰ বিষয়ে একো নকয়।",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "ছেণ্ডবক্সত পূৰ্ণ পাইপলাইন",
+            "quick": "দ্ৰুত: কেৱল লিখনী উত্তৰ"
           }
         }
       }
@@ -15075,7 +15221,7 @@
       "cancel": "বাতিল কৰক",
       "done": "{count}টা ছেটিংক সিহঁতৰ উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ ৰিছেট কৰক।",
       "partial": "{done}টা ছেটিং ৰিছেট হ'ল; {failed}টা ৰিছেট কৰিব পৰা নগ'ল। বিফল ছেটিংছৰ বাৰ্তা চাওক।",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done}টা ছেটিং ৰিছেট কৰা হ'ল। কাৰণ লগা {skipped}টা যেনেকুৱা আছিল তেনেকুৱাই ৰখা হ'ল।"
     },
     "import": {
       "button": "অভাৰৰাইড আমদানি কৰক",
@@ -15148,16 +15294,16 @@
       "unknownActor": "অজ্ঞাত",
       "noReason": "কোনো কাৰণ দিয়া হোৱা নাই",
       "showMore": "অধিক দেখুৱাওক",
-      "scope": "Level",
+      "scope": "স্তৰ",
       "scopeWorkspace": "ৱৰ্কস্পেচ",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "এজেণ্ট {id}",
+      "scopeFilter": "পৰিৱৰ্তন এই স্তৰত দেখুৱাওক",
+      "filterAll": "সকলো স্তৰ",
+      "filterWorkspace": "কেৱল ৱৰ্কস্পেচ",
+      "filterAgents": "কেৱল এজেণ্ট",
+      "searchLoadedOnly": "সন্ধানে এতিয়ালৈকে লোড হোৱা পৰিৱৰ্তনবোৰ সামৰি লয়।",
+      "loadError": "পৰিৱৰ্তনৰ ইতিহাস লোড কৰিব পৰা নগ'ল। {message}",
+      "moreFailed": "অধিক পৰিৱৰ্তন লোড কৰিব পৰা নগ'ল। {message}",
       "loadingMore": "লোড হৈ আছে"
     }
   },
@@ -15165,7 +15311,7 @@
     "title": "আচৰণ আৰু সীমা",
     "intro": "এই এজেণ্ট এটা টাৰ্নত কিমান দূৰ যাব পাৰে সেয়া নিয়ন্ত্ৰণ কৰক: কিমানটা টুল কল কৰিব পাৰে, কিমান সময় চলিব পাৰে আৰু কিমান উভতাই পঢ়ে। আপুনি ইয়াত যি সলনি নকৰে সেয়া আপোনাৰ ৱৰ্কস্পেচৰ পৰা উত্তৰাধিকাৰসূত্ৰে আহে।",
     "saveFirst": "প্ৰথমে এজেণ্টক ছেভ কৰক। ই বনাৰ পিছত ইয়াৰ আচৰণ আৰু সীমা ছেট কৰিব পাৰি।",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "ইয়াৰ আচৰণ আৰু সীমা টেব খুলিবলৈ তলৰ পৰা এজন এজেণ্ট বাছক।",
     "tabs": {
       "label": "এজেণ্ট কনফিগাৰেচন",
       "setup": "ছেটআপ",
@@ -15176,12 +15322,12 @@
       "label": "সম্পৰ্কিত পৃষ্ঠা",
       "tenant": "ৱৰ্কস্পেচ ডিফল্ট সলনি কৰক",
       "playground": "প্লেগ্ৰাউণ্ডত চেষ্টা কৰক",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "এই এজেণ্টৰ প্ৰম্পট",
+      "promptsAria": "{name}ৰ প্ৰম্পট: প্ৰম্পট ৰেজিষ্ট্ৰি এই এজেণ্টত খোলক",
+      "approvals": "এই এজেণ্টৰ অনুমোদন",
+      "approvalsAria": "{name}ৰ অনুমোদন: এই এজেণ্টৰ বাবে ফিল্টাৰ কৰা অনুমোদনৰ শাৰী খোলক",
+      "turns": "টাৰ্ন টাইমলাইন",
+      "turnsAria": "{name}ৰ টাৰ্ন টাইমলাইন: এই এজেণ্টৰ বাবে টাৰ্ন পৰিদৰ্শক খোলক"
     },
     "readOnly": {
       "locked": "এই এজেণ্ট সম্পাদনাৰ বাবে লক কৰা আছে, সেয়েহে এই মানবোৰ কেৱল পঢ়িবলৈ।",
@@ -15361,7 +15507,7 @@
     "regAgentPlaceholder": "এটা এজেণ্ট বাছক",
     "regAgentsFailed": "আপোনাৰ এজেণ্ট লোড কৰিব পৰা নগ'ল।",
     "regPickAgent": "এটা এজেণ্টৰ প্ৰম্পট চাবলৈ আৰু সলনি কৰিবলৈ তাক বাছক।",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "লিংকত থকা এজেণ্ট আপোনাৰ বাবে উপলব্ধ নহয়, কাৰণ ই নাই বা আপুনি ইয়াক চাব নোৱাৰে। ইয়াৰ সলনি ৰেজিষ্ট্ৰি ৱৰ্কস্পেচ পৰিসৰত খোলা হ'ল।",
     "regSearchLabel": "প্ৰম্পট সন্ধান কৰক",
     "regSearchPlaceholder": "কি, শিৰোনাম বা বিৱৰণ",
     "regRiskLabel": "বিপদৰ শ্ৰেণী",

@@ -916,15 +916,15 @@
     "rsParam_seed": "随机种子",
     "rsParam_stopSequences": "停止序列",
     "rsParamDropped": "{param} 已在此智能体上设置，但 {provider} 对 {model} 会忽略它，因此没有效果。",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "本次运行的工具",
+    "rsToolsRunOnly": "仅限本次运行",
+    "rsToolsRunNote": "这些开关用于选择你从此试验场发送的消息可以使用智能体的哪些工具。不会保存任何内容:智能体对其他所有人仍保留自己的工具访问权限。它们只能关闭智能体的工具,不能给它新的工具。",
+    "rsToolsRunSummary": "智能体的 {total} 个工具中有 {on} 个在本次运行中开启",
+    "rsToolsRunNone": "本次运行没有工具:智能体只能用文字回答。",
+    "rsToolsReset": "使用智能体的工具",
+    "rsToolsNotInAgent": "不属于该智能体已保存的工具,因此无法在运行中开启。",
+    "rsToolsEditAgent": "更改智能体已保存的工具",
+    "rsToolsLimitedChip": "本次运行的工具受限",
     "rsToolsEmpty": "此智能体没有可用的工具。",
     "rsToolsSummary": "已开启 {on} 个工具，共 {total} 个",
     "rsToolsFailed": "无法加载工具。",
@@ -982,14 +982,14 @@
     "chipToolsOff": "不使用工具重试",
     "chipFailoverBlocked": "未使用备用模型：工具已经运行过",
     "rsLimitChangeOne": "更改",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "已被限流",
+    "reasonTimeout": "已超时",
+    "reasonProviderUnavailable": "提供商不可用",
+    "reasonAuthFailed": "提供商拒绝了凭据",
+    "reasonBilling": "提供商账单问题",
+    "reasonModelNotFound": "模型不可用",
+    "reasonProviderError": "提供商错误",
+    "reasonMalformedToolCall": "该工具调用无法使用"
   },
   "nodeDefs": {
     "triggerLabel": "触发器",
@@ -13597,7 +13597,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "技能",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14599,7 +14599,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "技能",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14773,7 +14773,7 @@
       "role": "您的角色无法更改此设置。请联系工作区管理员。",
       "scope": "此设置无法在此覆盖。",
       "readOnly": "设置目前为只读。",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "只有工作区管理员可以更改此安全设置。你可以在此查看其值,但不能编辑。"
     },
     "reset": {
       "button": "重置为继承值",
@@ -14823,12 +14823,12 @@
       "acknowledge": "我了解此安全更改的后果。",
       "cancel": "取消",
       "confirm": "确认并保存",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "重置:覆盖值会被移除,设置恢复为它继承的值。"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "越高越严格:较高的值会被接受,较低的值会被拒绝。",
+      "lower": "越低越严格:较低的值会被接受,较高的值会被拒绝。",
+      "enumOrder": "选项从最宽松到最严格排列:{options}。你只能向严格的一端调整。"
     }
   },
   "approvalsQueue": {
@@ -14997,8 +14997,8 @@
     "tlSevWarn": "需要关注",
     "tlSevError": "失败",
     "tlIntake": "轮次已开始：{chars} 个字符，{tools} 个工具，{attachments} 个附件",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "本次运行的工具",
+    "tlRunToolsNone": "无(仅文字)",
     "tlModelCall": "调用 {model}（{provider}）的模型，路由 {route}",
     "tlFailover": "已故障转移到 {model}（{provider}）",
     "tlRetryModel": "已在 {model}（{provider}）上重试，路由 {route}",
@@ -15007,6 +15007,7 @@
     "tlToolCall": "工具调用 {tool}：{status}",
     "tlApprovalRequested": "运行 {tool} 之前已请求批准",
     "tlApprovalDecided": "{tool} 的批准已决定：{decision}",
+    "tlApprovalAutoAllowed": "{tool} 未经询问就运行了:受监督模式下的只读调用",
     "tlContinuation": "续写：{guard}（{outcome}）",
     "tlGuard": "护栏 {guard}：{outcome}",
     "tlVerifyPassed": "检查通过：{check}",
@@ -15076,7 +15077,7 @@
     "modeTextOnlyHelp": "智能体不使用工具作答。安全：不会发生任何真实操作。无法满足预期工具检查。",
     "modeFull": "带工具的完整流水线",
     "modeFullHelp": "与真实用户相同的工具、护栏和步骤上限。预期工具和轨迹检查需要此项。",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "只读取数据的工具会真实运行。任何可能更改数据、发送消息或花钱的操作都会被模拟并列在运行记录中,因此不会发生任何真实影响。没有安全分类的工具同样会被模拟。",
     "autoApproveLabel": "在评估沙盒中自动批准工具调用",
     "autoApproveHelp": "原本需要等待人工的工具调用会由评估沙盒批准，使该用例得以完成。否则，该用例会像在生产环境中一样停在未答复的批准处。",
     "autoApproveWarnTitle": "仅限非生产工作区",
@@ -15084,7 +15085,7 @@
     "autoApproveNeedsFull": "请先开启完整流水线：自动批准仅在工具运行时才适用。",
     "autoApproveRefused": "此工作区不允许：{reason}",
     "autoApproveConfirmTitle": "在评估中自动批准工具调用？",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "此数据集重放中每个需要等待人工的工具调用都会被自动批准。获批后只读取数据的工具会真实运行;可能更改内容的获批工具仍会被模拟。请仅在含有测试数据的工作区中这样做。运行会记录它们是自动批准的。",
     "autoApproveConfirm": "开启自动批准",
     "trajectoryLabel": "轨迹检查",
     "trajectoryOn": "On",
@@ -15109,22 +15110,22 @@
     "samplingSource_platform": "由平台设置",
     "samplingSource_tenant": "为您的工作区设置",
     "samplingSource_agent": "为此智能体设置",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "工作区默认值",
+    "modeDefaultHelp": "沿用你的工作区设置(除非管理员更改,否则为完整流水线)。每次运行仍可选择自己的模式。",
+    "modeDefaultCurrent": "当前:{mode}",
+    "modeNameFull": "完整流水线",
+    "modeNameQuick": "快速(仅文字)",
+    "badgeFull": "完整流水线",
+    "badgeQuick": "快速",
+    "datasetModePinnedTitle": "此数据集始终以这种方式重放。单次运行仍可选择其他模式。",
+    "datasetModeDefaultTitle": "此数据集的运行重放方式沿用工作区默认值。",
+    "runModeLabel": "下一次运行的重放模式",
+    "runModeInherit": "使用数据集的设置",
+    "runModeHelp": "完整流水线会在安全沙盒中连同智能体的工具、护栏和审批一起运行:只读取数据的工具会真实运行,任何可能更改数据或发送内容的操作都会被模拟。快速模式不提供工具,只测试书面回答。",
+    "runModeFullTitle": "本次运行在评估沙盒中使用了完整流水线。",
+    "runModeQuickTitle": "本次运行是仅文字的快速重放:智能体的工具未被提供。",
+    "runSimulatedTools": "本次运行中仅模拟,未执行(它们可能更改数据或影响平台之外):{tools}。",
+    "toolStatusSimulated": "已模拟,未执行"
   },
   "agentLab": {
     "wtLabel": "使用智能体的工具运行",
@@ -15157,6 +15158,14 @@
       "memory": {
         "label": "记忆",
         "description": "智能体保留并召回多少条记忆。"
+      },
+      "attachments": {
+        "label": "聊天上传",
+        "description": "用户可附加到聊天消息的文件大小上限。"
+      },
+      "skills": {
+        "label": "技能",
+        "description": "已安装技能列表最多可占用智能体指令的多少。"
       },
       "aux": {
         "label": "后台模型调用",
@@ -15223,6 +15232,28 @@
           "label": "回复未完成后的额外轮次",
           "description": "当模型的回复停在已宣布但未执行的步骤时，额外要求它继续的次数。",
           "help": "对于经常宣布一个步骤后就停下的智能体，请调高。每增加一轮都会多花一次模型调用。"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "超出上限后仍回应的调用",
+          "description": "在本轮的工具上限用尽后,模型还可以再尝试多少次工具调用。每次调用都会被拒绝,并附上要求其用现有信息作答的提示;超过此数量,本轮会因错误而停止。",
+          "help": "如果模型需要尝试几次才会停止调用工具,请调高。要更早结束陷入循环的轮次,请调低。0 表示在超出上限的第一次调用时停止本轮。"
+        },
+        "supervisedDivisor": {
+          "label": "受监督的智能体获得工具上限的 1/N",
+          "description": "受监督的智能体获得本轮工具调用上限除以此数的结果,但绝不会低于下方的最小值。",
+          "help": "调高可让受监督的智能体受到更严格的约束。1 表示给予完整上限。"
+        },
+        "supervisedMinSteps": {
+          "label": "受监督智能体的最少工具调用数",
+          "description": "无论上面的数字多高,受监督智能体获得的最小工具调用上限。",
+          "help": "请保持在 3 或以上,以便受监督的智能体仍能完成包含多个步骤的简单任务。"
+        },
+        "autonomousMultiplier": {
+          "label": "完全自主的智能体获得 N 倍上限",
+          "description": "完全自主的智能体获得本轮工具调用上限乘以此数的结果。",
+          "help": "对于无人看管、运行长任务的智能体可调高;这样它们在一轮中可以花费更多调用次数和费用。1 表示标准上限。"
         }
       }
     },
@@ -15294,6 +15325,82 @@
           "label": "后续追问工具保持提供的时长",
           "description": "工具在被使用后，对简短追问消息继续保持提供的时长。",
           "help": "较长的时间窗口有助于长时间的工作会话，较短的则能让工具列表保持精简。"
+        },
+        "maxStickyTools": {
+          "label": "后续消息中继续提供的工具上限",
+          "description": "带入简短后续消息的工具最多数量。0 表示一个都不保留。",
+          "help": "数值较大有助于任务使用大量工具,数值较小则让工具列表保持简短。"
+        },
+        "keepPrimaryModel": {
+          "label": "后续消息保留主模型",
+          "description": "已使用过工具的对话中的简短后续消息会继续使用智能体的主模型,而不是更便宜的模型。",
+          "help": "关闭后,成本路由会把“好的”之类的后续消息发给更便宜的模型,但可能会降低对进行中任务的处理质量。"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "问题需要多相似才会复用回答",
+          "description": "适用于会复用相似问题回答的智能体:新问题与之前的问题需要多接近(0.85 到 1),才会返回已存储的回答。",
+          "help": "数值较低会复用更多回答,但可能给出本是为另一个问题准备的答案。回答出错代价高时请保持较高。回答只会复用给收到它的那个人。"
+        },
+        "ttl": {
+          "label": "可复用回答的保留时长",
+          "description": "已存储的回答在被丢弃前可以回应相似问题多久。",
+          "help": "如果你的回答很快就会过时,请缩短。"
+        },
+        "maxEntriesPerAgent": {
+          "label": "每个智能体存储回答的上限",
+          "description": "一个智能体保留多少条回答以供复用。超出后最旧的会被丢弃。",
+          "help": "存储量越大,越容易命中重复问题,但占用的存储也越多。"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "在对话中保留工具调用记录",
+          "description": "随对话存储每一轮工具调用的简短记录,以便后续轮次了解做过什么。",
+          "help": "关闭后对话历史将只保留文字;智能体就无法得知它的工具在之前的轮次里做了什么。这适用于整个工作区。"
+        },
+        "replayEnabled": {
+          "label": "向模型显示工具记录",
+          "description": "在把对话提供给模型时,包含已存储的以往工具调用记录。",
+          "help": "关闭后仍会存储记录,但不占用模型的任何工作空间。"
+        },
+        "replayTurns": {
+          "label": "显示工具记录的以往轮次数",
+          "description": "在最近使用过工具的轮次中,有多少轮的记录会显示给模型。",
+          "help": "数值较大对长时间的工作会话有帮助,但会占用模型更多的工作空间。"
+        },
+        "maxEntriesPerTurn": {
+          "label": "每轮列出的工具调用数",
+          "description": "一轮中有多少次工具调用会写入记录。其余调用只计数。",
+          "help": "对于调用很多、需要记住每一次的轮次,请调高。"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "每轮最长的工具记录",
+          "description": "一轮的记录中有多少字符会显示给模型;其余部分只计数,不列出。",
+          "help": "调低可节省之后每一轮的成本,调高可保留更多细节。"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "图片上传大小上限 (MB)",
+          "description": "用户可附加到聊天消息的最大图片,单位为兆字节。平台还有整体的文件上限,此值不能超过它。",
+          "help": "拍照和截图可调高;大文件发送更慢,并占用更多模型额度。"
+        },
+        "maxAudioMb": {
+          "label": "音频上传大小上限 (MB)",
+          "description": "用户可附加到聊天消息的最大音频文件,单位为兆字节。平台还有整体的文件上限,此值不能超过它。",
+          "help": "较长的录音可调高;大文件发送更慢,并占用更多模型额度。"
+        },
+        "maxVideoMb": {
+          "label": "视频上传大小上限 (MB)",
+          "description": "用户可附加到聊天消息的最大视频,单位为兆字节。平台还有整体的文件上限,此值不能超过它。",
+          "help": "较长的视频片段可调高;大文件发送更慢,并占用更多模型额度。"
+        },
+        "maxDocumentMb": {
+          "label": "文档上传大小上限 (MB)",
+          "description": "用户可附加到聊天消息的最大文档或电子表格,单位为兆字节。平台还有整体的文件上限,此值不能超过它。",
+          "help": "长报告和大型数据文件可调高;大文件处理更慢。"
         }
       },
       "continuation": {
@@ -15352,6 +15459,20 @@
           "help": "对于应该记住很多关于人的信息的助手，请调高；这也会增加存储和召回成本。"
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "共享记忆上限",
+          "description": "工作区内共享的记忆保留多少条。超出后最旧的会被丢弃。",
+          "help": "依赖共享知识的大型团队可调高;这也会增加存储和召回的成本。这适用于整个工作区。"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "提供给设备端聊天的记忆数",
+          "description": "设备端会话启动时交给它多少条记忆。",
+          "help": "设备端模型的工作空间较小,所以请保持较低。"
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "从图记忆召回的事实数",
@@ -15362,6 +15483,20 @@
           "label": "每次查找读取的图路径数",
           "description": "为查找一次的事实，会读取记忆图中的多少条连接。",
           "help": "多条连接可能通向同一个事实，因此关联紧密的记忆可能需要更大的数值才能找全。数值越大，每次查找越慢。"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "提示词中列出的技能上限",
+          "description": "在智能体的指令中列出多少个技能名称,让它知道这些技能存在。其余的只计数,不列出。",
+          "help": "技能很多时可调高;每个被列出的技能在每一轮都会占用模型的一点工作空间。这适用于整个工作区。"
+        },
+        "maxBlockChars": {
+          "label": "提示词中技能列表的大小",
+          "description": "技能列表最多可占用智能体指令中的多少字符。列表满了之后,后面的技能会缩短为只有名称。",
+          "help": "调高可为更多技能保留描述,调低可在每一轮节省令牌。这适用于整个工作区。"
         }
       }
     },
@@ -15414,6 +15549,17 @@
           "description": "AI 安全评审会阅读被检查文本的多少内容。超出部分不会被评审。",
           "help": "只能调高到平台值以上。调高后会完整评审较长的工具结果，但每次评审调用会更大。"
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "受监督的智能体与只读工具",
+          "description": "自主级别为受监督的智能体,在使用只读取数据的工具(如搜索或查询)之前是否仍会询问你。写入、发送以及平台未分类的工具始终会询问。",
+          "help": "你只能把它设置得比平台设置更严格。每次都询问是最安全的选择;让只读工具直接运行可以少一次询问,但也少了一次拦下意外搜索的机会。能读取私密数据、接收不可信内容并向外发送数据的智能体,无论此项如何设置,每次调用都会询问。",
+          "options": {
+            "auto-allow": "让只读工具无需询问直接运行",
+            "gate": "每次工具调用前都询问"
+          }
+        }
       }
     },
     "quality": {
@@ -15436,12 +15582,12 @@
           "help": "每次重复都会使运行的成本和时间成倍增加。"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "评估的运行方式",
+          "description": "当运行或其数据集没有指定时,评估运行是在安全沙盒中带着工具重放智能体(完整流水线),还是仅用文字回答(快速)。",
+          "help": "完整流水线会测试用户实际得到的内容,包括工具的使用,成本更高。其中只读取数据的工具会真实运行;任何可能更改数据、发送消息或花钱的操作都会被模拟并列在运行记录中。快速模式更便宜,但无法反映工具的使用情况。",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "沙盒中的完整流水线",
+            "quick": "快速:仅文字回答"
           }
         }
       }
@@ -15545,7 +15691,7 @@
       "cancel": "取消",
       "done": "将 {count} 项设置重置为其继承值。",
       "partial": "已重置 {done} 项设置；{failed} 项无法重置。请查看失败设置上的消息。",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "已重置 {done} 项设置。需要理由的 {skipped} 项保持原样。"
     },
     "import": {
       "button": "导入覆盖",
@@ -15618,24 +15764,24 @@
       "unknownActor": "未知",
       "noReason": "未给出原因",
       "showMore": "显示更多",
-      "scope": "Level",
-      "scopeWorkspace": "Workspace",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
-      "loadingMore": "Loading"
+      "scope": "级别",
+      "scopeWorkspace": "工作区",
+      "scopeAgent": "智能体 {id}",
+      "scopeFilter": "显示以下级别的更改",
+      "filterAll": "所有级别",
+      "filterWorkspace": "仅工作区",
+      "filterAgents": "仅智能体",
+      "searchLoadedOnly": "搜索范围为目前已加载的更改。",
+      "loadError": "无法加载更改历史。{message}",
+      "moreFailed": "无法加载更多更改。{message}",
+      "loadingMore": "加载中"
     }
   },
   "agentBehavior": {
     "title": "行为与上限",
     "intro": "控制此智能体在一个轮次中能做到什么程度：可以调用多少个工具、可以运行多久，以及回读多少内容。您在此未更改的内容都继承自您的工作区。",
     "saveFirst": "请先保存智能体。智能体创建后即可设置其行为与上限。",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "在下方选择一个智能体,即可打开它的“行为与上限”标签页。",
     "tabs": {
       "label": "智能体配置",
       "setup": "设置",
@@ -15646,12 +15792,12 @@
       "label": "相关页面",
       "tenant": "更改工作区默认值",
       "playground": "在测试场中试用",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "此智能体的提示词",
+      "promptsAria": "{name} 的提示词:在此智能体处打开提示词注册表",
+      "approvals": "此智能体的审批",
+      "approvalsAria": "{name} 的审批:打开按此智能体筛选的审批队列",
+      "turns": "轮次时间线",
+      "turnsAria": "{name} 的轮次时间线:为此智能体打开轮次检查器"
     },
     "readOnly": {
       "locked": "此智能体已锁定编辑，因此这些值为只读。",
@@ -15831,7 +15977,7 @@
     "regAgentPlaceholder": "选择智能体",
     "regAgentsFailed": "无法加载您的智能体。",
     "regPickAgent": "选择一个智能体以查看并更改其提示词。",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "链接中的智能体对你不可用,原因是它不存在或你无法查看。注册表已改为在工作区范围打开。",
     "regSearchLabel": "搜索提示词",
     "regSearchPlaceholder": "键、标题或描述",
     "regRiskLabel": "风险类别",

@@ -817,15 +817,15 @@
     "rsParam_seed": "Seed",
     "rsParam_stopSequences": "Stoppsequenzen",
     "rsParamDropped": "{param} ist für diesen Agenten festgelegt, wird aber von {provider} für {model} ignoriert und hat daher keine Wirkung.",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "Tools für diesen Lauf",
+    "rsToolsRunOnly": "Nur dieser Lauf",
+    "rsToolsRunNote": "Mit diesen Schaltern wählen Sie, welche Tools des Agents die Nachrichten aus diesem Playground nutzen dürfen. Nichts wird gespeichert: Der Agent behält für alle anderen seinen eigenen Tool-Zugriff. Sie können die Tools des Agents nur abschalten, ihm aber nie ein neues geben.",
+    "rsToolsRunSummary": "{on} von {total} Tools des Agents für diesen Lauf aktiv",
+    "rsToolsRunNone": "Keine Tools für diesen Lauf: Der Agent kann nur mit Text antworten.",
+    "rsToolsReset": "Tools des Agents verwenden",
+    "rsToolsNotInAgent": "Gehört nicht zu den gespeicherten Tools dieses Agents und kann daher für einen Lauf nicht eingeschaltet werden.",
+    "rsToolsEditAgent": "Gespeicherte Tools des Agents ändern",
+    "rsToolsLimitedChip": "Tools für diesen Lauf eingeschränkt",
     "rsToolsEmpty": "Für diesen Agenten sind keine Tools verfügbar.",
     "rsToolsSummary": "{on} von {total} Tools eingeschaltet",
     "rsToolsFailed": "Die Tools konnten nicht geladen werden.",
@@ -883,14 +883,14 @@
     "chipToolsOff": "Neuer Versuch ohne Tools",
     "chipFailoverBlocked": "Kein Ersatzmodell verwendet: Tools liefen bereits",
     "rsLimitChangeOne": "Ändern",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "ratenbegrenzt",
+    "reasonTimeout": "Zeitüberschreitung",
+    "reasonProviderUnavailable": "Anbieter nicht verfügbar",
+    "reasonAuthFailed": "Anbieter hat die Zugangsdaten abgelehnt",
+    "reasonBilling": "Abrechnungsproblem beim Anbieter",
+    "reasonModelNotFound": "Modell nicht verfügbar",
+    "reasonProviderError": "Anbieterfehler",
+    "reasonMalformedToolCall": "der Tool-Aufruf war nicht verwendbar"
   },
   "nodeDefs": {
     "triggerLabel": "Auslöser",
@@ -14262,7 +14262,7 @@
       "role": "Ihre Rolle darf diese Einstellung nicht ändern. Fragen Sie eine Arbeitsbereich-Administration.",
       "scope": "Diese Einstellung kann hier nicht überschrieben werden.",
       "readOnly": "Einstellungen sind derzeit schreibgeschützt.",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "Nur ein Arbeitsbereichs-Admin kann diese Sicherheitseinstellung ändern. Sie können den Wert hier sehen, aber nicht bearbeiten."
     },
     "reset": {
       "button": "Auf geerbten Wert zurücksetzen",
@@ -14312,12 +14312,12 @@
       "acknowledge": "Ich verstehe die Folgen dieser Sicherheitsänderung.",
       "cancel": "Abbrechen",
       "confirm": "Bestätigen und speichern",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "Zurücksetzen: Die Überschreibung wird entfernt und die Einstellung kehrt zu dem Wert zurück, den sie erbt."
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "Höher ist strenger: Ein höherer Wert wird akzeptiert, ein niedrigerer abgelehnt.",
+      "lower": "Niedriger ist strenger: Ein niedrigerer Wert wird akzeptiert, ein höherer abgelehnt.",
+      "enumOrder": "Die Optionen reichen von am wenigsten bis am strengsten: {options}. Sie können nur in Richtung des strengen Endes wechseln."
     }
   },
   "approvalsQueue": {
@@ -14486,8 +14486,8 @@
     "tlSevWarn": "Erfordert Aufmerksamkeit",
     "tlSevError": "Fehlgeschlagen",
     "tlIntake": "Turn gestartet: {chars} Zeichen, {tools} Tools, {attachments} Anhänge",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "Tools für diesen Lauf",
+    "tlRunToolsNone": "keine (nur Text)",
     "tlModelCall": "Modellaufruf an {model} ({provider}), Route {route}",
     "tlFailover": "Failover auf {model} ({provider})",
     "tlRetryModel": "Erneut versucht mit {model} ({provider}), Route {route}",
@@ -14496,6 +14496,7 @@
     "tlToolCall": "Tool-Aufruf {tool}: {status}",
     "tlApprovalRequested": "Freigabe angefordert, bevor {tool} ausgeführt wird",
     "tlApprovalDecided": "Freigabe entschieden für {tool}: {decision}",
+    "tlApprovalAutoAllowed": "{tool} lief ohne Rückfrage: ein rein lesender Aufruf unter Beaufsichtigt",
     "tlContinuation": "Fortsetzung: {guard} ({outcome})",
     "tlGuard": "Guardrail {guard}: {outcome}",
     "tlVerifyPassed": "Prüfung bestanden: {check}",
@@ -14565,7 +14566,7 @@
     "modeTextOnlyHelp": "Der Agent antwortet ohne seine Tools. Sicher: Es passiert nichts Reales. Prüfungen auf erwartete Tools können nicht erfüllt werden.",
     "modeFull": "Volle Pipeline mit Tools",
     "modeFullHelp": "Dieselben Tools, Guardrails und Schrittlimits wie bei einem echten Nutzer. Nötig für Prüfungen auf erwartete Tools und Trajektorien.",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "Tools, die nur lesen, laufen wirklich. Alles, was Daten ändern, eine Nachricht senden oder Geld ausgeben könnte, wird simuliert und im Lauf aufgeführt, sodass nichts Reales passiert. Tools ohne Sicherheitsklassifizierung werden ebenfalls simuliert.",
     "autoApproveLabel": "Tool-Aufrufe in der Eval-Sandbox automatisch freigeben",
     "autoApproveHelp": "Ein Tool-Aufruf, der normalerweise auf eine Person warten würde, wird von der Eval-Sandbox freigegeben, damit der Fall abgeschlossen werden kann. Ohne dies endet der Fall bei der unbeantworteten Freigabe, wie in der Produktion.",
     "autoApproveWarnTitle": "Nur für Nicht-Produktions-Arbeitsbereiche",
@@ -14573,7 +14574,7 @@
     "autoApproveNeedsFull": "Schalten Sie zuerst die volle Pipeline ein: Die automatische Freigabe gilt nur, wenn Tools laufen.",
     "autoApproveRefused": "In diesem Arbeitsbereich nicht erlaubt: {reason}",
     "autoApproveConfirmTitle": "Tool-Aufrufe in Evals automatisch freigeben?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "Jeder Tool-Aufruf in den Wiederholungen dieses Datensatzes, der auf eine Person warten würde, wird automatisch freigegeben. Freigegebene Tools, die nur lesen, laufen wirklich; freigegebene Tools, die etwas ändern könnten, werden weiterhin simuliert. Tun Sie das nur in einem Arbeitsbereich mit Testdaten. Läufe halten fest, dass sie automatisch freigegeben wurden.",
     "autoApproveConfirm": "Automatische Freigabe einschalten",
     "trajectoryLabel": "Trajektorien-Prüfungen",
     "trajectoryOn": "On",
@@ -14598,22 +14599,22 @@
     "samplingSource_platform": "Von der Plattform festgelegt",
     "samplingSource_tenant": "Für Ihren Arbeitsbereich festgelegt",
     "samplingSource_agent": "Für diesen Agenten festgelegt",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "Arbeitsbereich-Standard",
+    "modeDefaultHelp": "Folgt der Einstellung Ihres Arbeitsbereichs (die vollständige Pipeline, sofern ein Admin das nicht geändert hat). Jeder Lauf kann weiterhin seinen eigenen Modus wählen.",
+    "modeDefaultCurrent": "Aktuell: {mode}",
+    "modeNameFull": "Vollständige Pipeline",
+    "modeNameQuick": "Schnell (nur Text)",
+    "badgeFull": "vollständige Pipeline",
+    "badgeQuick": "schnell",
+    "datasetModePinnedTitle": "Dieser Datensatz wird immer auf diese Weise wiederholt. Ein einzelner Lauf kann trotzdem einen anderen Modus wählen.",
+    "datasetModeDefaultTitle": "Dieser Datensatz folgt dem Standard des Arbeitsbereichs für die Art der Wiederholung.",
+    "runModeLabel": "Wiederholungsmodus für den nächsten Lauf",
+    "runModeInherit": "Einstellung des Datensatzes verwenden",
+    "runModeHelp": "Die vollständige Pipeline führt den Agent mit seinen Tools, Guardrails und Freigaben in einer sicheren Sandbox aus: Tools, die nur lesen, laufen wirklich, alles, was Daten ändern oder etwas senden könnte, wird simuliert. Schnell hält die Tools zurück und prüft nur die geschriebene Antwort.",
+    "runModeFullTitle": "Dieser Lauf nutzte die vollständige Pipeline in der Eval-Sandbox.",
+    "runModeQuickTitle": "Dieser Lauf war eine schnelle reine Text-Wiederholung: Die Tools des Agents wurden zurückgehalten.",
+    "runSimulatedTools": "Simuliert, in diesem Lauf nicht ausgeführt (sie könnten Daten ändern oder außerhalb der Plattform wirken): {tools}.",
+    "toolStatusSimulated": "simuliert, nicht ausgeführt"
   },
   "agentLab": {
     "wtLabel": "Mit den Tools des Agenten ausführen",
@@ -14646,6 +14647,14 @@
       "memory": {
         "label": "Gedächtnis",
         "description": "Wie viele Erinnerungen ein Agent behält und abruft."
+      },
+      "attachments": {
+        "label": "Chat-Uploads",
+        "description": "Wie groß die Dateien sein dürfen, die Personen an Chat-Nachrichten anhängen."
+      },
+      "skills": {
+        "label": "Skills",
+        "description": "Wie viel von den Anweisungen des Agents die Liste der installierten Skills belegen darf."
       },
       "aux": {
         "label": "Modellaufrufe im Hintergrund",
@@ -14712,6 +14721,28 @@
           "label": "Zusätzliche Durchgänge nach einer unfertigen Antwort",
           "description": "Wie oft das Modell zusätzlich gebeten wird weiterzumachen, wenn seine Antwort bei einem angekündigten, aber nicht ausgeführten Schritt stehen geblieben ist.",
           "help": "Erhöhen Sie sie für Agenten, die oft einen Schritt ankündigen und dann stoppen. Jeder zusätzliche Durchgang kostet einen Modellaufruf."
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "Nach dem Limit beantwortete Aufrufe",
+          "description": "Wie viele weitere Tool-Aufrufe das Modell versuchen darf, nachdem das Tool-Limit des Turns aufgebraucht ist. Jeder wird mit dem Hinweis abgelehnt, mit dem Vorhandenen zu antworten; darüber hinaus wird der Turn mit einem Fehler beendet.",
+          "help": "Erhöhen Sie den Wert, wenn ein Modell einige Versuche braucht, um keine Tools mehr aufzurufen. Senken Sie ihn, um Endlosschleifen früher zu beenden. 0 stoppt den Turn beim ersten Aufruf über dem Limit."
+        },
+        "supervisedDivisor": {
+          "label": "Beaufsichtigte Agents erhalten 1/N des Tool-Limits",
+          "description": "Ein beaufsichtigter Agent erhält das Tool-Aufruf-Limit des Turns geteilt durch diese Zahl, aber nie weniger als das Minimum darunter.",
+          "help": "Erhöhen Sie den Wert, um beaufsichtigte Agents kürzer zu halten. 1 gibt ihnen das volle Limit."
+        },
+        "supervisedMinSteps": {
+          "label": "Mindestanzahl an Tool-Aufrufen für einen beaufsichtigten Agent",
+          "description": "Das kleinste Tool-Aufruf-Limit, das ein beaufsichtigter Agent erhält, egal wie hoch die obige Zahl ist.",
+          "help": "Lassen Sie es bei 3 oder mehr, damit ein beaufsichtigter Agent eine einfache Aufgabe mit mehreren Schritten noch abschließen kann."
+        },
+        "autonomousMultiplier": {
+          "label": "Vollständig autonome Agents erhalten das N-Fache des Limits",
+          "description": "Ein vollständig autonomer Agent erhält das Tool-Aufruf-Limit des Turns multipliziert mit dieser Zahl.",
+          "help": "Erhöhen Sie den Wert für Agents, die lange Aufgaben ohne Aufsicht ausführen; sie können dann in einem Turn mehr Aufrufe und mehr Geld ausgeben. 1 gibt ihnen das Standardlimit."
         }
       }
     },
@@ -14783,6 +14814,82 @@
           "label": "Wie lange Tools für Folgefragen angeboten bleiben",
           "description": "Wie lange nach der Nutzung ein Tool für kurze Folgenachrichten angeboten bleibt.",
           "help": "Ein längeres Fenster hilft bei langen Arbeitssitzungen, ein kürzeres hält die Tool-Liste klein."
+        },
+        "maxStickyTools": {
+          "label": "Maximal angebotene Tools in Folgenachrichten",
+          "description": "Die maximale Zahl an Tools, die in eine kurze Folgenachricht übernommen werden. 0 behält keine.",
+          "help": "Eine höhere Zahl hilft, wenn eine Aufgabe viele Tools nutzt; eine niedrigere hält die Tool-Liste klein."
+        },
+        "keepPrimaryModel": {
+          "label": "Hauptmodell für Folgenachrichten beibehalten",
+          "description": "Eine kurze Folgenachricht in einer Unterhaltung, die bereits Tools genutzt hat, bleibt beim Hauptmodell des Agents statt beim günstigeren.",
+          "help": "Schalten Sie es aus, damit das Kostenrouting Folgenachrichten wie „ja“ an das günstigere Modell schickt – mit dem Risiko einer schwächeren Bearbeitung einer laufenden Aufgabe."
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "Wie ähnlich eine Frage sein muss, damit eine Antwort wiederverwendet wird",
+          "description": "Für Agents, die Antworten auf ähnliche Fragen wiederverwenden: wie nah eine neue Frage an einer früheren liegen muss, von 0,85 bis 1, damit die gespeicherte Antwort ausgeliefert wird.",
+          "help": "Ein niedrigerer Wert liefert mehr Wiederholungen aus, birgt aber das Risiko, eine Antwort auf eine andere Frage zu geben. Halten Sie ihn hoch, wenn falsche Antworten teuer sind. Eine Antwort wird nur für die Person wiederverwendet, der sie gegeben wurde."
+        },
+        "ttl": {
+          "label": "Wie lange eine wiederverwendbare Antwort aufbewahrt wird",
+          "description": "Wie lange eine gespeicherte Antwort auf eine ähnliche Frage ausgeliefert werden kann, bevor sie verworfen wird.",
+          "help": "Verkürzen Sie es, wenn Ihre Antworten schnell veralten."
+        },
+        "maxEntriesPerAgent": {
+          "label": "Maximal gespeicherte Antworten pro Agent",
+          "description": "Wie viele Antworten ein Agent zur Wiederverwendung behält. Die ältesten werden darüber hinaus verworfen.",
+          "help": "Ein größerer Speicher findet mehr Wiederholungen und braucht mehr Speicherplatz."
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "Protokoll der Tool-Aufrufe in der Unterhaltung führen",
+          "description": "Speichert mit der Unterhaltung ein kurzes Protokoll der Tool-Aufrufe jedes Turns, damit spätere Turns sehen können, was getan wurde.",
+          "help": "Schalten Sie es aus, damit der Unterhaltungsverlauf nur aus Text besteht; der Agent kann dann nicht erkennen, was seine Tools in früheren Turns getan haben. Das gilt für den gesamten Arbeitsbereich."
+        },
+        "replayEnabled": {
+          "label": "Tool-Protokoll dem Modell zeigen",
+          "description": "Das gespeicherte Protokoll früherer Tool-Aufrufe einbeziehen, wenn dem Modell die Unterhaltung übergeben wird.",
+          "help": "Schalten Sie es aus, um das Protokoll weiter zu speichern, ohne dafür Arbeitsspeicher des Modells zu verbrauchen."
+        },
+        "replayTurns": {
+          "label": "Frühere Turns, deren Tool-Protokoll angezeigt wird",
+          "description": "Bei wie vielen der letzten Turns, die Tools genutzt haben, dem Modell das Protokoll angezeigt wird.",
+          "help": "Eine größere Zahl hilft in langen Arbeitssitzungen, verbraucht aber mehr Arbeitsspeicher des Modells."
+        },
+        "maxEntriesPerTurn": {
+          "label": "Pro Turn aufgelistete Tool-Aufrufe",
+          "description": "Wie viele der Tool-Aufrufe eines Turns ins Protokoll geschrieben werden. Weitere Aufrufe werden nur gezählt.",
+          "help": "Erhöhen Sie den Wert für Turns mit vielen Aufrufen, bei denen jeder einzelne gemerkt werden muss."
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "Längstes Tool-Protokoll pro Turn",
+          "description": "Wie viele Zeichen des Protokolls eines Turns dem Modell gezeigt werden; der Rest wird gezählt, nicht aufgelistet.",
+          "help": "Senken Sie ihn, um bei jedem späteren Turn Kosten zu sparen, erhöhen Sie ihn, um mehr Details zu behalten."
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "Größter Bild-Upload (MB)",
+          "description": "Das größte Bild, das eine Person an eine Chat-Nachricht anhängen kann, in Megabyte. Die Plattform hat auch ein Gesamtlimit für Dateien, das dies nicht überschreiten kann.",
+          "help": "Erhöhen Sie ihn für Fotos und Screenshots; große Dateien werden langsamer gesendet und belegen mehr vom Kontingent des Modells."
+        },
+        "maxAudioMb": {
+          "label": "Größter Audio-Upload (MB)",
+          "description": "Die größte Audiodatei, die eine Person an eine Chat-Nachricht anhängen kann, in Megabyte. Die Plattform hat auch ein Gesamtlimit für Dateien, das dies nicht überschreiten kann.",
+          "help": "Erhöhen Sie ihn für längere Aufnahmen; große Dateien werden langsamer gesendet und belegen mehr vom Kontingent des Modells."
+        },
+        "maxVideoMb": {
+          "label": "Größter Video-Upload (MB)",
+          "description": "Das größte Video, das eine Person an eine Chat-Nachricht anhängen kann, in Megabyte. Die Plattform hat auch ein Gesamtlimit für Dateien, das dies nicht überschreiten kann.",
+          "help": "Erhöhen Sie ihn für längere Clips; große Dateien werden langsamer gesendet und belegen mehr vom Kontingent des Modells."
+        },
+        "maxDocumentMb": {
+          "label": "Größter Dokument-Upload (MB)",
+          "description": "Das größte Dokument oder die größte Tabelle, die eine Person an eine Chat-Nachricht anhängen kann, in Megabyte. Die Plattform hat auch ein Gesamtlimit für Dateien, das dies nicht überschreiten kann.",
+          "help": "Erhöhen Sie ihn für lange Berichte und große Datendateien; große Dateien werden langsamer verarbeitet."
         }
       },
       "continuation": {
@@ -14841,6 +14948,20 @@
           "help": "Erhöhen Sie es für Assistenten, die sich viel über Menschen merken sollen; das erhöht auch Speicher- und Abrufkosten."
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "Maximal gemeinsame Erinnerungen",
+          "description": "Wie viele im Arbeitsbereich geteilte Erinnerungen behalten werden. Die ältesten werden darüber hinaus verworfen.",
+          "help": "Erhöhen Sie den Wert für große Teams, die auf geteiltes Wissen angewiesen sind; das erhöht auch die Speicher- und Abrufkosten. Das gilt für den gesamten Arbeitsbereich."
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "Erinnerungen für Chat auf dem Gerät",
+          "description": "Wie viele Erinnerungen einer Sitzung auf dem Gerät beim Start übergeben werden.",
+          "help": "Modelle auf dem Gerät haben wenig Arbeitsspeicher, halten Sie den Wert daher niedrig."
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "Fakten aus dem Graph-Gedächtnis",
@@ -14851,6 +14972,20 @@
           "label": "Gelesene Graph-Pfade pro Abfrage",
           "description": "Wie viele Verbindungen im Gedächtnisgraphen gelesen werden, um die Fakten für eine Abfrage zu finden.",
           "help": "Mehrere Verbindungen können zum selben Fakt führen, daher brauchen dicht verknüpfte Erinnerungen womöglich eine höhere Zahl, um alles zu finden. Eine höhere Zahl macht jede Abfrage langsamer."
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "Maximal im Prompt aufgeführte Skills",
+          "description": "Wie viele Ihrer Skills in den Anweisungen des Agents genannt werden, damit er von ihnen weiß. Die übrigen werden gezählt, nicht aufgelistet.",
+          "help": "Erhöhen Sie den Wert, wenn Sie viele Skills haben; jeder aufgeführte Skill belegt bei jedem Turn etwas Arbeitsspeicher des Modells. Das gilt für den gesamten Arbeitsbereich."
+        },
+        "maxBlockChars": {
+          "label": "Größe der Skill-Liste im Prompt",
+          "description": "Wie viele Zeichen die Skill-Liste in den Anweisungen des Agents belegen darf. Ist sie voll, werden spätere Skills auf ihre Namen gekürzt.",
+          "help": "Erhöhen Sie ihn, um Beschreibungen für mehr Skills zu behalten, senken Sie ihn, um bei jedem Turn Tokens zu sparen. Das gilt für den gesamten Arbeitsbereich."
         }
       }
     },
@@ -14903,6 +15038,17 @@
           "description": "Wie viel des geprüften Texts die KI-Sicherheits-Judges lesen. Text darüber hinaus wird nicht beurteilt.",
           "help": "Sie können dies nur über den Plattformwert anheben. Eine Erhöhung beurteilt lange Tool-Ergebnisse vollständig, macht aber jeden Judge-Aufruf größer."
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "Beaufsichtigte Agents und rein lesende Tools",
+          "description": "Ob ein Agent der Autonomiestufe Beaufsichtigt Sie auch vor einem Tool fragt, das nur liest, etwa einer Suche oder einem Nachschlagen. Schreibvorgänge, Sendungen und Tools, die die Plattform nicht klassifiziert hat, fragen immer.",
+          "help": "Sie können dies nur strenger machen als die Plattform-Einstellung. Jedes Mal zu fragen ist die sicherste Wahl; rein lesende Tools laufen zu lassen erspart eine Rückfrage, aber auch die Chance, eine unerwartete Suche zu stoppen. Ein Agent, der private Daten lesen, nicht vertrauenswürdige Inhalte aufnehmen und Daten senden kann, wird bei jedem Aufruf gefragt, was auch hier steht.",
+          "options": {
+            "auto-allow": "Rein lesende Tools ohne Rückfrage laufen lassen",
+            "gate": "Vor jedem Tool-Aufruf fragen"
+          }
+        }
       }
     },
     "quality": {
@@ -14925,12 +15071,12 @@
           "help": "Jede Wiederholung vervielfacht Kosten und Dauer eines Laufs."
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "Wie Evaluierungen laufen",
+          "description": "Ob ein Evaluierungslauf den Agent mit seinen Tools in einer sicheren Sandbox wiederholt (vollständige Pipeline) oder nur mit Text antwortet (schnell), wenn der Lauf oder sein Datensatz nichts angibt.",
+          "help": "Die vollständige Pipeline testet, was Ihre Nutzer bekommen, einschließlich Tool-Nutzung, und kostet mehr. Darin laufen Tools, die nur lesen, wirklich; alles, was Daten ändern, eine Nachricht senden oder Geld ausgeben könnte, wird simuliert und im Lauf aufgeführt. Schnell ist günstiger und sagt nichts über die Tool-Nutzung aus.",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "Vollständige Pipeline in einer Sandbox",
+            "quick": "Schnell: nur Textantworten"
           }
         }
       }
@@ -15034,7 +15180,7 @@
       "cancel": "Abbrechen",
       "done": "{count} Einstellungen auf ihre geerbten Werte zurücksetzen.",
       "partial": "{done} Einstellungen zurückgesetzt; {failed} konnten nicht zurückgesetzt werden. Siehe die Meldungen bei den fehlgeschlagenen Einstellungen.",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} Einstellungen zurückgesetzt. {skipped}, die eine Begründung brauchen, blieben unverändert."
     },
     "import": {
       "button": "Überschreibungen importieren",
@@ -15107,24 +15253,24 @@
       "unknownActor": "Unbekannt",
       "noReason": "Kein Grund angegeben",
       "showMore": "Mehr anzeigen",
-      "scope": "Level",
-      "scopeWorkspace": "Workspace",
+      "scope": "Ebene",
+      "scopeWorkspace": "Arbeitsbereich",
       "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
-      "loadingMore": "Loading"
+      "scopeFilter": "Änderungen anzeigen auf",
+      "filterAll": "Alle Ebenen",
+      "filterWorkspace": "Nur Arbeitsbereich",
+      "filterAgents": "Nur Agents",
+      "searchLoadedOnly": "Die Suche erfasst die bisher geladenen Änderungen.",
+      "loadError": "Der Änderungsverlauf konnte nicht geladen werden. {message}",
+      "moreFailed": "Weitere Änderungen konnten nicht geladen werden. {message}",
+      "loadingMore": "Wird geladen"
     }
   },
   "agentBehavior": {
     "title": "Verhalten und Limits",
     "intro": "Steuern Sie, wie weit dieser Agent in einem Turn gehen darf: wie viele Tools er aufrufen kann, wie lange er laufen darf und wie viel er zurückliest. Alles, was Sie hier nicht ändern, wird aus Ihrem Arbeitsbereich übernommen.",
     "saveFirst": "Speichern Sie den Agenten zuerst. Verhalten und Limits lassen sich festlegen, sobald er existiert.",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "Wählen Sie unten einen Agent, um seinen Tab „Verhalten und Limits“ zu öffnen.",
     "tabs": {
       "label": "Agenten-Konfiguration",
       "setup": "Einrichtung",
@@ -15135,12 +15281,12 @@
       "label": "Verwandte Seiten",
       "tenant": "Arbeitsbereich-Standards ändern",
       "playground": "Im Playground ausprobieren",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "Prompts dieses Agents",
+      "promptsAria": "Prompts für {name}: das Prompt-Register bei diesem Agent öffnen",
+      "approvals": "Freigaben dieses Agents",
+      "approvalsAria": "Freigaben für {name}: die Freigabewarteschlange gefiltert auf diesen Agent öffnen",
+      "turns": "Turn-Zeitleiste",
+      "turnsAria": "Turn-Zeitleiste für {name}: den Turn-Inspektor für diesen Agent öffnen"
     },
     "readOnly": {
       "locked": "Dieser Agent ist für die Bearbeitung gesperrt, daher sind diese Werte schreibgeschützt.",
@@ -15320,7 +15466,7 @@
     "regAgentPlaceholder": "Agent auswählen",
     "regAgentsFailed": "Ihre Agenten konnten nicht geladen werden.",
     "regPickAgent": "Wählen Sie einen Agenten, um seine Prompts zu sehen und zu ändern.",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "Der Agent im Link ist für Sie nicht verfügbar, weil er nicht existiert oder Sie ihn nicht sehen können. Stattdessen wurde das Register im Arbeitsbereichs-Geltungsbereich geöffnet.",
     "regSearchLabel": "Prompts durchsuchen",
     "regSearchPlaceholder": "Schlüssel, Titel oder Beschreibung",
     "regRiskLabel": "Risikoklasse",

@@ -817,15 +817,15 @@
     "rsParam_seed": "シード",
     "rsParam_stopSequences": "停止シーケンス",
     "rsParamDropped": "{param} はこのエージェントで設定されていますが、{provider} は {model} に対してこれを無視するため、効果はありません。",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "この実行で使うツール",
+    "rsToolsRunOnly": "この実行のみ",
+    "rsToolsRunNote": "これらのスイッチは、このプレイグラウンドから送るメッセージがエージェントのどのツールを使えるかを選びます。何も保存されません。ほかのすべての人に対しては、エージェントは自身のツールアクセスを保ちます。エージェントのツールをオフにすることしかできず、新しいツールを与えることはできません。",
+    "rsToolsRunSummary": "この実行ではエージェントの{total}個のツールのうち{on}個がオン",
+    "rsToolsRunNone": "この実行ではツールなし: エージェントはテキストでしか回答できません。",
+    "rsToolsReset": "エージェントのツールを使う",
+    "rsToolsNotInAgent": "このエージェントの保存済みツールではないため、実行でオンにすることはできません。",
+    "rsToolsEditAgent": "エージェントの保存済みツールを変更",
+    "rsToolsLimitedChip": "この実行ではツールが制限されています",
     "rsToolsEmpty": "このエージェントには使用できるツールがありません。",
     "rsToolsSummary": "{total} 個中 {on} 個のツールがオン",
     "rsToolsFailed": "ツールを読み込めませんでした。",
@@ -883,14 +883,14 @@
     "chipToolsOff": "ツールなしで再試行中",
     "chipFailoverBlocked": "バックアップモデルは使用されませんでした: すでにツールが実行されています",
     "rsLimitChangeOne": "変更",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "レート制限",
+    "reasonTimeout": "タイムアウト",
+    "reasonProviderUnavailable": "プロバイダーが利用できません",
+    "reasonAuthFailed": "プロバイダーが認証情報を拒否しました",
+    "reasonBilling": "プロバイダーの請求の問題",
+    "reasonModelNotFound": "モデルが利用できません",
+    "reasonProviderError": "プロバイダーのエラー",
+    "reasonMalformedToolCall": "ツール呼び出しを利用できませんでした"
   },
   "nodeDefs": {
     "triggerLabel": "トリガー",
@@ -13236,7 +13236,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "スキル",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14238,7 +14238,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "スキル",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14412,7 +14412,7 @@
       "role": "お使いのロールではこの設定を変更できません。ワークスペース管理者に依頼してください。",
       "scope": "この設定はここでは上書きできません。",
       "readOnly": "現在、設定は読み取り専用です。",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "このセキュリティ設定を変更できるのはワークスペース管理者のみです。値は確認できますが、編集はできません。"
     },
     "reset": {
       "button": "継承値にリセット",
@@ -14462,12 +14462,12 @@
       "acknowledge": "このセキュリティ変更の影響を理解しました。",
       "cancel": "キャンセル",
       "confirm": "確認して保存",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "リセット: 上書きが削除され、設定は継承する値に戻ります。"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "高いほど厳格: 高い値は受け入れられ、低い値は拒否されます。",
+      "lower": "低いほど厳格: 低い値は受け入れられ、高い値は拒否されます。",
+      "enumOrder": "選択肢は緩い順から厳しい順に並んでいます: {options}。厳しい側にしか動かせません。"
     }
   },
   "approvalsQueue": {
@@ -14636,8 +14636,8 @@
     "tlSevWarn": "要確認",
     "tlSevError": "失敗",
     "tlIntake": "ターン開始: {chars} 文字、ツール {tools} 個、添付ファイル {attachments} 件",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "この実行で使うツール",
+    "tlRunToolsNone": "なし(テキストのみ)",
     "tlModelCall": "{model} ({provider}) へのモデル呼び出し、ルート {route}",
     "tlFailover": "{model} ({provider}) にフェイルオーバーしました",
     "tlRetryModel": "{model} ({provider}) で再試行、ルート {route}",
@@ -14646,6 +14646,7 @@
     "tlToolCall": "ツール呼び出し {tool}: {status}",
     "tlApprovalRequested": "{tool} の実行前に承認がリクエストされました",
     "tlApprovalDecided": "{tool} の承認が決定されました: {decision}",
+    "tlApprovalAutoAllowed": "{tool}は確認なしで実行されました: 監視付きでの読み取り専用の呼び出し",
     "tlContinuation": "継続: {guard} ({outcome})",
     "tlGuard": "ガードレール {guard}: {outcome}",
     "tlVerifyPassed": "チェック合格: {check}",
@@ -14715,7 +14716,7 @@
     "modeTextOnlyHelp": "エージェントはツールなしで回答します。安全で、実際には何も起こりません。期待ツールのチェックは満たせません。",
     "modeFull": "ツール付きのフルパイプライン",
     "modeFullHelp": "実際のユーザーと同じツール、ガードレール、ステップ上限を使用します。期待ツールおよびトラジェクトリのチェックに必要です。",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "読み取りだけを行うツールは実際に実行されます。データの変更、メッセージの送信、お金の使用につながり得るものはシミュレートされ、実行内に一覧表示されるため、実際には何も起きません。安全性の分類がないツールもシミュレートされます。",
     "autoApproveLabel": "評価サンドボックスでツール呼び出しを自動承認",
     "autoApproveHelp": "通常は人の承認を待つツール呼び出しを評価サンドボックスが承認し、ケースを完了できるようにします。これがない場合、ケースは本番と同様に、応答のない承認で終了します。",
     "autoApproveWarnTitle": "非本番ワークスペース専用",
@@ -14723,7 +14724,7 @@
     "autoApproveNeedsFull": "最初にフルパイプラインをオンにしてください。自動承認はツールが実行される場合にのみ適用されます。",
     "autoApproveRefused": "このワークスペースでは許可されていません: {reason}",
     "autoApproveConfirmTitle": "評価でツール呼び出しを自動承認しますか?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "このデータセットのリプレイで人の判断を待つことになるすべてのツール呼び出しが自動的に承認されます。承認された読み取り専用のツールは実際に実行され、何かを変更し得る承認済みツールは引き続きシミュレートされます。テストデータのあるワークスペースでのみ行ってください。実行には自動承認されたことが記録されます。",
     "autoApproveConfirm": "自動承認をオンにする",
     "trajectoryLabel": "トラジェクトリチェック",
     "trajectoryOn": "On",
@@ -14748,22 +14749,22 @@
     "samplingSource_platform": "プラットフォームで設定",
     "samplingSource_tenant": "ワークスペースで設定",
     "samplingSource_agent": "このエージェントで設定",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "ワークスペースのデフォルト",
+    "modeDefaultHelp": "ワークスペースの設定に従います(管理者が変更していなければ完全なパイプライン)。各実行は引き続き独自のモードを選べます。",
+    "modeDefaultCurrent": "現在: {mode}",
+    "modeNameFull": "完全なパイプライン",
+    "modeNameQuick": "クイック(テキストのみ)",
+    "badgeFull": "完全なパイプライン",
+    "badgeQuick": "クイック",
+    "datasetModePinnedTitle": "このデータセットは常にこの方法でリプレイされます。個々の実行は別のモードを選ぶこともできます。",
+    "datasetModeDefaultTitle": "このデータセットは、実行のリプレイ方法についてワークスペースの既定値に従います。",
+    "runModeLabel": "次の実行のリプレイモード",
+    "runModeInherit": "データセットの設定を使う",
+    "runModeHelp": "完全なパイプラインは、エージェントをそのツール、ガードレール、承認とともに安全なサンドボックスで実行します。読み取りだけのツールは実際に実行され、データを変更したり何かを送信したりし得るものはシミュレートされます。クイックはツールを使わせず、書かれた回答だけをテストします。",
+    "runModeFullTitle": "この実行は評価サンドボックスで完全なパイプラインを使用しました。",
+    "runModeQuickTitle": "この実行はテキストのみのクイックリプレイでした: エージェントのツールは使われませんでした。",
+    "runSimulatedTools": "この実行ではシミュレートのみで実行されませんでした(データを変更したりプラットフォーム外に影響したりし得るため): {tools}。",
+    "toolStatusSimulated": "シミュレート済み、未実行"
   },
   "agentLab": {
     "wtLabel": "エージェントのツールで実行",
@@ -14796,6 +14797,14 @@
       "memory": {
         "label": "メモリ",
         "description": "エージェントが保持・呼び出すメモリの数です。"
+      },
+      "attachments": {
+        "label": "チャットのアップロード",
+        "description": "チャットメッセージに添付できるファイルの大きさ。"
+      },
+      "skills": {
+        "label": "スキル",
+        "description": "インストール済みスキルの一覧が使えるエージェントの指示の量。"
       },
       "aux": {
         "label": "バックグラウンドのモデル呼び出し",
@@ -14862,6 +14871,28 @@
           "label": "未完了の返信後の追加パス",
           "description": "予告したステップを実行せずに返信が止まった場合に、モデルに続行を依頼する追加回数です。",
           "help": "ステップを予告して止まることが多いエージェントでは増やします。追加パスのたびにモデル呼び出しが 1 回発生します。"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "上限後に応答する呼び出し",
+          "description": "ターンのツール上限を使い切った後で、モデルがさらに試みてよいツール呼び出しの数。それぞれ「手元にあるもので回答する」というメモ付きで拒否され、この数を超えるとターンはエラーで停止します。",
+          "help": "モデルがツール呼び出しをやめるまでに数回かかる場合は上げてください。ループするターンを早く終わらせるには下げてください。0にすると上限を超えた最初の呼び出しでターンが停止します。"
+        },
+        "supervisedDivisor": {
+          "label": "監視付きエージェントはツール上限の1/Nを受け取る",
+          "description": "監視付きエージェントは、ターンのツール呼び出し上限をこの数で割った値を受け取りますが、下の最小値を下回ることはありません。",
+          "help": "監視付きエージェントをより厳しく抑えるには上げてください。1にすると上限全体を受け取ります。"
+        },
+        "supervisedMinSteps": {
+          "label": "監視付きエージェントの最小ツール呼び出し数",
+          "description": "上の数がどれほど大きくても、監視付きエージェントが受け取る最小のツール呼び出し上限。",
+          "help": "監視付きエージェントが複数ステップの簡単な作業を完了できるよう、3以上に保ってください。"
+        },
+        "autonomousMultiplier": {
+          "label": "完全自律エージェントは上限のN倍を受け取る",
+          "description": "完全自律エージェントは、ターンのツール呼び出し上限にこの数を掛けた値を受け取ります。",
+          "help": "人が見ていない長い作業を実行するエージェントには上げてください。1ターンでより多くの呼び出しと費用を使えるようになります。1にすると標準の上限になります。"
         }
       }
     },
@@ -14933,6 +14964,82 @@
           "label": "フォローアップ用ツールを提示し続ける時間",
           "description": "短いフォローアップメッセージに対して、使用後どのくらいの間ツールを提示し続けるかです。",
           "help": "長いほど長い作業セッションに役立ち、短いほどツール一覧が小さく保たれます。"
+        },
+        "maxStickyTools": {
+          "label": "フォローアップで提示し続けるツールの最大数",
+          "description": "短いフォローアップメッセージに引き継がれるツールの最大数。0にすると何も引き継ぎません。",
+          "help": "タスクで多くのツールを使う場合は大きい値が役立ち、小さい値はツール一覧を短く保ちます。"
+        },
+        "keepPrimaryModel": {
+          "label": "フォローアップでメインモデルを維持",
+          "description": "すでにツールを使った会話での短いフォローアップは、安価なモデルではなくエージェントのメインモデルのままになります。",
+          "help": "オフにすると、コストルーティングが「はい」のようなフォローアップを安価なモデルに送ります。進行中のタスクの扱いが弱くなるおそれがあります。"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "回答を再利用するために質問がどれだけ似ている必要があるか",
+          "description": "似た質問への回答を再利用するエージェント向け: 保存済みの回答を返すために、新しい質問が過去の質問にどれだけ近い必要があるか(0.85〜1)。",
+          "help": "低くすると再利用が増えますが、別の質問向けの回答を返すおそれがあります。誤答のコストが大きい場合は高く保ってください。回答は、それを受け取った本人にのみ再利用されます。"
+        },
+        "ttl": {
+          "label": "再利用できる回答を保持する期間",
+          "description": "保存済みの回答が、破棄されるまで似た質問に返され得る期間。",
+          "help": "回答がすぐに古くなる場合は短くしてください。"
+        },
+        "maxEntriesPerAgent": {
+          "label": "エージェントごとの保存回答の最大数",
+          "description": "1つのエージェントが再利用のために保持する回答の数。これを超えると古いものから破棄されます。",
+          "help": "保存数を増やすと再利用が増えますが、ストレージも多く使います。"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "会話にツール呼び出しの記録を残す",
+          "description": "各ターンのツール呼び出しの短い記録を会話とともに保存し、後のターンで何が行われたかを確認できるようにします。",
+          "help": "会話履歴をテキストのみにするにはオフにしてください。その場合、エージェントは以前のターンでツールが何をしたかを知ることができません。ワークスペース全体に適用されます。"
+        },
+        "replayEnabled": {
+          "label": "ツール記録をモデルに見せる",
+          "description": "会話をモデルに渡すとき、保存済みの過去のツール呼び出しの記録を含めます。",
+          "help": "記録の保存は続けつつ、モデルの作業領域を使わないようにするにはオフにしてください。"
+        },
+        "replayTurns": {
+          "label": "ツール記録を表示する過去のターン",
+          "description": "ツールを使った直近のターンのうち、いくつ分の記録をモデルに見せるか。",
+          "help": "大きい値は長い作業セッションで役立ちますが、モデルの作業領域をより多く使います。"
+        },
+        "maxEntriesPerTurn": {
+          "label": "ターンごとに列挙するツール呼び出し",
+          "description": "1つのターンのツール呼び出しのうち、いくつを記録に書き込むか。それ以降の呼び出しは数えるだけです。",
+          "help": "多くの呼び出しを行い、そのすべてを覚えておく必要があるターンでは上げてください。"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "ターンごとの最長のツール記録",
+          "description": "1つのターンの記録のうち、何文字をモデルに見せるか。残りは数えるだけで列挙されません。",
+          "help": "後続のすべてのターンのコストを節約するには下げ、より多くの詳細を残すには上げてください。"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "画像アップロードの最大サイズ (MB)",
+          "description": "チャットメッセージに添付できる画像の最大サイズ(メガバイト)。プラットフォームにはファイル全体の上限もあり、これはそれを超えられません。",
+          "help": "写真やスクリーンショットには上げてください。大きなファイルは送信が遅く、モデルの許容量をより多く使います。"
+        },
+        "maxAudioMb": {
+          "label": "音声アップロードの最大サイズ (MB)",
+          "description": "チャットメッセージに添付できる音声ファイルの最大サイズ(メガバイト)。プラットフォームにはファイル全体の上限もあり、これはそれを超えられません。",
+          "help": "長い録音には上げてください。大きなファイルは送信が遅く、モデルの許容量をより多く使います。"
+        },
+        "maxVideoMb": {
+          "label": "動画アップロードの最大サイズ (MB)",
+          "description": "チャットメッセージに添付できる動画の最大サイズ(メガバイト)。プラットフォームにはファイル全体の上限もあり、これはそれを超えられません。",
+          "help": "長いクリップには上げてください。大きなファイルは送信が遅く、モデルの許容量をより多く使います。"
+        },
+        "maxDocumentMb": {
+          "label": "ドキュメントアップロードの最大サイズ (MB)",
+          "description": "チャットメッセージに添付できるドキュメントまたはスプレッドシートの最大サイズ(メガバイト)。プラットフォームにはファイル全体の上限もあり、これはそれを超えられません。",
+          "help": "長いレポートや大きなデータファイルには上げてください。大きなファイルは処理が遅くなります。"
         }
       },
       "continuation": {
@@ -14991,6 +15098,20 @@
           "help": "人についてたくさん覚えておくべきアシスタントでは増やします。ストレージと呼び出しのコストも増えます。"
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "共有メモリの最大数",
+          "description": "ワークスペースで共有されるメモリを何件保持するか。これを超えると古いものから破棄されます。",
+          "help": "共有知識に頼る大規模なチーム向けに上げてください。保存と呼び出しのコストも上がります。ワークスペース全体に適用されます。"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "オンデバイスチャットに渡すメモリ",
+          "description": "オンデバイスのセッション開始時に渡すメモリの数。",
+          "help": "オンデバイスモデルは作業領域が小さいため、低く保ってください。"
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "グラフメモリから呼び出すファクト数",
@@ -15001,6 +15122,20 @@
           "label": "検索ごとに読み取るグラフパス数",
           "description": "1 回の検索でファクトを見つけるために、メモリグラフの接続をいくつ読み取るかです。",
           "help": "複数の接続が同じファクトにつながることがあるため、密に結びついたメモリではすべてを見つけるのに大きい値が必要な場合があります。値を大きくすると各検索は遅くなります。"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "プロンプトに列挙するスキルの最大数",
+          "description": "エージェントがスキルの存在を知るために、指示にスキル名を何件載せるか。残りは数えるだけで列挙されません。",
+          "help": "スキルが多い場合は上げてください。列挙されたスキルはターンごとにモデルの作業領域を少し使います。ワークスペース全体に適用されます。"
+        },
+        "maxBlockChars": {
+          "label": "プロンプト内のスキル一覧のサイズ",
+          "description": "エージェントの指示のなかでスキル一覧が占められる文字数。いっぱいになると、後ろのスキルは名前だけに短縮されます。",
+          "help": "より多くのスキルの説明を残すには上げ、ターンごとのトークンを節約するには下げてください。ワークスペース全体に適用されます。"
         }
       }
     },
@@ -15053,6 +15188,17 @@
           "description": "AI の安全性判定モデルが、チェック対象のテキストをどこまで読むかです。それを超えるテキストは判定されません。",
           "help": "プラットフォームの値より上げることのみ可能です。上げると長いツール結果を全文判定できますが、判定モデルの呼び出しが大きくなります。"
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "監視付きエージェントと読み取り専用ツール",
+          "description": "自律性レベルが監視付きのエージェントが、検索や参照のように読み取りだけを行うツールの前にも確認を求めるかどうか。書き込み、送信、プラットフォームが分類していないツールは常に確認を求めます。",
+          "help": "プラットフォームの設定より厳しくすることしかできません。毎回確認するのが最も安全です。読み取り専用ツールを実行させると確認が1つ減りますが、予期しない検索を止める機会も失います。非公開データを読み、信頼できない内容を取り込み、データを送信できるエージェントは、この設定にかかわらず呼び出しごとに確認されます。",
+          "options": {
+            "auto-allow": "読み取り専用ツールを確認なしで実行させる",
+            "gate": "ツール呼び出しのたびに確認する"
+          }
+        }
       }
     },
     "quality": {
@@ -15075,12 +15221,12 @@
           "help": "繰り返しのたびに実行のコストと時間が倍になります。"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "評価の実行方法",
+          "description": "実行やそのデータセットが指定していないとき、評価の実行が安全なサンドボックスでエージェントをツール付きでリプレイするか(完全なパイプライン)、テキストのみで回答するか(クイック)。",
+          "help": "完全なパイプラインは、ツールの使用を含め、ユーザーが受け取るものをテストし、コストが高くなります。そこでは読み取りだけのツールは実際に実行され、データの変更、メッセージの送信、お金の使用につながり得るものはシミュレートされ、実行内に一覧表示されます。クイックは安価ですが、ツールの使用については何も示しません。",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "サンドボックスでの完全なパイプライン",
+            "quick": "クイック: テキストの回答のみ"
           }
         }
       }
@@ -15184,7 +15330,7 @@
       "cancel": "キャンセル",
       "done": "{count} 件の設定を継承値にリセットします。",
       "partial": "{done} 件の設定をリセットしました。{failed} 件はリセットできませんでした。失敗した設定のメッセージをご確認ください。",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done}件の設定をリセットしました。理由が必要な{skipped}件はそのままにしました。"
     },
     "import": {
       "button": "上書きをインポート",
@@ -15257,24 +15403,24 @@
       "unknownActor": "不明",
       "noReason": "理由なし",
       "showMore": "さらに表示",
-      "scope": "Level",
-      "scopeWorkspace": "Workspace",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
-      "loadingMore": "Loading"
+      "scope": "レベル",
+      "scopeWorkspace": "ワークスペース",
+      "scopeAgent": "エージェント {id}",
+      "scopeFilter": "変更を表示するレベル",
+      "filterAll": "すべてのレベル",
+      "filterWorkspace": "ワークスペースのみ",
+      "filterAgents": "エージェントのみ",
+      "searchLoadedOnly": "検索は、ここまでに読み込まれた変更を対象にします。",
+      "loadError": "変更履歴を読み込めませんでした。{message}",
+      "moreFailed": "これ以上の変更を読み込めませんでした。{message}",
+      "loadingMore": "読み込み中"
     }
   },
   "agentBehavior": {
     "title": "動作と上限",
     "intro": "このエージェントが 1 ターンでどこまで行えるかを制御します。呼び出せるツールの数、実行できる時間、読み戻す量などです。ここで変更しない項目は、ワークスペースから継承されます。",
     "saveFirst": "先にエージェントを保存してください。動作と上限は、エージェントが作成された後に設定できます。",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "下でエージェントを選ぶと、その「動作と上限」タブが開きます。",
     "tabs": {
       "label": "エージェント設定",
       "setup": "セットアップ",
@@ -15285,12 +15431,12 @@
       "label": "関連ページ",
       "tenant": "ワークスペースのデフォルトを変更",
       "playground": "プレイグラウンドで試す",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "このエージェントのプロンプト",
+      "promptsAria": "{name}のプロンプト: このエージェントでプロンプトレジストリを開く",
+      "approvals": "このエージェントの承認",
+      "approvalsAria": "{name}の承認: このエージェントで絞り込んだ承認キューを開く",
+      "turns": "ターンタイムライン",
+      "turnsAria": "{name}のターンタイムライン: このエージェントのターンインスペクターを開く"
     },
     "readOnly": {
       "locked": "このエージェントは編集がロックされているため、これらの値は読み取り専用です。",
@@ -15470,7 +15616,7 @@
     "regAgentPlaceholder": "エージェントを選択",
     "regAgentsFailed": "エージェントを読み込めませんでした。",
     "regPickAgent": "エージェントを選択すると、そのプロンプトを表示・変更できます。",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "リンク先のエージェントは、存在しないか見る権限がないため、利用できません。代わりにワークスペースのスコープでレジストリを開きました。",
     "regSearchLabel": "プロンプトを検索",
     "regSearchPlaceholder": "キー、タイトル、または説明",
     "regRiskLabel": "リスククラス",

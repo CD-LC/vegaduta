@@ -882,15 +882,15 @@
     "rsParam_seed": "ಸೀಡ್",
     "rsParam_stopSequences": "ನಿಲ್ಲಿಸುವ ಅನುಕ್ರಮಗಳು",
     "rsParamDropped": "{param} ಈ ಏಜೆಂಟ್‌ನಲ್ಲಿ ಹೊಂದಿಸಲಾಗಿದೆ, ಆದರೆ {provider} ಅದನ್ನು {model}ಗೆ ನಿರ್ಲಕ್ಷಿಸುತ್ತದೆ, ಹಾಗಾಗಿ ಅದಕ್ಕೆ ಪರಿಣಾಮವಿಲ್ಲ.",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "ಈ ರನ್‌ಗಾಗಿ ಟೂಲ್‌ಗಳು",
+    "rsToolsRunOnly": "ಈ ರನ್ ಮಾತ್ರ",
+    "rsToolsRunNote": "ಈ ಪ್ಲೇಗ್ರೌಂಡ್‌ನಿಂದ ನೀವು ಕಳುಹಿಸುವ ಸಂದೇಶಗಳು ಏಜೆಂಟ್‌ನ ಯಾವ ಟೂಲ್‌ಗಳನ್ನು ಬಳಸಬಹುದು ಎಂಬುದನ್ನು ಈ ಸ್ವಿಚ್‌ಗಳು ಆಯ್ಕೆ ಮಾಡುತ್ತವೆ. ಏನೂ ಉಳಿಸಲಾಗುವುದಿಲ್ಲ: ಉಳಿದ ಎಲ್ಲರಿಗೂ ಏಜೆಂಟ್ ತನ್ನದೇ ಟೂಲ್ ಪ್ರವೇಶವನ್ನು ಇಟ್ಟುಕೊಳ್ಳುತ್ತದೆ. ಇವು ಏಜೆಂಟ್‌ನ ಟೂಲ್‌ಗಳನ್ನು ಆಫ್ ಮಾಡಬಹುದು ಅಷ್ಟೇ, ಹೊಸ ಟೂಲ್ ಅನ್ನು ಎಂದಿಗೂ ನೀಡಲಾರವು.",
+    "rsToolsRunSummary": "ಏಜೆಂಟ್‌ನ {total} ಟೂಲ್‌ಗಳಲ್ಲಿ {on} ಈ ರನ್‌ಗಾಗಿ ಆನ್ ಆಗಿವೆ",
+    "rsToolsRunNone": "ಈ ರನ್‌ಗಾಗಿ ಟೂಲ್‌ಗಳಿಲ್ಲ: ಏಜೆಂಟ್ ಪಠ್ಯದಲ್ಲಿ ಮಾತ್ರ ಉತ್ತರಿಸಬಹುದು.",
+    "rsToolsReset": "ಏಜೆಂಟ್‌ನ ಟೂಲ್‌ಗಳನ್ನು ಬಳಸಿ",
+    "rsToolsNotInAgent": "ಇದು ಈ ಏಜೆಂಟ್‌ನ ಉಳಿಸಿದ ಟೂಲ್‌ಗಳಲ್ಲಿ ಒಂದಲ್ಲ, ಆದ್ದರಿಂದ ರನ್‌ಗಾಗಿ ಆನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ.",
+    "rsToolsEditAgent": "ಏಜೆಂಟ್‌ನ ಉಳಿಸಿದ ಟೂಲ್‌ಗಳನ್ನು ಬದಲಿಸಿ",
+    "rsToolsLimitedChip": "ಈ ರನ್‌ಗಾಗಿ ಟೂಲ್‌ಗಳು ಸೀಮಿತ",
     "rsToolsEmpty": "ಈ ಏಜೆಂಟ್‌ಗೆ ಟೂಲ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ.",
     "rsToolsSummary": "{total}ರಲ್ಲಿ {on} ಟೂಲ್‌ಗಳು ಆನ್ ಆಗಿವೆ",
     "rsToolsFailed": "ಟೂಲ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ.",
@@ -948,14 +948,14 @@
     "chipToolsOff": "ಟೂಲ್‌ಗಳಿಲ್ಲದೆ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸುತ್ತಿದೆ",
     "chipFailoverBlocked": "ಬ್ಯಾಕಪ್ ಮಾಡೆಲ್ ಬಳಸಿಲ್ಲ: ಟೂಲ್‌ಗಳು ಈಗಾಗಲೇ ಚಲಿಸಿವೆ",
     "rsLimitChangeOne": "ಬದಲಾಯಿಸಿ",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "ದರ ಮಿತಿ ತಲುಪಿದೆ",
+    "reasonTimeout": "ಸಮಯ ಮೀರಿದೆ",
+    "reasonProviderUnavailable": "ಪೂರೈಕೆದಾರ ಲಭ್ಯವಿಲ್ಲ",
+    "reasonAuthFailed": "ಪೂರೈಕೆದಾರರು ರುಜುವಾತುಗಳನ್ನು ತಿರಸ್ಕರಿಸಿದರು",
+    "reasonBilling": "ಪೂರೈಕೆದಾರರ ಬಿಲ್ಲಿಂಗ್ ಸಮಸ್ಯೆ",
+    "reasonModelNotFound": "ಮಾಡೆಲ್ ಲಭ್ಯವಿಲ್ಲ",
+    "reasonProviderError": "ಪೂರೈಕೆದಾರರ ದೋಷ",
+    "reasonMalformedToolCall": "ಟೂಲ್ ಕರೆಯನ್ನು ಬಳಸಲಾಗಲಿಲ್ಲ"
   },
   "nodeDefs": {
     "triggerLabel": "ಪ್ರಚೋದಕ",
@@ -13588,7 +13588,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "ಸ್ಕಿಲ್‌ಗಳು",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14590,7 +14590,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "ಸ್ಕಿಲ್‌ಗಳು",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14764,7 +14764,7 @@
       "role": "ನಿಮ್ಮ ಪಾತ್ರ ಈ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬದಲಾಯಿಸಲಾರದು. ವರ್ಕ್‌ಸ್ಪೇಸ್ ನಿರ್ವಾಹಕರನ್ನು ಕೇಳಿ.",
       "scope": "ಈ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಇಲ್ಲಿ ಓವರ್‌ರೈಡ್ ಮಾಡಲಾಗದು.",
       "readOnly": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈಗ ಓದಲು ಮಾತ್ರ.",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "ಈ ಭದ್ರತಾ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ವರ್ಕ್‌ಸ್ಪೇಸ್ ನಿರ್ವಾಹಕರು ಮಾತ್ರ ಬದಲಿಸಬಹುದು. ನೀವು ಅದರ ಮೌಲ್ಯವನ್ನು ಇಲ್ಲಿ ನೋಡಬಹುದು, ಆದರೆ ಸಂಪಾದಿಸಲಾಗುವುದಿಲ್ಲ."
     },
     "reset": {
       "button": "ಬಳುವಳಿ ಮೌಲ್ಯಕ್ಕೆ ಮರುಹೊಂದಿಸಿ",
@@ -14814,12 +14814,12 @@
       "acknowledge": "ಈ ಸುರಕ್ಷತಾ ಬದಲಾವಣೆಯ ಪರಿಣಾಮಗಳನ್ನು ನಾನು ಅರ್ಥಮಾಡಿಕೊಂಡಿದ್ದೇನೆ.",
       "cancel": "ರದ್ದುಮಾಡಿ",
       "confirm": "ದೃಢೀಕರಿಸಿ ಮತ್ತು ಉಳಿಸಿ",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "ಮರುಹೊಂದಿಸಿ: ಓವರ್‌ರೈಡ್ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ ಮತ್ತು ಸೆಟ್ಟಿಂಗ್ ಅದು ಪಡೆಯುವ ಮೌಲ್ಯಕ್ಕೆ ಹಿಂತಿರುಗುತ್ತದೆ."
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "ಹೆಚ್ಚು ಎಂದರೆ ಕಠಿಣ: ಹೆಚ್ಚಿನ ಮೌಲ್ಯ ಸ್ವೀಕರಿಸಲ್ಪಡುತ್ತದೆ, ಕಡಿಮೆಯದು ತಿರಸ್ಕರಿಸಲ್ಪಡುತ್ತದೆ.",
+      "lower": "ಕಡಿಮೆ ಎಂದರೆ ಕಠಿಣ: ಕಡಿಮೆ ಮೌಲ್ಯ ಸ್ವೀಕರಿಸಲ್ಪಡುತ್ತದೆ, ಹೆಚ್ಚಿನದು ತಿರಸ್ಕರಿಸಲ್ಪಡುತ್ತದೆ.",
+      "enumOrder": "ಆಯ್ಕೆಗಳು ಕಡಿಮೆ ಕಠಿಣದಿಂದ ಹೆಚ್ಚು ಕಠಿಣದ ಕ್ರಮದಲ್ಲಿವೆ: {options}. ನೀವು ಕಠಿಣ ತುದಿಯ ಕಡೆಗೆ ಮಾತ್ರ ಸಾಗಬಹುದು."
     }
   },
   "approvalsQueue": {
@@ -14988,8 +14988,8 @@
     "tlSevWarn": "ಗಮನ ಬೇಕು",
     "tlSevError": "ವಿಫಲ",
     "tlIntake": "ಟರ್ನ್ ಪ್ರಾರಂಭವಾಯಿತು: {chars} ಅಕ್ಷರಗಳು, {tools} ಟೂಲ್‌ಗಳು, {attachments} ಲಗತ್ತುಗಳು",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "ಈ ರನ್‌ಗಾಗಿ ಟೂಲ್‌ಗಳು",
+    "tlRunToolsNone": "ಯಾವುದೂ ಇಲ್ಲ (ಪಠ್ಯ ಮಾತ್ರ)",
     "tlModelCall": "{model} ({provider})ಗೆ ಮಾಡೆಲ್ ಕರೆ, ಮಾರ್ಗ {route}",
     "tlFailover": "{model} ({provider})ಗೆ ಫೇಲ್‌ಓವರ್ ಆಯಿತು",
     "tlRetryModel": "{model} ({provider})ನಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲಾಯಿತು, ಮಾರ್ಗ {route}",
@@ -14998,6 +14998,7 @@
     "tlToolCall": "ಟೂಲ್ ಕರೆ {tool}: {status}",
     "tlApprovalRequested": "{tool} ಚಲಿಸುವ ಮೊದಲು ಅನುಮೋದನೆ ಕೇಳಲಾಯಿತು",
     "tlApprovalDecided": "{tool}ಗೆ ಅನುಮೋದನೆ ನಿರ್ಧಾರ ಆಯಿತು: {decision}",
+    "tlApprovalAutoAllowed": "{tool} ಕೇಳದೆ ಚಲಿಸಿತು: ಮೇಲ್ವಿಚಾರಿತ ಅಡಿಯಲ್ಲಿ ಓದಲು-ಮಾತ್ರ ಕರೆ",
     "tlContinuation": "ಮುಂದುವರಿಕೆ: {guard} ({outcome})",
     "tlGuard": "ಗಾರ್ಡ್‌ರೈಲ್ {guard}: {outcome}",
     "tlVerifyPassed": "ಪರಿಶೀಲನೆ ಉತ್ತೀರ್ಣ: {check}",
@@ -15067,7 +15068,7 @@
     "modeTextOnlyHelp": "ಏಜೆಂಟ್ ತನ್ನ ಟೂಲ್‌ಗಳಿಲ್ಲದೆ ಉತ್ತರಿಸುತ್ತದೆ. ಸುರಕ್ಷಿತ: ನಿಜವಾಗಿ ಏನೂ ನಡೆಯುವುದಿಲ್ಲ. ನಿರೀಕ್ಷಿತ-ಟೂಲ್ ಪರಿಶೀಲನೆಗಳು ಪೂರೈಸಲಾಗದು.",
     "modeFull": "ಟೂಲ್‌ಗಳೊಂದಿಗೆ ಪೂರ್ಣ ಪೈಪ್‌ಲೈನ್",
     "modeFullHelp": "ನಿಜವಾದ ಬಳಕೆದಾರರಿಗೆ ಸಿಗುವ ಅದೇ ಟೂಲ್‌ಗಳು, ಗಾರ್ಡ್‌ರೈಲ್‌ಗಳು ಮತ್ತು ಹಂತ ಮಿತಿಗಳು. ನಿರೀಕ್ಷಿತ-ಟೂಲ್ ಮತ್ತು ಪಥ ಪರಿಶೀಲನೆಗಳಿಗೆ ಅಗತ್ಯ.",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "ಓದುವುದನ್ನು ಮಾತ್ರ ಮಾಡುವ ಟೂಲ್‌ಗಳು ನಿಜವಾಗಿಯೂ ಚಲಿಸುತ್ತವೆ. ಡೇಟಾ ಬದಲಿಸಬಲ್ಲ, ಸಂದೇಶ ಕಳುಹಿಸಬಲ್ಲ ಅಥವಾ ಹಣ ಖರ್ಚು ಮಾಡಬಲ್ಲ ಯಾವುದೇ ವಿಷಯವನ್ನು ಅನುಕರಿಸಿ ರನ್‌ನಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡಲಾಗುತ್ತದೆ, ಆದ್ದರಿಂದ ನಿಜವಾಗಿ ಏನೂ ನಡೆಯುವುದಿಲ್ಲ. ಸುರಕ್ಷತಾ ವರ್ಗೀಕರಣವಿಲ್ಲದ ಟೂಲ್‌ಗಳನ್ನೂ ಅನುಕರಿಸಲಾಗುತ್ತದೆ.",
     "autoApproveLabel": "ಇವಾಲ್ ಸ್ಯಾಂಡ್‌ಬಾಕ್ಸ್‌ನಲ್ಲಿ ಟೂಲ್ ಕರೆಗಳನ್ನು ಸ್ವಯಂ-ಅನುಮೋದಿಸಿ",
     "autoApproveHelp": "ಸಾಮಾನ್ಯವಾಗಿ ವ್ಯಕ್ತಿಗಾಗಿ ಕಾಯುವ ಟೂಲ್ ಕರೆಯನ್ನು ಇವಾಲ್ ಸ್ಯಾಂಡ್‌ಬಾಕ್ಸ್ ಅನುಮೋದಿಸುತ್ತದೆ, ಇದರಿಂದ ಪ್ರಕರಣ ಮುಗಿಯಬಹುದು. ಇದಿಲ್ಲದೆ ಪ್ರಕರಣ ಉತ್ಪಾದನೆಯಲ್ಲಿ ಆಗುವಂತೆ ಉತ್ತರಿಸದ ಅನುಮೋದನೆಯಲ್ಲೇ ಕೊನೆಗೊಳ್ಳುತ್ತದೆ.",
     "autoApproveWarnTitle": "ಉತ್ಪಾದನೇತರ ವರ್ಕ್‌ಸ್ಪೇಸ್‌ಗಳಿಗೆ ಮಾತ್ರ",
@@ -15075,7 +15076,7 @@
     "autoApproveNeedsFull": "ಮೊದಲು ಪೂರ್ಣ ಪೈಪ್‌ಲೈನ್ ಆನ್ ಮಾಡಿ: ಟೂಲ್‌ಗಳು ಚಲಿಸಿದಾಗ ಮಾತ್ರ ಸ್ವಯಂ-ಅನುಮೋದನೆ ಅನ್ವಯಿಸುತ್ತದೆ.",
     "autoApproveRefused": "ಈ ವರ್ಕ್‌ಸ್ಪೇಸ್‌ನಲ್ಲಿ ಅನುಮತಿಯಿಲ್ಲ: {reason}",
     "autoApproveConfirmTitle": "ಇವಾಲ್‌ಗಳಲ್ಲಿ ಟೂಲ್ ಕರೆಗಳನ್ನು ಸ್ವಯಂ-ಅನುಮೋದಿಸಬೇಕೆ?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "ಈ ಡೇಟಾಸೆಟ್‌ನ ರೀಪ್ಲೇಗಳಲ್ಲಿ ವ್ಯಕ್ತಿಗಾಗಿ ಕಾಯುವ ಪ್ರತಿ ಟೂಲ್ ಕರೆಯನ್ನು ತಾನಾಗಿ ಅನುಮೋದಿಸಲಾಗುತ್ತದೆ. ಅನುಮೋದಿತ ಓದಲು-ಮಾತ್ರ ಟೂಲ್‌ಗಳು ನಿಜವಾಗಿ ಚಲಿಸುತ್ತವೆ; ಏನನ್ನಾದರೂ ಬದಲಿಸಬಲ್ಲ ಅನುಮೋದಿತ ಟೂಲ್‌ಗಳು ಈಗಲೂ ಅನುಕರಣೆಯಾಗುತ್ತವೆ. ಇದನ್ನು ಪರೀಕ್ಷಾ ಡೇಟಾ ಇರುವ ವರ್ಕ್‌ಸ್ಪೇಸ್‌ನಲ್ಲಿ ಮಾತ್ರ ಮಾಡಿ. ಅವು ತಾನಾಗಿ ಅನುಮೋದಿತವಾಗಿದ್ದವು ಎಂದು ರನ್‌ಗಳು ದಾಖಲಿಸುತ್ತವೆ.",
     "autoApproveConfirm": "ಸ್ವಯಂ-ಅನುಮೋದನೆ ಆನ್ ಮಾಡಿ",
     "trajectoryLabel": "ಪಥ ಪರಿಶೀಲನೆಗಳು",
     "trajectoryOn": "On",
@@ -15100,22 +15101,22 @@
     "samplingSource_platform": "ಪ್ಲಾಟ್‌ಫಾರ್ಮ್ ಹೊಂದಿಸಿದ್ದು",
     "samplingSource_tenant": "ನಿಮ್ಮ ವರ್ಕ್‌ಸ್ಪೇಸ್‌ಗೆ ಹೊಂದಿಸಲಾಗಿದೆ",
     "samplingSource_agent": "ಈ ಏಜೆಂಟ್‌ಗೆ ಹೊಂದಿಸಲಾಗಿದೆ",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "ವರ್ಕ್‌ಸ್ಪೇಸ್ ಡೀಫಾಲ್ಟ್",
+    "modeDefaultHelp": "ನಿಮ್ಮ ವರ್ಕ್‌ಸ್ಪೇಸ್‌ನ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಅನುಸರಿಸುತ್ತದೆ (ನಿರ್ವಾಹಕರು ಬದಲಿಸದಿದ್ದರೆ ಪೂರ್ಣ ಪೈಪ್‌ಲೈನ್). ಪ್ರತಿ ರನ್ ಈಗಲೂ ತನ್ನದೇ ಮೋಡ್ ಆಯ್ಕೆ ಮಾಡಬಹುದು.",
+    "modeDefaultCurrent": "ಪ್ರಸ್ತುತ: {mode}",
+    "modeNameFull": "ಪೂರ್ಣ ಪೈಪ್‌ಲೈನ್",
+    "modeNameQuick": "ತ್ವರಿತ (ಪಠ್ಯ ಮಾತ್ರ)",
+    "badgeFull": "ಪೂರ್ಣ ಪೈಪ್‌ಲೈನ್",
+    "badgeQuick": "ತ್ವರಿತ",
+    "datasetModePinnedTitle": "ಈ ಡೇಟಾಸೆಟ್ ಯಾವಾಗಲೂ ಹೀಗೆಯೇ ರೀಪ್ಲೇ ಆಗುತ್ತದೆ. ಒಂದು ರನ್ ಈಗಲೂ ಬೇರೆ ಮೋಡ್ ಆಯ್ಕೆ ಮಾಡಬಹುದು.",
+    "datasetModeDefaultTitle": "ರನ್‌ಗಳು ಹೇಗೆ ರೀಪ್ಲೇ ಆಗಬೇಕು ಎಂಬುದಕ್ಕೆ ಈ ಡೇಟಾಸೆಟ್ ವರ್ಕ್‌ಸ್ಪೇಸ್ ಡೀಫಾಲ್ಟ್ ಅನ್ನು ಅನುಸರಿಸುತ್ತದೆ.",
+    "runModeLabel": "ಮುಂದಿನ ರನ್‌ಗಾಗಿ ರೀಪ್ಲೇ ಮೋಡ್",
+    "runModeInherit": "ಡೇಟಾಸೆಟ್‌ನ ಸೆಟ್ಟಿಂಗ್ ಬಳಸಿ",
+    "runModeHelp": "ಪೂರ್ಣ ಪೈಪ್‌ಲೈನ್ ಏಜೆಂಟ್ ಅನ್ನು ಅದರ ಟೂಲ್‌ಗಳು, ಗಾರ್ಡ್‌ರೈಲ್‌ಗಳು ಮತ್ತು ಅನುಮೋದನೆಗಳೊಂದಿಗೆ ಸುರಕ್ಷಿತ ಸ್ಯಾಂಡ್‌ಬಾಕ್ಸ್‌ನಲ್ಲಿ ಚಲಾಯಿಸುತ್ತದೆ: ಓದುವುದನ್ನು ಮಾತ್ರ ಮಾಡುವ ಟೂಲ್‌ಗಳು ನಿಜವಾಗಿ ಚಲಿಸುತ್ತವೆ, ಡೇಟಾ ಬದಲಿಸಬಲ್ಲ ಅಥವಾ ಏನನ್ನಾದರೂ ಕಳುಹಿಸಬಲ್ಲ ಯಾವುದೂ ಅನುಕರಣೆಯಾಗುತ್ತದೆ. ತ್ವರಿತ ಮೋಡ್ ಟೂಲ್‌ಗಳನ್ನು ತಡೆಹಿಡಿದು ಬರೆದ ಉತ್ತರವನ್ನು ಮಾತ್ರ ಪರೀಕ್ಷಿಸುತ್ತದೆ.",
+    "runModeFullTitle": "ಈ ರನ್ ಇವಾಲ್ ಸ್ಯಾಂಡ್‌ಬಾಕ್ಸ್‌ನಲ್ಲಿ ಪೂರ್ಣ ಪೈಪ್‌ಲೈನ್ ಬಳಸಿತು.",
+    "runModeQuickTitle": "ಈ ರನ್ ಪಠ್ಯ ಮಾತ್ರದ ತ್ವರಿತ ರೀಪ್ಲೇ ಆಗಿತ್ತು: ಏಜೆಂಟ್‌ನ ಟೂಲ್‌ಗಳನ್ನು ತಡೆಹಿಡಿಯಲಾಗಿತ್ತು.",
+    "runSimulatedTools": "ಈ ರನ್‌ನಲ್ಲಿ ಅನುಕರಿಸಲಾಗಿದೆ, ಚಲಾಯಿಸಿಲ್ಲ (ಅವು ಡೇಟಾ ಬದಲಿಸಬಹುದಿತ್ತು ಅಥವಾ ವೇದಿಕೆಯ ಹೊರಗೆ ತಲುಪಬಹುದಿತ್ತು): {tools}.",
+    "toolStatusSimulated": "ಅನುಕರಿಸಲಾಗಿದೆ, ಚಲಾಯಿಸಿಲ್ಲ"
   },
   "agentLab": {
     "wtLabel": "ಏಜೆಂಟ್‌ನ ಟೂಲ್‌ಗಳೊಂದಿಗೆ ರನ್ ಮಾಡಿ",
@@ -15148,6 +15149,14 @@
       "memory": {
         "label": "ಮೆಮೊರಿ",
         "description": "ಏಜೆಂಟ್ ಎಷ್ಟು ನೆನಪುಗಳನ್ನು ಇಟ್ಟುಕೊಂಡು ನೆನಪಿಸಿಕೊಳ್ಳುತ್ತದೆ."
+      },
+      "attachments": {
+        "label": "ಚಾಟ್ ಅಪ್‌ಲೋಡ್‌ಗಳು",
+        "description": "ಜನರು ಚಾಟ್ ಸಂದೇಶಗಳಿಗೆ ಜೋಡಿಸುವ ಫೈಲ್‌ಗಳು ಎಷ್ಟು ದೊಡ್ಡದಾಗಿರಬಹುದು."
+      },
+      "skills": {
+        "label": "ಸ್ಕಿಲ್‌ಗಳು",
+        "description": "ಸ್ಥಾಪಿತ ಸ್ಕಿಲ್‌ಗಳ ಪಟ್ಟಿ ಏಜೆಂಟ್‌ನ ಸೂಚನೆಗಳ ಎಷ್ಟನ್ನು ಬಳಸಬಹುದು."
       },
       "aux": {
         "label": "ಹಿನ್ನೆಲೆ ಮಾಡೆಲ್ ಕರೆಗಳು",
@@ -15214,6 +15223,28 @@
           "label": "ಅಪೂರ್ಣ ಉತ್ತರದ ನಂತರ ಹೆಚ್ಚುವರಿ ಪಾಸ್‌ಗಳು",
           "description": "ಮಾಡೆಲ್‌ನ ಉತ್ತರ ಘೋಷಿಸಿದರೂ ಮಾಡದ ಹಂತದಲ್ಲಿ ನಿಂತಾಗ ಮುಂದುವರಿಸಲು ಅದನ್ನು ಇನ್ನೂ ಎಷ್ಟು ಬಾರಿ ಕೇಳಲಾಗುತ್ತದೆ.",
           "help": "ಆಗಾಗ ಒಂದು ಹಂತ ಘೋಷಿಸಿ ನಿಲ್ಲುವ ಏಜೆಂಟ್‌ಗಳಿಗೆ ಹೆಚ್ಚಿಸಿ. ಪ್ರತಿ ಹೆಚ್ಚುವರಿ ಪಾಸ್ ಒಂದು ಮಾಡೆಲ್ ಕರೆ ವೆಚ್ಚ ಮಾಡುತ್ತದೆ."
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "ಮಿತಿಯ ನಂತರ ಉತ್ತರಿಸಿದ ಕರೆಗಳು",
+          "description": "ಟರ್ನ್‌ನ ಟೂಲ್ ಮಿತಿ ಮುಗಿದ ನಂತರ ಮಾಡೆಲ್ ಇನ್ನೂ ಎಷ್ಟು ಟೂಲ್ ಕರೆಗಳನ್ನು ಪ್ರಯತ್ನಿಸಬಹುದು. ಪ್ರತಿಯೊಂದನ್ನೂ \"ಇರುವುದರಿಂದಲೇ ಉತ್ತರಿಸು\" ಎಂಬ ಟಿಪ್ಪಣಿಯೊಂದಿಗೆ ತಿರಸ್ಕರಿಸಲಾಗುತ್ತದೆ; ಈ ಸಂಖ್ಯೆ ದಾಟಿದರೆ ಟರ್ನ್ ದೋಷದೊಂದಿಗೆ ನಿಲ್ಲಿಸಲಾಗುತ್ತದೆ.",
+          "help": "ಟೂಲ್‌ಗಳನ್ನು ಕರೆಯುವುದನ್ನು ನಿಲ್ಲಿಸಲು ಮಾಡೆಲ್‌ಗೆ ಕೆಲವು ಪ್ರಯತ್ನಗಳು ಬೇಕಾದರೆ ಇದನ್ನು ಹೆಚ್ಚಿಸಿ. ಲೂಪ್ ಆಗುವ ಟರ್ನ್‌ಗಳನ್ನು ಬೇಗ ಮುಗಿಸಲು ಕಡಿಮೆ ಮಾಡಿ. 0 ಮಿತಿ ಮೀರಿದ ಮೊದಲ ಕರೆಯಲ್ಲೇ ಟರ್ನ್ ನಿಲ್ಲಿಸುತ್ತದೆ."
+        },
+        "supervisedDivisor": {
+          "label": "ಮೇಲ್ವಿಚಾರಿತ ಏಜೆಂಟ್‌ಗಳಿಗೆ ಟೂಲ್ ಮಿತಿಯ 1/N ಸಿಗುತ್ತದೆ",
+          "description": "ಮೇಲ್ವಿಚಾರಿತ ಏಜೆಂಟ್‌ಗೆ ಟರ್ನ್‌ನ ಟೂಲ್-ಕರೆ ಮಿತಿಯನ್ನು ಈ ಸಂಖ್ಯೆಯಿಂದ ಭಾಗಿಸಿ ನೀಡಲಾಗುತ್ತದೆ, ಆದರೆ ಕೆಳಗಿನ ಕನಿಷ್ಠಕ್ಕಿಂತ ಎಂದಿಗೂ ಕಡಿಮೆಯಲ್ಲ.",
+          "help": "ಮೇಲ್ವಿಚಾರಿತ ಏಜೆಂಟ್‌ಗಳನ್ನು ಇನ್ನಷ್ಟು ಕಟ್ಟುನಿಟ್ಟಾಗಿ ಇರಿಸಲು ಇದನ್ನು ಹೆಚ್ಚಿಸಿ. 1 ಅವರಿಗೆ ಪೂರ್ಣ ಮಿತಿಯನ್ನು ನೀಡುತ್ತದೆ."
+        },
+        "supervisedMinSteps": {
+          "label": "ಮೇಲ್ವಿಚಾರಿತ ಏಜೆಂಟ್‌ಗೆ ಕನಿಷ್ಠ ಟೂಲ್ ಕರೆಗಳು",
+          "description": "ಮೇಲಿನ ಸಂಖ್ಯೆ ಎಷ್ಟೇ ಹೆಚ್ಚಿದ್ದರೂ, ಮೇಲ್ವಿಚಾರಿತ ಏಜೆಂಟ್‌ಗೆ ಸಿಗುವ ಅತಿ ಸಣ್ಣ ಟೂಲ್-ಕರೆ ಮಿತಿ.",
+          "help": "ಮೇಲ್ವಿಚಾರಿತ ಏಜೆಂಟ್ ಹಲವು ಹಂತಗಳ ಸರಳ ಕೆಲಸವನ್ನು ಇನ್ನೂ ಮುಗಿಸಲು ಸಾಧ್ಯವಾಗುವಂತೆ ಇದನ್ನು 3 ಅಥವಾ ಹೆಚ್ಚು ಇರಿಸಿ."
+        },
+        "autonomousMultiplier": {
+          "label": "ಪೂರ್ಣ ಸ್ವಾಯತ್ತ ಏಜೆಂಟ್‌ಗಳಿಗೆ ಮಿತಿಯ N ಪಟ್ಟು ಸಿಗುತ್ತದೆ",
+          "description": "ಪೂರ್ಣ ಸ್ವಾಯತ್ತ ಏಜೆಂಟ್‌ಗೆ ಟರ್ನ್‌ನ ಟೂಲ್-ಕರೆ ಮಿತಿಯನ್ನು ಈ ಸಂಖ್ಯೆಯಿಂದ ಗುಣಿಸಿ ನೀಡಲಾಗುತ್ತದೆ.",
+          "help": "ಯಾರೂ ಗಮನಿಸದೆ ದೀರ್ಘ ಕೆಲಸಗಳನ್ನು ಚಲಾಯಿಸುವ ಏಜೆಂಟ್‌ಗಳಿಗಾಗಿ ಹೆಚ್ಚಿಸಿ; ಆಗ ಅವು ಒಂದು ಟರ್ನ್‌ನಲ್ಲಿ ಹೆಚ್ಚು ಕರೆಗಳನ್ನು ಮತ್ತು ಹಣವನ್ನು ಖರ್ಚು ಮಾಡಬಹುದು. 1 ಅವುಗಳಿಗೆ ಪ್ರಮಾಣಿತ ಮಿತಿಯನ್ನು ನೀಡುತ್ತದೆ."
         }
       }
     },
@@ -15285,6 +15316,82 @@
           "label": "ಅನುಸರಣೆ ಟೂಲ್‌ಗಳು ಎಷ್ಟು ಹೊತ್ತು ಲಭ್ಯವಿರುತ್ತವೆ",
           "description": "ಬಳಕೆಯ ನಂತರ ಚಿಕ್ಕ ಅನುಸರಣೆ ಸಂದೇಶಗಳಿಗೆ ಟೂಲ್ ಎಷ್ಟು ಹೊತ್ತು ನೀಡಲ್ಪಡುತ್ತದೆ.",
           "help": "ಉದ್ದ ಕಿಟಕಿ ದೀರ್ಘ ಕೆಲಸದ ಸೆಷನ್‌ಗಳಿಗೆ ಸಹಾಯ ಮಾಡುತ್ತದೆ, ಚಿಕ್ಕದು ಟೂಲ್ ಪಟ್ಟಿಯನ್ನು ಚಿಕ್ಕದಾಗಿ ಇಡುತ್ತದೆ."
+        },
+        "maxStickyTools": {
+          "label": "ಫಾಲೋ-ಅಪ್‌ಗಳಲ್ಲಿ ಸೂಚಿಸುತ್ತಲೇ ಇರುವ ಗರಿಷ್ಠ ಟೂಲ್‌ಗಳು",
+          "description": "ಸಣ್ಣ ಫಾಲೋ-ಅಪ್ ಸಂದೇಶಕ್ಕೆ ಒಯ್ಯುವ ಗರಿಷ್ಠ ಟೂಲ್‌ಗಳು. 0 ಯಾವುದನ್ನೂ ಉಳಿಸುವುದಿಲ್ಲ.",
+          "help": "ಒಂದು ಕೆಲಸ ಹಲವು ಟೂಲ್‌ಗಳನ್ನು ಬಳಸಿದರೆ ದೊಡ್ಡ ಸಂಖ್ಯೆ ಸಹಾಯ ಮಾಡುತ್ತದೆ; ಚಿಕ್ಕದು ಟೂಲ್ ಪಟ್ಟಿಯನ್ನು ಚಿಕ್ಕದಾಗಿಡುತ್ತದೆ."
+        },
+        "keepPrimaryModel": {
+          "label": "ಫಾಲೋ-ಅಪ್‌ಗಳಿಗೆ ಮುಖ್ಯ ಮಾಡೆಲ್ ಅನ್ನು ಉಳಿಸಿ",
+          "description": "ಈಗಾಗಲೇ ಟೂಲ್‌ಗಳನ್ನು ಬಳಸಿದ ಸಂಭಾಷಣೆಯಲ್ಲಿನ ಸಣ್ಣ ಫಾಲೋ-ಅಪ್ ಅಗ್ಗದ ಮಾಡೆಲ್ ಬದಲು ಏಜೆಂಟ್‌ನ ಮುಖ್ಯ ಮಾಡೆಲ್‌ನಲ್ಲೇ ಉಳಿಯುತ್ತದೆ.",
+          "help": "ಇದನ್ನು ಆಫ್ ಮಾಡಿದರೆ ವೆಚ್ಚ ರೂಟಿಂಗ್ \"ಹೌದು\" ಮುಂತಾದ ಫಾಲೋ-ಅಪ್‌ಗಳನ್ನು ಅಗ್ಗದ ಮಾಡೆಲ್‌ಗೆ ಕಳುಹಿಸುತ್ತದೆ; ಆದರೆ ನಡೆಯುತ್ತಿರುವ ಕೆಲಸವನ್ನು ದುರ್ಬಲವಾಗಿ ನಿಭಾಯಿಸುವ ಅಪಾಯವಿದೆ."
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "ಉತ್ತರವನ್ನು ಮರುಬಳಸಲು ಪ್ರಶ್ನೆ ಎಷ್ಟು ಹೋಲಬೇಕು",
+          "description": "ಹೋಲುವ ಪ್ರಶ್ನೆಗಳ ಉತ್ತರಗಳನ್ನು ಮರುಬಳಸುವ ಏಜೆಂಟ್‌ಗಳಿಗೆ: ಉಳಿಸಿದ ಉತ್ತರವನ್ನು ನೀಡಲು ಹೊಸ ಪ್ರಶ್ನೆ ಹಿಂದಿನ ಪ್ರಶ್ನೆಗೆ ಎಷ್ಟು ಹತ್ತಿರವಿರಬೇಕು, 0.85 ರಿಂದ 1.",
+          "help": "ಕಡಿಮೆ ಸಂಖ್ಯೆ ಹೆಚ್ಚು ಪುನರಾವರ್ತನೆಗಳಿಗೆ ಉತ್ತರಿಸುತ್ತದೆ ಆದರೆ ಬೇರೆ ಪ್ರಶ್ನೆಗಾಗಿದ್ದ ಉತ್ತರ ನೀಡುವ ಅಪಾಯವಿದೆ. ತಪ್ಪು ಉತ್ತರಗಳು ದುಬಾರಿಯಾದಾಗ ಇದನ್ನು ಹೆಚ್ಚು ಇರಿಸಿ. ಉತ್ತರವನ್ನು ಅದು ಯಾರಿಗೆ ನೀಡಲಾಗಿತ್ತೋ ಅವರಿಗೆ ಮಾತ್ರ ಮರುಬಳಸಲಾಗುತ್ತದೆ."
+        },
+        "ttl": {
+          "label": "ಮರುಬಳಸಬಹುದಾದ ಉತ್ತರವನ್ನು ಎಷ್ಟು ಕಾಲ ಇಡಲಾಗುತ್ತದೆ",
+          "description": "ಉಳಿಸಿದ ಉತ್ತರವನ್ನು ತೆಗೆದುಹಾಕುವ ಮೊದಲು ಹೋಲುವ ಪ್ರಶ್ನೆಗೆ ಎಷ್ಟು ಕಾಲ ನೀಡಬಹುದು.",
+          "help": "ನಿಮ್ಮ ಉತ್ತರಗಳು ಬೇಗ ಹಳೆಯದಾದರೆ ಇದನ್ನು ಕಡಿಮೆ ಮಾಡಿ."
+        },
+        "maxEntriesPerAgent": {
+          "label": "ಪ್ರತಿ ಏಜೆಂಟ್‌ಗೆ ಗರಿಷ್ಠ ಉಳಿಸಿದ ಉತ್ತರಗಳು",
+          "description": "ಒಂದು ಏಜೆಂಟ್ ಮರುಬಳಕೆಗಾಗಿ ಎಷ್ಟು ಉತ್ತರಗಳನ್ನು ಇಟ್ಟುಕೊಳ್ಳುತ್ತದೆ. ಇದನ್ನು ಮೀರಿದರೆ ಹಳೆಯವನ್ನು ತೆಗೆಯಲಾಗುತ್ತದೆ.",
+          "help": "ದೊಡ್ಡ ಸಂಗ್ರಹ ಹೆಚ್ಚು ಪುನರಾವರ್ತನೆಗಳನ್ನು ಕಂಡುಹಿಡಿಯುತ್ತದೆ ಮತ್ತು ಹೆಚ್ಚು ಸಂಗ್ರಹಣೆ ಬಳಸುತ್ತದೆ."
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "ಸಂಭಾಷಣೆಯಲ್ಲಿ ಟೂಲ್ ಕರೆಗಳ ದಾಖಲೆ ಇಡಿ",
+          "description": "ಪ್ರತಿ ಟರ್ನ್‌ನ ಟೂಲ್ ಕರೆಗಳ ಸಣ್ಣ ದಾಖಲೆಯನ್ನು ಸಂಭಾಷಣೆಯೊಂದಿಗೆ ಉಳಿಸಿ, ಇದರಿಂದ ನಂತರದ ಟರ್ನ್‌ಗಳು ಏನು ಮಾಡಲಾಯಿತು ಎಂದು ನೋಡಬಹುದು.",
+          "help": "ಸಂಭಾಷಣೆಯ ಇತಿಹಾಸವನ್ನು ಪಠ್ಯ ಮಾತ್ರವಾಗಿ ಇಡಲು ಇದನ್ನು ಆಫ್ ಮಾಡಿ; ಆಗ ಹಿಂದಿನ ಟರ್ನ್‌ಗಳಲ್ಲಿ ಅದರ ಟೂಲ್‌ಗಳು ಏನು ಮಾಡಿದವು ಎಂದು ಏಜೆಂಟ್‌ಗೆ ತಿಳಿಯುವುದಿಲ್ಲ. ಇದು ಇಡೀ ವರ್ಕ್‌ಸ್ಪೇಸ್‌ಗೆ ಅನ್ವಯಿಸುತ್ತದೆ."
+        },
+        "replayEnabled": {
+          "label": "ಮಾಡೆಲ್‌ಗೆ ಟೂಲ್ ದಾಖಲೆಯನ್ನು ತೋರಿಸಿ",
+          "description": "ಮಾಡೆಲ್‌ಗೆ ಸಂಭಾಷಣೆಯನ್ನು ನೀಡುವಾಗ ಹಿಂದಿನ ಟೂಲ್ ಕರೆಗಳ ಉಳಿಸಿದ ದಾಖಲೆಯನ್ನು ಸೇರಿಸಿ.",
+          "help": "ದಾಖಲೆ ಉಳಿಯುತ್ತಲೇ ಇರಲು ಆದರೆ ಅದಕ್ಕೆ ಮಾಡೆಲ್‌ನ ಕೆಲಸದ ಸ್ಥಳ ಬಳಕೆಯಾಗದಂತೆ ಇದನ್ನು ಆಫ್ ಮಾಡಿ."
+        },
+        "replayTurns": {
+          "label": "ಟೂಲ್ ದಾಖಲೆ ತೋರಿಸುವ ಹಿಂದಿನ ಟರ್ನ್‌ಗಳು",
+          "description": "ಟೂಲ್‌ಗಳನ್ನು ಬಳಸಿದ ಅತ್ಯಂತ ಇತ್ತೀಚಿನ ಟರ್ನ್‌ಗಳಲ್ಲಿ ಎಷ್ಟರ ದಾಖಲೆಯನ್ನು ಮಾಡೆಲ್‌ಗೆ ತೋರಿಸಲಾಗುತ್ತದೆ.",
+          "help": "ದೊಡ್ಡ ಸಂಖ್ಯೆ ದೀರ್ಘ ಕೆಲಸದ ಸೆಷನ್‌ಗಳಲ್ಲಿ ಸಹಾಯ ಮಾಡುತ್ತದೆ ಆದರೆ ಮಾಡೆಲ್‌ನ ಕೆಲಸದ ಸ್ಥಳವನ್ನು ಹೆಚ್ಚು ಬಳಸುತ್ತದೆ."
+        },
+        "maxEntriesPerTurn": {
+          "label": "ಪ್ರತಿ ಟರ್ನ್‌ಗೆ ಪಟ್ಟಿ ಮಾಡುವ ಟೂಲ್ ಕರೆಗಳು",
+          "description": "ಒಂದು ಟರ್ನ್‌ನ ಎಷ್ಟು ಟೂಲ್ ಕರೆಗಳನ್ನು ದಾಖಲೆಯಲ್ಲಿ ಬರೆಯಲಾಗುತ್ತದೆ. ಮುಂದಿನ ಕರೆಗಳನ್ನು ಎಣಿಸಲಾಗುತ್ತದೆ ಅಷ್ಟೇ.",
+          "help": "ಹಲವು ಕರೆಗಳನ್ನು ಮಾಡಿ ಪ್ರತಿಯೊಂದನ್ನೂ ನೆನಪಿಡಬೇಕಾದ ಟರ್ನ್‌ಗಳಿಗೆ ಹೆಚ್ಚಿಸಿ."
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "ಪ್ರತಿ ಟರ್ನ್‌ಗೆ ಅತಿ ಉದ್ದದ ಟೂಲ್ ದಾಖಲೆ",
+          "description": "ಒಂದು ಟರ್ನ್‌ನ ದಾಖಲೆಯ ಎಷ್ಟು ಅಕ್ಷರಗಳನ್ನು ಮಾಡೆಲ್‌ಗೆ ತೋರಿಸಲಾಗುತ್ತದೆ; ಉಳಿದದ್ದನ್ನು ಎಣಿಸಲಾಗುತ್ತದೆ, ಪಟ್ಟಿ ಮಾಡಲಾಗುವುದಿಲ್ಲ.",
+          "help": "ನಂತರದ ಪ್ರತಿ ಟರ್ನ್‌ನ ವೆಚ್ಚ ಉಳಿಸಲು ಕಡಿಮೆ ಮಾಡಿ, ಹೆಚ್ಚು ವಿವರ ಇಡಲು ಹೆಚ್ಚಿಸಿ."
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "ಅತಿ ದೊಡ್ಡ ಚಿತ್ರ ಅಪ್‌ಲೋಡ್ (MB)",
+          "description": "ಚಾಟ್ ಸಂದೇಶಕ್ಕೆ ಯಾರಾದರೂ ಜೋಡಿಸಬಹುದಾದ ಅತಿ ದೊಡ್ಡ ಚಿತ್ರ, ಮೆಗಾಬೈಟ್‌ಗಳಲ್ಲಿ. ವೇದಿಕೆಗೆ ಒಟ್ಟಾರೆ ಫೈಲ್ ಮಿತಿಯೂ ಇದೆ; ಇದು ಅದನ್ನು ಮೀರುವಂತಿಲ್ಲ.",
+          "help": "ಫೋಟೋಗಳು ಮತ್ತು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳಿಗಾಗಿ ಹೆಚ್ಚಿಸಿ; ದೊಡ್ಡ ಫೈಲ್‌ಗಳು ಕಳುಹಿಸಲು ನಿಧಾನ ಮತ್ತು ಮಾಡೆಲ್‌ನ ಹೆಚ್ಚು ಕೋಟಾ ಬಳಸುತ್ತವೆ."
+        },
+        "maxAudioMb": {
+          "label": "ಅತಿ ದೊಡ್ಡ ಆಡಿಯೋ ಅಪ್‌ಲೋಡ್ (MB)",
+          "description": "ಚಾಟ್ ಸಂದೇಶಕ್ಕೆ ಯಾರಾದರೂ ಜೋಡಿಸಬಹುದಾದ ಅತಿ ದೊಡ್ಡ ಆಡಿಯೋ ಫೈಲ್, ಮೆಗಾಬೈಟ್‌ಗಳಲ್ಲಿ. ವೇದಿಕೆಗೆ ಒಟ್ಟಾರೆ ಫೈಲ್ ಮಿತಿಯೂ ಇದೆ; ಇದು ಅದನ್ನು ಮೀರುವಂತಿಲ್ಲ.",
+          "help": "ದೀರ್ಘ ರೆಕಾರ್ಡಿಂಗ್‌ಗಳಿಗಾಗಿ ಹೆಚ್ಚಿಸಿ; ದೊಡ್ಡ ಫೈಲ್‌ಗಳು ಕಳುಹಿಸಲು ನಿಧಾನ ಮತ್ತು ಮಾಡೆಲ್‌ನ ಹೆಚ್ಚು ಕೋಟಾ ಬಳಸುತ್ತವೆ."
+        },
+        "maxVideoMb": {
+          "label": "ಅತಿ ದೊಡ್ಡ ವೀಡಿಯೊ ಅಪ್‌ಲೋಡ್ (MB)",
+          "description": "ಚಾಟ್ ಸಂದೇಶಕ್ಕೆ ಯಾರಾದರೂ ಜೋಡಿಸಬಹುದಾದ ಅತಿ ದೊಡ್ಡ ವೀಡಿಯೊ, ಮೆಗಾಬೈಟ್‌ಗಳಲ್ಲಿ. ವೇದಿಕೆಗೆ ಒಟ್ಟಾರೆ ಫೈಲ್ ಮಿತಿಯೂ ಇದೆ; ಇದು ಅದನ್ನು ಮೀರುವಂತಿಲ್ಲ.",
+          "help": "ದೀರ್ಘ ಕ್ಲಿಪ್‌ಗಳಿಗಾಗಿ ಹೆಚ್ಚಿಸಿ; ದೊಡ್ಡ ಫೈಲ್‌ಗಳು ಕಳುಹಿಸಲು ನಿಧಾನ ಮತ್ತು ಮಾಡೆಲ್‌ನ ಹೆಚ್ಚು ಕೋಟಾ ಬಳಸುತ್ತವೆ."
+        },
+        "maxDocumentMb": {
+          "label": "ಅತಿ ದೊಡ್ಡ ದಾಖಲೆ ಅಪ್‌ಲೋಡ್ (MB)",
+          "description": "ಚಾಟ್ ಸಂದೇಶಕ್ಕೆ ಯಾರಾದರೂ ಜೋಡಿಸಬಹುದಾದ ಅತಿ ದೊಡ್ಡ ದಾಖಲೆ ಅಥವಾ ಸ್ಪ್ರೆಡ್‌ಶೀಟ್, ಮೆಗಾಬೈಟ್‌ಗಳಲ್ಲಿ. ವೇದಿಕೆಗೆ ಒಟ್ಟಾರೆ ಫೈಲ್ ಮಿತಿಯೂ ಇದೆ; ಇದು ಅದನ್ನು ಮೀರುವಂತಿಲ್ಲ.",
+          "help": "ದೀರ್ಘ ವರದಿಗಳು ಮತ್ತು ದೊಡ್ಡ ಡೇಟಾ ಫೈಲ್‌ಗಳಿಗಾಗಿ ಹೆಚ್ಚಿಸಿ; ದೊಡ್ಡ ಫೈಲ್‌ಗಳು ಸಂಸ್ಕರಿಸಲು ನಿಧಾನ."
         }
       },
       "continuation": {
@@ -15343,6 +15450,20 @@
           "help": "ಜನರ ಬಗ್ಗೆ ಬಹಳಷ್ಟು ನೆನಪಿಡಬೇಕಾದ ಸಹಾಯಕರಿಗೆ ಹೆಚ್ಚಿಸಿ; ಇದು ಸಂಗ್ರಹಣೆ ಮತ್ತು ನೆನಪಿಸಿಕೊಳ್ಳುವ ವೆಚ್ಚವನ್ನೂ ಹೆಚ್ಚಿಸುತ್ತದೆ."
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "ಗರಿಷ್ಠ ಹಂಚಿದ ನೆನಪುಗಳು",
+          "description": "ವರ್ಕ್‌ಸ್ಪೇಸ್‌ನಾದ್ಯಂತ ಹಂಚಿದ ಎಷ್ಟು ನೆನಪುಗಳನ್ನು ಉಳಿಸಲಾಗುತ್ತದೆ. ಇದನ್ನು ಮೀರಿದರೆ ಹಳೆಯವನ್ನು ತೆಗೆಯಲಾಗುತ್ತದೆ.",
+          "help": "ಹಂಚಿದ ಜ್ಞಾನವನ್ನು ಅವಲಂಬಿಸುವ ದೊಡ್ಡ ತಂಡಗಳಿಗೆ ಹೆಚ್ಚಿಸಿ; ಇದು ಸಂಗ್ರಹಣೆ ಮತ್ತು ಮರುಸ್ಮರಣೆಯ ವೆಚ್ಚವನ್ನೂ ಹೆಚ್ಚಿಸುತ್ತದೆ. ಇದು ಇಡೀ ವರ್ಕ್‌ಸ್ಪೇಸ್‌ಗೆ ಅನ್ವಯಿಸುತ್ತದೆ."
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ಸಾಧನದಲ್ಲಿನ ಚಾಟ್‌ಗೆ ನೀಡುವ ನೆನಪುಗಳು",
+          "description": "ಸಾಧನದಲ್ಲಿನ ಸೆಷನ್ ಪ್ರಾರಂಭವಾದಾಗ ಅದಕ್ಕೆ ಎಷ್ಟು ನೆನಪುಗಳನ್ನು ಒಪ್ಪಿಸಲಾಗುತ್ತದೆ.",
+          "help": "ಸಾಧನದಲ್ಲಿನ ಮಾಡೆಲ್‌ಗಳಿಗೆ ಸಣ್ಣ ಕೆಲಸದ ಸ್ಥಳವಿರುತ್ತದೆ, ಆದ್ದರಿಂದ ಇದನ್ನು ಕಡಿಮೆ ಇರಿಸಿ."
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "ಗ್ರಾಫ್ ಮೆಮೊರಿಯಿಂದ ನೆನಪಿಸಿಕೊಂಡ ಸಂಗತಿಗಳು",
@@ -15353,6 +15474,20 @@
           "label": "ಪ್ರತಿ ಲುಕಪ್‌ಗೆ ಓದಿದ ಗ್ರಾಫ್ ಮಾರ್ಗಗಳು",
           "description": "ಒಂದು ಲುಕಪ್‌ನ ಸಂಗತಿಗಳನ್ನು ಕಂಡುಹಿಡಿಯಲು ಮೆಮೊರಿ ಗ್ರಾಫ್‌ನ ಎಷ್ಟು ಸಂಪರ್ಕಗಳನ್ನು ಓದಲಾಗುತ್ತದೆ.",
           "help": "ಹಲವು ಸಂಪರ್ಕಗಳು ಒಂದೇ ಸಂಗತಿಗೆ ಕರೆದೊಯ್ಯಬಹುದು, ಹಾಗಾಗಿ ದಟ್ಟವಾಗಿ ಜೋಡಿಸಿದ ನೆನಪುಗಳಿಗೆ ಎಲ್ಲವನ್ನೂ ಕಂಡುಹಿಡಿಯಲು ಹೆಚ್ಚಿನ ಸಂಖ್ಯೆ ಬೇಕಾಗಬಹುದು. ಹೆಚ್ಚಿನ ಸಂಖ್ಯೆ ಪ್ರತಿ ಲುಕಪ್ ಅನ್ನು ನಿಧಾನಗೊಳಿಸುತ್ತದೆ."
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "ಪ್ರಾಂಪ್ಟ್‌ನಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡುವ ಗರಿಷ್ಠ ಸ್ಕಿಲ್‌ಗಳು",
+          "description": "ಏಜೆಂಟ್‌ಗೆ ಅವು ಇವೆ ಎಂದು ತಿಳಿಯಲು, ಅದರ ಸೂಚನೆಗಳಲ್ಲಿ ನಿಮ್ಮ ಎಷ್ಟು ಸ್ಕಿಲ್‌ಗಳ ಹೆಸರುಗಳನ್ನು ನೀಡಲಾಗುತ್ತದೆ. ಉಳಿದದ್ದನ್ನು ಎಣಿಸಲಾಗುತ್ತದೆ, ಪಟ್ಟಿ ಮಾಡಲಾಗುವುದಿಲ್ಲ.",
+          "help": "ನಿಮ್ಮಲ್ಲಿ ಹಲವು ಸ್ಕಿಲ್‌ಗಳಿದ್ದರೆ ಹೆಚ್ಚಿಸಿ; ಪಟ್ಟಿ ಮಾಡಿದ ಪ್ರತಿ ಸ್ಕಿಲ್ ಪ್ರತಿ ಟರ್ನ್‌ನಲ್ಲಿ ಮಾಡೆಲ್‌ನ ಕೆಲಸದ ಸ್ಥಳದ ಸ್ವಲ್ಪ ಭಾಗವನ್ನು ಬಳಸುತ್ತದೆ. ಇದು ಇಡೀ ವರ್ಕ್‌ಸ್ಪೇಸ್‌ಗೆ ಅನ್ವಯಿಸುತ್ತದೆ."
+        },
+        "maxBlockChars": {
+          "label": "ಪ್ರಾಂಪ್ಟ್‌ನಲ್ಲಿ ಸ್ಕಿಲ್‌ಗಳ ಪಟ್ಟಿಯ ಗಾತ್ರ",
+          "description": "ಏಜೆಂಟ್‌ನ ಸೂಚನೆಗಳಲ್ಲಿ ಸ್ಕಿಲ್‌ಗಳ ಪಟ್ಟಿ ಎಷ್ಟು ಅಕ್ಷರಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಬಹುದು. ತುಂಬಿದಾಗ ನಂತರದ ಸ್ಕಿಲ್‌ಗಳನ್ನು ಹೆಸರುಗಳಿಗೆ ಮಾತ್ರ ಕುಗ್ಗಿಸಲಾಗುತ್ತದೆ.",
+          "help": "ಹೆಚ್ಚು ಸ್ಕಿಲ್‌ಗಳ ವಿವರಣೆಗಳನ್ನು ಉಳಿಸಲು ಹೆಚ್ಚಿಸಿ, ಪ್ರತಿ ಟರ್ನ್‌ನಲ್ಲಿ ಟೋಕನ್‌ಗಳನ್ನು ಉಳಿಸಲು ಕಡಿಮೆ ಮಾಡಿ. ಇದು ಇಡೀ ವರ್ಕ್‌ಸ್ಪೇಸ್‌ಗೆ ಅನ್ವಯಿಸುತ್ತದೆ."
         }
       }
     },
@@ -15405,6 +15540,17 @@
           "description": "ಪರಿಶೀಲಿಸಿದ ಪಠ್ಯದ ಎಷ್ಟನ್ನು AI ಸುರಕ್ಷತಾ ತೀರ್ಪುಗಾರರು ಓದುತ್ತಾರೆ. ಅದನ್ನು ಮೀರಿದ ಪಠ್ಯವನ್ನು ನಿರ್ಣಯಿಸಲಾಗುವುದಿಲ್ಲ.",
           "help": "ನೀವು ಇದನ್ನು ಪ್ಲಾಟ್‌ಫಾರ್ಮ್ ಮೌಲ್ಯಕ್ಕಿಂತ ಹೆಚ್ಚಿಸಬಹುದು ಮಾತ್ರ. ಹೆಚ್ಚಿಸಿದರೆ ಉದ್ದ ಟೂಲ್ ಫಲಿತಾಂಶಗಳನ್ನು ಪೂರ್ಣವಾಗಿ ನಿರ್ಣಯಿಸಲಾಗುತ್ತದೆ ಆದರೆ ಪ್ರತಿ ತೀರ್ಪುಗಾರ ಕರೆ ದೊಡ್ಡದಾಗುತ್ತದೆ."
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "ಮೇಲ್ವಿಚಾರಿತ ಏಜೆಂಟ್‌ಗಳು ಮತ್ತು ಓದಲು-ಮಾತ್ರ ಟೂಲ್‌ಗಳು",
+          "description": "ಮೇಲ್ವಿಚಾರಿತ ಸ್ವಾಯತ್ತತೆಯ ಮಟ್ಟದ ಏಜೆಂಟ್ ಹುಡುಕಾಟ ಅಥವಾ ಲುಕಪ್‌ನಂತಹ ಓದುವುದನ್ನು ಮಾತ್ರ ಮಾಡುವ ಟೂಲ್‌ಗೂ ಮುನ್ನ ನಿಮ್ಮನ್ನು ಕೇಳುತ್ತದೆಯೇ. ಬರೆಯುವುದು, ಕಳುಹಿಸುವುದು ಮತ್ತು ವೇದಿಕೆ ವರ್ಗೀಕರಿಸದ ಟೂಲ್‌ಗಳು ಯಾವಾಗಲೂ ಕೇಳುತ್ತವೆ.",
+          "help": "ನೀವು ಇದನ್ನು ವೇದಿಕೆಯ ಸೆಟ್ಟಿಂಗ್‌ಗಿಂತ ಕಠಿಣಗೊಳಿಸಬಹುದು ಅಷ್ಟೇ. ಪ್ರತಿ ಬಾರಿ ಕೇಳುವುದು ಅತ್ಯಂತ ಸುರಕ್ಷಿತ ಆಯ್ಕೆ; ಓದಲು-ಮಾತ್ರ ಟೂಲ್‌ಗಳನ್ನು ಚಲಿಸಲು ಬಿಟ್ಟರೆ ಒಂದು ಪ್ರಶ್ನೆ ಕಡಿಮೆಯಾಗುತ್ತದೆ, ಆದರೆ ಅನಿರೀಕ್ಷಿತ ಹುಡುಕಾಟವನ್ನು ತಡೆಯುವ ಒಂದು ಅವಕಾಶವೂ ಹೋಗುತ್ತದೆ. ಖಾಸಗಿ ಡೇಟಾ ಓದಬಲ್ಲ, ನಂಬಲರ್ಹವಲ್ಲದ ವಿಷಯ ತೆಗೆದುಕೊಳ್ಳಬಲ್ಲ ಮತ್ತು ಡೇಟಾ ಹೊರಗೆ ಕಳುಹಿಸಬಲ್ಲ ಏಜೆಂಟ್‌ನನ್ನು ಈ ಸೆಟ್ಟಿಂಗ್ ಏನೇ ಹೇಳಿದರೂ ಪ್ರತಿ ಕರೆಯಲ್ಲೂ ಕೇಳಲಾಗುತ್ತದೆ.",
+          "options": {
+            "auto-allow": "ಓದಲು-ಮಾತ್ರ ಟೂಲ್‌ಗಳನ್ನು ಕೇಳದೆ ಚಲಿಸಲು ಬಿಡಿ",
+            "gate": "ಪ್ರತಿ ಟೂಲ್ ಕರೆಗೂ ಮುನ್ನ ಕೇಳಿ"
+          }
+        }
       }
     },
     "quality": {
@@ -15427,12 +15573,12 @@
           "help": "ಪ್ರತಿ ಪುನರಾವರ್ತನೆ ರನ್‌ನ ವೆಚ್ಚ ಮತ್ತು ಸಮಯವನ್ನು ಗುಣಿಸುತ್ತದೆ."
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "ಮೌಲ್ಯಮಾಪನಗಳು ಹೇಗೆ ಚಲಿಸುತ್ತವೆ",
+          "description": "ರನ್ ಅಥವಾ ಅದರ ಡೇಟಾಸೆಟ್ ಹೇಳದಿದ್ದಾಗ, ಮೌಲ್ಯಮಾಪನ ರನ್ ಏಜೆಂಟ್ ಅನ್ನು ಅದರ ಟೂಲ್‌ಗಳೊಂದಿಗೆ ಸುರಕ್ಷಿತ ಸ್ಯಾಂಡ್‌ಬಾಕ್ಸ್‌ನಲ್ಲಿ ರೀಪ್ಲೇ ಮಾಡುತ್ತದೆಯೇ (ಪೂರ್ಣ ಪೈಪ್‌ಲೈನ್) ಅಥವಾ ಪಠ್ಯದಲ್ಲಿ ಮಾತ್ರ ಉತ್ತರಿಸುತ್ತದೆಯೇ (ತ್ವರಿತ).",
+          "help": "ಪೂರ್ಣ ಪೈಪ್‌ಲೈನ್ ನಿಮ್ಮ ಬಳಕೆದಾರರಿಗೆ ಸಿಗುವುದನ್ನು, ಟೂಲ್‌ಗಳ ಬಳಕೆ ಸೇರಿ, ಪರೀಕ್ಷಿಸುತ್ತದೆ ಮತ್ತು ವೆಚ್ಚ ಹೆಚ್ಚು. ಅದರಲ್ಲಿ ಓದುವುದನ್ನು ಮಾತ್ರ ಮಾಡುವ ಟೂಲ್‌ಗಳು ನಿಜವಾಗಿ ಚಲಿಸುತ್ತವೆ; ಡೇಟಾ ಬದಲಿಸಬಲ್ಲ, ಸಂದೇಶ ಕಳುಹಿಸಬಲ್ಲ ಅಥವಾ ಹಣ ಖರ್ಚು ಮಾಡಬಲ್ಲ ಯಾವುದೂ ಅನುಕರಿಸಿ ರನ್‌ನಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡಲಾಗುತ್ತದೆ. ತ್ವರಿತ ಅಗ್ಗ ಮತ್ತು ಟೂಲ್‌ಗಳ ಬಳಕೆಯ ಬಗ್ಗೆ ಏನೂ ಹೇಳುವುದಿಲ್ಲ.",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "ಸ್ಯಾಂಡ್‌ಬಾಕ್ಸ್‌ನಲ್ಲಿ ಪೂರ್ಣ ಪೈಪ್‌ಲೈನ್",
+            "quick": "ತ್ವರಿತ: ಪಠ್ಯ ಉತ್ತರಗಳು ಮಾತ್ರ"
           }
         }
       }
@@ -15536,7 +15682,7 @@
       "cancel": "ರದ್ದುಮಾಡಿ",
       "done": "{count} ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಅವುಗಳ ಬಳುವಳಿ ಮೌಲ್ಯಗಳಿಗೆ ಮರುಹೊಂದಿಸಿ.",
       "partial": "{done} ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮರುಹೊಂದಿಸಲಾಗಿದೆ; {failed} ಮರುಹೊಂದಿಸಲಾಗಲಿಲ್ಲ. ವಿಫಲ ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಮೇಲಿನ ಸಂದೇಶಗಳನ್ನು ನೋಡಿ.",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮರುಹೊಂದಿಸಲಾಗಿದೆ. ಕಾರಣ ಬೇಕಾದ {skipped} ಹಾಗೆಯೇ ಬಿಡಲಾಗಿದೆ."
     },
     "import": {
       "button": "ಓವರ್‌ರೈಡ್‌ಗಳನ್ನು ಆಮದು ಮಾಡಿ",
@@ -15609,16 +15755,16 @@
       "unknownActor": "ಅಜ್ಞಾತ",
       "noReason": "ಕಾರಣ ನೀಡಿಲ್ಲ",
       "showMore": "ಇನ್ನಷ್ಟು ತೋರಿಸಿ",
-      "scope": "Level",
+      "scope": "ಮಟ್ಟ",
       "scopeWorkspace": "ವರ್ಕ್‌ಸ್ಪೇಸ್",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "ಏಜೆಂಟ್ {id}",
+      "scopeFilter": "ಬದಲಾವಣೆಗಳನ್ನು ಈ ಮಟ್ಟದಲ್ಲಿ ತೋರಿಸಿ",
+      "filterAll": "ಎಲ್ಲಾ ಮಟ್ಟಗಳು",
+      "filterWorkspace": "ವರ್ಕ್‌ಸ್ಪೇಸ್ ಮಾತ್ರ",
+      "filterAgents": "ಏಜೆಂಟ್‌ಗಳು ಮಾತ್ರ",
+      "searchLoadedOnly": "ಹುಡುಕಾಟವು ಇಲ್ಲಿಯವರೆಗೆ ಲೋಡ್ ಆದ ಬದಲಾವಣೆಗಳನ್ನು ಒಳಗೊಳ್ಳುತ್ತದೆ.",
+      "loadError": "ಬದಲಾವಣೆ ಇತಿಹಾಸವನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ. {message}",
+      "moreFailed": "ಇನ್ನಷ್ಟು ಬದಲಾವಣೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ. {message}",
       "loadingMore": "ಲೋಡ್ ಆಗುತ್ತಿದೆ"
     }
   },
@@ -15626,7 +15772,7 @@
     "title": "ವರ್ತನೆ ಮತ್ತು ಮಿತಿಗಳು",
     "intro": "ಈ ಏಜೆಂಟ್ ಒಂದು ಟರ್ನ್‌ನಲ್ಲಿ ಎಷ್ಟು ದೂರ ಹೋಗಬಹುದು ಎಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಿ: ಎಷ್ಟು ಟೂಲ್‌ಗಳನ್ನು ಕರೆಯಬಹುದು, ಎಷ್ಟು ಹೊತ್ತು ಚಲಿಸಬಹುದು ಮತ್ತು ಎಷ್ಟು ಮರಳಿ ಓದುತ್ತದೆ. ನೀವು ಇಲ್ಲಿ ಬದಲಾಯಿಸದ ಎಲ್ಲವೂ ನಿಮ್ಮ ವರ್ಕ್‌ಸ್ಪೇಸ್‌ನಿಂದ ಬಳುವಳಿಯಾಗಿ ಬರುತ್ತದೆ.",
     "saveFirst": "ಮೊದಲು ಏಜೆಂಟ್ ಅನ್ನು ಉಳಿಸಿ. ಅದು ಅಸ್ತಿತ್ವಕ್ಕೆ ಬಂದ ನಂತರ ಅದರ ವರ್ತನೆ ಮತ್ತು ಮಿತಿಗಳನ್ನು ಹೊಂದಿಸಬಹುದು.",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "ಅದರ ವರ್ತನೆ ಮತ್ತು ಮಿತಿಗಳು ಟ್ಯಾಬ್ ತೆರೆಯಲು ಕೆಳಗೆ ಒಂದು ಏಜೆಂಟ್ ಅನ್ನು ಆರಿಸಿ.",
     "tabs": {
       "label": "ಏಜೆಂಟ್ ಕಾನ್ಫಿಗರೇಶನ್",
       "setup": "ಸೆಟಪ್",
@@ -15637,12 +15783,12 @@
       "label": "ಸಂಬಂಧಿತ ಪುಟಗಳು",
       "tenant": "ವರ್ಕ್‌ಸ್ಪೇಸ್ ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿ",
       "playground": "ಪ್ಲೇಗ್ರೌಂಡ್‌ನಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "ಈ ಏಜೆಂಟ್‌ನ ಪ್ರಾಂಪ್ಟ್‌ಗಳು",
+      "promptsAria": "{name} ನ ಪ್ರಾಂಪ್ಟ್‌ಗಳು: ಪ್ರಾಂಪ್ಟ್ ರಿಜಿಸ್ಟ್ರಿಯನ್ನು ಈ ಏಜೆಂಟ್‌ನಲ್ಲಿ ತೆರೆಯಿರಿ",
+      "approvals": "ಈ ಏಜೆಂಟ್‌ನ ಅನುಮೋದನೆಗಳು",
+      "approvalsAria": "{name} ನ ಅನುಮೋದನೆಗಳು: ಈ ಏಜೆಂಟ್‌ಗಾಗಿ ಫಿಲ್ಟರ್ ಮಾಡಿದ ಅನುಮೋದನೆ ಸರತಿಯನ್ನು ತೆರೆಯಿರಿ",
+      "turns": "ಟರ್ನ್ ಟೈಮ್‌ಲೈನ್",
+      "turnsAria": "{name} ನ ಟರ್ನ್ ಟೈಮ್‌ಲೈನ್: ಈ ಏಜೆಂಟ್‌ಗಾಗಿ ಟರ್ನ್ ಇನ್ಸ್‌ಪೆಕ್ಟರ್ ತೆರೆಯಿರಿ"
     },
     "readOnly": {
       "locked": "ಈ ಏಜೆಂಟ್ ಸಂಪಾದನೆಗೆ ಲಾಕ್ ಆಗಿದೆ, ಹಾಗಾಗಿ ಈ ಮೌಲ್ಯಗಳು ಓದಲು ಮಾತ್ರ.",
@@ -15822,7 +15968,7 @@
     "regAgentPlaceholder": "ಒಂದು ಏಜೆಂಟ್ ಆಯ್ಕೆಮಾಡಿ",
     "regAgentsFailed": "ನಿಮ್ಮ ಏಜೆಂಟ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ.",
     "regPickAgent": "ಒಂದು ಏಜೆಂಟ್‌ನ ಪ್ರಾಂಪ್ಟ್‌ಗಳನ್ನು ನೋಡಲು ಮತ್ತು ಬದಲಾಯಿಸಲು ಅದನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "ಲಿಂಕ್‌ನಲ್ಲಿರುವ ಏಜೆಂಟ್ ನಿಮಗೆ ಲಭ್ಯವಿಲ್ಲ, ಏಕೆಂದರೆ ಅದು ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ ಅಥವಾ ನೀವು ಅದನ್ನು ನೋಡಲಾಗುವುದಿಲ್ಲ. ಬದಲಿಗೆ ರಿಜಿಸ್ಟ್ರಿ ವರ್ಕ್‌ಸ್ಪೇಸ್ ವ್ಯಾಪ್ತಿಯಲ್ಲಿ ತೆರೆಯಿತು.",
     "regSearchLabel": "ಪ್ರಾಂಪ್ಟ್‌ಗಳನ್ನು ಹುಡುಕಿ",
     "regSearchPlaceholder": "ಕೀ, ಶೀರ್ಷಿಕೆ ಅಥವಾ ವಿವರಣೆ",
     "regRiskLabel": "ಅಪಾಯ ವರ್ಗ",

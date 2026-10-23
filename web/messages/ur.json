@@ -817,15 +817,15 @@
     "rsParam_seed": "سیڈ",
     "rsParam_stopSequences": "روکنے والے سلسلے",
     "rsParamDropped": "{param} اس ایجنٹ پر سیٹ ہے، لیکن {provider} اسے {model} کے لیے نظر انداز کرتا ہے، اس لیے اس کا کوئی اثر نہیں۔",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "اس رن کے ٹولز",
+    "rsToolsRunOnly": "صرف یہ رن",
+    "rsToolsRunNote": "یہ سوئچ طے کرتے ہیں کہ اس پلے گراؤنڈ سے بھیجے گئے پیغامات ایجنٹ کے کون سے ٹولز استعمال کر سکتے ہیں۔ کچھ محفوظ نہیں ہوتا: باقی سب کے لیے ایجنٹ کے پاس اس کی اپنی ٹول رسائی برقرار رہتی ہے۔ یہ ایجنٹ کے ٹولز صرف بند کر سکتے ہیں، اسے کبھی نیا ٹول نہیں دے سکتے۔",
+    "rsToolsRunSummary": "ایجنٹ کے {total} ٹولز میں سے {on} اس رن کے لیے آن ہیں",
+    "rsToolsRunNone": "اس رن کے لیے کوئی ٹول نہیں: ایجنٹ صرف متن میں جواب دے سکتا ہے۔",
+    "rsToolsReset": "ایجنٹ کے ٹولز استعمال کریں",
+    "rsToolsNotInAgent": "یہ اس ایجنٹ کے محفوظ شدہ ٹولز میں سے نہیں، اس لیے اسے رن کے لیے آن نہیں کیا جا سکتا۔",
+    "rsToolsEditAgent": "ایجنٹ کے محفوظ شدہ ٹولز تبدیل کریں",
+    "rsToolsLimitedChip": "اس رن کے لیے ٹولز محدود ہیں",
     "rsToolsEmpty": "اس ایجنٹ کے لیے کوئی ٹول دستیاب نہیں۔",
     "rsToolsSummary": "{total} میں سے {on} ٹولز آن ہیں",
     "rsToolsFailed": "ٹولز لوڈ نہیں ہو سکے۔",
@@ -883,14 +883,14 @@
     "chipToolsOff": "ٹولز کے بغیر دوبارہ کوشش ہو رہی ہے",
     "chipFailoverBlocked": "بیک اپ ماڈل استعمال نہیں ہوا: ٹولز پہلے ہی چل چکے تھے",
     "rsLimitChangeOne": "تبدیل کریں",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "شرح کی حد پوری ہو گئی",
+    "reasonTimeout": "وقت ختم ہو گیا",
+    "reasonProviderUnavailable": "فراہم کنندہ دستیاب نہیں",
+    "reasonAuthFailed": "فراہم کنندہ نے اسناد مسترد کر دیں",
+    "reasonBilling": "فراہم کنندہ کی بلنگ میں مسئلہ",
+    "reasonModelNotFound": "ماڈل دستیاب نہیں",
+    "reasonProviderError": "فراہم کنندہ کی خرابی",
+    "reasonMalformedToolCall": "ٹول کال استعمال نہیں ہو سکی"
   },
   "nodeDefs": {
     "triggerLabel": "ٹرگر",
@@ -13228,7 +13228,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "اسکلز",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14230,7 +14230,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "اسکلز",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14404,7 +14404,7 @@
       "role": "آپ کا کردار یہ سیٹنگ نہیں بدل سکتا۔ کسی ورک اسپیس منتظم سے پوچھیں۔",
       "scope": "یہ سیٹنگ یہاں اوور رائیڈ نہیں کی جا سکتی۔",
       "readOnly": "سیٹنگز ابھی صرف پڑھنے کے لیے ہیں۔",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "یہ سیکیورٹی سیٹنگ صرف ورک اسپیس ایڈمن تبدیل کر سکتا ہے۔ آپ اس کی قدر یہاں دیکھ سکتے ہیں، مگر ترمیم نہیں کر سکتے۔"
     },
     "reset": {
       "button": "وراثتی قدر پر ری سیٹ کریں",
@@ -14454,12 +14454,12 @@
       "acknowledge": "میں اس سیکیورٹی تبدیلی کے نتائج سمجھتا/سمجھتی ہوں۔",
       "cancel": "منسوخ کریں",
       "confirm": "تصدیق کریں اور محفوظ کریں",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "ری سیٹ: اووررائیڈ ہٹا دیا جاتا ہے اور سیٹنگ اس قدر پر واپس آ جاتی ہے جو اسے ورثے میں ملتی ہے۔"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "زیادہ قدر زیادہ سخت ہے: زیادہ قدر قبول ہوتی ہے، کم مسترد۔",
+      "lower": "کم قدر زیادہ سخت ہے: کم قدر قبول ہوتی ہے، زیادہ مسترد۔",
+      "enumOrder": "اختیارات کم سے کم سخت سے سب سے زیادہ سخت کی ترتیب میں ہیں: {options}۔ آپ صرف سخت سرے کی طرف جا سکتے ہیں۔"
     }
   },
   "approvalsQueue": {
@@ -14628,8 +14628,8 @@
     "tlSevWarn": "توجہ درکار",
     "tlSevError": "ناکام",
     "tlIntake": "ٹرن شروع ہوا: {chars} حروف، {tools} ٹولز، {attachments} منسلکات",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "اس رن کے ٹولز",
+    "tlRunToolsNone": "کوئی نہیں (صرف متن)",
     "tlModelCall": "{model} ({provider}) کو ماڈل کال، روٹ {route}",
     "tlFailover": "{model} ({provider}) پر فیل اوور ہوا",
     "tlRetryModel": "{model} ({provider}) پر دوبارہ کوشش کی گئی، روٹ {route}",
@@ -14638,6 +14638,7 @@
     "tlToolCall": "ٹول کال {tool}: {status}",
     "tlApprovalRequested": "{tool} چلنے سے پہلے منظوری مانگی گئی",
     "tlApprovalDecided": "{tool} کے لیے منظوری کا فیصلہ ہوا: {decision}",
+    "tlApprovalAutoAllowed": "{tool} بغیر پوچھے چلا: نگرانی شدہ موڈ میں صرف پڑھنے والی کال",
     "tlContinuation": "تسلسل: {guard} ({outcome})",
     "tlGuard": "گارڈ ریل {guard}: {outcome}",
     "tlVerifyPassed": "جانچ کامیاب: {check}",
@@ -14707,7 +14708,7 @@
     "modeTextOnlyHelp": "ایجنٹ اپنے ٹولز کے بغیر جواب دیتا ہے۔ محفوظ: کچھ حقیقی نہیں ہوتا۔ متوقع ٹول جانچیں پوری نہیں ہو سکتیں۔",
     "modeFull": "ٹولز کے ساتھ مکمل پائپ لائن",
     "modeFullHelp": "وہی ٹولز، گارڈ ریلز اور مراحل کی حدیں جو حقیقی صارف کو ملتی ہیں۔ متوقع ٹول اور ٹریجیکٹری جانچوں کے لیے ضروری۔",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "جو ٹولز صرف پڑھتے ہیں وہ حقیقی طور پر چلتے ہیں۔ جو کچھ ڈیٹا بدل سکتا ہو، پیغام بھیج سکتا ہو یا رقم خرچ کر سکتا ہو اسے سمولیٹ کیا جاتا ہے اور رن میں درج کیا جاتا ہے، اس لیے کوئی حقیقی کام نہیں ہوتا۔ حفاظتی درجہ بندی کے بغیر ٹولز بھی سمولیٹ ہوتے ہیں۔",
     "autoApproveLabel": "ایول سینڈ باکس میں ٹول کالز خود بخود منظور کریں",
     "autoApproveHelp": "جو ٹول کال عام طور پر کسی شخص کا انتظار کرتی اسے ایول سینڈ باکس منظور کر دیتا ہے تاکہ کیس مکمل ہو سکے۔ اس کے بغیر کیس پروڈکشن کی طرح بے جواب منظوری پر ہی ختم ہوتا ہے۔",
     "autoApproveWarnTitle": "صرف غیر پروڈکشن ورک اسپیسز کے لیے",
@@ -14715,7 +14716,7 @@
     "autoApproveNeedsFull": "پہلے مکمل پائپ لائن آن کریں: خود کار منظوری صرف تب لاگو ہوتی ہے جب ٹولز چلیں۔",
     "autoApproveRefused": "اس ورک اسپیس میں اجازت نہیں: {reason}",
     "autoApproveConfirmTitle": "ایولز میں ٹول کالز خود بخود منظور کریں؟",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "اس ڈیٹا سیٹ کے ری پلے میں ہر وہ ٹول کال جو کسی شخص کا انتظار کرتی، خودکار طور پر منظور ہو جائے گی۔ منظور شدہ ٹولز جو صرف پڑھتے ہیں حقیقی طور پر چلتے ہیں؛ جو کچھ بدل سکتے ہیں وہ اب بھی سمولیٹ ہوتے ہیں۔ یہ صرف ایسے ورک اسپیس میں کریں جس میں ٹیسٹ ڈیٹا ہو۔ رن ریکارڈ کرتے ہیں کہ وہ خودکار طور پر منظور ہوئے تھے۔",
     "autoApproveConfirm": "خود کار منظوری آن کریں",
     "trajectoryLabel": "ٹریجیکٹری جانچیں",
     "trajectoryOn": "On",
@@ -14740,22 +14741,22 @@
     "samplingSource_platform": "پلیٹ فارم کی طرف سے سیٹ",
     "samplingSource_tenant": "آپ کے ورک اسپیس کے لیے سیٹ",
     "samplingSource_agent": "اس ایجنٹ کے لیے سیٹ",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "ورک اسپیس ڈیفالٹ",
+    "modeDefaultHelp": "آپ کے ورک اسپیس کی سیٹنگ کی پیروی کرتا ہے (مکمل پائپ لائن، جب تک کسی ایڈمن نے اسے تبدیل نہ کیا ہو)۔ ہر رن پھر بھی اپنا موڈ چن سکتا ہے۔",
+    "modeDefaultCurrent": "فی الحال: {mode}",
+    "modeNameFull": "مکمل پائپ لائن",
+    "modeNameQuick": "تیز (صرف متن)",
+    "badgeFull": "مکمل پائپ لائن",
+    "badgeQuick": "تیز",
+    "datasetModePinnedTitle": "یہ ڈیٹا سیٹ ہمیشہ اسی طرح ری پلے ہوتا ہے۔ کوئی ایک رن پھر بھی دوسرا موڈ چن سکتا ہے۔",
+    "datasetModeDefaultTitle": "یہ ڈیٹا سیٹ اس بات کے لیے ورک اسپیس کے ڈیفالٹ کی پیروی کرتا ہے کہ رنز کیسے ری پلے ہوں۔",
+    "runModeLabel": "اگلے رن کے لیے ری پلے موڈ",
+    "runModeInherit": "ڈیٹا سیٹ کی سیٹنگ استعمال کریں",
+    "runModeHelp": "مکمل پائپ لائن ایجنٹ کو اس کے ٹولز، گارڈ ریلز اور منظوریوں کے ساتھ ایک محفوظ سینڈ باکس میں چلاتی ہے: صرف پڑھنے والے ٹولز واقعی چلتے ہیں، اور جو کچھ ڈیٹا بدل سکتا ہو یا کچھ بھیج سکتا ہو اسے سمولیٹ کیا جاتا ہے۔ تیز موڈ ٹولز روک لیتا ہے اور صرف لکھے ہوئے جواب کو جانچتا ہے۔",
+    "runModeFullTitle": "اس رن نے ایول سینڈ باکس میں مکمل پائپ لائن استعمال کی۔",
+    "runModeQuickTitle": "یہ رن صرف متن والا تیز ری پلے تھا: ایجنٹ کے ٹولز روک لیے گئے تھے۔",
+    "runSimulatedTools": "اس رن میں سمولیٹ کیے گئے، چلائے نہیں گئے (وہ ڈیٹا بدل سکتے تھے یا پلیٹ فارم سے باہر پہنچ سکتے تھے): {tools}۔",
+    "toolStatusSimulated": "سمولیٹ کیا گیا، چلایا نہیں گیا"
   },
   "agentLab": {
     "wtLabel": "ایجنٹ کے ٹولز کے ساتھ چلائیں",
@@ -14788,6 +14789,14 @@
       "memory": {
         "label": "میموری",
         "description": "ایجنٹ کتنی یادیں رکھتا اور یاد کرتا ہے۔"
+      },
+      "attachments": {
+        "label": "چیٹ اپ لوڈز",
+        "description": "لوگ چیٹ پیغامات کے ساتھ کتنی بڑی فائلیں منسلک کر سکتے ہیں۔"
+      },
+      "skills": {
+        "label": "اسکلز",
+        "description": "نصب شدہ اسکلز کی فہرست ایجنٹ کی ہدایات کا کتنا حصہ استعمال کر سکتی ہے۔"
       },
       "aux": {
         "label": "پس منظر ماڈل کالز",
@@ -14854,6 +14863,28 @@
           "label": "نامکمل جواب کے بعد اضافی پاس",
           "description": "جب ماڈل کا جواب اعلان شدہ مگر نہ اٹھائے گئے مرحلے پر رک جائے تو اسے مزید کتنی بار جاری رکھنے کو کہا جاتا ہے۔",
           "help": "ان ایجنٹس کے لیے بڑھائیں جو اکثر کسی مرحلے کا اعلان کر کے رک جاتے ہیں۔ ہر اضافی پاس ایک ماڈل کال خرچ کرتا ہے۔"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "حد کے بعد جواب دی گئی کالز",
+          "description": "ٹرن کی ٹول حد ختم ہونے کے بعد ماڈل مزید کتنی ٹول کالز آزما سکتا ہے۔ ہر ایک کو اس نوٹ کے ساتھ مسترد کیا جاتا ہے کہ جو اس کے پاس ہے اسی سے جواب دے؛ اس تعداد سے آگے ٹرن خرابی کے ساتھ روک دیا جاتا ہے۔",
+          "help": "اگر ماڈل کو ٹول کالز بند کرنے میں چند کوششیں لگتی ہیں تو اسے بڑھائیں۔ لوپ میں پھنسے ٹرنز جلدی ختم کرنے کے لیے اسے کم کریں۔ 0 حد سے اوپر کی پہلی کال پر ٹرن روک دیتا ہے۔"
+        },
+        "supervisedDivisor": {
+          "label": "نگرانی شدہ ایجنٹس کو ٹول حد کا 1/N ملتا ہے",
+          "description": "نگرانی شدہ ایجنٹ کو ٹرن کی ٹول کال کی حد اس عدد سے تقسیم ہو کر ملتی ہے، مگر نیچے دی گئی کم از کم قدر سے کبھی کم نہیں۔",
+          "help": "نگرانی شدہ ایجنٹس کو زیادہ سخت رکھنے کے لیے اسے بڑھائیں۔ 1 انہیں پوری حد دیتا ہے۔"
+        },
+        "supervisedMinSteps": {
+          "label": "نگرانی شدہ ایجنٹ کے لیے کم از کم ٹول کالز",
+          "description": "نگرانی شدہ ایجنٹ کو ملنے والی سب سے چھوٹی ٹول کال کی حد، چاہے اوپر کا عدد کتنا ہی زیادہ ہو۔",
+          "help": "اسے 3 یا اس سے زیادہ رکھیں تاکہ نگرانی شدہ ایجنٹ کئی مراحل والا سادہ کام پھر بھی مکمل کر سکے۔"
+        },
+        "autonomousMultiplier": {
+          "label": "مکمل خودمختار ایجنٹس کو حد کا N گنا ملتا ہے",
+          "description": "مکمل خودمختار ایجنٹ کو ٹرن کی ٹول کال کی حد اس عدد سے ضرب ہو کر ملتی ہے۔",
+          "help": "ان ایجنٹس کے لیے بڑھائیں جو بغیر نگرانی کے طویل کام چلاتے ہیں؛ تب وہ ایک ٹرن میں زیادہ کالز اور رقم خرچ کر سکتے ہیں۔ 1 انہیں معیاری حد دیتا ہے۔"
         }
       }
     },
@@ -14925,6 +14956,82 @@
           "label": "فالو اپ ٹولز کتنی دیر پیش رہتے ہیں",
           "description": "استعمال کے بعد مختصر فالو اپ پیغامات کے لیے ٹول کتنی دیر پیش رہتا ہے۔",
           "help": "لمبی کھڑکی طویل کام کے سیشنز میں مدد کرتی ہے، چھوٹی ٹول فہرست کو مختصر رکھتی ہے۔"
+        },
+        "maxStickyTools": {
+          "label": "فالو اپس میں پیش کیے جانے والے زیادہ سے زیادہ ٹولز",
+          "description": "مختصر فالو اپ پیغام میں آگے لے جائے جانے والے ٹولز کی زیادہ سے زیادہ تعداد۔ 0 کسی کو نہیں رکھتا۔",
+          "help": "بڑا عدد تب مدد کرتا ہے جب کوئی کام کئی ٹولز استعمال کرے؛ چھوٹا عدد ٹول فہرست کو مختصر رکھتا ہے۔"
+        },
+        "keepPrimaryModel": {
+          "label": "فالو اپس کے لیے مرکزی ماڈل برقرار رکھیں",
+          "description": "ایسی گفتگو میں مختصر فالو اپ جو پہلے ٹولز استعمال کر چکی ہو، سستے ماڈل کے بجائے ایجنٹ کے مرکزی ماڈل پر ہی رہتا ہے۔",
+          "help": "اسے بند کریں تاکہ لاگت روٹنگ \"ہاں\" جیسے فالو اپس سستے ماڈل کو بھیجے، اس خطرے کے ساتھ کہ جاری کام کو وہ کمزور طریقے سے سنبھالے۔"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "جواب دوبارہ استعمال کرنے کے لیے سوال کتنا ملتا جلتا ہو",
+          "description": "ان ایجنٹس کے لیے جو ملتے جلتے سوالات کے جوابات دوبارہ استعمال کرتے ہیں: محفوظ شدہ جواب دینے کے لیے نیا سوال پچھلے سوال کے کتنا قریب ہو، 0.85 سے 1 تک۔",
+          "help": "کم عدد زیادہ دہراؤ کو جواب دیتا ہے مگر کسی اور سوال کے لیے بنا جواب دے دینے کا خطرہ رہتا ہے۔ غلط جوابات مہنگے ہوں تو اسے زیادہ رکھیں۔ جواب صرف اسی شخص کے لیے دوبارہ استعمال ہوتا ہے جسے وہ دیا گیا تھا۔"
+        },
+        "ttl": {
+          "label": "دوبارہ قابل استعمال جواب کتنی دیر رکھا جائے",
+          "description": "محفوظ شدہ جواب کو حذف ہونے سے پہلے کتنی دیر تک ملتے جلتے سوال کو دیا جا سکتا ہے۔",
+          "help": "اگر آپ کے جوابات جلد پرانے ہو جاتے ہیں تو اسے مختصر کریں۔"
+        },
+        "maxEntriesPerAgent": {
+          "label": "فی ایجنٹ زیادہ سے زیادہ محفوظ شدہ جوابات",
+          "description": "ایک ایجنٹ دوبارہ استعمال کے لیے کتنے جوابات رکھتا ہے۔ اس سے زیادہ ہونے پر سب سے پرانے حذف کر دیے جاتے ہیں۔",
+          "help": "بڑا ذخیرہ زیادہ دہراؤ تلاش کرتا ہے اور زیادہ اسٹوریج استعمال کرتا ہے۔"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "گفتگو میں ٹول کالز کا ریکارڈ رکھیں",
+          "description": "ہر ٹرن کی ٹول کالز کا مختصر ریکارڈ گفتگو کے ساتھ محفوظ کریں، تاکہ بعد کے ٹرنز دیکھ سکیں کہ کیا کیا گیا۔",
+          "help": "گفتگو کی تاریخ کو صرف متن رکھنے کے لیے اسے بند کریں؛ تب ایجنٹ نہیں جان سکتا کہ پچھلے ٹرنز میں اس کے ٹولز نے کیا کیا۔ یہ پورے ورک اسپیس پر لاگو ہوتا ہے۔"
+        },
+        "replayEnabled": {
+          "label": "ماڈل کو ٹول ریکارڈ دکھائیں",
+          "description": "ماڈل کو گفتگو دیتے وقت پچھلی ٹول کالز کا محفوظ شدہ ریکارڈ شامل کریں۔",
+          "help": "اسے بند کریں تاکہ ریکارڈ محفوظ ہوتا رہے مگر اس کے لیے ماڈل کی کام کی جگہ استعمال نہ ہو۔"
+        },
+        "replayTurns": {
+          "label": "پچھلے ٹرنز جن کا ٹول ریکارڈ دکھایا جاتا ہے",
+          "description": "ٹولز استعمال کرنے والے حالیہ ترین کتنے ٹرنز کا ریکارڈ ماڈل کو دکھایا جاتا ہے۔",
+          "help": "بڑا عدد طویل کام کے سیشنز میں مدد کرتا ہے مگر ماڈل کی کام کی جگہ زیادہ استعمال کرتا ہے۔"
+        },
+        "maxEntriesPerTurn": {
+          "label": "فی ٹرن درج کی جانے والی ٹول کالز",
+          "description": "ایک ٹرن کی کتنی ٹول کالز ریکارڈ میں لکھی جاتی ہیں۔ باقی کالز صرف گنی جاتی ہیں۔",
+          "help": "ان ٹرنز کے لیے بڑھائیں جو بہت کالز کرتے ہیں اور جن میں ہر ایک یاد رکھنی ہو۔"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "فی ٹرن سب سے لمبا ٹول ریکارڈ",
+          "description": "ایک ٹرن کے ریکارڈ کے کتنے حروف ماڈل کو دکھائے جاتے ہیں؛ باقی گنے جاتے ہیں، درج نہیں کیے جاتے۔",
+          "help": "بعد کے ہر ٹرن کی لاگت بچانے کے لیے کم کریں، زیادہ تفصیل رکھنے کے لیے بڑھائیں۔"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "سب سے بڑی تصویر اپ لوڈ (MB)",
+          "description": "کوئی شخص چیٹ پیغام کے ساتھ سب سے بڑی کون سی تصویر منسلک کر سکتا ہے، میگابائٹس میں۔ پلیٹ فارم کی ایک مجموعی فائل حد بھی ہے جسے یہ عبور نہیں کر سکتا۔",
+          "help": "تصاویر اور اسکرین شاٹس کے لیے بڑھائیں؛ بڑی فائلیں بھیجنے میں سست ہوتی ہیں اور ماڈل کا زیادہ کوٹا استعمال کرتی ہیں۔"
+        },
+        "maxAudioMb": {
+          "label": "سب سے بڑی آڈیو اپ لوڈ (MB)",
+          "description": "کوئی شخص چیٹ پیغام کے ساتھ سب سے بڑی کون سی آڈیو فائل منسلک کر سکتا ہے، میگابائٹس میں۔ پلیٹ فارم کی ایک مجموعی فائل حد بھی ہے جسے یہ عبور نہیں کر سکتا۔",
+          "help": "طویل ریکارڈنگز کے لیے بڑھائیں؛ بڑی فائلیں بھیجنے میں سست ہوتی ہیں اور ماڈل کا زیادہ کوٹا استعمال کرتی ہیں۔"
+        },
+        "maxVideoMb": {
+          "label": "سب سے بڑی ویڈیو اپ لوڈ (MB)",
+          "description": "کوئی شخص چیٹ پیغام کے ساتھ سب سے بڑی کون سی ویڈیو منسلک کر سکتا ہے، میگابائٹس میں۔ پلیٹ فارم کی ایک مجموعی فائل حد بھی ہے جسے یہ عبور نہیں کر سکتا۔",
+          "help": "طویل کلپس کے لیے بڑھائیں؛ بڑی فائلیں بھیجنے میں سست ہوتی ہیں اور ماڈل کا زیادہ کوٹا استعمال کرتی ہیں۔"
+        },
+        "maxDocumentMb": {
+          "label": "سب سے بڑی دستاویز اپ لوڈ (MB)",
+          "description": "کوئی شخص چیٹ پیغام کے ساتھ سب سے بڑی کون سی دستاویز یا اسپریڈ شیٹ منسلک کر سکتا ہے، میگابائٹس میں۔ پلیٹ فارم کی ایک مجموعی فائل حد بھی ہے جسے یہ عبور نہیں کر سکتا۔",
+          "help": "طویل رپورٹس اور بڑی ڈیٹا فائلوں کے لیے بڑھائیں؛ بڑی فائلیں پروسیس ہونے میں سست ہوتی ہیں۔"
         }
       },
       "continuation": {
@@ -14983,6 +15090,20 @@
           "help": "ان معاونین کے لیے بڑھائیں جنہیں لوگوں کے بارے میں بہت کچھ یاد رکھنا چاہیے؛ اس سے اسٹوریج اور یاد کرنے کی لاگت بھی بڑھتی ہے۔"
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "زیادہ سے زیادہ مشترکہ یادیں",
+          "description": "ورک اسپیس میں کتنی مشترکہ یادیں رکھی جاتی ہیں۔ اس سے زیادہ ہونے پر سب سے پرانی حذف کر دی جاتی ہیں۔",
+          "help": "مشترکہ علم پر انحصار کرنے والی بڑی ٹیموں کے لیے بڑھائیں؛ اس سے اسٹوریج اور یاد کرنے کی لاگت بھی بڑھتی ہے۔ یہ پورے ورک اسپیس پر لاگو ہوتا ہے۔"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "آن ڈیوائس چیٹ کو دی جانے والی یادیں",
+          "description": "آن ڈیوائس سیشن کے شروع ہونے پر اسے کتنی یادیں دی جاتی ہیں۔",
+          "help": "آن ڈیوائس ماڈلز کی کام کی جگہ چھوٹی ہوتی ہے، اس لیے اسے کم رکھیں۔"
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "گراف میموری سے یاد کیے گئے حقائق",
@@ -14993,6 +15114,20 @@
           "label": "فی لُک اَپ پڑھے گئے گراف راستے",
           "description": "ایک لُک اَپ کے حقائق تلاش کرنے کے لیے میموری گراف کے کتنے کنکشن پڑھے جاتے ہیں۔",
           "help": "کئی کنکشن ایک ہی حقیقت تک لے جا سکتے ہیں، اس لیے گھنے جڑی یادوں میں سب کچھ ڈھونڈنے کے لیے زیادہ عدد درکار ہو سکتا ہے۔ زیادہ عدد ہر لُک اَپ کو سست کرتا ہے۔"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "پرامپٹ میں درج زیادہ سے زیادہ اسکلز",
+          "description": "آپ کی کتنی اسکلز کے نام ایجنٹ کی ہدایات میں دیے جاتے ہیں تاکہ اسے ان کے ہونے کا علم رہے۔ باقی گنی جاتی ہیں، درج نہیں کی جاتیں۔",
+          "help": "اگر آپ کے پاس بہت سی اسکلز ہیں تو بڑھائیں؛ درج ہر اسکل ہر ٹرن میں ماڈل کی تھوڑی کام کی جگہ استعمال کرتی ہے۔ یہ پورے ورک اسپیس پر لاگو ہوتا ہے۔"
+        },
+        "maxBlockChars": {
+          "label": "پرامپٹ میں اسکلز کی فہرست کا سائز",
+          "description": "اسکلز کی فہرست ایجنٹ کی ہدایات میں کتنے حروف لے سکتی ہے۔ بھر جانے پر بعد کی اسکلز صرف ناموں تک مختصر کر دی جاتی ہیں۔",
+          "help": "زیادہ اسکلز کی تفصیلات رکھنے کے لیے بڑھائیں، ہر ٹرن میں ٹوکنز بچانے کے لیے کم کریں۔ یہ پورے ورک اسپیس پر لاگو ہوتا ہے۔"
         }
       }
     },
@@ -15045,6 +15180,17 @@
           "description": "جانچے گئے ٹیکسٹ کا کتنا حصہ AI حفاظتی جج پڑھتے ہیں۔ اس سے آگے کے ٹیکسٹ کا فیصلہ نہیں ہوتا۔",
           "help": "آپ اسے صرف پلیٹ فارم کی قدر سے اوپر بڑھا سکتے ہیں۔ بڑھانے سے طویل ٹول نتائج کا مکمل فیصلہ ہوتا ہے لیکن ہر جج کال بڑی ہو جاتی ہے۔"
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "نگرانی شدہ ایجنٹس اور صرف پڑھنے والے ٹولز",
+          "description": "کیا نگرانی شدہ خودمختاری درجے کا ایجنٹ ایسے ٹول سے پہلے بھی آپ سے پوچھتا ہے جو صرف پڑھتا ہو، جیسے تلاش یا لک اپ۔ لکھنا، بھیجنا اور وہ ٹولز جنہیں پلیٹ فارم نے درجہ بند نہیں کیا ہمیشہ پوچھتے ہیں۔",
+          "help": "آپ اسے صرف پلیٹ فارم کی سیٹنگ سے زیادہ سخت بنا سکتے ہیں۔ ہر بار پوچھنا سب سے محفوظ انتخاب ہے؛ صرف پڑھنے والے ٹولز کو چلنے دینے سے ایک سوال کم ہوتا ہے مگر کسی غیر متوقع تلاش کو روکنے کا موقع بھی جاتا رہتا ہے۔ جو ایجنٹ نجی ڈیٹا پڑھ سکتا ہو، ناقابل اعتماد مواد لے سکتا ہو اور ڈیٹا باہر بھیج سکتا ہو، اس سے اس سیٹنگ کے باوجود ہر کال پر پوچھا جاتا ہے۔",
+          "options": {
+            "auto-allow": "صرف پڑھنے والے ٹولز کو بغیر پوچھے چلنے دیں",
+            "gate": "ہر ٹول کال سے پہلے پوچھیں"
+          }
+        }
       }
     },
     "quality": {
@@ -15067,12 +15213,12 @@
           "help": "ہر تکرار رن کی لاگت اور وقت کو ضرب دیتی ہے۔"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "تشخیص کیسے چلتی ہیں",
+          "description": "جب رن یا اس کا ڈیٹا سیٹ نہ بتائے تو تشخیصی رن ایجنٹ کو اس کے ٹولز کے ساتھ محفوظ سینڈ باکس میں ری پلے کرتا ہے (مکمل پائپ لائن) یا صرف متن میں جواب دیتا ہے (تیز)۔",
+          "help": "مکمل پائپ لائن وہ جانچتی ہے جو آپ کے صارفین کو ملتا ہے، ٹولز کے استعمال سمیت، اور اس کی لاگت زیادہ ہے۔ اس میں صرف پڑھنے والے ٹولز واقعی چلتے ہیں؛ جو کچھ ڈیٹا بدل سکتا ہو، پیغام بھیج سکتا ہو یا رقم خرچ کر سکتا ہو اسے سمولیٹ کیا جاتا ہے اور رن میں درج کیا جاتا ہے۔ تیز سستا ہے اور ٹولز کے استعمال کے بارے میں کچھ نہیں بتاتا۔",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "سینڈ باکس میں مکمل پائپ لائن",
+            "quick": "تیز: صرف متنی جوابات"
           }
         }
       }
@@ -15176,7 +15322,7 @@
       "cancel": "منسوخ کریں",
       "done": "{count} سیٹنگز کو ان کی وراثتی قدروں پر ری سیٹ کریں۔",
       "partial": "{done} سیٹنگز ری سیٹ ہوئیں؛ {failed} ری سیٹ نہیں ہو سکیں۔ ناکام سیٹنگز پر پیغامات دیکھیں۔",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} سیٹنگز ری سیٹ ہوئیں۔ جن {skipped} کے لیے وجہ درکار تھی انہیں جوں کا توں چھوڑ دیا گیا۔"
     },
     "import": {
       "button": "اوور رائیڈز درآمد کریں",
@@ -15249,16 +15395,16 @@
       "unknownActor": "نامعلوم",
       "noReason": "کوئی وجہ نہیں دی گئی",
       "showMore": "مزید دکھائیں",
-      "scope": "Level",
+      "scope": "سطح",
       "scopeWorkspace": "ورک اسپیس",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "ایجنٹ {id}",
+      "scopeFilter": "تبدیلیاں اس سطح پر دکھائیں",
+      "filterAll": "تمام سطحیں",
+      "filterWorkspace": "صرف ورک اسپیس",
+      "filterAgents": "صرف ایجنٹس",
+      "searchLoadedOnly": "تلاش اب تک لوڈ ہوئی تبدیلیوں کا احاطہ کرتی ہے۔",
+      "loadError": "تبدیلی کی تاریخ لوڈ نہیں ہو سکی۔ {message}",
+      "moreFailed": "مزید تبدیلیاں لوڈ نہیں ہو سکیں۔ {message}",
       "loadingMore": "لوڈ ہو رہا ہے"
     }
   },
@@ -15266,7 +15412,7 @@
     "title": "رویہ اور حدیں",
     "intro": "کنٹرول کریں کہ یہ ایجنٹ ایک ٹرن میں کتنا آگے جا سکتا ہے: کتنے ٹولز کال کر سکتا ہے، کتنی دیر چل سکتا ہے اور کتنا واپس پڑھتا ہے۔ جو آپ یہاں نہیں بدلتے وہ آپ کے ورک اسپیس سے وراثت میں آتا ہے۔",
     "saveFirst": "پہلے ایجنٹ کو محفوظ کریں۔ اس کا رویہ اور حدیں اس کے وجود میں آنے کے بعد سیٹ کی جا سکتی ہیں۔",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "اس کا رویہ اور حدیں ٹیب کھولنے کے لیے نیچے سے ایک ایجنٹ چنیں۔",
     "tabs": {
       "label": "ایجنٹ کنفیگریشن",
       "setup": "سیٹ اپ",
@@ -15277,12 +15423,12 @@
       "label": "متعلقہ صفحات",
       "tenant": "ورک اسپیس ڈیفالٹس بدلیں",
       "playground": "پلے گراؤنڈ میں آزمائیں",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "اس ایجنٹ کے پرامپٹس",
+      "promptsAria": "{name} کے پرامپٹس: پرامپٹ رجسٹری کو اس ایجنٹ پر کھولیں",
+      "approvals": "اس ایجنٹ کی منظوریاں",
+      "approvalsAria": "{name} کی منظوریاں: اس ایجنٹ کے لیے فلٹر کی گئی منظوری قطار کھولیں",
+      "turns": "ٹرن ٹائم لائن",
+      "turnsAria": "{name} کی ٹرن ٹائم لائن: اس ایجنٹ کے لیے ٹرن انسپکٹر کھولیں"
     },
     "readOnly": {
       "locked": "یہ ایجنٹ ترمیم کے لیے مقفل ہے، اس لیے یہ قدریں صرف پڑھنے کے لیے ہیں۔",
@@ -15462,7 +15608,7 @@
     "regAgentPlaceholder": "ایجنٹ منتخب کریں",
     "regAgentsFailed": "آپ کے ایجنٹس لوڈ نہیں ہو سکے۔",
     "regPickAgent": "کسی ایجنٹ کے پرامپٹس دیکھنے اور بدلنے کے لیے اسے منتخب کریں۔",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "لنک والا ایجنٹ آپ کے لیے دستیاب نہیں، کیونکہ وہ موجود نہیں یا آپ اسے دیکھ نہیں سکتے۔ اس کے بجائے رجسٹری ورک اسپیس اسکوپ پر کھلی۔",
     "regSearchLabel": "پرامپٹس تلاش کریں",
     "regSearchPlaceholder": "کلید، عنوان یا تفصیل",
     "regRiskLabel": "خطرے کی قسم",
