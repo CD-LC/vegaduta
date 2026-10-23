@@ -58,7 +58,7 @@ describe("ControlsFinder", () => {
     await screen.findByTestId("controls-anchor-agent-runtime-limits");
     expect(document.getElementById("agent-runtime-limits")).not.toBeNull();
     expect(document.getElementById("behaviour-settings")).not.toBeNull();
-    expect(within(screen.getByTestId("controls-anchor-agent-runtime-limits")).getAllByRole("heading", { level: 4 })).toHaveLength(7);
+    expect(within(screen.getByTestId("controls-anchor-agent-runtime-limits")).getAllByRole("heading", { level: 4 })).toHaveLength(11);
   });
 
   it("finds a setting or a page by the words people use and announces the count", async () => {
