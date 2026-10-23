@@ -32,7 +32,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | agents-budget | kernel | 11 | audit, chat, providers, security, tenancy |  |
 | agents-chatport | kernel | 21 | agents, agents-turn, audit, json, security, sharing, tenancy |  |
 | agents-interop | kernel | 58 | agents, agents-budget, agents-turn, audit, chat, json, prompts, providers, security, settings, sharing, tenancy |  |
-| agents-jobs | kernel | 175 | agents, agents-browser, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, settings, sharing, tenancy |  |
+| agents-jobs | kernel | 176 | agents, agents-browser, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, settings, sharing, tenancy |  |
 | agents-studio | kernel | 100 | agents, agents-tools (test), agents-turn, approval, chat, guardrails, json, knowledge, mcp, providers, rl, sdlc, security, sharing, tenancy |  |
 | agents-tools | kernel | 256 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, prompts, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
 | agents-turn | kernel | 398 | agents, agents-budget, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, prompts, providers, rl, security, settings, sharing, storage, tenancy |  |
@@ -67,7 +67,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | payments | vendor | 55 | agents (test), agents-tools (test), agentspi, approval, audit, billing, crypto, eventbus, json, security, tenancy | UPI mandate payments |
 | platform | kernel | 153 | admin, agents, agents-turn, audit, chat, codeintel, crypto, guardrails, json, providers, security, tenancy, workflow |  |
 | prompts | kernel | 34 | audit, json, security |  |
-| providers | kernel (hosts vendor code) | 175 | crypto, json, knowledge, settings, tenancy | kernel provider registry; LLM validators + OpenAI/sidecar modality adapters |
+| providers | kernel (hosts vendor code) | 176 | crypto, json, knowledge, settings, tenancy | kernel provider registry; LLM validators + OpenAI/sidecar modality adapters |
 | quality | kernel | 154 | chat, json, prompts, providers, reliability, security, settings, sharing, tenancy |  |
 | reliability | kernel | 1 | (none) |  |
 | rl | kernel | 52 | chat, json, security, settings |  |
