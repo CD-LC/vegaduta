@@ -99,6 +99,9 @@ Tenant-wide export and deletion that applies to the whole workspace, not one use
   response's `Content-Disposition`, default `tenant-data-export.json`).
 - **Request account deletion** is irreversible (it drops the workspace schema). The button stays disabled until you type
   the workspace's organisation name exactly (`POST /api/tenant/data-deletion` with `confirmOrgName`).
+  It also clears the workspace's cached counters in Valkey (usage and rate-limit counters, per-user budget counters,
+  deduplication markers) and records a deletion entry for the platform administrator, because the workspace's own audit
+  log is dropped with it.
 
 Neither action goes through the shared API client; they use plain authenticated requests so the browser can handle the
 file download.

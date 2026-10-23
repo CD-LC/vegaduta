@@ -5,7 +5,6 @@ import com.agenticai.core.admin.keycloak.KeycloakUserRepresentation;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.storage.FileStorageService;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -56,8 +55,6 @@ public class TenantDataErasureService {
 
     private static final Logger log = LoggerFactory.getLogger(TenantDataErasureService.class);
 
-
-
     private final TenantRepository tenantRepository;
     private final IdentityUserAdminPort keycloakAdminClient;
     private final DataSource dataSource;
@@ -102,6 +99,12 @@ public class TenantDataErasureService {
      * can span anyway (same reason {@link TenantProvisioningService#compensate} is plain,
      * uncommitted-transaction JDBC too). Only the final {@link Tenant#markErased} + save is
      * transactional, since that part - and only that part - genuinely is a single-database write.
+     *
+     * <p>Runs the same audit-before-delete + Valkey purge + erasure sequence as the platform-admin
+     * path ({@link #eraseWithAudit}): the tenant's own audit log is dropped with its schema, so the
+     * control-plane {@link PlatformTenantDeletionLog} row is the only durable trace that the
+     * workspace erased itself, and the tenant's Valkey state (usage counters, rate buckets, dedup
+     * markers) must not outlive the data it describes.
      */
     public void eraseCurrentTenant(String confirmOrgName) {
         Tenant tenant = requireCurrentTenant();
@@ -116,7 +119,7 @@ public class TenantDataErasureService {
                         + " /api/tenant/data-deletion",
                 tenant.getName(),
                 tenant.getSchemaName());
-        performErasure(tenant, actorId());
+        eraseWithAudit(tenant, actorId(), "self-service: ");
     }
 
     /**
@@ -134,9 +137,8 @@ public class TenantDataErasureService {
      * App stores require that deletion is reachable in-app by the account holder themselves,
      * without any extra permission.
      *
-     * <p>Unlike {@link #eraseCurrentTenant}, a control-plane deletion-audit row is written first
-     * (same audit-before-delete gate as {@link #eraseTenantById}) because the tenant's own audit
-     * log is dropped with the schema.
+     * <p>Same audit-before-delete gate and Valkey purge as {@link #eraseCurrentTenant} and {@link
+     * #eraseTenantById}, through the one shared {@link #eraseWithAudit} sequence.
      */
     public void eraseCurrentTenantForSoleMemberAccountDeletion() {
         Tenant tenant = requireCurrentTenant();
@@ -147,33 +149,12 @@ public class TenantDataErasureService {
                     org.springframework.http.HttpStatus.FORBIDDEN,
                     "The shared demo workspace cannot be deleted through account deletion.");
         }
-        String actor = actorId();
         log.warn(
                 "Erasing tenant '{}' (schema '{}') - sole-member self-service account deletion via"
                         + " DELETE /api/account",
                 tenant.getName(),
                 tenant.getSchemaName());
-        PlatformTenantDeletionLog auditRow =
-                deletionAuditService.recordInitiated(tenant.getId(), tenant.getName(), actor);
-        ErasureOutcome outcome;
-        try {
-            outcome = performErasure(tenant, actor);
-        } catch (RuntimeException erasureFailure) {
-            deletionAuditService.recordFailed(
-                    auditRow.getId(),
-                    erasureFailure.getMessage(),
-                    "keycloak-users, object-storage (account self-deletion)");
-            throw erasureFailure;
-        }
-        deletionAuditService.recordCompleted(
-                auditRow.getId(),
-                (outcome.graphMemoryDropped()
-                                ? "account self-deletion: keycloak-users, object-storage,"
-                                        + " postgres-schema, graph-memory-schema"
-                                : "account self-deletion: keycloak-users, object-storage,"
-                                        + " postgres-schema (graph-memory-schema FAILED - needs"
-                                        + " manual cleanup)")
-                        + outcome.controlPlaneSummary());
+        eraseWithAudit(tenant, actorId(), "account self-deletion: ");
     }
 
     /**
@@ -438,7 +419,8 @@ public class TenantDataErasureService {
         // deleted above, which is why this runs after object storage. The
         // per-table steps are best-effort and only reported in the audit row.
         int appUsersDeleted = appUserRepository.deleteAllByTenantId(tenant.getId());
-        List<String> controlPlaneFailures = controlPlanePurger.purgeControlPlaneRows(tenant, schemaName);
+        List<String> controlPlaneFailures =
+                controlPlanePurger.purgeControlPlaneRows(tenant, schemaName);
         log.info(
                 "Erasure: removed {} app_user row(s) for tenant '{}'; control-plane cleanup"
                         + " failures: {}",
@@ -516,8 +498,8 @@ public class TenantDataErasureService {
      * every repository query through {@link TenantContext}, which names the CURRENT request's own
      * tenant, not whichever tenant {@link #eraseTenantById} was asked to target. Best-effort - a
      * missing/older table (module never active for this tenant) returns an empty list rather than
-     * failing the whole deletion, same posture {@code eraseObjectKeysFromTable} already
-     * established for this identical per-table enumeration problem.
+     * failing the whole deletion, same posture {@code eraseObjectKeysFromTable} already established
+     * for this identical per-table enumeration problem.
      */
     private List<String> collectStringColumn(String schemaName, String table, String column) {
         List<String> values = new ArrayList<>();
@@ -567,8 +549,8 @@ public class TenantDataErasureService {
                                 () ->
                                         new IllegalStateException(
                                                 "No TenantContext for an authenticated"
-                                                    + " /api/tenant/data-deletion request -"
-                                                    + " SecurityConfig should have blocked this"));
+                                                        + " /api/tenant/data-deletion request -"
+                                                        + " SecurityConfig should have blocked this"));
         return tenantRepository
                 .findBySchemaName(schemaName)
                 .orElseThrow(
