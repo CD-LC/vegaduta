@@ -15,6 +15,7 @@
     "tests-prod/**/*.ts",
     "helpers/**/*.ts",
     "playwright.config.ts",
-    "playwright.prod.config.ts"
+    "playwright.prod.config.ts",
+    "playwright.personal.config.ts"
   ]
 }
