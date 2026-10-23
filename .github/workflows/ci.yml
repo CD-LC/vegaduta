@@ -475,7 +475,7 @@ jobs:
         run: |
           for m in test_auth test_service test_guardrails test_agent \
                    test_approval_reconcile test_exec_and_mcp \
-                   test_gitops_auth_token test_gitops_confinement \
+                   test_gitops_auth_token test_gitops_confinement test_id_validation \
                    test_run_modes test_store_search; do
             python -m "tests.$m" || exit 1
           done
