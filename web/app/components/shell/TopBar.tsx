@@ -16,6 +16,7 @@ import EdgeSetupChip from "../edge/EdgeSetupChip";
 import NotificationBell from "../NotificationBell";
 import TrustStrip from "../TrustStrip";
 import { getPublicEnv } from "../../lib/env";
+import { showEnvironmentPill } from "../../lib/deployEnv";
 import type { ComponentProps, ReactNode, RefObject } from "react";
 import { initialsOf } from "./initialsOf";
 
@@ -109,8 +110,8 @@ export default function TopBar({
             RULE 0's .ai=prod/.xyz=staging split). Deliberately absent
             rather than a placeholder on any build that omits it, so this
             never claims an environment nobody configured. */}
-      {/* "personal" is not an environment to warn about (it rendered in staging amber): no pill. */}
-      {getPublicEnv("NEXT_PUBLIC_DEPLOY_ENV") && getPublicEnv("NEXT_PUBLIC_DEPLOY_ENV") !== "personal" && (
+      {/* The install tiers ("personal", "lite", "full") are not environments to warn about (they rendered in staging amber): no pill. */}
+      {showEnvironmentPill(getPublicEnv("NEXT_PUBLIC_DEPLOY_ENV")) && (
         <span
           className="hidden shrink-0 items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide sm:inline-flex"
           style={{

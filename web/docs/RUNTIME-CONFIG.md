@@ -69,7 +69,7 @@ value at runtime. For the `=== "1"` flags, pass `0` to switch one off.
 | `NEXT_PUBLIC_EDGE_AGENTS` | `1` turns on the on-device agents UI | off |
 | `NEXT_PUBLIC_EDGE_MODEL_MANIFEST_URL` | fallback edge model manifest | empty |
 | `NEXT_PUBLIC_EDITION` | `personal` / `lite` / `full`: the edition core runs as (`app.edition.tier`). Decides which pages the console hides and 404s on a personal install (`lib/edition.ts`, one `EDITION_ROUTES` table). Compose derives it and core's `APP_EDITION_TIER` from the single `VEGADUTA_EDITION`. Unset falls back to `NEXT_PUBLIC_AUTH_MODE=local` = personal, then `NEXT_PUBLIC_DEPLOY_ENV=lite\|full`; a console that is told nothing hides nothing. The console compares it with `edition.tier` from `/api/public/status` and warns on a mismatch | derived (see left) |
-| `NEXT_PUBLIC_DEPLOY_ENV` | topbar environment pill (`production` / `staging`) | none |
+| `NEXT_PUBLIC_DEPLOY_ENV` | install tier, or topbar environment pill. The tiers `personal`, `lite` and `full` select install behaviour (for example `/add-ons` is left out on `full`) and show no pill; any other value (`production`, `staging`) is shown as the pill | `full` in Compose (`docker-compose.yml`) and the Helm web chart, `lite` / `personal` in their stacks |
 | `NEXT_PUBLIC_FREE_MODE` | `1` hides pricing | off |
 | `NEXT_PUBLIC_BILLING_ENABLED` | `1` shows plans/prices/upgrade/billing UI; off redirects `/billing`, `/features`, `/admin/billing` (`lib/billing-flag.ts`) | off |
 | `NEXT_PUBLIC_COFFEE_URL` | donation link | none |
@@ -107,7 +107,11 @@ allowlist.
   `NEXT_PUBLIC_CODE_INTEL_URL`), so a deployment on its own domain gets a
   policy naming its own origins, and whose script nonce is fresh per request.
 - `ENABLE_DEV_ROUTES=true` (web, runtime) re-enables the developer-only
-  `/ui-kit` and `/eval` routes on a production server; by default they 404.
+  `/ui-kit` style-guide index and `/eval` (with `/api/eval/*`) on a production
+  server; by default they 404. The sample-data previews under `/ui-kit`
+  (`/ui-kit/dashboard-preview`, `/ui-kit/console-preview`) are not covered: they
+  depend on mock APIs that only install outside a production build, so they
+  always 404 there (security review FE-017) and need `next dev`.
 - Routes that are statically prerendered freeze whatever they read at build.
   Today these are `sitemap.ts`, `robots.ts` and `llms.txt/route.ts`, which is
   `force-static`, and they use `SITE_URL`. Set `NEXT_PUBLIC_SITE_URL` at build
