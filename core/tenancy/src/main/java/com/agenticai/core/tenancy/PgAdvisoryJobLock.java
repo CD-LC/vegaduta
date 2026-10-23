@@ -1,5 +1,6 @@
 package com.agenticai.core.tenancy;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,7 +8,6 @@ import java.sql.SQLException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
-import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -67,10 +67,11 @@ import org.springframework.stereotype.Service;
  * #CAP_EXEMPT_JOBS} lists, by lock name, the jobs that never take or wait for a permit and are
  * never skipped by the cap: cron jobs (a skipped midnight quota reset would not run again for a
  * day), jobs that are long by design (index builds, knowledge ingestion/re-embed, retention purges)
- * and the short latency-critical relays/schedulers. They still pin their own connection, so the
- * bound stays soft. Exemption is by name (not a second method) so every caller and its test double
- * keeps the one {@link #tryRunExclusive} entry point; a NEW cron or long-running locked job must be
- * added to that set.
+ * and the short latency-critical relays/schedulers, plus the migrate-only Job's lock (its caller
+ * reads a skipped tick as "another migrator holds the lock"). They still pin their own connection,
+ * so the bound stays soft. Exemption is by name (not a second method) so every caller and its test
+ * double keeps the one {@link #tryRunExclusive} entry point; a NEW cron or long-running locked job
+ * must be added to that set.
  */
 @Service
 public class PgAdvisoryJobLock {
@@ -123,7 +124,10 @@ public class PgAdvisoryJobLock {
                     "workflow-scheduler",
                     "agent-job-dispatch",
                     "agent-job-deadline-sweep",
-                    "agent-job-orphan-sweep");
+                    "agent-job-orphan-sweep",
+                    // the one-shot migrate-only Job: a cap skip would read as "another migrator
+                    // holds the lock" and exit 75 without migrating
+                    TenantMigrateOnlyRunner.LOCK_NAME);
 
     private static final long SKIP_WARN_INTERVAL_NANOS = 60_000_000_000L;
 
@@ -212,9 +216,9 @@ public class PgAdvisoryJobLock {
             lastSkipWarnNanos.put(jobName, now);
             log.warn(
                     "Job '{}' tick skipped: this JVM already holds the max concurrent locked jobs"
-                        + " (app.scheduling.max-concurrent-locked-jobs); sustained skips mean"
-                        + " long-running locked jobs are hogging the permits (logged at most once a"
-                        + " minute per job)",
+                            + " (app.scheduling.max-concurrent-locked-jobs); sustained skips mean"
+                            + " long-running locked jobs are hogging the permits (logged at most once a"
+                            + " minute per job)",
                     jobName);
         }
     }

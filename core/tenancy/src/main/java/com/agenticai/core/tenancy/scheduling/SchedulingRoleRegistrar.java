@@ -25,6 +25,10 @@ import org.springframework.stereotype.Component;
  *       a broad package ({@code com.agenticai.core.*}) and keep the few pollers it owns.
  *   <li>{@code app.scheduling.pool} / {@code app.scheduling.offloaded-pools} - named pools of the
  *       jobs shape, resolved by {@link SchedulingPools} into the two lists above.
+ *   <li>{@code app.tenancy.migrate-only=true} - the one-shot migrate Job registers no scheduled
+ *       method at all: it migrates and exits, and a tick that started meanwhile could hold an
+ *       advisory-lock permit (or a connection) against the migration itself. Takes precedence over
+ *       every list above.
  *   <li>{@code app.scheduling.skip-listener-classes} - classes whose {@code @EventListener} methods
  *       (the {@code ApplicationReadyEvent} boot sweeps) become no-ops (implemented by {@link
  *       SkippingEventListenerFactory}).
@@ -46,6 +50,7 @@ public class SchedulingRoleRegistrar
 
     static final String SKIP_BEAN_CLASSES = "app.scheduling.skip-bean-classes";
     static final String KEEP_BEAN_CLASSES = "app.scheduling.keep-bean-classes";
+    static final String MIGRATE_ONLY = "app.tenancy.migrate-only";
     static final String SKIP_LISTENER_CLASSES = "app.scheduling.skip-listener-classes";
     static final String LISTENER_FACTORY_BEAN_NAME = "schedulingRoleSkippingEventListenerFactory";
 
@@ -64,7 +69,11 @@ public class SchedulingRoleRegistrar
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
             throws BeansException {
         String processorName = TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME;
-        SchedulingRoleMatcher scheduled = SchedulingPools.scheduledBeans(Binder.get(environment));
+        Binder binder = Binder.get(environment);
+        SchedulingRoleMatcher scheduled =
+                binder.bind(MIGRATE_ONLY, Boolean.class).orElse(false)
+                        ? SchedulingRoleMatcher.everything()
+                        : SchedulingPools.scheduledBeans(binder);
         if (!scheduled.isEmpty() && registry.containsBeanDefinition(processorName)) {
             RootBeanDefinition replacement =
                     new RootBeanDefinition(
