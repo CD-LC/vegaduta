@@ -113,6 +113,7 @@ updates:
       - /services/whatsapp-qr
       - /services/browser-runner
       - /sdk/typescript
+      - /docs/marketing/reels/recorder
     schedule:
       interval: weekly
       day: monday
