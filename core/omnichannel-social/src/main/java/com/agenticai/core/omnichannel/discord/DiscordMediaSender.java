@@ -2,6 +2,8 @@ package com.agenticai.core.omnichannel.discord;
 
 import com.agenticai.core.omnichannel.media.ChannelMediaSender;
 import com.agenticai.core.omnichannel.session.ChannelType;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
  * Token from storage.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class DiscordMediaSender implements ChannelMediaSender {
 
     private final DiscordCredentialService credentialService;

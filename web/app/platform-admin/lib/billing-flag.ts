@@ -1,4 +1,4 @@
-import { getPublicEnv } from "./env";
+import { getPublicPolicy } from "./env";
 
 // Billing switch (OSS default, 2026-09-29) - web-admin mirror of
 // web/app/lib/billing-flag.ts. Self-hosted installs have no plans or payment
@@ -7,7 +7,7 @@ import { getPublicEnv } from "./env";
 // not price-related and stays visible either way. Unset = OFF.
 
 export function isBillingEnabled(): boolean {
-  return getPublicEnv("NEXT_PUBLIC_BILLING_ENABLED") === "1";
+  return getPublicPolicy("NEXT_PUBLIC_BILLING_ENABLED") === "1";
 }
 
 /** Admin routes that only exist to show paid plans / subscriptions. */
@@ -21,7 +21,7 @@ export function isBillingRoute(href: string): boolean {
 /** Nav sections with billing items removed when billing is off; empty sections drop out. */
 export function filterBillingNav<S extends { items: readonly { href: string }[] }>(
   sections: readonly S[],
-  enabled = isBillingEnabled(),
+  enabled = isBillingEnabled()
 ): S[] {
   if (enabled) return [...sections];
   return sections
