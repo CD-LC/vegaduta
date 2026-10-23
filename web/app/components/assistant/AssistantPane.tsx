@@ -2,26 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import {
-  AlertTriangle,
-  Brain,
-  Globe,
-  FileUp,
-  Hammer,
-  Loader2,
-  Monitor,
-  MessageSquarePlus,
-  PanelLeft,
-  PanelRight,
-  Sparkles,
-  SlidersHorizontal,
-  Workflow,
-  Zap,
-  Volume2,
-  VolumeX,
-  Square,
-} from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { AlertTriangle, FileUp, Loader2, PanelLeft, PanelRight } from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
 import { errorMessage } from "../../lib/errors";
 import { cn } from "../../lib/utils";
@@ -29,7 +11,7 @@ import { assistantApi } from "../../lib/api/assistant";
 import { usePageReady } from "../RouteTransition";
 import { Button } from "../ui/button";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import ChatExportMenu from "../ChatExportMenu";
+import { ONBOARDING_HOLD_ATTR } from "../../lib/overlayGate";
 import { useComposerAttachments } from "../chat/useComposerAttachments";
 import AssistantComposer from "./AssistantComposer";
 import AssistantTranscript from "./AssistantTranscript";
@@ -45,8 +27,9 @@ import { useAssistantTurn } from "./useAssistantTurn";
 import { useAssistantPrefs } from "./assistantPrefs";
 import { useWarmLocalModel } from "../../lib/useWarmLocalModel";
 import LocalModelTip from "./LocalModelTip";
-import AssistantInfoCard from "./AssistantInfoCard";
-import AssistantPalette, { type PaletteItem } from "./AssistantPalette";
+import AssistantHeader from "./AssistantHeader";
+import AssistantPalette from "./AssistantPalette";
+import { useAssistantPaletteItems } from "./useAssistantPaletteItems";
 import { usePlatformBusyFlag } from "../../lib/platformBusy";
 import PreviewPane from "./PreviewPane";
 import BrowserPane from "./BrowserPane";
@@ -70,7 +53,7 @@ import {
   taskForJob,
 } from "./backgroundWork";
 import { nextTurnId } from "./useAssistantTurn";
-import type { AgentJobSummaryResponse } from "../../lib/api/types";
+import { useJobActions } from "./useJobActions";
 import FolderPicker from "./FolderPicker";
 import { useWorkspaceFolder } from "./useWorkspaceFolder";
 import { useAssistantFiles } from "./useAssistantFiles";
@@ -82,10 +65,6 @@ import { useQuickTask } from "./useQuickTask";
 import ComposerModeBar from "./ComposerModeBar";
 import { parseComposerMode, type ComposerMode } from "./assistantTypes";
 
-/** A header toggle that is switched on: solid brand fill and a glow ring, so on and off are never confused. */
-const TOGGLE_ON =
-  "bg-primary text-primary-foreground ring-4 ring-primary/30 hover:bg-primary/90 hover:text-primary-foreground";
-
 /**
  * The /assistant screen: threads on the left (local index), the transcript and the box in the centre,
  * the work rail on the right. Composes the console's existing chat pieces rather than extending
@@ -95,10 +74,8 @@ const TOGGLE_ON =
  */
 export default function AssistantPane() {
   const t = useTranslations("assistant");
-  const tb = useTranslations("assistantBrowser");
   const tq = useTranslations("approvalsQueue");
   const searchParams = useSearchParams();
-  const router = useRouter();
   const agentState = useAssistantAgent();
   const assistantAgent = agentState.status === "ready" ? agentState.agent : null;
   // Who answers: the Assistant by default, or the agent picked under the box / in ?agent=.
@@ -118,7 +95,6 @@ export default function AssistantPane() {
   const [workKey, setWorkKey] = useState(0);
   const counts = useWorkCounts(ready, `${workKey}:${turn.settledCount}`, active?.id ?? null);
   const learned = useLearned(ready, turn.settledCount);
-  const [stoppingId, setStoppingId] = useState<string | null>(null);
   const composerAttachments = useComposerAttachments(agent, turn.sending);
   const workspace = useWorkspaceFolder(ready);
   const livePreviews = usePreviews(ready && !!workspace.workspace?.terminal, `${workKey}:${turn.settledCount}`);
@@ -294,54 +270,12 @@ export default function AssistantPane() {
     if (id) void openThread(id, true);
   }, [openThread, turn.sessionId]);
 
-  /** A finished (or failed, or stopped) task's outcome as a reply in the conversation on screen. */
-  const showJobResult = useCallback(
-    async (job: AgentJobSummaryResponse) => {
-      const note = job.goalPreview ?? null;
-      try {
-        const full = await assistantApi.getJob(job.agentId, job.id);
-        const phase = jobPhase(full.status);
-        const text =
-          phase === "done"
-            ? full.resultText?.trim() || t("taskNoResult")
-            : phase === "stopped"
-              ? t("taskWasStopped")
-              : full.errorMessage || t("taskFailedPlain");
-        turn.appendTurns({
-          id: nextTurnId("a"),
-          role: "assistant",
-          content: text,
-          at: Date.now(),
-          note,
-          failed: phase === "failed",
-        });
-      } catch (err) {
-        turn.appendTurns({
-          id: nextTurnId("a"),
-          role: "assistant",
-          content: errorMessage(err),
-          at: Date.now(),
-          failed: true,
-        });
-      }
-    },
-    [turn, t]
-  );
-
-  const stopJob = useCallback(
-    async (job: AgentJobSummaryResponse) => {
-      setStoppingId(job.id);
-      try {
-        await assistantApi.cancelJob(job.agentId, job.id);
-      } catch (err) {
-        setThreadError(errorMessage(err, t("taskStopFailed")));
-      } finally {
-        setStoppingId(null);
-        setWorkKey((n) => n + 1);
-      }
-    },
-    [t]
-  );
+  const bumpWork = useCallback(() => setWorkKey((n) => n + 1), []);
+  const { showJobResult, stopJob, stoppingId } = useJobActions({
+    appendTurns: turn.appendTurns,
+    onError: setThreadError,
+    onChanged: bumpWork,
+  });
 
   // A task started from the conversation on screen finishes: say so right there, with its outcome.
   const turnsRef = useRef(turn.turns);
@@ -383,71 +317,13 @@ export default function AssistantPane() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const paletteItems: PaletteItem[] = [
-    {
-      id: "new",
-      group: t("paletteGroupActions"),
-      label: t("paletteNewThread"),
-      icon: <MessageSquarePlus size={14} />,
-      run: newThread,
-    },
-    {
-      id: "mode-chat",
-      group: t("paletteGroupActions"),
-      label: t("statusMode_chat"),
-      icon: <Sparkles size={14} />,
-      run: () => setMode("chat"),
-    },
-    ...(caps.jobs
-      ? [
-          {
-            id: "mode-bg",
-            group: t("paletteGroupActions"),
-            label: t("statusMode_background"),
-            icon: <Workflow size={14} />,
-            run: () => setMode("background"),
-          },
-        ]
-      : []),
-    {
-      id: "mode-task",
-      group: t("paletteGroupActions"),
-      label: t("statusMode_task"),
-      icon: <Zap size={14} />,
-      run: () => setMode("task"),
-    },
-    {
-      id: "tune",
-      group: t("paletteGroupBuild"),
-      label: t("journey_tune_title"),
-      hint: t("paletteOpens"),
-      icon: <SlidersHorizontal size={14} />,
-      run: () => router.push(active ? `/agents?agent=${encodeURIComponent(active.id)}` : "/agents"),
-    },
-    {
-      id: "workflow",
-      group: t("paletteGroupBuild"),
-      label: t("journey_workflow_title"),
-      hint: t("paletteOpens"),
-      icon: <Workflow size={14} />,
-      run: () => router.push("/workflows"),
-    },
-    {
-      id: "app",
-      group: t("paletteGroupBuild"),
-      label: t("journey_app_title"),
-      hint: t("paletteOpens"),
-      icon: <Hammer size={14} />,
-      run: () => router.push("/build"),
-    },
-    ...(["tune", "workflow", "app"] as const).map((j) => ({
-      id: `ask-${j}`,
-      group: t("paletteGroupAsk"),
-      label: t(`journey_${j}_blurb`),
-      icon: <Sparkles size={14} />,
-      run: () => setInput(t(`journey_${j}_prompt`)),
-    })),
-  ];
+  const paletteItems = useAssistantPaletteItems({
+    agentId: active?.id ?? null,
+    jobs: caps.jobs,
+    onNewThread: newThread,
+    onMode: setMode,
+    onPrompt: setInput,
+  });
 
   // Wide screens show both panels inline and the button folds them away (remembered per browser);
   // narrow screens keep them as overlays the same button opens.
@@ -481,16 +357,53 @@ export default function AssistantPane() {
     </Button>
   );
 
+  // First-run overlays (the welcome modal, the tour) never land on a conversation: someone with threads, or with
+  // one open, is not new here (lib/overlayGate reads this; "pending" makes it wait until the threads are known).
+  const onboardingHold = !threads.loaded
+    ? "pending"
+    : threads.threads.length > 0 || turn.turns.length > 0
+      ? "returning"
+      : "first-run";
+  const overlayOpen = leftOpen || rightOpen;
+  useEffect(() => {
+    if (!overlayOpen) return undefined;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setLeftOpen(false);
+      setRightOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [overlayOpen]);
+
   return (
     <div
       className="relative flex min-h-0 flex-1"
       data-testid="assistant-pane"
+      {...{ [ONBOARDING_HOLD_ATTR]: onboardingHold }}
+      data-turn-in-flight={turn.sending || approvalContinuation.continuing ? "true" : undefined}
       onDragOver={onDragOver}
       onDragLeave={(e) => {
         if (e.currentTarget === e.target) setDragging(false);
       }}
       onDrop={onDrop}
     >
+      {/* Narrow screens: a panel opened over the conversation dims it, and a tap outside closes the panel. */}
+      {overlayOpen && (
+        <button
+          type="button"
+          aria-label={t("closePanel")}
+          className={cn(
+            "absolute inset-0 z-10 cursor-default border-0 bg-background/60 p-0 shadow-none backdrop-blur-[2px]",
+            rightOpen ? "xl:hidden" : "lg:hidden"
+          )}
+          onClick={() => {
+            setLeftOpen(false);
+            setRightOpen(false);
+          }}
+          data-testid="assistant-panel-scrim"
+        />
+      )}
       <aside
         className={cn(
           "asst-panel-left w-64 shrink-0 border-r border-border",
@@ -519,115 +432,28 @@ export default function AssistantPane() {
       </aside>
 
       <section className="asst-canvas flex min-w-0 flex-1 flex-col">
-        <header className="asst-header flex items-center gap-2 border-b border-border px-3 py-2 sm:px-6">
-          {railButton("left")}
-          <Sparkles
-            className={cn("size-4 shrink-0 text-primary", (turn.sending || liveTasks > 0) && "asst-mark-busy")}
-            aria-hidden="true"
-            data-testid="assistant-mark"
-            data-busy={turn.sending || liveTasks > 0 ? "true" : undefined}
-          />
-          <h2 className="truncate text-sm font-semibold text-foreground">{active?.name ?? t("title")}</h2>
-          {active && !active.isAssistant && (
-            <span
-              className="truncate rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
-              data-testid="talking-to"
-            >
-              {t("answeringAgent", { name: active.name })}
-            </span>
-          )}
-          {agentState.status === "ready" && agentState.created && (
-            <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
-              {t("justCreated")}
-            </span>
-          )}
-          <span className="flex-1" />
-          <AssistantInfoCard />
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            aria-pressed={prefs.speakReplies}
-            aria-label={prefs.speakReplies ? t("speakRepliesOff") : t("speakRepliesOn")}
-            title={prefs.speakReplies ? t("speakRepliesOff") : t("speakRepliesOn")}
-            className={cn(prefs.speakReplies && TOGGLE_ON)}
-            onClick={() => {
-              // Off means silent now: speech already queued in the browser would otherwise play on.
-              if (prefs.speakReplies) stopSpeaking();
-              setPrefs({ speakReplies: !prefs.speakReplies });
-            }}
-          >
-            {prefs.speakReplies ? <Volume2 size={16} aria-hidden="true" /> : <VolumeX size={16} aria-hidden="true" />}
-          </Button>
-          {speaking && (
-            <Button
-              type="button"
-              size="sm"
-              variant="destructive"
-              onClick={() => stopSpeaking()}
-              aria-label={t("stopSpeakingNow")}
-              title={t("stopSpeakingNow")}
-              data-testid="stop-speaking"
-            >
-              <Square size={12} aria-hidden="true" />
-              <span className="hidden sm:inline">{t("stopSpeakingNow")}</span>
-            </Button>
-          )}
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            aria-pressed={prefs.showThinking}
-            aria-label={prefs.showThinking ? t("hideThinking") : t("showThinking")}
-            title={prefs.showThinking ? t("hideThinking") : t("showThinking")}
-            className={cn(prefs.showThinking && TOGGLE_ON)}
-            onClick={() => setPrefs({ showThinking: !prefs.showThinking })}
-          >
-            <Brain size={16} aria-hidden="true" />
-          </Button>
-          {livePreviews.previews.length > 0 && (
-            <Button
-              type="button"
-              size="sm"
-              variant={previewVisible ? "secondary" : "outline"}
-              onClick={() => setPreviewOpen((o) => !o)}
-              aria-label={t("previewTitle")}
-              title={t("previewTitle")}
-              data-testid="preview-toggle"
-            >
-              <Monitor size={14} aria-hidden="true" />
-              <span className="hidden sm:inline">{t("previewTitle")}</span>
-            </Button>
-          )}
-          {browserReady && (
-            <Button
-              type="button"
-              size="sm"
-              variant={browserVisible ? "secondary" : "outline"}
-              onClick={() => setBrowserOpen((o) => !o)}
-              aria-pressed={browserVisible}
-              aria-label={tb("toggle")}
-              title={tb("toggle")}
-              data-testid="browser-toggle"
-            >
-              <Globe size={14} aria-hidden="true" />
-              <span className="hidden sm:inline">{tb("toggle")}</span>
-              {browser.pending && !browserVisible && (
-                <span className="size-2 rounded-full bg-amber-500" role="status" aria-label={tb("needsYou")} />
-              )}
-            </Button>
-          )}
-          {active && <ChatExportMenu agentId={active.id} sessionId={turn.sessionId} />}
-          {active && (
-            <Link
-              href={`/agents?agent=${encodeURIComponent(active.id)}`}
-              className="hidden whitespace-nowrap text-xs text-muted-foreground underline-offset-2 hover:underline sm:inline"
-            >
-              {t("openAgent")}
-            </Link>
-          )}
-          {railButton("right")}
-        </header>
+        <AssistantHeader
+          agent={active ? { id: active.id, name: active.name, isAssistant: active.isAssistant } : null}
+          justCreated={agentState.status === "ready" && !!agentState.created}
+          busy={turn.sending || liveTasks > 0 || approvalContinuation.continuing}
+          prefs={prefs}
+          setPrefs={setPrefs}
+          speaking={speaking}
+          previews={{
+            count: livePreviews.previews.length,
+            visible: previewVisible,
+            onToggle: () => setPreviewOpen((o) => !o),
+          }}
+          browser={{
+            ready: browserReady,
+            visible: browserVisible,
+            pending: !!browser.pending,
+            onToggle: () => setBrowserOpen((o) => !o),
+          }}
+          sessionId={turn.sessionId}
+          leftRail={railButton("left")}
+          rightRail={railButton("right")}
+        />
 
         {active && <LocalModelTip agentId={active.id} providerName={active.providerName} />}
         {agentState.status === "loading" && (
