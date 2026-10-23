@@ -137,7 +137,11 @@ python -m pytest tests/ -q
 ```
 
 `services/code-intel` tests are plain scripts, not pytest: run
-`python -m tests.<module>` from `services/code-intel` (see `make test-python`).
+`python -m tests.<module>` from `services/code-intel` (see `make test-python`, which
+runs every `tests/test_*.py`). CI runs `ruff check services/sidecar services/code-intel`
+(the same command as `make lint`) over the whole of both services, not just the files
+a pull request changes. The Node services (`mcp-stdio-runner`, `workspace-runner`,
+`whatsapp-qr`, `desktop-agent`) use `node --test` in their folder (`make test-node-services`).
 
 ### Full stack in containers
 
@@ -193,6 +197,10 @@ Run `make gates` locally to catch them before pushing.
 | `sh scripts/ci/check-file-size.sh` | ratchet: hard cap 700 lines; no new source file over 665 (within 5% of the cap); baseline only shrinks |
 | `sh scripts/ci/check-module-size.sh` | ratchet (ADR-0023): at most 300 main `.java` files per `core/*` module and no classes directly in `com.agenticai.core.agents`, unless in `scripts/ci/module-size-baseline.txt`; baseline only shrinks (`--update` lowers it after a split) |
 | `bash scripts/ci/docs-link-check.sh` | relative links and anchors in `README.md`, `CONTRIBUTING.md` and `docs/` (offline; `ci.yml` also runs lychee, which has its own rules) |
+| `bash scripts/ci/sync-platform-guide-docs.sh --check` | the docs the Assistant bundles (`core/agents-tools/.../platform-guide/docs`) match `docs/` (drop `--check` to re-copy after editing a bundled page) |
+| `node scripts/docs/asyncapi.mjs --check` | `docs/api/asyncapi.json` matches the generator (drop `--check` to regenerate) |
+| `bash scripts/ci/dependabot-coverage.sh` | every `package.json`, `go.mod` and `Dockerfile` directory is listed in `.github/dependabot.yml` (or exempted in the script with a reason) |
+| `bash scripts/ci/test-gates-parity.sh` | every command under `make gates` has a step in `static-gates.yml` |
 | `python3 scripts/docs/test_gen_shapes.py` | the generator's own fixture tests (YAML reader, reason text, class annotations) |
 | `python3 scripts/docs/gen-shapes.py --check` | the ownership tables in `docs/deploy/DEPLOYMENT-SHAPES.md` match the `@Scheduled` sources and shape profiles (drop `--check` to regenerate) |
 | `bash scripts/ci/secret-scan.sh` | gitleaks over your new commits |

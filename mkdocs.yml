@@ -71,6 +71,9 @@ hooks:
 validation:
   nav:
     omitted_files: ignore
+  # A link to a heading that mkdocs slugs differently from GitHub (" / " keeps a
+  # double dash on GitHub, one dash here) only logged INFO; warn makes --strict fail.
+  anchors: warn
 
 nav:
   - Home: README.md

@@ -275,7 +275,7 @@ credentials, or on a cluster with the NetworkPolicies enforced has been done.
 All three cloud SDKs are on the classpath of every core shape, including
 password-mode images.
 
-## Authentication (OIDC / Keycloak)
+## Authentication (OIDC and Keycloak)
 
 This section is the Keycloak (`app.auth.mode=keycloak`, default) setup. For the single-owner alternative that needs no identity server, see [Local sign-in](#local-sign-in-appauthmodelocal).
 
