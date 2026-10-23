@@ -152,6 +152,7 @@ gates: ## The static gates (static-gates.yml runs them when CI is triggered; run
 	sh scripts/ci/check-file-size.sh
 	sh scripts/ci/check-module-size.sh
 	sh scripts/ci/dockerfile-poms.sh
+	sh scripts/ci/web-image-deps.sh
 	sh scripts/ci/postgres-portable-build.sh
 	bash scripts/ci/check-browser-runner-version.sh
 	bash scripts/ci/check-browser-runner-version.sh --self-test
