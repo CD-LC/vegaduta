@@ -96,7 +96,7 @@ while someone else is measuring on the same stage.
 
 Stage facts: the kind stage is served over plain http (`*.127.0.0.1.nip.io`), and keycloak-js needs a secure context, so a
 browser must run with `--unsafely-treat-insecure-origin-as-secure` (the Playwright stage config does). Whether to move the
-stage to https is a separate decision (see `docs/operations/stage-e2e-improvements.md`, SE-01).
+stage to https is a separate decision.
 
 ## What's in here
 
