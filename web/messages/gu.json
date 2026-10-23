@@ -2140,6 +2140,9 @@
     "noFilesUploadedHint": "તમારા એજન્ટો દ્વારા શોધી શકાય તે માટે આ સંગ્રહમાં ફાઇલો અપલોડ કરો.",
     "ocrComingSoonTooltip": "હજી ઉપલબ્ધ નથી - અપલોડ્સ બિલ્ટ-ઇન Tesseract OCR પર પાછા જશે."
   },
+  "tutorPage": {
+    "backToHelp": "મદદ પર પાછા જાઓ"
+  },
   "knowledgePage": {
     "knowledgeLabel": "જ્ઞાન",
     "buildEyebrow": "બનાવો",
@@ -5928,6 +5931,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ઇમેઇલ અને વધુને કનેક્ટ કરો, પછી પસંદ કરો કે દરેક પર કયો એજન્ટ જવાબ આપે છે.",
     "channelsPoint1": "મફત પ્લાન પર WhatsApp, Telegram અને ઇમેઇલ",
     "channelsPoint2": "નવો પ્રેષક પહેલા તમારી મંજૂરીની રાહ જુએ છે",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage અથવા ઇમેઇલ જોડો, પછી દરેક ચેનલ પર કયો કસ્ટમ એજન્ટ જવાબ આપશે તે પસંદ કરો.",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage અને ઇમેઇલ",
     "toolsTitle": "ઇન્ટિગ્રેશન્સ એજન્ટ્સને ટૂલ્સ આપે છે",
     "toolsBody": "વાતચીતની વચ્ચે એજન્ટ શું વાપરી શકે છે તે ચાલુ કરો: વેબ શોધ, ડેટાબેઝ, MCP સર્વર્સ અને તમારી પોતાની સ્ક્રિપ્ટ્સ.",
     "toolsPoint1": "અહીં સક્ષમ કરો, પછી દરેક એજન્ટ માટે તેની મંજૂરી આપો",
@@ -14765,6 +14770,11 @@
     "runModeQuickTitle": "આ રન ફક્ત ટેક્સ્ટનો ઝડપી રીપ્લે હતો: એજન્ટના ટૂલ્સ રોકી રાખ્યા હતા.",
     "runSimulatedTools": "આ રનમાં સિમ્યુલેટ થયા, ચલાવાયા નહીં (તે ડેટા બદલી શકતા કે પ્લેટફૉર્મની બહાર પહોંચી શકતા): {tools}.",
     "toolStatusSimulated": "સિમ્યુલેટ થયું, ચલાવાયું નહીં"
+  },
+  "assistant": {
+    "taskPhoneLabel": "તમારો ફોન નંબર",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "તે નંબર સાચવી શકાયો નહીં."
   },
   "agentLab": {
     "wtLabel": "એજન્ટના ટૂલ્સ સાથે ચલાવો",

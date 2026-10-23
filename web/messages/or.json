@@ -2041,6 +2041,9 @@
     "noFilesUploadedHint": "ଏହି ସଂଗ୍ରହରେ ଫାଇଲ୍ ଅପଲୋଡ୍ କରନ୍ତୁ ଯାହାଦ୍ୱାରା ଆପଣଙ୍କ ଏଜେଣ୍ଟମାନେ ଏହାକୁ ଖୋଜିପାରିବେ।",
     "ocrComingSoonTooltip": "ଏପର୍ଯ୍ୟନ୍ତ ଉପଲବ୍ଧ ନୁହେଁ - ଅପଲୋଡଗୁଡିକ ବିଲ୍ଟ-ଇନ୍ Tesseract OCR କୁ ଫେରିଯିବ।"
   },
+  "tutorPage": {
+    "backToHelp": "ସହାୟତାକୁ ଫେରନ୍ତୁ"
+  },
   "knowledgePage": {
     "knowledgeLabel": "ଜ୍ଞାନ",
     "buildEyebrow": "ନିର୍ମାଣ",
@@ -5924,6 +5927,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ଇମେଲ୍ ଏବଂ ଅଧିକ ସଂଯୋଗ କରନ୍ତୁ, ତା'ପରେ ପ୍ରତ୍ୟେକରେ କେଉଁ ଏଜେଣ୍ଟ ଉତ୍ତର ଦେବ ତାହା ବାଛନ୍ତୁ।",
     "channelsPoint1": "ମାଗଣା ପ୍ଲାନରେ WhatsApp, Telegram ଏବଂ ଇମେଲ୍",
     "channelsPoint2": "ଜଣେ ନୂଆ ପ୍ରେରକ ପ୍ରଥମେ ଆପଣଙ୍କ ଅନୁମୋଦନ ପାଇଁ ଅପେକ୍ଷା କରେ",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage କିମ୍ବା ଇମେଲ୍ ସଂଯୋଗ କରନ୍ତୁ, ତା'ପରେ ପ୍ରତ୍ୟେକ ଚ୍ୟାନେଲରେ କେଉଁ କଷ୍ଟମ୍ ଏଜେଣ୍ଟ ଉତ୍ତର ଦେବ ତାହା ବାଛନ୍ତୁ।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage ଏବଂ ଇମେଲ୍",
     "toolsTitle": "ଇଣ୍ଟିଗ୍ରେସନ୍‌ଗୁଡ଼ିକ ଏଜେଣ୍ଟମାନଙ୍କୁ ଟୁଲ୍ ଦିଏ",
     "toolsBody": "ଜଣେ ଏଜେଣ୍ଟ ବାର୍ତ୍ତାଳାପ ମଝିରେ କ'ଣ ବ୍ୟବହାର କରିପାରିବ ତାହା ଚାଲୁ କରନ୍ତୁ: ୱେବ୍ ସର୍ଚ୍ଚ, ଡାଟାବେସ୍, MCP ସର୍ଭର୍, ଏବଂ ଆପଣଙ୍କ ନିଜ ସ୍କ୍ରିପ୍ଟ।",
     "toolsPoint1": "ଏଠାରେ ସକ୍ଷମ କରନ୍ତୁ, ତା'ପରେ ପ୍ରତି ଏଜେଣ୍ଟ ପାଇଁ ଏହାକୁ ଅନୁମତି ଦିଅନ୍ତୁ",
@@ -14742,6 +14747,11 @@
     "runModeQuickTitle": "ଏହି ରନ୍ କେବଳ-ଲେଖା ଦ୍ରୁତ ରିପ୍ଲେ ଥିଲା: ଏଜେଣ୍ଟର ଟୁଲ୍ ଅଟକାଇ ରଖାଯାଇଥିଲା।",
     "runSimulatedTools": "ଏହି ରନ୍‌ରେ ଅନୁକରଣ କରାଗଲା, ଚଲାଯାଇନାହିଁ (ସେଗୁଡ଼ିକ ଡାଟା ବଦଳାଇପାରିଥାନ୍ତା କିମ୍ବା ପ୍ଲାଟଫର୍ମ ବାହାରେ ପହଞ୍ଚିପାରିଥାନ୍ତା): {tools}।",
     "toolStatusSimulated": "ଅନୁକରଣ କରାଗଲା, ଚଲାଯାଇନାହିଁ"
+  },
+  "assistant": {
+    "taskPhoneLabel": "ଆପଣଙ୍କ ଫୋନ୍ ନମ୍ବର",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "ସେହି ନମ୍ବର ସଞ୍ଚୟ କରାଯାଇପାରିଲା ନାହିଁ।"
   },
   "agentLab": {
     "wtLabel": "ଏଜେଣ୍ଟର ଟୁଲ୍ ସହ ଚଲାନ୍ତୁ",

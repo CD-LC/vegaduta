@@ -2041,6 +2041,9 @@
     "noFilesUploadedHint": "ਇਸ ਸੰਗ੍ਰਹਿ ਵਿੱਚ ਫਾਈਲਾਂ ਅੱਪਲੋਡ ਕਰੋ ਤਾਂ ਜੋ ਤੁਹਾਡੇ ਏਜੰਟ ਉਹਨਾਂ ਨੂੰ ਖੋਜ ਸਕਣ।",
     "ocrComingSoonTooltip": "ਅਜੇ ਉਪਲਬਧ ਨਹੀਂ - ਅੱਪਲੋਡ ਬਿਲਟ-ਇਨ Tesseract OCR 'ਤੇ ਵਾਪਸ ਚਲੇ ਜਾਣਗੇ।"
   },
+  "tutorPage": {
+    "backToHelp": "ਮਦਦ ’ਤੇ ਵਾਪਸ ਜਾਓ"
+  },
   "knowledgePage": {
     "knowledgeLabel": "ਗਿਆਨ",
     "buildEyebrow": "ਬਣਾਓ",
@@ -5928,6 +5931,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ਈਮੇਲ ਅਤੇ ਹੋਰ ਬਹੁਤ ਕੁਝ ਕਨੈਕਟ ਕਰੋ, ਫਿਰ ਚੁਣੋ ਕਿ ਹਰੇਕ 'ਤੇ ਕਿਹੜਾ ਏਜੰਟ ਜਵਾਬ ਦੇਵੇਗਾ।",
     "channelsPoint1": "ਮੁਫ਼ਤ ਪਲਾਨ 'ਤੇ WhatsApp, Telegram ਅਤੇ ਈਮੇਲ",
     "channelsPoint2": "ਇੱਕ ਨਵਾਂ ਭੇਜਣ ਵਾਲਾ ਪਹਿਲਾਂ ਤੁਹਾਡੀ ਪ੍ਰਵਾਨਗੀ ਦੀ ਉਡੀਕ ਕਰਦਾ ਹੈ",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage ਜਾਂ ਈਮੇਲ ਜੋੜੋ, ਫਿਰ ਚੁਣੋ ਕਿ ਹਰ ਚੈਨਲ ’ਤੇ ਕਿਹੜਾ ਕਸਟਮ ਏਜੰਟ ਜਵਾਬ ਦੇਵੇਗਾ।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage ਅਤੇ ਈਮੇਲ",
     "toolsTitle": "ਇੰਟੈਗਰੇਸ਼ਨ ਏਜੰਟਾਂ ਨੂੰ ਟੂਲ ਦਿੰਦੇ ਹਨ",
     "toolsBody": "ਚਾਲੂ ਕਰੋ ਕਿ ਇੱਕ ਏਜੰਟ ਗੱਲਬਾਤ ਦੇ ਵਿਚਕਾਰ ਕੀ ਵਰਤ ਸਕਦਾ ਹੈ: ਵੈੱਬ ਖੋਜ, ਡੇਟਾਬੇਸ, MCP ਸਰਵਰ, ਅਤੇ ਤੁਹਾਡੀਆਂ ਆਪਣੀਆਂ ਸਕ੍ਰਿਪਟਾਂ।",
     "toolsPoint1": "ਇੱਥੇ ਯੋਗ ਕਰੋ, ਫਿਰ ਪ੍ਰਤੀ ਏਜੰਟ ਇਸਦੀ ਆਗਿਆ ਦਿਓ",
@@ -14750,6 +14755,11 @@
     "runModeQuickTitle": "ਇਹ ਰਨ ਸਿਰਫ਼ ਲਿਖਤ ਵਾਲਾ ਤੇਜ਼ ਰੀਪਲੇਅ ਸੀ: ਏਜੰਟ ਦੇ ਟੂਲ ਰੋਕ ਲਏ ਗਏ ਸਨ।",
     "runSimulatedTools": "ਇਸ ਰਨ ਵਿੱਚ ਸਿਮੂਲੇਟ ਕੀਤੇ ਗਏ, ਚਲਾਏ ਨਹੀਂ ਗਏ (ਉਹ ਡਾਟਾ ਬਦਲ ਸਕਦੇ ਜਾਂ ਪਲੇਟਫਾਰਮ ਤੋਂ ਬਾਹਰ ਪਹੁੰਚ ਸਕਦੇ ਸਨ): {tools}।",
     "toolStatusSimulated": "ਸਿਮੂਲੇਟ ਕੀਤਾ, ਚਲਾਇਆ ਨਹੀਂ"
+  },
+  "assistant": {
+    "taskPhoneLabel": "ਤੁਹਾਡਾ ਫ਼ੋਨ ਨੰਬਰ",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "ਉਹ ਨੰਬਰ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ।"
   },
   "agentLab": {
     "wtLabel": "ਏਜੰਟ ਦੇ ਟੂਲਾਂ ਨਾਲ ਚਲਾਓ",

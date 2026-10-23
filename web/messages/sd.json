@@ -2042,6 +2042,9 @@
     "noFilesUploadedHint": "هن ڪليڪشن ۾ فائلون اپلوڊ ڪريو ته جيئن اهي توهان جي ايجنٽن لاءِ ڳولڻ جي قابل ٿين.",
     "ocrComingSoonTooltip": "اڃا دستياب ناهي - اپلوڊز بلٽ ان Tesseract OCR تي واپس ويندا."
   },
+  "tutorPage": {
+    "backToHelp": "واپس مدد ڏانهن"
+  },
   "knowledgePage": {
     "knowledgeLabel": "ڄاڻ",
     "buildEyebrow": "ٺاهيو",
@@ -5929,6 +5932,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, اي ميل ۽ وڌيڪ ڳنڍيو، پوءِ چونڊيو ته ڪهڙو ايجنٽ هر هڪ تي جواب ڏيندو.",
     "channelsPoint1": "مفت پلان تي WhatsApp, Telegram ۽ اي ميل",
     "channelsPoint2": "هڪ نئون موڪليندڙ پهرين توهان جي منظوري جو انتظار ڪندو آهي",
+    "channelsPersonalBody": "WhatsApp، Telegram، Signal، iMessage يا اي ميل ڳنڍيو، پوءِ چونڊيو ته هر چينل تي ڪهڙو ڪسٽم ايجنٽ جواب ڏيندو.",
+    "channelsPersonalPoint1": "WhatsApp، Telegram، Signal، iMessage ۽ اي ميل",
     "toolsTitle": "انٽيگريشنز ايجنٽن کي اوزار ڏين ٿيون",
     "toolsBody": "آن ڪريو جيڪو هڪ ايجنٽ گفتگو جي وچ ۾ استعمال ڪري سگهي ٿو: ويب ڳولا، ڊيٽابيس، MCP سرورز، ۽ توهان جا پنهنجا اسڪرپٽ.",
     "toolsPoint1": "هتي فعال ڪريو، پوءِ هر ايجنٽ لاءِ ان جي اجازت ڏيو",
@@ -14726,6 +14731,11 @@
     "runModeQuickTitle": "هي رن رڳو لکت وارو تڪڙو ريپلي هو: ايجنٽ جا ٽول روڪيا ويا هئا.",
     "runSimulatedTools": "هن رن ۾ نقل ڪيا ويا، هلايا نه ويا (اهي ڊيٽا مٽائي سگهن ها يا پليٽ فارم کان ٻاهر پهچي سگهن ها): {tools}.",
     "toolStatusSimulated": "نقل ڪيو ويو، هلايو نه ويو"
+  },
+  "assistant": {
+    "taskPhoneLabel": "توهان جو فون نمبر",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "اهو نمبر محفوظ نه ٿي سگهيو."
   },
   "agentLab": {
     "wtLabel": "ايجنٽ جي ٽولن سان هلايو",

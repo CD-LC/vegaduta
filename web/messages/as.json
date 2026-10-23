@@ -2041,6 +2041,9 @@
     "noFilesUploadedHint": "আপোনাৰ এজেণ্টসকলৰ দ্বাৰা সন্ধানযোগ্য কৰিবলৈ এই সংগ্ৰহত ফাইল আপলোড কৰক।",
     "ocrComingSoonTooltip": "এতিয়াও উপলব্ধ নহয় - আপলোডবোৰে বিল্ট-ইন Tesseract OCR ব্যৱহাৰ কৰিব।"
   },
+  "tutorPage": {
+    "backToHelp": "সহায়লৈ উভতি যাওক"
+  },
   "knowledgePage": {
     "knowledgeLabel": "জ্ঞান",
     "buildEyebrow": "নিৰ্মাণ",
@@ -5923,6 +5926,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ইমেইল আৰু বহুতো সংযোগ কৰক, তাৰ পিছত প্ৰতিটোত কোনটো এজেণ্টে উত্তৰ দিব সেয়া বাছনি কৰক।",
     "channelsPoint1": "বিনামূলীয়া প্লেনত WhatsApp, Telegram আৰু ইমেইল",
     "channelsPoint2": "এজন নতুন প্ৰেৰকে প্ৰথমে আপোনাৰ অনুমোদনৰ বাবে অপেক্ষা কৰে",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage বা ইমেইল সংযোগ কৰক, তাৰ পিছত প্ৰতিটো চেনেলত কোনটো কাষ্টম এজেণ্টে উত্তৰ দিব সেয়া বাছক।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage আৰু ইমেইল",
     "toolsTitle": "ইন্টিগ্ৰেচনবোৰে এজেণ্টক সঁজুলি দিয়ে",
     "toolsBody": "এটা এজেণ্টে কথা-বতৰাৰ মাজত কি ব্যৱহাৰ কৰিব পাৰে সেয়া অন কৰক: ৱেব চাৰ্ছ, ডাটাবেচ, MCP চাৰ্ভাৰ, আৰু আপোনাৰ নিজৰ স্ক্ৰীপ্ট।",
     "toolsPoint1": "ইয়াত সক্ষম কৰক, তাৰ পিছত প্ৰতিটো এজেণ্টৰ বাবে অনুমতি দিয়ক",
@@ -14656,6 +14661,11 @@
     "runModeQuickTitle": "এই ৰান কেৱল লিখনীৰ দ্ৰুত ৰিপ্লে আছিল: এজেণ্টৰ টুলবোৰ ৰখাই ৰখা হৈছিল।",
     "runSimulatedTools": "এই ৰানত অনুকৰণ কৰা হ'ল, চলোৱা নহ'ল (সেইবোৰে ডেটা সলনি কৰিব পাৰিলেহেঁতেন বা প্লেটফৰ্মৰ বাহিৰলৈ পাব পাৰিলেহেঁতেন): {tools}।",
     "toolStatusSimulated": "অনুকৰণ কৰা হ'ল, চলোৱা নহ'ল"
+  },
+  "assistant": {
+    "taskPhoneLabel": "আপোনাৰ ফোন নম্বৰ",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "সেই নম্বৰ ছেভ কৰিব পৰা নগ'ল।"
   },
   "agentLab": {
     "wtLabel": "এজেণ্টৰ টুলৰ সৈতে চলাওক",

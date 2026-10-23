@@ -2042,6 +2042,9 @@
     "noFilesUploadedHint": "नोंनि एजेन्टफोरजों नागिरनो हानाय खालामनो बे कलेक्सनआव फाइल आपल'ड खालाम।",
     "ocrComingSoonTooltip": "दासिम मोनाखै - आपल'डफोरा बिल्ट-इन Tesseract OCR आव थांफिनगोन।"
   },
+  "tutorPage": {
+    "backToHelp": "सहायताआव फिन्नो थां"
+  },
   "knowledgePage": {
     "knowledgeLabel": "गियान",
     "buildEyebrow": "लु",
@@ -5929,6 +5932,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, इमेल आरो गुबुनफोरखौ दाजाब, बेनि उनाव सायख' बबे एजेन्टआ मोनफ्रोमबोआव फिन्नाय होगोन।",
     "channelsPoint1": "मायोनो प्लानआव WhatsApp, Telegram आरो इमेल",
     "channelsPoint2": "मोनसे गोदान दैथायहरग्राया गिबियावनो नोंनि अनुमोदननि थाखाय नेना थायो",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage नंबा ईमेल सोमोन्दो खालाम, उनाव जाबाय च्यानेलआव माबो कस्टम एजेन्टआ जाप होगोन बेखौ बाछि।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage आरो ईमेल",
     "toolsTitle": "एकीकरणफोरा एजेन्टफोरनो थुलफोर होयो",
     "toolsBody": "सावरायलायनायनि गेजेराव मोनसे एजेन्टआ मा बाहायनो हागोन बेखौ अन खालाम: वेब नागिरनाय, डेटाबेस, MCP सारभार, आरो नोंनि गावबागावनि स्क्रिप्टफोर।",
     "toolsPoint1": "बेयाव एनेबोल खालाम, बेनि उनाव मोनफ्रोम एजेन्टनि थाखाय बेखौ अनुमति हो",
@@ -14726,6 +14731,11 @@
     "runModeQuickTitle": "बे रनआ लिर आबुङै फैसिन रिप्ले आदों: एजेन्टनि टुलफोरखौ थुनाय आदों।",
     "runSimulatedTools": "बे रनआव नकल खालामनाय जादों, गोहो जाया (बिफोरआ डेटा सोलायनो हागोन नंबा प्लेटफर्मनि फाराव फैनो हागोन): {tools}।",
     "toolStatusSimulated": "नकल जादों, गोहो जाया"
+  },
+  "assistant": {
+    "taskPhoneLabel": "नोंनि फोन नम्बर",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "बे नम्बरखौ सेभ खालामनो हाया।"
   },
   "agentLab": {
     "wtLabel": "एजेन्टनि टुलजों गोहो",

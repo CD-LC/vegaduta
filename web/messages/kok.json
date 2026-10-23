@@ -2041,6 +2041,9 @@
     "noFilesUploadedHint": "तुमच्या एजंटांक सोदपाक मेळपा खातीर ह्या संग्रहान फायली अपलोड करात.",
     "ocrComingSoonTooltip": "अजून उपलब्ध ना - अपलोड्स बिल्ट-इन Tesseract OCR कडेन परत वतले."
   },
+  "tutorPage": {
+    "backToHelp": "मदतीक परत वच"
+  },
   "knowledgePage": {
     "knowledgeLabel": "ज्ञान",
     "buildEyebrow": "बांदचें",
@@ -5883,6 +5886,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ईमेल आनी हेर जोडून दवरात, आनी मागीर दर एकाचेर खंयचो एजंट जाप दितलो तें निवडात.",
     "channelsPoint1": "WhatsApp, Telegram आनी ईमेल मोफत येवजणेर",
     "channelsPoint2": "एक नवो प्रेषक पयलीं तुमच्या मान्यतेची वाट पळयता",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage वा ईमेल जोड, उपरांत दरेक चॅनलार खंयचो कस्टम एजंट जाप दितलो तें वेंच.",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage आनी ईमेल",
     "toolsTitle": "इंटिग्रेशन्स एजंटांक साधनां दितात",
     "toolsBody": "उलोवपाच्या मदीं एजंट कितें वापरूंक शकता तें चालू करात: वेब सोद, डेटाबेस, MCP सर्व्हर, आनी तुमचे स्वताचे स्क्रिप्ट.",
     "toolsPoint1": "हांगा सक्षम करात, मागीर दर एका एजंटाक परवानगी दियात",
@@ -14634,6 +14639,11 @@
     "runModeQuickTitle": "हो रन फकत मजकुराचो जलद रिप्ले आशिल्लो: एजंटाचीं साधनां आडायिल्लीं.",
     "runSimulatedTools": "ह्या रनांत अनुकरण केलें, चलयलें ना (तीं डेटा बदलूंक शकतलीं वा प्लॅटफॉर्मा भायर पावूंक शकतलीं): {tools}.",
     "toolStatusSimulated": "अनुकरण केलें, चलयलें ना"
+  },
+  "assistant": {
+    "taskPhoneLabel": "तुमचो फोन नंबर",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "तो नंबर सांबाळूंक जालो ना."
   },
   "agentLab": {
     "wtLabel": "एजंटाच्या साधनांनी चलय",

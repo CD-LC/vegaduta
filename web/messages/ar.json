@@ -2175,6 +2175,9 @@
     "noFilesUploadedHint": "ارفع ملفات لهذه المجموعة لجعلها قابلة للبحث من قبل عملائك.",
     "ocrComingSoonTooltip": "غير متوفر بعد - ستعتمد الملفات المرفوعة على محرك Tesseract OCR المدمج."
   },
+  "tutorPage": {
+    "backToHelp": "العودة إلى المساعدة"
+  },
   "knowledgePage": {
     "knowledgeLabel": "المعرفة",
     "buildEyebrow": "بناء",
@@ -6108,6 +6111,8 @@
     "channelsBody": "صِل واتساب، تيليجرام، انستغرام، سلاك، البريد الإلكتروني والمزيد، ثم اختر الوكيل الذي يجيب على كل منها.",
     "channelsPoint1": "واتساب وتيليجرام والبريد الإلكتروني في الخطة المجانية",
     "channelsPoint2": "أي مرسل جديد ينتظر موافقتك أولاً",
+    "channelsPersonalBody": "اربط WhatsApp أو Telegram أو Signal أو iMessage أو البريد الإلكتروني، ثم اختر أي وكيل مخصص يرد على كل قناة.",
+    "channelsPersonalPoint1": "WhatsApp وTelegram وSignal وiMessage والبريد الإلكتروني",
     "toolsTitle": "التكاملات تمنح الوكلاء أدوات",
     "toolsBody": "فعّل ما يمكن للوكيل استخدامه أثناء المحادثة: البحث على الويب، وقواعد البيانات، وخوادم MCP، والنصوص البرمجية الخاصة بك.",
     "toolsPoint1": "فعّلها هنا، ثم اسمح بها لكل وكيل",
@@ -15126,6 +15131,11 @@
     "runModeQuickTitle": "كان هذا التشغيل إعادة تشغيل سريعة بالنص فقط: حُجبت أدوات الوكيل.",
     "runSimulatedTools": "محاكاة، لم تُنفَّذ في هذا التشغيل (قد تغيّر البيانات أو تصل إلى خارج المنصة): {tools}.",
     "toolStatusSimulated": "محاكاة، لم تُنفَّذ"
+  },
+  "assistant": {
+    "taskPhoneLabel": "رقم هاتفك",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "تعذّر حفظ هذا الرقم."
   },
   "agentLab": {
     "wtLabel": "التشغيل باستخدام أدوات الوكيل",

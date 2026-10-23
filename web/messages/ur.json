@@ -2040,6 +2040,9 @@
     "noFilesUploadedHint": "اس کلیکشن میں فائلیں اپ لوڈ کریں تاکہ آپ کے ایجنٹس انہیں تلاش کر سکیں۔",
     "ocrComingSoonTooltip": "ابھی دستیاب نہیں - اپ لوڈز بلٹ ان Tesseract OCR پر واپس چلی جائیں گی۔"
   },
+  "tutorPage": {
+    "backToHelp": "مدد پر واپس جائیں"
+  },
   "knowledgePage": {
     "knowledgeLabel": "نالج",
     "buildEyebrow": "تعمیر",
@@ -5924,6 +5927,8 @@
     "channelsBody": "WhatsApp، Telegram، Instagram، Slack، ای میل اور مزید کو جوڑیں، پھر منتخب کریں کہ ہر ایک پر کون سا ایجنٹ جواب دیتا ہے۔",
     "channelsPoint1": "مفت پلان پر WhatsApp، Telegram اور ای میل",
     "channelsPoint2": "ایک نیا بھیجنے والا پہلے آپ کی منظوری کا انتظار کرتا ہے",
+    "channelsPersonalBody": "WhatsApp، Telegram، Signal، iMessage یا ای میل جوڑیں، پھر چنیں کہ ہر چینل پر کون سا کسٹم ایجنٹ جواب دے۔",
+    "channelsPersonalPoint1": "WhatsApp، Telegram، Signal، iMessage اور ای میل",
     "toolsTitle": "انٹیگریشنز ایجنٹس کو ٹولز دیتی ہیں",
     "toolsBody": "آن کریں جو ایک ایجنٹ گفتگو کے دوران استعمال کر سکتا ہے: ویب سرچ، ڈیٹا بیس، MCP سرورز، اور آپ کی اپنی اسکرپٹس۔",
     "toolsPoint1": "یہاں فعال کریں، پھر فی ایجنٹ اس کی اجازت دیں",
@@ -14757,6 +14762,11 @@
     "runModeQuickTitle": "یہ رن صرف متن والا تیز ری پلے تھا: ایجنٹ کے ٹولز روک لیے گئے تھے۔",
     "runSimulatedTools": "اس رن میں سمولیٹ کیے گئے، چلائے نہیں گئے (وہ ڈیٹا بدل سکتے تھے یا پلیٹ فارم سے باہر پہنچ سکتے تھے): {tools}۔",
     "toolStatusSimulated": "سمولیٹ کیا گیا، چلایا نہیں گیا"
+  },
+  "assistant": {
+    "taskPhoneLabel": "آپ کا فون نمبر",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "وہ نمبر محفوظ نہیں ہو سکا۔"
   },
   "agentLab": {
     "wtLabel": "ایجنٹ کے ٹولز کے ساتھ چلائیں",

@@ -3878,6 +3878,8 @@ class EvalDatasetDtos_DatasetResponse(TypedDict, total=False):
     passThreshold: float
     toolExecutionEnabled: bool
     autoApproveTools: bool
+    mode: str
+    effectiveMode: str
     caseCount: int
     contentHash: str
     createdBy: str
@@ -3916,6 +3918,7 @@ class EvalDatasetDtos_ReplayedToolCallResponse(TypedDict, total=False):
 class EvalDatasetDtos_RunDetailResponse(TypedDict, total=False):
     run: EvalDatasetDtos_RunResponse
     caseResults: List[EvalDatasetDtos_CaseResultResponse]
+    simulatedTools: List[str]
 
 
 class EvalDatasetDtos_RunResponse(TypedDict, total=False):
@@ -3935,6 +3938,7 @@ class EvalDatasetDtos_RunResponse(TypedDict, total=False):
     datasetHash: str
     requestedJudgeModel: str
     strictJudge: bool
+    mode: str
     autoApproved: bool
     repeats: int
     budgetUsd: float
@@ -3956,6 +3960,7 @@ class EvalDatasetDtos_TriggerRunRequest(TypedDict, total=False):
     strictJudge: bool
     repeats: int
     budgetUsd: float
+    mode: str
 
 
 class EvalDatasetDtos_UpsertCaseRequest(TypedDict, total=False):
@@ -3971,6 +3976,7 @@ class EvalDatasetDtos_UpsertDatasetRequest(TypedDict, total=False):
     passThreshold: float
     toolExecutionEnabled: bool
     autoApproveTools: bool
+    mode: str
 
 
 class EvalGateDtos_GateEvaluationResponse(TypedDict, total=False):

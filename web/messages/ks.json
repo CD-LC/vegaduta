@@ -2042,6 +2042,9 @@
     "noFilesUploadedHint": "یَتھ کَلیکشنَس مَنٛز فایِل اَپلوڈ کٔرِو تاکہِ یِم توٚہِندؠ ایجنٹ تَللاش کٔرِتھ ہیکَن.",
     "ocrComingSoonTooltip": "وُنِہ چھُ نہٕ دستیاب - اپلوڈ گَژھَن بلٹ اِن Tesseract OCR پؠٹھ واپس۔"
   },
+  "tutorPage": {
+    "backToHelp": "مدد کن واپس گژھو"
+  },
   "knowledgePage": {
     "knowledgeLabel": "معلومات",
     "buildEyebrow": "بَنٲوِو",
@@ -5925,6 +5928,8 @@
     "channelsBody": "WhatsApp، Telegram، Instagram، Slack، ای میل تہٕ باقی چیزٕ جوڈو، پتہٕ ژارِو زِ پرٛتھ اَکہِ پؠٹھ کُس ایجنٹ جواب دِی۔",
     "channelsPoint1": "مفت پلان پؠٹھ WhatsApp، Telegram تہٕ ای میل",
     "channelsPoint2": "اَکھ نٔو سینڈر چھُ گۄڈٕ تُہنٛزِ منظوٗری خٲطرٕ وُچھان",
+    "channelsPersonalBody": "WhatsApp، Telegram، Signal، iMessage یا ای میل جوڑو، پتہ چُنو زِ ہر چینلس پیٹھ کُس کسٹم ایجنٹ جواب دِ۔",
+    "channelsPersonalPoint1": "WhatsApp، Telegram، Signal، iMessage تہٕ ای میل",
     "toolsTitle": "اِنٹیگریشن چھِ ایجنٹن اَوزار دِوان",
     "toolsBody": "آن کٔرِو یُس اَکھ ایجنٹ کتھ باتھہِ دوران اِستِمال کٔرِتھ ہیٚکہِ: ویب تلاش، ڈیٹا بیس، MCP سرور، تہٕ تُہنٛدِ پننِ سکرپٹ۔",
     "toolsPoint1": "یتہِ فعال کٔرِو، پتہٕ پرٛتھ ایجنٹس خٲطرٕ اجازت دِیو",
@@ -14718,6 +14723,11 @@
     "runModeQuickTitle": "یہ رَن ٲس صرف متنک تیز ریپلے: ایجنٹک ٹول ٲسۍ روٚکنہ آمتۍ۔",
     "runSimulatedTools": "یمہ رَنس منٛز سمولیٹ کرنہ آیہ، چلاونہ آیہ نہ (تم سکہِ ڈیٹا بدلتھ یا پلیٹ فارمہ پیٹھ بہر پہنچتھ): {tools}۔",
     "toolStatusSimulated": "سمولیٹ کرنہ آمُت، چلاونہ آمُت نہ"
+  },
+  "assistant": {
+    "taskPhoneLabel": "توہہِ ہند فون نمبر",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "سُہ نمبر محفوظ کٔرتھ سکیو نہ۔"
   },
   "agentLab": {
     "wtLabel": "ایجنٹن ہندین ٹولن سان چلاو",
