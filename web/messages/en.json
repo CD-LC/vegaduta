@@ -10078,6 +10078,8 @@
     "channelsBody": "Connect WhatsApp, Telegram, Instagram, Slack, email and more, then choose which custom agent answers on each channel.",
     "channelsPoint1": "WhatsApp, Telegram and email on the free plan",
     "channelsPoint2": "A new sender waits for your approval first",
+    "channelsPersonalBody": "Connect WhatsApp, Telegram, Signal, iMessage or email, then choose which custom agent answers on each channel.",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage and email",
     "toolsTitle": "Integrations let the AI take action",
     "toolsBody": "Give an agent controlled access to web search, databases, MCP servers and your own scripts while it works.",
     "toolsPoint1": "Enable here, then allow it per agent",

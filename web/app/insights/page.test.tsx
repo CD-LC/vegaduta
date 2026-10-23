@@ -28,7 +28,10 @@ vi.mock("../components/AppShell", () => ({
 }));
 vi.mock("../components/RouteTransition", () => ({ usePageReady: (): void => undefined }));
 vi.mock("../components/AuthProvider", () => ({
-  useAuth: () => ({ isAdmin: authState.isAdmin, hasPermission: (name: string) => authState.permissions.includes(name) }),
+  useAuth: () => ({
+    isAdmin: authState.isAdmin,
+    hasPermission: (name: string) => authState.permissions.includes(name),
+  }),
 }));
 vi.mock("next/navigation", () => ({ usePathname: () => "/insights" }));
 vi.mock("../lib/i18n", () => ({
@@ -75,7 +78,15 @@ const ZERO_JOBS: AgentJobCountsDto = {
   agentId: null,
   tenantWide: true,
 };
-const BUSY_JOBS = { ...ZERO_JOBS, queued: 2, running: 1, awaitingApproval: 1, succeededInWindow: 9, failedInWindow: 1, cancelledInWindow: 3 };
+const BUSY_JOBS = {
+  ...ZERO_JOBS,
+  queued: 2,
+  running: 1,
+  awaitingApproval: 1,
+  succeededInWindow: 9,
+  failedInWindow: 1,
+  cancelledInWindow: 3,
+};
 
 const forbidden = () => Object.assign(new Error("You don't have permission to do that"), { status: 403 });
 
@@ -86,7 +97,11 @@ function mockAdminData() {
     { date: "2026-10-05", metrics: metrics({ totalCalls: 2, estimatedCostUsd: 1 }) },
   ]);
   insightsApi.getSpendByModel.mockResolvedValue(
-    Array.from({ length: 7 }, (_, i) => ({ model: `model-${i}`, modality: "text", metrics: metrics({ totalCalls: i + 1, estimatedCostUsd: i + 1 }) }))
+    Array.from({ length: 7 }, (_, i) => ({
+      model: `model-${i}`,
+      modality: "text",
+      metrics: metrics({ totalCalls: i + 1, estimatedCostUsd: i + 1 }),
+    }))
   );
   insightsApi.getSpendByAgent.mockResolvedValue([
     { agentId: "a1", metrics: metrics({ totalCalls: 7, estimatedCostUsd: 4 }) },
@@ -103,7 +118,10 @@ beforeEach(() => {
   authState.isAdmin = true;
   authState.permissions = ["VIEW_USAGE", "VIEW_AUDIT_LOG"];
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllEnvs();
+});
 
 describe("InsightsPage - zero-data workspace", () => {
   beforeEach(() => {
@@ -149,7 +167,9 @@ describe("InsightsPage - admin with data", () => {
     expect((Date.parse(range.to) - Date.parse(range.from)) / 86_400_000).toBe(6);
     expect(insightsApi.getSpendByDay).toHaveBeenCalledWith(range);
     expect(insightsApi.getAgentJobCounts).toHaveBeenCalledWith({ window: "P7D" });
-    expect(screen.getByTestId("insights-range")).toHaveTextContent("Showing 29 Sep to 5 Oct (UTC dates). Today is still in progress.");
+    expect(screen.getByTestId("insights-range")).toHaveTextContent(
+      "Showing 29 Sep to 5 Oct (UTC dates). Today is still in progress."
+    );
   });
 
   it("shows the KPI row with an estimated cost and approximate latency", async () => {
@@ -176,8 +196,12 @@ describe("InsightsPage - admin with data", () => {
 
   it("gives every chart a plain sentence and marks today as 'so far'", async () => {
     const { container } = render(<InsightsPage />);
-    expect(await screen.findByText("9 of 10 AI calls succeeded from 29 Sep to 5 Oct. Today is still counting.")).toBeInTheDocument();
-    expect(screen.getByText("AI calls cost an estimated $5.50 from 29 Sep to 5 Oct. Today is still counting.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("9 of 10 AI calls succeeded from 29 Sep to 5 Oct. Today is still counting.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("AI calls cost an estimated $5.50 from 29 Sep to 5 Oct. Today is still counting.")
+    ).toBeInTheDocument();
 
     const partial = container.querySelectorAll("rect[data-partial='true']");
     expect(partial).toHaveLength(2); // calls per day + estimated cost per day
@@ -198,7 +222,9 @@ describe("InsightsPage - admin with data", () => {
     expect(screen.getByText("$4.00 estimated, 7 calls")).toBeInTheDocument();
 
     // The model total covers all 7 rows even though only 5 are drawn.
-    expect(screen.getByText("model-6 has the highest estimated cost: $7.00 of $28.00 in total (7 ranked).")).toBeInTheDocument();
+    expect(
+      screen.getByText("model-6 has the highest estimated cost: $7.00 of $28.00 in total (7 ranked).")
+    ).toBeInTheDocument();
     expect(screen.getByText("and 2 more")).toBeInTheDocument();
     expect(screen.queryByText("model-0")).not.toBeInTheDocument();
   });
@@ -232,7 +258,11 @@ describe("InsightsPage - admin with data", () => {
   it("switching to 90 days refetches, and the job window shown is the clamped one", async () => {
     render(<InsightsPage />);
     await screen.findByTestId("insights-kpis");
-    insightsApi.getAgentJobCounts.mockResolvedValue({ ...BUSY_JOBS, windowStart: "2026-09-05T10:00:00Z", window: "PT720H" });
+    insightsApi.getAgentJobCounts.mockResolvedValue({
+      ...BUSY_JOBS,
+      windowStart: "2026-09-05T10:00:00Z",
+      window: "PT720H",
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "90 days" }));
     expect(screen.getByRole("button", { name: "90 days" })).toHaveAttribute("aria-pressed", "true");
@@ -259,8 +289,12 @@ describe("InsightsPage - non-admin (403 on spend reports)", () => {
     render(<InsightsPage />);
     expect(await screen.findByTestId("insights-admin-only")).toHaveTextContent(/visible to workspace admins only/);
     expect(await screen.findByTestId("insights-jobs-scope")).toHaveTextContent("Your agents");
-    expect(screen.getByText("Background jobs for the agents you can see, not the whole workspace.")).toBeInTheDocument();
-    expect(screen.getByText("9 jobs succeeded and 1 failed in the last 7 days; 4 are in progress now.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Background jobs for the agents you can see, not the whole workspace.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("9 jobs succeeded and 1 failed in the last 7 days; 4 are in progress now.")
+    ).toBeInTheDocument();
 
     expect(screen.queryByTestId("insights-kpis")).not.toBeInTheDocument();
     expect(screen.queryByText("AI calls per day")).not.toBeInTheDocument();
@@ -348,6 +382,27 @@ describe("InsightsPage - errors", () => {
     mockAdminData();
     api.listAgents.mockRejectedValue(new Error("boom"));
     render(<InsightsPage />);
-    expect(await screen.findByText("Agent a1 has the highest estimated cost: $4.00 of $5.50 in total (3 ranked).")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Agent a1 has the highest estimated cost: $4.00 of $5.50 in total (3 ranked).")
+    ).toBeInTheDocument();
+  });
+});
+
+describe("InsightsPage - /roi links", () => {
+  beforeEach(() => mockAdminData());
+
+  it("links to /roi on a shared install", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "full");
+    const { container } = render(<InsightsPage />);
+    await screen.findByTestId("insights-kpis");
+    expect(container.querySelectorAll("a[href='/roi']").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("has no link to the billing pages on a personal install", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    const { container } = render(<InsightsPage />);
+    await screen.findByTestId("insights-kpis");
+    expect(container.querySelectorAll("a[href='/roi']")).toHaveLength(0);
+    expect(container.querySelector("a[href='/usage']")).not.toBeNull();
   });
 });

@@ -1,6 +1,8 @@
 package com.agenticai.core.platform;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * {@code @Profile("security")}: the erasure path behind it depends on the Keycloak admin client,
  * which only exists in that profile, while the demo settings/metrics endpoints do not.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @RestController
 @RequestMapping("/api/platform/demo-sandboxes")
 @Profile("security")
