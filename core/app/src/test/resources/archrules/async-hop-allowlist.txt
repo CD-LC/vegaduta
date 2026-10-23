@@ -18,8 +18,6 @@
 # added to a listed class by hand.
 com.agenticai.core.agents.turn.StreamIdleWatch | Mono.delay is the idle timer's tick and emits nothing but a signal; the scheduler is TenantAwareSchedulers.parallel() (the timeout callback carries the submitting tenant) and no tenant-schema table is touched
 com.agenticai.core.agents.turn.BufferedTurnRunner | keep-alive Flux.interval emits empty chunks only; the turn itself is hopped in bufferedTurn() under TenantScope
-com.agenticai.core.agents.turn.FastStreamRecovery | the stream-idle .timeout() continuation runs on Reactor's timer thread: retryOnFallbackProvider re-applies the turn's TenantScope around resolveFallbackClient and passes the tenant context to the issue recorder as data; the other recovery branches only rebuild a prompt or emit a marker
-com.agenticai.core.agents.turn.FastStreamTurn | the stream-idle .timeout() continuation runs on Reactor's timer thread: its error handlers are the FastStreamRecovery branches (hand-scoped), the interrupted-turn persistence writes tenant-keyed session memory (Redis), TurnRecorder.commit runs under its captured scope, and the continuation pass subscribes under TenantScopedFlux
 com.agenticai.core.agents.a2a.A2aClientService | body-read watchdog that closes an HTTP stream; no tenant state
 com.agenticai.core.agents.a2a.A2aTaskService | store.save is Redis/in-memory keyed by the task tenant id; runAsync sets the captured TenantContext on its fresh virtual thread and clears it in finally; the terminal audit callbacks use TenantScope in run()
 com.agenticai.core.agents.agui.AgUiRunController | keep-alive heartbeat Flux.interval only; the run buffer is keyed by an explicit tenantKey captured at request time

@@ -94,6 +94,10 @@
     </dependency>
     <dependency>
       <groupId>com.agenticai</groupId>
+      <artifactId>settings</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
       <artifactId>secrets</artifactId>
     </dependency>
     <dependency>
