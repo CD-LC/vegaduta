@@ -22,6 +22,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import PaginationControls from "./PaginationControls";
+import { usePagination } from "../lib/usePagination";
 import { cn } from "../lib/utils";
 
 // Mobile Sentinels - console-side controls for the on-device health &
@@ -67,6 +69,10 @@ const SEVERITY_STATE: Record<Exclude<Severity, "CRITICAL">, string> = {
 
 const QUIET_STATUSES = [403, 404, 405, 501];
 const quietJson = toJsonQuietOn(QUIET_STATUSES);
+
+// "My synced events" is fetched in one shot with this hard cap; the pager
+// slices it client-side and flags the cap via PaginationControls' `capped`.
+const EVENTS_LIMIT = 50;
 
 const RETENTION_MIN = 1;
 const RETENTION_MAX = 3650;
@@ -181,6 +187,9 @@ export default function SentinelsPanel() {
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const [eventsError, setEventsError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  // Client-side paging over the synced-events list - the whole (capped)
+  // array is already in memory, so this just slices it for display.
+  const eventsPg = usePagination(events);
 
   const [confirmErase, setConfirmErase] = useState(false);
   const [erasing, setErasing] = useState(false);
@@ -189,7 +198,9 @@ export default function SentinelsPanel() {
   const loadEvents = useCallback(async () => {
     setEventsError(null);
     try {
-      const body = await apiFetch(`/api/mobile/sentinels/events?limit=50`).then(toJsonQuietOn<{ events?: SentinelEvent[] } | null>(QUIET_STATUSES));
+      const body = await apiFetch(`/api/mobile/sentinels/events?limit=${EVENTS_LIMIT}`).then(
+        toJsonQuietOn<{ events?: SentinelEvent[] } | null>(QUIET_STATUSES)
+      );
       setEvents(Array.isArray(body?.events) ? body.events : []);
     } catch (e: unknown) {
       const err = asApiError(e);
@@ -281,7 +292,9 @@ export default function SentinelsPanel() {
         caregiverEscalationEnabled: draft.caregiverEscalationEnabled,
         retentionDays: draft.retentionDays,
       };
-      const saved = await apiFetch(`/api/mobile/sentinels/policy`, { method: "PUT", ...jsonBody(body) }).then(quietJson);
+      const saved = await apiFetch(`/api/mobile/sentinels/policy`, { method: "PUT", ...jsonBody(body) }).then(
+        quietJson
+      );
       const p = normalizePolicy(saved || body);
       setPolicy(p);
       setDraft(p);
@@ -298,7 +311,9 @@ export default function SentinelsPanel() {
     setErasing(true);
     setEraseResult(null);
     try {
-      const body = await apiFetch(`/api/mobile/sentinels/events`, { method: "DELETE" }).then(toJsonQuietOn<{ deleted?: number } | null>(QUIET_STATUSES));
+      const body = await apiFetch(`/api/mobile/sentinels/events`, { method: "DELETE" }).then(
+        toJsonQuietOn<{ deleted?: number } | null>(QUIET_STATUSES)
+      );
       setEraseResult(t("eraseDone", { count: typeof body?.deleted === "number" ? body.deleted : 0 }));
       setEvents([]);
       setConfirmErase(false);
@@ -438,7 +453,9 @@ export default function SentinelsPanel() {
               </div>
 
               {policy?.updatedAt && (
-                <p className="text-xs text-muted-foreground">{t("lastUpdated", { time: formatTime(policy.updatedAt) })}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("lastUpdated", { time: formatTime(policy.updatedAt) })}
+                </p>
               )}
 
               {!readOnly && (
@@ -477,9 +494,7 @@ export default function SentinelsPanel() {
           {canAdmin && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">
-                  {t("summaryTitle", { days: summary?.windowDays ?? 7 })}
-                </CardTitle>
+                <CardTitle className="text-sm">{t("summaryTitle", { days: summary?.windowDays ?? 7 })}</CardTitle>
                 <CardDescription>{t("summaryPrivacyNote")}</CardDescription>
               </CardHeader>
               <CardContent>
@@ -499,7 +514,10 @@ export default function SentinelsPanel() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                       {SEVERITIES.map((sev) => (
-                        <div key={sev} className="flex items-center justify-between gap-2 rounded-xl border border-border p-2.5">
+                        <div
+                          key={sev}
+                          className="flex items-center justify-between gap-2 rounded-xl border border-border p-2.5"
+                        >
                           <SeverityBadge severity={sev} label={severityLabel(sev)} />
                           <span className="text-sm font-semibold tabular-nums text-foreground">
                             {summary.bySeverity?.[sev] ?? 0}
@@ -537,7 +555,7 @@ export default function SentinelsPanel() {
               {eventsLoaded && !eventsError && events.length === 0 && (
                 <p className="text-sm text-muted-foreground">{t("eventsEmpty")}</p>
               )}
-              {events.map((ev, i) => {
+              {eventsPg.pageItems.map((ev, i) => {
                 const key = String(ev.id ?? ev.clientEventId ?? i);
                 const open = !!expanded[key];
                 const summaryText = ev.summary || "";
@@ -583,6 +601,16 @@ export default function SentinelsPanel() {
                   </div>
                 );
               })}
+
+              <PaginationControls
+                page={eventsPg.page}
+                totalPages={eventsPg.totalPages}
+                totalItems={eventsPg.totalItems}
+                pageSize={eventsPg.pageSize}
+                onPageChange={eventsPg.setPage}
+                onPageSizeChange={eventsPg.setPageSize}
+                capped={EVENTS_LIMIT}
+              />
 
               <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
                 <Button
