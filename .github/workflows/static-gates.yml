@@ -14,6 +14,9 @@ name: Static gates
 #   skip-expiry           test skips carrying an expired `expires:` token
 #   check-file-size       ratchet: 700-line hard cap, fails over 665 (5% margin);
 #                         baseline only shrinks
+#   postgres-portable-build
+#                         deploy/postgres builds pgvector with OPTFLAGS="" (its default
+#                         -march=native makes the image SIGILL on other CPUs)
 #   check-module-size     ratchet (ADR-0023): at most 300 main files per core/*
 #                         module, no classes in com.agenticai.core.agents;
 #                         baseline only shrinks
@@ -104,6 +107,10 @@ jobs:
       - name: core/Dockerfile copies every module pom
         if: always()
         run: sh scripts/ci/dockerfile-poms.sh
+
+      - name: Postgres image builds pgvector portably
+        if: always()
+        run: sh scripts/ci/postgres-portable-build.sh
 
       # Playwright refuses a client of another major.minor, and the browser-runner
       # healthcheck only tests the port: package.json, its lock, the Dockerfile base

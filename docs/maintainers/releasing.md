@@ -56,6 +56,12 @@ Images and charts are signed by digest, so the floating tags added at the end
 are covered by the same signatures. Verification commands are in
 [SECURITY.md](../../SECURITY.md#verifying-releases).
 
+The `postgres` images compile pgvector from source on the release runner. They must stay
+portable: `deploy/postgres/Dockerfile*` builds it with `OPTFLAGS=""`, because pgvector's
+default `-march=native` bakes the runner's CPU into `vector.so` and the database then dies
+with `SIGILL` (illegal instruction) on a host CPU that lacks one of those instructions.
+`scripts/ci/postgres-portable-build.sh` (part of `make gates`) fails if that flag goes missing.
+
 ## All or nothing
 
 - No image is tagged until **every** image built on both architectures.
