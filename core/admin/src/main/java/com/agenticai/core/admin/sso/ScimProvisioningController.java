@@ -3,6 +3,8 @@ package com.agenticai.core.admin.sso;
 import com.agenticai.core.admin.identity.IdentityUserAdminPort;
 import com.agenticai.core.admin.keycloak.KeycloakUserRepresentation;
 import com.agenticai.core.security.TenantLimits;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -41,9 +43,17 @@ import org.springframework.web.bind.annotation.RestController;
  * password is ever set here; the user activates via Keycloak's own required-actions email, so a
  * SCIM token holder can add/disable users but can't mint credentials.
  */
+// Off on a personal install (app.edition.tier=personal): there the SCIM bearer tokens that gate
+// this
+// permitAll surface cannot be minted (TenantSsoController is Keycloak-only), so the endpoints would
+// be a
+// public, token-guarded door with no IdP behind it. Gated by the edition, not by
+// app.identity.provider, so
+// lite, full, jobs and worker keep it exactly as before whatever identity provider they run.
 @RestController
 @RequestMapping("/scim/v2")
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 public class ScimProvisioningController {
 
     private static final String SCIM_CONTENT_TYPE = "application/scim+json";

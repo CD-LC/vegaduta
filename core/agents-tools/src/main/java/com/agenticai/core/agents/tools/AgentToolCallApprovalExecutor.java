@@ -14,6 +14,7 @@ import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
 import com.agenticai.core.guardrails.ToolDefinitionDigest;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -548,8 +549,8 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
         } catch (RuntimeException e) {
             log.warn(
                     "Failed to append approval-outcome note to session '{}' memory (approval outcome unaffected): {}",
-                    sessionId,
-                    e.getMessage());
+                    LogSafe.clean(sessionId),
+                    LogSafe.clean(e.getMessage()));
         }
     }
 

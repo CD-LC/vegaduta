@@ -216,6 +216,13 @@ services:
       # app.auth.mode / taint / billing defaults come from application-personal.yml;
       # set APP_AUTH_MODE etc. in core.env to change them.
       #
+      # Edition: ONE variable, VEGADUTA_EDITION (personal | lite | full), in .env. It sets core's tier here and
+      # the console's NEXT_PUBLIC_EDITION on the web service below, so the two can never disagree. `full` or
+      # `lite` gives back every feature the personal tier leaves off; a single feature comes back with
+      # APP_EDITION_FEATURES_<NAME>_ENABLED=true in core.env (see application-personal.yml). The launcher
+      # writes VEGADUTA_EDITION=personal into .env.
+      APP_EDITION_TIER: ${VEGADUTA_EDITION:-personal}
+      #
       # STDIO MCP sandbox: the personal profile defaults to `os`, which needs macOS sandbox-exec or
       # Linux bubblewrap. Inside this container neither exists (the slim image has no bwrap and
       # `cap_drop: ALL` blocks the unshare fallback), and a required-but-missing sandbox stops core
@@ -340,6 +347,10 @@ services:
       # core. Without it the proxy falls back to the browser URL above, which inside this container
       # is the container itself, so every sign-in answers "could not reach the server".
       CORE_INTERNAL_URL: ${CORE_INTERNAL_URL:-http://core:8080}
+      # The edition core runs as (one variable, shared with core's APP_EDITION_TIER above). The console reads it
+      # at runtime; NEXT_PUBLIC_AUTH_MODE / NEXT_PUBLIC_BILLING_ENABLED stay until the console derives both from
+      # the edition (web edition contract), then they go.
+      NEXT_PUBLIC_EDITION: ${VEGADUTA_EDITION:-personal}
       NEXT_PUBLIC_AUTH_MODE: ${WEB_AUTH_MODE:-local}
       NEXT_PUBLIC_BILLING_ENABLED: ${WEB_BILLING_ENABLED:-}
       NEXT_PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:${WEB_HOST_PORT:-3000}}

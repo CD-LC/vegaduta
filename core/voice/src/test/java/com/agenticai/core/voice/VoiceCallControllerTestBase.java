@@ -186,6 +186,16 @@ abstract class VoiceCallControllerTestBase {
      * tts} leaves the ElevenLabs tier out, as a distribution without it would.
      */
     VoiceCallController newController(Optional<SidecarClient> sidecar, ElevenLabsClient tts) {
+        return newController(sidecar, tts, Optional.of(roomRegistry));
+    }
+
+    /**
+     * As above, with the room registry optional: absent on an edition that drops call recording.
+     */
+    VoiceCallController newController(
+            Optional<SidecarClient> sidecar,
+            ElevenLabsClient tts,
+            Optional<VoiceCallRoomRegistry> rooms) {
         List<CallSpeechSynthesizer> synthesizers = new ArrayList<>();
         if (tts != null) {
             synthesizers.add(
@@ -204,7 +214,7 @@ abstract class VoiceCallControllerTestBase {
                 sidecar,
                 synthesizers,
                 Optional.of(new SarvamCallSpeechTranscriber(sttClient)),
-                roomRegistry,
+                rooms,
                 providerFactory);
     }
 
