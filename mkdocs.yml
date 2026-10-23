@@ -206,7 +206,6 @@ nav:
       - Hosting behind a Cloudflare Tunnel: operations/tunnel-hosting.md
       - Key rotation: operations/key-rotation.md
       - Personal data breach runbook: operations/breach-runbook.md
-      - Stage E2E improvements: operations/stage-e2e-improvements.md
   - Security:
       - Security model (taint, sandbox, pairing): security-model.md
       - DPDP obligations and controls: compliance/dpdp-obligations.md
@@ -230,6 +229,7 @@ nav:
       - Branch protection: maintainers/branch-protection.md
       - Releasing: maintainers/releasing.md
       - Dependabot pull requests: maintainers/dependabot-prs.md
+      - v1.0.0 definition of done: maintainers/v1.0.0-definition-of-done.md
       - Agent coordination: maintainers/agent-coordination.md
       - Releasing the Java Agent SDK: maintainers/releasing-sdk.md
       - Publishing these docs: maintainers/docs-site.md
