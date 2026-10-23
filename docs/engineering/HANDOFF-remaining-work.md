@@ -40,3 +40,10 @@ Measured on a 24 GB Apple-silicon Mac, Ollama 0.40.3, qwen3.5:9b (mlx runner), c
 - Persistence: log shows "reply stopped at an unfinished step; continuation pass 1 ... made no tool call; stopping". The loop gives up after one pass.
 Goals: first token in 2-3 s on a warm session; stream text and step events continuously; the agent keeps going until the task is done or a real limit is hit; never claim a capability is missing when it is allowed.
 Ideas: prefix-cache warm-up at session open, stable prefix ordering (static first, per-turn tools last), a compact local-model prompt profile, keep tool_search always available, raise continuation passes with a "no tool call but task unfinished" re-prompt, and a smaller default local model (qwen3.5:4b) on machines under memory pressure (swap was 5.9 GB of 7 GB).
+
+### Part 6 requirement: nothing hardcoded, everything user-configurable
+- Hardcoded today: `PlatformHostedLlmProvider.SMALL_MODEL_MAX_BILLIONS = 8.0` (core/providers). It decides which local models get small-model mode,
+  and qwen3.5:9b misses it, so it runs the full prompt with 12 tools. Make it a setting in the catalog (platform < tenant < row override), show it in the UI, document it in docs/settings.md.
+- Already configurable: `app.chat.small-model.tool-cap` (6), directive texts via the prompt registry (prompts/en/directive.*.md), `app.tools.auto-selection.*`.
+- Audit the latency path for any other constants (timeouts, token budgets, prefix thresholds such as prompt.prefix-warn-tokens read from env only) and move each into the settings catalog.
+- Identify the ~11K unaccounted characters in the fixed prefix (skills block, memory blocks, MCP text) and make each part switchable and sized by a setting.
