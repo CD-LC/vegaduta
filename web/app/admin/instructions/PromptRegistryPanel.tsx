@@ -17,6 +17,8 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Select } from "../../components/ui/select";
 import { Skeleton } from "../../components/ui/skeleton";
+import PaginationControls from "../../components/PaginationControls";
+import { usePagination } from "../../lib/usePagination";
 import PromptEditor from "./PromptEditor";
 import { RISK_CLASSES, isCustomised, matchesQuery, type EditTarget } from "./promptRegistryModel";
 import { registrySearch, resolveRequestedAgent } from "./registryDeepLink";
@@ -61,7 +63,10 @@ export default function PromptRegistryPanel({ initialAgentId = null }: { initial
         const options = list.map((a) => ({ id: a.id, name: a.name || a.id }));
         setAgents(options);
         if (requested) {
-          const found = resolveRequestedAgent(requested, options.map((a) => a.id));
+          const found = resolveRequestedAgent(
+            requested,
+            options.map((a) => a.id)
+          );
           setRequested(null);
           if (found.kind === "agent") setAgentId(found.agentId);
           else {
@@ -124,6 +129,8 @@ export default function PromptRegistryPanel({ initialAgentId = null }: { initial
       ),
     [views, query, risk, onlyCustomised]
   );
+
+  const pg = usePagination(visible);
 
   const toggle = (key: string) =>
     setOpen((s) => {
@@ -189,7 +196,10 @@ export default function PromptRegistryPanel({ initialAgentId = null }: { initial
                 {t("regSearchLabel")}
               </Label>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-2 top-2.5 size-4 text-muted-foreground" aria-hidden="true" />
+                <Search
+                  className="pointer-events-none absolute left-2 top-2.5 size-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <Input
                   id="reg-search"
                   className="pl-8"
@@ -215,7 +225,11 @@ export default function PromptRegistryPanel({ initialAgentId = null }: { initial
               />
             </div>
             <div className="flex items-center gap-2 pb-2">
-              <Checkbox id="reg-custom" checked={onlyCustomised} onCheckedChange={(v) => setOnlyCustomised(v === true)} />
+              <Checkbox
+                id="reg-custom"
+                checked={onlyCustomised}
+                onCheckedChange={(v) => setOnlyCustomised(v === true)}
+              />
               <Label htmlFor="reg-custom" className="text-xs">
                 {t("regOnlyCustomised")}
               </Label>
@@ -261,7 +275,7 @@ export default function PromptRegistryPanel({ initialAgentId = null }: { initial
           {visible.length === 0 ? (
             <EmptyState title={t("regEmptyTitle")} hint={t("regEmptyBody")} />
           ) : (
-            visible.map((v) => {
+            pg.pageItems.map((v) => {
               const d = v.definition;
               const isOpen = open.has(d.key);
               const e = v.effective;
@@ -304,7 +318,10 @@ export default function PromptRegistryPanel({ initialAgentId = null }: { initial
                       aria-controls={`prompt-${d.key}`}
                       onClick={() => toggle(d.key)}
                     >
-                      <ChevronDown className={`size-4 transition-transform ${isOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+                      <ChevronDown
+                        className={`size-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                        aria-hidden="true"
+                      />
                       {isOpen ? t("regCloseEditor", { title: d.title }) : t("regOpenEditor", { title: d.title })}
                     </Button>
                   </CardHeader>
@@ -321,6 +338,14 @@ export default function PromptRegistryPanel({ initialAgentId = null }: { initial
               );
             })
           )}
+          <PaginationControls
+            page={pg.page}
+            totalPages={pg.totalPages}
+            totalItems={pg.totalItems}
+            pageSize={pg.pageSize}
+            onPageChange={pg.setPage}
+            onPageSizeChange={pg.setPageSize}
+          />
         </>
       )}
     </section>
