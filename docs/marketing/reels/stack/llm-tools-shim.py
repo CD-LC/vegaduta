@@ -2,12 +2,16 @@
 that drops the `tools` / `tool_choice` fields. Llama 3.2 3B's tool-call output does not satisfy
 llama.cpp's tool-call parser (HTTP 500), and the platform's probe treats tool support as advisory,
 so the agent gets plain text answers instead - knowledge context is injected by core either way."""
-import json, sys, http.client
+import json, re, sys, http.client
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 UP_HOST, UP_PORT = '127.0.0.1', int(sys.argv[2]) if len(sys.argv) > 2 else 8091
+# Only an origin-relative path under the model server's own API is forwarded (fixed host, fixed port).
+SAFE_PATH = re.compile(r'^/[A-Za-z0-9._~%:@!$&()*+,;=/-]*(\?[A-Za-z0-9._~%:@!$&()*+,;=/?-]*)?$')
 class H(BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     def _fwd(self):
+        if not SAFE_PATH.match(self.path) or self.path.startswith('//'):
+            self.send_error(400, 'bad path'); return
         n = int(self.headers.get('Content-Length') or 0)
         body = self.rfile.read(n) if n else b''
         if self.command == 'POST' and self.path.rstrip('/').endswith('/chat/completions') and body:
