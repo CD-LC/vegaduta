@@ -36,11 +36,13 @@ FAIL = 0
 
 def _sse_body(resp) -> str:
     """Consume a StreamingResponse's async iterator synchronously."""
+
     async def collect():
         out = []
         async for c in resp.body_iterator:
             out.append(c.encode() if isinstance(c, str) else c)
         return b"".join(out)
+
     return asyncio.run(collect()).decode()
 
 
@@ -66,15 +68,23 @@ class _FakeResp:
 
 
 def _git(args: list[str], cwd: str) -> None:
-    subprocess.run(["git", *args], cwd=cwd, check=True,
-                   capture_output=True, text=True, timeout=30)
+    subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, text=True, timeout=30)
 
 
 def _make_project(settings: Settings, ctx: TenantContext, project_id: str) -> str:
     pdir = project_root(settings.data_dir, ctx, project_id)
     with open(os.path.join(pdir, ".appbuilder.json"), "w", encoding="utf-8") as f:
-        json.dump({"name": "Test Stack", "install": "", "run": "start",
-                  "build": "", "test": "npm test", "port": 3000}, f)
+        json.dump(
+            {
+                "name": "Test Stack",
+                "install": "",
+                "run": "start",
+                "build": "",
+                "test": "npm test",
+                "port": 3000,
+            },
+            f,
+        )
     with open(os.path.join(pdir, "app.txt"), "w", encoding="utf-8") as f:
         f.write("original content\n")
     _git(["init", "-q"], pdir)
@@ -82,10 +92,17 @@ def _make_project(settings: Settings, ctx: TenantContext, project_id: str) -> st
     _git(["config", "user.name", "t"], pdir)
     _git(["add", "-A"], pdir)
     _git(["commit", "-q", "-m", "init"], pdir)
-    projects.upsert(settings.data_dir, ctx, projects.Project(
-        project_id=project_id, tenant_id=ctx.tenant_id,
-        template_id="node-react", status="ready",
-        code_intel_repo_id=project_id))
+    projects.upsert(
+        settings.data_dir,
+        ctx,
+        projects.Project(
+            project_id=project_id,
+            tenant_id=ctx.tenant_id,
+            template_id="node-react",
+            status="ready",
+            code_intel_repo_id=project_id,
+        ),
+    )
     return pdir
 
 
@@ -131,31 +148,46 @@ def main() -> int:
         print("== progress callback emits stages in pipeline order ==")
         _make_project(settings, ctx, "proj-prog")
 
-        def fake_gen(ctx, instruction, passages, manifest,
-                     prior_failure=None, context=None, images=None,
-                     settings=None, **_kw):
+        def fake_gen(
+            ctx,
+            instruction,
+            passages,
+            manifest,
+            prior_failure=None,
+            context=None,
+            images=None,
+            settings=None,
+            **_kw,
+        ):
             return [{"path": "app.txt", "content": "v2\n"}]
 
         generate._generate_files = fake_gen
         stages = []
         result = generate.modify_project(
-            ctx, "proj-prog", "change it", settings,
-            progress=lambda stage, detail=None: stages.append(
-                (stage, detail)))
+            ctx,
+            "proj-prog",
+            "change it",
+            settings,
+            progress=lambda stage, detail=None: stages.append((stage, detail)),
+        )
         names = [s[0] for s in stages]
-        check("stages in order: context -> writing -> files -> checking "
-              "-> publishing",
-              names == ["context", "writing", "files", "checking", "publishing"],
-              f"got {names}")
+        check(
+            "stages in order: context -> writing -> files -> checking -> publishing",
+            names == ["context", "writing", "files", "checking", "publishing"],
+            f"got {names}",
+        )
         files_evt = next((d for s, d in stages if s == "files"), None)
-        check("files event carries the applied set",
-              files_evt is not None
-              and files_evt["files_changed"] == ["app.txt"]
-              and files_evt["files"][0]["path"] == "app.txt")
-        check("checking event carries an attempt number",
-              next((d for s, d in stages if s == "checking"), {}).get("attempt") == 1)
-        check("a no-op (or absent) progress callback is fine",
-              result["success"] is True)
+        check(
+            "files event carries the applied set",
+            files_evt is not None
+            and files_evt["files_changed"] == ["app.txt"]
+            and files_evt["files"][0]["path"] == "app.txt",
+        )
+        check(
+            "checking event carries an attempt number",
+            next((d for s, d in stages if s == "checking"), {}).get("attempt") == 1,
+        )
+        check("a no-op (or absent) progress callback is fine", result["success"] is True)
 
         print("== summary flows from the model into the result ==")
         _make_project(settings, ctx, "proj-summary")
@@ -167,38 +199,46 @@ def main() -> int:
 
         generate._generate_files = fake_gen_summary
         result = generate.modify_project(ctx, "proj-summary", "restyle", settings)
-        check("result carries the model's summary",
-              result.get("summary") == "Added a dark header and a contact form.")
+        check(
+            "result carries the model's summary",
+            result.get("summary") == "Added a dark header and a contact form.",
+        )
 
         generate._generate_files = fake_gen  # plain list: no summary attr
         result = generate.modify_project(ctx, "proj-summary", "restyle", settings)
-        check("no summary -> key absent (older core behaviour)",
-              "summary" not in result)
+        check("no summary -> key absent (older core behaviour)", "summary" not in result)
 
         print("== _generate_files parses summary from core's response ==")
         real_gen = orig["_generate_files"]
-        core_settings = Settings(data_dir=tmp, core_base_url="http://fake-core:8080",
-                                 core_service_token="s3cr3t")
+        core_settings = Settings(
+            data_dir=tmp, core_base_url="http://fake-core:8080", core_service_token="s3cr3t"
+        )
         orig_request = httpx.request
         try:
-            httpx.request = lambda *a, **k: _FakeResp(200, {
-                "files": [{"path": "a.txt", "content": "x"}],
-                "summary": "  Made the header blue. "})
+            httpx.request = lambda *a, **k: _FakeResp(
+                200,
+                {
+                    "files": [{"path": "a.txt", "content": "x"}],
+                    "summary": "  Made the header blue. ",
+                },
+            )
             files = real_gen(ctx, "blue header", [], {"name": "s"}, settings=core_settings)
-            check("summary parsed and trimmed",
-                  getattr(files, "summary", None) == "Made the header blue.")
+            check(
+                "summary parsed and trimmed",
+                getattr(files, "summary", None) == "Made the header blue.",
+            )
 
-            httpx.request = lambda *a, **k: _FakeResp(200, {
-                "files": [{"path": "a.txt", "content": "x"}]})
+            httpx.request = lambda *a, **k: _FakeResp(
+                200, {"files": [{"path": "a.txt", "content": "x"}]}
+            )
             files = real_gen(ctx, "x", [], {"name": "s"}, settings=core_settings)
             check("absent summary -> None", getattr(files, "summary", None) is None)
 
-            httpx.request = lambda *a, **k: _FakeResp(200, {
-                "files": [{"path": "a.txt", "content": "x"}],
-                "summary": {"not": "a string"}})
+            httpx.request = lambda *a, **k: _FakeResp(
+                200, {"files": [{"path": "a.txt", "content": "x"}], "summary": {"not": "a string"}}
+            )
             files = real_gen(ctx, "x", [], {"name": "s"}, settings=core_settings)
-            check("non-string summary -> None",
-                  getattr(files, "summary", None) is None)
+            check("non-string summary -> None", getattr(files, "summary", None) is None)
         finally:
             httpx.request = orig_request
 
@@ -209,33 +249,44 @@ def main() -> int:
         # is faked below, so the project record is never re-read.
         app_main._projects.get_or_404 = lambda *a, **k: object()
 
-        def fake_modify(ctx, project_id, instruction, settings=None,
-                        context=None, images=None, progress=None):
+        def fake_modify(
+            ctx, project_id, instruction, settings=None, context=None, images=None, progress=None
+        ):
             if progress:
                 progress("context")
                 progress("writing")
-                progress("files", {"files": [{"path": "app.txt", "content": "v2\n"}],
-                                   "files_changed": ["app.txt"]})
+                progress(
+                    "files",
+                    {
+                        "files": [{"path": "app.txt", "content": "v2\n"}],
+                        "files_changed": ["app.txt"],
+                    },
+                )
                 progress("checking", {"attempt": 1, "total": 1})
                 progress("publishing")
-            return {"success": True, "files_changed": ["app.txt"],
-                    "summary": "Did a thing.", "diff": "d"}
+            return {
+                "success": True,
+                "files_changed": ["app.txt"],
+                "summary": "Did a thing.",
+                "diff": "d",
+            }
 
         app_main._modify_project = fake_modify
         resp = app_main.generate_stream("proj-sse", GenerateRequest(instruction="restyle"), ctx)
         check("SSE content type", resp.media_type == "text/event-stream")
         body = _sse_body(resp)
-        events = [json.loads(line[6:]) for line in body.splitlines()
-                  if line.startswith("data: ")]
+        events = [json.loads(line[6:]) for line in body.splitlines() if line.startswith("data: ")]
         names = [e["stage"] for e in events]
-        check("ordered stage events then done",
-              names == ["context", "writing", "files", "checking",
-                        "publishing", "done"],
-              f"got {names}")
-        check("done carries the pipeline result",
-              events[-1].get("result", {}).get("summary") == "Did a thing.")
-        check("files event carries the applied set",
-              events[2]["files_changed"] == ["app.txt"])
+        check(
+            "ordered stage events then done",
+            names == ["context", "writing", "files", "checking", "publishing", "done"],
+            f"got {names}",
+        )
+        check(
+            "done carries the pipeline result",
+            events[-1].get("result", {}).get("summary") == "Did a thing.",
+        )
+        check("files event carries the applied set", events[2]["files_changed"] == ["app.txt"])
 
         print("== /generate/stream wraps a pipeline failure as an error event ==")
 
@@ -245,12 +296,12 @@ def main() -> int:
         app_main._modify_project = fake_modify_fail
         resp = app_main.generate_stream("proj-sse", GenerateRequest(instruction="x"), ctx)
         body = _sse_body(resp)
-        events = [json.loads(line[6:]) for line in body.splitlines()
-                  if line.startswith("data: ")]
-        check("error event ends the stream",
-              len(events) == 1 and events[0]["stage"] == "error")
-        check("error event carries the message and a status",
-              events[0]["status"] == 500 and "core unreachable" in events[0]["error"])
+        events = [json.loads(line[6:]) for line in body.splitlines() if line.startswith("data: ")]
+        check("error event ends the stream", len(events) == 1 and events[0]["stage"] == "error")
+        check(
+            "error event carries the message and a status",
+            events[0]["status"] == 500 and "core unreachable" in events[0]["error"],
+        )
 
         print("== /generate/stream fails before the stream opens on a bad project ==")
         app_main._modify_project = orig["_modify_project"]
@@ -270,6 +321,7 @@ def main() -> int:
     finally:
         restore()
         import shutil
+
         shutil.rmtree(tmp, ignore_errors=True)
 
 
