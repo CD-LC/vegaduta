@@ -13,6 +13,7 @@ import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -105,7 +106,8 @@ public class SessionSummaryService {
      * to size, no shutdown needed" properties, as {@code AgentChatService}'s {@code
      * preTurnExecutor}.
      */
-    private final ExecutorService FOLD_EXECUTOR = TenantAwareExecutors.newVirtualThreadPerTaskExecutor("session-summary-service-");
+    private final ExecutorService FOLD_EXECUTOR =
+            TenantAwareExecutors.newVirtualThreadPerTaskExecutor("session-summary-service-");
 
     /** Instance-owned (was static) so it is shut down with the bean (JAVA-026). */
     @jakarta.annotation.PreDestroy
@@ -227,7 +229,7 @@ public class SessionSummaryService {
             // follows will fold at the next batch boundary anyway.
             log.debug(
                     "Skipping session-history fold for session {} - no tenant context to run the summariser under",
-                    sessionId);
+                    LogSafe.clean(sessionId));
             return;
         }
 
@@ -252,7 +254,7 @@ public class SessionSummaryService {
                                 log.warn(
                                         "Session-history summarisation failed for session {} ({} evicted turns) - "
                                                 + "the rolling summary is left unchanged and those turns are dropped, as they were before this feature",
-                                        sessionId,
+                                        LogSafe.clean(sessionId),
                                         turns.size(),
                                         e);
                             }
@@ -280,7 +282,7 @@ public class SessionSummaryService {
             // strictly worse than keeping a stale one.
             log.warn(
                     "Session-history summariser returned an empty summary for session {} - keeping the previous one",
-                    sessionId);
+                    LogSafe.clean(sessionId));
             return;
         }
         String trimmed = folded.strip();
@@ -296,7 +298,7 @@ public class SessionSummaryService {
         log.debug(
                 "Folded {} evicted turns into the rolling summary for session {} ({} chars)",
                 turns.size(),
-                sessionId,
+                LogSafe.clean(sessionId),
                 trimmed.length());
     }
 

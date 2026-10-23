@@ -2,6 +2,8 @@ package com.agenticai.core.omnichannel.slack;
 
 import com.agenticai.core.omnichannel.media.ChannelMediaSender;
 import com.agenticai.core.omnichannel.session.ChannelType;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
  * piggyback a token off of; it must resolve the tenant's own active Bot Token from storage.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class SlackMediaSender implements ChannelMediaSender {
 
     private final SlackCredentialService credentialService;

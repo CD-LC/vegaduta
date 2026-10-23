@@ -3,7 +3,7 @@
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { CHANNEL_ICON } from "../BrandIcons";
-import { CHANNEL_META, CHANNEL_ORDER, StatusDot } from "./ChannelInspectorCards";
+import { CHANNEL_META, offeredChannelOrder, StatusDot } from "./ChannelInspectorCards";
 import { SMS_ICON, SMS_META } from "./SmsInspector";
 import { cn } from "../../lib/utils";
 import { useTranslations } from "../../lib/i18n";
@@ -31,6 +31,9 @@ export function ChannelGrid({
 }) {
   const t = useTranslations("channelsPanel");
   const tSms = useTranslations("channelsSms");
+  // Tiles for the channels this install runs; the rest are hidden here, not removed from CHANNEL_META.
+  const [first, ...rest] = offeredChannelOrder();
+  const tiles = [first, "sms", ...rest];
   return (
     <Card>
       <CardHeader className="pb-0">
@@ -40,7 +43,7 @@ export function ChannelGrid({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {[CHANNEL_ORDER[0], "sms", ...CHANNEL_ORDER.slice(1)].map((key) => {
+          {tiles.map((key) => {
             const meta = CHANNEL_META[key] ?? SMS_META;
             const entry = cardsByKey.get(key);
             const state = entry?.state || "NOT_CONNECTED";
