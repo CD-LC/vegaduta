@@ -69,6 +69,7 @@ These pages are also published as a searchable site (`mkdocs.yml`, `make docs-se
 - [Repository setup](maintainers/repo-setup.md): identity placeholders, repository settings, labels, history
 - [Branch protection](maintainers/branch-protection.md): the required checks (`CI OK`, `CodeQL OK`) and ruleset
 - [Releasing](maintainers/releasing.md): tags, what a release publishes, signatures, pre-releases and `latest`
+- [v1.0.0 definition of done](maintainers/v1.0.0-definition-of-done.md): what 1.0.0 promises and does not, the stability and support rules from 1.0.0, and the release checklist
 - [Releasing the Java Agent SDK](maintainers/releasing-sdk.md): `sdk-v*` tags, Maven Central Portal, GPG, provenance
 - [Publishing these docs](maintainers/docs-site.md): the MkDocs site on GitHub Pages
 

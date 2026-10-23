@@ -5,13 +5,9 @@ import { X as CloseIcon } from "lucide-react";
 import ShareWorkflowPanel from "./ShareWorkflowPanel";
 import { useDialogFocus } from "../../lib/hooks/useDialogFocus";
 import McpExposureField from "../McpExposureField";
+import { isPersonalEdition } from "../../lib/edition";
 
-export default function WorkflowShareModal({
-  setShowShareModal,
-  showShareModal,
-  t,
-  workflow,
-}: any) {
+export default function WorkflowShareModal({ setShowShareModal, showShareModal, t, workflow }: any) {
   // Focus in on open, Tab trap, Escape closes, focus back to the opener on close (FE-041).
   const dialogRef = useRef<HTMLDivElement>(null);
   useDialogFocus(dialogRef, null, () => setShowShareModal(false), { enabled: !!(showShareModal && workflow) });
@@ -25,7 +21,9 @@ export default function WorkflowShareModal({
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           role="presentation"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowShareModal(false); }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowShareModal(false);
+          }}
         >
           <div
             className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-card shadow-xl"
@@ -46,9 +44,11 @@ export default function WorkflowShareModal({
               </button>
             </div>
             <ShareWorkflowPanel workflowId={workflow.id} workflowName={workflow.name} />
-            <div className="px-5 pb-5">
-              <McpExposureField kind="workflows" resourceId={workflow.id} />
-            </div>
+            {!isPersonalEdition() && (
+              <div className="px-5 pb-5">
+                <McpExposureField kind="workflows" resourceId={workflow.id} />
+              </div>
+            )}
           </div>
         </div>
       )}
