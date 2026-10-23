@@ -7,6 +7,7 @@ import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.turn.ApprovalContinuation.Outcome;
 import com.agenticai.core.agents.turn.ApprovalContinuationPort;
 import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
+import com.agenticai.core.agents.turn.ToolLedger;
 import com.agenticai.core.approval.ApprovalActionExecutor;
 import com.agenticai.core.approval.ApprovalReplayGrant;
 import com.agenticai.core.approval.ApprovalRequest;
@@ -210,8 +211,8 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
                     appendSessionMemoryNote(
                             request,
                             target,
-                            notes().renderCompletedNote(
-                                    target.toolName(), truncate(result, notes().getMaxNoteResultChars())));
+                            ApprovalOutcomeNotes.outcomeRecord(
+                                    notes(), request, target, ToolLedger.Status.OK, request.getDecidedBy(), result));
             // The tool ran and its result is persisted; a note that could not be written does not
             // change that outcome (rethrowing would record a failure and could retry a real side
             // effect). It is surfaced to the approver instead of being only a log line.
@@ -247,8 +248,8 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
                     appendSessionMemoryNote(
                             request,
                             target,
-                            notes().renderFailedNote(
-                                    target.toolName(), truncate(failure, notes().getMaxNoteResultChars())));
+                            ApprovalOutcomeNotes.outcomeRecord(
+                                    notes(), request, target, ToolLedger.Status.FAILED, request.getDecidedBy(), failure));
             notify(
                     target,
                     NotificationSeverity.ERROR,
@@ -301,8 +302,8 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
             appendSessionMemoryNote(
                     request,
                     target,
-                    texts.renderDeniedNote(
-                            target.toolName(), decidedBy, truncate(shown, texts.getMaxNoteResultChars())));
+                    ApprovalOutcomeNotes.outcomeRecord(
+                            texts, request, target, ToolLedger.Status.NOT_RUN, decidedBy, shown));
             continueTask(request, Outcome.DENIED, shown);
         } finally {
             previous.ifPresentOrElse(TenantContext::set, TenantContext::clear);
@@ -491,8 +492,8 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
     }
 
     /** See {@link ApprovalOutcomeNotes#append}; returns why the note could not be written, or {@code null}. */
-    private String appendSessionMemoryNote(ApprovalRequest request, ReplayTarget target, String note) {
-        return ApprovalOutcomeNotes.append(sessionMemoryService, request, target, note, log);
+    private String appendSessionMemoryNote(ApprovalRequest request, ReplayTarget target, ToolLedger record) {
+        return ApprovalOutcomeNotes.append(sessionMemoryService, request, target, record, log);
     }
 
     private static String truncate(String value, int maxChars) {

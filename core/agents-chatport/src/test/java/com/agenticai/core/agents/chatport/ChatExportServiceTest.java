@@ -21,6 +21,7 @@ import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.InMemorySessionMemory;
 import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
+import com.agenticai.core.agents.turn.ToolLedger;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
@@ -125,6 +126,30 @@ class ChatExportServiceTest {
         String exported = c.messages().get(1).content();
 
         assertEquals("(This reply failed: The AI provider rejected our credentials.)", exported);
+    }
+
+    @Test
+    void aDecidedActionsToolRecordIsNotExportedAsAMessage() {
+        ChatExportRenderer.Conversation c =
+                ChatExportService.toConversation(
+                        "s1",
+                        "Helper Bot",
+                        List.of(
+                                new ChatTurn(MessageRole.USER, "Search x.", T0),
+                                ChatTurn.toolRecord(
+                                        new ToolLedger(
+                                                List.of(
+                                                        new ToolLedger.Entry(
+                                                                "web_search",
+                                                                "{}",
+                                                                "[approved action 'web_search' completed: raw]",
+                                                                ToolLedger.Status.OK,
+                                                                "r1")),
+                                                0)),
+                                new ChatTurn(MessageRole.ASSISTANT, "Found it.", T0.plusSeconds(5))));
+
+        assertEquals(2, c.messages().size());
+        assertEquals("Found it.", c.messages().get(1).content());
     }
 
     // ---- live session ----

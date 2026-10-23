@@ -39,6 +39,14 @@ public record ChatTurn(
         return new ChatTurn(MessageRole.ASSISTANT, content, Instant.now());
     }
 
+    /**
+     * An assistant turn that carries only {@code record} and no text (see {@link #isToolRecordOnly}): how a
+     * decided action's outcome is put into the history the model reads without showing up in the transcript.
+     */
+    public static ChatTurn toolRecord(ToolLedger record) {
+        return new ChatTurn(MessageRole.ASSISTANT, "", Instant.now(), record);
+    }
+
     /** An assistant turn that called tools: {@code tools} is what they did ({@code null}/empty = none). */
     public static ChatTurn assistant(String content, ToolLedger tools) {
         return new ChatTurn(MessageRole.ASSISTANT, content, Instant.now(), tools);
@@ -85,6 +93,20 @@ public record ChatTurn(
 
     private static String defaultFailureMessage() {
         return PromptResolver.defaultsOnly().catalog().defaultText("message.generic_failure");
+    }
+
+    /**
+     * True for an assistant turn that carries only a platform tool record and no text: the outcome of an
+     * action a person decided after the turn that asked for it had ended (approved and ran, failed, or
+     * denied). The model reads the record on later turns ({@link ToolLedgerReplay}); a person never sees the
+     * turn - transcript, export and resumed-reply readers skip it, since there is nothing for them to show.
+     * Static so it adds no property to the stored JSON.
+     */
+    public static boolean isToolRecordOnly(ChatTurn turn) {
+        return turn != null
+            && turn.role() == MessageRole.ASSISTANT
+            && turn.tools() != null
+            && (turn.content() == null || turn.content().isBlank());
     }
 
     /** True for a {@link #failedAssistant} entry. Static so it adds no property to the stored JSON. */
