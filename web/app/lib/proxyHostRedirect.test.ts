@@ -32,7 +32,16 @@ describe("proxy() apex -> app host canonicalisation", () => {
   });
 
   it("redirects console routes on the apex host to app.vegaduta.ai", async () => {
-    for (const path of ["/tools", "/agents", "/build", "/tools/servers", "/admin", "/workflows", "/ai-models", "/help/docs"]) {
+    for (const path of [
+      "/tools",
+      "/agents",
+      "/build",
+      "/tools/servers",
+      "/admin",
+      "/workflows",
+      "/ai-models",
+      "/help/docs",
+    ]) {
       const res = await proxy(fakeRequest(`https://vegaduta.ai${path}`));
       expect(res.status, `${path} should 308`).toBe(308);
       expect(res.headers.get("location")).toBe(`https://app.vegaduta.ai${path}`);
@@ -64,7 +73,19 @@ describe("proxy() apex -> app host canonicalisation", () => {
   });
 
   it("leaves public routes on the apex host (marketing surface)", async () => {
-    for (const path of ["/docs", "/billing", "/signup", "/templates", "/templates/mine", "/a/abc123", "/workflow/wf9", "/try", "/compare/x", "/code", "/status"]) {
+    for (const path of [
+      "/docs",
+      "/billing",
+      "/signup",
+      "/templates",
+      "/templates/mine",
+      "/a/abc123",
+      "/workflow/wf9",
+      "/try",
+      "/compare/x",
+      "/code",
+      "/status",
+    ]) {
       const res = await proxy(fakeRequest(`https://vegaduta.ai${path}`));
       expect(res.status, `${path} should stay on apex`).not.toBe(308);
       expect(res.headers.get("location"), `${path} should stay on apex`).toBeNull();
@@ -185,5 +206,130 @@ describe("proxy() site-mode switch (NEXT_PUBLIC_SITE_MODE)", () => {
       const res = await proxy(fakeRequest(`http://localhost:3000${path}`));
       expect(res.headers.get("location"), path).toBeNull();
     }
+  });
+});
+
+// The standalone server (web/Dockerfile: HOSTNAME=0.0.0.0) builds nextUrl from
+// its BIND address, so request.nextUrl.hostname is "0.0.0.0" and the real host
+// is only in the Host header. These requests mirror that shape; the suites
+// above build the URL from the public host, which hid the bug.
+describe("proxy() behind the standalone server (nextUrl is the bind address)", () => {
+  const bind = "http://0.0.0.0:3000";
+  const cfHttp = '{"scheme":"http"}';
+  const saved = {
+    app: process.env.NEXT_PUBLIC_APP_URL,
+    site: process.env.NEXT_PUBLIC_SITE_URL,
+    admin: process.env.PLATFORM_ADMIN_HOST,
+  };
+  const restore = (key: string, value: string | undefined) => {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  };
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_BILLING_ENABLED = "1";
+    process.env.NEXT_PUBLIC_SITE_MODE = "classic";
+    delete process.env.NEXT_PUBLIC_APP_URL;
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+    delete process.env.PLATFORM_ADMIN_HOST;
+  });
+  afterEach(() => {
+    delete process.env.NEXT_PUBLIC_BILLING_ENABLED;
+    delete process.env.NEXT_PUBLIC_SITE_MODE;
+    restore("NEXT_PUBLIC_APP_URL", saved.app);
+    restore("NEXT_PUBLIC_SITE_URL", saved.site);
+    restore("PLATFORM_ADMIN_HOST", saved.admin);
+  });
+
+  describe("CF-Visitor http -> https (web-proxy-01)", () => {
+    it("redirects to the configured public host, never the bind address", async () => {
+      process.env.NEXT_PUBLIC_APP_URL = "https://app.example.com";
+      const res = await proxy(fakeRequest(`${bind}/about?x=1`, {}, { host: "app.example.com", "cf-visitor": cfHttp }));
+      expect(res.status).toBe(308);
+      expect(res.headers.get("location")).toBe("https://app.example.com/about?x=1");
+    });
+
+    it("accepts the host configured through NEXT_PUBLIC_SITE_URL, ignoring the port", async () => {
+      process.env.NEXT_PUBLIC_SITE_URL = "https://www.example.org";
+      const res = await proxy(
+        fakeRequest(`${bind}/pricing`, {}, { host: "www.example.org:443", "cf-visitor": cfHttp })
+      );
+      expect(res.status).toBe(308);
+      expect(res.headers.get("location")).toBe("https://www.example.org/pricing");
+    });
+
+    it("accepts the platform-admin host and the hosted apex hosts", async () => {
+      process.env.PLATFORM_ADMIN_HOST = "admin.example.com";
+      const admin = await proxy(
+        fakeRequest(`${bind}/platform-admin`, {}, { host: "admin.example.com", "cf-visitor": cfHttp })
+      );
+      expect(admin.headers.get("location")).toBe("https://admin.example.com/platform-admin");
+      const apex = await proxy(fakeRequest(`${bind}/`, {}, { host: "vegaduta.ai", "cf-visitor": cfHttp }));
+      expect(apex.status).toBe(308);
+      expect(apex.headers.get("location")).toBe("https://vegaduta.ai/");
+    });
+
+    it("does not redirect to an unconfigured Host (open-redirect guard)", async () => {
+      process.env.NEXT_PUBLIC_APP_URL = "https://app.example.com";
+      for (const host of ["evil.example", "app.example.com.evil.example", "0.0.0.0:3000", ""]) {
+        const res = await proxy(fakeRequest(`${bind}/about`, {}, { host, "cf-visitor": cfHttp }));
+        const loc = res.headers.get("location") || "";
+        expect(res.status, `Host "${host}"`).not.toBe(308);
+        expect(loc, `Host "${host}"`).not.toMatch(/evil\.example|0\.0\.0\.0/);
+      }
+    });
+
+    it("does not trust X-Forwarded-Host", async () => {
+      process.env.NEXT_PUBLIC_APP_URL = "https://app.example.com";
+      const res = await proxy(
+        fakeRequest(
+          `${bind}/about`,
+          {},
+          { host: "0.0.0.0:3000", "x-forwarded-host": "app.example.com", "cf-visitor": cfHttp }
+        )
+      );
+      expect(res.status).not.toBe(308);
+    });
+
+    it("is a no-op without the CF-Visitor header or when the visitor used https", async () => {
+      process.env.NEXT_PUBLIC_APP_URL = "https://app.example.com";
+      for (const headers of [
+        { host: "app.example.com" },
+        { host: "app.example.com", "cf-visitor": '{"scheme":"https"}' },
+      ]) {
+        const res = await proxy(fakeRequest(`${bind}/about`, {}, headers));
+        expect(res.status).not.toBe(308);
+        expect(res.headers.get("location")).toBeNull();
+      }
+    });
+  });
+
+  describe("apex -> app host keys on the Host header (web-proxy-02)", () => {
+    it("redirects a console route requested on the apex Host", async () => {
+      for (const host of ["vegaduta.ai", "www.vegaduta.ai:3000", "VEGADUTA.AI"]) {
+        const res = await proxy(fakeRequest(`${bind}/tools?x=1`, {}, { host, "x-forwarded-proto": "https" }));
+        expect(res.status, host).toBe(308);
+        expect(res.headers.get("location"), host).toBe("https://app.vegaduta.ai/tools?x=1");
+      }
+    });
+
+    it("uses the forwarded scheme and falls back to the request's own", async () => {
+      const plain = await proxy(fakeRequest(`${bind}/tools`, {}, { host: "vegaduta.xyz" }));
+      expect(plain.headers.get("location")).toBe("http://app.vegaduta.xyz/tools");
+    });
+
+    it("leaves other hosts alone", async () => {
+      for (const host of ["localhost:3000", "app.vegaduta.ai", "evil.example"]) {
+        const res = await proxy(fakeRequest(`${bind}/tools`, {}, { host }));
+        expect(res.status, host).not.toBe(308);
+        expect(res.headers.get("location"), host).toBeNull();
+      }
+    });
+
+    it("still never redirects the marketing homepage or an OIDC callback", async () => {
+      const home = await proxy(fakeRequest(`${bind}/`, {}, { host: "vegaduta.ai" }));
+      expect(home.headers.get("location")).toBeNull();
+      const cb = await proxy(fakeRequest(`${bind}/tools?code=a&state=b`, {}, { host: "vegaduta.ai" }));
+      expect(cb.headers.get("location")).toBeNull();
+    });
   });
 });

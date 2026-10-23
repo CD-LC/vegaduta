@@ -80,6 +80,41 @@ const APEX_TO_APP_HOST = {
   "www.vegaduta.xyz": "app.vegaduta.xyz",
 };
 
+// The request's real host, from the Host HEADER (port stripped, lowercased).
+// NOT request.nextUrl.hostname: in the standalone server (web/Dockerfile binds
+// HOSTNAME=0.0.0.0) nextUrl is built from the bind address, so it reads
+// "0.0.0.0" whatever the visitor typed. ingress-nginx and Cloudflare pass the
+// real Host through intact.
+function hostHeaderName(request) {
+  return (request.headers.get("host") || "").split(":")[0].toLowerCase();
+}
+
+function hostnameOf(url) {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+// Hosts this deployment is known to be served on: the hosted apex/app pairs,
+// the platform-admin host and the origins the operator configured. Read from
+// node:process so the live container env is seen (see the adminHost note in
+// route()). Used to decide whether a Host header may be echoed into a redirect
+// Location: an unknown Host must never be (open redirect).
+export function isKnownPublicHost(host) {
+  if (!host) return false;
+  if (APEX_TO_APP_HOST[host] || Object.values(APEX_TO_APP_HOST).includes(host)) return true;
+  const env = nodeProcess.env;
+  return [
+    env.PLATFORM_ADMIN_HOST,
+    hostnameOf(env.NEXT_PUBLIC_APP_URL || ""),
+    hostnameOf(env.NEXT_PUBLIC_SITE_URL || ""),
+  ]
+    .map((h) => (h || "").toLowerCase())
+    .includes(host);
+}
+
 // Query params that mean "this URL is an OIDC callback in flight" - see the
 // comment at the redirect site for why these must never be host-redirected.
 const OIDC_CALLBACK_PARAMS = ["code", "state", "session_state", "iss", "error", "error_description"];
@@ -231,14 +266,17 @@ function route(request, csp) {
   // been here over https once. Cloudflare reports the visitor's real scheme in
   // CF-Visitor; redirecting on it makes this hold even when the zone's "Always
   // Use HTTPS" switch is off. Absent header (local dev, compose, e2e) = no-op.
-  // The target is the request's OWN URL with the scheme flipped - never the
-  // Host header: anyone reaching the origin directly (Compose, Helm, no
-  // Cloudflare) could send Host: evil.example plus this header and get a
-  // cacheable 308 to evil.example (open redirect).
+  // The target host comes from the Host header, but ONLY when it is one this
+  // deployment is configured for (isKnownPublicHost): request.nextUrl is the
+  // bind address (0.0.0.0) in the standalone server, and an unchecked Host
+  // would let anyone reaching the origin directly (Compose, Helm, no
+  // Cloudflare) send Host: evil.example plus this header and get a cacheable
+  // 308 to evil.example (open redirect). An unknown host is served as before.
   if ((request.headers.get("cf-visitor") || "").includes('"scheme":"http"')) {
-    const secure = request.nextUrl.clone();
-    secure.protocol = "https:";
-    return NextResponse.redirect(secure, 308);
+    const publicHost = hostHeaderName(request);
+    if (isKnownPublicHost(publicHost)) {
+      return NextResponse.redirect(`https://${publicHost}${request.nextUrl.pathname}${request.nextUrl.search}`, 308);
+    }
   }
 
   // Console-host canonicalisation (2026-09-28). The same Next app serves both
@@ -285,10 +323,8 @@ function route(request, csp) {
   // (Verified on the deployed image: process.env.X was empty here while the
   // pod env had it; node:process sees the container env.)
   const adminHost = (nodeProcess.env.PLATFORM_ADMIN_HOST || "").toLowerCase();
-  // NOTE the Host HEADER, not request.nextUrl.hostname: in the standalone
-  // server nextUrl is built from the bind address (0.0.0.0), not the request
-  // Host. ingress-nginx passes the real host through intact.
-  const requestHost = (request.headers.get("host") || "").split(":")[0].toLowerCase();
+  // NOTE the Host HEADER, not request.nextUrl.hostname (see hostHeaderName).
+  const requestHost = hostHeaderName(request);
   if (
     adminHost &&
     requestHost === adminHost &&
@@ -308,7 +344,7 @@ function route(request, csp) {
     return NextResponse.redirect(`${scheme}://${requestHost}${targetPath}${request.nextUrl.search}`, 307);
   }
 
-  const appHost = APEX_TO_APP_HOST[request.nextUrl.hostname.toLowerCase()];
+  const appHost = APEX_TO_APP_HOST[requestHost || request.nextUrl.hostname.toLowerCase()];
   if (appHost) {
     const barePathname = splitLocalePrefix(request.nextUrl.pathname).pathname;
     const isAuthCallback = OIDC_CALLBACK_PARAMS.some((p) => request.nextUrl.searchParams.has(p));
@@ -324,6 +360,9 @@ function route(request, csp) {
       target.hostname = appHost;
       target.port = "";
       target.pathname = barePathname;
+      // nextUrl's scheme is the bind address's (http); use the scheme the edge forwarded.
+      const forwardedProto = (request.headers.get("x-forwarded-proto") || "").split(",")[0].trim();
+      if (forwardedProto === "http" || forwardedProto === "https") target.protocol = `${forwardedProto}:`;
       return NextResponse.redirect(target, 308);
     }
   }
