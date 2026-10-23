@@ -1737,7 +1737,8 @@ app:
     # (Twilio requires a public HTTPS URL). Example: https://abcd1234.ngrok.io
     public-base-url: ${OMNICHANNEL_PUBLIC_BASE_URL:}
     discord:
-      # Discord bot Gateway bridge (channels/discord Node service). Outbound
+      # Discord bot Gateway bridge (a separate Node service that is NOT in this
+      # repository; contract in docs/channels/discord.md). Outbound
       # sends still go straight from DiscordApiClient to Discord's REST API
       # (no Java -> Node call needed for that), but Java DOES call the Node
       # service once, at credential-activation time (DiscordGatewayClient),

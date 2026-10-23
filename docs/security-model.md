@@ -120,8 +120,9 @@ default:
   approval until you auto-approve that type.
 - Inbound turns can be rate limited per tenant, channel and sender (`app.omnichannel.rate-limit.*`; on in `personal`,
   opt-in elsewhere, and a message over the limit is dropped without a reply), and webhooks
-  verify a signature or a constant-time secret. The channel clients reach the bridge only through the SSRF guard, which
-  refuses private addresses unless the operator listed the host.
+  verify a signature or a constant-time secret. The channel clients reach the bridge, and an email channel reaches the
+  tenant's IMAP server, only through the SSRF guard, which refuses private addresses unless the operator listed the
+  host.
 
 **What it does not do.**
 
@@ -131,6 +132,36 @@ default:
 - The Matrix and iMessage clients cannot read end-to-end-encrypted content, and an iMessage webhook secret travels in
   a query string because BlueBubbles cannot send headers; keep the request path private.
 - Rate limiting drops excess messages silently on the channel.
+- **Email trusts the unauthenticated `From` header.** An email contact is keyed on the sender address the message
+  claims. The platform does not check SPF, DKIM or DMARC, so it relies on the mailbox provider to reject spoofed mail;
+  anyone who knows an approved address and the support mailbox address can try to send as that person where the
+  sender's domain does not enforce DMARC. Use a dedicated mailbox at a provider that enforces it, and do not approve
+  email contacts for agents with high-impact tools unless those tools sit behind the approval gate. Replies to
+  email, like every channel's, leave through the approval gate.
+- The email poller opens its mailbox read-write and marks each message read after one attempt; see
+  [Email](channels/email.md).
+
+## Replay protection on inbound channels
+
+**The problem.** A webhook request that was valid once can be captured and sent again.
+
+**What it does.** A request is only accepted if its signature or secret checks out, and a message the provider
+delivered twice is processed once, because each inbound message is claimed in Redis on the provider's own id
+(`app.omnichannel.dedup.ttl-minutes`, default 60) before any processing. Slack is the one channel whose signed request
+also carries a timestamp, so a Slack request older than five minutes is refused. The Telegram secret is stored as a
+SHA-256 digest, and a voice relay admission ticket can be used once.
+
+**What it does not do.**
+
+- Meta and Twilio sign the body (and, for Twilio, the URL) but no timestamp, and Telegram, Discord and iMessage use a
+  fixed shared secret, so none of them has a time window of its own. A captured request replayed after its de-duplication
+  key has expired (after 60 minutes by default), or while Redis is unreachable, is processed again. The de-duplication
+  fails open on purpose (a missed duplicate costs less than every inbound message going unanswered during a Redis
+  hiccup), and each such skipped check is counted in `governance_fail_open_total`.
+- A replay can only re-trigger processing for a sender who is already approved, and the reply still goes through the
+  approval gate.
+- Where a provider's own body carries a timestamp (Meta's message time, Telegram's message date) it is not signed
+  separately, so the platform does not use it as a window.
 
 ## Related controls
 
