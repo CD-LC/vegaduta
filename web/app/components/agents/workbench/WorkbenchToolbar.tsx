@@ -4,6 +4,7 @@ import { ChevronDown, Copy, LayoutTemplate, Lock, Plus, Rocket, Trash2 } from "l
 import Link from "next/link";
 import CoachButton from "../../brief/CoachDrawer";
 import ShareAsTemplateButton from "../../templates/ShareAsTemplateButton";
+import { isPersonalEdition } from "../../../lib/edition";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -184,7 +185,7 @@ export default function WorkbenchToolbar() {
               <Copy size={14} />
               {t("duplicate")}
             </Button>
-            {selectedAgent && (
+            {selectedAgent && !isPersonalEdition() && (
               <ShareAsTemplateButton
                 sourceId={selectedAgent.id}
                 sourceName={selectedAgent.name}

@@ -2,6 +2,7 @@ package com.agenticai.core.agents.research;
 
 import com.agenticai.core.agents.tools.web.DailyWindowCounter;
 import com.agenticai.core.agents.tools.web.DeepResearchDailyAllowance;
+import com.agenticai.core.security.logging.LogSafe;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -121,7 +122,7 @@ public class ResearchRunUsageService {
         } catch (RuntimeException e) {
             log.warn(
                     "Could not read the daily search allowance for {} - not refusing the run on its account",
-                    subject,
+                    LogSafe.clean(subject),
                     e);
             return false;
         }

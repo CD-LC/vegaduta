@@ -23,7 +23,7 @@ import { Label } from "../../components/ui/label";
 import { Skeleton } from "../../components/ui/skeleton";
 import { Switch } from "../../components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { CHANNELS, LoadError, errText, fmtTime } from "./shared";
+import { offeredChannels, LoadError, errText, fmtTime } from "./shared";
 
 const CLASSES: RetentionDataClass[] = ["TRANSCRIPT", "RECORDING", "EXTRACTED_FIELDS"];
 
@@ -170,7 +170,7 @@ export default function RetentionTab() {
               onValueChange={setChannel}
               options={[
                 { value: ALL_CHANNELS, label: t("tenantDefault") },
-                ...CHANNELS.map((c) => ({ value: c, label: c })),
+                ...offeredChannels().map((c) => ({ value: c, label: c })),
               ]}
             />
           </div>
