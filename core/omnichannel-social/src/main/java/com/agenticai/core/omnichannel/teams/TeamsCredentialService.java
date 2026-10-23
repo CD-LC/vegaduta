@@ -6,6 +6,8 @@ import com.agenticai.core.omnichannel.teams.dto.TeamsCredentialResponse;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
@@ -27,6 +29,7 @@ import org.springframework.util.StringUtils;
  * into the Azure bot's Configuration tab is {@code https://<api-host>/webhook/teams/<appId>}.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class TeamsCredentialService {
 
     static final String DEFAULT_AAD_TENANT = "botframework.com";
