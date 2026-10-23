@@ -4,9 +4,9 @@
 > clean linear history; the old repository's merged-in commit history was
 > removed (content unchanged). If your local checkout predates this:
 > **`git fetch origin && git reset --hard origin/main`** — do NOT `git pull`,
-> do NOT push from a stale clone, and do NOT merge `cdandlc/vegaduta` or any
-> remote branch back into `main` without asking first; that re-imports the
-> old history. Remove this notice once all active checkouts have reset.
+> do NOT push from a stale clone, and do NOT merge any other remote, fork or
+> branch back into `main` without asking first; that re-imports the old
+> history. Remove this notice once all active checkouts have reset.
 
 Instructions for AI coding agents (and humans in a hurry) working in this
 repository. Read this before editing. Human contributors: the full guide is

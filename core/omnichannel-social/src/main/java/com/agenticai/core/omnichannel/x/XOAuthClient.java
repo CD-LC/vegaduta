@@ -1,5 +1,7 @@
 package com.agenticai.core.omnichannel.x;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Component;
  * class's javadoc), rather than any server-side session store.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class XOAuthClient {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(10);
