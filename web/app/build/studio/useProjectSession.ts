@@ -3,7 +3,7 @@ import { useDictation } from "./dictation";
 import { canAdminister, canEdit } from "./collab";
 import { CREATE_SYSTEM, EDIT_SYSTEM, createPrompt, editPrompt, runModel, type EngineKind } from "./engine";
 import { PLAN_SYSTEM, findDuplicateDeclarations, integrationPrompt, needsPlan, parsePlan, planPrompt, repairPrompt, stepPrompt } from "./buildPlan";
-import { applyEditBlocks, dedupeSkeletonHelpers, extractHtmlDocument, looksLikeValidApp, parseEditBlocks } from "./patch";
+import { applyEditBlocks, dedupeSkeletonHelpers, extractEditNote, extractHtmlDocument, looksLikeValidApp, parseEditBlocks } from "./patch";
 import { DEFAULT_ENV, HARNESS_LINES, findInSource, serializeDoc, withHarness, type PreviewEnv, type SelectedElement } from "./runtime";
 import { MAX_ATTACHMENTS, readAttachment, resolveAssets, withAttachments, type Attachment } from "./attachments";
 import { addVersion, currentHtml, type StudioProject, type VersionSource } from "./store";
@@ -214,7 +214,11 @@ export function useProjectSession({
       ];
       let lastError = "The AI couldn't make that change.";
       let lastRes: Awaited<ReturnType<typeof runModel>> | null = null;
-      let applied: { html: string; note: string; engine: EngineKind | null; model: string | null } | null = null;
+      // `note` stays the mechanical "N changes applied" count — the partial-
+      // result bookkeeping below parses that number back out of it. `logNote`
+      // is what the chat shows: the model's own NOTE: sentence when it wrote
+      // one, else the same mechanical line.
+      let applied: { html: string; note: string; logNote: string; engine: EngineKind | null; model: string | null } | null = null;
       // Every cloud attempt resends the whole app, so one edit costs at
       // most two cloud calls (the ask + one format-reminder retry), and none
       // more once the endpoint itself errored - the same request would only
@@ -225,7 +229,7 @@ export function useProjectSession({
       // fallback but is not accepted yet: the unmatched block is often the
       // headline change (e.g. the rename), and "2 of 3 changes applied" would
       // otherwise read as done. Retry once for a clean apply first.
-      let partial: { html: string; note: string; engine: EngineKind | null; model: string | null } | null = null;
+      let partial: { html: string; note: string; logNote: string; engine: EngineKind | null; model: string | null } | null = null;
       let retryHint = "";
       for (const a of attempts) {
         if (ctrl.signal.aborted) break;
@@ -242,6 +246,7 @@ export function useProjectSession({
           continue;
         }
         const blocks = parseEditBlocks(res.text);
+        const modelNote = extractEditNote(res.text);
         let next: string | null = null;
         let note = "";
         if (blocks.length > 0) {
@@ -251,7 +256,7 @@ export function useProjectSession({
             note = r.failed.length ? `${r.applied} of ${blocks.length} changes applied` : `${r.applied} change${r.applied > 1 ? "s" : ""} applied`;
             if (r.failed.length && looksLikeValidApp(next)) {
               const keep = !partial || r.applied > Number(partial.note.split(" ")[0]);
-              if (keep) partial = { html: resolveAssets(fromModelView(next, view), opts.assets || []), note, engine: res.engine, model: res.modelName };
+              if (keep) partial = { html: resolveAssets(fromModelView(next, view), opts.assets || []), note, logNote: modelNote || note, engine: res.engine, model: res.modelName };
               retryHint = `Your previous reply had ${r.failed.length} edit block(s) whose SEARCH text did not match the app. Send ALL the changes again and copy every SEARCH line character-for-character from the APP above.`;
               next = null;
               continue;
@@ -265,7 +270,7 @@ export function useProjectSession({
           note = "App rewritten";
         }
         if (next && looksLikeValidApp(next)) {
-          applied = { html: resolveAssets(fromModelView(next, view), opts.assets || []), note, engine: res.engine, model: res.modelName };
+          applied = { html: resolveAssets(fromModelView(next, view), opts.assets || []), note, logNote: modelNote || note, engine: res.engine, model: res.modelName };
           break;
         }
         lastError =
@@ -293,7 +298,7 @@ export function useProjectSession({
       }
       lastHtmlRef.current = applied.html;
       commit(applied.html, req.length > 80 ? req.slice(0, 78) + "…" : req, applied.engine === "device" ? "device" : "cloud", { resetData: opts.resetData });
-      pushLog({ kind: "result", text: applied.note, engine: applied.engine, model: applied.model, ms: Date.now() - started });
+      pushLog({ kind: "result", text: applied.logNote, engine: applied.engine, model: applied.model, ms: Date.now() - started });
       return true;
     },
     [project, enginePref, commit, engine, editable]

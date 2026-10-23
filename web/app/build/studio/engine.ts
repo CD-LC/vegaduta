@@ -350,6 +350,7 @@ export const EDIT_SYSTEM = [
   "- Never edit or copy the vd:connect placeholder comment - the studio manages it.",
   "- To add something, SEARCH a nearby existing line and repeat it in REPLACE together with the new code.",
   "- Use several blocks for several changes. Change only what the request needs.",
+  "- After the last block, write exactly one line: NOTE: <one plain sentence describing what changed, for a non-technical user - no file names, no jargon>.",
   "- Keep it offline: no external scripts, fonts or frameworks. Plain JavaScript.",
   "- The skeleton script already defines esc(s), load(key, default) and save(key, value) at top level. Use them; NEVER declare const/let/var/function esc, load or save again (that throws a SyntaxError and blanks the app).",
   "- File upload for end users: use <input type=\"file\"> (add accept=\"image/*\" for photos), read it with FileReader, preview images in an <img>, keep the result in localStorage when small, and show a friendly message for oversized or wrong files. Never post files to made-up URLs.",

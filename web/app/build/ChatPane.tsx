@@ -231,11 +231,25 @@ export default function ChatPane({
     setSketchOpen(false);
     setThread((cur) => [...cur, { kind: "user", text: shown, attachments: attachments.map((a) => a.label) }]);
     setBusy(true);
+    // True once a streamed "files" event already updated the preview —
+    // on a failed or aborted turn the preview must be put back, since those
+    // files were never promoted to the project.
+    let previewFilesShown = false;
+    const revertPreview = () => {
+      if (previewFilesShown && snapshot) {
+        onFiles?.(Array.from(snapshot, ([path, content]) => ({ path, content })));
+        previewFilesShown = false;
+      }
+    };
     try {
       let result;
       let via = "hosted";
       // Files the on-device path applied (used when the server echoes none).
       let appliedEdge = null;
+      // The on-device model's own explanation of the change — forwarded to
+      // the server in applyEdits and echoed back; kept here as the fallback
+      // for backends that predate the field.
+      let edgeSummary = null;
       // Which engine produced this change, shown on the result entry below.
       // On-device path: the tier the edge layer resolved plus the manifest
       // model name. Hosted path: app-builder forwards core's resolved
@@ -260,10 +274,12 @@ export default function ChatPane({
         if (edge.ok) {
           via = "on-device";
           poweredBy = { source: "device", model: edge.modelName || null };
+          edgeSummary = edge.summary ?? null;
           setBusyLabel("Applying + checking…");
           result = await appBuilder.applyEdits(project.project_id, {
             instruction: shown,
             files: edge.files,
+            summary: edge.summary ?? undefined,
           });
           appliedEdge = edge.files;
           if (result?.success === false && result?.check_output) {
@@ -286,9 +302,11 @@ export default function ChatPane({
             });
             if (retry.ok) {
               poweredBy = { source: "device", model: retry.modelName || null };
+              edgeSummary = retry.summary ?? edgeSummary;
               result = await appBuilder.applyEdits(project.project_id, {
                 instruction: shown,
                 files: retry.files,
+                summary: retry.summary ?? undefined,
               });
               appliedEdge = retry.files;
             }
@@ -301,10 +319,32 @@ export default function ChatPane({
       }
       if (!result) {
         setBusyLabel("Platform model…");
-        result = await appBuilder.generate(project.project_id, shown, {
+        const onStage = (stage, evt) => {
+          if (stage === "context") setBusyLabel("Reading your app…");
+          else if (stage === "writing")
+            setBusyLabel(evt?.attempt > 1 ? `Rewriting the change (try ${evt.attempt})…` : "Writing your change…");
+          else if (stage === "files") {
+            if (evt?.files?.length) {
+              previewFilesShown = true;
+              onFiles?.(evt.files);
+            }
+            setBusyLabel("Checking it builds…");
+          } else if (stage === "checking")
+            setBusyLabel(evt?.attempt > 1 ? `Checking the fix (try ${evt.attempt})…` : "Checking it builds…");
+          else if (stage === "publishing") setBusyLabel("Publishing the change…");
+        };
+        const generateBody = {
           context: context || undefined,
           images: images.length ? images : undefined,
-        });
+        };
+        try {
+          result = await appBuilder.generateStream(project.project_id, shown, generateBody, onStage);
+        } catch (e) {
+          // Pre-stream app-builder builds have no /generate/stream — the
+          // turn still works via the sync route, just without live stages.
+          if (e?.status !== 404 && e?.status !== 405) throw e;
+          result = await appBuilder.generate(project.project_id, shown, generateBody);
+        }
         if (!result) {
           // A null body is not "success with zero files".
           throw new Error("The builder returned an empty response, so nothing was changed. Please try again.");
@@ -318,6 +358,10 @@ export default function ChatPane({
         }
       }
       const success = result?.success !== false;
+      // A streamed turn's "files" event already showed the candidate files
+      // in the preview; if the check then failed, nothing was promoted —
+      // put the pre-turn files back so the preview reflects the project.
+      if (!success) revertPreview();
       // Prefer what the server says it wrote; for an on-device edit that the
       // server did not echo, fall back to the files we sent it.
       const applied = result?.files?.length ? result.files : via === "on-device" && success ? appliedEdge : null;
@@ -325,6 +369,10 @@ export default function ChatPane({
         kind: "result",
         success,
         prompt: shown,
+        // The model's own plain-English explanation (hosted: core's summary
+        // field; on-device: the edge model's, echoed by the server or kept
+        // locally when the backend predates the field).
+        summary: result?.summary || edgeSummary,
         filesChanged: result?.files_changed?.length ? result.files_changed : (applied || []).map((f) => f.path),
         touched: (applied || []).map((f) => f.path),
         diff: result?.diff || "",
@@ -357,6 +405,7 @@ export default function ChatPane({
         }));
       }
     } catch (e) {
+      revertPreview();
       pushEntry({ kind: "result", success: false, error: e.message });
       onError(e.message);
       // Give the user their draft back instead of making them retype it.

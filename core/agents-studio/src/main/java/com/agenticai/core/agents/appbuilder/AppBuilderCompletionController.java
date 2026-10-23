@@ -107,7 +107,7 @@ public class AppBuilderCompletionController {
                     generation = completionService.generateFiles(tenantId, request.asFormatRetry());
                 }
             }
-            return new AppBuilderGenerateFilesResult(generation.files(), generation.providerName(), generation.model());
+            return new AppBuilderGenerateFilesResult(generation.files(), generation.providerName(), generation.model(), generation.summary());
         } finally {
             TenantContext.clear();
         }

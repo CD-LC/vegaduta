@@ -39,6 +39,11 @@ export interface EdgeFilesSuccess {
    * display name). Null for tier 0 - the browser's built-in model exposes
    * no model id. Lets the UI name the engine that generated this change. */
   modelName?: string | null;
+  /** The model's own one-sentence explanation of the change — forwarded to
+   * POST /generate/apply's `summary` so the chat entry reads the same as a
+   * hosted turn's. Null when the model produced no summary (small models
+   * sometimes skip it). */
+  summary?: string | null;
 }
 
 export type EdgeFilesFailureReason =
@@ -80,7 +85,9 @@ const SYSTEM_PROMPT =
   "You are an autonomous software engineer editing a small app for a " +
   "non-technical user. Reply with ONLY a single JSON object, no markdown " +
   "fences, no prose:\n" +
-  '{"files": [{"path": "relative/path", "content": "full new file content"}]}\n' +
+  '{"summary": "one plain sentence for a non-technical user describing what ' +
+  'changed (no file names, no jargon)", "files": [{"path": "relative/path", ' +
+  '"content": "full new file content"}]}\n' +
   "Write the FULL content of every file you create or change — never " +
   "partial diffs. Keep changes minimal. Never touch lockfiles, CI config, " +
   "or secrets. Reference uploaded assets by their path under assets/. " +
@@ -225,7 +232,7 @@ async function runOneShot(
 /** Parse the model's reply into a file set — tolerant of a ```json fence
  * and of leading/trailing prose around the JSON object (small models add
  * both despite being told not to). */
-function parseFiles(raw: string): AppBuilderFileWrite[] {
+function parseReply(raw: string): { files: AppBuilderFileWrite[]; summary: string | null } {
   let text = raw.trim();
   if (text.startsWith("```")) {
     text = text
@@ -239,15 +246,22 @@ function parseFiles(raw: string): AppBuilderFileWrite[] {
   if (start >= 0 && end > start) text = text.slice(start, end + 1);
   const parsed = JSON.parse(text);
   const files = Array.isArray(parsed?.files) ? parsed.files : [];
-  return files
-    .filter(
-      (f: unknown): f is AppBuilderFileWrite =>
-        !!f &&
-        typeof (f as AppBuilderFileWrite).path === "string" &&
-        typeof (f as AppBuilderFileWrite).content === "string"
-    )
-    .filter((f: AppBuilderFileWrite) => !isForbiddenWritePath(f.path))
-    .map((f: AppBuilderFileWrite) => ({ ...f, path: normalizeWritePath(f.path) }));
+  const summary =
+    typeof parsed?.summary === "string" && parsed.summary.trim()
+      ? parsed.summary.trim()
+      : null;
+  return {
+    files: files
+      .filter(
+        (f: unknown): f is AppBuilderFileWrite =>
+          !!f &&
+          typeof (f as AppBuilderFileWrite).path === "string" &&
+          typeof (f as AppBuilderFileWrite).content === "string"
+      )
+      .filter((f: AppBuilderFileWrite) => !isForbiddenWritePath(f.path))
+      .map((f: AppBuilderFileWrite) => ({ ...f, path: normalizeWritePath(f.path) })),
+    summary,
+  };
 }
 
 /**
@@ -285,11 +299,11 @@ export async function generateFilesOnDevice(
 
     if (!raw.trim()) return { ok: false, reason: "empty-reply" };
     try {
-      const parsed = parseFiles(raw);
-      if (parsed.length === 0) return { ok: false, reason: "bad-shape" };
-      const files = safeWrites(parsed, options.existing, shown.writable);
+      const parsed = parseReply(raw);
+      if (parsed.files.length === 0) return { ok: false, reason: "bad-shape" };
+      const files = safeWrites(parsed.files, options.existing, shown.writable);
       if (files.length === 0) return { ok: false, reason: "unsafe-writes" };
-      return { ok: true, tier: eligible.tier, files, modelName: eligible.modelName };
+      return { ok: true, tier: eligible.tier, files, modelName: eligible.modelName, summary: parsed.summary };
     } catch {
       return { ok: false, reason: "bad-shape" };
     }
