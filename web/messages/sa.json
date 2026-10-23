@@ -61,7 +61,9 @@
     "railBrand": "मुद्राङ्कनम्",
     "railLearn": "शिक्षणम्",
     "railGuard": "रक्षामार्गाः",
-    "brandIdentityAriaLabel": "VegaDūta मुद्रा परिचयः"
+    "brandIdentityAriaLabel": "VegaDūta मुद्रा परिचयः",
+    "railRuntimeSettings": "रनटाइम-विन्यासाः",
+    "railControls": "अहं किं नियन्त्रयामि...?"
   },
   "languageSwitcher": {
     "label": "भाषा",
@@ -754,7 +756,142 @@
     "edgeTier0Badge": "यन्त्रस्थम् · क्रोमान्तर्गतम्",
     "edgeTier0BadgeTitle": "क्रोमान्तर्गतप्रतिरूपेण (जेमिनि नैनो) उत्तरितम् - शीघ्रं पूर्णतया च गोप्यम्, किन्तु केवलं संवादाय। उपकरणानि प्रयोक्तुं न शक्नोति, जटिलविषयेषु च न्यूनं यथार्थं भवितुमर्हति। सर्वयोजनासु निःशुल्कम्।",
     "edgeTier1Badge": "यन्त्रस्थम् · स्थानीयं प्रतिरूपम्",
-    "edgeTier1BadgeTitle": "अधोभारितेन यन्त्रस्थप्रतिरूपेण उत्तरितम् - गोप्यम्, उपकरणानि च प्रयोक्तुं शक्नोति (यथा पोषितपर्याये रक्षितानि)। तथापि पोषितसमूहात् लघुतरम्, अतः जटिलानुरोधेषु न्यूनं यथार्थं भवितुमर्हति। सर्वयोजनासु निःशुल्कम्।"
+    "edgeTier1BadgeTitle": "अधोभारितेन यन्त्रस्थप्रतिरूपेण उत्तरितम् - गोप्यम्, उपकरणानि च प्रयोक्तुं शक्नोति (यथा पोषितपर्याये रक्षितानि)। तथापि पोषितसमूहात् लघुतरम्, अतः जटिलानुरोधेषु न्यूनं यथार्थं भवितुमर्हति। सर्वयोजनासु निःशुल्कम्।",
+    "viewTurn": "आवर्तान् पश्यतु",
+    "viewTurnTitle": "अस्य संवादस्य आवर्तानां पदशः कालरेखां उद्घाटयतु",
+    "headerRunning": "एकः आवर्तः चलति",
+    "headerReady": "सज्जम्",
+    "clearContext": "सन्दर्भं मार्जयतु",
+    "clearContextTitle": "नूतनं संवादम् आरभताम्। इदम् अस्य चैट्-यन्त्रस्य सर्वर-पक्षीयं च सत्र-स्मृतिं मार्जयति।",
+    "stopRun": "एतत् उत्तरं निरुणद्धि",
+    "fallbackSendToPlatform": "प्लेटफॉर्मं प्रति प्रेषयतु",
+    "chipsLabel": "अभिकर्ता इदानीं किं करोति",
+    "chipPreparing": "सज्जः अस्ति",
+    "chipModelCall": "मॉडलं प्रतीक्षते",
+    "chipThinking": "चिन्तयति",
+    "chipWriting": "उत्तरं लिखति",
+    "chipTool": "साधनं चलति: {tool}",
+    "chipToolUnnamed": "एकं साधनं चलति",
+    "chipWaitingApproval": "भवतः अनुमोदनं प्रतीक्षते ({count})",
+    "chipContinuing": "उत्तरं निरन्तरयति",
+    "chipContinuingPass": "उत्तरं निरन्तरयति ({max} मध्ये आवर्तः {pass})",
+    "chipContinuingApproval": "भवतः निर्णयानन्तरं निरन्तरयति",
+    "chipRetrying": "पुनः प्रयतते",
+    "chipRetryingReason": "पुनः प्रयतते: {reason}",
+    "chipRetryingAttempt": "पुनः प्रयतते (प्रयासः {attempt}/{max})",
+    "chipRetryingAttemptReason": "पुनः प्रयतते (प्रयासः {attempt}/{max}): {reason}",
+    "chipFailover": "आपत्कालीन-मॉडलं प्रति परिवर्तितम्",
+    "chipFailoverReason": "आपत्कालीन-मॉडलं प्रति परिवर्तितम्: {reason}",
+    "chipFailoverTo": "{model} प्रति परिवर्तितम्",
+    "chipFailoverToReason": "{model} प्रति परिवर्तितम्: {reason}",
+    "outcomeTruncated": "एतत् उत्तरं पूर्णतायाः पूर्वमेव छिन्नम्।",
+    "outcomeContinue": "निरन्तरयतु",
+    "outcomeLongerReplies": "दीर्घोत्तरम् अनुमन्यताम्",
+    "continueMessage": "यत्र स्थगितम् आसीत् तत एव निरन्तरयतु, पूर्वलिखितं पुनः अलिखन्।",
+    "outcomeRefused": "सुरक्षाकारणात् मॉडल-प्रदाता एतत् उत्तरं निरुद्धवान्, अतः प्रदर्शनार्थं किमपि उत्तरं नास्ति। अनुरोधं परिवर्त्य पुनः प्रयतताम्।",
+    "outcomeRefusedReason": "सुरक्षाकारणात् ({reason}) मॉडल-प्रदाता एतत् उत्तरं निरुद्धवान्, अतः प्रदर्शनार्थं किमपि उत्तरं नास्ति। अनुरोधं परिवर्त्य पुनः प्रयतताम्।",
+    "outcomeMalformedToolCall": "मॉडलः साधनम् उपयोक्तुम् अयतत किन्तु तस्य अनुरोधः अमान्यः आसीत्, अतः किमपि न चलितम्। पुनः प्रयतताम्।",
+    "outcomeEmpty": "मॉडलः रिक्तम् उत्तरं दत्तवान्। पुनः प्रयतताम्।",
+    "stopRaiseSteps": "साधन-आह्वान-सीमां वर्धयतु",
+    "stopRaiseBudget": "व्यय-सीमां परिवर्तयतु",
+    "stopAskEditor": "यः कश्चित् एतम् अभिकर्तारं सम्पादयितुं शक्नोति तं सीमां वर्धयितुं वदतु।",
+    "rsOpen": "रन-विन्यासाः",
+    "rsTitle": "रन-विन्यासाः",
+    "rsClose": "रन-विन्यासान् पिधत्ताम्",
+    "rsBack": "रन-विन्यासान् प्रति प्रतिगच्छतु",
+    "rsIntro": "{name} कृते अग्रिमः सन्देशः कथं चलिष्यति। एतान् अभिकर्तुः आचरण-पटले परिवर्तयतु।",
+    "rsLoading": "आरोप्यते",
+    "rsRetry": "पुनः प्रयतताम्",
+    "rsOpenBehavior": "आचरणे सम्पादयतु",
+    "rsModelHeading": "मॉडल-नमूना-चयनं च",
+    "rsModel": "मॉडलम्",
+    "rsModelNotSet": "निर्धारितं नास्ति",
+    "rsModelDefault": "मॉडलस्य पूर्वनिर्धारितम्",
+    "rsDepth": "तर्कगाम्भीर्यम्",
+    "rsSourceAgent": "अस्मिन् अभिकर्तरि निर्धारितम्",
+    "rsParam_temperature": "तापमानम्",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "उत्तरस्य अधिकतमं दैर्घ्यम् (टोकनानि)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "पुनरावृत्ति-दण्डः",
+    "rsParam_presencePenalty": "उपस्थिति-दण्डः",
+    "rsParam_seed": "बीजम्",
+    "rsParam_stopSequences": "विरामक्रमः",
+    "rsParamDropped": "{param} अस्मिन् अभिकर्तरि निर्धारितम् अस्ति, किन्तु {provider} {model} कृते तत् उपेक्षते, अतः तस्य प्रभावः नास्ति।",
+    "rsToolsRunHeading": "Tools for this run",
+    "rsToolsRunOnly": "This run only",
+    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
+    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
+    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
+    "rsToolsReset": "Use the agent's tools",
+    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
+    "rsToolsEditAgent": "Change the agent's saved tools",
+    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsEmpty": "अस्य अभिकर्तुः कृते साधनानि उपलब्धानि न सन्ति।",
+    "rsToolsSummary": "{total} मध्ये {on} साधनानि सक्रियानि",
+    "rsToolsFailed": "साधनानि आरोपयितुं न शक्तम्।",
+    "rsLimitsHeading": "प्रत्येकस्य आवर्तस्य सीमाः",
+    "rsLimitsChange": "सीमाः परिवर्तयतु",
+    "rsLimitsView": "सीमाः पश्यतु",
+    "rsLimitsFailed": "सीमाः आरोपयितुं न शक्ताः।",
+    "rsLimitsEmpty": "अस्य अभिकर्तुः कृते प्रदर्शनार्थं सीमाः न सन्ति।",
+    "rsNoLimit": "कापि सीमा नास्ति",
+    "rsScoreAll": "प्रत्येकं मेलनम्",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} अक्षराणि",
+    "rsLimitRange": "अनुमतम्: {min} तः {max} पर्यन्तम्",
+    "rsLayer_AGENT": "अस्मिन् अभिकर्तरि निर्धारितम्",
+    "rsLayer_TENANT": "कार्यक्षेत्र-पूर्वनिर्धारितम्",
+    "rsLayer_PLATFORM": "प्लेटफॉर्म-पूर्वनिर्धारितम्",
+    "rsLayer_REQUEST": "अस्य अनुरोधस्य कृते निर्धारितम्",
+    "rsLimit_maxToolSteps": "प्रत्येकस्मिन् आवर्ते साधन-आह्वानानि",
+    "rsLimit_turnTimeoutSeconds": "एकस्य आवर्तस्य कालः",
+    "rsLimit_toolTimeoutSeconds": "एकस्य साधन-आह्वानस्य कालः",
+    "rsLimit_toolOutputMaxChars": "साधन-परिणामस्य आकारः",
+    "rsLimit_retrievalTopK": "प्रत्येकस्मिन् अन्वेषणे ज्ञान-परिणामाः",
+    "rsLimit_retrievalMinScore": "ज्ञान-मेलनस्य न्यूनतमा प्रासङ्गिकता",
+    "rsLimit_continuationPasses": "उत्तरं पूरयितुं अतिरिक्ताः आवर्ताः",
+    "rsLimitHelp_maxToolSteps": "एकं उत्तरं अधिकतमं कति साधन-आह्वानानि कर्तुं शक्नोति। सीमां प्राप्ते आवर्तः स्थगयति तथा तत् वदति।",
+    "rsLimitHelp_turnTimeoutSeconds": "एकः आवर्तः स्थगनात् पूर्वं कियत्कालं चलितुं शक्नोति।",
+    "rsLimitHelp_toolTimeoutSeconds": "एकं साधन-आह्वानं स्थगनात् पूर्वं कियत्कालं चलितुं शक्नोति।",
+    "rsLimitHelp_toolOutputMaxChars": "एकस्य साधन-परिणामस्य कियान् भागः मॉडलः पठितुं शक्नोति। शेषः छिद्यते।",
+    "rsLimitHelp_retrievalTopK": "एकम् अन्वेषणं ज्ञान-भाण्डारात् कति खण्डान् प्रत्यर्पयति।",
+    "rsLimitHelp_retrievalMinScore": "एतस्मात् न्यूनमेलनयुक्ताः खण्डाः त्यज्यन्ते। शून्यं प्रत्येकं मेलनं धारयति।",
+    "rsLimitHelp_continuationPasses": "घोषितेषु किन्तु अकृतेषु पदेषु स्थगितम् उत्तरं पूरयितुं अतिरिक्ताः प्रयासाः।",
+    "rsPreviewButton": "प्रॉम्प्ट-पूर्वावलोकनम्",
+    "rsPreviewTitle": "प्रॉम्प्ट-पूर्वावलोकनम्",
+    "rsPreviewIntro": "एषः अभिकर्ता यं सिस्टम-प्रॉम्प्टं साधन-सूचीं च प्रेषयिष्यति, यथार्थ-आवर्तवत् निर्मितम्। मॉडलं प्रति किमपि न प्रेष्यते।",
+    "rsPreviewBuilding": "पूर्वावलोकनं निर्मीयते",
+    "rsPreviewFailed": "पूर्वावलोकनं निर्मातुं न शक्तम्।",
+    "rsPreviewTotals": "सिस्टम-पाठ्यस्य कृते प्रायः {prompt} टोकनानि साधन-परिभाषाणां कृते {tools} टोकनानि (अनुमानम्)।",
+    "rsPreviewOverBudgetTitle": "टोकन-बजटात् अधिकम्",
+    "rsPreviewOverBudget": "स्थायि सिस्टम-पाठ्यं विन्यस्तात् {budget} टोकन-बजटात् अधिकम् अस्ति। किमपि न छिन्नम्; एकं प्रॉम्प्टं लघु कर्तुं विचारयतु।",
+    "rsPreviewNoBlocks": "प्रदर्शनार्थं प्रॉम्प्ट-खण्डाः न सन्ति।",
+    "rsPreviewMessage": "सन्देशः: {message}",
+    "rsPreviewTokens": "~{tokens} टोकनानि",
+    "rsPreviewShowText": "पाठ्यं दर्शयतु",
+    "rsPreviewTools": "साधनानि ({count})",
+    "rsPreviewNoTools": "एषः अभिकर्ता किमपि साधनं न ददाति।",
+    "rsPreviewNotes": "एतत् पूर्वावलोकनं यत् ज्ञातुं न शक्नोति",
+    "rsPreviewOpenAdmin": "प्रत्येकस्य प्रॉम्प्टस्य शब्दावलीं पश्यतु परिवर्तयतु च",
+    "rsOriginDefault": "पूर्वनिर्धारितरूपेण आगतम्",
+    "rsOriginOverride": "{scope} अधिलेखनम् v{version}",
+    "rsOriginAgentConfig": "अभिकर्तुः स्वकीयः सिस्टम-प्रॉम्प्टः",
+    "rsOriginCode": "प्लेटफॉर्म-संकेतः",
+    "rsRunBudget": "प्रत्येकस्य रनस्य व्यय-सीमा",
+    "rsNoCap": "कापि सीमा नास्ति",
+    "rsRunBudgetHelp": "यदा रनः अन्येभ्यः अभिकर्तृभ्यः कार्यं ददाति अथवा गहनं अनुसन्धानं चालयति तदा सः अधिकतमं कियत् व्ययितुं शक्नोति। इदम् अनुमानम्, देयकं न।",
+    "chipToolsOff": "साधनानि विना पुनः प्रयतते",
+    "chipFailoverBlocked": "आपत्कालीन-मॉडलं न उपयुक्तम्: साधनानि पूर्वमेव चलितानि आसन्",
+    "rsLimitChangeOne": "परिवर्तयतु",
+    "reasonRateLimited": "rate limited",
+    "reasonTimeout": "timed out",
+    "reasonProviderUnavailable": "provider unavailable",
+    "reasonAuthFailed": "provider rejected the credentials",
+    "reasonBilling": "provider billing problem",
+    "reasonModelNotFound": "model not available",
+    "reasonProviderError": "provider error",
+    "reasonMalformedToolCall": "the tool call could not be used"
   },
   "nodeDefs": {
     "triggerLabel": "प्रवर्तकः",
@@ -1400,7 +1537,35 @@
     "ttsProviderUpdatedSuccess": "वाक्प्रदाता अद्यतनः कृतः।",
     "updateTtsProviderError": "अस्य अभिकर्तुः वाक्प्रदाता अद्यतनीकर्तुं न शक्यते।",
     "ttsProviderFreePlanTooltip": "वाक्प्रदाताचयनं श्रेष्ठांशः अस्ति।",
-    "ttsProviderNotSet": "मञ्चस्य पूर्वनिर्धारितं प्रयुज्यते"
+    "ttsProviderNotSet": "मञ्चस्य पूर्वनिर्धारितं प्रयुज्यते",
+    "samplingTitle": "उन्नत-नमूना-चयनम्",
+    "samplingIntro": "मॉडलः शब्दान् कथं चिनोति तत् सूक्ष्मं समायोजयतु। मॉडलस्य पूर्वनिर्धारितम् उपयोक्तुं मञ्जूषां रिक्तां त्यजतु। यः प्रदाता कञ्चित् क्षेत्रं न बोधयति सः तत् केवलम् उपेक्षते।",
+    "samplingIgnored": "अस्य मॉडलस्य प्रदाता एतत् विन्यासम् उपेक्षते, अतः तस्य परिवर्तनेन प्रभावः नास्ति।",
+    "samplingSaving": "रक्ष्यते…",
+    "samplingSaved": "रक्षितम्",
+    "samplingNotSaved": "न रक्षितम्",
+    "samplingSaveFailed": "तत् विन्यासं रक्षितुं न शक्तम्।",
+    "samplingErrorWhole": "{label} {min} तः {max} पर्यन्तं पूर्णाङ्कः भवितव्यः, अथवा निष्क्रियीकर्तुं रिक्तं त्यजतु।",
+    "samplingErrorNumber": "{label} {min} तः {max} पर्यन्तं सङ्ख्या भवितव्या, अथवा निष्क्रियीकर्तुं रिक्तं त्यजतु।",
+    "samplingStopTooLong": "एकः विरामक्रमः अधिकतमं {max} अक्षराणां भवितुम् अर्हति।",
+    "samplingStopTooMany": "अधिकतमं {max} विरामक्रमाः।",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "केवलं सर्वाधिकसम्भाव्यान् K अग्रिमशब्दान् विचारयतु। न्यूनं नाम अधिकं सुरक्षितं, पूर्वानुमेयं पाठ्यम्। 1 तः 1000 पर्यन्तम्।",
+    "samplingSeed": "बीजम्",
+    "samplingSeedHelp": "एकस्य प्रॉम्प्टस्य कृते उत्तराणि अधिकं पुनरावर्तनीयानि कर्तुं सङ्ख्यां निर्धारयतु। सर्वे प्रदातारः एतस्य प्रत्ययं न ददति।",
+    "samplingFrequency": "पुनरावृत्ति-दण्डः",
+    "samplingFrequencyHelp": "धनात्मकानि मूल्यानि एकस्य शब्दस्य पुनः पुनः उपयोगं निरुन्धन्ति। -2 तः 2 पर्यन्तम्।",
+    "samplingPresence": "उपस्थिति-दण्डः",
+    "samplingPresenceHelp": "धनात्मकानि मूल्यानि मॉडलं एकस्मिन् विषये स्थातुं विहाय नूतनविषयान् प्रति प्रेरयन्ति। -2 तः 2 पर्यन्तम्।",
+    "samplingPlaceholderDefault": "पूर्वनिर्धारितम्",
+    "samplingPlaceholderRandom": "यादृच्छिकम्",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "विरामक्रमः",
+    "samplingStopPlaceholder": "वाक्यांशं लिखतु, Enter नुदतु",
+    "samplingStopHelp": "मॉडलः एतेषु किमपि लिखति चेत् उत्तरं समाप्यते। अधिकतमं {count}, प्रत्येकं अधिकतमं {max} अक्षराणाम्।",
+    "samplingStopCurrent": "वर्तमानाः विरामक्रमाः",
+    "samplingStopRemove": "विरामक्रमं {value} अपसारयतु",
+    "samplingAdd": "योजयतु"
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "ग्रन्थिं विन्यासितुं चिनोतु, अथवा वामतः फलकात् नूतनां कर्षतु।",
@@ -13085,7 +13250,7 @@
   },
   "adminAccessPage": {
     "pageTitle": "Team access",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "प्रशासनम्",
     "matrixTitle": "Access matrix",
     "matrixHint": "Every member's effective scopes at a glance - tick a cell to grant or revoke that scope for that person.",
     "memberColumn": "MEMBER",
@@ -13100,7 +13265,7 @@
   "adminPaymentsPage": {
     "pageTitle": "Agent payments",
     "pageSubtitle": "Signed UPI mandates, spend caps and payment history for each agent.",
-    "agentPickerLabel": "Agent",
+    "agentPickerLabel": "अभिकर्ता",
     "noAgents": "No agents in this workspace",
     "loadFailed": "Could not load payment data for this agent.",
     "mandatesHeading": "Payment mandates",
@@ -13128,9 +13293,9 @@
     "thresholdRequired": "Set the approval threshold amount.",
     "previewFailed": "Could not build the mandate preview.",
     "reviewMandate": "Review mandate",
-    "back": "Back",
+    "back": "प्रतिगच्छतु",
     "signAndGrant": "Sign & grant",
-    "cancel": "Cancel",
+    "cancel": "निरस्यतु",
     "canonicalReviewLabel": "Canonical mandate document",
     "canonicalReviewHint": "This exact JSON is what gets Ed25519-signed. Verify the caps, scope and validity before granting.",
     "grantSuccess": "Mandate granted and signed.",
@@ -13156,7 +13321,7 @@
     "colStatus": "Status",
     "colVpa": "Payee VPA",
     "colDescription": "Description",
-    "colCreated": "Created",
+    "colCreated": "निर्मितम्",
     "detailId": "Transaction",
     "detailMandate": "Mandate",
     "detailGatewayPayment": "Gateway payment",
@@ -13200,7 +13365,7 @@
     "restoreTooltip": "Make this version the agent's current configuration.",
     "restoreConfirmTitle": "Restore v{version}?",
     "restoreConfirmBody": "The agent's current configuration is replaced by this version's. The restore itself is saved as a new version, so it can be undone.",
-    "cancelButton": "Cancel",
+    "cancelButton": "निरस्यतु",
     "restoredNotice": "Restored - the agent now runs this configuration.",
     "restoreError": "Couldn't restore that version.",
     "labelUpdatedNotice": "Label updated.",
@@ -13213,18 +13378,18 @@
     "forceReasonLabel": "Override reason (required, written to the audit log)",
     "forceReasonPlaceholder": "Why is this safe to promote without a passing eval?",
     "forcePromoteButton": "Promote anyway",
-    "fieldModel": "Model",
+    "fieldModel": "मॉडलम्",
     "fieldFallback": "Fallback",
     "fieldGeneration": "Generation",
     "fieldModes": "Modes",
-    "fieldTools": "Tools",
+    "fieldTools": "साधनम्",
     "toolsUnrestricted": "All resolved tools",
     "toolsNone": "None",
     "toolsCount": "{count} allowed",
-    "fieldGuardrails": "Guardrails",
+    "fieldGuardrails": "गार्डरेल्",
     "fieldFlags": "Enabled",
     "fieldPrompt": "System prompt",
-    "flagKnowledge": "Knowledge",
+    "flagKnowledge": "ज्ञानम्",
     "flagSarvam": "Sarvam",
     "flagSandbox": "Sandbox",
     "flagCodeWorkspace": "Code workspace",
@@ -13245,18 +13410,18 @@
       "AUTONOMOUS": "Autonomous"
     },
     "state": {
-      "READY": "Ready",
+      "READY": "सज्जम्",
       "MISSING": "Missing",
       "WAITING_ON_ADMIN": "Waiting on admin",
       "GATED": "Not on your plan",
       "SIMULATED": "Simulated"
     },
     "kind": {
-      "agent": "Agent",
+      "agent": "अभिकर्ता",
       "workflow": "Workflow",
       "tool": "Tool",
       "mcp": "MCP server",
-      "knowledge": "Knowledge",
+      "knowledge": "ज्ञानम्",
       "procedure": "Procedure",
       "secret": "Secret",
       "channel": "Channel"
@@ -13296,7 +13461,7 @@
     },
     "narrative": {
       "aria": "About {name}",
-      "close": "Close",
+      "close": "पिधत्ताम्",
       "why": "Why it is here",
       "tune": "If results are wrong",
       "proof": "How you will know it works",
@@ -13313,14 +13478,14 @@
       "step": {
         "PENDING": "Waiting",
         "DONE": "Done",
-        "FAILED": "Failed",
+        "FAILED": "विफलम्",
         "COMPENSATED": "Rolled back"
       },
       "failedAt": "Step {step} failed: {name}.",
       "failedGeneric": "The apply did not finish.",
       "nothingKept": "Nothing was kept. Everything created in this run was rolled back.",
       "someKept": "Some steps were already saved and are shown above. Check them before trying again.",
-      "retry": "Try again",
+      "retry": "पुनः प्रयतताम्",
       "doneBody": "Your envoy is in place and starts under watch. Fill in what is still missing on the right."
     },
     "plan": {
@@ -13337,7 +13502,7 @@
       "stepsLabel": "Steps",
       "step": {
         "preview": "Preview",
-        "ready": "Ready",
+        "ready": "सज्जम्",
         "applying": "Apply"
       },
       "toReady": "Check what it needs",
@@ -13426,7 +13591,7 @@
         "other": "setting"
       },
       "op": {
-        "changed": "Changed",
+        "changed": "परिवर्तितम्",
         "added": "Added",
         "removed": "Removed"
       },
@@ -13464,8 +13629,8 @@
       "entityAdded": "{where} is added",
       "entityRemoved": "{where} is removed",
       "showFull": "Show the full text",
-      "before": "Before:",
-      "after": "After:",
+      "before": "पूर्वम्:",
+      "after": "पश्चात्:",
       "apply": "Apply this change",
       "discard": "Discard"
     },
@@ -13474,7 +13639,7 @@
       "placeholder": "For example: the reminders sound too harsh, soften the first one",
       "propose": "Show me the change",
       "proposing": "Working out the change...",
-      "saving": "Saving...",
+      "saving": "रक्ष्यते...",
       "applying": "Applying...",
       "failed": "Could not work out a change. Try saying it another way.",
       "done": "Applied. Scoring has been asked for; the new score appears in the ledger when it finishes.",
@@ -13493,7 +13658,7 @@
       "noCards": "Nothing stands out yet. Suggestions appear once something has scored low.",
       "cardsLabel": "Suggestions",
       "scored": "{dimension} {score}",
-      "open": "Open",
+      "open": "उद्घाटयतु",
       "notApplied": "Available once the envoy is applied.",
       "dimension": {
         "helpfulness": "Helpfulness",
@@ -13578,11 +13743,11 @@
       "demoteNone": "Demote",
       "demoteConfirm": "Demote to {rung}? Approvals return to every risky step immediately.",
       "demoteConfirmYes": "Yes, demote",
-      "demoteConfirmCancel": "Cancel",
+      "demoteConfirmCancel": "निरस्यतु",
       "demoteHint": "Always available. It puts the approvals back straight away.",
       "demoteNeedsAdmin": "Only a workspace admin can change the trust level.",
       "atBottom": "Already at the lowest level.",
-      "history": "History",
+      "history": "इतिहासः",
       "noHistory": "No trust changes yet.",
       "showEvidence": "Show the evidence",
       "diffKind": {
@@ -13613,7 +13778,7 @@
       "runError": "This run could not finish.",
       "transcriptFailed": "Could not load this transcript.",
       "showTranscript": "Read the conversation ({count} turns)",
-      "agent": "Agent",
+      "agent": "अभिकर्ता",
       "verdict": {
         "PASSED": "The agent handled it well",
         "FAILED": "The agent was talked out of its rules",
@@ -13644,7 +13809,7 @@
   },
   "contactsPage": {
     "pageTitle": "Contacts & routing",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "प्रशासनम्",
     "pageSubtitle": "A contact is a sender your agents already know. Approving a new sender makes them a contact and routes their messages to an agent.",
     "routingTitle": "Channel routing",
     "routingHint": "Pick the agent new conversations go to, and whether a sender you've never seen needs your approval first or goes straight through.",
@@ -13664,16 +13829,16 @@
     "contactsTitle": "Contacts",
     "contactsHint": "Known senders skip approval entirely - a contact here is pre-approved and routes by contact agent → group agent → channel default.",
     "allChannels": "All channels",
-    "allGroups": "All groups",
-    "filterByGroupLabel": "Filter by group",
+    "allGroups": "सर्वे समूहाः",
+    "filterByGroupLabel": "समूहेन छन्नयतु",
     "searchPlaceholder": "Search number, chat id or name…",
     "identifierPlaceholder": "Phone / chat id / email *",
     "namePlaceholder": "Name (optional)",
     "groupPlaceholder": "Group",
     "noGroup": "No group",
-    "agentPlaceholder": "Agent",
+    "agentPlaceholder": "अभिकर्ता",
     "channelDefault": "Channel default",
-    "addButton": "Add",
+    "addButton": "योजयतु",
     "contactAdded": "Contact added.",
     "statusLinked": "Live",
     "statusDirectory": "Directory",
@@ -13685,7 +13850,7 @@
     "groupsTitle": "Contact groups",
     "groupsHint": "Group contacts to route them together - a group's agent answers every member without their own override.",
     "groupNamePlaceholder": "Group name",
-    "groupAgentPlaceholder": "Agent",
+    "groupAgentPlaceholder": "अभिकर्ता",
     "createGroupButton": "Create",
     "groupCreated": "Group created.",
     "groupMeta": "{count} member(s) · routes to {agent}",
@@ -13715,10 +13880,10 @@
     "colContact": "Contact",
     "colStatus": "Status",
     "colGroup": "Group",
-    "colAgent": "Agent",
+    "colAgent": "अभिकर्ता",
     "colRoutesVia": "Routes via",
-    "selectedCount": "{count} selected",
-    "approveN": "Approve {count}",
+    "selectedCount": "{count} चितानि",
+    "approveN": "{count} अनुमोदयतु",
     "rejectN": "Reject {count}",
     "clearSelection": "Clear",
     "bulkProgress": "{done} of {total} done…",
@@ -13734,7 +13899,7 @@
     "contactsEmptyImport": "Import a sheet",
     "contactsNoMatch": "No contacts match these filters.",
     "addContactButton": "Add contact",
-    "cancelButton": "Cancel",
+    "cancelButton": "निरस्यतु",
     "statusLinkedHint": "Has an active conversation",
     "statusDirectoryHint": "Known sender, no conversation yet",
     "justNow": "just now",
@@ -13805,7 +13970,7 @@
     "deactivating": "Removing…",
     "deactivateTitle": "Remove your {provider} key?",
     "deactivateBody": "Decision calls for this workspace will fall back to the platform key (when configured) or local heuristics.",
-    "cancel": "Cancel",
+    "cancel": "निरस्यतु",
     "policyTitle": "Decision controls",
     "policySubtitle": "Where the decision model may act for this workspace — and how sure it must be. Inherit uses the platform default; changes propagate within ~30 seconds.",
     "policyLoading": "Loading policy…",
@@ -13815,17 +13980,17 @@
     "policy_agentRoutingHelp": "Let the decision model pick the best-fit agent for a Quick Task by intent, instead of keyword matching.",
     "policyOpt_inherit": "Inherit",
     "policyOpt_on": "On",
-    "policyOpt_off": "Off",
+    "policyOpt_off": "निष्क्रियम्",
     "policyThreshold": "“Simple turn” confidence bar",
     "policyThresholdHelp": "0.5–0.99 — higher means the decision model must be more sure before a turn is called simple. Blank inherits.",
     "policySave": "Save policy",
-    "saving": "Saving…",
+    "saving": "रक्ष्यते…",
     "policyPropagation": "Agents can set their own stricter bar in their cost-routing settings — per-agent wins over this workspace value.",
     "playgroundTitle": "Playground",
     "playgroundSubtitle": "Ask the active decision provider a typed question against your resolved key. Bounded to one question per run — see the raw answer, model and token usage.",
     "stateLabel": "State",
     "statePlaceholder": "The facts the decision model reasons over, e.g. a user message or a task description…",
-    "instructionsLabel": "Instructions",
+    "instructionsLabel": "निर्देशाः",
     "typeHelp_noul": "noul — a calibrated yes/no probability (0–1).",
     "typeHelp_choice": "choice — pick a winner from 2+ options, with per-option probabilities.",
     "typeHelp_score": "score — a probability-weighted score over 2–10 ordered levels.",
@@ -13865,7 +14030,7 @@
     "headerEyebrow": "Sales pipeline",
     "pageSubtitle": "Every lead in one place - move them through the pipeline, log calls and emails, and let workflows keep the stages up to date.",
     "newLead": "New lead",
-    "close": "Close",
+    "close": "पिधत्ताम्",
     "fieldName": "Name",
     "fieldEmail": "Email",
     "fieldPhone": "Phone",
@@ -13896,7 +14061,7 @@
     "daysAgo": "{n}d ago",
     "lastContacted": "Last contacted {when}",
     "lastReplied": "Last replied {when}",
-    "saveButton": "Save changes",
+    "saveButton": "परिवर्तनानि रक्षतु",
     "createButton": "Create lead",
     "deleteButton": "Delete",
     "timelineTitle": "Activity",
@@ -13949,7 +14114,7 @@
   "schedulePanel": {
     "noAgentsTitle": "No agents yet",
     "noAgentsBody": "Create an agent first — a schedule is a recurring job for one specific agent.",
-    "agent": "Agent",
+    "agent": "अभिकर्ता",
     "loading": "Loading schedule…",
     "enabled": "Enabled",
     "paused": "Paused",
@@ -13969,8 +14134,8 @@
     "cadenceInterval": "Every N minutes / hours / days",
     "cadenceCron": "Cron expression",
     "intervalEvery": "Every",
-    "unitMinutes": "minutes",
-    "unitHours": "hours",
+    "unitMinutes": "निमेषाः",
+    "unitHours": "होराः",
     "unitDays": "days",
     "intervalHint": "At least 1 minute. The scheduler checks once a minute.",
     "cronLabel": "Cron",
@@ -14026,7 +14191,7 @@
     "builtInReadOnly": "Built-in skills can't be edited. To customise one, export it, change its name, and upload it as your own.",
     "badgeBuiltIn": "Built-in",
     "badgeCustom": "Custom",
-    "badgeOff": "Off",
+    "badgeOff": "निष्क्रियम्",
     "fileCount": "{count} bundled file(s)",
     "toggleAria": "Enable skill {name}",
     "selectPrompt": "Select a skill to read its instructions.",
@@ -14034,8 +14199,8 @@
     "editButton": "Edit",
     "deleteButton": "Delete",
     "saveButton": "Save skill",
-    "savingButton": "Saving…",
-    "cancelButton": "Cancel",
+    "savingButton": "रक्ष्यते…",
+    "cancelButton": "निरस्यतु",
     "replaceButton": "Replace",
     "newHeading": "New skill",
     "editHeading": "Edit {name}",
@@ -14050,5 +14215,1279 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "कार्यक्षेत्र-विन्यासाः",
+      "agent": "अभिकर्तृ-विन्यासाः"
+    },
+    "agentMissing": "कस्यचित् अभिकर्तुः विन्यासान् द्रष्टुं तं चिनोतु।",
+    "scopeNote": {
+      "agent": "एतानि मूल्यानि केवलम् अस्मिन् अभिकर्तरि प्रवर्तन्ते। यत् भवान् अत्र नाधिलिखति तत् भवतः कार्यक्षेत्र-विन्यासेभ्यः उत्तराधिकारेण आगच्छति।"
+    },
+    "loading": "विन्यासाः आरोप्यन्ते",
+    "loadError": "विन्यासान् आरोपयितुं न शक्तम्। {message}",
+    "retry": "पुनः प्रयतताम्",
+    "filters": {
+      "label": "विन्यासान् छन्नयतु",
+      "search": "विन्यासान् अन्विष्यताम्",
+      "searchPlaceholder": "नाम्ना विवरणेन वा अन्विष्यताम्",
+      "group": "समूहेन छन्नयतु",
+      "allGroups": "सर्वे समूहाः",
+      "risk": "जोखिमेन छन्नयतु",
+      "allRisks": "सर्वे जोखिम-स्तराः",
+      "clear": "छन्नकं मार्जयतु"
+    },
+    "empty": {
+      "none": "अत्र भवान् परिवर्तयितुं योग्यः कोऽपि विन्यासः नास्ति।",
+      "filtered": "कोऽपि विन्यासः भवतः छन्नकेन न मिलति।"
+    },
+    "saved": "रक्षितम्। अद्यतनीकृताः विन्यासाः: {count}।",
+    "saveFailed": "न रक्षितम्। विफलाः विन्यासाः: {count}। भवतः सम्पादनानि अद्यापि प्रपत्रे सन्ति।",
+    "resetDone": "{label} इदानीं उत्तराधिकारप्राप्तं मूल्यम् उपयुङ्क्ते।",
+    "resetFailed": "विन्यासं पुनःस्थापयितुं न शक्तम्।",
+    "unsaved": "अरक्षितानि परिवर्तनानि",
+    "discardOne": "परिवर्तनानि निरस्यतु",
+    "restartRequired": "पुनरारम्भः आवश्यकः",
+    "source": {
+      "default": "पूर्वनिर्धारितम्",
+      "platform": "प्लेटफॉर्म",
+      "tenant": "कार्यक्षेत्रम्",
+      "agent": "अभिकर्ता",
+      "tenantInherited": "कार्यक्षेत्रात् उत्तराधिकारप्राप्तम्",
+      "aria": "मूल्यस्य स्रोतः: {source}"
+    },
+    "sourceHelp": {
+      "default": "केनापि एतत् न परिवर्तितम्। एतत् उत्पादेन सह आगतं मूल्यम् उपयुङ्क्ते।",
+      "platform": "भवतः प्लेटफॉर्म-सञ्चालकेन एतत् सम्पूर्णस्य नियोजनस्य कृते निर्धारितम्।",
+      "tenant": "भवतः कार्यक्षेत्रं पूर्वनिर्धारितम् अधिलिखति। उत्तराधिकारप्राप्त-मूल्यं प्रति प्रतिगन्तुं पुनःस्थापयतु।",
+      "agent": "एषः अभिकर्ता कार्यक्षेत्रस्य मूल्यम् अधिलिखति। कार्यक्षेत्रस्य मूल्यं पुनः उत्तराधिकारेण प्राप्तुं पुनःस्थापयतु।",
+      "tenantInherited": "अस्य अभिकर्तुः स्वकीयः अधिलेखः नास्ति, अतः सः कार्यक्षेत्रस्य मूल्यम् उपयुङ्क्ते। एतत् सम्पादयतः केवलं अस्य अभिकर्तुः कृते अधिलेखः निर्मीयते।",
+      "lockedSuffix": "एतत् अवरुद्धम् अस्ति, अतः अत्र परिवर्तयितुं न शक्यते।"
+    },
+    "risk": {
+      "low": "अल्पजोखिमम्",
+      "medium": "मध्यमजोखिमम्",
+      "high": "उच्चजोखिमम्",
+      "security": "सुरक्षा"
+    },
+    "bool": {
+      "on": "On",
+      "off": "निष्क्रियम्"
+    },
+    "value": {
+      "unset": "निर्धारितं नास्ति",
+      "empty": "रिक्तम्"
+    },
+    "select": {
+      "placeholder": "विकल्पं चिनोतु"
+    },
+    "slider": {
+      "label": "{label} (स्लाइडर्)"
+    },
+    "duration": {
+      "unitLabel": "{label} इत्यस्य एककम्"
+    },
+    "units": {
+      "chars": "अक्षराणि",
+      "tokens": "टोकनानि",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "क्षणाः",
+      "min": "निमेषाः",
+      "h": "होराः"
+    },
+    "groups": {
+      "agent": "अभिकर्तृ-रनटाइम्",
+      "approvals": "अनुमोदनम्",
+      "quality": "गुणवत्ता-परीक्षा",
+      "guardrails": "गार्डरेल्",
+      "chat": "चैट्",
+      "tools": "साधनम्",
+      "memory": "स्मृतिः",
+      "knowledge": "ज्ञानम्",
+      "delegation": "कार्य-समर्पणम्",
+      "aux": "सहायक-मॉडलानि",
+      "routing": "मॉडल-मार्गनिर्धारणम्"
+    },
+    "errors": {
+      "required": "मूल्यं ददातु।",
+      "notNumber": "सङ्ख्यां ददातु।",
+      "notInteger": "पूर्णाङ्कं ददातु।",
+      "belowMin": "न्यूनातिन्यूनं {min} भवितव्यम्।",
+      "aboveMax": "अधिकतमं {max} भवितव्यम्।",
+      "notAllowed": "सूचीबद्धेषु विकल्पेषु एकं चिनोतु।",
+      "tooShort": "अतिलघु। न्यूनातिन्यूनं {min} उपयुज्यताम्।",
+      "tooLong": "अतिदीर्घम्। अधिकतमं {max} उपयुज्यताम्।",
+      "precision": "एतत् एककं तत् सम्यक् प्रकटयितुं न शक्नोति। लघुतमस्य एककस्य पूर्णाङ्कं उपयुज्यताम् अथवा लघु एककं चिनोतु।",
+      "serverRange": "अनुमतः परिधिः: {min} तः {max} पर्यन्तम्।",
+      "serverOptions": "अनुमतानि मूल्यानि: {options}।",
+      "server": {
+        "invalid": "सर्वरः एतत् मूल्यं न अङ्गीकृतवान्: {message}",
+        "locked": "एतत् विन्यासं भवतः प्रशासकेन अवरुद्धम्, अतः भवतः परिवर्तनं न रक्षितम्।",
+        "notFound": "एतत् विन्यासं इदानीं नास्ति।",
+        "forbidden": "एतत् विन्यासं परिवर्तयितुं भवतः अनुमतिः नास्ति।",
+        "reasonRequired": "अस्य परिवर्तनस्य कारणम् आवश्यकम्। एकं ददातु पुनः प्रयतताम्।",
+        "network": "सर्वरं प्राप्तुं न शक्तम्, अतः भवतः परिवर्तनं न रक्षितम्। {message}",
+        "other": "परिवर्तनं रक्षितुं न शक्तम्: {message}"
+      }
+    },
+    "effective": "इदानीं प्रवर्तमानम्: {value}",
+    "hint": {
+      "range": "अनुमतम्: {min} तः {max} पर्यन्तम्।",
+      "min": "न्यूनतमम्: {min}।",
+      "max": "अधिकतमम्: {max}।",
+      "default": "पूर्वनिर्धारितम्: {value}।",
+      "securityStricter": "सुरक्षा-विन्यासः प्लेटफॉर्मस्य मूल्यात् केवलम् अधिकं कठोरः कर्तुं शक्यते, कदापि दुर्बलः न।",
+      "inherited": "यदि भवान् एतत् पुनःस्थापयति तर्हि एतत् प्रत्यागमिष्यति: {value}।"
+    },
+    "locked": {
+      "withReason": "भवतः प्रशासकेन अवरुद्धम्: {reason}",
+      "noReason": "भवतः प्रशासकेन अवरुद्धम्। अत्र परिवर्तयितुं न शक्यते।"
+    },
+    "blocked": {
+      "role": "भवतः भूमिका एतत् विन्यासं परिवर्तयितुं न शक्नोति। कार्यक्षेत्र-प्रशासकं पृच्छतु।",
+      "scope": "एतत् विन्यासम् अत्र अधिलेखितुं न शक्यते।",
+      "readOnly": "विन्यासाः इदानीं केवलं पठनार्थाः।",
+      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+    },
+    "reset": {
+      "button": "उत्तराधिकारप्राप्त-मूल्ये पुनःस्थापयतु",
+      "aria": "उत्तराधिकारप्राप्त-मूल्ये पुनःस्थापयतु: {label}"
+    },
+    "help": {
+      "show": "अधिकं विवरणम्",
+      "hide": "विवरणं गोपयतु"
+    },
+    "history": {
+      "button": "इतिहासः",
+      "open": "इतिहासः: {label}",
+      "title": "इतिहासः: {label}",
+      "scopeTenant": "कार्यक्षेत्र-परिवर्तनानि",
+      "scopeAgent": "अस्य अभिकर्तुः परिवर्तनानि",
+      "close": "इतिहासं पिधत्ताम्",
+      "loading": "इतिहासः आरोप्यते",
+      "error": "इतिहासम् आरोपयितुं न शक्तम्। {message}",
+      "empty": "अद्यावधि कोऽपि परिवर्तनः न अभिलिखितः।",
+      "listLabel": "परिवर्तन-इतिहासः, नूतनतमः प्रथमम्",
+      "version": "संस्करणम् {version}",
+      "before": "पूर्वम्:",
+      "after": "पश्चात्:",
+      "by": "परिवर्तकः",
+      "unknownActor": "अज्ञातम्",
+      "reason": "कारणम्:"
+    },
+    "savebar": {
+      "count": "अरक्षितानि परिवर्तनानि: {count}।",
+      "invalid": "रक्षणात् पूर्वम् उद्भासितानि क्षेत्राणि संशोधयतु। संशोधनीयानि क्षेत्राणि: {count}।",
+      "discard": "परिवर्तनानि निरस्यतु",
+      "save": "परिवर्तनानि रक्षतु",
+      "saving": "रक्ष्यते"
+    },
+    "risky": {
+      "title": "जोखिमयुक्तानि परिवर्तनानि निश्चिनोतु ({count})",
+      "description": "एते विन्यासाः भवतः अभिकर्तारः कथम् आचरन्ति किं वा कर्तुम् अनुमताः इति परिवर्तयन्ति। प्रत्येकं परिवर्तनं समीक्षताम् भवान् कथम् इदं करोति इति च वदतु। कारणं लेखापरीक्षा-पत्रे रक्ष्यते।",
+      "descriptionSecurity": "एतेषु न्यूनातिन्यूनम् एकः सुरक्षा-विन्यासः अस्ति। सः प्लेटफॉर्मस्य मूल्यात् केवलम् अधिकं कठोरः कर्तुं शक्यते। प्रत्येकं परिवर्तनं समीक्षताम् भवान् कथम् इदं करोति इति च वदतु। कारणं लेखापरीक्षा-पत्रे रक्ष्यते।",
+      "listLabel": "निश्चेतव्यानि परिवर्तनानि",
+      "from": "तः",
+      "to": "to",
+      "securityNote": "सुरक्षा-विन्यासः: एषः प्लेटफॉर्मस्य मूल्यात् दुर्बलः भवितुं न शक्नोति।",
+      "consequence": "एतत् किं परिवर्तयति:",
+      "reasonLabel": "अस्य परिवर्तनस्य कारणम्",
+      "reasonPlaceholder": "उदाहरणम्: सहाय्य-दलस्य दीर्घ-अन्वेषणार्थं सीमां वर्धयितुम्",
+      "reasonHint": "आवश्यकम्, न्यूनातिन्यूनं {min} अक्षराणि। परिवर्तकेन पुराणनूतनमूल्याभ्यां च सह रक्ष्यते।",
+      "acknowledge": "अहम् अस्य सुरक्षा-परिवर्तनस्य परिणामान् जानामि।",
+      "cancel": "निरस्यतु",
+      "confirm": "निश्चित्य रक्षतु",
+      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+    },
+    "strictness": {
+      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
+      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
+      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "अवशिष्टम्",
+    "status_APPROVED": "अनुमोदितम्",
+    "status_REJECTED": "निराकृतम्",
+    "status_EXPIRED": "कालातीतम्",
+    "status_EXECUTION_FAILED": "कार्यान्वयनं विफलम्",
+    "status_DEAD_LETTERED": "डेड् लेटर्",
+    "filtersLabel": "अनुरोधान् छन्नयतु",
+    "filterAgentLabel": "अभिकर्त्रा छन्नयतु",
+    "filterToolLabel": "साधनेन छन्नयतु",
+    "filterAgeLabel": "वयसा छन्नयतु",
+    "filterAnyAgent": "कोऽपि अभिकर्ता",
+    "filterAnyTool": "किमपि साधनम्",
+    "filterAnyAge": "किमपि वयः",
+    "age_newer1h": "१ होरातः नूतनम्",
+    "age_older1h": "१ होरातः प्राचीनम्",
+    "age_older24h": "१ दिनात् प्राचीनम्",
+    "age_older7d": "७ दिनेभ्यः प्राचीनम्",
+    "filtersClear": "छन्नकं मार्जयतु",
+    "filterWindowNote": "नूतनतमान् {count} अनुरोधान् छन्नयति। प्राचीनाः न अन्तर्भवन्ति।",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time} काले कालातीतं भविष्यति",
+    "expiresAt": "यदि कश्चित् निर्णयं न करोति तर्हि {time} काले स्वयं पिधास्यते",
+    "overdue": "कालसीमा अतीता, अग्रिमे शोधने पिधास्यते",
+    "neverExpires": "एतत् कार्यक्षेत्रं प्रतीक्षमाणान् अनुरोधान् कालातीतान् न करोति।",
+    "expiredNote": "{time} काले कालातीतम् अभवत्: समये कश्चित् निर्णयं न कृतवान्",
+    "expiredReasonPrefix": "कालातीतम्:",
+    "auditExpired": "कालातीतम्, समये कश्चित् निर्णयं न कृतवान्",
+    "riskLow": "अल्पजोखिमम्",
+    "riskMedium": "मध्यमजोखिमम्",
+    "riskHigh": "उच्चजोखिमम्",
+    "riskEstimateNote": "जोखिमः साधनस्य नाम्नः कृतम् अनुमानम्। प्लेटफॉर्म साधनानां वर्गीकरणं न करोति, अतः अनुमोदनात् पूर्वं तर्कान् पठतु।",
+    "riskWhoDecides": "किं अनुमोदनं प्रतीक्षेत इति कः निर्धारयति?",
+    "previewGoal": "यस्मिन् कार्ये एतत् कार्यं करोति स्म:",
+    "previewArguments": "तर्काः",
+    "previewNoArguments": "अस्य आह्वानस्य कृते तर्काः न अभिलिखिताः।",
+    "previewRedacted": "{count} संवेदनशीलानि इव दृश्यमानानि मूल्यानि अत्र गोपितानि सन्ति। यदि भवान् अनुमोदयति तर्हि तानि तथापि साधनं प्रति प्रेष्यन्ते।",
+    "previewTruncated": "एते तर्काः सम्पूर्णतया दर्शयितुम् अतिदीर्घाः सन्ति, अतः एषः अनुरोधः अतः अनुमोदयितुं न शक्यते।",
+    "approveBlockedTooLong": "भवान् सम्पूर्णम् अनुरोधं समीक्षितुं न शक्नोति इति अनुमोदनं निष्क्रियम्। भवान् तथापि इमं निराकर्तुं शक्नोति।",
+    "ifApproveLabel": "यदि भवान् अनुमोदयति:",
+    "ifApprove": "{tool} उपरितनैः तर्कैः सह इदानीमेव चलति, अभिकर्ता च तस्य परिणामम् उपयुज्य कार्यं निरन्तरयति।",
+    "ifDenyLabel": "यदि भवान् निराकरोति:",
+    "ifDeny": "{tool} न चलति। अभिकर्त्रे उच्यते यत् भवान् नेति उक्तवान्, कारणे दत्ते तेन सह, सः च तेन विना अग्रे गच्छति।",
+    "whyGated": "अभिकर्ता {tool} उपयोक्तुम् ऐच्छत्। अभिकर्ता पर्यवेक्षणे निर्धारितः यतः, अथवा एतत् कार्यक्षेत्रं तस्य साधनस्य कृते अनुमोदनम् अनिवार्यं कृतवत् यतः, भवतः निर्णयार्थं एतत् स्थगितम्।",
+    "denyReasonLabel": "निराकरणस्य कारणम् (ऐच्छिकम्)",
+    "denyReasonPlaceholder": "उदाहरणम्: दोषयुक्तः प्राप्तकर्ता, प्रेषणात् पूर्वं माम् अपृच्छतु",
+    "denyReasonHelp": "यदि भवान् निराकरोति तर्हि अभिकर्ता एतत् कारणं निराकृतस्य आह्वानस्य परिणामरूपेण पठति स्वयं च समायोजयति। कारणं विना निराकर्तुं रिक्तं त्यजतु।",
+    "denyButton": "निराकरोतु",
+    "detailRegionLabel": "अनुरोधस्य विवरणम्",
+    "sessionLabel": "संवादः",
+    "linkOpenAgent": "अभिकर्तारम् उद्घाटयतु",
+    "linkInspectTurns": "तस्य आवर्तान् परीक्षताम्",
+    "continuationLabel": "ततः अभिकर्ता किम् अकरोत्",
+    "continuationCompleted": "अभिकर्ता कार्यनिरन्तरणं समापितवान्।",
+    "continuationFailed": "अस्य निर्णयस्य अनन्तरम् अभिकर्ता निरन्तरयितुं न अशक्नोत्।",
+    "continuationRetry": "तं निरन्तरयितुं वदतु",
+    "retryMessage": "कृपया कार्यं निरन्तरयतु।",
+    "lastDecisionTitle": "भवतः अन्तिमः निर्णयः: {tool}",
+    "lastDecisionClose": "पिधत्ताम्",
+    "deepLinkNotFound": "सः अनुमोदन-अनुरोधः न लब्धः, अथवा भवान् तं द्रष्टुं न शक्नोति।",
+    "selectAllLabel": "अस्य पृष्ठस्य सर्वाणि अवशिष्टानि साधन-आह्वानानि चिनोतु",
+    "selectRowLabel": "{tool} इत्यस्य अवशिष्टानि आह्वानानि चिनोतु",
+    "bulkSelected": "{count} चितानि",
+    "bulkApprove": "चितानि अनुमोदयतु",
+    "bulkDeny": "चितानि निराकरोतु",
+    "bulkClear": "चयनं मार्जयतु",
+    "bulkCancel": "निरस्यतु",
+    "bulkDismiss": "तिरस्करोतु",
+    "bulkMixedTools": "सामूहिकनिर्णयार्थं चिताः सर्वे अनुरोधाः एकस्यैव साधनस्य भवेयुः।",
+    "bulkNotLowRisk": "सामूहिक-अनुमोदनं केवलम् अल्पजोखिम-साधनानां (अन्वेषणानां) कृते। निराकरणं कस्यापि एकस्य साधनस्य कृते कार्यं करोति, अथवा एतानि एकैकशः निर्णयतु।",
+    "bulkNotToolCall": "सामूहिकनिर्णयाः केवलम् अभिकर्तृ-साधन-आह्वानानि समाविशन्ति।",
+    "bulkNotPending": "सामूहिकनिर्णयाः केवलम् अद्यापि अवशिष्टान् अनुरोधान् समाविशन्ति।",
+    "bulkConfirmApproveTitle": "{tool} इत्यस्य {count} आह्वानानि अनुमोदयामि वा?",
+    "bulkConfirmApproveBody": "एतेषु प्रत्येकं इदानीमेव {tool} चालयति, अधः सूचीबद्धैः स्वकीयैः तर्कैः सह, अभिकर्ता च परिणामम् उपयुज्य अग्रे गच्छति। इदं पूर्ववत् कर्तुं न शक्यते।",
+    "bulkConfirmDenyTitle": "{tool} इत्यस्य {count} आह्वानानि निराकरोमि वा?",
+    "bulkConfirmDenyBody": "एतेषु किमपि न चलति। अभिकर्त्रे उच्यते यत् प्रत्येकम् आह्वानं निराकृतम्, कारणे दत्ते तेन सह।",
+    "bulkConfirmApprove": "{count} अनुमोदयतु",
+    "bulkConfirmDeny": "{count} निराकरोतु",
+    "bulkMore": "अपरे {count}",
+    "bulkProgress": "{count} मध्ये {done} पूर्णानि",
+    "bulkResult": "{done} निर्णीतानि, {failed} विफलानि।",
+    "notifyOff": "मां सूचयतु",
+    "notifyOn": "सूचनाः सक्रियाः",
+    "notifyHelp": "यदा एतत् पटलं पृष्ठभूमौ भवति नूतनश्च अनुरोधः आगच्छति तदा ब्राउजर्-सूचनां दर्शयतु",
+    "notifyUnsupported": "एतत् ब्राउजर् सूचनां दर्शयितुं न शक्नोति।",
+    "notifyBlocked": "सूचनाः अवरुद्धाः सन्ति। ताः सक्रियाः कर्तुं स्वब्राउजरस्य साइट्-विन्यासेषु अनुमतिं ददातु।",
+    "notifyTitle": "एकः अभिकर्ता अनुमोदनं प्रतीक्षते",
+    "notifyBodyOne": "{tool} इत्यस्य भवतः निर्णयः आवश्यकः।",
+    "notifyBodyMany": "{count} अनुरोधानां भवतः निर्णयः आवश्यकः।",
+    "newArrived": "{count} नूतनाः अनुमोदन-अनुरोधाः आगताः।",
+    "rulesTitle": "साधनस्य कृते नियमः",
+    "rulesIntro": "चिनोतु यत् साधनं सदा मानवं प्रतीक्षेत वा कदापि न। एषः नियमः अर्ध-स्वायत्ते निर्धारिते प्रत्येकस्मिन् अभिकर्तरि प्रवर्तते।",
+    "rulesNeedsScope": "नियमं परिवर्तयितुं भवतः अनुमोदन-अनुमतिः आवश्यकी।",
+    "rulesToolLabel": "साधनस्य नाम",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "अनुरोधे साधनं यथा दृश्यते तथैव, यथा send_email।",
+    "rulesToolNameInvalid": "साधनस्य नाम्नि रिक्तस्थानं न भवितुम् अर्हति।",
+    "rulesModeLabel": "किं भवेत्",
+    "rulesAskName": "सदा पृच्छतु",
+    "rulesAskHint": "अस्य साधनस्य प्रत्येकम् आह्वानं मानवानुमोदनं प्रतीक्षते।",
+    "rulesNeverName": "कदापि न पृच्छतु",
+    "rulesNeverHint": "अस्य साधनस्य आह्वानानि कस्यापि अनुमोदनं विना तत्क्षणं चलन्ति।",
+    "rulesNeverRiskyWarn": "एतत् साधनं वस्तूनि परिवर्तयति इव दृश्यते। निश्चितं भवतु।",
+    "rulesScopeNote": "नियमः सम्पूर्णे कार्यक्षेत्रे प्रवर्तते, एकस्मिन् अभिकर्तरि न। पर्यवेक्षणे स्थितः अभिकर्ता अद्यापि सर्वत्र पृच्छति, पूर्णस्वायत्तः अभिकर्ता च नियमः यत् वदेत् तथापि कदापि न पृच्छति। भवता निर्धारिताः नियमाः अद्यापि अत्र सूचीबद्धाः न सन्ति।",
+    "rulesSave": "नियमं रक्षतु",
+    "rulesSaveFailed": "नियमं रक्षितुं न शक्तम्।",
+    "rulesSavedAsk": "{tool} सदा अनुमोदनं याचिष्यते।",
+    "rulesSavedNever": "{tool} इदानीं अनुमोदनं न याचिष्यते।",
+    "rulesNeverConfirmTitle": "{tool} चालनात् पूर्वं प्रष्टुं निवर्तयामि वा?",
+    "rulesNeverConfirmBody": "प्रत्येकः अर्ध-स्वायत्तः अभिकर्ता कस्यापि अनुमोदनं विना {tool} चालयिष्यति। एतत् वस्तूनि परिवर्तयितुं प्रेषयितुं वा शक्नोति इव दृश्यते, दोषश्च पूर्ववत् कर्तुं न शक्यते।",
+    "rulesNeverConfirmBodyLow": "प्रत्येकः अर्ध-स्वायत्तः अभिकर्ता अपृष्ट्वा {tool} चालयिष्यति। एतत् अन्वेषण इव दृश्यते, अतः सामान्यतः सुरक्षितम्।",
+    "rulesNeverConfirm": "प्रश्नं निवर्तयतु",
+    "tiersTitle": "किं अनुमोदनं प्रतीक्षेत इति कः निर्धारयति?",
+    "tiersIntro": "प्रत्येकस्य अभिकर्तुः एकः स्वायत्तता-स्तरः अस्ति। कार्यक्षेत्रस्य अनुमोदन-नियमाः आहत्य प्रयोक्तव्याः न वा इति सः निर्धारयति।",
+    "tierCurrent": "एषः अभिकर्ता",
+    "tierConsequenceLabel": "उपयोगे:",
+    "tierSupervisedName": "पर्यवेक्षणे",
+    "tierSupervisedWhat": "कार्यक्षेत्रस्य नियमाः यत् वदेयुः तथापि प्रत्येकं साधन-आह्वानं मानवं प्रतीक्षते। अस्मै प्रत्येकस्मिन् आवर्ते साधन-पदानां न्यूना सीमा अपि दीयते।",
+    "tierSupervisedConsequence": "सर्वाधिकं सुरक्षितम्, किन्तु पङ्क्तौ बहवः अनुरोधाः मन्दः च अभिकर्ता इति अपेक्षताम्।",
+    "tierSemiName": "अर्ध-स्वायत्तः",
+    "tierSemiWhat": "कार्यक्षेत्रस्य नियमः प्रत्येकं साधनं निर्धारयति: प्रेषणं, लोपनं, भुक्तिः इत्यादीनि जोखिमयुक्तानि साधनानि पूर्वनिर्धारितरूपेण पृच्छन्ति, शेषाणि चलन्ति।",
+    "tierSemiConsequence": "उत्तमं पूर्वनिर्धारितम्। भवतः प्रति-साधन-नियमाः अत्र प्रभावशालिनः भवन्ति।",
+    "tierFullName": "पूर्णस्वायत्तः",
+    "tierFullWhat": "किमपि साधन-आह्वानं कदापि अनुमोदनं न प्रतीक्षते अभिकर्ता च साधन-पदानां बृहतीं सीमां प्राप्नोति। प्रति-साधन-नियमाः उपेक्ष्यन्ते।",
+    "tierFullConsequence": "एषः अपृष्ट्वा कार्यं करोति। एतम् केवलं तस्य अभिकर्तुः कृते उपयुज्यताम् यस्य दोषाः सुखेन पूर्ववत् कर्तुं शक्यन्ते।",
+    "tiersRuleNote": "साधन-नियमाः (सदा पृच्छतु, कदापि न पृच्छतु) केवलम् अर्ध-स्वायत्तानाम् अभिकर्तॄणां कृते महत्त्वपूर्णाः।",
+    "agentModeTitle": "एतस्य अभिकर्तुः अनुमोदनं कदा आवश्यकम्?",
+    "agentModeSupervised": "एषः अभिकर्ता पर्यवेक्षणे अस्ति: प्रत्येकं साधन-आह्वानं मानवं प्रतीक्षते, प्रति-साधन-नियमाः च उपेक्ष्यन्ते।",
+    "agentModeSemi": "एषः अभिकर्ता अर्ध-स्वायत्तः अस्ति: प्रत्येकं साधनं कार्यक्षेत्रस्य नियमम् अनुसरति। प्रेषणं, लोपनं, भुक्तिः च पूर्वनिर्धारितरूपेण पृच्छन्ति।",
+    "agentModeFull": "एषः अभिकर्ता पूर्णस्वायत्तः अस्ति: सः कदापि अनुमोदनं न प्रतीक्षते, प्रति-साधन-नियमाः च उपेक्ष्यन्ते।",
+    "agentModeQueueLink": "अस्य अभिकर्तुः अनुरोधान् पश्यतु",
+    "agentModeRulesLink": "साधनस्य कृते नियमं निर्धारयतु",
+    "agentModeShowTiers": "त्रीन् स्तरान् तुलयतु",
+    "agentModeHideTiers": "तुलनां गोपयतु",
+    "agentModeScopeNote": "उपरितनेन स्वायत्तता-चयनेन स्तरं परिवर्तयतु। साधन-नियमाः सम्पूर्णस्य कार्यक्षेत्रस्य, न प्रति-अभिकर्तारम्।",
+    "policyThenApprovalNote": "एतेभ्यः नियमेभ्यः निर्गतम् आह्वानं तथापि मानवं प्रतीक्षितुं शक्नोति। तत् अभिकर्तुः स्वायत्तता-स्तरे निर्भरति, यः अधः व्याख्यातः।",
+    "chatReasonToggle": "कारणं योजयतु",
+    "chatReviewInQueue": "पङ्क्तौ समीक्षताम्"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "घटनाः छन्नयतु",
+    "tlFilterCategories": "घटनायाः प्रकारः",
+    "tlCatIntake": "प्रवेशः",
+    "tlCatModel": "मॉडलम्",
+    "tlCatTool": "साधनम्",
+    "tlCatApproval": "अनुमोदनम्",
+    "tlCatContinuation": "निरन्तरता",
+    "tlCatRetry": "पुनः प्रयासः विफलतान्तरणं च",
+    "tlCatGuardrail": "गार्डरेल्",
+    "tlCatCache": "कैश्",
+    "tlCatVerify": "परीक्षा",
+    "tlCatFinish": "समापनम्",
+    "tlProblemsOnly": "केवलं समस्याः",
+    "tlSearch": "घटनाः अन्विष्यताम्",
+    "tlSearchPlaceholder": "साधनम्, मॉडलम्, गार्डः वा स्थितिः",
+    "tlClearFilters": "छन्नकं मार्जयतु",
+    "tlShowing": "{total} घटनासु {shown} दर्श्यन्ते",
+    "tlNoMatch": "कापि घटना एतेन छन्नकेन न मिलति।",
+    "tlSevOk": "सफलम्",
+    "tlSevInfo": "सूचना",
+    "tlSevWarn": "ध्यानम् अपेक्षते",
+    "tlSevError": "विफलम्",
+    "tlIntake": "आवर्तः आरब्धः: {chars} अक्षराणि, {tools} साधनानि, {attachments} संलग्नकानि",
+    "tlRunTools": "Tools for this run",
+    "tlRunToolsNone": "none (text only)",
+    "tlModelCall": "{model} ({provider}) प्रति मॉडल-आह्वानम्, मार्गः {route}",
+    "tlFailover": "{model} ({provider}) प्रति विफलतान्तरणम् अभवत्",
+    "tlRetryModel": "{model} ({provider}) प्रति पुनः प्रयासः कृतः, मार्गः {route}",
+    "tlRetry": "पुनः प्रयासः: {guard} ({outcome})",
+    "tlCacheHit": "प्रतिक्रिया-कैशतः उत्तरं दत्तम्",
+    "tlToolCall": "साधन-आह्वानम् {tool}: {status}",
+    "tlApprovalRequested": "{tool} चलनात् पूर्वम् अनुमोदनं याचितम्",
+    "tlApprovalDecided": "{tool} कृते अनुमोदन-निर्णयः अभवत्: {decision}",
+    "tlContinuation": "निरन्तरता: {guard} ({outcome})",
+    "tlGuard": "गार्डरेल् {guard}: {outcome}",
+    "tlVerifyPassed": "परीक्षा उत्तीर्णा: {check}",
+    "tlVerifyFailed": "परीक्षा अनुत्तीर्णा: {check}",
+    "tlFinish": "समाप्तम्: {status} (उत्तरे {chars} अक्षराणि)",
+    "tlOther": "घटना {type}",
+    "reasonFallbackProvider": "प्राथमिकं मॉडलं विफलम् अभवत्, अतः आवर्तः अभिकर्तुः विकल्प-प्रदातारं गतः।",
+    "reasonToolsDisabledRetry": "प्रदाता साधन-आह्वान-इतिहासं प्रत्याख्यातवान्, अतः आवर्तस्य उत्तरं पुनः एकवारं साधनानि विना दत्तम्।",
+    "reasonRetryOther": "मॉडल-आह्वानं पुनरावर्तितम्।",
+    "reasonToolCallRetry": "मॉडलः स्वोत्तरं विकृतेन साधन-आह्वानेन समापितवान्, अतः पुनः पृष्टः।",
+    "reasonCutOff": "उत्तरं दैर्घ्य-सीमायां छिन्नम्, अतः मॉडलं निरन्तरयितुम् उक्तम्।",
+    "reasonToolsContinue": "साधन-आह्वानानन्तरं मॉडलाय अधिकानि पदानि आवश्यकानि आसन्, अतः आवर्तः अनुवृत्तः।",
+    "reasonToolBlocked": "साधनस्य स्थाने कश्चित् गार्डः, नीतिः, हुकः वा सीमा उत्तरं दत्तवान्, अतः तत् न चलितम्।",
+    "reasonToolParked": "आह्वानं मानवस्य अनुमोदनं प्रतीक्षते; साधनं न चलितम्।",
+    "reasonGuardAction": "एकेन गार्डरेलेन उत्तरं परिवर्तितं वा धारितम्।",
+    "tlAtStart": "आरम्भात्",
+    "tlGap": "पूर्वघटनातः",
+    "tlDuration": "कालसीमा",
+    "tlTokens": "निवेश / निर्गम टोकनानि",
+    "tlCost": "व्ययः",
+    "tlDetails": "हैशः अपरिष्कृतं सारं च",
+    "tlArgsHash": "तर्काणां हैशः",
+    "tlResultDigest": "परिणामस्य सारांशः",
+    "tlContentNote": "तर्काः परिणामाः च कदापि न रक्ष्यन्ते। साधन-आह्वानस्य कृते कालरेखा तस्य स्थितिं, कालं, तस्य तर्कपरिणामयोः हैशं च दर्शयति, तेषां विषयवस्तु न।",
+    "tlStatFinish": "समापनस्य कारणम्",
+    "tlStillOpen": "न समाप्तम्",
+    "tlProblemCount": "{count} घटनासु ध्यानम् अपेक्षितम्",
+    "tlStatRetries": "पुनः प्रयासः विफलतान्तरणं च",
+    "tlStatContinuations": "निरन्तरता",
+    "tlStatApprovals": "अनुमोदनम्",
+    "tlStatTokens": "निवेश / निर्गम टोकनानि",
+    "tlTokensNotRecorded": "अस्य आवर्तस्य कृते न अभिलिखितम्",
+    "tlTokensInOut": "निवेश / निर्गम",
+    "tlCopyTurnId": "आवर्त-ID प्रतिलिपयतु",
+    "tlCopyTurnIdShort": "ID प्रतिलिपयतु",
+    "tlCopied": "आवर्त-ID प्रतिलिपितम्।",
+    "tlCopyFailed": "प्रतिलिपिं कर्तुं न शक्तम्। ID चित्वा हस्तेन प्रतिलिपयतु।",
+    "sessTitle": "एकस्य सत्रस्य आवर्ताः",
+    "sessSubtitle": "अभिलिखितान् आवर्तान् नूतनतमान् प्रथमं द्रष्टुं चैट्-सत्रं चिनोतु। चैट्-सन्देशस्य आवर्तान् पश्यतु इति सम्बन्धं उद्घाट्य भवतः कृते एतत् स्वयं पूर्यते।",
+    "sessionIdLabel": "सत्र-ID",
+    "sessionIdPlaceholder": "चैट्-सत्र-ID",
+    "sessFind": "आवर्त-अन्वेषकः",
+    "sessInvalid": "अभिकर्तृ-ID (एकः UUID) सत्र-ID च ददातु।",
+    "sessLoading": "सत्रस्य आवर्ताः आरोप्यन्ते...",
+    "sessUnavailableTitle": "सत्र-अन्वेषणं उपलब्धं नास्ति",
+    "sessUnavailableBody": "एषः सर्वरः सत्रस्य आवर्तान् सूचीबद्धं कर्तुं न शक्नोति। तस्य स्थाने अधः ID द्वारा आवर्तम् उद्घाटयतु।",
+    "sessErrorTitle": "सत्रस्य आवर्ताः आरोपयितुं न शक्ताः",
+    "sessEmptyTitle": "अस्मिन् सत्रे जर्नल्-कृताः आवर्ताः न सन्ति",
+    "sessEmptyBody": "सत्रं किमपि न अभिलिखितवत्। सत्र-ID दोषयुक्तः, अथवा तस्य आवर्तानां चलनसमये आवर्त-जर्नल् निष्क्रियम् आसीत्।",
+    "sessListLabel": "{count} जर्नल्-कृताः आवर्ताः",
+    "sessEvents": "{count} घटनाः",
+    "sessStatusOpen": "उद्घाटयतु",
+    "sessOpen": "कालरेखां उद्घाटयतु",
+    "sessOpened": "अधः दर्शितम्"
+  },
+  "evalControls": {
+    "cancel": "निरस्यतु",
+    "saving": "रक्ष्यते...",
+    "saved": "रक्षितम्।",
+    "saveMode": "पुनर्वादन-रीतिं रक्षतु",
+    "discard": "परिवर्तनानि निरस्यतु",
+    "saveFailed": "पुनर्वादन-रीतिं रक्षितुं न शक्तम्।",
+    "unsavedChanges": "अरक्षितानि परिवर्तनानि",
+    "modeTitle": "एतत् दत्तांश-समूहं कथं पुनर्वाद्यते",
+    "modeHelp": "पुनर्वादनं अभिकर्तुः साधनानि उपयोक्तुं शक्नोति वा न वा इति चिनोतु। इदं परवर्तिनः रनाः किं मापयन्ति तत् परिवर्तयति।",
+    "modeTextOnly": "केवलं पाठ्यम्",
+    "modeTextOnlyHelp": "अभिकर्ता स्वसाधनानि विना उत्तरं ददाति। सुरक्षितम्: यथार्थतः किमपि न चलति। अपेक्षित-साधन-परीक्षाः पूरयितुं न शक्यन्ते।",
+    "modeFull": "साधनैः सह सम्पूर्णा पाइपलाइन्",
+    "modeFullHelp": "यथार्थः उपयोक्ता यानि साधनानि, गार्डरेलानि, पदसीमाः च प्राप्नोति तान्येव। अपेक्षित-साधन-परीक्षाणां गति-पथ-परीक्षाणां च कृते आवश्यकम्।",
+    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "autoApproveLabel": "इवैल्-सैण्डबॉक्से साधन-आह्वानानि स्वयम् अनुमोदयतु",
+    "autoApproveHelp": "सामान्यतः मानवं प्रतीक्षमाणानि साधन-आह्वानानि इवैल्-सैण्डबॉक्सः अनुमोदयति, येन प्रकरणं समाप्तुं शक्नुयात्। एतेन विना प्रकरणं उत्पादने यथा भवति तथैव अनुत्तरिते अनुमोदने समाप्यते।",
+    "autoApproveWarnTitle": "केवलम् अनुत्पादन-कार्यक्षेत्राणां कृते",
+    "autoApproveWarnBody": "यत्र साधनानि यथार्थ-ग्राहकान् दत्तांशं वा स्प्रष्टुं शक्नुवन्ति तत्र एतत् कदापि न सक्रियं कुर्यात्। शेल्, कोडिङ्, समयसूची, अभिकर्तृ-तः-अभिकर्तारम्, भुक्तिः, लोपन-साधनानि च कदापि स्वयं न अनुमोद्यन्ते। भवतः प्रशासकेन एतत् कार्यक्षेत्रम् अनुत्पादनरूपेण चिह्नितं भवितव्यम्।",
+    "autoApproveNeedsFull": "प्रथमं सम्पूर्णां पाइपलाइन् सक्रियां करोतु: स्वयम् अनुमोदनं केवलं साधनानि चलन्ति चेदेव प्रवर्तते।",
+    "autoApproveRefused": "अस्मिन् कार्यक्षेत्रे अनुमतं नास्ति: {reason}",
+    "autoApproveConfirmTitle": "इवैल्-मध्ये साधन-आह्वानानि स्वयम् अनुमोदयामि वा?",
+    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirm": "स्वयम् अनुमोदनं सक्रियं करोतु",
+    "trajectoryLabel": "गति-पथ-परीक्षाः",
+    "trajectoryOn": "On",
+    "trajectoryOff": "उपलब्धं नास्ति",
+    "trajectoryHelpOn": "अपेक्षितगति-पथयुक्तानि प्रकरणानि अभिकर्त्रा कानि साधनानि कस्मिन् क्रमे आहूतानि इत्यस्य आधारेण अङ्कितानि भवन्ति। इदं भवतः प्रशासकः सम्पूर्णस्य नियोजनस्य कृते सक्रियं करोति, प्रत्येकस्य दत्तांश-समूहस्य कृते न।",
+    "trajectoryHelpOff": "गति-पथ-परीक्षाः अत्र उपलब्धाः न सन्ति। तानि भवतः प्रशासकः सम्पूर्णस्य नियोजनस्य कृते सक्रियं करोति, इवैल्-युक्ता योजना च आवश्यकी।",
+    "trajectoryNeedsFull": "एतत् दत्तांश-समूहं केवलं पाठ्यम् अस्ति, अतः अपेक्षितगति-पथयुक्तानि प्रकरणानि अङ्कितानि न भविष्यन्ति। सम्पूर्णां पाइपलाइन् सक्रियां करोतु।",
+    "runAutoApproved": "स्वयम् अनुमोदितम्",
+    "runAutoApprovedTitle": "अस्य रनस्य कस्यापि साधन-आह्वानस्य निर्णयं कश्चन मानवः न कृतवान्; इवैल्-सैण्डबॉक्सः तानि अनुमोदितवान्।",
+    "toolCallsLabel": "अस्मिन् पुनर्वादने साधन-आह्वानानि",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "विफलम्",
+    "toolStatusNotRun": "न चलितम्",
+    "toolStatusAwaitingApproval": "अनुमोदनं प्रतीक्षते",
+    "toolStatusReplayed": "पुनर्वादितम्",
+    "samplingTitle": "पृष्ठभूमि-गुणवत्ता-अङ्कनम्",
+    "samplingLoading": "अङ्कन-दरः आरोप्यते...",
+    "samplingUnavailable": "पृष्ठभूमि-निर्णायकः कति जीवित-आवर्तान् अङ्कयति इति भवतः प्लेटफॉर्म-प्रशासकः निर्धारयति, अत्र च न दर्श्यते।",
+    "samplingValue": "प्रायः {percent}% जीवित-आवर्तान् पृष्ठभूमि-गुणवत्ता-निर्णायकः अङ्कयति।",
+    "samplingHelp": "न्यूनः दरः व्ययं न्यूनीकरोति ऊर्ध्वप्रवृत्तौ च न्यूनानि अङ्कानि धारयति। एतत् मूल्यम् अत्र केवलं पठनार्थम्।",
+    "samplingSource_default": "पूर्वनिर्धारितम्",
+    "samplingSource_platform": "प्लेटफॉर्मेन निर्धारितम्",
+    "samplingSource_tenant": "भवतः कार्यक्षेत्रस्य कृते निर्धारितम्",
+    "samplingSource_agent": "अस्य अभिकर्तुः कृते निर्धारितम्",
+    "modeDefault": "कार्यक्षेत्र-पूर्वनिर्धारितम्",
+    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
+    "modeDefaultCurrent": "Currently: {mode}",
+    "modeNameFull": "Full pipeline",
+    "modeNameQuick": "Quick (text only)",
+    "badgeFull": "full pipeline",
+    "badgeQuick": "quick",
+    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
+    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
+    "runModeLabel": "Replay mode for the next run",
+    "runModeInherit": "Use the dataset's setting",
+    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
+    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
+    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
+    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
+    "toolStatusSimulated": "simulated, not executed"
+  },
+  "agentLab": {
+    "wtLabel": "अभिकर्तुः साधनैः सह चालयतु",
+    "wtHelp": "निष्क्रियम्: प्रत्येकम् उत्तरम् एकः सामान्यः मॉडल-आह्वानः। सक्रियम्: उत्तराणि तस्मात् साधन-पाइपलाइनात् आगच्छन्ति यं चैट्-आवर्तः उपयुनक्ति, अतः साधनानि चलन्ति, गार्डरेलानि प्रवर्तन्ते, पदक्रम-सीमाः च पाल्यन्ते। यानि आह्वानानि मानवानुमोदनम् अपेक्षन्ते तानि लम्बितानुमोदनरूपेण प्रतीक्षन्ते।",
+    "wtUnavailable": "अस्मिन् संस्थापने साधनैः सह लैब् चालनम् निष्क्रियम् अस्ति। तत् सक्रियं कर्तुं प्रशासकं वदतु।",
+    "wtRefused": "एषः रनः निराकृतः: {reason}",
+    "wtActive": "अस्मिन् रने साधनानि यथार्थतः चलिष्यन्ति, तेषां पार्श्वप्रभावैः सह।",
+    "wtConfirmTitle": "अभिकर्तुः साधनैः सह लैब् चालयामि वा?",
+    "wtConfirmBody": "प्रत्येकं नमूनं अभिकर्तुः यथार्थसाधनानि आह्वातुं शक्नोति, तेषाम् आह्वानानां च यथार्थः प्रभावः भवितुम् अर्हति, यथा सन्देशप्रेषणम् अथवा दत्तांश-लेखनम्। अनुमोदनयोग्यानि आह्वानानि मानवं प्रतीक्षिष्यन्ते। इदं केवलं परीक्षण-अभिकर्तृभिः वा परीक्षण-दत्तांशैः सह उपयुज्यताम्।",
+    "wtConfirm": "साधनानि उपयुज्यताम्"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "अभिकर्तुः सीमाः",
+        "description": "स्थगनात् पूर्वम् एकः अभिकर्तृ-आवर्तः कियत् कार्यं कर्तुं शक्नोति।"
+      },
+      "approvals": {
+        "label": "अनुमोदनम्",
+        "description": "मानवेन कार्यस्य अनुमोदने निराकरणे वा कृते किं भवति, अनुरोधश्च कियत्कालं प्रतीक्षते।"
+      },
+      "chat": {
+        "label": "संवादस्य आचरणम्",
+        "description": "उत्तराणि कथं समाप्यन्ते, पुनः प्रयासाः, कैश्, निरन्तरणं च।"
+      },
+      "routing": {
+        "label": "मॉडल-मार्गनिर्धारणम्",
+        "description": "कः सन्देशः द्रुत-मॉडलाय पर्याप्तं सरलः इति गण्यते।"
+      },
+      "memory": {
+        "label": "स्मृतिः",
+        "description": "अभिकर्ता कति स्मृतीः धारयति स्मरति च।"
+      },
+      "aux": {
+        "label": "पृष्ठभूमि-मॉडल-आह्वानानि",
+        "description": "सारः, सहायता, सङ्कोचनं च कं मॉडलम् उपयुञ्जते।"
+      },
+      "guardrails": {
+        "label": "सुरक्षा-परीक्षाः",
+        "description": "स्वचालिताः सुरक्षा-परीक्षाः कियत् कठोराः। एताः प्लेटफॉर्म-विन्यासात् केवलम् अधिकं कठोराः कर्तुं शक्यन्ते।"
+      },
+      "quality": {
+        "label": "मूल्याङ्कनम्",
+        "description": "परीक्षण-रनाः एआइ-निर्णायकाः च कथम् आचरन्ति।"
+      },
+      "delegation": {
+        "label": "कार्य-समर्पणम्",
+        "description": "एकः अभिकर्ता एकदा अन्येभ्यः अभिकर्तृभ्यः कियत् कार्यं दातुं शक्नोति।"
+      },
+      "knowledge": {
+        "label": "ज्ञान-अन्वेषणम्",
+        "description": "श्रेष्ठान् भागान् चेतुं पूर्वं भवता आरोपितानां लेखानाम् अन्वेषणं प्रत्याशिनः कियद्विस्तृतं सङ्गृह्णाति।"
+      },
+      "learning": {
+        "label": "अधिगमः",
+        "description": "अभिकर्तुः अधिगम-नीतिः विकल्पान् कथं परीक्षते।"
+      },
+      "providers": {
+        "label": "एआइ-प्रदातारः",
+        "description": "संयुक्तेषु एआइ-प्रदातृषु एकः कार्यं कर्तुं विरमति चेत् तान् कथम् उपयुज्यते।"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "प्रत्येकस्मिन् आवर्ते अधिकतमानि साधन-आह्वानानि",
+          "description": "एकम् आवर्तं निरुध्य यत् तस्य हस्ते अस्ति तेन उत्तरं दातुं वक्तुं पूर्वं सः अधिकतमं कति साधन-आह्वानानि कर्तुं शक्नोति।",
+          "help": "दीर्घ-बहुपद-कार्यं कुर्वद्भ्यः अभिकर्तृभ्यः वर्धयतु। नियन्त्रणाद् बहिः चक्रान् निरोद्धुं व्ययं च पूर्वानुमेयं स्थापयितुं न्यूनीकरोतु। कार्यक्षेत्रस्य प्लेटफॉर्मस्य वा कृते दर्शितं मूल्यं मुख्या सङ्ख्या अस्ति: अभिकर्तुः स्वायत्तता-स्तरः रनकाले एतां ऊर्ध्वाधः करोति, अतः अधिकस्वायत्ताः न्यूनस्वायत्ताः वा अभिकर्तारः भिन्नां सङ्ख्याम् उपयोक्तुं शक्नुवन्ति। अभिकर्तुः स्वकीयं मूल्यं निर्धारितं चेत् तत् यथातथं प्रयुज्यते।"
+        },
+        "turnTimeoutSeconds": {
+          "label": "प्रत्येकस्मिन् आवर्ते अधिकतमः कालः",
+          "description": "एकः आवर्तः स्थगनात् पूर्वं कियत्कालं चलितुं शक्नोति।",
+          "help": "मन्द-अनुसन्धानाय कोड-कार्याय वा वर्धयतु। कालातीतः आवर्तः अद्यावधि कृतेन कार्येण सह समाप्यते।"
+        },
+        "toolTimeoutSeconds": {
+          "label": "प्रत्येकस्मिन् साधन-आह्वाने अधिकतमः कालः",
+          "description": "एकं साधन-आह्वानं स्थगनात् पूर्वं कियत्कालं चलितुं शक्नोति। प्लेटफॉर्म-पूर्वनिर्धारिते कापि सीमा नास्ति; तदा प्रत्येकं साधनं स्वकीयं टाइमआउट् धारयति।",
+          "help": "यदि मन्दं साधनं सम्पूर्णं संवादं रोद्धुं शक्नोति तर्हि सीमां निर्धारयतु। स्थगितस्य आह्वानस्य किमपि प्रभावः आसीत् वा इति न ज्ञायते, अतः अभिकर्त्रे उच्यते यत् सः सफलम् आसीत् इति न मन्येत।"
+        },
+        "toolOutputMaxChars": {
+          "label": "दीर्घतमः साधन-परिणामः",
+          "description": "एकस्य साधन-परिणामस्य कति अक्षराणि मॉडलाय दीयन्ते; शेषं छिद्यते।",
+          "help": "यदि अभिकर्त्रा दीर्घाः लेखाः API-प्रतिक्रियाः वा सम्पूर्णतया पठितव्याः तर्हि वर्धयतु, प्रत्येकस्मिन् आवर्ते अधिकटोकनानां मूल्येन। व्ययं रक्षितुं न्यूनीकरोतु।"
+        },
+        "retrievalTopK": {
+          "label": "प्रत्येकस्मिन् अन्वेषणे ज्ञान-खण्डाः",
+          "description": "एकम् ज्ञान-भाण्डार-अन्वेषणं अभिकर्त्रे कति खण्डान् प्रत्यर्पयति।",
+          "help": "अधिकाः खण्डाः अभिकर्त्रे कार्यं कर्तुं अधिकां सामग्रीं ददति किन्तु अधिकटोकनानि व्ययन्ति कोलाहलं च वर्धयितुं शक्नुवन्ति। न्यूनाः खण्डाः द्रुताः सस्ताः च।"
+        },
+        "retrievalMinScore": {
+          "label": "खण्डस्य न्यूनतमा प्रासङ्गिकता",
+          "description": "ज्ञान-खण्डः प्रत्यर्प्यमाणः भवितुं कियत् प्रासङ्गिकः भवेत्। 0 प्रत्येकं मेलनं प्रत्यर्पयति।",
+          "help": "यदि अभिकर्ता अप्रासङ्गिकान् खण्डान् उद्धरति तर्हि वर्धयतु। अतिवृद्धौ सः किमपि न प्राप्नुयात्।"
+        },
+        "continuationPasses": {
+          "label": "अपूर्ण-उत्तरानन्तरम् अतिरिक्ताः आवर्ताः",
+          "description": "यदि मॉडलस्य उत्तरं घोषिते किन्तु अकृते पदे स्थगति तर्हि तं कतिवारं निरन्तरयितुं उच्यते।",
+          "help": "यः अभिकर्ता प्रायः पदं घोषयित्वा स्थगति तस्मै वर्धयतु। प्रत्येकः अतिरिक्तः आवर्तः एकं मॉडल-आह्वानं व्ययति।"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "अनुमोदनानन्तरं निरन्तरयतु",
+          "description": "यदा मानवः कार्यम् अनुमोदयति तदा अभिकर्ता नूतनसन्देशं प्रतीक्षमाणः न भूत्वा स्वयं कार्यं समापयति।",
+          "help": "यदि भवान् इच्छति यत् प्रत्येकं अनुमोदितं कार्यं आवर्तं समापयेत् अनुवर्ती च हस्तेन भवेत् तर्हि एतत् निष्क्रियं करोतु।"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "निराकरणानन्तरमपि पृष्ठभूमि-कार्यं निरन्तरं चलति",
+          "description": "पृष्ठभूमि-कार्ये यदा मानवः कार्यं निराकरोति तदा कार्यं न स्थगति, निराकरणं लिखित्वा निरन्तरं चलति।",
+          "help": "यदि निराकरणेन कार्यं स्थगनीयं तर्हि एतत् निष्क्रियं स्थापयतु। निराकृतं पदं विना कार्यं सामान्यतः समाप्तुं शक्नोति चेत् सक्रियं करोतु।"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "अनुमोदन-अनुरोधाः कालातीताः भवन्ति",
+          "description": "एकः अनुमोदन-अनुरोधः कालातीतः भवितुं पूर्वं निर्णयार्थं कियत्कालं प्रतीक्षते। 0 इत्यस्य अर्थः अनुरोधः कदापि कालातीतः न भवति।",
+          "help": "कालसीमां विना, विस्मृताः अनुरोधाः अनिश्चितकालं मुक्ताः तिष्ठन्ति अभिकर्ता च प्रतीक्षमाणः तिष्ठति। कालातीतः अनुरोधः अनुमोदितः नास्ति इति गण्यते।"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "छिन्नानि उत्तराणि पूरयतु",
+          "description": "यदि मॉडलस्य दैर्घ्य-सीमा उत्तरं छिनत्ति विकृते साधन-आह्वाने वा समाप्यते तर्हि मॉडलं निरन्तरयितुं पुनः प्रयतितुं वा वदतु।",
+          "help": "एतत् केवलं मॉडल-समस्यायाः निदानार्थं निष्क्रियं करोतु; तदा मानवाः छिन्नम् उत्तरं यथातथं पश्यन्ति।"
+        },
+        "maxContinuations": {
+          "label": "छिन्न-उत्तरस्य अधिकतमा निरन्तरता",
+          "description": "उत्तरे छिन्ने मॉडलं कतिवारं निरन्तरयितुं उच्यते।",
+          "help": "प्रत्येका निरन्तरता अपरं मॉडल-आह्वानम् अस्ति। दीर्घोत्तरेभ्यः वर्धयतु, व्ययं रक्षितुं न्यूनीकरोतु।"
+        },
+        "maxToolCallRetries": {
+          "label": "विकृत-साधन-आह्वानस्य अधिकतमाः पुनः प्रयासाः",
+          "description": "अनुपयोग्यैः तर्कैः सह आगतं साधन-आह्वानं पुनरावर्तयितुं मॉडलं कतिवारं उच्यते।",
+          "help": "एकः पुनः प्रयासः एकं मॉडल-आह्वानं व्ययति। 0 प्रथमे विकृते आह्वाने एव पराजयं स्वीकरोति।"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "प्रति मॉडल-आह्वानं प्रयासाः",
+          "description": "यदा प्रदाता विफलः व्यस्तः वा भवति तदा, प्रथमप्रयासेन सह, एकं मॉडल-आह्वानं कतिवारं प्रयत्यते।",
+          "help": "अधिकाः प्रयासाः प्रदातुः लघु-विघ्नान् आच्छादयन्ति किन्तु विफलः अनुरोधः दोषं दर्शयितुम् अधिकं कालं गृह्णाति।"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "साधनयुक्तेभ्यः अभिकर्तृभ्यः उत्तराणि पुनरुपयुज्यताम्",
+          "description": "साधनयुक्तेभ्यः अभिकर्तृभ्यः रक्षितानि उत्तराणि पुनरुपयोक्तुम् अनुमन्यताम्। साधनं परवारं अन्यत् प्रत्यर्पयितुं शक्नोति, अतः पूर्वनिर्धारितरूपेण निष्क्रियम्।",
+          "help": "यदि साधनानि केवलं पठनार्थानि मन्दं च परिवर्तनशीलानि भवेयुः, भवान् च द्रुतानि सस्तानि पुनरावर्तित-उत्तराणि इच्छति चेदेव सक्रियं करोतु। मानवाः अनद्यतनीकृतं उत्तरं पश्येयुः।"
+        },
+        "contextTurns": {
+          "label": "पुनरावृत्तिं ज्ञातुं पूर्वावर्ताः",
+          "description": "एकः सन्देशः रक्षितम् उत्तरं पुनरुपयोक्तुं योग्या पुनरावृत्तिः अस्ति वा न वा इति निर्धारयितुं कति पूर्वावर्ताः तुल्यन्ते।",
+          "help": "अधिकावर्ताः मेलनं कठोरं कैश्-प्राप्तिं च दुर्लभां कुर्वन्ति।"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "अनुवर्तिषु साधनानि सूचयन्तु",
+          "description": "यदा अग्रिमः सन्देशः लघु अनुवर्ती भवति तदा संवादेन पूर्वमेव उपयुक्तानि साधनानि सूचयन्तु।",
+          "help": "यदि \"आम्\" इत्यादीनि लघूनि उत्तराणि सामान्य-साधन-चयनात् आरब्धव्यानि तर्हि एतत् निष्क्रियं करोतु।"
+        },
+        "stickyToolsWindow": {
+          "label": "अनुवर्ति-साधनानि कियत्कालं सूचितानि तिष्ठन्ति",
+          "description": "उपयोगानन्तरं लघु-अनुवर्ति-सन्देशेभ्यः एकं साधनं कियत्कालं सूचितं तिष्ठति।",
+          "help": "दीर्घं वातायनं दीर्घ-कार्य-सत्रेषु साहाय्यं करोति, लघु साधन-सूचीं लघ्वीं स्थापयति।"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "अपूर्ण-शब्दावल्यां स्मारणम्",
+          "description": "यदि उत्तरं यत् करिष्यामि इति उक्तवत् तत् कर्तुं पूर्वं स्थगितम् इव दृश्यते तर्हि मॉडलं निरन्तरयितुं वदतु।",
+          "help": "यदि स्मारणं तेषु उत्तरेषु सक्रियं भवति येषां तत्रैव समाप्तिः आवश्यकी आसीत् तर्हि एतत् निष्क्रियं करोतु।"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "प्राचीनान् साधन-परिणामान् मार्जयतु",
+            "description": "दीर्घेषु साधन-रनेषु, संवादं मॉडलस्य सीमायां स्थापयितुं प्राचीनान् साधन-परिणामान् लघु-स्थानधारकेण स्थापयतु।",
+            "help": "यदि अभिकर्त्रा प्रत्येकं पूर्वपरिणामं द्रष्टव्यं तर्हि एतत् निष्क्रियं करोतु; दीर्घाः रनाः तदा मॉडलस्य आकार-सीमां प्राप्नुयुः।"
+          },
+          "thresholdChars": {
+            "label": "मार्जनारम्भ-आकारः",
+            "description": "प्राचीनान् मार्जयितुं पूर्वं एकस्य आवर्तस्य साधन-परिणामाः कियन्तः महान्तः भवितुम् अर्हन्ति।",
+            "help": "अधिकान् परिणामान् दृश्यान् स्थापयितुं वर्धयतु, दीर्घान् रनान् लघून् सस्तान् च स्थापयितुं न्यूनीकरोतु।"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "दीर्घतमः सरलः सन्देशः",
+          "description": "एतस्मात् दीर्घः सन्देशः कदापि सरलः न गण्यते। सरलाः सन्देशाः द्रुतं सस्तं मॉडलं गन्तुं शक्नुवन्ति।",
+          "help": "गुणवत्तार्थं अधिकान् सन्देशान् मुख्य-मॉडलं प्रति प्रेषयितुं न्यूनीकरोतु; व्ययं रक्षितुं वर्धयतु।"
+        },
+        "maxClauses": {
+          "label": "एकस्मिन् सरले सन्देशे अधिकतमानि वाक्यानि",
+          "description": "एतस्मात् अधिकवाक्ययुक्तः सन्देशः कदापि सरलः न गण्यते।",
+          "help": "गुणवत्तार्थं अधिकान् सन्देशान् मुख्य-मॉडलं प्रति प्रेषयितुं न्यूनीकरोतु।"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "प्रत्येकस्मिन् आवर्ते स्मर्यमाणाः अभिकर्तुः स्मृतयः",
+          "description": "प्रत्येकस्य सन्देशस्य कृते अभिकर्तुः स्वकीयासु स्मृतिषु कति दृश्यन्ते।",
+          "help": "अधिकाः स्मृतयः अधिकं सन्दर्भं ददति किन्तु अधिकटोकनानि उपयुञ्जन्ति।"
+        },
+        "tenantTopK": {
+          "label": "प्रत्येकस्मिन् आवर्ते स्मर्यमाणाः साधारण-स्मृतयः",
+          "description": "प्रत्येकस्य सन्देशस्य कृते कार्यक्षेत्रे साधारणीकृतासु स्मृतिषु कति दृश्यन्ते।",
+          "help": "अधिकाः स्मृतयः अधिकं सन्दर्भं ददति किन्तु अधिकटोकनानि उपयुञ्जन्ति।"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "प्रति अभिकर्तारम् अधिकतमाः स्मृतयः",
+          "description": "एकः अभिकर्ता कति स्मृतीः धारयितुं शक्नोति। एतस्मात् अधिकेषु जातेषु प्राचीनतमाः अल्पोपयुक्ताः च त्यज्यन्ते।",
+          "help": "यस्मै सहायकाय जनानां विषये बहु स्मर्तव्यं भवति तस्मै वर्धयतु; इदं रक्षणस्य स्मरणस्य च व्ययम् अपि वर्धयति।"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "आलेख-स्मृतितः स्मृतानि तथ्यानि",
+          "description": "एकस्मिन् अन्वेषणे अभिकर्त्रे तस्य सम्बन्ध-स्मृतितः दर्श्यमानानि अधिकतमानि तथ्यानि।",
+          "help": "अधिकानि तथ्यानि अभिकर्त्रे कस्यचित् जनस्य विषयस्य वा विषये अधिकां पृष्ठभूमिं ददति किन्तु तस्य कार्यस्थानस्य अधिकं भागम् उपयुञ्जन्ति। न्यूनानि तथ्यानि उत्तरं केन्द्रितं स्थापयन्ति। एतत् सम्पूर्णस्य कार्यक्षेत्रस्य कृते, अथवा अधिकं न्यूनं वा आवश्यकम् अभिकर्तारं प्रति निर्धारयतु।"
+        },
+        "recallMaxPaths": {
+          "label": "प्रत्येकस्मिन् अन्वेषणे पठ्यमानाः आलेख-पथाः",
+          "description": "एकस्य अन्वेषणस्य तथ्यानि अन्वेष्टुं स्मृति-आलेखस्य कति सम्बन्धाः पठ्यन्ते।",
+          "help": "बहवः सम्बन्धाः एकमेव तथ्यं प्रापयितुं शक्नुवन्ति, अतः घनसंयुक्तासु स्मृतिषु सर्वं प्राप्तुम् अधिका सङ्ख्या आवश्यकी भवितुम् अर्हति। अधिकाः सङ्ख्याः प्रत्येकम् अन्वेषणं मन्दयन्ति।"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "पृष्ठभूमि-आह्वानानि अभिकर्तुः मॉडलम् उपयुञ्जते",
+        "description": "यदा तेषां कृते किमपि मॉडलं न चितं तदा सारः, सहायता, सन्दर्भ-सङ्कोचनं च यस्य अभिकर्तुः कृते कार्यं कुर्वन्ति तस्यैव मॉडलम् उपयुञ्जते।",
+        "help": "एतेषां आह्वानानां कृते प्लेटफॉर्मः मॉडलं चिनुयात् इति एतत् निष्क्रियं करोतु, यत् सस्तं भिन्नप्रदातुः वा भवितुम् अर्हति।"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "सुरक्षा-परीक्षा विफला चेत्",
+        "description": "यदा सुरक्षा-परीक्षा स्वयं विफला भवति तदा किं भवति, यथा निर्णायक-मॉडलं निष्क्रियं चेत्। बन्दं कार्यं निराकरोति; मुक्तं तत् गन्तुम् अनुमन्यते।",
+        "help": "भवान् एतत् केवलं प्लेटफॉर्म-विन्यासात् अधिकं कठोरं कर्तुं शक्नोति। बन्दं कस्यचित् सविचारं परीक्षां विफलीकर्तुं विरुद्धं रक्षति, विघ्नकाले कार्यनिराकरणस्य मूल्येन।",
+        "options": {
+          "open": "मुक्तम्: कार्यं गन्तुम् अनुमन्यताम्",
+          "closed": "बन्दम्: कार्यं निराक्रियताम्"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "साधन-आह्वान-परीक्षा विफला चेत्",
+          "description": "जोखिमयुक्तानि साधन-आह्वानानि समीक्षमाणा परीक्षा निर्णेतुं न शक्नोति चेत् किं करोति। उत्तराधिकारः उपरितनं सुरक्षा-परीक्षा-विन्यासम् अनुसरति।",
+          "help": "भवान् एतत् केवलं प्लेटफॉर्म-विन्यासात् अधिकं कठोरं कर्तुं शक्नोति। परीक्षा विफला चेत् बन्दं साधन-आह्वानं निराकरोति।",
+          "options": {
+            "open": "मुक्तम्: साधन-आह्वानं गन्तुम् अनुमन्यताम्",
+            "inherit": "सुरक्षा-परीक्षा-विन्यासम् अनुसरतु",
+            "closed": "बन्दम्: साधन-आह्वानं निराक्रियताम्"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "निरोधित-विषाक्तता-अङ्कः",
+          "description": "निर्णायकस्य 0 तः 100 विषाक्तता-मापे एतम् अथवा अधिकम् अङ्कं प्राप्नुवत् विषयवस्तु निरुध्यते। न्यूना सङ्ख्या अधिकं निरुणद्धि।",
+          "help": "भवान् एतत् केवलं न्यूनीकर्तुं शक्नोति, प्लेटफॉर्मस्य मूल्यात् उपरि कदापि वर्धयितुं न शक्नोति। अतिन्यूनं मूल्यं सामान्यान् स्पष्टशब्दान् अपि निरुणद्धि।"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "जेलब्रेक-प्रयत्नार्थं परीक्षितं पाठ्यम्",
+          "description": "जेलब्रेक-प्रतिरूपार्थं सन्देशस्य उत्तरस्य वा कियान् भागः परीक्ष्यते। एतस्मात् अधिकं पाठ्यं न परीक्ष्यते।",
+          "help": "भवान् एतत् केवलं प्लेटफॉर्मस्य मूल्यात् उपरि वर्धयितुं शक्नोति। विस्तृतं वातायनं पूरणानन्तरं गुप्तान् आक्रमणान् निरुणद्धि, किञ्चित् अधिक-प्रक्रियाकरणस्य मूल्येन।"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "सुरक्षा-निर्णायकाय दर्शितं पाठ्यम्",
+          "description": "परीक्षितस्य पाठ्यस्य कियन्तं भागम् एआइ-सुरक्षा-निर्णायकः पठति। एतस्मात् अधिकं पाठ्यं न निर्णीयते।",
+          "help": "भवान् एतत् केवलं प्लेटफॉर्मस्य मूल्यात् उपरि वर्धयितुं शक्नोति। वर्धनेन दीर्घाणां साधन-परिणामानां सम्पूर्णः निर्णयः भवति किन्तु प्रत्येकं निर्णायक-आह्वानं महत् भवति।"
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "एआइ-निर्णायकाय मॉडलम्",
+          "description": "मूल्याङ्कन-रनान् निर्णेतुं उपयुज्यमानं मॉडलम्। भवतः कार्यक्षेत्रेण पूर्वमेव उपयुज्यमानेषु मॉडलेषु प्लेटफॉर्मः चिनुयात् इति रिक्तं त्यजतु।",
+          "help": "अधिकविश्वसनीय-श्रेणीकरणार्थं प्रबलतरं मॉडलम् अथवा व्ययं रक्षितुं सस्तं मॉडलम् उपयुज्यताम्। मॉडलं भवतः संयुक्ते प्रदातरि उपलब्धं भवितव्यम्।"
+        },
+        "callTimeoutSeconds": {
+          "label": "प्रति निर्णायक-आह्वानम् अधिकतमः कालः",
+          "description": "एकं निर्णायक-आह्वानं विफलं गणनात् पूर्वं कियन्तं कालं गृह्णीयात्।",
+          "help": "यदि मन्दं मॉडलं प्रायः टाइमआउट् भवति तर्हि वर्धयतु; विफलानि आह्वानानि मूल्याङ्कन-परिणामम् अपूर्णं कुर्वन्ति।"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "प्रति परीक्षण-प्रकरणं पुनरावृत्तयः",
+          "description": "यदि रनः प्रतिलिपितः नास्ति तर्हि प्रत्येकं परीक्षण-प्रकरणं कतिवारं चाल्यते। अधिकाः पुनरावृत्तयः अभिकर्ता कियत् सङ्गतः इति दर्शयन्ति।",
+          "help": "प्रत्येका पुनरावृत्तिः एकस्य रनस्य व्ययं कालं च गुणयति।"
+        },
+        "defaultMode": {
+          "label": "How evaluations run",
+          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
+          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "options": {
+            "full": "Full pipeline in a sandbox",
+            "quick": "Quick: text answers only"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "अधिकतमाः समानान्तराः उप-कार्याणि",
+        "description": "एकं कार्य-समर्पणम् एकदा कति उप-कार्याणि सहायक-अभिकर्तॄन् वा आरभ्य शक्नोति। अतिरिक्ताः सीमातिक्रान्ताः इति सूच्यन्ते।",
+        "help": "विस्तृत-अनुसन्धान-कार्याय वर्धयतु, व्ययं भारं च न्यूनं स्थापयितुं न्यूनीकरोतु।"
+      },
+      "branchTimeoutSeconds": {
+        "label": "प्रत्येकस्मिन् उप-कार्ये अधिकतमः कालः",
+        "description": "समर्पितम् उप-कार्यं टाइमआउट् इति सूचनात् पूर्वं कियत्कालं चलितुं शक्नोति।",
+        "help": "मन्द-उप-कार्येभ्यः वर्धयतु। स्थगितम् उप-कार्यं सम्पूर्णम् उत्तरं एतस्मात् कालात् अधिकं कदापि न धारयति।"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "प्रत्येकस्य परिणामस्य कृते अन्वेषण-विस्तारः",
+          "description": "ज्ञान-अन्वेषणं अन्ते प्रत्यर्पितस्य प्रत्येकस्य खण्डस्य कृते कति प्रत्याशि-खण्डान् सङ्गृह्णाति।",
+          "help": "अधिका सङ्ख्या क्रमनिर्धारणाय चयनार्थम् अधिकं ददाति, यत् बहवः लेखाः सदृशाः चेत् साहाय्यं करोति, किन्तु प्रत्येकस्मिन् अन्वेषणे अधिकं कालं गणनं च अपेक्षते। अन्वेषणं मन्दं प्रतीयते चेत् न्यूनीकरोतु। एतत् अभिकर्त्रा दृश्यमानानां खण्डानां सङ्ख्यां न परिवर्तयति।"
+        },
+        "candidatePoolMax": {
+          "label": "प्रति अन्वेषणम् अधिकतमाः प्रत्याशिनः",
+          "description": "कति परिणामाः याचिताः इति न विचार्य, एकेन ज्ञान-अन्वेषणेन सङ्गृहीतानां प्रत्याशि-खण्डानाम् ऊर्ध्वसीमा।",
+          "help": "यदि अभिकर्ता एकदा बहून् परिणामान् याचते तर्हि एतत् गतिं व्ययं च रक्षति। बृहत्सु ज्ञान-भाण्डारेषु यदा उत्तरं प्रासङ्गिकान् खण्डान् त्यजति तदैव वर्धयतु।"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "अल्पपरीक्षितान् विकल्पान् प्रयतितुम् इच्छा",
+          "description": "विश्वास-सीमा-विधिम् उपयुञ्जाना अधिगम-नीतिः स्वयं अल्पवारं परीक्षितान् विकल्पान् कियत् प्राथमिकतां ददाति।",
+          "help": "शून्यं सदा अद्यावधि सर्वोत्तम-माध्यं विकल्पं चिनोति। अधिकानि मूल्यानि अन्यान् विकल्पान् स्थिरीभवनात् पूर्वम् अधिकं कालं परीक्षमाणानि तिष्ठन्ति। पूर्वनिर्धारितं पाठ्यपुस्तक-सन्तुलनम्। केवलम् एतां विधिम् उपयुञ्जानाः नीतयः प्रभाविताः भवन्ति।"
+        },
+        "defaultExplorationRate": {
+          "label": "नूतननीतीनां प्रारम्भिक-अन्वेषण-दरः",
+          "description": "नूतनतया निर्मिता अधिगम-नीतिः यादृच्छिक-विकल्पान् परीक्षितुम् आवर्तानां कियन्तं भागं व्ययति।",
+          "help": "एतत् केवलम् अतः परं निर्मीयमाणानां नीतीनां प्रारम्भिक-बिन्दुं निर्धारयति। विद्यमानाः नीतयः स्वकीयं दरं धारयन्ति, यं नीति-प्रबन्धन-स्थले भवान् प्रति अभिकर्तारं परिवर्तयति। शून्यं नाम नूतननीतयः आरम्भे अन्वेषणं न कुर्वन्ति।"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "प्रदातुः कुञ्जीं प्रत्याख्याने विरामः",
+          "description": "प्रदातुः संयुक्तां कुञ्जीं प्रत्याख्यातवति पृष्ठभूमि-कार्यं तां कियत्कालं त्यजति।",
+          "help": "विरामसमये, निर्धारित-स्वचालित-कार्याणि पुनः पुनः विफलां कुञ्जीम् आह्वातुं विहाय अन्यं संयुक्तं प्रदातारम् उपयुञ्जन्ति, अथवा प्रतीक्षन्ते। संवादं कुर्वन्तः मानवाः कदापि न निरुध्यन्ते प्रदातुः यथार्थं दोषं च सदा पश्यन्ति। विरामे समाप्ते, कुञ्जी निराकृता वा इति परीक्षितुम् एकम् आह्वानं गन्तुम् अनुमन्यते। शून्यं विरामं निष्क्रियं करोति।"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "प्रशासनम्",
+    "title": "रनटाइम-विन्यासाः",
+    "subtitle": "अस्य कार्यक्षेत्रस्य प्रत्येकः अभिकर्ता कथम् आचरति इति समायोजयतु: सीमाः, अनुमोदनम्, गुणवत्ता-परीक्षाः, गार्डरेलानि, स्मृतिः, मॉडलानि च। यत्र अनुमतं तत्र अभिकर्तुः स्वामी अद्यापि एकस्य अभिकर्तुः कृते विन्यासम् अधिलेखितुं शक्नोति।",
+    "docsLink": "साहाय्यं लेखाश्च",
+    "tabs": {
+      "label": "रनटाइम-विन्यासानां दृश्यम्",
+      "settings": "विन्यासाः",
+      "history": "परिवर्तन-इतिहासः"
+    },
+    "readOnly": {
+      "title": "केवलं दर्शनार्थम्",
+      "body": "केवलं कार्यक्षेत्र-प्रशासकाः एव एतान् विन्यासान् परिवर्तयितुं शक्नुवन्ति। भवान् प्रत्येकस्य विन्यासस्य प्रवर्तमानं मूल्यं तत् कुतः आगच्छति इति च द्रष्टुं शक्नोति।"
+    },
+    "summary": "अस्मिन् कार्यक्षेत्रे {total} विन्यासेषु {changed} परिवर्तिताः सन्ति। शेषाः प्लेटफॉर्मस्य मूल्यम् उपयुञ्जन्ति।",
+    "export": {
+      "button": "अधिलेखान् निर्यातयतु",
+      "done": "{count} कार्यक्षेत्र-अधिलेखाः एकस्मिन् सञ्चिकायां निर्यातिताः।",
+      "none": "निर्यातयितुं किमपि नास्ति: एतत् कार्यक्षेत्रं कमपि विन्यासं न परिवर्तितवत्।"
+    },
+    "filters": {
+      "changedOnly": "केवलम् अस्मिन् कार्यक्षेत्रे परिवर्तितम्"
+    },
+    "jump": {
+      "label": "समूहं गच्छतु"
+    },
+    "anchor": {
+      "unknown": "अस्मिन् कार्यक्षेत्रे \"{key}\" नामकः कोऽपि विन्यासः नास्ति। तस्य नाम परिवर्तितं स्यात् अथवा तत् कार्यक्षेत्र-स्तरे उपलब्धं नास्ति।"
+    },
+    "empty": {
+      "noneChanged": "अस्मिन् कार्यक्षेत्रे अद्यावधि कोऽपि विन्यासः न परिवर्तितः। सर्वे प्लेटफॉर्मस्य मूल्यम् उपयुञ्जन्ति।"
+    },
+    "risk": {
+      "high": "उच्चजोखिमम्",
+      "security": "सुरक्षा-विन्यासाः"
+    },
+    "security": {
+      "title": "सुरक्षा-विन्यासाः",
+      "body": "एते विन्यासाः भवतः कार्यक्षेत्रं रक्षन्ति। एते केवलं प्लेटफॉर्मस्य मूल्यात् अधिकं कठोराः कर्तुं शक्यन्ते, कदापि दुर्बलाः न। प्रत्येकं परिवर्तनं कारणम् अपेक्षते लेखापरीक्षा-पत्रे च अभिलिख्यते।"
+    },
+    "resetGroup": {
+      "count": "अस्मिन् समूहे {count} परिवर्तिताः",
+      "button": "{group} उत्तराधिकारप्राप्त-मूल्येषु पुनःस्थापयतु",
+      "confirmTitle": "{group} उत्तराधिकारप्राप्त-मूल्येषु पुनःस्थापयामि वा?",
+      "confirmBody": "एतत् अस्य समूहस्य {count} कार्यक्षेत्र-अधिलेखान् अपसारयति। स्वकीयम् अधिलेखं न धारयन्तं प्रत्येकम् अभिकर्तारं प्रति विन्यासाः तत्क्षणं प्लेटफॉर्मस्य मूल्यं प्रतिगच्छन्ति। प्रत्येकं पुनःस्थापनं लेखापरीक्षा-पत्रे अभिलिख्यते।",
+      "confirm": "उत्तराधिकारप्राप्त-मूल्ये पुनःस्थापयतु",
+      "cancel": "निरस्यतु",
+      "done": "{count} विन्यासान् तेषाम् उत्तराधिकारप्राप्त-मूल्येषु पुनःस्थापयतु।",
+      "partial": "{done} विन्यासाः पुनःस्थापिताः; {failed} पुनःस्थापयितुं न शक्ताः। विफलानां विन्यासानां सन्देशान् पश्यतु।",
+      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+    },
+    "import": {
+      "button": "अधिलेखान् आयातयतु",
+      "title": "कार्यक्षेत्र-अधिलेखान् आयातयतु",
+      "intro": "अस्मात् पृष्ठात् निर्यातिताम् एकां सञ्चिकां चिनोतु, अथवा तस्याः विषयवस्तु योजयतु। किमपि रक्षणात् पूर्वं किं परिवर्तिष्यते इति भवान् यथार्थतः द्रक्ष्यति।",
+      "reviewIntro": "एषा सञ्चिका किं परिवर्तयिष्यति इति समीक्षताम्। अद्यावधि किमपि न रक्षितम्।",
+      "fileLabel": "अधिलेख-सञ्चिका (JSON)",
+      "pasteLabel": "अथवा सञ्चिकायाः विषयवस्तु योजयतु",
+      "fileError": {
+        "empty": "प्रथमं सञ्चिकां चिनोतु अथवा तस्याः विषयवस्तु योजयतु।",
+        "invalidJson": "एतत् वैधं JSON नास्ति। सम्पूर्णा सञ्चिका प्रतिलिपिता वा इति परीक्षताम्।",
+        "wrongFormat": "एषा अस्मात् पृष्ठात् निर्यातिता विन्यास-अधिलेख-सञ्चिका नास्ति।",
+        "unsupportedVersion": "एषा सञ्चिका निर्यातस्य भिन्नेन संस्करणेन निर्मिता पठितुं न शक्यते च।",
+        "noOverrides": "सञ्चिकायाम् अधिलेख-विभागः नास्ति।",
+        "unreadable": "सञ्चिका पठितुं न शक्ता।"
+      },
+      "summary": "{changes} परिवर्तनीयाः, {unchanged} पूर्वमेव प्रवर्तमानाः, {problems} प्रयोक्तुं न शक्याः।",
+      "changesHeading": "परिवर्तनानि ({count})",
+      "before": "इदानीम्:",
+      "after": "आयातानन्तरम्:",
+      "resetMissing": "सञ्चिकायाम् अविद्यमानान् कार्यक्षेत्र-अधिलेखान् अपि अपसारयतु",
+      "resetMissingHelp": "अत्र परिवर्तिताः किन्तु सञ्चिकायाम् अविद्यमानाः विन्यासाः प्लेटफॉर्मस्य मूल्यं प्रतिगच्छन्ति। केवलं योजयितुं नवीकर्तुं वा एतत् निष्क्रियं स्थापयतु।",
+      "resetsHeading": "अपसारणीयाः अधिलेखाः ({count})",
+      "resetFrom": "इदानीं {value}; उत्तराधिकारप्राप्त-मूल्यं प्रतिगच्छति।",
+      "problemsHeading": "प्रयोक्तुं न शक्याः ({count})",
+      "problem": {
+        "unknownKey": "अनेन कुञ्जीयुक्तः कोऽपि विन्यासः नास्ति।",
+        "notWorkspaceSetting": "एतत् विन्यासं सम्पूर्णस्य कार्यक्षेत्रस्य कृते परिवर्तयितुं न शक्यते।",
+        "locked": "प्लेटफॉर्म-सञ्चालकेन एतत् विन्यासं पिन् कृतम्, अतः तत् परिवर्तयितुं न शक्यते।",
+        "wrongType": "अस्य विन्यासस्य कृते मूल्यस्य प्रकारः दोषयुक्तः।",
+        "required": "मूल्यम् आवश्यकम्।",
+        "notNumber": "मूल्यं सङ्ख्या भवितव्यम्।",
+        "notInteger": "मूल्यं पूर्णाङ्कः भवितव्यः।",
+        "belowMin": "मूल्यम् अतिन्यूनम्। न्यूनतमम् {min}।",
+        "aboveMax": "मूल्यम् अत्यधिकम्। अधिकतमम् {max}।",
+        "notAllowed": "एतत् अनुमतेषु विकल्पेषु नास्ति।",
+        "tooShort": "पाठ्यम् अतिलघु। न्यूनतमं दैर्घ्यम् {min}।",
+        "tooLong": "पाठ्यम् अतिदीर्घम्। अधिकतमं दैर्घ्यम् {max}।",
+        "precision": "मूल्यम् अस्य विन्यासस्य अनुमतात् अधिकं सूक्ष्मम्।"
+      },
+      "nothing": "अस्याः सञ्चिकायाः किमपि कमपि विन्यासं न परिवर्तयति।",
+      "reasonNote": "एतेषु विन्यासेषु केचन अधिकजोखिमयुक्ताः सन्ति। प्रयोगानन्तरं भवान् कारणं पृष्टः भविष्यति यत् लेखापरीक्षा-पत्रे अभिलिख्यते।",
+      "back": "प्रतिगच्छतु",
+      "cancel": "निरस्यतु",
+      "review": "परिवर्तनानि समीक्षताम्",
+      "apply": "{count} परिवर्तनानि प्रयुञ्जताम्",
+      "cancelled": "आयातः निरस्तः। कोऽपि विन्यासः न परिवर्तितः।",
+      "done": "आयातः पूर्णः: {applied} विन्यासाः अद्यतनीकृताः।",
+      "donePartial": "आयातः अंशतः पूर्णः: {applied} विन्यासाः अद्यतनीकृताः, {failed} प्रयोक्तुं न शक्ताः। समीक्षा दर्शयति अद्यापि किं अवशिष्टम्।"
+    },
+    "history": {
+      "adminOnly": "कार्यक्षेत्र-विन्यासानां परिवर्तन-इतिहासः केवलं कार्यक्षेत्र-प्रशासकैः द्रष्टुं शक्यते।",
+      "loading": "परिवर्तन-इतिहासः आरोप्यते",
+      "partial": "{count} विन्यासानाम् इतिहासः आरोपयितुं न शक्तः, अतः एषा सूची अपूर्णा स्यात्।",
+      "retry": "पुनः प्रयतताम्",
+      "search": "परिवर्तन-इतिहासम् अन्विष्यताम्",
+      "searchPlaceholder": "विन्यासेन, व्यक्त्या, कारणेन वा अन्विष्यताम्",
+      "empty": "अस्मिन् कार्यक्षेत्रे अद्यावधि कोऽपि विन्यासः न परिवर्तितः।",
+      "noMatch": "कोऽपि परिवर्तनः भवतः अन्वेषणेन न मिलति।",
+      "count": "{total} परिवर्तनेषु {shown} दर्श्यन्ते, नूतनतमाः प्रथमम्।",
+      "tableLabel": "कार्यक्षेत्र-विन्यासानां परिवर्तन-इतिहासः",
+      "when": "कदा",
+      "setting": "विन्यासः",
+      "change": "परिवर्तयतु",
+      "by": "परिवर्तकः",
+      "reason": "कारणम्",
+      "before": "पूर्वम्:",
+      "after": "पश्चात्:",
+      "inherited": "उत्तराधिकारप्राप्तं मूल्यम्",
+      "unknownActor": "अज्ञातम्",
+      "noReason": "कारणं न दत्तम्",
+      "showMore": "अधिकं दर्शयतु",
+      "scope": "Level",
+      "scopeWorkspace": "कार्यक्षेत्रम्",
+      "scopeAgent": "Agent {id}",
+      "scopeFilter": "Show changes at",
+      "filterAll": "All levels",
+      "filterWorkspace": "Workspace only",
+      "filterAgents": "Agents only",
+      "searchLoadedOnly": "The search covers the changes loaded so far.",
+      "loadError": "The change history could not be loaded. {message}",
+      "moreFailed": "More changes could not be loaded. {message}",
+      "loadingMore": "आरोप्यते"
+    }
+  },
+  "agentBehavior": {
+    "title": "आचरणं सीमाः च",
+    "intro": "एषः अभिकर्ता एकस्मिन् आवर्ते कियत् दूरं गन्तुं शक्नोति इति नियन्त्रयतु: कति साधन-आह्वानानि कर्तुं शक्नोति, कियत्कालं चलितुं शक्नोति, कियत् पृष्ठतः पठति च। यत् भवान् अत्र न परिवर्तयति तत् भवतः कार्यक्षेत्रात् उत्तराधिकारेण आगच्छति।",
+    "saveFirst": "प्रथमम् अभिकर्तारं रक्षतु। निर्मिते सति तस्य आचरणं सीमाः च निर्धारयितुं शक्यन्ते।",
+    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "tabs": {
+      "label": "अभिकर्तृ-विन्यासः",
+      "setup": "स्थापना",
+      "behavior": "आचरणं सीमाः च",
+      "unsaved": "अरक्षितानि परिवर्तनानि"
+    },
+    "links": {
+      "label": "सम्बन्धित-पृष्ठानि",
+      "tenant": "कार्यक्षेत्र-पूर्वनिर्धारितानि परिवर्तयतु",
+      "playground": "क्रीडाङ्गणे प्रयतताम्",
+      "prompts": "This agent's prompts",
+      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
+      "approvals": "This agent's approvals",
+      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
+      "turns": "Turn timeline",
+      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+    },
+    "readOnly": {
+      "locked": "एषः अभिकर्ता सम्पादनार्थम् अवरुद्धः, अतः एतानि मूल्यानि केवलं पठनार्थानि।",
+      "access": "भवान् एतानि मूल्यानि द्रष्टुं शक्नोति किन्तु अस्मिन् अभिकर्तरि भवतः प्रवेशः तानि परिवर्तयितुं न ददाति।"
+    },
+    "unsaved": "अस्मिन् पटले भवतः अरक्षितानि परिवर्तनानि सन्ति। गमनात् पूर्वं अधः तानि रक्षतु निरस्यतु वा।",
+    "inheritNote": "प्रत्येकः विन्यासः तस्य मूल्यं कुतः आगच्छति इति दर्शयति। अत्र एकं परिवर्तयन् केवलम् अस्य अभिकर्तुः कृते अधिलेखः भवति; कार्यक्षेत्रस्य मूल्यं पुनः उत्तराधिकारेण प्राप्तुं पुनःस्थापयतु।",
+    "others": {
+      "title": "अस्य अभिकर्तुः अन्ये नियन्त्रकाः",
+      "intro": "एते नियन्त्रकाः उपरितन-विन्यासानां भागाः न सन्ति, अतः ते स्थापना-पटले सन्ति।",
+      "generation": "उत्तरस्य सृजनशीलता दैर्घ्यं च (तापमानम्, top-p, अधिकतमटोकनानि) अतिरिक्त-नमूना-चयन-विकल्पाश्च।",
+      "generationLink": "जनन-समायोजनं गच्छतु",
+      "autonomy": "स्वायत्तता-स्तरः, प्रत्येकस्य रनस्य व्यय-सीमा, साधन-नियमाः, मानवेन कदा अनुमोदनीयम् इति च।",
+      "autonomyLink": "तर्कं स्वायत्ततां च गच्छतु"
+    },
+    "discard": {
+      "title": "अरक्षितं त्यजामि वा?",
+      "description": "अस्य अभिकर्तुः आचरणे सीमासु च भवतः अरक्षितानि परिवर्तनानि सन्ति। इदानीं निर्गमने तानि नष्टानि भविष्यन्ति।",
+      "stay": "अत्रैव स्थित्वा सम्पादनं निरन्तरयतु",
+      "leave": "त्यक्त्वा परिवर्तनानि निरस्यतु"
+    },
+    "summary": {
+      "title": "एषः अभिकर्ता इदानीं कथम् आचरति",
+      "subtitle": "अभिकर्तुः स्वकीयानाम् अधिलेखानां, भवतः कार्यक्षेत्र-विन्यासानां, प्लेटफॉर्म-विन्यासानां च प्रयोगानन्तरम् अस्य अभिकर्तुः कृते प्रवर्तमानानि मूल्यानि।",
+      "loading": "वर्तमान-आचरणम् आरोप्यते",
+      "error": "वर्तमान-आचरणम् आरोपयितुं न शक्तम्। {message}",
+      "retry": "पुनः प्रयतताम्",
+      "empty": "अस्य अभिकर्तुः कृते अद्यावधि आचरण-विन्यासाः उपलब्धाः न सन्ति।",
+      "facts": {
+        "steps": "प्रत्येकस्मिन् आवर्ते साधन-आह्वानानि",
+        "turnTimeout": "प्रति आवर्तं कालः",
+        "toolTimeout": "प्रति साधन-आह्वानं कालः",
+        "outputCap": "धारितं साधन-निर्गमम्",
+        "continuation": "निरन्तरता-आवर्ताः",
+        "approvals": "अनुमोदनम्",
+        "judge": "गुणवत्ता-निर्णायक-मॉडलम्",
+        "model": "मॉडलम्"
+      },
+      "tier": {
+        "SUPERVISED": "पर्यवेक्षणे: प्रत्येकं साधन-आह्वानं मानवं प्रतीक्षते",
+        "SEMI_AUTONOMOUS": "अर्ध-स्वायत्तः: भवतः कार्यक्षेत्र-नियमः निर्धारयति",
+        "FULLY_AUTONOMOUS": "पूर्णस्वायत्तः: साधन-आह्वानानि कदापि न प्रतीक्षन्ते"
+      },
+      "approvalResumes": "अनुमोदनानन्तरं स्वयं निरन्तरयति",
+      "approvalStops": "अनुमोदनानन्तरं नूतनसन्देशं प्रतीक्षते",
+      "judgeDefault": "प्लेटफॉर्मेन चितम्",
+      "overrides": {
+        "none": "एषः अभिकर्ता सर्वत्र भवतः कार्यक्षेत्रस्य मूल्यम् उपयुङ्क्ते।",
+        "some": "अस्य अभिकर्तुः कृते अधिलेखिताः विन्यासाः: {count}।"
+      }
+    },
+    "impact": {
+      "title": "एतस्य अर्थः किम्",
+      "steps": "एषः अभिकर्ता एकस्मिन् आवर्ते अधिकतमं {count} साधन-आह्वानानि कर्तुं शक्नोति। तदनन्तरं तस्य हस्ते यत् अस्ति तेन उत्तरं दातुं सः उच्यते।",
+      "stepsTierSupervised": "एषः अभिकर्ता पर्यवेक्षणे अस्ति, अतः तस्य यथार्थ उपरितनसीमा तस्याः मुख्यसङ्ख्यायाः न्यूना। सटीकां सङ्ख्यां उपयोक्तुम् अस्य अभिकर्तुः कृते स्वकीयं मूल्यं निर्धारयतु।",
+      "stepsTierFull": "एषः अभिकर्ता पूर्णस्वायत्तः अस्ति, अतः तस्य यथार्थ उपरितनसीमा तस्याः मुख्यसङ्ख्यायाः अधिका। सटीकां सङ्ख्यां उपयोक्तुम् अस्य अभिकर्तुः कृते स्वकीयं मूल्यं निर्धारयतु।",
+      "turnTimeout": "एकः आवर्तः {duration} अनन्तरं छिद्यते।",
+      "turnTimeoutNone": "आवर्तस्य कालसीमा नास्ति।",
+      "toolTimeout": "एकं साधन-आह्वानं {duration} अनन्तरं छिद्यते।",
+      "toolTimeoutNone": "साधन-आह्वानस्य कालसीमा नास्ति।",
+      "outputCap": "{chars} तः दीर्घाः साधन-परिणामाः अभिकर्त्रा पठनात् पूर्वं लघूकृताः भवन्ति।",
+      "continuation": "उत्तरं छिन्नं चेत्, अभिकर्ता तत् अधिकतमम् अपरान् {count} वारान् निरन्तरयितुं शक्नोति।",
+      "continuationNone": "छिन्नानि उत्तराणि न निरन्त्यन्ते।",
+      "retrieval": "प्रत्येकस्य प्रश्नस्य कृते सः उत्तमान् {count} ज्ञान-मेलनानि पठति।",
+      "retrievalScored": "प्रत्येकस्य प्रश्नस्य कृते सः उत्तमान् {count} ज्ञान-मेलनानि पठति {score} तः न्यूनाङ्कयुक्तानि मेलनानि च उपेक्षते।",
+      "approvalContinuationOn": "यदा मानवः प्रतीक्षमाणं कार्यम् अनुमोदयति तदा अभिकर्ता स्वयं कार्यं समापयति।",
+      "approvalContinuationOff": "यदा मानवः प्रतीक्षमाणं कार्यम् अनुमोदयति तदा आवर्तः समाप्यते अनुवर्ती च हस्तेन कर्तव्या भवति।",
+      "guardClosed": "यदा सुरक्षा-परीक्षा विफला भवति तदा कार्यं निराक्रियते।",
+      "guardOpen": "यदा सुरक्षा-परीक्षा विफला भवति तदा कार्यं गन्तुम् अनुमन्यते।",
+      "branches": "एकं कार्य-समर्पणम् एकदा अधिकतमं {count} उप-कार्याणि आरभ्य शक्नोति।"
+    }
+  },
+  "controls": {
+    "eyebrow": "साहाय्यम्",
+    "title": "अहं किं नियन्त्रयामि...?",
+    "subtitle": "भवतः अभिकर्तुः आचरणं रूपयन्तः प्रत्येकं नियन्त्रकः, तेषां स्थानं पृष्ठं च। यत् परिवर्तयितुम् इच्छति तेन अन्विष्यताम्।",
+    "breadcrumb": {
+      "label": "ब्रेडक्रम्ब्",
+      "console": "कन्सोल्",
+      "controls": "नियन्त्रकाः"
+    },
+    "related": {
+      "label": "अन्ये नियन्त्रकाः"
+    },
+    "search": {
+      "label": "नियन्त्रकान् अन्विष्यताम्",
+      "placeholder": "उदाहरणम्: टाइमआउट्, अनुमोदनम्, प्रॉम्प्टः, स्मृतिः",
+      "count": "{count} मिलितानि नियन्त्रकाणि",
+      "none": "\"{query}\" इत्यनेन किमपि न मिलति। लघुतरं शब्दं प्रयतताम्।",
+      "noSettings": "कोऽपि विन्यासः भवतः अन्वेषणेन न मिलति।"
+    },
+    "areasHeading": "नियन्त्रक-क्षेत्रम्",
+    "areasIntro": "एतेषु पृष्ठेषु ते नियन्त्रकाः सन्ति ये एकाकिन्यः सङ्ख्याः न सन्ति: निर्देशाः, अनुमोदन-नियमाः, सुरक्षा-नियमाः, आवर्तेन यत् कृतं तस्य अभिलेखः च।",
+    "openArea": "उद्घाटयतु",
+    "needsAccess": "अस्य पृष्ठस्य प्रवेशार्थं कार्यक्षेत्र-प्रशासकं वदतु।",
+    "settingsHeading": "प्रत्येकः रनटाइम्-विन्यासः",
+    "settingsIntro": "प्रत्येकः विन्यासः सम्पूर्णस्य कार्यक्षेत्रस्य कृते, एकस्य अभिकर्तुः कृते, उभयोः कृते वा परिवर्तयितुं शक्यते। अभिकर्तुः स्वकीयं मूल्यं कार्यक्षेत्रस्य मूल्यात् प्रबलम्। विन्यासं साक्षात् गन्तुं सम्बन्धं चिनोतु।",
+    "loading": "विन्यास-सूची आरोप्यते",
+    "loadFailed": "विन्यास-सूचीम् आरोपयितुं न शक्तम्। {message}",
+    "retry": "पुनः प्रयतताम्",
+    "emptyCatalog": "अस्मिन् कार्यक्षेत्रे प्रदर्शनार्थं रनटाइम्-विन्यासाः न सन्ति।",
+    "changeWorkspace": "कार्यक्षेत्राय परिवर्तयतु",
+    "changeAgent": "एकस्मिन् अभिकर्तरि परिवर्तयतु",
+    "workspaceOnly": "केवलं कार्यक्षेत्र-व्यापी",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "अभिकर्तृ-रनटाइम्-सीमाः",
+        "intro": "एक आवर्तः कियत् कार्यं कर्तुं शक्नोति: साधन-आह्वानानि, कालः, परिणाम-आकारः, पुनःप्राप्तिः च।"
+      },
+      "behaviour-settings": {
+        "title": "आचरण-विन्यासाः",
+        "intro": "उत्तराणि कथं समाप्यन्ते कैश्-क्रियन्ते च, अनुमोदनं कथं निरन्तरं भवति, सुरक्षा-परीक्षाः कथम् आचरन्ति, स्मृतिः अन्वेषणं कार्य-समर्पणं च कथं कार्यं कुर्वन्ति।"
+      },
+      "other": {
+        "title": "अन्ये विन्यासाः",
+        "intro": "येषां स्वकीयः विभागः नास्ति ते विन्यासाः।"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "रनटाइम-विन्यासाः",
+        "summary": "सम्पूर्णस्य कार्यक्षेत्रस्य कृते सीमाः, अनुमोदनम्, गुणवत्ता-परीक्षाः, सुरक्षा-कठोरता, स्मृतिः, कार्य-समर्पणं च।",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers सीमाः टाइमआउट् साधन पदानि पुनः प्रयासः कैश् स्मृतिः कार्यसमर्पणम् गुणवत्ता निर्णायकः विन्यासाः सङ्ख्याः"
+      },
+      "prompts": {
+        "title": "निर्देशाः",
+        "summary": "प्लेटफॉर्मः मॉडलाय यानि प्रॉम्प्टानि ददाति: प्रत्येकं पश्यतु, कार्यक्षेत्रस्य एकस्य अभिकर्तुः वा कृते अधिलिखतु, परिणामस्य पूर्वावलोकनं च पश्यतु।",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry प्रॉम्प्ट निर्देशाः सिस्टम-प्रॉम्प्ट् अधिलेखनम् पूर्वावलोकनम् पञ्जिका"
+      },
+      "approvals": {
+        "title": "अनुमोदनम्",
+        "summary": "मानवं प्रतीक्षमाणानां कार्याणां पङ्क्तिः, कस्य साधनस्य अनुमोदनम् आवश्यकम् इति नियमाः, भवतः निर्णयानन्तरं किं भवति च।",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation अनुमोदनम् निराकरणम् पङ्क्तिः ह्यूमन् इन् द लूप् साधन नियमाः कालातीतम् निरन्तरता"
+      },
+      "guardrails": {
+        "title": "गार्डरेल्",
+        "summary": "यान् प्रतिरूपान् एतत् कार्यक्षेत्रं गन्तुं न ददाति, साधन-परिणामेषु प्रवर्तमाना विषयवस्तु-नीतिश्च।",
+        "keywords": "safety rules block filter policy content patterns सुरक्षा नियमाः निरोधः छन्नकम् नीतिः विषयवस्तु प्रतिरूपाणि"
+      },
+      "turns": {
+        "title": "आवर्त-निरीक्षकः",
+        "summary": "एकस्य अभिकर्तृ-आवर्तस्य अभिलिखिता कालरेखा: किं पृष्टम्, कानि साधनानि चलितानि, प्रत्येकं पदं कियत् व्ययितम्, कथं च स्थगितम्।",
+        "keywords": "turn timeline journal trace replay history steps debug आवर्तः कालरेखा जर्नल् अनुरेखणम् पुनर्वादनम् इतिहासः पदानि दोषनिवारणम्"
+      },
+      "agentBehavior": {
+        "title": "अभिकर्तुः आचरणं सीमाः च",
+        "summary": "एकस्य अभिकर्तुः पृष्ठे: तस्य स्वकीयाः सीमाः आचरण-विन्यासाः च, प्रत्येकं मूल्यं कुतः आगच्छति इति कार्यक्षेत्रस्य मूल्ये पुनःस्थापनेन सह।",
+        "keywords": "agent override per agent behavior limits tab अभिकर्ता अधिलेखनम् प्रति अभिकर्ता आचरणम् सीमाः पटलम्"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "एतत् प्रॉम्प्ट-खण्डैः निर्मितम्",
+    "blocksCount": "{n} खण्डाः",
+    "blockDefault": "पूर्वनिर्धारितरूपेण आगतम्",
+    "blockOverride": "{scope} अधिलेखनम् v{version}",
+    "blockAgentConfig": "अभिकर्तुः स्वकीयः प्रॉम्प्टः",
+    "blockCode": "प्लेटफॉर्म-संकेतः",
+    "blockTokens": "~{tokens} टोकनानि",
+    "blockHash": "शब्दावल्याः हैशः"
+  },
+  "toolApproval": {
+    "continuing": "अभिकर्ता कार्यं निरन्तरयति।",
+    "continueNotStarted": "अस्य निर्णयस्य अनन्तरम् अभिकर्ता स्वयं पुनः न आरब्धः। तं अग्रे नेतुं सन्देशं प्रेषयतु।",
+    "continueTimedOut": "अभिकर्ता निरन्तरणं न समापितवान्। समाप्ते तस्य उत्तरं संवादे दृश्येत; परीक्षितुं पुनः आरोपयतु।"
+  },
+  "promptDirectives": {
+    "tabRegistry": "सर्वे प्रॉम्प्टाः",
+    "tabAgentPreview": "अन्तिम-प्रॉम्प्टस्य पूर्वावलोकनम्",
+    "regTitle": "प्रत्येकं प्रॉम्प्टम्",
+    "regIntro": "मॉडलाय प्लेटफॉर्मेन लिखितं सर्वं पाठ्यं, इदानीं प्रवर्तमानया शब्दावल्या, तस्याः स्रोतेन संस्करणेन च सह। परिधिं चिनोतु, परिवर्तनार्थं प्रॉम्प्टं उद्घाटयतु, प्रत्येकं पूर्वसंस्करणं च पश्यतु। परिवर्तनं प्रायः अर्धनिमेषे सर्वान् सर्वरान् प्राप्नोति।",
+    "regScopeLabel": "कस्मिन् परिधौ परिवर्तयितव्यम्",
+    "regScope_tenant": "एतत् कार्यक्षेत्रम्",
+    "regScope_agent": "एकः अभिकर्ता",
+    "regScope_platform": "सम्पूर्णं प्लेटफॉर्म",
+    "regAgentLabel": "अभिकर्ता",
+    "regAgentPlaceholder": "अभिकर्तारं चिनोतु",
+    "regAgentsFailed": "भवतः अभिकर्तारः आरोपयितुं न शक्ताः।",
+    "regPickAgent": "कस्यचित् अभिकर्तुः प्रॉम्प्टान् द्रष्टुं परिवर्तयितुं च तं चिनोतु।",
+    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regSearchLabel": "प्रॉम्प्टान् अन्विष्यताम्",
+    "regSearchPlaceholder": "किम्, शीर्षकं वा विवरणम्",
+    "regRiskLabel": "जोखिम-श्रेणी",
+    "regRiskAll": "सर्वाः जोखिम-श्रेण्यः",
+    "regRisk_STEERS_EVERY_TURN": "प्रत्येकम् आवर्तं नियन्त्रयति",
+    "regRisk_SECONDARY_CALL": "द्वितीयं मॉडल-आह्वानम्",
+    "regRisk_USER_VISIBLE": "मानवाय दर्श्यते",
+    "regRisk_TOOL_DESCRIPTION": "साधन-विवरणम्",
+    "regOnlyCustomised": "केवलं अनुकूलितम्",
+    "regPlatformReadOnly": "प्लेटफॉर्म-व्यापिनः प्रॉम्प्टाः अत्र पठनीयाः; केवलं प्लेटफॉर्म-प्रशासकाः एव तान् परिवर्तयितुं शक्नुवन्ति।",
+    "regLoadFailed": "प्रॉम्प्टान् आरोपयितुं न शक्तम्।",
+    "regCount": "{total} प्रॉम्प्टेषु {shown} दर्श्यन्ते।",
+    "regEmptyTitle": "कोऽपि प्रॉम्प्टः न मिलितः",
+    "regEmptyBody": "अन्वेषणं छन्नकं वा परिवर्तयतु।",
+    "regSource_DEFAULT": "पूर्वनिर्धारितरूपेण आगतम्",
+    "regSource_FALLBACK": "पूर्वनिर्धारितरूपेण आगतम् (अधिलेखनं उपलब्धं नास्ति)",
+    "regSource_PLATFORM": "प्लेटफॉर्म",
+    "regSource_TENANT": "कार्यक्षेत्रम्",
+    "regSource_AGENT": "अभिकर्ता",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "निवृत्तम्",
+    "regRetiredBody": "एतत् प्रॉम्प्टं इदानीं किमपि पाठ्यं न प्रेषयति, अतः परिवर्तयितुं किमपि नास्ति।",
+    "regEffectiveOff": "निष्क्रियम्: किमपि न प्रेष्यते।",
+    "regEffectiveTokens": "इदानीं प्रवर्तमानम्, प्रायः {tokens} टोकनानि।",
+    "regEffectiveLabel": "{title} कृते प्रवर्तमाना शब्दावली",
+    "regOpenEditor": "{title} सम्पादयतु",
+    "regCloseEditor": "{title} पिधत्ताम्",
+    "regEditingOverride": "{scope} संस्करणं सम्पाद्यते, इदानीं v{version}।",
+    "regEditingNone": "अद्यावधि कोऽपि {scope} संस्करणः नास्ति। एतत् अस्य अधः स्थिताभ्यः शब्दावलीभ्यः आरभते: {below}।",
+    "regPlaceholders": "रनटाइमकाले पूर्यते:",
+    "regRequired": "(आवश्यकम्)",
+    "regProblemsTitle": "रक्षणात् पूर्वम् एतत् संशोधयतु",
+    "regReasonLabel": "परिवर्तनस्य कारणम् (इतिहासे रक्ष्यते)",
+    "regReasonPlaceholder": "ऐच्छिकम्",
+    "regConflict": "भवतः सम्पादनसमये कश्चन एतत् प्रॉम्प्टं परिवर्तितवान्। तस्य संस्करणं द्रष्टुं एतत् पिधाय पुनः उद्घाटयतु, ततः पुनः प्रयतताम्।",
+    "regRevert": "{to} प्रति प्रतिगच्छतु",
+    "regShowHistory": "इतिहासः",
+    "regHideHistory": "इतिहासं गोपयतु",
+    "regHistoryLoading": "इतिहासः आरोप्यते…",
+    "regHistoryFailed": "इतिहासम् आरोपयितुं न शक्तम्।",
+    "regHistoryEmpty": "अस्मिन् परिधौ अद्यावधि संस्करणानि न सन्ति।",
+    "regVersion": "संस्करणम् {version}",
+    "regAction_CREATE": "निर्मितम्",
+    "regAction_UPDATE": "परिवर्तितम्",
+    "regAction_REVERT": "प्रतिनिवर्तितम्",
+    "regAction_MIGRATE": "स्थानान्तरितम्",
+    "regCurrent": "वर्तमानम्",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "अज्ञातम्",
+    "regReason": "कारणम्: {reason}",
+    "regShowDiff": "संस्करणस्य {version} परिवर्तनं दर्शयतु",
+    "regHideDiff": "संस्करणस्य {version} परिवर्तनं गोपयतु",
+    "regDiffLabel": "संस्करणेन {version} कृतं परिवर्तनम्",
+    "regNoDiff": "अस्मिन् संस्करणे किमपि पाठ्यं न परिवर्तितम्।",
+    "regRestore": "संस्करणं {version} पुनःस्थापयतु",
+    "regRestoreReason": "संस्करणस्य {version} शब्दावली पुनःस्थापिता",
+    "regRestoreFailed": "तत् संस्करणं पुनःस्थापयितुं न शक्तम्।",
+    "regRestoreAck": "अहं जानामि यत् {title} इत्यस्य संस्करणस्य पुनःस्थापनेन सुरक्षा दुर्बला भवितुम् अर्हति।",
+    "regPreviewTitle": "अन्तिम-प्रॉम्प्टस्य पूर्वावलोकनम्",
+    "regPreviewIntro": "मॉडलम् अनाहूय, आवर्तः यथा करिष्यति तथैव अभिकर्तुः यथार्थं सिस्टम-प्रॉम्प्टं साधन-सूचीं च निर्माति। प्रत्येकं खण्डं दर्शयति यत् प्रॉम्प्टं किम्, तस्य परिधिः, तस्य शब्दावली कस्मात् संस्करणात् आगच्छति च।",
+    "regPreviewMessageLabel": "नमूना उपयोक्तृ-सन्देशः (ऐच्छिकः)",
+    "regPreviewMessagePlaceholder": "यथार्थ-सन्देशवत् साधनानि स्मृत-स्मृतिं च चेतुम् उपयुज्यते।",
+    "regPreviewSmallModel": "लघु-मॉडलस्य कृते पूर्वावलोकनम्",
+    "regPreviewBuild": "पूर्वावलोकनं निर्मातु",
+    "regPreviewBuilding": "निर्मीयते…",
+    "regPreviewFailed": "पूर्वावलोकनं निर्मातुं न शक्तम्।",
+    "regPreviewTotals": "सिस्टम-पाठ्यस्य कृते प्रायः {prompt} टोकनानि साधन-परिभाषाणां कृते {tools} टोकनानि (अनुमानम्)।",
+    "regPreviewOverBudgetTitle": "टोकन-बजटात् अधिकम्",
+    "regPreviewOverBudget": "स्थायि सिस्टम-पाठ्यं विन्यस्तात् {budget} टोकन-बजटात् अधिकम् अस्ति। किमपि न छिन्नम्; एकं प्रॉम्प्टं लघु कर्तुं विचारयतु।",
+    "regPreviewMessageHeading": "सन्देशः: {message}",
+    "regPreviewTokens": "~{tokens} टोकनानि",
+    "regPreviewTools": "साधनानि ({count})",
+    "regPreviewNoTools": "एषः अभिकर्ता किमपि साधनं न ददाति।",
+    "regPreviewNotes": "एतत् पूर्वावलोकनं यत् ज्ञातुं न शक्नोति",
+    "regOriginDefault": "पूर्वनिर्धारितरूपेण आगतम्",
+    "regOriginOverride": "{scope} अधिलेखनम् v{version}",
+    "regOriginAgentConfig": "अभिकर्तुः स्वकीयः सिस्टम-प्रॉम्प्टः",
+    "regOriginCode": "प्लेटफॉर्म-संकेतः"
   }
 }

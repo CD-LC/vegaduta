@@ -125,6 +125,8 @@ public class ToolRelevanceSelector {
     // case this degrades to the pre-2026-08-12 lexical-only behavior.
     private final ObjectProvider<SidecarClient> sidecarClientProvider;
     private final boolean semanticEnabled;
+    // A message in a script no tool text is written in matches nothing by construction; see select().
+    private final boolean unscorableUsesFullBudget;
     // Tool description text rarely changes turn to turn (a tool's name/
     // description is effectively static for the lifetime of its
     // registration), so its embedding is cached indefinitely rather than
@@ -154,13 +156,16 @@ public class ToolRelevanceSelector {
                     int maxSchemaTokensPerTurn,
             @Value("${app.tools.auto-selection.no-match-max-tools:4}") int noMatchMaxToolsPerTurn,
             ObjectProvider<SidecarClient> sidecarClientProvider,
-            @Value("${app.tools.auto-selection.semantic-enabled:true}") boolean semanticEnabled) {
+            @Value("${app.tools.auto-selection.semantic-enabled:true}") boolean semanticEnabled,
+            @Value("${app.tools.auto-selection.unscorable-uses-full-budget:true}")
+                    boolean unscorableUsesFullBudget) {
         this.enabled = enabled;
         this.maxToolsPerTurn = maxToolsPerTurn;
         this.maxSchemaTokensPerTurn = maxSchemaTokensPerTurn;
         this.noMatchMaxToolsPerTurn = noMatchMaxToolsPerTurn;
         this.sidecarClientProvider = sidecarClientProvider;
         this.semanticEnabled = semanticEnabled;
+        this.unscorableUsesFullBudget = unscorableUsesFullBudget;
     }
 
     /**
@@ -175,7 +180,7 @@ public class ToolRelevanceSelector {
      * turns) they were written against.
      */
     ToolRelevanceSelector(boolean enabled, int maxToolsPerTurn) {
-        this(enabled, maxToolsPerTurn, 8000, maxToolsPerTurn, null, false);
+        this(enabled, maxToolsPerTurn, 8000, maxToolsPerTurn, null, false, true);
     }
 
     /**
@@ -185,7 +190,7 @@ public class ToolRelevanceSelector {
      * pre-existing test using this overload keeps testing unchanged lexical behavior.
      */
     ToolRelevanceSelector(boolean enabled, int maxToolsPerTurn, int maxSchemaTokensPerTurn) {
-        this(enabled, maxToolsPerTurn, maxSchemaTokensPerTurn, maxToolsPerTurn, null, false);
+        this(enabled, maxToolsPerTurn, maxSchemaTokensPerTurn, maxToolsPerTurn, null, false, true);
     }
 
     /**
@@ -197,7 +202,7 @@ public class ToolRelevanceSelector {
             int maxToolsPerTurn,
             int maxSchemaTokensPerTurn,
             int noMatchMaxToolsPerTurn) {
-        this(enabled, maxToolsPerTurn, maxSchemaTokensPerTurn, noMatchMaxToolsPerTurn, null, false);
+        this(enabled, maxToolsPerTurn, maxSchemaTokensPerTurn, noMatchMaxToolsPerTurn, null, false, true);
     }
 
     /**
@@ -217,7 +222,8 @@ public class ToolRelevanceSelector {
                 maxSchemaTokensPerTurn,
                 maxToolsPerTurn,
                 sidecarClientProvider,
-                semanticEnabled);
+                semanticEnabled,
+                true);
     }
 
     /** Cost-transparency panel: whether per-turn tool-schema minimization is currently active. */
@@ -331,10 +337,11 @@ public class ToolRelevanceSelector {
         // it also applies to catalogs at-or-below maxToolsPerTurn that used to
         // bypass selection entirely - "hello" no longer pays the full tool
         // catalog. Positive-score turns keep the pre-existing budget exactly.
+        boolean knownToMatchNothing =
+                !anyPositiveScore
+                        && !(unscorableUsesFullBudget && WordTokens.hasLettersOutsideLatin(userMessage));
         int effectiveMaxTools =
-                anyPositiveScore
-                        ? maxToolsPerTurn
-                        : Math.min(maxToolsPerTurn, noMatchMaxToolsPerTurn);
+                knownToMatchNothing ? Math.min(maxToolsPerTurn, noMatchMaxToolsPerTurn) : maxToolsPerTurn;
         if (candidates.size() <= effectiveMaxTools
                 && totalSchemaTokens(candidates) <= maxSchemaTokensPerTurn) {
             return candidates;

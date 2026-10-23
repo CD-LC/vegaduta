@@ -37,6 +37,8 @@ import RailFooter from "./shell/RailFooter";
 import HubFlyout from "./shell/HubFlyout";
 import TopBar from "./shell/TopBar";
 import FeatureGate from "./shell/FeatureGate";
+// Breadcrumb + links between the control pages (runtime settings, instructions, approvals, guardrails, turn inspector); renders nothing elsewhere.
+import ControlsBreadcrumb from "./controls/ControlsBreadcrumb";
 
 export type { NavItem, NavSection };
 
@@ -381,6 +383,7 @@ function AppShellBody({
                   rendered on `bleed` (full-viewport canvas) pages, whose
                   layout owns the whole viewport. */}
               <UsageAlertBanner quota={usageQuota} canManageBilling={hasPermission("MANAGE_BILLING")} />
+              <ControlsBreadcrumb />
               <FeatureGate>{children}</FeatureGate>
             </div>
           )}

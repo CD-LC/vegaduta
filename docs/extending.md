@@ -497,8 +497,12 @@ throwing sink does not affect the others or the call.
 ## 13. Record more of a turn in the turn journal
 
 The turn journal ([ADR-0020](architecture/ADR-0020-turn-journal.md), bet 1) is an append-only, hash-chained
-record of what an agent turn did. It is **off by default** (`app.turn-journal.enabled=false`) and only the
-streaming fast path of `ChatTurnExecutor` writes it today.
+record of what an agent turn did. It is **off by default** (`app.turn-journal.enabled=false`); when on, every
+reasoning depth and delegated or specialist turns write it (through `TurnJournals`). A `TOOL_CALL` event carries
+`status=ok|error|blocked|parked`, worked out by `JournalingToolCallback` from what the platform answered, and a parked
+call also writes an `APPROVAL` event. The turn id is returned in the `X-Journal-Turn-Id` response header. Limits to
+know before relying on it as evidence: nothing purges old rows (there is no retention job), workflow runs are not
+journaled, and the chain is not yet sealed into the audit seals.
 
 The SPI is `core/agents-turn/.../turnjournal/TurnJournal.java`: `append(agentId, turnId, type, payloadHash, summary)`
 (the implementation assigns `seq` and the chain hashes) and `read(agentId, turnId)`. Implementations:

@@ -44,6 +44,7 @@ export default function AgentToolPoliciesCard({
   lockedTooltip?: string;
 }) {
   const t = useTranslations("toolPolicies");
+  const q = useTranslations("approvalsQueue");
   // Keyed by the agent it was fetched for, so switching agents can never show (or save against) the previous
   // agent's policies while the new fetch is in flight.
   const [loaded, setLoaded] = useState<{ agentId: string; view: ToolPoliciesView } | null>(null);
@@ -167,6 +168,9 @@ export default function AgentToolPoliciesCard({
       </label>
       <p className="mb-2 text-xs text-muted-foreground">{t("intro")}</p>
       <ToolPolicyExplainer className="mb-2" />
+      <p className="mb-2 text-xs text-muted-foreground" data-testid="agent-tool-policies-approval-note">
+        {q("policyThenApprovalNote")}
+      </p>
       <GuardrailActivity kind="toolPolicy" agentId={agentId} />
 
       <div className="mb-2 rounded-md border border-border p-2" data-testid="agent-tool-policies-summary">

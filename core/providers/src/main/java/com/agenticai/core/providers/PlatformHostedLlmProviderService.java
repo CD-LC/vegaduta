@@ -85,7 +85,9 @@ public class PlatformHostedLlmProviderService {
     private final EncryptionService encryptionService;
     private final ProviderModelCatalogService providerModelCatalogService;
     private final HostedPoolEndpointProbe endpointProbe;
-    private final HostedPoolRequestResolver requestResolver;
+    private HostedPoolRequestResolver requestResolver;
+    private ProviderEndpoints providerEndpoints;
+    private ProviderModelDefaultsProperties modelDefaults;
     private final HostedPoolChainResolver chain;
 
     /**
@@ -433,6 +435,30 @@ public class PlatformHostedLlmProviderService {
                 entity.getVertexProjectId(),
                 entity.getVertexLocation());
         return PlatformHostedLlmProviderResponse.from(repository.save(entity));
+    }
+
+    /**
+     * Spring injects {@code app.llm.endpoints}; without it the vendors' public addresses are used. Rebuilds
+     * the resolver, which holds the pool's per-provider default base URLs.
+     */
+    @Autowired(required = false)
+    void setProviderEndpoints(ProviderEndpoints providerEndpoints) {
+        this.providerEndpoints = providerEndpoints;
+        rebuildRequestResolver();
+    }
+
+    /** Spring injects {@code app.models.*}; the resolver's auto-selection keyword order comes from it. */
+    @Autowired(required = false)
+    void setModelDefaults(ProviderModelDefaultsProperties modelDefaults) {
+        this.modelDefaults = modelDefaults;
+        rebuildRequestResolver();
+    }
+
+    private void rebuildRequestResolver() {
+        this.requestResolver = new HostedPoolRequestResolver(
+                providerModelCatalogService,
+                providerEndpoints != null ? providerEndpoints : new ProviderEndpoints(),
+                modelDefaults);
     }
 
     /** Spring injects the chat module's probe when present; tests inject a stub. */

@@ -116,6 +116,7 @@ public class PgAdvisoryJobLock {
                     "knowledge-reembed-poll",
                     "chat-branch-retention-purge",
                     "agent-step-journal-purge",
+                    "turn-journal-retention-purge",
                     // short, latency-critical dispatch/relay loops that must not starve behind long
                     // jobs
                     "workflow-event-outbox-relay",

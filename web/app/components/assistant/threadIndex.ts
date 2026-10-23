@@ -1,4 +1,5 @@
 import type { AssistantTurn, ThreadSummary } from "./assistantTypes";
+import { isApprovalContinuationMessage } from "../agents/approvalContinuation";
 import { stripAppContext } from "./needs";
 
 /**
@@ -90,6 +91,9 @@ export function transcriptToTurns(transcript: ChatTranscript | null | undefined,
   transcript.messages.forEach((m, i) => {
     const role = m.role === "user" ? "user" : m.role === "assistant" ? "assistant" : null;
     if (!role) return;
+    // The platform's own message handing a decided tool call's result back to the agent: not something the
+    // person typed, and the agent's reply to it follows as an ordinary assistant entry.
+    if (role === "user" && isApprovalContinuationMessage(m.content)) return;
     const at = m.timestamp ? Date.parse(m.timestamp) : NaN;
     turns.push({
       id: `${sessionId}:${i}`,

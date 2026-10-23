@@ -45,7 +45,7 @@ class LlmModelSupportTest {
     // ------------------------------------------------------------ retry policy
 
     @Test
-    void transientClassificationRetriesServerErrorsAndConnectFailuresOnly() {
+    void transientClassificationRetriesServerErrorsRateLimitsAndConnectFailuresOnly() {
         assertTrue(LlmModelSupport.isTransient(new TransientAiException("503 - overloaded")));
         assertTrue(LlmModelSupport.isTransient(new ResourceAccessException("I/O error", new ConnectException("refused"))));
         assertTrue(LlmModelSupport.isTransient(
@@ -54,8 +54,11 @@ class LlmModelSupportTest {
         assertTrue(LlmModelSupport.isTransient(
             new RuntimeException("Failed to generate content", new ServerException(503, "UNAVAILABLE", "overloaded"))));
 
-        // 4xx - including 429 - goes straight to the caller's provider fallback.
-        assertFalse(LlmModelSupport.isTransient(new NonTransientAiException("429 - rate limited")));
+        // 429 is retried (after the provider's Retry-After; see LlmRetryPolicyTest) - it used to go
+        // straight to the caller's provider fallback. Any other 4xx still does.
+        assertTrue(LlmModelSupport.isTransient(new NonTransientAiException("429 - rate limited")));
+        assertFalse(LlmModelSupport.isTransient(new NonTransientAiException("400 - bad request")));
+        assertFalse(LlmModelSupport.isTransient(new NonTransientAiException("401 - invalid api key")));
         assertFalse(LlmModelSupport.isTransient(new IllegalStateException("bug")));
     }
 

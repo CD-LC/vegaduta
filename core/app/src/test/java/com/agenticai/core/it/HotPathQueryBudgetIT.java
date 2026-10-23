@@ -553,8 +553,15 @@ class HotPathQueryBudgetIT extends AbstractContextIT {
      * agent_job/webhook checks that join prompt assembly; they buy episode continuity for
      * reward attribution and job-aware turns. rl_trajectory_step could become a cached
      * counter later; until then the queries are part of the recorded budget.
+     * Statements raised to 18 on 2026-10-23: a short message (at most {@code
+     * app.chat.follow-up.short-message-chars}, 40 by default, which "hello there" is) is a possible
+     * follow-up, so the turn reads the session's tool-call log once
+     * ({@code FollowUpTools#stickyTools}: {@code tool_call_log} by agent, session and window) to keep
+     * the tools the conversation already used on offer and to leave a tool task on its own model. It
+     * rides on a connection the turn already holds (connections stay 17). A message longer than the
+     * limit pays nothing.
      */
     private static final long BUDGET_TURN_CONNECTIONS = 17;
 
-    private static final long BUDGET_TURN_STATEMENTS = 17;
+    private static final long BUDGET_TURN_STATEMENTS = 18;
 }

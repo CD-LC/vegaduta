@@ -26,6 +26,8 @@ import {
 } from "./evalDatasetsApi";
 import CasesSection, { type CaseDraft } from "./evalDatasets/CasesSection";
 import CreateDatasetForm, { type CreateDatasetDraft } from "./evalDatasets/CreateDatasetForm";
+import DatasetModePanel from "./evalDatasets/DatasetModePanel";
+import { autoApproveRefusal, modeForRequest, type DatasetModeValue } from "./evalDatasets/datasetMode";
 import RunHistory from "./evalDatasets/RunHistory";
 import RunOptionsPanel, { type RunOptionValues } from "./evalDatasets/RunOptionsPanel";
 import { LIVE_STATUSES } from "./evalDatasets/evalBadges";
@@ -60,9 +62,10 @@ import { useEvalDownloads } from "./evalDatasets/useEvalDownloads";
 /** Poll cadence while a run is live - cheap list call, matches other consoles. */
 const POLL_MS = 5000;
 
-const EMPTY_CREATE_DRAFT: CreateDatasetDraft = { name: "", description: "", threshold: "0.7", toolExec: false };
+// A new dataset pins no mode (null): its runs follow the workspace default, the full pipeline as shipped.
+const EMPTY_CREATE_DRAFT: CreateDatasetDraft = { name: "", description: "", threshold: "0.7", toolExec: null, autoApprove: false };
 const EMPTY_CASE_DRAFT: CaseDraft = { message: "", expected: "", tools: "" };
-const DEFAULT_RUN_OPTS: RunOptionValues = { judgeModel: "", strictJudge: false, repeats: "1", budget: "5" };
+const DEFAULT_RUN_OPTS: RunOptionValues = { judgeModel: "", strictJudge: false, repeats: "1", budget: "5", mode: "" };
 
 export default function EvalDatasetsSection({ agentId }: { agentId: string | null }) {
   // resolveEvalApi() is stable per bundle — memo once.
@@ -86,10 +89,13 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
 
   const [runDetailId, setRunDetailId] = useState<string | null>(null);
   const [caseResults, setCaseResults] = useState<EvalCaseResult[] | null>(null);
+  // The tools the sandbox simulated in the open run, from its detail.
+  const [simulatedTools, setSimulatedTools] = useState<string[]>([]);
 
   // Create-dataset form
   const [showCreate, setShowCreate] = useState(false);
   const [createDraft, setCreateDraft] = useState<CreateDatasetDraft>(EMPTY_CREATE_DRAFT);
+  const [createRefusal, setCreateRefusal] = useState<string | null>(null);
 
   // Add-case form
   const [caseDraft, setCaseDraft] = useState<CaseDraft>(EMPTY_CASE_DRAFT);
@@ -218,17 +224,41 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
         name: createDraft.name.trim(),
         description: createDraft.description.trim() || null,
         passThreshold: Number.isFinite(parseFloat(createDraft.threshold)) ? parseFloat(createDraft.threshold) : null,
-        toolExecutionEnabled: createDraft.toolExec,
+        mode: modeForRequest({ toolExecutionEnabled: createDraft.toolExec, autoApproveTools: createDraft.autoApprove }),
+        autoApproveTools: createDraft.toolExec !== false && createDraft.autoApprove,
       });
       setShowCreate(false);
       setCreateDraft(EMPTY_CREATE_DRAFT);
+      setCreateRefusal(null);
       await refreshDatasets();
-    } catch {
-      // api.ts's shared toJson already raised the global error toast.
+    } catch (e) {
+      // api.ts's shared toJson already raised the global error toast. A refused auto-approval is also explained
+      // next to its switch, which turns itself off and stays off with the server's sentence.
+      const refused = autoApproveRefusal(e);
+      if (refused) {
+        setCreateRefusal(refused);
+        setCreateDraft((prev) => ({ ...prev, autoApprove: false }));
+      }
     } finally {
       setBusy(false);
     }
   }, [evalApi, agentId, createDraft, refreshDatasets]);
+
+  // Saves a dataset's replay mode. The update endpoint takes the whole definition, so the rest is sent unchanged.
+  const saveMode = useCallback(
+    async (dataset: EvalDatasetSummary, mode: DatasetModeValue) => {
+      if (!evalApi || !agentId) return;
+      await evalApi.updateEvalDataset(agentId, dataset.id, {
+        name: dataset.name,
+        description: dataset.description,
+        passThreshold: dataset.passThreshold,
+        mode: modeForRequest(mode),
+        autoApproveTools: mode.toolExecutionEnabled !== false && mode.autoApproveTools,
+      });
+      await refreshDatasets();
+    },
+    [evalApi, agentId, refreshDatasets]
+  );
 
   // "Seed from golden set" - core copies core/quality's golden-dataset.json
   // cases into a fresh dataset for this agent, so a tenant's first regression
@@ -324,6 +354,8 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
           strictJudge: runOpts.strictJudge || undefined,
           repeats: repeatsOption(runOpts.repeats),
           budgetUsd: Number.isFinite(budgetUsd) && budgetUsd !== 5 ? budgetUsd : undefined,
+          // Sent only when this run names a mode; otherwise the dataset's pin, then the workspace default, apply.
+          mode: runOpts.mode || undefined,
         };
         await evalApi.triggerEvalRun(agentId, datasetId, options);
         if (expandedId !== datasetId) {
@@ -360,13 +392,16 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
       if (runDetailId === runId) {
         setRunDetailId(null);
         setCaseResults(null);
+        setSimulatedTools([]);
         return;
       }
       setRunDetailId(runId);
       setCaseResults(null);
+      setSimulatedTools([]);
       try {
         const d = await evalApi.getEvalRun(agentId, expandedId, runId);
         setCaseResults(d.caseResults || []);
+        setSimulatedTools(d.simulatedTools || []);
       } catch {
         setCaseResults([]);
       }
@@ -426,10 +461,15 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
 
       {showCreate && (
         <CreateDatasetForm
+          agentId={agentId}
+          refusal={createRefusal}
           draft={createDraft}
           onChange={(patch) => setCreateDraft((prev) => ({ ...prev, ...patch }))}
           busy={busy}
-          onCancel={() => setShowCreate(false)}
+          onCancel={() => {
+            setShowCreate(false);
+            setCreateRefusal(null);
+          }}
           onCreate={createDataset}
         />
       )}
@@ -486,6 +526,9 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
                         </Alert>
                       )}
 
+                      {/* Replay mode: the workspace default, the full pipeline in the sandbox or quick text only, and sandbox auto-approval */}
+                      <DatasetModePanel agentId={agentId} dataset={dataset} save={(mode) => saveMode(dataset, mode)} />
+
                       {/* Cases */}
                       <CasesSection
                         agentId={agentId}
@@ -521,6 +564,7 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
                         onDownloadJunit={downloadJunit}
                         onDownloadRunJsonl={downloadRunJsonl}
                         onCancelRun={cancelRun}
+                        simulatedTools={simulatedTools}
                       />
                     </div>
                   )}

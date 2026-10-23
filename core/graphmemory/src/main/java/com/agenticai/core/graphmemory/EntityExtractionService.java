@@ -2,13 +2,17 @@ package com.agenticai.core.graphmemory;
 
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,33 +32,33 @@ public class EntityExtractionService {
     private static final Logger log = LoggerFactory.getLogger(EntityExtractionService.class);
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-    private static final String EXTRACTION_SYSTEM_PROMPT = """
-        Extract simple (subject, relation, object) relationship triples from the given fact, if any
-        exist. relation should be a short SCREAMING_SNAKE_CASE label (e.g. MANAGER_OF_BY, WORKS_AT,
-        PREFERS, LOCATED_IN). subject and object should be short entity names (a person, place,
-        company, or thing), not full sentences.
+    /** Registry key of the system prompt (default text: {@code prompts/en/memory.entity_extraction.md}). */
+    static final String PROMPT_KEY = "memory.entity_extraction";
 
-        If the fact contains no clear relationship between two named entities (e.g. it's a vague
-        preference or a fact about a single thing with no second entity), return an empty array.
+    private final PromptSlot prompts = new PromptSlot();
 
-        Respond with ONLY a JSON array, no other text, in this exact shape:
-        [{"subject": "...", "relation": "...", "object": "..."}]
-
-        Example input: "Priya's manager is Raj"
-        Example output: [{"subject": "Priya", "relation": "MANAGER_OF_BY", "object": "Raj"}]
-
-        Example input: "I prefer email over WhatsApp"
-        Example output: []
-        """;
+    /** The prompt registry, so a tenant or agent override of {@link #PROMPT_KEY} applies; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     /** Returns an empty list on any error, blank input, or a null {@code chatClient} - never throws. */
     public List<GraphTriple> extractTriples(ChatClient chatClient, String factText) {
+        return extractTriples(chatClient, factText, null);
+    }
+
+    /**
+     * As {@link #extractTriples(ChatClient, String)}; {@code agentId} (null = unknown) lets an
+     * agent-scope override of the extraction prompt apply to this agent's memory writes.
+     */
+    public List<GraphTriple> extractTriples(ChatClient chatClient, String factText, UUID agentId) {
         if (chatClient == null || factText == null || factText.isBlank()) {
             return List.of();
         }
         try {
             String response = chatClient.prompt()
-                .system(EXTRACTION_SYSTEM_PROMPT)
+                .system(prompts.text(PROMPT_KEY, agentId))
                 .user(factText)
                 .call()
                 .content();

@@ -159,7 +159,9 @@
     "railJobs": "জবস",
     "railSecrets": "সিক্রেটস",
     "railBrand": "ব্র্যান্ডিং",
-    "railLearn": "শিখুন"
+    "railLearn": "শিখুন",
+    "railRuntimeSettings": "রানটাইম সেটিংস",
+    "railControls": "কোথায় নিয়ন্ত্রণ করব...?"
   },
   "languageSwitcher": {
     "label": "ভাষা",
@@ -852,7 +854,142 @@
     "edgeTier0Badge": "অন-ডিভাইস · Chrome-এর বিল্ট-ইন",
     "edgeTier0BadgeTitle": "Chrome-এর বিল্ট-ইন মডেল (Gemini Nano) এর উত্তর দিয়েছে - দ্রুত এবং সম্পূর্ণ ব্যক্তিগত, কিন্তু শুধুমাত্র চ্যাটের জন্য: এটি টুল ব্যবহার করতে পারে না এবং জটিল বিষয়ে আসল প্রোভাইডারের চেয়ে কম নির্ভুল হতে পারে। প্রতিটি প্ল্যানে বিনামূল্যে।",
     "edgeTier1Badge": "অন-ডিভাইস · স্থানীয় মডেল",
-    "edgeTier1BadgeTitle": "একটি ডাউনলোড করা অন-ডিভাইস মডেল এর উত্তর দিয়েছে - ব্যক্তিগত, এবং এটি টুল ব্যবহার করতে পারে (হোস্ট করা মডেলের মতো একই সুরক্ষিত টুল)। এটি হোস্ট করা পুলের চেয়ে অনেক ছোট মডেল, তাই জটিল অনুরোধে কম নির্ভুল হতে পারে। প্রতিটি প্ল্যানে বিনামূল্যে।"
+    "edgeTier1BadgeTitle": "একটি ডাউনলোড করা অন-ডিভাইস মডেল এর উত্তর দিয়েছে - ব্যক্তিগত, এবং এটি টুল ব্যবহার করতে পারে (হোস্ট করা মডেলের মতো একই সুরক্ষিত টুল)। এটি হোস্ট করা পুলের চেয়ে অনেক ছোট মডেল, তাই জটিল অনুরোধে কম নির্ভুল হতে পারে। প্রতিটি প্ল্যানে বিনামূল্যে।",
+    "viewTurn": "টার্ন দেখুন",
+    "viewTurnTitle": "এই কথোপকথনের টার্নগুলোর ধাপে ধাপে টাইমলাইন খুলুন",
+    "headerRunning": "একটি টার্ন চলছে",
+    "headerReady": "প্রস্তুত",
+    "clearContext": "প্রসঙ্গ মুছুন",
+    "clearContextTitle": "নতুন কথোপকথন শুরু করুন। এতে এই চ্যাটের ডিভাইসে ও সার্ভার-পাশের সেশন মেমরি মুছে যায়।",
+    "stopRun": "এই উত্তর থামান",
+    "fallbackSendToPlatform": "প্ল্যাটফর্মে পাঠান",
+    "chipsLabel": "এজেন্ট এখন কী করছে",
+    "chipPreparing": "প্রস্তুত হচ্ছে",
+    "chipModelCall": "মডেলের জন্য অপেক্ষা",
+    "chipThinking": "ভাবছে",
+    "chipWriting": "উত্তর লিখছে",
+    "chipTool": "টুল চলছে: {tool}",
+    "chipToolUnnamed": "একটি টুল চলছে",
+    "chipWaitingApproval": "আপনার অনুমোদনের অপেক্ষায় ({count})",
+    "chipContinuing": "উত্তর চালিয়ে যাচ্ছে",
+    "chipContinuingPass": "উত্তর চালিয়ে যাচ্ছে ({max}-এর মধ্যে পাস {pass})",
+    "chipContinuingApproval": "আপনার সিদ্ধান্তের পর চালিয়ে যাচ্ছে",
+    "chipRetrying": "আবার চেষ্টা করছে",
+    "chipRetryingReason": "আবার চেষ্টা করছে: {reason}",
+    "chipRetryingAttempt": "আবার চেষ্টা করছে (প্রচেষ্টা {attempt}/{max})",
+    "chipRetryingAttemptReason": "আবার চেষ্টা করছে (প্রচেষ্টা {attempt}/{max}): {reason}",
+    "chipFailover": "ব্যাকআপ মডেলে স্যুইচ করা হয়েছে",
+    "chipFailoverReason": "ব্যাকআপ মডেলে স্যুইচ করা হয়েছে: {reason}",
+    "chipFailoverTo": "{model}-এ স্যুইচ করা হয়েছে",
+    "chipFailoverToReason": "{model}-এ স্যুইচ করা হয়েছে: {reason}",
+    "outcomeTruncated": "এই উত্তর শেষ হওয়ার আগেই কেটে গেছে।",
+    "outcomeContinue": "চালিয়ে যান",
+    "outcomeLongerReplies": "দীর্ঘ উত্তরের অনুমতি দিন",
+    "continueMessage": "আপনি যেখানে থেমেছিলেন ঠিক সেখান থেকে চালিয়ে যান, যা আগেই লিখেছেন তা পুনরাবৃত্তি না করে।",
+    "outcomeRefused": "নিরাপত্তার কারণে মডেল প্রোভাইডার এই উত্তর থামিয়ে দিয়েছে, তাই দেখানোর মতো কোনো উত্তর নেই। অনুরোধ বদলে আবার চেষ্টা করুন।",
+    "outcomeRefusedReason": "নিরাপত্তার কারণে ({reason}) মডেল প্রোভাইডার এই উত্তর থামিয়ে দিয়েছে, তাই দেখানোর মতো কোনো উত্তর নেই। অনুরোধ বদলে আবার চেষ্টা করুন।",
+    "outcomeMalformedToolCall": "মডেল একটি টুল ব্যবহার করতে চেয়েছিল, কিন্তু তার অনুরোধ অবৈধ ছিল, তাই কিছুই চলেনি। আবার চেষ্টা করুন।",
+    "outcomeEmpty": "মডেল একটি খালি উত্তর ফেরত দিয়েছে। আবার চেষ্টা করুন।",
+    "stopRaiseSteps": "টুল-কলের সীমা বাড়ান",
+    "stopRaiseBudget": "খরচের সীমা পরিবর্তন করুন",
+    "stopAskEditor": "যিনি এই এজেন্ট সম্পাদনা করতে পারেন তাঁকে সীমা বাড়াতে বলুন।",
+    "rsOpen": "রান সেটিংস",
+    "rsTitle": "রান সেটিংস",
+    "rsClose": "রান সেটিংস বন্ধ করুন",
+    "rsBack": "রান সেটিংসে ফিরে যান",
+    "rsIntro": "{name}-কে পরের বার্তা কীভাবে চলবে। এগুলো এজেন্টের আচরণ ট্যাবে বদলান।",
+    "rsLoading": "লোড হচ্ছে",
+    "rsRetry": "আবার চেষ্টা করুন",
+    "rsOpenBehavior": "আচরণে সম্পাদনা করুন",
+    "rsModelHeading": "মডেল ও স্যাম্পলিং",
+    "rsModel": "মডেল",
+    "rsModelNotSet": "সেট করা নেই",
+    "rsModelDefault": "মডেলের ডিফল্ট",
+    "rsDepth": "যুক্তির গভীরতা",
+    "rsSourceAgent": "এই এজেন্টে সেট করা",
+    "rsParam_temperature": "তাপমাত্রা",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "উত্তরের সর্বোচ্চ দৈর্ঘ্য (টোকেন)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "ফ্রিকোয়েন্সি পেনাল্টি",
+    "rsParam_presencePenalty": "উপস্থিতি পেনাল্টি",
+    "rsParam_seed": "সিড",
+    "rsParam_stopSequences": "থামার ক্রম",
+    "rsParamDropped": "{param} এই এজেন্টে সেট করা আছে, কিন্তু {provider} {model}-এর জন্য এটি উপেক্ষা করে, তাই এর কোনো প্রভাব নেই।",
+    "rsToolsRunHeading": "Tools for this run",
+    "rsToolsRunOnly": "This run only",
+    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
+    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
+    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
+    "rsToolsReset": "Use the agent's tools",
+    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
+    "rsToolsEditAgent": "Change the agent's saved tools",
+    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsEmpty": "এই এজেন্টের জন্য কোনো টুল নেই।",
+    "rsToolsSummary": "{total}-এর মধ্যে {on}টি টুল চালু",
+    "rsToolsFailed": "টুল লোড করা যায়নি।",
+    "rsLimitsHeading": "প্রতি টার্নের সীমা",
+    "rsLimitsChange": "সীমা বদলান",
+    "rsLimitsView": "সীমা দেখুন",
+    "rsLimitsFailed": "সীমা লোড করা যায়নি।",
+    "rsLimitsEmpty": "এই এজেন্টের জন্য দেখানোর মতো কোনো সীমা নেই।",
+    "rsNoLimit": "কোনো সীমা নেই",
+    "rsScoreAll": "প্রতিটি মিল",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n}টি অক্ষর",
+    "rsLimitRange": "অনুমোদিত: {min} থেকে {max}",
+    "rsLayer_AGENT": "এই এজেন্টে সেট করা",
+    "rsLayer_TENANT": "ওয়ার্কস্পেসের ডিফল্ট",
+    "rsLayer_PLATFORM": "প্ল্যাটফর্মের ডিফল্ট",
+    "rsLayer_REQUEST": "এই অনুরোধের জন্য সেট করা",
+    "rsLimit_maxToolSteps": "প্রতি টার্নে টুল কল",
+    "rsLimit_turnTimeoutSeconds": "একটি টার্নের সময়",
+    "rsLimit_toolTimeoutSeconds": "একটি টুল কলের সময়",
+    "rsLimit_toolOutputMaxChars": "টুল ফলাফলের আকার",
+    "rsLimit_retrievalTopK": "প্রতি অনুসন্ধানে জ্ঞানের ফলাফল",
+    "rsLimit_retrievalMinScore": "জ্ঞান মিলের ন্যূনতম প্রাসঙ্গিকতা",
+    "rsLimit_continuationPasses": "উত্তর শেষ করতে অতিরিক্ত পাস",
+    "rsLimitHelp_maxToolSteps": "একটি উত্তর সর্বোচ্চ কতগুলো টুল কল করতে পারে। সীমায় পৌঁছালে টার্ন থেমে যায় এবং সেটি জানায়।",
+    "rsLimitHelp_turnTimeoutSeconds": "একটি টার্ন থামানোর আগে কত সময় চলতে পারে।",
+    "rsLimitHelp_toolTimeoutSeconds": "একটি টুল কল থামানোর আগে কত সময় চলতে পারে।",
+    "rsLimitHelp_toolOutputMaxChars": "একটি টুল ফলাফলের কতটা মডেল পড়তে পারে। বাকিটা কেটে ফেলা হয়।",
+    "rsLimitHelp_retrievalTopK": "একটি অনুসন্ধান জ্ঞান ভাণ্ডারের কয়টি অংশ ফেরত দেয়।",
+    "rsLimitHelp_retrievalMinScore": "এর চেয়ে কম মিল থাকা অংশ বাদ দেওয়া হয়। শূন্য প্রতিটি মিল রাখে।",
+    "rsLimitHelp_continuationPasses": "যে উত্তর ঘোষিত অথচ না নেওয়া ধাপে থেমে গেছে তা শেষ করতে অতিরিক্ত চেষ্টা।",
+    "rsPreviewButton": "প্রম্পটের প্রিভিউ",
+    "rsPreviewTitle": "প্রম্পট প্রিভিউ",
+    "rsPreviewIntro": "এই এজেন্ট যে সিস্টেম প্রম্পট ও টুল তালিকা পাঠাত, আসল টার্ন যেভাবে তৈরি করে ঠিক সেভাবে তৈরি। কোনো মডেলে কিছু পাঠানো হয় না।",
+    "rsPreviewBuilding": "প্রিভিউ তৈরি হচ্ছে",
+    "rsPreviewFailed": "প্রিভিউ তৈরি করা যায়নি।",
+    "rsPreviewTotals": "প্রায় {prompt} টোকেন সিস্টেম টেক্সট এবং {tools} টোকেন টুল সংজ্ঞা (আনুমানিক)।",
+    "rsPreviewOverBudgetTitle": "টোকেন বাজেটের বেশি",
+    "rsPreviewOverBudget": "স্থায়ী সিস্টেম টেক্সট কনফিগার করা {budget} টোকেনের বাজেট ছাড়িয়ে গেছে। কিছু কাটা হয় না; কোনো প্রম্পট ছোট করার কথা ভাবুন।",
+    "rsPreviewNoBlocks": "দেখানোর মতো কোনো প্রম্পট ব্লক নেই।",
+    "rsPreviewMessage": "বার্তা: {message}",
+    "rsPreviewTokens": "~{tokens} টোকেন",
+    "rsPreviewShowText": "টেক্সট দেখান",
+    "rsPreviewTools": "টুল ({count})",
+    "rsPreviewNoTools": "এই এজেন্ট কোনো টুল দেয় না।",
+    "rsPreviewNotes": "এই প্রিভিউ যা জানতে পারে না",
+    "rsPreviewOpenAdmin": "প্রতিটি প্রম্পটের ভাষ্য দেখুন ও বদলান",
+    "rsOriginDefault": "সাথে আসা ডিফল্ট",
+    "rsOriginOverride": "{scope} ওভাররাইড v{version}",
+    "rsOriginAgentConfig": "এজেন্টের নিজস্ব সিস্টেম প্রম্পট",
+    "rsOriginCode": "প্ল্যাটফর্ম কোড",
+    "rsRunBudget": "প্রতি রানে খরচের সীমা",
+    "rsNoCap": "কোনো সীমা নেই",
+    "rsRunBudgetHelp": "একটি রান যখন অন্য এজেন্টকে দায়িত্ব দেয় বা গভীর গবেষণা চালায় তখন সর্বোচ্চ কত খরচ করতে পারে। এটি আনুমানিক, বিলিং নয়।",
+    "chipToolsOff": "টুল ছাড়া আবার চেষ্টা করছে",
+    "chipFailoverBlocked": "ব্যাকআপ মডেল ব্যবহার হয়নি: টুল আগেই চলেছে",
+    "rsLimitChangeOne": "পরিবর্তন",
+    "reasonRateLimited": "rate limited",
+    "reasonTimeout": "timed out",
+    "reasonProviderUnavailable": "provider unavailable",
+    "reasonAuthFailed": "provider rejected the credentials",
+    "reasonBilling": "provider billing problem",
+    "reasonModelNotFound": "model not available",
+    "reasonProviderError": "provider error",
+    "reasonMalformedToolCall": "the tool call could not be used"
   },
   "nodeDefs": {
     "triggerLabel": "ট্রিগার",
@@ -1498,7 +1635,35 @@
     "ttsProviderUpdatedSuccess": "TTS প্রোভাইডার আপডেট করা হয়েছে।",
     "updateTtsProviderError": "এই এজেন্টের TTS প্রোভাইডার আপডেট করা যায়নি।",
     "ttsProviderFreePlanTooltip": "TTS প্রোভাইডার নির্বাচন একটি প্রিমিয়াম ফিচার।",
-    "ttsProviderNotSet": "প্ল্যাটফর্ম ডিফল্ট ব্যবহার হচ্ছে"
+    "ttsProviderNotSet": "প্ল্যাটফর্ম ডিফল্ট ব্যবহার হচ্ছে",
+    "samplingTitle": "উন্নত স্যাম্পলিং",
+    "samplingIntro": "মডেল কীভাবে শব্দ বাছে তা সূক্ষ্মভাবে ঠিক করুন। মডেলের ডিফল্ট ব্যবহার করতে ঘর ফাঁকা রাখুন। যে প্রোভাইডার কোনো ঘর সমর্থন করে না তারা সেটি কেবল উপেক্ষা করে।",
+    "samplingIgnored": "এই মডেলের প্রোভাইডার এই সেটিং উপেক্ষা করে, তাই এটি বদলালে কোনো প্রভাব পড়ে না।",
+    "samplingSaving": "সংরক্ষণ হচ্ছে…",
+    "samplingSaved": "সংরক্ষিত",
+    "samplingNotSaved": "সংরক্ষিত হয়নি",
+    "samplingSaveFailed": "সেই সেটিং সংরক্ষণ করা যায়নি।",
+    "samplingErrorWhole": "{label} অবশ্যই {min} থেকে {max}-এর মধ্যে একটি পূর্ণসংখ্যা হতে হবে, অথবা বন্ধ করতে ফাঁকা রাখুন।",
+    "samplingErrorNumber": "{label} অবশ্যই {min} থেকে {max}-এর মধ্যে একটি সংখ্যা হতে হবে, অথবা বন্ধ করতে ফাঁকা রাখুন।",
+    "samplingStopTooLong": "একটি থামার ক্রম সর্বোচ্চ {max}টি অক্ষরের হতে পারে।",
+    "samplingStopTooMany": "সর্বোচ্চ {max}টি থামার ক্রম।",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "শুধু সবচেয়ে সম্ভাব্য K-টি পরবর্তী শব্দ বিবেচনা করুন। কম মানে আরও নিরাপদ, অনুমানযোগ্য টেক্সট। ১ থেকে ১০০০।",
+    "samplingSeed": "সিড",
+    "samplingSeedHelp": "একই প্রম্পটের জন্য উত্তর আরও পুনরাবৃত্তিযোগ্য করতে একটি সংখ্যা দিন। সব প্রোভাইডার এর নিশ্চয়তা দেয় না।",
+    "samplingFrequency": "ফ্রিকোয়েন্সি পেনাল্টি",
+    "samplingFrequencyHelp": "ধনাত্মক মান একই শব্দ বারবার ব্যবহারকে নিরুৎসাহিত করে। -2 থেকে 2।",
+    "samplingPresence": "উপস্থিতি পেনাল্টি",
+    "samplingPresenceHelp": "ধনাত্মক মান মডেলকে একটি বিষয়ে আটকে না থেকে নতুন বিষয়ের দিকে ঠেলে দেয়। -2 থেকে 2।",
+    "samplingPlaceholderDefault": "ডিফল্ট",
+    "samplingPlaceholderRandom": "এলোমেলো",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "থামার ক্রম",
+    "samplingStopPlaceholder": "একটি বাক্যাংশ লিখে Enter চাপুন",
+    "samplingStopHelp": "মডেল এগুলোর কোনোটি লিখলেই উত্তর শেষ হয়ে যায়। সর্বোচ্চ {count}টি, প্রতিটি সর্বোচ্চ {max}টি অক্ষরের।",
+    "samplingStopCurrent": "বর্তমান থামার ক্রম",
+    "samplingStopRemove": "থামার ক্রম {value} সরান",
+    "samplingAdd": "যোগ করুন"
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "কনফিগার করতে একটি নোড নির্বাচন করুন, অথবা বাম দিকের প্যালেট থেকে একটি নতুন নোড টেনে আনুন।",
@@ -12977,7 +13142,7 @@
   },
   "adminAccessPage": {
     "pageTitle": "Team access",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "প্রশাসন",
     "matrixTitle": "Access matrix",
     "matrixHint": "Every member's effective scopes at a glance - tick a cell to grant or revoke that scope for that person.",
     "memberColumn": "MEMBER",
@@ -12992,7 +13157,7 @@
   "adminPaymentsPage": {
     "pageTitle": "Agent payments",
     "pageSubtitle": "Signed UPI mandates, spend caps and payment history for each agent.",
-    "agentPickerLabel": "Agent",
+    "agentPickerLabel": "এজেন্ট",
     "noAgents": "No agents in this workspace",
     "loadFailed": "Could not load payment data for this agent.",
     "mandatesHeading": "Payment mandates",
@@ -13020,9 +13185,9 @@
     "thresholdRequired": "Set the approval threshold amount.",
     "previewFailed": "Could not build the mandate preview.",
     "reviewMandate": "Review mandate",
-    "back": "Back",
+    "back": "ফিরে যান",
     "signAndGrant": "Sign & grant",
-    "cancel": "Cancel",
+    "cancel": "বাতিল",
     "canonicalReviewLabel": "Canonical mandate document",
     "canonicalReviewHint": "This exact JSON is what gets Ed25519-signed. Verify the caps, scope and validity before granting.",
     "grantSuccess": "Mandate granted and signed.",
@@ -13048,7 +13213,7 @@
     "colStatus": "Status",
     "colVpa": "Payee VPA",
     "colDescription": "Description",
-    "colCreated": "Created",
+    "colCreated": "তৈরি",
     "detailId": "Transaction",
     "detailMandate": "Mandate",
     "detailGatewayPayment": "Gateway payment",
@@ -13092,7 +13257,7 @@
     "restoreTooltip": "Make this version the agent's current configuration.",
     "restoreConfirmTitle": "Restore v{version}?",
     "restoreConfirmBody": "The agent's current configuration is replaced by this version's. The restore itself is saved as a new version, so it can be undone.",
-    "cancelButton": "Cancel",
+    "cancelButton": "বাতিল",
     "restoredNotice": "Restored - the agent now runs this configuration.",
     "restoreError": "Couldn't restore that version.",
     "labelUpdatedNotice": "Label updated.",
@@ -13105,18 +13270,18 @@
     "forceReasonLabel": "Override reason (required, written to the audit log)",
     "forceReasonPlaceholder": "Why is this safe to promote without a passing eval?",
     "forcePromoteButton": "Promote anyway",
-    "fieldModel": "Model",
+    "fieldModel": "মডেল",
     "fieldFallback": "Fallback",
     "fieldGeneration": "Generation",
     "fieldModes": "Modes",
-    "fieldTools": "Tools",
+    "fieldTools": "টুল",
     "toolsUnrestricted": "All resolved tools",
     "toolsNone": "None",
     "toolsCount": "{count} allowed",
-    "fieldGuardrails": "Guardrails",
+    "fieldGuardrails": "গার্ডরেল",
     "fieldFlags": "Enabled",
     "fieldPrompt": "System prompt",
-    "flagKnowledge": "Knowledge",
+    "flagKnowledge": "জ্ঞান",
     "flagSarvam": "Sarvam",
     "flagSandbox": "Sandbox",
     "flagCodeWorkspace": "Code workspace",
@@ -13137,18 +13302,18 @@
       "AUTONOMOUS": "Autonomous"
     },
     "state": {
-      "READY": "Ready",
+      "READY": "প্রস্তুত",
       "MISSING": "Missing",
       "WAITING_ON_ADMIN": "Waiting on admin",
       "GATED": "Not on your plan",
       "SIMULATED": "Simulated"
     },
     "kind": {
-      "agent": "Agent",
+      "agent": "এজেন্ট",
       "workflow": "Workflow",
       "tool": "Tool",
       "mcp": "MCP server",
-      "knowledge": "Knowledge",
+      "knowledge": "জ্ঞান",
       "procedure": "Procedure",
       "secret": "Secret",
       "channel": "Channel"
@@ -13188,7 +13353,7 @@
     },
     "narrative": {
       "aria": "About {name}",
-      "close": "Close",
+      "close": "বন্ধ করুন",
       "why": "Why it is here",
       "tune": "If results are wrong",
       "proof": "How you will know it works",
@@ -13205,14 +13370,14 @@
       "step": {
         "PENDING": "Waiting",
         "DONE": "Done",
-        "FAILED": "Failed",
+        "FAILED": "ব্যর্থ",
         "COMPENSATED": "Rolled back"
       },
       "failedAt": "Step {step} failed: {name}.",
       "failedGeneric": "The apply did not finish.",
       "nothingKept": "Nothing was kept. Everything created in this run was rolled back.",
       "someKept": "Some steps were already saved and are shown above. Check them before trying again.",
-      "retry": "Try again",
+      "retry": "আবার চেষ্টা করুন",
       "doneBody": "Your envoy is in place and starts under watch. Fill in what is still missing on the right."
     },
     "plan": {
@@ -13229,7 +13394,7 @@
       "stepsLabel": "Steps",
       "step": {
         "preview": "Preview",
-        "ready": "Ready",
+        "ready": "প্রস্তুত",
         "applying": "Apply"
       },
       "toReady": "Check what it needs",
@@ -13318,7 +13483,7 @@
         "other": "setting"
       },
       "op": {
-        "changed": "Changed",
+        "changed": "পরিবর্তিত",
         "added": "Added",
         "removed": "Removed"
       },
@@ -13356,8 +13521,8 @@
       "entityAdded": "{where} is added",
       "entityRemoved": "{where} is removed",
       "showFull": "Show the full text",
-      "before": "Before:",
-      "after": "After:",
+      "before": "আগে:",
+      "after": "পরে:",
       "apply": "Apply this change",
       "discard": "Discard"
     },
@@ -13366,7 +13531,7 @@
       "placeholder": "For example: the reminders sound too harsh, soften the first one",
       "propose": "Show me the change",
       "proposing": "Working out the change...",
-      "saving": "Saving...",
+      "saving": "সংরক্ষণ হচ্ছে...",
       "applying": "Applying...",
       "failed": "Could not work out a change. Try saying it another way.",
       "done": "Applied. Scoring has been asked for; the new score appears in the ledger when it finishes.",
@@ -13385,7 +13550,7 @@
       "noCards": "Nothing stands out yet. Suggestions appear once something has scored low.",
       "cardsLabel": "Suggestions",
       "scored": "{dimension} {score}",
-      "open": "Open",
+      "open": "খুলুন",
       "notApplied": "Available once the envoy is applied.",
       "dimension": {
         "helpfulness": "Helpfulness",
@@ -13470,11 +13635,11 @@
       "demoteNone": "Demote",
       "demoteConfirm": "Demote to {rung}? Approvals return to every risky step immediately.",
       "demoteConfirmYes": "Yes, demote",
-      "demoteConfirmCancel": "Cancel",
+      "demoteConfirmCancel": "বাতিল",
       "demoteHint": "Always available. It puts the approvals back straight away.",
       "demoteNeedsAdmin": "Only a workspace admin can change the trust level.",
       "atBottom": "Already at the lowest level.",
-      "history": "History",
+      "history": "ইতিহাস",
       "noHistory": "No trust changes yet.",
       "showEvidence": "Show the evidence",
       "diffKind": {
@@ -13505,7 +13670,7 @@
       "runError": "This run could not finish.",
       "transcriptFailed": "Could not load this transcript.",
       "showTranscript": "Read the conversation ({count} turns)",
-      "agent": "Agent",
+      "agent": "এজেন্ট",
       "verdict": {
         "PASSED": "The agent handled it well",
         "FAILED": "The agent was talked out of its rules",
@@ -13536,7 +13701,7 @@
   },
   "contactsPage": {
     "pageTitle": "Contacts & routing",
-    "pageEyebrow": "Administration",
+    "pageEyebrow": "প্রশাসন",
     "pageSubtitle": "A contact is a sender your agents already know. Approving a new sender makes them a contact and routes their messages to an agent.",
     "routingTitle": "Channel routing",
     "routingHint": "Pick the agent new conversations go to, and whether a sender you've never seen needs your approval first or goes straight through.",
@@ -13556,16 +13721,16 @@
     "contactsTitle": "Contacts",
     "contactsHint": "Known senders skip approval entirely - a contact here is pre-approved and routes by contact agent → group agent → channel default.",
     "allChannels": "All channels",
-    "allGroups": "All groups",
-    "filterByGroupLabel": "Filter by group",
+    "allGroups": "সব গ্রুপ",
+    "filterByGroupLabel": "গ্রুপ অনুযায়ী ফিল্টার করুন",
     "searchPlaceholder": "Search number, chat id or name…",
     "identifierPlaceholder": "Phone / chat id / email *",
     "namePlaceholder": "Name (optional)",
     "groupPlaceholder": "Group",
     "noGroup": "No group",
-    "agentPlaceholder": "Agent",
+    "agentPlaceholder": "এজেন্ট",
     "channelDefault": "Channel default",
-    "addButton": "Add",
+    "addButton": "যোগ করুন",
     "contactAdded": "Contact added.",
     "statusLinked": "Live",
     "statusDirectory": "Directory",
@@ -13577,7 +13742,7 @@
     "groupsTitle": "Contact groups",
     "groupsHint": "Group contacts to route them together - a group's agent answers every member without their own override.",
     "groupNamePlaceholder": "Group name",
-    "groupAgentPlaceholder": "Agent",
+    "groupAgentPlaceholder": "এজেন্ট",
     "createGroupButton": "Create",
     "groupCreated": "Group created.",
     "groupMeta": "{count} member(s) · routes to {agent}",
@@ -13607,10 +13772,10 @@
     "colContact": "Contact",
     "colStatus": "Status",
     "colGroup": "Group",
-    "colAgent": "Agent",
+    "colAgent": "এজেন্ট",
     "colRoutesVia": "Routes via",
-    "selectedCount": "{count} selected",
-    "approveN": "Approve {count}",
+    "selectedCount": "{count}টি নির্বাচিত",
+    "approveN": "{count}টি অনুমোদন করুন",
     "rejectN": "Reject {count}",
     "clearSelection": "Clear",
     "bulkProgress": "{done} of {total} done…",
@@ -13626,7 +13791,7 @@
     "contactsEmptyImport": "Import a sheet",
     "contactsNoMatch": "No contacts match these filters.",
     "addContactButton": "Add contact",
-    "cancelButton": "Cancel",
+    "cancelButton": "বাতিল",
     "statusLinkedHint": "Has an active conversation",
     "statusDirectoryHint": "Known sender, no conversation yet",
     "justNow": "just now",
@@ -13697,7 +13862,7 @@
     "deactivating": "Removing…",
     "deactivateTitle": "Remove your {provider} key?",
     "deactivateBody": "Decision calls for this workspace will fall back to the platform key (when configured) or local heuristics.",
-    "cancel": "Cancel",
+    "cancel": "বাতিল",
     "policyTitle": "Decision controls",
     "policySubtitle": "Where the decision model may act for this workspace — and how sure it must be. Inherit uses the platform default; changes propagate within ~30 seconds.",
     "policyLoading": "Loading policy…",
@@ -13707,17 +13872,17 @@
     "policy_agentRoutingHelp": "Let the decision model pick the best-fit agent for a Quick Task by intent, instead of keyword matching.",
     "policyOpt_inherit": "Inherit",
     "policyOpt_on": "On",
-    "policyOpt_off": "Off",
+    "policyOpt_off": "বন্ধ",
     "policyThreshold": "“Simple turn” confidence bar",
     "policyThresholdHelp": "0.5–0.99 — higher means the decision model must be more sure before a turn is called simple. Blank inherits.",
     "policySave": "Save policy",
-    "saving": "Saving…",
+    "saving": "সংরক্ষণ হচ্ছে…",
     "policyPropagation": "Agents can set their own stricter bar in their cost-routing settings — per-agent wins over this workspace value.",
     "playgroundTitle": "Playground",
     "playgroundSubtitle": "Ask the active decision provider a typed question against your resolved key. Bounded to one question per run — see the raw answer, model and token usage.",
     "stateLabel": "State",
     "statePlaceholder": "The facts the decision model reasons over, e.g. a user message or a task description…",
-    "instructionsLabel": "Instructions",
+    "instructionsLabel": "নির্দেশনা",
     "typeHelp_noul": "noul — a calibrated yes/no probability (0–1).",
     "typeHelp_choice": "choice — pick a winner from 2+ options, with per-option probabilities.",
     "typeHelp_score": "score — a probability-weighted score over 2–10 ordered levels.",
@@ -13803,7 +13968,7 @@
     "headerEyebrow": "Sales pipeline",
     "pageSubtitle": "Every lead in one place - move them through the pipeline, log calls and emails, and let workflows keep the stages up to date.",
     "newLead": "New lead",
-    "close": "Close",
+    "close": "বন্ধ করুন",
     "fieldName": "Name",
     "fieldEmail": "Email",
     "fieldPhone": "Phone",
@@ -13834,7 +13999,7 @@
     "daysAgo": "{n}d ago",
     "lastContacted": "Last contacted {when}",
     "lastReplied": "Last replied {when}",
-    "saveButton": "Save changes",
+    "saveButton": "পরিবর্তন সংরক্ষণ করুন",
     "createButton": "Create lead",
     "deleteButton": "Delete",
     "timelineTitle": "Activity",
@@ -13890,7 +14055,7 @@
     "adminOnlyToast": "Only workspace admins can import an API.",
     "readOnlyNote": "Only workspace admins can import, refresh, or change API sources. Every agent in the workspace can already call the tools listed here.",
     "loadError": "Could not load imported APIs.",
-    "retryButton": "Try again",
+    "retryButton": "আবার চেষ্টা করুন",
     "emptyTitle": "No APIs imported yet",
     "emptyBody": "Point the platform at an OpenAPI 3 or Swagger 2 document and every operation in it becomes a tool your agents can call - no code to write.",
     "importTitle": "Import an API from its OpenAPI document",
@@ -13950,9 +14115,9 @@
     "importingEllipsis": "Importing…",
     "importFailed": "The import failed.",
     "importedToast": "\"{name}\" imported - {count} tools are live for your agents.",
-    "backButton": "Back",
-    "cancelButton": "Cancel",
-    "closeButton": "Close",
+    "backButton": "ফিরে যান",
+    "cancelButton": "বাতিল",
+    "closeButton": "বন্ধ করুন",
     "toolCountLabel": "{enabled} of {total} tools enabled",
     "refreshedAtLabel": "refreshed {when}",
     "statusEnabled": "Enabled",
@@ -13962,7 +14127,7 @@
     "refreshAriaLabel": "Refresh {name}",
     "refreshTitle": "Re-read the document and update the tools",
     "editAriaLabel": "Edit settings of {name}",
-    "editTitle": "Settings",
+    "editTitle": "সেটিংস",
     "deleteAriaLabel": "Delete {name}",
     "deleteTitle": "Delete",
     "toggleAriaLabel": "Toggle {name}",
@@ -13985,7 +14150,7 @@
     "nameAndBaseUrlRequired": "Name and base URL are both required.",
     "prefixImmutableNote": "The tool prefix ({prefix}) cannot change - agents may already rely on the generated tool names. To re-read the document itself, use Refresh.",
     "saveSettingsButton": "Save settings",
-    "savingEllipsis": "Saving…",
+    "savingEllipsis": "সংরক্ষণ হচ্ছে…",
     "saveFailed": "Could not save the settings.",
     "settingsSavedToast": "\"{name}\" settings saved.",
     "deleteDialogTitle": "Delete \"{name}\"?",
@@ -13999,7 +14164,7 @@
   "schedulePanel": {
     "noAgentsTitle": "No agents yet",
     "noAgentsBody": "Create an agent first — a schedule is a recurring job for one specific agent.",
-    "agent": "Agent",
+    "agent": "এজেন্ট",
     "loading": "Loading schedule…",
     "enabled": "Enabled",
     "paused": "Paused",
@@ -14019,8 +14184,8 @@
     "cadenceInterval": "Every N minutes / hours / days",
     "cadenceCron": "Cron expression",
     "intervalEvery": "Every",
-    "unitMinutes": "minutes",
-    "unitHours": "hours",
+    "unitMinutes": "মিনিট",
+    "unitHours": "ঘণ্টা",
     "unitDays": "days",
     "intervalHint": "At least 1 minute. The scheduler checks once a minute.",
     "cronLabel": "Cron",
@@ -14076,7 +14241,7 @@
     "builtInReadOnly": "Built-in skills can't be edited. To customise one, export it, change its name, and upload it as your own.",
     "badgeBuiltIn": "Built-in",
     "badgeCustom": "Custom",
-    "badgeOff": "Off",
+    "badgeOff": "বন্ধ",
     "fileCount": "{count} bundled file(s)",
     "toggleAria": "Enable skill {name}",
     "selectPrompt": "Select a skill to read its instructions.",
@@ -14084,8 +14249,8 @@
     "editButton": "Edit",
     "deleteButton": "Delete",
     "saveButton": "Save skill",
-    "savingButton": "Saving…",
-    "cancelButton": "Cancel",
+    "savingButton": "সংরক্ষণ হচ্ছে…",
+    "cancelButton": "বাতিল",
     "replaceButton": "Replace",
     "newHeading": "New skill",
     "editHeading": "Edit {name}",
@@ -14100,5 +14265,1279 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "ওয়ার্কস্পেস সেটিংস",
+      "agent": "এজেন্ট সেটিংস"
+    },
+    "agentMissing": "এজেন্টের সেটিংস দেখতে একটি এজেন্ট বেছে নিন।",
+    "scopeNote": {
+      "agent": "এই মানগুলো শুধু এই এজেন্টের জন্য প্রযোজ্য। এখানে যা ওভাররাইড করেননি তা আপনার ওয়ার্কস্পেস সেটিংস থেকে উত্তরাধিকারসূত্রে আসে।"
+    },
+    "loading": "সেটিংস লোড হচ্ছে",
+    "loadError": "সেটিংস লোড করা যায়নি। {message}",
+    "retry": "আবার চেষ্টা করুন",
+    "filters": {
+      "label": "সেটিংস ফিল্টার করুন",
+      "search": "সেটিংস খুঁজুন",
+      "searchPlaceholder": "নাম বা বিবরণ দিয়ে খুঁজুন",
+      "group": "গ্রুপ অনুযায়ী ফিল্টার করুন",
+      "allGroups": "সব গ্রুপ",
+      "risk": "ঝুঁকি অনুযায়ী ফিল্টার করুন",
+      "allRisks": "সব ঝুঁকির স্তর",
+      "clear": "ফিল্টার মুছুন"
+    },
+    "empty": {
+      "none": "এখানে আপনি বদলাতে পারেন এমন কোনো সেটিং নেই।",
+      "filtered": "কোনো সেটিং আপনার ফিল্টারের সাথে মেলে না।"
+    },
+    "saved": "সংরক্ষিত। হালনাগাদ হওয়া সেটিংস: {count}।",
+    "saveFailed": "সংরক্ষিত হয়নি। ব্যর্থ সেটিংস: {count}। আপনার সম্পাদনা এখনও ফর্মে আছে।",
+    "resetDone": "{label} এখন উত্তরাধিকারসূত্রে পাওয়া মান ব্যবহার করে।",
+    "resetFailed": "সেটিংটি রিসেট করা যায়নি।",
+    "unsaved": "অসংরক্ষিত পরিবর্তন",
+    "discardOne": "পরিবর্তন বাতিল করুন",
+    "restartRequired": "রিস্টার্ট দরকার",
+    "source": {
+      "default": "ডিফল্ট",
+      "platform": "প্ল্যাটফর্ম",
+      "tenant": "ওয়ার্কস্পেস",
+      "agent": "এজেন্ট",
+      "tenantInherited": "ওয়ার্কস্পেস থেকে উত্তরাধিকারসূত্রে পাওয়া",
+      "aria": "মানের উৎস: {source}"
+    },
+    "sourceHelp": {
+      "default": "কেউ এটি বদলায়নি। পণ্যের সাথে আসা মান ব্যবহার করছে।",
+      "platform": "আপনার প্ল্যাটফর্ম অপারেটর এটি পুরো ডিপ্লয়মেন্টের জন্য সেট করেছেন।",
+      "tenant": "আপনার ওয়ার্কস্পেস ডিফল্ট ওভাররাইড করে। উত্তরাধিকারসূত্রে পাওয়া মানে ফিরতে রিসেট করুন।",
+      "agent": "এই এজেন্ট ওয়ার্কস্পেসের মান ওভাররাইড করে। ওয়ার্কস্পেসের মান আবার পেতে রিসেট করুন।",
+      "tenantInherited": "এই এজেন্টের নিজস্ব কোনো ওভাররাইড নেই, তাই এটি ওয়ার্কস্পেসের মান ব্যবহার করে। এটি সম্পাদনা করলে শুধু এই এজেন্টের জন্য একটি ওভাররাইড তৈরি হয়।",
+      "lockedSuffix": "এটি লক করা, তাই এখানে বদলানো যাবে না।"
+    },
+    "risk": {
+      "low": "কম ঝুঁকি",
+      "medium": "মাঝারি ঝুঁকি",
+      "high": "উচ্চ ঝুঁকি",
+      "security": "নিরাপত্তা"
+    },
+    "bool": {
+      "on": "On",
+      "off": "বন্ধ"
+    },
+    "value": {
+      "unset": "সেট করা নেই",
+      "empty": "ফাঁকা"
+    },
+    "select": {
+      "placeholder": "একটি বিকল্প বেছে নিন"
+    },
+    "slider": {
+      "label": "{label} (স্লাইডার)"
+    },
+    "duration": {
+      "unitLabel": "{label}-এর একক"
+    },
+    "units": {
+      "chars": "অক্ষর",
+      "tokens": "টোকেন",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "সেকেন্ড",
+      "min": "মিনিট",
+      "h": "ঘণ্টা"
+    },
+    "groups": {
+      "agent": "এজেন্ট রানটাইম",
+      "approvals": "অনুমোদন",
+      "quality": "মান যাচাই",
+      "guardrails": "গার্ডরেল",
+      "chat": "চ্যাট",
+      "tools": "টুল",
+      "memory": "মেমরি",
+      "knowledge": "জ্ঞান",
+      "delegation": "দায়িত্ব অর্পণ",
+      "aux": "সহায়ক মডেল",
+      "routing": "মডেল রাউটিং"
+    },
+    "errors": {
+      "required": "একটি মান লিখুন।",
+      "notNumber": "একটি সংখ্যা লিখুন।",
+      "notInteger": "একটি পূর্ণসংখ্যা লিখুন।",
+      "belowMin": "কমপক্ষে {min} হতে হবে।",
+      "aboveMax": "সর্বোচ্চ {max} হতে হবে।",
+      "notAllowed": "তালিকাভুক্ত বিকল্পগুলোর একটি বেছে নিন।",
+      "tooShort": "খুব ছোট। কমপক্ষে {min} ব্যবহার করুন।",
+      "tooLong": "খুব বড়। সর্বোচ্চ {max} ব্যবহার করুন।",
+      "precision": "এই একক এটি নিখুঁতভাবে প্রকাশ করতে পারে না। সবচেয়ে ছোট এককের একটি পূর্ণসংখ্যা ব্যবহার করুন বা ছোট একক বেছে নিন।",
+      "serverRange": "অনুমোদিত পরিসর: {min} থেকে {max}।",
+      "serverOptions": "অনুমোদিত মান: {options}।",
+      "server": {
+        "invalid": "সার্ভার এই মান গ্রহণ করেনি: {message}",
+        "locked": "এই সেটিং আপনার অ্যাডমিন লক করেছেন, তাই আপনার পরিবর্তন সংরক্ষিত হয়নি।",
+        "notFound": "এই সেটিং আর নেই।",
+        "forbidden": "এই সেটিং বদলানোর অনুমতি আপনার নেই।",
+        "reasonRequired": "এই পরিবর্তনের জন্য একটি কারণ আবশ্যক। একটি লিখে আবার চেষ্টা করুন।",
+        "network": "সার্ভারে পৌঁছানো যায়নি, তাই আপনার পরিবর্তন সংরক্ষিত হয়নি। {message}",
+        "other": "পরিবর্তন সংরক্ষণ করা যায়নি: {message}"
+      }
+    },
+    "effective": "এখন কার্যকর: {value}",
+    "hint": {
+      "range": "অনুমোদিত: {min} থেকে {max}।",
+      "min": "সর্বনিম্ন: {min}।",
+      "max": "সর্বোচ্চ: {max}।",
+      "default": "ডিফল্ট: {value}।",
+      "securityStricter": "একটি নিরাপত্তা সেটিং শুধু প্ল্যাটফর্মের মানের চেয়ে কড়া করা যায়, কখনো দুর্বল নয়।",
+      "inherited": "রিসেট করলে এটি ফিরে যাবে: {value}।"
+    },
+    "locked": {
+      "withReason": "আপনার অ্যাডমিন লক করেছেন: {reason}",
+      "noReason": "আপনার অ্যাডমিন লক করেছেন। এখানে বদলানো যাবে না।"
+    },
+    "blocked": {
+      "role": "আপনার ভূমিকা এই সেটিং বদলাতে পারে না। ওয়ার্কস্পেস অ্যাডমিনকে জিজ্ঞেস করুন।",
+      "scope": "এই সেটিং এখানে ওভাররাইড করা যায় না।",
+      "readOnly": "সেটিংস এখন শুধু-পঠনযোগ্য।",
+      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+    },
+    "reset": {
+      "button": "উত্তরাধিকারসূত্রে পাওয়া মানে রিসেট করুন",
+      "aria": "উত্তরাধিকারসূত্রে পাওয়া মানে রিসেট করুন: {label}"
+    },
+    "help": {
+      "show": "আরও বিবরণ",
+      "hide": "বিবরণ লুকান"
+    },
+    "history": {
+      "button": "ইতিহাস",
+      "open": "ইতিহাস: {label}",
+      "title": "ইতিহাস: {label}",
+      "scopeTenant": "ওয়ার্কস্পেসের পরিবর্তন",
+      "scopeAgent": "এই এজেন্টের পরিবর্তন",
+      "close": "ইতিহাস বন্ধ করুন",
+      "loading": "ইতিহাস লোড হচ্ছে",
+      "error": "ইতিহাস লোড করা যায়নি। {message}",
+      "empty": "এখনও কোনো পরিবর্তন রেকর্ড করা হয়নি।",
+      "listLabel": "পরিবর্তনের ইতিহাস, নতুনটি আগে",
+      "version": "সংস্করণ {version}",
+      "before": "আগে:",
+      "after": "পরে:",
+      "by": "যিনি বদলেছেন",
+      "unknownActor": "অজানা",
+      "reason": "কারণ:"
+    },
+    "savebar": {
+      "count": "অসংরক্ষিত পরিবর্তন: {count}।",
+      "invalid": "সংরক্ষণের আগে হাইলাইট করা ঘরগুলো ঠিক করুন। ঠিক করার ঘর: {count}।",
+      "discard": "পরিবর্তন বাতিল করুন",
+      "save": "পরিবর্তন সংরক্ষণ করুন",
+      "saving": "সংরক্ষণ হচ্ছে"
+    },
+    "risky": {
+      "title": "ঝুঁকিপূর্ণ পরিবর্তন নিশ্চিত করুন ({count})",
+      "description": "এই সেটিংস আপনার এজেন্টগুলো কেমন আচরণ করবে বা কী করার অনুমতি পাবে তা বদলে দেয়। প্রতিটি পরিবর্তন পর্যালোচনা করুন এবং কেন করছেন তা ব্যাখ্যা করুন। কারণটি অডিট লগে সংরক্ষিত হয়।",
+      "descriptionSecurity": "এগুলোর অন্তত একটি নিরাপত্তা সেটিং। এটি শুধু প্ল্যাটফর্মের মানের চেয়ে কড়া করা যায়। প্রতিটি পরিবর্তন পর্যালোচনা করুন এবং কেন করছেন তা ব্যাখ্যা করুন। কারণটি অডিট লগে সংরক্ষিত হয়।",
+      "listLabel": "নিশ্চিত করার পরিবর্তন",
+      "from": "থেকে",
+      "to": "to",
+      "securityNote": "নিরাপত্তা সেটিং: এটি প্ল্যাটফর্মের মানের চেয়ে দুর্বল হতে পারে না।",
+      "consequence": "এটি কী বদলায়:",
+      "reasonLabel": "এই পরিবর্তনের কারণ",
+      "reasonPlaceholder": "উদাহরণ: সাপোর্ট টিমের দীর্ঘ তদন্তের জন্য সীমা বাড়ানো",
+      "reasonHint": "আবশ্যক, কমপক্ষে {min}টি অক্ষর। কে পরিবর্তন করেছেন এবং পুরোনো ও নতুন মানসহ সংরক্ষিত হয়।",
+      "acknowledge": "আমি এই নিরাপত্তা পরিবর্তনের পরিণতি বুঝি।",
+      "cancel": "বাতিল",
+      "confirm": "নিশ্চিত করে সংরক্ষণ করুন",
+      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+    },
+    "strictness": {
+      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
+      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
+      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "মুলতুবি",
+    "status_APPROVED": "অনুমোদিত",
+    "status_REJECTED": "প্রত্যাখ্যাত",
+    "status_EXPIRED": "মেয়াদোত্তীর্ণ",
+    "status_EXECUTION_FAILED": "কার্যকর হতে ব্যর্থ",
+    "status_DEAD_LETTERED": "ডেড লেটার",
+    "filtersLabel": "অনুরোধ ফিল্টার করুন",
+    "filterAgentLabel": "এজেন্ট অনুযায়ী ফিল্টার করুন",
+    "filterToolLabel": "টুল অনুযায়ী ফিল্টার করুন",
+    "filterAgeLabel": "বয়স অনুযায়ী ফিল্টার করুন",
+    "filterAnyAgent": "যেকোনো এজেন্ট",
+    "filterAnyTool": "যেকোনো টুল",
+    "filterAnyAge": "যেকোনো বয়স",
+    "age_newer1h": "১ ঘণ্টার চেয়ে নতুন",
+    "age_older1h": "১ ঘণ্টার চেয়ে পুরোনো",
+    "age_older24h": "১ দিনের চেয়ে পুরোনো",
+    "age_older7d": "৭ দিনের চেয়ে পুরোনো",
+    "filtersClear": "ফিল্টার মুছুন",
+    "filterWindowNote": "সর্বশেষ {count}টি অনুরোধ ফিল্টার করা হচ্ছে। পুরোনোগুলো অন্তর্ভুক্ত নয়।",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time}-এ মেয়াদ শেষ হবে",
+    "expiresAt": "কেউ সিদ্ধান্ত না নিলে {time}-এ স্বয়ংক্রিয়ভাবে বন্ধ হবে",
+    "overdue": "সময়সীমা পেরিয়ে গেছে, পরের ঝাড়ুতে বন্ধ হবে",
+    "neverExpires": "এই ওয়ার্কস্পেস অপেক্ষমাণ অনুরোধের মেয়াদ শেষ করে না।",
+    "expiredNote": "{time}-এ মেয়াদ শেষ হয়েছে: সময়মতো কেউ সিদ্ধান্ত নেননি",
+    "expiredReasonPrefix": "মেয়াদ শেষ:",
+    "auditExpired": "মেয়াদ শেষ, সময়মতো কেউ সিদ্ধান্ত নেননি",
+    "riskLow": "কম ঝুঁকি",
+    "riskMedium": "মাঝারি ঝুঁকি",
+    "riskHigh": "উচ্চ ঝুঁকি",
+    "riskEstimateNote": "ঝুঁকি টুলের নাম থেকে করা একটি অনুমান। প্ল্যাটফর্ম টুল শ্রেণিবদ্ধ করে না, তাই অনুমোদনের আগে আর্গুমেন্ট পড়ুন।",
+    "riskWhoDecides": "অনুমোদনের অপেক্ষায় কী থাকবে তা কে ঠিক করে?",
+    "previewGoal": "এটি যে কাজ করছিল:",
+    "previewArguments": "আর্গুমেন্ট",
+    "previewNoArguments": "এই কলের জন্য কোনো আর্গুমেন্ট রেকর্ড করা হয়নি।",
+    "previewRedacted": "{count}টি সংবেদনশীল-দেখতে মান এখানে লুকানো আছে। অনুমোদন দিলে সেগুলো তবু টুলে পাঠানো হয়।",
+    "previewTruncated": "এই আর্গুমেন্টগুলো পুরোটা দেখানোর জন্য খুব দীর্ঘ, তাই এখান থেকে এই অনুরোধ অনুমোদন করা যাবে না।",
+    "approveBlockedTooLong": "অনুমোদন বন্ধ কারণ আপনি পুরো অনুরোধ পর্যালোচনা করতে পারছেন না। আপনি তবু এটি প্রত্যাখ্যান করতে পারেন।",
+    "ifApproveLabel": "আপনি অনুমোদন দিলে:",
+    "ifApprove": "{tool} ওপরের আর্গুমেন্ট দিয়ে এখনই চলে, এবং এজেন্ট তার ফলাফল নিয়ে কাজ চালিয়ে যায়।",
+    "ifDenyLabel": "আপনি প্রত্যাখ্যান করলে:",
+    "ifDeny": "{tool} চলে না। এজেন্টকে জানানো হয় আপনি না বলেছেন, কারণ দিলে তাসহ, এবং সে সেটি ছাড়াই এগিয়ে যায়।",
+    "whyGated": "এজেন্ট {tool} ব্যবহার করতে চেয়েছে। এটি আপনার সিদ্ধান্তের জন্য আটকে রাখা হয়েছে কারণ এজেন্ট তত্ত্বাবধানাধীন হিসেবে সেট করা, অথবা এই ওয়ার্কস্পেস সেই টুলের জন্য অনুমোদন দাবি করে।",
+    "denyReasonLabel": "প্রত্যাখ্যান করলে কারণ (ঐচ্ছিক)",
+    "denyReasonPlaceholder": "উদাহরণ: ভুল প্রাপক, পাঠানোর আগে আমাকে জিজ্ঞেস করুন",
+    "denyReasonHelp": "প্রত্যাখ্যান করলে এজেন্ট এই কারণটি প্রত্যাখ্যাত কলের ফলাফল হিসেবে পড়ে এবং নিজেকে মানিয়ে নেয়। কারণ ছাড়া প্রত্যাখ্যান করতে ফাঁকা রাখুন।",
+    "denyButton": "প্রত্যাখ্যান",
+    "detailRegionLabel": "অনুরোধের বিবরণ",
+    "sessionLabel": "কথোপকথন",
+    "linkOpenAgent": "এজেন্ট খুলুন",
+    "linkInspectTurns": "এর টার্ন পরীক্ষা করুন",
+    "continuationLabel": "এজেন্ট এরপর কী করল",
+    "continuationCompleted": "এজেন্ট কাজটি চালিয়ে যাওয়া শেষ করেছে।",
+    "continuationFailed": "এই সিদ্ধান্তের পর এজেন্ট চালিয়ে যেতে পারেনি।",
+    "continuationRetry": "চালিয়ে যেতে বলুন",
+    "retryMessage": "অনুগ্রহ করে কাজটি চালিয়ে যান।",
+    "lastDecisionTitle": "আপনার শেষ সিদ্ধান্ত: {tool}",
+    "lastDecisionClose": "বন্ধ করুন",
+    "deepLinkNotFound": "সেই অনুমোদন অনুরোধটি পাওয়া যায়নি, অথবা আপনি এটি দেখতে পারেন না।",
+    "selectAllLabel": "এই পাতার সব মুলতুবি টুল কল নির্বাচন করুন",
+    "selectRowLabel": "{tool}-এর মুলতুবি কল নির্বাচন করুন",
+    "bulkSelected": "{count}টি নির্বাচিত",
+    "bulkApprove": "নির্বাচিতগুলো অনুমোদন করুন",
+    "bulkDeny": "নির্বাচিতগুলো প্রত্যাখ্যান করুন",
+    "bulkClear": "নির্বাচন মুছুন",
+    "bulkCancel": "বাতিল",
+    "bulkDismiss": "বাতিল করুন",
+    "bulkMixedTools": "গণ সিদ্ধান্তের জন্য নির্বাচিত সব অনুরোধ একই টুলের হতে হবে।",
+    "bulkNotLowRisk": "গণ অনুমোদন শুধু কম ঝুঁকির টুলের (লুকআপ) জন্য। প্রত্যাখ্যান যেকোনো একটি টুলে কাজ করে, অথবা এগুলো একটি একটি করে ঠিক করুন।",
+    "bulkNotToolCall": "গণ সিদ্ধান্ত শুধু এজেন্টের টুল কলের জন্য।",
+    "bulkNotPending": "গণ সিদ্ধান্ত শুধু এখনও মুলতুবি অনুরোধের জন্য।",
+    "bulkConfirmApproveTitle": "{tool}-এ {count}টি কল অনুমোদন করবেন?",
+    "bulkConfirmApproveBody": "এগুলোর প্রতিটি নিচে তালিকাভুক্ত নিজ নিজ আর্গুমেন্ট দিয়ে এখনই {tool} চালায়, এবং এজেন্ট ফলাফল নিয়ে এগিয়ে যায়। এটি ফেরানো যায় না।",
+    "bulkConfirmDenyTitle": "{tool}-এ {count}টি কল প্রত্যাখ্যান করবেন?",
+    "bulkConfirmDenyBody": "এগুলোর কোনোটিই চলবে না। এজেন্টকে জানানো হয় প্রতিটি কল প্রত্যাখ্যাত হয়েছে, কারণ দিলে তাসহ।",
+    "bulkConfirmApprove": "{count}টি অনুমোদন করুন",
+    "bulkConfirmDeny": "{count}টি প্রত্যাখ্যান করুন",
+    "bulkMore": "এবং আরও {count}টি",
+    "bulkProgress": "{count}-এর মধ্যে {done}টি সম্পন্ন",
+    "bulkResult": "{done}টির সিদ্ধান্ত হয়েছে, {failed}টি ব্যর্থ।",
+    "notifyOff": "আমাকে জানান",
+    "notifyOn": "বিজ্ঞপ্তি চালু",
+    "notifyHelp": "এই ট্যাব ব্যাকগ্রাউন্ডে থাকলে নতুন অনুরোধ এলে ব্রাউজার বিজ্ঞপ্তি দেখান",
+    "notifyUnsupported": "এই ব্রাউজার বিজ্ঞপ্তি দেখাতে পারে না।",
+    "notifyBlocked": "বিজ্ঞপ্তি ব্লক করা আছে। এটি চালু করতে আপনার ব্রাউজারের সাইট সেটিংসে অনুমতি দিন।",
+    "notifyTitle": "একটি এজেন্ট অনুমোদনের অপেক্ষায়",
+    "notifyBodyOne": "{tool}-এর জন্য আপনার সিদ্ধান্ত দরকার।",
+    "notifyBodyMany": "{count}টি অনুরোধে আপনার সিদ্ধান্ত দরকার।",
+    "newArrived": "{count}টি নতুন অনুমোদনের অনুরোধ এসেছে।",
+    "rulesTitle": "একটি টুলের নিয়ম",
+    "rulesIntro": "একটি টুল সবসময় কারও জন্য অপেক্ষা করবে নাকি কখনো নয় তা বেছে নিন। নিয়মটি আধা-স্বায়ত্তশাসিত হিসেবে সেট করা প্রতিটি এজেন্টে প্রযোজ্য।",
+    "rulesNeedsScope": "নিয়ম বদলাতে আপনার অনুমোদনের অনুমতি লাগবে।",
+    "rulesToolLabel": "টুলের নাম",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "অনুরোধে টুলটি যেভাবে দেখায় ঠিক সেভাবে, যেমন send_email।",
+    "rulesToolNameInvalid": "টুলের নামে ফাঁকা স্থান থাকে না।",
+    "rulesModeLabel": "কী ঘটা উচিত",
+    "rulesAskName": "সবসময় জিজ্ঞেস করুন",
+    "rulesAskHint": "এই টুলের প্রতিটি কল কারও অনুমোদনের জন্য অপেক্ষা করে।",
+    "rulesNeverName": "কখনো জিজ্ঞেস করবেন না",
+    "rulesNeverHint": "এই টুলের কল কারও অনুমোদন ছাড়াই সঙ্গে সঙ্গে চলে।",
+    "rulesNeverRiskyWarn": "এই টুল জিনিসপত্র বদলায় বলে মনে হচ্ছে। নিশ্চিত হন।",
+    "rulesScopeNote": "নিয়মগুলো পুরো ওয়ার্কস্পেস জুড়ে প্রযোজ্য, একটি এজেন্টে নয়। তত্ত্বাবধানাধীন এজেন্ট এখনও সবকিছুতে জিজ্ঞেস করে, আর সম্পূর্ণ স্বায়ত্তশাসিত এজেন্ট নিয়ম যা-ই বলুক কখনো জিজ্ঞেস করে না। আপনার সেট করা নিয়ম এখনও এখানে তালিকাভুক্ত হয় না।",
+    "rulesSave": "নিয়ম সংরক্ষণ করুন",
+    "rulesSaveFailed": "নিয়মটি সংরক্ষণ করা যায়নি।",
+    "rulesSavedAsk": "{tool} সবসময় অনুমোদন চাইবে।",
+    "rulesSavedNever": "{tool} আর অনুমোদন চাইবে না।",
+    "rulesNeverConfirmTitle": "{tool} চালানোর আগে জিজ্ঞেস করা বন্ধ করবেন?",
+    "rulesNeverConfirmBody": "প্রতিটি আধা-স্বায়ত্তশাসিত এজেন্ট কারও অনুমোদন ছাড়াই {tool} চালাবে। এটি জিনিস বদলাতে বা পাঠাতে পারে বলে মনে হয়, আর ভুল ফেরানো যায় না।",
+    "rulesNeverConfirmBodyLow": "প্রতিটি আধা-স্বায়ত্তশাসিত এজেন্ট জিজ্ঞেস না করেই {tool} চালাবে। এটি লুকআপের মতো মনে হয়, তাই এটি সাধারণত নিরাপদ।",
+    "rulesNeverConfirm": "জিজ্ঞেস করা বন্ধ করুন",
+    "tiersTitle": "অনুমোদনের অপেক্ষায় কী থাকবে তা কে ঠিক করে?",
+    "tiersIntro": "প্রতিটি এজেন্টের একটি স্বায়ত্তশাসনের স্তর আছে। এটি ঠিক করে ওয়ার্কস্পেসের অনুমোদন নিয়ম আদৌ ব্যবহৃত হবে কি না।",
+    "tierCurrent": "এই এজেন্ট",
+    "tierConsequenceLabel": "বাস্তবে:",
+    "tierSupervisedName": "তত্ত্বাবধানাধীন",
+    "tierSupervisedWhat": "ওয়ার্কস্পেসের নিয়ম যা-ই হোক, প্রতিটি টুল কল কারও জন্য অপেক্ষা করে। প্রতি টার্নে টুল ধাপের সীমাও কম পায়।",
+    "tierSupervisedConsequence": "সবচেয়ে নিরাপদ, কিন্তু সারিতে অনেক অনুরোধ ও ধীর এজেন্ট আশা করুন।",
+    "tierSemiName": "আধা-স্বায়ত্তশাসিত",
+    "tierSemiWhat": "প্রতিটি টুলের জন্য ওয়ার্কস্পেসের নিয়ম ঠিক করে: পাঠানো, মুছে ফেলা ও পেমেন্টের মতো ঝুঁকিপূর্ণ টুল ডিফল্টভাবে জিজ্ঞেস করে, বাকিগুলো চলে।",
+    "tierSemiConsequence": "একটি ভালো ডিফল্ট। আপনার প্রতি-টুল নিয়ম এখানে কার্যকর হয়।",
+    "tierFullName": "সম্পূর্ণ স্বায়ত্তশাসিত",
+    "tierFullWhat": "কোনো টুল কল কখনো অনুমোদনের জন্য অপেক্ষা করে না এবং এজেন্ট টুল ধাপের উচ্চতর সীমা পায়। প্রতি-টুল নিয়ম উপেক্ষিত হয়।",
+    "tierFullConsequence": "এটি জিজ্ঞেস না করেই কাজ করে। শুধু সেই এজেন্টের জন্য ব্যবহার করুন যার ভুল সহজে ফেরানো যায়।",
+    "tiersRuleNote": "টুলের নিয়ম (সবসময় জিজ্ঞেস করুন, কখনো জিজ্ঞেস করবেন না) শুধু আধা-স্বায়ত্তশাসিত এজেন্টের জন্য গুরুত্বপূর্ণ।",
+    "agentModeTitle": "এই এজেন্টের কখন অনুমোদন লাগে?",
+    "agentModeSupervised": "এই এজেন্ট তত্ত্বাবধানাধীন: প্রতিটি টুল কল কারও জন্য অপেক্ষা করে, আর প্রতি-টুল নিয়ম উপেক্ষিত হয়।",
+    "agentModeSemi": "এই এজেন্ট আধা-স্বায়ত্তশাসিত: প্রতিটি টুল ওয়ার্কস্পেসের নিয়ম মেনে চলে। পাঠানো, মুছে ফেলা ও পেমেন্ট ডিফল্টভাবে জিজ্ঞেস করে।",
+    "agentModeFull": "এই এজেন্ট সম্পূর্ণ স্বায়ত্তশাসিত: এটি কখনো অনুমোদনের জন্য অপেক্ষা করে না, আর প্রতি-টুল নিয়ম উপেক্ষিত হয়।",
+    "agentModeQueueLink": "এই এজেন্টের অনুরোধ দেখুন",
+    "agentModeRulesLink": "একটি টুলের জন্য নিয়ম সেট করুন",
+    "agentModeShowTiers": "তিনটি স্তরের তুলনা করুন",
+    "agentModeHideTiers": "তুলনা লুকান",
+    "agentModeScopeNote": "ওপরের স্বায়ত্তশাসনের পছন্দ দিয়ে স্তর বদলান। টুলের নিয়ম পুরো ওয়ার্কস্পেসের, প্রতি এজেন্টের নয়।",
+    "policyThenApprovalNote": "এই নিয়মগুলো পেরিয়ে যাওয়া কলও কারও জন্য অপেক্ষা করতে পারে। এটি এজেন্টের স্বায়ত্তশাসনের স্তরের ওপর নির্ভর করে, যা নিচে ব্যাখ্যা করা হয়েছে।",
+    "chatReasonToggle": "একটি কারণ যোগ করুন",
+    "chatReviewInQueue": "সারিতে পর্যালোচনা করুন"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "ইভেন্ট ফিল্টার করুন",
+    "tlFilterCategories": "ইভেন্টের ধরন",
+    "tlCatIntake": "ইনটেক",
+    "tlCatModel": "মডেল",
+    "tlCatTool": "টুল",
+    "tlCatApproval": "অনুমোদন",
+    "tlCatContinuation": "ধারাবাহিকতা",
+    "tlCatRetry": "পুনঃচেষ্টা ও ফেইলওভার",
+    "tlCatGuardrail": "গার্ডরেল",
+    "tlCatCache": "ক্যাশ",
+    "tlCatVerify": "যাচাই",
+    "tlCatFinish": "সমাপ্তি",
+    "tlProblemsOnly": "শুধু সমস্যা",
+    "tlSearch": "ইভেন্ট খুঁজুন",
+    "tlSearchPlaceholder": "টুল, মডেল, গার্ড বা অবস্থা",
+    "tlClearFilters": "ফিল্টার মুছুন",
+    "tlShowing": "{total}টি ইভেন্টের মধ্যে {shown}টি দেখানো হচ্ছে",
+    "tlNoMatch": "কোনো ইভেন্ট এই ফিল্টারের সাথে মেলে না।",
+    "tlSevOk": "সফল",
+    "tlSevInfo": "তথ্য",
+    "tlSevWarn": "মনোযোগ দরকার",
+    "tlSevError": "ব্যর্থ",
+    "tlIntake": "টার্ন শুরু হয়েছে: {chars}টি অক্ষর, {tools}টি টুল, {attachments}টি সংযুক্তি",
+    "tlRunTools": "Tools for this run",
+    "tlRunToolsNone": "none (text only)",
+    "tlModelCall": "{model} ({provider})-এ মডেল কল, রুট {route}",
+    "tlFailover": "{model} ({provider})-এ ফেইলওভার হয়েছে",
+    "tlRetryModel": "{model} ({provider})-এ আবার চেষ্টা করা হয়েছে, রুট {route}",
+    "tlRetry": "পুনঃচেষ্টা: {guard} ({outcome})",
+    "tlCacheHit": "রেসপন্স ক্যাশ থেকে উত্তর দেওয়া হয়েছে",
+    "tlToolCall": "টুল কল {tool}: {status}",
+    "tlApprovalRequested": "{tool} চালানোর আগে অনুমোদন চাওয়া হয়েছে",
+    "tlApprovalDecided": "{tool}-এর অনুমোদনের সিদ্ধান্ত হয়েছে: {decision}",
+    "tlContinuation": "ধারাবাহিকতা: {guard} ({outcome})",
+    "tlGuard": "গার্ডরেল {guard}: {outcome}",
+    "tlVerifyPassed": "যাচাই উত্তীর্ণ: {check}",
+    "tlVerifyFailed": "যাচাই ব্যর্থ: {check}",
+    "tlFinish": "সমাপ্ত: {status} (উত্তরে {chars}টি অক্ষর)",
+    "tlOther": "ইভেন্ট {type}",
+    "reasonFallbackProvider": "প্রাথমিক মডেল ব্যর্থ হয়েছে, তাই টার্নটি এজেন্টের ফলব্যাক প্রোভাইডারে গেছে।",
+    "reasonToolsDisabledRetry": "প্রোভাইডার টুল-কলের ইতিহাস প্রত্যাখ্যান করেছে, তাই টার্নটির উত্তর আরও একবার টুল ছাড়া দেওয়া হয়েছে।",
+    "reasonRetryOther": "মডেল কলটি পুনরাবৃত্তি করা হয়েছে।",
+    "reasonToolCallRetry": "মডেল একটি বিকৃত টুল কল দিয়ে উত্তর শেষ করেছে, তাই তাকে আবার জিজ্ঞেস করা হয়েছে।",
+    "reasonCutOff": "উত্তর দৈর্ঘ্যের সীমায় কেটে গেছে, তাই মডেলকে চালিয়ে যেতে বলা হয়েছে।",
+    "reasonToolsContinue": "টুল কলের পর মডেলের আরও ধাপ দরকার ছিল, তাই টার্নটি চলতে থেকেছে।",
+    "reasonToolBlocked": "টুলের বদলে একটি গার্ড, নীতি, হুক বা সীমা উত্তর দিয়েছে, তাই টুলটি চলেনি।",
+    "reasonToolParked": "কলটি কারও অনুমোদনের অপেক্ষায়; টুলটি চলেনি।",
+    "reasonGuardAction": "একটি গার্ডরেল উত্তর বদলে দিয়েছে বা আটকে রেখেছে।",
+    "tlAtStart": "শুরু থেকে",
+    "tlGap": "আগের ইভেন্ট থেকে",
+    "tlDuration": "সময়কাল",
+    "tlTokens": "ইনপুট / আউটপুট টোকেন",
+    "tlCost": "খরচ",
+    "tlDetails": "হ্যাশ ও কাঁচা সারাংশ",
+    "tlArgsHash": "আর্গুমেন্টের হ্যাশ",
+    "tlResultDigest": "ফলাফলের ডাইজেস্ট",
+    "tlContentNote": "আর্গুমেন্ট ও ফলাফল কখনোই সংরক্ষণ করা হয় না। টুল কলের জন্য টাইমলাইনে তার অবস্থা, সময়কাল এবং আর্গুমেন্ট ও ফলাফলের হ্যাশ দেখানো হয়, বিষয়বস্তু নয়।",
+    "tlStatFinish": "শেষ হওয়ার কারণ",
+    "tlStillOpen": "শেষ হয়নি",
+    "tlProblemCount": "{count}টি ইভেন্টে মনোযোগ দরকার",
+    "tlStatRetries": "পুনঃচেষ্টা ও ফেইলওভার",
+    "tlStatContinuations": "ধারাবাহিকতা",
+    "tlStatApprovals": "অনুমোদন",
+    "tlStatTokens": "ইনপুট / আউটপুট টোকেন",
+    "tlTokensNotRecorded": "এই টার্নের জন্য রেকর্ড করা হয়নি",
+    "tlTokensInOut": "ইনপুট / আউটপুট",
+    "tlCopyTurnId": "টার্ন ID কপি করুন",
+    "tlCopyTurnIdShort": "ID কপি করুন",
+    "tlCopied": "টার্ন ID কপি হয়েছে।",
+    "tlCopyFailed": "কপি করা যায়নি। ID নির্বাচন করে হাতে কপি করুন।",
+    "sessTitle": "একটি সেশনের টার্ন",
+    "sessSubtitle": "রেকর্ড করা টার্ন নতুনটি আগে দেখতে একটি চ্যাট সেশন বেছে নিন। চ্যাট বার্তার টার্ন দেখুন লিংক খুললে এটি আপনার জন্য নিজে থেকে ভরে যায়।",
+    "sessionIdLabel": "সেশন ID",
+    "sessionIdPlaceholder": "চ্যাট সেশন ID",
+    "sessFind": "টার্ন খুঁজুন",
+    "sessInvalid": "এজেন্ট ID (একটি UUID) এবং সেশন ID লিখুন।",
+    "sessLoading": "সেশনের টার্ন লোড হচ্ছে...",
+    "sessUnavailableTitle": "সেশন অনুসন্ধান উপলব্ধ নয়",
+    "sessUnavailableBody": "এই সার্ভার একটি সেশনের টার্ন তালিকাভুক্ত করতে পারে না। এর বদলে নিচে ID দিয়ে একটি টার্ন খুলুন।",
+    "sessErrorTitle": "সেশনের টার্ন লোড করা যায়নি",
+    "sessEmptyTitle": "এই সেশনে কোনো জার্নাল করা টার্ন নেই",
+    "sessEmptyBody": "সেশন কিছুই রেকর্ড করেনি। হয় সেশন ID ভুল, নয়তো এর টার্ন চলার সময় টার্ন জার্নাল বন্ধ ছিল।",
+    "sessListLabel": "{count}টি জার্নাল করা টার্ন",
+    "sessEvents": "{count}টি ইভেন্ট",
+    "sessStatusOpen": "খুলুন",
+    "sessOpen": "টাইমলাইন খুলুন",
+    "sessOpened": "নিচে দেখানো হয়েছে"
+  },
+  "evalControls": {
+    "cancel": "বাতিল",
+    "saving": "সংরক্ষণ হচ্ছে...",
+    "saved": "সংরক্ষিত।",
+    "saveMode": "রিপ্লে মোড সংরক্ষণ করুন",
+    "discard": "পরিবর্তন বাতিল করুন",
+    "saveFailed": "রিপ্লে মোড সংরক্ষণ করা যায়নি।",
+    "unsavedChanges": "অসংরক্ষিত পরিবর্তন",
+    "modeTitle": "এই ডেটাসেট কীভাবে রিপ্লে হয়",
+    "modeHelp": "রিপ্লে এজেন্টের টুল ব্যবহার করতে পারবে কি না তা বেছে নিন। এটি পরের রান কী পরিমাপ করে তা বদলে দেয়।",
+    "modeTextOnly": "শুধু টেক্সট",
+    "modeTextOnlyHelp": "এজেন্ট তার টুল ছাড়া উত্তর দেয়। নিরাপদ: বাস্তবে কিছু ঘটে না। প্রত্যাশিত-টুল যাচাই পূরণ করা যায় না।",
+    "modeFull": "টুল সহ পূর্ণ পাইপলাইন",
+    "modeFullHelp": "একজন আসল ব্যবহারকারী যে টুল, গার্ডরেল ও ধাপের সীমা পান ঠিক সেগুলোই। প্রত্যাশিত-টুল ও ট্রাজেক্টরি যাচাইয়ের জন্য দরকার।",
+    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "autoApproveLabel": "ইভ্যাল স্যান্ডবক্সে টুল কল স্বয়ংক্রিয়ভাবে অনুমোদন করুন",
+    "autoApproveHelp": "যে টুল কল সাধারণত কারও জন্য অপেক্ষা করত তা ইভ্যাল স্যান্ডবক্স অনুমোদন করে দেয়, যাতে কেসটি শেষ হতে পারে। এটি ছাড়া কেসটি অমীমাংসিত অনুমোদনেই শেষ হয়, প্রোডাকশনে যেমন হতো।",
+    "autoApproveWarnTitle": "শুধু নন-প্রোডাকশন ওয়ার্কস্পেসের জন্য",
+    "autoApproveWarnBody": "যেখানে টুল আসল গ্রাহক বা ডেটায় পৌঁছায় সেখানে এটি কখনো চালু করবেন না। শেল, কোডিং, সময়সূচি, এজেন্ট-থেকে-এজেন্ট, পেমেন্ট ও মুছে ফেলার টুল কখনোই স্বয়ংক্রিয়ভাবে অনুমোদিত হয় না। আপনার অ্যাডমিন অবশ্যই এই ওয়ার্কস্পেসকে নন-প্রোডাকশন হিসেবে চিহ্নিত করে থাকবেন।",
+    "autoApproveNeedsFull": "প্রথমে পূর্ণ পাইপলাইন চালু করুন: স্বয়ংক্রিয় অনুমোদন শুধু তখনই প্রযোজ্য যখন টুল চলে।",
+    "autoApproveRefused": "এই ওয়ার্কস্পেসে অনুমোদিত নয়: {reason}",
+    "autoApproveConfirmTitle": "ইভ্যালে টুল কল স্বয়ংক্রিয়ভাবে অনুমোদন করবেন?",
+    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirm": "স্বয়ংক্রিয় অনুমোদন চালু করুন",
+    "trajectoryLabel": "ট্রাজেক্টরি যাচাই",
+    "trajectoryOn": "On",
+    "trajectoryOff": "উপলব্ধ নয়",
+    "trajectoryHelpOn": "প্রত্যাশিত ট্রাজেক্টরি থাকা কেসগুলো এজেন্ট কোন টুল কোন ক্রমে কল করেছে তার ভিত্তিতে স্কোর হয়। এটি আপনার অ্যাডমিন পুরো ডিপ্লয়মেন্টের জন্য চালু করেন, প্রতি ডেটাসেটে নয়।",
+    "trajectoryHelpOff": "ট্রাজেক্টরি যাচাই এখানে উপলব্ধ নয়। এগুলো আপনার অ্যাডমিন পুরো ডিপ্লয়মেন্টের জন্য চালু করেন, এবং ইভ্যাল অন্তর্ভুক্ত প্ল্যান লাগে।",
+    "trajectoryNeedsFull": "এই ডেটাসেট শুধু টেক্সট, তাই প্রত্যাশিত ট্রাজেক্টরি থাকা কেস স্কোর হবে না। পূর্ণ পাইপলাইন চালু করুন।",
+    "runAutoApproved": "স্বয়ংক্রিয়ভাবে অনুমোদিত",
+    "runAutoApprovedTitle": "এই রানের কোনো টুল কলের সিদ্ধান্ত কোনো ব্যক্তি নেননি; ইভ্যাল স্যান্ডবক্স সেগুলো অনুমোদন করেছে।",
+    "toolCallsLabel": "এই রিপ্লেতে টুল কল",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "ব্যর্থ",
+    "toolStatusNotRun": "চলেনি",
+    "toolStatusAwaitingApproval": "অনুমোদনের অপেক্ষায়",
+    "toolStatusReplayed": "রিপ্লে করা হয়েছে",
+    "samplingTitle": "ব্যাকগ্রাউন্ড মান স্কোরিং",
+    "samplingLoading": "স্কোরিংয়ের হার লোড হচ্ছে...",
+    "samplingUnavailable": "ব্যাকগ্রাউন্ড বিচারক লাইভ টার্নের কত অংশ স্কোর করে তা আপনার প্ল্যাটফর্ম অ্যাডমিন ঠিক করেন এবং এখানে দেখানো হয় না।",
+    "samplingValue": "লাইভ টার্নের প্রায় {percent}% ব্যাকগ্রাউন্ড মান বিচারক স্কোর করে।",
+    "samplingHelp": "কম হারে খরচ কম হয় এবং ওপরের প্রবণতায় স্কোর কম থাকে। এই মান এখানে শুধু-পঠনযোগ্য।",
+    "samplingSource_default": "ডিফল্ট",
+    "samplingSource_platform": "প্ল্যাটফর্ম কর্তৃক সেট করা",
+    "samplingSource_tenant": "আপনার ওয়ার্কস্পেসের জন্য সেট করা",
+    "samplingSource_agent": "এই এজেন্টের জন্য সেট করা",
+    "modeDefault": "Workspace default",
+    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
+    "modeDefaultCurrent": "Currently: {mode}",
+    "modeNameFull": "Full pipeline",
+    "modeNameQuick": "Quick (text only)",
+    "badgeFull": "full pipeline",
+    "badgeQuick": "quick",
+    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
+    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
+    "runModeLabel": "Replay mode for the next run",
+    "runModeInherit": "Use the dataset's setting",
+    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
+    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
+    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
+    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
+    "toolStatusSimulated": "simulated, not executed"
+  },
+  "agentLab": {
+    "wtLabel": "এজেন্টের টুল দিয়ে চালান",
+    "wtHelp": "বন্ধ: প্রতিটি উত্তর একটি সাধারণ মডেল কল। চালু: উত্তরগুলো চ্যাট টার্নের মতোই একই টুল পাইপলাইন থেকে আসে, তাই টুল চলে, গার্ডরেল প্রযোজ্য হয় এবং ধাপের সীমা মানা হয়। যে কলে কারও অনুমোদন লাগে সেটি মুলতুবি অনুমোদন হিসেবে অপেক্ষা করে।",
+    "wtUnavailable": "এই ইনস্টলেশনে টুল সহ ল্যাব চালানো বন্ধ আছে। চালু করতে অ্যাডমিনকে বলুন।",
+    "wtRefused": "এই রান প্রত্যাখ্যাত হয়েছে: {reason}",
+    "wtActive": "এই রানে টুলগুলো সত্যিই চলবে, পার্শ্বপ্রতিক্রিয়াসহ।",
+    "wtConfirmTitle": "এজেন্টের টুল দিয়ে ল্যাব চালাবেন?",
+    "wtConfirmBody": "প্রতিটি নমুনা এজেন্টের আসল টুল কল করতে পারে, আর সেই কলের বাস্তব প্রভাব থাকতে পারে, যেমন বার্তা পাঠানো বা ডেটা লেখা। অনুমোদন লাগে এমন কল কারও জন্য অপেক্ষা করবে। শুধু টেস্ট এজেন্ট বা টেস্ট ডেটার সাথে এটি ব্যবহার করুন।",
+    "wtConfirm": "টুল ব্যবহার করুন"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "এজেন্টের সীমা",
+        "description": "থামানোর আগে একটি এজেন্ট টার্ন কতটা কাজ করতে পারে।"
+      },
+      "approvals": {
+        "label": "অনুমোদন",
+        "description": "কেউ কোনো কাজ অনুমোদন বা প্রত্যাখ্যান করার পর কী ঘটে, এবং একটি অনুরোধ কত সময় অপেক্ষা করে।"
+      },
+      "chat": {
+        "label": "কথোপকথনের আচরণ",
+        "description": "একটি উত্তর কীভাবে শেষ হয়, আবার চেষ্টা হয়, ক্যাশ হয় ও চালিয়ে যাওয়া হয়।"
+      },
+      "routing": {
+        "label": "মডেল রাউটিং",
+        "description": "কোন বার্তাগুলো দ্রুততর মডেলের জন্য যথেষ্ট সহজ বলে গণ্য হবে।"
+      },
+      "memory": {
+        "label": "মেমরি",
+        "description": "একটি এজেন্ট কতগুলো স্মৃতি রাখে ও মনে করে।"
+      },
+      "aux": {
+        "label": "ব্যাকগ্রাউন্ড মডেল কল",
+        "description": "সারাংশ, সহায়তা ও কম্প্যাকশন কোন মডেল ব্যবহার করে।"
+      },
+      "guardrails": {
+        "label": "নিরাপত্তা যাচাই",
+        "description": "স্বয়ংক্রিয় নিরাপত্তা যাচাই কতটা কড়া। এগুলো শুধু প্ল্যাটফর্ম সেটিংয়ের চেয়ে কড়া করা যায়।"
+      },
+      "quality": {
+        "label": "মূল্যায়ন",
+        "description": "টেস্ট রান ও এআই বিচারক কীভাবে আচরণ করে।"
+      },
+      "delegation": {
+        "label": "দায়িত্ব অর্পণ",
+        "description": "একটি এজেন্ট একসাথে অন্য এজেন্টদের কতটা কাজ দিতে পারে।"
+      },
+      "knowledge": {
+        "label": "জ্ঞান অনুসন্ধান",
+        "description": "সেরা অংশগুলো বাছার আগে আপনার আপলোড করা নথিতে অনুসন্ধান কতটা বিস্তৃতভাবে প্রার্থী সংগ্রহ করে।"
+      },
+      "learning": {
+        "label": "শেখা",
+        "description": "এজেন্টের শেখার নীতি কীভাবে বিভিন্ন বিকল্প পরীক্ষা করে।"
+      },
+      "providers": {
+        "label": "এআই প্রোভাইডার",
+        "description": "কোনো সংযুক্ত এআই প্রোভাইডারের কী কাজ করা বন্ধ করলে সেগুলো কীভাবে ব্যবহার হয়।"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "প্রতি টার্নে সর্বোচ্চ টুল কল",
+          "description": "একটি টার্ন থামানো এবং তার কাছে যা আছে তা দিয়ে উত্তর দিতে বলার আগে সর্বোচ্চ কতগুলো টুল কল করতে পারে।",
+          "help": "দীর্ঘ বহু-ধাপের কাজ করা এজেন্টের জন্য বাড়ান। বেপরোয়া লুপ থামাতে ও খরচ অনুমানযোগ্য রাখতে কমান। একটি ওয়ার্কস্পেস বা প্ল্যাটফর্মের জন্য দেখানো মানটি একটি আদর্শ এজেন্টের ভিত্তি সংখ্যা: এজেন্টের স্বায়ত্তশাসনের স্তর রানের সময় একে বদলে দেয়, তাই কম বা বেশি স্বায়ত্তশাসিত এজেন্ট ভিন্ন সংখ্যা ব্যবহার করতে পারে। একটি এজেন্টের নিজস্ব মান ঠিক যেমন সেট করা হয় তেমনই ব্যবহার হয়।"
+        },
+        "turnTimeoutSeconds": {
+          "label": "প্রতি টার্নে সর্বোচ্চ সময়",
+          "description": "একটি টার্ন থামানোর আগে কত সময় চলতে পারে।",
+          "help": "ধীর গবেষণা বা কোডের কাজে বাড়ান। যে টার্নের সময় ফুরিয়ে যায় তা এ পর্যন্ত যা করা হয়েছে তা নিয়ে শেষ হয়।"
+        },
+        "toolTimeoutSeconds": {
+          "label": "প্রতি টুল কলে সর্বোচ্চ সময়",
+          "description": "একটি টুল কল থামানোর আগে কত সময় চলতে পারে। প্ল্যাটফর্ম ডিফল্টে কোনো সীমা নেই; তখন প্রতিটি টুল নিজের টাইমআউট রাখে।",
+          "help": "একটি ধীর টুল পুরো কথোপকথন আটকে দিতে পারলে সীমা সেট করুন। থামানো কলের কোনো প্রভাব ছিল কি না তা অজানা, তাই এজেন্টকে বলা হয় এটি সফল হয়েছে ধরে না নিতে।"
+        },
+        "toolOutputMaxChars": {
+          "label": "দীর্ঘতম টুল ফলাফল",
+          "description": "একটি টুল ফলাফলের কতগুলো অক্ষর মডেলকে দেওয়া হয়; বাকিটা কেটে ফেলা হয়।",
+          "help": "এজেন্টকে দীর্ঘ নথি বা API উত্তর পুরোটা পড়তে হলে বাড়ান, প্রতি টার্নে আরও টোকেনের বিনিময়ে। খরচ বাঁচাতে কমান।"
+        },
+        "retrievalTopK": {
+          "label": "প্রতি অনুসন্ধানে জ্ঞানের অংশ",
+          "description": "একটি জ্ঞান ভাণ্ডার অনুসন্ধান এজেন্টকে কতগুলো অংশ ফেরত দেয়।",
+          "help": "বেশি অংশ এজেন্টকে কাজের জন্য আরও উপাদান দেয় কিন্তু বেশি টোকেন খরচ করে এবং গোলমাল যোগ করতে পারে। কম অংশ দ্রুততর ও সস্তা।"
+        },
+        "retrievalMinScore": {
+          "label": "একটি অংশের ন্যূনতম প্রাসঙ্গিকতা",
+          "description": "ফেরত দেওয়ার জন্য একটি জ্ঞান অংশকে কতটা প্রাসঙ্গিক হতে হবে। ০ প্রতিটি হিট ফেরত দেয়।",
+          "help": "এজেন্ট অপ্রাসঙ্গিক অংশ উদ্ধৃত করলে বাড়ান। খুব বেশি হলে সে কিছুই না পেতে পারে।"
+        },
+        "continuationPasses": {
+          "label": "অসমাপ্ত উত্তরের পর অতিরিক্ত পাস",
+          "description": "মডেলের উত্তর ঘোষিত অথচ না নেওয়া ধাপে থেমে গেলে তাকে আর কতবার চালিয়ে যেতে বলা হয়।",
+          "help": "যে এজেন্ট প্রায়ই একটি ধাপ ঘোষণা করে থেমে যায় তাদের জন্য বাড়ান। প্রতিটি অতিরিক্ত পাসে একটি মডেল কল খরচ হয়।"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "অনুমোদনের পর চালিয়ে যান",
+          "description": "কেউ কোনো কাজ অনুমোদন করলে এজেন্ট নতুন বার্তার অপেক্ষা না করে নিজেই কাজটি শেষ করে।",
+          "help": "প্রতিটি অনুমোদিত কাজ টার্ন শেষ করুক ও হাতে ফলোআপ হোক চাইলে এটি বন্ধ করুন।"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "প্রত্যাখ্যানের পরও ব্যাকগ্রাউন্ড কাজ চলতে থাকে",
+          "description": "কেউ ব্যাকগ্রাউন্ড কাজে কোনো পদক্ষেপ প্রত্যাখ্যান করলে কাজটি থেমে না গিয়ে প্রত্যাখ্যান নথিভুক্ত করে চলতে থাকে।",
+          "help": "প্রত্যাখ্যানে কাজ থামা উচিত হলে এটি বন্ধ রাখুন। প্রত্যাখ্যাত ধাপ ছাড়াই কাজ সাধারণত শেষ হতে পারলে চালু করুন।"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "অনুমোদনের অনুরোধের মেয়াদ শেষ হয়",
+          "description": "একটি অনুমোদনের অনুরোধ মেয়াদ শেষ হওয়ার আগে সিদ্ধান্তের জন্য কত সময় অপেক্ষা করে। ০ মানে অনুরোধের মেয়াদ কখনো শেষ হয় না।",
+          "help": "মেয়াদ না থাকলে ভুলে যাওয়া অনুরোধ অনির্দিষ্টকাল খোলা থাকে এবং এজেন্ট অপেক্ষা করতে থাকে। মেয়াদোত্তীর্ণ অনুরোধ অনুমোদিত নয় বলে গণ্য হয়।"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "কেটে যাওয়া উত্তর শেষ করুন",
+          "description": "মডেলের দৈর্ঘ্যের সীমায় উত্তর কেটে গেলে বা বিকৃত টুল কলে শেষ হলে মডেলকে চালিয়ে যেতে বা আবার চেষ্টা করতে বলুন।",
+          "help": "শুধু মডেলের সমস্যা নির্ণয় করতে এটি বন্ধ করুন; তখন মানুষ কেটে যাওয়া উত্তর যেমন আছে তেমনই দেখেন।"
+        },
+        "maxContinuations": {
+          "label": "কেটে যাওয়া উত্তরের সর্বোচ্চ ধারাবাহিকতা",
+          "description": "উত্তর কেটে যাওয়ার পর মডেলকে কতবার চালিয়ে যেতে বলা হয়।",
+          "help": "প্রতিটি ধারাবাহিকতা আরেকটি মডেল কল। দীর্ঘ উত্তরের জন্য বাড়ান, খরচ বাঁচাতে কমান।"
+        },
+        "maxToolCallRetries": {
+          "label": "বিকৃত টুল কলের সর্বোচ্চ পুনঃচেষ্টা",
+          "description": "অব্যবহারযোগ্য আর্গুমেন্টসহ আসা টুল কল মডেলকে কতবার পুনরাবৃত্তি করতে বলা হয়।",
+          "help": "একটি পুনঃচেষ্টায় একটি মডেল কল খরচ হয়। ০ হলে প্রথম বিকৃত কলেই হাল ছেড়ে দেয়।"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "প্রতি মডেল কলে প্রচেষ্টা",
+          "description": "প্রোভাইডার ব্যর্থ হলে বা ব্যস্ত থাকলে একটি মডেল কল কতবার চেষ্টা করা হয়, প্রথম চেষ্টাসহ।",
+          "help": "বেশি প্রচেষ্টা প্রোভাইডারের স্বল্প বিভ্রাট আড়াল করে কিন্তু ব্যর্থ অনুরোধ ত্রুটি জানাতে দেরি করে।"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "টুলসহ এজেন্টের জন্য উত্তর পুনরায় ব্যবহার করুন",
+          "description": "টুল আছে এমন এজেন্টের জন্য সংরক্ষিত উত্তর পুনরায় ব্যবহারের অনুমতি দিন। ডিফল্টভাবে বন্ধ কারণ টুল পরের বার ভিন্ন কিছু ফেরত দিতে পারে।",
+          "help": "টুলগুলো শুধু-পঠনযোগ্য ও ধীরে-বদলানো হলে এবং আপনি দ্রুততর, সস্তা পুনরাবৃত্ত উত্তর চাইলে তবেই চালু করুন। মানুষ এমন উত্তর দেখতে পারেন যা হালনাগাদ নয়।"
+        },
+        "contextTurns": {
+          "label": "পুনরাবৃত্তি শনাক্তকারী আগের টার্ন",
+          "description": "একটি বার্তা সংরক্ষিত উত্তর পুনরায় ব্যবহার করতে পারে এমন পুনরাবৃত্তি কি না তা ঠিক করতে কতগুলো আগের টার্ন তুলনা করা হয়।",
+          "help": "বেশি টার্ন মিল আরও কড়া করে এবং ক্যাশ হিট বিরল করে।"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "ফলোআপে টুল প্রস্তাবিত রাখুন",
+          "description": "পরের বার্তা সংক্ষিপ্ত ফলোআপ হলে কথোপকথন যে টুল আগেই ব্যবহার করেছে সেগুলো প্রস্তাব করা চালিয়ে যান।",
+          "help": "\"হ্যাঁ\"-এর মতো সংক্ষিপ্ত উত্তর স্বাভাবিক টুল নির্বাচন থেকে শুরু হওয়া উচিত হলে এটি বন্ধ করুন।"
+        },
+        "stickyToolsWindow": {
+          "label": "ফলোআপ টুল কত সময় প্রস্তাবিত থাকে",
+          "description": "ব্যবহারের পর একটি টুল সংক্ষিপ্ত ফলোআপ বার্তার জন্য কত সময় প্রস্তাবিত থাকে।",
+          "help": "দীর্ঘ জানালা দীর্ঘ কাজের সেশনে সাহায্য করে, ছোট জানালা টুল তালিকা ছোট রাখে।"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "অসমাপ্ত বাক্যাংশে তাগাদা",
+          "description": "কোনো উত্তর যা করবে বলেছিল তা করার আগেই থেমে গেছে বলে মনে হলে মডেলকে চালিয়ে যেতে বলুন।",
+          "help": "যে উত্তর ওভাবেই শেষ হওয়ার কথা ছিল সেখানে তাগাদা চালু হলে এটি বন্ধ করুন।"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "পুরোনো টুল ফলাফল মুছুন",
+            "description": "দীর্ঘ টুল রানে পুরোনো টুল ফলাফল একটি সংক্ষিপ্ত প্লেসহোল্ডার দিয়ে বদলে দিন, যাতে কথোপকথন মডেলের সীমার মধ্যে থাকে।",
+            "help": "এজেন্টকে আগের প্রতিটি ফলাফল দেখতে হলে এটি বন্ধ করুন; তখন দীর্ঘ রান মডেলের আকারের সীমায় পৌঁছাতে পারে।"
+          },
+          "thresholdChars": {
+            "label": "মোছা শুরু করার আকার",
+            "description": "পুরোনোগুলো মুছে ফেলার আগে একটি টার্নের টুল ফলাফল কত বড় হতে পারে।",
+            "help": "আরও ফলাফল দৃশ্যমান রাখতে বাড়ান, দীর্ঘ রান ছোট ও সস্তা রাখতে কমান।"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "দীর্ঘতম সহজ বার্তা",
+          "description": "এর চেয়ে দীর্ঘ বার্তা কখনো সহজ বলে গণ্য হয় না। সহজ বার্তা দ্রুততর, সস্তা মডেলে যেতে পারে।",
+          "help": "মানের জন্য আরও বার্তা মূল মডেলে পাঠাতে কমান; খরচ বাঁচাতে বাড়ান।"
+        },
+        "maxClauses": {
+          "label": "একটি সহজ বার্তায় সর্বোচ্চ বাক্য",
+          "description": "এর চেয়ে বেশি বাক্যের বার্তা কখনো সহজ বলে গণ্য হয় না।",
+          "help": "মানের জন্য আরও বার্তা মূল মডেলে পাঠাতে কমান।"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "প্রতি টার্নে মনে করা এজেন্টের স্মৃতি",
+          "description": "প্রতিটি বার্তার জন্য এজেন্টের নিজস্ব কতগুলো স্মৃতি খোঁজা হয়।",
+          "help": "বেশি স্মৃতি আরও প্রসঙ্গ দেয় কিন্তু বেশি টোকেন ব্যবহার করে।"
+        },
+        "tenantTopK": {
+          "label": "প্রতি টার্নে মনে করা ভাগ করা স্মৃতি",
+          "description": "প্রতিটি বার্তার জন্য ওয়ার্কস্পেস জুড়ে ভাগ করা কতগুলো স্মৃতি খোঁজা হয়।",
+          "help": "বেশি স্মৃতি আরও প্রসঙ্গ দেয় কিন্তু বেশি টোকেন ব্যবহার করে।"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "প্রতি এজেন্টে সর্বোচ্চ স্মৃতি",
+          "description": "একটি এজেন্ট কতগুলো স্মৃতি রাখতে পারে। এর বেশি হলে সবচেয়ে পুরোনো ও সবচেয়ে কম ব্যবহৃতগুলো বাদ দেওয়া হয়।",
+          "help": "যে সহকারীদের মানুষ সম্পর্কে অনেক কিছু মনে রাখা উচিত তাদের জন্য বাড়ান; এতে সংরক্ষণ ও স্মরণের খরচও বাড়ে।"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "গ্রাফ স্মৃতি থেকে মনে করা তথ্য",
+          "description": "একটি লুকআপে এজেন্টকে তার সম্পর্কের স্মৃতি থেকে সর্বোচ্চ কতগুলো তথ্য দেখানো হয়।",
+          "help": "বেশি তথ্য এজেন্টকে কোনো ব্যক্তি বা বিষয় সম্পর্কে আরও পটভূমি দেয় কিন্তু তার কর্মক্ষেত্রের আরও জায়গা নেয়। কম তথ্য উত্তরকে কেন্দ্রীভূত রাখে। পুরো ওয়ার্কস্পেসের জন্য সেট করুন, অথবা যে একটি এজেন্টের বেশি বা কম লাগে তার জন্য।"
+        },
+        "recallMaxPaths": {
+          "label": "প্রতি লুকআপে পড়া গ্রাফ পথ",
+          "description": "একটি লুকআপের তথ্য খুঁজতে স্মৃতি গ্রাফের কতগুলো সংযোগ পড়া হয়।",
+          "help": "একাধিক সংযোগ একই তথ্যে পৌঁছাতে পারে, তাই ঘনভাবে যুক্ত স্মৃতিতে সবকিছু খুঁজতে বেশি সংখ্যা লাগতে পারে। বেশি সংখ্যা প্রতিটি লুকআপ ধীর করে।"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "ব্যাকগ্রাউন্ড কল এজেন্টের মডেল ব্যবহার করে",
+        "description": "সারাংশ, সহায়তা ও প্রসঙ্গ কম্প্যাকশনের জন্য কোনো মডেল বেছে না নিলে সেগুলো যে এজেন্টের জন্য কাজ করে তার একই মডেল ব্যবহার করে।",
+        "help": "এগুলো বন্ধ করুন যাতে প্ল্যাটফর্ম এই কলগুলোর জন্য একটি মডেল বেছে নেয়, যা সস্তা বা ভিন্ন প্রোভাইডারের হতে পারে।"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "নিরাপত্তা যাচাই বিকল হলে",
+        "description": "নিরাপত্তা যাচাই নিজেই ব্যর্থ হলে কী ঘটে, যেমন বিচারক মডেল বন্ধ থাকলে। বন্ধ কাজটি প্রত্যাখ্যান করে; খোলা সেটি পেরিয়ে যেতে দেয়।",
+        "help": "আপনি এটি শুধু প্ল্যাটফর্ম সেটিংয়ের চেয়ে কড়া করতে পারেন। বন্ধ কেউ ইচ্ছে করে যাচাই ব্যর্থ করালে তার বিরুদ্ধে রক্ষা করে, বিভ্রাটের সময় কাজ প্রত্যাখ্যান করার বিনিময়ে।",
+        "options": {
+          "open": "খোলা: কাজটি পেরিয়ে যেতে দিন",
+          "closed": "বন্ধ: কাজটি প্রত্যাখ্যান করুন"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "টুল-কল যাচাই বিকল হলে",
+          "description": "ঝুঁকিপূর্ণ টুল কল পর্যালোচনাকারী যাচাই রায় দিতে না পারলে কী করে। উত্তরাধিকার ওপরের নিরাপত্তা যাচাই সেটিং অনুসরণ করে।",
+          "help": "আপনি এটি শুধু প্ল্যাটফর্ম সেটিংয়ের চেয়ে কড়া করতে পারেন। যাচাই ব্যর্থ হলে বন্ধ টুল কল প্রত্যাখ্যান করে।",
+          "options": {
+            "open": "খোলা: টুল কল পেরিয়ে যেতে দিন",
+            "inherit": "নিরাপত্তা-যাচাই সেটিং অনুসরণ করুন",
+            "closed": "বন্ধ: টুল কল প্রত্যাখ্যান করুন"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "যে বিষাক্ততার স্কোর ব্লক করে",
+          "description": "বিচারকের ০ থেকে ১০০ বিষাক্ততার মাপকাঠিতে এই স্কোর বা তার বেশি পাওয়া বিষয়বস্তু ব্লক হয়। কম সংখ্যা বেশি ব্লক করে।",
+          "help": "আপনি এটি শুধু কমাতে পারেন, প্ল্যাটফর্মের মানের ওপরে কখনো বাড়াতে পারেন না। খুব কম মান সাধারণ স্পষ্ট ভাষাকেও ব্লক করে।"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "জেলব্রেক চেষ্টার জন্য স্ক্যান করা টেক্সট",
+          "description": "জেলব্রেক প্যাটার্নের জন্য একটি বার্তা বা উত্তরের কতটা স্ক্যান হয়। এর বাইরের টেক্সট স্ক্যান হয় না।",
+          "help": "আপনি এটি শুধু প্ল্যাটফর্মের মানের ওপরে বাড়াতে পারেন। প্রশস্ত জানালা প্যাডিংয়ের আড়ালে লুকানো আক্রমণ থামায়, সামান্য বেশি প্রক্রিয়াকরণের বিনিময়ে।"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "নিরাপত্তা বিচারককে দেখানো টেক্সট",
+          "description": "এআই নিরাপত্তা বিচারকরা যাচাই করা টেক্সটের কতটা পড়েন। এর বাইরের টেক্সট বিচার করা হয় না।",
+          "help": "আপনি এটি শুধু প্ল্যাটফর্মের মানের ওপরে বাড়াতে পারেন। এটি বাড়ালে দীর্ঘ টুল ফলাফল পুরোটা বিচার হয় কিন্তু প্রতিটি বিচারক কল বড় হয়।"
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "এআই বিচারকের মডেল",
+          "description": "মূল্যায়ন রান বিচার করতে ব্যবহৃত মডেল। ফাঁকা রাখলে আপনার ওয়ার্কস্পেস ইতিমধ্যে যা ব্যবহার করে তা থেকে প্ল্যাটফর্ম বেছে নেয়।",
+          "help": "আরও নির্ভরযোগ্য গ্রেডের জন্য শক্তিশালী মডেল বা খরচ বাঁচাতে সস্তা মডেল ব্যবহার করুন। মডেলটি আপনার সংযুক্ত প্রোভাইডারে উপলব্ধ থাকতে হবে।"
+        },
+        "callTimeoutSeconds": {
+          "label": "প্রতি বিচারক কলে সর্বোচ্চ সময়",
+          "description": "একটি বিচারক কল ব্যর্থ বলে গণ্য হওয়ার আগে কত সময় নিতে পারে।",
+          "help": "ধীর মডেল প্রায়ই টাইমআউট হলে বাড়ান; ব্যর্থ কল মূল্যায়নের ফলাফল অসম্পূর্ণ করে।"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "প্রতি টেস্ট কেসে পুনরাবৃত্তি",
+          "description": "কোনো রান নির্দিষ্ট না করলে প্রতিটি টেস্ট কেস কতবার চালানো হয়। বেশি পুনরাবৃত্তি এজেন্ট কতটা সামঞ্জস্যপূর্ণ তা দেখায়।",
+          "help": "প্রতিটি পুনরাবৃত্তি একটি রানের খরচ ও সময় গুণ করে।"
+        },
+        "defaultMode": {
+          "label": "How evaluations run",
+          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
+          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "options": {
+            "full": "Full pipeline in a sandbox",
+            "quick": "Quick: text answers only"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "সর্বোচ্চ সমান্তরাল উপ-কাজ",
+        "description": "একটি দায়িত্ব অর্পণ কল একসাথে কতগুলো উপ-কাজ বা সহায়ক এজেন্ট শুরু করতে পারে। অতিরিক্তগুলো সীমা ছাড়িয়েছে বলে জানানো হয়।",
+        "help": "বিস্তৃত গবেষণার কাজে বাড়ান, খরচ ও লোড কম রাখতে কমান।"
+      },
+      "branchTimeoutSeconds": {
+        "label": "প্রতি উপ-কাজে সর্বোচ্চ সময়",
+        "description": "একটি অর্পিত উপ-কাজ টাইমআউট হয়েছে বলে জানানোর আগে কত সময় চলতে পারে।",
+        "help": "ধীর উপ-কাজের জন্য বাড়ান। আটকে যাওয়া উপ-কাজ কখনো এই সময়ের পর পুরো উত্তর আটকে রাখে না।"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "প্রতি ফলাফলে অনুসন্ধানের বিস্তার",
+          "description": "একটি জ্ঞান অনুসন্ধান শেষ পর্যন্ত যে প্রতিটি অংশ ফেরত দেয় তার জন্য কতগুলো প্রার্থী অংশ সংগ্রহ করে।",
+          "help": "বেশি সংখ্যা র‍্যাঙ্কিংকে বাছাইয়ের জন্য আরও বিকল্প দেয়, যা অনেক নথি একই রকম হলে সাহায্য করে, কিন্তু প্রতিটি অনুসন্ধানে আরও সময় ও কম্পিউট লাগে। অনুসন্ধান ধীর মনে হলে কমান। এটি এজেন্ট কতগুলো অংশ দেখে তা বদলায় না।"
+        },
+        "candidatePoolMax": {
+          "label": "প্রতি অনুসন্ধানে সর্বোচ্চ প্রার্থী",
+          "description": "কতগুলো ফলাফল চাওয়া হোক না কেন, একটি জ্ঞান অনুসন্ধান সর্বোচ্চ কতগুলো প্রার্থী অংশ সংগ্রহ করে তার ঊর্ধ্বসীমা।",
+          "help": "একটি এজেন্ট একসাথে অনেক ফলাফল চাইলে এটি গতি ও খরচ রক্ষা করে। শুধু তখনই বাড়ান যখন বড় জ্ঞান ভাণ্ডারে উত্তর প্রাসঙ্গিক অংশ মিস করে।"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "কম-পরীক্ষিত বিকল্প চেষ্টা করার ইচ্ছা",
+          "description": "কনফিডেন্স-বাউন্ড পদ্ধতি ব্যবহারকারী একটি শেখার নীতি যে বিকল্পগুলো কম চেষ্টা করেছে সেগুলোকে কতটা অগ্রাধিকার দেয়।",
+          "help": "শূন্য সবসময় এ পর্যন্ত সেরা গড়ের বিকল্প বেছে নেয়। বেশি মান স্থির হওয়ার আগে অন্য বিকল্প আরও বেশি সময় চেষ্টা করতে থাকে। ডিফল্ট হলো পাঠ্যবইয়ের ভারসাম্য। শুধু যে নীতিগুলো এই পদ্ধতি ব্যবহার করে সেগুলো প্রভাবিত হয়।"
+        },
+        "defaultExplorationRate": {
+          "label": "নতুন নীতির জন্য প্রাথমিক অন্বেষণের হার",
+          "description": "নতুন তৈরি একটি শেখার নীতি যে অংশের টার্ন একটি এলোমেলো বিকল্প চেষ্টায় ব্যয় করে।",
+          "help": "এটি শুধু এখন থেকে তৈরি নীতির শুরুর বিন্দু ঠিক করে। বিদ্যমান নীতি নিজের হার রাখে, যা নীতি যেখানে পরিচালিত হয় সেখানে প্রতি এজেন্টে আপনি বদলান। শূন্য মানে নতুন নীতি শুরুতে অন্বেষণ করে না।"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "প্রোভাইডার কী প্রত্যাখ্যান করার পর বিরতি",
+          "description": "প্রোভাইডার কোনো সংযুক্ত প্রোভাইডার কী প্রত্যাখ্যান করার পর ব্যাকগ্রাউন্ড কাজ সেটি কত সময় এড়িয়ে চলে।",
+          "help": "বিরতির সময় নির্ধারিত ও স্বয়ংক্রিয় কাজ বারবার ব্যর্থ হওয়া কী কল করার বদলে অন্য কোনো সংযুক্ত প্রোভাইডার ব্যবহার করে, অথবা অপেক্ষা করে। যাঁরা চ্যাট করছেন তাঁরা কখনো ব্লক হন না এবং সবসময় প্রোভাইডারের আসল ত্রুটি দেখেন। বিরতি শেষ হলে কী ঠিক হয়েছে কি না যাচাই করতে একটি কল ছেড়ে দেওয়া হয়। শূন্য বিরতি বন্ধ করে।"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "প্রশাসন",
+    "title": "রানটাইম সেটিংস",
+    "subtitle": "এই ওয়ার্কস্পেস জুড়ে এজেন্টরা কেমন আচরণ করবে তা ঠিক করুন: সীমা, অনুমোদন, মান যাচাই, গার্ডরেল, মেমরি ও মডেল। যেখানে অনুমতি আছে সেখানে এজেন্টের মালিক এখনও একটি এজেন্টের জন্য সেটিং ওভাররাইড করতে পারেন।",
+    "docsLink": "সহায়তা ও ডকুমেন্টেশন",
+    "tabs": {
+      "label": "রানটাইম সেটিংসের ভিউ",
+      "settings": "সেটিংস",
+      "history": "পরিবর্তনের ইতিহাস"
+    },
+    "readOnly": {
+      "title": "শুধু দেখা",
+      "body": "শুধু ওয়ার্কস্পেস অ্যাডমিনরা এই সেটিংস বদলাতে পারেন। আপনি প্রতিটি সেটিংয়ের কার্যকর মান এবং তা কোথা থেকে আসছে তা দেখতে পারেন।"
+    },
+    "summary": "এই ওয়ার্কস্পেসে {total}টির মধ্যে {changed}টি সেটিং বদলানো হয়েছে। বাকিগুলো প্ল্যাটফর্মের মান ব্যবহার করে।",
+    "export": {
+      "button": "ওভাররাইড রপ্তানি করুন",
+      "done": "{count}টি ওয়ার্কস্পেস ওভাররাইড একটি ফাইলে রপ্তানি করা হয়েছে।",
+      "none": "রপ্তানির কিছু নেই: এই ওয়ার্কস্পেস কোনো সেটিং বদলায়নি।"
+    },
+    "filters": {
+      "changedOnly": "শুধু এই ওয়ার্কস্পেসে বদলানো"
+    },
+    "jump": {
+      "label": "একটি গ্রুপে যান"
+    },
+    "anchor": {
+      "unknown": "এই ওয়ার্কস্পেসে \"{key}\" নামে কোনো সেটিং নেই। এর নাম বদলে থাকতে পারে অথবা এটি ওয়ার্কস্পেস স্তরে উপলব্ধ নয়।"
+    },
+    "empty": {
+      "noneChanged": "এই ওয়ার্কস্পেসে এখনও কোনো সেটিং বদলানো হয়নি। সবকিছু প্ল্যাটফর্মের মান ব্যবহার করে।"
+    },
+    "risk": {
+      "high": "উচ্চ ঝুঁকি",
+      "security": "নিরাপত্তা সেটিং"
+    },
+    "security": {
+      "title": "নিরাপত্তা সেটিংস",
+      "body": "এই সেটিংস আপনার ওয়ার্কস্পেস রক্ষা করে। এগুলো শুধু প্ল্যাটফর্মের মানের চেয়ে কড়া করা যায়, কখনো দুর্বল নয়। প্রতিটি পরিবর্তনে একটি কারণ লাগে এবং তা অডিট লগে রেকর্ড হয়।"
+    },
+    "resetGroup": {
+      "count": "এই গ্রুপে {count}টি বদলানো হয়েছে",
+      "button": "{group} উত্তরাধিকারসূত্রে পাওয়া মানে রিসেট করুন",
+      "confirmTitle": "{group} উত্তরাধিকারসূত্রে পাওয়া মানে রিসেট করবেন?",
+      "confirmBody": "এটি এই গ্রুপের {count}টি ওয়ার্কস্পেস ওভাররাইড সরিয়ে দেয়। যে এজেন্টের নিজস্ব ওভাররাইড নেই তাদের সবার জন্য সেটিংস সঙ্গে সঙ্গে প্ল্যাটফর্মের মানে ফিরে যায়। প্রতিটি রিসেট অডিট লগে রেকর্ড হয়।",
+      "confirm": "উত্তরাধিকারসূত্রে পাওয়া মানে রিসেট করুন",
+      "cancel": "বাতিল",
+      "done": "{count}টি সেটিং তাদের উত্তরাধিকারসূত্রে পাওয়া মানে রিসেট করুন।",
+      "partial": "{done}টি সেটিং রিসেট হয়েছে; {failed}টি রিসেট করা যায়নি। ব্যর্থ সেটিংসের বার্তা দেখুন।",
+      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+    },
+    "import": {
+      "button": "ওভাররাইড আমদানি করুন",
+      "title": "ওয়ার্কস্পেস ওভাররাইড আমদানি করুন",
+      "intro": "এই পাতা থেকে রপ্তানি করা একটি ফাইল বেছে নিন, অথবা তার বিষয়বস্তু পেস্ট করুন। কিছু সংরক্ষণের আগে ঠিক কী বদলাবে তা আপনি দেখতে পাবেন।",
+      "reviewIntro": "এই ফাইল কী বদলাবে তা পর্যালোচনা করুন। এখনও কিছু সংরক্ষণ করা হয়নি।",
+      "fileLabel": "ওভাররাইড ফাইল (JSON)",
+      "pasteLabel": "অথবা ফাইলের বিষয়বস্তু পেস্ট করুন",
+      "fileError": {
+        "empty": "আগে একটি ফাইল বেছে নিন বা তার বিষয়বস্তু পেস্ট করুন।",
+        "invalidJson": "এটি বৈধ JSON নয়। পুরো ফাইল কপি হয়েছে কি না যাচাই করুন।",
+        "wrongFormat": "এটি এই পাতা থেকে রপ্তানি করা সেটিং ওভাররাইড ফাইল নয়।",
+        "unsupportedVersion": "এই ফাইল রপ্তানির ভিন্ন সংস্করণে তৈরি এবং পড়া যায় না।",
+        "noOverrides": "ফাইলে কোনো ওভাররাইড অংশ নেই।",
+        "unreadable": "ফাইলটি পড়া যায়নি।"
+      },
+      "summary": "{changes}টি বদলাবে, {unchanged}টি আগেই কার্যকর, {problems}টি প্রয়োগ করা যায় না।",
+      "changesHeading": "পরিবর্তন ({count})",
+      "before": "এখন:",
+      "after": "আমদানির পর:",
+      "resetMissing": "ফাইলে নেই এমন ওয়ার্কস্পেস ওভাররাইডও সরান",
+      "resetMissingHelp": "এখানে বদলানো কিন্তু ফাইলে না থাকা সেটিংস প্ল্যাটফর্মের মানে ফিরে যায়। শুধু যোগ বা হালনাগাদ করতে এটি বন্ধ রাখুন।",
+      "resetsHeading": "সরানোর ওভাররাইড ({count})",
+      "resetFrom": "বর্তমানে {value}; উত্তরাধিকারসূত্রে পাওয়া মানে ফিরে যায়।",
+      "problemsHeading": "প্রয়োগ করা যায় না ({count})",
+      "problem": {
+        "unknownKey": "এই কী-এর কোনো সেটিং নেই।",
+        "notWorkspaceSetting": "এই সেটিং পুরো ওয়ার্কস্পেসের জন্য বদলানো যায় না।",
+        "locked": "প্ল্যাটফর্ম অপারেটর এই সেটিং পিন করেছেন, তাই এটি বদলানো যায় না।",
+        "wrongType": "এই সেটিংয়ের জন্য মানের ধরন ভুল।",
+        "required": "একটি মান আবশ্যক।",
+        "notNumber": "মান অবশ্যই একটি সংখ্যা হতে হবে।",
+        "notInteger": "মান অবশ্যই একটি পূর্ণসংখ্যা হতে হবে।",
+        "belowMin": "মান খুব কম। সর্বনিম্ন {min}।",
+        "aboveMax": "মান খুব বেশি। সর্বোচ্চ {max}।",
+        "notAllowed": "এটি অনুমোদিত বিকল্পগুলোর একটি নয়।",
+        "tooShort": "টেক্সট খুব ছোট। সর্বনিম্ন দৈর্ঘ্য {min}।",
+        "tooLong": "টেক্সট খুব দীর্ঘ। সর্বোচ্চ দৈর্ঘ্য {max}।",
+        "precision": "মানটি এই সেটিং যতটা অনুমোদন করে তার চেয়ে বেশি নিখুঁত।"
+      },
+      "nothing": "এই ফাইলের কিছুই কোনো সেটিং বদলাবে না।",
+      "reasonNote": "এই সেটিংসের কিছু উচ্চ ঝুঁকির। প্রয়োগের পর আপনার কাছে একটি কারণ চাওয়া হবে যা অডিট লগে রেকর্ড হয়।",
+      "back": "ফিরে যান",
+      "cancel": "বাতিল",
+      "review": "পরিবর্তন পর্যালোচনা করুন",
+      "apply": "{count}টি পরিবর্তন প্রয়োগ করুন",
+      "cancelled": "আমদানি বাতিল হয়েছে। কোনো সেটিং বদলানো হয়নি।",
+      "done": "আমদানি সম্পন্ন: {applied}টি সেটিং হালনাগাদ হয়েছে।",
+      "donePartial": "আমদানি আংশিক সম্পন্ন: {applied}টি সেটিং হালনাগাদ হয়েছে, {failed}টি প্রয়োগ করা যায়নি। পর্যালোচনায় দেখা যায় এখনও কী বাকি।"
+    },
+    "history": {
+      "adminOnly": "ওয়ার্কস্পেস সেটিংসের পরিবর্তনের ইতিহাস শুধু ওয়ার্কস্পেস অ্যাডমিনদের কাছে দৃশ্যমান।",
+      "loading": "পরিবর্তনের ইতিহাস লোড হচ্ছে",
+      "partial": "{count}টি সেটিংয়ের ইতিহাস লোড করা যায়নি, তাই এই তালিকা অসম্পূর্ণ হতে পারে।",
+      "retry": "আবার চেষ্টা করুন",
+      "search": "পরিবর্তনের ইতিহাস খুঁজুন",
+      "searchPlaceholder": "সেটিং, ব্যক্তি বা কারণ দিয়ে খুঁজুন",
+      "empty": "এই ওয়ার্কস্পেসে এখনও কোনো সেটিং বদলানো হয়নি।",
+      "noMatch": "কোনো পরিবর্তন আপনার অনুসন্ধানের সাথে মেলে না।",
+      "count": "{total}টি পরিবর্তনের মধ্যে {shown}টি দেখানো হচ্ছে, নতুনটি আগে।",
+      "tableLabel": "ওয়ার্কস্পেস সেটিংসের পরিবর্তনের ইতিহাস",
+      "when": "কখন",
+      "setting": "সেটিং",
+      "change": "পরিবর্তন",
+      "by": "যিনি বদলেছেন",
+      "reason": "কারণ",
+      "before": "আগে:",
+      "after": "পরে:",
+      "inherited": "উত্তরাধিকারসূত্রে পাওয়া মান",
+      "unknownActor": "অজানা",
+      "noReason": "কোনো কারণ দেওয়া হয়নি",
+      "showMore": "আরও দেখান",
+      "scope": "Level",
+      "scopeWorkspace": "ওয়ার্কস্পেস",
+      "scopeAgent": "Agent {id}",
+      "scopeFilter": "Show changes at",
+      "filterAll": "All levels",
+      "filterWorkspace": "Workspace only",
+      "filterAgents": "Agents only",
+      "searchLoadedOnly": "The search covers the changes loaded so far.",
+      "loadError": "The change history could not be loaded. {message}",
+      "moreFailed": "More changes could not be loaded. {message}",
+      "loadingMore": "লোড হচ্ছে"
+    }
+  },
+  "agentBehavior": {
+    "title": "আচরণ ও সীমা",
+    "intro": "একটি টার্নে এই এজেন্ট কতদূর যেতে পারে তা নিয়ন্ত্রণ করুন: কতগুলো টুল কল করতে পারে, কত সময় চলতে পারে এবং কতটা ফেরত পড়ে। এখানে যা বদলান না তা আপনার ওয়ার্কস্পেস থেকে উত্তরাধিকারসূত্রে আসে।",
+    "saveFirst": "আগে এজেন্ট সংরক্ষণ করুন। এটি তৈরি হওয়ার পর এর আচরণ ও সীমা সেট করা যায়।",
+    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "tabs": {
+      "label": "এজেন্ট কনফিগারেশন",
+      "setup": "সেটআপ",
+      "behavior": "আচরণ ও সীমা",
+      "unsaved": "অসংরক্ষিত পরিবর্তন"
+    },
+    "links": {
+      "label": "সংশ্লিষ্ট পাতা",
+      "tenant": "ওয়ার্কস্পেসের ডিফল্ট বদলান",
+      "playground": "প্লেগ্রাউন্ডে চেষ্টা করুন",
+      "prompts": "This agent's prompts",
+      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
+      "approvals": "This agent's approvals",
+      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
+      "turns": "Turn timeline",
+      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+    },
+    "readOnly": {
+      "locked": "এই এজেন্ট সম্পাদনার জন্য লক করা, তাই এই মানগুলো শুধু-পঠনযোগ্য।",
+      "access": "আপনি এই মানগুলো দেখতে পারেন কিন্তু এই এজেন্টে আপনার অ্যাক্সেস সেগুলো বদলানোর অনুমতি দেয় না।"
+    },
+    "unsaved": "এই ট্যাবে আপনার অসংরক্ষিত পরিবর্তন আছে। যাওয়ার আগে নিচে সংরক্ষণ করুন বা বাতিল করুন।",
+    "inheritNote": "প্রতিটি সেটিং তার মান কোথা থেকে আসে তা দেখায়। এখানে একটি বদলালে তা শুধু এই এজেন্টের জন্য ওভাররাইড হয়; ওয়ার্কস্পেসের মান আবার পেতে রিসেট করুন।",
+    "others": {
+      "title": "এই এজেন্টের অন্যান্য নিয়ন্ত্রণ",
+      "intro": "এই নিয়ন্ত্রণগুলো ওপরের সেটিংসের অংশ নয়, তাই সেগুলো সেটআপ ট্যাবে থাকে।",
+      "generation": "উত্তরের সৃজনশীলতা ও দৈর্ঘ্য (তাপমাত্রা, top-p, সর্বোচ্চ টোকেন) এবং অতিরিক্ত স্যাম্পলিং বিকল্প।",
+      "generationLink": "জেনারেশন টিউনিংয়ে যান",
+      "autonomy": "স্বায়ত্তশাসনের স্তর, প্রতি রানে খরচের সীমা, টুলের নিয়ম এবং কখন কারও অনুমোদন দিতে হবে।",
+      "autonomyLink": "যুক্তি ও স্বায়ত্তশাসনে যান"
+    },
+    "discard": {
+      "title": "সংরক্ষণ না করে চলে যাবেন?",
+      "description": "এই এজেন্টের আচরণ ও সীমায় আপনার অসংরক্ষিত পরিবর্তন আছে। এখন গেলে সেগুলো হারিয়ে যাবে।",
+      "stay": "এখানে থেকে সম্পাদনা চালিয়ে যান",
+      "leave": "চলে যান ও পরিবর্তন বাতিল করুন"
+    },
+    "summary": {
+      "title": "এই এজেন্ট এখন কেমন আচরণ করে",
+      "subtitle": "এজেন্টের নিজস্ব ওভাররাইড, আপনার ওয়ার্কস্পেস সেটিংস ও প্ল্যাটফর্ম সেটিংস প্রয়োগের পর এই এজেন্টের জন্য কার্যকর মান।",
+      "loading": "বর্তমান আচরণ লোড হচ্ছে",
+      "error": "বর্তমান আচরণ লোড করা যায়নি। {message}",
+      "retry": "আবার চেষ্টা করুন",
+      "empty": "এই এজেন্টের জন্য এখনও কোনো আচরণ সেটিং উপলব্ধ নেই।",
+      "facts": {
+        "steps": "প্রতি টার্নে টুল কল",
+        "turnTimeout": "প্রতি টার্নে সময়",
+        "toolTimeout": "প্রতি টুল কলে সময়",
+        "outputCap": "রাখা টুল আউটপুট",
+        "continuation": "ধারাবাহিকতার পাস",
+        "approvals": "অনুমোদন",
+        "judge": "মান বিচারক মডেল",
+        "model": "মডেল"
+      },
+      "tier": {
+        "SUPERVISED": "তত্ত্বাবধানাধীন: প্রতিটি টুল কল কারও জন্য অপেক্ষা করে",
+        "SEMI_AUTONOMOUS": "আধা-স্বায়ত্তশাসিত: আপনার ওয়ার্কস্পেসের নিয়ম ঠিক করে",
+        "FULLY_AUTONOMOUS": "সম্পূর্ণ স্বায়ত্তশাসিত: টুল কল কখনো অপেক্ষা করে না"
+      },
+      "approvalResumes": "অনুমোদনের পর নিজেই চালিয়ে যায়",
+      "approvalStops": "অনুমোদনের পর নতুন বার্তার জন্য অপেক্ষা করে",
+      "judgeDefault": "প্ল্যাটফর্ম বেছে নিয়েছে",
+      "overrides": {
+        "none": "এই এজেন্ট সব জায়গায় আপনার ওয়ার্কস্পেসের মান ব্যবহার করে।",
+        "some": "এই এজেন্টের জন্য ওভাররাইড করা সেটিংস: {count}।"
+      }
+    },
+    "impact": {
+      "title": "এর মানে কী",
+      "steps": "এই এজেন্ট একটি টার্নে সর্বোচ্চ {count}টি টুল কল করতে পারে। এরপর তাকে যা আছে তা দিয়ে উত্তর দিতে বলা হয়।",
+      "stepsTierSupervised": "এই এজেন্ট তত্ত্বাবধানাধীন, তাই এর প্রকৃত ঊর্ধ্বসীমা ওই ভিত্তি সংখ্যার চেয়ে কম। সঠিক সংখ্যা ব্যবহার করতে এই এজেন্টের জন্য আপনার নিজের মান সেট করুন।",
+      "stepsTierFull": "এই এজেন্ট সম্পূর্ণ স্বায়ত্তশাসিত, তাই এর প্রকৃত ঊর্ধ্বসীমা ওই ভিত্তি সংখ্যার চেয়ে বেশি। সঠিক সংখ্যা ব্যবহার করতে এই এজেন্টের জন্য আপনার নিজের মান সেট করুন।",
+      "turnTimeout": "একটি টার্ন {duration} পর কেটে দেওয়া হয়।",
+      "turnTimeoutNone": "একটি টার্নের কোনো সময়সীমা নেই।",
+      "toolTimeout": "একটি টুল কল {duration} পর কেটে দেওয়া হয়।",
+      "toolTimeoutNone": "একটি টুল কলের কোনো সময়সীমা নেই।",
+      "outputCap": "{chars}-এর চেয়ে দীর্ঘ টুল ফলাফল এজেন্ট পড়ার আগে ছোট করা হয়।",
+      "continuation": "কোনো উত্তর কেটে গেলে এজেন্ট সেটি আরও সর্বোচ্চ {count} বার চালিয়ে যেতে পারে।",
+      "continuationNone": "কেটে যাওয়া উত্তর চালিয়ে যাওয়া হয় না।",
+      "retrieval": "প্রতিটি প্রশ্নের জন্য এটি সেরা {count}টি জ্ঞান মিল পড়ে।",
+      "retrievalScored": "প্রতিটি প্রশ্নের জন্য এটি সেরা {count}টি জ্ঞান মিল পড়ে এবং {score}-এর নিচে স্কোর পাওয়া মিল উপেক্ষা করে।",
+      "approvalContinuationOn": "কেউ অপেক্ষমাণ কাজ অনুমোদন করার পর এজেন্ট নিজেই কাজটি শেষ করে।",
+      "approvalContinuationOff": "কেউ অপেক্ষমাণ কাজ অনুমোদন করার পর টার্ন শেষ হয়ে যায় এবং হাতে ফলোআপ করতে হয়।",
+      "guardClosed": "নিরাপত্তা যাচাই বিকল হলে কাজটি প্রত্যাখ্যাত হয়।",
+      "guardOpen": "নিরাপত্তা যাচাই বিকল হলে কাজটি পেরিয়ে যেতে দেওয়া হয়।",
+      "branches": "একটি দায়িত্ব অর্পণ কল একসাথে সর্বোচ্চ {count}টি উপ-কাজ শুরু করতে পারে।"
+    }
+  },
+  "controls": {
+    "eyebrow": "সহায়তা",
+    "title": "কোথায় নিয়ন্ত্রণ করব...?",
+    "subtitle": "আপনার এজেন্টদের আচরণ গড়ে তোলা প্রতিটি নিয়ন্ত্রণ, এবং সেটি যে পাতায় আছে। যা বদলাতে চান তা দিয়ে খুঁজুন।",
+    "breadcrumb": {
+      "label": "ব্রেডক্রাম্ব",
+      "console": "কনসোল",
+      "controls": "নিয়ন্ত্রণ"
+    },
+    "related": {
+      "label": "অন্যান্য নিয়ন্ত্রণ"
+    },
+    "search": {
+      "label": "নিয়ন্ত্রণ খুঁজুন",
+      "placeholder": "উদাহরণ: টাইমআউট, অনুমোদন, প্রম্পট, মেমরি",
+      "count": "{count}টি মিলে যাওয়া নিয়ন্ত্রণ",
+      "none": "\"{query}\"-এর সাথে কিছু মেলে না। ছোট শব্দ চেষ্টা করুন।",
+      "noSettings": "কোনো সেটিং আপনার অনুসন্ধানের সাথে মেলে না।"
+    },
+    "areasHeading": "নিয়ন্ত্রণের ক্ষেত্র",
+    "areasIntro": "এই পাতাগুলোতে সেই নিয়ন্ত্রণগুলো আছে যা একক সংখ্যা নয়: নির্দেশনা, অনুমোদনের নিয়ম, নিরাপত্তার নিয়ম এবং একটি টার্ন কী করেছে তার রেকর্ড।",
+    "openArea": "খুলুন",
+    "needsAccess": "এই পাতায় প্রবেশাধিকারের জন্য ওয়ার্কস্পেস অ্যাডমিনকে বলুন।",
+    "settingsHeading": "প্রতিটি রানটাইম সেটিং",
+    "settingsIntro": "প্রতিটি সেটিং পুরো ওয়ার্কস্পেসের জন্য, একটি এজেন্টের জন্য, বা উভয়ের জন্য বদলানো যায়। এজেন্টের নিজস্ব মান ওয়ার্কস্পেসের মানকে ছাপিয়ে যায়। সেটিংয়ে সরাসরি পৌঁছাতে একটি লিংক বেছে নিন।",
+    "loading": "সেটিংসের তালিকা লোড হচ্ছে",
+    "loadFailed": "সেটিংসের তালিকা লোড করা যায়নি। {message}",
+    "retry": "আবার চেষ্টা করুন",
+    "emptyCatalog": "এই ওয়ার্কস্পেসে দেখানোর মতো কোনো রানটাইম সেটিং নেই।",
+    "changeWorkspace": "ওয়ার্কস্পেসের জন্য বদলান",
+    "changeAgent": "একটি এজেন্টে বদলান",
+    "workspaceOnly": "শুধু ওয়ার্কস্পেস-ব্যাপী",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "এজেন্ট রানটাইম সীমা",
+        "intro": "একটি টার্ন কতটা কাজ করতে পারে: টুল কল, সময়, ফলাফলের আকার ও পুনরুদ্ধার।"
+      },
+      "behaviour-settings": {
+        "title": "আচরণ সেটিংস",
+        "intro": "উত্তর কীভাবে শেষ ও ক্যাশ হয়, অনুমোদন কীভাবে চলতে থাকে, নিরাপত্তা যাচাই কেমন আচরণ করে, এবং মেমরি, অনুসন্ধান ও দায়িত্ব অর্পণ কীভাবে কাজ করে।"
+      },
+      "other": {
+        "title": "অন্যান্য সেটিংস",
+        "intro": "যে সেটিংসের নিজস্ব কোনো বিভাগ নেই।"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "রানটাইম সেটিংস",
+        "summary": "পুরো ওয়ার্কস্পেসের জন্য সীমা, অনুমোদন, মান যাচাই, নিরাপত্তার কড়াকড়ি, মেমরি ও দায়িত্ব অর্পণ।",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers সীমা টাইমআউট টুল ধাপ পুনঃচেষ্টা ক্যাশ মেমরি দায়িত্ব অর্পণ মান বিচারক সেটিংস সংখ্যা"
+      },
+      "prompts": {
+        "title": "নির্দেশনা",
+        "summary": "প্ল্যাটফর্ম মডেলকে যে প্রম্পট দেয়: প্রতিটি দেখুন, ওয়ার্কস্পেস বা একটি এজেন্টের জন্য ওভাররাইড করুন এবং ফলাফলের প্রিভিউ দেখুন।",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry প্রম্পট নির্দেশিকা সিস্টেম প্রম্পট নির্দেশনা ওভাররাইড প্রিভিউ রেজিস্ট্রি"
+      },
+      "approvals": {
+        "title": "অনুমোদন",
+        "summary": "কারও জন্য অপেক্ষমাণ কাজের সারি, কোন টুলের অনুমোদন লাগে তার নিয়ম, এবং আপনার সিদ্ধান্তের পর কী ঘটে।",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation অনুমোদন প্রত্যাখ্যান সারি হিউম্যান ইন দ্য লুপ টুলের নিয়ম মেয়াদ ধারাবাহিকতা"
+      },
+      "guardrails": {
+        "title": "গার্ডরেল",
+        "summary": "যে প্যাটার্ন এই ওয়ার্কস্পেস পেরোতে দিতে অস্বীকার করে, এবং টুল ফলাফলে প্রযোজ্য কনটেন্ট নীতি।",
+        "keywords": "safety rules block filter policy content patterns নিরাপত্তার নিয়ম ব্লক ফিল্টার নীতি কনটেন্ট প্যাটার্ন"
+      },
+      "turns": {
+        "title": "টার্ন পরিদর্শক",
+        "summary": "একটি এজেন্ট টার্নের রেকর্ড করা টাইমলাইন: কী চাওয়া হয়েছিল, কোন টুল চলেছে, প্রতিটি ধাপে কত খরচ হয়েছে এবং কেন থেমেছে।",
+        "keywords": "turn timeline journal trace replay history steps debug টার্ন টাইমলাইন জার্নাল ট্রেস রিপ্লে ইতিহাস ধাপ ডিবাগ"
+      },
+      "agentBehavior": {
+        "title": "এজেন্টের আচরণ ও সীমা",
+        "summary": "একটি এজেন্টের পাতায়: এর নিজস্ব সীমা ও আচরণ সেটিংস, প্রতিটি মান কোথা থেকে আসে তা এবং ওয়ার্কস্পেসের মানে রিসেট সহ।",
+        "keywords": "agent override per agent behavior limits tab এজেন্ট ওভাররাইড প্রতি এজেন্ট আচরণ সীমা ট্যাব"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "এই প্রম্পট ব্লকগুলো দিয়ে তৈরি",
+    "blocksCount": "{n}টি ব্লক",
+    "blockDefault": "সাথে আসা ডিফল্ট",
+    "blockOverride": "{scope} ওভাররাইড v{version}",
+    "blockAgentConfig": "এজেন্টের নিজস্ব প্রম্পট",
+    "blockCode": "প্ল্যাটফর্ম কোড",
+    "blockTokens": "~{tokens} টোকেন",
+    "blockHash": "ভাষ্যের হ্যাশ"
+  },
+  "toolApproval": {
+    "continuing": "এজেন্ট কাজটি চালিয়ে যাচ্ছে।",
+    "continueNotStarted": "এই সিদ্ধান্তের পর এজেন্ট স্বয়ংক্রিয়ভাবে পুনরায় শুরু হয়নি। চালিয়ে যেতে একটি বার্তা পাঠান।",
+    "continueTimedOut": "এজেন্ট এখনও চালিয়ে যাওয়া শেষ করেনি। শেষ হলে তার উত্তর কথোপকথনে দেখা যাবে; যাচাই করতে রিলোড করুন।"
+  },
+  "promptDirectives": {
+    "tabRegistry": "সব প্রম্পট",
+    "tabAgentPreview": "চূড়ান্ত প্রম্পটের প্রিভিউ",
+    "regTitle": "প্রতিটি প্রম্পট",
+    "regIntro": "মডেলের জন্য প্ল্যাটফর্ম যা কিছু লেখে সেসব টেক্সট, বর্তমানে কার্যকর ভাষ্য, তার উৎস ও সংস্করণসহ। একটি পরিসর বেছে নিন, বদলাতে একটি প্রম্পট খুলুন এবং আগের প্রতিটি সংস্করণ দেখুন। পরিবর্তন প্রায় আধ মিনিটের মধ্যে সব সার্ভারে পৌঁছায়।",
+    "regScopeLabel": "যে পরিসরে বদলাবেন",
+    "regScope_tenant": "এই ওয়ার্কস্পেস",
+    "regScope_agent": "একটি এজেন্ট",
+    "regScope_platform": "পুরো প্ল্যাটফর্ম",
+    "regAgentLabel": "এজেন্ট",
+    "regAgentPlaceholder": "একটি এজেন্ট বেছে নিন",
+    "regAgentsFailed": "আপনার এজেন্ট লোড করা যায়নি।",
+    "regPickAgent": "এজেন্টের প্রম্পট দেখতে ও বদলাতে একটি এজেন্ট বেছে নিন।",
+    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regSearchLabel": "প্রম্পট খুঁজুন",
+    "regSearchPlaceholder": "কী, শিরোনাম বা বিবরণ",
+    "regRiskLabel": "ঝুঁকির শ্রেণি",
+    "regRiskAll": "সব ঝুঁকির শ্রেণি",
+    "regRisk_STEERS_EVERY_TURN": "প্রতিটি টার্ন পরিচালনা করে",
+    "regRisk_SECONDARY_CALL": "দ্বিতীয় মডেল কল",
+    "regRisk_USER_VISIBLE": "মানুষকে দেখানো হয়",
+    "regRisk_TOOL_DESCRIPTION": "টুলের বিবরণ",
+    "regOnlyCustomised": "শুধু কাস্টমাইজ করা",
+    "regPlatformReadOnly": "প্ল্যাটফর্ম-ব্যাপী প্রম্পট এখানে পড়া যায়; শুধু প্ল্যাটফর্ম অ্যাডমিন সেগুলো বদলাতে পারেন।",
+    "regLoadFailed": "প্রম্পট লোড করা যায়নি।",
+    "regCount": "{total}টি প্রম্পটের মধ্যে {shown}টি দেখানো হচ্ছে।",
+    "regEmptyTitle": "কোনো প্রম্পট মেলেনি",
+    "regEmptyBody": "অনুসন্ধান বা ফিল্টার বদলান।",
+    "regSource_DEFAULT": "সাথে আসা ডিফল্ট",
+    "regSource_FALLBACK": "সাথে আসা ডিফল্ট (ওভাররাইড উপলব্ধ নয়)",
+    "regSource_PLATFORM": "প্ল্যাটফর্ম",
+    "regSource_TENANT": "ওয়ার্কস্পেস",
+    "regSource_AGENT": "এজেন্ট",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "অবসরপ্রাপ্ত",
+    "regRetiredBody": "এই প্রম্পট আর কোনো টেক্সট পাঠায় না, তাই বদলানোর কিছু নেই।",
+    "regEffectiveOff": "বন্ধ: কিছু পাঠানো হয় না।",
+    "regEffectiveTokens": "এখন কার্যকর, প্রায় {tokens} টোকেন।",
+    "regEffectiveLabel": "{title}-এর কার্যকর ভাষ্য",
+    "regOpenEditor": "{title} সম্পাদনা করুন",
+    "regCloseEditor": "{title} বন্ধ করুন",
+    "regEditingOverride": "{scope} সংস্করণ সম্পাদনা হচ্ছে, বর্তমানে v{version}।",
+    "regEditingNone": "এখনও কোনো {scope} সংস্করণ নেই। এটি তার নিচের ভাষ্য থেকে শুরু হয়: {below}।",
+    "regPlaceholders": "রানটাইমে পূরণ হয়:",
+    "regRequired": "(আবশ্যক)",
+    "regProblemsTitle": "সংরক্ষণের আগে এটি ঠিক করুন",
+    "regReasonLabel": "পরিবর্তনের কারণ (ইতিহাসে রাখা হয়)",
+    "regReasonPlaceholder": "ঐচ্ছিক",
+    "regConflict": "আপনি সম্পাদনা করার সময় কেউ এই প্রম্পট বদলে ফেলেছেন। তাঁর সংস্করণ দেখতে এটি বন্ধ করে আবার খুলুন, তারপর আবার চেষ্টা করুন।",
+    "regRevert": "{to}-এ ফিরে যান",
+    "regShowHistory": "ইতিহাস",
+    "regHideHistory": "ইতিহাস লুকান",
+    "regHistoryLoading": "ইতিহাস লোড হচ্ছে…",
+    "regHistoryFailed": "ইতিহাস লোড করা যায়নি।",
+    "regHistoryEmpty": "এই পরিসরে এখনও কোনো সংস্করণ নেই।",
+    "regVersion": "সংস্করণ {version}",
+    "regAction_CREATE": "তৈরি",
+    "regAction_UPDATE": "পরিবর্তিত",
+    "regAction_REVERT": "ফেরানো হয়েছে",
+    "regAction_MIGRATE": "স্থানান্তরিত",
+    "regCurrent": "বর্তমান",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "অজানা",
+    "regReason": "কারণ: {reason}",
+    "regShowDiff": "সংস্করণ {version}-এর পরিবর্তন দেখান",
+    "regHideDiff": "সংস্করণ {version}-এর পরিবর্তন লুকান",
+    "regDiffLabel": "সংস্করণ {version} যে পরিবর্তন করেছে",
+    "regNoDiff": "এই সংস্করণে কোনো টেক্সট বদলায়নি।",
+    "regRestore": "সংস্করণ {version} পুনরুদ্ধার করুন",
+    "regRestoreReason": "সংস্করণ {version}-এর ভাষ্য পুনরুদ্ধার করা হয়েছে",
+    "regRestoreFailed": "সেই সংস্করণ পুনরুদ্ধার করা যায়নি।",
+    "regRestoreAck": "আমি বুঝি যে {title}-এর কোনো সংস্করণ পুনরুদ্ধার করলে নিরাপত্তা দুর্বল হতে পারে।",
+    "regPreviewTitle": "চূড়ান্ত প্রম্পটের প্রিভিউ",
+    "regPreviewIntro": "মডেল কল না করে, একটি টার্ন যেভাবে করত ঠিক সেভাবে একটি এজেন্টের আসল সিস্টেম প্রম্পট ও টুল তালিকা তৈরি করে। প্রতিটি ব্লকে প্রম্পটের কী, পরিসর এবং যে সংস্করণ থেকে তার ভাষ্য এসেছে তা দেখানো হয়।",
+    "regPreviewMessageLabel": "নমুনা ব্যবহারকারীর বার্তা (ঐচ্ছিক)",
+    "regPreviewMessagePlaceholder": "আসল বার্তার মতো টুল ও মনে করা মেমরি বাছাইয়ে ব্যবহৃত হয়।",
+    "regPreviewSmallModel": "ছোট মডেলের জন্য প্রিভিউ",
+    "regPreviewBuild": "প্রিভিউ তৈরি করুন",
+    "regPreviewBuilding": "তৈরি হচ্ছে…",
+    "regPreviewFailed": "প্রিভিউ তৈরি করা যায়নি।",
+    "regPreviewTotals": "প্রায় {prompt} টোকেন সিস্টেম টেক্সট এবং {tools} টোকেন টুল সংজ্ঞা (আনুমানিক)।",
+    "regPreviewOverBudgetTitle": "টোকেন বাজেটের বেশি",
+    "regPreviewOverBudget": "স্থায়ী সিস্টেম টেক্সট কনফিগার করা {budget} টোকেনের বাজেট ছাড়িয়ে গেছে। কিছু কাটা হয় না; কোনো প্রম্পট ছোট করার কথা ভাবুন।",
+    "regPreviewMessageHeading": "বার্তা: {message}",
+    "regPreviewTokens": "~{tokens} টোকেন",
+    "regPreviewTools": "টুল ({count})",
+    "regPreviewNoTools": "এই এজেন্ট কোনো টুল দেয় না।",
+    "regPreviewNotes": "এই প্রিভিউ যা জানতে পারে না",
+    "regOriginDefault": "সাথে আসা ডিফল্ট",
+    "regOriginOverride": "{scope} ওভাররাইড v{version}",
+    "regOriginAgentConfig": "এজেন্টের নিজস্ব সিস্টেম প্রম্পট",
+    "regOriginCode": "প্ল্যাটফর্ম কোড"
   }
 }

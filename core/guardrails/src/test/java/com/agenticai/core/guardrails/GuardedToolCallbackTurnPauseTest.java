@@ -48,7 +48,7 @@ class GuardedToolCallbackTurnPauseTest {
         HumanApprovalGateService gate = mock(HumanApprovalGateService.class);
         ApprovalRequest pending = mock(ApprovalRequest.class);
         when(pending.getId()).thenReturn(UUID.randomUUID());
-        when(gate.recordToolCallForApproval(anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any()))
+        when(gate.recordToolCallForApproval(anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
             .thenReturn(pending);
 
         AtomicInteger turn = new AtomicInteger();
@@ -57,11 +57,13 @@ class GuardedToolCallbackTurnPauseTest {
 
         String parked = guard(gated, turn, policy, gate).call("{}");
         assertTrue(parked.contains("NOT executed"));
-        assertTrue(parked.contains("STOP NOW"));
+        // The old text told the model to "STOP NOW" and not continue the task; it now says the task
+        // resumes and the goal is unchanged (GuardedToolCallbackParkingTest pins the wording).
+        assertTrue(parked.toLowerCase().contains("resumed automatically"));
 
         String after = guard(other, turn, policy, gate).call("{}");
         assertTrue(after.contains("NOT executed"));
-        assertTrue(after.contains("waiting for the user's approval"));
+        assertTrue(after.contains("waiting for human approval"));
         verify(other, never()).call(anyString());
     }
 
@@ -72,7 +74,7 @@ class GuardedToolCallbackTurnPauseTest {
         HumanApprovalGateService gate = mock(HumanApprovalGateService.class);
         ApprovalRequest pending = mock(ApprovalRequest.class);
         when(pending.getId()).thenReturn(UUID.randomUUID());
-        when(gate.recordToolCallForApproval(anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any()))
+        when(gate.recordToolCallForApproval(anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
             .thenReturn(pending);
 
         guard(tool("gated", "x"), new AtomicInteger(), policy, gate).call("{}");

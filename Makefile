@@ -180,3 +180,19 @@ docs-serve: $(DOCS_VENV)/bin/mkdocs ## Serve the documentation site with live re
 	$(DOCS_VENV)/bin/mkdocs serve
 
 .PHONY: docs-build docs-serve
+
+# ---- configuration reference: the default tables of docs/configuration.md come from the code
+# (application*.yml, @Value, @ConfigurationProperties); see scripts/docs/gen-config-tables.py
+.PHONY: config-docs config-docs-check config-docs-write config-docs-test
+config-docs: ## Dry run: list broken/drifted/empty defaults and undocumented keys in docs/configuration.md (writes nothing)
+	python3 scripts/docs/gen-config-tables.py
+
+config-docs-check: ## Fail when a default in docs/configuration.md is broken or differs from the code, or a key is undocumented
+	python3 scripts/docs/test_gen_config_tables.py
+	python3 scripts/docs/gen-config-tables.py --check
+
+config-docs-write: ## Rewrite only the default cell of broken/drifted Appendix rows of docs/configuration.md
+	python3 scripts/docs/gen-config-tables.py --write
+
+config-docs-test: ## Unit tests of the generator
+	python3 scripts/docs/test_gen_config_tables.py

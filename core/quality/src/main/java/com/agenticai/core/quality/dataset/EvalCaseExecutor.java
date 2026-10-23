@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,19 +47,23 @@ final class EvalCaseExecutor {
     private final EvalRunCaseResultRepository caseResultRepository;
     private final BooleanSupplier codeGradersEnabled;
     private final BooleanSupplier trajectoryEvalEnabled;
+    /** Whether a tenant (by id) may still use the sandbox auto-approval - asked again at every replay. */
+    private final Predicate<String> autoApproveAllowed;
 
     EvalCaseExecutor(
         AgentTurnReplayer replayer,
         EvalEngine evalEngine,
         EvalRunCaseResultRepository caseResultRepository,
         BooleanSupplier codeGradersEnabled,
-        BooleanSupplier trajectoryEvalEnabled
+        BooleanSupplier trajectoryEvalEnabled,
+        Predicate<String> autoApproveAllowed
     ) {
         this.replayer = replayer;
         this.evalEngine = evalEngine;
         this.caseResultRepository = caseResultRepository;
         this.codeGradersEnabled = codeGradersEnabled;
         this.trajectoryEvalEnabled = trajectoryEvalEnabled;
+        this.autoApproveAllowed = autoApproveAllowed;
     }
 
     /**
@@ -205,9 +210,20 @@ final class EvalCaseExecutor {
         EvalDatasetCase datasetCase, List<EvaluationType> enabledTypes, String sessionId
     ) {
         try {
-            AgentTurnReplayer.ReplayedTurn turn = replayer.replay(
+            // The replay mode is the RUN's (frozen when it was triggered): quick = text only, full = the
+            // production pipeline in the eval sandbox, with or without the sandbox auto-approval. The
+            // auto-approval is the run's snapshot, and is re-checked against the operator's non-production
+            // tenant list at EVERY replay, so removing a tenant from the list stops a run already queued.
+            AgentTurnReplayer.ReplayMode mode =
+                AgentTurnReplayer.ReplayMode.of(run.getEvalMode(), run.isAutoApproved());
+            if (mode.autoApproves() && !autoApproveAllowed.test(run.getTenantId())) {
+                throw new IllegalStateException(
+                    "Auto-approving tool calls in evals is no longer permitted for this workspace"
+                        + " (app.quality.eval.auto-approve.tenant-ids) - the case was not replayed.");
+            }
+            AgentTurnReplayer.ReplayedTurn turn = replayer.replay(new AgentTurnReplayer.ReplayRequest(
                 run.getAgentId(), sessionId, run.getRequestedBy(), datasetCase.getUserMessage(),
-                dataset.isToolExecutionEnabled(), CASE_REPLAY_TIMEOUT);
+                mode, CASE_REPLAY_TIMEOUT));
 
             List<String> toolNames = turn.toolCalls().stream()
                 .map(AgentTurnReplayer.ReplayedToolCall::toolName)
@@ -220,7 +236,7 @@ final class EvalCaseExecutor {
                 datasetCase.getExpectedOutput());
 
             AggregatedEvaluationResult result = evalEngine.evaluate(context, enabledTypes);
-            Boolean toolsSatisfied = evaluateExpectedTools(dataset, datasetCase, toolNames);
+            Boolean toolsSatisfied = evaluateExpectedTools(run.getEvalMode(), datasetCase, toolNames);
 
             Map<String, Object> scores = scoreMap(result);
             Boolean graderPassed = null;
@@ -230,15 +246,22 @@ final class EvalCaseExecutor {
             String judgeOutage = judgeOutageReason(result);
             Double overall = judgeOutage != null ? null : result.overallScore();
             // Trajectory eval (app.quality.trajectory-eval.enabled, default off): a case whose grader_spec is a
-            // trajectory spec scores the replayed turn's tool calls. Its verdict joins the grader vote and its
-            // score is blended into the case's overall score, so pass^k and paired comparison see it.
-            if (trajectoryEvalEnabled.getAsBoolean() && dataset.isToolExecutionEnabled()) {
-                TrajectoryCaseGrader.Graded trajectory =
-                    TrajectoryCaseGrader.grade(datasetCase.getGraderSpec(), turn.toolCalls());
-                if (trajectory != null) {
-                    graderPassed = trajectory.passed();
-                    overall = TrajectoryCaseGrader.blend(overall, trajectory.score());
-                    scores.put(TrajectoryCaseGrader.DIMENSION, trajectory.dimension());
+            // trajectory spec scores the replayed turn's tool calls - as the turn itself recorded how each one
+            // ended (ran, failed, not run, held for approval), not as a reading of their output text. Its
+            // verdict joins the grader vote and its score is blended into the case's overall score, so pass^k
+            // and paired comparison see it. A text-only replay made no tool calls, so the dimension is reported
+            // as unavailable (and the case is not failed or passed on it) instead of being skipped silently.
+            if (trajectoryEvalEnabled.getAsBoolean() && TrajectoryCaseGrader.isTrajectorySpec(datasetCase.getGraderSpec())) {
+                if (!mode.executesTools()) {
+                    scores.put(TrajectoryCaseGrader.DIMENSION, TrajectoryCaseGrader.textOnlyDimension());
+                } else {
+                    TrajectoryCaseGrader.Graded trajectory =
+                        TrajectoryCaseGrader.grade(datasetCase.getGraderSpec(), turn.toolCalls());
+                    if (trajectory != null) {
+                        graderPassed = trajectory.passed();
+                        overall = TrajectoryCaseGrader.blend(overall, trajectory.score());
+                        scores.put(TrajectoryCaseGrader.DIMENSION, trajectory.dimension());
+                    }
                 }
             }
             CodeGrader.Result graded = gradeWithCodeGrader(datasetCase, turn.responseText());
@@ -352,16 +375,18 @@ final class EvalCaseExecutor {
 
     /**
      * Three-valued expected-tools assertion. NULL when the case asserts
-     * nothing OR the dataset replays tool-less (the assertion is
+     * nothing OR the run replayed tool-less (a quick run: the assertion is
      * structurally unevaluable there - reporting it as failed would punish
-     * the SAFE default); otherwise subset check: every expected tool name
-     * must appear among the turn's actual calls.
+     * the choice of the cheap mode); otherwise subset check: every expected
+     * tool name must appear among the turn's actual calls. A call the eval
+     * sandbox simulated still counts as made: the agent chose the tool, only
+     * its effect was withheld.
      */
     static Boolean evaluateExpectedTools(
-        EvalDataset dataset, EvalDatasetCase datasetCase, List<String> actualToolNames
+        EvalMode mode, EvalDatasetCase datasetCase, List<String> actualToolNames
     ) {
         List<String> expected = EvalDatasetService.parseExpectedTools(datasetCase.getExpectedTools());
-        if (expected.isEmpty() || !dataset.isToolExecutionEnabled()) {
+        if (expected.isEmpty() || !mode.executesTools()) {
             return null;
         }
         return new HashSet<>(actualToolNames).containsAll(expected);
@@ -378,6 +403,10 @@ final class EvalCaseExecutor {
                 entry.put("toolName", call.toolName());
                 entry.put("input", call.input());
                 entry.put("output", call.output());
+                // How the turn recorded the call's end; omitted when unknown so stored rows keep their shape.
+                if (call.status() != AgentTurnReplayer.ToolStatus.UNKNOWN) {
+                    entry.put("status", call.status().name());
+                }
                 shaped.add(entry);
             }
             return MAPPER.writeValueAsString(shaped);

@@ -2,10 +2,13 @@ package com.agenticai.core.agents.turn.quality;
 
 import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.chat.LlmMetricsAdvisor;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,30 +39,17 @@ public class AnswerConsistencyChecker {
 
     private static final Logger log = LoggerFactory.getLogger(AnswerConsistencyChecker.class);
 
-    private static final String CHECK_SYSTEM_PROMPT = """
-        You are an independent self-consistency check on an AI assistant's already-given answer.
-        You will be shown the user's question and the answer already produced, and - when
-        available - the actual tool-call evidence the answer was built from and recent earlier
-        turns from this same session. Judge whether the answer is internally consistent, directly
-        addresses the question, doesn't contain unsupported or contradictory claims, accurately
-        reflects the tool evidence (if given) rather than misrepresenting or overstating it, and
-        doesn't contradict anything already said earlier in this session (if given). Do not judge
-        writing style or tone.
+    /** Registry keys of the two prompts (default text: {@code prompts/en/quality.consistency.*.md}). */
+    static final String CHECK_KEY = "quality.consistency.check";
+    static final String REVISE_KEY = "quality.consistency.revise";
 
-        Respond with EXACTLY one of:
-        CONSISTENT
-        REVISE: <one short sentence on what's wrong>
+    private final PromptSlot prompts = new PromptSlot();
 
-        No other text.
-        """;
-
-    private static final String REVISE_SYSTEM_PROMPT = """
-        You previously answered a user's question. An independent check found an issue with your
-        answer. Produce a corrected final answer that fixes the issue while still fully addressing
-        the user's original question, using only information already available to you (do not
-        claim to look anything up again). Output ONLY the corrected answer - no preamble, no
-        explanation of what changed.
-        """;
+    /** The prompt registry, so a tenant or agent override of the keys above applies; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     /**
      * Returns {@code originalAnswer} unchanged unless the consistency check finds a genuine
@@ -106,7 +96,7 @@ public class AnswerConsistencyChecker {
         }
         try {
             String verdict = chatClient.prompt()
-                .system(CHECK_SYSTEM_PROMPT)
+                .system(prompts.text(CHECK_KEY, agentId))
                 .user(groundedPrompt(
                     "User's question: " + userMessage + "\n\nAnswer already given: " + originalAnswer,
                     toolEvidence, recentHistory))
@@ -126,7 +116,7 @@ public class AnswerConsistencyChecker {
             log.info("Self-consistency check flagged an issue - revising once: {}", issue);
 
             String revised = chatClient.prompt()
-                .system(REVISE_SYSTEM_PROMPT)
+                .system(prompts.text(REVISE_KEY, agentId))
                 .user(groundedPrompt(
                     "Original question: " + userMessage + "\n\nPrevious answer: " + originalAnswer
                         + "\n\nIssue found: " + issue,

@@ -17,6 +17,8 @@ import com.agenticai.core.agents.job.dto.AgentJobSummaryResponse;
 import com.agenticai.core.agents.research.dto.ResearchRunStartRequest;
 import com.agenticai.core.agents.research.dto.ResearchStatusResponse;
 import com.agenticai.core.agents.tools.web.WebSearchProviderRegistry;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.providers.PlatformToolCredentialService;
 import com.agenticai.core.providers.PlatformToolKey;
 import com.agenticai.core.providers.ProviderCredentialResolver;
@@ -97,6 +99,14 @@ public class ResearchRunService {
     private final ObjectProvider<ProviderCredentialResolver> providerCredentialResolver;
     private final TenantLimits tenantLimits;
 
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so a tenant override of {@code research.system} seeds new research agents; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
+
     /**
      * Striped locks so two simultaneous first runs by one user do not create two research agents.
      */
@@ -171,7 +181,7 @@ public class ResearchRunService {
                     jobService.submit(
                             agentId,
                             new AgentJobStartRequest(
-                                    ResearchRunPlan.goal(run),
+                                    ResearchRunPlan.goal(run, prompts, agentId),
                                     properties.getTimeoutSeconds(),
                                     ResearchRunPlan.RESULT_SCHEMA,
                                     null),
@@ -363,7 +373,10 @@ public class ResearchRunService {
     Optional<UUID> findUnfinishedResearchAgent(TenantContext context) {
         return agentRepository.findByCreatedBy(context.getSubject()).stream()
                 .filter(agent -> ResearchRunPlan.AGENT_NAME.equals(agent.getName()))
-                .filter(agent -> ResearchRunPlan.SYSTEM_PROMPT.equals(agent.getSystemPrompt()))
+                .filter(
+                        agent ->
+                                ResearchRunPlan.SYSTEM_PROMPT.equals(agent.getSystemPrompt())
+                                        || seedPrompt().equals(agent.getSystemPrompt()))
                 .min(
                         Comparator.comparing(
                                 Agent::getCreatedAt,
@@ -380,6 +393,11 @@ public class ResearchRunService {
         agentService.setCapabilityEnabled(agentId, DeepResearchCapability.CAPABILITY_KEY, true);
     }
 
+    /** The seed system prompt for a new research agent: the registry's wording for this tenant. */
+    private String seedPrompt() {
+        return prompts.text(ResearchRunPlan.PROMPT_KEY);
+    }
+
     private UUID createResearchAgent(TenantContext context) {
         requireFreeAgentSlot(context);
         // ADVANCED on purpose: Simple mode would switch the knowledge base on and refuse a tool
@@ -388,7 +406,7 @@ public class ResearchRunService {
                 agentService.create(
                         new AgentCreateRequest(
                                 ResearchRunPlan.AGENT_NAME,
-                                ResearchRunPlan.SYSTEM_PROMPT,
+                                seedPrompt(),
                                 resolveProviderName(context),
                                 null,
                                 ResearchRunPlan.AGENT_MAX_TOKENS,

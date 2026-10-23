@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +51,10 @@ final class ToolResolver {
     private final ToolSearchDeferral toolSearchDeferral;
     // Defense-in-depth backstop behind ToolRelevanceSelector - see AgentToolSelection#capToHardLimit.
     private final int hardCapPerTurn;
+    // Prompt-registry overrides of tool and parameter descriptions (tool.description.*, tool.template.*, tool.param.*).
+    private final ToolDescriptionResolver toolDescriptions;
 
+    /** As the wired constructor, with the shipped tool descriptions only (hand-built resolvers, tests). */
     ToolResolver(
             List<ToolSource> sources,
             AgentService agentService,
@@ -59,7 +63,31 @@ final class ToolResolver {
             AgentIntegrationToolResolver integrationToolResolver,
             ObjectProvider<PlatformIssueService> issueService,
             ToolSearchDeferral toolSearchDeferral,
+            int hardCapPerTurn) {
+        this(
+                sources,
+                agentService,
+                toolRelevanceSelector,
+                toolGuard,
+                integrationToolResolver,
+                issueService,
+                toolSearchDeferral,
+                ToolDescriptionResolver.defaultsOnly(),
+                hardCapPerTurn);
+    }
+
+    @Autowired
+    ToolResolver(
+            List<ToolSource> sources,
+            AgentService agentService,
+            ToolRelevanceSelector toolRelevanceSelector,
+            AgentToolGuard toolGuard,
+            AgentIntegrationToolResolver integrationToolResolver,
+            ObjectProvider<PlatformIssueService> issueService,
+            ToolSearchDeferral toolSearchDeferral,
+            ToolDescriptionResolver toolDescriptions,
             @Value("${app.tools.hard-cap-per-turn:40}") int hardCapPerTurn) {
+        this.toolDescriptions = toolDescriptions;
         this.mcpSources = ofKind(sources, ToolSource.Kind.MCP);
         this.builtInSources = ofKind(sources, ToolSource.Kind.BUILT_IN);
         this.postAllowListSources = ofKind(sources, ToolSource.Kind.POST_ALLOW_LIST);
@@ -82,6 +110,12 @@ final class ToolResolver {
     }
 
     ResolvedToolList resolve(ToolResolutionContext ctx, boolean applyRelevanceSelection) {
+        // Bound for the whole building of the list, so a tool that renders its own description
+        // template when it is constructed (ToolPromptTexts.current()) answers for this agent.
+        return toolDescriptions.within(ctx.agentId(), () -> resolveList(ctx, applyRelevanceSelection));
+    }
+
+    private ResolvedToolList resolveList(ToolResolutionContext ctx, boolean applyRelevanceSelection) {
         UUID agentId = ctx.agentId();
         // Captured separately (not just folded into `tools`) so ToolRelevanceSelector can tell
         // "one step of an MCP server's multi-step chain" apart from a built-in tool that happens
@@ -120,6 +154,9 @@ final class ToolResolver {
                 allowed.addAll(contributed);
             }
         }
+        // The registry's wording of each built-in tool for this agent. Last in the list-building,
+        // so the skill and restore tools above are covered too; a no-op for tools without keys.
+        allowed = new ArrayList<>(toolDescriptions.apply(allowed, agentId));
         boolean anyMcp = !mcpTools.isEmpty();
         if (!applyRelevanceSelection) {
             // The caller wants the untrimmed candidate set, not the per-turn LLM-facing cap.
@@ -146,9 +183,13 @@ final class ToolResolver {
                                             ctx.chatClient(),
                                             false));
             if (deferred != allowed) {
+                // search_tools / call_tool are added here, after the pass above.
                 return new ResolvedToolList(
                         AgentToolSelection.capToHardLimit(
-                                deferred, hardCapPerTurn, mcpToolNames, agentId),
+                                toolDescriptions.apply(deferred, agentId),
+                                hardCapPerTurn,
+                                mcpToolNames,
+                                agentId),
                         anyMcp);
             }
         }
@@ -156,11 +197,27 @@ final class ToolResolver {
                 toolRelevanceSelector.select(
                         ctx.userMessage(),
                         allowed,
-                        AgentToolSelection.ALWAYS_RELEVANT_TOOL_NAMES,
+                        alwaysRelevant(ctx),
                         mcpToolNames);
         return new ResolvedToolList(
                 AgentToolSelection.capToHardLimit(selected, hardCapPerTurn, mcpToolNames, agentId),
                 anyMcp);
+    }
+
+    /**
+     * The names selection never trims: the standing capabilities, plus - on the continuation turn
+     * after an approval - the tools this conversation already used. A continuation's goal matches
+     * the tool it is waiting on, but the NEXT step often needs one the goal never names (a lookup
+     * made earlier, a follow-up write), and a tool that vanishes mid-task makes the model narrate
+     * what it would have done instead of doing it.
+     */
+    private static Set<String> alwaysRelevant(ToolResolutionContext ctx) {
+        if (ctx.stickyTools().isEmpty()) {
+            return AgentToolSelection.ALWAYS_RELEVANT_TOOL_NAMES;
+        }
+        Set<String> names = new java.util.HashSet<>(AgentToolSelection.ALWAYS_RELEVANT_TOOL_NAMES);
+        names.addAll(ctx.stickyTools());
+        return names;
     }
 
     private static List<ToolCallback> collect(List<ToolSource> sources, ToolResolutionContext ctx) {

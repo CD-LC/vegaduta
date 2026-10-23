@@ -17,9 +17,12 @@ export interface ApprovalRequestItem {
   executionError?: string | null;
   executionResult?: string | null;
   payload?: string | null;
+  /** When core will close this request undecided; absent on a core that does not send it (see approvalExpiry.ts). */
+  expiresAt?: string | null;
 }
 
-export const STATUS_FILTERS = ["PENDING", "", "APPROVED", "REJECTED", "EXECUTION_FAILED", "DEAD_LETTERED"];
+// EXPIRED is a UI filter: core stores an expired request as REJECTED by "system:approval-expiry" (approvalsQueueModel).
+export const STATUS_FILTERS = ["PENDING", "", "APPROVED", "REJECTED", "EXPIRED", "EXECUTION_FAILED", "DEAD_LETTERED"];
 
 // Every value is a real ACTION_TYPE a channel adapter gates through; "channel.*.send" is the documented glob.
 // Non-channel action types (mcp_tool.*, workflow.node.*) are free-typed via allowCustom in the picker.
@@ -126,6 +129,7 @@ export function requestedFields(payloadJson: string | null | undefined): string[
 export function statusState(status: string): string {
   if (status === "PENDING") return "var(--state-warning)";
   if (status === "APPROVED") return "var(--state-success)";
+  if (status === "EXPIRED") return "var(--state-idle, var(--muted-foreground))";
   if (status === "REJECTED" || status === "EXECUTION_FAILED" || status === "DEAD_LETTERED") return "var(--state-error)";
   return "var(--state-idle, var(--muted-foreground))";
 }

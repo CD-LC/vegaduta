@@ -2,6 +2,7 @@ package com.agenticai.core.quality.impl;
 
 import com.agenticai.core.quality.EvaluationContext;
 import com.agenticai.core.quality.EvaluationType;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,6 +18,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AccuracyEvaluator extends AbstractLlmJudgeEvaluator {
+
+    /** Registry keys of the judge prompt and its two optional blocks (default text: {@code prompts/en/eval.judge.accuracy*.md}). */
+    static final String PROMPT_KEY = "eval.judge.accuracy";
+
+    static final String REFERENCE_KEY = "eval.judge.accuracy.reference";
+    static final String REFERENCE_CHECK_KEY = "eval.judge.accuracy.reference_check";
 
     public AccuracyEvaluator(JudgeChatClientFactory judgeChatClientFactory) {
         super(judgeChatClientFactory);
@@ -35,51 +42,21 @@ public class AccuracyEvaluator extends AbstractLlmJudgeEvaluator {
         // into "does this match what the tenant said is correct?" - the
         // single highest-signal upgrade a golden dataset buys. Online turns
         // never have one (EvaluationContext#expectedOutput is null there),
-        // so the prompt below is byte-identical to before on every
-        // pre-existing path.
+        // so the prompt is byte-identical to before on every pre-existing path.
         String referenceBlock = context.hasExpectedOutput()
-            ? String.format(
-                """
-
-                REFERENCE ANSWER (known-good, authored by the agent's owner - treat as ground truth):
-                %s
-                """,
-                context.expectedOutput())
+            ? prompts.text(REFERENCE_KEY, context.agentId(), Map.of("reference", v(context.expectedOutput())))
             : "";
+        String referenceCheck = context.hasExpectedOutput() ? prompts.text(REFERENCE_CHECK_KEY, context.agentId()) : "";
 
-        return String.format(
-            """
-            You are an expert fact-checker evaluating the accuracy of an agent's response.
-
-            USER QUESTION:
-            %s
-
-            AGENT RESPONSE:
-            %s
-            %s
-            Evaluate the factual accuracy of this response. Consider:
-            - Are the facts stated correct and verifiable?
-            - Are any claims properly qualified or cited?
-            - Is the response internally logically consistent?
-            - Are there any false statements, misrepresentations, or unsupported claims?%s
-
-            Score the accuracy on a scale of 0.0 to 1.0, where:
-            - 1.0: All facts are correct, properly sourced and internally consistent
-            - 0.75: Mostly accurate with minor issues or minor unsourced claims
-            - 0.5: Significant accuracy issues, mixed correct and incorrect information
-            - 0.25: Many inaccuracies, mostly unreliable
-            - 0.0: Mostly or entirely false
-
-            Respond in this exact format:
-            SCORE: <number from 0.0 to 1.0>
-            FEEDBACK: <brief explanation of accuracy issues found, if any>
-            """,
-            context.userMessage(),
-            context.agentResponse(),
-            referenceBlock,
-            context.hasExpectedOutput()
-                ? "\n- Does the response agree with the REFERENCE ANSWER on every material fact?"
-                : ""
+        return prompts.text(
+            PROMPT_KEY,
+            context.agentId(),
+            Map.of(
+                "question", v(context.userMessage()),
+                "response", v(context.agentResponse()),
+                "reference_block", referenceBlock,
+                "reference_check", referenceCheck
+            )
         );
     }
 }

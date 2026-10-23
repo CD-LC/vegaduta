@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.dto.AgentResponse;
+import com.agenticai.core.agents.runtime.RuntimeLimits;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.elevenlabs.ElevenLabsCallSpeechQuota;
@@ -108,6 +109,9 @@ abstract class VoiceCallControllerTestBase {
         // would freeze the mock's state at setUp() time and silently ignore every
         // per-test when(mockAgent.getX()) stub below.
         when(agentService.get(testAgentId)).thenAnswer(inv -> AgentResponse.from(mockAgent));
+        // The real Agent#getRuntimeLimits() is null-safe (never null); a bare mock returns
+        // null, which AgentResponse.from(...) would dereference.
+        when(mockAgent.getRuntimeLimits()).thenReturn(RuntimeLimits.none());
         when(mockAgent.getVoiceModelProvider()).thenReturn(null); // Default: no selected provider
         when(mockAgent.getVoiceModel()).thenReturn(null);
         when(elevenLabsVoiceService.hasAnyVoice()).thenReturn(false);

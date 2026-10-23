@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.core;
 
+import com.agenticai.core.agents.generation.AgentGenerationProperties;
 import com.agenticai.core.agents.hosted.FreeTierChatClientService;
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.providers.ProviderCredentialResolver;
@@ -38,8 +39,6 @@ public class GenerationParamsInferenceService {
     // temperature/topP, applied here in code since this path skips that
     // DTO's Bean Validation (nothing here is a customer-submitted request
     // body).
-    private static final int MIN_MAX_TOKENS = 128;
-    private static final int MAX_MAX_TOKENS = 8192;
     private static final InferredParams FALLBACK_ON_FAILURE = new InferredParams(1024, 0.7, 1.0);
 
     private final ProviderCredentialResolver credentialResolver;
@@ -50,6 +49,14 @@ public class GenerationParamsInferenceService {
     private final ObjectMapper objectMapper;
     private final int defaultMaxTokens;
 
+    /** {@code app.agents.max-tokens-ceiling} / {@code inferred-max-tokens-floor}; setter-injected, the shipped defaults until then. */
+    private volatile AgentGenerationProperties generation = new AgentGenerationProperties();
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void useGenerationProperties(AgentGenerationProperties properties) {
+        this.generation = properties;
+    }
+
     public GenerationParamsInferenceService(
         ProviderCredentialResolver credentialResolver,
         com.agenticai.core.chat.ChatClientRegistry chatClientRegistry,
@@ -57,7 +64,7 @@ public class GenerationParamsInferenceService {
         TenantLimits tenantLimits,
         FreeTierChatClientService freeTierChatClientService,
         ObjectMapper objectMapper,
-        @Value("${app.agents.default-max-tokens:1024}") int defaultMaxTokens
+        @Value("${app.agents.default-max-tokens:4096}") int defaultMaxTokens
     ) {
         this.credentialResolver = credentialResolver;
         this.chatClientRegistry = chatClientRegistry;
@@ -120,7 +127,7 @@ public class GenerationParamsInferenceService {
         }
     }
 
-    private InferredParams parse(String raw) {
+    InferredParams parse(String raw) {
         if (raw == null || raw.isBlank()) {
             return FALLBACK_ON_FAILURE;
         }
@@ -134,7 +141,11 @@ public class GenerationParamsInferenceService {
         }
         double temperature = clamp(node.path("temperature").asDouble(0.7), 0.0, 1.0);
         double topP = clamp(node.path("topP").asDouble(1.0), 0.0, 1.0);
-        int maxTokens = (int) clamp(node.path("maxTokens").asInt(defaultMaxTokens), MIN_MAX_TOKENS, MAX_MAX_TOKENS);
+        AgentGenerationProperties bounds = generation;
+        int maxTokens = (int) clamp(
+            node.path("maxTokens").asInt(defaultMaxTokens),
+            bounds.getInferredMaxTokensFloor(),
+            bounds.getMaxTokensCeiling());
         return new InferredParams(maxTokens, temperature, topP);
     }
 

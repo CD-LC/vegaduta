@@ -36,6 +36,18 @@
       <groupId>com.agenticai</groupId>
       <artifactId>audit</artifactId>
     </dependency>
+    <!-- The prompt registry: PromptResolver for the model-facing text this module steers with (see docs/prompts.md).
+         prompts depends only on security and audit, so this adds no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>prompts</artifactId>
+    </dependency>
+    <!-- The settings catalog: the strictness knobs (fail mode, toxicity score, scan windows) a workspace or agent may
+         tighten are read through SettingsResolver (GuardrailSettings). settings depends only on security and audit. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>settings</artifactId>
+    </dependency>
     <!-- Phase P6: policy-pack config (enabled packs per tenant/plan, semantic
          thresholds) is read at runtime through PlatformSettingsService; the
          current tenant/actor is read from TenantContext (core/security, which

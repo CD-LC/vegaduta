@@ -3,7 +3,12 @@ package com.agenticai.core.guardrails.impl;
 import com.agenticai.core.guardrails.ContentGuardrail;
 import com.agenticai.core.guardrails.ContentGuardrailResult;
 import com.agenticai.core.guardrails.ContentGuardrailType;
+import com.agenticai.core.guardrails.GuardrailPrompts;
+import com.agenticai.core.guardrails.PatternSets;
+import com.agenticai.core.prompts.PromptResolver;
+import java.util.List;
 import java.util.regex.Pattern;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,38 +24,41 @@ import org.springframework.stereotype.Component;
 @Component
 public class PolicyViolationGuardrail implements ContentGuardrail {
 
-    // Violence-related patterns
-    private static final Pattern VIOLENCE_PATTERN = Pattern.compile(
-        "\\b(kill|murder|shoot|bomb|assault|attack|stab|rape|torture|execute)\\b",
-        Pattern.CASE_INSENSITIVE
-    );
+    // The terms are guardrails/patterns/<locale>/policy-*.txt (every locale on the classpath, English first):
+    // the English files hold exactly the patterns this class compiled before they moved.
+    private static final List<Pattern> VIOLENCE_PATTERNS = patterns("policy-violence");
+    private static final List<Pattern> ILLEGAL_ACTIVITY_PATTERNS = patterns("policy-illegal-activity");
+    private static final List<Pattern> HATE_SPEECH_PATTERNS = patterns("policy-hate-speech");
+    private static final List<Pattern> SELF_HARM_PATTERNS = patterns("policy-self-harm");
+    // Child safety is absolute zero-tolerance and is checked first.
+    private static final List<Pattern> CHILD_SAFETY_PATTERNS = patterns("policy-child-safety");
 
-    // Illegal activity patterns
-    private static final Pattern ILLEGAL_ACTIVITY_PATTERN = Pattern.compile(
-        "\\b(drug|cocaine|heroin|meth|counterfeit|steal|rob|hack|phishing|"
-        + "cybercrime|embezzle|money.?launder|fraud|blackmail|extort)\\b",
-        Pattern.CASE_INSENSITIVE
-    );
+    private static List<Pattern> patterns(String set) {
+        return PatternSets.localized(set).stream().map(PatternSets.Entry::pattern).toList();
+    }
 
-    // Hate speech and discrimination patterns
-    private static final Pattern HATE_SPEECH_PATTERN = Pattern.compile(
-        "\\b(racist|sexist|homophobe|transphobe|ableist|"
-        + "inferior.?(?:race|gender)|supremacist|inferior)\\b",
-        Pattern.CASE_INSENSITIVE
-    );
+    private static boolean matches(List<Pattern> patterns, String content) {
+        for (Pattern pattern : patterns) {
+            if (pattern.matcher(content).find()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    // Self-harm and suicide patterns
-    private static final Pattern SELF_HARM_PATTERN = Pattern.compile(
-        "\\b(suicide|self.?harm|self.?injur|cut.?wrist|hang.?self|overdose.?intent)\\b",
-        Pattern.CASE_INSENSITIVE
-    );
+    /** Where the refusal texts come from ({@code refusal.guardrail.*}); the shipped texts unless the application wires the registry. */
+    private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
 
-    // Child safety patterns (absolute zero-tolerance)
-    private static final Pattern CHILD_SAFETY_PATTERN = Pattern.compile(
-        "\\b(child.?(?:abuse|exploitation|grooming|trafficking)|"
-        + "pedophil|child.?pornograph|csam|minors?.?(?:exploit|abuse))\\b",
-        Pattern.CASE_INSENSITIVE
-    );
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        if (resolver != null) {
+            this.prompts = resolver;
+        }
+    }
+
+    private String refusal(String key) {
+        return GuardrailPrompts.scopedText(prompts, key);
+    }
 
     @Override
     public ContentGuardrailType getType() {
@@ -64,46 +72,46 @@ public class PolicyViolationGuardrail implements ContentGuardrail {
         }
 
         // Highest priority: child safety (zero tolerance)
-        if (CHILD_SAFETY_PATTERN.matcher(content).find()) {
+        if (matches(CHILD_SAFETY_PATTERNS, content)) {
             return ContentGuardrailResult.fail(
                 ContentGuardrailType.POLICY_VIOLATION,
-                "Content violates critical safety policies regarding child protection. This request cannot be fulfilled.",
+                refusal(GuardrailPrompts.REFUSAL_CHILD_SAFETY),
                 100
             );
         }
 
         // Self-harm detection (high priority)
-        if (SELF_HARM_PATTERN.matcher(content).find()) {
+        if (matches(SELF_HARM_PATTERNS, content)) {
             return ContentGuardrailResult.fail(
                 ContentGuardrailType.POLICY_VIOLATION,
-                "Content related to self-harm is not permitted. If you're struggling, please reach out to a mental health professional.",
+                refusal(GuardrailPrompts.REFUSAL_SELF_HARM),
                 95
             );
         }
 
         // Violence detection
-        if (VIOLENCE_PATTERN.matcher(content).find()) {
+        if (matches(VIOLENCE_PATTERNS, content)) {
             return ContentGuardrailResult.fail(
                 ContentGuardrailType.POLICY_VIOLATION,
-                "Content promoting violence is not permitted on this platform.",
+                refusal(GuardrailPrompts.REFUSAL_VIOLENCE),
                 85
             );
         }
 
         // Illegal activity detection
-        if (ILLEGAL_ACTIVITY_PATTERN.matcher(content).find()) {
+        if (matches(ILLEGAL_ACTIVITY_PATTERNS, content)) {
             return ContentGuardrailResult.fail(
                 ContentGuardrailType.POLICY_VIOLATION,
-                "Content promoting illegal activities is not permitted.",
+                refusal(GuardrailPrompts.REFUSAL_ILLEGAL_ACTIVITY),
                 80
             );
         }
 
         // Hate speech detection
-        if (HATE_SPEECH_PATTERN.matcher(content).find()) {
+        if (matches(HATE_SPEECH_PATTERNS, content)) {
             return ContentGuardrailResult.fail(
                 ContentGuardrailType.POLICY_VIOLATION,
-                "Content containing hate speech or discrimination is not permitted.",
+                refusal(GuardrailPrompts.REFUSAL_HATE_SPEECH),
                 80
             );
         }

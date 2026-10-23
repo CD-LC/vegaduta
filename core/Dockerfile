@@ -81,6 +81,8 @@ COPY agents-interop/pom.xml agents-interop/
 COPY agents-studio/pom.xml agents-studio/
 COPY approval/pom.xml approval/
 COPY audit/pom.xml audit/
+COPY prompts/pom.xml prompts/
+COPY settings/pom.xml settings/
 COPY billing/pom.xml billing/
 COPY chat/pom.xml chat/
 COPY codeintel/pom.xml codeintel/

@@ -25,7 +25,7 @@ public class AgentDefaults {
 
     public AgentDefaults(
             @Value("${app.agents.default-model}") String model,
-            @Value("${app.agents.default-max-tokens:1024}") int maxTokens,
+            @Value("${app.agents.default-max-tokens:4096}") int maxTokens,
             @Value("${app.agents.default-temperature:0.7}") double temperature,
             @Value("${app.agents.default-top-p:1.0}") double topP,
             @Value("${app.agents.default-guardrails:jailbreak}") String guardrails) {

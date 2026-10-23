@@ -81,6 +81,43 @@ class WorkspaceFileToolCallbackTest {
         assertThat(r.path("content").asText()).isEqualTo("2\tb\n3\tc\n");
     }
 
+    private String readWithLimit(int outputLimit, String json) throws Exception {
+        return new WorkspaceFileToolCallback(files, WorkspaceFileToolCallback.Kind.READ, "/workspace", outputLimit)
+                .call(json);
+    }
+
+    @Test
+    void aReadStopsEarlyEnoughThatTheWholeAnswerFitsTheOutputLimitAndTheNoteSurvives() throws Exception {
+        // 400 numbered lines of 20 characters, with a quote on each so JSON escaping inflates the content.
+        StringBuilder body = new StringBuilder();
+        for (int n = 1; n <= 400; n++) {
+            body.append("row \"").append(n).append("\" xxxxxxxxxx\n");
+        }
+        Files.writeString(root.resolve("demo/big.txt"), body.toString());
+
+        String answer = readWithLimit(2_000, "{\"path\":\"demo/big.txt\"}");
+        JsonNode r = JsonMappers.plain().readTree(answer);
+
+        assertThat(answer.length()).as("whole answer incl. JSON escaping").isLessThanOrEqualTo(2_000);
+        assertThat(r.path("note").asText()).startsWith("Output cut at line ").contains("read on with offset=");
+        int next = Integer.parseInt(r.path("note").asText().replaceAll(".*offset=(\\d+)\\..*", "$1"));
+        String content = r.path("content").asText();
+        assertThat(content).endsWith("row \"" + (next - 1) + "\" xxxxxxxxxx\n");
+        JsonNode second = JsonMappers.plain().readTree(
+                readWithLimit(2_000, "{\"path\":\"demo/big.txt\",\"offset\":" + next + "}"));
+        assertThat(second.path("content").asText()).startsWith(next + "\trow ");
+    }
+
+    @Test
+    void aSingleLineWiderThanAPageStillMakesProgress() throws Exception {
+        Files.writeString(root.resolve("demo/min.js"), "x".repeat(50_000) + "\nsecond\n");
+
+        JsonNode r = JsonMappers.plain().readTree(readWithLimit(2_000, "{\"path\":\"demo/min.js\"}"));
+
+        assertThat(r.path("content").asText()).isNotEmpty().startsWith("1\txxx");
+        assertThat(r.path("note").asText()).contains("offset=2");
+    }
+
     @Test
     void searchFindsFileNamesAndLinesAndSkipsBinaryAndEscapes() throws Exception {
         Files.writeString(root.resolve("demo/Invoice March.txt"), "Total due: 420 EUR\nPaid by card\n");

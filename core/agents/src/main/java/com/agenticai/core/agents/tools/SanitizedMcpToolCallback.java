@@ -129,6 +129,13 @@ final class SanitizedMcpToolCallback implements ToolCallback {
      * on why that must propagate as a real exception instead).
      */
     private String blockedResult(String reason) {
+        // Registered as the platform's answer: the wrapped JSON no longer starts with the refusal wording, so the
+        // effect and turn journals could not tell it from a tool's output by the text.
+        return com.agenticai.core.guardrails.ToolResultMarker.mark(blockedText(reason),
+                com.agenticai.core.guardrails.ToolResultMarker.Kind.BLOCKED);
+    }
+
+    private String blockedText(String reason) {
         return McpToolOutputSanitizer.ensureJsonObject(
                 "This tool call ('"
                         + sanitizedDefinition.name()

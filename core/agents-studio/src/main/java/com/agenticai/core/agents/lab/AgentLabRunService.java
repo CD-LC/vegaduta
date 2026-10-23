@@ -195,6 +195,11 @@ public class AgentLabRunService {
     private final ConcurrentMap<String, LiveRun> liveRuns = new ConcurrentHashMap<>();
     private ScheduledExecutorService heartbeat;
 
+    /** The 400 for a run that asks for the agent's tools where the mode is off (app.agent-lab.with-tools.enabled). */
+    static final String WITH_TOOLS_UNAVAILABLE_MESSAGE =
+        "Running the lab with the agent's tools is turned off on this install (app.agent-lab.with-tools.enabled)."
+            + " Run it without tools, or ask an administrator to enable it.";
+
     @Autowired
     public AgentLabRunService(
         AgentService agentService,
@@ -308,7 +313,8 @@ public class AgentLabRunService {
         LabRunPlanner.LabCaps caps = stored == TenantPlan.FREE ? FREE_CAPS : PAID_CAPS;
         return new LabCapabilitiesResponse(
             allowed, allowed ? null : "PLAN",
-            caps.cells(), caps.calls(), caps.systemPrompts(), caps.similarityCells(), RUN_TTL_MINUTES);
+            caps.cells(), caps.calls(), caps.systemPrompts(), caps.similarityCells(), RUN_TTL_MINUTES,
+            completionService.withToolsAvailable());
     }
 
     /**
@@ -337,6 +343,11 @@ public class AgentLabRunService {
 
         String runId = UUID.randomUUID().toString();
         LabRunPlanner.RunPlan plan = LabRunPlanner.validate(request, runId, agentId, tenantId, requester, clock.getAsLong(), caps);
+        // Asked for the agent's tools but this install does not offer that: refused up front with a sentence,
+        // not run as a tool-less lab (the answers would not mean what the person asked) or failed cell by cell.
+        if (plan.withTools() && !completionService.withToolsAvailable()) {
+            throw new IllegalArgumentException(WITH_TOOLS_UNAVAILABLE_MESSAGE);
+        }
 
         boolean locked;
         try {

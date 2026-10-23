@@ -1,9 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { OctagonAlert } from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
 import { cn } from "../../lib/utils";
-import { stopReasonKind, turnStopKind, type ActivityStep } from "./AgentActivityTrace";
+import { stopReasonKind, turnStopKind, type ActivityStep, type StopReasonKind } from "./AgentActivityTrace";
 
 /**
  * One always-visible line under a reply whose run was STOPPED by a limit the
@@ -22,10 +23,13 @@ export default function TurnStopNotice({
   steps,
   message,
   className,
+  action,
 }: {
   steps?: readonly ActivityStep[] | null;
   message?: string | null;
   className?: string;
+  /** What the person can do about this stop, e.g. a link to raise the limit; rendered after the sentence. */
+  action?: (kind: StopReasonKind) => ReactNode;
 }) {
   const t = useTranslations("runCost");
   const kind = turnStopKind(steps) ?? stopReasonKind(message);
@@ -40,7 +44,10 @@ export default function TurnStopNotice({
       )}
     >
       <OctagonAlert size={12} className="mt-0.5 size-3 shrink-0 text-muted-foreground" aria-hidden="true" />
-      <span>{kind === "run_budget" ? t("stopRunBudget") : t("stopStepLimit")}</span>
+      <span className="min-w-0">
+        {kind === "run_budget" ? t("stopRunBudget") : t("stopStepLimit")}
+        {action ? <> {action(kind)}</> : null}
+      </span>
     </p>
   );
 }

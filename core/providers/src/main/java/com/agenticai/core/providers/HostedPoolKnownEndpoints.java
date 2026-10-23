@@ -1,5 +1,6 @@
 package com.agenticai.core.providers;
 
+import java.util.EnumMap;
 import java.util.Map;
 
 /**
@@ -23,23 +24,24 @@ final class HostedPoolKnownEndpoints {
      * PlatformHostedLlmProvider#getCompletionsPath()}'s javadoc). An admin-supplied {@code
      * baseUrl}/{@code completionsPath} always wins over this default - see {@code PlatformHostedLlmProviderService#resolveRequest}.
      */
-    static final Map<ProviderName, KnownEndpoint> KNOWN_PROVIDER_ENDPOINTS =
-            Map.of(
-                    ProviderName.OPENAI, new KnownEndpoint("https://api.openai.com", null),
-                    ProviderName.GROK, new KnownEndpoint("https://api.x.ai", null),
-                    ProviderName.OPENROUTER, new KnownEndpoint("https://openrouter.ai/api", null),
-                    ProviderName.GEMINI,
-                            new KnownEndpoint(
-                                    "https://generativelanguage.googleapis.com",
-                                    "/v1beta/openai/chat/completions"),
-                    // Values match MistralAgentChatClientFactory/DeepSeekAgentChatClientFactory/
-                    // GroqAgentChatClientFactory's own BASE_URL constants exactly (2026-08-03).
-                    ProviderName.MISTRAL, new KnownEndpoint("https://api.mistral.ai", null),
-                    ProviderName.DEEPSEEK, new KnownEndpoint("https://api.deepseek.com", null),
-                    ProviderName.GROQ, new KnownEndpoint("https://api.groq.com/openai", null),
-                    // Matches MetaAgentChatClientFactory's BASE_URL (2026-09-17); the null
-                    // completionsPath means the conventional "/v1/chat/completions".
-                    ProviderName.META, new KnownEndpoint("https://api.meta.ai", null));
+    static final Map<ProviderName, KnownEndpoint> KNOWN_PROVIDER_ENDPOINTS = from(new ProviderEndpoints());
+
+    /**
+     * The hosted pool's default per provider, built from {@code app.llm.endpoints} so the pool, the key
+     * validators and the chat-client factories can never disagree about a vendor's address. A null
+     * {@code completionsPath} means the conventional "/v1/chat/completions".
+     */
+    static Map<ProviderName, KnownEndpoint> from(ProviderEndpoints endpoints) {
+        Map<ProviderName, KnownEndpoint> known = new EnumMap<>(ProviderName.class);
+        for (ProviderName provider : ProviderName.values()) {
+            if (!PlatformHostedLlmProviderService.HOSTED_POOL_COMPATIBLE_PROVIDERS.contains(provider)) {
+                continue;
+            }
+            endpoints.endpoint(provider).ifPresent(e ->
+                known.put(provider, new KnownEndpoint(e.getBaseUrl(), e.getCompletionsPath())));
+        }
+        return Map.copyOf(known);
+    }
 
     record KnownEndpoint(String baseUrl, String completionsPath) {}
 }

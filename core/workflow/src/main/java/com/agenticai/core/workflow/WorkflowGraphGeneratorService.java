@@ -13,6 +13,8 @@ import com.agenticai.core.chat.gateway.GatewayCallSpec;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.omnichannel.WhatsAppDispatchService;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.providers.ProviderModelCatalogEmptyException;
 import com.agenticai.core.providers.ProviderModelCatalogService;
@@ -105,7 +107,7 @@ public class WorkflowGraphGeneratorService {
         TaskPlanningService taskPlanningService,
         @Value("${app.agents.default-model}") String defaultModel,
         // Deliberately its OWN config key, not app.agents.default-max-tokens
-        // (1024) - that default is tuned for a conversational chat reply,
+        // (4096) - that default is sized for a conversational chat reply,
         // not a full JSON workflow graph. A real production bug: at 1024
         // tokens, anything beyond a trivial 1-2 node workflow got its JSON
         // output cut off mid-object ("Unexpected end-of-input in field
@@ -208,11 +210,11 @@ public class WorkflowGraphGeneratorService {
                     "This workflow is too large for the AI to change in one request - edit it on the canvas, "
                         + "or start over to generate a fresh draft.");
             }
-            editSuffix = WorkflowGeneratorSupport.editSuffix(currentJson)
-                + (redacted.secrets().isEmpty() ? "" : WorkflowEditRedaction.PROMPT_NOTE);
+            editSuffix = WorkflowGeneratorSupport.editSuffix(currentJson, prompts, null)
+                + (redacted.secrets().isEmpty() ? "" : prompts.text(WorkflowEditRedaction.NOTE_KEY));
         }
 
-        String system = buildSystemPrompt(agents) + WorkflowGeneratorSupport.directAddendum(enforceApprovalBeforeSend);
+        String system = buildSystemPrompt(agents) + WorkflowGeneratorSupport.directAddendum(enforceApprovalBeforeSend, prompts, null);
         GenerationRun run = run(instruction, depth, system, editSuffix);
         WorkflowGraphDto generated = WorkflowEditRedaction.restore(objectMapper, run.graph(), redacted);
 
@@ -330,8 +332,9 @@ public class WorkflowGraphGeneratorService {
             knowledgeList.append("- ref=\"").append(hint.ref()).append("\" name=\"").append(hint.name()).append("\"\n");
         }
         String system = WorkflowGeneratorPrompts.buildSystemPrompt(
-                agentList.length() == 0 ? "(none)" : agentList.toString(), expressionsWired())
-            + WorkflowGeneratorPrompts.refModeAddendum(knowledgeList.length() == 0 ? "(none)" : knowledgeList.toString());
+                agentList.length() == 0 ? "(none)" : agentList.toString(), expressionsWired(), prompts, null)
+            + WorkflowGeneratorPrompts.refModeAddendum(
+                knowledgeList.length() == 0 ? "(none)" : knowledgeList.toString(), prompts, null);
         GenerationRun run = run(instruction, depth, system, null);
         // Deliberately NOT passed through WorkflowSendApprovalGuard: approval placement for a Brief
         // is owned by the trust ladder (TrustGraphMaterializer adds eaMaterialised approval nodes
@@ -562,7 +565,7 @@ public class WorkflowGraphGeneratorService {
                 agentList.append("- id=\"").append(agent.id()).append("\" name=\"").append(agent.name()).append("\"\n");
             }
         }
-        return WorkflowGeneratorPrompts.buildSystemPrompt(agentList.toString(), expressionsWired());
+        return WorkflowGeneratorPrompts.buildSystemPrompt(agentList.toString(), expressionsWired(), prompts, null);
     }
 
     /**
@@ -578,6 +581,14 @@ public class WorkflowGraphGeneratorService {
     @Autowired(required = false)
     void setExpressions(WorkflowExpressionResolver expressions) {
         this.expressions = expressions;
+    }
+
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so a tenant override of the edit-redaction note applies; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
     }
 
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { ArrowUp, Paperclip, X } from "lucide-react";
+import { ArrowUp, Paperclip, Square, X } from "lucide-react";
 import { useTranslations } from "../../../lib/i18n";
 import { cn } from "../../../lib/utils";
 import type { RequestLifecycleSnapshot } from "../../../lib/requestLifecycle";
@@ -83,6 +83,8 @@ export function Composer({
   onAttachFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   const t = useTranslations("agentPlayground");
+  // A turn is running and something can actually be cancelled: the hosted request, or the on-device model.
+  const canStop = sending && (Boolean(chatSnapshot?.cancellable) || Boolean(edgePhase));
   return (
     <div className="border-t border-border px-5 py-4">
       {/* Server chat path status + Cancel - not shown while an on-device
@@ -143,10 +145,10 @@ export function Composer({
         <div className="mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-secondary/40 p-2.5 text-xs text-muted-foreground">
           <span className="min-w-0">{pendingFallbackAsk}</span>
           <Button type="button" variant="outline" size="sm" onClick={() => fallbackAskResolverRef.current?.(true)}>
-            Send to platform
+            {t("fallbackSendToPlatform")}
           </Button>
           <Button type="button" variant="ghost" size="sm" onClick={() => fallbackAskResolverRef.current?.(false)}>
-            Cancel
+            {t("cancel")}
           </Button>
         </div>
       )}
@@ -275,6 +277,25 @@ export function Composer({
           disabled={!agent || sending}
         />
         <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">{t("enterToSend")}</span>
+        {canStop ? (
+          // A clear, always-there way to stop a running reply: replaces Send while a turn can be cancelled, on the
+          // hosted path and the on-device path alike.
+          <Button
+            type="button"
+            size="icon"
+            variant="destructive"
+            className="shrink-0"
+            onClick={() => {
+              onCancelChat();
+              onCancelEdgeTurn();
+            }}
+            aria-label={t("stopRun")}
+            title={t("stopRun")}
+            data-testid="composer-stop"
+          >
+            <Square size={12} aria-hidden="true" />
+          </Button>
+        ) : (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -291,6 +312,7 @@ export function Composer({
           </TooltipTrigger>
           <TooltipContent>{t("sendAriaLabel")}</TooltipContent>
         </Tooltip>
+        )}
       </form>
     </div>
   );

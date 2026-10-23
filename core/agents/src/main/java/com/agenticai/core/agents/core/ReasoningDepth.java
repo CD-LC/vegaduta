@@ -5,8 +5,14 @@ package com.agenticai.core.agents.core;
  * agent's tool calls get before they execute, per turn. Mirrors the
  * temperature/topP/maxTokens pattern (a per-agent tuning knob, changeable
  * after creation via {@code PATCH /api/agents/{id}/reasoning-depth}), but
- * this one controls the guardrail/verification pipeline in {@code
- * GuardedToolCallback}, not the model's own sampling.
+ * this one chooses how the turn is run and checked, not the model's own
+ * sampling. It is read in two places: {@code ChatTurnDispatcher} routes
+ * FAST to the streaming path and CAREFUL / RIGOROUS / PLANNED to the buffered
+ * path ({@code BufferedTurnRunner}, which holds the reply until its answer
+ * checks have run), and only RIGOROUS also switches on the per-tool-call
+ * verifier in {@code GuardedToolCallback}, resolved once per turn by {@code
+ * AgentToolProvider} (and only when the user's message carries a verifiable
+ * intent). CAREFUL never touches {@code GuardedToolCallback}.
  *
  * <ul>
  *   <li>{@link #FAST} - today's behavior, unchanged: no extra verification

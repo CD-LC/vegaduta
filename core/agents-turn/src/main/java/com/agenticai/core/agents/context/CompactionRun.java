@@ -146,7 +146,8 @@ public final class CompactionRun implements ToolLoopHistoryTransform {
             int window =
                     Math.min(
                             scopeWindowTokens,
-                            ModelContextWindows.heuristic(modelId, defaultWindowTokens));
+                            ModelContextWindows.heuristic(
+                                    modelId, defaultWindowTokens, params.tuning().getWindowRules()));
             effective =
                     new Params(
                             window,
@@ -155,7 +156,9 @@ public final class CompactionRun implements ToolLoopHistoryTransform {
                             params.keepRecentToolResults(),
                             params.keepRecentMessages(),
                             params.summaryMaxTokens(),
-                            params.restoreToolOffered());
+                            params.restoreToolOffered(),
+                            params.tuning(),
+                            params.texts());
         }
         return run(history, toolSchemaTokens, effective, "tool-loop");
     }

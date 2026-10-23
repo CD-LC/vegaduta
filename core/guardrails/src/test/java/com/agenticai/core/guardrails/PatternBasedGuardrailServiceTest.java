@@ -97,7 +97,9 @@ class PatternBasedGuardrailServiceTest {
 
         String sanitized = service.sanitizeToolOutput("screenshot-tool", oversized);
 
-        assertThat(sanitized).hasSize(20_000);
+        // Cut to the shared cap (app.tools.output.max-chars), marker included, and the model is told how
+        // much was cut. This used to assert hasSize(20_000) of bare "a"s: silent truncation.
+        assertThat(sanitized).hasSizeBetween(19_990, 20_000).startsWith("aaaa").contains("25000").contains("truncated");
     }
 
     @Test
@@ -121,6 +123,25 @@ class PatternBasedGuardrailServiceTest {
 
         String sanitized = service.sanitizeToolOutput("some-tool", output);
 
-        assertThat(sanitized).hasSize(20_000);
+        assertThat(sanitized).hasSizeBetween(19_990, 20_000).doesNotContain("ignore all previous instructions");
+    }
+
+    @Test
+    void theCapIsTheSharedConfigurableOneAndAPerToolEntryWins() {
+        ToolOutputProperties limits = new ToolOutputProperties();
+        limits.setMaxChars(2_000);
+        limits.getPerTool().put("big-tool", 8_000);
+        PatternBasedGuardrailService configured = new PatternBasedGuardrailService(limits);
+
+        assertThat(configured.sanitizeToolOutput("some-tool", "x".repeat(5_000))).hasSizeBetween(1_990, 2_000);
+        assertThat(configured.sanitizeToolOutput("big-tool", "x".repeat(5_000))).hasSize(5_000);
+    }
+
+    @Test
+    void anAlreadyCutResultIsNotCutAgain() {
+        ToolOutputProperties limits = new ToolOutputProperties();
+        String once = limits.limit("some-tool", "y".repeat(30_000));
+
+        assertThat(service.sanitizeToolOutput("some-tool", once)).isEqualTo(once);
     }
 }

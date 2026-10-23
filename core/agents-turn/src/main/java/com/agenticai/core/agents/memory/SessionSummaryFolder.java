@@ -31,17 +31,27 @@ final class SessionSummaryFolder {
     private final HistoryWindowSettings windowSettings;
     private final Function<String, ChatTurn> deserializer;
 
+    /** The storage bound and fold batch in force ({@code app.memory.limits.*}); read per call, so a rebind is seen. */
+    private final java.util.function.Supplier<MemoryLimitsProperties> limits;
+
+    /** The line that opens the replayed summary (with its line break); the registry's, see the service. */
+    private final java.util.function.Supplier<String> preamble;
+
     SessionSummaryFolder(
             StringRedisTemplate redisTemplate,
             Duration sessionTtl,
             ObjectProvider<SessionSummaryService> summaryService,
             HistoryWindowSettings windowSettings,
-            Function<String, ChatTurn> deserializer) {
+            Function<String, ChatTurn> deserializer,
+            java.util.function.Supplier<MemoryLimitsProperties> limits,
+            java.util.function.Supplier<String> preamble) {
+        this.preamble = preamble;
         this.redisTemplate = redisTemplate;
         this.sessionTtl = sessionTtl;
         this.summaryService = summaryService;
         this.windowSettings = windowSettings;
         this.deserializer = deserializer;
+        this.limits = limits;
     }
 
     /**
@@ -80,8 +90,9 @@ final class SessionSummaryFolder {
                 0,
                 new ChatTurn(
                         oldest.role(),
-                        SessionMemoryService.SUMMARY_PREAMBLE + summary + "\n\n" + content,
-                        oldest.timestamp()));
+                        preamble.get() + summary + "\n\n" + content,
+                        oldest.timestamp(),
+                        oldest.tools()));
         return merged;
     }
 
@@ -131,7 +142,8 @@ final class SessionSummaryFolder {
      */
     int foldWindowTurns() {
         return Math.min(
-                windowSettings.current().maxTurns(), SessionMemoryService.MAX_STORED_ENTRIES - SessionMemoryService.SUMMARY_FOLD_BATCH);
+                windowSettings.current().maxTurns(),
+                limits.get().getSessionMaxStoredEntries() - limits.get().effectiveFoldBatch());
     }
 
     /**
@@ -162,7 +174,7 @@ final class SessionSummaryFolder {
                             SessionAppendScript.FOLD_CLAIM_SCRIPT,
                             List.of(redisKey, SessionMemoryService.foldMarkerKey(sessionId)),
                             Integer.toString(foldWindowTurns()),
-                            Integer.toString(SessionMemoryService.SUMMARY_FOLD_BATCH),
+                            Integer.toString(limits.get().effectiveFoldBatch()),
                             Long.toString(sessionTtl.toSeconds()));
             handClaimedBatchToSummariser(sessionId, summariser, tenant, raw);
         } catch (RuntimeException e) {
@@ -228,7 +240,7 @@ final class SessionSummaryFolder {
             redisTemplate.execute(
                     SessionAppendScript.TRIM_SCRIPT,
                     List.of(redisKey, SessionMemoryService.foldMarkerKey(sessionId)),
-                    Integer.toString(SessionMemoryService.MAX_STORED_ENTRIES),
+                    Integer.toString(limits.get().getSessionMaxStoredEntries()),
                     Long.toString(sessionTtl.toSeconds()));
         } catch (RuntimeException e) {
             log.warn(
@@ -236,7 +248,7 @@ final class SessionSummaryFolder {
                             + " trim",
                     sessionId,
                     e);
-            redisTemplate.opsForList().trim(redisKey, -SessionMemoryService.MAX_STORED_ENTRIES, -1);
+            redisTemplate.opsForList().trim(redisKey, -limits.get().getSessionMaxStoredEntries(), -1);
         }
     }
 

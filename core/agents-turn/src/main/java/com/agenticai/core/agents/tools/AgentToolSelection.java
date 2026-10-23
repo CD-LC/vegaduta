@@ -233,8 +233,8 @@ public final class AgentToolSelection {
         return result;
     }
 
-    /** Small-model mode (V501): tools offered on one turn. Six is what 3B-8B models route between reliably. */
-    public static final int SMALL_MODEL_TOOL_CAP = 6;
+    // Small-model mode (V501): the tools offered on one turn, the browsing quota and the ranking weights are
+    // app.chat.small-model.* - see SmallModelProperties.
 
     /**
      * Small-model mode (V501): at most {@code cap} tools, the ones most relevant to {@code
@@ -245,13 +245,40 @@ public final class AgentToolSelection {
      * returned as it is. Returns a mutable list, like the resolver does.
      */
     public static List<ToolCallback> capForSmallModel(List<ToolCallback> tools, String userMessage, int cap) {
+        return capForSmallModel(tools, userMessage, cap, Set.of());
+    }
+
+    /** As above, with the cap and ranking weights taken from {@code settings} ({@code app.chat.small-model.*}). */
+    public static List<ToolCallback> capForSmallModel(
+            List<ToolCallback> tools, String userMessage, Set<String> stickyTools, SmallModelProperties settings) {
+        return capForSmallModel(tools, userMessage, settings.getToolCap(), stickyTools, settings);
+    }
+
+    /**
+     * As {@link #capForSmallModel(List, String, int)}, for a turn whose message may be a short
+     * follow-up: {@code stickyTools} are the tools the conversation already used (most recent first),
+     * kept ahead of the message-driven choice, so a task does not lose its tools to a message
+     * ("continue") that names none. They never take the slots of a tool the message names itself.
+     */
+    public static List<ToolCallback> capForSmallModel(
+            List<ToolCallback> tools, String userMessage, int cap, Set<String> stickyTools) {
+        return capForSmallModel(tools, userMessage, cap, stickyTools, new SmallModelProperties());
+    }
+
+    /** As above, with the browsing quota and ranking weights taken from {@code settings}. */
+    public static List<ToolCallback> capForSmallModel(
+            List<ToolCallback> tools,
+            String userMessage,
+            int cap,
+            Set<String> stickyTools,
+            SmallModelProperties settings) {
         if (tools == null || tools.size() <= cap) {
             return tools;
         }
         Set<String> query = tokens(userMessage);
         Map<ToolCallback, Integer> scores = new java.util.IdentityHashMap<>();
         for (ToolCallback tool : tools) {
-            scores.put(tool, smallModelScore(query, tool, userMessage));
+            scores.put(tool, smallModelScore(query, tool, userMessage, settings));
         }
         List<ToolCallback> ranked = new ArrayList<>(tools);
         // Stable sort: equal scores keep the resolved order (always-relevant tools come first there).
@@ -263,6 +290,20 @@ public final class AgentToolSelection {
         // fill the rest by score, so every intent the person voiced keeps at least one tool.
         List<ToolCallback> kept = new ArrayList<>(cap);
         Set<ToolCallback> taken = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        if (stickyTools != null && !stickyTools.isEmpty()) {
+            int named = (int) ranked.stream().filter(t -> scores.get(t) >= settings.getNamedToolScore()).count();
+            for (String sticky : stickyTools) {
+                for (ToolCallback tool : ranked) {
+                    if (kept.size() >= cap - named) {
+                        break;
+                    }
+                    if (tool.getToolDefinition().name().equals(sticky) && scores.get(tool) < settings.getNamedToolScore()) {
+                        taken.add(tool);
+                        kept.add(tool);
+                    }
+                }
+            }
+        }
         Map<Integer, List<ToolCallback>> byIntent = new java.util.TreeMap<>();
         for (ToolCallback tool : ranked) {
             int intent = matchedIntent(query, userMessage, tool.getToolDefinition().name());
@@ -276,7 +317,7 @@ public final class AgentToolSelection {
             for (Map.Entry<Integer, List<ToolCallback>> family : byIntent.entrySet()) {
                 // One tool per intent per pass, except a family that only works as a set (driving a page needs
                 // navigate, read and click together; one of them alone sent the model round in circles).
-                int quota = INTENTS.get(family.getKey()).getValue().get(0).startsWith("browser_") ? BROWSER_FAMILY_QUOTA : 1;
+                int quota = INTENTS.get(family.getKey()).getValue().get(0).startsWith("browser_") ? settings.getBrowserFamilyQuota() : 1;
                 for (ToolCallback candidate : family.getValue()) {
                     if (kept.size() >= cap || quota == 0) {
                         break;
@@ -314,7 +355,7 @@ public final class AgentToolSelection {
      * small model was offered six unrelated tools and answered from memory or invented a call
      * (seen 2026-10-18: it asked for fetch_web_page, which was not among the six). Each entry is
      * (words that signal the intent, name fragments of the tools that serve it); a matching tool
-     * scores {@link #INTENT_BOOST}, enough to outrank any overlap score but not an explicit
+     * scores {@code app.chat.small-model.intent-boost}, enough to outrank any overlap score but not an explicit
      * tool-name mention.
      */
     private static final List<Map.Entry<Set<String>, List<String>>> INTENTS =
@@ -352,18 +393,13 @@ public final class AgentToolSelection {
                             Set.of("knowledge", "uploaded", "upload", "document", "documents", "pdf", "notes", "paper", "according", "summarise", "summarize", "summary"),
                             List.of("search_knowledge_base", "list_knowledge_collections")));
 
-    /** Tools a browsing request keeps in small-model mode: navigate, read, click, type. */
-    private static final int BROWSER_FAMILY_QUOTA = 4;
-
-    /** Beats the lexical score of any one tool, loses to the tool being named in the message. */
-    static final int INTENT_BOOST = 50;
-
-    private static int smallModelScore(Set<String> query, ToolCallback tool, String userMessage) {
+    private static int smallModelScore(
+            Set<String> query, ToolCallback tool, String userMessage, SmallModelProperties settings) {
         String name = tool.getToolDefinition().name();
         if (userMessage != null && userMessage.toLowerCase(java.util.Locale.ROOT).contains(name.toLowerCase(java.util.Locale.ROOT))) {
-            return 1_000;
+            return settings.getNamedToolScore();
         }
-        int score = intentScore(query, userMessage, name);
+        int score = intentScore(query, userMessage, name, settings.getIntentBoost());
         for (String token : tokens(name.replace('_', ' '))) {
             if (query.contains(token)) {
                 score += 3;
@@ -377,7 +413,7 @@ public final class AgentToolSelection {
         return score;
     }
 
-    private static int intentScore(Set<String> query, String userMessage, String toolName) {
+    private static int intentScore(Set<String> query, String userMessage, String toolName, int intentBoost) {
         String lowerName = toolName.toLowerCase(java.util.Locale.ROOT);
         boolean hasUrl = hasUrl(userMessage);
         int best = 0;
@@ -389,7 +425,7 @@ public final class AgentToolSelection {
             for (int i = 0; i < fragments.size(); i++) {
                 if (lowerName.contains(fragments.get(i))) {
                     // The first fragment is the tool that does the job; later ones are helpers.
-                    best = Math.max(best, INTENT_BOOST - i);
+                    best = Math.max(best, intentBoost - i);
                     break;
                 }
             }
@@ -425,13 +461,8 @@ public final class AgentToolSelection {
 
     private static Set<String> tokens(String text) {
         Set<String> out = new java.util.HashSet<>();
-        if (text == null) {
-            return out;
-        }
-        for (String raw : text.toLowerCase(java.util.Locale.ROOT).split("[^a-z0-9]+")) {
-            if (raw.length() >= 3) {
-                out.add(raw.endsWith("s") && raw.length() > 4 ? raw.substring(0, raw.length() - 1) : raw);
-            }
+        for (String raw : WordTokens.words(text)) {
+            out.add(raw.endsWith("s") && raw.length() > 4 ? raw.substring(0, raw.length() - 1) : raw);
         }
         return out;
     }

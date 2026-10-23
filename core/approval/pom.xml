@@ -35,6 +35,12 @@
       <groupId>com.agenticai</groupId>
       <artifactId>security</artifactId>
     </dependency>
+    <!-- The settings catalog: how long a request may wait for a person (approvals.expiry.ttl) is a workspace setting read
+         through SettingsResolver. settings depends only on security and audit. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>settings</artifactId>
+    </dependency>
     <!-- Approval-feedback -> RL reward loop (workbench fail-proof/learning
          hardening pass): a human's approve/reject decision on a workflow
          Approval node is training signal, folded into the same rl_episode

@@ -3,18 +3,19 @@ package com.agenticai.core.agents.assist;
 import com.agenticai.core.agents.assist.dto.AssistCodeEditRequest;
 import com.agenticai.core.agents.assist.dto.AssistRequest;
 import com.agenticai.core.agents.assist.dto.AssistResponse;
+import com.agenticai.core.agents.auxiliary.AuxiliaryModelResolver;
+import com.agenticai.core.agents.auxiliary.AuxiliaryPurpose;
 import com.agenticai.core.agents.hosted.FreeTierChatClientService;
 import com.agenticai.core.chat.ChatClientRegistry;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
-import com.agenticai.core.providers.ProviderCredentialResolver;
-import com.agenticai.core.providers.ProviderModelCatalogEmptyException;
-import com.agenticai.core.providers.ProviderModelCatalogService;
-import com.agenticai.core.providers.ProviderName;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Service;
  * config text, etc - see {@code AskAiHelper.js}). One tiny, non-streaming
  * completion per click: no session, no memory, no tools, no persisted
  * agent - deliberately the simplest possible use of the existing LLM
- * plumbing, reusing {@link ProviderCredentialResolver} and {@link
+ * plumbing, reusing the provider credentials and {@link
  * ChatClientRegistry} exactly as {@code AgentChatService} does, just against
  * "whichever provider is active" instead of one specific agent's provider.
  *
@@ -32,52 +33,54 @@ import org.springframework.stereotype.Service;
  * page isn't reachable on Free), so {@link #buildChatClient} mirrors {@code
  * AgentChatService#buildChatClientFor}'s plan branch: FREE routes through
  * {@link FreeTierChatClientService} (usage-quota checked, platform-hosted
- * pool) instead of {@link #credentialResolver}. Before this branch existed,
+ * pool) instead of a BYOK credential. Before this branch existed,
  * every FREE-tenant click of "Ask AI" failed outright with {@code
  * NoActiveProviderException} - this was a gap left over from when free-tier
  * hosted-pool routing was added only to the main chat path, not a deliberate
  * restriction.
  *
- * <p>{@code defaultModel} is an Anthropic model id ({@code
- * app.agents.default-model}) - fine as a fallback, but {@link
- * #credentialResolver}'s active provider is not always Anthropic (any of
- * ANTHROPIC/GEMINI/GROK/OPENROUTER/SARVAM/META/... can be the one active BYOK
- * credential). Passing the Anthropic id straight through to a non-Anthropic
- * provider produced a 404 "model not found" at the gateway (reproduced via
- * Gemini). {@link #buildChatClient} now looks up a real model for whichever
- * provider actually resolved via {@link ProviderModelCatalogService}, only
- * falling back to {@code defaultModel} if that provider's catalog is
- * unexpectedly empty.
+ * <p>The provider and model of a BYOK tenant's call come from {@link AuxiliaryModelResolver} (the tenant's
+ * "assist" preference, {@code app.auxiliary-model.assist.*}, else the best credential and that provider's
+ * catalog default model), never an Anthropic id passed to another provider and never the first alphabetical
+ * catalog entry.
  */
 @Service
 public class AssistService {
 
-    private final ProviderCredentialResolver credentialResolver;
+    private final AuxiliaryModelResolver auxiliaryModels;
     private final ChatClientRegistry chatClientRegistry;
     private final LlmGatewayService llmGatewayService;
-    private final ProviderModelCatalogService providerModelCatalogService;
     private final TenantLimits tenantLimits;
     private final FreeTierChatClientService freeTierChatClientService;
-    private final String defaultModel;
     private final int defaultMaxTokens;
 
+    /**
+     * Registry key of the form-field writer's system prompt ({@code prompts/en/edge.ask_ai.system.md}); an {@code
+     * edge} key because the console's on-device draft ({@code AskAiHelper}) reads the same wording from the edge bundle.
+     */
+    public static final String FIELD_DRAFT_KEY = "edge.ask_ai.system";
+
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so an owner can reword the helper's instruction; absent = the shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
+
     public AssistService(
-        ProviderCredentialResolver credentialResolver,
+        AuxiliaryModelResolver auxiliaryModels,
         ChatClientRegistry chatClientRegistry,
         LlmGatewayService llmGatewayService,
-        ProviderModelCatalogService providerModelCatalogService,
         TenantLimits tenantLimits,
         FreeTierChatClientService freeTierChatClientService,
-        @Value("${app.agents.default-model}") String defaultModel,
-        @Value("${app.agents.default-max-tokens:1024}") int defaultMaxTokens
+        @Value("${app.agents.default-max-tokens:4096}") int defaultMaxTokens
     ) {
-        this.credentialResolver = credentialResolver;
+        this.auxiliaryModels = auxiliaryModels;
         this.chatClientRegistry = chatClientRegistry;
         this.llmGatewayService = llmGatewayService;
-        this.providerModelCatalogService = providerModelCatalogService;
         this.tenantLimits = tenantLimits;
         this.freeTierChatClientService = freeTierChatClientService;
-        this.defaultModel = defaultModel;
         this.defaultMaxTokens = defaultMaxTokens;
     }
 
@@ -89,17 +92,7 @@ public class AssistService {
         // value should ever tune that, not this one-off internal helper.
         ChatClient chatClient = buildChatClient();
 
-        String system = """
-            You help an admin of an AI agent SaaS platform write clear,
-            effective text for one specific form field. You will be told the
-            field's purpose, the admin's rough instruction, and (maybe) what
-            they've already typed. Reply with ONLY the finished text for that
-            field - no preamble, no markdown code fences, no explanation, no
-            quotation marks around it. If a current draft is given, improve or
-            extend it rather than ignoring it. Keep length appropriate to the
-            field (a system prompt can be a paragraph or two; a short
-            description field should be one or two sentences).
-            """;
+        String system = prompts.text(FIELD_DRAFT_KEY);
 
         String user = "Field: " + request.fieldLabel()
             + "\nInstruction: " + request.instruction()
@@ -164,31 +157,10 @@ public class AssistService {
                 return freeTierChatClientService.buildClientForFreeTenant(tenantId, plan, defaultMaxTokens, 0.3, 1.0);
             }
         }
-        ProviderCredentialResolver.ResolvedProvider active = credentialResolver.resolveBest(background);
-        String model = resolveModelFor(active.providerName());
+        AuxiliaryModelResolver.Selection model = auxiliaryModels.select(AuxiliaryPurpose.ASSIST, null, background);
         return llmGatewayService.resolveClient(tenantId, new GatewayCallSpec(
-            active.providerName(), active.apiKey(), model, defaultMaxTokens, 0.3, 1.0
+            model.provider(), model.apiKey(), model.model(), defaultMaxTokens, 0.3, 1.0,
+            AuxiliaryPurpose.ASSIST.featureKey()
         ));
-    }
-
-    /**
-     * Picks a real model id for {@code provider} via {@link
-     * ProviderModelCatalogService#defaultModelFor} - the same explicit
-     * per-provider preference new agents get - instead of always sending the
-     * Anthropic-only {@link #defaultModel}. NOT the catalog's first
-     * alphabetical entry: that accident of sort order could be a retired or
-     * non-chat model (see AgentService#resolveDefaultModelFor). Falls back
-     * to {@link #defaultModel} for Anthropic only if the catalog is
-     * unexpectedly empty (e.g. a transient refresh failure).
-     */
-    private String resolveModelFor(ProviderName provider) {
-        java.util.Optional<String> picked = providerModelCatalogService.defaultModelFor(provider);
-        if (picked.isPresent()) {
-            return picked.get();
-        }
-        if (provider == ProviderName.ANTHROPIC) {
-            return defaultModel;
-        }
-        throw new ProviderModelCatalogEmptyException(provider);
     }
 }

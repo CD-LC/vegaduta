@@ -116,6 +116,8 @@ nav:
       - Roles and permissions: console/roles-and-permissions.md
   - Build:
       - Extending the platform: extending.md
+      - Prompt registry: prompts.md
+      - Settings catalog: settings.md
       - Workflow DSL: api/workflow-dsl-v1.md
       - API and OpenAPI: api/README.md
       - List endpoint paging: api/LIST-ENDPOINT-PAGING.md

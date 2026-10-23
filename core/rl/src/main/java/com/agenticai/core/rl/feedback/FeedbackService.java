@@ -40,6 +40,14 @@ public class FeedbackService {
     private final ContextualBanditService banditService;
     private ApplicationEventPublisher events;
 
+    private RlFeedbackProperties feedbackProperties = new RlFeedbackProperties();
+
+    /** {@code rl.feedback.*}: the reward each signal maps to. Without it the built-in mapping applies. */
+    @Autowired(required = false)
+    public void setFeedbackProperties(RlFeedbackProperties feedbackProperties) {
+        this.feedbackProperties = feedbackProperties == null ? new RlFeedbackProperties() : feedbackProperties;
+    }
+
     public FeedbackService(
             TurnFeedbackRepository feedbackRepository,
             EpisodeRepository episodeRepository,
@@ -180,21 +188,24 @@ public class FeedbackService {
      * Maps a human signal onto a [0,1] reward target for the arm that produced the turn:
      *
      * <ul>
-     *   <li>THUMBS_UP -&gt; 1.0, THUMBS_DOWN -&gt; 0.0.
+     *   <li>THUMBS_UP -&gt; 1.0, THUMBS_DOWN -&gt; 0.0 (rl.feedback.thumbs-up-reward / thumbs-down-reward).
      *   <li>RESOLVED -&gt; 1.0, UNRESOLVED -&gt; 0.0 (did the turn actually resolve the user's
      *       need).
      *   <li>RATING -&gt; (rating-1)/4 so 1 star -&gt; 0.0 and 5 stars -&gt; 1.0.
-     *   <li>EDIT -&gt; 0.0: the arm's own output needed human correction, so it is trained AWAY
+     *   <li>EDIT -&gt; 0.0 (rl.feedback.edit-reward): the arm's own output needed human correction, so it is trained AWAY
      *       from; the corrected text becomes the "chosen" side of a DPO preference pair on export
      *       instead.
      * </ul>
      */
     private double signalToReward(FeedbackSignal signal, Short rating) {
         return switch (signal) {
-            case THUMBS_UP, RESOLVED -> 1.0;
-            case THUMBS_DOWN, UNRESOLVED, EDIT -> 0.0;
+            case THUMBS_UP -> feedbackProperties.getThumbsUpReward();
+            case RESOLVED -> feedbackProperties.getResolvedReward();
+            case THUMBS_DOWN -> feedbackProperties.getThumbsDownReward();
+            case UNRESOLVED -> feedbackProperties.getUnresolvedReward();
+            case EDIT -> feedbackProperties.getEditReward();
             case RATING -> {
-                int r = rating == null ? 3 : Math.max(1, Math.min(5, rating));
+                int r = rating == null ? feedbackProperties.getDefaultRating() : Math.max(1, Math.min(5, rating));
                 yield (r - 1) / 4.0;
             }
         };

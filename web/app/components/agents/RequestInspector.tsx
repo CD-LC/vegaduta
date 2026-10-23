@@ -30,12 +30,30 @@ import BrandText from "../BrandText";
  * real token counts live on the cost row.
  */
 
+/** Where one block of a system message came from: the prompt-registry key and the scope/version that supplied it. */
+export interface LlmRequestPromptBlock {
+  id: string;
+  /** Registry key; null for text that is not a registry prompt (the agent's own prompt, skills, recalled memory). */
+  key?: string | null;
+  /** default | platform | tenant | agent | fallback | agent_config | code */
+  source?: string | null;
+  /** platform | tenant | agent; null for the shipped default. */
+  scope?: string | null;
+  /** 0 or absent for the shipped default. */
+  version?: number | null;
+  hash?: string | null;
+  chars?: number;
+  estimatedTokens?: number;
+}
+
 export interface LlmRequestMessage {
   role: "system" | "user" | "assistant" | "tool";
   text: string;
   chars: number;
   toolCalls?: string[];
   mediaCount?: number;
+  /** Which prompt blocks a system message is made of; absent on snapshots from before block labels. */
+  blocks?: LlmRequestPromptBlock[];
 }
 
 export interface LlmRequestTool {
@@ -76,6 +94,16 @@ const ROLE_COLOR: Record<string, string> = {
 
 const est = (chars: number) => Math.max(1, Math.round(chars / 4));
 const fmt = new Intl.NumberFormat();
+
+/** One short label for where a block's wording came from. */
+export function describeBlockOrigin(
+  b: LlmRequestPromptBlock,
+  t: (k: string, v?: Record<string, string | number>) => string
+): string {
+  if (!b.key) return b.source === "agent_config" ? t("blockAgentConfig") : t("blockCode");
+  if (!b.version || b.version <= 0) return t("blockDefault");
+  return t("blockOverride", { scope: b.scope ?? b.source ?? "", version: b.version });
+}
 
 /** The platform stacks several system messages (agent prompt, procedures, skills, memory/directives, plan). */
 function messageTitle(
@@ -366,6 +394,9 @@ export default function RequestInspector({
                               · {t("attachments", { n: m.mediaCount ?? 0 })}
                             </span>
                           )}
+                          {(m.blocks ?? []).length > 0 && (
+                            <span className="text-muted-foreground">· {t("blocksCount", { n: m.blocks?.length ?? 0 })}</span>
+                          )}
                         </button>
                         <button
                           type="button"
@@ -382,6 +413,26 @@ export default function RequestInspector({
                       </div>
                       {isOpen && (
                         <div className="border-t border-border px-2 py-1.5">
+                          {(m.blocks ?? []).length > 0 && (
+                            <div className="mb-1.5" data-testid={`blocks-${p.i}`}>
+                              <p className="mb-1 text-muted-foreground">{t("blocksHeading")}</p>
+                              <ul className="flex flex-wrap gap-1">
+                                {(m.blocks ?? []).map((b, k) => (
+                                  <li
+                                    key={`${b.id}-${k}`}
+                                    className={`rounded-full border px-2 py-0.5 ${b.version && b.version > 0 ? "border-primary/40 bg-accent text-accent-foreground" : "border-border bg-secondary text-muted-foreground"}`}
+                                    title={b.hash ? `${t("blockHash")} ${b.hash}` : undefined}
+                                  >
+                                    <span className="font-mono text-foreground">{b.key ?? b.id}</span>{" "}
+                                    {describeBlockOrigin(b, t)}
+                                    {typeof b.estimatedTokens === "number" && b.estimatedTokens > 0
+                                      ? ` · ${t("blockTokens", { tokens: fmt.format(b.estimatedTokens) })}`
+                                      : ""}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                           {m.text ? (
                             <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed text-foreground">
                               {m.text}

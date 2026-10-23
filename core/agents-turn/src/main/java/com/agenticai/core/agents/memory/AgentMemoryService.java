@@ -31,8 +31,8 @@ import org.springframework.stereotype.Service;
  * embedding model. Gated behind the "knowledge" profile for the same reason: it's the profile that
  * guarantees a pgvector-enabled Postgres and a running sidecar exist.
  *
- * <p><b>Bounded memory space (universal-tier product decision):</b> each agent is capped at {@value
- * #MAX_MEMORIES_PER_AGENT} stored memories total, across every subject it has ever talked to - not
+ * <p><b>Bounded memory space (universal-tier product decision):</b> each agent is capped at {@code
+ * app.memory.limits.agent-max-memories} (default 50) stored memories total, across every subject it has ever talked to - not
  * per-subject, the whole bank. {@link #remember} prunes the oldest rows (by {@code created_at})
  * immediately after an insert that pushes an agent over the cap, so the bank behaves like a
  * fixed-size space that keeps only what's been added most recently rather than growing without
@@ -48,13 +48,6 @@ import org.springframework.stereotype.Service;
 public class AgentMemoryService {
 
     private static final Logger log = LoggerFactory.getLogger(AgentMemoryService.class);
-    private static final int DEFAULT_RECALL_TOP_K = 5;
-
-    // Universal-tier product decision: every agent gets the same bounded
-    // memory space, regardless of the tenant's AccountType - see
-    // TenantLimitsServiceImpl's javadoc for the matching 2-user/5-agent
-    // caps this pairs with.
-    private static final int MAX_MEMORIES_PER_AGENT = 50;
 
     private final SidecarClient sidecarClient;
     private final JdbcTemplate jdbcTemplate;
@@ -65,8 +58,54 @@ public class AgentMemoryService {
     }
 
     /**
+     * {@code app.memory.limits.*}: the per-agent cap ({@code agent-max-memories}) and the recall top-k ({@code agent-recall-top-k}). A hand-built instance keeps the shipped
+     * defaults, which is also what Spring supplies when the properties bean is absent.
+     */
+    private volatile MemoryLimitsProperties limits = new MemoryLimitsProperties();
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setLimits(MemoryLimitsProperties limits) {
+        this.limits = limits == null ? new MemoryLimitsProperties() : limits;
+    }
+
+    private volatile com.agenticai.core.settings.SettingsResolver settings;
+
+    /**
+     * The settings catalog, so a tenant's or an agent's {@code memory.recall.agentTopK} and {@code
+     * memory.agent.maxMemories} apply to that agent's memory. Absent (hand-built instances): {@code
+     * app.memory.limits.*}. Memory is read and written on the turn's own thread, where the tenant is set.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setSettingsResolver(com.agenticai.core.settings.SettingsResolver resolver) {
+        this.settings = resolver;
+    }
+
+    static final String RECALL_TOP_K_KEY = "memory.recall.agentTopK";
+    static final String MAX_MEMORIES_KEY = "memory.agent.maxMemories";
+
+    private int setting(String key, UUID agentId, int platform) {
+        com.agenticai.core.settings.SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return platform;
+        }
+        try {
+            return catalog.getInt(key, com.agenticai.core.settings.SettingContext.forAgent(agentId));
+        } catch (RuntimeException e) {
+            return platform;
+        }
+    }
+
+    private int recallTopK(UUID agentId) {
+        return setting(RECALL_TOP_K_KEY, agentId, limits.getAgentRecallTopK());
+    }
+
+    private int maxMemories(UUID agentId) {
+        return setting(MAX_MEMORIES_KEY, agentId, limits.getAgentMaxMemories());
+    }
+
+    /**
      * Persists one fact/preference, embedding it for later semantic recall, then prunes the oldest
-     * memories for this agent if this insert pushed it over {@value #MAX_MEMORIES_PER_AGENT}.
+     * memories for this agent if this insert pushed it over {@code app.memory.limits.agent-max-memories}.
      */
     public UUID remember(UUID agentId, String subjectKey, String content) {
         float[] embedding = sidecarClient.embedQuery(content);
@@ -115,7 +154,7 @@ public class AgentMemoryService {
                         own == null ? 0 : own,
                         total == null ? 0 : total,
                         maxOwn,
-                        MAX_MEMORIES_PER_AGENT);
+                        maxMemories(agentId));
         if (evict > 0) {
             jdbcTemplate.update(
                     "DELETE FROM "
@@ -133,7 +172,7 @@ public class AgentMemoryService {
     }
 
     /**
-     * Keeps this agent's total memory count at or under {@value #MAX_MEMORIES_PER_AGENT} by
+     * Keeps this agent's total memory count at or under {@code app.memory.limits.agent-max-memories} by
      * deleting its oldest rows (across every subject) once it's over - a bounded "memory space"
      * rather than unbounded accumulation.
      */
@@ -143,10 +182,11 @@ public class AgentMemoryService {
                         "SELECT COUNT(*) FROM " + table + " WHERE agent_id = ?",
                         Integer.class,
                         agentId);
-        if (count == null || count <= MAX_MEMORIES_PER_AGENT) {
+        int cap = maxMemories(agentId);
+        if (count == null || count <= cap) {
             return;
         }
-        int overflow = count - MAX_MEMORIES_PER_AGENT;
+        int overflow = count - cap;
         jdbcTemplate.update(
                 "DELETE FROM "
                         + table
@@ -160,7 +200,7 @@ public class AgentMemoryService {
                 "Pruned {} oldest memories for agent {} (over the {}-memory cap)",
                 overflow,
                 agentId,
-                MAX_MEMORIES_PER_AGENT);
+                cap);
     }
 
     /** Semantic recall, scoped to this agent + subject, ordered by relevance to {@code query}. */
@@ -228,13 +268,13 @@ public class AgentMemoryService {
      * com.agenticai.core.agents.turn.AgentChatService}.
      */
     public List<AgentMemoryEntry> recall(UUID agentId, String subjectKey, String query) {
-        return recall(agentId, subjectKey, query, DEFAULT_RECALL_TOP_K);
+        return recall(agentId, subjectKey, query, recallTopK(agentId));
     }
 
     /** Default-topK recall that shares {@code embedding}; see {@link QueryEmbedding}. */
     public List<AgentMemoryEntry> recall(
             UUID agentId, String subjectKey, String query, QueryEmbedding embedding) {
-        return recall(agentId, subjectKey, query, DEFAULT_RECALL_TOP_K, embedding);
+        return recall(agentId, subjectKey, query, recallTopK(agentId), embedding);
     }
 
     /**

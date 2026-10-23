@@ -7,6 +7,8 @@ import com.agenticai.core.agents.share.AgentShareService;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -43,9 +46,16 @@ public class StudioAppInvokeService {
 
     private static final Logger log = LoggerFactory.getLogger(StudioAppInvokeService.class);
     private static final Duration TURN_TIMEOUT = Duration.ofSeconds(45);
-    private static final String DEFAULT_AI_SYSTEM =
-            "You are the AI built into a small app. Answer the user's request directly and"
-                    + " concisely, plain text, no markdown fences.";
+    /** Registry key of the persona of an app with no system prompt of its own ({@code prompts/en/studioapp.default_system.md}). */
+    static final String DEFAULT_AI_SYSTEM_KEY = "studioapp.default_system";
+
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so an owner can reword the default persona; absent = the shipped text. */
+    @Autowired(required = false)
+    void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     private final AgentShareService agentShareService;
     private final AgentChatService agentChatService;
@@ -206,7 +216,7 @@ public class StudioAppInvokeService {
             TenantPlan plan = tenantLimits.plan(tenantId);
             String system =
                     app.getAiSystemPrompt() == null || app.getAiSystemPrompt().isBlank()
-                            ? DEFAULT_AI_SYSTEM
+                            ? prompts.text(DEFAULT_AI_SYSTEM_KEY)
                             : app.getAiSystemPrompt();
             List<ChatClient> chain =
                     freeTierChatClientService.buildClientChainForFreeTenant(

@@ -6,8 +6,14 @@ import { ShieldQuestion, X } from "lucide-react";
 import { api } from "../../lib/api";
 import { useTranslations } from "../../lib/i18n";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import ExpiryCountdown from "../approvals/ExpiryCountdown";
+import RiskBadge from "../approvals/RiskBadge";
+import { useApprovalExpiryTtl } from "../approvals/approvalExpiry";
+import { redactedArguments, toolRisk } from "../approvals/approvalsQueueModel";
+import type { ApprovalRequestItem } from "../approvals/approvalsModel";
 import {
-  approvalArgsPreview,
+  ARGS_PREVIEW_MAX_CHARS,
   approvalArgsTruncated,
   matchSessionApprovals,
   outcomeOf,
@@ -27,6 +33,9 @@ import {
  * shows the parked call where it was asked for: what tool, with what
  * arguments, Approve / Reject, and then the replayed result.
  *
+ * A card also shows an estimated risk, a countdown when the workspace expires waiting requests, and an optional
+ * reason for rejecting that the agent reads as the result of the refused call.
+ *
  * Deliberately small in scope: no auto-approve and no "always allow". The
  * server stays the only authority - deciding a tool call needs
  * MANAGE_APPROVALS (ApprovalController#enforceApproverAuthorization), so a
@@ -35,6 +44,14 @@ import {
  *
  * Arguments and results are model- or tool-authored text. They are rendered
  * as text nodes inside <pre> only - never as HTML or markdown.
+ *
+ * Deciding a card does not hand anything back to the agent from the browser:
+ * the turn that asked is long over, and core itself carries the task on once
+ * the decision has an outcome (it starts a turn that restates the request and
+ * delivers the tool's result or the denial). The card reports each decision
+ * through onDecided(outcome, requestId) so the surface can follow that turn
+ * (useApprovalContinuation) - show it carrying on, hold the input back, append
+ * the agent's reply.
  */
 
 /**
@@ -59,11 +76,17 @@ type LocalOutcome = ToolApprovalOutcome | { kind: "error"; detail: string | null
 
 /**
  * A card whose call ran cleanly ("Done") closes itself after this long; the
- * result it carried is already back in the agent's hands, so the card is
- * only a receipt. Failed and rejected cards stay until the person closes
- * them - that outcome is the only place the error is shown.
+ * result it carried has been handed to the agent by core, which continues the
+ * task (the surface shows that, not this card), so the card is only a receipt.
+ * Failed and rejected cards stay until the person closes them - that outcome
+ * is the only place the error is shown.
  */
 export const DONE_AUTO_CLOSE_MS = 6_000;
+
+/** Moves focus into the reason field when it opens (the person just asked for it). */
+function focusOnMount(el: HTMLInputElement | null): void {
+  el?.focus();
+}
 
 /** A transport error is not a decision: such a card is still waiting. */
 function unresolved(outcome: LocalOutcome | undefined): boolean {
@@ -77,6 +100,7 @@ export default function PendingToolApprovals({
   className,
   autoCloseMs,
   onDecided,
+  onWaitingChange,
 }: {
   agentId: string | null | undefined;
   sessionId: string | null | undefined;
@@ -86,12 +110,20 @@ export default function PendingToolApprovals({
   /** How long a clean "Done" card stays before closing itself (tests shorten it). */
   autoCloseMs?: number;
   /**
-   * Called once a decision made on this card has an outcome (ran, failed, rejected). The
-   * Assistant uses it to carry on a long task after the person approves a command.
+   * Called once per request when its decision has an outcome (ran, failed, rejected), whether the person
+   * decided it on this card or it was decided elsewhere (the approvals queue). Core continues the task by
+   * itself after every outcome; the surface uses this to follow that continuation, not to start one.
    */
-  onDecided?: (outcome: ToolApprovalOutcome) => void;
+  onDecided?: (outcome: ToolApprovalOutcome, requestId: string) => void;
+  /** Called with the number of tool calls waiting for a decision, whenever it changes (0 when none). */
+  onWaitingChange?: (waiting: number) => void;
 }) {
   const t = useTranslations("toolApproval");
+  const q = useTranslations("approvalsQueue");
+  const ttlSeconds = useApprovalExpiryTtl();
+  // Optional reason per request for a rejection, and which cards have the reason field open.
+  const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [reasonOpen, setReasonOpen] = useState<Set<string>>(() => new Set());
   const [cards, setCards] = useState<ToolApprovalRow[]>([]);
   const [outcomes, setOutcomes] = useState<Record<string, LocalOutcome>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -106,6 +138,8 @@ export default function PendingToolApprovals({
   cardsRef.current = cards;
   const outcomesRef = useRef<Record<string, LocalOutcome>>({});
   outcomesRef.current = outcomes;
+  const onDecidedRef = useRef(onDecided);
+  onDecidedRef.current = onDecided;
 
   const refresh = useCallback(async () => {
     if (!agentId || !sessionId) return;
@@ -136,7 +170,11 @@ export default function PendingToolApprovals({
         const latest = await api.getApproval(card.id, QUIET_READ, true);
         if (scopeRef.current !== requestScope) return;
         const outcome = outcomeOf(latest);
-        if (outcome) setOutcomes((prev) => (unresolved(prev[card.id]) ? { ...prev, [card.id]: outcome } : prev));
+        if (outcome) {
+          const wasWaiting = unresolved(outcomesRef.current[card.id]);
+          setOutcomes((prev) => (unresolved(prev[card.id]) ? { ...prev, [card.id]: outcome } : prev));
+          if (wasWaiting) onDecidedRef.current?.(outcome, card.id);
+        }
       } catch {
         /* still unknown - the next poll tries again */
       }
@@ -151,6 +189,8 @@ export default function PendingToolApprovals({
     setBusyId(null);
     setNeedsAdmin(false);
     setDismissed(new Set());
+    setReasons({});
+    setReasonOpen(new Set());
     if (scope) void refresh();
   }, [scope, refresh]);
 
@@ -194,6 +234,12 @@ export default function PendingToolApprovals({
   }, [turnInFlight, refresh]);
 
   const waiting = cards.some((c) => unresolved(outcomes[c.id]));
+  const waitingCount = cards.filter((c) => unresolved(outcomes[c.id])).length;
+  const onWaitingChangeRef = useRef(onWaitingChange);
+  onWaitingChangeRef.current = onWaitingChange;
+  useEffect(() => {
+    onWaitingChangeRef.current?.(waitingCount);
+  }, [waitingCount]);
   useEffect(() => {
     if (!waiting || !scope) return undefined;
     const startedAt = Date.now();
@@ -229,7 +275,7 @@ export default function PendingToolApprovals({
     try {
       let latest: ToolApprovalRow = approve
         ? await api.approveRequest(card.id, undefined, undefined, QUIET_DECIDE)
-        : await api.rejectRequest(card.id, undefined, null, QUIET_DECIDE);
+        : await api.rejectRequest(card.id, undefined, reasons[card.id]?.trim() || null, QUIET_DECIDE);
       // The approve response can be serialised before the replayed tool's
       // result is attached; one follow-up read picks it up.
       if (approve && latest && !latest.executionResult && !latest.executionError) {
@@ -244,7 +290,7 @@ export default function PendingToolApprovals({
       const outcome: ToolApprovalOutcome =
         outcomeOf(latest) ?? (approve ? { kind: "done", detail: null } : { kind: "rejected", detail: null });
       setOutcomes((prev) => ({ ...prev, [card.id]: outcome }));
-      onDecided?.(outcome);
+      onDecided?.(outcome, card.id);
     } catch (err: any) {
       if (scopeRef.current !== requestScope) return;
       if (err?.status === 403) {
@@ -278,7 +324,7 @@ export default function PendingToolApprovals({
       if (outcome) {
         const resolved: LocalOutcome = outcome;
         setOutcomes((prev) => ({ ...prev, [card.id]: resolved }));
-        if (resolved.kind !== "error") onDecided?.(resolved);
+        if (resolved.kind !== "error") onDecided?.(resolved, card.id);
       }
     } finally {
       setBusyId(null);
@@ -292,7 +338,8 @@ export default function PendingToolApprovals({
     <div className={className ?? "flex w-full max-w-[85%] flex-col gap-2"} data-testid="pending-tool-approvals">
       {visibleCards.map((card) => {
         const tool = toolNameOf(card);
-        const args = approvalArgsPreview(card.payload);
+        const shownArgs = redactedArguments(card.payload, ARGS_PREVIEW_MAX_CHARS);
+        const args = shownArgs.text;
         // The card shows less than what would run: no Approve from here.
         const argsTruncated = approvalArgsTruncated(card.payload);
         const outcome = outcomes[card.id];
@@ -309,6 +356,7 @@ export default function PendingToolApprovals({
               <span className="min-w-0 flex-1 truncate font-medium text-foreground">
                 {decided ? t("decidedTitle", { tool }) : t("title", { tool })}
               </span>
+              {!decided && <RiskBadge risk={toolRisk(tool)} />}
               {decided && (
                 <button
                   type="button"
@@ -323,6 +371,13 @@ export default function PendingToolApprovals({
               )}
             </div>
             {!decided && <p className="mt-1 text-xs text-muted-foreground">{t("notRunYet")}</p>}
+            {!decided && (
+              <ExpiryCountdown
+                className="mt-1"
+                ttlSeconds={ttlSeconds}
+                item={{ ...card, status: card.status ?? "PENDING", actionType: card.actionType ?? "" } as ApprovalRequestItem}
+              />
+            )}
             {args && (
               <pre
                 data-testid="tool-approval-args"
@@ -332,6 +387,11 @@ export default function PendingToolApprovals({
               </pre>
             )}
             {!args && !decided && <p className="mt-1 text-xs text-muted-foreground">{t("noArguments")}</p>}
+            {shownArgs.redactedCount > 0 && !decided && (
+              <p className="mt-1 text-xs text-muted-foreground" data-testid="tool-approval-redacted">
+                {q("previewRedacted", { count: shownArgs.redactedCount })}
+              </p>
+            )}
             {argsTruncated && !decided && (
               <p className="mt-1 text-xs text-muted-foreground" data-testid="tool-approval-args-truncated">
                 {t("argsTruncated")}{" "}
@@ -394,8 +454,53 @@ export default function PendingToolApprovals({
                   >
                     {t("reject")}
                   </Button>
+                  <button
+                    type="button"
+                    data-testid="tool-approval-reason-toggle"
+                    aria-expanded={reasonOpen.has(card.id)}
+                    aria-controls={`tool-approval-reason-${card.id}`}
+                    onClick={() =>
+                      setReasonOpen((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(card.id)) next.delete(card.id);
+                        else next.add(card.id);
+                        return next;
+                      })
+                    }
+                    className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                  >
+                    {q("chatReasonToggle")}
+                  </button>
+                  <Link
+                    href={`/admin/approvals?id=${encodeURIComponent(card.id)}`}
+                    data-testid="tool-approval-queue-link"
+                    className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                  >
+                    {q("chatReviewInQueue")}
+                  </Link>
                 </div>
               ))}
+            {!decided && !needsAdmin && reasonOpen.has(card.id) && (
+              <div className="mt-2 grid gap-1" id={`tool-approval-reason-${card.id}`}>
+                <label htmlFor={`tool-approval-reason-input-${card.id}`} className="text-xs font-medium">
+                  {q("denyReasonLabel")}
+                </label>
+                <Input
+                  ref={focusOnMount}
+                  id={`tool-approval-reason-input-${card.id}`}
+                  data-testid="tool-approval-reason"
+                  value={reasons[card.id] ?? ""}
+                  maxLength={2000}
+                  disabled={busyId != null}
+                  aria-describedby={`tool-approval-reason-help-${card.id}`}
+                  placeholder={q("denyReasonPlaceholder")}
+                  onChange={(e) => setReasons((prev) => ({ ...prev, [card.id]: e.target.value }))}
+                />
+                <p id={`tool-approval-reason-help-${card.id}`} className="text-xs text-muted-foreground">
+                  {q("denyReasonHelp")}
+                </p>
+              </div>
+            )}
           </div>
         );
       })}

@@ -79,7 +79,7 @@ public class AgentHookRuntime {
             ObjectProvider<AuditLogService> audit,
             ObjectProvider<MeterRegistry> meters,
             ObjectProvider<McpRemoteUrlGuard> urlGuard,
-            @Value("${app.agent-hooks.enabled:false}") boolean enabled,
+            @Value("${app.agent-hooks.enabled:true}") boolean enabled,
             @Value("${app.agent-hooks.latency-budget-ms:2000}") long latencyBudgetMillis,
             @Value("${app.agent-hooks.hard-cap-ms:5000}") long hardCapMillis,
             @Value("${app.agent-hooks.webhook.signing-secret:}") String signingSecret) {
@@ -104,6 +104,12 @@ public class AgentHookRuntime {
                         latencyBudgetMillis,
                         hardCapMillis,
                         TenantAwareExecutors.newVirtualThreadPerTaskExecutor("agent-hook-runtime-"));
+    }
+
+    /** Wires the prompt registry for the hook wording ({@code message.hook.*}); absent = the shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(com.agenticai.core.prompts.PromptResolver resolver) {
+        engine.usePrompts(resolver);
     }
 
     public boolean isEnabled() {

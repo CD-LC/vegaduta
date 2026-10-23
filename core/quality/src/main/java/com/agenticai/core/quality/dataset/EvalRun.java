@@ -145,6 +145,25 @@ public class EvalRun {
     private boolean strictJudge;
 
     /**
+     * How this run replayed its cases (V670): {@code FULL} (the production pipeline in the eval sandbox) or {@code
+     * QUICK} (the agent's tools withheld). Resolved when the run is triggered - the run's own request, else the
+     * dataset's pin, else the workspace's default - and frozen here, so a finished run always says what it
+     * measured even if the dataset or the default changes later. Rows from before V670 hold the mode their dataset
+     * had then.
+     */
+    @Column(name = "eval_mode", nullable = false, length = 8)
+    private String evalMode = EvalMode.QUICK.name();
+
+    /**
+     * The run replayed its tool calls under the eval sandbox's auto-approval (V667): a gated call ran
+     * without a person deciding it. Snapshotted at trigger from the dataset, so editing the dataset
+     * later never rewrites how a finished run was produced, and the console can say so. Never true
+     * for a quick (text-only) run.
+     */
+    @Column(name = "auto_approved", nullable = false)
+    private boolean autoApproved;
+
+    /**
      * Replay+score repetitions per case (1..5, CHECK-constrained). A case
      * passes only when a strict majority of its repetitions pass - the
      * non-determinism guard. Costs multiply accordingly; {@link #budgetUsd}
@@ -271,6 +290,16 @@ public class EvalRun {
         this.idempotencyKey = idempotencyKey;
     }
 
+    /** Freezes the mode the run replays in, before the row's first save. */
+    public void bindMode(EvalMode mode) {
+        this.evalMode = (mode == null ? EvalMode.QUICK : mode).name();
+    }
+
+    /** Marks the run as replayed under the sandbox auto-approval, before the row's first save. */
+    public void markAutoApproved() {
+        this.autoApproved = true;
+    }
+
     /** Records the V375 agent-config snapshot before the row's first save. */
     public void applyAgentSnapshot(AgentConfigSnapshot snapshot) {
         this.agentModel = snapshot.model();
@@ -394,6 +423,16 @@ public class EvalRun {
 
     public String getTenantId() {
         return tenantId;
+    }
+
+    /** The mode this run replayed in; see the field's javadoc. */
+    public EvalMode getEvalMode() {
+        return EvalMode.lenient(evalMode, EvalMode.QUICK);
+    }
+
+    /** See the field's javadoc. */
+    public boolean isAutoApproved() {
+        return autoApproved;
     }
 
     public String getRequestedBy() {

@@ -10,6 +10,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.agenticai.core.agents.auxiliary.AuxiliaryModelProperties;
+import com.agenticai.core.agents.auxiliary.AuxiliaryModelResolver;
+import com.agenticai.core.agents.core.AgentService;
+import com.agenticai.core.agents.turn.AgentServiceAuxiliaryAgentModels;
+import com.agenticai.core.tenancy.TenantAiModelPreferenceService;
+import org.springframework.beans.factory.ObjectProvider;
 import com.agenticai.core.agents.assist.dto.AssistRequest;
 import com.agenticai.core.agents.hosted.FreeTierChatClientService;
 import com.agenticai.core.chat.ChatClientRegistry;
@@ -37,6 +43,14 @@ class AssistServicePlatformPoolTest {
         TenantContext.clear();
     }
 
+    private static AuxiliaryModelResolver auxiliary(ProviderCredentialResolver credentials) {
+        @SuppressWarnings("unchecked")
+        ObjectProvider<TenantAiModelPreferenceService> noPreferences = mock(ObjectProvider.class);
+        return new AuxiliaryModelResolver(
+            new AuxiliaryModelProperties(), credentials, mock(ProviderModelCatalogService.class),
+            new AgentServiceAuxiliaryAgentModels(mock(AgentService.class)), noPreferences, "claude-x");
+    }
+
     @Test
     void unlimitedTenantOnPlatformPoolUsesHostedPoolNotByok() {
         ProviderCredentialResolver resolver = mock(ProviderCredentialResolver.class);
@@ -50,8 +64,8 @@ class AssistServicePlatformPoolTest {
         when(client.prompt().system(anyString()).user(anyString()).call().content()).thenReturn("  drafted  ");
 
         AssistService service = new AssistService(
-            resolver, mock(ChatClientRegistry.class), mock(LlmGatewayService.class),
-            mock(ProviderModelCatalogService.class), limits, pool, "claude-x", 1024);
+            auxiliary(resolver), mock(ChatClientRegistry.class), mock(LlmGatewayService.class),
+            limits, pool, 1024);
 
         TenantContext.set(TenantContext.of("t1", "u1", java.util.Set.of()));
         String out = service.draft(new AssistRequest("Field", "Instruction", "<html>big</html>")).suggestion();
@@ -73,8 +87,8 @@ class AssistServicePlatformPoolTest {
         when(client.prompt().system("EDIT RULES").user("APP + REQUEST").call().content()).thenReturn(" blocks ");
 
         AssistService service = new AssistService(
-            mock(ProviderCredentialResolver.class), mock(ChatClientRegistry.class), mock(LlmGatewayService.class),
-            mock(ProviderModelCatalogService.class), limits, pool, "claude-x", 1024);
+            auxiliary(mock(ProviderCredentialResolver.class)), mock(ChatClientRegistry.class), mock(LlmGatewayService.class),
+            limits, pool, 1024);
 
         TenantContext.set(TenantContext.of("t1", "u1", java.util.Set.of()));
         String out = service.codeEdit(

@@ -155,8 +155,11 @@ public class ApplyCodeChangesToolCallback implements ToolCallback {
                 + workspaceId + " (repo " + repoId + "): " + summarizePaths(files);
             String requestedBy = TenantContext.current().map(TenantContext::getSubject).orElse(null);
 
-            ApprovalEvaluation evaluation = gateService.evaluate(
-                ApplyCodeWorkspaceApprovalExecutor.ACTION_TYPE, summary, payloadJson, requestedBy);
+            // evaluateInTurn: the request carries the conversation it came from, so the human's decision
+            // puts the outcome back into it and the agent carries on (see ApprovalOutcomePort).
+            ApprovalEvaluation evaluation = gateService.evaluateInTurn(
+                ApplyCodeWorkspaceApprovalExecutor.ACTION_TYPE, "apply_code_changes", summary, payloadJson,
+                requestedBy);
 
             return responseJson(evaluation);
         } catch (Exception e) {

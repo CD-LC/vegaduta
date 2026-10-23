@@ -142,3 +142,91 @@ describe("toolApprovalPollDelayMs", () => {
     expect(toolApprovalPollDelayMs(Number.NaN)).toBe(10_000);
   });
 });
+
+// Actions a tool gates ITSELF on (a code-workspace run or apply, a channel send) are recorded by core with the
+// conversation envelope next to the action's own fields; requestedBy is the person, not the agent/session label.
+// The card must find them in the conversation they belong to - and only there - so the person can decide them
+// inline and core's continuation (the same one a guarded tool call gets) is followed by the surface.
+describe("self-gated actions (code workspace, channel send)", () => {
+  const envelope = (over: Record<string, unknown> = {}) => ({
+    version: 1,
+    toolName: "run_in_code_workspace",
+    agentId: "a1",
+    requestedAgentId: "a1",
+    sessionId: "s1",
+    memorySessionId: "c1:abc",
+    goal: "Run the tests and fix what fails",
+    tenantId: "t1",
+    subject: "user-123",
+    ...over,
+  });
+  const runRow = (over: Partial<ToolApprovalRow> = {}, replay: Record<string, unknown> = {}): ToolApprovalRow =>
+    row({
+      id: "run1",
+      actionType: "codeintel.workspace.run",
+      summary: "Run in code workspace ws-1 (repo billing): mvn -q test",
+      requestedBy: "user-123",
+      payload: JSON.stringify({
+        repoId: "billing",
+        workspaceId: "ws-1",
+        command: "mvn -q test",
+        attempts: 1,
+        adminOnly: true,
+        replay: envelope(replay),
+      }),
+      ...over,
+    });
+
+  it("matches a run/apply/send recorded for this agent and session", () => {
+    const rows = [
+      runRow(),
+      runRow({ id: "apply1", actionType: "codeintel.workspace.apply" }, { toolName: "apply_code_changes" }),
+      runRow({ id: "send1", actionType: "channel.telegram.send" }, { toolName: "channel_send_message" }),
+    ];
+    expect(matchSessionApprovals(rows, "a1", "s1").map((r) => r.id)).toEqual(["run1", "apply1", "send1"]);
+  });
+
+  it("matches on the agent the conversation was requested under as well as the routed one", () => {
+    const routed = runRow({}, { agentId: "a-clone", requestedAgentId: "a1" });
+    expect(matchSessionApprovals([routed], "a1", "s1")).toHaveLength(1);
+    expect(matchSessionApprovals([routed], "a-clone", "s1")).toHaveLength(1);
+  });
+
+  it("never shows another session's, another agent's or a prefix-colliding session's action", () => {
+    const rows = [
+      runRow({ id: "other-session" }, { sessionId: "s2" }),
+      runRow({ id: "prefix" }, { sessionId: "s10" }),
+      runRow({ id: "other-agent" }, { agentId: "a2", requestedAgentId: "a2" }),
+    ];
+    expect(matchSessionApprovals(rows, "a1", "s1")).toEqual([]);
+  });
+
+  it("ignores an envelope that names no goal (core cannot continue it) and a payload that is not JSON", () => {
+    expect(matchSessionApprovals([runRow({}, { goal: undefined })], "a1", "s1")).toEqual([]);
+    expect(matchSessionApprovals([runRow({ payload: "not json" })], "a1", "s1")).toEqual([]);
+    expect(matchSessionApprovals([runRow({ payload: null })], "a1", "s1")).toEqual([]);
+  });
+
+  it("does not let an mcp_tool row's model-authored payload place it in another conversation", () => {
+    const forged = row({
+      id: "forged",
+      requestedBy: "agent:a9:session:s9",
+      payload: JSON.stringify({ replay: envelope(), arguments: {} }),
+    });
+    expect(matchSessionApprovals([forged], "a1", "s1")).toEqual([]);
+  });
+
+  it("names the card after the tool the agent called, not the action type", () => {
+    expect(toolNameOf(runRow())).toBe("run_in_code_workspace");
+    expect(toolNameOf(runRow({}, { toolName: "channel_send_message" }))).toBe("channel_send_message");
+  });
+
+  it("shows the action's own fields, never the envelope", () => {
+    const text = approvalArgsText(runRow().payload);
+    expect(text).toContain("mvn -q test");
+    expect(text).toContain("billing");
+    expect(text).not.toContain("replay");
+    expect(text).not.toContain("memorySessionId");
+    expect(approvalArgsPreview(JSON.stringify({ replay: envelope() }))).toBeNull();
+  });
+});

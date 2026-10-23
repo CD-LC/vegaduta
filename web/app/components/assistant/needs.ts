@@ -127,28 +127,6 @@ export function attachedFilesContextLines(files: ReadonlyArray<{ workspacePath?:
   ];
 }
 
-/**
- * The facts the app knows for certain about an approved (or rejected) tool call, for the "carry on"
- * turn that follows it: the status and, for a command, its exit code. Never the output itself - that
- * is tool data (core wraps it as untrusted), and copying it into the user's message would hand
- * whatever a build log or a file says the user's authority.
- */
-export function approvalOutcomeLines(outcome: { kind: string; detail: string | null }): string[] {
-  if (outcome.kind === "rejected") return ["The user rejected the tool call you asked for."];
-  const exit = /exit_code\\?"\s*:\s*(-?\d+)/.exec(outcome.detail ?? "")?.[1];
-  const timedOut = /timed_out\\?"\s*:\s*true/.test(outcome.detail ?? "");
-  const facts = [
-    outcome.kind === "failed"
-      ? "The tool call you asked for was approved but failed."
-      : "The tool call you asked for was approved and ran.",
-  ];
-  if (exit !== undefined) facts.push(`Exit code: ${exit}${timedOut ? " (stopped at its time limit)" : ""}.`);
-  facts.push(
-    "A note with its output is in this conversation's history: read it, then continue (fix what failed, or go on to the next step)."
-  );
-  return facts;
-}
-
 /** The connection facts and the attached folder as one app_context block, or null when there is nothing to say. */
 export function assistantContext(status: StatusInput, folder: string | null, extraLines: string[] = []): string | null {
   const connections = connectionsContext(status);

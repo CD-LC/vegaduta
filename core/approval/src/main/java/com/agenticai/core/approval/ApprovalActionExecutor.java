@@ -64,4 +64,17 @@ public interface ApprovalActionExecutor {
     default void onRejected(ApprovalRequest request, String decidedBy, String reason) {
         // no cleanup needed for most action types
     }
+
+    /**
+     * True when this executor itself puts the outcome of the action back into the conversation that
+     * asked for it (and continues the task) - the gated agent-tool replay executor does. For every other
+     * executor {@link HumanApprovalGateService} reports the outcome through {@link ApprovalOutcomePort}
+     * after {@link #execute} returned, failed for good, or the request was rejected or expired, so a
+     * request raised from an agent turn resumes the agent whichever executor ran it. Reporting twice is
+     * harmless to the conversation (the continuation is claimed once) but would write the history note
+     * twice, hence this flag.
+     */
+    default boolean reportsOutcomeItself() {
+        return false;
+    }
 }

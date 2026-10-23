@@ -173,6 +173,27 @@ public class AgentService {
     }
 
     /**
+     * The agent's own runtime-limit overrides (V662) - "projection, not the full entity", read once per
+     * turn by the runtime-settings resolver. Empty when nothing is overridden.
+     */
+    public com.agenticai.core.agents.runtime.RuntimeLimits getRuntimeLimits(UUID agentId) {
+        com.agenticai.core.agents.runtime.RuntimeLimits limits = projection(agentId).runtimeLimits();
+        return limits == null ? com.agenticai.core.agents.runtime.RuntimeLimits.none() : limits;
+    }
+
+    /**
+     * Stores (or with null/empty, clears) the agent's runtime-limit overrides. Same "requireAccess,
+     * assertEditable, mutate, saveVersioned" shape as {@link #setAutonomyTier}. The values are validated
+     * by the caller against {@code app.agent-runtime.bounds.*} (the resolver lives in a module above this
+     * one).
+     */
+    @Transactional
+    public AgentResponse setRuntimeLimits(
+            UUID agentId, com.agenticai.core.agents.runtime.RuntimeLimits limits) {
+        return settings.apply(agentId, new AgentSettingsPatch.RuntimeLimitsPatch(limits));
+    }
+
+    /**
      * V331 extra sampling controls: null = unchanged, empty stopSequences = clear, {@code
      * clearSamplingParams=true} resets all five first.
      */

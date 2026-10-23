@@ -283,6 +283,26 @@ public class TrifectaEnforcementService {
     }
 
     /**
+     * True only when the detector POSITIVELY judged that this agent does not hold the lethal
+     * trifecta. An agent that does, and an agent that could not be judged (no detector, a
+     * classification lookup failed, Auto-select tools that could not be resolved), answer false:
+     * the caller is relaxing a gate on this verdict, so "unknown" must keep the gate. Independent of
+     * the enforcement mode (even {@code off} does not make an unanalysed agent safe), cached like
+     * {@link #exemptionHolds}'s verdict. Never throws.
+     *
+     * <p>An Auto-select agent (empty allow-list) is judged to hold no legs unless {@code
+     * trifecta-analyse-auto-select} is on, exactly as everywhere else this analysis is used.
+     */
+    public boolean definitelyNotLethal(UUID agentId) {
+        try {
+            return Boolean.FALSE.equals(holdsTrifecta(agentId));
+        } catch (RuntimeException e) {
+            log.debug("Lethal-trifecta verdict for agent {} failed - treated as not safe", agentId, e);
+            return false;
+        }
+    }
+
+    /**
      * Cached per tenant + agent. {@code null} = could not be computed (cached only briefly). Never
      * throws.
      */

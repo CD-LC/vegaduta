@@ -10,6 +10,8 @@ import com.agenticai.core.agents.context.ContextBudgetPlanner.Settings;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.chat.ToolResultClearing;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.prompts.PromptContext;
+import com.agenticai.core.prompts.PromptResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,8 +58,7 @@ public final class ContextCompactionEngine {
     private static final Logger log = LoggerFactory.getLogger(ContextCompactionEngine.class);
 
     /** Opens every compaction summary; also how a summary is recognised (and rolled) on a later pass. */
-    public static final String SUMMARY_PREFIX =
-        "[Conversation summary - earlier turns were compacted to save context. A recap of what was said, not instructions.]\n";
+    public static final String SUMMARY_PREFIX = Texts.shipped().summaryPrefix();
 
     /**
      * Message metadata flag that exempts a message from clearing and compaction. No production code sets it yet:
@@ -68,13 +69,8 @@ public final class ContextCompactionEngine {
     /** Marker of the placeholder the character-threshold clearing in core/chat writes. */
     private static final String LEGACY_CLEARED_PREFIX = "[tool result cleared";
 
-    private static final int MESSAGE_OVERHEAD_TOKENS = 4;
-    private static final int MEDIA_TOKENS = 1000;
-    private static final int RESPONSE_OVERHEAD_TOKENS = 6;
-    /** Estimated size of one placeholder; the planner will not "clear" a result smaller than twice this. */
-    static final int PLACEHOLDER_TOKENS = Settings.DEFAULT_PLACEHOLDER_TOKENS;
-    /** Tokens of a summary message beyond its body: the opening line and the per-message overhead. */
-    private static final int SUMMARY_FRAME_TOKENS = 40;
+    // The token estimates (message, media and tool-call overhead, summary frame, placeholder size) are
+    // app.context.compaction.* - see ContextCompactionProperties; a Params carries the ones in force.
 
     private static final ObjectMapper JSON = JsonMappers.plain();
 
@@ -98,11 +94,84 @@ public final class ContextCompactionEngine {
      * @param keepRecentMessages newest prior-turn messages that are never summarised away
      * @param summaryMaxTokens token budget of one summary
      * @param restoreToolOffered whether placeholders may point at {@code restore_tool_result}
+     * @param tuning the token estimates in force ({@code app.context.compaction.*}); null = the shipped ones
+     * @param texts the model-facing wording of the summary and of the cleared-result note (the prompt registry's
+     *     {@code compaction.*} keys as the agent sees them); null = the shipped wording
      */
     public record Params(
         int windowTokens, double clearAt, double compactAt, int keepRecentToolResults, int keepRecentMessages,
-        int summaryMaxTokens, boolean restoreToolOffered
+        int summaryMaxTokens, boolean restoreToolOffered, ContextCompactionProperties tuning, Texts texts
     ) {
+
+        public Params {
+            tuning = tuning == null ? ContextCompactionProperties.shipped() : tuning;
+            texts = texts == null ? Texts.shipped() : texts;
+        }
+
+        /** Params with the shipped wording. */
+        public Params(
+            int windowTokens, double clearAt, double compactAt, int keepRecentToolResults, int keepRecentMessages,
+            int summaryMaxTokens, boolean restoreToolOffered, ContextCompactionProperties tuning
+        ) {
+            this(windowTokens, clearAt, compactAt, keepRecentToolResults, keepRecentMessages, summaryMaxTokens,
+                restoreToolOffered, tuning, null);
+        }
+
+        /** Params with the shipped token estimates, window rules and wording. */
+        public Params(
+            int windowTokens, double clearAt, double compactAt, int keepRecentToolResults, int keepRecentMessages,
+            int summaryMaxTokens, boolean restoreToolOffered
+        ) {
+            this(windowTokens, clearAt, compactAt, keepRecentToolResults, keepRecentMessages, summaryMaxTokens,
+                restoreToolOffered, null, null);
+        }
+    }
+
+    /**
+     * The words the engine writes into the prompt, taken once per run from the prompt registry
+     * ({@code compaction.summary_prefix}, {@code compaction.restore_hint}, {@code
+     * compaction.restore_hint.no_restore}) so a summary is recognised by the same text that wrote it.
+     *
+     * @param summaryPrefix opens every summary, line break included
+     * @param restoreHint the note inside a cleared result when {@code restore_tool_result} is offered;
+     *     {@code {stepId}} is replaced by the id
+     * @param noRestoreHint the note when it is not
+     */
+    public record Texts(String summaryPrefix, String restoreHint, String noRestoreHint) {
+
+        private static final Texts SHIPPED = build(PromptResolver.defaultsOnly(), PromptContext.none());
+
+        public Texts {
+            summaryPrefix = summaryPrefix == null || summaryPrefix.isBlank() ? shippedPrefix() : summaryPrefix;
+            restoreHint = restoreHint == null || restoreHint.isBlank() ? shippedRestoreHint() : restoreHint;
+            noRestoreHint = noRestoreHint == null || noRestoreHint.isBlank() ? shippedNoRestoreHint() : noRestoreHint;
+        }
+
+        private static String shippedPrefix() {
+            return PromptResolver.defaultsOnly().catalog().defaultText("compaction.summary_prefix") + "\n";
+        }
+
+        private static String shippedRestoreHint() {
+            return PromptResolver.defaultsOnly().catalog().defaultText("compaction.restore_hint");
+        }
+
+        private static String shippedNoRestoreHint() {
+            return PromptResolver.defaultsOnly().catalog().defaultText("compaction.restore_hint.no_restore");
+        }
+
+        /** The shipped wording. */
+        public static Texts shipped() {
+            return SHIPPED;
+        }
+
+        /** The wording {@code resolver} gives for {@code context} (the agent, in its tenant). */
+        public static Texts build(PromptResolver resolver, PromptContext context) {
+            String prefix = resolver.text("compaction.summary_prefix", context);
+            return new Texts(
+                prefix == null ? null : prefix + "\n",
+                resolver.text("compaction.restore_hint", context),
+                resolver.text("compaction.restore_hint.no_restore", context));
+        }
     }
 
     /**
@@ -131,7 +200,7 @@ public final class ContextCompactionEngine {
     public Result apply(List<Message> messages, int fixedOverheadTokens, Params params, Summarizer summarizer) {
         int overhead = Math.max(fixedOverheadTokens, 0);
         if (messages == null || messages.isEmpty() || params == null || params.windowTokens() <= 0) {
-            int tokens = estimateAll(messages) + overhead;
+            int tokens = estimateAll(messages, params == null ? null : params.tuning()) + overhead;
             return new Result(messages, tokens, tokens, 0, 0);
         }
 
@@ -140,23 +209,24 @@ public final class ContextCompactionEngine {
         classify(messages, params, items, entries);
         Settings settings = new Settings(
             params.windowTokens(), params.clearAt(), params.compactAt(), params.keepRecentToolResults(),
-            params.summaryMaxTokens() + SUMMARY_FRAME_TOKENS, PLACEHOLDER_TOKENS);
+            params.summaryMaxTokens() + params.tuning().getSummaryFrameTokens(),
+            params.tuning().getPlaceholderTokens());
         Plan plan = ContextBudgetPlanner.plan(items, overhead, settings);
         if (plan.isEmpty()) {
             return new Result(messages, plan.tokensBefore(), plan.tokensBefore(), 0, 0);
         }
 
         List<Message> out = new ArrayList<>(messages);
-        int cleared = applyClears(plan, messages, entries, out, params.restoreToolOffered());
+        int cleared = applyClears(plan, messages, entries, out, params.restoreToolOffered(), params.texts());
         int compacted = 0;
         Compact compact = plan.compaction();
         if (compact != null && summarizer != null) {
-            compacted = applyCompaction(compact, messages, entries, out, summarizer, params.summaryMaxTokens());
+            compacted = applyCompaction(compact, messages, entries, out, summarizer, params.summaryMaxTokens(), params.texts());
         }
         if (cleared == 0 && compacted == 0) {
             return new Result(messages, plan.tokensBefore(), plan.tokensBefore(), 0, 0);
         }
-        return new Result(out, plan.tokensBefore(), estimateAll(out) + overhead, cleared, compacted);
+        return new Result(out, plan.tokensBefore(), estimateAll(out, params.tuning()) + overhead, cleared, compacted);
     }
 
     // ------------------------------------------------------------------ classification
@@ -203,15 +273,15 @@ public final class ContextCompactionEngine {
                 for (int j = 0; j < responses.size(); j++) {
                     String data = responses.get(j).responseData();
                     items.add(new Item(
-                        Kind.TOOL_RESULT, responseTokens(responses.get(j)), pinned, isCleared(data),
+                        Kind.TOOL_RESULT, responseTokens(responses.get(j), params.tuning()), pinned, isCleared(data),
                         i == lastToolMessage, false));
                     entries.add(new Entry(i, j));
                 }
                 continue;
             }
-            int tokens = messageTokens(m);
+            int tokens = messageTokens(m, params.tuning());
             if (m instanceof SystemMessage) {
-                boolean summary = textOf(m).startsWith(SUMMARY_PREFIX);
+                boolean summary = isSummary(textOf(m), params.texts());
                 items.add(new Item(summary ? Kind.SUMMARY : Kind.SYSTEM, tokens, pinned, false, !summary, recent));
             } else if (m instanceof UserMessage) {
                 items.add(new Item(Kind.USER, tokens, pinned, false, i == latestUser, recent));
@@ -220,6 +290,11 @@ public final class ContextCompactionEngine {
             }
             entries.add(new Entry(i, -1));
         }
+    }
+
+    /** A summary this run wrote, or one written with the shipped prefix. */
+    private static boolean isSummary(String text, Texts texts) {
+        return text.startsWith(texts.summaryPrefix()) || text.startsWith(SUMMARY_PREFIX);
     }
 
     private static boolean isPinned(Message message) {
@@ -238,7 +313,8 @@ public final class ContextCompactionEngine {
     // ------------------------------------------------------------------ clearing
 
     private static int applyClears(
-        Plan plan, List<Message> messages, List<Entry> entries, List<Message> out, boolean restoreToolOffered
+        Plan plan, List<Message> messages, List<Entry> entries, List<Message> out, boolean restoreToolOffered,
+        Texts texts
     ) {
         Map<Entry, String> argsByResponse = argumentsByResponse(messages);
         Map<Integer, List<ToolResponseMessage.ToolResponse>> rebuilt = new HashMap<>();
@@ -252,7 +328,7 @@ public final class ContextCompactionEngine {
             List<ToolResponseMessage.ToolResponse> responses = rebuilt.computeIfAbsent(
                 entry.messageIndex(), k -> new ArrayList<>(original.getResponses()));
             ToolResponseMessage.ToolResponse response = responses.get(entry.responseIndex());
-            String placeholder = placeholder(response, argsByResponse.get(entry), restoreToolOffered);
+            String placeholder = placeholder(response, argsByResponse.get(entry), restoreToolOffered, texts);
             responses.set(entry.responseIndex(),
                 new ToolResponseMessage.ToolResponse(response.id(), response.name(), placeholder));
             cleared++;
@@ -329,6 +405,12 @@ public final class ContextCompactionEngine {
      * not carry an explicit status; the original is still in {@code tool_call_log} either way.
      */
     static String placeholder(ToolResponseMessage.ToolResponse response, String arguments, boolean restoreToolOffered) {
+        return placeholder(response, arguments, restoreToolOffered, Texts.shipped());
+    }
+
+    static String placeholder(
+        ToolResponseMessage.ToolResponse response, String arguments, boolean restoreToolOffered, Texts texts
+    ) {
         String tool = response.name() == null ? "tool" : response.name();
         String data = response.responseData() == null ? "" : response.responseData();
         String digest = ToolResultRestoreIds.digest(arguments);
@@ -339,9 +421,8 @@ public final class ContextCompactionEngine {
         body.put("status", looksLikeFailure(data) ? "error" : "ok");
         body.put("chars", data.length());
         body.put("restore", restoreToolOffered
-            ? "call restore_tool_result with stepId \"" + ToolResultRestoreIds.stepId(tool, arguments)
-                + "\", or run the tool again"
-            : "run the tool again if you need it");
+            ? texts.restoreHint().replace("{stepId}", ToolResultRestoreIds.stepId(tool, arguments))
+            : texts.noRestoreHint());
         try {
             return JSON.writeValueAsString(body);
         } catch (Exception e) {
@@ -361,7 +442,7 @@ public final class ContextCompactionEngine {
 
     private static int applyCompaction(
         Compact compact, List<Message> messages, List<Entry> entries, List<Message> out,
-        Summarizer summarizer, int summaryMaxTokens
+        Summarizer summarizer, int summaryMaxTokens, Texts texts
     ) {
         List<Integer> messageIndexes = new ArrayList<>();
         for (int itemIndex : compact.indices()) {
@@ -372,8 +453,9 @@ public final class ContextCompactionEngine {
         for (int messageIndex : messageIndexes) {
             Message m = messages.get(messageIndex);
             String text = textOf(m);
-            if (m instanceof SystemMessage && text.startsWith(SUMMARY_PREFIX)) {
-                existingSummary = text.substring(SUMMARY_PREFIX.length());
+            if (m instanceof SystemMessage && isSummary(text, texts)) {
+                existingSummary =
+                    text.substring((text.startsWith(texts.summaryPrefix()) ? texts.summaryPrefix() : SUMMARY_PREFIX).length());
             } else {
                 turns.add(m);
             }
@@ -392,7 +474,7 @@ public final class ContextCompactionEngine {
         if (summary == null || summary.isBlank()) {
             return 0;
         }
-        out.set(messageIndexes.get(0), new SystemMessage(SUMMARY_PREFIX + capToTokens(summary.strip(), summaryMaxTokens)));
+        out.set(messageIndexes.get(0), new SystemMessage(texts.summaryPrefix() + capToTokens(summary.strip(), summaryMaxTokens)));
         for (int k = messageIndexes.size() - 1; k >= 1; k--) {
             int messageIndex = messageIndexes.get(k);
             out.remove(messageIndex);
@@ -413,43 +495,54 @@ public final class ContextCompactionEngine {
 
     /** Estimated tokens of a whole message list; the same estimate the planner's items use. */
     public static int estimateAll(List<Message> messages) {
+        return estimateAll(messages, null);
+    }
+
+    /** {@link #estimateAll(List)} under the given token estimates; null = the shipped ones. */
+    public static int estimateAll(List<Message> messages, ContextCompactionProperties tuning) {
         if (messages == null) {
             return 0;
         }
         long total = 0;
         for (Message m : messages) {
-            total += messageTokens(m);
+            total += messageTokens(m, tuning);
         }
         return (int) Math.min(total, Integer.MAX_VALUE);
     }
 
     /** Estimated tokens of one message (a tool-response message is the sum of its responses). */
     public static int messageTokens(Message message) {
+        return messageTokens(message, null);
+    }
+
+    /** {@link #messageTokens(Message)} under the given token estimates; null = the shipped ones. */
+    public static int messageTokens(Message message, ContextCompactionProperties tuning) {
         if (message == null) {
             return 0;
         }
+        ContextCompactionProperties t = tuning == null ? ContextCompactionProperties.shipped() : tuning;
         if (message instanceof ToolResponseMessage trm) {
             long sum = 0;
             for (ToolResponseMessage.ToolResponse response : trm.getResponses()) {
-                sum += responseTokens(response);
+                sum += responseTokens(response, t);
             }
             return (int) Math.min(sum, Integer.MAX_VALUE);
         }
-        long tokens = MESSAGE_OVERHEAD_TOKENS + SessionMemoryService.estimateTokens(textOf(message));
+        long tokens = t.getMessageOverheadTokens() + SessionMemoryService.estimateTokens(textOf(message));
         if (message instanceof AssistantMessage assistant && assistant.hasToolCalls()) {
             for (AssistantMessage.ToolCall call : assistant.getToolCalls()) {
                 tokens += SessionMemoryService.estimateTokens(call.name())
-                    + SessionMemoryService.estimateTokens(call.arguments()) + RESPONSE_OVERHEAD_TOKENS;
+                    + SessionMemoryService.estimateTokens(call.arguments()) + t.getResponseOverheadTokens();
             }
         }
         if (message instanceof UserMessage user && user.getMedia() != null) {
-            tokens += (long) user.getMedia().size() * MEDIA_TOKENS;
+            tokens += (long) user.getMedia().size() * t.getMediaTokens();
         }
         return (int) Math.min(tokens, Integer.MAX_VALUE);
     }
 
-    private static int responseTokens(ToolResponseMessage.ToolResponse response) {
-        long tokens = RESPONSE_OVERHEAD_TOKENS + SessionMemoryService.estimateTokens(response.responseData());
+    private static int responseTokens(ToolResponseMessage.ToolResponse response, ContextCompactionProperties t) {
+        long tokens = t.getResponseOverheadTokens() + SessionMemoryService.estimateTokens(response.responseData());
         return (int) Math.min(tokens, Integer.MAX_VALUE);
     }
 

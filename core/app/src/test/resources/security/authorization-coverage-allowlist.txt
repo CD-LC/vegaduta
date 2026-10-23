@@ -14,6 +14,7 @@ DELETE /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}  # HAND
 DELETE /api/agents/{agentId}/quality/gate  # HANDLER: QualityAgentAccessGate (EDITOR on writes)
 DELETE /api/agents/{agentId}/quality/simulations/personas/{key}  # HANDLER: QualityAgentAccessGate (EDITOR on writes)
 DELETE /api/agents/{agentId}/result-schema  # HANDLER: AgentJobObservabilityController (requireAccess EDITOR)
+DELETE /api/agents/{agentId}/settings/{key}  # HANDLER: SettingsService (SettingsAgentAccess.requireEditor = AgentService requireAccess EDITOR; a TENANT_ADMIN-minRole key also needs ROLE_tenant-admin)
 DELETE /api/agents/{agentId}/share  # HANDLER: AgentShareOwnerController -> AgentShareService requireOwnerAccess (ResourceAccessService)
 DELETE /api/channels/google/personal/connection  # MEMBER: removes the caller's own Google connection (GoogleOAuthService, scoped to the caller's subject)
 DELETE /api/secrets/{id}  # HANDLER: SecretVaultService requireCanWrite + SecretVaultService requireVisible
@@ -76,6 +77,7 @@ POST /api/agents/{agentId}/jobs  # HANDLER: AgentJobService RUNNER plus the run 
 POST /api/agents/{agentId}/jobs/{jobId}/cancel  # HANDLER: AgentJobService RUNNER for the job's requester, EDITOR on the agent for anyone else (review step 8)
 POST /api/agents/{agentId}/lab/runs  # HANDLER: AgentLabRunService RUNNER plus stored-plan caps
 POST /api/agents/{agentId}/lab/runs/{runId}/cancel  # HANDLER: AgentLabRunService (requestedBy must equal caller)
+POST /api/agents/{agentId}/prompt-preview  # HANDLER: PromptPreviewService (requireAccess EDITOR: the preview shows prompts, the tool list and the caller's recalled memory; read-only, nothing is stored or sent to a model)
 POST /api/agents/{agentId}/prompt/versions/{versionId}/revert  # HANDLER: AgentService (EDITOR + assertEditable)
 POST /api/agents/{agentId}/quality/datasets  # HANDLER: QualityAgentAccessGate (EDITOR for non-GET)
 POST /api/agents/{agentId}/quality/datasets/seed-golden  # HANDLER: QualityAgentAccessGate (EDITOR)
@@ -158,6 +160,8 @@ PUT /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}  # HANDLER
 PUT /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}/grader  # HANDLER: QualityAgentAccessGate (EDITOR)
 PUT /api/agents/{agentId}/quality/gate  # HANDLER: QualityAgentAccessGate (EDITOR)
 PUT /api/agents/{agentId}/result-schema  # HANDLER: AgentJobObservabilityController (EDITOR)
+PUT /api/agents/{agentId}/runtime-limits  # HANDLER: AgentService.setRuntimeLimits (requireAccess EDITOR + assertEditable); the GET needs VIEWER
+PUT /api/agents/{agentId}/settings/{key}  # HANDLER: SettingsService (SettingsAgentAccess.requireEditor = AgentService requireAccess EDITOR; a TENANT_ADMIN-minRole key also needs ROLE_tenant-admin)
 PUT /api/agents/{agentId}/skills  # HANDLER: SkillController (EDITOR + assertEditable)
 PUT /api/agents/{agentId}/versions/{versionId}/label  # HANDLER: AgentVersionService (EDITOR + assertEditable)
 PUT /api/secrets/{id}/allowed-hosts  # HANDLER: SecretVaultService requireCanWrite + SecretVaultService requireVisible

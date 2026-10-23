@@ -1,9 +1,11 @@
 package com.agenticai.core.agents.tools.workspacefiles;
 
 import com.agenticai.core.agentspi.WorkspaceToolSource;
+import com.agenticai.core.guardrails.ToolOutputProperties;
 import java.nio.file.Path;
 import java.util.List;
 import org.springframework.ai.tool.ToolCallback;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
@@ -27,14 +29,19 @@ public class WorkspaceFileToolSource implements WorkspaceToolSource {
             Environment environment,
             @Value("${app.assistant.local-shell.enabled:false}") boolean enabled,
             @Value("${app.assistant.local-shell.acknowledge-shared-host:false}") boolean acknowledgeSharedHost,
-            @Value("${app.assistant.local-shell.workspace:${user.home}/vegaduta-workspace}") String workspace) {
+            @Value("${app.assistant.local-shell.workspace:${user.home}/vegaduta-workspace}") String workspace,
+            ObjectProvider<ToolOutputProperties> toolOutput) {
         boolean singleUser = acknowledgeSharedHost || environment.acceptsProfiles(Profiles.of("personal"));
         this.offered = enabled && singleUser;
         this.files = new WorkspaceFiles(Path.of(workspace));
+        // A read pages its own output (offset/limit), so it is built to fit the model-facing cap that
+        // applies to it (app.tools.output.*, including a per-tool entry for workspace_read).
+        ToolOutputProperties outputLimits = toolOutput.getIfAvailable(ToolOutputProperties::new);
+        int readLimit = outputLimits.limitFor(WorkspaceFileToolCallback.Kind.READ.toolName);
         this.tools =
                 List.of(
                         new WorkspaceFileToolCallback(files, WorkspaceFileToolCallback.Kind.LIST, workspace),
-                        new WorkspaceFileToolCallback(files, WorkspaceFileToolCallback.Kind.READ, workspace),
+                        new WorkspaceFileToolCallback(files, WorkspaceFileToolCallback.Kind.READ, workspace, readLimit),
                         new WorkspaceFileToolCallback(files, WorkspaceFileToolCallback.Kind.SEARCH, workspace),
                         new WorkspaceFileToolCallback(files, WorkspaceFileToolCallback.Kind.WRITE, workspace),
                         new WorkspaceFileToolCallback(files, WorkspaceFileToolCallback.Kind.EDIT, workspace));

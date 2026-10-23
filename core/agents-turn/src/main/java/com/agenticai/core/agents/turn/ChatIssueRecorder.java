@@ -25,6 +25,13 @@ final class ChatIssueRecorder {
     private final AgentService agentService;
     private final ObjectProvider<PlatformIssueService> platformIssueService;
 
+    /**
+     * The prompt registry's view for an agent; the shipped text until {@link ChatServiceParts} wires
+     * the settings bean.
+     */
+    volatile java.util.function.Function<UUID, ResolvedDirectives> prompts =
+            ResolvedDirectives.DEFAULTS_FOR_AGENT;
+
     ChatIssueRecorder(AgentService agentService, ObjectProvider<PlatformIssueService> platformIssueService) {
         this.agentService = agentService;
         this.platformIssueService = platformIssueService;
@@ -162,6 +169,15 @@ final class ChatIssueRecorder {
      * unmodified if the platform-issue write itself fails.
      */
     String recordAndCorrectFabricatedGenerationUrl(UUID agentId, String sessionId, String fullAnswer) {
+        return recordAndCorrectFabricatedGenerationUrl(agentId, sessionId, fullAnswer, prompts.apply(agentId));
+    }
+
+    /**
+     * As above, with the prompt settings the caller already holds for this turn (a caller on a
+     * completion thread takes them in the turn's tenant).
+     */
+    String recordAndCorrectFabricatedGenerationUrl(
+            UUID agentId, String sessionId, String fullAnswer, ResolvedDirectives pd) {
         log.warn(
             "Agent {} session {} produced a response containing a known fabricated generation-service "
                 + "URL pattern with no corroborating tool call this turn - correcting the persisted history",
@@ -184,8 +200,6 @@ final class ChatIssueRecorder {
                 log.warn("Failed to record platform issue for agent {} fabricated-URL detection", agentId, recordingFailure);
             }
         }
-        return "I need to correct my previous message - the file link I gave you was not real. "
-            + "I have not actually generated that file. Please ask again and I will use the proper "
-            + "generation tool this time.";
+        return pd.textOrShipped("message.fabricated_url.correction");
     }
 }
