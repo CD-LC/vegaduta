@@ -4,6 +4,7 @@ import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ApprovalContinuationPort;
 import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
+import com.agenticai.core.agents.turn.ToolLedger;
 import com.agenticai.core.approval.ApprovalOutcomePort;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.security.TenantContext;
@@ -111,18 +112,19 @@ public class ApprovalOutcomeFollowUp implements ApprovalOutcomePort {
         };
     }
 
-    private static String note(
+    private static ToolLedger note(
             ApprovalContinuationProperties wording,
             Outcome outcome,
             ReplayTarget target,
             ApprovalRequest request,
             String shown) {
-        String cut = ApprovalOutcomeNotes.truncate(shown, wording.getMaxNoteResultChars());
-        return switch (outcome) {
-            case COMPLETED -> wording.renderCompletedNote(target.toolName(), cut);
-            case FAILED -> wording.renderFailedNote(target.toolName(), cut);
-            case DENIED -> wording.renderDeniedNote(target.toolName(), request.getDecidedBy(), cut);
-        };
+        ToolLedger.Status status =
+                switch (outcome) {
+                    case COMPLETED -> ToolLedger.Status.OK;
+                    case FAILED -> ToolLedger.Status.FAILED;
+                    case DENIED -> ToolLedger.Status.NOT_RUN;
+                };
+        return ApprovalOutcomeNotes.outcomeRecord(wording, request, target, status, request.getDecidedBy(), shown);
     }
 
     private boolean continueTask(ApprovalRequest request, Outcome outcome, String shown) {

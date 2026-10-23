@@ -56,6 +56,8 @@ class ApprovalContinuationDefaultsTest {
         assertThat(fromYml.getFailedNote()).isEqualTo(code.getFailedNote());
         assertThat(fromYml.getCompletedNoOutputText()).isEqualTo(code.getCompletedNoOutputText());
         assertThat(fromYml.getMaxNoteResultChars()).isEqualTo(code.getMaxNoteResultChars()).isEqualTo(500);
+        assertThat(fromYml.getMaxNoteArgumentsChars()).isEqualTo(code.getMaxNoteArgumentsChars()).isEqualTo(160);
+        assertThat(fromYml.getNoteApproval()).isEqualTo(code.getNoteApproval());
         assertThat(fromYml.getCompletedMessage()).isEqualTo(code.getCompletedMessage());
         assertThat(fromYml.getFailedMessage()).isEqualTo(code.getFailedMessage());
         assertThat(fromYml.getDeniedMessage()).isEqualTo(code.getDeniedMessage());
