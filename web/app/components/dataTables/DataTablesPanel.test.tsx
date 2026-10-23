@@ -13,11 +13,21 @@ const createDataTable = vi.fn();
 
 vi.mock("../../lib/api", () => ({
   api: {
-    get getDataTablesConfig() { return getDataTablesConfig; },
-    get listDataTables() { return listDataTables; },
-    get listDataTableRows() { return listDataTableRows; },
-    get updateDataTableRow() { return updateDataTableRow; },
-    get createDataTable() { return createDataTable; },
+    get getDataTablesConfig() {
+      return getDataTablesConfig;
+    },
+    get listDataTables() {
+      return listDataTables;
+    },
+    get listDataTableRows() {
+      return listDataTableRows;
+    },
+    get updateDataTableRow() {
+      return updateDataTableRow;
+    },
+    get createDataTable() {
+      return createDataTable;
+    },
   },
   triggerBrowserDownload: vi.fn(),
 }));
@@ -40,7 +50,8 @@ vi.mock("../../lib/toastBus", () => ({
 vi.mock("next/link", async () => {
   const React = await import("react");
   return {
-    default: ({ href, children }: { href: string; children: unknown }) => React.createElement("a", { href }, children as any),
+    default: ({ href, children }: { href: string; children: unknown }) =>
+      React.createElement("a", { href }, children as any),
   };
 });
 
@@ -111,6 +122,18 @@ describe("DataTablesPanel states", () => {
     expect(await screen.findByText("planLockedTitle")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "upgrade" })).toHaveAttribute("href", "/admin/billing");
     expect(listDataTables).not.toHaveBeenCalled();
+  });
+
+  it("shows the plan-locked card without an upgrade link on a personal install", async () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITION", "personal");
+    try {
+      getDataTablesConfig.mockResolvedValue(config({ planLocked: true }));
+      render(<DataTablesPanel />);
+      expect(await screen.findByText("planLockedTitle")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "upgrade" })).not.toBeInTheDocument();
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it("reports a real failure with a retry", async () => {
@@ -218,7 +241,9 @@ describe("DataTablesPanel create", () => {
     fireEvent.change(screen.getByLabelText("nameLabel"), { target: { value: "  Leads " } });
     fireEvent.click(screen.getByRole("button", { name: /^create$/ }));
 
-    await waitFor(() => expect(createDataTable).toHaveBeenCalledWith({ name: "Leads", description: undefined, columns: [] }));
+    await waitFor(() =>
+      expect(createDataTable).toHaveBeenCalledWith({ name: "Leads", description: undefined, columns: [] })
+    );
     expect(await screen.findByTestId("data-table-grid")).toBeInTheDocument();
   });
 });

@@ -48,6 +48,36 @@ class PersonalProfileConfigTest {
     }
 
     @Test
+    void theEditionTierIsPersonalHereAndCanBeOverriddenFromTheEnvironment() throws IOException {
+        assertThat(environment(Map.of()).getProperty("app.edition.tier")).isEqualTo("personal");
+        assertThat(environment(Map.of("APP_EDITION_TIER", "full")).getProperty("app.edition.tier"))
+                .isEqualTo("full");
+    }
+
+    @Test
+    void a2aAndTheResolutionSweepAreOffAndTheSchedulerDoesNotOfferSlackOrA2aDelivery()
+            throws IOException {
+        StandardEnvironment env = environment(Map.of());
+
+        assertThat(env.getProperty("app.a2a.enabled")).isEqualTo("false");
+        assertThat(env.getProperty("resolution.sweep.enabled")).isEqualTo("false");
+        assertThat(env.getProperty("app.scheduled-tasks.delivery-channels").split(","))
+                .contains("in_app", "email", "whatsapp", "telegram")
+                .doesNotContain("slack", "a2a");
+
+        StandardEnvironment overridden =
+                environment(
+                        Map.of(
+                                "APP_A2A_ENABLED", "true",
+                                "RESOLUTION_SWEEP_ENABLED", "true",
+                                "SCHEDULED_TASKS_DELIVERY_CHANNELS", "in_app,slack"));
+        assertThat(overridden.getProperty("app.a2a.enabled")).isEqualTo("true");
+        assertThat(overridden.getProperty("resolution.sweep.enabled")).isEqualTo("true");
+        assertThat(overridden.getProperty("app.scheduled-tasks.delivery-channels"))
+                .isEqualTo("in_app,slack");
+    }
+
+    @Test
     void embeddingsFallBackToOllamaAndTheSidecarIsOffUnlessAskedFor() throws IOException {
         StandardEnvironment env = environment(Map.of());
         assertThat(env.getProperty("app.embeddings.provider")).isEqualTo("auto");

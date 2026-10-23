@@ -1,6 +1,8 @@
 package com.agenticai.core.billing.gateway;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -30,19 +32,20 @@ import org.springframework.web.client.RestClientException;
  * <p><b>What's CONFIRMED against PhonePe's official developer docs (developer.phonepe.com) as of
  * this writing, vs. BEST-EFFORT / NEEDS VERIFICATION before this goes anywhere near real money -
  * stated explicitly, the same discipline {@link RazorpayGatewayClient}'s own javadoc follows:</b>
+ *
  * <ul>
- *   <li><b>CONFIRMED</b> - the OAuth {@code client_credentials} token flow: exact sandbox
- *       ({@code api-preprod.phonepe.com/apis/pg-sandbox/v1/oauth/token}) and production
- *       ({@code api.phonepe.com/apis/identity-manager/v1/oauth/token}) endpoints, request fields
- *       ({@code client_id}/{@code client_version}/{@code client_secret}/{@code grant_type=
+ *   <li><b>CONFIRMED</b> - the OAuth {@code client_credentials} token flow: exact sandbox ({@code
+ *       api-preprod.phonepe.com/apis/pg-sandbox/v1/oauth/token}) and production ({@code
+ *       api.phonepe.com/apis/identity-manager/v1/oauth/token}) endpoints, request fields ({@code
+ *       client_id}/{@code client_version}/{@code client_secret}/{@code grant_type=
  *       client_credentials}), response shape ({@code access_token}/{@code expires_at}/{@code
  *       token_type: "O-Bearer"}), and that the token is sent as {@code Authorization: O-Bearer
  *       <token>} on subsequent calls.
  *   <li><b>CONFIRMED</b> - webhook authenticity verification: HTTP Basic Auth style, {@code
  *       Authorization: SHA256(username:password)} where username/password are configured in the
  *       PhonePe Business Dashboard's Webhook settings, compared against a locally-computed hash of
- *       those same configured credentials. Notably NOT an HMAC-over-the-request-body scheme the
- *       way Razorpay's webhook signature works - this only proves the caller knows the configured
+ *       those same configured credentials. Notably NOT an HMAC-over-the-request-body scheme the way
+ *       Razorpay's webhook signature works - this only proves the caller knows the configured
  *       username/password, not that this specific body wasn't altered in transit (TLS is what
  *       protects that here) - a real, documented difference from Razorpay, not an oversight below.
  *   <li><b>CONFIRMED</b> - the one-time Standard Checkout webhook event names ({@code
@@ -50,29 +53,29 @@ import org.springframework.web.client.RestClientException;
  *       {@code pg.refund.failed}), and that subscription/mandate ("Autopay") setup is a SEPARATE
  *       API surface from one-time Standard Checkout, with its own documented fields ({@code
  *       subscriptionType: "RECURRING"}, {@code authWorkflowType}, {@code amountType}, {@code
- *       maxAmount} - capped at ₹15,000 by NPCI's own UPI Autopay rules, not this codebase's
- *       choice, {@code frequency}, {@code productType: "UPI_MANDATE"}).
+ *       maxAmount} - capped at ₹15,000 by NPCI's own UPI Autopay rules, not this codebase's choice,
+ *       {@code frequency}, {@code productType: "UPI_MANDATE"}).
  *   <li><b>NOT CONFIRMED - flagged, not guessed at</b>:
- *     <ol>
- *       <li>The exact base path for the non-OAuth Payment Gateway / Subscription-Setup REST
- *           calls. Only the OAuth token endpoint's exact URL was directly verifiable from the
- *           fetched docs during this pass - {@code app.billing.phonepe.api-base-url} below is
- *           left fully config-driven (no hardcoded default) specifically so this can't silently
- *           point at a guessed, wrong host.</li>
- *       <li>The exact subscription LIFECYCLE webhook event names (activated/charged/cancelled/
- *           paused for an Autopay mandate specifically, as opposed to the one-time Standard
- *           Checkout events above, which ARE confirmed). {@link #mapEventType} maps every event
- *           name it hasn't independently confirmed to {@link BillingEventType#UNKNOWN} rather
- *           than guess a mapping that could silently misfile a real subscription-lifecycle event
- *           - the same safe-default precedent {@link RazorpayGatewayClient#gatewayName}'s sibling
- *           {@code mapEventType} method already established.</li>
- *       <li>How a trial period maps onto the Subscription Setup API - no trial-period field was
- *           visible in what was fetched. See {@link #createSubscriptionWithTrial}'s inline note.</li>
- *       <li>INR pricing for this platform's PREMIUM/UNLIMITED tiers - UPI Autopay is INR-only,
- *           and {@code app.billing.phonepe.plan-premium}/{@code plan-unlimited} (parsed by
- *           {@link #parsePlanConfig}) need real amounts a business decision, not this class,
- *           should set - see those properties' own comments in {@code application.yml}.</li>
- *     </ol>
+ *       <ol>
+ *         <li>The exact base path for the non-OAuth Payment Gateway / Subscription-Setup REST
+ *             calls. Only the OAuth token endpoint's exact URL was directly verifiable from the
+ *             fetched docs during this pass - {@code app.billing.phonepe.api-base-url} below is
+ *             left fully config-driven (no hardcoded default) specifically so this can't silently
+ *             point at a guessed, wrong host.
+ *         <li>The exact subscription LIFECYCLE webhook event names (activated/charged/cancelled/
+ *             paused for an Autopay mandate specifically, as opposed to the one-time Standard
+ *             Checkout events above, which ARE confirmed). {@link #mapEventType} maps every event
+ *             name it hasn't independently confirmed to {@link BillingEventType#UNKNOWN} rather
+ *             than guess a mapping that could silently misfile a real subscription-lifecycle event
+ *             - the same safe-default precedent {@link RazorpayGatewayClient#gatewayName}'s sibling
+ *             {@code mapEventType} method already established.
+ *         <li>How a trial period maps onto the Subscription Setup API - no trial-period field was
+ *             visible in what was fetched. See {@link #createSubscriptionWithTrial}'s inline note.
+ *         <li>INR pricing for this platform's PREMIUM/UNLIMITED tiers - UPI Autopay is INR-only,
+ *             and {@code app.billing.phonepe.plan-premium}/{@code plan-unlimited} (parsed by {@link
+ *             #parsePlanConfig}) need real amounts a business decision, not this class, should set
+ *             - see those properties' own comments in {@code application.yml}.
+ *       </ol>
  * </ul>
  *
  * <p>Registered alongside {@link RazorpayGatewayClient} via {@link PaymentGatewayRegistry} - see
@@ -82,11 +85,15 @@ import org.springframework.web.client.RestClientException;
  */
 @Component
 @Profile("security")
+@ConditionalOnEditionFeature(EditionFeature.BILLING_PAYMENTS)
 public class PhonePeGatewayClient implements PaymentGatewayClient {
 
     private static final Logger log = LoggerFactory.getLogger(PhonePeGatewayClient.class);
 
-    /** NPCI's own UPI Autopay per-mandate ceiling - a real regulatory constraint, not this codebase's choice. */
+    /**
+     * NPCI's own UPI Autopay per-mandate ceiling - a real regulatory constraint, not this
+     * codebase's choice.
+     */
     private static final long MAX_AUTOPAY_AMOUNT_PAISE = 15_000_00L;
 
     private final RestClient oauthClient;
@@ -98,9 +105,11 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
     private final String merchantId;
     private final String webhookUsername;
     private final String webhookPassword;
+
     /** SEC-024: warn once (not per request) when webhook credentials are blank. */
     private final java.util.concurrent.atomic.AtomicBoolean blankCredentialsWarned =
-        new java.util.concurrent.atomic.AtomicBoolean(false);
+            new java.util.concurrent.atomic.AtomicBoolean(false);
+
     private final String premiumPlanConfig;
     private final String unlimitedPlanConfig;
     // Kept as a raw string in addition to the built apiClient because
@@ -118,31 +127,30 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
     private volatile Instant cachedTokenExpiresAt = Instant.EPOCH;
 
     /**
-     * @param restClientBuilder the AUTO-CONFIGURED builder, injected rather
-     *     than two bare {@code RestClient.builder()} calls (2026-07-29 security
-     *     audit - this client is named explicitly in the finding). A hand-built
-     *     builder bypasses Spring Boot's HTTP client auto-configuration, so
-     *     both the OAuth and the payments client ran with no connect and no
-     *     read timeout: a PhonePe outage parked a checkout request forever
-     *     instead of failing it, with the user's browser waiting on a payment
-     *     whose real state was unknown. Injecting the shared builder picks up
-     *     {@code spring.http.client.*}. Note {@code .baseUrl()} mutates the
-     *     builder, so the two clients each get their own {@code clone()}
-     *     rather than sharing one instance.
+     * @param restClientBuilder the AUTO-CONFIGURED builder, injected rather than two bare {@code
+     *     RestClient.builder()} calls (2026-07-29 security audit - this client is named explicitly
+     *     in the finding). A hand-built builder bypasses Spring Boot's HTTP client
+     *     auto-configuration, so both the OAuth and the payments client ran with no connect and no
+     *     read timeout: a PhonePe outage parked a checkout request forever instead of failing it,
+     *     with the user's browser waiting on a payment whose real state was unknown. Injecting the
+     *     shared builder picks up {@code spring.http.client.*}. Note {@code .baseUrl()} mutates the
+     *     builder, so the two clients each get their own {@code clone()} rather than sharing one
+     *     instance.
      */
     public PhonePeGatewayClient(
-        RestClient.Builder restClientBuilder,
-        @Value("${app.billing.phonepe.oauth-base-url:https://api-preprod.phonepe.com/apis/pg-sandbox}") String oauthBaseUrl,
-        @Value("${app.billing.phonepe.api-base-url}") String apiBaseUrl,
-        @Value("${app.billing.phonepe.client-id}") String clientId,
-        @Value("${app.billing.phonepe.client-secret}") String clientSecret,
-        @Value("${app.billing.phonepe.client-version}") String clientVersion,
-        @Value("${app.billing.phonepe.merchant-id}") String merchantId,
-        @Value("${app.billing.phonepe.webhook-username}") String webhookUsername,
-        @Value("${app.billing.phonepe.webhook-password}") String webhookPassword,
-        @Value("${app.billing.phonepe.plan-premium:}") String premiumPlanConfig,
-        @Value("${app.billing.phonepe.plan-unlimited:}") String unlimitedPlanConfig
-    ) {
+            RestClient.Builder restClientBuilder,
+            @Value(
+                            "${app.billing.phonepe.oauth-base-url:https://api-preprod.phonepe.com/apis/pg-sandbox}")
+                    String oauthBaseUrl,
+            @Value("${app.billing.phonepe.api-base-url}") String apiBaseUrl,
+            @Value("${app.billing.phonepe.client-id}") String clientId,
+            @Value("${app.billing.phonepe.client-secret}") String clientSecret,
+            @Value("${app.billing.phonepe.client-version}") String clientVersion,
+            @Value("${app.billing.phonepe.merchant-id}") String merchantId,
+            @Value("${app.billing.phonepe.webhook-username}") String webhookUsername,
+            @Value("${app.billing.phonepe.webhook-password}") String webhookPassword,
+            @Value("${app.billing.phonepe.plan-premium:}") String premiumPlanConfig,
+            @Value("${app.billing.phonepe.plan-unlimited:}") String unlimitedPlanConfig) {
         this.oauthClient = restClientBuilder.clone().baseUrl(oauthBaseUrl).build();
         this.apiClient = restClientBuilder.clone().baseUrl(apiBaseUrl).build();
         this.clientId = clientId;
@@ -157,19 +165,19 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
     }
 
     /**
-     * PhonePe needs all four of client-id/client-secret/merchant-id AND an
-     * api-base-url before any subscription call can succeed - the base URL
-     * was deliberately left blank-by-default in application.yml because the
-     * correct non-OAuth host was never independently confirmed (see the
-     * class javadoc's "NOT CONFIRMED" list). Checking it here means a
-     * deployment that set credentials but not the URL fails with a clear
-     * "not configured" at upgrade time rather than an HTTP error against a
-     * blank host at call time.
+     * PhonePe needs all four of client-id/client-secret/merchant-id AND an api-base-url before any
+     * subscription call can succeed - the base URL was deliberately left blank-by-default in
+     * application.yml because the correct non-OAuth host was never independently confirmed (see the
+     * class javadoc's "NOT CONFIRMED" list). Checking it here means a deployment that set
+     * credentials but not the URL fails with a clear "not configured" at upgrade time rather than
+     * an HTTP error against a blank host at call time.
      */
     @Override
     public boolean isConfigured() {
-        return isPresent(clientId) && isPresent(clientSecret) && isPresent(merchantId)
-            && isPresent(apiBaseUrl);
+        return isPresent(clientId)
+                && isPresent(clientSecret)
+                && isPresent(merchantId)
+                && isPresent(apiBaseUrl);
     }
 
     private static boolean isPresent(String value) {
@@ -178,7 +186,8 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
 
     @Override
     public java.util.Set<GatewayCapability> capabilities() {
-        return java.util.EnumSet.of(GatewayCapability.SUBSCRIPTIONS, GatewayCapability.USAGE_ADDONS);
+        return java.util.EnumSet.of(
+                GatewayCapability.SUBSCRIPTIONS, GatewayCapability.USAGE_ADDONS);
     }
 
     @Override
@@ -211,8 +220,11 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
 
     @Override
     public GatewaySubscription createSubscriptionWithTrial(
-        String tenantId, String planId, int trialDays, String customerEmail, String customerName
-    ) {
+            String tenantId,
+            String planId,
+            int trialDays,
+            String customerEmail,
+            String customerName) {
         // See this class's javadoc, "NOT CONFIRMED" item 3: no trial-period field was found on
         // the Subscription Setup API. TenantUpgradeService today only ever passes trialDays=0 for
         // upgrades (see that class's own "No trial on an upgrade" javadoc), so this is currently
@@ -221,19 +233,20 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
         // resolved first, so it's surfaced loudly rather than silently ignored.
         if (trialDays > 0) {
             log.warn(
-                "PhonePeGatewayClient#createSubscriptionWithTrial called with trialDays={} but no trial-period field "
-                    + "has been confirmed on PhonePe's Subscription Setup API yet - proceeding as if trialDays=0",
-                trialDays
-            );
+                    "PhonePeGatewayClient#createSubscriptionWithTrial called with trialDays={} but no trial-period field "
+                            + "has been confirmed on PhonePe's Subscription Setup API yet - proceeding as if trialDays=0",
+                    trialDays);
         }
 
         PlanConfig plan = parsePlanConfig(planId);
         if (plan.amountInPaise() > MAX_AUTOPAY_AMOUNT_PAISE) {
             throw new PaymentGatewayException(
-                "Plan amount " + plan.amountInPaise() + " paise exceeds UPI Autopay's NPCI-mandated "
-                    + MAX_AUTOPAY_AMOUNT_PAISE + "-paise per-mandate ceiling - this plan cannot be sold via PhonePe/UPI Autopay as configured.",
-                null
-            );
+                    "Plan amount "
+                            + plan.amountInPaise()
+                            + " paise exceeds UPI Autopay's NPCI-mandated "
+                            + MAX_AUTOPAY_AMOUNT_PAISE
+                            + "-paise per-mandate ceiling - this plan cannot be sold via PhonePe/UPI Autopay as configured.",
+                    null);
         }
 
         String accessToken = obtainAccessToken();
@@ -257,22 +270,26 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
         metaInfo.put("udf3", customerName);
 
         try {
-            JsonNode response = apiClient.post()
-                .uri("/v2/subscriptions/setup")
-                .header(HttpHeaders.AUTHORIZATION, "O-Bearer " + accessToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(request)
-                .retrieve()
-                .body(JsonNode.class);
+            JsonNode response =
+                    apiClient
+                            .post()
+                            .uri("/v2/subscriptions/setup")
+                            .header(HttpHeaders.AUTHORIZATION, "O-Bearer " + accessToken)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(request)
+                            .retrieve()
+                            .body(JsonNode.class);
             if (response == null) {
-                throw new PaymentGatewayException("PhonePe subscription setup returned an empty response", null);
+                throw new PaymentGatewayException(
+                        "PhonePe subscription setup returned an empty response", null);
             }
             String subscriptionId = response.path("subscriptionId").asText(merchantOrderId);
             String redirectUrl = response.path("redirectUrl").asText(null);
             String state = response.path("state").asText("PENDING");
             return new GatewaySubscription(subscriptionId, redirectUrl, state);
         } catch (RestClientException e) {
-            throw new PaymentGatewayException("Could not create PhonePe subscription: " + e.getMessage(), e);
+            throw new PaymentGatewayException(
+                    "Could not create PhonePe subscription: " + e.getMessage(), e);
         }
     }
 
@@ -292,21 +309,24 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
         // the expected value would be sha256(":") - a public constant anyone can send.
         if (!isPresent(webhookUsername) || !isPresent(webhookPassword)) {
             if (blankCredentialsWarned.compareAndSet(false, true)) {
-                log.warn("PhonePe webhook credentials (app.billing.phonepe.webhook-username/-password,"
-                    + " PHONEPE_WEBHOOK_USERNAME / PHONEPE_WEBHOOK_PASSWORD) are not configured - every"
-                    + " PhonePe webhook is rejected until both are set");
+                log.warn(
+                        "PhonePe webhook credentials (app.billing.phonepe.webhook-username/-password,"
+                                + " PHONEPE_WEBHOOK_USERNAME / PHONEPE_WEBHOOK_PASSWORD) are not configured - every"
+                                + " PhonePe webhook is rejected until both are set");
             }
-            throw new InvalidWebhookSignatureException("PhonePe webhook credentials are not configured");
+            throw new InvalidWebhookSignatureException(
+                    "PhonePe webhook credentials are not configured");
         }
         if (signatureHeader == null || signatureHeader.isBlank()) {
-            throw new InvalidWebhookSignatureException("Missing PhonePe webhook Authorization header");
+            throw new InvalidWebhookSignatureException(
+                    "Missing PhonePe webhook Authorization header");
         }
         String expected = sha256Hex(webhookUsername + ":" + webhookPassword);
         if (!MessageDigest.isEqual(
-            expected.getBytes(StandardCharsets.UTF_8),
-            signatureHeader.trim().toLowerCase(Locale.ROOT).getBytes(StandardCharsets.UTF_8)
-        )) {
-            throw new InvalidWebhookSignatureException("PhonePe webhook Authorization header did not match the configured credentials");
+                expected.getBytes(StandardCharsets.UTF_8),
+                signatureHeader.trim().toLowerCase(Locale.ROOT).getBytes(StandardCharsets.UTF_8))) {
+            throw new InvalidWebhookSignatureException(
+                    "PhonePe webhook Authorization header did not match the configured credentials");
         }
     }
 
@@ -330,11 +350,16 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
         if (subscriptionOrOrderId == null) {
             subscriptionOrOrderId = json.path("payload").path("subscriptionId").asText(null);
         }
-        return new BillingEvent(mapEventType(rawEventName), subscriptionOrOrderId, rawEventName, gatewayName());
+        return new BillingEvent(
+                mapEventType(rawEventName), subscriptionOrOrderId, rawEventName, gatewayName());
     }
 
     @Override
-    public void createOverageAddon(String gatewaySubscriptionId, String description, long amountInSubunits, String currency) {
+    public void createOverageAddon(
+            String gatewaySubscriptionId,
+            String description,
+            long amountInSubunits,
+            String currency) {
         // Honestly unimplemented rather than guessed: no PhonePe API equivalent to Razorpay's
         // "add-on charged against a subscription's next invoice" was found during this pass.
         // Fabricating a call here risks either silently no-op'ing a real overage charge or
@@ -342,10 +367,9 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
         // usage-metering overage (the only caller of this method today) should stay Razorpay-only
         // until a real PhonePe equivalent is confirmed.
         throw new UnsupportedOperationException(
-            "PhonePeGatewayClient does not yet support overage add-on charges - no confirmed PhonePe API equivalent "
-                + "to Razorpay's per-subscription add-on exists as of this writing. Route overage billing through "
-                + "the Razorpay gateway until this is resolved."
-        );
+                "PhonePeGatewayClient does not yet support overage add-on charges - no confirmed PhonePe API equivalent "
+                        + "to Razorpay's per-subscription add-on exists as of this writing. Route overage billing through "
+                        + "the Razorpay gateway until this is resolved.");
     }
 
     private String obtainAccessToken() {
@@ -362,33 +386,38 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
         form.add("grant_type", "client_credentials");
 
         try {
-            JsonNode response = oauthClient.post()
-                .uri("/v1/oauth/token")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(form)
-                .retrieve()
-                .body(JsonNode.class);
+            JsonNode response =
+                    oauthClient
+                            .post()
+                            .uri("/v1/oauth/token")
+                            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                            .body(form)
+                            .retrieve()
+                            .body(JsonNode.class);
             if (response == null || !response.hasNonNull("access_token")) {
-                throw new PaymentGatewayException("PhonePe OAuth token response was missing access_token", null);
+                throw new PaymentGatewayException(
+                        "PhonePe OAuth token response was missing access_token", null);
             }
             String accessToken = response.path("access_token").asText();
             long expiresAtEpochSeconds = response.path("expires_at").asLong(now.getEpochSecond());
             // Refresh a little early (60s margin) rather than risk a request starting just before
             // expiry and finishing just after it.
-            this.cachedTokenExpiresAt = Instant.ofEpochSecond(expiresAtEpochSeconds).minusSeconds(60);
+            this.cachedTokenExpiresAt =
+                    Instant.ofEpochSecond(expiresAtEpochSeconds).minusSeconds(60);
             this.cachedAccessToken = accessToken;
             return accessToken;
         } catch (RestClientException e) {
-            throw new PaymentGatewayException("Could not obtain a PhonePe OAuth access token: " + e.getMessage(), e);
+            throw new PaymentGatewayException(
+                    "Could not obtain a PhonePe OAuth access token: " + e.getMessage(), e);
         }
     }
 
     /**
-     * See this class's javadoc, "NOT CONFIRMED" item 2 - only the one-time Standard Checkout
-     * events and refund events are independently confirmed. Everything else, including any real
-     * Autopay subscription-lifecycle event, deliberately falls to {@link BillingEventType#UNKNOWN}
-     * rather than a guessed mapping - the same safe-default precedent
-     * {@code RazorpayGatewayClient}'s own {@code mapEventType} established.
+     * See this class's javadoc, "NOT CONFIRMED" item 2 - only the one-time Standard Checkout events
+     * and refund events are independently confirmed. Everything else, including any real Autopay
+     * subscription-lifecycle event, deliberately falls to {@link BillingEventType#UNKNOWN} rather
+     * than a guessed mapping - the same safe-default precedent {@code RazorpayGatewayClient}'s own
+     * {@code mapEventType} established.
      */
     private static BillingEventType mapEventType(String rawEventName) {
         return switch (rawEventName) {
@@ -416,29 +445,34 @@ public class PhonePeGatewayClient implements PaymentGatewayClient {
      * configuration rather than a currency-converted guess baked into this code.
      */
     private PlanConfig parsePlanConfig(String planId) {
-        String raw = "premium".equalsIgnoreCase(planId) ? premiumPlanConfig
-            : "unlimited".equalsIgnoreCase(planId) ? unlimitedPlanConfig
-            : planId;
+        String raw =
+                "premium".equalsIgnoreCase(planId)
+                        ? premiumPlanConfig
+                        : "unlimited".equalsIgnoreCase(planId) ? unlimitedPlanConfig : planId;
         if (raw == null || raw.isBlank()) {
             throw new PaymentGatewayException(
-                "No PhonePe plan configuration found for '" + planId + "' - set "
-                    + "app.billing.phonepe.plan-premium / app.billing.phonepe.plan-unlimited "
-                    + "(format: \"<amountInPaise>:<frequency>\")", null
-            );
+                    "No PhonePe plan configuration found for '"
+                            + planId
+                            + "' - set "
+                            + "app.billing.phonepe.plan-premium / app.billing.phonepe.plan-unlimited "
+                            + "(format: \"<amountInPaise>:<frequency>\")",
+                    null);
         }
         String[] parts = raw.split(":", 2);
         if (parts.length != 2) {
             throw new PaymentGatewayException(
-                "Malformed PhonePe plan configuration '" + raw + "' - expected \"<amountInPaise>:<frequency>\"", null
-            );
+                    "Malformed PhonePe plan configuration '"
+                            + raw
+                            + "' - expected \"<amountInPaise>:<frequency>\"",
+                    null);
         }
         try {
-            return new PlanConfig(Long.parseLong(parts[0].trim()), parts[1].trim().toUpperCase(Locale.ROOT));
+            return new PlanConfig(
+                    Long.parseLong(parts[0].trim()), parts[1].trim().toUpperCase(Locale.ROOT));
         } catch (NumberFormatException e) {
             throw new PaymentGatewayException("Malformed PhonePe plan amount in '" + raw + "'", e);
         }
     }
 
-    private record PlanConfig(long amountInPaise, String frequency) {
-    }
+    private record PlanConfig(long amountInPaise, String frequency) {}
 }
