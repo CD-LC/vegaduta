@@ -127,6 +127,13 @@ class McpClientPerRequestBearerContractTest {
     @org.junit.jupiter.api.io.TempDir static java.nio.file.Path cacheBase;
 
     private DynamicMcpConnectionManager manager(AtlassianOAuthService oauth) {
+        DynamicMcpConnectionManager manager = newManager(oauth);
+        // The transports run on the SSRF-guarded socket, which refuses this loopback test server.
+        manager.setRemoteClientBuilders(LoopbackMcpClients.supplier());
+        return manager;
+    }
+
+    private DynamicMcpConnectionManager newManager(AtlassianOAuthService oauth) {
         return new DynamicMcpConnectionManager(
                 mock(McpRegistryService.class),
                 mock(TenantSchemaIterator.class),

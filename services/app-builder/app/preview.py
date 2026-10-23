@@ -36,8 +36,7 @@ def _install_and_run_command(manifest: dict) -> str:
     return f"{install} && {run}" if install else run
 
 
-def start_preview(ctx: TenantContext, project_id: str,
-                  settings: Settings = SETTINGS) -> dict:
+def start_preview(ctx: TenantContext, project_id: str, settings: Settings = SETTINGS) -> dict:
     project = projects.require_live(settings.data_dir, ctx, project_id)
     manifest = project_manifest(ctx, project_id, settings)
 
@@ -47,8 +46,14 @@ def start_preview(ctx: TenantContext, project_id: str,
     command = _install_and_run_command(manifest)
     try:
         proc = ci_client.create_process(
-            ctx, project_id, ws_id, command, run_mode="docker",
-            image=manifest.get("image"), port=manifest.get("port"))
+            ctx,
+            project_id,
+            ws_id,
+            command,
+            run_mode="docker",
+            image=manifest.get("image"),
+            port=manifest.get("port"),
+        )
     except CodeIntelClientError:
         # Don't leak the scratch workspace if process start fails.
         try:
@@ -61,55 +66,69 @@ def start_preview(ctx: TenantContext, project_id: str,
         preview_url = proc["preview_url"]
     else:
         preview_url = ingress.register_preview_route(
-            project_id, proc["host"], proc["port"])
+            ctx.tenant_id, project_id, proc["host"], proc["port"], settings
+        )
 
     project.preview = {
-        "process_id": proc["process_id"], "workspace_id": ws_id,
+        "process_id": proc["process_id"],
+        "workspace_id": ws_id,
         "run_mode": proc.get("run_mode", "docker"),
         "preview_url": preview_url,
-        "host": proc.get("host"), "port": proc.get("port"),
+        "host": proc.get("host"),
+        "port": proc.get("port"),
         "started_at": time.time(),
     }
     projects.upsert(settings.data_dir, ctx, project)
 
-    audit.record(tenant_root(settings.data_dir, ctx), {
-        "kind": "preview_started", "project_id": project_id,
-        "actor": ctx.subject, "preview_url": preview_url})
+    audit.record(
+        tenant_root(settings.data_dir, ctx),
+        {
+            "kind": "preview_started",
+            "project_id": project_id,
+            "actor": ctx.subject,
+            "preview_url": preview_url,
+        },
+    )
 
     return {"preview_url": preview_url}
 
 
-def stop_preview(ctx: TenantContext, project_id: str,
-                 settings: Settings = SETTINGS) -> dict:
+def stop_preview(ctx: TenantContext, project_id: str, settings: Settings = SETTINGS) -> dict:
     project = projects.get_or_404(settings.data_dir, ctx, project_id)
     if not project.preview:
         return {"stopped": False, "reason": "no active preview"}
 
-    ingress.deregister_preview_route(project_id)
+    ingress.deregister_preview_route(
+        ctx.tenant_id,
+        project_id,
+        settings,
+        legacy=ingress.is_legacy_preview_url(
+            project.preview.get("preview_url"), project_id, settings
+        ),
+    )
     try:
         ci_client.delete_process(
-            ctx, project_id, project.preview["workspace_id"],
-            project.preview["process_id"])
+            ctx, project_id, project.preview["workspace_id"], project.preview["process_id"]
+        )
     except CodeIntelClientError:
         pass
     try:
-        ci_client.delete_workspace(
-            ctx, project_id, project.preview["workspace_id"])
+        ci_client.delete_workspace(ctx, project_id, project.preview["workspace_id"])
     except CodeIntelClientError:
         pass
 
     project.preview = None
     projects.upsert(settings.data_dir, ctx, project)
 
-    audit.record(tenant_root(settings.data_dir, ctx), {
-        "kind": "preview_stopped", "project_id": project_id,
-        "actor": ctx.subject})
+    audit.record(
+        tenant_root(settings.data_dir, ctx),
+        {"kind": "preview_stopped", "project_id": project_id, "actor": ctx.subject},
+    )
 
     return {"stopped": True}
 
 
-def preview_status(ctx: TenantContext, project_id: str,
-                   settings: Settings = SETTINGS) -> dict:
+def preview_status(ctx: TenantContext, project_id: str, settings: Settings = SETTINGS) -> dict:
     project = projects.get_or_404(settings.data_dir, ctx, project_id)
     if not project.preview:
         return {"active": False}
@@ -117,10 +136,14 @@ def preview_status(ctx: TenantContext, project_id: str,
     live: dict = {}
     try:
         live = ci_client.get_process(
-            ctx, project_id, project.preview["workspace_id"],
-            project.preview["process_id"])
+            ctx, project_id, project.preview["workspace_id"], project.preview["process_id"]
+        )
     except CodeIntelClientError:
         pass  # stale/unreachable process info; report what we last knew
 
-    return {"active": True, **project.preview,
-           "running": live.get("running"), "exit_code": live.get("exit_code")}
+    return {
+        "active": True,
+        **project.preview,
+        "running": live.get("running"),
+        "exit_code": live.get("exit_code"),
+    }

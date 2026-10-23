@@ -102,8 +102,8 @@ what the code does not do, stated as plainly as the rest.
   `AgentChatServiceConsentGateTest`). Their message text is not written to the transcript or kept
   as the session preview (`ChannelSessionService.resolveOrCreate`, tested in
   `ChannelSessionServiceTest`). Agreement is a clear word (`YES`, `I agree`, `haan`, `हाँ`, or the
-  tenant's own words); `ok`, `y` and sentences that only contain the word do not count
-  (`ConsentTextTest`). Every decision is an append-only row with timestamp, channel, contact id,
+  tenant's own words); `ok`, `y` and sentences that only contain the word do not count, and
+  neither does a reply longer than 512 characters (`ConsentTextTest`). Every decision is an append-only row with timestamp, channel, contact id,
   agent, purpose, notice version, notice language and the SHA-256 of the exact notice text shown
   (`ConsentLedger`, table `privacy_consent_record`). Editing the notice text raises the version
   and asks everyone again. `STOP` withdraws consent and, unless the tenant switched it off,

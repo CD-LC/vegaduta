@@ -20,6 +20,12 @@ build. The reasoning, and what is deliberately not split, is in
 
 With no shape profile (the Compose default) one process runs everything. Nothing below applies to it.
 
+On the full Compose stack the `jobs` profile adds `core-jobs`, but Compose cannot see which profiles are active, so the
+API only gets `shape-api` when you set `CORE_SHAPE_PROFILE=,shape-api` next to it (in `deploy/compose/.env`). Without
+that the API keeps running every sweep and poller beside `core-jobs` (advisory locks keep each tick single-winner, so
+nothing runs twice, but the API JVM carries the load the jobs pod was added to take). Set it only together with the
+`jobs` profile: with `shape-api` and no jobs pod nothing runs the background work.
+
 The chat hot path never leaves the API pod. Pools and shapes split background work only.
 
 ## Who runs which scheduled bean

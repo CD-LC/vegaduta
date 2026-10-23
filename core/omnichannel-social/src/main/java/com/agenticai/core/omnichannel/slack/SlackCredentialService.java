@@ -1,6 +1,7 @@
 package com.agenticai.core.omnichannel.slack;
 
 import com.agenticai.core.crypto.EncryptionService;
+import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.omnichannel.slack.dto.SlackActivationRequest;
 import com.agenticai.core.omnichannel.slack.dto.SlackCredentialResponse;
 import com.agenticai.core.security.TenantContext;
@@ -65,12 +66,31 @@ public class SlackCredentialService {
         }
         SlackApiClient.AuthInfo authInfo = slackApiClient.authTest(request.botToken());
 
+        // Inbound events are routed by team_id, which every app installed in one workspace
+        // shares. Linking is a last-writer-wins upsert, so a second tenant connecting its own
+        // app in the same workspace would silently take the first tenant's events (and break
+        // its signature check). One workspace, one tenant: refuse instead of repointing.
+        String currentSchema = tenantSchemaResolver.resolveCurrentTenantIdentifier();
+        tenantResolutionService
+                .resolveTenantSchema(ExternalAccountProvider.SLACK, authInfo.teamId())
+                .filter(owner -> !owner.equals(currentSchema))
+                .ifPresent(
+                        owner -> {
+                            throw new ChannelConfigurationException(
+                                    "slack",
+                                    "This Slack workspace is already connected to another workspace"
+                                            + " on this platform.");
+                        });
+
         String encryptedToken = encryptionService.encrypt(request.botToken());
         String encryptedSecret = encryptionService.encrypt(request.signingSecret());
 
+        Optional<SlackCredential> existingCredential = repository.findFirstByOrderByCreatedAtAsc();
+        // Moving this tenant's credential to another workspace must not leave the old workspace
+        // linked to it (it would keep blocking that workspace for everyone else).
+        String previousTeamId = existingCredential.map(SlackCredential::getTeamId).orElse(null);
         SlackCredential credential =
-                repository
-                        .findFirstByOrderByCreatedAtAsc()
+                existingCredential
                         .map(
                                 existing -> {
                                     existing.reactivate(
@@ -93,10 +113,11 @@ public class SlackCredentialService {
         SlackCredentialResponse response =
                 SlackCredentialResponse.from(repository.save(credential));
 
+        if (previousTeamId != null && !previousTeamId.equals(authInfo.teamId())) {
+            tenantResolutionService.unlink(ExternalAccountProvider.SLACK, previousTeamId);
+        }
         tenantResolutionService.link(
-                ExternalAccountProvider.SLACK,
-                authInfo.teamId(),
-                tenantSchemaResolver.resolveCurrentTenantIdentifier());
+                ExternalAccountProvider.SLACK, authInfo.teamId(), currentSchema);
 
         return response;
     }

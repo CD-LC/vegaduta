@@ -30,6 +30,7 @@ from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
 from . import proc, runner
+from .logsafe import clean
 from .models import (
     ErrorType,
     ExecuteRequest,
@@ -72,7 +73,7 @@ app = FastAPI(
     description=(
         "Compiles, verifies and executes tenant-authored Java and Python tools in isolation."
     ),
-    docs_url=None,      # no interactive docs on a service that executes code
+    docs_url=None,  # no interactive docs on a service that executes code
     redoc_url=None,
     openapi_url=None,
     lifespan=lifespan,
@@ -119,14 +120,16 @@ async def health() -> HealthResponse:
         status="ok",
         version=VERSION,
         languages=list(runner.LANGUAGES),
-        seccomp="enabled" if (settings.enable_seccomp and proc.SECCOMP_AVAILABLE)
-                else proc.seccomp_status(),
+        seccomp="enabled"
+        if (settings.enable_seccomp and proc.SECCOMP_AVAILABLE)
+        else proc.seccomp_status(),
         privilegeDrop=privilege_drop,
     )
 
 
-@app.post("/v1/validate", response_model=ValidateResponse,
-          dependencies=[Depends(require_internal_token)])
+@app.post(
+    "/v1/validate", response_model=ValidateResponse, dependencies=[Depends(require_internal_token)]
+)
 async def validate(
     request: ValidateRequest,
     tenant: str = Depends(require_tenant),
@@ -139,7 +142,8 @@ async def validate(
     """
     async with _slots:
         outcome = await run_in_threadpool(
-            _runner.validate, request.language, tenant, request.source)
+            _runner.validate, request.language, tenant, request.source
+        )
     return ValidateResponse(
         valid=outcome.valid,
         sourceSha256=outcome.source_sha256,
@@ -150,8 +154,9 @@ async def validate(
     )
 
 
-@app.post("/v1/execute", response_model=ExecuteResponse,
-          dependencies=[Depends(require_internal_token)])
+@app.post(
+    "/v1/execute", response_model=ExecuteResponse, dependencies=[Depends(require_internal_token)]
+)
 async def execute(
     request: ExecuteRequest,
     tenant: str = Depends(require_tenant),
@@ -177,7 +182,10 @@ async def execute(
         # logs, which is the same rule core's GlobalExceptionHandler follows.
         log.info(
             "tool execution failed tool=%s language=%s type=%s duration=%dms",
-            request.toolName, request.language, outcome.error_type, outcome.duration_ms,
+            clean(request.toolName),
+            clean(request.language),
+            outcome.error_type,
+            outcome.duration_ms,
         )
 
     return ExecuteResponse(
@@ -197,5 +205,5 @@ async def execute(
 @app.exception_handler(Exception)
 async def unhandled(request: Request, exc: Exception) -> JSONResponse:
     """Never leak an internal stack trace to the caller."""
-    log.exception("unhandled error on %s", request.url.path)
+    log.exception("unhandled error on %s", clean(request.url.path))
     return JSONResponse(status_code=500, content={"detail": "sandbox internal error"})

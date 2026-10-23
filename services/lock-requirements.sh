@@ -21,7 +21,7 @@
 # linux/amd64 AND linux/arm64 (and the dev laptops), with environment markers
 # instead of per-platform files - the image is built for both architectures.
 # It targets Python 3.12, the interpreter every service image runs
-# (python:3.12.14-slim-bookworm).
+# (python:3.12.15-slim-trixie).
 #
 # To bump a dependency: edit requirements.txt, run this script, run
 # `pip-audit -r <service>/requirements.lock` and the service's tests, commit

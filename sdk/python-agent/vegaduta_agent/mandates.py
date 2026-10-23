@@ -212,9 +212,7 @@ class Mandate:
         mandate's subject, keeps principal and max_depth, only attenuates."""
         narrower = frozenset(narrower_tools)
         if self.depth + 1 > self.max_depth:
-            raise ValueError(
-                f"mandate {self.id} is at depth {self.depth} of {self.max_depth}; cannot derive"
-            )
+            raise ValueError(f"mandate {self.id} is at depth {self.depth} of {self.max_depth}; cannot derive")
         self._check_attenuation(narrower, lower_or_equal_risk, earlier_or_equal_expiry)
         return Mandate._build(
             str(uuid.uuid4()),
@@ -230,14 +228,10 @@ class Mandate:
             self.digest,
         )
 
-    def _check_attenuation(
-        self, tools: frozenset[str], risk: RiskLabel, expiry: datetime
-    ) -> None:
+    def _check_attenuation(self, tools: frozenset[str], risk: RiskLabel, expiry: datetime) -> None:
         for tool in tools:
             if not self._covers(tool):
-                raise ValueError(
-                    f"derived tool {tool!r} is not covered by mandate {self.id}'s allowed tools"
-                )
+                raise ValueError(f"derived tool {tool!r} is not covered by mandate {self.id}'s allowed tools")
         if risk > self.max_risk:
             raise ValueError(
                 f"derived maxRisk {risk.name} exceeds parent {self.max_risk.name} of mandate {self.id}"
@@ -372,9 +366,7 @@ def verify_chain(root_to_leaf: list[Mandate]) -> Mandate:
     parent = root
     for child in root_to_leaf[1:]:
         if child.parent_id != parent.id:
-            raise ValueError(
-                f"mandate {child.id} names parent {child.parent_id} but follows {parent.id}"
-            )
+            raise ValueError(f"mandate {child.id} names parent {child.parent_id} but follows {parent.id}")
         if child.depth != parent.depth + 1:
             raise ValueError(f"mandate {child.id} has depth {child.depth} after {parent.depth}")
         if child.digest != _sha256(child._canonical(parent.digest)):
@@ -403,9 +395,7 @@ class MandateGate:
         self.require_mandate = require_mandate
         self._delegate = delegate
 
-    def evaluate(
-        self, call: ToolCall, classification: ToolClassification, context: RunContext
-    ) -> Verdict:
+    def evaluate(self, call: ToolCall, classification: ToolClassification, context: RunContext) -> Verdict:
         try:
             mandate = from_context(context)
         except ValueError:
