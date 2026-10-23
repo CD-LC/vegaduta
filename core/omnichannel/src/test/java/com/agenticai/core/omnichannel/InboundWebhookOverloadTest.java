@@ -33,6 +33,7 @@ import com.agenticai.core.omnichannel.telegram.TelegramCredential;
 import com.agenticai.core.omnichannel.telegram.TelegramCredentialRepository;
 import com.agenticai.core.omnichannel.telegram.TelegramUpdateService;
 import com.agenticai.core.omnichannel.telegram.TelegramWebhookController;
+import com.agenticai.core.omnichannel.telegram.TelegramWebhookSecret;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerNodeService;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.omnichannel.twilio.TwilioCredentialService;
@@ -361,7 +362,7 @@ class InboundWebhookOverloadTest {
         when(tenants.resolveTenantSchema(ExternalAccountProvider.TELEGRAM, "bot"))
                 .thenReturn(Optional.of("tenant_test"));
         TelegramCredential cred = mock(TelegramCredential.class);
-        when(cred.getWebhookSecret()).thenReturn("sec");
+        when(cred.getWebhookSecret()).thenReturn(TelegramWebhookSecret.hash("sec"));
         when(cred.getEncryptedBotToken()).thenReturn("enc");
         when(repo.findFirstByOrderByCreatedAtAsc()).thenReturn(Optional.of(cred));
         when(enc.decrypt("enc")).thenReturn("bot-token");

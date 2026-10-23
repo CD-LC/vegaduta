@@ -50,8 +50,8 @@ class TelegramTurnContextTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String UPDATE =
             """
-            {"update_id":12345,"message":{"chat":{"id":"chat-1"},"from":{"id":"user-1"},"text":"hello"}}
-            """;
+{"update_id":12345,"message":{"chat":{"id":"chat-1"},"from":{"id":"user-1"},"text":"hello"}}
+""";
 
     private TurnContextProbe probe;
     private AgentChatService chat;
@@ -91,7 +91,9 @@ class TelegramTurnContextTest {
                         tenants, credentials, encryption, updateService, executor);
         when(tenants.resolveTenantSchema(ExternalAccountProvider.TELEGRAM, BOT_USER_ID))
                 .thenReturn(Optional.of("tenant_telegram"));
-        TelegramCredential credential = new TelegramCredential(BOT_USER_ID, "bot", "enc", SECRET);
+        TelegramCredential credential =
+                new TelegramCredential(
+                        BOT_USER_ID, "bot", "enc", TelegramWebhookSecret.hash(SECRET));
         when(credentials.findFirstByOrderByCreatedAtAsc()).thenReturn(Optional.of(credential));
         when(encryption.decrypt("enc")).thenReturn("bot-token");
         when(dedup.tryClaim(eq(ChannelType.TELEGRAM), any())).thenReturn(true);
