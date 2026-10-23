@@ -5,6 +5,7 @@ import { useTranslations } from "../../lib/i18n";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import ShareAsTemplateButton from "../templates/ShareAsTemplateButton";
+import { isPersonalEdition } from "../../lib/edition";
 import WorkflowExportButton from "../WorkflowExportButton";
 
 /**
@@ -56,13 +57,7 @@ export default function WorkflowRowActions({
     <div className="flex items-center justify-end gap-1">
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={onEdit}
-            aria-label={t("editWorkflow")}
-          >
+          <Button variant="ghost" size="icon" className="size-8" onClick={onEdit} aria-label={t("editWorkflow")}>
             <Pencil aria-hidden="true" size={15} />
           </Button>
         </TooltipTrigger>
@@ -85,36 +80,26 @@ export default function WorkflowRowActions({
             )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
-          {atLimit ? "Workflow limit reached" : "Duplicate as a new draft"}
-        </TooltipContent>
+        <TooltipContent>{atLimit ? "Workflow limit reached" : "Duplicate as a new draft"}</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            onClick={onCopyLink}
-            aria-label="Copy workflow link"
-          >
-            {copied ? (
-              <Check aria-hidden="true" size={15} />
-            ) : (
-              <Link2 aria-hidden="true" size={15} />
-            )}
+          <Button variant="ghost" size="icon" className="size-8" onClick={onCopyLink} aria-label="Copy workflow link">
+            {copied ? <Check aria-hidden="true" size={15} /> : <Link2 aria-hidden="true" size={15} />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>{copied ? "Link copied" : "Copy link"}</TooltipContent>
       </Tooltip>
-      <ShareAsTemplateButton
-        sourceId={wf.id}
-        sourceName={wf.name}
-        sourceKind="WORKFLOW"
-        variant="ghost"
-        size="icon"
-        className="size-8"
-      />
+      {!isPersonalEdition() && (
+        <ShareAsTemplateButton
+          sourceId={wf.id}
+          sourceName={wf.name}
+          sourceKind="WORKFLOW"
+          variant="ghost"
+          size="icon"
+          className="size-8"
+        />
+      )}
       {portable && <WorkflowExportButton workflowId={wf.id} workflowName={wf.name} />}
       {/* On FREE the Button renders its own upgrade tooltip
           (upgradeLocked), so only the unlocked button gets
