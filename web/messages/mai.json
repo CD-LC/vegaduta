@@ -817,15 +817,15 @@
     "rsParam_seed": "सीड",
     "rsParam_stopSequences": "रोकबाक क्रम",
     "rsParamDropped": "{param} एहि एजेंटपर सेट अछि, मुदा {provider} {model} लेल एकरा अनदेखा करैत अछि, तैँ एकर कोनो प्रभाव नहि अछि।",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "एहि रन लेल टूल",
+    "rsToolsRunOnly": "मात्र ई रन",
+    "rsToolsRunNote": "ई स्विच तय करैत अछि जे एहि प्लेग्राउंडसँ पठाओल संदेश एजेंटक कोन टूल प्रयोग कए सकैत अछि। किछु सहेजल नहि जाइत अछि: आन सभ लेल एजेंट अपन टूल पहुँच रखैत अछि। ई एजेंटक टूल मात्र बंद कए सकैत अछि, ओकरा कहियो नव टूल नहि द' सकैत अछि।",
+    "rsToolsRunSummary": "एजेंटक {total} टूल मे सँ {on} एहि रन लेल चालू अछि",
+    "rsToolsRunNone": "एहि रन लेल कोनो टूल नहि: एजेंट मात्र पाठमे उत्तर दए सकैत अछि।",
+    "rsToolsReset": "एजेंटक टूल प्रयोग करू",
+    "rsToolsNotInAgent": "ई एहि एजेंटक सहेजल टूल मे सँ नहि अछि, तैँ रन लेल चालू नहि कएल जा सकैत अछि।",
+    "rsToolsEditAgent": "एजेंटक सहेजल टूल बदलू",
+    "rsToolsLimitedChip": "एहि रन लेल टूल सीमित",
     "rsToolsEmpty": "एहि एजेंट लेल कोनो टूल उपलब्ध नहि अछि।",
     "rsToolsSummary": "{total} मे सँ {on} टूल चालू",
     "rsToolsFailed": "टूल सभ लोड नहि भए सकल।",
@@ -883,14 +883,14 @@
     "chipToolsOff": "टूल बिना फेरसँ प्रयास क' रहल अछि",
     "chipFailoverBlocked": "बैकअप मॉडल प्रयोग नहि भेल: टूल सभ पहिनहि चलि चुकल छल",
     "rsLimitChangeOne": "बदलू",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "दर सीमा पहुँचि गेल",
+    "reasonTimeout": "समय समाप्त भए गेल",
+    "reasonProviderUnavailable": "प्रदाता उपलब्ध नहि अछि",
+    "reasonAuthFailed": "प्रदाता क्रेडेंशियल अस्वीकार क' देलक",
+    "reasonBilling": "प्रदाताक बिलिंग समस्या",
+    "reasonModelNotFound": "मॉडल उपलब्ध नहि अछि",
+    "reasonProviderError": "प्रदाताक त्रुटि",
+    "reasonMalformedToolCall": "टूल कॉल प्रयोग नहि कएल जा सकल"
   },
   "nodeDefs": {
     "triggerLabel": "ट्रिगर",
@@ -13351,7 +13351,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "स्किल",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14195,7 +14195,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "स्किल",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14369,7 +14369,7 @@
       "role": "अहाँक भूमिका ई सेटिंग नहि बदलि सकैत अछि। कोनो वर्कस्पेस प्रशासकसँ पुछू।",
       "scope": "ई सेटिंग एतए ओवरराइड नहि कएल जा सकैत अछि।",
       "readOnly": "सेटिंग सभ आब मात्र पढ़बाक लेल अछि।",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "ई सुरक्षा सेटिंग मात्र वर्कस्पेस एडमिन बदलि सकैत छथि। अहाँ एकर मान एतए देखि सकैत छी, मुदा संपादित नहि कए सकैत छी।"
     },
     "reset": {
       "button": "विरासतमे भेटल मानपर रीसेट करू",
@@ -14419,12 +14419,12 @@
       "acknowledge": "हम एहि सुरक्षा बदलावक परिणाम बुझैत छी।",
       "cancel": "रद्द करू",
       "confirm": "पक्का क' कए सहेजू",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "रीसेट: ओवरराइड हटा देल जाइत अछि आ सेटिंग ओहि मानपर घुरि जाइत अछि जे ओकरा विरासतमे भेटैत अछि।"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "उच्च मतलब बेसी कठोर: उच्च मान स्वीकार कएल जाइत अछि, निम्न अस्वीकार।",
+      "lower": "निम्न मतलब बेसी कठोर: निम्न मान स्वीकार कएल जाइत अछि, उच्च अस्वीकार।",
+      "enumOrder": "विकल्प कम कठोरसँ बेसी कठोर क्रमसँ अछि: {options}। अहाँ मात्र कठोर छोर दिस जा सकैत छी।"
     }
   },
   "approvalsQueue": {
@@ -14593,8 +14593,8 @@
     "tlSevWarn": "ध्यान देबाक आवश्यकता",
     "tlSevError": "विफल",
     "tlIntake": "टर्न शुरू भेल: {chars} अक्षर, {tools} टूल, {attachments} संलग्न",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "एहि रन लेल टूल",
+    "tlRunToolsNone": "कोनो नहि (मात्र पाठ)",
     "tlModelCall": "{model} ({provider}) पर मॉडल कॉल, रूट {route}",
     "tlFailover": "{model} ({provider}) पर फेलओवर भेल",
     "tlRetryModel": "{model} ({provider}) पर फेरसँ प्रयास कएल गेल, रूट {route}",
@@ -14603,6 +14603,7 @@
     "tlToolCall": "टूल कॉल {tool}: {status}",
     "tlApprovalRequested": "{tool} चलबासँ पहिने स्वीकृति मँगल गेल",
     "tlApprovalDecided": "{tool} लेल स्वीकृतिक निर्णय भेल: {decision}",
+    "tlApprovalAutoAllowed": "{tool} बिना पुछने चलल: निगरानीमे मात्र-पढ़बाक कॉल",
     "tlContinuation": "निरंतरता: {guard} ({outcome})",
     "tlGuard": "गार्डरेल {guard}: {outcome}",
     "tlVerifyPassed": "जाँच उत्तीर्ण: {check}",
@@ -14672,7 +14673,7 @@
     "modeTextOnlyHelp": "एजेंट अपन टूल बिना उत्तर दैत अछि। सुरक्षित: वास्तवमे किछु नहि चलैत अछि। अपेक्षित-टूल जाँच पूर्ण नहि कएल जा सकैत अछि।",
     "modeFull": "टूल सभक संग पूर्ण पाइपलाइन",
     "modeFullHelp": "वैह टूल, गार्डरेल आ चरणक सीमा जे एकटा वास्तविक प्रयोगकर्ताकेँ भेटैत अछि। अपेक्षित-टूल आ ट्रैजेक्टरी जाँच लेल आवश्यक।",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "जे टूल मात्र पढ़ैत अछि से वास्तवमे चलैत अछि। जे किछु डेटा बदलि सकैत अछि, संदेश पठा सकैत अछि वा पाइ खर्च कए सकैत अछि तकरा अनुकरण कएल जाइत अछि आ रनमे सूचीबद्ध कएल जाइत अछि, तैँ वास्तवमे किछु नहि होइत अछि। सुरक्षा वर्गीकरणक बिना टूलकेँ सेहो अनुकरण कएल जाइत अछि।",
     "autoApproveLabel": "इवैल सैंडबॉक्समे टूल कॉल अपने आप स्वीकृत करू",
     "autoApproveHelp": "सामान्यतः मनुष्यक प्रतीक्षा करऽ बला टूल कॉलकेँ इवैल सैंडबॉक्स स्वीकृत कए दैत अछि, जाहिसँ केस पूर्ण भए सकय। एकरा बिना केस प्रोडक्शनमे जेना होइत अछि तहिना बिना उत्तर देल स्वीकृतिपर समाप्त भए जाइत अछि।",
     "autoApproveWarnTitle": "मात्र गैर-प्रोडक्शन वर्कस्पेस लेल",
@@ -14680,7 +14681,7 @@
     "autoApproveNeedsFull": "पहिने पूर्ण पाइपलाइन चालू करू: अपने आप स्वीकृति मात्र तखन लागू होइत अछि जखन टूल चलैत अछि।",
     "autoApproveRefused": "एहि वर्कस्पेसमे अनुमति नहि अछि: {reason}",
     "autoApproveConfirmTitle": "इवैलमे टूल कॉल अपने आप स्वीकृत करी?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "एहि डेटासेटक रीप्लेमे मनुष्यक प्रतीक्षा करऽ बला प्रत्येक टूल कॉल अपने आप स्वीकृत भए जायत। स्वीकृत मात्र-पढ़ऽ बला टूल वास्तवमे चलैत अछि; जे किछु बदलि सकैत अछि से एखनो अनुकरण कएल जाइत अछि। एकरा मात्र परीक्षण डेटा बला वर्कस्पेसमे करू। रन रिकॉर्ड करैत अछि जे ओ अपने आप स्वीकृत भेल छल।",
     "autoApproveConfirm": "अपने आप स्वीकृति चालू करू",
     "trajectoryLabel": "ट्रैजेक्टरी जाँच",
     "trajectoryOn": "On",
@@ -14705,22 +14706,22 @@
     "samplingSource_platform": "प्लेटफॉर्म द्वारा सेट कएल गेल",
     "samplingSource_tenant": "अहाँक वर्कस्पेस लेल सेट कएल गेल",
     "samplingSource_agent": "एहि एजेंट लेल सेट कएल गेल",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "वर्कस्पेस डिफॉल्ट",
+    "modeDefaultHelp": "अहाँक वर्कस्पेसक सेटिंगकेँ मानैत अछि (पूर्ण पाइपलाइन, जँ कोनो एडमिन नहि बदलने हो)। प्रत्येक रन एखनो अपन मोड चुनि सकैत अछि।",
+    "modeDefaultCurrent": "एखन: {mode}",
+    "modeNameFull": "पूर्ण पाइपलाइन",
+    "modeNameQuick": "तेज (मात्र पाठ)",
+    "badgeFull": "पूर्ण पाइपलाइन",
+    "badgeQuick": "तेज",
+    "datasetModePinnedTitle": "ई डेटासेट सदिखन एहिना रीप्ले होइत अछि। एकटा रन एखनो दोसर मोड चुनि सकैत अछि।",
+    "datasetModeDefaultTitle": "रन कोना रीप्ले होय तकरा लेल ई डेटासेट वर्कस्पेसक डिफॉल्टकेँ मानैत अछि।",
+    "runModeLabel": "अगिला रन लेल रीप्ले मोड",
+    "runModeInherit": "डेटासेटक सेटिंग प्रयोग करू",
+    "runModeHelp": "पूर्ण पाइपलाइन एजेंटकेँ ओकर टूल, गार्डरेल आ स्वीकृतिक संग सुरक्षित सैंडबॉक्समे चलबैत अछि: मात्र पढ़ऽ बला टूल वास्तवमे चलैत अछि, आ जे किछु डेटा बदलि सकैत अछि वा किछु पठा सकैत अछि तकरा अनुकरण कएल जाइत अछि। तेज मोड टूल रोकि लैत अछि आ मात्र लिखल उत्तरकेँ परखैत अछि।",
+    "runModeFullTitle": "एहि रन इवैल सैंडबॉक्समे पूर्ण पाइपलाइन प्रयोग केलक।",
+    "runModeQuickTitle": "ई रन मात्र पाठ बला तेज रीप्ले छल: एजेंटक टूल रोकल गेल छल।",
+    "runSimulatedTools": "एहि रनमे अनुकरण कएल गेल, चलाओल नहि गेल (ओ डेटा बदलि सकैत छल वा प्लेटफॉर्मसँ बाहर पहुँचि सकैत छल): {tools}।",
+    "toolStatusSimulated": "अनुकरण कएल गेल, चलाओल नहि गेल"
   },
   "agentLab": {
     "wtLabel": "एजेंटक टूल सभक संग चलाउ",
@@ -14753,6 +14754,14 @@
       "memory": {
         "label": "मेमोरी",
         "description": "एजेंट कतेक स्मृति रखैत अछि आ मोन पाड़ैत अछि।"
+      },
+      "attachments": {
+        "label": "चैट अपलोड",
+        "description": "लोक चैट संदेशक संग कतेक पैघ फाइल जोड़ि सकैत अछि।"
+      },
+      "skills": {
+        "label": "स्किल",
+        "description": "इन्स्टॉल कएल स्किलक सूची एजेंटक निर्देशक कतेक भाग प्रयोग कए सकैत अछि।"
       },
       "aux": {
         "label": "पृष्ठभूमि मॉडल कॉल",
@@ -14819,6 +14828,28 @@
           "label": "अधूरा उत्तरक बाद अतिरिक्त पास",
           "description": "जँ मॉडलक उत्तर घोषित मुदा नहि कएल गेल चरणपर रुकि जाइत अछि तँ ओकरा कतेक बेर जारी रखबाक लेल कहल जाइत अछि।",
           "help": "ओहि एजेंट लेल बढ़ाउ जे प्रायः एकटा चरणक घोषणा कए रुकि जाइत अछि। प्रत्येक अतिरिक्त पास एकटा मॉडल कॉलक खर्च करैत अछि।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "सीमाक बाद उत्तर देल गेल कॉल",
+          "description": "टर्नक टूल सीमा समाप्त भेलाक बाद मॉडल आओर कतेक टूल कॉलक प्रयास कए सकैत अछि। प्रत्येककेँ \"जे छौ तकरे संग उत्तर दे\" वला टिप्पणीक संग अस्वीकार कएल जाइत अछि; एहि संख्याक बाद टर्न त्रुटिक संग रोकि देल जाइत अछि।",
+          "help": "जँ मॉडलकेँ टूल कॉल बंद करऽ लेल किछु प्रयास चाही तँ एकरा बढ़ाउ। लूपमे फँसल टर्नकेँ जल्दी समाप्त करबाक लेल घटाउ। 0 सीमासँ ऊपरक पहिल कॉलपर टर्न रोकि दैत अछि।"
+        },
+        "supervisedDivisor": {
+          "label": "निगरानी बला एजेंट टूल सीमाक 1/N पबैत अछि",
+          "description": "निगरानी बला एजेंटकेँ टर्नक टूल-कॉल सीमा एहि संख्यासँ भाग देल भेटैत अछि, मुदा नीचाँक न्यूनतमसँ कहियो कम नहि।",
+          "help": "निगरानी बला एजेंटकेँ आओर कसि कए राखबाक लेल एकरा बढ़ाउ। 1 हुनका पूर्ण सीमा दैत अछि।"
+        },
+        "supervisedMinSteps": {
+          "label": "निगरानी बला एजेंटक लेल न्यूनतम टूल कॉल",
+          "description": "ऊपरक संख्या चाहे जतेक ऊँच हो, निगरानी बला एजेंटकेँ भेटऽ बला सभसँ छोट टूल-कॉल सीमा।",
+          "help": "एकरा 3 वा बेसी राखू जाहिसँ निगरानी बला एजेंट कएक चरणक सरल काज एखनो पूरा कए सकय।"
+        },
+        "autonomousMultiplier": {
+          "label": "पूर्ण स्वायत्त एजेंट सीमाक N गुना पबैत अछि",
+          "description": "पूर्ण स्वायत्त एजेंटकेँ टर्नक टूल-कॉल सीमा एहि संख्यासँ गुणा कएल भेटैत अछि।",
+          "help": "ओहि एजेंट लेल बढ़ाउ जे बिना कोनो देखरेखक लंबा काज चलबैत अछि; तखन ओ एक टर्नमे बेसी कॉल आ पाइ खर्च कए सकैत अछि। 1 ओकरा मानक सीमा दैत अछि।"
         }
       }
     },
@@ -14890,6 +14921,82 @@
           "label": "फॉलो-अप टूल कतेक काल सुझाओल रहैत अछि",
           "description": "प्रयोगक बाद छोट फॉलो-अप संदेश सभ लेल एकटा टूल कतेक काल सुझाओल रहैत अछि।",
           "help": "लंबा खिड़की लंबा काजक सत्र सभमे सहायता करैत अछि, छोट खिड़की टूल सूचीकेँ छोट रखैत अछि।"
+        },
+        "maxStickyTools": {
+          "label": "फॉलो-अपमे सुझाओल जाइत रहऽ बला अधिकतम टूल",
+          "description": "छोट फॉलो-अप संदेशमे आगाँ लए जाओल जाऽ बला अधिकतम टूल। 0 कोनो नहि रखैत अछि।",
+          "help": "जखन कोनो काज बहुत टूल प्रयोग करैत अछि तखन पैघ संख्या सहायक होइत अछि; छोट संख्या टूल सूचीकेँ छोट राखैत अछि।"
+        },
+        "keepPrimaryModel": {
+          "label": "फॉलो-अप लेल मुख्य मॉडल राखू",
+          "description": "जे वार्तालाप पहिनहि टूल प्रयोग कएने अछि तकर छोट फॉलो-अप सस्त मॉडलक बदला एजेंटक मुख्य मॉडलपर रहैत अछि।",
+          "help": "एकरा बंद करू जाहिसँ खर्च रूटिंग \"हँ\" सन फॉलो-अपकेँ सस्त मॉडल दिस पठाबय, मुदा चलि रहल कार्यकेँ कमजोर ढंगसँ सम्हारबाक जोखिम रहैत अछि।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "उत्तर फेरसँ प्रयोग करबाक लेल प्रश्न कतेक मिलैत हेबाक चाही",
+          "description": "ओहि एजेंट लेल जे मिलैत-जुलैत प्रश्नक उत्तर फेरसँ प्रयोग करैत अछि: सहेजल उत्तर देबाक लेल नव प्रश्न पहिलुका प्रश्नक कतेक लग हेबाक चाही, 0.85 सँ 1 धरि।",
+          "help": "कम संख्या बेसी दोहरावकेँ उत्तर दैत अछि मुदा दोसर प्रश्नक लेल बनल उत्तर दए देबाक जोखिम रहैत अछि। गलत उत्तर महग पड़ए तँ एकरा ऊँच राखू। उत्तर मात्र ओहि व्यक्तिक लेल फेरसँ प्रयोग कएल जाइत अछि जकरा ओ देल गेल छल।"
+        },
+        "ttl": {
+          "label": "फेरसँ प्रयोग योग्य उत्तर कतेक काल राखल जाइत अछि",
+          "description": "सहेजल उत्तरकेँ हटाओल जएबासँ पहिने मिलैत-जुलैत प्रश्नकेँ कतेक काल धरि देल जा सकैत अछि।",
+          "help": "जँ अहाँक उत्तर जल्दी पुरान भए जाइत अछि तँ एकरा छोट करू।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "प्रति एजेंट अधिकतम सहेजल उत्तर",
+          "description": "एकटा एजेंट फेरसँ प्रयोगक लेल कतेक उत्तर राखैत अछि। एहिसँ बेसी भेलापर सभसँ पुरान हटा देल जाइत अछि।",
+          "help": "पैघ भंडार बेसी दोहराव पाबैत अछि आ बेसी स्टोरेज प्रयोग करैत अछि।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "वार्तालापमे टूल कॉलक रिकॉर्ड राखू",
+          "description": "प्रत्येक टर्नक टूल कॉलक छोट रिकॉर्ड वार्तालापक संग सहेजू, जाहिसँ बादक टर्न देखि सकय जे की कएल गेल छल।",
+          "help": "वार्तालापक इतिहासकेँ मात्र पाठ राखबाक लेल एकरा बंद करू; तखन एजेंट नहि जानि सकैत अछि जे पहिलुका टर्नमे ओकर टूल की केलक। ई पूर्ण वर्कस्पेसपर लागू होइत अछि।"
+        },
+        "replayEnabled": {
+          "label": "मॉडलकेँ टूल रिकॉर्ड देखाउ",
+          "description": "मॉडलकेँ वार्तालाप देबाक समय पहिलुका टूल कॉलक सहेजल रिकॉर्ड सम्मिलित करू।",
+          "help": "रिकॉर्ड सहेजल जाइत रहय मुदा ओहि लेल मॉडलक काजक स्थान प्रयोग नहि हो, तैँ एकरा बंद करू।"
+        },
+        "replayTurns": {
+          "label": "ओ पहिलुका टर्न जकर टूल रिकॉर्ड देखाओल जाइत अछि",
+          "description": "टूल प्रयोग कएल सभसँ नव कतेक टर्नक रिकॉर्ड मॉडलकेँ देखाओल जाइत अछि।",
+          "help": "पैघ संख्या लंबा कार्य सत्रमे सहायक होइत अछि मुदा मॉडलक काजक स्थान बेसी प्रयोग करैत अछि।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "प्रति टर्न सूचीबद्ध टूल कॉल",
+          "description": "एक टर्नक कतेक टूल कॉल रिकॉर्डमे लिखल जाइत अछि। आगाँक कॉल मात्र गनल जाइत अछि।",
+          "help": "ओहि टर्न लेल बढ़ाउ जे बहुत कॉल करैत अछि आ प्रत्येककेँ मोन राखब आवश्यक अछि।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "प्रति टर्न सभसँ लंबा टूल रिकॉर्ड",
+          "description": "एक टर्नक रिकॉर्डक कतेक अक्षर मॉडलकेँ देखाओल जाइत अछि; शेष गनल जाइत अछि, सूचीबद्ध नहि कएल जाइत अछि।",
+          "help": "बादक प्रत्येक टर्नपर खर्च बचेबाक लेल घटाउ, बेसी विवरण राखबाक लेल बढ़ाउ।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "सभसँ पैघ चित्र अपलोड (MB)",
+          "description": "चैट संदेशमे कियो जे सभसँ पैघ चित्र जोड़ि सकैत अछि, मेगाबाइटमे। प्लेटफॉर्मक एक कुल फाइल सीमा सेहो अछि जकरा ई पार नहि कए सकैत अछि।",
+          "help": "फोटो आ स्क्रीनशॉट लेल बढ़ाउ; पैघ फाइल पठाबऽ मे मंद होइत अछि आ मॉडलक बेसी कोटा प्रयोग करैत अछि।"
+        },
+        "maxAudioMb": {
+          "label": "सभसँ पैघ ऑडियो अपलोड (MB)",
+          "description": "चैट संदेशमे कियो जे सभसँ पैघ ऑडियो फाइल जोड़ि सकैत अछि, मेगाबाइटमे। प्लेटफॉर्मक एक कुल फाइल सीमा सेहो अछि जकरा ई पार नहि कए सकैत अछि।",
+          "help": "लंबा रिकॉर्डिंग लेल बढ़ाउ; पैघ फाइल पठाबऽ मे मंद होइत अछि आ मॉडलक बेसी कोटा प्रयोग करैत अछि।"
+        },
+        "maxVideoMb": {
+          "label": "सभसँ पैघ वीडियो अपलोड (MB)",
+          "description": "चैट संदेशमे कियो जे सभसँ पैघ वीडियो जोड़ि सकैत अछि, मेगाबाइटमे। प्लेटफॉर्मक एक कुल फाइल सीमा सेहो अछि जकरा ई पार नहि कए सकैत अछि।",
+          "help": "लंबा क्लिप लेल बढ़ाउ; पैघ फाइल पठाबऽ मे मंद होइत अछि आ मॉडलक बेसी कोटा प्रयोग करैत अछि।"
+        },
+        "maxDocumentMb": {
+          "label": "सभसँ पैघ दस्तावेज अपलोड (MB)",
+          "description": "चैट संदेशमे कियो जे सभसँ पैघ दस्तावेज वा स्प्रेडशीट जोड़ि सकैत अछि, मेगाबाइटमे। प्लेटफॉर्मक एक कुल फाइल सीमा सेहो अछि जकरा ई पार नहि कए सकैत अछि।",
+          "help": "लंबा रिपोर्ट आ पैघ डेटा फाइल लेल बढ़ाउ; पैघ फाइल प्रोसेस करऽ मे मंद होइत अछि।"
         }
       },
       "continuation": {
@@ -14948,6 +15055,20 @@
           "help": "ओहि सहायकक लेल बढ़ाउ जकरा लोक सभक विषयमे बहुत किछु मोन राखऽ पड़ैत अछि; ई सहेजबाक आ मोन पाड़बाक खर्च सेहो बढ़बैत अछि।"
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "अधिकतम साझा स्मृति",
+          "description": "वर्कस्पेसमे साझा कएल कतेक स्मृति राखल जाइत अछि। एहिसँ बेसी भेलापर सभसँ पुरान हटा देल जाइत अछि।",
+          "help": "साझा ज्ञानपर निर्भर पैघ दल लेल बढ़ाउ; एहिसँ स्टोरेज आ स्मरणक खर्च सेहो बढ़ैत अछि। ई पूर्ण वर्कस्पेसपर लागू होइत अछि।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ऑन-डिवाइस चैटकेँ देल स्मृति",
+          "description": "ऑन-डिवाइस सत्र शुरू होइत काल ओकरा कतेक स्मृति सौंपल जाइत अछि।",
+          "help": "ऑन-डिवाइस मॉडलक काजक स्थान छोट होइत अछि, तैँ एकरा कम राखू।"
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "ग्राफ मेमोरीसँ मोन पाड़ल तथ्य",
@@ -14958,6 +15079,20 @@
           "label": "प्रति लुकअप पढ़ल जाऽ बला ग्राफ पथ",
           "description": "एकटा लुकअपक तथ्य खोजबाक लेल मेमोरी ग्राफक कतेक संबंध पढ़ल जाइत अछि।",
           "help": "कतेक संबंध एके तथ्य धरि पहुँचा सकैत अछि, तैँ घनिष्ठ रूपेँ जुड़ल स्मृति सभमे सभ किछु खोजबाक लेल बेसी संख्याक आवश्यकता भए सकैत अछि। बेसी संख्या प्रत्येक लुकअपकेँ मंद करैत अछि।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "प्रॉम्प्टमे सूचीबद्ध अधिकतम स्किल",
+          "description": "एजेंटकेँ बुझल रहय जे ओ सभ अछि, तैँ ओकर निर्देशमे अहाँक कतेक स्किलक नाम देल जाइत अछि। शेष गनल जाइत अछि, सूचीबद्ध नहि कएल जाइत अछि।",
+          "help": "जँ अहाँक लग बहुत स्किल अछि तँ बढ़ाउ; सूचीबद्ध प्रत्येक स्किल प्रत्येक टर्नमे मॉडलक काजक स्थानक किछु भाग प्रयोग करैत अछि। ई पूर्ण वर्कस्पेसपर लागू होइत अछि।"
+        },
+        "maxBlockChars": {
+          "label": "प्रॉम्प्टमे स्किल सूचीक आकार",
+          "description": "एजेंटक निर्देशमे स्किलक सूची कतेक अक्षर लए सकैत अछि। भरि गेलापर बादक स्किल मात्र नाम धरि छोट कए देल जाइत अछि।",
+          "help": "बेसी स्किलक विवरण राखबाक लेल बढ़ाउ, प्रत्येक टर्नमे टोकन बचेबाक लेल घटाउ। ई पूर्ण वर्कस्पेसपर लागू होइत अछि।"
         }
       }
     },
@@ -15010,6 +15145,17 @@
           "description": "जाँचल जाऽ बला पाठक कतेक भाग AI सुरक्षा न्यायाधीश पढ़ैत अछि। एहिसँ बेसी पाठक निर्णय नहि कएल जाइत अछि।",
           "help": "अहाँ एकरा मात्र प्लेटफॉर्मक मानसँ ऊपर बढ़ा सकैत छी। बढ़ेलापर लंबा टूल परिणाम सभक पूर्ण निर्णय होइत अछि मुदा प्रत्येक न्यायाधीश कॉल पैघ भए जाइत अछि।"
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "निगरानी बला एजेंट आ मात्र-पढ़ऽ बला टूल",
+          "description": "की निगरानी स्वायत्तता स्तरक एजेंट खोज वा लुकअप सन मात्र पढ़ऽ बला टूलसँ पहिनहुँ अहाँसँ पुछैत अछि। लिखब, पठाएब आ ओ टूल जकरा प्लेटफॉर्म वर्गीकृत नहि कएने अछि सदिखन पुछैत अछि।",
+          "help": "अहाँ एकरा मात्र प्लेटफॉर्म सेटिंगसँ बेसी कठोर कए सकैत छी। प्रत्येक बेर पुछब सभसँ सुरक्षित विकल्प अछि; मात्र-पढ़ऽ बला टूलकेँ चलऽ देलासँ एकटा प्रश्न कम होइत अछि, मुदा अप्रत्याशित खोज रोकबाक एक अवसर सेहो जाइत अछि। जे एजेंट निजी डेटा पढ़ि सकैत अछि, अविश्वसनीय सामग्री लए सकैत अछि आ डेटा बाहर पठा सकैत अछि तकरासँ ई सेटिंग जे किछु कहय प्रत्येक कॉलपर पुछल जाइत अछि।",
+          "options": {
+            "auto-allow": "मात्र-पढ़ऽ बला टूलकेँ बिना पुछने चलऽ दिअ",
+            "gate": "प्रत्येक टूल कॉलसँ पहिने पुछू"
+          }
+        }
       }
     },
     "quality": {
@@ -15032,12 +15178,12 @@
           "help": "प्रत्येक दोहराव एकटा रनक खर्च आ समयकेँ गुणा करैत अछि।"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "मूल्यांकन कोना चलैत अछि",
+          "description": "जखन रन वा ओकर डेटासेट नहि कहैत अछि तखन मूल्यांकन रन एजेंटकेँ ओकर टूलक संग सुरक्षित सैंडबॉक्समे रीप्ले करैत अछि (पूर्ण पाइपलाइन) वा मात्र पाठमे उत्तर दैत अछि (तेज)।",
+          "help": "पूर्ण पाइपलाइन ओ परखैत अछि जे अहाँक प्रयोगकर्ताकेँ भेटैत अछि, टूलक प्रयोग सहित, आ खर्च बेसी अछि। एहिमे मात्र पढ़ऽ बला टूल वास्तवमे चलैत अछि; जे किछु डेटा बदलि सकैत अछि, संदेश पठा सकैत अछि वा पाइ खर्च कए सकैत अछि तकरा अनुकरण कएल जाइत अछि आ रनमे सूचीबद्ध कएल जाइत अछि। तेज सस्त अछि आ टूलक प्रयोगक विषयमे किछु नहि कहैत अछि।",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "सैंडबॉक्समे पूर्ण पाइपलाइन",
+            "quick": "तेज: मात्र पाठ उत्तर"
           }
         }
       }
@@ -15141,7 +15287,7 @@
       "cancel": "रद्द करू",
       "done": "{count} सेटिंग सभकेँ ओकर विरासतमे भेटल मानपर रीसेट करू।",
       "partial": "{done} सेटिंग रीसेट भेल; {failed} रीसेट नहि भए सकल। विफल सेटिंग सभक संदेश देखू।",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} सेटिंग रीसेट भेल। जकरा कारण चाही से {skipped} जेना छल तहिना छोड़ि देल गेल।"
     },
     "import": {
       "button": "ओवरराइड आयात करू",
@@ -15214,16 +15360,16 @@
       "unknownActor": "अज्ञात",
       "noReason": "कोनो कारण नहि देल गेल",
       "showMore": "आओर देखाउ",
-      "scope": "Level",
+      "scope": "स्तर",
       "scopeWorkspace": "वर्कस्पेस",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "एजेंट {id}",
+      "scopeFilter": "बदलाव एहि स्तरपर देखाउ",
+      "filterAll": "सभ स्तर",
+      "filterWorkspace": "मात्र वर्कस्पेस",
+      "filterAgents": "मात्र एजेंट",
+      "searchLoadedOnly": "खोज एखन धरि लोड भेल बदलावकेँ समेटैत अछि।",
+      "loadError": "बदलावक इतिहास लोड नहि भए सकल। {message}",
+      "moreFailed": "आओर बदलाव लोड नहि भए सकल। {message}",
       "loadingMore": "लोड भ' रहल अछि"
     }
   },
@@ -15231,7 +15377,7 @@
     "title": "व्यवहार आ सीमा",
     "intro": "नियंत्रित करू जे ई एजेंट एकटा टर्नमे कतेक आगाँ जा सकैत अछि: कतेक टूल कॉल कए सकैत अछि, कतेक काल चलि सकैत अछि आ कतेक पाछाँ पढ़ैत अछि। जे अहाँ एतए नहि बदलैत छी से अहाँक वर्कस्पेससँ विरासतमे अबैत अछि।",
     "saveFirst": "पहिने एजेंटकेँ सहेजू। एकर बनलाक बाद एकर व्यवहार आ सीमा सेट कएल जा सकैत अछि।",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "एकर व्यवहार आ सीमा टैब खोलबाक लेल नीचाँसँ एकटा एजेंट चुनू।",
     "tabs": {
       "label": "एजेंट कॉन्फिगरेशन",
       "setup": "सेटअप",
@@ -15242,12 +15388,12 @@
       "label": "संबंधित पृष्ठ",
       "tenant": "वर्कस्पेस डिफॉल्ट बदलू",
       "playground": "प्लेग्राउंडमे परखू",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "एहि एजेंटक प्रॉम्प्ट",
+      "promptsAria": "{name} क प्रॉम्प्ट: प्रॉम्प्ट रजिस्ट्री एहि एजेंटपर खोलू",
+      "approvals": "एहि एजेंटक स्वीकृति",
+      "approvalsAria": "{name} क स्वीकृति: एहि एजेंट लेल छानल स्वीकृति पंक्ति खोलू",
+      "turns": "टर्न टाइमलाइन",
+      "turnsAria": "{name} क टर्न टाइमलाइन: एहि एजेंट लेल टर्न निरीक्षक खोलू"
     },
     "readOnly": {
       "locked": "ई एजेंट संपादन लेल बंद अछि, तैँ ई मान सभ मात्र पढ़बाक लेल अछि।",
@@ -15427,7 +15573,7 @@
     "regAgentPlaceholder": "एकटा एजेंट चुनू",
     "regAgentsFailed": "अहाँक एजेंट लोड नहि भए सकल।",
     "regPickAgent": "कोनो एजेंटक प्रॉम्प्ट देखबाक आ बदलबाक लेल ओकरा चुनू।",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "लिंकक एजेंट अहाँक लेल उपलब्ध नहि अछि, कारण ओ नहि अछि वा अहाँ ओकरा देखि नहि सकैत छी। एकर बदलामे रजिस्ट्री वर्कस्पेस दायरामे खुजल।",
     "regSearchLabel": "प्रॉम्प्ट खोजू",
     "regSearchPlaceholder": "की, शीर्षक वा विवरण",
     "regRiskLabel": "जोखिमक श्रेणी",

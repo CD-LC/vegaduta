@@ -916,15 +916,15 @@
     "rsParam_seed": "সিড",
     "rsParam_stopSequences": "থামার ক্রম",
     "rsParamDropped": "{param} এই এজেন্টে সেট করা আছে, কিন্তু {provider} {model}-এর জন্য এটি উপেক্ষা করে, তাই এর কোনো প্রভাব নেই।",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "এই রানের জন্য টুল",
+    "rsToolsRunOnly": "শুধু এই রান",
+    "rsToolsRunNote": "এই সুইচগুলো ঠিক করে এই প্লেগ্রাউন্ড থেকে পাঠানো বার্তা এজেন্টের কোন টুল ব্যবহার করতে পারবে। কিছুই সংরক্ষিত হয় না: বাকি সবার জন্য এজেন্ট তার নিজস্ব টুল অ্যাক্সেস রাখে। এগুলো কেবল এজেন্টের টুল বন্ধ করতে পারে, কখনো নতুন টুল দিতে পারে না।",
+    "rsToolsRunSummary": "এজেন্টের {total}টি টুলের মধ্যে {on}টি এই রানের জন্য চালু",
+    "rsToolsRunNone": "এই রানের জন্য কোনো টুল নেই: এজেন্ট শুধু লেখায় উত্তর দিতে পারে।",
+    "rsToolsReset": "এজেন্টের টুল ব্যবহার করুন",
+    "rsToolsNotInAgent": "এটি এই এজেন্টের সংরক্ষিত টুলের একটি নয়, তাই রানের জন্য চালু করা যায় না।",
+    "rsToolsEditAgent": "এজেন্টের সংরক্ষিত টুল পরিবর্তন করুন",
+    "rsToolsLimitedChip": "এই রানের জন্য টুল সীমিত",
     "rsToolsEmpty": "এই এজেন্টের জন্য কোনো টুল নেই।",
     "rsToolsSummary": "{total}-এর মধ্যে {on}টি টুল চালু",
     "rsToolsFailed": "টুল লোড করা যায়নি।",
@@ -982,14 +982,14 @@
     "chipToolsOff": "টুল ছাড়া আবার চেষ্টা করছে",
     "chipFailoverBlocked": "ব্যাকআপ মডেল ব্যবহার হয়নি: টুল আগেই চলেছে",
     "rsLimitChangeOne": "পরিবর্তন",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "রেট সীমা ছাড়িয়েছে",
+    "reasonTimeout": "সময় শেষ",
+    "reasonProviderUnavailable": "প্রদানকারী উপলব্ধ নয়",
+    "reasonAuthFailed": "প্রদানকারী ক্রেডেনশিয়াল প্রত্যাখ্যান করেছে",
+    "reasonBilling": "প্রদানকারীর বিলিং সমস্যা",
+    "reasonModelNotFound": "মডেল উপলব্ধ নয়",
+    "reasonProviderError": "প্রদানকারীর ত্রুটি",
+    "reasonMalformedToolCall": "টুল কলটি ব্যবহার করা যায়নি"
   },
   "nodeDefs": {
     "triggerLabel": "ট্রিগার",
@@ -13226,7 +13226,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "স্কিল",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14228,7 +14228,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "স্কিল",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14402,7 +14402,7 @@
       "role": "আপনার ভূমিকা এই সেটিং বদলাতে পারে না। ওয়ার্কস্পেস অ্যাডমিনকে জিজ্ঞেস করুন।",
       "scope": "এই সেটিং এখানে ওভাররাইড করা যায় না।",
       "readOnly": "সেটিংস এখন শুধু-পঠনযোগ্য।",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "শুধু ওয়ার্কস্পেস অ্যাডমিন এই নিরাপত্তা সেটিং বদলাতে পারেন। আপনি এর মান এখানে দেখতে পারেন, কিন্তু সম্পাদনা করতে পারবেন না।"
     },
     "reset": {
       "button": "উত্তরাধিকারসূত্রে পাওয়া মানে রিসেট করুন",
@@ -14452,12 +14452,12 @@
       "acknowledge": "আমি এই নিরাপত্তা পরিবর্তনের পরিণতি বুঝি।",
       "cancel": "বাতিল",
       "confirm": "নিশ্চিত করে সংরক্ষণ করুন",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "রিসেট: ওভাররাইড সরানো হয় এবং সেটিং তার উত্তরাধিকারসূত্রে পাওয়া মানে ফিরে যায়।"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "বেশি মানে বেশি কঠোর: বেশি মান গ্রহণ করা হয়, কম মান প্রত্যাখ্যাত।",
+      "lower": "কম মানে বেশি কঠোর: কম মান গ্রহণ করা হয়, বেশি মান প্রত্যাখ্যাত।",
+      "enumOrder": "বিকল্পগুলো সবচেয়ে কম থেকে সবচেয়ে বেশি কঠোর ক্রমে সাজানো: {options}। আপনি শুধু কঠোর প্রান্তের দিকে যেতে পারবেন।"
     }
   },
   "approvalsQueue": {
@@ -14626,8 +14626,8 @@
     "tlSevWarn": "মনোযোগ দরকার",
     "tlSevError": "ব্যর্থ",
     "tlIntake": "টার্ন শুরু হয়েছে: {chars}টি অক্ষর, {tools}টি টুল, {attachments}টি সংযুক্তি",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "এই রানের জন্য টুল",
+    "tlRunToolsNone": "কোনোটি নয় (শুধু লেখা)",
     "tlModelCall": "{model} ({provider})-এ মডেল কল, রুট {route}",
     "tlFailover": "{model} ({provider})-এ ফেইলওভার হয়েছে",
     "tlRetryModel": "{model} ({provider})-এ আবার চেষ্টা করা হয়েছে, রুট {route}",
@@ -14636,6 +14636,7 @@
     "tlToolCall": "টুল কল {tool}: {status}",
     "tlApprovalRequested": "{tool} চালানোর আগে অনুমোদন চাওয়া হয়েছে",
     "tlApprovalDecided": "{tool}-এর অনুমোদনের সিদ্ধান্ত হয়েছে: {decision}",
+    "tlApprovalAutoAllowed": "{tool} জিজ্ঞাসা না করেই চলেছে: তত্ত্বাবধানাধীন অবস্থায় শুধু পড়ার একটি কল",
     "tlContinuation": "ধারাবাহিকতা: {guard} ({outcome})",
     "tlGuard": "গার্ডরেল {guard}: {outcome}",
     "tlVerifyPassed": "যাচাই উত্তীর্ণ: {check}",
@@ -14705,7 +14706,7 @@
     "modeTextOnlyHelp": "এজেন্ট তার টুল ছাড়া উত্তর দেয়। নিরাপদ: বাস্তবে কিছু ঘটে না। প্রত্যাশিত-টুল যাচাই পূরণ করা যায় না।",
     "modeFull": "টুল সহ পূর্ণ পাইপলাইন",
     "modeFullHelp": "একজন আসল ব্যবহারকারী যে টুল, গার্ডরেল ও ধাপের সীমা পান ঠিক সেগুলোই। প্রত্যাশিত-টুল ও ট্রাজেক্টরি যাচাইয়ের জন্য দরকার।",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "যে টুল শুধু পড়ে সেগুলো সত্যিই চলে। যা কিছু ডেটা বদলাতে, বার্তা পাঠাতে বা টাকা খরচ করতে পারে তা সিমুলেট করা হয় এবং রানে তালিকাভুক্ত থাকে, ফলে বাস্তবে কিছু ঘটে না। নিরাপত্তা শ্রেণিবিন্যাস ছাড়া টুলও সিমুলেট করা হয়।",
     "autoApproveLabel": "ইভ্যাল স্যান্ডবক্সে টুল কল স্বয়ংক্রিয়ভাবে অনুমোদন করুন",
     "autoApproveHelp": "যে টুল কল সাধারণত কারও জন্য অপেক্ষা করত তা ইভ্যাল স্যান্ডবক্স অনুমোদন করে দেয়, যাতে কেসটি শেষ হতে পারে। এটি ছাড়া কেসটি অমীমাংসিত অনুমোদনেই শেষ হয়, প্রোডাকশনে যেমন হতো।",
     "autoApproveWarnTitle": "শুধু নন-প্রোডাকশন ওয়ার্কস্পেসের জন্য",
@@ -14713,7 +14714,7 @@
     "autoApproveNeedsFull": "প্রথমে পূর্ণ পাইপলাইন চালু করুন: স্বয়ংক্রিয় অনুমোদন শুধু তখনই প্রযোজ্য যখন টুল চলে।",
     "autoApproveRefused": "এই ওয়ার্কস্পেসে অনুমোদিত নয়: {reason}",
     "autoApproveConfirmTitle": "ইভ্যালে টুল কল স্বয়ংক্রিয়ভাবে অনুমোদন করবেন?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "এই ডেটাসেটের রিপ্লেতে মানুষের জন্য অপেক্ষা করবে এমন প্রতিটি টুল কল স্বয়ংক্রিয়ভাবে অনুমোদিত হবে। অনুমোদিত যে টুল শুধু পড়ে সেগুলো সত্যিই চলে; যেগুলো কিছু বদলাতে পারে সেগুলো এখনও সিমুলেট হয়। এটি শুধু টেস্ট ডেটা আছে এমন ওয়ার্কস্পেসে করুন। রান রেকর্ড করে যে সেগুলো স্বয়ংক্রিয়ভাবে অনুমোদিত হয়েছিল।",
     "autoApproveConfirm": "স্বয়ংক্রিয় অনুমোদন চালু করুন",
     "trajectoryLabel": "ট্রাজেক্টরি যাচাই",
     "trajectoryOn": "On",
@@ -14738,22 +14739,22 @@
     "samplingSource_platform": "প্ল্যাটফর্ম কর্তৃক সেট করা",
     "samplingSource_tenant": "আপনার ওয়ার্কস্পেসের জন্য সেট করা",
     "samplingSource_agent": "এই এজেন্টের জন্য সেট করা",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "ওয়ার্কস্পেসের ডিফল্ট",
+    "modeDefaultHelp": "আপনার ওয়ার্কস্পেসের সেটিং অনুসরণ করে (পূর্ণ পাইপলাইন, যদি না কোনো অ্যাডমিন বদলান)। প্রতিটি রান তবুও নিজের মোড বেছে নিতে পারে।",
+    "modeDefaultCurrent": "বর্তমানে: {mode}",
+    "modeNameFull": "পূর্ণ পাইপলাইন",
+    "modeNameQuick": "দ্রুত (শুধু লেখা)",
+    "badgeFull": "পূর্ণ পাইপলাইন",
+    "badgeQuick": "দ্রুত",
+    "datasetModePinnedTitle": "এই ডেটাসেট সবসময় এভাবেই রিপ্লে হয়। একটি রান তবুও অন্য মোড বেছে নিতে পারে।",
+    "datasetModeDefaultTitle": "রান কীভাবে রিপ্লে হবে সেই বিষয়ে এই ডেটাসেট ওয়ার্কস্পেসের ডিফল্ট অনুসরণ করে।",
+    "runModeLabel": "পরের রানের জন্য রিপ্লে মোড",
+    "runModeInherit": "ডেটাসেটের সেটিং ব্যবহার করুন",
+    "runModeHelp": "পূর্ণ পাইপলাইন এজেন্টকে তার টুল, গার্ডরেল ও অনুমোদন সহ একটি নিরাপদ স্যান্ডবক্সে চালায়: যে টুল শুধু পড়ে সেগুলো সত্যিই চলে, আর যা ডেটা বদলাতে বা কিছু পাঠাতে পারে তা সিমুলেট করা হয়। দ্রুত মোড টুল আটকে রাখে এবং শুধু লিখিত উত্তর পরীক্ষা করে।",
+    "runModeFullTitle": "এই রান ইভ্যাল স্যান্ডবক্সে পূর্ণ পাইপলাইন ব্যবহার করেছে।",
+    "runModeQuickTitle": "এই রান ছিল শুধু লেখার দ্রুত রিপ্লে: এজেন্টের টুল আটকে রাখা হয়েছিল।",
+    "runSimulatedTools": "এই রানে সিমুলেট করা হয়েছে, চালানো হয়নি (এগুলো ডেটা বদলাতে বা প্ল্যাটফর্মের বাইরে পৌঁছাতে পারত): {tools}।",
+    "toolStatusSimulated": "সিমুলেট করা, চালানো হয়নি"
   },
   "agentLab": {
     "wtLabel": "এজেন্টের টুল দিয়ে চালান",
@@ -14786,6 +14787,14 @@
       "memory": {
         "label": "মেমরি",
         "description": "একটি এজেন্ট কতগুলো স্মৃতি রাখে ও মনে করে।"
+      },
+      "attachments": {
+        "label": "চ্যাট আপলোড",
+        "description": "চ্যাট বার্তায় মানুষ কত বড় ফাইল সংযুক্ত করতে পারে।"
+      },
+      "skills": {
+        "label": "স্কিল",
+        "description": "ইনস্টল করা স্কিলের তালিকা এজেন্টের নির্দেশনার কতটা ব্যবহার করতে পারে।"
       },
       "aux": {
         "label": "ব্যাকগ্রাউন্ড মডেল কল",
@@ -14852,6 +14861,28 @@
           "label": "অসমাপ্ত উত্তরের পর অতিরিক্ত পাস",
           "description": "মডেলের উত্তর ঘোষিত অথচ না নেওয়া ধাপে থেমে গেলে তাকে আর কতবার চালিয়ে যেতে বলা হয়।",
           "help": "যে এজেন্ট প্রায়ই একটি ধাপ ঘোষণা করে থেমে যায় তাদের জন্য বাড়ান। প্রতিটি অতিরিক্ত পাসে একটি মডেল কল খরচ হয়।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "সীমার পরে উত্তর দেওয়া কল",
+          "description": "টার্নের টুল সীমা শেষ হওয়ার পরে মডেল আরও কতগুলো টুল কল চেষ্টা করতে পারে। প্রতিটি কল \"যা আছে তা দিয়েই উত্তর দাও\" নোট সহ প্রত্যাখ্যাত হয়; এই সংখ্যা ছাড়ালে টার্ন ত্রুটি সহ থামানো হয়।",
+          "help": "মডেল টুল কল করা বন্ধ করতে কয়েকবার চেষ্টা করলে এটি বাড়ান। লুপে আটকে থাকা টার্ন দ্রুত শেষ করতে কমান। 0 সীমার ওপরের প্রথম কলেই টার্ন থামায়।"
+        },
+        "supervisedDivisor": {
+          "label": "তত্ত্বাবধানাধীন এজেন্ট টুল সীমার 1/N পায়",
+          "description": "তত্ত্বাবধানাধীন এজেন্ট টার্নের টুল কল সীমাকে এই সংখ্যা দিয়ে ভাগ করে পায়, কিন্তু নিচের সর্বনিম্ন মানের কম কখনো নয়।",
+          "help": "তত্ত্বাবধানাধীন এজেন্টকে আরও কড়া নজরে রাখতে এটি বাড়ান। 1 তাদের পূর্ণ সীমা দেয়।"
+        },
+        "supervisedMinSteps": {
+          "label": "তত্ত্বাবধানাধীন এজেন্টের সর্বনিম্ন টুল কল",
+          "description": "ওপরের সংখ্যা যত বেশিই হোক, তত্ত্বাবধানাধীন এজেন্ট যে সবচেয়ে ছোট টুল কল সীমা পায়।",
+          "help": "এটি 3 বা তার বেশি রাখুন যাতে তত্ত্বাবধানাধীন এজেন্ট কয়েক ধাপের সহজ কাজ শেষ করতে পারে।"
+        },
+        "autonomousMultiplier": {
+          "label": "সম্পূর্ণ স্বায়ত্তশাসিত এজেন্ট সীমার N গুণ পায়",
+          "description": "সম্পূর্ণ স্বায়ত্তশাসিত এজেন্ট টার্নের টুল কল সীমাকে এই সংখ্যা দিয়ে গুণ করে পায়।",
+          "help": "যেসব এজেন্ট কেউ না দেখে দীর্ঘ কাজ চালায় তাদের জন্য বাড়ান; তখন তারা এক টার্নে বেশি কল ও বেশি টাকা খরচ করতে পারে। 1 তাদের স্বাভাবিক সীমা দেয়।"
         }
       }
     },
@@ -14923,6 +14954,82 @@
           "label": "ফলোআপ টুল কত সময় প্রস্তাবিত থাকে",
           "description": "ব্যবহারের পর একটি টুল সংক্ষিপ্ত ফলোআপ বার্তার জন্য কত সময় প্রস্তাবিত থাকে।",
           "help": "দীর্ঘ জানালা দীর্ঘ কাজের সেশনে সাহায্য করে, ছোট জানালা টুল তালিকা ছোট রাখে।"
+        },
+        "maxStickyTools": {
+          "label": "ফলো-আপে প্রস্তাবিত রাখা সর্বোচ্চ টুল",
+          "description": "ছোট ফলো-আপ বার্তায় বহন করা সর্বোচ্চ টুল সংখ্যা। 0 একটিও রাখে না।",
+          "help": "কোনো কাজ অনেক টুল ব্যবহার করলে বড় সংখ্যা সাহায্য করে; ছোট সংখ্যা টুল তালিকা ছোট রাখে।"
+        },
+        "keepPrimaryModel": {
+          "label": "ফলো-আপের জন্য প্রধান মডেল রাখুন",
+          "description": "আগে টুল ব্যবহার করা কথোপকথনের ছোট ফলো-আপ সস্তা মডেলের বদলে এজেন্টের প্রধান মডেলেই থাকে।",
+          "help": "এটি বন্ধ করুন যাতে খরচ রাউটিং \"হ্যাঁ\"-এর মতো ফলো-আপ সস্তা মডেলে পাঠায়, তবে চলমান কাজ দুর্বলভাবে সামলানোর ঝুঁকি থাকে।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "উত্তর পুনর্ব্যবহার করতে প্রশ্ন কতটা মিলতে হবে",
+          "description": "যেসব এজেন্ট একই রকম প্রশ্নের উত্তর পুনর্ব্যবহার করে তাদের জন্য: সংরক্ষিত উত্তর দিতে নতুন প্রশ্ন আগের প্রশ্নের কতটা কাছাকাছি হতে হবে, 0.85 থেকে 1।",
+          "help": "কম সংখ্যা বেশি পুনরাবৃত্তিতে সাড়া দেয়, কিন্তু অন্য প্রশ্নের জন্য তৈরি উত্তর দিয়ে ফেলার ঝুঁকি থাকে। ভুল উত্তর ব্যয়বহুল হলে এটি বেশি রাখুন। উত্তর শুধু যে ব্যক্তিকে দেওয়া হয়েছিল তার জন্যই পুনর্ব্যবহার হয়।"
+        },
+        "ttl": {
+          "label": "পুনর্ব্যবহারযোগ্য উত্তর কতক্ষণ রাখা হয়",
+          "description": "সংরক্ষিত উত্তর বাদ যাওয়ার আগে কতক্ষণ একই রকম প্রশ্নে দেওয়া যেতে পারে।",
+          "help": "আপনার উত্তর দ্রুত পুরোনো হয়ে গেলে এটি ছোট করুন।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "প্রতি এজেন্টে সর্বোচ্চ সংরক্ষিত উত্তর",
+          "description": "একটি এজেন্ট পুনর্ব্যবহারের জন্য কতগুলো উত্তর রাখে। এর বেশি হলে সবচেয়ে পুরোনোগুলো বাদ যায়।",
+          "help": "বড় ভান্ডার বেশি পুনরাবৃত্তি খুঁজে পায় এবং বেশি স্টোরেজ ব্যবহার করে।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "কথোপকথনে টুল কলের রেকর্ড রাখুন",
+          "description": "পরের টার্ন যাতে দেখতে পায় কী করা হয়েছিল, সেজন্য প্রতিটি টার্নের টুল কলের ছোট রেকর্ড কথোপকথনের সঙ্গে সংরক্ষণ করুন।",
+          "help": "কথোপকথনের ইতিহাস শুধু লেখায় রাখতে এটি বন্ধ করুন; তখন এজেন্ট জানতে পারে না আগের টার্নে তার টুল কী করেছিল। এটি পুরো ওয়ার্কস্পেসে প্রযোজ্য।"
+        },
+        "replayEnabled": {
+          "label": "মডেলকে টুল রেকর্ড দেখান",
+          "description": "মডেলকে কথোপকথন দেওয়ার সময় আগের টুল কলের সংরক্ষিত রেকর্ড অন্তর্ভুক্ত করুন।",
+          "help": "রেকর্ড সংরক্ষণ চালু রেখে মডেলের কর্মক্ষেত্র ব্যবহার না করতে এটি বন্ধ করুন।"
+        },
+        "replayTurns": {
+          "label": "যেসব আগের টার্নের টুল রেকর্ড দেখানো হয়",
+          "description": "টুল ব্যবহার করা সাম্প্রতিকতম কতগুলো টার্নের রেকর্ড মডেলকে দেখানো হয়।",
+          "help": "বড় সংখ্যা দীর্ঘ কাজের সেশনে সাহায্য করে কিন্তু মডেলের কর্মক্ষেত্র বেশি ব্যবহার করে।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "প্রতি টার্নে তালিকাভুক্ত টুল কল",
+          "description": "একটি টার্নের কতগুলো টুল কল রেকর্ডে লেখা হয়। পরের কলগুলো শুধু গোনা হয়।",
+          "help": "যেসব টার্ন অনেক কল করে এবং প্রতিটি মনে রাখা দরকার, সেগুলোর জন্য বাড়ান।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "প্রতি টার্নে দীর্ঘতম টুল রেকর্ড",
+          "description": "একটি টার্নের রেকর্ডের কত অক্ষর মডেলকে দেখানো হয়; বাকিটা গোনা হয়, তালিকাভুক্ত হয় না।",
+          "help": "পরের প্রতিটি টার্নে খরচ বাঁচাতে কমান, বেশি বিবরণ রাখতে বাড়ান।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "সর্বোচ্চ ছবি আপলোড (MB)",
+          "description": "চ্যাট বার্তায় কেউ সর্বোচ্চ কত বড় ছবি সংযুক্ত করতে পারে, মেগাবাইটে। প্ল্যাটফর্মেরও একটি সামগ্রিক ফাইল সীমা আছে যা এটি ছাড়াতে পারে না।",
+          "help": "ছবি ও স্ক্রিনশটের জন্য বাড়ান; বড় ফাইল পাঠাতে ধীর এবং মডেলের বেশি কোটা ব্যবহার করে।"
+        },
+        "maxAudioMb": {
+          "label": "সর্বোচ্চ অডিও আপলোড (MB)",
+          "description": "চ্যাট বার্তায় কেউ সর্বোচ্চ কত বড় অডিও ফাইল সংযুক্ত করতে পারে, মেগাবাইটে। প্ল্যাটফর্মেরও একটি সামগ্রিক ফাইল সীমা আছে যা এটি ছাড়াতে পারে না।",
+          "help": "দীর্ঘ রেকর্ডিংয়ের জন্য বাড়ান; বড় ফাইল পাঠাতে ধীর এবং মডেলের বেশি কোটা ব্যবহার করে।"
+        },
+        "maxVideoMb": {
+          "label": "সর্বোচ্চ ভিডিও আপলোড (MB)",
+          "description": "চ্যাট বার্তায় কেউ সর্বোচ্চ কত বড় ভিডিও সংযুক্ত করতে পারে, মেগাবাইটে। প্ল্যাটফর্মেরও একটি সামগ্রিক ফাইল সীমা আছে যা এটি ছাড়াতে পারে না।",
+          "help": "দীর্ঘ ক্লিপের জন্য বাড়ান; বড় ফাইল পাঠাতে ধীর এবং মডেলের বেশি কোটা ব্যবহার করে।"
+        },
+        "maxDocumentMb": {
+          "label": "সর্বোচ্চ নথি আপলোড (MB)",
+          "description": "চ্যাট বার্তায় কেউ সর্বোচ্চ কত বড় নথি বা স্প্রেডশিট সংযুক্ত করতে পারে, মেগাবাইটে। প্ল্যাটফর্মেরও একটি সামগ্রিক ফাইল সীমা আছে যা এটি ছাড়াতে পারে না।",
+          "help": "দীর্ঘ প্রতিবেদন ও বড় ডেটা ফাইলের জন্য বাড়ান; বড় ফাইল প্রক্রিয়া করতে ধীর।"
         }
       },
       "continuation": {
@@ -14981,6 +15088,20 @@
           "help": "যে সহকারীদের মানুষ সম্পর্কে অনেক কিছু মনে রাখা উচিত তাদের জন্য বাড়ান; এতে সংরক্ষণ ও স্মরণের খরচও বাড়ে।"
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "সর্বোচ্চ ভাগ করা স্মৃতি",
+          "description": "ওয়ার্কস্পেসে ভাগ করা কতগুলো স্মৃতি রাখা হয়। এর বেশি হলে সবচেয়ে পুরোনোগুলো বাদ যায়।",
+          "help": "ভাগ করা জ্ঞানের ওপর নির্ভর করা বড় দলের জন্য বাড়ান; এতে স্টোরেজ ও স্মরণের খরচও বাড়ে। এটি পুরো ওয়ার্কস্পেসে প্রযোজ্য।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ডিভাইসে চ্যাটকে দেওয়া স্মৃতি",
+          "description": "ডিভাইসের সেশন শুরুর সময় তাকে কতগুলো স্মৃতি দেওয়া হয়।",
+          "help": "ডিভাইসের মডেলের কর্মক্ষেত্র ছোট, তাই এটি কম রাখুন।"
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "গ্রাফ স্মৃতি থেকে মনে করা তথ্য",
@@ -14991,6 +15112,20 @@
           "label": "প্রতি লুকআপে পড়া গ্রাফ পথ",
           "description": "একটি লুকআপের তথ্য খুঁজতে স্মৃতি গ্রাফের কতগুলো সংযোগ পড়া হয়।",
           "help": "একাধিক সংযোগ একই তথ্যে পৌঁছাতে পারে, তাই ঘনভাবে যুক্ত স্মৃতিতে সবকিছু খুঁজতে বেশি সংখ্যা লাগতে পারে। বেশি সংখ্যা প্রতিটি লুকআপ ধীর করে।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "প্রম্পটে তালিকাভুক্ত সর্বোচ্চ স্কিল",
+          "description": "এজেন্টের নির্দেশনায় আপনার কতগুলো স্কিলের নাম দেওয়া হয় যাতে সে জানে সেগুলো আছে। বাকিগুলো গোনা হয়, তালিকাভুক্ত হয় না।",
+          "help": "আপনার অনেক স্কিল থাকলে বাড়ান; তালিকাভুক্ত প্রতিটি স্কিল প্রতি টার্নে মডেলের কর্মক্ষেত্রের সামান্য অংশ ব্যবহার করে। এটি পুরো ওয়ার্কস্পেসে প্রযোজ্য।"
+        },
+        "maxBlockChars": {
+          "label": "প্রম্পটে স্কিল তালিকার আকার",
+          "description": "এজেন্টের নির্দেশনায় স্কিলের তালিকা কত অক্ষর নিতে পারে। ভরে গেলে পরের স্কিলগুলো শুধু নামে ছোট করা হয়।",
+          "help": "আরও স্কিলের বিবরণ রাখতে বাড়ান, প্রতি টার্নে টোকেন বাঁচাতে কমান। এটি পুরো ওয়ার্কস্পেসে প্রযোজ্য।"
         }
       }
     },
@@ -15043,6 +15178,17 @@
           "description": "এআই নিরাপত্তা বিচারকরা যাচাই করা টেক্সটের কতটা পড়েন। এর বাইরের টেক্সট বিচার করা হয় না।",
           "help": "আপনি এটি শুধু প্ল্যাটফর্মের মানের ওপরে বাড়াতে পারেন। এটি বাড়ালে দীর্ঘ টুল ফলাফল পুরোটা বিচার হয় কিন্তু প্রতিটি বিচারক কল বড় হয়।"
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "তত্ত্বাবধানাধীন এজেন্ট ও শুধু পড়ার টুল",
+          "description": "তত্ত্বাবধানাধীন স্বায়ত্তশাসন স্তরের এজেন্ট খোঁজ বা লুকআপের মতো শুধু পড়ে এমন টুলের আগেও আপনাকে জিজ্ঞাসা করবে কি না। লেখা, পাঠানো এবং প্ল্যাটফর্ম যেসব টুল শ্রেণিবদ্ধ করেনি সেগুলো সবসময় জিজ্ঞাসা করে।",
+          "help": "আপনি এটি শুধু প্ল্যাটফর্ম সেটিংয়ের চেয়ে বেশি কঠোর করতে পারেন। প্রতিবার জিজ্ঞাসা করাই সবচেয়ে নিরাপদ; শুধু পড়ার টুল চলতে দিলে একটি প্রশ্ন কমে, কিন্তু অপ্রত্যাশিত খোঁজ থামানোর একটি সুযোগও যায়। যে এজেন্ট ব্যক্তিগত ডেটা পড়তে, অবিশ্বস্ত বিষয়বস্তু নিতে এবং ডেটা বাইরে পাঠাতে পারে, এই সেটিং যাই বলুক, তাকে প্রতিটি কলে জিজ্ঞাসা করা হয়।",
+          "options": {
+            "auto-allow": "শুধু পড়ার টুল জিজ্ঞাসা না করে চলতে দিন",
+            "gate": "প্রতিটি টুল কলের আগে জিজ্ঞাসা করুন"
+          }
+        }
       }
     },
     "quality": {
@@ -15065,12 +15211,12 @@
           "help": "প্রতিটি পুনরাবৃত্তি একটি রানের খরচ ও সময় গুণ করে।"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "মূল্যায়ন কীভাবে চলে",
+          "description": "রান বা তার ডেটাসেট না বললে, মূল্যায়ন রান এজেন্টকে তার টুল সহ নিরাপদ স্যান্ডবক্সে রিপ্লে করবে (পূর্ণ পাইপলাইন) নাকি শুধু লেখায় উত্তর দেবে (দ্রুত)।",
+          "help": "পূর্ণ পাইপলাইন আপনার ব্যবহারকারীরা যা পায় তা পরীক্ষা করে, টুল ব্যবহারসহ, এবং খরচ বেশি। এতে যে টুল শুধু পড়ে সেগুলো সত্যিই চলে; যা ডেটা বদলাতে, বার্তা পাঠাতে বা টাকা খরচ করতে পারে তা সিমুলেট করা হয় এবং রানে তালিকাভুক্ত থাকে। দ্রুত সস্তা এবং টুল ব্যবহার সম্পর্কে কিছু বলে না।",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "স্যান্ডবক্সে পূর্ণ পাইপলাইন",
+            "quick": "দ্রুত: শুধু লেখায় উত্তর"
           }
         }
       }
@@ -15174,7 +15320,7 @@
       "cancel": "বাতিল",
       "done": "{count}টি সেটিং তাদের উত্তরাধিকারসূত্রে পাওয়া মানে রিসেট করুন।",
       "partial": "{done}টি সেটিং রিসেট হয়েছে; {failed}টি রিসেট করা যায়নি। ব্যর্থ সেটিংসের বার্তা দেখুন।",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done}টি সেটিং রিসেট হয়েছে। যে {skipped}টির কারণ লাগে সেগুলো যেমন ছিল তেমনই রাখা হয়েছে।"
     },
     "import": {
       "button": "ওভাররাইড আমদানি করুন",
@@ -15247,16 +15393,16 @@
       "unknownActor": "অজানা",
       "noReason": "কোনো কারণ দেওয়া হয়নি",
       "showMore": "আরও দেখান",
-      "scope": "Level",
+      "scope": "স্তর",
       "scopeWorkspace": "ওয়ার্কস্পেস",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "এজেন্ট {id}",
+      "scopeFilter": "পরিবর্তন দেখান এই স্তরে",
+      "filterAll": "সব স্তর",
+      "filterWorkspace": "শুধু ওয়ার্কস্পেস",
+      "filterAgents": "শুধু এজেন্ট",
+      "searchLoadedOnly": "খোঁজ এখন পর্যন্ত লোড হওয়া পরিবর্তনগুলো কভার করে।",
+      "loadError": "পরিবর্তনের ইতিহাস লোড করা যায়নি। {message}",
+      "moreFailed": "আরও পরিবর্তন লোড করা যায়নি। {message}",
       "loadingMore": "লোড হচ্ছে"
     }
   },
@@ -15264,7 +15410,7 @@
     "title": "আচরণ ও সীমা",
     "intro": "একটি টার্নে এই এজেন্ট কতদূর যেতে পারে তা নিয়ন্ত্রণ করুন: কতগুলো টুল কল করতে পারে, কত সময় চলতে পারে এবং কতটা ফেরত পড়ে। এখানে যা বদলান না তা আপনার ওয়ার্কস্পেস থেকে উত্তরাধিকারসূত্রে আসে।",
     "saveFirst": "আগে এজেন্ট সংরক্ষণ করুন। এটি তৈরি হওয়ার পর এর আচরণ ও সীমা সেট করা যায়।",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "এর আচরণ ও সীমা ট্যাব খুলতে নিচ থেকে একটি এজেন্ট বেছে নিন।",
     "tabs": {
       "label": "এজেন্ট কনফিগারেশন",
       "setup": "সেটআপ",
@@ -15275,12 +15421,12 @@
       "label": "সংশ্লিষ্ট পাতা",
       "tenant": "ওয়ার্কস্পেসের ডিফল্ট বদলান",
       "playground": "প্লেগ্রাউন্ডে চেষ্টা করুন",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "এই এজেন্টের প্রম্পট",
+      "promptsAria": "{name}-এর প্রম্পট: প্রম্পট রেজিস্ট্রি এই এজেন্টে খুলুন",
+      "approvals": "এই এজেন্টের অনুমোদন",
+      "approvalsAria": "{name}-এর অনুমোদন: এই এজেন্টের জন্য ফিল্টার করা অনুমোদন সারি খুলুন",
+      "turns": "টার্ন টাইমলাইন",
+      "turnsAria": "{name}-এর টার্ন টাইমলাইন: এই এজেন্টের জন্য টার্ন পরিদর্শক খুলুন"
     },
     "readOnly": {
       "locked": "এই এজেন্ট সম্পাদনার জন্য লক করা, তাই এই মানগুলো শুধু-পঠনযোগ্য।",
@@ -15460,7 +15606,7 @@
     "regAgentPlaceholder": "একটি এজেন্ট বেছে নিন",
     "regAgentsFailed": "আপনার এজেন্ট লোড করা যায়নি।",
     "regPickAgent": "এজেন্টের প্রম্পট দেখতে ও বদলাতে একটি এজেন্ট বেছে নিন।",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "লিংকের এজেন্ট আপনার জন্য উপলব্ধ নয়, কারণ এটি নেই বা আপনি এটি দেখতে পারেন না। এর বদলে রেজিস্ট্রি ওয়ার্কস্পেস স্কোপে খোলা হয়েছে।",
     "regSearchLabel": "প্রম্পট খুঁজুন",
     "regSearchPlaceholder": "কী, শিরোনাম বা বিবরণ",
     "regRiskLabel": "ঝুঁকির শ্রেণি",

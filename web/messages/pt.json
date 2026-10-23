@@ -817,15 +817,15 @@
     "rsParam_seed": "Seed",
     "rsParam_stopSequences": "Sequências de parada",
     "rsParamDropped": "{param} está definido neste agente, mas {provider} o ignora para {model}, então não tem efeito.",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "Ferramentas para esta execução",
+    "rsToolsRunOnly": "Somente esta execução",
+    "rsToolsRunNote": "Estes interruptores escolhem quais ferramentas do agente as mensagens enviadas deste playground podem usar. Nada é salvo: o agente mantém o próprio acesso às ferramentas para todos os outros. Eles só podem desativar ferramentas do agente, nunca dar uma nova.",
+    "rsToolsRunSummary": "{on} de {total} ferramentas do agente ativadas nesta execução",
+    "rsToolsRunNone": "Nenhuma ferramenta nesta execução: o agente só pode responder em texto.",
+    "rsToolsReset": "Usar as ferramentas do agente",
+    "rsToolsNotInAgent": "Não é uma das ferramentas salvas deste agente, por isso não pode ser ativada em uma execução.",
+    "rsToolsEditAgent": "Alterar as ferramentas salvas do agente",
+    "rsToolsLimitedChip": "Ferramentas limitadas nesta execução",
     "rsToolsEmpty": "Este agente não tem ferramentas disponíveis.",
     "rsToolsSummary": "{on} de {total} ferramentas ativadas",
     "rsToolsFailed": "Não foi possível carregar as ferramentas.",
@@ -883,14 +883,14 @@
     "chipToolsOff": "Tentando novamente sem ferramentas",
     "chipFailoverBlocked": "Nenhum modelo reserva usado: as ferramentas já tinham sido executadas",
     "rsLimitChangeOne": "Alterar",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "limite de taxa atingido",
+    "reasonTimeout": "tempo esgotado",
+    "reasonProviderUnavailable": "provedor indisponível",
+    "reasonAuthFailed": "o provedor rejeitou as credenciais",
+    "reasonBilling": "problema de cobrança do provedor",
+    "reasonModelNotFound": "modelo indisponível",
+    "reasonProviderError": "erro do provedor",
+    "reasonMalformedToolCall": "a chamada da ferramenta não pôde ser usada"
   },
   "nodeDefs": {
     "triggerLabel": "Gatilho",
@@ -14622,7 +14622,7 @@
       "role": "Sua função não pode alterar esta configuração. Peça a um administrador do espaço de trabalho.",
       "scope": "Esta configuração não pode ser substituída aqui.",
       "readOnly": "As configurações estão somente leitura no momento.",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "Somente um administrador do espaço de trabalho pode alterar esta configuração de segurança. Você pode ver o valor aqui, mas não editá-lo."
     },
     "reset": {
       "button": "Redefinir para o herdado",
@@ -14672,12 +14672,12 @@
       "acknowledge": "Entendo as consequências desta alteração de segurança.",
       "cancel": "Cancelar",
       "confirm": "Confirmar e salvar",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "Redefinir: a substituição é removida e a configuração volta ao valor que herda."
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "Mais alto é mais rigoroso: um valor mais alto é aceito e um mais baixo é recusado.",
+      "lower": "Mais baixo é mais rigoroso: um valor mais baixo é aceito e um mais alto é recusado.",
+      "enumOrder": "As opções vão da menos à mais rigorosa: {options}. Você só pode avançar em direção à extremidade rigorosa."
     }
   },
   "approvalsQueue": {
@@ -14846,8 +14846,8 @@
     "tlSevWarn": "Requer atenção",
     "tlSevError": "Falhou",
     "tlIntake": "Turno iniciado: {chars} caracteres, {tools} ferramentas, {attachments} anexos",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "Ferramentas para esta execução",
+    "tlRunToolsNone": "nenhuma (somente texto)",
     "tlModelCall": "Chamada de modelo para {model} ({provider}), rota {route}",
     "tlFailover": "Failover para {model} ({provider})",
     "tlRetryModel": "Nova tentativa em {model} ({provider}), rota {route}",
@@ -14856,6 +14856,7 @@
     "tlToolCall": "Chamada da ferramenta {tool}: {status}",
     "tlApprovalRequested": "Aprovação solicitada antes de executar {tool}",
     "tlApprovalDecided": "Aprovação decidida para {tool}: {decision}",
+    "tlApprovalAutoAllowed": "{tool} foi executada sem perguntar: uma chamada somente de leitura sob Supervisionado",
     "tlContinuation": "Continuação: {guard} ({outcome})",
     "tlGuard": "Barreira {guard}: {outcome}",
     "tlVerifyPassed": "Verificação aprovada: {check}",
@@ -14925,7 +14926,7 @@
     "modeTextOnlyHelp": "O agente responde sem as ferramentas. Seguro: nada real acontece. As verificações de ferramentas esperadas não podem ser atendidas.",
     "modeFull": "Pipeline completo com ferramentas",
     "modeFullHelp": "As mesmas ferramentas, barreiras de proteção e limites de etapas que um usuário real recebe. Necessário para verificações de ferramentas esperadas e de trajetória.",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "As ferramentas que só leem são executadas de verdade. Tudo o que pudesse alterar dados, enviar uma mensagem ou gastar dinheiro é simulado e listado na execução, então nada real acontece. Ferramentas sem classificação de segurança também são simuladas.",
     "autoApproveLabel": "Aprovar automaticamente chamadas de ferramentas no sandbox de avaliação",
     "autoApproveHelp": "Uma chamada de ferramenta que normalmente aguardaria uma pessoa é aprovada pelo sandbox de avaliação para que o caso possa terminar. Sem isso, o caso termina na aprovação sem resposta, como na produção.",
     "autoApproveWarnTitle": "Somente para espaços de trabalho que não são de produção",
@@ -14933,7 +14934,7 @@
     "autoApproveNeedsFull": "Ative primeiro o pipeline completo: a aprovação automática só vale quando as ferramentas rodam.",
     "autoApproveRefused": "Não permitido neste espaço de trabalho: {reason}",
     "autoApproveConfirmTitle": "Aprovar automaticamente chamadas de ferramentas nas avaliações?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "Toda chamada de ferramenta nas repetições deste conjunto de dados que esperaria por uma pessoa será aprovada automaticamente. As ferramentas aprovadas que só leem são executadas de verdade; as aprovadas que poderiam alterar algo continuam simuladas. Faça isso apenas em um espaço de trabalho com dados de teste. As execuções registram que foram aprovadas automaticamente.",
     "autoApproveConfirm": "Ativar aprovação automática",
     "trajectoryLabel": "Verificações de trajetória",
     "trajectoryOn": "On",
@@ -14958,22 +14959,22 @@
     "samplingSource_platform": "Definido pela plataforma",
     "samplingSource_tenant": "Definido para o seu espaço de trabalho",
     "samplingSource_agent": "Definido para este agente",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "Padrão do espaço de trabalho",
+    "modeDefaultHelp": "Segue a configuração do seu espaço de trabalho (o pipeline completo, a menos que um administrador a tenha alterado). Cada execução ainda pode escolher seu próprio modo.",
+    "modeDefaultCurrent": "Atualmente: {mode}",
+    "modeNameFull": "Pipeline completo",
+    "modeNameQuick": "Rápido (somente texto)",
+    "badgeFull": "pipeline completo",
+    "badgeQuick": "rápido",
+    "datasetModePinnedTitle": "Este conjunto de dados sempre é repetido desta forma. Uma execução isolada ainda pode escolher outro modo.",
+    "datasetModeDefaultTitle": "Este conjunto de dados segue o padrão do espaço de trabalho para a forma de repetir as execuções.",
+    "runModeLabel": "Modo de repetição para a próxima execução",
+    "runModeInherit": "Usar a configuração do conjunto de dados",
+    "runModeHelp": "O pipeline completo executa o agente com suas ferramentas, barreiras de proteção e aprovações em um ambiente isolado seguro: as ferramentas que só leem são executadas de verdade, e tudo o que pudesse alterar dados ou enviar algo é simulado. O modo rápido retém as ferramentas e testa apenas a resposta escrita.",
+    "runModeFullTitle": "Esta execução usou o pipeline completo no ambiente isolado de avaliação.",
+    "runModeQuickTitle": "Esta execução foi uma repetição rápida somente de texto: as ferramentas do agente foram retidas.",
+    "runSimulatedTools": "Simuladas, não executadas nesta execução (poderiam alterar dados ou atingir algo fora da plataforma): {tools}.",
+    "toolStatusSimulated": "simulada, não executada"
   },
   "agentLab": {
     "wtLabel": "Executar com as ferramentas do agente",
@@ -15006,6 +15007,14 @@
       "memory": {
         "label": "Memória",
         "description": "Quantas memórias um agente guarda e recupera."
+      },
+      "attachments": {
+        "label": "Uploads no chat",
+        "description": "Qual pode ser o tamanho dos arquivos que as pessoas anexam às mensagens do chat."
+      },
+      "skills": {
+        "label": "Skills",
+        "description": "Quanto das instruções do agente a lista de skills instaladas pode usar."
       },
       "aux": {
         "label": "Chamadas de modelo em segundo plano",
@@ -15072,6 +15081,28 @@
           "label": "Passagens extras após uma resposta inacabada",
           "description": "Quantas vezes mais o modelo é solicitado a continuar quando a resposta parou em uma etapa anunciada mas não realizada.",
           "help": "Aumente para agentes que costumam anunciar uma etapa e parar. Cada passagem extra custa uma chamada ao modelo."
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "Chamadas atendidas após o limite",
+          "description": "Quantas chamadas de ferramenta a mais o modelo pode tentar depois de esgotado o limite de ferramentas do turno. Cada uma é recusada com uma nota para responder com o que tem; acima desse número, o turno é interrompido com um erro.",
+          "help": "Aumente se um modelo precisar de algumas tentativas para parar de chamar ferramentas. Diminua para encerrar mais cedo turnos em ciclo. 0 interrompe o turno na primeira chamada acima do limite."
+        },
+        "supervisedDivisor": {
+          "label": "Agentes supervisionados recebem 1/N do limite de ferramentas",
+          "description": "Um agente supervisionado recebe o limite de chamadas de ferramenta do turno dividido por este número, mas nunca menos que o mínimo abaixo.",
+          "help": "Aumente para manter os agentes supervisionados em rédea mais curta. 1 dá a eles o limite total."
+        },
+        "supervisedMinSteps": {
+          "label": "Mínimo de chamadas de ferramenta de um agente supervisionado",
+          "description": "O menor limite de chamadas de ferramenta que um agente supervisionado recebe, por mais alto que seja o número acima.",
+          "help": "Mantenha em 3 ou mais para que um agente supervisionado ainda consiga concluir uma tarefa simples com várias etapas."
+        },
+        "autonomousMultiplier": {
+          "label": "Agentes totalmente autônomos recebem N vezes o limite",
+          "description": "Um agente totalmente autônomo recebe o limite de chamadas de ferramenta do turno multiplicado por este número.",
+          "help": "Aumente para agentes que executam tarefas longas sem ninguém acompanhando; eles podem então gastar mais chamadas e dinheiro em um turno. 1 dá a eles o limite padrão."
         }
       }
     },
@@ -15143,6 +15174,82 @@
           "label": "Por quanto tempo as ferramentas de acompanhamento ficam disponíveis",
           "description": "Por quanto tempo depois do uso uma ferramenta continua oferecida para mensagens de acompanhamento curtas.",
           "help": "Uma janela mais longa ajuda em sessões de trabalho longas, uma mais curta mantém a lista de ferramentas pequena."
+        },
+        "maxStickyTools": {
+          "label": "Máximo de ferramentas oferecidas nos acompanhamentos",
+          "description": "O máximo de ferramentas levadas para uma mensagem de acompanhamento curta. 0 não mantém nenhuma.",
+          "help": "Um número maior ajuda quando uma tarefa usa muitas ferramentas; um menor mantém a lista de ferramentas curta."
+        },
+        "keepPrimaryModel": {
+          "label": "Manter o modelo principal nos acompanhamentos",
+          "description": "Uma mensagem de acompanhamento curta em uma conversa que já usou ferramentas permanece no modelo principal do agente em vez do mais barato.",
+          "help": "Desative para que o roteamento por custo envie acompanhamentos como \"sim\" ao modelo mais barato, com o risco de tratar pior uma tarefa em andamento."
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "Quão parecida uma pergunta deve ser para reutilizar uma resposta",
+          "description": "Para agentes que reutilizam respostas a perguntas semelhantes: quão próxima uma nova pergunta deve estar de uma anterior, de 0,85 a 1, para que a resposta guardada seja entregue.",
+          "help": "Um número mais baixo atende mais repetições, mas arrisca dar uma resposta pensada para outra pergunta. Mantenha alto quando respostas erradas custam caro. Uma resposta só é reutilizada para a pessoa a quem foi dada."
+        },
+        "ttl": {
+          "label": "Por quanto tempo uma resposta reutilizável é mantida",
+          "description": "Por quanto tempo uma resposta guardada pode ser entregue a uma pergunta semelhante antes de ser descartada.",
+          "help": "Reduza se suas respostas ficarem desatualizadas rapidamente."
+        },
+        "maxEntriesPerAgent": {
+          "label": "Máximo de respostas guardadas por agente",
+          "description": "Quantas respostas um agente guarda para reutilização. As mais antigas são descartadas além disso.",
+          "help": "Um armazenamento maior encontra mais repetições e usa mais espaço."
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "Manter um registro das chamadas de ferramenta na conversa",
+          "description": "Guarda com a conversa um breve registro das chamadas de ferramenta de cada turno, para que os turnos seguintes vejam o que foi feito.",
+          "help": "Desative para manter o histórico da conversa somente em texto; o agente então não consegue saber o que suas ferramentas fizeram em turnos anteriores. Isso se aplica a todo o espaço de trabalho."
+        },
+        "replayEnabled": {
+          "label": "Mostrar o registro de ferramentas ao modelo",
+          "description": "Inclui o registro guardado das chamadas de ferramenta anteriores quando a conversa é entregue ao modelo.",
+          "help": "Desative para continuar guardando o registro sem gastar espaço de trabalho do modelo com ele."
+        },
+        "replayTurns": {
+          "label": "Turnos anteriores cujo registro de ferramentas é mostrado",
+          "description": "De quantos dos turnos mais recentes que usaram ferramentas o registro é mostrado ao modelo.",
+          "help": "Um número maior ajuda em longas sessões de trabalho, mas usa mais espaço de trabalho do modelo."
+        },
+        "maxEntriesPerTurn": {
+          "label": "Chamadas de ferramenta listadas por turno",
+          "description": "Quantas das chamadas de ferramenta de um turno são escritas no registro. As demais são apenas contadas.",
+          "help": "Aumente para turnos que fazem muitas chamadas e precisam lembrar de cada uma."
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "Maior registro de ferramentas por turno",
+          "description": "Quantos caracteres do registro de um turno são mostrados ao modelo; o restante é contado, não listado.",
+          "help": "Diminua para economizar custo em todo turno seguinte, aumente para manter mais detalhes."
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "Maior upload de imagem (MB)",
+          "description": "A maior imagem que uma pessoa pode anexar a uma mensagem do chat, em megabytes. A plataforma também tem um limite geral de arquivo que este valor não pode ultrapassar.",
+          "help": "Aumente para fotos e capturas de tela; arquivos grandes são mais lentos de enviar e usam mais da cota do modelo."
+        },
+        "maxAudioMb": {
+          "label": "Maior upload de áudio (MB)",
+          "description": "O maior arquivo de áudio que uma pessoa pode anexar a uma mensagem do chat, em megabytes. A plataforma também tem um limite geral de arquivo que este valor não pode ultrapassar.",
+          "help": "Aumente para gravações mais longas; arquivos grandes são mais lentos de enviar e usam mais da cota do modelo."
+        },
+        "maxVideoMb": {
+          "label": "Maior upload de vídeo (MB)",
+          "description": "O maior vídeo que uma pessoa pode anexar a uma mensagem do chat, em megabytes. A plataforma também tem um limite geral de arquivo que este valor não pode ultrapassar.",
+          "help": "Aumente para clipes mais longos; arquivos grandes são mais lentos de enviar e usam mais da cota do modelo."
+        },
+        "maxDocumentMb": {
+          "label": "Maior upload de documento (MB)",
+          "description": "O maior documento ou planilha que uma pessoa pode anexar a uma mensagem do chat, em megabytes. A plataforma também tem um limite geral de arquivo que este valor não pode ultrapassar.",
+          "help": "Aumente para relatórios longos e arquivos de dados grandes; arquivos grandes são mais lentos de processar."
         }
       },
       "continuation": {
@@ -15201,6 +15308,20 @@
           "help": "Aumente para assistentes que devem lembrar muito sobre as pessoas; isso também aumenta o custo de armazenamento e recuperação."
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "Máximo de memórias compartilhadas",
+          "description": "Quantas memórias compartilhadas no espaço de trabalho são mantidas. As mais antigas são descartadas além disso.",
+          "help": "Aumente para grandes equipes que dependem de conhecimento compartilhado; isso também aumenta o custo de armazenamento e de recuperação. Isso se aplica a todo o espaço de trabalho."
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "Memórias dadas ao chat no dispositivo",
+          "description": "Quantas memórias são entregues a uma sessão no dispositivo quando ela começa.",
+          "help": "Modelos no dispositivo têm pouco espaço de trabalho, então mantenha este valor baixo."
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "Fatos recuperados da memória em grafo",
@@ -15211,6 +15332,20 @@
           "label": "Caminhos do grafo lidos por consulta",
           "description": "Quantas conexões do grafo de memória são lidas para encontrar os fatos de uma consulta.",
           "help": "Várias conexões podem levar ao mesmo fato, então memórias muito interligadas podem precisar de um número maior para encontrar tudo. Um número maior deixa cada consulta mais lenta."
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "Máximo de skills listadas no prompt",
+          "description": "Quantas de suas skills são nomeadas nas instruções do agente para que ele saiba que existem. As demais são contadas, não listadas.",
+          "help": "Aumente se você tiver muitas skills; cada skill listada usa um pouco do espaço de trabalho do modelo em todo turno. Isso se aplica a todo o espaço de trabalho."
+        },
+        "maxBlockChars": {
+          "label": "Tamanho da lista de skills no prompt",
+          "description": "Quantos caracteres a lista de skills pode ocupar nas instruções do agente. Quando está cheia, as skills seguintes são reduzidas ao nome.",
+          "help": "Aumente para manter as descrições de mais skills, diminua para economizar tokens em todo turno. Isso se aplica a todo o espaço de trabalho."
         }
       }
     },
@@ -15263,6 +15398,17 @@
           "description": "Quanto do texto verificado os juízes de segurança de IA leem. O texto além disso não é julgado.",
           "help": "Você só pode aumentar acima do valor da plataforma. Aumentar faz julgar resultados longos de ferramentas por inteiro, mas torna cada chamada ao juiz maior."
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "Agentes supervisionados e ferramentas somente de leitura",
+          "description": "Se um agente do nível de autonomia Supervisionado ainda pergunta a você antes de uma ferramenta que só lê, como uma busca ou uma consulta. Gravações, envios e ferramentas que a plataforma não classificou sempre perguntam.",
+          "help": "Você só pode tornar isto mais rigoroso que a configuração da plataforma. Perguntar sempre é a escolha mais segura; deixar as ferramentas somente de leitura rodarem elimina uma pergunta, mas também uma chance de parar uma busca inesperada. Um agente que pode ler dados privados, receber conteúdo não confiável e enviar dados é consultado a cada chamada, independentemente desta opção.",
+          "options": {
+            "auto-allow": "Deixar as ferramentas somente de leitura rodarem sem perguntar",
+            "gate": "Perguntar antes de cada chamada de ferramenta"
+          }
+        }
       }
     },
     "quality": {
@@ -15285,12 +15431,12 @@
           "help": "Cada repetição multiplica o custo e o tempo de uma execução."
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "Como as avaliações são executadas",
+          "description": "Se uma execução de avaliação repete o agente com suas ferramentas em um ambiente isolado seguro (pipeline completo) ou responde somente em texto (rápido), quando a execução ou seu conjunto de dados não diz.",
+          "help": "O pipeline completo testa o que seus usuários recebem, incluindo o uso de ferramentas, e custa mais. Nele, as ferramentas que só leem são executadas de verdade; tudo o que pudesse alterar dados, enviar uma mensagem ou gastar dinheiro é simulado e listado na execução. O modo rápido é mais barato e não diz nada sobre o uso de ferramentas.",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "Pipeline completo em um ambiente isolado",
+            "quick": "Rápido: somente respostas em texto"
           }
         }
       }
@@ -15394,7 +15540,7 @@
       "cancel": "Cancelar",
       "done": "Redefinir {count} configurações para seus valores herdados.",
       "partial": "{done} configurações redefinidas; {failed} não puderam ser redefinidas. Veja as mensagens nas configurações que falharam.",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} configurações redefinidas. As {skipped} que precisam de um motivo foram deixadas como estavam."
     },
     "import": {
       "button": "Importar substituições",
@@ -15467,24 +15613,24 @@
       "unknownActor": "Desconhecido",
       "noReason": "Nenhum motivo informado",
       "showMore": "Mostrar mais",
-      "scope": "Level",
-      "scopeWorkspace": "Workspace",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
-      "loadingMore": "Loading"
+      "scope": "Nível",
+      "scopeWorkspace": "Espaço de trabalho",
+      "scopeAgent": "Agente {id}",
+      "scopeFilter": "Mostrar alterações em",
+      "filterAll": "Todos os níveis",
+      "filterWorkspace": "Somente espaço de trabalho",
+      "filterAgents": "Somente agentes",
+      "searchLoadedOnly": "A busca abrange as alterações carregadas até agora.",
+      "loadError": "Não foi possível carregar o histórico de alterações. {message}",
+      "moreFailed": "Não foi possível carregar mais alterações. {message}",
+      "loadingMore": "Carregando"
     }
   },
   "agentBehavior": {
     "title": "Comportamento e limites",
     "intro": "Controle até onde este agente pode ir em um turno: quantas ferramentas pode chamar, por quanto tempo pode rodar e quanto relê. Tudo que você não alterar aqui é herdado do seu espaço de trabalho.",
     "saveFirst": "Salve o agente primeiro. O comportamento e os limites podem ser definidos depois que ele existir.",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "Escolha um agente abaixo para abrir sua guia Comportamento e limites.",
     "tabs": {
       "label": "Configuração do agente",
       "setup": "Configuração inicial",
@@ -15495,12 +15641,12 @@
       "label": "Páginas relacionadas",
       "tenant": "Alterar os padrões do espaço de trabalho",
       "playground": "Experimentar no playground",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "Prompts deste agente",
+      "promptsAria": "Prompts de {name}: abrir o registro de prompts neste agente",
+      "approvals": "Aprovações deste agente",
+      "approvalsAria": "Aprovações de {name}: abrir a fila de aprovações filtrada por este agente",
+      "turns": "Linha do tempo de turnos",
+      "turnsAria": "Linha do tempo de turnos de {name}: abrir o inspetor de turnos para este agente"
     },
     "readOnly": {
       "locked": "Este agente está bloqueado para edição, então estes valores são somente leitura.",
@@ -15680,7 +15826,7 @@
     "regAgentPlaceholder": "Escolha um agente",
     "regAgentsFailed": "Não foi possível carregar seus agentes.",
     "regPickAgent": "Escolha um agente para ver e alterar seus prompts.",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "O agente do link não está disponível para você, porque não existe ou você não pode vê-lo. O registro foi aberto no escopo do espaço de trabalho.",
     "regSearchLabel": "Pesquisar prompts",
     "regSearchPlaceholder": "Chave, título ou descrição",
     "regRiskLabel": "Classe de risco",

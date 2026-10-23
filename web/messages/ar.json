@@ -951,15 +951,15 @@
     "rsParam_seed": "البذرة",
     "rsParam_stopSequences": "تسلسلات التوقف",
     "rsParamDropped": "تم تحديد {param} على هذا الوكيل، لكن {provider} يتجاهله مع {model}، لذا لا يكون له تأثير.",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "أدوات هذا التشغيل",
+    "rsToolsRunOnly": "هذا التشغيل فقط",
+    "rsToolsRunNote": "تحدد هذه المفاتيح أي أدوات الوكيل يمكن للرسائل التي ترسلها من هذه الساحة استخدامها. لا يُحفظ شيء: يحتفظ الوكيل بوصوله الخاص إلى الأدوات لجميع الآخرين. ولا يمكنها إلا إيقاف أدوات الوكيل، ولا تمنحه أداة جديدة أبدًا.",
+    "rsToolsRunSummary": "{on} من أصل {total} أدوات للوكيل مفعّلة لهذا التشغيل",
+    "rsToolsRunNone": "لا أدوات لهذا التشغيل: يمكن للوكيل الرد بالنص فقط.",
+    "rsToolsReset": "استخدام أدوات الوكيل",
+    "rsToolsNotInAgent": "ليست من أدوات هذا الوكيل المحفوظة، لذا لا يمكن تفعيلها في تشغيل.",
+    "rsToolsEditAgent": "تغيير أدوات الوكيل المحفوظة",
+    "rsToolsLimitedChip": "الأدوات محدودة في هذا التشغيل",
     "rsToolsEmpty": "لا توجد أدوات متاحة لهذا الوكيل.",
     "rsToolsSummary": "{on} من {total} أدوات قيد التشغيل",
     "rsToolsFailed": "تعذّر تحميل الأدوات.",
@@ -1017,14 +1017,14 @@
     "chipToolsOff": "إعادة المحاولة بدون أدوات",
     "chipFailoverBlocked": "لم يُستخدم نموذج احتياطي: الأدوات عملت بالفعل",
     "rsLimitChangeOne": "تغيير",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "تم تجاوز حد المعدل",
+    "reasonTimeout": "انتهت المهلة",
+    "reasonProviderUnavailable": "المزوّد غير متاح",
+    "reasonAuthFailed": "رفض المزوّد بيانات الاعتماد",
+    "reasonBilling": "مشكلة في فوترة المزوّد",
+    "reasonModelNotFound": "النموذج غير متاح",
+    "reasonProviderError": "خطأ من المزوّد",
+    "reasonMalformedToolCall": "تعذّر استخدام استدعاء الأداة"
   },
   "nodeDefs": {
     "triggerLabel": "المُحفِّز",
@@ -13597,7 +13597,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "المهارات",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14599,7 +14599,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "المهارات",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14773,7 +14773,7 @@
       "role": "لا يمكن لدورك تغيير هذا الإعداد. اسأل مسؤول مساحة العمل.",
       "scope": "لا يمكن تجاوز هذا الإعداد هنا.",
       "readOnly": "الإعدادات للقراءة فقط حاليًا.",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "لا يستطيع تغيير إعداد الأمان هذا إلا مشرف مساحة العمل. يمكنك رؤية قيمته هنا، لكن لا يمكنك تعديلها."
     },
     "reset": {
       "button": "إعادة الضبط إلى القيمة الموروثة",
@@ -14823,12 +14823,12 @@
       "acknowledge": "أفهم عواقب هذا التغيير الأمني.",
       "cancel": "إلغاء",
       "confirm": "تأكيد وحفظ",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "إعادة الضبط: تُزال القيمة المخصصة ويعود الإعداد إلى القيمة التي يرثها."
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "الأعلى أكثر صرامة: تُقبل القيمة الأعلى وتُرفض الأدنى.",
+      "lower": "الأدنى أكثر صرامة: تُقبل القيمة الأدنى وتُرفض الأعلى.",
+      "enumOrder": "تتدرج الخيارات من الأقل إلى الأكثر صرامة: {options}. لا يمكنك التحرك إلا نحو الطرف الصارم."
     }
   },
   "approvalsQueue": {
@@ -14997,8 +14997,8 @@
     "tlSevWarn": "يحتاج إلى انتباه",
     "tlSevError": "فشل",
     "tlIntake": "بدأت الدورة: {chars} حرفًا، {tools} أدوات، {attachments} مرفقات",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "أدوات هذا التشغيل",
+    "tlRunToolsNone": "لا شيء (نص فقط)",
     "tlModelCall": "استدعاء نموذج إلى {model} ({provider})، المسار {route}",
     "tlFailover": "تم التحويل عند الفشل إلى {model} ({provider})",
     "tlRetryModel": "أُعيدت المحاولة على {model} ({provider})، المسار {route}",
@@ -15007,6 +15007,7 @@
     "tlToolCall": "استدعاء الأداة {tool}: {status}",
     "tlApprovalRequested": "طُلبت موافقة قبل تشغيل {tool}",
     "tlApprovalDecided": "تم البتّ في الموافقة على {tool}: {decision}",
+    "tlApprovalAutoAllowed": "تم تشغيل {tool} دون سؤال: استدعاء للقراءة فقط ضمن وضع الإشراف",
     "tlContinuation": "متابعة: {guard} ({outcome})",
     "tlGuard": "الحاجز {guard}: {outcome}",
     "tlVerifyPassed": "اجتاز الفحص: {check}",
@@ -15076,7 +15077,7 @@
     "modeTextOnlyHelp": "يجيب الوكيل بدون أدواته. آمن: لا يحدث شيء حقيقي. لا يمكن استيفاء فحوصات الأدوات المتوقعة.",
     "modeFull": "المسار الكامل مع الأدوات",
     "modeFullHelp": "الأدوات والحواجز الوقائية وحدود الخطوات نفسها التي يحصل عليها مستخدم حقيقي. مطلوب لفحوصات الأدوات المتوقعة والمسار.",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "الأدوات التي تقرأ فقط تعمل فعليًا. أما كل ما قد يغيّر البيانات أو يرسل رسالة أو ينفق مالًا فيُحاكى ويُدرج في التشغيل، فلا يحدث شيء حقيقي. والأدوات التي ليس لها تصنيف أمان تُحاكى أيضًا.",
     "autoApproveLabel": "الموافقة التلقائية على استدعاءات الأدوات في بيئة التقييم المعزولة",
     "autoApproveHelp": "استدعاء الأداة الذي ينتظر عادةً شخصًا توافق عليه بيئة التقييم المعزولة ليتمكن الاختبار من الانتهاء. بدون هذا ينتهي الاختبار عند الموافقة التي لم يُرَدّ عليها، كما في الإنتاج.",
     "autoApproveWarnTitle": "لمساحات العمل غير الإنتاجية فقط",
@@ -15084,7 +15085,7 @@
     "autoApproveNeedsFull": "فعّل المسار الكامل أولًا: لا تُطبَّق الموافقة التلقائية إلا عند تشغيل الأدوات.",
     "autoApproveRefused": "غير مسموح في مساحة العمل هذه: {reason}",
     "autoApproveConfirmTitle": "هل تريد الموافقة تلقائيًا على استدعاءات الأدوات في التقييمات؟",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "ستتم الموافقة تلقائيًا على كل استدعاء أداة في عمليات إعادة تشغيل مجموعة البيانات هذه كان سينتظر شخصًا. تعمل الأدوات الموافَق عليها التي تقرأ فقط فعليًا؛ أما التي قد تغيّر شيئًا فتظل محاكاة. افعل ذلك فقط في مساحة عمل بها بيانات اختبار. تسجّل عمليات التشغيل أنه تمت الموافقة عليها تلقائيًا.",
     "autoApproveConfirm": "تفعيل الموافقة التلقائية",
     "trajectoryLabel": "فحوصات المسار",
     "trajectoryOn": "On",
@@ -15109,22 +15110,22 @@
     "samplingSource_platform": "محدَّد من المنصة",
     "samplingSource_tenant": "محدَّد لمساحة عملك",
     "samplingSource_agent": "محدَّد لهذا الوكيل",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "الافتراضي لمساحة العمل",
+    "modeDefaultHelp": "يتبع إعداد مساحة عملك (المسار الكامل ما لم يغيّره مشرف). ويمكن لكل تشغيل أن يختار وضعه الخاص.",
+    "modeDefaultCurrent": "حاليًا: {mode}",
+    "modeNameFull": "المسار الكامل",
+    "modeNameQuick": "سريع (نص فقط)",
+    "badgeFull": "المسار الكامل",
+    "badgeQuick": "سريع",
+    "datasetModePinnedTitle": "تُعاد هذه المجموعة دائمًا بهذه الطريقة. ويمكن لتشغيل واحد أن يختار وضعًا آخر.",
+    "datasetModeDefaultTitle": "تتبع مجموعة البيانات هذه الإعداد الافتراضي لمساحة العمل في طريقة إعادة التشغيل.",
+    "runModeLabel": "وضع إعادة التشغيل للتشغيل التالي",
+    "runModeInherit": "استخدام إعداد مجموعة البيانات",
+    "runModeHelp": "يشغّل المسار الكامل الوكيل بأدواته وحواجزه الوقائية وموافقاته في بيئة معزولة آمنة: الأدوات التي تقرأ فقط تعمل فعليًا، وكل ما قد يغيّر البيانات أو يرسل شيئًا يُحاكى. أما الوضع السريع فيحجب الأدوات ويختبر الإجابة المكتوبة فقط.",
+    "runModeFullTitle": "استخدم هذا التشغيل المسار الكامل في بيئة التقييم المعزولة.",
+    "runModeQuickTitle": "كان هذا التشغيل إعادة تشغيل سريعة بالنص فقط: حُجبت أدوات الوكيل.",
+    "runSimulatedTools": "محاكاة، لم تُنفَّذ في هذا التشغيل (قد تغيّر البيانات أو تصل إلى خارج المنصة): {tools}.",
+    "toolStatusSimulated": "محاكاة، لم تُنفَّذ"
   },
   "agentLab": {
     "wtLabel": "التشغيل باستخدام أدوات الوكيل",
@@ -15157,6 +15158,14 @@
       "memory": {
         "label": "الذاكرة",
         "description": "عدد الذكريات التي يحتفظ بها الوكيل ويستدعيها."
+      },
+      "attachments": {
+        "label": "الملفات المرفوعة في الدردشة",
+        "description": "ما الحجم الذي يمكن أن تبلغه الملفات التي يرفقها الأشخاص برسائل الدردشة."
+      },
+      "skills": {
+        "label": "المهارات",
+        "description": "مقدار تعليمات الوكيل الذي يمكن لقائمة المهارات المثبّتة استخدامه."
       },
       "aux": {
         "label": "استدعاءات النماذج في الخلفية",
@@ -15223,6 +15232,28 @@
           "label": "مرّات إضافية بعد رد غير مكتمل",
           "description": "عدد المرات الإضافية التي يُطلب فيها من النموذج المواصلة عندما توقف رده عند خطوة أُعلن عنها ولم تُنفَّذ.",
           "help": "ارفعها للوكلاء الذين يعلنون خطوة ثم يتوقفون كثيرًا. كل مرة إضافية تكلّف استدعاء نموذج."
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "الاستدعاءات المُجابة بعد الحد",
+          "description": "عدد استدعاءات الأدوات الإضافية التي يمكن للنموذج محاولتها بعد استنفاد حد الأدوات في الدورة. يُرفض كل منها مع ملاحظة بالرد بما لديه؛ وبعد هذا العدد تتوقف الدورة بخطأ.",
+          "help": "ارفعه إذا احتاج النموذج إلى بضع محاولات ليتوقف عن استدعاء الأدوات. اخفضه لإنهاء الدورات المتكررة مبكرًا. القيمة 0 توقف الدورة عند أول استدعاء يتجاوز الحد."
+        },
+        "supervisedDivisor": {
+          "label": "يحصل الوكلاء الخاضعون للإشراف على 1/N من حد الأدوات",
+          "description": "يحصل الوكيل الخاضع للإشراف على حد استدعاءات الأدوات في الدورة مقسومًا على هذا الرقم، لكن ليس أقل من الحد الأدنى أدناه.",
+          "help": "ارفعه لإبقاء الوكلاء الخاضعين للإشراف تحت رقابة أشد. القيمة 1 تمنحهم الحد الكامل."
+        },
+        "supervisedMinSteps": {
+          "label": "أقل عدد من استدعاءات الأدوات لوكيل خاضع للإشراف",
+          "description": "أصغر حد لاستدعاءات الأدوات يحصل عليه الوكيل الخاضع للإشراف، مهما كان الرقم أعلاه مرتفعًا.",
+          "help": "أبقه عند 3 أو أكثر ليتمكن الوكيل الخاضع للإشراف من إنهاء مهمة بسيطة من عدة خطوات."
+        },
+        "autonomousMultiplier": {
+          "label": "يحصل الوكلاء المستقلون تمامًا على N أضعاف الحد",
+          "description": "يحصل الوكيل المستقل تمامًا على حد استدعاءات الأدوات في الدورة مضروبًا في هذا الرقم.",
+          "help": "ارفعه للوكلاء الذين ينفذون مهام طويلة دون مراقبة؛ فيمكنهم حينئذ إنفاق مزيد من الاستدعاءات والمال في دورة واحدة. القيمة 1 تمنحهم الحد المعتاد."
         }
       }
     },
@@ -15294,6 +15325,82 @@
           "label": "مدة بقاء أدوات المتابعة معروضة",
           "description": "المدة التي تبقى فيها الأداة معروضة بعد استخدامها لرسائل المتابعة القصيرة.",
           "help": "نافذة أطول تفيد جلسات العمل الطويلة، وأقصر تُبقي قائمة الأدوات صغيرة."
+        },
+        "maxStickyTools": {
+          "label": "أقصى عدد من الأدوات المعروضة في المتابعات",
+          "description": "أقصى عدد من الأدوات التي تُنقل إلى رسالة متابعة قصيرة. القيمة 0 لا تُبقي أيًّا منها.",
+          "help": "الرقم الأكبر يساعد عندما تستخدم المهمة أدوات كثيرة، والأصغر يُبقي قائمة الأدوات قصيرة."
+        },
+        "keepPrimaryModel": {
+          "label": "إبقاء النموذج الرئيسي للمتابعات",
+          "description": "تبقى رسالة المتابعة القصيرة في محادثة استخدمت الأدوات سابقًا على النموذج الرئيسي للوكيل بدلًا من الأرخص.",
+          "help": "أوقفه لتدع توجيه التكلفة يرسل المتابعات مثل «نعم» إلى النموذج الأرخص، مع احتمال ضعف معالجة مهمة قيد التنفيذ."
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "مدى تشابه السؤال لإعادة استخدام الإجابة",
+          "description": "للوكلاء الذين يعيدون استخدام الإجابات لأسئلة مشابهة: مدى قرب السؤال الجديد من سؤال سابق، من 0.85 إلى 1، ليُقدَّم الجواب المخزَّن.",
+          "help": "الرقم الأقل يقدّم مزيدًا من التكرارات لكنه قد يعطي إجابة موجهة لسؤال مختلف. أبقِه مرتفعًا عندما تكون الإجابات الخاطئة مكلفة. لا تُعاد الإجابة إلا للشخص الذي أُعطيت له."
+        },
+        "ttl": {
+          "label": "مدة الاحتفاظ بإجابة قابلة لإعادة الاستخدام",
+          "description": "المدة التي يمكن فيها تقديم إجابة مخزَّنة لسؤال مشابه قبل حذفها.",
+          "help": "اختصرها إذا كانت إجاباتك تتقادم بسرعة."
+        },
+        "maxEntriesPerAgent": {
+          "label": "أقصى عدد من الإجابات المخزَّنة لكل وكيل",
+          "description": "عدد الإجابات التي يحتفظ بها الوكيل لإعادة استخدامها. تُحذف الأقدم عند تجاوز هذا العدد.",
+          "help": "المخزن الأكبر يجد تكرارات أكثر ويستخدم تخزينًا أكبر."
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "الاحتفاظ بسجل لاستدعاءات الأدوات في المحادثة",
+          "description": "تخزين سجل قصير لاستدعاءات الأدوات في كل دورة مع المحادثة، لكي ترى الدورات اللاحقة ما جرى.",
+          "help": "أوقفه لإبقاء سجل المحادثة نصًا فقط؛ عندئذ لا يستطيع الوكيل معرفة ما فعلته أدواته في الدورات السابقة. ينطبق هذا على مساحة العمل بأكملها."
+        },
+        "replayEnabled": {
+          "label": "إظهار سجل الأدوات للنموذج",
+          "description": "تضمين السجل المخزَّن لاستدعاءات الأدوات السابقة عند تسليم المحادثة إلى النموذج.",
+          "help": "أوقفه لمواصلة تخزين السجل دون استخدام أي من مساحة عمل النموذج له."
+        },
+        "replayTurns": {
+          "label": "الدورات السابقة التي يُعرض سجل أدواتها",
+          "description": "لكم من الدورات الأحدث التي استخدمت أدوات يُعرض سجلها على النموذج.",
+          "help": "الرقم الأكبر يفيد في جلسات العمل الطويلة لكنه يستهلك مزيدًا من مساحة عمل النموذج."
+        },
+        "maxEntriesPerTurn": {
+          "label": "استدعاءات الأدوات المدرجة لكل دورة",
+          "description": "عدد استدعاءات الأدوات في الدورة الواحدة التي تُكتب في السجل. أما الاستدعاءات الإضافية فتُحصى فقط.",
+          "help": "ارفعه للدورات التي تجري استدعاءات كثيرة وتحتاج إلى تذكّر كل واحد منها."
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "أطول سجل أدوات لكل دورة",
+          "description": "عدد أحرف سجل الدورة الواحدة التي تُعرض على النموذج؛ ويُحصى الباقي ولا يُدرج.",
+          "help": "اخفضه لتوفير التكلفة في كل دورة لاحقة، وارفعه للاحتفاظ بمزيد من التفاصيل."
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "أكبر صورة يمكن رفعها (ميغابايت)",
+          "description": "أكبر صورة يمكن للشخص إرفاقها برسالة دردشة، بالميغابايت. وللمنصة أيضًا حد إجمالي للملفات لا يمكن لهذا تجاوزه.",
+          "help": "ارفعه للصور ولقطات الشاشة؛ الملفات الكبيرة أبطأ في الإرسال وتستهلك مزيدًا من حصة النموذج."
+        },
+        "maxAudioMb": {
+          "label": "أكبر ملف صوتي يمكن رفعه (ميغابايت)",
+          "description": "أكبر ملف صوتي يمكن للشخص إرفاقه برسالة دردشة، بالميغابايت. وللمنصة أيضًا حد إجمالي للملفات لا يمكن لهذا تجاوزه.",
+          "help": "ارفعه للتسجيلات الأطول؛ الملفات الكبيرة أبطأ في الإرسال وتستهلك مزيدًا من حصة النموذج."
+        },
+        "maxVideoMb": {
+          "label": "أكبر فيديو يمكن رفعه (ميغابايت)",
+          "description": "أكبر فيديو يمكن للشخص إرفاقه برسالة دردشة، بالميغابايت. وللمنصة أيضًا حد إجمالي للملفات لا يمكن لهذا تجاوزه.",
+          "help": "ارفعه للمقاطع الأطول؛ الملفات الكبيرة أبطأ في الإرسال وتستهلك مزيدًا من حصة النموذج."
+        },
+        "maxDocumentMb": {
+          "label": "أكبر مستند يمكن رفعه (ميغابايت)",
+          "description": "أكبر مستند أو جدول بيانات يمكن للشخص إرفاقه برسالة دردشة، بالميغابايت. وللمنصة أيضًا حد إجمالي للملفات لا يمكن لهذا تجاوزه.",
+          "help": "ارفعه للتقارير الطويلة وملفات البيانات الكبيرة؛ الملفات الكبيرة أبطأ في المعالجة."
         }
       },
       "continuation": {
@@ -15352,6 +15459,20 @@
           "help": "ارفعه للمساعدين الذين يجب أن يتذكروا الكثير عن الأشخاص؛ وهذا يرفع أيضًا تكلفة التخزين والاستدعاء."
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "أقصى عدد من الذكريات المشتركة",
+          "description": "عدد الذكريات المشتركة في مساحة العمل التي يُحتفظ بها. تُحذف الأقدم عند تجاوز هذا العدد.",
+          "help": "ارفعه للفرق الكبيرة التي تعتمد على المعرفة المشتركة؛ كما يرفع ذلك تكلفة التخزين والاسترجاع. ينطبق هذا على مساحة العمل بأكملها."
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "الذكريات المقدَّمة لدردشة الجهاز",
+          "description": "عدد الذكريات التي تُسلَّم إلى جلسة على الجهاز عند بدئها.",
+          "help": "لدى النماذج على الجهاز مساحة عمل صغيرة، فأبقِ هذا منخفضًا."
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "الحقائق المستدعاة من ذاكرة الرسم البياني",
@@ -15362,6 +15483,20 @@
           "label": "مسارات الرسم البياني المقروءة لكل عملية بحث",
           "description": "عدد الروابط في الرسم البياني للذاكرة التي تُقرأ للعثور على حقائق عملية بحث واحدة.",
           "help": "قد تؤدي عدة روابط إلى الحقيقة نفسها، لذا قد تحتاج الذكريات المترابطة بكثافة إلى رقم أعلى للعثور على كل شيء. الرقم الأعلى يبطّئ كل عملية بحث."
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "أقصى عدد من المهارات المدرجة في المطالبة",
+          "description": "عدد مهاراتك التي تُذكر أسماؤها في تعليمات الوكيل ليعرف بوجودها. وتُحصى البقية ولا تُدرج.",
+          "help": "ارفعه إذا كانت لديك مهارات كثيرة؛ فكل مهارة مدرجة تستهلك قليلًا من مساحة عمل النموذج في كل دورة. ينطبق هذا على مساحة العمل بأكملها."
+        },
+        "maxBlockChars": {
+          "label": "حجم قائمة المهارات في المطالبة",
+          "description": "عدد الأحرف التي يمكن أن تشغلها قائمة المهارات في تعليمات الوكيل. عند امتلائها تُختصر المهارات اللاحقة إلى أسمائها.",
+          "help": "ارفعه للاحتفاظ بأوصاف مزيد من المهارات، واخفضه لتوفير الرموز في كل دورة. ينطبق هذا على مساحة العمل بأكملها."
         }
       }
     },
@@ -15414,6 +15549,17 @@
           "description": "مقدار النص المفحوص الذي يقرؤه حُكّام الأمان بالذكاء الاصطناعي. النص الذي يتجاوزه لا يُحكَم عليه.",
           "help": "يمكنك رفعه فقط فوق قيمة المنصة. رفعه يحكم على نتائج الأدوات الطويلة كاملة لكنه يجعل كل استدعاء للحَكَم أكبر."
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "الوكلاء الخاضعون للإشراف وأدوات القراءة فقط",
+          "description": "ما إذا كان الوكيل في مستوى الاستقلالية «خاضع للإشراف» لا يزال يسألك قبل أداة تقرأ فقط، مثل بحث أو استعلام. أما الكتابات والإرسال والأدوات التي لم تصنّفها المنصة فتسأل دائمًا.",
+          "help": "يمكنك فقط جعل هذا أكثر صرامة من إعداد المنصة. السؤال في كل مرة هو الخيار الأكثر أمانًا؛ أما ترك أدوات القراءة فقط تعمل فيزيل سؤالًا لكنه يزيل أيضًا فرصة لإيقاف بحث لم تتوقعه. الوكيل الذي يستطيع قراءة بيانات خاصة واستقبال محتوى غير موثوق وإرسال بيانات إلى الخارج يُسأل عن كل استدعاء مهما كان هذا الإعداد.",
+          "options": {
+            "auto-allow": "السماح لأدوات القراءة فقط بالعمل دون سؤال",
+            "gate": "السؤال قبل كل استدعاء أداة"
+          }
+        }
       }
     },
     "quality": {
@@ -15436,12 +15582,12 @@
           "help": "كل تكرار يضاعف تكلفة التشغيل ووقته."
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "كيفية تشغيل التقييمات",
+          "description": "ما إذا كان تشغيل التقييم يعيد تشغيل الوكيل بأدواته في بيئة معزولة آمنة (المسار الكامل) أو يجيب بالنص فقط (سريع)، عندما لا يحدد التشغيل أو مجموعة بياناته ذلك.",
+          "help": "يختبر المسار الكامل ما يحصل عليه مستخدموك، بما في ذلك استخدام الأدوات، ويكلّف أكثر. وفيه تعمل الأدوات التي تقرأ فقط فعليًا؛ وكل ما قد يغيّر البيانات أو يرسل رسالة أو ينفق مالًا يُحاكى ويُدرج في التشغيل. أما السريع فأرخص ولا يقول شيئًا عن استخدام الأدوات.",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "المسار الكامل في بيئة معزولة",
+            "quick": "سريع: إجابات نصية فقط"
           }
         }
       }
@@ -15545,7 +15691,7 @@
       "cancel": "إلغاء",
       "done": "إعادة ضبط {count} إعدادات إلى قيمها الموروثة.",
       "partial": "أُعيد ضبط {done} إعدادات؛ وتعذّرت إعادة ضبط {failed}. راجع الرسائل على الإعدادات التي فشلت.",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "أُعيد ضبط {done} إعدادات. وتُركت {skipped} إعدادات تحتاج إلى سبب كما هي."
     },
     "import": {
       "button": "استيراد التجاوزات",
@@ -15618,16 +15764,16 @@
       "unknownActor": "غير معروف",
       "noReason": "لم يُذكر سبب",
       "showMore": "عرض المزيد",
-      "scope": "Level",
+      "scope": "المستوى",
       "scopeWorkspace": "مساحة العمل",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "الوكيل {id}",
+      "scopeFilter": "عرض التغييرات على",
+      "filterAll": "كل المستويات",
+      "filterWorkspace": "مساحة العمل فقط",
+      "filterAgents": "الوكلاء فقط",
+      "searchLoadedOnly": "يشمل البحث التغييرات المحمّلة حتى الآن.",
+      "loadError": "تعذّر تحميل سجل التغييرات. {message}",
+      "moreFailed": "تعذّر تحميل مزيد من التغييرات. {message}",
       "loadingMore": "جارٍ التحميل"
     }
   },
@@ -15635,7 +15781,7 @@
     "title": "السلوك والحدود",
     "intro": "تحكّم إلى أي مدى يمكن لهذا الوكيل أن يذهب في دورة واحدة: كم أداة يمكنه استدعاؤها، وكم يمكنه أن يعمل، وكم يقرأ من النتائج. أي شيء لا تغيّره هنا يُورَّث من مساحة عملك.",
     "saveFirst": "احفظ الوكيل أولًا. يمكن ضبط سلوكه وحدوده بعد أن يصبح موجودًا.",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "اختر وكيلًا أدناه لفتح تبويب السلوك والحدود الخاص به.",
     "tabs": {
       "label": "إعداد الوكيل",
       "setup": "الإعداد الأولي",
@@ -15646,12 +15792,12 @@
       "label": "صفحات ذات صلة",
       "tenant": "تغيير الإعدادات الافتراضية لمساحة العمل",
       "playground": "جرّبه في ساحة التجربة",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "مطالبات هذا الوكيل",
+      "promptsAria": "مطالبات {name}: افتح سجل المطالبات عند هذا الوكيل",
+      "approvals": "موافقات هذا الوكيل",
+      "approvalsAria": "موافقات {name}: افتح قائمة الموافقات مصفاة على هذا الوكيل",
+      "turns": "الجدول الزمني للدورات",
+      "turnsAria": "الجدول الزمني لدورات {name}: افتح مفتش الدورات لهذا الوكيل"
     },
     "readOnly": {
       "locked": "هذا الوكيل مقفل للتعديل، لذا فهذه القيم للقراءة فقط.",
@@ -15831,7 +15977,7 @@
     "regAgentPlaceholder": "اختر وكيلًا",
     "regAgentsFailed": "تعذّر تحميل وكلائك.",
     "regPickAgent": "اختر وكيلًا لعرض مطالباته وتغييرها.",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "الوكيل في الرابط غير متاح لك، لأنه غير موجود أو لا يمكنك رؤيته. فُتح السجل بنطاق مساحة العمل بدلًا من ذلك.",
     "regSearchLabel": "بحث في المطالبات",
     "regSearchPlaceholder": "المفتاح أو العنوان أو الوصف",
     "regRiskLabel": "فئة المخاطر",

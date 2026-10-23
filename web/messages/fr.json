@@ -916,15 +916,15 @@
     "rsParam_seed": "Seed",
     "rsParam_stopSequences": "Séquences d'arrêt",
     "rsParamDropped": "{param} est défini sur cet agent, mais {provider} l'ignore pour {model}, donc il n'a aucun effet.",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "Outils pour cette exécution",
+    "rsToolsRunOnly": "Cette exécution seulement",
+    "rsToolsRunNote": "Ces commutateurs choisissent les outils de l'agent que les messages envoyés depuis ce playground peuvent utiliser. Rien n'est enregistré : l'agent garde son propre accès aux outils pour tous les autres. Ils ne peuvent que désactiver des outils de l'agent, jamais lui en donner un nouveau.",
+    "rsToolsRunSummary": "{on} outils de l'agent sur {total} activés pour cette exécution",
+    "rsToolsRunNone": "Aucun outil pour cette exécution : l'agent ne peut répondre que par du texte.",
+    "rsToolsReset": "Utiliser les outils de l'agent",
+    "rsToolsNotInAgent": "Ne fait pas partie des outils enregistrés de cet agent, il ne peut donc pas être activé pour une exécution.",
+    "rsToolsEditAgent": "Modifier les outils enregistrés de l'agent",
+    "rsToolsLimitedChip": "Outils limités pour cette exécution",
     "rsToolsEmpty": "Aucun outil n'est disponible pour cet agent.",
     "rsToolsSummary": "{on} outils sur {total} activés",
     "rsToolsFailed": "Impossible de charger les outils.",
@@ -982,14 +982,14 @@
     "chipToolsOff": "Nouvelle tentative sans outils",
     "chipFailoverBlocked": "Aucun modèle de secours utilisé : des outils avaient déjà été exécutés",
     "rsLimitChangeOne": "Modifier",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "limite de débit atteinte",
+    "reasonTimeout": "délai dépassé",
+    "reasonProviderUnavailable": "fournisseur indisponible",
+    "reasonAuthFailed": "le fournisseur a refusé les identifiants",
+    "reasonBilling": "problème de facturation chez le fournisseur",
+    "reasonModelNotFound": "modèle indisponible",
+    "reasonProviderError": "erreur du fournisseur",
+    "reasonMalformedToolCall": "l'appel d'outil était inutilisable"
   },
   "nodeDefs": {
     "triggerLabel": "Déclencheur",
@@ -14773,7 +14773,7 @@
       "role": "Votre rôle ne peut pas modifier ce paramètre. Demandez à un administrateur de l'espace de travail.",
       "scope": "Ce paramètre ne peut pas être remplacé ici.",
       "readOnly": "Les paramètres sont en lecture seule pour le moment.",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "Seul un administrateur de l'espace de travail peut modifier ce réglage de sécurité. Vous pouvez en voir la valeur ici, mais pas la modifier."
     },
     "reset": {
       "button": "Réinitialiser à la valeur héritée",
@@ -14823,12 +14823,12 @@
       "acknowledge": "Je comprends les conséquences de cette modification de sécurité.",
       "cancel": "Annuler",
       "confirm": "Confirmer et enregistrer",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "Réinitialiser : la surcharge est supprimée et le réglage revient à la valeur dont il hérite."
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "Plus haut est plus strict : une valeur plus haute est acceptée, une plus basse est refusée.",
+      "lower": "Plus bas est plus strict : une valeur plus basse est acceptée, une plus haute est refusée.",
+      "enumOrder": "Les options vont de la moins stricte à la plus stricte : {options}. Vous ne pouvez aller que vers l'extrémité stricte."
     }
   },
   "approvalsQueue": {
@@ -14997,8 +14997,8 @@
     "tlSevWarn": "Nécessite de l'attention",
     "tlSevError": "Échec",
     "tlIntake": "Tour démarré : {chars} caractères, {tools} outils, {attachments} pièces jointes",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "Outils pour cette exécution",
+    "tlRunToolsNone": "aucun (texte uniquement)",
     "tlModelCall": "Appel du modèle {model} ({provider}), route {route}",
     "tlFailover": "Basculement vers {model} ({provider})",
     "tlRetryModel": "Nouvelle tentative sur {model} ({provider}), route {route}",
@@ -15007,6 +15007,7 @@
     "tlToolCall": "Appel de l'outil {tool} : {status}",
     "tlApprovalRequested": "Approbation demandée avant l'exécution de {tool}",
     "tlApprovalDecided": "Approbation décidée pour {tool} : {decision}",
+    "tlApprovalAutoAllowed": "{tool} s'est exécuté sans demander : un appel en lecture seule sous Supervisé",
     "tlContinuation": "Poursuite : {guard} ({outcome})",
     "tlGuard": "Garde-fou {guard} : {outcome}",
     "tlVerifyPassed": "Vérification réussie : {check}",
@@ -15076,7 +15077,7 @@
     "modeTextOnlyHelp": "L'agent répond sans ses outils. Sûr : rien de réel ne se produit. Les vérifications d'outils attendus ne peuvent pas être satisfaites.",
     "modeFull": "Pipeline complet avec outils",
     "modeFullHelp": "Les mêmes outils, garde-fous et limites d'étapes qu'un utilisateur réel. Nécessaire pour les vérifications d'outils attendus et de trajectoire.",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "Les outils qui ne font que lire s'exécutent pour de vrai. Tout ce qui pourrait modifier des données, envoyer un message ou dépenser de l'argent est simulé et listé dans l'exécution, de sorte que rien de réel ne se produit. Les outils sans classification de sécurité sont aussi simulés.",
     "autoApproveLabel": "Approuver automatiquement les appels d'outils dans le bac à sable d'évaluation",
     "autoApproveHelp": "Un appel d'outil qui attendrait normalement une personne est approuvé par le bac à sable d'évaluation afin que le cas puisse se terminer. Sans cela, le cas s'arrête à l'approbation restée sans réponse, comme en production.",
     "autoApproveWarnTitle": "Pour les espaces de travail hors production uniquement",
@@ -15084,7 +15085,7 @@
     "autoApproveNeedsFull": "Activez d'abord le pipeline complet : l'approbation automatique ne s'applique que lorsque les outils s'exécutent.",
     "autoApproveRefused": "Non autorisé dans cet espace de travail : {reason}",
     "autoApproveConfirmTitle": "Approuver automatiquement les appels d'outils dans les évaluations ?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "Chaque appel d'outil des rejeux de ce jeu de données qui attendrait une personne sera approuvé automatiquement. Les outils approuvés qui ne font que lire s'exécutent pour de vrai ; ceux qui pourraient modifier quelque chose restent simulés. Ne le faites que dans un espace de travail contenant des données de test. Les exécutions notent qu'elles ont été approuvées automatiquement.",
     "autoApproveConfirm": "Activer l'approbation automatique",
     "trajectoryLabel": "Vérifications de trajectoire",
     "trajectoryOn": "On",
@@ -15109,22 +15110,22 @@
     "samplingSource_platform": "Défini par la plateforme",
     "samplingSource_tenant": "Défini pour votre espace de travail",
     "samplingSource_agent": "Défini pour cet agent",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "Valeur par défaut de l'espace de travail",
+    "modeDefaultHelp": "Suit le réglage de votre espace de travail (le pipeline complet, sauf si un administrateur l'a modifié). Chaque exécution peut toujours choisir son propre mode.",
+    "modeDefaultCurrent": "Actuellement : {mode}",
+    "modeNameFull": "Pipeline complet",
+    "modeNameQuick": "Rapide (texte uniquement)",
+    "badgeFull": "pipeline complet",
+    "badgeQuick": "rapide",
+    "datasetModePinnedTitle": "Ce jeu de données est toujours rejoué de cette façon. Une exécution isolée peut quand même choisir un autre mode.",
+    "datasetModeDefaultTitle": "Ce jeu de données suit la valeur par défaut de l'espace de travail pour la façon de rejouer les exécutions.",
+    "runModeLabel": "Mode de rejeu pour la prochaine exécution",
+    "runModeInherit": "Utiliser le réglage du jeu de données",
+    "runModeHelp": "Le pipeline complet exécute l'agent avec ses outils, ses garde-fous et ses approbations dans un bac à sable sûr : les outils qui ne font que lire s'exécutent vraiment, tout ce qui pourrait modifier des données ou envoyer quelque chose est simulé. Le mode rapide retient les outils et ne teste que la réponse écrite.",
+    "runModeFullTitle": "Cette exécution a utilisé le pipeline complet dans le bac à sable d'évaluation.",
+    "runModeQuickTitle": "Cette exécution était un rejeu rapide en texte seul : les outils de l'agent ont été retenus.",
+    "runSimulatedTools": "Simulés, non exécutés dans cette exécution (ils pourraient modifier des données ou agir hors de la plateforme) : {tools}.",
+    "toolStatusSimulated": "simulé, non exécuté"
   },
   "agentLab": {
     "wtLabel": "Exécuter avec les outils de l'agent",
@@ -15157,6 +15158,14 @@
       "memory": {
         "label": "Mémoire",
         "description": "Combien de souvenirs un agent conserve et rappelle."
+      },
+      "attachments": {
+        "label": "Envois de fichiers dans le chat",
+        "description": "Taille maximale des fichiers que les personnes peuvent joindre aux messages du chat."
+      },
+      "skills": {
+        "label": "Skills",
+        "description": "Part des instructions de l'agent que la liste des skills installés peut utiliser."
       },
       "aux": {
         "label": "Appels de modèle en arrière-plan",
@@ -15223,6 +15232,28 @@
           "label": "Passes supplémentaires après une réponse inachevée",
           "description": "Combien de fois de plus le modèle est invité à poursuivre quand sa réponse s'est arrêtée à une étape annoncée mais non réalisée.",
           "help": "Augmentez-la pour les agents qui annoncent souvent une étape puis s'arrêtent. Chaque passe supplémentaire coûte un appel de modèle."
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "Appels traités après la limite",
+          "description": "Combien d'appels d'outils supplémentaires le modèle peut tenter une fois la limite d'outils du tour épuisée. Chacun est refusé avec une note lui demandant de répondre avec ce qu'il a ; au-delà de ce nombre, le tour est arrêté avec une erreur.",
+          "help": "Augmentez-le si un modèle a besoin de quelques essais pour arrêter d'appeler des outils. Diminuez-le pour mettre fin plus vite aux tours en boucle. 0 arrête le tour au premier appel au-delà de la limite."
+        },
+        "supervisedDivisor": {
+          "label": "Les agents supervisés reçoivent 1/N de la limite d'outils",
+          "description": "Un agent supervisé reçoit la limite d'appels d'outils du tour divisée par ce nombre, mais jamais moins que le minimum ci-dessous.",
+          "help": "Augmentez-le pour tenir les agents supervisés plus court. 1 leur donne la limite complète."
+        },
+        "supervisedMinSteps": {
+          "label": "Minimum d'appels d'outils pour un agent supervisé",
+          "description": "La plus petite limite d'appels d'outils qu'un agent supervisé reçoit, quel que soit le nombre ci-dessus.",
+          "help": "Gardez 3 ou plus pour qu'un agent supervisé puisse encore terminer une tâche simple en plusieurs étapes."
+        },
+        "autonomousMultiplier": {
+          "label": "Les agents entièrement autonomes reçoivent N fois la limite",
+          "description": "Un agent entièrement autonome reçoit la limite d'appels d'outils du tour multipliée par ce nombre.",
+          "help": "Augmentez-le pour les agents qui exécutent de longues tâches sans surveillance ; ils peuvent alors dépenser plus d'appels et d'argent en un tour. 1 leur donne la limite standard."
         }
       }
     },
@@ -15294,6 +15325,82 @@
           "label": "Durée pendant laquelle les outils de relance restent proposés",
           "description": "Combien de temps après son utilisation un outil reste proposé pour les messages de relance courts.",
           "help": "Une fenêtre plus longue aide les longues sessions de travail, une plus courte garde la liste d'outils petite."
+        },
+        "maxStickyTools": {
+          "label": "Maximum d'outils proposés dans les messages de suivi",
+          "description": "Le nombre maximal d'outils reportés dans un court message de suivi. 0 n'en garde aucun.",
+          "help": "Un nombre plus élevé aide quand une tâche utilise beaucoup d'outils ; un nombre plus bas garde la liste d'outils courte."
+        },
+        "keepPrimaryModel": {
+          "label": "Garder le modèle principal pour les suivis",
+          "description": "Un court message de suivi dans une conversation qui a déjà utilisé des outils reste sur le modèle principal de l'agent au lieu du modèle moins cher.",
+          "help": "Désactivez-le pour laisser le routage par coût envoyer les suivis comme « oui » vers le modèle moins cher, au risque de traiter moins bien une tâche en cours."
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "Degré de ressemblance d'une question pour réutiliser une réponse",
+          "description": "Pour les agents qui réutilisent des réponses à des questions similaires : à quel point une nouvelle question doit être proche d'une précédente, de 0,85 à 1, pour que la réponse enregistrée soit servie.",
+          "help": "Un nombre plus bas sert plus de répétitions mais risque de donner une réponse destinée à une autre question. Gardez-le élevé quand une mauvaise réponse coûte cher. Une réponse n'est réutilisée que pour la personne à qui elle a été donnée."
+        },
+        "ttl": {
+          "label": "Durée de conservation d'une réponse réutilisable",
+          "description": "Combien de temps une réponse enregistrée peut être servie à une question similaire avant d'être supprimée.",
+          "help": "Raccourcissez-la si vos réponses deviennent vite obsolètes."
+        },
+        "maxEntriesPerAgent": {
+          "label": "Maximum de réponses enregistrées par agent",
+          "description": "Combien de réponses un agent garde pour les réutiliser. Les plus anciennes sont supprimées au-delà.",
+          "help": "Un stock plus grand trouve plus de répétitions et utilise plus de stockage."
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "Garder une trace des appels d'outils dans la conversation",
+          "description": "Enregistrer avec la conversation une courte trace des appels d'outils de chaque tour, afin que les tours suivants voient ce qui a été fait.",
+          "help": "Désactivez-le pour garder un historique de conversation en texte seul ; l'agent ne peut alors plus savoir ce que ses outils ont fait lors des tours précédents. Cela s'applique à tout l'espace de travail."
+        },
+        "replayEnabled": {
+          "label": "Montrer la trace des outils au modèle",
+          "description": "Inclure la trace enregistrée des appels d'outils précédents lorsque la conversation est donnée au modèle.",
+          "help": "Désactivez-le pour continuer à enregistrer la trace sans utiliser l'espace de travail du modèle."
+        },
+        "replayTurns": {
+          "label": "Tours précédents dont la trace d'outils est montrée",
+          "description": "Pour combien des tours récents ayant utilisé des outils la trace est montrée au modèle.",
+          "help": "Un nombre plus grand aide dans les longues sessions de travail mais utilise plus de l'espace de travail du modèle."
+        },
+        "maxEntriesPerTurn": {
+          "label": "Appels d'outils listés par tour",
+          "description": "Combien des appels d'outils d'un tour sont écrits dans la trace. Les appels suivants sont seulement comptés.",
+          "help": "Augmentez-le pour les tours qui font beaucoup d'appels et dont chacun doit être mémorisé."
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "Trace d'outils la plus longue par tour",
+          "description": "Combien de caractères de la trace d'un tour sont montrés au modèle ; le reste est compté, pas listé.",
+          "help": "Diminuez-le pour réduire le coût de chaque tour suivant, augmentez-le pour garder plus de détails."
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "Plus grande image envoyée (Mo)",
+          "description": "La plus grande image qu'une personne peut joindre à un message du chat, en mégaoctets. La plateforme a aussi une limite globale de fichier que cette valeur ne peut pas dépasser.",
+          "help": "Augmentez-le pour les photos et les captures d'écran ; les gros fichiers sont plus lents à envoyer et utilisent plus du quota du modèle."
+        },
+        "maxAudioMb": {
+          "label": "Plus grand fichier audio envoyé (Mo)",
+          "description": "Le plus grand fichier audio qu'une personne peut joindre à un message du chat, en mégaoctets. La plateforme a aussi une limite globale de fichier que cette valeur ne peut pas dépasser.",
+          "help": "Augmentez-le pour les enregistrements plus longs ; les gros fichiers sont plus lents à envoyer et utilisent plus du quota du modèle."
+        },
+        "maxVideoMb": {
+          "label": "Plus grande vidéo envoyée (Mo)",
+          "description": "La plus grande vidéo qu'une personne peut joindre à un message du chat, en mégaoctets. La plateforme a aussi une limite globale de fichier que cette valeur ne peut pas dépasser.",
+          "help": "Augmentez-le pour les clips plus longs ; les gros fichiers sont plus lents à envoyer et utilisent plus du quota du modèle."
+        },
+        "maxDocumentMb": {
+          "label": "Plus grand document envoyé (Mo)",
+          "description": "Le plus grand document ou tableur qu'une personne peut joindre à un message du chat, en mégaoctets. La plateforme a aussi une limite globale de fichier que cette valeur ne peut pas dépasser.",
+          "help": "Augmentez-le pour les longs rapports et les gros fichiers de données ; les gros fichiers sont plus lents à traiter."
         }
       },
       "continuation": {
@@ -15352,6 +15459,20 @@
           "help": "Augmentez-le pour les assistants censés retenir beaucoup de choses sur les personnes ; cela augmente aussi le coût de stockage et de rappel."
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "Maximum de souvenirs partagés",
+          "description": "Combien de souvenirs partagés dans l'espace de travail sont conservés. Les plus anciens sont supprimés au-delà.",
+          "help": "Augmentez-le pour les grandes équipes qui s'appuient sur des connaissances partagées ; cela augmente aussi le coût de stockage et de rappel. Cela s'applique à tout l'espace de travail."
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "Souvenirs donnés au chat sur l'appareil",
+          "description": "Combien de souvenirs sont remis à une session sur l'appareil à son démarrage.",
+          "help": "Les modèles sur l'appareil ont peu d'espace de travail, gardez donc ce nombre bas."
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "Faits rappelés de la mémoire en graphe",
@@ -15362,6 +15483,20 @@
           "label": "Chemins du graphe lus par consultation",
           "description": "Combien de connexions du graphe de mémoire sont lues pour trouver les faits d'une consultation.",
           "help": "Plusieurs connexions peuvent mener au même fait, donc des souvenirs très liés peuvent nécessiter un nombre plus élevé pour tout trouver. Un nombre plus élevé ralentit chaque consultation."
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "Maximum de skills listés dans le prompt",
+          "description": "Combien de vos skills sont nommés dans les instructions de l'agent pour qu'il sache qu'ils existent. Les autres sont comptés, pas listés.",
+          "help": "Augmentez-le si vous avez beaucoup de skills ; chaque skill listé utilise un peu de l'espace de travail du modèle à chaque tour. Cela s'applique à tout l'espace de travail."
+        },
+        "maxBlockChars": {
+          "label": "Taille de la liste de skills dans le prompt",
+          "description": "Combien de caractères la liste des skills peut occuper dans les instructions de l'agent. Quand elle est pleine, les skills suivants sont réduits à leur nom.",
+          "help": "Augmentez-le pour garder les descriptions de plus de skills, diminuez-le pour économiser des tokens à chaque tour. Cela s'applique à tout l'espace de travail."
         }
       }
     },
@@ -15414,6 +15549,17 @@
           "description": "Quelle part du texte vérifié les juges de sécurité IA lisent. Le texte au-delà n'est pas jugé.",
           "help": "Vous ne pouvez que le relever au-dessus de la valeur de la plateforme. Le relever juge intégralement les longs résultats d'outils mais rend chaque appel au juge plus gros."
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "Agents supervisés et outils en lecture seule",
+          "description": "Si un agent du niveau d'autonomie Supervisé vous demande encore avant un outil qui ne fait que lire, comme une recherche ou une consultation. Les écritures, les envois et les outils que la plateforme n'a pas classés demandent toujours.",
+          "help": "Vous ne pouvez le rendre que plus strict que le réglage de la plateforme. Demander à chaque fois est le choix le plus sûr ; laisser les outils en lecture seule s'exécuter supprime une demande mais aussi une chance d'arrêter une recherche inattendue. Un agent qui peut lire des données privées, accepter du contenu non fiable et envoyer des données est interrogé pour chaque appel, quoi que dise ce réglage.",
+          "options": {
+            "auto-allow": "Laisser les outils en lecture seule s'exécuter sans demander",
+            "gate": "Demander avant chaque appel d'outil"
+          }
+        }
       }
     },
     "quality": {
@@ -15436,12 +15582,12 @@
           "help": "Chaque répétition multiplie le coût et la durée d'une exécution."
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "Comment les évaluations s'exécutent",
+          "description": "Si une exécution d'évaluation rejoue l'agent avec ses outils dans un bac à sable sûr (pipeline complet) ou répond en texte seul (rapide), quand l'exécution ou son jeu de données ne le précise pas.",
+          "help": "Le pipeline complet teste ce que reçoivent vos utilisateurs, y compris l'usage des outils, et coûte plus cher. Dedans, les outils qui ne font que lire s'exécutent vraiment ; tout ce qui pourrait modifier des données, envoyer un message ou dépenser de l'argent est simulé et listé dans l'exécution. Le mode rapide coûte moins cher et ne dit rien de l'usage des outils.",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "Pipeline complet dans un bac à sable",
+            "quick": "Rapide : réponses en texte seul"
           }
         }
       }
@@ -15545,7 +15691,7 @@
       "cancel": "Annuler",
       "done": "Réinitialiser {count} paramètres à leurs valeurs héritées.",
       "partial": "{done} paramètres réinitialisés ; {failed} n'ont pas pu l'être. Consultez les messages sur les paramètres en échec.",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} réglages réinitialisés. {skipped} nécessitant une raison ont été laissés tels quels."
     },
     "import": {
       "button": "Importer des remplacements",
@@ -15618,24 +15764,24 @@
       "unknownActor": "Inconnu",
       "noReason": "Aucun motif donné",
       "showMore": "Afficher plus",
-      "scope": "Level",
-      "scopeWorkspace": "Workspace",
+      "scope": "Niveau",
+      "scopeWorkspace": "Espace de travail",
       "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
-      "loadingMore": "Loading"
+      "scopeFilter": "Afficher les changements au niveau",
+      "filterAll": "Tous les niveaux",
+      "filterWorkspace": "Espace de travail seulement",
+      "filterAgents": "Agents seulement",
+      "searchLoadedOnly": "La recherche porte sur les changements chargés jusqu'ici.",
+      "loadError": "L'historique des changements n'a pas pu être chargé. {message}",
+      "moreFailed": "D'autres changements n'ont pas pu être chargés. {message}",
+      "loadingMore": "Chargement"
     }
   },
   "agentBehavior": {
     "title": "Comportement et limites",
     "intro": "Contrôlez jusqu'où cet agent peut aller en un tour : combien d'outils il peut appeler, combien de temps il peut s'exécuter et combien il relit. Tout ce que vous ne modifiez pas ici est hérité de votre espace de travail.",
     "saveFirst": "Enregistrez d'abord l'agent. Son comportement et ses limites peuvent être définis une fois qu'il existe.",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "Choisissez un agent ci-dessous pour ouvrir son onglet Comportement et limites.",
     "tabs": {
       "label": "Configuration de l'agent",
       "setup": "Configuration",
@@ -15646,12 +15792,12 @@
       "label": "Pages associées",
       "tenant": "Modifier les valeurs par défaut de l'espace de travail",
       "playground": "Essayer dans le playground",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "Prompts de cet agent",
+      "promptsAria": "Prompts de {name} : ouvrir le registre de prompts sur cet agent",
+      "approvals": "Approbations de cet agent",
+      "approvalsAria": "Approbations de {name} : ouvrir la file d'approbation filtrée sur cet agent",
+      "turns": "Chronologie des tours",
+      "turnsAria": "Chronologie des tours de {name} : ouvrir l'inspecteur de tours pour cet agent"
     },
     "readOnly": {
       "locked": "Cet agent est verrouillé en modification, ces valeurs sont donc en lecture seule.",
@@ -15831,7 +15977,7 @@
     "regAgentPlaceholder": "Choisir un agent",
     "regAgentsFailed": "Impossible de charger vos agents.",
     "regPickAgent": "Choisissez un agent pour voir et modifier ses prompts.",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "L'agent du lien n'est pas disponible pour vous, car il n'existe pas ou vous ne pouvez pas le voir. Le registre s'est ouvert à la portée de l'espace de travail à la place.",
     "regSearchLabel": "Rechercher des prompts",
     "regSearchPlaceholder": "Clé, titre ou description",
     "regRiskLabel": "Classe de risque",

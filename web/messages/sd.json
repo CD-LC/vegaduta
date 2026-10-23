@@ -14607,6 +14607,7 @@
     "tlToolCall": "ٽول ڪال {tool}: {status}",
     "tlApprovalRequested": "{tool} هلڻ کان اڳ منظوري گهري وئي",
     "tlApprovalDecided": "{tool} لاءِ منظوري جو فيصلو ٿيو: {decision}",
+    "tlApprovalAutoAllowed": "{tool} ran without asking: a read-only call under Supervised",
     "tlContinuation": "تسلسل: {guard} ({outcome})",
     "tlGuard": "گارڊ ريل {guard}: {outcome}",
     "tlVerifyPassed": "جاچ پاس: {check}",
@@ -14758,6 +14759,14 @@
         "label": "ميموري",
         "description": "ايجنٽ ڪيتريون ياداشتون رکي ٿو ۽ ياد ڪري ٿو."
       },
+      "attachments": {
+        "label": "Chat uploads",
+        "description": "How large the files people attach to chat messages may be."
+      },
+      "skills": {
+        "label": "Skills",
+        "description": "How much of the agent's instructions the list of installed skills may use."
+      },
       "aux": {
         "label": "پس منظر ماڊل ڪال",
         "description": "خلاصو، مدد ۽ ڪمپريشن ڪهڙو ماڊل استعمال ڪن ٿا."
@@ -14823,6 +14832,28 @@
           "label": "اڻپورن جوابن کان پوءِ اضافي پاس",
           "description": "جيڪڏهن ماڊل جو جواب اعلان ڪيل پر نه ڪيل قدم تي رڪجي وڃي ته ان کي ڪيترا دفعا جاري رکڻ لاءِ چيو وڃي ٿو.",
           "help": "ان ايجنٽ لاءِ وڌايو جيڪو اڪثر قدم جو اعلان ڪري رڪجي وڃي ٿو. هر اضافي پاس هڪ ماڊل ڪال خرچ ڪري ٿو."
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "Calls answered after the limit",
+          "description": "How many more tool calls the model may attempt after the turn's tool limit is used up. Each one is refused with a note to answer with what it has; past this number the turn is stopped with an error.",
+          "help": "Raise it if a model needs a few tries to stop calling tools. Lower it to end looping turns sooner. 0 stops the turn at the first call over the limit."
+        },
+        "supervisedDivisor": {
+          "label": "Supervised agents get 1/N of the tool limit",
+          "description": "A supervised agent gets the turn's tool-call limit divided by this number, but never less than the minimum below.",
+          "help": "Raise it to keep supervised agents on a shorter leash. 1 gives them the full limit."
+        },
+        "supervisedMinSteps": {
+          "label": "Least tool calls for a supervised agent",
+          "description": "The smallest tool-call limit a supervised agent gets, however high the number above is.",
+          "help": "Keep it at 3 or more so a supervised agent can still finish a simple job with several steps."
+        },
+        "autonomousMultiplier": {
+          "label": "Fully autonomous agents get N times the limit",
+          "description": "A fully autonomous agent gets the turn's tool-call limit multiplied by this number.",
+          "help": "Raise it for agents that run long jobs without a person watching; they can then spend more calls and money in one turn. 1 gives them the standard limit."
         }
       }
     },
@@ -14894,6 +14925,82 @@
           "label": "فالو اپ ٽول ڪيتري دير تجويز ٿيل رهن ٿا",
           "description": "استعمال کان پوءِ ننڍن فالو اپ پيغامن لاءِ هڪ ٽول ڪيتري دير تجويز ٿيل رهي ٿو.",
           "help": "ڊگهي دريءَ ڊگهن ڪم جي سيشنن ۾ مدد ڪري ٿي، ننڍي ٽول فهرست کي ننڍو رکي ٿي."
+        },
+        "maxStickyTools": {
+          "label": "Most tools kept on offer in follow-ups",
+          "description": "The most tools carried over into a short follow-up message. 0 keeps none.",
+          "help": "A higher number helps when a task uses many tools, a lower one keeps the tool list small."
+        },
+        "keepPrimaryModel": {
+          "label": "Keep the main model for follow-ups",
+          "description": "A short follow-up in a conversation that already used tools stays on the agent's main model instead of the cheaper one.",
+          "help": "Turn it off to let cost routing send follow-ups such as 'yes' to the cheaper model, at the risk of weaker handling of a task in progress."
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "How alike a question must be to reuse an answer",
+          "description": "For agents that reuse answers to similar questions: how close a new question must be to an earlier one, from 0.85 to 1, for the stored answer to be served.",
+          "help": "A lower number serves more repeats but risks giving an answer meant for a different question. Keep it high when wrong answers are costly. An answer is only reused for the person it was given to."
+        },
+        "ttl": {
+          "label": "How long a reusable answer is kept",
+          "description": "How long a stored answer can be served to a similar question before it is dropped.",
+          "help": "Shorten it when your answers go out of date quickly."
+        },
+        "maxEntriesPerAgent": {
+          "label": "Most stored answers per agent",
+          "description": "How many answers one agent keeps for reuse. The oldest are dropped beyond this.",
+          "help": "A larger store finds more repeats and uses more storage."
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "Keep a record of tool calls in the conversation",
+          "description": "Store a short record of each turn's tool calls with the conversation, so later turns can see what was done.",
+          "help": "Turn it off to keep conversation history text-only; the agent then cannot tell what its tools did in earlier turns. This applies to the whole workspace."
+        },
+        "replayEnabled": {
+          "label": "Show the tool record to the model",
+          "description": "Include the stored record of earlier tool calls when the model is given the conversation.",
+          "help": "Turn it off to keep storing the record without using any of the model's working space for it."
+        },
+        "replayTurns": {
+          "label": "Earlier turns whose tool record is shown",
+          "description": "How many of the most recent turns that used tools have their record shown to the model.",
+          "help": "A larger number helps in long working sessions but uses more of the model's working space."
+        },
+        "maxEntriesPerTurn": {
+          "label": "Tool calls listed per turn",
+          "description": "How many of one turn's tool calls are written into the record. Further calls are only counted.",
+          "help": "Raise it for turns that make many calls and need every one remembered."
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "Longest tool record per turn",
+          "description": "How many characters of one turn's record are shown to the model; the rest is counted, not listed.",
+          "help": "Lower it to save cost on every later turn, raise it to keep more detail."
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "Largest image upload (MB)",
+          "description": "The biggest image a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
+          "help": "Raise it for photos and screenshots; large files are slower to send and use more of the model's allowance."
+        },
+        "maxAudioMb": {
+          "label": "Largest audio upload (MB)",
+          "description": "The biggest audio file a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
+          "help": "Raise it for longer recordings; large files are slower to send and use more of the model's allowance."
+        },
+        "maxVideoMb": {
+          "label": "Largest video upload (MB)",
+          "description": "The biggest video a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
+          "help": "Raise it for longer clips; large files are slower to send and use more of the model's allowance."
+        },
+        "maxDocumentMb": {
+          "label": "Largest document upload (MB)",
+          "description": "The biggest document or spreadsheet a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
+          "help": "Raise it for long reports and large data files; large files are slower to process."
         }
       },
       "continuation": {
@@ -14952,6 +15059,20 @@
           "help": "ان مددگار لاءِ وڌايو جنهن کي ماڻهن بابت گهڻو ياد رکڻو پوي ٿو؛ هي محفوظ ڪرڻ ۽ ياد ڪرڻ جو خرچ پڻ وڌائي ٿو."
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "Most shared memories",
+          "description": "How many memories shared across the workspace are kept. The oldest are dropped beyond this.",
+          "help": "Raise it for large teams that rely on shared knowledge; it also raises storage and recall cost. This applies to the whole workspace."
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "Memories given to on-device chat",
+          "description": "How many memories are handed to an on-device session when it starts.",
+          "help": "On-device models have a small working space, so keep this low."
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "گراف ميموري مان ياد ڪيل حقيقتون",
@@ -14962,6 +15083,20 @@
           "label": "هر لوڪ اپ ۾ پڙهيل گراف رستا",
           "description": "هڪ لوڪ اپ جون حقيقتون ڳولڻ لاءِ ميموري گراف جا ڪيترا ڪنيڪشن پڙهيا وڃن ٿا.",
           "help": "ڪيترائي ڪنيڪشن ساڳي حقيقت تائين پهچائي سگهن ٿا، تنهن ڪري ڳنڍيل ياداشتن ۾ سڀ ڪجهه ڳولڻ لاءِ وڏو انگ گهربل ٿي سگهي ٿو. وڌيڪ انگ هر لوڪ اپ کي سست ڪن ٿا."
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "Most skills listed in the prompt",
+          "description": "How many of your skills are named in the agent's instructions so it knows they exist. The rest are counted, not listed.",
+          "help": "Raise it if you have many skills; each listed skill uses a little of the model's working space on every turn. This applies to the whole workspace."
+        },
+        "maxBlockChars": {
+          "label": "Size of the skills list in the prompt",
+          "description": "How many characters the list of skills may take in the agent's instructions. When it is full, later skills are shortened to their names.",
+          "help": "Raise it to keep descriptions for more skills, lower it to save tokens on every turn. This applies to the whole workspace."
         }
       }
     },
@@ -15013,6 +15148,17 @@
           "label": "حفاظتي جج کي ڏيکاريل لکت",
           "description": "جاچيل لکت جو ڪيترو حصو AI حفاظتي جج پڙهي ٿو. هن کان وڌيڪ لکت جو فيصلو نٿو ڪيو وڃي.",
           "help": "توهان هن کي رڳو پليٽ فارم جي قدر کان مٿي وڌائي سگهو ٿا. وڌائڻ سان ڊگهن ٽول نتيجن جو مڪمل فيصلو ٿئي ٿو پر هر جج ڪال وڏي ٿي وڃي ٿي."
+        }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "Supervised agents and read-only tools",
+          "description": "Whether an agent on the Supervised autonomy tier still asks you before a tool that only reads, such as a search or a lookup. Writes, sends and tools the platform has not classified always ask.",
+          "help": "You can only make this stricter than the platform setting. Asking every time is the safest choice; letting read-only tools run removes a prompt but also a chance to stop a search you did not expect. An agent that can read private data, take in untrusted content and send data out is asked about every call whatever this says.",
+          "options": {
+            "auto-allow": "Let read-only tools run without asking",
+            "gate": "Ask before every tool call"
+          }
         }
       }
     },

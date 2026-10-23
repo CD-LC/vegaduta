@@ -817,15 +817,15 @@
     "rsParam_seed": "सिड",
     "rsParam_stopSequences": "रोक्ने अनुक्रमहरू",
     "rsParamDropped": "{param} यो एजेन्टमा सेट गरिएको छ, तर {provider} ले यसलाई {model} का लागि बेवास्ता गर्छ, त्यसैले यसको कुनै असर छैन।",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "यो रनका लागि टुलहरू",
+    "rsToolsRunOnly": "यो रन मात्र",
+    "rsToolsRunNote": "यी स्विचहरूले यो प्लेग्राउन्डबाट तपाईंले पठाउने सन्देशहरूले एजेन्टका कुन टुलहरू प्रयोग गर्न सक्छन् भन्ने छान्छन्। केही पनि सुरक्षित गरिँदैन: बाँकी सबैका लागि एजेन्टले आफ्नै टुल पहुँच राख्छ। यिनले एजेन्टका टुलहरू बन्द मात्र गर्न सक्छन्, उसलाई नयाँ टुल कहिल्यै दिन सक्दैनन्।",
+    "rsToolsRunSummary": "एजेन्टका {total} टुलहरूमध्ये {on} यो रनका लागि खुला छन्",
+    "rsToolsRunNone": "यो रनका लागि कुनै टुल छैन: एजेन्टले पाठमा मात्र जवाफ दिन सक्छ।",
+    "rsToolsReset": "एजेन्टका टुलहरू प्रयोग गर्नुहोस्",
+    "rsToolsNotInAgent": "यो यस एजेन्टका सुरक्षित गरिएका टुलमध्ये होइन, त्यसैले रनका लागि खुला गर्न सकिँदैन।",
+    "rsToolsEditAgent": "एजेन्टका सुरक्षित गरिएका टुलहरू परिवर्तन गर्नुहोस्",
+    "rsToolsLimitedChip": "यो रनका लागि टुलहरू सीमित",
     "rsToolsEmpty": "यो एजेन्टका लागि कुनै टुल उपलब्ध छैन।",
     "rsToolsSummary": "{total} मध्ये {on} टुल खुला",
     "rsToolsFailed": "टुलहरू लोड गर्न सकिएन।",
@@ -883,14 +883,14 @@
     "chipToolsOff": "टुलहरू बिना फेरि प्रयास गर्दै",
     "chipFailoverBlocked": "ब्याकअप मोडेल प्रयोग भएन: टुलहरू पहिल्यै चलिसकेका थिए",
     "rsLimitChangeOne": "परिवर्तन गर्नुहोस्",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "दर सीमा पुग्यो",
+    "reasonTimeout": "समय सकियो",
+    "reasonProviderUnavailable": "प्रदायक उपलब्ध छैन",
+    "reasonAuthFailed": "प्रदायकले प्रमाणपत्र अस्वीकार गर्यो",
+    "reasonBilling": "प्रदायकको बिलिङ समस्या",
+    "reasonModelNotFound": "मोडेल उपलब्ध छैन",
+    "reasonProviderError": "प्रदायकको त्रुटि",
+    "reasonMalformedToolCall": "टुल कल प्रयोग गर्न सकिएन"
   },
   "nodeDefs": {
     "triggerLabel": "ट्रिगर",
@@ -13369,7 +13369,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "स्किलहरू",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14213,7 +14213,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "स्किलहरू",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14387,7 +14387,7 @@
       "role": "तपाईंको भूमिकाले यो सेटिङ परिवर्तन गर्न सक्दैन। वर्कस्पेस प्रशासकलाई सोध्नुहोस्।",
       "scope": "यो सेटिङ यहाँ ओभरराइड गर्न सकिँदैन।",
       "readOnly": "सेटिङहरू अहिले पढ्न मात्र छन्।",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "यो सुरक्षा सेटिङ वर्कस्पेस प्रशासकले मात्र परिवर्तन गर्न सक्छन्। तपाईंले यसको मान यहाँ हेर्न सक्नुहुन्छ, तर सम्पादन गर्न सक्नुहुन्न।"
     },
     "reset": {
       "button": "विरासतमा पाएको मानमा रिसेट गर्नुहोस्",
@@ -14437,12 +14437,12 @@
       "acknowledge": "मैले यो सुरक्षा परिवर्तनका परिणामहरू बुझें।",
       "cancel": "रद्द गर्नुहोस्",
       "confirm": "पुष्टि गरी सुरक्षित गर्नुहोस्",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "रिसेट: ओभरराइड हटाइन्छ र सेटिङ आफूले विरासतमा पाउने मानमा फर्कन्छ।"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "उच्च भनेको बढी कडा: उच्च मान स्वीकार गरिन्छ, न्यून अस्वीकार।",
+      "lower": "न्यून भनेको बढी कडा: न्यून मान स्वीकार गरिन्छ, उच्च अस्वीकार।",
+      "enumOrder": "विकल्पहरू कम कडाबाट बढी कडाको क्रममा छन्: {options}। तपाईं कडा छेउतिर मात्र सर्न सक्नुहुन्छ।"
     }
   },
   "approvalsQueue": {
@@ -14611,8 +14611,8 @@
     "tlSevWarn": "ध्यान चाहिन्छ",
     "tlSevError": "असफल",
     "tlIntake": "टर्न सुरु भयो: {chars} वर्ण, {tools} टुल, {attachments} संलग्नक",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "यो रनका लागि टुलहरू",
+    "tlRunToolsNone": "कुनै पनि छैन (पाठ मात्र)",
     "tlModelCall": "{model} ({provider}) मा मोडेल कल, रुट {route}",
     "tlFailover": "{model} ({provider}) मा फेलओभर भयो",
     "tlRetryModel": "{model} ({provider}) मा फेरि प्रयास गरियो, रुट {route}",
@@ -14621,6 +14621,7 @@
     "tlToolCall": "टुल कल {tool}: {status}",
     "tlApprovalRequested": "{tool} चल्नुअघि स्वीकृति मागियो",
     "tlApprovalDecided": "{tool} का लागि स्वीकृतिको निर्णय भयो: {decision}",
+    "tlApprovalAutoAllowed": "{tool} नसोधी चल्यो: निगरानीमा पढ्न-मात्र कल",
     "tlContinuation": "निरन्तरता: {guard} ({outcome})",
     "tlGuard": "गार्डरेल {guard}: {outcome}",
     "tlVerifyPassed": "जाँच उत्तीर्ण: {check}",
@@ -14690,7 +14691,7 @@
     "modeTextOnlyHelp": "एजेन्टले आफ्ना टुलहरू बिना उत्तर दिन्छ। सुरक्षित: केही वास्तविक हुँदैन। अपेक्षित-टुल जाँचहरू पूरा हुन सक्दैनन्।",
     "modeFull": "टुलहरूसहित पूर्ण पाइपलाइन",
     "modeFullHelp": "वास्तविक प्रयोगकर्ताले पाउने उही टुल, गार्डरेल र चरण सीमाहरू। अपेक्षित-टुल र ट्राजेक्ट्री जाँचका लागि आवश्यक।",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "पढ्ने मात्र गर्ने टुलहरू वास्तवमै चल्छन्। डेटा परिवर्तन गर्न, सन्देश पठाउन वा पैसा खर्च गर्न सक्ने जे पनि अनुकरण गरिन्छ र रनमा सूचीबद्ध गरिन्छ, त्यसैले वास्तवमा केही हुँदैन। सुरक्षा वर्गीकरण नभएका टुलहरू पनि अनुकरण गरिन्छन्।",
     "autoApproveLabel": "इभल स्यान्डबक्समा टुल कलहरू स्वतः स्वीकृत गर्नुहोस्",
     "autoApproveHelp": "सामान्यतया कसैलाई पर्खने टुल कललाई इभल स्यान्डबक्सले स्वीकृत गर्छ, ताकि केस पूरा हुन सकोस्। यसबिना केस उत्पादनमा जस्तै उत्तर नआएको स्वीकृतिमै समाप्त हुन्छ।",
     "autoApproveWarnTitle": "गैर-उत्पादन वर्कस्पेसका लागि मात्र",
@@ -14698,7 +14699,7 @@
     "autoApproveNeedsFull": "पहिले पूर्ण पाइपलाइन खुला गर्नुहोस्: स्वतः स्वीकृति टुलहरू चल्दा मात्र लागू हुन्छ।",
     "autoApproveRefused": "यो वर्कस्पेसमा अनुमति छैन: {reason}",
     "autoApproveConfirmTitle": "इभलमा टुल कलहरू स्वतः स्वीकृत गर्ने?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "यो डेटासेटका रिप्लेहरूमा व्यक्तिको प्रतीक्षा गर्ने हरेक टुल कल स्वतः स्वीकृत हुनेछ। स्वीकृत पढ्न-मात्र टुलहरू वास्तवमै चल्छन्; केही परिवर्तन गर्न सक्नेहरू अझै अनुकरण गरिन्छन्। यो परीक्षण डेटा भएको वर्कस्पेसमा मात्र गर्नुहोस्। रनहरूले ती स्वतः स्वीकृत भएका थिए भनेर दर्ता गर्छन्।",
     "autoApproveConfirm": "स्वतः स्वीकृति खुला गर्नुहोस्",
     "trajectoryLabel": "ट्राजेक्ट्री जाँचहरू",
     "trajectoryOn": "On",
@@ -14723,22 +14724,22 @@
     "samplingSource_platform": "प्लेटफर्मले सेट गरेको",
     "samplingSource_tenant": "तपाईंको वर्कस्पेसका लागि सेट गरिएको",
     "samplingSource_agent": "यो एजेन्टका लागि सेट गरिएको",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "वर्कस्पेस पूर्वनिर्धारित",
+    "modeDefaultHelp": "तपाईंको वर्कस्पेसको सेटिङ पछ्याउँछ (प्रशासकले नबदलेसम्म पूर्ण पाइपलाइन)। हरेक रनले अझै आफ्नो मोड छान्न सक्छ।",
+    "modeDefaultCurrent": "हाल: {mode}",
+    "modeNameFull": "पूर्ण पाइपलाइन",
+    "modeNameQuick": "छिटो (पाठ मात्र)",
+    "badgeFull": "पूर्ण पाइपलाइन",
+    "badgeQuick": "छिटो",
+    "datasetModePinnedTitle": "यो डेटासेट सधैं यसरी नै रिप्ले हुन्छ। एउटा रनले अझै अर्को मोड छान्न सक्छ।",
+    "datasetModeDefaultTitle": "रनहरू कसरी रिप्ले हुन्छन् भन्ने बारेमा यो डेटासेटले वर्कस्पेसको पूर्वनिर्धारित पछ्याउँछ।",
+    "runModeLabel": "अर्को रनका लागि रिप्ले मोड",
+    "runModeInherit": "डेटासेटको सेटिङ प्रयोग गर्नुहोस्",
+    "runModeHelp": "पूर्ण पाइपलाइनले एजेन्टलाई उसका टुल, गार्डरेल र स्वीकृतिसहित सुरक्षित स्यान्डबक्समा चलाउँछ: पढ्ने मात्र गर्ने टुलहरू वास्तवमै चल्छन्, डेटा परिवर्तन गर्न वा केही पठाउन सक्ने जे पनि अनुकरण गरिन्छ। छिटो मोडले टुलहरू रोक्छ र लेखिएको जवाफ मात्र परीक्षण गर्छ।",
+    "runModeFullTitle": "यो रनले इभल स्यान्डबक्समा पूर्ण पाइपलाइन प्रयोग गर्‍यो।",
+    "runModeQuickTitle": "यो रन पाठ मात्रको छिटो रिप्ले थियो: एजेन्टका टुलहरू रोकिएका थिए।",
+    "runSimulatedTools": "यो रनमा अनुकरण गरियो, चलाइएन (तिनले डेटा परिवर्तन गर्न वा प्लेटफर्म बाहिर पुग्न सक्थे): {tools}।",
+    "toolStatusSimulated": "अनुकरण गरियो, चलाइएन"
   },
   "agentLab": {
     "wtLabel": "एजेन्टका टुलहरूसँग चलाउनुहोस्",
@@ -14771,6 +14772,14 @@
       "memory": {
         "label": "मेमोरी",
         "description": "एजेन्टले कति सम्झना राख्छ र सम्झन्छ।"
+      },
+      "attachments": {
+        "label": "च्याट अपलोडहरू",
+        "description": "मानिसहरूले च्याट सन्देशसँग कति ठूला फाइलहरू जोड्न सक्छन्।"
+      },
+      "skills": {
+        "label": "स्किलहरू",
+        "description": "स्थापित स्किलहरूको सूचीले एजेन्टका निर्देशनहरूको कति भाग प्रयोग गर्न सक्छ।"
       },
       "aux": {
         "label": "ब्याकग्राउन्ड मोडेल कलहरू",
@@ -14837,6 +14846,28 @@
           "label": "अधूरो उत्तरपछि थप पास",
           "description": "घोषणा गरिएको तर नलिइएको चरणमा मोडेलको उत्तर रोकिँदा उसलाई थप कतिपटक जारी राख्न भनिन्छ।",
           "help": "प्रायः चरण घोषणा गरेर रोकिने एजेन्टका लागि बढाउनुहोस्। हरेक थप पासले एउटा मोडेल कल खर्च गर्छ।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "सीमा पछि जवाफ दिइएका कलहरू",
+          "description": "टर्नको टुल सीमा सकिएपछि मोडेलले थप कतिवटा टुल कल प्रयास गर्न सक्छ। हरेकलाई \"भएकै कुराले जवाफ देऊ\" भन्ने टिप्पणीसहित अस्वीकार गरिन्छ; यो सङ्ख्या नाघेपछि टर्न त्रुटिसहित रोकिन्छ।",
+          "help": "मोडेललाई टुल कल गर्न बन्द गर्न केही प्रयास चाहिन्छ भने यसलाई बढाउनुहोस्। लुपमा परेका टर्नहरू चाँडो सक्न घटाउनुहोस्। 0 ले सीमा नाघेको पहिलो कलमै टर्न रोक्छ।"
+        },
+        "supervisedDivisor": {
+          "label": "निगरानीमा रहेका एजेन्टले टुल सीमाको 1/N पाउँछन्",
+          "description": "निगरानीमा रहेको एजेन्टले टर्नको टुल-कल सीमालाई यो सङ्ख्याले भाग गरेर पाउँछ, तर तलको न्यूनतमभन्दा कहिल्यै कम होइन।",
+          "help": "निगरानीमा रहेका एजेन्टलाई थप कडा राख्न यसलाई बढाउनुहोस्। 1 ले उनीहरूलाई पूर्ण सीमा दिन्छ।"
+        },
+        "supervisedMinSteps": {
+          "label": "निगरानीमा रहेको एजेन्टका लागि न्यूनतम टुल कल",
+          "description": "माथिको सङ्ख्या जति उच्च भए पनि, निगरानीमा रहेको एजेन्टले पाउने सबैभन्दा सानो टुल-कल सीमा।",
+          "help": "निगरानीमा रहेको एजेन्टले धेरै चरणको सरल काम अझै पूरा गर्न सकोस् भनेर यसलाई 3 वा बढी राख्नुहोस्।"
+        },
+        "autonomousMultiplier": {
+          "label": "पूर्ण स्वायत्त एजेन्टले सीमाको N गुणा पाउँछन्",
+          "description": "पूर्ण स्वायत्त एजेन्टले टर्नको टुल-कल सीमालाई यो सङ्ख्याले गुणा गरेर पाउँछ।",
+          "help": "कसैले नहेरी लामा काम चलाउने एजेन्टहरूका लागि बढाउनुहोस्; तब उनीहरूले एउटा टर्नमा बढी कल र पैसा खर्च गर्न सक्छन्। 1 ले उनीहरूलाई मानक सीमा दिन्छ।"
         }
       }
     },
@@ -14908,6 +14939,82 @@
           "label": "फलो-अप टुलहरू कति समय प्रस्तावमा रहन्छन्",
           "description": "प्रयोगपछि छोटा फलो-अप सन्देशका लागि टुल कति समय प्रस्तावमा रहन्छ।",
           "help": "लामो विन्डोले लामा कार्य सत्रमा मद्दत गर्छ, छोटोले टुल सूची सानो राख्छ।"
+        },
+        "maxStickyTools": {
+          "label": "फलो-अपमा सुझाइरहने अधिकतम टुलहरू",
+          "description": "छोटो फलो-अप सन्देशमा लगिने अधिकतम टुलहरू। 0 ले केही पनि राख्दैन।",
+          "help": "कुनै काम धेरै टुल प्रयोग गर्छ भने ठूलो सङ्ख्याले मद्दत गर्छ; सानोले टुल सूची छोटो राख्छ।"
+        },
+        "keepPrimaryModel": {
+          "label": "फलो-अपका लागि मुख्य मोडेल राख्नुहोस्",
+          "description": "पहिले नै टुल प्रयोग भएको कुराकानीमा छोटो फलो-अप सस्तो मोडेलको सट्टा एजेन्टको मुख्य मोडेलमै रहन्छ।",
+          "help": "यसलाई बन्द गर्नुहोस् ताकि लागत रुटिङले \"हो\" जस्ता फलो-अपहरू सस्तो मोडेलमा पठाओस्, तर चलिरहेको कामलाई कमजोर तरिकाले सम्हाल्ने जोखिम हुन्छ।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "जवाफ पुनः प्रयोग गर्न प्रश्न कति मिल्नुपर्छ",
+          "description": "मिल्दाजुल्दा प्रश्नका जवाफ पुनः प्रयोग गर्ने एजेन्टका लागि: सुरक्षित गरिएको जवाफ दिन नयाँ प्रश्न अघिल्लो प्रश्नको कति नजिक हुनुपर्छ, 0.85 देखि 1 सम्म।",
+          "help": "कम सङ्ख्याले बढी दोहोरिएकालाई सेवा दिन्छ तर अर्कै प्रश्नका लागि बनेको जवाफ दिने जोखिम हुन्छ। गलत जवाफ महँगा हुँदा यसलाई उच्च राख्नुहोस्। जवाफ जसलाई दिइएको थियो उसैका लागि मात्र पुनः प्रयोग हुन्छ।"
+        },
+        "ttl": {
+          "label": "पुनः प्रयोग योग्य जवाफ कति समय राखिन्छ",
+          "description": "सुरक्षित गरिएको जवाफ हटाइनुअघि मिल्दोजुल्दो प्रश्नलाई कति समयसम्म दिन सकिन्छ।",
+          "help": "तपाईंका जवाफ चाँडै पुराना हुन्छन् भने यसलाई छोटो पार्नुहोस्।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "प्रति एजेन्ट अधिकतम सुरक्षित गरिएका जवाफ",
+          "description": "एउटा एजेन्टले पुनः प्रयोगका लागि कतिवटा जवाफ राख्छ। यसभन्दा बढी भएपछि सबैभन्दा पुराना हटाइन्छन्।",
+          "help": "ठूलो भण्डारले बढी दोहोरिएका फेला पार्छ र बढी स्टोरेज प्रयोग गर्छ।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "कुराकानीमा टुल कलहरूको अभिलेख राख्नुहोस्",
+          "description": "हरेक टर्नका टुल कलहरूको छोटो अभिलेख कुराकानीसँगै सुरक्षित गर्नुहोस्, ताकि पछिका टर्नले के गरिएको थियो भनेर देख्न सकून्।",
+          "help": "कुराकानीको इतिहास पाठ मात्र राख्न यसलाई बन्द गर्नुहोस्; तब एजेन्टले अघिल्ला टर्नमा उसका टुलहरूले के गरे भनेर जान्न सक्दैन। यो सम्पूर्ण वर्कस्पेसमा लागू हुन्छ।"
+        },
+        "replayEnabled": {
+          "label": "मोडेललाई टुल अभिलेख देखाउनुहोस्",
+          "description": "मोडेललाई कुराकानी दिँदा अघिल्ला टुल कलहरूको सुरक्षित गरिएको अभिलेख समावेश गर्नुहोस्।",
+          "help": "अभिलेख सुरक्षित भइरहोस् तर त्यसका लागि मोडेलको काम गर्ने ठाउँ प्रयोग नहोस् भनेर यसलाई बन्द गर्नुहोस्।"
+        },
+        "replayTurns": {
+          "label": "टुल अभिलेख देखाइने अघिल्ला टर्नहरू",
+          "description": "टुल प्रयोग गरेका सबैभन्दा हालका कतिवटा टर्नको अभिलेख मोडेललाई देखाइन्छ।",
+          "help": "ठूलो सङ्ख्याले लामो काम सत्रहरूमा मद्दत गर्छ तर मोडेलको काम गर्ने ठाउँ बढी प्रयोग गर्छ।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "प्रति टर्न सूचीबद्ध टुल कलहरू",
+          "description": "एउटा टर्नका कतिवटा टुल कल अभिलेखमा लेखिन्छन्। थप कलहरू गनिन्छन् मात्र।",
+          "help": "धेरै कल गर्ने र हरेकलाई सम्झनुपर्ने टर्नहरूका लागि बढाउनुहोस्।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "प्रति टर्न सबैभन्दा लामो टुल अभिलेख",
+          "description": "एउटा टर्नको अभिलेखका कति अक्षर मोडेललाई देखाइन्छन्; बाँकी गनिन्छ, सूचीबद्ध गरिँदैन।",
+          "help": "पछिका हरेक टर्नमा लागत जोगाउन घटाउनुहोस्, बढी विवरण राख्न बढाउनुहोस्।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "सबैभन्दा ठूलो तस्बिर अपलोड (MB)",
+          "description": "च्याट सन्देशसँग कसैले जोड्न सक्ने सबैभन्दा ठूलो तस्बिर, मेगाबाइटमा। प्लेटफर्मको समग्र फाइल सीमा पनि छ जसलाई यसले नाघ्न सक्दैन।",
+          "help": "फोटो र स्क्रिनसटका लागि बढाउनुहोस्; ठूला फाइल पठाउन ढिला हुन्छन् र मोडेलको बढी कोटा प्रयोग गर्छन्।"
+        },
+        "maxAudioMb": {
+          "label": "सबैभन्दा ठूलो अडियो अपलोड (MB)",
+          "description": "च्याट सन्देशसँग कसैले जोड्न सक्ने सबैभन्दा ठूलो अडियो फाइल, मेगाबाइटमा। प्लेटफर्मको समग्र फाइल सीमा पनि छ जसलाई यसले नाघ्न सक्दैन।",
+          "help": "लामा रेकर्डिङका लागि बढाउनुहोस्; ठूला फाइल पठाउन ढिला हुन्छन् र मोडेलको बढी कोटा प्रयोग गर्छन्।"
+        },
+        "maxVideoMb": {
+          "label": "सबैभन्दा ठूलो भिडियो अपलोड (MB)",
+          "description": "च्याट सन्देशसँग कसैले जोड्न सक्ने सबैभन्दा ठूलो भिडियो, मेगाबाइटमा। प्लेटफर्मको समग्र फाइल सीमा पनि छ जसलाई यसले नाघ्न सक्दैन।",
+          "help": "लामा क्लिपका लागि बढाउनुहोस्; ठूला फाइल पठाउन ढिला हुन्छन् र मोडेलको बढी कोटा प्रयोग गर्छन्।"
+        },
+        "maxDocumentMb": {
+          "label": "सबैभन्दा ठूलो कागजात अपलोड (MB)",
+          "description": "च्याट सन्देशसँग कसैले जोड्न सक्ने सबैभन्दा ठूलो कागजात वा स्प्रेडसिट, मेगाबाइटमा। प्लेटफर्मको समग्र फाइल सीमा पनि छ जसलाई यसले नाघ्न सक्दैन।",
+          "help": "लामा प्रतिवेदन र ठूला डेटा फाइलका लागि बढाउनुहोस्; ठूला फाइल प्रशोधन गर्न ढिला हुन्छन्।"
         }
       },
       "continuation": {
@@ -14966,6 +15073,20 @@
           "help": "मानिसहरूबारे धेरै कुरा सम्झनुपर्ने सहायकहरूका लागि बढाउनुहोस्; यसले भण्डारण र सम्झने लागत पनि बढाउँछ।"
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "अधिकतम साझा सम्झनाहरू",
+          "description": "वर्कस्पेसभरि साझा गरिएका कतिवटा सम्झना राखिन्छन्। यसभन्दा बढी भएपछि सबैभन्दा पुराना हटाइन्छन्।",
+          "help": "साझा ज्ञानमा भर पर्ने ठूला टोलीका लागि बढाउनुहोस्; यसले स्टोरेज र सम्झना लागत पनि बढाउँछ। यो सम्पूर्ण वर्कस्पेसमा लागू हुन्छ।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "अन-डिभाइस च्याटलाई दिइने सम्झनाहरू",
+          "description": "अन-डिभाइस सत्र सुरु हुँदा उसलाई कतिवटा सम्झना सुम्पिन्छ।",
+          "help": "अन-डिभाइस मोडेलहरूको काम गर्ने ठाउँ सानो हुन्छ, त्यसैले यसलाई कम राख्नुहोस्।"
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "ग्राफ मेमोरीबाट सम्झिएका तथ्य",
@@ -14976,6 +15097,20 @@
           "label": "प्रति लुकअप पढिने ग्राफ मार्ग",
           "description": "एउटा लुकअपका तथ्य भेट्टाउन मेमोरी ग्राफका कति जडान पढिन्छन्।",
           "help": "धेरै जडानले एउटै तथ्यमा पुर्‍याउन सक्छन्, त्यसैले घनिष्ठ रूपमा जोडिएका सम्झनाहरूमा सबै भेट्टाउन बढी संख्या चाहिन सक्छ। बढी संख्याले हरेक लुकअप ढिलो बनाउँछ।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "प्रम्प्टमा सूचीबद्ध अधिकतम स्किलहरू",
+          "description": "एजेन्टलाई तिनको अस्तित्व थाहा होस् भनेर उसका निर्देशनमा तपाईंका कतिवटा स्किलका नाम दिइन्छन्। बाँकी गनिन्छ, सूचीबद्ध गरिँदैन।",
+          "help": "तपाईंसँग धेरै स्किल छन् भने बढाउनुहोस्; सूचीबद्ध हरेक स्किलले हरेक टर्नमा मोडेलको काम गर्ने ठाउँको अलिकति प्रयोग गर्छ। यो सम्पूर्ण वर्कस्पेसमा लागू हुन्छ।"
+        },
+        "maxBlockChars": {
+          "label": "प्रम्प्टमा स्किल सूचीको आकार",
+          "description": "एजेन्टका निर्देशनमा स्किलहरूको सूचीले कति अक्षर लिन सक्छ। भरिएपछि पछिका स्किलहरू नाममा मात्र छोटो पारिन्छन्।",
+          "help": "थप स्किलका विवरण राख्न बढाउनुहोस्, हरेक टर्नमा टोकन जोगाउन घटाउनुहोस्। यो सम्पूर्ण वर्कस्पेसमा लागू हुन्छ।"
         }
       }
     },
@@ -15028,6 +15163,17 @@
           "description": "जाँचिएको टेक्स्टको कति भाग AI सुरक्षा न्यायाधीशहरूले पढ्छन्। त्योभन्दा पर टेक्स्टको फैसला हुँदैन।",
           "help": "तपाईं यसलाई प्लेटफर्मको मानभन्दा माथि बढाउन मात्र सक्नुहुन्छ। बढाउँदा लामा टुल नतिजाको पूर्ण फैसला हुन्छ तर हरेक न्यायाधीश कल ठूलो हुन्छ।"
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "निगरानीमा रहेका एजेन्ट र पढ्न-मात्र टुलहरू",
+          "description": "निगरानी स्वायत्तता स्तरको एजेन्टले खोजी वा लुकअप जस्ता पढ्ने मात्र गर्ने टुल अघि पनि तपाईंलाई सोध्छ कि सोध्दैन। लेख्ने, पठाउने र प्लेटफर्मले वर्गीकरण नगरेका टुलहरूले सधैं सोध्छन्।",
+          "help": "तपाईंले यसलाई प्लेटफर्म सेटिङभन्दा बढी कडा मात्र बनाउन सक्नुहुन्छ। हरेक पटक सोध्नु सबैभन्दा सुरक्षित विकल्प हो; पढ्न-मात्र टुलहरू चल्न दिँदा एउटा प्रश्न कम हुन्छ, तर अप्रत्याशित खोजी रोक्ने एउटा मौका पनि जान्छ। निजी डेटा पढ्न सक्ने, अविश्वसनीय सामग्री लिन सक्ने र डेटा बाहिर पठाउन सक्ने एजेन्टलाई यो सेटिङले जे भने पनि हरेक कलमा सोधिन्छ।",
+          "options": {
+            "auto-allow": "पढ्न-मात्र टुलहरूलाई नसोधी चल्न दिनुहोस्",
+            "gate": "हरेक टुल कल अघि सोध्नुहोस्"
+          }
+        }
       }
     },
     "quality": {
@@ -15050,12 +15196,12 @@
           "help": "हरेक दोहोर्‍याइले रनको लागत र समय गुणा गर्छ।"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "मूल्याङ्कनहरू कसरी चल्छन्",
+          "description": "रन वा यसको डेटासेटले नभनेको अवस्थामा, मूल्याङ्कन रनले एजेन्टलाई टुलसहित सुरक्षित स्यान्डबक्समा रिप्ले गर्छ (पूर्ण पाइपलाइन) वा पाठमा मात्र जवाफ दिन्छ (छिटो)।",
+          "help": "पूर्ण पाइपलाइनले तपाईंका प्रयोगकर्ताले पाउने कुरा, टुल प्रयोगसमेत, परीक्षण गर्छ र लागत बढी हुन्छ। यसमा पढ्ने मात्र गर्ने टुलहरू वास्तवमै चल्छन्; डेटा परिवर्तन गर्न, सन्देश पठाउन वा पैसा खर्च गर्न सक्ने जे पनि अनुकरण गरिन्छ र रनमा सूचीबद्ध गरिन्छ। छिटो सस्तो हुन्छ र टुल प्रयोगबारे केही भन्दैन।",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "स्यान्डबक्समा पूर्ण पाइपलाइन",
+            "quick": "छिटो: पाठ जवाफ मात्र"
           }
         }
       }
@@ -15159,7 +15305,7 @@
       "cancel": "रद्द गर्नुहोस्",
       "done": "{count} सेटिङलाई तिनका विरासतमा पाएका मानमा रिसेट गर्नुहोस्।",
       "partial": "{done} सेटिङ रिसेट भए; {failed} रिसेट गर्न सकिएन। असफल सेटिङहरूमा रहेका सन्देशहरू हेर्नुहोस्।",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} सेटिङ रिसेट गरियो। कारण चाहिने {skipped} जस्ताको तस्तै छोडियो।"
     },
     "import": {
       "button": "ओभरराइडहरू आयात गर्नुहोस्",
@@ -15232,16 +15378,16 @@
       "unknownActor": "अज्ञात",
       "noReason": "कुनै कारण दिइएन",
       "showMore": "थप देखाउनुहोस्",
-      "scope": "Level",
+      "scope": "स्तर",
       "scopeWorkspace": "वर्कस्पेस",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "एजेन्ट {id}",
+      "scopeFilter": "परिवर्तनहरू यो स्तरमा देखाउनुहोस्",
+      "filterAll": "सबै स्तर",
+      "filterWorkspace": "वर्कस्पेस मात्र",
+      "filterAgents": "एजेन्टहरू मात्र",
+      "searchLoadedOnly": "खोजीले अहिलेसम्म लोड गरिएका परिवर्तनहरूलाई समेट्छ।",
+      "loadError": "परिवर्तन इतिहास लोड गर्न सकिएन। {message}",
+      "moreFailed": "थप परिवर्तनहरू लोड गर्न सकिएन। {message}",
       "loadingMore": "लोड हुँदै"
     }
   },
@@ -15249,7 +15395,7 @@
     "title": "व्यवहार र सीमाहरू",
     "intro": "यो एजेन्ट एउटा टर्नमा कति टाढा जान सक्छ भन्ने नियन्त्रण गर्नुहोस्: कति टुल कल गर्न सक्छ, कति समय चल्न सक्छ र कति फिर्ता पढ्छ। यहाँ तपाईंले परिवर्तन नगरेका कुरा तपाईंको वर्कस्पेसबाट विरासतमा आउँछन्।",
     "saveFirst": "पहिले एजेन्ट सुरक्षित गर्नुहोस्। यो बनेपछि यसको व्यवहार र सीमाहरू सेट गर्न सकिन्छ।",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "यसको व्यवहार र सीमाहरू ट्याब खोल्न तलबाट एउटा एजेन्ट छान्नुहोस्।",
     "tabs": {
       "label": "एजेन्ट कन्फिगरेसन",
       "setup": "सेटअप",
@@ -15260,12 +15406,12 @@
       "label": "सम्बन्धित पृष्ठहरू",
       "tenant": "वर्कस्पेस पूर्वनिर्धारितहरू परिवर्तन गर्नुहोस्",
       "playground": "प्लेग्राउन्डमा प्रयास गर्नुहोस्",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "यस एजेन्टका प्रम्प्टहरू",
+      "promptsAria": "{name} का प्रम्प्टहरू: प्रम्प्ट रजिस्ट्री यस एजेन्टमा खोल्नुहोस्",
+      "approvals": "यस एजेन्टका स्वीकृतिहरू",
+      "approvalsAria": "{name} का स्वीकृतिहरू: यस एजेन्टका लागि फिल्टर गरिएको स्वीकृति लाइन खोल्नुहोस्",
+      "turns": "टर्न टाइमलाइन",
+      "turnsAria": "{name} को टर्न टाइमलाइन: यस एजेन्टका लागि टर्न निरीक्षक खोल्नुहोस्"
     },
     "readOnly": {
       "locked": "यो एजेन्ट सम्पादनका लागि बन्द गरिएको छ, त्यसैले यी मानहरू पढ्न मात्र हुन्।",
@@ -15445,7 +15591,7 @@
     "regAgentPlaceholder": "एजेन्ट छान्नुहोस्",
     "regAgentsFailed": "तपाईंका एजेन्टहरू लोड गर्न सकिएन।",
     "regPickAgent": "कुनै एजेन्टका प्रम्प्टहरू हेर्न र परिवर्तन गर्न त्यसलाई छान्नुहोस्।",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "लिंकमा रहेको एजेन्ट तपाईंका लागि उपलब्ध छैन, किनभने त्यो अस्तित्वमा छैन वा तपाईंले देख्न सक्नुहुन्न। त्यसको सट्टा रजिस्ट्री वर्कस्पेस दायरामा खुल्यो।",
     "regSearchLabel": "प्रम्प्टहरू खोज्नुहोस्",
     "regSearchPlaceholder": "कुञ्जी, शीर्षक वा विवरण",
     "regRiskLabel": "जोखिम वर्ग",

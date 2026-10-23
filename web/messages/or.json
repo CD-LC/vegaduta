@@ -817,15 +817,15 @@
     "rsParam_seed": "ସିଡ୍",
     "rsParam_stopSequences": "ବନ୍ଦ କରିବା କ୍ରମ",
     "rsParamDropped": "{param} ଏହି ଏଜେଣ୍ଟରେ ସେଟ୍ ହୋଇଛି, କିନ୍ତୁ {provider} {model} ପାଇଁ ଏହାକୁ ଅଣଦେଖା କରେ, ତେଣୁ ଏହାର କୌଣସି ପ୍ରଭାବ ନାହିଁ।",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "ଏହି ରନ୍ ପାଇଁ ଟୁଲ୍",
+    "rsToolsRunOnly": "କେବଳ ଏହି ରନ୍",
+    "rsToolsRunNote": "ଏହି ସୁଇଚ୍ ଗୁଡ଼ିକ ସ୍ଥିର କରେ ଯେ ଏହି ପ୍ଲେଗ୍ରାଉଣ୍ଡରୁ ଆପଣ ପଠାଇଥିବା ବାର୍ତ୍ତା ଏଜେଣ୍ଟର କେଉଁ ଟୁଲ୍ ବ୍ୟବହାର କରିପାରିବ। କିଛି ସଞ୍ଚିତ ହୁଏ ନାହିଁ: ଅନ୍ୟ ସମସ୍ତଙ୍କ ପାଇଁ ଏଜେଣ୍ଟ ନିଜର ଟୁଲ୍ ପ୍ରବେଶ ରଖେ। ଏଗୁଡ଼ିକ ଏଜେଣ୍ଟର ଟୁଲ୍ କେବଳ ବନ୍ଦ କରିପାରିବ, କେବେ ନୂଆ ଟୁଲ୍ ଦେଇପାରିବ ନାହିଁ।",
+    "rsToolsRunSummary": "ଏଜେଣ୍ଟର {total} ଟୁଲ୍ ମଧ୍ୟରୁ {on} ଏହି ରନ୍ ପାଇଁ ଚାଲୁ",
+    "rsToolsRunNone": "ଏହି ରନ୍ ପାଇଁ କୌଣସି ଟୁଲ୍ ନାହିଁ: ଏଜେଣ୍ଟ କେବଳ ଲେଖାରେ ଉତ୍ତର ଦେଇପାରିବ।",
+    "rsToolsReset": "ଏଜେଣ୍ଟର ଟୁଲ୍ ବ୍ୟବହାର କରନ୍ତୁ",
+    "rsToolsNotInAgent": "ଏହା ଏହି ଏଜେଣ୍ଟର ସଞ୍ଚିତ ଟୁଲ୍ ମଧ୍ୟରୁ ନୁହେଁ, ତେଣୁ ରନ୍ ପାଇଁ ଚାଲୁ କରାଯାଇପାରିବ ନାହିଁ।",
+    "rsToolsEditAgent": "ଏଜେଣ୍ଟର ସଞ୍ଚିତ ଟୁଲ୍ ବଦଳାନ୍ତୁ",
+    "rsToolsLimitedChip": "ଏହି ରନ୍ ପାଇଁ ଟୁଲ୍ ସୀମିତ",
     "rsToolsEmpty": "ଏହି ଏଜେଣ୍ଟ ପାଇଁ କୌଣସି ଟୁଲ୍ ଉପଲବ୍ଧ ନାହିଁ।",
     "rsToolsSummary": "{total} ମଧ୍ୟରୁ {on}ଟି ଟୁଲ୍ ଚାଲୁ",
     "rsToolsFailed": "ଟୁଲ୍ ଲୋଡ୍ କରିହେଲା ନାହିଁ।",
@@ -883,14 +883,14 @@
     "chipToolsOff": "ଟୁଲ୍ ବିନା ପୁଣି ଚେଷ୍ଟା କରୁଛି",
     "chipFailoverBlocked": "ବ୍ୟାକଅପ୍ ମଡେଲ୍ ବ୍ୟବହୃତ ହେଲା ନାହିଁ: ଟୁଲ୍ ଆଗରୁ ଚାଲିସାରିଥିଲା",
     "rsLimitChangeOne": "ବଦଳାନ୍ତୁ",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "ହାର ସୀମା ପହଞ୍ଚିଗଲା",
+    "reasonTimeout": "ସମୟ ଶେଷ ହେଲା",
+    "reasonProviderUnavailable": "ପ୍ରଦାତା ଉପଲବ୍ଧ ନୁହେଁ",
+    "reasonAuthFailed": "ପ୍ରଦାତା କ୍ରେଡେନସିଆଲ୍ ପ୍ରତ୍ୟାଖ୍ୟାନ କଲେ",
+    "reasonBilling": "ପ୍ରଦାତାଙ୍କ ବିଲିଂ ସମସ୍ୟା",
+    "reasonModelNotFound": "ମଡେଲ୍ ଉପଲବ୍ଧ ନୁହେଁ",
+    "reasonProviderError": "ପ୍ରଦାତାଙ୍କ ତ୍ରୁଟି",
+    "reasonMalformedToolCall": "ଟୁଲ୍ କଲ୍ ବ୍ୟବହାର କରାଯାଇପାରିଲା ନାହିଁ"
   },
   "nodeDefs": {
     "triggerLabel": "ଟ୍ରିଗର୍",
@@ -13371,7 +13371,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "ସ୍କିଲ୍",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14215,7 +14215,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "ସ୍କିଲ୍",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14389,7 +14389,7 @@
       "role": "ଆପଣଙ୍କ ଭୂମିକା ଏହି ସେଟିଂ ବଦଳାଇପାରିବ ନାହିଁ। ଜଣେ ୱାର୍କସ୍ପେସ୍ ପ୍ରଶାସକଙ୍କୁ ପଚାରନ୍ତୁ।",
       "scope": "ଏହି ସେଟିଂ ଏଠାରେ ଓଭରରାଇଡ୍ କରିହେବ ନାହିଁ।",
       "readOnly": "ସେଟିଂସ୍ ବର୍ତ୍ତମାନ କେବଳ ପଢ଼ିବା ପାଇଁ।",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "ଏହି ସୁରକ୍ଷା ସେଟିଂ କେବଳ ୱାର୍କସ୍ପେସ୍ ଏଡମିନ୍ ବଦଳାଇପାରିବେ। ଆପଣ ଏହାର ମୂଲ୍ୟ ଏଠାରେ ଦେଖିପାରିବେ, କିନ୍ତୁ ସମ୍ପାଦନ କରିପାରିବେ ନାହିଁ।"
     },
     "reset": {
       "button": "ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟକୁ ରିସେଟ୍ କରନ୍ତୁ",
@@ -14439,12 +14439,12 @@
       "acknowledge": "ମୁଁ ଏହି ସୁରକ୍ଷା ପରିବର୍ତ୍ତନର ପରିଣାମ ବୁଝୁଛି।",
       "cancel": "ବାତିଲ୍ କରନ୍ତୁ",
       "confirm": "ନିଶ୍ଚିତ କରି ସେଭ୍ କରନ୍ତୁ",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "ରିସେଟ୍: ଓଭରରାଇଡ୍ ହଟାଯାଏ ଏବଂ ସେଟିଂ ସେ ଉତ୍ତରାଧିକାରରେ ପାଉଥିବା ମୂଲ୍ୟକୁ ଫେରିଯାଏ।"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "ଅଧିକ ମାନେ ଅଧିକ କଠୋର: ଅଧିକ ମୂଲ୍ୟ ଗ୍ରହଣ ହୁଏ, କମ୍ ପ୍ରତ୍ୟାଖ୍ୟାନ ହୁଏ।",
+      "lower": "କମ୍ ମାନେ ଅଧିକ କଠୋର: କମ୍ ମୂଲ୍ୟ ଗ୍ରହଣ ହୁଏ, ଅଧିକ ପ୍ରତ୍ୟାଖ୍ୟାନ ହୁଏ।",
+      "enumOrder": "ବିକଳ୍ପଗୁଡ଼ିକ ସବୁଠୁ କମ୍ ରୁ ସବୁଠୁ ଅଧିକ କଠୋର କ୍ରମରେ ଅଛି: {options}। ଆପଣ କେବଳ କଠୋର ପ୍ରାନ୍ତ ଆଡ଼କୁ ଯାଇପାରିବେ।"
     }
   },
   "approvalsQueue": {
@@ -14613,8 +14613,8 @@
     "tlSevWarn": "ଧ୍ୟାନ ଦରକାର",
     "tlSevError": "ବିଫଳ",
     "tlIntake": "ଟର୍ନ ଆରମ୍ଭ ହେଲା: {chars}ଟି ଅକ୍ଷର, {tools}ଟି ଟୁଲ୍, {attachments}ଟି ସଂଲଗ୍ନକ",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "ଏହି ରନ୍ ପାଇଁ ଟୁଲ୍",
+    "tlRunToolsNone": "କିଛି ନାହିଁ (କେବଳ ଲେଖା)",
     "tlModelCall": "{model} ({provider})କୁ ମଡେଲ୍ କଲ୍, ରୁଟ୍ {route}",
     "tlFailover": "{model} ({provider})କୁ ଫେଲଓଭର୍ ହେଲା",
     "tlRetryModel": "{model} ({provider})ରେ ପୁଣି ଚେଷ୍ଟା କରାଗଲା, ରୁଟ୍ {route}",
@@ -14623,6 +14623,7 @@
     "tlToolCall": "ଟୁଲ୍ କଲ୍ {tool}: {status}",
     "tlApprovalRequested": "{tool} ଚାଲିବା ପୂର୍ବରୁ ଅନୁମୋଦନ ମାଗାଗଲା",
     "tlApprovalDecided": "{tool} ପାଇଁ ଅନୁମୋଦନର ନିଷ୍ପତ୍ତି ହେଲା: {decision}",
+    "tlApprovalAutoAllowed": "{tool} ନପଚାରି ଚାଲିଲା: ତତ୍ତ୍ୱାବଧାନରେ କେବଳ-ପଢ଼ିବା କଲ୍",
     "tlContinuation": "ନିରନ୍ତରତା: {guard} ({outcome})",
     "tlGuard": "ଗାର୍ଡରେଲ୍ {guard}: {outcome}",
     "tlVerifyPassed": "ଯାଞ୍ଚ ଉତ୍ତୀର୍ଣ୍ଣ: {check}",
@@ -14692,7 +14693,7 @@
     "modeTextOnlyHelp": "ଏଜେଣ୍ଟ ତାର ଟୁଲ୍ ବିନା ଉତ୍ତର ଦିଏ। ସୁରକ୍ଷିତ: ପ୍ରକୃତରେ କିଛି ହୁଏ ନାହିଁ। ଆଶାକୃତ-ଟୁଲ୍ ଯାଞ୍ଚ ପୂରଣ ହୋଇପାରିବ ନାହିଁ।",
     "modeFull": "ଟୁଲ୍ ସହ ପୂର୍ଣ୍ଣ ପାଇପଲାଇନ୍",
     "modeFullHelp": "ଜଣେ ପ୍ରକୃତ ଉପଯୋଗକର୍ତ୍ତା ପାଉଥିବା ସମାନ ଟୁଲ୍, ଗାର୍ଡରେଲ୍ ଓ ପଦକ୍ଷେପ ସୀମା। ଆଶାକୃତ-ଟୁଲ୍ ଓ ଟ୍ରାଜେକ୍ଟୋରୀ ଯାଞ୍ଚ ପାଇଁ ଆବଶ୍ୟକ।",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "ଯେଉଁ ଟୁଲ୍ କେବଳ ପଢ଼େ ସେଗୁଡ଼ିକ ପ୍ରକୃତରେ ଚାଲେ। ଯାହା ଡାଟା ବଦଳାଇପାରେ, ବାର୍ତ୍ତା ପଠାଇପାରେ କିମ୍ବା ଟଙ୍କା ଖର୍ଚ୍ଚ କରିପାରେ ତାହା ଅନୁକରଣ କରାଯାଇ ରନ୍‌ରେ ତାଲିକାଭୁକ୍ତ ହୁଏ, ତେଣୁ ପ୍ରକୃତରେ କିଛି ଘଟେ ନାହିଁ। ସୁରକ୍ଷା ବର୍ଗୀକରଣ ନଥିବା ଟୁଲ୍ ମଧ୍ୟ ଅନୁକରଣ ହୁଏ।",
     "autoApproveLabel": "ଇଭାଲ୍ ସାଣ୍ଡବକ୍ସରେ ଟୁଲ୍ କଲ୍ ସ୍ୱତଃ-ଅନୁମୋଦନ କରନ୍ତୁ",
     "autoApproveHelp": "ସାଧାରଣତଃ ଜଣେ ବ୍ୟକ୍ତିଙ୍କୁ ଅପେକ୍ଷା କରୁଥିବା ଟୁଲ୍ କଲ୍‌କୁ ଇଭାଲ୍ ସାଣ୍ଡବକ୍ସ ଅନୁମୋଦନ କରେ, ଯେପରି କେସ୍ ଶେଷ ହୋଇପାରିବ। ଏହା ବିନା କେସ୍ ପ୍ରଡକ୍ସନରେ ଯେପରି ହୁଏ ସେହିପରି ଉତ୍ତର ନମିଳିଥିବା ଅନୁମୋଦନରେ ଶେଷ ହୁଏ।",
     "autoApproveWarnTitle": "କେବଳ ଅଣ-ପ୍ରଡକ୍ସନ୍ ୱାର୍କସ୍ପେସ୍ ପାଇଁ",
@@ -14700,7 +14701,7 @@
     "autoApproveNeedsFull": "ପ୍ରଥମେ ପୂର୍ଣ୍ଣ ପାଇପଲାଇନ୍ ଚାଲୁ କରନ୍ତୁ: ସ୍ୱତଃ-ଅନୁମୋଦନ କେବଳ ଟୁଲ୍ ଚାଲିଲେ ହିଁ ଲାଗୁ ହୁଏ।",
     "autoApproveRefused": "ଏହି ୱାର୍କସ୍ପେସ୍‌ରେ ଅନୁମତି ନାହିଁ: {reason}",
     "autoApproveConfirmTitle": "ଇଭାଲ୍‌ରେ ଟୁଲ୍ କଲ୍ ସ୍ୱତଃ-ଅନୁମୋଦନ କରିବେ?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "ଏହି ଡାଟାସେଟ୍‌ର ରିପ୍ଲେରେ ବ୍ୟକ୍ତିଙ୍କ ପାଇଁ ଅପେକ୍ଷା କରୁଥିବା ପ୍ରତ୍ୟେକ ଟୁଲ୍ କଲ୍ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଅନୁମୋଦିତ ହେବ। ଅନୁମୋଦିତ କେବଳ-ପଢ଼ିବା ଟୁଲ୍ ପ୍ରକୃତରେ ଚାଲେ; ଯାହା କିଛି ବଦଳାଇପାରେ ସେଗୁଡ଼ିକ ତଥାପି ଅନୁକରଣ ହୁଏ। ଏହା କେବଳ ଟେଷ୍ଟ ଡାଟା ଥିବା ୱାର୍କସ୍ପେସ୍‌ରେ କରନ୍ତୁ। ରନ୍ ଗୁଡ଼ିକ ରେକର୍ଡ କରେ ଯେ ସେଗୁଡ଼ିକ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଅନୁମୋଦିତ ହୋଇଥିଲା।",
     "autoApproveConfirm": "ସ୍ୱତଃ-ଅନୁମୋଦନ ଚାଲୁ କରନ୍ତୁ",
     "trajectoryLabel": "ଟ୍ରାଜେକ୍ଟୋରୀ ଯାଞ୍ଚ",
     "trajectoryOn": "On",
@@ -14725,22 +14726,22 @@
     "samplingSource_platform": "ପ୍ଲାଟଫର୍ମ ଦ୍ୱାରା ସେଟ୍",
     "samplingSource_tenant": "ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍ ପାଇଁ ସେଟ୍",
     "samplingSource_agent": "ଏହି ଏଜେଣ୍ଟ ପାଇଁ ସେଟ୍",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "ୱାର୍କସ୍ପେସ୍ ଡିଫଲ୍ଟ",
+    "modeDefaultHelp": "ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍‌ର ସେଟିଂ ଅନୁସରଣ କରେ (ଏଡମିନ୍ ବଦଳାଇ ନଥିଲେ ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍)। ପ୍ରତ୍ୟେକ ରନ୍ ତଥାପି ନିଜର ମୋଡ୍ ବାଛିପାରେ।",
+    "modeDefaultCurrent": "ବର୍ତ୍ତମାନ: {mode}",
+    "modeNameFull": "ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍",
+    "modeNameQuick": "ଦ୍ରୁତ (କେବଳ ଲେଖା)",
+    "badgeFull": "ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍",
+    "badgeQuick": "ଦ୍ରୁତ",
+    "datasetModePinnedTitle": "ଏହି ଡାଟାସେଟ୍ ସର୍ବଦା ଏହିପରି ରିପ୍ଲେ ହୁଏ। ଗୋଟିଏ ରନ୍ ତଥାପି ଅନ୍ୟ ମୋଡ୍ ବାଛିପାରେ।",
+    "datasetModeDefaultTitle": "ରନ୍ କିପରି ରିପ୍ଲେ ହେବ ସେ ବିଷୟରେ ଏହି ଡାଟାସେଟ୍ ୱାର୍କସ୍ପେସ୍ ଡିଫଲ୍ଟ ଅନୁସରଣ କରେ।",
+    "runModeLabel": "ପରବର୍ତ୍ତୀ ରନ୍ ପାଇଁ ରିପ୍ଲେ ମୋଡ୍",
+    "runModeInherit": "ଡାଟାସେଟ୍‌ର ସେଟିଂ ବ୍ୟବହାର କରନ୍ତୁ",
+    "runModeHelp": "ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍ ଏଜେଣ୍ଟକୁ ତାର ଟୁଲ୍, ଗାର୍ଡରେଲ୍ ଓ ଅନୁମୋଦନ ସହ ସୁରକ୍ଷିତ ସାଣ୍ଡବକ୍ସରେ ଚଲାଏ: କେବଳ ପଢ଼ୁଥିବା ଟୁଲ୍ ପ୍ରକୃତରେ ଚାଲେ, ଡାଟା ବଦଳାଇପାରୁଥିବା କିମ୍ବା କିଛି ପଠାଇପାରୁଥିବା ସବୁକିଛି ଅନୁକରଣ ହୁଏ। ଦ୍ରୁତ ମୋଡ୍ ଟୁଲ୍ ଗୁଡ଼ିକୁ ଅଟକାଇ ରଖେ ଓ କେବଳ ଲିଖିତ ଉତ୍ତର ପରୀକ୍ଷା କରେ।",
+    "runModeFullTitle": "ଏହି ରନ୍ ଇଭାଲ୍ ସାଣ୍ଡବକ୍ସରେ ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍ ବ୍ୟବହାର କଲା।",
+    "runModeQuickTitle": "ଏହି ରନ୍ କେବଳ-ଲେଖା ଦ୍ରୁତ ରିପ୍ଲେ ଥିଲା: ଏଜେଣ୍ଟର ଟୁଲ୍ ଅଟକାଇ ରଖାଯାଇଥିଲା।",
+    "runSimulatedTools": "ଏହି ରନ୍‌ରେ ଅନୁକରଣ କରାଗଲା, ଚଲାଯାଇନାହିଁ (ସେଗୁଡ଼ିକ ଡାଟା ବଦଳାଇପାରିଥାନ୍ତା କିମ୍ବା ପ୍ଲାଟଫର୍ମ ବାହାରେ ପହଞ୍ଚିପାରିଥାନ୍ତା): {tools}।",
+    "toolStatusSimulated": "ଅନୁକରଣ କରାଗଲା, ଚଲାଯାଇନାହିଁ"
   },
   "agentLab": {
     "wtLabel": "ଏଜେଣ୍ଟର ଟୁଲ୍ ସହ ଚଲାନ୍ତୁ",
@@ -14773,6 +14774,14 @@
       "memory": {
         "label": "ମେମୋରୀ",
         "description": "ଏଜେଣ୍ଟ କେତୋଟି ସ୍ମୃତି ରଖେ ଓ ମନେପକାଏ।"
+      },
+      "attachments": {
+        "label": "ଚାଟ୍ ଅପଲୋଡ୍",
+        "description": "ଲୋକମାନେ ଚାଟ୍ ବାର୍ତ୍ତା ସହ କେତେ ବଡ଼ ଫାଇଲ୍ ଯୋଡ଼ିପାରିବେ।"
+      },
+      "skills": {
+        "label": "ସ୍କିଲ୍",
+        "description": "ସ୍ଥାପିତ ସ୍କିଲ୍‌ର ତାଲିକା ଏଜେଣ୍ଟର ନିର୍ଦ୍ଦେଶର କେତେ ଅଂଶ ବ୍ୟବହାର କରିପାରିବ।"
       },
       "aux": {
         "label": "ପୃଷ୍ଠଭୂମି ମଡେଲ୍ କଲ୍",
@@ -14839,6 +14848,28 @@
           "label": "ଅସମ୍ପୂର୍ଣ୍ଣ ଉତ୍ତର ପରେ ଅତିରିକ୍ତ ପାସ୍",
           "description": "ଘୋଷଣା କରାଯାଇଥିବା କିନ୍ତୁ ନିଆଯାଇନଥିବା ପଦକ୍ଷେପରେ ମଡେଲ୍‌ର ଉତ୍ତର ଅଟକିଗଲେ ତାକୁ ଆଉ କେତେ ଥର ଜାରି ରଖିବାକୁ କୁହାଯାଏ।",
           "help": "ଯେଉଁ ଏଜେଣ୍ଟ ପ୍ରାୟତଃ ଏକ ପଦକ୍ଷେପ ଘୋଷଣା କରି ଅଟକିଯାଆନ୍ତି ସେମାନଙ୍କ ପାଇଁ ବଢ଼ାନ୍ତୁ। ପ୍ରତ୍ୟେକ ଅତିରିକ୍ତ ପାସ୍ ଗୋଟିଏ ମଡେଲ୍ କଲ୍ ଖର୍ଚ୍ଚ କରେ।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "ସୀମା ପରେ ଉତ୍ତର ଦିଆଯାଇଥିବା କଲ୍",
+          "description": "ଟର୍ନର ଟୁଲ୍ ସୀମା ଶେଷ ହେବା ପରେ ମଡେଲ୍ ଆଉ କେତେ ଟୁଲ୍ କଲ୍ ଚେଷ୍ଟା କରିପାରିବ। ପ୍ରତ୍ୟେକକୁ \"ଯାହା ଅଛି ତାହା ଦ୍ୱାରା ଉତ୍ତର ଦିଅ\" ବୋଲି ଟିପ୍ପଣୀ ସହ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ; ଏହି ସଂଖ୍ୟା ପରେ ଟର୍ନ ତ୍ରୁଟି ସହ ବନ୍ଦ ହୁଏ।",
+          "help": "ମଡେଲ୍ ଟୁଲ୍ କଲ୍ କରିବା ବନ୍ଦ କରିବାକୁ କିଛି ଚେଷ୍ଟା ଆବଶ୍ୟକ କଲେ ଏହାକୁ ବଢ଼ାନ୍ତୁ। ଲୁପ୍‌ରେ ଥିବା ଟର୍ନ ଶୀଘ୍ର ଶେଷ କରିବାକୁ କମାନ୍ତୁ। 0 ସୀମା ଟପିଥିବା ପ୍ରଥମ କଲ୍‌ରେ ଟର୍ନ ବନ୍ଦ କରେ।"
+        },
+        "supervisedDivisor": {
+          "label": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ଟୁଲ୍ ସୀମାର 1/N ପାଆନ୍ତି",
+          "description": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ଟର୍ନର ଟୁଲ୍-କଲ୍ ସୀମାକୁ ଏହି ସଂଖ୍ୟାରେ ଭାଗ କରି ପାଏ, କିନ୍ତୁ ତଳେ ଥିବା ସର୍ବନିମ୍ନରୁ କେବେ କମ୍ ନୁହେଁ।",
+          "help": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟଙ୍କୁ ଅଧିକ କଡ଼ାକଡ଼ି ରଖିବାକୁ ବଢ଼ାନ୍ତୁ। 1 ସେମାନଙ୍କୁ ପୂର୍ଣ୍ଣ ସୀମା ଦିଏ।"
+        },
+        "supervisedMinSteps": {
+          "label": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ପାଇଁ ସର୍ବନିମ୍ନ ଟୁଲ୍ କଲ୍",
+          "description": "ଉପରର ସଂଖ୍ୟା ଯେତେ ଅଧିକ ହେଲେ ବି, ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ପାଉଥିବା ସବୁଠୁ ଛୋଟ ଟୁଲ୍-କଲ୍ ସୀମା।",
+          "help": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ଅନେକ ପଦକ୍ଷେପର ସରଳ କାମ ଶେଷ କରିପାରିବା ପାଇଁ ଏହାକୁ 3 କିମ୍ବା ଅଧିକ ରଖନ୍ତୁ।"
+        },
+        "autonomousMultiplier": {
+          "label": "ପୂର୍ଣ୍ଣ ସ୍ୱାୟତ୍ତ ଏଜେଣ୍ଟ ସୀମାର N ଗୁଣ ପାଆନ୍ତି",
+          "description": "ପୂର୍ଣ୍ଣ ସ୍ୱାୟତ୍ତ ଏଜେଣ୍ଟ ଟର୍ନର ଟୁଲ୍-କଲ୍ ସୀମାକୁ ଏହି ସଂଖ୍ୟା ଦ୍ୱାରା ଗୁଣନ କରି ପାଏ।",
+          "help": "କେହି ନଦେଖି ଲମ୍ବା କାମ ଚଳାଉଥିବା ଏଜେଣ୍ଟ ପାଇଁ ବଢ଼ାନ୍ତୁ; ତେବେ ସେମାନେ ଗୋଟିଏ ଟର୍ନରେ ଅଧିକ କଲ୍ ଓ ଟଙ୍କା ଖର୍ଚ୍ଚ କରିପାରିବେ। 1 ସେମାନଙ୍କୁ ମାନକ ସୀମା ଦିଏ।"
         }
       }
     },
@@ -14910,6 +14941,82 @@
           "label": "ଫଲୋ-ଅପ୍ ଟୁଲ୍ କେତେ ସମୟ ପ୍ରସ୍ତାବିତ ରହେ",
           "description": "ବ୍ୟବହାର ପରେ ଛୋଟ ଫଲୋ-ଅପ୍ ବାର୍ତ୍ତା ପାଇଁ ଗୋଟିଏ ଟୁଲ୍ କେତେ ସମୟ ପ୍ରସ୍ତାବିତ ରହେ।",
           "help": "ଲମ୍ବା ୱିଣ୍ଡୋ ଦୀର୍ଘ କାମ ସେସନ୍‌ରେ ସାହାଯ୍ୟ କରେ, ଛୋଟ ୱିଣ୍ଡୋ ଟୁଲ୍ ତାଲିକାକୁ ଛୋଟ ରଖେ।"
+        },
+        "maxStickyTools": {
+          "label": "ଫଲୋ-ଅପ୍‌ରେ ପ୍ରସ୍ତାବିତ ରଖାଯାଉଥିବା ସର୍ବାଧିକ ଟୁଲ୍",
+          "description": "ଛୋଟ ଫଲୋ-ଅପ୍ ବାର୍ତ୍ତାକୁ ନିଆଯାଉଥିବା ସର୍ବାଧିକ ଟୁଲ୍। 0 କିଛି ରଖେ ନାହିଁ।",
+          "help": "ଗୋଟିଏ କାମ ଅନେକ ଟୁଲ୍ ବ୍ୟବହାର କଲେ ବଡ଼ ସଂଖ୍ୟା ସାହାଯ୍ୟ କରେ; ଛୋଟ ସଂଖ୍ୟା ଟୁଲ୍ ତାଲିକାକୁ ଛୋଟ ରଖେ।"
+        },
+        "keepPrimaryModel": {
+          "label": "ଫଲୋ-ଅପ୍ ପାଇଁ ମୁଖ୍ୟ ମଡେଲ୍ ରଖନ୍ତୁ",
+          "description": "ପୂର୍ବରୁ ଟୁଲ୍ ବ୍ୟବହାର କରିଥିବା କଥାବାର୍ତ୍ତାରେ ଛୋଟ ଫଲୋ-ଅପ୍ ଶସ୍ତା ମଡେଲ୍ ବଦଳରେ ଏଜେଣ୍ଟର ମୁଖ୍ୟ ମଡେଲ୍‌ରେ ହିଁ ରହେ।",
+          "help": "ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ ଯେପରି ଖର୍ଚ୍ଚ ରାଉଟିଂ \"ହଁ\" ଭଳି ଫଲୋ-ଅପ୍‌କୁ ଶସ୍ତା ମଡେଲ୍‌କୁ ପଠାଇବ, କିନ୍ତୁ ଚାଲିଥିବା କାମକୁ ଦୁର୍ବଳ ଭାବେ ସମ୍ଭାଳିବାର ଆଶଙ୍କା ଅଛି।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "ଉତ୍ତର ପୁନଃବ୍ୟବହାର ପାଇଁ ପ୍ରଶ୍ନ କେତେ ସମାନ ହେବା ଉଚିତ",
+          "description": "ସମାନ ପ୍ରଶ୍ନର ଉତ୍ତର ପୁନଃବ୍ୟବହାର କରୁଥିବା ଏଜେଣ୍ଟ ପାଇଁ: ସଞ୍ଚିତ ଉତ୍ତର ଦେବାକୁ ନୂଆ ପ୍ରଶ୍ନ ପୂର୍ବ ପ୍ରଶ୍ନର କେତେ ନିକଟ ହେବା ଦରକାର, 0.85 ରୁ 1।",
+          "help": "କମ୍ ସଂଖ୍ୟା ଅଧିକ ପୁନରାବୃତ୍ତିକୁ ଉତ୍ତର ଦିଏ କିନ୍ତୁ ଅନ୍ୟ ପ୍ରଶ୍ନ ପାଇଁ ଉଦ୍ଦିଷ୍ଟ ଉତ୍ତର ଦେବାର ଆଶଙ୍କା ଥାଏ। ଭୁଲ ଉତ୍ତର ମହଙ୍ଗା ପଡ଼ିଲେ ଏହାକୁ ଅଧିକ ରଖନ୍ତୁ। ଉତ୍ତର କେବଳ ସେହି ବ୍ୟକ୍ତିଙ୍କ ପାଇଁ ପୁନଃବ୍ୟବହାର ହୁଏ ଯାହାଙ୍କୁ ତାହା ଦିଆଯାଇଥିଲା।"
+        },
+        "ttl": {
+          "label": "ପୁନଃବ୍ୟବହାରଯୋଗ୍ୟ ଉତ୍ତର କେତେ ସମୟ ରଖାଯାଏ",
+          "description": "ସଞ୍ଚିତ ଉତ୍ତର ବାଦ୍ ଦିଆଯିବା ପୂର୍ବରୁ ସମାନ ପ୍ରଶ୍ନକୁ କେତେ ସମୟ ଦିଆଯାଇପାରେ।",
+          "help": "ଆପଣଙ୍କ ଉତ୍ତର ଶୀଘ୍ର ପୁରୁଣା ହୋଇଗଲେ ଏହାକୁ ଛୋଟ କରନ୍ତୁ।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "ପ୍ରତି ଏଜେଣ୍ଟ ସର୍ବାଧିକ ସଞ୍ଚିତ ଉତ୍ତର",
+          "description": "ଗୋଟିଏ ଏଜେଣ୍ଟ ପୁନଃବ୍ୟବହାର ପାଇଁ କେତେ ଉତ୍ତର ରଖେ। ଏହାଠାରୁ ଅଧିକ ହେଲେ ସବୁଠୁ ପୁରୁଣା ଗୁଡ଼ିକ ବାଦ୍ ଦିଆଯାଏ।",
+          "help": "ବଡ଼ ଭଣ୍ଡାର ଅଧିକ ପୁନରାବୃତ୍ତି ଖୋଜିପାଏ ଓ ଅଧିକ ଷ୍ଟୋରେଜ୍ ବ୍ୟବହାର କରେ।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "କଥାବାର୍ତ୍ତାରେ ଟୁଲ୍ କଲ୍‌ର ରେକର୍ଡ ରଖନ୍ତୁ",
+          "description": "ପ୍ରତ୍ୟେକ ଟର୍ନର ଟୁଲ୍ କଲ୍‌ର ଛୋଟ ରେକର୍ଡ କଥାବାର୍ତ୍ତା ସହ ସଞ୍ଚୟ କରନ୍ତୁ, ଯାହାଦ୍ୱାରା ପରବର୍ତ୍ତୀ ଟର୍ନ ଦେଖିପାରିବ କ'ଣ କରାଯାଇଥିଲା।",
+          "help": "କଥାବାର୍ତ୍ତାର ଇତିହାସ କେବଳ-ଲେଖା ରଖିବାକୁ ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ; ତେବେ ଏଜେଣ୍ଟ ଜାଣିପାରିବ ନାହିଁ ପୂର୍ବ ଟର୍ନରେ ତାର ଟୁଲ୍ କ'ଣ କରିଥିଲା। ଏହା ସମଗ୍ର ୱାର୍କସ୍ପେସ୍‌ରେ ଲାଗୁ ହୁଏ।"
+        },
+        "replayEnabled": {
+          "label": "ମଡେଲ୍‌କୁ ଟୁଲ୍ ରେକର୍ଡ ଦେଖାନ୍ତୁ",
+          "description": "ମଡେଲ୍‌କୁ କଥାବାର୍ତ୍ତା ଦେବା ସମୟରେ ପୂର୍ବ ଟୁଲ୍ କଲ୍‌ର ସଞ୍ଚିତ ରେକର୍ଡ ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ।",
+          "help": "ରେକର୍ଡ ସଞ୍ଚୟ ହେବା ଜାରି ରହିବା ପାଇଁ କିନ୍ତୁ ଏଥିପାଇଁ ମଡେଲ୍‌ର କାମ କରିବା ସ୍ଥାନ ବ୍ୟବହାର ନହେବା ପାଇଁ ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ।"
+        },
+        "replayTurns": {
+          "label": "ଯେଉଁ ପୂର୍ବ ଟର୍ନର ଟୁଲ୍ ରେକର୍ଡ ଦେଖାଯାଏ",
+          "description": "ଟୁଲ୍ ବ୍ୟବହାର କରିଥିବା ସବୁଠୁ ସାମ୍ପ୍ରତିକ ଟର୍ନ ମଧ୍ୟରୁ କେତେଟିର ରେକର୍ଡ ମଡେଲ୍‌କୁ ଦେଖାଯାଏ।",
+          "help": "ବଡ଼ ସଂଖ୍ୟା ଲମ୍ବା କାମ ସେସନ୍‌ରେ ସାହାଯ୍ୟ କରେ କିନ୍ତୁ ମଡେଲ୍‌ର କାମ କରିବା ସ୍ଥାନ ଅଧିକ ବ୍ୟବହାର କରେ।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "ପ୍ରତି ଟର୍ନରେ ତାଲିକାଭୁକ୍ତ ଟୁଲ୍ କଲ୍",
+          "description": "ଗୋଟିଏ ଟର୍ନର କେତେ ଟୁଲ୍ କଲ୍ ରେକର୍ଡରେ ଲେଖାଯାଏ। ପରବର୍ତ୍ତୀ କଲ୍ କେବଳ ଗଣାଯାଏ।",
+          "help": "ଅନେକ କଲ୍ କରୁଥିବା ଓ ପ୍ରତ୍ୟେକଟି ମନେ ରଖିବାକୁ ପଡ଼ୁଥିବା ଟର୍ନ ପାଇଁ ବଢ଼ାନ୍ତୁ।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "ପ୍ରତି ଟର୍ନରେ ସବୁଠୁ ଲମ୍ବା ଟୁଲ୍ ରେକର୍ଡ",
+          "description": "ଗୋଟିଏ ଟର୍ନର ରେକର୍ଡର କେତେ ଅକ୍ଷର ମଡେଲ୍‌କୁ ଦେଖାଯାଏ; ବାକି ଗଣାଯାଏ, ତାଲିକାଭୁକ୍ତ ହୁଏ ନାହିଁ।",
+          "help": "ପରବର୍ତ୍ତୀ ପ୍ରତ୍ୟେକ ଟର୍ନରେ ଖର୍ଚ୍ଚ ବଞ୍ଚାଇବାକୁ କମାନ୍ତୁ, ଅଧିକ ବିବରଣୀ ରଖିବାକୁ ବଢ଼ାନ୍ତୁ।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "ସବୁଠୁ ବଡ଼ ଛବି ଅପଲୋଡ୍ (MB)",
+          "description": "ଚାଟ୍ ବାର୍ତ୍ତା ସହ କେହି ଯୋଡ଼ିପାରିବା ସବୁଠୁ ବଡ଼ ଛବି, ମେଗାବାଇଟ୍‌ରେ। ପ୍ଲାଟଫର୍ମର ଏକ ସମଗ୍ର ଫାଇଲ୍ ସୀମା ମଧ୍ୟ ଅଛି ଯାହାକୁ ଏହା ଅତିକ୍ରମ କରିପାରିବ ନାହିଁ।",
+          "help": "ଫଟୋ ଓ ସ୍କ୍ରିନସଟ୍ ପାଇଁ ବଢ଼ାନ୍ତୁ; ବଡ଼ ଫାଇଲ୍ ପଠାଇବାରେ ମନ୍ଥର ଓ ମଡେଲ୍‌ର ଅଧିକ କୋଟା ବ୍ୟବହାର କରେ।"
+        },
+        "maxAudioMb": {
+          "label": "ସବୁଠୁ ବଡ଼ ଅଡିଓ ଅପଲୋଡ୍ (MB)",
+          "description": "ଚାଟ୍ ବାର୍ତ୍ତା ସହ କେହି ଯୋଡ଼ିପାରିବା ସବୁଠୁ ବଡ଼ ଅଡିଓ ଫାଇଲ୍, ମେଗାବାଇଟ୍‌ରେ। ପ୍ଲାଟଫର୍ମର ଏକ ସମଗ୍ର ଫାଇଲ୍ ସୀମା ମଧ୍ୟ ଅଛି ଯାହାକୁ ଏହା ଅତିକ୍ରମ କରିପାରିବ ନାହିଁ।",
+          "help": "ଲମ୍ବା ରେକର୍ଡିଂ ପାଇଁ ବଢ଼ାନ୍ତୁ; ବଡ଼ ଫାଇଲ୍ ପଠାଇବାରେ ମନ୍ଥର ଓ ମଡେଲ୍‌ର ଅଧିକ କୋଟା ବ୍ୟବହାର କରେ।"
+        },
+        "maxVideoMb": {
+          "label": "ସବୁଠୁ ବଡ଼ ଭିଡିଓ ଅପଲୋଡ୍ (MB)",
+          "description": "ଚାଟ୍ ବାର୍ତ୍ତା ସହ କେହି ଯୋଡ଼ିପାରିବା ସବୁଠୁ ବଡ଼ ଭିଡିଓ, ମେଗାବାଇଟ୍‌ରେ। ପ୍ଲାଟଫର୍ମର ଏକ ସମଗ୍ର ଫାଇଲ୍ ସୀମା ମଧ୍ୟ ଅଛି ଯାହାକୁ ଏହା ଅତିକ୍ରମ କରିପାରିବ ନାହିଁ।",
+          "help": "ଲମ୍ବା କ୍ଲିପ୍ ପାଇଁ ବଢ଼ାନ୍ତୁ; ବଡ଼ ଫାଇଲ୍ ପଠାଇବାରେ ମନ୍ଥର ଓ ମଡେଲ୍‌ର ଅଧିକ କୋଟା ବ୍ୟବହାର କରେ।"
+        },
+        "maxDocumentMb": {
+          "label": "ସବୁଠୁ ବଡ଼ ଦଲିଲ ଅପଲୋଡ୍ (MB)",
+          "description": "ଚାଟ୍ ବାର୍ତ୍ତା ସହ କେହି ଯୋଡ଼ିପାରିବା ସବୁଠୁ ବଡ଼ ଦଲିଲ କିମ୍ବା ସ୍ପ୍ରେଡସିଟ୍, ମେଗାବାଇଟ୍‌ରେ। ପ୍ଲାଟଫର୍ମର ଏକ ସମଗ୍ର ଫାଇଲ୍ ସୀମା ମଧ୍ୟ ଅଛି ଯାହାକୁ ଏହା ଅତିକ୍ରମ କରିପାରିବ ନାହିଁ।",
+          "help": "ଲମ୍ବା ରିପୋର୍ଟ ଓ ବଡ଼ ଡାଟା ଫାଇଲ୍ ପାଇଁ ବଢ଼ାନ୍ତୁ; ବଡ଼ ଫାଇଲ୍ ପ୍ରକ୍ରିୟାକରଣରେ ମନ୍ଥର।"
         }
       },
       "continuation": {
@@ -14968,6 +15075,20 @@
           "help": "ଲୋକଙ୍କ ବିଷୟରେ ଅନେକ ମନେ ରଖିବାକୁ ଥିବା ସହାୟକ ପାଇଁ ବଢ଼ାନ୍ତୁ; ଏହା ସଂରକ୍ଷଣ ଓ ମନେପକାଇବା ଖର୍ଚ୍ଚ ମଧ୍ୟ ବଢ଼ାଏ।"
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "ସର୍ବାଧିକ ଭାଗ କରାଯାଇଥିବା ସ୍ମୃତି",
+          "description": "ୱାର୍କସ୍ପେସ୍‌ରେ ଭାଗ କରାଯାଇଥିବା କେତେ ସ୍ମୃତି ରଖାଯାଏ। ଏହାଠାରୁ ଅଧିକ ହେଲେ ସବୁଠୁ ପୁରୁଣା ଗୁଡ଼ିକ ବାଦ୍ ଦିଆଯାଏ।",
+          "help": "ଭାଗ କରାଯାଇଥିବା ଜ୍ଞାନ ଉପରେ ନିର୍ଭର କରୁଥିବା ବଡ଼ ଦଳ ପାଇଁ ବଢ଼ାନ୍ତୁ; ଏହା ଷ୍ଟୋରେଜ୍ ଓ ସ୍ମରଣ ଖର୍ଚ୍ଚ ମଧ୍ୟ ବଢ଼ାଏ। ଏହା ସମଗ୍ର ୱାର୍କସ୍ପେସ୍‌ରେ ଲାଗୁ ହୁଏ।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ଅନ୍-ଡିଭାଇସ୍ ଚାଟ୍‌କୁ ଦିଆଯାଉଥିବା ସ୍ମୃତି",
+          "description": "ଅନ୍-ଡିଭାଇସ୍ ସେସନ୍ ଆରମ୍ଭ ହେଲେ ତାକୁ କେତେ ସ୍ମୃତି ହସ୍ତାନ୍ତର କରାଯାଏ।",
+          "help": "ଅନ୍-ଡିଭାଇସ୍ ମଡେଲ୍‌ର କାମ କରିବା ସ୍ଥାନ ଛୋଟ, ତେଣୁ ଏହାକୁ କମ୍ ରଖନ୍ତୁ।"
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "ଗ୍ରାଫ୍ ମେମୋରୀରୁ ମନେପକାଯାଉଥିବା ତଥ୍ୟ",
@@ -14978,6 +15099,20 @@
           "label": "ପ୍ରତି ଲୁକଅପ୍‌ରେ ପଢ଼ାଯାଉଥିବା ଗ୍ରାଫ୍ ପଥ",
           "description": "ଗୋଟିଏ ଲୁକଅପ୍‌ର ତଥ୍ୟ ଖୋଜିବାକୁ ମେମୋରୀ ଗ୍ରାଫ୍‌ର କେତୋଟି ସଂଯୋଗ ପଢ଼ାଯାଏ।",
           "help": "ଏକାଧିକ ସଂଯୋଗ ଏକା ତଥ୍ୟକୁ ନେଇପାରେ, ତେଣୁ ଘନ ଭାବେ ଯୋଡ଼ା ସ୍ମୃତିରେ ସବୁକିଛି ଖୋଜିବାକୁ ଅଧିକ ସଂଖ୍ୟା ଦରକାର ହୋଇପାରେ। ଅଧିକ ସଂଖ୍ୟା ପ୍ରତ୍ୟେକ ଲୁକଅପ୍‌କୁ ମନ୍ଥର କରେ।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "ପ୍ରମ୍ପ୍ଟରେ ତାଲିକାଭୁକ୍ତ ସର୍ବାଧିକ ସ୍କିଲ୍",
+          "description": "ଏଜେଣ୍ଟ ଜାଣିବାକୁ ଯେ ସେଗୁଡ଼ିକ ଅଛି, ତାର ନିର୍ଦ୍ଦେଶରେ ଆପଣଙ୍କ କେତେ ସ୍କିଲ୍‌ର ନାମ ଦିଆଯାଏ। ବାକି ଗଣାଯାଏ, ତାଲିକାଭୁକ୍ତ ହୁଏ ନାହିଁ।",
+          "help": "ଆପଣଙ୍କ ପାଖରେ ଅନେକ ସ୍କିଲ୍ ଥିଲେ ବଢ଼ାନ୍ତୁ; ତାଲିକାଭୁକ୍ତ ପ୍ରତ୍ୟେକ ସ୍କିଲ୍ ପ୍ରତ୍ୟେକ ଟର୍ନରେ ମଡେଲ୍‌ର କାମ କରିବା ସ୍ଥାନର ଟିକିଏ ବ୍ୟବହାର କରେ। ଏହା ସମଗ୍ର ୱାର୍କସ୍ପେସ୍‌ରେ ଲାଗୁ ହୁଏ।"
+        },
+        "maxBlockChars": {
+          "label": "ପ୍ରମ୍ପ୍ଟରେ ସ୍କିଲ୍ ତାଲିକାର ଆକାର",
+          "description": "ଏଜେଣ୍ଟର ନିର୍ଦ୍ଦେଶରେ ସ୍କିଲ୍ ତାଲିକା କେତେ ଅକ୍ଷର ନେଇପାରିବ। ଭରିଗଲେ ପରବର୍ତ୍ତୀ ସ୍କିଲ୍ କେବଳ ନାମକୁ ଛୋଟ କରାଯାଏ।",
+          "help": "ଅଧିକ ସ୍କିଲ୍‌ର ବର୍ଣ୍ଣନା ରଖିବାକୁ ବଢ଼ାନ୍ତୁ, ପ୍ରତ୍ୟେକ ଟର୍ନରେ ଟୋକେନ୍ ବଞ୍ଚାଇବାକୁ କମାନ୍ତୁ। ଏହା ସମଗ୍ର ୱାର୍କସ୍ପେସ୍‌ରେ ଲାଗୁ ହୁଏ।"
         }
       }
     },
@@ -15030,6 +15165,17 @@
           "description": "ଯାଞ୍ଚ ହୋଇଥିବା ଟେକ୍ସଟ୍‌ର କେତେ ଅଂଶ AI ସୁରକ୍ଷା ବିଚାରକ ପଢ଼ନ୍ତି। ତାହାଠାରୁ ଅଧିକ ଟେକ୍ସଟ୍‌ର ବିଚାର ହୁଏ ନାହିଁ।",
           "help": "ଆପଣ ଏହାକୁ କେବଳ ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟଠାରୁ ଉପରକୁ ବଢ଼ାଇପାରିବେ। ବଢ଼ାଇଲେ ଲମ୍ବା ଟୁଲ୍ ଫଳାଫଳର ସମ୍ପୂର୍ଣ୍ଣ ବିଚାର ହୁଏ କିନ୍ତୁ ପ୍ରତ୍ୟେକ ବିଚାରକ କଲ୍ ବଡ଼ ହୁଏ।"
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ଓ କେବଳ-ପଢ଼ିବା ଟୁଲ୍",
+          "description": "ତତ୍ତ୍ୱାବଧାନ ସ୍ୱାୟତ୍ତତା ସ୍ତରର ଏଜେଣ୍ଟ ସନ୍ଧାନ କିମ୍ବା ଲୁକଅପ୍ ଭଳି କେବଳ ପଢ଼ୁଥିବା ଟୁଲ୍ ପୂର୍ବରୁ ମଧ୍ୟ ଆପଣଙ୍କୁ ପଚାରେ କି ନାହିଁ। ଲେଖିବା, ପଠାଇବା ଏବଂ ପ୍ଲାଟଫର୍ମ ବର୍ଗୀକରଣ ନକରିଥିବା ଟୁଲ୍ ସର୍ବଦା ପଚାରେ।",
+          "help": "ଆପଣ ଏହାକୁ କେବଳ ପ୍ଲାଟଫର୍ମ ସେଟିଂ ଠାରୁ ଅଧିକ କଠୋର କରିପାରିବେ। ପ୍ରତ୍ୟେକ ଥର ପଚାରିବା ସବୁଠୁ ସୁରକ୍ଷିତ ପସନ୍ଦ; କେବଳ-ପଢ଼ିବା ଟୁଲ୍ ଚଳିବାକୁ ଦେଲେ ଗୋଟିଏ ପ୍ରଶ୍ନ କମ୍ ହୁଏ, କିନ୍ତୁ ଅପ୍ରତ୍ୟାଶିତ ସନ୍ଧାନକୁ ରୋକିବାର ଗୋଟିଏ ସୁଯୋଗ ମଧ୍ୟ ଯାଏ। ଯେଉଁ ଏଜେଣ୍ଟ ବ୍ୟକ୍ତିଗତ ଡାଟା ପଢ଼ିପାରେ, ଅବିଶ୍ୱସନୀୟ ବିଷୟବସ୍ତୁ ନେଇପାରେ ଏବଂ ଡାଟା ବାହାରକୁ ପଠାଇପାରେ, ଏହି ସେଟିଂ ଯାହା କହିଲେ ବି ତାକୁ ପ୍ରତ୍ୟେକ କଲ୍‌ରେ ପଚରାଯାଏ।",
+          "options": {
+            "auto-allow": "କେବଳ-ପଢ଼ିବା ଟୁଲ୍ ନପଚାରି ଚଳିବାକୁ ଦିଅନ୍ତୁ",
+            "gate": "ପ୍ରତ୍ୟେକ ଟୁଲ୍ କଲ୍ ପୂର୍ବରୁ ପଚାରନ୍ତୁ"
+          }
+        }
       }
     },
     "quality": {
@@ -15052,12 +15198,12 @@
           "help": "ପ୍ରତ୍ୟେକ ପୁନରାବୃତ୍ତି ଗୋଟିଏ ରନ୍‌ର ଖର୍ଚ୍ଚ ଓ ସମୟକୁ ଗୁଣନ କରେ।"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "ମୂଲ୍ୟାୟନ କିପରି ଚାଲେ",
+          "description": "ରନ୍ କିମ୍ବା ତାର ଡାଟାସେଟ୍ ନକହିଲେ, ମୂଲ୍ୟାୟନ ରନ୍ ଏଜେଣ୍ଟକୁ ତାର ଟୁଲ୍ ସହ ସୁରକ୍ଷିତ ସାଣ୍ଡବକ୍ସରେ ରିପ୍ଲେ କରେ (ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍) ନା କେବଳ ଲେଖାରେ ଉତ୍ତର ଦିଏ (ଦ୍ରୁତ)।",
+          "help": "ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍ ଆପଣଙ୍କ ଉପଯୋଗକର୍ତ୍ତା ଯାହା ପାଆନ୍ତି ତାହା, ଟୁଲ୍ ବ୍ୟବହାର ସମେତ, ପରୀକ୍ଷା କରେ ଏବଂ ଖର୍ଚ୍ଚ ଅଧିକ। ଏହାରେ କେବଳ ପଢ଼ୁଥିବା ଟୁଲ୍ ପ୍ରକୃତରେ ଚାଲେ; ଯାହା ଡାଟା ବଦଳାଇପାରେ, ବାର୍ତ୍ତା ପଠାଇପାରେ କିମ୍ବା ଟଙ୍କା ଖର୍ଚ୍ଚ କରିପାରେ ତାହା ଅନୁକରଣ ହୁଏ ଓ ରନ୍‌ରେ ତାଲିକାଭୁକ୍ତ ହୁଏ। ଦ୍ରୁତ ଶସ୍ତା ଏବଂ ଟୁଲ୍ ବ୍ୟବହାର ବିଷୟରେ କିଛି କହେ ନାହିଁ।",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "ସାଣ୍ଡବକ୍ସରେ ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍",
+            "quick": "ଦ୍ରୁତ: କେବଳ ଲେଖା ଉତ୍ତର"
           }
         }
       }
@@ -15161,7 +15307,7 @@
       "cancel": "ବାତିଲ୍ କରନ୍ତୁ",
       "done": "{count}ଟି ସେଟିଂକୁ ସେମାନଙ୍କ ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟକୁ ରିସେଟ୍ କରନ୍ତୁ।",
       "partial": "{done}ଟି ସେଟିଂ ରିସେଟ୍ ହେଲା; {failed}ଟି ରିସେଟ୍ କରିହେଲା ନାହିଁ। ବିଫଳ ସେଟିଂସ୍‌ର ବାର୍ତ୍ତା ଦେଖନ୍ତୁ।",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} ସେଟିଂ ରିସେଟ୍ ହେଲା। କାରଣ ଆବଶ୍ୟକ କରୁଥିବା {skipped} ଯେପରି ଥିଲା ସେପରି ରଖାଗଲା।"
     },
     "import": {
       "button": "ଓଭରରାଇଡ୍ ଆମଦାନି କରନ୍ତୁ",
@@ -15234,16 +15380,16 @@
       "unknownActor": "ଅଜ୍ଞାତ",
       "noReason": "କୌଣସି କାରଣ ଦିଆଯାଇନାହିଁ",
       "showMore": "ଅଧିକ ଦେଖାନ୍ତୁ",
-      "scope": "Level",
+      "scope": "ସ୍ତର",
       "scopeWorkspace": "ୱାର୍କସ୍ପେସ୍",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "ଏଜେଣ୍ଟ {id}",
+      "scopeFilter": "ପରିବର୍ତ୍ତନ ଏହି ସ୍ତରରେ ଦେଖାନ୍ତୁ",
+      "filterAll": "ସମସ୍ତ ସ୍ତର",
+      "filterWorkspace": "କେବଳ ୱାର୍କସ୍ପେସ୍",
+      "filterAgents": "କେବଳ ଏଜେଣ୍ଟ",
+      "searchLoadedOnly": "ସନ୍ଧାନ ଏପର୍ଯ୍ୟନ୍ତ ଲୋଡ୍ ହୋଇଥିବା ପରିବର୍ତ୍ତନକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ।",
+      "loadError": "ପରିବର୍ତ୍ତନ ଇତିହାସ ଲୋଡ୍ କରାଯାଇପାରିଲା ନାହିଁ। {message}",
+      "moreFailed": "ଆହୁରି ପରିବର୍ତ୍ତନ ଲୋଡ୍ କରାଯାଇପାରିଲା ନାହିଁ। {message}",
       "loadingMore": "ଲୋଡ୍ ହେଉଛି"
     }
   },
@@ -15251,7 +15397,7 @@
     "title": "ଆଚରଣ ଓ ସୀମା",
     "intro": "ଏହି ଏଜେଣ୍ଟ ଗୋଟିଏ ଟର୍ନରେ କେତେ ଦୂର ଯାଇପାରିବ ତାହା ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ: କେତୋଟି ଟୁଲ୍ କଲ୍ କରିପାରିବ, କେତେ ସମୟ ଚାଲିପାରିବ ଏବଂ କେତେ ପଢ଼ି ଫେରାଇବ। ଆପଣ ଏଠାରେ ଯାହା ବଦଳାନ୍ତି ନାହିଁ ତାହା ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍‌ରୁ ଉତ୍ତରାଧିକାରସୂତ୍ରେ ଆସେ।",
     "saveFirst": "ପ୍ରଥମେ ଏଜେଣ୍ଟକୁ ସେଭ୍ କରନ୍ତୁ। ଏହା ତିଆରି ହେବା ପରେ ଏହାର ଆଚରଣ ଓ ସୀମା ସେଟ୍ କରାଯାଇପାରିବ।",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "ଏହାର ଆଚରଣ ଓ ସୀମା ଟ୍ୟାବ୍ ଖୋଲିବାକୁ ତଳୁ ଗୋଟିଏ ଏଜେଣ୍ଟ ବାଛନ୍ତୁ।",
     "tabs": {
       "label": "ଏଜେଣ୍ଟ କନ୍ଫିଗରେସନ୍",
       "setup": "ସେଟଅପ୍",
@@ -15262,12 +15408,12 @@
       "label": "ସମ୍ବନ୍ଧିତ ପୃଷ୍ଠା",
       "tenant": "ୱାର୍କସ୍ପେସ୍ ଡିଫଲ୍ଟ ବଦଳାନ୍ତୁ",
       "playground": "ପ୍ଲେଗ୍ରାଉଣ୍ଡରେ ଚେଷ୍ଟା କରନ୍ତୁ",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "ଏହି ଏଜେଣ୍ଟର ପ୍ରମ୍ପ୍ଟ",
+      "promptsAria": "{name} ର ପ୍ରମ୍ପ୍ଟ: ପ୍ରମ୍ପ୍ଟ ରେଜିଷ୍ଟ୍ରିକୁ ଏହି ଏଜେଣ୍ଟରେ ଖୋଲନ୍ତୁ",
+      "approvals": "ଏହି ଏଜେଣ୍ଟର ଅନୁମୋଦନ",
+      "approvalsAria": "{name} ର ଅନୁମୋଦନ: ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଫିଲ୍ଟର୍ ହୋଇଥିବା ଅନୁମୋଦନ ଧାଡ଼ି ଖୋଲନ୍ତୁ",
+      "turns": "ଟର୍ନ ଟାଇମଲାଇନ୍",
+      "turnsAria": "{name} ର ଟର୍ନ ଟାଇମଲାଇନ୍: ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଟର୍ନ ଇନ୍ସପେକ୍ଟର୍ ଖୋଲନ୍ତୁ"
     },
     "readOnly": {
       "locked": "ଏହି ଏଜେଣ୍ଟ ସମ୍ପାଦନା ପାଇଁ ଲକ୍ ହୋଇଛି, ତେଣୁ ଏହି ମୂଲ୍ୟ କେବଳ ପଢ଼ିବା ପାଇଁ।",
@@ -15447,7 +15593,7 @@
     "regAgentPlaceholder": "ଏକ ଏଜେଣ୍ଟ ବାଛନ୍ତୁ",
     "regAgentsFailed": "ଆପଣଙ୍କ ଏଜେଣ୍ଟ ଲୋଡ୍ କରିହେଲା ନାହିଁ।",
     "regPickAgent": "ଏକ ଏଜେଣ୍ଟର ପ୍ରମ୍ପ୍ଟ ଦେଖିବାକୁ ଓ ବଦଳାଇବାକୁ ତାକୁ ବାଛନ୍ତୁ।",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "ଲିଙ୍କ୍‌ରେ ଥିବା ଏଜେଣ୍ଟ ଆପଣଙ୍କ ପାଇଁ ଉପଲବ୍ଧ ନୁହେଁ, କାରଣ ଏହା ନାହିଁ କିମ୍ବା ଆପଣ ଏହାକୁ ଦେଖିପାରିବେ ନାହିଁ। ଏହା ବଦଳରେ ରେଜିଷ୍ଟ୍ରି ୱାର୍କସ୍ପେସ୍ ପରିସରରେ ଖୋଲିଲା।",
     "regSearchLabel": "ପ୍ରମ୍ପ୍ଟ ସନ୍ଧାନ କରନ୍ତୁ",
     "regSearchPlaceholder": "କି, ଶୀର୍ଷକ ବା ବିବରଣୀ",
     "regRiskLabel": "ବିପଦ ଶ୍ରେଣୀ",

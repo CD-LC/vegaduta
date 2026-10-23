@@ -817,15 +817,15 @@
     "rsParam_seed": "सीड",
     "rsParam_stopSequences": "थांबोवपाचो क्रम",
     "rsParamDropped": "{param} ह्या एजंटाचेर सेट केल्लें आसा, पूण {provider} {model} खातीर ताका दुर्लक्ष करता, देखून ताचो कसलोच परिणाम ना.",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "ह्या रना खातीर साधनां",
+    "rsToolsRunOnly": "फकत हो रन",
+    "rsToolsRunNote": "हे स्विच ठरायतात की ह्या प्लेग्राउंडांतल्यान तुमी धाडिल्ले संदेश एजंटाचीं खंयचीं साधनां वापरूंक शकतात. कांयच सांबाळिना: बाकी सगळ्यां खातीर एजंट आपलो स्वताचो साधन प्रवेश दवरता. हे एजंटाचीं साधनां फकत बंद करूंक शकतात, ताका केन्नाच नवें साधन दिवंक शकनात.",
+    "rsToolsRunSummary": "एजंटाच्या {total} साधनां पैकी {on} ह्या रना खातीर चालू",
+    "rsToolsRunNone": "ह्या रना खातीर साधनां ना: एजंट फकत मजकुरांत जाप दिवंक शकता.",
+    "rsToolsReset": "एजंटाचीं साधनां वापर",
+    "rsToolsNotInAgent": "हें ह्या एजंटाच्या सांबाळिल्ल्या साधनां मदलें न्हय, देखून रना खातीर चालू करूंक जायना.",
+    "rsToolsEditAgent": "एजंटाचीं सांबाळिल्लीं साधनां बदल",
+    "rsToolsLimitedChip": "ह्या रना खातीर साधनां मर्यादीत",
     "rsToolsEmpty": "ह्या एजंटा खातीर कसलीं साधनां उपलब्ध ना.",
     "rsToolsSummary": "{total} पैकी {on} साधनां चालू",
     "rsToolsFailed": "साधनां लोड करूंक जालें ना.",
@@ -883,14 +883,14 @@
     "chipToolsOff": "साधनां बगर परतून यत्न करता",
     "chipFailoverBlocked": "बॅकअप मॉडेल वापरूंक ना: साधनां आदींच चल्ली",
     "rsLimitChangeOne": "बदल",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "दर मर्यादा पावली",
+    "reasonTimeout": "वेळ सोंपलो",
+    "reasonProviderUnavailable": "प्रदाता उपलब्ध ना",
+    "reasonAuthFailed": "प्रदात्यान क्रेडेन्शियल न्हयकारले",
+    "reasonBilling": "प्रदात्याची बिलिंग समस्या",
+    "reasonModelNotFound": "मॉडेल उपलब्ध ना",
+    "reasonProviderError": "प्रदात्याची चूक",
+    "reasonMalformedToolCall": "साधन कॉल वापरूंक जालो ना"
   },
   "nodeDefs": {
     "triggerLabel": "ट्रिगर",
@@ -13263,7 +13263,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "स्किल",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14107,7 +14107,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "स्किल",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14281,7 +14281,7 @@
       "role": "तुमची भूमिका ही सेटिंग बदलूंक शकना. वर्कस्पेस प्रशासकाक विचार.",
       "scope": "ही सेटिंग हांगा ओव्हरराइड करूंक जायना.",
       "readOnly": "सेटिंग्ज आतां फकत वाचपा खातीर आसात.",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "ही सुरक्षा सेटिंग फकत वर्कस्पेस अड्मिनूच बदलूंक शकता. तुमी ताचें मोल हांगा पळोवंक शकता, पूण सुदारूंक शकना."
     },
     "reset": {
       "button": "वारसा हक्कान आयिल्ल्या मोलाक रीसेट कर",
@@ -14331,12 +14331,12 @@
       "acknowledge": "हांव ह्या सुरक्षा बदलाचे परिणाम समजतां.",
       "cancel": "रद्द कर",
       "confirm": "निश्चीत करून सांबाळ",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "रीसेट: ओव्हरराइड काडटात आनी सेटिंग ताका वारसा हक्कान मेळपी मोलाक परत वता."
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "चड म्हळ्यार चड कडक: चड मोल मान्य जाता, उणें न्हयकारतात.",
+      "lower": "उणें म्हळ्यार चड कडक: उणें मोल मान्य जाता, चड न्हयकारतात.",
+      "enumOrder": "पर्याय उणे कडकापसून चड कडकामेरेन क्रमान आसात: {options}. तुमी फकत कडक सिऱ्याकडेन वचूंक शकता."
     }
   },
   "approvalsQueue": {
@@ -14505,8 +14505,8 @@
     "tlSevWarn": "लक्ष दिवपाची गरज",
     "tlSevError": "अपेशी",
     "tlIntake": "टर्न सुरू जालो: {chars} अक्षरां, {tools} साधनां, {attachments} जोडिल्लीं",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "ह्या रना खातीर साधनां",
+    "tlRunToolsNone": "कितेंच ना (फकत मजकूर)",
     "tlModelCall": "{model} ({provider}) कडेन मॉडेल कॉल, मार्ग {route}",
     "tlFailover": "{model} ({provider}) कडेन फेलओव्हर जालो",
     "tlRetryModel": "{model} ({provider}) कडेन परत यत्न केलो, मार्ग {route}",
@@ -14515,6 +14515,7 @@
     "tlToolCall": "साधन कॉल {tool}: {status}",
     "tlApprovalRequested": "{tool} चलपाआदीं मंजूर मागली",
     "tlApprovalDecided": "{tool} खातीर मंजुरेचो निर्णय जालो: {decision}",
+    "tlApprovalAutoAllowed": "{tool} विचारिनासतना चललें: देखरेखीखाला फकत-वाचपाचो कॉल",
     "tlContinuation": "सातत्य: {guard} ({outcome})",
     "tlGuard": "गार्डरेल {guard}: {outcome}",
     "tlVerifyPassed": "तपासणी पास: {check}",
@@ -14584,7 +14585,7 @@
     "modeTextOnlyHelp": "एजंट आपलीं साधनां बगर जाप दिता. सुरक्षीत: खरेंच कांयच चलना. अपेक्षीत-साधन तपासणी पुराय करूंक येना.",
     "modeFull": "साधनांसयत पुराय पाइपलायन",
     "modeFullHelp": "खऱ्या वापरपीक मेळटात तींच साधनां, गार्डरेल आनी पावलांची मर. अपेक्षीत-साधन आनी ट्रॅजेक्टरी तपासणी खातीर गरजेचें.",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "जीं साधनां फकत वाचतात तीं खरेंच चलतात. डेटा बदलूंक शकपी, संदेश धाडूंक शकपी वा पयसे खर्च करूंक शकपी कितेंय अनुकरण करतात आनी रनांत यादी करतात, देखून खऱ्यांतल्यान कांयच घडना. सुरक्षा वर्गीकरण नाशिल्लीं साधनांय अनुकरण जातात.",
     "autoApproveLabel": "इव्हल सँडबॉक्सांत साधन कॉल आपसूक मंजूर कर",
     "autoApproveHelp": "सादारणपणान मनशाची वाट पळोवपी साधन कॉल इव्हल सँडबॉक्स मंजूर करता, जाका लागून केस सोंपूंक शकता. हाचे बगर केस उत्पादनांत जसो जाता तसोच उत्तर नाशिल्ल्या मंजुरेर सोंपता.",
     "autoApproveWarnTitle": "फकत उत्पादन नाशिल्ल्या वर्कस्पेसां खातीर",
@@ -14592,7 +14593,7 @@
     "autoApproveNeedsFull": "आदीं पुराय पाइपलायन चालू कर: आपसूक मंजुरी फकत साधनां चलतात तेन्ना लागू जाता.",
     "autoApproveRefused": "ह्या वर्कस्पेसांत परवानगी ना: {reason}",
     "autoApproveConfirmTitle": "इव्हलांत साधन कॉल आपसूक मंजूर करचे?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "ह्या डेटासेटाच्या रिप्लेंत मनशाची वाट पळोवपी दरेक साधन कॉल आपसूक मंजूर जातलो. मंजूर केल्लीं फकत-वाचपाचीं साधनां खरेंच चलतात; कितेंतरी बदलूंक शकपीं मंजूर साधनां अजून अनुकरण जातात. हें फकत चाचणी डेटा आशिल्ल्या वर्कस्पेसांतूच कर. रन नोंद करतात की ते आपसूक मंजूर जाल्ले.",
     "autoApproveConfirm": "आपसूक मंजुरी चालू कर",
     "trajectoryLabel": "ट्रॅजेक्टरी तपासणी",
     "trajectoryOn": "On",
@@ -14617,22 +14618,22 @@
     "samplingSource_platform": "प्लॅटफॉर्मान सेट केल्लें",
     "samplingSource_tenant": "तुमच्या वर्कस्पेसा खातीर सेट केल्लें",
     "samplingSource_agent": "ह्या एजंटा खातीर सेट केल्लें",
-    "modeDefault": "Workspace default",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefault": "वर्कस्पेस डिफॉल्ट",
+    "modeDefaultHelp": "तुमच्या वर्कस्पेसाची सेटिंग पाळटा (अड्मिनान बदल्ली ना जाल्यार पुराय पाइपलायन). दरेक रन अजूनय आपलो मोड वेंचूंक शकता.",
+    "modeDefaultCurrent": "आतां: {mode}",
+    "modeNameFull": "पुराय पाइपलायन",
+    "modeNameQuick": "जलद (फकत मजकूर)",
+    "badgeFull": "पुराय पाइपलायन",
+    "badgeQuick": "जलद",
+    "datasetModePinnedTitle": "हो डेटासेट सदांच अश्यूच रिप्ले जाता. एक रन अजूनय दुसरो मोड वेंचूंक शकता.",
+    "datasetModeDefaultTitle": "रन कसे रिप्ले जावंक जाय हाचेर हो डेटासेट वर्कस्पेसाचो डिफॉल्ट पाळटा.",
+    "runModeLabel": "फुडल्या रना खातीर रिप्ले मोड",
+    "runModeInherit": "डेटासेटाची सेटिंग वापर",
+    "runModeHelp": "पुराय पाइपलायन एजंटाक ताचीं साधनां, गार्डरेल आनी मंजुरेसयत सुरक्षीत सँडबॉक्सांत चलयता: फकत वाचपीं साधनां खरेंच चलतात, आनी डेटा बदलूंक शकपी वा कितेंय धाडूंक शकपी कितेंय अनुकरण जाता. जलद मोड साधनां आडायता आनी फकत बरयिल्ली जाप तपासता.",
+    "runModeFullTitle": "ह्या रनान इव्हल सँडबॉक्सांत पुराय पाइपलायन वापरली.",
+    "runModeQuickTitle": "हो रन फकत मजकुराचो जलद रिप्ले आशिल्लो: एजंटाचीं साधनां आडायिल्लीं.",
+    "runSimulatedTools": "ह्या रनांत अनुकरण केलें, चलयलें ना (तीं डेटा बदलूंक शकतलीं वा प्लॅटफॉर्मा भायर पावूंक शकतलीं): {tools}.",
+    "toolStatusSimulated": "अनुकरण केलें, चलयलें ना"
   },
   "agentLab": {
     "wtLabel": "एजंटाच्या साधनांनी चलय",
@@ -14665,6 +14666,14 @@
       "memory": {
         "label": "मेमरी",
         "description": "एजंट किती आठवणी दवरता आनी याद करता."
+      },
+      "attachments": {
+        "label": "चॅट अपलोड",
+        "description": "मनशां चॅट संदेशां वांगडा किती व्हड फायली जोडूंक शकतात."
+      },
+      "skills": {
+        "label": "स्किल",
+        "description": "इन्स्टॉल केल्ल्या स्किलांची यादी एजंटाच्या सुचोवण्यांचो किती भाग वापरूंक शकता."
       },
       "aux": {
         "label": "फाटभूमी मॉडेल कॉल",
@@ -14731,6 +14740,28 @@
           "label": "अपुराय जापेउपरांत चड पास",
           "description": "मॉडेलाची जाप जाहीर केल्ल्या पूण ना केल्ल्या पावलार थांबल्यार ताका किती फावटी फुडें व्हरपाक सांगतात.",
           "help": "एक पावल जाहीर करून थांबपी एजंटा खातीर वाडय. दरेक चड पास एक मॉडेल कॉल खर्च करता."
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "मर्येनंतर जाप दिल्ले कॉल",
+          "description": "टर्नाची साधन मर्यादा सोंपले उपरांत मॉडेल आनीक किती साधन कॉल यत्न करूंक शकता. दरेकाक \"आशिल्ल्यान जाप दी\" ह्या टिपेसयत न्हयकारतात; ह्या संख्येउपरांत टर्न चुकेसयत आडायतात.",
+          "help": "मॉडेलाक साधनां कॉल करप बंद करपाक कांय यत्न जाय जाल्यार हें वाडय. लुपांत सांपडिल्ले टर्न चाड्डो सोंपोवपाक उणें कर. 0 मर्या ओलांडिल्ल्या पयल्याच कॉलार टर्न आडायता."
+        },
+        "supervisedDivisor": {
+          "label": "देखरेखीखालच्या एजंटांक साधन मर्येचो 1/N मेळटा",
+          "description": "देखरेखीखालच्या एजंटाक टर्नाची साधन-कॉल मर्या ह्या संख्येन भाग करून मेळटा, पूण सकयल्या उणेंत उण्या मोलाक परस केन्नाच उणी न्हय.",
+          "help": "देखरेखीखालच्या एजंटांक चड कडक दवरपाक हें वाडय. 1 तांकां पुराय मर्या दिता."
+        },
+        "supervisedMinSteps": {
+          "label": "देखरेखीखालच्या एजंटा खातीर उणेंत उणे साधन कॉल",
+          "description": "वयली संख्या कितेंय व्हड आसूं, देखरेखीखालच्या एजंटाक मेळपी सगळ्यांत ल्हान साधन-कॉल मर्या.",
+          "help": "हें 3 वा चड दवर, जाका लागून देखरेखीखालचो एजंट गोबां पावलांचें सादें काम अजूनय पुराय करूंक शकता."
+        },
+        "autonomousMultiplier": {
+          "label": "पुराय स्वायत्त एजंटांक मर्येच्या N पटींनी मेळटात",
+          "description": "पुराय स्वायत्त एजंटाक टर्नाची साधन-कॉल मर्या ह्या संख्येन गुणून मेळटा.",
+          "help": "कोणे पळोवनासतना लांब काम चलोवपी एजंटां खातीर वाडय; तेन्ना ते एका टर्नांत चड कॉल आनी पयशे खर्च करूंक शकतात. 1 तांकां मानक मर्या दिता."
         }
       }
     },
@@ -14802,6 +14833,82 @@
           "label": "फॉलो-अप साधनां किती वेळ सुचयतात",
           "description": "वापराउपरांत ल्हान फॉलो-अप संदेशां खातीर एक साधन किती वेळ सुचयलेलें उरता.",
           "help": "लांब खिडकी लांब कामाच्या सेशनांत मदत करता, ल्हान साधन यादी ल्हान दवरता."
+        },
+        "maxStickyTools": {
+          "label": "फलो-अपांत सुचयत रावपी चड करून साधनां",
+          "description": "ल्हान फलो-अप संदेशांत व्हरपी चड करून साधनां. 0 कितेंच दवरना.",
+          "help": "एके कामाक गोबां साधनां लागल्यार व्हडली संख्या मदत करता; ल्हान संख्या साधन यादी ल्हान दवरता."
+        },
+        "keepPrimaryModel": {
+          "label": "फलो-अपां खातीर मुखेल मॉडेल दवर",
+          "description": "आदींच साधनां वापरिल्ल्या संभाशणांतलो ल्हान फलो-अप सस्त्या मॉडेला बदला एजंटाच्या मुखेल मॉडेलाचेरूच रावता.",
+          "help": "हें बंद कर जाका लागून खर्च रुटिंग \"होय\" सारके फलो-अप सस्त्या मॉडेलाक धाडटलें, पूण चालू आशिल्ल्या कामाक कमजोर तरेन सांबाळपाचो धोको आसता."
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "जाप परत वापरपाक प्रस्न कितलो मिळटा जावंक जाय",
+          "description": "मिळटे-जुळटे प्रस्नांच्यो जापो परत वापरपी एजंटां खातीर: सांबाळिल्ली जाप दिवपाक नवो प्रस्न आदल्या प्रस्नाचे किती लागींचो जावंक जाय, 0.85 पासून 1 मेरेन.",
+          "help": "उणी संख्या चड पुनरावृत्तींक जाप दिता पूण दुसऱ्या प्रस्ना खातीर आशिल्ली जाप दिवपाचो धोको आसता. चुकीच्यो जापो म्हागाय जाल्यार हें चड दवर. जाप जाका दिल्ली ताका फकत परत वापरतात."
+        },
+        "ttl": {
+          "label": "परत वापरपा जोगी जाप कितो वेळ दवरतात",
+          "description": "सांबाळिल्ली जाप काडून उडोवपाआदीं मिळटे-जुळटे प्रस्नाक किती वेळ दिवंक शकतात.",
+          "help": "तुमच्यो जापो चाड्डो जुनाट जातात जाल्यार हें उणें कर."
+        },
+        "maxEntriesPerAgent": {
+          "label": "प्रति एजंट चड करून सांबाळिल्ल्यो जापो",
+          "description": "एक एजंट परत वापरपा खातीर कितल्यो जापो दवरता. हाचे परस चड जाल्यार सगळ्यांत जुन्यो काडून उडयतात.",
+          "help": "व्हड भांडार चड पुनरावृत्ती सोदून काडटा आनी चड स्टोरेज वापरता."
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "संभाशणांत साधन कॉलांची नोंद दवर",
+          "description": "दरेक टर्नाच्या साधन कॉलांची ल्हान नोंद संभाशणा वांगडा सांबाळ, जाका लागून फुडले टर्न कितें केलें तें पळोवंक शकतले.",
+          "help": "संभाशणाचो इतिहास मजकूर आबुङै दवरपाक हें बंद कर; तेन्ना एजंटाक आदल्या टर्नांनी ताच्या साधनांनी कितें केलें तें कळना. हें पुराय वर्कस्पेसाक लागू जाता."
+        },
+        "replayEnabled": {
+          "label": "मॉडेलाक साधन नोंद दाखय",
+          "description": "मॉडेलाक संभाशण दिवपाच्या वेळार आदल्या साधन कॉलांची सांबाळिल्ली नोंद सामील कर.",
+          "help": "नोंद सांबाळटा रावची पूण ताका लागून मॉडेलाची कामाची जागा वापरूंक नाका म्हूण हें बंद कर."
+        },
+        "replayTurns": {
+          "label": "जांचीं साधन नोंद दाखयतात ते आदले टर्न",
+          "description": "साधनां वापरिल्ल्या सगळ्यांत ताज्या किती टर्नांची नोंद मॉडेलाक दाखयतात.",
+          "help": "व्हडली संख्या लांब कामाच्या सेशनांनी मदत करता पूण मॉडेलाची कामाची जागा चड वापरता."
+        },
+        "maxEntriesPerTurn": {
+          "label": "प्रति टर्न यादी केल्ले साधन कॉल",
+          "description": "एका टर्नांतले किती साधन कॉल नोंदींत बरयतात. फुडले कॉल फकत गणतात.",
+          "help": "गोबां कॉल करपी आनी दरेक याद दवरपाक जाय आशिल्ल्या टर्नां खातीर वाडय."
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "प्रति टर्न सगळ्यांत लांब साधन नोंद",
+          "description": "एका टर्नाच्या नोंदीचीं किती अक्षरां मॉडेलाक दाखयतात; उरिल्लीं गणतात, यादी करिनात.",
+          "help": "फुडल्या दरेक टर्नाचो खर्च वाटावपाक उणें कर, चड तपशील दवरपाक वाडय."
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "सगळ्यांत व्हड प्रतिमा अपलोड (MB)",
+          "description": "चॅट संदेशाक कोण जोडूंक शकता ती सगळ्यांत व्हड प्रतिमा, मेगाबायटांनी. प्लॅटफॉर्माची एक पुराय फायल मर्याय आसा जी हें ओलांडूंक शकना.",
+          "help": "फोटो आनी स्क्रीनशॉटां खातीर वाडय; व्हड फायली धाडपाक सावकाश आनी मॉडेलाचो चड कोटा वापरतात."
+        },
+        "maxAudioMb": {
+          "label": "सगळ्यांत व्हड ऑडियो अपलोड (MB)",
+          "description": "चॅट संदेशाक कोण जोडूंक शकता ती सगळ्यांत व्हड ऑडियो फायल, मेगाबायटांनी. प्लॅटफॉर्माची एक पुराय फायल मर्याय आसा जी हें ओलांडूंक शकना.",
+          "help": "लांब रेकॉर्डिंगां खातीर वाडय; व्हड फायली धाडपाक सावकाश आनी मॉडेलाचो चड कोटा वापरतात."
+        },
+        "maxVideoMb": {
+          "label": "सगळ्यांत व्हड व्हिडिओ अपलोड (MB)",
+          "description": "चॅट संदेशाक कोण जोडूंक शकता तो सगळ्यांत व्हड व्हिडिओ, मेगाबायटांनी. प्लॅटफॉर्माची एक पुराय फायल मर्याय आसा जी हें ओलांडूंक शकना.",
+          "help": "लांब क्लिपां खातीर वाडय; व्हड फायली धाडपाक सावकाश आनी मॉडेलाचो चड कोटा वापरतात."
+        },
+        "maxDocumentMb": {
+          "label": "सगळ्यांत व्हड दस्तावेज अपलोड (MB)",
+          "description": "चॅट संदेशाक कोण जोडूंक शकता तो सगळ्यांत व्हड दस्तावेज वा स्प्रेडशीट, मेगाबायटांनी. प्लॅटफॉर्माची एक पुराय फायल मर्याय आसा जी हें ओलांडूंक शकना.",
+          "help": "लांब प्रतिवृत्त आनी व्हड डेटा फायलां खातीर वाडय; व्हड फायली प्रक्रिया करपाक सावकाश."
         }
       },
       "continuation": {
@@ -14860,6 +14967,20 @@
           "help": "मनशां विशीं चड याद दवरपी साहाय्यका खातीर वाडय; हें सांबाळपाचो आनी याद करपाचो खर्चय वाडयता."
         }
       },
+      "tenant": {
+        "maxMemories": {
+          "label": "चड करून वांटिल्ल्यो आठवणी",
+          "description": "वर्कस्पेसांत वांटिल्ल्यो कितल्यो आठवणी दवरतात. हाचे परस चड जाल्यार सगळ्यांत जुन्यो काडून उडयतात.",
+          "help": "वांटिल्ल्या गियानार आदारपी व्हड्ल्या पंगडां खातीर वाडय; हाका लागून स्टोरेज आनी याद करपाचो खर्चय वाडटा. हें पुराय वर्कस्पेसाक लागू जाता."
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "अन-डिव्हायस चॅटाक दिल्ल्यो आठवणी",
+          "description": "अन-डिव्हायस सेशन सुरू जाता तेन्ना ताका कितल्यो आठवणी सुपूर्द करतात.",
+          "help": "अन-डिव्हायस मॉडेलांक कामाची जागा ल्हान आसता, देखून हें उणें दवर."
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "label": "ग्राफ मेमरींतल्यान याद केल्ले तथ्य",
@@ -14870,6 +14991,20 @@
           "label": "दर लुकअपांत वाचपी ग्राफ मार्ग",
           "description": "एका लुकअपाचे तथ्य सोदपाक मेमरी ग्राफाचे किती जोडणे वाचतात.",
           "help": "कितलेशे जोडणे एकाच तथ्याक पावंक शकतात, देखून घट्ट जोडिल्ल्या आठवणींत सगळें सोदपाक चड संख्या जाय जावंक शकता. चड संख्या दरेक लुकअप सावकाश करतात."
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "प्रॉम्प्टांत यादी केल्ले चड करून स्किल",
+          "description": "एजंटाक तीं आसात हें कळचें म्हूण ताच्या सुचोवण्यांनी तुमच्या कितल्या स्किलांचीं नांवां दितात. उरिल्लीं गणतात, यादी करिनात.",
+          "help": "तुमकां गोबां स्किल आसात जाल्यार वाडय; यादी केल्लें दरेक स्किल दरेक टर्नांत मॉडेलाच्या कामाच्या जाग्याचो थोडो भाग वापरता. हें पुराय वर्कस्पेसाक लागू जाता."
+        },
+        "maxBlockChars": {
+          "label": "प्रॉम्प्टांत स्किल यादीचो आकार",
+          "description": "एजंटाच्या सुचोवण्यांनी स्किलांची यादी किती अक्षरां घेवंक शकता. भरले उपरांत फुडलीं स्किलां फकत नांवांमेरेन ल्हान करतात.",
+          "help": "चड स्किलांचीं वर्णनां दवरपाक वाडय, दरेक टर्नांत टोकन वाटावपाक उणें कर. हें पुराय वर्कस्पेसाक लागू जाता."
         }
       }
     },
@@ -14922,6 +15057,17 @@
           "description": "तपासिल्ल्या मजकुराचो कितलो भाग AI सुरक्षा न्यायाधीश वाचता. हे परस चड मजकुराचो निवाडो करिनात.",
           "help": "तुमी हें फकत प्लॅटफॉर्माच्या मोला परस वयर वाडोवंक शकता. वाडयल्यार लांब साधन निकालांचो पुरायपणान निवाडो जाता पूण दरेक न्यायाधीश कॉल व्हड जाता."
         }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "देखरेखीखालचे एजंट आनी फकत-वाचपाचीं साधनां",
+          "description": "देखरेखीखाला स्वायत्तते स्तराचो एजंट सोद वा लुकअप सारक्या फकत वाचपी साधनाआदींय तुमकां विचारता काय ना. बरोवप, धाडप आनी प्लॅटफॉर्मान वर्गीकरण ना केल्लीं साधनां सदांच विचारतात.",
+          "help": "तुमी हें फकत प्लॅटफॉर्म सेटिंगा परस चड कडक करूंक शकता. दर फावटी विचारप आडवाट सुरक्षीत वेंचणी; फकत-वाचपीं साधनां चलूंक दिल्यार एक प्रस्न उणो जाता, पूण अप्रत्याशीत सोद आडावपाची एक संधयूय वता. खाजगी डेटा वाचूंक शकपी, अविश्वासार्ह मजकूर घेवंक शकपी आनी डेटा भायर धाडूंक शकपी एजंटाक ह्या सेटिंगान कितेंय म्हळें तरी दरेक कॉलार विचारतात.",
+          "options": {
+            "auto-allow": "फकत-वाचपीं साधनां विचारिनासतना चलूंक दी",
+            "gate": "दरेक साधन कॉलाआदीं विचार"
+          }
+        }
       }
     },
     "quality": {
@@ -14944,12 +15090,12 @@
           "help": "दरेक पुनरावृत्ती एका रनाचो खर्च आनी वेळ गुणाकार करता."
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "मूल्यांकन कशे चलतात",
+          "description": "रनान वा ताच्या डेटासेटान सांगलें ना जाल्यार, मूल्यांकन रन एजंटाक ताच्या साधनांसयत सुरक्षीत सँडबॉक्सांत रिप्ले करता (पुराय पाइपलायन) वा फकत मजकुरांत जाप दिता (जलद).",
+          "help": "पुराय पाइपलायन तुमच्या वापरपींक मेळटा तें, साधनां वापरपासयत, तपासता आनी खर्च चड. हांगा फकत वाचपीं साधनां खरेंच चलतात; डेटा बदलूंक शकपी, संदेश धाडूंक शकपी वा पयसे खर्च करूंक शकपी कितेंय अनुकरण करतात आनी रनांत यादी करतात. जलद सस्तें आनी साधनां वापरपा विशीं कांयच सांगना.",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "सँडबॉक्सांत पुराय पाइपलायन",
+            "quick": "जलद: फकत मजकूर जापो"
           }
         }
       }
@@ -15053,7 +15199,7 @@
       "cancel": "रद्द कर",
       "done": "{count} सेटिंग्जांक तांच्या वारसा हक्कान आयिल्ल्या मोलाक रीसेट कर.",
       "partial": "{done} सेटिंग्ज रीसेट जाल्यो; {failed} रीसेट करूंक जाल्यो ना. अपेशी सेटिंग्जांचे संदेश पळय.",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} सेटिंग्ज रीसेट जाल्यो. कारण जाय आशिल्ल्यो {skipped} आसात तश्योच सोडल्यो."
     },
     "import": {
       "button": "ओव्हरराइड आयात कर",
@@ -15126,16 +15272,16 @@
       "unknownActor": "अपरिचित",
       "noReason": "कसलेंच कारण दिल्लें ना",
       "showMore": "चड दाखय",
-      "scope": "Level",
+      "scope": "स्तर",
       "scopeWorkspace": "वर्कस्पेस",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "एजंट {id}",
+      "scopeFilter": "बदल ह्या स्तरार दाखय",
+      "filterAll": "सगळे स्तर",
+      "filterWorkspace": "फकत वर्कस्पेस",
+      "filterAgents": "फकत एजंट",
+      "searchLoadedOnly": "सोद आतांमेरेन लोड जाल्ल्या बदलांक व्यापता.",
+      "loadError": "बदलांचो इतिहास लोड करूंक जालो ना. {message}",
+      "moreFailed": "आनीक बदल लोड करूंक जाले ना. {message}",
       "loadingMore": "लोड जाता"
     }
   },
@@ -15143,7 +15289,7 @@
     "title": "वागणूक आनी मर्यादा",
     "intro": "हो एजंट एका टर्नांत किती पुढे वचूंक शकता तें नियंत्रण कर: किती साधन कॉल करूंक शकता, किती वेळ चलूंक शकता आनी किती फाटीं वाचता. तुमी हांगा बदलनात तें तुमच्या वर्कस्पेसांतल्यान वारसा हक्कान येता.",
     "saveFirst": "आदीं एजंट सांबाळ. तो तयार जाल्या उपरांत ताची वागणूक आनी मर्यादा सेट करूंक येतात.",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "ताचो वागणूक आनी मर्यादा टॅब उक्तो करपाक सकयल एक एजंट वेंच.",
     "tabs": {
       "label": "एजंट संरचना",
       "setup": "सेटअप",
@@ -15154,12 +15300,12 @@
       "label": "संबंधीत पानां",
       "tenant": "वर्कस्पेस डिफॉल्ट बदल",
       "playground": "प्लेग्राउंडांत चाखून पळय",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "ह्या एजंटाचे प्रॉम्प्ट",
+      "promptsAria": "{name} चे प्रॉम्प्ट: प्रॉम्प्ट रजिस्ट्री ह्या एजंटाचेर उक्ती कर",
+      "approvals": "ह्या एजंटाच्यो मंजुरी",
+      "approvalsAria": "{name} च्यो मंजुरी: ह्या एजंटा खातीर गाळिल्ली मंजुरेची रांग उक्ती कर",
+      "turns": "टर्न टाइमलाइन",
+      "turnsAria": "{name} ची टर्न टाइमलाइन: ह्या एजंटा खातीर टर्न निरीक्षक उक्तो कर"
     },
     "readOnly": {
       "locked": "हो एजंट बदलपा खातीर कुलूपबंद आसा, देखून हीं मोलां फकत वाचपा खातीर.",
@@ -15339,7 +15485,7 @@
     "regAgentPlaceholder": "एक एजंट वेंच",
     "regAgentsFailed": "तुमचे एजंट लोड करूंक जाले ना.",
     "regPickAgent": "एजंटाचे प्रॉम्प्ट पळोवपाक आनी बदलपाक ताका वेंच.",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "दुव्यांतलो एजंट तुमकां उपलब्ध ना, कारण तो नासा वा तुमी तो पळोवंक शकनात. ताचे बदला रजिस्ट्री वर्कस्पेस व्याप्तेंत उक्ती जाली.",
     "regSearchLabel": "प्रॉम्प्ट सोद",
     "regSearchPlaceholder": "कितें, शीर्षक वा वर्णन",
     "regRiskLabel": "धोक्याची श्रेणी",
