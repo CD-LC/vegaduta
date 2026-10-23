@@ -108,3 +108,46 @@
 @media (prefers-reduced-motion: reduce) {
   .asst-mark-busy { animation: none; }
 }
+
+/* Live activity line: a soft light sweep across the words while the turn works ("Searching the web…"). */
+.asst-shimmer {
+  background: linear-gradient(
+      90deg,
+      var(--muted-foreground) 0%,
+      var(--muted-foreground) 40%,
+      color-mix(in srgb, var(--muted-foreground) 30%, transparent) 50%,
+      var(--muted-foreground) 60%,
+      var(--muted-foreground) 100%
+    )
+    0 0 / 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: asst-shimmer 2.2s linear infinite;
+}
+@keyframes asst-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -150% 0; }
+}
+
+/* Streaming reply: a blinking caret after the last block, gone the moment the turn settles. */
+.asst-streaming > :last-child > :last-child::after {
+  content: "";
+  display: inline-block;
+  width: 0.45em;
+  height: 1em;
+  margin-left: 0.15em;
+  vertical-align: -0.12em;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.5;
+  animation: asst-caret 1s steps(2, start) infinite;
+}
+@keyframes asst-caret {
+  to { visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .asst-shimmer { animation: none; background: none; -webkit-text-fill-color: currentColor; }
+  .asst-streaming > :last-child > :last-child::after { animation: none; }
+}
