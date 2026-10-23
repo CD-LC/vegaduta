@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -32,12 +34,30 @@ public class ChatParityProperties {
         OUTPUT_GUARDRAILS
     }
 
+    /** How a FAST turn that matches a buffering trigger reaches the person. */
+    public enum FastBufferingMode {
+        /** Streamed live; only the part from the first link (a hold marker) on is held, checked and then sent. */
+        FROM_FIRST_LINK,
+        /** The whole reply is held, checked and sent as one piece. */
+        WHOLE_REPLY
+    }
+
     private static final String DEFAULTS_RESOURCE = "/chat/parity.properties";
 
     private static final Properties DEFAULTS = loadDefaults();
 
     /** See {@link FastBufferTrigger}. */
     private Set<FastBufferTrigger> fastBufferingTriggers = triggers(DEFAULTS.getProperty("fast-buffering-triggers"));
+
+    /** See {@link FastBufferingMode}. */
+    private FastBufferingMode fastBufferingMode =
+            FastBufferingMode.valueOf(DEFAULTS.getProperty("fast-buffering-mode").strip());
+
+    /**
+     * Text that starts the held part of a {@link FastBufferingMode#FROM_FIRST_LINK} reply, compared ignoring case. The
+     * invented-link guard's own host markers are always added.
+     */
+    private List<String> fastHoldMarkers = markers(DEFAULTS.getProperty("fast-hold-markers"));
 
     /** The verifiers see the newest this-many characters of the turn's tool results; 0 = all of it. */
     private int verifierMaxEvidenceChars = Integer.parseInt(DEFAULTS.getProperty("verifier-max-evidence-chars"));
@@ -73,6 +93,34 @@ public class ChatParityProperties {
             }
         }
         return out;
+    }
+
+    private static List<String> markers(String commaList) {
+        List<String> out = new ArrayList<>();
+        if (commaList != null) {
+            for (String marker : commaList.split(",")) {
+                if (!marker.isBlank()) {
+                    out.add(marker.strip());
+                }
+            }
+        }
+        return List.copyOf(out);
+    }
+
+    public FastBufferingMode getFastBufferingMode() {
+        return fastBufferingMode;
+    }
+
+    public void setFastBufferingMode(FastBufferingMode fastBufferingMode) {
+        this.fastBufferingMode = fastBufferingMode == null ? FastBufferingMode.FROM_FIRST_LINK : fastBufferingMode;
+    }
+
+    public List<String> getFastHoldMarkers() {
+        return fastHoldMarkers;
+    }
+
+    public void setFastHoldMarkers(List<String> fastHoldMarkers) {
+        this.fastHoldMarkers = fastHoldMarkers == null ? List.of() : markers(String.join(",", fastHoldMarkers));
     }
 
     public Set<FastBufferTrigger> getFastBufferingTriggers() {

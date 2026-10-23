@@ -47,3 +47,18 @@ Ideas: prefix-cache warm-up at session open, stable prefix ordering (static firs
 - Already configurable: `app.chat.small-model.tool-cap` (6), directive texts via the prompt registry (prompts/en/directive.*.md), `app.tools.auto-selection.*`.
 - Audit the latency path for any other constants (timeouts, token budgets, prefix thresholds such as prompt.prefix-warn-tokens read from env only) and move each into the settings catalog.
 - Identify the ~11K unaccounted characters in the fixed prefix (skills block, memory blocks, MCP text) and make each part switchable and sized by a setting.
+
+### Part 6 status (2026-10-23, after the latency fix)
+Done (commit "fix(chat): stream replies live and keep local-model prompts cacheable"):
+- Streaming: FAST turns with a generation/MCP tool stream live; only the part from the first link is held
+  (`app.chat.parity.fast-buffering-mode`, `fast-hold-markers`). This was the "whole answer at once" behaviour on every provider.
+- Local models get a stable tool set (`app.chat.local-model.stable-tools`, `.providers`), so Ollama's prompt cache holds and web_search is no longer dropped.
+- Small-model size limit is a setting (`app.providers.small-model-max-billions`).
+- Measured (24 GB M5, qwen3.5:9b, MLX): cold 9K-token prompt ~15 s to first token; cached <1.5 s; decode ~23 tok/s.
+Still open:
+- Not yet measured end to end on a rebuilt install (the running install was the 0.1.8 images).
+- Cold first message after a model load still reads the whole prefix. Next: prefix warm-up after the model loads (MLX keeps whole-state
+  snapshots only every 8192 tokens, at prompt end, and at branch points; two requests that diverge at the user message create the
+  boundary snapshot), and a shorter prefix (the schema budget counts only input schemas, not descriptions; always-kept tools are uncapped).
+- The per-turn memory/date block (message B) sits before the history; moving it after the history would keep more of the prompt cacheable.
+- Hosted (non-local) turns still drop web_search on messages that do not mention it (no-match budget); the small-model intent table is not used there.

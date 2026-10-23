@@ -409,7 +409,7 @@ public class AgentChatService extends LegacyChatEntryPoints {
         this.structuredCalls = new ChatStructuredCall(this, agentService, toolCallLogService);
         this.preflight = new ChatTurnPreflight(this);
         this.rlArmSelection = new RlArmSelection(this);
-        this.clientSelection = new ChatClientSelection(this, parts.followUp, timeouts.continuationProperties());
+        this.clientSelection = new ChatClientSelection(this, parts.followUp, timeouts.continuationProperties(), timeouts.localModel());
         this.promptAssembler = new ChatPromptAssembler(this);
         this.dispatcher = new ChatTurnDispatcher(this);
     }

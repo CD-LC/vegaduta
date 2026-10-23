@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.turn.ChatParityProperties.FastBufferTrigger;
+import com.agenticai.core.agents.turn.ChatParityProperties.FastBufferingMode;
 import com.agenticai.core.agents.turn.ContinuationProperties;
 import com.agenticai.core.guardrails.impl.ProfanityGuardrail;
 import java.util.ArrayList;
@@ -150,21 +151,71 @@ class StreamBufferedParityE2ETest {
     // ------------------------------------------------------------------ what buffers a FAST turn
 
     private ApprovalTurnHarness withGenerationTool(Set<FastBufferTrigger> triggers) {
+        return withGenerationTool(triggers, FastBufferingMode.FROM_FIRST_LINK, "Here is a longer plain answer with no link in it.");
+    }
+
+    private ApprovalTurnHarness withGenerationTool(Set<FastBufferTrigger> triggers, FastBufferingMode mode, String reply) {
         return build(
                 ApprovalTurnHarness.builder()
                         .tool(RecordingTool.returning("generate_image", "Generates an image", "{\"url\":\"https://x.test/i.png\"}"))
-                        .parity(p -> p.setFastBufferingTriggers(triggers))
-                        .responder(request -> ScriptedLlm.text("Here is a longer plain answer with no link in it.")));
+                        .parity(p -> {
+                            p.setFastBufferingTriggers(triggers);
+                            p.setFastBufferingMode(mode);
+                        })
+                        .responder(request -> ScriptedLlm.text(reply)));
     }
 
     @Test
-    void aFastTurnThatOffersAGenerationToolIsBufferedByDefault() {
-        ApprovalTurnHarness harness =
+    void aFastTurnThatOffersAGenerationToolStreamsByDefaultAndHoldsOnlyFromItsFirstLink() {
+        ApprovalTurnHarness plain =
                 withGenerationTool(EnumSet.of(FastBufferTrigger.GENERATION_TOOLS, FastBufferTrigger.MCP_TOOLS));
+        List<String> plainChunks = plain.chatChunks("Hello there");
+        assertTrue(plainChunks.size() > 1, "a reply without a link streams: " + plainChunks);
+
+        ApprovalTurnHarness linked =
+                withGenerationTool(
+                        EnumSet.of(FastBufferTrigger.GENERATION_TOOLS, FastBufferTrigger.MCP_TOOLS),
+                        FastBufferingMode.FROM_FIRST_LINK,
+                        "The notes are online at https://docs.example.org/notes.txt for you to read.");
+        List<String> chunks = linked.chatChunks("Hello there");
+        assertTrue(chunks.size() > 1, "the words before the link stream: " + chunks);
+        assertEquals(
+                "The notes are online at https://docs.example.org/notes.txt for you to read.",
+                String.join("", chunks),
+                "a real link is sent as written once the reply is complete");
+        String last = chunks.get(chunks.size() - 1);
+        assertTrue(last.contains("https://docs.example.org/notes.txt"), "the link arrives in one held piece: " + chunks);
+        for (String chunk : chunks.subList(0, chunks.size() - 1)) {
+            assertTrue(!chunk.toLowerCase().contains("http"), "nothing of the link is streamed early: " + chunks);
+        }
+    }
+
+    @Test
+    void wholeReplyModeHoldsTheTurnAndSendsItAsOnePiece() {
+        ApprovalTurnHarness harness =
+                withGenerationTool(
+                        EnumSet.of(FastBufferTrigger.GENERATION_TOOLS, FastBufferTrigger.MCP_TOOLS),
+                        FastBufferingMode.WHOLE_REPLY,
+                        "Here is a longer plain answer with no link in it.");
 
         List<String> chunks = harness.chatChunks("Hello there");
 
         assertEquals(1, chunks.size(), "held and sent as one piece: " + chunks);
+    }
+
+    @Test
+    void anInventedGenerationLinkIsReplacedWhileTheWordsBeforeItStillStream() {
+        ApprovalTurnHarness harness =
+                withGenerationTool(
+                        EnumSet.of(FastBufferTrigger.GENERATION_TOOLS, FastBufferTrigger.MCP_TOOLS),
+                        FastBufferingMode.FROM_FIRST_LINK,
+                        "Your image is ready, download it at https://fake.example/picture.png right now.");
+
+        List<String> chunks = harness.chatChunks("Draw a cat");
+
+        String reply = String.join("", chunks);
+        assertTrue(!reply.contains("fake.example"), "the invented link never reaches the person: " + reply);
+        assertTrue(reply.startsWith("Your image is ready"), "the words before it were streamed: " + reply);
     }
 
     @Test

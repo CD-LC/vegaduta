@@ -515,6 +515,11 @@ final class ChatPromptDirectives {
         return false;
     }
 
+    /** The guard's host markers ({@code guard.fabricated_url.markers}), for the streamed hold to start on. */
+    static List<String> fabricatedUrlHostMarkers(ResolvedDirectives prompts) {
+        return detectorLines(prompts == null ? ResolvedDirectives.DEFAULTS : prompts, FABRICATED_URL_MARKERS_KEY);
+    }
+
     /** The non-blank, trimmed, lower-cased lines of every locale's text of {@code key}. */
     private static List<String> detectorLines(ResolvedDirectives prompts, String key) {
         List<String> texts = prompts.textsInAllLocales(key);

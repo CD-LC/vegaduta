@@ -218,7 +218,7 @@ class ChatTurnLookupCountTest {
                 mock(VisionSessionService.class),
                 providerOf((com.agenticai.core.providers.PlatformHostedLlmProviderService) null),
                 mock(LoadTestTenantAllowlist.class),
-                mock(ChatTurnCancelService.class),
+                NeverCancelledTurns.service(),
                 java.time.Duration.ofSeconds(90),
                 java.time.Duration.ofSeconds(240),
                 java.time.Duration.ofSeconds(20));

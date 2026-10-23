@@ -421,6 +421,44 @@ final class ChatTurnExecutor {
     }
 
     /**
+     * The streamed form of {@link #bufferAndGuardGenerationClaims} ({@code app.chat.parity.fast-buffering-mode} =
+     * FROM_FIRST_LINK): the reply streams as it is generated and only the part from the first link on is held. When
+     * the finished reply carries an invented generation link (the same check, the same tool evidence), the held part
+     * is replaced by the correction, so the link never reaches the person; otherwise it is sent as written.
+     */
+    Flux<String> streamAndGuardGenerationClaims(
+            TurnContext context,
+            Flux<String> stream,
+            UUID agentId,
+            String sessionId,
+            Instant turnStartedAt,
+            List<String> holdMarkers) {
+        // Taken here, on the request thread, as in bufferAndGuardGenerationClaims.
+        ResolvedDirectives pd = prompts.apply(agentId);
+        java.util.LinkedHashSet<String> markers = new java.util.LinkedHashSet<>(holdMarkers);
+        markers.addAll(ChatPromptDirectives.fabricatedUrlHostMarkers(pd));
+        return LinkHoldingStream.apply(
+                stream,
+                markers,
+                (whole, held) -> {
+                    if (containsFabricatedGenerationUrl(whole, pd)
+                            && context.scope()
+                                            .get(() -> collectToolEvidenceSince(agentId, sessionId, turnStartedAt))
+                                    == null) {
+                        log.warn(
+                                "Agent {} session {} - streamed generation-adjacent reply contained a fabricated"
+                                        + " generation-service URL with no corroborating tool call; the held part"
+                                        + " was replaced by an honest correction before it reached the client",
+                                agentId,
+                                sessionId);
+                        String correction = pd.textOrShipped("message.fabricated_url.not_generated");
+                        return whole.length() == held.length() ? correction : "\n\n" + correction;
+                    }
+                    return held;
+                });
+    }
+
+    /**
      * Turn-loss fix (2026-08-07): before this, the FAST path persisted the assistant turn ONLY in
      * {@code doOnComplete} - a mid-stream provider failure, stream-idle timeout, or client cancel
      * silently dropped every token already streamed to the user from session memory (the user turn

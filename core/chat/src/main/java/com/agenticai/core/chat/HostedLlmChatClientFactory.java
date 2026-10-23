@@ -294,7 +294,7 @@ public class HostedLlmChatClientFactory {
      * providerName} says OLLAMA, or whose base URL is the operator-configured local model server
      * ({@code app.local-models.ollama-base-url}, the same URL LocalModelOllamaGateway talks to).
      */
-    boolean isLocalOllamaRow(PlatformHostedLlmProvider provider) {
+    public boolean isLocalOllamaRow(PlatformHostedLlmProvider provider) {
         if (provider == null) {
             return false;
         }

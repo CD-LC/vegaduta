@@ -126,6 +126,33 @@ class ToolResolverTest {
     }
 
     @Test
+    void aStableToolSetTurnOffersEveryAllowedToolInTheSameOrderWithoutAskingTheSelector() {
+        // A selector that would keep only one tool: a stable-tool-set turn must not consult it.
+        when(selector.select(any(), any(), any(), any()))
+                .thenAnswer(inv -> inv.<List<ToolCallback>>getArgument(1).subList(0, 1));
+        ToolResolver resolver =
+                resolver(
+                        source("one", ToolSource.Kind.BUILT_IN, "b1", "b2"),
+                        source("mcp", ToolSource.Kind.MCP, "mcp__s__a"));
+
+        List<String> first = names(resolver.resolve(ctx(), true, true));
+        List<String> second = names(resolver.resolve(ctx(), true, true));
+
+        assertEquals(List.of("b1", "b2", "mcp__s__a"), first);
+        assertEquals(first, second, "the same tools in the same order on every turn");
+        org.mockito.Mockito.verify(selector, org.mockito.Mockito.never()).select(any(), any(), any(), any());
+        assertEquals(List.of("b1"), names(resolver.resolve(ctx(), true, false)), "a normal turn still selects");
+    }
+
+    @Test
+    void aStableToolSetTurnStillHonoursTheHardCap() {
+        hardCap = 2;
+        ToolResolver resolver = resolver(source("one", ToolSource.Kind.BUILT_IN, "b1", "b2", "b3"));
+
+        assertEquals(2, resolver.resolve(ctx(), true, true).size());
+    }
+
+    @Test
     void anyMcpToolsOfferedIsFalseWithoutMcpCandidates() {
         ResolvedToolList result =
                 resolver(source("one", ToolSource.Kind.BUILT_IN, "b1")).resolve(ctx(), true);

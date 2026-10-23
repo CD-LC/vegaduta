@@ -38,6 +38,7 @@ final class ChatTimeouts {
     private ChatParityProperties parity = new ChatParityProperties();
     private ChatCacheProperties cache = new ChatCacheProperties();
     private SmallModelProperties smallModel = new SmallModelProperties();
+    private LocalModelTurnProperties localModel = new LocalModelTurnProperties();
     private ChatLimitsProperties limits = new ChatLimitsProperties();
     private AgentRuntime runtime;
     private BehaviourSettings behaviour = BehaviourSettings.platformOnly();
@@ -206,6 +207,15 @@ final class ChatTimeouts {
     }
 
     /**
+     * Sets {@code app.chat.local-model.*} (how a turn adapts to a model on the person's own machine); until it is
+     * called the shipped defaults apply.
+     */
+    @Autowired(required = false)
+    void useLocalModel(LocalModelTurnProperties localModel) {
+        this.localModel = localModel == null ? new LocalModelTurnProperties() : localModel;
+    }
+
+    /**
      * Sets the resolver of the per-tenant / per-agent runtime limits ({@code app.agent-runtime.*}); until it is
      * called (hand-built fixtures) every turn runs under the platform settings this class was built with.
      */
@@ -245,6 +255,11 @@ final class ChatTimeouts {
     /** {@code app.chat.small-model.*}: the tool cap and ranking weights of small-model mode. */
     SmallModelProperties smallModel() {
         return smallModel;
+    }
+
+    /** {@code app.chat.local-model.*}: how a turn adapts to a model on the person's own machine. */
+    LocalModelTurnProperties localModel() {
+        return localModel;
     }
 
     /** {@code app.chat.cache.*}: what the response caches may serve and store, and what they key on. */

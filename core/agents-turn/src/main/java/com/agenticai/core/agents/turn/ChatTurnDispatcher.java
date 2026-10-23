@@ -139,6 +139,11 @@ final class ChatTurnDispatcher {
         // A held reply that the output guardrails may withhold is checked where the reply completes
         // (FastStreamTurn), so what is shown and what is stored are the same text.
         context.reply().holdForOutputCheck(FastBuffering.holdsForOutputCheck(parity, outputGuardrails));
+        // app.chat.parity.fast-buffering-mode: FROM_FIRST_LINK streams the reply and holds only the part from the first
+        // link on; a reply the output guardrails may withhold is always held whole (it must not have been half shown).
+        boolean holdWholeReply =
+                parity.getFastBufferingMode() == ChatParityProperties.FastBufferingMode.WHOLE_REPLY
+                        || FastBuffering.holdsForOutputCheck(parity, outputGuardrails);
         Instant fastDispatchStartedAt = Instant.now();
         // RL REASONING_DEPTH (2026-08-15 wiring): effReasoningDepth is the
         // bandit-selected depth when one was chosen (never PLANNED - see
@@ -171,10 +176,19 @@ final class ChatTurnDispatcher {
                             } finally {
                                 SessionMemoryService.restoreMemorySessionId(previousMemoryBinding);
                             }
-                            return bufferForGenerationSafety
+                            if (!bufferForGenerationSafety) {
+                                return fast;
+                            }
+                            return holdWholeReply
                                     ? turns.bufferAndGuardGenerationClaims(
                                             context, fast, agentId, sessionId, fastDispatchStartedAt)
-                                    : fast;
+                                    : turns.streamAndGuardGenerationClaims(
+                                            context,
+                                            fast,
+                                            agentId,
+                                            sessionId,
+                                            fastDispatchStartedAt,
+                                            parity.getFastHoldMarkers());
                         };
         // A CAREFUL/RIGOROUS/PLANNED turn that hits its time limit (app.llm.http.buffered-turn-timeout, or
         // an enclosing job deadline when that is longer) used to surface as "every model failed", and

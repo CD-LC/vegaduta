@@ -169,6 +169,14 @@ For an external database, create it that way yourself
 superuser with `PGHOST`, `PGUSER`, `PGDATABASE`, `APP_DB_USER`,
 `APP_DB_PASSWORD` set).
 
+**HTTP response compression and the JPA session.** JSON API responses are gzip-compressed when the client accepts it:
+`server.compression.enabled` (`APP_SERVER_COMPRESSION_ENABLED`, default `true`), for the types in
+`server.compression.mime-types` (`application/json,application/problem+json`; the streamed `text/event-stream` chat
+replies are never compressed, so a reply is not held back in a compression buffer), above
+`server.compression.min-response-size` (`APP_SERVER_COMPRESSION_MIN_SIZE`, default `1024` bytes).
+`spring.jpa.open-in-view` is `false`: a database session is not held open for a whole web request (and a whole
+streamed reply), only for the work that needs it.
+
 ### Database login without a stored password (IAM / token authentication)
 
 `app.datasource.auth` (env `DB_AUTH`) selects how core logs in. The default,
@@ -996,7 +1004,7 @@ Three groups of settings make the agent behave the same whichever way a turn is 
 
 | Difference | Why it exists | Setting |
 |---|---|---|
-| A FAST turn that offers a generation tool or an MCP tool is buffered (held, checked, sent as one piece), not streamed | a fabricated result link must be replaced before it reaches the person; it cannot be recalled once streamed | `app.chat.parity.fast-buffering-triggers` (`GENERATION_TOOLS`, `MCP_TOOLS`; empty = never buffer a FAST turn) |
+| A FAST turn that offers a generation tool or an MCP tool streams its words live but holds the part from the first link on until the reply is complete | a fabricated result link must be replaced before it reaches the person; it cannot be recalled once streamed | `app.chat.parity.fast-buffering-triggers` (`GENERATION_TOOLS`, `MCP_TOOLS`; empty = never hold), `app.chat.parity.fast-buffering-mode` (`WHOLE_REPLY` = hold the whole reply) |
 | Output guardrails withhold a buffered reply but only audit a streamed one | the tokens of a streamed reply have already been delivered | add `OUTPUT_GUARDRAILS` to `fast-buffering-triggers`: a FAST turn of an agent with output guardrails is then held, a violating reply is withheld and the replacement is what is stored. Pattern-based guardrails only on FAST (the semantic toxicity check is a blocking model call); the buffered depths run it too |
 | The buffered verifiers (self-consistency, Reflexion) rewrite a flagged answer without tools | re-running the tools could repeat a side effect | the rewrite is accepted only if it is not a fraction of the answer it replaces, and the evidence it is shown is bounded: `app.chat.parity.verifier-min-revision-ratio`, `verifier-ratio-applies-above-chars`, `verifier-max-evidence-chars` |
 | Reasoning depth itself (verification passes, planning, no live streaming) | that is what CAREFUL, RIGOROUS and PLANNED are for | the agent's reasoning depth |
@@ -1006,6 +1014,8 @@ Three groups of settings make the agent behave the same whichever way a turn is 
 | Property | Environment variable | Default | Effect |
 |---|---|---|---|
 | `app.chat.parity.fast-buffering-triggers` | `APP_CHAT_PARITY_FAST_BUFFERING_TRIGGERS` | `GENERATION_TOOLS,MCP_TOOLS` | what makes a FAST turn buffer its reply instead of streaming it |
+| `app.chat.parity.fast-buffering-mode` | `APP_CHAT_PARITY_FAST_BUFFERING_MODE` | `FROM_FIRST_LINK` | how a turn that matches a trigger reaches the person: `FROM_FIRST_LINK` streams it live and holds only the part from the first link on until the reply is complete; `WHOLE_REPLY` holds all of it (the behaviour before 2026-10-23). An `OUTPUT_GUARDRAILS` hold is always whole |
+| `app.chat.parity.fast-hold-markers` | `APP_CHAT_PARITY_FAST_HOLD_MARKERS` | `http,www.` | text that starts the held part, ignoring case; the invented-link guard's host markers are always added. Keep it covering every link shape the guard detects |
 | `app.chat.parity.verifier-max-evidence-chars` | `APP_CHAT_PARITY_VERIFIER_MAX_EVIDENCE_CHARS` | `12000` | the buffered verifiers see the newest this-many characters of the turn's tool results; `0` = all |
 | `app.chat.parity.verifier-min-revision-ratio` | `APP_CHAT_PARITY_VERIFIER_MIN_REVISION_RATIO` | `0.3` | a verifier's rewrite shorter than this fraction of the answer is not accepted; `0` accepts any |
 | `app.chat.parity.verifier-ratio-applies-above-chars` | `APP_CHAT_PARITY_VERIFIER_RATIO_APPLIES_ABOVE_CHARS` | `400` | the ratio check applies to answers longer than this |
@@ -1075,6 +1085,14 @@ lean on (the notes say which).
 | `app.chat.small-model.browser-family-quota` | `APP_CHAT_SMALL_MODEL_BROWSER_FAMILY_QUOTA` | `4` | tools a browsing request keeps (navigate, read, click and type only work as a set) |
 | `app.chat.small-model.intent-boost` | `APP_CHAT_SMALL_MODEL_INTENT_BOOST` | `50` | score of a tool that serves a signalled intent; beats word overlap, loses to a tool named in the message |
 | `app.chat.small-model.named-tool-score` | `APP_CHAT_SMALL_MODEL_NAMED_TOOL_SCORE` | `1000` | score of a tool the message names outright |
+
+**Local models** (`app.chat.local-model.*`, `app.providers.small-model-max-billions`): how a turn adapts to a model served on the person's own machine. Such a model reads its prompt at a few hundred tokens a second on a laptop GPU and far slower on a CPU, and its server keeps one prompt cache with the tool definitions ahead of the system prompt, so an unchanged prompt start is what makes the next turn fast. See [local-models.md](local-models.md#response-speed).
+
+| Property | Environment variable | Default | Effect |
+|---|---|---|---|
+| `app.chat.local-model.stable-tools` | `APP_CHAT_LOCAL_MODEL_STABLE_TOOLS` | `true` | offer a local model (the install's Ollama pool row, or a provider in `providers`) the agent's tools unchanged and in a fixed order on every turn instead of a per-message selection, so every turn after the first is answered from the server's cache and a tool the message did not name (web search) is never missing. A model in small-model mode keeps its short list |
+| `app.chat.local-model.providers` | `APP_CHAT_LOCAL_MODEL_PROVIDERS` | `OLLAMA,LOCAL_OPENAI` | bring-your-own providers that are servers on the person's machine |
+| `app.providers.small-model-max-billions` | `APP_PROVIDERS_SMALL_MODEL_MAX_BILLIONS` | `8.0` | a pool row whose model has this many billions of parameters or fewer runs in small-model mode unless its "Small-model mode" control says otherwise; negative = never by size |
 
 **Turn limits** (`app.chat.limits.*`, `app.chat.semantic-cache.*`, and additions to `app.chat.parity.*` and `app.chat.resilience.*`)
 
