@@ -2023,7 +2023,6 @@ Android builds of a generated Capacitor app read `ANDROID_KEYSTORE_PATH`, `ANDRO
 | Variable | Default | Effect |
 |---|---|---|
 | `MCP_STDIO_RUNNER_SWEEP_INTERVAL_MS` | `30000` | how often the runner checks for children past `MCP_STDIO_RUNNER_IDLE_TTL_MS` or `MCP_STDIO_RUNNER_MAX_LIFETIME_MS`; `0` turns the check off, so neither limit is enforced |
->>>>>>> origin/main
 
 ## Compose-only variables
 
