@@ -26,3 +26,17 @@ See prompts in the chat handoff; summary:
 3. Full verification gate + install smoke tests (personal, lite, test).
 4. Finish D1/D2/D3 per docs/engineering/agent-runtime-defaults-review.md.
 5. Translations review (G7) and LoadSkill strings.
+
+## Part 6: local-model latency and agent persistence (measured 2026-10-23, personal install on 0.1.8 images)
+Measured on a 24 GB Apple-silicon Mac, Ollama 0.40.3, qwen3.5:9b (mlx runner), core env APP_LLM_OLLAMA_NUM_CTX=32768.
+- Raw Ollama is fast (~27 tok/s, 0.3 s for a tiny prompt, no reload when num_ctx changes).
+- Core sends a fixed prefix of ~8.9K tokens (35.7K chars: system messages + tool schemas) on every call. Prefill runs at ~600 tok/s, so a cold call
+  takes ~13-19 s before the first token (llm_call_log: 8588 prompt tokens -> 19166 ms). A repeat with an identical prefix took 2.6 s, so caching works only when the prefix is stable.
+- The agent's own system prompt is only 4.7K chars; tool schemas are budgeted at ~3000 tokens (app.tools.auto-selection.*). Find where the other ~25K chars come from
+  (platform prompt blocks, skills, guidance) and cut or conditionally include them for local models. Hypothesis: the per-turn tool selection changes the tools block and breaks the cache.
+- The SSE endpoints exist (AgentChatStreamController, resumable streams). The "delivered as a letter" feeling is the dead time before the first token plus silence during tool steps; verify in the UI that deltas and step events render as they arrive.
+- "No web search" replies: web_search is in the agent's allowed tools and SearXNG is configured (WEB_SEARCH_PROVIDER=searxng), so the per-turn tool selector probably drops it
+  (no-match budget is 4 tools) and the model is not told other tools exist. Check that tool_search is enabled and that the prompt tells the model it can search for tools.
+- Persistence: log shows "reply stopped at an unfinished step; continuation pass 1 ... made no tool call; stopping". The loop gives up after one pass.
+Goals: first token in 2-3 s on a warm session; stream text and step events continuously; the agent keeps going until the task is done or a real limit is hit; never claim a capability is missing when it is allowed.
+Ideas: prefix-cache warm-up at session open, stable prefix ordering (static first, per-turn tools last), a compact local-model prompt profile, keep tool_search always available, raise continuation passes with a "no tool call but task unfinished" re-prompt, and a smaller default local model (qwen3.5:4b) on machines under memory pressure (swap was 5.9 GB of 7 GB).

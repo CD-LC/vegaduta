@@ -814,15 +814,15 @@
     "rsParam_seed": "ᱥᱤᱰ",
     "rsParam_stopSequences": "ᱵᱚᱸᱫ ᱟᱜ ᱠᱷᱟᱛᱨᱟ",
     "rsParamDropped": "{param} ᱫᱚ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱥᱮᱴ ᱟᱠᱟᱱᱟ, ᱢᱮᱱᱠᱷᱟᱱ {provider} ᱫᱚ {model} ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱟᱝ ᱢᱟᱱᱟᱣᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱟᱜ ᱪᱮᱫᱽ ᱵᱟᱝ ᱯᱷᱚᱞ ᱢᱮᱱᱟᱜᱼᱟ।",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱴᱩᱞ",
+    "rsToolsRunOnly": "ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱨᱚᱱ",
+    "rsToolsRunNote": "ᱱᱚᱶᱟ ᱥᱩᱭᱪ ᱠᱚ ᱫᱚ ᱱᱚᱶᱟ ᱯᱞᱮᱜᱨᱟᱣᱱᱰ ᱠᱷᱚᱱ ᱟᱢ ᱵᱷᱮᱡᱟᱣ ᱵᱷᱮᱡᱟᱣ ᱮᱡᱮᱱᱴ ᱟᱜ ᱪᱮᱫ ᱴᱩᱞ ᱠᱚ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱮᱫᱟ। ᱪᱮᱫᱽ ᱵᱟᱝ ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱟ: ᱮᱴᱟᱜ ᱡᱷᱚᱛᱚ ᱞᱟᱹᱜᱤᱫ ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱡ ᱴᱩᱞ ᱵᱚᱸᱫᱷᱚᱜ ᱛᱟᱦᱮᱱ ᱮᱫᱟ। ᱱᱚᱶᱟ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱷᱟᱞᱤ ᱵᱚᱸᱫ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱱᱟᱣᱟ ᱴᱩᱞ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rsToolsRunSummary": "ᱮᱡᱮᱱᱴ ᱟᱜ {total} ᱴᱩᱞ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {on} ᱱᱚᱶᱟ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱪᱟᱹᱞᱩ",
+    "rsToolsRunNone": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜᱼᱟ: ᱮᱡᱮᱱᱴ ᱫᱚ ᱚᱞ ᱨᱮ ᱜᱮ ᱡᱚᱵᱟᱵ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rsToolsReset": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱵᱮᱵᱷᱟᱨ ᱢᱮ",
+    "rsToolsNotInAgent": "ᱱᱚᱶᱟ ᱫᱚ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱴᱩᱞ ᱛᱟᱞᱟ ᱨᱮ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱪᱟᱹᱞᱩ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rsToolsEditAgent": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱴᱩᱞ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "rsToolsLimitedChip": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱴᱩᱞ ᱥᱤᱢᱟ ᱨᱮ",
     "rsToolsEmpty": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
     "rsToolsSummary": "{total} ᱴᱩᱞ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {on} ᱪᱟᱹᱞᱩ",
     "rsToolsFailed": "ᱴᱩᱞ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
@@ -880,14 +880,14 @@
     "chipToolsOff": "ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱮᱫᱟ",
     "chipFailoverBlocked": "ᱵᱮᱠᱟᱯ ᱢᱚᱰᱮᱞ ᱵᱟᱝ ᱵᱮᱵᱷᱟᱨ ᱞᱮᱱᱟ: ᱴᱩᱞ ᱠᱚ ᱫᱚ ᱫᱚᱦᱚᱜ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
     "rsLimitChangeOne": "ᱵᱚᱫᱚᱞ ᱢᱮ",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "ᱦᱟᱨ ᱥᱤᱢᱟ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱞᱮᱱᱟ",
+    "reasonTimeout": "ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭᱞᱮᱱᱟ",
+    "reasonProviderUnavailable": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ",
+    "reasonAuthFailed": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱠᱨᱮᱰᱮᱱᱥᱤᱭᱟᱞ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱠᱟᱫᱼᱟ",
+    "reasonBilling": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱵᱤᱞᱤᱝ ᱥᱚᱢᱥᱭᱟ",
+    "reasonModelNotFound": "ᱢᱚᱰᱮᱞ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ",
+    "reasonProviderError": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱵᱷᱩᱞ",
+    "reasonMalformedToolCall": "ᱴᱩᱞ ᱠᱚᱞ ᱵᱮᱵᱷᱟᱨ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ"
   },
   "nodeDefs": {
     "triggerLabel": "ᱮᱛᱚᱦᱚᱵ",
@@ -13265,7 +13265,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "ᱥᱠᱤᱞ",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14109,7 +14109,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "ᱥᱠᱤᱞ",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14283,7 +14283,7 @@
       "role": "ᱟᱢᱟᱜ ᱵᱷᱩᱢᱤᱠᱟ ᱛᱮ ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ। ᱣᱟᱨᱠᱥᱯᱮᱥ ᱮᱰᱢᱤᱱ ᱥᱮᱱ ᱪᱷᱚᱞ ᱢᱮ।",
       "scope": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱱᱚᱸᱰᱮ ᱚᱣᱟᱨᱟᱭᱰ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
       "readOnly": "ᱥᱮᱴᱤᱝ ᱫᱚ ᱱᱤᱛᱚᱜ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱱᱟ।",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "ᱱᱚᱶᱟ ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ ᱠᱚ ᱠᱷᱟᱞᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱮᱰᱢᱤᱱ ᱜᱮ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱟᱢ ᱚᱱᱟ ᱟᱜ ᱢᱟᱱ ᱱᱚᱸᱰᱮ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱢᱮᱱᱠᱷᱟᱱ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
     },
     "reset": {
       "button": "ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ",
@@ -14333,12 +14333,12 @@
       "acknowledge": "ᱤᱧ ᱱᱚᱶᱟ ᱥᱩᱨᱠᱷᱟ ᱵᱚᱫᱚᱞ ᱟᱜ ᱯᱷᱚᱞ ᱵᱩᱡᱷᱟᱣ ᱠᱟᱱᱟ।",
       "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
       "confirm": "ᱴᱷᱤᱠ ᱠᱟᱛᱮ ᱥᱟᱸᱪᱟᱣ ᱢᱮ",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "ᱨᱤᱥᱮᱴ: ᱚᱣᱟᱨᱟᱭᱰ ᱚᱪᱚᱜ ᱦᱩᱭᱟ ᱟᱨ ᱥᱮᱴᱤᱝ ᱫᱚ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ।"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "ᱞᱟᱢᱟ ᱢᱮᱱᱛᱮ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ: ᱞᱟᱢᱟ ᱢᱟᱱ ᱫᱚ ᱢᱟᱱᱟᱣ ᱦᱩᱭᱟ, ᱠᱚᱢ ᱫᱚ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱟ।",
+      "lower": "ᱠᱚᱢ ᱢᱮᱱᱛᱮ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ: ᱠᱚᱢ ᱢᱟᱱ ᱫᱚ ᱢᱟᱱᱟᱣ ᱦᱩᱭᱟ, ᱞᱟᱢᱟ ᱫᱚ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱟ।",
+      "enumOrder": "ᱵᱤᱠᱚᱞᱯᱚ ᱠᱚ ᱠᱚᱢ ᱠᱟᱲᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱠᱷᱟᱛᱨᱟ ᱨᱮ ᱢᱮᱱᱟᱜᱼᱟ: {options}। ᱟᱢ ᱠᱷᱟᱞᱤ ᱠᱟᱲᱟ ᱥᱮᱸᱫᱽᱨᱟ ᱥᱮᱱ ᱜᱮ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
     }
   },
   "approvalsQueue": {
@@ -14507,8 +14507,8 @@
     "tlSevWarn": "ᱱᱚᱨᱚᱡ ᱞᱟᱹᱠᱛᱤ",
     "tlSevError": "ᱵᱟᱭᱡᱷᱮᱛ",
     "tlIntake": "ᱴᱚᱨᱱ ᱮᱦᱚᱵ ᱞᱮᱱᱟ: {chars} ᱚᱠᱷᱚᱨ, {tools} ᱴᱩᱞ, {attachments} ᱥᱟᱶᱛᱮ",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱴᱩᱞ",
+    "tlRunToolsNone": "ᱪᱮᱫᱽ ᱵᱟᱹᱱᱩᱜᱼᱟ (ᱠᱷᱟᱞᱤ ᱚᱞ)",
     "tlModelCall": "{model} ({provider}) ᱥᱮᱱ ᱢᱚᱰᱮᱞ ᱠᱚᱞ, ᱨᱩᱴ {route}",
     "tlFailover": "{model} ({provider}) ᱥᱮᱱ ᱯᱷᱮᱞᱚᱣᱟᱨ ᱦᱩᱭᱞᱮᱱᱟ",
     "tlRetryModel": "{model} ({provider}) ᱨᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱞᱮᱱᱟ, ᱨᱩᱴ {route}",
@@ -14517,7 +14517,7 @@
     "tlToolCall": "ᱴᱩᱞ ᱠᱚᱞ {tool}: {status}",
     "tlApprovalRequested": "{tool} ᱪᱟᱞᱟᱜ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱢᱚᱱᱡᱩᱨᱤ ᱠᱷᱚᱡ ᱞᱮᱱᱟ",
     "tlApprovalDecided": "{tool} ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱦᱩᱭᱞᱮᱱᱟ: {decision}",
-    "tlApprovalAutoAllowed": "{tool} ran without asking: a read-only call under Supervised",
+    "tlApprovalAutoAllowed": "{tool} ᱫᱚ ᱵᱟᱝ ᱪᱷᱚᱞ ᱠᱟᱛᱮ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ: ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱠᱚᱞ",
     "tlContinuation": "ᱞᱟᱜᱟᱛᱟᱨ: {guard} ({outcome})",
     "tlGuard": "ᱜᱟᱨᱰᱨᱮᱞ {guard}: {outcome}",
     "tlVerifyPassed": "ᱪᱮᱠ ᱯᱟᱥ: {check}",
@@ -14587,7 +14587,7 @@
     "modeTextOnlyHelp": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱡ ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱡᱚᱵᱟᱵ ᱮᱢᱟ। ᱥᱩᱨᱠᱷᱤᱛ: ᱥᱟᱹᱨᱤ ᱨᱮ ᱪᱮᱫᱽ ᱵᱟᱝ ᱪᱟᱞᱟᱜᱼᱟ। ᱟᱱᱟᱡ ᱟᱠᱟᱱ-ᱴᱩᱞ ᱪᱮᱠ ᱠᱚ ᱯᱩᱨᱟᱹ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
     "modeFull": "ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ",
     "modeFullHelp": "ᱚᱱᱟ ᱞᱮᱠᱟ ᱴᱩᱞ, ᱜᱟᱨᱰᱨᱮᱞ ᱟᱨ ᱯᱟᱦᱴᱟ ᱥᱤᱢᱟ ᱡᱟᱦᱟᱸ ᱢᱤᱫ ᱥᱟᱹᱨᱤ ᱵᱮᱵᱷᱟᱨᱤ ᱠᱚ ᱧᱟᱢᱟ। ᱟᱱᱟᱡ ᱟᱠᱟᱱ-ᱴᱩᱞ ᱟᱨ ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱪᱮᱠ ᱞᱟᱹᱜᱤᱫ ᱞᱟᱹᱠᱛᱤ।",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "ᱡᱟᱦᱟᱸ ᱴᱩᱞ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣᱟ ᱚᱱᱟ ᱫᱚ ᱥᱟᱹᱨᱤ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ। ᱰᱮᱴᱟ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ, ᱵᱷᱮᱡᱟᱣ ᱵᱷᱮᱡᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱥᱮ ᱯᱟᱭᱥᱟ ᱠᱷᱚᱨᱪᱟ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱪᱮᱫᱽ ᱫᱚ ᱱᱚᱠᱚᱞ ᱠᱟᱛᱮ ᱨᱚᱱ ᱨᱮ ᱛᱟᱞᱤᱠᱟ ᱦᱩᱭᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱥᱟᱹᱨᱤ ᱨᱮ ᱪᱮᱫᱽ ᱵᱟᱝ ᱦᱩᱭᱟ। ᱥᱩᱨᱠᱷᱟ ᱵᱟᱠᱷᱟᱸᱴ ᱵᱟᱹᱱᱩᱜ ᱴᱩᱞ ᱦᱚᱸ ᱱᱚᱠᱚᱞ ᱦᱩᱭᱟ।",
     "autoApproveLabel": "ᱤᱵᱷᱟᱞ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
     "autoApproveHelp": "ᱥᱟᱫᱷᱟᱨᱚᱬ ᱛᱮ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱟᱠᱟᱱ ᱴᱩᱞ ᱠᱚᱞ ᱠᱚ ᱤᱵᱷᱟᱞ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱫᱚ ᱢᱚᱱᱡᱩᱨ ᱮᱫᱟ, ᱠᱮᱥ ᱪᱷᱚᱭ ᱞᱟᱹᱜᱤᱫ। ᱚᱱᱟ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱠᱮᱥ ᱫᱚ ᱯᱨᱚᱰᱚᱠᱥᱚᱱ ᱨᱮ ᱪᱮᱠᱟ ᱦᱩᱭᱟ ᱚᱱᱟ ᱞᱮᱠᱟ ᱡᱚᱵᱟᱵ ᱵᱟᱹᱱᱩᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱨᱮ ᱪᱷᱚᱭ ᱦᱩᱭᱟ।",
     "autoApproveWarnTitle": "ᱠᱷᱟᱞᱤ ᱯᱨᱚᱰᱚᱠᱥᱚᱱ ᱵᱟᱝ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ",
@@ -14595,7 +14595,7 @@
     "autoApproveNeedsFull": "ᱢᱟᱲᱟᱝ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱪᱟᱹᱞᱩ ᱢᱮ: ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨᱤ ᱫᱚ ᱴᱩᱞ ᱪᱟᱞᱟᱜ ᱚᱠᱛᱚ ᱜᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱜᱼᱟ।",
     "autoApproveRefused": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱵᱟᱛᱟᱣ ᱵᱟᱹᱱᱩᱜᱼᱟ: {reason}",
     "autoApproveConfirmTitle": "ᱤᱵᱷᱟᱞ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱟ?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "ᱱᱚᱶᱟ ᱰᱮᱴᱟᱥᱮᱴ ᱟᱜ ᱨᱤᱯᱞᱮ ᱨᱮ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱠᱟᱱ ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱠᱚᱞ ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱜᱼᱟ। ᱢᱚᱱᱡᱩᱨ ᱟᱠᱟᱱ ᱠᱷᱟᱞᱤ-ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱫᱚ ᱥᱟᱹᱨᱤ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ; ᱪᱮᱫᱽ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱫᱚ ᱫᱚᱦᱚᱜ ᱱᱚᱠᱚᱞ ᱦᱩᱭᱟ। ᱱᱚᱶᱟ ᱠᱷᱟᱞᱤ ᱴᱮᱥᱴ ᱰᱮᱴᱟ ᱛᱟᱦᱮᱱ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱜᱮ ᱢᱮ। ᱨᱚᱱ ᱫᱚ ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭ ᱞᱮᱱᱟ ᱚᱱᱟ ᱨᱮᱠᱚᱨᱰ ᱮᱫᱟ।",
     "autoApproveConfirm": "ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨᱤ ᱪᱟᱹᱞᱩ ᱢᱮ",
     "trajectoryLabel": "ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱪᱮᱠ",
     "trajectoryOn": "On",
@@ -14621,21 +14621,21 @@
     "samplingSource_tenant": "ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
     "samplingSource_agent": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
     "modeDefault": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱰᱤᱯᱷᱚᱞᱴ",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefaultHelp": "ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱥᱮᱴᱤᱝ ᱵᱟᱨᱟᱭ ᱮᱫᱟ (ᱮᱰᱢᱤᱱ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱞᱮᱱᱟ ᱠᱷᱟᱱ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ)। ᱥᱟᱱᱟᱢ ᱨᱚᱱ ᱫᱚ ᱫᱚᱦᱚᱜ ᱟᱡ ᱢᱚᱰ ᱵᱟᱪᱷᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "modeDefaultCurrent": "ᱱᱤᱛᱚᱜ: {mode}",
+    "modeNameFull": "ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ",
+    "modeNameQuick": "ᱥᱮᱛᱟ (ᱠᱷᱟᱞᱤ ᱚᱞ)",
+    "badgeFull": "ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ",
+    "badgeQuick": "ᱥᱮᱛᱟ",
+    "datasetModePinnedTitle": "ᱱᱚᱶᱟ ᱰᱮᱴᱟᱥᱮᱴ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱱᱚᱶᱟ ᱞᱮᱠᱟ ᱛᱮ ᱨᱤᱯᱞᱮ ᱦᱩᱭᱟ। ᱢᱤᱫ ᱨᱚᱱ ᱫᱚ ᱫᱚᱦᱚᱜ ᱮᱴᱟᱜ ᱢᱚᱰ ᱵᱟᱪᱷᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "datasetModeDefaultTitle": "ᱨᱚᱱ ᱪᱮᱠᱟ ᱛᱮ ᱨᱤᱯᱞᱮ ᱦᱩᱭᱟ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱰᱮᱴᱟᱥᱮᱴ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱟᱨᱟᱭ ᱮᱫᱟ।",
+    "runModeLabel": "ᱛᱟᱭᱚᱢ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱨᱤᱯᱞᱮ ᱢᱚᱰ",
+    "runModeInherit": "ᱰᱮᱴᱟᱥᱮᱴ ᱟᱜ ᱥᱮᱴᱤᱝ ᱵᱮᱵᱷᱟᱨ ᱢᱮ",
+    "runModeHelp": "ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱫᱚ ᱮᱡᱮᱱᱴ ᱠᱚ ᱟᱡ ᱴᱩᱞ, ᱜᱟᱨᱰᱨᱮᱞ ᱟᱨ ᱢᱚᱱᱡᱩᱨᱤ ᱥᱟᱶ ᱥᱩᱨᱠᱷᱤᱛ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱨᱮ ᱪᱟᱞᱟᱣᱟ: ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱠᱚ ᱥᱟᱹᱨᱤ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ, ᱟᱨ ᱰᱮᱴᱟ ᱵᱚᱫᱚᱞ ᱥᱮ ᱪᱮᱫᱽ ᱵᱷᱮᱡᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱡᱷᱚᱛᱚ ᱱᱚᱠᱚᱞ ᱦᱩᱭᱟ। ᱥᱮᱛᱟ ᱢᱚᱰ ᱫᱚ ᱴᱩᱞ ᱠᱚ ᱛᱟᱞᱟ ᱨᱮ ᱞᱟᱹᱜᱩᱣᱟ ᱟᱨ ᱠᱷᱟᱞᱤ ᱚᱞᱟᱜ ᱡᱚᱵᱟᱵ ᱠᱚ ᱪᱮᱠ ᱮᱫᱟ।",
+    "runModeFullTitle": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱫᱚ ᱤᱵᱷᱟᱞ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱨᱮ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱵᱮᱵᱷᱟᱨ ᱞᱮᱱᱟ।",
+    "runModeQuickTitle": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱫᱚ ᱠᱷᱟᱞᱤ ᱚᱞ ᱨᱮᱭᱟᱜ ᱥᱮᱛᱟ ᱨᱤᱯᱞᱮ ᱛᱟᱦᱮᱱᱟ: ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱛᱟᱞᱟ ᱨᱮ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ।",
+    "runSimulatedTools": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱨᱮ ᱱᱚᱠᱚᱞ ᱞᱮᱱᱟ, ᱪᱟᱞᱟᱣ ᱵᱟᱝ ᱞᱮᱱᱟ (ᱚᱱᱟ ᱠᱚ ᱰᱮᱴᱟ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ ᱛᱟᱦᱮᱱᱟ ᱥᱮ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱵᱟᱦᱨᱮ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱛᱟᱦᱮᱱᱟ): {tools}।",
+    "toolStatusSimulated": "ᱱᱚᱠᱚᱞ ᱞᱮᱱᱟ, ᱪᱟᱞᱟᱣ ᱵᱟᱝ ᱞᱮᱱᱟ"
   },
   "agentLab": {
     "wtLabel": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱪᱟᱞᱟᱣ ᱢᱮ",
@@ -14670,12 +14670,12 @@
         "description": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱪᱮᱫ ᱢᱮᱢᱚᱨᱤ ᱛᱟᱦᱮᱱ ᱟᱨ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱮᱫᱟ।"
       },
       "attachments": {
-        "label": "Chat uploads",
-        "description": "How large the files people attach to chat messages may be."
+        "label": "ᱪᱮᱴ ᱟᱯᱞᱚᱰ",
+        "description": "ᱢᱟᱱᱩᱸ ᱠᱚ ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱶ ᱪᱮᱫ ᱞᱟᱢᱟ ᱯᱷᱟᱭᱞ ᱡᱚᱰᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
       },
       "skills": {
-        "label": "Skills",
-        "description": "How much of the agent's instructions the list of installed skills may use."
+        "label": "ᱥᱠᱤᱞ",
+        "description": "ᱤᱱᱥᱴᱚᱞ ᱟᱠᱟᱱ ᱥᱠᱤᱞ ᱛᱟᱞᱤᱠᱟ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱱᱤᱨᱫᱮᱥ ᱨᱮᱭᱟᱜ ᱪᱮᱫ ᱵᱷᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
       },
       "aux": {
         "label": "ᱥᱚᱨᱮᱥ ᱢᱚᱰᱮᱞ ᱠᱚᱞ",
@@ -14746,24 +14746,24 @@
       },
       "steps": {
         "graceCalls": {
-          "label": "Calls answered after the limit",
-          "description": "How many more tool calls the model may attempt after the turn's tool limit is used up. Each one is refused with a note to answer with what it has; past this number the turn is stopped with an error.",
-          "help": "Raise it if a model needs a few tries to stop calling tools. Lower it to end looping turns sooner. 0 stops the turn at the first call over the limit."
+          "label": "ᱥᱤᱢᱟ ᱛᱟᱭᱚᱢ ᱡᱚᱵᱟᱵ ᱮᱢ ᱟᱠᱟᱱ ᱠᱚᱞ",
+          "description": "ᱴᱚᱨᱱ ᱟᱜ ᱴᱩᱞ ᱥᱤᱢᱟ ᱪᱷᱚᱭ ᱦᱩᱭ ᱛᱟᱭᱚᱢ ᱢᱚᱰᱮᱞ ᱪᱮᱫ ᱟᱨ ᱴᱩᱞ ᱠᱚᱞ ᱪᱮᱥᱴᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱡᱷᱚᱛᱚ ᱫᱚ \"ᱢᱮᱱᱟᱜ ᱞᱮᱠᱟ ᱡᱚᱵᱟᱵ ᱮᱢ\" ᱢᱮᱱ ᱴᱤᱯᱯᱚᱱᱤ ᱥᱟᱶ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱟ; ᱱᱚᱶᱟ ᱜᱚᱱᱚᱝ ᱛᱟᱭᱚᱢ ᱴᱚᱨᱱ ᱵᱷᱩᱞ ᱥᱟᱶ ᱵᱚᱸᱫ ᱦᱩᱭᱟ।",
+          "help": "ᱢᱚᱰᱮᱞ ᱫᱚ ᱴᱩᱞ ᱠᱚᱞ ᱵᱚᱸᱫ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱟᱨ ᱪᱮᱥᱴᱟ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱞᱩᱯ ᱨᱮ ᱛᱟᱦᱮᱱ ᱴᱚᱨᱱ ᱥᱮᱛᱟ ᱪᱷᱚᱭ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ। 0 ᱫᱚ ᱥᱤᱢᱟ ᱯᱟᱨ ᱟᱠᱟᱱ ᱢᱟᱲᱟᱝ ᱠᱚᱞ ᱨᱮ ᱴᱚᱨᱱ ᱵᱚᱸᱫ ᱮᱫᱟ।"
         },
         "supervisedDivisor": {
-          "label": "Supervised agents get 1/N of the tool limit",
-          "description": "A supervised agent gets the turn's tool-call limit divided by this number, but never less than the minimum below.",
-          "help": "Raise it to keep supervised agents on a shorter leash. 1 gives them the full limit."
+          "label": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱴᱩᱞ ᱥᱤᱢᱟ ᱟᱜ 1/N ᱧᱟᱢᱟ",
+          "description": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱴᱚᱨᱱ ᱟᱜ ᱴᱩᱞ-ᱠᱚᱞ ᱥᱤᱢᱟ ᱠᱚ ᱱᱚᱶᱟ ᱜᱚᱱᱚᱝ ᱥᱟᱶ ᱵᱷᱟᱜ ᱠᱟᱛᱮ ᱧᱟᱢᱟ, ᱢᱮᱱᱠᱷᱟᱱ ᱞᱟᱛᱟᱨ ᱨᱮᱭᱟᱜ ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱢᱟᱱ ᱠᱷᱚᱱ ᱛᱟᱠᱠᱟᱣ ᱠᱚᱢ ᱵᱟᱝ।",
+          "help": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱠᱚ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱛᱮ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। 1 ᱫᱚ ᱚᱱᱟ ᱠᱚ ᱯᱩᱨᱟᱹ ᱥᱤᱢᱟ ᱮᱢᱟ।"
         },
         "supervisedMinSteps": {
-          "label": "Least tool calls for a supervised agent",
-          "description": "The smallest tool-call limit a supervised agent gets, however high the number above is.",
-          "help": "Keep it at 3 or more so a supervised agent can still finish a simple job with several steps."
+          "label": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱴᱩᱞ ᱠᱚᱞ",
+          "description": "ᱛᱟᱞᱟ ᱨᱮᱭᱟᱜ ᱜᱚᱱᱚᱝ ᱪᱮᱫ ᱞᱟᱢᱟ ᱦᱩᱭᱥᱮ, ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱪᱮᱫ ᱥᱟᱸᱜᱤᱛ ᱪᱷᱚᱴᱚ ᱴᱩᱞ-ᱠᱚᱞ ᱥᱤᱢᱟ ᱧᱟᱢᱟ।",
+          "help": "ᱱᱚᱶᱟ ᱠᱚ 3 ᱥᱮ ᱵᱟᱲᱛᱤ ᱛᱟᱦᱮᱱ ᱢᱮ ᱡᱟᱦᱟᱸ ᱛᱮ ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱵᱟᱲᱛᱤ ᱯᱟᱦᱴᱟ ᱟᱜ ᱥᱚᱡᱷᱮ ᱠᱟᱹᱢᱤ ᱫᱚᱦᱚᱜ ᱯᱩᱨᱟᱹ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
         },
         "autonomousMultiplier": {
-          "label": "Fully autonomous agents get N times the limit",
-          "description": "A fully autonomous agent gets the turn's tool-call limit multiplied by this number.",
-          "help": "Raise it for agents that run long jobs without a person watching; they can then spend more calls and money in one turn. 1 gives them the standard limit."
+          "label": "ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ ᱮᱡᱮᱱᱴ ᱫᱚ ᱥᱤᱢᱟ ᱟᱜ N ᱜᱩᱱ ᱧᱟᱢᱟ",
+          "description": "ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ ᱮᱡᱮᱱᱴ ᱫᱚ ᱴᱚᱨᱱ ᱟᱜ ᱴᱩᱞ-ᱠᱚᱞ ᱥᱤᱢᱟ ᱠᱚ ᱱᱚᱶᱟ ᱜᱚᱱᱚᱝ ᱥᱟᱶ ᱜᱩᱱ ᱠᱟᱛᱮ ᱧᱟᱢᱟ।",
+          "help": "ᱡᱟᱦᱟᱸ ᱮᱡᱮᱱᱴ ᱠᱚ ᱪᱮᱫᱽ ᱵᱟᱝ ᱧᱮᱞ ᱠᱟᱛᱮ ᱞᱟᱢᱟ ᱠᱟᱹᱢᱤ ᱪᱟᱞᱟᱣᱟ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱚᱱᱟ ᱥᱮᱱ ᱚᱱᱟ ᱠᱚ ᱢᱤᱫ ᱴᱚᱨᱱ ᱨᱮ ᱵᱟᱲᱛᱤ ᱠᱚᱞ ᱟᱨ ᱯᱟᱭᱥᱟ ᱠᱷᱚᱨᱪᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। 1 ᱫᱚ ᱚᱱᱟ ᱠᱚ ᱢᱟᱱᱠ ᱥᱤᱢᱟ ᱮᱢᱟ।"
         }
       }
     },
@@ -14837,80 +14837,80 @@
           "help": "ᱞᱟᱢᱟ ᱤᱱᱰᱚ ᱫᱚ ᱞᱟᱢᱟ ᱠᱟᱹᱢᱤ ᱥᱮᱥᱚᱱ ᱨᱮ ᱜᱚᱲᱚ ᱮᱫᱟ, ᱪᱷᱚᱴᱚ ᱫᱚ ᱴᱩᱞ ᱞᱮᱠᱟ ᱪᱷᱚᱴᱚ ᱛᱟᱦᱮᱱ ᱮᱫᱟ।"
         },
         "maxStickyTools": {
-          "label": "Most tools kept on offer in follow-ups",
-          "description": "The most tools carried over into a short follow-up message. 0 keeps none.",
-          "help": "A higher number helps when a task uses many tools, a lower one keeps the tool list small."
+          "label": "ᱯᱷᱚᱞᱚ-ᱟᱯ ᱨᱮ ᱥᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱ ᱟᱠᱟᱱ ᱵᱟᱲᱛᱤ ᱛᱮ ᱴᱩᱞ",
+          "description": "ᱪᱷᱚᱴᱚ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱵᱷᱮᱡᱟᱣ ᱨᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱟᱠᱟᱱ ᱵᱟᱲᱛᱤ ᱛᱮ ᱴᱩᱞ। 0 ᱫᱚ ᱪᱮᱫᱽ ᱵᱟᱝ ᱛᱟᱦᱮᱱᱟ।",
+          "help": "ᱢᱤᱫ ᱠᱟᱹᱢᱤ ᱫᱚ ᱵᱟᱲᱛᱤ ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱠᱷᱟᱱ ᱞᱟᱢᱟ ᱜᱚᱱᱚᱝ ᱜᱚᱲᱚ ᱮᱫᱟ; ᱪᱷᱚᱴᱚ ᱫᱚ ᱴᱩᱞ ᱛᱟᱞᱤᱠᱟ ᱪᱷᱚᱴᱚ ᱛᱟᱦᱮᱱ ᱮᱫᱟ।"
         },
         "keepPrimaryModel": {
-          "label": "Keep the main model for follow-ups",
-          "description": "A short follow-up in a conversation that already used tools stays on the agent's main model instead of the cheaper one.",
-          "help": "Turn it off to let cost routing send follow-ups such as 'yes' to the cheaper model, at the risk of weaker handling of a task in progress."
+          "label": "ᱯᱷᱚᱞᱚ-ᱟᱯ ᱞᱟᱹᱜᱤᱫ ᱢᱩᱞ ᱢᱚᱰᱮᱞ ᱛᱟᱦᱮᱱ ᱢᱮ",
+          "description": "ᱫᱚᱦᱚᱜ ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱵᱟᱛ ᱪᱤᱛ ᱨᱮ ᱪᱷᱚᱴᱚ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱫᱚ ᱥᱚᱥᱛᱟ ᱢᱚᱰᱮᱞ ᱵᱚᱫᱚᱞ ᱮᱡᱮᱱᱴ ᱟᱜ ᱢᱩᱞ ᱢᱚᱰᱮᱞ ᱨᱮ ᱜᱮ ᱛᱟᱦᱮᱱᱟ।",
+          "help": "ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ ᱡᱟᱦᱟᱸ ᱛᱮ ᱠᱷᱚᱨᱪᱟ ᱨᱩᱴᱤᱝ ᱫᱚ \"ᱦᱚᱭ\" ᱞᱮᱠᱟ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱠᱚ ᱥᱚᱥᱛᱟ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱮᱫᱟ, ᱢᱮᱱᱠᱷᱟᱱ ᱪᱟᱞᱟᱜ ᱠᱟᱱ ᱠᱟᱹᱢᱤ ᱠᱚᱢᱡᱚᱨ ᱞᱮᱠᱟ ᱥᱟᱸᱢᱟᱞᱟ ᱥᱮ ᱡᱷᱩᱠᱤ ᱢᱮᱱᱟᱜᱼᱟ।"
         }
       },
       "semanticCache": {
         "similarityThreshold": {
-          "label": "How alike a question must be to reuse an answer",
-          "description": "For agents that reuse answers to similar questions: how close a new question must be to an earlier one, from 0.85 to 1, for the stored answer to be served.",
-          "help": "A lower number serves more repeats but risks giving an answer meant for a different question. Keep it high when wrong answers are costly. An answer is only reused for the person it was given to."
+          "label": "ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱥᱚᱨᱮᱥ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱥᱟᱢᱟᱱ ᱞᱟᱹᱠᱛᱤ",
+          "description": "ᱥᱟᱢᱟᱱ ᱥᱚᱨᱮᱥ ᱨᱮᱭᱟᱜ ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ ᱚᱱᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ: ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱟᱹᱜᱤᱫ ᱱᱟᱣᱟ ᱥᱚᱨᱮᱥ ᱫᱚ ᱢᱟᱲᱟᱝ ᱥᱚᱨᱮᱥ ᱨᱮᱭᱟᱜ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱞᱟᱹᱠᱛᱤ, 0.85 ᱠᱷᱚᱱ 1 ᱦᱟᱹᱵᱤᱡ।",
+          "help": "ᱠᱚᱢ ᱜᱚᱱᱚᱝ ᱫᱚ ᱵᱟᱲᱛᱤ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱠᱚ ᱡᱚᱵᱟᱵ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱮᱴᱟᱜ ᱥᱚᱨᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜ ᱡᱷᱩᱠᱤ ᱢᱮᱱᱟᱜᱼᱟ। ᱵᱷᱩᱞ ᱡᱚᱵᱟᱵ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱚᱨᱪᱟ ᱵᱟᱲᱛᱤ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚ ᱞᱟᱢᱟ ᱛᱟᱦᱮᱱ ᱢᱮ। ᱡᱚᱵᱟᱵ ᱫᱚ ᱡᱟᱦᱟᱸ ᱠᱚ ᱮᱢ ᱟᱠᱟᱱ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱜᱮ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱦᱩᱭᱟ।"
         },
         "ttl": {
-          "label": "How long a reusable answer is kept",
-          "description": "How long a stored answer can be served to a similar question before it is dropped.",
-          "help": "Shorten it when your answers go out of date quickly."
+          "label": "ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜ ᱡᱚᱵᱟᱵ ᱪᱮᱫ ᱚᱠᱛᱚ ᱛᱟᱦᱮᱱ ᱦᱩᱭᱟ",
+          "description": "ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱚᱪᱚᱜ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱥᱟᱢᱟᱱ ᱥᱚᱨᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱚᱠᱛᱚ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱟᱢᱟᱜ ᱡᱚᱵᱟᱵ ᱥᱮᱛᱟ ᱯᱩᱨᱟᱹᱱᱤ ᱦᱩᱭ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚᱢ ᱢᱮ।"
         },
         "maxEntriesPerAgent": {
-          "label": "Most stored answers per agent",
-          "description": "How many answers one agent keeps for reuse. The oldest are dropped beyond this.",
-          "help": "A larger store finds more repeats and uses more storage."
+          "label": "ᱮᱡᱮᱱᱴ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ",
+          "description": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱫᱚ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱡᱚᱵᱟᱵ ᱛᱟᱦᱮᱱ ᱮᱫᱟ। ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱦᱩᱭ ᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ ᱠᱚ ᱵᱟᱛᱼᱟᱣ ᱟᱠᱚᱜᱼᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱵᱷᱟᱱᱰᱟᱨ ᱫᱚ ᱵᱟᱲᱛᱤ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱠᱚ ᱧᱟᱢᱟ ᱟᱨ ᱵᱟᱲᱛᱤ ᱥᱴᱚᱨᱮᱡ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
         }
       },
       "toolLedger": {
         "enabled": {
-          "label": "Keep a record of tool calls in the conversation",
-          "description": "Store a short record of each turn's tool calls with the conversation, so later turns can see what was done.",
-          "help": "Turn it off to keep conversation history text-only; the agent then cannot tell what its tools did in earlier turns. This applies to the whole workspace."
+          "label": "ᱵᱟᱛ ᱪᱤᱛ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ ᱟᱜ ᱨᱮᱠᱚᱨᱰ ᱛᱟᱦᱮᱱ ᱢᱮ",
+          "description": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱟᱜ ᱴᱩᱞ ᱠᱚᱞ ᱨᱮᱭᱟᱜ ᱪᱷᱚᱴᱚ ᱨᱮᱠᱚᱨᱰ ᱵᱟᱛ ᱪᱤᱛ ᱥᱟᱶ ᱥᱟᱸᱪᱟᱣ ᱢᱮ, ᱡᱟᱦᱟᱸ ᱛᱮ ᱛᱟᱭᱚᱢ ᱴᱚᱨᱱ ᱠᱚ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱞᱮᱱᱟ ᱚᱱᱟ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱵᱟᱛ ᱪᱤᱛ ᱤᱛᱤᱦᱟᱥ ᱠᱷᱟᱞᱤ ᱚᱞ ᱞᱮᱠᱟ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ; ᱚᱱᱟ ᱥᱮᱱ ᱮᱡᱮᱱᱴ ᱫᱚ ᱢᱟᱲᱟᱝ ᱴᱚᱨᱱ ᱨᱮ ᱟᱡ ᱴᱩᱞ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱞᱮᱱᱟ ᱚᱱᱟ ᱵᱟᱝ ᱵᱟᱰᱟᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱱᱚᱶᱟ ᱫᱚ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ।"
         },
         "replayEnabled": {
-          "label": "Show the tool record to the model",
-          "description": "Include the stored record of earlier tool calls when the model is given the conversation.",
-          "help": "Turn it off to keep storing the record without using any of the model's working space for it."
+          "label": "ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱴᱩᱞ ᱨᱮᱠᱚᱨᱰ ᱧᱮᱞᱟᱹ ᱢᱮ",
+          "description": "ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱟᱛ ᱪᱤᱛ ᱮᱢ ᱚᱠᱛᱚ ᱢᱟᱲᱟᱝ ᱴᱩᱞ ᱠᱚᱞ ᱨᱮᱭᱟᱜ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱨᱮᱠᱚᱨᱰ ᱥᱮᱞᱮᱫ ᱢᱮ।",
+          "help": "ᱨᱮᱠᱚᱨᱰ ᱥᱟᱸᱪᱟᱣ ᱛᱟᱦᱮᱱ ᱢᱮᱱᱠᱷᱟᱱ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱰᱮᱞ ᱟᱜ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱸᱣ ᱵᱟᱝ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ।"
         },
         "replayTurns": {
-          "label": "Earlier turns whose tool record is shown",
-          "description": "How many of the most recent turns that used tools have their record shown to the model.",
-          "help": "A larger number helps in long working sessions but uses more of the model's working space."
+          "label": "ᱢᱟᱲᱟᱝ ᱴᱚᱨᱱ ᱡᱟᱦᱟᱸ ᱟᱜ ᱴᱩᱞ ᱨᱮᱠᱚᱨᱰ ᱧᱮᱞᱟᱹ ᱦᱩᱭᱟ",
+          "description": "ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱱᱟᱣᱟ ᱴᱚᱨᱱ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱪᱮᱫ ᱟᱜ ᱨᱮᱠᱚᱨᱰ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱧᱮᱞᱟᱹ ᱦᱩᱭᱟ।",
+          "help": "ᱞᱟᱢᱟ ᱜᱚᱱᱚᱝ ᱫᱚ ᱞᱟᱢᱟ ᱠᱟᱹᱢᱤ ᱥᱮᱥᱚᱱ ᱨᱮ ᱜᱚᱲᱚ ᱮᱫᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱢᱚᱰᱮᱞ ᱟᱜ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱸᱣ ᱵᱟᱲᱛᱤ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
         },
         "maxEntriesPerTurn": {
-          "label": "Tool calls listed per turn",
-          "description": "How many of one turn's tool calls are written into the record. Further calls are only counted.",
-          "help": "Raise it for turns that make many calls and need every one remembered."
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱛᱟᱞᱤᱠᱟ ᱟᱠᱟᱱ ᱴᱩᱞ ᱠᱚᱞ",
+          "description": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱟᱜ ᱪᱮᱫ ᱴᱩᱞ ᱠᱚᱞ ᱨᱮᱠᱚᱨᱰ ᱨᱮ ᱚᱞ ᱦᱩᱭᱟ। ᱛᱟᱭᱚᱢ ᱠᱚᱞ ᱠᱚ ᱠᱷᱟᱞᱤ ᱜᱚᱱᱚᱝ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱠᱚᱞ ᱪᱷᱚᱭ ᱟᱨ ᱥᱟᱱᱟᱢ ᱢᱤᱫ ᱢᱤᱫ ᱠᱚ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱞᱟᱹᱠᱛᱤ ᱠᱟᱱ ᱴᱚᱨᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ।"
         },
         "maxReplayCharsPerTurn": {
-          "label": "Longest tool record per turn",
-          "description": "How many characters of one turn's record are shown to the model; the rest is counted, not listed.",
-          "help": "Lower it to save cost on every later turn, raise it to keep more detail."
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱴᱩᱞ ᱨᱮᱠᱚᱨᱰ",
+          "description": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱟᱜ ᱨᱮᱠᱚᱨᱰ ᱨᱮᱭᱟᱜ ᱪᱮᱫ ᱚᱠᱷᱚᱨ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱧᱮᱞᱟᱹ ᱦᱩᱭᱟ; ᱵᱟᱠᱤ ᱠᱚ ᱜᱚᱱᱚᱝ ᱦᱩᱭᱟ, ᱛᱟᱞᱤᱠᱟ ᱵᱟᱝ ᱦᱩᱭᱟ।",
+          "help": "ᱛᱟᱭᱚᱢ ᱥᱟᱱᱟᱢ ᱴᱚᱨᱱ ᱨᱮ ᱠᱷᱚᱨᱪᱟ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ, ᱵᱟᱲᱛᱤ ᱵᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ।"
         }
       },
       "attachments": {
         "maxImageMb": {
-          "label": "Largest image upload (MB)",
-          "description": "The biggest image a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for photos and screenshots; large files are slower to send and use more of the model's allowance."
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱪᱤᱛᱟᱹᱨ ᱟᱯᱞᱚᱰ (MB)",
+          "description": "ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱶ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱰᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱪᱤᱛᱟᱹᱨ, ᱢᱮᱜᱟᱵᱟᱭᱴ ᱨᱮ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱤᱫ ᱡᱷᱚᱛᱚ ᱯᱷᱟᱭᱞ ᱥᱤᱢᱟ ᱦᱚᱸ ᱢᱮᱱᱟᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱱᱚᱶᱟ ᱯᱟᱨ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱯᱷᱚᱴᱚ ᱟᱨ ᱥᱠᱨᱤᱱᱥᱚᱴ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱞᱟᱢᱟ ᱯᱷᱟᱭᱞ ᱠᱚ ᱵᱷᱮᱡᱟᱣ ᱨᱮ ᱥᱮᱛᱟ ᱟᱨ ᱢᱚᱰᱮᱞ ᱟᱜ ᱵᱟᱲᱛᱤ ᱠᱳᱴᱟ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
         },
         "maxAudioMb": {
-          "label": "Largest audio upload (MB)",
-          "description": "The biggest audio file a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for longer recordings; large files are slower to send and use more of the model's allowance."
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱚᱰᱤᱭᱳ ᱟᱯᱞᱚᱰ (MB)",
+          "description": "ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱶ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱰᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱚᱰᱤᱭᱳ ᱯᱷᱟᱭᱞ, ᱢᱮᱜᱟᱵᱟᱭᱴ ᱨᱮ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱤᱫ ᱡᱷᱚᱛᱚ ᱯᱷᱟᱭᱞ ᱥᱤᱢᱟ ᱦᱚᱸ ᱢᱮᱱᱟᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱱᱚᱶᱟ ᱯᱟᱨ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱞᱟᱢᱟ ᱨᱮᱠᱚᱨᱰᱤᱝ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱞᱟᱢᱟ ᱯᱷᱟᱭᱞ ᱠᱚ ᱵᱷᱮᱡᱟᱣ ᱨᱮ ᱥᱮᱛᱟ ᱟᱨ ᱢᱚᱰᱮᱞ ᱟᱜ ᱵᱟᱲᱛᱤ ᱠᱳᱴᱟ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
         },
         "maxVideoMb": {
-          "label": "Largest video upload (MB)",
-          "description": "The biggest video a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for longer clips; large files are slower to send and use more of the model's allowance."
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱵᱷᱤᱰᱤᱭᱳ ᱟᱯᱞᱚᱰ (MB)",
+          "description": "ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱶ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱰᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱵᱷᱤᱰᱤᱭᱳ, ᱢᱮᱜᱟᱵᱟᱭᱴ ᱨᱮ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱤᱫ ᱡᱷᱚᱛᱚ ᱯᱷᱟᱭᱞ ᱥᱤᱢᱟ ᱦᱚᱸ ᱢᱮᱱᱟᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱱᱚᱶᱟ ᱯᱟᱨ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱞᱟᱢᱟ ᱠᱞᱤᱯ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱞᱟᱢᱟ ᱯᱷᱟᱭᱞ ᱠᱚ ᱵᱷᱮᱡᱟᱣ ᱨᱮ ᱥᱮᱛᱟ ᱟᱨ ᱢᱚᱰᱮᱞ ᱟᱜ ᱵᱟᱲᱛᱤ ᱠᱳᱴᱟ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
         },
         "maxDocumentMb": {
-          "label": "Largest document upload (MB)",
-          "description": "The biggest document or spreadsheet a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for long reports and large data files; large files are slower to process."
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱫᱚᱠᱩᱢᱮᱱᱴ ᱟᱯᱞᱚᱰ (MB)",
+          "description": "ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱶ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱰᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱫᱚᱠᱩᱢᱮᱱᱴ ᱥᱮ ᱥᱯᱨᱮᱰᱥᱤᱴ, ᱢᱮᱜᱟᱵᱟᱭᱴ ᱨᱮ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱤᱫ ᱡᱷᱚᱛᱚ ᱯᱷᱟᱭᱞ ᱥᱤᱢᱟ ᱦᱚᱸ ᱢᱮᱱᱟᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱱᱚᱶᱟ ᱯᱟᱨ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱞᱟᱢᱟ ᱨᱤᱯᱚᱨᱴ ᱟᱨ ᱞᱟᱢᱟ ᱰᱮᱴᱟ ᱯᱷᱟᱭᱞ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱞᱟᱢᱟ ᱯᱷᱟᱭᱞ ᱠᱚ ᱯᱨᱚᱥᱮᱥ ᱨᱮ ᱥᱮᱛᱟ ᱮᱫᱟ।"
         }
       },
       "continuation": {
@@ -14971,16 +14971,16 @@
       },
       "tenant": {
         "maxMemories": {
-          "label": "Most shared memories",
-          "description": "How many memories shared across the workspace are kept. The oldest are dropped beyond this.",
-          "help": "Raise it for large teams that rely on shared knowledge; it also raises storage and recall cost. This applies to the whole workspace."
+          "label": "ᱵᱟᱲᱛᱤ ᱛᱮ ᱛᱮᱦᱮᱸ ᱟᱠᱟᱱ ᱡᱟᱹᱱᱟᱹᱨᱤ",
+          "description": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱛᱮᱦᱮᱸ ᱟᱠᱟᱱ ᱪᱮᱫ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱛᱟᱦᱮᱱ ᱦᱩᱭᱟ। ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱦᱩᱭ ᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ ᱠᱚ ᱵᱟᱛᱼᱟᱣ ᱟᱠᱚᱜᱼᱟ।",
+          "help": "ᱛᱮᱦᱮᱸ ᱟᱠᱟᱱ ᱵᱟᱰᱟᱭ ᱨᱮ ᱵᱷᱚᱨᱚᱥᱟ ᱠᱟᱱ ᱞᱟᱢᱟ ᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱱᱚᱶᱟ ᱥᱴᱚᱨᱮᱡ ᱟᱨ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱠᱷᱚᱨᱪᱟ ᱦᱚᱸ ᱵᱟᱲᱦᱟᱣᱟ। ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ।"
         }
       },
       "edge": {
         "maxFacts": {
-          "label": "Memories given to on-device chat",
-          "description": "How many memories are handed to an on-device session when it starts.",
-          "help": "On-device models have a small working space, so keep this low."
+          "label": "ᱰᱤᱵᱟᱭᱥ ᱪᱮᱴ ᱥᱮᱱ ᱮᱢ ᱟᱠᱟᱱ ᱡᱟᱹᱱᱟᱹᱨᱤ",
+          "description": "ᱰᱤᱵᱟᱭᱥ ᱥᱮᱥᱚᱱ ᱮᱦᱚᱵ ᱚᱠᱛᱚ ᱚᱱᱟ ᱥᱮᱱ ᱪᱮᱫ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱥᱚᱯᱷᱮᱨ ᱦᱩᱭᱟ।",
+          "help": "ᱰᱤᱵᱟᱭᱥ ᱢᱚᱰᱮᱞ ᱟᱜ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱸᱣ ᱪᱷᱚᱴᱚ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱠᱚᱢ ᱛᱟᱦᱮᱱ ᱢᱮ।"
         }
       },
       "graph": {
@@ -14999,14 +14999,14 @@
     "skills": {
       "prompt": {
         "maxSkills": {
-          "label": "Most skills listed in the prompt",
-          "description": "How many of your skills are named in the agent's instructions so it knows they exist. The rest are counted, not listed.",
-          "help": "Raise it if you have many skills; each listed skill uses a little of the model's working space on every turn. This applies to the whole workspace."
+          "label": "ᱯᱨᱚᱢᱯᱴ ᱨᱮ ᱛᱟᱞᱤᱠᱟ ᱟᱠᱟᱱ ᱵᱟᱲᱛᱤ ᱛᱮ ᱥᱠᱤᱞ",
+          "description": "ᱮᱡᱮᱱᱴ ᱠᱚ ᱚᱱᱟ ᱢᱮᱱᱟᱜ ᱞᱮᱠᱟ ᱵᱟᱰᱟᱭ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱟᱜ ᱱᱤᱨᱫᱮᱥ ᱨᱮ ᱟᱢᱟᱜ ᱪᱮᱫ ᱥᱠᱤᱞ ᱟᱜ ᱧᱩᱛᱩᱢ ᱮᱢ ᱦᱩᱭᱟ। ᱵᱟᱠᱤ ᱠᱚ ᱜᱚᱱᱚᱝ ᱦᱩᱭᱟ, ᱛᱟᱞᱤᱠᱟ ᱵᱟᱝ ᱦᱩᱭᱟ।",
+          "help": "ᱟᱢᱟᱜ ᱵᱟᱲᱛᱤ ᱥᱠᱤᱞ ᱢᱮᱱᱟᱜ ᱠᱷᱟᱱ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱛᱟᱞᱤᱠᱟ ᱟᱠᱟᱱ ᱥᱟᱱᱟᱢ ᱥᱠᱤᱞ ᱫᱚ ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱢᱚᱰᱮᱞ ᱟᱜ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱸᱣ ᱟᱜ ᱪᱷᱚᱴᱚ ᱵᱷᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ। ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ।"
         },
         "maxBlockChars": {
-          "label": "Size of the skills list in the prompt",
-          "description": "How many characters the list of skills may take in the agent's instructions. When it is full, later skills are shortened to their names.",
-          "help": "Raise it to keep descriptions for more skills, lower it to save tokens on every turn. This applies to the whole workspace."
+          "label": "ᱯᱨᱚᱢᱯᱴ ᱨᱮ ᱥᱠᱤᱞ ᱛᱟᱞᱤᱠᱟ ᱟᱜ ᱞᱚᱸᱜᱚ",
+          "description": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱱᱤᱨᱫᱮᱥ ᱨᱮ ᱥᱠᱤᱞ ᱛᱟᱞᱤᱠᱟ ᱪᱮᱫ ᱚᱠᱷᱚᱨ ᱞᱟᱹᱜᱩᱣᱟ। ᱯᱩᱨᱟᱹ ᱦᱩᱭ ᱠᱷᱟᱱ ᱛᱟᱭᱚᱢ ᱥᱠᱤᱞ ᱠᱚ ᱧᱩᱛᱩᱢ ᱦᱟᱹᱵᱤᱡ ᱪᱷᱚᱴᱚ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱥᱠᱤᱞ ᱟᱜ ᱵᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ, ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱴᱚᱠᱮᱱ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ। ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ।"
         }
       }
     },
@@ -15062,12 +15062,12 @@
       },
       "supervised": {
         "readOnlyCalls": {
-          "label": "Supervised agents and read-only tools",
-          "description": "Whether an agent on the Supervised autonomy tier still asks you before a tool that only reads, such as a search or a lookup. Writes, sends and tools the platform has not classified always ask.",
-          "help": "You can only make this stricter than the platform setting. Asking every time is the safest choice; letting read-only tools run removes a prompt but also a chance to stop a search you did not expect. An agent that can read private data, take in untrusted content and send data out is asked about every call whatever this says.",
+          "label": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱟᱨ ᱠᱷᱟᱞᱤ-ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ",
+          "description": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱥᱛᱚᱨ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱠᱷᱚᱡᱮᱛ ᱥᱮ ᱞᱩᱠᱟᱯ ᱞᱮᱠᱟ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱦᱚᱸ ᱟᱢᱠᱚ ᱪᱷᱚᱞᱟ ᱥᱮ ᱵᱟᱝ। ᱚᱞ, ᱵᱷᱮᱡᱟᱣ ᱟᱨ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱵᱟᱝ ᱥᱟᱸᱜᱤᱛ ᱞᱮᱱᱟ ᱴᱩᱞ ᱠᱚ ᱛᱟᱠᱠᱟᱣ ᱪᱷᱚᱞᱟ।",
+          "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴᱤᱝ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱥᱟᱱᱟᱢ ᱵᱷᱮᱛᱟ ᱪᱷᱚᱞ ᱫᱚ ᱟᱹᱰᱤ ᱥᱩᱨᱠᱷᱤᱛ ᱵᱟᱪᱷᱟᱣ ᱠᱟᱱᱟ; ᱠᱷᱟᱞᱤ-ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱠᱚ ᱪᱟᱞᱟᱜ ᱮᱢ ᱠᱷᱟᱱ ᱢᱤᱫ ᱥᱚᱨᱮᱥ ᱠᱚᱢ ᱦᱩᱭᱟ, ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱝ ᱵᱤᱥᱚᱭ ᱠᱷᱚᱡᱮᱛ ᱵᱚᱸᱫ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱢᱚᱠᱟ ᱦᱚᱸ ᱪᱟᱞᱟᱜᱼᱟ। ᱡᱟᱦᱟᱸ ᱮᱡᱮᱱᱴ ᱫᱚ ᱵᱷᱮᱛᱟ ᱰᱮᱴᱟ ᱯᱟᱲᱦᱟᱣ, ᱵᱟᱝ ᱵᱷᱚᱨᱚᱥᱟ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱵᱷᱮᱡᱟᱣ ᱟᱨ ᱰᱮᱴᱟ ᱵᱟᱦᱨᱮ ᱵᱷᱮᱡᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱪᱮᱫ ᱢᱮᱱᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱠᱚᱞ ᱨᱮ ᱚᱱᱟ ᱠᱚ ᱪᱷᱚᱞᱟ।",
           "options": {
-            "auto-allow": "Let read-only tools run without asking",
-            "gate": "Ask before every tool call"
+            "auto-allow": "ᱠᱷᱟᱞᱤ-ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱠᱚ ᱵᱟᱝ ᱪᱷᱚᱞ ᱠᱟᱛᱮ ᱪᱟᱞᱟᱜ ᱮᱢ ᱢᱮ",
+            "gate": "ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱠᱚᱞ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱷᱚᱞ ᱢᱮ"
           }
         }
       }
@@ -15092,12 +15092,12 @@
           "help": "ᱥᱟᱱᱟᱢ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱫᱚ ᱢᱤᱫ ᱨᱚᱱ ᱟᱜ ᱠᱷᱚᱨᱪᱟ ᱟᱨ ᱚᱠᱛᱚ ᱵᱟᱲᱦᱟᱣᱟ।"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "ᱢᱩᱞᱭᱟᱸᱠᱚᱱ ᱪᱮᱠᱟ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ",
+          "description": "ᱨᱚᱱ ᱥᱮ ᱚᱱᱟ ᱟᱜ ᱰᱮᱴᱟᱥᱮᱴ ᱵᱟᱝ ᱢᱮᱛ ᱠᱷᱟᱱ, ᱢᱩᱞᱭᱟᱸᱠᱚᱱ ᱨᱚᱱ ᱫᱚ ᱮᱡᱮᱱᱴ ᱠᱚ ᱟᱡ ᱴᱩᱞ ᱥᱟᱶ ᱥᱩᱨᱠᱷᱤᱛ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱨᱮ ᱨᱤᱯᱞᱮ ᱮᱫᱟ (ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ) ᱥᱮ ᱠᱷᱟᱞᱤ ᱚᱞ ᱨᱮ ᱡᱚᱵᱟᱵ ᱮᱢᱟ (ᱥᱮᱛᱟ)।",
+          "help": "ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱫᱚ ᱟᱢᱟᱜ ᱵᱮᱵᱷᱟᱨᱤᱭᱟᱹ ᱠᱚ ᱡᱟᱦᱟᱸ ᱧᱟᱢᱟ ᱚᱱᱟ, ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱥᱮᱞᱮᱫ, ᱪᱮᱠ ᱮᱫᱟ ᱟᱨ ᱠᱷᱚᱨᱪᱟ ᱵᱟᱲᱛᱤ ᱠᱟᱱᱟ। ᱚᱱᱟ ᱨᱮ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱠᱚ ᱥᱟᱹᱨᱤ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ; ᱰᱮᱴᱟ ᱵᱚᱫᱚᱞ, ᱵᱷᱮᱡᱟᱣ ᱵᱷᱮᱡᱟᱣ ᱥᱮ ᱯᱟᱭᱥᱟ ᱠᱷᱚᱨᱪᱟ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱡᱷᱚᱛᱚ ᱱᱚᱠᱚᱞ ᱦᱩᱭᱟ ᱟᱨ ᱨᱚᱱ ᱨᱮ ᱛᱟᱞᱤᱠᱟ ᱦᱩᱭᱟ। ᱥᱮᱛᱟ ᱫᱚ ᱥᱚᱥᱛᱟ ᱟᱨ ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱵᱤᱥᱚᱭ ᱨᱮ ᱪᱮᱫᱽ ᱵᱟᱝ ᱢᱮᱛᱟ।",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "ᱥᱮᱱᱰᱵᱚᱠᱥ ᱨᱮ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ",
+            "quick": "ᱥᱮᱛᱟ: ᱠᱷᱟᱞᱤ ᱚᱞ ᱡᱚᱵᱟᱵ"
           }
         }
       }
@@ -15201,7 +15201,7 @@
       "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
       "done": "{count} ᱥᱮᱴᱤᱝ ᱠᱚ ᱚᱱᱟ ᱟᱜ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ।",
       "partial": "{done} ᱥᱮᱴᱤᱝ ᱨᱤᱥᱮᱴ ᱦᱩᱭᱞᱮᱱᱟ; {failed} ᱨᱤᱥᱮᱴ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। ᱵᱟᱭᱡᱷᱮᱛ ᱥᱮᱴᱤᱝ ᱟᱜ ᱵᱷᱮᱡᱟᱣ ᱧᱮᱞ ᱢᱮ।",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} ᱥᱮᱴᱤᱝ ᱨᱤᱥᱮᱴ ᱦᱩᱭᱞᱮᱱᱟ। ᱠᱟᱨᱚᱱ ᱞᱟᱹᱠᱛᱤ ᱠᱟᱱ {skipped} ᱫᱚ ᱢᱮᱱᱟᱜ ᱞᱮᱠᱟ ᱜᱮ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ।"
     },
     "import": {
       "button": "ᱚᱣᱟᱨᱟᱭᱰ ᱠᱚ ᱟᱹᱜᱩ ᱛᱷᱟᱸᱣ ᱢᱮ",
@@ -15274,16 +15274,16 @@
       "unknownActor": "ᱵᱟᱝ ᱪᱤᱱᱦᱟᱹ ᱟᱠᱟᱱ",
       "noReason": "ᱪᱮᱫᱽ ᱠᱟᱨᱚᱱ ᱵᱟᱝ ᱮᱢ ᱞᱮᱱᱟ",
       "showMore": "ᱵᱟᱲᱛᱤ ᱧᱮᱞᱟᱹ ᱢᱮ",
-      "scope": "Level",
+      "scope": "ᱥᱛᱚᱨ",
       "scopeWorkspace": "ᱣᱟᱨᱠᱥᱯᱮᱥ",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "ᱮᱡᱮᱱᱴ {id}",
+      "scopeFilter": "ᱵᱚᱫᱚᱞ ᱱᱚᱶᱟ ᱥᱛᱚᱨ ᱨᱮ ᱧᱮᱞᱟᱹ ᱢᱮ",
+      "filterAll": "ᱡᱷᱚᱛᱚ ᱥᱛᱚᱨ",
+      "filterWorkspace": "ᱠᱷᱟᱞᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ",
+      "filterAgents": "ᱠᱷᱟᱞᱤ ᱮᱡᱮᱱᱴ",
+      "searchLoadedOnly": "ᱠᱷᱚᱡᱮᱛ ᱫᱚ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱞᱚᱰ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ ᱠᱚ ᱥᱮᱞᱮᱫ ᱮᱫᱟ।",
+      "loadError": "ᱵᱚᱫᱚᱞ ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+      "moreFailed": "ᱵᱟᱲᱛᱤ ᱵᱚᱫᱚᱞ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
       "loadingMore": "ᱞᱚᱰ ᱮᱫᱟ"
     }
   },
@@ -15291,7 +15291,7 @@
     "title": "ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ",
     "intro": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱢᱤᱫ ᱴᱚᱨᱱ ᱨᱮ ᱪᱮᱫ ᱥᱮᱛᱟ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱚᱱᱟ ᱠᱷᱟᱛᱨᱟ ᱪᱷᱟᱸᱪᱚ ᱢᱮ: ᱪᱮᱫ ᱴᱩᱞ ᱠᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱪᱮᱫ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱟᱨ ᱪᱮᱫ ᱯᱷᱤᱨ ᱯᱟᱲᱦᱟᱣᱟ। ᱟᱢ ᱱᱚᱸᱰᱮ ᱪᱮᱫ ᱵᱟᱝ ᱵᱚᱫᱚᱞᱟ ᱚᱱᱟ ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱠᱷᱚᱱ ᱤᱫᱷᱤᱛ ᱟᱹᱜᱩ ᱠᱟᱱᱟ।",
     "saveFirst": "ᱢᱟᱲᱟᱝ ᱮᱡᱮᱱᱴ ᱥᱟᱸᱪᱟᱣ ᱢᱮ। ᱚᱱᱟ ᱵᱟᱱᱟᱣ ᱛᱟᱭᱚᱢ ᱚᱱᱟ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ ᱥᱮᱴ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "ᱚᱱᱟ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ ᱴᱮᱵ ᱠᱷᱩᱞᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱞᱟᱛᱟᱨ ᱠᱷᱚᱱ ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
     "tabs": {
       "label": "ᱮᱡᱮᱱᱴ ᱠᱚᱱᱯᱷᱤᱜᱩᱨᱮᱥᱚᱱ",
       "setup": "ᱥᱮᱴᱟᱯ",
@@ -15302,12 +15302,12 @@
       "label": "ᱥᱚᱵᱟᱱᱫᱷ ᱥᱟᱦᱴᱟ",
       "tenant": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱚᱫᱚᱞ ᱢᱮ",
       "playground": "ᱯᱞᱮᱜᱨᱟᱣᱱᱰ ᱨᱮ ᱪᱮᱥᱴᱟ ᱢᱮ",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱯᱨᱚᱢᱯᱴ",
+      "promptsAria": "{name} ᱟᱜ ᱯᱨᱚᱢᱯᱴ: ᱯᱨᱚᱢᱯᱴ ᱨᱮᱡᱤᱥᱴᱨᱤ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+      "approvals": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ",
+      "approvalsAria": "{name} ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ: ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱪᱷᱟᱸᱪᱚ ᱟᱠᱟᱱ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱭᱱ ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+      "turns": "ᱴᱚᱨᱱ ᱴᱟᱭᱢᱞᱟᱭᱱ",
+      "turnsAria": "{name} ᱟᱜ ᱴᱚᱨᱱ ᱴᱟᱭᱢᱞᱟᱭᱱ: ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱴᱚᱨᱱ ᱪᱮᱠᱚᱨ ᱠᱷᱩᱞᱟᱹ ᱢᱮ"
     },
     "readOnly": {
       "locked": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱛᱟᱞᱟ ᱟᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱢᱟᱱ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱱᱟ।",
@@ -15487,7 +15487,7 @@
     "regAgentPlaceholder": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
     "regAgentsFailed": "ᱟᱢᱟᱜ ᱮᱡᱮᱱᱴ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
     "regPickAgent": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱟᱜ ᱯᱨᱚᱢᱯᱴ ᱠᱚ ᱧᱮᱞ ᱟᱨ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "ᱞᱤᱝᱠ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ, ᱠᱷᱟᱱᱟ ᱚᱱᱟ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ ᱥᱮ ᱟᱢ ᱚᱱᱟ ᱵᱟᱝ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱨᱮ ᱨᱮᱡᱤᱥᱴᱨᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱤᱢᱟ ᱨᱮ ᱠᱷᱩᱞᱟᱹ ᱞᱮᱱᱟ।",
     "regSearchLabel": "ᱯᱨᱚᱢᱯᱴ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
     "regSearchPlaceholder": "ᱪᱮᱫ, ᱢᱩᱲᱩᱫ ᱥᱮ ᱵᱩᱡᱷᱟᱣ",
     "regRiskLabel": "ᱡᱷᱩᱠᱤ ᱥᱟᱶ",

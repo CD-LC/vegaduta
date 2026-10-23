@@ -818,15 +818,15 @@
     "rsParam_seed": "سيڊ",
     "rsParam_stopSequences": "روڪڻ جو ترتيب",
     "rsParamDropped": "{param} هن ايجنٽ تي سيٽ ٿيل آهي، پر {provider} {model} لاءِ ان کي نظرانداز ڪري ٿو، تنهن ڪري ان جو ڪو اثر ناهي.",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "هن رن لاءِ ٽول",
+    "rsToolsRunOnly": "رڳو هي رن",
+    "rsToolsRunNote": "هي سوئچ طئي ڪن ٿا ته هن پلي گرائونڊ مان موڪليل پيغام ايجنٽ جا ڪهڙا ٽول استعمال ڪري سگهن ٿا. ڪجهه به محفوظ نٿو ٿئي: باقي سڀني لاءِ ايجنٽ پنهنجي ٽول رسائي رکي ٿو. اهي ايجنٽ جا ٽول رڳو بند ڪري سگهن ٿا، کيس ڪڏهن به نئون ٽول نٿا ڏين.",
+    "rsToolsRunSummary": "ايجنٽ جي {total} ٽولن مان {on} هن رن لاءِ چالو آهن",
+    "rsToolsRunNone": "هن رن لاءِ ڪي ٽول ناهن: ايجنٽ رڳو لکت ۾ جواب ڏئي سگهي ٿو.",
+    "rsToolsReset": "ايجنٽ جا ٽول استعمال ڪريو",
+    "rsToolsNotInAgent": "هي هن ايجنٽ جي محفوظ ٽولن مان ناهي، تنهن ڪري رن لاءِ چالو نٿو ٿي سگهي.",
+    "rsToolsEditAgent": "ايجنٽ جا محفوظ ٽول مٽايو",
+    "rsToolsLimitedChip": "هن رن لاءِ ٽول محدود",
     "rsToolsEmpty": "هن ايجنٽ لاءِ ڪو ٽول موجود ناهي.",
     "rsToolsSummary": "{total} مان {on} ٽول چالو",
     "rsToolsFailed": "ٽول لوڊ نه ٿي سگهيا.",
@@ -884,14 +884,14 @@
     "chipToolsOff": "ٽولن کان سواءِ ٻيهر ڪوشش ڪري رهيو آهي",
     "chipFailoverBlocked": "بيڪ اپ ماڊل استعمال نه ٿيو: ٽول اڳ ۾ ئي هلي چڪا هئا",
     "rsLimitChangeOne": "مٽايو",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "رفتار جي حد پهچي وئي",
+    "reasonTimeout": "وقت ختم ٿيو",
+    "reasonProviderUnavailable": "پرووائيڊر موجود ناهي",
+    "reasonAuthFailed": "پرووائيڊر اسناد رد ڪيا",
+    "reasonBilling": "پرووائيڊر جي بلنگ جو مسئلو",
+    "reasonModelNotFound": "ماڊل موجود ناهي",
+    "reasonProviderError": "پرووائيڊر جي غلطي",
+    "reasonMalformedToolCall": "ٽول ڪال استعمال نه ٿي سگهي"
   },
   "nodeDefs": {
     "triggerLabel": "ٽرگر",
@@ -13355,7 +13355,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "اسڪلز",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14199,7 +14199,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "اسڪلز",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14373,7 +14373,7 @@
       "role": "توهان جو ڪردار هي سيٽنگ مٽائي نٿو سگهي. ورڪ اسپيس ايڊمن کان پڇو.",
       "scope": "هي سيٽنگ هتي اوور رائيڊ نٿي ٿي سگهي.",
       "readOnly": "سيٽنگون هاڻي رڳو پڙهڻ لاءِ آهن.",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "هي حفاظتي سيٽنگ رڳو ورڪ اسپيس ايڊمن مٽائي سگهي ٿو. توهان ان جو قدر هتي ڏسي سگهو ٿا، پر ايڊٽ نٿا ڪري سگهو."
     },
     "reset": {
       "button": "ورثي ۾ مليل قدر ڏانهن ري سيٽ ڪريو",
@@ -14423,12 +14423,12 @@
       "acknowledge": "مان هن حفاظتي تبديلي جا نتيجا سمجهان ٿو.",
       "cancel": "رد ڪريو",
       "confirm": "پڪ ڪري محفوظ ڪريو",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "ري سيٽ: اوور رائيڊ هٽايو وڃي ٿو ۽ سيٽنگ ان قدر ڏانهن موٽي ٿي جيڪو کيس ورثي ۾ ملي ٿو."
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "مٿي وڌيڪ سخت آهي: مٿيون قدر قبول ٿئي ٿو، هيٺيون رد.",
+      "lower": "هيٺ وڌيڪ سخت آهي: هيٺيون قدر قبول ٿئي ٿو، مٿيون رد.",
+      "enumOrder": "آپشن گهٽ کان وڌيڪ سخت جي ترتيب ۾ آهن: {options}. توهان رڳو سخت پاسي ڏانهن وڃي سگهو ٿا."
     }
   },
   "approvalsQueue": {
@@ -14597,8 +14597,8 @@
     "tlSevWarn": "ڌيان گهربل",
     "tlSevError": "ناڪام",
     "tlIntake": "ٽرن شروع ٿيو: {chars} اکر، {tools} ٽول، {attachments} ڳنڍيل",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "هن رن لاءِ ٽول",
+    "tlRunToolsNone": "ڪو به ناهي (رڳو لکت)",
     "tlModelCall": "{model} ({provider}) ڏانهن ماڊل ڪال، رستو {route}",
     "tlFailover": "{model} ({provider}) ڏانهن فيل اوور ٿيو",
     "tlRetryModel": "{model} ({provider}) تي ٻيهر ڪوشش ڪئي وئي، رستو {route}",
@@ -14607,7 +14607,7 @@
     "tlToolCall": "ٽول ڪال {tool}: {status}",
     "tlApprovalRequested": "{tool} هلڻ کان اڳ منظوري گهري وئي",
     "tlApprovalDecided": "{tool} لاءِ منظوري جو فيصلو ٿيو: {decision}",
-    "tlApprovalAutoAllowed": "{tool} ran without asking: a read-only call under Supervised",
+    "tlApprovalAutoAllowed": "{tool} پڇڻ کانسواءِ هليو: نگراني هيٺ رڳو-پڙهڻ واري ڪال",
     "tlContinuation": "تسلسل: {guard} ({outcome})",
     "tlGuard": "گارڊ ريل {guard}: {outcome}",
     "tlVerifyPassed": "جاچ پاس: {check}",
@@ -14677,7 +14677,7 @@
     "modeTextOnlyHelp": "ايجنٽ پنهنجي ٽولن کانسواءِ جواب ڏئي ٿو. محفوظ: حقيقت ۾ ڪجهه به نٿو هلي. متوقع ٽول جاچون مڪمل نه ٿي سگهن ٿيون.",
     "modeFull": "ٽولن سان مڪمل پائپ لائن",
     "modeFullHelp": "اهي ئي ٽول، گارڊ ريل ۽ قدمن جون حدون جيڪي هڪ حقيقي استعمال ڪندڙ کي ملن ٿيون. متوقع ٽول ۽ ٽريجيڪٽري جاچن لاءِ گهربل.",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "جيڪي ٽول رڳو پڙهن ٿا اهي حقيقت ۾ هلن ٿا. جيڪو ڪجهه ڊيٽا مٽائي سگهي، پيغام موڪلي سگهي يا پئسا خرچ ڪري سگهي ان کي نقل ڪيو وڃي ٿو ۽ رن ۾ درج ڪيو وڃي ٿو، تنهن ڪري حقيقت ۾ ڪجهه نٿو ٿئي. حفاظتي درجه بندي کانسواءِ ٽول به نقل ٿين ٿا.",
     "autoApproveLabel": "ايول سينڊ باڪس ۾ ٽول ڪال پاڻمرادو منظور ڪريو",
     "autoApproveHelp": "عام طور ماڻهوءَ جو انتظار ڪندڙ ٽول ڪالن کي ايول سينڊ باڪس منظور ڪري ٿو، ته جيئن ڪيس ختم ٿي سگهي. ان کانسواءِ ڪيس پروڊڪشن ۾ جيئن ٿئي ٿو تيئن ئي بي جواب منظوري تي ختم ٿئي ٿو.",
     "autoApproveWarnTitle": "رڳو غير پروڊڪشن ورڪ اسپيسز لاءِ",
@@ -14685,7 +14685,7 @@
     "autoApproveNeedsFull": "پهرين مڪمل پائپ لائن چالو ڪريو: پاڻمرادو منظوري رڳو تڏهن لاڳو ٿئي ٿي جڏهن ٽول هلن ٿا.",
     "autoApproveRefused": "هن ورڪ اسپيس ۾ اجازت ناهي: {reason}",
     "autoApproveConfirmTitle": "ايول ۾ ٽول ڪال پاڻمرادو منظور ڪريان؟",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "هن ڊيٽاسيٽ جي ريپلين ۾ ماڻهوءَ جو انتظار ڪندڙ هر ٽول ڪال پاڻمرادو منظور ٿي ويندي. منظور ٿيل رڳو-پڙهندڙ ٽول حقيقت ۾ هلن ٿا؛ ڪجهه مٽائي سگهندڙ اڃا به نقل ٿين ٿا. هي رڳو ٽيسٽ ڊيٽا واري ورڪ اسپيس ۾ ڪريو. رن رڪارڊ ڪن ٿا ته اهي پاڻمرادو منظور ٿيل هئا.",
     "autoApproveConfirm": "پاڻمرادو منظوري چالو ڪريو",
     "trajectoryLabel": "ٽريجيڪٽري جاچون",
     "trajectoryOn": "On",
@@ -14711,21 +14711,21 @@
     "samplingSource_tenant": "توهان جي ورڪ اسپيس لاءِ سيٽ ڪيل",
     "samplingSource_agent": "هن ايجنٽ لاءِ سيٽ ڪيل",
     "modeDefault": "ورڪ اسپيس ڊفالٽ",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefaultHelp": "توهان جي ورڪ اسپيس جي سيٽنگ کي مڃي ٿو (مڪمل پائپ لائن، جيستائين ايڊمن نه مٽائي). هر رن اڃا به پنهنجي رٿ چونڊي سگهي ٿو.",
+    "modeDefaultCurrent": "هاڻي: {mode}",
+    "modeNameFull": "مڪمل پائپ لائن",
+    "modeNameQuick": "تڪڙو (رڳو لکت)",
+    "badgeFull": "مڪمل پائپ لائن",
+    "badgeQuick": "تڪڙو",
+    "datasetModePinnedTitle": "هي ڊيٽاسيٽ هميشه هن طرح ريپلي ٿئي ٿو. هڪ رن اڃا به ٻي رٿ چونڊي سگهي ٿو.",
+    "datasetModeDefaultTitle": "رن ڪيئن ريپلي ٿين ان لاءِ هي ڊيٽاسيٽ ورڪ اسپيس جي ڊفالٽ کي مڃي ٿو.",
+    "runModeLabel": "ايندڙ رن لاءِ ريپلي موڊ",
+    "runModeInherit": "ڊيٽاسيٽ جي سيٽنگ استعمال ڪريو",
+    "runModeHelp": "مڪمل پائپ لائن ايجنٽ کي ان جي ٽولن، گارڊ ريلن ۽ منظورين سان گڏ محفوظ سينڊ باڪس ۾ هلائي ٿي: رڳو پڙهندڙ ٽول حقيقت ۾ هلن ٿا، ۽ جيڪو ڪجهه ڊيٽا مٽائي سگهي يا ڪجهه موڪلي سگهي ان کي نقل ڪيو وڃي ٿو. تڪڙو موڊ ٽول روڪي ٿو ۽ رڳو لکيل جواب کي پرکي ٿو.",
+    "runModeFullTitle": "هن رن ايول سينڊ باڪس ۾ مڪمل پائپ لائن استعمال ڪئي.",
+    "runModeQuickTitle": "هي رن رڳو لکت وارو تڪڙو ريپلي هو: ايجنٽ جا ٽول روڪيا ويا هئا.",
+    "runSimulatedTools": "هن رن ۾ نقل ڪيا ويا، هلايا نه ويا (اهي ڊيٽا مٽائي سگهن ها يا پليٽ فارم کان ٻاهر پهچي سگهن ها): {tools}.",
+    "toolStatusSimulated": "نقل ڪيو ويو، هلايو نه ويو"
   },
   "agentLab": {
     "wtLabel": "ايجنٽ جي ٽولن سان هلايو",
@@ -14760,12 +14760,12 @@
         "description": "ايجنٽ ڪيتريون ياداشتون رکي ٿو ۽ ياد ڪري ٿو."
       },
       "attachments": {
-        "label": "Chat uploads",
-        "description": "How large the files people attach to chat messages may be."
+        "label": "چيٽ اپلوڊ",
+        "description": "ماڻهو چيٽ پيغامن سان ڪيتريون وڏيون فائلون ڳنڍي سگهن ٿا."
       },
       "skills": {
-        "label": "Skills",
-        "description": "How much of the agent's instructions the list of installed skills may use."
+        "label": "اسڪلز",
+        "description": "نصب ٿيل اسڪلن جي فهرست ايجنٽ جي هدايتن جو ڪيترو حصو استعمال ڪري سگهي ٿي."
       },
       "aux": {
         "label": "پس منظر ماڊل ڪال",
@@ -14836,24 +14836,24 @@
       },
       "steps": {
         "graceCalls": {
-          "label": "Calls answered after the limit",
-          "description": "How many more tool calls the model may attempt after the turn's tool limit is used up. Each one is refused with a note to answer with what it has; past this number the turn is stopped with an error.",
-          "help": "Raise it if a model needs a few tries to stop calling tools. Lower it to end looping turns sooner. 0 stops the turn at the first call over the limit."
+          "label": "حد کان پوءِ جواب ڏنل ڪالون",
+          "description": "ٽرن جي ٽول حد پوري ٿيڻ کان پوءِ ماڊل ٻيون ڪيتريون ٽول ڪالون ڪوشش ڪري سگهي ٿو. هر هڪ کي \"جيڪو آهي ان سان جواب ڏي\" واري نوٽ سان رد ڪيو وڃي ٿو؛ هن انگ کان پوءِ ٽرن غلطي سان روڪيو وڃي ٿو.",
+          "help": "جيڪڏهن ماڊل کي ٽول ڪالون بند ڪرڻ لاءِ ڪجهه ڪوششون گهرجن ته وڌايو. لوپ ۾ ڦاٿل ٽرن جلدي ختم ڪرڻ لاءِ گهٽايو. 0 حد کان مٿيين پهرين ڪال تي ٽرن روڪي ٿو."
         },
         "supervisedDivisor": {
-          "label": "Supervised agents get 1/N of the tool limit",
-          "description": "A supervised agent gets the turn's tool-call limit divided by this number, but never less than the minimum below.",
-          "help": "Raise it to keep supervised agents on a shorter leash. 1 gives them the full limit."
+          "label": "نگراني هيٺ ايجنٽن کي ٽول حد جو 1/N ملي ٿو",
+          "description": "نگراني هيٺ ايجنٽ کي ٽرن جي ٽول-ڪال حد هن انگ سان ورهائي ملي ٿي، پر هيٺين گهٽ ۾ گهٽ قدر کان ڪڏهن به گهٽ نه.",
+          "help": "نگراني هيٺ ايجنٽن کي وڌيڪ سختيءَ ۾ رکڻ لاءِ وڌايو. 1 کين مڪمل حد ڏئي ٿو."
         },
         "supervisedMinSteps": {
-          "label": "Least tool calls for a supervised agent",
-          "description": "The smallest tool-call limit a supervised agent gets, however high the number above is.",
-          "help": "Keep it at 3 or more so a supervised agent can still finish a simple job with several steps."
+          "label": "نگراني هيٺ ايجنٽ لاءِ گهٽ ۾ گهٽ ٽول ڪالون",
+          "description": "مٿيون انگ ڪيترو به وڏو هجي، نگراني هيٺ ايجنٽ کي ملندڙ سڀ کان ننڍي ٽول-ڪال حد.",
+          "help": "هن کي 3 يا وڌيڪ رکو ته جيئن نگراني هيٺ ايجنٽ ڪيترن قدمن وارو سادو ڪم اڃا به مڪمل ڪري سگهي."
         },
         "autonomousMultiplier": {
-          "label": "Fully autonomous agents get N times the limit",
-          "description": "A fully autonomous agent gets the turn's tool-call limit multiplied by this number.",
-          "help": "Raise it for agents that run long jobs without a person watching; they can then spend more calls and money in one turn. 1 gives them the standard limit."
+          "label": "مڪمل خودمختيار ايجنٽن کي حد جا N ڀيرا ملن ٿا",
+          "description": "مڪمل خودمختيار ايجنٽ کي ٽرن جي ٽول-ڪال حد هن انگ سان ضرب ڏئي ملي ٿي.",
+          "help": "انهن ايجنٽن لاءِ وڌايو جيڪي ڪنهن جي نگراني کانسواءِ ڊگها ڪم هلائين ٿا؛ تڏهن اهي هڪ ٽرن ۾ وڌيڪ ڪالون ۽ پئسا خرچ ڪري سگهن ٿا. 1 کين معياري حد ڏئي ٿو."
         }
       }
     },
@@ -14927,80 +14927,80 @@
           "help": "ڊگهي دريءَ ڊگهن ڪم جي سيشنن ۾ مدد ڪري ٿي، ننڍي ٽول فهرست کي ننڍو رکي ٿي."
         },
         "maxStickyTools": {
-          "label": "Most tools kept on offer in follow-ups",
-          "description": "The most tools carried over into a short follow-up message. 0 keeps none.",
-          "help": "A higher number helps when a task uses many tools, a lower one keeps the tool list small."
+          "label": "فالو اپ ۾ تجويز ٿيل وڌ ۾ وڌ ٽول",
+          "description": "ننڍي فالو اپ پيغام ۾ کڻي وڃبا وڌ ۾ وڌ ٽول. 0 ڪو به نٿو رکي.",
+          "help": "جڏهن ڪو ڪم ڪيترائي ٽول استعمال ڪري ته وڏو انگ مدد ڪري ٿو؛ ننڍو ٽول فهرست کي ننڍو رکي ٿو."
         },
         "keepPrimaryModel": {
-          "label": "Keep the main model for follow-ups",
-          "description": "A short follow-up in a conversation that already used tools stays on the agent's main model instead of the cheaper one.",
-          "help": "Turn it off to let cost routing send follow-ups such as 'yes' to the cheaper model, at the risk of weaker handling of a task in progress."
+          "label": "فالو اپ لاءِ مکيه ماڊل رکو",
+          "description": "اهڙي ڳالهه ٻولهه ۾ ننڍو فالو اپ جنهن ۾ اڳ ۾ ئي ٽول استعمال ٿيا هجن، سستي ماڊل بدران ايجنٽ جي مکيه ماڊل تي ئي رهي ٿو.",
+          "help": "هن کي بند ڪريو ته جيئن خرچ روٽنگ \"ها\" جهڙا فالو اپ سستي ماڊل ڏانهن موڪلي، پر هلندڙ ڪم کي ڪمزور نموني سنڀالڻ جو خطرو آهي."
         }
       },
       "semanticCache": {
         "similarityThreshold": {
-          "label": "How alike a question must be to reuse an answer",
-          "description": "For agents that reuse answers to similar questions: how close a new question must be to an earlier one, from 0.85 to 1, for the stored answer to be served.",
-          "help": "A lower number serves more repeats but risks giving an answer meant for a different question. Keep it high when wrong answers are costly. An answer is only reused for the person it was given to."
+          "label": "جواب ٻيهر استعمال ڪرڻ لاءِ سوال ڪيترو ملندڙ هجڻ گهرجي",
+          "description": "انهن ايجنٽن لاءِ جيڪي ملندڙ سوالن جا جواب ٻيهر استعمال ڪن ٿا: محفوظ ٿيل جواب ڏيڻ لاءِ نئون سوال اڳئين سوال جي ڪيترو ويجهو هجڻ گهرجي، 0.85 کان 1 تائين.",
+          "help": "گهٽ انگ وڌيڪ ورجاءَ کي جواب ڏئي ٿو پر ڪنهن ٻئي سوال لاءِ ٺهيل جواب ڏيڻ جو خطرو آهي. غلط جواب قيمتي هجن ته هن کي مٿي رکو. جواب رڳو ان شخص لاءِ ٻيهر استعمال ٿئي ٿو جنهن کي اهو ڏنو ويو هو."
         },
         "ttl": {
-          "label": "How long a reusable answer is kept",
-          "description": "How long a stored answer can be served to a similar question before it is dropped.",
-          "help": "Shorten it when your answers go out of date quickly."
+          "label": "ٻيهر استعمال جوڳو جواب ڪيتري دير رکيو وڃي ٿو",
+          "description": "محفوظ ٿيل جواب کي ڪڍڻ کان اڳ ملندڙ سوال کي ڪيتري دير تائين ڏئي سگهجي ٿو.",
+          "help": "جيڪڏهن توهان جا جواب جلدي پراڻا ٿين ٿا ته هن کي ننڍو ڪريو."
         },
         "maxEntriesPerAgent": {
-          "label": "Most stored answers per agent",
-          "description": "How many answers one agent keeps for reuse. The oldest are dropped beyond this.",
-          "help": "A larger store finds more repeats and uses more storage."
+          "label": "هر ايجنٽ جا وڌ ۾ وڌ محفوظ ٿيل جواب",
+          "description": "هڪ ايجنٽ ٻيهر استعمال لاءِ ڪيترا جواب رکي ٿو. هن کان وڌيڪ ٿيڻ تي سڀ کان پراڻا ڪڍيا وڃن ٿا.",
+          "help": "وڏو ذخيرو وڌيڪ ورجاءَ ڳولي ٿو ۽ وڌيڪ اسٽوريج استعمال ڪري ٿو."
         }
       },
       "toolLedger": {
         "enabled": {
-          "label": "Keep a record of tool calls in the conversation",
-          "description": "Store a short record of each turn's tool calls with the conversation, so later turns can see what was done.",
-          "help": "Turn it off to keep conversation history text-only; the agent then cannot tell what its tools did in earlier turns. This applies to the whole workspace."
+          "label": "ڳالهه ٻولهه ۾ ٽول ڪالن جو رڪارڊ رکو",
+          "description": "هر ٽرن جي ٽول ڪالن جو ننڍو رڪارڊ ڳالهه ٻولهه سان محفوظ ڪريو، ته جيئن ايندڙ ٽرن ڏسي سگهن ته ڇا ڪيو ويو.",
+          "help": "ڳالهه ٻولهه جي تاريخ کي رڳو لکت رکڻ لاءِ هن کي بند ڪريو؛ تڏهن ايجنٽ اهو نٿو ڄاڻي سگهي ته اڳئين ٽرنن ۾ سندس ٽولن ڇا ڪيو. هي سڄي ورڪ اسپيس تي لاڳو ٿئي ٿو."
         },
         "replayEnabled": {
-          "label": "Show the tool record to the model",
-          "description": "Include the stored record of earlier tool calls when the model is given the conversation.",
-          "help": "Turn it off to keep storing the record without using any of the model's working space for it."
+          "label": "ماڊل کي ٽول رڪارڊ ڏيکاريو",
+          "description": "ماڊل کي ڳالهه ٻولهه ڏيڻ وقت اڳين ٽول ڪالن جو محفوظ ٿيل رڪارڊ شامل ڪريو.",
+          "help": "رڪارڊ محفوظ ٿيندو رهي پر ان لاءِ ماڊل جي ڪم جي جاءِ استعمال نه ٿئي ان ڪري هن کي بند ڪريو."
         },
         "replayTurns": {
-          "label": "Earlier turns whose tool record is shown",
-          "description": "How many of the most recent turns that used tools have their record shown to the model.",
-          "help": "A larger number helps in long working sessions but uses more of the model's working space."
+          "label": "اڳيان ٽرن جن جو ٽول رڪارڊ ڏيکاريو وڃي ٿو",
+          "description": "ٽول استعمال ڪندڙ تازن ٽرنن مان ڪيترن جو رڪارڊ ماڊل کي ڏيکاريو وڃي ٿو.",
+          "help": "وڏو انگ ڊگهن ڪم جي سيشنن ۾ مدد ڪري ٿو پر ماڊل جي ڪم جي جاءِ وڌيڪ استعمال ڪري ٿو."
         },
         "maxEntriesPerTurn": {
-          "label": "Tool calls listed per turn",
-          "description": "How many of one turn's tool calls are written into the record. Further calls are only counted.",
-          "help": "Raise it for turns that make many calls and need every one remembered."
+          "label": "هر ٽرن ۾ درج ٿيل ٽول ڪالون",
+          "description": "هڪ ٽرن جون ڪيتريون ٽول ڪالون رڪارڊ ۾ لکيون وڃن ٿيون. ايندڙ ڪالون رڳو ڳڻيون وڃن ٿيون.",
+          "help": "اهڙن ٽرنن لاءِ وڌايو جيڪي ڪيتريون ئي ڪالون ڪن ٿا ۽ هر هڪ ياد رکڻي آهي."
         },
         "maxReplayCharsPerTurn": {
-          "label": "Longest tool record per turn",
-          "description": "How many characters of one turn's record are shown to the model; the rest is counted, not listed.",
-          "help": "Lower it to save cost on every later turn, raise it to keep more detail."
+          "label": "هر ٽرن ۾ سڀ کان ڊگهو ٽول رڪارڊ",
+          "description": "هڪ ٽرن جي رڪارڊ جا ڪيترا اکر ماڊل کي ڏيکاريا وڃن ٿا؛ باقي ڳڻيا وڃن ٿا، درج نه ڪيا وڃن ٿا.",
+          "help": "ايندڙ هر ٽرن تي خرچ بچائڻ لاءِ گهٽايو، وڌيڪ تفصيل رکڻ لاءِ وڌايو."
         }
       },
       "attachments": {
         "maxImageMb": {
-          "label": "Largest image upload (MB)",
-          "description": "The biggest image a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for photos and screenshots; large files are slower to send and use more of the model's allowance."
+          "label": "سڀ کان وڏو تصوير اپلوڊ (MB)",
+          "description": "چيٽ پيغام سان ڪو شخص سڀ کان وڏي ڪهڙي تصوير ڳنڍي سگهي ٿو، ميگابائيٽ ۾. پليٽ فارم جي هڪ ڪل فائل حد پڻ آهي جنهن کي هي پار نٿو ڪري سگهي.",
+          "help": "تصويرن ۽ اسڪرين شاٽن لاءِ وڌايو؛ وڏيون فائلون موڪلڻ ۾ سست آهن ۽ ماڊل جو وڌيڪ ڪوٽا استعمال ڪن ٿيون."
         },
         "maxAudioMb": {
-          "label": "Largest audio upload (MB)",
-          "description": "The biggest audio file a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for longer recordings; large files are slower to send and use more of the model's allowance."
+          "label": "سڀ کان وڏو آڊيو اپلوڊ (MB)",
+          "description": "چيٽ پيغام سان ڪو شخص سڀ کان وڏي ڪهڙي آڊيو فائل ڳنڍي سگهي ٿو، ميگابائيٽ ۾. پليٽ فارم جي هڪ ڪل فائل حد پڻ آهي جنهن کي هي پار نٿو ڪري سگهي.",
+          "help": "ڊگهن رڪارڊنگن لاءِ وڌايو؛ وڏيون فائلون موڪلڻ ۾ سست آهن ۽ ماڊل جو وڌيڪ ڪوٽا استعمال ڪن ٿيون."
         },
         "maxVideoMb": {
-          "label": "Largest video upload (MB)",
-          "description": "The biggest video a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for longer clips; large files are slower to send and use more of the model's allowance."
+          "label": "سڀ کان وڏو وڊيو اپلوڊ (MB)",
+          "description": "چيٽ پيغام سان ڪو شخص سڀ کان وڏي ڪهڙي وڊيو ڳنڍي سگهي ٿو، ميگابائيٽ ۾. پليٽ فارم جي هڪ ڪل فائل حد پڻ آهي جنهن کي هي پار نٿو ڪري سگهي.",
+          "help": "ڊگهن ڪلپن لاءِ وڌايو؛ وڏيون فائلون موڪلڻ ۾ سست آهن ۽ ماڊل جو وڌيڪ ڪوٽا استعمال ڪن ٿيون."
         },
         "maxDocumentMb": {
-          "label": "Largest document upload (MB)",
-          "description": "The biggest document or spreadsheet a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for long reports and large data files; large files are slower to process."
+          "label": "سڀ کان وڏو دستاويز اپلوڊ (MB)",
+          "description": "چيٽ پيغام سان ڪو شخص سڀ کان وڏو ڪهڙو دستاويز يا اسپريڊ شيٽ ڳنڍي سگهي ٿو، ميگابائيٽ ۾. پليٽ فارم جي هڪ ڪل فائل حد پڻ آهي جنهن کي هي پار نٿو ڪري سگهي.",
+          "help": "ڊگهن رپورٽن ۽ وڏين ڊيٽا فائلن لاءِ وڌايو؛ وڏيون فائلون پروسيس ڪرڻ ۾ سست آهن."
         }
       },
       "continuation": {
@@ -15061,16 +15061,16 @@
       },
       "tenant": {
         "maxMemories": {
-          "label": "Most shared memories",
-          "description": "How many memories shared across the workspace are kept. The oldest are dropped beyond this.",
-          "help": "Raise it for large teams that rely on shared knowledge; it also raises storage and recall cost. This applies to the whole workspace."
+          "label": "وڌ ۾ وڌ ورهايل يادگيريون",
+          "description": "ورڪ اسپيس ۾ ورهايل ڪيتريون يادگيريون رکيون وڃن ٿيون. هن کان وڌيڪ ٿيڻ تي سڀ کان پراڻيون ڪڍيون وڃن ٿيون.",
+          "help": "ورهايل علم تي ڀروسو ڪندڙ وڏين ٽيمن لاءِ وڌايو؛ هي اسٽوريج ۽ ياد ڪرڻ جو خرچ پڻ وڌائي ٿو. هي سڄي ورڪ اسپيس تي لاڳو ٿئي ٿو."
         }
       },
       "edge": {
         "maxFacts": {
-          "label": "Memories given to on-device chat",
-          "description": "How many memories are handed to an on-device session when it starts.",
-          "help": "On-device models have a small working space, so keep this low."
+          "label": "ڊوائيس تي چيٽ کي ڏنل يادگيريون",
+          "description": "ڊوائيس تي سيشن شروع ٿيڻ وقت ان کي ڪيتريون يادگيريون ڏنيون وڃن ٿيون.",
+          "help": "ڊوائيس تي ماڊلن جي ڪم جي جاءِ ننڍي هوندي آهي، تنهن ڪري هن کي گهٽ رکو."
         }
       },
       "graph": {
@@ -15089,14 +15089,14 @@
     "skills": {
       "prompt": {
         "maxSkills": {
-          "label": "Most skills listed in the prompt",
-          "description": "How many of your skills are named in the agent's instructions so it knows they exist. The rest are counted, not listed.",
-          "help": "Raise it if you have many skills; each listed skill uses a little of the model's working space on every turn. This applies to the whole workspace."
+          "label": "پرامپٽ ۾ درج وڌ ۾ وڌ اسڪلز",
+          "description": "ايجنٽ کي خبر پوي ته اهي آهن، تنهن ڪري ان جي هدايتن ۾ توهان جي ڪيترين اسڪلن جا نالا ڏنا وڃن ٿا. باقي ڳڻيون وڃن ٿيون، درج نه ڪيون وڃن ٿيون.",
+          "help": "جيڪڏهن توهان وٽ گهڻيون اسڪلز آهن ته وڌايو؛ درج ٿيل هر اسڪل هر ٽرن ۾ ماڊل جي ڪم جي جاءِ جو ٿورو حصو استعمال ڪري ٿي. هي سڄي ورڪ اسپيس تي لاڳو ٿئي ٿو."
         },
         "maxBlockChars": {
-          "label": "Size of the skills list in the prompt",
-          "description": "How many characters the list of skills may take in the agent's instructions. When it is full, later skills are shortened to their names.",
-          "help": "Raise it to keep descriptions for more skills, lower it to save tokens on every turn. This applies to the whole workspace."
+          "label": "پرامپٽ ۾ اسڪل فهرست جو سائيز",
+          "description": "ايجنٽ جي هدايتن ۾ اسڪلن جي فهرست ڪيترا اکر وٺي سگهي ٿي. ڀرجي وڃڻ تي ايندڙ اسڪلز رڳو نالن تائين ننڍيون ڪيون وڃن ٿيون.",
+          "help": "وڌيڪ اسڪلن جا بيان رکڻ لاءِ وڌايو، هر ٽرن ۾ ٽوڪن بچائڻ لاءِ گهٽايو. هي سڄي ورڪ اسپيس تي لاڳو ٿئي ٿو."
         }
       }
     },
@@ -15152,12 +15152,12 @@
       },
       "supervised": {
         "readOnlyCalls": {
-          "label": "Supervised agents and read-only tools",
-          "description": "Whether an agent on the Supervised autonomy tier still asks you before a tool that only reads, such as a search or a lookup. Writes, sends and tools the platform has not classified always ask.",
-          "help": "You can only make this stricter than the platform setting. Asking every time is the safest choice; letting read-only tools run removes a prompt but also a chance to stop a search you did not expect. An agent that can read private data, take in untrusted content and send data out is asked about every call whatever this says.",
+          "label": "نگراني هيٺ ايجنٽ ۽ رڳو-پڙهندڙ ٽول",
+          "description": "ڇا نگراني واري خودمختياري جي درجي وارو ايجنٽ ڳولا يا لوڪ اپ جهڙي رڳو پڙهندڙ ٽول کان اڳ به توهان کان پڇي ٿو. لکڻ، موڪلڻ ۽ جن ٽولن کي پليٽ فارم درجه بندي نه ڪئي آهي اهي هميشه پڇن ٿا.",
+          "help": "توهان هن کي رڳو پليٽ فارم سيٽنگ کان وڌيڪ سخت ڪري سگهو ٿا. هر ڀيري پڇڻ سڀ کان محفوظ چونڊ آهي؛ رڳو-پڙهندڙ ٽولن کي هلڻ ڏيڻ سان هڪ سوال گهٽجي ٿو، پر غير متوقع ڳولا کي روڪڻ جو هڪ موقعو به وڃي ٿو. جيڪو ايجنٽ خانگي ڊيٽا پڙهي سگهي ٿو، غير ڀروسي جوڳو مواد وٺي سگهي ٿو ۽ ڊيٽا ٻاهر موڪلي سگهي ٿو، ان کان هر ڪال تي پڇيو وڃي ٿو، هيءَ سيٽنگ جيڪو به چوي.",
           "options": {
-            "auto-allow": "Let read-only tools run without asking",
-            "gate": "Ask before every tool call"
+            "auto-allow": "رڳو-پڙهندڙ ٽولن کي پڇڻ کانسواءِ هلڻ ڏيو",
+            "gate": "هر ٽول ڪال کان اڳ پڇو"
           }
         }
       }
@@ -15182,12 +15182,12 @@
           "help": "هر ورجاءَ هڪ رن جي خرچ ۽ وقت کي ضرب ڏئي ٿو."
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "جاچون ڪيئن هلن ٿيون",
+          "description": "جڏهن رن يا ان جو ڊيٽاسيٽ نه ٻڌائي ته جاچ واري رن ايجنٽ کي ان جي ٽولن سان گڏ محفوظ سينڊ باڪس ۾ ريپلي ڪري ٿو (مڪمل پائپ لائن) يا رڳو لکت ۾ جواب ڏئي ٿو (تڪڙو).",
+          "help": "مڪمل پائپ لائن اهو پرکي ٿي جيڪو توهان جي استعمال ڪندڙن کي ملي ٿو، ٽول جي استعمال سميت، ۽ خرچ وڌيڪ آهي. ان ۾ رڳو پڙهندڙ ٽول حقيقت ۾ هلن ٿا؛ جيڪو ڪجهه ڊيٽا مٽائي سگهي، پيغام موڪلي سگهي يا پئسا خرچ ڪري سگهي ان کي نقل ڪيو وڃي ٿو ۽ رن ۾ درج ڪيو وڃي ٿو. تڪڙو سستو آهي ۽ ٽولن جي استعمال بابت ڪجهه نٿو ٻڌائي.",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "سينڊ باڪس ۾ مڪمل پائپ لائن",
+            "quick": "تڪڙو: رڳو لکت جا جواب"
           }
         }
       }
@@ -15291,7 +15291,7 @@
       "cancel": "رد ڪريو",
       "done": "{count} سيٽنگن کي سندن ورثي ۾ مليل قدر ڏانهن ري سيٽ ڪريو.",
       "partial": "{done} سيٽنگون ري سيٽ ٿيون؛ {failed} ري سيٽ نه ٿي سگهيون. ناڪام سيٽنگن جا پيغام ڏسو.",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} سيٽنگون ري سيٽ ٿيون. جن {skipped} کي سبب گهربل هو اهي جيئن هيون تيئن ئي ڇڏيون ويون."
     },
     "import": {
       "button": "اوور رائيڊ درآمد ڪريو",
@@ -15364,16 +15364,16 @@
       "unknownActor": "اڻڄاتل",
       "noReason": "ڪو سبب نه ڏنو ويو",
       "showMore": "وڌيڪ ڏيکاريو",
-      "scope": "Level",
+      "scope": "درجو",
       "scopeWorkspace": "ورڪ اسپيس",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "ايجنٽ {id}",
+      "scopeFilter": "تبديليون هن درجي تي ڏيکاريو",
+      "filterAll": "سڀ درجا",
+      "filterWorkspace": "رڳو ورڪ اسپيس",
+      "filterAgents": "رڳو ايجنٽ",
+      "searchLoadedOnly": "ڳولا هن وقت تائين لوڊ ٿيل تبديلين کي ڍڪي ٿي.",
+      "loadError": "تبديلين جي تاريخ لوڊ نه ٿي سگهي. {message}",
+      "moreFailed": "وڌيڪ تبديليون لوڊ نه ٿي سگهيون. {message}",
       "loadingMore": "لوڊ ٿي رهيو آهي"
     }
   },
@@ -15381,7 +15381,7 @@
     "title": "رويو ۽ حدون",
     "intro": "ڪنٽرول ڪريو ته هي ايجنٽ هڪ ٽرن ۾ ڪيترو اڳتي وڃي سگهي ٿو: ڪيترا ٽول ڪال ڪري سگهي ٿو، ڪيتري دير هلي سگهي ٿو ۽ ڪيترو پوئتي پڙهي ٿو. جيڪو توهان هتي نٿا مٽايو سو توهان جي ورڪ اسپيس مان ورثي ۾ اچي ٿو.",
     "saveFirst": "پهرين ايجنٽ کي محفوظ ڪريو. ان جي ٺهڻ کان پوءِ ان جو رويو ۽ حدون سيٽ ٿي سگهن ٿيون.",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "ان جو رويو ۽ حدون ٽئب کولڻ لاءِ هيٺ هڪ ايجنٽ چونڊيو.",
     "tabs": {
       "label": "ايجنٽ ترتيب",
       "setup": "سيٽ اپ",
@@ -15392,12 +15392,12 @@
       "label": "لاڳاپيل صفحا",
       "tenant": "ورڪ اسپيس ڊفالٽ مٽايو",
       "playground": "پلي گراؤنڊ ۾ آزمايو",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "هن ايجنٽ جا پرامپٽ",
+      "promptsAria": "{name} جا پرامپٽ: پرامپٽ رجسٽري هن ايجنٽ تي کوليو",
+      "approvals": "هن ايجنٽ جون منظوريون",
+      "approvalsAria": "{name} جون منظوريون: هن ايجنٽ لاءِ ڇاڻيل منظوري قطار کوليو",
+      "turns": "ٽرن ٽائم لائن",
+      "turnsAria": "{name} جي ٽرن ٽائم لائن: هن ايجنٽ لاءِ ٽرن معائنو ڪندڙ کوليو"
     },
     "readOnly": {
       "locked": "هي ايجنٽ ايڊٽنگ لاءِ بند آهي، تنهن ڪري هي قدر رڳو پڙهڻ لاءِ آهن.",
@@ -15577,7 +15577,7 @@
     "regAgentPlaceholder": "هڪ ايجنٽ چونڊيو",
     "regAgentsFailed": "توهان جا ايجنٽ لوڊ نه ٿي سگهيا.",
     "regPickAgent": "ڪنهن ايجنٽ جا پرامپٽ ڏسڻ ۽ مٽائڻ لاءِ ان کي چونڊيو.",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "لنڪ ۾ ايجنٽ توهان لاءِ موجود ناهي، ڇاڪاڻ ته اهو آهي ئي ڪونه يا توهان ان کي ڏسي نٿا سگهو. ان جي جاءِ تي رجسٽري ورڪ اسپيس دائري ۾ کليو.",
     "regSearchLabel": "پرامپٽ ڳوليو",
     "regSearchPlaceholder": "ڇا، عنوان يا وضاحت",
     "regRiskLabel": "خطري جو درجو",

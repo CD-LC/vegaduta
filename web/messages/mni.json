@@ -818,15 +818,15 @@
     "rsParam_seed": "সিড",
     "rsParam_stopSequences": "মেন্তলবগী ক্রম",
     "rsParamDropped": "{param} এজেন্ট অসিদা সেট তৌখ্রে, নত্তে {provider}না {model}গীদমক মসি পাংদে, অদুগা মসিগী ফংসন লৈদে।",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "রন অসিগীদমক টুল",
+    "rsToolsRunOnly": "রন অসি অমত্তা",
+    "rsToolsRunNote": "সুইচ অসিনা প্লেগ্রাউন্ড অসিগীদগী থাগৎলিবা খবরশিংনা এজেন্টকী কোন টুল ব্যবহার তৌবা ঙম্লিবনো মসি থীরি। করিসু সেভ তৌদে: বাকী মাপুংগীদমক এজেন্টনা মখোইগী টুল প্রবেশ থম্মি। মসিনা এজেন্টকী টুল মেন্তলবা ঙম্লি, মতমদাসু অনৌবা টুল পীদে।",
+    "rsToolsRunSummary": "এজেন্টকী টুল {total}গী মনুংদগী {on} রন অসিগীদমক শিন্থৌরে",
+    "rsToolsRunNone": "রন অসিগীদমক টুল লৈদে: এজেন্টনা লিখাকতা অমত্তা জবাব পীবা ঙম্লি।",
+    "rsToolsReset": "এজেন্টকী টুল ব্যবহার তৌরো",
+    "rsToolsNotInAgent": "মসি এজেন্ট অসিগী সেভ তৌখ্রবা টুলগী মনুংদা লৈদে, তৈঁ রনগীদমক শিন্থৌবা ঙম্দে।",
+    "rsToolsEditAgent": "এজেন্টকী সেভ তৌখ্রবা টুল সোইরো",
+    "rsToolsLimitedChip": "রন অসিগীদমক টুল সীমিত",
     "rsToolsEmpty": "এজেন্ট অসিগীদমক টুল লৈদে।",
     "rsToolsSummary": "টুল {total}গী মনুংদগী {on} শিন্থৌরে",
     "rsToolsFailed": "টুলশিং লোড তৌবা ঙম্দ্রে।",
@@ -884,14 +884,14 @@
     "chipToolsOff": "টুল লৈদ্রনা অসুক কোশিশ তৌরি",
     "chipFailoverBlocked": "বেকআপ মডেল ব্যবহার তৌদ্রে: টুলশিং অদোম্না চত্থ্রে",
     "rsLimitChangeOne": "সোইরো",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "হারগী মেহুৎ ফাওখ্রে",
+    "reasonTimeout": "মতম ফাওখ্রে",
+    "reasonProviderUnavailable": "প্রোভাইডর ফংদে",
+    "reasonAuthFailed": "প্রোভাইডরনা ক্রেডেনশিয়াল য়েংদোকখ্রে",
+    "reasonBilling": "প্রোভাইডরগী বিলিং সমস্যা",
+    "reasonModelNotFound": "মডেল ফংদে",
+    "reasonProviderError": "প্রোভাইডরগী ভুল",
+    "reasonMalformedToolCall": "টুল কল ব্যবহার তৌবা ঙম্দ্রে"
   },
   "nodeDefs": {
     "triggerLabel": "হৌদোকপা",
@@ -13287,7 +13287,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "স্কিল",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14131,7 +14131,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "স্কিল",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14305,7 +14305,7 @@
       "role": "নহাক্কী ভূমিকানা সেটিং অসি সোইবা ঙম্দে। ওয়ার্কস্পেস এডমিন অমদা খোংনো।",
       "scope": "সেটিং অসি অসিদা ওভারাইড তৌবা ঙম্দে।",
       "readOnly": "সেটিংশিং ঙসি ফংবগীদমকনি।",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "সুরক্ষা সেটিং অসি ওয়ার্কস্পেস এডমিননাদাগী সোইবা ঙম্লি। নহাক্না মসিগী মান অসিদা য়েংবা ঙম্লি, নক্তনা সম্পাদনা তৌবা ঙম্দে।"
     },
     "reset": {
       "button": "ঊৎপীবা মানদা রিসেট তৌরো",
@@ -14355,12 +14355,12 @@
       "acknowledge": "ঐনা সুরক্ষা সোইবা অসিগী ফল খংলি।",
       "cancel": "তাঙ্খৎলো",
       "confirm": "নিশ্চিত তৌনা সেভ তৌরো",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "রিসেট: ওভারাইড ঊৎকোক্লরি অমসুং সেটিংনা মখোইনা ঊৎপীবা মানদা ঊৎলকরি।"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "অপুনবনা অপুনবা কঠোর: অপুনবা মান ওংহনরি, অনৌবা য়েংদোকপি।",
+      "lower": "অনৌবনা অপুনবা কঠোর: অনৌবা মান ওংহনরি, অপুনবা য়েংদোকপি।",
+      "enumOrder": "বিকল্পশিং অনৌবা কঠোরগীদগী অপুনবা কঠোর ক্রমদা লৈ: {options}। নহাক্না কঠোর মরুংদা অমত্তা চত্থবা ঙম্লি।"
     }
   },
   "approvalsQueue": {
@@ -14529,8 +14529,8 @@
     "tlSevWarn": "ঈশিনবা গনি",
     "tlSevError": "বায়ফম",
     "tlIntake": "টর্ন ইন্থৌখ্রে: অক্ষর {chars}, টুল {tools}, সংযুক্তি {attachments}",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "রন অসিগীদমক টুল",
+    "tlRunToolsNone": "করিসু লৈদে (লিখাক অমত্তা)",
     "tlModelCall": "{model} ({provider})দা মডেল কল, রুট {route}",
     "tlFailover": "{model} ({provider})দা ফেলওভার ওইখ্রে",
     "tlRetryModel": "{model} ({provider})দা অসুক কোশিশ তৌখ্রে, রুট {route}",
@@ -14539,7 +14539,7 @@
     "tlToolCall": "টুল কল {tool}: {status}",
     "tlApprovalRequested": "{tool} চত্থবগী মমাংদা অনুমোদন খোংখ্রে",
     "tlApprovalDecided": "{tool}গীদমক অনুমোদনগী ফৈসালা ওইখ্রে: {decision}",
-    "tlApprovalAutoAllowed": "{tool} ran without asking: a read-only call under Supervised",
+    "tlApprovalAutoAllowed": "{tool} খোংদ্রনা চত্থ্রে: তত্ত্বাবধানদা ফংবগীদমক কল অমা",
     "tlContinuation": "নিরন্তরতা: {guard} ({outcome})",
     "tlGuard": "গার্ডরেল {guard}: {outcome}",
     "tlVerifyPassed": "নাজাবা পাস: {check}",
@@ -14609,7 +14609,7 @@
     "modeTextOnlyHelp": "এজেন্টনা মখোইগী টুল লৈদ্রনা জবাব পীরি। সুরক্ষিত: মরম অসেংবা মতেংদা করিসু চত্থদে। অনুমান তৌখ্রবা টুল নাজাবা অচৌহনবা ঙম্দে।",
     "modeFull": "টুলশিং নখোইনা অচৌবা পাইপলাইন",
     "modeFullHelp": "মরম অসেংবা ব্যবহারকারী অমদা ফংবা টুল, গার্ডরেল অমসুং চরণগী মেহুৎশিং মহাক্তা। অনুমান তৌখ্রবা টুল অমসুং ট্রাজেক্টরি নাজাবাশিংগীদমক গনি।",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "ফংবা অমত্তা তৌবা টুলশিং মরম অসেংবা মতেংদা চত্থরি। ডেটা সোইবা, খবর থাগৎপা নত্রবদি পাইসা খর্চা তৌবা ঙমবা করিসু অনুকরণ তৌরি অমসুং রনদা তালিকা তৌরি, তৈঁ মরম অসেংবা মতেংদা করিসু ওইদে। সুরক্ষা শ্রেণী লৈদ্রবা টুলসু অনুকরণ ওইরি।",
     "autoApproveLabel": "ইভ্যাল স্যান্ডবক্সদা টুল কল মখোইনা অনুমোদন তৌরো",
     "autoApproveHelp": "শাঙনা মী অমা ঙৈবা টুল কলশিং ইভ্যাল স্যান্ডবক্সনা অনুমোদন তৌরি, কেস অসি অচৌহনবগীদমক। মসি লৈদ্রনা কেস অসি প্রোডাকসনদা ওইবগুম্না জবাব ফংদ্রবা অনুমোদনদা অচৌরি।",
     "autoApproveWarnTitle": "প্রোডাকসন নত্তবা ওয়ার্কস্পেসশিংগীদমকনি",
@@ -14617,7 +14617,7 @@
     "autoApproveNeedsFull": "মমাংদা অচৌবা পাইপলাইন শিন্থৌরো: মখোইনা অনুমোদন তৌবা টুলশিং চত্থবদাগী লাগু ওইরি।",
     "autoApproveRefused": "ওয়ার্কস্পেস অসিদা অনুমতি লৈদে: {reason}",
     "autoApproveConfirmTitle": "ইভ্যালদা টুল কল মখোইনা অনুমোদন তৌবনি?",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "ডেটাসেট অসিগী রিপ্লেদা মী অমা ঙৈবা টুল কল প্রত্যেক মখোইনা অনুমোদন ওইগনি। অনুমোদন ওইবা ফংবা অমত্তা তৌবা টুলশিং মরম অসেংবা মতেংদা চত্থরি; করিসু সোইবা ঙমবাশিং ঙসিসু অনুকরণ ওইরি। মসি টেস্ট ডেটা লৈবা ওয়ার্কস্পেসদা অমত্তা তৌরো। রনশিংনা মখোইনা অনুমোদন ওইখিবা রেকর্ড তৌরি।",
     "autoApproveConfirm": "মখোইনা অনুমোদন শিন্থৌরো",
     "trajectoryLabel": "ট্রাজেক্টরি নাজাবাশিং",
     "trajectoryOn": "On",
@@ -14643,21 +14643,21 @@
     "samplingSource_tenant": "নহাক্কী ওয়ার্কস্পেসগীদমক সেট তৌখ্রে",
     "samplingSource_agent": "এজেন্ট অসিগীদমক সেট তৌখ্রে",
     "modeDefault": "ওয়ার্কস্পেস ডিফল্ট",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefaultHelp": "নহাক্কী ওয়ার্কস্পেসগী সেটিং ফীরি (এডমিননা সোইদ্রবদি পূর্ণ পাইপলাইন)। রন প্রত্যেকনা ঙসিসু মখোইগী মোড থীবা ঙম্লি।",
+    "modeDefaultCurrent": "ঙসি: {mode}",
+    "modeNameFull": "পূর্ণ পাইপলাইন",
+    "modeNameQuick": "ফাঙবা (লিখাক অমত্তা)",
+    "badgeFull": "পূর্ণ পাইপলাইন",
+    "badgeQuick": "ফাঙবা",
+    "datasetModePinnedTitle": "ডেটাসেট অসি মতমদাসু মসিগুম্নাদিনো রিপ্লে ওইরি। রন অমনা ঙসিসু অমনীবা মোড থীবা ঙম্লি।",
+    "datasetModeDefaultTitle": "রন করিনা রিপ্লে ওইগনো মসিদা ডেটাসেট অসিনা ওয়ার্কস্পেসগী ডিফল্ট ফীরি।",
+    "runModeLabel": "মতাংগী রনগীদমক রিপ্লে মোড",
+    "runModeInherit": "ডেটাসেটকী সেটিং ব্যবহার তৌরো",
+    "runModeHelp": "পূর্ণ পাইপলাইননা এজেন্টকী টুল, গার্ডরেল অমসুং অনুমোদন নখোইনা সুরক্ষিত স্যান্ডবক্সদা চত্থহনরি: ফংবা অমত্তা তৌবা টুলশিং মরম অসেংবা মতেংদা চত্থরি, ডেটা সোইবা নত্রবদি করিসু থাগৎপা ঙমবা মাপুং অনুকরণ ওইরি। ফাঙবা মোডনা টুলশিং ফাদোকলি অমসুং ঙাকখ্রবা জবাব অমত্তা নাজারি।",
+    "runModeFullTitle": "রন অসিনা ইভ্যাল স্যান্ডবক্সদা পূর্ণ পাইপলাইন ব্যবহার তৌখ্রে।",
+    "runModeQuickTitle": "রন অসি লিখাক অমত্তা ফাঙবা রিপ্লে অমনি: এজেন্টকী টুলশিং ফাদোকখ্রে।",
+    "runSimulatedTools": "রন অসিদা অনুকরণ তৌখ্রে, চত্থহনদ্রে (মখোইনা ডেটা সোইবা নত্রবদি প্লাটফর্মগী ফাওবা ঙম্লি): {tools}।",
+    "toolStatusSimulated": "অনুকরণ তৌখ্রে, চত্থহনদ্রে"
   },
   "agentLab": {
     "wtLabel": "এজেন্টকী টুলশিং নখোইনা চত্থবা",
@@ -14692,12 +14692,12 @@
         "description": "এজেন্টনা কয়া স্মৃতি থম্মি অমসুং ঈশিন্নবনো।"
       },
       "attachments": {
-        "label": "Chat uploads",
-        "description": "How large the files people attach to chat messages may be."
+        "label": "চ্যাট আপলোড",
+        "description": "মীশিংনা চ্যাট খবরশিংদা কয়াগুম্বা অচৌবা ফাইল জোড়বা ঙম্লিবনো।"
       },
       "skills": {
-        "label": "Skills",
-        "description": "How much of the agent's instructions the list of installed skills may use."
+        "label": "স্কিল",
+        "description": "ইন্স্টল তৌখ্রবা স্কিলশিংগী তালিকানা এজেন্টকী নির্দেশনাগী কয়া ব্যবহার তৌবা ঙম্লিবনো।"
       },
       "aux": {
         "label": "পিছোকগী মডেল কল",
@@ -14768,24 +14768,24 @@
       },
       "steps": {
         "graceCalls": {
-          "label": "Calls answered after the limit",
-          "description": "How many more tool calls the model may attempt after the turn's tool limit is used up. Each one is refused with a note to answer with what it has; past this number the turn is stopped with an error.",
-          "help": "Raise it if a model needs a few tries to stop calling tools. Lower it to end looping turns sooner. 0 stops the turn at the first call over the limit."
+          "label": "মেহুৎগী মতাংদা জবাব পীখ্রবা কল",
+          "description": "টর্নগী টুল মেহুৎ ফাওখ্রবগী মতাংদা মডেলনা আওইবা কয়া টুল কল কোশিশ তৌবা ঙম্লিবনো। প্রত্যেকতা \"লৈবা নখোইনা জবাব পী\" হায়বা টিপ্পনীনা য়েংদোকপি; সংখ্যা অসিগীদগী ওংখ্রবদি টর্ন ভুলনা মেন্তল ওইরি।",
+          "help": "মডেলনা টুল কল তৌবা মেন্তলবগীদমক কোশিশ কয়া গনবদি হাপহনরো। লুপদা ঙৈবা টর্নশিং শীঘ্র অচৌহনবগীদমক অনৌ তৌরো। ০না মেহুৎগী মপাংদা ওংখ্রবা মরুং কলতাসু টর্ন মেন্তলরি।"
         },
         "supervisedDivisor": {
-          "label": "Supervised agents get 1/N of the tool limit",
-          "description": "A supervised agent gets the turn's tool-call limit divided by this number, but never less than the minimum below.",
-          "help": "Raise it to keep supervised agents on a shorter leash. 1 gives them the full limit."
+          "label": "তত্ত্বাবধানদা লৈবা এজেন্টশিংনা টুল মেহুৎগী ১/N ফংরি",
+          "description": "তত্ত্বাবধানদা লৈবা এজেন্টনা টর্নগী টুল-কল মেহুৎ সংখ্যা অসিনা ভাগ তৌনা ফংরি, নক্তনা মমাংগী ঙাক্তুনা মানগীদগী মতমদাসু অনৌ ওইদে।",
+          "help": "তত্ত্বাবধানদা লৈবা এজেন্টশিং অপুনবা কঠোরনা থম্বগীদমক হাপহনরো। ১না মখোইগীদমক পূর্ণ মেহুৎ পীরি।"
         },
         "supervisedMinSteps": {
-          "label": "Least tool calls for a supervised agent",
-          "description": "The smallest tool-call limit a supervised agent gets, however high the number above is.",
-          "help": "Keep it at 3 or more so a supervised agent can still finish a simple job with several steps."
+          "label": "তত্ত্বাবধানদা লৈবা এজেন্টগীদমক ঙাক্তুনা টুল কল",
+          "description": "মপাংগী সংখ্যা কয়াগুম্বা অপুন ওইবসু, তত্ত্বাবধানদা লৈবা এজেন্টনা ফংবা লৌবা অনৌবা টুল-কল মেহুৎ।",
+          "help": "মসি ৩ নত্রবদি অপুনবা থম্মো, তৌবা তত্ত্বাবধানদা লৈবা এজেন্টনা চরণ অপুনবা লৈবা সরল ফংসন ঙসিসু অচৌহনবা ঙমগনি।"
         },
         "autonomousMultiplier": {
-          "label": "Fully autonomous agents get N times the limit",
-          "description": "A fully autonomous agent gets the turn's tool-call limit multiplied by this number.",
-          "help": "Raise it for agents that run long jobs without a person watching; they can then spend more calls and money in one turn. 1 gives them the standard limit."
+          "label": "পূর্ণ স্বায়ত্ত এজেন্টশিংনা মেহুৎগী N গুণ ফংরি",
+          "description": "পূর্ণ স্বায়ত্ত এজেন্টনা টর্নগী টুল-কল মেহুৎ সংখ্যা অসিনা গুণ তৌনা ফংরি।",
+          "help": "কমনাসু য়েংদ্রনা অপাইবা ফংসন চত্থিবা এজেন্টশিংগীদমক হাপহনরো; অদুদা মখোইনা টর্ন অমদা অপুনবা কল অমসুং পাইসা খর্চা তৌবা ঙম্লি। ১না মখোইগীদমক মানক মেহুৎ পীরি।"
         }
       }
     },
@@ -14859,80 +14859,80 @@
           "help": "অপাইবা উইন্ডোনা অপাইবা ফংসনগী সেসনশিংদা তেংনরি, গিদিমবনা টুল তালিকা গিদিম থম্মি।"
         },
         "maxStickyTools": {
-          "label": "Most tools kept on offer in follow-ups",
-          "description": "The most tools carried over into a short follow-up message. 0 keeps none.",
-          "help": "A higher number helps when a task uses many tools, a lower one keeps the tool list small."
+          "label": "ফলো-আপদা প্রস্তাব তৌনা থম্বা আওইবা টুল",
+          "description": "গিদিম ফলো-আপ খবরদা নুংনা চত্থবা আওইবা টুল। ০না করিসু থম্দে।",
+          "help": "ফংসন অমনা টুল অপুনবা ব্যবহার তৌবদা অচৌবা সংখ্যানা তেংনরি; গিদিমবনা টুল তালিকা গিদিম থম্মি।"
         },
         "keepPrimaryModel": {
-          "label": "Keep the main model for follow-ups",
-          "description": "A short follow-up in a conversation that already used tools stays on the agent's main model instead of the cheaper one.",
-          "help": "Turn it off to let cost routing send follow-ups such as 'yes' to the cheaper model, at the risk of weaker handling of a task in progress."
+          "label": "ফলো-আপগীদমক মুখ্য মডেল থম্মো",
+          "description": "মমাংদাশিং টুল ব্যবহার তৌখ্রবা বাতচাদা গিদিম ফলো-আপ সস্তা মডেলগী মফমদা এজেন্টকী মুখ্য মডেলদনো লৈরি।",
+          "help": "মসি মেন্তলরো, তৌবা খর্চা রুটিংনা \"হোই\" গুম্বা ফলো-আপশিং সস্তা মডেলদা থাগৎগনি, নক্তনা চত্থিবা ফংসন ঙাক্লবা তৌনা সম্ভালবগী জোখিম লৈ।"
         }
       },
       "semanticCache": {
         "similarityThreshold": {
-          "label": "How alike a question must be to reuse an answer",
-          "description": "For agents that reuse answers to similar questions: how close a new question must be to an earlier one, from 0.85 to 1, for the stored answer to be served.",
-          "help": "A lower number serves more repeats but risks giving an answer meant for a different question. Keep it high when wrong answers are costly. An answer is only reused for the person it was given to."
+          "label": "জবাব অসুক ব্যবহার তৌবগীদমক খোংবা কয়াগুম্বা মিলনগনো",
+          "description": "মিলনবা খোংবাশিংগী জবাব অসুক ব্যবহার তৌবা এজেন্টশিংগীদমক: সেভ তৌখ্রবা জবাব পীবগীদমক অনৌবা খোংবা মমাংগী খোংবাদগী কয়াগুম্বা নেংবা লৈগনো, ০.৮৫দগী ১সিং।",
+          "help": "অনৌবা সংখ্যানা অপুনবা অসুক অসুক ওইবদা জবাব পীরি নক্তনা অমনীবা খোংবাগীদমক ওইবা জবাব পীবগী জোখিম লৈ। ভুল জবাব মহৎ ওইবদি মসি অপুনবা থম্মো। জবাব কনাদা পীখিবনো মহাকগীদমকনো অসুক ব্যবহার তৌরি।"
         },
         "ttl": {
-          "label": "How long a reusable answer is kept",
-          "description": "How long a stored answer can be served to a similar question before it is dropped.",
-          "help": "Shorten it when your answers go out of date quickly."
+          "label": "অসুক ব্যবহার তৌবা ঙমবা জবাব কয়া মতম থম্মিবনো",
+          "description": "সেভ তৌখ্রবা জবাব ঊৎকোকবগী মমাংদা মিলনবা খোংবাদা কয়া মতম পীবা ঙম্লিবনো।",
+          "help": "নহাক্কী জবাবশিং শীঘ্র পুরান ওইবদি মসি গিদিম তৌরো।"
         },
         "maxEntriesPerAgent": {
-          "label": "Most stored answers per agent",
-          "description": "How many answers one agent keeps for reuse. The oldest are dropped beyond this.",
-          "help": "A larger store finds more repeats and uses more storage."
+          "label": "এজেন্ট প্রত্যেকগী আওইবা সেভ তৌখ্রবা জবাব",
+          "description": "এজেন্ট অমনা অসুক ব্যবহার তৌবগীদমক কয়া জবাব থম্মিবনো। মসিগীদগী অপুনবদি পুরান ওইবাশিং ঊৎকোক্লরি।",
+          "help": "অচৌবা ভাণ্ডারনা অপুনবা অসুক অসুক ফংরি অমসুং অপুনবা স্টোরেজ ব্যবহার তৌরি।"
         }
       },
       "toolLedger": {
         "enabled": {
-          "label": "Keep a record of tool calls in the conversation",
-          "description": "Store a short record of each turn's tool calls with the conversation, so later turns can see what was done.",
-          "help": "Turn it off to keep conversation history text-only; the agent then cannot tell what its tools did in earlier turns. This applies to the whole workspace."
+          "label": "বাতচাদা টুল কলগী রেকর্ড থম্মো",
+          "description": "টর্ন প্রত্যেকগী টুল কলগী গিদিম রেকর্ড বাতচা নখোইনা সেভ তৌরো, তৌবা মতাংগী টর্নশিংনা করি তৌখিবনো য়েংবা ঙমগনি।",
+          "help": "বাতচাগী ইতিহাস লিখাক অমত্তা থম্বগীদমক মসি মেন্তলরো; অদুদা মমাংগী টর্নশিংদা এজেন্টকী টুলশিংনা করি তৌখিবনো এজেন্টনা খংবা ঙম্দে। মসি ওয়ার্কস্পেস অচৌবাদা লাগু ওইরি।"
         },
         "replayEnabled": {
-          "label": "Show the tool record to the model",
-          "description": "Include the stored record of earlier tool calls when the model is given the conversation.",
-          "help": "Turn it off to keep storing the record without using any of the model's working space for it."
+          "label": "মডেলদা টুল রেকর্ড য়েংহনরো",
+          "description": "মডেলদা বাতচা পীবগী মতমদা মমাংগী টুল কলগী সেভ তৌখ্রবা রেকর্ড থেংনরো।",
+          "help": "রেকর্ড সেভ তৌনা লৈবগীদমক নক্তনা মসিগীদমক মডেলগী ফংসন তৌবা মফম ব্যবহার তৌদ্রবগীদমক মসি মেন্তলরো।"
         },
         "replayTurns": {
-          "label": "Earlier turns whose tool record is shown",
-          "description": "How many of the most recent turns that used tools have their record shown to the model.",
-          "help": "A larger number helps in long working sessions but uses more of the model's working space."
+          "label": "টুল রেকর্ড য়েংহনবা মমাংগী টর্ন",
+          "description": "টুল ব্যবহার তৌখ্রবা মতাংগী টর্নশিংগী মনুংদগী কয়াগী রেকর্ড মডেলদা য়েংহনরিবনো।",
+          "help": "অচৌবা সংখ্যানা অপাইবা ফংসন সেসনশিংদা তেংনরি নক্তনা মডেলগী ফংসন তৌবা মফম অপুনবা ব্যবহার তৌরি।"
         },
         "maxEntriesPerTurn": {
-          "label": "Tool calls listed per turn",
-          "description": "How many of one turn's tool calls are written into the record. Further calls are only counted.",
-          "help": "Raise it for turns that make many calls and need every one remembered."
+          "label": "টর্ন প্রত্যেকদা তালিকা তৌরিবা টুল কল",
+          "description": "টর্ন অমগী কয়া টুল কল রেকর্ডদা ঙাকলিবনো। মতাংগী কলশিং গনবা অমত্তা ওইরি।",
+          "help": "অপুনবা কল তৌবা অমসুং প্রত্যেক ঈশিন্নগনবা টর্নশিংগীদমক হাপহনরো।"
         },
         "maxReplayCharsPerTurn": {
-          "label": "Longest tool record per turn",
-          "description": "How many characters of one turn's record are shown to the model; the rest is counted, not listed.",
-          "help": "Lower it to save cost on every later turn, raise it to keep more detail."
+          "label": "টর্ন প্রত্যেকদা অপাইবা টুল রেকর্ড",
+          "description": "টর্ন অমগী রেকর্ডগী অক্ষর কয়া মডেলদা য়েংহনরিবনো; বাকী গনরি, তালিকা তৌদে।",
+          "help": "মতাংগী টর্ন প্রত্যেকদা খর্চা তেংনবগীদমক গিদিম তৌরো, অপুনবা বিবরণ থম্বগীদমক হাপহনরো।"
         }
       },
       "attachments": {
         "maxImageMb": {
-          "label": "Largest image upload (MB)",
-          "description": "The biggest image a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for photos and screenshots; large files are slower to send and use more of the model's allowance."
+          "label": "আওইবা অচৌবা ছবি আপলোড (MB)",
+          "description": "চ্যাট খবরদা মী অমনা জোড়বা ঙমবা আওইবা অচৌবা ছবি, মেগাবাইটতা। প্লাটফর্মগী অচৌবা ফাইল মেহুৎসু লৈ মসিনা মসি ওংখৎপা ঙম্দে।",
+          "help": "ফটো অমসুং স্ক্রিনশটগীদমক হাপহনরো; অচৌবা ফাইলশিং থাগৎপদা ঙাক্লি অমসুং মডেলগী কোটা অপুনবা ব্যবহার তৌরি।"
         },
         "maxAudioMb": {
-          "label": "Largest audio upload (MB)",
-          "description": "The biggest audio file a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for longer recordings; large files are slower to send and use more of the model's allowance."
+          "label": "আওইবা অচৌবা অডিও আপলোড (MB)",
+          "description": "চ্যাট খবরদা মী অমনা জোড়বা ঙমবা আওইবা অচৌবা অডিও ফাইল, মেগাবাইটতা। প্লাটফর্মগী অচৌবা ফাইল মেহুৎসু লৈ মসিনা মসি ওংখৎপা ঙম্দে।",
+          "help": "অপাইবা রেকর্ডিংগীদমক হাপহনরো; অচৌবা ফাইলশিং থাগৎপদা ঙাক্লি অমসুং মডেলগী কোটা অপুনবা ব্যবহার তৌরি।"
         },
         "maxVideoMb": {
-          "label": "Largest video upload (MB)",
-          "description": "The biggest video a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for longer clips; large files are slower to send and use more of the model's allowance."
+          "label": "আওইবা অচৌবা ভিডিও আপলোড (MB)",
+          "description": "চ্যাট খবরদা মী অমনা জোড়বা ঙমবা আওইবা অচৌবা ভিডিও, মেগাবাইটতা। প্লাটফর্মগী অচৌবা ফাইল মেহুৎসু লৈ মসিনা মসি ওংখৎপা ঙম্দে।",
+          "help": "অপাইবা ক্লিপশিংগীদমক হাপহনরো; অচৌবা ফাইলশিং থাগৎপদা ঙাক্লি অমসুং মডেলগী কোটা অপুনবা ব্যবহার তৌরি।"
         },
         "maxDocumentMb": {
-          "label": "Largest document upload (MB)",
-          "description": "The biggest document or spreadsheet a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for long reports and large data files; large files are slower to process."
+          "label": "আওইবা অচৌবা দস্তাবেজ আপলোড (MB)",
+          "description": "চ্যাট খবরদা মী অমনা জোড়বা ঙমবা আওইবা অচৌবা দস্তাবেজ নত্রবদি স্প্রেডশীট, মেগাবাইটতা। প্লাটফর্মগী অচৌবা ফাইল মেহুৎসু লৈ মসিনা মসি ওংখৎপা ঙম্দে।",
+          "help": "অপাইবা রিপোর্ট অমসুং অচৌবা ডেটা ফাইলশিংগীদমক হাপহনরো; অচৌবা ফাইলশিং প্রক্রিয়া তৌবদা ঙাক্লি।"
         }
       },
       "continuation": {
@@ -14993,16 +14993,16 @@
       },
       "tenant": {
         "maxMemories": {
-          "label": "Most shared memories",
-          "description": "How many memories shared across the workspace are kept. The oldest are dropped beyond this.",
-          "help": "Raise it for large teams that rely on shared knowledge; it also raises storage and recall cost. This applies to the whole workspace."
+          "label": "আওইবা ভাগ-বাঁটা তৌখ্রবা স্মৃতি",
+          "description": "ওয়ার্কস্পেসদা ভাগ-বাঁটা তৌখ্রবা স্মৃতি কয়া থম্মিবনো। মসিগীদগী অপুনবদি পুরান ওইবাশিং ঊৎকোক্লরি।",
+          "help": "ভাগ-বাঁটা তৌখ্রবা জ্ঞানদা ঈশিন্নবা অচৌবা দলশিংগীদমক হাপহনরো; মসিনা স্টোরেজ অমসুং স্মরণগী খর্চাসু হাপহনরি। মসি ওয়ার্কস্পেস অচৌবাদা লাগু ওইরি।"
         }
       },
       "edge": {
         "maxFacts": {
-          "label": "Memories given to on-device chat",
-          "description": "How many memories are handed to an on-device session when it starts.",
-          "help": "On-device models have a small working space, so keep this low."
+          "label": "ডিভাইসতা চ্যাটদা পীবা স্মৃতি",
+          "description": "ডিভাইসতা সেসন ইন্থৌবগী মতমদা মহাকতা কয়া স্মৃতি পীরিবনো।",
+          "help": "ডিভাইসতা মডেলগী ফংসন তৌবা মফম গিদিম, তৈঁ মসি অনৌ থম্মো।"
         }
       },
       "graph": {
@@ -15021,14 +15021,14 @@
     "skills": {
       "prompt": {
         "maxSkills": {
-          "label": "Most skills listed in the prompt",
-          "description": "How many of your skills are named in the agent's instructions so it knows they exist. The rest are counted, not listed.",
-          "help": "Raise it if you have many skills; each listed skill uses a little of the model's working space on every turn. This applies to the whole workspace."
+          "label": "প্রোম্পটতা তালিকা তৌরিবা আওইবা স্কিল",
+          "description": "এজেন্টনা মখোই লৈবা খংবগীদমক মহাকগী নির্দেশনাদা নহাক্কী স্কিল কয়াগী মুং পীরিবনো। বাকী গনরি, তালিকা তৌদে।",
+          "help": "নহাক্কা স্কিল অপুনবা লৈবদি হাপহনরো; তালিকা তৌখ্রবা স্কিল প্রত্যেকনা টর্ন প্রত্যেকদা মডেলগী ফংসন তৌবা মফমগী অংশ অমা ব্যবহার তৌরি। মসি ওয়ার্কস্পেস অচৌবাদা লাগু ওইরি।"
         },
         "maxBlockChars": {
-          "label": "Size of the skills list in the prompt",
-          "description": "How many characters the list of skills may take in the agent's instructions. When it is full, later skills are shortened to their names.",
-          "help": "Raise it to keep descriptions for more skills, lower it to save tokens on every turn. This applies to the whole workspace."
+          "label": "প্রোম্পটতা স্কিল তালিকাগী অচৌবা",
+          "description": "এজেন্টকী নির্দেশনাদা স্কিলশিংগী তালিকানা কয়া অক্ষর লৌবা ঙম্লিবনো। পুরিবগী মতাংদা মতাংগী স্কিলশিং মুংশিং ফাওবা গিদিম তৌরি।",
+          "help": "অপুনবা স্কিলগী বিবরণ থম্বগীদমক হাপহনরো, টর্ন প্রত্যেকদা টোকেন তেংনবগীদমক গিদিম তৌরো। মসি ওয়ার্কস্পেস অচৌবাদা লাগু ওইরি।"
         }
       }
     },
@@ -15084,12 +15084,12 @@
       },
       "supervised": {
         "readOnlyCalls": {
-          "label": "Supervised agents and read-only tools",
-          "description": "Whether an agent on the Supervised autonomy tier still asks you before a tool that only reads, such as a search or a lookup. Writes, sends and tools the platform has not classified always ask.",
-          "help": "You can only make this stricter than the platform setting. Asking every time is the safest choice; letting read-only tools run removes a prompt but also a chance to stop a search you did not expect. An agent that can read private data, take in untrusted content and send data out is asked about every call whatever this says.",
+          "label": "তত্ত্বাবধানদা লৈবা এজেন্ট অমসুং ফংবা অমত্তা তৌবা টুল",
+          "description": "তত্ত্বাবধান স্বায়ত্ততাগী স্তরদা লৈবা এজেন্টনা বিচার নত্রবদি লুকআপ গুম্বা ফংবা অমত্তা তৌবা টুলগী মমাংদাসু নহাকতা খোংরি নখোংদ্রি। ঙাকপা, থাগৎপা অমসুং প্লাটফর্মনা শ্রেণী শেমদ্রবা টুলশিংনা মতমদাসু খোংরি।",
+          "help": "নহাক্না মসি প্লাটফর্ম সেটিংগীদগী কঠোর ওইনা অমত্তা তৌবা ঙম্লি। প্রত্যেক বেরদা খোংবা মসি আওইবা সুরক্ষিত থীবা অমনি; ফংবা অমত্তা তৌবা টুল চত্থহনবদা খোংবা অমা তেংনরি, নক্তনা অপ্রত্যাশিত বিচার ফাদোকপগী মওংদা অমাসু ঊৎলকরি। মীশিংগী ডেটা ফংবা, বিশ্বাস তৌদ্রবা বিষয়বস্তু লৌবা অমসুং ডেটা মপাংদা থাগৎপা ঙমবা এজেন্টতা সেটিং অসিনা করি হায়বসু কল প্রত্যেকদা খোংরি।",
           "options": {
-            "auto-allow": "Let read-only tools run without asking",
-            "gate": "Ask before every tool call"
+            "auto-allow": "ফংবা অমত্তা তৌবা টুল খোংদ্রনা চত্থহনরো",
+            "gate": "টুল কল প্রত্যেকগী মমাংদা খোংরো"
           }
         }
       }
@@ -15114,12 +15114,12 @@
           "help": "অসুক অসুক প্রত্যেকনা রন অমগী খর্চা অমসুং মতম গুণ তৌরি।"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "মূল্যায়ন করিনা চত্থরিবনো",
+          "description": "রন নত্রবদি মসিগী ডেটাসেটনা হায়দ্রবদা, মূল্যায়ন রননা এজেন্টকী টুল নখোইনা সুরক্ষিত স্যান্ডবক্সদা রিপ্লে তৌরিবনো (পূর্ণ পাইপলাইন) নত্রবদি লিখাকতা অমত্তা জবাব পীরিবনো (ফাঙবা)।",
+          "help": "পূর্ণ পাইপলাইননা নহাক্কী ব্যবহারকারীশিংনা ফংবা, টুল ব্যবহার সহিত, নাজারি অমসুং খর্চা অপুনবা ওইরি। মসিদা ফংবা অমত্তা তৌবা টুলশিং মরম অসেংবা মতেংদা চত্থরি; ডেটা সোইবা, খবর থাগৎপা নত্রবদি পাইসা খর্চা তৌবা ঙমবা মাপুং অনুকরণ ওইরি অমসুং রনদা তালিকা তৌরি। ফাঙবা সস্তা অমসুং টুল ব্যবহারগী বিষয়দা করিসু হায়দে।",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "স্যান্ডবক্সদা পূর্ণ পাইপলাইন",
+            "quick": "ফাঙবা: লিখাক জবাব অমত্তা"
           }
         }
       }
@@ -15223,7 +15223,7 @@
       "cancel": "তাঙ্খৎলো",
       "done": "সেটিং {count} মখোইগী ঊৎপীবা মানদা রিসেট তৌরো।",
       "partial": "সেটিং {done} রিসেট তৌখ্রে; {failed} রিসেট তৌবা ঙম্দ্রে। বায়বা সেটিংশিংগী খবর য়েংরো।",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "সেটিং {done} রিসেট তৌখ্রে। মরম গনবা {skipped} মখোই লৈবগুম্নাদিনো থম্খ্রে।"
     },
     "import": {
       "button": "ওভারাইড ইম্পোর্ট তৌরো",
@@ -15296,16 +15296,16 @@
       "unknownActor": "খংদ্রবা",
       "noReason": "মরম করিসু পীদ্রে",
       "showMore": "থেংনবা য়েংহনরো",
-      "scope": "Level",
+      "scope": "স্তর",
       "scopeWorkspace": "ওয়ার্কস্পেস",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "এজেন্ট {id}",
+      "scopeFilter": "সোইবা মসি স্তরদা য়েংহনরো",
+      "filterAll": "স্তর মাপুং",
+      "filterWorkspace": "ওয়ার্কস্পেস অমত্তা",
+      "filterAgents": "এজেন্ট অমত্তা",
+      "searchLoadedOnly": "বিচারনা ঙসিগা লোড তৌখ্রবা সোইবাশিং থেংনরি।",
+      "loadError": "সোইবগী ইতিহাস লোড তৌবা ঙম্দ্রে। {message}",
+      "moreFailed": "অপুনবা সোইবা লোড তৌবা ঙম্দ্রে। {message}",
       "loadingMore": "লোড তৌরি"
     }
   },
@@ -15313,7 +15313,7 @@
     "title": "ব্যবহার অমসুং মেহুৎশিং",
     "intro": "এজেন্ট অসিনা টর্ন অমদা কয়া অপুনবা চত্থবা ঙম্লিবনো মসি কন্ট্রোল তৌরো: টুল কল কয়া তৌবা ঙম্লিবনো, কয়া মতম চত্থবা ঙম্লিবনো অমসুং কয়া মমাংদা ফংরিবনো। নহাক্না অসিদা সোইদ্রবা মখোই নহাক্কী ওয়ার্কস্পেসগীদগী ঊৎপীনা লাকপা ওইরি।",
     "saveFirst": "মমাংদা এজেন্ট সেভ তৌরো। শেমখ্রবগী মতাংদা মহাক্কী ব্যবহার অমসুং মেহুৎশিং সেট তৌবা ঙম্লি।",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "মহাকগী ব্যবহার অমসুং মেহুৎ ট্যাব ফিদোকপগীদমক মমাংদা এজেন্ট অমা থীরো।",
     "tabs": {
       "label": "এজেন্ট কনফিগারেসন",
       "setup": "সেটআপ",
@@ -15324,12 +15324,12 @@
       "label": "সম্পর্ক লৈবা পেজশিং",
       "tenant": "ওয়ার্কস্পেস ডিফল্ট সোইরো",
       "playground": "প্লেগ্রাউন্ডদা নাজারো",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "এজেন্ট অসিগী প্রোম্পট",
+      "promptsAria": "{name}গী প্রোম্পট: প্রোম্পট রেজিস্ট্রি এজেন্ট অসিদা ফিদোকরো",
+      "approvals": "এজেন্ট অসিগী অনুমোদন",
+      "approvalsAria": "{name}গী অনুমোদন: এজেন্ট অসিগীদমক ঊৎলখ্রবা অনুমোদনগী লাইন ফিদোকরো",
+      "turns": "টর্ন টাইমলাইন",
+      "turnsAria": "{name}গী টর্ন টাইমলাইন: এজেন্ট অসিগীদমক টর্ন পরিদর্শক ফিদোকরো"
     },
     "readOnly": {
       "locked": "এজেন্ট অসি সোইবগীদমক তালা পাংখ্রে, অদুগা মানশিং অসি ফংবগীদমকনি।",
@@ -15509,7 +15509,7 @@
     "regAgentPlaceholder": "এজেন্ট অমা থীরো",
     "regAgentsFailed": "নহাক্কী এজেন্টশিং লোড তৌবা ঙম্দ্রে।",
     "regPickAgent": "এজেন্ট অমগী প্রোম্পটশিং য়েংবগা সোইবগীদমক মসি থীরো।",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "লিংকদা লৈবা এজেন্ট অসি নহাকপগীদমক ফংদে, করিগীদোক্তনা মসি লৈদে নত্রবদি নহাক্না মসি য়েংবা ঙম্দে। মসিগী মফমদা রেজিস্ট্রি ওয়ার্কস্পেস পরিধিদা ফিদোকখ্রে।",
     "regSearchLabel": "প্রোম্পট বিচার তৌরো",
     "regSearchPlaceholder": "করি, শিরোনাম নত্রবদি বিবরণ",
     "regRiskLabel": "ঝুঁকিগী শ্রেণী",
