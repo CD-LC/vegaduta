@@ -19,6 +19,7 @@ import java.util.HexFormat;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 
 /**
  * {@link WhatsAppVoiceNoteService} with fake Meta and Sarvam gateways - no network, no Spring.
@@ -617,6 +618,47 @@ class WhatsAppVoiceNoteServiceTest {
         assertTrue(media.sent.isEmpty());
         assertEquals(1, metrics.tally(VoiceNoteOutcome.VOICE_REPLY_TTS_FAILED));
         assertNull(media.lastSentMime);
+    }
+
+    // ---- no speech vendor installed (CLOUD_SPEECH off) ----
+
+    @Test
+    void startsWithNoSpeechGatewayBeanAndAnswersEveryVoiceNoteAsNotAvailable() {
+        // The Spring-facing constructor with empty ObjectProviders: what a lean install wires when
+        // voice notes are switched on but SarvamVoiceSpeechGateway is not a bean.
+        StaticListableBeanFactory emptyContext = new StaticListableBeanFactory();
+        service =
+                new WhatsAppVoiceNoteService(
+                        true,
+                        true,
+                        60,
+                        1_048_576L,
+                        5,
+                        25,
+                        25,
+                        500,
+                        20,
+                        300,
+                        true,
+                        "",
+                        "codemix",
+                        "",
+                        "",
+                        "mp3",
+                        media,
+                        emptyContext.getBeanProvider(VoiceSpeechGateway.class),
+                        emptyContext.getBeanProvider(
+                                io.micrometer.core.instrument.MeterRegistry.class));
+
+        WhatsAppVoiceNoteService.Transcription t = service.transcribe(REF, CREDS, "919999900000");
+        service.sendVoiceReply("A perfectly speakable answer.", "en-IN", CREDS, "919999900000");
+
+        assertTrue(service.isEnabled());
+        assertEquals(VoiceNoteOutcome.NOT_AVAILABLE, t.outcome());
+        assertEquals(0, media.downloads);
+        assertTrue(media.sent.isEmpty());
+        assertTrue(
+                service.languageHint("hi-IN").contains("Reply in the language the person spoke"));
     }
 
     private static boolean anyNonZero(byte[] bytes) {
