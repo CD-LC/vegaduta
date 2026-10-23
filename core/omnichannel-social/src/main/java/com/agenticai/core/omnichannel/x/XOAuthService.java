@@ -6,6 +6,8 @@ import com.agenticai.core.omnichannel.x.dto.XConnectionResponse;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.oauth.OAuthStateBinding;
 import com.agenticai.core.security.oauth.OAuthStateBindingException;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
@@ -40,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
  * window, same as Google's.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class XOAuthService {
 
     private static final Logger log = LoggerFactory.getLogger(XOAuthService.class);

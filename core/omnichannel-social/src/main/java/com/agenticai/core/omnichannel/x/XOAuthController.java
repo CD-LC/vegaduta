@@ -3,6 +3,8 @@ package com.agenticai.core.omnichannel.x;
 import com.agenticai.core.omnichannel.x.dto.XAppRegistrationRequest;
 import com.agenticai.core.omnichannel.x.dto.XConnectionResponse;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.oauth.OAuthStateBinding;
 import com.agenticai.core.security.publicurl.PublicWebUrl;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
  * </ul>
  */
 @RestController
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class XOAuthController {
 
     private static final Logger log = LoggerFactory.getLogger(XOAuthController.class);

@@ -2,6 +2,8 @@ package com.agenticai.core.omnichannel.teams;
 
 import com.agenticai.core.omnichannel.outbound.ChannelTextSend;
 import com.agenticai.core.omnichannel.session.ChannelType;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
  * only learns from inbound activity - the same lookup {@code TeamsSendController} does.
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class TeamsTextSend implements ChannelTextSend {
 
     private final TeamsCredentialService credentialService;

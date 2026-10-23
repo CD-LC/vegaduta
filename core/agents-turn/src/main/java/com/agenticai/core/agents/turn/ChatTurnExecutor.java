@@ -21,6 +21,7 @@ import com.agenticai.core.chat.gateway.LlmGatewayService;
 import com.agenticai.core.guardrails.GuardrailViolationException;
 import com.agenticai.core.guardrails.ToolStepLimitExceededException;
 import com.agenticai.core.providers.ProviderCredentialResolver;
+import com.agenticai.core.security.logging.LogSafe;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import java.time.Duration;
@@ -69,7 +70,8 @@ final class ChatTurnExecutor {
 
     /**
      * How many extra model passes a FAST turn may run when a reply stops at an announced-but-undone
-     * step ({@link TurnContinuation}); 0 turns it off. Set from {@code app.chat.continuation.max-passes}.
+     * step ({@link TurnContinuation}); 0 turns it off. Set from {@code
+     * app.chat.continuation.max-passes}.
      */
     volatile int maxContinuations;
 
@@ -107,7 +109,9 @@ final class ChatTurnExecutor {
      */
     private MeterRegistry meterRegistry = Metrics.globalRegistry;
 
-    /** The registry the degraded-turn counters go to (ChatTurnDispatcher's depth-timeout fallback). */
+    /**
+     * The registry the degraded-turn counters go to (ChatTurnDispatcher's depth-timeout fallback).
+     */
     MeterRegistry meterRegistry() {
         return meterRegistry;
     }
@@ -144,7 +148,6 @@ final class ChatTurnExecutor {
                 AgentStepEventEmitter.disabled());
     }
 
-
     /**
      * Deterministic tool order so the provider's cached prompt prefix survives turns where the
      * relevance-selected subset differs: always-kept tools (see {@link
@@ -167,7 +170,9 @@ final class ChatTurnExecutor {
                                 java.util.Comparator.<String>naturalOrder()));
         java.util.Comparator<ToolCallback> alwaysKeptFirst =
                 java.util.Comparator.comparing(
-                        t -> !AgentToolSelection.isAlwaysRelevantTool(t.getToolDefinition().name()));
+                        t ->
+                                !AgentToolSelection.isAlwaysRelevantTool(
+                                        t.getToolDefinition().name()));
         List<ToolCallback> sorted = new java.util.ArrayList<>(tools);
         sorted.sort(alwaysKeptFirst.thenComparing(byName));
         return sorted;
@@ -253,8 +258,8 @@ final class ChatTurnExecutor {
                                                 + " contained a fabricated generation-service URL with"
                                                 + " no corroborating tool call; substituting an honest"
                                                 + " correction before it ever reached the client",
-                                        agentId,
-                                        sessionId);
+                                        LogSafe.clean(agentId),
+                                        LogSafe.clean(sessionId));
                                 return "I wasn't able to generate that - I don't have a real result"
                                         + " to share. Please try asking again.";
                             }
@@ -307,8 +312,8 @@ final class ChatTurnExecutor {
                         e -> {
                             log.error(
                                     "Chat stream failed for agent {} session {}",
-                                    agentId,
-                                    sessionId,
+                                    LogSafe.clean(agentId),
+                                    LogSafe.clean(sessionId),
                                     e);
                             persistInterruptedAssistantTurn(
                                     memorySessionId, accumulated, assistantTurnPersisted);

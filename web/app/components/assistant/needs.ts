@@ -1,4 +1,11 @@
-import { CONNECT_ITEMS, connectState, type ConnectItem, type StatusInput } from "../../connect/connectCatalog";
+import {
+  CONNECT_ITEMS,
+  connectItemOffered,
+  connectState,
+  offeredConnectItems,
+  type ConnectItem,
+  type StatusInput,
+} from "../../connect/connectCatalog";
 
 // "Connect first": what a request needs that may not be connected yet. Pure, no React and no network.
 // The platform only gives an agent a service's tools once that service is connected (Google tools appear
@@ -41,9 +48,17 @@ const RULES: readonly Rule[] = [
 const ACTION =
   /\b(read|get|check|show|send|reply|summari[sz]e|find|search|list|fetch|add|book|schedule|put|create|forward|draft|write|look|pull|export|upload|share|clear|delete|move|cancel|remind|monitor|watch|count|tell)\b/i;
 
+/** A connection id this install offers (Slack is not, on a personal install). */
+function offered(id: ConnectId): boolean {
+  const item = CONNECT_ITEMS.find((i) => i.id === id);
+  return !item || connectItemOffered(item);
+}
+
 export function detectNeeds(message: string): Need[] {
   if (!ACTION.test(message)) return [];
-  return RULES.filter((r) => r.pattern.test(message)).map(({ key, options }) => ({ key, options }));
+  return RULES.map((r) => ({ ...r, options: r.options.filter(offered) }))
+    .filter((r) => r.options.length > 0 && r.pattern.test(message))
+    .map(({ key, options }) => ({ key, options }));
 }
 
 function stateOf(id: ConnectId, status: StatusInput) {
@@ -84,7 +99,7 @@ const CONTEXT_BLOCK = /^<app_context>[\s\S]*?<\/app_context>\s*/;
 export function connectionsContext(status: StatusInput): string | null {
   const connected: string[] = [];
   const missing: string[] = [];
-  for (const item of CONNECT_ITEMS) {
+  for (const item of offeredConnectItems()) {
     const label = AGENT_LABELS[item.id];
     if (!label) continue;
     const s = connectState(item, status);
@@ -116,10 +131,16 @@ export function folderContextLines(folder: string | null): string[] {
  * folder: where each one is, and which tools find things in them. Paths are the app's own (the server
  * chose them), never the person's text.
  */
-export function attachedFilesContextLines(files: ReadonlyArray<{ workspacePath?: string; workspaceTextPath?: string | null }>): string[] {
-  const saved = files.filter((f): f is { workspacePath: string; workspaceTextPath?: string | null } => !!f.workspacePath);
+export function attachedFilesContextLines(
+  files: ReadonlyArray<{ workspacePath?: string; workspaceTextPath?: string | null }>
+): string[] {
+  const saved = files.filter(
+    (f): f is { workspacePath: string; workspaceTextPath?: string | null } => !!f.workspacePath
+  );
   if (saved.length === 0) return [];
-  const list = saved.map((f) => `- "${f.workspacePath}"${f.workspaceTextPath ? ` (its text is in "${f.workspaceTextPath}")` : ""}`);
+  const list = saved.map(
+    (f) => `- "${f.workspacePath}"${f.workspaceTextPath ? ` (its text is in "${f.workspaceTextPath}")` : ""}`
+  );
   return [
     "The user attached these files to this message; they are saved in the projects folder:",
     ...list,
