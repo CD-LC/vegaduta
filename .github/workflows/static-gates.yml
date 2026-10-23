@@ -108,6 +108,10 @@ jobs:
         if: always()
         run: sh scripts/ci/dockerfile-poms.sh
 
+      - name: Web image dependency floors and no package manager
+        if: always()
+        run: sh scripts/ci/web-image-deps.sh
+
       - name: Postgres image builds pgvector portably
         if: always()
         run: sh scripts/ci/postgres-portable-build.sh
