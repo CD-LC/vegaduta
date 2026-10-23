@@ -5,8 +5,10 @@ import { Check, Copy, RotateCcw, Volume2 } from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
 import { isSpeaking, speakText, stopSpeaking } from "./speakText";
 
+// p-0 and min-h-0 are load-bearing (as in ui/button's icon size): the global `button {}` rule pads every <button>
+// and gives it a touch-target min height, which squeezed these 14px icons to zero width.
 const ACTION =
-  "inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50";
+  "inline-flex size-7 min-h-0 shrink-0 p-0 [&_svg]:shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50";
 
 /**
  * Copy / Listen / Regenerate under a finished reply, as quiet icon buttons (the words are their names and
