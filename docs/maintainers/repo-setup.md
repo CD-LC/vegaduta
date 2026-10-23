@@ -43,6 +43,9 @@ bash scripts/dev/set-repo-identity.sh --repo <org>/<repo> --lead <handle> \
 git diff
 ```
 
+If the security and conduct addresses are the same, `--conduct-email` rewrites
+only `CODE_OF_CONDUCT.md` and `--security-email` every other file.
+
 `--registry` defaults to `ghcr.io/<owner>` and `--team` to
 `@<owner>/maintainers`. The script rewrites
 [`repo-identity.env`](../../scripts/dev/repo-identity.env) too; keep that file
