@@ -28,6 +28,7 @@ import {
   parseExport,
 } from "./importDetect";
 import { classifyImportError, normalizeReport, truncateText, type ImportErrorKind } from "./importReport";
+import { isPersonalEdition } from "../../lib/edition";
 
 /**
  * Import agent - migration kit. Paste or upload an export from OpenAI Assistants,
@@ -324,11 +325,13 @@ export default function AgentImportPage() {
             <AlertDescription>
               <p className="font-medium">{t("upgradeTitle")}</p>
               <p>{error.message || t("upgradeBody")}</p>
-              <Button asChild size="sm" variant="outline" className="mt-2">
-                <Link href="/admin/billing">
-                  <Sparkles size={14} aria-hidden="true" /> {t("upgradeCta")}
-                </Link>
-              </Button>
+              {!isPersonalEdition() && (
+                <Button asChild size="sm" variant="outline" className="mt-2">
+                  <Link href="/admin/billing">
+                    <Sparkles size={14} aria-hidden="true" /> {t("upgradeCta")}
+                  </Link>
+                </Button>
+              )}
             </AlertDescription>
           </Alert>
         )}
