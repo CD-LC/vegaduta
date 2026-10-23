@@ -10,7 +10,11 @@ vi.mock("../../lib/i18n", () => {
   };
 });
 
-import ApprovalContinuationStatus, { COMPLETED_AUTO_CLOSE_MS } from "./ApprovalContinuationStatus";
+import ApprovalContinuationStatus, {
+  COMPLETED_AUTO_CLOSE_MS,
+  LONG_WAIT_MS,
+  STILL_WORKING_MS,
+} from "./ApprovalContinuationStatus";
 
 afterEach(() => {
   cleanup();
@@ -33,6 +37,38 @@ describe("ApprovalContinuationStatus", () => {
   it("says the agent is carrying on", () => {
     render(<ApprovalContinuationStatus continuation={{ ...base, continuing: true }} />);
     expect(screen.getByRole("status")).toHaveTextContent("The agent is carrying on with the task.");
+  });
+
+  it("keeps the carrying-on line alive: stages, elapsed time and a still-working note as time passes", () => {
+    vi.useFakeTimers();
+    const since = Date.now();
+    const { rerender } = render(
+      <ApprovalContinuationStatus continuation={{ ...base, continuing: true, since, phase: "waiting" }} />
+    );
+    const line = screen.getByTestId("approval-continuing");
+    expect(line).toHaveAttribute("data-phase", "waiting");
+    expect(screen.getByTestId("approval-continuing-hint")).toHaveTextContent("picking the task back up");
+    expect(screen.getByTestId("approval-continuing-elapsed")).toHaveTextContent("0 s");
+    const stages = Array.from(line.querySelectorAll("li")).map((li) => li.getAttribute("data-state"));
+    expect(stages).toEqual(["done", "active", "todo"]);
+
+    rerender(<ApprovalContinuationStatus continuation={{ ...base, continuing: true, since, phase: "running" }} />);
+    expect(screen.getByTestId("approval-continuing-hint")).toHaveTextContent("working on the next step");
+    expect(Array.from(line.querySelectorAll("li")).map((li) => li.getAttribute("data-state"))).toEqual([
+      "done",
+      "done",
+      "active",
+    ]);
+
+    act(() => {
+      vi.advanceTimersByTime(STILL_WORKING_MS + 1000);
+    });
+    expect(screen.getByTestId("approval-continuing-hint")).toHaveTextContent("Still working");
+    expect(screen.getByTestId("approval-continuing-elapsed")).toHaveTextContent("31 s");
+    act(() => {
+      vi.advanceTimersByTime(LONG_WAIT_MS);
+    });
+    expect(screen.getByTestId("approval-continuing-hint")).toHaveTextContent("taking longer than usual");
   });
 
   it("shows a finished receipt that closes itself", () => {

@@ -313,7 +313,7 @@ export default function EdgeSetupChip() {
           {inUse.active && (
             <span className="size-1.5 shrink-0 animate-pulse rounded-full bg-primary" aria-hidden="true" />
           )}
-          <span className="topbar-label max-w-40 truncate">{label}</span>
+          <span className="topbar-label topbar-status-label max-w-40 truncate">{label}</span>
           <span className="sr-only"> — {t("chip.openConsole")}</span>
         </Link>
         <button
