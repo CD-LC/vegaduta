@@ -99,6 +99,14 @@ and can serve beside the old one while Container Apps switches traffic.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-23 09:44, release-readiness lead: merged the v1.0.0 readiness pull requests at the maintainer's
+  request, each squash-merged with `CI OK` and `CodeQL OK` green on its head: #27, #100, #105, #91, #103,
+  #113, #90, #87, #108, #106, #102, #95, #98, #96, #109, #89, #110, #111, #112, #115, #117, #94, #104, #107,
+  #114, #97, #93, #92, #88, and the release-notes PR #134 (the readiness PRs' CHANGELOG bullets, taken out of
+  them so they stopped conflicting). Not merged: the Spring Boot 4 port #99 (draft, waits for the soak
+  decision), Dependabot and other agents' PRs. No tag and no release in flight. Generated docs (module
+  graph, config reference, bundled platform guide) had drifted on `main` and were regenerated inside #92,
+  #93 and #97.
 - 2026-10-23 02:37, release-readiness lead: merged #118 (`next` 16.4.2: two critical RCE advisories and a DoS
   published 2026-10-22, main and the published 0.1.9 web image shipped 16.3.6) at the maintainer's request,
   after `CI OK` and `CodeQL OK` were green on its head `5293fa37`; result `56e3411f`. No tag and no release
