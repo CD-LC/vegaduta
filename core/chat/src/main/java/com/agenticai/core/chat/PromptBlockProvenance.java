@@ -26,16 +26,16 @@ public final class PromptBlockProvenance {
         String id, String key, String scope, String source, int version, String hash, String text, int estimatedTokens
     ) {}
 
-    private record Entry(Instant at, List<Block> blocks) {}
+    private record SessionEntry(Instant at, List<Block> blocks) {}
 
     private static final PromptBlockProvenance INSTANCE = new PromptBlockProvenance();
 
     private volatile Duration ttl = Duration.ofHours(6);
     private volatile int maxSessions = 300;
 
-    private final Map<String, Entry> bySession = new LinkedHashMap<>(64, 0.75f, true) {
+    private final Map<String, SessionEntry> bySession = new LinkedHashMap<>(64, 0.75f, true) {
         @Override
-        protected boolean removeEldestEntry(Map.Entry<String, Entry> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<String, SessionEntry> eldest) {
             return size() > maxSessions;
         }
     };
@@ -67,7 +67,7 @@ public final class PromptBlockProvenance {
             }
         }
         synchronized (INSTANCE) {
-            INSTANCE.bySession.put(key(tenantId, sessionId), new Entry(Instant.now(), List.copyOf(usable)));
+            INSTANCE.bySession.put(key(tenantId, sessionId), new SessionEntry(Instant.now(), List.copyOf(usable)));
         }
     }
 
@@ -76,7 +76,7 @@ public final class PromptBlockProvenance {
         if (sessionId == null || messageText == null || messageText.isEmpty()) {
             return List.of();
         }
-        Entry entry;
+        SessionEntry entry;
         synchronized (INSTANCE) {
             entry = INSTANCE.bySession.get(key(tenantId, sessionId));
             if (entry != null && entry.at().isBefore(Instant.now().minus(INSTANCE.ttl))) {

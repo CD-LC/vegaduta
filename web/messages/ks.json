@@ -818,15 +818,15 @@
     "rsParam_seed": "سیڈ",
     "rsParam_stopSequences": "روکنچ ترتیب",
     "rsParamDropped": "{param} چھُ یمہ ایجنٹس پیٹھ سیٹ، مگر {provider} چھُ {model} خاطرٕ یہ نظرانداز کران، لہذا یمہِ ہند چھُنہ کانہہ اثر۔",
-    "rsToolsRunHeading": "Tools for this run",
-    "rsToolsRunOnly": "This run only",
-    "rsToolsRunNote": "These switches choose which of the agent's tools the messages you send from this playground may use. Nothing is saved: the agent keeps its own tool access for everyone else. They can only turn the agent's tools off, never give it a new one.",
-    "rsToolsRunSummary": "{on} of the agent's {total} tools on for this run",
-    "rsToolsRunNone": "No tools for this run: the agent can only answer in text.",
-    "rsToolsReset": "Use the agent's tools",
-    "rsToolsNotInAgent": "Not one of this agent's saved tools, so it cannot be switched on for a run.",
-    "rsToolsEditAgent": "Change the agent's saved tools",
-    "rsToolsLimitedChip": "Tools limited for this run",
+    "rsToolsRunHeading": "یمہ رَنچ ٹول",
+    "rsToolsRunOnly": "صرف یہ رَن",
+    "rsToolsRunNote": "یم سوئچ چھِ طے کران زِ یمہ پلے گراؤنڈہ پیٹھ بوزناونہ آمژ پیغام ایجنٹک کم ٹول ورتاوتھ سکن۔ کینہہ نہ چھُ محفوظ گژھان: باقی سارنی خاطرٕ چھُ ایجنٹ پنن ٹول رسائی رٔکھان۔ یم چھِ ایجنٹک ٹول صرف بند کٔرتھ سکان، تمس کنہ وقت نہ نوو ٹول دِتھ۔",
+    "rsToolsRunSummary": "ایجنٹک {total} ٹولن منٛز {on} چھِ یمہ رَنہ خاطرٕ چالو",
+    "rsToolsRunNone": "یمہ رَنہ خاطرٕ چھِ نہ کانہہ ٹول: ایجنٹ سکہِ صرف متنس منٛز جواب دتھ۔",
+    "rsToolsReset": "ایجنٹک ٹول ورتاو",
+    "rsToolsNotInAgent": "یہ چھُ نہ یمہ ایجنٹک محفوظ کرنہ آمتین ٹولن منٛز، لہذا رَنہ خاطرٕ چالو کٔرتھ چھُنہ سکان۔",
+    "rsToolsEditAgent": "ایجنٹک محفوظ کرنہ آمتۍ ٹول بدلاو",
+    "rsToolsLimitedChip": "یمہ رَنہ خاطرٕ ٹول محدود",
     "rsToolsEmpty": "یمہ ایجنٹ خاطرٕ چھُنہ کانہہ ٹول دستیاب۔",
     "rsToolsSummary": "{total} منٛز {on} ٹول چالو",
     "rsToolsFailed": "ٹول لوڈ کٔرتھ سکیو نہ۔",
@@ -884,14 +884,14 @@
     "chipToolsOff": "ٹولن بغیر دوبارہ کوشش کران چھُ",
     "chipFailoverBlocked": "بیک اپ ماڈل ناورتیومت: ٹول ٲسۍ پتہ چلان",
     "rsLimitChangeOne": "بدلاو",
-    "reasonRateLimited": "rate limited",
-    "reasonTimeout": "timed out",
-    "reasonProviderUnavailable": "provider unavailable",
-    "reasonAuthFailed": "provider rejected the credentials",
-    "reasonBilling": "provider billing problem",
-    "reasonModelNotFound": "model not available",
-    "reasonProviderError": "provider error",
-    "reasonMalformedToolCall": "the tool call could not be used"
+    "reasonRateLimited": "شرح حد پہنچ گیہ",
+    "reasonTimeout": "وقت ختم گوو",
+    "reasonProviderUnavailable": "پرووائیڈر دستیاب چھُنہ",
+    "reasonAuthFailed": "پرووائیڈرن کور اسناد مسترد",
+    "reasonBilling": "پرووائیڈرک بلنگ مسئلہ",
+    "reasonModelNotFound": "ماڈل دستیاب چھُنہ",
+    "reasonProviderError": "پرووائیڈرک خرابی",
+    "reasonMalformedToolCall": "ٹول کال ورتاونہ آیہ نہ"
   },
   "nodeDefs": {
     "triggerLabel": "ٹرِگر",
@@ -13347,7 +13347,7 @@
     "openReceipt": "Open receipt"
   },
   "agentSkillsCard": {
-    "title": "Skills",
+    "title": "اسکل",
     "subtitle": "Let this agent load packaged instructions when a task calls for them.",
     "manageLink": "Manage skills",
     "scopeAria": "Which skills this agent can use",
@@ -14191,7 +14191,7 @@
   },
   "skillsPage": {
     "pageEyebrow": "Build",
-    "pageTitle": "Skills",
+    "pageTitle": "اسکل",
     "pageSubtitle": "Packaged expertise your agents load only when a task needs it.",
     "howItWorks": "A skill is a set of instructions for one kind of task. Agents see only each skill's name and description; when a request matches, the agent loads the full instructions, and reads any bundled files only if it needs them. So you can add many skills without slowing agents down or raising cost on unrelated chats.",
     "newSkillButton": "New skill",
@@ -14365,7 +14365,7 @@
       "role": "توہہِ ہند کردار چھُ نہ یہ سیٹنگ بدلتھ سکان۔ ورک سپیس ایڈمنس پرژھ۔",
       "scope": "یہ سیٹنگ چھیہ نہ یتھ اووررائڈ کرنہ یوان۔",
       "readOnly": "سیٹنگ چھِ ہُن صرف پڑھنہ خاطرٕ۔",
-      "adminOnly": "Only a workspace admin can change this security setting. You can see its value here, but not edit it."
+      "adminOnly": "یہ حفاظتی سیٹنگ سکہِ صرف ورک سپیس ایڈمن بدلتھ۔ توہہ سکو تمۍ ہند قدر یتھ وچھتھ، مگر ترمیم کٔرتھ ناہ۔"
     },
     "reset": {
       "button": "وراثت منٛز آمژ قدرس کن ری سیٹ کٔرو",
@@ -14415,12 +14415,12 @@
       "acknowledge": "بہٕ چھس یمہ حفاظتی تبدیلی نتیجہ سمجھان۔",
       "cancel": "منسوخ کٔرو",
       "confirm": "تصدیق کٔرتھ محفوظ کٔرو",
-      "resetNote": "Reset: the override is removed and the setting returns to the value it inherits."
+      "resetNote": "ری سیٹ: اووررائڈ چھُ ہٹنہ یوان تہٕ سیٹنگ چھیہ تمس قدرس کن واپس گژھان یُس تس وراثت منٛز ملان چھُ۔"
     },
     "strictness": {
-      "higher": "Higher is stricter: a higher value is accepted, a lower one is refused.",
-      "lower": "Lower is stricter: a lower value is accepted, a higher one is refused.",
-      "enumOrder": "Options run from least to most strict: {options}. You can only move toward the strict end."
+      "higher": "زیادہ مطلب زیادہ سخت: زیادہ قدر چھیہ قبول سپدان، کم مسترد۔",
+      "lower": "کم مطلب زیادہ سخت: کم قدر چھیہ قبول سپدان، زیادہ مسترد۔",
+      "enumOrder": "آپشن چھِ کم سخت پیٹھ زیادہ سخت تام ترتیبہ سان: {options}۔ توہہ سکو صرف سخت سرس کن گژھتھ۔"
     }
   },
   "approvalsQueue": {
@@ -14589,8 +14589,8 @@
     "tlSevWarn": "توجہ ہیو ضروری",
     "tlSevError": "ناکام",
     "tlIntake": "ٹرن شروع گوو: {chars} حرف، {tools} ٹول، {attachments} منسلک",
-    "tlRunTools": "Tools for this run",
-    "tlRunToolsNone": "none (text only)",
+    "tlRunTools": "یمہ رَنچ ٹول",
+    "tlRunToolsNone": "کانہہ نہ (صرف متن)",
     "tlModelCall": "{model} ({provider}) کن ماڈل کال، راستہ {route}",
     "tlFailover": "{model} ({provider}) کن فیل اوور سپد",
     "tlRetryModel": "{model} ({provider}) پیٹھ دوبارہ کوشش کرنہ آو، راستہ {route}",
@@ -14599,7 +14599,7 @@
     "tlToolCall": "ٹول کال {tool}: {status}",
     "tlApprovalRequested": "{tool} چلنہ برونہہ منظوری منگنہ آئ",
     "tlApprovalDecided": "{tool} خاطرٕ منظوری فیصلہ سپد: {decision}",
-    "tlApprovalAutoAllowed": "{tool} ran without asking: a read-only call under Supervised",
+    "tlApprovalAutoAllowed": "{tool} چلیو بغیر پرژھنہ: نگرانی منٛز صرف پڑھنچ کال",
     "tlContinuation": "تسلسل: {guard} ({outcome})",
     "tlGuard": "گارڈریل {guard}: {outcome}",
     "tlVerifyPassed": "جانچ پاس: {check}",
@@ -14669,7 +14669,7 @@
     "modeTextOnlyHelp": "ایجنٹ چھُ پننین ٹولن بغیر جواب دوان۔ محفوظ: حقیقی طور کینہہ نہ چلان۔ متوقع ٹول جانچ چھیہ نہ پوٚر گژھتھ سکان۔",
     "modeFull": "ٹولن سان مکمل پائپ لائن",
     "modeFullHelp": "سیود ٹول، گارڈریل تہٕ قدمن ہند حدن یم اکس اصلی صارفس ملان چھِ۔ متوقع ٹول تہٕ ٹریجکٹری جانچن خاطرٕ ضروری۔",
-    "modeFullNote": "Tools that only read run for real. Anything that could change data, send a message or spend money is simulated and listed in the run, so nothing real happens. Tools without a safety classification are simulated too.",
+    "modeFullNote": "یم ٹول صرف پڑھان چھِ تم چھِ حقیقی طور چلان۔ یُس کینہہ ڈیٹا بدلتھ، پیغام بوزناوتھ یا رقم خرچ کٔرتھ سکہِ تمہ چھُ سمولیٹ کرنہ یوان تہٕ رَنس منٛز درج، لہذا حقیقی طور کینہہ نہ چھُ سپدان۔ حفاظتی درجہ بندی بغیر ٹول چھِ تہِ سمولیٹ سپدان۔",
     "autoApproveLabel": "ایول سینڈ باکسس منٛز ٹول کال خودبخود منظور کٔرو",
     "autoApproveHelp": "عام طور چھُ انسانس خاطرٕ ژھٹان والین ٹول کالن ایول سینڈ باکس منظور کران، تیلہ زِ کیس ختم سپدتھ سکہِ۔ یمہ بغیر چھُ کیس پروڈکشنس منٛز یتھہ طرح گژھان تتھہ طرح بے جواب منظوری پیٹھ ختم گژھان۔",
     "autoApproveWarnTitle": "صرف غیر پروڈکشن ورک سپیسن خاطرٕ",
@@ -14677,7 +14677,7 @@
     "autoApproveNeedsFull": "پیٹھمس مکمل پائپ لائن چالو کٔرو: خودکار منظوری چھیہ صرف ییلہ ٹول چلن تیلہ لاگو گژھان۔",
     "autoApproveRefused": "یمہ ورک سپیسس منٛز اجازت چھیہ نہ: {reason}",
     "autoApproveConfirmTitle": "ایولس منٛز ٹول کال خودبخود منظور کٔرو؟",
-    "autoApproveConfirmBody": "Every tool call in this dataset's replays that would wait for a person will be approved automatically. Approved tools that only read run for real; approved tools that could change something are still simulated. Only do this in a workspace with test data. Runs record that they were auto-approved.",
+    "autoApproveConfirmBody": "یمہ ڈیٹا سیٹک ریپلے منٛز ہر ٹول کال یُس انسانس خاطرٕ ژھٹتھ، گژھِ خودبخود منظور سپدنۍ۔ منظور شدہ صرف پڑھن والۍ ٹول چھِ حقیقی طور چلان؛ یم کینہہ بدلتھ سکن سُہ چھِ ہنوز سمولیٹ سپدان۔ یہ صرف ٹیسٹ ڈیٹا والس ورک سپیسس منٛز کٔرو۔ رَن چھِ درج کران زِ تم ٲسۍ خودبخود منظور سپدمتۍ۔",
     "autoApproveConfirm": "خودکار منظوری چالو کٔرو",
     "trajectoryLabel": "ٹریجکٹری جانچ",
     "trajectoryOn": "On",
@@ -14703,21 +14703,21 @@
     "samplingSource_tenant": "توہہِ ہندس ورک سپیسس خاطرٕ سیٹ کرنہ آمُت",
     "samplingSource_agent": "یمہ ایجنٹ خاطرٕ سیٹ کرنہ آمُت",
     "modeDefault": "ورک سپیس ڈیفالٹ",
-    "modeDefaultHelp": "Follows your workspace's setting (the full pipeline unless an admin changed it). Each run can still choose its own mode.",
-    "modeDefaultCurrent": "Currently: {mode}",
-    "modeNameFull": "Full pipeline",
-    "modeNameQuick": "Quick (text only)",
-    "badgeFull": "full pipeline",
-    "badgeQuick": "quick",
-    "datasetModePinnedTitle": "This dataset always replays this way. A single run can still choose another mode.",
-    "datasetModeDefaultTitle": "This dataset follows the workspace default for how runs replay.",
-    "runModeLabel": "Replay mode for the next run",
-    "runModeInherit": "Use the dataset's setting",
-    "runModeHelp": "Full pipeline runs the agent with its tools, guardrails and approvals in a safe sandbox: tools that only read really run, anything that could change data or send something is simulated. Quick withholds the tools and tests the written answer only.",
-    "runModeFullTitle": "This run used the full pipeline in the eval sandbox.",
-    "runModeQuickTitle": "This run was a quick text-only replay: the agent's tools were withheld.",
-    "runSimulatedTools": "Simulated, not executed in this run (they could change data or reach outside the platform): {tools}.",
-    "toolStatusSimulated": "simulated, not executed"
+    "modeDefaultHelp": "توہہِ ہند ورک سپیسک سیٹنگ چھُ مانان (مکمل پائپ لائن، جیسے کہ ایڈمنن نہ بدلوو)۔ ہر رَن سکہِ ہنوز پننہ موڈ چُنتھ۔",
+    "modeDefaultCurrent": "ہُن: {mode}",
+    "modeNameFull": "مکمل پائپ لائن",
+    "modeNameQuick": "تیز (صرف متن)",
+    "badgeFull": "مکمل پائپ لائن",
+    "badgeQuick": "تیز",
+    "datasetModePinnedTitle": "یہ ڈیٹا سیٹ چھُ ہمیشہ یتھہ طرح ریپلے سپدان۔ اکھ رَن سکہِ ہنوز بیاکھ موڈ چُنتھ۔",
+    "datasetModeDefaultTitle": "رَن کِتھ ریپلے سپدن، یمہ بارہ منٛز چھُ یہ ڈیٹا سیٹ ورک سپیسک ڈیفالٹ مانان۔",
+    "runModeLabel": "اگلہ رَنہ خاطرٕ ریپلے موڈ",
+    "runModeInherit": "ڈیٹا سیٹک سیٹنگ ورتاو",
+    "runModeHelp": "مکمل پائپ لائن چھیہ ایجنٹس تمۍ ہندین ٹولن، گارڈریلن تہٕ منظوریَن سان محفوظ سینڈ باکسس منٛز چلاوان: صرف پڑھن والۍ ٹول چھِ حقیقی طور چلان، تہٕ یُس کینہہ ڈیٹا بدلتھ یا کینہہ بوزناوتھ سکہِ سُہ چھُ سمولیٹ سپدان۔ تیز موڈ چھُ ٹول روٚکان تہٕ صرف لیکھنہ آمژ جواب پرکھان۔",
+    "runModeFullTitle": "یمہ رَنن ایول سینڈ باکسس منٛز مکمل پائپ لائن ورتووے۔",
+    "runModeQuickTitle": "یہ رَن ٲس صرف متنک تیز ریپلے: ایجنٹک ٹول ٲسۍ روٚکنہ آمتۍ۔",
+    "runSimulatedTools": "یمہ رَنس منٛز سمولیٹ کرنہ آیہ، چلاونہ آیہ نہ (تم سکہِ ڈیٹا بدلتھ یا پلیٹ فارمہ پیٹھ بہر پہنچتھ): {tools}۔",
+    "toolStatusSimulated": "سمولیٹ کرنہ آمُت، چلاونہ آمُت نہ"
   },
   "agentLab": {
     "wtLabel": "ایجنٹن ہندین ٹولن سان چلاو",
@@ -14752,12 +14752,12 @@
         "description": "ایجنٹ چھُ کتھ یاداشت رٔکھان تہٕ یاد کران۔"
       },
       "attachments": {
-        "label": "Chat uploads",
-        "description": "How large the files people attach to chat messages may be."
+        "label": "چیٹ اپلوڈ",
+        "description": "لوکھ سکن چیٹ پیغامن سان کتھ بوٚڈ فائل جوڑتھ۔"
       },
       "skills": {
-        "label": "Skills",
-        "description": "How much of the agent's instructions the list of installed skills may use."
+        "label": "اسکل",
+        "description": "نصب شدہ اسکلن ہند فہرست سکہِ ایجنٹک ہدایتن ہند کتھ حصہ ورتاوتھ۔"
       },
       "aux": {
         "label": "پس منظر ماڈل کال",
@@ -14828,24 +14828,24 @@
       },
       "steps": {
         "graceCalls": {
-          "label": "Calls answered after the limit",
-          "description": "How many more tool calls the model may attempt after the turn's tool limit is used up. Each one is refused with a note to answer with what it has; past this number the turn is stopped with an error.",
-          "help": "Raise it if a model needs a few tries to stop calling tools. Lower it to end looping turns sooner. 0 stops the turn at the first call over the limit."
+          "label": "حد پتہ جواب دنہ آمتۍ کال",
+          "description": "ٹرنک ٹول حد ختم سپدنہ پتہ سکہِ ماڈل کتھ ٹول کال ہور آزمایتھ۔ ہر اکھ چھُ \"یمہ کینہہ تہِ چھُ تمہ سان جواب دِ\" نوٹس سان مسترد کرنہ یوان؛ یمہ گنتی پتہ چھُ ٹرن غلطی سان روٚکنہ یوان۔",
+          "help": "اگر ماڈلس ٹول کال بند کرنہ خاطرٕ کینہہ کوشش چھیہ ضرورت تہٕ یہ بڈاو۔ لوپس منٛز پھسمتۍ ٹرن جلدی ختم کرنہ خاطرٕ گھٹاو۔ 0 چھُ حدہ پیٹھ اُتھ پہلس کالس پیٹھ ٹرن روٚکان۔"
         },
         "supervisedDivisor": {
-          "label": "Supervised agents get 1/N of the tool limit",
-          "description": "A supervised agent gets the turn's tool-call limit divided by this number, but never less than the minimum below.",
-          "help": "Raise it to keep supervised agents on a shorter leash. 1 gives them the full limit."
+          "label": "نگرانی منٛز ایجنٹن چھُ ٹول حدک 1/N میلان",
+          "description": "نگرانی منٛز ایجنٹس چھیہ ٹرنک ٹول کال حد یمہ عددن سان تقسیم سپدتھ میلان، مگر تل آمتس کم ز کم قدرہ کھوتہ کنہ وقت کم نہ۔",
+          "help": "نگرانی منٛز ایجنٹن زیادہ سختی منٛز رٔکھنہ خاطرٕ یہ بڈاو۔ 1 چھُ تمن پوٚر حد دوان۔"
         },
         "supervisedMinSteps": {
-          "label": "Least tool calls for a supervised agent",
-          "description": "The smallest tool-call limit a supervised agent gets, however high the number above is.",
-          "help": "Keep it at 3 or more so a supervised agent can still finish a simple job with several steps."
+          "label": "نگرانی منٛز ایجنٹک خاطرٕ کم ز کم ٹول کال",
+          "description": "اُتھ عدد کتھ تہِ زیادہ سپدِ، نگرانی منٛز ایجنٹس ملنہ والی سب پیٹھ سیود ٹول کال حد۔",
+          "help": "یہ 3 یا زیادہ رٔکھو تاکہ نگرانی منٛز ایجنٹ کئی قدمن والۍ سادٕ کام ہنوز مکمل کٔرتھ سکہِ۔"
         },
         "autonomousMultiplier": {
-          "label": "Fully autonomous agents get N times the limit",
-          "description": "A fully autonomous agent gets the turn's tool-call limit multiplied by this number.",
-          "help": "Raise it for agents that run long jobs without a person watching; they can then spend more calls and money in one turn. 1 gives them the standard limit."
+          "label": "مکمل خود مختار ایجنٹن چھُ حدک N گنا میلان",
+          "description": "مکمل خود مختار ایجنٹس چھیہ ٹرنک ٹول کال حد یمہ عددن سان ضرب سپدتھ میلان۔",
+          "help": "یمن ایجنٹن خاطرٕ بڈاو یم بغیر کنہ تہِ نگرانی لمبٕ کام چلاوان چھِ؛ تیلہ سکن تم اکس ٹرنس منٛز زیادہ کال تہٕ رقم خرچ کٔرتھ۔ 1 چھُ تمن معیاری حد دوان۔"
         }
       }
     },
@@ -14919,80 +14919,80 @@
           "help": "لمبٕ کھڑکی چھیہ لمبین کامچ سیشنن منٛز مدد کران، سیود چھیہ ٹول فہرست سیود رٔکھان۔"
         },
         "maxStickyTools": {
-          "label": "Most tools kept on offer in follow-ups",
-          "description": "The most tools carried over into a short follow-up message. 0 keeps none.",
-          "help": "A higher number helps when a task uses many tools, a lower one keeps the tool list small."
+          "label": "فالو اپس منٛز تجویز رٔکھنہ والۍ زیادہ ز زیادہ ٹول",
+          "description": "سیودس فالو اپ پیغامس منٛز اگے نیونہ والۍ زیادہ ز زیادہ ٹول۔ 0 چھُ کانہہ نہ رٔکھان۔",
+          "help": "ییلہ کانہہ کام زیادہ ٹول ورتاوان چھُ تیلہ بوٚڈ عدد چھُ مدد کران؛ سیود چھُ ٹول فہرست سیود رٔکھان۔"
         },
         "keepPrimaryModel": {
-          "label": "Keep the main model for follow-ups",
-          "description": "A short follow-up in a conversation that already used tools stays on the agent's main model instead of the cheaper one.",
-          "help": "Turn it off to let cost routing send follow-ups such as 'yes' to the cheaper model, at the risk of weaker handling of a task in progress."
+          "label": "فالو اپس خاطرٕ مرکزی ماڈل رٔکھو",
+          "description": "یمہ گفتگو منٛز یتھ پہلے ٹول ورتاونہ آمتۍ ٲسۍ سیود فالو اپ چھُ سستس ماڈلس بدلہ ایجنٹک مرکزی ماڈلس پیٹھ ہی روزان۔",
+          "help": "یہ بند کٔرو تاکہ لاگت روٹنگ \"ہاں\" جیسن فالو اپس سستس ماڈلس کن بوزنوی، مگر جاری کامک کمزور طریقہ سان سنبھالنچ خطر چھُ روزان۔"
         }
       },
       "semanticCache": {
         "similarityThreshold": {
-          "label": "How alike a question must be to reuse an answer",
-          "description": "For agents that reuse answers to similar questions: how close a new question must be to an earlier one, from 0.85 to 1, for the stored answer to be served.",
-          "help": "A lower number serves more repeats but risks giving an answer meant for a different question. Keep it high when wrong answers are costly. An answer is only reused for the person it was given to."
+          "label": "جواب دوبارہ ورتاونہ خاطرٕ سوال کتھ ملتا جلتا گژھِ",
+          "description": "یمن ایجنٹن خاطرٕ یم ملتین سوالن ہند جواب دوبارہ ورتاوان چھِ: محفوظ جواب دنہ خاطرٕ نوو سوال پیشنس سوالس کتھ نزدیک گژھِ سپدنۍ، 0.85 پیٹھ 1 تام۔",
+          "help": "کم عدد چھُ زیادہ دہراو جواب دوان مگر بییس سوالس خاطرٕ بنیومت جواب دنچ خطر چھُ روزان۔ غلط جواب مہنگۍ سپدن تہٕ یہ اُتھ رٔکھو۔ جواب چھُ صرف تمس شخصس خاطرٕ دوبارہ ورتاونہ یوان یمس سُہ دتمُت ٲس۔"
         },
         "ttl": {
-          "label": "How long a reusable answer is kept",
-          "description": "How long a stored answer can be served to a similar question before it is dropped.",
-          "help": "Shorten it when your answers go out of date quickly."
+          "label": "دوبارہ ورتاونہ لایق جواب کتھ وقت رٔکھنہ یوان چھُ",
+          "description": "محفوظ جواب ہٹاونہ برونہہ ملتین سوالس کتھ وقت تام دنہ یتھ۔",
+          "help": "اگر توہہِ ہند جواب جلدی پرانۍ گژھان چھِ تہٕ یہ مختصر کٔرو۔"
         },
         "maxEntriesPerAgent": {
-          "label": "Most stored answers per agent",
-          "description": "How many answers one agent keeps for reuse. The oldest are dropped beyond this.",
-          "help": "A larger store finds more repeats and uses more storage."
+          "label": "فی ایجنٹ زیادہ ز زیادہ محفوظ جواب",
+          "description": "اکھ ایجنٹ چھُ دوبارہ ورتاونہ خاطرٕ کتھ جواب رٔکھان۔ یمہ کھوتہ زیادہ سپدنس پیٹھ چھِ سب پیٹھ پرانۍ ہٹنہ یوان۔",
+          "help": "بوٚڈ ذخیرہ چھُ زیادہ دہراو لبان تہٕ زیادہ اسٹوریج ورتاوان۔"
         }
       },
       "toolLedger": {
         "enabled": {
-          "label": "Keep a record of tool calls in the conversation",
-          "description": "Store a short record of each turn's tool calls with the conversation, so later turns can see what was done.",
-          "help": "Turn it off to keep conversation history text-only; the agent then cannot tell what its tools did in earlier turns. This applies to the whole workspace."
+          "label": "گفتگو منٛز ٹول کالن ہند ریکارڈ رٔکھو",
+          "description": "ہر ٹرنک ٹول کالن ہند سیود ریکارڈ گفتگو سان محفوظ کٔرو، تاکہ پتمۍ ٹرن وچھتھ سکن زِ کیا کرنہ آو۔",
+          "help": "گفتگو ہند تاریخ صرف متن رٔکھنہ خاطرٕ یہ بند کٔرو؛ تیلہ سکہِ ایجنٹ نہ زانتھ زِ پیشنین ٹرنن منٛز تمۍ ہندین ٹولن کیا کوو۔ یہ چھُ پوری ورک سپیسس پیٹھ لاگو سپدان۔"
         },
         "replayEnabled": {
-          "label": "Show the tool record to the model",
-          "description": "Include the stored record of earlier tool calls when the model is given the conversation.",
-          "help": "Turn it off to keep storing the record without using any of the model's working space for it."
+          "label": "ماڈلس ٹول ریکارڈ ہاو",
+          "description": "ماڈلس گفتگو دنہ وقت پیشنین ٹول کالن ہند محفوظ ریکارڈ شامل کٔرو۔",
+          "help": "یہ بند کٔرو تاکہ ریکارڈ محفوظ گژھان روزِ مگر تمہ خاطرٕ ماڈلک کام کرنچ جاے نہ ورتاونہ یوی۔"
         },
         "replayTurns": {
-          "label": "Earlier turns whose tool record is shown",
-          "description": "How many of the most recent turns that used tools have their record shown to the model.",
-          "help": "A larger number helps in long working sessions but uses more of the model's working space."
+          "label": "پیشن ٹرن یمن ہند ٹول ریکارڈ ہاونہ یوان چھُ",
+          "description": "ٹول ورتاون والین حالیہ ترین ٹرنن منٛز کتھن ہند ریکارڈ ماڈلس ہاونہ یوان چھُ۔",
+          "help": "بوٚڈ عدد چھُ لمبین کامچن سیشنن منٛز مدد کران مگر ماڈلک کام کرنچ جاے زیادہ ورتاوان۔"
         },
         "maxEntriesPerTurn": {
-          "label": "Tool calls listed per turn",
-          "description": "How many of one turn's tool calls are written into the record. Further calls are only counted.",
-          "help": "Raise it for turns that make many calls and need every one remembered."
+          "label": "فی ٹرن درج کرنہ آمتۍ ٹول کال",
+          "description": "اکس ٹرنک کتھ ٹول کال چھِ ریکارڈس منٛز لیکھنہ یوان۔ باقی کال چھِ صرف گنڈنہ یوان۔",
+          "help": "یمن ٹرنن خاطرٕ بڈاو یم بہت کال چھِ کران تہٕ ہر اکھ یاد رٔکھن ضروری چھُ۔"
         },
         "maxReplayCharsPerTurn": {
-          "label": "Longest tool record per turn",
-          "description": "How many characters of one turn's record are shown to the model; the rest is counted, not listed.",
-          "help": "Lower it to save cost on every later turn, raise it to keep more detail."
+          "label": "فی ٹرن سب پیٹھ لمبٕ ٹول ریکارڈ",
+          "description": "اکس ٹرنک ریکارڈک کتھ حرف ماڈلس ہاونہ یوان چھِ؛ باقی چھِ گنڈنہ یوان، درج نہ کرنہ یوان۔",
+          "help": "پتمین ہر ٹرنک خرچہ بچاونہ خاطرٕ گھٹاو، زیادہ تفصیل رٔکھنہ خاطرٕ بڈاو۔"
         }
       },
       "attachments": {
         "maxImageMb": {
-          "label": "Largest image upload (MB)",
-          "description": "The biggest image a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for photos and screenshots; large files are slower to send and use more of the model's allowance."
+          "label": "سب پیٹھ بوٚڈ تصویر اپلوڈ (MB)",
+          "description": "چیٹ پیغامس سان کانہہ شخص سب پیٹھ بوٚڈ کتھ تصویر جوڑتھ سکہِ، میگابائٹس منٛز۔ پلیٹ فارمچ اکھ کل فائل حد تہِ چھیہ یمہ کھوتہ یہ نہ اُتھ گژھتھ سکہِ۔",
+          "help": "تصویرن تہٕ اسکرین شاٹن خاطرٕ بڈاو؛ بوٚڈ فائل چھِ بوزناونس منٛز سست تہٕ ماڈلک زیادہ کوٹہ ورتاوان۔"
         },
         "maxAudioMb": {
-          "label": "Largest audio upload (MB)",
-          "description": "The biggest audio file a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for longer recordings; large files are slower to send and use more of the model's allowance."
+          "label": "سب پیٹھ بوٚڈ آڈیو اپلوڈ (MB)",
+          "description": "چیٹ پیغامس سان کانہہ شخص سب پیٹھ بوٚڈ کتھ آڈیو فائل جوڑتھ سکہِ، میگابائٹس منٛز۔ پلیٹ فارمچ اکھ کل فائل حد تہِ چھیہ یمہ کھوتہ یہ نہ اُتھ گژھتھ سکہِ۔",
+          "help": "لمبین ریکارڈنگن خاطرٕ بڈاو؛ بوٚڈ فائل چھِ بوزناونس منٛز سست تہٕ ماڈلک زیادہ کوٹہ ورتاوان۔"
         },
         "maxVideoMb": {
-          "label": "Largest video upload (MB)",
-          "description": "The biggest video a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for longer clips; large files are slower to send and use more of the model's allowance."
+          "label": "سب پیٹھ بوٚڈ ویڈیو اپلوڈ (MB)",
+          "description": "چیٹ پیغامس سان کانہہ شخص سب پیٹھ بوٚڈ کتھ ویڈیو جوڑتھ سکہِ، میگابائٹس منٛز۔ پلیٹ فارمچ اکھ کل فائل حد تہِ چھیہ یمہ کھوتہ یہ نہ اُتھ گژھتھ سکہِ۔",
+          "help": "لمبین کلپن خاطرٕ بڈاو؛ بوٚڈ فائل چھِ بوزناونس منٛز سست تہٕ ماڈلک زیادہ کوٹہ ورتاوان۔"
         },
         "maxDocumentMb": {
-          "label": "Largest document upload (MB)",
-          "description": "The biggest document or spreadsheet a person can attach to a chat message, in megabytes. The platform also has an overall file limit that this cannot exceed.",
-          "help": "Raise it for long reports and large data files; large files are slower to process."
+          "label": "سب پیٹھ بوٚڈ دستاویز اپلوڈ (MB)",
+          "description": "چیٹ پیغامس سان کانہہ شخص سب پیٹھ بوٚڈ کتھ دستاویز یا اسپریڈ شیٹ جوڑتھ سکہِ، میگابائٹس منٛز۔ پلیٹ فارمچ اکھ کل فائل حد تہِ چھیہ یمہ کھوتہ یہ نہ اُتھ گژھتھ سکہِ۔",
+          "help": "لمبین رپورٹن تہٕ بوڈین ڈیٹا فائلن خاطرٕ بڈاو؛ بوٚڈ فائل چھِ پروسیس کرنس منٛز سست۔"
         }
       },
       "continuation": {
@@ -15053,16 +15053,16 @@
       },
       "tenant": {
         "maxMemories": {
-          "label": "Most shared memories",
-          "description": "How many memories shared across the workspace are kept. The oldest are dropped beyond this.",
-          "help": "Raise it for large teams that rely on shared knowledge; it also raises storage and recall cost. This applies to the whole workspace."
+          "label": "زیادہ ز زیادہ مشترکہ یاداشت",
+          "description": "ورک سپیسس منٛز کتھ مشترکہ یاداشت چھِ رٔکھنہ یوان۔ یمہ کھوتہ زیادہ سپدنس پیٹھ چھِ سب پیٹھ پرانۍ ہٹنہ یوان۔",
+          "help": "مشترکہ علمس پیٹھ منحصر بوڈین ٹیمن خاطرٕ بڈاو؛ یہ چھُ اسٹوریج تہٕ یاد کرنک خرچہ تہِ بڈاوان۔ یہ چھُ پوری ورک سپیسس پیٹھ لاگو سپدان۔"
         }
       },
       "edge": {
         "maxFacts": {
-          "label": "Memories given to on-device chat",
-          "description": "How many memories are handed to an on-device session when it starts.",
-          "help": "On-device models have a small working space, so keep this low."
+          "label": "ڈیوائسس پیٹھ چیٹس دنہ آمژ یاداشت",
+          "description": "ڈیوائسس پیٹھ سیشن شروع سپدنس پیٹھ تمس کتھ یاداشت چھِ سونپنہ یوان۔",
+          "help": "ڈیوائسس پیٹھ ماڈلن چھیہ کام کرنچ جاے سیود، لہذا یہ کم رٔکھو۔"
         }
       },
       "graph": {
@@ -15081,14 +15081,14 @@
     "skills": {
       "prompt": {
         "maxSkills": {
-          "label": "Most skills listed in the prompt",
-          "description": "How many of your skills are named in the agent's instructions so it knows they exist. The rest are counted, not listed.",
-          "help": "Raise it if you have many skills; each listed skill uses a little of the model's working space on every turn. This applies to the whole workspace."
+          "label": "پرامپٹس منٛز درج زیادہ ز زیادہ اسکل",
+          "description": "ایجنٹس پتہ لگِ زِ تم چھِ، لہذا تمۍ ہندین ہدایتن منٛز چھِ توہہِ ہندین کتھن اسکلن ہند نام دنہ یوان۔ باقی چھِ گنڈنہ یوان، درج نہ کرنہ یوان۔",
+          "help": "اگر توہہِ کن چھِ بہت اسکل تہٕ بڈاو؛ درج ہر اسکل چھِ ہر ٹرنس منٛز ماڈلک کام کرنچ جاے ہند تھوڑ حصہ ورتاوان۔ یہ چھُ پوری ورک سپیسس پیٹھ لاگو سپدان۔"
         },
         "maxBlockChars": {
-          "label": "Size of the skills list in the prompt",
-          "description": "How many characters the list of skills may take in the agent's instructions. When it is full, later skills are shortened to their names.",
-          "help": "Raise it to keep descriptions for more skills, lower it to save tokens on every turn. This applies to the whole workspace."
+          "label": "پرامپٹس منٛز اسکل فہرست ہند سائز",
+          "description": "ایجنٹک ہدایتن منٛز اسکلن ہند فہرست سکہِ کتھ حرف لیتھ۔ بھرنہ پتہ چھِ پتمۍ اسکل صرف نامن تام مختصر کرنہ یوان۔",
+          "help": "زیادہ اسکلن ہند تفصیل رٔکھنہ خاطرٕ بڈاو، ہر ٹرنس منٛز ٹوکن بچاونہ خاطرٕ گھٹاو۔ یہ چھُ پوری ورک سپیسس پیٹھ لاگو سپدان۔"
         }
       }
     },
@@ -15144,12 +15144,12 @@
       },
       "supervised": {
         "readOnlyCalls": {
-          "label": "Supervised agents and read-only tools",
-          "description": "Whether an agent on the Supervised autonomy tier still asks you before a tool that only reads, such as a search or a lookup. Writes, sends and tools the platform has not classified always ask.",
-          "help": "You can only make this stricter than the platform setting. Asking every time is the safest choice; letting read-only tools run removes a prompt but also a chance to stop a search you did not expect. An agent that can read private data, take in untrusted content and send data out is asked about every call whatever this says.",
+          "label": "نگرانی منٛز ایجنٹ تہٕ صرف پڑھنہ والۍ ٹول",
+          "description": "کیا نگرانی خود مختاری درجچ ایجنٹ چھُ تلاش یا لُک اپ جیسن صرف پڑھن والین ٹولن برونہہ تہِ توہہِ پرژھان۔ لیکھُن، بوزناون تہٕ یم ٹول یمن پلیٹ فارمن درجہ بند کوو نہ، تم چھِ ہمیشہ پرژھان۔",
+          "help": "توہہ سکو یہ صرف پلیٹ فارم سیٹنگہ کھوتہ سخت کٔرتھ۔ ہر وار پرژھُن چھُ سب پیٹھ محفوظ انتخاب؛ صرف پڑھن والین ٹولن چلنہ دنہ سیتۍ چھُ اکھ سوال کم سپدان، مگر غیر متوقع تلاش روکنچ اکھ موقع تہِ چھُ گژھان۔ یُس ایجنٹ نجی ڈیٹا پڑھتھ، ناقابل بھروسہ مواد لیتھ تہٕ ڈیٹا بہر بوزناوتھ سکہِ، تمہ پرژھنہ یوان ہر کالس پیٹھ یہ سیٹنگ کینہہ تہِ ونان۔",
           "options": {
-            "auto-allow": "Let read-only tools run without asking",
-            "gate": "Ask before every tool call"
+            "auto-allow": "صرف پڑھن والین ٹولن بغیر پرژھنہ چلنہ دِو",
+            "gate": "ہر ٹول کالہ برونہہ پرژھو"
           }
         }
       }
@@ -15174,12 +15174,12 @@
           "help": "ہر دوہراو چھُ اکس رَنک خرچہ تہٕ وقت ضرب کران۔"
         },
         "defaultMode": {
-          "label": "How evaluations run",
-          "description": "Whether an evaluation run replays the agent with its tools in a safe sandbox (full pipeline), or answers in text only (quick), when the run or its dataset does not say.",
-          "help": "The full pipeline tests what your users get, including tool use, and costs more. In it, tools that only read really run; anything that could change data, send a message or spend money is simulated and listed in the run. Quick is cheaper and says nothing about tool use.",
+          "label": "تشخیص کِتھ چھِ چلان",
+          "description": "ییلہ رَن یا تمۍ ہند ڈیٹا سیٹ ناہ ونان، تیلہ چھُ تشخیصی رَن ایجنٹس تمۍ ہندین ٹولن سان محفوظ سینڈ باکسس منٛز ریپلے کران (مکمل پائپ لائن) یا صرف متنس منٛز جواب دوان (تیز)۔",
+          "help": "مکمل پائپ لائن چھیہ پرکھان یُس توہہِ ہندین صارفن ملان چھُ، ٹول ورتاو سمیت، تہٕ لاگت چھیہ زیادہ۔ یتھ منٛز چھِ صرف پڑھن والۍ ٹول حقیقی طور چلان؛ یُس کینہہ ڈیٹا بدلتھ، پیغام بوزناوتھ یا رقم خرچ کٔرتھ سکہِ سُہ چھُ سمولیٹ سپدان تہٕ رَنس منٛز درج۔ تیز چھُ سستۍ تہٕ ٹول ورتاونچ بارہ منٛز چھُ کینہہ نہ ونان۔",
           "options": {
-            "full": "Full pipeline in a sandbox",
-            "quick": "Quick: text answers only"
+            "full": "سینڈ باکسس منٛز مکمل پائپ لائن",
+            "quick": "تیز: صرف متنی جواب"
           }
         }
       }
@@ -15283,7 +15283,7 @@
       "cancel": "منسوخ کٔرو",
       "done": "{count} سیٹنگ تمۍ ہندس وراثت منٛز آمتس قدرس کن ری سیٹ کٔرو۔",
       "partial": "{done} سیٹنگ گۅیہ ری سیٹ؛ {failed} ری سیٹ کٔرتھ سکیو نہ۔ ناکام سیٹنگن ہند پیغام وچھو۔",
-      "cancelled": "Reset {done} settings. {skipped} that need a reason were left as they are."
+      "cancelled": "{done} سیٹنگ گیہ ری سیٹ۔ یم {skipped} یمن وجہ ٲس ضروری، تم گیہ یتھہ ٲسۍ تتھہ ژھوڈنہ۔"
     },
     "import": {
       "button": "اووررائڈ درآمد کٔرو",
@@ -15356,16 +15356,16 @@
       "unknownActor": "نامعلوم",
       "noReason": "کانہہ وجہ دنہ آیہ نہ",
       "showMore": "مزید ہاو",
-      "scope": "Level",
+      "scope": "درجہ",
       "scopeWorkspace": "ورک سپیس",
-      "scopeAgent": "Agent {id}",
-      "scopeFilter": "Show changes at",
-      "filterAll": "All levels",
-      "filterWorkspace": "Workspace only",
-      "filterAgents": "Agents only",
-      "searchLoadedOnly": "The search covers the changes loaded so far.",
-      "loadError": "The change history could not be loaded. {message}",
-      "moreFailed": "More changes could not be loaded. {message}",
+      "scopeAgent": "ایجنٹ {id}",
+      "scopeFilter": "تبدیلی یمہ درجس پیٹھ ہاو",
+      "filterAll": "سارے درجہ",
+      "filterWorkspace": "صرف ورک سپیس",
+      "filterAgents": "صرف ایجنٹ",
+      "searchLoadedOnly": "تلاش چھیہ ہُن تام لوڈ سپدمژ تبدیلی ہیتھ۔",
+      "loadError": "تبدیلی تاریخ لوڈ کٔرتھ سکیو نہ۔ {message}",
+      "moreFailed": "مزید تبدیلی لوڈ کٔرتھ سکیو نہ۔ {message}",
       "loadingMore": "لوڈ گژھان چھُ"
     }
   },
@@ -15373,7 +15373,7 @@
     "title": "برتاؤ تہٕ حد",
     "intro": "قابو کٔرو زِ یہ ایجنٹ سکہِ اکس ٹرنس منٛز کتھ دور گژھتھ: کتھ ٹول کال کٔرتھ، کتھ وقت چلتھ تہٕ کتھ پتھ پڑھتھ۔ یُس توہہ یتھ نہ بدلاوو سُہ چھُ توہہِ ہندس ورک سپیسہ پیٹھ وراثت منٛز یوان۔",
     "saveFirst": "پیٹھمس ایجنٹ محفوظ کٔرو۔ بنن پتہ سکہِ تمۍ ہند برتاؤ تہٕ حد سیٹ کرنہ یتھ۔",
-    "pickAgent": "Pick an agent below to open its Behavior and limits tab.",
+    "pickAgent": "تمۍ ہند برتاؤ تہٕ حد ٹیب کھولنہ خاطرٕ تل اکھ ایجنٹ چُنو۔",
     "tabs": {
       "label": "ایجنٹ ترتیب",
       "setup": "سیٹ اپ",
@@ -15384,12 +15384,12 @@
       "label": "متعلقہ صفحہ",
       "tenant": "ورک سپیس ڈیفالٹ بدلاو",
       "playground": "پلے گراؤنڈس منٛز آزمایو",
-      "prompts": "This agent's prompts",
-      "promptsAria": "Prompts for {name}: open the prompt registry at this agent",
-      "approvals": "This agent's approvals",
-      "approvalsAria": "Approvals for {name}: open the approvals queue filtered to this agent",
-      "turns": "Turn timeline",
-      "turnsAria": "Turn timeline for {name}: open the turn inspector for this agent"
+      "prompts": "یمہ ایجنٹک پرامپٹ",
+      "promptsAria": "{name} ہند پرامپٹ: پرامپٹ رجسٹری یمہ ایجنٹس پیٹھ کھولو",
+      "approvals": "یمہ ایجنٹک منظوری",
+      "approvalsAria": "{name} ہند منظوری: یمہ ایجنٹ خاطرٕ چھانٹنہ آمژ منظوری قطار کھولو",
+      "turns": "ٹرن ٹائم لائن",
+      "turnsAria": "{name} ہند ٹرن ٹائم لائن: یمہ ایجنٹ خاطرٕ ٹرن معائنہ کار کھولو"
     },
     "readOnly": {
       "locked": "یہ ایجنٹ چھُ ترمیم خاطرٕ مقفل، لہذا یم قدر چھِ صرف پڑھنہ خاطرٕ۔",
@@ -15569,7 +15569,7 @@
     "regAgentPlaceholder": "اکھ ایجنٹ چُنو",
     "regAgentsFailed": "توہہِ ہند ایجنٹ لوڈ کٔرتھ سکیو نہ۔",
     "regPickAgent": "کُنہِ ایجنٹک پرامپٹ وچھنہ تہٕ بدلاونہ خاطرٕ تس چُنو۔",
-    "regAgentUnavailable": "The agent in the link is not available to you, because it does not exist or you cannot see it. The registry opened at the workspace scope instead.",
+    "regAgentUnavailable": "لنکس منٛز ایجنٹ چھُ توہہِ خاطرٕ دستیاب نہ، کیازِ سُہ چھُ نہ موجود یا توہہ سکو نہ تس وچھتھ۔ بدلہ کھولنہ آو رجسٹری ورک سپیس دائرس منٛز۔",
     "regSearchLabel": "پرامپٹ تلاش کٔرو",
     "regSearchPlaceholder": "کیا، عنوان یا تفصیل",
     "regRiskLabel": "خطرچ قسم",
