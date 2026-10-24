@@ -55,7 +55,11 @@ export default function AgentToolPoliciesCard({
   // Who the stored "last changed by" id is: the viewer, or - for someone allowed to list members - a teammate.
   // Anyone else sees "a teammate", never the raw id.
   // useContext, not useAuth(): this card must still render where no provider is mounted.
-  const authCtx = useContext(AuthContext) as { username?: string | null; firstName?: string | null; isAdmin?: boolean } | null;
+  const authCtx = useContext(AuthContext) as {
+    username?: string | null;
+    firstName?: string | null;
+    isAdmin?: boolean;
+  } | null;
   const username = authCtx?.username ?? null;
   const firstName = authCtx?.firstName ?? null;
   const isAdmin = !!authCtx?.isAdmin;
@@ -82,8 +86,9 @@ export default function AgentToolPoliciesCard({
     };
   }, [needsLookup]);
   const updatedBy = useMemo(
-    () => updatedByLabel(updatedByRaw, { selfId: auth.getUserId(), selfName: firstName || username, names: memberNames }),
-    [updatedByRaw, firstName, username, memberNames],
+    () =>
+      updatedByLabel(updatedByRaw, { selfId: auth.getUserId(), selfName: firstName || username, names: memberNames }),
+    [updatedByRaw, firstName, username, memberNames]
   );
 
   useEffect(() => {
@@ -119,7 +124,8 @@ export default function AgentToolPoliciesCard({
   const dirty = isTextDirty(text, stored);
   const check = parsePolicyText(text, view.limits);
   // An empty editor is not an error to shout about - Save is simply unavailable.
-  const inlineError = text.trim() === "" || check.error == null ? null : precheckMessage(check.error, check.policy, check.limit);
+  const inlineError =
+    text.trim() === "" || check.error == null ? null : precheckMessage(check.error, check.policy, check.limit);
   const summaries = policySummaries(stored);
 
   function precheckMessage(error: PolicyTextError, policy: number, limit: number): string {
@@ -181,11 +187,11 @@ export default function AgentToolPoliciesCard({
           <ul className="mt-1 space-y-1">
             {summaries.map((p, i) => (
               <li key={`${p.tool}-${i}`} className="text-xs text-muted-foreground">
-                <code className="font-mono text-foreground">{p.tool}</code>
+                <code className="break-all font-mono text-foreground">{p.tool}</code>
                 {p.denyUnlistedArgs ? <span> - {t("denyUnlisted")}</span> : null}
                 {p.rules.map((r, j) => (
                   <div key={`${r.path}-${j}`} className="ml-3">
-                    <code className="font-mono">{r.path}</code>
+                    <code className="break-all font-mono">{r.path}</code>
                     {r.checks.length > 0 ? <span>: {r.checks.join(" · ")}</span> : null}
                   </div>
                 ))}

@@ -71,6 +71,10 @@ class ApplyFilesRequest(BaseModel):
 
     instruction: str = Field(default="", max_length=4000)
     files: list[FileWrite] = Field(min_length=1, max_length=100)
+    # The on-device model's own explanation of its change, echoed back on
+    # the result so the chat shows the same "what changed" line a hosted
+    # turn does. Optional — older clients simply omit it.
+    summary: str | None = Field(default=None, max_length=4000)
 
 
 class ConnectGitHubRequest(BaseModel):

@@ -79,6 +79,9 @@ services:
       APP_WEB_PUBLIC_URL: https://app.${BASE_DOMAIN}
       APP_WEB_ALLOWED_ORIGINS: https://app.${BASE_DOMAIN},https://admin.${BASE_DOMAIN}
       LIVEKIT_URL: wss://livekit.${BASE_DOMAIN}
+      # A public sign-up page verifies e-mail addresses by default; it needs KEYCLOAK_SMTP_* (else set
+      # KEYCLOAK_REQUIRE_EMAIL_VERIFICATION=false, as the local tiers do).
+      APP_KEYCLOAK_REQUIRE_EMAIL_VERIFICATION: ${KEYCLOAK_REQUIRE_EMAIL_VERIFICATION:-true}
 
   core-worker:
     environment: *core-domain-env

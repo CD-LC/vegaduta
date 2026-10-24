@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Check, Copy, History, Loader2, Search } from "lucide-react";
 import { api } from "../../lib/api";
 import { useTranslations } from "../../lib/i18n";
+import { usePagination } from "../../lib/usePagination";
 import { cn } from "../../lib/utils";
 import { errorMessage } from "../../lib/errors";
+import PaginationControls from "../PaginationControls";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
@@ -39,6 +41,9 @@ export default function SemanticSearchPanel({
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState<SearchResultItem[] | null>(null);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
+  // The collection scope picker is one row per tenant collection - unbounded,
+  // so it gets the same shared client-side pagination as the sidebar list.
+  const scopePagination = usePagination(collections);
 
   function collectionName(id: string) {
     return collections.find((c) => c.id === id)?.name || t("unknownCollectionLabel");
@@ -200,7 +205,7 @@ export default function SemanticSearchPanel({
         </div>
         {collections.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {collections.map((c: KnowledgeCollectionSummary) => (
+            {scopePagination.pageItems.map((c: KnowledgeCollectionSummary) => (
               <button
                 key={c.id}
                 type="button"
@@ -218,6 +223,14 @@ export default function SemanticSearchPanel({
             ))}
           </div>
         )}
+        <PaginationControls
+          page={scopePagination.page}
+          totalPages={scopePagination.totalPages}
+          totalItems={scopePagination.totalItems}
+          pageSize={scopePagination.pageSize}
+          onPageChange={scopePagination.setPage}
+          onPageSizeChange={scopePagination.setPageSize}
+        />
       </div>
 
       <Separator className="my-4" />

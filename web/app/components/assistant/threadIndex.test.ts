@@ -205,4 +205,70 @@ describe("transcriptToTurns", () => {
       ["assistant", "Sent."],
     ]);
   });
+
+  it("never turns an assistant entry with no text into an empty bubble, but keeps a failed one", () => {
+    const turns = transcriptToTurns(
+      {
+        sessionId: "s1",
+        messages: [
+          { role: "user", content: "search x" },
+          { role: "assistant", content: "" },
+          { role: "assistant", content: "   ", status: "ok" },
+          { role: "assistant", content: "", status: "failed", error: true },
+          { role: "assistant", content: "Found it." },
+        ],
+      },
+      "s1"
+    );
+    expect(turns.map((t) => [t.role, t.content, !!t.failed])).toEqual([
+      ["user", "search x", false],
+      ["assistant", "", true],
+      ["assistant", "Found it.", false],
+    ]);
+  });
+});
+
+describe("thread titles never show the app's <app_context> block", () => {
+  const withContext = (typed: string) =>
+    `<app_context>\nAdded by the app, not typed by the user.\nNot connected: Slack.\n</app_context>\n\n${typed}`;
+
+  it("titles a new thread with the person's own words", async () => {
+    expect(threadTitle(withContext("book me a dentist\nnext week"))).toBe("book me a dentist");
+    expect(threadTitle("  <app_context>\nConnected: none.")).toBe("New thread");
+    const row = await recordThreadActivity("u1", "s1", "a1", withContext("plan my trip"), 1_000);
+    expect(row.title).toBe("plan my trip");
+    expect(
+      (await mergeServerThreads("u1", [
+        { sessionId: "s2", agentId: "a1", title: withContext("from the server"), createdAt: "", updatedAt: "2026-10-17T10:00:00Z" },
+      ]))
+    ).toBe(1);
+    expect((await getThread("u1", "s2"))?.title).toBe("from the server");
+  });
+
+  it("re-titles a row stored as <app_context> from the server's title or the next turn, and never lists it as such", async () => {
+    await recordThreadActivity("u1", "old", "a1", "x", 1_000);
+    await patchThread("u1", "old", { title: "<app_context>" });
+    await recordThreadActivity("u1", "old2", "a1", "y", 1_000);
+    await patchThread("u1", "old2", { title: "<app_context>" });
+
+    expect((await listThreads("u1")).map((r) => r.title)).toEqual(["New thread", "New thread"]);
+
+    // The server's title (now derived from the person's words) replaces it, even when nothing else changed.
+    expect(
+      mergeServerThread(
+        { id: "old", scope: "u1", agentId: "a1", title: "<app_context>", lastAt: 9_000, createdAt: 1_000, pinned: true },
+        { sessionId: "old", agentId: "a1", title: "find flights", createdAt: "", updatedAt: "1970-01-01T00:00:01Z" },
+        "u1"
+      )
+    ).toMatchObject({ title: "find flights", pinned: true, lastAt: 9_000 });
+
+    // Or the next turn's first user line does.
+    expect((await recordThreadActivity("u1", "old2", "a1", withContext("summarise my inbox"), 2_000)).title).toBe(
+      "summarise my inbox"
+    );
+
+    // A person's own rename is kept.
+    await patchThread("u1", "old", { title: "my rename" });
+    expect((await recordThreadActivity("u1", "old", "a1", "other", 3_000)).title).toBe("my rename");
+  });
 });

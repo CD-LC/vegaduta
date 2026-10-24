@@ -130,7 +130,10 @@ export default function ApprovalsPanel({
         }
         setServerTotal(res.total ?? (cur.page - 1) * cur.pageSize + data.length + (res.hasMore ? 1 : 0));
         setWindowMayBeTruncated(useWindow && (res.hasMore || (res.total ?? 0) > data.length));
-        void api.countApprovals("PENDING").then(setPendingTotal).catch((): void => undefined);
+        void api
+          .countApprovals("PENDING")
+          .then(setPendingTotal)
+          .catch((): void => undefined);
         setLoaded(data);
         setLoading(false);
       } catch (err: any) {
@@ -157,7 +160,10 @@ export default function ApprovalsPanel({
   const totalItems = windowed ? visible.length : serverTotal;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const pageItems = useMemo(
-    () => (windowed ? visible.slice((Math.min(page, totalPages) - 1) * pageSize, Math.min(page, totalPages) * pageSize) : visible),
+    () =>
+      windowed
+        ? visible.slice((Math.min(page, totalPages) - 1) * pageSize, Math.min(page, totalPages) * pageSize)
+        : visible,
     [windowed, visible, page, pageSize, totalPages]
   );
   const options = useMemo(() => filterOptions(loaded), [loaded]);
@@ -224,21 +230,18 @@ export default function ApprovalsPanel({
   // New pending requests: refresh a pending list in place, announce politely, and (opted in, tab in the
   // background) raise a system notification whose click opens the request.
   const notifyPref = useNotifyPreference();
-  const openRequest = useCallback(
-    async (id: string) => {
-      try {
-        const item = (await api.getApproval(id, [403, 404], true)) as ApprovalRequestItem | null;
-        if (item) {
-          setPinned(item);
-          setSelectedId(item.id);
-          if (item.status === "PENDING") setStatusFilter("PENDING");
-        }
-      } catch {
-        /* the list still shows it if it exists */
+  const openRequest = useCallback(async (id: string) => {
+    try {
+      const item = (await api.getApproval(id, [403, 404], true)) as ApprovalRequestItem | null;
+      if (item) {
+        setPinned(item);
+        setSelectedId(item.id);
+        if (item.status === "PENDING") setStatusFilter("PENDING");
       }
-    },
-    []
-  );
+    } catch {
+      /* the list still shows it if it exists */
+    }
+  }, []);
   useNewApprovalWatcher({
     poll: async () => (await listApprovalsPage("PENDING", 1, 20)).rows as ApprovalRequestItem[],
     notify: notifyPref.on,
@@ -281,7 +284,10 @@ export default function ApprovalsPanel({
       // "background... should animate once user performs some action,
       // according to action performed."
       if (e?.currentTarget) firePulseAtElement(e.currentTarget, "success");
-      await afterDecision({ ...selected, ...resp, status: "APPROVED" } as ApprovalRequestItem, resp?.status && resp.status !== "PENDING" ? resp.status : "APPROVED");
+      await afterDecision(
+        { ...selected, ...resp, status: "APPROVED" } as ApprovalRequestItem,
+        resp?.status && resp.status !== "PENDING" ? resp.status : "APPROVED"
+      );
     } catch (err) {
       setError(errorMessage(err, t("approveFailed")));
     } finally {
@@ -295,7 +301,11 @@ export default function ApprovalsPanel({
     setSuccess(null);
     setBusy(true);
     try {
-      const resp = (await api.rejectRequest(selected.id, null, note.trim() || null)) as Partial<ApprovalRequestItem> | null;
+      const resp = (await api.rejectRequest(
+        selected.id,
+        null,
+        note.trim() || null
+      )) as Partial<ApprovalRequestItem> | null;
       setSuccess(t("rejectedSuccess"));
       setNote("");
       if (e?.currentTarget) firePulseAtElement(e.currentTarget, "danger");
@@ -320,7 +330,10 @@ export default function ApprovalsPanel({
           else await api.rejectRequest(target.id, null, reason);
           done += 1;
         } catch (err) {
-          failed.push({ id: target.id, message: errorMessage(err, t(mode === "approve" ? "approveFailed" : "rejectFailed")) });
+          failed.push({
+            id: target.id,
+            message: errorMessage(err, t(mode === "approve" ? "approveFailed" : "rejectFailed")),
+          });
         }
         onProgress(done + failed.length);
       }
@@ -421,7 +434,9 @@ export default function ApprovalsPanel({
         <Card className="gap-2 py-3" data-testid="last-decision">
           <CardContent className="grid gap-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-medium">{q("lastDecisionTitle", { tool: requestToolName(lastDecided) })}</span>
+              <span className="min-w-0 break-words text-sm font-medium">
+                {q("lastDecisionTitle", { tool: requestToolName(lastDecided) })}
+              </span>
               <button
                 type="button"
                 aria-label={q("lastDecisionClose")}
@@ -442,8 +457,7 @@ export default function ApprovalsPanel({
           <CardContent className="grid gap-6">
             <form onSubmit={handleSetPolicy} className="grid max-w-xl gap-3">
               <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {t("policyOverrideLabel")}{" "}
-                {!isAdmin && <span className="normal-case">{t("tenantAdminOnly")}</span>}
+                {t("policyOverrideLabel")} {!isAdmin && <span className="normal-case">{t("tenantAdminOnly")}</span>}
               </div>
               <Select
                 searchable
@@ -535,7 +549,13 @@ export default function ApprovalsPanel({
           </div>
         </Card>
 
-        <div className="outline-none lg:sticky lg:top-4" ref={detailRef} tabIndex={-1} role="region" aria-label={q("detailRegionLabel")}>
+        <div
+          className="outline-none lg:sticky lg:top-4"
+          ref={detailRef}
+          tabIndex={-1}
+          role="region"
+          aria-label={q("detailRegionLabel")}
+        >
           {selected ? (
             <ApprovalDetail
               item={selected}

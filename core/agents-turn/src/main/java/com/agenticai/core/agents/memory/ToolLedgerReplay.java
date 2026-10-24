@@ -73,6 +73,8 @@ public final class ToolLedgerReplay {
      * its text when {@code showLedger}; a failed reply (kept in the transcript for the person, never shown
      * to the model as something it said) is dropped unless it carries a ledger, in which case the model is
      * shown the ledger and the failure note - the tools ran, and it must not run them again blindly.
+     * A record-only turn ({@link ChatTurn#isToolRecordOnly}) always has its record shown, whatever {@code showLedger}
+     * and the replay switches say: the record is all it holds.
      * Everything else is returned without a ledger; a returned turn still carries {@code tools} only when the record was folded in, so a caller can tell.
      */
     public static Optional<ChatTurn> modelView(ChatTurn turn, ToolLedgerProperties p, boolean showLedger) {
@@ -80,12 +82,16 @@ public final class ToolLedgerReplay {
             return Optional.empty();
         }
         boolean failed = ChatTurn.isFailedReply(turn);
+        // A record-only turn (ChatTurn#isToolRecordOnly: a decided action's outcome) has nothing but the record
+        // to say, so the record is always shown: dropping it would lose the outcome, and an empty assistant
+        // message is rejected by some providers.
         boolean ledgerShown =
-                showLedger
-                        && turn.tools() != null
-                        && p.isEnabled()
-                        && p.isReplayEnabled()
-                        && turn.role() == MessageRole.ASSISTANT;
+                ChatTurn.isToolRecordOnly(turn)
+                        || (showLedger
+                                && turn.tools() != null
+                                && p.isEnabled()
+                                && p.isReplayEnabled()
+                                && turn.role() == MessageRole.ASSISTANT);
         if (failed && !ledgerShown) {
             return Optional.empty();
         }
@@ -109,7 +115,12 @@ public final class ToolLedgerReplay {
         boolean[] show = new boolean[stored.size()];
         for (int i = stored.size() - 1; i >= 0; i--) {
             ChatTurn t = stored.get(i);
-            if (t != null && t.tools() != null && t.role() == MessageRole.ASSISTANT && shown < p.getReplayTurns()) {
+            // Record-only turns are always shown (see above) and do not take a place in the replay-turns count.
+            if (t != null
+                    && t.tools() != null
+                    && t.role() == MessageRole.ASSISTANT
+                    && !ChatTurn.isToolRecordOnly(t)
+                    && shown < p.getReplayTurns()) {
                 show[i] = true;
                 shown++;
             }

@@ -436,6 +436,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "sharing",
     "systemStatusPanel",
     "toolApproval",
+    "toolLabels",
     "toolPolicies",
     "trialOffer",
     "try",
@@ -567,7 +568,8 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "selectComponent",
     "skillLibrary",
     "systemStatusPanel",
-    "toolApproval"
+    "toolApproval",
+    "toolLabels"
   ],
   "/billing": [
     "billing"
@@ -1042,6 +1044,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "selectComponent",
     "systemStatusPanel",
     "toolApproval",
+    "toolLabels",
     "turnProgress"
   ],
   "/plugins": [],
@@ -1247,6 +1250,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "startFlow",
     "systemStatusPanel",
     "toolApproval",
+    "toolLabels",
     "turnProgress"
   ],
   "/status": [],
@@ -1441,6 +1445,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "settings",
     "settingsUi",
     "toolApproval",
+    "toolLabels",
     "turnProgress"
   ],
   "/ui-kit/console-preview/agents": [
@@ -1493,6 +1498,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "sharing",
     "systemStatusPanel",
     "toolApproval",
+    "toolLabels",
     "toolPolicies",
     "trialOffer",
     "try",
@@ -1522,7 +1528,8 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "selectComponent",
     "skillLibrary",
     "systemStatusPanel",
-    "toolApproval"
+    "toolApproval",
+    "toolLabels"
   ],
   "/ui-kit/console-preview/contacts": [
     "auditNotifications",
@@ -1598,6 +1605,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "selectComponent",
     "systemStatusPanel",
     "toolApproval",
+    "toolLabels",
     "turnProgress"
   ],
   "/ui-kit/console-preview/providers": [

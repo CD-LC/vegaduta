@@ -296,24 +296,24 @@ describe("AgentPlayground - live status chips", () => {
     await send("find the report");
     expect(await screen.findByTestId("chip-preparing")).toBeTruthy();
 
-    await turn.emit({ type: "phase", id: 1, phase: "model" });
+    turn.emit({ type: "phase", id: 1, phase: "model" });
     expect(screen.getByTestId("chip-modelCall")).toBeTruthy();
 
-    await turn.emit({ type: "tool_call", id: 2, tool: "web_search", args: "{}" });
+    turn.emit({ type: "tool_call", id: 2, tool: "web_search", args: "{}" });
     expect(screen.getByTestId("chip-tool").textContent).toBe('chipTool:{"tool":"web_search"}');
 
-    await turn.emit({ type: "tool_result", id: 2, tool: "web_search", preview: "ok" });
-    await turn.emit({ type: "retry", id: 3, attempt: 2, maxAttempts: 3, reason: "rate_limited" });
+    turn.emit({ type: "tool_result", id: 2, tool: "web_search", preview: "ok" });
+    turn.emit({ type: "retry", id: 3, attempt: 2, maxAttempts: 3, reason: "rate_limited" });
     expect(screen.getByTestId("chip-retrying").textContent).toBe(
       'chipRetryingAttemptReason:{"attempt":2,"max":3,"reason":"reasonRateLimited"}'
     );
 
-    await turn.emit({ type: "failover", id: 4, toModel: "gpt-4o", reason: "timeout" });
+    turn.emit({ type: "failover", id: 4, toModel: "gpt-4o", reason: "timeout" });
     expect(screen.getByTestId("chip-failover").textContent).toBe(
       'chipFailoverToReason:{"model":"gpt-4o","reason":"reasonTimeout"}'
     );
 
-    await turn.write("Found it.");
+    turn.write("Found it.");
     expect(screen.getByTestId("chip-writing")).toBeTruthy();
 
     await turn.finish();

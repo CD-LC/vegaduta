@@ -99,6 +99,13 @@ export default function AutonomySection() {
                     <span className="mt-0.5 block text-xs text-muted-foreground">
                       {t(`reasoningDepth${depth}Hint`)}
                     </span>
+                    {/* What choosing it costs, in one plain sentence (speed, tokens, streaming). */}
+                    <span
+                      className="mt-1 block text-xs text-foreground/80"
+                      data-testid={`reasoning-depth-${depth.toLowerCase()}-cost`}
+                    >
+                      {t(`reasoningDepth${depth}Cost`)}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -119,25 +126,9 @@ export default function AutonomySection() {
            * approvalGateModeFor() in AgentToolProvider, nothing else. */}
           {!isDraft && (
             <div className="mb-4">
-              <div className="mb-1 text-xs text-muted-foreground">Autonomy</div>
+              <div className="mb-1 text-xs text-muted-foreground">{t("autonomyLabel")}</div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                {[
-                  {
-                    tier: "SUPERVISED",
-                    label: "Supervised",
-                    hint: "Every tool call waits for a human to approve it, whatever the workspace policy says. Tighter step ceiling.",
-                  },
-                  {
-                    tier: "SEMI_AUTONOMOUS",
-                    label: "Semi-autonomous",
-                    hint: "Follows the workspace's approval policy for each action type. The default for every agent.",
-                  },
-                  {
-                    tier: "FULLY_AUTONOMOUS",
-                    label: "Fully autonomous",
-                    hint: "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
-                  },
-                ].map(({ tier, label, hint }) => (
+                {["SUPERVISED", "SEMI_AUTONOMOUS", "FULLY_AUTONOMOUS"].map((tier) => (
                   <button
                     key={tier}
                     type="button"
@@ -158,16 +149,20 @@ export default function AutonomySection() {
                         autonomyTier === tier ? "text-foreground" : "text-muted-foreground"
                       )}
                     >
-                      {label}
+                      {t(`autonomyTier${tier}`)}
                     </span>
-                    <span className="mt-0.5 block text-xs text-muted-foreground">{hint}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">{t(`autonomyTier${tier}Hint`)}</span>
+                    {/* What choosing it costs you, in one plain sentence (how often it asks). */}
+                    <span
+                      className="mt-1 block text-xs text-foreground/80"
+                      data-testid={`autonomy-tier-${tier.toLowerCase()}-cost`}
+                    >
+                      {t(`autonomyTier${tier}Cost`)}
+                    </span>
                   </button>
                 ))}
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Approval requests land in the workspace&apos;s approvals queue, and a tool call that is waiting is not
-                run - the agent is told so and carries on with the rest of the turn.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t("autonomyQueueNote")}</p>
             </div>
           )}
 

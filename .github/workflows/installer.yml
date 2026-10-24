@@ -65,7 +65,7 @@ jobs:
           done
           (cd dist && sha256sum vegaduta-setup-* | LC_ALL=C sort -k2 > SHA256SUMS)
           ls -lh dist
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: vegaduta-setup-dist
           path: installer/dist/*
@@ -88,7 +88,7 @@ jobs:
           set -euo pipefail
           cd installer
           ./package.sh darwin --version "dev-$(git rev-parse --short HEAD)"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: vegaduta-setup-dmg
           path: installer/dist/*.dmg
