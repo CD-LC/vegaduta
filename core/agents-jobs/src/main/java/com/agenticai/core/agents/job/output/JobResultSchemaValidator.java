@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.Error;
+import com.networknt.schema.InputFormat;
 import com.networknt.schema.Schema;
 import com.networknt.schema.SchemaRegistry;
 import com.networknt.schema.SpecificationVersion;
@@ -33,13 +34,20 @@ import org.springframework.stereotype.Component;
  * failed", which is the same class of mistake as validating a cron expression
  * only when it first fires.
  *
- * <h2>The 2.0.0 API is not the one every example on the internet shows</h2>
+ * <h2>The 2.x/3.x API is not the one every example on the internet shows</h2>
  * {@code com.networknt:json-schema-validator} 2.0.0 renamed its whole surface:
  * {@link SchemaRegistry} / {@link Schema} / {@link Error} / {@link
  * SpecificationVersion}, NOT the 1.x {@code JsonSchemaFactory} / {@code
  * JsonSchema} / {@code ValidationMessage} / {@code SpecVersion.VersionFlag}
- * names. Verified against the jar itself rather than from memory. If a future
- * bump makes this file stop compiling, that rename is why.
+ * names. Verified against the jar itself rather than from memory.
+ *
+ * <p>3.0.0 then swapped the engine's JSON tree to Jackson 3 ({@code
+ * tools.jackson.databind.JsonNode}) while this codebase is still on Jackson 2
+ * ({@code com.fasterxml}). Rather than bridging the two tree types, this class
+ * only calls the {@link String}-based entry points - {@code
+ * getSchema(String, InputFormat)} and {@code validate(String, InputFormat)} -
+ * so no {@code tools.jackson} type ever crosses the boundary. If a future bump
+ * makes this file stop compiling, those two facts are why.
  *
  * <h2>What is rejected, and why each one</h2>
  * <ul>
@@ -136,7 +144,10 @@ public class JobResultSchemaValidator {
      */
     public List<String> violations(String schemaJson, JsonNode instance) {
         Schema schema = compile(schemaJson);
-        List<Error> errors = schema.validate(instance);
+        // Instance arrives as a Jackson-2 JsonNode; the 3.x validator takes
+        // Jackson-3 (tools.jackson) nodes or raw text - passing the serialized
+        // form keeps this class free of the Jackson-3 type entirely.
+        List<Error> errors = schema.validate(instance.toString(), InputFormat.JSON);
         List<String> readable = new ArrayList<>(errors.size());
         for (Error error : errors) {
             readable.add(format(error));
@@ -181,7 +192,7 @@ public class JobResultSchemaValidator {
 
         Schema compiled;
         try {
-            compiled = registry.getSchema(schemaNode);
+            compiled = registry.getSchema(schemaJson, InputFormat.JSON);
         } catch (RuntimeException uncompilable) {
             throw new InvalidResultSchemaException(
                 "The result schema is not a valid JSON Schema: " + messageOf(uncompilable), uncompilable);
