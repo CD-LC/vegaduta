@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.tools.workspacefiles;
 
 import com.agenticai.core.json.JsonMappers;
+import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -42,11 +43,23 @@ final class WorkspaceFileToolCallback implements ToolCallback {
     private final WorkspaceFiles files;
     private final Kind kind;
     private final String rootLabel;
+    /**
+     * The most characters of the model-facing JSON a read may produce - the tool's own {@code
+     * app.tools.output.*} limit. A read that is longer than the cap would be cut by the guard in the
+     * middle of the JSON, and the "read on with offset=N" note, which sits after the content, would be
+     * the part that was lost; so the page stops early enough for the whole answer to fit.
+     */
+    private final int outputLimit;
 
     WorkspaceFileToolCallback(WorkspaceFiles files, Kind kind, String rootLabel) {
+        this(files, kind, rootLabel, WorkspaceFiles.MAX_READ_CHARS);
+    }
+
+    WorkspaceFileToolCallback(WorkspaceFiles files, Kind kind, String rootLabel, int outputLimit) {
         this.files = files;
         this.kind = kind;
         this.rootLabel = rootLabel;
+        this.outputLimit = outputLimit > 0 ? outputLimit : WorkspaceFiles.MAX_READ_CHARS;
     }
 
     @Override
@@ -183,19 +196,45 @@ final class WorkspaceFileToolCallback implements ToolCallback {
         String[] lines = files.read(path).split("\n", -1);
         int from = Math.max(1, offset);
         int to = limit > 0 ? Math.min(lines.length, from - 1 + limit) : lines.length;
+        int budget = contentBudget(path, lines.length);
         StringBuilder sb = new StringBuilder();
+        int escaped = 0;
         int i = from;
         for (; i <= to; i++) {
             String line = i + "\t" + lines[i - 1] + "\n";
-            if (sb.length() + line.length() > WorkspaceFiles.MAX_READ_CHARS) {
+            int cost = escapedLength(line);
+            if (sb.length() + line.length() > WorkspaceFiles.MAX_READ_CHARS || escaped + cost > budget) {
+                if (sb.length() == 0) {
+                    // One line wider than a whole page (a minified file): show the start of it rather than
+                    // nothing, so the read makes progress; the next offset moves on to the line after.
+                    int fits = Math.max(1, Math.min(line.length(), budget / 6));
+                    sb.append(line, 0, fits);
+                    i++;
+                }
                 break;
             }
             sb.append(line);
+            escaped += cost;
         }
         out.put("path", path).put("total_lines", lines.length).put("content", sb.toString());
         if (i <= to) {
             out.put("note", "Output cut at line " + (i - 1) + "; read on with offset=" + i + ".");
         }
+    }
+
+    /**
+     * How many JSON-escaped characters of file content fit in the tool's output limit once the rest of
+     * the answer (path, line count, the continuation note) is accounted for.
+     */
+    private int contentBudget(String path, int totalLines) throws IOException {
+        ObjectNode skeleton = MAPPER.createObjectNode();
+        skeleton.put("path", path).put("total_lines", totalLines).put("content", "");
+        skeleton.put("note", "Output cut at line " + totalLines + "; read on with offset=" + (totalLines + 1) + ".");
+        return Math.max(1, outputLimit - MAPPER.writeValueAsString(skeleton).length());
+    }
+
+    private static int escapedLength(String text) {
+        return JsonStringEncoder.getInstance().quoteAsString(text).length;
     }
 
     private static String error(String message) {

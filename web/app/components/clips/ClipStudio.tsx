@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui
 import { Button } from "../ui/button";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { usePageReady } from "../RouteTransition";
+import PaginationControls from "../PaginationControls";
+import { usePagination } from "../../lib/usePagination";
 import MotionPresetPicker from "./MotionPresetPicker";
 import MotionPlusStudio from "./MotionPlusStudio";
 import { edgeEnabled } from "../../lib/edge/capabilities";
@@ -57,6 +59,7 @@ export default function ClipStudio() {
   const [images, setImages] = useState<any[]>([]);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [imagesFailed, setImagesFailed] = useState(false);
+  const imagePages = usePagination(images);
   const [source, setSource] = useState<KenBurnsSource | null>(null);
   const [sourceLabel, setSourceLabel] = useState("");
   const [selectedImageId, setSelectedImageId] = useState<any>(null);
@@ -350,7 +353,7 @@ export default function ClipStudio() {
                   </p>
                 ) : (
                   <ul className="max-h-72 space-y-1 overflow-y-auto pr-1">
-                    {images.map((row: any) => {
+                    {imagePages.pageItems.map((row: any) => {
                       const selected = selectedImageId != null && String(selectedImageId) === String(row.id);
                       return (
                         <li
@@ -396,6 +399,18 @@ export default function ClipStudio() {
                       );
                     })}
                   </ul>
+                )}
+
+                {images.length > 0 && (
+                  <PaginationControls
+                    page={imagePages.page}
+                    totalPages={imagePages.totalPages}
+                    totalItems={imagePages.totalItems}
+                    pageSize={imagePages.pageSize}
+                    onPageChange={imagePages.setPage}
+                    onPageSizeChange={imagePages.setPageSize}
+                    itemLabel="images"
+                  />
                 )}
 
                 <div className="mt-4 border-t border-border pt-4">

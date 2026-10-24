@@ -155,7 +155,7 @@ public class AwsBedrockAgentChatClientFactory implements AgentChatClientFactory 
         AwsBedrockChatModel chatModel = new AwsBedrockChatModel(
             clients.sync(), clients.async(), model, maxTokens, temperature, topP);
 
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.AWS_BEDROCK)
             .defaultAdvisors(modelSupport.advisors(
                 new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.AWS_BEDROCK, model, meterRegistry, pricingCatalog)))
             .build();

@@ -4,6 +4,10 @@
 # Default file set: tracked plus new untracked (not ignored) files, so a doc you have not
 # added yet is still checked. Files named on the command line are resolved against the
 # current directory, from any directory inside the repository.
+# Also fails (default file set, or any .html file named on the command line) when a hand-written
+# HTML page under docs/ links to a .md file: mkdocs publishes the HTML verbatim and serves each
+# Markdown page as /<name>/, so such a link works on disk and on GitHub but is a 404 on the site.
+# Also fails on a leftover `TODO(maintainers)` identity placeholder in a Markdown file or CODEOWNERS.
 # Usage: bash scripts/ci/docs-link-check.sh [files...]
 set -uo pipefail
 args=()
@@ -74,6 +78,31 @@ for f in files:
         if frag and dest.endswith(".md") and os.path.isfile(dest):
             if urllib.parse.unquote(frag).lower() not in anchors(dest):
                 print(f"{f}: missing anchor {target}"); bad += 1
-print(f"checked {len(files)} files, {bad} broken link(s)")
+
+html_md = re.compile(r'href="([^":#?]*\.md)(?:#[^"]*)?"')
+if args:
+    html_files = [f for f in files if f.endswith(".html")]
+else:
+    out = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-standard", "docs/*.html", "docs/**/*.html"],
+                         capture_output=True, text=True).stdout.split()
+    html_files = sorted(f for f in set(out) if os.path.exists(f) and "/archive/" not in f)
+for f in html_files:
+    for n, line in enumerate(open(f, encoding="utf-8").read().splitlines(), 1):
+        for m in html_md.finditer(line):
+            print(f"{f}:{n}: href to a .md file ({m.group(1)}) is a 404 on the published site; link the site URL (.../name/)")
+            bad += 1
+
+if not args:
+    out = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-standard", "*.md", ".github/CODEOWNERS"],
+                         capture_output=True, text=True).stdout.split()
+    for f in sorted(set(out)):
+        if not os.path.isfile(f) or "/archive/" in f:
+            continue
+        for n, line in enumerate(open(f, encoding="utf-8", errors="replace").read().splitlines(), 1):
+            if "TODO(maintainers)" in line:
+                print(f"{f}:{n}: leftover TODO(maintainers) placeholder; the repository identity is settled")
+                bad += 1
+
+print(f"checked {len(files)} files and {len(html_files)} html pages, {bad} broken link(s) or placeholder(s)")
 sys.exit(1 if bad else 0)
 PY

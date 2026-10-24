@@ -13,14 +13,14 @@ has `pypi-release.yml` (tag `pysdk-v*`).
 
 | Step | Where | Notes |
 |---|---|---|
-| Reserve the npm name | `npm login` → `npm publish` of a 0.0.0 placeholder, or an org scope | `vegaduta-sdk` is a placeholder; check `npm view vegaduta-sdk` — if it is squatted, pick `@vegaduta/sdk` (requires creating the `vegaduta` npm org first) and update `sdk/typescript/package.json` `name` |
+| Reserve the npm name | `npm login` → `npm publish` of a 0.0.0 placeholder, or an org scope | `vegaduta-sdk` is the name in `package.json` and is not registered yet; check `npm view vegaduta-sdk` — if it is squatted, pick `@vegaduta/sdk` (requires creating the `vegaduta` npm org first) and update `sdk/typescript/package.json` `name` |
 | Reserve the PyPI name | `pypi.org/manage/account` → "Publishing" → pending publisher | `vegaduta-sdk` on PyPI; same squatting check (`pip index versions vegaduta-sdk` or the project page) |
 | npm token | npm account → Access Tokens → Granular (publish) | Becomes the `NPM_TOKEN` secret. Classic tokens also work; granular tokens scoped to the one package are safer |
 | PyPI trusted publisher | PyPI project → Publishing | Workflow `rest-sdk-release.yml`, environment `pypi-rest-sdk`. No password/token is ever stored |
 | GitHub environments | Settings → Environments | Create `npm` and `pypi-rest-sdk`; require a reviewer on each so a publish cannot fire unattended |
 | Secrets | Settings → Secrets | `NPM_TOKEN` only (PyPI uses OIDC) |
 | Turn publishing on | Settings → Variables (repository) | `SDK_PUBLISH_NPM=true`, `SDK_PUBLISH_PYPI=true` — set each independently. With neither set the workflow still verifies, builds, attests and creates the GitHub Release but skips the registries |
-| Flip the npm private flag | `sdk/typescript/package.json` | `"private": true` is a deliberate guard against publishing the unreserved name; the workflow removes it itself (`npm pkg delete private`) - leave it in the repo |
+| Flip the npm private flag | `sdk/typescript/package.json` | `"private": true` is a deliberate guard against publishing the unreserved name; the build job removes it from the copy it packs (`npm pkg delete private`) - leave it in the repo |
 
 ## Releasing
 
@@ -38,10 +38,13 @@ has `pypi-release.yml` (tag `pysdk-v*`).
 4. Actions tab → **REST SDK release** → **Run workflow**, **Use workflow from** = the
    tag. Verify asserts the tag equals all three version strings, re-checks the
    generated files against the spec, type-checks, builds and runs every runtime and
-   contract test; build packs the npm tarball and the sdist+wheel, checks them into
-   `SHA256SUMS`, attests SLSA provenance and creates the GitHub Release.
+   contract test; build packs the npm tarball (checking that `dist/index.js` and the type
+   declarations are in it) and the sdist+wheel, checks them into `SHA256SUMS`, attests SLSA
+   provenance and creates the GitHub Release.
 5. If publishing is armed, the `npm` and `pypi` jobs publish (npm with
-   `--provenance`, PyPI via trusted publishing). Both skip existing versions.
+   `--provenance`, PyPI via trusted publishing). Both publish the files the build job attested
+   and attached to the GitHub Release, not a rebuild. PyPI skips existing versions; npm refuses
+   to republish one.
 6. Verify:
 
     ```bash

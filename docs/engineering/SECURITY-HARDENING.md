@@ -108,7 +108,20 @@ A2A card fetch, outbound webhooks, and the Magic Studio fetcher.
   enabling browser-use.
 - **OAuth state binding** is server-side, single-use and short-lived, but the
   browser cookie is optional until the web app sends credentials. The nonce
-  store is per JVM (callbacks on another replica fail closed).
+  store is per JVM (callbacks on another replica fail closed). Until the cookie
+  is required, the browser that completes consent is not proven to be the one
+  that started it: a tenant user who can mint a consent URL (it needs
+  `PERM_MANAGE_INTEGRATIONS`) and gets another person to finish it within the
+  10-minute window lands that person's provider tokens in the attacker's own
+  tenant. The two MCP flows (`/oauth/mcp/remote/callback` and
+  `/oauth/mcp/{provider}/callback`) have **no** browser-cookie binding at all
+  (only the encrypted, authenticated state), even with
+  `app.oauth.state.require-browser-cookie=true`, which covers Google, X and
+  Atlassian only. Closing both needs credentialed CORS for an explicit console
+  origin, `credentials: 'include'` in the console, the cookie on the MCP
+  authorize/callback pair, and an opt-out for plain-http `localhost` installs
+  (the cookie is `Secure`); it is a changed default, so it is a post-1.0
+  decision.
 - **Workflow webhooks** still authenticate by path token (looked up by hash,
   masked in core logs, but visible in upstream proxy/CDN logs). HMAC-signed
   webhooks are not built.
@@ -118,9 +131,9 @@ A2A card fetch, outbound webhooks, and the Magic Studio fetcher.
   name-only rule are re-evaluated only when next saved.
 - **Legacy tenant schemas** named after an organisation are protected from the
   drop paths but not renamed.
-- **Dependencies:** `poi-ooxml` stays at 5.3.0 (`core/documentgen`, `core/omnichannel`);
-  bump it to >= 5.4. Done since this review: `bcprov-jdk18on` is at 1.85
-  (`core/agents-tools`) and core is on Spring Boot 3.5.16.
+- **Dependencies:** done since this review: `poi-ooxml` is at 5.5.1 (`poi.version` in
+  `core/pom.xml`, used by `core/documentgen` and `core/omnichannel`; it was 5.3.0),
+  `bcprov-jdk18on` is at 1.85 (`core/agents-tools`) and core is on Spring Boot 3.5.16.
 - **Core database role:** core still connects as the Postgres superuser in some
   deployments; run it as the non-superuser app role that owns only tenant
   schemas.

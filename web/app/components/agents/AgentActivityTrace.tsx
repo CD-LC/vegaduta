@@ -18,6 +18,7 @@ import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
 import McpAppFrame from "../McpAppFrame";
 import { MCP_APPS_ENABLED, parseAppPointer, type McpAppPointer } from "../../lib/mcpApps/mcpApps";
+import { FINISH_STEP_TYPES, lifecycleDetails, type StepDetails } from "../../lib/turnLifecycle";
 
 /**
  * AG-UI-style live activity trace, shared by ChatPanel (/playground) and
@@ -92,6 +93,8 @@ export interface ActivityStep {
   memory?: MemoryStepInfo;
   /** Only set on a `tool_result` whose tool declared an MCP App (core: app.mcp.apps.enabled). A handle, not the HTML. */
   app?: McpAppPointer;
+  /** Only set on lifecycle events (retry, failover, continuation, approval, finish): reason, attempt, pass, model... */
+  details?: StepDetails;
 }
 
 const CLOSING_TYPES = new Set<string>(["tool_result", "error"]);
@@ -189,7 +192,14 @@ export function normalizeServerStep(
     ...(type === "phase" ? { stage: asString(raw.phase) } : {}),
     ...(type === "memory" ? { memory: memoryInfo(raw) } : {}),
     ...(type === "tool_result" ? appField(raw.app) : {}),
+    ...detailsField(type, raw),
   };
+}
+
+/** `{ details }` only for a lifecycle event that carried some, so every other step is key-for-key what it was. */
+function detailsField(type: string, raw: Record<string, unknown>): { details?: StepDetails } {
+  const details = lifecycleDetails(type, raw);
+  return details ? { details } : {};
 }
 
 /** `{ app }` only for a valid pointer, so a step without one is key-for-key what it was before MCP Apps. */
@@ -251,6 +261,9 @@ export function buildTraceRows(steps: readonly ActivityStep[]): TraceRow[] {
     // Phase events feed the live progress line (lib/turnProgress.ts), not the trace: "guardrails,
     // routing, context, model" is where the turn WAS, which is noise once it has answered.
     if (step.type === "phase") continue;
+    // The `finish` event says how the reply ended; it feeds the outcome notice under the reply (turnOutcome.ts), and a
+    // row for every turn's ending would only add a step to every trace.
+    if (FINISH_STEP_TYPES.has(step.type)) continue;
     if (step.type === "tool_call") {
       const closing = steps.find((s) => s.id === step.id && s.origin === step.origin && CLOSING_TYPES.has(s.type));
       rows.push({ kind: "tool", call: step, closing });

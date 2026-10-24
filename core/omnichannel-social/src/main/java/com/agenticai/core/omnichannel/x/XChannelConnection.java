@@ -2,6 +2,8 @@ package com.agenticai.core.omnichannel.x;
 
 import com.agenticai.core.omnichannel.status.ChannelConnection;
 import com.agenticai.core.omnichannel.status.ChannelNotConnectedException;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
  * finished needs attention rather than being "not connected".
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class XChannelConnection implements ChannelConnection {
 
     private final XOAuthService oAuthService;

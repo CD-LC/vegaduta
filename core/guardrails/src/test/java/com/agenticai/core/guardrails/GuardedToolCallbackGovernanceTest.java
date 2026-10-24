@@ -90,7 +90,7 @@ class GuardedToolCallbackGovernanceTest {
         ApprovalRequest pending = mock(ApprovalRequest.class);
         when(pending.getId()).thenReturn(UUID.randomUUID());
         when(approvalGateService.recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any()))
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
             .thenReturn(pending);
         GuardedToolCallback guarded = guarded(name -> ToolDispatchGate.Verdict.requireApproval("irreversible"), 10);
 
@@ -111,7 +111,7 @@ class GuardedToolCallbackGovernanceTest {
 
         assertEquals(TOOL_OUTPUT, guarded.call(TOOL_INPUT));
         verify(approvalGateService, never()).recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any());
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
     }
 
     @Test
@@ -120,7 +120,7 @@ class GuardedToolCallbackGovernanceTest {
         ApprovalRequest pending = mock(ApprovalRequest.class);
         when(pending.getId()).thenReturn(UUID.randomUUID());
         when(approvalGateService.recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any()))
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
             .thenReturn(pending);
         GuardedToolCallback guarded = new GuardedToolCallback(
             delegate, new AtomicInteger(0), 10, guardrailService, approvalPolicyService, approvalGateService,
@@ -183,8 +183,10 @@ class GuardedToolCallbackGovernanceTest {
     }
 
     @Test
-    void theStepLimitIsStillAHardStopAndIsTaggedAsSuch() {
-        GuardedToolCallback guarded = guarded(null, 0);
+    void aModelThatKeepsCallingPastTheGraceIsStillStoppedHardAndTheStopIsTaggedAsSuch() {
+        ToolStepLimitProperties noGrace = new ToolStepLimitProperties();
+        noGrace.setGraceCalls(0);
+        GuardedToolCallback guarded = guarded(null, 0).withStepLimits(noGrace);
 
         assertThrows(ToolStepLimitExceededException.class, () -> guarded.call(TOOL_INPUT));
         assertEquals(1, meters.timer(GuardedToolCallback.CALL_TIMER,

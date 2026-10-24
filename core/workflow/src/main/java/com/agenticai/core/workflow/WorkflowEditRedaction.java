@@ -1,5 +1,6 @@
 package com.agenticai.core.workflow;
 
+import com.agenticai.core.prompts.PromptResolver;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,10 +36,14 @@ import java.util.regex.Pattern;
  */
 final class WorkflowEditRedaction {
 
-    /** Appended to the edit-mode user message only when something was redacted. */
-    static final String PROMPT_NOTE = "\n\nValues shown as [[REDACTED_1]], [[REDACTED_2]], ... are hidden "
-        + "credentials. Copy each placeholder back EXACTLY as written wherever its value is kept; never invent, "
-        + "alter or explain one.";
+    /** Registry key of the note appended to the edit-mode user message only when something was redacted. */
+    static final String NOTE_KEY = "workflow.edit_redaction_note";
+
+    /**
+     * The shipped wording of {@link #NOTE_KEY}, for tests only: the generator resolves the key through
+     * the registry so a tenant override applies.
+     */
+    static final String PROMPT_NOTE = PromptResolver.defaultsOnly().catalog().defaultText(NOTE_KEY);
 
     private static final Pattern SENSITIVE_NAME = Pattern.compile(
         "(?i)(authorization|api[-_ ]?key|token|secret|password|passwd|cookie|credential|signature)");

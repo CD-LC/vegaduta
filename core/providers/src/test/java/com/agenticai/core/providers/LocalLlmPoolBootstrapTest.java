@@ -377,6 +377,59 @@ class LocalLlmPoolBootstrapTest {
     private void usable(PlatformHostedLlmProvider row) {
         when(service.resolveEnabledSelectionById(row.getId()))
                 .thenReturn(Optional.of(new HostedProviderSelection(row, "ollama")));
+        when(service.resolveEnabledSelectionByIdIgnoringPoolSwitch(row.getId()))
+                .thenReturn(Optional.of(new HostedProviderSelection(row, "ollama")));
+    }
+
+    /** A pool an admin switched off, holding only an enabled local row that cannot be used. */
+    private PlatformHostedLlmProvider switchedOffPoolWithAnUnusableLocalRow(long id) {
+        server.expect(ExpectedCount.manyTimes(), requestTo(BASE + "/api/tags"))
+                .andRespond(withSuccess(TAGS, MediaType.APPLICATION_JSON));
+        PlatformHostedLlmProvider stuck = row(id, "Local model (Ollama)", BASE, 0);
+        when(stuck.isEnabled()).thenReturn(true);
+        when(repository.findAllByOrderByPriorityAsc()).thenReturn(List.of(stuck));
+        when(repository.findAllByEnabledTrueOrderByPriorityAsc()).thenReturn(List.of(stuck));
+        when(service.getPoolSettings())
+                .thenReturn(new HostedLlmPoolSettingsResponse(false, null, "admin"));
+        when(service.resolveEnabledSelectionById(id)).thenReturn(Optional.empty());
+        when(service.resolveEnabledSelectionByIdIgnoringPoolSwitch(id))
+                .thenReturn(Optional.empty());
+        return stuck;
+    }
+
+    @Test
+    void aSwitchedOffPoolIsLeftOffWhenTheLocalRowsHostIsRefused() {
+        switchedOffPoolWithAnUnusableLocalRow(20);
+
+        // No allowed private host: the SSRF guard refuses the row, so switching the pool on would
+        // gain nothing - the chat would still find it empty.
+        assertFalse(bootstrap("ollama", guard(Set.of())).repairOnDemand());
+
+        verify(service, never()).setPoolEnabled(org.mockito.ArgumentMatchers.anyBoolean(), any());
+        verify(service, never()).update(any(), any());
+        assertTrue(logged(Level.WARN, "SSRF guard refuses"));
+    }
+
+    @Test
+    void aSwitchedOffPoolIsLeftOffWhenTheLocalRowNeedsAKeyThatIsNotConfigured() {
+        switchedOffPoolWithAnUnusableLocalRow(21);
+
+        assertFalse(bootstrap("", guard(Set.of("ollama:11434"))).repairOnDemand());
+
+        verify(service, never()).setPoolEnabled(org.mockito.ArgumentMatchers.anyBoolean(), any());
+        verify(service, never()).update(any(), any());
+        assertTrue(logged(Level.WARN, "api-key is blank"));
+    }
+
+    @Test
+    void aSwitchedOffPoolIsSwitchedOnOnlyAfterTheLocalRowIsRepaired() {
+        switchedOffPoolWithAnUnusableLocalRow(22);
+
+        assertTrue(bootstrap("ollama", guard(Set.of("ollama:11434"))).repairOnDemand());
+
+        org.mockito.InOrder order = org.mockito.Mockito.inOrder(service);
+        order.verify(service).update(org.mockito.ArgumentMatchers.eq(22L), any());
+        order.verify(service).setPoolEnabled(true, "local-llm-pool-bootstrap");
     }
 
     @Test

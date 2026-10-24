@@ -4,7 +4,7 @@ import { NAV_SECTIONS } from "./navSections";
 
 // Authenticated console routes that must stay reachable from the rail. Add a route
 // here when a page ships without a nav row would otherwise orphan it.
-const REQUIRED_NAV_ROUTES = ["/assistant", "/roi", "/admin/payments", "/agents/quality", "/agents/turns", "/insights", "/usage"];
+const REQUIRED_NAV_ROUTES = ["/assistant", "/roi", "/admin/payments", "/agents/quality", "/agents/turns", "/insights", "/usage", "/admin/runtime-settings"];
 
 describe("navSections", () => {
   // The blueprint is split into two halves (navSections.ts assembles them).
@@ -27,5 +27,6 @@ describe("navSections", () => {
     expect(find("/roi")?.perm).toBe("VIEW_USAGE");
     expect(find("/admin/payments")?.perm).toBe("MANAGE_AGENTS");
     expect(find("/agents/turns")?.perm).toBe("VIEW_AUDIT_LOG");
+    expect(find("/admin/runtime-settings")?.perm).toBe("MANAGE_TENANT_SETTINGS");
   });
 });

@@ -19,6 +19,7 @@ import {
   AlertOctagon,
   Activity,
   ScrollText,
+  SlidersHorizontal,
   Files,
   Palette,
   Puzzle,
@@ -30,6 +31,7 @@ import {
   Lock,
   Fingerprint,
   Wallet,
+  Signpost,
 } from "lucide-react";
 
 import type { NavSection } from "./navTypes";
@@ -269,6 +271,18 @@ export const OPERATE_NAV_SECTIONS: NavSection[] = [
         adminHidden: false,
         adminOnly: false,
       },
+      // "Where do I control...?" (/help/controls): the map from a thing you want to change to the page that changes it,
+      // built from the settings catalog. Open to every member; each page it links to gates itself.
+      {
+        href: "/help/controls",
+        labelKey: "railControls",
+        icon: Signpost,
+        exact: false,
+        badge: null,
+        badgeVariant: null,
+        adminHidden: false,
+        adminOnly: false,
+      },
       // Public plugin/app catalog (/plugins): in-house page with real store links where
       // published and honest 'not yet published' states otherwise (clients/PUBLISHING.md).
       // No Play Store or Wear OS link: neither exists publicly, a dead link is worse.
@@ -395,6 +409,19 @@ export const OPERATE_NAV_SECTIONS: NavSection[] = [
         href: "/admin/instructions",
         labelKey: "railInstructions",
         icon: ScrollText,
+        exact: false,
+        badge: null,
+        badgeVariant: null,
+        adminHidden: false,
+        adminOnly: false,
+        perm: "MANAGE_TENANT_SETTINGS",
+      },
+      // Workspace runtime settings (limits, approvals, quality, guardrails ...), catalog-driven. Reads are open to
+      // every member and the page shows values read-only below tenant admin; the row is scope-gated like its siblings.
+      {
+        href: "/admin/runtime-settings",
+        labelKey: "railRuntimeSettings",
+        icon: SlidersHorizontal,
         exact: false,
         badge: null,
         badgeVariant: null,

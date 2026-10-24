@@ -4,22 +4,31 @@ import { Button } from "../../../components/ui/button";
 import { Card, CardContent } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
+import DatasetModeControls from "./DatasetModeControls";
 
 export interface CreateDatasetDraft {
   name: string;
   description: string;
   threshold: string;
-  toolExec: boolean;
+  /** true pins the full pipeline, false pins quick (text only), null pins nothing: the workspace default. */
+  toolExec: boolean | null;
+  /** The eval sandbox approves tool calls that would wait for a person (only when tools run). */
+  autoApprove: boolean;
 }
 
 /** The "New dataset" card. State is owned by the section; this is presentational. */
 export default function CreateDatasetForm({
+  agentId,
+  refusal = null,
   draft,
   onChange,
   busy,
   onCancel,
   onCreate,
 }: {
+  agentId: string | null;
+  /** The server's sentence when it refused auto-approval for this workspace. */
+  refusal?: string | null;
   draft: CreateDatasetDraft;
   onChange: (patch: Partial<CreateDatasetDraft>) => void;
   busy: boolean;
@@ -65,13 +74,13 @@ export default function CreateDatasetForm({
             placeholder="What this dataset protects against regressing"
           />
         </div>
-        <label className="flex items-center gap-2 text-sm text-foreground">
-          <input type="checkbox" checked={draft.toolExec} onChange={(e) => onChange({ toolExec: e.target.checked })} />
-          Execute tools during replays
-          <span className="text-xs text-muted-foreground">
-            (off = safe tool-less replay; on = real tool side effects, required for expected-tool checks)
-          </span>
-        </label>
+        <DatasetModeControls
+          agentId={agentId}
+          refusal={refusal}
+          disabled={busy}
+          value={{ toolExecutionEnabled: draft.toolExec, autoApproveTools: draft.autoApprove }}
+          onChange={(next) => onChange({ toolExec: next.toolExecutionEnabled, autoApprove: next.autoApproveTools })}
+        />
         <div className="flex justify-end gap-2">
           <Button variant="outline" size="sm" onClick={() => onCancel()}>
             Cancel

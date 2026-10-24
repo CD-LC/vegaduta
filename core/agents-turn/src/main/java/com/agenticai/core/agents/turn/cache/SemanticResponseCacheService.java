@@ -3,6 +3,8 @@ package com.agenticai.core.agents.turn.cache;
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.knowledge.SidecarClient;
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -14,7 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -35,13 +37,12 @@ import org.springframework.stereotype.Service;
  * <ol>
  *   <li>Per-agent opt-in via {@link Agent#semanticResponseCachingEnabled},
  *       distinct from the exact-match flag and default false.</li>
- *   <li>A high default cosine-similarity threshold ({@value
- *       #DEFAULT_SIMILARITY_THRESHOLD}) - only near-identical phrasings match.</li>
+ *   <li>A high default cosine-similarity threshold (0.95) - only near-identical phrasings match.</li>
  *   <li>Only the plain default turn shape is ever cached (no attachment, no
  *       per-call extra tools - enforced at the {@link AgentChatService} call
  *       site), and {@link #put} is only invoked for turns that used NO tools,
  *       so a live/tool-derived answer never enters this cache.</li>
- *   <li>A wall-clock TTL ({@value #DEFAULT_TTL_HOURS}h default) bounds how stale
+ *   <li>A wall-clock TTL (6h default) bounds how stale
  *       any entry can get.</li>
  * </ol>
  *
@@ -63,38 +64,107 @@ import org.springframework.stereotype.Service;
 public class SemanticResponseCacheService {
 
     private static final Logger log = LoggerFactory.getLogger(SemanticResponseCacheService.class);
-    private static final double DEFAULT_SIMILARITY_THRESHOLD = 0.95;
-    private static final long DEFAULT_TTL_HOURS = 6;
-    private static final int DEFAULT_MAX_ENTRIES_PER_AGENT = 200;
-
     private final SidecarClient sidecarClient;
     private final JdbcTemplate jdbcTemplate;
-    private final double similarityThreshold;
-    private final Duration ttl;
-    private final int maxEntriesPerAgent;
+    private final SemanticCacheProperties properties;
 
+    /**
+     * The settings catalog, so a tenant's or an agent's {@code chat.semanticCache.*} replace {@code
+     * app.chat.semantic-cache.*} for that agent's cache. The cache is read and written on the turn's own thread, where
+     * the tenant is set. Absent (hand-built instances) or failing: the platform value.
+     */
+    private volatile SettingsResolver settings;
+
+    @Autowired
     public SemanticResponseCacheService(
-        SidecarClient sidecarClient,
-        JdbcTemplate jdbcTemplate,
-        @Value("${app.chat.semantic-cache.similarity-threshold:" + DEFAULT_SIMILARITY_THRESHOLD + "}") double similarityThreshold,
-        @Value("${app.chat.semantic-cache.ttl-hours:" + DEFAULT_TTL_HOURS + "}") long ttlHours,
-        @Value("${app.chat.semantic-cache.max-entries-per-agent:" + DEFAULT_MAX_ENTRIES_PER_AGENT + "}") int maxEntriesPerAgent
+        SidecarClient sidecarClient, JdbcTemplate jdbcTemplate, SemanticCacheProperties properties
     ) {
         this.sidecarClient = sidecarClient;
         this.jdbcTemplate = jdbcTemplate;
-        this.similarityThreshold = similarityThreshold;
-        this.ttl = Duration.ofHours(ttlHours);
-        this.maxEntriesPerAgent = maxEntriesPerAgent;
+        this.properties = properties;
+    }
+
+    /** With explicit platform values (tests, embedded use). */
+    public SemanticResponseCacheService(
+        SidecarClient sidecarClient, JdbcTemplate jdbcTemplate, double similarityThreshold, long ttlHours, int maxEntriesPerAgent
+    ) {
+        this(sidecarClient, jdbcTemplate, platform(similarityThreshold, ttlHours, maxEntriesPerAgent));
+    }
+
+    private static SemanticCacheProperties platform(double similarityThreshold, long ttlHours, int maxEntriesPerAgent) {
+        SemanticCacheProperties p = new SemanticCacheProperties();
+        p.setSimilarityThreshold(similarityThreshold);
+        p.setTtlHours(ttlHours);
+        p.setMaxEntriesPerAgent(maxEntriesPerAgent);
+        return p;
+    }
+
+    @Autowired(required = false)
+    public void setSettingsResolver(SettingsResolver resolver) {
+        this.settings = resolver;
+    }
+
+    static final String SIMILARITY_THRESHOLD_KEY = "chat.semanticCache.similarityThreshold";
+    static final String TTL_KEY = "chat.semanticCache.ttl";
+    static final String MAX_ENTRIES_KEY = "chat.semanticCache.maxEntriesPerAgent";
+
+    private double similarityThreshold(UUID agentId) {
+        SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return properties.getSimilarityThreshold();
+        }
+        try {
+            return catalog.getDecimal(SIMILARITY_THRESHOLD_KEY, SettingContext.forAgent(agentId));
+        } catch (RuntimeException e) {
+            log.warn("Could not read {}; using the platform value: {}", SIMILARITY_THRESHOLD_KEY, e.toString());
+            return properties.getSimilarityThreshold();
+        }
+    }
+
+    private Duration ttl(UUID agentId) {
+        SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return Duration.ofHours(properties.getTtlHours());
+        }
+        try {
+            return catalog.getDuration(TTL_KEY, SettingContext.forAgent(agentId));
+        } catch (RuntimeException e) {
+            log.warn("Could not read {}; using the platform value: {}", TTL_KEY, e.toString());
+            return Duration.ofHours(properties.getTtlHours());
+        }
+    }
+
+    private int maxEntriesPerAgent(UUID agentId) {
+        SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return properties.getMaxEntriesPerAgent();
+        }
+        try {
+            return catalog.getInt(MAX_ENTRIES_KEY, SettingContext.forAgent(agentId));
+        } catch (RuntimeException e) {
+            log.warn("Could not read {}; using the platform value: {}", MAX_ENTRIES_KEY, e.toString());
+            return properties.getMaxEntriesPerAgent();
+        }
     }
 
     /**
-     * @return a cached answer whose stored question is at least {@link
-     *     #similarityThreshold} cosine-similar to {@code userMessage} and not yet
+     * @return a cached answer whose stored question is at least the agent's similarity threshold
+     *     ({@code chat.semanticCache.similarityThreshold}) cosine-similar to {@code userMessage} and not yet
      *     expired, or empty. Best-effort: any failure (sidecar down, no rows,
      *     Redis/DB hiccup) degrades to empty - a cache is never allowed to break
      *     or block the chat turn, same posture as {@link LlmResponseCacheService}.
      */
     public Optional<String> get(UUID agentId, String principal, String userMessage) {
+        return get(agentId, principal, userMessage, "");
+    }
+
+    /**
+     * As above for a message that follows an earlier conversation: {@code conversationKey} (a digest of the
+     * turns before it, {@code ""} for a first message) is folded into the row's {@code subject_hash}, so a
+     * near-identical "yes" is only matched against rows stored after the same context. {@code ""} is exactly
+     * the principal-only hash (no schema change; rows stored before keep matching a first message).
+     */
+    public Optional<String> get(UUID agentId, String principal, String userMessage, String conversationKey) {
         try {
             float[] queryVector = sidecarClient.embedQuery(userMessage);
             String literal = toVectorLiteral(queryVector);
@@ -109,14 +179,15 @@ public class SemanticResponseCacheService {
                 "SELECT embedding OPERATOR(public.<=>) ?::public.vector AS distance, answer FROM " + table
                     + " WHERE agent_id = ? AND subject_hash = ? AND expires_at > now() ORDER BY distance ASC LIMIT 1",
                 (rs, rowNum) -> new CacheHit(rs.getDouble("distance"), rs.getString("answer")),
-                literal, agentId, subjectHash(principal)
+                literal, agentId, scopeHash(principal, conversationKey)
             );
             if (hits.isEmpty()) {
                 return Optional.empty();
             }
             CacheHit best = hits.get(0);
-            if (best.distance() > (1.0 - similarityThreshold)) {
-                log.debug("Semantic cache near-miss for agent {} (distance {} > {})", agentId, best.distance(), 1.0 - similarityThreshold);
+            double threshold = similarityThreshold(agentId);
+            if (best.distance() > (1.0 - threshold)) {
+                log.debug("Semantic cache near-miss for agent {} (distance {} > {})", agentId, best.distance(), 1.0 - threshold);
                 return Optional.empty();
             }
             log.debug("Semantic cache hit for agent {} (distance {})", agentId, best.distance());
@@ -133,6 +204,11 @@ public class SemanticResponseCacheService {
      * write must never affect the reply the caller already has in hand.
      */
     public void put(UUID agentId, String principal, String userMessage, String reply) {
+        put(agentId, principal, userMessage, "", reply);
+    }
+
+    /** As above, stored under the scope for a message that follows an earlier conversation; see {@link #get(UUID, String, String, String)}. */
+    public void put(UUID agentId, String principal, String userMessage, String conversationKey, String reply) {
         if (reply == null || reply.isBlank()) {
             return;
         }
@@ -144,8 +220,8 @@ public class SemanticResponseCacheService {
             jdbcTemplate.update(
                 "INSERT INTO " + table + " (id, agent_id, subject_hash, question, answer, embedding, created_at, expires_at) "
                     + "VALUES (?, ?, ?, ?, ?, ?::public.vector, ?, ?)",
-                UUID.randomUUID(), agentId, subjectHash(principal), userMessage, reply, literal,
-                Timestamp.from(now), Timestamp.from(now.plus(ttl))
+                UUID.randomUUID(), agentId, scopeHash(principal, conversationKey), userMessage, reply, literal,
+                Timestamp.from(now), Timestamp.from(now.plus(ttl(agentId)))
             );
             pruneExpiredAndOverCap(table, agentId);
         } catch (RuntimeException e) {
@@ -170,8 +246,8 @@ public class SemanticResponseCacheService {
     }
 
     /**
-     * Deletes this agent's expired rows, then trims its live set back to {@link
-     * #maxEntriesPerAgent} by dropping the oldest - a bounded cache, not
+     * Deletes this agent's expired rows, then trims its live set back to the agent's cap
+     * ({@code chat.semanticCache.maxEntriesPerAgent}) by dropping the oldest - a bounded cache, not
      * unbounded growth (same "fixed memory space" posture {@code
      * AgentMemoryService.pruneOverCap} takes).
      */
@@ -180,10 +256,11 @@ public class SemanticResponseCacheService {
         Integer count = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM " + table + " WHERE agent_id = ?", Integer.class, agentId
         );
-        if (count == null || count <= maxEntriesPerAgent) {
+        int cap = maxEntriesPerAgent(agentId);
+        if (count == null || count <= cap) {
             return;
         }
-        int overflow = count - maxEntriesPerAgent;
+        int overflow = count - cap;
         jdbcTemplate.update(
             "DELETE FROM " + table + " WHERE id IN ("
                 + "SELECT id FROM " + table + " WHERE agent_id = ? ORDER BY created_at ASC LIMIT ?)",
@@ -203,6 +280,16 @@ public class SemanticResponseCacheService {
     // Package-private (not private) so SemanticResponseCacheServiceTest can
     // construct the exact row type the mocked JdbcTemplate must hand back.
     record CacheHit(double distance, String answer) {
+    }
+
+    /**
+     * The {@code subject_hash} a row is bound to: the principal's hash (SEC-052), or, for a message that
+     * follows an earlier conversation, the hash of the principal and the conversation key together.
+     */
+    static String scopeHash(String principal, String conversationKey) {
+        return conversationKey == null || conversationKey.isBlank()
+            ? subjectHash(principal)
+            : subjectHash((principal == null ? "" : principal) + '\u001f' + conversationKey);
     }
 
     /** SEC-052: sha256 hex of the principal - never the raw subject/phone number/visitor id in a table column. */

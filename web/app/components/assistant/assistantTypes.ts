@@ -77,6 +77,8 @@ export interface AssistantTurn {
   /** When the reply started streaming and when it settled; `endedAt` stays null while live. */
   startedAt?: number;
   endedAt?: number | null;
+  /** While live: when the stream last said anything (a chunk, a step event or a heartbeat). */
+  lastEventAt?: number | null;
   /** The reply failed before any text arrived; `content` then holds the plain-language reason. */
   failed?: boolean;
   /** Display copies of what the person attached (no file bytes kept). */

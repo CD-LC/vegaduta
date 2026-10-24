@@ -1,8 +1,10 @@
 package com.agenticai.core.omnichannel.teams;
 
-import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.omnichannel.ChannelConfigurationException;
 import com.agenticai.core.omnichannel.ChannelDeliveryException;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
+import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Component;
  * </ol>
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.SOCIAL_CHANNELS)
 public class TeamsApiClient {
 
     private static final String TOKEN_SCOPE = "https://api.botframework.com/.default";

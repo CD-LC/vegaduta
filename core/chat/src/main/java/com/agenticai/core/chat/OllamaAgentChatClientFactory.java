@@ -77,6 +77,15 @@ public class OllamaAgentChatClientFactory implements AgentChatClientFactory {
     @org.springframework.beans.factory.annotation.Value("${app.llm.ollama.reasoning-effort:}")
     private String reasoningEffort = "";
 
+    // The prompt registry the structured-output fallback reads its schema instruction from (setter-injected;
+    // without it the shipped wording).
+    private volatile com.agenticai.core.prompts.PromptResolver prompts;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPromptResolver(com.agenticai.core.prompts.PromptResolver resolver) {
+        this.prompts = resolver;
+    }
+
     public OllamaAgentChatClientFactory(
         LlmCallMetricsService llmCallMetricsService, LlmCallLogService llmCallLogService,
         MeterRegistry meterRegistry, LlmPricingCatalog pricingCatalog,
@@ -174,10 +183,10 @@ public class OllamaAgentChatClientFactory implements AgentChatClientFactory {
         org.springframework.ai.chat.model.ChatModel chatModel = openAiChatModel;
         var schemaSpec = com.agenticai.core.chat.structured.StructuredSchemaSpec.from(providerOptions);
         if (schemaSpec != null && options.getResponseFormat() != null) {
-            chatModel = new OllamaStructuredFallbackChatModel(openAiChatModel, schemaSpec.jsonSchema());
+            chatModel = new OllamaStructuredFallbackChatModel(openAiChatModel, schemaSpec.jsonSchema()).withPrompts(prompts);
         }
 
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.OLLAMA)
             .defaultAdvisors(modelSupport.advisors(
                 new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.OLLAMA, model, meterRegistry, pricingCatalog)))
             .build();

@@ -49,11 +49,11 @@ it into services is not on this roadmap.
 
 | Item | Status |
 |---|---|
-| MCP client (stdio, SSE, Streamable HTTP) and MCP server at `/mcp` | done |
-| A2A agent cards (signed) and JSON-RPC task methods | done |
-| AG-UI event stream | done |
+| MCP client (stdio, SSE, Streamable HTTP) and MCP server at `/mcp` | in progress: works with peers that use the handshake (`initialize`) protocol, up to revision 2025-11-25. Not done: the current 2026-07-28 revision (stateless, `server/discover`; blocked on the MCP Java SDK), so a modern-only server cannot be reached; `x-mcp-header` parameter mirroring, server-side header validation and OAuth step-up on 403 are missing. Row by row: [docs/architecture/mcp-spec-alignment.md](docs/architecture/mcp-spec-alignment.md) |
+| A2A agent cards (signed) and JSON-RPC and REST task methods | in progress: signed Agent Card, and 4 of the 11 spec operations on both bindings (`SendMessage`, `SendStreamingMessage`, `GetTask`, `CancelTask`); `ListTasks`, `SubscribeToTask`, push notifications and the extended card answer with the spec's unsupported-operation error. Text parts only, 5 of the 8 task states, no gRPC binding, card signing deviates from the spec's canonicalisation in three ways, no run against an independent client or the TCK. The outbound client is off by default. Row by row: [docs/architecture/a2a-conformance.md](docs/architecture/a2a-conformance.md) |
+| AG-UI event stream | in progress: run stream, text, tool-call, state and custom events, replay by `Last-Event-ID`, tool discovery. Not done: the optional `STEP_*`, `STATE_DELTA`, `MESSAGES_SNAPSHOT` and `RAW` events, the binary transport, and a dedicated interrupt or approval event (a tool call waiting for approval is not announced as such on this stream) |
 | OpenTelemetry GenAI: `invoke_agent` and `execute_tool` spans in addition to `gen_ai.*` chat attributes | done (`AgentInvocationObservation`, `GenAiToolObservationConvention`, `GenAiSpansTest`) |
-| Conformance table for MCP, A2A, AG-UI and OpenTelemetry, generated from source checks | done (`scripts/ci/conformance-report.py` → `docs/api/conformance.md`, `--check` in static gates) |
+| Conformance table for MCP, A2A, AG-UI and OpenTelemetry, generated from source checks | done (`scripts/ci/conformance-report.py` → `docs/api/conformance.md`, `--check` in static gates). The checks look for class and method names (and, for `ListTasks` and `SubscribeToTask`, for a dispatcher arm that answers rather than refuses them, so those two read `missing`); "implemented" there means the code is present, not that the spec requirement is met. The judgement is in the two conformance pages above, and where they differ the conformance pages and the code are right |
 | Mapping of the platform's controls to the OWASP guidance for agentic applications | done ([docs/security/owasp-mapping.md](docs/security/owasp-mapping.md)) |
 
 ## 5. Quality

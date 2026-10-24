@@ -1,0 +1,2 @@
+# Child-safety terms (PolicyViolationGuardrail), checked first: zero tolerance. English set; other locales add to it.
+(?i)\b(child.?(?:abuse|exploitation|grooming|trafficking)|pedophil|child.?pornograph|csam|minors?.?(?:exploit|abuse))\b

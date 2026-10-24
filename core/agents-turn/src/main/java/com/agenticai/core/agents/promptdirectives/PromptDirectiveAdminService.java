@@ -1,37 +1,43 @@
 package com.agenticai.core.agents.promptdirectives;
 
 import com.agenticai.core.agents.turn.PromptDirectiveRegistry;
-import com.agenticai.core.agents.turn.PromptDirectiveSettings;
-import com.agenticai.core.audit.AuditLogService;
-import com.agenticai.core.audit.AuditOutcome;
-import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.prompts.PromptOverride;
+import com.agenticai.core.prompts.PromptOverrideService;
+import com.agenticai.core.prompts.PromptOverrideStore;
+import com.agenticai.core.prompts.PromptScope;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Owner-facing read and write of the tenant's prompt-directive settings. Every write validates
- * (a security-critical directive cannot be switched off or reworded without an explicit
- * acknowledgement), evicts the chat path's cache and leaves an audit entry that names the key but
- * never the text.
+ * The owner's original, tenant-wide view of the standing directives ({@code /api/prompt-directives}),
+ * kept for compatibility and now a thin layer over the prompt registry ({@link
+ * PromptOverrideService}, {@code /api/prompts}): every write becomes a tenant-scope override with
+ * a version, an immutable history row and an audit entry carrying the old-to-new diff. A directive
+ * with two wordings (tool_trust full and compact, context_compaction with and without the restore
+ * tool) is written to both keys, as the single legacy override always applied to both. New code
+ * should use {@code /api/prompts}, which also has the agent and platform scopes.
  */
 @Service
 public class PromptDirectiveAdminService {
 
     static final int MAX_DIRECTIVE_TEXT = 4000;
     static final int MAX_CUSTOM_TEXT = 8000;
-    static final String ACTION_UPDATED = "PROMPT_DIRECTIVE_UPDATED";
-    static final String ACTION_RESET = "PROMPT_DIRECTIVE_RESET";
-    private static final Logger log = LoggerFactory.getLogger(PromptDirectiveAdminService.class);
+
+    /** Where the real, assembled prompt of an agent can be read. */
+    static final String PROMPT_PREVIEW_PATH = "/api/agents/{agentId}/prompt-preview";
+
+    static final String PREVIEW_NOTE =
+            "Illustrative only: the tenant-wide directives with a sample date, ignoring which tools an agent"
+                    + " has, agent and platform overrides, the agent's own prompt, skills, memory and small-model"
+                    + " mode. The real prompt of an agent is POST " + PROMPT_PREVIEW_PATH + ".";
 
     /** One built-in directive as the console shows it. */
     public record DirectiveView(
@@ -49,22 +55,23 @@ public class PromptDirectiveAdminService {
     /** The owner's free-text block appended for every agent. */
     public record CustomInstructions(boolean enabled, String text) {}
 
+    /**
+     * {@code assembledPreview} is kept for existing clients but is NOT the prompt a model gets;
+     * {@code assembledPreviewNote} says so and {@code promptPreviewPath} points at the real one.
+     */
     public record Overview(
             List<DirectiveView> directives,
             CustomInstructions customInstructions,
-            String assembledPreview) {}
+            String assembledPreview,
+            String assembledPreviewNote,
+            String promptPreviewPath) {}
 
-    private final PromptDirectiveSettingRepository repository;
-    private final PromptDirectiveSettings settings;
-    private final AuditLogService audit;
+    private final PromptOverrideStore store;
+    private final PromptOverrideService overrides;
 
-    public PromptDirectiveAdminService(
-            PromptDirectiveSettingRepository repository,
-            PromptDirectiveSettings settings,
-            AuditLogService audit) {
-        this.repository = repository;
-        this.settings = settings;
-        this.audit = audit;
+    public PromptDirectiveAdminService(PromptOverrideStore store, PromptOverrideService overrides) {
+        this.store = store;
+        this.overrides = overrides;
     }
 
     @Transactional(readOnly = true)
@@ -73,17 +80,18 @@ public class PromptDirectiveAdminService {
     }
 
     Overview overview(LocalDate sampleDate) {
-        Map<String, PromptDirectiveSetting> rows = new HashMap<>();
-        repository.findAll().forEach(r -> rows.put(r.getDirectiveKey(), r));
+        Map<String, PromptOverride> rows = new HashMap<>();
+        for (PromptOverride r : store.list(PromptScope.TENANT, "")) {
+            if (overrides.defaultLocale().equals(r.locale())) {
+                rows.put(r.key(), r);
+            }
+        }
         List<DirectiveView> views = new ArrayList<>();
         List<String> preview = new ArrayList<>();
         for (PromptDirectiveRegistry.Entry e : PromptDirectiveRegistry.all()) {
-            PromptDirectiveSetting row = rows.get(e.key());
-            boolean enabled = row == null || row.isEnabled();
-            String override =
-                    row != null && row.getTextOverride() != null && !row.getTextOverride().isBlank()
-                            ? row.getTextOverride()
-                            : null;
+            PromptOverride row = rows.get(e.primaryPromptKey());
+            boolean enabled = row == null || row.enabled();
+            String override = row != null && row.text() != null && !row.text().isBlank() ? row.text() : null;
             String effective = null;
             if (enabled && e.overridable()) {
                 effective = (override != null ? override : e.defaultText());
@@ -105,17 +113,15 @@ public class PromptDirectiveAdminService {
                             override,
                             effective));
         }
-        PromptDirectiveSetting custom = rows.get(PromptDirectiveRegistry.CUSTOM_INSTRUCTIONS_KEY);
+        PromptOverride custom = rows.get(PromptDirectiveRegistry.Keys.CUSTOM_INSTRUCTIONS);
         CustomInstructions customView =
                 custom == null
                         ? new CustomInstructions(true, "")
-                        : new CustomInstructions(
-                                custom.isEnabled(),
-                                custom.getTextOverride() == null ? "" : custom.getTextOverride());
+                        : new CustomInstructions(custom.enabled(), custom.text() == null ? "" : custom.text());
         if (customView.enabled() && !customView.text().isBlank()) {
             preview.add(customView.text().strip());
         }
-        return new Overview(views, customView, String.join("\n\n", preview));
+        return new Overview(views, customView, String.join("\n\n", preview), PREVIEW_NOTE, PROMPT_PREVIEW_PATH);
     }
 
     /**
@@ -126,10 +132,7 @@ public class PromptDirectiveAdminService {
     public void put(String key, boolean enabled, String text, boolean acknowledgeRisk) {
         PromptDirectiveRegistry.Entry entry =
                 PromptDirectiveRegistry.find(key)
-                        .orElseThrow(
-                                () ->
-                                        new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND, "Unknown directive: " + key));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown directive: " + key));
         String clean = text == null || text.isBlank() ? null : text.strip();
         if (clean != null && clean.length() > MAX_DIRECTIVE_TEXT) {
             throw bad("Directive text is limited to " + MAX_DIRECTIVE_TEXT + " characters.");
@@ -147,25 +150,20 @@ public class PromptDirectiveAdminService {
                             + " the agent obey instructions hidden in tool output. Send"
                             + " acknowledgeRisk=true to confirm.");
         }
-        if (enabled && clean == null) {
-            repository.findById(key).ifPresent(repository::delete);
-        } else {
-            save(key, enabled, clean);
+        if (!entry.overridable()) {
+            return; // retired: nothing is sent, so there is nothing to switch off either
         }
-        afterWrite(ACTION_UPDATED, key, "enabled=" + enabled + ", reworded=" + (clean != null));
+        writeAll(entry.promptKeys(), enabled, clean, acknowledgeRisk);
     }
 
     /** Back to the built-in wording, on. */
     @Transactional
     public void reset(String key) {
-        boolean known =
-                PromptDirectiveRegistry.CUSTOM_INSTRUCTIONS_KEY.equals(key)
-                        || PromptDirectiveRegistry.find(key).isPresent();
-        if (!known) {
+        List<String> keys = PromptDirectiveRegistry.promptKeys(key);
+        if (keys.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown directive: " + key);
         }
-        repository.findById(key).ifPresent(repository::delete);
-        afterWrite(ACTION_RESET, key, "reset to default");
+        revertAll(keys);
     }
 
     @Transactional
@@ -174,39 +172,27 @@ public class PromptDirectiveAdminService {
         if (clean != null && clean.length() > MAX_CUSTOM_TEXT) {
             throw bad("Custom instructions are limited to " + MAX_CUSTOM_TEXT + " characters.");
         }
-        if (clean == null && enabled) {
-            repository.findById(PromptDirectiveRegistry.CUSTOM_INSTRUCTIONS_KEY).ifPresent(repository::delete);
-        } else {
-            save(PromptDirectiveRegistry.CUSTOM_INSTRUCTIONS_KEY, enabled, clean);
-        }
-        afterWrite(
-                ACTION_UPDATED,
-                PromptDirectiveRegistry.CUSTOM_INSTRUCTIONS_KEY,
-                "enabled=" + enabled + ", chars=" + (clean == null ? 0 : clean.length()));
+        writeAll(List.of(PromptDirectiveRegistry.Keys.CUSTOM_INSTRUCTIONS), enabled, clean, false);
     }
 
-    private void save(String key, boolean enabled, String text) {
-        PromptDirectiveSetting row = repository.findById(key).orElse(null);
-        if (row == null) {
-            repository.save(new PromptDirectiveSetting(key, enabled, text, actor()));
-        } else {
-            row.apply(enabled, text, actor());
-            repository.save(row);
+    private void writeAll(List<String> promptKeys, boolean enabled, String clean, boolean acknowledgeRisk) {
+        if (enabled && clean == null) {
+            revertAll(promptKeys);
+            return;
+        }
+        for (String k : promptKeys) {
+            overrides.put(
+                    new PromptOverrideService.Write(
+                            PromptScope.TENANT, null, k, null, clean, enabled, acknowledgeRisk, "via /api/prompt-directives", null));
         }
     }
 
-    private void afterWrite(String action, String key, String detail) {
-        settings.evictCurrentTenant();
-        log.info("Prompt directive {} {} by {} ({})", key, action, actor(), detail);
-        try {
-            audit.record(actor(), action, "prompt_directive", key, AuditOutcome.SUCCESS, detail);
-        } catch (RuntimeException e) {
-            log.warn("Audit write failed for {} on {} - the change itself stands", action, key, e);
+    private void revertAll(List<String> promptKeys) {
+        for (String k : promptKeys) {
+            if (store.find(PromptScope.TENANT, "", k, overrides.defaultLocale()).isPresent()) {
+                overrides.revert(PromptScope.TENANT, null, k, overrides.defaultLocale(), "via /api/prompt-directives", null);
+            }
         }
-    }
-
-    private static String actor() {
-        return TenantContext.current().map(TenantContext::getSubject).orElse("system");
     }
 
     private static ResponseStatusException bad(String message) {

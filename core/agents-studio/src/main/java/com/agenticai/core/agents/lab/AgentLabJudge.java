@@ -2,6 +2,8 @@ package com.agenticai.core.agents.lab;
 
 import com.agenticai.core.agents.turn.AgentLabCompletionService.LabCompletionRequest;
 import com.agenticai.core.agents.turn.AgentLabCompletionService;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -52,20 +54,26 @@ public class AgentLabJudge {
 
     private static final int MAX_FEEDBACK_CHARS = 500;
 
-    static final String SCORE_SYSTEM_PROMPT = """
-        You grade one answer from an AI assistant. Be strict and consistent. Score from 0.0 to 1.0. \
-        If a REFERENCE ANSWER is given: how fully the ANSWER agrees with it on every material point \
-        (1.0 = same substance, 0.0 = contradicts or misses it); ignore wording, length and formatting. \
-        If no REFERENCE ANSWER is given: how correctly and completely the ANSWER addresses the USER MESSAGE. \
-        Reply in exactly this format and nothing else:
-        SCORE: <number from 0.0 to 1.0>
-        FEEDBACK: <one short sentence>""";
+    /** Registry keys of the two judge prompts (default text: {@code prompts/en/lab.judge.*.md}). */
+    static final String SCORE_KEY = "lab.judge.score";
 
-    static final String SAME_SYSTEM_PROMPT = """
-        You compare two answers to the same question. Decide whether they mean the same thing: \
-        the same substantive claims, decision or recommendation. Ignore wording, length, tone and formatting. \
-        If one answer states something the other contradicts or materially omits, they are different. \
-        Reply with exactly one word: SAME or DIFFERENT.""";
+    static final String SAME_KEY = "lab.judge.same";
+
+    /**
+     * The shipped wording of the two keys, for tests only: a judge call resolves them through the
+     * registry so a tenant or agent override applies.
+     */
+    static final String SCORE_SYSTEM_PROMPT = PromptResolver.defaultsOnly().catalog().defaultText(SCORE_KEY);
+
+    static final String SAME_SYSTEM_PROMPT = PromptResolver.defaultsOnly().catalog().defaultText(SAME_KEY);
+
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so a tenant or agent override of the lab judge prompts applies; absent = shipped text. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     /** A line that claims to carry the score; group 1 is everything after the {@code :} or {@code =}. */
     private static final Pattern SCORE_LINE = Pattern.compile("(?im)^\\W*SCORE\\W*[:=](.*)$");
@@ -127,7 +135,7 @@ public class AgentLabJudge {
         }
         user.append("\n\nANSWER:\n").append(clamp(answer));
 
-        String reply = ask(agentId, subject, sessionId, SCORE_SYSTEM_PROMPT, user.toString());
+        String reply = ask(agentId, subject, sessionId, prompts.text(SCORE_KEY, agentId), user.toString());
         if (reply == null) {
             return ScoreVerdict.unavailable();
         }
@@ -150,7 +158,7 @@ public class AgentLabJudge {
         String user = "QUESTION:\n" + clamp(question)
             + "\n\nANSWER A:\n" + clamp(answerA)
             + "\n\nANSWER B:\n" + clamp(answerB);
-        String reply = ask(agentId, subject, sessionId, SAME_SYSTEM_PROMPT, user);
+        String reply = ask(agentId, subject, sessionId, prompts.text(SAME_KEY, agentId), user);
         if (reply == null) {
             return null;
         }

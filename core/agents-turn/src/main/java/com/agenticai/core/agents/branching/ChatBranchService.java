@@ -13,9 +13,13 @@ import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.memory.TranscriptView;
+import com.agenticai.core.agents.tunables.BehaviourSettings;
+import com.agenticai.core.agents.turn.ChatCacheProperties;
+import com.agenticai.core.agents.turn.ChatCachePolicy;
 import com.agenticai.core.agents.turn.cache.LlmResponseCacheService;
 import com.agenticai.core.agents.turn.cache.SemanticResponseCacheService;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.sharing.PermissionLevel;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -92,6 +96,28 @@ public class ChatBranchService {
     private final ObjectProvider<SemanticResponseCacheService> semanticCache;
     private final boolean enabled;
     private final int maxNodesPerSession;
+
+    /**
+     * What the response caches key on ({@code app.chat.cache.*}): the same policy the chat turn reads and
+     * writes them with, so a regenerate drops the entry that turn made. The shipped defaults until set.
+     */
+    private volatile ChatCachePolicy cachePolicy = new ChatCachePolicy(new ChatCacheProperties());
+
+    private volatile ChatCacheProperties cacheProperties = new ChatCacheProperties();
+    private volatile BehaviourSettings behaviour = BehaviourSettings.platformOnly();
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void useCacheProperties(ChatCacheProperties properties) {
+        this.cacheProperties = properties == null ? new ChatCacheProperties() : properties;
+        this.cachePolicy = new ChatCachePolicy(cacheProperties, behaviour);
+    }
+
+    /** The settings catalog, so a regenerate computes the key with the same {@code chat.cache.contextTurns} the turn used. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void useSettings(ObjectProvider<SettingsResolver> resolver) {
+        this.behaviour = BehaviourSettings.lazy(resolver::getIfAvailable);
+        this.cachePolicy = new ChatCachePolicy(cacheProperties, behaviour);
+    }
 
     public ChatBranchService(
             AgentService agentService,
@@ -209,7 +235,7 @@ public class ChatBranchService {
         UUID previousLeaf = s.state() == null ? null : s.state().activeLeafId();
         List<Node> before = ChatBranchTree.activePath(s.byId(), user.parentId());
         moveTo(s, agentId, sessionId, before, user.parentId(), user.id());
-        evictCachedReply(agentId, user.content());
+        evictCachedReply(agentId, user.content(), toTurns(before));
         return new PreparedTurn(sessionId, user.content(), previousLeaf);
     }
 
@@ -457,7 +483,11 @@ public class ChatBranchService {
         if (liveId == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found.");
         }
-        sessionMemory.replaceHistory(liveId, toTurns(path));
+        // The branch tree stores role and text only, so a turn's tool record (ChatTurn#tools) is carried
+        // over from the live transcript for every turn that is unchanged - which is every turn before an
+        // edit or a regenerate. Turns of another branch the live list never held have none.
+        sessionMemory.replaceHistory(
+                liveId, withToolRecords(toTurns(path), sessionMemory.getFullHistory(liveId)));
         ChatBranchStore.State base =
                 s.state() != null
                         ? s.state()
@@ -477,11 +507,16 @@ public class ChatBranchService {
         }
     }
 
-    private void evictCachedReply(UUID agentId, String userText) {
+    /**
+     * Drops the cached reply of the message being regenerated. {@code before} is the conversation up to it,
+     * so the key is the very one the chat turn read and wrote (the cache keys on the conversation too).
+     */
+    private void evictCachedReply(UUID agentId, String userText, List<ChatTurn> before) {
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
+        String conversationKey = cachePolicy.conversationKey(before, null, agentId);
         // Same principal the chat turn keys the cache on (AgentChatService's subjectKey = the JWT
         // subject).
-        responseCache.evict(tenantId, agentId, currentSubject(), userText);
+        responseCache.evict(tenantId, agentId, currentSubject(), userText, conversationKey);
         SemanticResponseCacheService semantic = semanticCache.getIfAvailable();
         if (semantic != null) {
             semantic.evict(agentId, userText);
@@ -513,6 +548,26 @@ public class ChatBranchService {
             ChatBranchStore.State base, String subject, UUID leaf, UUID reuse) {
         String owner = base.ownerSubject() != null ? base.ownerSubject() : subject;
         return new ChatBranchStore.State(base.agentId(), base.sessionId(), owner, leaf, reuse);
+    }
+
+    /** {@code turns}, each with the tool record of the same turn (same position, role and text) in {@code live}. */
+    static List<ChatTurn> withToolRecords(List<ChatTurn> turns, List<ChatTurn> live) {
+        if (live == null || live.isEmpty()) {
+            return turns;
+        }
+        List<ChatTurn> out = new ArrayList<>(turns.size());
+        for (int i = 0; i < turns.size(); i++) {
+            ChatTurn turn = turns.get(i);
+            ChatTurn before = i < live.size() ? live.get(i) : null;
+            out.add(
+                    before != null
+                                    && before.tools() != null
+                                    && before.role() == turn.role()
+                                    && java.util.Objects.equals(before.content(), turn.content())
+                            ? turn.withTools(before.tools())
+                            : turn);
+        }
+        return out;
     }
 
     private static List<ChatTurn> toTurns(List<Node> path) {

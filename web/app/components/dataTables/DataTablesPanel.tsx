@@ -24,6 +24,7 @@ import { capacity } from "./capacity";
 import PaginationControls from "../PaginationControls";
 import { ListSkeleton } from "../tenantLists/ListStates";
 import { usePagination } from "../../lib/usePagination";
+import { isPersonalEdition } from "../../lib/edition";
 
 /**
  * /data-tables: the list of the workspace's tables on the left, the grid editor of the selected one on the right.
@@ -176,9 +177,11 @@ export default function DataTablesPanel({ onLoaded }: { onLoaded?: () => void })
         <AlertTitle>{t("planLockedTitle")}</AlertTitle>
         <AlertDescription>
           <p>{t("planLockedBody")}</p>
-          <Button asChild size="sm" className="mt-2">
-            <Link href="/admin/billing">{t("upgrade")}</Link>
-          </Button>
+          {!isPersonalEdition() && (
+            <Button asChild size="sm" className="mt-2">
+              <Link href="/admin/billing">{t("upgrade")}</Link>
+            </Button>
+          )}
         </AlertDescription>
       </Alert>
     );
@@ -310,7 +313,9 @@ export default function DataTablesPanel({ onLoaded }: { onLoaded?: () => void })
           <ul className="flex flex-col gap-1" data-testid="data-table-list">
             {[
               // Keep the open table visible even when it falls on another page of the list.
-              ...(selectedId && filteredTables.some((x) => x.id === selectedId) && !tablePager.pageItems.some((x) => x.id === selectedId)
+              ...(selectedId &&
+              filteredTables.some((x) => x.id === selectedId) &&
+              !tablePager.pageItems.some((x) => x.id === selectedId)
                 ? filteredTables.filter((x) => x.id === selectedId)
                 : []),
               ...tablePager.pageItems,

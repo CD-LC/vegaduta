@@ -245,7 +245,15 @@ merely insecure.
 
 ## Enabling it
 
-Off by default at both ends. In `deploy/.env`:
+Off by default at both ends. The compose profile `sandbox` starts the service and the launcher
+sets `TOOL_SANDBOX_ENABLED=true` for it and fills `TOOL_SANDBOX_INTERNAL_TOKEN` in
+`deploy/compose/.env`:
+
+```bash
+scripts/vegaduta up --full --profile sandbox
+```
+
+To do it by hand instead, set these in `deploy/compose/.env`:
 
 ```bash
 TOOL_SANDBOX_ENABLED=true

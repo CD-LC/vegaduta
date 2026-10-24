@@ -20,18 +20,23 @@ try:
     import numpy  # noqa: F401
 except ImportError:  # pragma: no cover
     import types
+
     _np = types.ModuleType("numpy")
     _np.ndarray = object
     _np.float32 = float
     sys.modules["numpy"] = _np
 
-from app import gitops, registry, service as svc          # noqa: E402
-from app.registry import RepoEntry                        # noqa: E402
-from app.settings import Settings                         # noqa: E402
-from app.tenancy import TenantContext                     # noqa: E402
+from app import gitops, registry
+from app import service as svc
+from app.registry import RepoEntry
+from app.settings import Settings
+from app.tenancy import TenantContext
 
-CTX = TenantContext(tenant_id="t1") if "tenant_id" in getattr(
-    TenantContext, "__dataclass_fields__", {}) else None
+CTX = (
+    TenantContext(tenant_id="t1")
+    if "tenant_id" in getattr(TenantContext, "__dataclass_fields__", {})
+    else None
+)
 
 
 def _ctx():
@@ -47,6 +52,7 @@ def _raises(fn, exc):
 
 
 # ------------------------------------------------------------ registry
+
 
 @dataclass
 class _OldRepoEntry:  # the pre-last_capacity_error schema (old image)
@@ -68,8 +74,7 @@ def test_registry_file_readable_by_old_schema_loader():
     d = tempfile.mkdtemp()
     try:
         ctx = _ctx()
-        registry.upsert(d, ctx, RepoEntry(repo_id="r1", source_type="local",
-                                          path="/x"))
+        registry.upsert(d, ctx, RepoEntry(repo_id="r1", source_type="local", path="/x"))
         path = registry._registry_path(d, ctx)
         raw = json.load(open(path))
         assert "last_capacity_error" not in raw["r1"]
@@ -99,16 +104,28 @@ def test_registry_load_ignores_unknown_keys_and_keeps_capacity_error():
 
 # -------------------------------------------------------------- gitops
 
+
 def _git(cwd, *a):
-    subprocess.run(["git", *a], cwd=cwd, check=True, capture_output=True,
-                   env={**os.environ, "GIT_AUTHOR_NAME": "t",
-                        "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
-                        "GIT_COMMITTER_EMAIL": "t@t"})
+    subprocess.run(
+        ["git", *a],
+        cwd=cwd,
+        check=True,
+        capture_output=True,
+        env={
+            **os.environ,
+            "GIT_AUTHOR_NAME": "t",
+            "GIT_AUTHOR_EMAIL": "t@t",
+            "GIT_COMMITTER_NAME": "t",
+            "GIT_COMMITTER_EMAIL": "t@t",
+        },
+    )
 
 
 def test_limits_default_off_and_opt_in():
-    saved = {k: os.environ.pop(k, None) for k in (
-        "CODE_INTEL_ENFORCE_REPO_LIMITS", "CODE_INTEL_MAX_REPO_FILES")}
+    saved = {
+        k: os.environ.pop(k, None)
+        for k in ("CODE_INTEL_ENFORCE_REPO_LIMITS", "CODE_INTEL_MAX_REPO_FILES")
+    }
     try:
         os.environ["CODE_INTEL_MAX_REPO_FILES"] = "1"
         assert gitops._limits()[:2] == (0, 0)
@@ -122,32 +139,36 @@ def test_limits_default_off_and_opt_in():
 
 
 def test_rejected_commit_is_not_reset_again():
-    saved = {k: os.environ.get(k) for k in (
-        "CODE_INTEL_ENFORCE_REPO_LIMITS", "CODE_INTEL_MAX_REPO_FILES")}
+    saved = {
+        k: os.environ.get(k)
+        for k in ("CODE_INTEL_ENFORCE_REPO_LIMITS", "CODE_INTEL_MAX_REPO_FILES")
+    }
     d = tempfile.mkdtemp()
     try:
         os.environ["CODE_INTEL_ENFORCE_REPO_LIMITS"] = "true"
         os.environ["CODE_INTEL_MAX_REPO_FILES"] = "2"
         _git(d, "init", "-q", "-b", "main")
         open(os.path.join(d, "a"), "w").write("1")
-        _git(d, "add", "."); _git(d, "commit", "-qm", "c1")
+        _git(d, "add", ".")
+        _git(d, "commit", "-qm", "c1")
         old = gitops._rev(d, "HEAD", 10)
         for n in "bcd":
             open(os.path.join(d, n), "w").write("1")
-        _git(d, "add", "."); _git(d, "commit", "-qm", "c2")
+        _git(d, "add", ".")
+        _git(d, "commit", "-qm", "c2")
         new = gitops._rev(d, "HEAD", 10)
         _git(d, "branch", "target", new)
         _git(d, "reset", "-q", "--hard", old)
-        assert _raises(lambda: gitops._update_checkout(d, "target", 10),
-                       gitops.RepoTooLargeError)
+        assert _raises(lambda: gitops._update_checkout(d, "target", 10), gitops.RepoTooLargeError)
         assert gitops._rev(d, "HEAD", 10) == old
         # second call must raise from the memo, without touching the tree
         calls = []
         orig = gitops._run
         gitops._run = lambda *a, **k: calls.append(a[0]) or orig(*a, **k)
         try:
-            assert _raises(lambda: gitops._update_checkout(d, "target", 10),
-                           gitops.RepoTooLargeError)
+            assert _raises(
+                lambda: gitops._update_checkout(d, "target", 10), gitops.RepoTooLargeError
+            )
         finally:
             gitops._run = orig
         assert not any(c[0] == "reset" for c in calls), calls
@@ -162,6 +183,7 @@ def test_rejected_commit_is_not_reset_again():
 
 
 # ------------------------------------------------------------- service
+
 
 def _service(tmp, **kw):
     return svc.CodeIntelService(Settings(data_dir=tmp, **kw))
@@ -194,25 +216,23 @@ def test_slot_released_when_index_fails_and_capacity_error_recorded():
     try:
         s = _service(d, max_heavy_jobs=1, max_tenant_heavy_jobs=1)
         ctx = _ctx()
-        registry.upsert(d, ctx, RepoEntry(repo_id="r1", source_type="local",
-                                          path="/x"))
+        registry.upsert(d, ctx, RepoEntry(repo_id="r1", source_type="local", path="/x"))
         s._heavy.acquire("other")  # global cap taken by someone else
         assert _raises(lambda: s.index(ctx, "r1"), svc.HeavyJobBusyError)
         # background caller (wait>0) records it without touching last_index
-        s2 = _service(d, max_heavy_jobs=1, max_tenant_heavy_jobs=1,
-                      heavy_queue_wait_seconds=1)
+        s2 = _service(d, max_heavy_jobs=1, max_tenant_heavy_jobs=1, heavy_queue_wait_seconds=1)
         s2._heavy.acquire("other")
-        assert _raises(lambda: s2.index(ctx, "r1", wait=0.05),
-                       svc.HeavyJobBusyError)
+        assert _raises(lambda: s2.index(ctx, "r1", wait=0.05), svc.HeavyJobBusyError)
         e = registry.get(d, ctx, "r1")
         assert e.last_capacity_error and e.last_index is None
-        s._heavy.release("other"); s2._heavy.release("other")
+        s._heavy.release("other")
+        s2._heavy.release("other")
         # a stubbed checkout failure still releases the slot
         orig = gitops.ensure_checkout
-        gitops.ensure_checkout = lambda *a, **k: (_ for _ in ()).throw(
-            gitops.GitOpsError("boom"))
+        gitops.ensure_checkout = lambda *a, **k: (_ for _ in ()).throw(gitops.GitOpsError("boom"))
         try:
-            e.source_type = "git"; e.git_url = "https://example.com/x.git"
+            e.source_type = "git"
+            e.git_url = "https://example.com/x.git"
             registry.upsert(d, ctx, e)
             assert _raises(lambda: s.index(ctx, "r1"), gitops.GitOpsError)
         finally:
@@ -228,9 +248,8 @@ def test_http_handlers_map_429_413_409():
     except ImportError:
         print("  skip  test_http_handlers_map_429_413_409 (fastapi missing)")
         return
-    h = {t: f for t, f in main.app.exception_handlers.items()}
-    r = asyncio.run(h[svc.HeavyJobBusyError](None, svc.HeavyJobBusyError(
-        "busy", retry_after=9)))
+    h = dict(main.app.exception_handlers.items())
+    r = asyncio.run(h[svc.HeavyJobBusyError](None, svc.HeavyJobBusyError("busy", retry_after=9)))
     assert r.status_code == 429 and r.headers["Retry-After"] == "9"
     r = asyncio.run(h[gitops.RepoTooLargeError](None, gitops.RepoTooLargeError("x")))
     assert r.status_code == 413
@@ -253,8 +272,12 @@ def test_embedder_allow_list_fallback():
         c = _cfg(s)
         assert (c.embedder, c.embed_model) == ("hash", "m0")
         # allow-list: listed model honoured, unlisted ignored
-        s = _service(d, default_embedder="hash", default_embed_model="m0",
-                     allowed_embed_models=frozenset({"ok"}))
+        s = _service(
+            d,
+            default_embedder="hash",
+            default_embed_model="m0",
+            allowed_embed_models=frozenset({"ok"}),
+        )
         c = _cfg(s, embedder="fastembed", embed_model="ok")
         assert (c.embedder, c.embed_model) == ("fastembed", "ok")
         c = _cfg(s, embedder="fastembed", embed_model="huge")
@@ -268,8 +291,12 @@ if __name__ == "__main__":
     for n, f in sorted(globals().items()):
         if n.startswith("test_") and callable(f):
             try:
-                f(); print("  ok   ", n)
-            except Exception as ex:  # noqa: BLE001
-                import traceback; traceback.print_exc()
-                bad += 1; print("  FAIL ", n, repr(ex))
+                f()
+                print("  ok   ", n)
+            except Exception as ex:
+                import traceback
+
+                traceback.print_exc()
+                bad += 1
+                print("  FAIL ", n, repr(ex))
     sys.exit(1 if bad else 0)

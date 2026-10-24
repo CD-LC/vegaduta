@@ -10,7 +10,7 @@ policy-checked, budgeted event**, so debugging, evaluation, compliance evidence 
 
 ## 1. Turn journal: the agent turn as an event-sourced state machine
 
-**Status: first slice implemented behind a flag** ([ADR-0020](ADR-0020-turn-journal.md)). `TurnJournal` SPI with in-memory and Postgres implementations, hash-chained events, written from the streaming FAST path of `ChatTurnExecutor` when `app.turn-journal.enabled=true` (default `false`); read at `GET /api/agents/{agentId}/turns/{turnId}/journal`. Not done: audit-seal integration, APPROVAL calls from the approval gate, buffered depths and workflow runs, retention, CLI. The acceptance test is only partly met (replay compares tool sequence and answer hash; the seal chaining is open).
+**Status: first slice implemented behind a flag** ([ADR-0020](ADR-0020-turn-journal.md)). `TurnJournal` SPI with in-memory and Postgres implementations, hash-chained events, written for every reasoning depth and for delegated or specialist turns, with approval events, when `app.turn-journal.enabled=true` (default `false`); read at `GET /api/agents/{agentId}/turns/{turnId}/journal`. Not done: audit-seal integration, workflow runs, a retention job, CLI. The acceptance test is only partly met (replay compares tool sequence and answer hash; the seal chaining is open).
 
 - **Idea.** Model a turn as explicit states (`INTAKE -> GUARD -> PLAN -> TOOL_LOOP -> VERIFY -> COMMIT`) and append every
   transition, model call, tool call, approval and guardrail hit to one append-only per-turn journal.

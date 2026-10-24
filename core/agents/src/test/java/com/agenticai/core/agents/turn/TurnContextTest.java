@@ -154,4 +154,161 @@ class TurnContextTest {
         assertThat(withBudget.requestId()).isEqualTo(ctx.requestId());
         assertThat(withBudget.startedAt()).isEqualTo(ctx.startedAt());
     }
+
+    @Test
+    void approvalStateTravelsWithTheContextAndSurvivesWithBudget() {
+        com.agenticai.core.guardrails.TurnApprovalState state =
+                new com.agenticai.core.guardrails.TurnApprovalState("c1:scoped");
+        TurnContext base = TurnContext.fromCurrentThread(AGENT, "s1", "req-1", T0, null);
+        assertThat(base.approval()).isNull();
+
+        TurnContext withState = base.withApproval(state);
+        TurnContext withBoth = withState.withBudget(null);
+
+        assertThat(withState.approval()).isSameAs(state);
+        assertThat(withBoth.approval()).as("a later copy keeps the same instance").isSameAs(state);
+        assertThat(withState.requestId()).isEqualTo(base.requestId());
+        assertThat(base.approval()).as("the original is untouched").isNull();
+    }
+
+    @Test
+    void theTurnIdIsMadeOnceNeverTakenFromTheCallerAndKeptByEveryCopy() {
+        TurnContext a = TurnContext.fromCurrentThread(AGENT, "s1", "same-request-id", T0, null);
+        TurnContext b = TurnContext.fromCurrentThread(AGENT, "s1", "same-request-id", T0, null);
+
+        assertThat(a.turnId()).isNotNull();
+        assertThat(a.turnId()).as("two turns never share an id, even with the same request id").isNotEqualTo(b.turnId());
+        assertThat(a.withBudget(new TurnReservationGuards()).turnId()).isEqualTo(a.turnId());
+        assertThat(a.withApproval(new com.agenticai.core.guardrails.TurnApprovalState("c1:x")).turnId())
+                .isEqualTo(a.turnId());
+        assertThat(a.withDeadline(T0.plusSeconds(5)).turnId()).isEqualTo(a.turnId());
+        assertThat(new TurnContext(null, AGENT, "s", "r", T0, null, null).turnId()).isNotNull();
+    }
+
+    // ---------------------------------------------------------- the continuation after an approval
+
+    private static ApprovalContinuation continuation(String goal) {
+        return new ApprovalContinuation(
+                UUID.randomUUID(),
+                ApprovalContinuation.Outcome.COMPLETED,
+                "send_invoice",
+                "{}",
+                "sent",
+                "admin-1",
+                goal,
+                AGENT,
+                "s1",
+                "user-1",
+                "tenant_a",
+                "user-1",
+                "c1:x",
+                java.util.List.of("send_invoice"),
+                java.util.List.of());
+    }
+
+    @Test
+    void anOrdinaryTurnDecidesOnTheUsersMessage() {
+        TurnContext ctx = TurnContext.fromCurrentThread(AGENT, "s1", "req-1", T0, null);
+
+        assertThat(ctx.continuation()).isNull();
+        assertThat(ctx.decisionMessage("hello")).isEqualTo("hello");
+        assertThat(ctx.withContinuation(null)).isSameAs(ctx);
+    }
+
+    @Test
+    void aContinuationTurnDecidesOnTheOriginalGoalNotOnThePlatformWrittenMessage() {
+        TurnContext ctx =
+                TurnContext.fromCurrentThread(AGENT, "s1", "req-1", T0, null)
+                        .withContinuation(continuation("Send invoice INV-7731."));
+
+        assertThat(ctx.decisionMessage("<approval_result ...>tool output</approval_result>"))
+                .isEqualTo("Send invoice INV-7731.");
+    }
+
+    @Test
+    void aContinuationWithoutAGoalFallsBackToTheMessage() {
+        TurnContext ctx =
+                TurnContext.fromCurrentThread(AGENT, "s1", "req-1", T0, null).withContinuation(continuation("  "));
+
+        assertThat(ctx.decisionMessage("the message")).isEqualTo("the message");
+    }
+
+    @Test
+    void theEntryContextCarriesTheRequestsContinuation() {
+        ApprovalContinuation c = continuation("Send invoice.");
+        ChatTurnRequest request =
+                ChatTurnRequest.builder(AGENT, "s1", "user-1", "<approval_result>...").continuation(c).build();
+
+        TurnContext ctx = TurnContext.forEntry(TenantContext.of("tenant_a", "user-1", Set.of()), request);
+
+        assertThat(ctx.continuation()).isSameAs(c);
+        assertThat(ChatTurnRequest.builder(AGENT, "s1", "user-1", "hi").build().continuation()).isNull();
+    }
+
+    @Test
+    void otherCopiesKeepTheContinuation() {
+        ApprovalContinuation c = continuation("Send invoice.");
+        TurnContext ctx = TurnContext.fromCurrentThread(AGENT, "s1", "req-1", T0, null).withContinuation(c);
+
+        assertThat(ctx.withBudget(null).continuation()).isSameAs(c);
+        assertThat(ctx.withApproval(null).continuation()).isSameAs(c);
+    }
+
+    @Test
+    void everyContextHasAReplyOutcomeThatEveryCopySharesByReference() {
+        TurnContext ctx = TurnContext.fromCurrentThread(AGENT, "s1", "req-1", T0, null);
+
+        assertThat(ctx.reply()).isNotNull();
+        assertThat(ctx.reply().isComplete()).isTrue();
+        assertThat(ctx.withBudget(null).reply()).isSameAs(ctx.reply());
+        assertThat(ctx.withApproval(null).reply()).isSameAs(ctx.reply());
+        assertThat(ctx.withContinuation(continuation("Send invoice.")).reply()).isSameAs(ctx.reply());
+        // The stage that produces the reply marks it; the stage that caches it sees the mark through
+        // a different copy of the context.
+        ctx.withBudget(null).reply().mark(TurnReplyOutcome.Kind.TRUNCATED);
+        assertThat(ctx.reply().isComplete()).isFalse();
+        assertThat(ctx.reply().kind()).isEqualTo(TurnReplyOutcome.Kind.TRUNCATED);
+    }
+
+    @Test
+    void aNewReplyAttemptForgetsHowTheLastOneEndedAndASnapshotCanBePutBack() {
+        TurnReplyOutcome reply = new TurnReplyOutcome();
+        reply.mark(TurnReplyOutcome.Kind.REFUSED, "SAFETY");
+        assertThat(reply.detail()).isEqualTo("SAFETY");
+        TurnReplyOutcome.State refused = reply.snapshot();
+
+        reply.begin();
+        assertThat(reply.isComplete()).isTrue();
+        assertThat(reply.detail()).isNull();
+
+        reply.restore(refused);
+        assertThat(reply.kind()).isEqualTo(TurnReplyOutcome.Kind.REFUSED);
+        assertThat(reply.detail()).isEqualTo("SAFETY");
+    }
+
+    @Test
+    void theToolActivityIsOneInstanceSharedByEveryCopyOfTheContext() {
+        TurnContext ctx = TurnContext.fromCurrentThread(AGENT, "s1", "req-1", T0, null);
+
+        assertThat(ctx.toolActivity()).isNotNull();
+        assertThat(ctx.withBudget(null).toolActivity()).isSameAs(ctx.toolActivity());
+        assertThat(ctx.withApproval(null).toolActivity()).isSameAs(ctx.toolActivity());
+        assertThat(ctx.withContinuation(continuation("Send invoice.")).toolActivity()).isSameAs(ctx.toolActivity());
+        assertThat(ctx.withDeadline(T0.plusSeconds(5)).toolActivity()).isSameAs(ctx.toolActivity());
+        ctx.withBudget(null).toolActivity().begin("send_email");
+        assertThat(ctx.toolActivity().inFlightCount()).isEqualTo(1);
+    }
+
+    @Test
+    void anEnclosingDeadlineCanBeSetAndIsNeverBeforeTheStart() {
+        TurnContext ctx = TurnContext.fromCurrentThread(AGENT, "s1", "req-1", T0, null);
+
+        assertThat(ctx.withDeadline(null)).isSameAs(ctx);
+        assertThat(ctx.withDeadline(T0.plusSeconds(600)).deadline()).isEqualTo(T0.plusSeconds(600));
+        assertThat(ctx.withDeadline(T0.plusSeconds(600)).remaining(T0.plusSeconds(100)))
+                .contains(Duration.ofSeconds(500));
+        assertThat(ctx.withDeadline(T0.minusMillis(3)).deadline())
+                .as("a limit computed from a clock a moment ahead is clamped, not rejected")
+                .isEqualTo(T0);
+    }
 }

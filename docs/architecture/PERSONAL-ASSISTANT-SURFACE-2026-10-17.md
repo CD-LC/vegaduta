@@ -91,14 +91,14 @@ screen that makes a laptop user feel all of that as a single assistant.
 |---|---|---|---|
 | G1 | ~~No endpoint lists a user's conversations~~ **Done:** `GET /api/chat/threads` lists the signed-in user's sessions (title = first user line, agent, last activity; keyset paging on `updatedAt`) and `DELETE /api/chat/threads/{agentId}/{sessionId}` removes one with its live history, both over the branching tables (`ChatThreadController`, 404 while `APP_CHAT_BRANCHING_ENABLED` is off). The browser index is now a cache of that list plus local-only state (rename, pin, sessions of a core that stores nothing); the Assistant reads the server tree after each turn so its sessions are recorded, and the transcript route falls back to the stored tree after the 24 h Redis window. | no `GET .../sessions` in any chat controller; `application.yml:1090` | Client-side conversation index in IndexedDB (same layer as `lib/api/persistentCache.ts` and the playground's `persistence.ts`), one row per session: id, title, agent, last message, pinned. Transcript re-fetched from `/sessions/{sid}/transcript` when opened. The personal profile sets `APP_CHAT_BRANCHING_ENABLED=true` so messages persist in Postgres and survive longer than 24 h. Titles: first user line, truncated; optional rename stored locally. Export via `/export`. A server-side list is the first backend follow-up (one controller over the branching tables). |
 | G2 | **No agent-agnostic chat entry.** Every turn needs an `agentId`. | `AgentChatStreamController` | One personal **Assistant agent per user**, created on first run through `POST /api/agents` (or `POST /api/agents/generate` from a one-paragraph description), marked with a name and a memory block so it can be found again, like Deep Research does with its capability row. Quick Task's auto-selection stays available as "ask a specialist" when the tenant has more agents. |
-| G3 | **Approvals are not in the stream.** The request id reaches the model as text in a `tool_result`; the decision outcome arrives through notifications. | `GuardedToolCallback.java:581`, `ApprovalController` | While a turn or job is live, poll `GET /api/approvals?status=PENDING` every 3 s (what `PendingToolApprovals` already does) and claim rows whose `requestedBy` names this session. Render as an inline card; approve and reject call the existing endpoints. After the decision the agent job resumes on its own (AWAITING_APPROVAL to RUNNING); for a chat turn the surface re-sends "continue" so the tool runs again. |
+| G3 | **Approvals are not in the stream.** The request id reaches the model as text in a `tool_result`; the decision outcome arrives through notifications. | `GuardedToolCallback.java:581`, `ApprovalController` | While a turn or job is live, poll `GET /api/approvals?status=PENDING` every 3 s (what `PendingToolApprovals` already does) and claim rows whose `requestedBy` names this session. Render as an inline card; approve and reject call the existing endpoints. After the decision the agent job resumes on its own (AWAITING_APPROVAL to RUNNING); for a chat turn the platform now starts the continuation turn itself (`app.approvals.continuation.enabled`, default `true`: same agent and session, it restates the user's goal and hands the agent the tool's result or the denial), so the surface does not send "continue"; it follows the stored conversation for the agent's reply (`useApprovalContinuation`). |
 | G4 | **No thinking or citation events** in the chat stream. | `AgentStepEventPayloads` | Show `plan{text}` as the "thinking" line. Citations: use `SourcesPanel` on research-run results (which do carry sources) and on `fetch_web_page` and `web_search` tool results in the trace. |
 | G5 | **No local shell or local file-system tool.** Code runs in E2B or the tool-sandbox; files reach the assistant only as uploads or knowledge documents. | `core/agents-tools` | In scope for v1: drag-and-drop to `/chat/attachments` and `/knowledge/upload`; `run_code` when a sandbox is configured. A folder-scoped local file tool (the Cowork model) is backend work and listed under follow-ups. |
 | G6 | **Job-vs-turn decision is the client's.** The chat turn has a per-turn tool-step cap; a job has a timeout and `maxToolCalls`. | `ToolStepLimitExceededException`, `AgentJobStartRequest` | The dispatch ladder below. The model also escalates itself: the Assistant agent gets `schedule_task`, `delegate_parallel`, `deep_research` and `request_human`, so "every Monday" or "research all three" is handled inside the turn without the UI guessing. |
-| G7 | Several needed features are **off by default**: resumable streams, branching, scheduled tasks, research runs, turn journal, artifacts directive. | `application.yml` | Turned on in the personal profile (table below). No code change. |
+| G7 | Several needed features are **off by default**: resumable streams, branching, scheduled tasks, research runs, turn journal, artifacts directive. | `application.yml` | Branching and scheduled tasks are turned on in the personal profile; resumable streams, research runs and the artifacts directive are **not** (see the table below); the turn journal is **not** either: `application-personal.yml` and `deploy/compose/personal.yml` leave `app.turn-journal.enabled` at its code default `false`, and, once switched on, it records every reasoning depth and delegated turns (G10). |
 | G8 | **Ollama registration is platform-admin only** on main. | `/api/platform/hosted-llm-providers` | The personal-agent branch adds the local-model wizard and the local OpenAI-compatible probe; on the personal profile the single user is the admin. |
 | G9 | No desktop wrapper, no offline shell. | `web/public/manifest.webmanifest` only | The installer already opens the console; it should open `/assistant` and offer "Install as app" (PWA, standalone, already declared in the manifest). A Tauri shell is a follow-up, not a prerequisite. |
-| G10 | The turn-journal `turnId` is never returned to the client. | `TurnRecorder.java:40` | Not needed for v1; the "what did it do" view is the step trace plus `GET .../tool-calls` and `/sessions/{sid}/llm-requests`. |
+| G10 | The turn-journal `turnId` was never returned to the client. | `AgentChatStreamResponder.journalTurnHeader`, `TurnJournalGateway.TURN_ID_HEADER` | Fixed: while the journal is on, the stream response carries `X-Journal-Turn-Id` and `GET /api/agents/{agentId}/turn-journal?sessionId=...` lists a session's turns. The journal stays off in the personal profile, so for v1 the "what did it do" view is still the step trace plus `GET .../tool-calls` and `/sessions/{sid}/llm-requests`. |
 
 ## The design
 
@@ -251,19 +251,22 @@ Quick Task's existing no-provider banner logic (`providerGate.ts`) is reused rat
 
 ## Profile settings the surface relies on
 
-All exist today; the personal profile (branch) and `deploy/compose/personal.yml` set them.
+All of these settings exist. Only some are set by the personal profile today (checked against
+`application-personal.yml` and `deploy/compose/personal.yml`); the rest are what the surface needs and
+must be turned on by the operator or by a later change to the profile.
 
-| Setting | Value on personal | Why |
-|---|---|---|
-| `APP_CHAT_BRANCHING_ENABLED` | `true` | messages persist in Postgres (G1); edit and regenerate |
-| `app.chat.resumable-streams.enabled` | `true` | reload-safe answers |
-| `SCHEDULED_TASKS_ENABLED` | `true` | routines |
-| `app.research.runs.enabled` | `true` | research with citations |
-| `NEXT_PUBLIC_ARTIFACTS` | `true` | artifact pane |
-| `TOOL_UNCLASSIFIED_ACTION` | `allow` (default rung) | safety ladder |
-| `app.agents.taint.mode` | `enforce` (branch default) | untrusted content cannot drive consequential tools |
-| `app.skills.learning.enabled` | `true` (branch default) | learned skills, with the Pending gate |
-| `app.chat.session-ttl-hours` | leave at 24 | branching retention governs persistence |
+| Setting | Value on personal | Set by the personal profile today? | Why |
+|---|---|---|---|
+| `APP_CHAT_BRANCHING_ENABLED` | `true` | yes (`application-personal.yml`) | messages persist in Postgres (G1); edit and regenerate |
+| `app.chat.resumable-streams.enabled` | `true` | no (default `false`; `lite.yml` sets it) | reload-safe answers |
+| `SCHEDULED_TASKS_ENABLED` | `true` | yes | routines |
+| `app.research.runs.enabled` | `true` | no (default `false`) | research with citations |
+| `NEXT_PUBLIC_ARTIFACTS` | `true` | no (empty in `deploy/compose/.env.example`, `WEB_ARTIFACTS`) | artifact pane |
+| `app.turn-journal.enabled` | `true` if the inspector is wanted | no (default `false`; records every depth when on) | "what did it do" view (G10) |
+| `TOOL_UNCLASSIFIED_ACTION` | `allow` (default rung) | yes (the shared default; nothing to set) | safety ladder |
+| `app.agents.taint.mode` | `enforce` (branch default) | yes (`application-personal.yml`) | untrusted content cannot drive consequential tools |
+| `app.skills.learning.enabled` | `true` (branch default) | yes (`application-personal.yml`) | learned skills, with the Pending gate |
+| `app.chat.session-ttl-hours` | leave at 24 | not set (shared default) | branching retention governs persistence |
 
 Each needs a line in `docs/configuration.md` where it is not already documented.
 
@@ -307,7 +310,7 @@ conversations in the rail, voice composer, PWA install prompt and the installer 
 3. A `thinking` step event when the provider streams reasoning.
 4. A folder-scoped local file tool for the personal profile (read, write under an allowlisted
    root, no shell), the Cowork and Hermes `HERMES_WRITE_SAFE_ROOT` idea.
-5. The turn journal `turnId` on the response headers so the inspector is one click from a turn.
+5. (Done: `X-Journal-Turn-Id` is returned while the journal is on.) Switching the journal on for the personal profile, which needs a retention decision first.
 6. A Tauri shell with a tray icon and OS notifications, after the PWA has been measured.
 
 ## Open decisions

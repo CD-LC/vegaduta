@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-const PAGES = ["agents", "workflows", "tools", "knowledge", "admin", "admin-billing", "quick-task", "playground", "usage", "providers", "local-model", "contacts", "agent-lab", "assistant"];
+const PAGES = ["agents", "workflows", "tools", "knowledge", "admin", "admin-billing", "quick-task", "playground", "usage", "providers", "local-model", "contacts", "agent-lab", "agent-playground", "assistant"];
 
 export default function ConsolePreviewIndex() {
   // Sample-data preview: never reachable in a production build.

@@ -1,0 +1,2 @@
+# Self-harm and suicide terms (PolicyViolationGuardrail). English set; other locales add to it.
+(?i)\b(suicide|self.?harm|self.?injur|cut.?wrist|hang.?self|overdose.?intent)\b

@@ -61,7 +61,9 @@
     "railBrand": "برانڊنگ",
     "railLearn": "سکيا",
     "railGuard": "حفاظتي حدون",
-    "brandIdentityAriaLabel": "VegaDūta برانڊ جي سڃاڻپ"
+    "brandIdentityAriaLabel": "VegaDūta برانڊ جي سڃاڻپ",
+    "railRuntimeSettings": "رن ٽائم سيٽنگون",
+    "railControls": "مان ڇا ڪنٽرول ڪريان...؟"
   },
   "languageSwitcher": {
     "label": "ٻولي",
@@ -754,7 +756,142 @@
     "edgeTier0Badge": "آن-ڊيوائس · ڪروم ۾ شامل",
     "edgeTier0BadgeTitle": "ڪروم جي شامل ماڊل (جيمنائي نانو) هن جو جواب ڏنو - تيز ۽ مڪمل طور تي نجي، پر صرف چيٽ لاءِ: هي اوزار استعمال نٿو ڪري سگهي ۽ پيچيده شين تي حقيقي فراهم ڪندڙ کان گهٽ صحيح ٿي سگهي ٿو. هر پلان تي مفت.",
     "edgeTier1Badge": "آن-ڊيوائس · مقامي ماڊل",
-    "edgeTier1BadgeTitle": "هڪ ڊائون لوڊ ڪيل آن-ڊيوائس ماڊل هن جو جواب ڏنو - نجي، ۽ هي اوزار استعمال ڪري سگهي ٿو (اهي ئي محفوظ اوزار جيڪي هڪ هوسٽڊ ٽرن ڪري سگهي ٿو). اڃا به هوسٽڊ پول کان تمام ننڍو ماڊل آهي، تنهنڪري اهو پيچيده درخواستن تي گهٽ صحيح ٿي سگهي ٿو. هر پلان تي مفت."
+    "edgeTier1BadgeTitle": "هڪ ڊائون لوڊ ڪيل آن-ڊيوائس ماڊل هن جو جواب ڏنو - نجي، ۽ هي اوزار استعمال ڪري سگهي ٿو (اهي ئي محفوظ اوزار جيڪي هڪ هوسٽڊ ٽرن ڪري سگهي ٿو). اڃا به هوسٽڊ پول کان تمام ننڍو ماڊل آهي، تنهنڪري اهو پيچيده درخواستن تي گهٽ صحيح ٿي سگهي ٿو. هر پلان تي مفت.",
+    "viewTurn": "ٽرن ڏسو",
+    "viewTurnTitle": "هن گفتگو جي ٽرنن جي قدم بہ قدم ٽائم لائن کوليو",
+    "headerRunning": "هڪ ٽرن هلي رهيو آهي",
+    "headerReady": "تيار",
+    "clearContext": "سياق صاف ڪريو",
+    "clearContextTitle": "نئين گفتگو شروع ڪريو. هي هن چيٽ جي ڊوائيس ۽ سرور پاسي جي سيشن ميموري کي صاف ڪري ٿو.",
+    "stopRun": "هن جواب کي بند ڪريو",
+    "fallbackSendToPlatform": "پليٽ فارم ڏانهن موڪليو",
+    "chipsLabel": "ايجنٽ هن وقت ڇا ڪري رهيو آهي",
+    "chipPreparing": "تيار آهي",
+    "chipModelCall": "ماڊل جو انتظار",
+    "chipThinking": "سوچي رهيو آهي",
+    "chipWriting": "جواب لکي رهيو آهي",
+    "chipTool": "ٽول هلي رهيو آهي: {tool}",
+    "chipToolUnnamed": "هڪ ٽول هلي رهيو آهي",
+    "chipWaitingApproval": "توهان جي منظوري جو انتظار ({count})",
+    "chipContinuing": "جواب جاري رکي رهيو آهي",
+    "chipContinuingPass": "جواب جاري رکي رهيو آهي ({max} مان پاس {pass})",
+    "chipContinuingApproval": "توهان جي فيصلي کان پوءِ جاري رکي رهيو آهي",
+    "chipRetrying": "ٻيهر ڪوشش ڪري رهيو آهي",
+    "chipRetryingReason": "ٻيهر ڪوشش ڪري رهيو آهي: {reason}",
+    "chipRetryingAttempt": "ٻيهر ڪوشش ڪري رهيو آهي (ڪوشش {attempt}/{max})",
+    "chipRetryingAttemptReason": "ٻيهر ڪوشش ڪري رهيو آهي (ڪوشش {attempt}/{max}): {reason}",
+    "chipFailover": "بيڪ اپ ماڊل ڏانهن مٽايو ويو",
+    "chipFailoverReason": "بيڪ اپ ماڊل ڏانهن مٽايو ويو: {reason}",
+    "chipFailoverTo": "{model} ڏانهن مٽايو ويو",
+    "chipFailoverToReason": "{model} ڏانهن مٽايو ويو: {reason}",
+    "outcomeTruncated": "هي جواب مڪمل ٿيڻ کان اڳ ڪٽجي ويو.",
+    "outcomeContinue": "جاري رکو",
+    "outcomeLongerReplies": "ڊگهي جواب جي اجازت ڏيو",
+    "continueMessage": "جتي بيٺو هو اتان ئي جاري رکو، اڳ ۾ لکيل کي ورجائڻ کانسواءِ.",
+    "outcomeRefused": "حفاظت جي سبب ماڊل پرووائيڊر هي جواب بند ڪري ڇڏيو، تنهن ڪري ڏيکارڻ لاءِ ڪو جواب ناهي. درخواست مٽائي ٻيهر ڪوشش ڪريو.",
+    "outcomeRefusedReason": "حفاظت جي سبب ({reason}) ماڊل پرووائيڊر هي جواب بند ڪري ڇڏيو، تنهن ڪري ڏيکارڻ لاءِ ڪو جواب ناهي. درخواست مٽائي ٻيهر ڪوشش ڪريو.",
+    "outcomeMalformedToolCall": "ماڊل ٽول استعمال ڪرڻ جي ڪوشش ڪئي پر ان جي درخواست غلط هئي، تنهن ڪري ڪجهه به نه هليو. ٻيهر ڪوشش ڪريو.",
+    "outcomeEmpty": "ماڊل خالي جواب ڏنو. ٻيهر ڪوشش ڪريو.",
+    "stopRaiseSteps": "ٽول ڪال جي حد وڌايو",
+    "stopRaiseBudget": "خرچ جي حد مٽايو",
+    "stopAskEditor": "ڪنهن اهڙي شخص کي چئو جيڪو هن ايجنٽ کي ايڊٽ ڪري سگهي ته حد وڌائي.",
+    "rsOpen": "رن سيٽنگون",
+    "rsTitle": "رن سيٽنگون",
+    "rsClose": "رن سيٽنگون بند ڪريو",
+    "rsBack": "رن سيٽنگن ڏانهن موٽو",
+    "rsIntro": "{name} لاءِ ايندڙ پيغام ڪيئن هلندو. انهن کي ايجنٽ جي رويي واري ٽئب ۾ مٽايو.",
+    "rsLoading": "لوڊ ٿي رهيو آهي",
+    "rsRetry": "ٻيهر ڪوشش ڪريو",
+    "rsOpenBehavior": "رويي ۾ ايڊٽ ڪريو",
+    "rsModelHeading": "ماڊل ۽ نمونو چونڊ",
+    "rsModel": "ماڊل",
+    "rsModelNotSet": "سيٽ نه ڪيل",
+    "rsModelDefault": "ماڊل جو ڊفالٽ",
+    "rsDepth": "دليل جي کوٽائي",
+    "rsSourceAgent": "هن ايجنٽ تي سيٽ ڪيل",
+    "rsParam_temperature": "گرمي پد",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "جواب جي وڌ ۾ وڌ ڊيگهه (ٽوڪن)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "ورجاءَ جي سزا",
+    "rsParam_presencePenalty": "موجودگي جي سزا",
+    "rsParam_seed": "سيڊ",
+    "rsParam_stopSequences": "روڪڻ جو ترتيب",
+    "rsParamDropped": "{param} هن ايجنٽ تي سيٽ ٿيل آهي، پر {provider} {model} لاءِ ان کي نظرانداز ڪري ٿو، تنهن ڪري ان جو ڪو اثر ناهي.",
+    "rsToolsRunHeading": "هن رن لاءِ ٽول",
+    "rsToolsRunOnly": "رڳو هي رن",
+    "rsToolsRunNote": "هي سوئچ طئي ڪن ٿا ته هن پلي گرائونڊ مان موڪليل پيغام ايجنٽ جا ڪهڙا ٽول استعمال ڪري سگهن ٿا. ڪجهه به محفوظ نٿو ٿئي: باقي سڀني لاءِ ايجنٽ پنهنجي ٽول رسائي رکي ٿو. اهي ايجنٽ جا ٽول رڳو بند ڪري سگهن ٿا، کيس ڪڏهن به نئون ٽول نٿا ڏين.",
+    "rsToolsRunSummary": "ايجنٽ جي {total} ٽولن مان {on} هن رن لاءِ چالو آهن",
+    "rsToolsRunNone": "هن رن لاءِ ڪي ٽول ناهن: ايجنٽ رڳو لکت ۾ جواب ڏئي سگهي ٿو.",
+    "rsToolsReset": "ايجنٽ جا ٽول استعمال ڪريو",
+    "rsToolsNotInAgent": "هي هن ايجنٽ جي محفوظ ٽولن مان ناهي، تنهن ڪري رن لاءِ چالو نٿو ٿي سگهي.",
+    "rsToolsEditAgent": "ايجنٽ جا محفوظ ٽول مٽايو",
+    "rsToolsLimitedChip": "هن رن لاءِ ٽول محدود",
+    "rsToolsEmpty": "هن ايجنٽ لاءِ ڪو ٽول موجود ناهي.",
+    "rsToolsSummary": "{total} مان {on} ٽول چالو",
+    "rsToolsFailed": "ٽول لوڊ نه ٿي سگهيا.",
+    "rsLimitsHeading": "هر ٽرن جون حدون",
+    "rsLimitsChange": "حدون مٽايو",
+    "rsLimitsView": "حدون ڏسو",
+    "rsLimitsFailed": "حدون لوڊ نه ٿي سگهيون.",
+    "rsLimitsEmpty": "هن ايجنٽ لاءِ ڏيکارڻ لاءِ ڪابه حد ناهي.",
+    "rsNoLimit": "ڪابه حد ناهي",
+    "rsScoreAll": "هر ميچ",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} اکر",
+    "rsLimitRange": "اجازت ڏنل: {min} کان {max}",
+    "rsLayer_AGENT": "هن ايجنٽ تي سيٽ ڪيل",
+    "rsLayer_TENANT": "ورڪ اسپيس ڊفالٽ",
+    "rsLayer_PLATFORM": "پليٽ فارم ڊفالٽ",
+    "rsLayer_REQUEST": "هن درخواست لاءِ سيٽ ڪيل",
+    "rsLimit_maxToolSteps": "هر ٽرن ۾ ٽول ڪال",
+    "rsLimit_turnTimeoutSeconds": "هڪ ٽرن جو وقت",
+    "rsLimit_toolTimeoutSeconds": "هڪ ٽول ڪال جو وقت",
+    "rsLimit_toolOutputMaxChars": "ٽول نتيجي جو سائيز",
+    "rsLimit_retrievalTopK": "هر ڳولا ۾ علم جا نتيجا",
+    "rsLimit_retrievalMinScore": "علم ميچ جي گهٽ ۾ گهٽ لاڳاپو",
+    "rsLimit_continuationPasses": "جواب مڪمل ڪرڻ لاءِ اضافي پاس",
+    "rsLimitHelp_maxToolSteps": "هڪ جواب وڌ ۾ وڌ ڪيترا ٽول ڪال ڪري سگهي ٿو. حد تي پهچڻ سان ٽرن بند ٿئي ٿو ۽ اهو ٻڌائي ٿو.",
+    "rsLimitHelp_turnTimeoutSeconds": "هڪ ٽرن بند ٿيڻ کان اڳ ڪيتري دير هلي سگهي ٿو.",
+    "rsLimitHelp_toolTimeoutSeconds": "هڪ ٽول ڪال بند ٿيڻ کان اڳ ڪيتري دير هلي سگهي ٿي.",
+    "rsLimitHelp_toolOutputMaxChars": "هڪ ٽول نتيجي جو ڪيترو حصو ماڊل پڙهي سگهي ٿو. باقي ڪٽيو وڃي ٿو.",
+    "rsLimitHelp_retrievalTopK": "هڪ ڳولا علم ذخيري مان ڪيترا ٽڪرا موٽائي ٿي.",
+    "rsLimitHelp_retrievalMinScore": "هن کان گهٽ ميچ وارا ٽڪرا ڇڏيا وڃن ٿا. صفر هر ميچ کي رکي ٿو.",
+    "rsLimitHelp_continuationPasses": "اعلان ڪيل پر نه ڪيل قدم تي رڪيل جواب کي مڪمل ڪرڻ لاءِ اضافي ڪوششون.",
+    "rsPreviewButton": "پرامپٽ جو اڳ ڏيک",
+    "rsPreviewTitle": "پرامپٽ جو اڳ ڏيک",
+    "rsPreviewIntro": "هي ايجنٽ جيڪو سسٽم پرامپٽ ۽ ٽول فهرست موڪليندو، حقيقي ٽرن وانگر ٺاهيل. ماڊل ڏانهن ڪجهه به نٿو موڪليو وڃي.",
+    "rsPreviewBuilding": "اڳ ڏيک ٺهي رهيو آهي",
+    "rsPreviewFailed": "اڳ ڏيک ٺاهي نه سگهيو.",
+    "rsPreviewTotals": "سسٽم لکت لاءِ تقريباً {prompt} ٽوڪن ۽ ٽول جي وصفن لاءِ {tools} ٽوڪن (اندازو).",
+    "rsPreviewOverBudgetTitle": "ٽوڪن بجيٽ کان وڌيڪ",
+    "rsPreviewOverBudget": "مستقل سسٽم لکت ترتيب ڏنل {budget} ٽوڪنن جي بجيٽ کان وڌيڪ آهي. ڪجهه به نه ڪٽيو ويو؛ هڪ پرامپٽ کي ننڍو ڪرڻ بابت سوچيو.",
+    "rsPreviewNoBlocks": "ڏيکارڻ لاءِ ڪو پرامپٽ بلاڪ ناهي.",
+    "rsPreviewMessage": "پيغام: {message}",
+    "rsPreviewTokens": "~{tokens} ٽوڪن",
+    "rsPreviewShowText": "لکت ڏيکاريو",
+    "rsPreviewTools": "ٽول ({count})",
+    "rsPreviewNoTools": "هي ايجنٽ ڪو ٽول نٿو ڏئي.",
+    "rsPreviewNotes": "هي اڳ ڏيک جيڪو نٿو ڄاڻي سگهي",
+    "rsPreviewOpenAdmin": "هر پرامپٽ جا لفظ ڏسو ۽ مٽايو",
+    "rsOriginDefault": "ڊفالٽ طور آيل",
+    "rsOriginOverride": "{scope} اوور رائيڊ v{version}",
+    "rsOriginAgentConfig": "ايجنٽ جو پنهنجو سسٽم پرامپٽ",
+    "rsOriginCode": "پليٽ فارم ڪوڊ",
+    "rsRunBudget": "هر رن جي خرچ جي حد",
+    "rsNoCap": "ڪابه حد ناهي",
+    "rsRunBudgetHelp": "جڏهن هڪ رن ٻين ايجنٽن کي ڪم ڏئي ٿو يا ڊگهي تحقيق هلائي ٿو ته اهو وڌ ۾ وڌ ڪيترو خرچ ڪري سگهي ٿو. هي اندازو آهي، بل ناهي.",
+    "chipToolsOff": "ٽولن کان سواءِ ٻيهر ڪوشش ڪري رهيو آهي",
+    "chipFailoverBlocked": "بيڪ اپ ماڊل استعمال نه ٿيو: ٽول اڳ ۾ ئي هلي چڪا هئا",
+    "rsLimitChangeOne": "مٽايو",
+    "reasonRateLimited": "رفتار جي حد پهچي وئي",
+    "reasonTimeout": "وقت ختم ٿيو",
+    "reasonProviderUnavailable": "پرووائيڊر موجود ناهي",
+    "reasonAuthFailed": "پرووائيڊر اسناد رد ڪيا",
+    "reasonBilling": "پرووائيڊر جي بلنگ جو مسئلو",
+    "reasonModelNotFound": "ماڊل موجود ناهي",
+    "reasonProviderError": "پرووائيڊر جي غلطي",
+    "reasonMalformedToolCall": "ٽول ڪال استعمال نه ٿي سگهي"
   },
   "nodeDefs": {
     "triggerLabel": "ٽرگر",
@@ -1400,7 +1537,50 @@
     "ttsProviderUpdatedSuccess": "TTS فراهم ڪندڙ اپڊيٽ ٿي ويو.",
     "updateTtsProviderError": "هن ايجنٽ جو TTS فراهم ڪندڙ اپڊيٽ نه ٿي سگهيو.",
     "ttsProviderFreePlanTooltip": "TTS فراهم ڪندڙ جي چونڊ هڪ پريميئم فيچر آهي.",
-    "ttsProviderNotSet": "پليٽ فارم جو ڊفالٽ استعمال ڪندي"
+    "ttsProviderNotSet": "پليٽ فارم جو ڊفالٽ استعمال ڪندي",
+    "samplingTitle": "اعليٰ نمونو چونڊ",
+    "samplingIntro": "ماڊل لفظ ڪيئن چونڊي ٿو ان کي باريڪيءَ سان ترتيب ڏيو. ماڊل جو ڊفالٽ استعمال ڪرڻ لاءِ دٻو خالي ڇڏيو. جيڪو پرووائيڊر ڪنهن خاني کي نٿو سمجهي اهو ان کي رڳو نظرانداز ڪري ٿو.",
+    "samplingIgnored": "هن ماڊل جو پرووائيڊر هن سيٽنگ کي نظرانداز ڪري ٿو، تنهن ڪري ان کي مٽائڻ جو ڪو اثر ناهي.",
+    "samplingSaving": "محفوظ ٿي رهيو آهي…",
+    "samplingSaved": "محفوظ ٿيو",
+    "samplingNotSaved": "محفوظ نه ٿيو",
+    "samplingSaveFailed": "اها سيٽنگ محفوظ نه ٿي سگهي.",
+    "samplingErrorWhole": "{label} {min} کان {max} تائين پورو انگ هجڻ گهرجي، يا بند ڪرڻ لاءِ خالي ڇڏيو.",
+    "samplingErrorNumber": "{label} {min} کان {max} تائين انگ هجڻ گهرجي، يا بند ڪرڻ لاءِ خالي ڇڏيو.",
+    "samplingStopTooLong": "هڪ روڪڻ جو ترتيب وڌ ۾ وڌ {max} اکرن جو ٿي سگهي ٿو.",
+    "samplingStopTooMany": "وڌ ۾ وڌ {max} روڪڻ جا ترتيب.",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "رڳو سڀ کان وڌيڪ ممڪن K ايندڙ لفظن تي غور ڪريو. گهٽ جو مطلب وڌيڪ محفوظ، اڳڪٿي جوڳي لکت. 1 کان 1000 تائين.",
+    "samplingSeed": "سيڊ",
+    "samplingSeedHelp": "ساڳئي پرامپٽ لاءِ جوابن کي وڌيڪ ورجائڻ جوڳو بڻائڻ لاءِ هڪ انگ سيٽ ڪريو. سڀ پرووائيڊر ان جي ضمانت نٿا ڏين.",
+    "samplingFrequency": "ورجاءَ جي سزا",
+    "samplingFrequencyHelp": "مثبت قدر ساڳئي لفظ کي بار بار استعمال ڪرڻ کان روڪين ٿا. -2 کان 2 تائين.",
+    "samplingPresence": "موجودگي جي سزا",
+    "samplingPresenceHelp": "مثبت قدر ماڊل کي هڪ موضوع تي رهڻ بدران نون موضوعن ڏانهن ڌڪين ٿا. -2 کان 2 تائين.",
+    "samplingPlaceholderDefault": "ڊفالٽ",
+    "samplingPlaceholderRandom": "بي ترتيب",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "روڪڻ جو ترتيب",
+    "samplingStopPlaceholder": "هڪ جملو لکو، Enter دٻايو",
+    "samplingStopHelp": "ماڊل جيئن ئي انهن مان ڪو لکي ٿو، جواب ختم ٿي وڃي ٿو. وڌ ۾ وڌ {count}، هر هڪ وڌ ۾ وڌ {max} اکرن جو.",
+    "samplingStopCurrent": "موجوده روڪڻ جا ترتيب",
+    "samplingStopRemove": "روڪڻ جو ترتيب {value} هٽايو",
+    "samplingAdd": "شامل ڪريو",
+    "reasoningDepthFASTCost": "Quickest and cheapest: one pass, and the reply streams in as it is written.",
+    "reasoningDepthPLANNEDCost": "Writes a plan before acting: more model calls per task, and the reply appears all at once instead of streaming.",
+    "reasoningDepthCAREFULCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming.",
+    "reasoningDepthRIGOROUSCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming. Uses the most tokens.",
+    "autonomyLabel": "Autonomy",
+    "autonomyTierSUPERVISED": "Supervised",
+    "autonomyTierSUPERVISEDHint": "Every tool call waits for a human to approve it, whatever the workspace policy says. Tighter step ceiling.",
+    "autonomyTierSUPERVISEDCost": "Asks you before every tool call, searches included.",
+    "autonomyTierSEMI_AUTONOMOUS": "Semi-autonomous",
+    "autonomyTierSEMI_AUTONOMOUSHint": "Follows the workspace's approval policy for each action type. The default for every agent.",
+    "autonomyTierSEMI_AUTONOMOUSCost": "Asks you only for the actions your workspace's approval rules name; the rest run without asking.",
+    "autonomyTierFULLY_AUTONOMOUS": "Fully autonomous",
+    "autonomyTierFULLY_AUTONOMOUSHint": "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
+    "autonomyTierFULLY_AUTONOMOUSCost": "Never asks you: every tool call runs as soon as the agent makes it, sends and payments included.",
+    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "ڪنهن نوڊ کي ترتيب ڏيڻ لاءِ چونڊيو، يا کاٻي پاسي واري پيليٽ مان هڪ نئون ڇڪي آڻيو.",
@@ -1876,6 +2056,9 @@
     "emptyWorkspaceTitle": "اڃا تائين ڪا به ڪليڪشن ناهي",
     "noFilesUploadedHint": "هن ڪليڪشن ۾ فائلون اپلوڊ ڪريو ته جيئن اهي توهان جي ايجنٽن لاءِ ڳولڻ جي قابل ٿين.",
     "ocrComingSoonTooltip": "اڃا دستياب ناهي - اپلوڊز بلٽ ان Tesseract OCR تي واپس ويندا."
+  },
+  "tutorPage": {
+    "backToHelp": "واپس مدد ڏانهن"
   },
   "knowledgePage": {
     "knowledgeLabel": "ڄاڻ",
@@ -5764,6 +5947,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, اي ميل ۽ وڌيڪ ڳنڍيو، پوءِ چونڊيو ته ڪهڙو ايجنٽ هر هڪ تي جواب ڏيندو.",
     "channelsPoint1": "مفت پلان تي WhatsApp, Telegram ۽ اي ميل",
     "channelsPoint2": "هڪ نئون موڪليندڙ پهرين توهان جي منظوري جو انتظار ڪندو آهي",
+    "channelsPersonalBody": "WhatsApp، Telegram، Signal، iMessage يا اي ميل ڳنڍيو، پوءِ چونڊيو ته هر چينل تي ڪهڙو ڪسٽم ايجنٽ جواب ڏيندو.",
+    "channelsPersonalPoint1": "WhatsApp، Telegram، Signal، iMessage ۽ اي ميل",
     "toolsTitle": "انٽيگريشنز ايجنٽن کي اوزار ڏين ٿيون",
     "toolsBody": "آن ڪريو جيڪو هڪ ايجنٽ گفتگو جي وچ ۾ استعمال ڪري سگهي ٿو: ويب ڳولا، ڊيٽابيس، MCP سرورز، ۽ توهان جا پنهنجا اسڪرپٽ.",
     "toolsPoint1": "هتي فعال ڪريو، پوءِ هر ايجنٽ لاءِ ان جي اجازت ڏيو",
@@ -14071,5 +14256,1495 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "ورڪ اسپيس سيٽنگون",
+      "agent": "ايجنٽ سيٽنگون"
+    },
+    "agentMissing": "ڪنهن ايجنٽ جون سيٽنگون ڏسڻ لاءِ ان کي چونڊيو.",
+    "scopeNote": {
+      "agent": "هي قدر رڳو هن ايجنٽ تي لاڳو ٿين ٿا. جيڪو توهان هتي اوور رائيڊ نٿا ڪريو سو توهان جي ورڪ اسپيس سيٽنگن مان ورثي ۾ اچي ٿو."
+    },
+    "loading": "سيٽنگون لوڊ ٿي رهيون آهن",
+    "loadError": "سيٽنگون لوڊ نه ٿي سگهيون. {message}",
+    "retry": "ٻيهر ڪوشش ڪريو",
+    "filters": {
+      "label": "سيٽنگون ڇانٽيو",
+      "search": "سيٽنگون ڳوليو",
+      "searchPlaceholder": "نالي يا وضاحت سان ڳوليو",
+      "group": "گروپ سان ڇانٽيو",
+      "allGroups": "سڀ گروپ",
+      "risk": "خطري سان ڇانٽيو",
+      "allRisks": "سڀ خطري جا درجا",
+      "clear": "ڇاڻي صاف ڪريو"
+    },
+    "empty": {
+      "none": "هتي توهان جي مٽائڻ جوڳي ڪا سيٽنگ ناهي.",
+      "filtered": "ڪا سيٽنگ توهان جي ڇاڻي سان نٿي ملي."
+    },
+    "saved": "محفوظ ٿيو. نوان ڪيل سيٽنگون: {count}.",
+    "saveFailed": "محفوظ نه ٿيو. ناڪام سيٽنگون: {count}. توهان جون ايڊٽون اڃا فارم ۾ آهن.",
+    "resetDone": "{label} هاڻي ورثي ۾ مليل قدر استعمال ڪري ٿو.",
+    "resetFailed": "سيٽنگ ري سيٽ نه ٿي سگهي.",
+    "unsaved": "غير محفوظ تبديليون",
+    "discardOne": "تبديليون رد ڪريو",
+    "restartRequired": "ريسٽارٽ گهربل",
+    "source": {
+      "default": "ڊفالٽ",
+      "platform": "پليٽ فارم",
+      "tenant": "ورڪ اسپيس",
+      "agent": "ايجنٽ",
+      "tenantInherited": "ورڪ اسپيس مان ورثي ۾ مليل",
+      "aria": "قدر جو ماخذ: {source}"
+    },
+    "sourceHelp": {
+      "default": "ڪنهن به هن کي نه مٽايو آهي. هي پراڊڪٽ سان آيل قدر استعمال ڪري ٿو.",
+      "platform": "توهان جي پليٽ فارم آپريٽر هي پوري تعيناتي لاءِ سيٽ ڪيو آهي.",
+      "tenant": "توهان جي ورڪ اسپيس ڊفالٽ کي اوور رائيڊ ڪري ٿي. ورثي ۾ مليل قدر ڏانهن موٽڻ لاءِ ري سيٽ ڪريو.",
+      "agent": "هي ايجنٽ ورڪ اسپيس جي قدر کي اوور رائيڊ ڪري ٿو. ورڪ اسپيس جو قدر ٻيهر ورثي ۾ وٺڻ لاءِ ري سيٽ ڪريو.",
+      "tenantInherited": "هن ايجنٽ جو پنهنجو ڪو اوور رائيڊ ناهي، تنهن ڪري اهو ورڪ اسپيس جو قدر استعمال ڪري ٿو. هن کي ايڊٽ ڪرڻ سان رڳو هن ايجنٽ لاءِ اوور رائيڊ ٺهي ٿو.",
+      "lockedSuffix": "هي بند ٿيل آهي، تنهن ڪري هتي مٽائي نٿو سگهجي."
+    },
+    "risk": {
+      "low": "گهٽ خطرو",
+      "medium": "وچولو خطرو",
+      "high": "وڌيڪ خطرو",
+      "security": "حفاظت"
+    },
+    "bool": {
+      "on": "On",
+      "off": "بند"
+    },
+    "value": {
+      "unset": "سيٽ نه ڪيل",
+      "empty": "خالي"
+    },
+    "select": {
+      "placeholder": "هڪ آپشن چونڊيو"
+    },
+    "slider": {
+      "label": "{label} (سلائيڊر)"
+    },
+    "duration": {
+      "unitLabel": "{label} جو يونٽ"
+    },
+    "units": {
+      "chars": "اکر",
+      "tokens": "ٽوڪن",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "سيڪنڊ",
+      "min": "منٽ",
+      "h": "ڪلاڪ"
+    },
+    "groups": {
+      "agent": "ايجنٽ رن ٽائم",
+      "approvals": "منظوري",
+      "quality": "معيار جاچون",
+      "guardrails": "گارڊ ريل",
+      "chat": "چيٽ",
+      "tools": "ٽول",
+      "memory": "ميموري",
+      "knowledge": "علم",
+      "delegation": "ڪم سونپڻ",
+      "aux": "مددگار ماڊل",
+      "routing": "ماڊل روٽنگ"
+    },
+    "errors": {
+      "required": "هڪ قدر ڏيو.",
+      "notNumber": "هڪ انگ ڏيو.",
+      "notInteger": "هڪ پورو انگ ڏيو.",
+      "belowMin": "گهٽ ۾ گهٽ {min} هجڻ گهرجي.",
+      "aboveMax": "وڌ ۾ وڌ {max} هجڻ گهرجي.",
+      "notAllowed": "درج ٿيل آپشنن مان هڪ چونڊيو.",
+      "tooShort": "تمام ننڍو. گهٽ ۾ گهٽ {min} استعمال ڪريو.",
+      "tooLong": "تمام ڊگهو. وڌ ۾ وڌ {max} استعمال ڪريو.",
+      "precision": "هي يونٽ ان کي صحيح طرح ظاهر نٿو ڪري سگهي. سڀ کان ننڍي يونٽ جو پورو انگ استعمال ڪريو يا ننڍو يونٽ چونڊيو.",
+      "serverRange": "اجازت ڏنل دائرو: {min} کان {max}.",
+      "serverOptions": "اجازت ڏنل قدر: {options}.",
+      "server": {
+        "invalid": "سرور هي قدر قبول نه ڪيو: {message}",
+        "locked": "هي سيٽنگ توهان جي ايڊمن بند ڪيل آهي، تنهن ڪري توهان جي تبديلي محفوظ نه ٿي.",
+        "notFound": "هي سيٽنگ هاڻي موجود ناهي.",
+        "forbidden": "توهان کي هي سيٽنگ مٽائڻ جي اجازت ناهي.",
+        "reasonRequired": "هن تبديلي لاءِ سبب گهربل آهي. هڪ ڏيو ۽ ٻيهر ڪوشش ڪريو.",
+        "network": "سرور تائين پهچي نه سگهيو، تنهن ڪري توهان جي تبديلي محفوظ نه ٿي. {message}",
+        "other": "تبديلي محفوظ نه ٿي سگهي: {message}"
+      }
+    },
+    "effective": "هاڻي لاڳو: {value}",
+    "hint": {
+      "range": "اجازت ڏنل: {min} کان {max}.",
+      "min": "گهٽ ۾ گهٽ: {min}.",
+      "max": "وڌ ۾ وڌ: {max}.",
+      "default": "ڊفالٽ: {value}.",
+      "securityStricter": "هڪ حفاظتي سيٽنگ کي رڳو پليٽ فارم جي قدر کان وڌيڪ سخت ڪري سگهجي ٿو، ڪڏهن به ڪمزور نه.",
+      "inherited": "جيڪڏهن توهان هن کي ري سيٽ ڪندا ته هي هتي موٽي ايندو: {value}."
+    },
+    "locked": {
+      "withReason": "توهان جي ايڊمن بند ڪيل: {reason}",
+      "noReason": "توهان جي ايڊمن بند ڪيل. هتي مٽائي نٿو سگهجي."
+    },
+    "blocked": {
+      "role": "توهان جو ڪردار هي سيٽنگ مٽائي نٿو سگهي. ورڪ اسپيس ايڊمن کان پڇو.",
+      "scope": "هي سيٽنگ هتي اوور رائيڊ نٿي ٿي سگهي.",
+      "readOnly": "سيٽنگون هاڻي رڳو پڙهڻ لاءِ آهن.",
+      "adminOnly": "هي حفاظتي سيٽنگ رڳو ورڪ اسپيس ايڊمن مٽائي سگهي ٿو. توهان ان جو قدر هتي ڏسي سگهو ٿا، پر ايڊٽ نٿا ڪري سگهو."
+    },
+    "reset": {
+      "button": "ورثي ۾ مليل قدر ڏانهن ري سيٽ ڪريو",
+      "aria": "ورثي ۾ مليل قدر ڏانهن ري سيٽ ڪريو: {label}"
+    },
+    "help": {
+      "show": "وڌيڪ تفصيل",
+      "hide": "تفصيل لڪايو"
+    },
+    "history": {
+      "button": "تاريخ",
+      "open": "تاريخ: {label}",
+      "title": "تاريخ: {label}",
+      "scopeTenant": "ورڪ اسپيس جون تبديليون",
+      "scopeAgent": "هن ايجنٽ جون تبديليون",
+      "close": "تاريخ بند ڪريو",
+      "loading": "تاريخ لوڊ ٿي رهي آهي",
+      "error": "تاريخ لوڊ نه ٿي سگهي. {message}",
+      "empty": "اڃا تائين ڪا تبديلي رڪارڊ نه ڪئي وئي آهي.",
+      "listLabel": "تبديلين جي تاريخ، نئين کان پهريان",
+      "version": "نسخو {version}",
+      "before": "اڳ:",
+      "after": "پوءِ:",
+      "by": "مٽائيندڙ",
+      "unknownActor": "اڻڄاتل",
+      "reason": "سبب:"
+    },
+    "savebar": {
+      "count": "غير محفوظ تبديليون: {count}.",
+      "invalid": "محفوظ ڪرڻ کان اڳ نمايان ڪيل خانن کي درست ڪريو. درست ڪرڻ جوڳا خانا: {count}.",
+      "discard": "تبديليون رد ڪريو",
+      "save": "تبديليون محفوظ ڪريو",
+      "saving": "محفوظ ٿي رهيو آهي"
+    },
+    "risky": {
+      "title": "خطرناڪ تبديليون پڪيون ڪريو ({count})",
+      "description": "هي سيٽنگون توهان جي ايجنٽن جو رويو يا انهن کي ڇا ڪرڻ جي اجازت آهي ان کي مٽائين ٿيون. هر تبديلي جي نظرثاني ڪريو ۽ ٻڌايو ته توهان هي ڇو ڪري رهيا آهيو. سبب آڊٽ لاگ ۾ محفوظ ڪيو وڃي ٿو.",
+      "descriptionSecurity": "انهن مان گهٽ ۾ گهٽ هڪ حفاظتي سيٽنگ آهي. ان کي رڳو پليٽ فارم جي قدر کان وڌيڪ سخت ڪري سگهجي ٿو. هر تبديلي جي نظرثاني ڪريو ۽ ٻڌايو ته توهان هي ڇو ڪري رهيا آهيو. سبب آڊٽ لاگ ۾ محفوظ ڪيو وڃي ٿو.",
+      "listLabel": "پڪيون ڪرڻ جوڳيون تبديليون",
+      "from": "کان",
+      "to": "to",
+      "securityNote": "حفاظتي سيٽنگ: هي پليٽ فارم جي قدر کان ڪمزور نٿي ٿي سگهي.",
+      "consequence": "هي ڇا مٽائي ٿو:",
+      "reasonLabel": "هن تبديلي جو سبب",
+      "reasonPlaceholder": "مثال: سپورٽ ٽيم جي ڊگهي تحقيق لاءِ حد وڌائڻ",
+      "reasonHint": "گهربل، گهٽ ۾ گهٽ {min} اکر. مٽائيندڙ ۽ پراڻن ۽ نون قدرن سان گڏ محفوظ ٿئي ٿو.",
+      "acknowledge": "مان هن حفاظتي تبديلي جا نتيجا سمجهان ٿو.",
+      "cancel": "رد ڪريو",
+      "confirm": "پڪ ڪري محفوظ ڪريو",
+      "resetNote": "ري سيٽ: اوور رائيڊ هٽايو وڃي ٿو ۽ سيٽنگ ان قدر ڏانهن موٽي ٿي جيڪو کيس ورثي ۾ ملي ٿو."
+    },
+    "strictness": {
+      "higher": "مٿي وڌيڪ سخت آهي: مٿيون قدر قبول ٿئي ٿو، هيٺيون رد.",
+      "lower": "هيٺ وڌيڪ سخت آهي: هيٺيون قدر قبول ٿئي ٿو، مٿيون رد.",
+      "enumOrder": "آپشن گهٽ کان وڌيڪ سخت جي ترتيب ۾ آهن: {options}. توهان رڳو سخت پاسي ڏانهن وڃي سگهو ٿا."
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "باقي",
+    "status_APPROVED": "منظور ٿيل",
+    "status_REJECTED": "رد ٿيل",
+    "status_EXPIRED": "وقت ختم",
+    "status_EXECUTION_FAILED": "عملدرآمد ناڪام",
+    "status_DEAD_LETTERED": "ڊيڊ ليٽر",
+    "filtersLabel": "درخواستون ڇانٽيو",
+    "filterAgentLabel": "ايجنٽ سان ڇانٽيو",
+    "filterToolLabel": "ٽول سان ڇانٽيو",
+    "filterAgeLabel": "عمر سان ڇانٽيو",
+    "filterAnyAgent": "ڪو به ايجنٽ",
+    "filterAnyTool": "ڪو به ٽول",
+    "filterAnyAge": "ڪا به عمر",
+    "age_newer1h": "١ ڪلاڪ کان نئون",
+    "age_older1h": "١ ڪلاڪ کان پراڻو",
+    "age_older24h": "١ ڏينهن کان پراڻو",
+    "age_older7d": "٧ ڏينهن کان پراڻو",
+    "filtersClear": "ڇاڻي صاف ڪريو",
+    "filterWindowNote": "سڀ کان نيون {count} درخواستون ڇاڻي رهيو آهي. پراڻيون ان ۾ شامل ناهن.",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time} تي وقت ختم ٿيندو",
+    "expiresAt": "جيڪڏهن ڪنهن فيصلو نه ڪيو ته {time} تي پاڻمرادو بند ٿي ويندو",
+    "overdue": "وقت جي حد گذري وئي، ايندڙ صفائيءَ تي بند ٿيندو",
+    "neverExpires": "هي ورڪ اسپيس بيٺل درخواستن جو وقت ختم نٿو ڪري.",
+    "expiredNote": "{time} تي وقت ختم ٿيو: وقت تي ڪنهن به فيصلو نه ڪيو",
+    "expiredReasonPrefix": "وقت ختم ٿيو:",
+    "auditExpired": "وقت ختم ٿيو، وقت تي ڪنهن به فيصلو نه ڪيو",
+    "riskLow": "گهٽ خطرو",
+    "riskMedium": "وچولو خطرو",
+    "riskHigh": "وڌيڪ خطرو",
+    "riskEstimateNote": "خطرو ٽول جي نالي تان لڳايل هڪ اندازو آهي. پليٽ فارم ٽولن جي درجه بندي نٿو ڪري، تنهن ڪري منظور ڪرڻ کان اڳ دليل پڙهو.",
+    "riskWhoDecides": "ڪير طئي ڪري ٿو ته ڇا منظوري جو انتظار ڪري؟",
+    "previewGoal": "هي جنهن ڪم تي ڪم ڪري رهيو هو:",
+    "previewArguments": "دليل",
+    "previewNoArguments": "هن ڪال لاءِ ڪي دليل رڪارڊ نه ڪيا ويا.",
+    "previewRedacted": "{count} حساس لڳندڙ قدر هتي لڪايل آهن. جيڪڏهن توهان منظور ڪريو ته انهن کي پوءِ به ٽول ڏانهن موڪليو وڃي ٿو.",
+    "previewTruncated": "هي دليل مڪمل ڏيکارڻ لاءِ تمام ڊگها آهن، تنهن ڪري هي درخواست هتان منظور نه ٿي سگهي.",
+    "approveBlockedTooLong": "توهان مڪمل درخواست جي نظرثاني نٿا ڪري سگهو تنهن ڪري منظوري بند آهي. توهان پوءِ به ان کي رد ڪري سگهو ٿا.",
+    "ifApproveLabel": "جيڪڏهن توهان منظور ڪريو:",
+    "ifApprove": "{tool} مٿين دليلن سان هاڻي ئي هلندو آهي، ۽ ايجنٽ ان جو نتيجو استعمال ڪري ڪم جاري رکي ٿو.",
+    "ifDenyLabel": "جيڪڏهن توهان رد ڪريو:",
+    "ifDeny": "{tool} نٿو هلي. ايجنٽ کي ٻڌايو وڃي ٿو ته توهان نه چيو، سبب ڏيڻ تي ان سان گڏ، ۽ اهو ان کانسواءِ اڳتي وڌي ٿو.",
+    "whyGated": "ايجنٽ {tool} استعمال ڪرڻ چاهيو ٿي. ان کي توهان جي فيصلي لاءِ ان ڪري روڪيو ويو ته ايجنٽ نگراني ۾ سيٽ ٿيل آهي، يا هن ورڪ اسپيس ان ٽول لاءِ منظوري لازمي ڪئي آهي.",
+    "denyReasonLabel": "رد ڪرڻ جو سبب (اختياري)",
+    "denyReasonPlaceholder": "مثال: غلط وصول ڪندڙ، موڪلڻ کان اڳ مون کان پڇو",
+    "denyReasonHelp": "جيڪڏهن توهان رد ڪريو ته ايجنٽ هي سبب رد ٿيل ڪال جي نتيجي طور پڙهي ٿو ۽ پاڻ کي ترتيب ڏئي ٿو. سبب کانسواءِ رد ڪرڻ لاءِ خالي ڇڏيو.",
+    "denyButton": "رد ڪريو",
+    "detailRegionLabel": "درخواست جي وضاحت",
+    "sessionLabel": "گفتگو",
+    "linkOpenAgent": "ايجنٽ کوليو",
+    "linkInspectTurns": "ان جا ٽرن جاچيو",
+    "continuationLabel": "ان کان پوءِ ايجنٽ ڇا ڪيو",
+    "continuationCompleted": "ايجنٽ ڪم جاري رکڻ ختم ڪيو.",
+    "continuationFailed": "هن فيصلي کان پوءِ ايجنٽ جاري نه رکي سگهيو.",
+    "continuationRetry": "ان کي جاري رکڻ لاءِ چئو",
+    "retryMessage": "مهرباني ڪري ڪم جاري رکو.",
+    "lastDecisionTitle": "توهان جو آخري فيصلو: {tool}",
+    "lastDecisionClose": "بند ڪريو",
+    "deepLinkNotFound": "اها منظوري جي درخواست نه ملي، يا توهان ان کي ڏسي نٿا سگهو.",
+    "selectAllLabel": "هن صفحي جا سڀ باقي ٽول ڪال چونڊيو",
+    "selectRowLabel": "{tool} جا باقي ڪال چونڊيو",
+    "bulkSelected": "{count} چونڊيل",
+    "bulkApprove": "چونڊيل منظور ڪريو",
+    "bulkDeny": "چونڊيل رد ڪريو",
+    "bulkClear": "چونڊ صاف ڪريو",
+    "bulkCancel": "رد ڪريو",
+    "bulkDismiss": "خارج ڪريو",
+    "bulkMixedTools": "گڏيل فيصلي لاءِ چونڊيل سڀ درخواستون هڪ ئي ٽول جون هجڻ گهرجن.",
+    "bulkNotLowRisk": "گڏيل منظوري رڳو گهٽ خطري وارن ٽولن (لوڪ اپ) لاءِ آهي. رد ڪرڻ ڪنهن به هڪ ٽول لاءِ ڪم ڪري ٿو، يا انهن کي هڪ هڪ ڪري فيصلو ڪريو.",
+    "bulkNotToolCall": "گڏيل فيصلا رڳو ايجنٽ ٽول ڪالن کي شامل ڪن ٿا.",
+    "bulkNotPending": "گڏيل فيصلا رڳو اڃا باقي درخواستن کي شامل ڪن ٿا.",
+    "bulkConfirmApproveTitle": "{tool} جا {count} ڪال منظور ڪريان؟",
+    "bulkConfirmApproveBody": "انهن مان هر هڪ هاڻي ئي {tool} هلائي ٿو، هيٺ درج ٿيل پنهنجن دليلن سان، ۽ ايجنٽ نتيجو استعمال ڪري اڳتي وڌي ٿو. هن کي واپس نٿو ڪري سگهجي.",
+    "bulkConfirmDenyTitle": "{tool} جا {count} ڪال رد ڪريان؟",
+    "bulkConfirmDenyBody": "انهن مان ڪجهه به نٿو هلي. ايجنٽ کي ٻڌايو وڃي ٿو ته هر ڪال رد ٿي، سبب ڏيڻ تي ان سان گڏ.",
+    "bulkConfirmApprove": "{count} منظور ڪريو",
+    "bulkConfirmDeny": "{count} رد ڪريو",
+    "bulkMore": "۽ {count} وڌيڪ",
+    "bulkProgress": "{count} مان {done} مڪمل",
+    "bulkResult": "{done} جو فيصلو ٿيو، {failed} ناڪام ٿيا.",
+    "notifyOff": "مون کي ٻڌايو",
+    "notifyOn": "اطلاع چالو",
+    "notifyHelp": "جڏهن هي ٽئب پس منظر ۾ هجي ۽ نئين درخواست اچي ته برائوزر اطلاع ڏيکاريو",
+    "notifyUnsupported": "هي برائوزر اطلاع ڏيکاري نٿو سگهي.",
+    "notifyBlocked": "اطلاع بلاڪ ٿيل آهن. انهن کي چالو ڪرڻ لاءِ پنهنجي برائوزر جي سائيٽ سيٽنگن ۾ اجازت ڏيو.",
+    "notifyTitle": "هڪ ايجنٽ منظوري جو انتظار ڪري رهيو آهي",
+    "notifyBodyOne": "{tool} کي توهان جي فيصلي جي ضرورت آهي.",
+    "notifyBodyMany": "{count} درخواستن کي توهان جي فيصلي جي ضرورت آهي.",
+    "newArrived": "{count} نيون منظوري جون درخواستون آيون.",
+    "rulesTitle": "هڪ ٽول لاءِ ضابطو",
+    "rulesIntro": "چونڊيو ته هڪ ٽول هميشه ماڻهوءَ جو انتظار ڪري يا ڪڏهن به نه. هي ضابطو نيم خودمختيار سيٽ ڪيل هر ايجنٽ تي لاڳو ٿئي ٿو.",
+    "rulesNeedsScope": "ضابطو مٽائڻ لاءِ توهان کي منظوري جي اجازت گهرجي.",
+    "rulesToolLabel": "ٽول جو نالو",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "درخواست ۾ ٽول جيئن ڏسجي ٿو بلڪل تيئن، مثال طور send_email.",
+    "rulesToolNameInvalid": "ٽول جي نالي ۾ خالي جاءِ نٿي ٿي سگهي.",
+    "rulesModeLabel": "ڇا ٿيڻ گهرجي",
+    "rulesAskName": "هميشه پڇو",
+    "rulesAskHint": "هن ٽول جو هر ڪال ماڻهوءَ جي منظوري جو انتظار ڪري ٿو.",
+    "rulesNeverName": "ڪڏهن به نه پڇو",
+    "rulesNeverHint": "هن ٽول جا ڪال ڪنهن جي به منظوري کانسواءِ فوري طور هلن ٿا.",
+    "rulesNeverRiskyWarn": "هي ٽول شيون مٽائيندڙ لڳي ٿو. پڪ ڪريو.",
+    "rulesScopeNote": "ضابطو سڄي ورڪ اسپيس تي لاڳو ٿئي ٿو، هڪ ايجنٽ تي نه. نگراني ۾ رکيل ايجنٽ اڃا به هر شيءِ لاءِ پڇي ٿو، ۽ مڪمل خودمختيار ايجنٽ ضابطو جيڪو به چوي ڪڏهن به نٿو پڇي. توهان جا سيٽ ڪيل ضابطا اڃا هتي درج ناهن.",
+    "rulesSave": "ضابطو محفوظ ڪريو",
+    "rulesSaveFailed": "ضابطو محفوظ نه ٿي سگهيو.",
+    "rulesSavedAsk": "{tool} هميشه منظوري گهرندو.",
+    "rulesSavedNever": "{tool} هاڻي منظوري نه گهرندو.",
+    "rulesNeverConfirmTitle": "{tool} هلائڻ کان اڳ پڇڻ بند ڪريان؟",
+    "rulesNeverConfirmBody": "هر نيم خودمختيار ايجنٽ ڪنهن جي به منظوري کانسواءِ {tool} هلائيندو. هي شيون مٽائيندڙ يا موڪليندڙ لڳي ٿو، ۽ غلطي واپس نٿي ٿي سگهي.",
+    "rulesNeverConfirmBodyLow": "هر نيم خودمختيار ايجنٽ پڇڻ کانسواءِ {tool} هلائيندو. هي لوڪ اپ وانگر لڳي ٿو، تنهن ڪري هي عام طور محفوظ آهي.",
+    "rulesNeverConfirm": "پڇڻ بند ڪريو",
+    "tiersTitle": "ڪير طئي ڪري ٿو ته ڇا منظوري جو انتظار ڪري؟",
+    "tiersIntro": "هر ايجنٽ جو هڪ خودمختياري جو درجو آهي. اهو طئي ڪري ٿو ته ورڪ اسپيس جا منظوري ضابطا بلڪل استعمال ٿيندا يا نه.",
+    "tierCurrent": "هي ايجنٽ",
+    "tierConsequenceLabel": "استعمال ۾:",
+    "tierSupervisedName": "نگراني ۾",
+    "tierSupervisedWhat": "ورڪ اسپيس جا ضابطا جيڪي به چون، هر ٽول ڪال ماڻهوءَ جو انتظار ڪري ٿو. ان کي هر ٽرن ۾ ٽول قدمن جي گهٽ حد پڻ ڏني ويندي آهي.",
+    "tierSupervisedConsequence": "سڀ کان محفوظ، پر قطار ۾ وڌيڪ درخواستن ۽ سست ايجنٽ جي توقع رکو.",
+    "tierSemiName": "نيم خودمختيار",
+    "tierSemiWhat": "ورڪ اسپيس جو ضابطو هر ٽول لاءِ طئي ڪري ٿو: موڪلڻ، ڊليٽ ۽ ادائگي جهڙا خطرناڪ ٽول ڊفالٽ طور پڇن ٿا، باقي هلن ٿا.",
+    "tierSemiConsequence": "هڪ سٺو ڊفالٽ. توهان جا هر-ٽول ضابطا هتي اثرائتا آهن.",
+    "tierFullName": "مڪمل خودمختيار",
+    "tierFullWhat": "ڪو به ٽول ڪال ڪڏهن به منظوري جو انتظار نٿو ڪري ۽ ايجنٽ کي ٽول قدمن جي وڏي حد ملي ٿي. هر-ٽول ضابطا نظرانداز ڪيا وڃن ٿا.",
+    "tierFullConsequence": "هي پڇڻ کانسواءِ ڪم ڪري ٿو. هن کي رڳو ان ايجنٽ لاءِ استعمال ڪريو جنهن جون غلطيون آساني سان واپس ٿي سگهن.",
+    "tiersRuleNote": "ٽول ضابطا (هميشه پڇو، ڪڏهن به نه پڇو) رڳو نيم خودمختيار ايجنٽن لاءِ اهم آهن.",
+    "agentModeTitle": "هن ايجنٽ کي منظوري ڪڏهن گهرجي؟",
+    "agentModeSupervised": "هي ايجنٽ نگراني ۾ آهي: هر ٽول ڪال ماڻهوءَ جو انتظار ڪري ٿو، ۽ هر-ٽول ضابطا نظرانداز ڪيا وڃن ٿا.",
+    "agentModeSemi": "هي ايجنٽ نيم خودمختيار آهي: هر ٽول ورڪ اسپيس جي ضابطي کي مڃي ٿو. موڪلڻ، ڊليٽ ۽ ادائگي ڊفالٽ طور پڇن ٿا.",
+    "agentModeFull": "هي ايجنٽ مڪمل خودمختيار آهي: هي ڪڏهن به منظوري جو انتظار نٿو ڪري، ۽ هر-ٽول ضابطا نظرانداز ڪيا وڃن ٿا.",
+    "agentModeQueueLink": "هن ايجنٽ جون درخواستون ڏسو",
+    "agentModeRulesLink": "هڪ ٽول لاءِ ضابطو سيٽ ڪريو",
+    "agentModeShowTiers": "ٽن درجن جو مقابلو ڪريو",
+    "agentModeHideTiers": "مقابلو لڪايو",
+    "agentModeScopeNote": "مٿين خودمختياري جي چونڊ سان درجو مٽايو. ٽول ضابطا سڄي ورڪ اسپيس جا آهن، هر ايجنٽ جا نه.",
+    "policyThenApprovalNote": "جيڪا ڪال انهن ضابطن مان نڪري وڃي ٿي سا پوءِ به ماڻهوءَ جو انتظار ڪري سگهي ٿي. اهو ايجنٽ جي خودمختياري جي درجي تي منحصر آهي، جيڪو هيٺ بيان ڪيل آهي.",
+    "chatReasonToggle": "هڪ سبب شامل ڪريو",
+    "chatReviewInQueue": "قطار ۾ نظرثاني ڪريو"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "واقعا ڇانٽيو",
+    "tlFilterCategories": "واقعي جو قسم",
+    "tlCatIntake": "انٽيڪ",
+    "tlCatModel": "ماڊل",
+    "tlCatTool": "ٽول",
+    "tlCatApproval": "منظوري",
+    "tlCatContinuation": "تسلسل",
+    "tlCatRetry": "ٻيهر ڪوشش ۽ فيل اوور",
+    "tlCatGuardrail": "گارڊ ريل",
+    "tlCatCache": "ڪيش",
+    "tlCatVerify": "جاچ",
+    "tlCatFinish": "پڄاڻي",
+    "tlProblemsOnly": "رڳو مسئلا",
+    "tlSearch": "واقعا ڳوليو",
+    "tlSearchPlaceholder": "ٽول، ماڊل، گارڊ يا حالت",
+    "tlClearFilters": "ڇاڻي صاف ڪريو",
+    "tlShowing": "{total} واقعن مان {shown} ڏيکاري رهيو آهي",
+    "tlNoMatch": "ڪو واقعو هن ڇاڻي سان نٿو ملي.",
+    "tlSevOk": "ڪامياب",
+    "tlSevInfo": "معلومات",
+    "tlSevWarn": "ڌيان گهربل",
+    "tlSevError": "ناڪام",
+    "tlIntake": "ٽرن شروع ٿيو: {chars} اکر، {tools} ٽول، {attachments} ڳنڍيل",
+    "tlRunTools": "هن رن لاءِ ٽول",
+    "tlRunToolsNone": "ڪو به ناهي (رڳو لکت)",
+    "tlModelCall": "{model} ({provider}) ڏانهن ماڊل ڪال، رستو {route}",
+    "tlFailover": "{model} ({provider}) ڏانهن فيل اوور ٿيو",
+    "tlRetryModel": "{model} ({provider}) تي ٻيهر ڪوشش ڪئي وئي، رستو {route}",
+    "tlRetry": "ٻيهر ڪوشش: {guard} ({outcome})",
+    "tlCacheHit": "رسپانس ڪيش مان جواب ڏنو ويو",
+    "tlToolCall": "ٽول ڪال {tool}: {status}",
+    "tlApprovalRequested": "{tool} هلڻ کان اڳ منظوري گهري وئي",
+    "tlApprovalDecided": "{tool} لاءِ منظوري جو فيصلو ٿيو: {decision}",
+    "tlApprovalAutoAllowed": "{tool} پڇڻ کانسواءِ هليو: نگراني هيٺ رڳو-پڙهڻ واري ڪال",
+    "tlContinuation": "تسلسل: {guard} ({outcome})",
+    "tlGuard": "گارڊ ريل {guard}: {outcome}",
+    "tlVerifyPassed": "جاچ پاس: {check}",
+    "tlVerifyFailed": "جاچ فيل: {check}",
+    "tlFinish": "پڄاڻي: {status} (جواب ۾ {chars} اکر)",
+    "tlOther": "واقعو {type}",
+    "reasonFallbackProvider": "بنيادي ماڊل ناڪام ٿيو، تنهن ڪري ٽرن ايجنٽ جي فال بيڪ پرووائيڊر ڏانهن ويو.",
+    "reasonToolsDisabledRetry": "پرووائيڊر ٽول ڪال جي تاريخ رد ڪئي، تنهن ڪري ٽرن جو جواب هڪ دفعو ٻيهر ٽولن کانسواءِ ڏنو ويو.",
+    "reasonRetryOther": "ماڊل ڪال ورجائي وئي.",
+    "reasonToolCallRetry": "ماڊل پنهنجو جواب خراب ٽول ڪال سان ختم ڪيو، تنهن ڪري کيس ٻيهر پڇيو ويو.",
+    "reasonCutOff": "جواب ڊيگهه جي حد تي ڪٽجي ويو، تنهن ڪري ماڊل کي جاري رکڻ لاءِ چيو ويو.",
+    "reasonToolsContinue": "ٽول ڪال کان پوءِ ماڊل کي وڌيڪ قدمن جي ضرورت هئي، تنهن ڪري ٽرن جاري رهيو.",
+    "reasonToolBlocked": "ٽول جي جاءِ تي ڪنهن گارڊ، پاليسي، هُڪ يا حد جواب ڏنو، تنهن ڪري اهو نه هليو.",
+    "reasonToolParked": "ڪال ماڻهوءَ جي منظوري جو انتظار ڪري رهي آهي؛ ٽول نه هليو.",
+    "reasonGuardAction": "هڪ گارڊ ريل جواب مٽايو يا روڪي ڇڏيو.",
+    "tlAtStart": "شروعات کان",
+    "tlGap": "اڳئين واقعي کان",
+    "tlDuration": "وقت جي حد",
+    "tlTokens": "ان پٽ / آئوٽ پٽ ٽوڪن",
+    "tlCost": "خرچ",
+    "tlDetails": "هيش ۽ ڪچو خلاصو",
+    "tlArgsHash": "دليلن جو هيش",
+    "tlResultDigest": "نتيجي جو خلاصو",
+    "tlContentNote": "دليل ۽ نتيجا ڪڏهن به محفوظ نه ٿيندا آهن. ٽول ڪال لاءِ ٽائم لائن ان جي حالت، وقت ۽ ان جي دليلن ۽ نتيجن جو هيش ڏيکاري ٿي، انهن جو مواد نه.",
+    "tlStatFinish": "پڄاڻيءَ جو سبب",
+    "tlStillOpen": "ختم نه ٿيو",
+    "tlProblemCount": "{count} واقعن ۾ ڌيان گهربل",
+    "tlStatRetries": "ٻيهر ڪوشش ۽ فيل اوور",
+    "tlStatContinuations": "تسلسل",
+    "tlStatApprovals": "منظوري",
+    "tlStatTokens": "ان پٽ / آئوٽ پٽ ٽوڪن",
+    "tlTokensNotRecorded": "هن ٽرن لاءِ رڪارڊ نه ڪيو ويو",
+    "tlTokensInOut": "ان پٽ / آئوٽ پٽ",
+    "tlCopyTurnId": "ٽرن ID ڪاپي ڪريو",
+    "tlCopyTurnIdShort": "ID ڪاپي ڪريو",
+    "tlCopied": "ٽرن ID ڪاپي ٿيو.",
+    "tlCopyFailed": "ڪاپي نه ٿي سگهي. ID چونڊي هٿ سان ڪاپي ڪريو.",
+    "sessTitle": "هڪ سيشن جا ٽرن",
+    "sessSubtitle": "رڪارڊ ٿيل ٽرن نئين کان پهريان ڏسڻ لاءِ هڪ چيٽ سيشن چونڊيو. چيٽ پيغام جو ٽرن ڏسو لنڪ کولڻ تي هي توهان لاءِ پاڻمرادو ڀرجي وڃي ٿو.",
+    "sessionIdLabel": "سيشن ID",
+    "sessionIdPlaceholder": "چيٽ سيشن ID",
+    "sessFind": "ٽرن ڳوليندڙ",
+    "sessInvalid": "ايجنٽ ID (هڪ UUID) ۽ سيشن ID ڏيو.",
+    "sessLoading": "سيشن جا ٽرن لوڊ ٿي رهيا آهن...",
+    "sessUnavailableTitle": "سيشن ڳولا موجود ناهي",
+    "sessUnavailableBody": "هي سرور ڪنهن سيشن جي ٽرنن جي فهرست نٿو ٺاهي سگهي. ان جي بدران هيٺ ID ذريعي هڪ ٽرن کوليو.",
+    "sessErrorTitle": "سيشن جا ٽرن لوڊ نه ٿي سگهيا",
+    "sessEmptyTitle": "هن سيشن ۾ ڪو جرنل ٿيل ٽرن ناهي",
+    "sessEmptyBody": "سيشن ڪجهه به رڪارڊ نه ڪيو. يا ته سيشن ID غلط آهي، يا ان جي ٽرنن هلڻ وقت ٽرن جرنل بند هو.",
+    "sessListLabel": "{count} جرنل ٿيل ٽرن",
+    "sessEvents": "{count} واقعا",
+    "sessStatusOpen": "کوليو",
+    "sessOpen": "ٽائم لائن کوليو",
+    "sessOpened": "هيٺ ڏيکاريل"
+  },
+  "evalControls": {
+    "cancel": "رد ڪريو",
+    "saving": "محفوظ ٿي رهيو آهي...",
+    "saved": "محفوظ ٿيو.",
+    "saveMode": "ريپلي موڊ محفوظ ڪريو",
+    "discard": "تبديليون رد ڪريو",
+    "saveFailed": "ريپلي موڊ محفوظ نه ٿي سگهيو.",
+    "unsavedChanges": "غير محفوظ تبديليون",
+    "modeTitle": "هي ڊيٽاسيٽ ڪيئن ريپلي ٿئي ٿو",
+    "modeHelp": "چونڊيو ته ريپلي ايجنٽ جا ٽول استعمال ڪري سگهي ٿو يا نه. هي ايندڙ رنن جي ماپ کي مٽائي ٿو.",
+    "modeTextOnly": "رڳو لکت",
+    "modeTextOnlyHelp": "ايجنٽ پنهنجي ٽولن کانسواءِ جواب ڏئي ٿو. محفوظ: حقيقت ۾ ڪجهه به نٿو هلي. متوقع ٽول جاچون مڪمل نه ٿي سگهن ٿيون.",
+    "modeFull": "ٽولن سان مڪمل پائپ لائن",
+    "modeFullHelp": "اهي ئي ٽول، گارڊ ريل ۽ قدمن جون حدون جيڪي هڪ حقيقي استعمال ڪندڙ کي ملن ٿيون. متوقع ٽول ۽ ٽريجيڪٽري جاچن لاءِ گهربل.",
+    "modeFullNote": "جيڪي ٽول رڳو پڙهن ٿا اهي حقيقت ۾ هلن ٿا. جيڪو ڪجهه ڊيٽا مٽائي سگهي، پيغام موڪلي سگهي يا پئسا خرچ ڪري سگهي ان کي نقل ڪيو وڃي ٿو ۽ رن ۾ درج ڪيو وڃي ٿو، تنهن ڪري حقيقت ۾ ڪجهه نٿو ٿئي. حفاظتي درجه بندي کانسواءِ ٽول به نقل ٿين ٿا.",
+    "autoApproveLabel": "ايول سينڊ باڪس ۾ ٽول ڪال پاڻمرادو منظور ڪريو",
+    "autoApproveHelp": "عام طور ماڻهوءَ جو انتظار ڪندڙ ٽول ڪالن کي ايول سينڊ باڪس منظور ڪري ٿو، ته جيئن ڪيس ختم ٿي سگهي. ان کانسواءِ ڪيس پروڊڪشن ۾ جيئن ٿئي ٿو تيئن ئي بي جواب منظوري تي ختم ٿئي ٿو.",
+    "autoApproveWarnTitle": "رڳو غير پروڊڪشن ورڪ اسپيسز لاءِ",
+    "autoApproveWarnBody": "ان کي ڪڏهن به اتي چالو نه ڪريو جتي ٽول حقيقي گراهڪن يا ڊيٽا کي ڇهي سگهن. شيل، ڪوڊنگ، شيڊيولنگ، ايجنٽ کان ايجنٽ، ادائگي ۽ ڊليٽ ٽول ڪڏهن به پاڻمرادو منظور نه ٿيندا آهن. توهان جي ايڊمن هن ورڪ اسپيس کي غير پروڊڪشن طور نشان لڳايو هجڻ گهرجي.",
+    "autoApproveNeedsFull": "پهرين مڪمل پائپ لائن چالو ڪريو: پاڻمرادو منظوري رڳو تڏهن لاڳو ٿئي ٿي جڏهن ٽول هلن ٿا.",
+    "autoApproveRefused": "هن ورڪ اسپيس ۾ اجازت ناهي: {reason}",
+    "autoApproveConfirmTitle": "ايول ۾ ٽول ڪال پاڻمرادو منظور ڪريان؟",
+    "autoApproveConfirmBody": "هن ڊيٽاسيٽ جي ريپلين ۾ ماڻهوءَ جو انتظار ڪندڙ هر ٽول ڪال پاڻمرادو منظور ٿي ويندي. منظور ٿيل رڳو-پڙهندڙ ٽول حقيقت ۾ هلن ٿا؛ ڪجهه مٽائي سگهندڙ اڃا به نقل ٿين ٿا. هي رڳو ٽيسٽ ڊيٽا واري ورڪ اسپيس ۾ ڪريو. رن رڪارڊ ڪن ٿا ته اهي پاڻمرادو منظور ٿيل هئا.",
+    "autoApproveConfirm": "پاڻمرادو منظوري چالو ڪريو",
+    "trajectoryLabel": "ٽريجيڪٽري جاچون",
+    "trajectoryOn": "On",
+    "trajectoryOff": "موجود ناهي",
+    "trajectoryHelpOn": "متوقع ٽريجيڪٽري وارن ڪيسن کي ان بنياد تي نمبر ڏنا وڃن ٿا ته ايجنٽ ڪهڙا ٽول ڪهڙي ترتيب سان ڪال ڪيا. هن کي توهان جو ايڊمن پوري تعيناتي لاءِ چالو ڪري ٿو، هر ڊيٽاسيٽ لاءِ نه.",
+    "trajectoryHelpOff": "ٽريجيڪٽري جاچون هتي موجود ناهن. انهن کي توهان جو ايڊمن پوري تعيناتي لاءِ چالو ڪري ٿو، ۽ ايول شامل پلان گهربل آهي.",
+    "trajectoryNeedsFull": "هي ڊيٽاسيٽ رڳو لکت وارو آهي، تنهن ڪري متوقع ٽريجيڪٽري وارن ڪيسن کي نمبر نه ملندا. مڪمل پائپ لائن چالو ڪريو.",
+    "runAutoApproved": "پاڻمرادو منظور ٿيل",
+    "runAutoApprovedTitle": "هن رن جي ڪنهن به ٽول ڪال جو فيصلو ڪنهن ماڻهوءَ نه ڪيو؛ ايول سينڊ باڪس انهن کي منظور ڪيو.",
+    "toolCallsLabel": "هن ريپلي ۾ ٽول ڪال",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "ناڪام",
+    "toolStatusNotRun": "نه هليو",
+    "toolStatusAwaitingApproval": "منظوري جو انتظار",
+    "toolStatusReplayed": "ريپلي ٿيو",
+    "samplingTitle": "پس منظر جي معيار جو اسڪورنگ",
+    "samplingLoading": "اسڪورنگ جو تناسب لوڊ ٿي رهيو آهي...",
+    "samplingUnavailable": "پس منظر جو جج ڪيترن لائيو ٽرنن کي نمبر ڏئي ٿو اهو توهان جو پليٽ فارم ايڊمن طئي ڪري ٿو ۽ هتي ڏيکاريو نه ويندو آهي.",
+    "samplingValue": "تقريباً {percent}% لائيو ٽرنن کي پس منظر جو معيار جج نمبر ڏئي ٿو.",
+    "samplingHelp": "گهٽ تناسب خرچ گهٽائي ٿو ۽ مٿين رجحان ۾ گهٽ نمبر رکي ٿو. هي قدر هتي رڳو پڙهڻ لاءِ آهي.",
+    "samplingSource_default": "ڊفالٽ",
+    "samplingSource_platform": "پليٽ فارم طرفان سيٽ ڪيل",
+    "samplingSource_tenant": "توهان جي ورڪ اسپيس لاءِ سيٽ ڪيل",
+    "samplingSource_agent": "هن ايجنٽ لاءِ سيٽ ڪيل",
+    "modeDefault": "ورڪ اسپيس ڊفالٽ",
+    "modeDefaultHelp": "توهان جي ورڪ اسپيس جي سيٽنگ کي مڃي ٿو (مڪمل پائپ لائن، جيستائين ايڊمن نه مٽائي). هر رن اڃا به پنهنجي رٿ چونڊي سگهي ٿو.",
+    "modeDefaultCurrent": "هاڻي: {mode}",
+    "modeNameFull": "مڪمل پائپ لائن",
+    "modeNameQuick": "تڪڙو (رڳو لکت)",
+    "badgeFull": "مڪمل پائپ لائن",
+    "badgeQuick": "تڪڙو",
+    "datasetModePinnedTitle": "هي ڊيٽاسيٽ هميشه هن طرح ريپلي ٿئي ٿو. هڪ رن اڃا به ٻي رٿ چونڊي سگهي ٿو.",
+    "datasetModeDefaultTitle": "رن ڪيئن ريپلي ٿين ان لاءِ هي ڊيٽاسيٽ ورڪ اسپيس جي ڊفالٽ کي مڃي ٿو.",
+    "runModeLabel": "ايندڙ رن لاءِ ريپلي موڊ",
+    "runModeInherit": "ڊيٽاسيٽ جي سيٽنگ استعمال ڪريو",
+    "runModeHelp": "مڪمل پائپ لائن ايجنٽ کي ان جي ٽولن، گارڊ ريلن ۽ منظورين سان گڏ محفوظ سينڊ باڪس ۾ هلائي ٿي: رڳو پڙهندڙ ٽول حقيقت ۾ هلن ٿا، ۽ جيڪو ڪجهه ڊيٽا مٽائي سگهي يا ڪجهه موڪلي سگهي ان کي نقل ڪيو وڃي ٿو. تڪڙو موڊ ٽول روڪي ٿو ۽ رڳو لکيل جواب کي پرکي ٿو.",
+    "runModeFullTitle": "هن رن ايول سينڊ باڪس ۾ مڪمل پائپ لائن استعمال ڪئي.",
+    "runModeQuickTitle": "هي رن رڳو لکت وارو تڪڙو ريپلي هو: ايجنٽ جا ٽول روڪيا ويا هئا.",
+    "runSimulatedTools": "هن رن ۾ نقل ڪيا ويا، هلايا نه ويا (اهي ڊيٽا مٽائي سگهن ها يا پليٽ فارم کان ٻاهر پهچي سگهن ها): {tools}.",
+    "toolStatusSimulated": "نقل ڪيو ويو، هلايو نه ويو"
+  },
+  "assistant": {
+    "taskPhoneLabel": "توهان جو فون نمبر",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "اهو نمبر محفوظ نه ٿي سگهيو.",
+    "searchingWebFor": "Searching the web for “{target}”…",
+    "readingPageAt": "Reading {target}…",
+    "researchingTopic": "Researching “{target}”…",
+    "statusWriting": "Writing the answer…",
+    "quietFor": "still waiting on the model ({duration} since the last update)",
+    "toolStepsLabel": "Steps",
+    "chipDone": "finished",
+    "chipFailed": "failed",
+    "moreSteps": "+{n} more",
+    "sourcesLabel": "Sources",
+    "closePanel": "Close the panel",
+    "conversationLabel": "Conversation",
+    "copiedReply": "Copied",
+    "jumpToLatest": "Jump to the latest message"
+  },
+  "agentLab": {
+    "wtLabel": "ايجنٽ جي ٽولن سان هلايو",
+    "wtHelp": "بند: هر جواب هڪ عام ماڊل ڪال آهي. چالو: جواب ان ٽول پائپ لائن مان ايندا آهن جيڪا چيٽ ٽرن استعمال ڪري ٿي، تنهن ڪري ٽول هلندا آهن، گارڊ ريل لاڳو ٿين ٿا ۽ قدمن جي حد مڃي ويندي آهي. جن ڪالن کي ماڻهوءَ جي منظوري گهرجي، سي باقي منظوري طور انتظار ڪن ٿيون.",
+    "wtUnavailable": "هن انسٽاليشن ۾ ٽولن سان ليب هلائڻ بند آهي. ان کي چالو ڪرڻ لاءِ ڪنهن ايڊمن کي چئو.",
+    "wtRefused": "هي رن رد ڪيو ويو: {reason}",
+    "wtActive": "هن رن ۾ ٽول حقيقت ۾ هلندا، انهن جي ضمني اثرن سميت.",
+    "wtConfirmTitle": "ايجنٽ جي ٽولن سان ليب هلايان؟",
+    "wtConfirmBody": "هر نمونو ايجنٽ جي حقيقي ٽولن کي ڪال ڪري سگهي ٿو، ۽ انهن ڪالن جو حقيقي اثر ٿي سگهي ٿو، جهڙوڪ پيغام موڪلڻ يا ڊيٽا لکڻ. منظوري واريون ڪالون ماڻهوءَ جو انتظار ڪنديون. هن کي رڳو ٽيسٽ ايجنٽن يا ٽيسٽ ڊيٽا سان استعمال ڪريو.",
+    "wtConfirm": "ٽول استعمال ڪريو"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "ايجنٽ جون حدون",
+        "description": "بند ٿيڻ کان اڳ هڪ ايجنٽ ٽرن ڪيترو ڪم ڪري سگهي ٿو."
+      },
+      "approvals": {
+        "label": "منظوري",
+        "description": "جڏهن ڪو ماڻهو ڪارروائي منظور يا رد ڪري ٿو ته ڇا ٿئي ٿو، ۽ درخواست ڪيتري دير انتظار ڪري ٿي."
+      },
+      "chat": {
+        "label": "گفتگو جو رويو",
+        "description": "جواب ڪيئن ختم ٿين ٿا، ٻيهر ڪوشش، ڪيش ۽ جاري رکڻ."
+      },
+      "routing": {
+        "label": "ماڊل روٽنگ",
+        "description": "ڪهڙو پيغام تيز ماڊل لاءِ ڪافي سادو سمجهيو وڃي ٿو."
+      },
+      "memory": {
+        "label": "ميموري",
+        "description": "ايجنٽ ڪيتريون ياداشتون رکي ٿو ۽ ياد ڪري ٿو."
+      },
+      "attachments": {
+        "label": "چيٽ اپلوڊ",
+        "description": "ماڻهو چيٽ پيغامن سان ڪيتريون وڏيون فائلون ڳنڍي سگهن ٿا."
+      },
+      "skills": {
+        "label": "اسڪلز",
+        "description": "نصب ٿيل اسڪلن جي فهرست ايجنٽ جي هدايتن جو ڪيترو حصو استعمال ڪري سگهي ٿي."
+      },
+      "aux": {
+        "label": "پس منظر ماڊل ڪال",
+        "description": "خلاصو، مدد ۽ ڪمپريشن ڪهڙو ماڊل استعمال ڪن ٿا."
+      },
+      "guardrails": {
+        "label": "حفاظتي جاچون",
+        "description": "خودڪار حفاظتي جاچون ڪيتريون سخت آهن. انهن کي رڳو پليٽ فارم سيٽنگ کان وڌيڪ سخت ڪري سگهجي ٿو."
+      },
+      "quality": {
+        "label": "جائزو",
+        "description": "ٽيسٽ رن ۽ AI جج ڪيئن رويو ڪن ٿا."
+      },
+      "delegation": {
+        "label": "ڪم سونپڻ",
+        "description": "هڪ ايجنٽ هڪ ئي وقت ٻين ايجنٽن کي ڪيترو ڪم ڏئي سگهي ٿو."
+      },
+      "knowledge": {
+        "label": "علم ڳولا",
+        "description": "بهترين حصا چونڊڻ کان اڳ توهان جي اپلوڊ ڪيل دستاويزن جي ڳولا اميدوار ڪيترو وسيع گڏ ڪري ٿي."
+      },
+      "learning": {
+        "label": "سکيا",
+        "description": "ايجنٽ جي سکيا واري پاليسي آپشنن کي ڪيئن آزمائي ٿي."
+      },
+      "providers": {
+        "label": "AI پرووائيڊر",
+        "description": "جڙيل AI پرووائيڊرن مان هڪ ڪم ڪرڻ بند ڪري ته انهن کي ڪيئن استعمال ڪيو وڃي ٿو."
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "هر ٽرن ۾ وڌ ۾ وڌ ٽول ڪال",
+          "description": "هڪ ٽرن کي بند ڪري ان کي جيڪو ان وٽ آهي ان سان جواب ڏيڻ لاءِ چوڻ کان اڳ اهو وڌ ۾ وڌ ڪيترا ٽول ڪال ڪري سگهي ٿو.",
+          "help": "ڊگهن، گهڻن قدمن وارن ڪمن واري ايجنٽ لاءِ وڌايو. ڪنٽرول کان ٻاهر لوپن کي روڪڻ ۽ خرچ کي اڳڪٿي جوڳو رکڻ لاءِ گهٽايو. ورڪ اسپيس يا پليٽ فارم لاءِ ڏيکاريل قدر هڪ بنيادي انگ آهي: ايجنٽ جو خودمختياري جو درجو رن وقت ان کي مٿي-هيٺ ڪري ٿو، تنهن ڪري وڌيڪ يا گهٽ خودمختيار ايجنٽ مختلف انگ استعمال ڪري سگهن ٿا. ايجنٽ جو پنهنجو قدر سيٽ هجي ته ان کي جيئن آهي تيئن استعمال ڪيو وڃي ٿو."
+        },
+        "turnTimeoutSeconds": {
+          "label": "هر ٽرن ۾ وڌ ۾ وڌ وقت",
+          "description": "هڪ ٽرن بند ٿيڻ کان اڳ ڪيتري دير هلي سگهي ٿو.",
+          "help": "سست تحقيق يا ڪوڊ ڪم لاءِ وڌايو. وقت ختم ٿيندڙ ٽرن هاڻوڪي ڪيل ڪم سان ختم ٿئي ٿو."
+        },
+        "toolTimeoutSeconds": {
+          "label": "هر ٽول ڪال ۾ وڌ ۾ وڌ وقت",
+          "description": "هڪ ٽول ڪال بند ٿيڻ کان اڳ ڪيتري دير هلي سگهي ٿي. پليٽ فارم ڊفالٽ ۾ ڪابه حد ناهي؛ پوءِ هر ٽول پنهنجو ٽائم آئوٽ رکي ٿو.",
+          "help": "جيڪڏهن هڪ سست ٽول سڄي گفتگو کي روڪي سگهي ٿو ته حد سيٽ ڪريو. بند ڪيل ڪال جو ڪو اثر هو يا نه اهو معلوم ناهي، تنهن ڪري ايجنٽ کي چيو وڃي ٿو ته اهو نه سمجهي ته اها ڪامياب ٿي هئي."
+        },
+        "toolOutputMaxChars": {
+          "label": "سڀ کان ڊگهو ٽول نتيجو",
+          "description": "هڪ ٽول نتيجي جا ڪيترا اکر ماڊل کي ڏنا وڃن ٿا؛ باقي ڪٽيا وڃن ٿا.",
+          "help": "جيڪڏهن ايجنٽ کي ڊگها دستاويز يا API جواب مڪمل پڙهڻا آهن ته وڌايو، هر ٽرن ۾ وڌيڪ ٽوڪنن جي قيمت تي. خرچ بچائڻ لاءِ گهٽايو."
+        },
+        "retrievalTopK": {
+          "label": "هر ڳولا ۾ علم جا ٽڪرا",
+          "description": "هڪ علم ذخيري جي ڳولا ايجنٽ کي ڪيترا ٽڪرا موٽائي ٿي.",
+          "help": "وڌيڪ ٽڪرا ايجنٽ کي ڪم ڪرڻ لاءِ وڌيڪ مواد ڏين ٿا پر وڌيڪ ٽوڪن خرچ ڪن ٿا ۽ گوڙ وڌائي سگهن ٿا. گهٽ ٽڪرا تيز ۽ سستا آهن."
+        },
+        "retrievalMinScore": {
+          "label": "هڪ ٽڪري جو گهٽ ۾ گهٽ لاڳاپو",
+          "description": "هڪ علم ٽڪري کي موٽائڻ لاءِ ڪيترو لاڳاپيل هجڻ گهرجي. 0 هر هٽ کي موٽائي ٿو.",
+          "help": "جيڪڏهن ايجنٽ غير لاڳاپيل ٽڪرن جو حوالو ڏئي ٿو ته وڌايو. تمام گهڻو وڌائڻ تي ان کي ڪجهه به نه ملي سگهي ٿو."
+        },
+        "continuationPasses": {
+          "label": "اڻپورن جوابن کان پوءِ اضافي پاس",
+          "description": "جيڪڏهن ماڊل جو جواب اعلان ڪيل پر نه ڪيل قدم تي رڪجي وڃي ته ان کي ڪيترا دفعا جاري رکڻ لاءِ چيو وڃي ٿو.",
+          "help": "ان ايجنٽ لاءِ وڌايو جيڪو اڪثر قدم جو اعلان ڪري رڪجي وڃي ٿو. هر اضافي پاس هڪ ماڊل ڪال خرچ ڪري ٿو."
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "حد کان پوءِ جواب ڏنل ڪالون",
+          "description": "ٽرن جي ٽول حد پوري ٿيڻ کان پوءِ ماڊل ٻيون ڪيتريون ٽول ڪالون ڪوشش ڪري سگهي ٿو. هر هڪ کي \"جيڪو آهي ان سان جواب ڏي\" واري نوٽ سان رد ڪيو وڃي ٿو؛ هن انگ کان پوءِ ٽرن غلطي سان روڪيو وڃي ٿو.",
+          "help": "جيڪڏهن ماڊل کي ٽول ڪالون بند ڪرڻ لاءِ ڪجهه ڪوششون گهرجن ته وڌايو. لوپ ۾ ڦاٿل ٽرن جلدي ختم ڪرڻ لاءِ گهٽايو. 0 حد کان مٿيين پهرين ڪال تي ٽرن روڪي ٿو."
+        },
+        "supervisedDivisor": {
+          "label": "نگراني هيٺ ايجنٽن کي ٽول حد جو 1/N ملي ٿو",
+          "description": "نگراني هيٺ ايجنٽ کي ٽرن جي ٽول-ڪال حد هن انگ سان ورهائي ملي ٿي، پر هيٺين گهٽ ۾ گهٽ قدر کان ڪڏهن به گهٽ نه.",
+          "help": "نگراني هيٺ ايجنٽن کي وڌيڪ سختيءَ ۾ رکڻ لاءِ وڌايو. 1 کين مڪمل حد ڏئي ٿو."
+        },
+        "supervisedMinSteps": {
+          "label": "نگراني هيٺ ايجنٽ لاءِ گهٽ ۾ گهٽ ٽول ڪالون",
+          "description": "مٿيون انگ ڪيترو به وڏو هجي، نگراني هيٺ ايجنٽ کي ملندڙ سڀ کان ننڍي ٽول-ڪال حد.",
+          "help": "هن کي 3 يا وڌيڪ رکو ته جيئن نگراني هيٺ ايجنٽ ڪيترن قدمن وارو سادو ڪم اڃا به مڪمل ڪري سگهي."
+        },
+        "autonomousMultiplier": {
+          "label": "مڪمل خودمختيار ايجنٽن کي حد جا N ڀيرا ملن ٿا",
+          "description": "مڪمل خودمختيار ايجنٽ کي ٽرن جي ٽول-ڪال حد هن انگ سان ضرب ڏئي ملي ٿي.",
+          "help": "انهن ايجنٽن لاءِ وڌايو جيڪي ڪنهن جي نگراني کانسواءِ ڊگها ڪم هلائين ٿا؛ تڏهن اهي هڪ ٽرن ۾ وڌيڪ ڪالون ۽ پئسا خرچ ڪري سگهن ٿا. 1 کين معياري حد ڏئي ٿو."
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "منظوري کان پوءِ جاري رکو",
+          "description": "جڏهن ڪو ماڻهو ڪارروائي منظور ڪري ٿو ته ايجنٽ نئين پيغام جو انتظار ڪرڻ کانسواءِ پاڻمرادو ڪم ختم ڪري ٿو.",
+          "help": "جيڪڏهن توهان چاهيو ٿا ته هر منظور ڪيل ڪارروائي ٽرن ختم ڪري ۽ فالو اپ هٿ سان ٿئي ته هن کي بند ڪريو."
+        },
+        "jobsContinueAfterDenial": {
+          "label": "رد ٿيڻ کان پوءِ به پس منظر جاب جاري رهي ٿو",
+          "description": "پس منظر جاب ۾ جڏهن ڪو ماڻهو ڪارروائي رد ڪري ٿو ته جاب بند ٿيڻ بدران رد ڪرڻ کي درج ڪري جاري رهي ٿو.",
+          "help": "جيڪڏهن رد ڪرڻ سان جاب بند ٿيڻ گهرجي ته هن کي بند رکو. جيڪڏهن جاب رد ٿيل قدم کانسواءِ عام طور ختم ٿي سگهي ٿو ته چالو ڪريو."
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "منظوري جي درخواست جو وقت ختم ٿئي ٿو",
+          "description": "هڪ منظوري جي درخواست وقت ختم ٿيڻ کان اڳ فيصلي لاءِ ڪيتري دير انتظار ڪري ٿي. 0 جو مطلب درخواست جو وقت ڪڏهن به ختم نٿو ٿئي.",
+          "help": "وقت جي حد کانسواءِ، وسريل درخواستون اڻڄاڻ وقت تائين کليل رهن ٿيون ۽ ايجنٽ انتظار ڪندو رهي ٿو. وقت ختم ٿيل درخواست کي منظور نه ٿيل سمجهيو وڃي ٿو."
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "ڪٽيل جواب مڪمل ڪريو",
+          "description": "جيڪڏهن ماڊل جي ڊيگهه جي حد جواب کي ڪٽي يا اهو خراب ٽول ڪال تي ختم ٿئي ته ماڊل کي جاري رکڻ يا ٻيهر ڪوشش ڪرڻ لاءِ چئو.",
+          "help": "هن کي رڳو ماڊل جي مسئلي جي نشاندهي ڪرڻ لاءِ بند ڪريو؛ پوءِ ماڻهو ڪٽيل جواب کي جيئن آهي تيئن ڏسن ٿا."
+        },
+        "maxContinuations": {
+          "label": "ڪٽيل جواب جو وڌ ۾ وڌ تسلسل",
+          "description": "جواب ڪٽجڻ کان پوءِ ماڊل کي ڪيترا دفعا جاري رکڻ لاءِ چيو وڃي ٿو.",
+          "help": "هر تسلسل هڪ ٻيو ماڊل ڪال آهي. ڊگهن جوابن لاءِ وڌايو، خرچ بچائڻ لاءِ گهٽايو."
+        },
+        "maxToolCallRetries": {
+          "label": "خراب ٽول ڪال جي وڌ ۾ وڌ ٻيهر ڪوشش",
+          "description": "ناقابل استعمال دليلن سان ايندڙ ٽول ڪال کي ورجائڻ لاءِ ماڊل کي ڪيترا دفعا چيو وڃي ٿو.",
+          "help": "هڪ ٻيهر ڪوشش هڪ ماڊل ڪال خرچ ڪري ٿي. 0 پهرين خراب ڪال تي ئي هار مڃي ٿو."
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "هر ماڊل ڪال جون ڪوششون",
+          "description": "جڏهن پرووائيڊر ناڪام يا مصروف هجي ته پهرين ڪوشش سميت، هڪ ماڊل ڪال ڪيترا دفعا آزمائي وڃي ٿي.",
+          "help": "وڌيڪ ڪوششون پرووائيڊر جي ننڍين رڪاوٽن کي لڪائين ٿيون پر ناڪام ٿيندڙ درخواست کي غلطي ڏيکارڻ ۾ وڌيڪ وقت لڳندو آهي."
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "ٽول وارن ايجنٽن لاءِ جواب ٻيهر استعمال ڪريو",
+          "description": "ٽول وارن ايجنٽن لاءِ محفوظ ٿيل جواب ٻيهر استعمال ڪرڻ جي اجازت ڏيو. ٽول ايندڙ دفعي ڪجهه ٻيو موٽائي سگهي ٿو، تنهن ڪري ڊفالٽ طور بند.",
+          "help": "جيڪڏهن ٽول رڳو-پڙهڻ وارا ۽ آهستي مٽجڻ وارا آهن، ۽ توهان تيز، سستا ورجايل جواب چاهيو ٿا ته ئي چالو ڪريو. ماڻهو اڻ-اپڊيٽ ٿيل جواب ڏسي سگهن ٿا."
+        },
+        "contextTurns": {
+          "label": "ورجاءَ سڃاڻڻ لاءِ اڳيان ٽرن",
+          "description": "هڪ پيغام اهڙو ورجاءَ آهي جنهن تي محفوظ جواب ٻيهر استعمال ٿي سگهي يا نه اهو طئي ڪرڻ لاءِ ڪيترن اڳين ٽرنن جو مقابلو ڪيو وڃي ٿو.",
+          "help": "وڌيڪ ٽرن ميچ کي سخت ۽ ڪيش هٽ کي ناياب ڪن ٿا."
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "فالو اپ ۾ ٽول تجويز ڪندا رهو",
+          "description": "جڏهن ايندڙ پيغام ننڍو فالو اپ هجي ته گفتگو اڳ ۾ ئي استعمال ڪيل ٽول تجويز ڪندي رهي.",
+          "help": "جيڪڏهن \"ها\" جهڙا ننڍا جواب عام ٽول چونڊ کان شروع ٿيڻ گهرجن ته هن کي بند ڪريو."
+        },
+        "stickyToolsWindow": {
+          "label": "فالو اپ ٽول ڪيتري دير تجويز ٿيل رهن ٿا",
+          "description": "استعمال کان پوءِ ننڍن فالو اپ پيغامن لاءِ هڪ ٽول ڪيتري دير تجويز ٿيل رهي ٿو.",
+          "help": "ڊگهي دريءَ ڊگهن ڪم جي سيشنن ۾ مدد ڪري ٿي، ننڍي ٽول فهرست کي ننڍو رکي ٿي."
+        },
+        "maxStickyTools": {
+          "label": "فالو اپ ۾ تجويز ٿيل وڌ ۾ وڌ ٽول",
+          "description": "ننڍي فالو اپ پيغام ۾ کڻي وڃبا وڌ ۾ وڌ ٽول. 0 ڪو به نٿو رکي.",
+          "help": "جڏهن ڪو ڪم ڪيترائي ٽول استعمال ڪري ته وڏو انگ مدد ڪري ٿو؛ ننڍو ٽول فهرست کي ننڍو رکي ٿو."
+        },
+        "keepPrimaryModel": {
+          "label": "فالو اپ لاءِ مکيه ماڊل رکو",
+          "description": "اهڙي ڳالهه ٻولهه ۾ ننڍو فالو اپ جنهن ۾ اڳ ۾ ئي ٽول استعمال ٿيا هجن، سستي ماڊل بدران ايجنٽ جي مکيه ماڊل تي ئي رهي ٿو.",
+          "help": "هن کي بند ڪريو ته جيئن خرچ روٽنگ \"ها\" جهڙا فالو اپ سستي ماڊل ڏانهن موڪلي، پر هلندڙ ڪم کي ڪمزور نموني سنڀالڻ جو خطرو آهي."
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "جواب ٻيهر استعمال ڪرڻ لاءِ سوال ڪيترو ملندڙ هجڻ گهرجي",
+          "description": "انهن ايجنٽن لاءِ جيڪي ملندڙ سوالن جا جواب ٻيهر استعمال ڪن ٿا: محفوظ ٿيل جواب ڏيڻ لاءِ نئون سوال اڳئين سوال جي ڪيترو ويجهو هجڻ گهرجي، 0.85 کان 1 تائين.",
+          "help": "گهٽ انگ وڌيڪ ورجاءَ کي جواب ڏئي ٿو پر ڪنهن ٻئي سوال لاءِ ٺهيل جواب ڏيڻ جو خطرو آهي. غلط جواب قيمتي هجن ته هن کي مٿي رکو. جواب رڳو ان شخص لاءِ ٻيهر استعمال ٿئي ٿو جنهن کي اهو ڏنو ويو هو."
+        },
+        "ttl": {
+          "label": "ٻيهر استعمال جوڳو جواب ڪيتري دير رکيو وڃي ٿو",
+          "description": "محفوظ ٿيل جواب کي ڪڍڻ کان اڳ ملندڙ سوال کي ڪيتري دير تائين ڏئي سگهجي ٿو.",
+          "help": "جيڪڏهن توهان جا جواب جلدي پراڻا ٿين ٿا ته هن کي ننڍو ڪريو."
+        },
+        "maxEntriesPerAgent": {
+          "label": "هر ايجنٽ جا وڌ ۾ وڌ محفوظ ٿيل جواب",
+          "description": "هڪ ايجنٽ ٻيهر استعمال لاءِ ڪيترا جواب رکي ٿو. هن کان وڌيڪ ٿيڻ تي سڀ کان پراڻا ڪڍيا وڃن ٿا.",
+          "help": "وڏو ذخيرو وڌيڪ ورجاءَ ڳولي ٿو ۽ وڌيڪ اسٽوريج استعمال ڪري ٿو."
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "ڳالهه ٻولهه ۾ ٽول ڪالن جو رڪارڊ رکو",
+          "description": "هر ٽرن جي ٽول ڪالن جو ننڍو رڪارڊ ڳالهه ٻولهه سان محفوظ ڪريو، ته جيئن ايندڙ ٽرن ڏسي سگهن ته ڇا ڪيو ويو.",
+          "help": "ڳالهه ٻولهه جي تاريخ کي رڳو لکت رکڻ لاءِ هن کي بند ڪريو؛ تڏهن ايجنٽ اهو نٿو ڄاڻي سگهي ته اڳئين ٽرنن ۾ سندس ٽولن ڇا ڪيو. هي سڄي ورڪ اسپيس تي لاڳو ٿئي ٿو."
+        },
+        "replayEnabled": {
+          "label": "ماڊل کي ٽول رڪارڊ ڏيکاريو",
+          "description": "ماڊل کي ڳالهه ٻولهه ڏيڻ وقت اڳين ٽول ڪالن جو محفوظ ٿيل رڪارڊ شامل ڪريو.",
+          "help": "رڪارڊ محفوظ ٿيندو رهي پر ان لاءِ ماڊل جي ڪم جي جاءِ استعمال نه ٿئي ان ڪري هن کي بند ڪريو."
+        },
+        "replayTurns": {
+          "label": "اڳيان ٽرن جن جو ٽول رڪارڊ ڏيکاريو وڃي ٿو",
+          "description": "ٽول استعمال ڪندڙ تازن ٽرنن مان ڪيترن جو رڪارڊ ماڊل کي ڏيکاريو وڃي ٿو.",
+          "help": "وڏو انگ ڊگهن ڪم جي سيشنن ۾ مدد ڪري ٿو پر ماڊل جي ڪم جي جاءِ وڌيڪ استعمال ڪري ٿو."
+        },
+        "maxEntriesPerTurn": {
+          "label": "هر ٽرن ۾ درج ٿيل ٽول ڪالون",
+          "description": "هڪ ٽرن جون ڪيتريون ٽول ڪالون رڪارڊ ۾ لکيون وڃن ٿيون. ايندڙ ڪالون رڳو ڳڻيون وڃن ٿيون.",
+          "help": "اهڙن ٽرنن لاءِ وڌايو جيڪي ڪيتريون ئي ڪالون ڪن ٿا ۽ هر هڪ ياد رکڻي آهي."
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "هر ٽرن ۾ سڀ کان ڊگهو ٽول رڪارڊ",
+          "description": "هڪ ٽرن جي رڪارڊ جا ڪيترا اکر ماڊل کي ڏيکاريا وڃن ٿا؛ باقي ڳڻيا وڃن ٿا، درج نه ڪيا وڃن ٿا.",
+          "help": "ايندڙ هر ٽرن تي خرچ بچائڻ لاءِ گهٽايو، وڌيڪ تفصيل رکڻ لاءِ وڌايو."
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "سڀ کان وڏو تصوير اپلوڊ (MB)",
+          "description": "چيٽ پيغام سان ڪو شخص سڀ کان وڏي ڪهڙي تصوير ڳنڍي سگهي ٿو، ميگابائيٽ ۾. پليٽ فارم جي هڪ ڪل فائل حد پڻ آهي جنهن کي هي پار نٿو ڪري سگهي.",
+          "help": "تصويرن ۽ اسڪرين شاٽن لاءِ وڌايو؛ وڏيون فائلون موڪلڻ ۾ سست آهن ۽ ماڊل جو وڌيڪ ڪوٽا استعمال ڪن ٿيون."
+        },
+        "maxAudioMb": {
+          "label": "سڀ کان وڏو آڊيو اپلوڊ (MB)",
+          "description": "چيٽ پيغام سان ڪو شخص سڀ کان وڏي ڪهڙي آڊيو فائل ڳنڍي سگهي ٿو، ميگابائيٽ ۾. پليٽ فارم جي هڪ ڪل فائل حد پڻ آهي جنهن کي هي پار نٿو ڪري سگهي.",
+          "help": "ڊگهن رڪارڊنگن لاءِ وڌايو؛ وڏيون فائلون موڪلڻ ۾ سست آهن ۽ ماڊل جو وڌيڪ ڪوٽا استعمال ڪن ٿيون."
+        },
+        "maxVideoMb": {
+          "label": "سڀ کان وڏو وڊيو اپلوڊ (MB)",
+          "description": "چيٽ پيغام سان ڪو شخص سڀ کان وڏي ڪهڙي وڊيو ڳنڍي سگهي ٿو، ميگابائيٽ ۾. پليٽ فارم جي هڪ ڪل فائل حد پڻ آهي جنهن کي هي پار نٿو ڪري سگهي.",
+          "help": "ڊگهن ڪلپن لاءِ وڌايو؛ وڏيون فائلون موڪلڻ ۾ سست آهن ۽ ماڊل جو وڌيڪ ڪوٽا استعمال ڪن ٿيون."
+        },
+        "maxDocumentMb": {
+          "label": "سڀ کان وڏو دستاويز اپلوڊ (MB)",
+          "description": "چيٽ پيغام سان ڪو شخص سڀ کان وڏو ڪهڙو دستاويز يا اسپريڊ شيٽ ڳنڍي سگهي ٿو، ميگابائيٽ ۾. پليٽ فارم جي هڪ ڪل فائل حد پڻ آهي جنهن کي هي پار نٿو ڪري سگهي.",
+          "help": "ڊگهن رپورٽن ۽ وڏين ڊيٽا فائلن لاءِ وڌايو؛ وڏيون فائلون پروسيس ڪرڻ ۾ سست آهن."
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "اڻپورن لفظن ۾ ياد ڏياريندڙ",
+          "description": "جيڪڏهن جواب اهو ڪم ڪرڻ کان اڳ رڪيل لڳي جيڪو ان چيو هو ته ماڊل کي جاري رکڻ لاءِ چئو.",
+          "help": "جيڪڏهن ياد ڏياريندڙ اهڙن جوابن تي سرگرم ٿئي جن کي اتي ئي ختم ٿيڻ گهرجي ها ته هن کي بند ڪريو."
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "پراڻا ٽول نتيجا صاف ڪريو",
+            "description": "ڊگهن ٽول رنن ۾، گفتگو کي ماڊل جي حدن اندر رکڻ لاءِ پراڻن ٽول نتيجن کي ننڍي پليس هولڊر سان مٽايو.",
+            "help": "جيڪڏهن ايجنٽ کي هر اڳيون نتيجو ڏسڻو آهي ته هن کي بند ڪريو؛ ڊگها رن پوءِ ماڊل جي سائيز حد تائين پهچي سگهن ٿا."
+          },
+          "thresholdChars": {
+            "label": "صاف ڪرڻ شروع ڪرڻ جو سائيز",
+            "description": "پراڻن کي صاف ڪرڻ کان اڳ هڪ ٽرن جا ٽول نتيجا ڪيترا وڏا ٿي سگهن ٿا.",
+            "help": "وڌيڪ نتيجا ڏسڻ ۾ رکڻ لاءِ وڌايو، ڊگهن رنن کي ننڍو ۽ سستو رکڻ لاءِ گهٽايو."
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "سڀ کان ڊگهو سادو پيغام",
+          "description": "هن کان ڊگهي پيغام کي ڪڏهن به سادو نه سمجهيو وڃي ٿو. سادا پيغام تيز، سستي ماڊل ڏانهن وڃي سگهن ٿا.",
+          "help": "معيار لاءِ وڌيڪ پيغام مکيه ماڊل ڏانهن موڪلڻ لاءِ گهٽايو؛ خرچ بچائڻ لاءِ وڌايو."
+        },
+        "maxClauses": {
+          "label": "هڪ سادي پيغام ۾ وڌ ۾ وڌ جملا",
+          "description": "هن کان وڌيڪ جملن وارو پيغام ڪڏهن به سادو نه سمجهيو وڃي ٿو.",
+          "help": "معيار لاءِ وڌيڪ پيغام مکيه ماڊل ڏانهن موڪلڻ لاءِ گهٽايو."
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "هر ٽرن ۾ ياد رکيل ايجنٽ جون ياداشتون",
+          "description": "هر پيغام لاءِ ايجنٽ جي پنهنجي ياداشتن مان ڪيتريون ڏٺيون وڃن ٿيون.",
+          "help": "وڌيڪ ياداشتون وڌيڪ سياق ڏين ٿيون پر وڌيڪ ٽوڪن استعمال ڪن ٿيون."
+        },
+        "tenantTopK": {
+          "label": "هر ٽرن ۾ ياد رکيل ونڊيل ياداشتون",
+          "description": "هر پيغام لاءِ ورڪ اسپيس ۾ ونڊيل ياداشتن مان ڪيتريون ڏٺيون وڃن ٿيون.",
+          "help": "وڌيڪ ياداشتون وڌيڪ سياق ڏين ٿيون پر وڌيڪ ٽوڪن استعمال ڪن ٿيون."
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "هر ايجنٽ جون وڌ ۾ وڌ ياداشتون",
+          "description": "هڪ ايجنٽ ڪيتريون ياداشتون رکي سگهي ٿو. هن کان وڌيڪ ٿيڻ تي سڀ کان پراڻيون ۽ گهٽ استعمال ٿيل ڇڏيون وڃن ٿيون.",
+          "help": "ان مددگار لاءِ وڌايو جنهن کي ماڻهن بابت گهڻو ياد رکڻو پوي ٿو؛ هي محفوظ ڪرڻ ۽ ياد ڪرڻ جو خرچ پڻ وڌائي ٿو."
+        }
+      },
+      "tenant": {
+        "maxMemories": {
+          "label": "وڌ ۾ وڌ ورهايل يادگيريون",
+          "description": "ورڪ اسپيس ۾ ورهايل ڪيتريون يادگيريون رکيون وڃن ٿيون. هن کان وڌيڪ ٿيڻ تي سڀ کان پراڻيون ڪڍيون وڃن ٿيون.",
+          "help": "ورهايل علم تي ڀروسو ڪندڙ وڏين ٽيمن لاءِ وڌايو؛ هي اسٽوريج ۽ ياد ڪرڻ جو خرچ پڻ وڌائي ٿو. هي سڄي ورڪ اسپيس تي لاڳو ٿئي ٿو."
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ڊوائيس تي چيٽ کي ڏنل يادگيريون",
+          "description": "ڊوائيس تي سيشن شروع ٿيڻ وقت ان کي ڪيتريون يادگيريون ڏنيون وڃن ٿيون.",
+          "help": "ڊوائيس تي ماڊلن جي ڪم جي جاءِ ننڍي هوندي آهي، تنهن ڪري هن کي گهٽ رکو."
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "گراف ميموري مان ياد ڪيل حقيقتون",
+          "description": "هڪ لوڪ اپ ۾ ايجنٽ کي ان جي رشتن واري ميموري مان ڏيکاريل وڌ ۾ وڌ حقيقتون.",
+          "help": "وڌيڪ حقيقتون ايجنٽ کي ڪنهن ماڻهوءَ يا موضوع بابت وڌيڪ پس منظر ڏين ٿيون پر ان جي ڪم ڪرڻ واري جاءِ جو وڌيڪ حصو استعمال ڪن ٿيون. گهٽ حقيقتون جواب کي مرڪوز رکن ٿيون. هن کي سڄي ورڪ اسپيس لاءِ، يا وڌيڪ يا گهٽ گهربندڙ ايجنٽ لاءِ سيٽ ڪريو."
+        },
+        "recallMaxPaths": {
+          "label": "هر لوڪ اپ ۾ پڙهيل گراف رستا",
+          "description": "هڪ لوڪ اپ جون حقيقتون ڳولڻ لاءِ ميموري گراف جا ڪيترا ڪنيڪشن پڙهيا وڃن ٿا.",
+          "help": "ڪيترائي ڪنيڪشن ساڳي حقيقت تائين پهچائي سگهن ٿا، تنهن ڪري ڳنڍيل ياداشتن ۾ سڀ ڪجهه ڳولڻ لاءِ وڏو انگ گهربل ٿي سگهي ٿو. وڌيڪ انگ هر لوڪ اپ کي سست ڪن ٿا."
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "پرامپٽ ۾ درج وڌ ۾ وڌ اسڪلز",
+          "description": "ايجنٽ کي خبر پوي ته اهي آهن، تنهن ڪري ان جي هدايتن ۾ توهان جي ڪيترين اسڪلن جا نالا ڏنا وڃن ٿا. باقي ڳڻيون وڃن ٿيون، درج نه ڪيون وڃن ٿيون.",
+          "help": "جيڪڏهن توهان وٽ گهڻيون اسڪلز آهن ته وڌايو؛ درج ٿيل هر اسڪل هر ٽرن ۾ ماڊل جي ڪم جي جاءِ جو ٿورو حصو استعمال ڪري ٿي. هي سڄي ورڪ اسپيس تي لاڳو ٿئي ٿو."
+        },
+        "maxBlockChars": {
+          "label": "پرامپٽ ۾ اسڪل فهرست جو سائيز",
+          "description": "ايجنٽ جي هدايتن ۾ اسڪلن جي فهرست ڪيترا اکر وٺي سگهي ٿي. ڀرجي وڃڻ تي ايندڙ اسڪلز رڳو نالن تائين ننڍيون ڪيون وڃن ٿيون.",
+          "help": "وڌيڪ اسڪلن جا بيان رکڻ لاءِ وڌايو، هر ٽرن ۾ ٽوڪن بچائڻ لاءِ گهٽايو. هي سڄي ورڪ اسپيس تي لاڳو ٿئي ٿو."
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "پس منظر ڪال ايجنٽ جو ماڊل استعمال ڪن ٿا",
+        "description": "جڏهن انهن لاءِ ڪو ماڊل چونڊيل نه هجي ته، خلاصو، مدد ۽ سياق ڪمپريشن ان ايجنٽ جو ئي ماڊل استعمال ڪن ٿا جنهن لاءِ اهي ڪم ڪن ٿا.",
+        "help": "انهن ڪالن لاءِ پليٽ فارم ماڊل چونڊي ان ڪري هن کي بند ڪريو، جيڪو سستو يا ڪنهن ٻئي پرووائيڊر جو ٿي سگهي ٿو."
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "حفاظتي جاچ ناڪام ٿيڻ تي",
+        "description": "جڏهن حفاظتي جاچ پاڻ ناڪام ٿئي ٿي ته ڇا ٿئي ٿو، مثال طور جج ماڊل بند هجي ته. بند ڪارروائي کي رد ڪري ٿو؛ کليل ان کي گذرڻ ڏئي ٿو.",
+        "help": "توهان هن کي رڳو پليٽ فارم سيٽنگ کان وڌيڪ سخت ڪري سگهو ٿا. بند ڪنهن جي ارادي سان جاچ کي ناڪام ڪرڻ جي خلاف حفاظت ڏئي ٿو، بحران دوران ڪم رد ڪرڻ جي قيمت تي.",
+        "options": {
+          "open": "کليل: ڪارروائي کي گذرڻ ڏيو",
+          "closed": "بند: ڪارروائي رد ڪريو"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "ٽول-ڪال جاچ ناڪام ٿيڻ تي",
+          "description": "خطرناڪ ٽول ڪالن جي نظرثاني ڪندڙ جاچ فيصلو نه ڪري سگهي ته ڇا ڪري ٿي. ورثو مٿين حفاظتي جاچ واري سيٽنگ کي مڃي ٿو.",
+          "help": "توهان هن کي رڳو پليٽ فارم سيٽنگ کان وڌيڪ سخت ڪري سگهو ٿا. جاچ ناڪام ٿيڻ تي بند ٽول ڪال کي رد ڪري ٿو.",
+          "options": {
+            "open": "کليل: ٽول ڪال کي گذرڻ ڏيو",
+            "inherit": "حفاظتي-جاچ سيٽنگ کي مڃيو",
+            "closed": "بند: ٽول ڪال رد ڪريو"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "روڪڻ جوڳو زهر جو نمبر",
+          "description": "جج جي 0 کان 100 زهر جي ماپ تي هي يا ان کان وڌيڪ نمبر وارو مواد روڪيو وڃي ٿو. گهٽ انگ وڌيڪ روڪي ٿو.",
+          "help": "توهان هن کي رڳو گهٽائي سگهو ٿا، پليٽ فارم جي قدر کان مٿي ڪڏهن به نه وڌائي سگهو. تمام گهٽ قدر عام صاف لفظن کي به روڪي ٿو."
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "جيل بريڪ ڪوششن لاءِ اسڪين ڪيل لکت",
+          "description": "جيل بريڪ نمونن لاءِ هڪ پيغام يا جواب جو ڪيترو حصو اسڪين ڪيو وڃي ٿو. هن کان وڌيڪ لکت اسڪين نٿي ڪئي وڃي.",
+          "help": "توهان هن کي رڳو پليٽ فارم جي قدر کان مٿي وڌائي سگهو ٿا. وسيع دري پيڊنگ کان پوءِ لڪيل حملن کي روڪي ٿي، ٿورڙي وڌيڪ پروسيسنگ جي قيمت تي."
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "حفاظتي جج کي ڏيکاريل لکت",
+          "description": "جاچيل لکت جو ڪيترو حصو AI حفاظتي جج پڙهي ٿو. هن کان وڌيڪ لکت جو فيصلو نٿو ڪيو وڃي.",
+          "help": "توهان هن کي رڳو پليٽ فارم جي قدر کان مٿي وڌائي سگهو ٿا. وڌائڻ سان ڊگهن ٽول نتيجن جو مڪمل فيصلو ٿئي ٿو پر هر جج ڪال وڏي ٿي وڃي ٿي."
+        }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "نگراني هيٺ ايجنٽ ۽ رڳو-پڙهندڙ ٽول",
+          "description": "ڇا نگراني واري خودمختياري جي درجي وارو ايجنٽ ڳولا يا لوڪ اپ جهڙي رڳو پڙهندڙ ٽول کان اڳ به توهان کان پڇي ٿو. لکڻ، موڪلڻ ۽ جن ٽولن کي پليٽ فارم درجه بندي نه ڪئي آهي اهي هميشه پڇن ٿا.",
+          "help": "توهان هن کي رڳو پليٽ فارم سيٽنگ کان وڌيڪ سخت ڪري سگهو ٿا. هر ڀيري پڇڻ سڀ کان محفوظ چونڊ آهي؛ رڳو-پڙهندڙ ٽولن کي هلڻ ڏيڻ سان هڪ سوال گهٽجي ٿو، پر غير متوقع ڳولا کي روڪڻ جو هڪ موقعو به وڃي ٿو. جيڪو ايجنٽ خانگي ڊيٽا پڙهي سگهي ٿو، غير ڀروسي جوڳو مواد وٺي سگهي ٿو ۽ ڊيٽا ٻاهر موڪلي سگهي ٿو، ان کان هر ڪال تي پڇيو وڃي ٿو، هيءَ سيٽنگ جيڪو به چوي.",
+          "options": {
+            "auto-allow": "رڳو-پڙهندڙ ٽولن کي پڇڻ کانسواءِ هلڻ ڏيو",
+            "gate": "هر ٽول ڪال کان اڳ پڇو"
+          }
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI جج لاءِ ماڊل",
+          "description": "مولانڪن رنن جو فيصلو ڪرڻ لاءِ استعمال ٿيندڙ ماڊل. توهان جي ورڪ اسپيس اڳ ۾ ئي استعمال ڪيل ماڊلن مان پليٽ فارم چونڊي ان ڪري خالي ڇڏيو.",
+          "help": "وڌيڪ ڀروسي جوڳن گريڊن لاءِ وڌيڪ طاقتور ماڊل يا خرچ بچائڻ لاءِ سستو ماڊل استعمال ڪريو. ماڊل توهان جي جڙيل پرووائيڊر ۾ موجود هجڻ گهرجي."
+        },
+        "callTimeoutSeconds": {
+          "label": "هر جج ڪال ۾ وڌ ۾ وڌ وقت",
+          "description": "هڪ جج ڪال کي ناڪام ڳڻڻ کان اڳ ڪيترو وقت لڳي سگهي ٿو.",
+          "help": "جيڪڏهن سست ماڊل اڪثر ٽائم آئوٽ ٿئي ٿو ته وڌايو؛ ناڪام ڪالون مولانڪن جي نتيجي کي اڻپورو ڪن ٿيون."
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "هر ٽيسٽ ڪيس جا ورجاءَ",
+          "description": "جيڪڏهن رن نقل نه ڪيو ويو هجي ته هر ٽيسٽ ڪيس ڪيترا دفعا هلايو وڃي ٿو. وڌيڪ ورجاءَ ڏيکارين ٿا ته ايجنٽ ڪيترو هڪجهڙو آهي.",
+          "help": "هر ورجاءَ هڪ رن جي خرچ ۽ وقت کي ضرب ڏئي ٿو."
+        },
+        "defaultMode": {
+          "label": "جاچون ڪيئن هلن ٿيون",
+          "description": "جڏهن رن يا ان جو ڊيٽاسيٽ نه ٻڌائي ته جاچ واري رن ايجنٽ کي ان جي ٽولن سان گڏ محفوظ سينڊ باڪس ۾ ريپلي ڪري ٿو (مڪمل پائپ لائن) يا رڳو لکت ۾ جواب ڏئي ٿو (تڪڙو).",
+          "help": "مڪمل پائپ لائن اهو پرکي ٿي جيڪو توهان جي استعمال ڪندڙن کي ملي ٿو، ٽول جي استعمال سميت، ۽ خرچ وڌيڪ آهي. ان ۾ رڳو پڙهندڙ ٽول حقيقت ۾ هلن ٿا؛ جيڪو ڪجهه ڊيٽا مٽائي سگهي، پيغام موڪلي سگهي يا پئسا خرچ ڪري سگهي ان کي نقل ڪيو وڃي ٿو ۽ رن ۾ درج ڪيو وڃي ٿو. تڪڙو سستو آهي ۽ ٽولن جي استعمال بابت ڪجهه نٿو ٻڌائي.",
+          "options": {
+            "full": "سينڊ باڪس ۾ مڪمل پائپ لائن",
+            "quick": "تڪڙو: رڳو لکت جا جواب"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "وڌ ۾ وڌ متوازي ذيلي ڪم",
+        "description": "هڪ ڪم سونپڻ هڪ ئي وقت ڪيترا ذيلي ڪم يا مددگار ايجنٽ شروع ڪري سگهي ٿو. اضافي کي حد کان وڌيل ڪري ٻڌايو وڃي ٿو.",
+        "help": "وسيع تحقيق جي ڪم لاءِ وڌايو، خرچ ۽ بار گهٽ رکڻ لاءِ گهٽايو."
+      },
+      "branchTimeoutSeconds": {
+        "label": "هر ذيلي ڪم ۾ وڌ ۾ وڌ وقت",
+        "description": "سونپيل ذيلي ڪم ٽائم آئوٽ ٻڌائڻ کان اڳ ڪيتري دير هلي سگهي ٿو.",
+        "help": "سست ذيلي ڪمن لاءِ وڌايو. رڪيل ذيلي ڪم هن وقت کان وڌيڪ مڪمل جواب کي ڪڏهن به روڪي نٿو رکي."
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "هر نتيجي لاءِ ڳولا جو پکيڙ",
+          "description": "علم ڳولا آخر ۾ موٽايل هر ٽڪري لاءِ ڪيترا اميدوار ٽڪرا گڏ ڪري ٿي.",
+          "help": "وڌيڪ انگ رئنڪنگ کي چونڊڻ لاءِ وڌيڪ ڏئي ٿو، جيڪو گهڻا دستاويز هڪجهڙا هجڻ تي مدد ڪري ٿو، پر هر ڳولا ۾ وڌيڪ وقت ۽ ڪمپيوٽ لڳن ٿا. جيڪڏهن ڳولا سست لڳي ته گهٽايو. هي ايجنٽ جي ڏسندڙ ٽڪرن جو تعداد نٿو مٽائي."
+        },
+        "candidatePoolMax": {
+          "label": "هر ڳولا ۾ وڌ ۾ وڌ اميدوار",
+          "description": "ڪيترا نتيجا گهرايا ويا آهن اهو جيڪو به هجي، هڪ علم ڳولا جي گڏ ڪيل اميدوار ٽڪرن جي مٿين حد.",
+          "help": "جيڪڏهن ايجنٽ هڪ ئي وقت گهڻا نتيجا گهري ٿو ته هي رفتار ۽ خرچ جي حفاظت ڪري ٿو. وڏن علم ذخيرن ۾ جڏهن جواب لاڳاپيل ٽڪرا ڇڏي ڏئي تڏهن ئي وڌايو."
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "گهٽ آزمايل آپشن ڪوشش ڪرڻ جي خواهش",
+          "description": "اعتماد-حد طريقو استعمال ڪندڙ سکيا پاليسي پاڻ گهٽ دفعا آزمايل آپشنن کي ڪيتري ترجيح ڏئي ٿي.",
+          "help": "صفر هميشه هن وقت تائين جو بهترين اوسط وارو آپشن چونڊي ٿو. وڌيڪ قدر ٻين آپشنن کي مستحڪم ٿيڻ کان اڳ وڌيڪ وقت آزمائيندا رهن ٿا. ڊفالٽ درسي ڪتابي توازن آهي. رڳو هي طريقو استعمال ڪندڙ پاليسيون متاثر ٿين ٿيون."
+        },
+        "defaultExplorationRate": {
+          "label": "نين پاليسين لاءِ شروعاتي ڳولا جو تناسب",
+          "description": "نئين ٺاهيل سکيا پاليسي بي ترتيب آپشن آزمائڻ ۾ ٽرنن جو ڪيترو حصو خرچ ڪري ٿي.",
+          "help": "هي رڳو هاڻي کان ٺهندڙ پاليسين جو شروعاتي نقطو سيٽ ڪري ٿو. موجود پاليسيون پنهنجو تناسب رکن ٿيون، جيڪو توهان پاليسي سنڀالڻ واري جاءِ تي هر ايجنٽ لاءِ مٽايو ٿا. صفر جو مطلب آهي نيون پاليسيون شروع ۾ ڳولا نٿيون ڪن."
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "پرووائيڊر ڪنجي رد ڪرڻ کان پوءِ وقفو",
+          "description": "پرووائيڊر جڙيل ڪنجي رد ڪرڻ کان پوءِ پس منظر جو ڪم ان کي ڪيتري دير ڇڏي ڏئي ٿو.",
+          "help": "وقفي دوران، شيڊول ٿيل ۽ خودڪار جاب بار بار ناڪام ٿيندڙ ڪنجي کي ڪال ڪرڻ بدران ٻيو جڙيل پرووائيڊر استعمال ڪن ٿا، يا انتظار ڪن ٿا. چيٽ ڪندڙ ماڻهو ڪڏهن به بلاڪ نٿا ٿين ۽ هميشه پرووائيڊر جي حقيقي غلطي ڏسن ٿا. وقفو ختم ٿيڻ تي، ڪنجي درست ٿي يا نه اهو جاچڻ لاءِ هڪ ڪال وڃڻ ڏني وڃي ٿي. صفر وقفي کي بند ڪري ٿو."
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "انتظام",
+    "title": "رن ٽائم سيٽنگون",
+    "subtitle": "هن ورڪ اسپيس جو هر ايجنٽ ڪيئن رويو ڪري ٿو اهو ترتيب ڏيو: حدون، منظوري، معيار جاچون، گارڊ ريل، ميموري ۽ ماڊل. جتي اجازت آهي اتي ايجنٽ جو مالڪ اڃا به هڪ ايجنٽ لاءِ سيٽنگ کي اوور رائيڊ ڪري سگهي ٿو.",
+    "docsLink": "مدد ۽ دستاويز",
+    "tabs": {
+      "label": "رن ٽائم سيٽنگن جو ڏيک",
+      "settings": "سيٽنگون",
+      "history": "تبديلين جي تاريخ"
+    },
+    "readOnly": {
+      "title": "رڳو ڏسڻ لاءِ",
+      "body": "رڳو ورڪ اسپيس ايڊمن ئي هي سيٽنگون مٽائي سگهن ٿا. توهان هر سيٽنگ جو لاڳو قدر ۽ اهو ڪٿان اچي ٿو ڏسي سگهو ٿا."
+    },
+    "summary": "هن ورڪ اسپيس ۾ {total} سيٽنگن مان {changed} مٽايون ويون آهن. باقي پليٽ فارم جو قدر استعمال ڪن ٿيون.",
+    "export": {
+      "button": "اوور رائيڊ برآمد ڪريو",
+      "done": "{count} ورڪ اسپيس اوور رائيڊ هڪ فائل ۾ برآمد ٿيا.",
+      "none": "برآمد ڪرڻ لاءِ ڪجهه ناهي: هن ورڪ اسپيس ڪا به سيٽنگ نه مٽائي آهي."
+    },
+    "filters": {
+      "changedOnly": "رڳو هن ورڪ اسپيس ۾ مٽايل"
+    },
+    "jump": {
+      "label": "هڪ گروپ ڏانهن وڃو"
+    },
+    "anchor": {
+      "unknown": "هن ورڪ اسپيس ۾ \"{key}\" نالي ڪا سيٽنگ ناهي. ان جو نالو مٽجي ويو آهي يا اها ورڪ اسپيس درجي تي موجود ناهي."
+    },
+    "empty": {
+      "noneChanged": "هن ورڪ اسپيس ۾ اڃا تائين ڪا سيٽنگ نه مٽائي وئي آهي. سڀ پليٽ فارم جو قدر استعمال ڪن ٿيون."
+    },
+    "risk": {
+      "high": "وڌيڪ خطرو",
+      "security": "حفاظتي سيٽنگون"
+    },
+    "security": {
+      "title": "حفاظتي سيٽنگون",
+      "body": "هي سيٽنگون توهان جي ورڪ اسپيس جي حفاظت ڪن ٿيون. انهن کي رڳو پليٽ فارم جي قدر کان وڌيڪ سخت ڪري سگهجي ٿو، ڪڏهن به ڪمزور نه. هر تبديلي لاءِ سبب گهربل آهي ۽ اهو آڊٽ لاگ ۾ رڪارڊ ٿئي ٿو."
+    },
+    "resetGroup": {
+      "count": "هن گروپ ۾ {count} مٽايل آهن",
+      "button": "{group} کي ورثي ۾ مليل قدر ڏانهن ري سيٽ ڪريو",
+      "confirmTitle": "{group} کي ورثي ۾ مليل قدر ڏانهن ري سيٽ ڪريان؟",
+      "confirmBody": "هي هن گروپ جا {count} ورڪ اسپيس اوور رائيڊ هٽائي ٿو. پنهنجو اوور رائيڊ نه رکندڙ هر ايجنٽ لاءِ سيٽنگون فوري طور پليٽ فارم جي قدر ڏانهن موٽي وڃن ٿيون. هر ري سيٽ آڊٽ لاگ ۾ رڪارڊ ٿئي ٿو.",
+      "confirm": "ورثي ۾ مليل قدر ڏانهن ري سيٽ ڪريو",
+      "cancel": "رد ڪريو",
+      "done": "{count} سيٽنگن کي سندن ورثي ۾ مليل قدر ڏانهن ري سيٽ ڪريو.",
+      "partial": "{done} سيٽنگون ري سيٽ ٿيون؛ {failed} ري سيٽ نه ٿي سگهيون. ناڪام سيٽنگن جا پيغام ڏسو.",
+      "cancelled": "{done} سيٽنگون ري سيٽ ٿيون. جن {skipped} کي سبب گهربل هو اهي جيئن هيون تيئن ئي ڇڏيون ويون."
+    },
+    "import": {
+      "button": "اوور رائيڊ درآمد ڪريو",
+      "title": "ورڪ اسپيس اوور رائيڊ درآمد ڪريو",
+      "intro": "هن صفحي مان برآمد ڪيل هڪ فائل چونڊيو، يا ان جو مواد پيسٽ ڪريو. ڪجهه به محفوظ ڪرڻ کان اڳ توهان ٺيڪ ڏسندا ته ڇا مٽجندو.",
+      "reviewIntro": "هي فائل ڇا مٽائيندي ان جي نظرثاني ڪريو. اڃا تائين ڪجهه به محفوظ نه ڪيو ويو آهي.",
+      "fileLabel": "اوور رائيڊ فائل (JSON)",
+      "pasteLabel": "يا فائل جو مواد پيسٽ ڪريو",
+      "fileError": {
+        "empty": "پهرين هڪ فائل چونڊيو يا ان جو مواد پيسٽ ڪريو.",
+        "invalidJson": "هي صحيح JSON ناهي. چيڪ ڪريو ته مڪمل فائل ڪاپي ٿي آهي يا نه.",
+        "wrongFormat": "هي هن صفحي مان برآمد ڪيل سيٽنگ اوور رائيڊ فائل ناهي.",
+        "unsupportedVersion": "هي فائل برآمد جي مختلف نسخي ٺاهي هئي ۽ پڙهي نٿي سگهجي.",
+        "noOverrides": "فائل ۾ اوور رائيڊ سيڪشن ناهي.",
+        "unreadable": "فائل پڙهي نه سگهي."
+      },
+      "summary": "{changes} مٽائڻا آهن، {unchanged} اڳ ۾ ئي لاڳو آهن، {problems} لاڳو نٿا ٿي سگهن.",
+      "changesHeading": "تبديليون ({count})",
+      "before": "هاڻي:",
+      "after": "درآمد کان پوءِ:",
+      "resetMissing": "فائل ۾ نه هجڻ وارا ورڪ اسپيس اوور رائيڊ پڻ هٽايو",
+      "resetMissingHelp": "هتي مٽايل پر فائل ۾ نه هجڻ وارين سيٽنگن کي پليٽ فارم جي قدر ڏانهن موٽايو وڃي ٿو. رڳو شامل ڪرڻ يا اپڊيٽ ڪرڻ لاءِ هن کي بند رکو.",
+      "resetsHeading": "هٽائڻ جوڳا اوور رائيڊ ({count})",
+      "resetFrom": "هاڻي {value}؛ ورثي ۾ مليل قدر ڏانهن موٽي ٿو.",
+      "problemsHeading": "لاڳو نٿا ٿي سگهن ({count})",
+      "problem": {
+        "unknownKey": "هن ڪنجي واري ڪا سيٽنگ ناهي.",
+        "notWorkspaceSetting": "هي سيٽنگ سڄي ورڪ اسپيس لاءِ مٽائي نٿي سگهجي.",
+        "locked": "پليٽ فارم آپريٽر هي سيٽنگ پن ڪئي آهي، تنهن ڪري ان کي مٽائي نٿو سگهجي.",
+        "wrongType": "هن سيٽنگ لاءِ قدر جو قسم غلط آهي.",
+        "required": "هڪ قدر گهربل آهي.",
+        "notNumber": "قدر هڪ انگ هجڻ گهرجي.",
+        "notInteger": "قدر هڪ پورو انگ هجڻ گهرجي.",
+        "belowMin": "قدر تمام گهٽ آهي. گهٽ ۾ گهٽ {min}.",
+        "aboveMax": "قدر تمام وڌيڪ آهي. وڌ ۾ وڌ {max}.",
+        "notAllowed": "هي اجازت ڏنل آپشنن ۾ ناهي.",
+        "tooShort": "لکت تمام ننڍي آهي. گهٽ ۾ گهٽ ڊيگهه {min}.",
+        "tooLong": "لکت تمام ڊگهي آهي. وڌ ۾ وڌ ڊيگهه {max}.",
+        "precision": "قدر هن سيٽنگ جي اجازت کان وڌيڪ صحيح آهي."
+      },
+      "nothing": "هن فائل جو ڪجهه به ڪا سيٽنگ نٿو مٽائي.",
+      "reasonNote": "انهن سيٽنگن مان ڪجهه وڌيڪ خطرناڪ آهن. لاڳو ڪرڻ کان پوءِ توهان کان سبب پڇيو ويندو جيڪو آڊٽ لاگ ۾ رڪارڊ ٿئي ٿو.",
+      "back": "موٽو",
+      "cancel": "رد ڪريو",
+      "review": "تبديلين جي نظرثاني ڪريو",
+      "apply": "{count} تبديليون لاڳو ڪريو",
+      "cancelled": "درآمد رد ٿي. ڪا به سيٽنگ نه مٽي.",
+      "done": "درآمد مڪمل: {applied} سيٽنگون اپڊيٽ ٿيون.",
+      "donePartial": "درآمد جزوي مڪمل: {applied} سيٽنگون اپڊيٽ ٿيون، {failed} لاڳو نه ٿي سگهيون. نظرثاني ڏيکاري ٿي ته اڃا ڇا باقي آهي."
+    },
+    "history": {
+      "adminOnly": "ورڪ اسپيس سيٽنگن جي تبديلين جي تاريخ رڳو ورڪ اسپيس ايڊمن ڏسي سگهن ٿا.",
+      "loading": "تبديلين جي تاريخ لوڊ ٿي رهي آهي",
+      "partial": "{count} سيٽنگن جي تاريخ لوڊ نه ٿي سگهي، تنهن ڪري هي فهرست اڻپوري ٿي سگهي ٿي.",
+      "retry": "ٻيهر ڪوشش ڪريو",
+      "search": "تبديلين جي تاريخ ڳوليو",
+      "searchPlaceholder": "سيٽنگ، ماڻهو يا سبب سان ڳوليو",
+      "empty": "هن ورڪ اسپيس ۾ اڃا تائين ڪا سيٽنگ نه مٽائي وئي آهي.",
+      "noMatch": "ڪا تبديلي توهان جي ڳولا سان نٿي ملي.",
+      "count": "{total} تبديلين مان {shown} ڏيکاري رهيو آهي، نئين کان پهريان.",
+      "tableLabel": "ورڪ اسپيس سيٽنگن جي تبديلين جي تاريخ",
+      "when": "ڪڏهن",
+      "setting": "سيٽنگ",
+      "change": "مٽايو",
+      "by": "مٽائيندڙ",
+      "reason": "سبب",
+      "before": "اڳ:",
+      "after": "پوءِ:",
+      "inherited": "ورثي ۾ مليل قدر",
+      "unknownActor": "اڻڄاتل",
+      "noReason": "ڪو سبب نه ڏنو ويو",
+      "showMore": "وڌيڪ ڏيکاريو",
+      "scope": "درجو",
+      "scopeWorkspace": "ورڪ اسپيس",
+      "scopeAgent": "ايجنٽ {id}",
+      "scopeFilter": "تبديليون هن درجي تي ڏيکاريو",
+      "filterAll": "سڀ درجا",
+      "filterWorkspace": "رڳو ورڪ اسپيس",
+      "filterAgents": "رڳو ايجنٽ",
+      "searchLoadedOnly": "ڳولا هن وقت تائين لوڊ ٿيل تبديلين کي ڍڪي ٿي.",
+      "loadError": "تبديلين جي تاريخ لوڊ نه ٿي سگهي. {message}",
+      "moreFailed": "وڌيڪ تبديليون لوڊ نه ٿي سگهيون. {message}",
+      "loadingMore": "لوڊ ٿي رهيو آهي"
+    }
+  },
+  "agentBehavior": {
+    "title": "رويو ۽ حدون",
+    "intro": "ڪنٽرول ڪريو ته هي ايجنٽ هڪ ٽرن ۾ ڪيترو اڳتي وڃي سگهي ٿو: ڪيترا ٽول ڪال ڪري سگهي ٿو، ڪيتري دير هلي سگهي ٿو ۽ ڪيترو پوئتي پڙهي ٿو. جيڪو توهان هتي نٿا مٽايو سو توهان جي ورڪ اسپيس مان ورثي ۾ اچي ٿو.",
+    "saveFirst": "پهرين ايجنٽ کي محفوظ ڪريو. ان جي ٺهڻ کان پوءِ ان جو رويو ۽ حدون سيٽ ٿي سگهن ٿيون.",
+    "pickAgent": "ان جو رويو ۽ حدون ٽئب کولڻ لاءِ هيٺ هڪ ايجنٽ چونڊيو.",
+    "tabs": {
+      "label": "ايجنٽ ترتيب",
+      "setup": "سيٽ اپ",
+      "behavior": "رويو ۽ حدون",
+      "unsaved": "غير محفوظ تبديليون"
+    },
+    "links": {
+      "label": "لاڳاپيل صفحا",
+      "tenant": "ورڪ اسپيس ڊفالٽ مٽايو",
+      "playground": "پلي گراؤنڊ ۾ آزمايو",
+      "prompts": "هن ايجنٽ جا پرامپٽ",
+      "promptsAria": "{name} جا پرامپٽ: پرامپٽ رجسٽري هن ايجنٽ تي کوليو",
+      "approvals": "هن ايجنٽ جون منظوريون",
+      "approvalsAria": "{name} جون منظوريون: هن ايجنٽ لاءِ ڇاڻيل منظوري قطار کوليو",
+      "turns": "ٽرن ٽائم لائن",
+      "turnsAria": "{name} جي ٽرن ٽائم لائن: هن ايجنٽ لاءِ ٽرن معائنو ڪندڙ کوليو"
+    },
+    "readOnly": {
+      "locked": "هي ايجنٽ ايڊٽنگ لاءِ بند آهي، تنهن ڪري هي قدر رڳو پڙهڻ لاءِ آهن.",
+      "access": "توهان هي قدر ڏسي سگهو ٿا پر هن ايجنٽ تائين توهان جي رسائي انهن کي مٽائڻ نٿي ڏئي."
+    },
+    "unsaved": "هن ٽئب ۾ توهان جون غير محفوظ تبديليون آهن. وڃڻ کان اڳ هيٺ انهن کي محفوظ يا رد ڪريو.",
+    "inheritNote": "هر سيٽنگ ڏيکاري ٿي ته ان جو قدر ڪٿان اچي ٿو. هتي هڪ کي مٽائڻ رڳو هن ايجنٽ لاءِ اوور رائيڊ آهي؛ ورڪ اسپيس جو قدر ٻيهر ورثي ۾ وٺڻ لاءِ ري سيٽ ڪريو.",
+    "others": {
+      "title": "هن ايجنٽ جا ٻيا ڪنٽرول",
+      "intro": "هي ڪنٽرول مٿين سيٽنگن جو حصو ناهن، تنهن ڪري اهي سيٽ اپ ٽئب ۾ آهن.",
+      "generation": "جوابن جي تخليقيت ۽ ڊيگهه (گرمي پد، top-p، وڌ ۾ وڌ ٽوڪن) ۽ اضافي نمونو چونڊ جا آپشن.",
+      "generationLink": "جنريشن ٽيوننگ ڏانهن وڃو",
+      "autonomy": "خودمختياري جو درجو، هر رن جي خرچ جي حد، ٽول ضابطا ۽ ماڻهوءَ کي ڪڏهن منظوري ڏيڻ گهرجي.",
+      "autonomyLink": "دليل ۽ خودمختياري ڏانهن وڃو"
+    },
+    "discard": {
+      "title": "محفوظ ڪرڻ کانسواءِ ڇڏيو؟",
+      "description": "هن ايجنٽ جي رويي ۽ حدن ۾ توهان جون غير محفوظ تبديليون آهن. هاڻي ڇڏڻ تي اهي ضايع ٿي وينديون.",
+      "stay": "هتي ئي رهو ۽ ايڊٽنگ جاري رکو",
+      "leave": "ڇڏيو ۽ تبديليون رد ڪريو"
+    },
+    "summary": {
+      "title": "هي ايجنٽ هاڻي ڪيئن رويو ڪري ٿو",
+      "subtitle": "ايجنٽ جي پنهنجن اوور رائيڊن، توهان جي ورڪ اسپيس سيٽنگن ۽ پليٽ فارم سيٽنگن لاڳو ٿيڻ کان پوءِ هن ايجنٽ لاءِ لاڳو قدر.",
+      "loading": "موجوده رويو لوڊ ٿي رهيو آهي",
+      "error": "موجوده رويو لوڊ نه ٿي سگهيو. {message}",
+      "retry": "ٻيهر ڪوشش ڪريو",
+      "empty": "هن ايجنٽ لاءِ اڃا تائين ڪي رويي جون سيٽنگون موجود ناهن.",
+      "facts": {
+        "steps": "هر ٽرن ۾ ٽول ڪال",
+        "turnTimeout": "هر ٽرن جو وقت",
+        "toolTimeout": "هر ٽول ڪال جو وقت",
+        "outputCap": "رکيل ٽول آئوٽ پٽ",
+        "continuation": "تسلسل پاس",
+        "approvals": "منظوري",
+        "judge": "معيار جج ماڊل",
+        "model": "ماڊل"
+      },
+      "tier": {
+        "SUPERVISED": "نگراني ۾: هر ٽول ڪال ماڻهوءَ جو انتظار ڪري ٿو",
+        "SEMI_AUTONOMOUS": "نيم خودمختيار: توهان جو ورڪ اسپيس ضابطو طئي ڪري ٿو",
+        "FULLY_AUTONOMOUS": "مڪمل خودمختيار: ٽول ڪال ڪڏهن به انتظار نٿا ڪن"
+      },
+      "approvalResumes": "منظوري کان پوءِ پاڻمرادو جاري رکي ٿو",
+      "approvalStops": "منظوري کان پوءِ نئين پيغام جو انتظار ڪري ٿو",
+      "judgeDefault": "پليٽ فارم طرفان چونڊيل",
+      "overrides": {
+        "none": "هي ايجنٽ هر شيءِ لاءِ توهان جي ورڪ اسپيس جو قدر استعمال ڪري ٿو.",
+        "some": "هن ايجنٽ لاءِ اوور رائيڊ ڪيل سيٽنگون: {count}."
+      }
+    },
+    "impact": {
+      "title": "ان جو مطلب ڇا آهي",
+      "steps": "هي ايجنٽ هڪ ٽرن ۾ وڌ ۾ وڌ {count} ٽول ڪال ڪري سگهي ٿو. ان کان پوءِ ان کي جيڪو ان وٽ آهي ان سان جواب ڏيڻ لاءِ چيو وڃي ٿو.",
+      "stepsTierSupervised": "هي ايجنٽ نگراني ۾ آهي، تنهن ڪري ان جي حقيقي مٿين حد ان بنيادي انگ کان گهٽ آهي. صحيح انگ استعمال ڪرڻ لاءِ هن ايجنٽ لاءِ پنهنجو قدر سيٽ ڪريو.",
+      "stepsTierFull": "هي ايجنٽ مڪمل خودمختيار آهي، تنهن ڪري ان جي حقيقي مٿين حد ان بنيادي انگ کان وڌيڪ آهي. صحيح انگ استعمال ڪرڻ لاءِ هن ايجنٽ لاءِ پنهنجو قدر سيٽ ڪريو.",
+      "turnTimeout": "هڪ ٽرن {duration} کان پوءِ ڪٽيو وڃي ٿو.",
+      "turnTimeoutNone": "ٽرن جي ڪا وقت جي حد ناهي.",
+      "toolTimeout": "هڪ ٽول ڪال {duration} کان پوءِ ڪٽي وڃي ٿي.",
+      "toolTimeoutNone": "ٽول ڪال جي ڪا وقت جي حد ناهي.",
+      "outputCap": "{chars} کان ڊگها ٽول نتيجا ايجنٽ جي پڙهڻ کان اڳ ننڍا ڪيا وڃن ٿا.",
+      "continuation": "جيڪڏهن جواب ڪٽجي ٿو ته ايجنٽ ان کي وڌ ۾ وڌ وڌيڪ {count} دفعا جاري رکي سگهي ٿو.",
+      "continuationNone": "ڪٽيل جواب جاري نه رکيا وڃن ٿا.",
+      "retrieval": "هر سوال لاءِ هي بهترين {count} علم ميچ پڙهي ٿو.",
+      "retrievalScored": "هر سوال لاءِ هي بهترين {count} علم ميچ پڙهي ٿو ۽ {score} کان گهٽ نمبر وارن ميچن کي نظرانداز ڪري ٿو.",
+      "approvalContinuationOn": "جڏهن ڪو ماڻهو بيٺل ڪارروائي منظور ڪري ٿو ته ايجنٽ پاڻمرادو ڪم ختم ڪري ٿو.",
+      "approvalContinuationOff": "جڏهن ڪو ماڻهو بيٺل ڪارروائي منظور ڪري ٿو ته ٽرن ختم ٿي وڃي ٿو ۽ فالو اپ هٿ سان ڪرڻو پوي ٿو.",
+      "guardClosed": "جڏهن حفاظتي جاچ ناڪام ٿئي ٿي ته ڪارروائي رد ڪئي وڃي ٿي.",
+      "guardOpen": "جڏهن حفاظتي جاچ ناڪام ٿئي ٿي ته ڪارروائي کي گذرڻ ڏنو وڃي ٿو.",
+      "branches": "هڪ ڪم سونپڻ هڪ ئي وقت وڌ ۾ وڌ {count} ذيلي ڪم شروع ڪري سگهي ٿو."
+    }
+  },
+  "controls": {
+    "eyebrow": "مدد",
+    "title": "مان ڇا ڪنٽرول ڪريان...؟",
+    "subtitle": "هر ڪنٽرول جيڪو توهان جي ايجنٽ جي رويي کي شڪل ڏئي ٿو، ۽ اهو صفحو جتي اهو آهي. جيڪو توهان مٽائڻ چاهيو ٿا ان سان ڳوليو.",
+    "breadcrumb": {
+      "label": "بريڊ ڪرمب",
+      "console": "ڪنسول",
+      "controls": "ڪنٽرول"
+    },
+    "related": {
+      "label": "ٻيا ڪنٽرول"
+    },
+    "search": {
+      "label": "ڪنٽرول ڳوليو",
+      "placeholder": "مثال: ٽائم آئوٽ، منظوري، پرامپٽ، ميموري",
+      "count": "{count} ملندڙ ڪنٽرول",
+      "none": "\"{query}\" سان ڪجهه به نٿو ملي. ننڍو لفظ آزمايو.",
+      "noSettings": "ڪا سيٽنگ توهان جي ڳولا سان نٿي ملي."
+    },
+    "areasHeading": "ڪنٽرول علائقو",
+    "areasIntro": "انهن صفحن ۾ اهي ڪنٽرول آهن جيڪي اڪيلا انگ ناهن: هدايتون، منظوري جا ضابطا، حفاظتي ضابطا ۽ ٽرن ڇا ڪيو ان جو رڪارڊ.",
+    "openArea": "کوليو",
+    "needsAccess": "هن صفحي تائين رسائي لاءِ ورڪ اسپيس ايڊمن کي چئو.",
+    "settingsHeading": "هر رن ٽائم سيٽنگ",
+    "settingsIntro": "هر سيٽنگ سڄي ورڪ اسپيس لاءِ، هڪ ايجنٽ لاءِ، يا ٻنهي لاءِ مٽائي سگهجي ٿي. ايجنٽ جو پنهنجو قدر ورڪ اسپيس جي قدر کان مٿانهون آهي. سيٽنگ تائين سڌو وڃڻ لاءِ هڪ لنڪ چونڊيو.",
+    "loading": "سيٽنگن جي فهرست لوڊ ٿي رهي آهي",
+    "loadFailed": "سيٽنگن جي فهرست لوڊ نه ٿي سگهي. {message}",
+    "retry": "ٻيهر ڪوشش ڪريو",
+    "emptyCatalog": "هن ورڪ اسپيس ۾ ڏيکارڻ لاءِ ڪي رن ٽائم سيٽنگون ناهن.",
+    "changeWorkspace": "ورڪ اسپيس لاءِ مٽايو",
+    "changeAgent": "هڪ ايجنٽ تي مٽايو",
+    "workspaceOnly": "رڳو ورڪ اسپيس-ويڪرو",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "ايجنٽ رن ٽائم حدون",
+        "intro": "هڪ ٽرن ڪيترو ڪم ڪري سگهي ٿو: ٽول ڪال، وقت، نتيجي جو سائيز ۽ بحالي."
+      },
+      "behaviour-settings": {
+        "title": "رويي جون سيٽنگون",
+        "intro": "جواب ڪيئن ختم ۽ ڪيش ٿين ٿا، منظوري ڪيئن جاري رهي ٿي، حفاظتي جاچون ڪيئن رويو ڪن ٿيون، ۽ ميموري، ڳولا ۽ ڪم سونپڻ ڪيئن ڪم ڪن ٿا."
+      },
+      "other": {
+        "title": "ٻيون سيٽنگون",
+        "intro": "اهي سيٽنگون جن جو پنهنجو حصو ناهي."
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "رن ٽائم سيٽنگون",
+        "summary": "سڄي ورڪ اسپيس لاءِ حدون، منظوري، معيار جاچون، حفاظتي سختي، ميموري ۽ ڪم سونپڻ.",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers حدون ٽائم آئوٽ ٽول قدم ٻيهر ڪوشش ڪيش ميموري ڪم سونپڻ معيار جج سيٽنگون انگ"
+      },
+      "prompts": {
+        "title": "هدايتون",
+        "summary": "پليٽ فارم ماڊل کي جيڪي پرامپٽ ڏئي ٿو: هر هڪ ڏسو، ورڪ اسپيس يا هڪ ايجنٽ لاءِ اوور رائيڊ ڪريو، ۽ نتيجي جو اڳ ڏيک ڏسو.",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry پرامپٽ هدايتون سسٽم پرامپٽ اوور رائيڊ اڳ ڏيک رجسٽري"
+      },
+      "approvals": {
+        "title": "منظوري",
+        "summary": "ماڻهوءَ جو انتظار ڪندڙ ڪارروائين جي قطار، ڪهڙي ٽول کي منظوري گهرجي ان جا ضابطا، ۽ توهان جي فيصلي کان پوءِ ڇا ٿئي ٿو.",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation منظوري رد قطار هيومن ان دي لوپ ٽول ضابطا وقت ختم تسلسل"
+      },
+      "guardrails": {
+        "title": "گارڊ ريل",
+        "summary": "اهي نمونا جن کي هي ورڪ اسپيس گذرڻ کان انڪار ڪري ٿو، ۽ ٽول نتيجن تي لاڳو ٿيندڙ مواد پاليسي.",
+        "keywords": "safety rules block filter policy content patterns حفاظتي ضابطا روڪ ڇاڻي پاليسي مواد نمونا"
+      },
+      "turns": {
+        "title": "ٽرن معائنو ڪندڙ",
+        "summary": "هڪ ايجنٽ ٽرن جي رڪارڊ ٿيل ٽائم لائن: ڇا پڇيو ويو، ڪهڙا ٽول هليا، هر قدم تي ڪيترو خرچ ٿيو ۽ اهو ڇو رڪيو.",
+        "keywords": "turn timeline journal trace replay history steps debug ٽرن ٽائم لائن جرنل ٽريس ريپلي تاريخ قدم ڊيبگ"
+      },
+      "agentBehavior": {
+        "title": "ايجنٽ جو رويو ۽ حدون",
+        "summary": "هڪ ايجنٽ جي صفحي تي: ان جون پنهنجيون حدون ۽ رويي جون سيٽنگون، هر قدر ڪٿان اچي ٿو ۽ ورڪ اسپيس جي قدر ڏانهن ري سيٽ سان.",
+        "keywords": "agent override per agent behavior limits tab ايجنٽ اوور رائيڊ هر ايجنٽ رويو حدون ٽئب"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "هي پرامپٽ بلاڪن مان ٺهيل آهي",
+    "blocksCount": "{n} بلاڪ",
+    "blockDefault": "ڊفالٽ طور آيل",
+    "blockOverride": "{scope} اوور رائيڊ v{version}",
+    "blockAgentConfig": "ايجنٽ جو پنهنجو پرامپٽ",
+    "blockCode": "پليٽ فارم ڪوڊ",
+    "blockTokens": "~{tokens} ٽوڪن",
+    "blockHash": "لفظن جو هيش"
+  },
+  "toolApproval": {
+    "continuing": "ايجنٽ ڪم جاري رکيو آهي.",
+    "continueNotStarted": "هن فيصلي کان پوءِ ايجنٽ پاڻمرادو ٻيهر شروع نه ٿيو. ان کي اڳتي وڌائڻ لاءِ پيغام موڪليو.",
+    "continueTimedOut": "ايجنٽ اڃا جاري رکڻ ختم نه ڪيو آهي. ختم ٿيڻ تي ان جو جواب گفتگو ۾ ظاهر ٿيندو؛ چيڪ ڪرڻ لاءِ ريلوڊ ڪريو.",
+    "continuingWaiting": "Your decision is recorded. The agent is picking the task back up.",
+    "continuingRunning": "The agent is working on the next step. Its reply appears here as soon as it is ready.",
+    "continuingStill": "Still working. A model running on this computer can take a few minutes; you can keep reading meanwhile.",
+    "continuingLongWait": "This is taking longer than usual, but the agent has not stopped. Its reply will appear here when it is done.",
+    "continuingStagesLabel": "Progress",
+    "continuingStageDecided": "Decision recorded",
+    "continuingStageRestarted": "Agent restarted",
+    "continuingStageWorking": "Working on it",
+    "panelLabel": "Tool approvals",
+    "queuePosition": "Approval {position} of {total}",
+    "queueMore": "{count} more waiting. The next one appears when you decide this one.",
+    "rawName": "Technical name",
+    "approveAll": "Approve all {count}",
+    "rejectAll": "Reject all",
+    "approvingProgress": "Approving {position} of {total}",
+    "rejectingProgress": "Rejecting {position} of {total}",
+    "bulkHint": "Decides the waiting calls one after another, oldest first, and stops at the first problem.",
+    "bulkStoppedTruncated": "Stopped: the next call's arguments are too long to show here, so it waits for your own decision.",
+    "bulkStoppedError": "Stopped after a problem; the calls below it are still waiting.",
+    "waitingList": "Waiting calls"
+  },
+  "promptDirectives": {
+    "tabRegistry": "سڀ پرامپٽ",
+    "tabAgentPreview": "آخري پرامپٽ جو اڳ ڏيک",
+    "regTitle": "هر پرامپٽ",
+    "regIntro": "ماڊل لاءِ پليٽ فارم جيڪا به لکت لکي ٿو، هاڻوڪا لاڳو لفظ، انهن جي ماخذ ۽ نسخي سان. هڪ دائرو چونڊيو، مٽائڻ لاءِ هڪ پرامپٽ کوليو، ۽ هر پراڻو نسخو ڏسو. تبديلي تقريباً اڌ منٽ ۾ سڀني سرورن تائين پهچي ٿي.",
+    "regScopeLabel": "ڪهڙي دائري ۾ مٽائڻو آهي",
+    "regScope_tenant": "هي ورڪ اسپيس",
+    "regScope_agent": "هڪ ايجنٽ",
+    "regScope_platform": "سڄو پليٽ فارم",
+    "regAgentLabel": "ايجنٽ",
+    "regAgentPlaceholder": "هڪ ايجنٽ چونڊيو",
+    "regAgentsFailed": "توهان جا ايجنٽ لوڊ نه ٿي سگهيا.",
+    "regPickAgent": "ڪنهن ايجنٽ جا پرامپٽ ڏسڻ ۽ مٽائڻ لاءِ ان کي چونڊيو.",
+    "regAgentUnavailable": "لنڪ ۾ ايجنٽ توهان لاءِ موجود ناهي، ڇاڪاڻ ته اهو آهي ئي ڪونه يا توهان ان کي ڏسي نٿا سگهو. ان جي جاءِ تي رجسٽري ورڪ اسپيس دائري ۾ کليو.",
+    "regSearchLabel": "پرامپٽ ڳوليو",
+    "regSearchPlaceholder": "ڇا، عنوان يا وضاحت",
+    "regRiskLabel": "خطري جو درجو",
+    "regRiskAll": "سڀ خطري جا درجا",
+    "regRisk_STEERS_EVERY_TURN": "هر ٽرن کي سنڀالي ٿو",
+    "regRisk_SECONDARY_CALL": "ٻيو ماڊل ڪال",
+    "regRisk_USER_VISIBLE": "ماڻهوءَ کي ڏيکاريو وڃي ٿو",
+    "regRisk_TOOL_DESCRIPTION": "ٽول جي وضاحت",
+    "regOnlyCustomised": "رڳو ڪسٽمائيز ٿيل",
+    "regPlatformReadOnly": "پليٽ فارم-ويڪرا پرامپٽ هتي پڙهي سگهجن ٿا؛ رڳو پليٽ فارم ايڊمن ئي انهن کي مٽائي سگهن ٿا.",
+    "regLoadFailed": "پرامپٽ لوڊ نه ٿي سگهيا.",
+    "regCount": "{total} پرامپٽن مان {shown} ڏيکاري رهيو آهي.",
+    "regEmptyTitle": "ڪو پرامپٽ نه مليو",
+    "regEmptyBody": "ڳولا يا ڇاڻي مٽايو.",
+    "regSource_DEFAULT": "ڊفالٽ طور آيل",
+    "regSource_FALLBACK": "ڊفالٽ طور آيل (اوور رائيڊ موجود ناهي)",
+    "regSource_PLATFORM": "پليٽ فارم",
+    "regSource_TENANT": "ورڪ اسپيس",
+    "regSource_AGENT": "ايجنٽ",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "رٽائر ٿيل",
+    "regRetiredBody": "هي پرامپٽ هاڻي ڪا لکت نٿو موڪليو، تنهن ڪري مٽائڻ لاءِ ڪجهه ناهي.",
+    "regEffectiveOff": "بند: ڪجهه به نٿو موڪليو وڃي.",
+    "regEffectiveTokens": "هاڻي لاڳو، تقريباً {tokens} ٽوڪن.",
+    "regEffectiveLabel": "{title} لاءِ لاڳو لفظ",
+    "regOpenEditor": "{title} مٽايو",
+    "regCloseEditor": "{title} بند ڪريو",
+    "regEditingOverride": "{scope} نسخو مٽائي رهيو آهي، هاڻي v{version}.",
+    "regEditingNone": "اڃا تائين ڪو {scope} نسخو ناهي. هي هن جي هيٺين لفظن کان شروع ٿئي ٿو: {below}.",
+    "regPlaceholders": "رن ٽائم تي ڀريو وڃي ٿو:",
+    "regRequired": "(گهربل)",
+    "regProblemsTitle": "محفوظ ڪرڻ کان اڳ هن کي درست ڪريو",
+    "regReasonLabel": "تبديلي جو سبب (تاريخ ۾ رکيو وڃي ٿو)",
+    "regReasonPlaceholder": "اختياري",
+    "regConflict": "توهان جي ايڊٽ ڪرڻ دوران ڪنهن هن پرامپٽ کي مٽايو. سندس نسخو ڏسڻ لاءِ هن کي بند ڪري ٻيهر کوليو، پوءِ ٻيهر ڪوشش ڪريو.",
+    "regRevert": "{to} ڏانهن موٽو",
+    "regShowHistory": "تاريخ",
+    "regHideHistory": "تاريخ لڪايو",
+    "regHistoryLoading": "تاريخ لوڊ ٿي رهي آهي…",
+    "regHistoryFailed": "تاريخ لوڊ نه ٿي سگهي.",
+    "regHistoryEmpty": "هن دائري ۾ اڃا تائين ڪو نسخو ناهي.",
+    "regVersion": "نسخو {version}",
+    "regAction_CREATE": "ٺاهيل",
+    "regAction_UPDATE": "مٽايل",
+    "regAction_REVERT": "واپس ڪيل",
+    "regAction_MIGRATE": "منتقل ٿيل",
+    "regCurrent": "موجوده",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "اڻڄاتل",
+    "regReason": "سبب: {reason}",
+    "regShowDiff": "نسخي {version} جي تبديلي ڏيکاريو",
+    "regHideDiff": "نسخي {version} جي تبديلي لڪايو",
+    "regDiffLabel": "نسخي {version} طرفان ڪيل تبديلي",
+    "regNoDiff": "هن نسخي ۾ ڪا لکت نه مٽي.",
+    "regRestore": "نسخو {version} بحال ڪريو",
+    "regRestoreReason": "نسخي {version} جا لفظ بحال ٿيا",
+    "regRestoreFailed": "اهو نسخو بحال نه ٿي سگهيو.",
+    "regRestoreAck": "مان سمجهان ٿو ته {title} جو هڪ نسخو بحال ڪرڻ سان حفاظت ڪمزور ٿي سگهي ٿي.",
+    "regPreviewTitle": "آخري پرامپٽ جو اڳ ڏيک",
+    "regPreviewIntro": "ماڊل کي ڪال ڪرڻ کانسواءِ، ٽرن جيئن ڪري ها تيئن ئي ايجنٽ جو حقيقي سسٽم پرامپٽ ۽ ٽول فهرست ٺاهي ٿو. هر بلاڪ ڏيکاري ٿو ته پرامپٽ ڇا آهي، ان جو دائرو، ۽ ان جا لفظ ڪهڙي نسخي مان اچن ٿا.",
+    "regPreviewMessageLabel": "نمونو استعمال ڪندڙ پيغام (اختياري)",
+    "regPreviewMessagePlaceholder": "حقيقي پيغام وانگر ٽول ۽ ياد رکيل ميموري چونڊڻ لاءِ استعمال ٿئي ٿو.",
+    "regPreviewSmallModel": "ننڍي ماڊل لاءِ اڳ ڏيک",
+    "regPreviewBuild": "اڳ ڏيک ٺاهيو",
+    "regPreviewBuilding": "ٺهي رهيو آهي…",
+    "regPreviewFailed": "اڳ ڏيک ٺاهي نه سگهيو.",
+    "regPreviewTotals": "سسٽم لکت لاءِ تقريباً {prompt} ٽوڪن ۽ ٽول جي وصفن لاءِ {tools} ٽوڪن (اندازو).",
+    "regPreviewOverBudgetTitle": "ٽوڪن بجيٽ کان وڌيڪ",
+    "regPreviewOverBudget": "مستقل سسٽم لکت ترتيب ڏنل {budget} ٽوڪنن جي بجيٽ کان وڌيڪ آهي. ڪجهه به نه ڪٽيو ويو؛ هڪ پرامپٽ کي ننڍو ڪرڻ بابت سوچيو.",
+    "regPreviewMessageHeading": "پيغام: {message}",
+    "regPreviewTokens": "~{tokens} ٽوڪن",
+    "regPreviewTools": "ٽول ({count})",
+    "regPreviewNoTools": "هي ايجنٽ ڪو ٽول نٿو ڏئي.",
+    "regPreviewNotes": "هي اڳ ڏيک جيڪو نٿو ڄاڻي سگهي",
+    "regOriginDefault": "ڊفالٽ طور آيل",
+    "regOriginOverride": "{scope} اوور رائيڊ v{version}",
+    "regOriginAgentConfig": "ايجنٽ جو پنهنجو سسٽم پرامپٽ",
+    "regOriginCode": "پليٽ فارم ڪوڊ"
+  },
+  "toolLabels": {
+    "mcpTool": "{tool} ({server})",
+    "label_web_search": "Search the web",
+    "does_web_search": "Looks up public web pages that match a search and reads their titles and snippets.",
+    "label_fetch_web_page": "Open a web page",
+    "does_fetch_web_page": "Downloads one public web page and reads its text.",
+    "label_deep_research": "Research a topic on the web",
+    "does_deep_research": "Runs several web searches and reads the pages it finds.",
+    "label_verify_citations": "Check quotes against sources",
+    "does_verify_citations": "Compares quoted text with the web pages it was taken from.",
+    "label_http_request": "Call a web API",
+    "does_http_request": "Sends a request to a web address or API; depending on the request it can read or change something there.",
+    "label_http_request_write": "Send data to a web API",
+    "does_http_request_write": "Sends data to a web address, which can change something on that service.",
+    "label_schedule_task": "Schedule a task",
+    "does_schedule_task": "Sets up a task to run later or on a repeating schedule.",
+    "label_create_workflow": "Create a workflow",
+    "does_create_workflow": "Creates a new workflow in this workspace.",
+    "label_data_table_query": "Look up a data table",
+    "does_data_table_query": "Reads rows from one of this workspace's data tables.",
+    "label_data_table_write": "Change a data table",
+    "does_data_table_write": "Adds or changes rows in one of this workspace's data tables.",
+    "label_coding_task": "Run a coding task",
+    "does_coding_task": "Starts a coding task that can read and change files in a code workspace.",
+    "label_delegate_to_specialist": "Ask a specialist agent",
+    "does_delegate_to_specialist": "Hands part of the task to another agent and reads its answer.",
+    "label_delegate_parallel": "Ask several agents at once",
+    "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
+    "label_web_task": "Use a browser on a website",
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
   }
 }

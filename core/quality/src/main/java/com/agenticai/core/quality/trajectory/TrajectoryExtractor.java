@@ -2,6 +2,7 @@ package com.agenticai.core.quality.trajectory;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.quality.dataset.AgentTurnReplayer.ReplayedToolCall;
+import com.agenticai.core.quality.dataset.AgentTurnReplayer.ToolStatus;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.MissingNode;
@@ -17,8 +18,10 @@ import java.util.List;
  * adapter over the tool-call log of a live session is a one-line map into {@link #fromRaw}. (Agent Lab runs
  * are text-only and carry no tool calls, so there is nothing to extract from them.)
  *
- * <p>{@code ok} is derived from the call's OUTPUT text, mirroring how the guard chain words results for calls
- * that did not run: a result starting {@code This tool call (} (refused / blocked / failed), {@code This action (}
+ * <p>{@code ok} comes from how the turn itself recorded the call's end ({@link ToolStatus}: ran / replayed /
+ * simulated by the eval sandbox = ok; failed, not run, held for approval = not ok) whenever that record exists. Only a call with no recorded
+ * status (older stored results, or a turn whose tool ledger was off) falls back to the OUTPUT text, mirroring
+ * how the guard chain words results for calls that did not run: a result starting {@code This tool call (} (refused / blocked / failed), {@code This action (}
  * (parked for human approval), {@code This tool (} (circuit breaker), {@code Tool output from '} (withheld by a
  * safety check) or the structural-validation marker is {@code ok = false}; anything else, including a missing
  * output, is {@code ok = true}. It is a heuristic over wording, documented here because it is one.
@@ -33,15 +36,26 @@ public final class TrajectoryExtractor {
     private TrajectoryExtractor() {
     }
 
-    /** One recorded call from any source. {@code input} is the raw argument JSON text. */
-    public record RawCall(String toolName, String input, String output) {
+    /**
+     * One recorded call from any source. {@code input} is the raw argument JSON text; {@code status} is how the
+     * turn recorded the call's end, {@code UNKNOWN} (or null) when it did not.
+     */
+    public record RawCall(String toolName, String input, String output, ToolStatus status) {
+
+        public RawCall(String toolName, String input, String output) {
+            this(toolName, input, output, ToolStatus.UNKNOWN);
+        }
+
+        public RawCall {
+            status = status == null ? ToolStatus.UNKNOWN : status;
+        }
     }
 
     public static List<TrajectoryToolCall> fromReplayed(List<ReplayedToolCall> calls) {
         List<RawCall> raw = new ArrayList<>();
         if (calls != null) {
             for (ReplayedToolCall c : calls) {
-                raw.add(new RawCall(c.toolName(), c.input(), c.output()));
+                raw.add(new RawCall(c.toolName(), c.input(), c.output(), c.status()));
             }
         }
         return fromRaw(raw);
@@ -62,7 +76,7 @@ public final class TrajectoryExtractor {
                 for (JsonNode entry : root) {
                     raw.add(new RawCall(
                         entry.path("toolName").asText(null), entry.path("input").asText(null),
-                        entry.path("output").asText(null)));
+                        entry.path("output").asText(null), statusOf(entry.path("status").asText(null))));
                 }
             }
             return fromRaw(raw);
@@ -80,9 +94,31 @@ public final class TrajectoryExtractor {
             if (steps.size() >= MAX_STEPS) {
                 break;
             }
-            steps.add(new TrajectoryToolCall(c.toolName(), parseArgs(c.input()), !looksFailed(c.output())));
+            steps.add(new TrajectoryToolCall(c.toolName(), parseArgs(c.input()), ok(c)));
         }
         return steps;
+    }
+
+    /** The recorded end of the call when there is one, else the wording of its output. */
+    static boolean ok(RawCall call) {
+        return switch (call.status()) {
+            // SIMULATED: the eval sandbox accepted the call and withheld only its effect, so for the question
+            // "did the agent make the right call" it is a call that went through.
+            case OK, REPLAYED, SIMULATED -> true;
+            case FAILED, NOT_RUN, AWAITING_APPROVAL -> false;
+            case UNKNOWN -> !looksFailed(call.output());
+        };
+    }
+
+    private static ToolStatus statusOf(String name) {
+        if (name == null || name.isBlank()) {
+            return ToolStatus.UNKNOWN;
+        }
+        try {
+            return ToolStatus.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            return ToolStatus.UNKNOWN;
+        }
     }
 
     static JsonNode parseArgs(String input) {

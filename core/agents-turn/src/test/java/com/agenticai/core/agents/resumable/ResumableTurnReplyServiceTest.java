@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.resumable.ResumableTurnReplyService.PersistedReply;
+import com.agenticai.core.agents.turn.ToolLedger;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,21 @@ class ResumableTurnReplyServiceTest {
 
         assertEquals(ResumableTurnReplyService.STATUS_PENDING, reply.status());
         assertNull(reply.text());
+    }
+
+    @Test
+    void aDecidedActionsToolRecordWrittenAfterTheReplyIsNeverTakenForTheReply() {
+        ChatTurn record = new ChatTurn(MessageRole.ASSISTANT, "", Instant.ofEpochMilli(STARTED + 9_000L),
+            new ToolLedger(List.of(new ToolLedger.Entry(
+                "web_search", "{}", "[approved action 'web_search' completed: raw]", ToolLedger.Status.OK, "r1")), 0));
+
+        PersistedReply reply = ResumableTurnReplyService.pick("turn-1", STARTED, List.of(
+            userAt(STARTED + 10L, "q2"),
+            assistantAt(STARTED + 4_000L, "This needs your approval."),
+            record));
+
+        assertEquals(ResumableTurnReplyService.STATUS_COMPLETE, reply.status());
+        assertEquals("This needs your approval.", reply.text());
     }
 
     @Test

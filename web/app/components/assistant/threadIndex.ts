@@ -1,4 +1,5 @@
 import type { AssistantTurn, ThreadSummary } from "./assistantTypes";
+import { isApprovalContinuationMessage } from "../agents/approvalContinuation";
 import { stripAppContext } from "./needs";
 
 /**
@@ -28,9 +29,25 @@ export function threadScope(userId: string | null | undefined): string {
   return userId && userId.trim() ? userId.trim() : "local";
 }
 
-/** First non-empty line of the first message, cut at a word boundary. */
+const APP_CONTEXT_OPEN = "<app_context>";
+
+/**
+ * A title that is the app's own context block rather than the person's words: rows titled before the title
+ * left the block out (every thread read `<app_context>`). Such a title is re-derived when a better source shows
+ * up (the server's title, the next turn's first user line) and never shown as it is.
+ */
+export function isAppContextTitle(title: string | null | undefined): boolean {
+  return (title ?? "").trimStart().startsWith(APP_CONTEXT_OPEN);
+}
+
+/**
+ * First non-empty line of what the person typed in the first message, cut at a word boundary. The
+ * `<app_context>` block the app puts ahead of the message is not theirs and is left out; a block that is
+ * opened and never closed (a cut title) is all app text.
+ */
 export function threadTitle(text: string, max = TITLE_MAX_CHARS): string {
-  const line = (text ?? "")
+  const own = stripAppContext((text ?? "").trimStart());
+  const line = (isAppContextTitle(own) ? "" : own)
     .split(/\r?\n/)
     .map((l) => l.trim())
     .find((l) => l.length > 0);
@@ -90,6 +107,12 @@ export function transcriptToTurns(transcript: ChatTranscript | null | undefined,
   transcript.messages.forEach((m, i) => {
     const role = m.role === "user" ? "user" : m.role === "assistant" ? "assistant" : null;
     if (!role) return;
+    // The platform's own message handing a decided tool call's result back to the agent: not something the
+    // person typed, and the agent's reply to it follows as an ordinary assistant entry.
+    if (role === "user" && isApprovalContinuationMessage(m.content)) return;
+    // An assistant entry with no text and no failure has nothing to show (the platform keeps a decided action's
+    // outcome as a tool record for the model, not as a message): never an empty bubble.
+    if (role === "assistant" && !(m.error || m.status === "failed") && !(m.content ?? "").trim()) return;
     const at = m.timestamp ? Date.parse(m.timestamp) : NaN;
     turns.push({
       id: `${sessionId}:${i}`,
@@ -147,14 +170,19 @@ function stripKey(row: ThreadRow & { key?: string }): ThreadRow {
   return rest;
 }
 
+/** A row as the rail shows it: a title stored as the app's context block reads as a plain title instead. */
+function readable(row: ThreadRow): ThreadRow {
+  return isAppContextTitle(row.title) ? { ...row, title: threadTitle(row.title) } : row;
+}
+
 export async function listThreads(scope: string): Promise<ThreadRow[]> {
   const db = await openDb();
-  if (!db) return sortThreads([...memory.values()].filter((r) => r.scope === scope));
+  if (!db) return sortThreads([...memory.values()].filter((r) => r.scope === scope).map(readable));
   try {
     const tx = db.transaction(STORE, "readonly");
     const rows = await new Promise<ThreadRow[]>((resolve) => {
       const req = tx.objectStore(STORE).index("scope").getAll(scope);
-      req.onsuccess = () => resolve((req.result as (ThreadRow & { key: string })[]).map(stripKey));
+      req.onsuccess = () => resolve((req.result as (ThreadRow & { key: string })[]).map(stripKey).map(readable));
       req.onerror = () => resolve([]);
     });
     await settled(tx);
@@ -219,7 +247,13 @@ export async function recordThreadActivity(
 ): Promise<ThreadRow> {
   const existing = await getThread(scope, id);
   const row: ThreadRow = existing
-    ? { ...existing, lastAt: Math.max(existing.lastAt, at), agentId }
+    ? {
+        ...existing,
+        lastAt: Math.max(existing.lastAt, at),
+        agentId,
+        // A row titled with the app's context block (before titles left it out) gets the person's words now.
+        ...(isAppContextTitle(existing.title) ? { title: threadTitle(firstUserLine) } : {}),
+      }
     : { id, scope, agentId, title: threadTitle(firstUserLine), lastAt: at, createdAt: at, pinned: false };
   await putThread(row);
   return row;
@@ -262,8 +296,13 @@ export function mergeServerThread(local: ThreadRow | null, server: ServerThreadL
     ...local,
     lastAt: Math.max(local.lastAt, updatedAt),
     agentId: server.agentId || local.agentId,
+    // A local title that is the app's context block (stored before titles left it out) is not a rename: the
+    // server's title, derived from the person's own words, replaces it.
+    ...(isAppContextTitle(local.title) && server.title ? { title: threadTitle(server.title) } : {}),
   };
-  return next.lastAt === local.lastAt && next.agentId === local.agentId ? null : next;
+  return next.lastAt === local.lastAt && next.agentId === local.agentId && next.title === local.title
+    ? null
+    : next;
 }
 
 /** Folds a page of server sessions into the index for `scope`; returns how many rows were written. */

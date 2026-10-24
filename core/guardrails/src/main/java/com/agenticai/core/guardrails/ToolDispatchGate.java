@@ -36,13 +36,31 @@ public interface ToolDispatchGate {
      * @param reason model-facing explanation for {@link Outcome#DENY}; a short
      *     log/metric-safe note for the other outcomes. Never contains tool
      *     arguments or output.
+     * @param readOnly true only for an ALLOW the gate positively classified as read-only (see {@link
+     *     #allowReadOnly()}); false for everything else, including an unclassified tool.
      */
-    record Verdict(Outcome outcome, String reason) {
+    record Verdict(Outcome outcome, String reason, boolean readOnly) {
 
-        private static final Verdict ALLOWED = new Verdict(Outcome.ALLOW, null);
+        private static final Verdict ALLOWED = new Verdict(Outcome.ALLOW, null, false);
 
         public Verdict {
             outcome = outcome == null ? Outcome.ALLOW : outcome;
+            // Only an ALLOW can be read-only: a refusal or an approval requirement is never "safe to run unattended".
+            readOnly = readOnly && outcome == Outcome.ALLOW;
+        }
+
+        public Verdict(Outcome outcome, String reason) {
+            this(outcome, reason, false);
+        }
+
+        /**
+         * An ALLOW the gate also vouches for as read-only: the tool has an explicit classification row (a stored row
+         * or a compiled-in declaration, never a server's own hint) that is not consequential and not irreversible.
+         * {@code GuardedToolCallback} uses it only under {@link ApprovalGateMode#GATE_UNLESS_READ_ONLY}; for every
+         * other mode it is an ordinary allow.
+         */
+        public static Verdict allowReadOnly() {
+            return new Verdict(Outcome.ALLOW, null, true);
         }
 
         public static Verdict allow() {

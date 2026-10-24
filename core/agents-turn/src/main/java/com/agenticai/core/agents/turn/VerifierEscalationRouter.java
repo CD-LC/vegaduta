@@ -2,16 +2,19 @@ package com.agenticai.core.agents.turn;
 
 import com.agenticai.core.agents.turn.quality.QueryComplexityClassifier;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -76,114 +79,76 @@ public class VerifierEscalationRouter {
     public static final String SKIPPED_METRIC = "chat.router.escalation_skipped";
 
     /**
-     * Tool-name prefixes treated as read-only (safe to replay). Anything else is assumed mutating.
+     * The name lists a replay decision reads (read-only prefixes, mutating words, never-replay tools)
+     * live in the prompt registry as {@code detector.replay.*} keys (default text: {@code
+     * prompts/en/detector.replay.*.md}), so they are data, can be overridden per tenant or agent with
+     * acknowledgement, and are documented in docs/prompts.md. See {@link ReplayNames}.
      */
-    private static final List<String> READ_ONLY_PREFIXES =
-            List.of(
-                    "get",
-                    "list",
-                    "search",
-                    "read",
-                    "fetch",
-                    "find",
-                    "lookup",
-                    "look_up",
-                    "query",
-                    "retrieve",
-                    "describe",
-                    "check",
-                    "view",
-                    "recall",
-                    "load_skill",
-                    "web_search",
-                    "browse",
-                    "calculate",
-                    "count");
+    static final String READ_ONLY_PREFIXES_KEY = "detector.replay.read_only_prefixes";
+
+    static final String MUTATING_WORDS_KEY = "detector.replay.mutating_words";
+    static final String NEVER_REPLAY_KEY = "detector.replay.never_replay_tools";
 
     /**
-     * Whole words that mark an unclassified tool as mutating even when it starts with a read verb
-     * ("get_and_delete").
+     * Registry key of the low-confidence marker list. {@code app.chat.escalation.low-confidence-markers} is a
+     * deprecated alias for its platform default ({@link PromptPropertyAliases#lowConfidenceMarkers}); this class
+     * reads only the registry.
      */
-    private static final java.util.Set<String> MUTATING_WORDS =
-            java.util.Set.of(
-                    "delete",
-                    "remove",
-                    "send",
-                    "create",
-                    "update",
-                    "write",
-                    "post",
-                    "put",
-                    "patch",
-                    "drop",
-                    "click",
-                    "type",
-                    "submit",
-                    "cancel",
-                    "pay",
-                    "book",
-                    "execute",
-                    "exec",
-                    "run",
-                    "set",
-                    "add",
-                    "insert",
-                    "upload",
-                    "publish",
-                    "reply",
-                    "forward",
-                    "approve",
-                    "transfer",
-                    "charge",
-                    "purchase",
-                    "buy",
-                    "sell",
-                    "merge",
-                    "commit",
-                    "push",
-                    "kill",
-                    "stop",
-                    "start",
-                    "reset",
-                    "modify",
-                    "edit",
-                    "save",
-                    "store",
-                    "invoke",
-                    "call",
-                    "trigger",
-                    "email",
-                    "message",
-                    "sms",
-                    "notify");
+    static final String LOW_CONFIDENCE_MARKERS_KEY = "detector.escalation.low_confidence_markers";
+
+    private final PromptSlot prompts = new PromptSlot();
+
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
+
+    /**
+     * The three replay name lists, resolved for one decision. The shipped lists are a floor for the
+     * mutating words and the never-replay tools: an override can add to them, never remove from them,
+     * so a tenant edit cannot make a mutating tool replayable. The read-only prefixes are replaced by
+     * the override (removing a prefix only makes the check stricter).
+     */
+    record ReplayNames(List<String> readOnlyPrefixes, Set<String> mutatingWords, Set<String> neverReplay) {
+
+        private static final class Shipped {
+            static final ReplayNames VALUE = build(new PromptSlot(), null, null);
+        }
+
+        /** The shipped lists, with no tenant or agent override (hand-built code, tests, static callers). */
+        static ReplayNames shipped() {
+            return Shipped.VALUE;
+        }
+
+        static ReplayNames resolve(PromptSlot slot, UUID agentId) {
+            return build(slot, agentId, shipped());
+        }
+
+        private static ReplayNames build(PromptSlot slot, UUID agentId, ReplayNames floor) {
+            List<String> prefixes = lower(slot.linesAllLocales(READ_ONLY_PREFIXES_KEY, agentId));
+            Set<String> mutating = new LinkedHashSet<>(lower(slot.linesAllLocales(MUTATING_WORDS_KEY, agentId)));
+            Set<String> never = new LinkedHashSet<>(slot.linesAllLocales(NEVER_REPLAY_KEY, agentId));
+            if (floor != null) {
+                mutating.addAll(floor.mutatingWords());
+                never.addAll(floor.neverReplay());
+            }
+            return new ReplayNames(List.copyOf(prefixes), Set.copyOf(mutating), Set.copyOf(never));
+        }
+
+        private static List<String> lower(List<String> in) {
+            return in.stream().map(v -> v.toLowerCase(Locale.ROOT)).toList();
+        }
+    }
 
     /**
      * A low-confidence marker counts only in a SHORT reply ({@code <
-     * MAX_LOW_CONFIDENCE_REPLY_CHARS}), within its first {@code LEADING_WINDOW_CHARS}, and only
+     * app.chat.limits.escalation.low-confidence-max-chars}), within its first {@code
+     * low-confidence-leading-chars}, and only
      * when the turn used no tool results (a reply built on tool output that says "I don't know" is
      * reporting what the tool returned, and a re-run would not know more).
      */
-    static final int MAX_LOW_CONFIDENCE_REPLY_CHARS = 400;
-
-    static final int LEADING_WINDOW_CHARS = 240;
-
-    /**
-     * Tools never treated as replay-safe even when classified non-durable (http_request can POST).
-     */
-    private static final java.util.Set<String> NEVER_REPLAY =
-            java.util.Set.of("http_request", "http_request_write");
-
-    static final List<String> DEFAULT_LOW_CONFIDENCE_MARKERS =
-            List.of(
-                    "i'm not sure",
-                    "i am not sure",
-                    "i don't know",
-                    "i do not know",
-                    "i'm not certain",
-                    "i cannot determine",
-                    "i can't determine",
-                    "low confidence",
-                    "[low-confidence]");
+    // Both bounds are app.chat.limits.escalation.* (ChatLimitsProperties): low-confidence-max-chars and
+    // low-confidence-leading-chars.
 
     /** Why a cheap answer was rejected. */
     public enum Reason {
@@ -210,11 +175,16 @@ public class VerifierEscalationRouter {
     private record Registration(
             WeakReference<ChatClient> cheap, Supplier<ChatClient> strong, long at) {}
 
-    private static final long REGISTRATION_TTL_MS = 10 * 60_000L;
+    /** {@code app.chat.limits.escalation.*}; a hand-built instance keeps the shipped defaults. */
+    private volatile ChatLimitsProperties.Escalation limits = new ChatLimitsProperties().getEscalation();
+
+    @Autowired(required = false)
+    void useLimits(ChatLimitsProperties properties) {
+        this.limits = (properties == null ? new ChatLimitsProperties() : properties).getEscalation();
+    }
 
     private final boolean enabled;
     private final boolean killSwitch;
-    private final List<String> markers;
     private final int maxToolErrors;
     private final double economyCostRatio;
     private final MeterRegistry registry;
@@ -244,14 +214,12 @@ public class VerifierEscalationRouter {
             ObjectProvider<MeterRegistry> registry,
             @Value("${app.chat.escalation.enabled:false}") boolean enabled,
             @Value("${app.chat.escalation.kill-switch:false}") boolean killSwitch,
-            @Value("${app.chat.escalation.low-confidence-markers:}") String markersCsv,
             @Value("${app.chat.escalation.max-tool-errors:2}") int maxToolErrors,
             @Value("${app.chat.escalation.economy-cost-ratio:0.2}") double economyCostRatio) {
         this(
                 registry.getIfAvailable(),
                 enabled,
                 killSwitch,
-                markersCsv,
                 maxToolErrors,
                 economyCostRatio);
     }
@@ -261,29 +229,13 @@ public class VerifierEscalationRouter {
             MeterRegistry registry,
             boolean enabled,
             boolean killSwitch,
-            String markersCsv,
             int maxToolErrors,
             double economyCostRatio) {
         this.registry = registry != null ? registry : Metrics.globalRegistry;
         this.enabled = enabled;
         this.killSwitch = killSwitch;
-        this.markers = parseMarkers(markersCsv);
         this.maxToolErrors = Math.max(1, maxToolErrors);
         this.economyCostRatio = Math.min(1.0, Math.max(0.0, economyCostRatio));
-    }
-
-    private static List<String> parseMarkers(String csv) {
-        if (csv == null || csv.isBlank()) {
-            return DEFAULT_LOW_CONFIDENCE_MARKERS;
-        }
-        List<String> out = new ArrayList<>();
-        for (String m : csv.split(",")) {
-            String t = m.trim().toLowerCase(Locale.ROOT);
-            if (!t.isEmpty()) {
-                out.add(t);
-            }
-        }
-        return out.isEmpty() ? DEFAULT_LOW_CONFIDENCE_MARKERS : out;
     }
 
     /** True only when the feature is on and the kill switch is off. */
@@ -303,7 +255,7 @@ public class VerifierEscalationRouter {
             return;
         }
         long now = System.currentTimeMillis();
-        registrations.values().removeIf(r -> now - r.at() > REGISTRATION_TTL_MS);
+        registrations.values().removeIf(r -> now - r.at() > limits.getRegistrationTtl().toMillis());
         registrations.put(agentId, new Registration(new WeakReference<>(cheapClient), strong, now));
     }
 
@@ -336,6 +288,14 @@ public class VerifierEscalationRouter {
      *     signal
      */
     Signals inspect(String answer, String outputSchemaJson, int toolErrors, int toolCalls) {
+        return inspect(answer, outputSchemaJson, toolErrors, toolCalls, null);
+    }
+
+    /**
+     * As {@link #inspect(String, String, int, int)}; {@code agentId} (null = unknown) lets an
+     * agent-scope override of the low-confidence marker list apply.
+     */
+    Signals inspect(String answer, String outputSchemaJson, int toolErrors, int toolCalls, UUID agentId) {
         boolean empty = answer == null || answer.isBlank();
         boolean parseFailure = false;
         if (!empty && outputSchemaJson != null && !outputSchemaJson.isBlank()) {
@@ -343,13 +303,13 @@ public class VerifierEscalationRouter {
         }
         boolean lowConfidence = false;
         String trimmed = empty ? "" : answer.strip();
-        if (!empty && toolCalls <= 0 && trimmed.length() < MAX_LOW_CONFIDENCE_REPLY_CHARS) {
+        if (!empty && toolCalls <= 0 && trimmed.length() < limits.getLowConfidenceMaxChars()) {
             // A substantive answer that mentions "I don't know" in passing (quoting, a sub-point, a
             // caveat) is not a low-confidence answer: only a SHORT reply, with the marker in its
             // opening, and no tool results behind it, counts.
-            String window = trimmed.substring(0, Math.min(trimmed.length(), LEADING_WINDOW_CHARS));
+            String window = trimmed.substring(0, Math.min(trimmed.length(), limits.getLowConfidenceLeadingChars()));
             String lower = window.toLowerCase(Locale.ROOT);
-            for (String m : markers) {
+            for (String m : markers(agentId)) {
                 if (lower.contains(m)) {
                     lowConfidence = true;
                     break;
@@ -365,6 +325,39 @@ public class VerifierEscalationRouter {
      * escalation).
      */
     boolean replaySafe(List<String> toolNames) {
+        return replaySafe(toolNames, (UUID) null);
+    }
+
+    /**
+     * As {@link #replaySafe(List)}, with the name lists resolved for {@code agentId} (null = tenant-wide
+     * and shipped lists).
+     */
+    boolean replaySafe(List<String> toolNames, UUID agentId) {
+        return replaySafe(toolNames, classification, ReplayNames.resolve(prompts, agentId));
+    }
+
+    /** The low-confidence markers: the registry list for this agent. */
+    private List<String> markers(UUID agentId) {
+        return prompts.linesAllLocales(LOW_CONFIDENCE_MARKERS_KEY, agentId).stream()
+                .map(m -> m.toLowerCase(Locale.ROOT))
+                .toList();
+    }
+
+    /**
+     * As {@link #replaySafe(List)}, against an explicit classification lookup ({@code null} = names
+     * only). Shared with {@link FailoverReplayGate}, which asks the same question of the tools a turn ran
+     * before it fails over to another provider.
+     */
+    static boolean replaySafe(
+            List<String> toolNames, java.util.function.Function<String, Optional<Boolean>> lookup) {
+        return replaySafe(toolNames, lookup, ReplayNames.shipped());
+    }
+
+    /** As above, against explicit name lists (see {@link ReplayNames}). */
+    static boolean replaySafe(
+            List<String> toolNames,
+            java.util.function.Function<String, Optional<Boolean>> lookup,
+            ReplayNames names) {
         if (toolNames == null) {
             return true;
         }
@@ -372,12 +365,11 @@ public class VerifierEscalationRouter {
             if (name == null) {
                 return false;
             }
-            if (NEVER_REPLAY.contains(name)) {
+            if (names.neverReplay().contains(name)) {
                 return false;
             }
             // The tool classification is authoritative when the tool has one (browser_click is
             // DURABLE + irreversible there, whatever its name looks like).
-            java.util.function.Function<String, Optional<Boolean>> lookup = classification;
             if (lookup != null) {
                 Optional<Boolean> verdict;
                 try {
@@ -397,7 +389,7 @@ public class VerifierEscalationRouter {
             // leading word ("browse" matches browse_page, never browser_click).
             String n = name.toLowerCase(Locale.ROOT);
             boolean readOnly = false;
-            for (String prefix : READ_ONLY_PREFIXES) {
+            for (String prefix : names.readOnlyPrefixes()) {
                 if (n.startsWith(prefix)
                         && (n.length() == prefix.length()
                                 || !Character.isLetter(n.charAt(prefix.length())))) {
@@ -407,7 +399,7 @@ public class VerifierEscalationRouter {
             }
             if (readOnly) {
                 for (String word : n.split("[^a-z]+")) {
-                    if (MUTATING_WORDS.contains(word)) {
+                    if (names.mutatingWords().contains(word)) {
                         readOnly = false;
                         break;
                     }

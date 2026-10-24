@@ -85,7 +85,7 @@ class HookGuardChainTest {
     @BeforeEach
     void setUp() {
         when(guardrails.sanitizeToolOutput(anyString(), anyString(), any())).thenAnswer(i -> i.getArgument(1));
-        when(approvalGate.recordToolCallForApproval(anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any()))
+        when(approvalGate.recordToolCallForApproval(anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
             .thenReturn(new ApprovalRequest("mcp_tool." + TOOL, "Tool call", "{}", "agent"));
         HookWebhookClient webhook = new HookWebhookClient(
             url -> Optional.empty(), List.of("hooks.example.com"), "",
@@ -134,7 +134,7 @@ class HookGuardChainTest {
         assertTrue(result.contains("requires human approval"), result);
         assertTrue(raw.calls.isEmpty(), "the tool never ran");
         assertTrue(webhookPayloads.isEmpty(), "the hook is behind the gate: a parked call never reaches it");
-        verify(approvalGate).recordToolCallForApproval(anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any());
+        verify(approvalGate).recordToolCallForApproval(anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
     }
 
     @Test
@@ -162,7 +162,7 @@ class HookGuardChainTest {
         assertTrue(result.startsWith("This tool call ('" + TOOL + "') was not executed"), result);
         assertTrue(result.contains("Email is off"), result);
         assertTrue(raw.calls.isEmpty());
-        verify(approvalGate, never()).recordToolCallForApproval(anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any());
+        verify(approvalGate, never()).recordToolCallForApproval(anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
     }
 
     @Test

@@ -7,6 +7,7 @@ import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.agents.hosted.FreeTierChatClientService;
 import com.agenticai.core.agents.hosted.HostedChainLink;
 import com.agenticai.core.agents.hosted.HostedPoolExhaustedException;
+import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.turn.cache.LlmResponseCacheService;
@@ -128,8 +129,21 @@ final class ChatTurnDispatcher {
         // tried so far has had a real gap, and the cost of a false fire
         // (one reply buffered instead of streamed) is far lower than the
         // cost of a false miss (a fabricated link still reaching the user).
+        // Which turns give streaming up is app.chat.parity.fast-buffering-triggers (default: a generation
+        // tool or an MCP tool on offer, the live-incident guard above), decided in one place.
+        ChatParityProperties parity = turns.parity;
+        java.util.function.BooleanSupplier outputGuardrails =
+                FastBuffering.once(() -> svc.guardrails.hasOutputGuardrails(agent, currentTenantId));
         boolean bufferForGenerationSafety =
-                ChatPromptDirectives.offersGenerationTool(tools) || anyMcpToolsOffered;
+                FastBuffering.applies(parity, tools, anyMcpToolsOffered, outputGuardrails);
+        // A held reply that the output guardrails may withhold is checked where the reply completes
+        // (FastStreamTurn), so what is shown and what is stored are the same text.
+        context.reply().holdForOutputCheck(FastBuffering.holdsForOutputCheck(parity, outputGuardrails));
+        // app.chat.parity.fast-buffering-mode: FROM_FIRST_LINK streams the reply and holds only the part from the first
+        // link on; a reply the output guardrails may withhold is always held whole (it must not have been half shown).
+        boolean holdWholeReply =
+                parity.getFastBufferingMode() == ChatParityProperties.FastBufferingMode.WHOLE_REPLY
+                        || FastBuffering.holdsForOutputCheck(parity, outputGuardrails);
         Instant fastDispatchStartedAt = Instant.now();
         // RL REASONING_DEPTH (2026-08-15 wiring): effReasoningDepth is the
         // bandit-selected depth when one was chosen (never PLANNED - see
@@ -162,33 +176,106 @@ final class ChatTurnDispatcher {
                             } finally {
                                 SessionMemoryService.restoreMemorySessionId(previousMemoryBinding);
                             }
-                            return bufferForGenerationSafety
+                            if (!bufferForGenerationSafety) {
+                                return fast;
+                            }
+                            return holdWholeReply
                                     ? turns.bufferAndGuardGenerationClaims(
                                             context, fast, agentId, sessionId, fastDispatchStartedAt)
-                                    : fast;
+                                    : turns.streamAndGuardGenerationClaims(
+                                            context,
+                                            fast,
+                                            agentId,
+                                            sessionId,
+                                            fastDispatchStartedAt,
+                                            parity.getFastHoldMarkers());
                         };
-        // Self-correction (2026-10-18): a CAREFUL/RIGOROUS/PLANNED turn that hits
-        // app.llm.http.buffered-turn-timeout used to surface as "every model failed" - the
-        // whole turn was discarded after four minutes of work. Seen on a laptop running a 4B
-        // model at RIGOROUS depth: five sequential model calls plus verifier calls per tool
-        // never fit. Now the turn is answered at FAST depth instead, streamed, with tools
-        // disabled (the buffered attempt may already have run some of them; re-running a
-        // write is worse than answering without it), and the trace says so. The hosted chain
-        // wrapper sees a successful turn, so no provider is marked dead for being slow.
+        // A CAREFUL/RIGOROUS/PLANNED turn that hits its time limit (app.llm.http.buffered-turn-timeout, or
+        // an enclosing job deadline when that is longer) used to surface as "every model failed", and
+        // then (2026-10-18) was answered at FAST depth with its tools REMOVED - but the buffered attempt
+        // may already have run some of them, and the FAST answer was written without ever seeing what
+        // they returned, so it could claim anything about work it had not seen. Now:
+        //  - a tool ran (or is still running): the turn is reported with the steps that ran, in the
+        //    app.chat.resilience.depth-timeout-partial-notice wording, and is not answered again;
+        //  - no tool ran: nothing is lost by answering again at FAST depth, and the tools stay on offer
+        //    (app.chat.resilience.retry-at-fast-when-no-tool-ran);
+        // either way the trace says so, and the hosted chain wrapper sees a successful turn, so no
+        // provider is marked dead for being slow.
         java.util.function.BiFunction<ChatClient, String, Flux<String>> depthTimeoutFallback =
                 (client, depthName) ->
                         Flux.defer(
                                 () -> {
-                                    DegradedRetrySignal.flagDepthTimeout(
-                                            turns.meterRegistry(), agent, depthName, stepEvents);
-                                    return fastTurn.apply(client, List.of());
+                                    ChatResilienceProperties resilience = turns.resilience;
+                                    TurnToolActivity.Snapshot ran = context.toolActivity().snapshot();
+                                    if (!ran.anyToolRan() && resilience.isRetryAtFastWhenNoToolRan()) {
+                                        DegradedRetrySignal.flagDepthTimeout(
+                                                turns.meterRegistry(), agent, depthName, resilience, stepEvents);
+                                        return fastTurn.apply(client, tools);
+                                    }
+                                    DegradedRetrySignal.flagDepthTimeoutPartial(
+                                            turns.meterRegistry(),
+                                            agent,
+                                            depthName,
+                                            DepthTimeoutReport.completed(resilience, ran));
+                                    String report =
+                                            DepthTimeoutReport.text(
+                                                    resilience,
+                                                    depthName,
+                                                    bufferedTurns.bufferedLimit(context, fastDispatchStartedAt),
+                                                    ran);
+                                    // Not an answer: never cached, judged or announced. It is kept in the
+                                    // conversation, so the next turn can see which steps already ran
+                                    // instead of running them again.
+                                    context.reply().mark(TurnReplyOutcome.Kind.INTERRUPTED);
+                                    try {
+                                        turns.sessionMemoryService.appendTurn(
+                                                memorySessionId,
+                                                ChatTurn.assistant(
+                                                        report,
+                                                        context.toolActivity().ledger().snapshotOrNull()));
+                                    } catch (RuntimeException persistFailure) {
+                                        AgentChatService.log.warn(
+                                                "Could not persist the timeout report for agent {} session {}",
+                                                agentId,
+                                                sessionId,
+                                                persistFailure);
+                                    }
+                                    return Flux.just(report);
                                 });
+        // The FAST stream has no overall limit of its own; one applies when a tenant or the agent set a turn
+        // timeout or an agent job gave the turn its deadline (see TurnTimeLimit). A stream that runs past it
+        // is cut and the person is told what ran, in the same wording a buffered depth uses. The tokens already
+        // streamed were stored as an interrupted reply when the stream was cut, so nothing is stored here.
+        java.util.function.UnaryOperator<Flux<String>> capFastTurn =
+                fast ->
+                        TurnTimeLimit.fast(context, Instant.now())
+                                .map(
+                                        limit ->
+                                                TurnTimeLimit.cap(fast, limit)
+                                                        .onErrorResume(
+                                                                TurnTimeLimit.Exceeded.class,
+                                                                exceeded ->
+                                                                        Flux.defer(
+                                                                                () -> {
+                                                                                    ChatResilienceProperties resilience = turns.resilience;
+                                                                                    TurnToolActivity.Snapshot ran = context.toolActivity().snapshot();
+                                                                                    DegradedRetrySignal.flagDepthTimeoutPartial(
+                                                                                            turns.meterRegistry(),
+                                                                                            agent,
+                                                                                            "FAST",
+                                                                                            DepthTimeoutReport.completed(resilience, ran));
+                                                                                    context.reply().mark(TurnReplyOutcome.Kind.INTERRUPTED);
+                                                                                    return Flux.just(
+                                                                                            DepthTimeoutReport.text(
+                                                                                                    resilience, "FAST", exceeded.limitRoundedUp(), ran));
+                                                                                })))
+                                .orElse(fast);
         Function<ChatClient, Flux<String>> dispatchTurn =
                 turnClient -> {
                     ChatClient client =
                             compactionRun == null ? turnClient : compactionRun.attach(turnClient);
                     if (effectiveForceFastDepth || effReasoningDepth == ReasoningDepth.FAST) {
-                        return fastTurn.apply(client, tools);
+                        return capFastTurn.apply(fastTurn.apply(client, tools));
                     } else if (effReasoningDepth == ReasoningDepth.PLANNED) {
                         String previousMemoryBinding =
                                 SessionMemoryService.bindMemorySessionId(memorySessionId);
@@ -274,6 +361,8 @@ final class ChatTurnDispatcher {
         // The issue write below runs inside a reactor operator, on a thread that carries no
         // TenantContext; platform_issue is a tenant-schema table, so without the turn's scope it
         // resolved to a schema that does not exist and the pool-exhausted issue was never recorded.
+        TurnLifecycleEvents.HostedChain hostedFailovers =
+                new TurnLifecycleEvents.HostedChain(stepEvents, hostedChain);
         Flux<String> result =
                 svc.buildingTurnStream(
                         agentId,
@@ -284,12 +373,23 @@ final class ChatTurnDispatcher {
                                                         hostedChain,
                                                         0,
                                                         null,
-                                                        dispatchTurn,
+                                                        hostedFailovers.attempt(dispatchTurn),
                                                         agentId,
                                                         sessionId,
                                                         freeTierChatClientService.providerHealth(),
-                                                        svc::maybeSelfHealInvalidModelRow,
-                                                        exhaustedChainSyncHeal)
+                                                        hostedFailovers.onRungFailure(
+                                                                svc::maybeSelfHealInvalidModelRow),
+                                                        exhaustedChainSyncHeal,
+                                                        // A rung that failed after the turn ran tools is
+                                                        // not replayed on the next one (the tools would
+                                                        // run again): see FailoverReplayGate.
+                                                        () ->
+                                                                turns.replayBlockedBy(
+                                                                                context.toolActivity(),
+                                                                                agent,
+                                                                                "hosted-chain",
+                                                                                stepEvents)
+                                                                        .orElse(null))
                                                 .doOnError(
                                                         e -> {
                                                             context.scope()
@@ -413,12 +513,16 @@ final class ChatTurnDispatcher {
                                         // tens of seconds loading weights and evaluating the
                                         // prompt before its first token.
                                         stepEvents.phase("model");
+                                        if (context.continuation() != null) {
+                                            TurnLifecycleEvents.approvalContinuation(stepEvents);
+                                        }
                                     })
                             .doOnComplete(
-                                    () ->
-                                            stepEvents.runFinished(
-                                                    Duration.between(runStartedAt, Instant.now())
-                                                            .toMillis()))
+                                    () -> {
+                                        TurnLifecycleEvents.finish(stepEvents, context.reply().snapshot());
+                                        stepEvents.runFinished(
+                                                Duration.between(runStartedAt, Instant.now()).toMillis());
+                                    })
                             .doOnError(
                                     e -> {
                                         GuardrailViolationException violation =
@@ -471,7 +575,12 @@ final class ChatTurnDispatcher {
                         ttftStartNanos);
         // memorySessionId, not the raw client id: the failed reply must land in the same list the
         // user turn went to (and the transcript endpoint reads), not in an unscoped one.
-        result = svc.withFailedReplyPersistence(result, agentId, memorySessionId);
+        result =
+                svc.withFailedReplyPersistence(
+                        result,
+                        agentId,
+                        memorySessionId,
+                        () -> context.toolActivity().ledger().snapshotOrNull());
         // Skill-learning loop (app.skills.learning.enabled, off by default): reports how the turn
         // ended. Returns the same Flux, untouched, while the loop is off.
         result =
@@ -495,10 +604,22 @@ final class ChatTurnDispatcher {
         // person's message only; the reply stream is not touched and nothing blocks.
         com.agenticai.core.agents.skills.PreferenceSignalGateway.observe(
                 agentId, sessionId, userMessage, context.tenantContext());
-        boolean semanticPutEligible = semanticEligible && tools.isEmpty();
+        // A turn is stored only if it is cacheable now, not just when it began: an agent that offers
+        // tools, or a turn whose model called one, answered from live data. (Preflight already keeps
+        // such an agent out of the caches; this is the same rule at the point of writing, and the only
+        // one a per-call extra tool or a late-resolved list could otherwise slip past.)
+        ChatCachePolicy cachePolicy = turns.cachePolicy;
+        boolean toolFree = tools.isEmpty() && !context.toolActivity().anyToolRan();
+        // The tenant's and the agent's opt-in (chat.cache.eligibleWithTools), read once for this turn's write decisions.
+        boolean cacheEligibleWithTools = cachePolicy.eligibleWithTools(context.scope(), agentId);
+        boolean exactPutEligible = cacheEligible && (cacheEligibleWithTools || toolFree);
+        // The semantic cache has only ever stored tool-less turns, whatever the setting.
+        boolean semanticPutEligible =
+                semanticEligible && tools.isEmpty() && (cacheEligibleWithTools || toolFree);
+        String cacheConversationKey = turn.cacheConversationKey();
         Flux<Long> cancelled =
                 chatTurnCancelService.watchForCancellation(requestedAgentId, memorySessionId);
-        if (!cacheEligible && !semanticPutEligible) {
+        if (!exactPutEligible && !semanticPutEligible) {
             return result.takeUntilOther(cancelled);
         }
         StringBuilder fullReply = new StringBuilder();
@@ -506,9 +627,31 @@ final class ChatTurnDispatcher {
                 .doOnComplete(
                         () -> {
                             String full = fullReply.toString();
-                            if (cacheEligible) {
+                            // A stream that completes is not necessarily an answer: a reply cut off
+                            // at the output limit, stopped by the safety system, closed after a
+                            // failure or replaced by the "no response" line must not be served to
+                            // the next person who asks the same thing.
+                            if (!context.reply().isComplete()) {
+                                AgentChatService.log.info(
+                                        "Agent {} session {}: reply ended as {} - not cached",
+                                        agentId,
+                                        sessionId,
+                                        context.reply().kind());
+                                return;
+                            }
+                            // A tool ran during this turn after all (the list offered at the start can
+                            // be empty while a delegate call runs one): the reply is not cacheable.
+                            if (!cacheEligibleWithTools && context.toolActivity().anyToolRan()) {
+                                return;
+                            }
+                            if (exactPutEligible) {
                                 responseCacheService.put(
-                                        currentTenantId, agentId, subjectKey, userMessage, full);
+                                        currentTenantId,
+                                        agentId,
+                                        subjectKey,
+                                        userMessage,
+                                        cacheConversationKey,
+                                        full);
                             }
                             if (semanticPutEligible) {
                                 context.scope()
@@ -518,6 +661,7 @@ final class ChatTurnDispatcher {
                                                                 agentId,
                                                                 subjectKey,
                                                                 userMessage,
+                                                                cacheConversationKey,
                                                                 full));
                             }
                         })

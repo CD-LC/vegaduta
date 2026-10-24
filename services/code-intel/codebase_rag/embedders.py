@@ -63,8 +63,7 @@ class FastEmbedEmbedder(Embedder):
         try:
             from fastembed import TextEmbedding  # type: ignore
         except ImportError as e:
-            raise RuntimeError(
-                "embedder 'fastembed' requires: pip install fastembed") from e
+            raise RuntimeError("embedder 'fastembed' requires: pip install fastembed") from e
         self.model = model
         self._m = TextEmbedding(model_name=model)
 
@@ -81,16 +80,18 @@ class SentenceTransformersEmbedder(Embedder):
             from sentence_transformers import SentenceTransformer  # type: ignore
         except ImportError as e:
             raise RuntimeError(
-                "embedder 'sentence-transformers' requires: "
-                "pip install sentence-transformers") from e
+                "embedder 'sentence-transformers' requires: pip install sentence-transformers"
+            ) from e
         self.model = model
         self._m = SentenceTransformer(model)
 
     def embed(self, texts: list[str]) -> np.ndarray:
         return np.asarray(
-            self._m.encode(texts, batch_size=BATCH_SIZE,
-                           show_progress_bar=False, convert_to_numpy=True),
-            dtype=np.float32)
+            self._m.encode(
+                texts, batch_size=BATCH_SIZE, show_progress_bar=False, convert_to_numpy=True
+            ),
+            dtype=np.float32,
+        )
 
 
 class OpenAIEmbedder(Embedder):
@@ -100,8 +101,7 @@ class OpenAIEmbedder(Embedder):
         try:
             from openai import OpenAI  # type: ignore
         except ImportError as e:
-            raise RuntimeError(
-                "embedder 'openai' requires: pip install openai") from e
+            raise RuntimeError("embedder 'openai' requires: pip install openai") from e
         self.model = model
         self._client = OpenAI(
             base_url=base_url,
@@ -111,8 +111,7 @@ class OpenAIEmbedder(Embedder):
     def embed(self, texts: list[str]) -> np.ndarray:
         out: list[list[float]] = []
         for i in range(0, len(texts), BATCH_SIZE):
-            resp = self._client.embeddings.create(
-                model=self.model, input=texts[i:i + BATCH_SIZE])
+            resp = self._client.embeddings.create(model=self.model, input=texts[i : i + BATCH_SIZE])
             out.extend(d.embedding for d in resp.data)
         return np.asarray(out, dtype=np.float32)
 
@@ -124,8 +123,8 @@ def _cache_max() -> int:
         return 2
 
 
-_EMBEDDER_CACHE: "OrderedDict[tuple, Embedder]" = OrderedDict()
-_EMBEDDER_LOCK = threading.Lock()       # guards the dict only (never a load)
+_EMBEDDER_CACHE: OrderedDict[tuple, Embedder] = OrderedDict()
+_EMBEDDER_LOCK = threading.Lock()  # guards the dict only (never a load)
 _BUILD_LOCKS: dict[tuple, threading.Lock] = {}
 
 
@@ -155,8 +154,11 @@ def make_embedder(cfg: Config) -> Embedder:
     service enforces CODE_INTEL_ALLOWED_EMBED_MODELS before this point). The
     cache lock is never held during a model load, so a slow load does not
     block searches that need an already-cached embedder."""
-    key = (cfg.embedder.lower(), cfg.embed_model,
-           cfg.openai_base_url if cfg.embedder.lower() == "openai" else None)
+    key = (
+        cfg.embedder.lower(),
+        cfg.embed_model,
+        cfg.openai_base_url if cfg.embedder.lower() == "openai" else None,
+    )
     with _EMBEDDER_LOCK:
         emb = _EMBEDDER_CACHE.get(key)
         if emb is not None:
@@ -188,5 +190,7 @@ def _build_embedder(cfg: Config) -> Embedder:
         return SentenceTransformersEmbedder(cfg.embed_model)
     if kind == "openai":
         return OpenAIEmbedder(cfg.embed_model, cfg.openai_base_url)
-    raise ValueError(f"Unknown embedder '{cfg.embedder}' "
-                     "(expected fastembed | sentence-transformers | openai | hash)")
+    raise ValueError(
+        f"Unknown embedder '{cfg.embedder}' "
+        "(expected fastembed | sentence-transformers | openai | hash)"
+    )

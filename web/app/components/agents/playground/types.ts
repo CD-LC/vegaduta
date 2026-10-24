@@ -153,6 +153,21 @@ export interface PlaygroundAgent {
   modalities?: { document?: boolean; sandboxData?: boolean; sandboxDataUnavailableReason?: string | null } | null;
   allowedKnowledgeCollectionIds?: string[] | null;
   biometricConsentEnabled?: boolean;
+  // What the "Run settings" drawer shows (all optional: an older core, or a stub agent in a test, omits them).
+  /** FAST / PLANNED / CAREFUL / RIGOROUS. */
+  reasoningDepth?: string | null;
+  temperature?: number | null;
+  topP?: number | null;
+  maxTokens?: number | null;
+  topK?: number | null;
+  frequencyPenalty?: number | null;
+  presencePenalty?: number | null;
+  seed?: number | null;
+  stopSequences?: string[] | null;
+  /** Tools the agent may call; a tool is on when it is in this list. */
+  allowedToolNames?: string[] | null;
+  /** EDITOR / VIEWER / RUNNER; null or absent means the caller owns the agent. */
+  accessLevel?: string | null;
 }
 
 /** sendViaEdge's result contract for handleSend: routeTurn's own

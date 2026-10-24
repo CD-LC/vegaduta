@@ -336,7 +336,7 @@ function OutcomeCard({ outcome, title, accent }: { outcome: MissionOutcome; titl
         <div className="md:col-span-3">
           <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Answer</div>
           {outcome.answer ? (
-            <div className="whitespace-pre-wrap rounded-lg bg-muted/40 p-3 text-sm leading-relaxed">
+            <div className="whitespace-pre-wrap break-all rounded-lg bg-muted/40 p-3 text-sm leading-relaxed">
               {outcome.answer}
             </div>
           ) : outcome.running ? (

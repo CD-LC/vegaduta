@@ -2,6 +2,8 @@ package com.agenticai.core.platform.ops;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -45,6 +47,7 @@ import org.springframework.stereotype.Service;
  *
  * <p>Answers are cached for 30 s per replica; probes run in parallel.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Service
 public class PlatformVersionService {
 
@@ -87,7 +90,7 @@ public class PlatformVersionService {
         @Value("${BUILD_TIME:}") String buildTime,
         @Value("${app.sidecar.base-url:}") String sidecarBaseUrl,
         @Value("${code-intel.enabled:false}") boolean codeIntelEnabled,
-        @Value("${code-intel.base-url:}") String codeIntelBaseUrl,
+        @Value("${code-intel.base-url:http://localhost:8090}") String codeIntelBaseUrl,
         @Value("${app.platform.ops.academy-base-url:}") String academyBaseUrl,
         @Value("${app.platform.ops.app-builder-base-url:}") String appBuilderBaseUrl,
         @Value("${app.platform.ops.web-base-url:}") String webBaseUrl,

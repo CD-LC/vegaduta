@@ -1,0 +1,2 @@
+# Hate-speech and discrimination terms (PolicyViolationGuardrail). English set; other locales add to it.
+(?i)\b(racist|sexist|homophobe|transphobe|ableist|inferior.?(?:race|gender)|supremacist|inferior)\b

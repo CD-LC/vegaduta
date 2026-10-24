@@ -5,6 +5,8 @@ import com.agenticai.core.audit.IssueSource;
 import com.agenticai.core.audit.PlatformIssueService;
 import com.agenticai.core.chat.LlmCallLogService;
 import com.agenticai.core.chat.langfuse.LangfuseScoreClient;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.security.TenantContext;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -67,20 +70,30 @@ public class LlmQualityJudgeService {
 
     private static final Logger log = LoggerFactory.getLogger(LlmQualityJudgeService.class);
 
-    private static final String JUDGE_SYSTEM_PROMPT = """
-        You are an independent quality reviewer sampling a live AI assistant's response for a
-        SaaS platform's admin quality dashboard - you are not the user and not the assistant.
-        Judge the response strictly on: (1) does it actually address what the user asked, (2) does
-        it contain a confident factual claim that reads as fabricated or unverifiable, (3) does it
-        refuse or deflect a request that seems reasonable to answer, (4) is it incoherent, badly
-        truncated, or otherwise broken. Minor style or tone issues are NOT a flag - only real
-        problems a platform operator would want to know about.
+    /** Registry key of the judge's system prompt (default text: {@code prompts/en/judge.quality.md}). */
+    static final String PROMPT_KEY = "judge.quality";
 
-        Respond with EXACTLY one line, no other text:
-        OK
-        or
-        FLAG: <one short sentence explaining the specific problem>
-        """;
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so a tenant or agent override of {@link #PROMPT_KEY} applies; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
+
+    private volatile JudgeSampleRate sampleRates;
+
+    /** The run-time override of the sample rate (platform setting); absent = {@code app.llm.judge.sample-rate} as is. */
+    @Autowired(required = false)
+    void useSampleRate(JudgeSampleRate rates) {
+        this.sampleRates = rates;
+    }
+
+    /** The fraction of turns sampled right now: the platform setting if an admin set one, else the configured rate. */
+    double effectiveSampleRate() {
+        JudgeSampleRate rates = sampleRates;
+        return rates == null ? sampleRate : rates.current(sampleRate);
+    }
 
     private final ObjectProvider<PlatformIssueService> issueService;
     private final LlmCallLogService llmCallLogService;
@@ -120,7 +133,7 @@ public class LlmQualityJudgeService {
         if (service == null) {
             return;
         }
-        if (ThreadLocalRandom.current().nextDouble() >= sampleRate) {
+        if (ThreadLocalRandom.current().nextDouble() >= effectiveSampleRate()) {
             return;
         }
 
@@ -141,7 +154,7 @@ public class LlmQualityJudgeService {
         PlatformIssueService service, ChatClient chatClient, UUID agentId, String sessionId, String userMessage, String answer
     ) {
         String verdict = chatClient.prompt()
-            .system(JUDGE_SYSTEM_PROMPT)
+            .system(prompts.text(PROMPT_KEY, agentId))
             .user("User's message: " + truncate(userMessage) + "\n\nAssistant's response: " + truncate(answer))
             .call()
             .content();

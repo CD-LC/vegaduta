@@ -350,7 +350,7 @@ class SkillFormatTest {
         // other session is unaffected
         assertFalse(gate.shouldOffer("s2", skills, "yes, go ahead"));
         // history window expires, but a loaded skill stays sticky for the session
-        for (int i = 0; i < SkillPromptBlock.HISTORY_TURNS + 1; i++) {
+        for (int i = 0; i < new SkillPromptProperties().getHistoryTurns() + 1; i++) {
             gate.shouldOffer("s3", skills, i == 0 ? "need a spreadsheet" : "chat turn " + i);
         }
         assertFalse(gate.shouldOffer("s3", skills, "still chatting"));

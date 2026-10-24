@@ -77,11 +77,12 @@ class AsyncHopTenantScopeRulesTest {
                     "com.agenticai.core.agents.turn.TenantScopedFlux");
 
     /**
-     * ADR-0024: every type in the factory package captures the tenant on submit (the executors
-     * and schedulers {@code TenantAwareExecutors} / {@code TenantAwareSchedulers} build), so a
-     * call to it, or a hand-off to one of its concrete types, is a wrapped hop.
+     * ADR-0024: every type in the factory package captures the tenant on submit (the executors and
+     * schedulers {@code TenantAwareExecutors} / {@code TenantAwareSchedulers} build), so a call to
+     * it, or a hand-off to one of its concrete types, is a wrapped hop.
      */
-    private static final String APPROVED_WRAPPER_PACKAGE = "com.agenticai.core.security.concurrent.";
+    private static final String APPROVED_WRAPPER_PACKAGE =
+            "com.agenticai.core.security.concurrent.";
 
     static boolean isApprovedWrapper(String ownerName) {
         return APPROVED_WRAPPER_OWNERS.contains(ownerName)
@@ -105,7 +106,12 @@ class AsyncHopTenantScopeRulesTest {
                     "interval",
                     "delay",
                     "delayElements",
-                    "delaySubscription");
+                    "delaySubscription",
+                    // A timeout that fires emits TimeoutException on Reactor's raw parallel
+                    // timer thread, so every onErrorResume/doOnError after it runs with no
+                    // TenantContext (fails closed, but drops the fallback or the partial
+                    // transcript). The timer-thread continuation is a hop like delay().
+                    "timeout");
 
     private static JavaClasses classes;
 
@@ -290,17 +296,17 @@ class AsyncHopTenantScopeRulesTest {
                     soft.assertThat(unlisted)
                             .as(
                                     "These classes hand work to another thread without TenantScope"
-                                        + " / ContextPropagatingExecutor / TenantScopedFlux in the"
-                                        + " same method. TenantContext is a ThreadLocal: capture it"
-                                        + " on the originating thread (TenantScope.capture()) and"
-                                        + " re-apply it on the worker (scope.run(..),"
-                                        + " scope.wrapRunnable(..),"
-                                        + " ContextPropagatingExecutor.propagating(..)), never"
-                                        + " leave it set on a pooled thread. If the hop genuinely"
-                                        + " needs no tenant (control-plane/non-tenant work, tenant"
-                                        + " carried as an explicit id, set/restore done by hand),"
-                                        + " add 'fully.qualified.Class | reason' to "
-                                        + "core/app/src/test/resources"
+                                            + " / ContextPropagatingExecutor / TenantScopedFlux in the"
+                                            + " same method. TenantContext is a ThreadLocal: capture it"
+                                            + " on the originating thread (TenantScope.capture()) and"
+                                            + " re-apply it on the worker (scope.run(..),"
+                                            + " scope.wrapRunnable(..),"
+                                            + " ContextPropagatingExecutor.propagating(..)), never"
+                                            + " leave it set on a pooled thread. If the hop genuinely"
+                                            + " needs no tenant (control-plane/non-tenant work, tenant"
+                                            + " carried as an explicit id, set/restore done by hand),"
+                                            + " add 'fully.qualified.Class | reason' to "
+                                            + "core/app/src/test/resources"
                                             + ALLOWLIST
                                             + ". Offenders:"
                                             + message)
@@ -348,7 +354,8 @@ class AsyncHopTenantScopeRulesTest {
                 .anySatisfy(
                         site -> assertThat(site).startsWith("executorExecute: Executor.execute"))
                 .anySatisfy(site -> assertThat(site).startsWith("reactorHops: Mono.subscribeOn"))
-                .anySatisfy(site -> assertThat(site).startsWith("reactorHops: Mono.publishOn"));
+                .anySatisfy(site -> assertThat(site).startsWith("reactorHops: Mono.publishOn"))
+                .anySatisfy(site -> assertThat(site).startsWith("reactorTimeout: Mono.timeout"));
         assertThat(sites)
                 .as("creating a pool is not a hop")
                 .noneMatch(site -> site.startsWith("newPool"));

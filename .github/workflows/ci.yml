@@ -48,6 +48,7 @@ jobs:
       compose: ${{ steps.filter.outputs.compose }}
       helm: ${{ steps.filter.outputs.helm }}
       docs: ${{ steps.filter.outputs.docs }}
+      windows-launcher: ${{ steps.filter.outputs.windows-launcher }}
     # Path filtering only applies to pull requests: every downstream job runs
     # unconditionally on push and workflow_dispatch (`|| github.event_name !=
     # 'pull_request'`), so the filter is skipped there and the outputs stay
@@ -79,10 +80,19 @@ jobs:
               # ConsumerContractVerificationTest and OpenApiSpecFreshnessTest (ADR-0025)
               - 'contracts/consumers/**'
               - 'docs/api/openapi.json'
+              # AuditOutcomeAlignmentTest reads contracts/outbound/audit-event.schema.json
+              # and pins the SDK enums (sdk/java agent-api, sdk/python-agent audit.py)
+              - 'contracts/outbound/**'
+              - 'sdk/java/agent-api/**'
+              - 'sdk/python-agent/vegaduta_agent/audit.py'
             sdk:
               - *ci
               - 'sdk/java/**'
               - 'examples/sdk/**'
+              # agent-testkit CoreConsumerContractTest reads contracts/consumers/sdk-java
+              # and contracts/outbound/audit-event.schema.json
+              - 'contracts/consumers/sdk-java/**'
+              - 'contracts/outbound/**'
             sdk-clients:
               - *ci
               - 'sdk/generate.mjs'
@@ -112,7 +122,11 @@ jobs:
             node-services:
               - *ci
               - 'services/mcp-stdio-runner/**'
+              - 'services/workspace-runner/**'
+              - 'core/Dockerfile'
               - 'services/piece-host/**'
+              - 'services/whatsapp-qr/**'
+              - 'services/desktop-agent/**'
               - 'examples/mcp-servers/**'
             shell:
               - *ci
@@ -132,6 +146,11 @@ jobs:
               - *ci
               - '*.md'
               - 'docs/**'
+            # scripts/vegaduta.ps1 runs on the Windows runner under both PowerShells; no other change reaches it.
+            windows-launcher:
+              - 'scripts/vegaduta.ps1'
+              - 'tests/install/**'
+              - '.github/workflows/ci.yml'
 
   core:
     name: core (Maven verify, JDK 21)
@@ -242,12 +261,14 @@ jobs:
         # own containers on random ports (the pg container above is untouched).
         run: mvn -B -ntp -Pcoverage,it verify -Dvegaduta.test.postgres.image=vegaduta-postgres:ci
 
-      # The integration suite above boots a Spring test context. This boots the packaged jar
-      # (the artifact the image ships) against the same Postgres image and Redis, waits for
-      # readiness and probes routes that must answer 401. It reuses the jar `verify` just built.
+      # The integration suite above boots a Spring test context. This boots the packaged jars
+      # (the artifacts the images ship: api, a migrate-only run, jobs and worker) against the
+      # same Postgres image and Redis, waits for readiness and probes api routes that must answer
+      # 401. The jobs and worker shapes scan no controllers and failed to start in v0.1.9 while
+      # the api booted. It reuses the jars `verify` just built.
       # Advisory for now: it has run locally but not yet on a runner. Remove continue-on-error
       # once it has been green on main (audit item 1, docs/architecture/STRUCTURAL-AUDIT-2026-10-14.md).
-      - name: Boot check (packaged jar, Postgres + Redis)
+      - name: "Boot check (packaged jars: api, migrate-only, jobs, worker; Postgres + Redis)"
         continue-on-error: true
         env:
           BOOTCHECK_PG_IMAGE: vegaduta-postgres:ci
@@ -317,9 +338,9 @@ jobs:
         working-directory: sdk/java
         run: |
           set -euo pipefail
-          sha256sum */target/*-SNAPSHOT.jar */target/*-sources.jar | sort > /tmp/build-1.sha256
+          find . -path '*/target/*.jar' ! -name '*-javadoc.jar' -print0 | sort -z | xargs -0 sha256sum > /tmp/build-1.sha256
           mvn -B -ntp -q -DskipTests clean package
-          sha256sum */target/*-SNAPSHOT.jar */target/*-sources.jar | sort > /tmp/build-2.sha256
+          find . -path '*/target/*.jar' ! -name '*-javadoc.jar' -print0 | sort -z | xargs -0 sha256sum > /tmp/build-2.sha256
           diff /tmp/build-1.sha256 /tmp/build-2.sha256
 
       # The examples consume the SDK the way a user does: from the local repository.
@@ -420,8 +441,10 @@ jobs:
 
       # Ruff config lives in each service's pyproject.toml (sidecar, code-intel);
       # the other services use ruff's defaults. Blocking gate = lint + format of
-      # the .py files this PR adds or modifies, in any service. The whole-tree
-      # run below is advisory until the existing findings are burned down.
+      # the .py files this PR adds or modifies, in any service, and the whole
+      # tree of sidecar and code-intel (the same command as `make lint`). The
+      # other four services' whole-tree run is advisory until their existing
+      # findings are burned down.
       - name: Install ruff
         run: pip install ruff==0.12.4
       - name: Ruff lint + format (changed files)
@@ -431,9 +454,11 @@ jobs:
           if [ "${#files[@]}" -eq 0 ]; then echo "No changed Python files."; exit 0; fi
           ruff check --force-exclude "${files[@]}"
           ruff format --check --force-exclude "${files[@]}"
-      - name: Ruff whole tree (all services, advisory)
+      - name: Ruff whole tree (sidecar, code-intel)
+        run: ruff check services/sidecar services/code-intel
+      - name: Ruff whole tree (other services, advisory)
         continue-on-error: true
-        run: ruff check services/sidecar services/code-intel services/app-builder services/voice-agent services/rl-trainer services/tool-sandbox
+        run: ruff check services/app-builder services/voice-agent services/rl-trainer services/tool-sandbox
 
       # The same hash-locked install as the sidecar Dockerfile: the torch
       # block of requirements.lock first, --no-deps, from the CPU-only index,
@@ -464,16 +489,14 @@ jobs:
 
       # NOT pytest. code-intel/tests are framework-free scripts on a hand-rolled
       # check() harness that reports failures only through main()'s exit code;
-      # pytest would error on collection or pass vacuously. Invoke each module
-      # and rely on its exit code.
+      # pytest would error on collection or pass vacuously. Invoke every
+      # tests/test_*.py module (a new one is picked up without editing this
+      # file) and rely on its exit code.
       - name: code-intel tests (script harness, not pytest)
         working-directory: services/code-intel
         run: |
-          for m in test_auth test_service test_guardrails test_agent \
-                   test_approval_reconcile test_exec_and_mcp \
-                   test_gitops_auth_token test_gitops_confinement \
-                   test_run_modes test_store_search; do
-            python -m "tests.$m" || exit 1
+          for f in tests/test_*.py; do
+            python -m "tests.$(basename "$f" .py)" || exit 1
           done
 
   python-locks:
@@ -527,6 +550,9 @@ jobs:
             test: pip install pytest==8.3.2 && python -m pytest tests/ -q
           - service: voice-agent
             test: python -m pytest tests/ -q
+          - service: rl-trainer
+            # pytest comes from requirements-dev.txt (installed by the Install step).
+            test: python -m pytest tests/ -q
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -546,7 +572,7 @@ jobs:
         run: bash -c "$TEST_CMD"
 
   node-services:
-    name: Node services (mcp-stdio-runner, piece-host, example MCP servers)
+    name: Node services (mcp-stdio-runner, piece-host, workspace-runner, whatsapp-qr, desktop-agent, example MCP servers)
     needs: changes
     if: needs.changes.outputs.node-services == 'true' || github.event_name != 'pull_request'
     runs-on: ubuntu-latest
@@ -558,9 +584,21 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
+      # Plain `node --test` runs every *.test.js (server.test.js and
+      # server.limits.test.js); naming one file skipped the limits suite.
       - name: mcp-stdio-runner (node:test)
         working-directory: services/mcp-stdio-runner
-        run: node --test server.test.js
+        run: node --test
+      # The next three have no runtime dependencies the tests load: no npm install.
+      - name: workspace-runner (node:test)
+        working-directory: services/workspace-runner
+        run: node --test
+      - name: whatsapp-qr (node:test)
+        working-directory: services/whatsapp-qr
+        run: node --test
+      - name: desktop-agent (node:test)
+        working-directory: services/desktop-agent
+        run: node --test
       # Zero runtime dependencies; the tests need no npm install.
       - name: piece-host (node:test)
         working-directory: services/piece-host
@@ -605,14 +643,19 @@ jobs:
       - name: Python client and sdk-python consumer contract (unittest)
         working-directory: sdk/python
         run: python -m unittest discover -s tests
+      - name: Inbound webhook fixtures validate against contracts/inbound schemas (unittest)
+        run: python -m unittest discover -s contracts/consumers/tools -p 'test_*.py'
       - name: python-agent tests, incl. sdk-python-agent consumer contract (pytest)
         working-directory: sdk/python-agent
         run: |
           pip install -e '.[dev]'
           python -m pytest tests/ -q
-      - name: python-agent lint (ruff)
+      - name: python-agent lint and format check (ruff)
         working-directory: sdk/python-agent
-        run: ruff check vegaduta_agent tests
+        # pypi-release.yml runs the same two commands, so a release can no longer fail on formatting.
+        run: |
+          ruff check vegaduta_agent tests
+          ruff format --check vegaduta_agent tests
 
   shellcheck:
     name: shellcheck
@@ -698,7 +741,10 @@ jobs:
 
   # Developer Certificate of Origin: every non-merge commit in the pull request
   # carries a "Signed-off-by:" trailer with the commit author's email
-  # (`git commit -s`). See CONTRIBUTING.md.
+  # (`git commit -s`). See CONTRIBUTING.md. Commits by Dependabot and the GitHub
+  # Actions bot on their own pull requests are skipped (the bots never sign off);
+  # a human commit pushed onto such a branch is still checked.
+  # The logic lives in scripts/ci/dco-check.sh, tested by scripts/ci/test-dco-check.sh.
   dco:
     name: DCO sign-off
     if: github.event_name == 'pull_request'
@@ -709,25 +755,14 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: DCO check self-test
+        run: bash scripts/ci/test-dco-check.sh
       - name: Check Signed-off-by trailers
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          bad=0
-          while read -r sha; do
-            email="$(git log -1 --format=%ae "$sha")"
-            if git log -1 --format=%B "$sha" | grep -i '^Signed-off-by: ' | grep -qiF "<${email}>"; then
-              echo "ok      ${sha:0:12} $(git log -1 --format=%s "$sha")"
-            else
-              echo "::error::commit ${sha:0:12} has no 'Signed-off-by:' trailer for its author <${email}>"
-              bad=1
-            fi
-          done < <(git rev-list --no-merges "${BASE_SHA}..${HEAD_SHA}")
-          if [ "$bad" -ne 0 ]; then
-            echo "Sign off every commit: git rebase --signoff ${BASE_SHA:0:12} && git push --force-with-lease"
-            exit 1
-          fi
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: bash scripts/ci/dco-check.sh "$BASE_SHA" "$HEAD_SHA" "$PR_AUTHOR"
 
   # Blocks a pull request that adds a dependency with a known high/critical
   # vulnerability, or one under a license incompatible with shipping the
@@ -788,10 +823,48 @@ jobs:
           "$RUNNER_TEMP/lychee" --offline --no-progress --include-fragments \
             './*.md' 'docs/**/*.md' 'docs/**/*.html'
 
+  # The Windows launcher (scripts/vegaduta.ps1) is the one script that ships to every Windows user and
+  # that no other job executes. Pester (tests/install/vegaduta-ps1.Tests.ps1) runs it as a child process
+  # against a fake docker, once under Windows PowerShell 5.1 (powershell.exe, the one Setup starts) and
+  # once under PowerShell 7 (pwsh); 5.1 behaves differently from 7 (native stderr under
+  # $ErrorActionPreference = 'Stop', syntax, cmdlet parameters), so both must pass. The second step runs
+  # even when the first fails, so one run shows both results.
+  windows-launcher:
+    name: windows launcher (PowerShell 5.1 and 7)
+    needs: changes
+    if: needs.changes.outputs.windows-launcher == 'true' || github.event_name != 'pull_request'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Pester under Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+          ./tests/install/run-vegaduta-ps1-tests.ps1
+      - name: Pester under PowerShell 7
+        if: ${{ !cancelled() }}
+        shell: pwsh
+        run: |
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+          ./tests/install/run-vegaduta-ps1-tests.ps1
+      - name: PSScriptAnalyzer (syntax compatible with 5.1, no errors)
+        if: ${{ !cancelled() }}
+        shell: pwsh
+        run: |
+          Install-Module -Name PSScriptAnalyzer -RequiredVersion 1.24.0 -Scope CurrentUser -Force
+          $compat = @{ Rules = @{ PSUseCompatibleSyntax = @{ Enable = $true; TargetVersions = @('5.1') } } }
+          $found = @(Invoke-ScriptAnalyzer -Path scripts/vegaduta.ps1 -Settings $compat -IncludeRule PSUseCompatibleSyntax)
+          $found += @(Invoke-ScriptAnalyzer -Path scripts/vegaduta.ps1 -Severity Error)
+          $found | Format-Table RuleName, Severity, Line, Message -AutoSize | Out-String -Width 200 | Write-Host
+          if ($found.Count -gt 0) { throw "$($found.Count) PSScriptAnalyzer finding(s)" }
+
   ci-ok:
     name: CI OK
     if: always()
-    needs: [changes, core, sdk, sdk-clients, web, python, python-locks, python-extra, node-services, shellcheck, hadolint, compose, helm, static-gates, dco, dependency-review, docs-links]
+    needs: [changes, core, sdk, sdk-clients, web, python, python-locks, python-extra, node-services, shellcheck, hadolint, compose, helm, static-gates, dco, dependency-review, docs-links, windows-launcher]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

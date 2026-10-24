@@ -3,6 +3,7 @@ package com.agenticai.core.agents.collab;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.StepJournal;
 import com.agenticai.core.agents.turn.AgentChatService;
+import com.agenticai.core.prompts.tool.ToolPromptTexts;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,9 +41,10 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * handoff} edges - emitted on the tool's own thread, not the branches', since the emitter's
  * tool-scope binding is a ThreadLocal that does not propagate onto virtual threads.
  *
- * <p><b>Bounded:</b> at most {@value #MAX_BRANCHES} branches per call and a per-branch wall-clock
- * timeout of {@value #BRANCH_TIMEOUT_SECONDS}s, so a hung collaborator cannot pin the turn forever
- * and a model cannot fan out unboundedly. Branch results are capped at {@value #MAX_ANSWER_CHARS}
+ * <p><b>Bounded:</b> at most {@code app.agents.collaboration.max-branches} branches per call and a
+ * per-branch wall-clock timeout of {@code branch-timeout-seconds}, so a hung collaborator cannot pin
+ * the turn forever and a model cannot fan out unboundedly. Branch results are capped at {@code
+ * max-answer-chars}
  * chars each to keep the aggregate inside the calling model's context budget.
  */
 public class DelegateToTeamToolCallback implements ToolCallback {
@@ -50,18 +52,53 @@ public class DelegateToTeamToolCallback implements ToolCallback {
     private static final Logger log = LoggerFactory.getLogger(DelegateToTeamToolCallback.class);
     private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
-    static final int MAX_BRANCHES = 8;
-    static final long BRANCH_TIMEOUT_SECONDS = 240;
-    static final int MAX_ANSWER_CHARS = 4000;
     public static final String TOOL_NAME = "delegate_parallel";
     static final String ERR_NOT_MEMBER = "not a member of this team";
     static final String ERR_QUESTION_REQUIRED = "question is required";
+
+    /** Branch, timeout and answer bounds ({@code app.agents.collaboration.*}); the shipped defaults until {@link #withLimits}. */
+    private volatile CollaborationProperties limits = new CollaborationProperties();
+
+    /** Applies the bound {@code app.agents.collaboration.*} settings; called by the factory right after construction. */
+    DelegateToTeamToolCallback withLimits(CollaborationProperties limits) {
+        this.limits = limits;
+        this.resolvedLimits = ResolvedCollaborationLimits.platformOnly(limits);
+        return this;
+    }
+
+    /** The branch and timeout bounds as the settings catalog resolves them; the platform values until {@link #withSettings}. */
+    private volatile ResolvedCollaborationLimits resolvedLimits = ResolvedCollaborationLimits.platformOnly(limits);
+
+    /** The bounds in force; the platform's own when no view was set (an instance made without its field initialisers). */
+    private ResolvedCollaborationLimits limitsView() {
+        ResolvedCollaborationLimits view = resolvedLimits;
+        return view != null ? view : ResolvedCollaborationLimits.platformOnly(limits);
+    }
+
+    /**
+     * Reads {@code delegation.maxBranches} and {@code delegation.branchTimeoutSeconds} through the settings catalog for
+     * {@code callerAgentId} (the agent whose turn offers the tool) and the tenant captured at construction; called by the
+     * factory right after {@link #withLimits}. A null resolver keeps the platform values.
+     */
+    DelegateToTeamToolCallback withSettings(com.agenticai.core.settings.SettingsResolver settings, UUID callerAgentId) {
+        if (settings != null) {
+            this.resolvedLimits = new ResolvedCollaborationLimits(limits, settings, callerAgentId, capturedContext);
+        }
+        return this;
+    }
 
     /** One swarm member, resolved at tool-resolution time (id + display name). */
     public record Member(UUID agentId, String name, String slug) {}
 
     private final AgentChatService agentChatService;
     private final Map<String, Member> membersBySlug;
+
+    /**
+     * The prompt registry as it stands for the agent whose tools are being resolved (captured at
+     * construction, on the request thread): the description is the registry key {@code
+     * tool.template.delegate_parallel} with {@code {roster}} filled in.
+     */
+    private final ToolPromptTexts promptTexts = ToolPromptTexts.current();
 
     /**
      * The calling thread's TenantContext, captured at tool-RESOLUTION time on the request thread -
@@ -150,7 +187,9 @@ public class DelegateToTeamToolCallback implements ToolCallback {
         for (Member m : members) {
             bySlug.put(m.slug(), m);
         }
-        this.membersBySlug = Map.copyOf(bySlug);
+        // Not Map.copyOf: its iteration order is salted per JVM, which made the roster text (and the
+        // not-a-member hint) list the members in a different order from run to run.
+        this.membersBySlug = java.util.Collections.unmodifiableMap(bySlug);
     }
 
     @Override
@@ -162,17 +201,11 @@ public class DelegateToTeamToolCallback implements ToolCallback {
         String rosterText = roster.substring(0, roster.length() - 2);
         return ToolDefinition.builder()
                 .name(TOOL_NAME)
-                .description(
-                        "Delegates several independent questions to specialist agents AT ONCE and waits for all of them."
-                                + " Members you can address: "
-                                + rosterText
-                                + "."
-                                + " Use this when the user's request splits into independent parts that different specialists can"
-                                + " answer in parallel - each member gets only the question you send (no conversation history),"
-                                + " works in isolation, and you get every answer back together. Do NOT use it for sequential"
-                                + " work where one specialist's answer shapes the next question - delegate one at a time instead.")
+                .description(promptTexts.description(TOOL_NAME, Map.of("roster", rosterText)))
                 .inputSchema(
-                        """
+                        promptTexts.schema(
+                                TOOL_NAME,
+                                """
                 {
                     "type": "object",
                     "properties": {
@@ -197,12 +230,12 @@ public class DelegateToTeamToolCallback implements ToolCallback {
                                 },
                                 "required": ["agent", "question"]
                             },
-                            "maxItems": 8
+                            "maxItems": %d
                         }
                     },
                     "required": ["tasks"]
                 }
-                """)
+                """.formatted(limitsView().maxBranches())))
                 .build();
     }
 
@@ -224,7 +257,9 @@ public class DelegateToTeamToolCallback implements ToolCallback {
         String runId = UUID.randomUUID().toString().substring(0, 8);
         // Bound the fan-out: extra requested branches are reported as skipped
         // rather than silently dropped, so the model can see and re-issue them.
-        int branchCap = Math.min(tasks.size(), MAX_BRANCHES);
+        int maxBranches = limitsView().maxBranches();
+        long branchTimeoutSeconds = limitsView().branchTimeoutSeconds();
+        int branchCap = Math.min(tasks.size(), maxBranches);
         boolean budgeted = runBudget != null && runBudget.isEnabled();
         String estimateText = null;
         String budgetStop = null;
@@ -281,14 +316,14 @@ public class DelegateToTeamToolCallback implements ToolCallback {
             for (int i = 0; i < futures.size(); i++) {
                 Future<Map<String, Object>> future = futures.get(i);
                 try {
-                    results.add(future.get(BRANCH_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+                    results.add(future.get(branchTimeoutSeconds, TimeUnit.SECONDS));
                 } catch (java.util.concurrent.TimeoutException e) {
                     future.cancel(true);
                     Member m = dispatched.get(i);
                     Map<String, Object> out = new LinkedHashMap<>();
                     out.put("agent", m == null ? "unknown" : m.slug());
                     out.put("status", "timeout");
-                    out.put("error", "exceeded the " + BRANCH_TIMEOUT_SECONDS + "s branch limit");
+                    out.put("error", "exceeded the " + branchTimeoutSeconds + "s branch limit");
                     results.add(out);
                 } catch (Exception e) {
                     // runBranch already converts branch failures into status
@@ -315,9 +350,9 @@ public class DelegateToTeamToolCallback implements ToolCallback {
         for (int i = runnable.size(); i < tasks.size(); i++) {
             Object agent = tasks.get(i).get("agent");
             String why =
-                    budgetStop != null && i < Math.min(tasks.size(), MAX_BRANCHES)
+                    budgetStop != null && i < Math.min(tasks.size(), maxBranches)
                             ? RunBudget.STOP_REASON + ": " + budgetStop
-                            : "over the " + MAX_BRANCHES + "-branch limit";
+                            : "over the " + maxBranches + "-branch limit";
             results.add(
                     Map.of(
                             "agent",
@@ -403,7 +438,7 @@ public class DelegateToTeamToolCallback implements ToolCallback {
                                 try {
                                     raw =
                                             en.getValue()
-                                                    .get(BRANCH_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                                                    .get(limitsView().branchTimeoutSeconds(), TimeUnit.SECONDS);
                                 } catch (Exception e) {
                                     en.getValue().cancel(true);
                                     raw =
@@ -531,8 +566,8 @@ public class DelegateToTeamToolCallback implements ToolCallback {
                     agentChatService.delegateCall(
                             member.agentId(), sent, contextSummary, sessionId);
             String capped =
-                    answer != null && answer.length() > MAX_ANSWER_CHARS
-                            ? answer.substring(0, MAX_ANSWER_CHARS) + "…"
+                    answer != null && answer.length() > limits.getMaxAnswerChars()
+                            ? answer.substring(0, limits.getMaxAnswerChars()) + "…"
                             : answer;
             if (branchStep != null) {
                 stepJournal.complete(journalRunId, branchStep, StepJournal.KIND_SWARM, capped);

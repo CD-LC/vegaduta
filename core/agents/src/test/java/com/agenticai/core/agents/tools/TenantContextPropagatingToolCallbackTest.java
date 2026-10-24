@@ -70,6 +70,29 @@ class TenantContextPropagatingToolCallbackTest {
                 "expected a JSON-wrapped object, got: " + result);
     }
 
+    /**
+     * The tool-step ceiling is the one deliberate hard stop in the guard chain; the exception
+     * processor, the translating wrapper and the turn's error handling all list it as "propagate".
+     * This catch used to turn it into an ordinary "this tool call failed" result too, which let the
+     * model carry on calling tools past the ceiling it had just hit.
+     */
+    @Test
+    void aToolStepLimitStopIsNotTurnedIntoAToolResult() {
+        ToolCallback delegate = fakeDelegate();
+        com.agenticai.core.guardrails.ToolStepLimitExceededException stop =
+                new com.agenticai.core.guardrails.ToolStepLimitExceededException(
+                        java.util.UUID.randomUUID(), "sess-1", 15);
+        when(delegate.call("{}")).thenThrow(stop);
+        TenantContextPropagatingToolCallback wrapped =
+                new TenantContextPropagatingToolCallback(delegate, null);
+
+        org.junit.jupiter.api.Assertions.assertSame(
+                stop,
+                org.junit.jupiter.api.Assertions.assertThrows(
+                        com.agenticai.core.guardrails.ToolStepLimitExceededException.class,
+                        () -> wrapped.call("{}")));
+    }
+
     @Test
     void aThrownExceptionWithNoMessageStillProducesAUsableResult() {
         ToolCallback delegate = fakeDelegate();

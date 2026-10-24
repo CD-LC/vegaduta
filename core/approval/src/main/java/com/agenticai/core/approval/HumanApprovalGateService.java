@@ -72,6 +72,18 @@ public class HumanApprovalGateService {
     private final long baseDelaySeconds;
     private final long maxDelaySeconds;
 
+    /**
+     * Where the end of every approval is reported so the conversation that asked for the action can
+     * carry on (see {@link ApprovalOutcomePort}). Absent in a context without the turn path: the
+     * decision then only runs (or refuses) the action, as before.
+     */
+    private volatile ApprovalOutcomePort outcomePort;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setOutcomePort(ApprovalOutcomePort outcomePort) {
+        this.outcomePort = outcomePort;
+    }
+
     public HumanApprovalGateService(
         ApprovalPolicyService policyService,
         ApprovalRequestRepository requestRepository,
@@ -107,6 +119,56 @@ public class HumanApprovalGateService {
             return ApprovalEvaluation.autoApproved();
         }
         return ApprovalEvaluation.pending(request.getId());
+    }
+
+    /**
+     * As {@link #evaluate}, for a tool that gates ITSELF inside its {@code call()} (a code-workspace run,
+     * a channel send) and so runs under the tool guard's {@link ToolCallScope}. A request that will wait
+     * for a human is recorded with the same replay envelope a guarded tool call has - the tool, the
+     * agent and conversation, the user's goal, the scoped history id, the tenant and subject - merged
+     * into the action's own payload (its own fields stay at the top level, so the executor and the
+     * {@code adminOnly} check read it unchanged). When the human has decided and the action has ended,
+     * {@link ApprovalOutcomePort} puts the outcome back into the conversation and continues the task.
+     *
+     * <p>Outside a tool call, or when policy auto-approves (the action runs right now, inside the turn
+     * that asked, which needs no continuation), this is exactly {@link #evaluate}. {@code requestedBy}
+     * is never changed, so who may decide the request is unchanged too.
+     *
+     * @param toolName used when no scope names the tool
+     */
+    public ApprovalEvaluation evaluateInTurn(
+        String actionType, String toolName, String summary, String payloadJson, String requestedBy
+    ) {
+        java.util.Optional<ToolCallScope.Current> scope = ToolCallScope.current();
+        if (scope.isEmpty() || scope.get().origin() == null || !policyService.requiresApproval(actionType)) {
+            return evaluate(actionType, summary, payloadJson, requestedBy);
+        }
+        String enveloped;
+        try {
+            enveloped = withReplayEnvelope(payloadJson, toolName, scope.get());
+        } catch (RuntimeException e) {
+            log.warn("Could not add the conversation envelope to the '{}' approval request - recording the plain "
+                + "payload; the task will not be continued after the decision: {}", actionType, e.getMessage());
+            return evaluate(actionType, summary, payloadJson, requestedBy);
+        }
+        ApprovalRequest request = recorder.recordNew(actionType, summary, enveloped, requestedBy, false);
+        return ApprovalEvaluation.pending(request.getId());
+    }
+
+    private String withReplayEnvelope(String payloadJson, String toolName, ToolCallScope.Current scope) {
+        try {
+            JsonNode parsed = payloadJson == null || payloadJson.isBlank()
+                ? objectMapper.createObjectNode() : objectMapper.readTree(payloadJson);
+            if (!(parsed instanceof ObjectNode payload)) {
+                throw new IllegalArgumentException("the action payload is not a JSON object");
+            }
+            payload.set("replay", replayEnvelope(
+                scope.toolName() != null ? scope.toolName() : toolName,
+                scope.agentId(), scope.sessionId(), scope.toolDigest(), scope.origin()));
+            return payload.toString();
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new IllegalArgumentException("the action payload is not valid JSON", e);
+        }
     }
 
     public ApprovalRequest approve(UUID requestId, String decidedBy) {
@@ -168,6 +230,22 @@ public class HumanApprovalGateService {
     }
 
     /**
+     * Closes a request nobody decided in time (see {@link ApprovalExpiryProperties}): recorded as a
+     * rejection by {@link ApprovalRequest#EXPIRY_ACTOR} with {@code reason}, after which {@link
+     * #approve} refuses it as already decided - a stale request can no longer be approved into
+     * running its action. The executor that would have run it gets the same cleanup call as for a
+     * rejection, so anything suspended on the decision (a workflow run parked at an approval node) is
+     * settled rather than left waiting. Throws {@link ApprovalRequestAlreadyDecidedException} if the
+     * request was decided first.
+     */
+    public ApprovalRequest expire(UUID requestId, String reason) {
+        ApprovalRequest request = getPendingOrThrow(requestId);
+        request = recorder.recordExpired(request, reason);
+        notifyExecutorOfRejection(request, ApprovalRequest.EXPIRY_ACTOR, reason);
+        return request;
+    }
+
+    /**
      * Rejection cleanup hook (see {@link ApprovalActionExecutor#onRejected}):
      * lets the executor that WOULD have run this action settle any external
      * state its pending request left suspended - a workflow run parked
@@ -185,6 +263,7 @@ public class HumanApprovalGateService {
                 log.warn("Rejection cleanup for request {} (action type '{}') failed - the rejection itself stands: {}",
                     request.getId(), request.getActionType(), e.getMessage());
             }
+            reportOutcome(executor, request, ApprovalOutcomePort.Outcome.DENIED, reason);
         });
     }
 
@@ -309,9 +388,42 @@ public class HumanApprovalGateService {
         String actionType, String toolName, String summary, String argumentsJson,
         String requestedBy, UUID agentId, String sessionId, String toolDigest
     ) {
+        return recordToolCallForApproval(
+            actionType, toolName, summary, argumentsJson, requestedBy, agentId, sessionId, toolDigest, null);
+    }
+
+    /**
+     * As the 8-arg overload, plus {@code memorySessionId}: the SEC-004 scoped id the originating
+     * turn reads its conversation history under. It is stored in the envelope so that, once the
+     * human decides, the executor appends its "approved action ... completed" note to THAT history
+     * (the one the conversation's next turn replays) rather than to the raw client session id,
+     * which nothing reads. {@code null} (edge execution, delegated calls, rows recorded before this
+     * existed) stores nothing and the executor derives the id from the tenant and subject.
+     */
+    public ApprovalRequest recordToolCallForApproval(
+        String actionType, String toolName, String summary, String argumentsJson,
+        String requestedBy, UUID agentId, String sessionId, String toolDigest, String memorySessionId
+    ) {
+        return recordToolCallWithOrigin(
+            actionType, toolName, summary, argumentsJson, requestedBy, agentId, sessionId, toolDigest,
+            ToolCallOrigin.ofMemorySession(memorySessionId));
+    }
+
+    /**
+     * As the 9-arg {@code recordToolCallForApproval}, with the whole {@link ToolCallOrigin}: besides the scoped history id,
+     * the user message that started the parked turn, the agent id the conversation was requested
+     * under and its memory subject. They are what lets the platform continue the original task
+     * after the human decides (restate the goal, read the same history) rather than only replay
+     * the tool. A {@code null} origin records none of them.
+     */
+    public ApprovalRequest recordToolCallWithOrigin(
+        String actionType, String toolName, String summary, String argumentsJson,
+        String requestedBy, UUID agentId, String sessionId, String toolDigest, ToolCallOrigin origin
+    ) {
         String payloadJson;
         try {
-            payloadJson = buildToolCallReplayPayload(toolName, argumentsJson, agentId, sessionId, toolDigest);
+            payloadJson = buildToolCallReplayPayload(
+                toolName, argumentsJson, agentId, sessionId, toolDigest, origin);
         } catch (RuntimeException e) {
             log.warn("Failed to build replay envelope for gated tool call '{}' - recording raw arguments instead "
                 + "(request will need the legacy replay path): {}", toolName, e.getMessage());
@@ -322,7 +434,8 @@ public class HumanApprovalGateService {
 
     /**
      * Shape: {@code {"replay": {"version": 1, "toolName", "agentId",
-     * "sessionId", "tenantId", "subject"}, "arguments": {...}}}. The
+     * "sessionId", "memorySessionId", "goal", "requestedAgentId", "subjectKey", "runToolNames",
+     * "tenantId", "subject"}, "arguments": {...}}}. The
      * top-level {@code "replay"} key is the discriminator {@code
      * AgentToolCallApprovalExecutor} uses to tell this envelope apart from a
      * legacy raw-arguments payload - raw tool input is model-authored and
@@ -335,21 +448,11 @@ public class HumanApprovalGateService {
      * model originally produced.
      */
     private String buildToolCallReplayPayload(
-        String toolName, String argumentsJson, UUID agentId, String sessionId, String toolDigest
+        String toolName, String argumentsJson, UUID agentId, String sessionId, String toolDigest,
+        ToolCallOrigin origin
     ) {
         ObjectNode payload = objectMapper.createObjectNode();
-        ObjectNode replay = payload.putObject("replay");
-        replay.put("version", 1);
-        replay.put("toolName", toolName);
-        replay.put("agentId", agentId != null ? agentId.toString() : null);
-        replay.put("sessionId", sessionId);
-        if (toolDigest != null && !toolDigest.isBlank()) {
-            replay.put("toolDigest", toolDigest);
-        }
-        TenantContext.current().ifPresent(context -> {
-            replay.put("tenantId", context.getTenantId());
-            replay.put("subject", context.getSubject());
-        });
+        payload.set("replay", replayEnvelope(toolName, agentId, sessionId, toolDigest, origin));
         String arguments = argumentsJson == null || argumentsJson.isBlank() ? "{}" : argumentsJson;
         try {
             payload.set("arguments", objectMapper.readTree(arguments));
@@ -357,6 +460,54 @@ public class HumanApprovalGateService {
             payload.put("argumentsRaw", arguments);
         }
         return payload.toString();
+    }
+
+    /** The {@code replay} object of the envelope: the call's identity and where it came from. */
+    private ObjectNode replayEnvelope(
+        String toolName, UUID agentId, String sessionId, String toolDigest, ToolCallOrigin origin
+    ) {
+        ObjectNode replay = objectMapper.createObjectNode();
+        replay.put("version", 1);
+        replay.put("toolName", toolName);
+        replay.put("agentId", agentId != null ? agentId.toString() : null);
+        replay.put("sessionId", sessionId);
+        if (toolDigest != null && !toolDigest.isBlank()) {
+            replay.put("toolDigest", toolDigest);
+        }
+        if (origin != null) {
+            putIfPresent(replay, "memorySessionId", origin.memorySessionId());
+            putIfPresent(replay, "goal", origin.goal());
+            putIfPresent(replay, "requestedAgentId",
+                origin.requestedAgentId() == null ? null : origin.requestedAgentId().toString());
+            putIfPresent(replay, "subjectKey", origin.subjectKey());
+            if (origin.runToolNames() != null) {
+                // Present even when empty: "narrowed to no tools" is not "not narrowed".
+                com.fasterxml.jackson.databind.node.ArrayNode names = replay.putArray("runToolNames");
+                origin.runToolNames().forEach(names::add);
+            }
+        }
+        TenantContext.current().ifPresent(context -> {
+            replay.put("tenantId", context.getTenantId());
+            replay.put("subject", context.getSubject());
+        });
+        return replay;
+    }
+
+    /**
+     * The requests still waiting for a human that one conversation's tool guard recorded ({@code
+     * requestedBy} is its {@code "agent:<agentId>:session:<sessionId>"} label), oldest first. Read
+     * when a human decides one of them, to tell the continued task which of its other actions are
+     * still outstanding. Read-only.
+     */
+    public java.util.List<ApprovalRequest> findPendingRequestedBy(String requestedBy) {
+        return requestRepository.findByRequestedByAndStatusOrderByCreatedAtAsc(
+            requestedBy, ApprovalStatus.PENDING);
+    }
+
+    private static void putIfPresent(ObjectNode node, String field, String value) {
+        if (value != null && !value.isBlank()) {
+            node.put(field, value);
+        }
     }
 
     private void runIfExecutorRegistered(ApprovalRequest request, String decidedBy) {
@@ -377,6 +528,33 @@ public class HumanApprovalGateService {
             recordFailureAndMaybeScheduleRetry(request, e, decidedBy);
             throw e;
         }
+        reportOutcome(executor, request, ApprovalOutcomePort.Outcome.COMPLETED, request.getExecutionResult());
+    }
+
+    /**
+     * Tells the conversation that asked for the action how its approval ended (see {@link
+     * ApprovalOutcomePort}) - unless the executor does that itself. Strictly best-effort: the decision
+     * and the action already took effect, so nothing thrown here may change either. A request that did
+     * not come from an agent turn is ignored by the port.
+     */
+    private void reportOutcome(
+        ApprovalActionExecutor executor, ApprovalRequest request, ApprovalOutcomePort.Outcome outcome, String text
+    ) {
+        ApprovalOutcomePort port = outcomePort;
+        if (port == null || executor.reportsOutcomeItself()) {
+            return;
+        }
+        try {
+            port.afterDecision(request, outcome, text);
+        } catch (RuntimeException e) {
+            log.warn("Could not report the {} outcome of approval request {} (action type '{}') to its conversation: {}",
+                outcome, request.getId(), request.getActionType(), e.getMessage());
+        }
+    }
+
+    private void reportOutcome(ApprovalRequest request, ApprovalOutcomePort.Outcome outcome, String text) {
+        executorRegistry.find(request.getActionType())
+            .ifPresent(executor -> reportOutcome(executor, request, outcome, text));
     }
 
     /**
@@ -400,6 +578,7 @@ public class HumanApprovalGateService {
         try {
             executor.execute(request);
             recorder.recordRetrySucceeded(request);
+            reportOutcome(executor, request, ApprovalOutcomePort.Outcome.COMPLETED, request.getExecutionResult());
         } catch (RuntimeException e) {
             recordFailureAndMaybeScheduleRetry(request, e, ApprovalRequestRecorder.RETRY_JOB_ACTOR);
         }
@@ -416,10 +595,14 @@ public class HumanApprovalGateService {
     private void recordFailureAndMaybeScheduleRetry(ApprovalRequest request, RuntimeException e, String decidedBy) {
         if (!(e instanceof RetryableActionFailure)) {
             recorder.recordExecutionFailed(request, decidedBy, e.getMessage());
+            reportOutcome(request, ApprovalOutcomePort.Outcome.FAILED, failureText(e));
             return;
         }
         if (request.getRetryCount() >= maxRetryAttempts) {
             recorder.recordDeadLettered(request, e.getMessage());
+            // The last attempt failed: the call is over, which is what the conversation should hear. A
+            // failure that will be retried is not the end of the call and is not reported.
+            reportOutcome(request, ApprovalOutcomePort.Outcome.FAILED, failureText(e));
             return;
         }
         Instant nextRetryAt = Instant.now().plusSeconds(backoffDelaySeconds(request.getRetryCount() + 1));
@@ -437,6 +620,10 @@ public class HumanApprovalGateService {
     private long backoffDelaySeconds(int attemptNumber) {
         long delay = baseDelaySeconds * (1L << Math.min(attemptNumber - 1, 20));
         return Math.min(delay, maxDelaySeconds);
+    }
+
+    private static String failureText(RuntimeException e) {
+        return e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
     }
 
     private ApprovalRequest getPendingOrThrow(UUID id) {

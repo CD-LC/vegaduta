@@ -45,17 +45,17 @@ import org.springframework.stereotype.Service;
  * replies depend on live/per-caller data: no), which only the tenant who
  * configured that agent actually knows.
  *
- * <p><b>Scope note on WHEN a cache write happens</b>: {@link
- * com.agenticai.core.agents.turn.AgentChatService#chat} only writes to this cache
- * for the plain default turn shape - no attachment, no per-call extra
- * delegation tools (see that method's own comment at the call site). It does
- * NOT inspect whether the LLM call that produced the cached reply happened
- * to invoke a tool mid-turn; GPTCache itself makes the same simplification.
- * This is a real, honestly-stated constraint: enabling this flag on an agent
- * whose tools return live/volatile data (a stock price, "what time is it")
- * means a later identical-looking question can be served a stale cached
- * answer for the remainder of the TTL. Tenants are told this in the toggle's
- * own help text (web console) - it is a per-agent choice, not a silent trap.
+ * <p><b>Scope note on WHEN a cache read or write happens</b>: {@link
+ * com.agenticai.core.agents.turn.AgentChatService#chat} uses this cache
+ * only for the plain default turn shape - no attachment, no per-call extra
+ * delegation tools, and (since {@code app.chat.cache.eligible-with-tools} defaults to
+ * false) no agent that offers tools at all, so a turn that read live data (a stock
+ * price, "what time is it") is neither served from nor stored in the cache. The key
+ * is the normalised message plus, for a message that is not the first of its
+ * conversation, a digest of the turns before it ({@code app.chat.cache.key-on-conversation}),
+ * so "yes" is not answered with another conversation's "yes". An operator who sets
+ * {@code eligible-with-tools} back to true gets the old behaviour, including its
+ * staleness caveat.
  */
 @Service
 public class LlmResponseCacheService {
@@ -83,8 +83,18 @@ public class LlmResponseCacheService {
      *     another user who asks the same question.
      */
     public Optional<String> get(String tenantId, UUID agentId, String principal, String userMessage) {
+        return get(tenantId, agentId, principal, userMessage, "");
+    }
+
+    /**
+     * As above for a message that follows an earlier conversation: {@code conversationKey} (a digest of the
+     * turns before it, {@code ""} for a first message) is part of the key, so "yes" after one question is a
+     * different entry from "yes" after another. {@code ""} is exactly the message-only key.
+     */
+    public Optional<String> get(
+            String tenantId, UUID agentId, String principal, String userMessage, String conversationKey) {
         try {
-            String cached = redisTemplate.opsForValue().get(buildKey(tenantId, agentId, principal, userMessage));
+            String cached = redisTemplate.opsForValue().get(buildKey(tenantId, agentId, principal, userMessage, conversationKey));
             return Optional.ofNullable(cached);
         } catch (RuntimeException e) {
             // Best-effort, same posture as SessionMemoryService's own Redis
@@ -96,11 +106,17 @@ public class LlmResponseCacheService {
     }
 
     public void put(String tenantId, UUID agentId, String principal, String userMessage, String reply) {
+        put(tenantId, agentId, principal, userMessage, "", reply);
+    }
+
+    /** As above, under the key for a message that follows an earlier conversation; see {@link #get(String, UUID, String, String, String)}. */
+    public void put(
+            String tenantId, UUID agentId, String principal, String userMessage, String conversationKey, String reply) {
         if (reply == null || reply.isBlank()) {
             return;
         }
         try {
-            redisTemplate.opsForValue().set(buildKey(tenantId, agentId, principal, userMessage), reply, ttl);
+            redisTemplate.opsForValue().set(buildKey(tenantId, agentId, principal, userMessage, conversationKey), reply, ttl);
         } catch (RuntimeException e) {
             REDIS_DOWN_LOG.warnf("LLM response cache write failed for agent {} - reply was still returned to the caller normally: {}", agentId, e.getMessage());
         }
@@ -113,20 +129,30 @@ public class LlmResponseCacheService {
      * (SEC-052), so only this caller's cached reply is dropped. Best-effort, like every other call here.
      */
     public void evict(String tenantId, UUID agentId, String principal, String userMessage) {
+        evict(tenantId, agentId, principal, userMessage, "");
+    }
+
+    /** As above, for the key of a message that follows an earlier conversation. */
+    public void evict(
+            String tenantId, UUID agentId, String principal, String userMessage, String conversationKey) {
         try {
-            redisTemplate.delete(buildKey(tenantId, agentId, principal, userMessage));
+            redisTemplate.delete(buildKey(tenantId, agentId, principal, userMessage, conversationKey));
         } catch (RuntimeException e) {
             REDIS_DOWN_LOG.warnf("LLM response cache evict failed for agent {} - a regenerate may be answered from cache: {}", agentId, e.getMessage());
         }
     }
 
-    private String buildKey(String tenantId, UUID agentId, String principal, String userMessage) {
+    private String buildKey(
+            String tenantId, UUID agentId, String principal, String userMessage, String conversationKey) {
         String scope = tenantId == null || tenantId.isBlank() ? "public" : tenantId;
         // SEC-052: "u" segment = sha256 of the principal (hashed so no raw
         // subject/phone number/visitor id sits in a Redis key name). The old
         // tenant:agent:msg keys are never read again and age out on their TTL.
+        // The conversation segment is present only when there is a conversation before the message, so the
+        // key of a first message (and of a message-only caller) is byte-for-byte what it always was.
+        String conversation = conversationKey == null || conversationKey.isBlank() ? "" : ":c" + sha256(conversationKey);
         return KEY_PREFIX + scope + ":" + agentId + ":u" + sha256(principal == null ? "" : principal)
-            + ":" + sha256(normalize(userMessage));
+            + ":" + sha256(normalize(userMessage)) + conversation;
     }
 
     /** Trim + lowercase + collapse internal whitespace - catches trivial formatting variance without any embedding/similarity logic. */

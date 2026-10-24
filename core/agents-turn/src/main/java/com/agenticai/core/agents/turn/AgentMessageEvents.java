@@ -5,6 +5,7 @@ import com.agenticai.core.eventbus.WorkflowEventPublisher;
 import com.agenticai.core.eventbus.WorkflowEventTypes;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -19,6 +20,13 @@ import org.slf4j.LoggerFactory;
 final class AgentMessageEvents {
 
     private static final Logger log = LoggerFactory.getLogger(AgentChatService.class);
+
+    /** {@code app.chat.limits.*}: the excerpt carried by the completed event; the shipped defaults until set. */
+    private volatile ChatLimitsProperties limits = new ChatLimitsProperties();
+
+    void useLimits(ChatLimitsProperties limits) {
+        this.limits = limits == null ? new ChatLimitsProperties() : limits;
+    }
 
     /**
      * Tenant webhooks (V241) - publishes {@code agent.message.completed} on the platform event bus
@@ -63,9 +71,10 @@ final class AgentMessageEvents {
                         scope.run(
                                 () -> {
                                     try {
+                                        int excerptChars = limits.getCompletedEventExcerptChars();
                                         String excerpt =
-                                                answer.length() > 500
-                                                        ? answer.substring(0, 500)
+                                                answer.length() > excerptChars
+                                                        ? answer.substring(0, excerptChars)
                                                         : answer;
                                         publisher.publish(
                                                 WorkflowEventTypes.AGENT_MESSAGE_COMPLETED,
@@ -85,8 +94,8 @@ final class AgentMessageEvents {
                                         log.warn(
                                                 "agent.message.completed emission failed for agent {} session {} -"
                                                         + " the reply itself is unaffected",
-                                                agentId,
-                                                sessionId,
+                                                LogSafe.clean(agentId),
+                                                LogSafe.clean(sessionId),
                                                 e);
                                     }
                                 }));
