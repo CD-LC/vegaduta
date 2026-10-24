@@ -264,7 +264,7 @@
          quarter of physical RAM) overrides it in its own <properties>. -->
     <testForkJvmArgs></testForkJvmArgs>
     <jacoco.version>0.8.15</jacoco.version>
-    <spotless.version>2.44.4</spotless.version>
+    <spotless.version>3.10.3</spotless.version>
     <google-java-format.version>1.25.2</google-java-format.version>
     <!-- Git ref Spotless ratchets against. CI fetches origin/main (fetch-depth 0);
          a clone without that remote can pass -Dspotless.ratchet.ref=main (or HEAD). -->
