@@ -399,6 +399,11 @@ def modify_project(
         run_result: dict | None = None
         success = True
         attempts = 0
+        # The model's own plain-English explanation is known now - show it
+        # while the (slow) build/test check still runs, not only in the
+        # result at the end.
+        if summary:
+            emit("summary", {"summary": summary})
         # The exact file set is known now - hand it to the client for the
         # in-browser preview BEFORE the (slow) build/test check, so the
         # user sees their change while verification still runs.
@@ -438,6 +443,8 @@ def modify_project(
                 powered_by = retry_powered or powered_by
                 summary = getattr(retry_files, "summary", None) or summary
                 files = _merge_files(files, retry_files)
+                if summary:
+                    emit("summary", {"summary": summary})
                 emit("files", {"files": files, "files_changed": [f["path"] for f in files]})
                 emit("checking", {"attempt": attempts + 1, "total": settings.max_fix_attempts + 1})
                 run_result = ci_client.run(ctx, project_id, ws_id, check_cmd)
@@ -584,6 +591,8 @@ def apply_files_to_project(
     run_result: dict | None = None
     success = True
     try:
+        if summary:
+            emit("summary", {"summary": summary})
         emit("files", {"files": files, "files_changed": [f["path"] for f in files]})
         ci_client.apply_files(ctx, project_id, ws_id, files)
 
