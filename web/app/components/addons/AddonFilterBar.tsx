@@ -70,7 +70,7 @@ export default function AddonFilterBar({ filters, onChange, categories, total, t
                   : "border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               )}
             >
-              {category === "all" ? t("filter.all") : text.category(category)}
+              {category === "all" ? t("filter.all") : text.category(category)}{" "}
               <span className="tabular-nums opacity-70">{count}</span>
             </button>
           );
