@@ -442,7 +442,7 @@ export default function PendingToolApprovals({
         {!decided && named.label !== named.raw && (
           <details className="mt-1 text-xs text-muted-foreground" data-testid="tool-approval-raw-name">
             <summary className="cursor-pointer hover:text-foreground">{t("rawName")}</summary>
-            <code className="font-mono text-[11px]">{named.raw}</code>
+            <code className="break-all font-mono text-[11px]">{named.raw}</code>
           </details>
         )}
         {!decided && (

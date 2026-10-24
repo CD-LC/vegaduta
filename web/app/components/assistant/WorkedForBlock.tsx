@@ -94,7 +94,9 @@ function liveStatusLabel(
       const key = status.tool ? TOOL_STATUS_KEYS[status.tool] : undefined;
       return key
         ? t(key)
-        : t("statusToolGeneric", { tool: (status.tool ?? "tool").replace(/[_-]+/g, " ").replace(/^\w/, (c) => c.toUpperCase()) });
+        : t("statusToolGeneric", {
+            tool: (status.tool ?? "tool").replace(/[_-]+/g, " ").replace(/^\w/, (c) => c.toUpperCase()),
+          });
     }
     default:
       return t("statusWorking");
@@ -178,7 +180,10 @@ export default function WorkedForBlock({
         {parts.length > 0 && <span>· {parts.join(", ")}</span>}
       </Button>
       {live && status && (
-        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 px-1.5 text-xs text-muted-foreground" data-testid="live-status">
+        <div
+          className="mt-1 flex flex-wrap items-center gap-x-1.5 px-1.5 text-xs text-muted-foreground"
+          data-testid="live-status"
+        >
           <Loader2 size={12} className="motion-safe:animate-spin text-primary" aria-hidden="true" />
           <span role="status" className="asst-shimmer font-medium">
             {liveStatusLabel(status, t, hasText)}
@@ -207,8 +212,14 @@ export default function WorkedForBlock({
               return (
                 <li key={`call-${call.id}-${index}`} className="min-w-0 space-y-0.5 text-xs">
                   <div className="flex items-center gap-1.5">
-                    {failed && <AlertTriangle size={12} className="size-3 shrink-0 text-destructive" aria-hidden="true" />}
-                    <span className={cn("truncate font-mono font-medium", failed ? "text-destructive" : "text-foreground")}>{call.tool}</span>
+                    {failed && (
+                      <AlertTriangle size={12} className="size-3 shrink-0 text-destructive" aria-hidden="true" />
+                    )}
+                    <span
+                      className={cn("truncate font-mono font-medium", failed ? "text-destructive" : "text-foreground")}
+                    >
+                      {call.tool}
+                    </span>
                     {closing?.ms != null && <span className="shrink-0 text-muted-foreground">{closing.ms} ms</span>}
                     {!closing && live && <span className="shrink-0 text-muted-foreground">{t("stepRunning")}</span>}
                   </div>
@@ -297,7 +308,7 @@ function EventRow({ step }: { step: ActivityStep }) {
       {text && (
         <p
           className={cn(
-            "whitespace-pre-wrap text-xs text-muted-foreground",
+            "whitespace-pre-wrap break-words text-xs text-muted-foreground",
             step.type === "thinking" && "italic"
           )}
           title={text}
