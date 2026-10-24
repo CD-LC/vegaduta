@@ -15,12 +15,16 @@
 # Optional (scripts/vegaduta up --lite ...):
 #   --profile rag        adds the Python sidecar (document ingestion,
 #                        embeddings, rerank, transcription)
-#   --profile tools      mcp-stdio-runner: the container STDIO MCP servers
-#                        (npx/uvx connectors) run in, away from core's secrets
 #   --profile workspace  workspace-runner: the Assistant's build terminal and
 #                        the projects folder it works in (VEGADUTA_PROJECTS_DIR)
+#
+# On by default for a FRESH lite install (opt out with --no-search / --no-tools /
+# --no-browser, or VEGADUTA_SEARCH=0 / VEGADUTA_TOOLS=0 / VEGADUTA_BROWSER=0 in .env):
+#   --profile tools      mcp-stdio-runner: the container STDIO MCP servers
+#                        (npx/uvx connectors) run in, away from core's secrets
 #   --search             SearXNG web search (docker-compose.search*.yml)
-#   --browser            the Assistant's own browser (deploy/compose/browser.yml)
+#   --browser            the Assistant's own browser (deploy/compose/browser.yml):
+#                        browser_* tools (navigate, screenshot, click, type)
 #
 # Upgrading to the full stack keeps the Postgres volume only if you reuse
 # the same COMPOSE_PROJECT_NAME; Keycloak users (dev-file) and local files do

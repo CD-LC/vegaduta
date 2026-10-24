@@ -389,6 +389,16 @@ resolve_profiles() {
       warn "--browser needs the container core and is ignored with --native-core (a host JVM drives its own Chromium)"
       BROWSER=0
     fi
+    # A fresh lite install gets the same out-of-box tool surface as a fresh personal one:
+    # web search (SearXNG), the MCP runner (built-in STDIO servers and tenant MCP
+    # servers) and the agent's browser (screenshots, downloads, page automation).
+    # A saved choice or an install that predates the defaults (no state values)
+    # keeps what it had; --minimal / --no-* / VEGADUTA_*=0 decline.
+    if [ "$TIER" = lite ] && [ ! -f "$STATE_FILE" ]; then
+      [ -n "$SEARCH" ] || SEARCH=1
+      [ -n "$TOOLS" ] || TOOLS=1
+      [ -n "$BROWSER" ] || BROWSER=1
+    fi
     # STDIO MCP servers run in the mcp-stdio-runner container; core relays to it. A host JVM (--native-core)
     # keeps its own `os` sandbox and launchers, and does not use the runner.
     if [ "$TOOLS" = 1 ] && [ "$NATIVE_CORE" != 1 ]; then export MCP_STDIO_SIDECAR_ENABLED=true; fi
@@ -422,6 +432,16 @@ resolve_profiles() {
   case " $PROFILES " in *" events "*) extra=",workflow" ;; esac
   case " $PROFILES " in *" temporal "*) extra=",workflow,temporal"; export WORKFLOW_EXECUTION_ENGINE=temporal ;; esac
   [ -n "$extra" ] && [ -z "$(get_env CORE_PROFILES_EXTRA)" ] && export CORE_PROFILES_EXTRA="$extra"
+  # A fresh full install gets the same out-of-box tool surface: web search plus the
+  # `tools` and `browser` profiles (the mcp-stdio-runner-browser - built-in STDIO MCP
+  # servers, tenant MCP servers and the Playwright browser server). A saved choice
+  # or an install that predates the defaults (no state file) is left alone;
+  # --minimal / --no-tools / --no-browser / VEGADUTA_*=0 decline.
+  if [ "$TIER" = full ] && [ ! -f "$STATE_FILE" ]; then
+    [ -n "$SEARCH" ] || SEARCH=1
+    [ "${TOOLS:-1}" = 1 ] && add_profile tools
+    [ "${BROWSER:-1}" = 1 ] && add_profile browser
+  fi
   case " $PROFILES " in *" code-intel "*) export CODE_INTEL_ENABLED=true ;; esac
   case " $PROFILES " in *" sandbox "*) export TOOL_SANDBOX_ENABLED=true ;; esac
   # mcp-stdio-runner (sandbox/tools/browser): STDIO MCP servers - tenant ones
@@ -941,8 +961,8 @@ ask_search() {
   [ -z "$SEARCH" ] || return 0
   local a
   printf 'Give agents free web search (a private SearXNG container, no API key)? [Y/n]: '; read -r a
-  # A "no" on a personal install is remembered as 0: its default is on, so empty would read as "never asked".
-  case "${a:-y}" in n|N|no) if [ "$TIER" = personal ]; then SEARCH=0; fi ;; *) SEARCH=1 ;; esac
+  # A "no" is remembered as 0 on every tier whose default is on: empty would read as "never asked".
+  case "${a:-y}" in n|N|no) SEARCH=0 ;; *) SEARCH=1 ;; esac
 }
 
 choose_model_source() {
@@ -992,8 +1012,8 @@ cmd_up() {
     # What `up` would do, without Docker: the choices, the state they leave and the compose command.
     # Used by tests/install; also a safe way to see what a flag combination does.
     save_state
-    printf 'plan: tier=%s profiles=%s local_ai=%s local_model=%s search=%s\n' \
-      "$TIER" "${PROFILES:-none}" "${LOCAL_AI:-none}" "${LOCAL_MODEL:-default}" "${SEARCH:-0}"
+    printf 'plan: tier=%s profiles=%s local_ai=%s local_model=%s search=%s tools=%s browser=%s\n' \
+      "$TIER" "${PROFILES:-none}" "${LOCAL_AI:-none}" "${LOCAL_MODEL:-default}" "${SEARCH:-0}" "${TOOLS:-0}" "${BROWSER:-0}"
     printf 'plan: docker compose %s up -d\n' "${COMPOSE_ARGS[*]}"
     exit 0
   fi
@@ -2072,6 +2092,7 @@ personal_apply_defaults() {
   if [ "$PERSONAL_FRESH" = 1 ]; then
     [ -n "$SEARCH" ] || SEARCH=1
     [ -n "$TOOLS" ] || TOOLS=1
+    [ -n "$BROWSER" ] || BROWSER=1
   fi
 }
 

@@ -98,6 +98,20 @@ and can serve beside the old one while Container Apps switches traffic.
    `{"enabled":true}` (proves the env var took effect); open an existing chat, send one message,
    reload: it is still there; `POST /api/platform-llm/warm` answers `202`. Then add a Log line.
 
+## Blocked dependency bumps (as of 2026-10-24)
+
+Dependabot keeps these open so they self-merge when upstream ships support. Do not force them —
+each is blocked outside this repository.
+
+| PR | Bump | Blocker |
+|---|---|---|
+| #67 | eslint 9 → 10 | `eslint-plugin-jsx-a11y@6.10.2` peers `eslint ^9` max; no eslint-10-compatible release exists. Merging would mean dropping accessibility linting. |
+| #59 | typescript 6 → 7 (web) | `typescript-eslint@8.x` peers `typescript <6.1` and TS7 is the Go rewrite (`tsgo`) with no classic compiler API — the lint stack cannot run on it. |
+| #99 | Spring Boot 4.1 + Spring AI 2.0 | Tracked migration (ADR-0012 P2/P3) owned by another workstream: Jackson 2→3, vendor SDKs, tool-loop changes, MCP SDK 2.0. Merge conflicts + maintainer decision, not a version bump. |
+
+Closed as superseded by #99: #45 (spring-ai 2.0 alone), #47 (spring-boot-starter 4 alone) — either would
+break the build standalone.
+
 ## Log
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.

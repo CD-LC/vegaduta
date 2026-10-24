@@ -8,6 +8,18 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- Fresh personal, lite and full installs now start the out-of-box tool surface by
+  default: private web search (SearXNG), the MCP connector runner (built-in STDIO
+  servers and tenant MCP connectors) and the Assistant's browser
+  (`browser-runner`, giving agents `browser_navigate`, `browser_screenshot`,
+  `browser_read_page_text` and friends plus the takeover view). Decline per
+  install with `--no-search` / `--no-tools` / `--no-browser` or the matching
+  `VEGADUTA_*=0` env var; `--minimal` still drops all of them. A remembered
+  choice and installs that predate the defaults are left unchanged.
+
+
 ### Security
 
 - **The console moves to Next.js 16.4.2.** Next.js 16.0.0 through 16.4.0 are affected by two critical advisories, unauthenticated remote code execution in the Image Optimization API when SVG files are used ([GHSA-2464-fhr4-w9xw](https://github.com/advisories/GHSA-2464-fhr4-w9xw)) and in `'use cache'` functions that return typed arrays ([GHSA-673q-mjm6-r5xr](https://github.com/advisories/GHSA-673q-mjm6-r5xr)), and by a high-severity denial of service in the App Router with Server Actions ([GHSA-p3m5-59mp-jv5r](https://github.com/advisories/GHSA-p3m5-59mp-jv5r), CVE-2026-94482); the first patched release is 16.4.1. The console, published up to 0.1.9, shipped 16.3.6. `web/package.json` now asks for `^16.4.2` and the lockfile resolves `next` and its `@next/*` packages to 16.4.2; no application code changed.

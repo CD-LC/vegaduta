@@ -12,9 +12,9 @@ and Lite and Full behave exactly as before.
 
 | | Personal | Lite | Full |
 |---|---|---|---|
-| Containers always on | Postgres, Valkey, core, web, plus web search (SearXNG), the connector runner and a local model by default (`--minimal`: just Postgres, core, web) | Postgres, Valkey, Keycloak, core, web | Lite plus PgBouncer, storage, sidecar and more |
+| Containers always on | Postgres, Valkey, core, web, plus web search (SearXNG), the connector runner, the Assistant's browser and a local model by default (`--minimal`: just Postgres, core, web) | Postgres, Valkey, Keycloak, core, web | Lite plus PgBouncer, storage, sidecar and more |
 | Sign-in | local, one owner (core) | Keycloak | Keycloak |
-| Container memory limits (sum) | about 2.5 GB for the four; 3.8 GB with web search and the connector runner (about 2.3 GB with `--minimal`); a local model needs its own memory | more (Keycloak alone is about 768 MB) | more |
+| Container memory limits (sum) | about 2.5 GB for the four; 5.8 GB with web search, the connector runner and the browser (about 2.3 GB with `--minimal`); a local model needs its own memory | more (Keycloak alone is about 768 MB) | more |
 | Billing, plans, payments | off | on unless disabled | on unless disabled |
 | Edition (`VEGADUTA_EDITION`) | `personal`: operator and business features are not loaded (see [What a personal install leaves out](#what-a-personal-install-leaves-out)) | `lite`: everything on | `full`: everything on |
 | Meant for | one person | trying it | one server, a team |
@@ -95,6 +95,7 @@ It also repairs the usual reasons a start fails:
 | `--cloud` | no local model (by default one is downloaded, see below); you will add a provider key in the console. Remembered: a later plain `personal` stays cloud. Run `personal --local-ai` or `--local-ai=host` to switch |
 | `--search` / `--no-search` | start or leave out the private SearXNG that gives agents `web_search` with no API key. On by default for a fresh install; the choice is remembered (see [What is on from the start](#what-is-on-from-the-start)) |
 | `--no-tools` | leave out the MCP connector runner and its starter connectors. `--profile tools` turns it back on |
+| `--no-browser` | leave out the Assistant's browser (`browser-runner`, the `browser_*` tools and the takeover view). On by default for a fresh install; `--browser` turns it back on |
 | `--no-valkey` | leave out the Valkey container; core's counters and caches run in its in-process fallback (see [Running without Valkey](#running-without-valkey)). `--valkey` turns it back on |
 | `--minimal` | the floor: `postgres` + `core` + `web` and nothing else (implies `--no-search --no-tools --no-valkey` and `--no-browser`). Every piece a flag turned off stays off until you ask for it again |
 | `--profile rag` | add the ML sidecar (document extraction for PDF and scans, sidecar embeddings, transcription) and switch core's sidecar on |
@@ -121,8 +122,8 @@ on `127.0.0.1` for the host JVM (sidecar 8001, SearXNG 8888, Ollama 11434; overr
 
 ## What is on from the start
 
-A **fresh** personal install (no `deploy/compose/.vegaduta-state` yet) starts with two things switched on, so the
-Assistant can search the web and read a page the first time you ask:
+A **fresh** personal install (no `deploy/compose/.vegaduta-state` yet) starts with three things switched on, so the
+Assistant can search the web, read a page and drive a browser the first time you ask:
 
 - **Private web search.** A SearXNG container (profile `search`, no API key, no published port, 512 MB limit) behind
   the built-in `web_search` tool. A Brave, Tavily, Exa or Serper key is still a platform-admin setting that a personal
@@ -135,6 +136,10 @@ Assistant can search the web and read a page the first time you ask:
   its own package, and that also means it can reach what this computer exposes to Docker containers: the built-in
   `fetch_web_page` tool has an address guard in core, the MCP `fetch` server has none of its own. With
   `--native-core` the runner is not used (core runs STDIO servers itself under the OS sandbox).
+- **The Assistant's own browser** (`browser-runner`, profile `browser`). A Playwright server with Chromium in its
+  own container, so agents get the `browser_*` tools (navigate, read the page text, take a screenshot, click,
+  type) and the live takeover view out of the box. See [The Assistant's browser](#the-assistants-browser) for the
+  security model; decline a fresh install with `--no-browser` or `VEGADUTA_BROWSER=0` in `.env`.
 
 On the first start where the runner is on, core registers three **starter connectors** for the Personal workspace,
 each pinned to an exact version and recognised by the connector catalog as that exact spec, so none lands in the
@@ -710,13 +715,13 @@ Turn it off by starting without the profile; the folder and its files stay where
 
 ## The Assistant's browser
 
-The agent can drive its own headless Chromium (`browser_*` tools: navigate, read the page text, take a screenshot, click, type), and you can sign in to a site once in a live view of that same page; the login is saved as an encrypted profile and the agent keeps working logged in. In the personal profile the flags are already on (`BROWSER_V2_ENABLED`, `BROWSER_PROFILES_ENABLED`, `BROWSER_TAKEOVER_ENABLED`); TOTP stays off. What the default install lacks is a Chromium: the slim `core` image has none, so the browser tools are not offered and `GET /api/browser/automation/capabilities` answers `browserAvailable=false` with a reason, and the Assistant's Browser button says how to turn it on.
+The agent can drive its own headless Chromium (`browser_*` tools: navigate, read the page text, take a screenshot, click, type), and you can sign in to a site once in a live view of that same page; the login is saved as an encrypted profile and the agent keeps working logged in. In the personal profile the flags are already on (`BROWSER_V2_ENABLED`, `BROWSER_PROFILES_ENABLED`, `BROWSER_TAKEOVER_ENABLED`); TOTP stays off. A fresh install adds the `browser-runner` container for the Chromium: without it the slim `core` image has none, the browser tools are not offered and `GET /api/browser/automation/capabilities` answers `browserAvailable=false` with a reason, and the Assistant's Browser button says how to turn it on.
 
-Turn it on (container stack):
+Turn it off or back on (container stack):
 
 ```sh
-scripts/vegaduta personal --browser        # PowerShell: .\scripts\vegaduta.ps1 personal -Profile browser
-scripts/vegaduta personal --no-browser     # turn it off again (the choice is remembered)
+scripts/vegaduta personal --no-browser     # turn it off (fresh installs get it; the choice is remembered)
+scripts/vegaduta personal --browser        # turn it back on — PowerShell: .\scripts\vegaduta.ps1 personal -Profile browser
 ```
 
 This adds one container, `browser-runner` (`services/browser-runner`, a Playwright 1.63.0 server with Chromium; about 2 GB to download, 3.4 GB on disk, a 2 GB memory limit you can change with `BROWSER_RUNNER_MEM_LIMIT`). Core stays on the slim image and attaches to it (`APP_BROWSERUSE_REMOTE_URL=ws://browser-runner:3000/`). A host JVM (`--native-core`) does not use it: install Chromium on the host and set `APP_BROWSERUSE_CHROMIUM_EXECUTABLE_PATH` instead. The older route still works and needs none of this: `CORE_IMAGE_VARIANT=-full` (the 6 GB `core-full` image with Chromium inside core; raise `CORE_MEM_LIMIT=2560m`).

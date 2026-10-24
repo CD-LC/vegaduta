@@ -19,14 +19,18 @@
 # embeddings); a model comes from Ollama on the host (--local-ai=host overlays).
 #
 # On by default for a FRESH install (scripts/vegaduta personal; opt out with --no-search /
-# --no-tools, or VEGADUTA_SEARCH=0 / VEGADUTA_TOOLS=0 in .env):
+# --no-tools / --no-browser, or VEGADUTA_SEARCH=0 / VEGADUTA_TOOLS=0 / VEGADUTA_BROWSER=0 in .env):
 #   --profile tools   mcp-stdio-runner: the container STDIO MCP servers (npx/uvx packages) run in,
 #                     so the slim core image needs no Node or uv. Starter connectors (fetch, time,
 #                     sequential-thinking) are registered for the owner when it is on.
 #   web search        docker-compose.search.yml (SearXNG, profile `search`), layered by the launcher.
+#   --browser         browser.yml (browser-runner: Playwright Chromium, profile `browser`) - the
+#                     browser_* tools (navigate, read page text, screenshot, click, type) and the
+#                     live takeover view, on a private network shared only with core.
 #
 # Memory budget (limits, not measured use): postgres 384m + valkey 192m + core 1536m
-# + web 384m = 2.5 GB; the defaults add searxng 512m + mcp-stdio-runner 768m = 3.8 GB.
+# + web 384m = 2.5 GB; the defaults add searxng 512m + mcp-stdio-runner 768m + browser-runner 2g
+# = about 5.8 GB.
 # Measured start-up and memory: docs/personal-mode.md.
 #
 # Upgrading to lite/full keeps the Postgres volume only if COMPOSE_PROJECT_NAME is
