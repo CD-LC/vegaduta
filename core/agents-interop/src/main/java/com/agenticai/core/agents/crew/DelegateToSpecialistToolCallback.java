@@ -3,6 +3,7 @@ package com.agenticai.core.agents.crew;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.prompts.tool.ToolPromptTexts;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,13 @@ public class DelegateToSpecialistToolCallback implements ToolCallback {
     private final List<String> capabilityTags;
     private final HandoffChain chain;
 
+    /**
+     * The prompt registry as it stands for the agent whose tools are being resolved (captured at
+     * construction, on the request thread): the description is the registry key {@code
+     * tool.template.delegate_to_specialist} with its placeholders filled in.
+     */
+    private final ToolPromptTexts promptTexts = ToolPromptTexts.current();
+
     public DelegateToSpecialistToolCallback(AgentChatService agentChatService, List<String> capabilityTags, HandoffChain chain) {
         this.agentChatService = agentChatService;
         this.capabilityTags = capabilityTags;
@@ -52,16 +60,13 @@ public class DelegateToSpecialistToolCallback implements ToolCallback {
         return ToolDefinition.builder()
             .name(TOOL_NAME)
             .description(
-                "Hands off a focused sub-task to a specialist agent, chosen by capability/role rather than by name."
-                    + " Available capabilities in this workspace: " + roster + "."
-                    + " Use this when part of the request falls squarely in one of those specialties rather than your"
-                    + " own. The specialist will NOT see this conversation's history, only the sub-task you send plus,"
-                    + " if you provide one, a short context summary. It may itself hand off to ANOTHER specialist if"
-                    + " its own sub-task needs one, up to " + HandoffChain.MAX_DEPTH + " hops total in this chain"
-                    + " (currently at hop " + chain.depth() + " of " + HandoffChain.MAX_DEPTH + ") - it can never hand"
-                    + " back to an agent already in this chain."
-            )
-            .inputSchema("""
+                promptTexts.description(
+                    TOOL_NAME,
+                    Map.of(
+                        "roster", roster,
+                        "max_depth", String.valueOf(HandoffChain.MAX_DEPTH),
+                        "hop", String.valueOf(chain.depth()))))
+            .inputSchema(promptTexts.schema(TOOL_NAME, """
                 {
                     "type": "object",
                     "properties": {
@@ -80,7 +85,7 @@ public class DelegateToSpecialistToolCallback implements ToolCallback {
                     },
                     "required": ["capability", "subTask"]
                 }
-                """)
+                """))
             .build();
     }
 

@@ -4,6 +4,42 @@ Configure a repository **ruleset** (Settings -> Rules -> Rulesets) that targets
 the default branch. Rulesets are preferred over classic branch protection:
 they apply to administrators too, and OpenSSF Scorecard reads them.
 
+## Current state (2026-10-22)
+
+**This ruleset is not configured yet.** On `CD-LC/vegaduta` today:
+
+- `gh api repos/CD-LC/vegaduta/rulesets` returns `[]`, and
+  `gh api repos/CD-LC/vegaduta/branches/main/protection` returns 404
+  "Branch not protected". Nothing stops a push to `main` that skipped CI, a
+  force push, or a merge without green checks. The rule in
+  [GOVERNANCE.md](../../GOVERNANCE.md) and CONTRIBUTING.md is kept by the
+  maintainer, not by GitHub.
+- OpenSSF Scorecard reports Branch-Protection 0 and Code-Review 0 for the same
+  reason (no ruleset, and changesets without a second reviewer). Creating the
+  ruleset raises the first; the second stays low while one maintainer merges
+  their own pull requests (see "While there is only one maintainer" below).
+- The `@CD-LC/maintainers` team named in `.github/CODEOWNERS` has to exist
+  before "require review from code owners" can work. `gh api
+  repos/CD-LC/vegaduta/codeowners/errors` reports "Unknown owner" for every
+  rule until it does.
+
+What the repository owner must do, in this order:
+
+1. Create the public team `maintainers` in the `CD-LC` organization, add the
+   project lead, and give it **Write** on the repository
+   ([repo-setup.md](repo-setup.md)). Check:
+   `gh api repos/CD-LC/vegaduta/codeowners/errors --jq '.errors | length'`
+   prints `0`.
+2. Open any pull request so `CI OK` and `CodeQL OK` report once (a check name
+   is offered in the picker only after it has reported; see "After the first
+   run").
+3. Create the ruleset on the default branch as described below.
+4. Verify: `gh api repos/CD-LC/vegaduta/rules/branches/main --jq 'length'`
+   prints a number above 0, and a direct push to `main` is refused.
+
+Until step 3 is done, treat every statement below as the intended
+configuration, not as a description of what GitHub enforces.
+
 ## Required status checks
 
 Require exactly these check names, with "require branches to be up to date"

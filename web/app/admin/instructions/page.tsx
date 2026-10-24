@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ScrollText, TriangleAlert } from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
@@ -17,15 +18,25 @@ import { Skeleton } from "../../components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import CustomInstructionsCard from "./CustomInstructionsCard";
 import DirectiveCard from "./DirectiveCard";
+import PromptPreviewPanel from "./PromptPreviewPanel";
+import PromptRegistryPanel from "./PromptRegistryPanel";
+import { REGISTRY_AGENT_PARAM, agentFromParam } from "./registryDeepLink";
 
 // Every instruction the platform gives the model, in one place. Layering, lowest to highest
 // precedence: built-in directives < these workspace settings < the agent's own System prompt.
-export default function AdminInstructionsPage() {
+//
+// Deep link: /admin/instructions?agent=<agentId> opens the Prompt registry tab at agent scope for that agent (an
+// agent the person cannot see falls back to the workspace scope with a notice; see PromptRegistryPanel).
+function AdminInstructionsInner() {
   const t = useTranslations("promptDirectives");
   const allowed = useRequireScope("MANAGE_TENANT_SETTINGS");
   const [data, setData] = useState<PromptDirectivesOverview | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [tab, setTab] = useState("edit");
+  const params = useSearchParams();
+  // The registry keeps ?agent= in step with its own scope picker, so the live value is also what a remount (after
+  // a visit to another tab) should start from; the tab to open on arrival is decided once.
+  const urlAgent = agentFromParam(params?.get(REGISTRY_AGENT_PARAM));
+  const [tab, setTab] = useState(urlAgent ? "registry" : "edit");
 
   const reload = useCallback(async () => {
     const next = await api.getPromptDirectives();
@@ -86,6 +97,8 @@ export default function AdminInstructionsPage() {
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
             <TabsTrigger value="edit">{t("tabEdit")}</TabsTrigger>
+            <TabsTrigger value="registry">{t("tabRegistry")}</TabsTrigger>
+            <TabsTrigger value="agentPreview">{t("tabAgentPreview")}</TabsTrigger>
             <TabsTrigger value="preview">{t("tabPreview")}</TabsTrigger>
           </TabsList>
 
@@ -108,6 +121,14 @@ export default function AdminInstructionsPage() {
             </section>
           </TabsContent>
 
+          <TabsContent value="registry">
+            <PromptRegistryPanel initialAgentId={urlAgent} />
+          </TabsContent>
+
+          <TabsContent value="agentPreview">
+            <PromptPreviewPanel />
+          </TabsContent>
+
           <TabsContent value="preview">
             <Card>
               <CardHeader>
@@ -115,6 +136,9 @@ export default function AdminInstructionsPage() {
                 <CardDescription className="text-xs">{t("previewBody")}</CardDescription>
               </CardHeader>
               <CardContent>
+                {data.assembledPreviewNote ? (
+                  <p className="mb-2 text-xs text-muted-foreground">{data.assembledPreviewNote}</p>
+                ) : null}
                 {data.assembledPreview.trim() === "" ? (
                   <p className="text-sm text-muted-foreground">{t("previewEmpty")}</p>
                 ) : (
@@ -133,5 +157,13 @@ export default function AdminInstructionsPage() {
         </Tabs>
       )}
     </AppShell>
+  );
+}
+
+export default function AdminInstructionsPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminInstructionsInner />
+    </Suspense>
   );
 }

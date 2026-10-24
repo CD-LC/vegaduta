@@ -86,7 +86,9 @@ class AgentJobToolCeilingTest {
                         mock(AgentJobProgressService.class))
                 .run(job.getId(), AgentJobTestSupport.TENANT);
 
-        verify(toolCallLogRepository)
+        // At the turn boundary and again to size the turn's own remaining budget (no count is cached
+        // across them: the executor is shared by concurrent jobs); every one is on the job's session.
+        verify(toolCallLogRepository, org.mockito.Mockito.atLeastOnce())
                 .countByAgentIdAndSessionId(
                         job.getAgentId(), AgentJobSession.sessionIdFor(job.getId()));
         assertEquals(AgentJobStatus.SUCCEEDED, job.getStatus());

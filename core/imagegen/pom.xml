@@ -57,6 +57,11 @@
       <groupId>com.agenticai</groupId>
       <artifactId>agentspi</artifactId>
     </dependency>
+    <!-- The prompt registry: the text generate_image returns to the model is registry text (prompts/en/). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>prompts</artifactId>
+    </dependency>
     <!-- Test scope only: AppBuilderImageControllerTest exercises the kernel AppBuilderImageController. -->
     <dependency>
       <groupId>com.agenticai</groupId>

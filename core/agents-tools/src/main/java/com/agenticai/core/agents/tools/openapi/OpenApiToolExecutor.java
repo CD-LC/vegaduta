@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -65,9 +64,9 @@ import org.springframework.util.StringUtils;
  *       duration of the request, and scrubbed from the response text and every error message before
  *       either reaches the model. A {@code {{secret.NAME}}} value is resolved through the tenant
  *       vault (workspace-scoped, same as MCP server env) instead.
- *   <li><b>Cost</b> - 10s connect / 30s request timeouts, response read capped at {@value
- *       #MAX_RESPONSE_BYTES} bytes and clipped again to {@value #MAX_RESULT_CHARS} chars: a tool
- *       result re-enters the prompt on every subsequent turn.
+ *   <li><b>Cost</b> - connect / request timeouts, a cap on the bytes of a response read and a
+ *       second clip on the characters handed to the model ({@code app.tools.openapi.*}; 10 s / 30 s
+ *       / 1 MiB / 16,000 by default): a tool result re-enters the prompt on every subsequent turn.
  * </ul>
  *
  * <p>Both injected collaborators are {@link ObjectProvider}s for the same reason {@code
@@ -81,11 +80,8 @@ public class OpenApiToolExecutor {
     private static final Logger log = LoggerFactory.getLogger(OpenApiToolExecutor.class);
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-    static final int MAX_RESPONSE_BYTES = 1024 * 1024;
-    static final int MAX_RESULT_CHARS = 16_000;
-    private static final int MAX_SPEC_REDIRECTS = 3;
-    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
-    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(30);
+    /** Timeouts and size limits ({@code app.tools.openapi.*}). */
+    private final OpenApiToolProperties limits;
 
     private final CloseableHttpClient httpClient;
     private final SsrfGuard guard;
@@ -106,6 +102,13 @@ public class OpenApiToolExecutor {
         this(encryptionService, secretReferenceResolver, SsrfGuard.defaultGuard());
     }
 
+    public OpenApiToolExecutor(
+            ObjectProvider<EncryptionService> encryptionService,
+            ObjectProvider<SecretReferenceResolver> secretReferenceResolver,
+            SsrfGuard guard) {
+        this(encryptionService, secretReferenceResolver, guard, new OpenApiToolProperties());
+    }
+
     /**
      * SEC-027: every request (spec fetch, token call, tool call) goes through a {@link
      * SafeHttpClients} client built on {@code guard} - resolved and validated at connect time,
@@ -117,11 +120,14 @@ public class OpenApiToolExecutor {
     public OpenApiToolExecutor(
             ObjectProvider<EncryptionService> encryptionService,
             ObjectProvider<SecretReferenceResolver> secretReferenceResolver,
-            SsrfGuard guard) {
+            SsrfGuard guard,
+            OpenApiToolProperties limits) {
         this.encryptionService = encryptionService;
         this.secretReferenceResolver = secretReferenceResolver;
         this.guard = guard;
-        this.httpClient = SafeHttpClients.create(guard, CONNECT_TIMEOUT, REQUEST_TIMEOUT, false);
+        this.limits = limits;
+        this.httpClient =
+                SafeHttpClients.create(guard, limits.connectTimeout(), limits.requestTimeout(), false);
     }
 
     // ------------------------------------------------------------------
@@ -129,14 +135,14 @@ public class OpenApiToolExecutor {
     // ------------------------------------------------------------------
 
     /**
-     * GETs an OpenAPI document. Redirects are followed manually (max {@value #MAX_SPEC_REDIRECTS}
-     * hops) with the full public-address check re-run on every hop, exactly like {@code
+     * GETs an OpenAPI document. Redirects are followed manually (at most {@code
+     * app.tools.openapi.max-spec-redirects} hops) with the full public-address check re-run on every hop, exactly like {@code
      * WebPageFetcher}. Throws {@link OpenApiToolException} with a person-readable reason on every
      * failure path.
      */
     public String fetchSpecText(String rawUrl) {
         URI current = OpenApiUrlGuard.validatePublicHttpUri(rawUrl, guard);
-        for (int hop = 0; hop <= MAX_SPEC_REDIRECTS; hop++) {
+        for (int hop = 0; hop <= limits.getMaxSpecRedirects(); hop++) {
             PinnedResponse response;
             try {
                 HttpGet request = new HttpGet(current);
@@ -194,7 +200,7 @@ public class OpenApiToolExecutor {
             return new String(raw, StandardCharsets.UTF_8);
         }
         throw new OpenApiToolException(
-                "The spec URL redirected more than " + MAX_SPEC_REDIRECTS + " times.");
+                "The spec URL redirected more than " + limits.getMaxSpecRedirects() + " times.");
     }
 
     // ------------------------------------------------------------------
@@ -362,11 +368,11 @@ public class OpenApiToolExecutor {
                                         body));
                 status = response.statusCode();
             }
-            byte[] raw = readCapped(response.body(), MAX_RESPONSE_BYTES);
+            byte[] raw = readCapped(response.body(), limits.getMaxResponseBytes());
             String text = new String(raw, StandardCharsets.UTF_8);
             boolean truncated = false;
-            if (text.length() > MAX_RESULT_CHARS) {
-                text = text.substring(0, MAX_RESULT_CHARS);
+            if (text.length() > limits.getMaxResultChars()) {
+                text = text.substring(0, limits.getMaxResultChars());
                 truncated = true;
             }
             String responseContentType = response.header("Content-Type").orElse("");
@@ -472,7 +478,7 @@ public class OpenApiToolExecutor {
         try {
             text =
                     new String(
-                            readCapped(response.body(), MAX_RESPONSE_BYTES),
+                            readCapped(response.body(), limits.getMaxResponseBytes()),
                             StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new OpenApiToolException("The token endpoint's response could not be read.");

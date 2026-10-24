@@ -1,5 +1,6 @@
 package com.agenticai.core.chat;
 
+import com.agenticai.core.prompts.PromptResolver;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -55,6 +56,13 @@ final class ToolArgumentValidator {
     }
 
     static Result validate(String arguments, String inputSchema, ObjectMapper objectMapper) {
+        return validate(arguments, inputSchema, objectMapper, PromptResolver.defaultsOnly(), ChatPrompts.Run.NONE);
+    }
+
+    /** As above, the wording of each problem read from the prompt registry for {@code run}'s agent and tenant. */
+    static Result validate(
+        String arguments, String inputSchema, ObjectMapper objectMapper, PromptResolver prompts, ChatPrompts.Run run
+    ) {
         List<String> problems = new ArrayList<>();
         List<String> unknown = new ArrayList<>();
         JsonNode schema = read(inputSchema, objectMapper);
@@ -63,11 +71,12 @@ final class ToolArgumentValidator {
         }
         JsonNode args = arguments == null || arguments.isBlank() ? objectMapper.createObjectNode() : read(arguments, objectMapper);
         if (args == null) {
-            problems.add("arguments are not valid JSON");
+            problems.add(ChatPrompts.text(prompts, ChatPrompts.INVALID_ARGUMENTS_NOT_JSON, run));
             return new Result(problems, unknown);
         }
         if (!args.isObject()) {
-            problems.add("arguments must be a JSON object, got " + args.getNodeType().name().toLowerCase());
+            problems.add(ChatPrompts.text(
+                prompts, ChatPrompts.INVALID_ARGUMENTS_NOT_OBJECT, run, "type", args.getNodeType().name().toLowerCase()));
             return new Result(problems, unknown);
         }
         JsonNode required = schema.get("required");
@@ -78,7 +87,8 @@ final class ToolArgumentValidator {
                 }
                 JsonNode value = args.get(name.asText());
                 if (value == null || value.isNull()) {
-                    problems.add("missing required property '" + name.asText() + "'");
+                    problems.add(ChatPrompts.text(
+                        prompts, ChatPrompts.INVALID_ARGUMENTS_MISSING_REQUIRED, run, "property", name.asText()));
                 }
             }
         }
@@ -104,14 +114,20 @@ final class ToolArgumentValidator {
      * the next attempt can be right.
      */
     static String feedback(String toolName, Result result, String inputSchema, ObjectMapper objectMapper) {
-        StringBuilder hint = new StringBuilder();
-        hint.append("The call to ").append(toolName).append(" was NOT executed: ")
-            .append(String.join("; ", result.problems())).append(". ");
-        if (!result.unknownKeys().isEmpty()) {
-            hint.append("These keys are not parameters of ").append(toolName).append(" and were ignored: ")
-                .append(String.join(", ", result.unknownKeys())).append(". ");
-        }
-        hint.append("Call ").append(toolName).append(" again with arguments that match its schema.");
+        return feedback(toolName, result, inputSchema, objectMapper, PromptResolver.defaultsOnly(), ChatPrompts.Run.NONE);
+    }
+
+    /** As above, the hint read from the prompt registry for {@code run}'s agent and tenant. */
+    static String feedback(
+        String toolName, Result result, String inputSchema, ObjectMapper objectMapper,
+        PromptResolver prompts, ChatPrompts.Run run
+    ) {
+        String unknownKeys = result.unknownKeys().isEmpty()
+            ? ""
+            : ChatPrompts.text(prompts, ChatPrompts.INVALID_ARGUMENTS_UNKNOWN_KEYS, run,
+                "tool", toolName, "keys", String.join(", ", result.unknownKeys()));
+        String hint = ChatPrompts.text(prompts, ChatPrompts.INVALID_ARGUMENTS_HINT, run,
+            "tool", toolName, "problems", String.join("; ", result.problems()), "unknown_keys", unknownKeys);
         String schema = inputSchema == null ? "" : inputSchema.strip();
         if (schema.length() > MAX_SCHEMA_ECHO_CHARS) {
             schema = schema.substring(0, MAX_SCHEMA_ECHO_CHARS) + "...";
@@ -122,10 +138,10 @@ final class ToolArgumentValidator {
                 "tool", toolName,
                 "problems", result.problems(),
                 "unknown_keys", result.unknownKeys(),
-                "hint", hint.toString(),
+                "hint", hint,
                 "schema", schema));
         } catch (Exception e) {
-            return "{\"error\":\"invalid_arguments\",\"hint\":\"" + hint.toString().replace("\"", "'") + "\"}";
+            return "{\"error\":\"invalid_arguments\",\"hint\":\"" + hint.replace("\"", "'") + "\"}";
         }
     }
 

@@ -33,36 +33,7 @@ import {
   formatFixRequest,
   injectReporter,
 } from "./previewReporter";
-
-declare global {
-  interface Window {
-    Babel?: {
-      transform: (code: string, opts: Record<string, unknown>) => { code: string };
-    };
-  }
-}
-
-let babelPromise: Promise<NonNullable<Window["Babel"]>> | null = null;
-
-/** Load @babel/standalone lazily from the vendored same-origin copy
- * (scripts/vendor-babel.mjs). No third-party CDN fallback: the enforced CSP
- * does not trust one. Cached so it loads once. */
-function loadBabel(): Promise<NonNullable<Window["Babel"]>> {
-  if (window.Babel) return Promise.resolve(window.Babel);
-  if (babelPromise === null) {
-    babelPromise = new Promise((resolve, reject) => {
-      const trySrc = (src: string, fallback?: () => void) => {
-        const s = document.createElement("script");
-        s.src = src;
-        s.onload = () => (window.Babel ? resolve(window.Babel) : reject(new Error("babel empty")));
-        s.onerror = () => (fallback ? fallback() : reject(new Error(`cannot load ${src}`)));
-        document.head.appendChild(s);
-      };
-      trySrc("/vendored/babel.min.js");
-    });
-  }
-  return babelPromise;
-}
+import { loadBabel } from "../lib/babel";
 
 // ---------------------------------------------------------------------------
 // module graph (pure parts live in sandboxModules.ts)

@@ -87,6 +87,48 @@ final class OpenApiDescriptions {
                         + " answer is kept as a sibling. "
                         + SESSION_OWNER
                         + BRANCHING_FLAG);
+        m.put(
+                "PUT /api/settings/tenant/{key}",
+                "Set a runtime setting for the whole workspace (tenant admin). Body {value, reason}: a"
+                        + " high or security key needs a typed reason, and a security key can only be made"
+                        + " stricter than the value it inherits. Answers 409 SETTING_LOCKED when the operator"
+                        + " pinned the key (app.settings.locked) and 409 SETTING_CONFLICT when another writer"
+                        + " changed the same key at the same moment (reload and retry).");
+        m.put(
+                "DELETE /api/settings/tenant/{key}",
+                "Remove the workspace override so the platform value applies again (tenant admin). A high or"
+                        + " security key needs a typed reason (?reason=), like a PUT. Answers 409 SETTING_LOCKED"
+                        + " when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the"
+                        + " same moment.");
+        m.put(
+                "PUT /api/agents/{agentId}/settings/{key}",
+                "Set a runtime setting for one agent (EDITOR on the agent; a security key also needs a tenant"
+                        + " admin). Same body and rules as the workspace PUT. Answers 409 SETTING_LOCKED when"
+                        + " the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same"
+                        + " moment.");
+        m.put(
+                "DELETE /api/agents/{agentId}/settings/{key}",
+                "Remove the agent's override so the workspace value applies again. A high or security key needs"
+                        + " a typed reason (?reason=). Answers 409 SETTING_LOCKED when the key is pinned and 409"
+                        + " SETTING_CONFLICT when another writer changed it at the same moment.");
+        m.put(
+                "GET /api/settings/{key}/history",
+                "The change history of one setting, newest first. scope=tenant needs a tenant admin; scope=agent"
+                        + " with agentId needs EDITOR on the agent. For every key at once use GET"
+                        + " /api/settings/history.");
+        m.put(
+                "GET /api/settings/history",
+                "The change history of every setting in one call, newest first. scope=all (default) is the"
+                        + " workspace's own changes plus every agent's (tenant admin), scope=tenant the workspace's"
+                        + " only, scope=agent every agent's (tenant admin), scope=agent with agentId one agent's"
+                        + " (EDITOR on it). since (ISO-8601 instant)"
+                        + " keeps rows at or after it; page with limit and offset, the body carries total and"
+                        + " hasMore.");
+        m.put(
+                "GET /api/agents/{agentId}/settings/history",
+                "Every change to this agent's settings, newest first (EDITOR on the agent; an agent of"
+                        + " another workspace is a 404). since keeps rows at or after that instant; page with"
+                        + " limit and offset.");
         BY_VERB_AND_PATH = Collections.unmodifiableMap(m);
     }
 

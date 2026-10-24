@@ -1,7 +1,11 @@
 package com.agenticai.core.chat;
 
+import com.agenticai.core.json.JsonMappers;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -16,12 +20,19 @@ import org.springframework.ai.chat.messages.UserMessage;
  * latest round (the last {@link ToolResponseMessage}) are never cleared, and
  * budget-exhausted markers are kept because the loop limiter reads them.
  * Idempotent; returns the input list untouched when nothing is cleared.
+ *
+ * <p>The placeholder is a JSON OBJECT ({@code {"context_cleared":true,"tool":...}}, the same shape the
+ * token-budget compaction writes), not prose: Spring AI's Gemini adapter parses every tool result as JSON
+ * when it builds the next request ({@code GoogleGenAiChatModel#parseJsonToMap}) and fails the whole turn on
+ * anything else, and the hosted pool is Gemini-first. The earlier plain-text form
+ * ({@code [tool result cleared to save context: ...]}) is still recognised as already cleared.
  */
 public final class ToolResultClearing {
 
     public static final int DEFAULT_THRESHOLD_CHARS = 24_000;
     public static final int DEFAULT_KEEP_LAST = 3;
 
+    /** The plain-text placeholder this class wrote before it wrote JSON; recognised, never written. */
     static final String PLACEHOLDER_PREFIX = "[tool result cleared to save context: ";
     /**
      * Start of the JSON placeholder the token-budget compaction (core/agents {@code context} package,
@@ -37,22 +48,65 @@ public final class ToolResultClearing {
     public static final int MAX_PLACEHOLDER_CHARS = 1_000;
     private static final String BUDGET_MARKER = "tool_budget_exhausted";
 
+    private static final ObjectMapper JSON = JsonMappers.plain();
+
     private final boolean enabled;
     private final int thresholdChars;
     private final int keepLast;
+    private final String restoreHint;
 
     public ToolResultClearing(boolean enabled, int thresholdChars, int keepLast) {
+        this(enabled, thresholdChars, keepLast, new ToolLoopProperties.ResultClearing().getRestoreHint());
+    }
+
+    /** @param restoreHint the placeholder's {@code restore} text ({@code app.chat.tools.result-clearing.restore-hint}) */
+    public ToolResultClearing(boolean enabled, int thresholdChars, int keepLast, String restoreHint) {
         this.enabled = enabled;
         this.thresholdChars = thresholdChars > 0 ? thresholdChars : DEFAULT_THRESHOLD_CHARS;
         this.keepLast = Math.max(keepLast, 0);
+        this.restoreHint = restoreHint == null ? "" : restoreHint;
+    }
+
+    /** Built from {@code app.chat.tools.result-clearing.*}. */
+    public static ToolResultClearing from(ToolLoopProperties.ResultClearing properties) {
+        return new ToolResultClearing(
+            properties.isEnabled(), properties.getThresholdChars(), properties.getKeepLast(),
+            properties.getRestoreHint());
+    }
+
+    /**
+     * This clearing with a different switch and/or threshold (null keeps the current one): how one run applies its own
+     * tenant's and agent's settings over the process-wide ones. The keep-last count and the placeholder wording stay.
+     */
+    ToolResultClearing withOverrides(Boolean enabledOverride, Integer thresholdCharsOverride) {
+        if (enabledOverride == null && thresholdCharsOverride == null) {
+            return this;
+        }
+        return new ToolResultClearing(
+            enabledOverride != null ? enabledOverride : enabled,
+            thresholdCharsOverride != null ? thresholdCharsOverride : thresholdChars,
+            keepLast,
+            restoreHint);
     }
 
     public static ToolResultClearing disabled() {
         return new ToolResultClearing(false, DEFAULT_THRESHOLD_CHARS, DEFAULT_KEEP_LAST);
     }
 
-    static String placeholder(String toolName, int chars) {
-        return PLACEHOLDER_PREFIX + toolName + " " + chars + " chars; re-call if needed]";
+    /** The JSON stand-in for a cleared result of {@code chars} characters from {@code toolName}. */
+    String placeholder(String toolName, int chars) {
+        String tool = toolName == null ? "tool" : toolName;
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("context_cleared", true);
+        body.put("tool", tool);
+        body.put("chars", chars);
+        body.put("restore", restoreHint);
+        try {
+            return JSON.writeValueAsString(body);
+        } catch (Exception e) {
+            // A String/Integer/Boolean map always serialises; keep the marker valid anyway.
+            return CONTEXT_CLEARED_JSON_PREFIX + ",\"tool\":\"" + tool.replace("\"", "'") + "\"}";
+        }
     }
 
     public List<Message> apply(List<Message> history) {

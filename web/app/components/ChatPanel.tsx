@@ -72,6 +72,8 @@ import { loadPendingTurn } from "../lib/resumableStream";
 // point - a person watching a slow multi-tool turn can see it working instead
 // of a motionless "…".
 import PendingToolApprovals from "./agents/PendingToolApprovals";
+import ApprovalContinuationStatus from "./agents/ApprovalContinuationStatus";
+import { useApprovalContinuation } from "./agents/useApprovalContinuation";
 import BrowserTakeoverPanel from "./agents/BrowserTakeoverPanel";
 import { sessionUsedBrowser } from "../lib/browserTakeover";
 import TurnStopNotice from "./agents/TurnStopNotice";
@@ -272,6 +274,22 @@ export default function ChatPanel({
   const { toolCalls, setToolCalls, memories, setMemories, refreshToolCalls, refreshMemories, handleForget } =
     useChatSideData(agent, sessionId);
 
+  // A decided tool approval: core carries the task on itself; the reply it produces is appended here, and the
+  // input stays off until it has (a message typed meanwhile would race the agent's own turn).
+  const approvalContinuation = useApprovalContinuation({
+    agentId: agent?.id ?? null,
+    sessionId,
+    onReply: (reply) => {
+      setTurns((t: any[]) => [
+        ...t,
+        reply.failed ? { role: "assistant", content: reply.content, failed: true } : { role: "assistant", content: reply.content },
+      ]);
+      if (!reply.failed && reply.content.trim()) onTurnCompleteRef.current?.();
+      void refreshToolCalls();
+      void refreshMemories();
+    },
+  });
+  const busy = sending || approvalContinuation.continuing;
 
   async function handleSend(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -292,7 +310,8 @@ export default function ChatPanel({
   // to the agent - see components/generative-ui/) goes through the exact same
   // turn pipeline: edge routing, streaming, step trace, eval refs.
   async function runTurn(userMessage: string, sentAttachments: PendingAttachment[]) {
-    if (!agent) return;
+    // Not while the agent is still carrying on after an approval: that turn is running server-side.
+    if (!agent || approvalContinuation.continuing) return;
     setError(null);
     setTurns((t) => [
       ...t,
@@ -523,7 +542,13 @@ export default function ChatPanel({
               setInput={setInput}
             />
           ))}
-          <PendingToolApprovals agentId={agent.id} sessionId={sessionId} turnInFlight={sending} />
+          <PendingToolApprovals
+            agentId={agent.id}
+            sessionId={sessionId}
+            turnInFlight={sending}
+            onDecided={(_outcome, requestId) => approvalContinuation.watch(requestId)}
+          />
+          <ApprovalContinuationStatus continuation={approvalContinuation} />
           <BrowserTakeoverPanel
             agentId={agent.id}
             sessionId={sessionId}
@@ -556,7 +581,7 @@ export default function ChatPanel({
           />
           <form onSubmit={handleSend} className="flex items-center gap-2">
             {modalities && (
-              <AttachButton modalities={modalities} disabled={sending || attaching} onFiles={handleFilesPicked} />
+              <AttachButton modalities={modalities} disabled={busy || attaching} onFiles={handleFilesPicked} />
             )}
             <Input
               ref={composerRef}
@@ -566,9 +591,9 @@ export default function ChatPanel({
               placeholder={t("sendPlaceholder")}
               aria-label={t("sendPlaceholder")}
               {...composerLimitProps(input.length)}
-              disabled={sending}
+              disabled={busy}
             />
-            <Button type="submit" disabled={sending || attaching || isOverComposerLimit(input.length) || (!input.trim() && !attachments.length)}>
+            <Button type="submit" disabled={busy || attaching || isOverComposerLimit(input.length) || (!input.trim() && !attachments.length)}>
               {sending ? t("sending") : t("send")}
             </Button>
           </form>

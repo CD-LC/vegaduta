@@ -30,7 +30,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Switch } from "../../components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { CHANNELS, errText, fmtTime } from "./shared";
+import { offeredChannels, errText, fmtTime } from "./shared";
 
 function ConsentHistory({ records }: { records: ConsentRecordDto[] }) {
   const t = useTranslations("privacySso");
@@ -147,7 +147,7 @@ export default function ContactsTab() {
     if (!exported) return;
     triggerBrowserDownload(
       new Blob([JSON.stringify(exported, null, 2)], { type: "application/json" }),
-      `contact-export-${exported.channel.toLowerCase()}.json`,
+      `contact-export-${exported.channel.toLowerCase()}.json`
     );
   };
 
@@ -161,7 +161,7 @@ export default function ContactsTab() {
               id="contact-channel"
               value={channel}
               onValueChange={setChannel}
-              options={CHANNELS.map((c) => ({ value: c, label: c }))}
+              options={offeredChannels().map((c) => ({ value: c, label: c }))}
             />
           </div>
           <div className="grid gap-1.5">
@@ -171,7 +171,12 @@ export default function ContactsTab() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Switch id="contact-leads" checked={includeLeads} onCheckedChange={setIncludeLeads} aria-label={t("includeLeads")} />
+          <Switch
+            id="contact-leads"
+            checked={includeLeads}
+            onCheckedChange={setIncludeLeads}
+            aria-label={t("includeLeads")}
+          />
           <Label htmlFor="contact-leads">{t("includeLeads")}</Label>
         </div>
         <div className="flex items-center gap-3">
@@ -230,16 +235,12 @@ export default function ContactsTab() {
       {exported && (
         <div className="space-y-3 rounded-lg border border-border p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-medium">
-              {t("exportReportTitle", { subject: exported.subjectMasked })}
-            </h3>
+            <h3 className="text-sm font-medium">{t("exportReportTitle", { subject: exported.subjectMasked })}</h3>
             <Button type="button" size="sm" variant="outline" onClick={downloadExport}>
               {t("downloadJson")}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {t("generatedAt", { at: fmtTime(exported.generatedAt) })}
-          </p>
+          <p className="text-xs text-muted-foreground">{t("generatedAt", { at: fmtTime(exported.generatedAt) })}</p>
           <ul className="list-disc pl-5 text-sm">
             {Object.entries(exported.data).map(([k, v]) => (
               <li key={k}>

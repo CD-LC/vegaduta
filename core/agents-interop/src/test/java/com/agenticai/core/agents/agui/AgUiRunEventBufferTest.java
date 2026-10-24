@@ -2,6 +2,7 @@ package com.agenticai.core.agents.agui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,11 +25,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 /**
- * The durable-buffer half of AG-UI stream rejoin. Same fake-Redis convention
- * as {@code A2aTaskStoreRedisTest}: mocked ops interfaces backed by maps, and
- * TWO {@link AgUiRunEventBuffer} instances sharing one fake standing in for
- * two core replicas - which is what lets the cross-pod rejoin contract be
- * pinned without a live Redis or a second JVM.
+ * The durable-buffer half of AG-UI stream rejoin. Same fake-Redis convention as {@code
+ * A2aTaskStoreRedisTest}: mocked ops interfaces backed by maps, and TWO {@link AgUiRunEventBuffer}
+ * instances sharing one fake standing in for two core replicas - which is what lets the cross-pod
+ * rejoin contract be pinned without a live Redis or a second JVM.
  */
 class AgUiRunEventBufferTest {
 
@@ -47,21 +47,33 @@ class AgUiRunEventBufferTest {
         ValueOperations<String, String> valueOps = mock(ValueOperations.class);
         when(redis.opsForList()).thenReturn(listOps);
         when(redis.opsForValue()).thenReturn(valueOps);
-        when(listOps.rightPush(anyString(), anyString())).thenAnswer(inv -> {
-            List<String> list = lists.computeIfAbsent(inv.getArgument(0), k -> new ArrayList<>());
-            list.add(inv.getArgument(1));
-            return (long) list.size();
-        });
-        when(listOps.range(anyString(), org.mockito.ArgumentMatchers.eq(0L), org.mockito.ArgumentMatchers.eq(-1L)))
-            .thenAnswer(inv -> {
-                List<String> list = lists.get(inv.getArgument(0));
-                return list == null ? null : new ArrayList<>(list);
-            });
-        org.mockito.Mockito.doAnswer(inv -> {
-            values.put(inv.getArgument(0), inv.getArgument(1));
-            return null;
-        }).when(valueOps).set(anyString(), anyString(), any(Duration.class));
-        when(redis.hasKey(anyString())).thenAnswer(inv -> values.containsKey(inv.<String>getArgument(0)));
+        when(listOps.rightPush(anyString(), anyString()))
+                .thenAnswer(
+                        inv -> {
+                            List<String> list =
+                                    lists.computeIfAbsent(
+                                            inv.getArgument(0), k -> new ArrayList<>());
+                            list.add(inv.getArgument(1));
+                            return (long) list.size();
+                        });
+        when(listOps.range(
+                        anyString(),
+                        org.mockito.ArgumentMatchers.eq(0L),
+                        org.mockito.ArgumentMatchers.eq(-1L)))
+                .thenAnswer(
+                        inv -> {
+                            List<String> list = lists.get(inv.getArgument(0));
+                            return list == null ? null : new ArrayList<>(list);
+                        });
+        org.mockito.Mockito.doAnswer(
+                        inv -> {
+                            values.put(inv.getArgument(0), inv.getArgument(1));
+                            return null;
+                        })
+                .when(valueOps)
+                .set(anyString(), anyString(), any(Duration.class));
+        when(redis.hasKey(anyString()))
+                .thenAnswer(inv -> values.containsKey(inv.<String>getArgument(0)));
 
         // Two pods sharing one Redis - the only difference between them is
         // their pod-local liveRuns map, exactly like the real deployment.
@@ -105,8 +117,12 @@ class AgUiRunEventBufferTest {
         // A rejoin subscribing AFTER both events were recorded still gets them
         // - replay().all() is what makes the buffer-then-attach race unwinnable
         // for the gap.
-        List<BufferedEvent> replayed = podA.liveTail("acme", "run-1").asFlux()
-            .take(2).collectList().block(Duration.ofSeconds(5));
+        List<BufferedEvent> replayed =
+                podA.liveTail("acme", "run-1")
+                        .asFlux()
+                        .take(2)
+                        .collectList()
+                        .block(Duration.ofSeconds(5));
         assertEquals(2, replayed.size());
         assertEquals(1, replayed.get(0).seq());
         assertEquals(2, replayed.get(1).seq());
@@ -153,18 +169,59 @@ class AgUiRunEventBufferTest {
     }
 
     @Test
+    void theBufferIdIsScopedToTheAgentAndTheCaller() {
+        java.util.UUID agentA = java.util.UUID.randomUUID();
+        java.util.UUID agentB = java.util.UUID.randomUUID();
+
+        String alice = AgUiRunEventBuffer.scopedRunId(agentA, "alice", "run-1");
+
+        // Same runId, but another caller, another agent, or no caller: a different buffer.
+        assertNotEquals(alice, AgUiRunEventBuffer.scopedRunId(agentA, "bob", "run-1"));
+        assertNotEquals(alice, AgUiRunEventBuffer.scopedRunId(agentB, "alice", "run-1"));
+        assertNotEquals(alice, AgUiRunEventBuffer.scopedRunId(agentA, "", "run-1"));
+        assertEquals(alice, AgUiRunEventBuffer.scopedRunId(agentA, "alice", "run-1"));
+        assertFalse(
+                alice.contains("alice"), "the subject is digested, not embedded in the Redis key");
+
+        podA.open("acme", alice);
+        podA.record("acme", alice, "alice-event");
+        assertEquals(
+                List.of(),
+                podA.readAfter("acme", AgUiRunEventBuffer.scopedRunId(agentA, "bob", "run-1"), 0));
+        assertEquals(1, podA.readAfter("acme", alice, 0).size());
+    }
+
+    @Test
+    void aClientChosenRunIdCannotSpellAnotherRunsMarkerKey() {
+        assertFalse(AgUiRunEventBuffer.RUN_ID_PATTERN.matcher("run-1:done").matches());
+        assertFalse(AgUiRunEventBuffer.RUN_ID_PATTERN.matcher("../x").matches());
+        assertFalse(AgUiRunEventBuffer.RUN_ID_PATTERN.matcher("").matches());
+        assertFalse(AgUiRunEventBuffer.RUN_ID_PATTERN.matcher("a".repeat(129)).matches());
+        assertTrue(
+                AgUiRunEventBuffer.RUN_ID_PATTERN
+                        .matcher("3f0c9e2a-7b1d-4c55-9a43-0d1f6a2b7c10")
+                        .matches());
+        assertTrue(AgUiRunEventBuffer.RUN_ID_PATTERN.matcher("run_1-A").matches());
+    }
+
+    @Test
     void aRedisFailureDegradesToLiveOnly() {
         // A sick Redis must never take the RUNNING turn down - record() still
         // feeds the live tail, just without a durable seq.
-        doThrow(new RedisConnectionFailureException("down")).when(listOps)
-            .rightPush(anyString(), anyString());
+        doThrow(new RedisConnectionFailureException("down"))
+                .when(listOps)
+                .rightPush(anyString(), anyString());
         podA.open("acme", "run-1");
 
         long seq = podA.record("acme", "run-1", "e1");
 
         assertEquals(-1, seq);
-        BufferedEvent live = podA.liveTail("acme", "run-1").asFlux()
-            .take(1).single().block(Duration.ofSeconds(5));
+        BufferedEvent live =
+                podA.liveTail("acme", "run-1")
+                        .asFlux()
+                        .take(1)
+                        .single()
+                        .block(Duration.ofSeconds(5));
         assertEquals("e1", live.json());
     }
 }

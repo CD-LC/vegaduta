@@ -70,7 +70,7 @@ export default function ConsistencyResults(props: { run: LabRun; context: Consis
           <p className="text-xs text-muted-foreground">{t("ccContradictionNote", { count: result.contradictions })}</p>
         )}
         {run.status !== "SUCCEEDED" && <p className="text-xs font-medium text-foreground">{t("partialResults")}</p>}
-        {context?.usedTools && <p className="text-xs text-muted-foreground">{t("ccToolsWarning")}</p>}
+        {context?.usedTools && !context.withTools && <p className="text-xs text-muted-foreground">{t("ccToolsWarning")}</p>}
       </div>
 
       {conclusive && (

@@ -48,6 +48,28 @@ class PersonalProfileConfigTest {
     }
 
     @Test
+    void aSupervisedAgentIsNotAskedForAClassifiedReadHereAndTheBaseValueGates() throws IOException {
+        StandardEnvironment env = environment(Map.of());
+
+        assertThat(env.getProperty("app.guardrails.supervised.gate-read-only")).isEqualTo("false");
+        assertThat(
+                        org.springframework.boot.context.properties.bind.Binder.get(env)
+                                .bind("app.guardrails", com.agenticai.core.guardrails.GuardrailTuningProperties.class)
+                                .get()
+                                .getSupervised()
+                                .isGateReadOnly())
+                .as("the typed property the guard and the settings catalog read")
+                .isFalse();
+        assertThat(
+                        environment(Map.of("APP_GUARDRAILS_SUPERVISED_GATE_READ_ONLY", "true"))
+                                .getProperty("app.guardrails.supervised.gate-read-only"))
+                .isEqualTo("true");
+        assertThat(new com.agenticai.core.guardrails.GuardrailTuningProperties().getSupervised().isGateReadOnly())
+                .as("without this profile every call of a supervised agent is gated")
+                .isTrue();
+    }
+
+    @Test
     void embeddingsFallBackToOllamaAndTheSidecarIsOffUnlessAskedFor() throws IOException {
         StandardEnvironment env = environment(Map.of());
         assertThat(env.getProperty("app.embeddings.provider")).isEqualTo("auto");

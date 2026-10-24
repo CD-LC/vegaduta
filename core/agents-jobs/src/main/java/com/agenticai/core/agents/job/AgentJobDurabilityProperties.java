@@ -24,11 +24,11 @@ public class AgentJobDurabilityProperties {
     private boolean requeueZeroWorkOrphans = true;
 
     /**
-     * L1 step journal master switch (default OFF): job turns, DURABLE tool effects and delegate_parallel
+     * L1 step journal master switch (default ON since 2026-10-23): job turns, DURABLE tool effects and delegate_parallel
      * branches are journaled in Postgres ({@code agent_step_journal}, V376). Read by {@code StepJournal}
      * itself via {@code @Value}; mirrored here for documentation and the policy.
      */
-    private boolean stepJournalEnabled = false;
+    private boolean stepJournalEnabled = true;
 
     /**
      * With the journal on, an orphan that already STARTED turns may be re-queued (instead of ORPHANED) when
@@ -50,8 +50,8 @@ public class AgentJobDurabilityProperties {
      */
     private int stepJournalRetentionDays = 14;
 
-    /** How often the retention purge runs. */
-    private java.time.Duration stepJournalPurgeInterval = java.time.Duration.ofHours(6);
+    // app.agent-jobs.durability.step-journal-purge-interval (6h), how often the retention purge runs, is read by the
+    // @Scheduled placeholder of StepJournalRetentionPurge alone; a field here would be a second, unread copy.
 
     public int getStepJournalRetentionDays() {
         return stepJournalRetentionDays;
@@ -59,14 +59,6 @@ public class AgentJobDurabilityProperties {
 
     public void setStepJournalRetentionDays(int stepJournalRetentionDays) {
         this.stepJournalRetentionDays = stepJournalRetentionDays;
-    }
-
-    public java.time.Duration getStepJournalPurgeInterval() {
-        return stepJournalPurgeInterval;
-    }
-
-    public void setStepJournalPurgeInterval(java.time.Duration stepJournalPurgeInterval) {
-        this.stepJournalPurgeInterval = stepJournalPurgeInterval;
     }
 
     public boolean isStepJournalEnabled() {

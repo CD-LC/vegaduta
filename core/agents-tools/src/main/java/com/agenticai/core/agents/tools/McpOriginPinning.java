@@ -28,11 +28,13 @@ import java.util.Optional;
  * The registered URL itself passed {@link McpRemoteUrlGuard#checkResolved} immediately before
  * connect, so "same origin as the base" is the validation the endpoint needs.
  *
- * <p><b>Residual.</b> The SDK transports build on {@code java.net.http.HttpClient}, which has no
- * resolver hook, so the socket cannot be pinned to the address {@code checkResolved} saw: a DNS
- * answer that flips to an internal address between that check and the SDK's own connect is not
- * caught in-process. Redirects are NEVER on both transports; the deploy's egress controls are the
- * backstop for the rebinding window.
+ * <p><b>The socket is pinned too.</b> The SDK would build its own {@code java.net.http.HttpClient},
+ * which resolves the host again at connect. {@link McpTransportFactory} instead hands both
+ * transports a {@code GuardedHttpClientBuilder} (their {@code clientBuilder(..)} hook), whose
+ * client resolves every connect, and every reconnect of the SSE stream, through {@code SsrfGuard}
+ * and connects to the address it validated: a DNS answer that flips to an internal address after
+ * {@code checkResolved} has nothing to connect to. Redirects are NEVER on both transports, so there
+ * is no redirect hop to re-validate.
  */
 final class McpOriginPinning {
 

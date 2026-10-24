@@ -4,8 +4,11 @@ import com.agenticai.core.agentspi.MediaToolSource;
 import com.agenticai.core.imagegen.GeneratedImageService;
 import com.agenticai.core.imagegen.ImageGenerationOrchestratorService;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.ai.tool.ToolCallback;
+import com.agenticai.core.prompts.PromptResolver;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,12 +22,19 @@ public class ImageGenerationToolSource implements MediaToolSource {
 
     private final ObjectProvider<ImageGenerationOrchestratorService> orchestrator;
     private final ObjectProvider<GeneratedImageService> generatedImageService;
+    private volatile PromptResolver prompts;
 
     public ImageGenerationToolSource(
             ObjectProvider<ImageGenerationOrchestratorService> orchestrator,
             ObjectProvider<GeneratedImageService> generatedImageService) {
         this.orchestrator = orchestrator;
         this.generatedImageService = generatedImageService;
+    }
+
+    /** The prompt registry, so the text the tool returns to the model can be overridden; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        this.prompts = resolver;
     }
 
     @Override
@@ -34,6 +44,11 @@ public class ImageGenerationToolSource implements MediaToolSource {
 
     @Override
     public List<ToolCallback> rawTools() {
+        return rawTools(null);
+    }
+
+    @Override
+    public List<ToolCallback> rawTools(UUID agentId) {
         ImageGenerationOrchestratorService service = orchestrator.getIfAvailable();
         GeneratedImageService images = generatedImageService.getIfAvailable();
         if (service == null || images == null) {
@@ -42,6 +57,6 @@ public class ImageGenerationToolSource implements MediaToolSource {
         if (!service.isAnyProviderActive() && !service.isPoolAvailable()) {
             return List.of();
         }
-        return List.of(new GenerateImageToolCallback(service, images));
+        return List.of(new GenerateImageToolCallback(service, images).withPrompts(prompts).forAgent(agentId));
     }
 }

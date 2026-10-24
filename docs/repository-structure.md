@@ -253,6 +253,7 @@ tree. See [Plugins, apps and mobile](plugins-and-apps.md).
 | `docs.yml` | doc-affecting paths on PRs and pushes to `main` | strict site build; deploys to Pages when enabled |
 | `trivy.yml`, `zap.yml`, `sonarqube.yml`, `license-scan.yml` | PRs and pushes, or weekly | report-only scans (dependencies and IaC, DAST baseline, code quality, redistributed-file licenses); see [Scan reports](security/scanning.md) |
 | `pypi-release.yml` | manual, on a `pysdk-v*.*.*` tag | Python Agent SDK sdist and wheel, provenance, GitHub Release; PyPI upload only when `SDK_PUBLISH_PYPI` is `true` |
+| `rest-sdk-release.yml` | manual, on a `restsdk-v*.*.*` tag | generated REST clients (TypeScript npm + Python PyPI, both `vegaduta-sdk`): dists, provenance, GitHub Release; npm upload only when `SDK_PUBLISH_NPM` is `true`, PyPI only when `SDK_PUBLISH_PYPI` is `true`; runbook [Releasing the REST client SDKs](maintainers/releasing-rest-sdks.md) |
 | `release.yml` | manual, on a `v*.*.*` tag | platform images, charts, signatures, SBOM, provenance, draft release |
 | `sdk-release.yml` | manual, on an `sdk-v*.*.*` tag | SDK jars, SBOMs, provenance, GitHub Release, optional Maven Central upload |
 | `labeler.yml`, `stale.yml` | on PR events, daily | labels, housekeeping |
@@ -288,13 +289,13 @@ one changes.
 
 | Item | State | Consequence |
 |---|---|---|
-| Repository visibility | private (`CD-LC/vegaduta`) | links from public pages to the repository, and the Pages site, are not reachable by outsiders until it is public |
-| GitHub plan | organization on the Free plan | branch protection rulesets and GitHub Pages are unavailable for private repositories; see [Branch protection](maintainers/branch-protection.md) |
+| Repository visibility | public (`CD-LC/vegaduta`) | links from public pages to the repository are reachable; Pages stays gated as below |
+| GitHub plan | organization on the Free plan | rulesets and Pages are available because the repository is public; no ruleset is configured on `main` yet, see [Branch protection](maintainers/branch-protection.md) |
 | Documentation site | workflow and config exist; deploy job gated by repository variable `DOCS_PUBLISH_PAGES` | set Pages source to "GitHub Actions" and the variable to `true` ([Publishing these docs](maintainers/docs-site.md)) |
-| CODEOWNERS team | `@CD-LC/maintainers`; the organization has no teams yet | create the team, or change it with `scripts/dev/set-repo-identity.sh --team` |
-| Security and conduct contacts | placeholders `contact@cdandlc.com`, `contact@cdandlc.com` | replace with monitored addresses ([Repository setup](maintainers/repo-setup.md)) |
+| CODEOWNERS team | `@CD-LC/maintainers`; the team does not exist in the organization yet (`gh api repos/CD-LC/vegaduta/codeowners/errors` lists every rule as "Unknown owner") | create the team ([Repository setup](maintainers/repo-setup.md)), or change it with `scripts/dev/set-repo-identity.sh --team` |
+| Security and conduct contacts | `contact@cdandlc.com` for both; private vulnerability reporting is on | keep the address monitored ([Repository setup](maintainers/repo-setup.md)) |
 | GitHub Actions | jobs do not start: the account's payments failed or the spending limit is reached | no remote CI result exists until billing is fixed; run `make gates` and the module builds locally |
 | Java Agent SDK on Maven Central | not published; `0.1.0-SNAPSHOT` builds from source | verify the `io.github.cd-lc` namespace, then follow [Releasing the SDK](maintainers/releasing-sdk.md) |
-| Python Agent SDK on PyPI | not published (`sdk/python-agent/README.md`: "not yet on PyPI"); `pypi-release.yml` uploads only when `SDK_PUBLISH_PYPI` is `true` | configure PyPI trusted publishing, then tag `pysdk-v*` |
-| TypeScript and Python client packages | package names are placeholders; not on npm or PyPI | reserve names, then publish |
+| Python Agent SDK on PyPI | not published (`sdk/python-agent/README.md`: "not yet on PyPI"); PyPI pending publisher registered for `pypi-release.yml` + environment `pypi`; upload runs only when `SDK_PUBLISH_PYPI` is `true` | tag `pysdk-v*` and dispatch the workflow; the first upload claims the project |
+| TypeScript and Python client packages | not on npm or PyPI; `rest-sdk-release.yml` covers both on `restsdk-v*` tags; PyPI pending publisher registered (environment `pypi-rest-sdk`); npm needs a reserved name and an `NPM_TOKEN` secret | one-time setup in [Releasing the REST client SDKs](maintainers/releasing-rest-sdks.md), then tag `restsdk-v*` |
 | Client builds for plugins and apps | not in this repository | published through the plugin catalog per deployment |

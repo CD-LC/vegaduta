@@ -1,6 +1,10 @@
 package com.agenticai.core.guardrails.toolargs;
 
+import com.agenticai.core.guardrails.GuardrailPrompts;
+import com.agenticai.core.guardrails.GuardrailSettings;
 import com.agenticai.core.guardrails.ToolStepLimitExceededException;
+import com.agenticai.core.guardrails.ToolStepLimitProperties;
+import com.agenticai.core.prompts.PromptResolver;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
@@ -24,14 +28,18 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * retrying forever, a refusal still spends one step of the turn's shared step budget when the wrapper was
  * given the counter, and the ceiling is then enforced exactly as {@code GuardedToolCallback} does.
  *
- * <p><b>Failure posture.</b> A policy LOOKUP that throws is logged and the call proceeds (the policy store
- * being briefly unavailable must not take every tool of the agent down - the same choice {@code
- * GuardedToolCallback} makes for its dispatch gate). An evaluation that throws on a matching policy is
- * refused: the call could not be verified.
+ * <p><b>Failure posture.</b> A policy LOOKUP that throws follows the global guardrail fail mode ({@code
+ * app.guardrails.fail-mode}, {@link GuardrailSettings#failClosed(UUID)}) exactly as {@code
+ * GuardedToolCallback}'s dispatch gate does: refused when closed (the default), logged and allowed when open -
+ * a failing policy store must not be a way to switch an agent's argument policies off. An evaluation that
+ * throws on a matching policy is refused in both modes: the call could not be verified.
  */
 public final class ToolArgPolicyCallback implements ToolCallback {
 
     private static final Logger log = LoggerFactory.getLogger(ToolArgPolicyCallback.class);
+
+    /** The rule name of the refusal made when the policy lookup itself failed (as opposed to a rule the arguments broke). */
+    static final String LOOKUP_FAILED_RULE = "lookup";
 
     private final ToolCallback delegate;
     private final ToolArgPolicySource source;
@@ -56,6 +64,28 @@ public final class ToolArgPolicyCallback implements ToolCallback {
         this.maxSteps = maxSteps;
     }
 
+    /** Where the refusal text comes from (the prompt registry); the shipped wording unless set. */
+    private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
+
+    /** Uses the prompt registry for the refusal text; null keeps the shipped wording. */
+    public ToolArgPolicyCallback withPrompts(PromptResolver resolver) {
+        if (resolver != null) {
+            this.prompts = resolver;
+        }
+        return this;
+    }
+
+    /** What happens past the ceiling ({@code app.guardrails.step-limit.*}); the module defaults unless set. */
+    private volatile ToolStepLimitProperties stepLimits = new ToolStepLimitProperties();
+
+    /** Uses the operator's step-limit settings; null keeps the module defaults. */
+    public ToolArgPolicyCallback withStepLimits(ToolStepLimitProperties limits) {
+        if (limits != null) {
+            this.stepLimits = limits;
+        }
+        return this;
+    }
+
     @Override
     public ToolDefinition getToolDefinition() {
         return delegate.getToolDefinition();
@@ -78,22 +108,42 @@ public final class ToolArgPolicyCallback implements ToolCallback {
         if (verdict != null && !verdict.allowed()) {
             String reason = verdict.reason();
             report(toolName, reason);
-            if (stepCounter != null && stepCounter.incrementAndGet() > maxSteps) {
-                throw new ToolStepLimitExceededException(agentId, sessionId, maxSteps);
+            if (stepCounter != null) {
+                int step = stepCounter.incrementAndGet();
+                ToolStepLimitProperties.Stage stage = stepLimits.stageOf(step, maxSteps);
+                if (stage == ToolStepLimitProperties.Stage.ABORT) {
+                    throw new ToolStepLimitExceededException(agentId, sessionId, maxSteps);
+                }
+                if (stage == ToolStepLimitProperties.Stage.EXHAUSTED) {
+                    // Over the turn's ceiling: the model is told to answer now, as for any other call over it.
+                    return GuardrailPrompts.budgetCallsResult(prompts, agentId, stepLimits, maxSteps);
+                }
             }
-            return "This tool call ('" + toolName + "') was not executed: its arguments broke this agent's argument "
-                + "policy for the tool - " + reason + ". Fix the arguments and try again, or proceed without this tool.";
+            boolean lookupFailed = verdict.violations().stream().anyMatch(v -> LOOKUP_FAILED_RULE.equals(v.rule()));
+            String refusal = lookupFailed
+                ? GuardrailPrompts.text(prompts, GuardrailPrompts.DISPATCH_DENIED, agentId, "tool", toolName, "reason", reason)
+                : GuardrailPrompts.text(prompts, GuardrailPrompts.ARG_POLICY_VIOLATION, agentId, "tool", toolName, "reason", reason);
+            return com.agenticai.core.guardrails.ToolResultMarker.mark(
+                refusal,
+                com.agenticai.core.guardrails.ToolResultMarker.Kind.BLOCKED);
         }
         return toolContext != null ? delegate.call(toolInput, toolContext) : delegate.call(toolInput);
     }
 
-    /** Null = no policy applies (or the lookup failed open). */
+    /** Null = no policy applies (or the lookup failed and the fail mode is open). */
     private ToolArgPolicyEvaluator.Result evaluate(String toolName, String toolInput) {
         ToolArgPolicyEvaluator evaluator;
         try {
             evaluator = source.evaluatorFor(agentId);
         } catch (RuntimeException e) {
-            log.warn("Tool argument policy lookup failed for agent {} - allowing '{}' (fail-open on lookup)",
+            if (GuardrailSettings.failClosed(agentId)) {
+                log.warn("Tool argument policy lookup failed for agent {} - refusing '{}' (fail-closed)",
+                    agentId, toolName, e);
+                return new ToolArgPolicyEvaluator.Result(false, java.util.List.of(new ToolArgPolicyEvaluator.Violation(
+                    toolName, "", LOOKUP_FAILED_RULE,
+                    GuardrailPrompts.text(prompts, GuardrailPrompts.DISPATCH_CHECK_FAILED, agentId))));
+            }
+            log.warn("Tool argument policy lookup failed for agent {} - allowing '{}' (fail-open by app.guardrails.fail-mode)",
                 agentId, toolName, e);
             return null;
         }

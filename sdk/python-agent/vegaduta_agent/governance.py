@@ -107,17 +107,14 @@ class GovernedTool:
     def __call__(self, arguments: str | dict = "{}", *, context: RunContext | None = None) -> str:
         if inspect.iscoroutinefunction(self.fn):
             raise TypeError(
-                f"{self.tool_name} is async: 'await tool.acall(...)' or wrap it with "
-                "governance.wrap_async"
+                f"{self.tool_name} is async: 'await tool.acall(...)' or wrap it with governance.wrap_async"
             )
         ctx = context or RunContext.anonymous()
         args_json = arguments if isinstance(arguments, str) else json.dumps(arguments)
         call = ToolCall(tool_name=self.tool_name, arguments_json=args_json)
         return self._g.dispatch(self.fn, self.tool_name, self.classification, call, ctx)
 
-    async def acall(
-        self, arguments: str | dict = "{}", *, context: RunContext | None = None
-    ) -> str:
+    async def acall(self, arguments: str | dict = "{}", *, context: RunContext | None = None) -> str:
         """The async entry point. A sync tool runs inline (same as
         ``__call__``); a coroutine function runs the whole governed pipeline
         on a worker thread, where the tool body gets its own event loop —
@@ -132,9 +129,7 @@ class GovernedTool:
         ctx = context or RunContext.anonymous()
         args_json = arguments if isinstance(arguments, str) else json.dumps(arguments)
         call = ToolCall(tool_name=self.tool_name, arguments_json=args_json)
-        return await asyncio.to_thread(
-            self._g.dispatch, shim, self.tool_name, self.classification, call, ctx
-        )
+        return await asyncio.to_thread(self._g.dispatch, shim, self.tool_name, self.classification, call, ctx)
 
     def describe(self) -> dict:
         """A framework-neutral description for adapters: name, docstring and
@@ -226,8 +221,7 @@ class Governance:
 
                 if self.provenance.mode is ProvenanceMode.ENFORCE:
                     raise ToolDeniedException(
-                        f"tool {tool.tool_name} drifted from its pinned manifest: "
-                        f"{drift.detail}"
+                        f"tool {tool.tool_name} drifted from its pinned manifest: {drift.detail}"
                     )
         self._tools[tool.tool_name] = tool
         return tool

@@ -191,7 +191,7 @@ final class AgentLabRunWorker {
                     plan.agentId(),
                     cell.promptIndex() == null ? null : plan.systemPrompts().get(cell.promptIndex()),
                     cell.history(), cell.message(), null, null, plan.subject(),
-                    "lab:" + plan.runId() + ":" + n));
+                    "lab:" + plan.runId() + ":" + n, plan.withTools()));
             } catch (RuntimeException e) {
                 state.completedCalls++;
                 if (AgentLabCompletionService.isLimitFailure(e)) {

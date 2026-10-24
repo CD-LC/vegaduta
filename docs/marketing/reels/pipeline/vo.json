@@ -1,0 +1,40 @@
+{
+ "r1": [
+  ["hook", "You wanted an AI agent for your team. And every option wanted your data on someone else's cloud."],
+  ["cmd", "VegaDuta runs on your own machine. One command."],
+  ["boot", "Postgres, a model, the console. It boots, runs its migrations, and hands you a setup link."],
+  ["unlock", "Choose how you unlock. Passkey, PIN, or password. That is your workspace."],
+  ["oss", "Open source. Self-hosted. Yours."],
+  ["end", "VegaDuta. Build the agent, then give the idea wings."]
+ ],
+ "r2": [
+  ["hook", "Northwind Bikes gets the same five questions all day. Returns, warranty, store hours."],
+  ["job", "Create an agent. Give it a job."],
+  ["model", "Pick the model. Here, it's a free local one, running on this laptop."],
+  ["docs", "Hand it the returns policy. It reads the documents, chunks them, and embeds them."],
+  ["ask", "Ask it anything. It answers from your documents, not from the internet."],
+  ["end", "Sixty seconds. No code. VegaDuta."]
+ ],
+ "r3": [
+  ["hook", "An agent that can issue refunds is only useful if it cannot go rogue."],
+  ["node", "In VegaDuta, you put a human step inside the workflow. Agent, then approval, then action."],
+  ["pause", "The agent drafts the refund decision. The run pauses."],
+  ["decide", "A person reads it, approves or rejects, and only then does the workflow move on."],
+  ["log", "Every step is logged. Every decision has a name on it."],
+  ["end", "Autonomy, with a seatbelt. VegaDuta."]
+ ],
+ "r4": [
+  ["hook", "Your customers will not install another app."],
+  ["channels", "Connect the same agent to WhatsApp, Telegram, Slack, SMS, Discord, Teams, and email."],
+  ["rules", "Same agent, same rules, same approvals, whatever the channel."],
+  ["inbox", "And one place to see every conversation."],
+  ["end", "VegaDuta."]
+ ],
+ "r5": [
+  ["hook", "Nobody signs off on an agent they cannot measure."],
+  ["roi", "VegaDuta records every token and every resolution, and shows cost, value, and R O I, per agent."],
+  ["prices", "Type in your own prices and your own baseline. Nothing is invented for you."],
+  ["report", "Print the one-page pilot report. Take it to the budget meeting."],
+  ["end", "VegaDuta."]
+ ]
+}

@@ -1,0 +1,30 @@
+# Prompt-injection / jailbreak phrasings in USER INPUT (JailbreakDetectorGuardrail). English set.
+# One Java regex per line; a leading (?i) / (?im) group becomes the pattern flags. {GAP} is the bounded,
+# lazy gap between two keywords of a multi-keyword pattern ([^\n]{0,40}?, the ReDoS guard) and is filled in
+# by the detector. Add a language with guardrails/patterns/<locale>/jailbreak.txt: every locale's patterns
+# are checked together. See docs/prompts.md ("Detector pattern sets").
+
+# Role override / instruction ignore
+(?i)ignore{GAP}previous{GAP}instruction
+(?i)disregard{GAP}prompt
+(?i)forget{GAP}your{GAP}instruction
+
+# Prompt extraction attempts
+(?i)show{GAP}(?:me|us){GAP}(?:your|the){GAP}(?:system{GAP})?prompt
+(?i)(?:system|original){GAP}prompt{GAP}(?:was|is)
+(?i)what{GAP}(?:are|is){GAP}your{GAP}(?:system{GAP})?instruction
+
+# Authority spoofing
+(?i)i{GAP}(?:am|'m){GAP}(?:admin|developer|owner|creator)
+(?i)you{GAP}must{GAP}listen{GAP}to{GAP}me
+
+# Format override
+(?i)respond{GAP}only{GAP}(?:in|as|like){GAP}(?:json|xml|html|markdown|code)
+(?i)output{GAP}format{GAP}override
+
+# Direct injection markers. The "<<<" form is bounded for the same reason as the gaps.
+(?i)\[\[JAILBREAK\]\]
+(?i)<<<[^\n]{0,200}?>>>
+
+# Common attack prefixes. Multiline so "^" anchors at every line start (a prefix buried one newline deep).
+(?im)^(DAN|UCAR|ALPACA|GPT-4|REAL-ME):

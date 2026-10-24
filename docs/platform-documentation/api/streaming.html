@@ -45,6 +45,7 @@
     <tr><td><code>attachmentKey</code>, <code>attachmentMimeType</code>, <code>attachments</code>, <code>visionSessionId</code>, <code>turnRef</code></td><td>various</td><td>Attachment and vision context. Upload via <code>POST /api/agents/{agentId}/chat/attachments</code> (multipart).</td></tr>
     <tr><td><code>forceFastDepth</code></td><td>boolean</td><td>Used by the voice bridge to force the FAST reasoning depth.</td></tr>
     <tr><td><code>stepEvents</code></td><td>boolean</td><td>Opt in to tool-activity events on the stream.</td></tr>
+    <tr><td><code>toolNames</code></td><td>string[]</td><td>Narrows this one turn to the listed tools of the agent (the playground's "this run only" tool switches). Narrowing only: a name the agent does not offer you for this turn is refused (400, naming it); a tool that is kept is still behind its approval, autonomy and guardrail gates; the agent's saved tool access is never changed. Omitted leaves the agent's tools as they are; an empty list runs the turn without tools. At most 200 names of 128 characters. The turn the platform starts after a human decides a gated call keeps the same selection, and the turn journal's intake event lists it (<code>runTools=</code>).</td></tr>
   </tbody>
 </table>
 <h3>Response framing</h3>
@@ -70,6 +71,19 @@
   property of the request, never a default. The exact step-event JSON fields were not enumerated for this page:
   not documented here; see <code>AgentStepEventEmitter</code>.
 </div>
+<h3>Turn-lifecycle step events</h3>
+<p>Besides the tool and run events, a stream that set <code>stepEvents:true</code> carries five events that say what the turn is doing beyond working. Their fields are codes, counts, names and ids, never wording, so a client keys its chips and notices on them and not on the notice text the platform also appends to the reply. The schemas are the <code>agentStep_*</code> messages of <code>docs/api/asyncapi.json</code>.</p>
+<table>
+  <thead><tr><th><code>type</code></th><th>Fields</th><th>When</th></tr></thead>
+  <tbody>
+    <tr><td><code>finish</code></td><td><code>finishReason</code>: <code>stop</code>, <code>length</code>, <code>safety</code>, <code>malformed_tool_call</code>, <code>empty</code> or <code>interrupted</code>; optional <code>detail</code> (the provider's word for a refusal)</td><td>Once per reply, before <code>run_finished</code>. Offer "Continue" on <code>length</code> and <code>interrupted</code>; show the refusal notice on <code>safety</code>.</td></tr>
+    <tr><td><code>retry</code></td><td><code>attempt</code> (the try about to run, 1 is the first), <code>maxAttempts</code>, <code>reason</code></td><td>The same model is called again after a failure before its first token, or an unusable tool call is asked for again.</td></tr>
+    <tr><td><code>failover</code></td><td><code>toModel</code> (absent when not known by name), <code>reason</code></td><td>The turn moved to the agent's fallback provider or to the next model of the platform-hosted pool.</td></tr>
+    <tr><td><code>continuation</code></td><td><code>pass</code>, <code>maxPasses</code>, <code>reason</code>: <code>cut_off</code>, <code>unfinished_step</code> or <code>approval</code></td><td>Another model pass carries the reply on.</td></tr>
+    <tr><td><code>approval_required</code></td><td><code>tool</code>, <code>approvalId</code></td><td>A tool call was recorded as a pending approval; sent after that call's <code>tool_result</code>.</td></tr>
+  </tbody>
+</table>
+<p><code>reason</code> on <code>retry</code> and <code>failover</code> is one of <code>rate_limited</code>, <code>timeout</code>, <code>provider_unavailable</code>, <code>auth_failed</code>, <code>billing</code>, <code>model_not_found</code>, <code>provider_error</code> or, on <code>retry</code> only, <code>malformed_tool_call</code>. A client without a <code>finish</code> event (an older core) falls back to recognising the reply-text markers.</p>
 <h3>Run control</h3>
 <table>
   <thead><tr><th>Verb and path</th><th>Behaviour</th></tr></thead>
@@ -92,7 +106,7 @@
   (<code>id</code>, <code>role</code>, <code>content</code>, <code>toolCalls</code>, <code>toolCallId</code>, <code>name</code>),
   <code>tools[]</code>, <code>context[]</code>, <code>forwardedProps</code>; unknown fields are ignored. The controller runs the
   <em>last user message's text</em> (string content, or the joined <code>text</code> parts of an array). No user text: 400.
-  Over the controller's maximum message length: 400. Missing <code>threadId</code>/<code>runId</code> are generated as UUIDs.
+  Over the controller's maximum message length: 400. Missing <code>threadId</code>/<code>runId</code> are generated as UUIDs. A supplied <code>runId</code> must be 1 to 128 letters, digits, <code>-</code> or <code>_</code> (otherwise 400).
   In the controller code read for this page, only the last user message and the ids are passed to the turn; <code>tools</code> and <code>state</code> are not forwarded to it.
 </p>
 <h3>Event sequence</h3>
@@ -120,7 +134,7 @@ RUN_FINISHED{threadId,runId}   or   RUN_ERROR{message,code}   (never both)</pre>
   <code>GET /api/agents/{agentId}/agui/runs/{runId}/events</code> replays buffered events after a position, then attaches to the live
   tail if the run executes on this pod. Position: <code>?after=&lt;seq&gt;</code> or the standard <code>Last-Event-ID</code> header
   (<code>after</code> wins). If the run is on another pod or its live window passed you receive the buffered history and a clean
-  end of stream; poll again until the buffer contains <code>RUN_FINISHED</code> or <code>RUN_ERROR</code>.
+  end of stream; poll again until the buffer contains <code>RUN_FINISHED</code> or <code>RUN_ERROR</code>. A rejoin is scoped to the agent in the path and to the signed-in user who started the run: for anyone else, or another agent, the stream is empty, exactly as for a run that does not exist.
   Companion: <code>GET /api/agents/{agentId}/agui/tools</code> (JSON, <code>VIEWER</code>) lists the agent's tools as AG-UI
   <code>Tool</code> objects (<code>name</code>, <code>description</code>, permissive <code>parameters</code> schema).
 </p>

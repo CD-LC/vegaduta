@@ -9,7 +9,7 @@ does it leave behind?". The companion document is the
 
 Read this first:
 
-- **The SDK is `0.1.0-SNAPSHOT`.** It has not been released to Maven Central and has had no
+- **The SDK is `0.1.0`.** It is a GitHub Release (`sdk-v0.1.0`), not yet on Maven Central, and has had no
   third-party security assessment or penetration test. Everything below is a description of
   what the code does, not an attestation. Verify it against the source in your own review.
 - **Mapping is not certification.** Nothing here makes an application "EU AI Act compliant",
@@ -60,7 +60,7 @@ classified against, so coverage is visible per call, not only on paper.
 | ASI01 Agent Goal Hijack | `BuiltInRules.promptInjection()` redacts instruction-override, role-reassignment and system-prompt-probe phrases in tool output; `LethalTrifectaDetector`; `ToolManifest`/`ProvenanceGate` (this change) stops injected "new tools" | `WARNING` events `output redacted: injection.*`; `agent.toolset` trifecta report | Pattern matching catches known phrasings only. A paraphrased or multilingual injection passes. Treat the rules as a tripwire, not a filter; add a model-based `ContentGuardrail` for real coverage. Streamed model replies are not inspected in 0.1. |
 | ASI02 Tool Misuse and Exploitation | `ToolClassification` + `PolicyToolDispatchGate` (risk threshold, deny list, deny unclassified in STRICT); argument guardrails; `MandateGate` (this change) | `DENIED` / `PENDING_APPROVAL` events with gate reason | WARN mode (the default) runs unclassified tools with the default classification. A reviewer should require STRICT in production. |
 | ASI03 Identity and Privilege Abuse | `RunContext` (tenant, principal, agent) scopes every gate, approval, budget and journal key; `FourEyesAuthorizer`; secrets egress rules; `Mandate` (this change) binds actions to a principal and a validity window | `actorId`, `principal`, `tenantId` on every event | The SDK trusts the `RunContext` the host hands it. If the host derives it from an unauthenticated source, every downstream control is scoped to a lie. The optional approvals endpoint has no authentication of its own. |
-| ASI04 Agentic Supply Chain Vulnerabilities | `ToolManifest`/`ProvenanceGate` and `agent-scanner` (this change); reproducible jars, CycloneDX SBOM, GPG signatures and SLSA provenance on release | Manifest, scan report, SBOM | No release has been made yet, so no signed artifact exists to verify. The Agent Skills supply-chain scanner and MCP hardening module are ADR-0013 phase 2, not shipped. |
+| ASI04 Agentic Supply Chain Vulnerabilities | `ToolManifest`/`ProvenanceGate` and `agent-scanner` (this change); reproducible jars, CycloneDX SBOM, GPG signatures and SLSA provenance on release | Manifest, scan report, SBOM | The `sdk-v0.1.0` GitHub Release carries SHA256SUMS and SLSA provenance (`gh attestation verify`); GPG signatures arrive with Maven Central, which has not published it yet. The Agent Skills supply-chain scanner and MCP hardening module are ADR-0013 phase 2, not shipped. |
 | ASI05 Unexpected Code Execution | Classification of code-running tools as `CRITICAL`/`sideEffecting` and the gate's threshold; `AutonomyLevel` (this change) | Gate events | The SDK does not sandbox anything. It decides whether a call is made; what the tool then does is the tool's problem. Pair with an execution sandbox. |
 | ASI06 Memory and Context Poisoning | Output guardrails on `TOOL_OUTPUT`; `GovernedMemoryStore` (this change) routes memory writes through the same chain and audits them | Redaction `WARNING`s; memory audit events | Only content passing through governed tools or the governed store is checked. Memory the framework keeps elsewhere is not. |
 | ASI07 Insecure Inter-Agent Communication | `WebhookHook` signs outbound policy calls with HMAC-SHA256; hook `FailMode` per registration | Signature header on every webhook | Signing is one-way (SDK to policy engine) with a shared secret. The SDK does not verify inbound signatures from other agents; the A2A guard is phase 3. |
@@ -194,7 +194,7 @@ fill a regulatory gap; it gives a bank concrete controls it can write into its o
 7. **Token budgets are recorded, not enforced**, in 0.1.
 8. **Standards are not shortcuts.** ISO/IEC 42001 certification, SOC 2 reports and EU AI Act
    conformity are about your organisation and system; the SDK supplies evidence and controls.
-9. **0.1.0-SNAPSHOT, no third-party audit.** No release, no signed artifact to verify yet, no
+9. **0.1.0, no third-party audit.** No Maven Central release or GPG signature yet (the GitHub Release has provenance), no
    external penetration test. Several mechanisms in this document are being added in the same
    change and are `@Experimental`.
 10. **Names of external standards move.** OWASP ASI titles, OTel GenAI attributes and the ACS

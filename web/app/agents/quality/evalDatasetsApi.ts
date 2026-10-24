@@ -38,7 +38,14 @@ export interface EvalDatasetSummary {
   name: string;
   description: string | null;
   passThreshold: number;
-  toolExecutionEnabled: boolean;
+  /** The dataset's pinned mode as a boolean: true = full pipeline, false = quick (text only), null = it pins none. */
+  toolExecutionEnabled: boolean | null;
+  /** The pinned mode by name; null/absent = none, runs follow the workspace default. */
+  mode?: EvalMode | null;
+  /** The mode a run of this dataset takes right now when it names none: the pin, else the workspace default. */
+  effectiveMode?: EvalMode;
+  /** With tools: a call that would wait for a person is approved by the eval sandbox (non-production tenants only). */
+  autoApproveTools?: boolean;
   caseCount: number;
   createdBy: string | null;
   createdAt: string;
@@ -60,6 +67,9 @@ export interface EvalDatasetDetail {
   cases: EvalCase[];
 }
 
+/** How a run replays its cases: the production pipeline in the eval sandbox, or text only with the tools withheld. */
+export type EvalMode = "FULL" | "QUICK";
+
 export type EvalRunStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
 export type EvalRunVerdict = "PASSED" | "FAILED" | "INCONCLUSIVE";
 
@@ -72,6 +82,8 @@ export interface EvalRunOptions {
   repeats?: number;
   budgetUsd?: number;
   idempotencyKey?: string;
+  /** FULL or QUICK; absent = the dataset's pinned mode, else the workspace default (the full pipeline as shipped). */
+  mode?: EvalMode;
 }
 
 export interface EvalRunSummary {
@@ -96,6 +108,10 @@ export interface EvalRunSummary {
    *  judgeModel). */
   requestedJudgeModel?: string | null;
   strictJudge?: boolean;
+  /** How the run replayed its cases (frozen when it was triggered). Absent on an older server (text only then). */
+  mode?: EvalMode;
+  /** The run replayed under the eval sandbox's auto-approval: a person decided none of its tool calls. */
+  autoApproved?: boolean;
   repeats?: number;
   budgetUsd?: number | null;
   /** Observed replay spend accumulated during the run (V343). */
@@ -136,7 +152,8 @@ export interface EvalCaseResult {
   expectedOutput: string | null;
   expectedTools: string[];
   agentResponse: string | null;
-  toolCalls: { toolName: string | null; input: string | null; output: string | null }[];
+  /** status: how the turn recorded the call's end (OK, FAILED, NOT_RUN, AWAITING_APPROVAL, REPLAYED, SIMULATED); absent on older results. */
+  toolCalls: { toolName: string | null; input: string | null; output: string | null; status?: string | null }[];
   scores: Record<string, EvalDimensionScore>;
   overallScore: number | null;
   expectedToolsSatisfied: boolean | null;
@@ -165,13 +182,19 @@ export interface ImportEvalCasePayload {
 export interface EvalRunDetail {
   run: EvalRunSummary;
   caseResults: EvalCaseResult[];
+  /** The tools the sandbox answered with a simulated result in at least one case (they could change something). */
+  simulatedTools?: string[];
 }
 
 export interface UpsertEvalDatasetPayload {
   name: string;
   description?: string | null;
   passThreshold?: number | null;
+  /** Older boolean spelling of `mode` (true = FULL, false = QUICK); used by the server only when `mode` is absent. */
   toolExecutionEnabled?: boolean | null;
+  /** FULL or QUICK pins the dataset's mode, DEFAULT drops the pin (runs follow the workspace default); absent = unchanged. */
+  mode?: EvalMode | "DEFAULT" | null;
+  autoApproveTools?: boolean | null;
 }
 
 export interface UpsertEvalCasePayload {

@@ -508,7 +508,7 @@ def set_policies(
         norm = []
         for o in allowed_origins:
             o = str(o).strip().rstrip("/").lower()
-            if not _ORIGIN_RX.match(o):
+            if not _ORIGIN_RX.fullmatch(o):
                 raise DataError(
                     400, "bad_origins", f"not an origin (scheme://host[:port]): {o[:80]!r}"
                 )

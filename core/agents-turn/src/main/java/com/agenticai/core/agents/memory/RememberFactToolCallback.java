@@ -130,7 +130,7 @@ public class RememberFactToolCallback implements ToolCallback {
             return;
         }
         try {
-            List<GraphTriple> triples = entityExtractionService.extractTriples(chatClient, fact);
+            List<GraphTriple> triples = entityExtractionService.extractTriples(chatClient, fact, agentId);
             if (memoryWriteArbitrationService != null) {
                 memoryWriteArbitrationService.arbitrateAndWrite(chatClient, graphMemoryService, agentId, subjectKey, triples);
             } else {

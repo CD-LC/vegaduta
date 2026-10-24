@@ -29,6 +29,7 @@ final class AgentSettingsFacets {
                 new CachingApplier(),
                 new CapabilitiesApplier(schemaService),
                 new RunBudgetApplier(),
+                new RuntimeLimitsApplier(),
                 new AutonomyApplier(),
                 new ReasoningDepthApplier(),
                 new ScopeApplier(schemaService));
@@ -176,6 +177,22 @@ final class AgentSettingsFacets {
             if (!(patch instanceof AgentSettingsPatch.RunBudget p)) throw unsupported(patch);
             agent.setRunBudgetUsd(p.usd());
             return "Changed run cap";
+        }
+    }
+
+    private record RuntimeLimitsApplier() implements FacetApplier {
+        @Override
+        public Facet facet() {
+            return Facet.RUNTIME_LIMITS;
+        }
+
+        @Override
+        public String apply(Agent agent, AgentSettingsPatch patch) {
+            if (!(patch instanceof AgentSettingsPatch.RuntimeLimitsPatch p)) throw unsupported(patch);
+            agent.setRuntimeLimits(p.limits());
+            return p.limits() == null || p.limits().isEmpty()
+                    ? "Cleared runtime limit overrides"
+                    : "Changed runtime limits";
         }
     }
 

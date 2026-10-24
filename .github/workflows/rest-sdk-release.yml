@@ -39,10 +39,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.13"
       - name: Tag must equal both manifest versions
@@ -87,17 +87,25 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.13"
       - name: Typecheck, build and pack the TypeScript package
         working-directory: sdk/typescript
         run: |
+          set -euo pipefail
           npm ci || npm install --no-audit --no-fund
-          npm pack
+          # package.json says "private": true so nothing publishes it from a checkout by accident. The
+          # tarball built here is what the GitHub release carries and what the npm job publishes, so
+          # the flag goes before it is packed (`npm publish` refuses a private manifest, also in a tarball).
+          npm pkg delete private
+          npm pack  # prepack: typecheck + build, so dist/ is in the tarball
+          for f in package/dist/index.js package/dist/index.d.ts package/LICENSE package/package.json; do
+            tar -tzf vegaduta-sdk-*.tgz | grep -qx "$f" || { echo "::error::the packed tarball has no $f"; exit 1; }
+          done
           mv vegaduta-sdk-*.tgz ../.. --verbose
       - name: Build the Python package
         run: |
@@ -113,7 +121,7 @@ jobs:
           subject-path: |
             dist/
             vegaduta-sdk-*.tgz
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: rest-sdk-dists
           path: |
@@ -129,7 +137,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: rest-sdk-dists
       - name: Create the release
@@ -154,7 +162,7 @@ jobs:
     permissions:
       id-token: write # trusted publishing
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: rest-sdk-dists
           path: dist
@@ -175,18 +183,23 @@ jobs:
       id-token: write # npm provenance
       contents: read
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The tarball the build job packed, attested and attached to the GitHub release. A fresh checkout
+      # has no dist/ (it is gitignored and `--ignore-scripts` skips the build), so publishing the source
+      # tree would ship a package whose `main` and `types` point at files that are not there.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          persist-credentials: false
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+          name: rest-sdk-dists
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
-      - name: Publish to npm (provenance)
-        working-directory: sdk/typescript
+      - name: Publish the attested tarball to npm (provenance)
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm ci || npm install --no-audit --no-fund
-          npm pkg delete private  # the release workflow owns the publish decision
-          npm publish --provenance --access public --ignore-scripts
+          set -euo pipefail
+          tarball="$(ls vegaduta-sdk-*.tgz)"
+          case "$tarball" in *$'\n'*) echo "::error::more than one vegaduta-sdk tarball: $tarball"; exit 1 ;; esac
+          tar -tzf "$tarball" | grep -qx 'package/dist/index.js' \
+            || { echo "::error::$tarball has no dist/index.js; refusing to publish an empty package"; exit 1; }
+          npm publish "./$tarball" --provenance --access public

@@ -38,6 +38,18 @@
       <groupId>com.agenticai</groupId>
       <artifactId>audit</artifactId>
     </dependency>
+    <!-- The prompt registry: PromptResolver for the model-facing text this module steers with (see docs/prompts.md).
+         prompts depends only on security and audit, so this adds no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>prompts</artifactId>
+    </dependency>
+    <!-- The settings catalog: SettingsResolver for the chat.retry.maxAttempts use site (docs/settings.md).
+         settings depends only on security and audit, so this adds no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>settings</artifactId>
+    </dependency>
     <!-- Smart AI layer (PlatformFeatureBudgetService / PlatformSettingsService) -
          ProviderErrorTranslator's AI-generated error explanation feature reads
          the master switch/per-feature budget from here. tenancy depends only on

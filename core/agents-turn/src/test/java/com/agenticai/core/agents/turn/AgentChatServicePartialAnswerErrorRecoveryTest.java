@@ -99,6 +99,7 @@ class AgentChatServicePartialAnswerErrorRecoveryTest {
         when(requestSpec.messages(anyList())).thenReturn(requestSpec);
         when(requestSpec.user(any(Consumer.class))).thenReturn(requestSpec);
         when(requestSpec.toolCallbacks(anyList())).thenReturn(requestSpec);
+        when(requestSpec.toolContext(org.mockito.ArgumentMatchers.anyMap())).thenReturn(requestSpec);
         when(requestSpec.advisors(any(Consumer.class))).thenReturn(requestSpec);
         when(requestSpec.stream()).thenReturn(streamResponseSpec);
 

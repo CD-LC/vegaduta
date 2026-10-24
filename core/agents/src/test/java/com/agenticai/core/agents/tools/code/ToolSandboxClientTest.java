@@ -36,7 +36,7 @@ class ToolSandboxClientTest {
                         withStatus(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body("compiler pool exhausted"));
 
-        ToolSandboxClient client = new ToolSandboxClient(builder, properties());
+        ToolSandboxClient client = ToolSandboxClient.usingBuilderTransport(builder, properties());
 
         assertThatThrownBy(
                         () -> client.validate(CustomCodeToolLanguage.JAVA, "my_tool", "class X {}"))
@@ -55,7 +55,7 @@ class ToolSandboxClientTest {
         server.expect(requestTo(BASE_URL + "/v1/validate"))
                 .andRespond(withStatus(HttpStatus.UNAUTHORIZED));
 
-        ToolSandboxClient client = new ToolSandboxClient(builder, properties());
+        ToolSandboxClient client = ToolSandboxClient.usingBuilderTransport(builder, properties());
 
         assertThatThrownBy(
                         () -> client.validate(CustomCodeToolLanguage.PYTHON, "my_tool", "print(1)"))
@@ -76,7 +76,7 @@ class ToolSandboxClientTest {
                                 "{\"valid\":false,\"sourceSha256\":\"abc\",\"errors\":[{\"line\":2,\"message\":\"cannot find symbol\"}],\"warnings\":[]}",
                                 MediaType.APPLICATION_JSON));
 
-        ToolSandboxClient client = new ToolSandboxClient(builder, properties());
+        ToolSandboxClient client = ToolSandboxClient.usingBuilderTransport(builder, properties());
         SandboxValidateResponse verdict =
                 client.validate(CustomCodeToolLanguage.JAVA, "my_tool", "class X {}");
 
@@ -104,7 +104,7 @@ class ToolSandboxClientTest {
                                 MediaType.APPLICATION_JSON));
 
         SandboxValidateResponse verdict =
-                new ToolSandboxClient(builder, properties())
+                ToolSandboxClient.usingBuilderTransport(builder, properties())
                         .validate(CustomCodeToolLanguage.JAVA, "my_tool", "class X {}");
 
         assertThat(verdict.valid()).isTrue();

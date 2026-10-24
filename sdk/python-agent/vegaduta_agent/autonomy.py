@@ -155,9 +155,7 @@ class AutonomyGate:
         self.registry = registry or AutonomyRegistry()
         self.delegate = delegate
 
-    def evaluate(
-        self, call: ToolCall, classification: ToolClassification, context: RunContext
-    ) -> Verdict:
+    def evaluate(self, call: ToolCall, classification: ToolClassification, context: RunContext) -> Verdict:
         own = evaluate(resolve_level(self.registry, context), classification)
         if own.outcome is Outcome.DENY or self.delegate is None:
             return own

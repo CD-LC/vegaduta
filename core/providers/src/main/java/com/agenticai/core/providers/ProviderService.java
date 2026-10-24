@@ -10,6 +10,7 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.settings.SettingsResolver;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,17 @@ public class ProviderService {
     /** The cooldown reported as "background calls paused until"; same property the resolver applies. */
     @Value("${app.providers.rejected-cooldown-hours:6}")
     long rejectedCooldownHours = 6;
+
+    private SettingsResolver settings;
+
+    /**
+     * The settings catalog ({@code providers.credential.rejectedCooldown}): a workspace's cooldown replaces the
+     * property value. Setter-injected; without it the property applies.
+     */
+    @Autowired(required = false)
+    void setSettings(SettingsResolver settings) {
+        this.settings = settings;
+    }
 
     public ProviderService(
         LlmProviderCredentialRepository repository,
@@ -179,7 +191,7 @@ public class ProviderService {
         try {
             List<ProviderName> active = responses.stream()
                 .filter(r -> r.status() == ProviderStatus.ACTIVE).map(ProviderResponse::providerName).toList();
-            Map<ProviderName, ProviderHealth> health = signal.health(active, Duration.ofHours(Math.max(0, rejectedCooldownHours)));
+            Map<ProviderName, ProviderHealth> health = signal.health(active, ProviderSettings.rejectedCooldown(settings, rejectedCooldownHours));
             if (health == null || health.isEmpty()) {
                 return;
             }

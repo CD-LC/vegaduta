@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -29,7 +30,7 @@ const upAttempts = 3
 
 // ensureDocker installs and starts Docker when needed, then gives its VM
 // enough memory for the tier. Each step reports progress through emit.
-func ensureDocker(ctx context.Context, tier string, emit func(Event)) error {
+func ensureDocker(ctx context.Context, tier string, restartOK bool, emit func(Event)) error {
 	line := func(s string) { emit(Event{Line: s}) }
 	if err := ensurePlatformPrereqs(ctx, emit); err != nil {
 		return err
@@ -66,15 +67,38 @@ func ensureDocker(ctx context.Context, tier string, emit func(Event)) error {
 	if !full {
 		line(fmt.Sprintf("This computer can spare %d GB for Docker, short of the %d GB VegaDūta wants - it may run slowly.", target, needGB))
 	}
-	changed, err := raiseDockerMemory(ctx, target, emit)
+	raiseDockerMemoryWithConsent(ctx, target, have, int64(needGB), restartOK, emit)
+	return nil
+}
+
+// raiseMemory and raiseRestartsDocker are vars so tests can exercise the
+// consent rule on any OS.
+var (
+	raiseMemory         = raiseDockerMemory
+	raiseRestartsDocker = runtime.GOOS == "windows" // raising the WSL2 VM's memory restarts Docker Desktop and shuts WSL down
+)
+
+// raiseDockerMemoryWithConsent gives Docker target GB. Where that restarts
+// Docker Desktop and shuts WSL down (Windows), which closes every WSL window the
+// person has open, it only happens with their consent (the wizard's checkbox,
+// or --allow-docker-restart); without it Setup says what to do and goes on.
+func raiseDockerMemoryWithConsent(ctx context.Context, target, have, need int64, restartOK bool, emit func(Event)) {
+	line := func(s string) { emit(Event{Line: s}) }
+	if raiseRestartsDocker && !restartOK {
+		line(fmt.Sprintf("Docker has %d GB of memory and VegaDūta wants %d GB, so it may run slowly. Giving Docker more means restarting Docker Desktop "+
+			"and WSL, which closes every WSL window you have open (terminals, editors), so Setup did not do it. Either tick \"Let Setup restart Docker\" "+
+			"in the wizard (or run Setup with --allow-docker-restart) and click Install again, or raise it yourself in Docker Desktop > Settings > Resources > Memory.",
+			have, need))
+		return
+	}
+	changed, err := raiseMemory(ctx, target, emit)
 	if err != nil {
 		line("Could not raise Docker's memory automatically (" + err.Error() + ") - continuing.")
-		return nil
+		return
 	}
 	if changed {
 		line(fmt.Sprintf("Gave Docker %d GB of memory.", target))
 	}
-	return nil
 }
 
 // memoryTarget picks how much memory to give Docker: the tier's need plus
@@ -145,7 +169,7 @@ func classifyFailure(output string) failureKind {
 
 // repair fixes what a failure kind allows and reports whether a retry is
 // worth it.
-func repair(ctx context.Context, kind failureKind, emit func(Event)) bool {
+func repair(ctx context.Context, kind failureKind, ports []int, emit func(Event)) bool {
 	line := func(s string) { emit(Event{Line: s}) }
 	run := func(args ...string) { _ = exec.CommandContext(ctx, "docker", args...).Run() }
 	switch kind {
@@ -165,7 +189,7 @@ func repair(ctx context.Context, kind failureKind, emit func(Event)) bool {
 	case failNetwork:
 		line("The download was interrupted - retrying…")
 	case failPort:
-		line("A port VegaDūta needs (3000 or 8080) is used by another program, or reserved by Windows. Close that program, or on Windows run as administrator: net stop winnat; net start winnat - then click Install again.")
+		line(portAdvice(ports, busyPortsNow(ctx, ports), runtime.GOOS))
 		return false
 	case failSlow:
 		line("Some services were still starting - giving them more time…")
@@ -177,13 +201,51 @@ func repair(ctx context.Context, kind failureKind, emit func(Event)) bool {
 
 // upWithRepair runs the stack start, repairing and retrying failures. tail
 // keeps the recent output so a failure can be classified.
-func upWithRepair(ctx context.Context, start func(onLine func(string)) error, emit func(Event), emitLine func(string)) error {
-	return upWithRepairWait(ctx, start, emit, emitLine, 10*time.Second)
+func upWithRepair(ctx context.Context, start func(onLine func(string)) error, emit func(Event), emitLine func(string), ports []int) error {
+	return upWithRepairWait(ctx, start, emit, emitLine, ports, 10*time.Second)
+}
+
+// busyPortsNow lists, of ports, the ones another program holds right now - the
+// stack's own containers (started before the failure) do not count. A var for tests.
+var busyPortsNow = func(ctx context.Context, ports []int) []int {
+	own := vegadutaHeldPorts(ctx)
+	var other []int
+	for _, p := range busyPorts(ports) {
+		if !own[p] {
+			other = append(other, p)
+		}
+	}
+	return other
+}
+
+// portAdvice is what to tell a person when a host port cannot be published:
+// the ports this install is configured for (not a hard-coded pair), which of
+// them are busy now, how to move the stack to other ports, and - on Windows,
+// where a port can be reserved by the system without any program using it - how
+// to see that, with the winnat restart last and its cost said.
+func portAdvice(ports, busy []int, goos string) string {
+	var b strings.Builder
+	switch {
+	case len(busy) > 0 && len(ports) > 0:
+		fmt.Fprintf(&b, "Port %s is used by another program (VegaDūta needs %s). ", ints(busy), ints(ports))
+	case len(ports) > 0:
+		fmt.Fprintf(&b, "A port VegaDūta needs (%s) is used by another program. ", ints(ports))
+	default:
+		b.WriteString("A port VegaDūta needs is used by another program. ")
+	}
+	b.WriteString("Close that program, or move VegaDūta to other ports: set WEB_HOST_PORT and CORE_HOST_PORT in deploy/compose/.env in the install folder. ")
+	if goos == "windows" {
+		b.WriteString("Windows can also reserve a port with no program using it: `netsh interface ipv4 show excludedportrange protocol=tcp` lists the reserved ranges, " +
+			"and a different WEB_HOST_PORT/CORE_HOST_PORT outside them fixes it. As a last resort, from an administrator prompt, `net stop winnat` then `net start winnat` " +
+			"releases the reservations, but it briefly drops every Hyper-V and WSL network connection (Docker Desktop and open WSL windows may need a restart). ")
+	}
+	b.WriteString("Then click Install again.")
+	return b.String()
 }
 
 // upWithRepairWait is upWithRepair with the back-off step (attempt n waits
 // n*step) as a parameter, so tests need not sleep.
-func upWithRepairWait(ctx context.Context, start func(onLine func(string)) error, emit func(Event), emitLine func(string), step time.Duration) error {
+func upWithRepairWait(ctx context.Context, start func(onLine func(string)) error, emit func(Event), emitLine func(string), ports []int, step time.Duration) error {
 	var err error
 	for attempt := 1; attempt <= upAttempts; attempt++ {
 		var tail []string
@@ -200,7 +262,7 @@ func upWithRepairWait(ctx context.Context, start func(onLine func(string)) error
 		if attempt == upAttempts || ctx.Err() != nil {
 			break
 		}
-		if !repair(ctx, classifyFailure(strings.Join(tail, "\n")), emit) {
+		if !repair(ctx, classifyFailure(strings.Join(tail, "\n")), ports, emit) {
 			break
 		}
 		select {
@@ -210,6 +272,19 @@ func upWithRepairWait(ctx context.Context, start func(onLine func(string)) error
 		}
 	}
 	return err
+}
+
+// backupWSLConfig keeps the person's own .wslconfig next to it the first time
+// Setup rewrites it. Later rewrites never replace that copy, so it stays theirs.
+func backupWSLConfig(path string, old []byte) error {
+	if len(old) == 0 {
+		return nil
+	}
+	bak := path + ".vegaduta.bak"
+	if _, err := os.Stat(bak); err == nil {
+		return nil
+	}
+	return os.WriteFile(bak, old, 0o644)
 }
 
 // mergeWSLConfig sets memory=<gb>GB under [wsl2] in a .wslconfig, keeping

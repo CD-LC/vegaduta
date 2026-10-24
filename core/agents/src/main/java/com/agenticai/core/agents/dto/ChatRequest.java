@@ -83,6 +83,14 @@ import java.util.List;
  * contract can set this flag, which is precisely the set of callers that can
  * also parse the result. See {@code AgentStepEventEmitter}'s javadoc for the
  * full consumer inventory and the framing rules.
+ *
+ * <p>{@code toolNames} (the playground's "this run only" tool switches) narrows THIS turn to the listed
+ * tools of the agent. It is narrowing-only: a name that is not one of the tools the agent resolves for the
+ * caller is refused with a 400 that names it, a tool kept is still behind its approval, autonomy and
+ * guardrail gates, and the agent itself (its saved tool access) is never changed. Omitted (or {@code null})
+ * leaves the agent's tools as they are - byte-identical to before the field existed; an empty list runs the
+ * turn without tools. The turn the platform starts by itself after a human decides a gated call of this turn
+ * keeps the same selection.
  */
 public record ChatRequest(
     String sessionId,
@@ -115,6 +123,31 @@ public record ChatRequest(
     List<ChatInlineAttachment> attachments,
     String visionSessionId,
     boolean forceFastDepth,
-    boolean stepEvents
+    boolean stepEvents,
+    @Size(max = ChatRequest.MAX_TOOL_NAMES, message = "toolNames is too long (200 names maximum)")
+    List<@NotBlank(message = "toolNames may not contain a blank name") @Size(max = ChatRequest.MAX_TOOL_NAME_LENGTH,
+        message = "a tool name is too long (128 characters maximum)") String> toolNames
 ) {
+
+    /** Most tool names one request may select; the agent's whole catalog is far smaller than this. */
+    public static final int MAX_TOOL_NAMES = 200;
+
+    /** Longest tool name accepted; registered tool names (MCP-namespaced ones included) are well under this. */
+    public static final int MAX_TOOL_NAME_LENGTH = 128;
+
+    /** A request that selects no tools (every caller that predates {@code toolNames}). */
+    public ChatRequest(
+        String sessionId,
+        String message,
+        String attachmentKey,
+        String attachmentMimeType,
+        String turnRef,
+        List<ChatInlineAttachment> attachments,
+        String visionSessionId,
+        boolean forceFastDepth,
+        boolean stepEvents
+    ) {
+        this(sessionId, message, attachmentKey, attachmentMimeType, turnRef, attachments, visionSessionId,
+            forceFastDepth, stepEvents, null);
+    }
 }

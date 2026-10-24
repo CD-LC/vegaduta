@@ -1,0 +1,7 @@
+# Blatant injection markers in TOOL OUTPUT (PatternBasedGuardrailService): a match withholds the whole output.
+# Kept narrow on purpose, to avoid false positives on legitimate output. English set; other locales add to it.
+(?i)ignore\s+(all\s+)?(the\s+)?(above|previous)\s+instructions
+(?i)disregard\s+(your|the)\s+system\s+prompt
+(?i)reveal\s+(your|the)\s+system\s+prompt
+(?i)you\s+are\s+now\s+in\s+(developer|dan|jailbreak)\s+mode
+(?i)###\s*(system|admin|override)\s*###

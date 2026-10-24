@@ -6,7 +6,6 @@ import com.agenticai.core.mcp.McpCatalogService;
 import com.agenticai.core.mcp.McpDynamicConnector;
 import com.agenticai.core.mcp.McpRegistryService;
 import com.agenticai.core.mcp.McpRemoteUrlGuard;
-import com.agenticai.core.mcp.McpServerRegistration;
 import com.agenticai.core.mcp.McpStdioCommandGuard;
 import com.agenticai.core.mcp.atlassian.AtlassianOAuthService;
 import com.agenticai.core.mcp.dto.McpConnectionTestResult;
@@ -14,12 +13,9 @@ import com.agenticai.core.mcp.dto.McpDynamicConfig;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.AllowUnlockedSchedule;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.ServerParameters;
-import io.modelcontextprotocol.client.transport.StdioClientTransport;
 import io.modelcontextprotocol.spec.McpClientTransport;
 import java.time.Duration;
 import java.util.List;
@@ -70,14 +66,32 @@ import org.springframework.stereotype.Component;
 public class DynamicMcpConnectionManager implements McpDynamicConnector {
 
     private static final Logger log = LoggerFactory.getLogger(DynamicMcpConnectionManager.class);
-    static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(60);
+    /**
+     * The client-side wait for one request to a connected MCP server and for the "test connection" action
+     * ({@code app.tools.mcp.*}). Setter-injected so hand-built managers keep the shipped defaults.
+     */
+    private volatile McpClientProperties clientProperties = new McpClientProperties();
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void useClientProperties(McpClientProperties properties) {
+        this.clientProperties = properties;
+    }
+
+    Duration requestTimeout() {
+        return clientProperties.requestTimeout();
+    }
+
+    Duration testTimeout() {
+        return clientProperties.testTimeout();
+    }
+
     // Master Roadmap 2026 Section9.3 ("connection health checks") - once a
     // registration hit CONNECTED, nothing re-verified it was still alive:
     // reconnectEnabledOnStartup only ran on app restart, and otherwise an
     // admin had to notice a broken tool and hit "try again" manually. Five
     // minutes is deliberately not aggressive - a subprocess dying is rare,
     // and each check is a real round-trip against a possibly-slow/hung
-    // client (up to REQUEST_TIMEOUT) - see application.yml's scheduling
+    // client (up to the request timeout, app.tools.mcp.request-timeout-seconds) - see application.yml's scheduling
     // pool-size comment for why this needed its own scheduler thread
     // separate from WorkflowScheduler's once-a-minute tick.
     private static final long HEALTH_CHECK_INTERVAL_MS = 5 * 60 * 1000L;
@@ -257,7 +271,8 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
                         diagnostics,
                         () -> transports,
                         stdioParamsBuilder::stdioParamsFor,
-                        DynamicMcpConnectionManager::tenantKey);
+                        DynamicMcpConnectionManager::tenantKey,
+                        this::testTimeout);
         this.toolCache =
                 new McpToolCache(
                         liveClients,
@@ -286,7 +301,8 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
                         liveClients,
                         liveToolCallbacks,
                         toolCache,
-                        lifecycle);
+                        lifecycle,
+                        this::requestTimeout);
     }
 
     private volatile McpToolPinGate toolPins;
@@ -541,8 +557,7 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
      * Outermost wrap: lets a callback hand its call to the owner replica when routing is enabled
      * (pass-through otherwise).
      */
-    List<ToolCallback> routable(
-            List<ToolCallback> wrapped, String tenant, UUID registrationId) {
+    List<ToolCallback> routable(List<ToolCallback> wrapped, String tenant, UUID registrationId) {
         if (toolPins != null) {
             toolPins.observe(tenant, registrationId, wrapped);
         }
@@ -601,6 +616,12 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
         return transports.buildRemoteTransport(config);
     }
 
+    /** Test seam: see {@link McpTransportFactory#setClientBuilders}. */
+    void setRemoteClientBuilders(
+            java.util.function.Supplier<java.net.http.HttpClient.Builder> builders) {
+        transports.setClientBuilders(builders);
+    }
+
     /** See {@link McpTransportFactory#remoteRequestHeaders}. */
     McpRemoteHeaders.PerRequestHeaders remoteRequestHeaders(McpDynamicConfig config) {
         return transports.remoteRequestHeaders(config);
@@ -640,10 +661,10 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
     /**
      * MCP-DOCTOR: the real, bounded connection test behind {@code POST
      * /api/mcp/registrations/{id}/test}. Same guards, transport construction and diagnosis as
-     * {@link #connect} but on a TRANSIENT client (shorter {@link McpConnectionTester#TEST_TIMEOUT}, always closed,
-     * never registered in {@code liveClients}), so testing never disturbs a live connection.
-     * Outcome is persisted either way: pass -&gt; usageStatus READY, fail -&gt; FAILED + structured
-     * diagnosis. Never throws.
+     * {@link #connect} but on a TRANSIENT client (shorter {@link McpConnectionTester#TEST_TIMEOUT},
+     * always closed, never registered in {@code liveClients}), so testing never disturbs a live
+     * connection. Outcome is persisted either way: pass -&gt; usageStatus READY, fail -&gt; FAILED
+     * + structured diagnosis. Never throws.
      */
     @Override
     public McpConnectionTestResult test(UUID registrationId) {

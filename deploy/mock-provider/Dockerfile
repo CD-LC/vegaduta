@@ -3,7 +3,7 @@
 # this is reached via a seeded control_plane.platform_hosted_llm_provider
 # row, not an env var on core. CI-only image - never referenced by
 # deploy/docker-compose.yml's dev defaults, only by docker-compose.ci.yml.
-FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+FROM python:3.14.7-slim-trixie@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d
 
 WORKDIR /app
 

@@ -101,5 +101,15 @@ describe("AskAiHelper edge helpers", () => {
       });
       expect(blankDraft.user).not.toContain("Current draft");
     });
+
+    it("takes the system wording from the edge prompt registry key, so an override reaches the on-device draft", async () => {
+      vi.doMock("../lib/edge/edgePrompts", () => ({
+        edgePrompt: (key: string) => (key === "edge.ask_ai.system" ? "Write the field." : "?"),
+        primeEdgePrompts: async () => {},
+      }));
+      const { buildAskAiEdgePrompt } = await import("./AskAiHelper");
+      expect(buildAskAiEdgePrompt({ fieldLabel: "F", instruction: "I" }).system).toBe("Write the field.");
+      vi.doUnmock("../lib/edge/edgePrompts");
+    });
   });
 });

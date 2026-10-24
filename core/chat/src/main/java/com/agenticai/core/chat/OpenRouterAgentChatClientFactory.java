@@ -103,7 +103,7 @@ public class OpenRouterAgentChatClientFactory implements AgentChatClientFactory 
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.OPENROUTER)
             .defaultAdvisors(modelSupport.advisors(
                 new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.OPENROUTER, model, meterRegistry, pricingCatalog)))
             .build();

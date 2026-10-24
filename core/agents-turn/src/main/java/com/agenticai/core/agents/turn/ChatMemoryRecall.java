@@ -8,6 +8,7 @@ import com.agenticai.core.agents.memory.QueryEmbedding;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -33,6 +34,18 @@ final class ChatMemoryRecall {
      * because it is field-injected.
      */
     private final BooleanSupplier memoryEventsEnabled;
+
+    /**
+     * The prompt registry's view for an agent (its, its tenant's and the platform's overrides) for the
+     * lines that frame the recalled facts; the shipped text until {@link ChatServiceParts} wires the
+     * settings bean.
+     */
+    private volatile java.util.function.Function<UUID, ResolvedDirectives> prompts =
+            ResolvedDirectives.DEFAULTS_FOR_AGENT;
+
+    void usePrompts(java.util.function.Function<UUID, ResolvedDirectives> prompts) {
+        this.prompts = prompts == null ? ResolvedDirectives.DEFAULTS_FOR_AGENT : prompts;
+    }
 
     ChatMemoryRecall(
             ObjectProvider<AgentMemoryService> agentMemoryService,
@@ -68,6 +81,20 @@ final class ChatMemoryRecall {
      */
     String recallMemoryFactsBlock(
             UUID agentId, String subjectKey, String userMessage, AgentStepEventEmitter stepEvents) {
+        return recallMemoryFactsBlock(
+                agentId, subjectKey, userMessage, stepEvents, prompts.apply(agentId));
+    }
+
+    /**
+     * As above, with the prompt settings to frame the facts with (the preview passes its recording
+     * view, so the framing keys show up in its provenance).
+     */
+    String recallMemoryFactsBlock(
+            UUID agentId,
+            String subjectKey,
+            String userMessage,
+            AgentStepEventEmitter stepEvents,
+            ResolvedDirectives pd) {
         StringBuilder block = new StringBuilder();
         boolean hasUserBlocks = false;
         boolean report = stepEvents != null && stepEvents.isEnabled() && memoryEventsEnabled();
@@ -99,13 +126,14 @@ final class ChatMemoryRecall {
                     blocks = blockService.renderPromptBlocks(subjectKey, userMessage);
                 }
                 if (blocks != null) {
+                    blocks = MemoryBlocks.withNotesHeader(blocks, pd.text(MemoryBlocks.NOTES_KEY));
                     block.append(blocks).append("\n\n");
                     hasUserBlocks = true;
                 }
             } catch (Exception e) {
                 log.warn(
                         "Memory block render failed for subject '{}' - continuing without it",
-                        subjectKey,
+                        LogSafe.clean(subjectKey),
                         e);
             }
         }
@@ -127,10 +155,8 @@ final class ChatMemoryRecall {
                                     .reduce((a, b) -> a + "\n" + b)
                                     .orElse("");
                     block.append(
-                                    "Known facts about this user from previous conversations (use"
-                                            + " if relevant, ")
-                            .append("don't force them into unrelated answers):\n")
-                            .append(factList);
+                            pd.textOrShipped(
+                                    "memory.recall.private", java.util.Map.of("facts", factList)));
                     privateFacts = memories.size();
                     memories.forEach(m -> factIds.add(m.id()));
                 }
@@ -138,8 +164,8 @@ final class ChatMemoryRecall {
                 log.warn(
                         "Long-term memory recall failed for agent {} subject '{}' - continuing"
                                 + " without it",
-                        agentId,
-                        subjectKey,
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(subjectKey),
                         e);
             }
         }
@@ -159,7 +185,8 @@ final class ChatMemoryRecall {
                                     userMessage,
                                     embedding != null
                                             ? embedding
-                                            : tenantService.queryEmbedding(userMessage));
+                                            : tenantService.queryEmbedding(userMessage),
+                                    agentId);
                     if (!sharedMemories.isEmpty()) {
                         String sharedFactList =
                                 sharedMemories.stream()
@@ -170,12 +197,9 @@ final class ChatMemoryRecall {
                             block.append("\n\n");
                         }
                         block.append(
-                                        "Known facts about this user shared by other agents on this"
-                                                + " team ")
-                                .append(
-                                        "(use if relevant, don't force them into unrelated"
-                                                + " answers):\n")
-                                .append(sharedFactList);
+                                pd.textOrShipped(
+                                        "memory.recall.shared",
+                                        java.util.Map.of("facts", sharedFactList)));
                         sharedFacts = sharedMemories.size();
                         sharedMemories.forEach(m -> factIds.add(m.id()));
                     }
@@ -184,8 +208,8 @@ final class ChatMemoryRecall {
                 log.warn(
                         "Shared tenant memory recall failed for agent {} subject '{}' - continuing"
                                 + " without it",
-                        agentId,
-                        subjectKey,
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(subjectKey),
                         e);
             }
         }

@@ -1,0 +1,2 @@
+# Illegal-activity terms (PolicyViolationGuardrail). English set; other locales add to it.
+(?i)\b(drug|cocaine|heroin|meth|counterfeit|steal|rob|hack|phishing|cybercrime|embezzle|money.?launder|fraud|blackmail|extort)\b

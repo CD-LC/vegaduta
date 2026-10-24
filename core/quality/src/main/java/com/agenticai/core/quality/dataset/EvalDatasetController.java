@@ -152,10 +152,31 @@ public class EvalDatasetController {
         @RequestBody UpsertDatasetRequest request
     ) {
         assertEvalAccess();
+        ModePin pin = modePin(request);
         EvalDataset dataset = datasetService.createDataset(
             agentId, request.name(), request.description(),
-            request.passThreshold(), request.toolExecutionEnabled());
+            request.passThreshold(), pin.tools(), request.autoApproveTools());
         return ResponseEntity.ok(toDatasetResponse(dataset));
+    }
+
+    /**
+     * The mode pin an upsert asks for: {@code mode} when named (FULL, QUICK, or DEFAULT to drop the pin), else the
+     * older {@code toolExecutionEnabled} boolean, else nothing (null = unchanged on an update, no pin on a create).
+     */
+    private static ModePin modePin(UpsertDatasetRequest request) {
+        String named = request.mode();
+        if (named != null && !named.isBlank()) {
+            if ("DEFAULT".equalsIgnoreCase(named.trim())) {
+                return new ModePin(null, true);
+            }
+            EvalMode mode = EvalMode.parse(named).orElseThrow();
+            return new ModePin(mode.executesTools(), false);
+        }
+        return new ModePin(request.toolExecutionEnabled(), false);
+    }
+
+    /** {@code tools}: the pinned choice (true full, false quick, null none/unchanged); {@code clear}: drop the pin. */
+    private record ModePin(Boolean tools, boolean clear) {
     }
 
     /** GET /{datasetId} - the dataset plus all of its cases. */
@@ -172,7 +193,7 @@ public class EvalDatasetController {
         return ResponseEntity.ok(new DatasetDetailResponse(toDatasetResponse(dataset), cases));
     }
 
-    /** PUT /{datasetId} - update name/description/threshold/tool flag. */
+    /** PUT /{datasetId} - update name/description/threshold/tool flag/auto-approval. */
     @PutMapping("/{datasetId}")
     public ResponseEntity<DatasetResponse> updateDataset(
         @PathVariable UUID agentId,
@@ -180,9 +201,10 @@ public class EvalDatasetController {
         @RequestBody UpsertDatasetRequest request
     ) {
         assertEvalAccess();
+        ModePin pin = modePin(request);
         EvalDataset dataset = datasetService.updateDataset(
             agentId, datasetId, request.name(), request.description(),
-            request.passThreshold(), request.toolExecutionEnabled());
+            request.passThreshold(), pin.tools(), request.autoApproveTools(), pin.clear());
         return ResponseEntity.ok(toDatasetResponse(dataset));
     }
 
@@ -316,7 +338,7 @@ public class EvalDatasetController {
             value = "Idempotency-Key", required = false) String idempotencyKey
     ) {
         TenantPlan plan = assertEvalAccess();
-        TriggerRunRequest body = request != null ? request : new TriggerRunRequest(null, null, null, null);
+        TriggerRunRequest body = request != null ? request : new TriggerRunRequest(null, null, null, null, null);
         Integer repeats = body.repeats();
         java.math.BigDecimal budgetUsd = body.budgetUsd();
         if (plan == TenantPlan.FREE) {
@@ -335,7 +357,7 @@ public class EvalDatasetController {
             budgetUsd = FREE_MAX_BUDGET_USD;
         }
         EvalRun run = runService.triggerRun(agentId, datasetId, new EvalRunService.RunOptions(
-            body.judgeModel(), body.strictJudge(), repeats, budgetUsd, idempotencyKey));
+            body.judgeModel(), body.strictJudge(), repeats, budgetUsd, idempotencyKey, body.mode()));
         return ResponseEntity.ok(toRunResponse(run));
     }
 
@@ -373,7 +395,7 @@ public class EvalDatasetController {
             String traceId = datasetService.traceIdForRunCase(runId, i);
             results.add(toCaseResultResponse(rows.get(i), traceId, datasetService.langfuseTraceUrl(traceId)));
         }
-        return ResponseEntity.ok(new RunDetailResponse(toRunResponse(run), results));
+        return ResponseEntity.ok(new RunDetailResponse(toRunResponse(run), results, simulatedTools(results)));
     }
 
     /** POST /{datasetId}/runs/{runId}/cancel - cooperative, see EvalRun#requestCancel. */
@@ -414,6 +436,22 @@ public class EvalDatasetController {
     // DTO assembly
     // ------------------------------------------------------------------
 
+    /**
+     * The tools the eval sandbox simulated in this run, each once, in the order they first appeared: the part of the
+     * agent's tool use the run could not really exercise.
+     */
+    private static List<String> simulatedTools(List<CaseResultResponse> results) {
+        java.util.Set<String> names = new java.util.LinkedHashSet<>();
+        for (CaseResultResponse result : results) {
+            for (ReplayedToolCallResponse call : result.toolCalls()) {
+                if ("SIMULATED".equals(call.status()) && call.toolName() != null) {
+                    names.add(call.toolName());
+                }
+            }
+        }
+        return List.copyOf(names);
+    }
+
     private DatasetResponse toDatasetResponse(EvalDataset dataset) {
         return new DatasetResponse(
             dataset.getId(),
@@ -421,7 +459,10 @@ public class EvalDatasetController {
             dataset.getName(),
             dataset.getDescription(),
             dataset.getPassThreshold(),
-            dataset.isToolExecutionEnabled(),
+            dataset.getToolExecutionEnabled(),
+            dataset.isAutoApproveTools(),
+            dataset.pinnedMode().map(EvalMode::name).orElse(null),
+            dataset.pinnedMode().orElseGet(runService::effectiveDefaultMode).name(),
             datasetService.countCases(dataset.getId()),
             dataset.getContentHash(),
             dataset.getCreatedBy(),
@@ -464,6 +505,8 @@ public class EvalDatasetController {
             run.getDatasetHash(),
             run.getRequestedJudgeModel(),
             run.isStrictJudge(),
+            run.getEvalMode().name(),
+            run.isAutoApproved(),
             run.getRepeats(),
             run.getBudgetUsd(),
             run.getCostUsd(),
@@ -532,7 +575,8 @@ public class EvalDatasetController {
                     calls.add(new ReplayedToolCallResponse(
                         entry.path("toolName").asText(null),
                         entry.path("input").asText(null),
-                        entry.path("output").asText(null)));
+                        entry.path("output").asText(null),
+                        entry.hasNonNull("status") ? entry.path("status").asText(null) : null));
                 }
             }
             return calls;

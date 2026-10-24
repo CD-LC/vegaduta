@@ -1,0 +1,22 @@
+# Trivy configuration for .github/workflows/trivy.yml (passed as trivy-config).
+#
+# The scan covers the whole repository. Two directories are left out because
+# they hold sample and benchmark manifests, not anything that is deployed:
+#
+#   deploy/helm/examples   example values files for the chart (cloud, scale-out,
+#                          autoscaling ...). They are inputs to a chart whose own
+#                          defaults are scanned; an example that sets a replica
+#                          count or a resource limit is not a finding.
+#   tests/load             kind-cluster manifests and values for the load tests
+#                          (mock LLM, Prometheus, a throwaway cluster).
+#
+# infra/terraform/modules is NOT skipped. Those are reference modules the
+# operator hardens (infra/terraform/README.md), and their findings are the
+# list an operator works from.
+#
+# Findings that are accepted individually go in .trivyignore.yaml, with a
+# reason, not here.
+scan:
+  skip-dirs:
+    - deploy/helm/examples
+    - tests/load

@@ -4,8 +4,11 @@ import com.agenticai.core.chat.LlmCallLogService;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.quality.AggregatedEvaluationResult;
 import com.agenticai.core.quality.EvalEngine;
+import com.agenticai.core.quality.QualitySettings;
 import com.agenticai.core.quality.impl.JudgeChatClientFactory;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingsResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.List;
@@ -120,6 +123,61 @@ public class EvalRunService {
     boolean judgePreflightEnabled = true;
 
     /**
+     * The rules for the sandbox auto-approval of tool calls ({@link EvalSandboxPolicy}). Field-injected
+     * like the flags above so the constructor stays as tests build it; a context without the bean keeps
+     * the shipped default, under which no tenant may auto-approve.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    EvalSandboxPolicy sandboxPolicy = EvalSandboxPolicy.defaults();
+
+    /**
+     * The settings catalog ({@code quality.eval.defaultRepeats}): the workspace's own default repetition count when it
+     * set one, else {@link #defaultRepeats}, the platform value. Field-injected and optional like the policy above; a
+     * context without a catalog, or a settings failure, gives the platform value.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    SettingsResolver settings;
+
+    /** Repetitions per case when the trigger names none: the workspace's setting, else the platform's, never outside the bounds. */
+    private int effectiveDefaultRepeats() {
+        int value = defaultRepeats;
+        SettingsResolver resolver = settings;
+        if (resolver != null) {
+            try {
+                value = resolver.getInt(QualitySettings.EVAL_DEFAULT_REPEATS, SettingContext.tenant());
+            } catch (RuntimeException e) {
+                log.warn("Could not read {}; using the platform value {}: {}", QualitySettings.EVAL_DEFAULT_REPEATS, value, e.toString());
+            }
+        }
+        return Math.max(MIN_REPEATS, Math.min(value, MAX_REPEATS));
+    }
+
+    /**
+     * The mode a run takes when it names none and its dataset pins none: the workspace's own default when it set one
+     * ({@code quality.eval.defaultMode}), else {@link EvalSandboxPolicy#defaultMode} (the platform value, full as
+     * shipped). A context without a catalog, or a settings failure, gives the platform value.
+     */
+    EvalMode effectiveDefaultMode() {
+        EvalMode value = sandboxPolicy.defaultMode();
+        SettingsResolver resolver = settings;
+        if (resolver != null) {
+            try {
+                value = resolver.getEnum(QualitySettings.EVAL_DEFAULT_MODE, SettingContext.tenant(), EvalMode.class);
+            } catch (RuntimeException e) {
+                log.warn("Could not read {}; using the platform value {}: {}", QualitySettings.EVAL_DEFAULT_MODE, value, e.toString());
+            }
+        }
+        return value;
+    }
+
+    /** The mode of a run: what it asked for, else what its dataset pins, else the default. */
+    EvalMode resolveMode(String requested, EvalDataset dataset) {
+        return EvalMode.parse(requested)
+            .or(dataset::pinnedMode)
+            .orElseGet(this::effectiveDefaultMode);
+    }
+
+    /**
      * Consecutive judge-outage cases, with nothing scored yet, after which a
      * run stops instead of replaying the rest. Covers a judge that passes the
      * preflight and then dies (or the preflight being switched off).
@@ -161,7 +219,8 @@ public class EvalRunService {
         this.headVersionLookup = headVersionLookup;
         AgentTurnReplayer replayer = selectReplayer(replayers);
         EvalCaseExecutor caseExecutor = new EvalCaseExecutor(
-            replayer, evalEngine, caseResultRepository, () -> codeGradersEnabled, () -> trajectoryEvalEnabled);
+            replayer, evalEngine, caseResultRepository, () -> codeGradersEnabled, () -> trajectoryEvalEnabled,
+            tenantId -> sandboxPolicy.autoApproveAllowedFor(tenantId));
         this.worker = new EvalRunWorker(datasetRepository, caseRepository, runRepository, judgeChatClientFactory,
             agentDefinitionLookup, caseExecutor, llmCallLogService, () -> judgePreflightEnabled);
     }
@@ -178,25 +237,28 @@ public class EvalRunService {
         Boolean strictJudge,
         Integer repeats,
         BigDecimal budgetUsd,
-        String idempotencyKey
+        String idempotencyKey,
+        /** {@code FULL} or {@code QUICK} (case-insensitive); null = the dataset's pin, else the workspace default. */
+        String mode
     ) {
+        /** The options as they were before a run could name its mode. */
+        public RunOptions(
+            String judgeModel, Boolean strictJudge, Integer repeats, BigDecimal budgetUsd, String idempotencyKey
+        ) {
+            this(judgeModel, strictJudge, repeats, budgetUsd, idempotencyKey, null);
+        }
+
         public static RunOptions defaults() {
-            return new RunOptions(null, null, null, null, null);
+            return new RunOptions(null, null, null, null, null, null);
         }
     }
 
     /**
-     * Prefers any typed implementation over the reflective bridge, so the
-     * recorded follow-up (an agents-side {@code AgentTurnReplayer} bean)
-     * wins the moment it exists, with no change here - see
-     * {@link ReflectiveAgentChatTurnReplayer}'s javadoc.
+     * The typed replayer (the app module's bridge to the chat service). A context without one - a module-scoped
+     * slice - still constructs; the first replay then fails with a clear per-case error, never a boot failure.
      */
     private static AgentTurnReplayer selectReplayer(List<AgentTurnReplayer> replayers) {
-        return replayers.stream()
-            .filter(r -> !(r instanceof ReflectiveAgentChatTurnReplayer))
-            .findFirst()
-            .orElseGet(() -> replayers.stream().findFirst().orElseThrow(
-                () -> new IllegalStateException("No AgentTurnReplayer implementation available")));
+        return replayers.stream().findFirst().orElseGet(UnavailableTurnReplayer::new);
     }
 
     /**
@@ -314,7 +376,7 @@ public class EvalRunService {
 
         int repeats = opts.repeats() != null
             ? opts.repeats()
-            : Math.max(MIN_REPEATS, Math.min(defaultRepeats, MAX_REPEATS));
+            : effectiveDefaultRepeats();
         if (repeats < MIN_REPEATS || repeats > MAX_REPEATS) {
             throw new IllegalArgumentException(
                 "'repeats' must be between " + MIN_REPEATS + " and " + MAX_REPEATS + ".");
@@ -349,6 +411,16 @@ public class EvalRunService {
             new IllegalStateException(
                 "Eval runs can only be triggered with a tenant context (authenticated request)."));
 
+        // The sandbox auto-approval is part of how a run is produced: refused here unless the operator
+        // declared this tenant non-production, and recorded on the run (it is checked again at every replay).
+        // The mode is frozen on the run here (the run's own request, else the dataset's pin, else the default), so
+        // a finished run always says what it measured. A quick run has no tool calls, so nothing is approved in it.
+        EvalMode mode = resolveMode(opts.mode(), dataset);
+        boolean autoApprove = mode.executesTools() && dataset.isAutoApproveTools();
+        if (autoApprove) {
+            sandboxPolicy.requireAutoApproveAllowed(context.getTenantId());
+        }
+
         // Snapshot the dataset's content hash NOW so the gate can later prove
         // the run replayed the cases as they currently stand (V343).
         String datasetHash = datasetService.computeContentHash(datasetId);
@@ -369,6 +441,10 @@ public class EvalRunService {
             // such runs replay fine but can never satisfy a promote gate.
             headVersionLookup.findHeadVersionId(agentId).ifPresent(newRun::bindAgentVersion);
             newRun.applyRunConfig(datasetHash, judgeModel, strictJudge, repeats, budgetUsd, idempotencyKey);
+            newRun.bindMode(mode);
+            if (autoApprove) {
+                newRun.markAutoApproved();
+            }
             if (snapshotEnabled) {
                 snapshotQuietly(agentId).ifPresent(newRun::applyAgentSnapshot);
             }

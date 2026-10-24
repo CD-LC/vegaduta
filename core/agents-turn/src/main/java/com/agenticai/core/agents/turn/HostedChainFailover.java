@@ -11,6 +11,7 @@ import com.agenticai.core.providers.PlatformHostedLlmProviderService;
 import com.agenticai.core.resilience.CircuitBreaker;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -138,6 +139,40 @@ final class HostedChainFailover {
             HostedProviderHealth health,
             BiConsumer<HostedChainLink, Throwable> rungFailureListener,
             BiFunction<HostedChainLink, Throwable, HostedChainLink> exhaustedChainSyncHeal) {
+        return attemptHostedChain(
+                chain,
+                index,
+                originalError,
+                attempt,
+                agentId,
+                sessionId,
+                health,
+                rungFailureListener,
+                exhaustedChainSyncHeal,
+                null);
+    }
+
+    /**
+     * As above, with a replay gate. Failing over re-runs the turn on the next rung, tools included, and
+     * "this rung emitted no token" does not mean nothing happened: a tool-calling turn emits no token
+     * while it works. {@code replayBlockedBy} is asked before a retryable failure advances the chain
+     * (and before the synchronous self-heal retry, which replays the turn too); a non-empty answer names
+     * the tools that already ran, and the failure is surfaced as it is instead of replaying them.
+     *
+     * @param replayBlockedBy nullable; returns the tools that stand in the way of a replay, or
+     *     {@code null}/empty when the turn may be run again
+     */
+    static Flux<String> attemptHostedChain(
+            List<HostedChainLink> chain,
+            int index,
+            Throwable originalError,
+            Function<ChatClient, Flux<String>> attempt,
+            UUID agentId,
+            String sessionId,
+            HostedProviderHealth health,
+            BiConsumer<HostedChainLink, Throwable> rungFailureListener,
+            BiFunction<HostedChainLink, Throwable, HostedChainLink> exhaustedChainSyncHeal,
+            Supplier<String> replayBlockedBy) {
         // Captured HERE, on the caller's thread (the request thread for the
         // index-0 call every production path makes), and threaded through the
         // recursion explicitly: every later rung and the self-heal retry run
@@ -153,7 +188,8 @@ final class HostedChainFailover {
                 health,
                 rungFailureListener,
                 exhaustedChainSyncHeal,
-                TenantScope.capture());
+                TenantScope.capture(),
+                replayBlockedBy);
     }
 
     /**
@@ -177,7 +213,8 @@ final class HostedChainFailover {
             HostedProviderHealth health,
             BiConsumer<HostedChainLink, Throwable> rungFailureListener,
             BiFunction<HostedChainLink, Throwable, HostedChainLink> exhaustedChainSyncHeal,
-            TenantScope tenantScope) {
+            TenantScope tenantScope,
+            Supplier<String> replayBlockedBy) {
         HostedChainLink link = chain.get(index);
         // Per-row circuit breaker (app.resilience.circuit-breaker.enabled, default ON; with the
         // flag off the permit is
@@ -193,9 +230,9 @@ final class HostedChainFailover {
             if (index < chain.size() - 1) {
                 log.debug(
                         "Hosted pool provider '{}' skipped for agent {} session {}: circuit open",
-                        link.label(),
-                        agentId,
-                        sessionId);
+                        LogSafe.clean(link.label()),
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(sessionId));
                 return attemptHostedChain(
                         chain,
                         index + 1,
@@ -206,7 +243,8 @@ final class HostedChainFailover {
                         health,
                         rungFailureListener,
                         exhaustedChainSyncHeal,
-                        tenantScope);
+                        tenantScope,
+                        replayBlockedBy);
             }
             breakerPermit = null;
         }
@@ -312,12 +350,26 @@ final class HostedChainFailover {
                     if (!HostedFailoverPolicy.isRetryable(e)) {
                         log.warn(
                                 "Hosted pool provider '{}' failed for agent {} session {} with a"
-                                    + " non-retryable error ({}) - failing fast, another provider"
-                                    + " would reject this the same way",
+                                        + " non-retryable error ({}) - failing fast, another provider"
+                                        + " would reject this the same way",
+                                LogSafe.clean(link.label()),
+                                LogSafe.clean(agentId),
+                                LogSafe.clean(sessionId),
+                                LogSafe.clean(e.getMessage()));
+                        return Flux.error(e);
+                    }
+                    // Replaying the turn on another rung (or on the self-healed rung) runs it again
+                    // from the start. Not after a tool with side effects ran.
+                    String toolsThatRan = replayBlockedBy == null ? null : replayBlockedBy.get();
+                    if (toolsThatRan != null && !toolsThatRan.isEmpty()) {
+                        log.warn(
+                                "Hosted pool provider '{}' failed for agent {} session {} ({}) after the turn ran tools"
+                                        + " ({}) - not failing over, the next provider would run them again",
                                 link.label(),
                                 agentId,
                                 sessionId,
-                                e.getMessage());
+                                e.getMessage(),
+                                toolsThatRan);
                         return Flux.error(e);
                     }
                     if (terminal) {
@@ -325,13 +377,13 @@ final class HostedChainFailover {
                                 () -> {
                                     log.error(
                                             "Hosted pool fallback chain exhausted for agent {}"
-                                                + " session {}: all {} enabled provider(s) failed"
-                                                + " (last was '{}': {})",
-                                            agentId,
-                                            sessionId,
+                                                    + " session {}: all {} enabled provider(s) failed"
+                                                    + " (last was '{}': {})",
+                                            LogSafe.clean(agentId),
+                                            LogSafe.clean(sessionId),
                                             chain.size(),
-                                            link.label(),
-                                            e.getMessage());
+                                            LogSafe.clean(link.label()),
+                                            LogSafe.clean(e.getMessage()));
                                     return Flux.error(
                                             new HostedPoolExhaustedException(chain, firstError));
                                 };
@@ -365,13 +417,13 @@ final class HostedChainFailover {
                                         healed -> {
                                             log.warn(
                                                     "Hosted pool provider '{}' self-healed to model"
-                                                        + " '{}' for agent {} session {} - retrying"
-                                                        + " this turn once against the freshly"
-                                                        + " auto-selected model before giving up",
-                                                    link.label(),
-                                                    healed.model(),
-                                                    agentId,
-                                                    sessionId);
+                                                            + " '{}' for agent {} session {} - retrying"
+                                                            + " this turn once against the freshly"
+                                                            + " auto-selected model before giving up",
+                                                    LogSafe.clean(link.label()),
+                                                    LogSafe.clean(healed.model()),
+                                                    LogSafe.clean(agentId),
+                                                    LogSafe.clean(sessionId));
                                             AtomicBoolean retryEmitted = new AtomicBoolean(false);
                                             long retryStartedAtNanos = System.nanoTime();
                                             return subscribeInScope(
@@ -398,15 +450,18 @@ final class HostedChainFailover {
                                                                 }
                                                                 log.error(
                                                                         "Hosted pool fallback chain"
-                                                                            + " exhausted for agent"
-                                                                            + " {} session {} even"
-                                                                            + " after a self-healed"
-                                                                            + " retry against '{}':"
-                                                                            + " {}",
-                                                                        agentId,
-                                                                        sessionId,
-                                                                        healed.label(),
-                                                                        retryFailure.getMessage());
+                                                                                + " exhausted for agent"
+                                                                                + " {} session {} even"
+                                                                                + " after a self-healed"
+                                                                                + " retry against '{}':"
+                                                                                + " {}",
+                                                                        LogSafe.clean(agentId),
+                                                                        LogSafe.clean(sessionId),
+                                                                        LogSafe.clean(
+                                                                                healed.label()),
+                                                                        LogSafe.clean(
+                                                                                retryFailure
+                                                                                        .getMessage()));
                                                                 return Flux.error(
                                                                         new HostedPoolExhaustedException(
                                                                                 chain, firstError));
@@ -418,13 +473,13 @@ final class HostedChainFailover {
                             "Hosted pool provider '{}' (model {}, #{} of {}) failed for agent {}"
                                     + " session {} ({}) - falling over to the next provider in the"
                                     + " chain",
-                            link.label(),
-                            link.model(),
-                            index + 1,
+                            LogSafe.clean(link.label()),
+                            LogSafe.clean(link.model()),
+                            LogSafe.clean(index + 1),
                             chain.size(),
-                            agentId,
-                            sessionId,
-                            e.getMessage());
+                            LogSafe.clean(agentId),
+                            LogSafe.clean(sessionId),
+                            LogSafe.clean(e.getMessage()));
                     return attemptHostedChain(
                             chain,
                             index + 1,
@@ -435,7 +490,8 @@ final class HostedChainFailover {
                             health,
                             rungFailureListener,
                             exhaustedChainSyncHeal,
-                            tenantScope);
+                            tenantScope,
+                            replayBlockedBy);
                 });
     }
 
@@ -447,7 +503,12 @@ final class HostedChainFailover {
      * is platform-wide shared state consulted on a failure path, a worst case of one redundant heal
      * attempt per replica per cooldown is the acceptable trade for zero hot-path I/O.
      */
-    private static final long HOSTED_MODEL_SELF_HEAL_COOLDOWN_MS = 10 * 60 * 1000L;
+    private volatile java.time.Duration selfHealCooldown = new ChatResilienceProperties().getHostedSelfHealCooldown();
+
+    /** Sets {@code app.chat.resilience.hosted-self-heal-cooldown}; until it is called the shipped default applies. */
+    void useSelfHealCooldown(java.time.Duration cooldown) {
+        this.selfHealCooldown = cooldown == null ? new ChatResilienceProperties().getHostedSelfHealCooldown() : cooldown;
+    }
 
     /**
      * Last self-heal ATTEMPT (not success) per pool row id - see {@link
@@ -613,7 +674,7 @@ final class HostedChainFailover {
                 rowId,
                 (id, lastAttempt) -> {
                     if (lastAttempt == null
-                            || now - lastAttempt >= HOSTED_MODEL_SELF_HEAL_COOLDOWN_MS) {
+                            || now - lastAttempt >= selfHealCooldown.toMillis()) {
                         claimed.set(true);
                         return now;
                     }

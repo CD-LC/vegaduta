@@ -2,11 +2,12 @@ package com.agenticai.core.quality.dataset;
 
 /**
  * Lifecycle of one {@link EvalRun}. A strict subset of {@code AgentJobStatus}
- * on purpose - no AWAITING_APPROVAL, because replays run tool-less by default
- * and even tool-enabled replays are triggered by a human whose authority is
- * frozen on the run row; a parked approval inside an eval loop would just
- * hang the run (see {@code EvalDataset#isToolExecutionEnabled}'s javadoc for
- * the side-effect posture).
+ * on purpose - no AWAITING_APPROVAL, because even a full-pipeline replay is
+ * triggered by a human whose authority is frozen on the run row, and a call
+ * that needs an approval is held inside the turn without recording a request
+ * (nobody is notified and nothing is waited for); a parked approval inside an
+ * eval loop would just hang the run (see {@link EvalMode} for the side-effect
+ * posture).
  */
 public enum EvalRunStatus {
 

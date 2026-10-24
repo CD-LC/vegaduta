@@ -86,7 +86,30 @@ class ToolResolverConfiguration {
             // Absent bean = the legacy unguarded path.
             ObjectProvider<AgentToolGovernance> agentToolGovernance,
             // MCP Apps (app.mcp.apps.enabled, default off): absent bean = feature off.
-            ObjectProvider<com.agenticai.core.agents.tools.mcpapps.McpAppsService> mcpApps) {
+            ObjectProvider<com.agenticai.core.agents.tools.mcpapps.McpAppsService> mcpApps,
+            // app.guardrails.approval-park.*: what a held call tells the model. Absent bean = the
+            // module's code defaults (same text).
+            ObjectProvider<com.agenticai.core.guardrails.ApprovalParkProperties> approvalPark,
+            // app.guardrails.step-limit.*: what a call past the ceiling gets, and the autonomy tiers'
+            // scaling of it. Absent bean = the module's code defaults (same values).
+            ObjectProvider<com.agenticai.core.guardrails.ToolStepLimitProperties> stepLimits,
+            // app.tools.output.*: the one cap on a tool result. Absent bean = the module's code defaults.
+            ObjectProvider<com.agenticai.core.guardrails.ToolOutputProperties> toolOutput,
+            // app.chat.tool-ledger.*: the compact record of what the turn's tools did, stored with the
+            // assistant turn. Absent bean = the module's code defaults (same values).
+            ObjectProvider<com.agenticai.core.agents.turn.ToolLedgerProperties> toolLedger,
+            // The one resolver of the per-tenant / per-agent runtime limits (tool steps, tool timeout, tool
+            // output cap, ...). Absent bean = every agent runs under the guard's own settings.
+            ObjectProvider<com.agenticai.core.agents.runtime.AgentRuntime> runtimeSettings,
+            // The prompt registry: the tool results the guard hands the model (blocked, held for approval,
+            // withheld, budget used up) resolve through it. Absent bean = the shipped wording.
+            ObjectProvider<com.agenticai.core.prompts.PromptResolver> prompts,
+            // The end of the conversation, for the RIGOROUS tool-call verifier
+            // (app.guardrails.tool-verifier.context-messages). Absent bean = the current message alone.
+            ObjectProvider<com.agenticai.core.guardrails.ConversationTailSource> conversationTail,
+            // The settings catalog: a tenant's chat.toolLedger.* decide whether the turn's tools are recorded in the
+            // ledger. Absent bean = app.chat.tool-ledger.* as configured.
+            ObjectProvider<com.agenticai.core.settings.SettingsResolver> settings) {
         AgentToolGuard guard =
                 new AgentToolGuard(
                         toolCallLogRepository,
@@ -102,7 +125,22 @@ class ToolResolverConfiguration {
                         toolCircuitBreakerService,
                         agentToolGovernance.getIfAvailable());
         guard.setMcpApps(mcpApps);
+        guard.setApprovalPark(approvalPark);
+        guard.setStepLimitProperties(stepLimits);
+        guard.setOutputProperties(toolOutput);
+        guard.setToolLedger(toolLedger);
+        guard.setRuntimeResolver(runtimeSettings);
+        guard.setPromptResolver(prompts);
+        guard.setConversationTailSource(conversationTail);
+        guard.setSettings(settings);
         return guard;
+    }
+
+    /** The conversation tail the RIGOROUS verifier reads, from the session memory the turn itself reads. */
+    @Bean
+    com.agenticai.core.guardrails.ConversationTailSource conversationTailSource(
+            ObjectProvider<com.agenticai.core.agents.memory.SessionMemoryService> sessionMemory) {
+        return new SessionConversationTailSource(sessionMemory);
     }
 
     /**
@@ -112,7 +150,7 @@ class ToolResolverConfiguration {
     @Bean
     TurnRunBudgets turnRunBudgets(
             AgentService agentService,
-            @Value("${app.guardrails.run-budget.usd:0}") BigDecimal runBudgetUsd,
+            @Value("${app.guardrails.run-budget.usd:2.0}") BigDecimal runBudgetUsd,
             @Value("${app.guardrails.run-budget.input-usd-per-m:3.00}")
                     BigDecimal runBudgetInputUsdPerM,
             @Value("${app.guardrails.run-budget.output-usd-per-m:15.00}")
@@ -207,7 +245,7 @@ class ToolResolverConfiguration {
             ObjectProvider<List<McpSyncClient>> staticMcpSyncClients,
             ObjectProvider<PlatformIssueService> issueService,
             MeterRegistry meterRegistry,
-            @Value("${app.tools.mcp-discovery-cache-ttl-seconds:20}")
+            @Value("${app.tools.mcp-discovery-cache-ttl-seconds:300}")
                     long mcpDiscoveryCacheTtlSeconds) {
         return new AgentMcpToolResolver(
                 toolGuard,

@@ -224,9 +224,15 @@ class AgentTurnServiceTest {
     }
 
     @Test
-    void invalidToolArgumentsBecomeNoArgumentsRatherThanAFailedTurn() {
-        assertEquals(Map.of(), AgentTurnService.parseArgs("{not json"));
-        assertEquals(Map.of(), AgentTurnService.parseArgs(null));
+    void argumentsThatAreNotJsonAreMarkedUnusableNeverSilentlyEmpty() {
+        // Was: invalidToolArgumentsBecomeNoArgumentsRatherThanAFailedTurn - it pinned the defect
+        // (the client ran the tool with {} arguments).
+        assertFalse(AgentTurnService.parseArgs("{not json").valid());
+        assertFalse(AgentTurnService.parseArgs("{\"path\": \"a.ts").valid(), "cut-off JSON");
+        assertFalse(AgentTurnService.parseArgs("[1,2]").valid(), "JSON that is not an object");
+        assertTrue(AgentTurnService.parseArgs(null).valid(), "a call with no arguments is legitimate");
+        assertTrue(AgentTurnService.parseArgs("  ").valid());
+        assertEquals(Map.of("path", "a.ts"), AgentTurnService.parseArgs("{\"path\":\"a.ts\"}").value());
     }
 
     // ---- the gate ----------------------------------------------------------
@@ -318,6 +324,53 @@ class AgentTurnServiceTest {
     }
 
     @Test
+    void anInputShapedFailureIsNotReplayedAcrossTheRestOfThePool() {
+        givenPool("a", "b", "c");
+        Stub service = service();
+        service.behaviour = n -> {
+            throw new org.springframework.ai.retry.NonTransientAiException(
+                "413 - {\"error\":{\"message\":\"Request entity too large\"}}");
+        };
+
+        UpstreamProviderException thrown =
+            assertThrows(UpstreamProviderException.class, () -> service.turn(request(null)));
+
+        assertEquals(413, thrown.getUpstreamStatus());
+        assertEquals(1, service.calls, "every other row would reject the same oversized input");
+        assertEquals(1, entitlements.abandoned);
+        assertEquals(0, entitlements.settled);
+    }
+
+    @Test
+    void aContextLengthOverflowReportedAsA400StopsTheWalkToo() {
+        givenPool("a", "b");
+        Stub service = service();
+        service.behaviour = n -> {
+            throw new org.springframework.ai.retry.NonTransientAiException(
+                "400 - This model's maximum context length is 8192 tokens, however you requested 9000");
+        };
+
+        assertThrows(UpstreamProviderException.class, () -> service.turn(request(null)));
+
+        assertEquals(1, service.calls);
+    }
+
+    @Test
+    void aRowShapedClientErrorStillFailsOverToTheNextRow() {
+        givenPool("bad-key", "good");
+        Stub service = service();
+        service.behaviour = n -> {
+            if (n == 1) {
+                throw new org.springframework.ai.retry.NonTransientAiException("401 - invalid api key");
+            }
+            return textResponse("answered");
+        };
+
+        assertEquals("good", service.turn(request(null)).model());
+        assertEquals(2, service.calls);
+    }
+
+    @Test
     void aModelWithNoOutputCountsAsAFailureAndFailsOver() {
         givenPool("mute", "talker");
         Stub service = service();
@@ -363,10 +416,179 @@ class AgentTurnServiceTest {
         assertEquals(1, entitlements.settled);
     }
 
+    // ---- unusable tool-call arguments ------------------------------------
+
+    private static ChatResponse callResponse(String finishReason, AssistantMessage.ToolCall... calls) {
+        AssistantMessage message = AssistantMessage.builder().content("").toolCalls(List.of(calls)).build();
+        return new ChatResponse(
+            List.of(new Generation(message,
+                org.springframework.ai.chat.metadata.ChatGenerationMetadata.builder().finishReason(finishReason).build())),
+            ChatResponseMetadata.builder().usage(new DefaultUsage(100, 10)).build());
+    }
+
+    private static ChatResponse textResponse(String text, String finishReason) {
+        return new ChatResponse(
+            List.of(new Generation(new AssistantMessage(text),
+                org.springframework.ai.chat.metadata.ChatGenerationMetadata.builder().finishReason(finishReason).build())),
+            ChatResponseMetadata.builder().usage(new DefaultUsage(100, 10)).build());
+    }
+
+    private static AssistantMessage.ToolCall call(String id, String name, String args) {
+        return new AssistantMessage.ToolCall(id, "function", name, args);
+    }
+
+    @Test
+    void aToolCallCutOffAtTheOutputLimitIsNotHandedToTheClientWithEmptyArguments() {
+        givenPool("model-a");
+        Stub service = service();
+        // Attempt 1: the model hit max_tokens halfway through write_file's JSON. Attempt 2: it re-issues it.
+        service.behaviour = n -> n == 1
+            ? callResponse("length", call("c1", "write_file", "{\"path\": \"a.ts\", \"content\": \"export const x"))
+            : callResponse("tool_use", call("c2", "write_file", "{\"path\":\"a.ts\",\"content\":\"x\"}"));
+
+        AgentTurn.Result result = service.turn(request(null));
+
+        assertEquals(2, service.calls, "the model is asked again");
+        assertEquals("tool_calls", result.finishReason());
+        assertEquals(Map.of("path", "a.ts", "content", "x"), result.toolCalls().get(0).args());
+        // The second request carries the broken call and the error as ITS RESULT.
+        var second = service.messagesSeen.get(1);
+        AssistantMessage replayed = assertInstanceOf(AssistantMessage.class, second.get(second.size() - 2));
+        assertEquals("{}", replayed.getToolCalls().get(0).arguments(),
+            "unusable arguments are not replayed (providers refuse invalid JSON in history)");
+        ToolResponseMessage error = assertInstanceOf(ToolResponseMessage.class, second.get(second.size() - 1));
+        assertEquals("c1", error.getResponses().get(0).id());
+        assertTrue(error.getResponses().get(0).responseData().contains("write_file"));
+        assertTrue(error.getResponses().get(0).responseData().contains("output length limit"),
+            "the model is told the reply was cut off, not just that the JSON was bad: "
+                + error.getResponses().get(0).responseData());
+        assertEquals(1, entitlements.settled);
+        assertEquals(200L, entitlements.settledPrompt, "usage of both calls is settled");
+        assertEquals(20L, entitlements.settledCompletion);
+    }
+
+    @Test
+    void whenTheCallIsStillUnusableAfterTheLastAttemptItIsDroppedAndTheClientIsToldWhy() {
+        givenPool("model-a");
+        Stub service = service();
+        service.behaviour = n -> callResponse("length", call("c" + n, "write_file", "{\"path\": \"a.ts"));
+
+        AgentTurn.Result result = service.turn(request(null));
+
+        assertEquals(2, service.calls, "one attempt to repair, as configured");
+        assertTrue(result.toolCalls().isEmpty(), "a call with guessed-empty arguments must never reach the client");
+        assertEquals("length", result.finishReason());
+        assertTrue(result.content().contains("write_file"), result.content());
+        assertTrue(result.content().contains("nothing was run"), result.content());
+    }
+
+    @Test
+    void zeroRepairAttemptsDropsTheUnusableCallAtOnce() {
+        givenPool("model-a");
+        Stub service = service();
+        AgentTurnRepairProperties noRepair = new AgentTurnRepairProperties();
+        noRepair.setMaxAttempts(0);
+        service.useRepairProperties(noRepair);
+        service.behaviour = n -> callResponse("tool_calls", call("c1", "write_file", "{oops"));
+
+        AgentTurn.Result result = service.turn(request(null));
+
+        assertEquals(1, service.calls);
+        assertTrue(result.toolCalls().isEmpty());
+        assertEquals("malformed_tool_call", result.finishReason());
+        assertTrue(result.content().contains("not valid JSON"), result.content());
+    }
+
+    @Test
+    void theRepairTextsComeFromConfigurationNotFromCode() {
+        givenPool("model-a");
+        Stub service = service();
+        AgentTurnRepairProperties custom = new AgentTurnRepairProperties();
+        custom.setInvalidArgumentsMessage("BROKEN {tool} because {reason}");
+        custom.setSkippedMessage("SKIPPED {tool}");
+        custom.setInvalidReasonMalformed("gibberish");
+        service.useRepairProperties(custom);
+        service.behaviour = n -> n == 1
+            ? callResponse("tool_calls", call("c1", "read_file", "{\"path\":\"a\"}"), call("c2", "write_file", "{oops"))
+            : textResponse("done", "stop");
+
+        service.turn(request(null));
+
+        var second = service.messagesSeen.get(1);
+        ToolResponseMessage results = assertInstanceOf(ToolResponseMessage.class, second.get(second.size() - 1));
+        assertEquals("SKIPPED read_file", results.getResponses().get(0).responseData(),
+            "a good call in the same reply was not run either, and the model is told so");
+        assertEquals("BROKEN write_file because gibberish", results.getResponses().get(1).responseData());
+        AssistantMessage replayed = assertInstanceOf(AssistantMessage.class, second.get(second.size() - 2));
+        assertEquals("{\"path\":\"a\"}", replayed.getToolCalls().get(0).arguments(), "good arguments are replayed as sent");
+    }
+
+    @Test
+    void anIdLessToolCallFromTheProviderGetsAnIdTheClientCanAnswer() {
+        givenPool("gemini");
+        Stub service = service();
+        service.behaviour = n -> callResponse("STOP", call("", "read_file", "{\"path\":\"a\"}"),
+            call(null, "read_file", "{\"path\":\"b\"}"));
+
+        AgentTurn.Result result = service.turn(request(null));
+
+        assertEquals(2, result.toolCalls().size());
+        String first = result.toolCalls().get(0).id();
+        String second = result.toolCalls().get(1).id();
+        assertFalse(first == null || first.isBlank());
+        assertFalse(second == null || second.isBlank());
+        assertFalse(first.equals(second));
+        // The echo of that id is exactly what the controller then accepts.
+        validate(new AgentTurn.Request(
+            List.of(new Message("user", "go", null, null, null),
+                new Message("assistant", "", List.of(result.toolCalls().get(0)), null, null),
+                new Message("tool", "out", null, first, "read_file")),
+            null, null, null, null));
+        assertEquals("tool_calls", result.finishReason());
+    }
+
+    @Test
+    void theFinishReasonIsNormalisedAndNeverForcedOverATruncation() {
+        givenPool("model-a");
+        Stub service = service();
+        java.util.Map<String, String> expected = new java.util.LinkedHashMap<>();
+        expected.put("STOP", "stop");
+        expected.put("end_turn", "stop");
+        expected.put("MAX_TOKENS", "length");
+        expected.put("max_tokens", "length");
+        expected.put("length", "length");
+        expected.put("SAFETY", "content_filter");
+        expected.put("refusal", "content_filter");
+        expected.put("content_filter", "content_filter");
+        expected.put("MALFORMED_FUNCTION_CALL", "malformed_tool_call");
+        expected.put("pause_turn", "pause_turn");
+        for (var e : expected.entrySet()) {
+            service.behaviour = n -> textResponse("partial", e.getKey());
+            assertEquals(e.getValue(), service.turn(request(null)).finishReason(), "provider said " + e.getKey());
+        }
+        service.behaviour = n -> textResponse("partial", null);
+        assertEquals("stop", service.turn(request(null)).finishReason());
+    }
+
+    @Test
+    void aRowWhoseSafetySystemBlockedTheReplyIsFailedOverToTheNextRow() {
+        givenPool("blocked", "talker");
+        Stub service = service();
+        service.behaviour = n -> n == 1 ? textResponse("", "SAFETY") : textResponse("hi", "STOP");
+
+        assertEquals("talker", service.turn(request(null)).model(),
+            "a row whose safety system blocked the reply is failed over like any row with no output");
+    }
+
     // ---- controller bounds -------------------------------------------------
 
+    /** The controller's bounds at their shipped defaults ({@code app.agent-turn.limits.*}). */
+    private static void validate(AgentTurn.Request request) {
+        AgentTurnController.validate(request, new AgentTurnLimitsProperties());
+    }
+
     private static HttpStatus statusOf(AgentTurn.Request request) {
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> AgentTurnController.validate(request));
+        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> validate(request));
         return HttpStatus.valueOf(e.getStatusCode().value());
     }
 
@@ -383,14 +605,14 @@ class AgentTurnServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST, statusOf(new AgentTurn.Request(
             List.of(new Message("user", "hi", List.of(new ToolCall("1", "t", Map.of())), null, null)), null, null, null, null)));
         assertEquals(HttpStatus.PAYLOAD_TOO_LARGE, statusOf(new AgentTurn.Request(
-            List.of(new Message("user", "x".repeat(AgentTurnController.MAX_TOTAL_CHARS + 1), null, null, null)),
+            List.of(new Message("user", "x".repeat(new AgentTurnLimitsProperties().getMaxTotalChars() + 1), null, null, null)),
             null, null, null, null)));
     }
 
     @Test
     void aWellFormedRequestPassesValidation() {
-        AgentTurnController.validate(request(null));
-        AgentTurnController.validate(new AgentTurn.Request(
+        validate(request(null));
+        validate(new AgentTurn.Request(
             List.of(
                 new Message("user", "u", null, null, null),
                 new Message("assistant", "", List.of(new ToolCall("c1", "read_file", Map.of())), null, null),

@@ -1283,6 +1283,18 @@ class AgentMemoryApi:
         return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/memories/{quote_path(memory_id)}", response="void")
 
 
+class AgentPromptPreviewApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def preview(self, agent_id: str, body: Optional[m.PromptPreviewService_Request] = None, *, idempotency_key: Optional[str] = None) -> m.PromptPreviewService_Preview:
+        """Preview.
+
+        POST /api/agents/{agentId}/prompt-preview
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/prompt-preview", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+
 class AgentRunBudgetApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -1300,6 +1312,25 @@ class AgentRunBudgetApi:
         PATCH /api/agents/{agentId}/run-budget
         """
         return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/run-budget", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
+
+
+class AgentRuntimeLimitsApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def get(self, agent_id: str) -> m.RuntimeLimitsView:
+        """Get.
+
+        GET /api/agents/{agentId}/runtime-limits
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/runtime-limits")
+
+    def put(self, agent_id: str, body: Optional[m.RuntimeLimits] = None) -> m.RuntimeLimitsView:
+        """Put.
+
+        PUT /api/agents/{agentId}/runtime-limits
+        """
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/runtime-limits", body=body)
 
 
 class AgentScheduleApi:
@@ -1386,6 +1417,38 @@ class AgentSessionLlmUsageApi:
         GET /api/agents/{agentId}/sessions/{sessionId}/llm-usage/summary
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/llm-usage/summary")
+
+
+class AgentSettingsApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def history(self, agent_id: str, *, since: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> m.SettingsController_HistoryPageResponse:
+        """History.
+
+        GET /api/agents/{agentId}/settings/history
+
+        Every change to this agent's settings, newest first (EDITOR on the agent; an agent of another workspace is a 404). since keeps rows at or after that instant; page with limit and offset.
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/settings/history", query={"since": since, "limit": limit, "offset": offset})
+
+    def put(self, agent_id: str, key: str, body: m.SettingsController_ValueRequest) -> m.SettingsController_WriteResponse:
+        """Put.
+
+        PUT /api/agents/{agentId}/settings/{key}
+
+        Set a runtime setting for one agent (EDITOR on the agent; a security key also needs a tenant admin). Same body and rules as the workspace PUT. Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.
+        """
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/settings/{quote_path(key)}", body=body)
+
+    def delete(self, agent_id: str, key: str, *, reason: Optional[str] = None) -> m.SettingsController_WriteResponse:
+        """Delete.
+
+        DELETE /api/agents/{agentId}/settings/{key}
+
+        Remove the agent's override so the workspace value applies again. A high or security key needs a typed reason (?reason=). Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.
+        """
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/settings/{quote_path(key)}", query={"reason": reason})
 
 
 class AgentShareApi:
@@ -4416,6 +4479,18 @@ class EdgeAgentsConfigApi:
         Restricted to platform-admin.
         """
         return self._http.request("GET", "/api/edge/manifest/registry")
+
+
+class EdgePromptBundleApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def bundle(self, *, agent_id: Optional[str] = None) -> m.EdgePromptBundleController_EdgePromptBundle:
+        """Bundle.
+
+        GET /api/edge/prompts
+        """
+        return self._http.request("GET", "/api/edge/prompts", query={"agentId": agent_id})
 
 
 class EdgeRelayApi:
@@ -8697,6 +8772,60 @@ class ProductFeedApi:
         return self._http.request("POST", f"/api/commerce/feed/{quote_path(tenant_id)}/checkout", body=body)
 
 
+class PromptAdminApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, *, agent_id: Optional[str] = None, locale: Optional[str] = None, family: Optional[str] = None, q: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.PromptOverrideService_PromptView]:
+        """List.
+
+        GET /api/prompts
+        """
+        return self._http.request("GET", "/api/prompts", query={"agentId": agent_id, "locale": locale, "family": family, "q": q, "limit": limit, "offset": offset})
+
+    def get(self, key: str, *, agent_id: Optional[str] = None, locale: Optional[str] = None) -> m.PromptOverrideService_PromptView:
+        """Get.
+
+        GET /api/prompts/{key}
+        """
+        return self._http.request("GET", f"/api/prompts/{quote_path(key)}", query={"agentId": agent_id, "locale": locale})
+
+    def history(self, key: str, *, scope: Optional[str] = None, agent_id: Optional[str] = None, locale: Optional[str] = None, limit: Optional[int] = None) -> List[m.PromptHistoryEntry]:
+        """History.
+
+        GET /api/prompts/{key}/history
+        """
+        return self._http.request("GET", f"/api/prompts/{quote_path(key)}/history", query={"scope": scope, "agentId": agent_id, "locale": locale, "limit": limit})
+
+    def put(self, key: str, scope: str, body: m.PromptAdminController_OverrideRequest, *, agent_id: Optional[str] = None, locale: Optional[str] = None) -> m.PromptOverrideService_Applied:
+        """Put.
+
+        PUT /api/prompts/{key}/overrides/{scope}
+        """
+        return self._http.request("PUT", f"/api/prompts/{quote_path(key)}/overrides/{quote_path(scope)}", query={"agentId": agent_id, "locale": locale}, body=body)
+
+    def revert(self, key: str, scope: str, *, agent_id: Optional[str] = None, locale: Optional[str] = None, reason: Optional[str] = None, expected_version: Optional[int] = None) -> m.PromptOverrideService_Applied:
+        """Revert.
+
+        DELETE /api/prompts/{key}/overrides/{scope}
+        """
+        return self._http.request("DELETE", f"/api/prompts/{quote_path(key)}/overrides/{quote_path(scope)}", query={"agentId": agent_id, "locale": locale, "reason": reason, "expectedVersion": expected_version})
+
+    def restore(self, key: str, scope: str, body: m.PromptAdminController_RestoreRequest, *, agent_id: Optional[str] = None, locale: Optional[str] = None, idempotency_key: Optional[str] = None) -> m.PromptOverrideService_Applied:
+        """Restore.
+
+        POST /api/prompts/{key}/overrides/{scope}/restore
+        """
+        return self._http.request("POST", f"/api/prompts/{quote_path(key)}/overrides/{quote_path(scope)}/restore", query={"agentId": agent_id, "locale": locale}, headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def validate(self, key: str, body: m.PromptAdminController_ValidateRequest, *, idempotency_key: Optional[str] = None) -> m.PromptOverrideService_Validation:
+        """Validate.
+
+        POST /api/prompts/{key}/validate
+        """
+        return self._http.request("POST", f"/api/prompts/{quote_path(key)}/validate", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+
 class PromptDirectiveApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -9577,6 +9706,61 @@ class SessionConfigApi:
         GET /api/session/config
         """
         return self._http.request("GET", "/api/session/config")
+
+
+class SettingsApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def catalog(self) -> m.SettingsController_CatalogResponse:
+        """Catalog.
+
+        GET /api/settings/catalog
+        """
+        return self._http.request("GET", "/api/settings/catalog")
+
+    def effective(self, *, agent_id: Optional[str] = None) -> m.SettingsController_EffectiveResponse:
+        """Effective.
+
+        GET /api/settings/effective
+        """
+        return self._http.request("GET", "/api/settings/effective", query={"agentId": agent_id})
+
+    def history_all(self, *, scope: Optional[str] = None, agent_id: Optional[str] = None, since: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> m.SettingsController_HistoryPageResponse:
+        """History all.
+
+        GET /api/settings/history
+
+        The change history of every setting in one call, newest first. scope=all (default) is the workspace's own changes plus every agent's (tenant admin), scope=tenant the workspace's only, scope=agent every agent's (tenant admin), scope=agent with agentId one agent's (EDITOR on it). since (ISO-8601 instant) keeps rows at or after it; page with limit and offset, the body carries total and hasMore.
+        """
+        return self._http.request("GET", "/api/settings/history", query={"scope": scope, "agentId": agent_id, "since": since, "limit": limit, "offset": offset})
+
+    def put_tenant(self, key: str, body: m.SettingsController_ValueRequest) -> m.SettingsController_WriteResponse:
+        """Put tenant.
+
+        PUT /api/settings/tenant/{key}
+
+        Set a runtime setting for the whole workspace (tenant admin). Body {value, reason}: a high or security key needs a typed reason, and a security key can only be made stricter than the value it inherits. Answers 409 SETTING_LOCKED when the operator pinned the key (app.settings.locked) and 409 SETTING_CONFLICT when another writer changed the same key at the same moment (reload and retry).
+        """
+        return self._http.request("PUT", f"/api/settings/tenant/{quote_path(key)}", body=body)
+
+    def delete_tenant(self, key: str, *, reason: Optional[str] = None) -> m.SettingsController_WriteResponse:
+        """Delete tenant.
+
+        DELETE /api/settings/tenant/{key}
+
+        Remove the workspace override so the platform value applies again (tenant admin). A high or security key needs a typed reason (?reason=), like a PUT. Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.
+        """
+        return self._http.request("DELETE", f"/api/settings/tenant/{quote_path(key)}", query={"reason": reason})
+
+    def history(self, key: str, *, scope: Optional[str] = None, agent_id: Optional[str] = None, limit: Optional[int] = None) -> List[m.SettingHistoryEntry]:
+        """History.
+
+        GET /api/settings/{key}/history
+
+        The change history of one setting, newest first. scope=tenant needs a tenant admin; scope=agent with agentId needs EDITOR on the agent. For every key at once use GET /api/settings/history.
+        """
+        return self._http.request("GET", f"/api/settings/{quote_path(key)}/history", query={"scope": scope, "agentId": agent_id, "limit": limit})
 
 
 class ShareApi:
@@ -11024,6 +11208,32 @@ class TenantFeatureFlagApi:
         return self._http.request("GET", f"/api/tenant/feature-flags/{quote_path(key)}/evaluate")
 
 
+class TenantRuntimeLimitsApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def get(self) -> m.RuntimeLimitsView:
+        """Get.
+
+        GET /api/agent-runtime/limits
+        """
+        return self._http.request("GET", "/api/agent-runtime/limits")
+
+    def put(self, body: Optional[m.RuntimeLimits] = None) -> m.RuntimeLimitsView:
+        """Put.
+
+        PUT /api/agent-runtime/limits
+        """
+        return self._http.request("PUT", "/api/agent-runtime/limits", body=body)
+
+    def clear(self) -> None:
+        """Clear.
+
+        DELETE /api/agent-runtime/limits
+        """
+        return self._http.request("DELETE", "/api/agent-runtime/limits", response="void")
+
+
 class TenantSettingsApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -11356,6 +11566,15 @@ class TrialGrantApi:
 class TurnJournalApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
+
+    def by_session(self, agent_id: str, *, session_id: str, limit: Optional[int] = None) -> m.TurnJournalService_SessionView:
+        """By session.
+
+        GET /api/agents/{agentId}/turn-journal
+
+        Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/turn-journal", query={"sessionId": session_id, "limit": limit})
 
     def get(self, agent_id: str, turn_id: str) -> m.TurnJournalService_JournalView:
         """Get.
@@ -13007,10 +13226,13 @@ class VegadutaClient:
         self.agent_job_operator = AgentJobOperatorApi(self.http)
         self.agent_lab = AgentLabApi(self.http)
         self.agent_memory = AgentMemoryApi(self.http)
+        self.agent_prompt_preview = AgentPromptPreviewApi(self.http)
         self.agent_run_budget = AgentRunBudgetApi(self.http)
+        self.agent_runtime_limits = AgentRuntimeLimitsApi(self.http)
         self.agent_schedule = AgentScheduleApi(self.http)
         self.agent_session_llm_request = AgentSessionLlmRequestApi(self.http)
         self.agent_session_llm_usage = AgentSessionLlmUsageApi(self.http)
+        self.agent_settings = AgentSettingsApi(self.http)
         self.agent_share = AgentShareApi(self.http)
         self.agent_share_owner = AgentShareOwnerApi(self.http)
         self.agent_share_vision = AgentShareVisionApi(self.http)
@@ -13086,6 +13308,7 @@ class VegadutaClient:
         self.e2b_credential = E2bCredentialApi(self.http)
         self.e2b_sandbox = E2bSandboxApi(self.http)
         self.edge_agents_config = EdgeAgentsConfigApi(self.http)
+        self.edge_prompt_bundle = EdgePromptBundleApi(self.http)
         self.edge_relay = EdgeRelayApi(self.http)
         self.edge_tool_execution = EdgeToolExecutionApi(self.http)
         self.edge_turn_telemetry = EdgeTurnTelemetryApi(self.http)
@@ -13190,6 +13413,7 @@ class VegadutaClient:
         self.procedure = ProcedureApi(self.http)
         self.product_catalog = ProductCatalogApi(self.http)
         self.product_feed = ProductFeedApi(self.http)
+        self.prompt_admin = PromptAdminApi(self.http)
         self.prompt_directive = PromptDirectiveApi(self.http)
         self.provider = ProviderApi(self.http)
         self.public_status = PublicStatusApi(self.http)
@@ -13214,6 +13438,7 @@ class VegadutaClient:
         self.scim_provisioning = ScimProvisioningApi(self.http)
         self.secret_vault = SecretVaultApi(self.http)
         self.session_config = SessionConfigApi(self.http)
+        self.settings = SettingsApi(self.http)
         self.share = ShareApi(self.http)
         self.shared_with_me = SharedWithMeApi(self.http)
         self.signal_credential = SignalCredentialApi(self.http)
@@ -13253,6 +13478,7 @@ class VegadutaClient:
         self.tenant_default_model = TenantDefaultModelApi(self.http)
         self.tenant_deletion = TenantDeletionApi(self.http)
         self.tenant_feature_flag = TenantFeatureFlagApi(self.http)
+        self.tenant_runtime_limits = TenantRuntimeLimitsApi(self.http)
         self.tenant_settings = TenantSettingsApi(self.http)
         self.tenant_signup = TenantSignupApi(self.http)
         self.tenant_spend_cap = TenantSpendCapApi(self.http)

@@ -9,6 +9,7 @@ vi.mock("../../lib/api/core", () => ({ triggerBrowserDownload: download }));
 vi.mock("../../lib/i18n", async () => {
   const en = (await import("../../../messages/en.json")).default as unknown as Record<string, Record<string, string>>;
   return {
+    useLocale: () => "en",
     useTranslations: (ns: string) => (key: string, values?: Record<string, unknown>) => {
       const raw = en[ns]?.[key] ?? `${ns}.${key}`;
       return raw.replace(/\{(\w+)\}/g, (_m, k) => String(values?.[k] ?? ""));

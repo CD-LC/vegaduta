@@ -30,7 +30,7 @@ import java.util.List;
  * sane upper bound is.
  */
 public record AgentGenerationParamsUpdateRequest(
-    @NotNull(message = "maxTokens is required") @Positive @Max(value = 8192, message = "maxTokens must be at most 8192") Integer maxTokens,
+    @NotNull(message = "maxTokens is required") @Positive @MaxTokensCeiling Integer maxTokens,
     @NotNull(message = "temperature is required")
     @DecimalMin(value = "0.0", message = "temperature must be between 0 and 1")
     @DecimalMax(value = "1.0", message = "temperature must be between 0 and 1")

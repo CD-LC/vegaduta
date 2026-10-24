@@ -8,6 +8,7 @@ import static com.agenticai.core.workflow.WorkflowAiNodeSupport.present;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.str;
 import static com.agenticai.core.workflow.WorkflowAiNodeSupport.unitConfig;
 import com.agenticai.core.chat.structured.StructuredOutput;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,6 +31,13 @@ import static com.agenticai.core.workflow.WorkflowAiNodeHandler.*;
  * {@link WorkflowAiNodeHandler}.
  */
 final class AiClassifierHandler {
+
+    /** The registry slot of the owning node handler; shipped text until it is wired. */
+    private PromptSlot prompts = new PromptSlot();
+
+    void usePrompts(PromptSlot slot) {
+        this.prompts = slot;
+    }
 
     private final ObjectProvider<WorkflowAiModel> modelProvider;
     private final ObjectMapper objectMapper;
@@ -64,7 +72,7 @@ final class AiClassifierHandler {
 
         @Override
         String system() {
-            return CLASSIFIER_SYSTEM;
+            return prompts.text(CLASSIFIER_KEY);
         }
 
         @Override

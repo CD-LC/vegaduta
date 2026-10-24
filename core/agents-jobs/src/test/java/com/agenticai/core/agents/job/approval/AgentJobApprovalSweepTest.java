@@ -417,6 +417,71 @@ class AgentJobApprovalSweepTest {
         verify(executor).tryDispatch(parked.getId(), parked.getTenantId());
     }
 
+    /**
+     * {@code app.agent-jobs.approval.replay-grace} replaces the old 90-second constant: an approval decided
+     * 100 s ago is past the default grace (resume), but inside a configured 5-minute grace (hold).
+     */
+    @Test
+    void theReplayGraceIsConfigurable() {
+        AgentJob parked = AgentJobApprovalTestSupport.parkedJob(Instant.now().plusSeconds(3600));
+        AgentJobRepository repository = AgentJobApprovalTestSupport.repositoryFor(parked);
+        stillParked(repository, parked);
+        ApprovalRequest approved = AgentJobApprovalTestSupport.pendingRequestFor(parked);
+        approved.markApproved("admin@example.com");
+        decidedAt(approved, Instant.now().minusSeconds(100));
+        when(lookup.findTop20ByRequestedByOrderByCreatedAtDesc(label(parked))).thenReturn(List.of(approved));
+        when(executor.tryDispatch(parked.getId(), parked.getTenantId())).thenReturn(true);
+
+        properties.getApproval().setReplayGrace(java.time.Duration.ofMinutes(5));
+        sweep(repository).sweepParkedJobs();
+        verify(executor, never()).tryDispatch(any(UUID.class), anyString());
+
+        properties.getApproval().setReplayGrace(java.time.Duration.ofSeconds(90));
+        sweep(repository).sweepParkedJobs();
+        verify(executor).tryDispatch(parked.getId(), parked.getTenantId());
+    }
+
+    /**
+     * A request that expired undecided ({@code app.approvals.expiry}) is stored as a rejection by the
+     * expiry actor. The job must fail as a TIMEOUT with the expiry message, not as "a human rejected".
+     */
+    @Test
+    void anExpiredApprovalFailsTheJobAsATimeoutNotAsAHumanRejection() {
+        AgentJob parked = AgentJobApprovalTestSupport.parkedJob(Instant.now().plusSeconds(3600));
+        AgentJobRepository repository = AgentJobApprovalTestSupport.repositoryFor(parked);
+        stillParked(repository, parked);
+        ApprovalRequest expired = AgentJobApprovalTestSupport.pendingRequestFor(parked);
+        expired.markExpired("nobody decided in 24 hours");
+        when(lookup.findByRequestedByAndStatusOrderByCreatedAtAsc(label(parked), ApprovalStatus.REJECTED))
+            .thenReturn(List.of(expired));
+
+        sweep(repository).sweepParkedJobs();
+
+        verify(repository).failIfAwaitingApproval(
+            eq(parked.getId()), eq(AgentJobApprovalSweep.ERROR_APPROVAL_TIMEOUT), anyString(), any(Instant.class));
+        assertEquals(AgentJobApprovalSweep.ERROR_APPROVAL_TIMEOUT, parked.getErrorCode());
+        assertTrue(parked.getErrorMessage().contains("expired"), parked.getErrorMessage());
+        assertTrue(parked.getErrorMessage().contains(label(parked)), "the {label} placeholder is filled in");
+        verify(executor, never()).tryDispatch(any(UUID.class), anyString());
+    }
+
+    /** A mix of an expired and a human-rejected request is still a human rejection. */
+    @Test
+    void aHumanRejectionAmongExpiredRequestsStillFailsTheJobAsRejected() {
+        AgentJob parked = AgentJobApprovalTestSupport.parkedJob(Instant.now().plusSeconds(3600));
+        AgentJobRepository repository = AgentJobApprovalTestSupport.repositoryFor(parked);
+        stillParked(repository, parked);
+        ApprovalRequest expired = AgentJobApprovalTestSupport.pendingRequestFor(parked);
+        expired.markExpired("nobody decided");
+        when(lookup.findByRequestedByAndStatusOrderByCreatedAtAsc(label(parked), ApprovalStatus.REJECTED))
+            .thenReturn(List.of(expired, AgentJobApprovalTestSupport.rejectedRequestFor(parked)));
+
+        sweep(repository).sweepParkedJobs();
+
+        verify(repository).failIfAwaitingApproval(
+            eq(parked.getId()), eq(AgentJobApprovalSweep.ERROR_APPROVAL_REJECTED), anyString(), any(Instant.class));
+    }
+
     /** The intended happy path: approved, replay finished, result recorded - resume. */
     @Test
     void anApprovedRequestWithARecordedResultResumesImmediately() {

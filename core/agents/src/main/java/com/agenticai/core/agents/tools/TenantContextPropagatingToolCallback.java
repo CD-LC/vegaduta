@@ -164,6 +164,10 @@ public class TenantContextPropagatingToolCallback implements ToolCallback {
      * RedactingToolExecutionExceptionProcessor#redact} (credential-shaped text masked, length
      * capped) before it goes to the model - this string is sent to the LLM provider verbatim and
      * persisted in the conversation history.
+     *
+     * <p>Not caught: the deliberate stop conditions {@link
+     * RedactingToolExecutionExceptionProcessor#isPropagated} names (the tool-step ceiling), which
+     * are rethrown so the turn actually stops.
      */
     private String safeCall(String toolInput, ToolContext toolContext) {
         try {
@@ -173,6 +177,13 @@ public class TenantContextPropagatingToolCallback implements ToolCallback {
                             : delegate.call(toolInput);
             return McpToolOutputSanitizer.ensureJsonObject(output);
         } catch (RuntimeException e) {
+            // A deliberate turn-level stop (the tool-step ceiling, a hard guardrail violation) is not
+            // "a failed tool call": it must reach the turn, exactly as ToolExceptionTranslatingCallback
+            // and the exception processor already let it. Papering it over as a friendly result let
+            // the model carry on calling tools past a ceiling it had just hit.
+            if (RedactingToolExecutionExceptionProcessor.isPropagated(e)) {
+                throw e;
+            }
             String detail =
                     RedactingToolExecutionExceptionProcessor.redact(
                             e.getMessage() != null && !e.getMessage().isBlank()

@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.context;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -15,7 +16,7 @@ import java.util.Locale;
 public final class ModelContextWindows {
 
     /** Used when nothing is known about a model and the config does not say otherwise. */
-    public static final int DEFAULT_WINDOW_TOKENS = 128_000;
+    public static final int DEFAULT_WINDOW_TOKENS = ContextCompactionProperties.DEFAULT_WINDOW_TOKENS;
 
     private ModelContextWindows() {
     }
@@ -26,28 +27,34 @@ public final class ModelContextWindows {
      * @param fallback the configured default, used when neither source knows the model
      */
     public static int resolve(Integer catalogWindow, String modelId, int fallback) {
+        return resolve(catalogWindow, modelId, fallback, ContextCompactionProperties.shipped().getWindowRules());
+    }
+
+    /** {@link #resolve(Integer, String, int)} under the given name rules ({@code app.context.compaction.window-rules}). */
+    public static int resolve(
+        Integer catalogWindow, String modelId, int fallback, List<ContextCompactionProperties.WindowRule> rules
+    ) {
         if (catalogWindow != null && catalogWindow > 0) {
             return catalogWindow;
         }
-        return heuristic(modelId, fallback > 0 ? fallback : DEFAULT_WINDOW_TOKENS);
+        return heuristic(modelId, fallback > 0 ? fallback : DEFAULT_WINDOW_TOKENS, rules);
     }
 
     /** Name-based floor for a handful of well-known families; {@code fallback} for everything else. */
     public static int heuristic(String modelId, int fallback) {
-        if (modelId == null || modelId.isBlank()) {
+        return heuristic(modelId, fallback, ContextCompactionProperties.shipped().getWindowRules());
+    }
+
+    /** {@link #heuristic(String, int)} under the given name rules; the first matching rule wins. */
+    public static int heuristic(String modelId, int fallback, List<ContextCompactionProperties.WindowRule> rules) {
+        if (modelId == null || modelId.isBlank() || rules == null) {
             return fallback;
         }
         String id = modelId.toLowerCase(Locale.ROOT);
-        if (id.contains("claude")) {
-            return 200_000;
-        }
-        if (id.contains("gemini")) {
-            return 200_000;
-        }
-        if (id.contains("gpt-5") || id.contains("gpt-4o") || id.contains("gpt-4.1") || id.contains("gpt-4-turbo")
-            || id.startsWith("o1") || id.startsWith("o3")
-            || id.startsWith("o4") || id.contains("/o1") || id.contains("/o3") || id.contains("/o4")) {
-            return 128_000;
+        for (ContextCompactionProperties.WindowRule rule : rules) {
+            if (rule.matches(id)) {
+                return rule.getTokens();
+            }
         }
         return fallback;
     }

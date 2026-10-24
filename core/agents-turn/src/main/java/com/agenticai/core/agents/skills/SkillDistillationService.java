@@ -3,9 +3,10 @@ package com.agenticai.core.agents.skills;
 import com.agenticai.core.agents.job.AgentJobLookup;
 import com.agenticai.core.agents.tools.ToolCallLog;
 import com.agenticai.core.agents.tools.ToolCallLogRepository;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.rl.domain.Episode;
 import com.agenticai.core.rl.repo.EpisodeRepository;
-import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -35,24 +36,17 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p><b>Sequence normalization.</b> Consecutive repeats of one tool collapse to a single step - a
  * polling loop run 12 times and the same loop run 3 times are the same procedure. Sequences shorter
- * than {@link #MIN_SEQUENCE_LEN} or longer than {@link #MAX_SEQUENCE_LEN} are ignored: one call is
+ * than {@code app.skills.distillation.min-sequence-length} or longer than {@code max-sequence-length} are ignored: one call is
  * not a procedure and a very long chain is a run, not a pattern.
  *
- * <p><b>Support.</b> A pattern must appear in at least {@link #MIN_DISTINCT_RUNS} distinct sessions
+ * <p><b>Support.</b> A pattern must appear in at least {@code app.skills.distillation.min-distinct-runs} distinct sessions
  * before it can be distilled - an accident repeated inside one run is not a skill.
  */
 @Service
 public class SkillDistillationService {
 
-    static final int MIN_DISTINCT_RUNS = 3;
-    static final int MIN_SEQUENCE_LEN = 2;
-    static final int MAX_SEQUENCE_LEN = 8;
-    static final int MAX_JOBS_SCANNED = 500;
-    static final int MAX_EPISODES_SCANNED = 500;
-    static final BigDecimal MIN_EPISODE_REWARD = new BigDecimal("0.60");
-    static final int MAX_PROPOSALS_PER_RUN = 5;
-    static final int MAX_SAMPLE_GOALS = 3;
-    static final int MAX_GOAL_CHARS = 160;
+    // The support, the sequence length bounds, the scan sizes, the reward bar and the per-pass caps are
+    // app.skills.distillation.* - see SkillDistillationProperties.
 
     /**
      * Marker stored in the generated description/body so a later run recognises its own proposals.
@@ -63,6 +57,14 @@ public class SkillDistillationService {
     private final EpisodeRepository episodeRepository;
     private final ToolCallLogRepository toolCallLogRepository;
     private final SkillService skillService;
+
+    /** {@code app.skills.distillation.*}; a hand-built instance keeps the shipped defaults. */
+    private volatile SkillDistillationProperties properties = new SkillDistillationProperties();
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setProperties(SkillDistillationProperties properties) {
+        this.properties = properties == null ? new SkillDistillationProperties() : properties;
+    }
 
     public SkillDistillationService(
             AgentJobLookup jobLookup,
@@ -102,7 +104,7 @@ public class SkillDistillationService {
         collectFromJobs(agentId, patterns);
         collectFromEpisodes(agentId, patterns);
         return patterns.values().stream()
-                .filter(a -> a.sessions.size() >= MIN_DISTINCT_RUNS)
+                .filter(a -> a.sessions.size() >= properties.getMinDistinctRuns())
                 .map(Agg::toPattern)
                 .sorted(
                         Comparator.comparingInt(ToolPattern::distinctSessions)
@@ -125,13 +127,14 @@ public class SkillDistillationService {
         Map<String, String> skipped = new LinkedHashMap<>();
         int staged = 0;
         for (ToolPattern pattern : patterns) {
-            if (staged >= MAX_PROPOSALS_PER_RUN) {
+            if (staged >= properties.getMaxProposalsPerRun()) {
                 skipped.put(signature(pattern.tools()), "over the per-run proposal cap");
                 continue;
             }
             String name = skillName(pattern.tools());
             try {
-                skillService.propose(name, description(pattern), body(pattern), DISTILLER_ACTOR);
+                skillService.propose(
+                        name, description(pattern, agentId), body(pattern, agentId), DISTILLER_ACTOR);
                 proposed.add(name);
                 staged++;
             } catch (SkillValidationException e) {
@@ -145,7 +148,7 @@ public class SkillDistillationService {
 
     private void collectFromJobs(UUID agentId, Map<String, Agg> patterns) {
         List<AgentJobLookup.JobFacts> succeeded =
-                jobLookup.recentSucceeded(agentId, MAX_JOBS_SCANNED);
+                jobLookup.recentSucceeded(agentId, properties.getMaxJobsScanned());
         for (AgentJobLookup.JobFacts job : succeeded) {
             List<ToolCallLog> calls =
                     toolCallLogRepository.findByAgentIdAndSessionIdOrderByStartedAtAsc(
@@ -157,7 +160,7 @@ public class SkillDistillationService {
             Agg agg = patterns.computeIfAbsent(signature(sequence), s -> new Agg(sequence));
             agg.sessions.add(job.sessionId());
             agg.runs++;
-            if (job.goal() != null && agg.goals.size() < MAX_SAMPLE_GOALS) {
+            if (job.goal() != null && agg.goals.size() < properties.getMaxSampleGoals()) {
                 agg.goals.add(truncate(job.goal()));
             }
         }
@@ -169,10 +172,10 @@ public class SkillDistillationService {
                 episodeRepository.findByAgentIdAndRewardIsNotNullOrderByStartedAtAsc(agentId);
         int scanned = 0;
         for (int i = rewarded.size() - 1;
-                i >= 0 && scanned < MAX_EPISODES_SCANNED;
+                i >= 0 && scanned < properties.getMaxEpisodesScanned();
                 i--, scanned++) {
             Episode e = rewarded.get(i);
-            if (e.getReward() == null || e.getReward().compareTo(MIN_EPISODE_REWARD) < 0) {
+            if (e.getReward() == null || e.getReward().compareTo(properties.getMinEpisodeReward()) < 0) {
                 continue;
             }
             List<ToolCallLog> calls =
@@ -201,7 +204,7 @@ public class SkillDistillationService {
     /**
      * Ordered, deduped tool names of a run's successful calls; null when the run teaches nothing.
      */
-    private static List<String> sequenceOf(List<ToolCallLog> calls) {
+    private List<String> sequenceOf(List<ToolCallLog> calls) {
         List<String> sequence = new ArrayList<>();
         for (ToolCallLog c : calls) {
             if (c.getErrorMessage() != null || c.getToolName() == null) {
@@ -212,7 +215,8 @@ public class SkillDistillationService {
                 sequence.add(name);
             }
         }
-        if (sequence.size() < MIN_SEQUENCE_LEN || sequence.size() > MAX_SEQUENCE_LEN) {
+        if (sequence.size() < properties.getMinSequenceLength()
+                || sequence.size() > properties.getMaxSequenceLength()) {
             return null;
         }
         return sequence;
@@ -246,43 +250,59 @@ public class SkillDistillationService {
         return s.isEmpty() ? "tool" : s;
     }
 
-    private static String description(ToolPattern p) {
+    /** Registry keys of the generated skill text (default text: {@code prompts/en/skills.distilled.*.md}). */
+    static final String DESCRIPTION_KEY = "skills.distilled.description";
+    static final String PURPOSE_KEY = "skills.distilled.purpose";
+    static final String WHEN_TO_USE_KEY = "skills.distilled.when_to_use";
+    static final String PROCEDURE_KEY = "skills.distilled.procedure";
+    static final String FOOTER_KEY = "skills.distilled.footer";
+
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so a tenant or agent override of the keys above applies; absent = shipped text. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
+
+    String description(ToolPattern p, UUID agentId) {
         String seq = signature(p.tools());
-        String d = "Distilled from " + p.runs() + " successful runs: " + seq + ".";
+        String d =
+                prompts.text(
+                        DESCRIPTION_KEY,
+                        agentId,
+                        Map.of("runs", String.valueOf(p.runs()), "sequence", seq));
         return d.length() > 200 ? d.substring(0, 197) + "..." : d;
     }
 
-    private static String body(ToolPattern p) {
+    String body(ToolPattern p, UUID agentId) {
         StringBuilder b = new StringBuilder();
-        b.append("## Purpose\n\n");
-        b.append("This procedure was distilled from ")
-                .append(p.runs())
-                .append(" successful runs of this agent (across ")
-                .append(p.distinctSessions())
-                .append(" separate sessions) that all followed the same tool sequence. ")
-                .append("It is a record of what demonstrably worked, not a guess.\n\n");
+        b.append(
+                prompts.text(
+                        PURPOSE_KEY,
+                        agentId,
+                        Map.of(
+                                "runs", String.valueOf(p.runs()),
+                                "sessions", String.valueOf(p.distinctSessions()))));
         if (!p.sampleGoals().isEmpty()) {
-            b.append(
-                    "## When to use\n\nWhen the task resembles the goals this pattern served, for example:\n\n");
+            b.append(prompts.text(WHEN_TO_USE_KEY, agentId));
             for (String goal : p.sampleGoals()) {
                 b.append("- ").append(goal).append('\n');
             }
             b.append('\n');
         }
-        b.append("## Procedure\n\nFollow this tool sequence in order:\n\n");
+        b.append(prompts.text(PROCEDURE_KEY, agentId));
         for (int i = 0; i < p.tools().size(); i++) {
             b.append(i + 1).append(". `").append(p.tools().get(i)).append("`\n");
         }
-        b.append(
-                "\nIf a step errors, do not silently substitute a different tool - surface the failure. ");
-        b.append(
-                "The sequence above is what was observed to succeed; departures from it are unverified.\n");
+        b.append(prompts.text(FOOTER_KEY, agentId));
         return b.toString();
     }
 
-    private static String truncate(String goal) {
+    private String truncate(String goal) {
         String g = goal.replaceAll("\\s+", " ").trim();
-        return g.length() > MAX_GOAL_CHARS ? g.substring(0, MAX_GOAL_CHARS - 3) + "..." : g;
+        int max = properties.getMaxGoalChars();
+        return g.length() > max ? g.substring(0, max - 3) + "..." : g;
     }
 
     private static byte[] sha256(String s) {

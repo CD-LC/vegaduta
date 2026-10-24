@@ -74,18 +74,35 @@ public final class AgentLabDtos {
      * @param kind {@code KNOCKOUT} or {@code CONSISTENCY}
      * @param scoring {@code NONE}, or {@code JUDGE} to grade every answer 0..1
      * @param similarity {@code NONE}, or {@code JUDGE} to compare every pair of answers for same meaning
+     * @param withTools {@code true} to answer with the agent's REAL tools (the chat turn's tool pipeline; a call that
+     *     needs a person parks as a pending approval); null or {@code false} = the tool-less completion. Refused
+     *     with a 400 unless {@code app.agent-lab.with-tools.enabled} is on
      */
     public record LabRunRequest(
-        String kind, List<String> systemPrompts, List<LabCellRequest> cells, String scoring, String similarity
-    ) {}
+        String kind, List<String> systemPrompts, List<LabCellRequest> cells, String scoring, String similarity,
+        Boolean withTools
+    ) {
+
+        /** A run that does not ask for the agent's tools (the only kind there was before the mode existed). */
+        public LabRunRequest(
+            String kind, List<String> systemPrompts, List<LabCellRequest> cells, String scoring, String similarity
+        ) {
+            this(kind, systemPrompts, cells, scoring, similarity, null);
+        }
+    }
 
     // ---- responses ------------------------------------------------------------
 
-    /** @param reason {@code PLAN} when {@code allowed} is false, otherwise null */
+    /**
+     * @param reason {@code PLAN} when {@code allowed} is false, otherwise null
+     * @param withToolsAvailable whether a run may ask for the agent's real tools: the mode is switched on for this
+     *     install and the tool pipeline exists. False on a default install, so a client can show the option disabled,
+     *     with the reason, before anyone tries to run.
+     */
     @JsonInclude(JsonInclude.Include.ALWAYS)
     public record LabCapabilitiesResponse(
         boolean allowed, String reason, int maxCells, int maxCallsPerRun,
-        int maxSystemPrompts, int maxSimilarityCells, int runTtlMinutes
+        int maxSystemPrompts, int maxSimilarityCells, int runTtlMinutes, boolean withToolsAvailable
     ) {}
 
     /**

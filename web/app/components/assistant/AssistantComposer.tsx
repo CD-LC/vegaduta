@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ClipboardEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type ClipboardEvent, type KeyboardEvent, type ReactNode } from "react";
 import { ArrowUp, CloudUpload, Phone, Square } from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
 import type { RequestLifecycleSnapshot } from "../../lib/requestLifecycle";
@@ -67,6 +67,24 @@ export default function AssistantComposer({
   const t = useTranslations("assistant");
   const boxRef = useRef<HTMLTextAreaElement>(null);
   const overLimit = isOverComposerLimit(value.length);
+
+  // The box grows with what is typed (up to max-h-48, then scrolls). CSS field-sizing does it where supported;
+  // elsewhere the height follows the content here.
+  useLayoutEffect(() => {
+    const el = boxRef.current;
+    if (!el || typeof CSS === "undefined" || CSS.supports?.("field-sizing", "content")) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+
+  // When a turn settles and focus was left nowhere (the Stop button that vanished, say), the box takes it back
+  // so the next message can be typed straight away. Focus the person put somewhere else stays there.
+  const wasSending = useRef(sending);
+  useLayoutEffect(() => {
+    const idle = typeof document !== "undefined" && (!document.activeElement || document.activeElement === document.body);
+    if (wasSending.current && !sending && !disabled && idle) boxRef.current?.focus({ preventScroll: true });
+    wasSending.current = sending;
+  }, [sending, disabled]);
   const canSend =
     !disabled &&
     !sending &&
@@ -100,8 +118,8 @@ export default function AssistantComposer({
     : [];
 
   return (
-    <div className="asst-composer-bar px-3 py-3 sm:px-6">
-      <div className="mx-auto w-full max-w-3xl space-y-2">
+    <div className="asst-composer-bar px-3 pb-3 pt-2 sm:px-6">
+      <div className="asst-column mx-auto w-full space-y-2">
         {reconnecting ? (
           <StreamReconnectingNotice state={reconnecting} />
         ) : (
@@ -139,8 +157,8 @@ export default function AssistantComposer({
         )}
         <div
           className={cn(
-            "asst-composer-box rounded-2xl border p-2 transition-[box-shadow,border-color]",
-            "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/40"
+            "asst-composer-box rounded-3xl border p-2 transition-[box-shadow,border-color]",
+            "focus-within:border-ring/70 focus-within:ring-2 focus-within:ring-ring/25"
           )}
         >
           <div className="flex items-end gap-2">
@@ -162,6 +180,7 @@ export default function AssistantComposer({
               aria-label={placeholder ?? t("composerPlaceholder")}
               disabled={disabled}
               rows={1}
+              data-assistant-box=""
               {...composerLimitProps(value.length)}
               className="max-h-48 min-h-9 flex-1 resize-none border-0 bg-transparent px-2 py-1.5 shadow-none focus-visible:ring-0"
             />
@@ -201,12 +220,13 @@ export default function AssistantComposer({
               <Button
                 type="button"
                 size="icon"
-                variant="outline"
                 onClick={onStop}
                 aria-label={t("stop")}
                 title={t("stop")}
+                data-testid="assistant-stop"
+                className="size-9 shrink-0 rounded-full"
               >
-                <Square size={14} aria-hidden="true" />
+                <Square size={12} className="fill-current" aria-hidden="true" />
               </Button>
             ) : showCall ? null : (
               <Button
@@ -216,6 +236,7 @@ export default function AssistantComposer({
                 disabled={!canSend}
                 aria-label={t("send")}
                 title={t("send")}
+                className="size-9 shrink-0 rounded-full"
               >
                 <ArrowUp size={16} aria-hidden="true" />
               </Button>
@@ -224,7 +245,7 @@ export default function AssistantComposer({
           {toolbar && <div className="mt-2 border-t border-border/60 px-1 pt-2">{toolbar}</div>}
         </div>
         <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
-          <span>{t("composerHint")}</span>
+          <span className="hidden sm:inline">{t("composerHint")}</span>
           <ComposerLimitNote length={value.length} />
         </div>
       </div>

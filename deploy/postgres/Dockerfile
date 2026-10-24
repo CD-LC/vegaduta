@@ -56,10 +56,19 @@ ARG AGE_VERSION=PG16/v1.6.0-rc0
 ARG AGE_COMMIT=2db2f060c4c9265a14d40f007eb8c56febf31e4c
 ARG PG_CONFIG=/usr/lib/postgresql/16/bin/pg_config
 
+# pgvector's Makefile defaults to OPTFLAGS=-march=native, i.e. the CPU of whatever
+# machine builds the image (a CI runner). On any host whose CPU lacks one of those
+# instructions the backend dies with SIGILL the first time a vector is built or an
+# HNSW index is created (the tenant baseline migration does), so core never boots.
+# OPTFLAGS="" builds portable code; pgvector still picks its fast distance kernels
+# at runtime (function multiversioning on x86-64), so there is no recall or
+# correctness change. Apache AGE's Makefile sets no -march flag (it uses the
+# distro pg_config CFLAGS), so it needs nothing. Keep OPTFLAGS="" on both make calls.
+
 # Build deps are purged in the same layer, so apt version pins would only make
 # the build break on every Debian point release without changing the image.
 # hadolint ignore=DL3008
-RUN apt-get update     && apt-get install -y --no-install-recommends         build-essential         git         postgresql-server-dev-16         libreadline-dev         zlib1g-dev         flex         bison         ca-certificates     && git clone --branch "${PGVECTOR_VERSION}" --depth 1 https://github.com/pgvector/pgvector.git /tmp/pgvector     && test "$(git -C /tmp/pgvector rev-parse HEAD)" = "${PGVECTOR_COMMIT}"     && make -C /tmp/pgvector PG_CONFIG="${PG_CONFIG}"     && make -C /tmp/pgvector install PG_CONFIG="${PG_CONFIG}"     && git clone --branch "${AGE_VERSION}" --depth 1 https://github.com/apache/age.git /tmp/age     && test "$(git -C /tmp/age rev-parse HEAD)" = "${AGE_COMMIT}"     && make -C /tmp/age PG_CONFIG="${PG_CONFIG}"     && make -C /tmp/age install PG_CONFIG="${PG_CONFIG}"     && pkglibdir="$("${PG_CONFIG}" --pkglibdir)"     && mkdir -p "${pkglibdir}/plugins"     && ln -sf ../age.so "${pkglibdir}/plugins/age.so"     && test -e "${pkglibdir}/plugins/age.so"     && rm -rf /tmp/pgvector /tmp/age     && apt-get purge -y --auto-remove build-essential git postgresql-server-dev-16 flex bison     && rm -rf /var/lib/apt/lists/*
+RUN apt-get update     && apt-get install -y --no-install-recommends         build-essential         git         postgresql-server-dev-16         libreadline-dev         zlib1g-dev         flex         bison         ca-certificates     && git clone --branch "${PGVECTOR_VERSION}" --depth 1 https://github.com/pgvector/pgvector.git /tmp/pgvector     && test "$(git -C /tmp/pgvector rev-parse HEAD)" = "${PGVECTOR_COMMIT}"     && make -C /tmp/pgvector PG_CONFIG="${PG_CONFIG}" OPTFLAGS=""     && make -C /tmp/pgvector install PG_CONFIG="${PG_CONFIG}" OPTFLAGS=""     && git clone --branch "${AGE_VERSION}" --depth 1 https://github.com/apache/age.git /tmp/age     && test "$(git -C /tmp/age rev-parse HEAD)" = "${AGE_COMMIT}"     && make -C /tmp/age PG_CONFIG="${PG_CONFIG}"     && make -C /tmp/age install PG_CONFIG="${PG_CONFIG}"     && pkglibdir="$("${PG_CONFIG}" --pkglibdir)"     && mkdir -p "${pkglibdir}/plugins"     && ln -sf ../age.so "${pkglibdir}/plugins/age.so"     && test -e "${pkglibdir}/plugins/age.so"     && rm -rf /tmp/pgvector /tmp/age     && apt-get purge -y --auto-remove build-essential git postgresql-server-dev-16 flex bison     && rm -rf /var/lib/apt/lists/*
 
 # Loading AGE:
 #   * compose (deploy/docker-compose.yml `command:`) and the Helm chart set

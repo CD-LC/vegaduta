@@ -17,6 +17,7 @@ import { Select } from "../../ui/select";
 import { Textarea } from "../../ui/textarea";
 import { LAB_DEFAULT_MAX_CALLS, LAB_MAX_MESSAGE_CHARS, LAB_MAX_PROMPT_CHARS, plannedCalls } from "./labApi";
 import { LabEstimate, LabRunButton, LabRunStatus } from "./LabRunControls";
+import LabWithToolsToggle, { useLabWithTools } from "./LabWithToolsToggle";
 import { promptOf } from "./labTurns";
 import KnockoutResults from "./KnockoutResults";
 import { MIN_LABEL_DF, MIN_LABEL_ITEMS, canEstimateFloor } from "./knockoutMath";
@@ -91,6 +92,7 @@ export default function KnockoutPanel({ agent, capabilities }: KnockoutPanelProp
   const ids = useId();
   const agentId = agent.id;
   const lab = useLabRun<KnockoutContext>(agentId, "KNOCKOUT");
+  const tools = useLabWithTools(lab, capabilities);
 
   const prompt = promptOf(agent);
   const split = useMemo(() => splitPromptSections(prompt, MAX_PROMPT_SECTIONS), [prompt]);
@@ -388,6 +390,7 @@ export default function KnockoutPanel({ agent, capabilities }: KnockoutPanelProp
           </div>
 
           <div className="space-y-3">
+            <LabWithToolsToggle state={tools} disabled={live} />
             <LabEstimate
               calls={calls}
               cap={cap}
@@ -400,7 +403,7 @@ export default function KnockoutPanel({ agent, capabilities }: KnockoutPanelProp
                 capabilities={capabilities}
                 disabled={blockedReason !== undefined || live}
                 disabledReason={blockedReason}
-                onRun={() => void lab.start(request, ctx)}
+                onRun={() => void lab.start(tools.withTools ? { ...request, withTools: true } : request, ctx)}
               />
               {blockedReason !== undefined && <p className="text-xs text-muted-foreground">{blockedReason}</p>}
             </div>

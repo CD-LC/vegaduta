@@ -197,7 +197,12 @@ export function useServerTurn(ctx: PlaygroundContext) {
               return copy;
             });
           },
-        }
+        },
+        // Normal chat route (no branching override).
+        undefined,
+        // The Run settings drawer's tool switches: narrows THIS run to these of the agent's tools; null/absent sends
+        // nothing and the run uses the agent's own tools. Never saved to the agent.
+        ctx.runToolNames
       );
 
       // One last catch-up poll (fallback path only) - closes the small race
