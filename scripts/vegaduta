@@ -1017,8 +1017,11 @@ cmd_logs() {
 
 # ------------------------------------------------------------- backup/restore
 # backup [DIR]: pg_dump (custom format) of the app database and, on the full
-# stack, the Keycloak database; a tar of the uploaded-files volume; and a copy
-# of .env (APP_ENCRYPTION_KEY - without it the database backup is useless).
+# stack, the Keycloak database; dumps of the profiled auxiliary databases
+# (temporal-postgresql, langfuse-postgres) when they run; a tar of the
+# uploaded-files volume; and a copy of .env (APP_ENCRYPTION_KEY - without it
+# the database backup is useless). The auxiliary dumps are what lets a stock
+# postgres volume migrate when its image changes major between releases.
 # Everything is written owner-only (umask 077). Prints the backup directory.
 BACKUP_DIR_RESULT=""
 cmd_backup() {
@@ -1039,6 +1042,22 @@ cmd_backup() {
       || die "backup: pg_dump of the Keycloak database failed"
     ok "keycloak db   -> keycloak-db.dump"
   fi
+  # Profiled auxiliary databases (temporal, tracing). Non-fatal: they run only
+  # under their profiles, and a failed dump must not lose the app backup.
+  # POSTGRES_DB defaults to POSTGRES_USER in the stock image.
+  local aux
+  for aux in temporal-postgresql langfuse-postgres; do
+    if [ -n "$(dc ps -q "$aux" 2>/dev/null)" ]; then
+      # shellcheck disable=SC2016  # expands inside the container
+      if dc exec -T "$aux" sh -c 'pg_dump -U "$POSTGRES_USER" -d "${POSTGRES_DB:-$POSTGRES_USER}" -Fc' > "$dir/$aux.dump" \
+        && [ -s "$dir/$aux.dump" ]; then
+        ok "$aux -> $aux.dump"
+      else
+        rm -f "$dir/$aux.dump"
+        warn "backup: pg_dump of $aux failed - dump it manually before an upgrade that changes its postgres major"
+      fi
+    fi
+  done
   # Uploaded files: SeaweedFS data (full) or core's local storage (lite).
   local svc path cid img
   if [ "$TIER" = full ]; then svc=seaweedfs; path=/data; else svc=core; path=/data/storage; fi
@@ -1092,6 +1111,16 @@ cmd_restore() {
       || die "restore: pg_restore of the Keycloak database failed"
     ok "Keycloak database restored"
   fi
+  local aux
+  for aux in temporal-postgresql langfuse-postgres; do
+    if [ -s "$dir/$aux.dump" ]; then
+      dc up -d --wait "$aux"
+      # shellcheck disable=SC2016
+      dc exec -T "$aux" sh -c 'pg_restore -U "$POSTGRES_USER" -d "${POSTGRES_DB:-$POSTGRES_USER}" --clean --if-exists --no-owner --exit-on-error' < "$dir/$aux.dump" \
+        && ok "$aux database restored" \
+        || warn "$aux restore failed - replay $dir/$aux.dump manually"
+    fi
+  done
   [ -s "$dir/files.tar.gz" ] && warn "files.tar.gz is not restored automatically: extract it into the $([ "$TIER" = full ] && echo seaweedfs-data || echo core-storage) volume with the stack stopped"
   # db-roles re-adopts the restored objects for the app role on the next up.
   cmd_up

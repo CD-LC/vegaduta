@@ -427,7 +427,15 @@ services:
       POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?run scripts/vegaduta secrets}
       POSTGRES_DB: ${KEYCLOAK_DB_NAME:-keycloak}
     volumes:
-      - keycloak-db-data:/var/lib/postgresql/data
+      # postgres:18+ stores the cluster at /var/lib/postgresql/<major>/docker
+      # (upstream docker-library/postgres#1259) and REFUSES to start while
+      # something is mounted at the pre-18 /var/lib/postgresql/data path, so
+      # the volume mounts one level up. A volume written by postgres:16/17
+      # keeps its cluster at the volume root; the 18 image then exits with
+      # its "PostgreSQL data in /var/lib/postgresql" error until the data is
+      # migrated (dump + recreate + restore; see deploy/README.md#upgrade).
+      # Fresh installs are unaffected.
+      - keycloak-db-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -702,7 +710,10 @@ services:
       POSTGRES_USER: ${TEMPORAL_DB_USER:-temporal}
       POSTGRES_PASSWORD: ${TEMPORAL_DB_PASSWORD:?run scripts/vegaduta secrets}
     volumes:
-      - temporal-db-data:/var/lib/postgresql/data
+      # See keycloak-db: postgres:18+ mounts the volume at /var/lib/postgresql;
+      # a pre-18 temporal-db-data volume must be dumped and recreated before
+      # this image starts (deploy/README.md#upgrade).
+      - temporal-db-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
       interval: 5s
@@ -1033,7 +1044,10 @@ services:
       TZ: UTC
       PGTZ: UTC
     volumes:
-      - langfuse-postgres-data:/var/lib/postgresql/data
+      # See keycloak-db: postgres:18+ mounts the volume at /var/lib/postgresql;
+      # a pre-18 langfuse-postgres-data volume must be dumped and recreated
+      # before this image starts (deploy/README.md#upgrade).
+      - langfuse-postgres-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
       interval: 5s

@@ -19,6 +19,10 @@ Release notes on GitHub are generated from the section for each version.
 
 - **A release path for the generated REST clients.** `.github/workflows/rest-sdk-release.yml` verifies, builds, attests and publishes the npm and PyPI `vegaduta-sdk` packages for `restsdk-v*` tags (publish stays off until `SDK_PUBLISH_NPM`/`SDK_PUBLISH_PYPI` are set); setup and procedure in `docs/maintainers/releasing-rest-sdks.md`. New tests cover the classification package (lethal-trifecta detector, resolver overrides, composite and annotated sources) and the Spring AI wiring, plus the retry/timeout/error paths in both REST runtimes.
 
+### Changed
+
+- **Auxiliary Postgres containers move to PostgreSQL 18.** `keycloak-db`, `temporal-postgresql` and `langfuse-postgres` now run `postgres:18.4-alpine`, and their volumes mount at `/var/lib/postgresql` to match the 18+ image layout. Fresh installs are unaffected; **existing installs must migrate the pre-18 volumes** before the new image starts (the 18+ image refuses both an old cluster and the old `/var/lib/postgresql/data` mount). The `upgrade`/`backup` dump covers all three databases and [deploy/README.md](deploy/README.md#upgrade) walks through recreate-and-restore.
+
 ## [0.1.9] - 2026-10-21
 
 ### Added
