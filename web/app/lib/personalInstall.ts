@@ -12,10 +12,11 @@ import { isFullEdition, isLiteEdition, isPersonalEdition, railHidden, underRoute
  * Assistant agent is per user, on any tier). /add-ons is the switchboard on personal and lite -
  * on full every add-on ships installed, so the page drops out of the rail and renders a
  * "managed for you" notice instead of live switches for a server a tenant cannot change.
- * /providers/local-model is personal-only everywhere: guided Ollama setup writes the install's
- * platform pool, which on a tenant-based install belongs to the operator, never a tenant.
+ * /providers/local-model used to sit here; it now self-gates on {@link localModelManagedHere}
+ * so a self-hosted lite/full install that deploys a local model gets the wizard, while a
+ * hosted tenant still sees the "managed for you" notice.
  */
-const SHARED_ONLY_ROUTES: readonly string[] = ["/providers/local-model"];
+const SHARED_ONLY_ROUTES: readonly string[] = [];
 
 const FULL_HIDDEN_ROUTES: readonly string[] = ["/add-ons"];
 
@@ -37,6 +38,13 @@ export function isFullInstall(): boolean {
 export function localModelAllowed(): boolean {
   return isPersonalEdition();
 }
+
+/**
+ * The capability probe for the surfaces that manage or diagnose the install's local model
+ * (/troubleshoot, /providers/local-model) is {@code localModelManagedHere} in
+ * api/localModels.ts: the API layer is client-only while this module stays in the
+ * server-component import graph, so the fetch cannot live here.
+ */
 
 /**
  * True when {@code href} is a surface this install should not advertise: on a personal install the

@@ -126,15 +126,18 @@ describe("hiddenOnPersonalInstall", () => {
     expect(hiddenOnPersonalInstall("/add-ons-extra")).toBe(false);
   });
 
-  it("hides local-model setup on every shared tier", () => {
+  it("keeps local-model setup reachable on every tier; the page self-gates on capability", () => {
     local();
     expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(false);
     lite();
-    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(true);
+    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(false);
     full();
-    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(true);
+    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(false);
     hosted();
-    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(true);
+    // The rail no longer hides it: the page asks core whether this install
+    // manages a local model (localModelManagedHere) and shows the wizard or
+    // the operator-managed notice accordingly.
+    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(false);
     // The catalogue itself stays: the tenant may look, just not change the server.
     expect(hiddenOnPersonalInstall("/providers")).toBe(false);
   });
@@ -178,7 +181,7 @@ describe("edition seed", () => {
     seeded("lite", false);
     expect(isPersonalInstall()).toBe(false);
     expect(tierCommand("--browser")).toBe("scripts/vegaduta up --lite --browser");
-    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(true);
+    expect(hiddenOnPersonalInstall("/providers/local-model")).toBe(false);
     seeded("full", false);
     expect(hiddenOnPersonalInstall("/add-ons")).toBe(true);
     expect(hiddenOnPersonalInstall("/admin/payments")).toBe(false);

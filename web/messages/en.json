@@ -14857,9 +14857,12 @@
     "firstRunTitle": "No model provider yet",
     "firstRunBody": "Run an open-weight model on this computer for free. We will check your hardware, show every model with the ones that fit first, download your pick and create your first agent.",
     "firstRunCta": "Set up a local model",
+    "firstRunServingTitle": "Your local model is running",
+    "firstRunServingBody": "Agents on this install already answer with {tag} for free, no API key. Add a cloud provider key if you ever need a bigger or different model.",
+    "firstRunServingCta": "Create an agent",
     "providersEntry": "Set up a local model",
-    "sharedTitle": "Local model setup is for personal installs",
-    "sharedBody": "On a tenant-based installation the model pools are run by the platform operator. You can browse the provider catalogue, but nothing here can change what runs on the server - this wizard only exists on a personal VegaDūta box."
+    "sharedTitle": "No local model on this install",
+    "sharedBody": "This install does not run a local model. On a shared or hosted install the model pools are run by the platform operator - contact your admin; on your own install, deploy with local AI (scripts/vegaduta up --local-ai)."
   },
   "addons": {
     "eyebrow": "Configuration",
@@ -15097,7 +15100,7 @@
     "learnAgents": "Agents & tools →",
     "learnModels": "Local models →",
     "learnInstall": "Installing VegaDūta →",
-    "sharedBody": "This panel diagnoses the local model on a personal install. Your tenant's models and infrastructure are managed by the platform operator - contact your admin for help."
+    "sharedBody": "This install does not run a local model, so there is nothing to diagnose here. On a shared or hosted install the model pools are managed by the platform operator - contact your admin; on your own install, deploy with local AI (scripts/vegaduta up --local-ai) and this page checks it."
   },
   "turnProgress": {
     "starting": "Getting started…",
