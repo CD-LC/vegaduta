@@ -1,7 +1,7 @@
 // Types, starter templates and pure helpers for CustomCodeToolsPanel. See the header
 // comment in ../CustomCodeToolsPanel.tsx for the behaviours this panel depends on.
 
-export type CustomCodeToolLanguage = "JAVA" | "PYTHON";
+export type CustomCodeToolLanguage = "JAVA" | "PYTHON" | "JAVASCRIPT" | "TYPESCRIPT";
 export type CustomCodeToolStatus = "DRAFT" | "VALIDATED" | "REJECTED";
 
 export interface CustomCodeTool {
@@ -74,9 +74,47 @@ def run(input):
     return {"greeting": f"Hello, {name}!"}
 `;
 
+export const JAVASCRIPT_TEMPLATE = `// Your tool must define a top-level function named run(input) taking a
+// plain object parsed from the tool call's JSON. Return any JSON-serializable
+// value. There is no module system, no process environment and no network -
+// this runs in a locked-down sandbox; import/require/process/eval/fetch are
+// rejected outright.
+
+function run(input) {
+  const name = input.name ?? "world";
+  return { greeting: \`Hello, \${name}!\` };
+}
+`;
+
+export const TYPESCRIPT_TEMPLATE = `// Same contract as the JavaScript template, with type annotations allowed
+// (the runtime strips them - enums and other type-generating syntax are not
+// supported).
+
+interface ToolInput {
+  name?: string;
+}
+
+function run(input: ToolInput): { greeting: string } {
+  const name = input.name ?? "world";
+  return { greeting: \`Hello, \${name}!\` };
+}
+`;
+
 export const TEMPLATES: Record<CustomCodeToolLanguage, string> = {
   JAVA: JAVA_TEMPLATE,
   PYTHON: PYTHON_TEMPLATE,
+  JAVASCRIPT: JAVASCRIPT_TEMPLATE,
+  TYPESCRIPT: TYPESCRIPT_TEMPLATE,
+};
+
+export const LANGUAGE_ORDER: CustomCodeToolLanguage[] = ["JAVA", "PYTHON", "JAVASCRIPT", "TYPESCRIPT"];
+
+/** Language names are proper nouns - shown verbatim, not translated. */
+export const LANGUAGE_LABELS: Record<CustomCodeToolLanguage, string> = {
+  JAVA: "Java",
+  PYTHON: "Python",
+  JAVASCRIPT: "JavaScript",
+  TYPESCRIPT: "TypeScript",
 };
 
 // ---------------------------------------------------------------------------

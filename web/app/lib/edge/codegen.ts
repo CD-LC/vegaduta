@@ -54,7 +54,7 @@ import { applyViewAsHeader } from "../viewAs";
 // Types
 // ---------------------------------------------------------------------------
 
-export type CodegenLanguage = "JAVA" | "PYTHON";
+export type CodegenLanguage = "JAVA" | "PYTHON" | "JAVASCRIPT" | "TYPESCRIPT";
 
 export interface CodegenValidationError {
   message?: string;
@@ -112,6 +112,18 @@ export interface GenerateOnDeviceOptions {
 // ---------------------------------------------------------------------------
 
 function systemPromptFor(language: CodegenLanguage): string {
+  if (language === "JAVASCRIPT" || language === "TYPESCRIPT") {
+    return (
+      `You write a single ${language === "TYPESCRIPT" ? "TypeScript" : "JavaScript"} tool for a ` +
+      "sandboxed agent platform. Output ONLY the code, no prose, no markdown " +
+      "fence. The module must define a top-level function run(input) taking a " +
+      "plain object and returning any JSON-serializable value. There is no " +
+      "module system: no import, no require, no npm packages - and no " +
+      "process, globalThis, eval, Function, fetch, WebSocket, Worker or " +
+      "`.constructor` access; the sandbox rejects them. Keep the program " +
+      "self-contained, built-in language features only."
+    );
+  }
   if (language === "PYTHON") {
     return (
       "You write a single Python tool for a sandboxed agent platform. " +

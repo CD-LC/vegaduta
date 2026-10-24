@@ -1,4 +1,5 @@
-# tool-sandbox - compiles, verifies and runs tenant-authored Java/Python tools.
+# tool-sandbox - compiles, verifies and runs tenant-authored Java/Python/
+# JavaScript/TypeScript tools.
 #
 # Why this is its own image rather than something core does in-process:
 #   * core's runtime image is a JRE, so it has no `javac` and no `python3`;
@@ -30,6 +31,11 @@ RUN set -eux; \
 # the module allowlist in app/policy.py is checked against the stdlib that
 # actually ships. (Previously this stage was the temurin jammy image with apt's
 # python3 - 3.10 - the only 3.10 service in the repo.)
+# The Node runtime for the javascript/typescript languages: the same pinned
+# 22.x tag every other Node-based service uses (services/workspace-runner,
+# services/mcp-stdio-runner).
+FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS node
+
 FROM python:3.14.7-slim-trixie@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -61,6 +67,13 @@ RUN set -eux; \
     command -v prlimit; \
     /opt/java/openjdk/bin/java -version; \
     /opt/java/openjdk/bin/javac -version
+
+# The Node runtime tenant JavaScript/TypeScript tools run under. Only the
+# binary is copied - there is no npm and no node_modules on purpose: tenant
+# tools are single-file programs with no package ecosystem (the identifier
+# policy denies `require`/`import` of anything at all).
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+RUN /usr/local/bin/node --version
 
 # Two identities, and the split is the point:
 #   `sandbox` (uid 5000) owns nothing and is unused today, reserved for running
@@ -101,6 +114,7 @@ RUN set -eux; \
 ENV TOOL_SANDBOX_JAVAC=/opt/java/openjdk/bin/javac \
     TOOL_SANDBOX_JAVA=/opt/java/openjdk/bin/java \
     TOOL_SANDBOX_PYTHON=/usr/local/bin/python3 \
+    TOOL_SANDBOX_NODE=/usr/local/bin/node \
     TOOL_SANDBOX_HARNESS_ROOT=/opt/tool-sandbox \
     TOOL_SANDBOX_WORK_ROOT=/var/sandbox/work \
     TOOL_SANDBOX_CACHE_ROOT=/var/sandbox/cache \
@@ -117,7 +131,7 @@ EXPOSE 8095
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 --start-period=20s \
     CMD /usr/local/bin/python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8095/health', timeout=3)"
 
-# Runs as root ONLY so it can drop to uid 5001 for tenant code - `setpriv`
+# trivy:ignore:DS-0002 Runs as root ONLY so it can drop to uid 5001 for tenant code - `setpriv`
 # needs CAP_SETUID/CAP_SETGID, and SIGKILLing the uid-5001 child on timeout
 # needs CAP_KILL. This is the documented exception to "every service runs
 # non-root": the compose entry and the helm chart drop every capability except

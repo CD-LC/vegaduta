@@ -93,7 +93,7 @@ now lives in `mcp-stdio-runner` (and its `-browser` variant), or in the opt-in
 | mcp-stdio-runner-browser | plug-and-play | the above plus the browser built-ins `puppeteer` and `playwright-vision` (pinned Chromium/Chrome baked in) | profile `browser` (`MCP_STDIO_RUNNER_VARIANT=-browser`) | `mcp-stdio-runner.browser=true` | same as the runner |
 | core-full image | alternative | stdio MCP servers inside the core container, for hosts that cannot run the runner (single-user only: no isolation) | `CORE_IMAGE_VARIANT=-full` + `CORE_MCP_PROFILE=,mcp` | `global.core.mcpToolchain=full` (API only) | `MCP_STDIO_SIDECAR_ENABLED=false` |
 | sidecar | plug-and-play | document ingestion, embeddings, rerank, STT/TTS, rendering | always in full; lite profile `rag` | `global.components.sidecar` (default on) | `SIDECAR_BASE_URL` |
-| tool-sandbox | plug-and-play | tenant-authored Java/Python tools | profile `sandbox` | `global.components.toolSandbox` + RuntimeClass | `TOOL_SANDBOX_ENABLED=true` |
+| tool-sandbox | plug-and-play | tenant-authored Java/Python/JavaScript/TypeScript tools (and agent-authored `create_custom_tool`) | profile `sandbox` (full), `tools` (personal/lite) | | `global.components.toolSandbox` + RuntimeClass | `TOOL_SANDBOX_ENABLED=true` |
 | code-intel | plug-and-play | code intelligence, repository indexing | profile `code-intel` | `global.components.codeIntel` | `CODE_INTEL_ENABLED=true` |
 | app-builder | plug-and-play | the App Builder (`/build`) | profile `builder` | `global.components.appBuilder` | `APP_BUILDER_CORE_SERVICE_TOKEN` |
 | voice-agent | plug-and-play | LiveKit voice calls with agents | profile `voice` | `global.components.voiceAgent` + `global.livekit.*` | `LIVEKIT_*` |
@@ -556,7 +556,7 @@ effective defaults are the ones in this table and now in the yml. Seeding keys a
 | Env | Default | Enables | Also set |
 |---|---|---|---|
 | `CODE_INTEL_ENABLED` | `false` | code intelligence (`services/code-intel`) | `CODE_INTEL_BASE_URL`, `CODE_INTEL_INTERNAL_TOKEN` |
-| `TOOL_SANDBOX_ENABLED` | `false` | custom Java/Python tools in `services/tool-sandbox` | `TOOL_SANDBOX_BASE_URL`, `TOOL_SANDBOX_INTERNAL_TOKEN` |
+| `TOOL_SANDBOX_ENABLED` | `false` (`true` automatically when the `tools` profile runs on personal/lite) | custom Java/Python/JavaScript/TypeScript tools in `services/tool-sandbox`, incl. agent-authored `create_custom_tool` drafts (enabled only after human approval) | `TOOL_SANDBOX_BASE_URL`, `TOOL_SANDBOX_INTERNAL_TOKEN` |
 | `MCP_STDIO_SIDECAR_ENABLED` | `false` | run stdio MCP servers (tenant-registered and the `mcp` profile's built-ins) in `services/mcp-stdio-runner` instead of inside core | `MCP_STDIO_SIDECAR_URL`, `MCP_STDIO_SIDECAR_SHARED_SECRET` |
 | `MCP_STDIO_PREFLIGHT_FAIL_FAST` | `true` | stop core at startup when a stdio launcher it needs is missing (`npx` for the `mcp` profile without the runner, `node` for the runner relay); `false` only logs a warning | |
 | `WORKFLOW_EVENTS_ENABLED` | `false` (`true` with the `workflow` profile) | workflow events on Kafka | `WORKFLOW_KAFKA_BOOTSTRAP_SERVERS` |
@@ -2002,7 +2002,7 @@ Android builds of a generated Capacitor app read `ANDROID_KEYSTORE_PATH`, `ANDRO
 | `TOOL_SANDBOX_DEFAULT_TIMEOUT_MS` / `TOOL_SANDBOX_DEFAULT_MEMORY_MB` | `5000` / `128` | defaults for a run that does not ask for more |
 | `TOOL_SANDBOX_COMPILE_TIMEOUT_MS` / `TOOL_SANDBOX_COMPILE_MEMORY_MB` | `30000` / `512` | separate, larger budget for compiling Java |
 | `TOOL_SANDBOX_MAX_CACHE_ENTRIES` | `64` | compiled artifacts kept per tenant, oldest evicted first |
-| `TOOL_SANDBOX_JAVAC` / `TOOL_SANDBOX_JAVA` / `TOOL_SANDBOX_PYTHON` | `javac` / `java` / `python3` | toolchain executables |
+| `TOOL_SANDBOX_JAVAC` / `TOOL_SANDBOX_JAVA` / `TOOL_SANDBOX_PYTHON` / `TOOL_SANDBOX_NODE` | `javac` / `java` / `python3` / `node` | toolchain executables (Node 22.x in the image; JavaScript/TypeScript tools run under `--experimental-permission` so fs/child_process/worker calls throw) |
 
 ### workspace-runner (the Assistant's build container, port 8090)
 
