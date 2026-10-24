@@ -1447,6 +1447,7 @@ class AppBuilderGenerateFilesResult(TypedDict, total=False):
     files: List[AppBuilderFileEdit]
     providerName: str
     model: str
+    summary: str
 
 
 class ApplyDtos_ApplyRequest(TypedDict, total=False):
