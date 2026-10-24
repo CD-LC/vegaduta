@@ -203,7 +203,7 @@ export function setScriptChecker(checker: ScriptChecker | null): void {
  * truncated block, a mangled `const`. */
 export function firstBrokenScript(html: string): string | null {
   if (!scriptChecker) return null;
-  for (const m of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)) {
+  for (const m of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script\s*>/gi)) {
     const attrs = m[1];
     const body = m[2];
     if (!body.trim()) continue;
@@ -230,8 +230,8 @@ export function looksLikeValidApp(html: string): boolean {
   const lower = html.toLowerCase();
   if (!lower.includes("<body") || !lower.includes("</body>")) return false;
   const count = (re: RegExp) => (lower.match(re) || []).length;
-  if (count(/<script[\s>]/g) !== count(/<\/script>/g)) return false;
-  if (count(/<style[\s>]/g) !== count(/<\/style>/g)) return false;
+  if (count(/<script[\s>]/g) !== count(/<\/script\s*>/g)) return false;
+  if (count(/<style[\s>]/g) !== count(/<\/style\s*>/g)) return false;
   if (/^\s*(?:<{3,}\s*SEARCH|={5,}|>{3,}\s*REPLACE)\s*$/im.test(html)) return false;
   if (firstBrokenScript(html) != null) return false;
   return true;
