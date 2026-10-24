@@ -1,16 +1,14 @@
 package com.agenticai.core.agents.tools.code;
 
 import com.agenticai.core.approval.ApprovalActionExecutor;
+import com.agenticai.core.approval.ApprovalExecutionResultWriter;
 import com.agenticai.core.approval.ApprovalRequest;
-import com.agenticai.core.approval.ApprovalRequestExecutionRecordedEvent;
-import com.agenticai.core.approval.ApprovalRequestRepository;
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 /**
@@ -47,16 +45,12 @@ public class CustomCodeToolEnableApprovalExecutor implements ApprovalActionExecu
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
     private final CustomCodeToolService service;
-    private final ApprovalRequestRepository requestRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final ApprovalExecutionResultWriter resultWriter;
 
     public CustomCodeToolEnableApprovalExecutor(
-            CustomCodeToolService service,
-            ApprovalRequestRepository requestRepository,
-            ApplicationEventPublisher eventPublisher) {
+            CustomCodeToolService service, ApprovalExecutionResultWriter resultWriter) {
         this.service = service;
-        this.requestRepository = requestRepository;
-        this.eventPublisher = eventPublisher;
+        this.resultWriter = resultWriter;
     }
 
     @Override
@@ -74,13 +68,11 @@ public class CustomCodeToolEnableApprovalExecutor implements ApprovalActionExecu
                 toolId,
                 request.getId());
         // Same contract RunCodeWorkspaceApprovalExecutor documents: execute() runs outside a
-        // transaction, so the outcome is persisted and announced here explicitly.
-        request.recordExecutionResult(
+        // transaction, so the outcome is persisted and announced here explicitly - through the
+        // approval area's writer, not its repository (feature areas keep their tables private).
+        resultWriter.record(
+                request,
                 "enabled tool '" + enabled.getToolName() + "' (" + toolId + ") for the workspace");
-        requestRepository.save(request);
-        eventPublisher.publishEvent(
-                new ApprovalRequestExecutionRecordedEvent(
-                        this, request.getId(), request.getRequestedBy()));
     }
 
     @Override
