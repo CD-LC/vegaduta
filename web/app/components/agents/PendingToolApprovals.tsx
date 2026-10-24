@@ -103,6 +103,7 @@ export default function PendingToolApprovals({
   agentId,
   sessionId,
   turnInFlight = false,
+  transcriptLen,
   className,
   autoCloseMs,
   onDecided,
@@ -112,6 +113,10 @@ export default function PendingToolApprovals({
   sessionId: string | null | undefined;
   /** True while a chat turn is streaming; the list is re-read when it ends. */
   turnInFlight?: boolean;
+  /** Length of the chat transcript. When it grows after a decision, the agent's
+   * reply IS the receipt - close any lingering "Done" cards immediately so the
+   * answer is the last thing on screen. */
+  transcriptLen?: number;
   className?: string;
   /** How long a clean "Done" card stays before closing itself (tests shorten it). */
   autoCloseMs?: number;
@@ -235,6 +240,25 @@ export default function PendingToolApprovals({
       }
     };
   }, [outcomes, autoCloseDelay, dismiss]);
+
+  // The continuation reply landing IS the receipt: the moment the transcript
+  // grows past what the decision saw, close every "Done" card at once rather
+  // than letting it trail the final answer for the auto-close window.
+  const transcriptLenAtLastDecideRef = useRef<number | null>(null);
+  useEffect(() => {
+    const decided = Object.values(outcomes).some((o) => o.kind === "done");
+    if (!decided || transcriptLen == null) return;
+    if (transcriptLenAtLastDecideRef.current == null) {
+      transcriptLenAtLastDecideRef.current = transcriptLen;
+      return;
+    }
+    if (transcriptLen > transcriptLenAtLastDecideRef.current) {
+      for (const [id, outcome] of Object.entries(outcomes)) {
+        if (outcome.kind === "done") dismiss(id);
+      }
+      transcriptLenAtLastDecideRef.current = null;
+    }
+  }, [transcriptLen, outcomes, dismiss]);
 
   // A turn just finished - the gate may have parked a call during it.
   // Falling edge only, so mounting (already covered above) does not read twice.

@@ -50,7 +50,7 @@ final class ToolSearchDeferral {
      */
     static final String DEFAULT_ALWAYS_ON =
             "remember_fact,remember_shared_fact,recall_related_facts,recall_shared_graph_facts,"
-                    + "list_knowledge_collections,search_knowledge_base,request_human,load_skill,read_skill_file,"
+                    + "list_knowledge_collections,search_knowledge_base,search_code,request_human,load_skill,read_skill_file,"
                     + "run_skill_script,propose_skill,improve_skill,ask_agent_*,delegate_to_specialist,run_subtasks,create_workflow,restore_tool_result,generate_document,"
                     + "local_shell,local_shell_read,workspace_list,workspace_read,workspace_search,workspace_write,workspace_edit,vegaduta_setup_guide,vegaduta_api_guide,local_desktop_*";
 
