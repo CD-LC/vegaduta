@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
@@ -76,6 +77,17 @@ class UniqueBeanNamesTest {
         fixtures =
                 new ClassFileImporter()
                         .importPackagesOf(BeanNameFixturesA.class, BeanNameFixturesB.class);
+    }
+
+    /**
+     * Releases the imported class graphs. Surefire runs all of this module's tests in one JVM, so
+     * the statics of a finished test class would otherwise stay on the heap for the rest of the
+     * run, and the other ArchUnit tests import the classpath again.
+     */
+    @AfterAll
+    static void releaseImports() {
+        production = null;
+        fixtures = null;
     }
 
     @Test

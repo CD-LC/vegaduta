@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -57,6 +58,16 @@ class RawHttpClientBanRulesTest {
                 new ClassFileImporter()
                         .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
                         .importPackages(ROOT);
+    }
+
+    /**
+     * Releases the imported class graphs. Surefire runs all of this module's tests in one JVM, so
+     * the statics of a finished test class would otherwise stay on the heap for the rest of the
+     * run, and the other ArchUnit tests import the classpath again.
+     */
+    @AfterAll
+    static void releaseImports() {
+        classes = null;
     }
 
     /** What raw form a call is, or null when it is allowed. */
