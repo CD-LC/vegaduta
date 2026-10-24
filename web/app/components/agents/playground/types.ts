@@ -133,6 +133,10 @@ export interface PlaygroundTurn {
    * renders as an inline error bubble with "Try again". Persisted with the transcript, so it survives a reload. */
   failed?: boolean;
   ref?: string;
+  /** The reply to a turn core continued after a tool approval was decided -
+   * badged "after approval" so the person can tell it is the agent's final
+   * answer, not another step. */
+  continuation?: boolean;
   watch?: boolean;
   onDevice?: boolean;
   edgeAttempt?: boolean;
