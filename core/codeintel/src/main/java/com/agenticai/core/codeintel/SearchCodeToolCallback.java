@@ -10,10 +10,9 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * {@code search_code} - semantic search over this tenant's indexed codebase.
- * Read-only; returns code passages with citations (path, line span, symbol).
- * Parallel in every respect to {@code KnowledgeSearchToolCallback}, just
- * pointed at code instead of uploaded documents.
+ * {@code search_code} - semantic search over this tenant's indexed codebase. Read-only; returns
+ * code passages with citations (path, line span, symbol). Parallel in every respect to {@code
+ * KnowledgeSearchToolCallback}, just pointed at code instead of uploaded documents.
  */
 public class SearchCodeToolCallback implements ToolCallback {
 
@@ -29,21 +28,17 @@ public class SearchCodeToolCallback implements ToolCallback {
     }
 
     /**
-     * Bug fix (2026-08-16, direct report - a "search all repos" fan-out let
-     * an agent scoped to one repo's task pull a hit from a completely
-     * unrelated repo it was never granted): EMPTY {@code allowedRepoIds}
-     * means UNRESTRICTED here - the opposite of {@code
-     * CreateCodeWorkspaceToolCallback}'s deny-all-when-empty convention, and
-     * deliberately so. This tier had NO scoping at all until this fix, so
-     * every existing agent's {@code allowedCodeIntelRepoIds} is empty today
-     * (nothing has ever populated it for a read-only use) - defaulting to
-     * deny-all would silently break code search for every agent on the
-     * platform the moment this ships. Matches {@code
-     * KnowledgeSearchToolCallback}'s {@code allowedCollectionIds} convention
-     * instead: empty = "no restriction has been configured," non-empty =
-     * enforce it. A tenant-admin who wants an agent locked to specific
-     * repos now has a real mechanism to do so (see {@code
-     * AgentToolProvider#resolveCodeIntelTools}).
+     * Bug fix (2026-08-16, direct report - a "search all repos" fan-out let an agent scoped to one
+     * repo's task pull a hit from a completely unrelated repo it was never granted): EMPTY {@code
+     * allowedRepoIds} means UNRESTRICTED here - the opposite of {@code
+     * CreateCodeWorkspaceToolCallback}'s deny-all-when-empty convention, and deliberately so. This
+     * tier had NO scoping at all until this fix, so every existing agent's {@code
+     * allowedCodeIntelRepoIds} is empty today (nothing has ever populated it for a read-only use) -
+     * defaulting to deny-all would silently break code search for every agent on the platform the
+     * moment this ships. Matches {@code KnowledgeSearchToolCallback}'s {@code allowedCollectionIds}
+     * convention instead: empty = "no restriction has been configured," non-empty = enforce it. A
+     * tenant-admin who wants an agent locked to specific repos now has a real mechanism to do so
+     * (see {@code AgentToolProvider#resolveCodeIntelTools}).
      */
     public SearchCodeToolCallback(CodeIntelClient client, Set<String> allowedRepoIds) {
         this.client = client;
@@ -53,13 +48,18 @@ public class SearchCodeToolCallback implements ToolCallback {
     @Override
     public ToolDefinition getToolDefinition() {
         return ToolDefinition.builder()
-            .name("search_code")
-            .description(
-                "Searches this tenant's indexed source code for snippets relevant to a query and "
-                    + "returns them with citations (file path, line span, enclosing symbol). Use this "
-                    + "for 'where is X handled / implemented / configured' questions about the codebase. "
-                    + "Omit repo_id to search across every indexed repository; pass repo_id to scope to one.")
-            .inputSchema("""
+                .name("search_code")
+                .description(
+                        "Searches this tenant's indexed source code for snippets relevant to a query and "
+                                + "returns them with citations (file path, line span, enclosing symbol). This is the "
+                                + "RIGHT tool whenever the user says 'repository', 'repo', 'codebase', 'source code' or "
+                                + "asks where code/files live - use it for 'where is X handled / implemented / "
+                                + "configured' questions about the codebase. Do NOT use it for the user's uploaded "
+                                + "documents (that is search_knowledge_base) or for workspace files on this machine "
+                                + "(workspace_search). Omit repo_id to search across every indexed repository; "
+                                + "pass repo_id to scope to one.")
+                .inputSchema(
+                        """
                 {
                     "type": "object",
                     "properties": {
@@ -75,7 +75,7 @@ public class SearchCodeToolCallback implements ToolCallback {
                     "required": ["query"]
                 }
                 """)
-            .build();
+                .build();
     }
 
     @Override
@@ -100,7 +100,9 @@ public class SearchCodeToolCallback implements ToolCallback {
             // fan-out into repos it was never granted.
             if (!allowedRepoIds.isEmpty()) {
                 return "{\"error\": \"This agent is restricted to specific repositories - pass repo_id "
-                    + "(one of: " + String.join(", ", allowedRepoIds) + ") instead of searching all repositories.\"}";
+                        + "(one of: "
+                        + String.join(", ", allowedRepoIds)
+                        + ") instead of searching all repositories.\"}";
             }
             return client.searchCode(query.toString(), null, DEFAULT_TOP_K);
         } catch (Exception e) {
