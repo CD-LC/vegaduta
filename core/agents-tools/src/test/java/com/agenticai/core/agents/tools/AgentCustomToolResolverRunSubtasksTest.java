@@ -63,7 +63,6 @@ class AgentCustomToolResolverRunSubtasksTest {
                         null,
                         null,
                         null,
-                        null,
                         counter ->
                                 new RunBudget(
                                         BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.ONE, 1000));

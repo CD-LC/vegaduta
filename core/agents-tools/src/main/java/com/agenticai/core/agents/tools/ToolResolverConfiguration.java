@@ -400,9 +400,9 @@ class ToolResolverConfiguration {
                         skillService,
                         skillSandboxClient,
                         skillSandboxProperties,
-                        approvalGateService,
                         turnRunBudgets::forTurn);
         resolver.setResearchEnabled(researchEnabled);
+        resolver.setApprovalGateService(approvalGateService);
         resolver.setRunSubtasksEnabled(runSubtasksEnabled);
         resolver.setCollaboratorToolFactory(collaboratorToolFactory);
         options.applyTo(resolver);

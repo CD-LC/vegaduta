@@ -3,17 +3,18 @@ package com.agenticai.core.agents.tools.code;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.agenticai.core.approval.ApprovalExecutionResultWriter;
 import com.agenticai.core.approval.ApprovalRequest;
-import com.agenticai.core.approval.ApprovalRequestRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * The approval-side half of {@code create_custom_tool}: this executor is the ONLY path that turns a
@@ -23,16 +24,14 @@ import org.springframework.context.ApplicationEventPublisher;
 class CustomCodeToolEnableApprovalExecutorTest {
 
     private CustomCodeToolService service;
-    private ApprovalRequestRepository requestRepository;
+    private ApprovalExecutionResultWriter resultWriter;
     private CustomCodeToolEnableApprovalExecutor executor;
 
     @BeforeEach
     void setUp() {
         service = mock(CustomCodeToolService.class);
-        requestRepository = mock(ApprovalRequestRepository.class);
-        executor =
-                new CustomCodeToolEnableApprovalExecutor(
-                        service, requestRepository, mock(ApplicationEventPublisher.class));
+        resultWriter = mock(ApprovalExecutionResultWriter.class);
+        executor = new CustomCodeToolEnableApprovalExecutor(service, resultWriter);
     }
 
     private static ApprovalRequest requestOf(String payloadJson) {
@@ -75,8 +74,7 @@ class CustomCodeToolEnableApprovalExecutorTest {
         executor.execute(request);
 
         verify(service).setEnabled(toolId, true);
-        verify(requestRepository).save(request);
-        assertThat(request.getExecutionResult()).contains("csv_to_markdown");
+        verify(resultWriter).record(eq(request), argThat(r -> r.contains("csv_to_markdown")));
     }
 
     @Test

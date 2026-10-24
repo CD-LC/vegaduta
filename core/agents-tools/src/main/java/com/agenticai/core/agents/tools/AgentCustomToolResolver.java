@@ -107,10 +107,6 @@ final class AgentCustomToolResolver {
     private final SkillPromptBlock.SessionGate skillGate = new SkillPromptBlock.SessionGate();
     private final ObjectProvider<ToolSandboxClient> skillSandboxClient;
     private final ObjectProvider<ToolSandboxProperties> skillSandboxProperties;
-    // ObjectProvider - core/approval's HumanApprovalGateService may be absent in slim contexts;
-    // create_custom_tool then creates the draft but leaves it disabled rather than crashing.
-    private final ObjectProvider<com.agenticai.core.approval.HumanApprovalGateService>
-            approvalGateService;
 
     AgentCustomToolResolver(
             AgentToolGuard toolGuard,
@@ -124,8 +120,6 @@ final class AgentCustomToolResolver {
             SkillService skillService,
             ObjectProvider<ToolSandboxClient> skillSandboxClient,
             ObjectProvider<ToolSandboxProperties> skillSandboxProperties,
-            ObjectProvider<com.agenticai.core.approval.HumanApprovalGateService>
-                    approvalGateService,
             Function<AtomicInteger, RunBudget> runBudgetFactory) {
         this.runBudgetFactory = runBudgetFactory;
         this.toolGuard = toolGuard;
@@ -139,7 +133,6 @@ final class AgentCustomToolResolver {
         this.skillService = skillService;
         this.skillSandboxClient = skillSandboxClient;
         this.skillSandboxProperties = skillSandboxProperties;
-        this.approvalGateService = approvalGateService;
     }
 
     // Swarm goal verifier (app.swarm.verifier.*): setter-injected by AgentToolProvider; DISABLED =
@@ -165,6 +158,18 @@ final class AgentCustomToolResolver {
                         ? com.agenticai.core.agents.collab.SwarmVerifierConfig.DISABLED
                         : config;
         this.swarmVerifierMeters = meters;
+    }
+
+    // ObjectProvider - core/approval's HumanApprovalGateService may be absent in slim contexts;
+    // create_custom_tool then creates the draft but leaves it disabled rather than crashing.
+    // Setter-injected like the other optional collaborators so the constructor stays under the
+    // architecture rule's parameter cap.
+    private volatile ObjectProvider<com.agenticai.core.approval.HumanApprovalGateService>
+            approvalGateService;
+
+    void setApprovalGateService(
+            ObjectProvider<com.agenticai.core.approval.HumanApprovalGateService> provider) {
+        this.approvalGateService = provider;
     }
 
     private static String gateKey(UUID agentId, String sessionId) {
