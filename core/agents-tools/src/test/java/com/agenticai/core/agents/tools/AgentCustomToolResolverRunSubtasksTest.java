@@ -44,7 +44,8 @@ class AgentCustomToolResolverRunSubtasksTest {
         when(guard.withRunBudget(any(), any(), anyBoolean())).thenAnswer(inv -> inv.getArgument(0));
         when(agentService.getCollaboratorAgentIds(agentId)).thenReturn(Set.of());
         ToolCallback subtasks = namedTool("run_subtasks");
-        when(factory.runSubtasks(any(), eq(agentId), any(), any(), any(), any())).thenReturn(subtasks);
+        when(factory.runSubtasks(any(), eq(agentId), any(), any(), any(), any()))
+                .thenReturn(subtasks);
         ObjectProvider<AgentChatService> chat = mock(ObjectProvider.class);
         when(chat.getIfAvailable()).thenReturn(chatService);
         ObjectProvider<CollaboratorToolFactory> factories = mock(ObjectProvider.class);

@@ -17,12 +17,13 @@ import hashlib
 import json
 import logging
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from . import classfile, policy, proc, pyvalidate
+from . import classfile, jsvalidate, policy, proc, pyvalidate
 from .isolation import RunIdentity, RunIsolation, Workdir
 from .javacache import JavaArtifactCache
 from .outcome import ExecutionOutcome, ValidationOutcome, interpret
@@ -34,7 +35,12 @@ log = logging.getLogger(__name__)
 
 JAVA = "java"
 PYTHON = "python"
-LANGUAGES = (JAVA, PYTHON)
+JAVASCRIPT = "javascript"
+TYPESCRIPT = "typescript"
+LANGUAGES = (JAVA, PYTHON, JAVASCRIPT, TYPESCRIPT)
+
+#: Languages whose source runs under the Node runtime (`.mjs` / `.mts`).
+JS_LANGS = (JAVASCRIPT, TYPESCRIPT)
 
 
 class Runner:
@@ -55,6 +61,16 @@ class Runner:
 
         if language == PYTHON:
             violations = pyvalidate.validate(source)
+            return ValidationOutcome(
+                valid=not violations,
+                source_sha256=digest,
+                errors=[{"line": v.line, "message": v.message} for v in violations],
+            )
+
+        if language in JS_LANGS:
+            violations = jsvalidate.validate(source)
+            with self._workdir(tenant) as (work, ident):
+                violations.extend(self._check_js_syntax(language, source, work, ident))
             return ValidationOutcome(
                 valid=not violations,
                 source_sha256=digest,
@@ -95,11 +111,30 @@ class Runner:
             with self._workdir(tenant) as (work, ident):
                 if language == JAVA:
                     return self._execute_java(
-                        tenant, source, input_text, work, timeout_ms, memory_mb, started,
-                        secrets, ident=ident)
+                        tenant,
+                        source,
+                        input_text,
+                        work,
+                        timeout_ms,
+                        memory_mb,
+                        started,
+                        secrets,
+                        ident=ident,
+                    )
+                if language in JS_LANGS:
+                    return self._execute_js(
+                        language,
+                        source,
+                        input_text,
+                        work,
+                        timeout_ms,
+                        memory_mb,
+                        started,
+                        ident=ident,
+                    )
                 return self._execute_python(
-                    source, input_text, work, timeout_ms, memory_mb, started, secrets,
-                    ident=ident)
+                    source, input_text, work, timeout_ms, memory_mb, started, secrets, ident=ident
+                )
         except proc.UidPoolExhausted as exc:
             log.error("refusing to execute tenant code: %s", exc)
             return ExecutionOutcome(
@@ -114,7 +149,7 @@ class Runner:
             return ExecutionOutcome(
                 False,
                 error="The sandbox is misconfigured and refused to run this tool. "
-                      "An administrator needs to check the tool-sandbox service logs.",
+                "An administrator needs to check the tool-sandbox service logs.",
                 error_type="INTERNAL",
                 duration_ms=_elapsed_ms(started),
             )
@@ -127,9 +162,7 @@ class Runner:
         errors: list[dict] = field(default_factory=list)
         warnings: list[str] = field(default_factory=list)
 
-    def _compile_java(
-        self, source: str, work: Path, ident: RunIdentity
-    ) -> Runner._CompileResult:
+    def _compile_java(self, source: str, work: Path, ident: RunIdentity) -> Runner._CompileResult:
         src_dir = work / "src"
         classes_dir = work / "classes"
         src_dir.mkdir(parents=True, exist_ok=True)
@@ -146,11 +179,14 @@ class Runner:
                 "-proc:none",
                 "-nowarn",
                 "-implicit:none",
-                "-encoding", "UTF-8",
+                "-encoding",
+                "UTF-8",
                 # keeps line numbers, so a thrown exception can point at the tool
                 "-g:lines,source",
-                "-d", str(classes_dir),
-                "-cp", str(self.settings.vega_api_jar),
+                "-d",
+                str(classes_dir),
+                "-cp",
+                str(self.settings.vega_api_jar),
                 str(source_file),
             ],
             cwd=work,
@@ -164,29 +200,41 @@ class Runner:
         )
 
         if result.timed_out:
-            return Runner._CompileResult(errors=[{
-                "line": None,
-                "message": "Compilation timed out. Simplify the program and try again.",
-            }])
+            return Runner._CompileResult(
+                errors=[
+                    {
+                        "line": None,
+                        "message": "Compilation timed out. Simplify the program and try again.",
+                    }
+                ]
+            )
         if result.exit_code != 0:
             return Runner._CompileResult(errors=_parse_javac_errors(result.stderr or result.stdout))
 
         class_files = {p.name: p.read_bytes() for p in sorted(classes_dir.rglob("*.class"))}
         if not class_files:
-            return Runner._CompileResult(errors=[{
-                "line": None,
-                "message": "Compilation produced no classes. " + policy.JAVA_ENTRYPOINT_HINT,
-            }])
+            return Runner._CompileResult(
+                errors=[
+                    {
+                        "line": None,
+                        "message": "Compilation produced no classes. "
+                        + policy.JAVA_ENTRYPOINT_HINT,
+                    }
+                ]
+            )
         if "Tool.class" not in class_files:
-            return Runner._CompileResult(errors=[{
-                "line": None,
-                "message": "No `Tool` class was produced. " + policy.JAVA_ENTRYPOINT_HINT,
-            }])
+            return Runner._CompileResult(
+                errors=[
+                    {
+                        "line": None,
+                        "message": "No `Tool` class was produced. " + policy.JAVA_ENTRYPOINT_HINT,
+                    }
+                ]
+            )
 
         violations = classfile.verify(class_files)
         if violations:
-            return Runner._CompileResult(
-                errors=[{"line": None, "message": v} for v in violations])
+            return Runner._CompileResult(errors=[{"line": None, "message": v} for v in violations])
 
         return Runner._CompileResult(classes_dir=classes_dir)
 
@@ -222,22 +270,25 @@ class Runner:
         result_file.write_text("", encoding="utf-8")
         self._make_writable(result_file, ident)
 
-        classpath = os.pathsep.join([
-            str(self.settings.harness_jar),
-            str(self.settings.vega_api_jar),
-            str(classes_dir),
-        ])
+        classpath = os.pathsep.join(
+            [
+                str(self.settings.harness_jar),
+                str(self.settings.vega_api_jar),
+                str(classes_dir),
+            ]
+        )
         run = proc.run(
             [
                 self.settings.java,
                 # Only java.base is observable: no java.net.http, no java.sql,
                 # no jdk.* internals, nothing the policy would have to deny
                 # one class at a time.
-                "--limit-modules", "java.base",
-                "-XX:-UsePerfData",            # no shared-memory perf file on disk
-                "-XX:+DisableAttachMechanism", # no external process can attach to this JVM
+                "--limit-modules",
+                "java.base",
+                "-XX:-UsePerfData",  # no shared-memory perf file on disk
+                "-XX:+DisableAttachMechanism",  # no external process can attach to this JVM
                 "-XX:ActiveProcessorCount=1",  # keep GC/JIT thread counts inside RLIMIT_NPROC
-                "-XX:TieredStopAtLevel=1",     # a tool runs for milliseconds; C2 never pays off
+                "-XX:TieredStopAtLevel=1",  # a tool runs for milliseconds; C2 never pays off
                 f"-Xmx{memory_mb}m",
                 "-XX:MaxMetaspaceSize=96m",
                 "-Xss1m",
@@ -245,7 +296,8 @@ class Runner:
                 # Keep any JVM-internal temp file inside the per-run directory
                 # that is destroyed afterwards, rather than in a shared /tmp.
                 f"-Djava.io.tmpdir={work}",
-                "-cp", classpath,
+                "-cp",
+                classpath,
                 "vega.internal.Harness",
                 str(input_file),
                 str(result_file),
@@ -304,6 +356,182 @@ class Runner:
         )
         return self._interpret(run, result_file, started)
 
+    # ------------------------------------------------------- JavaScript path
+
+    #: Trusted footer appended to tenant source AFTER jsvalidate has seen it.
+    #: Reads the tool input on stdin, calls `run`, and writes the outcome
+    #: envelope to result.json - the same contract py_harness.py fulfils.
+    #: `process`/`import` appear here and only here; the identifier policy
+    #: never sees this text.
+    _JS_FOOTER = (
+        "\n"
+        'import { writeFileSync as __sandboxWrite } from "node:fs";\n'
+        "const __sandboxReport = (envelope) => __sandboxWrite(\n"
+        '    new URL("./result.json", import.meta.url), JSON.stringify(envelope));\n'
+        "(async () => {\n"
+        '    let __data = "";\n'
+        "    for await (const __chunk of process.stdin) __data += __chunk;\n"
+        '    const __input = JSON.parse(__data || "null");\n'
+        "    const __result = await Promise.resolve(run(__input));\n"
+        "    __sandboxReport({ ok: true, result: __result === undefined ? null : __result });\n"
+        "})().catch((err) => {\n"
+        "    __sandboxReport({ ok: false, error: String((err && err.stack) || err),\n"
+        '        errorType: "RUNTIME" });\n'
+        "    process.exit(2);\n"
+        "});\n"
+    )
+
+    def _js_suffix(self, language: str) -> str:
+        return ".mts" if language == TYPESCRIPT else ".mjs"
+
+    def _js_argv(self, tool_file: Path, work: Path, memory_mb: int) -> list[str]:
+        # Node's permission model: every fs write anywhere except the result
+        # file, every fs read outside the run's own directory, and all
+        # child_process/worker/addons/wasi use throws ERR_ACCESS_DENIED. The
+        # entry file itself is loaded by Node's own bootstrap, so it needs no
+        # grant; the read grant exists because `.mts` type-stripping resolves
+        # the file a second time.
+        return [
+            self.settings.node,
+            self._node_permission_flag(),
+            "--experimental-strip-types",
+            "--allow-fs-read=" + str(work),
+            "--allow-fs-write=" + str(work / "result.json"),
+            "--no-warnings",
+            # The heap cap that actually bounds committed memory (V8's virtual
+            # reservation is untouched - RLIMIT_AS kills node at startup, so the
+            # run limit leaves address space unbounded; see _execute_js).
+            f"--max-old-space-size={max(16, memory_mb)}",
+            str(tool_file),
+        ]
+
+    # Node renamed the flag: --experimental-permission through 22.x (the pinned
+    # runtime), --permission since 23.5. Probe once so the same code runs on
+    # either - the sandbox image pins 22.x but tests and dev machines do not.
+    _node_perm_flag_cache: str | None = None
+
+    def _node_permission_flag(self) -> str:
+        if self._node_perm_flag_cache is None:
+            probe = proc.run(
+                [self.settings.node, "--experimental-permission", "-e", "1"],
+                cwd=self.settings.work_root,
+                limits=proc.Limits(wall_ms=10_000, cpu_seconds=5, max_output_bytes=4096),
+                require_privilege_drop=False,
+            )
+            self._node_perm_flag_cache = (
+                "--experimental-permission"
+                if probe.exit_code == 0 and "bad option" not in (probe.stderr or "")
+                else "--permission"
+            )
+        return self._node_perm_flag_cache
+
+    def _check_js_syntax(
+        self, language: str, source: str, work: Path, ident: RunIdentity
+    ) -> list[jsvalidate.Violation]:
+        """Parse the source without executing it - the syntax half of JS
+        validation (the identifier policy half is jsvalidate.validate, run by
+        the caller). Uses ``node:module.stripTypeScriptTypes`` because ``node
+        --check`` cannot parse TypeScript annotations on this runtime, while
+        the stripper parses (and thereby syntax-checks) both plain JS and TS.
+        """
+        tool_file = work / ("check" + self._js_suffix(language))
+        tool_file.write_text(source, encoding="utf-8")
+        result = proc.run(
+            [
+                self.settings.node,
+                "--experimental-strip-types",
+                "-e",
+                "require('node:module').stripTypeScriptTypes("
+                "require('node:fs').readFileSync(process.argv[1], 'utf8'),"
+                " { mode: 'strip' });",
+                str(tool_file),
+            ],
+            cwd=work,
+            limits=proc.Limits(
+                wall_ms=10_000,
+                cpu_seconds=5,
+                max_output_bytes=self.settings.max_output_bytes,
+            ),
+            stdin_data=b"",
+            run_uid=ident.uid,
+            run_gid=ident.gid,
+            require_privilege_drop=self.settings.require_privilege_drop,
+            enable_seccomp=self.settings.enable_seccomp,
+        )
+        if result.timed_out:
+            return [jsvalidate.Violation(None, "The syntax check timed out.")]
+        if result.exit_code == 0:
+            return []
+        # The useful line is the `*Error: <message>` one; the lines around it
+        # are the source echo, a caret and stack frames.
+        errors: list[jsvalidate.Violation] = []
+        for line in (result.stderr or "").splitlines():
+            m = re.search(r"(SyntaxError|TypeError|ReferenceError)\s*[^:]*:\s*(.+)", line)
+            if m:
+                errors.append(jsvalidate.Violation(None, f"Syntax error: {m.group(2).strip()}"))
+                break
+        if not errors:
+            first = next(
+                (
+                    line.strip()
+                    for line in (result.stderr or "").splitlines()
+                    if line.strip() and "Warning" not in line
+                ),
+                "the program did not pass Node's syntax check",
+            )
+            errors.append(jsvalidate.Violation(None, f"Syntax error: {first}"))
+        return errors
+
+    def _execute_js(
+        self,
+        language: str,
+        source: str,
+        input_text: str,
+        work: Path,
+        timeout_ms: int,
+        memory_mb: int,
+        started: float,
+        *,
+        ident: RunIdentity,
+    ) -> ExecutionOutcome:
+        violations = jsvalidate.validate(source) + self._check_js_syntax(
+            language, source, work, ident
+        )
+        if violations:
+            return ExecutionOutcome(
+                False,
+                error="; ".join(v.message for v in violations),
+                error_type="VALIDATION",
+                duration_ms=_elapsed_ms(started),
+            )
+
+        tool_file = work / ("tool" + self._js_suffix(language))
+        result_file = work / "result.json"
+        # The footer is trusted code - appended here, AFTER validation, never
+        # part of what jsvalidate scanned. Input travels on stdin (the run has
+        # no fs grant it could read an input file with).
+        tool_file.write_text(source + self._JS_FOOTER, encoding="utf-8")
+        result_file.write_text("", encoding="utf-8")
+        self._make_writable(result_file, ident)
+
+        run = proc.run(
+            self._js_argv(tool_file, work, memory_mb),
+            cwd=work,
+            # V8 reserves far more virtual address space than it commits (the code
+            # range alone is ~1 GB), exactly like the JVM's compressed class
+            # space, so an RLIMIT_AS near the heap size makes node fail at
+            # startup instead of bounding it. --max-old-space-size caps what is
+            # actually committed; the container cgroup bounds the rest.
+            limits=self._run_limits(timeout_ms, address_space_mb=None),
+            stdin_data=input_text.encode("utf-8"),
+            # No secrets: JS tools cannot declare vault secrets yet - the JS
+            # harness has no narrow-API equivalent of vega.Secrets, and the
+            # whole child environment would be reachable from process.env if
+            # the identifier policy were ever outsmarted.
+            **self._isolation_kwargs(ident, None),
+        )
+        return self._interpret(run, result_file, started)
+
     # -------------------------------------------------------------- shared
 
     def _run_limits(self, timeout_ms: int, address_space_mb: int | None) -> proc.Limits:
@@ -340,7 +568,7 @@ class Runner:
 
     def _check_source_envelope(self, language: str, source: str) -> str | None:
         if language not in LANGUAGES:
-            return f"Unsupported language '{language}'. Choose java or python."
+            return f"Unsupported language '{language}'. Choose {' or '.join(LANGUAGES)}."
         if not source or not source.strip():
             return "The program is empty."
         if len(source.encode("utf-8")) > self.settings.max_source_bytes:
@@ -387,4 +615,3 @@ def _parse_javac_errors(text: str) -> list[dict]:
         cleaned = (text or "").strip()
         errors.append({"line": None, "message": cleaned[:2000] or "Compilation failed."})
     return errors
-

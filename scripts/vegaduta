@@ -443,7 +443,15 @@ resolve_profiles() {
     [ "${BROWSER:-1}" = 1 ] && add_profile browser
   fi
   case " $PROFILES " in *" code-intel "*) export CODE_INTEL_ENABLED=true ;; esac
+  # Custom code tools (create_custom_tool) run in tool-sandbox. Full: its own `sandbox`
+  # profile. Single-box tiers: it rides `tools` - "agents can write and run a tool" is part
+  # of that surface, so --no-tools declines it too. Not for a host JVM (--native-core): the
+  # sandbox lives on the internal sandbox-net, unreachable from the host - the same carve-out
+  # tools_args makes for the MCP runner.
   case " $PROFILES " in *" sandbox "*) export TOOL_SANDBOX_ENABLED=true ;; esac
+  if [ "$TIER" != full ] && [ "$NATIVE_CORE" != 1 ]; then
+    case " $PROFILES " in *" tools "*) export TOOL_SANDBOX_ENABLED=true ;; esac
+  fi
   # mcp-stdio-runner (sandbox/tools/browser): STDIO MCP servers - tenant ones
   # and the `mcp` profile's built-ins - run there, not in the slim core image.
   case " $PROFILES " in

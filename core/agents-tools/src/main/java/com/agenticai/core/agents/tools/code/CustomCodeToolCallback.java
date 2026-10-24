@@ -91,7 +91,13 @@ public class CustomCodeToolCallback implements ToolCallback {
             sb.append(" Returns: ").append(tool.outputDescription());
         }
         sb.append(" (User-created tool - a ")
-                .append(tool.language() == CustomCodeToolLanguage.PYTHON ? "Python" : "Java")
+                .append(
+                        switch (tool.language()) {
+                            case PYTHON -> "Python";
+                            case JAVA -> "Java";
+                            case JAVASCRIPT -> "JavaScript";
+                            case TYPESCRIPT -> "TypeScript";
+                        })
                 .append(
                         " program written by this workspace, run in an isolated sandbox with hard time and memory limits.)");
         return sb.toString();

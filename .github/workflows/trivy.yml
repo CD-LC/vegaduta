@@ -52,6 +52,7 @@ jobs:
           scan-type: fs
           scanners: vuln,misconfig
           trivy-config: trivy.yaml
+          trivyignores: .trivyignore.yaml
           format: sarif
           output: trivy.sarif
 
@@ -63,6 +64,7 @@ jobs:
           scan-type: fs
           scanners: vuln,misconfig
           trivy-config: trivy.yaml
+          trivyignores: .trivyignore.yaml
           format: json
           output: trivy.json
 

@@ -2504,7 +2504,7 @@ export interface CreateUserRequest {
   initialPermissions?: string[];
 }
 
-export type CustomCodeToolLanguage = "JAVA" | "PYTHON";
+export type CustomCodeToolLanguage = "JAVA" | "PYTHON" | "JAVASCRIPT" | "TYPESCRIPT";
 
 export interface CustomCodeToolRequest {
   toolName?: string;
