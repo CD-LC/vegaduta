@@ -87,10 +87,15 @@
     <cyclonedx-maven-plugin.version>2.9.3</cyclonedx-maven-plugin.version>
     <japicmp-maven-plugin.version>0.26.5</japicmp-maven-plugin.version>
     <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
-    <spotless.version>2.44.4</spotless.version>
-    <!-- Same formatter version as core/. google-java-format does not run on JDK 17.0.20+ (a javac
-         internal it calls changed), so run spotless with a JDK 21: see .github/workflows/ci.yml. -->
-    <google-java-format.version>1.25.2</google-java-format.version>
+    <spotless.version>3.10.4</spotless.version>
+    <!-- google-java-format does not run on JDK 17.0.20+ (a javac internal it calls
+         changed), and Spotless 3.x enforces a minimum google-java-format per JVM
+         (JVM 25+ needs >= 1.30.0). 1.30.x-1.35.x still crash on JDK 27 javac;
+         1.36.1 runs on JDK 21 through 27 and formats this codebase identically
+         to 1.25.2 (whole-tree spotless:check stays clean). core/ keeps 1.25.2
+         because its gate is ratcheted to changed files and 1.36.x reflows
+         some javadoc differently. -->
+    <google-java-format.version>1.36.1</google-java-format.version>
     <jacoco.version>0.8.15</jacoco.version>
 
     <!-- japicmp compares against the last released version of each artifact. Until 0.1.0 is on
