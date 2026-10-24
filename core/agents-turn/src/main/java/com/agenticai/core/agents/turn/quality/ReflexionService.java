@@ -2,10 +2,13 @@ package com.agenticai.core.agents.turn.quality;
 
 import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.chat.LlmMetricsAdvisor;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -34,28 +37,17 @@ public class ReflexionService {
 
     private static final Logger log = LoggerFactory.getLogger(ReflexionService.class);
 
-    private static final String CRITIQUE_SYSTEM_PROMPT = """
-        You are an independent reviewer checking whether an AI assistant's answer actually solves
-        what the user asked - not just whether it's well-written or internally consistent, but
-        whether it is COMPLETE and ON-TARGET for the specific request. When tool-call evidence
-        and/or recent earlier turns from this session are provided, also check that the answer
-        accurately reflects what the tools actually returned and doesn't contradict anything
-        already said earlier in this session.
+    /** Registry keys of the two prompts (default text: {@code prompts/en/quality.reflexion.*.md}). */
+    static final String CRITIQUE_KEY = "quality.reflexion.critique";
+    static final String REVISE_KEY = "quality.reflexion.revise";
 
-        Respond with EXACTLY one of:
-        SOLVED
-        INCOMPLETE: <one short sentence on what's missing or off-target>
+    private final PromptSlot prompts = new PromptSlot();
 
-        No other text.
-        """;
-
-    private static final String REFLECT_AND_REVISE_SYSTEM_PROMPT = """
-        You previously answered a user's request. An independent reviewer found the answer
-        incomplete or off-target. Reflect on what was missed, then produce a complete, corrected
-        final answer using only the information already available to you (do not claim to look
-        anything up again). Output ONLY the corrected answer - no preamble, no meta-commentary
-        about the revision itself.
-        """;
+    /** The prompt registry, so a tenant or agent override of the keys above applies; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     /**
      * Returns {@code candidateAnswer} unchanged unless the critique finds a genuine gap AND the
@@ -100,7 +92,7 @@ public class ReflexionService {
         }
         try {
             String verdict = chatClient.prompt()
-                .system(CRITIQUE_SYSTEM_PROMPT)
+                .system(prompts.text(CRITIQUE_KEY, agentId))
                 .user(groundedPrompt(
                     "User's request: " + userMessage + "\n\nAnswer given: " + candidateAnswer,
                     toolEvidence, recentHistory))
@@ -120,7 +112,7 @@ public class ReflexionService {
             log.info("Reflexion critique found a gap - revising once (bounded, no re-critique): {}", gap);
 
             String revised = chatClient.prompt()
-                .system(REFLECT_AND_REVISE_SYSTEM_PROMPT)
+                .system(prompts.text(REVISE_KEY, agentId))
                 .user(groundedPrompt(
                     "Original request: " + userMessage + "\n\nPrevious answer: " + candidateAnswer
                         + "\n\nGap found: " + gap,

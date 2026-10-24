@@ -521,8 +521,24 @@ public class PlatformHostedLlmProvider {
         this.keepAlive = keepAlive;
     }
 
-    /** Models at or below this many billions of parameters run in small-model mode by default. */
+    /**
+     * Code default of {@code app.providers.small-model-max-billions}: models at or below this many billions of
+     * parameters run in small-model mode unless the row says otherwise.
+     */
     public static final double SMALL_MODEL_MAX_BILLIONS = 8.0;
+
+    /** The configured limit (SmallModelThresholdConfiguration sets it at start-up); the code default until then. */
+    private static volatile double smallModelMaxBillions = SMALL_MODEL_MAX_BILLIONS;
+
+    /** Sets the size limit of small-model mode ({@code app.providers.small-model-max-billions}); negative = never by size. */
+    public static void useSmallModelMaxBillions(double maxBillions) {
+        smallModelMaxBillions = maxBillions;
+    }
+
+    /** The size limit of small-model mode in effect. */
+    public static double smallModelMaxBillions() {
+        return smallModelMaxBillions;
+    }
 
     /**
      * V501 - whether turns on this row run in small-model mode (at most six tools, compact
@@ -535,7 +551,7 @@ public class PlatformHostedLlmProvider {
             return smallModel;
         }
         Double billions = effectiveParameterBillions();
-        return billions != null && billions <= SMALL_MODEL_MAX_BILLIONS;
+        return billions != null && billions <= smallModelMaxBillions;
     }
 
     /**

@@ -74,7 +74,7 @@ class GuardedToolCallbackConfirmationSummaryTest {
         ApprovalRequest pending = mock(ApprovalRequest.class);
         when(pending.getId()).thenReturn(UUID.randomUUID());
         when(approvalGateService.recordToolCallForApproval(
-            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any()))
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any()))
             .thenReturn(pending);
     }
 
@@ -94,7 +94,7 @@ class GuardedToolCallbackConfirmationSummaryTest {
 
     private void verifySummary(String expected) {
         verify(approvalGateService).recordToolCallForApproval(
-            eq(ACTION_TYPE), eq(TOOL_NAME), eq(expected), eq(INPUT), anyString(), eq(AGENT_ID), eq("s1"), any());
+            eq(ACTION_TYPE), eq(TOOL_NAME), eq(expected), eq(INPUT), anyString(), eq(AGENT_ID), eq("s1"), any(), any());
     }
 
     @Test

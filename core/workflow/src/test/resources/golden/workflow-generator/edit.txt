@@ -1,0 +1,4 @@
+
+
+CURRENT GRAPH - the instruction above is a CHANGE REQUEST for this existing workflow, not a description of a new one. Modify this graph: keep every node and edge the request does not concern exactly as it is (same "id", "type", "position", "label" and "config"), reuse existing ids, give new nodes and edges new unique ids, and return the COMPLETE updated graph in the usual JSON shape (not a diff):
+<<GRAPH>>

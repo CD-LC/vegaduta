@@ -66,8 +66,10 @@ public class ChannelSendPortImpl implements ChannelSendPort {
                     normalized, "Failed to serialize " + normalized + " send payload", e);
         }
 
+        // evaluateInTurn: a send an agent asked for is recorded with the conversation it came from, so the
+        // human's decision (sent, failed, or declined) is put back into it and the agent carries on.
         ApprovalEvaluation evaluation =
-                gateService.evaluate(actionType, summary, payloadJson, requestedBy);
+                gateService.evaluateInTurn(actionType, "channel_send_message", summary, payloadJson, requestedBy);
         return new ChannelSendResult(
                 evaluation.approved(),
                 evaluation.pendingRequestId() == null

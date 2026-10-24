@@ -8,8 +8,12 @@ from the workspace it came from.
 
 Ready-made bundles live in [`examples/agent-bundles/`](https://github.com/CD-LC/vegaduta/tree/main/examples/agent-bundles):
 a personal assistant, a daily briefing, a research analyst and a meeting-notes
-tool. They use only tools that need no account, so they work on a free local
-model (see [local models](local-models.md)).
+tool. They use only tools that need no account, so they run on a free local
+model (see [local models](local-models.md)). They are `SUPERVISED`, which means
+every tool call waits for a person to approve it in the approvals inbox before it
+runs (the agent then continues the task by itself); a small local model that calls
+many tools therefore produces many approval requests. Change the agent to
+`SEMI_AUTONOMOUS` in the agent editor if that is too many.
 
 ## In the console
 
@@ -29,6 +33,16 @@ A bundle comes from someone else, so the server treats it as untrusted:
 
 - the format must be `vegaduta.agent-bundle/1` and the design at most 64,000
   characters, with at most 100 tools;
+- every setting that takes one of a fixed set of values must use one of them,
+  or be left out (then the default applies). An unknown value is refused with
+  a message naming the field, the value and the allowed values, for example
+  `Unknown value 'BALANCED' for reasoningDepth (allowed: FAST, CAREFUL,
+  RIGOROUS, PLANNED)`. The fields are `reasoningDepth`, `autonomyTier`,
+  `tuningMode`, `experienceMode`, `providerName`, `economyProviderName`,
+  `fallbackProviderName`, `voiceModelProvider` and `videoModelProvider`;
+  `reasoningDepth` is how much checking a turn gets (`FAST` none extra,
+  `CAREFUL` one answer check, `RIGOROUS` also a self-critique and a check of
+  every tool call, `PLANNED` plans the steps first);
 - a bundle can never grant `FULLY_AUTONOMOUS`: it is lowered to `SUPERVISED`,
   so every side effect waits for your approval until you change it yourself;
 - knowledge-base restrictions are dropped, because those ids belong to the
@@ -65,7 +79,8 @@ example. Check a file offline before sharing it:
 python3 examples/agent-bundles/validate.py my-agent.json
 ```
 
-The checker applies the same rules as the server and also flags an empty tool
+The checker applies the same rules as the server (including the allowed values of
+every fixed-choice setting above) and also flags an empty tool
 list (which would mean "every tool") and anything that looks like a secret.
 Keep the tool list short: small local models pick tools far more reliably from
 five than from fifty.

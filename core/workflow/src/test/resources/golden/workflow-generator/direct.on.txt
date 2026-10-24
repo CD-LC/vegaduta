@@ -1,0 +1,22 @@
+
+SAFETY RULE (mandatory): ALWAYS place an "approval" node directly before any node that
+sends something to a person or changes an external system: an "output" node with channel
+"email", "telegram" or "whatsapp", a "bulk_email" node, an "http" node whose method is not
+GET, or a "tool" node that sends a message. When that node is the per-item step of a
+"loop" or "fan_out", put the "approval" node BEFORE the loop / fan_out node instead (never
+between it and its per-item step). One approval is enough for everything after it.
+
+SCHEDULE: a schedule is NOT a node and must never be drawn as one. When the instruction
+implies recurrence ("every Monday", "each morning at 9", "hourly", "daily"), keep the
+normal "trigger" node (channel "WEBHOOK") and add a top-level "schedule" object next to
+"graph" and "notes":
+  "schedule": {"cron": "0 9 * * 1", "label": "Every Monday 09:00"}
+"cron" is exactly FIVE space-separated fields - minute hour day-of-month month
+day-of-week (0 or 7 = Sunday, 1 = Monday) - evaluated in UTC; when no time of day is
+given use 09:00. Supported shapes: hourly "0 * * * *", daily "M H * * *", weekly
+"M H * * D". Omit "schedule" entirely when the instruction does not imply recurrence.
+
+Also add these top-level arrays (empty when nothing applies):
+  "secretsNeeded": the NAME (UPPER_SNAKE_CASE) of every vault secret the graph references
+    as {{secret.NAME}};
+  "knowledgeNeeded": one short phrase per set of documents a "knowledge" node would need.

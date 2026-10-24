@@ -2,10 +2,13 @@ package com.agenticai.core.agents.turn.quality;
 
 import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.chat.LlmMetricsAdvisor;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,44 +31,42 @@ public class TaskPlanningService {
 
     private static final Logger log = LoggerFactory.getLogger(TaskPlanningService.class);
 
-    private static final String PLAN_SYSTEM_PROMPT = """
-        You are a planning assistant for an AI agent that is about to handle a user's request,
-        possibly using tools. Break the request into a short, ordered list of concrete steps the
-        agent should take.
+    /** Registry keys (default text: {@code prompts/en/planner.task*.md}). */
+    static final String PLAN_KEY = "planner.task";
+    static final String REPLAN_KEY = "planner.task.replan";
+    static final String TOOLS_NONE_KEY = "planner.task.tools_none";
+    static final String TOOLS_KEY = "planner.task.tools";
 
-        If the request is simple enough to answer or handle in one step, respond with exactly:
-        NO_PLAN_NEEDED
+    private final PromptSlot prompts = new PromptSlot();
 
-        Otherwise respond with ONLY a numbered list of steps, one per line, no other text:
-        1. <step>
-        2. <step>
+    /** The prompt registry, so a tenant or agent override of the keys above applies; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
-        Keep steps concrete and actionable - each one should map to something the agent can
-        actually do (call a tool, ask a clarifying question, produce part of the answer), not
-        vague advice like "consider the user's needs".
-        """;
-
+    /** The tool hint with the shipped wording (no overrides); see {@link #toolsHint(java.util.List, UUID)}. */
     public static String toolsHint(java.util.List<String> toolNames) {
+        return hint(new PromptSlot(), toolNames, null);
+    }
+
+    /**
+     * The sentence appended to the planning prompt that names the agent's tools ({@code ""} when the
+     * list is unknown, {@code null}), through the registry so overrides apply for {@code agentId}.
+     */
+    String toolsHint(java.util.List<String> toolNames, UUID agentId) {
+        return hint(prompts, toolNames, agentId);
+    }
+
+    private static String hint(PromptSlot slot, java.util.List<String> toolNames, UUID agentId) {
         if (toolNames == null) {
             return "";
         }
         if (toolNames.isEmpty()) {
-            return "\nThe agent has NO tools: plan only steps it can do by answering directly.\n";
+            return slot.text(TOOLS_NONE_KEY, agentId);
         }
-        return "\nThe agent's tools are: " + String.join(", ", toolNames) + ". Plan only steps these tools "
-            + "or the agent's own reasoning can do. Do not add steps like \"identify the current date\" "
-            + "(the date is already in the agent's prompt). If the request needs a capability none of "
-            + "these tools provide, make the step say what is missing.\n";
+        return slot.text(TOOLS_KEY, agentId, java.util.Map.of("tools", String.join(", ", toolNames)));
     }
-
-    private static final String REPLAN_SYSTEM_PROMPT = """
-        An AI agent was following a plan to handle a user's request, but a step failed in a way
-        that invalidates the rest of the plan. Produce a replacement numbered list of the
-        REMAINING steps only, taking the failure into account (work around it, try an
-        alternative, or drop steps that depended on it). Same format as before - ONLY a numbered
-        list, no other text. If nothing further is needed or possible, respond with exactly:
-        NO_PLAN_NEEDED
-        """;
 
     /**
      * The upfront plan for a {@link ReasoningDepth#PLANNED} turn. Returns {@code null} - never an
@@ -98,7 +99,7 @@ public class TaskPlanningService {
         }
         try {
             String plan = chatClient.prompt()
-                .system(PLAN_SYSTEM_PROMPT + toolsHint(toolNames))
+                .system(prompts.text(PLAN_KEY, agentId) + toolsHint(toolNames, agentId))
                 .user(userMessage)
                 .advisors(LlmMetricsAdvisor.attributeTo(agentId, sessionId))
                 .call()
@@ -135,7 +136,7 @@ public class TaskPlanningService {
         }
         try {
             String plan = chatClient.prompt()
-                .system(REPLAN_SYSTEM_PROMPT)
+                .system(prompts.text(REPLAN_KEY, agentId))
                 .user("Original request: " + userMessage + "\n\nCurrent plan:\n" + currentPlan
                     + "\n\nA step just failed:\n" + failureDescription)
                 .advisors(LlmMetricsAdvisor.attributeTo(agentId, sessionId))

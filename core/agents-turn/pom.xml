@@ -60,6 +60,17 @@
       <groupId>com.agenticai</groupId>
       <artifactId>audit</artifactId>
     </dependency>
+    <!-- The prompt registry: PromptResolver and the scoped, versioned overrides behind the standing directives. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>prompts</artifactId>
+    </dependency>
+    <!-- The settings catalog: this module's entries (SettingsContributor) and SettingsResolver for its use sites
+         (docs/settings.md). settings depends only on security and audit, so this adds no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>settings</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.agenticai</groupId>
       <artifactId>tenancy</artifactId>

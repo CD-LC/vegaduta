@@ -59,7 +59,7 @@ public class SkillSupplyChainService {
             BuiltInSkillCatalog builtIns,
             AgentSkillConfigRepository agentConfigs,
             @Value("${app.skills.supply-chain.enabled:true}") boolean enabled,
-            @Value("${app.skills.supply-chain.enforce:false}") boolean enforce) {
+            @Value("${app.skills.supply-chain.enforce:true}") boolean enforce) {
         this.skills = skills;
         this.builtIns = builtIns;
         this.agentConfigs = agentConfigs;

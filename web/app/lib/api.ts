@@ -34,6 +34,7 @@ import { briefsApi } from "./api/briefs";
 import { studioAppsApi } from "./api/studioApps";
 import { agentTrustApi } from "./api/agentTrust";
 import { promptDirectivesApi } from "./api/promptDirectives";
+import { promptRegistryApi } from "./api/promptRegistry";
 import { memoryApi } from "./api/memory";
 import { researchApi } from "./api/research";
 import { tutorApi } from "./api/tutor";
@@ -84,6 +85,7 @@ export const api = {
   ...studioAppsApi,
   ...agentTrustApi,
   ...promptDirectivesApi,
+  ...promptRegistryApi,
   ...memoryApi,
   ...researchApi,
   ...tutorApi,

@@ -39,8 +39,8 @@ see the *Evidence model* section at the bottom for exactly what a check proves.
 | A2A | HTTP+JSON/REST binding (spec section 11): `POST /message:send`, `POST /message:stream` (SSE), `GET /tasks/{id}`, `POST /tasks/{id}:cancel` under `/api/a2a/rest` and `/api/agents/{agentId}/a2a/rest` | implemented | `core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aRestController.java`<br>`core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aAgentCardService.java`<br>`core/agents-interop/src/test/java/com/agenticai/core/agents/a2a/A2aRestControllerTest.java` |
 | A2A | REST errors as `google.rpc.Status` with an `ErrorInfo` detail (domain `a2a-protocol.org`) and the section 5.4 HTTP statuses | implemented | `core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aRestController.java` |
 | A2A | Agent Card declares both bindings in `supportedInterfaces` (`JSONRPC` first, then `HTTP+JSON`), each with `protocolVersion` | implemented | `core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aAgentCardService.java` |
-| A2A | `ListTasks` (JSON-RPC and REST `GET /tasks`) returns tasks instead of an unsupported error | partial | `core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aJsonRpcController.java`<br>`core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aTaskStore.java`<br>`core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aRestController.java` |
-| A2A | `SubscribeToTask` (re-attach to a running task's stream) | implemented | `core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aJsonRpcController.java`<br>`core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aRestController.java` |
+| A2A | `ListTasks` (JSON-RPC and REST `GET /tasks`) returns tasks instead of an unsupported error | missing | `core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aJsonRpcController.java`<br>`core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aRestController.java`<br>`core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aTaskStore.java` |
+| A2A | `SubscribeToTask` (re-attach to a running task's stream) | missing | `core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aJsonRpcController.java`<br>`core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aRestController.java` |
 | A2A | gRPC binding (spec section 10) | missing | `core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aGrpcService.java` |
 | A2A | Agent Card caching headers (`Cache-Control`; `ETag` is a spec SHOULD) | partial | `core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aAgentCardController.java` |
 | A2A | Outbound client: `a2a_call_agent` tool with signed-card verification and an egress allow-list (off by default: `app.a2a.client.enabled`) | implemented | `core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aClientService.java`<br>`core/agents/src/main/java/com/agenticai/core/agents/a2a/A2aRemoteAgentToolSource.java`<br>`core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aRemoteAgentToolCallback.java`<br>`core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aEgressGuard.java`<br>`core/agents-interop/src/main/java/com/agenticai/core/agents/a2a/A2aCardVerifier.java`<br>`core/agents-tools/src/main/java/com/agenticai/core/agents/tools/AgentIntegrationToolResolver.java` |
@@ -91,6 +91,6 @@ python3 scripts/ci/conformance-report.py --check  # CI gate: fail if stale
 | Standard | Rows | implemented | partial | planned | missing |
 |---|---:|---:|---:|---:|---:|
 | MCP | 11 | 11 | 0 | 0 | 0 |
-| A2A | 17 | 13 | 2 | 0 | 2 |
+| A2A | 17 | 12 | 1 | 0 | 4 |
 | AG-UI | 9 | 7 | 0 | 0 | 2 |
 | OpenTelemetry | 7 | 7 | 0 | 0 | 0 |

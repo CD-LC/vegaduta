@@ -45,17 +45,9 @@ describe("chatStreamReducer", () => {
     expect(run([{ type: "clear-error" }], s).phase).toBe("streaming");
   });
 
-  it("awaiting-approval only exists inside a turn and resumes streaming", () => {
-    expect(run([{ type: "await-approval" }]).phase).toBe("idle");
-    const waiting = run([{ type: "start" }, { type: "await-approval" }]);
-    expect(waiting.phase).toBe("awaiting-approval");
-    expect(isBusyPhase(waiting.phase)).toBe(true);
-    expect(reduce(waiting, { type: "approval-resolved" }).phase).toBe("streaming");
-    expect(reduce(waiting, { type: "settle" }).phase).toBe("idle");
-  });
-
-  it("approval-resolved outside awaiting-approval is a no-op", () => {
-    expect(reduce(idle, { type: "approval-resolved" })).toBe(idle);
+  it("only a streaming turn is busy (a parked tool call ends its turn; there is no awaiting-approval phase)", () => {
+    expect(isBusyPhase("streaming")).toBe(true);
+    for (const phase of ["idle", "error", "resumable"] as const) expect(isBusyPhase(phase)).toBe(false);
   });
 });
 
@@ -66,9 +58,6 @@ describe("useChatStream", () => {
     act(() => result.current.setSending(true));
     expect(result.current.sending).toBe(true);
     expect(result.current.phase).toBe("streaming");
-    act(() => result.current.awaitApproval());
-    expect(result.current.sending).toBe(true);
-    expect(result.current.phase).toBe("awaiting-approval");
     act(() => result.current.setError("nope", { resumable: true }));
     act(() => result.current.setSending(false));
     expect(result.current.sending).toBe(false);

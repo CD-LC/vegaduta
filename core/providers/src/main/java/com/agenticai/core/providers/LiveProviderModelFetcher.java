@@ -57,17 +57,22 @@ public class LiveProviderModelFetcher {
 
     private static final Logger log = LoggerFactory.getLogger(LiveProviderModelFetcher.class);
 
-    static final String GROK_LANGUAGE_MODELS_URL = "https://api.x.ai/v1/language-models";
-    static final String GROK_MODELS_URL = "https://api.x.ai/v1/models";
-    static final String OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
-    static final String ANTHROPIC_MODELS_URL = "https://api.anthropic.com/v1/models";
+    /**
+     * The vendors' default addresses ({@code app.llm.endpoints}'s defaults): what the fetcher calls unless an
+     * operator configured another base URL. Kept for the tests that assert the default URL.
+     */
+    private static final ProviderEndpoints DEFAULT_ENDPOINTS = new ProviderEndpoints();
+    static final String GROK_LANGUAGE_MODELS_URL = DEFAULT_ENDPOINTS.grokLanguageModelsUrl();
+    static final String GROK_MODELS_URL = DEFAULT_ENDPOINTS.modelsUrl(ProviderName.GROK);
+    static final String OPENAI_MODELS_URL = DEFAULT_ENDPOINTS.modelsUrl(ProviderName.OPENAI);
+    static final String ANTHROPIC_MODELS_URL = DEFAULT_ENDPOINTS.modelsUrl(ProviderName.ANTHROPIC);
     static final String ANTHROPIC_VERSION = "2023-06-01";
-    static final String GEMINI_MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/models";
-    static final String MISTRAL_MODELS_URL = "https://api.mistral.ai/v1/models";
-    static final String GROQ_MODELS_URL = "https://api.groq.com/openai/v1/models";
-    static final String DEEPSEEK_MODELS_URL = "https://api.deepseek.com/v1/models";
-    static final String META_MODELS_URL = "https://api.meta.ai/v1/models";
-    static final String OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
+    static final String GEMINI_MODELS_URL = DEFAULT_ENDPOINTS.modelsUrl(ProviderName.GEMINI);
+    static final String MISTRAL_MODELS_URL = DEFAULT_ENDPOINTS.modelsUrl(ProviderName.MISTRAL);
+    static final String GROQ_MODELS_URL = DEFAULT_ENDPOINTS.modelsUrl(ProviderName.GROQ);
+    static final String DEEPSEEK_MODELS_URL = DEFAULT_ENDPOINTS.modelsUrl(ProviderName.DEEPSEEK);
+    static final String META_MODELS_URL = DEFAULT_ENDPOINTS.modelsUrl(ProviderName.META);
+    static final String OPENROUTER_MODELS_URL = DEFAULT_ENDPOINTS.modelsUrl(ProviderName.OPENROUTER);
 
     /**
      * Conservative substring denylist for entries a provider's flat models
@@ -100,19 +105,25 @@ public class LiveProviderModelFetcher {
     ) {}
 
     private final RestClient restClient;
+    private final ProviderEndpoints endpoints;
 
     // Two constructors exist (this one + the package-private test seam
     // below) - Spring only auto-detects a single unannotated constructor,
     // so without @Autowired it falls back to a no-arg constructor that
     // doesn't exist and fails bean creation with "No default constructor
     // found" (caught during 2026-08-05 staging deploy verification).
-    @Autowired
     public LiveProviderModelFetcher(RestClient.Builder restClientBuilder) {
         // User-facing request path: bounded connect/read timeouts so a hung
         // vendor endpoint degrades to the cached catalog instead of hanging
         // the dropdown (the platform-wide default builder carries none) -
         // same SimpleClientHttpRequestFactory approach as SidecarClient.
-        this(restClientBuilder.clone().requestFactory(timeoutFactory()).build());
+        this(restClientBuilder.clone().requestFactory(timeoutFactory()).build(), new ProviderEndpoints());
+    }
+
+    /** Production wiring: the vendor addresses come from {@code app.llm.endpoints}. */
+    @Autowired
+    public LiveProviderModelFetcher(RestClient.Builder restClientBuilder, ProviderEndpoints endpoints) {
+        this(restClientBuilder.clone().requestFactory(timeoutFactory()).build(), endpoints);
     }
 
     /**
@@ -121,7 +132,12 @@ public class LiveProviderModelFetcher {
      * installs into a builder, so tests build the client themselves.
      */
     LiveProviderModelFetcher(RestClient restClient) {
+        this(restClient, new ProviderEndpoints());
+    }
+
+    LiveProviderModelFetcher(RestClient restClient, ProviderEndpoints endpoints) {
         this.restClient = restClient;
+        this.endpoints = endpoints;
     }
 
     private static SimpleClientHttpRequestFactory timeoutFactory() {
@@ -143,16 +159,16 @@ public class LiveProviderModelFetcher {
         try {
             List<LiveModel> models = switch (provider) {
                 case GROK -> fetchGrok(apiKey);
-                case OPENAI -> fetchOpenAiCompatibleIds(OPENAI_MODELS_URL, apiKey);
+                case OPENAI -> fetchOpenAiCompatibleIds(endpoints.modelsUrl(ProviderName.OPENAI), apiKey);
                 case ANTHROPIC -> fetchAnthropic(apiKey);
                 case GEMINI -> fetchGemini(apiKey);
                 case MISTRAL -> fetchMistral(apiKey);
                 case GROQ -> fetchGroq(apiKey);
-                case DEEPSEEK -> fetchOpenAiCompatibleIds(DEEPSEEK_MODELS_URL, apiKey);
+                case DEEPSEEK -> fetchOpenAiCompatibleIds(endpoints.modelsUrl(ProviderName.DEEPSEEK), apiKey);
                 // Meta Model API is OpenAI-compatible; its /v1/models also
                 // lists muse-image-1.0 and muse-voice-transcribe-1.0, which
                 // the NON_CHAT_MODEL_MARKERS filter below drops.
-                case META -> fetchOpenAiCompatibleIds(META_MODELS_URL, apiKey);
+                case META -> fetchOpenAiCompatibleIds(endpoints.modelsUrl(ProviderName.META), apiKey);
                 case OPENROUTER -> fetchOpenRouter();
                 default -> List.<LiveModel>of();
             };
@@ -176,7 +192,7 @@ public class LiveProviderModelFetcher {
     private List<LiveModel> fetchGrok(String apiKey) {
         // Prefer /v1/language-models: unlike the bare-ids /v1/models it
         // carries input_modalities and pricing/context metadata per model.
-        JsonNode response = getJson(GROK_LANGUAGE_MODELS_URL, spec -> spec
+        JsonNode response = getJson(endpoints.grokLanguageModelsUrl(), spec -> spec
             .header("Authorization", "Bearer " + apiKey));
         if (response != null && response.has("models")) {
             List<LiveModel> models = new ArrayList<>();
@@ -203,7 +219,7 @@ public class LiveProviderModelFetcher {
             }
         }
         // Fall back to the conventional OpenAI-shape ids-only endpoint.
-        return fetchOpenAiCompatibleIds(GROK_MODELS_URL, apiKey);
+        return fetchOpenAiCompatibleIds(endpoints.modelsUrl(ProviderName.GROK), apiKey);
     }
 
     /** Conventional OpenAI-compatible {@code /models}: {@code data[].id} only. */
@@ -223,7 +239,7 @@ public class LiveProviderModelFetcher {
 
     private List<LiveModel> fetchAnthropic(String apiKey) {
         // Same auth-header shape as AnthropicProviderValidator.
-        JsonNode response = getJson(ANTHROPIC_MODELS_URL, spec -> spec
+        JsonNode response = getJson(endpoints.modelsUrl(ProviderName.ANTHROPIC), spec -> spec
             .header("x-api-key", apiKey)
             .header("anthropic-version", ANTHROPIC_VERSION));
         List<LiveModel> models = new ArrayList<>();
@@ -243,7 +259,7 @@ public class LiveProviderModelFetcher {
     private List<LiveModel> fetchGemini(String apiKey) {
         // Same x-goog-api-key header as GeminiProviderValidator (never the
         // ?key= query form - keys don't belong in URLs/access logs).
-        JsonNode response = getJson(GEMINI_MODELS_URL, spec -> spec.header("x-goog-api-key", apiKey));
+        JsonNode response = getJson(endpoints.modelsUrl(ProviderName.GEMINI), spec -> spec.header("x-goog-api-key", apiKey));
         List<LiveModel> models = new ArrayList<>();
         if (response != null && response.has("models")) {
             for (JsonNode node : response.get("models")) {
@@ -275,7 +291,7 @@ public class LiveProviderModelFetcher {
     }
 
     private List<LiveModel> fetchMistral(String apiKey) {
-        JsonNode response = getJson(MISTRAL_MODELS_URL, spec -> spec.header("Authorization", "Bearer " + apiKey));
+        JsonNode response = getJson(endpoints.modelsUrl(ProviderName.MISTRAL), spec -> spec.header("Authorization", "Bearer " + apiKey));
         List<LiveModel> models = new ArrayList<>();
         if (response != null && response.has("data")) {
             for (JsonNode node : response.get("data")) {
@@ -300,7 +316,7 @@ public class LiveProviderModelFetcher {
     }
 
     private List<LiveModel> fetchGroq(String apiKey) {
-        JsonNode response = getJson(GROQ_MODELS_URL, spec -> spec.header("Authorization", "Bearer " + apiKey));
+        JsonNode response = getJson(endpoints.modelsUrl(ProviderName.GROQ), spec -> spec.header("Authorization", "Bearer " + apiKey));
         List<LiveModel> models = new ArrayList<>();
         if (response != null && response.has("data")) {
             for (JsonNode node : response.get("data")) {
@@ -319,7 +335,7 @@ public class LiveProviderModelFetcher {
     private List<LiveModel> fetchOpenRouter() {
         // Public, unauthenticated - the one provider needing no key at all
         // (same endpoint ProviderModelCatalogService's daily job consumes).
-        JsonNode response = getJson(OPENROUTER_MODELS_URL, spec -> spec);
+        JsonNode response = getJson(endpoints.modelsUrl(ProviderName.OPENROUTER), spec -> spec);
         List<LiveModel> models = new ArrayList<>();
         if (response != null && response.has("data")) {
             for (JsonNode node : response.get("data")) {

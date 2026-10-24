@@ -101,6 +101,24 @@ class ModerationServiceTest {
     }
 
     @Test
+    void theSemanticLayerRunsInsideTheAgentScopeOfTheModeratedContent() {
+        when(policy.isModerationEnabled()).thenReturn(true);
+        when(policy.enabledPacks(ctx)).thenReturn(List.of(ModerationPolicyPack.HARASSMENT));
+        when(policy.resolve(eq(ModerationPolicyPack.HARASSMENT), any()))
+            .thenReturn(new PolicyPackConfig(true, true, 50, 90));
+        java.util.concurrent.atomic.AtomicReference<UUID> seen = new java.util.concurrent.atomic.AtomicReference<>();
+        when(semantic.score(any(), eq(ModerationPolicyPack.HARASSMENT), any())).thenAnswer(inv -> {
+            seen.set(com.agenticai.core.guardrails.GuardrailPromptScope.currentAgent());
+            return 10;
+        });
+
+        service.moderate("perfectly nice message", ctx, mock(org.springframework.ai.chat.client.ChatClient.class));
+
+        assertThat(seen.get()).isEqualTo(ctx.agentId());
+        assertThat(com.agenticai.core.guardrails.GuardrailPromptScope.currentAgent()).isNull();
+    }
+
+    @Test
     void semanticBelowReviewBandAllows() {
         when(policy.isModerationEnabled()).thenReturn(true);
         when(policy.enabledPacks(ctx)).thenReturn(List.of(ModerationPolicyPack.HARASSMENT));

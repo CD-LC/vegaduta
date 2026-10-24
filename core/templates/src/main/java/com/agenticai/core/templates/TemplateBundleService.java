@@ -25,7 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
  * person, so import is strict: the format must match, the size is capped, the design must parse as
  * the allow-listed snapshot, a bundle can never ask for {@code FULLY_AUTONOMOUS} (it is lowered to
  * {@code SUPERVISED}, so every side effect waits for approval until the importer changes it) and
- * knowledge-base ids are dropped. The agent is then created through {@code AgentService} like any
+ * knowledge-base ids are dropped; an enum-typed field with a value the server does not know is
+ * rejected rather than defaulted. The agent is then created through {@code AgentService} like any
  * template import, so plan limits and ownership still apply.
  */
 @Service
@@ -150,6 +151,14 @@ public class TemplateBundleService {
         TemplateSnapshotService.AgentSnapshot snapshot;
         try {
             snapshot = snapshotService.readAgentSnapshot(configJson);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("The agent design is not valid: " + e.getMessage(), e);
+        }
+        // An unknown enum value (reasoningDepth "BALANCED", a misspelt tier ...) used to be
+        // swallowed into a default, so the author thought they had configured something they had
+        // not. Reject it, naming the field, the bad value and the allowed ones.
+        try {
+            snapshotService.requireValidEnums(snapshot);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("The agent design is not valid: " + e.getMessage(), e);
         }

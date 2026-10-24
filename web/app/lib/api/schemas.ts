@@ -15,6 +15,14 @@ import { z } from "zod";
 import { reportClientError } from "../clientLogger";
 import type { AgentStepEvent } from "./core";
 
+// The enforced CSP (lib/csp.ts) has no 'unsafe-eval'. zod 4 probes
+// `new Function("")` each time it builds an object schema; strict CSPs report
+// that blocked call even though zod catches the throw, which filed one false
+// "eval" violation per page view at /api/csp-report. Jitless mode skips the
+// probe (payloads here are small session and SSE reads; the JIT fast path is
+// not needed). This must run before the first z.object() below.
+z.config({ jitless: true });
+
 // ---------------------------------------------------------------------------
 // Session / identity payloads (read right after sign-in)
 // ---------------------------------------------------------------------------

@@ -63,5 +63,5 @@ summaries); nothing is un-redacted, and the page never fetches payloads (they ar
 
 - Operators can answer "what did this turn do" without database access, and turn an incident into a fixture.
 - The inspector shows only what the journal records. It cannot show prompts or answers by design.
-- Not in this slice: listing turns for an agent (the user must know the turn ID), diffing two turns, replay from the UI,
+- Not in this slice: listing all turns of an agent (a session's turns are listed through `GET .../turn-journal?sessionId=`), diffing two turns, replay from the UI,
   approval-gate linking, cost and token capture, testkit loader.

@@ -80,6 +80,8 @@ export function isVisibleStep(step: ActivityStep): boolean {
 export function liveStatusKey(steps: readonly ActivityStep[] | null | undefined): {
   key: string;
   tool?: string;
+  /** What the open tool call is about (its query, URL, path or command), when its arguments say. */
+  target?: string;
   thinking?: string;
 } | null {
   // Pre-token `phase` events count here (not in the trace): "Checking safety…", "Gathering
@@ -96,8 +98,50 @@ export function liveStatusKey(steps: readonly ActivityStep[] | null | undefined)
     return { key: "analyzing", thinking: last.message ?? undefined };
   }
   if (last.type === "plan") return { key: "planning" };
-  if (last.type === "tool_call") return { key: "tool", tool: last.tool ?? undefined };
+  if (last.type === "tool_call") {
+    const target = toolTarget(last.args);
+    return { key: "tool", tool: last.tool ?? undefined, ...(target ? { target } : {}) };
+  }
   if (last.type === "tool_result") return { key: "afterTool" };
   if (last.type === "error") return { key: "recovering" };
   return { key: "working" };
+}
+
+/** Argument names that say what a tool call is about, most telling first. */
+const TARGET_KEYS = ["query", "q", "search", "question", "topic", "url", "path", "file", "command", "name"];
+
+/**
+ * What a tool call is about, from its (redacted, capped) JSON arguments: the search query, the page URL, the
+ * file path or the command - one line, at most `max` characters. Null when the arguments say nothing usable.
+ */
+export function toolTarget(args: string | null | undefined, max = 60): string | null {
+  if (!args || !args.trim()) return null;
+  let value: unknown = null;
+  try {
+    const parsed: unknown = JSON.parse(args);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      const record = parsed as Record<string, unknown>;
+      value = TARGET_KEYS.map((k) => record[k]).find((v) => typeof v === "string" && v.trim()) ?? null;
+    }
+  } catch {
+    value = null; // capped or plain-text arguments: say nothing rather than guess
+  }
+  if (typeof value !== "string") return null;
+  const line = value.replace(/\s+/g, " ").trim();
+  return line.length <= max ? line : `${line.slice(0, max - 1)}…`;
+}
+
+/** "web_search" -> "Web search": the tool's own name, readable, for a chip that has no dedicated wording. */
+export function humanizeTool(tool: string | null | undefined): string {
+  const name = (tool ?? "").replace(/^mcp[_.-]+/i, "").replace(/[_.-]+/g, " ").trim();
+  return name ? name.replace(/^\w/, (c) => c.toUpperCase()) : "Tool";
+}
+
+/** "https://www.example.com/a/b?x" -> "example.com": the site a URL points at, or the text itself. */
+export function siteOf(text: string): string {
+  try {
+    return new URL(text).hostname.replace(/^www\./, "");
+  } catch {
+    return text;
+  }
 }

@@ -60,7 +60,9 @@
     "railJobs": "কাম",
     "railSecrets": "গোপনীয়",
     "railBrand": "ব্ৰেণ্ডিং",
-    "railLearn": "শিকক"
+    "railLearn": "শিকক",
+    "railRuntimeSettings": "ৰানটাইম ছেটিংছ",
+    "railControls": "মই ক'ত নিয়ন্ত্ৰণ কৰিম...?"
   },
   "languageSwitcher": {
     "label": "ভাষা",
@@ -753,7 +755,142 @@
     "edgeTier0Badge": "অন-ডিভাইচ · ক্ৰোম বিল্ট-ইন",
     "edgeTier0BadgeTitle": "ক্ৰোমৰ বিল্ট-ইন মডেল (Gemini Nano) এ ইয়াৰ উত্তৰ দিছে - দ্ৰুত আৰু সম্পূৰ্ণ ব্যক্তিগত, কিন্তু কেৱল চেটৰ বাবে: ই সঁজুলি ব্যৱহাৰ কৰিব নোৱাৰে আৰু জটিল কামত এজন প্ৰকৃত প্ৰদানকাৰীতকৈ কম সঠিক হ'ব পাৰে। প্ৰতিটো প্লেনত বিনামূলীয়া।",
     "edgeTier1Badge": "অন-ডিভাইচ · স্থানীয় মডেল",
-    "edgeTier1BadgeTitle": "এটা ডাউনলোড কৰা অন-ডিভাইচ মডেল এ ইয়াৰ উত্তৰ দিছে - ব্যক্তিগত, আৰু ই সঁজুলি ব্যৱহাৰ কৰিব পাৰে (যিবোৰ সুৰক্ষিত সঁজুলি এটা হোষ্টেড টাৰ্ণে ব্যৱহাৰ কৰিব পাৰে)। তথাপিও হোষ্টেড পুলতকৈ বহু সৰু মডেল, সেয়েহে ই জটিল অনুৰোধত কম সঠিক হ'ব পাৰে। প্ৰতিটো প্লেনত বিনামূলীয়া।"
+    "edgeTier1BadgeTitle": "এটা ডাউনলোড কৰা অন-ডিভাইচ মডেল এ ইয়াৰ উত্তৰ দিছে - ব্যক্তিগত, আৰু ই সঁজুলি ব্যৱহাৰ কৰিব পাৰে (যিবোৰ সুৰক্ষিত সঁজুলি এটা হোষ্টেড টাৰ্ণে ব্যৱহাৰ কৰিব পাৰে)। তথাপিও হোষ্টেড পুলতকৈ বহু সৰু মডেল, সেয়েহে ই জটিল অনুৰোধত কম সঠিক হ'ব পাৰে। প্ৰতিটো প্লেনত বিনামূলীয়া।",
+    "viewTurn": "টাৰ্ন চাওক",
+    "viewTurnTitle": "এই বাৰ্তালাপৰ টাৰ্নবোৰৰ পদক্ষেপ-পদক্ষেপ টাইমলাইন খোলক",
+    "headerRunning": "এটা টাৰ্ন চলি আছে",
+    "headerReady": "সাজু",
+    "clearContext": "প্ৰসংগ মচক",
+    "clearContextTitle": "নতুন বাৰ্তালাপ আৰম্ভ কৰক। ই এই চেটৰ ডিভাইচত আৰু ছাৰ্ভাৰ-পক্ষৰ ছেশ্বন মেম'ৰী মচে।",
+    "stopRun": "এই উত্তৰ বন্ধ কৰক",
+    "fallbackSendToPlatform": "প্লেটফৰ্মলৈ পঠাওক",
+    "chipsLabel": "এজেণ্টে এতিয়া কি কৰি আছে",
+    "chipPreparing": "সাজু হৈ আছে",
+    "chipModelCall": "মডেলৰ বাবে অপেক্ষা",
+    "chipThinking": "ভাবি আছে",
+    "chipWriting": "উত্তৰ লিখি আছে",
+    "chipTool": "টুল চলি আছে: {tool}",
+    "chipToolUnnamed": "এটা টুল চলি আছে",
+    "chipWaitingApproval": "আপোনাৰ অনুমোদনৰ বাবে অপেক্ষা ({count})",
+    "chipContinuing": "উত্তৰ অব্যাহত ৰাখি আছে",
+    "chipContinuingPass": "উত্তৰ অব্যাহত ৰাখি আছে ({max}ৰ ভিতৰত পাছ {pass})",
+    "chipContinuingApproval": "আপোনাৰ সিদ্ধান্তৰ পিছত অব্যাহত ৰাখি আছে",
+    "chipRetrying": "পুনৰ চেষ্টা কৰি আছে",
+    "chipRetryingReason": "পুনৰ চেষ্টা কৰি আছে: {reason}",
+    "chipRetryingAttempt": "পুনৰ চেষ্টা কৰি আছে (প্ৰয়াস {attempt}/{max})",
+    "chipRetryingAttemptReason": "পুনৰ চেষ্টা কৰি আছে (প্ৰয়াস {attempt}/{max}): {reason}",
+    "chipFailover": "বেকআপ মডেললৈ সলনি কৰা হ'ল",
+    "chipFailoverReason": "বেকআপ মডেললৈ সলনি কৰা হ'ল: {reason}",
+    "chipFailoverTo": "{model}লৈ সলনি কৰা হ'ল",
+    "chipFailoverToReason": "{model}লৈ সলনি কৰা হ'ল: {reason}",
+    "outcomeTruncated": "এই উত্তৰ সম্পূৰ্ণ হোৱাৰ আগতেই কাটি গ'ল।",
+    "outcomeContinue": "অব্যাহত ৰাখক",
+    "outcomeLongerReplies": "দীঘল উত্তৰৰ অনুমতি দিয়ক",
+    "continueMessage": "আপুনি যিখিনিত ৰৈছিল ঠিক তাৰ পৰাই, আগতে লিখা কথা পুনৰাবৃত্তি নকৰি অব্যাহত ৰাখক।",
+    "outcomeRefused": "সুৰক্ষাজনিত কাৰণত মডেল প্ৰদানকাৰীয়ে এই উত্তৰ বন্ধ কৰি দিলে, সেয়েহে দেখুৱাবলৈ কোনো উত্তৰ নাই। অনুৰোধ সলনি কৰি পুনৰ চেষ্টা কৰক।",
+    "outcomeRefusedReason": "সুৰক্ষাজনিত কাৰণত ({reason}) মডেল প্ৰদানকাৰীয়ে এই উত্তৰ বন্ধ কৰি দিলে, সেয়েহে দেখুৱাবলৈ কোনো উত্তৰ নাই। অনুৰোধ সলনি কৰি পুনৰ চেষ্টা কৰক।",
+    "outcomeMalformedToolCall": "মডেলে এটা টুল ব্যৱহাৰ কৰিবলৈ চেষ্টা কৰিলে কিন্তু তাৰ অনুৰোধ অবৈধ আছিল, সেয়েহে একো নচলিল। পুনৰ চেষ্টা কৰক।",
+    "outcomeEmpty": "মডেলে খালী উত্তৰ ঘুৰাই দিলে। পুনৰ চেষ্টা কৰক।",
+    "stopRaiseSteps": "টুল-কল সীমা বঢ়াওক",
+    "stopRaiseBudget": "খৰচৰ সীমা সলনি কৰক",
+    "stopAskEditor": "এই এজেণ্ট সম্পাদনা কৰিব পৰা কোনোবাক সীমা বঢ়াবলৈ কওক।",
+    "rsOpen": "ৰান ছেটিংছ",
+    "rsTitle": "ৰান ছেটিংছ",
+    "rsClose": "ৰান ছেটিংছ বন্ধ কৰক",
+    "rsBack": "ৰান ছেটিংছলৈ উভটি যাওক",
+    "rsIntro": "{name}লৈ পৰৱৰ্তী বাৰ্তা কেনেকৈ চলিব। এইবোৰ এজেণ্টৰ আচৰণ টেবত সলনি কৰক।",
+    "rsLoading": "লোড হৈ আছে",
+    "rsRetry": "পুনৰ চেষ্টা কৰক",
+    "rsOpenBehavior": "আচৰণত সম্পাদনা কৰক",
+    "rsModelHeading": "মডেল আৰু নমুনা সংগ্ৰহ",
+    "rsModel": "মডেল",
+    "rsModelNotSet": "ছেট কৰা হোৱা নাই",
+    "rsModelDefault": "মডেলৰ ডিফল্ট",
+    "rsDepth": "যুক্তিৰ গভীৰতা",
+    "rsSourceAgent": "এই এজেণ্টত ছেট কৰা হৈছে",
+    "rsParam_temperature": "উষ্ণতা",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "উত্তৰৰ সৰ্বাধিক দৈৰ্ঘ্য (টোকেন)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "পুনৰাবৃত্তি দণ্ড",
+    "rsParam_presencePenalty": "উপস্থিতি দণ্ড",
+    "rsParam_seed": "ছিড",
+    "rsParam_stopSequences": "বন্ধ কৰা ক্ৰম",
+    "rsParamDropped": "{param} এই এজেণ্টত ছেট কৰা আছে, কিন্তু {provider}য়ে {model}ৰ বাবে ইয়াক অৱজ্ঞা কৰে, সেয়েহে ইয়াৰ কোনো প্ৰভাৱ নাই।",
+    "rsToolsRunHeading": "এই ৰানৰ বাবে টুল",
+    "rsToolsRunOnly": "কেৱল এই ৰান",
+    "rsToolsRunNote": "এই ছুইচবোৰে ঠিক কৰে যে এই প্লেগ্ৰাউণ্ডৰ পৰা আপুনি পঠোৱা বাৰ্তাই এজেণ্টৰ কোনবোৰ টুল ব্যৱহাৰ কৰিব পাৰে। একো ছেভ নহয়: বাকী সকলোৰে বাবে এজেণ্টে নিজৰ টুল প্ৰৱেশাধিকাৰ ৰাখে। ইহঁতে এজেণ্টৰ টুল কেৱল বন্ধ কৰিব পাৰে, কেতিয়াও নতুন টুল দিব নোৱাৰে।",
+    "rsToolsRunSummary": "এজেণ্টৰ {total}টা টুলৰ ভিতৰত {on}টা এই ৰানৰ বাবে চালু",
+    "rsToolsRunNone": "এই ৰানৰ বাবে কোনো টুল নাই: এজেণ্টে কেৱল লিখনীত উত্তৰ দিব পাৰে।",
+    "rsToolsReset": "এজেণ্টৰ টুল ব্যৱহাৰ কৰক",
+    "rsToolsNotInAgent": "এইটো এই এজেণ্টৰ ছেভ কৰা টুলৰ ভিতৰত নহয়, সেয়েহে ৰানৰ বাবে চালু কৰিব নোৱাৰি।",
+    "rsToolsEditAgent": "এজেণ্টৰ ছেভ কৰা টুল সলনি কৰক",
+    "rsToolsLimitedChip": "এই ৰানৰ বাবে টুল সীমিত",
+    "rsToolsEmpty": "এই এজেণ্টৰ বাবে কোনো টুল উপলব্ধ নহয়।",
+    "rsToolsSummary": "{total}ৰ ভিতৰত {on}টা টুল চালু",
+    "rsToolsFailed": "টুল লোড কৰিব পৰা নগ'ল।",
+    "rsLimitsHeading": "প্ৰতিটো টাৰ্নৰ সীমা",
+    "rsLimitsChange": "সীমা সলনি কৰক",
+    "rsLimitsView": "সীমা চাওক",
+    "rsLimitsFailed": "সীমা লোড কৰিব পৰা নগ'ল।",
+    "rsLimitsEmpty": "এই এজেণ্টৰ বাবে দেখুৱাবলৈ কোনো সীমা নাই।",
+    "rsNoLimit": "কোনো সীমা নাই",
+    "rsScoreAll": "প্ৰতিটো মিল",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n}টা আখৰ",
+    "rsLimitRange": "অনুমতি প্ৰাপ্ত: {min}ৰ পৰা {max}",
+    "rsLayer_AGENT": "এই এজেণ্টত ছেট কৰা হৈছে",
+    "rsLayer_TENANT": "ৱৰ্কস্পেচ ডিফল্ট",
+    "rsLayer_PLATFORM": "প্লেটফৰ্ম ডিফল্ট",
+    "rsLayer_REQUEST": "এই অনুৰোধৰ বাবে ছেট কৰা",
+    "rsLimit_maxToolSteps": "প্ৰতি টাৰ্নত টুল কল",
+    "rsLimit_turnTimeoutSeconds": "এটা টাৰ্নৰ সময়",
+    "rsLimit_toolTimeoutSeconds": "এটা টুল কলৰ সময়",
+    "rsLimit_toolOutputMaxChars": "টুল ফলাফলৰ আকাৰ",
+    "rsLimit_retrievalTopK": "প্ৰতিটো সন্ধানত জ্ঞানৰ ফলাফল",
+    "rsLimit_retrievalMinScore": "জ্ঞানৰ মিলৰ নূন্যতম প্ৰাসংগিকতা",
+    "rsLimit_continuationPasses": "উত্তৰ সম্পূৰ্ণ কৰিবলৈ অতিৰিক্ত পাছ",
+    "rsLimitHelp_maxToolSteps": "এটা উত্তৰে কৰিব পৰা সৰ্বাধিক টুল কল। সীমাত পালে টাৰ্ন বন্ধ হয় আৰু সেয়া জনায়।",
+    "rsLimitHelp_turnTimeoutSeconds": "এটা টাৰ্ন বন্ধ হোৱাৰ আগতে কিমান সময় চলিব পাৰে।",
+    "rsLimitHelp_toolTimeoutSeconds": "এটা টুল কল বন্ধ হোৱাৰ আগতে কিমান সময় চলিব পাৰে।",
+    "rsLimitHelp_toolOutputMaxChars": "এটা টুল ফলাফলৰ কিমান অংশ মডেলে পঢ়িব পাৰে। বাকী কাটি দিয়া হয়।",
+    "rsLimitHelp_retrievalTopK": "এটা সন্ধানে জ্ঞান ভঁৰালৰ কিমানটা অংশ ঘুৰাই আনে।",
+    "rsLimitHelp_retrievalMinScore": "ইয়াতকৈ কম মিল থকা অংশবোৰ বাদ দিয়া হয়। শূন্যই প্ৰতিটো মিল ৰাখে।",
+    "rsLimitHelp_continuationPasses": "ঘোষণা কৰা কিন্তু গ্ৰহণ নকৰা পদক্ষেপত ৰৈ যোৱা উত্তৰ সম্পূৰ্ণ কৰিবলৈ অতিৰিক্ত প্ৰয়াস।",
+    "rsPreviewButton": "প্ৰম্পট পূৰ্বদৰ্শন",
+    "rsPreviewTitle": "প্ৰম্পট পূৰ্বদৰ্শন",
+    "rsPreviewIntro": "এই এজেণ্টে পঠিয়াবলগীয়া ছিষ্টেম প্ৰম্পট আৰু টুল তালিকা, প্ৰকৃত টাৰ্নে যেনেকৈ বনায় তেনেকৈয়ে বনোৱা। কোনো মডেললৈ একো পঠোৱা নহয়।",
+    "rsPreviewBuilding": "পূৰ্বদৰ্শন বনাই আছে",
+    "rsPreviewFailed": "পূৰ্বদৰ্শন বনাব পৰা নগ'ল।",
+    "rsPreviewTotals": "প্ৰায় {prompt}টা টোকেন ছিষ্টেম লিখনী আৰু {tools}টা টোকেন টুলৰ সংজ্ঞা (অনুমান)।",
+    "rsPreviewOverBudgetTitle": "টোকেন বাজেটতকৈ অধিক",
+    "rsPreviewOverBudget": "স্থায়ী ছিষ্টেম লিখনী কনফিগাৰ কৰা {budget}টা টোকেনৰ বাজেটতকৈ অধিক। একো কটা নহয়; এটা প্ৰম্পট চুটি কৰাৰ কথা ভাবক।",
+    "rsPreviewNoBlocks": "দেখুৱাবলৈ কোনো প্ৰম্পট ব্লক নাই।",
+    "rsPreviewMessage": "বাৰ্তা: {message}",
+    "rsPreviewTokens": "~{tokens}টা টোকেন",
+    "rsPreviewShowText": "লিখনী দেখুৱাওক",
+    "rsPreviewTools": "টুল ({count})",
+    "rsPreviewNoTools": "এই এজেণ্টে কোনো টুল নিদিয়ে।",
+    "rsPreviewNotes": "এই পূৰ্বদৰ্শনে যি জানিব নোৱাৰে",
+    "rsPreviewOpenAdmin": "প্ৰতিটো প্ৰম্পটৰ শব্দাৱলী চাওক আৰু সলনি কৰক",
+    "rsOriginDefault": "ডিফল্ট হিচাপে অহা",
+    "rsOriginOverride": "{scope} অভাৰৰাইড v{version}",
+    "rsOriginAgentConfig": "এজেণ্টৰ নিজস্ব ছিষ্টেম প্ৰম্পট",
+    "rsOriginCode": "প্লেটফৰ্ম ক'ড",
+    "rsRunBudget": "প্ৰতিটো ৰানৰ খৰচৰ সীমা",
+    "rsNoCap": "কোনো সীমা নাই",
+    "rsRunBudgetHelp": "এটা ৰানে অন্য এজেণ্টক কাম দিলে বা গভীৰ গৱেষণা চলালে সৰ্বাধিক কিমান খৰচ কৰিব পাৰে। এয়া অনুমান, বিলিং নহয়।",
+    "chipToolsOff": "টুল অবিহনে পুনৰ চেষ্টা কৰি আছে",
+    "chipFailoverBlocked": "বেকআপ মডেল ব্যৱহাৰ কৰা হোৱা নাই: টুল আগতেই চলি গৈছিল",
+    "rsLimitChangeOne": "সলনি কৰক",
+    "reasonRateLimited": "হাৰ সীমা পাইছে",
+    "reasonTimeout": "সময় শেষ হ'ল",
+    "reasonProviderUnavailable": "প্ৰদানকাৰী উপলব্ধ নহয়",
+    "reasonAuthFailed": "প্ৰদানকাৰীয়ে ক্ৰেডেনশ্বিয়েল প্ৰত্যাখ্যান কৰিলে",
+    "reasonBilling": "প্ৰদানকাৰীৰ বিলিঙৰ সমস্যা",
+    "reasonModelNotFound": "মডেল উপলব্ধ নহয়",
+    "reasonProviderError": "প্ৰদানকাৰীৰ ত্ৰুটি",
+    "reasonMalformedToolCall": "টুল কলটো ব্যৱহাৰ কৰিব পৰা নগ'ল"
   },
   "nodeDefs": {
     "triggerLabel": "ট্ৰিগাৰ",
@@ -1399,7 +1536,50 @@
     "ttsProviderUpdatedSuccess": "TTS প্ৰভাইডাৰ আপডেট কৰা হ'ল।",
     "updateTtsProviderError": "এই এজেন্টৰ TTS প্ৰভাইডাৰ আপডেট কৰিব পৰা নগ'ল।",
     "ttsProviderFreePlanTooltip": "TTS প্ৰভাইডাৰ নিৰ্বাচন এটা প্ৰিমিয়াম সুবিধা।",
-    "ttsProviderNotSet": "প্লেটফৰ্ম ডিফল্ট ব্যৱহাৰ কৰি আছে"
+    "ttsProviderNotSet": "প্লেটফৰ্ম ডিফল্ট ব্যৱহাৰ কৰি আছে",
+    "samplingTitle": "উন্নত নমুনা সংগ্ৰহ",
+    "samplingIntro": "মডেলে শব্দ কেনেকৈ বাছে সেয়া সূক্ষ্মভাৱে মিলাওক। মডেলৰ ডিফল্ট ব্যৱহাৰ কৰিবলৈ বাকচ খালী ৰাখক। কোনো ফিল্ড সমৰ্থন নকৰা প্ৰদানকাৰীয়ে ইয়াক কেৱল অৱজ্ঞা কৰে।",
+    "samplingIgnored": "এই মডেলৰ প্ৰদানকাৰীয়ে এই ছেটিং অৱজ্ঞা কৰে, সেয়েহে ইয়াক সলনি কৰিলে কোনো প্ৰভাৱ নপৰে।",
+    "samplingSaving": "ছেভ কৰি আছে…",
+    "samplingSaved": "ছেভ হ'ল",
+    "samplingNotSaved": "ছেভ হোৱা নাই",
+    "samplingSaveFailed": "সেই ছেটিং ছেভ কৰিব পৰা নগ'ল।",
+    "samplingErrorWhole": "{label} {min}ৰ পৰা {max}লৈকে এটা পূৰ্ণ সংখ্যা হ'ব লাগিব, বা বন্ধ কৰিবলৈ খালী।",
+    "samplingErrorNumber": "{label} {min}ৰ পৰা {max}লৈকে এটা সংখ্যা হ'ব লাগিব, বা বন্ধ কৰিবলৈ খালী।",
+    "samplingStopTooLong": "এটা বন্ধ কৰা ক্ৰম সৰ্বাধিক {max}টা আখৰৰ হ'ব পাৰে।",
+    "samplingStopTooMany": "সৰ্বাধিক {max}টা বন্ধ কৰা ক্ৰম।",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "কেৱল আটাইতকৈ সম্ভাব্য K টা পৰৱৰ্তী শব্দ বিবেচনা কৰক। কমৰ অৰ্থ অধিক সুৰক্ষিত, পূৰ্বানুমেয় লিখনী। 1 ৰ পৰা 1000।",
+    "samplingSeed": "ছিড",
+    "samplingSeedHelp": "একেটা প্ৰম্পটৰ বাবে উত্তৰ অধিক পুনৰাবৃত্তিযোগ্য কৰিবলৈ এটা সংখ্যা ছেট কৰক। সকলো প্ৰদানকাৰীয়ে ইয়াৰ নিশ্চয়তা নিদিয়ে।",
+    "samplingFrequency": "পুনৰাবৃত্তি দণ্ড",
+    "samplingFrequencyHelp": "ধনাত্মক মানে একেটা শব্দ বাৰে বাৰে ব্যৱহাৰ কৰাত নিৰুৎসাহিত কৰে। -2 ৰ পৰা 2।",
+    "samplingPresence": "উপস্থিতি দণ্ড",
+    "samplingPresenceHelp": "ধনাত্মক মানে মডেলক এটা বিষয়তে নাথাকি নতুন বিষয়ৰ ফালে ঠেলে। -2 ৰ পৰা 2।",
+    "samplingPlaceholderDefault": "ডিফল্ট",
+    "samplingPlaceholderRandom": "যাদৃচ্ছিক",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "বন্ধ কৰা ক্ৰম",
+    "samplingStopPlaceholder": "এটা বাক্যাংশ টাইপ কৰক, Enter টিপক",
+    "samplingStopHelp": "মডেলে এইবোৰৰ ভিতৰত কোনো এটা লিখাৰ লগে লগে উত্তৰ শেষ হয়। সৰ্বাধিক {count}টা, প্ৰতিটো সৰ্বাধিক {max}টা আখৰৰ।",
+    "samplingStopCurrent": "বৰ্তমানৰ বন্ধ কৰা ক্ৰম",
+    "samplingStopRemove": "বন্ধ কৰা ক্ৰম {value} আঁতৰাওক",
+    "samplingAdd": "যোগ কৰক",
+    "reasoningDepthFASTCost": "Quickest and cheapest: one pass, and the reply streams in as it is written.",
+    "reasoningDepthPLANNEDCost": "Writes a plan before acting: more model calls per task, and the reply appears all at once instead of streaming.",
+    "reasoningDepthCAREFULCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming.",
+    "reasoningDepthRIGOROUSCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming. Uses the most tokens.",
+    "autonomyLabel": "Autonomy",
+    "autonomyTierSUPERVISED": "Supervised",
+    "autonomyTierSUPERVISEDHint": "Every tool call waits for a human to approve it, whatever the workspace policy says. Tighter step ceiling.",
+    "autonomyTierSUPERVISEDCost": "Asks you before every tool call, searches included.",
+    "autonomyTierSEMI_AUTONOMOUS": "Semi-autonomous",
+    "autonomyTierSEMI_AUTONOMOUSHint": "Follows the workspace's approval policy for each action type. The default for every agent.",
+    "autonomyTierSEMI_AUTONOMOUSCost": "Asks you only for the actions your workspace's approval rules name; the rest run without asking.",
+    "autonomyTierFULLY_AUTONOMOUS": "Fully autonomous",
+    "autonomyTierFULLY_AUTONOMOUSHint": "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
+    "autonomyTierFULLY_AUTONOMOUSCost": "Never asks you: every tool call runs as soon as the agent makes it, sends and payments included.",
+    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "এটা নোড কনফিগাৰ কৰিবলৈ বাছনি কৰক, বা বাওঁফালৰ পেলেতৰ পৰা এটা নতুন নোড টানি আনক।",
@@ -1875,6 +2055,9 @@
     "emptyWorkspaceTitle": "এতিয়ালৈকে কোনো সংগ্ৰহ নাই",
     "noFilesUploadedHint": "আপোনাৰ এজেণ্টসকলৰ দ্বাৰা সন্ধানযোগ্য কৰিবলৈ এই সংগ্ৰহত ফাইল আপলোড কৰক।",
     "ocrComingSoonTooltip": "এতিয়াও উপলব্ধ নহয় - আপলোডবোৰে বিল্ট-ইন Tesseract OCR ব্যৱহাৰ কৰিব।"
+  },
+  "tutorPage": {
+    "backToHelp": "সহায়লৈ উভতি যাওক"
   },
   "knowledgePage": {
     "knowledgeLabel": "জ্ঞান",
@@ -5758,6 +5941,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ইমেইল আৰু বহুতো সংযোগ কৰক, তাৰ পিছত প্ৰতিটোত কোনটো এজেণ্টে উত্তৰ দিব সেয়া বাছনি কৰক।",
     "channelsPoint1": "বিনামূলীয়া প্লেনত WhatsApp, Telegram আৰু ইমেইল",
     "channelsPoint2": "এজন নতুন প্ৰেৰকে প্ৰথমে আপোনাৰ অনুমোদনৰ বাবে অপেক্ষা কৰে",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage বা ইমেইল সংযোগ কৰক, তাৰ পিছত প্ৰতিটো চেনেলত কোনটো কাষ্টম এজেণ্টে উত্তৰ দিব সেয়া বাছক।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage আৰু ইমেইল",
     "toolsTitle": "ইন্টিগ্ৰেচনবোৰে এজেণ্টক সঁজুলি দিয়ে",
     "toolsBody": "এটা এজেণ্টে কথা-বতৰাৰ মাজত কি ব্যৱহাৰ কৰিব পাৰে সেয়া অন কৰক: ৱেব চাৰ্ছ, ডাটাবেচ, MCP চাৰ্ভাৰ, আৰু আপোনাৰ নিজৰ স্ক্ৰীপ্ট।",
     "toolsPoint1": "ইয়াত সক্ষম কৰক, তাৰ পিছত প্ৰতিটো এজেণ্টৰ বাবে অনুমতি দিয়ক",
@@ -14001,5 +14186,1495 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "ৱৰ্কস্পেচ ছেটিংছ",
+      "agent": "এজেণ্ট ছেটিংছ"
+    },
+    "agentMissing": "এটা এজেণ্টৰ ছেটিংছ চাবলৈ তাক বাছক।",
+    "scopeNote": {
+      "agent": "এই মানবোৰ কেৱল এই এজেণ্টৰ বাবে প্ৰযোজ্য। আপুনি ইয়াত যি অভাৰৰাইড নকৰে সেয়া আপোনাৰ ৱৰ্কস্পেচ ছেটিংছৰ পৰা উত্তৰাধিকাৰসূত্ৰে আহে।"
+    },
+    "loading": "ছেটিংছ লোড হৈ আছে",
+    "loadError": "ছেটিংছ লোড কৰিব পৰা নগ'ল। {message}",
+    "retry": "পুনৰ চেষ্টা কৰক",
+    "filters": {
+      "label": "ছেটিংছ ফিল্টাৰ কৰক",
+      "search": "ছেটিংছ সন্ধান কৰক",
+      "searchPlaceholder": "নাম বা বিৱৰণৰ দ্বাৰা সন্ধান কৰক",
+      "group": "গোটৰ দ্বাৰা ফিল্টাৰ কৰক",
+      "allGroups": "সকলো গোট",
+      "risk": "বিপদৰ দ্বাৰা ফিল্টাৰ কৰক",
+      "allRisks": "সকলো বিপদৰ স্তৰ",
+      "clear": "ফিল্টাৰ মচক"
+    },
+    "empty": {
+      "none": "ইয়াত আপুনি সলনি কৰিব পৰা কোনো ছেটিংছ নাই।",
+      "filtered": "কোনো ছেটিং আপোনাৰ ফিল্টাৰৰ সৈতে মিলা নাই।"
+    },
+    "saved": "ছেভ হ'ল। আপডেট হোৱা ছেটিংছ: {count}।",
+    "saveFailed": "ছেভ হোৱা নাই। বিফল ছেটিংছ: {count}। আপোনাৰ সম্পাদনা এতিয়াও ফৰ্মত আছে।",
+    "resetDone": "{label}এ এতিয়া উত্তৰাধিকাৰসূত্ৰে পোৱা মান ব্যৱহাৰ কৰে।",
+    "resetFailed": "ছেটিং ৰিছেট কৰিব পৰা নগ'ল।",
+    "unsaved": "ছেভ নকৰা পৰিৱৰ্তন",
+    "discardOne": "পৰিৱৰ্তন বাতিল কৰক",
+    "restartRequired": "ৰিষ্টাৰ্ট প্ৰয়োজন",
+    "source": {
+      "default": "ডিফল্ট",
+      "platform": "প্লেটফৰ্ম",
+      "tenant": "ৱৰ্কস্পেচ",
+      "agent": "এজেণ্ট",
+      "tenantInherited": "ৱৰ্কস্পেচৰ পৰা উত্তৰাধিকাৰসূত্ৰে",
+      "aria": "মানৰ উৎস: {source}"
+    },
+    "sourceHelp": {
+      "default": "কোনেও ইয়াক সলনি কৰা নাই। ই সামগ্ৰীৰ সৈতে অহা মান ব্যৱহাৰ কৰে।",
+      "platform": "আপোনাৰ প্লেটফৰ্ম অপাৰেটৰে ইয়াক সম্পূৰ্ণ ডিপ্লইমেণ্টৰ বাবে ছেট কৰিছে।",
+      "tenant": "আপোনাৰ ৱৰ্কস্পেচে ডিফল্ট অভাৰৰাইড কৰে। উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ উভতিবলৈ ৰিছেট কৰক।",
+      "agent": "এই এজেণ্টে ৱৰ্কস্পেচৰ মান অভাৰৰাইড কৰে। ৱৰ্কস্পেচৰ মান পুনৰ উত্তৰাধিকাৰসূত্ৰে পাবলৈ ৰিছেট কৰক।",
+      "tenantInherited": "এই এজেণ্টৰ নিজৰ কোনো অভাৰৰাইড নাই, সেয়েহে ই ৱৰ্কস্পেচৰ মান ব্যৱহাৰ কৰে। ইয়াক সম্পাদনা কৰিলে কেৱল এই এজেণ্টৰ বাবে অভাৰৰাইড তৈয়াৰ হয়।",
+      "lockedSuffix": "ই লক কৰা আছে, সেয়েহে ইয়াত সলনি কৰিব নোৱাৰি।"
+    },
+    "risk": {
+      "low": "কম বিপদ",
+      "medium": "মধ্যম বিপদ",
+      "high": "অধিক বিপদ",
+      "security": "সুৰক্ষা"
+    },
+    "bool": {
+      "on": "On",
+      "off": "বন্ধ"
+    },
+    "value": {
+      "unset": "ছেট কৰা হোৱা নাই",
+      "empty": "খালী"
+    },
+    "select": {
+      "placeholder": "এটা বিকল্প বাছক"
+    },
+    "slider": {
+      "label": "{label} (শ্লাইডাৰ)"
+    },
+    "duration": {
+      "unitLabel": "{label}ৰ একক"
+    },
+    "units": {
+      "chars": "আখৰ",
+      "tokens": "টোকেন",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "ছেকেণ্ড",
+      "min": "মিনিট",
+      "h": "ঘণ্টা"
+    },
+    "groups": {
+      "agent": "এজেণ্ট ৰানটাইম",
+      "approvals": "অনুমোদন",
+      "quality": "গুণগত মান পৰীক্ষা",
+      "guardrails": "গাৰ্ডৰেইল",
+      "chat": "চেট",
+      "tools": "টুল",
+      "memory": "মেম'ৰী",
+      "knowledge": "জ্ঞান",
+      "delegation": "কাম অৰ্পণ",
+      "aux": "সহায়ক মডেল",
+      "routing": "মডেল ৰাউটিং"
+    },
+    "errors": {
+      "required": "এটা মান দিয়ক।",
+      "notNumber": "এটা সংখ্যা দিয়ক।",
+      "notInteger": "এটা পূৰ্ণ সংখ্যা দিয়ক।",
+      "belowMin": "অতি কমেও {min} হ'ব লাগিব।",
+      "aboveMax": "সৰ্বাধিক {max} হ'ব লাগিব।",
+      "notAllowed": "তালিকাভুক্ত বিকল্পৰ ভিতৰত এটা বাছক।",
+      "tooShort": "অতি চুটি। অতি কমেও {min} ব্যৱহাৰ কৰক।",
+      "tooLong": "অতি দীঘল। সৰ্বাধিক {max} ব্যৱহাৰ কৰক।",
+      "precision": "এই এককে ইয়াক সঠিকভাৱে প্ৰকাশ কৰিব নোৱাৰে। আটাইতকৈ সৰু এককৰ পূৰ্ণ সংখ্যা ব্যৱহাৰ কৰক বা সৰু একক বাছক।",
+      "serverRange": "অনুমতি প্ৰাপ্ত পৰিসৰ: {min}ৰ পৰা {max}।",
+      "serverOptions": "অনুমতি প্ৰাপ্ত মান: {options}।",
+      "server": {
+        "invalid": "ছাৰ্ভাৰে এই মান গ্ৰহণ নকৰিলে: {message}",
+        "locked": "এই ছেটিং আপোনাৰ প্ৰশাসকে লক কৰিছে, সেয়েহে আপোনাৰ পৰিৱৰ্তন ছেভ নহ'ল।",
+        "notFound": "এই ছেটিং আৰু নাই।",
+        "forbidden": "এই ছেটিং সলনি কৰাৰ অনুমতি আপোনাৰ নাই।",
+        "reasonRequired": "এই পৰিৱৰ্তনৰ বাবে এটা কাৰণ প্ৰয়োজন। এটা দিয়ক আৰু পুনৰ চেষ্টা কৰক।",
+        "network": "ছাৰ্ভাৰত পাব পৰা নগ'ল, সেয়েহে আপোনাৰ পৰিৱৰ্তন ছেভ নহ'ল। {message}",
+        "other": "পৰিৱৰ্তন ছেভ কৰিব পৰা নগ'ল: {message}"
+      }
+    },
+    "effective": "এতিয়া প্ৰযোজ্য: {value}",
+    "hint": {
+      "range": "অনুমতি প্ৰাপ্ত: {min}ৰ পৰা {max}।",
+      "min": "নূন্যতম: {min}।",
+      "max": "সৰ্বাধিক: {max}।",
+      "default": "ডিফল্ট: {value}।",
+      "securityStricter": "এটা সুৰক্ষা ছেটিংক কেৱল প্লেটফৰ্মৰ মানতকৈ কঠোৰ কৰিব পাৰি, কেতিয়াও দুৰ্বল নহয়।",
+      "inherited": "আপুনি ইয়াক ৰিছেট কৰিলে, ই ইয়াত উভতি যাব: {value}।"
+    },
+    "locked": {
+      "withReason": "আপোনাৰ প্ৰশাসকে লক কৰা: {reason}",
+      "noReason": "আপোনাৰ প্ৰশাসকে লক কৰা। ইয়াত সলনি কৰিব নোৱাৰি।"
+    },
+    "blocked": {
+      "role": "আপোনাৰ ভূমিকাই এই ছেটিং সলনি কৰিব নোৱাৰে। এজন ৱৰ্কস্পেচ প্ৰশাসকক সোধক।",
+      "scope": "এই ছেটিং ইয়াত অভাৰৰাইড কৰিব নোৱাৰি।",
+      "readOnly": "ছেটিংছ এতিয়া কেৱল পঢ়িবলৈ।",
+      "adminOnly": "এই সুৰক্ষা ছেটিং কেৱল ৱৰ্কস্পেচ প্ৰশাসকেহে সলনি কৰিব পাৰে। আপুনি ইয়াৰ মান ইয়াত চাব পাৰে, কিন্তু সম্পাদনা কৰিব নোৱাৰে।"
+    },
+    "reset": {
+      "button": "উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ ৰিছেট কৰক",
+      "aria": "উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ ৰিছেট কৰক: {label}"
+    },
+    "help": {
+      "show": "অধিক বিৱৰণ",
+      "hide": "বিৱৰণ লুকুৱাওক"
+    },
+    "history": {
+      "button": "ইতিহাস",
+      "open": "ইতিহাস: {label}",
+      "title": "ইতিহাস: {label}",
+      "scopeTenant": "ৱৰ্কস্পেচৰ পৰিৱৰ্তন",
+      "scopeAgent": "এই এজেণ্টৰ পৰিৱৰ্তন",
+      "close": "ইতিহাস বন্ধ কৰক",
+      "loading": "ইতিহাস লোড হৈ আছে",
+      "error": "ইতিহাস লোড কৰিব পৰা নগ'ল। {message}",
+      "empty": "এতিয়ালৈকে কোনো পৰিৱৰ্তন ৰেকৰ্ড কৰা হোৱা নাই।",
+      "listLabel": "পৰিৱৰ্তনৰ ইতিহাস, নতুনটো প্ৰথমে",
+      "version": "সংস্কৰণ {version}",
+      "before": "আগতে:",
+      "after": "পাছত:",
+      "by": "সলনি কৰোঁতা",
+      "unknownActor": "অজ্ঞাত",
+      "reason": "কাৰণ:"
+    },
+    "savebar": {
+      "count": "ছেভ নকৰা পৰিৱৰ্তন: {count}।",
+      "invalid": "ছেভ কৰাৰ আগতে হাইলাইট কৰা ফিল্ড সংশোধন কৰক। সংশোধন কৰিবলগীয়া ফিল্ড: {count}।",
+      "discard": "পৰিৱৰ্তন বাতিল কৰক",
+      "save": "পৰিৱৰ্তন ছেভ কৰক",
+      "saving": "ছেভ কৰি আছে"
+    },
+    "risky": {
+      "title": "বিপদপূৰ্ণ পৰিৱৰ্তন নিশ্চিত কৰক ({count})",
+      "description": "এই ছেটিংছে আপোনাৰ এজেণ্টে কেনেকৈ আচৰণ কৰে বা তেওঁলোকক কি কৰিবলৈ অনুমতি আছে সেয়া সলনি কৰে। প্ৰতিটো পৰিৱৰ্তনৰ সমীক্ষা কৰক আৰু আপুনি কিয় কৰি আছে সেয়া বুজাওক। কাৰণ অডিট লগত সংৰক্ষণ কৰা হয়।",
+      "descriptionSecurity": "এইবোৰৰ অতি কমেও এটা সুৰক্ষা ছেটিং। ইয়াক কেৱল প্লেটফৰ্মৰ মানতকৈ কঠোৰ কৰিব পাৰি। প্ৰতিটো পৰিৱৰ্তনৰ সমীক্ষা কৰক আৰু আপুনি কিয় কৰি আছে সেয়া বুজাওক। কাৰণ অডিট লগত সংৰক্ষণ কৰা হয়।",
+      "listLabel": "নিশ্চিত কৰিবলগীয়া পৰিৱৰ্তন",
+      "from": "পৰা",
+      "to": "to",
+      "securityNote": "সুৰক্ষা ছেটিং: ই প্লেটফৰ্মৰ মানতকৈ দুৰ্বল হ'ব নোৱাৰে।",
+      "consequence": "ই কি সলনি কৰে:",
+      "reasonLabel": "এই পৰিৱৰ্তনৰ কাৰণ",
+      "reasonPlaceholder": "উদাহৰণ: সহায়তা দলৰ দীঘল তদন্তৰ বাবে সীমা বঢ়োৱা",
+      "reasonHint": "প্ৰয়োজনীয়, অতি কমেও {min}টা আখৰ। পৰিৱৰ্তন কৰোঁতা আৰু পুৰণি আৰু নতুন মানৰ সৈতে ছেভ কৰা হয়।",
+      "acknowledge": "মই এই সুৰক্ষা পৰিৱৰ্তনৰ পৰিণাম বুজি পাওঁ।",
+      "cancel": "বাতিল কৰক",
+      "confirm": "নিশ্চিত কৰি ছেভ কৰক",
+      "resetNote": "ৰিছেট: অভাৰৰাইড আঁতৰোৱা হয় আৰু ছেটিং ই উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ উভতি যায়।"
+    },
+    "strictness": {
+      "higher": "অধিক মানে অধিক কঠোৰ: অধিক মান গ্ৰহণ কৰা হয়, কম প্ৰত্যাখ্যান কৰা হয়।",
+      "lower": "কম মানে অধিক কঠোৰ: কম মান গ্ৰহণ কৰা হয়, অধিক প্ৰত্যাখ্যান কৰা হয়।",
+      "enumOrder": "বিকল্পবোৰ আটাইতকৈ কম কঠোৰৰ পৰা আটাইতকৈ অধিক কঠোৰ ক্ৰমত আছে: {options}। আপুনি কেৱল কঠোৰ প্ৰান্তৰ ফাললৈহে যাব পাৰে।"
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "বাকী",
+    "status_APPROVED": "অনুমোদিত",
+    "status_REJECTED": "প্ৰত্যাখ্যাত",
+    "status_EXPIRED": "মিয়াদ শেষ",
+    "status_EXECUTION_FAILED": "কাৰ্যকৰী বিফল",
+    "status_DEAD_LETTERED": "ডেড লেটাৰ",
+    "filtersLabel": "অনুৰোধ ফিল্টাৰ কৰক",
+    "filterAgentLabel": "এজেণ্টৰ দ্বাৰা ফিল্টাৰ কৰক",
+    "filterToolLabel": "টুলৰ দ্বাৰা ফিল্টাৰ কৰক",
+    "filterAgeLabel": "বয়সৰ দ্বাৰা ফিল্টাৰ কৰক",
+    "filterAnyAgent": "যিকোনো এজেণ্ট",
+    "filterAnyTool": "যিকোনো টুল",
+    "filterAnyAge": "যিকোনো বয়স",
+    "age_newer1h": "১ ঘণ্টাতকৈ নতুন",
+    "age_older1h": "১ ঘণ্টাতকৈ পুৰণি",
+    "age_older24h": "১ দিনতকৈ পুৰণি",
+    "age_older7d": "৭ দিনতকৈ পুৰণি",
+    "filtersClear": "ফিল্টাৰ মচক",
+    "filterWindowNote": "আটাইতকৈ নতুন {count}টা অনুৰোধ ফিল্টাৰ কৰি আছে। পুৰণিবোৰ অন্তৰ্ভুক্ত নহয়।",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time}ত মিয়াদ শেষ হ'ব",
+    "expiresAt": "কোনেও সিদ্ধান্ত নললে {time}ত স্বয়ংক্ৰিয়ভাৱে বন্ধ হ'ব",
+    "overdue": "সময়সীমা পাৰ হ'ল, পৰৱৰ্তী পৰিষ্কাৰত বন্ধ হ'ব",
+    "neverExpires": "এই ৱৰ্কস্পেচে অপেক্ষা কৰি থকা অনুৰোধৰ মিয়াদ শেষ নকৰে।",
+    "expiredNote": "{time}ত মিয়াদ শেষ হ'ল: সময়মতে কোনেও সিদ্ধান্ত নল'লে",
+    "expiredReasonPrefix": "মিয়াদ শেষ:",
+    "auditExpired": "মিয়াদ শেষ, সময়মতে কোনেও সিদ্ধান্ত নল'লে",
+    "riskLow": "কম বিপদ",
+    "riskMedium": "মধ্যম বিপদ",
+    "riskHigh": "অধিক বিপদ",
+    "riskEstimateNote": "বিপদ টুলৰ নামৰ পৰা কৰা এটা অনুমান। প্লেটফৰ্মে টুলৰ শ্ৰেণীবিভাজন নকৰে, সেয়েহে অনুমোদন কৰাৰ আগতে আৰ্গুমেণ্ট পঢ়ক।",
+    "riskWhoDecides": "কি অনুমোদনৰ বাবে অপেক্ষা কৰিব সেয়া কোনে নিৰ্ধাৰণ কৰে?",
+    "previewGoal": "ই যি কামত কাম কৰি আছিল:",
+    "previewArguments": "আৰ্গুমেণ্ট",
+    "previewNoArguments": "এই কলৰ বাবে কোনো আৰ্গুমেণ্ট ৰেকৰ্ড কৰা হোৱা নাই।",
+    "previewRedacted": "{count}টা সংবেদনশীল যেন লগা মান ইয়াত লুকুৱাই ৰখা হৈছে। আপুনি অনুমোদন কৰিলে সেইবোৰ তথাপি টুললৈ পঠোৱা হয়।",
+    "previewTruncated": "এই আৰ্গুমেণ্টবোৰ সম্পূৰ্ণকৈ দেখুৱাবলৈ বেছি দীঘল, সেয়েহে এই অনুৰোধ ইয়াৰ পৰা অনুমোদন কৰিব নোৱাৰি।",
+    "approveBlockedTooLong": "আপুনি সম্পূৰ্ণ অনুৰোধৰ সমীক্ষা কৰিব নোৱাৰাৰ বাবে অনুমোদন বন্ধ কৰা আছে। আপুনি তথাপি ইয়াক প্ৰত্যাখ্যান কৰিব পাৰে।",
+    "ifApproveLabel": "আপুনি অনুমোদন কৰিলে:",
+    "ifApprove": "{tool} ওপৰৰ আৰ্গুমেণ্টৰ সৈতে এতিয়াই চলে, আৰু এজেণ্টে ইয়াৰ ফলাফল ব্যৱহাৰ কৰি কাম অব্যাহত ৰাখে।",
+    "ifDenyLabel": "আপুনি প্ৰত্যাখ্যান কৰিলে:",
+    "ifDeny": "{tool} নচলে। এজেণ্টক কোৱা হয় যে আপুনি নাই ক'লে, কাৰণ দিলে তাৰ সৈতে, আৰু ই তাৰ অবিহনে আগবাঢ়ে।",
+    "whyGated": "এজেণ্টে {tool} ব্যৱহাৰ কৰিবলৈ বিচাৰিছিল। এজেণ্টক তত্ত্বাৱধানত ছেট কৰা থকাৰ বাবে, বা এই ৱৰ্কস্পেচে সেই টুলৰ বাবে অনুমোদন বাধ্যতামূলক কৰা বাবে ইয়াক আপোনাৰ সিদ্ধান্তৰ বাবে ৰখা হৈছিল।",
+    "denyReasonLabel": "প্ৰত্যাখ্যান কৰিলে কাৰণ (ঐচ্ছিক)",
+    "denyReasonPlaceholder": "উদাহৰণ: ভুল প্ৰাপক, পঠোৱাৰ আগতে মোক সোধক",
+    "denyReasonHelp": "আপুনি প্ৰত্যাখ্যান কৰিলে, এজেণ্টে এই কাৰণ প্ৰত্যাখ্যাত কলৰ ফলাফল হিচাপে পঢ়ে আৰু নিজকে খাপ খুৱাই লয়। কাৰণ অবিহনে প্ৰত্যাখ্যান কৰিবলৈ খালী ৰাখক।",
+    "denyButton": "প্ৰত্যাখ্যান কৰক",
+    "detailRegionLabel": "অনুৰোধৰ বিৱৰণ",
+    "sessionLabel": "বাৰ্তালাপ",
+    "linkOpenAgent": "এজেণ্ট খোলক",
+    "linkInspectTurns": "ইয়াৰ টাৰ্ন পৰীক্ষা কৰক",
+    "continuationLabel": "এজেণ্টে তাৰ পিছত কি কৰিলে",
+    "continuationCompleted": "এজেণ্টে কাম অব্যাহত ৰখা শেষ কৰিলে।",
+    "continuationFailed": "এই সিদ্ধান্তৰ পিছত এজেণ্টে অব্যাহত ৰাখিব নোৱাৰিলে।",
+    "continuationRetry": "ইয়াক অব্যাহত ৰাখিবলৈ কওক",
+    "retryMessage": "অনুগ্ৰহ কৰি কাম অব্যাহত ৰাখক।",
+    "lastDecisionTitle": "আপোনাৰ শেষ সিদ্ধান্ত: {tool}",
+    "lastDecisionClose": "বন্ধ কৰক",
+    "deepLinkNotFound": "সেই অনুমোদনৰ অনুৰোধ বিচাৰি পোৱা নগ'ল, বা আপুনি ইয়াক চাব নোৱাৰে।",
+    "selectAllLabel": "এই পৃষ্ঠাৰ সকলো বাকী টুল কল বাছক",
+    "selectRowLabel": "{tool}ৰ বাকী কল বাছক",
+    "bulkSelected": "{count}টা বাছনি কৰা হ'ল",
+    "bulkApprove": "বাছনি কৰাবোৰ অনুমোদন কৰক",
+    "bulkDeny": "বাছনি কৰাবোৰ প্ৰত্যাখ্যান কৰক",
+    "bulkClear": "বাছনি মচক",
+    "bulkCancel": "বাতিল কৰক",
+    "bulkDismiss": "অগ্ৰাহ্য কৰক",
+    "bulkMixedTools": "সামূহিক সিদ্ধান্তৰ বাবে বাছনি কৰা সকলো অনুৰোধ একেটা টুলৰ হ'ব লাগিব।",
+    "bulkNotLowRisk": "সামূহিক অনুমোদন কেৱল কম বিপদৰ টুল (লুকআপ)ৰ বাবে। প্ৰত্যাখ্যান যিকোনো এটা টুলৰ বাবে চলে, বা এইবোৰ এটা এটাকৈ সিদ্ধান্ত লওক।",
+    "bulkNotToolCall": "সামূহিক সিদ্ধান্তে কেৱল এজেণ্ট টুল কল সামৰি লয়।",
+    "bulkNotPending": "সামূহিক সিদ্ধান্তে কেৱল এতিয়াও বাকী থকা অনুৰোধ সামৰি লয়।",
+    "bulkConfirmApproveTitle": "{tool}ৰ {count}টা কল অনুমোদন কৰিব নে?",
+    "bulkConfirmApproveBody": "এইবোৰৰ প্ৰতিটোৱে তলত তালিকাভুক্ত নিজৰ আৰ্গুমেণ্টৰ সৈতে এতিয়াই {tool} চলায়, আৰু এজেণ্টে ফলাফল ব্যৱহাৰ কৰি আগবাঢ়ে। ইয়াক পূৰ্বাৱস্থালৈ ঘুৰাব নোৱাৰি।",
+    "bulkConfirmDenyTitle": "{tool}ৰ {count}টা কল প্ৰত্যাখ্যান কৰিব নে?",
+    "bulkConfirmDenyBody": "এইবোৰৰ একো নচলে। এজেণ্টক কোৱা হয় যে প্ৰতিটো কল প্ৰত্যাখ্যাত হ'ল, কাৰণ দিলে তাৰ সৈতে।",
+    "bulkConfirmApprove": "{count}টা অনুমোদন কৰক",
+    "bulkConfirmDeny": "{count}টা প্ৰত্যাখ্যান কৰক",
+    "bulkMore": "আৰু {count}টা",
+    "bulkProgress": "{count}ৰ ভিতৰত {done}টা সম্পূৰ্ণ",
+    "bulkResult": "{done}টাৰ সিদ্ধান্ত হ'ল, {failed}টা বিফল।",
+    "notifyOff": "মোক জনাওক",
+    "notifyOn": "জাননী চালু",
+    "notifyHelp": "এই টেব পটভূমিত থকাৰ সময়ত নতুন অনুৰোধ আহিলে ব্ৰাউজাৰ জাননী দেখুৱাওক",
+    "notifyUnsupported": "এই ব্ৰাউজাৰে জাননী দেখুৱাব নোৱাৰে।",
+    "notifyBlocked": "জাননী অৱৰোধ কৰা আছে। ইয়াক চালু কৰিবলৈ আপোনাৰ ব্ৰাউজাৰৰ ছাইট ছেটিংছত অনুমতি দিয়ক।",
+    "notifyTitle": "এটা এজেণ্ট অনুমোদনৰ বাবে অপেক্ষা কৰি আছে",
+    "notifyBodyOne": "{tool}ক আপোনাৰ সিদ্ধান্তৰ প্ৰয়োজন।",
+    "notifyBodyMany": "{count}টা অনুৰোধক আপোনাৰ সিদ্ধান্তৰ প্ৰয়োজন।",
+    "newArrived": "{count}টা নতুন অনুমোদনৰ অনুৰোধ আহিল।",
+    "rulesTitle": "এটা টুলৰ বাবে নিয়ম",
+    "rulesIntro": "এটা টুলে সদায় এজন ব্যক্তিৰ বাবে অপেক্ষা কৰিব নে কেতিয়াও নহয় সেয়া বাছক। এই নিয়ম অৰ্ধ-স্বায়ত্তত ছেট কৰা প্ৰতিটো এজেণ্টত প্ৰযোজ্য হয়।",
+    "rulesNeedsScope": "নিয়ম সলনি কৰিবলৈ আপোনাৰ অনুমোদনৰ অনুমতি লাগিব।",
+    "rulesToolLabel": "টুলৰ নাম",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "অনুৰোধত টুলটো যেনেকৈ দেখা যায় ঠিক তেনেকৈয়ে, উদাহৰণস্বৰূপে send_email।",
+    "rulesToolNameInvalid": "টুলৰ নামত খালী ঠাই নাথাকে।",
+    "rulesModeLabel": "কি হ'ব লাগে",
+    "rulesAskName": "সদায় সোধক",
+    "rulesAskHint": "এই টুলৰ প্ৰতিটো কলে এজন ব্যক্তিৰ অনুমোদনৰ বাবে অপেক্ষা কৰে।",
+    "rulesNeverName": "কেতিয়াও নসুধিব",
+    "rulesNeverHint": "এই টুলৰ কল কাৰো অনুমোদন অবিহনে তৎক্ষণাত চলে।",
+    "rulesNeverRiskyWarn": "এই টুলে বস্তু সলনি কৰা যেন লাগিছে। নিশ্চিত হওক।",
+    "rulesScopeNote": "নিয়ম সম্পূৰ্ণ ৱৰ্কস্পেচত প্ৰযোজ্য হয়, এটা এজেণ্টত নহয়। তত্ত্বাৱধানত থকা এজেণ্টে এতিয়াও সকলো কথাত সোধে, আৰু সম্পূৰ্ণ স্বায়ত্ত এজেণ্টে নিয়মে যিয়েই নকওক কেতিয়াও নুসুধে। আপুনি ছেট কৰা নিয়ম এতিয়ালৈকে ইয়াত তালিকাভুক্ত নহয়।",
+    "rulesSave": "নিয়ম ছেভ কৰক",
+    "rulesSaveFailed": "নিয়ম ছেভ কৰিব পৰা নগ'ল।",
+    "rulesSavedAsk": "{tool}এ সদায় অনুমোদন বিচাৰিব।",
+    "rulesSavedNever": "{tool}এ আৰু অনুমোদন নিবিচাৰিব।",
+    "rulesNeverConfirmTitle": "{tool} চলাৰ আগতে সোধা বন্ধ কৰিব নে?",
+    "rulesNeverConfirmBody": "প্ৰতিটো অৰ্ধ-স্বায়ত্ত এজেণ্টে কাৰো অনুমোদন অবিহনে {tool} চলাব। ই বস্তু সলনি কৰিব বা পঠাব পৰা যেন লাগিছে, আৰু ভুলটো উভতাব নোৱাৰি।",
+    "rulesNeverConfirmBodyLow": "প্ৰতিটো অৰ্ধ-স্বায়ত্ত এজেণ্টে নুসুধি {tool} চলাব। ই লুকআপৰ দৰে লাগিছে, সেয়েহে ই সাধাৰণতে সুৰক্ষিত।",
+    "rulesNeverConfirm": "সোধা বন্ধ কৰক",
+    "tiersTitle": "কি অনুমোদনৰ বাবে অপেক্ষা কৰিব সেয়া কোনে নিৰ্ধাৰণ কৰে?",
+    "tiersIntro": "প্ৰতিটো এজেণ্টৰ এটা স্বায়ত্ততাৰ স্তৰ থাকে। ৱৰ্কস্পেচৰ অনুমোদনৰ নিয়ম আদৌ ব্যৱহাৰ কৰা হ'ব নে নাই সেয়া ই নিৰ্ধাৰণ কৰে।",
+    "tierCurrent": "এই এজেণ্ট",
+    "tierConsequenceLabel": "ব্যৱহাৰত:",
+    "tierSupervisedName": "তত্ত্বাৱধানত",
+    "tierSupervisedWhat": "ৱৰ্কস্পেচৰ নিয়মে যিয়েই নকওক, প্ৰতিটো টুল কলে এজন ব্যক্তিৰ বাবে অপেক্ষা কৰে। ইয়াক প্ৰতি টাৰ্নত টুল পদক্ষেপৰ কম সীমাও দিয়া হয়।",
+    "tierSupervisedConsequence": "আটাইতকৈ সুৰক্ষিত, কিন্তু শাৰীত বহুত অনুৰোধ আৰু লেহেমীয়া এজেণ্টৰ আশা কৰক।",
+    "tierSemiName": "অৰ্ধ-স্বায়ত্ত",
+    "tierSemiWhat": "প্ৰতিটো টুলৰ বাবে ৱৰ্কস্পেচৰ নিয়মে নিৰ্ধাৰণ কৰে: পঠোৱা, ডিলিট আৰু পেমেণ্টৰ দৰে বিপদপূৰ্ণ টুলে ডিফল্ট হিচাপে সোধে, বাকীবোৰ চলে।",
+    "tierSemiConsequence": "এটা ভাল ডিফল্ট। আপোনাৰ প্ৰতি-টুল নিয়ম ইয়াত কাৰ্যকৰী হয়।",
+    "tierFullName": "সম্পূৰ্ণ স্বায়ত্ত",
+    "tierFullWhat": "কোনো টুল কলে কেতিয়াও অনুমোদনৰ বাবে অপেক্ষা নকৰে আৰু এজেণ্টে টুল পদক্ষেপৰ অধিক সীমা পায়। প্ৰতি-টুল নিয়ম অৱজ্ঞা কৰা হয়।",
+    "tierFullConsequence": "ই নুসুধি কাম কৰে। কেৱল সেই এজেণ্টৰ বাবে ব্যৱহাৰ কৰক যাৰ ভুল সহজে পূৰ্বাৱস্থালৈ ঘুৰাব পাৰি।",
+    "tiersRuleNote": "টুল নিয়ম (সদায় সোধক, কেতিয়াও নুসুধিব) কেৱল অৰ্ধ-স্বায়ত্ত এজেণ্টৰ বাবে গুৰুত্বপূৰ্ণ।",
+    "agentModeTitle": "এই এজেণ্টক অনুমোদন কেতিয়া লাগে?",
+    "agentModeSupervised": "এই এজেণ্ট তত্ত্বাৱধানত আছে: প্ৰতিটো টুল কলে এজন ব্যক্তিৰ বাবে অপেক্ষা কৰে, আৰু প্ৰতি-টুল নিয়ম অৱজ্ঞা কৰা হয়।",
+    "agentModeSemi": "এই এজেণ্ট অৰ্ধ-স্বায়ত্ত: প্ৰতিটো টুলে ৱৰ্কস্পেচৰ নিয়ম অনুসৰণ কৰে। পঠোৱা, ডিলিট আৰু পেমেণ্টে ডিফল্ট হিচাপে সোধে।",
+    "agentModeFull": "এই এজেণ্ট সম্পূৰ্ণ স্বায়ত্ত: ই কেতিয়াও অনুমোদনৰ বাবে অপেক্ষা নকৰে, আৰু প্ৰতি-টুল নিয়ম অৱজ্ঞা কৰা হয়।",
+    "agentModeQueueLink": "এই এজেণ্টৰ অনুৰোধ চাওক",
+    "agentModeRulesLink": "এটা টুলৰ বাবে নিয়ম ছেট কৰক",
+    "agentModeShowTiers": "তিনিটা স্তৰৰ তুলনা কৰক",
+    "agentModeHideTiers": "তুলনা লুকুৱাওক",
+    "agentModeScopeNote": "ওপৰৰ স্বায়ত্ততাৰ বাছনিৰে স্তৰ সলনি কৰক। টুল নিয়ম সম্পূৰ্ণ ৱৰ্কস্পেচৰ, প্ৰতি এজেণ্টৰ নহয়।",
+    "policyThenApprovalNote": "এই নিয়মবোৰ পাৰ হোৱা কলে তথাপি এজন ব্যক্তিৰ বাবে অপেক্ষা কৰিব পাৰে। সেয়া এজেণ্টৰ স্বায়ত্ততাৰ স্তৰৰ ওপৰত নিৰ্ভৰ কৰে, যিটো তলত বুজোৱা হৈছে।",
+    "chatReasonToggle": "এটা কাৰণ যোগ কৰক",
+    "chatReviewInQueue": "শাৰীত সমীক্ষা কৰক"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "ইভেণ্ট ফিল্টাৰ কৰক",
+    "tlFilterCategories": "ইভেণ্টৰ প্ৰকাৰ",
+    "tlCatIntake": "ইনটেক",
+    "tlCatModel": "মডেল",
+    "tlCatTool": "টুল",
+    "tlCatApproval": "অনুমোদন",
+    "tlCatContinuation": "নিৰন্তৰতা",
+    "tlCatRetry": "পুনৰ চেষ্টা আৰু ফেইলঅভাৰ",
+    "tlCatGuardrail": "গাৰ্ডৰেইল",
+    "tlCatCache": "কেছ",
+    "tlCatVerify": "পৰীক্ষা",
+    "tlCatFinish": "সমাপ্তি",
+    "tlProblemsOnly": "কেৱল সমস্যা",
+    "tlSearch": "ইভেণ্ট সন্ধান কৰক",
+    "tlSearchPlaceholder": "টুল, মডেল, গাৰ্ড বা অৱস্থা",
+    "tlClearFilters": "ফিল্টাৰ মচক",
+    "tlShowing": "{total}টা ইভেণ্টৰ ভিতৰত {shown}টা দেখুৱাই আছে",
+    "tlNoMatch": "কোনো ইভেণ্ট এই ফিল্টাৰৰ সৈতে মিলা নাই।",
+    "tlSevOk": "সফল",
+    "tlSevInfo": "তথ্য",
+    "tlSevWarn": "মনোযোগ প্ৰয়োজন",
+    "tlSevError": "বিফল",
+    "tlIntake": "টাৰ্ন আৰম্ভ হ'ল: {chars}টা আখৰ, {tools}টা টুল, {attachments}টা সংলগ্ন",
+    "tlRunTools": "এই ৰানৰ বাবে টুল",
+    "tlRunToolsNone": "কোনো নাই (কেৱল লিখনী)",
+    "tlModelCall": "{model} ({provider})লৈ মডেল কল, ৰুট {route}",
+    "tlFailover": "{model} ({provider})লৈ ফেইলঅভাৰ হ'ল",
+    "tlRetryModel": "{model} ({provider})ত পুনৰ চেষ্টা কৰা হ'ল, ৰুট {route}",
+    "tlRetry": "পুনৰ চেষ্টা: {guard} ({outcome})",
+    "tlCacheHit": "ৰেস্পনচ কেছৰ পৰা উত্তৰ দিয়া হ'ল",
+    "tlToolCall": "টুল কল {tool}: {status}",
+    "tlApprovalRequested": "{tool} চলাৰ আগতে অনুমোদন বিচৰা হ'ল",
+    "tlApprovalDecided": "{tool}ৰ বাবে অনুমোদনৰ সিদ্ধান্ত হ'ল: {decision}",
+    "tlApprovalAutoAllowed": "{tool} নুসুধিয়াকৈ চলিল: তত্ত্বাৱধানত কেৱল-পঢ়া কল",
+    "tlContinuation": "নিৰন্তৰতা: {guard} ({outcome})",
+    "tlGuard": "গাৰ্ডৰেইল {guard}: {outcome}",
+    "tlVerifyPassed": "পৰীক্ষা উত্তীৰ্ণ: {check}",
+    "tlVerifyFailed": "পৰীক্ষা অনুত্তীৰ্ণ: {check}",
+    "tlFinish": "সমাপ্ত: {status} (উত্তৰত {chars}টা আখৰ)",
+    "tlOther": "ইভেণ্ট {type}",
+    "reasonFallbackProvider": "প্ৰাথমিক মডেল বিফল হ'ল, সেয়েহে টাৰ্ন এজেণ্টৰ ফলবেক প্ৰদানকাৰীলৈ গ'ল।",
+    "reasonToolsDisabledRetry": "প্ৰদানকাৰীয়ে টুল-কলৰ ইতিহাস প্ৰত্যাখ্যান কৰিলে, সেয়েহে টাৰ্নৰ উত্তৰ আৰু এবাৰ টুল অবিহনে দিয়া হ'ল।",
+    "reasonRetryOther": "মডেল কল পুনৰাবৃত্তি কৰা হ'ল।",
+    "reasonToolCallRetry": "মডেলে নিজৰ উত্তৰ বিকৃত টুল কলেৰে শেষ কৰিলে, সেয়েহে তাক পুনৰ সোধা হ'ল।",
+    "reasonCutOff": "উত্তৰ দৈৰ্ঘ্যৰ সীমাত কাটি গ'ল, সেয়েহে মডেলক অব্যাহত ৰাখিবলৈ কোৱা হ'ল।",
+    "reasonToolsContinue": "টুল কলৰ পিছত মডেলৰ অধিক পদক্ষেপৰ প্ৰয়োজন হ'ল, সেয়েহে টাৰ্ন অব্যাহত থাকিল।",
+    "reasonToolBlocked": "টুলৰ সলনি কোনো গাৰ্ড, নীতি, হুক বা সীমাই উত্তৰ দিলে, সেয়েহে ই নচলিল।",
+    "reasonToolParked": "কলটো এজন ব্যক্তিৰ অনুমোদনৰ বাবে অপেক্ষা কৰি আছে; টুল চলা নাই।",
+    "reasonGuardAction": "এটা গাৰ্ডৰেইলে উত্তৰ সলনি কৰিলে বা ৰখাই ৰাখিলে।",
+    "tlAtStart": "আৰম্ভণিৰ পৰা",
+    "tlGap": "পূৰ্বৰ ইভেণ্টৰ পৰা",
+    "tlDuration": "সময়সীমা",
+    "tlTokens": "ইনপুট / আউটপুট টোকেন",
+    "tlCost": "খৰচ",
+    "tlDetails": "হেচ আৰু কেঁচা সাৰাংশ",
+    "tlArgsHash": "আৰ্গুমেণ্টৰ হেচ",
+    "tlResultDigest": "ফলাফলৰ ডাইজেষ্ট",
+    "tlContentNote": "আৰ্গুমেণ্ট আৰু ফলাফল কেতিয়াও সংৰক্ষণ কৰা নহয়। টুল কলৰ বাবে টাইমলাইনে তাৰ অৱস্থা, সময়সীমা আৰু তাৰ আৰ্গুমেণ্ট আৰু ফলাফলৰ হেচ দেখুৱায়, সিহঁতৰ বিষয়বস্তু নহয়।",
+    "tlStatFinish": "সমাপ্তিৰ কাৰণ",
+    "tlStillOpen": "শেষ হোৱা নাই",
+    "tlProblemCount": "{count}টা ইভেণ্টত মনোযোগ প্ৰয়োজন",
+    "tlStatRetries": "পুনৰ চেষ্টা আৰু ফেইলঅভাৰ",
+    "tlStatContinuations": "নিৰন্তৰতা",
+    "tlStatApprovals": "অনুমোদন",
+    "tlStatTokens": "ইনপুট / আউটপুট টোকেন",
+    "tlTokensNotRecorded": "এই টাৰ্নৰ বাবে ৰেকৰ্ড কৰা হোৱা নাই",
+    "tlTokensInOut": "ইনপুট / আউটপুট",
+    "tlCopyTurnId": "টাৰ্ন ID কপি কৰক",
+    "tlCopyTurnIdShort": "ID কপি কৰক",
+    "tlCopied": "টাৰ্ন ID কপি হ'ল।",
+    "tlCopyFailed": "কপি কৰিব পৰা নগ'ল। ID নিৰ্বাচন কৰি হাতেৰে কপি কৰক।",
+    "sessTitle": "এটা ছেশ্বনৰ টাৰ্ন",
+    "sessSubtitle": "ৰেকৰ্ড কৰা টাৰ্ন নতুনটো প্ৰথমে চাবলৈ এটা চেট ছেশ্বন বাছক। চেট বাৰ্তাৰ টাৰ্ন চাওক লিংক খুলিলে ই আপোনাৰ বাবে নিজে পূৰণ হয়।",
+    "sessionIdLabel": "ছেশ্বন ID",
+    "sessionIdPlaceholder": "চেট ছেশ্বন ID",
+    "sessFind": "টাৰ্ন বিচাৰক",
+    "sessInvalid": "এজেণ্ট ID (এটা UUID) আৰু ছেশ্বন ID দিয়ক।",
+    "sessLoading": "ছেশ্বনৰ টাৰ্ন লোড হৈ আছে...",
+    "sessUnavailableTitle": "ছেশ্বন সন্ধান উপলব্ধ নহয়",
+    "sessUnavailableBody": "এই ছাৰ্ভাৰে এটা ছেশ্বনৰ টাৰ্ন তালিকাভুক্ত কৰিব নোৱাৰে। ইয়াৰ সলনি তলত ID ৰ দ্বাৰা এটা টাৰ্ন খোলক।",
+    "sessErrorTitle": "ছেশ্বনৰ টাৰ্ন লোড কৰিব পৰা নগ'ল",
+    "sessEmptyTitle": "এই ছেশ্বনত কোনো জাৰ্নেল কৰা টাৰ্ন নাই",
+    "sessEmptyBody": "ছেশ্বনে একো ৰেকৰ্ড কৰা নাই। হয় ছেশ্বন ID ভুল, নহয় তাৰ টাৰ্ন চলাৰ সময়ত টাৰ্ন জাৰ্নেল বন্ধ আছিল।",
+    "sessListLabel": "{count}টা জাৰ্নেল কৰা টাৰ্ন",
+    "sessEvents": "{count}টা ইভেণ্ট",
+    "sessStatusOpen": "খোলক",
+    "sessOpen": "টাইমলাইন খোলক",
+    "sessOpened": "তলত দেখুওৱা হৈছে"
+  },
+  "evalControls": {
+    "cancel": "বাতিল কৰক",
+    "saving": "ছেভ কৰি আছে...",
+    "saved": "ছেভ হ'ল।",
+    "saveMode": "ৰিপ্লে মোড ছেভ কৰক",
+    "discard": "পৰিৱৰ্তন বাতিল কৰক",
+    "saveFailed": "ৰিপ্লে মোড ছেভ কৰিব পৰা নগ'ল।",
+    "unsavedChanges": "ছেভ নকৰা পৰিৱৰ্তন",
+    "modeTitle": "এই ডেটাছেট কেনেকৈ ৰিপ্লে হয়",
+    "modeHelp": "ৰিপ্লেয়ে এজেণ্টৰ টুল ব্যৱহাৰ কৰিব পাৰিব নে নাই বাছক। ই পৰৱৰ্তী ৰানে কি জোখে সেয়া সলনি কৰে।",
+    "modeTextOnly": "কেৱল লিখনী",
+    "modeTextOnlyHelp": "এজেণ্টে তাৰ টুল অবিহনে উত্তৰ দিয়ে। সুৰক্ষিত: প্ৰকৃততে একো নহয়। প্ৰত্যাশিত-টুল পৰীক্ষা পূৰণ কৰিব নোৱাৰি।",
+    "modeFull": "টুলৰ সৈতে সম্পূৰ্ণ পাইপলাইন",
+    "modeFullHelp": "এজন প্ৰকৃত ব্যৱহাৰকাৰীয়ে পোৱা একেবোৰ টুল, গাৰ্ডৰেইল আৰু পদক্ষেপৰ সীমা। প্ৰত্যাশিত-টুল আৰু ট্ৰেজেক্টৰী পৰীক্ষাৰ বাবে প্ৰয়োজনীয়।",
+    "modeFullNote": "যিবোৰ টুলে কেৱল পঢ়ে সেইবোৰ সঁচাকৈয়ে চলে। ডেটা সলনি কৰিব পৰা, বাৰ্তা পঠাব পৰা বা ধন খৰচ কৰিব পৰা যিকোনো কথা অনুকৰণ কৰা হয় আৰু ৰানত তালিকাভুক্ত কৰা হয়, সেয়েহে বাস্তৱত একো নঘটে। সুৰক্ষা শ্ৰেণীবিভাজন নথকা টুলো অনুকৰণ কৰা হয়।",
+    "autoApproveLabel": "ইভেল ছেণ্ডবক্সত টুল কল স্বয়ংক্ৰিয়ভাৱে অনুমোদন কৰক",
+    "autoApproveHelp": "সাধাৰণতে এজন ব্যক্তিৰ বাবে অপেক্ষা কৰা টুল কলক ইভেল ছেণ্ডবক্সে অনুমোদন কৰে, যাতে কেছটো শেষ হ'ব পাৰে। ইয়াৰ অবিহনে কেছটো প্ৰডাকশ্বনত যেনে হয় তেনে উত্তৰ নোপোৱা অনুমোদনতে শেষ হয়।",
+    "autoApproveWarnTitle": "কেৱল অ-প্ৰডাকশ্বন ৱৰ্কস্পেচৰ বাবে",
+    "autoApproveWarnBody": "টুলবোৰে প্ৰকৃত গ্ৰাহক বা ডেটা চুব পৰা ঠাইত ইয়াক কেতিয়াও চালু নকৰিব। শ্বেল, ক'ডিং, সময়সূচী, এজেণ্ট-ৰ-পৰা-এজেণ্ট, পেমেণ্ট আৰু ডিলিট টুল কেতিয়াও স্বয়ংক্ৰিয়ভাৱে অনুমোদিত নহয়। আপোনাৰ প্ৰশাসকে এই ৱৰ্কস্পেচক অ-প্ৰডাকশ্বন হিচাপে চিহ্নিত কৰি থকা লাগিব।",
+    "autoApproveNeedsFull": "প্ৰথমে সম্পূৰ্ণ পাইপলাইন চালু কৰক: স্বয়ংক্ৰিয় অনুমোদন কেৱল টুল চলিলেহে প্ৰযোজ্য হয়।",
+    "autoApproveRefused": "এই ৱৰ্কস্পেচত অনুমতি নাই: {reason}",
+    "autoApproveConfirmTitle": "ইভেলত টুল কল স্বয়ংক্ৰিয়ভাৱে অনুমোদন কৰিব নে?",
+    "autoApproveConfirmBody": "এই ডেটাছেটৰ ৰিপ্লেত ব্যক্তিৰ বাবে অপেক্ষা কৰা প্ৰতিটো টুল কল স্বয়ংক্ৰিয়ভাৱে অনুমোদিত হ'ব। অনুমোদিত কেৱল-পঢ়া টুলবোৰ সঁচাকৈয়ে চলে; কিবা সলনি কৰিব পৰাবোৰ এতিয়াও অনুকৰণ কৰা হয়। ইয়াক কেৱল টেষ্ট ডেটা থকা ৱৰ্কস্পেচতহে কৰক। ৰানবোৰে ৰেকৰ্ড কৰে যে সেইবোৰ স্বয়ংক্ৰিয়ভাৱে অনুমোদিত হৈছিল।",
+    "autoApproveConfirm": "স্বয়ংক্ৰিয় অনুমোদন চালু কৰক",
+    "trajectoryLabel": "ট্ৰেজেক্টৰী পৰীক্ষা",
+    "trajectoryOn": "On",
+    "trajectoryOff": "উপলব্ধ নহয়",
+    "trajectoryHelpOn": "প্ৰত্যাশিত ট্ৰেজেক্টৰী থকা কেছবোৰক এজেণ্টে কোন টুল কোন ক্ৰমত কল কৰিলে তাৰ ভিত্তিত স্ক'ৰ দিয়া হয়। ইয়াক আপোনাৰ প্ৰশাসকে সম্পূৰ্ণ ডিপ্লইমেণ্টৰ বাবে চালু কৰে, প্ৰতিটো ডেটাছেটৰ বাবে নহয়।",
+    "trajectoryHelpOff": "ট্ৰেজেক্টৰী পৰীক্ষা ইয়াত উপলব্ধ নহয়। সেইবোৰ আপোনাৰ প্ৰশাসকে সম্পূৰ্ণ ডিপ্লইমেণ্টৰ বাবে চালু কৰে, আৰু ইভেল অন্তৰ্ভুক্ত থকা প্লেন লাগে।",
+    "trajectoryNeedsFull": "এই ডেটাছেট কেৱল লিখনী, সেয়েহে প্ৰত্যাশিত ট্ৰেজেক্টৰী থকা কেছক স্ক'ৰ দিয়া নহ'ব। সম্পূৰ্ণ পাইপলাইন চালু কৰক।",
+    "runAutoApproved": "স্বয়ংক্ৰিয়ভাৱে অনুমোদিত",
+    "runAutoApprovedTitle": "এই ৰানৰ কোনো টুল কলৰ সিদ্ধান্ত কোনো ব্যক্তিয়ে লোৱা নাই; ইভেল ছেণ্ডবক্সে সেইবোৰ অনুমোদন কৰিলে।",
+    "toolCallsLabel": "এই ৰিপ্লেত টুল কল",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "বিফল",
+    "toolStatusNotRun": "চলা নাই",
+    "toolStatusAwaitingApproval": "অনুমোদনৰ বাবে অপেক্ষা",
+    "toolStatusReplayed": "ৰিপ্লে কৰা হ'ল",
+    "samplingTitle": "পটভূমিৰ গুণগত মান স্ক'ৰিং",
+    "samplingLoading": "স্ক'ৰিংৰ হাৰ লোড হৈ আছে...",
+    "samplingUnavailable": "পটভূমিৰ বিচাৰকে কিমান লাইভ টাৰ্নক স্ক'ৰ দিয়ে সেয়া আপোনাৰ প্লেটফৰ্ম প্ৰশাসকে নিৰ্ধাৰণ কৰে আৰু ইয়াত দেখুওৱা নহয়।",
+    "samplingValue": "প্ৰায় {percent}% লাইভ টাৰ্নক পটভূমিৰ গুণগত মান বিচাৰকে স্ক'ৰ দিয়ে।",
+    "samplingHelp": "কম হাৰে খৰচ কম কৰে আৰু ওপৰৰ প্ৰৱণতাত কম স্ক'ৰ থাকে। এই মান ইয়াত কেৱল পঢ়িবলৈ।",
+    "samplingSource_default": "ডিফল্ট",
+    "samplingSource_platform": "প্লেটফৰ্মে ছেট কৰা",
+    "samplingSource_tenant": "আপোনাৰ ৱৰ্কস্পেচৰ বাবে ছেট কৰা",
+    "samplingSource_agent": "এই এজেণ্টৰ বাবে ছেট কৰা",
+    "modeDefault": "ৱৰ্কস্পেচ ডিফল্ট",
+    "modeDefaultHelp": "আপোনাৰ ৱৰ্কস্পেচৰ ছেটিং অনুসৰণ কৰে (প্ৰশাসকে সলনি নকৰিলে পূৰ্ণ পাইপলাইন)। প্ৰতিটো ৰানে এতিয়াও নিজৰ মোড বাছনি কৰিব পাৰে।",
+    "modeDefaultCurrent": "বৰ্তমান: {mode}",
+    "modeNameFull": "পূৰ্ণ পাইপলাইন",
+    "modeNameQuick": "দ্ৰুত (কেৱল লিখনী)",
+    "badgeFull": "পূৰ্ণ পাইপলাইন",
+    "badgeQuick": "দ্ৰুত",
+    "datasetModePinnedTitle": "এই ডেটাছেট সদায় এনেদৰেই ৰিপ্লে হয়। এটা ৰানে এতিয়াও আন মোড বাছনি কৰিব পাৰে।",
+    "datasetModeDefaultTitle": "ৰানবোৰ কেনেকৈ ৰিপ্লে হ'ব তাৰ বাবে এই ডেটাছেটে ৱৰ্কস্পেচৰ ডিফল্ট অনুসৰণ কৰে।",
+    "runModeLabel": "পৰৱৰ্তী ৰানৰ বাবে ৰিপ্লে মোড",
+    "runModeInherit": "ডেটাছেটৰ ছেটিং ব্যৱহাৰ কৰক",
+    "runModeHelp": "পূৰ্ণ পাইপলাইনে এজেণ্টক তাৰ টুল, গাৰ্ডৰেইল আৰু অনুমোদনৰ সৈতে সুৰক্ষিত ছেণ্ডবক্সত চলায়: কেৱল পঢ়া টুলবোৰ সঁচাকৈয়ে চলে, আৰু ডেটা সলনি কৰিব পৰা বা কিবা পঠাব পৰা যিকোনো কথা অনুকৰণ কৰা হয়। দ্ৰুত মোডে টুলবোৰ ৰখাই ৰাখে আৰু কেৱল লিখা উত্তৰ পৰীক্ষা কৰে।",
+    "runModeFullTitle": "এই ৰানে ইভাল ছেণ্ডবক্সত পূৰ্ণ পাইপলাইন ব্যৱহাৰ কৰিলে।",
+    "runModeQuickTitle": "এই ৰান কেৱল লিখনীৰ দ্ৰুত ৰিপ্লে আছিল: এজেণ্টৰ টুলবোৰ ৰখাই ৰখা হৈছিল।",
+    "runSimulatedTools": "এই ৰানত অনুকৰণ কৰা হ'ল, চলোৱা নহ'ল (সেইবোৰে ডেটা সলনি কৰিব পাৰিলেহেঁতেন বা প্লেটফৰ্মৰ বাহিৰলৈ পাব পাৰিলেহেঁতেন): {tools}।",
+    "toolStatusSimulated": "অনুকৰণ কৰা হ'ল, চলোৱা নহ'ল"
+  },
+  "assistant": {
+    "taskPhoneLabel": "আপোনাৰ ফোন নম্বৰ",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "সেই নম্বৰ ছেভ কৰিব পৰা নগ'ল।",
+    "searchingWebFor": "Searching the web for “{target}”…",
+    "readingPageAt": "Reading {target}…",
+    "researchingTopic": "Researching “{target}”…",
+    "statusWriting": "Writing the answer…",
+    "quietFor": "still waiting on the model ({duration} since the last update)",
+    "toolStepsLabel": "Steps",
+    "chipDone": "finished",
+    "chipFailed": "failed",
+    "moreSteps": "+{n} more",
+    "sourcesLabel": "Sources",
+    "closePanel": "Close the panel",
+    "conversationLabel": "Conversation",
+    "copiedReply": "Copied",
+    "jumpToLatest": "Jump to the latest message"
+  },
+  "agentLab": {
+    "wtLabel": "এজেণ্টৰ টুলৰ সৈতে চলাওক",
+    "wtHelp": "বন্ধ: প্ৰতিটো উত্তৰ এটা সাধাৰণ মডেল কল। চালু: উত্তৰবোৰ চেট টাৰ্নে ব্যৱহাৰ কৰা একেটা টুল পাইপলাইনৰ পৰা আহে, সেয়েহে টুল চলে, গাৰ্ডৰেইল প্ৰযোজ্য হয় আৰু পদক্ষেপৰ সীমা মানি চলা হয়। কোনো ব্যক্তিৰ অনুমোদন লাগা কল বাকী অনুমোদন হিচাপে অপেক্ষা কৰে।",
+    "wtUnavailable": "এই ইনষ্টলেচনত টুলৰ সৈতে লেব চলোৱা বন্ধ কৰা আছে। ইয়াক সক্ষম কৰিবলৈ এজন প্ৰশাসকক কওক।",
+    "wtRefused": "এই ৰান প্ৰত্যাখ্যান কৰা হ'ল: {reason}",
+    "wtActive": "এই ৰানত টুলবোৰ সঁচাকৈয়ে চলিব, ইহঁতৰ পাৰ্শ্বপ্ৰতিক্ৰিয়াসহ।",
+    "wtConfirmTitle": "এজেণ্টৰ টুলৰ সৈতে লেব চলাব নে?",
+    "wtConfirmBody": "প্ৰতিটো নমুনাই এজেণ্টৰ প্ৰকৃত টুল কল কৰিব পাৰে, আৰু সেই কলবোৰৰ বাৰ্তা পঠোৱা বা ডেটা লিখাৰ দৰে প্ৰকৃত প্ৰভাৱ হ'ব পাৰে। অনুমোদন লাগা কলে এজন ব্যক্তিৰ বাবে অপেক্ষা কৰিব। ইয়াক কেৱল টেষ্ট এজেণ্ট বা টেষ্ট ডেটাৰ সৈতে ব্যৱহাৰ কৰক।",
+    "wtConfirm": "টুল ব্যৱহাৰ কৰক"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "এজেণ্টৰ সীমা",
+        "description": "বন্ধ হোৱাৰ আগতে এটা এজেণ্ট টাৰ্নে কিমান কাম কৰিব পাৰে।"
+      },
+      "approvals": {
+        "label": "অনুমোদন",
+        "description": "এজন ব্যক্তিয়ে কাৰ্য অনুমোদন বা প্ৰত্যাখ্যান কৰাৰ পিছত কি হয়, আৰু অনুৰোধে কিমান সময় অপেক্ষা কৰে।"
+      },
+      "chat": {
+        "label": "বাৰ্তালাপৰ আচৰণ",
+        "description": "উত্তৰ কেনেকৈ শেষ, পুনৰ চেষ্টা, কেছ আৰু অব্যাহত ৰখা হয়।"
+      },
+      "routing": {
+        "label": "মডেল ৰাউটিং",
+        "description": "কোন বাৰ্তাক দ্ৰুত মডেলৰ বাবে যথেষ্ট সৰল বুলি গণ্য কৰা হয়।"
+      },
+      "memory": {
+        "label": "মেম'ৰী",
+        "description": "এজেণ্টে কিমানটা স্মৃতি ৰাখে আৰু মনত পেলায়।"
+      },
+      "attachments": {
+        "label": "চেট আপলোড",
+        "description": "মানুহে চেট বাৰ্তাৰ সৈতে কিমান ডাঙৰ ফাইল সংলগ্ন কৰিব পাৰে।"
+      },
+      "skills": {
+        "label": "স্কিল",
+        "description": "ইনষ্টল কৰা স্কিলৰ তালিকাই এজেণ্টৰ নিৰ্দেশনাৰ কিমান অংশ ব্যৱহাৰ কৰিব পাৰে।"
+      },
+      "aux": {
+        "label": "পটভূমি মডেল কল",
+        "description": "সাৰাংশ, সহায় আৰু কমপেক্সনে কোন মডেল ব্যৱহাৰ কৰে।"
+      },
+      "guardrails": {
+        "label": "সুৰক্ষা পৰীক্ষা",
+        "description": "স্বয়ংক্ৰিয় সুৰক্ষা পৰীক্ষা কিমান কঠোৰ। এইবোৰ কেৱল প্লেটফৰ্ম ছেটিংতকৈ কঠোৰ কৰিব পাৰি।"
+      },
+      "quality": {
+        "label": "মূল্যাংকন",
+        "description": "টেষ্ট ৰান আৰু AI বিচাৰকে কেনেকৈ আচৰণ কৰে।"
+      },
+      "delegation": {
+        "label": "কাম অৰ্পণ",
+        "description": "এটা এজেণ্টে এসাথে অন্য এজেণ্টক কিমান কাম দিব পাৰে।"
+      },
+      "knowledge": {
+        "label": "জ্ঞান সন্ধান",
+        "description": "শ্ৰেষ্ঠ অংশ বাছনি কৰাৰ আগতে আপোনাৰ আপলোড কৰা নথিৰ সন্ধানে প্ৰাৰ্থী কিমান বিস্তৃতভাৱে সংগ্ৰহ কৰে।"
+      },
+      "learning": {
+        "label": "শিক্ষণ",
+        "description": "এজেণ্টৰ শিক্ষণ নীতিয়ে বিভিন্ন বিকল্প কেনেকৈ পৰীক্ষা কৰে।"
+      },
+      "providers": {
+        "label": "AI প্ৰদানকাৰী",
+        "description": "সংযুক্ত AI প্ৰদানকাৰীৰ কি এটাই কাম কৰা বন্ধ কৰিলে সেইবোৰ কেনেকৈ ব্যৱহাৰ কৰা হয়।"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "প্ৰতি টাৰ্নত সৰ্বাধিক টুল কল",
+          "description": "এটা টাৰ্ন বন্ধ কৰি তাৰ হাতত যি আছে তাৰ সৈতে উত্তৰ দিবলৈ কোৱাৰ আগতে ই সৰ্বাধিক কিমানটা টুল কল কৰিব পাৰে।",
+          "help": "দীঘল বহু-পদক্ষেপৰ কাম কৰা এজেণ্টৰ বাবে বঢ়াওক। নিয়ন্ত্ৰণৰ বাহিৰৰ লুপ বন্ধ কৰিবলৈ আৰু খৰচ পূৰ্বানুমেয় ৰাখিবলৈ কমাওক। ৱৰ্কস্পেচ বা প্লেটফৰ্মৰ বাবে দেখুওৱা মান এটা মানক এজেণ্টৰ মূল সংখ্যা: এজেণ্টৰ স্বায়ত্ততাৰ স্তৰে ৰানৰ সময়ত ইয়াক ওপৰ-তল কৰে, সেয়েহে অধিক বা কম স্বায়ত্ত এজেণ্টে বেলেগ সংখ্যা ব্যৱহাৰ কৰিব পাৰে। এজেণ্টৰ নিজৰ মান ছেট কৰা অনুসৰি ব্যৱহাৰ কৰা হয়।"
+        },
+        "turnTimeoutSeconds": {
+          "label": "প্ৰতি টাৰ্নত সৰ্বাধিক সময়",
+          "description": "এটা টাৰ্ন বন্ধ হোৱাৰ আগতে কিমান সময় চলিব পাৰে।",
+          "help": "লেহেমীয়া গৱেষণা বা ক'ড কামৰ বাবে বঢ়াওক। সময় শেষ হোৱা টাৰ্ন এতিয়ালৈকে কৰা কামৰ সৈতে শেষ হয়।"
+        },
+        "toolTimeoutSeconds": {
+          "label": "প্ৰতি টুল কলত সৰ্বাধিক সময়",
+          "description": "এটা টুল কল বন্ধ হোৱাৰ আগতে কিমান সময় চলিব পাৰে। প্লেটফৰ্ম ডিফল্টত কোনো সীমা নাই; তেতিয়া প্ৰতিটো টুলে নিজৰ টাইমআউট ৰাখে।",
+          "help": "এটা লেহেমীয়া টুলে সম্পূৰ্ণ বাৰ্তালাপ ৰখাই ৰাখিব পাৰিলে সীমা ছেট কৰক। বন্ধ কৰা কলৰ কোনো প্ৰভাৱ আছিল নে নাই জনা নাযায়, সেয়েহে এজেণ্টক কোৱা হয় যে ই সফল হৈছিল বুলি নধৰিব।"
+        },
+        "toolOutputMaxChars": {
+          "label": "আটাইতকৈ দীঘল টুল ফলাফল",
+          "description": "এটা টুল ফলাফলৰ কিমানটা আখৰ মডেলক দিয়া হয়; বাকী কাটি দিয়া হয়।",
+          "help": "এজেণ্টে দীঘল নথি বা API প্ৰতিক্ৰিয়া সম্পূৰ্ণকৈ পঢ়িব লগা হ'লে বঢ়াওক, প্ৰতি টাৰ্নত অধিক টোকেনৰ মূল্যত। খৰচ বচাবলৈ কমাওক।"
+        },
+        "retrievalTopK": {
+          "label": "প্ৰতিটো সন্ধানত জ্ঞানৰ অংশ",
+          "description": "এটা জ্ঞান ভঁৰাল সন্ধানে এজেণ্টক কিমানটা অংশ ঘুৰাই দিয়ে।",
+          "help": "অধিক অংশে এজেণ্টক কাম কৰিবলৈ অধিক সামগ্ৰী দিয়ে কিন্তু অধিক টোকেন খৰচ হয় আৰু হুলস্থুল বঢ়াব পাৰে। কম অংশ দ্ৰুত আৰু সস্তা।"
+        },
+        "retrievalMinScore": {
+          "label": "এটা অংশৰ নূন্যতম প্ৰাসংগিকতা",
+          "description": "এটা জ্ঞান অংশ ঘুৰাই দিবলৈ কিমান প্ৰাসংগিক হ'ব লাগে। 0 য়ে প্ৰতিটো হিট ঘুৰাই দিয়ে।",
+          "help": "এজেণ্টে অপ্ৰাসংগিক অংশ উদ্ধৃত কৰিলে বঢ়াওক। অতি অধিক হ'লে তেওঁ একো নাপাব পাৰে।"
+        },
+        "continuationPasses": {
+          "label": "অসম্পূৰ্ণ উত্তৰৰ পিছত অতিৰিক্ত পাছ",
+          "description": "ঘোষণা কৰা কিন্তু গ্ৰহণ নকৰা পদক্ষেপত মডেলৰ উত্তৰ ৰৈ গ'লে তাক আৰু কিমানবাৰ অব্যাহত ৰাখিবলৈ কোৱা হয়।",
+          "help": "প্ৰায়ে এটা পদক্ষেপ ঘোষণা কৰি ৰৈ যোৱা এজেণ্টৰ বাবে বঢ়াওক। প্ৰতিটো অতিৰিক্ত পাছে এটা মডেল কল খৰচ কৰে।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "সীমাৰ পিছত উত্তৰ দিয়া কল",
+          "description": "টাৰ্নৰ টুল সীমা শেষ হোৱাৰ পিছত মডেলে আৰু কিমান টুল কল চেষ্টা কৰিব পাৰে। প্ৰতিটোকে \"যি আছে তাৰে উত্তৰ দিয়া\" বুলি টোকাৰ সৈতে প্ৰত্যাখ্যান কৰা হয়; এই সংখ্যাৰ পিছত টাৰ্ন ত্ৰুটিৰ সৈতে বন্ধ কৰা হয়।",
+          "help": "মডেলে টুল কল কৰা বন্ধ কৰিবলৈ কেইবাৰো চেষ্টা কৰিব লগা হ'লে ইয়াক বঢ়াওক। লুপত থকা টাৰ্ন সোনকালে শেষ কৰিবলৈ কমাওক। 0 য়ে সীমা অতিক্ৰম কৰা প্ৰথম কলতে টাৰ্ন বন্ধ কৰে।"
+        },
+        "supervisedDivisor": {
+          "label": "তত্ত্বাৱধানত থকা এজেণ্টে টুল সীমাৰ 1/N পায়",
+          "description": "তত্ত্বাৱধানত থকা এজেণ্টে টাৰ্নৰ টুল-কল সীমাক এই সংখ্যাৰে হৰণ কৰি পায়, কিন্তু তলৰ নূন্যতমতকৈ কেতিয়াও কম নহয়।",
+          "help": "তত্ত্বাৱধানত থকা এজেণ্টক অধিক কঠোৰভাৱে ৰাখিবলৈ বঢ়াওক। 1 য়ে তেওঁলোকক পূৰ্ণ সীমা দিয়ে।"
+        },
+        "supervisedMinSteps": {
+          "label": "তত্ত্বাৱধানত থকা এজেণ্টৰ বাবে নূন্যতম টুল কল",
+          "description": "ওপৰৰ সংখ্যা যিমানেই অধিক নহওক, তত্ত্বাৱধানত থকা এজেণ্টে পোৱা আটাইতকৈ সৰু টুল-কল সীমা।",
+          "help": "তত্ত্বাৱধানত থকা এজেণ্টে কেইবাটাও পদক্ষেপৰ সৰল কাম এতিয়াও শেষ কৰিব পৰাকৈ ইয়াক 3 বা অধিক ৰাখক।"
+        },
+        "autonomousMultiplier": {
+          "label": "সম্পূৰ্ণ স্বায়ত্ত এজেণ্টে সীমাৰ N গুণ পায়",
+          "description": "সম্পূৰ্ণ স্বায়ত্ত এজেণ্টে টাৰ্নৰ টুল-কল সীমাক এই সংখ্যাৰে পূৰণ কৰি পায়।",
+          "help": "কোনেও নোচোৱাকৈ দীঘল কাম চলোৱা এজেণ্টৰ বাবে বঢ়াওক; তেতিয়া তেওঁলোকে এটা টাৰ্নত অধিক কল আৰু ধন খৰচ কৰিব পাৰে। 1 য়ে তেওঁলোকক মানক সীমা দিয়ে।"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "অনুমোদনৰ পিছত অব্যাহত ৰাখক",
+          "description": "এজন ব্যক্তিয়ে কাৰ্য অনুমোদন কৰিলে, এজেণ্টে নতুন বাৰ্তাৰ বাবে অপেক্ষা নকৰি নিজেই কাম শেষ কৰে।",
+          "help": "প্ৰতিটো অনুমোদিত কাৰ্যই টাৰ্ন শেষ কৰক আৰু হাতেৰে ফলো-আপ হওক বুলি বিচাৰিলে ইয়াক বন্ধ কৰক।"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "প্ৰত্যাখ্যানৰ পিছতো পটভূমি জব অব্যাহত থাকে",
+          "description": "পটভূমি জবত এজন ব্যক্তিয়ে কাৰ্য প্ৰত্যাখ্যান কৰিলে, জব বন্ধ নহৈ প্ৰত্যাখ্যান টুকি লৈ অব্যাহত থাকে।",
+          "help": "প্ৰত্যাখ্যানে জব বন্ধ কৰা উচিত হ'লে ইয়াক বন্ধ ৰাখক। প্ৰত্যাখ্যাত পদক্ষেপ অবিহনে জব সাধাৰণতে শেষ হ'ব পাৰিলে চালু কৰক।"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "অনুমোদনৰ অনুৰোধৰ মিয়াদ শেষ হয়",
+          "description": "এটা অনুমোদনৰ অনুৰোধে মিয়াদ শেষ হোৱাৰ আগতে সিদ্ধান্তৰ বাবে কিমান সময় অপেক্ষা কৰে। 0 ৰ অৰ্থ অনুৰোধৰ মিয়াদ কেতিয়াও শেষ নহয়।",
+          "help": "মিয়াদ নাথাকিলে, পাহৰি যোৱা অনুৰোধ অনিৰ্দিষ্টকালৰ বাবে খোলা থাকে আৰু এজেণ্টে অপেক্ষা কৰি থাকে। মিয়াদ শেষ হোৱা অনুৰোধ অনুমোদিত নোহোৱা বুলি গণ্য কৰা হয়।"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "কাটি যোৱা উত্তৰ সম্পূৰ্ণ কৰক",
+          "description": "মডেলৰ দৈৰ্ঘ্য সীমাই উত্তৰ কাটিলে বা বিকৃত টুল কলত শেষ হ'লে, মডেলক অব্যাহত ৰাখিবলৈ বা পুনৰ চেষ্টা কৰিবলৈ কওক।",
+          "help": "কেৱল মডেলৰ সমস্যা নিদান কৰিবলৈ ইয়াক বন্ধ কৰক; তেতিয়া মানুহে কাটি যোৱা উত্তৰ যেনে আছে তেনেকৈয়ে দেখে।"
+        },
+        "maxContinuations": {
+          "label": "কাটি যোৱা উত্তৰৰ সৰ্বাধিক নিৰন্তৰতা",
+          "description": "উত্তৰ কাটি যোৱাৰ পিছত মডেলক কিমানবাৰ অব্যাহত ৰাখিবলৈ কোৱা হয়।",
+          "help": "প্ৰতিটো নিৰন্তৰতা আন এটা মডেল কল। দীঘল উত্তৰৰ বাবে বঢ়াওক, খৰচ বচাবলৈ কমাওক।"
+        },
+        "maxToolCallRetries": {
+          "label": "বিকৃত টুল কলৰ সৰ্বাধিক পুনৰ চেষ্টা",
+          "description": "ব্যৱহাৰ-অযোগ্য আৰ্গুমেণ্টৰ সৈতে অহা টুল কল পুনৰাবৃত্তি কৰিবলৈ মডেলক কিমানবাৰ কোৱা হয়।",
+          "help": "এটা পুনৰ চেষ্টাই এটা মডেল কল খৰচ কৰে। 0 য়ে প্ৰথম বিকৃত কলতে হাৰ মানে।"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "প্ৰতি মডেল কলৰ প্ৰয়াস",
+          "description": "প্ৰদানকাৰী বিফল বা ব্যস্ত হ'লে, প্ৰথম প্ৰয়াসসহ, এটা মডেল কল কিমানবাৰ চেষ্টা কৰা হয়।",
+          "help": "অধিক প্ৰয়াসে প্ৰদানকাৰীৰ চুটি বিঘিনি লুকুৱায় কিন্তু বিফল হোৱা অনুৰোধে ত্ৰুটি জনাবলৈ অধিক সময় লয়।"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "টুল থকা এজেণ্টৰ বাবে উত্তৰ পুনৰ ব্যৱহাৰ কৰক",
+          "description": "টুল থকা এজেণ্টৰ বাবে সংৰক্ষিত উত্তৰ পুনৰ ব্যৱহাৰ কৰিবলৈ অনুমতি দিয়ক। টুলে পৰৱৰ্তী বাৰ বেলেগ কিবা ঘুৰাই দিব পাৰে বাবে ডিফল্ট হিচাপে বন্ধ।",
+          "help": "টুলবোৰ কেৱল-পঢ়িবলৈ আৰু লাহে লাহে সলনি হোৱা হ'লে, আৰু আপুনি দ্ৰুত, সস্তা পুনৰাবৃত্ত উত্তৰ বিচাৰিলেহে চালু কৰক। মানুহে আপডেট নোহোৱা উত্তৰ দেখিব পাৰে।"
+        },
+        "contextTurns": {
+          "label": "পুনৰাবৃত্তি চিনাক্ত কৰা পূৰ্বৰ টাৰ্ন",
+          "description": "এটা বাৰ্তা সংৰক্ষিত উত্তৰ পুনৰ ব্যৱহাৰ কৰিব পৰা পুনৰাবৃত্তি নে নহয় সিদ্ধান্ত লবলৈ কিমানটা পূৰ্বৰ টাৰ্নৰ তুলনা কৰা হয়।",
+          "help": "অধিক টাৰ্নে মিলক কঠোৰ আৰু কেছ হিটক বিৰল কৰে।"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "ফলো-আপত টুল প্ৰস্তাৱ কৰি থাকক",
+          "description": "পৰৱৰ্তী বাৰ্তা চুটি ফলো-আপ হ'লে বাৰ্তালাপে আগতেই ব্যৱহাৰ কৰা টুল প্ৰস্তাৱ কৰি থাকক।",
+          "help": "\"হয়\"ৰ দৰে চুটি উত্তৰ সাধাৰণ টুল বাছনিৰ পৰা আৰম্ভ হোৱা উচিত হ'লে ইয়াক বন্ধ কৰক।"
+        },
+        "stickyToolsWindow": {
+          "label": "ফলো-আপ টুল কিমান সময় প্ৰস্তাৱিত থাকে",
+          "description": "ব্যৱহাৰৰ পিছত চুটি ফলো-আপ বাৰ্তাৰ বাবে এটা টুল কিমান সময় প্ৰস্তাৱিত থাকে।",
+          "help": "দীঘল উইণ্ড'ই দীঘল কামৰ ছেশ্বনত সহায় কৰে, চুটিয়ে টুল তালিকা সৰু ৰাখে।"
+        },
+        "maxStickyTools": {
+          "label": "ফলো-আপত প্ৰস্তাৱ কৰি থকা সৰ্বাধিক টুল",
+          "description": "চুটি ফলো-আপ বাৰ্তালৈ কঢ়িয়াই নিয়া সৰ্বাধিক টুল। 0 য়ে একোকে নাৰাখে।",
+          "help": "কোনো কামে বহুত টুল ব্যৱহাৰ কৰিলে ডাঙৰ সংখ্যাই সহায় কৰে; সৰুটোৱে টুল তালিকা চুটি ৰাখে।"
+        },
+        "keepPrimaryModel": {
+          "label": "ফলো-আপৰ বাবে মুখ্য মডেল ৰাখক",
+          "description": "আগতেই টুল ব্যৱহাৰ কৰা বাৰ্তালাপত চুটি ফলো-আপ সস্তীয়া মডেলৰ সলনি এজেণ্টৰ মুখ্য মডেলতে থাকে।",
+          "help": "ইয়াক বন্ধ কৰক যাতে খৰচ ৰাউটিঙে \"হয়\"ৰ দৰে ফলো-আপ সস্তীয়া মডেললৈ পঠায়, কিন্তু চলি থকা কাম দুৰ্বলভাৱে সামৰাৰ আশংকা থাকে।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "উত্তৰ পুনৰ ব্যৱহাৰ কৰিবলৈ প্ৰশ্ন কিমান একে হ'ব লাগে",
+          "description": "একে ধৰণৰ প্ৰশ্নৰ উত্তৰ পুনৰ ব্যৱহাৰ কৰা এজেণ্টৰ বাবে: ছেভ কৰা উত্তৰ দিবলৈ নতুন প্ৰশ্ন আগৰ প্ৰশ্নৰ কিমান ওচৰত হ'ব লাগে, 0.85 ৰ পৰা 1।",
+          "help": "কম সংখ্যাই অধিক পুনৰাবৃত্তিক উত্তৰ দিয়ে কিন্তু আন প্ৰশ্নৰ বাবে হোৱা উত্তৰ দিয়াৰ আশংকা থাকে। ভুল উত্তৰ ব্যয়বহুল হ'লে ইয়াক অধিক ৰাখক। উত্তৰ কেৱল যিজনক দিয়া হৈছিল তেওঁৰ বাবেহে পুনৰ ব্যৱহাৰ হয়।"
+        },
+        "ttl": {
+          "label": "পুনৰ ব্যৱহাৰযোগ্য উত্তৰ কিমান সময় ৰখা হয়",
+          "description": "ছেভ কৰা উত্তৰ বাদ দিয়াৰ আগতে একে ধৰণৰ প্ৰশ্নক কিমান সময় দিব পাৰি।",
+          "help": "আপোনাৰ উত্তৰ সোনকালে পুৰণি হৈ গ'লে ইয়াক চুটি কৰক।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "প্ৰতিজন এজেণ্টৰ সৰ্বাধিক ছেভ কৰা উত্তৰ",
+          "description": "এজন এজেণ্টে পুনৰ ব্যৱহাৰৰ বাবে কিমান উত্তৰ ৰাখে। ইয়াতকৈ অধিক হ'লে আটাইতকৈ পুৰণিবোৰ বাদ দিয়া হয়।",
+          "help": "ডাঙৰ ভঁৰালে অধিক পুনৰাবৃত্তি বিচাৰি পায় আৰু অধিক ষ্ট'ৰেজ ব্যৱহাৰ কৰে।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "বাৰ্তালাপত টুল কলৰ ৰেকৰ্ড ৰাখক",
+          "description": "প্ৰতিটো টাৰ্নৰ টুল কলৰ চুটি ৰেকৰ্ড বাৰ্তালাপৰ সৈতে ছেভ কৰক, যাতে পিছৰ টাৰ্নবোৰে কি কৰা হৈছিল চাব পাৰে।",
+          "help": "বাৰ্তালাপৰ ইতিহাস কেৱল লিখনী ৰাখিবলৈ ইয়াক বন্ধ কৰক; তেতিয়া এজেণ্টে আগৰ টাৰ্নত তাৰ টুলবোৰে কি কৰিছিল জানিব নোৱাৰে। ই সম্পূৰ্ণ ৱৰ্কস্পেচত প্ৰযোজ্য।"
+        },
+        "replayEnabled": {
+          "label": "মডেলক টুল ৰেকৰ্ড দেখুৱাওক",
+          "description": "মডেলক বাৰ্তালাপ দিওঁতে আগৰ টুল কলৰ ছেভ কৰা ৰেকৰ্ড অন্তৰ্ভুক্ত কৰক।",
+          "help": "ৰেকৰ্ড ছেভ হৈ থাকিবলৈ কিন্তু তাৰ বাবে মডেলৰ কামৰ ঠাই ব্যৱহাৰ নহ'বলৈ ইয়াক বন্ধ কৰক।"
+        },
+        "replayTurns": {
+          "label": "যিবোৰ আগৰ টাৰ্নৰ টুল ৰেকৰ্ড দেখুওৱা হয়",
+          "description": "টুল ব্যৱহাৰ কৰা আটাইতকৈ শেহতীয়া কিমানটা টাৰ্নৰ ৰেকৰ্ড মডেলক দেখুওৱা হয়।",
+          "help": "ডাঙৰ সংখ্যাই দীঘল কামৰ ছেশ্বনত সহায় কৰে কিন্তু মডেলৰ কামৰ ঠাই অধিক ব্যৱহাৰ কৰে।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "প্ৰতি টাৰ্নত তালিকাভুক্ত টুল কল",
+          "description": "এটা টাৰ্নৰ কিমান টুল কল ৰেকৰ্ডত লিখা হয়। পিছৰ কলবোৰ কেৱল গণনা কৰা হয়।",
+          "help": "বহুত কল কৰা আৰু প্ৰতিটো মনত ৰাখিব লগা টাৰ্নৰ বাবে বঢ়াওক।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "প্ৰতি টাৰ্নত আটাইতকৈ দীঘল টুল ৰেকৰ্ড",
+          "description": "এটা টাৰ্নৰ ৰেকৰ্ডৰ কিমান আখৰ মডেলক দেখুওৱা হয়; বাকী গণনা কৰা হয়, তালিকাভুক্ত কৰা নহয়।",
+          "help": "পিছৰ প্ৰতিটো টাৰ্নত খৰচ বচাবলৈ কমাওক, অধিক বিৱৰণ ৰাখিবলৈ বঢ়াওক।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "আটাইতকৈ ডাঙৰ ছবি আপলোড (MB)",
+          "description": "চেট বাৰ্তাৰ সৈতে কোনোৱে সংলগ্ন কৰিব পৰা আটাইতকৈ ডাঙৰ ছবি, মেগাবাইটত। প্লেটফৰ্মৰো এটা সামগ্ৰিক ফাইল সীমা আছে যাক ই অতিক্ৰম কৰিব নোৱাৰে।",
+          "help": "ফটো আৰু স্ক্ৰীণশ্বটৰ বাবে বঢ়াওক; ডাঙৰ ফাইল পঠাবলৈ লেহেমীয়া আৰু মডেলৰ অধিক কোটা ব্যৱহাৰ কৰে।"
+        },
+        "maxAudioMb": {
+          "label": "আটাইতকৈ ডাঙৰ অডিঅ' আপলোড (MB)",
+          "description": "চেট বাৰ্তাৰ সৈতে কোনোৱে সংলগ্ন কৰিব পৰা আটাইতকৈ ডাঙৰ অডিঅ' ফাইল, মেগাবাইটত। প্লেটফৰ্মৰো এটা সামগ্ৰিক ফাইল সীমা আছে যাক ই অতিক্ৰম কৰিব নোৱাৰে।",
+          "help": "দীঘল ৰেকৰ্ডিঙৰ বাবে বঢ়াওক; ডাঙৰ ফাইল পঠাবলৈ লেহেমীয়া আৰু মডেলৰ অধিক কোটা ব্যৱহাৰ কৰে।"
+        },
+        "maxVideoMb": {
+          "label": "আটাইতকৈ ডাঙৰ ভিডিঅ' আপলোড (MB)",
+          "description": "চেট বাৰ্তাৰ সৈতে কোনোৱে সংলগ্ন কৰিব পৰা আটাইতকৈ ডাঙৰ ভিডিঅ', মেগাবাইটত। প্লেটফৰ্মৰো এটা সামগ্ৰিক ফাইল সীমা আছে যাক ই অতিক্ৰম কৰিব নোৱাৰে।",
+          "help": "দীঘল ক্লিপৰ বাবে বঢ়াওক; ডাঙৰ ফাইল পঠাবলৈ লেহেমীয়া আৰু মডেলৰ অধিক কোটা ব্যৱহাৰ কৰে।"
+        },
+        "maxDocumentMb": {
+          "label": "আটাইতকৈ ডাঙৰ নথি আপলোড (MB)",
+          "description": "চেট বাৰ্তাৰ সৈতে কোনোৱে সংলগ্ন কৰিব পৰা আটাইতকৈ ডাঙৰ নথি বা স্প্ৰেডশ্বীট, মেগাবাইটত। প্লেটফৰ্মৰো এটা সামগ্ৰিক ফাইল সীমা আছে যাক ই অতিক্ৰম কৰিব নোৱাৰে।",
+          "help": "দীঘল প্ৰতিবেদন আৰু ডাঙৰ ডেটা ফাইলৰ বাবে বঢ়াওক; ডাঙৰ ফাইল প্ৰক্ৰিয়া কৰিবলৈ লেহেমীয়া।"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "অসম্পূৰ্ণ শব্দাৱলীত সোঁৱৰণী",
+          "description": "উত্তৰে যি কৰিম বুলি কৈছিল সেয়া কৰাৰ আগতে ৰৈ যোৱা যেন লাগিলে মডেলক অব্যাহত ৰাখিবলৈ কওক।",
+          "help": "যিবোৰ উত্তৰ তাতেই শেষ হ'ব লাগিছিল সেইবোৰত সোঁৱৰণী সক্ৰিয় হ'লে ইয়াক বন্ধ কৰক।"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "পুৰণি টুল ফলাফল মচক",
+            "description": "দীঘল টুল ৰানত, বাৰ্তালাপ মডেলৰ সীমাৰ ভিতৰত থাকিবলৈ পুৰণি টুল ফলাফলক এটা চুটি প্লেছহোল্ডাৰেৰে সলনি কৰক।",
+            "help": "এজেণ্টে প্ৰতিটো পূৰ্বৰ ফলাফল চাব লগা হ'লে ইয়াক বন্ধ কৰক; দীঘল ৰান তেতিয়া মডেলৰ আকাৰ সীমাত পাব পাৰে।"
+          },
+          "thresholdChars": {
+            "label": "মচা আৰম্ভ কৰা আকাৰ",
+            "description": "পুৰণিবোৰ মচাৰ আগতে এটা টাৰ্নৰ টুল ফলাফল কিমান ডাঙৰ হ'ব পাৰে।",
+            "help": "অধিক ফলাফল দৃশ্যমান ৰাখিবলৈ বঢ়াওক, দীঘল ৰান সৰু আৰু সস্তা ৰাখিবলৈ কমাওক।"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "আটাইতকৈ দীঘল সৰল বাৰ্তা",
+          "description": "ইয়াতকৈ দীঘল বাৰ্তাক কেতিয়াও সৰল বুলি গণ্য কৰা নহয়। সৰল বাৰ্তা দ্ৰুত, সস্তা মডেললৈ যাব পাৰে।",
+          "help": "গুণগত মানৰ বাবে অধিক বাৰ্তা মুখ্য মডেললৈ পঠাবলৈ কমাওক; খৰচ বচাবলৈ বঢ়াওক।"
+        },
+        "maxClauses": {
+          "label": "এটা সৰল বাৰ্তাত সৰ্বাধিক বাক্য",
+          "description": "ইয়াতকৈ অধিক বাক্য থকা বাৰ্তাক কেতিয়াও সৰল বুলি গণ্য কৰা নহয়।",
+          "help": "গুণগত মানৰ বাবে অধিক বাৰ্তা মুখ্য মডেললৈ পঠাবলৈ কমাওক।"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "প্ৰতি টাৰ্নত মনত পেলোৱা এজেণ্টৰ স্মৃতি",
+          "description": "প্ৰতিটো বাৰ্তাৰ বাবে এজেণ্টৰ নিজৰ স্মৃতিৰ কিমানটা চোৱা হয়।",
+          "help": "অধিক স্মৃতিয়ে অধিক প্ৰসংগ দিয়ে কিন্তু অধিক টোকেন ব্যৱহাৰ কৰে।"
+        },
+        "tenantTopK": {
+          "label": "প্ৰতি টাৰ্নত মনত পেলোৱা ভাগ-বতৰা স্মৃতি",
+          "description": "প্ৰতিটো বাৰ্তাৰ বাবে ৱৰ্কস্পেচত ভাগ-বতৰা কৰা স্মৃতিৰ কিমানটা চোৱা হয়।",
+          "help": "অধিক স্মৃতিয়ে অধিক প্ৰসংগ দিয়ে কিন্তু অধিক টোকেন ব্যৱহাৰ কৰে।"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "প্ৰতি এজেণ্টৰ সৰ্বাধিক স্মৃতি",
+          "description": "এটা এজেণ্টে কিমানটা স্মৃতি ৰাখিব পাৰে। ইয়াতকৈ অধিক হ'লে আটাইতকৈ পুৰণি আৰু কম ব্যৱহাৰ কৰাবোৰ বাদ দিয়া হয়।",
+          "help": "মানুহৰ বিষয়ে বহুত মনত ৰাখিব লগা সহায়কৰ বাবে বঢ়াওক; ই সংৰক্ষণ আৰু মনত পেলোৱা খৰচো বঢ়ায়।"
+        }
+      },
+      "tenant": {
+        "maxMemories": {
+          "label": "সৰ্বাধিক ভাগ-বতৰা কৰা স্মৃতি",
+          "description": "ৱৰ্কস্পেচত ভাগ-বতৰা কৰা কিমান স্মৃতি ৰখা হয়। ইয়াতকৈ অধিক হ'লে আটাইতকৈ পুৰণিবোৰ বাদ দিয়া হয়।",
+          "help": "ভাগ-বতৰা কৰা জ্ঞানৰ ওপৰত নিৰ্ভৰ কৰা ডাঙৰ দলৰ বাবে বঢ়াওক; ইয়ে ষ্ট'ৰেজ আৰু স্মৰণৰ খৰচো বঢ়ায়। ই সম্পূৰ্ণ ৱৰ্কস্পেচত প্ৰযোজ্য।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ডিভাইচৰ চেটক দিয়া স্মৃতি",
+          "description": "ডিভাইচৰ ছেশ্বন আৰম্ভ হোৱাৰ সময়ত তাক কিমান স্মৃতি দিয়া হয়।",
+          "help": "ডিভাইচৰ মডেলৰ কামৰ ঠাই সৰু, সেয়েহে ইয়াক কম ৰাখক।"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "গ্ৰাফ মেম'ৰীৰ পৰা মনত পেলোৱা তথ্য",
+          "description": "এটা লুকআপত এজেণ্টক তাৰ সম্পৰ্ক মেম'ৰীৰ পৰা দেখুওৱা সৰ্বাধিক তথ্য।",
+          "help": "অধিক তথ্যই এজেণ্টক এজন ব্যক্তি বা বিষয়ৰ বিষয়ে অধিক পটভূমি দিয়ে কিন্তু তাৰ কাম কৰা ঠাইৰ অধিক অংশ ব্যৱহাৰ কৰে। কম তথ্যই উত্তৰ কেন্দ্ৰীভূত ৰাখে। ইয়াক সম্পূৰ্ণ ৱৰ্কস্পেচৰ বাবে, বা অধিক বা কম লগা এটা এজেণ্টৰ বাবে ছেট কৰক।"
+        },
+        "recallMaxPaths": {
+          "label": "প্ৰতি লুকআপত পঢ়া গ্ৰাফ পথ",
+          "description": "এটা লুকআপৰ তথ্য বিচাৰি উলিয়াবলৈ মেম'ৰী গ্ৰাফৰ কিমানটা সংযোগ পঢ়া হয়।",
+          "help": "একাধিক সংযোগে একেটা তথ্যলৈ লৈ যাব পাৰে, সেয়েহে ঘনভাৱে সংযুক্ত স্মৃতিত সকলো বিচাৰি উলিয়াবলৈ অধিক সংখ্যাৰ প্ৰয়োজন হ'ব পাৰে। অধিক সংখ্যাই প্ৰতিটো লুকআপ লেহেমীয়া কৰে।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "প্ৰম্পটত তালিকাভুক্ত সৰ্বাধিক স্কিল",
+          "description": "এজেণ্টে সেইবোৰ আছে বুলি জানিবলৈ তাৰ নিৰ্দেশনাত আপোনাৰ কিমান স্কিলৰ নাম দিয়া হয়। বাকী গণনা কৰা হয়, তালিকাভুক্ত কৰা নহয়।",
+          "help": "আপোনাৰ বহুত স্কিল থাকিলে বঢ়াওক; তালিকাভুক্ত প্ৰতিটো স্কিলে প্ৰতিটো টাৰ্নত মডেলৰ কামৰ ঠাইৰ অলপ ব্যৱহাৰ কৰে। ই সম্পূৰ্ণ ৱৰ্কস্পেচত প্ৰযোজ্য।"
+        },
+        "maxBlockChars": {
+          "label": "প্ৰম্পটত স্কিল তালিকাৰ আকাৰ",
+          "description": "এজেণ্টৰ নিৰ্দেশনাত স্কিলৰ তালিকাই কিমান আখৰ ল'ব পাৰে। ভৰি পৰিলে পিছৰ স্কিলবোৰ কেৱল নামলৈ চুটি কৰা হয়।",
+          "help": "অধিক স্কিলৰ বিৱৰণ ৰাখিবলৈ বঢ়াওক, প্ৰতিটো টাৰ্নত টোকেন বচাবলৈ কমাওক। ই সম্পূৰ্ণ ৱৰ্কস্পেচত প্ৰযোজ্য।"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "পটভূমি কলে এজেণ্টৰ মডেল ব্যৱহাৰ কৰে",
+        "description": "সিহঁতৰ বাবে কোনো মডেল বাছনি কৰা নাথাকিলে, সাৰাংশ, সহায় আৰু প্ৰসংগ কমপেক্সনে যি এজেণ্টৰ বাবে কাম কৰে তাৰে একেটা মডেল ব্যৱহাৰ কৰে।",
+        "help": "এই কলবোৰৰ বাবে প্লেটফৰ্মে মডেল বাছনি কৰক বুলি ইয়াক বন্ধ কৰক, যিটো সস্তা বা বেলেগ প্ৰদানকাৰীৰ হ'ব পাৰে।"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "সুৰক্ষা পৰীক্ষা বিকল হ'লে",
+        "description": "সুৰক্ষা পৰীক্ষা নিজেই বিফল হ'লে কি হয়, উদাহৰণস্বৰূপে বিচাৰক মডেল বন্ধ থাকিলে। বন্ধই কাৰ্য প্ৰত্যাখ্যান কৰে; খোলাই ইয়াক পাৰ হ'বলৈ দিয়ে।",
+        "help": "আপুনি ইয়াক কেৱল প্লেটফৰ্ম ছেটিংতকৈ কঠোৰ কৰিব পাৰে। কোনোবাই ইচ্ছাকৃতভাৱে পৰীক্ষা বিফল কৰোৱাৰ বিৰুদ্ধে বন্ধই সুৰক্ষা দিয়ে, বিভ্ৰাটৰ সময়ত কাম প্ৰত্যাখ্যান কৰাৰ মূল্যত।",
+        "options": {
+          "open": "খোলা: কাৰ্যক পাৰ হ'বলৈ দিয়ক",
+          "closed": "বন্ধ: কাৰ্য প্ৰত্যাখ্যান কৰক"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "টুল-কল পৰীক্ষা বিকল হ'লে",
+          "description": "বিপদপূৰ্ণ টুল কলৰ সমীক্ষা কৰা পৰীক্ষাই ৰায় দিব নোৱাৰিলে কি কৰে। উত্তৰাধিকাৰে ওপৰৰ সুৰক্ষা পৰীক্ষা ছেটিং অনুসৰণ কৰে।",
+          "help": "আপুনি ইয়াক কেৱল প্লেটফৰ্ম ছেটিংতকৈ কঠোৰ কৰিব পাৰে। পৰীক্ষা বিফল হ'লে বন্ধই টুল কল প্ৰত্যাখ্যান কৰে।",
+          "options": {
+            "open": "খোলা: টুল কলক পাৰ হ'বলৈ দিয়ক",
+            "inherit": "সুৰক্ষা-পৰীক্ষা ছেটিং অনুসৰণ কৰক",
+            "closed": "বন্ধ: টুল কল প্ৰত্যাখ্যান কৰক"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "অৱৰোধ কৰা বিষাক্ততাৰ স্ক'ৰ",
+          "description": "বিচাৰকৰ 0 ৰ পৰা 100 বিষাক্ততাৰ জোখত এই বা তাতকৈ অধিক স্ক'ৰ পোৱা বিষয়বস্তু অৱৰোধ কৰা হয়। কম সংখ্যাই অধিক অৱৰোধ কৰে।",
+          "help": "আপুনি ইয়াক কেৱল কমাব পাৰে, প্লেটফৰ্মৰ মানতকৈ ওপৰলৈ কেতিয়াও বঢ়াব নোৱাৰে। অতি কম মানে সাধাৰণ স্পষ্ট শব্দাৱলীকো অৱৰোধ কৰে।"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "জেইলব্ৰেক প্ৰয়াসৰ বাবে স্কেন কৰা লিখনী",
+          "description": "জেইলব্ৰেক আৰ্হিৰ বাবে এটা বাৰ্তা বা উত্তৰৰ কিমান অংশ স্কেন কৰা হয়। তাতকৈ বেছি লিখনী স্কেন কৰা নহয়।",
+          "help": "আপুনি ইয়াক কেৱল প্লেটফৰ্মৰ মানতকৈ ওপৰলৈ বঢ়াব পাৰে। বহল উইণ্ড'ই পেডিঙৰ পিছত লুকাই থকা আক্ৰমণ বন্ধ কৰে, অলপ অধিক প্ৰক্ৰিয়াকৰণৰ মূল্যত।"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "সুৰক্ষা বিচাৰকক দেখুওৱা লিখনী",
+          "description": "পৰীক্ষা কৰা লিখনীৰ কিমান অংশ AI সুৰক্ষা বিচাৰকে পঢ়ে। তাতকৈ বেছি লিখনীৰ বিচাৰ কৰা নহয়।",
+          "help": "আপুনি ইয়াক কেৱল প্লেটফৰ্মৰ মানতকৈ ওপৰলৈ বঢ়াব পাৰে। বঢ়ালে দীঘল টুল ফলাফলৰ সম্পূৰ্ণ বিচাৰ হয় কিন্তু প্ৰতিটো বিচাৰক কল ডাঙৰ হয়।"
+        }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "তত্ত্বাৱধানত থকা এজেণ্ট আৰু কেৱল-পঢ়া টুল",
+          "description": "তত্ত্বাৱধান স্বায়ত্ততাৰ স্তৰৰ এজেণ্টে সন্ধান বা লুকআপৰ দৰে কেৱল পঢ়া টুলৰ আগতো আপোনাক সোধে নে নাই। লিখা, পঠোৱা আৰু প্লেটফৰ্মে শ্ৰেণীবিভাজন নকৰা টুলে সদায় সোধে।",
+          "help": "আপুনি ইয়াক কেৱল প্লেটফৰ্ম ছেটিংতকৈ অধিক কঠোৰ কৰিব পাৰে। প্ৰতিবাৰ সোধাটো আটাইতকৈ সুৰক্ষিত বাছনি; কেৱল-পঢ়া টুল চলিবলৈ দিলে এটা প্ৰশ্ন কমে, কিন্তু অপ্ৰত্যাশিত সন্ধান ৰোধ কৰাৰ এটা সুযোগো যায়। যি এজেণ্টে ব্যক্তিগত ডেটা পঢ়িব পাৰে, অবিশ্বাসযোগ্য বিষয়বস্তু ল'ব পাৰে আৰু ডেটা বাহিৰলৈ পঠাব পাৰে, এই ছেটিঙে যিয়েই নকওক তাক প্ৰতিটো কলত সোধা হয়।",
+          "options": {
+            "auto-allow": "কেৱল-পঢ়া টুল নুসুধিয়াকৈ চলিবলৈ দিয়ক",
+            "gate": "প্ৰতিটো টুল কলৰ আগতে সোধক"
+          }
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI বিচাৰকৰ বাবে মডেল",
+          "description": "মূল্যাংকন ৰানৰ বিচাৰ কৰিবলৈ ব্যৱহাৰ কৰা মডেল। আপোনাৰ ৱৰ্কস্পেচে আগতেই ব্যৱহাৰ কৰা মডেলৰ ভিতৰৰ পৰা প্লেটফৰ্মে বাছনি কৰক বুলি খালী ৰাখক।",
+          "help": "অধিক বিশ্বাসযোগ্য গ্ৰেডৰ বাবে অধিক শক্তিশালী মডেল বা খৰচ বচাবলৈ সস্তা মডেল ব্যৱহাৰ কৰক। মডেল আপোনাৰ সংযুক্ত প্ৰদানকাৰীত উপলব্ধ হ'ব লাগিব।"
+        },
+        "callTimeoutSeconds": {
+          "label": "প্ৰতি বিচাৰক কলত সৰ্বাধিক সময়",
+          "description": "এটা বিচাৰক কল বিফল বুলি গণ্য হোৱাৰ আগতে কিমান সময় ল'ব পাৰে।",
+          "help": "লেহেমীয়া মডেল প্ৰায়ে টাইমআউট হ'লে বঢ়াওক; বিফল কলে মূল্যাংকনৰ ফলাফল অসম্পূৰ্ণ কৰে।"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "প্ৰতি টেষ্ট কেছৰ পুনৰাবৃত্তি",
+          "description": "ৰানে নকলে প্ৰতিটো টেষ্ট কেছ কিমানবাৰ চলোৱা হয়। অধিক পুনৰাবৃত্তিয়ে এজেণ্ট কিমান সুসংগত সেয়া দেখুৱায়।",
+          "help": "প্ৰতিটো পুনৰাবৃত্তিয়ে এটা ৰানৰ খৰচ আৰু সময় গুণ কৰে।"
+        },
+        "defaultMode": {
+          "label": "মূল্যায়ন কেনেকৈ চলে",
+          "description": "ৰান বা তাৰ ডেটাছেটে নকলে, মূল্যায়ন ৰানে এজেণ্টক তাৰ টুলৰ সৈতে সুৰক্ষিত ছেণ্ডবক্সত ৰিপ্লে কৰে নে (পূৰ্ণ পাইপলাইন) কেৱল লিখনীত উত্তৰ দিয়ে (দ্ৰুত)।",
+          "help": "পূৰ্ণ পাইপলাইনে আপোনাৰ ব্যৱহাৰকাৰীয়ে যি পায় সেয়া, টুল ব্যৱহাৰকে ধৰি, পৰীক্ষা কৰে আৰু খৰচ অধিক। ইয়াত কেৱল পঢ়া টুলবোৰ সঁচাকৈয়ে চলে; ডেটা সলনি কৰিব পৰা, বাৰ্তা পঠাব পৰা বা ধন খৰচ কৰিব পৰা যিকোনো কথা অনুকৰণ কৰা হয় আৰু ৰানত তালিকাভুক্ত কৰা হয়। দ্ৰুত সস্তীয়া আৰু টুল ব্যৱহাৰৰ বিষয়ে একো নকয়।",
+          "options": {
+            "full": "ছেণ্ডবক্সত পূৰ্ণ পাইপলাইন",
+            "quick": "দ্ৰুত: কেৱল লিখনী উত্তৰ"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "সৰ্বাধিক সমান্তৰাল উপ-কাৰ্য",
+        "description": "এটা কাম অৰ্পণ কলে এসাথে কিমানটা উপ-কাৰ্য বা সহায়ক এজেণ্ট আৰম্ভ কৰিব পাৰে। অতিৰিক্তবোৰ সীমা পাৰ হোৱা বুলি জনোৱা হয়।",
+        "help": "বহল গৱেষণা কামৰ বাবে বঢ়াওক, খৰচ আৰু বোজা কম ৰাখিবলৈ কমাওক।"
+      },
+      "branchTimeoutSeconds": {
+        "label": "প্ৰতি উপ-কাৰ্যত সৰ্বাধিক সময়",
+        "description": "অৰ্পণ কৰা এটা উপ-কাৰ্য টাইমআউট বুলি জনোৱাৰ আগতে কিমান সময় চলিব পাৰে।",
+        "help": "লেহেমীয়া উপ-কাৰ্যৰ বাবে বঢ়াওক। ৰৈ যোৱা উপ-কাৰ্যই এই সময়তকৈ বেছি সম্পূৰ্ণ উত্তৰ কেতিয়াও ৰখাই নাৰাখে।"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "প্ৰতিটো ফলাফলৰ বাবে সন্ধানৰ বিস্তাৰ",
+          "description": "জ্ঞান সন্ধানে অৱশেষত ঘুৰাই দিয়া প্ৰতিটো অংশৰ বাবে কিমানটা প্ৰাৰ্থী অংশ সংগ্ৰহ কৰে।",
+          "help": "অধিক সংখ্যাই ৰেংকিঙক বাছনি কৰিবলৈ অধিক দিয়ে, যিটো বহুত নথি একে ধৰণৰ হ'লে সহায় কৰে, কিন্তু প্ৰতিটো সন্ধানত অধিক সময় আৰু কম্পিউট লাগে। সন্ধান লেহেমীয়া লাগিলে কমাওক। ই এজেণ্টে দেখা অংশৰ সংখ্যা সলনি নকৰে।"
+        },
+        "candidatePoolMax": {
+          "label": "প্ৰতি সন্ধানত সৰ্বাধিক প্ৰাৰ্থী",
+          "description": "কিমান ফলাফল বিচৰা হৈছে সেয়া যিয়েই নহওক, এটা জ্ঞান সন্ধানে সংগ্ৰহ কৰা প্ৰাৰ্থী অংশৰ ওপৰৰ সীমা।",
+          "help": "এজেণ্টে এসাথে বহুত ফলাফল বিচাৰিলে ই গতি আৰু খৰচ ৰক্ষা কৰে। ডাঙৰ জ্ঞান ভঁৰালত উত্তৰে প্ৰাসংগিক অংশ এৰি দিলেহে বঢ়াওক।"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "কম পৰীক্ষা কৰা বিকল্প চেষ্টা কৰাৰ ইচ্ছা",
+          "description": "আস্থা-সীমা পদ্ধতি ব্যৱহাৰ কৰা শিক্ষণ নীতিয়ে নিজে কম বাৰ চেষ্টা কৰা বিকল্পক কিমান অগ্ৰাধিকাৰ দিয়ে।",
+          "help": "শূন্যই সদায় এতিয়ালৈকে শ্ৰেষ্ঠ গড় থকা বিকল্প বাছে। অধিক মানে স্থিৰ হোৱাৰ আগতে অন্য বিকল্প অধিক সময় চেষ্টা কৰি থাকে। ডিফল্ট পাঠ্যপুথিৰ ভাৰসাম্য। কেৱল এই পদ্ধতি ব্যৱহাৰ কৰা নীতিয়েহে প্ৰভাৱিত হয়।"
+        },
+        "defaultExplorationRate": {
+          "label": "নতুন নীতিৰ বাবে প্ৰাৰম্ভিক অন্বেষণ হাৰ",
+          "description": "নতুনকৈ সৃষ্টি কৰা শিক্ষণ নীতিয়ে যাদৃচ্ছিক বিকল্প চেষ্টা কৰাত টাৰ্নৰ কিমান অংশ ব্যয় কৰে।",
+          "help": "ই কেৱল এতিয়াৰ পৰা সৃষ্টি হোৱা নীতিৰ আৰম্ভণি বিন্দু ছেট কৰে। বিদ্যমান নীতিয়ে নিজৰ হাৰ ৰাখে, যিটো নীতি পৰিচালনা কৰা ঠাইত আপুনি প্ৰতি এজেণ্টত সলনি কৰে। শূন্যৰ অৰ্থ নতুন নীতিয়ে আৰম্ভণিতে অন্বেষণ নকৰে।"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "প্ৰদানকাৰীয়ে কি প্ৰত্যাখ্যান কৰাৰ পিছত বিৰতি",
+          "description": "প্ৰদানকাৰীয়ে সংযুক্ত প্ৰদানকাৰী কি প্ৰত্যাখ্যান কৰাৰ পিছত পটভূমিৰ কামে তাক কিমান সময় এৰি দিয়ে।",
+          "help": "বিৰতিৰ সময়ত, সময়সূচীবদ্ধ আৰু স্বয়ংক্ৰিয় জবে বাৰে বাৰে বিফল হোৱা কি কল কৰাৰ সলনি অন্য সংযুক্ত প্ৰদানকাৰী ব্যৱহাৰ কৰে, বা অপেক্ষা কৰে। চেট কৰা মানুহ কেতিয়াও অৱৰোধিত নহয় আৰু সদায় প্ৰদানকাৰীৰ প্ৰকৃত ত্ৰুটি দেখে। বিৰতি শেষ হ'লে, কি' শুধৰোৱা হ'ল নে নাই পৰীক্ষা কৰিবলৈ এটা কল যাবলৈ দিয়া হয়। শূন্যই বিৰতি বন্ধ কৰে।"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "প্ৰশাসন",
+    "title": "ৰানটাইম ছেটিংছ",
+    "subtitle": "এই ৱৰ্কস্পেচ জুৰি এজেণ্টে কেনেকৈ আচৰণ কৰে সেয়া মিলাওক: সীমা, অনুমোদন, গুণগত মান পৰীক্ষা, গাৰ্ডৰেইল, মেম'ৰী আৰু মডেল। অনুমতি থকা ঠাইত এজেণ্টৰ মালিকে এতিয়াও এটা এজেণ্টৰ বাবে ছেটিং অভাৰৰাইড কৰিব পাৰে।",
+    "docsLink": "সহায় আৰু নথিপত্ৰ",
+    "tabs": {
+      "label": "ৰানটাইম ছেটিংছৰ দৃশ্য",
+      "settings": "ছেটিংছ",
+      "history": "পৰিৱৰ্তনৰ ইতিহাস"
+    },
+    "readOnly": {
+      "title": "কেৱল চাবলৈ",
+      "body": "কেৱল ৱৰ্কস্পেচ প্ৰশাসকেহে এই ছেটিংছ সলনি কৰিব পাৰে। আপুনি প্ৰতিটো ছেটিংৰ প্ৰযোজ্য মান আৰু ই ক'ৰ পৰা আহে সেয়া চাব পাৰে।"
+    },
+    "summary": "এই ৱৰ্কস্পেচত {total}টা ছেটিংৰ ভিতৰত {changed}টা সলনি কৰা হৈছে। বাকীবোৰে প্লেটফৰ্মৰ মান ব্যৱহাৰ কৰে।",
+    "export": {
+      "button": "অভাৰৰাইড ৰপ্তানি কৰক",
+      "done": "{count}টা ৱৰ্কস্পেচ অভাৰৰাইড এটা ফাইললৈ ৰপ্তানি কৰা হ'ল।",
+      "none": "ৰপ্তানি কৰিবলৈ একো নাই: এই ৱৰ্কস্পেচে কোনো ছেটিং সলনি কৰা নাই।"
+    },
+    "filters": {
+      "changedOnly": "কেৱল এই ৱৰ্কস্পেচত সলনি কৰা"
+    },
+    "jump": {
+      "label": "এটা গোটলৈ যাওক"
+    },
+    "anchor": {
+      "unknown": "এই ৱৰ্কস্পেচত \"{key}\" নামৰ কোনো ছেটিং নাই। ইয়াৰ নাম সলনি হৈছে বা ই ৱৰ্কস্পেচ স্তৰত উপলব্ধ নহয়।"
+    },
+    "empty": {
+      "noneChanged": "এই ৱৰ্কস্পেচত এতিয়ালৈকে কোনো ছেটিং সলনি কৰা হোৱা নাই। সকলোৱে প্লেটফৰ্মৰ মান ব্যৱহাৰ কৰে।"
+    },
+    "risk": {
+      "high": "অধিক বিপদ",
+      "security": "সুৰক্ষা ছেটিং"
+    },
+    "security": {
+      "title": "সুৰক্ষা ছেটিংছ",
+      "body": "এই ছেটিংছে আপোনাৰ ৱৰ্কস্পেচক সুৰক্ষা দিয়ে। এইবোৰক কেৱল প্লেটফৰ্মৰ মানতকৈ কঠোৰ কৰিব পাৰি, কেতিয়াও দুৰ্বল নহয়। প্ৰতিটো পৰিৱৰ্তনৰ বাবে এটা কাৰণ লাগে আৰু ই অডিট লগত ৰেকৰ্ড কৰা হয়।"
+    },
+    "resetGroup": {
+      "count": "এই গোটত {count}টা সলনি হৈছে",
+      "button": "{group}ক উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ ৰিছেট কৰক",
+      "confirmTitle": "{group}ক উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ ৰিছেট কৰিব নে?",
+      "confirmBody": "ই এই গোটৰ {count}টা ৱৰ্কস্পেচ অভাৰৰাইড আঁতৰায়। নিজৰ অভাৰৰাইড নথকা প্ৰতিটো এজেণ্টৰ বাবে ছেটিংছ তৎক্ষণাত প্লেটফৰ্মৰ মানলৈ উভতি যায়। প্ৰতিটো ৰিছেট অডিট লগত ৰেকৰ্ড কৰা হয়।",
+      "confirm": "উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ ৰিছেট কৰক",
+      "cancel": "বাতিল কৰক",
+      "done": "{count}টা ছেটিংক সিহঁতৰ উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ ৰিছেট কৰক।",
+      "partial": "{done}টা ছেটিং ৰিছেট হ'ল; {failed}টা ৰিছেট কৰিব পৰা নগ'ল। বিফল ছেটিংছৰ বাৰ্তা চাওক।",
+      "cancelled": "{done}টা ছেটিং ৰিছেট কৰা হ'ল। কাৰণ লগা {skipped}টা যেনেকুৱা আছিল তেনেকুৱাই ৰখা হ'ল।"
+    },
+    "import": {
+      "button": "অভাৰৰাইড আমদানি কৰক",
+      "title": "ৱৰ্কস্পেচ অভাৰৰাইড আমদানি কৰক",
+      "intro": "এই পৃষ্ঠাৰ পৰা ৰপ্তানি কৰা এটা ফাইল বাছক, বা ইয়াৰ বিষয়বস্তু পেষ্ট কৰক। একো ছেভ কৰাৰ আগতে কি সলনি হ'ব সেয়া আপুনি ঠিককৈ দেখিব।",
+      "reviewIntro": "এই ফাইলে কি সলনি কৰিব সেয়াৰ সমীক্ষা কৰক। এতিয়ালৈকে একো ছেভ কৰা হোৱা নাই।",
+      "fileLabel": "অভাৰৰাইড ফাইল (JSON)",
+      "pasteLabel": "বা ফাইলৰ বিষয়বস্তু পেষ্ট কৰক",
+      "fileError": {
+        "empty": "প্ৰথমে এটা ফাইল বাছক বা ইয়াৰ বিষয়বস্তু পেষ্ট কৰক।",
+        "invalidJson": "এইটো বৈধ JSON নহয়। সম্পূৰ্ণ ফাইল কপি কৰা হৈছে নে নাই পৰীক্ষা কৰক।",
+        "wrongFormat": "এইটো এই পৃষ্ঠাৰ পৰা ৰপ্তানি কৰা ছেটিং অভাৰৰাইড ফাইল নহয়।",
+        "unsupportedVersion": "এই ফাইল ৰপ্তানিৰ বেলেগ সংস্কৰণে বনাইছিল আৰু পঢ়িব নোৱাৰি।",
+        "noOverrides": "ফাইলত অভাৰৰাইড অংশ নাই।",
+        "unreadable": "ফাইল পঢ়িব পৰা নগ'ল।"
+      },
+      "summary": "{changes}টা সলনি কৰিবলগীয়া, {unchanged}টা আগতেই প্ৰযোজ্য, {problems}টা প্ৰয়োগ কৰিব নোৱাৰি।",
+      "changesHeading": "পৰিৱৰ্তন ({count})",
+      "before": "এতিয়া:",
+      "after": "আমদানিৰ পিছত:",
+      "resetMissing": "ফাইলত নথকা ৱৰ্কস্পেচ অভাৰৰাইডো আঁতৰাওক",
+      "resetMissingHelp": "ইয়াত সলনি কৰা কিন্তু ফাইলত নথকা ছেটিংছ প্লেটফৰ্মৰ মানলৈ উভতি যায়। কেৱল যোগ বা আপডেট কৰিবলৈ ইয়াক বন্ধ ৰাখক।",
+      "resetsHeading": "আঁতৰাবলগীয়া অভাৰৰাইড ({count})",
+      "resetFrom": "বৰ্তমান {value}; উত্তৰাধিকাৰসূত্ৰে পোৱা মানলৈ উভতি যায়।",
+      "problemsHeading": "প্ৰয়োগ কৰিব নোৱাৰি ({count})",
+      "problem": {
+        "unknownKey": "এই কি' থকা কোনো ছেটিং নাই।",
+        "notWorkspaceSetting": "এই ছেটিং সম্পূৰ্ণ ৱৰ্কস্পেচৰ বাবে সলনি কৰিব নোৱাৰি।",
+        "locked": "প্লেটফৰ্ম অপাৰেটৰে এই ছেটিং পিন কৰিছে, সেয়েহে ইয়াক সলনি কৰিব নোৱাৰি।",
+        "wrongType": "এই ছেটিংৰ বাবে মানৰ প্ৰকাৰ ভুল।",
+        "required": "এটা মান প্ৰয়োজনীয়।",
+        "notNumber": "মান এটা সংখ্যা হ'ব লাগিব।",
+        "notInteger": "মান এটা পূৰ্ণ সংখ্যা হ'ব লাগিব।",
+        "belowMin": "মান অতি কম। নূন্যতম {min}।",
+        "aboveMax": "মান অতি অধিক। সৰ্বাধিক {max}।",
+        "notAllowed": "এইটো অনুমতি প্ৰাপ্ত বিকল্পৰ ভিতৰত নহয়।",
+        "tooShort": "লিখনী অতি চুটি। নূন্যতম দৈৰ্ঘ্য {min}।",
+        "tooLong": "লিখনী অতি দীঘল। সৰ্বাধিক দৈৰ্ঘ্য {max}।",
+        "precision": "মান এই ছেটিঙে অনুমতি দিয়াতকৈ অধিক সঠিক।"
+      },
+      "nothing": "এই ফাইলৰ একোৱেই কোনো ছেটিং সলনি নকৰে।",
+      "reasonNote": "এই ছেটিংছৰ কিছুমান অধিক বিপদৰ। প্ৰয়োগ কৰাৰ পিছত, আপোনাক এটা কাৰণ সোধা হ'ব যিটো অডিট লগত ৰেকৰ্ড কৰা হয়।",
+      "back": "উভতি যাওক",
+      "cancel": "বাতিল কৰক",
+      "review": "পৰিৱৰ্তনৰ সমীক্ষা কৰক",
+      "apply": "{count}টা পৰিৱৰ্তন প্ৰয়োগ কৰক",
+      "cancelled": "আমদানি বাতিল কৰা হ'ল। কোনো ছেটিংছ সলনি কৰা হোৱা নাই।",
+      "done": "আমদানি সম্পূৰ্ণ: {applied}টা ছেটিংছ আপডেট হ'ল।",
+      "donePartial": "আমদানি আংশিক সম্পূৰ্ণ: {applied}টা ছেটিংছ আপডেট হ'ল, {failed}টা প্ৰয়োগ কৰিব পৰা নগ'ল। সমীক্ষাই দেখুৱায় এতিয়ালৈকে কি বাকী আছে।"
+    },
+    "history": {
+      "adminOnly": "ৱৰ্কস্পেচ ছেটিংছৰ পৰিৱৰ্তনৰ ইতিহাস কেৱল ৱৰ্কস্পেচ প্ৰশাসকে দেখা পায়।",
+      "loading": "পৰিৱৰ্তনৰ ইতিহাস লোড হৈ আছে",
+      "partial": "{count}টা ছেটিংছৰ ইতিহাস লোড কৰিব পৰা নগ'ল, সেয়েহে এই তালিকা অসম্পূৰ্ণ হ'ব পাৰে।",
+      "retry": "পুনৰ চেষ্টা কৰক",
+      "search": "পৰিৱৰ্তনৰ ইতিহাস সন্ধান কৰক",
+      "searchPlaceholder": "ছেটিং, ব্যক্তি বা কাৰণৰ দ্বাৰা সন্ধান কৰক",
+      "empty": "এই ৱৰ্কস্পেচত এতিয়ালৈকে কোনো ছেটিং সলনি কৰা হোৱা নাই।",
+      "noMatch": "কোনো পৰিৱৰ্তন আপোনাৰ সন্ধানৰ সৈতে মিলা নাই।",
+      "count": "{total}টা পৰিৱৰ্তনৰ ভিতৰত {shown}টা দেখুৱাই আছে, নতুনটো প্ৰথমে।",
+      "tableLabel": "ৱৰ্কস্পেচ ছেটিংছৰ পৰিৱৰ্তনৰ ইতিহাস",
+      "when": "কেতিয়া",
+      "setting": "ছেটিং",
+      "change": "সলনি কৰক",
+      "by": "সলনি কৰোঁতা",
+      "reason": "কাৰণ",
+      "before": "আগতে:",
+      "after": "পাছত:",
+      "inherited": "উত্তৰাধিকাৰসূত্ৰে পোৱা মান",
+      "unknownActor": "অজ্ঞাত",
+      "noReason": "কোনো কাৰণ দিয়া হোৱা নাই",
+      "showMore": "অধিক দেখুৱাওক",
+      "scope": "স্তৰ",
+      "scopeWorkspace": "ৱৰ্কস্পেচ",
+      "scopeAgent": "এজেণ্ট {id}",
+      "scopeFilter": "পৰিৱৰ্তন এই স্তৰত দেখুৱাওক",
+      "filterAll": "সকলো স্তৰ",
+      "filterWorkspace": "কেৱল ৱৰ্কস্পেচ",
+      "filterAgents": "কেৱল এজেণ্ট",
+      "searchLoadedOnly": "সন্ধানে এতিয়ালৈকে লোড হোৱা পৰিৱৰ্তনবোৰ সামৰি লয়।",
+      "loadError": "পৰিৱৰ্তনৰ ইতিহাস লোড কৰিব পৰা নগ'ল। {message}",
+      "moreFailed": "অধিক পৰিৱৰ্তন লোড কৰিব পৰা নগ'ল। {message}",
+      "loadingMore": "লোড হৈ আছে"
+    }
+  },
+  "agentBehavior": {
+    "title": "আচৰণ আৰু সীমা",
+    "intro": "এই এজেণ্ট এটা টাৰ্নত কিমান দূৰ যাব পাৰে সেয়া নিয়ন্ত্ৰণ কৰক: কিমানটা টুল কল কৰিব পাৰে, কিমান সময় চলিব পাৰে আৰু কিমান উভতাই পঢ়ে। আপুনি ইয়াত যি সলনি নকৰে সেয়া আপোনাৰ ৱৰ্কস্পেচৰ পৰা উত্তৰাধিকাৰসূত্ৰে আহে।",
+    "saveFirst": "প্ৰথমে এজেণ্টক ছেভ কৰক। ই বনাৰ পিছত ইয়াৰ আচৰণ আৰু সীমা ছেট কৰিব পাৰি।",
+    "pickAgent": "ইয়াৰ আচৰণ আৰু সীমা টেব খুলিবলৈ তলৰ পৰা এজন এজেণ্ট বাছক।",
+    "tabs": {
+      "label": "এজেণ্ট কনফিগাৰেচন",
+      "setup": "ছেটআপ",
+      "behavior": "আচৰণ আৰু সীমা",
+      "unsaved": "ছেভ নকৰা পৰিৱৰ্তন"
+    },
+    "links": {
+      "label": "সম্পৰ্কিত পৃষ্ঠা",
+      "tenant": "ৱৰ্কস্পেচ ডিফল্ট সলনি কৰক",
+      "playground": "প্লেগ্ৰাউণ্ডত চেষ্টা কৰক",
+      "prompts": "এই এজেণ্টৰ প্ৰম্পট",
+      "promptsAria": "{name}ৰ প্ৰম্পট: প্ৰম্পট ৰেজিষ্ট্ৰি এই এজেণ্টত খোলক",
+      "approvals": "এই এজেণ্টৰ অনুমোদন",
+      "approvalsAria": "{name}ৰ অনুমোদন: এই এজেণ্টৰ বাবে ফিল্টাৰ কৰা অনুমোদনৰ শাৰী খোলক",
+      "turns": "টাৰ্ন টাইমলাইন",
+      "turnsAria": "{name}ৰ টাৰ্ন টাইমলাইন: এই এজেণ্টৰ বাবে টাৰ্ন পৰিদৰ্শক খোলক"
+    },
+    "readOnly": {
+      "locked": "এই এজেণ্ট সম্পাদনাৰ বাবে লক কৰা আছে, সেয়েহে এই মানবোৰ কেৱল পঢ়িবলৈ।",
+      "access": "আপুনি এই মানবোৰ চাব পাৰে কিন্তু এই এজেণ্টলৈ আপোনাৰ প্ৰৱেশাধিকাৰে সেইবোৰ সলনি কৰিবলৈ নিদিয়ে।"
+    },
+    "unsaved": "এই টেবত আপোনাৰ ছেভ নকৰা পৰিৱৰ্তন আছে। যোৱাৰ আগতে তলত সেইবোৰ ছেভ বা বাতিল কৰক।",
+    "inheritNote": "প্ৰতিটো ছেটিঙে ইয়াৰ মান ক'ৰ পৰা আহে সেয়া দেখুৱায়। ইয়াত এটা সলনি কৰিলে ই কেৱল এই এজেণ্টৰ বাবে অভাৰৰাইড হয়; ৱৰ্কস্পেচৰ মান পুনৰ উত্তৰাধিকাৰসূত্ৰে পাবলৈ ৰিছেট কৰক।",
+    "others": {
+      "title": "এই এজেণ্টৰ অন্য নিয়ন্ত্ৰণ",
+      "intro": "এই নিয়ন্ত্ৰণবোৰ ওপৰৰ ছেটিংছৰ অংশ নহয়, সেয়েহে সেইবোৰ ছেটআপ টেবত থাকে।",
+      "generation": "উত্তৰৰ সৃজনশীলতা আৰু দৈৰ্ঘ্য (উষ্ণতা, top-p, সৰ্বাধিক টোকেন) আৰু অতিৰিক্ত নমুনা সংগ্ৰহ বিকল্প।",
+      "generationLink": "জেনেৰেচন টিউনিঙলৈ যাওক",
+      "autonomy": "স্বায়ত্ততাৰ স্তৰ, প্ৰতিটো ৰানৰ খৰচৰ সীমা, টুল নিয়ম আৰু এজন ব্যক্তিয়ে কেতিয়া অনুমোদন কৰিব লাগে।",
+      "autonomyLink": "যুক্তি আৰু স্বায়ত্ততালৈ যাওক"
+    },
+    "discard": {
+      "title": "ছেভ নকৰাকৈ এৰি যাব নে?",
+      "description": "এই এজেণ্টৰ আচৰণ আৰু সীমাত আপোনাৰ ছেভ নকৰা পৰিৱৰ্তন আছে। এতিয়া এৰিলে সেইবোৰ হেৰাই যাব।",
+      "stay": "ইয়াতে থাকি সম্পাদনা অব্যাহত ৰাখক",
+      "leave": "এৰি যাওক আৰু পৰিৱৰ্তন বাতিল কৰক"
+    },
+    "summary": {
+      "title": "এই এজেণ্টে এতিয়া কেনেকৈ আচৰণ কৰে",
+      "subtitle": "এজেণ্টৰ নিজৰ অভাৰৰাইড, আপোনাৰ ৱৰ্কস্পেচ ছেটিংছ আৰু প্লেটফৰ্ম ছেটিংছ প্ৰয়োগ কৰাৰ পিছত এই এজেণ্টৰ বাবে প্ৰযোজ্য মান।",
+      "loading": "বৰ্তমানৰ আচৰণ লোড হৈ আছে",
+      "error": "বৰ্তমানৰ আচৰণ লোড কৰিব পৰা নগ'ল। {message}",
+      "retry": "পুনৰ চেষ্টা কৰক",
+      "empty": "এই এজেণ্টৰ বাবে এতিয়ালৈকে কোনো আচৰণ ছেটিংছ উপলব্ধ নহয়।",
+      "facts": {
+        "steps": "প্ৰতি টাৰ্নত টুল কল",
+        "turnTimeout": "প্ৰতি টাৰ্নৰ সময়",
+        "toolTimeout": "প্ৰতি টুল কলৰ সময়",
+        "outputCap": "ৰখা টুল আউটপুট",
+        "continuation": "নিৰন্তৰতা পাছ",
+        "approvals": "অনুমোদন",
+        "judge": "গুণগত মান বিচাৰক মডেল",
+        "model": "মডেল"
+      },
+      "tier": {
+        "SUPERVISED": "তত্ত্বাৱধানত: প্ৰতিটো টুল কলে এজন ব্যক্তিৰ বাবে অপেক্ষা কৰে",
+        "SEMI_AUTONOMOUS": "অৰ্ধ-স্বায়ত্ত: আপোনাৰ ৱৰ্কস্পেচ নিয়মে নিৰ্ধাৰণ কৰে",
+        "FULLY_AUTONOMOUS": "সম্পূৰ্ণ স্বায়ত্ত: টুল কলে কেতিয়াও অপেক্ষা নকৰে"
+      },
+      "approvalResumes": "অনুমোদনৰ পিছত নিজেই অব্যাহত ৰাখে",
+      "approvalStops": "অনুমোদনৰ পিছত নতুন বাৰ্তাৰ বাবে অপেক্ষা কৰে",
+      "judgeDefault": "প্লেটফৰ্মে বাছনি কৰা",
+      "overrides": {
+        "none": "এই এজেণ্টে সকলোতে আপোনাৰ ৱৰ্কস্পেচৰ মান ব্যৱহাৰ কৰে।",
+        "some": "এই এজেণ্টৰ বাবে অভাৰৰাইড কৰা ছেটিংছ: {count}।"
+      }
+    },
+    "impact": {
+      "title": "ইয়াৰ অৰ্থ কি",
+      "steps": "এই এজেণ্টে এটা টাৰ্নত সৰ্বাধিক {count}টা টুল কল কৰিব পাৰে। তাৰ পিছত ইয়াক হাতত যি আছে তাৰে উত্তৰ দিবলৈ কোৱা হয়।",
+      "stepsTierSupervised": "এই এজেণ্ট তত্ত্বাৱধানত আছে, সেয়েহে ইয়াৰ প্ৰকৃত ওপৰৰ সীমা সেই মূল সংখ্যাতকৈ কম। সঠিক সংখ্যা ব্যৱহাৰ কৰিবলৈ এই এজেণ্টৰ বাবে আপোনাৰ নিজৰ মান ছেট কৰক।",
+      "stepsTierFull": "এই এজেণ্ট সম্পূৰ্ণ স্বায়ত্ত, সেয়েহে ইয়াৰ প্ৰকৃত ওপৰৰ সীমা সেই মূল সংখ্যাতকৈ অধিক। সঠিক সংখ্যা ব্যৱহাৰ কৰিবলৈ এই এজেণ্টৰ বাবে আপোনাৰ নিজৰ মান ছেট কৰক।",
+      "turnTimeout": "এটা টাৰ্ন {duration}ৰ পিছত কাটি দিয়া হয়।",
+      "turnTimeoutNone": "টাৰ্নৰ কোনো সময়সীমা নাই।",
+      "toolTimeout": "এটা টুল কল {duration}ৰ পিছত কাটি দিয়া হয়।",
+      "toolTimeoutNone": "টুল কলৰ কোনো সময়সীমা নাই।",
+      "outputCap": "{chars}তকৈ দীঘল টুল ফলাফল এজেণ্টে পঢ়াৰ আগতে চুটি কৰা হয়।",
+      "continuation": "উত্তৰ কাটি গ'লে, এজেণ্টে ইয়াক আৰু সৰ্বাধিক {count}বাৰ অব্যাহত ৰাখিব পাৰে।",
+      "continuationNone": "কাটি যোৱা উত্তৰ অব্যাহত ৰখা নহয়।",
+      "retrieval": "প্ৰতিটো প্ৰশ্নৰ বাবে ই শ্ৰেষ্ঠ {count}টা জ্ঞান মিল পঢ়ে।",
+      "retrievalScored": "প্ৰতিটো প্ৰশ্নৰ বাবে ই শ্ৰেষ্ঠ {count}টা জ্ঞান মিল পঢ়ে আৰু {score}তকৈ কম স্ক'ৰ থকা মিল অৱজ্ঞা কৰে।",
+      "approvalContinuationOn": "এজন ব্যক্তিয়ে অপেক্ষা কৰি থকা কাৰ্য অনুমোদন কৰাৰ পিছত, এজেণ্টে নিজেই কাম শেষ কৰে।",
+      "approvalContinuationOff": "এজন ব্যক্তিয়ে অপেক্ষা কৰি থকা কাৰ্য অনুমোদন কৰাৰ পিছত, টাৰ্ন শেষ হয় আৰু হাতেৰে ফলো-আপ কৰিব লাগে।",
+      "guardClosed": "এটা সুৰক্ষা পৰীক্ষা বিকল হ'লে, কাৰ্য প্ৰত্যাখ্যান কৰা হয়।",
+      "guardOpen": "এটা সুৰক্ষা পৰীক্ষা বিকল হ'লে, কাৰ্যক পাৰ হ'বলৈ দিয়া হয়।",
+      "branches": "এটা কাম অৰ্পণ কলে এসাথে সৰ্বাধিক {count}টা উপ-কাৰ্য আৰম্ভ কৰিব পাৰে।"
+    }
+  },
+  "controls": {
+    "eyebrow": "সহায়",
+    "title": "মই ক'ত নিয়ন্ত্ৰণ কৰিম...?",
+    "subtitle": "আপোনাৰ এজেণ্টৰ আচৰণ গঢ় দিয়া প্ৰতিটো নিয়ন্ত্ৰণ, আৰু ই থকা পৃষ্ঠা। আপুনি যি সলনি কৰিব বিচাৰে তাৰ দ্বাৰা সন্ধান কৰক।",
+    "breadcrumb": {
+      "label": "ব্ৰেডক্ৰাম্ব",
+      "console": "কনছ'ল",
+      "controls": "নিয়ন্ত্ৰণ"
+    },
+    "related": {
+      "label": "অন্য নিয়ন্ত্ৰণ"
+    },
+    "search": {
+      "label": "নিয়ন্ত্ৰণ সন্ধান কৰক",
+      "placeholder": "উদাহৰণ: টাইমআউট, অনুমোদন, প্ৰম্পট, মেম'ৰী",
+      "count": "{count}টা মিল থকা নিয়ন্ত্ৰণ",
+      "none": "\"{query}\"ৰ সৈতে একো মিলা নাই। চুটি শব্দ চেষ্টা কৰক।",
+      "noSettings": "কোনো ছেটিং আপোনাৰ সন্ধানৰ সৈতে মিলা নাই।"
+    },
+    "areasHeading": "নিয়ন্ত্ৰণ ক্ষেত্ৰ",
+    "areasIntro": "এই পৃষ্ঠাবোৰত সেই নিয়ন্ত্ৰণবোৰ আছে যিবোৰ একক সংখ্যা নহয়: নিৰ্দেশনা, অনুমোদনৰ নিয়ম, সুৰক্ষাৰ নিয়ম আৰু এটা টাৰ্নে কি কৰিলে তাৰ ৰেকৰ্ড।",
+    "openArea": "খোলক",
+    "needsAccess": "এই পৃষ্ঠালৈ প্ৰৱেশাধিকাৰৰ বাবে এজন ৱৰ্কস্পেচ প্ৰশাসকক কওক।",
+    "settingsHeading": "প্ৰতিটো ৰানটাইম ছেটিং",
+    "settingsIntro": "প্ৰতিটো ছেটিং সম্পূৰ্ণ ৱৰ্কস্পেচৰ বাবে, এটা এজেণ্টৰ বাবে, বা দুয়োটাৰে বাবে সলনি কৰিব পাৰি। এজেণ্টৰ নিজৰ মান ৱৰ্কস্পেচৰ মানতকৈ প্ৰাধান্য পায়। ছেটিংত পোনে পোনে পাবলৈ এটা লিংক বাছক।",
+    "loading": "ছেটিংছৰ তালিকা লোড হৈ আছে",
+    "loadFailed": "ছেটিংছৰ তালিকা লোড কৰিব পৰা নগ'ল। {message}",
+    "retry": "পুনৰ চেষ্টা কৰক",
+    "emptyCatalog": "এই ৱৰ্কস্পেচত দেখুৱাবলৈ কোনো ৰানটাইম ছেটিংছ নাই।",
+    "changeWorkspace": "ৱৰ্কস্পেচৰ বাবে সলনি কৰক",
+    "changeAgent": "এটা এজেণ্টত সলনি কৰক",
+    "workspaceOnly": "কেৱল ৱৰ্কস্পেচ-ব্যাপী",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "এজেণ্ট ৰানটাইম সীমা",
+        "intro": "এটা টাৰ্নে কিমান কাম কৰিব পাৰে: টুল কল, সময়, ফলাফলৰ আকাৰ আৰু পুনৰুদ্ধাৰ।"
+      },
+      "behaviour-settings": {
+        "title": "আচৰণ ছেটিংছ",
+        "intro": "উত্তৰ কেনেকৈ শেষ আৰু কেছ কৰা হয়, অনুমোদন কেনেকৈ অব্যাহত থাকে, সুৰক্ষা পৰীক্ষাই কেনেকৈ আচৰণ কৰে, আৰু মেম'ৰী, সন্ধান আৰু কাম অৰ্পণে কেনেকৈ কাম কৰে।"
+      },
+      "other": {
+        "title": "অন্য ছেটিংছ",
+        "intro": "নিজৰ অংশ নথকা ছেটিংছ।"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "ৰানটাইম ছেটিংছ",
+        "summary": "সম্পূৰ্ণ ৱৰ্কস্পেচৰ বাবে সীমা, অনুমোদন, গুণগত মান পৰীক্ষা, সুৰক্ষাৰ কঠোৰতা, মেম'ৰী আৰু কাম অৰ্পণ।",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers সীমা টাইমআউট টুল পদক্ষেপ পুনৰ চেষ্টা কেছ মেম'ৰী কাম অৰ্পণ গুণগত মান বিচাৰক ছেটিংছ সংখ্যা"
+      },
+      "prompts": {
+        "title": "নিৰ্দেশনা",
+        "summary": "প্লেটফৰ্মে মডেলক দিয়া প্ৰম্পট: প্ৰতিটো চাওক, ৱৰ্কস্পেচ বা এটা এজেণ্টৰ বাবে অভাৰৰাইড কৰক, আৰু ফলাফলৰ পূৰ্বদৰ্শন চাওক।",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry প্ৰম্পট নিৰ্দেশিকা ছিষ্টেম প্ৰম্পট নিৰ্দেশনা অভাৰৰাইড পূৰ্বদৰ্শন ৰেজিষ্ট্ৰী"
+      },
+      "approvals": {
+        "title": "অনুমোদন",
+        "summary": "এজন ব্যক্তিৰ বাবে অপেক্ষা কৰি থকা কাৰ্যৰ শাৰী, কোন টুলক অনুমোদন লাগে তাৰ নিয়ম, আৰু আপোনাৰ সিদ্ধান্তৰ পিছত কি হয়।",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation অনুমোদন প্ৰত্যাখ্যান শাৰী হিউমেন ইন দ্য লুপ টুল নিয়ম মিয়াদ নিৰন্তৰতা"
+      },
+      "guardrails": {
+        "title": "গাৰ্ডৰেইল",
+        "summary": "এই ৱৰ্কস্পেচে পাৰ হ'বলৈ দিবলৈ অস্বীকাৰ কৰা আৰ্হি, আৰু টুল ফলাফলত প্ৰযোজ্য বিষয়বস্তু নীতি।",
+        "keywords": "safety rules block filter policy content patterns সুৰক্ষা নিয়ম অৱৰোধ ফিল্টাৰ নীতি বিষয়বস্তু আৰ্হি"
+      },
+      "turns": {
+        "title": "টাৰ্ন পৰিদৰ্শক",
+        "summary": "এটা এজেণ্ট টাৰ্নৰ ৰেকৰ্ড কৰা টাইমলাইন: কি সোধা হ'ল, কোন টুল চলিল, প্ৰতিটো পদক্ষেপৰ খৰচ কিমান হ'ল আৰু ই কিয় ৰ'ল।",
+        "keywords": "turn timeline journal trace replay history steps debug টাৰ্ন টাইমলাইন জাৰ্নেল ট্ৰেচ ৰিপ্লে ইতিহাস পদক্ষেপ ডিবাগ"
+      },
+      "agentBehavior": {
+        "title": "এজেণ্টৰ আচৰণ আৰু সীমা",
+        "summary": "এটা এজেণ্টৰ পৃষ্ঠাত: ইয়াৰ নিজৰ সীমা আৰু আচৰণ ছেটিংছ, প্ৰতিটো মান ক'ৰ পৰা আহে আৰু ৱৰ্কস্পেচৰ মানলৈ ৰিছেটৰ সৈতে।",
+        "keywords": "agent override per agent behavior limits tab এজেণ্ট অভাৰৰাইড প্ৰতি এজেণ্ট আচৰণ সীমা টেব"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "এই প্ৰম্পট ব্লকবোৰেৰে গঠিত",
+    "blocksCount": "{n}টা ব্লক",
+    "blockDefault": "ডিফল্ট হিচাপে অহা",
+    "blockOverride": "{scope} অভাৰৰাইড v{version}",
+    "blockAgentConfig": "এজেণ্টৰ নিজস্ব প্ৰম্পট",
+    "blockCode": "প্লেটফৰ্ম ক'ড",
+    "blockTokens": "~{tokens}টা টোকেন",
+    "blockHash": "শব্দাৱলীৰ হেচ"
+  },
+  "toolApproval": {
+    "continuing": "এজেণ্টে কাম অব্যাহত ৰাখিছে।",
+    "continueNotStarted": "এই সিদ্ধান্তৰ পিছত এজেণ্ট স্বয়ংক্ৰিয়ভাৱে পুনৰ আৰম্ভ নহ'ল। ইয়াক আগবঢ়াবলৈ এটা বাৰ্তা পঠাওক।",
+    "continueTimedOut": "এজেণ্টে এতিয়ালৈকে অব্যাহত ৰখা শেষ কৰা নাই। শেষ হ'লে তাৰ উত্তৰ বাৰ্তালাপত দেখা যাব; পৰীক্ষা কৰিবলৈ ৰিলোড কৰক।",
+    "continuingWaiting": "Your decision is recorded. The agent is picking the task back up.",
+    "continuingRunning": "The agent is working on the next step. Its reply appears here as soon as it is ready.",
+    "continuingStill": "Still working. A model running on this computer can take a few minutes; you can keep reading meanwhile.",
+    "continuingLongWait": "This is taking longer than usual, but the agent has not stopped. Its reply will appear here when it is done.",
+    "continuingStagesLabel": "Progress",
+    "continuingStageDecided": "Decision recorded",
+    "continuingStageRestarted": "Agent restarted",
+    "continuingStageWorking": "Working on it",
+    "panelLabel": "Tool approvals",
+    "queuePosition": "Approval {position} of {total}",
+    "queueMore": "{count} more waiting. The next one appears when you decide this one.",
+    "rawName": "Technical name",
+    "approveAll": "Approve all {count}",
+    "rejectAll": "Reject all",
+    "approvingProgress": "Approving {position} of {total}",
+    "rejectingProgress": "Rejecting {position} of {total}",
+    "bulkHint": "Decides the waiting calls one after another, oldest first, and stops at the first problem.",
+    "bulkStoppedTruncated": "Stopped: the next call's arguments are too long to show here, so it waits for your own decision.",
+    "bulkStoppedError": "Stopped after a problem; the calls below it are still waiting.",
+    "waitingList": "Waiting calls"
+  },
+  "promptDirectives": {
+    "tabRegistry": "সকলো প্ৰম্পট",
+    "tabAgentPreview": "চূড়ান্ত প্ৰম্পটৰ পূৰ্বদৰ্শন",
+    "regTitle": "প্ৰতিটো প্ৰম্পট",
+    "regIntro": "মডেলৰ বাবে প্লেটফৰ্মে লিখা সকলো লিখনী, এতিয়া প্ৰযোজ্য শব্দাৱলী, তাৰ উৎস আৰু সংস্কৰণৰ সৈতে। এটা পৰিসৰ বাছক, সলনি কৰিবলৈ এটা প্ৰম্পট খোলক, আৰু প্ৰতিটো পূৰ্বৰ সংস্কৰণ চাওক। পৰিৱৰ্তন প্ৰায় আধা মিনিটত সকলো ছাৰ্ভাৰত পায়।",
+    "regScopeLabel": "যি পৰিসৰত সলনি কৰিব",
+    "regScope_tenant": "এই ৱৰ্কস্পেচ",
+    "regScope_agent": "এটা এজেণ্ট",
+    "regScope_platform": "সমগ্ৰ প্লেটফৰ্ম",
+    "regAgentLabel": "এজেণ্ট",
+    "regAgentPlaceholder": "এটা এজেণ্ট বাছক",
+    "regAgentsFailed": "আপোনাৰ এজেণ্ট লোড কৰিব পৰা নগ'ল।",
+    "regPickAgent": "এটা এজেণ্টৰ প্ৰম্পট চাবলৈ আৰু সলনি কৰিবলৈ তাক বাছক।",
+    "regAgentUnavailable": "লিংকত থকা এজেণ্ট আপোনাৰ বাবে উপলব্ধ নহয়, কাৰণ ই নাই বা আপুনি ইয়াক চাব নোৱাৰে। ইয়াৰ সলনি ৰেজিষ্ট্ৰি ৱৰ্কস্পেচ পৰিসৰত খোলা হ'ল।",
+    "regSearchLabel": "প্ৰম্পট সন্ধান কৰক",
+    "regSearchPlaceholder": "কি, শিৰোনাম বা বিৱৰণ",
+    "regRiskLabel": "বিপদৰ শ্ৰেণী",
+    "regRiskAll": "সকলো বিপদৰ শ্ৰেণী",
+    "regRisk_STEERS_EVERY_TURN": "প্ৰতিটো টাৰ্নক পৰিচালনা কৰে",
+    "regRisk_SECONDARY_CALL": "দ্বিতীয় মডেল কল",
+    "regRisk_USER_VISIBLE": "মানুহক দেখুওৱা হয়",
+    "regRisk_TOOL_DESCRIPTION": "টুলৰ বিৱৰণ",
+    "regOnlyCustomised": "কেৱল কাষ্টমাইজ কৰা",
+    "regPlatformReadOnly": "প্লেটফৰ্ম-ব্যাপী প্ৰম্পট ইয়াত পঢ়িব পাৰি; কেৱল প্লেটফৰ্ম প্ৰশাসকেহে সেইবোৰ সলনি কৰিব পাৰে।",
+    "regLoadFailed": "প্ৰম্পট লোড কৰিব পৰা নগ'ল।",
+    "regCount": "{total}টা প্ৰম্পটৰ ভিতৰত {shown}টা দেখুৱাই আছে।",
+    "regEmptyTitle": "কোনো প্ৰম্পট মিলা নাই",
+    "regEmptyBody": "সন্ধান বা ফিল্টাৰ সলনি কৰক।",
+    "regSource_DEFAULT": "ডিফল্ট হিচাপে অহা",
+    "regSource_FALLBACK": "ডিফল্ট হিচাপে অহা (অভাৰৰাইড উপলব্ধ নহয়)",
+    "regSource_PLATFORM": "প্লেটফৰ্ম",
+    "regSource_TENANT": "ৱৰ্কস্পেচ",
+    "regSource_AGENT": "এজেণ্ট",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "অৱসৰপ্ৰাপ্ত",
+    "regRetiredBody": "এই প্ৰম্পটে আৰু কোনো লিখনী নপঠায়, সেয়েহে সলনি কৰিবলৈ একো নাই।",
+    "regEffectiveOff": "বন্ধ: একো পঠোৱা নহয়।",
+    "regEffectiveTokens": "এতিয়া প্ৰযোজ্য, প্ৰায় {tokens}টা টোকেন।",
+    "regEffectiveLabel": "{title}ৰ বাবে প্ৰযোজ্য শব্দাৱলী",
+    "regOpenEditor": "{title} সম্পাদনা কৰক",
+    "regCloseEditor": "{title} বন্ধ কৰক",
+    "regEditingOverride": "{scope} সংস্কৰণ সম্পাদনা কৰি আছে, বৰ্তমান v{version}।",
+    "regEditingNone": "এতিয়ালৈকে কোনো {scope} সংস্কৰণ নাই। ই ইয়াৰ তলৰ শব্দাৱলীৰ পৰা আৰম্ভ হয়: {below}।",
+    "regPlaceholders": "ৰানটাইমত পূৰণ হয়:",
+    "regRequired": "(প্ৰয়োজনীয়)",
+    "regProblemsTitle": "ছেভ কৰাৰ আগতে এইটো সংশোধন কৰক",
+    "regReasonLabel": "পৰিৱৰ্তনৰ কাৰণ (ইতিহাসত ৰখা হয়)",
+    "regReasonPlaceholder": "ঐচ্ছিক",
+    "regConflict": "আপুনি সম্পাদনা কৰি থকাৰ সময়ত কোনোবাই এই প্ৰম্পট সলনি কৰিলে। তেওঁৰ সংস্কৰণ চাবলৈ ইয়াক বন্ধ কৰি পুনৰ খোলক, তাৰ পিছত পুনৰ চেষ্টা কৰক।",
+    "regRevert": "{to}লৈ উভতাওক",
+    "regShowHistory": "ইতিহাস",
+    "regHideHistory": "ইতিহাস লুকুৱাওক",
+    "regHistoryLoading": "ইতিহাস লোড হৈ আছে…",
+    "regHistoryFailed": "ইতিহাস লোড কৰিব পৰা নগ'ল।",
+    "regHistoryEmpty": "এই পৰিসৰত এতিয়ালৈকে কোনো সংস্কৰণ নাই।",
+    "regVersion": "সংস্কৰণ {version}",
+    "regAction_CREATE": "সৃষ্টি কৰা",
+    "regAction_UPDATE": "সলনি কৰা",
+    "regAction_REVERT": "উভতাই দিয়া",
+    "regAction_MIGRATE": "স্থানান্তৰিত",
+    "regCurrent": "বৰ্তমান",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "অজ্ঞাত",
+    "regReason": "কাৰণ: {reason}",
+    "regShowDiff": "সংস্কৰণ {version}ৰ পৰিৱৰ্তন দেখুৱাওক",
+    "regHideDiff": "সংস্কৰণ {version}ৰ পৰিৱৰ্তন লুকুৱাওক",
+    "regDiffLabel": "সংস্কৰণ {version}ে কৰা পৰিৱৰ্তন",
+    "regNoDiff": "এই সংস্কৰণত কোনো লিখনী সলনি হোৱা নাই।",
+    "regRestore": "সংস্কৰণ {version} পুনৰুদ্ধাৰ কৰক",
+    "regRestoreReason": "সংস্কৰণ {version}ৰ শব্দাৱলী পুনৰুদ্ধাৰ কৰা হ'ল",
+    "regRestoreFailed": "সেই সংস্কৰণ পুনৰুদ্ধাৰ কৰিব পৰা নগ'ল।",
+    "regRestoreAck": "মই বুজি পাওঁ যে {title}ৰ এটা সংস্কৰণ পুনৰুদ্ধাৰ কৰিলে সুৰক্ষা দুৰ্বল হ'ব পাৰে।",
+    "regPreviewTitle": "চূড়ান্ত প্ৰম্পটৰ পূৰ্বদৰ্শন",
+    "regPreviewIntro": "মডেলক কল নকৰাকৈ, এটা টাৰ্নে যেনেকৈ কৰিলেহেঁতেন তেনেকৈয়ে এজেণ্টৰ প্ৰকৃত ছিষ্টেম প্ৰম্পট আৰু টুল তালিকা বনায়। প্ৰতিটো ব্লকে প্ৰম্পট কি, পৰিসৰ আৰু তাৰ শব্দাৱলী অহা সংস্কৰণ দেখুৱায়।",
+    "regPreviewMessageLabel": "নমুনা ব্যৱহাৰকাৰী বাৰ্তা (ঐচ্ছিক)",
+    "regPreviewMessagePlaceholder": "প্ৰকৃত বাৰ্তাৰ দৰে টুল আৰু মনত পেলোৱা মেম'ৰী বাছনি কৰিবলৈ ব্যৱহাৰ কৰা হয়।",
+    "regPreviewSmallModel": "সৰু মডেলৰ বাবে পূৰ্বদৰ্শন",
+    "regPreviewBuild": "পূৰ্বদৰ্শন বনাওক",
+    "regPreviewBuilding": "বনাই আছে…",
+    "regPreviewFailed": "পূৰ্বদৰ্শন বনাব পৰা নগ'ল।",
+    "regPreviewTotals": "প্ৰায় {prompt}টা টোকেন ছিষ্টেম লিখনী আৰু {tools}টা টোকেন টুলৰ সংজ্ঞা (অনুমান)।",
+    "regPreviewOverBudgetTitle": "টোকেন বাজেটতকৈ অধিক",
+    "regPreviewOverBudget": "স্থায়ী ছিষ্টেম লিখনী কনফিগাৰ কৰা {budget}টা টোকেনৰ বাজেটতকৈ অধিক। একো কটা নহয়; এটা প্ৰম্পট চুটি কৰাৰ কথা ভাবক।",
+    "regPreviewMessageHeading": "বাৰ্তা: {message}",
+    "regPreviewTokens": "~{tokens}টা টোকেন",
+    "regPreviewTools": "টুল ({count})",
+    "regPreviewNoTools": "এই এজেণ্টে কোনো টুল নিদিয়ে।",
+    "regPreviewNotes": "এই পূৰ্বদৰ্শনে যি জানিব নোৱাৰে",
+    "regOriginDefault": "ডিফল্ট হিচাপে অহা",
+    "regOriginOverride": "{scope} অভাৰৰাইড v{version}",
+    "regOriginAgentConfig": "এজেণ্টৰ নিজস্ব ছিষ্টেম প্ৰম্পট",
+    "regOriginCode": "প্লেটফৰ্ম ক'ড"
+  },
+  "toolLabels": {
+    "mcpTool": "{tool} ({server})",
+    "label_web_search": "Search the web",
+    "does_web_search": "Looks up public web pages that match a search and reads their titles and snippets.",
+    "label_fetch_web_page": "Open a web page",
+    "does_fetch_web_page": "Downloads one public web page and reads its text.",
+    "label_deep_research": "Research a topic on the web",
+    "does_deep_research": "Runs several web searches and reads the pages it finds.",
+    "label_verify_citations": "Check quotes against sources",
+    "does_verify_citations": "Compares quoted text with the web pages it was taken from.",
+    "label_http_request": "Call a web API",
+    "does_http_request": "Sends a request to a web address or API; depending on the request it can read or change something there.",
+    "label_http_request_write": "Send data to a web API",
+    "does_http_request_write": "Sends data to a web address, which can change something on that service.",
+    "label_schedule_task": "Schedule a task",
+    "does_schedule_task": "Sets up a task to run later or on a repeating schedule.",
+    "label_create_workflow": "Create a workflow",
+    "does_create_workflow": "Creates a new workflow in this workspace.",
+    "label_data_table_query": "Look up a data table",
+    "does_data_table_query": "Reads rows from one of this workspace's data tables.",
+    "label_data_table_write": "Change a data table",
+    "does_data_table_write": "Adds or changes rows in one of this workspace's data tables.",
+    "label_coding_task": "Run a coding task",
+    "does_coding_task": "Starts a coding task that can read and change files in a code workspace.",
+    "label_delegate_to_specialist": "Ask a specialist agent",
+    "does_delegate_to_specialist": "Hands part of the task to another agent and reads its answer.",
+    "label_delegate_parallel": "Ask several agents at once",
+    "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
+    "label_web_task": "Use a browser on a website",
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
   }
 }

@@ -13,21 +13,21 @@ container-to-container only).
 Two modes (``APP_BUILDER_INGRESS_MODE`` / ``settings.ingress_mode``):
 
 ``path`` (default)
-    Registers ``handle_path /preview/{project_id}/*`` on the existing
+    Registers ``handle_path /preview/{tenant_key}/{project_id}/*`` on the existing
     ``:8899`` listener — the SAME listener every static route in the
     Caddyfile (web/admin/academy/api/auth/codeintel) already uses — that
-    strips the ``/preview/{project_id}`` prefix and reverse-proxies to the
+    strips the ``/preview/{tenant_key}/{project_id}`` prefix and reverse-proxies to the
     upstream. Needs zero new DNS: it rides the Host-header-agnostic path
     match on a listener that's already reachable through the tunnel today.
-    Returns ``{settings.preview_path_base_url}/preview/{project_id}/``.
+    Returns ``{settings.preview_path_base_url}/preview/{tenant_key}/{project_id}/``.
     This is the practical default until an operator does the wildcard-DNS
     step below.
 
 ``subdomain``
     Registers a Host-header route matching
-    ``{project_id}.{settings.preview_domain}`` -> reverse_proxy upstream,
+    ``{tenant_key}-{project_id}.{settings.preview_domain}`` -> reverse_proxy upstream,
     the same shape as every static route already in the Caddyfile.
-    Returns ``https://{project_id}.{settings.preview_domain}`` (the
+    Returns ``https://{tenant_key}-{project_id}.{settings.preview_domain}`` (the
     Cloudflare tunnel terminates TLS in front of Caddy, same as every
     other route here — see the ``https_proto`` snippet this mirrors).
     REQUIRES a manual, outside-this-repo operator step: point
@@ -48,17 +48,27 @@ to the END of the array would always lose to the catch-all, which sorts
 before it. We avoid needing to compute "insert right before the catch-all"
 by instead always inserting new preview routes at index 0 (the very
 front): our matchers (a specific project subdomain, or a
-``/preview/{project_id}/*`` path) never overlap the existing
+``/preview/{tenant_key}/{project_id}/*`` path) never overlap the existing
 Host-only-matched static routes, so putting them first only ever adds a
 new thing Caddy checks before falling through to the existing routes
 unchanged — see ``_upsert_route`` below.
 
+Tenant namespacing: project ids are unique only per tenant (the registry is
+a per-tenant directory), so two tenants can both own a project called
+``shop``. ``tenant_key`` is an opaque, fixed-length digest of the tenant id
+(``_tenant_key``) that prefixes the Caddy ``@id``, the URL path and the
+preview host, so one tenant's route can never replace or shadow another's.
+Routes registered before this namespacing used ``preview-{project_id}`` /
+``/preview/{project_id}/*``; ``deregister_preview_route(legacy=True)`` removes
+such a route (``preview.stop_preview`` passes it for a preview whose stored
+URL has the old shape). New registrations never touch a legacy id.
+
 Idempotent re-registration: every route we push carries a deterministic
-``"@id": "preview-{project_id}"``. Caddy indexes any config object tagged
+``"@id": "preview-{tenant_key}-{project_id}"``. Caddy indexes any config object tagged
 with ``@id`` so it can be addressed directly at ``/id/<value>`` regardless
 of where it lives in the tree. Re-registering the same project (e.g. the
 preview process restarted on a new host:port) goes through ``PATCH
-/id/preview-{project_id}`` — a full in-place replace that needs no array
+/id/preview-{tenant_key}-{project_id}`` — a full in-place replace that needs no array
 bookkeeping — and only falls back to the index-0 insert path the first
 time (or if the id was previously deregistered).
 
@@ -82,13 +92,16 @@ collide with a real tenant directory.
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
 
 import httpx
 
 from . import audit
+from .logsafe import clean
 from .settings import SETTINGS, Settings
+from .tenancy import validate_project_id, validate_tenant_id
 
 log = logging.getLogger(__name__)
 
@@ -109,8 +122,20 @@ class CaddyAdminError(RuntimeError):
     documented host:port fallback; never propagates to callers."""
 
 
-def _route_id(project_id: str) -> str:
-    return f"preview-{project_id}"
+def _tenant_key(tenant_id: str) -> str:
+    """Opaque, fixed-length (16 hex) namespace for one tenant's preview routes.
+    Not a secret: it only keeps two tenants' identical project ids apart."""
+    validate_tenant_id(tenant_id)
+    return hashlib.sha256(tenant_id.encode()).hexdigest()[:16]
+
+
+def _route_id(tenant_id: str, project_id: str) -> str:
+    return f"preview-{_tenant_key(tenant_id)}-{validate_project_id(project_id)}"
+
+
+def _legacy_route_id(project_id: str) -> str:
+    """The pre-namespacing id (``preview-{project_id}``)."""
+    return f"preview-{validate_project_id(project_id)}"
 
 
 def _audit_dir(settings: Settings) -> str:
@@ -122,24 +147,30 @@ def _audit_dir(settings: Settings) -> str:
 def _record_fallback(settings: Settings, project_id: str, reason: str) -> None:
     log.warning(
         "ingress: Caddy admin API unavailable, falling back to raw "
-        "host:port preview URL for project_id=%s (%s)", project_id, reason)
+        "host:port preview URL for project_id=%s (%s)",
+        clean(project_id),
+        clean(reason),
+    )
     try:
-        audit.record(_audit_dir(settings), {
-            "kind": "preview_ingress_fallback",
-            "project_id": project_id,
-            "reason": reason,
-        })
+        audit.record(
+            _audit_dir(settings),
+            {
+                "kind": "preview_ingress_fallback",
+                "project_id": project_id,
+                "reason": reason,
+            },
+        )
     except OSError:
         # Never let audit-logging itself break the fallback path.
         log.exception("ingress: failed to write fallback audit event")
 
 
-def _admin_request(settings: Settings, method: str, path: str,
-                    json_body: dict | None = None) -> httpx.Response:
+def _admin_request(
+    settings: Settings, method: str, path: str, json_body: dict | None = None
+) -> httpx.Response:
     url = settings.caddy_admin_url.rstrip("/") + path
     try:
-        resp = httpx.request(method, url, json=json_body,
-                              timeout=_ADMIN_TIMEOUT_SECONDS)
+        resp = httpx.request(method, url, json=json_body, timeout=_ADMIN_TIMEOUT_SECONDS)
     except httpx.TimeoutException as e:
         raise CaddyAdminError(f"Caddy admin API timed out: {method} {path}") from e
     except httpx.TransportError as e:
@@ -154,8 +185,7 @@ def _find_server_name(settings: Settings) -> str:
     or no matching server is found."""
     resp = _admin_request(settings, "GET", "/config/apps/http/servers")
     if resp.status_code != 200:
-        raise CaddyAdminError(
-            f"unexpected status reading servers: {resp.status_code}")
+        raise CaddyAdminError(f"unexpected status reading servers: {resp.status_code}")
     try:
         servers = resp.json() or {}
     except ValueError as e:
@@ -164,13 +194,13 @@ def _find_server_name(settings: Settings) -> str:
     for name, server in servers.items():
         if _LISTEN_ADDR in (server.get("listen") or []):
             return name
-    raise CaddyAdminError(
-        f"no Caddy server found listening on {_LISTEN_ADDR}")
+    raise CaddyAdminError(f"no Caddy server found listening on {_LISTEN_ADDR}")
 
 
-def _path_route(project_id: str, upstream_host: str, upstream_port: int,
-                route_id: str) -> dict:
-    prefix = f"/preview/{project_id}"
+def _path_route(
+    tenant_id: str, project_id: str, upstream_host: str, upstream_port: int, route_id: str
+) -> dict:
+    prefix = f"/preview/{_tenant_key(tenant_id)}/{project_id}"
     return {
         "@id": route_id,
         "match": [{"path": [f"{prefix}/*"]}],
@@ -179,16 +209,21 @@ def _path_route(project_id: str, upstream_host: str, upstream_port: int,
             {
                 "handler": "reverse_proxy",
                 "upstreams": [{"dial": f"{upstream_host}:{upstream_port}"}],
-                "headers": {"request": {"set": {
-                    "X-Forwarded-Proto": ["https"]}}},
+                "headers": {"request": {"set": {"X-Forwarded-Proto": ["https"]}}},
             },
         ],
     }
 
 
-def _subdomain_route(project_id: str, upstream_host: str, upstream_port: int,
-                     route_id: str, preview_domain: str) -> dict:
-    host = f"{project_id}.{preview_domain}"
+def _subdomain_route(
+    tenant_id: str,
+    project_id: str,
+    upstream_host: str,
+    upstream_port: int,
+    route_id: str,
+    preview_domain: str,
+) -> dict:
+    host = f"{_tenant_key(tenant_id)}-{project_id}.{preview_domain}"
     return {
         "@id": route_id,
         "match": [{"host": [host]}],
@@ -196,8 +231,7 @@ def _subdomain_route(project_id: str, upstream_host: str, upstream_port: int,
             {
                 "handler": "reverse_proxy",
                 "upstreams": [{"dial": f"{upstream_host}:{upstream_port}"}],
-                "headers": {"request": {"set": {
-                    "X-Forwarded-Proto": ["https"]}}},
+                "headers": {"request": {"set": {"X-Forwarded-Proto": ["https"]}}},
             },
         ],
     }
@@ -217,53 +251,81 @@ def _upsert_route(settings: Settings, route_id: str, route: dict) -> None:
     if patch_resp.status_code != 404:
         raise CaddyAdminError(
             f"unexpected status updating route {route_id}: "
-            f"{patch_resp.status_code} {patch_resp.text[:300]}")
+            f"{patch_resp.status_code} {patch_resp.text[:300]}"
+        )
 
     # Not registered yet — insert at the front of the live server's routes.
     server_name = _find_server_name(settings)
     insert_resp = _admin_request(
-        settings, "PUT",
-        f"/config/apps/http/servers/{server_name}/routes/0", route)
+        settings, "PUT", f"/config/apps/http/servers/{server_name}/routes/0", route
+    )
     if insert_resp.status_code not in (200, 201):
         raise CaddyAdminError(
             f"unexpected status inserting route {route_id}: "
-            f"{insert_resp.status_code} {insert_resp.text[:300]}")
+            f"{insert_resp.status_code} {insert_resp.text[:300]}"
+        )
 
 
-def register_preview_route(project_id: str, upstream_host: str,
-                           upstream_port: int,
-                           settings: Settings = SETTINGS) -> str:
-    route_id = _route_id(project_id)
+def register_preview_route(
+    tenant_id: str,
+    project_id: str,
+    upstream_host: str,
+    upstream_port: int,
+    settings: Settings = SETTINGS,
+) -> str:
+    route_id = _route_id(tenant_id, project_id)
+    key = _tenant_key(tenant_id)
     mode = settings.ingress_mode
 
     try:
         if mode == "subdomain":
             route = _subdomain_route(
-                project_id, upstream_host, upstream_port, route_id,
-                settings.preview_domain)
+                tenant_id,
+                project_id,
+                upstream_host,
+                upstream_port,
+                route_id,
+                settings.preview_domain,
+            )
             _upsert_route(settings, route_id, route)
-            return f"https://{project_id}.{settings.preview_domain}"
+            return f"https://{key}-{project_id}.{settings.preview_domain}"
 
         # default / "path"
-        route = _path_route(
-            project_id, upstream_host, upstream_port, route_id)
+        route = _path_route(tenant_id, project_id, upstream_host, upstream_port, route_id)
         _upsert_route(settings, route_id, route)
         base = settings.preview_path_base_url.rstrip("/")
-        return f"{base}/preview/{project_id}/"
+        return f"{base}/preview/{key}/{project_id}/"
     except CaddyAdminError as e:
         _record_fallback(settings, project_id, str(e))
         return f"http://{upstream_host}:{upstream_port}"
 
 
-def deregister_preview_route(project_id: str,
-                             settings: Settings = SETTINGS) -> None:
-    route_id = _route_id(project_id)
+def is_legacy_preview_url(
+    preview_url: str | None, project_id: str, settings: Settings = SETTINGS
+) -> bool:
+    """True when `preview_url` is one a pre-namespacing build returned for
+    `project_id` (``<base>/preview/<project_id>/`` or
+    ``https://<project_id>.<preview_domain>``), i.e. the project's live route
+    still carries the old ``preview-{project_id}`` id."""
+    if not preview_url:
+        return False
+    base = settings.preview_path_base_url.rstrip("/")
+    return preview_url in (
+        f"{base}/preview/{project_id}/",
+        f"https://{project_id}.{settings.preview_domain}",
+    )
+
+
+def deregister_preview_route(
+    tenant_id: str, project_id: str, settings: Settings = SETTINGS, legacy: bool = False
+) -> None:
+    route_id = _legacy_route_id(project_id) if legacy else _route_id(tenant_id, project_id)
     try:
         resp = _admin_request(settings, "DELETE", f"/id/{route_id}")
         if resp.status_code not in (200, 204, 404):
             raise CaddyAdminError(
-                f"unexpected status deleting route {route_id}: "
-                f"{resp.status_code} {resp.text[:300]}")
+                f"unexpected status deleting route {route_id}: {resp.status_code} {resp.text[:300]}"
+            )
     except CaddyAdminError as e:
         # No downstream URL to fall back to here (the caller already has
         # nothing to do with a return value) — just make sure the stale

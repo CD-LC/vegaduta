@@ -6,7 +6,7 @@
 
   <groupId>io.github.cd-lc</groupId>
   <artifactId>vegaduta-agent-parent</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
   <packaging>pom</packaging>
 
   <name>VegaDuta Agent SDK</name>
@@ -64,7 +64,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html).
          Bump when cutting a release. -->
-    <project.build.outputTimestamp>2026-10-12T00:00:00Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-10-22T07:57:34Z</project.build.outputTimestamp>
 
     <!-- Framework baselines. The adapters are built and tested against these; consumers may
          run newer patch versions. -->
@@ -86,7 +86,7 @@
     <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
     <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
     <japicmp-maven-plugin.version>0.23.1</japicmp-maven-plugin.version>
-    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
+    <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
     <spotless.version>2.44.4</spotless.version>
     <!-- Same formatter version as core/. google-java-format does not run on JDK 17.0.20+ (a javac
          internal it calls changed), so run spotless with a JDK 21: see .github/workflows/ci.yml. -->
@@ -154,6 +154,18 @@
         <version>${h2.version}</version>
       </dependency>
 
+      <!-- Jackson 3 (tools.jackson, pulled by spring-ai-client-chat) 3.1.7: Spring Boot 4.1.1's BOM manages
+           3.1.5, which grype reports for GHSA-p6pp-m3f8-5c89, GHSA-7hhh-6rmp-j9qf, GHSA-q4xh-88c3-wmh7,
+           GHSA-cxp5-3px4-pw24 and GHSA-wv8q-qhhj-9h54. An import cannot be steered by a property, so this BOM is
+           imported first (the first import that manages an artifact wins). DependencyAdvisoryFloorTest in
+           agent-spring-ai fails if the pin is lost. -->
+      <dependency>
+        <groupId>tools.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>3.1.7</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <!-- Spring Boot's BOM manages SLF4J, Micrometer, OpenTelemetry, JUnit, AssertJ and
            Mockito versions. Imported here so every module tests against one consistent set.
            flatten-maven-plugin resolves these into the published POMs, so consumers never

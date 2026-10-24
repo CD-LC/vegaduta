@@ -9,7 +9,10 @@ import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.providers.ProviderModelCatalogService;
 import com.agenticai.core.providers.ProviderModelResponse;
 import com.agenticai.core.providers.ProviderName;
+import com.agenticai.core.quality.QualitySettings;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.tenancy.AiModelFeature;
 import com.agenticai.core.tenancy.AiModelPreference;
 import com.agenticai.core.tenancy.TenantAiModelPreferenceService;
@@ -71,6 +74,18 @@ public class JudgeChatClientFactory {
     /** Overall time budget for one judge run (seconds): a calibration or eval run stops spending past it. */
     @Value("${app.quality.eval.judge-budget-seconds:120}")
     long budgetSeconds = JudgeCallGuard.DEFAULT_BUDGET.toSeconds();
+
+    /**
+     * The settings catalog ({@code quality.judge.model}, {@code quality.judge.callTimeoutSeconds}): the workspace's own
+     * value when it set one, else the two platform fields above. Optional like the other collaborators; a context
+     * without a catalog, or a settings failure, gives the platform fields.
+     */
+    private volatile SettingsResolver settings;
+
+    @Autowired(required = false)
+    public void setSettingsResolver(SettingsResolver settingsResolver) {
+        this.settings = settingsResolver;
+    }
 
     private final LlmGatewayService llmGatewayService;
     private final ProviderCredentialResolver credentialResolver;
@@ -142,7 +157,30 @@ public class JudgeChatClientFactory {
 
     /** The per-call limit, never null or non-positive. */
     public Duration callTimeout() {
-        return JudgeCallGuard.orDefault(Duration.ofSeconds(callTimeoutSeconds));
+        long seconds = callTimeoutSeconds;
+        SettingsResolver resolver = settings;
+        if (resolver != null) {
+            try {
+                seconds = resolver.getLong(QualitySettings.JUDGE_CALL_TIMEOUT_SECONDS, SettingContext.tenant());
+            } catch (RuntimeException e) {
+                log.warn("Could not read {}; using the platform value {}: {}", QualitySettings.JUDGE_CALL_TIMEOUT_SECONDS, seconds, e.toString());
+            }
+        }
+        return JudgeCallGuard.orDefault(Duration.ofSeconds(seconds));
+    }
+
+    /** The explicit judge model: the workspace's setting, else the platform's {@code app.quality.eval.judge-model}; blank = none. */
+    private String configuredJudgeModel() {
+        String value = configuredJudgeModel;
+        SettingsResolver resolver = settings;
+        if (resolver != null) {
+            try {
+                value = resolver.getString(QualitySettings.JUDGE_MODEL, SettingContext.tenant());
+            } catch (RuntimeException e) {
+                log.warn("Could not read {}; using the platform value: {}", QualitySettings.JUDGE_MODEL, e.toString());
+            }
+        }
+        return value == null ? "" : value.trim();
     }
 
     /** The overall time budget for a judge run, never null or non-positive. */
@@ -180,7 +218,8 @@ public class JudgeChatClientFactory {
      * Which provider, key and model judge right now, and WHY - in priority order:
      * <ol>
      *   <li>the model an eval run asked for ({@link #judgeModelScope});</li>
-     *   <li>the deployment's explicit {@code app.quality.eval.judge-model};</li>
+     *   <li>the workspace's {@code quality.judge.model} setting, else the deployment's explicit
+     *       {@code app.quality.eval.judge-model};</li>
      *   <li>the model of this workspace's most recent SUCCESSFUL call on its best-ranked provider
      *       ({@link ProviderCredentialResolver#rankActiveProviders}, read from llm_call_log) - a model
      *       known to answer, not an arbitrary catalog row;</li>
@@ -202,7 +241,7 @@ public class JudgeChatClientFactory {
         if (tenantChoice != null) {
             return tenantChoice;
         }
-        String configured = configuredJudgeModel == null ? "" : configuredJudgeModel.trim();
+        String configured = configuredJudgeModel();
         if (!configured.isEmpty()) {
             int slash = configured.indexOf('/');
             if (slash > 0) {

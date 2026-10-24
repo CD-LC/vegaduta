@@ -48,7 +48,7 @@ five tabs; links go to the Agent Lab (`/agents?agentId=...&lab=open`) and to [Ag
 | Tab | What it holds |
 |---|---|
 | Live quality | Turn-by-turn scores on real conversations (helpfulness, accuracy, tone, length, relevance, safety), then the **Improvements** card below. |
-| Datasets & gate | Golden-case eval datasets, case import and export, regression runs and history, judge calibration, statistics, and the **eval gate** that decides whether promoting the agent's head configuration to Production is allowed. |
+| Datasets & gate | Golden-case eval datasets, case import and export, regression runs and history, judge calibration, statistics, and the **eval gate** that decides whether promoting the agent's head configuration to Production is allowed. A run replays in one of two **modes**, shown on every run in the history: **Full pipeline** (the default: the same tool selection, guardrails, approvals and budget as a real message, in a sandbox where only tools that read really run and everything that could write, send or pay is simulated and listed in the run detail) or **Quick (text only)** (the agent's tools are withheld). Pick the mode per run in the run options, pin one on a dataset, or let a workspace admin change the default (`quality.eval.defaultMode`). See [configuration](../configuration.md#evals-the-agent-lab-the-quality-judge-and-rl-exploration-on-the-real-pipeline). |
 | Simulations | Persona-driven simulation sessions and attack reports. |
 | Reliability | Reliability runs and comparison against a measured noise floor. |
 | Solutions | The proof ledger of an applied App Builder envoy, next to the per-agent quality panels. The full envoy view is at `/build/{id}`. |
@@ -113,7 +113,7 @@ the stages the turn went through. It is the UI for the turn journal in
 [ADR-0021](../architecture/ADR-0021-turn-inspector.md). Your browser also re-checks the hash chain itself, and the
 page's **Export as test fixture** button downloads the turn as `turn-<id>.fixture.json`.
 
-- **You give it** an agent and a turn id. It reads `GET /api/agents/{agentId}/turns/{turnId}/journal`.
+- **You give it** an agent and a turn id, or an agent and a chat session id to list that session's turns. It reads `GET /api/agents/{agentId}/turns/{turnId}/journal` and `GET /api/agents/{agentId}/turn-journal?sessionId=...`.
 - **You see** one row per event, in order: type (`INTAKE`, `GUARD`, `MODEL_CALL`, `TOOL_CALL`, `APPROVAL`, `VERIFY`,
   `COMMIT`), a short redacted summary, the SHA-256 of the payload, the previous and own hash, and the time. The server
   also returns `chainIntact` and, when the chain does not verify, `brokenAtSeq` (the first event whose hash does not
@@ -123,10 +123,15 @@ page's **Export as test fixture** button downloads the turn as `turn-<id>.fixtur
 - **Empty and denied states** are shown on the page rather than as an error toast: `404` means nothing was recorded
   for that turn, `403` means you lack `PERM_VIEW_AUDIT_LOG` or access to the agent.
 - **Needs the flag**: nothing is recorded unless the deployment sets `app.turn-journal.enabled=true` (environment
-  `APP_TURN_JOURNAL_ENABLED`; default `false`). Only the streaming fast path is journaled today; buffered depths and
-  workflow runs are not, and the approval gate does not write `APPROVAL` events yet. The read works with the flag off
-  (it serves what was recorded earlier), so an empty result on a fresh install is expected. See
-  [configuration](../configuration.md).
+  `APP_TURN_JOURNAL_ENABLED`; default `false`). Every reasoning depth and delegated or specialist turns are
+  journaled, and a call held for approval writes an `APPROVAL` event (a gated call that an eval's sandbox auto-approved writes `decided:eval-approved`, never a person's decision); workflow runs are not journaled, and nothing
+  purges old rows, so the table grows until an operator prunes it. The read works with the flag off
+  (it serves what was recorded earlier), so an empty result on a fresh install is expected. Not even the personal
+  install turns the flag on. See [configuration](../configuration.md).
+- **Limits of what it shows**: a `TOOL_CALL` row carries `status=ok`, `error`, `blocked`, `parked` or (an eval turn whose sandbox answered with a simulated result instead of running the tool) `simulated`, worked out from
+  what the platform answered; the journal still stores hashes only, so for the arguments and the result check the
+  agent's tool-call log. While the journal is on, the chat response carries the turn id in the `X-Journal-Turn-Id`
+  header, and the by-session listing finds a session's turns without it.
 
 ## Cost & ROI (`/roi`)
 

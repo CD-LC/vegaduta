@@ -75,7 +75,10 @@ create table agent_enabled_guardrail (
 
 New field: `enabledGuardrails` (Set<String>)
 - Stored as `agent_enabled_guardrail` join table
-- Empty = no guardrails (default)
+- Empty = no guardrails. That is the state of every agent created before the default below; **a new agent is created
+  with `jailbreak` enabled** (`app.agents.default-guardrails`, default `jailbreak`, set it empty to restore the old
+  behaviour), and a tenant can switch it off per agent. The other types (profanity, PII, policy violation, toxicity) are
+  on for an agent only when someone enables them for it
 - EAGER fetch for efficient evaluation
 
 Getters/Setters:
@@ -178,7 +181,14 @@ with `GuardrailEvaluationContext.input(...)` after `moderateInbound`, and `enfor
 the output path with `GuardrailEvaluationContext.output(...)`; streamed output violations are audited by
 `auditStreamedOutboundViolation`. `ResponsePiiFlagAdvisor` (`core/agents-turn/.../agents/gateway`) also runs the
 PII guardrail over completed responses. The sketch below is the original design; read the class for the exact
-behaviour:
+behaviour.
+
+**Output guardrails withhold only a reply that has not been sent yet.** The buffered depths (CAREFUL, RIGOROUS,
+PLANNED) hold the answer and replace a violating one with a short notice. At the default FAST depth the reply
+streams, so the check on the finished answer detects and audits (`guardrail.output.blocked`) but cannot withhold
+anything the client has already read; only the pattern-based guardrails run there. Adding `OUTPUT_GUARDRAILS` to
+`app.chat.parity.fast-buffering-triggers` (default `GENERATION_TOOLS,MCP_TOOLS`) holds a FAST turn of an agent
+that has output guardrails, so a violation is withheld. If the check itself errors on a buffered depth, `app.guardrails.fail-mode` decides: `closed` (the default) withholds the answer, `open` returns it.
 
 **Input Path (before LLM call):**
 ```java

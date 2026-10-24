@@ -153,6 +153,9 @@ Authorization is not served from these: `SkillService#loadForAgent` still re-rea
 `HttpServer` in the test) for a tenant, sends a turn through `AgentChatService#chat` and counts connections and
 statements from the call to the first token. Warm that is 15 connections and 14 statements; the budget is 17 and
 16. What the 14 statements are is in the next section.
+As of 2026-10-23 the measured warm turn is 17 connections and 18 statements and the budget is 17 and 18: a message of
+at most `app.chat.follow-up.short-message-chars` characters (40) reads the session's `tool_call_log` once to keep the tools
+the conversation already used on offer (`FollowUpTools`). A longer message does not.
 
 ## 4. Measured latency of a whole turn
 

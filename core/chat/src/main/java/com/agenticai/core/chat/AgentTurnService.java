@@ -29,6 +29,7 @@ import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -100,6 +101,21 @@ public class AgentTurnService {
 
     @Nullable
     private volatile FimCompletionEntitlements entitlements;
+
+    /**
+     * Classifies a failed row's exception ({@link ProviderErrorTranslator}) so {@link
+     * ProviderFailurePolicy} can tell an input-shaped failure from a row-shaped one. Built here, without
+     * the Smart AI error explainer: a failover decision must never spend an LLM call.
+     */
+    private final ProviderErrorTranslator failureTranslator = new ProviderErrorTranslator(JSON, null);
+
+    /** What to do when a tool call arrives with unusable arguments; setter-injected, defaults built in. */
+    private volatile AgentTurnRepairProperties repair = new AgentTurnRepairProperties();
+
+    @Autowired(required = false)
+    void useRepairProperties(AgentTurnRepairProperties properties) {
+        this.repair = properties;
+    }
 
     public AgentTurnService(
         ObjectProvider<FimCompletionEntitlements> entitlements,
@@ -207,8 +223,8 @@ public class AgentTurnService {
         for (HostedProviderSelection selection : chain) {
             String model = selection.provider().getModel();
             try {
-                ChatResponse response = callModel(buildClient(selection, maxTokens, temperature), messages, options);
-                AgentTurn.Result result = toResult(response, model);
+                AgentTurn.Result result =
+                    answer(buildClient(selection, maxTokens, temperature), messages, options, model);
                 lease.settle(model,
                     result.usage() == null ? null : result.usage().promptTokens(),
                     result.usage() == null ? null : result.usage().completionTokens());
@@ -217,6 +233,17 @@ public class AgentTurnService {
                 if (isTerminalForTheTurn(e)) {
                     lease.abandon();
                     throw e;
+                }
+                // A failure that is a property of the INPUT (an over-long prompt, a payload too large,
+                // a content-policy refusal) is rejected the same way by every row: walking the rest of
+                // the pool only multiplies latency and spend before the same answer. Row-shaped
+                // failures (key, billing, model id, capacity, 5xx) still move on.
+                UpstreamProviderException classified = failureTranslator.translate(e);
+                if (!ProviderFailurePolicy.isRetryableOnAnotherProvider(classified)) {
+                    lease.abandon();
+                    log.warn("Agent turn: pool row {} failed with an input-shaped error ({}) - not trying the"
+                        + " other rows, they would reject it the same way", model, classified.getMessage());
+                    throw classified;
                 }
                 last = e;
                 log.warn("Agent turn: pool row {} failed ({}) - trying the next row", model, e.toString());
@@ -363,18 +390,141 @@ public class AgentTurnService {
             .build();
     }
 
-    private static AgentTurn.Result toResult(@Nullable ChatResponse response, String model) {
+    /**
+     * One row's answer. A tool call whose arguments are unusable (invalid JSON, typically cut off at
+     * the output limit) is never handed to the client with empty arguments - it would be run that way.
+     * Instead the model is shown that error as the call's RESULT and asked again, up to
+     * {@link AgentTurnRepairProperties#getMaxAttempts()} times; if the calls are still unusable they
+     * are dropped and the client is told in the reply text. Usage of every call made is summed, so the
+     * turn is settled for what it cost.
+     */
+    private AgentTurn.Result answer(
+        ChatClient client, List<org.springframework.ai.chat.messages.Message> messages,
+        ToolCallingChatOptions options, String model
+    ) {
+        AgentTurnRepairProperties repairProperties = repair;
+        List<org.springframework.ai.chat.messages.Message> conversation = messages;
+        AgentTurn.Usage total = null;
+        for (int attempt = 0; ; attempt++) {
+            Reply reply = read(callModel(client, conversation, options));
+            total = add(total, reply.usage());
+            if (reply.unusableCalls().isEmpty()) {
+                return reply.toResult(model, total);
+            }
+            if (attempt >= repairProperties.getMaxAttempts()) {
+                log.warn("Agent turn: model {} sent tool call(s) {} with unusable arguments and {} repair attempt(s) "
+                    + "did not fix it - dropping the calls", model, reply.unusableNames(), attempt);
+                return reply.withoutCalls(model, total, repairProperties);
+            }
+            log.info("Agent turn: model {} sent tool call(s) {} with unusable arguments (finish {}) - handing the "
+                + "model the error as the result and asking again ({}/{})", model, reply.unusableNames(),
+                reply.finish(), attempt + 1, repairProperties.getMaxAttempts());
+            conversation = withRepairExchange(conversation, reply, repairProperties);
+        }
+    }
+
+    /** The conversation extended with the broken reply and an error result for each of its calls. */
+    private static List<org.springframework.ai.chat.messages.Message> withRepairExchange(
+        List<org.springframework.ai.chat.messages.Message> conversation, Reply reply, AgentTurnRepairProperties repair
+    ) {
+        List<AssistantMessage.ToolCall> calls = new ArrayList<>();
+        List<ToolResponseMessage.ToolResponse> results = new ArrayList<>();
+        for (ReadCall call : reply.calls()) {
+            // The unusable arguments are replaced by {} in the replayed call: providers (Gemini)
+            // refuse to replay a call whose arguments are not valid JSON.
+            calls.add(new AssistantMessage.ToolCall(call.id(), "function", call.name(),
+                call.args().valid() ? call.rawArguments() : "{}"));
+            String text = call.args().valid()
+                ? repair.render(repair.getSkippedMessage(), call.name(), "")
+                : repair.render(repair.getInvalidArgumentsMessage(), call.name(),
+                    reply.finishReason() == FinishReason.LENGTH
+                        ? repair.getInvalidReasonCutOff() : repair.getInvalidReasonMalformed());
+            results.add(new ToolResponseMessage.ToolResponse(call.id(), call.name(), text));
+        }
+        List<org.springframework.ai.chat.messages.Message> next = new ArrayList<>(conversation);
+        next.add(AssistantMessage.builder().content(reply.text()).toolCalls(calls).build());
+        next.add(ToolResponseMessage.builder().responses(results).build());
+        return next;
+    }
+
+    private static AgentTurn.Usage add(@Nullable AgentTurn.Usage total, @Nullable AgentTurn.Usage next) {
+        if (next == null) {
+            return total;
+        }
+        if (total == null) {
+            return next;
+        }
+        return new AgentTurn.Usage(sum(total.promptTokens(), next.promptTokens()),
+            sum(total.completionTokens(), next.completionTokens()));
+    }
+
+    @Nullable
+    private static Long sum(@Nullable Long a, @Nullable Long b) {
+        return a == null ? b : b == null ? a : Long.valueOf(a + b);
+    }
+
+    /** What one model response said, with each tool call's arguments checked. */
+    private record Reply(String text, List<ReadCall> calls, String rawFinish, @Nullable AgentTurn.Usage usage) {
+
+        FinishReason finishReason() {
+            return FinishReason.of(rawFinish);
+        }
+
+        String finish() {
+            return rawFinish;
+        }
+
+        List<ReadCall> unusableCalls() {
+            return calls.stream().filter(c -> !c.args().valid()).toList();
+        }
+
+        List<String> unusableNames() {
+            return unusableCalls().stream().map(ReadCall::name).toList();
+        }
+
+        AgentTurn.Result toResult(String model, @Nullable AgentTurn.Usage total) {
+            List<ToolCall> wire = new ArrayList<>();
+            for (ReadCall call : calls) {
+                wire.add(new ToolCall(call.id(), call.name(), call.args().value()));
+            }
+            return new AgentTurn.Result(text, wire, model, wireFinish(finishReason(), rawFinish, !wire.isEmpty()), total);
+        }
+
+        /** Every call dropped (a partly run batch is worse than none), the reason given in the text. */
+        AgentTurn.Result withoutCalls(String model, @Nullable AgentTurn.Usage total, AgentTurnRepairProperties repair) {
+            String reason = finishReason() == FinishReason.LENGTH
+                ? repair.getInvalidReasonCutOff() : repair.getInvalidReasonMalformed();
+            String notice = repair.render(repair.getUnusableCallsNotice(), String.join(", ", unusableNames()), reason);
+            String body = text.isBlank() ? notice : text + "\n\n" + notice;
+            String finish = finishReason() == FinishReason.LENGTH ? "length" : "malformed_tool_call";
+            return new AgentTurn.Result(body, List.of(), model, finish, total);
+        }
+    }
+
+    private record ReadCall(String id, String name, String rawArguments, ParsedArgs args) {
+    }
+
+    /** Parsed tool arguments; {@code valid} is false when the provider's JSON could not be read. */
+    record ParsedArgs(Map<String, Object> value, boolean valid) {
+    }
+
+    private static Reply read(@Nullable ChatResponse response) {
         if (response == null || response.getResult() == null || response.getResult().getOutput() == null) {
             throw new IllegalStateException("the model returned no output");
         }
         AssistantMessage output = response.getResult().getOutput();
-        List<ToolCall> calls = new ArrayList<>();
+        String rawFinish = response.getResult().getMetadata() == null
+            ? null : response.getResult().getMetadata().getFinishReason();
+        List<ReadCall> calls = new ArrayList<>();
         for (AssistantMessage.ToolCall call : output.getToolCalls()) {
-            calls.add(new ToolCall(call.id(), call.name(), parseArgs(call.arguments())));
+            // Some providers (Gemini) send no call id; the client must be able to answer the call.
+            calls.add(new ReadCall(ToolCallIds.ensure(call.id()), call.name(), call.arguments(),
+                parseArgs(call.arguments())));
         }
         String text = output.getText() == null ? "" : output.getText();
         if (text.isEmpty() && calls.isEmpty()) {
-            throw new IllegalStateException("the model returned neither text nor a tool call");
+            throw new IllegalStateException("the model returned neither text nor a tool call"
+                + (FinishReason.of(rawFinish) == FinishReason.UNKNOWN ? "" : " (finish reason " + rawFinish + ")"));
         }
         AgentTurn.Usage usage = null;
         if (response.getMetadata() != null && response.getMetadata().getUsage() != null) {
@@ -383,25 +533,42 @@ public class AgentTurnService {
                 u.getPromptTokens() == null ? null : u.getPromptTokens().longValue(),
                 u.getCompletionTokens() == null ? null : u.getCompletionTokens().longValue());
         }
-        String finish = response.getResult().getMetadata() == null ? null : response.getResult().getMetadata().getFinishReason();
-        if (!calls.isEmpty()) {
-            finish = "tool_calls";
-        } else if (finish == null || finish.isBlank()) {
-            finish = "stop";
-        }
-        return new AgentTurn.Result(text, calls, model, finish, usage);
+        return new Reply(text, calls, rawFinish, usage);
     }
 
-    /** Providers return arguments as a JSON string; small models sometimes emit invalid JSON - empty map, not a 500. */
-    static Map<String, Object> parseArgs(@Nullable String arguments) {
+    /**
+     * The finish reason put on the wire: {@code tool_calls} when usable calls are returned, otherwise
+     * the provider's reason in one vocabulary ({@code stop}, {@code length}, {@code content_filter},
+     * {@code malformed_tool_call}); a reason this service does not know is passed through unchanged.
+     */
+    static String wireFinish(FinishReason reason, @Nullable String raw, boolean hasCalls) {
+        if (hasCalls) {
+            return "tool_calls";
+        }
+        return switch (reason) {
+            case LENGTH -> "length";
+            case SAFETY -> "content_filter";
+            case MALFORMED_TOOL_CALL -> "malformed_tool_call";
+            case OTHER -> raw;
+            case STOP, TOOL_CALLS, UNKNOWN -> "stop";
+        };
+    }
+
+    /**
+     * Providers return arguments as a JSON string. Blank arguments are a call with none. Anything that
+     * is not a JSON object is NOT turned into an empty map: the call is marked unusable, so the
+     * caller can tell the model instead of running a tool with arguments it never chose.
+     */
+    static ParsedArgs parseArgs(@Nullable String arguments) {
         if (arguments == null || arguments.isBlank()) {
-            return Map.of();
+            return new ParsedArgs(Map.of(), true);
         }
         try {
-            return JSON.readValue(arguments, MAP_TYPE);
+            Map<String, Object> parsed = JSON.readValue(arguments, MAP_TYPE);
+            return new ParsedArgs(parsed == null ? Map.of() : parsed, true);
         } catch (JsonProcessingException e) {
-            log.debug("Agent turn: tool-call arguments were not valid JSON - returning none");
-            return Map.of();
+            log.debug("Agent turn: tool-call arguments were not a valid JSON object");
+            return new ParsedArgs(Map.of(), false);
         }
     }
 

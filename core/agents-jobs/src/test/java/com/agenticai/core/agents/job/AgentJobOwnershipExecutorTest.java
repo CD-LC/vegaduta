@@ -190,4 +190,49 @@ class AgentJobOwnershipExecutorTest {
         assertTrue(executor.heartbeatQuiesced(), "the heartbeat scheduler must be terminated after a quiesce");
         assertEquals(0, executor.activeCount(), "quiesce waits (bounded) for the interrupted workers to unwind");
     }
+
+    /**
+     * The wait for interrupted workers is {@code app.agent-jobs.quiesce-worker-wait} (was a 3 s constant).
+     * A worker that ignores its interrupt is waited for exactly that long, so a short setting returns
+     * quickly and the default would have blocked for about 3 s.
+     */
+    @Test
+    void quiesceWaitsForAWorkerThatIgnoresItsInterruptOnlyAsLongAsConfigured() throws Exception {
+        UUID jobId = UUID.randomUUID();
+        AgentJobRepository repository = mock(AgentJobRepository.class);
+        when(repository.isCancelRequested(jobId)).thenReturn(Optional.of(false));
+        JobLeaseStore store = mock(JobLeaseStore.class);
+        when(store.renew(any(), any(), any())).thenReturn(true);
+        CountDownLatch started = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        AgentJobExecution stubborn = mock(AgentJobExecution.class);
+        doAnswer(invocation -> {
+            started.countDown();
+            while (release.getCount() > 0) {
+                try {
+                    release.await();
+                } catch (InterruptedException ignored) {
+                    // a worker stuck in non-interruptible I/O
+                }
+            }
+            return null;
+        }).when(stubborn).run(jobId, TENANT);
+
+        AgentJobProperties properties = ownershipProperties(true);
+        properties.setQuiesceWorkerWait(Duration.ofMillis(250));
+        executor = new AgentJobExecutor(repository, stubborn, properties);
+        JobOwnership ownership = new JobOwnership(properties, store);
+        executor.setOwnership(ownership);
+        assertTrue(executor.tryDispatch(jobId, TENANT));
+        assertTrue(started.await(5, TimeUnit.SECONDS));
+
+        ownership.beginShutdown();
+        long begun = System.nanoTime();
+        executor.quiesceForShutdown();
+        long waitedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begun);
+        release.countDown();
+
+        assertTrue(waitedMs >= 200, "waited for the configured window, not less: " + waitedMs + " ms");
+        assertTrue(waitedMs < 2_500, "and not for the old 3 s constant: " + waitedMs + " ms");
+    }
 }

@@ -129,12 +129,16 @@ class ChatContextCompactionTest {
     }
 
     @Test
-    void theShippedDefaultIsOff() {
-        // The @Value default repeated in code is what a slim context sees; application.yml says the
-        // same.
-        ChatContextCompaction viaDefaults = compaction(false, true, null, null);
+    void theShippedDefaultIsOn() throws Exception {
+        // Owner decision 2026-10-23 (defaults review row 10): on in the base and personal profiles. The @Value default
+        // repeated in code is what a slim context sees; application.yml says the same (ConfigurationDriftTest).
+        var ctor = ChatContextCompaction.class.getConstructors()[0];
+        String expr =
+                ctor.getParameters()[4]
+                        .getAnnotation(org.springframework.beans.factory.annotation.Value.class)
+                        .value();
 
-        assertEquals(false, viaDefaults.isEnabled());
+        assertEquals("${app.context.compaction.enabled:true}", expr);
     }
 
     // ---------------------------------------------------------------- restore tool

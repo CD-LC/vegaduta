@@ -6,7 +6,7 @@
   <parent>
     <groupId>io.github.cd-lc</groupId>
     <artifactId>vegaduta-agent-parent</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
   </parent>
 
   <artifactId>vegaduta-agent-scanner</artifactId>
@@ -20,6 +20,9 @@
 
   <properties>
     <automatic.module.name>io.vegaduta.agent.scanner</automatic.module.name>
+    <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
+    <!-- The jar CliJarIT runs. Override to point it at another jar (the thin jar fails the test). -->
+    <cli.jar>${project.build.directory}/${project.build.finalName}-cli.jar</cli.jar>
   </properties>
 
   <dependencies>
@@ -61,6 +64,92 @@
             </manifestEntries>
           </archive>
         </configuration>
+      </plugin>
+
+      <!-- The thin jar above is the library artifact: it needs agent-api, agent-core, slf4j and re2j on
+           the class path, so `java -jar` on it dies with NoClassDefFoundError. The runnable CLI is this
+           attached `-cli` jar, which bundles exactly those four. It is not a library: depend on the
+           thin jar from code. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>${maven-shade-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>cli-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>cli</shadedClassifierName>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <artifactSet>
+                <includes>
+                  <include>io.github.cd-lc:vegaduta-agent-api</include>
+                  <include>io.github.cd-lc:vegaduta-agent-core</include>
+                  <include>org.slf4j:slf4j-api</include>
+                  <include>com.google.re2j:re2j</include>
+                </includes>
+              </artifactSet>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>META-INF/MANIFEST.MF</exclude>
+                    <exclude>META-INF/maven/**</exclude>
+                    <exclude>module-info.class</exclude>
+                    <exclude>META-INF/versions/*/module-info.class</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>io.vegaduta.agent.scanner.Main</mainClass>
+                  <manifestEntries>
+                    <Implementation-Title>${project.artifactId}-cli</Implementation-Title>
+                    <Implementation-Version>${project.version}</Implementation-Version>
+                    <Bundle-License>Apache-2.0</Bundle-License>
+                  </manifestEntries>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                  <resource>META-INF/THIRD-PARTY-NOTICES.txt</resource>
+                  <file>src/cli/THIRD-PARTY-NOTICES.txt</file>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Runs the packaged CLI jar (CliJarIT) after `package`. Surefire, not failsafe, so no second
+           provider is resolved; -DskipTests skips it as it does the unit tests. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>cli-jar-it</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>**/*IT.java</include>
+              </includes>
+              <systemPropertyVariables>
+                <cli.jar>${cli.jar}</cli.jar>
+                <fixtures.dir>${project.build.testOutputDirectory}</fixtures.dir>
+              </systemPropertyVariables>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

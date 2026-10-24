@@ -7,8 +7,11 @@ import com.agenticai.core.agents.hosted.FreeTierProviderPoolEmptyException;
 import com.agenticai.core.agents.hosted.HostedChainLink;
 import com.agenticai.core.agents.loadtest.LoadTestChatClientFactory;
 import com.agenticai.core.agents.loadtest.LoadTestTenantAllowlist;
+import com.agenticai.core.guardrails.SandboxApprovalGrants;
+import com.agenticai.core.guardrails.TurnApprovalState;
 import com.agenticai.core.security.TenantPlan;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.ai.chat.client.ChatClient;
 import reactor.core.publisher.Flux;
@@ -50,9 +53,58 @@ final class ChatClientSelection {
             TurnContext context) {}
 
     private final AgentChatService svc;
+    private final FollowUpTools followUp;
+    private final ContinuationProperties continuation;
+    private final LocalModelTurnProperties localModel;
 
-    ChatClientSelection(AgentChatService svc) {
+    ChatClientSelection(AgentChatService svc, FollowUpTools followUp, ContinuationProperties continuation) {
+        this(svc, followUp, continuation, new LocalModelTurnProperties());
+    }
+
+    ChatClientSelection(
+            AgentChatService svc,
+            FollowUpTools followUp,
+            ContinuationProperties continuation,
+            LocalModelTurnProperties localModel) {
         this.svc = svc;
+        this.followUp = followUp;
+        this.continuation = continuation;
+        this.localModel = localModel == null ? new LocalModelTurnProperties() : localModel;
+    }
+
+    /**
+     * Whether this turn offers the agent's tool set unchanged (see {@link TurnModelTraits#stableToolSet}): the model it
+     * starts on is served on the person's own machine (the install's local pool row, or a bring-your-own provider in
+     * {@code app.chat.local-model.providers}), {@code app.chat.local-model.stable-tools} is on, and the model is not
+     * in small-model mode (that mode's short tool list matters more than a cached prompt on a slow machine).
+     */
+    boolean stableToolSet(Agent agent, List<HostedChainLink> hostedChain) {
+        if (!localModel.isStableTools()) {
+            return false;
+        }
+        if (hostedChain != null && !hostedChain.isEmpty()) {
+            HostedChainLink head = hostedChain.get(0);
+            return head.localModel() && !head.smallModel();
+        }
+        return agent != null
+                && agent.getProviderName() != null
+                && localModel.isLocalProvider(agent.getProviderName().name());
+    }
+
+    /**
+     * Whether the model this turn starts on is a weak tool caller (see {@link TurnModelTraits}): a
+     * platform-hosted row in small-model mode or measured at a text-only tool-calling grade, or a
+     * bring-your-own provider listed in {@code app.chat.continuation.heuristic-providers}.
+     */
+    boolean weakToolCaller(Agent agent, List<HostedChainLink> hostedChain) {
+        if (hostedChain != null && !hostedChain.isEmpty()) {
+            HostedChainLink head = hostedChain.get(0);
+            return head.smallModel()
+                    || (head.toolCallGrade() != null
+                            && continuation.getHeuristicToolGrades().contains(head.toolCallGrade()));
+        }
+        return agent.getProviderName() != null
+                && continuation.getHeuristicProviders().contains(agent.getProviderName());
     }
 
     Outcome select(
@@ -60,7 +112,8 @@ final class ChatClientSelection {
             ChatTurnPreflight.Turn turn,
             RlTurnPlan rl,
             String userMessage,
-            String subjectKey) {
+            String subjectKey,
+            List<String> runToolNames) {
         LoadTestTenantAllowlist loadTestTenantAllowlist = svc.loadTestTenantAllowlist;
         ChatClientResolver clientResolver = svc.clientResolver;
         FreeTierChatClientService freeTierChatClientService = svc.freeTierChatClientService;
@@ -156,6 +209,48 @@ final class ChatClientSelection {
         } else {
             hostedChain = null;
         }
+        context.modelTraits().weakToolCaller(weakToolCaller(agent, hostedChain));
+        context.modelTraits().stableToolSet(stableToolSet(agent, hostedChain));
+        // A short follow-up ("yes", "continue") carries no words to select tools or a model by: it keeps
+        // the tools the conversation already used and stays on the model that started the task. The
+        // continuation after an approval has its own goal and tool list.
+        Set<String> conversationTools =
+                context.continuation() == null
+                        ? followUp.stickyTools(
+                                agentId,
+                                context.sessionId(),
+                                userMessage,
+                                // The tenant's and the agent's chat.followUp.stickyTools* settings, asked only for a follow-up.
+                                () -> {
+                                    FollowUpTools.StickyPolicy platform = followUp.platformPolicy();
+                                    return new FollowUpTools.StickyPolicy(
+                                            svc.turns.behaviour.bool(
+                                                    "chat.followUp.stickyToolsEnabled",
+                                                    context.scope(),
+                                                    agentId,
+                                                    platform::enabled),
+                                            svc.turns.behaviour.seconds(
+                                                    "chat.followUp.stickyToolsWindow",
+                                                    context.scope(),
+                                                    agentId,
+                                                    platform::window),
+                                            svc.turns.behaviour.integer(
+                                                    "chat.followUp.maxStickyTools",
+                                                    context.scope(),
+                                                    agentId,
+                                                    platform::maxTools));
+                                })
+                        : Set.of();
+        boolean keepPrimaryModel =
+                !conversationTools.isEmpty()
+                        && followUp.keepsPrimaryModel(
+                                userMessage,
+                                conversationTools,
+                                svc.turns.behaviour.bool(
+                                        "chat.followUp.keepPrimaryModel",
+                                        context.scope(),
+                                        agentId,
+                                        followUp::platformKeepsPrimaryModel));
         ChatClient chatClient =
                 isLoadTestTenant
                         ? LoadTestChatClientFactory.create()
@@ -163,16 +258,42 @@ final class ChatClientSelection {
                                 ? hostedChain.get(0).client()
                                 : clientResolver.buildChatClientFor(
                                         agent,
-                                        userMessage,
+                                        // Cost routing judges the TASK; on a continuation that is the
+                                        // original goal (a platform-written message is never "simple").
+                                        context.decisionMessage(userMessage),
                                         rlModelOverride,
                                         currentTenantId,
                                         currentTenantPlan,
                                         effTemperature,
-                                        effTopP);
+                                        effTopP,
+                                        keepPrimaryModel);
+        // One approval state per turn, shared by reference with the tool guards (tool resolution
+        // reads it from this context) and the FAST loop: it carries the scoped memory id the replay
+        // envelope needs and tells the loop when a tool call has parked the turn on an approval.
+        // The goal it records is the person's own message (the ORIGINAL one on a continuation), and
+        // the tools the conversation already used ride along so tool selection keeps them on offer.
+        ApprovalContinuation approvalContinuation = context.continuation();
+        TurnApprovalState approvalState =
+                new TurnApprovalState(
+                        turn.memorySessionId(),
+                        context.decisionMessage(userMessage),
+                        context.requestedAgentId(),
+                        subjectKey,
+                        approvalContinuation == null
+                                ? conversationTools
+                                : Set.copyOf(approvalContinuation.stickyTools()),
+                        // The run-scoped tool selection (null = not narrowed): the journal shows it, tool
+                        // resolution keeps it out of relevance trimming and the approval gate passes it on to
+                        // the continuation.
+                        runToolNames);
+        // An offline eval turn the server itself started under a sandbox auto-approval (registered under this
+        // turn's request id by whoever started the turn; see SandboxApprovalGrants). Every other turn has none.
+        approvalState.enableSandboxGrant(SandboxApprovalGrants.forTurn(context.requestId()));
+        TurnContext withApproval = context.withApproval(approvalState);
         TurnContext turnContext =
                 usesHostedPool && !hostedChain.isEmpty()
-                        ? context.withBudget(hostedChain.get(0).guards())
-                        : context;
+                        ? withApproval.withBudget(hostedChain.get(0).guards())
+                        : withApproval;
         return Outcome.proceed(
                 new Clients(
                         chatClient,

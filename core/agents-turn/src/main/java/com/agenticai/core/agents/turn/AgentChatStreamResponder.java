@@ -4,6 +4,7 @@ import com.agenticai.core.agents.core.AgentController;
 import com.agenticai.core.agents.dto.ChatRequest;
 import com.agenticai.core.agents.resumable.ResumableChatStreamService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
+import com.agenticai.core.agents.turnjournal.TurnJournalGateway;
 import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.guardrails.GuardrailViolationException;
 import com.agenticai.core.security.TenantContext;
@@ -36,10 +37,17 @@ public final class AgentChatStreamResponder {
     private final AgentChatService agentChatService;
     private final Duration stepHeartbeatInterval;
 
+    /** Whether a turn the client did not tag still gets a turn reference (rl.selection.server-turn-ref); null = no. */
+    private volatile RlTurnRefPolicy rlTurnRefPolicy;
+
     public AgentChatStreamResponder(
             AgentChatService agentChatService, Duration stepHeartbeatInterval) {
         this.agentChatService = agentChatService;
         this.stepHeartbeatInterval = stepHeartbeatInterval;
+    }
+
+    void useRlTurnRefPolicy(RlTurnRefPolicy policy) {
+        this.rlTurnRefPolicy = policy;
     }
 
     /**
@@ -122,11 +130,17 @@ public final class AgentChatStreamResponder {
                         request.attachmentMimeType(),
                         request.attachments(),
                         List.of(),
-                        request.turnRef(),
+                        rlTurnRefPolicy == null
+                                ? request.turnRef()
+                                : rlTurnRefPolicy.turnRefFor(request.turnRef()),
                         request.visionSessionId(),
                         request.forceFastDepth(),
                         stepEvents,
-                        false);
+                        false,
+                        null,
+                        null,
+                        // The run-scoped tool selection (the playground's "this run only" switches); null = none.
+                        request.toolNames());
         // ADR-0022 stage 4: this HTTP entry builds the turn context from the tenant
         // TenantContextFilter put on this request thread.
         TurnContext context = TurnContext.forEntry(TenantContext.current().orElse(null), turn);
@@ -195,9 +209,13 @@ public final class AgentChatStreamResponder {
                                             sessionId,
                                             emitted.length(),
                                             e);
+                                    // On a reactor thread: read the wording in the turn's tenant.
+                                    String generic =
+                                            context.scope()
+                                                    .get(() -> agentChatService.genericFailureMessage(agentId));
                                     return Flux.just(
                                             AgentController.STREAM_ERROR_MARKER
-                                                    + midStreamFailureMessage(e));
+                                                    + midStreamFailureMessage(e, generic));
                                 });
 
         // THE byte-identity guarantee, in one expression: a turn that did not
@@ -234,6 +252,7 @@ public final class AgentChatStreamResponder {
                     resumable.start(agentId, sessionId, stream);
             return ResponseEntity.ok()
                     .header(AgentController.SESSION_ID_HEADER, sessionId)
+                    .headers(journalTurnHeader(context))
                     .header(ResumableChatStreamService.TURN_ID_HEADER, started.turnId())
                     .header(HttpHeaders.CACHE_CONTROL, "no-cache")
                     .header("X-Accel-Buffering", "no")
@@ -242,6 +261,7 @@ public final class AgentChatStreamResponder {
 
         return ResponseEntity.ok()
                 .header(AgentController.SESSION_ID_HEADER, sessionId)
+                .headers(journalTurnHeader(context))
                 // Standard streaming-response hygiene (2026-09-25 latency audit):
                 // no-cache tells intermediaries not to store or coalesce the body,
                 // and X-Accel-Buffering:no is the de-facto "do not buffer this
@@ -251,6 +271,19 @@ public final class AgentChatStreamResponder {
                 .header(HttpHeaders.CACHE_CONTROL, "no-cache")
                 .header("X-Accel-Buffering", "no")
                 .body(stream);
+    }
+
+    /**
+     * Names the turn's journal record in the response ({@link TurnJournalGateway#TURN_ID_HEADER}) so the client can
+     * open the turn it just ran, or find it by the session id it already has. Only while the journal is on: an id
+     * with nothing behind it would send the client to a 404.
+     */
+    private static java.util.function.Consumer<HttpHeaders> journalTurnHeader(TurnContext context) {
+        return headers -> {
+            if (TurnJournalGateway.enabled()) {
+                headers.set(TurnJournalGateway.TURN_ID_HEADER, context.turnId().toString());
+            }
+        };
     }
 
     /**
@@ -264,6 +297,25 @@ public final class AgentChatStreamResponder {
      * goes straight to an end user's chat window.
      */
     public static String midStreamFailureMessage(Throwable error) {
+        return midStreamFailureMessage(error, null);
+    }
+
+    /** The shipped wording of the generic sentence ({@code message.generic_failure}). */
+    public static String defaultGenericFailureMessage() {
+        return com.agenticai.core.prompts.PromptResolver.defaultsOnly()
+                .catalog()
+                .defaultText(GENERIC_FAILURE_KEY);
+    }
+
+    /** Registry key of the generic failure sentence. */
+    public static final String GENERIC_FAILURE_KEY = "message.generic_failure";
+
+    /**
+     * As {@link #midStreamFailureMessage(Throwable)}, with {@code genericFailure} as the generic
+     * sentence (the agent's, tenant's or platform's wording of {@code message.generic_failure});
+     * {@code null} = the shipped one.
+     */
+    public static String midStreamFailureMessage(Throwable error, String genericFailure) {
         // Bounded rather than "walk until null": a cause chain can be cyclic
         // (a wrapper that returns itself, or A->B->A), and this runs on the
         // error path of a live stream - the one place an infinite loop would
@@ -288,6 +340,6 @@ public final class AgentChatStreamResponder {
             Throwable cause = current.getCause();
             current = cause == current ? null : cause;
         }
-        return "Something went wrong finishing this reply. Please try again.";
+        return genericFailure != null ? genericFailure : defaultGenericFailureMessage();
     }
 }

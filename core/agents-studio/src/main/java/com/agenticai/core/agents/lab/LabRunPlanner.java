@@ -40,7 +40,7 @@ final class LabRunPlanner {
     record RunPlan(
         String runId, UUID agentId, String kind, String tenantId, String subject,
         List<String> systemPrompts, List<Cell> cells, boolean judgeScoring, boolean judgeSimilarity,
-        int plannedCalls, long createdAtMs
+        int plannedCalls, long createdAtMs, boolean withTools
     ) {}
 
     /**
@@ -139,7 +139,7 @@ final class LabRunPlanner {
         }
         return new RunPlan(
             runId, agentId, kind, tenantId, subject, List.copyOf(prompts), List.copyOf(cells),
-            judgeScoring, judgeSimilarity, planned, nowMs);
+            judgeScoring, judgeSimilarity, planned, nowMs, Boolean.TRUE.equals(request.withTools()));
     }
 
     private static boolean judgeMode(String field, String value) {

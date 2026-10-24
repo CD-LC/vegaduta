@@ -84,6 +84,20 @@ public class ContentGuardrailEngine {
         GuardrailEvaluationContext context,
         ChatClient chatClient
     ) {
+        // The guardrails below read their refusal wording and judge prompts from the prompt registry; the
+        // agent the content is for must be current on this thread so an agent-scope override applies on the
+        // inbound and outbound gates too, not only on the guarded tool call (see GuardrailPromptScope).
+        try (GuardrailPromptScope scope = GuardrailPromptScope.openIfKnown(context != null ? context.agentId() : null)) {
+            return evaluateInScope(content, enabledGuardrails, context, chatClient);
+        }
+    }
+
+    private ContentGuardrailCheckResult evaluateInScope(
+        String content,
+        Set<ContentGuardrailType> enabledGuardrails,
+        GuardrailEvaluationContext context,
+        ChatClient chatClient
+    ) {
         if (content == null || content.isBlank()) {
             return ContentGuardrailCheckResult.pass();
         }

@@ -13,6 +13,7 @@ import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.modality.ModelModalitiesService;
 import com.agenticai.core.agents.tools.AgentToolPort;
+import com.agenticai.core.agents.tools.SmallModelProperties;
 import com.agenticai.core.agents.tools.ToolCallLogService;
 import com.agenticai.core.agents.tools.e2b.SandboxFileRegistry;
 import com.agenticai.core.agents.turn.cache.LlmResponseCacheService;
@@ -30,6 +31,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -134,6 +136,13 @@ public class AgentChatService extends LegacyChatEntryPoints {
     final ChatAttachments attachmentResolver;
     final ChatClientResolver clientResolver;
     private final HostedChainFailover hostedFailover;
+
+    /** {@code app.chat.small-model.*}: the tool cap and ranking weights of small-model mode. */
+    final SmallModelProperties smallModel;
+
+    /** {@code app.chat.resilience.*}; here for the wait of a structured call. */
+    private final ChatResilienceProperties resilienceSettings;
+
     final RlEpisodeRecorder rlEpisodes;
     final ChatMemoryRecall memoryRecall;
     final ChatTurnExecutor turns;
@@ -270,6 +279,23 @@ public class AgentChatService extends LegacyChatEntryPoints {
     volatile PromptDirectiveSettings promptDirectiveSettings =
             PromptDirectiveSettings.defaultsOnly();
 
+    /**
+     * The sentence a failed reply carries when the provider gave no message of its own: the agent's,
+     * its tenant's or the platform's wording of {@code message.generic_failure}, else the shipped one.
+     * Read in the calling thread's tenant. Never null, never throws.
+     */
+    String genericFailureMessage(UUID agentId) {
+        try {
+            String text =
+                    promptDirectiveSettings
+                            .forTurn(java.time.LocalDate.now(java.time.ZoneOffset.UTC), agentId)
+                            .textOrShipped(AgentChatStreamResponder.GENERIC_FAILURE_KEY);
+            return text != null ? text : AgentChatStreamResponder.defaultGenericFailureMessage();
+        } catch (RuntimeException e) {
+            return AgentChatStreamResponder.defaultGenericFailureMessage();
+        }
+    }
+
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     void usePromptDirectiveSettings(PromptDirectiveSettings settings) {
         this.promptDirectiveSettings = settings;
@@ -349,6 +375,8 @@ public class AgentChatService extends LegacyChatEntryPoints {
         this.loadTestTenantAllowlist = policy.loadTestTenantAllowlist();
         this.chatTurnCancelService = policy.chatTurnCancelService();
         this.bufferedKeepAliveInterval = timeouts.bufferedKeepAliveInterval();
+        this.smallModel = timeouts.smallModel();
+        this.resilienceSettings = timeouts.resilience();
         // Before the parts: the delegate-call collaborators take its experiment-variants lookup.
         this.agentRouting = new ChatAgentRouting(this);
         ChatServiceParts parts =
@@ -381,7 +409,7 @@ public class AgentChatService extends LegacyChatEntryPoints {
         this.structuredCalls = new ChatStructuredCall(this, agentService, toolCallLogService);
         this.preflight = new ChatTurnPreflight(this);
         this.rlArmSelection = new RlArmSelection(this);
-        this.clientSelection = new ChatClientSelection(this);
+        this.clientSelection = new ChatClientSelection(this, parts.followUp, timeouts.continuationProperties(), timeouts.localModel());
         this.promptAssembler = new ChatPromptAssembler(this);
         this.dispatcher = new ChatTurnDispatcher(this);
     }
@@ -405,8 +433,12 @@ public class AgentChatService extends LegacyChatEntryPoints {
         return TenantScopedFlux.subscribeInScope(context.scope(), () -> reply);
     }
 
-    private Flux<String> runTurn(TurnContext context, ChatTurnRequest request) {
+    private Flux<String> runTurn(TurnContext entryContext, ChatTurnRequest request) {
         final long ttftStartNanos = System.nanoTime();
+        // The request is the source of truth for "this is the continuation after an approval": an
+        // entry that built its context without it (the context is built before the request is
+        // finished) still gets a turn that screens, selects tools and routes on the original goal.
+        final TurnContext context = entryContext.withContinuation(request.continuation());
         // The five stages below are the original body of chat(), in order, same early returns.
         ChatTurnPreflight.Outcome preflightOutcome =
                 preflight.run(
@@ -422,15 +454,26 @@ public class AgentChatService extends LegacyChatEntryPoints {
             return preflightOutcome.earlyReturn();
         }
         ChatTurnPreflight.Turn turn = preflightOutcome.turn();
+        // The agent is known: its runtime limits (tool steps, timeouts, output cap, continuation passes), with
+        // the tenant's defaults under them and this run's caps (an agent job's remaining budget) over them,
+        // are decided ONCE here and read by every stage that enforces one.
+        turns.resolveRuntime(context, turn.agentId(), request.caps());
         // Phase events (step-event turns only; the shared no-op emitter drops them): which
         // pre-token stage the turn is in, so a slow local model's silent minute reads as
         // progress in the console. `guardrails` fired inside preflight; `model` fires in the
         // dispatcher at subscribe.
         request.stepEvents().phase("routing");
         RlTurnPlan rl = rlArmSelection.select(context, turn, request.turnRef());
+        // The run-scoped tool selection; a text-only turn has no tools to narrow.
+        List<String> runToolNames = request.suppressAgentTools() ? null : request.toolNames();
         ChatClientSelection.Outcome clientOutcome =
                 clientSelection.select(
-                        context, turn, rl, request.userMessage(), request.subjectKey());
+                        context,
+                        turn,
+                        rl,
+                        request.userMessage(),
+                        request.subjectKey(),
+                        runToolNames);
         if (clientOutcome.earlyReturn() != null) {
             return clientOutcome.earlyReturn();
         }
@@ -451,7 +494,8 @@ public class AgentChatService extends LegacyChatEntryPoints {
                         request.visionSessionId(),
                         request.forceFastDepth(),
                         request.stepEvents(),
-                        request.suppressAgentTools());
+                        request.suppressAgentTools(),
+                        runToolNames);
         return dispatcher.stream(
                 ttftStartNanos,
                 turn,
@@ -498,7 +542,13 @@ public class AgentChatService extends LegacyChatEntryPoints {
 
     /** See {@link ChatFailedReply#withFailedReplyPersistence}. Package-private test seam. */
     Flux<String> withFailedReplyPersistence(Flux<String> stream, UUID agentId, String sessionId) {
-        return failedReplies.withFailedReplyPersistence(stream, agentId, sessionId);
+        return failedReplies.withFailedReplyPersistence(stream, agentId, sessionId, () -> null);
+    }
+
+    /** As above, keeping the turn's tool record with the failed reply (the tools ran before it failed). */
+    Flux<String> withFailedReplyPersistence(
+            Flux<String> stream, UUID agentId, String sessionId, Supplier<ToolLedger> toolRecord) {
+        return failedReplies.withFailedReplyPersistence(stream, agentId, sessionId, toolRecord);
     }
 
     /** See {@link ChatFailedReply#buildingTurnStream}. */
@@ -506,16 +556,6 @@ public class AgentChatService extends LegacyChatEntryPoints {
             UUID agentId, String sessionId, java.util.function.Supplier<Flux<String>> build) {
         return failedReplies.buildingTurnStream(agentId, sessionId, build);
     }
-
-    /**
-     * Live incident, 2026-08-10: a turn completed with zero tokens and no error at all - an empty
-     * assistant bubble, 0 tool calls, nothing surfaced anywhere for the user to act on. Shown
-     * instead of silence whenever {@code streamFast}'s stream completes normally with an empty
-     * {@code accumulated} buffer - see the {@code .concatWith(Flux.defer(...))} operator in {@code
-     * streamFast} for where this fires.
-     */
-    static final String EMPTY_REPLY_FALLBACK =
-            "I don't have a response for that - could you try rephrasing your message?";
 
     /**
      * See {@link ChatTurnExecutor#withAssistantTurnPersistence}. Package-private test seam ({@code
@@ -632,7 +672,12 @@ public class AgentChatService extends LegacyChatEntryPoints {
             StructuredAgentInput input,
             String turnRef) {
         return chatWithParams(
-                agentId, sessionId, subjectKey, input, turnRef, java.time.Duration.ofSeconds(120));
+                agentId,
+                sessionId,
+                subjectKey,
+                input,
+                turnRef,
+                resilienceSettings.getStructuredCallTimeout());
     }
 
     /**

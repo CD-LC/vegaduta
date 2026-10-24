@@ -1,6 +1,7 @@
 package com.agenticai.core.providers;
 
 import com.agenticai.core.crypto.EncryptionService;
+import com.agenticai.core.settings.SettingsResolver;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -31,6 +32,17 @@ public class ProviderCredentialResolver {
      */
     @Value("${app.providers.rejected-cooldown-hours:6}")
     long rejectedCooldownHours = 6;
+
+    private SettingsResolver settings;
+
+    /**
+     * The settings catalog ({@code providers.credential.rejectedCooldown}): a workspace's cooldown replaces the
+     * property value. Setter-injected; without it the property applies.
+     */
+    @Autowired(required = false)
+    void setSettings(SettingsResolver settings) {
+        this.settings = settings;
+    }
 
     private final LlmProviderCredentialRepository repository;
     private final EncryptionService encryptionService;
@@ -137,7 +149,7 @@ public class ProviderCredentialResolver {
         }
         RankedProvider chosen = ranked.get(0);
         if (background) {
-            Duration cooldown = Duration.ofHours(Math.max(0, rejectedCooldownHours));
+            Duration cooldown = ProviderSettings.rejectedCooldown(settings, rejectedCooldownHours);
             Instant now = Instant.now();
             chosen = ranked.stream().filter(r -> !r.coolingDown(cooldown, now)).findFirst().orElse(null);
             if (chosen == null) {

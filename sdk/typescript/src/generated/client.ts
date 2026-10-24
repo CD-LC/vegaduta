@@ -1499,6 +1499,22 @@ export class AgentMemoryApi {
   }
 }
 
+export class AgentPromptPreviewApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Preview.
+   * `POST /api/agents/{agentId}/prompt-preview`
+   */
+  preview(agentId: string, body?: T.PromptPreviewService_Request, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.PromptPreviewService_Preview> {
+    return this.http.request<T.PromptPreviewService_Preview>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/prompt-preview`, body });
+  }
+}
+
 export class AgentRunBudgetApi {
   private readonly http: HttpClient;
 
@@ -1520,6 +1536,30 @@ export class AgentRunBudgetApi {
    */
   update(agentId: string, body: unknown, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string; "If-Match"?: string }>): Promise<T.AgentRunBudgetResponse> {
     return this.http.request<T.AgentRunBudgetResponse>({ ...options, method: "PATCH", path: `/api/agents/${encodeURIComponent(String(agentId))}/run-budget`, body });
+  }
+}
+
+export class AgentRuntimeLimitsApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Get.
+   * `GET /api/agents/{agentId}/runtime-limits`
+   */
+  get(agentId: string, options?: CallOptions): Promise<T.RuntimeLimitsView> {
+    return this.http.request<T.RuntimeLimitsView>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/runtime-limits` });
+  }
+
+  /**
+   * Put.
+   * `PUT /api/agents/{agentId}/runtime-limits`
+   */
+  put(agentId: string, body?: T.RuntimeLimits, options?: CallOptions): Promise<T.RuntimeLimitsView> {
+    return this.http.request<T.RuntimeLimitsView>({ ...options, method: "PUT", path: `/api/agents/${encodeURIComponent(String(agentId))}/runtime-limits`, body });
   }
 }
 
@@ -1624,6 +1664,44 @@ export class AgentSessionLlmUsageApi {
    */
   summary(agentId: string, sessionId: string, options?: CallOptions): Promise<T.RunCostTimeline_Summary> {
     return this.http.request<T.RunCostTimeline_Summary>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/sessions/${encodeURIComponent(String(sessionId))}/llm-usage/summary` });
+  }
+}
+
+export class AgentSettingsApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * History.
+   * `GET /api/agents/{agentId}/settings/history`
+   *
+   * Every change to this agent's settings, newest first (EDITOR on the agent; an agent of another workspace is a 404). since keeps rows at or after that instant; page with limit and offset.
+   */
+  history(agentId: string, options?: CallOptions<{ since?: string; limit?: number; offset?: number }, HeaderParams>): Promise<T.SettingsController_HistoryPageResponse> {
+    return this.http.request<T.SettingsController_HistoryPageResponse>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/settings/history` });
+  }
+
+  /**
+   * Put.
+   * `PUT /api/agents/{agentId}/settings/{key}`
+   *
+   * Set a runtime setting for one agent (EDITOR on the agent; a security key also needs a tenant admin). Same body and rules as the workspace PUT. Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.
+   */
+  put(agentId: string, key: string, body: T.SettingsController_ValueRequest, options?: CallOptions): Promise<T.SettingsController_WriteResponse> {
+    return this.http.request<T.SettingsController_WriteResponse>({ ...options, method: "PUT", path: `/api/agents/${encodeURIComponent(String(agentId))}/settings/${encodeURIComponent(String(key))}`, body });
+  }
+
+  /**
+   * Delete.
+   * `DELETE /api/agents/{agentId}/settings/{key}`
+   *
+   * Remove the agent's override so the workspace value applies again. A high or security key needs a typed reason (?reason=). Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.
+   */
+  delete(agentId: string, key: string, options?: CallOptions<{ reason?: string }, HeaderParams>): Promise<T.SettingsController_WriteResponse> {
+    return this.http.request<T.SettingsController_WriteResponse>({ ...options, method: "DELETE", path: `/api/agents/${encodeURIComponent(String(agentId))}/settings/${encodeURIComponent(String(key))}` });
   }
 }
 
@@ -5208,6 +5286,22 @@ export class EdgeAgentsConfigApi {
    */
   getRegistry(options?: CallOptions): Promise<T.EdgeAgentsConfigController_EdgeModelEntry[]> {
     return this.http.request<T.EdgeAgentsConfigController_EdgeModelEntry[]>({ ...options, method: "GET", path: "/api/edge/manifest/registry" });
+  }
+}
+
+export class EdgePromptBundleApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Bundle.
+   * `GET /api/edge/prompts`
+   */
+  bundle(options?: CallOptions<{ agentId?: string }, HeaderParams>): Promise<T.EdgePromptBundleController_EdgePromptBundle> {
+    return this.http.request<T.EdgePromptBundleController_EdgePromptBundle>({ ...options, method: "GET", path: "/api/edge/prompts" });
   }
 }
 
@@ -10247,6 +10341,70 @@ export class ProductFeedApi {
   }
 }
 
+export class PromptAdminApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/prompts`
+   */
+  list(options?: CallOptions<{ agentId?: string; locale?: string; family?: string; q?: string; limit?: number; offset?: number }, HeaderParams>): Promise<T.PromptOverrideService_PromptView[]> {
+    return this.http.request<T.PromptOverrideService_PromptView[]>({ ...options, method: "GET", path: "/api/prompts" });
+  }
+
+  /**
+   * Get.
+   * `GET /api/prompts/{key}`
+   */
+  get(key: string, options?: CallOptions<{ agentId?: string; locale?: string }, HeaderParams>): Promise<T.PromptOverrideService_PromptView> {
+    return this.http.request<T.PromptOverrideService_PromptView>({ ...options, method: "GET", path: `/api/prompts/${encodeURIComponent(String(key))}` });
+  }
+
+  /**
+   * History.
+   * `GET /api/prompts/{key}/history`
+   */
+  history(key: string, options?: CallOptions<{ scope?: string; agentId?: string; locale?: string; limit?: number }, HeaderParams>): Promise<T.PromptHistoryEntry[]> {
+    return this.http.request<T.PromptHistoryEntry[]>({ ...options, method: "GET", path: `/api/prompts/${encodeURIComponent(String(key))}/history` });
+  }
+
+  /**
+   * Put.
+   * `PUT /api/prompts/{key}/overrides/{scope}`
+   */
+  put(key: string, scope: string, body: T.PromptAdminController_OverrideRequest, options?: CallOptions<{ agentId?: string; locale?: string }, HeaderParams>): Promise<T.PromptOverrideService_Applied> {
+    return this.http.request<T.PromptOverrideService_Applied>({ ...options, method: "PUT", path: `/api/prompts/${encodeURIComponent(String(key))}/overrides/${encodeURIComponent(String(scope))}`, body });
+  }
+
+  /**
+   * Revert.
+   * `DELETE /api/prompts/{key}/overrides/{scope}`
+   */
+  revert(key: string, scope: string, options?: CallOptions<{ agentId?: string; locale?: string; reason?: string; expectedVersion?: number }, HeaderParams>): Promise<T.PromptOverrideService_Applied> {
+    return this.http.request<T.PromptOverrideService_Applied>({ ...options, method: "DELETE", path: `/api/prompts/${encodeURIComponent(String(key))}/overrides/${encodeURIComponent(String(scope))}` });
+  }
+
+  /**
+   * Restore.
+   * `POST /api/prompts/{key}/overrides/{scope}/restore`
+   */
+  restore(key: string, scope: string, body: T.PromptAdminController_RestoreRequest, options?: CallOptions<{ agentId?: string; locale?: string }, { "Idempotency-Key"?: string }>): Promise<T.PromptOverrideService_Applied> {
+    return this.http.request<T.PromptOverrideService_Applied>({ ...options, method: "POST", path: `/api/prompts/${encodeURIComponent(String(key))}/overrides/${encodeURIComponent(String(scope))}/restore`, body });
+  }
+
+  /**
+   * Validate.
+   * `POST /api/prompts/{key}/validate`
+   */
+  validate(key: string, body: T.PromptAdminController_ValidateRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.PromptOverrideService_Validation> {
+    return this.http.request<T.PromptOverrideService_Validation>({ ...options, method: "POST", path: `/api/prompts/${encodeURIComponent(String(key))}/validate`, body });
+  }
+}
+
 export class PromptDirectiveApi {
   private readonly http: HttpClient;
 
@@ -11294,6 +11452,70 @@ export class SessionConfigApi {
    */
   getConfig(options?: CallOptions): Promise<T.SessionConfigController_SessionConfigResponse> {
     return this.http.request<T.SessionConfigController_SessionConfigResponse>({ ...options, method: "GET", path: "/api/session/config" });
+  }
+}
+
+export class SettingsApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Catalog.
+   * `GET /api/settings/catalog`
+   */
+  catalog(options?: CallOptions): Promise<T.SettingsController_CatalogResponse> {
+    return this.http.request<T.SettingsController_CatalogResponse>({ ...options, method: "GET", path: "/api/settings/catalog" });
+  }
+
+  /**
+   * Effective.
+   * `GET /api/settings/effective`
+   */
+  effective(options?: CallOptions<{ agentId?: string }, HeaderParams>): Promise<T.SettingsController_EffectiveResponse> {
+    return this.http.request<T.SettingsController_EffectiveResponse>({ ...options, method: "GET", path: "/api/settings/effective" });
+  }
+
+  /**
+   * History all.
+   * `GET /api/settings/history`
+   *
+   * The change history of every setting in one call, newest first. scope=all (default) is the workspace's own changes plus every agent's (tenant admin), scope=tenant the workspace's only, scope=agent every agent's (tenant admin), scope=agent with agentId one agent's (EDITOR on it). since (ISO-8601 instant) keeps rows at or after it; page with limit and offset, the body carries total and hasMore.
+   */
+  historyAll(options?: CallOptions<{ scope?: string; agentId?: string; since?: string; limit?: number; offset?: number }, HeaderParams>): Promise<T.SettingsController_HistoryPageResponse> {
+    return this.http.request<T.SettingsController_HistoryPageResponse>({ ...options, method: "GET", path: "/api/settings/history" });
+  }
+
+  /**
+   * Put tenant.
+   * `PUT /api/settings/tenant/{key}`
+   *
+   * Set a runtime setting for the whole workspace (tenant admin). Body {value, reason}: a high or security key needs a typed reason, and a security key can only be made stricter than the value it inherits. Answers 409 SETTING_LOCKED when the operator pinned the key (app.settings.locked) and 409 SETTING_CONFLICT when another writer changed the same key at the same moment (reload and retry).
+   */
+  putTenant(key: string, body: T.SettingsController_ValueRequest, options?: CallOptions): Promise<T.SettingsController_WriteResponse> {
+    return this.http.request<T.SettingsController_WriteResponse>({ ...options, method: "PUT", path: `/api/settings/tenant/${encodeURIComponent(String(key))}`, body });
+  }
+
+  /**
+   * Delete tenant.
+   * `DELETE /api/settings/tenant/{key}`
+   *
+   * Remove the workspace override so the platform value applies again (tenant admin). A high or security key needs a typed reason (?reason=), like a PUT. Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.
+   */
+  deleteTenant(key: string, options?: CallOptions<{ reason?: string }, HeaderParams>): Promise<T.SettingsController_WriteResponse> {
+    return this.http.request<T.SettingsController_WriteResponse>({ ...options, method: "DELETE", path: `/api/settings/tenant/${encodeURIComponent(String(key))}` });
+  }
+
+  /**
+   * History.
+   * `GET /api/settings/{key}/history`
+   *
+   * The change history of one setting, newest first. scope=tenant needs a tenant admin; scope=agent with agentId needs EDITOR on the agent. For every key at once use GET /api/settings/history.
+   */
+  history(key: string, options?: CallOptions<{ scope?: string; agentId?: string; limit?: number }, HeaderParams>): Promise<T.SettingHistoryEntry[]> {
+    return this.http.request<T.SettingHistoryEntry[]>({ ...options, method: "GET", path: `/api/settings/${encodeURIComponent(String(key))}/history` });
   }
 }
 
@@ -13009,6 +13231,38 @@ export class TenantFeatureFlagApi {
   }
 }
 
+export class TenantRuntimeLimitsApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Get.
+   * `GET /api/agent-runtime/limits`
+   */
+  get(options?: CallOptions): Promise<T.RuntimeLimitsView> {
+    return this.http.request<T.RuntimeLimitsView>({ ...options, method: "GET", path: "/api/agent-runtime/limits" });
+  }
+
+  /**
+   * Put.
+   * `PUT /api/agent-runtime/limits`
+   */
+  put(body?: T.RuntimeLimits, options?: CallOptions): Promise<T.RuntimeLimitsView> {
+    return this.http.request<T.RuntimeLimitsView>({ ...options, method: "PUT", path: "/api/agent-runtime/limits", body });
+  }
+
+  /**
+   * Clear.
+   * `DELETE /api/agent-runtime/limits`
+   */
+  clear(options?: CallOptions): Promise<void> {
+    return this.http.request<void>({ ...options, method: "DELETE", path: "/api/agent-runtime/limits", response: "void" });
+  }
+}
+
 export class TenantSettingsApi {
   private readonly http: HttpClient;
 
@@ -13414,6 +13668,16 @@ export class TurnJournalApi {
 
   constructor(http: HttpClient) {
     this.http = http;
+  }
+
+  /**
+   * By session.
+   * `GET /api/agents/{agentId}/turn-journal`
+   *
+   * Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
+   */
+  bySession(agentId: string, options: CallOptions<{ sessionId: string; limit?: number }, HeaderParams> & { query: { sessionId: string; limit?: number } }): Promise<T.TurnJournalService_SessionView> {
+    return this.http.request<T.TurnJournalService_SessionView>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/turn-journal` });
   }
 
   /**
@@ -15361,10 +15625,13 @@ export class VegadutaClient {
   readonly agentJobOperator: AgentJobOperatorApi;
   readonly agentLab: AgentLabApi;
   readonly agentMemory: AgentMemoryApi;
+  readonly agentPromptPreview: AgentPromptPreviewApi;
   readonly agentRunBudget: AgentRunBudgetApi;
+  readonly agentRuntimeLimits: AgentRuntimeLimitsApi;
   readonly agentSchedule: AgentScheduleApi;
   readonly agentSessionLlmRequest: AgentSessionLlmRequestApi;
   readonly agentSessionLlmUsage: AgentSessionLlmUsageApi;
+  readonly agentSettings: AgentSettingsApi;
   readonly agentShare: AgentShareApi;
   readonly agentShareOwner: AgentShareOwnerApi;
   readonly agentShareVision: AgentShareVisionApi;
@@ -15440,6 +15707,7 @@ export class VegadutaClient {
   readonly e2bCredential: E2bCredentialApi;
   readonly e2bSandbox: E2bSandboxApi;
   readonly edgeAgentsConfig: EdgeAgentsConfigApi;
+  readonly edgePromptBundle: EdgePromptBundleApi;
   readonly edgeRelay: EdgeRelayApi;
   readonly edgeToolExecution: EdgeToolExecutionApi;
   readonly edgeTurnTelemetry: EdgeTurnTelemetryApi;
@@ -15544,6 +15812,7 @@ export class VegadutaClient {
   readonly procedure: ProcedureApi;
   readonly productCatalog: ProductCatalogApi;
   readonly productFeed: ProductFeedApi;
+  readonly promptAdmin: PromptAdminApi;
   readonly promptDirective: PromptDirectiveApi;
   readonly provider: ProviderApi;
   readonly publicStatus: PublicStatusApi;
@@ -15568,6 +15837,7 @@ export class VegadutaClient {
   readonly scimProvisioning: ScimProvisioningApi;
   readonly secretVault: SecretVaultApi;
   readonly sessionConfig: SessionConfigApi;
+  readonly settings: SettingsApi;
   readonly share: ShareApi;
   readonly sharedWithMe: SharedWithMeApi;
   readonly signalCredential: SignalCredentialApi;
@@ -15607,6 +15877,7 @@ export class VegadutaClient {
   readonly tenantDefaultModel: TenantDefaultModelApi;
   readonly tenantDeletion: TenantDeletionApi;
   readonly tenantFeatureFlag: TenantFeatureFlagApi;
+  readonly tenantRuntimeLimits: TenantRuntimeLimitsApi;
   readonly tenantSettings: TenantSettingsApi;
   readonly tenantSignup: TenantSignupApi;
   readonly tenantSpendCap: TenantSpendCapApi;
@@ -15691,10 +15962,13 @@ export class VegadutaClient {
     this.agentJobOperator = new AgentJobOperatorApi(this.http);
     this.agentLab = new AgentLabApi(this.http);
     this.agentMemory = new AgentMemoryApi(this.http);
+    this.agentPromptPreview = new AgentPromptPreviewApi(this.http);
     this.agentRunBudget = new AgentRunBudgetApi(this.http);
+    this.agentRuntimeLimits = new AgentRuntimeLimitsApi(this.http);
     this.agentSchedule = new AgentScheduleApi(this.http);
     this.agentSessionLlmRequest = new AgentSessionLlmRequestApi(this.http);
     this.agentSessionLlmUsage = new AgentSessionLlmUsageApi(this.http);
+    this.agentSettings = new AgentSettingsApi(this.http);
     this.agentShare = new AgentShareApi(this.http);
     this.agentShareOwner = new AgentShareOwnerApi(this.http);
     this.agentShareVision = new AgentShareVisionApi(this.http);
@@ -15770,6 +16044,7 @@ export class VegadutaClient {
     this.e2bCredential = new E2bCredentialApi(this.http);
     this.e2bSandbox = new E2bSandboxApi(this.http);
     this.edgeAgentsConfig = new EdgeAgentsConfigApi(this.http);
+    this.edgePromptBundle = new EdgePromptBundleApi(this.http);
     this.edgeRelay = new EdgeRelayApi(this.http);
     this.edgeToolExecution = new EdgeToolExecutionApi(this.http);
     this.edgeTurnTelemetry = new EdgeTurnTelemetryApi(this.http);
@@ -15874,6 +16149,7 @@ export class VegadutaClient {
     this.procedure = new ProcedureApi(this.http);
     this.productCatalog = new ProductCatalogApi(this.http);
     this.productFeed = new ProductFeedApi(this.http);
+    this.promptAdmin = new PromptAdminApi(this.http);
     this.promptDirective = new PromptDirectiveApi(this.http);
     this.provider = new ProviderApi(this.http);
     this.publicStatus = new PublicStatusApi(this.http);
@@ -15898,6 +16174,7 @@ export class VegadutaClient {
     this.scimProvisioning = new ScimProvisioningApi(this.http);
     this.secretVault = new SecretVaultApi(this.http);
     this.sessionConfig = new SessionConfigApi(this.http);
+    this.settings = new SettingsApi(this.http);
     this.share = new ShareApi(this.http);
     this.sharedWithMe = new SharedWithMeApi(this.http);
     this.signalCredential = new SignalCredentialApi(this.http);
@@ -15937,6 +16214,7 @@ export class VegadutaClient {
     this.tenantDefaultModel = new TenantDefaultModelApi(this.http);
     this.tenantDeletion = new TenantDeletionApi(this.http);
     this.tenantFeatureFlag = new TenantFeatureFlagApi(this.http);
+    this.tenantRuntimeLimits = new TenantRuntimeLimitsApi(this.http);
     this.tenantSettings = new TenantSettingsApi(this.http);
     this.tenantSignup = new TenantSignupApi(this.http);
     this.tenantSpendCap = new TenantSpendCapApi(this.http);

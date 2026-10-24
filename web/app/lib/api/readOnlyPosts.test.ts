@@ -43,6 +43,26 @@ describe("read-only POSTs and shared calls", () => {
     expect(gets).toBe(1);
   });
 
+  it("checking a prompt draft and previewing an agent's prompt do not flush cached reads, saving one does", async () => {
+    let gets = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url: string, init?: RequestInit) => {
+        if ((init?.method || "GET") !== "GET") return Promise.resolve(jsonRes({}));
+        gets++;
+        return Promise.resolve(jsonRes({ ok: true }));
+      })
+    );
+    await apiFetch("/api/prompts");
+    await apiFetch("/api/prompts/directive.tool_trust/validate", { method: "POST", body: "{}" });
+    await apiFetch("/api/agents/a-1/prompt-preview", { method: "POST", body: "{}" });
+    await apiFetch("/api/prompts");
+    expect(gets).toBe(1);
+    await apiFetch("/api/prompts/directive.tool_trust/overrides/tenant", { method: "PUT", body: "{}" });
+    await apiFetch("/api/prompts");
+    expect(gets).toBe(2);
+  });
+
   it("an ordinary POST still flushes cached reads", async () => {
     let gets = 0;
     vi.stubGlobal(

@@ -134,9 +134,7 @@ class SqliteApprovalStore:
                 request.decided_by,
                 request.decision_reason,
                 request.result_json,
-                json.dumps(
-                    {"principal": ctx.principal, "attributes": dict(ctx.attributes)}
-                ),
+                json.dumps({"principal": ctx.principal, "attributes": dict(ctx.attributes)}),
             ),
         )
 
@@ -173,8 +171,7 @@ class SqliteApprovalStore:
     def pending(self, tenant_id: str | None, limit: int) -> list[ApprovalRequest]:
         if tenant_id is None:
             rows = self._conn.execute(
-                "SELECT * FROM vegaduta_approvals WHERE status = 'PENDING' "
-                "ORDER BY created_at LIMIT ?",
+                "SELECT * FROM vegaduta_approvals WHERE status = 'PENDING' ORDER BY created_at LIMIT ?",
                 (limit,),
             ).fetchall()
         else:

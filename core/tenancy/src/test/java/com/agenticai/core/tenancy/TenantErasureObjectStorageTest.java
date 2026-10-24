@@ -1,6 +1,5 @@
 package com.agenticai.core.tenancy;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -9,9 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -32,8 +29,9 @@ class TenantErasureObjectStorageTest extends TenantDataErasureFixture {
         // in total, by whichever table's loop runs first - not once per
         // table. That's fine here: this test only needs to prove that a
         // discovered key gets delete()'d, and that it happens before the
-        // schema drop.
-        when(resultSet.next()).thenReturn(true, false);
+        // schema drop. The first two queries are now the Valkey-purge id
+        // collections (MCP grants, workflow runs), which find nothing.
+        when(resultSet.next()).thenReturn(false, false, true, false);
         when(resultSet.getString(1)).thenReturn("some/object-key.bin");
 
         service.eraseCurrentTenant("Acme");
@@ -70,7 +68,7 @@ class TenantErasureObjectStorageTest extends TenantDataErasureFixture {
     @Test
     void oneFailedObjectStorageDeleteDoesNotStopErasureOrLeaveTheTenantUnerased()
             throws SQLException {
-        when(resultSet.next()).thenReturn(true, false);
+        when(resultSet.next()).thenReturn(false, false, true, false);
         when(resultSet.getString(1)).thenReturn("some/object-key.bin");
         org.mockito.Mockito.doThrow(new RuntimeException("S3 timeout"))
                 .when(fileStorageService)

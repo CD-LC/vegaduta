@@ -41,7 +41,7 @@ public class ScheduledTaskSettings {
         @Value("${app.scheduled-tasks.catch-up-window-minutes:720}") int catchUpWindowMinutes,
         @Value("${app.scheduled-tasks.retry-failed-once:true}") boolean retryFailedOnce,
         @Value("${app.scheduled-tasks.max-delivery-chars:3500}") int maxDeliveryChars,
-        @Value("${app.scheduled-tasks.delivery-channels:in_app,email,whatsapp,telegram,slack}") String deliveryChannels
+        @Value("${app.scheduled-tasks.delivery-channels:in_app,email,whatsapp,whatsapp_qr,telegram,slack,signal,matrix,imessage,a2a,voice}") String deliveryChannels
     ) {
         this.enabled = enabled;
         this.freePlanEnabled = freePlanEnabled;

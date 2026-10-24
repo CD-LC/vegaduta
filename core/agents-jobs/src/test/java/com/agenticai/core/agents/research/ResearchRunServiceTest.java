@@ -390,6 +390,49 @@ class ResearchRunServiceTest {
     }
 
     @Test
+    void aTenantOverrideOfTheSeedPromptIsWhatANewResearchAgentIsCreatedWith() {
+        com.agenticai.core.prompts.InMemoryPromptOverrideStore store = new com.agenticai.core.prompts.InMemoryPromptOverrideStore();
+        com.agenticai.core.prompts.DefaultPromptResolver resolver = new com.agenticai.core.prompts.DefaultPromptResolver(
+            com.agenticai.core.prompts.PromptResolver.defaultsOnly().catalog(), store, new com.agenticai.core.prompts.PromptProperties());
+        store.put(new com.agenticai.core.prompts.PromptOverride(
+            com.agenticai.core.prompts.PromptScope.TENANT, "", ResearchRunPlan.PROMPT_KEY, "en", "House research rules.", true, 1, "owner", Instant.now()));
+        UUID agentId = UUID.randomUUID();
+        AgentResponse created = mock(AgentResponse.class);
+        when(created.id()).thenReturn(agentId);
+        when(agentService.create(any())).thenReturn(created);
+        when(jobService.submit(eq(agentId), any(), eq(true))).thenReturn(queuedJob(agentId));
+        ResearchRunService service = service(true, true);
+        service.setPromptResolver(resolver);
+
+        service.start(question("q"));
+
+        ArgumentCaptor<AgentCreateRequest> create = ArgumentCaptor.forClass(AgentCreateRequest.class);
+        verify(agentService).create(create.capture());
+        assertEquals("House research rules.", create.getValue().systemPrompt());
+    }
+
+    @Test
+    void anUnfinishedAgentCreatedWithTheTenantsSeedPromptIsAdoptedToo() {
+        com.agenticai.core.prompts.InMemoryPromptOverrideStore store = new com.agenticai.core.prompts.InMemoryPromptOverrideStore();
+        com.agenticai.core.prompts.DefaultPromptResolver resolver = new com.agenticai.core.prompts.DefaultPromptResolver(
+            com.agenticai.core.prompts.PromptResolver.defaultsOnly().catalog(), store, new com.agenticai.core.prompts.PromptProperties());
+        store.put(new com.agenticai.core.prompts.PromptOverride(
+            com.agenticai.core.prompts.PromptScope.TENANT, "", ResearchRunPlan.PROMPT_KEY, "en", "House research rules.", true, 1, "owner", Instant.now()));
+        UUID halfBuilt = UUID.randomUUID();
+        Agent unfinished = researchAgent(halfBuilt, "Deep Research", false, Instant.parse("2026-02-01T00:00:00Z"));
+        when(unfinished.getSystemPrompt()).thenReturn("House research rules.");
+        when(agentRepository.findByCreatedBy(ALICE)).thenReturn(List.of(unfinished));
+        when(jobService.submit(eq(halfBuilt), any(), eq(true))).thenReturn(queuedJob(halfBuilt));
+        ResearchRunService service = service(true, true);
+        service.setPromptResolver(resolver);
+
+        service.start(question("q"));
+
+        verify(agentService, never()).create(any());
+        verify(agentService).setAllowedToolNames(halfBuilt, ResearchRunPlan.AGENT_TOOLS);
+    }
+
+    @Test
     void aCallerWithoutASubjectIsRefusedBeforeAnythingIsCreatedOrCounted() {
         UUID jobId = UUID.randomUUID();
         for (String subject : new String[] {null, "", "  "}) {

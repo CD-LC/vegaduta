@@ -7,6 +7,9 @@ import static com.agenticai.core.agents.turn.ChatPromptDirectives.isKnownThought
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
+import com.agenticai.core.chat.gateway.LlmGatewayContentPolicyViolationException;
+import com.agenticai.core.guardrails.GuardrailViolationException;
+import com.agenticai.core.guardrails.ToolStepLimitExceededException;
 import org.springframework.ai.chat.client.ChatClient;
 import reactor.core.publisher.Flux;
 
@@ -14,7 +17,7 @@ import reactor.core.publisher.Flux;
  * The FAST stream's recovery ladder, moved out of {@link ChatTurnExecutor#streamFast}
  * (extract-only split). {@link FastStreamTurn#stream} chains the three branches as {@code
  * onErrorResume} operators in this order: the same-provider tools-disabled retry for the known
- * Gemini thought_signature bug, the one-shot fallback-provider retry, and the graceful close of a
+ * Gemini thought_signature refusal (a visible reply written without tools), the one-shot fallback-provider retry, and the graceful close of a
  * stream that fails after text already reached the client. The first two only ever fire before
  * any token has streamed.
  */
@@ -27,54 +30,72 @@ final class FastStreamRecovery {
     }
 
     /**
-     * Known, OPEN upstream Spring AI bug (spring-projects/spring-ai#5466, confirmed live 2026-08-04
-     * via a real Gemini tool-calling turn and traced to bytecode:
-     * GoogleGenAiChatModel#responseCandidateToGeneration uses an allMatch check that
-     * drops/mis-builds a functionCall part whenever Gemini also returns a "thinking" part alongside
-     * it, so the resulting AssistantMessage.ToolCall never carries the thought_signature newer
-     * Gemini models require on the NEXT turn - Gemini then 400s with "Function call is missing a
-     * thought_signature". Not fixable from our code (Spring AI drops the field before
-     * AgentChatService ever sees the message; AssistantMessage.ToolCall has no field for it
-     * regardless) and not yet merged upstream, so this is a workaround, not a fix: retry the SAME
-     * turn, SAME provider/model, with tools disabled - the bug only triggers when a functionCall
-     * part is present, so removing tools from this one retry sidesteps it entirely. Same "only
-     * before any token has streamed" safety gate as the fallback-provider branch below, and tried
-     * FIRST (this branch is earlier in the chain) since it's a same-provider,
-     * no-credential-lookup, cheaper retry than switching providers - see that branch's own comment
-     * for why the token gate is required either way.
+     * Gemini refuses the request that follows a tool call ("Function call is missing a
+     * thought_signature") when the model's own function call is sent back without the signature it put
+     * on it. Spring AI stores those signatures with the reply and puts them back; {@code
+     * GeminiMixedContentToolCallChatModel} keeps the function-call parts' signatures lined up with their
+     * calls, which is what makes the turn work. This branch is for the provider refusing anyway.
+     *
+     * <p>It used to re-run the turn with every tool removed and say nothing. Now, only before any token
+     * has streamed (the same gate the fallback-provider branch uses, for the same reason), and unless
+     * {@code app.chat.resilience.thought-signature-degrade} is off: the reply opens with a notice that
+     * it was written without tools and which steps had already run, the model is given what those tools
+     * returned (it used to be shown nothing), and the reply is marked as not an answer so it is not
+     * cached or judged. The tools are not run again: this pass offers none.
      */
     Flux<String> retryWithoutToolsOnThoughtSignatureBug(Throwable e) {
         Agent agent = t.agent;
         if (!(e instanceof UpstreamProviderException upstreamE)
                 || !t.accumulated.isEmpty()
                 || t.tools.isEmpty()
+                || !t.owner.resilience.isThoughtSignatureDegrade()
                 || !isKnownThoughtSignatureBug(upstreamE)) {
             return Flux.error(e);
         }
         ChatTurnExecutor.log.warn(
-                "Provider {} failed for agent {} session {} with the"
-                        + " known Spring AI Gemini thought_signature bug"
-                        + " (spring-projects/spring-ai#5466) - retrying"
-                        + " once on the same provider/model with tools"
-                        + " disabled for this turn",
+                "Provider {} refused the tool-call history of agent {} session {} (missing thought_signature) -"
+                        + " answering once on the same provider/model WITHOUT tools, and saying so in the reply",
                 agent.getProviderName(),
                 t.agentId,
                 t.sessionId);
-        // Not presented as a normal turn any more (2026-09-28): the answer that follows was
-        // produced with NONE of the agent's tools, so a step-event consumer is told so, and the
-        // degradation is counted.
-        t.owner.flagToolsDisabledRetry(agent, t.stepEvents);
+        // Counted, and announced on the step-event channel as well as in the reply itself.
+        t.owner.flagToolsDisabledRetry(agent, t.stepEvents, t.context, t.agentId);
         t.turn.modelCall(
                 String.valueOf(agent.getProviderName()), agent.getModel(), "retry-tools-disabled");
+        ChatResilienceProperties resilience = t.owner.resilience;
+        String notice = ThoughtSignatureDegrade.notice(resilience, t.activity().snapshot());
+        String userText = ThoughtSignatureDegrade.userText(resilience, t.userMessage, toolEvidence());
+        t.reply().mark(TurnReplyOutcome.Kind.INTERRUPTED);
         // Deliberately NO toolCallbacks - see the comment above.
-        return t.content(t.chatClient, false)
-                // Same genuine mid-stream idle timeout as the initial attempt - this is a
-                // replacement Flux, not a continuation, so it needs its own operator instance.
-                .timeout(t.owner.streamIdleTimeout)
-                .onErrorMap(
-                        retryError ->
-                                t.owner.providerErrorTranslator.translate(
-                                        retryError, agent.getProviderName()));
+        return Flux.just(notice + "\n\n")
+                .concatWith(
+                        t.contentWithoutTools(userText)
+                                // Same genuine mid-stream idle timeout as the initial attempt - this is a
+                                // replacement Flux, not a continuation, so it needs its own operator instance.
+                                .transform(t::idleTimeout)
+                                .onErrorMap(
+                                        retryError ->
+                                                t.owner.providerErrorTranslator.translate(
+                                                        retryError, agent.getProviderName())));
+    }
+
+    /** What this turn's tools have returned so far, or {@code null} when none ran or it cannot be read. */
+    private String toolEvidence() {
+        try {
+            return t.context
+                    .scope()
+                    .get(
+                            () ->
+                                    t.owner.collectToolEvidenceSince(
+                                            t.agentId, t.sessionId, t.fabricationCheckStartedAt));
+        } catch (RuntimeException readFailure) {
+            ChatTurnExecutor.log.warn(
+                    "Agent {} session {}: could not read the tool results for the reply written without tools",
+                    t.agentId,
+                    t.sessionId,
+                    readFailure);
+            return null;
+        }
     }
 
     /**
@@ -111,6 +132,12 @@ final class FastStreamRecovery {
                     t.sessionId,
                     e.getMessage(),
                     agent.getFallbackProviderName());
+            return Flux.error(e);
+        }
+        // The fallback runs the turn again from the start, tools included. "No text has streamed" does
+        // not mean nothing happened: a tool-calling turn streams no text while it works. A turn that
+        // already ran a tool with side effects is not replayed (see FailoverReplayGate).
+        if (t.owner.replayBlockedBy(t.activity(), agent, "byok-fallback", t.stepEvents).isPresent()) {
             return Flux.error(e);
         }
         ChatTurnExecutor.log.warn(
@@ -153,12 +180,13 @@ final class FastStreamRecovery {
                 String.valueOf(agent.getFallbackProviderName()),
                 agent.getFallbackModel(),
                 "fallback");
+        TurnLifecycleEvents.failover(t.stepEvents, agent.getFallbackModel(), e);
         // Flat one-shot retry - no recursive fallback-of-fallback, no second onErrorResume
         // chained here, so this can never loop.
         return t.content(fallbackClient, true)
                 // Same genuine mid-stream idle timeout as the initial attempt - this is the
                 // fallback-provider replacement Flux.
-                .timeout(t.owner.streamIdleTimeout)
+                .transform(t::idleTimeout)
                 // doOnError runs BEFORE onErrorMap below, so it still sees the raw fallbackError
                 // rather than the translated UpstreamProviderException.
                 .doOnError(
@@ -199,6 +227,25 @@ final class FastStreamRecovery {
     }
 
     /**
+     * True for a failure that is a deliberate STOP decided by the platform, not a transient fault:
+     * {@link ToolStepLimitExceededException}, {@link GuardrailViolationException} and {@link
+     * LlmGatewayContentPolicyViolationException}, directly or as the cause of a wrapper. These pass
+     * through provider-error translation untouched and must never be recovered into a normal
+     * completion.
+     */
+    static boolean isPolicyStop(Throwable error) {
+        int depth = 0;
+        for (Throwable e = error; e != null && depth < 10; e = e.getCause(), depth++) {
+            if (e instanceof ToolStepLimitExceededException
+                    || e instanceof GuardrailViolationException
+                    || e instanceof LlmGatewayContentPolicyViolationException) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * "Half response" fix (2026-08-10): a tool call that errors or times out AFTER some text has
      * already reached the client falls through BOTH retry branches above unretried - each is
      * deliberately gated on accumulated.isEmpty() (switching provider/model mid-stream, or
@@ -223,15 +270,26 @@ final class FastStreamRecovery {
      * flight.
      *
      * <p>Deliberately not narrowed to UpstreamProviderException / a tool-specific exception type:
-     * by this point in the chain the upstream onErrorMap has already made the one routing
-     * decision that matters (GuardrailViolationException/ToolStepLimitExceededException pass
-     * through untranslated, everything else becomes an UpstreamProviderException), and once
-     * accumulated is non-empty every remaining error - regardless of which subsystem raised it -
-     * produces the identical "half response" symptom for the user, so the safe-completion
-     * behavior below applies uniformly.
+     * once accumulated is non-empty every remaining FAULT - regardless of which subsystem raised
+     * it - produces the identical "half response" symptom for the user, so the safe-completion
+     * behavior below applies uniformly. The exception is a policy stop ({@link #isPolicyStop}),
+     * which is propagated.
      */
     Flux<String> closeHalfResponse(Throwable e) {
         if (t.accumulated.isEmpty()) {
+            return Flux.error(e);
+        }
+        // A policy stop is not the "half response" accident this operator exists for: the tool-step
+        // ceiling (a deliberate runaway-loop hard stop), a guardrail violation or a gateway content
+        // policy violation says the turn was STOPPED, and completing normally with a truncation
+        // marker would present a stopped task as a finished one. Let it reach the caller.
+        if (isPolicyStop(e)) {
+            ChatTurnExecutor.log.warn(
+                    "Agent {} session {} was stopped by policy after partial text had streamed ({}) - propagating it,"
+                            + " not closing the stream as a normal completion",
+                    t.agentId,
+                    t.sessionId,
+                    e.getClass().getSimpleName());
             return Flux.error(e);
         }
         ChatTurnExecutor.log.warn(
@@ -243,6 +301,9 @@ final class FastStreamRecovery {
                 t.sessionId,
                 e.getMessage(),
                 e);
+        // The stream now completes normally, but what was sent is not an answer: record that, so the
+        // dispatcher does not cache the cut-off text and the turn does not announce or judge it.
+        t.context.reply().mark(TurnReplyOutcome.Kind.INTERRUPTED);
         return Flux.just(INTERRUPTED_REPLY_MARKER);
     }
 }

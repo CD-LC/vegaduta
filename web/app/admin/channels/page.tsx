@@ -7,7 +7,7 @@ import { useRequireScope } from "../../components/useRequireScope";
 import AppShell from "../../components/AppShell";
 import { usePageReady } from "../../components/RouteTransition";
 import ChannelsPanel from "../../components/ChannelsPanel";
-import { CHANNEL_ORDER } from "../../components/channels/ChannelInspectorCards";
+import { offeredChannelOrder } from "../../components/channels/ChannelInspectorCards";
 import PageHeader from "../../components/ax/PageHeader";
 import { Button } from "../../components/ui/button";
 import { Alert, AlertDescription } from "../../components/ui/alert";
@@ -64,7 +64,8 @@ function AdminChannelsInner() {
 
   // Count only channels that have a tile (sms is configured inside WhatsApp's
   // card), so the header and the grid agree.
-  const tiles = status ? status.channels.filter((c: { key: string }) => CHANNEL_ORDER.includes(c.key)) : null;
+  const offeredKeys = offeredChannelOrder();
+  const tiles = status ? status.channels.filter((c: { key: string }) => offeredKeys.includes(c.key)) : null;
 
   return (
     <AppShell eyebrow={t("pageEyebrow")}>
@@ -72,7 +73,9 @@ function AdminChannelsInner() {
         title={t("pageTitle")}
         subtitle={
           <span className="tabular-nums">
-            <strong className="font-semibold text-foreground">{tiles ? tiles.filter((c: { state: string }) => c.state === "CONNECTED").length : "—"}</strong>{" "}
+            <strong className="font-semibold text-foreground">
+              {tiles ? tiles.filter((c: { state: string }) => c.state === "CONNECTED").length : "—"}
+            </strong>{" "}
             {t("liveLabel")} <span className="text-muted-foreground">/</span> {tiles ? tiles.length : "—"}{" "}
             {t("availableLabel")}
           </span>

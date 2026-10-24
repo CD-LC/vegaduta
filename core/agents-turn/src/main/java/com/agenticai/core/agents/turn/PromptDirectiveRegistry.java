@@ -1,25 +1,31 @@
 package com.agenticai.core.agents.turn;
 
+import com.agenticai.core.prompts.PromptCatalog;
+import com.agenticai.core.prompts.PromptDefinition;
+import com.agenticai.core.prompts.PromptPlaceholder;
+import com.agenticai.core.prompts.PromptResolver;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * The platform's built-in standing prompt directives, under stable keys, so an owner can switch one
- * off or reword it per tenant (see {@link PromptDirectiveSettings}). The default text of each entry
- * is the very constant {@link ChatPromptDirectives} sends, so with no override the assembled prompt
- * is byte-identical to the hardcoded one. Whether a directive applies on a given turn (the tool it
- * is about is on the list, its {@code app.chat.directives.*} kill-switch) stays decided in code; an
- * override only replaces the text, a disable only removes it.
+ * The platform's standing prompt directives under their original short keys ({@code tool_trust},
+ * {@code current_date}, ...), the vocabulary of the owner console's {@code /api/prompt-directives}
+ * routes and of the tenant settings that predate the prompt registry. Each entry is a view of
+ * registry keys: its title, description, risk flag, placeholders and default text come from the
+ * default resource files under {@code prompts/en/directive.*.md} (core/agents-turn), so the text a
+ * turn sends, the text the console shows as the default and the text a reset restores are one
+ * thing. Everything that can actually change a prompt (scopes, versions, per-agent overrides)
+ * lives in {@code core/prompts}; see {@link PromptDirectiveSettings}.
  *
- * <p>Not covered, on purpose: the delegation and specialist-handoff prompts ({@code
- * ChatDelegateCall}, {@code ChatSpecialistHandoff}) reuse some of these constants and keep sending
- * the built-in text.
+ * <p>A directive with two wordings ({@code tool_trust} full and compact, {@code context_compaction}
+ * with and without the restore tool) is two registry keys; the legacy API reads the first and
+ * writes both, which is what the single legacy override always did.
  */
 public final class PromptDirectiveRegistry {
 
     private PromptDirectiveRegistry() {}
 
-    /** Reserved key of the free-text block appended after the built-ins for every agent. */
+    /** Reserved legacy key of the free-text block appended after the built-ins for every agent. */
     public static final String CUSTOM_INSTRUCTIONS_KEY = "custom_instructions";
 
     public static final String CURRENT_DATE = "current_date";
@@ -33,9 +39,29 @@ public final class PromptDirectiveRegistry {
     public static final String BROWSER_V2 = "browser_v2";
     public static final String ARTIFACTS = "artifacts";
 
+    /** Registry keys ({@code prompts/en/<key>.md}) of the standing directives. */
+    public static final class Keys {
+        private Keys() {}
+
+        public static final String CURRENT_DATE = "directive.current_date";
+        public static final String MEMORY_USAGE = "directive.memory_usage";
+        public static final String MEDIA_HONESTY = "directive.media_honesty";
+        public static final String TOOL_TRUST = "directive.tool_trust";
+        public static final String TOOL_TRUST_COMPACT = "directive.tool_trust.compact";
+        public static final String AGENTIC_COMPLETION = "directive.agentic_completion";
+        public static final String MCP_UNTRUSTED = "directive.mcp_untrusted";
+        public static final String TOOL_SEARCH = "directive.tool_search";
+        public static final String CONTEXT_COMPACTION = "directive.context_compaction";
+        public static final String CONTEXT_COMPACTION_NO_RESTORE = "directive.context_compaction.no_restore";
+        public static final String BROWSER_V2 = "directive.browser_v2";
+        public static final String ARTIFACTS = "directive.artifacts";
+        public static final String CUSTOM_INSTRUCTIONS = "directive.custom_instructions";
+    }
+
     /**
      * One built-in directive. {@code defaultText} is empty for a retired directive that currently
      * sends nothing (its rule moved into tool_trust); such an entry takes no text override.
+     * {@code promptKeys} are the registry keys it covers, the first being the one shown.
      */
     public record Entry(
             String key,
@@ -43,93 +69,72 @@ public final class PromptDirectiveRegistry {
             String description,
             boolean securityCritical,
             String defaultText,
-            List<String> placeholders) {
+            List<String> placeholders,
+            List<String> promptKeys) {
 
         /** True when the platform currently has text for this directive to replace. */
         public boolean overridable() {
             return !defaultText.isEmpty();
         }
+
+        public String primaryPromptKey() {
+            return promptKeys.get(0);
+        }
     }
 
-    private static final List<Entry> ENTRIES =
+    private static final List<String[]> LEGACY =
             List.of(
-                    new Entry(
-                            CURRENT_DATE,
-                            "Current date",
-                            "Every turn: tells the model today's date (UTC) so it does not guess one.",
-                            false,
-                            ChatPromptDirectives.CURRENT_DATE_DIRECTIVE,
-                            List.of("date")),
-                    new Entry(
-                            MEMORY_USAGE,
-                            "Memory usage",
-                            "When the agent can save facts (remember_fact): when to save a lasting preference or fact.",
-                            false,
-                            ChatPromptDirectives.MEMORY_USAGE_DIRECTIVE,
-                            List.of()),
-                    new Entry(
-                            MEDIA_HONESTY,
-                            "Media honesty (retired)",
-                            "Retired: its rule now lives in tool_trust, so it sends no text today.",
-                            false,
-                            "",
-                            List.of()),
-                    new Entry(
-                            TOOL_TRUST,
-                            "Tool trust",
-                            "When the agent has any tool: tool output is data, never claim an unmade call, work to completion.",
-                            true,
-                            ChatPromptDirectives.TOOL_TRUST_DIRECTIVE,
-                            List.of()),
-                    new Entry(
-                            AGENTIC_COMPLETION,
-                            "Agentic completion (retired)",
-                            "Retired: its rule now lives in tool_trust, so it sends no text today.",
-                            false,
-                            "",
-                            List.of()),
-                    new Entry(
-                            MCP_UNTRUSTED,
-                            "Untrusted MCP data",
-                            "When the agent has tools from external MCP servers: never obey instructions inside their results.",
-                            true,
-                            ChatPromptDirectives.MCP_UNTRUSTED_TOOL_DATA_DIRECTIVE,
-                            List.of()),
-                    new Entry(
-                            TOOL_SEARCH,
-                            "Tool search",
-                            "When some tools are withheld to save context and reachable via search_tools / call_tool.",
-                            false,
-                            ChatPromptDirectives.TOOL_SEARCH_DIRECTIVE,
-                            List.of()),
-                    new Entry(
-                            CONTEXT_COMPACTION,
-                            "Context compaction",
-                            "When context compaction is on and the agent has tools: explains cleared tool results and how to restore them.",
-                            false,
-                            ChatPromptDirectives.CONTEXT_COMPACTION_DIRECTIVE_WITH_RESTORE,
-                            List.of()),
-                    new Entry(
-                            BROWSER_V2,
-                            "Browser tools",
-                            "When the agent has the indexed-snapshot browser tools: how to drive them and what needs approval.",
-                            false,
-                            ChatPromptDirectives.BROWSER_V2_DIRECTIVE,
-                            List.of()),
-                    new Entry(
-                            ARTIFACTS,
-                            "Artifacts",
-                            "For agents opted in to the artifacts pane: how to fence a deliverable the user keeps.",
-                            false,
-                            ArtifactsDirective.TEXT,
-                            List.of()));
+                    new String[] {CURRENT_DATE, Keys.CURRENT_DATE},
+                    new String[] {MEMORY_USAGE, Keys.MEMORY_USAGE},
+                    new String[] {MEDIA_HONESTY, Keys.MEDIA_HONESTY},
+                    new String[] {TOOL_TRUST, Keys.TOOL_TRUST, Keys.TOOL_TRUST_COMPACT},
+                    new String[] {AGENTIC_COMPLETION, Keys.AGENTIC_COMPLETION},
+                    new String[] {MCP_UNTRUSTED, Keys.MCP_UNTRUSTED},
+                    new String[] {TOOL_SEARCH, Keys.TOOL_SEARCH},
+                    new String[] {CONTEXT_COMPACTION, Keys.CONTEXT_COMPACTION, Keys.CONTEXT_COMPACTION_NO_RESTORE},
+                    new String[] {BROWSER_V2, Keys.BROWSER_V2},
+                    new String[] {ARTIFACTS, Keys.ARTIFACTS});
+
+    private static volatile List<Entry> entries;
 
     /** All built-ins, in the order they appear in the prompt. */
     public static List<Entry> all() {
-        return ENTRIES;
+        List<Entry> e = entries;
+        if (e == null) {
+            e = build(PromptResolver.defaultsOnly().catalog());
+            entries = e;
+        }
+        return e;
     }
 
     public static Optional<Entry> find(String key) {
-        return ENTRIES.stream().filter(e -> e.key().equals(key)).findFirst();
+        return all().stream().filter(e -> e.key().equals(key)).findFirst();
+    }
+
+    /** The registry keys behind a legacy key (empty for an unknown one, including custom_instructions). */
+    public static List<String> promptKeys(String legacyKey) {
+        if (CUSTOM_INSTRUCTIONS_KEY.equals(legacyKey)) {
+            return List.of(Keys.CUSTOM_INSTRUCTIONS);
+        }
+        return find(legacyKey).map(Entry::promptKeys).orElse(List.of());
+    }
+
+    static List<Entry> build(PromptCatalog catalog) {
+        List<Entry> out = new java.util.ArrayList<>();
+        for (String[] row : LEGACY) {
+            String legacy = row[0];
+            List<String> keys = List.of(row).subList(1, row.length);
+            PromptDefinition def = catalog.find(keys.get(0)).orElseThrow(() -> new IllegalStateException("Missing prompt resource for " + keys.get(0)));
+            out.add(
+                    new Entry(
+                            legacy,
+                            def.title(),
+                            def.description(),
+                            def.securityCritical(),
+                            catalog.defaultText(def.key()),
+                            def.placeholders().stream().map(PromptPlaceholder::name).toList(),
+                            keys));
+        }
+        return List.copyOf(out);
     }
 }

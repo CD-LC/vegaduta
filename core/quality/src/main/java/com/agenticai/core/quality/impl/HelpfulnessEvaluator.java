@@ -2,6 +2,7 @@ package com.agenticai.core.quality.impl;
 
 import com.agenticai.core.quality.EvaluationContext;
 import com.agenticai.core.quality.EvaluationType;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class HelpfulnessEvaluator extends AbstractLlmJudgeEvaluator {
 
+    /** Registry key of the judge prompt (default text: {@code prompts/en/eval.judge.helpfulness.md}). */
+    static final String PROMPT_KEY = "eval.judge.helpfulness";
+
     public HelpfulnessEvaluator(JudgeChatClientFactory judgeChatClientFactory) {
         super(judgeChatClientFactory);
     }
@@ -27,33 +31,14 @@ public class HelpfulnessEvaluator extends AbstractLlmJudgeEvaluator {
 
     @Override
     protected String buildPrompt(EvaluationContext context) {
-        return String.format(
-            """
-            You are an AI evaluator assessing the helpfulness of an agent's response.
-
-            USER QUESTION:
-            %s
-
-            AGENT RESPONSE:
-            %s
-
-            AGENT SYSTEM PROMPT (for context on the agent's role):
-            %s
-
-            Score the response's helpfulness on a scale of 0.0 to 1.0, where:
-            - 1.0: Directly answers the question, complete and actionable
-            - 0.75: Mostly helpful, minor gaps or unclear parts
-            - 0.5: Partially helpful but has significant gaps or issues
-            - 0.25: Minimally helpful, mostly irrelevant or confusing
-            - 0.0: Not helpful at all, does not address the question
-
-            Respond in this exact format:
-            SCORE: <number from 0.0 to 1.0>
-            FEEDBACK: <brief explanation of the score>
-            """,
-            context.userMessage(),
-            context.agentResponse(),
-            context.systemPrompt()
+        return prompts.text(
+            PROMPT_KEY,
+            context.agentId(),
+            Map.of(
+                "question", v(context.userMessage()),
+                "response", v(context.agentResponse()),
+                "system_prompt", v(context.systemPrompt())
+            )
         );
     }
 }

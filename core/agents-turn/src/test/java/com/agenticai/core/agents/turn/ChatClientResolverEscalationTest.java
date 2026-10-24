@@ -75,7 +75,7 @@ class ChatClientResolverEscalationTest {
         when(limits.usesPlatformPool("acme", TenantPlan.PREMIUM)).thenReturn(false);
         when(credentials.resolveActiveKey(ProviderName.ANTHROPIC)).thenReturn("sk-a");
         when(credentials.resolveActiveKey(ProviderName.OPENAI)).thenReturn("sk-o");
-        when(classifier.isSimple(any(), any())).thenReturn(true);
+        when(classifier.isSimple(any(), any(), any())).thenReturn(true);
         when(gateway.resolveClient(eq("acme"), any(GatewayCallSpec.class), any()))
                 .thenAnswer(
                         inv -> {
@@ -91,7 +91,7 @@ class ChatClientResolverEscalationTest {
     @Test
     void activeRouterRegistersEconomyClientAndPrimarySupplier() {
         VerifierEscalationRouter router =
-                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, false, "", 2, 0.2);
+                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, false, 2, 0.2);
         resolver.useEscalationRouter(router);
         ChatClient used = build();
         assertSame(cheap, used);
@@ -102,7 +102,7 @@ class ChatClientResolverEscalationTest {
     @Test
     void flagOffRegistersNothingAndReturnsSameClient() {
         VerifierEscalationRouter router =
-                new VerifierEscalationRouter(new SimpleMeterRegistry(), false, false, "", 2, 0.2);
+                new VerifierEscalationRouter(new SimpleMeterRegistry(), false, false, 2, 0.2);
         resolver.useEscalationRouter(router);
         ChatClient used = build();
         assertSame(cheap, used);
@@ -112,7 +112,7 @@ class ChatClientResolverEscalationTest {
     @Test
     void killSwitchRegistersNothingAndReturnsSameClient() {
         VerifierEscalationRouter router =
-                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, "", 2, 0.2);
+                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, 2, 0.2);
         resolver.useEscalationRouter(router);
         ChatClient used = build();
         assertSame(cheap, used);
@@ -127,11 +127,28 @@ class ChatClientResolverEscalationTest {
     @Test
     void nonEconomyTurnIsNeverRegistered() {
         VerifierEscalationRouter router =
-                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, false, "", 2, 0.2);
+                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, false, 2, 0.2);
         resolver.useEscalationRouter(router);
-        when(classifier.isSimple(any(), any())).thenReturn(false);
+        when(classifier.isSimple(any(), any(), any())).thenReturn(false);
         ChatClient used = build();
         assertSame(strong, used);
         assertEquals(true, router.escalationFor(agentId, used).isEmpty());
+    }
+
+    @Test
+    void aFollowUpInTheMiddleOfAToolTaskStaysOnThePrimaryModelWithoutAskingTheClassifier() {
+        ChatClient used =
+                resolver.buildChatClientFor(agent, "yes", null, "acme", TenantPlan.PREMIUM, 0.7, 1.0, true);
+
+        assertSame(strong, used, "the model that started the task finishes it");
+        org.mockito.Mockito.verify(classifier, org.mockito.Mockito.never()).isSimple(any(), any(), any());
+    }
+
+    @Test
+    void aSimpleMessageThatIsNotMidTaskStillGoesToTheEconomyModel() {
+        ChatClient used =
+                resolver.buildChatClientFor(agent, "hi", null, "acme", TenantPlan.PREMIUM, 0.7, 1.0, false);
+
+        assertSame(cheap, used);
     }
 }

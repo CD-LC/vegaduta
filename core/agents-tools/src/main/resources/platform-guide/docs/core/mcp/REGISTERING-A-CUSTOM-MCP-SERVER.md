@@ -137,7 +137,7 @@ wraps every single one, uniformly, regardless of origin, in:
    + toolName)` (a tenant admin can require approval for one of your tool's specific
    actions — e.g. `mcp_tool.home_assistant_unlock_door` — through the *existing*
    `PUT /api/approvals/policy/**` endpoint, no new endpoint needed for this); deterministic
-   output validation (length/JSON-well-formedness, zero LLM calls); output sanitization
+   a length cap on the result (truncated with a marker past `app.tools.output.max-chars`, zero LLM calls); output sanitization
    (`GuardrailService.sanitizeToolOutput`); and, for agents running with
    `reasoningDepth = RIGOROUS`, an independent LLM-based intent-match check before the tool
    ever runs.

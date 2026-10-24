@@ -21,7 +21,9 @@ import org.springframework.web.server.ResponseStatusException;
  * {@code GET /api/agents/{agentId}/sessions/{sessionId}/transcript}: the stored conversation of a
  * live session, as the web restores it after a reload - every message with an explicit {@code
  * status} (ok / failed / interrupted), and a failed reply as the message the person was shown
- * rather than the stored technical marker.
+ * rather than the stored technical marker. A turn that only carries a platform tool record (the
+ * outcome of an action a person decided, {@link ChatTurn#isToolRecordOnly}) is the model's, not a
+ * message, and is left out.
  *
  * <p>Same access rule as the export: RUNNER on the agent AND the caller is the tenant + subject
  * that started the session (a client-chosen session id alone never reads a conversation). Not
@@ -74,7 +76,8 @@ public class ChatTranscriptService {
         List<TranscriptView.Entry> messages = new ArrayList<>();
         if (turns != null) {
             for (ChatTurn turn : turns) {
-                if (turn != null) {
+                // A record-only turn (a decided action's outcome, kept for the model) is not a message.
+                if (turn != null && !ChatTurn.isToolRecordOnly(turn)) {
                     messages.add(TranscriptView.of(turn));
                 }
             }
@@ -101,6 +104,13 @@ public class ChatTranscriptService {
         try {
             List<TranscriptView.Entry> out = new ArrayList<>();
             for (MessageView m : branchService.activePath(agentId, sessionId).messages()) {
+                // The tree keeps no tool records, so a record-only turn it absorbed from the live
+                // history is an assistant node with no text: nothing to show.
+                if ("assistant".equals(m.role())
+                        && !m.error()
+                        && (m.content() == null || m.content().isBlank())) {
+                    continue;
+                }
                 out.add(
                         new TranscriptView.Entry(
                                 m.role(), m.content(), m.createdAt(), m.status(), m.error()));

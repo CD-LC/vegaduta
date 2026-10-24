@@ -7,6 +7,8 @@ import com.agenticai.core.rl.domain.PolicyDimension;
 import com.agenticai.core.rl.repo.AgentPolicyRepository;
 import com.agenticai.core.rl.repo.PolicyArmRepository;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingsResolver;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -71,9 +73,41 @@ public class ContextualBanditService {
     private final AgentPolicyRepository policyRepository;
     private final PolicyArmRepository armRepository;
 
+    private RlPolicyProperties properties = new RlPolicyProperties();
+
     public ContextualBanditService(AgentPolicyRepository policyRepository, PolicyArmRepository armRepository) {
         this.policyRepository = policyRepository;
         this.armRepository = armRepository;
+    }
+
+    /** {@code rl.policy.*}: UCB1's exploration constant. Without it the textbook 2.0 applies. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setProperties(RlPolicyProperties properties) {
+        this.properties = properties == null ? new RlPolicyProperties() : properties;
+    }
+
+    private SettingsResolver settings;
+
+    /**
+     * The settings catalog ({@code rl.policy.*}): a workspace's or an agent's UCB1 exploration constant replaces the
+     * property value. Without it the property applies.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setSettings(SettingsResolver settings) {
+        this.settings = settings;
+    }
+
+    /** UCB1's exploration constant for {@code agentId} under the calling thread's workspace settings. */
+    private double ucb1ExplorationConstant(UUID agentId) {
+        if (settings != null) {
+            try {
+                return settings.getDecimal(RlSettings.UCB1_EXPLORATION_CONSTANT, SettingContext.forAgent(agentId));
+            } catch (RuntimeException e) {
+                // A selection never fails because a setting cannot be read: the configured constant applies.
+                log.warn("Could not read the RL exploration setting, using the configured constant: {}", e.toString());
+            }
+        }
+        return properties.getUcb1ExplorationConstant();
     }
 
     /**
@@ -134,7 +168,7 @@ public class ContextualBanditService {
         }
 
         return policy.getAlgorithm() == BanditAlgorithm.UCB1
-            ? selectByUcb1(candidates)
+            ? selectByUcb1(candidates, ucb1ExplorationConstant(agentId))
             : selectByThompsonSampling(candidates, rng);
     }
 
@@ -153,13 +187,13 @@ public class ContextualBanditService {
     }
 
     /**
-     * UCB1: score = avgReward + sqrt(2 * ln(totalPulls) / armPulls), argmax
+     * UCB1: score = avgReward + sqrt(c * ln(totalPulls) / armPulls) (c = rl.policy.ucb1-exploration-constant, 2.0, or the workspace's / agent's catalog override), argmax
      * wins. Any never-pulled arm gets an infinite score (visited first,
      * guaranteeing every arm is tried at least once before the confidence
      * term starts discriminating between them) - the standard UCB1
      * initialization, not a special case bolted on here.
      */
-    private Optional<PolicyArm> selectByUcb1(List<PolicyArm> candidates) {
+    private Optional<PolicyArm> selectByUcb1(List<PolicyArm> candidates, double explorationConstant) {
         long totalPulls = candidates.stream().mapToLong(PolicyArm::getPulls).sum();
         PolicyArm best = null;
         double bestScore = Double.NEGATIVE_INFINITY;
@@ -168,7 +202,7 @@ public class ContextualBanditService {
             if (arm.getPulls() == 0) {
                 score = Double.POSITIVE_INFINITY;
             } else {
-                score = arm.avgReward() + Math.sqrt(2.0 * Math.log(Math.max(totalPulls, 1)) / arm.getPulls());
+                score = arm.avgReward() + Math.sqrt(explorationConstant * Math.log(Math.max(totalPulls, 1)) / arm.getPulls());
             }
             if (score > bestScore) {
                 bestScore = score;

@@ -1,5 +1,7 @@
 package com.agenticai.core.quality.impl;
 
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.quality.EvaluationContext;
 import com.agenticai.core.quality.EvaluationResult;
 import com.agenticai.core.quality.Evaluator;
@@ -10,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Shared pipeline for every LLM-as-judge evaluator in this module
@@ -66,6 +69,20 @@ abstract class AbstractLlmJudgeEvaluator implements Evaluator {
     static final ChatOptions JUDGE_OPTIONS = ChatOptions.builder().temperature(0.0).build();
 
     private final Logger log = LoggerFactory.getLogger(getClass());
+
+    /** The prompt registry the judge prompts come from; the shipped text until a resolver is wired. */
+    protected final PromptSlot prompts = new PromptSlot();
+
+    /** Wired by Spring (inherited by every judge evaluator); absent = the shipped prompts. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
+
+    /** A placeholder value: what {@code String.format("%s", value)} printed, so a null prints as before. */
+    protected static String v(Object value) {
+        return String.valueOf(value);
+    }
 
     private final JudgeChatClientFactory judgeChatClientFactory;
 

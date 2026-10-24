@@ -34,7 +34,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 /**
  * Trajectory scoring inside {@link EvalRunService}: a case whose {@code grader_spec} is a trajectory spec scores
  * the replayed turn's tool calls, joins the grader vote, and blends into the overall score - but only behind
- * {@code app.quality.trajectory-eval.enabled}, and only for tool-executing datasets.
+ * {@code app.quality.trajectory-eval.enabled}, and only for tool-executing datasets (a text-only dataset reports
+ * the dimension as unavailable). The calls are judged by how the turn recorded each one's end, not by their
+ * output text.
  */
 class EvalRunServiceTrajectoryTest {
 
@@ -64,7 +66,9 @@ class EvalRunServiceTrajectoryTest {
         JudgeChatClientFactory judgeChatClientFactory = mock(JudgeChatClientFactory.class);
         AgentDefinitionLookup agentDefinitionLookup = mock(AgentDefinitionLookup.class);
         AgentHeadVersionLookup headVersionLookup = mock(AgentHeadVersionLookup.class);
-        replayer = mock(AgentTurnReplayer.class);
+        // Real default methods: the runner calls replay(ReplayRequest), whose default delegates to the six-argument form
+        // these tests stub.
+        replayer = mock(AgentTurnReplayer.class, org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.Mockito.CALLS_REAL_METHODS));
         LlmCallLogService llmCallLogService = mock(LlmCallLogService.class);
         @SuppressWarnings("unchecked")
         ObjectProvider<LlmCallLogService> llmLogProvider = mock(ObjectProvider.class);
@@ -214,7 +218,7 @@ class EvalRunServiceTrajectoryTest {
     }
 
     @Test
-    void aToollessDatasetCannotEvaluateATrajectoryAndSaysNothing() throws Exception {
+    void aToollessDatasetReportsTheTrajectoryAsUnavailableAndLeavesTheVerdictAlone() throws Exception {
         service.trajectoryEvalEnabled = true;
         useDataset(false);
         caseWithSpec(SPEC);
@@ -224,9 +228,54 @@ class EvalRunServiceTrajectoryTest {
         runInline();
 
         EvalRunCaseResult result = resultStore.values().iterator().next();
+        // Neither passed nor failed on a trajectory nobody could produce: the verdict and score are the judge's.
         assertEquals(Boolean.TRUE, result.getPassed());
         assertEquals(0.8, result.getOverallScore(), 1e-6);
-        assertFalse(result.getScoresJson().contains("TRAJECTORY"));
+        // But the case no longer pretends the spec was not there: the dimension says why it was not scored.
+        assertTrue(result.getScoresJson().contains("TRAJECTORY"), result.getScoresJson());
+        assertTrue(result.getScoresJson().contains("UNAVAILABLE"), result.getScoresJson());
+        assertTrue(result.getScoresJson().contains("text-only"), result.getScoresJson());
+    }
+
+    @Test
+    void aCallTheTurnRecordedAsHeldForApprovalIsReportedNotOkEvenThoughItsOutputLooksFine() throws Exception {
+        service.trajectoryEvalEnabled = true;
+        caseWithSpec(SPEC);
+        judge(0.9);
+        // The output text is ordinary - only the turn's own record says send_email never ran.
+        calls(true,
+            call("search", "{\"query\":\"refund\"}"),
+            new AgentTurnReplayer.ReplayedToolCall(
+                "send_email", "{\"to\":\"a@b.c\"}", "queued", AgentTurnReplayer.ToolStatus.AWAITING_APPROVAL));
+
+        runInline();
+
+        EvalRunCaseResult result = resultStore.values().iterator().next();
+        // The trajectory scores the agent's choice of calls (both steps were called, in order), as it always has;
+        // what changes is the evidence: the held call is reported as not ok, and counted in the failed-call metric.
+        assertEquals(Boolean.TRUE, result.getPassed());
+        assertTrue(result.getScoresJson().contains("\"ok\":false"), result.getScoresJson());
+        assertTrue(result.getScoresJson().contains("\"failedCalls\":1"), result.getScoresJson());
+    }
+
+    @Test
+    void theRecordedStatusIsStoredWithTheToolCallsSoTheStoredViewJudgesThemTheSameWay() throws Exception {
+        service.trajectoryEvalEnabled = true;
+        caseWithSpec(SPEC);
+        judge(0.9);
+        calls(true,
+            call("search", "{\"query\":\"refund\"}"),
+            new AgentTurnReplayer.ReplayedToolCall(
+                "send_email", "{\"to\":\"a@b.c\"}", "queued", AgentTurnReplayer.ToolStatus.NOT_RUN));
+
+        runInline();
+
+        EvalRunCaseResult result = resultStore.values().iterator().next();
+        assertTrue(result.getToolCallsJson().contains("\"status\":\"NOT_RUN\""), result.getToolCallsJson());
+        // A call with no recorded status is stored exactly as before.
+        assertFalse(result.getToolCallsJson().contains("\"status\":\"UNKNOWN\""));
+        var stored = com.agenticai.core.quality.trajectory.TrajectoryExtractor.fromToolCallsJson(result.getToolCallsJson());
+        assertEquals(List.of(true, false), stored.stream().map(com.agenticai.core.quality.trajectory.TrajectoryToolCall::ok).toList());
     }
 
     @Test

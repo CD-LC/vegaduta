@@ -1,8 +1,10 @@
 package com.agenticai.core.providers.validation;
 
+import com.agenticai.core.providers.ProviderEndpoints;
 import com.agenticai.core.providers.ProviderName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -24,13 +26,20 @@ import org.springframework.web.client.RestClientResponseException;
 public class AnthropicProviderValidator implements ProviderValidator {
 
     private static final Logger log = LoggerFactory.getLogger(AnthropicProviderValidator.class);
-    private static final String MODELS_URL = "https://api.anthropic.com/v1/models";
+    private final String modelsUrl;
     private static final String ANTHROPIC_VERSION = "2023-06-01";
 
     private final RestClient restClient;
 
+    /** Vendor defaults; Anthropic is called at the address {@code app.llm.endpoints} names. */
     public AnthropicProviderValidator(RestClient.Builder restClientBuilder) {
+        this(restClientBuilder, new ProviderEndpoints());
+    }
+
+    @Autowired
+    public AnthropicProviderValidator(RestClient.Builder restClientBuilder, ProviderEndpoints endpoints) {
         this.restClient = restClientBuilder.build();
+        this.modelsUrl = endpoints.modelsUrl(ProviderName.ANTHROPIC);
     }
 
     @Override
@@ -42,7 +51,7 @@ public class AnthropicProviderValidator implements ProviderValidator {
     public void validate(String apiKey) {
         try {
             restClient.get()
-                .uri(MODELS_URL)
+                .uri(modelsUrl)
                 .header("x-api-key", apiKey)
                 .header("anthropic-version", ANTHROPIC_VERSION)
                 .retrieve()

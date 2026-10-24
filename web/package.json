@@ -41,7 +41,7 @@
     "livekit-client": "^2.21.0",
     "lucide-react": "^0.469.0",
     "motion": "^12.42.2",
-    "next": "^16.3.6",
+    "next": "^16.4.2",
     "onnxruntime-web": "^1.27.0",
     "pino": "^10.3.0",
     "react": "^19.2.7",
@@ -59,7 +59,8 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.12",
+    "axe-core": "^4.12.1",
     "eslint": "^9.18.0",
     "eslint-config-next": "^16.2.9",
     "eslint-plugin-jsx-a11y": "^6.10.2",
@@ -68,11 +69,11 @@
     "tailwindcss": "^4.0.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.0",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.12"
   },
   "overrides": {
     "eslint-plugin-react-hooks": "5.2.0",
     "postcss": "^8.5.18",
-    "sharp": "^0.35.0"
+    "sharp": "^0.35.5"
   }
 }

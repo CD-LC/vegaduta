@@ -6,6 +6,7 @@ import static com.agenticai.core.agents.turn.ChatPromptDirectives.withSkillsBloc
 
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.AgentService;
+import com.agenticai.core.agents.skills.SkillPromptBlock;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.AgentToolPort;
 import com.agenticai.core.agents.turn.quality.LlmQualityJudgeService;
@@ -13,8 +14,6 @@ import com.agenticai.core.chat.LlmMetricsAdvisor;
 import com.agenticai.core.chat.ProviderErrorTranslator;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
-import com.agenticai.core.guardrails.GuardrailViolationException;
-import com.agenticai.core.guardrails.ToolStepLimitExceededException;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
@@ -46,6 +45,7 @@ final class ChatDelegateCall {
     private final ChatTurnExecutor turns;
     private final Function<String, String> experimentVariants;
     private final ChatPromptDirectives.DirectiveGates directiveGates;
+    private final SubAgentTurn subTurn;
 
     ChatDelegateCall(
             AgentService agentService,
@@ -57,7 +57,9 @@ final class ChatDelegateCall {
             ProviderErrorTranslator providerErrorTranslator,
             ChatTurnExecutor turns,
             Function<String, String> experimentVariants,
-            ChatPromptDirectives.DirectiveGates directiveGates) {
+            ChatPromptDirectives.DirectiveGates directiveGates,
+            SubAgentTurn subTurn) {
+        this.subTurn = subTurn;
         this.agentService = agentService;
         this.resourceAccessService = resourceAccessService;
         this.credentialResolver = credentialResolver;
@@ -198,19 +200,25 @@ final class ChatDelegateCall {
 
         // Skills block sits between the agent's own prompt and the forwarded context so the
         // stable part stays a prefix - a delegated specialist is exactly who benefits from skills.
+        // The delegate's own overrides (agent, tenant, platform) for every text below, not the built-in text.
+        ResolvedDirectives promptsForDelegate = directiveGates.directivesForAgent().apply(agentId);
         String delegatePrompt =
                 withSkillsBlock(
                         withSkillsBlock(
                                 agent.getSystemPrompt(),
                                 agentToolProvider.proceduresPromptBlock(agentId)),
-                        agentToolProvider.skillsPromptBlock(agentId, tools));
+                        SkillPromptBlock.withHeader(
+                                agentToolProvider.skillsPromptBlock(agentId, tools),
+                                promptsForDelegate.text(SkillPromptBlock.HEADER_KEY),
+                                false));
         String basePrompt =
                 (contextSummary == null || contextSummary.isBlank())
                         ? delegatePrompt
                         : delegatePrompt
-                                + "\n\nContext forwarded by the delegating agent (a short summary, not the full "
-                                + "conversation - use it only if relevant to the question below):\n"
-                                + contextSummary;
+                                + "\n\n"
+                                + promptsForDelegate.textOrShipped(
+                                        "delegation.context_header.collaborator",
+                                        java.util.Map.of("context", contextSummary));
         // 2026-10-01 audit fix: the collaborator resolves its OWN tools (MCP
         // included) but previously got none of the standing directives - the
         // fabricated-URL/false-claim/untrusted-data rails applied to outer
@@ -225,66 +233,27 @@ final class ChatDelegateCall {
                         tools,
                         directiveGates.mcpUntrusted().getAsBoolean()
                                 && agentToolProvider.anyMcpToolsOfferedFor(
-                                        agentId, delegatedSessionId, question, chatClient));
+                                        agentId, delegatedSessionId, question, chatClient),
+                        promptsForDelegate);
         String systemPrompt =
                 DelegateOptions.append(
                         options,
                         directiveBlock == null ? basePrompt : basePrompt + "\n\n" + directiveBlock);
 
-        try {
-            // #848 (LLM gateway seam) - delegated (agent-to-agent) calls
-            // never had provider fallback before this either; see
-            // callWithProviderFallback's javadoc.
-            String answer =
-                    turns.callWithProviderFallback(
-                            tenantId,
-                            agent,
-                            chatClient,
-                            client ->
-                                    client.prompt()
-                                            .system(systemPrompt)
-                                            .user(question)
-                                            .toolCallbacks(tools)
-                                            .advisors(
-                                                    a -> {
-                                                        // #1102 - see the same fix in
-                                                        // buildChatClientFor's callers above for
-                                                        // why
-                                                        // a null experimentVariants (no active
-                                                        // experiment - the common case)
-                                                        // can't be passed straight through to
-                                                        // Spring AI's AdvisorSpec#param.
-                                                        a.param(
-                                                                        LlmMetricsAdvisor
-                                                                                .AGENT_ID_PARAM,
-                                                                        agentId)
-                                                                .param(
-                                                                        LlmMetricsAdvisor
-                                                                                .SESSION_ID_PARAM,
-                                                                        delegatedSessionId);
-                                                        if (experimentVariants != null) {
-                                                            a.param(
-                                                                    LlmMetricsAdvisor
-                                                                            .EXPERIMENT_VARIANTS_PARAM,
-                                                                    experimentVariants);
-                                                        }
-                                                    })
-                                            .call()
-                                            .content());
-            String result =
-                    (answer == null || answer.isBlank())
-                            ? "The collaborator agent returned an empty answer."
-                            : answer;
-            // Gap 2 - delegated calls are sampled too, same as any other turn.
-            llmQualityJudgeService.sampleAsync(
-                    chatClient, agentId, delegatedSessionId, question, result);
-            return result;
-        } catch (RuntimeException e) {
-            log.warn("Delegated call to collaborator agent {} failed", agentId, e);
-            throw (e instanceof ToolStepLimitExceededException
-                            || e instanceof GuardrailViolationException)
-                    ? e
-                    : providerErrorTranslator.translate(e, agent.getProviderName());
-        }
+        // Screening, hooks, journal, guardrails and the continuation policy run in the sub-turn, the same stages a
+        // buffered turn has (see SubAgentTurn); it also keeps the provider fallback this call always had.
+        return subTurn.run(
+                new SubAgentTurn.Request(
+                        "delegate",
+                        agent,
+                        agentId,
+                        delegatedSessionId,
+                        question,
+                        systemPrompt,
+                        chatClient,
+                        tools,
+                        experimentVariants,
+                        tenantId,
+                        promptsForDelegate.textOrShipped("delegation.empty_answer.collaborator")));
     }
 }

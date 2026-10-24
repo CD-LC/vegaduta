@@ -12,6 +12,7 @@ import { SUB_TEXT } from "../AgentWorkbench/styles";
 import HudSlider from "../HudSlider";
 import ModelInfoCard, { modelOptionLabel } from "../ModelInfoCard";
 import { useWorkbench } from "./context";
+import { BEHAVIOR_ANCHORS } from "../AgentWorkbench/behaviorModel";
 import { WorkbenchSection } from "./WorkbenchSection";
 
 export default function GenerationTuningSection() {
@@ -74,6 +75,7 @@ export default function GenerationTuningSection() {
        * The header summary shows the mode and the live sampling values so
        * nobody has to open it to know what the agent runs with. */}
       <WorkbenchSection
+        anchorId={BEHAVIOR_ANCHORS.generation}
         icon={<Gauge size={13} />}
         label="Generation tuning"
         cat="var(--cat-comms)"

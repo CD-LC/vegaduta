@@ -289,11 +289,11 @@ one changes.
 
 | Item | State | Consequence |
 |---|---|---|
-| Repository visibility | private (`CD-LC/vegaduta`) | links from public pages to the repository, and the Pages site, are not reachable by outsiders until it is public |
-| GitHub plan | organization on the Free plan | branch protection rulesets and GitHub Pages are unavailable for private repositories; see [Branch protection](maintainers/branch-protection.md) |
+| Repository visibility | public (`CD-LC/vegaduta`) | links from public pages to the repository are reachable; Pages stays gated as below |
+| GitHub plan | organization on the Free plan | rulesets and Pages are available because the repository is public; no ruleset is configured on `main` yet, see [Branch protection](maintainers/branch-protection.md) |
 | Documentation site | workflow and config exist; deploy job gated by repository variable `DOCS_PUBLISH_PAGES` | set Pages source to "GitHub Actions" and the variable to `true` ([Publishing these docs](maintainers/docs-site.md)) |
-| CODEOWNERS team | `@CD-LC/maintainers`; the organization has no teams yet | create the team, or change it with `scripts/dev/set-repo-identity.sh --team` |
-| Security and conduct contacts | placeholders `contact@cdandlc.com`, `contact@cdandlc.com` | replace with monitored addresses ([Repository setup](maintainers/repo-setup.md)) |
+| CODEOWNERS team | `@CD-LC/maintainers`; the team does not exist in the organization yet (`gh api repos/CD-LC/vegaduta/codeowners/errors` lists every rule as "Unknown owner") | create the team ([Repository setup](maintainers/repo-setup.md)), or change it with `scripts/dev/set-repo-identity.sh --team` |
+| Security and conduct contacts | `contact@cdandlc.com` for both; private vulnerability reporting is on | keep the address monitored ([Repository setup](maintainers/repo-setup.md)) |
 | GitHub Actions | jobs do not start: the account's payments failed or the spending limit is reached | no remote CI result exists until billing is fixed; run `make gates` and the module builds locally |
 | Java Agent SDK on Maven Central | not published; `0.1.0-SNAPSHOT` builds from source | verify the `io.github.cd-lc` namespace, then follow [Releasing the SDK](maintainers/releasing-sdk.md) |
 | Python Agent SDK on PyPI | not published (`sdk/python-agent/README.md`: "not yet on PyPI"); PyPI pending publisher registered for `pypi-release.yml` + environment `pypi`; upload runs only when `SDK_PUBLISH_PYPI` is `true` | tag `pysdk-v*` and dispatch the workflow; the first upload claims the project |

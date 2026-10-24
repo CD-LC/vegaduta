@@ -412,3 +412,52 @@ func TestListExtrasPrintsEverything(t *testing.T) {
 		}
 	}
 }
+
+// The Windows launcher (scripts/vegaduta.ps1 Save-State) keeps every profile,
+// tools and browser included, in profiles= and writes no tools=/browser= keys.
+// Setup must read that, or a re-run drops the tools runner it was asked to keep.
+func TestDetectCurrentReadsToolsFromWindowsLauncherState(t *testing.T) {
+	c := mustCatalog(t)
+	state := "tier=personal\nprofiles=workspace tools\nbuild=0\nlocal_ai=container\nlocal_model=qwen3.5:4b\ncloud=0\n"
+	root := tree(t, "", state, "")
+	if err := saveChoice(root, c, selectionOf("workspace", "tools")); err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.Join(DetectCurrent(root, c).Sel.IDs(c), ","); got != "workspace,tools" {
+		t.Errorf("tools from profiles=: %q", got)
+	}
+	noChoice := tree(t, "", state, "")
+	if got := strings.Join(DetectCurrent(noChoice, c).Sel.IDs(c), ","); got != "workspace,tools" {
+		t.Errorf("tools from profiles= without a choice file: %q", got)
+	}
+
+	// A re-run of Setup on Windows keeps the tools profile in the plan and in the state it writes.
+	noop := func(Event) {}
+	x := prepareExtras(root, config{tier: "personal"}, "windows", noop)
+	if got := strings.Join(x.plan.Profiles, ","); got != "workspace,tools" {
+		t.Fatalf("plan profiles = %q, want workspace,tools", got)
+	}
+	if err := x.beforeUp(root, noop); err != nil {
+		t.Fatal(err)
+	}
+	if got := read(t, statePath(root)); !strings.Contains(got, "profiles=workspace tools\n") {
+		t.Errorf("state lost the tools profile: %q", got)
+	}
+	if got := strings.Join(x.args("personal"), " "); !strings.Contains(got, "workspace,tools") && runtime.GOOS == "windows" {
+		t.Errorf("args = %q", got)
+	}
+}
+
+// A profile the person turned off outside Setup must still show as off.
+func TestDetectCurrentToolsOffInBothStateShapes(t *testing.T) {
+	c := mustCatalog(t)
+	for name, state := range map[string]string{
+		"bash":    "tier=personal\nprofiles=workspace\nsearch=0\ntools=0\n",
+		"windows": "tier=personal\nprofiles=workspace\nbuild=0\n",
+	} {
+		root := tree(t, "", state, "")
+		if got := strings.Join(DetectCurrent(root, c).Sel.IDs(c), ","); got != "workspace" {
+			t.Errorf("%s state: %q", name, got)
+		}
+	}
+}
