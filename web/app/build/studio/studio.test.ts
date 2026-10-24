@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { applyEditBlocks, dedupeSkeletonHelpers, extractHtmlDocument, looksLikeValidApp, parseEditBlocks } from "./patch";
+import { parse } from "@babel/parser";
+import { applyEditBlocks, dedupeSkeletonHelpers, extractHtmlDocument, firstBrokenScript, looksLikeValidApp, parseEditBlocks, setScriptChecker } from "./patch";
 import { readAppBlock, stripConnections, writeConnections } from "./connect";
 import { aliasOf, extractResponsePath, renderConnectionTemplate } from "./payload";
 import { contrastRatio, readTheme, writeTheme } from "./theme";
@@ -22,6 +23,12 @@ const APP = `<!doctype html>
 </body></html>`;
 
 describe("patch", () => {
+  // The browser registers Babel (app/lib/babel.ts); tests register the real
+  // @babel/parser so the script-syntax gate is exercised end to end.
+  setScriptChecker((body, opts) => {
+    parse(body, { sourceType: opts.module ? "module" : "script" });
+  });
+
   it("parses blocks surrounded by prose and fences", () => {
     const reply = "Sure! Here:\n```\n<<<<<<< SEARCH\n  <h1>Hello</h1>\n=======\n  <h1>Hi there</h1>\n>>>>>>> REPLACE\n```\nDone.";
     const blocks = parseEditBlocks(reply);
@@ -80,6 +87,55 @@ describe("patch", () => {
   it("validates app structure", () => {
     expect(looksLikeValidApp(APP)).toBe(true);
     expect(looksLikeValidApp(APP.replace("</script>", ""))).toBe(false);
+  });
+
+  it("does not split a block on a comment divider inside its body", () => {
+    // A `// ====== Section ======` divider inside the REPLACE body must not
+    // be mistaken for the SEARCH/REPLACE separator - that splice is how a
+    // raw `=======` line ended up inside <script> ("Unexpected token '==='").
+    const reply =
+      "<<<<<<< SEARCH\n  <h1>Hello</h1>\n=======\n  <h1>Hi</h1>\n  // ====== greeting section ======\n  render();\n>>>>>>> REPLACE";
+    const blocks = parseEditBlocks(reply);
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0].replace).toContain("greeting section");
+    expect(blocks[0].replace).toContain("render()");
+  });
+
+  it("rejects a document with a leaked edit-marker line", () => {
+    const leaked = APP.replace("const x = 1;", "const x = 1;\n=======\nconst y = 2;");
+    expect(looksLikeValidApp(leaked)).toBe(false);
+    const leakedSearch = APP.replace("const x = 1;", "const x = 1;\n<<<<<<< SEARCH\nconst y = 2;");
+    expect(looksLikeValidApp(leakedSearch)).toBe(false);
+  });
+
+  it("rejects a document whose inline script does not parse, and names the script", () => {
+    // "Uncaught SyntaxError ... Unexpected token 'const'" - the doc ships dead
+    // unless validation catches it before commit.
+    const broken = APP.replace("const x = 1;", "const x = 1;\nconst x = ;");
+    expect(firstBrokenScript(broken)).toContain("const x = ;");
+    expect(looksLikeValidApp(broken)).toBe(false);
+  });
+
+  it("still accepts a valid app and a type=module script", () => {
+    expect(looksLikeValidApp(APP)).toBe(true);
+    const mod = APP.replace("<script>", '<script type="module">').replace(
+      "const x = 1;",
+      'import { x } from "./y.js";\nexport const z = x;'
+    );
+    expect(looksLikeValidApp(mod)).toBe(true);
+  });
+
+  it("skips the script check when no parser is registered", () => {
+    setScriptChecker(null);
+    try {
+      const broken = APP.replace("const x = 1;", "const x = ;");
+      expect(firstBrokenScript(broken)).toBeNull();
+      expect(looksLikeValidApp(broken)).toBe(true);
+    } finally {
+      setScriptChecker((body, opts) => {
+        parse(body, { sourceType: opts.module ? "module" : "script" });
+      });
+    }
   });
 });
 
