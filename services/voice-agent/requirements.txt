@@ -8,13 +8,9 @@
 # shape both this file and main.py rely on) has moved fast across 1.x.
 livekit-agents==1.8.8
 
-# Held at 2.x: livekit-agents 1.6.8 declares only `openai>=2` but its
-# inference/llm.py does `import httpx` and passes httpx objects to openai,
-# relying on openai 2.x's httpx dependency. openai 3.x moved to the renamed
-# httpx2 package, so with it `import livekit.agents` fails with
-# "No module named 'httpx'" (image and tests alike). Lift this pin together
-# with a livekit-agents release that supports openai 3.
-openai==2.54.0
+# livekit-agents 1.8.8 requires openai>=3.19,<4; the 1.6.8-era 2.x hold
+# (its inference/llm.py passed httpx objects to openai) is gone.
+openai==3.26.0
 
 # Official ElevenLabs TTS plugin - this platform's preferred/default TTS
 # provider (see core/agents/.../SpeakToolCallback.java's javadoc: "ElevenLabs
