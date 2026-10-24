@@ -93056,6 +93056,9 @@
           },
           "model": {
             "type": "string"
+          },
+          "summary": {
+            "type": "string"
           }
         }
       },
