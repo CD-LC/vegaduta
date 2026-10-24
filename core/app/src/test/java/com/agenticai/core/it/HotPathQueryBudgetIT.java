@@ -314,9 +314,13 @@ class HotPathQueryBudgetIT extends AbstractContextIT {
         assertThat(warm[0])
                 .as("budget: raise it only with a reason, and say what the new query buys")
                 .isLessThanOrEqualTo(BUDGET_TURN_CONNECTIONS);
-        assertThat(warm[1]).as(java.util.Arrays.toString(stats.getQueries())).isLessThanOrEqualTo(BUDGET_TURN_STATEMENTS);
+        assertThat(warm[1])
+                .as(java.util.Arrays.toString(stats.getQueries()))
+                .isLessThanOrEqualTo(BUDGET_TURN_STATEMENTS);
         assertThat(warmAgain[0]).isLessThanOrEqualTo(BUDGET_TURN_CONNECTIONS);
-        assertThat(warmAgain[1]).as(java.util.Arrays.toString(stats.getQueries())).isLessThanOrEqualTo(BUDGET_TURN_STATEMENTS);
+        assertThat(warmAgain[1])
+                .as(java.util.Arrays.toString(stats.getQueries()))
+                .isLessThanOrEqualTo(BUDGET_TURN_STATEMENTS);
         assertThat(cold[0]).as("a cold turn pays for the lookups once").isGreaterThan(warm[0]);
     }
 
@@ -547,21 +551,28 @@ class HotPathQueryBudgetIT extends AbstractContextIT {
      * resolution, prompt assembly, the model call), warm, against the mock model, recorded on
      * 2026-10-13: 15 connections and 14 statements (44 and 46 cold). Two of slack. The statements
      * that remain are listed in docs/architecture/HOT-PATH-PERFORMANCE.md; lower these as they are
-     * removed. Raised to 17 on 2026-10-20: the warm turn now issues 17 measured statements -
-     * the two slack slots plus one. The newcomers are the RL turn recorder's per-turn
-     * bookkeeping (rl_episode open-episode lookup, rl_trajectory_step step count) and the
-     * agent_job/webhook checks that join prompt assembly; they buy episode continuity for
-     * reward attribution and job-aware turns. rl_trajectory_step could become a cached
-     * counter later; until then the queries are part of the recorded budget.
-     * Statements raised to 18 on 2026-10-23: a short message (at most {@code
-     * app.chat.follow-up.short-message-chars}, 40 by default, which "hello there" is) is a possible
-     * follow-up, so the turn reads the session's tool-call log once
-     * ({@code FollowUpTools#stickyTools}: {@code tool_call_log} by agent, session and window) to keep
-     * the tools the conversation already used on offer and to leave a tool task on its own model. It
-     * rides on a connection the turn already holds (connections stay 17). A message longer than the
-     * limit pays nothing.
+     * removed. Raised to 17 on 2026-10-20: the warm turn now issues 17 measured statements - the
+     * two slack slots plus one. The newcomers are the RL turn recorder's per-turn bookkeeping
+     * (rl_episode open-episode lookup, rl_trajectory_step step count) and the agent_job/webhook
+     * checks that join prompt assembly; they buy episode continuity for reward attribution and
+     * job-aware turns. rl_trajectory_step could become a cached counter later; until then the
+     * queries are part of the recorded budget. Statements raised to 18 on 2026-10-23: a short
+     * message (at most {@code app.chat.follow-up.short-message-chars}, 40 by default, which "hello
+     * there" is) is a possible follow-up, so the turn reads the session's tool-call log once
+     * ({@code FollowUpTools#stickyTools}: {@code tool_call_log} by agent, session and window) to
+     * keep the tools the conversation already used on offer and to leave a tool task on its own
+     * model. It rides on a connection the turn already holds (connections stay 17). A message
+     * longer than the limit pays nothing.
+     *
+     * <p>Connections raised to 19 and statements to 20 on 2026-10-24 (the agent-runtime feature
+     * f29212078): each turn now resolves the agent's model against the provider catalog once -
+     * {@code ProviderModelCatalogService#findModel} pays a provider-catalog count (which warms the
+     * lazily-populated cache when empty) and then the model row itself, buying
+     * attachment/audio/video support and the configured context window for the turn. The remaining
+     * connection is the runtime-settings resolution's warm read the agent projection does not
+     * cover.
      */
-    private static final long BUDGET_TURN_CONNECTIONS = 17;
+    private static final long BUDGET_TURN_CONNECTIONS = 19;
 
-    private static final long BUDGET_TURN_STATEMENTS = 18;
+    private static final long BUDGET_TURN_STATEMENTS = 20;
 }
