@@ -132,16 +132,30 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+  </dependencies>
+  <profiles>
     <!-- The end-to-end approval harness (com.agenticai.core.agents.e2e) lives in agents-tools'
          test classes; the parked-job resume test runs the real job execution over it. Test scope
          only, and agents-jobs already depends on agents-tools through agents-browser, so no new
-         module edge appears in the main dependency graph. -->
-    <dependency>
-      <groupId>com.agenticai</groupId>
-      <artifactId>agents-tools</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+         module edge appears in the main dependency graph. In a profile that is off when tests are
+         skipped (-Dmaven.test.skip=true, as the core image build does): agents-tools then makes no
+         test jar, and a test-scope dependency on it would fail dependency resolution. -->
+    <profile>
+      <id>e2e-harness</id>
+      <activation>
+        <property>
+          <name>!maven.test.skip</name>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.agenticai</groupId>
+          <artifactId>agents-tools</artifactId>
+          <version>${project.version}</version>
+          <type>test-jar</type>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 </project>

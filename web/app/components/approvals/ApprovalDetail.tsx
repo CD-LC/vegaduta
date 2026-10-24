@@ -89,14 +89,17 @@ export default function ApprovalDetail({
           <CardTitle className="min-w-0 break-words text-base">{actionLabel(item.actionType, t)}</CardTitle>
           <ApprovalStatusBadge status={item.status} decidedBy={item.decidedBy} />
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="break-words text-sm text-muted-foreground">
           {t("requestedByRow", { name: item.requestedBy || t("unknownActor") })} &middot; {fmtTime(item.createdAt)}
         </p>
         <ExpiryCountdown item={item} ttlSeconds={ttlSeconds} showWhenNever />
         {ids && (
-          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground" data-testid="approval-links">
+          <p
+            className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground"
+            data-testid="approval-links"
+          >
             <span>
-              {q("sessionLabel")} <code className="font-mono">{ids.sessionId}</code>
+              {q("sessionLabel")} <code className="break-all font-mono">{ids.sessionId}</code>
             </span>
             <a
               className="font-medium text-foreground underline underline-offset-2"
@@ -121,19 +124,19 @@ export default function ApprovalDetail({
             <p className="text-sm">{q("whyGated", { tool })}</p>
           ) : (
             <p className="text-sm">
-              {t("policyTriggeredPrefix")} <code className="font-mono text-xs">{item.actionType}</code>{" "}
+              {t("policyTriggeredPrefix")} <code className="break-all font-mono text-xs">{item.actionType}</code>{" "}
               {t("policyTriggeredSuffix")}
             </p>
           )}
         </Section>
 
         <Section label={t("whyAgentAskedLabel")}>
-          <p className="text-sm">{item.summary || t("noSummaryRecorded")}</p>
+          <p className="break-words text-sm">{item.summary || t("noSummaryRecorded")}</p>
         </Section>
 
         {pay && (
           <Section label={t("paymentContextLabel")}>
-            <div className="grid gap-1 text-sm">
+            <div className="grid gap-1 break-words text-sm">
               <div>
                 <strong>{inr(pay.amountPaise)}</strong> {pay.currency && pay.currency !== "INR" ? pay.currency : ""} ·{" "}
                 {t("paymentTypeRow", { type: pay.type || "?" })}
@@ -154,7 +157,7 @@ export default function ApprovalDetail({
 
         {proposal && (
           <Section label={t("proposalGoalLabel")}>
-            <p className="text-sm">{proposal.goal}</p>
+            <p className="break-words text-sm">{proposal.goal}</p>
           </Section>
         )}
 
@@ -172,14 +175,14 @@ export default function ApprovalDetail({
 
         {item.rejectionReason && (
           <Alert variant="error">
-            <AlertDescription>
+            <AlertDescription className="break-words">
               {expired ? q("expiredReasonPrefix") : t("reasonPrefix")} {item.rejectionReason}
             </AlertDescription>
           </Alert>
         )}
         {item.executionError && (
           <Alert variant="error">
-            <AlertDescription>
+            <AlertDescription className="break-words">
               {t("executionErrorPrefix")} {item.executionError}
             </AlertDescription>
           </Alert>
@@ -254,20 +257,23 @@ export default function ApprovalDetail({
           <ol className="grid gap-1.5 text-sm">
             <li className="flex gap-3">
               <time className="w-40 shrink-0 text-xs text-muted-foreground">{fmtTime(item.createdAt)}</time>
-              <span>{t("requestedByRow", { name: item.requestedBy || t("unknownActor") })}</span>
+              <span className="min-w-0 break-words">
+                {t("requestedByRow", { name: item.requestedBy || t("unknownActor") })}
+              </span>
             </li>
             {item.decidedAt && (
               <li className="flex gap-3">
                 <time className="w-40 shrink-0 text-xs text-muted-foreground">{fmtTime(item.decidedAt)}</time>
-                <span>
-                  {expired ? q("auditExpired") : item.status.toLowerCase()} {t("byActorSuffix", { name: item.decidedBy || t("unknownActor") })}
+                <span className="min-w-0 break-words">
+                  {expired ? q("auditExpired") : item.status.toLowerCase()}{" "}
+                  {t("byActorSuffix", { name: item.decidedBy || t("unknownActor") })}
                 </span>
               </li>
             )}
             {retries > 0 && (
               <li className="flex gap-3">
                 <span className="w-40 shrink-0 text-xs text-muted-foreground">&mdash;</span>
-                <span>
+                <span className="min-w-0 break-words">
                   {t("retriedLabel", { count: retries, plural: retries === 1 ? "" : "s" })}
                   {item.nextRetryAt ? t("nextAttemptSuffix", { time: fmtTime(item.nextRetryAt) }) : ""}
                 </span>

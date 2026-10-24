@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "../../lib/i18n";
 import { api } from "../../lib/api";
 import type { PromptHistoryEntry, PromptScopeTarget } from "../../lib/api/promptRegistry";
@@ -11,6 +11,8 @@ import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Label } from "../../components/ui/label";
+import PaginationControls from "../../components/PaginationControls";
+import { usePagination } from "../../lib/usePagination";
 
 const DATE = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
 
@@ -49,6 +51,7 @@ export default function PromptHistory({
   const [busy, setBusy] = useState<number | null>(null);
   const [ack, setAck] = useState(false);
   const { scope, agentId, locale } = target;
+  const pg = usePagination(useMemo(() => entries ?? [], [entries]));
 
   const load = useCallback(async () => {
     try {
@@ -76,11 +79,15 @@ export default function PromptHistory({
     setBusy(entry.version);
     setError(null);
     try {
-      await api.restorePromptVersion(promptKey, { scope, agentId, locale }, {
-        toVersion: entry.version,
-        acknowledgeRisk: ack,
-        reason: t("regRestoreReason", { version: entry.version }),
-      });
+      await api.restorePromptVersion(
+        promptKey,
+        { scope, agentId, locale },
+        {
+          toVersion: entry.version,
+          acknowledgeRisk: ack,
+          reason: t("regRestoreReason", { version: entry.version }),
+        }
+      );
       await onRestored();
       await load();
     } catch (e: unknown) {
@@ -113,9 +120,10 @@ export default function PromptHistory({
         </div>
       )}
       <ol className="flex flex-col gap-2">
-        {(entries ?? []).map((e, index) => {
+        {pg.pageItems.map((e, index) => {
           const open = diffOpen.has(e.id);
-          const isCurrent = index === 0 && e.action !== "REVERT";
+          // "Current" is the newest entry overall - only page 1 holds it.
+          const isCurrent = pg.page === 1 && index === 0 && e.action !== "REVERT";
           const rows = open ? diffLines(e.previousText, e.text) : [];
           return (
             <li key={e.id} className="rounded-md border border-border bg-background/50 p-2 text-xs">
@@ -130,13 +138,7 @@ export default function PromptHistory({
               </div>
               {e.reason && <p className="mt-1 text-muted-foreground">{t("regReason", { reason: e.reason })}</p>}
               <div className="mt-1.5 flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  aria-expanded={open}
-                  onClick={() => toggleDiff(e.id)}
-                >
+                <Button type="button" size="sm" variant="ghost" aria-expanded={open} onClick={() => toggleDiff(e.id)}>
                   {open ? t("regHideDiff", { version: e.version }) : t("regShowDiff", { version: e.version })}
                 </Button>
                 {canEdit && e.text && !isCurrent && (
@@ -182,6 +184,14 @@ export default function PromptHistory({
           );
         })}
       </ol>
+      <PaginationControls
+        page={pg.page}
+        totalPages={pg.totalPages}
+        totalItems={pg.totalItems}
+        pageSize={pg.pageSize}
+        onPageChange={pg.setPage}
+        onPageSizeChange={pg.setPageSize}
+      />
     </div>
   );
 }

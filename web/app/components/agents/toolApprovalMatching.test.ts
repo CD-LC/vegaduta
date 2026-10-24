@@ -63,6 +63,11 @@ describe("toolNameOf", () => {
     expect(toolNameOf(row({ summary: "Pay vendor", actionType: "payment" }))).toBe("Pay vendor");
     expect(toolNameOf(row({ summary: null, actionType: null }))).toBe("tool");
   });
+
+  it("drops the annotations core appends to a summary, so queued calls to one tool read as that tool", () => {
+    expect(toolNameOf(row({ summary: "Tool call: web_search [queued behind: web_search]" }))).toBe("web_search");
+    expect(toolNameOf(row({ summary: "Tool call: send_email [flagged: tainted turn]" }))).toBe("send_email");
+  });
 });
 
 describe("approvalArgsPreview", () => {

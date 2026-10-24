@@ -173,7 +173,7 @@ public class AgentService {
     }
 
     /**
-     * The agent's own runtime-limit overrides (V662) - "projection, not the full entity", read once per
+     * The agent's own runtime-limit overrides (V671) - "projection, not the full entity", read once per
      * turn by the runtime-settings resolver. Empty when nothing is overridden.
      */
     public com.agenticai.core.agents.runtime.RuntimeLimits getRuntimeLimits(UUID agentId) {

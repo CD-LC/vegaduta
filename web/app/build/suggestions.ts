@@ -106,6 +106,39 @@ export function parseDiff(
   return { lines, truncated };
 }
 
+/**
+ * Per-file +/- line counts from a unified diff — the "where the change is"
+ * answer rendered next to each changed file in a chat result. Handles the
+ * shapes the generate diff produces: git-style `+++ b/path` headers, plain
+ * `+++ path`, and `diff --git a/p b/p` when the +++ header is missing.
+ */
+export function diffFileStats(diff: string): { path: string; adds: number; dels: number }[] {
+  const out: { path: string; adds: number; dels: number }[] = [];
+  const raw = String(diff || "").replace(/\r\n/g, "\n").split("\n");
+  let cur: { path: string; adds: number; dels: number } | null = null;
+  const push = () => {
+    if (cur && cur.path) out.push(cur);
+    cur = null;
+  };
+  for (const line of raw) {
+    if (line.startsWith("diff --git ")) {
+      push();
+      continue;
+    }
+    if (line.startsWith("+++ ")) {
+      push();
+      const p = line.slice(4).trim().replace(/^b\//, "");
+      cur = p === "/dev/null" ? null : { path: p, adds: 0, dels: 0 };
+      continue;
+    }
+    if (!cur) continue;
+    if (line.startsWith("+")) cur.adds += 1;
+    else if (line.startsWith("-")) cur.dels += 1;
+  }
+  push();
+  return out;
+}
+
 /** Web Speech API language tag from <html lang>. Hindi dictates as hi-IN. */
 export function speechLang(lang: string | null | undefined): string {
   const l = String(lang || "").trim().replace("_", "-");

@@ -14,7 +14,7 @@ import { useTranslations } from "../lib/i18n";
 export default function AssistantPage() {
   const t = useTranslations("assistant");
   return (
-    <AppShell title={t("title")} eyebrow={t("eyebrow")} fillViewport collapsibleRail>
+    <AppShell title={t("title")} eyebrow={t("eyebrow")} fillViewport collapsibleRail quietStatus>
       {/* useSearchParams in the pane needs a Suspense boundary (same as /agents, /jobs did). */}
       <Suspense fallback={null}>
         <AssistantPane />

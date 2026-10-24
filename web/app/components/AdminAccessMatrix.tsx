@@ -3,7 +3,9 @@
 import { useMemo, useState } from "react";
 import { api } from "../lib/api";
 import { useTranslations } from "../lib/i18n";
+import { usePagination } from "../lib/usePagination";
 import type { AdminUser } from "./AdminUsersPanel";
+import PaginationControls from "./PaginationControls";
 
 // The full granular catalog, same hand-maintained mirror as
 // AdminUsersPanel's PERMISSION_GROUPS - rendered as matrix COLUMNS, so the
@@ -12,7 +14,10 @@ import type { AdminUser } from "./AdminUsersPanel";
 const MATRIX_GROUPS: { key: string; permissions: string[] }[] = [
   { key: "permGroupPeople", permissions: ["MANAGE_USERS"] },
   { key: "permGroupMoney", permissions: ["MANAGE_BILLING", "VIEW_USAGE"] },
-  { key: "permGroupPlatform", permissions: ["MANAGE_INTEGRATIONS", "MANAGE_TENANT_SETTINGS", "MANAGE_CHANNELS", "MANAGE_LEADS"] },
+  {
+    key: "permGroupPlatform",
+    permissions: ["MANAGE_INTEGRATIONS", "MANAGE_TENANT_SETTINGS", "MANAGE_CHANNELS", "MANAGE_LEADS"],
+  },
   {
     key: "permGroupBuild",
     permissions: ["MANAGE_WORKFLOWS_ADMIN", "MANAGE_AGENTS", "MANAGE_TOOLS", "MANAGE_GUARDRAILS", "MANAGE_TEMPLATES"],
@@ -75,10 +80,8 @@ export default function AdminAccessMatrix({
     }
   }
 
-  const sorted = useMemo(
-    () => [...users].sort((a, b) => (a.username || "").localeCompare(b.username || "")),
-    [users]
-  );
+  const sorted = useMemo(() => [...users].sort((a, b) => (a.username || "").localeCompare(b.username || "")), [users]);
+  const pg = usePagination(sorted);
 
   return (
     <div className="ax-mnt-section" style={{ marginTop: 18 }}>
@@ -88,12 +91,25 @@ export default function AdminAccessMatrix({
           <div className="ax-mnt-sub">{t("matrixHint")}</div>
         </div>
       </div>
-      {error && <div className="ax-kb-error" role="alert">{error}</div>}
+      {error && (
+        <div className="ax-kb-error" role="alert">
+          {error}
+        </div>
+      )}
       <div style={{ overflowX: "auto" }}>
         <table style={{ borderCollapse: "collapse", fontSize: "0.78rem", minWidth: "100%" }}>
           <thead>
             <tr>
-              <th style={{ textAlign: "left", padding: "6px 10px", position: "sticky", left: 0, background: "var(--surface-card)", zIndex: 1 }}>
+              <th
+                style={{
+                  textAlign: "left",
+                  padding: "6px 10px",
+                  position: "sticky",
+                  left: 0,
+                  background: "var(--surface-card)",
+                  zIndex: 1,
+                }}
+              >
                 {t("memberColumn")}
               </th>
               {MATRIX_GROUPS.map((group) => (
@@ -128,7 +144,7 @@ export default function AdminAccessMatrix({
             </tr>
           </thead>
           <tbody>
-            {sorted.map((user) => {
+            {pg.pageItems.map((user) => {
               const held = new Set(user.permissions || []);
               const self = user.id === currentUserId;
               return (
@@ -143,7 +159,9 @@ export default function AdminAccessMatrix({
                     }}
                   >
                     <div style={{ fontWeight: 600 }}>{user.firstName || user.username}</div>
-                    <div className="ax-mnt-sub" style={{ fontSize: "0.7rem" }}>{user.email || user.username}</div>
+                    <div className="ax-mnt-sub" style={{ fontSize: "0.7rem" }}>
+                      {user.email || user.username}
+                    </div>
                   </td>
                   {MATRIX_COLUMNS.map((permission) => {
                     const granted = held.has(permission);
@@ -169,6 +187,14 @@ export default function AdminAccessMatrix({
           </tbody>
         </table>
       </div>
+      <PaginationControls
+        page={pg.page}
+        totalPages={pg.totalPages}
+        totalItems={pg.totalItems}
+        pageSize={pg.pageSize}
+        onPageChange={pg.setPage}
+        onPageSizeChange={pg.setPageSize}
+      />
     </div>
   );
 }

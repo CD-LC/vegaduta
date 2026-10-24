@@ -4137,6 +4137,11 @@ app:
       failed-note: "[approved action '{tool}' failed: {failure}]"
       completed-no-output-text: "The action ran and returned no output."
       max-note-result-chars: ${APP_APPROVALS_CONTINUATION_MAX_NOTE_RESULT_CHARS:500}
+      # The note is stored as a platform tool record on an assistant turn with no text: the model reads it on later turns,
+      # the person's transcript never shows it. The record's arguments are cut to this many characters (at most 500)...
+      max-note-arguments-chars: ${APP_APPROVALS_CONTINUATION_MAX_NOTE_ARGUMENTS_CHARS:160}
+      # ...and its approval detail names the request and who decided it ({requestId}, {approver}).
+      note-approval: "{requestId}, decided by {approver}"
       other-pending-header: |-
         Other actions of this same task are still waiting for a human decision. Do not request them again:
       completed-message: |-

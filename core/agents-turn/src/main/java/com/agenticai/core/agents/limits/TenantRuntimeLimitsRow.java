@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
 
-/** The tenant's runtime-limit defaults for all its agents (migration V662); at most one row, id 1. */
+/** The tenant's runtime-limit defaults for all its agents (migration V671); at most one row, id 1. */
 @Entity
 @Table(name = "tenant_runtime_limits")
 public class TenantRuntimeLimitsRow {

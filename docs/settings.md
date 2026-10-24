@@ -57,7 +57,7 @@ one gets a `RESET` row in the history (reason `agent deleted`, actor `system:age
 ran with stays complete.
 
 The seven runtime limits (`agent.limits.*`) are stored where they always were (`tenant_runtime_limits` and the `agent` table,
-V662) and `/api/agents/{id}/runtime-limits` and `/api/agent-runtime/limits` keep working: a write through either is visible in
+V671) and `/api/agents/{id}/runtime-limits` and `/api/agent-runtime/limits` keep working: a write through either is visible in
 the other and to the runtime. Only their history rows live in the new table.
 
 ## Console: Admin > Runtime settings

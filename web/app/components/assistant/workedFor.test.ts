@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { formatDuration, isVisibleStep, liveStatusKey, skippedReason, summarizeWork } from "./workedFor";
+import {
+  formatDuration,
+  humanizeTool,
+  isVisibleStep,
+  liveStatusKey,
+  siteOf,
+  skippedReason,
+  summarizeWork,
+  toolTarget,
+} from "./workedFor";
 
 describe("summarizeWork", () => {
   const steps = [
@@ -79,5 +88,35 @@ describe("liveStatusKey", () => {
         { type: "heartbeat", id: 2 },
       ])
     ).toEqual({ key: "analyzing", thinking: "x" });
+  });
+
+  it("names what an open tool call is about when its arguments say", () => {
+    expect(liveStatusKey([{ type: "tool_call", id: 1, tool: "web_search", args: '{"query":"tide times goa"}' }])).toEqual(
+      { key: "tool", tool: "web_search", target: "tide times goa" }
+    );
+  });
+});
+
+describe("toolTarget / humanizeTool / siteOf", () => {
+  it("reads the query, URL, path or command out of JSON arguments", () => {
+    expect(toolTarget('{"q":"  weather\\n bengaluru "}')).toBe("weather bengaluru");
+    expect(toolTarget('{"url":"https://example.com/a","depth":2}')).toBe("https://example.com/a");
+    expect(toolTarget('{"command":"ls -la"}')).toBe("ls -la");
+    expect(toolTarget(`{"query":"${"x".repeat(80)}"}`, 10)).toBe("xxxxxxxxx…");
+  });
+
+  it("says nothing for empty, capped or plain-text arguments", () => {
+    expect(toolTarget(undefined)).toBeNull();
+    expect(toolTarget('{"query":"cut off')).toBeNull();
+    expect(toolTarget("plain words")).toBeNull();
+    expect(toolTarget('{"limit":3}')).toBeNull();
+  });
+
+  it("makes tool names and URLs readable", () => {
+    expect(humanizeTool("web_search")).toBe("Web search");
+    expect(humanizeTool("mcp_google.calendar-list")).toBe("Google calendar list");
+    expect(humanizeTool(undefined)).toBe("Tool");
+    expect(siteOf("https://www.example.org/x?y=1")).toBe("example.org");
+    expect(siteOf("not a url")).toBe("not a url");
   });
 });
