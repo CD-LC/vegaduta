@@ -41,7 +41,7 @@ ComparisonVerdict = Literal["VARIANT_BETTER", "BASELINE_BETTER", "CANNOT_TELL", 
 
 ConsentLedger_Decision = Literal["PROMPTED", "GRANTED", "DECLINED", "WITHDRAWN"]
 
-CustomCodeToolLanguage = Literal["JAVA", "PYTHON"]
+CustomCodeToolLanguage = Literal["JAVA", "PYTHON", "JAVASCRIPT", "TYPESCRIPT"]
 
 CustomCodeToolStatus = Literal["DRAFT", "VALIDATED", "REJECTED"]
 
