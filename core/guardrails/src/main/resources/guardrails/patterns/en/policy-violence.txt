@@ -1,0 +1,2 @@
+# Violence terms (PolicyViolationGuardrail). English set; other locales add to it.
+(?i)\b(kill|murder|shoot|bomb|assault|attack|stab|rape|torture|execute)\b

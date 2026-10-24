@@ -1,105 +1,65 @@
 package com.agenticai.core.agents.turn;
 
-import com.agenticai.core.security.TenantContext;
-import java.time.Duration;
+import com.agenticai.core.prompts.PromptContext;
+import com.agenticai.core.prompts.PromptResolver;
 import java.time.LocalDate;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.LongSupplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.UUID;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Per-tenant prompt-directive overrides for the chat hot path. A turn calls {@link #forToday} once;
- * the answer comes from an in-process cache (TTL {@value #TTL_SECONDS}s, evicted explicitly on
- * every write), so no turn waits on the database unless the cache is cold. The tenant is the one on
- * the calling thread ({@link TenantContext}); with none, or with no {@link Store} bean, or if the
- * load fails, the answer is {@link ResolvedDirectives#DEFAULTS}, i.e. today's built-in prompt.
+ * The chat path's door to the prompt registry for the standing directives. A turn calls {@link
+ * #forTurn} once; the answer reads through the registry's {@link PromptResolver}, which caches the
+ * stored overrides in process (platform, tenant and agent scope; TTL {@code
+ * app.prompts.cache.ttl}, evicted on every local write), so no turn waits on the database unless
+ * the cache is cold. With no {@link PromptResolver} bean, or if a lookup fails, the answer is the
+ * shipped default text: today's built-in prompt.
  */
 @Component
 public class PromptDirectiveSettings {
 
-    static final long TTL_SECONDS = 30;
-    private static final long FAILURE_TTL_SECONDS = 5;
-    private static final int MAX_TENANTS = 10_000;
-    private static final Logger log = LoggerFactory.getLogger(PromptDirectiveSettings.class);
-
-    /** Where a tenant's stored settings come from; implemented next to the table. */
-    public interface Store {
-        /** Every stored setting of the current tenant (directive key to setting). */
-        Map<String, ResolvedDirectives.Setting> loadAllForCurrentTenant();
-    }
-
-    private record Cached(Map<String, ResolvedDirectives.Setting> settings, long expiresAtNanos) {}
-
-    private final ObjectProvider<Store> store;
-    private final LongSupplier nanoClock;
-    private final ConcurrentHashMap<String, Cached> cache = new ConcurrentHashMap<>();
+    private final ObjectProvider<PromptResolver> resolver;
 
     @Autowired
-    public PromptDirectiveSettings(ObjectProvider<Store> store) {
-        this.store = store;
-        this.nanoClock = System::nanoTime;
+    public PromptDirectiveSettings(ObjectProvider<PromptResolver> resolver) {
+        this.resolver = resolver;
     }
 
-    private PromptDirectiveSettings(ObjectProvider<Store> store, LongSupplier nanoClock) {
-        this.store = store;
-        this.nanoClock = nanoClock;
-    }
-
-    /** No store: every turn gets the built-in prompt. The default of hand-built fixtures. */
+    /** No resolver bean: every turn gets the built-in prompt. The default of hand-built fixtures. */
     static PromptDirectiveSettings defaultsOnly() {
-        return new PromptDirectiveSettings(null, System::nanoTime);
+        return new PromptDirectiveSettings(null);
     }
 
-    /** Test seam: a store given directly and a controllable clock. */
-    static PromptDirectiveSettings forTest(Store store, LongSupplier nanoClock) {
+    /** Test seam: a resolver given directly. */
+    static PromptDirectiveSettings forTest(PromptResolver resolver) {
         return new PromptDirectiveSettings(
                 new org.springframework.beans.factory.support.StaticListableBeanFactory(
-                                Map.of("store", store))
-                        .getBeanProvider(Store.class),
-                nanoClock);
+                                java.util.Map.of("resolver", resolver))
+                        .getBeanProvider(PromptResolver.class));
     }
 
-    /** The current tenant's directives for a turn on {@code today} (UTC). Never throws. */
+    /** The current tenant's directives for a turn on {@code today} (UTC), no agent. Never throws. */
     public ResolvedDirectives forToday(LocalDate today) {
-        String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
-        if (tenantId == null) {
-            return ResolvedDirectives.DEFAULTS;
-        }
-        long now = nanoClock.getAsLong();
-        Cached cached = cache.get(tenantId);
-        if (cached == null || now - cached.expiresAtNanos() >= 0) {
-            cached = load(tenantId, now);
-        }
-        return cached.settings().isEmpty()
-                ? ResolvedDirectives.DEFAULTS
-                : new ResolvedDirectives(cached.settings(), today);
+        return forTurn(today, null);
     }
 
-    private Cached load(String tenantId, long now) {
-        Store s = store == null ? null : store.getIfAvailable();
-        Cached fresh;
-        try {
-            Map<String, ResolvedDirectives.Setting> loaded =
-                    s == null ? Map.of() : Map.copyOf(s.loadAllForCurrentTenant());
-            fresh = new Cached(loaded, now + Duration.ofSeconds(TTL_SECONDS).toNanos());
-        } catch (RuntimeException e) {
-            log.warn("Prompt directive settings not loaded for a tenant; using built-in defaults", e);
-            fresh = new Cached(Map.of(), now + Duration.ofSeconds(FAILURE_TTL_SECONDS).toNanos());
+    /**
+     * The directives for {@code agentId} (null = no agent-scope override) on {@code today} (UTC) in
+     * the current tenant. Never throws.
+     */
+    public ResolvedDirectives forTurn(LocalDate today, UUID agentId) {
+        PromptResolver r = resolver == null ? null : resolver.getIfAvailable();
+        if (r == null) {
+            r = PromptResolver.defaultsOnly();
         }
-        if (cache.size() >= MAX_TENANTS) {
-            cache.clear();
+        PromptContext ctx = PromptContext.none();
+        if (agentId != null) {
+            ctx = ctx.withAgent(agentId);
         }
-        cache.put(tenantId, fresh);
-        return fresh;
-    }
-
-    /** Drops the current tenant's cached settings; call after every write. */
-    public void evictCurrentTenant() {
-        TenantContext.current().ifPresent(c -> cache.remove(c.getTenantId()));
+        if (today != null) {
+            ctx = ctx.withVariable("date", today.toString());
+        }
+        return new ResolvedDirectives(r, ctx);
     }
 }

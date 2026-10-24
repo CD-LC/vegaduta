@@ -20,6 +20,12 @@ build. The reasoning, and what is deliberately not split, is in
 
 With no shape profile (the Compose default) one process runs everything. Nothing below applies to it.
 
+On the full Compose stack the `jobs` profile adds `core-jobs`, but Compose cannot see which profiles are active, so the
+API only gets `shape-api` when you set `CORE_SHAPE_PROFILE=,shape-api` next to it (in `deploy/compose/.env`). Without
+that the API keeps running every sweep and poller beside `core-jobs` (advisory locks keep each tick single-winner, so
+nothing runs twice, but the API JVM carries the load the jobs pod was added to take). Set it only together with the
+`jobs` profile: with `shape-api` and no jobs pod nothing runs the background work.
+
 The chat hot path never leaves the API pod. Pools and shapes split background work only.
 
 ## Who runs which scheduled bean
@@ -100,7 +106,7 @@ that ticks in the API shape.
 
 ### Also run in the API shape
 
-These tick in the API pod as well. <!-- gen-shapes:begin alsolocked -->All 20<!-- gen-shapes:end alsolocked --> take the Postgres advisory lock, so one pod wins each tick; they
+These tick in the API pod as well. <!-- gen-shapes:begin alsolocked -->All 22<!-- gen-shapes:end alsolocked --> take the Postgres advisory lock, so one pod wins each tick; they
 still borrow a pinned database connection in a chat pod, and each can move to the jobs family once its owner
 confirms it depends on no API-pod state. `AbuseSignalService` is the exception: it writes into the API JVM's
 throttle map, which the API's request filters read, so it stays on the API pods.
@@ -111,6 +117,7 @@ throttle map, which the API's request filters read, so it stays on the API pods.
 | `AbuseSignalService` | platform | yes | - | - | advisory lock |
 | `AgentSentinelSweep` | agents-jobs | yes | yes | - | advisory lock |
 | `AgentSupervisorSweep` | app | yes | yes | - | advisory lock |
+| `ApprovalExpiryJob` | approval | yes | yes | - | advisory lock |
 | `BriefTrustWatcher` | brief | yes | yes | - | advisory lock |
 | `ChatBranchRetentionPurge` | agents-turn | yes | yes | - | advisory lock |
 | `CompGrantReminderJob` | tenancy | yes | yes, unless its pool is on | billing | advisory lock |
@@ -125,6 +132,7 @@ throttle map, which the API's request filters read, so it stays on the API pods.
 | `StalePendingUpgradeCleanup` | tenancy | yes | yes, unless its pool is on | billing | advisory lock |
 | `StepJournalRetentionPurge` | agents-jobs | yes | yes | - | advisory lock |
 | `StudyReviewReminderSweep` | app | yes | yes | - | advisory lock |
+| `TurnJournalRetentionPurge` | agents-turn | yes | yes | - | advisory lock |
 | `VectorSchemaInitializer` | knowledge | yes | yes | - | advisory lock |
 | `WorkflowPollTriggerTicker` | workflow | yes | yes | - | advisory lock |
 | `WorkflowWaitWakeJob` | workflow | yes | yes | - | advisory lock |

@@ -9,6 +9,7 @@ import JudgeTrustBadge from "../JudgeTrustBadge";
 import TrajectoryRunDiffs from "../TrajectoryRunDiffs";
 import { LIVE_STATUSES, deltaLabel, pct, statusBadge, traceLink, verdictBadge } from "./evalBadges";
 import type { PageState } from "./pageState";
+import { useTranslations } from "../../../lib/i18n";
 
 /** Run history for one expanded dataset, with per-run case results. */
 export default function RunHistory({
@@ -24,6 +25,7 @@ export default function RunHistory({
   onDownloadJunit,
   onDownloadRunJsonl,
   onCancelRun,
+  simulatedTools = [],
 }: {
   agentId: string | null;
   datasetId: string;
@@ -38,7 +40,22 @@ export default function RunHistory({
   onDownloadJunit: (runId: string) => void;
   onDownloadRunJsonl: (runId: string) => void;
   onCancelRun: (runId: string) => void;
+  /** The tools the sandbox simulated in the open run (from its detail); empty for a quick run or when none was. */
+  simulatedTools?: string[];
 }) {
+  const t = useTranslations("evalControls");
+  // The turn records OK, FAILED, NOT_RUN, AWAITING_APPROVAL, REPLAYED or SIMULATED; an unknown value is shown as it came.
+  const toolStatusLabel = (status: string): string => {
+    const known: Record<string, string> = {
+      OK: "toolStatusOk",
+      FAILED: "toolStatusFailed",
+      NOT_RUN: "toolStatusNotRun",
+      AWAITING_APPROVAL: "toolStatusAwaitingApproval",
+      REPLAYED: "toolStatusReplayed",
+      SIMULATED: "toolStatusSimulated",
+    };
+    return known[status] ? t(known[status]) : status;
+  };
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-semibold text-foreground">Run history</h3>
@@ -76,6 +93,19 @@ export default function RunHistory({
               <JudgeTrustBadge info={run.judgeCalibration} />
               {(run.repeats ?? 1) > 1 && <span className="text-xs text-muted-foreground">×{run.repeats} reps</span>}
               {run.strictJudge && <span className="text-xs text-muted-foreground">strict judge</span>}
+              {run.mode && (
+                <Badge
+                  variant={run.mode === "FULL" ? "accent" : "outline"}
+                  title={t(run.mode === "FULL" ? "runModeFullTitle" : "runModeQuickTitle")}
+                >
+                  {t(run.mode === "FULL" ? "badgeFull" : "badgeQuick")}
+                </Badge>
+              )}
+              {run.autoApproved && (
+                <Badge variant="outline" title={t("runAutoApprovedTitle")}>
+                  {t("runAutoApproved")}
+                </Badge>
+              )}
               {run.costUsd != null && <span className="text-xs text-muted-foreground">${run.costUsd}</span>}
               {traceLink(run.langfuseTraceUrl)}
               {!LIVE_STATUSES.includes(run.status) && (run.scoredCaseCount > 0 || run.erroredCaseCount > 0) && (
@@ -117,6 +147,11 @@ export default function RunHistory({
             {runDetailId === run.id && (
               <div className="space-y-2 border-t border-border p-3">
                 {caseResults === null && <p className="text-sm text-muted-foreground">Loading case results…</p>}
+                {simulatedTools.length > 0 && (
+                  <p className="text-xs text-muted-foreground" data-testid="run-simulated-tools">
+                    {t("runSimulatedTools", { tools: simulatedTools.join(", ") })}
+                  </p>
+                )}
                 {caseResultsPagination.pageItems.map((r) => (
                   <div key={r.id} className="rounded-md border border-border/60 p-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -143,6 +178,16 @@ export default function RunHistory({
                       {traceLink(r.langfuseTraceUrl)}
                     </div>
                     <p className="mt-1 text-sm text-foreground">{r.userMessage}</p>
+                    {r.toolCalls?.length > 0 && (
+                      <ul className="mt-1 flex flex-wrap gap-2" aria-label={t("toolCallsLabel")}>
+                        {r.toolCalls.map((call, i) => (
+                          <li key={i} className="text-xs text-muted-foreground">
+                            {call.toolName ?? "?"}
+                            {call.status ? ` (${toolStatusLabel(call.status)})` : ""}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     {r.agentResponse && (
                       <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{r.agentResponse}</p>
                     )}

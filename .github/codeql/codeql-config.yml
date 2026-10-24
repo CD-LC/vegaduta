@@ -1,0 +1,25 @@
+# CodeQL configuration for .github/workflows/codeql.yml (java-kotlin,
+# javascript-typescript, python).
+#
+# paths-ignore drops test, tooling and sample code from the analysis, so code
+# scanning reports on what ships: the core services, the web console and the
+# Python services. It is a per-file filter on what CodeQL analyses and reports;
+# it is NOT the workflow-level `paths-ignore` that codeql.yml deliberately
+# avoids (that one would stop the required check reporting on docs-only pull
+# requests). The check still runs on every pull request.
+#
+# Query suite: stays security-extended, set by the `queries` input of
+# codeql.yml's init step. Do not add `queries:` here without `uses:` entries
+# for that suite, or the two would no longer say the same thing.
+name: vegaduta-codeql
+
+paths-ignore:
+  - tests/**
+  - web/e2e/**
+  - "**/src/test/**"
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - docs/platform-documentation/assets/**
+  - web/scripts/**
+  - examples/**

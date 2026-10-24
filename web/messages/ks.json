@@ -61,7 +61,9 @@
     "railBrand": "برانڈِنگ",
     "railLearn": "ہیٚچھُن",
     "railGuard": "حِفاظَتی حَد",
-    "brandIdentityAriaLabel": "VegaDūta برانڈٕچ شَناخت"
+    "brandIdentityAriaLabel": "VegaDūta برانڈٕچ شَناخت",
+    "railRuntimeSettings": "رَنٹائم سیٹنگ",
+    "railControls": "بہٕ کیا کنٹرول کرٕو...؟"
   },
   "languageSwitcher": {
     "label": "زَبان",
@@ -754,7 +756,142 @@
     "edgeTier0Badge": "ڈیوائسس پؠٹھ · کرومس منٛزٕ بناونہٕ آمُت",
     "edgeTier0BadgeTitle": "یُس جواب چھُ کروم کس بلٹ اِن ماڈلن (جیمنی نینو) دیتمُت - تیز تہٕ مکمل پرایویٹ، مگر صرف چیٹ خٲطرٕ: یہِ چھُنہٕ ٹول اِستعمال کٔرِتھ ہیکان تہٕ پیچیدٕ چیزن پؠٹھ چھُ کم درست آسِتھ ہیکان۔ پرٛتھ کُنہِ پلانَس پؠٹھ مفت۔",
     "edgeTier1Badge": "ڈیوائسس پؠٹھ · مُقٲمی ماڈل",
-    "edgeTier1BadgeTitle": "یُس جواب چھُ اَکھ ڈاون لوڈ کرنہٕ آمژِ ڈیوائس ماڈلن دیتمُت - پرایویٹ، تہٕ یہِ ہیٚکہِ ٹول اِستعمال کٔرِتھ (یَتھ پٲٹھؠ اَکھ ہوسٹڈ وار ہیٚکہِ محفوظ ٹول اِستعمال کٔرِتھ)۔ تَتھ ووجوٗد چھُ یہِ ہوسٹڈ پولس کھوتہٕ واریاہ لۄکُٹ ماڈل، یمہٕ سٟتؠ چھُ یہِ پیچیدٕ درخواستن پؠٹھ کم درست آسِتھ ہیکان۔ پرٛتھ کُنہِ پلانَس پؠٹھ مفت۔"
+    "edgeTier1BadgeTitle": "یُس جواب چھُ اَکھ ڈاون لوڈ کرنہٕ آمژِ ڈیوائس ماڈلن دیتمُت - پرایویٹ، تہٕ یہِ ہیٚکہِ ٹول اِستعمال کٔرِتھ (یَتھ پٲٹھؠ اَکھ ہوسٹڈ وار ہیٚکہِ محفوظ ٹول اِستعمال کٔرِتھ)۔ تَتھ ووجوٗد چھُ یہِ ہوسٹڈ پولس کھوتہٕ واریاہ لۄکُٹ ماڈل، یمہٕ سٟتؠ چھُ یہِ پیچیدٕ درخواستن پؠٹھ کم درست آسِتھ ہیکان۔ پرٛتھ کُنہِ پلانَس پؠٹھ مفت۔",
+    "viewTurn": "ٹرن وچھو",
+    "viewTurnTitle": "یمہ گفتگوک ٹرنن ہند قدم بہ قدم ٹائم لائن کھولو",
+    "headerRunning": "اکھ ٹرن چھُ چلان",
+    "headerReady": "تیار",
+    "clearContext": "سیاق مٹاو",
+    "clearContextTitle": "نوو گفتگو شروع کٔرو۔ یہ چھُ یمہ چیٹک ڈیوائس تہٕ سرور پاسہ سیشن میموری مٹاوان۔",
+    "stopRun": "یہ جواب بند کٔرو",
+    "fallbackSendToPlatform": "پلیٹ فارمس کن بوزناو",
+    "chipsLabel": "ایجنٹ چھُ ہُن کیا کران",
+    "chipPreparing": "تیار چھُ",
+    "chipModelCall": "ماڈلس خاطرٕ ژھٹان",
+    "chipThinking": "سوچان چھُ",
+    "chipWriting": "جواب لیکھان چھُ",
+    "chipTool": "ٹول چھُ چلان: {tool}",
+    "chipToolUnnamed": "اکھ ٹول چھُ چلان",
+    "chipWaitingApproval": "توہہِ ہندس منظوری خاطرٕ ژھٹان ({count})",
+    "chipContinuing": "جواب چھُ جاری رٔکھان",
+    "chipContinuingPass": "جواب چھُ جاری رٔکھان ({max} منٛز پاس {pass})",
+    "chipContinuingApproval": "توہہِ ہندس فیصلس پتہ جاری رٔکھان",
+    "chipRetrying": "دوبارہ کوشش کران چھُ",
+    "chipRetryingReason": "دوبارہ کوشش کران چھُ: {reason}",
+    "chipRetryingAttempt": "دوبارہ کوشش کران چھُ (کوشش {attempt}/{max})",
+    "chipRetryingAttemptReason": "دوبارہ کوشش کران چھُ (کوشش {attempt}/{max}): {reason}",
+    "chipFailover": "بیک اپ ماڈلس کن بدلیومت",
+    "chipFailoverReason": "بیک اپ ماڈلس کن بدلیومت: {reason}",
+    "chipFailoverTo": "{model} کن بدلیومت",
+    "chipFailoverToReason": "{model} کن بدلیومت: {reason}",
+    "outcomeTruncated": "یہ جواب چھُ مکمل گژھنہ برونہہ کٹتھ گوومت۔",
+    "outcomeContinue": "جاری رکھو",
+    "outcomeLongerReplies": "لوٚب جوابچ اجازت دِو",
+    "continueMessage": "یتھہ پیٹھ رُکیومت، تتھہ پیٹھ جاری رکھو، پتہ لیکھنہ آمژ چیز دہراون بغیر۔",
+    "outcomeRefused": "حفاظتک وجہ ماڈل پرووائیڈرن بند کوو یہ جواب، لہذا ہاونہ خاطرٕ چھُنہ کانہہ جواب۔ درخواست بدلاوتھ دوبارہ کوشش کٔرو۔",
+    "outcomeRefusedReason": "حفاظتک وجہ ({reason}) ماڈل پرووائیڈرن بند کوو یہ جواب، لہذا ہاونہ خاطرٕ چھُنہ کانہہ جواب۔ درخواست بدلاوتھ دوبارہ کوشش کٔرو۔",
+    "outcomeMalformedToolCall": "ماڈلن کوشش کوو ٹول ورتاونچ مگر تُمہِ ہند درخواست ٲس غلط، لہذا کینہہ نہ چلیو۔ دوبارہ کوشش کٔرو۔",
+    "outcomeEmpty": "ماڈلن دوو خالی جواب۔ دوبارہ کوشش کٔرو۔",
+    "stopRaiseSteps": "ٹول کال حد ہیو بڈاو",
+    "stopRaiseBudget": "خرچہ حد بدلاو",
+    "stopAskEditor": "کُنہِ تہِ شخصس ونو یُس یمہ ایجنٹس بدلتھ سکہِ تہٕ یہ حد بڈاوِ۔",
+    "rsOpen": "رَن سیٹنگ",
+    "rsTitle": "رَن سیٹنگ",
+    "rsClose": "رَن سیٹنگ بند کٔرو",
+    "rsBack": "رَن سیٹنگس کن واپس گژھو",
+    "rsIntro": "{name} خاطرٕ اگلہ پیغام کِتھ چلِ۔ یم ایجنٹک برتاؤ ٹیبس منٛز بدلاو۔",
+    "rsLoading": "لوڈ گژھان چھُ",
+    "rsRetry": "دوبارہ کوشش کٔرو",
+    "rsOpenBehavior": "برتاؤس منٛز بدلاو",
+    "rsModelHeading": "ماڈل تہٕ نمونہ انتخاب",
+    "rsModel": "ماڈل",
+    "rsModelNotSet": "سیٹ کرنہ آمت چھُنہ",
+    "rsModelDefault": "ماڈلک ڈیفالٹ",
+    "rsDepth": "استدلالک گہرائی",
+    "rsSourceAgent": "یمہ ایجنٹس پیٹھ سیٹ کرنہ آمُت",
+    "rsParam_temperature": "درجہ حرارت",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "جوابچ زیادہ تہٕ زیادہ لمبائی (ٹوکن)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "دہراونچ سزا",
+    "rsParam_presencePenalty": "موجودگی سزا",
+    "rsParam_seed": "سیڈ",
+    "rsParam_stopSequences": "روکنچ ترتیب",
+    "rsParamDropped": "{param} چھُ یمہ ایجنٹس پیٹھ سیٹ، مگر {provider} چھُ {model} خاطرٕ یہ نظرانداز کران، لہذا یمہِ ہند چھُنہ کانہہ اثر۔",
+    "rsToolsRunHeading": "یمہ رَنچ ٹول",
+    "rsToolsRunOnly": "صرف یہ رَن",
+    "rsToolsRunNote": "یم سوئچ چھِ طے کران زِ یمہ پلے گراؤنڈہ پیٹھ بوزناونہ آمژ پیغام ایجنٹک کم ٹول ورتاوتھ سکن۔ کینہہ نہ چھُ محفوظ گژھان: باقی سارنی خاطرٕ چھُ ایجنٹ پنن ٹول رسائی رٔکھان۔ یم چھِ ایجنٹک ٹول صرف بند کٔرتھ سکان، تمس کنہ وقت نہ نوو ٹول دِتھ۔",
+    "rsToolsRunSummary": "ایجنٹک {total} ٹولن منٛز {on} چھِ یمہ رَنہ خاطرٕ چالو",
+    "rsToolsRunNone": "یمہ رَنہ خاطرٕ چھِ نہ کانہہ ٹول: ایجنٹ سکہِ صرف متنس منٛز جواب دتھ۔",
+    "rsToolsReset": "ایجنٹک ٹول ورتاو",
+    "rsToolsNotInAgent": "یہ چھُ نہ یمہ ایجنٹک محفوظ کرنہ آمتین ٹولن منٛز، لہذا رَنہ خاطرٕ چالو کٔرتھ چھُنہ سکان۔",
+    "rsToolsEditAgent": "ایجنٹک محفوظ کرنہ آمتۍ ٹول بدلاو",
+    "rsToolsLimitedChip": "یمہ رَنہ خاطرٕ ٹول محدود",
+    "rsToolsEmpty": "یمہ ایجنٹ خاطرٕ چھُنہ کانہہ ٹول دستیاب۔",
+    "rsToolsSummary": "{total} منٛز {on} ٹول چالو",
+    "rsToolsFailed": "ٹول لوڈ کٔرتھ سکیو نہ۔",
+    "rsLimitsHeading": "ہر ٹرنک حد",
+    "rsLimitsChange": "حد بدلاو",
+    "rsLimitsView": "حد وچھو",
+    "rsLimitsFailed": "حد لوڈ کٔرتھ سکیو نہ۔",
+    "rsLimitsEmpty": "یمہ ایجنٹ خاطرٕ چھیہ نہ ہاونہ خاطرٕ کانہہ حد۔",
+    "rsNoLimit": "کانہہ حد چھیہ نہ",
+    "rsScoreAll": "ہر میل",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} حرف",
+    "rsLimitRange": "اجازت: {min} پیٹھ {max} تام",
+    "rsLayer_AGENT": "یمہ ایجنٹس پیٹھ سیٹ کرنہ آمُت",
+    "rsLayer_TENANT": "ورک سپیس ڈیفالٹ",
+    "rsLayer_PLATFORM": "پلیٹ فارم ڈیفالٹ",
+    "rsLayer_REQUEST": "یمہ درخواست خاطرٕ سیٹ کرنہ آمُت",
+    "rsLimit_maxToolSteps": "فی ٹرن ٹول کال",
+    "rsLimit_turnTimeoutSeconds": "اکس ٹرنک وقت",
+    "rsLimit_toolTimeoutSeconds": "اکس ٹول کالک وقت",
+    "rsLimit_toolOutputMaxChars": "ٹول نتیجچ سائز",
+    "rsLimit_retrievalTopK": "فی تلاش علمک نتیجہ",
+    "rsLimit_retrievalMinScore": "علم میلک کم ز کم مطابقت",
+    "rsLimit_continuationPasses": "جواب مکمل کرنہ خاطرٕ اضافی پاس",
+    "rsLimitHelp_maxToolSteps": "اکھ جواب سکہِ زیادہ ز زیادہ کتھ ٹول کال کٔرتھ۔ حدس پیٹھ پہنچنہ پتہ روزِ ٹرن بند تہٕ یہ ونان۔",
+    "rsLimitHelp_turnTimeoutSeconds": "اکھ ٹرن سکہِ بند گژھنہ برونہہ کتھ وقت چلتھ۔",
+    "rsLimitHelp_toolTimeoutSeconds": "اکھ ٹول کال سکہِ بند گژھنہ برونہہ کتھ وقت چلتھ۔",
+    "rsLimitHelp_toolOutputMaxChars": "اکس ٹول نتیجکس کتھ حصہ سکہِ ماڈل پڑھتھ۔ باقی چھُ کٹنہ یوان۔",
+    "rsLimitHelp_retrievalTopK": "اکھ تلاش چھیہ علم ذخیرہ پیٹھ کتھ ٹکرے واپس انان۔",
+    "rsLimitHelp_retrievalMinScore": "یمہ پیٹھ کم میل والۍ ٹکرے چھِ ژھوٚڈنہ یوان۔ صفر چھُ ہر میل رٔکھان۔",
+    "rsLimitHelp_continuationPasses": "اعلان کرنہ آمتس مگر ناکرنہ آمتس قدمس پیٹھ رُکیومت جواب مکمل کرنہ خاطرٕ اضافی کوششہ۔",
+    "rsPreviewButton": "پرامپٹ پیشگی منظر",
+    "rsPreviewTitle": "پرامپٹ پیشگی منظر",
+    "rsPreviewIntro": "یہ ایجنٹ چھُ یُس سسٹم پرامپٹ تہٕ ٹول فہرست بوزنوں، اصلی ٹرن ہند طرح بنیومت۔ ماڈلس کن چھُ نہ کینہہ بوزناونہ یوان۔",
+    "rsPreviewBuilding": "پیشگی منظر چھُ بنان",
+    "rsPreviewFailed": "پیشگی منظر بناوتھ سکیو نہ۔",
+    "rsPreviewTotals": "سسٹم متنس خاطرٕ تقریباً {prompt} ٹوکن تہٕ ٹول تعریفن خاطرٕ {tools} ٹوکن (اندازہ)۔",
+    "rsPreviewOverBudgetTitle": "ٹوکن بجٹ کھوتہ زیادہ",
+    "rsPreviewOverBudget": "مستقل سسٹم متن چھُ ترتیب دنہ آمتہ {budget} ٹوکنک بجٹ کھوتہ زیادہ۔ کینہہ نہ کٹنہ آو؛ اکھ پرامپٹ مختصر کرنچ سوچ کٔرو۔",
+    "rsPreviewNoBlocks": "ہاونہ خاطرٕ چھُنہ کانہہ پرامپٹ بلاک۔",
+    "rsPreviewMessage": "پیغام: {message}",
+    "rsPreviewTokens": "~{tokens} ٹوکن",
+    "rsPreviewShowText": "متن ہاو",
+    "rsPreviewTools": "ٹول ({count})",
+    "rsPreviewNoTools": "یہ ایجنٹ چھُ نہ کانہہ ٹول دوان۔",
+    "rsPreviewNotes": "یہ پیشگی منظر کیا نہ چھُ زانتھ سکان",
+    "rsPreviewOpenAdmin": "ہر پرامپٹک لفظ وچھو تہٕ بدلاو",
+    "rsOriginDefault": "ڈیفالٹ طور آمُت",
+    "rsOriginOverride": "{scope} اووررائڈ v{version}",
+    "rsOriginAgentConfig": "ایجنٹک پننہ سسٹم پرامپٹ",
+    "rsOriginCode": "پلیٹ فارم کوڈ",
+    "rsRunBudget": "ہر رَنک خرچہ حد",
+    "rsNoCap": "کانہہ حد چھیہ نہ",
+    "rsRunBudgetHelp": "اکھ رَن سکہِ زیادہ ز زیادہ کتھ خرچ کٔرتھ یتھہ وقتہ یہ بییس ایجنٹس کام دوان چھُ یا گہرٕ تحقیق چلاوان۔ یہ چھُ اندازہ، بل نہ۔",
+    "chipToolsOff": "ٹولن بغیر دوبارہ کوشش کران چھُ",
+    "chipFailoverBlocked": "بیک اپ ماڈل ناورتیومت: ٹول ٲسۍ پتہ چلان",
+    "rsLimitChangeOne": "بدلاو",
+    "reasonRateLimited": "شرح حد پہنچ گیہ",
+    "reasonTimeout": "وقت ختم گوو",
+    "reasonProviderUnavailable": "پرووائیڈر دستیاب چھُنہ",
+    "reasonAuthFailed": "پرووائیڈرن کور اسناد مسترد",
+    "reasonBilling": "پرووائیڈرک بلنگ مسئلہ",
+    "reasonModelNotFound": "ماڈل دستیاب چھُنہ",
+    "reasonProviderError": "پرووائیڈرک خرابی",
+    "reasonMalformedToolCall": "ٹول کال ورتاونہ آیہ نہ"
   },
   "nodeDefs": {
     "triggerLabel": "ٹرِگر",
@@ -1400,7 +1537,50 @@
     "ttsProviderUpdatedSuccess": "TTS فراہم کنندہ گژھِ اپڈیٹ۔",
     "updateTtsProviderError": "اَتھ ایجنٹ سُند TTS فراہم کنندہ اپڈیٹ کرنہٕ نہٕ آو۔",
     "ttsProviderFreePlanTooltip": "TTS فراہم کنندہ چُناو چھُ اَکھ پریمیم فیچر۔",
-    "ttsProviderNotSet": "پلیٹ فارم ڈیفالٹ چھُ استعمال گژھان"
+    "ttsProviderNotSet": "پلیٹ فارم ڈیفالٹ چھُ استعمال گژھان",
+    "samplingTitle": "اعلیٰ نمونہ انتخاب",
+    "samplingIntro": "ماڈل کِتھ لفظ چھُ چُنان تتھ باریکی سان ٹھیک کٔرو۔ ماڈلک ڈیفالٹ ورتاونہ خاطرٕ ڈبہ خالی روزناو۔ یُس پرووائیڈر کانہہ خانہ ناسمجھان چھُ سُہ چھُ یہ صرف نظرانداز کران۔",
+    "samplingIgnored": "یمہ ماڈلک پرووائیڈر چھُ یہ سیٹنگ نظرانداز کران، لہذا یمہ بدلاونچ چھُ نہ کانہہ اثر۔",
+    "samplingSaving": "محفوظ گژھان چھُ…",
+    "samplingSaved": "محفوظ گوو",
+    "samplingNotSaved": "محفوظ گوو نہ",
+    "samplingSaveFailed": "سُہ سیٹنگ محفوظ کٔرتھ سکیو نہ۔",
+    "samplingErrorWhole": "{label} گژھِ {min} پیٹھ {max} تام پورٕ عدد سپدنۍ، یا بند کرنہ خاطرٕ خالی ژھوڈو۔",
+    "samplingErrorNumber": "{label} گژھِ {min} پیٹھ {max} تام عدد سپدنۍ، یا بند کرنہ خاطرٕ خالی ژھوڈو۔",
+    "samplingStopTooLong": "اکھ روکنچ ترتیب سکہِ زیادہ ز زیادہ {max} حرفن ہند سپدتھ۔",
+    "samplingStopTooMany": "زیادہ ز زیادہ {max} روکنچ ترتیب۔",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "صرف سب پیٹھ ممکن K اگلۍ لفظ غور منٛز انو۔ کم مطلب زیادہ محفوظ، پیشگوئی لایق متن۔ 1 پیٹھ 1000 تام۔",
+    "samplingSeed": "سیڈ",
+    "samplingSeedHelp": "اکس تس پرامپٹس خاطرٕ جوابن زیادہ دہراونہ لایق بناونہ خاطرٕ اکھ عدد سیٹ کٔرو۔ سارے پرووائیڈر چھِ نہ یمہ ہند ضمانت دوان۔",
+    "samplingFrequency": "دہراونچ سزا",
+    "samplingFrequencyHelp": "مثبت قدر چھِ اکس لفظس بار بار ورتاونس پیٹھ روکان۔ -2 پیٹھ 2 تام۔",
+    "samplingPresence": "موجودگی سزا",
+    "samplingPresenceHelp": "مثبت قدر چھِ ماڈلس اکس موضوعس پیٹھ روزنہ بدلہ نوین موضوعن کن دکھا دوان۔ -2 پیٹھ 2 تام۔",
+    "samplingPlaceholderDefault": "ڈیفالٹ",
+    "samplingPlaceholderRandom": "بے ترتیب",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "روکنچ ترتیب",
+    "samplingStopPlaceholder": "اکھ فقرہ لیکھو، Enter دبایو",
+    "samplingStopHelp": "ماڈلن یمن منٛز کانہہ لیکھنہ سیتۍ چھُ جواب ختم گژھان۔ زیادہ ز زیادہ {count}، ہر اکھ زیادہ ز زیادہ {max} حرفن ہند۔",
+    "samplingStopCurrent": "موجودہ روکنچ ترتیب",
+    "samplingStopRemove": "روکنچ ترتیب {value} ہٹاو",
+    "samplingAdd": "ملاو",
+    "reasoningDepthFASTCost": "Quickest and cheapest: one pass, and the reply streams in as it is written.",
+    "reasoningDepthPLANNEDCost": "Writes a plan before acting: more model calls per task, and the reply appears all at once instead of streaming.",
+    "reasoningDepthCAREFULCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming.",
+    "reasoningDepthRIGOROUSCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming. Uses the most tokens.",
+    "autonomyLabel": "Autonomy",
+    "autonomyTierSUPERVISED": "Supervised",
+    "autonomyTierSUPERVISEDHint": "Every tool call waits for a human to approve it, whatever the workspace policy says. Tighter step ceiling.",
+    "autonomyTierSUPERVISEDCost": "Asks you before every tool call, searches included.",
+    "autonomyTierSEMI_AUTONOMOUS": "Semi-autonomous",
+    "autonomyTierSEMI_AUTONOMOUSHint": "Follows the workspace's approval policy for each action type. The default for every agent.",
+    "autonomyTierSEMI_AUTONOMOUSCost": "Asks you only for the actions your workspace's approval rules name; the rest run without asking.",
+    "autonomyTierFULLY_AUTONOMOUS": "Fully autonomous",
+    "autonomyTierFULLY_AUTONOMOUSHint": "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
+    "autonomyTierFULLY_AUTONOMOUSCost": "Never asks you: every tool call runs as soon as the agent makes it, sends and payments included.",
+    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "کانفیگر کرنہٕ خٲطرٕ اَکھ نوڈ ژارِو، یا کھووُر طرفہٕ پیلیٹ منزٕ اَکھ نٔو اَندر ژھنٛگِتھ انِو۔",
@@ -1876,6 +2056,9 @@
     "emptyWorkspaceTitle": "وُنِی تام کانہہ کَلیکشن نَہ",
     "noFilesUploadedHint": "یَتھ کَلیکشنَس مَنٛز فایِل اَپلوڈ کٔرِو تاکہِ یِم توٚہِندؠ ایجنٹ تَللاش کٔرِتھ ہیکَن.",
     "ocrComingSoonTooltip": "وُنِہ چھُ نہٕ دستیاب - اپلوڈ گَژھَن بلٹ اِن Tesseract OCR پؠٹھ واپس۔"
+  },
+  "tutorPage": {
+    "backToHelp": "مدد کن واپس گژھو"
   },
   "knowledgePage": {
     "knowledgeLabel": "معلومات",
@@ -5760,6 +5943,8 @@
     "channelsBody": "WhatsApp، Telegram، Instagram، Slack، ای میل تہٕ باقی چیزٕ جوڈو، پتہٕ ژارِو زِ پرٛتھ اَکہِ پؠٹھ کُس ایجنٹ جواب دِی۔",
     "channelsPoint1": "مفت پلان پؠٹھ WhatsApp، Telegram تہٕ ای میل",
     "channelsPoint2": "اَکھ نٔو سینڈر چھُ گۄڈٕ تُہنٛزِ منظوٗری خٲطرٕ وُچھان",
+    "channelsPersonalBody": "WhatsApp، Telegram، Signal، iMessage یا ای میل جوڑو، پتہ چُنو زِ ہر چینلس پیٹھ کُس کسٹم ایجنٹ جواب دِ۔",
+    "channelsPersonalPoint1": "WhatsApp، Telegram، Signal، iMessage تہٕ ای میل",
     "toolsTitle": "اِنٹیگریشن چھِ ایجنٹن اَوزار دِوان",
     "toolsBody": "آن کٔرِو یُس اَکھ ایجنٹ کتھ باتھہِ دوران اِستِمال کٔرِتھ ہیٚکہِ: ویب تلاش، ڈیٹا بیس، MCP سرور، تہٕ تُہنٛدِ پننِ سکرپٹ۔",
     "toolsPoint1": "یتہِ فعال کٔرِو، پتہٕ پرٛتھ ایجنٹس خٲطرٕ اجازت دِیو",
@@ -14063,5 +14248,1495 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "ورک سپیس سیٹنگ",
+      "agent": "ایجنٹ سیٹنگ"
+    },
+    "agentMissing": "کُنہِ ایجنٹک سیٹنگ وچھنہ خاطرٕ تس چُنو۔",
+    "scopeNote": {
+      "agent": "یم قدر چھِ صرف یمہ ایجنٹس پیٹھ لاگو گژھان۔ یُس توہہ یتھ اووررائڈ ناکران سُہ چھُ توہہِ ہند ورک سپیس سیٹنگہ پیٹھ وراثت منٛز یوان۔"
+    },
+    "loading": "سیٹنگ چھِ لوڈ گژھان",
+    "loadError": "سیٹنگ لوڈ کٔرتھ سکیو نہ۔ {message}",
+    "retry": "دوبارہ کوشش کٔرو",
+    "filters": {
+      "label": "سیٹنگ چھانٹو",
+      "search": "سیٹنگ تلاش کٔرو",
+      "searchPlaceholder": "نام یا تفصیل سان تلاش کٔرو",
+      "group": "گروپ سان چھانٹو",
+      "allGroups": "سارے گروپ",
+      "risk": "خطر سان چھانٹو",
+      "allRisks": "سارے خطرچ درجہ",
+      "clear": "چھانٹ مٹاو"
+    },
+    "empty": {
+      "none": "یتھ چھِ نہ کانہہ سیٹنگ یم توہہ بدلتھ سکو۔",
+      "filtered": "کانہہ سیٹنگ چھیہ نہ توہہِ ہندس چھانٹس سان میلان۔"
+    },
+    "saved": "محفوظ گوو۔ نوی کرنہ آمژ سیٹنگ: {count}۔",
+    "saveFailed": "محفوظ گوو نہ۔ ناکام سیٹنگ: {count}۔ توہہِ ہند ترمیم چھیہ ہنوز فارمس منٛز۔",
+    "resetDone": "{label} چھُ ہُن وراثت منٛز آمت قدر ورتاوان۔",
+    "resetFailed": "سیٹنگ ری سیٹ کٔرتھ سکیو نہ۔",
+    "unsaved": "غیر محفوظ تبدیلی",
+    "discardOne": "تبدیلی منسوخ کٔرو",
+    "restartRequired": "ری سٹارٹ ضروری",
+    "source": {
+      "default": "ڈیفالٹ",
+      "platform": "پلیٹ فارم",
+      "tenant": "ورک سپیس",
+      "agent": "ایجنٹ",
+      "tenantInherited": "ورک سپیسہ پیٹھ وراثت منٛز آمُت",
+      "aria": "قدرک ماخذ: {source}"
+    },
+    "sourceHelp": {
+      "default": "کنہ تہِ چھُ نہ یہ بدلوومت۔ یہ چھُ مصنوعاتس سان آمت قدر ورتاوان۔",
+      "platform": "توہہِ ہند پلیٹ فارم آپریٹرن چھُ یہ پوری تعیناتی خاطرٕ سیٹ کوومت۔",
+      "tenant": "توہہِ ہند ورک سپیس چھُ ڈیفالٹ اووررائڈ کران۔ وراثت منٛز آمژ قدرس کن واپس گژھنہ خاطرٕ ری سیٹ کٔرو۔",
+      "agent": "یہ ایجنٹ چھُ ورک سپیسک قدر اووررائڈ کران۔ ورک سپیسک قدر دوبارہ وراثت منٛز ہیونہ خاطرٕ ری سیٹ کٔرو۔",
+      "tenantInherited": "یمہ ایجنٹس چھُ نہ پننہ کانہہ اووررائڈ، لہذا یہ چھُ ورک سپیسک قدر ورتاوان۔ یہ بدلاونہ سیتۍ بنان چھُ صرف یمہ ایجنٹ خاطرٕ اووررائڈ۔",
+      "lockedSuffix": "یہ چھُ مقفل، لہذا یتھ بدلتھ چھُنہ سکان۔"
+    },
+    "risk": {
+      "low": "کم خطر",
+      "medium": "درمیانہ خطر",
+      "high": "زیادہ خطر",
+      "security": "حفاظت"
+    },
+    "bool": {
+      "on": "On",
+      "off": "بند"
+    },
+    "value": {
+      "unset": "سیٹ کرنہ آمت چھُنہ",
+      "empty": "خالی"
+    },
+    "select": {
+      "placeholder": "اکھ آپشن چُنو"
+    },
+    "slider": {
+      "label": "{label} (سلائیڈر)"
+    },
+    "duration": {
+      "unitLabel": "{label} ہند اکائی"
+    },
+    "units": {
+      "chars": "حرف",
+      "tokens": "ٹوکن",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "سیکنڈ",
+      "min": "منٹ",
+      "h": "گنٹہ"
+    },
+    "groups": {
+      "agent": "ایجنٹ رَنٹائم",
+      "approvals": "منظوری",
+      "quality": "معیار جانچ",
+      "guardrails": "گارڈریل",
+      "chat": "چیٹ",
+      "tools": "ٹول",
+      "memory": "میموری",
+      "knowledge": "علم",
+      "delegation": "کام سونپُن",
+      "aux": "مددگار ماڈل",
+      "routing": "ماڈل روٹنگ"
+    },
+    "errors": {
+      "required": "اکھ قدر دِو۔",
+      "notNumber": "اکھ عدد دِو۔",
+      "notInteger": "اکھ پورٕ عدد دِو۔",
+      "belowMin": "کم ز کم {min} گژھِ سپدنۍ۔",
+      "aboveMax": "زیادہ ز زیادہ {max} گژھِ سپدنۍ۔",
+      "notAllowed": "درج آپشنن منٛز اکھ چُنو۔",
+      "tooShort": "بہت مختصر۔ کم ز کم {min} ورتاو۔",
+      "tooLong": "بہت لمبٕ۔ زیادہ ز زیادہ {max} ورتاو۔",
+      "precision": "یہ اکائی چھیہ نہ یہ صحیح بیان کٔرتھ سکان۔ سب پیٹھ سیود اکائی ہند پورٕ عدد ورتاو یا سیود اکائی چُنو۔",
+      "serverRange": "اجازت یافتہ دائرہ: {min} پیٹھ {max} تام۔",
+      "serverOptions": "اجازت یافتہ قدر: {options}۔",
+      "server": {
+        "invalid": "سرورن کور نہ یہ قدر قبول: {message}",
+        "locked": "یہ سیٹنگ چھیہ توہہِ ہندین ایڈمنن مقفل کوومژ، لہذا توہہِ ہند تبدیلی گیہ نہ محفوظ۔",
+        "notFound": "یہ سیٹنگ چھیہ ہُن موجود نہ۔",
+        "forbidden": "توہہِ چھِ نہ یہ سیٹنگ بدلنچ اجازت۔",
+        "reasonRequired": "یمہ تبدیلی خاطرٕ چھُ وجہ ضروری۔ اکھ دِو تہٕ دوبارہ کوشش کٔرو۔",
+        "network": "سرورس کن پہنچتھ سکیو نہ، لہذا توہہِ ہند تبدیلی گیہ نہ محفوظ۔ {message}",
+        "other": "تبدیلی محفوظ کٔرتھ سکیو نہ: {message}"
+      }
+    },
+    "effective": "ہُن لاگو: {value}",
+    "hint": {
+      "range": "اجازت: {min} پیٹھ {max} تام۔",
+      "min": "کم ز کم: {min}۔",
+      "max": "زیادہ ز زیادہ: {max}۔",
+      "default": "ڈیفالٹ: {value}۔",
+      "securityStricter": "اکھ حفاظتی سیٹنگ سکہِ صرف پلیٹ فارمک قدر کھوتہ سخت کرنہ یتھ، کنہ وقت کمزور نہ۔",
+      "inherited": "اگر توہہ یہ ری سیٹ کرو تہٕ یہ گژھِ واپس یتھ: {value}۔"
+    },
+    "locked": {
+      "withReason": "توہہِ ہندین ایڈمنن مقفل کوومت: {reason}",
+      "noReason": "توہہِ ہندین ایڈمنن مقفل کوومت۔ یتھ بدلتھ چھُنہ سکان۔"
+    },
+    "blocked": {
+      "role": "توہہِ ہند کردار چھُ نہ یہ سیٹنگ بدلتھ سکان۔ ورک سپیس ایڈمنس پرژھ۔",
+      "scope": "یہ سیٹنگ چھیہ نہ یتھ اووررائڈ کرنہ یوان۔",
+      "readOnly": "سیٹنگ چھِ ہُن صرف پڑھنہ خاطرٕ۔",
+      "adminOnly": "یہ حفاظتی سیٹنگ سکہِ صرف ورک سپیس ایڈمن بدلتھ۔ توہہ سکو تمۍ ہند قدر یتھ وچھتھ، مگر ترمیم کٔرتھ ناہ۔"
+    },
+    "reset": {
+      "button": "وراثت منٛز آمژ قدرس کن ری سیٹ کٔرو",
+      "aria": "وراثت منٛز آمژ قدرس کن ری سیٹ کٔرو: {label}"
+    },
+    "help": {
+      "show": "مزید تفصیل",
+      "hide": "تفصیل لُکناو"
+    },
+    "history": {
+      "button": "تاریخ",
+      "open": "تاریخ: {label}",
+      "title": "تاریخ: {label}",
+      "scopeTenant": "ورک سپیسک تبدیلی",
+      "scopeAgent": "یمہ ایجنٹک تبدیلی",
+      "close": "تاریخ بند کٔرو",
+      "loading": "تاریخ چھیہ لوڈ گژھان",
+      "error": "تاریخ لوڈ کٔرتھ سکیو نہ۔ {message}",
+      "empty": "ہُن تام چھیہ نہ کانہہ تبدیلی ریکارڈ کرنہ آمژ۔",
+      "listLabel": "تبدیلی تاریخ، نوو پیٹھمس",
+      "version": "ورژن {version}",
+      "before": "برونہہ:",
+      "after": "پتہ:",
+      "by": "بدلاون وول",
+      "unknownActor": "نامعلوم",
+      "reason": "وجہ:"
+    },
+    "savebar": {
+      "count": "غیر محفوظ تبدیلی: {count}۔",
+      "invalid": "محفوظ کرنہ برونہہ نشان زدہ خانہ ٹھیک کٔرو۔ ٹھیک کرنہ لایق خانہ: {count}۔",
+      "discard": "تبدیلی منسوخ کٔرو",
+      "save": "تبدیلی محفوظ کٔرو",
+      "saving": "محفوظ گژھان چھُ"
+    },
+    "risky": {
+      "title": "خطرناک تبدیلی تصدیق کٔرو ({count})",
+      "description": "یم سیٹنگ چھِ توہہِ ہندین ایجنٹن ہند برتاؤ یا تمن کیا کرنچ اجازت چھیہ بدلاوان۔ ہر تبدیلی جانچو تہٕ ونو زِ توہہ یہ کیازِ چھو کران۔ وجہ چھیہ آڈٹ لاگس منٛز محفوظ گژھان۔",
+      "descriptionSecurity": "یمن منٛز چھیہ کم ز کم اکھ حفاظتی سیٹنگ۔ یہ سکہِ صرف پلیٹ فارمک قدر کھوتہ سخت کرنہ یتھ۔ ہر تبدیلی جانچو تہٕ ونو زِ توہہ یہ کیازِ چھو کران۔ وجہ چھیہ آڈٹ لاگس منٛز محفوظ گژھان۔",
+      "listLabel": "تصدیق کرنہ لایق تبدیلی",
+      "from": "پیٹھ",
+      "to": "to",
+      "securityNote": "حفاظتی سیٹنگ: یہ سکہِ نہ پلیٹ فارمک قدر کھوتہ کمزور سپدتھ۔",
+      "consequence": "یہ کیا چھُ بدلاوان:",
+      "reasonLabel": "یمہ تبدیلی وجہ",
+      "reasonPlaceholder": "مثال: سپورٹ ٹیمک لمبین تحقیقاتن خاطرٕ حد بڈاون",
+      "reasonHint": "ضروری، کم ز کم {min} حرف۔ بدلاون وولس تہٕ پرانی تہٕ نوی قدرن سان محفوظ گژھان چھُ۔",
+      "acknowledge": "بہٕ چھس یمہ حفاظتی تبدیلی نتیجہ سمجھان۔",
+      "cancel": "منسوخ کٔرو",
+      "confirm": "تصدیق کٔرتھ محفوظ کٔرو",
+      "resetNote": "ری سیٹ: اووررائڈ چھُ ہٹنہ یوان تہٕ سیٹنگ چھیہ تمس قدرس کن واپس گژھان یُس تس وراثت منٛز ملان چھُ۔"
+    },
+    "strictness": {
+      "higher": "زیادہ مطلب زیادہ سخت: زیادہ قدر چھیہ قبول سپدان، کم مسترد۔",
+      "lower": "کم مطلب زیادہ سخت: کم قدر چھیہ قبول سپدان، زیادہ مسترد۔",
+      "enumOrder": "آپشن چھِ کم سخت پیٹھ زیادہ سخت تام ترتیبہ سان: {options}۔ توہہ سکو صرف سخت سرس کن گژھتھ۔"
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "باقی",
+    "status_APPROVED": "منظور شدہ",
+    "status_REJECTED": "مسترد شدہ",
+    "status_EXPIRED": "وقت ختم",
+    "status_EXECUTION_FAILED": "عمل درآمد ناکام",
+    "status_DEAD_LETTERED": "ڈیڈ لیٹر",
+    "filtersLabel": "درخواست چھانٹو",
+    "filterAgentLabel": "ایجنٹ سان چھانٹو",
+    "filterToolLabel": "ٹول سان چھانٹو",
+    "filterAgeLabel": "عمر سان چھانٹو",
+    "filterAnyAgent": "کانہہ تہِ ایجنٹ",
+    "filterAnyTool": "کانہہ تہِ ٹول",
+    "filterAnyAge": "کانہہ تہِ عمر",
+    "age_newer1h": "۱ گنٹہ کھوتہ نوو",
+    "age_older1h": "۱ گنٹہ کھوتہ پرانۍ",
+    "age_older24h": "۱ دۄہ کھوتہ پرانۍ",
+    "age_older7d": "۷ دۄہ کھوتہ پرانۍ",
+    "filtersClear": "چھانٹ مٹاو",
+    "filterWindowNote": "سب پیٹھ نوین {count} درخواستن چھُ چھانٹان۔ پرانۍ چھِ نہ شامل۔",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time} وقت گژھِ وقت ختم",
+    "expiresAt": "اگر کنہ تہِ فیصلہ ناکرِ تہٕ {time} وقت گژھِ خودبخود بند",
+    "overdue": "وقت حد گیہ پار، اگلہ صفائی پیٹھ گژھِ بند",
+    "neverExpires": "یہ ورک سپیس چھُ نہ ژھٹان والین درخواستن ہند وقت ختم کران۔",
+    "expiredNote": "{time} وقت ختم گوو: وقتس پیٹھ کنہ تہِ فیصلہ کوو نہ",
+    "expiredReasonPrefix": "وقت ختم گوو:",
+    "auditExpired": "وقت ختم گوو، وقتس پیٹھ کنہ تہِ فیصلہ کوو نہ",
+    "riskLow": "کم خطر",
+    "riskMedium": "درمیانہ خطر",
+    "riskHigh": "زیادہ خطر",
+    "riskEstimateNote": "خطر چھُ ٹولک نامہ پیٹھ لگایومت اندازہ۔ پلیٹ فارم چھُ نہ ٹولن درجہ بند کران، لہذا منظوری دنہ برونہہ دلیل پڑھو۔",
+    "riskWhoDecides": "کُس چھُ طے کران زِ کیا منظوری خاطرٕ ژھٹنۍ؟",
+    "previewGoal": "یہ کمیس کامس پیٹھ ٲس کام کران:",
+    "previewArguments": "دلیل",
+    "previewNoArguments": "یمہ کالہ خاطرٕ چھیہ نہ کانہہ دلیل ریکارڈ کرنہ آمژ۔",
+    "previewRedacted": "{count} حساس لگان قدر چھِ یتھ لُکنہ آمژ۔ اگر توہہ منظور کرو تہٕ تم چھِ تہِ ٹولس کن بوزناونہ یوان۔",
+    "previewTruncated": "یم دلیل چھِ پورٕ ہاونہ خاطرٕ بہت لمبٕ، لہذا یہ درخواست چھیہ نہ یتھ پیٹھ منظور کرنہ یوان۔",
+    "approveBlockedTooLong": "توہہ سکو نہ پوری درخواست جانچتھ تلہذا منظوری بند چھیہ۔ توہہ سکو تہِ یہ مسترد کٔرتھ۔",
+    "ifApproveLabel": "اگر توہہ منظور کرو:",
+    "ifApprove": "{tool} چھُ اُتھ دلیلن سان ہُن چلان، تہٕ ایجنٹ چھُ تمۍ ہند نتیجہ ورتاوتھ کام جاری رٔکھان۔",
+    "ifDenyLabel": "اگر توہہ مسترد کرو:",
+    "ifDeny": "{tool} چھُ نہ چلان۔ ایجنٹس چھُ ونان زِ توہہ ونوو نہ، وجہ دنہ پیٹھ تس سان، تہٕ سُہ چھُ تس بغیر اگے ہیچان۔",
+    "whyGated": "ایجنٹس ٲس {tool} ورتاونچ خواہش۔ یہ ژھٹنہ آو توہہِ ہندس فیصلس خاطرٕ کیازِ ایجنٹ چھُ نگرانی منٛز سیٹ، یا کیازِ یمہ ورک سپیسن کوو تمہ ٹولس خاطرٕ منظوری لازمی۔",
+    "denyReasonLabel": "مسترد کرنچ وجہ (اختیاری)",
+    "denyReasonPlaceholder": "مثال: غلط وصول کنندہ، بوزناونہ برونہہ مے پرژھ",
+    "denyReasonHelp": "اگر توہہ مسترد کرو تہٕ چھُ ایجنٹ یہ وجہ مسترد کالک نتیجہ پڑھان تہٕ پانس ڈھالان۔ وجہ بغیر مسترد کرنہ خاطرٕ خالی ژھوڈو۔",
+    "denyButton": "مسترد کٔرو",
+    "detailRegionLabel": "درخواستک تفصیل",
+    "sessionLabel": "گفتگو",
+    "linkOpenAgent": "ایجنٹ کھولو",
+    "linkInspectTurns": "تمۍ ہند ٹرن جانچو",
+    "continuationLabel": "تتھ پتہ ایجنٹن کیا کوو",
+    "continuationCompleted": "ایجنٹن کوو کام جاری رکھن ختم۔",
+    "continuationFailed": "یمہ فیصلس پتہ سپد نہ ایجنٹ جاری رکھنچ قابل۔",
+    "continuationRetry": "تس ونو جاری رکھن",
+    "retryMessage": "مہربانی کٔرتھ کام جاری رکھو۔",
+    "lastDecisionTitle": "توہہِ ہند آخری فیصلہ: {tool}",
+    "lastDecisionClose": "بند کٔرو",
+    "deepLinkNotFound": "سُہ منظوری درخواست میلیو نہ، یا توہہ سکو نہ تس وچھتھ۔",
+    "selectAllLabel": "یمہ صفحچ سارنی باقی ٹول کال چُنو",
+    "selectRowLabel": "{tool} ہند باقی کال چُنو",
+    "bulkSelected": "{count} چُنہ آمت",
+    "bulkApprove": "چُنہ آمتۍ منظور کٔرو",
+    "bulkDeny": "چُنہ آمتۍ مسترد کٔرو",
+    "bulkClear": "انتخاب مٹاو",
+    "bulkCancel": "منسوخ کٔرو",
+    "bulkDismiss": "خارج کٔرو",
+    "bulkMixedTools": "اجتماعی فیصلہ خاطرٕ چُنہ آمتۍ سارے درخواست گژھن اکہ ٹولک سپدنۍ۔",
+    "bulkNotLowRisk": "اجتماعی منظوری چھیہ صرف کم خطر ٹولن (لُک اپ) خاطرٕ۔ مسترد کرُن چھُ کنہ تہِ اکس ٹولس خاطرٕ کارگر، یا یم اکس اکس کٔرتھ طے کٔرو۔",
+    "bulkNotToolCall": "اجتماعی فیصلہ چھِ صرف ایجنٹ ٹول کال شامل کران۔",
+    "bulkNotPending": "اجتماعی فیصلہ چھِ صرف ہنوز باقی درخواست شامل کران۔",
+    "bulkConfirmApproveTitle": "{tool} ہند {count} کال منظور کٔرو؟",
+    "bulkConfirmApproveBody": "یمن منٛز ہر اکھ چھُ ہُن {tool} چلاوان، تل درج پننین دلیلن سان، تہٕ ایجنٹ چھُ نتیجہ ورتاوتھ اگے ہیچان۔ یہ چھُ نہ واپس کرنہ لایق۔",
+    "bulkConfirmDenyTitle": "{tool} ہند {count} کال مسترد کٔرو؟",
+    "bulkConfirmDenyBody": "یمن منٛز کینہہ نہ چلان۔ ایجنٹس چھُ ونان زِ ہر کال مسترد گیہ، وجہ دنہ پیٹھ تس سان۔",
+    "bulkConfirmApprove": "{count} منظور کٔرو",
+    "bulkConfirmDeny": "{count} مسترد کٔرو",
+    "bulkMore": "تہٕ {count} ہور",
+    "bulkProgress": "{count} منٛز {done} مکمل",
+    "bulkResult": "{done} ہند فیصلہ گوو، {failed} ناکام گۅیہ۔",
+    "notifyOff": "مے بوزناو",
+    "notifyOn": "اطلاع چالو",
+    "notifyHelp": "ییلہ یہ ٹیب پس منظرس منٛز چھُ تہٕ نوو درخواست یوان چھیہ، تیلہ براؤزر اطلاع ہاو",
+    "notifyUnsupported": "یہ براؤزر چھُ نہ اطلاع ہاوتھ سکان۔",
+    "notifyBlocked": "اطلاع چھِ بند کرنہ آمژ۔ یہ چالو کرنہ خاطرٕ پننہ براؤزرک سائٹ سیٹنگس منٛز اجازت دِو۔",
+    "notifyTitle": "اکھ ایجنٹ چھُ منظوری خاطرٕ ژھٹان",
+    "notifyBodyOne": "{tool} ہندس چھُ توہہِ ہند فیصلہ ضروری۔",
+    "notifyBodyMany": "{count} درخواستن چھُ توہہِ ہند فیصلہ ضروری۔",
+    "newArrived": "{count} نوۍ منظوری درخواست آیہ۔",
+    "rulesTitle": "اکس ٹولس خاطرٕ اصول",
+    "rulesIntro": "چُنو زِ اکھ ٹول گژھِ ہمیشہ انسانس خاطرٕ ژھٹتھ یا کنہ وقت نہ۔ یہ اصول چھُ نیم خود مختار سیٹ کرنہ آمژ ہر ایجنٹس پیٹھ لاگو گژھان۔",
+    "rulesNeedsScope": "اصول بدلاونہ خاطرٕ چھیہ توہہِ ہندس منظوری اجازت ضرورت۔",
+    "rulesToolLabel": "ٹولک نام",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "درخواستس منٛز یتھہ طرح ٹول چھُ نظر یوان تتھہ طرح، مثلاً send_email۔",
+    "rulesToolNameInvalid": "ٹولک نام چھُ نہ خالی جاے رٔکھتھ سکان۔",
+    "rulesModeLabel": "کیا گژھِ سپدنۍ",
+    "rulesAskName": "ہمیشہ پرژھو",
+    "rulesAskHint": "یمہ ٹولک ہر کال چھُ انسانی منظوری خاطرٕ ژھٹان۔",
+    "rulesNeverName": "کنہ وقت نہ پرژھو",
+    "rulesNeverHint": "یمہ ٹولک کال چھِ کنہ تہِ منظوری بغیر فوراً چلان۔",
+    "rulesNeverRiskyWarn": "یہ ٹول چھُ چیز بدلاون والین جیسن لگان۔ یقینی بناو۔",
+    "rulesScopeNote": "اصول چھُ پوری ورک سپیسس پیٹھ لاگو گژھان، اکس ایجنٹس پیٹھ نہ۔ نگرانی منٛز ایجنٹ چھُ ہنوز ہر کتھ پرژھان، تہٕ مکمل خود مختار ایجنٹ چھُ اصول یتھ کینہہ تہِ ونن کنہ وقت نہ پرژھان۔ توہہ سیٹ کرمژ اصول چھِ ہنوز نہ یتھ درج۔",
+    "rulesSave": "اصول محفوظ کٔرو",
+    "rulesSaveFailed": "اصول محفوظ کٔرتھ سکیو نہ۔",
+    "rulesSavedAsk": "{tool} گژھِ ہمیشہ منظوری منگنۍ۔",
+    "rulesSavedNever": "{tool} گژھِ ہُن منظوری نہ منگنۍ۔",
+    "rulesNeverConfirmTitle": "{tool} چلنہ برونہہ پرژھن بند کٔرو؟",
+    "rulesNeverConfirmBody": "ہر نیم خود مختار ایجنٹ گژھِ کنہ تہِ منظوری بغیر {tool} چلاونۍ۔ یہ چھُ چیز بدلاوان یا بوزناوان لگان، تہٕ غلطی چھیہ نہ واپس کرنہ لایق۔",
+    "rulesNeverConfirmBodyLow": "ہر نیم خود مختار ایجنٹ گژھِ پرژھنہ بغیر {tool} چلاونۍ۔ یہ چھُ لُک اپ ہند طرح لگان، لہذا یہ چھُ عام طور محفوظ۔",
+    "rulesNeverConfirm": "پرژھن بند کٔرو",
+    "tiersTitle": "کُس چھُ طے کران زِ کیا منظوری خاطرٕ ژھٹنۍ؟",
+    "tiersIntro": "ہر ایجنٹس چھُ اکھ خود مختاری درجہ۔ یہ چھُ طے کران زِ ورک سپیسک منظوری اصول چھِ بالکل ورتاونہ یوان یا نہ۔",
+    "tierCurrent": "یہ ایجنٹ",
+    "tierConsequenceLabel": "ورتاوس منٛز:",
+    "tierSupervisedName": "نگرانی منٛز",
+    "tierSupervisedWhat": "ورک سپیسک اصول کینہہ تہِ ونن، ہر ٹول کال چھُ انسانس خاطرٕ ژھٹان۔ یمس چھیہ فی ٹرن ٹول قدمن ہند کم حد تہِ دنہ یوان۔",
+    "tierSupervisedConsequence": "سب پیٹھ محفوظ، مگر قطارس منٛز زیادہ درخواست تہٕ سست ایجنٹ ہنز توقع رکھو۔",
+    "tierSemiName": "نیم خود مختار",
+    "tierSemiWhat": "ورک سپیسک اصول چھُ ہر ٹولس خاطرٕ طے کران: بوزناون، ڈیلیٹ تہٕ ادائیگی جیسن خطرناک ٹول چھِ ڈیفالٹ طور پرژھان، باقی چھِ چلان۔",
+    "tierSemiConsequence": "اکھ بوٚڈ ڈیفالٹ۔ توہہِ ہند فی ٹول اصول چھِ یتھ کارگر۔",
+    "tierFullName": "مکمل خود مختار",
+    "tierFullWhat": "کانہہ ٹول کال چھُ کنہ وقت منظوری خاطرٕ نہ ژھٹان تہٕ ایجنٹس چھیہ ٹول قدمن ہند زیادہ حد میلان۔ فی ٹول اصول چھِ نظرانداز کرنہ یوان۔",
+    "tierFullConsequence": "یہ چھُ پرژھنہ بغیر کام کران۔ صرف تمس ایجنٹس خاطرٕ ورتاو یمہ ہند غلطی آسانی سان واپس کرنہ یتھ سکن۔",
+    "tiersRuleNote": "ٹول اصول (ہمیشہ پرژھو، کنہ وقت نہ پرژھو) چھِ صرف نیم خود مختار ایجنٹن خاطرٕ اہم۔",
+    "agentModeTitle": "یمہ ایجنٹس کیا وقت چھیہ منظوری ضرورت؟",
+    "agentModeSupervised": "یہ ایجنٹ چھُ نگرانی منٛز: ہر ٹول کال چھُ انسانس خاطرٕ ژھٹان، تہٕ فی ٹول اصول چھِ نظرانداز کرنہ یوان۔",
+    "agentModeSemi": "یہ ایجنٹ چھُ نیم خود مختار: ہر ٹول چھُ ورک سپیسک اصولس پیروی کران۔ بوزناون، ڈیلیٹ تہٕ ادائیگی چھِ ڈیفالٹ طور پرژھان۔",
+    "agentModeFull": "یہ ایجنٹ چھُ مکمل خود مختار: یہ چھُ کنہ وقت نہ منظوری خاطرٕ ژھٹان، تہٕ فی ٹول اصول چھِ نظرانداز کرنہ یوان۔",
+    "agentModeQueueLink": "یمہ ایجنٹک درخواست وچھو",
+    "agentModeRulesLink": "اکس ٹولس خاطرٕ اصول سیٹ کٔرو",
+    "agentModeShowTiers": "ترین درجن ہند موازنہ کٔرو",
+    "agentModeHideTiers": "موازنہ لُکناو",
+    "agentModeScopeNote": "اُتھ خود مختاری انتخابہ سان درجہ بدلاو۔ ٹول اصول چھِ پوری ورک سپیسک، فی ایجنٹ نہ۔",
+    "policyThenApprovalNote": "یم اصول پار کرنہ والۍ کال سکہِ ہنوز انسانس خاطرٕ ژھٹتھ۔ یہ چھُ ایجنٹک خود مختاری درجس پیٹھ منحصر، یُس تل بیان کرنہ آمُت چھُ۔",
+    "chatReasonToggle": "اکھ وجہ ملاو",
+    "chatReviewInQueue": "قطارس منٛز جانچو"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "واقعہ چھانٹو",
+    "tlFilterCategories": "واقعچ قسم",
+    "tlCatIntake": "ان ٹیک",
+    "tlCatModel": "ماڈل",
+    "tlCatTool": "ٹول",
+    "tlCatApproval": "منظوری",
+    "tlCatContinuation": "تسلسل",
+    "tlCatRetry": "دوبارہ کوشش تہٕ فیل اوور",
+    "tlCatGuardrail": "گارڈریل",
+    "tlCatCache": "کیش",
+    "tlCatVerify": "جانچ",
+    "tlCatFinish": "اختتام",
+    "tlProblemsOnly": "صرف مسئلہ",
+    "tlSearch": "واقعہ تلاش کٔرو",
+    "tlSearchPlaceholder": "ٹول، ماڈل، گارڈ یا حالت",
+    "tlClearFilters": "چھانٹ مٹاو",
+    "tlShowing": "{total} واقعن منٛز {shown} چھِ ہاوان",
+    "tlNoMatch": "کانہہ واقعہ چھُ نہ یمہ چھانٹس سان میلان۔",
+    "tlSevOk": "کامیاب",
+    "tlSevInfo": "معلومات",
+    "tlSevWarn": "توجہ ہیو ضروری",
+    "tlSevError": "ناکام",
+    "tlIntake": "ٹرن شروع گوو: {chars} حرف، {tools} ٹول، {attachments} منسلک",
+    "tlRunTools": "یمہ رَنچ ٹول",
+    "tlRunToolsNone": "کانہہ نہ (صرف متن)",
+    "tlModelCall": "{model} ({provider}) کن ماڈل کال، راستہ {route}",
+    "tlFailover": "{model} ({provider}) کن فیل اوور سپد",
+    "tlRetryModel": "{model} ({provider}) پیٹھ دوبارہ کوشش کرنہ آو، راستہ {route}",
+    "tlRetry": "دوبارہ کوشش: {guard} ({outcome})",
+    "tlCacheHit": "رسپانس کیشہ پیٹھ جواب دنہ آو",
+    "tlToolCall": "ٹول کال {tool}: {status}",
+    "tlApprovalRequested": "{tool} چلنہ برونہہ منظوری منگنہ آئ",
+    "tlApprovalDecided": "{tool} خاطرٕ منظوری فیصلہ سپد: {decision}",
+    "tlApprovalAutoAllowed": "{tool} چلیو بغیر پرژھنہ: نگرانی منٛز صرف پڑھنچ کال",
+    "tlContinuation": "تسلسل: {guard} ({outcome})",
+    "tlGuard": "گارڈریل {guard}: {outcome}",
+    "tlVerifyPassed": "جانچ پاس: {check}",
+    "tlVerifyFailed": "جانچ فیل: {check}",
+    "tlFinish": "مکمل: {status} (جوابس منٛز {chars} حرف)",
+    "tlOther": "واقعہ {type}",
+    "reasonFallbackProvider": "بنیادی ماڈل گوو ناکام، لہذا ٹرن گوو ایجنٹک فال بیک پرووائیڈرس کن۔",
+    "reasonToolsDisabledRetry": "پرووائیڈرن کوو ٹول کال تاریخ مسترد، لہذا ٹرنک جواب دنہ آو اکوہ پیٹھ ٹولن بغیر۔",
+    "reasonRetryOther": "ماڈل کال دوہرینہ آو۔",
+    "reasonToolCallRetry": "ماڈلن ختم کوو پننہ جواب خراب ٹول کالہ سان، لہذا تمس پیٹھ دوبارہ پرژھنہ آو۔",
+    "reasonCutOff": "جواب گوو لمبائی حدس پیٹھ کٹتھ، لہذا ماڈلس وننہ آو جاری رکھن۔",
+    "reasonToolsContinue": "ٹول کالس پتہ ٲس ماڈلس ییلہ قدم ضروری، لہذا ٹرن روز جاری۔",
+    "reasonToolBlocked": "ٹولچ جاے کنہ گارڈ، پالیسی، ہُک یا حدن دوو جواب، لہذا سُہ چلیو نہ۔",
+    "reasonToolParked": "کال چھیہ انسانی منظوری خاطرٕ ژھٹان؛ ٹول چلیو نہ۔",
+    "reasonGuardAction": "اکھ گارڈریلن بدلوو جواب یا روٚکوُن۔",
+    "tlAtStart": "شروعاتہ پیٹھ",
+    "tlGap": "پیشنی واقعہ پیٹھ",
+    "tlDuration": "وقت حد",
+    "tlTokens": "ان پٹ / آؤٹ پٹ ٹوکن",
+    "tlCost": "خرچہ",
+    "tlDetails": "ہیش تہٕ خام خلاصہ",
+    "tlArgsHash": "دلیلن ہند ہیش",
+    "tlResultDigest": "نتیجچ خلاصہ",
+    "tlContentNote": "دلیل تہٕ نتیجہ چھِ کنہ تہِ محفوظ نہ کرنہ یوان۔ ٹول کالس خاطرٕ چھیہ ٹائم لائن تمۍ ہند حالت، وقت، تہٕ تمۍ ہندین دلیلن تہٕ نتیجن ہند ہیش ہاوان، تِمن ہند مواد نہ۔",
+    "tlStatFinish": "اختتامک وجہ",
+    "tlStillOpen": "ختم گوو نہ",
+    "tlProblemCount": "{count} واقعن منٛز توجہ ضروری",
+    "tlStatRetries": "دوبارہ کوشش تہٕ فیل اوور",
+    "tlStatContinuations": "تسلسل",
+    "tlStatApprovals": "منظوری",
+    "tlStatTokens": "ان پٹ / آؤٹ پٹ ٹوکن",
+    "tlTokensNotRecorded": "یمہ ٹرن خاطرٕ ریکارڈ کرنہ آو نہ",
+    "tlTokensInOut": "ان پٹ / آؤٹ پٹ",
+    "tlCopyTurnId": "ٹرن ID کاپی کٔرو",
+    "tlCopyTurnIdShort": "ID کاپی کٔرو",
+    "tlCopied": "ٹرن ID کاپی گوو۔",
+    "tlCopyFailed": "کاپی کٔرتھ سکیو نہ۔ ID چُنتھ ہاتھہ سان کاپی کٔرو۔",
+    "sessTitle": "اکس سیشنک ٹرن",
+    "sessSubtitle": "ریکارڈ کرنہ آمتۍ ٹرن پتھ نوو پیٹھ وچھنہ خاطرٕ اکھ چیٹ سیشن چُنو۔ چیٹ پیغامچ ٹرن وچھو لنک کھولنہ سیتۍ چھُ یہ توہہ خاطرٕ خودبخود بھرنہ یوان۔",
+    "sessionIdLabel": "سیشن ID",
+    "sessionIdPlaceholder": "چیٹ سیشن ID",
+    "sessFind": "ٹرن تلاش کرن وول",
+    "sessInvalid": "ایجنٹ ID (اکھ UUID) تہٕ سیشن ID دِو۔",
+    "sessLoading": "سیشنک ٹرن چھِ لوڈ گژھان...",
+    "sessUnavailableTitle": "سیشن تلاش چھیہ نہ دستیاب",
+    "sessUnavailableBody": "یہ سرور چھُ نہ سیشنک ٹرن فہرست کٔرتھ سکان۔ بدلہ تل ID سان اکھ ٹرن کھولو۔",
+    "sessErrorTitle": "سیشنک ٹرن لوڈ کٔرتھ سکیو نہ",
+    "sessEmptyTitle": "یمہ سیشنس منٛز چھِ نہ کانہہ جرنل کرنہ آمُت ٹرن",
+    "sessEmptyBody": "سیشنن کوو نہ کینہہ ریکارڈ۔ یا سیشن ID چھُ غلط، یا تمۍ ہند ٹرن چلنہ وقت ٲس ٹرن جرنل بند۔",
+    "sessListLabel": "{count} جرنل کرنہ آمتۍ ٹرن",
+    "sessEvents": "{count} واقعہ",
+    "sessStatusOpen": "کھولو",
+    "sessOpen": "ٹائم لائن کھولو",
+    "sessOpened": "تل ہاونہ آمُت"
+  },
+  "evalControls": {
+    "cancel": "منسوخ کٔرو",
+    "saving": "محفوظ گژھان چھُ...",
+    "saved": "محفوظ گوو۔",
+    "saveMode": "ریپلے موڈ محفوظ کٔرو",
+    "discard": "تبدیلی منسوخ کٔرو",
+    "saveFailed": "ریپلے موڈ محفوظ کٔرتھ سکیو نہ۔",
+    "unsavedChanges": "غیر محفوظ تبدیلی",
+    "modeTitle": "یہ ڈیٹا سیٹ کِتھ ریپلے چھُ گژھان",
+    "modeHelp": "چُنو ییلہ ریپلے سکہِ ایجنٹک ٹول ورتاوتھ یا نہ۔ یہ چھُ اگلین رَنن ہند ناپ بدلاوان۔",
+    "modeTextOnly": "صرف متن",
+    "modeTextOnlyHelp": "ایجنٹ چھُ پننین ٹولن بغیر جواب دوان۔ محفوظ: حقیقی طور کینہہ نہ چلان۔ متوقع ٹول جانچ چھیہ نہ پوٚر گژھتھ سکان۔",
+    "modeFull": "ٹولن سان مکمل پائپ لائن",
+    "modeFullHelp": "سیود ٹول، گارڈریل تہٕ قدمن ہند حدن یم اکس اصلی صارفس ملان چھِ۔ متوقع ٹول تہٕ ٹریجکٹری جانچن خاطرٕ ضروری۔",
+    "modeFullNote": "یم ٹول صرف پڑھان چھِ تم چھِ حقیقی طور چلان۔ یُس کینہہ ڈیٹا بدلتھ، پیغام بوزناوتھ یا رقم خرچ کٔرتھ سکہِ تمہ چھُ سمولیٹ کرنہ یوان تہٕ رَنس منٛز درج، لہذا حقیقی طور کینہہ نہ چھُ سپدان۔ حفاظتی درجہ بندی بغیر ٹول چھِ تہِ سمولیٹ سپدان۔",
+    "autoApproveLabel": "ایول سینڈ باکسس منٛز ٹول کال خودبخود منظور کٔرو",
+    "autoApproveHelp": "عام طور چھُ انسانس خاطرٕ ژھٹان والین ٹول کالن ایول سینڈ باکس منظور کران، تیلہ زِ کیس ختم سپدتھ سکہِ۔ یمہ بغیر چھُ کیس پروڈکشنس منٛز یتھہ طرح گژھان تتھہ طرح بے جواب منظوری پیٹھ ختم گژھان۔",
+    "autoApproveWarnTitle": "صرف غیر پروڈکشن ورک سپیسن خاطرٕ",
+    "autoApproveWarnBody": "یہ کنہ وقت نہ چالو کٔرو یتھ جایہ ٹول اصلی گاہکن یا ڈیٹا کن پہنچتھ سکن۔ شیل، کوڈنگ، شیڈیول، ایجنٹ سے ایجنٹ، ادائیگی تہٕ ڈیلیٹ ٹول چھِ کنہ وقت خودبخود منظور نہ سپدان۔ توہہِ ہند ایڈمن گژھِ یمہ ورک سپیسس غیر پروڈکشن نشان کرنہ آمژ روزن۔",
+    "autoApproveNeedsFull": "پیٹھمس مکمل پائپ لائن چالو کٔرو: خودکار منظوری چھیہ صرف ییلہ ٹول چلن تیلہ لاگو گژھان۔",
+    "autoApproveRefused": "یمہ ورک سپیسس منٛز اجازت چھیہ نہ: {reason}",
+    "autoApproveConfirmTitle": "ایولس منٛز ٹول کال خودبخود منظور کٔرو؟",
+    "autoApproveConfirmBody": "یمہ ڈیٹا سیٹک ریپلے منٛز ہر ٹول کال یُس انسانس خاطرٕ ژھٹتھ، گژھِ خودبخود منظور سپدنۍ۔ منظور شدہ صرف پڑھن والۍ ٹول چھِ حقیقی طور چلان؛ یم کینہہ بدلتھ سکن سُہ چھِ ہنوز سمولیٹ سپدان۔ یہ صرف ٹیسٹ ڈیٹا والس ورک سپیسس منٛز کٔرو۔ رَن چھِ درج کران زِ تم ٲسۍ خودبخود منظور سپدمتۍ۔",
+    "autoApproveConfirm": "خودکار منظوری چالو کٔرو",
+    "trajectoryLabel": "ٹریجکٹری جانچ",
+    "trajectoryOn": "On",
+    "trajectoryOff": "دستیاب چھیہ نہ",
+    "trajectoryHelpOn": "متوقع ٹریجکٹری والۍ کیس چھِ یمہ بنیادس پیٹھ نمبر حاصل کران زِ ایجنٹن کمۍ ترتیبہ کمۍ ٹول کال کوۍ۔ یہ چھُ توہہِ ہند ایڈمن پوری تعیناتی خاطرٕ چالو کران، ہر ڈیٹا سیٹ خاطرٕ نہ۔",
+    "trajectoryHelpOff": "ٹریجکٹری جانچ چھیہ نہ یتھ دستیاب۔ تم چھُ توہہِ ہند ایڈمن پوری تعیناتی خاطرٕ چالو کران، تہٕ ایول شامل پلان چھُ ضروری۔",
+    "trajectoryNeedsFull": "یہ ڈیٹا سیٹ چھُ صرف متن، لہذا متوقع ٹریجکٹری والین کیسن گژھنۍ نہ نمبر ملن۔ مکمل پائپ لائن چالو کٔرو۔",
+    "runAutoApproved": "خودبخود منظور",
+    "runAutoApprovedTitle": "یمہ رَنک کنہ تہِ ٹول کالک فیصلہ کوو نہ کانہہ انسانن؛ ایول سینڈ باکسن کور تم منظور۔",
+    "toolCallsLabel": "یمہ ریپلے منٛز ٹول کال",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "ناکام",
+    "toolStatusNotRun": "چلیو نہ",
+    "toolStatusAwaitingApproval": "منظوری خاطرٕ ژھٹان",
+    "toolStatusReplayed": "ریپلے گوو",
+    "samplingTitle": "پس منظر معیاری نمبر",
+    "samplingLoading": "نمبر دنچ شرح چھیہ لوڈ گژھان...",
+    "samplingUnavailable": "پس منظرک جج کتھ لائیو ٹرنن چھُ نمبر دوان یہ چھُ توہہِ ہند پلیٹ فارم ایڈمن طے کران تہٕ چھُ نہ یتھ ہاونہ یوان۔",
+    "samplingValue": "تقریباً {percent}% لائیو ٹرنن چھُ پس منظر معیار جج نمبر دوان۔",
+    "samplingHelp": "کم شرح چھیہ خرچہ کم کران تہٕ اُتھ رجحانس منٛز کم نمبر رٔکھان۔ یہ قدر چھیہ یتھ صرف پڑھنہ خاطرٕ۔",
+    "samplingSource_default": "ڈیفالٹ",
+    "samplingSource_platform": "پلیٹ فارمن سیٹ کرنہ آمُت",
+    "samplingSource_tenant": "توہہِ ہندس ورک سپیسس خاطرٕ سیٹ کرنہ آمُت",
+    "samplingSource_agent": "یمہ ایجنٹ خاطرٕ سیٹ کرنہ آمُت",
+    "modeDefault": "ورک سپیس ڈیفالٹ",
+    "modeDefaultHelp": "توہہِ ہند ورک سپیسک سیٹنگ چھُ مانان (مکمل پائپ لائن، جیسے کہ ایڈمنن نہ بدلوو)۔ ہر رَن سکہِ ہنوز پننہ موڈ چُنتھ۔",
+    "modeDefaultCurrent": "ہُن: {mode}",
+    "modeNameFull": "مکمل پائپ لائن",
+    "modeNameQuick": "تیز (صرف متن)",
+    "badgeFull": "مکمل پائپ لائن",
+    "badgeQuick": "تیز",
+    "datasetModePinnedTitle": "یہ ڈیٹا سیٹ چھُ ہمیشہ یتھہ طرح ریپلے سپدان۔ اکھ رَن سکہِ ہنوز بیاکھ موڈ چُنتھ۔",
+    "datasetModeDefaultTitle": "رَن کِتھ ریپلے سپدن، یمہ بارہ منٛز چھُ یہ ڈیٹا سیٹ ورک سپیسک ڈیفالٹ مانان۔",
+    "runModeLabel": "اگلہ رَنہ خاطرٕ ریپلے موڈ",
+    "runModeInherit": "ڈیٹا سیٹک سیٹنگ ورتاو",
+    "runModeHelp": "مکمل پائپ لائن چھیہ ایجنٹس تمۍ ہندین ٹولن، گارڈریلن تہٕ منظوریَن سان محفوظ سینڈ باکسس منٛز چلاوان: صرف پڑھن والۍ ٹول چھِ حقیقی طور چلان، تہٕ یُس کینہہ ڈیٹا بدلتھ یا کینہہ بوزناوتھ سکہِ سُہ چھُ سمولیٹ سپدان۔ تیز موڈ چھُ ٹول روٚکان تہٕ صرف لیکھنہ آمژ جواب پرکھان۔",
+    "runModeFullTitle": "یمہ رَنن ایول سینڈ باکسس منٛز مکمل پائپ لائن ورتووے۔",
+    "runModeQuickTitle": "یہ رَن ٲس صرف متنک تیز ریپلے: ایجنٹک ٹول ٲسۍ روٚکنہ آمتۍ۔",
+    "runSimulatedTools": "یمہ رَنس منٛز سمولیٹ کرنہ آیہ، چلاونہ آیہ نہ (تم سکہِ ڈیٹا بدلتھ یا پلیٹ فارمہ پیٹھ بہر پہنچتھ): {tools}۔",
+    "toolStatusSimulated": "سمولیٹ کرنہ آمُت، چلاونہ آمُت نہ"
+  },
+  "assistant": {
+    "taskPhoneLabel": "توہہِ ہند فون نمبر",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "سُہ نمبر محفوظ کٔرتھ سکیو نہ۔",
+    "searchingWebFor": "Searching the web for “{target}”…",
+    "readingPageAt": "Reading {target}…",
+    "researchingTopic": "Researching “{target}”…",
+    "statusWriting": "Writing the answer…",
+    "quietFor": "still waiting on the model ({duration} since the last update)",
+    "toolStepsLabel": "Steps",
+    "chipDone": "finished",
+    "chipFailed": "failed",
+    "moreSteps": "+{n} more",
+    "sourcesLabel": "Sources",
+    "closePanel": "Close the panel",
+    "conversationLabel": "Conversation",
+    "copiedReply": "Copied",
+    "jumpToLatest": "Jump to the latest message"
+  },
+  "agentLab": {
+    "wtLabel": "ایجنٹن ہندین ٹولن سان چلاو",
+    "wtHelp": "بند: ہر جواب چھُ اکھ عام ماڈل کال۔ چالو: جواب چھِ سُہ ٹول پائپ لائنہ پیٹھ یوان یُس چیٹ ٹرن ورتاوان چھُ، لہذا ٹول چھِ چلان، گارڈریل چھِ لاگو گژھان تہٕ قدمن ہند حد چھیہ مانان۔ یِم کال یمن انسانی منظوری گژھِ، سُہ چھِ باقی منظوری سپدتھ ژھٹان۔",
+    "wtUnavailable": "یتھ انسٹالیشنس منٛز چھُ ٹولن سان لیب چلُن بند۔ یہ چالو کرنہ خاطرٕ ایڈمنس سٟتۍ ونو۔",
+    "wtRefused": "یہ رَن چھُ ردّ کرنہ آمُت: {reason}",
+    "wtActive": "یتھ رَنس منٛز چھِ ٹول حقیقی طور چلان، تِمن ہندِ ضمنی اثرن سمیت۔",
+    "wtConfirmTitle": "ایجنٹن ہندین ٹولن سان لیب چلاو؟",
+    "wtConfirmBody": "ہر نمونہ سکہِ ایجنٹن ہند اصلی ٹول کال کٔرتھ تہٕ تِمن کالن ہند اصلی اثر سپدِتھ سکہِ، یُتھ پیٹھ پیغام بوزُن یا ڈیٹا لیکھُن۔ منظوری آلی کال چھِ انسانس خاطرٕ ژھٹان۔ یہ صرف ٹیسٹ ایجنٹن یا ٹیسٹ ڈیٹا سان ورتاو۔",
+    "wtConfirm": "ٹول ورتاو"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "ایجنٹک حد",
+        "description": "بند گژھنہ برونہہ اکھ ایجنٹ ٹرن سکہِ کتھ کام کٔرتھ۔"
+      },
+      "approvals": {
+        "label": "منظوری",
+        "description": "ییلہ اکھ انسان کارروائی منظور یا مسترد چھُ کران تیلہ کیا چھُ سپدان، تہٕ درخواست چھیہ کتھ وقت ژھٹان۔"
+      },
+      "chat": {
+        "label": "گفتگوک برتاؤ",
+        "description": "جواب کتھ چھِ ختم گژھان، دوبارہ کوشش، کیش تہٕ جاری رکھن۔"
+      },
+      "routing": {
+        "label": "ماڈل روٹنگ",
+        "description": "کُس پیغام چھُ تیز ماڈلس خاطرٕ کافی سادٕ گنڈنہ یوان۔"
+      },
+      "memory": {
+        "label": "میموری",
+        "description": "ایجنٹ چھُ کتھ یاداشت رٔکھان تہٕ یاد کران۔"
+      },
+      "attachments": {
+        "label": "چیٹ اپلوڈ",
+        "description": "لوکھ سکن چیٹ پیغامن سان کتھ بوٚڈ فائل جوڑتھ۔"
+      },
+      "skills": {
+        "label": "اسکل",
+        "description": "نصب شدہ اسکلن ہند فہرست سکہِ ایجنٹک ہدایتن ہند کتھ حصہ ورتاوتھ۔"
+      },
+      "aux": {
+        "label": "پس منظر ماڈل کال",
+        "description": "خلاصہ، مدد تہٕ کمپریشن چھِ کُس ماڈل ورتاوان۔"
+      },
+      "guardrails": {
+        "label": "حفاظتی جانچ",
+        "description": "خودکار حفاظتی جانچ چھیہ کتھ سخت۔ یم سکن صرف پلیٹ فارم سیٹنگ کھوتہ سخت کرنہ یتھ۔"
+      },
+      "quality": {
+        "label": "تشخیص",
+        "description": "ٹیسٹ رَن تہٕ AI جج چھِ کِتھ برتاؤ کران۔"
+      },
+      "delegation": {
+        "label": "کام سونپُن",
+        "description": "اکھ ایجنٹ سکہِ اکس ہی وقت بییین ایجنٹن کتھ کام سونپتھ۔"
+      },
+      "knowledge": {
+        "label": "علم تلاش",
+        "description": "بہترین حصہ چُننہ برونہہ چھیہ توہہِ ہندین اپلوڈ کرنہ آمتین دستاویزن ہند تلاش امیدوار کتھ وسیع پیمانس پیٹھ جمع کران۔"
+      },
+      "learning": {
+        "label": "سیکھُن",
+        "description": "ایجنٹک سیکھنچ پالیسی چھیہ آپشن کِتھ آزمایان۔"
+      },
+      "providers": {
+        "label": "AI پرووائیڈر",
+        "description": "اگر جوڑ تھاونہ آمژ AI پرووائیڈرن منٛز اکھ کام کرنہ بند کرِ تہٕ تمن کِتھ ورتاوُن۔"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "فی ٹرن زیادہ ز زیادہ ٹول کال",
+          "description": "اکھ ٹرن بند کرنہ تہٕ تس پننہ یمہ کینہہ تہِ چھُ تمہ سان جواب دنہ خاطرٕ ونُن برونہہ سُہ سکہِ زیادہ ز زیادہ کتھ ٹول کال کٔرتھ۔",
+          "help": "لمبین، کثیر قدم کام کرن والین ایجنٹن خاطرٕ بڈاو۔ بے قابو لوپ روکنہ تہٕ خرچہ قابل پیشگوئی رٔکھنہ خاطرٕ گھٹاو۔ ورک سپیس یا پلیٹ فارم خاطرٕ ہاونہ آمُت قدر چھیہ اکھ بنیادی عدد: ایجنٹک خود مختاری درجہ چھُ رَن وقت یتھ اُتھ تل کران، لہذا زیادہ یا کم خود مختار ایجنٹ سکن مختلف عدد ورتاوتھ۔ ایجنٹک پننہ قدر سیٹ سپدنس پیٹھ چھُ سُہ جیسے ہے ورتاونہ یوان۔"
+        },
+        "turnTimeoutSeconds": {
+          "label": "فی ٹرن زیادہ ز زیادہ وقت",
+          "description": "اکھ ٹرن سکہِ بند گژھنہ برونہہ کتھ وقت چلتھ۔",
+          "help": "سست تحقیق یا کوڈ کامن خاطرٕ بڈاو۔ وقت ختم سپدمت ٹرن چھُ ہُن تام کرنہ آمتس کامس سان ختم گژھان۔"
+        },
+        "toolTimeoutSeconds": {
+          "label": "فی ٹول کال زیادہ ز زیادہ وقت",
+          "description": "اکھ ٹول کال سکہِ بند گژھنہ برونہہ کتھ وقت چلتھ۔ پلیٹ فارم ڈیفالٹس منٛز چھیہ نہ کانہہ حد؛ تیلہ چھُ ہر ٹول پننہ ٹائم آؤٹ رٔکھان۔",
+          "help": "اگر اکھ سست ٹول سکہِ پوری گفتگو روٚکتھ تہٕ حد سیٹ کٔرو۔ بند کرنہ آمژ کالک کانہہ اثر ٲس یا نہ سُہ چھُ نہ معلوم، لہذا ایجنٹس چھُ ونان زِ سُہ نہ مانن زِ یہ کامیاب ٲس۔"
+        },
+        "toolOutputMaxChars": {
+          "label": "سب پیٹھ لمبٕ ٹول نتیجہ",
+          "description": "اکس ٹول نتیجچ کتھ حرف چھِ ماڈلس دنہ یوان؛ باقی چھِ کٹنہ یوان۔",
+          "help": "اگر ایجنٹس لمبٕ دستاویز یا API جواب پورٕ پڑھن چھِ تہٕ بڈاو، فی ٹرن زیادہ ٹوکنک قیمتس پیٹھ۔ خرچہ بچاونہ خاطرٕ گھٹاو۔"
+        },
+        "retrievalTopK": {
+          "label": "فی تلاش علمک ٹکرے",
+          "description": "اکھ علم ذخیرہ تلاش چھیہ ایجنٹس کتھ ٹکرے واپس دوان۔",
+          "help": "زیادہ ٹکرے چھِ ایجنٹس کام کرنہ خاطرٕ زیادہ مواد دوان مگر زیادہ ٹوکن خرچ کران تہٕ شور بڈاوتھ سکان۔ کم ٹکرے چھِ تیز تہٕ سستۍ۔"
+        },
+        "retrievalMinScore": {
+          "label": "اکس ٹکرچ کم ز کم مطابقت",
+          "description": "اکھ علم ٹکرہ واپس دنہ خاطرٕ کتھ متعلق گژھن۔ 0 چھُ ہر ہٹ واپس کران۔",
+          "help": "اگر ایجنٹ چھُ غیر متعلق ٹکرے نقل کران تہٕ بڈاو۔ بہت بڈاونہ سان سکہِ تس کینہہ نہ میلتھ۔"
+        },
+        "continuationPasses": {
+          "label": "نامکمل جوابس پتہ اضافی پاس",
+          "description": "اگر ماڈلک جواب اعلان کرنہ آمتس مگر ناکرنہ آمتس قدمس پیٹھ روزِ تہٕ تس کتھ وار جاری رکھنچ وننہ یوان۔",
+          "help": "اتھ ایجنٹس خاطرٕ بڈاو یُس اکثر قدم اعلان کٔرتھ رُکان چھُ۔ ہر اضافی پاس چھُ اکھ ماڈل کال خرچ کران۔"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "حد پتہ جواب دنہ آمتۍ کال",
+          "description": "ٹرنک ٹول حد ختم سپدنہ پتہ سکہِ ماڈل کتھ ٹول کال ہور آزمایتھ۔ ہر اکھ چھُ \"یمہ کینہہ تہِ چھُ تمہ سان جواب دِ\" نوٹس سان مسترد کرنہ یوان؛ یمہ گنتی پتہ چھُ ٹرن غلطی سان روٚکنہ یوان۔",
+          "help": "اگر ماڈلس ٹول کال بند کرنہ خاطرٕ کینہہ کوشش چھیہ ضرورت تہٕ یہ بڈاو۔ لوپس منٛز پھسمتۍ ٹرن جلدی ختم کرنہ خاطرٕ گھٹاو۔ 0 چھُ حدہ پیٹھ اُتھ پہلس کالس پیٹھ ٹرن روٚکان۔"
+        },
+        "supervisedDivisor": {
+          "label": "نگرانی منٛز ایجنٹن چھُ ٹول حدک 1/N میلان",
+          "description": "نگرانی منٛز ایجنٹس چھیہ ٹرنک ٹول کال حد یمہ عددن سان تقسیم سپدتھ میلان، مگر تل آمتس کم ز کم قدرہ کھوتہ کنہ وقت کم نہ۔",
+          "help": "نگرانی منٛز ایجنٹن زیادہ سختی منٛز رٔکھنہ خاطرٕ یہ بڈاو۔ 1 چھُ تمن پوٚر حد دوان۔"
+        },
+        "supervisedMinSteps": {
+          "label": "نگرانی منٛز ایجنٹک خاطرٕ کم ز کم ٹول کال",
+          "description": "اُتھ عدد کتھ تہِ زیادہ سپدِ، نگرانی منٛز ایجنٹس ملنہ والی سب پیٹھ سیود ٹول کال حد۔",
+          "help": "یہ 3 یا زیادہ رٔکھو تاکہ نگرانی منٛز ایجنٹ کئی قدمن والۍ سادٕ کام ہنوز مکمل کٔرتھ سکہِ۔"
+        },
+        "autonomousMultiplier": {
+          "label": "مکمل خود مختار ایجنٹن چھُ حدک N گنا میلان",
+          "description": "مکمل خود مختار ایجنٹس چھیہ ٹرنک ٹول کال حد یمہ عددن سان ضرب سپدتھ میلان۔",
+          "help": "یمن ایجنٹن خاطرٕ بڈاو یم بغیر کنہ تہِ نگرانی لمبٕ کام چلاوان چھِ؛ تیلہ سکن تم اکس ٹرنس منٛز زیادہ کال تہٕ رقم خرچ کٔرتھ۔ 1 چھُ تمن معیاری حد دوان۔"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "منظوری پتہ جاری رکھو",
+          "description": "ییلہ اکھ انسان کارروائی منظور کرِ، تیلہ چھُ ایجنٹ نوو پیغام خاطرٕ ژھٹنہ بغیر خود کام ختم کران۔",
+          "help": "اگر توہہ چھِ چھیو زِ ہر منظور کرنہ آمژ کارروائی گژھِ ٹرن ختم کرن تہٕ فالو اپ گژھِ ہاتھہ سان سپدن تہٕ یہ بند کٔرو۔"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "مسترد کرنہ پتہ تہِ چھُ پس منظر جاب جاری روزان",
+          "description": "پس منظر جابس منٛز ییلہ انسان کارروائی مسترد کرِ، تیلہ چھُ جاب بند گژھنہ بدلہ مسترد کرنس درج کٔرتھ جاری روزان۔",
+          "help": "اگر مسترد کرنہ سیتۍ جاب گژھِ بند سپدن تہٕ یہ بند رٔکھو۔ اگر جاب مسترد کرنہ آمتس قدمس بغیر عام طور ختم سپدتھ سکہِ تہٕ چالو کٔرو۔"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "منظوری درخواستک وقت ختم گژھان چھُ",
+          "description": "اکھ منظوری درخواست چھیہ وقت ختم گژھنہ برونہہ فیصلہ خاطرٕ کتھ وقت ژھٹان۔ 0 مطلب درخواست کنہ وقت نہ ختم گژھان۔",
+          "help": "وقت حد بغیر، بیچارۍ درخواست چھِ غیر معینہ مدت کھلۍ روزان تہٕ ایجنٹ چھُ ژھٹان۔ وقت ختم سپدمتۍ درخواست چھِ غیر منظور گنڈنہ یوان۔"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "کٹتھ گوومت جواب مکمل کٔرو",
+          "description": "اگر ماڈلک لمبائی حد جواب کٹان چھیہ یا سُہ خراب ٹول کالہ پیٹھ ختم گژھان چھُ، تہٕ ماڈلس ونو جاری رکھن یا دوبارہ کوشش کرنچ۔",
+          "help": "یہ صرف ماڈل ہند مسئلہ تشخیص کرنہ خاطرٕ بند کٔرو؛ تیلہ چھِ انسان کٹتھ گوومت جواب یتھہ طرح چھُ تتھہ طرح وچھان۔"
+        },
+        "maxContinuations": {
+          "label": "کٹتھ گوومتس جوابچ زیادہ ز زیادہ جاری رکھن",
+          "description": "جواب کٹنہ پتہ ماڈلس کتھ وار جاری رکھنچ وننہ یوان۔",
+          "help": "ہر جاری رکھن چھُ اکھ ہور ماڈل کال۔ لمبین جوابن خاطرٕ بڈاو، خرچہ بچاونہ خاطرٕ گھٹاو۔"
+        },
+        "maxToolCallRetries": {
+          "label": "خراب ٹول کالک زیادہ ز زیادہ دوبارہ کوشش",
+          "description": "ناقابل استعمال دلیلن سان آمتس ٹول کالس دوہراونہ خاطرٕ ماڈلس کتھ وار وننہ یوان۔",
+          "help": "اکھ دوبارہ کوشش چھیہ اکھ ماڈل کال خرچ کران۔ 0 چھُ پتمس خراب کالس پیٹھ ہار مانان۔"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "فی ماڈل کال کوشش",
+          "description": "ییلہ پرووائیڈر ناکام یا مصروف چھُ، تیلہ اکھ ماڈل کال کتھ وار کوشش کرنہ یوان، پہلی کوشش سمیت۔",
+          "help": "زیادہ کوشش چھِ پرووائیڈرک سیود رکاوٹ لُکناوان مگر ناکام سپدنس والس درخواستس گژھِ خرابی ہاونس زیادہ وقت لگتھ۔"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "ٹول والین ایجنٹن خاطرٕ جواب دوبارہ ورتاو",
+          "description": "ٹول والین ایجنٹن خاطرٕ محفوظ جواب دوبارہ ورتاونچ اجازت دِو۔ ٹول سکہِ اگلہ وار کینہہ ہور واپس دتھ، لہذا ڈیفالٹ طور بند۔",
+          "help": "اگر ٹول چھِ صرف پڑھنہ لایق تہٕ ہولے ہولے بدلان، تہٕ توہہ چھِو تیز، سستۍ دوہرایومتۍ جواب چھیو، تیلہ چالو کٔرو۔ انسان سکن غیر اپ ڈیٹ جواب وچھتھ۔"
+        },
+        "contextTurns": {
+          "label": "دوہراو پہچاننہ خاطرٕ پیشنی ٹرن",
+          "description": "اکھ پیغام چھُ اکھ دوہراو یتھ پیٹھ محفوظ جواب دوبارہ ورتاونہ سکہِ یا نہ، یہ طے کرنہ خاطرٕ کتھ پیشنی ٹرن موازنہ کرنہ یوان۔",
+          "help": "زیادہ ٹرن چھِ میلس سخت تہٕ کیش ہٹس نایاب کران۔"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "فالو اپس منٛز ٹول تجویز کران روزو",
+          "description": "ییلہ اگلہ پیغام اکھ سیود فالو اپ چھُ، تیلہ گفتگوہن برونہہ ورتاونہ آمت ٹول تجویز کران روزو۔",
+          "help": "اگر \"ہاں\" جیسن سیودن جوابن گژھن عام ٹول انتخابہ پیٹھ شروع سپدن تہٕ یہ بند کٔرو۔"
+        },
+        "stickyToolsWindow": {
+          "label": "فالو اپ ٹول کتھ وقت تجویز کرنہ یوان چھِ",
+          "description": "ورتاونس پتہ سیودن فالو اپ پیغامن خاطرٕ اکھ ٹول کتھ وقت تجویز کرنہ روزان چھُ۔",
+          "help": "لمبٕ کھڑکی چھیہ لمبین کامچ سیشنن منٛز مدد کران، سیود چھیہ ٹول فہرست سیود رٔکھان۔"
+        },
+        "maxStickyTools": {
+          "label": "فالو اپس منٛز تجویز رٔکھنہ والۍ زیادہ ز زیادہ ٹول",
+          "description": "سیودس فالو اپ پیغامس منٛز اگے نیونہ والۍ زیادہ ز زیادہ ٹول۔ 0 چھُ کانہہ نہ رٔکھان۔",
+          "help": "ییلہ کانہہ کام زیادہ ٹول ورتاوان چھُ تیلہ بوٚڈ عدد چھُ مدد کران؛ سیود چھُ ٹول فہرست سیود رٔکھان۔"
+        },
+        "keepPrimaryModel": {
+          "label": "فالو اپس خاطرٕ مرکزی ماڈل رٔکھو",
+          "description": "یمہ گفتگو منٛز یتھ پہلے ٹول ورتاونہ آمتۍ ٲسۍ سیود فالو اپ چھُ سستس ماڈلس بدلہ ایجنٹک مرکزی ماڈلس پیٹھ ہی روزان۔",
+          "help": "یہ بند کٔرو تاکہ لاگت روٹنگ \"ہاں\" جیسن فالو اپس سستس ماڈلس کن بوزنوی، مگر جاری کامک کمزور طریقہ سان سنبھالنچ خطر چھُ روزان۔"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "جواب دوبارہ ورتاونہ خاطرٕ سوال کتھ ملتا جلتا گژھِ",
+          "description": "یمن ایجنٹن خاطرٕ یم ملتین سوالن ہند جواب دوبارہ ورتاوان چھِ: محفوظ جواب دنہ خاطرٕ نوو سوال پیشنس سوالس کتھ نزدیک گژھِ سپدنۍ، 0.85 پیٹھ 1 تام۔",
+          "help": "کم عدد چھُ زیادہ دہراو جواب دوان مگر بییس سوالس خاطرٕ بنیومت جواب دنچ خطر چھُ روزان۔ غلط جواب مہنگۍ سپدن تہٕ یہ اُتھ رٔکھو۔ جواب چھُ صرف تمس شخصس خاطرٕ دوبارہ ورتاونہ یوان یمس سُہ دتمُت ٲس۔"
+        },
+        "ttl": {
+          "label": "دوبارہ ورتاونہ لایق جواب کتھ وقت رٔکھنہ یوان چھُ",
+          "description": "محفوظ جواب ہٹاونہ برونہہ ملتین سوالس کتھ وقت تام دنہ یتھ۔",
+          "help": "اگر توہہِ ہند جواب جلدی پرانۍ گژھان چھِ تہٕ یہ مختصر کٔرو۔"
+        },
+        "maxEntriesPerAgent": {
+          "label": "فی ایجنٹ زیادہ ز زیادہ محفوظ جواب",
+          "description": "اکھ ایجنٹ چھُ دوبارہ ورتاونہ خاطرٕ کتھ جواب رٔکھان۔ یمہ کھوتہ زیادہ سپدنس پیٹھ چھِ سب پیٹھ پرانۍ ہٹنہ یوان۔",
+          "help": "بوٚڈ ذخیرہ چھُ زیادہ دہراو لبان تہٕ زیادہ اسٹوریج ورتاوان۔"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "گفتگو منٛز ٹول کالن ہند ریکارڈ رٔکھو",
+          "description": "ہر ٹرنک ٹول کالن ہند سیود ریکارڈ گفتگو سان محفوظ کٔرو، تاکہ پتمۍ ٹرن وچھتھ سکن زِ کیا کرنہ آو۔",
+          "help": "گفتگو ہند تاریخ صرف متن رٔکھنہ خاطرٕ یہ بند کٔرو؛ تیلہ سکہِ ایجنٹ نہ زانتھ زِ پیشنین ٹرنن منٛز تمۍ ہندین ٹولن کیا کوو۔ یہ چھُ پوری ورک سپیسس پیٹھ لاگو سپدان۔"
+        },
+        "replayEnabled": {
+          "label": "ماڈلس ٹول ریکارڈ ہاو",
+          "description": "ماڈلس گفتگو دنہ وقت پیشنین ٹول کالن ہند محفوظ ریکارڈ شامل کٔرو۔",
+          "help": "یہ بند کٔرو تاکہ ریکارڈ محفوظ گژھان روزِ مگر تمہ خاطرٕ ماڈلک کام کرنچ جاے نہ ورتاونہ یوی۔"
+        },
+        "replayTurns": {
+          "label": "پیشن ٹرن یمن ہند ٹول ریکارڈ ہاونہ یوان چھُ",
+          "description": "ٹول ورتاون والین حالیہ ترین ٹرنن منٛز کتھن ہند ریکارڈ ماڈلس ہاونہ یوان چھُ۔",
+          "help": "بوٚڈ عدد چھُ لمبین کامچن سیشنن منٛز مدد کران مگر ماڈلک کام کرنچ جاے زیادہ ورتاوان۔"
+        },
+        "maxEntriesPerTurn": {
+          "label": "فی ٹرن درج کرنہ آمتۍ ٹول کال",
+          "description": "اکس ٹرنک کتھ ٹول کال چھِ ریکارڈس منٛز لیکھنہ یوان۔ باقی کال چھِ صرف گنڈنہ یوان۔",
+          "help": "یمن ٹرنن خاطرٕ بڈاو یم بہت کال چھِ کران تہٕ ہر اکھ یاد رٔکھن ضروری چھُ۔"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "فی ٹرن سب پیٹھ لمبٕ ٹول ریکارڈ",
+          "description": "اکس ٹرنک ریکارڈک کتھ حرف ماڈلس ہاونہ یوان چھِ؛ باقی چھِ گنڈنہ یوان، درج نہ کرنہ یوان۔",
+          "help": "پتمین ہر ٹرنک خرچہ بچاونہ خاطرٕ گھٹاو، زیادہ تفصیل رٔکھنہ خاطرٕ بڈاو۔"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "سب پیٹھ بوٚڈ تصویر اپلوڈ (MB)",
+          "description": "چیٹ پیغامس سان کانہہ شخص سب پیٹھ بوٚڈ کتھ تصویر جوڑتھ سکہِ، میگابائٹس منٛز۔ پلیٹ فارمچ اکھ کل فائل حد تہِ چھیہ یمہ کھوتہ یہ نہ اُتھ گژھتھ سکہِ۔",
+          "help": "تصویرن تہٕ اسکرین شاٹن خاطرٕ بڈاو؛ بوٚڈ فائل چھِ بوزناونس منٛز سست تہٕ ماڈلک زیادہ کوٹہ ورتاوان۔"
+        },
+        "maxAudioMb": {
+          "label": "سب پیٹھ بوٚڈ آڈیو اپلوڈ (MB)",
+          "description": "چیٹ پیغامس سان کانہہ شخص سب پیٹھ بوٚڈ کتھ آڈیو فائل جوڑتھ سکہِ، میگابائٹس منٛز۔ پلیٹ فارمچ اکھ کل فائل حد تہِ چھیہ یمہ کھوتہ یہ نہ اُتھ گژھتھ سکہِ۔",
+          "help": "لمبین ریکارڈنگن خاطرٕ بڈاو؛ بوٚڈ فائل چھِ بوزناونس منٛز سست تہٕ ماڈلک زیادہ کوٹہ ورتاوان۔"
+        },
+        "maxVideoMb": {
+          "label": "سب پیٹھ بوٚڈ ویڈیو اپلوڈ (MB)",
+          "description": "چیٹ پیغامس سان کانہہ شخص سب پیٹھ بوٚڈ کتھ ویڈیو جوڑتھ سکہِ، میگابائٹس منٛز۔ پلیٹ فارمچ اکھ کل فائل حد تہِ چھیہ یمہ کھوتہ یہ نہ اُتھ گژھتھ سکہِ۔",
+          "help": "لمبین کلپن خاطرٕ بڈاو؛ بوٚڈ فائل چھِ بوزناونس منٛز سست تہٕ ماڈلک زیادہ کوٹہ ورتاوان۔"
+        },
+        "maxDocumentMb": {
+          "label": "سب پیٹھ بوٚڈ دستاویز اپلوڈ (MB)",
+          "description": "چیٹ پیغامس سان کانہہ شخص سب پیٹھ بوٚڈ کتھ دستاویز یا اسپریڈ شیٹ جوڑتھ سکہِ، میگابائٹس منٛز۔ پلیٹ فارمچ اکھ کل فائل حد تہِ چھیہ یمہ کھوتہ یہ نہ اُتھ گژھتھ سکہِ۔",
+          "help": "لمبین رپورٹن تہٕ بوڈین ڈیٹا فائلن خاطرٕ بڈاو؛ بوٚڈ فائل چھِ پروسیس کرنس منٛز سست۔"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "نامکمل لفظن منٛز یاد دہانی",
+          "description": "اگر جواب یُس کرنچ کتھ تمۍ کرمژ ٲس سُہ کرنہ برونہہ رُکیومت لگان چھُ تہٕ ماڈلس ونو جاری رکھن۔",
+          "help": "اگر یاد دہانی تمن جوابن پیٹھ فعال گژھان چھیہ یمن تتھ ختم سپدنچ ضرورت ٲس تہٕ یہ بند کٔرو۔"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "پرانۍ ٹول نتیجہ مٹاو",
+            "description": "لمبین ٹول رَنن منٛز، گفتگو ماڈلک حدن منٛز رٔکھنہ خاطرٕ پرانین ٹول نتیجن سیود پلیس ہولڈرن سان بدلاو۔",
+            "help": "اگر ایجنٹس ہر پیشنی نتیجہ وچھن چھُ تہٕ یہ بند کٔرو؛ لمبٕ رَن سکن تیلہ ماڈلک سائز حدس پہنچتھ۔"
+          },
+          "thresholdChars": {
+            "label": "مٹاونچ شروعات سائز",
+            "description": "پرانین مٹاونہ برونہہ اکس ٹرنک ٹول نتیجہ کتھ بوٚڈ سپدتھ سکہِ۔",
+            "help": "زیادہ نتیجہ نظر رٔکھنہ خاطرٕ بڈاو، لمبین رَنن سیود تہٕ سستۍ رٔکھنہ خاطرٕ گھٹاو۔"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "سب پیٹھ لمبٕ سادٕ پیغام",
+          "description": "یمہ کھوتہ لمبین پیغامن چھُ کنہ وقت سادٕ نہ گنڈنہ یوان۔ سادٕ پیغام سکن تیز، سستس ماڈلس کن گژھتھ۔",
+          "help": "معیار خاطرٕ زیادہ پیغام مرکزی ماڈلس کن بوزناونہ خاطرٕ گھٹاو؛ خرچہ بچاونہ خاطرٕ بڈاو۔"
+        },
+        "maxClauses": {
+          "label": "اکس سادٕ پیغامس منٛز زیادہ ز زیادہ جملہ",
+          "description": "یمہ کھوتہ زیادہ جملن والین پیغامن چھُ کنہ وقت سادٕ نہ گنڈنہ یوان۔",
+          "help": "معیار خاطرٕ زیادہ پیغام مرکزی ماڈلس کن بوزناونہ خاطرٕ گھٹاو۔"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "فی ٹرن یاد کرنہ آمژ ایجنٹ یاداشت",
+          "description": "ہر پیغام خاطرٕ ایجنٹک پننین یاداشتن منٛز کتھ وچھنہ یوان چھِ۔",
+          "help": "زیادہ یاداشت چھِ زیادہ سیاق دوان مگر زیادہ ٹوکن ورتاوان۔"
+        },
+        "tenantTopK": {
+          "label": "فی ٹرن یاد کرنہ آمژ مشترکہ یاداشت",
+          "description": "ہر پیغام خاطرٕ ورک سپیسس منٛز مشترکہ یاداشتن منٛز کتھ وچھنہ یوان چھِ۔",
+          "help": "زیادہ یاداشت چھِ زیادہ سیاق دوان مگر زیادہ ٹوکن ورتاوان۔"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "فی ایجنٹ زیادہ ز زیادہ یاداشت",
+          "description": "اکھ ایجنٹ سکہِ کتھ یاداشت رٔکھتھ۔ یمہ کھوتہ زیادہ سپدنس پیٹھ چھِ سب پیٹھ پرانۍ تہٕ کم ورتاونہ آمتۍ ژھوڈنہ یوان۔",
+          "help": "اتھ مددگارس خاطرٕ بڈاو یُس لوکن بارہ منٛز بوٚڈ کینہہ یاد رٔکھان چھُ؛ یہ چھُ محفوظ کرنک تہٕ یاد کرنک خرچہ تہِ بڈاوان۔"
+        }
+      },
+      "tenant": {
+        "maxMemories": {
+          "label": "زیادہ ز زیادہ مشترکہ یاداشت",
+          "description": "ورک سپیسس منٛز کتھ مشترکہ یاداشت چھِ رٔکھنہ یوان۔ یمہ کھوتہ زیادہ سپدنس پیٹھ چھِ سب پیٹھ پرانۍ ہٹنہ یوان۔",
+          "help": "مشترکہ علمس پیٹھ منحصر بوڈین ٹیمن خاطرٕ بڈاو؛ یہ چھُ اسٹوریج تہٕ یاد کرنک خرچہ تہِ بڈاوان۔ یہ چھُ پوری ورک سپیسس پیٹھ لاگو سپدان۔"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ڈیوائسس پیٹھ چیٹس دنہ آمژ یاداشت",
+          "description": "ڈیوائسس پیٹھ سیشن شروع سپدنس پیٹھ تمس کتھ یاداشت چھِ سونپنہ یوان۔",
+          "help": "ڈیوائسس پیٹھ ماڈلن چھیہ کام کرنچ جاے سیود، لہذا یہ کم رٔکھو۔"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "گراف میموری پیٹھ یاد کرنہ آمژ حقائق",
+          "description": "اکس لُک اپس منٛز ایجنٹس تمۍ ہندس رشتہ میموری پیٹھ ہاونہ آمژ زیادہ ز زیادہ حقائق۔",
+          "help": "زیادہ حقائق چھِ ایجنٹس کنہ شخص یا موضوع بارہ منٛز زیادہ پس منظر دوان مگر تمۍ ہند کام کرنچ جاے ہند زیادہ حصہ ورتاوان۔ کم حقائق چھِ جواب مرکوز رٔکھان۔ یہ پوری ورک سپیس خاطرٕ، یا زیادہ یا کم ضرورت والس ایجنٹس خاطرٕ سیٹ کٔرو۔"
+        },
+        "recallMaxPaths": {
+          "label": "فی لُک اپ پڑھنہ آمتۍ گراف راستہ",
+          "description": "اکس لُک اپچ حقائق لبنہ خاطرٕ میموری گرافک کتھ کنکشن پڑھنہ یوان چھِ۔",
+          "help": "کئی کنکشن سکن اکس ہی حقیقتس تام پہنچتھ، لہذا گھنٹ جوڑ میموریس منٛز سارنی کینہہ لبنہ خاطرٕ زیادہ عدد ضروری سپدتھ سکہِ۔ زیادہ عدد چھِ ہر لُک اپ سست کران۔"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "پرامپٹس منٛز درج زیادہ ز زیادہ اسکل",
+          "description": "ایجنٹس پتہ لگِ زِ تم چھِ، لہذا تمۍ ہندین ہدایتن منٛز چھِ توہہِ ہندین کتھن اسکلن ہند نام دنہ یوان۔ باقی چھِ گنڈنہ یوان، درج نہ کرنہ یوان۔",
+          "help": "اگر توہہِ کن چھِ بہت اسکل تہٕ بڈاو؛ درج ہر اسکل چھِ ہر ٹرنس منٛز ماڈلک کام کرنچ جاے ہند تھوڑ حصہ ورتاوان۔ یہ چھُ پوری ورک سپیسس پیٹھ لاگو سپدان۔"
+        },
+        "maxBlockChars": {
+          "label": "پرامپٹس منٛز اسکل فہرست ہند سائز",
+          "description": "ایجنٹک ہدایتن منٛز اسکلن ہند فہرست سکہِ کتھ حرف لیتھ۔ بھرنہ پتہ چھِ پتمۍ اسکل صرف نامن تام مختصر کرنہ یوان۔",
+          "help": "زیادہ اسکلن ہند تفصیل رٔکھنہ خاطرٕ بڈاو، ہر ٹرنس منٛز ٹوکن بچاونہ خاطرٕ گھٹاو۔ یہ چھُ پوری ورک سپیسس پیٹھ لاگو سپدان۔"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "پس منظر کال ایجنٹک ماڈل چھِ ورتاوان",
+        "description": "ییلہ تمن خاطرٕ کانہہ ماڈل نہ چُنہ آمت چھُ، تیلہ چھِ خلاصہ، مدد تہٕ سیاق کمپریشن تمہ ایجنٹک ہی ماڈل ورتاوان یمہ خاطرٕ تم کام کران چھِ۔",
+        "help": "یمن کالن خاطرٕ پلیٹ فارم ماڈل چُنِ تہٕ یہ بند کٔرو، یُس سستۍ یا بییس پرووائیڈرک سپدتھ سکہِ۔"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "حفاظتی جانچ ناکام سپدنس پیٹھ",
+        "description": "ییلہ حفاظتی جانچ پانہ ناکام گژھان چھیہ تیلہ کیا سپدان چھُ، مثلاً جج ماڈل بند سپدنس پیٹھ۔ بند چھُ کارروائی مسترد کران؛ کھول چھُ تس گژھن دوان۔",
+        "help": "توہہ سکو یہ صرف پلیٹ فارم سیٹنگ کھوتہ سخت کٔرتھ۔ بند چھُ کنہ شخصن جان بوجھ جانچ ناکام کرنہ ہندس خلاف تحفظ دوان، بحرانس منٛز کام مسترد کرنہ ہندس قیمتس پیٹھ۔",
+        "options": {
+          "open": "کھول: کارروائی گژھن دِو",
+          "closed": "بند: کارروائی مسترد کٔرو"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "ٹول کال جانچ ناکام سپدنس پیٹھ",
+          "description": "خطرناک ٹول کالن ہند جائزہ والی جانچ ییلہ فیصلہ نہ کٔرتھ سکہِ تیلہ کیا کران۔ وراثت چھیہ اُتھ حفاظتی جانچ سیٹنگس پیروی کران۔",
+          "help": "توہہ سکو یہ صرف پلیٹ فارم سیٹنگ کھوتہ سخت کٔرتھ۔ جانچ ناکام سپدنس پیٹھ چھُ بند ٹول کال مسترد کران۔",
+          "options": {
+            "open": "کھول: ٹول کال گژھن دِو",
+            "inherit": "حفاظتی جانچ سیٹنگ پیروی کٔرو",
+            "closed": "بند: ٹول کال مسترد کٔرو"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "روکنہ لایق زہریلاپن نمبر",
+          "description": "جج ہند 0 پیٹھ 100 زہریلاپن پیمانس پیٹھ یتھ یا یمہ کھوتہ زیادہ نمبر میلنس والۍ مواد چھُ روکنہ یوان۔ کم عدد چھُ زیادہ روکان۔",
+          "help": "توہہ سکو یہ صرف گھٹاوتھ، پلیٹ فارمک قدر کھوتہ اُتھ کنہ وقت نہ بڈاوتھ۔ بہت کم قدر چھُ عام صاف لفظ تہِ روکان۔"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "جیل بریک کوششن خاطرٕ سکین کرنہ آمُت متن",
+          "description": "جیل بریک پیٹرننن خاطرٕ اکس پیغامچ یا جوابچ کتھ حصہ چھُ سکین کرنہ یوان۔ یمہ کھوتہ زیادہ متن چھُ نہ سکین کرنہ یوان۔",
+          "help": "توہہ سکو یہ صرف پلیٹ فارمک قدر کھوتہ اُتھ بڈاوتھ۔ وسیع کھڑکی چھیہ پیڈنگ پتہ لُکنہ آمژ حملہ روکان، تھوڑس زیادہ پروسیسنگ قیمتس پیٹھ۔"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "حفاظتی ججس ہاونہ آمُت متن",
+          "description": "جانچنہ آمتس متنس منٛز کتھ حصہ AI حفاظتی جج چھُ پڑھان۔ یمہ کھوتہ زیادہ متنک فیصلہ چھُ نہ کرنہ یوان۔",
+          "help": "توہہ سکو یہ صرف پلیٹ فارمک قدر کھوتہ اُتھ بڈاوتھ۔ بڈاونہ سیتۍ چھُ لمبین ٹول نتیجن ہند مکمل فیصلہ سپدان مگر ہر جج کال چھیہ بوڈ سپدان۔"
+        }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "نگرانی منٛز ایجنٹ تہٕ صرف پڑھنہ والۍ ٹول",
+          "description": "کیا نگرانی خود مختاری درجچ ایجنٹ چھُ تلاش یا لُک اپ جیسن صرف پڑھن والین ٹولن برونہہ تہِ توہہِ پرژھان۔ لیکھُن، بوزناون تہٕ یم ٹول یمن پلیٹ فارمن درجہ بند کوو نہ، تم چھِ ہمیشہ پرژھان۔",
+          "help": "توہہ سکو یہ صرف پلیٹ فارم سیٹنگہ کھوتہ سخت کٔرتھ۔ ہر وار پرژھُن چھُ سب پیٹھ محفوظ انتخاب؛ صرف پڑھن والین ٹولن چلنہ دنہ سیتۍ چھُ اکھ سوال کم سپدان، مگر غیر متوقع تلاش روکنچ اکھ موقع تہِ چھُ گژھان۔ یُس ایجنٹ نجی ڈیٹا پڑھتھ، ناقابل بھروسہ مواد لیتھ تہٕ ڈیٹا بہر بوزناوتھ سکہِ، تمہ پرژھنہ یوان ہر کالس پیٹھ یہ سیٹنگ کینہہ تہِ ونان۔",
+          "options": {
+            "auto-allow": "صرف پڑھن والین ٹولن بغیر پرژھنہ چلنہ دِو",
+            "gate": "ہر ٹول کالہ برونہہ پرژھو"
+          }
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI جج خاطرٕ ماڈل",
+          "description": "تشخیصی رَنن ہند فیصلہ کرنہ خاطرٕ ورتاونہ یوان ماڈل۔ توہہِ ہند ورک سپیس چھُ یمن ماڈلن پہلے ہی ورتاوان تمن منٛز پلیٹ فارم چُنِ تہٕ خالی ژھوڈو۔",
+          "help": "زیادہ بھروسہ مند گریڈن خاطرٕ طاقتور ماڈل یا خرچہ بچاونہ خاطرٕ سستۍ ماڈل ورتاو۔ ماڈل گژھِ توہہِ ہندس جوڑ تھاونہ آمژس پرووائیڈرس منٛز دستیاب سپدنۍ۔"
+        },
+        "callTimeoutSeconds": {
+          "label": "فی جج کال زیادہ ز زیادہ وقت",
+          "description": "اکھ جج کال سکہِ ناکام گنڈنہ برونہہ کتھ وقت لتھ۔",
+          "help": "اگر سست ماڈل چھُ اکثر ٹائم آؤٹ گژھان تہٕ بڈاو؛ ناکام کال چھِ تشخیصک نتیجہ نامکمل کران۔"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "فی ٹیسٹ کیس دوہراو",
+          "description": "اگر رَن نقل نہ کرنہ آمُت چھُ تہٕ ہر ٹیسٹ کیس کتھ وار چلاونہ یوان چھُ۔ زیادہ دوہراو چھِ ہاوان زِ ایجنٹ چھُ کتھ مستقل۔",
+          "help": "ہر دوہراو چھُ اکس رَنک خرچہ تہٕ وقت ضرب کران۔"
+        },
+        "defaultMode": {
+          "label": "تشخیص کِتھ چھِ چلان",
+          "description": "ییلہ رَن یا تمۍ ہند ڈیٹا سیٹ ناہ ونان، تیلہ چھُ تشخیصی رَن ایجنٹس تمۍ ہندین ٹولن سان محفوظ سینڈ باکسس منٛز ریپلے کران (مکمل پائپ لائن) یا صرف متنس منٛز جواب دوان (تیز)۔",
+          "help": "مکمل پائپ لائن چھیہ پرکھان یُس توہہِ ہندین صارفن ملان چھُ، ٹول ورتاو سمیت، تہٕ لاگت چھیہ زیادہ۔ یتھ منٛز چھِ صرف پڑھن والۍ ٹول حقیقی طور چلان؛ یُس کینہہ ڈیٹا بدلتھ، پیغام بوزناوتھ یا رقم خرچ کٔرتھ سکہِ سُہ چھُ سمولیٹ سپدان تہٕ رَنس منٛز درج۔ تیز چھُ سستۍ تہٕ ٹول ورتاونچ بارہ منٛز چھُ کینہہ نہ ونان۔",
+          "options": {
+            "full": "سینڈ باکسس منٛز مکمل پائپ لائن",
+            "quick": "تیز: صرف متنی جواب"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "زیادہ ز زیادہ متوازی ذیلی کام",
+        "description": "اکھ کام سونپُن سکہِ اکس وقت کتھ ذیلی کام یا مددگار ایجنٹ شروع کٔرتھ۔ اضافی چھِ حد پار کرنہ آمتۍ بیان کرنہ یوان۔",
+        "help": "وسیع تحقیقی کامن خاطرٕ بڈاو، خرچہ تہٕ بوجھ کم رٔکھنہ خاطرٕ گھٹاو۔"
+      },
+      "branchTimeoutSeconds": {
+        "label": "فی ذیلی کام زیادہ ز زیادہ وقت",
+        "description": "سونپنہ آمُت ذیلی کام سکہِ ٹائم آؤٹ بیان کرنہ برونہہ کتھ وقت چلتھ۔",
+        "help": "سست ذیلی کامن خاطرٕ بڈاو۔ رُکیومت ذیلی کام چھُ یمہ وقتہ کھوتہ زیادہ مکمل جواب کنہ وقت نہ روٚکان۔"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "ہر نتیجہ خاطرٕ تلاشک پھیلاو",
+          "description": "علم تلاش چھیہ آخرس منٛز واپس دنہ آمژ ہر ٹکرس خاطرٕ کتھ امیدوار ٹکرے جمع کران۔",
+          "help": "زیادہ عدد چھُ درجہ بندی چُننہ خاطرٕ زیادہ دوان، یُس مدد کران چھُ ییلہ بوٚڈ دستاویز اکہ جیسن چھِ، مگر ہر تلاشس زیادہ وقت تہٕ کمپیوٹ چھُ لگان۔ اگر تلاش سست لگان چھیہ تہٕ گھٹاو۔ یہ چھُ نہ ایجنٹن وچھنہ آمژ ٹکرن ہند تعداد بدلاوان۔"
+        },
+        "candidatePoolMax": {
+          "label": "فی تلاش زیادہ ز زیادہ امیدوار",
+          "description": "کتھ نتیجہ منگنہ آمت چھِ یہ چھُ کینہہ تہِ سپدان، اکس علم تلاشن جمع کرنہ آمژ امیدوار ٹکرن ہند اُتھ حد۔",
+          "help": "اگر ایجنٹ چھُ اکس وقت زیادہ نتیجہ منگان تہٕ یہ چھُ رفتار تہٕ خرچہ بچاوان۔ بوٚڈین علم ذخیرن منٛز ییلہ جواب متعلق ٹکرے ژھوڈان چھُ صرف تیلہ بڈاو۔"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "کم آزمودہ آپشن کوشش کرنچ خواہش",
+          "description": "اعتماد حد طریقہ ورتاون والۍ سیکھنچ پالیسی چھیہ پانہ کم وار آزمایومتین آپشنن کتھ ترجیح دوان۔",
+          "help": "صفر چھُ ہمیشہ ہُن تام بہترین اوسط والس آپشنس چُنان۔ زیادہ قدر چھِ بییین آپشنن ثابت گژھنہ برونہہ زیادہ وقت آزمایان۔ ڈیفالٹ چھُ نصابی توازن۔ صرف یہ طریقہ ورتاون والۍ پالیسی چھِ متاثر سپدان۔"
+        },
+        "defaultExplorationRate": {
+          "label": "نوین پالیسین خاطرٕ ابتدائی تلاش شرح",
+          "description": "نوی بنایمژ سیکھنچ پالیسی چھیہ بے ترتیب آپشن آزماونس منٛز ٹرنن ہند کتھ حصہ خرچ کران۔",
+          "help": "یہ چھُ صرف ہُن پیٹھ بنن والین پالیسین ہند ابتدائی نقطہ سیٹ کران۔ موجود پالیسی چھیہ پننہ شرح رٔکھان، یتھ توہہ پالیسی سنبھالنہ جایہ فی ایجنٹ بدلاوان چھو۔ صفر مطلب نوی پالیسی چھیہ شروعس منٛز تلاش ناکران۔"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "پرووائیڈرن کی مسترد کرنہ پتہ وقفہ",
+          "description": "پرووائیڈرن جوڑ تھاونہ آمژ کی مسترد کرنہ پتہ چھُ پس منظر کام تمہ کتھ وقت ژھوڈان۔",
+          "help": "وقفہ دوران، شیڈیول کرنہ آمتۍ تہٕ خودکار جاب چھِ بار بار ناکام گژھن والیس کیس کال کرنہ بدلہ بییس جوڑ تھاونہ آمژس پرووائیڈرس ورتاوان، یا ژھٹان۔ چیٹ کرن والۍ انسان چھِ کنہ وقت نہ روکنہ یوان تہٕ ہمیشہ پرووائیڈرک اصلی خرابی چھِ وچھان۔ وقفہ ختم سپدنس پیٹھ چھُ اکھ کال گژھن دنہ یوان یہ جانچنہ خاطرٕ زِ کی ٹھیک گیہ یا نہ۔ صفر چھُ وقفہ بند کران۔"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "انتظام",
+    "title": "رَنٹائم سیٹنگ",
+    "subtitle": "یمہ ورک سپیسک ہر ایجنٹ کِتھ برتاؤ کران چھُ سُہ ملاو: حد، منظوری، معیار جانچ، گارڈریل، میموری تہٕ ماڈل۔ یتھ اجازت چھیہ تتھ ایجنٹک مالک سکہِ ہنوز اکس ایجنٹس خاطرٕ سیٹنگ اووررائڈ کٔرتھ۔",
+    "docsLink": "مدد تہٕ دستاویزات",
+    "tabs": {
+      "label": "رَنٹائم سیٹنگک نظارہ",
+      "settings": "سیٹنگ",
+      "history": "تبدیلی تاریخ"
+    },
+    "readOnly": {
+      "title": "صرف وچھنہ خاطرٕ",
+      "body": "صرف ورک سپیس ایڈمن سکن یم سیٹنگ بدلتھ۔ توہہ سکو ہر سیٹنگک لاگو قدر تہٕ یہ کتھ پیٹھ یوان چھُ وچھتھ۔"
+    },
+    "summary": "یمہ ورک سپیسس منٛز {total} سیٹنگن منٛز {changed} چھِ بدلیومتۍ۔ باقی چھِ پلیٹ فارمک قدر ورتاوان۔",
+    "export": {
+      "button": "اووررائڈ برآمد کٔرو",
+      "done": "{count} ورک سپیس اووررائڈ گۅیہ اکس فائلس منٛز برآمد۔",
+      "none": "برآمد کرنہ خاطرٕ چھُ کینہہ نہ: یمہ ورک سپیسن بدلوو نہ کانہہ سیٹنگ۔"
+    },
+    "filters": {
+      "changedOnly": "صرف یمہ ورک سپیسس منٛز بدلیومت"
+    },
+    "jump": {
+      "label": "اکس گروپس کن گژھو"
+    },
+    "anchor": {
+      "unknown": "یمہ ورک سپیسس منٛز چھیہ نہ \"{key}\" نامک کانہہ سیٹنگ۔ تمۍ ہند نام بدلیوو یا یہ چھیہ ورک سپیس درجس پیٹھ دستیاب نہ۔"
+    },
+    "empty": {
+      "noneChanged": "یمہ ورک سپیسس منٛز گیہ ہن تام نہ کانہہ سیٹنگ بدلیومژ۔ سارے چھِ پلیٹ فارمک قدر ورتاوان۔"
+    },
+    "risk": {
+      "high": "زیادہ خطر",
+      "security": "حفاظتی سیٹنگ"
+    },
+    "security": {
+      "title": "حفاظتی سیٹنگ",
+      "body": "یم سیٹنگ چھِ توہہِ ہندس ورک سپیسس حفاظت دوان۔ یم سکن صرف پلیٹ فارمک قدر کھوتہ سخت کرنہ یتھ، کنہ وقت کمزور نہ۔ ہر تبدیلی خاطرٕ چھیہ وجہ ضروری تہٕ یہ چھیہ آڈٹ لاگس منٛز ریکارڈ گژھان۔"
+    },
+    "resetGroup": {
+      "count": "یمہ گروپس منٛز {count} بدلیومتۍ",
+      "button": "{group} وراثت منٛز آمژ قدرس کن ری سیٹ کٔرو",
+      "confirmTitle": "{group} وراثت منٛز آمژ قدرس کن ری سیٹ کٔرو؟",
+      "confirmBody": "یہ چھُ یمہ گروپک {count} ورک سپیس اووررائڈ ہٹاوان۔ ہر ایجنٹس خاطرٕ یتھ پننہ اووررائڈ چھُ نہ تیتھ سیٹنگ چھِ فوراً پلیٹ فارمک قدرس کن واپس گژھان۔ ہر ری سیٹ چھُ آڈٹ لاگس منٛز ریکارڈ گژھان۔",
+      "confirm": "وراثت منٛز آمژ قدرس کن ری سیٹ کٔرو",
+      "cancel": "منسوخ کٔرو",
+      "done": "{count} سیٹنگ تمۍ ہندس وراثت منٛز آمتس قدرس کن ری سیٹ کٔرو۔",
+      "partial": "{done} سیٹنگ گۅیہ ری سیٹ؛ {failed} ری سیٹ کٔرتھ سکیو نہ۔ ناکام سیٹنگن ہند پیغام وچھو۔",
+      "cancelled": "{done} سیٹنگ گیہ ری سیٹ۔ یم {skipped} یمن وجہ ٲس ضروری، تم گیہ یتھہ ٲسۍ تتھہ ژھوڈنہ۔"
+    },
+    "import": {
+      "button": "اووررائڈ درآمد کٔرو",
+      "title": "ورک سپیس اووررائڈ درآمد کٔرو",
+      "intro": "یمہ صفحہ پیٹھ برآمد کرنہ آمژ اکھ فائل چُنو، یا تمۍ ہند مواد چسپاں کٔرو۔ کینہہ محفوظ کرنہ برونہہ وچھو توہہ ٹھیک کیا بدلان۔",
+      "reviewIntro": "یمہ فائلس کیا بدلاوان سُہ جانچو۔ ہُن تام چھُ نہ کینہہ محفوظ کرنہ آمُت۔",
+      "fileLabel": "اووررائڈ فائل (JSON)",
+      "pasteLabel": "یا فائلک مواد چسپاں کٔرو",
+      "fileError": {
+        "empty": "پیٹھمس فائل چُنو یا تمۍ ہند مواد چسپاں کٔرو۔",
+        "invalidJson": "یہ چھُ نہ درست JSON۔ جانچو زِ پوری فائل گیہ کاپی۔",
+        "wrongFormat": "یہ چھیہ نہ یمہ صفحہ پیٹھ برآمد کرنہ آمژ سیٹنگ اووررائڈ فائل۔",
+        "unsupportedVersion": "یہ فائل چھیہ برآمدچ بییچ ورژنن بنومژ تہٕ یہ چھیہ نہ پڑھنہ لایق۔",
+        "noOverrides": "فائلس منٛز چھُ نہ اووررائڈ حصہ۔",
+        "unreadable": "فائل پڑھتھ سکیو نہ۔"
+      },
+      "summary": "{changes} بدلنۍ، {unchanged} پہلے ہی لاگو، {problems} لاگو کٔرتھ چھِ نہ سکان۔",
+      "changesHeading": "تبدیلی ({count})",
+      "before": "ہُن:",
+      "after": "درآمد پتہ:",
+      "resetMissing": "فائلس منٛز ناموجود ورک سپیس اووررائڈ تہِ ہٹاو",
+      "resetMissingHelp": "یتھ بدلیومتۍ مگر فائلس منٛز ناموجود سیٹنگ چھِ پلیٹ فارمک قدرس کن واپس گژھان۔ صرف ملاونہ یا اپ ڈیٹ کرنہ خاطرٕ یہ بند رٔکھو۔",
+      "resetsHeading": "ہٹاونہ لایق اووررائڈ ({count})",
+      "resetFrom": "ہُن {value}؛ وراثت منٛز آمتس قدرس کن واپس گژھان۔",
+      "problemsHeading": "لاگو کٔرتھ چھِ نہ سکان ({count})",
+      "problem": {
+        "unknownKey": "یمہ کیس والۍ چھیہ نہ کانہہ سیٹنگ۔",
+        "notWorkspaceSetting": "یہ سیٹنگ چھیہ نہ پوری ورک سپیس خاطرٕ بدلنہ لایق۔",
+        "locked": "پلیٹ فارم آپریٹرن چھیہ یہ سیٹنگ پن کوومژ، لہذا یہ چھیہ نہ بدلنہ لایق۔",
+        "wrongType": "یمہ سیٹنگ خاطرٕ قدرک قسم چھیہ غلط۔",
+        "required": "اکھ قدر چھیہ ضروری۔",
+        "notNumber": "قدر گژھِ عدد سپدنۍ۔",
+        "notInteger": "قدر گژھِ پورٕ عدد سپدنۍ۔",
+        "belowMin": "قدر چھیہ بہت کم۔ کم ز کم {min}۔",
+        "aboveMax": "قدر چھیہ بہت زیادہ۔ زیادہ ز زیادہ {max}۔",
+        "notAllowed": "یہ چھُ نہ اجازت یافتہ آپشنن منٛز۔",
+        "tooShort": "متن چھُ بہت مختصر۔ کم ز کم لمبائی {min}۔",
+        "tooLong": "متن چھُ بہت لمبٕ۔ زیادہ ز زیادہ لمبائی {max}۔",
+        "precision": "قدر چھیہ یمہ سیٹنگہ اجازت دنہ آمتس کھوتہ زیادہ درست۔"
+      },
+      "nothing": "یمہ فائلک کینہہ تہِ چھُ نہ کانہہ سیٹنگ بدلاوان۔",
+      "reasonNote": "یمن سیٹنگن منٛز کینہہ چھِ زیادہ خطرناک۔ لاگو کرنہ پتہ گژھِ توہہِ پرژھنہ وجہ یُس آڈٹ لاگس منٛز ریکارڈ گژھان چھیہ۔",
+      "back": "واپس گژھو",
+      "cancel": "منسوخ کٔرو",
+      "review": "تبدیلی جانچو",
+      "apply": "{count} تبدیلی لاگو کٔرو",
+      "cancelled": "درآمد منسوخ گوو۔ کانہہ سیٹنگ گیہ نہ بدلیومژ۔",
+      "done": "درآمد مکمل: {applied} سیٹنگ گۅیہ اپ ڈیٹ۔",
+      "donePartial": "درآمد جزوی مکمل: {applied} سیٹنگ گۅیہ اپ ڈیٹ، {failed} لاگو کٔرتھ سکیو نہ۔ جائزہ چھُ ہاوان ہُن کیا باقی چھُ۔"
+    },
+    "history": {
+      "adminOnly": "ورک سپیس سیٹنگن ہند تبدیلی تاریخ سکن صرف ورک سپیس ایڈمن وچھتھ۔",
+      "loading": "تبدیلی تاریخ چھیہ لوڈ گژھان",
+      "partial": "{count} سیٹنگن ہند تاریخ لوڈ کٔرتھ سکیو نہ، لہذا یہ فہرست سکہِ نامکمل سپدتھ۔",
+      "retry": "دوبارہ کوشش کٔرو",
+      "search": "تبدیلی تاریخ تلاش کٔرو",
+      "searchPlaceholder": "سیٹنگ، شخص یا وجہ سان تلاش کٔرو",
+      "empty": "یمہ ورک سپیسس منٛز گیہ ہُن تام نہ کانہہ سیٹنگ بدلیومژ۔",
+      "noMatch": "کانہہ تبدیلی چھیہ نہ توہہِ ہندس تلاشس سان میلان۔",
+      "count": "{total} تبدیلین منٛز {shown} چھِ ہاوان، نوو پیٹھمس۔",
+      "tableLabel": "ورک سپیس سیٹنگن ہند تبدیلی تاریخ",
+      "when": "کیا وقت",
+      "setting": "سیٹنگ",
+      "change": "بدلاو",
+      "by": "بدلاون وول",
+      "reason": "وجہ",
+      "before": "برونہہ:",
+      "after": "پتہ:",
+      "inherited": "وراثت منٛز آمُت قدر",
+      "unknownActor": "نامعلوم",
+      "noReason": "کانہہ وجہ دنہ آیہ نہ",
+      "showMore": "مزید ہاو",
+      "scope": "درجہ",
+      "scopeWorkspace": "ورک سپیس",
+      "scopeAgent": "ایجنٹ {id}",
+      "scopeFilter": "تبدیلی یمہ درجس پیٹھ ہاو",
+      "filterAll": "سارے درجہ",
+      "filterWorkspace": "صرف ورک سپیس",
+      "filterAgents": "صرف ایجنٹ",
+      "searchLoadedOnly": "تلاش چھیہ ہُن تام لوڈ سپدمژ تبدیلی ہیتھ۔",
+      "loadError": "تبدیلی تاریخ لوڈ کٔرتھ سکیو نہ۔ {message}",
+      "moreFailed": "مزید تبدیلی لوڈ کٔرتھ سکیو نہ۔ {message}",
+      "loadingMore": "لوڈ گژھان چھُ"
+    }
+  },
+  "agentBehavior": {
+    "title": "برتاؤ تہٕ حد",
+    "intro": "قابو کٔرو زِ یہ ایجنٹ سکہِ اکس ٹرنس منٛز کتھ دور گژھتھ: کتھ ٹول کال کٔرتھ، کتھ وقت چلتھ تہٕ کتھ پتھ پڑھتھ۔ یُس توہہ یتھ نہ بدلاوو سُہ چھُ توہہِ ہندس ورک سپیسہ پیٹھ وراثت منٛز یوان۔",
+    "saveFirst": "پیٹھمس ایجنٹ محفوظ کٔرو۔ بنن پتہ سکہِ تمۍ ہند برتاؤ تہٕ حد سیٹ کرنہ یتھ۔",
+    "pickAgent": "تمۍ ہند برتاؤ تہٕ حد ٹیب کھولنہ خاطرٕ تل اکھ ایجنٹ چُنو۔",
+    "tabs": {
+      "label": "ایجنٹ ترتیب",
+      "setup": "سیٹ اپ",
+      "behavior": "برتاؤ تہٕ حد",
+      "unsaved": "غیر محفوظ تبدیلی"
+    },
+    "links": {
+      "label": "متعلقہ صفحہ",
+      "tenant": "ورک سپیس ڈیفالٹ بدلاو",
+      "playground": "پلے گراؤنڈس منٛز آزمایو",
+      "prompts": "یمہ ایجنٹک پرامپٹ",
+      "promptsAria": "{name} ہند پرامپٹ: پرامپٹ رجسٹری یمہ ایجنٹس پیٹھ کھولو",
+      "approvals": "یمہ ایجنٹک منظوری",
+      "approvalsAria": "{name} ہند منظوری: یمہ ایجنٹ خاطرٕ چھانٹنہ آمژ منظوری قطار کھولو",
+      "turns": "ٹرن ٹائم لائن",
+      "turnsAria": "{name} ہند ٹرن ٹائم لائن: یمہ ایجنٹ خاطرٕ ٹرن معائنہ کار کھولو"
+    },
+    "readOnly": {
+      "locked": "یہ ایجنٹ چھُ ترمیم خاطرٕ مقفل، لہذا یم قدر چھِ صرف پڑھنہ خاطرٕ۔",
+      "access": "توہہ سکو یم قدر وچھتھ مگر یمہ ایجنٹس تام توہہِ ہند رسائی چھیہ نہ تم بدلنہ دوان۔"
+    },
+    "unsaved": "یمہ ٹیبس منٛز چھِ توہہِ ہند غیر محفوظ تبدیلی۔ گژھنہ برونہہ تل تم محفوظ یا منسوخ کٔرو۔",
+    "inheritNote": "ہر سیٹنگ چھیہ ہاوان زِ تمۍ ہند قدر کتھ پیٹھ چھُ یوان۔ یتھ اکس بدلاونہ سان چھُ صرف یمہ ایجنٹس خاطرٕ اووررائڈ سپدان؛ ورک سپیسک قدر دوبارہ وراثت منٛز ہیونہ خاطرٕ ری سیٹ کٔرو۔",
+    "others": {
+      "title": "یمہ ایجنٹک بییہ کنٹرول",
+      "intro": "یم کنٹرول چھِ نہ اُتھ سیٹنگن ہند حصہ، لہذا تم چھِ سیٹ اپ ٹیبس منٛز۔",
+      "generation": "جوابچ تخلیقیت تہٕ لمبائی (درجہ حرارت، top-p، زیادہ ز زیادہ ٹوکن) تہٕ اضافی نمونہ انتخاب آپشن۔",
+      "generationLink": "جنریشن ٹیوننگس کن گژھو",
+      "autonomy": "خود مختاری درجہ، ہر رَنک خرچہ حد، ٹول اصول تہٕ انسانن کیا وقت منظوری دنۍ چھیہ۔",
+      "autonomyLink": "استدلال تہٕ خود مختاری کن گژھو"
+    },
+    "discard": {
+      "title": "بغیر محفوظ کرنہ ژھوڈو؟",
+      "description": "یمہ ایجنٹک برتاؤ تہٕ حدن منٛز چھِ توہہِ ہند غیر محفوظ تبدیلی۔ ہُن ژھوڈنس پیٹھ گژھن تم ختم۔",
+      "stay": "یتھ روزو تہٕ ترمیم جاری رکھو",
+      "leave": "ژھوڈو تہٕ تبدیلی منسوخ کٔرو"
+    },
+    "summary": {
+      "title": "یہ ایجنٹ چھُ ہُن کِتھ برتاؤ کران",
+      "subtitle": "ایجنٹک پننہ اووررائڈ، توہہِ ہند ورک سپیس سیٹنگ تہٕ پلیٹ فارم سیٹنگ لاگو کرنہ پتہ یمہ ایجنٹس خاطرٕ لاگو قدر۔",
+      "loading": "موجودہ برتاؤ چھُ لوڈ گژھان",
+      "error": "موجودہ برتاؤ لوڈ کٔرتھ سکیو نہ۔ {message}",
+      "retry": "دوبارہ کوشش کٔرو",
+      "empty": "یمہ ایجنٹس خاطرٕ چھیہ ہُن تام نہ کانہہ برتاؤ سیٹنگ دستیاب۔",
+      "facts": {
+        "steps": "فی ٹرن ٹول کال",
+        "turnTimeout": "فی ٹرن وقت",
+        "toolTimeout": "فی ٹول کال وقت",
+        "outputCap": "رکھنہ آمُت ٹول آؤٹ پٹ",
+        "continuation": "تسلسل پاس",
+        "approvals": "منظوری",
+        "judge": "معیار جج ماڈل",
+        "model": "ماڈل"
+      },
+      "tier": {
+        "SUPERVISED": "نگرانی منٛز: ہر ٹول کال چھُ انسانس خاطرٕ ژھٹان",
+        "SEMI_AUTONOMOUS": "نیم خود مختار: توہہِ ہند ورک سپیس اصول چھُ طے کران",
+        "FULLY_AUTONOMOUS": "مکمل خود مختار: ٹول کال چھِ کنہ وقت نہ ژھٹان"
+      },
+      "approvalResumes": "منظوری پتہ خودبخود جاری رٔکھان چھُ",
+      "approvalStops": "منظوری پتہ نوو پیغام خاطرٕ ژھٹان چھُ",
+      "judgeDefault": "پلیٹ فارمن چُنُن",
+      "overrides": {
+        "none": "یہ ایجنٹ چھُ ہر کتھ توہہِ ہند ورک سپیسک قدر ورتاوان۔",
+        "some": "یمہ ایجنٹ خاطرٕ اووررائڈ کرنہ آمژ سیٹنگ: {count}۔"
+      }
+    },
+    "impact": {
+      "title": "یمہ ہند مطلب کیا چھُ",
+      "steps": "یہ ایجنٹ سکہِ اکس ٹرنس منٛز زیادہ ز زیادہ {count} ٹول کال کٔرتھ۔ تتھ پتہ چھُ تس ونان زِ پننہ یمہ کینہہ تہِ چھُ تمہ سان جواب دِ۔",
+      "stepsTierSupervised": "یہ ایجنٹ چھُ نگرانی منٛز، لہذا تمۍ ہند اصلی اُتھ حد چھیہ تمہ بنیادی عدد کھوتہ کم۔ صحیح عدد ورتاونہ خاطرٕ یمہ ایجنٹس خاطرٕ پننہ قدر سیٹ کٔرو۔",
+      "stepsTierFull": "یہ ایجنٹ چھُ مکمل خود مختار، لہذا تمۍ ہند اصلی اُتھ حد چھیہ تمہ بنیادی عدد کھوتہ زیادہ۔ صحیح عدد ورتاونہ خاطرٕ یمہ ایجنٹس خاطرٕ پننہ قدر سیٹ کٔرو۔",
+      "turnTimeout": "اکھ ٹرن چھُ {duration} پتہ کٹنہ یوان۔",
+      "turnTimeoutNone": "ٹرنک چھیہ نہ کانہہ وقت حد۔",
+      "toolTimeout": "اکھ ٹول کال چھیہ {duration} پتہ کٹنہ یوان۔",
+      "toolTimeoutNone": "ٹول کالک چھیہ نہ کانہہ وقت حد۔",
+      "outputCap": "{chars} کھوتہ لمبٕ ٹول نتیجہ چھِ ایجنٹن پڑھنہ برونہہ مختصر کرنہ یوان۔",
+      "continuation": "اگر جواب کٹان چھُ تہٕ سکہِ ایجنٹ یہ زیادہ ز زیادہ {count} وار ہور جاری رکھتھ۔",
+      "continuationNone": "کٹتھ گوومتۍ جواب چھِ نہ جاری رکھنہ یوان۔",
+      "retrieval": "ہر سوالس خاطرٕ چھُ سُہ بہترین {count} علم میل پڑھان۔",
+      "retrievalScored": "ہر سوالس خاطرٕ چھُ سُہ بہترین {count} علم میل پڑھان تہٕ {score} کھوتہ کم نمبر والین میلن نظرانداز کران۔",
+      "approvalContinuationOn": "ییلہ اکھ انسان ژھٹان والیس کارروائی منظور کرِ، تیلہ چھُ ایجنٹ خودبخود کام ختم کران۔",
+      "approvalContinuationOff": "ییلہ اکھ انسان ژھٹان والیس کارروائی منظور کرِ، تیلہ چھُ ٹرن ختم گژھان تہٕ فالو اپ گژھِ ہاتھہ سان کرنۍ۔",
+      "guardClosed": "ییلہ حفاظتی جانچ ناکام گژھان چھیہ، تیلہ چھیہ کارروائی مسترد کرنہ یوان۔",
+      "guardOpen": "ییلہ حفاظتی جانچ ناکام گژھان چھیہ، تیلہ چھیہ کارروائی گژھن دنہ یوان۔",
+      "branches": "اکھ کام سونپُن سکہِ اکس وقت زیادہ ز زیادہ {count} ذیلی کام شروع کٔرتھ۔"
+    }
+  },
+  "controls": {
+    "eyebrow": "مدد",
+    "title": "بہٕ کیا کنٹرول کرٕو...؟",
+    "subtitle": "ہر کنٹرول یُس توہہِ ہندین ایجنٹن ہند برتاؤ گڈان چھُ، تہٕ سُہ صفحہ یتھ سُہ چھُ۔ یُس توہہ بدلاون چھِو چھیو تمہ سان تلاش کٔرو۔",
+    "breadcrumb": {
+      "label": "بریڈ کرمب",
+      "console": "کنسول",
+      "controls": "کنٹرول"
+    },
+    "related": {
+      "label": "بییہ کنٹرول"
+    },
+    "search": {
+      "label": "کنٹرول تلاش کٔرو",
+      "placeholder": "مثال: ٹائم آؤٹ، منظوری، پرامپٹ، میموری",
+      "count": "{count} میل کھان والۍ کنٹرول",
+      "none": "\"{query}\" سان چھُ نہ کینہہ میلان۔ مختصر لفظ آزمایو۔",
+      "noSettings": "کانہہ سیٹنگ چھیہ نہ توہہِ ہندس تلاشس سان میلان۔"
+    },
+    "areasHeading": "کنٹرول علاقہ",
+    "areasIntro": "یمن صفحن منٛز چھِ تم کنٹرول یم اکھ عدد نہ چھِ: ہدایت، منظوری اصول، حفاظتی اصول تہٕ ٹرنن کیا کوو تمۍ ہند ریکارڈ۔",
+    "openArea": "کھولو",
+    "needsAccess": "یمہ صفحہ تام رسائی خاطرٕ ورک سپیس ایڈمنس ونو۔",
+    "settingsHeading": "ہر رَنٹائم سیٹنگ",
+    "settingsIntro": "ہر سیٹنگ سکہِ پوری ورک سپیس خاطرٕ، اکس ایجنٹس خاطرٕ، یا دۅنوی خاطرٕ بدلتھ۔ ایجنٹک پننہ قدر چھُ ورک سپیسک قدرس پیٹھ فوقیت رٔکھان۔ سیٹنگس تام سیدھ پہنچنہ خاطرٕ اکھ لنک چُنو۔",
+    "loading": "سیٹنگ فہرست چھیہ لوڈ گژھان",
+    "loadFailed": "سیٹنگ فہرست لوڈ کٔرتھ سکیو نہ۔ {message}",
+    "retry": "دوبارہ کوشش کٔرو",
+    "emptyCatalog": "یمہ ورک سپیسس منٛز چھیہ نہ ہاونہ خاطرٕ کانہہ رَنٹائم سیٹنگ۔",
+    "changeWorkspace": "ورک سپیس خاطرٕ بدلاو",
+    "changeAgent": "اکس ایجنٹس پیٹھ بدلاو",
+    "workspaceOnly": "صرف ورک سپیس بھر",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "ایجنٹ رَنٹائم حد",
+        "intro": "اکھ ٹرن سکہِ کتھ کام کٔرتھ: ٹول کال، وقت، نتیجچ سائز تہٕ بازیافت۔"
+      },
+      "behaviour-settings": {
+        "title": "برتاؤ سیٹنگ",
+        "intro": "جواب کِتھ ختم تہٕ کیش گژھان چھِ، منظوری کِتھ جاری چھیہ روزان، حفاظتی جانچ کِتھ برتاؤ کران چھیہ، تہٕ میموری، تلاش تہٕ کام سونپُن کِتھ کام کران چھِ۔"
+      },
+      "other": {
+        "title": "بییہ سیٹنگ",
+        "intro": "سیٹنگ یمن چھُ نہ پننہ حصہ۔"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "رَنٹائم سیٹنگ",
+        "summary": "پوری ورک سپیس خاطرٕ حد، منظوری، معیار جانچ، حفاظتی سختی، میموری تہٕ کام سونپُن۔",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers حد ٹائم آؤٹ ٹول قدم دوبارہ کوشش کیش میموری کام سونپُن معیار جج سیٹنگ عدد"
+      },
+      "prompts": {
+        "title": "ہدایت",
+        "summary": "پرامپٹ یم پلیٹ فارم ماڈلس چھُ دوان: ہر اکھ وچھو، ورک سپیس یا اکس ایجنٹس خاطرٕ اووررائڈ کٔرو، تہٕ نتیجک پیشگی منظر وچھو۔",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry پرامپٹ ہدایت سسٹم پرامپٹ اووررائڈ پیشگی منظر رجسٹری"
+      },
+      "approvals": {
+        "title": "منظوری",
+        "summary": "انسانس خاطرٕ ژھٹان والین کارروائین ہند قطار، کُس ٹول چھُ منظوری ضرورت تمۍ ہند اصول، تہٕ توہہِ ہندس فیصلس پتہ کیا سپدان چھُ۔",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation منظوری مسترد قطار ہیومن ان دی لوپ ٹول اصول وقت ختم تسلسل"
+      },
+      "guardrails": {
+        "title": "گارڈریل",
+        "summary": "یم نمونہ یم ورک سپیس گژھن دنہ چھُ انکار کران، تہٕ ٹول نتیجن پیٹھ لاگو مواد پالیسی۔",
+        "keywords": "safety rules block filter policy content patterns حفاظتی اصول روک چھانٹ پالیسی مواد نمونہ"
+      },
+      "turns": {
+        "title": "ٹرن معائنہ کار",
+        "summary": "اکس ایجنٹ ٹرنک ریکارڈ کرنہ آمت ٹائم لائن: کیا پرژھنہ آو، کُس ٹول چلیو، ہر قدمچ خرچہ کتھ ٲس تہٕ سُہ کیازِ رُکیو۔",
+        "keywords": "turn timeline journal trace replay history steps debug ٹرن ٹائم لائن جرنل ٹریس ریپلے تاریخ قدم ڈیبگ"
+      },
+      "agentBehavior": {
+        "title": "ایجنٹک برتاؤ تہٕ حد",
+        "summary": "اکس ایجنٹک صفحس پیٹھ: تمۍ ہند پننہ حد تہٕ برتاؤ سیٹنگ، ہر قدر کتھ پیٹھ یوان چھُ تہٕ ورک سپیسک قدرس کن ری سیٹ سان۔",
+        "keywords": "agent override per agent behavior limits tab ایجنٹ اووررائڈ فی ایجنٹ برتاؤ حد ٹیب"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "یہ پرامپٹ بلاکن سان بنیومت چھُ",
+    "blocksCount": "{n} بلاک",
+    "blockDefault": "ڈیفالٹ طور آمُت",
+    "blockOverride": "{scope} اووررائڈ v{version}",
+    "blockAgentConfig": "ایجنٹک پننہ پرامپٹ",
+    "blockCode": "پلیٹ فارم کوڈ",
+    "blockTokens": "~{tokens} ٹوکن",
+    "blockHash": "لفظن ہند ہیش"
+  },
+  "toolApproval": {
+    "continuing": "ایجنٹ چھُ کام جاری رٔکھان۔",
+    "continueNotStarted": "یمہ فیصلس پتہ گوو نہ ایجنٹ خودبخود دوبارہ شروع۔ یہ اگے نیونہ خاطرٕ اکھ پیغام بوزناو۔",
+    "continueTimedOut": "ایجنٹن چھُ ہُن تام جاری رکھن ختم کوومت نہ۔ ختم سپدنس پتہ گژھِ تٔمہِ ہند جواب گفتگو منٛز نظر یُن؛ تحقیق کرنہ خاطرٕ ری لوڈ کٔرو۔",
+    "continuingWaiting": "Your decision is recorded. The agent is picking the task back up.",
+    "continuingRunning": "The agent is working on the next step. Its reply appears here as soon as it is ready.",
+    "continuingStill": "Still working. A model running on this computer can take a few minutes; you can keep reading meanwhile.",
+    "continuingLongWait": "This is taking longer than usual, but the agent has not stopped. Its reply will appear here when it is done.",
+    "continuingStagesLabel": "Progress",
+    "continuingStageDecided": "Decision recorded",
+    "continuingStageRestarted": "Agent restarted",
+    "continuingStageWorking": "Working on it",
+    "panelLabel": "Tool approvals",
+    "queuePosition": "Approval {position} of {total}",
+    "queueMore": "{count} more waiting. The next one appears when you decide this one.",
+    "rawName": "Technical name",
+    "approveAll": "Approve all {count}",
+    "rejectAll": "Reject all",
+    "approvingProgress": "Approving {position} of {total}",
+    "rejectingProgress": "Rejecting {position} of {total}",
+    "bulkHint": "Decides the waiting calls one after another, oldest first, and stops at the first problem.",
+    "bulkStoppedTruncated": "Stopped: the next call's arguments are too long to show here, so it waits for your own decision.",
+    "bulkStoppedError": "Stopped after a problem; the calls below it are still waiting.",
+    "waitingList": "Waiting calls"
+  },
+  "promptDirectives": {
+    "tabRegistry": "سارے پرامپٹ",
+    "tabAgentPreview": "آخری پرامپٹک پیشگی منظر",
+    "regTitle": "ہر پرامپٹ",
+    "regIntro": "ماڈلس خاطرٕ پلیٹ فارمن لیکھمت سارنی متن، ہُن لاگو لفظن سان، تمۍ ہند ماخذ تہٕ ورژن سان۔ اکھ دائرہ چُنو، بدلاونہ خاطرٕ اکھ پرامپٹ کھولو، تہٕ ہر پیشن ورژن وچھو۔ تبدیلی چھیہ تقریباً اَدٕ منٹس منٛز سارنی سرورن پہنچان۔",
+    "regScopeLabel": "کمیس دائرس منٛز بدلُن",
+    "regScope_tenant": "یہ ورک سپیس",
+    "regScope_agent": "اکھ ایجنٹ",
+    "regScope_platform": "سارٕ پلیٹ فارم",
+    "regAgentLabel": "ایجنٹ",
+    "regAgentPlaceholder": "اکھ ایجنٹ چُنو",
+    "regAgentsFailed": "توہہِ ہند ایجنٹ لوڈ کٔرتھ سکیو نہ۔",
+    "regPickAgent": "کُنہِ ایجنٹک پرامپٹ وچھنہ تہٕ بدلاونہ خاطرٕ تس چُنو۔",
+    "regAgentUnavailable": "لنکس منٛز ایجنٹ چھُ توہہِ خاطرٕ دستیاب نہ، کیازِ سُہ چھُ نہ موجود یا توہہ سکو نہ تس وچھتھ۔ بدلہ کھولنہ آو رجسٹری ورک سپیس دائرس منٛز۔",
+    "regSearchLabel": "پرامپٹ تلاش کٔرو",
+    "regSearchPlaceholder": "کیا، عنوان یا تفصیل",
+    "regRiskLabel": "خطرچ قسم",
+    "regRiskAll": "سارے خطرچ قسم",
+    "regRisk_STEERS_EVERY_TURN": "ہر ٹرن چھُ سنبھالان",
+    "regRisk_SECONDARY_CALL": "دویم ماڈل کال",
+    "regRisk_USER_VISIBLE": "انسانس ہاونہ یوان",
+    "regRisk_TOOL_DESCRIPTION": "ٹولک تفصیل",
+    "regOnlyCustomised": "صرف حسب ضرورت",
+    "regPlatformReadOnly": "پلیٹ فارم بھر پرامپٹ چھِ یتھ پڑھنہ یوان؛ صرف پلیٹ فارم ایڈمن چھِ تم بدلتھ سکان۔",
+    "regLoadFailed": "پرامپٹ لوڈ کٔرتھ سکیو نہ۔",
+    "regCount": "{total} پرامپٹن منٛز {shown} چھِ ہاوان۔",
+    "regEmptyTitle": "کانہہ پرامپٹ میلیو نہ",
+    "regEmptyBody": "تلاش یا چھانٹ بدلاو۔",
+    "regSource_DEFAULT": "ڈیفالٹ طور آمُت",
+    "regSource_FALLBACK": "ڈیفالٹ طور آمُت (اووررائڈ دستیاب چھُنہ)",
+    "regSource_PLATFORM": "پلیٹ فارم",
+    "regSource_TENANT": "ورک سپیس",
+    "regSource_AGENT": "ایجنٹ",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "ریٹائر کرنہ آمُت",
+    "regRetiredBody": "یہ پرامپٹ چھُ ہُن کینہہ متن نہ بوزناوان، لہذا بدلاونہ خاطرٕ چھُنہ کینہہ۔",
+    "regEffectiveOff": "بند: کینہہ نہ چھُ بوزناونہ یوان۔",
+    "regEffectiveTokens": "ہُن لاگو، تقریباً {tokens} ٹوکن۔",
+    "regEffectiveLabel": "{title} خاطرٕ لاگو لفظ",
+    "regOpenEditor": "{title} بدلاو",
+    "regCloseEditor": "{title} بند کٔرو",
+    "regEditingOverride": "{scope} ورژن چھُ بدلاوان، ہُن v{version}۔",
+    "regEditingNone": "ہُن تام چھُ نہ کانہہ {scope} ورژن۔ یہ چھُ یمہ تل لفظن پیٹھ شروع گژھان: {below}۔",
+    "regPlaceholders": "رَنٹائمس پیٹھ چھُ بھرنہ یوان:",
+    "regRequired": "(ضروری)",
+    "regProblemsTitle": "محفوظ کرنہ برونہہ یہ ٹھیک کٔرو",
+    "regReasonLabel": "تبدیلی وجہ (تاریخس منٛز رٔکھنہ یوان)",
+    "regReasonPlaceholder": "اختیاری",
+    "regConflict": "توہہ بدلاوان ٲسۍ تہٕ کانہہ شخصن بدلوو یہ پرامپٹ۔ تمۍ ہند ورژن وچھنہ خاطرٕ یہ بند کٔرو تہٕ دوبارہ کھولو، پتہ دوبارہ کوشش کٔرو۔",
+    "regRevert": "{to} کن واپس گژھو",
+    "regShowHistory": "تاریخ",
+    "regHideHistory": "تاریخ لُکناو",
+    "regHistoryLoading": "تاریخ چھیہ لوڈ گژھان…",
+    "regHistoryFailed": "تاریخ لوڈ کٔرتھ سکیو نہ۔",
+    "regHistoryEmpty": "یمہ دائرس منٛز چھُ ہُن تام نہ کانہہ ورژن۔",
+    "regVersion": "ورژن {version}",
+    "regAction_CREATE": "بنیومت",
+    "regAction_UPDATE": "بدلیومت",
+    "regAction_REVERT": "واپس کرنہ آمُت",
+    "regAction_MIGRATE": "منتقل کرنہ آمُت",
+    "regCurrent": "موجودہ",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "نامعلوم",
+    "regReason": "وجہ: {reason}",
+    "regShowDiff": "ورژن {version} ہند تبدیلی ہاو",
+    "regHideDiff": "ورژن {version} ہند تبدیلی لُکناو",
+    "regDiffLabel": "ورژن {version} ہند کرنہ آمژ تبدیلی",
+    "regNoDiff": "یمہ ورژنس منٛز بدلیو نہ کانہہ متن۔",
+    "regRestore": "ورژن {version} بحال کٔرو",
+    "regRestoreReason": "ورژن {version} ہند لفظ بحال گۅو",
+    "regRestoreFailed": "سُہ ورژن بحال کٔرتھ سکیو نہ۔",
+    "regRestoreAck": "بہٕ چھس سمجھان زِ {title} ہند اکھ ورژن بحال کرنہ سیتۍ سکہِ حفاظت کمزور سپدتھ۔",
+    "regPreviewTitle": "آخری پرامپٹک پیشگی منظر",
+    "regPreviewIntro": "ماڈلس کال کرنہ بغیر، یتھہ طرح اکھ ٹرن کرتھ ہیتن تتھہ طرح چھُ ایجنٹک اصلی سسٹم پرامپٹ تہٕ ٹول فہرست بنان۔ ہر بلاک چھُ ہاوان زِ پرامپٹ کیا چھُ، تمۍ ہند دائرہ، تہٕ تمۍ ہند لفظ کمیس ورژنہ پیٹھ یوان چھِ۔",
+    "regPreviewMessageLabel": "نمونہ صارف پیغام (اختیاری)",
+    "regPreviewMessagePlaceholder": "اصلی پیغام ہند طرح ٹول تہٕ یاد کرنہ آمژ میموری چُننہ خاطرٕ ورتاونہ یوان۔",
+    "regPreviewSmallModel": "سیود ماڈلس خاطرٕ پیشگی منظر",
+    "regPreviewBuild": "پیشگی منظر بناو",
+    "regPreviewBuilding": "بنان چھُ…",
+    "regPreviewFailed": "پیشگی منظر بناوتھ سکیو نہ۔",
+    "regPreviewTotals": "سسٹم متنس خاطرٕ تقریباً {prompt} ٹوکن تہٕ ٹول تعریفن خاطرٕ {tools} ٹوکن (اندازہ)۔",
+    "regPreviewOverBudgetTitle": "ٹوکن بجٹ کھوتہ زیادہ",
+    "regPreviewOverBudget": "مستقل سسٹم متن چھُ ترتیب دنہ آمتہ {budget} ٹوکنک بجٹ کھوتہ زیادہ۔ کینہہ نہ کٹنہ آو؛ اکھ پرامپٹ مختصر کرنچ سوچ کٔرو۔",
+    "regPreviewMessageHeading": "پیغام: {message}",
+    "regPreviewTokens": "~{tokens} ٹوکن",
+    "regPreviewTools": "ٹول ({count})",
+    "regPreviewNoTools": "یہ ایجنٹ چھُ نہ کانہہ ٹول دوان۔",
+    "regPreviewNotes": "یہ پیشگی منظر کیا نہ چھُ زانتھ سکان",
+    "regOriginDefault": "ڈیفالٹ طور آمُت",
+    "regOriginOverride": "{scope} اووررائڈ v{version}",
+    "regOriginAgentConfig": "ایجنٹک پننہ سسٹم پرامپٹ",
+    "regOriginCode": "پلیٹ فارم کوڈ"
+  },
+  "toolLabels": {
+    "mcpTool": "{tool} ({server})",
+    "label_web_search": "Search the web",
+    "does_web_search": "Looks up public web pages that match a search and reads their titles and snippets.",
+    "label_fetch_web_page": "Open a web page",
+    "does_fetch_web_page": "Downloads one public web page and reads its text.",
+    "label_deep_research": "Research a topic on the web",
+    "does_deep_research": "Runs several web searches and reads the pages it finds.",
+    "label_verify_citations": "Check quotes against sources",
+    "does_verify_citations": "Compares quoted text with the web pages it was taken from.",
+    "label_http_request": "Call a web API",
+    "does_http_request": "Sends a request to a web address or API; depending on the request it can read or change something there.",
+    "label_http_request_write": "Send data to a web API",
+    "does_http_request_write": "Sends data to a web address, which can change something on that service.",
+    "label_schedule_task": "Schedule a task",
+    "does_schedule_task": "Sets up a task to run later or on a repeating schedule.",
+    "label_create_workflow": "Create a workflow",
+    "does_create_workflow": "Creates a new workflow in this workspace.",
+    "label_data_table_query": "Look up a data table",
+    "does_data_table_query": "Reads rows from one of this workspace's data tables.",
+    "label_data_table_write": "Change a data table",
+    "does_data_table_write": "Adds or changes rows in one of this workspace's data tables.",
+    "label_coding_task": "Run a coding task",
+    "does_coding_task": "Starts a coding task that can read and change files in a code workspace.",
+    "label_delegate_to_specialist": "Ask a specialist agent",
+    "does_delegate_to_specialist": "Hands part of the task to another agent and reads its answer.",
+    "label_delegate_parallel": "Ask several agents at once",
+    "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
+    "label_web_task": "Use a browser on a website",
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
   }
 }

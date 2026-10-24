@@ -38,4 +38,12 @@ public interface MediaToolSource {
      * inside the tools.
      */
     List<ToolCallback> rawTools();
+
+    /**
+     * As {@link #rawTools()}, for the agent the tools are being resolved for ({@code agentId} may be null). A source
+     * whose tools read an agent-scope prompt override overrides this to pass the agent on; the default ignores it.
+     */
+    default List<ToolCallback> rawTools(java.util.UUID agentId) {
+        return rawTools();
+    }
 }

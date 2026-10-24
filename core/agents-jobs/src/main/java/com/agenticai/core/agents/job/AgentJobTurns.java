@@ -4,10 +4,12 @@ import com.agenticai.core.agents.job.AgentJobExecution.AgentJobTimeoutException;
 import com.agenticai.core.agents.job.AgentJobExecution.AgentJobToolLimitException;
 import com.agenticai.core.agents.job.progress.AgentJobProgressService;
 import com.agenticai.core.agents.job.progress.ReportProgressToolCallback;
+import com.agenticai.core.agents.runtime.RuntimeLimits;
 import com.agenticai.core.agents.tools.StepJournal;
 import com.agenticai.core.agents.tools.TenantContextPropagatingToolCallback;
 import com.agenticai.core.agents.tools.ToolCallLogRepository;
 import com.agenticai.core.agents.turn.AgentChatService;
+import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.security.TenantContext;
@@ -65,6 +67,17 @@ final class AgentJobTurns {
     }
 
     /**
+     * Builds the first turn of a job RESUMED after an approval park from the decisions it was parked
+     * on (see {@link AgentJobApprovalResumption}). Optional setter like the journal: null (unit tests,
+     * slim contexts) => a resumed job re-sends its goal, as before.
+     */
+    void setApprovalResume(AgentJobApprovalResumption approvalResume) {
+        this.approvalResume = approvalResume;
+    }
+
+    private volatile AgentJobApprovalResumption approvalResume;
+
+    /**
      * The park detector's lower bound for "an approval request this attempt's turn caused".
      * Normally this attempt's own start. For a journal-resumed orphan (only then) it is the
      * journaled start of the turn that is being resumed, if that is earlier, so a PENDING approval
@@ -99,15 +112,23 @@ final class AgentJobTurns {
      * ceiling is checked at TURN BOUNDARIES, and retrofitting both into a straight-line call later
      * would mean rewriting the error handling around it.
      *
-     * <p><b>The per-job tool-call ceiling is enforced at turn granularity, and that limitation is
-     * deliberate rather than an oversight.</b> Exact per-job counting would require an overload of
-     * {@code AgentToolProvider#resolveToolsFor}, and that file is owned by a parallel session this
-     * workstream must not touch. Within a single turn, the existing {@code
-     * app.guardrails.max-tool-calls-per-turn} ceiling (enforced by {@code GuardedToolCallback},
-     * unchanged) still applies, so there is no unbounded window - only a coarser one. With {@code
-     * max_turns = 1} the two ceilings coincide exactly.
+     * <p><b>The per-job tool-call ceiling is checked at turn boundaries AND inside each turn.</b> The
+     * boundary check ({@link #guardBeforeTurn}) refuses a turn once the job is out of calls; inside the
+     * turn the job's remaining budget rides on the request as a cap ({@link ChatTurnRequest#caps()}), which
+     * the turn's runtime settings apply on top of the agent's own ceiling (a cap can lower it, never raise
+     * it), so a turn cannot spend more than the job has left.
      */
     String runTurns(AgentJob job, Instant deadlineAt, boolean orphanRequeue)
+            throws InterruptedException {
+        return runTurns(job, deadlineAt, orphanRequeue, false);
+    }
+
+    /**
+     * @param resumedFromPark the job was parked on a human approval and this run follows the
+     *     decision: its FIRST turn is the approval continuation (the goal restated with the
+     *     decided calls' results) instead of the bare goal
+     */
+    String runTurns(AgentJob job, Instant deadlineAt, boolean orphanRequeue, boolean resumedFromPark)
             throws InterruptedException {
         String lastResult = null;
         // Each park buys exactly ONE more turn. Without this, a resumed job
@@ -232,12 +253,31 @@ final class AgentJobTurns {
             if (journaling) {
                 journal.begin(runId, stepId, StepJournal.KIND_TURN);
             }
-            lastResult = runOneTurn(job, deadlineAt, outputContract.effectiveGoal(job), false);
+            String goal = outputContract.effectiveGoal(job);
+            AgentJobApprovalResumption.ResumeTurn resume =
+                    resumedFromPark && turn == firstTurn && approvalResume != null
+                            ? approvalResume.resumeFor(job, goal).orElse(null)
+                            : null;
+            lastResult =
+                    resume == null
+                            ? runOneTurn(job, deadlineAt, goal, false)
+                            : runOneTurn(
+                                    job, deadlineAt, resume.message(), false, resume.continuation());
             if (journaling) {
                 journal.complete(runId, stepId, StepJournal.KIND_TURN, lastResult);
             }
         }
         return lastResult;
+    }
+
+    /** Tool calls the job may still make, at least one (a job with none left never reaches a turn: see {@link #guardBeforeTurn}). */
+    private int remainingToolCalls(AgentJob job) {
+        // Counted per turn, from this job's own rows. Deliberately NOT cached on this object: one
+        // AgentJobTurns serves every concurrent job, so any per-job state held in a field leaks across jobs.
+        long used =
+                toolCallLogRepository.countByAgentIdAndSessionId(
+                        job.getAgentId(), job.getSessionId());
+        return (int) Math.max(1, Math.min(Integer.MAX_VALUE, job.getMaxToolCalls() - used));
     }
 
     /**
@@ -287,6 +327,22 @@ final class AgentJobTurns {
      */
     String runOneTurn(AgentJob job, Instant deadlineAt, String messageText, boolean textOnly)
             throws InterruptedException {
+        return runOneTurn(job, deadlineAt, messageText, textOnly, null);
+    }
+
+    /**
+     * As above, for the turn that follows an approval decision: {@code continuation} makes the turn
+     * screen, select tools and route on the job's goal (the message is the platform-written
+     * continuation) and keep the tools the job already used on offer. {@code null} on every other
+     * turn.
+     */
+    String runOneTurn(
+            AgentJob job,
+            Instant deadlineAt,
+            String messageText,
+            boolean textOnly,
+            ApprovalContinuation continuation)
+            throws InterruptedException {
         Duration remaining = Duration.between(Instant.now(), deadlineAt);
         if (remaining.isZero() || remaining.isNegative()) {
             throw new AgentJobTimeoutException(job.getTimeoutSeconds());
@@ -306,7 +362,8 @@ final class AgentJobTurns {
                 return agentChatService
                         .chat(
                                 TurnContext.forEntry(
-                                        TenantContext.current().orElse(null), textOnlyTurn),
+                                                TenantContext.current().orElse(null), textOnlyTurn)
+                                        .withDeadline(deadlineAt),
                                 textOnlyTurn)
                         .collect(Collectors.joining())
                         .block(remaining);
@@ -343,9 +400,17 @@ final class AgentJobTurns {
                                     job.getSubjectKey(),
                                     messageText)
                             .extraTools(extraTools)
+                            .continuation(continuation)
+                            // The job's remaining tool budget limits the turn's OWN calls, not just the next
+                            // turn boundary: a turn may make no more than the job has left (and never more than
+                            // the agent allows - a cap only tightens).
+                            .caps(RuntimeLimits.capToolSteps(remainingToolCalls(job)))
                             .build();
+            // The job's own deadline: a buffered reasoning depth uses it instead of its fixed
+            // buffered-turn-timeout when the job was given more time than that.
             TurnContext turnContext =
-                    TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+                    TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn)
+                            .withDeadline(deadlineAt);
             return agentChatService
                     .chat(turnContext, chatTurn)
                     .collect(Collectors.joining())

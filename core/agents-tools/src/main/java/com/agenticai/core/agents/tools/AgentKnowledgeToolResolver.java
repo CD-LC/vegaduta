@@ -156,8 +156,17 @@ final class AgentKnowledgeToolResolver {
                 purposeFiltered(agentId, agentService.getAllowedKnowledgeCollectionIds(agentId));
         ToolCallback listTool =
                 new ListKnowledgeCollectionsToolCallback(collectionService, allowedCollectionIds);
+        // How many chunks a search returns and how relevant they must be: the agent's runtime settings
+        // (tenant defaults under its own overrides); the tool's historic 3 / no cut-off without a resolver.
+        com.agenticai.core.agents.runtime.AgentRuntimeSettings runtime = toolGuard.runtimeSettings(agentId);
         ToolCallback searchTool =
-                new KnowledgeSearchToolCallback(searchService, allowedCollectionIds);
+                runtime == null
+                        ? new KnowledgeSearchToolCallback(searchService, allowedCollectionIds)
+                        : new KnowledgeSearchToolCallback(
+                                searchService,
+                                allowedCollectionIds,
+                                runtime.retrievalTopK(),
+                                runtime.retrievalMinScore());
         List<ToolCallback> tools = new ArrayList<>();
         tools.add(
                 guardAndLog(

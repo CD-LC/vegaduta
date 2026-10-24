@@ -116,7 +116,11 @@ final class SanitizedMcpToolCallback implements ToolCallback {
         if (blocked.isPresent()) {
             return blockedResult(blocked.get());
         }
-        return McpToolOutputSanitizer.sanitizeResult(delegate.call(toolInput, toolContext));
+        // The tool context is the platform's own per-turn state (the tool-loop transcript, ...), never meant for
+        // the MCP server: Spring AI's MCP callback copies it into the request's _meta, which leaks internal state
+        // to a third-party server and fails outright on an entry Jackson cannot write (seen 2026-10-23: the
+        // ToolLoopTranscript made every MCP call hang - the transport dropped the request and no result came back).
+        return McpToolOutputSanitizer.sanitizeResult(delegate.call(toolInput));
     }
 
     /**
@@ -129,6 +133,13 @@ final class SanitizedMcpToolCallback implements ToolCallback {
      * on why that must propagate as a real exception instead).
      */
     private String blockedResult(String reason) {
+        // Registered as the platform's answer: the wrapped JSON no longer starts with the refusal wording, so the
+        // effect and turn journals could not tell it from a tool's output by the text.
+        return com.agenticai.core.guardrails.ToolResultMarker.mark(blockedText(reason),
+                com.agenticai.core.guardrails.ToolResultMarker.Kind.BLOCKED);
+    }
+
+    private String blockedText(String reason) {
         return McpToolOutputSanitizer.ensureJsonObject(
                 "This tool call ('"
                         + sanitizedDefinition.name()

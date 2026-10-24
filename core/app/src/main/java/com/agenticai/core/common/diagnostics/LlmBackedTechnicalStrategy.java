@@ -1,10 +1,13 @@
 package com.agenticai.core.common.diagnostics;
 
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import java.util.Map;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -51,19 +54,16 @@ class LlmBackedTechnicalStrategy {
     private static final String TECHNICAL_PREFIX = "TECHNICAL:";
     private static final String EXPERT_PREFIX = "EXPERT:";
 
-    private static final String SYSTEM_PROMPT = """
-        You are an on-call engineering assistant explaining an application failure that has
-        already had all secrets, credentials, emails, phone numbers, IP addresses, and
-        filesystem paths removed from it. You will never be shown real secret values - do not
-        invent any.
+    /** Registry key of the system prompt ({@code prompts/en/diagnostics.technical_explanation.md}). */
+    static final String SYSTEM_PROMPT_KEY = "diagnostics.technical_explanation";
 
-        Produce exactly two lines, in this exact format and no other text:
-        TECHNICAL: <one or two sentences for a technical/developer audience - the real error
-        category and likely cause, no raw stack traces>
-        EXPERT: <maximum useful detail for an on-call engineer - exception class names,
-        provider/tool names, config key names, likely root cause and next diagnostic step -
-        still no secret VALUES, only names/categories>
-        """;
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so an owner can reword the instruction; absent = the shipped text. */
+    @Autowired(required = false)
+    void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     private final Map<String, Function<MaskedFailureContext, TechnicalExplanation>> templates = Map.of(
         "GuardrailViolationException", LlmBackedTechnicalStrategy::guardrailTemplate,
@@ -91,7 +91,7 @@ class LlmBackedTechnicalStrategy {
     private TechnicalExplanation tryLlm(MaskedFailureContext context) {
         try {
             String verdict = context.chatClient().prompt()
-                .system(SYSTEM_PROMPT)
+                .system(prompts.text(SYSTEM_PROMPT_KEY))
                 .user(buildUserPrompt(context))
                 .call()
                 .content();

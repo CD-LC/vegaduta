@@ -82,7 +82,11 @@ export default function ToolPinReview({ onChanged }: { onChanged?: () => void })
               <div className="mb-1 flex flex-wrap items-center gap-2">
                 <strong>{item.name}</strong>
                 <Badge variant="outline">{item.mode}</Badge>
-                {item.changedAt && <span className="text-xs text-muted-foreground">changed {new Date(item.changedAt).toLocaleString()}</span>}
+                {item.changedAt && (
+                  <span className="text-xs text-muted-foreground">
+                    changed {new Date(item.changedAt).toLocaleString()}
+                  </span>
+                )}
               </div>
               <ToolList label="Changed" names={item.changedTools} />
               <ToolList label="Added" names={item.added} />
@@ -95,7 +99,8 @@ export default function ToolPinReview({ onChanged }: { onChanged?: () => void })
                 onClick={() => void approve(item)}
                 data-testid={`mcp-tool-pin-approve-${item.name}`}
               >
-                {busyId === item.registrationId ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Approve new tool list
+                {busyId === item.registrationId ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Approve new tool
+                list
               </Button>
             </li>
           ))}

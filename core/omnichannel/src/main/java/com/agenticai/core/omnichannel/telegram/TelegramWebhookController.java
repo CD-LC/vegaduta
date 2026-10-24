@@ -6,8 +6,6 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -29,8 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Auth is Telegram's own {@code secret_token} mechanism: {@link
  * TelegramCredentialService#activate} registers a per-tenant random secret via {@code setWebhook},
  * and Telegram echoes it back on every call via {@code X-Telegram-Bot-Api-Secret-Token} - verified
- * here against the resolved tenant's stored value before anything else runs. Once the origin is
- * trusted, {@link TelegramUpdateService} does the rest.
+ * here against the resolved tenant's stored digest ({@link TelegramWebhookSecret}, constant-time)
+ * before anything else runs. Once the origin is trusted, {@link TelegramUpdateService} does the
+ * rest.
  */
 @RestController
 @RequestMapping("/webhook/telegram")
@@ -80,7 +79,8 @@ public class TelegramWebhookController {
                     credentialRepository.findFirstByOrderByCreatedAtAsc();
             if (credential.isEmpty()
                     || secretHeader == null
-                    || !constantTimeEquals(secretHeader, credential.get().getWebhookSecret())) {
+                    || !TelegramWebhookSecret.matches(
+                            secretHeader, credential.get().getWebhookSecret())) {
                 log.warn(
                         "Rejected Telegram inbound call with missing/invalid secret token for bot"
                                 + " ***{}",
@@ -110,18 +110,5 @@ public class TelegramWebhookController {
             return "***";
         }
         return value.substring(value.length() - 4);
-    }
-
-    // Constant-time comparison - a secret-token check is exactly the kind of
-    // thing a naive String.equals() timing side-channel could leak information
-    // from, however marginal. Same idiom as MetaWhatsAppSignatureValidator.
-    // A null on either side (e.g. a credential with no stored webhook secret)
-    // is a mismatch, never an NPE.
-    private static boolean constantTimeEquals(String a, String b) {
-        if (a == null || b == null) {
-            return false;
-        }
-        return MessageDigest.isEqual(
-                a.getBytes(StandardCharsets.UTF_8), b.getBytes(StandardCharsets.UTF_8));
     }
 }

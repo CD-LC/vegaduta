@@ -64,7 +64,7 @@ public class ToolArgPolicyService implements ToolArgPolicySource {
         AgentToolArgPolicyRepository repository,
         ObjectProvider<AuditLogService> auditLog,
         ObjectProvider<MeterRegistry> meterRegistry,
-        @Value("${app.tool-arg-policies.enabled:false}") boolean enabled,
+        @Value("${app.tool-arg-policies.enabled:true}") boolean enabled,
         @Value("${app.tool-arg-policies.cache-ttl-seconds:30}") long cacheTtlSeconds
     ) {
         this.agentService = agentService;

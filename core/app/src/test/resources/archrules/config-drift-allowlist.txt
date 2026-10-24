@@ -1,0 +1,21 @@
+# Reviewed exceptions to ConfigurationDriftTest. One entry per line:  rule | key | reason
+#   rule  drift         the code default of the key differs from application.yml on purpose
+#         unread        the key is in an application*.yml and is read by code that composes the key at run time
+#         undocumented  the code reads the key and docs/configuration.md does not name it
+#   key   exact, or a prefix ending in *
+# A reason is mandatory (at least a sentence fragment). An entry that no longer matches a finding fails the test:
+# delete it. Do not add an entry to silence a real mismatch; fix the code or the yml.
+
+# ---- drift: deliberate differences ----
+drift | app.storage.access-key | The yml ships MinIO's zero-setup development credential on purpose (a bare local run against the compose MinIO works); the class default stays empty so a context without the yml has no credential. DefaultStorageCredentialsWarning logs a startup WARN outside dev/local/test profiles. Weakening the code default is the thing to avoid, so the yml is the one that differs.
+drift | app.storage.secret-key | Same as app.storage.access-key: the yml carries the MinIO development default, guarded by DefaultStorageCredentialsWarning; the code default stays empty.
+drift | app.storage.endpoint | A blank endpoint means real AWS S3 (the SDK resolves the regional endpoint itself); the yml points a local run at the compose MinIO. Making the class default http://localhost:9000 would send an AWS deployment that forgot the variable to localhost.
+drift | spring.profiles.active | Spring Boot's own key, read only to learn whether a dev/test profile is active (TenantDataUsageService); the yml value is the platform default profile set, the empty code default means no profile.
+
+# ---- unread: keys composed at run time ----
+unread | app.mcp.oauth.providers.* | OAuthProviderRegistry builds KEY_PREFIX + "providers." + providerId + ".client-id|client-secret|enabled|scopes|mcp-url|tenant" for every provider it knows, so the literal key never appears in code.
+unread | app.resilience.* | CircuitBreakerSettings.bind and ResilienceConfiguration bind prefix + ".window", ".open-duration" and the other leaf names with a Binder, for the default and for every named instance (app.resilience.circuit-breaker.instances.<family>.*).
+unread | app.scheduling.pools.* | SchedulingPools reads the whole app.scheduling.pools map with a Binder (pool name to class list); JobsPoolsCoverEveryJobTest proves the lists.
+unread | app.scheduling.pool-lifecycle.* | SchedulingPools reads the app.scheduling.pool-lifecycle map with a Binder (pool name to the per-JVM lifecycle classes).
+unread | app.http.hcaptcha.* | OutboundHttpTimeouts.resolve(env, "hcaptcha", ...) reads "app.http." + name + ".connect-timeout" and ".read-timeout".
+unread | app.billing.razorpay.trial-days | Nothing reads it: the signup trial was removed (TenantUpgradeService passes trialDays=0, an upgrade has no trial). Billing owns the decision to delete the key and its RAZORPAY_TRIAL_DAYS variable; outside the agent-runtime scope of this change.

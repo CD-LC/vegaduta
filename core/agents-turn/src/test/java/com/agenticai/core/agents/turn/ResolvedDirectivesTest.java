@@ -3,30 +3,66 @@ package com.agenticai.core.agents.turn;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-import com.agenticai.core.agents.turn.ResolvedDirectives.Setting;
+import com.agenticai.core.agents.turn.PromptDirectiveRegistry.Keys;
+import com.agenticai.core.prompts.DefaultPromptResolver;
+import com.agenticai.core.prompts.InMemoryPromptOverrideStore;
+import com.agenticai.core.prompts.PromptOverride;
+import com.agenticai.core.prompts.PromptProperties;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptScope;
+import com.agenticai.core.prompts.PromptSource;
+import com.agenticai.core.security.TenantContext;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
 
 class ResolvedDirectivesTest {
 
     private static final LocalDate DAY = LocalDate.of(2026, 10, 19);
+    private static final UUID AGENT = UUID.fromString("00000000-0000-0000-0000-0000000000a1");
     private static final List<ToolCallback> ONE_TOOL = List.of(mock(ToolCallback.class));
 
-    private static ResolvedDirectives with(Map<String, Setting> settings) {
-        return new ResolvedDirectives(settings, DAY);
+    private final InMemoryPromptOverrideStore store = new InMemoryPromptOverrideStore();
+    private final DefaultPromptResolver resolver =
+            new DefaultPromptResolver(PromptResolver.defaultsOnly().catalog(), store, new PromptProperties());
+    private final PromptDirectiveSettings settings = PromptDirectiveSettings.forTest(resolver);
+
+    @AfterEach
+    void clear() {
+        TenantContext.clear();
+    }
+
+    private void tenant(String id) {
+        TenantContext.set(TenantContext.of(id, "owner", Set.of()));
+    }
+
+    private void override(PromptScope scope, String key, String text, boolean enabled) {
+        store.put(
+                new PromptOverride(
+                        scope, scope == PromptScope.AGENT ? AGENT.toString() : "", key, "en", text, enabled, 1, "owner", Instant.now()));
+        resolver.evictAll();
     }
 
     @Test
-    void defaultsPassEveryBlockThroughUnchangedAndAddNothing() {
+    void defaultsPassEveryDirectiveThroughUnchangedAndAddNothing() {
         ResolvedDirectives none = ResolvedDirectives.DEFAULTS;
 
         for (PromptDirectiveRegistry.Entry e : PromptDirectiveRegistry.all()) {
-            assertThat(none.resolve(e.key(), e.defaultText())).isEqualTo(e.defaultText());
-            assertThat(none.resolve(e.key(), null)).isNull();
+            for (String key : e.promptKeys()) {
+                if (e.overridable()) {
+                    assertThat(none.text(key)).as(key).isNotBlank();
+                } else {
+                    assertThat(none.text(key)).as(key).isNull();
+                }
+            }
+            assertThat(none.text(null)).isNull();
         }
+        assertThat(none.text(Keys.TOOL_TRUST)).isEqualTo(ChatPromptDirectives.TOOL_TRUST_DIRECTIVE);
         assertThat(none.customInstructionsBlock()).isNull();
     }
 
@@ -41,7 +77,7 @@ class ResolvedDirectivesTest {
                                 + "(today, latest, this week) and never guess a different date.");
         assertThat(text("tool_trust")).isEqualTo(ChatPromptDirectives.toolTrustDirective(ONE_TOOL));
         assertThat(text("mcp_untrusted")).isEqualTo(ChatPromptDirectives.mcpUntrustedDataDirective(true));
-        assertThat(text("artifacts")).isEqualTo(ChatPromptDirectives.artifactsDirective(true, true, "", java.util.UUID.randomUUID()));
+        assertThat(text("artifacts")).isEqualTo(ChatPromptDirectives.artifactsDirective(true, true, "", UUID.randomUUID()));
         assertThat(text("agentic_completion")).isEmpty();
         assertThat(ChatPromptDirectives.agenticCompletionDirective(ONE_TOOL)).isNull();
         assertThat(text("media_honesty")).isEmpty();
@@ -53,6 +89,10 @@ class ResolvedDirectivesTest {
         assertThat(PromptDirectiveRegistry.all().stream().filter(PromptDirectiveRegistry.Entry::securityCritical)
                         .map(PromptDirectiveRegistry.Entry::key))
                 .containsExactly("tool_trust", "mcp_untrusted");
+        assertThat(PromptDirectiveRegistry.find("tool_trust").orElseThrow().promptKeys())
+                .containsExactly("directive.tool_trust", "directive.tool_trust.compact");
+        assertThat(PromptDirectiveRegistry.find("context_compaction").orElseThrow().promptKeys())
+                .containsExactly("directive.context_compaction", "directive.context_compaction.no_restore");
     }
 
     private static String text(String key) {
@@ -61,44 +101,73 @@ class ResolvedDirectivesTest {
 
     @Test
     void resolutionOrderIsDisabledThenOverrideThenDefault() {
-        ResolvedDirectives pd =
-                with(
-                        Map.of(
-                                "memory_usage", new Setting(false, "ignored when disabled"),
-                                "tool_search", new Setting(true, "Search first."),
-                                "browser_v2", new Setting(true, "   ")));
+        tenant("a");
+        override(PromptScope.TENANT, Keys.MEMORY_USAGE, "ignored when disabled", false);
+        override(PromptScope.TENANT, Keys.TOOL_SEARCH, "Search first.", true);
+        override(PromptScope.TENANT, Keys.BROWSER_V2, "   ", true);
+        ResolvedDirectives pd = settings.forToday(DAY);
 
-        assertThat(pd.resolve("memory_usage", "built-in")).isNull();
-        assertThat(pd.resolve("tool_search", "built-in")).isEqualTo("Search first.");
-        assertThat(pd.resolve("browser_v2", "built-in")).isEqualTo("built-in");
-        assertThat(pd.resolve("artifacts", "built-in")).isEqualTo("built-in");
+        assertThat(pd.text(Keys.MEMORY_USAGE)).isNull();
+        assertThat(pd.text(Keys.TOOL_SEARCH)).isEqualTo("Search first.");
+        assertThat(pd.text(Keys.BROWSER_V2)).isEqualTo(ChatPromptDirectives.BROWSER_V2_DIRECTIVE);
+        assertThat(pd.text(Keys.ARTIFACTS)).isEqualTo(ArtifactsDirective.TEXT);
     }
 
     @Test
     void anOverrideNeverResurrectsADirectiveThePlatformDoesNotSendThisTurn() {
-        ResolvedDirectives pd = with(Map.of("tool_search", new Setting(true, "Search first.")));
+        tenant("a");
+        override(PromptScope.TENANT, Keys.TOOL_SEARCH, "Search first.", true);
 
-        assertThat(pd.resolve("tool_search", null)).isNull();
+        // The assembler passes no key for a directive that does not apply this turn.
+        assertThat(settings.forToday(DAY).text(DirectiveKeys.toolSearchKey(List.of()))).isNull();
     }
 
     @Test
-    void currentDateOverrideGetsThePlaceholderSubstituted() {
-        ResolvedDirectives pd = with(Map.of("current_date", new Setting(true, "It is {date} today.")));
+    void currentDateGetsThePlaceholderSubstitutedInTheDefaultAndInAnOverride() {
+        tenant("a");
+        assertThat(settings.forToday(DAY).text(Keys.CURRENT_DATE)).isEqualTo(ChatPromptDirectives.currentDateDirective(DAY));
+        override(PromptScope.TENANT, Keys.CURRENT_DATE, "It is {date} today.", true);
 
-        assertThat(pd.resolve("current_date", "built-in")).isEqualTo("It is 2026-10-19 today.");
+        assertThat(settings.forToday(DAY).text(Keys.CURRENT_DATE)).isEqualTo("It is 2026-10-19 today.");
     }
 
     @Test
     void customInstructionsOnlyWhenEnabledAndNotBlank() {
-        assertThat(with(Map.of("custom_instructions", new Setting(true, "  Be brief.  ")))
-                        .customInstructionsBlock())
-                .isEqualTo("Be brief.");
-        assertThat(with(Map.of("custom_instructions", new Setting(false, "Be brief.")))
-                        .customInstructionsBlock())
-                .isNull();
-        assertThat(with(Map.of("custom_instructions", new Setting(true, " ")))
-                        .customInstructionsBlock())
-                .isNull();
+        tenant("a");
+        override(PromptScope.TENANT, Keys.CUSTOM_INSTRUCTIONS, "  Be brief.  ", true);
+        assertThat(settings.forToday(DAY).customInstructionsBlock()).isEqualTo("Be brief.");
+        override(PromptScope.TENANT, Keys.CUSTOM_INSTRUCTIONS, "Be brief.", false);
+        assertThat(settings.forToday(DAY).customInstructionsBlock()).isNull();
+        override(PromptScope.TENANT, Keys.CUSTOM_INSTRUCTIONS, " ", true);
+        assertThat(settings.forToday(DAY).customInstructionsBlock()).isNull();
+    }
+
+    @Test
+    void anAgentOverrideBeatsTheTenantsForThatAgentOnly() {
+        tenant("a");
+        override(PromptScope.TENANT, Keys.TOOL_SEARCH, "Tenant search rule.", true);
+        override(PromptScope.AGENT, Keys.TOOL_SEARCH, "Agent search rule.", true);
+
+        assertThat(settings.forTurn(DAY, AGENT).text(Keys.TOOL_SEARCH)).isEqualTo("Agent search rule.");
+        assertThat(settings.forTurn(DAY, UUID.randomUUID()).text(Keys.TOOL_SEARCH)).isEqualTo("Tenant search rule.");
+        assertThat(settings.forToday(DAY).text(Keys.TOOL_SEARCH)).isEqualTo("Tenant search rule.");
+    }
+
+    @Test
+    void recordingRemembersWhichKeyScopeAndVersionProducedEachBlock() {
+        tenant("a");
+        override(PromptScope.AGENT, Keys.TOOL_SEARCH, "Agent search rule.", true);
+        ResolvedDirectives pd = settings.forTurn(DAY, AGENT).recording();
+
+        pd.text(Keys.TOOL_SEARCH);
+        pd.text(Keys.BROWSER_V2);
+        pd.text(null);
+
+        assertThat(pd.trace()).extracting(r -> r.key() + ":" + r.source())
+                .containsExactly("directive.tool_search:" + PromptSource.AGENT, "directive.browser_v2:" + PromptSource.DEFAULT);
+        assertThat(pd.trace().get(0).scope()).isEqualTo(PromptScope.AGENT);
+        assertThat(pd.trace().get(0).version()).isEqualTo(1);
+        assertThat(ResolvedDirectives.DEFAULTS.trace()).isEmpty();
     }
 
     @Test
@@ -113,16 +182,53 @@ class ResolvedDirectivesTest {
         assertThat(composer.compose(new PromptDirectiveComposer.Context(ONE_TOOL, true, false, ResolvedDirectives.DEFAULTS)))
                 .isEqualTo(old);
 
-        ResolvedDirectives pd =
-                with(
-                        Map.of(
-                                "tool_trust", new Setting(true, "House rules."),
-                                "mcp_untrusted", new Setting(false, null)));
-        // Small-model (compact) mode takes the override too.
-        assertThat(composer.compose(new PromptDirectiveComposer.Context(ONE_TOOL, true, true, pd)))
-                .isEqualTo("House rules.");
+        tenant("a");
+        override(PromptScope.TENANT, Keys.TOOL_TRUST, "House rules.", true);
+        override(PromptScope.TENANT, Keys.TOOL_TRUST_COMPACT, "Short house rules.", true);
+        override(PromptScope.TENANT, Keys.MCP_UNTRUSTED, null, false);
+        ResolvedDirectives pd = settings.forToday(DAY);
+        assertThat(composer.compose(new PromptDirectiveComposer.Context(ONE_TOOL, true, false, pd))).isEqualTo("House rules.");
+        // Small-model (compact) mode is a key of its own: the full wording's override does not leak into it.
+        assertThat(composer.compose(new PromptDirectiveComposer.Context(ONE_TOOL, true, true, pd))).isEqualTo("Short house rules.");
         // A turn without tools sends no tool_trust, and the override does not conjure one.
-        assertThat(composer.compose(new PromptDirectiveComposer.Context(List.of(), false, false, pd)))
-                .isNull();
+        assertThat(composer.compose(new PromptDirectiveComposer.Context(List.of(), false, false, pd))).isNull();
+    }
+
+    @Test
+    void theCompactWordingFallsBackToItsOwnDefaultWhenOnlyTheFullOneIsOverridden() {
+        tenant("a");
+        override(PromptScope.TENANT, Keys.TOOL_TRUST, "House rules.", true);
+        PromptDirectiveComposer composer = PromptDirectiveComposer.standard(() -> true, () -> false);
+
+        assertThat(composer.compose(new PromptDirectiveComposer.Context(ONE_TOOL, false, true, settings.forToday(DAY))))
+                .isEqualTo(ChatPromptDirectives.TOOL_TRUST_DIRECTIVE_COMPACT);
+    }
+
+    private static ToolCallback tool(String name) {
+        return new ToolCallback() {
+            @Override
+            public org.springframework.ai.tool.definition.ToolDefinition getToolDefinition() {
+                return org.springframework.ai.tool.definition.ToolDefinition.builder()
+                        .name(name)
+                        .description(name)
+                        .inputSchema("{}")
+                        .build();
+            }
+
+            @Override
+            public String call(String toolInput) {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    @Test
+    void compactionHasASeparateKeyWhenTheRestoreToolIsNotOffered() {
+        assertThat(DirectiveKeys.contextCompactionKey(true, List.of(tool("search_code")))).isEqualTo(Keys.CONTEXT_COMPACTION_NO_RESTORE);
+        assertThat(DirectiveKeys.contextCompactionKey(true, List.of(tool("restore_tool_result")))).isEqualTo(Keys.CONTEXT_COMPACTION);
+        assertThat(DirectiveKeys.contextCompactionKey(false, List.of(tool("search_code")))).isNull();
+        assertThat(DirectiveKeys.contextCompactionKey(true, List.of())).isNull();
+        assertThat(ChatPromptDirectives.contextCompactionDirective(true, List.of(tool("search_code"))))
+                .isEqualTo(ChatPromptDirectives.CONTEXT_COMPACTION_DIRECTIVE);
     }
 }

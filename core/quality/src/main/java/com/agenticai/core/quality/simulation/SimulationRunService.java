@@ -5,7 +5,7 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.quality.dataset.AgentDefinitionLookup;
 import com.agenticai.core.quality.dataset.AgentHeadVersionLookup;
 import com.agenticai.core.quality.dataset.AgentTurnReplayer;
-import com.agenticai.core.quality.dataset.ReflectiveAgentChatTurnReplayer;
+import com.agenticai.core.quality.dataset.UnavailableTurnReplayer;
 import com.agenticai.core.quality.impl.JudgeChatClientFactory;
 import com.agenticai.core.quality.simulation.attack.AttackScenarioCatalog;
 import com.agenticai.core.quality.simulation.attack.CanaryVerdict;
@@ -123,13 +123,9 @@ public class SimulationRunService {
         this.llmCallLogService = llmCallLogService;
     }
 
-    /** Same "prefer any typed implementation over the reflective bridge" selection as {@code EvalRunService}. */
+    /** Same selection as {@code EvalRunService}: the typed bridge, or one that fails each replay clearly. */
     private static AgentTurnReplayer selectReplayer(List<AgentTurnReplayer> replayers) {
-        return replayers.stream()
-            .filter(r -> !(r instanceof ReflectiveAgentChatTurnReplayer))
-            .findFirst()
-            .orElseGet(() -> replayers.stream().findFirst().orElseThrow(
-                () -> new IllegalStateException("No AgentTurnReplayer implementation available")));
+        return replayers.stream().findFirst().orElseGet(UnavailableTurnReplayer::new);
     }
 
     // ------------------------------------------------------------------

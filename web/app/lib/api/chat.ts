@@ -136,7 +136,13 @@ export const chatApi = {
     // read (message, turnRef, stepEvents) are the ones sent below. Omitted = the normal chat
     // endpoint, so every existing caller is unchanged. 11th positional parameter, same reason as
     // the ones above.
-    pathOverride?: string
+    pathOverride?: string,
+    // Run-scoped tool selection (the playground's "this run only" tool switches): sent as `toolNames`, which
+    // narrows THIS turn to those of the agent's tools - core refuses a name the agent does not offer, a tool kept
+    // stays behind its approval gate, and the agent itself is never changed. Omitted/null = no field in the body,
+    // so every other caller sends the bytes it always did; an empty array is sent as `[]` (a run without tools).
+    // 12th positional parameter, same reason as the ones above.
+    toolNames?: string[] | null
   ): Promise<string | null> => {
     // Captures whatever the operation itself threw (a real HTTP-error
     // Error with .status/.upstreamStatus attached, the STREAM_ERROR_MARKER
@@ -176,6 +182,7 @@ export const chatApi = {
                 // is dropped by jsonBody, so a caller that didn't opt in sends
                 // the exact same bytes it always did.
                 stepEvents: steps ? true : undefined,
+                toolNames: toolNames ?? undefined,
               })
             ),
           });

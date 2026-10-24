@@ -2,8 +2,11 @@
  * The chat stream as an explicit state machine (BIG-FILES-SPLIT-PLAN, file 4).
  *
  *   idle --start--> streaming --settle--> idle
- *   streaming --await-approval--> awaiting-approval --approval-resolved--> streaming
  *   streaming --fail + settle--> error | resumable
+ *
+ * There is deliberately no "awaiting approval" phase: a turn whose tool call the gate parked ENDS (the model is
+ * told to stop), so no turn is ever mid-stream waiting on a human. What follows a decision is a separate turn that
+ * core runs by itself; the playground follows it with useApprovalContinuation, not with this machine.
  *
  * `error` is the plain-language reason (shown under the transcript); `resumable`
  * marks a failure that kept partial reply text, so "continue" or "try again" is
@@ -13,7 +16,7 @@
  *
  * Pure and framework-free so the transitions are unit-testable.
  */
-export type ChatStreamPhase = "idle" | "streaming" | "awaiting-approval" | "error" | "resumable";
+export type ChatStreamPhase = "idle" | "streaming" | "error" | "resumable";
 
 export interface ChatStreamState {
   phase: ChatStreamPhase;
@@ -25,15 +28,13 @@ export type ChatStreamEvent =
   | { type: "start" }
   | { type: "settle" }
   | { type: "fail"; message: string; resumable?: boolean }
-  | { type: "clear-error" }
-  | { type: "await-approval" }
-  | { type: "approval-resolved" };
+  | { type: "clear-error" };
 
 export const initialChatStreamState: ChatStreamState = { phase: "idle", error: null, resumable: false };
 
 /** A turn is in flight (the composer is locked, Cancel is offered). */
 export function isBusyPhase(phase: ChatStreamPhase): boolean {
-  return phase === "streaming" || phase === "awaiting-approval";
+  return phase === "streaming";
 }
 
 function restingPhase(state: Pick<ChatStreamState, "error" | "resumable">): ChatStreamPhase {
@@ -55,10 +56,6 @@ export function chatStreamReducer(state: ChatStreamState, event: ChatStreamEvent
       const next: ChatStreamState = { ...state, error: null, resumable: false };
       return isBusyPhase(state.phase) ? next : { ...next, phase: "idle" };
     }
-    case "await-approval":
-      return isBusyPhase(state.phase) ? { ...state, phase: "awaiting-approval" } : state;
-    case "approval-resolved":
-      return state.phase === "awaiting-approval" ? { ...state, phase: "streaming" } : state;
     default:
       return state;
   }

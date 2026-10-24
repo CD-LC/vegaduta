@@ -2,6 +2,7 @@ package com.agenticai.core.codeintel;
 
 import com.agenticai.core.approval.ApprovalActionExecutor;
 import com.agenticai.core.approval.ApprovalRequest;
+import com.agenticai.core.approval.ApprovalExecutionResultWriter;
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,10 +37,16 @@ public class ApplyCodeWorkspaceApprovalExecutor implements ApprovalActionExecuto
     private static final Logger log = LoggerFactory.getLogger(ApplyCodeWorkspaceApprovalExecutor.class);
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-    private final CodeIntelClient client;
+    /** Cap on the result recorded on the request, so a large response can't bloat that row. */
+    private static final int MAX_RESULT_CHARS = 32 * 1024;
+    private static final String TRUNCATED_SUFFIX = "\n...[truncated]";
 
-    public ApplyCodeWorkspaceApprovalExecutor(CodeIntelClient client) {
+    private final CodeIntelClient client;
+    private final ApprovalExecutionResultWriter results;
+
+    public ApplyCodeWorkspaceApprovalExecutor(CodeIntelClient client, ApprovalExecutionResultWriter results) {
         this.client = client;
+        this.results = results;
     }
 
     @Override
@@ -56,6 +63,26 @@ public class ApplyCodeWorkspaceApprovalExecutor implements ApprovalActionExecuto
         int fileCount = payload.files() == null ? 0 : payload.files().size();
         log.info("code-intel apply to workspace {} (repo {}) approved and executed - {} file change(s) requested",
             payload.workspaceId(), payload.repoId(), fileCount);
+        persistExecutionResult(request, payload, fileCount, raw);
+    }
+
+    /**
+     * Records what the apply did on the request, the way {@link RunCodeWorkspaceApprovalExecutor} records a
+     * run: the gate persists nothing on a normal return, and this is the result the agent is handed when the
+     * task continues after the approval (and the approver sees on the Approvals screen). Before, an approved
+     * apply left no trace but a log line.
+     */
+    private void persistExecutionResult(ApprovalRequest request, ApplyPayload payload, int fileCount, String raw) {
+        String summary = "applied " + fileCount + " file change(s) to workspace " + payload.workspaceId()
+            + " (repo " + payload.repoId() + ")\n--- response ---\n" + truncate(raw);
+        results.record(request, summary);
+    }
+
+    private static String truncate(String s) {
+        if (s == null) {
+            return "";
+        }
+        return s.length() <= MAX_RESULT_CHARS ? s : s.substring(0, MAX_RESULT_CHARS) + TRUNCATED_SUFFIX;
     }
 
     private ApplyPayload parsePayload(String payloadJson) {
@@ -81,6 +108,7 @@ public class ApplyCodeWorkspaceApprovalExecutor implements ApprovalActionExecuto
 
     /** {@code adminOnly} is read by {@code ApprovalController#enforceApproverAuthorization}
      *  straight off the stored payload JSON - see {@link ApplyCodeChangesToolCallback}. */
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
     public record ApplyPayload(String repoId, String workspaceId, List<Map<String, Object>> files, boolean adminOnly) {
     }
 }

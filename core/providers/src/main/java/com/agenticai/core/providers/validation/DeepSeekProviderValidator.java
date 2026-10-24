@@ -1,8 +1,10 @@
 package com.agenticai.core.providers.validation;
 
+import com.agenticai.core.providers.ProviderEndpoints;
 import com.agenticai.core.providers.ProviderName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -20,12 +22,19 @@ import org.springframework.web.client.RestClientResponseException;
 public class DeepSeekProviderValidator implements ProviderValidator {
 
     private static final Logger log = LoggerFactory.getLogger(DeepSeekProviderValidator.class);
-    private static final String MODELS_URL = "https://api.deepseek.com/v1/models";
+    private final String modelsUrl;
 
     private final RestClient restClient;
 
+    /** Vendor defaults; DeepSeek is called at the address {@code app.llm.endpoints} names. */
     public DeepSeekProviderValidator(RestClient.Builder restClientBuilder) {
+        this(restClientBuilder, new ProviderEndpoints());
+    }
+
+    @Autowired
+    public DeepSeekProviderValidator(RestClient.Builder restClientBuilder, ProviderEndpoints endpoints) {
         this.restClient = restClientBuilder.build();
+        this.modelsUrl = endpoints.modelsUrl(ProviderName.DEEPSEEK);
     }
 
     @Override
@@ -37,7 +46,7 @@ public class DeepSeekProviderValidator implements ProviderValidator {
     public void validate(String apiKey) {
         try {
             restClient.get()
-                .uri(MODELS_URL)
+                .uri(modelsUrl)
                 .header("Authorization", "Bearer " + apiKey)
                 .retrieve()
                 .toBodilessEntity();

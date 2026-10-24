@@ -105,6 +105,17 @@ for set in "${sets[@]}"; do
     echo "FAIL: $set" >&2
     fail=1
   fi
+  # The full stack must tell the console it is the full tier (the console leaves /add-ons out of the
+  # rail on `full`): with WEB_DEPLOY_ENV unset, web gets NEXT_PUBLIC_DEPLOY_ENV=full, not empty.
+  if [[ "$set" == "deploy/compose/docker-compose.yml" ]]; then
+    tier="$(env -u WEB_DEPLOY_ENV "${env_overrides[@]}" COMPOSE_PROFILES='*' docker compose "${args[@]}" config 2>/dev/null | awk '/NEXT_PUBLIC_DEPLOY_ENV:/{print $2; exit}')"
+    if [[ "$tier" == "full" ]]; then
+      echo "OK: $set web NEXT_PUBLIC_DEPLOY_ENV=full"
+    else
+      echo "FAIL: $set web NEXT_PUBLIC_DEPLOY_ENV is '${tier}', want 'full'" >&2
+      fail=1
+    fi
+  fi
   echo "::endgroup::"
 done
 

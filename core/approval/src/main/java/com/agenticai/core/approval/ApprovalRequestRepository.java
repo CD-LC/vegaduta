@@ -33,6 +33,14 @@ public interface ApprovalRequestRepository extends JpaRepository<ApprovalRequest
     long countByStatus(ApprovalStatus status);
 
     /**
+     * The requests one conversation's tool guard recorded ({@code requestedBy} is the {@code
+     * "agent:<agentId>:session:<sessionId>"} label) in one state, oldest first. Read when a human
+     * decides one of them, to tell the continued task which of its other actions still wait.
+     */
+    List<ApprovalRequest> findByRequestedByAndStatusOrderByCreatedAtAsc(
+            String requestedBy, ApprovalStatus status);
+
+    /**
      * What one person decided since {@code after}, newest first, at most 500 rows. Read by the
      * preferences-from-behavior loop, which only counts; it never changes an approval.
      */
@@ -40,6 +48,13 @@ public interface ApprovalRequestRepository extends JpaRepository<ApprovalRequest
             String decidedBy, Instant after);
 
     List<ApprovalRequest> findAllByOrderByCreatedAtDescIdDesc(Pageable page);
+
+    /**
+     * {@code ApprovalExpiryJob}'s query: the oldest requests in {@code status} created before {@code
+     * cutoff}, one page of them.
+     */
+    List<ApprovalRequest> findByStatusAndCreatedAtBeforeOrderByCreatedAtAsc(
+            ApprovalStatus status, Instant cutoff, Pageable page);
 
     /**
      * Autonomy/Guardrails Strategy Stage C - {@code RetryFailedActionsJob}'s due-for-retry query.

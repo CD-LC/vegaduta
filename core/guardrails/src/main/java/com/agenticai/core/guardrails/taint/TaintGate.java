@@ -67,6 +67,15 @@ public final class TaintGate {
         this.sessionId = sessionId;
     }
 
+    /** Where the banner wording of spotlighted output comes from; null = the shipped text. */
+    private volatile com.agenticai.core.prompts.PromptResolver prompts;
+
+    /** Words the spotlight banner through the prompt registry (agent, tenant and platform overrides). */
+    public TaintGate withPrompts(com.agenticai.core.prompts.PromptResolver resolver) {
+        this.prompts = resolver;
+        return this;
+    }
+
     public TurnTaint turn() {
         return turn;
     }
@@ -118,7 +127,7 @@ public final class TaintGate {
             count(TAINTED_TURNS_METER, "mode", mode.name().toLowerCase(Locale.ROOT));
             log.debug("Turn tainted by '{}' (agent {}, session {}, mode {})", toolName, agentId, sessionId, mode);
         }
-        return mode == TaintMode.ENFORCE ? Spotlight.wrap(toolName, output) : output;
+        return mode == TaintMode.ENFORCE ? Spotlight.wrap(toolName, output, prompts, agentId) : output;
     }
 
     private ToolTaintProfile profile(String toolName, String toolInput) {

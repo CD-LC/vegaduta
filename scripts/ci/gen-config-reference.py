@@ -63,7 +63,7 @@ def scan_yml():
     return found
 
 
-VALUE_RE = re.compile(r'@Value\(\s*"\$\{([A-Za-z0-9_.\-]+)(?::([^}]*))?\}"\s*\)')
+VALUE_RE = re.compile(r'@Value\(\s*"\$\{([A-Za-z][A-Za-z0-9_.\-]*)(?::([^}]*))?\}"\s*\)')
 CP_RE = re.compile(r'@ConfigurationProperties\(\s*(?:prefix\s*=\s*|value\s*=\s*)?"([A-Za-z0-9_.\-]+)"')
 FIELD_RE = re.compile(r"^\s*private\s+(?!static)(?!final\s+static)[\w<>\[\],.? ]+\s+(\w+)\s*(?:=[^;]*)?;", re.M)
 
@@ -82,8 +82,17 @@ def scan_java():
             found.setdefault(m.group(1), (set(), m.group(2) or ""))[0].add(rel(p))
         for m in CP_RE.finditer(text):
             prefix = m.group(1)
-            found.setdefault(prefix, (set(), ""))[0].add(rel(p))
-            for f in FIELD_RE.finditer(text[m.end():]):
+            body = text[m.end():]
+            # fields of the annotated class only: a nested helper class (`Recall`, `Forget`) is bound under a
+            # key of its own, so its field names are not keys of this prefix
+            decl = re.search(r"\bclass\s+\w+", body)
+            nested = re.search(r"\bclass\s+\w+", body[decl.end():]) if decl else None
+            if decl and nested:
+                body = body[:decl.end() + nested.start()]
+            fields = list(FIELD_RE.finditer(body))
+            if not fields:
+                found.setdefault(prefix, (set(), ""))[0].add(rel(p))  # bound only through nested types or a map
+            for f in fields:
                 found.setdefault(prefix + "." + kebab(f.group(1)), (set(), ""))[0].add(rel(p))
     return found
 
@@ -112,7 +121,8 @@ def doc_tokens():
         if f.exists():
             text += f.read_text(encoding="utf-8", errors="replace")
     toks = set(re.findall(r"[A-Za-z0-9_.\-]+", text))
-    return {norm(t) for t in toks if len(t) > 2}
+    # a trailing dot ends a sentence or a family row (`app.models.defaults.<provider>`): the ancestor is named
+    return {norm(t.strip(".")) for t in toks if len(t.strip(".")) > 2}
 
 
 def documented(name, toks):
@@ -120,7 +130,10 @@ def documented(name, toks):
     if n in toks:
         return True
     parts = n.split(".")
-    return any(".".join(parts[:i]) in toks for i in range(2, len(parts)))
+    if any(".".join(parts[:i]) in toks for i in range(2, len(parts))):
+        return True
+    # a nested group (`app.graph-memory.recall`) is documented through the keys beneath it
+    return any(t.startswith(n + ".") for t in toks)
 
 
 def render(props, toks):

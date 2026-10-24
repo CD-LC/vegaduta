@@ -8,11 +8,13 @@ import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.SessionMemoryService;
+import com.agenticai.core.agents.tunables.BehaviourSettings;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.AgentToolSelection;
 import com.agenticai.core.agents.tools.ToolCallLogService;
 import com.agenticai.core.agents.turn.quality.LlmQualityJudgeService;
 import com.agenticai.core.agents.turn.quality.ReflexionService;
+import com.agenticai.core.chat.LlmRetryPolicy;
 import com.agenticai.core.chat.ProviderErrorTranslator;
 import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
@@ -30,6 +32,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -72,6 +75,139 @@ final class ChatTurnExecutor {
      * step ({@link TurnContinuation}); 0 turns it off. Set from {@code app.chat.continuation.max-passes}.
      */
     volatile int maxContinuations;
+
+    /**
+     * The resolver of the per-tenant / per-agent runtime limits; null (hand-built fixtures) = every turn
+     * runs under the platform values this executor was built with. Set from {@link ChatTimeouts#runtime()}
+     * when the service is built.
+     */
+    volatile com.agenticai.core.agents.runtime.AgentRuntime runtime;
+
+    /**
+     * Resolves the turn's runtime settings (platform, tenant, agent and the run's own caps) once the agent is
+     * known and records them on the turn's context, where every stage that enforces a limit reads them.
+     * Never fails the turn: with no resolver, or one that throws, the turn runs under the platform values.
+     */
+    void resolveRuntime(TurnContext context, UUID agentId, com.agenticai.core.agents.runtime.RuntimeLimits caps) {
+        com.agenticai.core.agents.runtime.AgentRuntime resolver = runtime;
+        if (resolver == null) {
+            return;
+        }
+        try {
+            context.runtime().set(resolver.forAgent(agentId, caps));
+        } catch (RuntimeException e) {
+            log.warn("Could not resolve the runtime settings of agent {}; the turn runs under the platform's: {}", agentId, e.toString());
+        }
+    }
+
+    /** Continuation passes this turn may run: the agent's setting, else the platform's {@link #maxContinuations}. */
+    int continuationPasses(TurnContext context) {
+        com.agenticai.core.agents.runtime.AgentRuntimeSettings settings = context == null ? null : context.runtimeSettings();
+        return settings != null ? settings.continuationPasses() : maxContinuations;
+    }
+
+    /**
+     * A tool-loop transcript for this turn's run, carrying the turn's own round cap when its tool-step ceiling
+     * needs a larger backstop than the platform's (see {@code AgentRuntimeSettingsResolver#toolLoopRounds}).
+     */
+    com.agenticai.core.chat.ToolLoopTranscript newTranscript(TurnContext context) {
+        return newTranscript(context, context == null ? null : context.requestedAgentId());
+    }
+
+    /**
+     * As {@link #newTranscript(TurnContext)} for the agent that answers (the routed one when an experiment chose a
+     * variant): the transcript also carries this tenant's and agent's tool-result clearing settings
+     * ({@code chat.toolLoop.resultClearing.*}), which the tool loop applies instead of the process-wide ones.
+     */
+    com.agenticai.core.chat.ToolLoopTranscript newTranscript(TurnContext context, UUID agentId) {
+        com.agenticai.core.chat.ToolLoopTranscript transcript = new com.agenticai.core.chat.ToolLoopTranscript();
+        if (context != null) {
+            // null = the tool loop's own (platform) value; set only when the catalog answers for this tenant and agent.
+            transcript.resultClearing(
+                    behaviour.boolOrNull(TOOL_RESULT_CLEARING_ENABLED_KEY, context.scope(), agentId),
+                    behaviour.integerOrNull(TOOL_RESULT_CLEARING_THRESHOLD_KEY, context.scope(), agentId));
+        }
+        com.agenticai.core.agents.runtime.AgentRuntime resolver = runtime;
+        com.agenticai.core.agents.runtime.AgentRuntimeSettings settings = context == null ? null : context.runtimeSettings();
+        if (resolver != null && settings != null) {
+            transcript.limitRounds(resolver.toolLoopRounds(settings));
+        }
+        // The tool loop writes text of its own (the "tool budget used up" result, the closing reply, the answer to a
+        // tool name that was never offered): it looks it up in the prompt registry for THIS turn's agent and tenant.
+        if (context != null) {
+            transcript.forPrompts(context.requestedAgentId(), context.scope());
+        }
+        return transcript;
+    }
+
+    /**
+     * Whether a reply that looks like a stopped task is re-prompted ({@code app.chat.continuation.*}),
+     * one policy for every reasoning depth. Set from {@link ChatTimeouts#continuation()} when the
+     * service is built; the shipped defaults apply until then.
+     */
+    volatile TurnContinuation continuation = new TurnContinuation(new ContinuationProperties());
+
+    /**
+     * What to do with the provider's finish reason ({@code app.chat.finish.*}): continue a reply cut
+     * off at the output limit, refuse honestly when the safety system stopped it, never present an
+     * empty or cut-off reply as an answer. Set from {@link ChatTimeouts#finish()} when the
+     * service is built; the shipped defaults apply until then.
+     */
+    volatile ChatFinishProperties finish = new ChatFinishProperties();
+
+    /**
+     * The tenant's and the agent's view of the settings catalog ({@code chat.finish.*}, {@code
+     * chat.continuation.heuristicEnabled}, the tool-loop result clearing, ...): the platform values until {@link
+     * ChatServiceParts} wires the catalog.
+     */
+    volatile BehaviourSettings behaviour = BehaviourSettings.platformOnly();
+
+    static final String TOOL_RESULT_CLEARING_ENABLED_KEY = "chat.toolLoop.resultClearing.enabled";
+    static final String TOOL_RESULT_CLEARING_THRESHOLD_KEY = "chat.toolLoop.resultClearing.thresholdChars";
+
+    /** What the provider's finish reason makes this turn do, for its tenant and agent; see {@link TurnFinishLimits}. */
+    TurnFinishLimits finishLimits(TurnContext context, UUID agentId) {
+        return TurnFinishLimits.resolve(behaviour, finish, context == null ? null : context.scope(), agentId);
+    }
+
+    /**
+     * What a turn does when it runs long or a provider fails while tools are involved ({@code
+     * app.chat.resilience.*}): the tool-aware idle timeout, replay after tools, the timeout notices. Set
+     * from {@link ChatTimeouts#resilience()} when the service is built; the shipped defaults until then.
+     */
+    volatile ChatResilienceProperties resilience = new ChatResilienceProperties();
+
+    /**
+     * {@code app.chat.tool-ledger.*}: the record of what the turn's tools did, stored with the assistant
+     * turn. Set from {@link ChatTimeouts#toolLedger()} when the service is built.
+     */
+    volatile ToolLedgerProperties toolLedger = new ToolLedgerProperties();
+
+    /**
+     * {@code app.chat.parity.*}: where the streamed and the buffered turn deliberately differ. Set from
+     * {@link ChatTimeouts#parity()} when the service is built.
+     */
+    volatile ChatParityProperties parity = new ChatParityProperties();
+
+    /**
+     * {@code app.chat.cache.*}: what the response caches may serve and store and what they key on. Set from
+     * {@link ChatTimeouts#cache()} when the service is built.
+     */
+    volatile ChatCachePolicy cachePolicy = new ChatCachePolicy(new ChatCacheProperties());
+
+    /** Whether a turn that ran tools may be replayed on another provider; see {@link FailoverReplayGate}. */
+    volatile FailoverReplayGate replayGate = new FailoverReplayGate(resilience, null);
+
+    /** {@code app.llm.retry.*}: how a streaming turn retries a transient failure before its first token. */
+    volatile LlmRetryPolicy retryPolicy = LlmRetryPolicy.defaults();
+
+    /**
+     * The prompt registry's view for an agent (its, its tenant's and the platform's overrides) for the
+     * texts this executor sends or shows. The shipped text until {@link ChatServiceParts} wires the
+     * settings bean.
+     */
+    volatile java.util.function.Function<UUID, ResolvedDirectives> prompts =
+            ResolvedDirectives.DEFAULTS_FOR_AGENT;
 
     ChatTurnExecutor(
             ProviderCredentialResolver credentialResolver,
@@ -217,8 +353,23 @@ final class ChatTurnExecutor {
     }
 
     /**
+     * As above, with the step-event wording of the agent (its, its tenant's or the platform's override of
+     * {@code message.degraded.tools_disabled}); {@code context} supplies the tenant for the lookup.
+     */
+    void flagToolsDisabledRetry(
+            Agent agent, AgentStepEventEmitter stepEvents, TurnContext context, UUID agentId) {
+        String text =
+                context.scope()
+                        .get(
+                                () ->
+                                        prompts.apply(agentId)
+                                                .textOrShipped(DegradedRetrySignal.TOOLS_DISABLED_KEY));
+        DegradedRetrySignal.flag(meterRegistry, agent, stepEvents, text);
+    }
+
+    /**
      * The live-stream half of the fabricated-generation-URL guard - see {@link
-     * #FABRICATED_GENERATION_URL_MARKERS}'s javadoc for the incident and {@code dispatchTurn}'s
+     * ChatPromptDirectives#containsFabricatedGenerationUrl}'s javadoc for the incident and {@code dispatchTurn}'s
      * comment in {@link #chat} for why this only applies to turns that both offer a generation tool
      * and read like a generation request. Buffers the entire reply (no chunk reaches the caller
      * until the upstream stream completes) and substitutes an honest correction for the SAME
@@ -233,13 +384,20 @@ final class ChatTurnExecutor {
             UUID agentId,
             String sessionId,
             Instant turnStartedAt) {
+        // Taken here, on the request thread: the map below runs on the stream-completion thread, and
+        // the object keeps the turn's tenant for its lookups.
+        ResolvedDirectives pd = prompts.apply(agentId);
         return stream.collectList()
                 .map(chunks -> String.join("", chunks))
                 .map(
-                        fullText -> {
+                        joined -> {
+                            // A reply the output guardrails withheld (FastStreamTurn checked and stored
+                            // it) is sent as the replacement, never as the text that was held.
+                            String replacement = context.reply().replacement();
+                            String fullText = replacement != null ? replacement : joined;
                             // The tool-log read runs in the turn's tenant scope (ADR-0022): this
                             // map fires on the stream-completion thread, not the request thread.
-                            if (containsFabricatedGenerationUrl(fullText)
+                            if (containsFabricatedGenerationUrl(fullText, pd)
                                     && context.scope()
                                                     .get(
                                                             () ->
@@ -255,12 +413,49 @@ final class ChatTurnExecutor {
                                                 + " correction before it ever reached the client",
                                         agentId,
                                         sessionId);
-                                return "I wasn't able to generate that - I don't have a real result"
-                                        + " to share. Please try asking again.";
+                                return pd.textOrShipped("message.fabricated_url.not_generated");
                             }
                             return fullText;
                         })
                 .flatMapMany(Flux::just);
+    }
+
+    /**
+     * The streamed form of {@link #bufferAndGuardGenerationClaims} ({@code app.chat.parity.fast-buffering-mode} =
+     * FROM_FIRST_LINK): the reply streams as it is generated and only the part from the first link on is held. When
+     * the finished reply carries an invented generation link (the same check, the same tool evidence), the held part
+     * is replaced by the correction, so the link never reaches the person; otherwise it is sent as written.
+     */
+    Flux<String> streamAndGuardGenerationClaims(
+            TurnContext context,
+            Flux<String> stream,
+            UUID agentId,
+            String sessionId,
+            Instant turnStartedAt,
+            List<String> holdMarkers) {
+        // Taken here, on the request thread, as in bufferAndGuardGenerationClaims.
+        ResolvedDirectives pd = prompts.apply(agentId);
+        java.util.LinkedHashSet<String> markers = new java.util.LinkedHashSet<>(holdMarkers);
+        markers.addAll(ChatPromptDirectives.fabricatedUrlHostMarkers(pd));
+        return LinkHoldingStream.apply(
+                stream,
+                markers,
+                (whole, held) -> {
+                    if (containsFabricatedGenerationUrl(whole, pd)
+                            && context.scope()
+                                            .get(() -> collectToolEvidenceSince(agentId, sessionId, turnStartedAt))
+                                    == null) {
+                        log.warn(
+                                "Agent {} session {} - streamed generation-adjacent reply contained a fabricated"
+                                        + " generation-service URL with no corroborating tool call; the held part"
+                                        + " was replaced by an honest correction before it reached the client",
+                                agentId,
+                                sessionId);
+                        String correction = pd.textOrShipped("message.fabricated_url.not_generated");
+                        return whole.length() == held.length() ? correction : "\n\n" + correction;
+                    }
+                    return held;
+                });
     }
 
     /**
@@ -294,6 +489,22 @@ final class ChatTurnExecutor {
             String memorySessionId,
             StringBuilder accumulated,
             Consumer<String> onCompleteFullAnswer) {
+        return withAssistantTurnPersistence(
+                stream, agentId, sessionId, memorySessionId, accumulated, onCompleteFullAnswer, () -> null);
+    }
+
+    /**
+     * As above for a turn whose tools are recorded: {@code toolRecord} is read when a partial reply is
+     * stored after a failure or a cancel, so the interrupted turn keeps what its tools did.
+     */
+    Flux<String> withAssistantTurnPersistence(
+            Flux<String> stream,
+            UUID agentId,
+            String sessionId,
+            String memorySessionId,
+            StringBuilder accumulated,
+            Consumer<String> onCompleteFullAnswer,
+            Supplier<ToolLedger> toolRecord) {
         AtomicBoolean assistantTurnPersisted = new AtomicBoolean(false);
         return stream.doOnNext(accumulated::append)
                 .doOnComplete(
@@ -311,12 +522,12 @@ final class ChatTurnExecutor {
                                     sessionId,
                                     e);
                             persistInterruptedAssistantTurn(
-                                    memorySessionId, accumulated, assistantTurnPersisted);
+                                    memorySessionId, accumulated, assistantTurnPersisted, toolRecord);
                         })
                 .doOnCancel(
                         () ->
                                 persistInterruptedAssistantTurn(
-                                        memorySessionId, accumulated, assistantTurnPersisted));
+                                        memorySessionId, accumulated, assistantTurnPersisted, toolRecord));
     }
 
     /**
@@ -325,14 +536,18 @@ final class ChatTurnExecutor {
      * stream died) mask the original stream error on its way to the client.
      */
     private void persistInterruptedAssistantTurn(
-            String sessionId, StringBuilder accumulated, AtomicBoolean assistantTurnPersisted) {
+            String sessionId,
+            StringBuilder accumulated,
+            AtomicBoolean assistantTurnPersisted,
+            Supplier<ToolLedger> toolRecord) {
         String partial = accumulated.toString();
         if (partial.isEmpty() || !assistantTurnPersisted.compareAndSet(false, true)) {
             return;
         }
         try {
             sessionMemoryService.appendTurn(
-                    sessionId, ChatTurn.assistant(partial + INTERRUPTED_REPLY_MARKER));
+                    sessionId,
+                    ChatTurn.assistant(partial + INTERRUPTED_REPLY_MARKER, toolRecord.get()));
         } catch (RuntimeException persistFailure) {
             log.warn(
                     "Could not persist interrupted assistant turn for session {}",
@@ -373,6 +588,25 @@ final class ChatTurnExecutor {
             Agent agent,
             ChatClient primaryClient,
             Function<ChatClient, String> promptExecutor) {
+        return callWithProviderFallback(tenantId, agent, primaryClient, promptExecutor, null, null);
+    }
+
+    /**
+     * As above, for a turn whose tool activity is known: a failure that comes after the turn ran tools
+     * with side effects is not retried on the fallback provider (it would run the turn, tools included,
+     * a second time) unless the effect journal recorded each of them - see {@link FailoverReplayGate}.
+     * The original failure is rethrown, with the tools that ran named in the log, the metric and, when
+     * the turn has step events, a note.
+     *
+     * @param activity the turn's tool activity; {@code null} skips the check (a delegated call has none)
+     */
+    String callWithProviderFallback(
+            String tenantId,
+            Agent agent,
+            ChatClient primaryClient,
+            Function<ChatClient, String> promptExecutor,
+            TurnToolActivity activity,
+            AgentStepEventEmitter stepEvents) {
         try {
             return promptExecutor.apply(primaryClient);
         } catch (RuntimeException e) {
@@ -404,6 +638,9 @@ final class ChatTurnExecutor {
                         agent.getFallbackProviderName());
                 throw classified;
             }
+            if (replayBlockedBy(activity, agent, "byok-fallback", stepEvents).isPresent()) {
+                throw classified != null ? classified : e;
+            }
             try {
                 String fallbackApiKey =
                         credentialResolver.resolveActiveKey(agent.getFallbackProviderName());
@@ -430,6 +667,7 @@ final class ChatTurnExecutor {
                         e.getMessage(),
                         agent.getFallbackProviderName());
                 issues.recordFallbackTriggeredIssue(agent.getId(), agent, e);
+                TurnLifecycleEvents.failover(stepEvents, agent.getFallbackModel(), e);
                 return promptExecutor.apply(fallbackClient);
             } catch (RuntimeException fallbackFailure) {
                 log.warn(
@@ -448,6 +686,80 @@ final class ChatTurnExecutor {
                 throw e;
             }
         }
+    }
+
+    /**
+     * The FAST stream's idle timeout: model silence only, a running tool suspends it (see {@link
+     * StreamIdleWatch}). Every idle timer of a turn's passes goes through here so none of them times a tool.
+     */
+    Flux<String> idleTimeout(Flux<String> stream, TurnToolActivity activity) {
+        return StreamIdleWatch.apply(
+                stream,
+                streamIdleTimeout,
+                resilience.getToolIdleCeiling(),
+                activity,
+                com.agenticai.core.security.concurrent.TenantAwareSchedulers.parallel());
+    }
+
+    /**
+     * Retries {@code first} when it fails before a token under {@code app.llm.retry.*} (429, 5xx, a
+     * connection that failed before a response), unless a tool has run this turn; see {@link StreamRetry}.
+     * {@code retry} builds the request again for each retry. A no-op when the setting is off.
+     */
+    Flux<String> retryBeforeFirstToken(
+            Flux<String> first,
+            java.util.function.Supplier<Flux<String>> retry,
+            TurnToolActivity activity,
+            com.agenticai.core.security.TenantScope scope,
+            UUID agentId,
+            String sessionId,
+            AgentStepEventEmitter stepEvents) {
+        LlmRetryPolicy policy = retryPolicy;
+        if (!policy.retriesStreamsBeforeFirstToken(scope)) {
+            return first;
+        }
+        return StreamRetry.apply(
+                first,
+                retry,
+                policy,
+                () -> !activity.anyToolRan(),
+                scope,
+                com.agenticai.core.security.concurrent.TenantAwareSchedulers.parallel(),
+                (retryNumber, wait, failure) -> {
+                    log.warn(
+                            "Agent {} session {}: the model stream failed before its first token ({}); retry {} of {}"
+                                    + " in {} ms",
+                            agentId,
+                            sessionId,
+                            failure.toString(),
+                            retryNumber,
+                            policy.maxAttempts(scope) - 1,
+                            wait.toMillis());
+                    TurnLifecycleEvents.callRetry(stepEvents, retryNumber, policy.maxAttempts(scope), failure);
+                    try {
+                        meterRegistry.counter("chat.llm.retry", "path", "stream-pre-first-token").increment();
+                    } catch (RuntimeException e) {
+                        log.debug("Could not record chat.llm.retry", e);
+                    }
+                });
+    }
+
+    /**
+     * Whether failing {@code agent}'s turn over to another provider is blocked because the turn already
+     * ran tools: empty when it may be replayed, else the tools that stand in the way. A block is counted,
+     * logged and, on a step-event turn, told to the consumer; see {@link FailoverReplayGate}.
+     *
+     * @param path which failover this is (for the metric and the log)
+     */
+    java.util.Optional<String> replayBlockedBy(
+            TurnToolActivity activity, Agent agent, String path, AgentStepEventEmitter stepEvents) {
+        FailoverReplayGate.Verdict verdict = replayGate.check(activity);
+        if (verdict.allowed()) {
+            return java.util.Optional.empty();
+        }
+        DegradedRetrySignal.flagReplayBlocked(
+                meterRegistry, agent, path, verdict.toolsThatRan(), resilience, stepEvents);
+        return java.util.Optional.of(verdict.toolsThatRan());
     }
 
     /**

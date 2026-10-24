@@ -11,6 +11,8 @@ import static com.agenticai.core.graphmemory.GraphMemoryCypher.sanitize;
 import static com.agenticai.core.graphmemory.GraphMemoryCypher.singleEdgeFilter;
 
 import com.agenticai.core.graphmemory.GraphFactTextMatcher.ValidEdge;
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.tenancy.AgeSessionSupport;
 import com.agenticai.core.tenancy.MissingTenantContextException;
 import java.sql.ResultSet;
@@ -83,10 +85,11 @@ public class GraphMemoryService {
 
     private static final Logger log = LoggerFactory.getLogger(GraphMemoryService.class);
 
-    /** Facts returned by one recall (the pre-existing cap), and the path rows read to fill it. */
-    static final int MAX_RECALL_FACTS = 20;
-
-    private static final int MAX_RECALL_PATHS = 200;
+    /**
+     * Defaults of {@code app.graph-memory.recall.max-facts}: facts returned by one recall (the pre-existing cap).
+     * The live value is {@link GraphMemoryProperties}; this alias is for the tests that assert the default.
+     */
+    static final int MAX_RECALL_FACTS = GraphMemoryProperties.DEFAULT_MAX_RECALL_FACTS;
 
     private static final String ONE_COLUMN = "v ag_catalog.agtype";
 
@@ -102,8 +105,44 @@ public class GraphMemoryService {
     private final JdbcTemplate jdbcTemplate;
     private LongSupplier clock = System::currentTimeMillis;
 
+    private GraphMemoryProperties properties = new GraphMemoryProperties();
+
     public GraphMemoryService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    /** {@code app.graph-memory.*} limits; without it the built-in defaults apply (slim tests and evals). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setProperties(GraphMemoryProperties properties) {
+        this.properties = properties == null ? new GraphMemoryProperties() : properties;
+    }
+
+    private SettingsResolver settings;
+
+    /**
+     * The settings catalog ({@code memory.graph.*}): a workspace's or an agent's recall limits replace the property
+     * values. Without it (slim tests and evals) the properties apply.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setSettings(SettingsResolver settings) {
+        this.settings = settings;
+    }
+
+    /** {@code {max facts, max paths}} one recall for {@code agentId} (null = the shared tier) works with. */
+    private int[] recallLimits(UUID agentId) {
+        GraphMemoryProperties.Recall configured = properties.getRecall();
+        if (settings != null) {
+            try {
+                SettingContext ctx = SettingContext.forAgent(agentId);
+                return new int[] {
+                    settings.getInt(GraphMemorySettings.RECALL_MAX_FACTS, ctx),
+                    settings.getInt(GraphMemorySettings.RECALL_MAX_PATHS, ctx)};
+            } catch (RuntimeException e) {
+                // The settings refine the property values; a recall never fails because they cannot be read.
+                log.warn("Could not read the graph memory recall settings, using the configured limits: {}", e.toString());
+            }
+        }
+        return new int[] {configured.getMaxFacts(), configured.getMaxPaths()};
     }
 
     /** Test/eval seam: the epoch-ms source for {@code valid_from}/{@code valid_to} stamps. */
@@ -205,7 +244,7 @@ public class GraphMemoryService {
         }
 
         try {
-            return recallFacts(graphName, sanitize(agentId.toString()), sanitize(subjectKey), entityHint, hops, asOf);
+            return recallFacts(graphName, agentId, sanitize(agentId.toString()), sanitize(subjectKey), entityHint, hops, asOf);
         } catch (Exception ex) {
             log.warn(
                 "Graph memory recall failed for agent {} subject '{}' entity '{}' - continuing with vector recall only",
@@ -318,7 +357,7 @@ public class GraphMemoryService {
         }
 
         try {
-            return recallFacts(graphName, SHARED_AGENT_SENTINEL, sanitize(subjectKey), entityHint, hops, null);
+            return recallFacts(graphName, null, SHARED_AGENT_SENTINEL, sanitize(subjectKey), entityHint, hops, null);
         } catch (Exception ex) {
             log.warn(
                 "Shared graph recall failed for subject '{}' entity '{}' - continuing without shared graph context",
@@ -414,10 +453,10 @@ public class GraphMemoryService {
     // ------------------------------------------------------------------
 
     /** Edges read per page by {@link #forgetFactText}. */
-    static final int FORGET_SCAN_PAGE = 500;
+    static final int FORGET_SCAN_PAGE = GraphMemoryProperties.DEFAULT_FORGET_SCAN_PAGE;
 
     /** Most pages one {@link #forgetFactText} call reads (so at most 10,000 currently-valid edges). */
-    static final int FORGET_SCAN_MAX_PAGES = 20;
+    static final int FORGET_SCAN_MAX_PAGES = GraphMemoryProperties.DEFAULT_FORGET_SCAN_MAX_PAGES;
 
     /** As {@link #forgetFactText(String, UUID, String, Collection)} with no other facts to protect. */
     public int forgetFactText(String subjectKey, UUID agentId, String factText) {
@@ -469,11 +508,11 @@ public class GraphMemoryService {
             Integer invalidated = onAge(st -> {
                 // All reads first, then the writes: invalidating while paging would shift the offsets.
                 List<ValidEdge> edges = new ArrayList<>();
-                for (int page = 0; page < FORGET_SCAN_MAX_PAGES; page++) {
+                for (int page = 0; page < properties.getForget().getScanMaxPages(); page++) {
                     int rows = 0;
                     try (ResultSet rs = st.executeQuery(cypherCall(
                         graphName,
-                        listCypher + " SKIP " + (page * FORGET_SCAN_PAGE) + " LIMIT " + FORGET_SCAN_PAGE,
+                        listCypher + " SKIP " + (page * properties.getForget().getScanPage()) + " LIMIT " + properties.getForget().getScanPage(),
                         "subject ag_catalog.agtype, relation ag_catalog.agtype, object ag_catalog.agtype"
                     ))) {
                         while (rs != null && rs.next()) {
@@ -484,7 +523,7 @@ public class GraphMemoryService {
                                 stripAgtypeQuotes(rs.getString("object"))));
                         }
                     }
-                    if (rows < FORGET_SCAN_PAGE) {
+                    if (rows < properties.getForget().getScanPage()) {
                         break;
                     }
                 }
@@ -570,8 +609,11 @@ public class GraphMemoryService {
     // ------------------------------------------------------------------
 
     private List<GraphFact> recallFacts(
-        String graphName, String tierStr, String subjectKeyStr, String entityHint, int hops, Instant asOf
+        String graphName, UUID settingsAgentId, String tierStr, String subjectKeyStr, String entityHint, int hops, Instant asOf
     ) {
+        int[] limits = recallLimits(settingsAgentId);
+        int maxFacts = limits[0];
+        int maxPaths = limits[1];
         String hintStr = sanitize(entityHint.toLowerCase(Locale.ROOT));
         int boundedHops = Math.max(1, Math.min(hops, 3));
         Long asOfMillis = asOf == null ? null : asOf.toEpochMilli();
@@ -587,15 +629,15 @@ public class GraphMemoryService {
                 + "AND toLower(a.name) CONTAINS '" + hintStr + "' "
                 + "AND b.agent_id = '" + tierStr + "' AND b.subject_key = '" + subjectKeyStr + "'"
                 + edgeFilter + " "
-                + "RETURN p LIMIT " + MAX_RECALL_PATHS;
+                + "RETURN p LIMIT " + maxPaths;
 
         List<GraphFact> facts = onAge(st -> {
             Set<GraphFact> result = new LinkedHashSet<>();
             try (ResultSet rs = st.executeQuery(cypherCall(graphName, cypher, "p ag_catalog.agtype"))) {
-                while (rs != null && rs.next() && result.size() < MAX_RECALL_FACTS) {
+                while (rs != null && rs.next() && result.size() < maxFacts) {
                     try {
                         for (GraphFact fact : parsePathFacts(rs.getString("p"), asOfMillis)) {
-                            if (result.size() < MAX_RECALL_FACTS) {
+                            if (result.size() < maxFacts) {
                                 result.add(fact);
                             }
                         }

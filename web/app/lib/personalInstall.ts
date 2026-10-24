@@ -1,62 +1,32 @@
-// Surfaces a one-person (local-auth) install never uses. The rail hides these
-// (useNavSections) - same rule both places, so a hidden screen never keeps a
-// link that leads to a console page the owner was deliberately spared.
+// Install-shape helpers for the personal edition. The edition itself comes from lib/edition.ts
+// (NEXT_PUBLIC_EDITION, falling back to local auth for an older image), and the list of surfaces a
+// one-person install does not advertise lives in its EDITION_ROUTES table - the same table the
+// deep-link gate (lib/editionCapabilities.ts) and the proxy read, so a hidden screen never keeps a
+// link that leads to a page the owner was deliberately spared.
 //
-// The pages still exist (deep links work); this list is about NOT advertising
-// multi-tenant/platform surfaces on a single box: nothing is shared with
-// teammates, there is no public agent directory or A2A trust story, no agent
-// commerce or payments, no white-label branding, no MCP clients connecting in,
-// no sales-lead funnel, no plans
-// page, no machine API keys, no cost/ROI roll-up (billing is off) and no Studio
-// generation surface.
-import { isLocalAuth } from "./authMode";
-import { getPublicEnv } from "./env";
-
-const PERSONAL_HIDDEN_ROUTES: readonly string[] = [
-  "/shared-with-me",
-  "/directory",
-  "/studio",
-  "/roi",
-  "/admin/agent-trust",
-  "/admin/commerce",
-  "/admin/payments",
-  "/admin/branding",
-  "/admin/mcp-servers",
-  "/admin/api-keys",
-  "/admin/sso",
-  "/admin/leads",
-  "/features",
-  // Folded into /assistant on a personal install (the agent picker, "In background" and "Quick
-  // task"); these routes redirect there, so the rail must not list them as separate destinations.
-  "/playground",
-  "/quick-task",
-  "/jobs",
-];
+// The rail hides those pages (useNavSections); a deep link shows the "not available" state.
+import { isFullEdition, isLiteEdition, isPersonalEdition, railHidden, underRoute } from "./edition";
 
 /**
  * Surfaces a shared/hosted install does not advertise. /assistant is for every install (the
  * Assistant agent is per user, on any tier). /add-ons is the switchboard on personal and lite -
  * on full every add-on ships installed, so the page drops out of the rail and renders a
  * "managed for you" notice instead of live switches for a server a tenant cannot change.
- * /providers/local-model is personal-only everywhere: guided Ollama setup writes the install's
- * platform pool, which on a tenant-based install belongs to the operator, never a tenant.
+ * /providers/local-model used to sit here; it now self-gates on {@link localModelManagedHere}
+ * so a self-hosted lite/full install that deploys a local model gets the wizard, while a
+ * hosted tenant still sees the "managed for you" notice.
  */
-const SHARED_ONLY_ROUTES: readonly string[] = ["/providers/local-model"];
+const SHARED_ONLY_ROUTES: readonly string[] = [];
 
 const FULL_HIDDEN_ROUTES: readonly string[] = ["/add-ons"];
 
-/** True on the lite tier (`NEXT_PUBLIC_DEPLOY_ENV=lite`): self-hosted, single box, Keycloak auth. */
-function isLiteInstall(): boolean {
-  return getPublicEnv("NEXT_PUBLIC_DEPLOY_ENV")?.trim().toLowerCase() === "lite";
-}
-
 /**
- * True on the full tier (`NEXT_PUBLIC_DEPLOY_ENV=full`): the multi-tenant shape where every
- * add-on and runner already ships. Tenant surfaces that would change what runs on the server
- * (the add-ons switchboard, local-model setup) stay disabled on it.
+ * True on the full tier (`NEXT_PUBLIC_EDITION=full`, or the older `NEXT_PUBLIC_DEPLOY_ENV=full`): the
+ * multi-tenant shape where every add-on and runner already ships. Tenant surfaces that would change
+ * what runs on the server (the add-ons switchboard, local-model setup) stay disabled on it.
  */
 export function isFullInstall(): boolean {
-  return getPublicEnv("NEXT_PUBLIC_DEPLOY_ENV")?.trim().toLowerCase() === "full";
+  return isFullEdition();
 }
 
 /**
@@ -66,24 +36,29 @@ export function isFullInstall(): boolean {
  * offer nor trigger them.
  */
 export function localModelAllowed(): boolean {
-  return isLocalAuth();
+  return isPersonalEdition();
 }
 
-const under = (href: string, route: string): boolean => href === route || href.startsWith(`${route}/`);
+/**
+ * The capability probe for the surfaces that manage or diagnose the install's local model
+ * (/troubleshoot, /providers/local-model) is {@code localModelManagedHere} in
+ * api/localModels.ts: the API layer is client-only while this module stays in the
+ * server-component import graph, so the fetch cannot live here.
+ */
 
 /**
  * True when {@code href} is a surface this install should not advertise: on a personal install the
- * multi-tenant and platform pages above; a shared install hides nothing here. Deep links keep
- * working either way.
+ * multi-tenant and platform pages in EDITION_ROUTES (lib/edition.ts); on a shared install only the
+ * personal-only and full-only pages above.
  */
 export function hiddenOnPersonalInstall(href: string): boolean {
-  if (!isLocalAuth()) {
+  if (!isPersonalEdition()) {
     return (
-      SHARED_ONLY_ROUTES.some((r) => under(href, r)) ||
-      (isFullInstall() && FULL_HIDDEN_ROUTES.some((r) => under(href, r)))
+      SHARED_ONLY_ROUTES.some((r) => underRoute(href, r)) ||
+      (isFullInstall() && FULL_HIDDEN_ROUTES.some((r) => underRoute(href, r)))
     );
   }
-  return PERSONAL_HIDDEN_ROUTES.some((r) => under(href, r));
+  return railHidden(href);
 }
 
 /**
@@ -94,7 +69,7 @@ export function hiddenOnPersonalInstall(href: string): boolean {
  * flips in one place.
  */
 export function isPersonalInstall(): boolean {
-  return isLocalAuth();
+  return isPersonalEdition();
 }
 
 /**
@@ -104,9 +79,9 @@ export function isPersonalInstall(): boolean {
  * identically on every tier, e.g. "--local-ai=host" or "--browser".
  */
 export function tierCommand(rest = ""): string {
-  const base = isLocalAuth()
+  const base = isPersonalEdition()
     ? "scripts/vegaduta personal"
-    : isLiteInstall()
+    : isLiteEdition()
       ? "scripts/vegaduta up --lite"
       : "scripts/vegaduta up --full";
   return rest ? `${base} ${rest}` : base;
@@ -138,9 +113,15 @@ export function showPlatformPoolToggle(): boolean {
  * webhook, `bulk_email` an SMTP relay, `crm_lead` the Leads CRM (hidden on this install), `device_control` a
  * paired phone. The palette stops offering them; a saved graph that already contains one still opens.
  */
-const PERSONAL_UNAVAILABLE_WORKFLOW_NODES: readonly string[] = ["wait", "voice_menu", "bulk_email", "crm_lead", "device_control"];
+const PERSONAL_UNAVAILABLE_WORKFLOW_NODES: readonly string[] = [
+  "wait",
+  "voice_menu",
+  "bulk_email",
+  "crm_lead",
+  "device_control",
+];
 
 /** False for a workflow node type the palette should not offer on this install. */
 export function workflowNodeOffered(type: string): boolean {
-  return !(isLocalAuth() && PERSONAL_UNAVAILABLE_WORKFLOW_NODES.includes(type));
+  return !(isPersonalEdition() && PERSONAL_UNAVAILABLE_WORKFLOW_NODES.includes(type));
 }

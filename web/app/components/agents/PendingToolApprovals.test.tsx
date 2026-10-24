@@ -238,3 +238,104 @@ describe("PendingToolApprovals", () => {
     expect(listApprovals).toHaveBeenCalledTimes(2);
   });
 });
+
+describe("PendingToolApprovals - reporting a decision to the surface", () => {
+  it("reports an approval once, with its outcome and the request id", async () => {
+    approveRequest.mockResolvedValue({ ...PENDING, status: "APPROVED", executionResult: "Email sent" });
+    const onDecided = vi.fn();
+    render(<PendingToolApprovals agentId="a1" sessionId="s1" onDecided={onDecided} />);
+    fireEvent.click(await screen.findByTestId("tool-approval-approve"));
+    await screen.findByTestId("tool-approval-outcome-done");
+    expect(onDecided).toHaveBeenCalledTimes(1);
+    expect(onDecided).toHaveBeenCalledWith({ kind: "done", detail: "Email sent" }, "req-1");
+  });
+
+  it("reports a rejection once, with its request id", async () => {
+    rejectRequest.mockResolvedValue({ ...PENDING, status: "REJECTED" });
+    const onDecided = vi.fn();
+    render(<PendingToolApprovals agentId="a1" sessionId="s1" onDecided={onDecided} />);
+    fireEvent.click(await screen.findByTestId("tool-approval-reject"));
+    await screen.findByTestId("tool-approval-outcome-rejected");
+    expect(onDecided).toHaveBeenCalledTimes(1);
+    expect(onDecided.mock.calls[0][0].kind).toBe("rejected");
+    expect(onDecided.mock.calls[0][1]).toBe("req-1");
+  });
+
+  it("reports nothing for a transport error (nothing was decided)", async () => {
+    approveRequest.mockRejectedValue(Object.assign(new Error("network"), { status: undefined }));
+    getApproval.mockResolvedValue({ ...PENDING });
+    const onDecided = vi.fn();
+    render(<PendingToolApprovals agentId="a1" sessionId="s1" onDecided={onDecided} />);
+    fireEvent.click(await screen.findByTestId("tool-approval-approve"));
+    await screen.findByTestId("tool-approval-outcome-error");
+    expect(onDecided).not.toHaveBeenCalled();
+  });
+
+  // A code-workspace run is held by the tool itself, not by the guard: its requestedBy is the person and its
+  // conversation is named only by the envelope core records. It must still show as a card in ITS conversation,
+  // be decided inline, and report the outcome so the surface follows core's continuation like for any tool.
+  describe("an action the tool gated itself on (code workspace run)", () => {
+    const RUN = {
+      id: "req-run",
+      actionType: "codeintel.workspace.run",
+      summary: "Run in code workspace ws-1 (repo billing): mvn -q test",
+      status: "PENDING",
+      requestedBy: "user-123",
+      payload: JSON.stringify({
+        repoId: "billing",
+        workspaceId: "ws-1",
+        command: "mvn -q test",
+        adminOnly: true,
+        replay: {
+          version: 1,
+          toolName: "run_in_code_workspace",
+          agentId: "a1",
+          requestedAgentId: "a1",
+          sessionId: "s1",
+          memorySessionId: "c1:abc",
+          goal: "Run the tests",
+          tenantId: "t-secret",
+        },
+      }),
+      createdAt: "2026-10-03T10:00:00Z",
+    };
+
+    it("shows the card in its own conversation with the command, not the envelope", async () => {
+      listApprovals.mockResolvedValue([RUN]);
+      render(<PendingToolApprovals agentId="a1" sessionId="s1" />);
+      expect(await screen.findByTestId("tool-approval-req-run")).toBeTruthy();
+      expect(screen.getByText("title:run_in_code_workspace")).toBeTruthy();
+      const args = screen.getByTestId("tool-approval-args").textContent || "";
+      expect(args).toContain("mvn -q test");
+      expect(args).not.toContain("t-secret");
+    });
+
+    it("does not show it in another conversation", async () => {
+      listApprovals.mockResolvedValue([RUN]);
+      const { container } = render(<PendingToolApprovals agentId="a1" sessionId="s2" />);
+      await waitFor(() => expect(listApprovals).toHaveBeenCalledTimes(1));
+      expect(container.firstChild).toBeNull();
+    });
+
+    it("approves it and reports the outcome the surface follows the continuation from", async () => {
+      listApprovals.mockResolvedValue([RUN]);
+      approveRequest.mockResolvedValue({ ...RUN, status: "APPROVED", executionResult: "success=true, exit_code=0" });
+      const onDecided = vi.fn();
+      render(<PendingToolApprovals agentId="a1" sessionId="s1" onDecided={onDecided} />);
+      fireEvent.click(await screen.findByTestId("tool-approval-approve"));
+      expect(await screen.findByTestId("tool-approval-outcome-done")).toBeTruthy();
+      expect(approveRequest.mock.calls[0][0]).toBe("req-run");
+      expect(onDecided).toHaveBeenCalledWith({ kind: "done", detail: "success=true, exit_code=0" }, "req-run");
+    });
+
+    it("reports a denial the same way", async () => {
+      listApprovals.mockResolvedValue([RUN]);
+      rejectRequest.mockResolvedValue({ ...RUN, status: "REJECTED", rejectionReason: "not in prod" });
+      const onDecided = vi.fn();
+      render(<PendingToolApprovals agentId="a1" sessionId="s1" onDecided={onDecided} />);
+      fireEvent.click(await screen.findByTestId("tool-approval-reject"));
+      await waitFor(() => expect(onDecided).toHaveBeenCalledTimes(1));
+      expect(onDecided.mock.calls[0][0].kind).toBe("rejected");
+    });
+  });
+});

@@ -4,6 +4,7 @@ import com.agenticai.core.chat.structured.JsonSchemaCheck;
 import com.agenticai.core.chat.structured.StructuredOutput;
 import com.agenticai.core.chat.structured.StructuredOutputException;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.prompts.PromptResolver;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -64,6 +65,19 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
     private final ChatModel delegate;
     private final JsonNode schema;
     private final String schemaText;
+    private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
+
+    /**
+     * Reads the schema instruction ({@code shim.structured.schema_instruction}) from the prompt registry for the
+     * tenant of the calling thread (and the agent, when the request's tool context names one); the shipped wording
+     * until set.
+     */
+    OllamaStructuredFallbackChatModel withPrompts(PromptResolver resolver) {
+        if (resolver != null) {
+            this.prompts = resolver;
+        }
+        return this;
+    }
 
     OllamaStructuredFallbackChatModel(ChatModel delegate, String jsonSchema) {
         this.delegate = delegate;
@@ -118,7 +132,8 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
     private ChatResponse promptBased(Prompt original, OpenAiChatOptions options) {
         OpenAiChatOptions plain = options.copy();
         plain.setResponseFormat(null);
-        List<Message> messages = withSchemaInstruction(original.getInstructions());
+        ChatPrompts.Run run = ToolLoopRunHooks.promptRun(original);
+        List<Message> messages = withSchemaInstruction(original.getInstructions(), run);
         ChatResponse response = delegate.call(new Prompt(messages, plain));
         String text = textOf(response);
         String problem = problemWith(text);
@@ -129,7 +144,7 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
         List<Message> repair = new ArrayList<>(messages);
         repair.add(new AssistantMessage(text));
         repair.add(new UserMessage(StructuredOutput.repairPrompt(
-                new StructuredOutputException(problem, text), schemaInstruction())));
+                new StructuredOutputException(problem, text), schemaInstruction(run))));
         ChatResponse second = TextToolCallRecoveringChatModel.withCumulativeUsage(
                 delegate.call(new Prompt(repair, plain)), response);
         String repairedText = textOf(second);
@@ -141,9 +156,9 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
     }
 
     /** The schema as an extra paragraph of the first system message (a new one when there is none). */
-    private List<Message> withSchemaInstruction(List<Message> original) {
+    private List<Message> withSchemaInstruction(List<Message> original, ChatPrompts.Run run) {
         List<Message> messages = new ArrayList<>(original);
-        String instruction = schemaInstruction();
+        String instruction = schemaInstruction(run);
         if (!messages.isEmpty() && messages.get(0) instanceof SystemMessage system) {
             messages.set(0, new SystemMessage(system.getText() + "\n\n" + instruction));
         } else {
@@ -152,9 +167,8 @@ final class OllamaStructuredFallbackChatModel implements ChatModel {
         return messages;
     }
 
-    private String schemaInstruction() {
-        return "Reply with ONLY one JSON value that is valid for the JSON Schema below. No markdown code fences,"
-                + " no commentary before or after.\nJSON Schema: " + schemaText;
+    private String schemaInstruction(ChatPrompts.Run run) {
+        return ChatPrompts.text(prompts, ChatPrompts.STRUCTURED_SCHEMA_INSTRUCTION, run, "schema", schemaText);
     }
 
     /** Null when {@code text} holds JSON that fits the schema; otherwise what is wrong with it. */

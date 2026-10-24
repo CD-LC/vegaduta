@@ -220,19 +220,21 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
                 if (!type.matches("[A-Za-z0-9._:-]+")) {
                     continue; // free-form action names never reach a prompt-bound proposal
                 }
-                String body;
+                // People read the title and body: "Search the web", not "mcp_tool.web_search". The raw type stays in
+                // the evidence below.
+                String label = ApprovalActionLabel.of(type);
+                String body = approvalPatternBody(p.approves(), label);
                 String title;
                 if (p.approves()) {
-                    body = "Usually approves \"" + type + "\" requests when asked (informational: approvals are still asked for)";
-                    title = "You approved \"" + type + "\" " + p.count() + " times in the last " + windowDays
+                    title = "You approved \"" + label + "\" " + p.count() + " times in the last " + windowDays
                             + " days, never rejected. Approval rules do not change; to get fewer prompts, review the"
                             + " agent's autonomy level in its settings.";
                 } else {
-                    body = "Usually rejects \"" + type + "\" requests (informational: approvals are still asked for)";
-                    title = "You rejected \"" + type + "\" " + p.count() + " times in the last " + windowDays
+                    title = "You rejected \"" + label + "\" " + p.count() + " times in the last " + windowDays
                             + " days, never approved. Approval rules do not change.";
                 }
-                if (alreadyKnown(subject, body)) {
+                // A proposal filed before labels existed carries the raw type in its body: still the same preference.
+                if (alreadyKnown(subject, body) || alreadyKnown(subject, approvalPatternBody(p.approves(), type))) {
                     continue;
                 }
                 Map<String, Object> evidence = new LinkedHashMap<>();
@@ -247,6 +249,12 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
         } catch (RuntimeException e) {
             log.warn("Approval-pattern scan failed: {}", e.getMessage());
         }
+    }
+
+    private static String approvalPatternBody(boolean approves, String name) {
+        return approves
+                ? "Usually approves \"" + name + "\" requests when asked (informational: approvals are still asked for)"
+                : "Usually rejects \"" + name + "\" requests (informational: approvals are still asked for)";
     }
 
     /** One action type the person decides the same way every time. */

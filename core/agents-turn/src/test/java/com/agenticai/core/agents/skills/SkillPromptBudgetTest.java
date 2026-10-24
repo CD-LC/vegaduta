@@ -35,12 +35,12 @@ class SkillPromptBudgetTest {
     void twoHundredSkillsStayInsideTheBudget() {
         String block = SkillPromptBlock.render(skills(200, 400));
         int ceiling =
-                SkillPromptBlock.MAX_BLOCK_CHARS + 2_000 /* names-only headroom */ + 400 /* header + footer */;
+                new SkillPromptProperties().getMaxBlockChars() + new SkillPromptProperties().getNamesOnlyHeadroom() + 400 /* header + footer */;
         assertTrue(block.length() <= ceiling, "block is " + block.length() + " chars");
         // Roughly 2-3k tokens, not the ~100k that 200 full descriptions would be.
         assertTrue(block.length() < 12_000);
         long listed = block.lines().filter(l -> l.startsWith("- skill-")).count();
-        assertTrue(listed <= SkillPromptBlock.MAX_SKILLS_IN_PROMPT, "listed " + listed);
+        assertTrue(listed <= new SkillPromptProperties().getMaxSkills(), "listed " + listed);
         assertTrue(block.contains("more skills are installed but not listed here"));
     }
 
@@ -72,7 +72,7 @@ class SkillPromptBudgetTest {
             assertTrue(block.contains("- " + m.name()), m.name() + " missing");
         }
         assertFalse(block.contains("not listed here"));
-        assertTrue(block.length() <= SkillPromptBlock.MAX_BLOCK_CHARS + 2_000 + 400);
+        assertTrue(block.length() <= new SkillPromptProperties().getMaxBlockChars() + 2_000 + 400);
     }
 
     @Test

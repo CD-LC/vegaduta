@@ -69,7 +69,7 @@ public record AgentCreateRequest(
     // javadoc for the 2026-08-10 incident this fixes (an unbounded maxTokens
     // gets reserved wholesale against the tenant's daily hosted-pool token
     // budget on every turn, rejecting turns regardless of actual usage).
-    @Positive @Max(value = 8192, message = "maxTokens must be at most 8192") Integer maxTokens,
+    @Positive @MaxTokensCeiling Integer maxTokens,
     @DecimalMin(value = "0.0", message = "temperature must be between 0 and 1")
     @DecimalMax(value = "1.0", message = "temperature must be between 0 and 1")
     Double temperature,

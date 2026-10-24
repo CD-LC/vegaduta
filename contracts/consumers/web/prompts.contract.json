@@ -1,0 +1,112 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-prompts",
+      "method": "GET",
+      "path": "/api/prompts",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].defaultText",
+          "$[*].definition",
+          "$[*].effective",
+          "$[*].overrides"
+        ]
+      }
+    },
+    {
+      "id": "get-api-prompts-key",
+      "method": "GET",
+      "path": "/api/prompts/{key}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.defaultText",
+          "$.definition",
+          "$.effective",
+          "$.overrides"
+        ]
+      }
+    },
+    {
+      "id": "get-api-prompts-key-history",
+      "method": "GET",
+      "path": "/api/prompts/{key}/history",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].action",
+          "$[*].createdAt",
+          "$[*].createdBy",
+          "$[*].enabled",
+          "$[*].id",
+          "$[*].key",
+          "$[*].locale",
+          "$[*].previousEnabled",
+          "$[*].previousText",
+          "$[*].reason",
+          "$[*].scope",
+          "$[*].scopeId",
+          "$[*].text",
+          "$[*].version"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-prompts-key-overrides-scope",
+      "method": "DELETE",
+      "path": "/api/prompts/{key}/overrides/{scope}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.history",
+          "$.override",
+          "$.unchanged"
+        ]
+      }
+    },
+    {
+      "id": "put-api-prompts-key-overrides-scope",
+      "method": "PUT",
+      "path": "/api/prompts/{key}/overrides/{scope}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.history",
+          "$.override",
+          "$.unchanged"
+        ]
+      }
+    },
+    {
+      "id": "post-api-prompts-key-overrides-scope-restore",
+      "method": "POST",
+      "path": "/api/prompts/{key}/overrides/{scope}/restore",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.history",
+          "$.override",
+          "$.unchanged"
+        ]
+      }
+    },
+    {
+      "id": "post-api-prompts-key-validate",
+      "method": "POST",
+      "path": "/api/prompts/{key}/validate",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.length",
+          "$.problems",
+          "$.requiresAcknowledgement",
+          "$.securityCritical",
+          "$.valid"
+        ]
+      }
+    }
+  ]
+}

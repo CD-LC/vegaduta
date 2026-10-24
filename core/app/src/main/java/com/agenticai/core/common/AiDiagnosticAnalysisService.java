@@ -7,6 +7,8 @@ import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
 import com.agenticai.core.audit.PlatformIssueService;
 import com.agenticai.core.common.diagnostics.SensitiveDataMasker;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.security.TenantContext;
 import java.util.EnumSet;
 import java.util.Locale;
@@ -86,17 +88,16 @@ public class AiDiagnosticAnalysisService {
     // collapsing that this class's own redact() never covered).
     private static final Pattern BEARER_TOKEN = Pattern.compile("Bearer\\s+[A-Za-z0-9._-]{10,}");
 
-    private static final String ANALYSIS_SYSTEM_PROMPT = """
-        You are an automated triage assistant analyzing one detected platform failure (a guardrail
-        block or an upstream LLM provider failure) so it can be categorized and, when warranted,
-        surfaced to a tenant admin as a notification. You are given the failure's source and a
-        redacted excerpt of its raw context - never ask for more detail or unredacted data, just
-        analyze what's given.
+    /** Registry key of the triage system prompt ({@code prompts/en/diagnostics.failure_triage.md}). */
+    public static final String ANALYSIS_PROMPT_KEY = "diagnostics.failure_triage";
 
-        Respond with EXACTLY two lines, no other text:
-        CATEGORY: <one of TOOL_FAILURE|SAFETY|SYSTEM|WORKFLOW|BILLING>
-        EXPLANATION: <one or two plain-English sentences a support engineer or the affected tenant could act on>
-        """;
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so an owner can reword the triage instruction; absent = the shipped text. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     private final PlatformIssueService platformIssueService;
     private final NotificationService notificationService;
@@ -172,7 +173,7 @@ public class AiDiagnosticAnalysisService {
         String redactedExcerpt = truncate(redact(rawContext));
 
         String content = chatClient.prompt()
-            .system(ANALYSIS_SYSTEM_PROMPT)
+            .system(prompts.text(ANALYSIS_PROMPT_KEY))
             .user("Source: " + source + " (" + sourceId + ")\n\nRedacted excerpt:\n" + redactedExcerpt)
             .call()
             .content();

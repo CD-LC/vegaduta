@@ -1,5 +1,7 @@
 package com.agenticai.core.sarvam;
 
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.speech.call.CallSpeechTranscriber;
 import org.springframework.stereotype.Component;
 
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Component;
  * configured".
  */
 @Component
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class SarvamCallSpeechTranscriber implements CallSpeechTranscriber {
 
     private final SarvamSpeechToTextClient client;

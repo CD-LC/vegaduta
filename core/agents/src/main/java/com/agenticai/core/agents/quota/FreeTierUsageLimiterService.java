@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.quota;
 
 import com.agenticai.core.agents.budget.PerUserBudgetService;
+import com.agenticai.core.agents.generation.AgentGenerationProperties;
 import com.agenticai.core.audit.NotificationCategory;
 import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
@@ -13,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
@@ -85,12 +87,17 @@ public class FreeTierUsageLimiterService {
     // module doesn't depend on core.chat.gateway).
     private static final String REJECTIONS_METRIC = "llm.gateway.rejections";
 
-    // 2026-08-10 incident fix: matches AgentCreateRequest/
-    // AgentGenerationParamsUpdateRequest's own write-time @Max bound and
-    // GenerationParamsInferenceService's MAX_MAX_TOKENS - see
-    // checkAndReserveTokenBudget's @param maxTokens doc for why this needs to
-    // ALSO be enforced here, not just at write time.
-    private static final long MAX_REASONABLE_MAX_TOKENS = 8192;
+    // 2026-08-10 incident fix: the same ceiling as AgentCreateRequest/
+    // AgentGenerationParamsUpdateRequest's write-time bound and
+    // GenerationParamsInferenceService (app.agents.max-tokens-ceiling, one
+    // setting) - see checkAndReserveTokenBudget's @param maxTokens doc for why
+    // this needs to ALSO be enforced here, not just at write time.
+    private volatile AgentGenerationProperties generation = new AgentGenerationProperties();
+
+    @Autowired(required = false)
+    void useGenerationProperties(AgentGenerationProperties properties) {
+        this.generation = properties;
+    }
 
     // PlatformSetting keys - the monthly/multiplier rows V194 seeds (the
     // daily row it also seeded is retired and deleted by V354). Kept public
@@ -324,7 +331,7 @@ public class FreeTierUsageLimiterService {
      *
      * @param maxTokens the caller's configured output ceiling - see the
      *     reservation-sizing note above. {@code AgentCreateRequest}/{@code
-     *     AgentGenerationParamsUpdateRequest} now cap this at 8192 at write
+     *     AgentGenerationParamsUpdateRequest} now cap this at write
      *     time, but this method clamps it too (2026-08-10 incident: an agent
      *     that got stored with an unbounded value before that validation
      *     existed reserved the ENTIRE stored number on every turn, rejecting
@@ -352,11 +359,11 @@ public class FreeTierUsageLimiterService {
             : isPremium ? "Upgrade to Unlimited" : "Upgrade to Premium";
 
         // Clamp defensively at read time (see this method's @param maxTokens
-        // doc) - MAX_REASONABLE_MAX_TOKENS matches the write-time validation
+        // doc) - the max-tokens ceiling matches the write-time validation
         // ceiling, so a call this size still comfortably fits inside even the
         // unscaled FREE-tier monthly budget instead of being able to exhaust
         // it in a single reservation.
-        long reservation = Math.min(Math.max(0, maxTokens), MAX_REASONABLE_MAX_TOKENS) + Math.max(0, tokenReservationPromptEstimate);
+        long reservation = Math.min(Math.max(0, maxTokens), (long) generation.getMaxTokensCeiling()) + Math.max(0, tokenReservationPromptEstimate);
         if (reservation <= 0) {
             return 0L;
         }

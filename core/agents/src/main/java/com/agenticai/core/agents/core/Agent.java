@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.core;
 
 import com.agenticai.core.agents.budget.BudgetPolicy;
+import com.agenticai.core.agents.runtime.RuntimeLimits;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.ExperienceMode;
 import jakarta.persistence.Column;
@@ -76,6 +77,14 @@ public class Agent extends AgentConfigColumns {
 
     @Embedded
     private BudgetPolicy budget = BudgetPolicy.none();
+
+    // Per-agent overrides of the runtime limits (migration V671): tool-step ceiling, timeouts, tool-output
+    // cap, retrieval top-k/min-score, continuation passes. Null (every column null) = nothing overridden,
+    // the tenant defaults and then the platform settings apply, so the column's existence changes no
+    // pre-existing agent. Like the run cap, deliberately NOT part of AgentConfigSnapshot: a hidden A/B
+    // treatment clone runs under its control agent's limits (see AgentProjection).
+    @Embedded
+    private RuntimeLimits runtimeLimits;
 
     // #815 Governance follow-up - see AgentAutonomyTier's javadoc. Never
     // null; SEMI_AUTONOMOUS both here and in migration V74's backfill, so
@@ -568,6 +577,16 @@ public class Agent extends AgentConfigColumns {
     /** The boolean capability opt-ins as one immutable value. */
     public CapabilityFlags capabilityFlags() {
         return capabilities;
+    }
+
+    /** The agent's own runtime-limit overrides; never null, empty when nothing is overridden. */
+    public RuntimeLimits getRuntimeLimits() {
+        return runtimeLimits == null ? RuntimeLimits.none() : runtimeLimits;
+    }
+
+    /** Replaces the agent's runtime-limit overrides; null or empty clears them all. */
+    public void setRuntimeLimits(RuntimeLimits limits) {
+        this.runtimeLimits = limits == null || limits.isEmpty() ? null : limits;
     }
 
     /** The run cap and cost routing as one immutable value. */

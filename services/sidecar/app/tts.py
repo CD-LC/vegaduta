@@ -38,6 +38,7 @@ drift apart. If narration ever does arrive with markdown in it, the fix
 is to expose that class over HTTP from core, which its own comment in
 voice-agent/app/tts_sarvam.py already names as the correct follow-up.
 """
+
 from __future__ import annotations
 
 import base64
@@ -55,8 +56,8 @@ log = logging.getLogger("sidecar.tts")
 
 _SARVAM_URL = "https://api.sarvam.ai/text-to-speech"
 
-# Same four var names voice-agent/app/config.py and deploy/docker-compose.yml's
-# `voice-agent` service already use - one value in deploy/.env covers both
+# Same four var names voice-agent/app/config.py and deploy/compose/docker-compose.yml's
+# `voice-agent` service already use - one value in deploy/compose/.env covers both
 # callers, which is the same reasoning that file applies to SIDECAR_BASE_URL.
 _API_KEY = os.environ.get("SARVAM_API_KEY", "")
 DEFAULT_LANGUAGE = os.environ.get("SARVAM_TARGET_LANGUAGE_CODE", "en-IN")
@@ -65,7 +66,7 @@ DEFAULT_LANGUAGE = os.environ.get("SARVAM_TARGET_LANGUAGE_CODE", "en-IN")
 # deprecated. Please use 'bulbul:v3' instead." Confirmed live 2026-09-17,
 # not inferred. core/sarvam's SarvamTextToSpeechClient.DEFAULT_MODEL,
 # core/providers' TtsModelProvider and V196__agent_tts_provider.sql had all
-# moved to v3 already - the Python services and deploy/docker-compose.yml
+# moved to v3 already - the Python services and deploy/compose/docker-compose.yml
 # were missed, which left every Sarvam TTS call from them failing.
 # NOTE: speaker names are per-model (anushka is v2, shubh is v3), so an
 # explicit SARVAM_SPEAKER carried over from v2 will also 400. Leaving it
@@ -106,7 +107,7 @@ def _require_api_key() -> str:
         # 500 is not. See the endpoint's own docstring.
         raise ValueError(
             "SARVAM_API_KEY is not configured on the sidecar. Locally: set it in "
-            "deploy/.env and recreate the sidecar container. On Azure: add the secret "
+            "deploy/compose/.env and recreate the sidecar container. On Azure: add the secret "
             "to Key Vault, reference it from the sidecar Container App, and roll a new "
             "revision - a container restart alone will not pick it up."
         )

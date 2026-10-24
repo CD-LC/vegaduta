@@ -27,6 +27,7 @@ These pages are also published as a searchable site (`mkdocs.yml`, `make docs-se
 | [Run free with local models](local-models.md) | Ollama in Compose or Helm, the model catalog (`scripts/vegaduta models`), on-device models at `/edge` |
 | [Share an agent as a file](agent-bundles.md) | Export an agent as a bundle, import one safely, ready-made examples in `examples/agent-bundles/` |
 | [Edge relay](edge-relay.md) | A signed-in browser as the model behind your SMS and WhatsApp numbers |
+| [Channels overview](channels/README.md) | All fifteen channels in one table (how each connects, its endpoint, what you provide), the rules they share, and how each inbound call is authenticated; one page per channel |
 | [SMS conversations](sms-channel.md) | Plain-text channel on a Twilio number |
 | [Signal](channels/signal.md), [Matrix](matrix-channel.md), [iMessage](imessage-channel.md) | Personal channels through a signal-cli server, a Matrix bot user and a BlueBubbles Mac; default deny with pairing |
 | [WhatsApp QR](channels/whatsapp-qr.md) | Link your own WhatsApp number as a companion device — no Meta Business account, no public URL |
@@ -69,6 +70,8 @@ These pages are also published as a searchable site (`mkdocs.yml`, `make docs-se
 - [Repository setup](maintainers/repo-setup.md): identity placeholders, repository settings, labels, history
 - [Branch protection](maintainers/branch-protection.md): the required checks (`CI OK`, `CodeQL OK`) and ruleset
 - [Releasing](maintainers/releasing.md): tags, what a release publishes, signatures, pre-releases and `latest`
+- [Dependabot pull requests](maintainers/dependabot-prs.md): the DCO exemption for bots, regenerating `requirements.lock` on a Dependabot branch
+- [v1.0.0 definition of done](maintainers/v1.0.0-definition-of-done.md): what 1.0.0 promises and does not, the stability and support rules from 1.0.0, and the release checklist
 - [Releasing the Java Agent SDK](maintainers/releasing-sdk.md): `sdk-v*` tags, Maven Central Portal, GPG, provenance
 - [Publishing these docs](maintainers/docs-site.md): the MkDocs site on GitHub Pages
 

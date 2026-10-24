@@ -85,7 +85,7 @@ class ToolLoopLimitAndExceptionTranslationTest {
 
         assertTrue(hard.returnDirect(), "the loop must end rather than call the model again");
         assertEquals(0, tool.calls.get());
-        assertEquals(ArgumentSanitizingToolCallingManager.HARD_STOP_REPLY, lastToolResponses(hard).get(0).responseData());
+        assertEquals(new ToolLoopProperties().getHardStopReply(), lastToolResponses(hard).get(0).responseData());
     }
 
     @Test

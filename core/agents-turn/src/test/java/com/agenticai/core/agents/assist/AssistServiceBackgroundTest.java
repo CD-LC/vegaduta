@@ -9,6 +9,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.agenticai.core.agents.auxiliary.AuxiliaryModelProperties;
+import com.agenticai.core.agents.auxiliary.AuxiliaryModelResolver;
+import com.agenticai.core.agents.core.AgentService;
+import com.agenticai.core.agents.turn.AgentServiceAuxiliaryAgentModels;
+import com.agenticai.core.tenancy.TenantAiModelPreferenceService;
+import org.springframework.beans.factory.ObjectProvider;
 import com.agenticai.core.agents.hosted.FreeTierChatClientService;
 import com.agenticai.core.chat.ChatClientRegistry;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
@@ -54,9 +60,17 @@ class AssistServiceBackgroundTest {
         when(limits.usesPlatformPool("t1", TenantPlan.PREMIUM)).thenReturn(false);
         client = mock(ChatClient.class, Answers.RETURNS_DEEP_STUBS);
         when(client.prompt().system(anyString()).user(anyString()).call().content()).thenReturn(" done ");
-        service = new AssistService(resolver, mock(ChatClientRegistry.class), gateway, catalog, limits,
-            mock(FreeTierChatClientService.class), "claude-x", 1024);
+        service = new AssistService(auxiliary(resolver, catalog), mock(ChatClientRegistry.class), gateway, limits,
+            mock(FreeTierChatClientService.class), 1024);
         TenantContext.set(TenantContext.of("t1", "u1", Set.of()));
+    }
+
+
+    private static AuxiliaryModelResolver auxiliary(ProviderCredentialResolver credentials, ProviderModelCatalogService catalog) {
+        @SuppressWarnings("unchecked")
+        ObjectProvider<TenantAiModelPreferenceService> noPreferences = mock(ObjectProvider.class);
+        return new AuxiliaryModelResolver(
+            new AuxiliaryModelProperties(), credentials, catalog, new AgentServiceAuxiliaryAgentModels(mock(AgentService.class)), noPreferences, "claude-x");
     }
 
     @AfterEach

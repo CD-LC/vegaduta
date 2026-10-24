@@ -12,8 +12,8 @@ migration with version N"), not two independent migrations.
 ## New migrations take the next free integer
 
 This repository allocates integer versions itself: since `V370` every new migration takes the
-next integer version free across **both** folders (the current maximum is `V661`, in
-`tenant/`). This is the rule in [CONTRIBUTING.md](../../CONTRIBUTING.md#flyway-migrations).
+next integer version free across **both** folders (the current maximum is `V663`, in
+`controlplane/`). This is the rule in [CONTRIBUTING.md](../../CONTRIBUTING.md#flyway-migrations).
 
 Rules:
 

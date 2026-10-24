@@ -1,13 +1,23 @@
 package com.agenticai.core.agents.tools;
 
+import com.agenticai.core.agents.turn.ToolLedger;
+import com.agenticai.core.agents.turn.ToolLedgerProperties;
+import com.agenticai.core.agents.turn.ToolLedgerSummary;
+import com.agenticai.core.agents.turn.TurnToolActivity;
 import com.agenticai.core.audit.IssueSeverity;
 import com.agenticai.core.audit.IssueSource;
 import com.agenticai.core.audit.PlatformIssueService;
+import com.agenticai.core.guardrails.GuardrailPrompts;
 import com.agenticai.core.guardrails.ToolCallOutputValidator;
+import com.agenticai.core.guardrails.ToolOutputProperties;
+import com.agenticai.core.guardrails.ToolResultMarker;
+import com.agenticai.core.guardrails.TurnApprovalState;
+import com.agenticai.core.prompts.PromptResolver;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.model.ToolContext;
@@ -38,6 +48,85 @@ public class LoggingToolCallback implements ToolCallback {
     private final Predicate<String> durableTool;
     private final String turnId;
     private final MeterRegistry meterRegistry;
+
+    /**
+     * The one tool-output cap ({@code app.tools.output.*}); the module defaults unless {@link
+     * #withOutputLimits} sets the operator's. {@code GuardedToolCallback}, inside this wrapper, has
+     * normally cut an over-long result already, and cutting a cut result changes nothing - this is the
+     * same cap applied once more for the built-in tool that reaches this wrapper without that guard.
+     */
+    private volatile ToolOutputProperties outputLimits = new ToolOutputProperties();
+
+    /**
+     * The turn's record of what its tools are doing (null = not tracked): a call is reported in flight
+     * while the tool works and ends as executed, journaled, failed, replayed or not-run. The stream idle
+     * timer and the failover replay gate read it; see {@link TurnToolActivity}.
+     */
+    private volatile TurnToolActivity activity;
+
+    /**
+     * What the turn's tool ledger needs besides the activity record it lives in: the limits (null = the
+     * ledger is off, nothing is recorded), the turn's approval state (null = no call is ever reported as
+     * held for a human) and the redactor for model-facing text (null = credentials only).
+     */
+    private volatile ToolLedgerProperties ledgerLimits;
+
+    private volatile TurnApprovalState approvalState;
+    private volatile UnaryOperator<String> ledgerRedactor;
+
+    /**
+     * Records every call this wrapper sees into the turn's tool ledger ({@link
+     * TurnToolActivity#ledger()}, so {@link #withActivity} must be set too), summarised to {@code limits}
+     * and masked with {@code redactor} (the one the model-facing result goes through) on top of the
+     * credential scrub. {@code null} limits turn the ledger off.
+     */
+    public LoggingToolCallback withLedger(
+            ToolLedgerProperties limits, TurnApprovalState approval, UnaryOperator<String> redactor) {
+        this.ledgerLimits = limits != null && limits.isEnabled() ? limits : null;
+        this.approvalState = approval;
+        this.ledgerRedactor = redactor;
+        return this;
+    }
+
+    /**
+     * The turn's tool timeout ({@code toolTimeoutSeconds} of the runtime settings): a call that outlives {@code
+     * limit} is stopped and the model is told {@code message}. Null (the default) = no limit, the call runs inline.
+     */
+    public LoggingToolCallback withToolTimeout(java.time.Duration limit, String message) {
+        this.timeout = limit == null || limit.isZero() || limit.isNegative() ? null : new ToolCallTimeout(limit, message);
+        return this;
+    }
+
+    private volatile ToolCallTimeout timeout;
+
+    /** Registry keys of the circuit-breaker result ({@code prompts/en/toolresult.tool_breaker.*.md}). */
+    static final String DISABLED_KEY = "toolresult.tool_breaker.disabled";
+
+    static final String LAST_ERROR_KEY = "toolresult.tool_breaker.last_error";
+    static final String WAIT_ONE_KEY = "toolresult.tool_breaker.wait.one";
+    static final String WAIT_MANY_KEY = "toolresult.tool_breaker.wait.many";
+
+    private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
+
+    /** Reads the circuit-breaker wording from the prompt registry for this agent; null keeps the shipped text. */
+    public LoggingToolCallback withPrompts(PromptResolver resolver) {
+        this.prompts = resolver == null ? PromptResolver.defaultsOnly() : resolver;
+        return this;
+    }
+
+    /** Reports every call to {@code turnActivity}; null leaves the wrapper untracked. */
+    public LoggingToolCallback withActivity(TurnToolActivity turnActivity) {
+        this.activity = turnActivity;
+        return this;
+    }
+
+    /** Uses the operator's tool-output cap; null keeps the module defaults. */
+    public LoggingToolCallback withOutputLimits(ToolOutputProperties limits) {
+        if (limits != null) {
+            this.outputLimits = limits;
+        }
+        return this;
+    }
 
     public LoggingToolCallback(
             ToolCallback delegate,
@@ -120,6 +209,7 @@ public class LoggingToolCallback implements ToolCallback {
             // tool_call_log like every other outcome. Not counted as a
             // failure (the delegate never ran) and not as a success either.
             persistBlockedCall(toolName, toolInput, blocked);
+            recordInLedger(toolName, toolInput, blocked, ToolLedger.Status.NOT_RUN);
             return blocked;
         }
 
@@ -142,6 +232,11 @@ public class LoggingToolCallback implements ToolCallback {
                         toolName,
                         sessionId);
                 countEffect("agent.tool.effect_journal.replayed", toolName);
+                TurnToolActivity replayed = activity;
+                if (replayed != null) {
+                    replayed.end(replayed.begin(toolName), TurnToolActivity.Outcome.REPLAYED);
+                }
+                recordInLedger(toolName, toolInput, prior.get(), ToolLedger.Status.REPLAYED);
                 return prior.get();
             }
             // Durable job scope only (no-op otherwise): mark the call in flight BEFORE the provider
@@ -154,11 +249,19 @@ public class LoggingToolCallback implements ToolCallback {
         String error = null;
         boolean validationFailed = false;
         boolean toolOriginatedFailure = false;
+        // What the model is shown as this call's result, for the turn's tool ledger.
+        String shownResult = null;
+        // From here the call is in flight until the finally block below: a long tool emits no token,
+        // and the stream idle timer must not read that silence as a dead provider.
+        TurnToolActivity turnActivity = activity;
+        long activityCall = turnActivity == null ? -1 : turnActivity.begin(toolName);
+        TurnToolActivity.Outcome outcome = TurnToolActivity.Outcome.NOT_RUN;
         try {
+            ToolCallTimeout limit = timeout;
             output =
-                    toolContext != null
-                            ? delegate.call(toolInput, toolContext)
-                            : delegate.call(toolInput);
+                    limit == null
+                            ? invoke(toolInput, toolContext)
+                            : limit.run(toolName, () -> invoke(toolInput, toolContext));
             // #815 Gap 1 - GuardedToolCallback (the delegate we're wrapping,
             // per AgentToolProvider#guardAndLog's wrapping order) tags a
             // structural-validation failure with this prefix instead of
@@ -175,20 +278,25 @@ public class LoggingToolCallback implements ToolCallback {
                         output.substring(
                                 ToolCallOutputValidator.VALIDATION_FAILURE_PREFIX.length());
             }
-            // Built-in tools only (no MCP grant): cap what goes back to the model; the full
-            // output is still persisted to tool_call_log below. MCP results are already
-            // capped by SanitizedMcpToolCallback.
-            String result =
-                    mcpGrantId == null ? McpToolOutputSanitizer.capBuiltInResult(output) : output;
+            // Built-in tools only (no MCP grant): cap what goes back to the model at the same
+            // app.tools.output.* limit as everything else (it used to be its own, lower, constant);
+            // the output is still persisted to tool_call_log below. MCP results are already
+            // bounded by SanitizedMcpToolCallback and by the guard inside this wrapper.
+            String result = mcpGrantId == null ? outputLimits.limit(toolName, output) : output;
+            shownResult = result;
             if (effectKey != null) {
                 // The tool RETURNED (executed or gated): no longer in flight. A throw leaves it
                 // STARTED on purpose:
                 // a failure after the provider acted is indistinguishable from one before it.
                 effectJournal.markDurableCallDone(sessionId, effectKey);
             }
+            if (!validationFailed && wasExecuted(output)) {
+                outcome = TurnToolActivity.Outcome.EXECUTED;
+            }
             if (effectKey != null && !validationFailed && wasExecuted(output)) {
                 effectJournal.record(effectKey, result);
                 countEffect("agent.tool.effect_journal.recorded", toolName);
+                outcome = TurnToolActivity.Outcome.JOURNALED;
             }
             return result;
         } catch (RuntimeException e) {
@@ -198,6 +306,12 @@ public class LoggingToolCallback implements ToolCallback {
             // TenantContextPropagatingToolCallback still decides what the
             // model sees.
             toolOriginatedFailure = isToolOriginated(e);
+            // A throw that came from the tool may have come after it acted; one the platform raised
+            // around it (guard, step budget) means the tool never ran.
+            outcome =
+                    toolOriginatedFailure
+                            ? TurnToolActivity.Outcome.FAILED
+                            : TurnToolActivity.Outcome.NOT_RUN;
             String detail =
                     e.getMessage() != null && !e.getMessage().isBlank()
                             ? e.getMessage()
@@ -205,6 +319,21 @@ public class LoggingToolCallback implements ToolCallback {
             error = com.agenticai.core.chat.RedactingToolExecutionExceptionProcessor.redact(detail);
             throw e;
         } finally {
+            if (turnActivity != null) {
+                turnActivity.end(activityCall, outcome);
+            }
+            recordInLedger(
+                    toolName,
+                    toolInput,
+                    error != null ? error : shownResult != null ? shownResult : output,
+                    ledgerStatus(
+                            toolName,
+                            toolInput,
+                            error,
+                            validationFailed,
+                            toolOriginatedFailure,
+                            outcome,
+                            ToolResultMarker.kindOf(output).filter(k -> k == ToolResultMarker.Kind.SANDBOXED).isPresent()));
             try {
                 ToolCallLog row =
                         new ToolCallLog(
@@ -252,6 +381,76 @@ public class LoggingToolCallback implements ToolCallback {
         }
     }
 
+    private String invoke(String toolInput, ToolContext toolContext) {
+        return toolContext != null ? delegate.call(toolInput, toolContext) : delegate.call(toolInput);
+    }
+
+    /**
+     * How the call ended for the turn's tool ledger: held for a human (the turn's approval state has a
+     * pending request for exactly this call), failed (the tool threw or its result was withheld), not run
+     * (a guard answered), or ok.
+     */
+    private ToolLedger.Status ledgerStatus(
+            String toolName,
+            String toolInput,
+            String error,
+            boolean validationFailed,
+            boolean toolOriginatedFailure,
+            TurnToolActivity.Outcome outcome,
+            boolean simulated) {
+        if (approvalRequestId(toolName, toolInput) != null) {
+            return ToolLedger.Status.AWAITING_APPROVAL;
+        }
+        if (error != null) {
+            return toolOriginatedFailure ? ToolLedger.Status.FAILED : ToolLedger.Status.NOT_RUN;
+        }
+        if (validationFailed) {
+            return ToolLedger.Status.FAILED;
+        }
+        if (outcome == TurnToolActivity.Outcome.EXECUTED || outcome == TurnToolActivity.Outcome.JOURNALED) {
+            return ToolLedger.Status.OK;
+        }
+        // An offline eval turn's sandbox answered with a simulated result: the tool did not run, and the record
+        // says so in its own word instead of folding it into every other kind of "a guard answered".
+        return simulated ? ToolLedger.Status.SIMULATED : ToolLedger.Status.NOT_RUN;
+    }
+
+    private String approvalRequestId(String toolName, String toolInput) {
+        TurnApprovalState state = approvalState;
+        return state == null ? null : state.requestIdFor(toolName, toolInput);
+    }
+
+    /**
+     * Adds the call to the turn's tool ledger, summarised and masked ({@link ToolLedgerSummary}). Never
+     * throws: the ledger is a record of the call, not part of it.
+     */
+    private void recordInLedger(String toolName, String toolInput, String result, ToolLedger.Status status) {
+        ToolLedgerProperties limits = ledgerLimits;
+        TurnToolActivity turnActivity = activity;
+        if (limits == null || turnActivity == null) {
+            return;
+        }
+        try {
+            String requestId = status == ToolLedger.Status.AWAITING_APPROVAL ? approvalRequestId(toolName, toolInput) : null;
+            turnActivity
+                    .ledger()
+                    .record(
+                            ToolLedgerSummary.entry(
+                                    toolName,
+                                    toolInput,
+                                    // A held call has no result: the park text is the platform's, and the
+                                    // status and request id already say everything it does.
+                                    status == ToolLedger.Status.AWAITING_APPROVAL ? null : result,
+                                    status,
+                                    requestId,
+                                    limits,
+                                    ledgerRedactor),
+                            limits.getMaxEntriesPerTurn());
+        } catch (RuntimeException e) {
+            log.warn("Could not record tool call {} in the turn's tool ledger", toolName, e);
+        }
+    }
+
     private boolean isDurable(String toolName) {
         try {
             return durableTool.test(toolName);
@@ -265,15 +464,10 @@ public class LoggingToolCallback implements ToolCallback {
      * did NOT run, so they must not be journaled as an executed effect.
      */
     static boolean wasExecuted(String output) {
-        if (output == null) {
-            return false;
-        }
-        return !(output.startsWith("This tool call (")
-                || output.startsWith("This tool call failed")
-                || output.startsWith("This action (")
-                || output.startsWith("This tool (")
-                || output.startsWith("Tool output from '")
-                || output.startsWith(ToolCallOutputValidator.VALIDATION_FAILURE_PREFIX));
+        // A typed answer: the layer that replied registered its exact text with ToolResultMarker, whatever the wording
+        // (the approval-park text is configurable). The old wording prefixes, the validation-failure prefix and the
+        // budget-exhausted result are still recognised, for a producer that did not register itself.
+        return output != null && !ToolResultMarker.isPlatformAnswer(output);
     }
 
     private void countEffect(String name, String toolName) {
@@ -311,22 +505,31 @@ public class LoggingToolCallback implements ToolCallback {
      * tell "transient blip" from "this dependency is actually down" instead of seeing an
      * unexplained "temporarily disabled" forever.
      */
-    private static String disabledMessage(
-            String toolName, ToolCircuitBreakerService.OpenInfo open) {
-        StringBuilder message =
-                new StringBuilder("This tool ('")
-                        .append(toolName)
-                        .append("') has been temporarily disabled after repeated failures");
-        if (open.lastError() != null && !open.lastError().isBlank()) {
-            message.append(" (most recent error: ").append(open.lastError()).append(")");
-        }
+    private String disabledMessage(String toolName, ToolCircuitBreakerService.OpenInfo open) {
+        String lastError =
+                open.lastError() != null && !open.lastError().isBlank()
+                        ? GuardrailPrompts.text(prompts, LAST_ERROR_KEY, agentId, "error", open.lastError())
+                        : "";
         long minutesLeft = Math.max(1, Math.round(open.secondsRemaining() / 60.0));
-        message.append(". It becomes available again automatically in about ")
-                .append(minutesLeft)
-                .append(minutesLeft == 1 ? " minute" : " minutes")
-                .append(
-                        ". Try a different approach, or let the user know this capability is briefly unavailable.");
-        return message.toString();
+        String wait =
+                GuardrailPrompts.text(
+                        prompts,
+                        minutesLeft == 1 ? WAIT_ONE_KEY : WAIT_MANY_KEY,
+                        agentId,
+                        "minutes",
+                        String.valueOf(minutesLeft));
+        String message =
+                GuardrailPrompts.text(
+                        prompts,
+                        DISABLED_KEY,
+                        agentId,
+                        "tool",
+                        toolName,
+                        "last_error",
+                        lastError,
+                        "wait",
+                        wait);
+        return ToolResultMarker.mark(message, ToolResultMarker.Kind.BLOCKED);
     }
 
     /**

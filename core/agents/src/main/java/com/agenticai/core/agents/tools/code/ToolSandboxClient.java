@@ -6,7 +6,12 @@ import com.agenticai.core.agents.tools.code.dto.SandboxHealthResponse;
 import com.agenticai.core.agents.tools.code.dto.SandboxValidateRequest;
 import com.agenticai.core.agents.tools.code.dto.SandboxValidateResponse;
 import com.agenticai.core.security.TenantContext;
+import java.time.Duration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -47,16 +52,40 @@ public class ToolSandboxClient {
     private final RestClient restClient;
     private final ToolSandboxProperties properties;
 
-    public ToolSandboxClient(
-            RestClient.Builder restClientBuilder, ToolSandboxProperties properties) {
+    /**
+     * Builds the transport from {@code tool-sandbox.connect-timeout-millis} and {@code
+     * tool-sandbox.request-timeout-millis}: the sandbox is an operator-configured internal service
+     * (compose network, private address), so it does not go through the SSRF guard, but a hung
+     * sandbox must not hold a request thread for longer than the operator allows.
+     */
+    @Autowired
+    public ToolSandboxClient(RestClient.Builder restClientBuilder, ToolSandboxProperties properties) {
+        this(
+                restClientBuilder.requestFactory(requestFactory(properties)),
+                properties,
+                properties.getBaseUrl());
+    }
+
+    private ToolSandboxClient(
+            RestClient.Builder restClientBuilder, ToolSandboxProperties properties, String baseUrl) {
         this.properties = properties;
-        // Plain builder + baseUrl, no custom request factory - same reasoning
-        // CodeIntelClient documents (stay version-agnostic across Spring Boot's
-        // evolving ClientHttpRequestFactory API). The shared builder's own
-        // read timeout already bounds these calls; tool-sandbox.*-timeout-millis
-        // are carried for the sandbox's own use and for a future shared
-        // RestClient.Builder customizer.
-        this.restClient = restClientBuilder.baseUrl(properties.getBaseUrl()).build();
+        this.restClient = restClientBuilder.baseUrl(baseUrl).build();
+    }
+
+    /**
+     * A client over the builder's own transport, the timeouts of which are not touched: for a test
+     * that binds a mock server to the builder.
+     */
+    static ToolSandboxClient usingBuilderTransport(
+            RestClient.Builder restClientBuilder, ToolSandboxProperties properties) {
+        return new ToolSandboxClient(restClientBuilder, properties, properties.getBaseUrl());
+    }
+
+    private static ClientHttpRequestFactory requestFactory(ToolSandboxProperties properties) {
+        return ClientHttpRequestFactoryBuilder.detect()
+                .build(ClientHttpRequestFactorySettings.defaults()
+                        .withConnectTimeout(Duration.ofMillis(Math.max(1, properties.getConnectTimeoutMillis())))
+                        .withReadTimeout(Duration.ofMillis(Math.max(1, properties.getRequestTimeoutMillis()))));
     }
 
     /**

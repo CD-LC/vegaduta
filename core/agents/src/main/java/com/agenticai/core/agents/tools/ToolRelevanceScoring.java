@@ -3,7 +3,6 @@ package com.agenticai.core.agents.tools;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.springframework.ai.tool.ToolCallback;
 
 /**
@@ -14,7 +13,6 @@ import org.springframework.ai.tool.ToolCallback;
  */
 final class ToolRelevanceScoring {
 
-    private static final Pattern WORD_PATTERN = Pattern.compile("[a-z0-9]+");
     private static final Set<String> STOPWORDS =
             Set.of(
                     "a", "an", "the", "is", "are", "was", "were", "be", "been", "being", "to", "of",
@@ -116,17 +114,8 @@ final class ToolRelevanceScoring {
     }
 
     static Set<String> tokenize(String text) {
-        if (text == null || text.isBlank()) {
-            return Set.of();
-        }
-        java.util.regex.Matcher matcher = WORD_PATTERN.matcher(text.toLowerCase(Locale.ROOT));
-        Set<String> tokens = new java.util.HashSet<>();
-        while (matcher.find()) {
-            String token = matcher.group();
-            if (token.length() > 2 && !STOPWORDS.contains(token)) {
-                tokens.add(token);
-            }
-        }
+        Set<String> tokens = new java.util.HashSet<>(WordTokens.words(text));
+        tokens.removeAll(STOPWORDS);
         return tokens;
     }
 

@@ -9,6 +9,8 @@ import com.agenticai.core.providers.PlatformToolCredentialService;
 import com.agenticai.core.providers.PlatformToolKey;
 import com.agenticai.core.providers.modelcost.MediaModality;
 import com.agenticai.core.providers.modelcost.MediaModelCostService;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -39,6 +41,7 @@ import org.springframework.stereotype.Service;
  * OpenRouter serves no music (or video) models, so there is nothing to pick there.
  */
 @Service
+@ConditionalOnEditionFeature(EditionFeature.CLOUD_SPEECH)
 public class MusicGenerationService {
 
     private static final Logger log = LoggerFactory.getLogger(MusicGenerationService.class);

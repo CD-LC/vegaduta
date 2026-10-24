@@ -54,7 +54,7 @@ class ChannelSendPortImplTest {
     @BeforeEach
     void setUp() {
         gate = mock(HumanApprovalGateService.class);
-        when(gate.evaluate(anyString(), anyString(), anyString(), anyString()))
+        when(gate.evaluateInTurn(anyString(), anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(ApprovalEvaluation.autoApproved());
         teams = mock(TeamsCredentialService.class);
         port =
@@ -77,7 +77,13 @@ class ChannelSendPortImplTest {
             throws Exception {
         ChannelSendPort.ChannelSendResult result =
                 port.send(channel, "to-1", "Subj", "hello", "agent:1");
-        verify(gate).evaluate(actionType, summary, MAPPER.writeValueAsString(payload), "agent:1");
+        verify(gate)
+                .evaluateInTurn(
+                        actionType,
+                        "channel_send_message",
+                        summary,
+                        MAPPER.writeValueAsString(payload),
+                        "agent:1");
         assertTrue(result.approved(), channel);
         assertEquals(summary, result.summary());
     }

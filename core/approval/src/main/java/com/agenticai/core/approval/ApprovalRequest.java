@@ -85,6 +85,12 @@ public class ApprovalRequest {
     @Column(name = "next_retry_at")
     private Instant nextRetryAt;
 
+    /**
+     * The {@code decidedBy} of a request nobody decided in time (see {@link ApprovalExpiryProperties}).
+     * An expired request is stored as REJECTED by this actor, so it needs no status of its own.
+     */
+    public static final String EXPIRY_ACTOR = "system:approval-expiry";
+
     protected ApprovalRequest() {
         // JPA
     }
@@ -110,6 +116,19 @@ public class ApprovalRequest {
         this.decidedBy = decidedBy;
         this.rejectionReason = reason;
         this.decidedAt = Instant.now();
+    }
+
+    /**
+     * Nobody decided in time: stored as a rejection by {@link #EXPIRY_ACTOR} with {@code reason} (what
+     * the waiting agent reads back). See {@link #isExpired()}.
+     */
+    public void markExpired(String reason) {
+        markRejected(EXPIRY_ACTOR, reason);
+    }
+
+    /** Whether this is a request that expired undecided rather than one a person rejected. */
+    public boolean isExpired() {
+        return status == ApprovalStatus.REJECTED && EXPIRY_ACTOR.equals(decidedBy);
     }
 
     /** A non-retryable failure - terminal, no retry ever scheduled. */

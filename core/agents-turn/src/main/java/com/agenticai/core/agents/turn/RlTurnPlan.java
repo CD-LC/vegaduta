@@ -48,6 +48,17 @@ final class RlTurnPlan {
     }
 
     /**
+     * Forgets the TOOL_SUBSET arm for this turn: the person narrowed the run's tools themselves, so the bandit
+     * neither filters them further nor is credited with a choice that did not influence the turn.
+     */
+    void dropToolSubsetArm() {
+        if (rlToolSubsetNames != null) {
+            rlToolSubsetArm = Optional.empty();
+            rlSelectedArms.remove(PolicyDimension.TOOL_SUBSET);
+        }
+    }
+
+    /**
      * Applies the TOOL_SUBSET arm to the agent's own resolved tools, mutating {@code tools} in
      * place (never reassigning it - the dispatch lambda captures the list). Moved verbatim from the
      * tool-resolution step of {@link AgentChatService#chat}.

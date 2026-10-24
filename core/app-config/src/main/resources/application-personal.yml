@@ -13,10 +13,17 @@
 # names other tranche areas read are in the first block):
 #   - auth: local accounts in core instead of Keycloak (app.auth.mode)
 #   - agent taint tracking enforced, not just observed (app.agents.taint.mode)
+#   - agent hooks, tool argument policies and skill supply-chain enforcement OFF where the base profile has them on
+#     (app.agent-hooks.enabled, app.tool-arg-policies.enabled, app.skills.supply-chain.enforce)
+#   (context compaction and the job step journal are on in the base profile too, so they are inherited, not set here)
 #   - STDIO MCP servers run under an OS sandbox (app.mcp.stdio.sandbox)
 #   - skills learning on (app.skills.learning.enabled)
 #   - learning proposals on (app.learning.proposals.enabled): the assistant proposes, you approve
 #   - billing off (app.edition.billing-enabled): no plans, quotas or gateways
+#   - edition tier `personal` (app.edition.tier): features an operator or a business needs but one person
+#     does not (@ConditionalOnEditionFeature, see EditionFeature) default to OFF; lite/full keep them all.
+#     Each is switchable back with app.edition.features.<name>.enabled (APP_EDITION_FEATURES_<NAME>_ENABLED)
+#     plus a core restart, e.g. APP_EDITION_FEATURES_CLOUD_SPEECH_ENABLED=true for a cloud speech provider.
 #   - tracing off, local file storage, in-process (legacy) workflow engine
 #   - small connection pools
 #   - the mail and telegram settings that normally ship inside the `workflow`
@@ -85,6 +92,17 @@ app:
       # A drafted skill is replayed against its own turn before it is queued; a FAIL is dropped.
       self-check:
         enabled: ${APP_SKILLS_LEARNING_SELF_CHECK_ENABLED:true}
+    supply-chain:
+      # The base profile withholds a changed or unapproved high-risk custom skill until an admin re-approves it
+      # (since 2026-10-23). Here the one person is also the author and the approver, and skill learning drafts
+      # skills continuously, so the scan and the pins stay on (app.skills.supply-chain.enabled) but nothing is withheld.
+      enforce: ${SKILLS_SUPPLY_CHAIN_ENFORCE:false}
+  # The base profile ships agent hooks and tool argument policies ON (2026-10-23): they do nothing until someone
+  # defines one. Nobody on a personal install authors either, so they stay off here (saving one answers 409).
+  agent-hooks:
+    enabled: ${AGENT_HOOKS_ENABLED:false}
+  tool-arg-policies:
+    enabled: ${TOOL_ARG_POLICIES_ENABLED:false}
   learning:
     proposals:
       # What the assistant proposes to learn (lessons, preferences, routines) waits here for approval.
@@ -122,8 +140,27 @@ app:
   # here (the shared default keeps it off for multi-tenant servers).
   data-tables:
     enabled: ${DATA_TABLES_ENABLED:true}
+  # ---- start-up time: keep best-effort work off the readiness path ----
+  # A laptop has one owner and one schema, so none of this needs to finish before the console opens.
+  startup:
+    # Runs the network-bound warm-ups and the per-agent version-snapshot backfill after readiness
+    # instead of before it (see application.yml app.startup.background-warmup for what moves).
+    background-warmup:
+      enabled: ${APP_STARTUP_BACKGROUND_WARMUP_ENABLED:true}
+  tenancy:
+    # The one personal schema is checked with a single query when its migration history already lists
+    # every script, not with a Flyway instance, classpath scan and checksum pass (257 scripts) on every
+    # restart. A schema that is behind still gets the full migrate. Set false to checksum-validate on boot.
+    migrate-skip-up-to-date: ${TENANCY_MIGRATE_SKIP_UP_TO_DATE:true}
   edition:
+    # personal | lite | full. Absent (any other profile set) means full: every feature on. The compose stack and
+    # the installer derive this and the web build's NEXT_PUBLIC_EDITION from the one VEGADUTA_EDITION variable.
+    tier: ${APP_EDITION_TIER:personal}
     billing-enabled: ${APP_EDITION_BILLING_ENABLED:false}
+  # A2A (agent-to-agent) surfaces and the outbound a2a_call_agent tool: off for one person unless asked for.
+  # (Read as a platform-wide kill switch by the A2A controllers and the replica safety check; default on.)
+  a2a:
+    enabled: ${APP_A2A_ENABLED:false}
   # Documents, agent memory and the per-turn query embedding. `auto` picks a cloud key if one is
   # set, else an Ollama named in the environment (APP_EMBEDDINGS_OLLAMA_BASE_URL, or the local-AI
   # bootstrap one), else - decided per call - the Ollama this install registered in the console's
@@ -171,6 +208,12 @@ app:
     # shared-server cap (15) stopped it mid-way. Commands still each need an approval unless
     # APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED=false (this profile's default) lifts the pin.
     max-tool-calls-per-turn: ${GUARDRAILS_MAX_TOOL_CALLS_PER_TURN:150}
+    # One person who is also the approver: a SUPERVISED agent no longer stops for a search or a lookup (every read-only
+    # prompt was the main reason a task felt stalled). Only tools with an explicit read-only classification qualify;
+    # writes, sends, unclassified tools and an agent that holds the lethal trifecta are still gated. The base value is
+    # true (gate every call).
+    supervised:
+      gate-read-only: ${APP_GUARDRAILS_SUPERVISED_GATE_READ_ONLY:false}
   omnichannel:
     rate-limit:
       # Off everywhere else (opt-in); a personal install is a new surface with strangers
@@ -184,6 +227,8 @@ app:
   scheduled-tasks:
     enabled: ${SCHEDULED_TASKS_ENABLED:true}
     max-per-tenant: ${SCHEDULED_TASKS_MAX_PER_TENANT:25}
+    # Where a result may be delivered: the shared list minus slack (no Slack channel on this edition) and a2a.
+    delivery-channels: ${SCHEDULED_TASKS_DELIVERY_CHANNELS:in_app,email,whatsapp,whatsapp_qr,telegram,signal,matrix,imessage,voice}
   # ---- runtime shape ----
   storage:
     type: ${APP_STORAGE_TYPE:local}
@@ -201,6 +246,18 @@ app:
       enabled: ${TELEGRAM_POLLING_ENABLED:true}
   mail:
     from: ${WORKFLOW_MAIL_FROM:workflows@agentic-ai.local}
+
+# Resolution metering is a pricing substrate (outcome-based billing); this edition bills nothing, so the hourly
+# sweep that closes conversations into resolution_event rows stays off. The REST surface keeps working.
+resolution:
+  sweep:
+    enabled: ${RESOLUTION_SWEEP_ENABLED:false}
+
+# The "Browse registry" tab fetches the official MCP registry on first use. Warming it during boot is
+# network and CPU work a one-person install does not need before it has opened that tab.
+mcp:
+  registry:
+    warm-on-startup: ${MCP_REGISTRY_WARM_ON_STARTUP:false}
 
 management:
   tracing:

@@ -2,6 +2,7 @@ package com.agenticai.core.guardrails;
 
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Instant;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -11,12 +12,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 /**
- * Logs guardrail violations for observability and compliance monitoring.
- * Records all guardrail blocks and near-blocks to enable tracking of:
- * - Which guardrails are most frequently triggered
- * - False positive rates
- * - Patterns in blocked content
- * - Potential abuse or attack attempts
+ * Logs guardrail violations for observability and compliance monitoring. Records all guardrail
+ * blocks and near-blocks to enable tracking of: - Which guardrails are most frequently triggered -
+ * False positive rates - Patterns in blocked content - Potential abuse or attack attempts
  */
 @Service
 public class GuardrailViolationLogger {
@@ -29,7 +27,10 @@ public class GuardrailViolationLogger {
 
     private final AuditLogService auditLogService;
 
-    /** Optional (setter-injected so the constructor callers and tests keep working); null means "publish nothing". */
+    /**
+     * Optional (setter-injected so the constructor callers and tests keep working); null means
+     * "publish nothing".
+     */
     private ApplicationEventPublisher eventPublisher;
 
     public GuardrailViolationLogger(AuditLogService auditLogService) {
@@ -41,17 +42,32 @@ public class GuardrailViolationLogger {
         this.eventPublisher = eventPublisher;
     }
 
-    /** Announces a block as a {@link GuardrailViolationEvent}; never lets a listener break the chat turn. */
-    private void publish(UUID agentId, String sessionId, boolean inputPath, ContentGuardrailCheckResult result) {
+    /**
+     * Announces a block as a {@link GuardrailViolationEvent}; never lets a listener break the chat
+     * turn.
+     */
+    private void publish(
+            UUID agentId, String sessionId, boolean inputPath, ContentGuardrailCheckResult result) {
         if (eventPublisher == null) {
             return;
         }
         try {
-            eventPublisher.publishEvent(new GuardrailViolationEvent(agentId, sessionId, inputPath,
-                result.getBlockedByGuardrail() == null ? null : result.getBlockedByGuardrail().name(),
-                result.getBlockReason(), Instant.now()));
+            eventPublisher.publishEvent(
+                    new GuardrailViolationEvent(
+                            agentId,
+                            sessionId,
+                            inputPath,
+                            result.getBlockedByGuardrail() == null
+                                    ? null
+                                    : result.getBlockedByGuardrail().name(),
+                            result.getBlockReason(),
+                            Instant.now()));
         } catch (RuntimeException e) {
-            log.warn("A guardrail-violation listener failed for agent {} session {}", agentId, sessionId, e);
+            log.warn(
+                    "A guardrail-violation listener failed for agent {} session {}",
+                    LogSafe.clean(agentId),
+                    LogSafe.clean(sessionId),
+                    e);
         }
     }
 
@@ -63,29 +79,32 @@ public class GuardrailViolationLogger {
      * @param result the guardrail check result (must indicate failure)
      */
     public void logInputViolation(
-        UUID agentId,
-        String sessionId,
-        ContentGuardrailCheckResult result
-    ) {
+            UUID agentId, String sessionId, ContentGuardrailCheckResult result) {
         if (result.isPassed()) {
             return; // Only log failures
         }
 
-        String detail = "path=input guardrail=" + result.getBlockedByGuardrail()
-            + " confidence=" + result.getConfidence()
-            + " reason=" + result.getBlockReason();
+        String detail =
+                "path=input guardrail="
+                        + result.getBlockedByGuardrail()
+                        + " confidence="
+                        + result.getConfidence()
+                        + " reason="
+                        + result.getBlockReason();
 
         auditLogService.record(
-            null, // No user context for input violations
-            ACTION_GUARDRAIL_INPUT_BLOCK,
-            TARGET_TYPE,
-            sessionId,
-            AuditOutcome.REJECTED,
-            detail
-        );
+                null, // No user context for input violations
+                ACTION_GUARDRAIL_INPUT_BLOCK,
+                TARGET_TYPE,
+                sessionId,
+                AuditOutcome.REJECTED,
+                detail);
 
-        log.warn("Input guardrail violation: agent={}, session={}, {}",
-            agentId, sessionId, detail);
+        log.warn(
+                "Input guardrail violation: agent={}, session={}, {}",
+                LogSafe.clean(agentId),
+                LogSafe.clean(sessionId),
+                LogSafe.clean(detail));
         publish(agentId, sessionId, true, result);
     }
 
@@ -97,29 +116,32 @@ public class GuardrailViolationLogger {
      * @param result the guardrail check result (must indicate failure)
      */
     public void logOutputViolation(
-        UUID agentId,
-        String sessionId,
-        ContentGuardrailCheckResult result
-    ) {
+            UUID agentId, String sessionId, ContentGuardrailCheckResult result) {
         if (result.isPassed()) {
             return; // Only log failures
         }
 
-        String detail = "path=output guardrail=" + result.getBlockedByGuardrail()
-            + " confidence=" + result.getConfidence()
-            + " reason=" + result.getBlockReason();
+        String detail =
+                "path=output guardrail="
+                        + result.getBlockedByGuardrail()
+                        + " confidence="
+                        + result.getConfidence()
+                        + " reason="
+                        + result.getBlockReason();
 
         auditLogService.record(
-            null, // No user context for output violations
-            ACTION_GUARDRAIL_OUTPUT_BLOCK,
-            TARGET_TYPE,
-            sessionId,
-            AuditOutcome.REJECTED,
-            detail
-        );
+                null, // No user context for output violations
+                ACTION_GUARDRAIL_OUTPUT_BLOCK,
+                TARGET_TYPE,
+                sessionId,
+                AuditOutcome.REJECTED,
+                detail);
 
-        log.warn("Output guardrail violation: agent={}, session={}, {}",
-            agentId, sessionId, detail);
+        log.warn(
+                "Output guardrail violation: agent={}, session={}, {}",
+                LogSafe.clean(agentId),
+                LogSafe.clean(sessionId),
+                LogSafe.clean(detail));
         publish(agentId, sessionId, false, result);
     }
 }

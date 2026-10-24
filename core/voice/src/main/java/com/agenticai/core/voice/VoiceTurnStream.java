@@ -5,6 +5,7 @@ import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.speech.SpeechStreamNormalizer;
 import com.agenticai.core.speech.SpeechTextNormalizer;
 import com.agenticai.core.speech.call.CallSpeechQuotaExceededException;
@@ -220,11 +221,11 @@ final class VoiceTurnStream {
                             tenant.run(() -> turnSpeech.persistTurnAudio(agentId, chunkResults));
                             log.info(
                                     "Voice turn stream completed: agent={} session={}"
-                                        + " transcriptionMethod={} lengths(transcript/reply)={}/{}"
-                                        + " audioChunks={}",
-                                    agentId,
-                                    resolvedSessionId,
-                                    resolvedTranscriptionMethod,
+                                            + " transcriptionMethod={} lengths(transcript/reply)={}/{}"
+                                            + " audioChunks={}",
+                                    LogSafe.clean(agentId),
+                                    LogSafe.clean(resolvedSessionId),
+                                    LogSafe.clean(resolvedTranscriptionMethod),
                                     resolvedUserText.length(),
                                     replyText.length(),
                                     chunkResults.size());
@@ -258,9 +259,9 @@ final class VoiceTurnStream {
                                         log.info(
                                                 "Voice turn stream stopped for agent {} session {}:"
                                                         + " voice quota exceeded: {}",
-                                                agentId,
-                                                resolvedSessionId,
-                                                quotaExceeded.getMessage());
+                                                LogSafe.clean(agentId),
+                                                LogSafe.clean(resolvedSessionId),
+                                                LogSafe.clean(quotaExceeded.getMessage()));
                                         return Flux.just(
                                                 VoiceTurnEvents.sse(
                                                         "error",
@@ -270,9 +271,9 @@ final class VoiceTurnStream {
                                     log.warn(
                                             "Voice turn stream failed for agent {} session {} after"
                                                     + " streaming had already started: {}",
-                                            agentId,
-                                            resolvedSessionId,
-                                            e.getMessage(),
+                                            LogSafe.clean(agentId),
+                                            LogSafe.clean(resolvedSessionId),
+                                            LogSafe.clean(e.getMessage()),
                                             e);
                                     return Flux.just(
                                             VoiceTurnEvents.sse(
@@ -313,9 +314,10 @@ final class VoiceTurnStream {
                                                     "Voice turn stream for agent {} session {}"
                                                             + " exceeded the {}s absolute ceiling -"
                                                             + " forcing cutover",
-                                                    agentId,
-                                                    resolvedSessionId,
-                                                    TURN_ABSOLUTE_TIMEOUT.toSeconds());
+                                                    LogSafe.clean(agentId),
+                                                    LogSafe.clean(resolvedSessionId),
+                                                    LogSafe.clean(
+                                                            TURN_ABSOLUTE_TIMEOUT.toSeconds()));
                                             return Mono.just(
                                                     VoiceTurnEvents.sse(
                                                             "error",

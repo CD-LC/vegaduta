@@ -48,6 +48,15 @@
       }
     },
     {
+      "id": "get-api-edge-prompts",
+      "method": "GET",
+      "path": "/api/edge/prompts",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
       "id": "get-api-edge-tools",
       "method": "GET",
       "path": "/api/edge/tools",

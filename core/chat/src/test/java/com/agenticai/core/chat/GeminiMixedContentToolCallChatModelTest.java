@@ -96,4 +96,54 @@ class GeminiMixedContentToolCallChatModelTest {
         assertTrue(message.getToolCalls().isEmpty());
         assertEquals("Just a normal answer, no tools needed.", message.getText());
     }
+
+    // ---- tool-call ids and finish reasons -------------------------------------
+
+    @Test
+    void functionCallsGetANonBlankUniqueIdBecauseGeminiSendsNone() {
+        Candidate candidate = Candidate.builder()
+            .content(Content.fromParts(
+                Part.fromFunctionCall("read_file", Map.of("path", "a.ts")),
+                Part.fromFunctionCall("read_file", Map.of("path", "a.ts"))))
+            .finishReason(FinishReason.Known.STOP)
+            .build();
+
+        List<AssistantMessage.ToolCall> calls =
+            MODEL.responseCandidateToGeneration(candidate).get(0).getOutput().getToolCalls();
+
+        assertEquals(2, calls.size());
+        assertFalse(calls.get(0).id().isBlank(), "a blank id makes the hosted agent-turn client's next request a 400");
+        assertFalse(calls.get(1).id().isBlank());
+        assertFalse(calls.get(0).id().equals(calls.get(1).id()), "even two identical calls need distinct ids");
+    }
+
+    @Test
+    void aProviderSuppliedFunctionCallIdIsKept() {
+        com.google.genai.types.FunctionCall withId = com.google.genai.types.FunctionCall.builder()
+            .id("fc_77").name("read_file").args(Map.of("path", "a.ts")).build();
+        Candidate candidate = Candidate.builder()
+            .content(Content.fromParts(Part.builder().functionCall(withId).build()))
+            .finishReason(FinishReason.Known.STOP)
+            .build();
+
+        assertEquals("fc_77", MODEL.responseCandidateToGeneration(candidate).get(0).getOutput().getToolCalls().get(0).id());
+    }
+
+    @Test
+    void theCandidatesFinishReasonSurvivesIntoTheGenerationMetadataForEveryStopKind() {
+        for (FinishReason.Known known : List.of(
+            FinishReason.Known.MAX_TOKENS, FinishReason.Known.SAFETY, FinishReason.Known.MALFORMED_FUNCTION_CALL)) {
+            Candidate empty = Candidate.builder().finishReason(known).build();
+
+            Generation generation = MODEL.responseCandidateToGeneration(empty).get(0);
+
+            assertEquals(known.toString(), generation.getMetadata().getFinishReason(),
+                "an empty candidate must still say WHY it is empty");
+            assertTrue(FinishReason_of(generation).isAbnormal(), known + " is not a normal stop");
+        }
+    }
+
+    private static com.agenticai.core.chat.FinishReason FinishReason_of(Generation generation) {
+        return com.agenticai.core.chat.FinishReason.of(generation.getMetadata().getFinishReason());
+    }
 }

@@ -124,14 +124,7 @@ function accentForeground(accent: string): string {
   return luminance > 0.45 ? "#111827" : "#ffffff";
 }
 
-export default function EmbedChat({
-  shareId,
-  accent,
-  greeting,
-  title,
-  theme,
-  parentOrigin,
-}: EmbedChatProps) {
+export default function EmbedChat({ shareId, accent, greeting, title, theme, parentOrigin }: EmbedChatProps) {
   const [phase, setPhase] = useState<"loading" | "ready" | "blocked">("loading");
   const [info, setInfo] = useState<SharedAgentInfo | null>(null);
   const [blockedCode, setBlockedCode] = useState<ShareErrorCode>("unavailable");
@@ -281,8 +274,7 @@ export default function EmbedChat({
   return (
     <div
       className={
-        "flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground antialiased" +
-        (dark ? " dark" : "")
+        "flex h-dvh w-full flex-col overflow-hidden bg-background text-foreground antialiased" + (dark ? " dark" : "")
       }
       style={accentStyle}
     >
@@ -293,11 +285,7 @@ export default function EmbedChat({
           <>
             {info?.brandLogoUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={info.brandLogoUrl}
-                alt=""
-                className="h-5 w-auto max-w-20 shrink-0 object-contain"
-              />
+              <img src={info.brandLogoUrl} alt="" className="h-5 w-auto max-w-20 shrink-0 object-contain" />
             )}
             <span className="truncate text-sm font-semibold tracking-tight">
               {title || info?.brandDisplayName || info?.agentName}
@@ -352,14 +340,13 @@ export default function EmbedChat({
             <p className="text-[11px] leading-snug text-muted-foreground">
               {whiteLabeled ? (
                 <>
-                  <span className="text-foreground">{info.agentName}</span> is an AI agent answering
-                  on behalf of{" "}
+                  <span className="text-foreground">{info.agentName}</span> is an AI agent answering on behalf of{" "}
                   <span className="text-foreground">{info.brandDisplayName || "its owner"}</span>.
                 </>
               ) : (
                 <>
-                  <span className="text-foreground">{info.agentName}</span> is an AI agent, built and
-                  shared by its owner on <BrandName />.
+                  <span className="text-foreground">{info.agentName}</span> is an AI agent, built and shared by its
+                  owner on <BrandName />.
                 </>
               )}
             </p>
@@ -399,12 +386,7 @@ export default function EmbedChat({
                   aria-label={`Message ${info.agentName}`}
                   className="max-h-28 min-h-9 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-muted-foreground"
                 />
-                <Button
-                  size="icon"
-                  onClick={() => send(input)}
-                  disabled={sending || !input.trim()}
-                  aria-label="Send"
-                >
+                <Button size="icon" onClick={() => send(input)} disabled={sending || !input.trim()} aria-label="Send">
                   <Send className="size-4" />
                 </Button>
               </div>
@@ -454,7 +436,7 @@ function ChatBubble({ bubble }: { bubble: Bubble }) {
             : "max-w-[85%] rounded-2xl rounded-bl-sm border border-border/60 bg-card/70 px-3 py-2 text-sm"
         }
       >
-        <p className="whitespace-pre-wrap leading-relaxed">{bubble.text}</p>
+        <p className="whitespace-pre-wrap break-words leading-relaxed">{bubble.text}</p>
       </div>
     </div>
   );

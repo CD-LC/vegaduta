@@ -1,5 +1,6 @@
 package com.agenticai.core.quality.eval;
 
+import com.agenticai.core.prompts.PromptResolver;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
@@ -21,25 +22,14 @@ final class EvalCaseRun {
 
     private static final Logger log = LoggerFactory.getLogger(EvalCaseRun.class);
 
-    private static final String JUDGE_SYSTEM_PROMPT = """
-        You are an independent grader for a prompt-regression test suite. You will be given: the system
-        prompt an AI assistant was given, the one user message it received, the rubric describing what a
-        PASSING response must do, and the assistant's actual response. Judge STRICTLY against the rubric
-        only - do not grade on writing quality, tone, or anything the rubric doesn't mention.
+    /**
+     * Registry key of the grader's system prompt (default text: {@code prompts/en/eval.judge.case.md}). The
+     * runner is a standalone command-line harness with no tenant and no database, so it reads the shipped
+     * text ({@link PromptResolver#defaultsOnly()}); change the wording by editing that resource.
+     */
+    static final String JUDGE_PROMPT_KEY = "eval.judge.case";
 
-        Respond with EXACTLY one line, no other text:
-        PASS
-        or
-        FAIL: <one short sentence explaining specifically which part of the rubric was not met>
-        or
-        ABSTAIN: <one short sentence naming what the assistant declined to do, or what it asked for>
-
-        Use ABSTAIN when the assistant did not attempt the task at all - it refused, said it was
-        unable to do this, asked for information it was missing, or handed the task to a human.
-        ABSTAIN takes precedence: answer ABSTAIN even when declining is exactly what the rubric
-        asked for. Whether stopping was the RIGHT call is not your decision - report only what the
-        assistant did, and the suite will grade it.
-        """;
+    private static final String JUDGE_SYSTEM_PROMPT = PromptResolver.defaultsOnly().text(JUDGE_PROMPT_KEY);
 
     /**
      * Runs one golden case's generation + judge calls inside a single OTel

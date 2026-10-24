@@ -45,11 +45,20 @@ import org.springframework.ai.model.tool.ToolCallingManager;
  * it here is honored by both the streaming and non-streaming code paths
  * without needing to touch anything else in the base class.
  *
- * <p>This is unrelated to the separate thought_signature-missing 400 that
- * {@code AgentChatService}'s {@code isKnownThoughtSignatureBug} retry
- * handles - that one fires on the multi-turn follow-up request, after a
- * tool call already succeeded; this fixes the tool call never being
- * attempted in the first place.
+ * <p><b>Thought signatures.</b> The follow-up request after a tool call is
+ * refused by Gemini ("Function call is missing a thought_signature") unless
+ * the model's own {@code functionCall} part goes back with the signature
+ * Gemini put on it. Spring AI 1.1.8 keeps the reply's signatures in the
+ * {@code thoughtSignatures} message property and, when it rebuilds the
+ * model's turn ({@code GoogleGenAiChatModel#messageToGeminiParts}, checked
+ * against the 1.1.8 jar), writes the text as one unsigned part and then
+ * takes one entry off that list for each function-call part, in order. So
+ * the list must hold the function-call parts' signatures only, lined up
+ * with the tool calls - see {@link #replayableThoughtSignatures}. It used
+ * to hold every part's, which shifted by one whenever a lead-in text part
+ * was signed, and the function call went back with the text part's
+ * signature. The turn-level fallback for a provider that still refuses is
+ * {@code ThoughtSignatureDegrade} (a visible reply written without tools).
  */
 public class GeminiMixedContentToolCallChatModel extends GoogleGenAiChatModel {
 
@@ -84,10 +93,7 @@ public class GeminiMixedContentToolCallChatModel extends GoogleGenAiChatModel {
 
         List<Part> parts = candidate.content().flatMap(Content::parts).orElse(List.of());
 
-        List<byte[]> thoughtSignatures = parts.stream()
-            .filter(part -> part.thoughtSignature().isPresent())
-            .map(part -> part.thoughtSignature().get())
-            .toList();
+        List<byte[]> thoughtSignatures = replayableThoughtSignatures(parts);
         if (!thoughtSignatures.isEmpty()) {
             messageMetadata.put("thoughtSignatures", thoughtSignatures);
         }
@@ -106,7 +112,7 @@ public class GeminiMixedContentToolCallChatModel extends GoogleGenAiChatModel {
         // via StringUtils::hasLength, and the Flux completes with ZERO elements and
         // NO exception anywhere in that chain - a live incident traced this exact
         // path to "turn completed with 0 tokens, no error" (AgentChatService's
-        // EMPTY_REPLY_FALLBACK backstop), with candidateFinishReason - already
+        // empty-reply finish notice backstop), with candidateFinishReason - already
         // correctly computed above - silently discarded before it could explain
         // why. Emitting one Generation here instead (empty text, but the SAME real
         // chatGenerationMetadata/finishReason every other branch already attaches)
@@ -138,7 +144,12 @@ public class GeminiMixedContentToolCallChatModel extends GoogleGenAiChatModel {
                 FunctionCall functionCall = part.functionCall().get();
                 String functionName = functionCall.name().orElse("");
                 String functionArguments = mapToJson(functionCall.args().orElse(Map.of()));
-                return new AssistantMessage.ToolCall("", "function", functionName, functionArguments);
+                // Gemini function calls carry no id, but every consumer downstream needs one: the
+                // result must be paired with its call, and the hosted agent-turn endpoint rejects a
+                // tool message without a toolCallId. One is made up here, once, and travels with the
+                // call (a blank id here used to make the client's next request a 400).
+                String functionCallId = ToolCallIds.ensure(functionCall.id().orElse(null));
+                return new AssistantMessage.ToolCall(functionCallId, "function", functionName, functionArguments);
             })
             .toList();
 
@@ -154,6 +165,38 @@ public class GeminiMixedContentToolCallChatModel extends GoogleGenAiChatModel {
             .build();
 
         return List.of(new Generation(assistantMessage, chatGenerationMetadata));
+    }
+
+    /**
+     * The signatures to send back with this reply, in the form Spring AI's request conversion
+     * ({@code GoogleGenAiChatModel#messageToGeminiParts}) consumes them: it writes the reply's text as
+     * one unsigned part, then takes one entry off this list for each function-call part, in order.
+     * Gemini signs the part it reasoned about - the function call, and for a parallel batch only the
+     * first - and may also sign a lead-in text or thought part. A list of every part's signature, as
+     * this used to be, therefore shifted by one whenever a text part was signed: the function call went
+     * back carrying the text part's signature and Gemini refused it ("Function call is missing a
+     * thought_signature").
+     *
+     * <p>So the list holds the function-call parts' signatures only. It cannot express "this call has
+     * none but the next has one" (nothing can be put in a slot to mean absent), so it stops at the first
+     * unsigned function call that is followed by a signed one: a later call's signature is never handed to
+     * an earlier call. Gemini requires the signature on the first call of a step, which is what a leading
+     * run keeps.
+     */
+    static List<byte[]> replayableThoughtSignatures(List<Part> parts) {
+        List<byte[]> signatures = new java.util.ArrayList<>();
+        boolean gap = false;
+        for (Part part : parts) {
+            if (part.functionCall().isEmpty()) {
+                continue;
+            }
+            if (part.thoughtSignature().isEmpty()) {
+                gap = true;
+            } else if (!gap) {
+                signatures.add(part.thoughtSignature().get());
+            }
+        }
+        return signatures;
     }
 
     private static String mapToJson(Map<String, Object> map) {

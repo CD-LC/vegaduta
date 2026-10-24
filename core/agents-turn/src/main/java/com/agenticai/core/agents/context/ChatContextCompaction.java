@@ -9,6 +9,8 @@ import com.agenticai.core.agents.tools.ToolCallLogService;
 import com.agenticai.core.agents.tools.context.RestoreToolResultToolCallback;
 import com.agenticai.core.providers.ProviderModelCatalogService;
 import com.agenticai.core.providers.ProviderModelResponse;
+import com.agenticai.core.prompts.PromptContext;
+import com.agenticai.core.prompts.PromptResolver;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.TenantContext;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -77,22 +79,37 @@ public class ChatContextCompaction {
     private final int summaryMaxTokens;
     private final int maxSummariesPerRun;
 
+    /**
+     * {@code app.context.compaction.*}: the token estimates, the window name rules and the size of a restored
+     * result. A hand-built instance keeps the shipped defaults, which is also what Spring supplies when the
+     * properties bean is absent.
+     */
+    private volatile ContextCompactionProperties tuning = ContextCompactionProperties.shipped();
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setTuning(ContextCompactionProperties tuning) {
+        this.tuning = tuning == null ? ContextCompactionProperties.shipped() : tuning;
+    }
+
     public ChatContextCompaction(
             ObjectProvider<LlmCompactionSummarizer> summarizer,
             ObjectProvider<ProviderModelCatalogService> catalog,
             ObjectProvider<ToolCallLogService> toolCallLogs,
             ObjectProvider<MeterRegistry> meterRegistry,
-            @Value("${app.context.compaction.enabled:false}") boolean enabled,
-            @Value("${app.context.compaction.clear-at:0.6}") double clearAt,
-            @Value("${app.context.compaction.compact-at:0.85}") double compactAt,
-            @Value("${app.context.compaction.keep-recent-tool-results:3}")
+            @Value("${app.context.compaction.enabled:true}") boolean enabled,
+            @Value("${app.context.compaction.clear-at:" + ContextCompactionProperties.DEFAULT_CLEAR_AT + "}")
+                    double clearAt,
+            @Value("${app.context.compaction.compact-at:" + ContextCompactionProperties.DEFAULT_COMPACT_AT + "}")
+                    double compactAt,
+            @Value("${app.context.compaction.keep-recent-tool-results:" + ContextCompactionProperties.DEFAULT_KEEP_RECENT_TOOL_RESULTS + "}")
                     int keepRecentToolResults,
             @Value("${app.context.compaction.restore-tool-enabled:true}")
                     boolean restoreToolEnabled,
             @Value("${app.context.compaction.keep-recent-messages:6}") int keepRecentMessages,
-            @Value("${app.context.compaction.default-window-tokens:128000}")
+            @Value("${app.context.compaction.default-window-tokens:" + ContextCompactionProperties.DEFAULT_WINDOW_TOKENS + "}")
                     int defaultWindowTokens,
-            @Value("${app.context.compaction.summary-max-tokens:800}") int summaryMaxTokens,
+            @Value("${app.context.compaction.summary-max-tokens:" + ContextCompactionProperties.DEFAULT_SUMMARY_TOKENS + "}")
+                    int summaryMaxTokens,
             @Value("${app.context.compaction.max-summaries-per-run:3}") int maxSummariesPerRun) {
         this.summarizer = summarizer;
         this.catalog = catalog;
@@ -112,6 +129,26 @@ public class ChatContextCompaction {
         this.maxSummariesPerRun = maxSummariesPerRun;
     }
 
+    /**
+     * Where the wording of the summary and of the cleared-result note comes from; the shipped text
+     * until Spring supplies the prompt registry.
+     */
+    private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPromptResolver(PromptResolver prompts) {
+        this.prompts = prompts == null ? PromptResolver.defaultsOnly() : prompts;
+    }
+
+    /** The wording for one run of {@code agentId}: its, its tenant's or the platform's override, else the shipped one. */
+    private ContextCompactionEngine.Texts textsFor(UUID agentId) {
+        try {
+            return ContextCompactionEngine.Texts.build(prompts, PromptContext.forAgent(agentId));
+        } catch (RuntimeException e) {
+            return ContextCompactionEngine.Texts.shipped();
+        }
+    }
+
     /** The master switch. */
     public boolean isEnabled() {
         return enabled;
@@ -129,7 +166,9 @@ public class ChatContextCompaction {
         if (logs == null) {
             return List.of();
         }
-        return List.of(new RestoreToolResultToolCallback(logs, agentId, sessionId));
+        return List.of(
+                new RestoreToolResultToolCallback(
+                        logs, agentId, sessionId, tuning.getRestoreResultMaxChars()));
     }
 
     /**
@@ -168,7 +207,9 @@ public class ChatContextCompaction {
                         keepRecentToolResults,
                         keepRecentMessages,
                         summaryMaxTokens,
-                        restoreOffered);
+                        restoreOffered,
+                        tuning,
+                        textsFor(agentId));
         return new CompactionRun(
                 engine,
                 params,
@@ -267,7 +308,8 @@ public class ChatContextCompaction {
                         e.toString());
             }
         }
-        return ModelContextWindows.resolve(catalogWindow, model, defaultWindowTokens);
+        return ModelContextWindows.resolve(
+                catalogWindow, model, defaultWindowTokens, tuning.getWindowRules());
     }
 
     private Summarizer summarizerFor(UUID agentId, String sessionId) {

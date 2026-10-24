@@ -96,7 +96,7 @@ public class GroqAgentChatClientFactory implements AgentChatClientFactory {
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.GROQ)
             .defaultAdvisors(modelSupport.advisors(
                 new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.GROQ, model, meterRegistry, pricingCatalog)))
             .build();

@@ -49,7 +49,7 @@ class ChatMemoryRecallBlocksTest {
         when(agentProvider.getIfAvailable()).thenReturn(agentMemory);
         when(tenantProvider.getIfAvailable()).thenReturn(tenant);
         when(agentService.isShareMemoryWithTenant(agentId)).thenReturn(true);
-        when(tenant.recall(anyString(), anyString(), nullable(QueryEmbedding.class)))
+        when(tenant.recall(anyString(), anyString(), nullable(QueryEmbedding.class), nullable(UUID.class)))
                 .thenReturn(List.of());
         recall =
                 new ChatMemoryRecall(
@@ -130,7 +130,7 @@ class ChatMemoryRecallBlocksTest {
                         0);
         when(agentMemory.recall(eq(agentId), eq("alice"), eq("hi"), nullable(QueryEmbedding.class)))
                 .thenReturn(List.of(mine));
-        when(tenant.recall(eq("alice"), eq("hi"), nullable(QueryEmbedding.class)))
+        when(tenant.recall(eq("alice"), eq("hi"), nullable(QueryEmbedding.class), nullable(UUID.class)))
                 .thenReturn(List.of(shared));
         AgentStepEventEmitter emitter = AgentStepEventEmitter.active();
 

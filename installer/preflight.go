@@ -90,22 +90,18 @@ func runPreflight(c config) Report {
 			Fix: "Upgrade Docker Desktop or the compose plugin (need >= 2.24)."})
 	}
 
-	needGB, diskGB, ports := tierNeeds(c.tier)
+	needGB, diskGB, _ := tierNeeds(c.tier)
 	// The stack publishes *_HOST_PORT, not the defaults: honor overrides the
-	// same way doctor does, so a moved port does not fail the check forever.
-	if p := portEnv("WEB_HOST_PORT"); p > 0 {
-		ports[0] = p
-	}
-	if p := portEnv("CORE_HOST_PORT"); p > 0 && len(ports) > 1 {
-		ports[1] = p
-	}
+	// same way doctor does (process environment, then the install's .env), so a
+	// moved port does not fail the check forever.
+	ports := hostPorts(installRoot(c), c.tier)
 	memGB := memBytes / (1 << 30)
 	if int(memGB) >= needGB {
 		add(Check{Name: "Memory", OK: true, Detail: fmt.Sprintf("Docker has %d GB (>= %d GB for %s)", memGB, needGB, c.tier)})
 	} else {
 		fix := dockerMemoryHint()
 		if runtime.GOOS == "windows" {
-			fix = "Setup gives Docker more memory for you when you click Install, if this computer has it to spare."
+			fix = "Setup can give Docker more memory, but that restarts Docker Desktop and WSL and closes any WSL window you have open: tick \"Let Setup restart Docker\" before Install (or raise it in Docker Desktop > Settings > Resources)."
 		}
 		add(Check{Name: "Memory", Warn: true, Detail: fmt.Sprintf("Docker has %d GB; %s wants >= %d GB", memGB, c.tier, needGB),
 			Fix: fix})
@@ -191,6 +187,27 @@ func existingDir(dir string) string {
 func portEnv(key string) int {
 	n, _ := strconv.Atoi(os.Getenv(key))
 	return n
+}
+
+// hostPorts is the host ports the tier publishes: the defaults of tierNeeds,
+// with WEB_HOST_PORT and CORE_HOST_PORT taken from the process environment
+// (compose prefers it) or else the install's deploy/compose/.env.
+func hostPorts(root, tier string) []int {
+	_, _, ports := tierNeeds(tier)
+	override := func(key string) int {
+		if n := portEnv(key); n > 0 {
+			return n
+		}
+		n, _ := strconv.Atoi(envFileValue(envPath(root), key))
+		return n
+	}
+	if p := override("WEB_HOST_PORT"); p > 0 {
+		ports[0] = p
+	}
+	if p := override("CORE_HOST_PORT"); p > 0 && len(ports) > 1 {
+		ports[1] = p
+	}
+	return ports
 }
 
 func busyPorts(ports []int) []int {

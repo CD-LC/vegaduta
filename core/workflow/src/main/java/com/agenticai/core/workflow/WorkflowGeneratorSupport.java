@@ -9,12 +9,15 @@ import com.agenticai.core.workflow.dto.WorkflowGraphDto;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.guidance.WorkflowGraphExplainer;
 import com.agenticai.core.workflow.guidance.WorkflowSendApprovalGuard;
+import com.agenticai.core.prompts.PromptSlot;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +41,12 @@ final class WorkflowGeneratorSupport {
     private static final Pattern SECRET_REF = Pattern.compile("\\{\\{\\s*secret\\.([A-Za-z0-9_]+)\\s*}}");
     private static final Pattern SECRET_NAME = Pattern.compile("[A-Z][A-Z0-9_]{1,63}");
 
+    /** Registry keys of the direct-generation wording ({@code prompts/en/workflow.generator.*.md}). */
+    static final String APPROVAL_RULE_KEY = "workflow.generator.approval_rule";
+
+    static final String DIRECT_ADDENDUM_KEY = "workflow.generator.direct_addendum";
+    static final String EDIT_SUFFIX_KEY = "workflow.generator.edit_suffix";
+
     private WorkflowGeneratorSupport() {
     }
 
@@ -48,43 +57,23 @@ final class WorkflowGeneratorSupport {
      * reference mode, which has its own addendum and its own trigger model).
      */
     static String directAddendum(boolean enforceApprovalBeforeSend) {
-        String approvalRule = enforceApprovalBeforeSend
-            ? """
+        return directAddendum(enforceApprovalBeforeSend, new PromptSlot(), null);
+    }
 
-              SAFETY RULE (mandatory): ALWAYS place an "approval" node directly before any node that
-              sends something to a person or changes an external system: an "output" node with channel
-              "email", "telegram" or "whatsapp", a "bulk_email" node, an "http" node whose method is not
-              GET, or a "tool" node that sends a message. When that node is the per-item step of a
-              "loop" or "fan_out", put the "approval" node BEFORE the loop / fan_out node instead (never
-              between it and its per-item step). One approval is enough for everything after it.
-              """
-            : "";
-        return approvalRule + """
-
-            SCHEDULE: a schedule is NOT a node and must never be drawn as one. When the instruction
-            implies recurrence ("every Monday", "each morning at 9", "hourly", "daily"), keep the
-            normal "trigger" node (channel "WEBHOOK") and add a top-level "schedule" object next to
-            "graph" and "notes":
-              "schedule": {"cron": "0 9 * * 1", "label": "Every Monday 09:00"}
-            "cron" is exactly FIVE space-separated fields - minute hour day-of-month month
-            day-of-week (0 or 7 = Sunday, 1 = Monday) - evaluated in UTC; when no time of day is
-            given use 09:00. Supported shapes: hourly "0 * * * *", daily "M H * * *", weekly
-            "M H * * D". Omit "schedule" entirely when the instruction does not imply recurrence.
-
-            Also add these top-level arrays (empty when nothing applies):
-              "secretsNeeded": the NAME (UPPER_SNAKE_CASE) of every vault secret the graph references
-                as {{secret.NAME}};
-              "knowledgeNeeded": one short phrase per set of documents a "knowledge" node would need.
-            """;
+    /** As above, the wording read from the prompt registry ({@code workflow.generator.direct_addendum}). */
+    static String directAddendum(boolean enforceApprovalBeforeSend, PromptSlot prompts, UUID agentId) {
+        String approvalRule = enforceApprovalBeforeSend ? prompts.text(APPROVAL_RULE_KEY, agentId) : "";
+        return prompts.text(DIRECT_ADDENDUM_KEY, agentId, Map.of("approval_rule", approvalRule));
     }
 
     /** The user-message suffix that turns a generation into an edit of {@code currentGraphJson}. */
     static String editSuffix(String currentGraphJson) {
-        return "\n\nCURRENT GRAPH - the instruction above is a CHANGE REQUEST for this existing workflow, "
-            + "not a description of a new one. Modify this graph: keep every node and edge the request does "
-            + "not concern exactly as it is (same \"id\", \"type\", \"position\", \"label\" and \"config\"), "
-            + "reuse existing ids, give new nodes and edges new unique ids, and return the COMPLETE updated "
-            + "graph in the usual JSON shape (not a diff):\n" + currentGraphJson;
+        return editSuffix(currentGraphJson, new PromptSlot(), null);
+    }
+
+    /** As above, the wording read from the prompt registry ({@code workflow.generator.edit_suffix}). */
+    static String editSuffix(String currentGraphJson, PromptSlot prompts, UUID agentId) {
+        return prompts.text(EDIT_SUFFIX_KEY, agentId, Map.of("current_graph", currentGraphJson));
     }
 
     /**

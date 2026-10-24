@@ -1,6 +1,7 @@
 // Route tables for the dev-only preview mock (mock-api.ts).
 
 import { labMockPatternRoutes } from "../../components/agents/lab/labMock";
+import { runControlsMockPatternRoutes } from "../../components/agents/playground/runControlsMock";
 import { probeFixture, recommendationFixture } from "../../components/localModel/fixtures";
 import { account, adminUsers, agents, auditLog, channelsStatus, collections, documentsByCollection, e2bCredential, embeddingModels, invoices, knowledgeStats, llmTelemetry, llmUsageSummary, mcpCatalog, mcpRegistrySearch, mcpServers, notifications, openApiSources, openApiTools, pendingApprovals, providerModels, providers, referral, spendProtection, subscription, systemStatus, tenantSettings, toolCalls, toolClassifications, toolScripts, twilioCredential, usageQuota, workflows } from "./mock-sample-data";
 import type { JsonBody } from "./mock-sample-data";
@@ -12,6 +13,7 @@ import type { MockContact } from "./mock-contacts";
 type PatternHandler = (m: RegExpMatchArray, url: URL, init?: RequestInit) => { status?: number; body: JsonBody } | null;
 export const patternRoutes: Array<[RegExp, PatternHandler]> = [
   ...labMockPatternRoutes,
+  ...runControlsMockPatternRoutes,
   [/^\/api\/providers\/([A-Z_]+)\/models$/, (m) => ({ body: providerModels[m[1]] ?? [] })],
   [/^\/api\/knowledge\/collections\/([^/]+)\/documents$/, (m) => ({ body: documentsByCollection[m[1]] ?? [] })],
   [/^\/api\/tools\/openapi\/([^/]+)\/tools$/, () => ({ body: openApiTools })],
