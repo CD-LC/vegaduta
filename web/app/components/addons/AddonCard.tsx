@@ -237,7 +237,8 @@ export default function AddonCard({ addon, byId, text, hardware, bridgeConfigure
             {failed && (
               <Button size="sm" disabled={busy || !addon.canEnable || !mayChange} onClick={() => onEnable(addon)}>
                 {t("action.retry")}
-                <span className="sr-only"> {name}</span>
+                {" "}
+                <span className="sr-only">{name}</span>
               </Button>
             )}
             <Button
@@ -247,14 +248,16 @@ export default function AddonCard({ addon, byId, text, hardware, bridgeConfigure
               onClick={() => onDisable(addon)}
             >
               {t("action.turnOff")}
-              <span className="sr-only"> {name}</span>
+              {" "}
+              <span className="sr-only">{name}</span>
             </Button>
           </>
         )}
         {!planned && !wanted && (
           <Button size="sm" disabled={busy || !addon.canEnable || !mayChange} onClick={() => onEnable(addon)}>
             {t("action.turnOn")}
-            <span className="sr-only"> {name}</span>
+            {" "}
+            <span className="sr-only">{name}</span>
           </Button>
         )}
         {busy && <Loader2 className="size-4 animate-spin text-muted-foreground" aria-hidden="true" />}
@@ -266,7 +269,8 @@ export default function AddonCard({ addon, byId, text, hardware, bridgeConfigure
             className="ml-auto text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
           >
             {t("learnMore")}
-            <span className="sr-only"> {name}</span>
+            {" "}
+            <span className="sr-only">{name}</span>
           </a>
         )}
       </div>

@@ -57,7 +57,8 @@ function CopyBlock({ label, value, text }: { label: string; value: string; text:
         <Button type="button" size="sm" variant="outline" onClick={copy}>
           {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
           {copied ? t("host.copied") : t("host.copy")}
-          <span className="sr-only"> {label}</span>
+          {" "}
+          <span className="sr-only">{label}</span>
         </Button>
       </div>
     </div>
