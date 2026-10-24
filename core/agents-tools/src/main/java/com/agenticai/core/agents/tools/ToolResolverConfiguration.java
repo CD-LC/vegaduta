@@ -449,6 +449,18 @@ class ToolResolverConfiguration {
     }
 
     @Bean
+    AgentBackgroundJobToolResolver agentBackgroundJobToolResolver(
+            AgentToolGuard toolGuard,
+            AgentService agentService,
+            ObjectProvider<com.agenticai.core.agents.tools.scheduling.BackgroundJobToolFactory>
+                    factory) {
+        AgentBackgroundJobToolResolver resolver =
+                new AgentBackgroundJobToolResolver(toolGuard, agentService);
+        resolver.setFactory(factory);
+        return resolver;
+    }
+
+    @Bean
     AgentWorkflowDraftToolResolver agentWorkflowDraftToolResolver(
             AgentToolGuard toolGuard,
             AgentService agentService,

@@ -136,9 +136,9 @@ public class AgentJobService implements AgentJobLauncher {
     }
 
     /**
-     * The one resolver of the per-tenant / per-agent runtime limits: a job that names no tool-call budget gets
-     * {@code maxTurns} times what one turn of ITS agent may make. Null (unit tests, slim contexts) = the single
-     * global {@code app.guardrails.max-tool-calls-per-turn}.
+     * The one resolver of the per-tenant / per-agent runtime limits: a job that names no tool-call
+     * budget gets {@code maxTurns} times what one turn of ITS agent may make. Null (unit tests,
+     * slim contexts) = the single global {@code app.guardrails.max-tool-calls-per-turn}.
      */
     private volatile com.agenticai.core.agents.runtime.AgentRuntime runtimeSettings;
 
@@ -147,7 +147,10 @@ public class AgentJobService implements AgentJobLauncher {
         this.runtimeSettings = resolver;
     }
 
-    /** What one turn of {@code agentId} may make: its runtime ceiling, else the global per-turn ceiling. */
+    /**
+     * What one turn of {@code agentId} may make: its runtime ceiling, else the global per-turn
+     * ceiling.
+     */
     private int toolCallsPerTurn(UUID agentId) {
         com.agenticai.core.agents.runtime.AgentRuntime resolver = runtimeSettings;
         if (resolver != null) {
@@ -197,7 +200,14 @@ public class AgentJobService implements AgentJobLauncher {
                                                 "An agent job cannot be submitted without an authenticated tenant context"));
 
         int timeoutSeconds = resolveTimeoutSeconds(request.timeoutSeconds());
-        int maxTurns = Math.max(1, properties.getMaxTurns());
+        // A request may ask for more turns than the global default (the continue_in_background
+        // handoff does), never for more than the per-job cap.
+        int maxTurns =
+                request.maxTurns() != null
+                        ? Math.min(
+                                Math.max(1, request.maxTurns()),
+                                Math.max(1, properties.getMaxTurnsCap()))
+                        : Math.max(1, properties.getMaxTurns());
         int maxToolCalls =
                 request.maxToolCalls() != null && request.maxToolCalls() > 0
                         ? request.maxToolCalls()

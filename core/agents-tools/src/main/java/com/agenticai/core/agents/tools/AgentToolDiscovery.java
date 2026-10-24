@@ -32,6 +32,7 @@ final class AgentToolDiscovery {
     private final AgentScheduledTaskToolResolver scheduledTaskToolResolver;
     private final AgentWorkflowDraftToolResolver workflowDraftToolResolver;
     private final AgentCodingTaskToolResolver codingTaskToolResolver;
+    private final AgentBackgroundJobToolResolver backgroundJobToolResolver;
     private final int hardCapPerTurn;
 
     AgentToolDiscovery(
@@ -46,6 +47,7 @@ final class AgentToolDiscovery {
             AgentScheduledTaskToolResolver scheduledTaskToolResolver,
             AgentWorkflowDraftToolResolver workflowDraftToolResolver,
             AgentCodingTaskToolResolver codingTaskToolResolver,
+            AgentBackgroundJobToolResolver backgroundJobToolResolver,
             @Value("${app.tools.hard-cap-per-turn:40}") int hardCapPerTurn) {
         this.mcpToolResolver = mcpToolResolver;
         this.knowledgeToolResolver = knowledgeToolResolver;
@@ -58,6 +60,7 @@ final class AgentToolDiscovery {
         this.scheduledTaskToolResolver = scheduledTaskToolResolver;
         this.workflowDraftToolResolver = workflowDraftToolResolver;
         this.codingTaskToolResolver = codingTaskToolResolver;
+        this.backgroundJobToolResolver = backgroundJobToolResolver;
         this.hardCapPerTurn = hardCapPerTurn;
     }
 
@@ -161,6 +164,11 @@ final class AgentToolDiscovery {
         if (scheduledTaskToolResolver != null) {
             tools.addAll(
                     scheduledTaskToolResolver.resolveScheduledTaskToolsForDiscovery(
+                            agentId, probeId, stepCounter, null, null, false));
+        }
+        if (backgroundJobToolResolver != null) {
+            tools.addAll(
+                    backgroundJobToolResolver.resolveBackgroundJobToolsForDiscovery(
                             agentId, probeId, stepCounter, null, null, false));
         }
         if (workflowDraftToolResolver != null) {
