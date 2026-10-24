@@ -913,6 +913,7 @@ class AgentJobStartRequest(_AgentJobStartRequestRequired, total=False):
     timeoutSeconds: int
     resultSchemaJson: str
     maxToolCalls: int
+    maxTurns: int
 
 
 class AgentJobSummaryResponse(TypedDict, total=False):

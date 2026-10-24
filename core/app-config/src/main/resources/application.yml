@@ -1052,10 +1052,15 @@ app:
     # requester's roles were frozen at submit; executing an hour-old snapshot of
     # someone's authority means acting on permissions nobody re-checked.
     queue-ttl: 1h
-    # Single-turn for now. Multi-turn autonomy is a separate decision, not a
+    # Single-turn by default. Multi-turn autonomy is a separate decision, not a
     # number to quietly raise - turns_used is durable on the row so that when it
     # does change, a resumed job cannot reset its own budget.
     max-turns: 1
+    # The most turns a single job may be SUBMITTED with (AgentJobStartRequest.maxTurns
+    # is clamped to this; the continue_in_background handoff uses it to keep working
+    # past one chat reply's tool budget). Each turn still runs under the normal
+    # per-turn tool-call ceiling and approval gates.
+    max-turns-cap: ${APP_AGENT_JOBS_MAX_TURNS_CAP:8}
     poll-interval: 10s
     heartbeat-interval: 15s
     # Backs BOTH the deadline sweep and the orphan sweep. The wall clock needs an
@@ -1591,7 +1596,7 @@ app:
       max-unknown-calls-per-invocation: ${CHAT_TOOL_MAX_UNKNOWN_CALLS_PER_INVOCATION:8}
       # Model-facing wording of the two stops. {rounds} = tool rounds used. No ${...} env override: placeholders.
       budget-exhausted-message: >-
-        Tool budget for this reply is exhausted after {rounds} tool round(s), so this call was NOT executed. Do not call any more tools. Answer the user now using only what you already have, and say briefly if anything is incomplete.
+        Tool budget for this reply is exhausted after {rounds} tool round(s), so this call was NOT executed. Do not call any more tools. Answer the user now using only what you already have, say briefly if anything is incomplete, and if the work needs more calls than one reply allows, tell the user it can continue in the background as a job.
       hard-stop-reply: >-
         I had to stop here: this request needed more tool calls than a single reply is allowed to make. Please narrow the request, or ask me to continue from where I left off.
       # In-turn tool-result clearing (gap analysis item 4): once the tool results
@@ -3102,7 +3107,7 @@ app:
       # FULLY_AUTONOMOUS agents get ceiling * autonomous-multiplier calls.
       autonomous-multiplier: ${APP_GUARDRAILS_STEP_LIMIT_AUTONOMOUS_MULTIPLIER:2}
       exhausted-message: >-
-        Tool budget for this reply is exhausted: {limit} tool call(s) have been made, so this call was NOT executed. Do not call any more tools. Answer the user now using only what you already have, and say briefly what is incomplete and what you would do next.
+        Tool budget for this reply is exhausted: {limit} tool call(s) have been made, so this call was NOT executed. Do not call any more tools. Answer the user now using only what you already have, say briefly what is incomplete and what you would do next, and if the work needs more calls than one reply allows, tell the user it can continue in the background as a job (they can ask for that, or you can hand it off with continue_in_background next turn if the tool is offered).
     # What a tool call held for human approval tells the model (GuardedToolCallback; typed
     # ApprovalParkProperties, whose code defaults are guardrails/approval-park.properties - keep the two
     # in step, ApprovalParkDefaultsTest pins it). Model-facing instructions: they say the action is

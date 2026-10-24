@@ -24,6 +24,13 @@ Release notes on GitHub are generated from the section for each version.
   (fs, child_process, worker, addons and wasi calls throw) plus an identifier policy that rejects
   `import`/`require`, `process`, `globalThis`, the eval family, the network globals and
   `.constructor` access; vault-secret grants are currently Java/Python only.
+- `continue_in_background` agent tool: when a task needs more tool calls than a
+  single chat reply's budget, the agent hands it to a multi-turn background job
+  instead of stopping with a partial answer. The job re-runs the same agent under
+  the normal per-turn ceiling and approval gates; `AgentJobStartRequest.maxTurns`
+  (capped by `APP_AGENT_JOBS_MAX_TURNS_CAP`, default 8) controls how many turns it
+  may use. Opt-in per agent via the tool allow-list.
+
 
 ### Changed
 
