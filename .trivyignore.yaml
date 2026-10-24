@@ -1,0 +1,14 @@
+# Findings accepted individually, with a reason - see trivy.yaml's header.
+# Scoped to a path wherever possible; an unscoped entry suppresses the check
+# for the whole repository, which is not what "accepted" means.
+misconfigurations:
+  - id: AVD-DS-0002
+    paths:
+      - services/tool-sandbox/Dockerfile
+    statement: >
+      Intentional: the service must start as root so it can drop tenant code
+      to uid/gid 5001 (setpriv needs CAP_SETUID/CAP_SETGID) and SIGKILL the
+      child on timeout (CAP_KILL). Tenant code never runs as root; compose and
+      helm drop every other capability and set no-new-privileges, and the app
+      refuses to start when CAP_KILL is missing unless explicitly configured
+      to allow it. See services/tool-sandbox/README.md's security model.
