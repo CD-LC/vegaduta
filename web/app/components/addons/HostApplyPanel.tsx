@@ -56,9 +56,7 @@ function CopyBlock({ label, value, text }: { label: string; value: string; text:
         </pre>
         <Button type="button" size="sm" variant="outline" onClick={copy}>
           {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-          {copied ? t("host.copied") : t("host.copy")}
-          {" "}
-          <span className="sr-only">{label}</span>
+          {copied ? t("host.copied") : t("host.copy")} <span className="sr-only">{label}</span>
         </Button>
       </div>
     </div>
@@ -101,7 +99,9 @@ export default function HostApplyPanel({ apply, bridgeConfigured, pending, text,
           <h2 id="addon-host-title" className="text-base font-semibold tracking-tight text-foreground">
             {t("host.title")}
           </h2>
-          <p className="text-sm text-muted-foreground">{t(bridgeConfigured ? "host.introBridge" : "host.introManual")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t(bridgeConfigured ? "host.introBridge" : "host.introManual")}
+          </p>
         </div>
       </div>
 
