@@ -116,6 +116,17 @@ break the build standalone.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-24, production deploy (local Devin session): deployed **v0.1.9** to the Azure Container Apps
+  production (`vegaduta-ai-az-rg` / `vegadutaaiazacr`), in the documented order core → web + web-admin →
+  sidecar + mcp-stdio-runner. Images copied registry-to-registry (`docker buildx imagetools create` from
+  `ghcr.io/cd-lc/*:0.1.9`; `web-admin:0.1.9` retagged from `web:0.1.9`, same digest as before). All five
+  revisions Healthy; `/actuator/health` UP, console 200, `/downloads` lists `VegaDuta-Setup-0.1.9`, core
+  image tag verified `core:0.1.9`. Flyway delta vs 0.1.8 is one tenant index (`V661__chat_branch_session_owner_idx`)
+  - applies per tenant, no control-plane change. Watch-outs seen in core logs (pre-existing, not from this
+  deploy): Redis Enterprise `Balanced_B0` is at `maxmemory` with `VolatileLRU` eviction, so writes whose keys
+  carry no TTL fail `OOM command not allowed` - needs an eviction-policy or SKU decision; the stale
+  `wqr_*` external account still polls a tenant schema missing V27 (needs DB cleanup, as before).
+
 - 2026-10-22 10:25, release agent: v0.1.9 published (tag on `b6269fd`, Release run 18) and verified:
   latest release; `.dmg`, Windows zip and source tarball match `SHA256SUMS`; no symlinks in the tarball;
   `application-personal.yml` has chat history on; voice-agent lock has certifi 2026.10.19 and pillow 13.0.0.
