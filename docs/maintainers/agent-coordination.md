@@ -102,6 +102,12 @@ and can serve beside the old one while Container Apps switches traffic.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-22 08:06, docs agent (local Devin session): pushed `docs/rest-sdk-release-workflow`
+  (adds `rest-sdk-release.yml` to the workflow table and refreshes the PyPI/npm state rows; docs
+  only, no code). Also on the repo: created the `pypi`, `pypi-rest-sdk` and `npm` environments,
+  set `SDK_PUBLISH_PYPI=true` (arms the PyPI jobs of both `pypi-release.yml` and
+  `rest-sdk-release.yml`; `SDK_PUBLISH_NPM` left unset until the npm name and `NPM_TOKEN` exist).
+
 - 2026-10-23 09:44, release-readiness lead: merged the v1.0.0 readiness pull requests at the maintainer's
   request, each squash-merged with `CI OK` and `CodeQL OK` green on its head: #27, #100, #105, #91, #103,
   #113, #90, #87, #108, #106, #102, #95, #98, #96, #109, #89, #110, #111, #112, #115, #117, #94, #104, #107,
