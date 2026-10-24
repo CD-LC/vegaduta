@@ -33,8 +33,7 @@ JAVAC = shutil.which("javac")
 # Java
 # --------------------------------------------------------------------------
 
-java_only = pytest.mark.skipif(
-    JAVA is None or JAVAC is None, reason="java/javac are not on PATH")
+java_only = pytest.mark.skipif(JAVA is None or JAVAC is None, reason="java/javac are not on PATH")
 
 
 @pytest.fixture(scope="module")
@@ -47,20 +46,38 @@ def java_runtime(tmp_path_factory) -> tuple[Path, Path]:
     api.mkdir()
     internal.mkdir()
     src = ROOT / "harness" / "java"
-    subprocess.run([JAVAC, "-nowarn", "-d", str(api),
-                    str(src / "vega" / "Log.java"),
-                    str(src / "vega" / "Secrets.java")],
-                   check=True, capture_output=True)
     subprocess.run(
-        [JAVAC, "-nowarn", "-d", str(internal), "-cp", str(api),
-         str(src / "vega" / "internal" / "Json.java"),
-         str(src / "vega" / "internal" / "Harness.java")],
-        check=True, capture_output=True)
+        [
+            JAVAC,
+            "-nowarn",
+            "-d",
+            str(api),
+            str(src / "vega" / "Log.java"),
+            str(src / "vega" / "Secrets.java"),
+        ],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        [
+            JAVAC,
+            "-nowarn",
+            "-d",
+            str(internal),
+            "-cp",
+            str(api),
+            str(src / "vega" / "internal" / "Json.java"),
+            str(src / "vega" / "internal" / "Harness.java"),
+        ],
+        check=True,
+        capture_output=True,
+    )
     return api, internal
 
 
-def run_java_tool(source: str, payload, java_runtime, tmp_path,
-                  env_extra: dict[str, str] | None = None) -> tuple[dict, str]:
+def run_java_tool(
+    source: str, payload, java_runtime, tmp_path, env_extra: dict[str, str] | None = None
+) -> tuple[dict, str]:
     api, internal = java_runtime
     classes = tmp_path / "classes"
     classes.mkdir()
@@ -68,7 +85,9 @@ def run_java_tool(source: str, payload, java_runtime, tmp_path,
     src.write_text(source, encoding="utf-8")
     compiled = subprocess.run(
         [JAVAC, "-nowarn", "-g:lines,source", "-d", str(classes), "-cp", str(api), str(src)],
-        capture_output=True, text=True)
+        capture_output=True,
+        text=True,
+    )
     assert compiled.returncode == 0, compiled.stderr
 
     input_file = tmp_path / "input.json"
@@ -78,10 +97,21 @@ def run_java_tool(source: str, payload, java_runtime, tmp_path,
 
     classpath = os.pathsep.join([str(internal), str(api), str(classes)])
     proc = subprocess.run(
-        [JAVA, "--limit-modules", "java.base", "-XX:-UsePerfData",
-         "-Xmx128m", "-cp", classpath, "vega.internal.Harness",
-         str(input_file), str(result_file)],
-        capture_output=True, text=True, timeout=60,
+        [
+            JAVA,
+            "--limit-modules",
+            "java.base",
+            "-XX:-UsePerfData",
+            "-Xmx128m",
+            "-cp",
+            classpath,
+            "vega.internal.Harness",
+            str(input_file),
+            str(result_file),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=60,
         env={**os.environ, **(env_extra or {})},
     )
     raw = result_file.read_text(encoding="utf-8")
@@ -198,6 +228,7 @@ def test_bare_scalar_input_is_reachable(java_runtime, tmp_path) -> None:
 # Python
 # --------------------------------------------------------------------------
 
+
 def run_python_tool(source: str, payload, tmp_path) -> tuple[dict, str]:
     tool_file = tmp_path / "tool.py"
     input_file = tmp_path / "input.json"
@@ -207,9 +238,19 @@ def run_python_tool(source: str, payload, tmp_path) -> tuple[dict, str]:
     result_file.write_text("", encoding="utf-8")
 
     proc = subprocess.run(
-        [sys.executable, "-I", "-S", "-B", str(ROOT / "harness" / "py_harness.py"),
-         str(tool_file), str(input_file), str(result_file)],
-        capture_output=True, text=True, timeout=60,
+        [
+            sys.executable,
+            "-I",
+            "-S",
+            "-B",
+            str(ROOT / "harness" / "py_harness.py"),
+            str(tool_file),
+            str(input_file),
+            str(result_file),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=60,
     )
     raw = result_file.read_text(encoding="utf-8")
     assert raw.strip(), f"harness wrote no result. stderr={proc.stderr}"
@@ -269,13 +310,16 @@ def test_python_print_goes_to_stdout_not_the_result(tmp_path) -> None:
     assert "a debug line" in stdout
 
 
-@pytest.mark.parametrize("source", [
-    # A module's own imports are plain attributes - `uuid.os` has no dunder
-    # and no getattr, so only the runtime module proxy stops it (SVC-003).
-    "import uuid\ndef run(input):\n    return str(uuid.os)\n",
-    "import json.tool\ndef run(input):\n    return str(json.tool.sys)\n",
-    "import calendar\ndef run(input):\n    return str(calendar.sys)\n",
-])
+@pytest.mark.parametrize(
+    "source",
+    [
+        # A module's own imports are plain attributes - `uuid.os` has no dunder
+        # and no getattr, so only the runtime module proxy stops it (SVC-003).
+        "import uuid\ndef run(input):\n    return str(uuid.os)\n",
+        "import json.tool\ndef run(input):\n    return str(json.tool.sys)\n",
+        "import calendar\ndef run(input):\n    return str(calendar.sys)\n",
+    ],
+)
 def test_python_module_internals_are_hidden_at_runtime(source, tmp_path) -> None:
     result, _ = run_python_tool(source, {}, tmp_path)
     assert result["ok"] is False
@@ -293,8 +337,9 @@ def test_python_private_module_attribute_is_rejected_before_running(tmp_path) ->
 
 
 def test_python_from_import_of_a_modules_import_fails(tmp_path) -> None:
-    result, _ = run_python_tool("from uuid import os\ndef run(input):\n    return 1\n",
-                                {}, tmp_path)
+    result, _ = run_python_tool(
+        "from uuid import os\ndef run(input):\n    return 1\n", {}, tmp_path
+    )
     assert result["ok"] is False
     assert "ImportError" in result["error"]
 
@@ -365,8 +410,12 @@ public class Tool {
 
 def test_java_tool_can_read_a_granted_secret(java_runtime, tmp_path):
     result, _ = run_java_tool(
-        JAVA_TOOL_READS_ITS_SECRET, {}, java_runtime, tmp_path,
-        env_extra={SECRET_ENV_PREFIX + "STRIPE_KEY": "sk_live_abc123"})
+        JAVA_TOOL_READS_ITS_SECRET,
+        {},
+        java_runtime,
+        tmp_path,
+        env_extra={SECRET_ENV_PREFIX + "STRIPE_KEY": "sk_live_abc123"},
+    )
 
     assert result["ok"] is True, result
     assert result["result"]["key"] == "sk_live_abc123"
@@ -376,8 +425,12 @@ def test_java_tool_can_read_a_granted_secret(java_runtime, tmp_path):
 
 def test_java_tool_gets_null_for_a_secret_it_was_not_granted(java_runtime, tmp_path):
     result, _ = run_java_tool(
-        JAVA_TOOL_ASKS_FOR_SOMETHING_IT_WAS_NOT_GRANTED, {}, java_runtime, tmp_path,
-        env_extra={SECRET_ENV_PREFIX + "STRIPE_KEY": "sk_live_abc123"})
+        JAVA_TOOL_ASKS_FOR_SOMETHING_IT_WAS_NOT_GRANTED,
+        {},
+        java_runtime,
+        tmp_path,
+        env_extra={SECRET_ENV_PREFIX + "STRIPE_KEY": "sk_live_abc123"},
+    )
 
     assert result["ok"] is True, result
     # null, not "" - an empty credential reads as anonymous access to several
@@ -398,3 +451,174 @@ public class Tool {
     result, _ = run_java_tool(source, {}, java_runtime, tmp_path)
     assert result["ok"] is True, result
     assert result["result"] == 0
+
+
+# --------------------------------------------------------------------------
+# JavaScript / TypeScript
+# --------------------------------------------------------------------------
+
+# The Node permission flag was renamed: --experimental-permission on 20.x-22.x,
+# --permission since 23.5. Detect once so the suite runs on either era.
+NODE = shutil.which("node")
+_NODE_PERM_FLAG: str | None = None
+
+
+def _node_perm_flag() -> str | None:
+    global _NODE_PERM_FLAG
+    if NODE is None:
+        return None
+    if _NODE_PERM_FLAG is None:
+        probe = subprocess.run(
+            [NODE, "--experimental-permission", "-e", "1"], capture_output=True, text=True
+        )
+        _NODE_PERM_FLAG = (
+            "--experimental-permission"
+            if "bad option" not in (probe.stderr or "")
+            else "--permission"
+        )
+    return _NODE_PERM_FLAG
+
+
+js_only = pytest.mark.skipif(NODE is None, reason="node is not on PATH")
+
+
+def run_js_tool(source: str, payload, tmp_path, suffix: str = ".mjs") -> tuple[dict, str]:
+    """Run a JS/TS tool exactly as Runner._execute_js does: tenant source with
+    the trusted footer appended, input on stdin, result.json on disk, all under
+    Node's permission model."""
+    from app import runner as app_runner
+
+    tool_file = tmp_path / ("tool" + suffix)
+    result_file = tmp_path / "result.json"
+    tool_file.write_text(source + app_runner.Runner._JS_FOOTER, encoding="utf-8")
+    result_file.write_text("", encoding="utf-8")
+
+    proc = subprocess.run(
+        [
+            NODE,
+            _node_perm_flag(),
+            "--experimental-strip-types",
+            "--allow-fs-read=" + str(tmp_path.resolve()),
+            "--allow-fs-write=" + str(result_file.resolve()),
+            "--no-warnings",
+            str(tool_file),
+        ],
+        input=json.dumps(payload),
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    raw = result_file.read_text(encoding="utf-8")
+    assert raw.strip(), f"harness wrote no result. stderr={proc.stderr}"
+    return json.loads(raw), proc.stdout
+
+
+@js_only
+def test_js_tool_returns_its_value(tmp_path) -> None:
+    source = """
+function run(input) {
+    return { greeting: `Hello, ${input.name ?? "world"}!` };
+}
+"""
+    result, _ = run_js_tool(source, {"name": "Ada"}, tmp_path)
+    assert result["ok"] is True
+    assert result["result"] == {"greeting": "Hello, Ada!"}
+
+
+@js_only
+def test_ts_tool_strips_annotations_and_runs(tmp_path) -> None:
+    source = """
+interface In { n: number }
+function run(input: In): number { return input.n * 3; }
+"""
+    result, _ = run_js_tool(source, {"n": 7}, tmp_path, suffix=".mts")
+    assert result["ok"] is True
+    assert result["result"] == 21
+
+
+@js_only
+def test_js_tool_async_run_awaited(tmp_path) -> None:
+    source = """
+async function run(input) {
+    return Promise.resolve({ n: input.n + 1 });
+}
+"""
+    result, _ = run_js_tool(source, {"n": 41}, tmp_path)
+    assert result["ok"] is True
+    assert result["result"] == {"n": 42}
+
+
+@js_only
+def test_js_tool_throwing_becomes_a_runtime_error(tmp_path) -> None:
+    source = """
+function run(input) {
+    throw new Error("nope");
+}
+"""
+    result, _ = run_js_tool(source, {}, tmp_path)
+    assert result["ok"] is False
+    assert "nope" in result["error"]
+
+
+@js_only
+def test_js_console_log_goes_to_stdout_not_the_result(tmp_path) -> None:
+    source = """
+function run(input) {
+    console.log("a debug line");
+    return "done";
+}
+"""
+    result, stdout = run_js_tool(source, {}, tmp_path)
+    assert result["result"] == "done"
+    assert "a debug line" in stdout
+    assert "a debug line" not in json.dumps(result["result"])
+
+
+@js_only
+def test_js_permission_model_blocks_fs_read_outside_the_grant(tmp_path) -> None:
+    # The footer itself needs node:fs to write result.json - so fs READS outside
+    # the work grant are the meaningful check. (jsvalidate would have rejected
+    # this source before it ran; the runtime layer is what this proves.)
+    source = """
+function run(input) {
+    return { ok: "should never run - denied identifiers only matter pre-scan" };
+}
+// Simulating what an escaped tenant would attempt, appended in trusted space:
+"""
+    # Append runtime probes AFTER the marker - they run in footer space, which is
+    # the same privilege an identifier-scan bypass would reach.
+    probe = (
+        source
+        + """
+import { readFileSync as __r } from "node:fs";
+const __t = {};
+try { __r("/etc/hostname", "utf8"); __t.fsOutsideWork = "OK"; }
+catch (e) { __t.fsOutsideWork = "denied"; }
+try { const cp = await import("node:child_process"); cp.execSync("id"); __t.spawn = "ran"; }
+catch (e) { __t.spawn = "denied"; }
+import { writeFileSync as __w } from "node:fs";
+__w(new URL("./result.json", import.meta.url), JSON.stringify({ ok: true, result: __t }));
+"""
+    )
+    tool_file = tmp_path / "tool.mjs"
+    result_file = tmp_path / "result.json"
+    tool_file.write_text(probe, encoding="utf-8")
+    result_file.write_text("", encoding="utf-8")
+    subprocess.run(
+        [
+            NODE,
+            _node_perm_flag(),
+            "--experimental-strip-types",
+            "--allow-fs-read=" + str(tmp_path.resolve()),
+            "--allow-fs-write=" + str(result_file.resolve()),
+            "--no-warnings",
+            str(tool_file),
+        ],
+        input="{}",
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    result = json.loads(result_file.read_text(encoding="utf-8"))
+    assert result["result"]["fsOutsideWork"] == "denied"
+    assert result["result"]["spawn"] == "denied"

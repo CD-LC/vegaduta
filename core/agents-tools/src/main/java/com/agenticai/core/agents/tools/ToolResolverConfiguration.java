@@ -90,24 +90,31 @@ class ToolResolverConfiguration {
             // app.guardrails.approval-park.*: what a held call tells the model. Absent bean = the
             // module's code defaults (same text).
             ObjectProvider<com.agenticai.core.guardrails.ApprovalParkProperties> approvalPark,
-            // app.guardrails.step-limit.*: what a call past the ceiling gets, and the autonomy tiers'
+            // app.guardrails.step-limit.*: what a call past the ceiling gets, and the autonomy
+            // tiers'
             // scaling of it. Absent bean = the module's code defaults (same values).
             ObjectProvider<com.agenticai.core.guardrails.ToolStepLimitProperties> stepLimits,
-            // app.tools.output.*: the one cap on a tool result. Absent bean = the module's code defaults.
+            // app.tools.output.*: the one cap on a tool result. Absent bean = the module's code
+            // defaults.
             ObjectProvider<com.agenticai.core.guardrails.ToolOutputProperties> toolOutput,
-            // app.chat.tool-ledger.*: the compact record of what the turn's tools did, stored with the
+            // app.chat.tool-ledger.*: the compact record of what the turn's tools did, stored with
+            // the
             // assistant turn. Absent bean = the module's code defaults (same values).
             ObjectProvider<com.agenticai.core.agents.turn.ToolLedgerProperties> toolLedger,
-            // The one resolver of the per-tenant / per-agent runtime limits (tool steps, tool timeout, tool
+            // The one resolver of the per-tenant / per-agent runtime limits (tool steps, tool
+            // timeout, tool
             // output cap, ...). Absent bean = every agent runs under the guard's own settings.
             ObjectProvider<com.agenticai.core.agents.runtime.AgentRuntime> runtimeSettings,
-            // The prompt registry: the tool results the guard hands the model (blocked, held for approval,
+            // The prompt registry: the tool results the guard hands the model (blocked, held for
+            // approval,
             // withheld, budget used up) resolve through it. Absent bean = the shipped wording.
             ObjectProvider<com.agenticai.core.prompts.PromptResolver> prompts,
             // The end of the conversation, for the RIGOROUS tool-call verifier
-            // (app.guardrails.tool-verifier.context-messages). Absent bean = the current message alone.
+            // (app.guardrails.tool-verifier.context-messages). Absent bean = the current message
+            // alone.
             ObjectProvider<com.agenticai.core.guardrails.ConversationTailSource> conversationTail,
-            // The settings catalog: a tenant's chat.toolLedger.* decide whether the turn's tools are recorded in the
+            // The settings catalog: a tenant's chat.toolLedger.* decide whether the turn's tools
+            // are recorded in the
             // ledger. Absent bean = app.chat.tool-ledger.* as configured.
             ObjectProvider<com.agenticai.core.settings.SettingsResolver> settings) {
         AgentToolGuard guard =
@@ -136,7 +143,10 @@ class ToolResolverConfiguration {
         return guard;
     }
 
-    /** The conversation tail the RIGOROUS verifier reads, from the session memory the turn itself reads. */
+    /**
+     * The conversation tail the RIGOROUS verifier reads, from the session memory the turn itself
+     * reads.
+     */
     @Bean
     com.agenticai.core.guardrails.ConversationTailSource conversationTailSource(
             ObjectProvider<com.agenticai.core.agents.memory.SessionMemoryService> sessionMemory) {
@@ -369,6 +379,8 @@ class ToolResolverConfiguration {
             SkillService skillService,
             ObjectProvider<ToolSandboxClient> skillSandboxClient,
             ObjectProvider<ToolSandboxProperties> skillSandboxProperties,
+            ObjectProvider<com.agenticai.core.approval.HumanApprovalGateService>
+                    approvalGateService,
             TurnRunBudgets turnRunBudgets,
             @Value("${app.research.deep.enabled:false}") boolean researchEnabled,
             @Value("${app.tools.run-subtasks.enabled:true}") boolean runSubtasksEnabled,
@@ -390,6 +402,7 @@ class ToolResolverConfiguration {
                         skillSandboxProperties,
                         turnRunBudgets::forTurn);
         resolver.setResearchEnabled(researchEnabled);
+        resolver.setApprovalGateService(approvalGateService);
         resolver.setRunSubtasksEnabled(runSubtasksEnabled);
         resolver.setCollaboratorToolFactory(collaboratorToolFactory);
         options.applyTo(resolver);
@@ -417,7 +430,8 @@ class ToolResolverConfiguration {
             AgentToolGuard toolGuard,
             AgentService agentService,
             ObjectProvider<com.agenticai.core.tables.DataTableService> dataTables) {
-        AgentDataTableToolResolver resolver = new AgentDataTableToolResolver(toolGuard, agentService);
+        AgentDataTableToolResolver resolver =
+                new AgentDataTableToolResolver(toolGuard, agentService);
         resolver.setDataTables(dataTables);
         return resolver;
     }

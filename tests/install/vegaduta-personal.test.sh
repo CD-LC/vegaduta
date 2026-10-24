@@ -182,7 +182,11 @@ e=s["core"]["environment"]
 print("runner" if r else "no-runner", e["MCP_STDIO_SIDECAR_ENABLED"], "secret" if e["MCP_STDIO_SIDECAR_SHARED_SECRET"] else "no-secret", e["MCP_STDIO_SIDECAR_URL"],
       sorted(r["networks"]) if r else "-", sorted(s["core"]["networks"]), "ports" if r and r.get("ports") else "no-ports", "volumes" if r and r.get("volumes") else "no-volumes",
       r["deploy"]["resources"]["limits"]["memory"] if r else "-")')"
-  check "the runner is on only its own network, publishes nothing, mounts nothing, and core relays to it" "$([ "$runner" = "runner true secret mcp-stdio-runner:8097 ['mcp-stdio-net'] ['default', 'mcp-stdio-net', 'search-net'] no-ports no-volumes 805306368" ]; echo $?)" "runner: $runner"
+  # browser-net is core's side of the browser runner (day-one --browser default);
+  # sandbox-net is the internal link to tool-sandbox (agent-authored tools ride `tools`).
+  check "the runner is on only its own network, publishes nothing, mounts nothing, and core relays to it" "$([ "$runner" = "runner true secret mcp-stdio-runner:8097 ['mcp-stdio-net'] ['browser-net', 'default', 'mcp-stdio-net', 'sandbox-net', 'search-net'] no-ports no-volumes 805306368" ]; echo $?)" "runner: $runner"
+  sandbox="$("$CLI" compose config --format json 2>/dev/null | python3 -c 'import json,sys; s=json.load(sys.stdin)["services"]; e=s["core"]["environment"]; t=s.get("tool-sandbox"); print(e["TOOL_SANDBOX_ENABLED"], e["TOOL_SANDBOX_BASE_URL"], sorted(t["networks"]) if t else "-", t["deploy"]["resources"]["limits"]["memory"] if t else "-")')"
+  check "tool-sandbox rides the tools profile on personal, on the internal network only" "$([ "$sandbox" = "true http://tool-sandbox:8095 ['sandbox-net'] 1073741824" ]; echo $?)" "sandbox: $sandbox"
   new_home
   "$CLI" personal --build --cloud --no-tools --dry-run >/dev/null 2>&1
   runner="$("$CLI" compose config --format json 2>/dev/null | python3 -c '

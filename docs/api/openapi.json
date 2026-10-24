@@ -97628,7 +97628,9 @@
         "type": "string",
         "enum": [
           "JAVA",
-          "PYTHON"
+          "PYTHON",
+          "JAVASCRIPT",
+          "TYPESCRIPT"
         ]
       },
       "CustomCodeToolRequest": {

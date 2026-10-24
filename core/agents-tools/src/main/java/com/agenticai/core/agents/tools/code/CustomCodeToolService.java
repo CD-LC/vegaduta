@@ -157,6 +157,11 @@ public class CustomCodeToolService {
         return execute(tool, inputJson);
     }
 
+    /** Whether this deployment runs the tool-sandbox service ({@code tool-sandbox.enabled}). */
+    public boolean isSandboxEnabled() {
+        return properties.isEnabled();
+    }
+
     public CustomCodeTool get(UUID id) {
         return repository.findById(id).orElseThrow(() -> new CustomCodeToolNotFoundException(id));
     }
@@ -172,6 +177,38 @@ public class CustomCodeToolService {
             String outputDescription,
             Integer timeoutMs,
             Integer memoryMb) {
+        return create(
+                toolName,
+                displayName,
+                description,
+                language,
+                sourceCode,
+                inputSchemaJson,
+                outputDescription,
+                timeoutMs,
+                memoryMb,
+                true);
+    }
+
+    /**
+     * As {@link #create(String, String, String, CustomCodeToolLanguage, String, String, String,
+     * Integer, Integer)} but the row lands with {@code enabled} as given. {@code
+     * create_custom_tool} passes {@code false}: a model-authored tool is created as a disabled
+     * draft and only a human's approval (the {@code custom_code_tool.enable} approval action) may
+     * flip it on - the approval decision is a property of the action, not of the calling agent's
+     * autonomy tier, so no gate mode can bypass it.
+     */
+    public CustomCodeTool create(
+            String toolName,
+            String displayName,
+            String description,
+            CustomCodeToolLanguage language,
+            String sourceCode,
+            String inputSchemaJson,
+            String outputDescription,
+            Integer timeoutMs,
+            Integer memoryMb,
+            boolean enabled) {
         // Cap first: a tenant at their ceiling should be told so before we
         // spend a sandbox compile on code we're going to refuse anyway.
         long existing = repository.count();
@@ -198,12 +235,18 @@ public class CustomCodeToolService {
                         clampTimeout(timeoutMs),
                         clampMemory(memoryMb),
                         currentActor());
+        tool.setEnabled(enabled);
         applyValidationVerdict(tool);
         CustomCodeTool saved = repository.save(tool);
         audit(
                 "custom_code_tool.create",
                 saved,
-                "language=" + language + " status=" + saved.getStatus());
+                "language="
+                        + language
+                        + " status="
+                        + saved.getStatus()
+                        + " enabled="
+                        + saved.isEnabled());
         return saved;
     }
 
@@ -470,7 +513,8 @@ public class CustomCodeToolService {
 
     private void validateLanguage(CustomCodeToolLanguage language) {
         if (language == null) {
-            throw new IllegalArgumentException("Language is required (JAVA or PYTHON).");
+            throw new IllegalArgumentException(
+                    "Language is required (JAVA, PYTHON, JAVASCRIPT or TYPESCRIPT).");
         }
     }
 

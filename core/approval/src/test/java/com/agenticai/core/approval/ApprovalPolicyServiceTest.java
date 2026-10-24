@@ -18,11 +18,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 /**
- * Fast, Spring-free coverage for {@link ApprovalPolicyService}: the
- * override-beats-default resolution order of {@code requiresApproval}, and
- * {@code setOverride}'s delegation to the repository's atomic native upsert
- * (which replaced the read-then-write flow whose documented insert race this
- * change closed - the service must no longer do a pre-read at all).
+ * Fast, Spring-free coverage for {@link ApprovalPolicyService}: the override-beats-default
+ * resolution order of {@code requiresApproval}, and {@code setOverride}'s delegation to the
+ * repository's atomic native upsert (which replaced the read-then-write flow whose documented
+ * insert race this change closed - the service must no longer do a pre-read at all).
  */
 class ApprovalPolicyServiceTest {
 
@@ -42,6 +41,15 @@ class ApprovalPolicyServiceTest {
     }
 
     @Test
+    void enablingAModelAuthoredToolIsDefaultGated() {
+        // create_custom_tool's enable step is the only path that can turn an
+        // agent-drafted program into a callable, workspace-wide tool - it must
+        // ask a person out of the box, with no override row required.
+        when(repository.findByActionType("custom_code_tool.enable")).thenReturn(Optional.empty());
+        assertTrue(service.requiresApproval("custom_code_tool.enable"));
+    }
+
+    @Test
     void nonSensitiveActionDefaultsToNoApproval() {
         when(repository.findByActionType("agent.config.read")).thenReturn(Optional.empty());
         assertFalse(service.requiresApproval("agent.config.read"));
@@ -50,11 +58,12 @@ class ApprovalPolicyServiceTest {
     @Test
     void explicitOverrideWinsInBothDirections() {
         when(repository.findByActionType("channel.whatsapp.send"))
-            .thenReturn(Optional.of(new ApprovalPolicyOverride("channel.whatsapp.send", false)));
+                .thenReturn(
+                        Optional.of(new ApprovalPolicyOverride("channel.whatsapp.send", false)));
         assertFalse(service.requiresApproval("channel.whatsapp.send"));
 
         when(repository.findByActionType("agent.config.read"))
-            .thenReturn(Optional.of(new ApprovalPolicyOverride("agent.config.read", true)));
+                .thenReturn(Optional.of(new ApprovalPolicyOverride("agent.config.read", true)));
         assertTrue(service.requiresApproval("agent.config.read"));
     }
 
@@ -65,7 +74,8 @@ class ApprovalPolicyServiceTest {
 
         service.setOverride("campaign.bulk_send", true);
 
-        verify(repository).upsert(id.capture(), eq("campaign.bulk_send"), eq(true), updatedAt.capture());
+        verify(repository)
+                .upsert(id.capture(), eq("campaign.bulk_send"), eq(true), updatedAt.capture());
         assertNotNull(id.getValue());
         assertNotNull(updatedAt.getValue());
         // The old read-then-write implementation is what raced; the fixed

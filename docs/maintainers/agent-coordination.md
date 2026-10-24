@@ -117,6 +117,17 @@ break the build standalone.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-24, merge queue + background-handoff (local Devin session): root-caused the
+  `HotPathQueryBudgetIT` regression blocking every core PR (bisect to `f29212078`: +3 legitimate
+  per-turn queries; budgets raised to 19/20) and the surefire `app`-module heap OOM
+  (`-Xmx8g` per-fork arg, from #75); both shipped in #153 which unblocked the queue. Merged:
+  #152, #63, #66, #65, #60, #55, #153, #157, #154, #150, #75, #120, #41, #42, #46. Opened
+  #155 (approval-status await flake fix), #156 (agent-authored tools), #158
+  (`feat/background-handoff`: `continue_in_background` tool handing over-budget tasks to a
+  multi-turn `agent_job`; `maxTurns` on `AgentJobStartRequest` + `app.agent-jobs.max-turns-cap=8`;
+  never offered inside a job session). #44 (spotless 3.x major bump) rebased, watch CI.
+  Deployed v0.1.9 to Azure prod (see entry below).
+
 - 2026-10-24, agent-authored tools (local Devin session): opened PR #156
   (`feat/agent-authored-tools`) - `create_custom_tool` built-in, structural human approval
   (`custom_code_tool.enable` executor, default-gated so NEVER_GATE agents cannot bypass),

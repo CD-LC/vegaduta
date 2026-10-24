@@ -11,17 +11,17 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-Language = Literal["java", "python"]
+Language = Literal["java", "python", "javascript", "typescript"]
 
 #: Every way an execution can fail, as a closed set the caller can branch on.
 ErrorType = Literal[
-    "VALIDATION",        # the program was rejected before it ran
-    "COMPILE",           # javac refused it
-    "RUNTIME",           # the program itself threw
-    "TIMEOUT",           # exceeded its wall-clock budget
-    "MEMORY",            # exceeded its memory budget
+    "VALIDATION",  # the program was rejected before it ran
+    "COMPILE",  # javac refused it
+    "RUNTIME",  # the program itself threw
+    "TIMEOUT",  # exceeded its wall-clock budget
+    "MEMORY",  # exceeded its memory budget
     "OUTPUT_TOO_LARGE",  # returned more than the result cap
-    "INTERNAL",          # the sandbox itself failed
+    "INTERNAL",  # the sandbox itself failed
 ]
 
 

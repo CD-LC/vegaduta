@@ -8,7 +8,7 @@ import { Textarea } from "../ui/textarea";
 import CodeEditorTextarea from "../CodeEditorTextarea";
 import AskAiPopover from "./AskAiPopover";
 import type { useToolGeneration } from "./useToolGeneration";
-import { TEMPLATES, type CustomCodeToolLanguage, type FormState } from "./model";
+import { LANGUAGE_LABELS, LANGUAGE_ORDER, TEMPLATES, type CustomCodeToolLanguage, type FormState } from "./model";
 
 /**
  * The create/edit form's inputs for a custom code tool: identity, language
@@ -79,7 +79,7 @@ export default function ToolFormFields({
       <div className="space-y-1.5">
         <Label>{t("languageLabel")}</Label>
         <div className="flex flex-wrap items-center gap-2">
-          {(["JAVA", "PYTHON"] as CustomCodeToolLanguage[]).map((lang) => (
+          {LANGUAGE_ORDER.map((lang) => (
             <Button
               key={lang}
               type="button"
@@ -88,7 +88,7 @@ export default function ToolFormFields({
               aria-pressed={form.language === lang}
               onClick={() => chooseLanguage(lang)}
             >
-              {lang === "PYTHON" ? t("languagePython") : t("languageJava")}
+              {LANGUAGE_LABELS[lang]}
             </Button>
           ))}
 
@@ -99,12 +99,7 @@ export default function ToolFormFields({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between gap-2">
           <Label htmlFor="cct-source">{t("sourceCodeLabel")}</Label>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => set("sourceCode", TEMPLATES[form.language])}
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={() => set("sourceCode", TEMPLATES[form.language])}>
             {t("insertTemplateButton")}
           </Button>
         </div>

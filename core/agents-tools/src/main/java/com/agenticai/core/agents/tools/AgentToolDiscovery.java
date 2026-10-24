@@ -145,6 +145,9 @@ final class AgentToolDiscovery {
                 customToolResolver.resolveCustomCodeTools(
                         agentId, probeId, stepCounter, null, null, false));
         tools.addAll(
+                customToolResolver.resolveToolAuthoringTools(
+                        agentId, probeId, stepCounter, null, null, false));
+        tools.addAll(
                 customToolResolver.resolveOpenApiTools(
                         agentId, probeId, stepCounter, null, null, false));
         tools.addAll(
@@ -187,7 +190,8 @@ final class AgentToolDiscovery {
         // documented on ToolRelevanceSelector/capToHardLimit, just surfacing here as a slow
         // admin page load instead of a 400 to the LLM provider.
         if (descriptors.size() > hardCapPerTurn) {
-            // INFO, not WARN: on a one-person install the Assistant alone resolves ~46 tools, and this
+            // INFO, not WARN: on a one-person install the Assistant alone resolves ~46 tools, and
+            // this
             // listing is the admin picker, so the line would otherwise show on every settings open.
             log.info(
                     "Agent {}'s available-tools listing resolved {} distinct tools - well above the {} per-turn "

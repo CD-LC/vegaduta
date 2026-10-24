@@ -11,6 +11,7 @@ import com.agenticai.core.agents.skills.tools.LoadSkillToolCallback;
 import com.agenticai.core.agents.skills.tools.ProposeSkillToolCallback;
 import com.agenticai.core.agents.skills.tools.ReadSkillFileToolCallback;
 import com.agenticai.core.agents.skills.tools.RunSkillScriptToolCallback;
+import com.agenticai.core.agents.tools.code.CreateCustomToolToolCallback;
 import com.agenticai.core.agents.tools.code.CustomCodeTool;
 import com.agenticai.core.agents.tools.code.CustomCodeToolCallback;
 import com.agenticai.core.agents.tools.code.CustomCodeToolService;
@@ -159,6 +160,18 @@ final class AgentCustomToolResolver {
         this.swarmVerifierMeters = meters;
     }
 
+    // ObjectProvider - core/approval's HumanApprovalGateService may be absent in slim contexts;
+    // create_custom_tool then creates the draft but leaves it disabled rather than crashing.
+    // Setter-injected like the other optional collaborators so the constructor stays under the
+    // architecture rule's parameter cap.
+    private volatile ObjectProvider<com.agenticai.core.approval.HumanApprovalGateService>
+            approvalGateService;
+
+    void setApprovalGateService(
+            ObjectProvider<com.agenticai.core.approval.HumanApprovalGateService> provider) {
+        this.approvalGateService = provider;
+    }
+
     private static String gateKey(UUID agentId, String sessionId) {
         return sessionId == null ? null : agentId + ":" + sessionId;
     }
@@ -176,10 +189,10 @@ final class AgentCustomToolResolver {
     }
 
     /**
-     * One delegation tool per
-     * agent in this agent's opt-in {@code collaboratorAgentIds} list (see that field's javadoc on
-     * {@code Agent}). Empty unless this agent has at least one collaborator configured - today's
-     * unchanged behavior (no delegation tool offered at all) for every agent that hasn't opted in.
+     * One delegation tool per agent in this agent's opt-in {@code collaboratorAgentIds} list (see
+     * that field's javadoc on {@code Agent}). Empty unless this agent has at least one collaborator
+     * configured - today's unchanged behavior (no delegation tool offered at all) for every agent
+     * that hasn't opted in.
      *
      * <p>{@code allowDelegation=false} (see {@link #resolveToolsForDelegatedCall}) short-circuits
      * to empty regardless of how many collaborators are configured - that single check is the
@@ -300,24 +313,19 @@ final class AgentCustomToolResolver {
                 // thread.
                 TenantContext verifierCtx = TenantContext.current().orElse(null);
                 verifierModel =
-                                (system, user) -> {
-                                    var previous = TenantContext.current();
-                                    if (verifierCtx != null) {
-                                        TenantContext.set(verifierCtx);
-                                    }
-                                    try {
-                                        ChatClient economy = chatService.economyClientFor(agentId);
-                                        ChatClient c = economy != null ? economy : chatClient;
-                                        return c.prompt()
-                                                .system(system)
-                                                .user(user)
-                                                .call()
-                                                .content();
-                                    } finally {
-                                        previous.ifPresentOrElse(
-                                                TenantContext::set, TenantContext::clear);
-                                    }
-                                };
+                        (system, user) -> {
+                            var previous = TenantContext.current();
+                            if (verifierCtx != null) {
+                                TenantContext.set(verifierCtx);
+                            }
+                            try {
+                                ChatClient economy = chatService.economyClientFor(agentId);
+                                ChatClient c = economy != null ? economy : chatClient;
+                                return c.prompt().system(system).user(user).call().content();
+                            } finally {
+                                previous.ifPresentOrElse(TenantContext::set, TenantContext::clear);
+                            }
+                        };
             }
             tools.add(
                     guardAndLog(
@@ -401,6 +409,36 @@ final class AgentCustomToolResolver {
                                         chatClient,
                                         rigorous))
                 .toList();
+    }
+
+    /**
+     * The "write me a tool" entry point - {@code create_custom_tool}, offered whenever the
+     * tool-sandbox service is enabled on this deployment (off: the bean exists but there is no
+     * sandbox behind it, so the tool is simply absent rather than present-but-dead). A call only
+     * writes a disabled draft - the workspace-wide enable is a {@code custom_code_tool.enable}
+     * approval a person grants - see {@link CreateCustomToolToolCallback}'s javadoc for why
+     * AI-authored code is never agent-visible unreviewed, under any autonomy tier.
+     */
+    List<ToolCallback> resolveToolAuthoringTools(
+            UUID agentId,
+            String sessionId,
+            AtomicInteger stepCounter,
+            String userMessage,
+            ChatClient chatClient,
+            boolean rigorous) {
+        if (!customCodeToolService.isSandboxEnabled()) {
+            return List.of();
+        }
+        return List.of(
+                guardAndLog(
+                        new CreateCustomToolToolCallback(
+                                customCodeToolService, approvalGateService),
+                        agentId,
+                        sessionId,
+                        stepCounter,
+                        userMessage,
+                        chatClient,
+                        rigorous));
     }
 
     /**
@@ -546,12 +584,12 @@ final class AgentCustomToolResolver {
         final String loadedKey = gateKey(agentId, sessionId);
         skillTools.add(
                 new LoadSkillToolCallback(skillService, agentId, scriptsRunnable) {
-                            @Override
-                            public String call(String toolInput) {
-                                skillGate.markLoaded(loadedKey);
-                                return super.call(toolInput);
-                            }
-                        }.withPrompts(toolGuard.promptResolver()));
+                    @Override
+                    public String call(String toolInput) {
+                        skillGate.markLoaded(loadedKey);
+                        return super.call(toolInput);
+                    }
+                }.withPrompts(toolGuard.promptResolver()));
         skillTools.add(new ReadSkillFileToolCallback(skillService, agentId));
         skillTools.add(new ProposeSkillToolCallback(skillService, agentId));
         // Self-improvement loop (V243): propose_skill can only ADD; this is
@@ -563,7 +601,8 @@ final class AgentCustomToolResolver {
                     new RunSkillScriptToolCallback(
                             skillService, sandbox, sandboxProperties, agentId));
         }
-        // alreadyResolved is a read-only snapshot (ToolResolver passes List.copyOf); the caller drops
+        // alreadyResolved is a read-only snapshot (ToolResolver passes List.copyOf); the caller
+        // drops
         // same-named earlier tools when it merges what this returns.
         return skillTools.stream()
                 .map(
