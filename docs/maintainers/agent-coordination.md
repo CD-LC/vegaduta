@@ -102,6 +102,12 @@ and can serve beside the old one while Container Apps switches traffic.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-22 10:25, release agent: v0.1.9 published (tag on `b6269fd`, Release run 18) and verified:
+  latest release; `.dmg`, Windows zip and source tarball match `SHA256SUMS`; no symlinks in the tarball;
+  `application-personal.yml` has chat history on; voice-agent lock has certifi 2026.10.19 and pillow 13.0.0.
+  Earlier attempts stopped at the image scan on advisories published after 0.1.8 (certifi, Pillow; fixed in
+  #28, #29). `main` is open again. Production can deploy 0.1.9 by version.
+
 - 2026-10-22 08:06, docs agent (local Devin session): pushed `docs/rest-sdk-release-workflow`
   (adds `rest-sdk-release.yml` to the workflow table and refreshes the PyPI/npm state rows; docs
   only, no code). Also on the repo: created the `pypi`, `pypi-rest-sdk` and `npm` environments,
