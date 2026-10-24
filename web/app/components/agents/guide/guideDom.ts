@@ -66,6 +66,16 @@ export function goToGuideAnchor(id: string): boolean {
   if (!el) return false;
 
   try {
+    // A section on a tab that is not showing (the workbench's Setup / Behavior tabs hide their panels): show the
+    // panel's own tab first, otherwise the scroll and focus below would land on something with no layout.
+    const hiddenPanel = el.closest('[role="tabpanel"][hidden]');
+    const tabId = hiddenPanel?.getAttribute("aria-labelledby");
+    if (tabId) document.getElementById(tabId)?.click();
+  } catch {
+    // Without the tab switch the section stays out of sight; the caller's words cover that.
+  }
+
+  try {
     // CollapsibleSection marks its ONE header trigger with data-guide-trigger.
     // The query is deliberately that narrow: this also runs when the section
     // is already open, and a looser "any closed Radix trigger" selector would

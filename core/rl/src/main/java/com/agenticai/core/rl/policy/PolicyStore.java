@@ -6,22 +6,29 @@ import com.agenticai.core.rl.domain.PolicyArm;
 import com.agenticai.core.rl.domain.PolicyDimension;
 import com.agenticai.core.rl.repo.AgentPolicyRepository;
 import com.agenticai.core.rl.repo.PolicyArmRepository;
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingSource;
+import com.agenticai.core.settings.SettingValue;
+import com.agenticai.core.settings.SettingsResolver;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * CRUD for {@link AgentPolicy}/{@link PolicyArm} plus default-arm seeding per
  * {@link PolicyDimension}. A policy starts DISABLED (nothing explores until an
- * admin turns the dimension on), with a modest epsilon exploration floor.
+ * admin turns the dimension on), with a modest epsilon exploration floor ({@code rl.policy.default-exploration-rate}, 0.1).
  *
  * <p>Seeded arm sets:
  * <ul>
- *   <li>REASONING_DEPTH - FAST / CAREFUL / RIGOROUS.</li>
- *   <li>GEN_PARAMS - PRECISE / BALANCED / CREATIVE (temperature/topP presets).</li>
+ *   <li>REASONING_DEPTH - FAST / CAREFUL / RIGOROUS ({@code rl.policy.reasoning-depth-arms}).</li>
+ *   <li>GEN_PARAMS - PRECISE / BALANCED / CREATIVE temperature/topP presets ({@code rl.policy.gen-param-presets}).</li>
  *   <li>MODEL_ROUTE - one arm per configured {@code rl.policy.model-route-arms}
  *       entry (none by default).</li>
  *   <li>TOOL_SUBSET - a single ALL arm (the safe default: offer the agent's
@@ -33,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PolicyStore {
 
-    private static final BigDecimal DEFAULT_EXPLORATION_RATE = new BigDecimal("0.100");
+    private static final Logger log = LoggerFactory.getLogger(PolicyStore.class);
 
     private final AgentPolicyRepository policyRepository;
     private final PolicyArmRepository armRepository;
@@ -43,6 +50,34 @@ public class PolicyStore {
         this.policyRepository = policyRepository;
         this.armRepository = armRepository;
         this.properties = properties;
+    }
+
+    private SettingsResolver settings;
+
+    /**
+     * The settings catalog ({@code rl.policy.defaultExplorationRate}): a workspace's starting exploration rate for a
+     * new policy replaces the property value. Without it the property applies.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setSettings(SettingsResolver settings) {
+        this.settings = settings;
+    }
+
+    /** The rate a new policy starts at: the workspace's override when it set one, else the configured default. */
+    private BigDecimal startingExplorationRate() {
+        if (settings != null) {
+            try {
+                SettingValue v = settings.get(RlSettings.DEFAULT_EXPLORATION_RATE, SettingContext.tenant());
+                if ((v.source() == SettingSource.TENANT || v.source() == SettingSource.AGENT) && v.value() instanceof Number n) {
+                    // The column is numeric(4,3): 0.000 to 1.000.
+                    return BigDecimal.valueOf(n.doubleValue()).setScale(3, RoundingMode.HALF_UP)
+                        .max(BigDecimal.ZERO).min(BigDecimal.ONE);
+                }
+            } catch (RuntimeException e) {
+                log.warn("Could not read the RL starting exploration rate setting, using the configured rate: {}", e.toString());
+            }
+        }
+        return properties.getDefaultExplorationRate();
     }
 
     @Transactional(readOnly = true)
@@ -80,7 +115,7 @@ public class PolicyStore {
         if (existing.isPresent()) {
             return existing.get();
         }
-        AgentPolicy policy = policyRepository.save(new AgentPolicy(agentId, dimension, false, DEFAULT_EXPLORATION_RATE));
+        AgentPolicy policy = policyRepository.save(new AgentPolicy(agentId, dimension, false, startingExplorationRate()));
         ensureDefaultArms(policy);
         return policy;
     }
@@ -90,14 +125,15 @@ public class PolicyStore {
     public void ensureDefaultArms(AgentPolicy policy) {
         switch (policy.getDimension()) {
             case REASONING_DEPTH -> {
-                seedArm(policy.getId(), "FAST", "{\"reasoningDepth\":\"FAST\"}");
-                seedArm(policy.getId(), "CAREFUL", "{\"reasoningDepth\":\"CAREFUL\"}");
-                seedArm(policy.getId(), "RIGOROUS", "{\"reasoningDepth\":\"RIGOROUS\"}");
+                for (String depth : properties.getReasoningDepthArms()) {
+                    if (depth != null && !depth.isBlank()) {
+                        seedArm(policy.getId(), depth.trim(), "{\"reasoningDepth\":\"" + depth.trim() + "\"}");
+                    }
+                }
             }
             case GEN_PARAMS -> {
-                seedArm(policy.getId(), "PRECISE", "{\"temperature\":0.2,\"topP\":0.8}");
-                seedArm(policy.getId(), "BALANCED", "{\"temperature\":0.7,\"topP\":0.9}");
-                seedArm(policy.getId(), "CREATIVE", "{\"temperature\":1.0,\"topP\":0.95}");
+                properties.genParamPresets().forEach((name, preset) -> seedArm(
+                    policy.getId(), name, "{\"temperature\":" + preset.getTemperature() + ",\"topP\":" + preset.getTopP() + "}"));
             }
             case MODEL_ROUTE -> {
                 for (String model : properties.getModelRouteArms()) {

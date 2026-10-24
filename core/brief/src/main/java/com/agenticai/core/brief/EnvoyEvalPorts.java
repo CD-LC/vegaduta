@@ -38,7 +38,8 @@ class EnvoyEvalPorts {
         UUID agent = UUID.fromString(agentId);
         EvalDataset dataset =
                 datasetService.createDataset(
-                        agent, name, "Created from the solution's brief.", passThreshold, false);
+                        // No pinned mode: the dataset follows the workspace's default (the full pipeline as shipped).
+                        agent, name, "Created from the solution's brief.", passThreshold, null);
         try {
             addCases(agent, dataset.getId(), cases);
         } catch (RuntimeException e) {

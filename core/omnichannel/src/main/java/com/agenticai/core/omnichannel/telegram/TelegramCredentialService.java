@@ -19,13 +19,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.StringUtils;
 
 /**
- * BYOK activation for a tenant's own Telegram Bot - mirrors {@code
- * DiscordCredentialService}'s shape, with one extra step: unlike Discord,
- * Telegram genuinely has a public webhook, so activation also calls {@code
- * setWebhook} so Telegram starts pushing updates immediately.
+ * BYOK activation for a tenant's own Telegram Bot - mirrors {@code DiscordCredentialService}'s
+ * shape, with one extra step: unlike Discord, Telegram genuinely has a public webhook, so
+ * activation also calls {@code setWebhook} so Telegram starts pushing updates immediately.
  *
- * <p><b>What a tenant does to get this value</b>: message @BotFather on
- * Telegram, {@code /newbot}, copy the token it hands back.
+ * <p><b>What a tenant does to get this value</b>: message @BotFather on Telegram, {@code /newbot},
+ * copy the token it hands back.
  */
 @Service
 public class TelegramCredentialService {
@@ -42,14 +41,13 @@ public class TelegramCredentialService {
     private final SecureRandom random = new SecureRandom();
 
     public TelegramCredentialService(
-        TelegramCredentialRepository repository,
-        EncryptionService encryptionService,
-        TenantResolutionService tenantResolutionService,
-        TenantSchemaResolver tenantSchemaResolver,
-        TelegramApiClient apiClient,
-        @Value("${app.telegram.webhook-base-url:}") String webhookBaseUrl,
-        ObjectProvider<TelegramPollingService> pollingService
-    ) {
+            TelegramCredentialRepository repository,
+            EncryptionService encryptionService,
+            TenantResolutionService tenantResolutionService,
+            TenantSchemaResolver tenantSchemaResolver,
+            TelegramApiClient apiClient,
+            @Value("${app.telegram.webhook-base-url:}") String webhookBaseUrl,
+            ObjectProvider<TelegramPollingService> pollingService) {
         this.repository = repository;
         this.encryptionService = encryptionService;
         this.tenantResolutionService = tenantResolutionService;
@@ -64,19 +62,36 @@ public class TelegramCredentialService {
         TelegramApiClient.BotInfo botInfo = apiClient.fetchBotInfo(request.botToken());
         String encryptedToken = encryptionService.encrypt(request.botToken());
         String webhookSecret = generateSecret();
+        // Telegram gets the raw token once (setWebhook below); only its digest is persisted.
+        String webhookSecretHash = TelegramWebhookSecret.hash(webhookSecret);
 
-        TelegramCredential credential = repository.findFirstByOrderByCreatedAtAsc()
-            .map(existing -> {
-                existing.reactivate(botInfo.id(), botInfo.username(), encryptedToken, webhookSecret);
-                return existing;
-            })
-            .orElseGet(() -> new TelegramCredential(botInfo.id(), botInfo.username(), encryptedToken, webhookSecret));
+        TelegramCredential credential =
+                repository
+                        .findFirstByOrderByCreatedAtAsc()
+                        .map(
+                                existing -> {
+                                    existing.reactivate(
+                                            botInfo.id(),
+                                            botInfo.username(),
+                                            encryptedToken,
+                                            webhookSecretHash);
+                                    return existing;
+                                })
+                        .orElseGet(
+                                () ->
+                                        new TelegramCredential(
+                                                botInfo.id(),
+                                                botInfo.username(),
+                                                encryptedToken,
+                                                webhookSecretHash));
 
-        TelegramCredentialResponse response = TelegramCredentialResponse.from(repository.save(credential));
+        TelegramCredentialResponse response =
+                TelegramCredentialResponse.from(repository.save(credential));
 
         tenantResolutionService.link(
-            ExternalAccountProvider.TELEGRAM, botInfo.id(), tenantSchemaResolver.resolveCurrentTenantIdentifier()
-        );
+                ExternalAccountProvider.TELEGRAM,
+                botInfo.id(),
+                tenantSchemaResolver.resolveCurrentTenantIdentifier());
 
         // Best-effort - if webhookBaseUrl isn't configured on this deployment
         // (self-hosted, no public HTTPS URL yet), the credential still saves
@@ -84,19 +99,24 @@ public class TelegramCredentialService {
         // live inbound routing until an operator sets
         // app.telegram.webhook-base-url and the tenant reactivates.
         if (StringUtils.hasText(webhookBaseUrl)) {
-            apiClient.setWebhook(request.botToken(), webhookBaseUrl + "/webhook/telegram/" + botInfo.id(), webhookSecret);
+            apiClient.setWebhook(
+                    request.botToken(),
+                    webhookBaseUrl + "/webhook/telegram/" + botInfo.id(),
+                    webhookSecret);
         } else {
             // No public URL: receive by long polling instead (lite profile), so the bot works
             // with nothing but its token. A no-op where polling is off.
             // After commit: the poller reads the credential from its own thread and must see it.
             String schema = tenantSchemaResolver.resolveCurrentTenantIdentifier();
-            pollingService.ifAvailable(polling ->
-                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                    @Override
-                    public void afterCommit() {
-                        polling.ensurePolling(botInfo.id(), schema);
-                    }
-                }));
+            pollingService.ifAvailable(
+                    polling ->
+                            TransactionSynchronizationManager.registerSynchronization(
+                                    new TransactionSynchronization() {
+                                        @Override
+                                        public void afterCommit() {
+                                            polling.ensurePolling(botInfo.id(), schema);
+                                        }
+                                    }));
         }
 
         return response;
@@ -110,34 +130,47 @@ public class TelegramCredentialService {
     /**
      * Tenant-initiated "log out of Telegram" - marks the credential {@link
      * TelegramCredentialStatus#DISCONNECTED} (same contract as {@code
-     * TwilioCredentialService#disconnect}), drops the bot-&gt;tenant link so
-     * inbound webhook calls stop resolving this tenant, AND calls {@code
-     * deleteWebhook} so Telegram stops pushing updates entirely. The
-     * deleteWebhook call is best-effort: the bot token may already be
-     * revoked, and unlinking alone is enough to make inbound a no-op - a
-     * failed upstream call must not leave the tenant unable to disconnect.
+     * TwilioCredentialService#disconnect}), drops the bot-&gt;tenant link so inbound webhook calls
+     * stop resolving this tenant, AND calls {@code deleteWebhook} so Telegram stops pushing updates
+     * entirely. The deleteWebhook call is best-effort: the bot token may already be revoked, and
+     * unlinking alone is enough to make inbound a no-op - a failed upstream call must not leave the
+     * tenant unable to disconnect.
      */
     @Transactional
     public void disconnect() {
-        repository.findFirstByOrderByCreatedAtAsc().ifPresent(credential -> {
-            credential.disconnect();
-            repository.save(credential);
-            tenantResolutionService.unlink(ExternalAccountProvider.TELEGRAM, credential.getBotUserId());
-            pollingService.ifAvailable(polling -> polling.stopPolling(credential.getBotUserId()));
-            try {
-                apiClient.deleteWebhook(encryptionService.decrypt(credential.getEncryptedBotToken()));
-            } catch (RuntimeException e) {
-                log.warn("Telegram deleteWebhook failed during disconnect for bot ***{} - continuing (tenant link already removed)", lastFour(credential.getBotUserId()), e);
-            }
-        });
+        repository
+                .findFirstByOrderByCreatedAtAsc()
+                .ifPresent(
+                        credential -> {
+                            credential.disconnect();
+                            repository.save(credential);
+                            tenantResolutionService.unlink(
+                                    ExternalAccountProvider.TELEGRAM, credential.getBotUserId());
+                            pollingService.ifAvailable(
+                                    polling -> polling.stopPolling(credential.getBotUserId()));
+                            try {
+                                apiClient.deleteWebhook(
+                                        encryptionService.decrypt(
+                                                credential.getEncryptedBotToken()));
+                            } catch (RuntimeException e) {
+                                log.warn(
+                                        "Telegram deleteWebhook failed during disconnect for bot ***{} - continuing (tenant link already removed)",
+                                        lastFour(credential.getBotUserId()),
+                                        e);
+                            }
+                        });
     }
 
     @Transactional(readOnly = true)
     public DecryptedCredential resolveActive() {
-        TelegramCredential credential = repository.findFirstByOrderByCreatedAtAsc()
-            .filter(c -> c.getStatus() == TelegramCredentialStatus.ACTIVE)
-            .orElseThrow(TelegramNotConfiguredException::new);
-        return new DecryptedCredential(credential.getBotUserId(), encryptionService.decrypt(credential.getEncryptedBotToken()));
+        TelegramCredential credential =
+                repository
+                        .findFirstByOrderByCreatedAtAsc()
+                        .filter(c -> c.getStatus() == TelegramCredentialStatus.ACTIVE)
+                        .orElseThrow(TelegramNotConfiguredException::new);
+        return new DecryptedCredential(
+                credential.getBotUserId(),
+                encryptionService.decrypt(credential.getEncryptedBotToken()));
     }
 
     private static String lastFour(String value) {
@@ -157,6 +190,5 @@ public class TelegramCredentialService {
         return sb.toString();
     }
 
-    public record DecryptedCredential(String botUserId, String botToken) {
-    }
+    public record DecryptedCredential(String botUserId, String botToken) {}
 }

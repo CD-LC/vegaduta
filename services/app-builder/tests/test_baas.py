@@ -11,6 +11,7 @@ Run: python3 -m tests.test_baas   (from the app-builder directory)
 
 from __future__ import annotations
 
+import logging
 import os
 import sys
 import tempfile
@@ -77,6 +78,7 @@ class _FakePsycopgModule:
     """Stands in for the `psycopg` package in sys.modules so baas.py's
     `import psycopg` picks this up instead of needing the real driver (or a
     real Postgres) installed for the test."""
+
     urls: list[str] = []
 
     @staticmethod
@@ -91,75 +93,125 @@ def main() -> int:
 
         print("== no APP_BUILDER_ADMIN_DATABASE_URL configured ==")
         settings_unconfigured = Settings(data_dir=tmp, admin_database_url="")
-        projects.upsert(tmp, ctx, projects.Project(
-            project_id="myapp", tenant_id="tenant_a",
-            template_id="node-react", status="ready",
-            code_intel_repo_id="myapp"))
+        projects.upsert(
+            tmp,
+            ctx,
+            projects.Project(
+                project_id="myapp",
+                tenant_id="tenant_a",
+                template_id="node-react",
+                status="ready",
+                code_intel_repo_id="myapp",
+            ),
+        )
         result = baas.provision_backend(ctx, "myapp", settings_unconfigured)
-        check("degrades gracefully with no admin URL (no crash)",
-              result["provisioned"] is False)
+        check("degrades gracefully with no admin URL (no crash)", result["provisioned"] is False)
         check("gives a clear reason", "not configured" in result["reason"])
 
         print("== unknown project ==")
-        result = baas.provision_backend(ctx, "no-such-project",
-                                        Settings(data_dir=tmp,
-                                                admin_database_url="postgres://x"))
-        check("unknown project reported, not raised",
-              result["provisioned"] is False)
+        result = baas.provision_backend(
+            ctx, "no-such-project", Settings(data_dir=tmp, admin_database_url="postgres://x")
+        )
+        check("unknown project reported, not raised", result["provisioned"] is False)
 
         print("== dash in project_id rejected as unsafe schema name ==")
-        projects.upsert(tmp, ctx, projects.Project(
-            project_id="my-app", tenant_id="tenant_a",
-            template_id="node-react", status="ready",
-            code_intel_repo_id="my-app"))
+        projects.upsert(
+            tmp,
+            ctx,
+            projects.Project(
+                project_id="my-app",
+                tenant_id="tenant_a",
+                template_id="node-react",
+                status="ready",
+                code_intel_repo_id="my-app",
+            ),
+        )
         result = baas.provision_backend(
-            ctx, "my-app", Settings(data_dir=tmp,
-                                    admin_database_url="postgres://x"))
-        check("dash-containing project id rejected",
-              result["provisioned"] is False
-              and "not safe" in result["reason"])
+            ctx, "my-app", Settings(data_dir=tmp, admin_database_url="postgres://x")
+        )
+        check(
+            "dash-containing project id rejected",
+            result["provisioned"] is False and "not safe" in result["reason"],
+        )
+
+        print("== stored schema name with a trailing newline is rejected ==")
+        projects.upsert(
+            tmp,
+            ctx,
+            projects.Project(
+                project_id="nl",
+                tenant_id="tenant_a",
+                template_id="node-react",
+                status="ready",
+                code_intel_repo_id="nl",
+                backend={"schema": "app_nl\n"},
+            ),
+        )
+        result = baas.provision_backend(
+            ctx, "nl", Settings(data_dir=tmp, admin_database_url="postgres://x")
+        )
+        check(
+            "'app_nl\\n' is not accepted as a schema name",
+            result["provisioned"] is False and "unsafe stored schema" in result["reason"],
+            extra=str(result),
+        )
 
         print("== provisioning succeeds against a fake psycopg ==")
         had_real_psycopg = "psycopg" in sys.modules
         prior_module = sys.modules.get("psycopg")
         sys.modules["psycopg"] = _FakePsycopgModule
         try:
-            settings_ok = Settings(data_dir=tmp,
-                                   admin_database_url="postgresql://admin:adminpw@db:5432/platform")
+            settings_ok = Settings(
+                data_dir=tmp, admin_database_url="postgresql://admin:adminpw@db:5432/platform"
+            )
             result = baas.provision_backend(ctx, "myapp", settings_ok)
 
-            check("provisioning reports success", result.get("provisioned") is True,
-                  extra=str(result))
+            check(
+                "provisioning reports success", result.get("provisioned") is True, extra=str(result)
+            )
             schema = result.get("schema", "")
-            check("schema name carries tenant hash + project id",
-                  schema.startswith("app_") and schema.endswith("_myapp")
-                  and schema != "app_myapp", extra=schema)
-            check("dedicated role named after the schema",
-                  result.get("role") == f"u_{schema}")
+            check(
+                "schema name carries tenant hash + project id",
+                schema.startswith("app_") and schema.endswith("_myapp") and schema != "app_myapp",
+                extra=schema,
+            )
+            check("dedicated role named after the schema", result.get("role") == f"u_{schema}")
             url = result.get("database_url", "")
-            check("database_url authenticates as the project role, not admin",
-                  f"u_{schema}:" in url and "adminpw" not in url
-                  and "//admin" not in url, extra=url)
-            check("database_url keeps host/port/db and pins search_path",
-                  "@db:5432/platform" in url
-                  and f"options=-csearch_path%3D{schema}" in url)
+            check(
+                "database_url authenticates as the project role, not admin",
+                f"u_{schema}:" in url and "adminpw" not in url and "//admin" not in url,
+                extra=url,
+            )
+            check(
+                "database_url keeps host/port/db and pins search_path",
+                "@db:5432/platform" in url and f"options=-csearch_path%3D{schema}" in url,
+            )
             joined = "\n".join(_FakeCursor.executed)
-            check("CREATE ROLE is unprivileged and connection-limited",
-                  "NOSUPERUSER" in joined and "NOCREATEROLE" in joined
-                  and "CONNECTION LIMIT" in joined)
-            check("schema created owned by the role",
-                  f'CREATE SCHEMA IF NOT EXISTS "{schema}" AUTHORIZATION "u_{schema}"' in joined)
-            check("role search_path pinned to its schema",
-                  f'ALTER ROLE "u_{schema}" SET search_path = "{schema}"' in joined)
-            check("public schema access revoked from the role",
-                  f'REVOKE ALL ON SCHEMA public FROM "u_{schema}"' in joined)
+            check(
+                "CREATE ROLE is unprivileged and connection-limited",
+                "NOSUPERUSER" in joined
+                and "NOCREATEROLE" in joined
+                and "CONNECTION LIMIT" in joined,
+            )
+            check(
+                "schema created owned by the role",
+                f'CREATE SCHEMA IF NOT EXISTS "{schema}" AUTHORIZATION "u_{schema}"' in joined,
+            )
+            check(
+                "role search_path pinned to its schema",
+                f'ALTER ROLE "u_{schema}" SET search_path = "{schema}"' in joined,
+            )
+            check(
+                "public schema access revoked from the role",
+                f'REVOKE ALL ON SCHEMA public FROM "u_{schema}"' in joined,
+            )
 
             project = projects.get(tmp, ctx, "myapp")
-            check("backend record persisted onto the project",
-                  project.backend is not None
-                  and project.backend.get("role") == f"u_{schema}")
-            check("admin credentials are never persisted",
-                  "adminpw" not in str(project.backend))
+            check(
+                "backend record persisted onto the project",
+                project.backend is not None and project.backend.get("role") == f"u_{schema}",
+            )
+            check("admin credentials are never persisted", "adminpw" not in str(project.backend))
 
             print("== re-provisioning is idempotent (no password rotation) ==")
             _FakeCursor.executed.clear()
@@ -169,57 +221,174 @@ def main() -> int:
 
             print("== two tenants, same project id -> different schemas ==")
             ctx_b = TenantContext(tenant_id="tenant_b")
-            projects.upsert(tmp, ctx_b, projects.Project(
-                project_id="myapp", tenant_id="tenant_b",
-                template_id="node-react", status="ready",
-                code_intel_repo_id="myapp"))
+            projects.upsert(
+                tmp,
+                ctx_b,
+                projects.Project(
+                    project_id="myapp",
+                    tenant_id="tenant_b",
+                    template_id="node-react",
+                    status="ready",
+                    code_intel_repo_id="myapp",
+                ),
+            )
             other = baas.provision_backend(ctx_b, "myapp", settings_ok)
-            check("tenant B gets its own schema and role",
-                  other.get("schema") != schema and other.get("role") != result.get("role"))
+            check(
+                "tenant B gets its own schema and role",
+                other.get("schema") != schema and other.get("role") != result.get("role"),
+            )
 
             print("== legacy record (no role) is upgraded in place ==")
-            projects.upsert(tmp, ctx, projects.Project(
-                project_id="legacy", tenant_id="tenant_a",
-                template_id="node-react", status="ready",
-                code_intel_repo_id="legacy",
-                backend={"schema": "app_legacy",
-                         "database_url": "postgresql://admin:adminpw@db/platform"}))
+            projects.upsert(
+                tmp,
+                ctx,
+                projects.Project(
+                    project_id="legacy",
+                    tenant_id="tenant_a",
+                    template_id="node-react",
+                    status="ready",
+                    code_intel_repo_id="legacy",
+                    backend={
+                        "schema": "app_legacy",
+                        "database_url": "postgresql://admin:adminpw@db/platform",
+                    },
+                ),
+            )
             _FakeCursor.executed.clear()
             up = baas.provision_backend(ctx, "legacy", settings_ok)
             check("legacy schema name kept", up.get("schema") == "app_legacy")
-            check("upgraded record has a role and no admin creds",
-                  up.get("role") == "u_app_legacy" and "adminpw" not in up["database_url"])
-            check("legacy tables handed to the new role",
-                  any("ALTER TABLE %I.%I OWNER TO %I" in q for q in _FakeCursor.executed))
+            check(
+                "upgraded record has a role and no admin creds",
+                up.get("role") == "u_app_legacy" and "adminpw" not in up["database_url"],
+            )
+            check(
+                "legacy tables handed to the new role",
+                any("ALTER TABLE %I.%I OWNER TO %I" in q for q in _FakeCursor.executed),
+            )
 
             print("== apply_schema runs as the project role ==")
             _FakePsycopgModule.urls.clear()
             _FakeCursor.executed.clear()
-            _FakeCursor.rows = [("notes", "id", "integer", "NO", False),
-                                ("notes", "body", "text", "YES", False)]
-            res = baas.apply_schema(ctx, "myapp", "CREATE TABLE notes (id int, body text);", settings_ok)
+            _FakeCursor.rows = [
+                ("notes", "id", "integer", "NO", False),
+                ("notes", "body", "text", "YES", False),
+            ]
+            res = baas.apply_schema(
+                ctx, "myapp", "CREATE TABLE notes (id int, body text);", settings_ok
+            )
             check("apply reports success", res.get("applied") is True, extra=str(res))
-            check("connected with the project role url, not admin",
-                  bool(_FakePsycopgModule.urls)
-                  and all(f"u_{schema}:" in u for u in _FakePsycopgModule.urls),
-                  extra=str(_FakePsycopgModule.urls))
-            check("statement timeout set before the migration",
-                  _FakeCursor.executed[0].startswith("SET LOCAL statement_timeout"))
-            check("tables introspected after apply",
-                  bool(res["tables"]) and res["tables"][0]["name"] == "notes"
-                  and len(res["tables"][0]["columns"]) == 2
-                  and res["tables"][0]["columns"][1]["nullable"] is True)
+            check(
+                "connected with the project role url, not admin",
+                bool(_FakePsycopgModule.urls)
+                and all(f"u_{schema}:" in u for u in _FakePsycopgModule.urls),
+                extra=str(_FakePsycopgModule.urls),
+            )
+            check(
+                "statement timeout set before the migration",
+                _FakeCursor.executed[0].startswith("SET LOCAL statement_timeout"),
+            )
+            check(
+                "tables introspected after apply",
+                bool(res["tables"])
+                and res["tables"][0]["name"] == "notes"
+                and len(res["tables"][0]["columns"]) == 2
+                and res["tables"][0]["columns"][1]["nullable"] is True,
+            )
 
             print("== apply_schema failure + guards ==")
             _FakeCursor.fail_on = "FORBIDDEN"
             bad = baas.apply_schema(ctx, "myapp", "GRANT ALL ON FORBIDDEN;", settings_ok)
             _FakeCursor.fail_on = None
-            check("DB error surfaces as applied:false with reason",
-                  bad.get("applied") is False and "permission denied" in bad["reason"])
-            check("empty sql rejected",
-                  baas.apply_schema(ctx, "myapp", "  ", settings_ok)["applied"] is False)
-            check("oversized sql rejected",
-                  baas.apply_schema(ctx, "myapp", "x" * (200 * 1024 + 1), settings_ok)["applied"] is False)
+            check(
+                "DB error surfaces as applied:false with a reason",
+                bad.get("applied") is False and bool(bad.get("reason")),
+            )
+            check(
+                "the driver's message is NOT returned to the caller",
+                "permission denied" not in str(bad) and "other" not in bad["reason"],
+                extra=str(bad),
+            )
+            check(
+                "the reason points the operator at the service log",
+                "see the app-builder service log" in bad["reason"],
+            )
+
+            print("== DB errors: log server-side, return only the SQLSTATE ==")
+
+            class _PgError(Exception):
+                sqlstate = "42601"
+
+            class _FailingCursor(_FakeCursor):
+                def execute(self, sql):
+                    raise _PgError('syntax error at or near "role u_secret_role"')
+
+            captured: list[str] = []
+
+            class _Capture(logging.Handler):
+                def emit(self, record):
+                    captured.append(
+                        record.getMessage()
+                        + (" | " + str(record.exc_info[1]) if record.exc_info else "")
+                    )
+
+            handler = _Capture()
+            baas.log.addHandler(handler)
+            orig_cursor = _FakeConn.cursor
+            _FakeConn.cursor = lambda self: _FailingCursor()
+            try:
+                applied = baas.apply_schema(ctx, "myapp", "select 1", settings_ok)
+                tables = baas.list_tables(ctx, "myapp", settings_ok)
+                # a project with no backend record yet -> provision hits the driver
+                projects.upsert(
+                    tmp,
+                    ctx,
+                    projects.Project(
+                        project_id="fresh",
+                        tenant_id="tenant_a",
+                        template_id="node-react",
+                        status="ready",
+                        code_intel_repo_id="fresh",
+                    ),
+                )
+                prov = baas.provision_backend(ctx, "fresh", settings_ok)
+            finally:
+                _FakeConn.cursor = orig_cursor
+                baas.log.removeHandler(handler)
+            for label, body in (
+                ("apply_schema", applied),
+                ("list_tables", tables),
+                ("provision_backend", prov),
+            ):
+                check(
+                    f"{label}: response carries no exception text",
+                    "u_secret_role" not in str(body) and "syntax error" not in str(body),
+                    extra=str(body),
+                )
+                check(
+                    f"{label}: response carries the SQLSTATE",
+                    "SQLSTATE 42601" in str(body),
+                    extra=str(body),
+                )
+            check(
+                "applied is false and tables is empty on failure",
+                applied["applied"] is False
+                and tables["tables"] == []
+                and prov["provisioned"] is False,
+            )
+            check(
+                "the exception text was logged server-side for each failure",
+                sum("u_secret_role" in c for c in captured) == 3,
+                extra=str(captured),
+            )
+            check(
+                "empty sql rejected",
+                baas.apply_schema(ctx, "myapp", "  ", settings_ok)["applied"] is False,
+            )
+            check(
+                "oversized sql rejected",
+                baas.apply_schema(ctx, "myapp", "x" * (200 * 1024 + 1), settings_ok)["applied"]
+                is False,
+            )
             noback = baas.apply_schema(ctx, "no-such", "select 1", settings_ok)
             check("unknown project can't apply", noback["applied"] is False)
         finally:
@@ -232,6 +401,7 @@ def main() -> int:
         return 1 if FAIL else 0
     finally:
         import shutil
+
         shutil.rmtree(tmp, ignore_errors=True)
 
 

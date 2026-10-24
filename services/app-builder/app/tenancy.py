@@ -39,14 +39,13 @@ class TenantContext:
 
 
 def validate_tenant_id(tenant_id: str) -> str:
-    if not tenant_id or not _TENANT_ID_RX.match(tenant_id):
+    if not tenant_id or not _TENANT_ID_RX.fullmatch(tenant_id):
         raise TenantValidationError(f"invalid tenant id: {tenant_id!r}")
     return tenant_id
 
 
 def validate_project_id(project_id: str) -> str:
-    if (not project_id or not _PROJECT_ID_RX.match(project_id)
-            or ".." in project_id):
+    if not project_id or not _PROJECT_ID_RX.fullmatch(project_id) or ".." in project_id:
         raise TenantValidationError(f"invalid project id: {project_id!r}")
     return project_id
 
@@ -58,8 +57,7 @@ def tenant_root(data_dir: str, ctx: TenantContext) -> str:
     return path
 
 
-def project_root(data_dir: str, ctx: TenantContext, project_id: str,
-                  create: bool = True) -> str:
+def project_root(data_dir: str, ctx: TenantContext, project_id: str, create: bool = True) -> str:
     """The project's own checkout directory — NOT a wrapper subtree like
     code-intel's repo_root (that service keeps checkout/state as siblings
     under a repo dir; app-builder has no index/state of its own to keep

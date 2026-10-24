@@ -119,7 +119,7 @@ public class OpenAIAgentChatClientFactory implements AgentChatClientFactory {
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.OPENAI)
             .defaultAdvisors(modelSupport.advisors(
                 new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.OPENAI, model, meterRegistry, pricingCatalog)))
             .build();

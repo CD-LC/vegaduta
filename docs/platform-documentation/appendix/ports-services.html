@@ -71,15 +71,15 @@ Dockerfile <code>EXPOSE</code> lines.</p>
 <tr><td><code>core/Dockerfile</code></td><td>8080</td><td><code>maven:3.9-eclipse-temurin-21</code> (build), <code>eclipse-temurin:21-jre-jammy</code></td></tr>
 <tr><td><code>web/Dockerfile</code></td><td>3000</td><td><code>node:22.23.3-bookworm-slim</code></td></tr>
 <tr><td><code>web-admin/Dockerfile</code></td><td>3001</td><td><code>node:22.23.3-bookworm-slim</code></td></tr>
-<tr><td><code>services/sidecar/Dockerfile</code></td><td>8001</td><td><code>python:3.12.14-slim-bookworm</code></td></tr>
-<tr><td><code>services/code-intel/Dockerfile</code></td><td>8090</td><td><code>python:3.12.14-slim-bookworm</code></td></tr>
-<tr><td><code>services/app-builder/Dockerfile</code></td><td>8091</td><td><code>python:3.12.14-slim-bookworm</code></td></tr>
-<tr><td><code>services/tool-sandbox/Dockerfile</code></td><td>8095</td><td><code>eclipse-temurin:21-jdk-jammy</code>, <code>python:3.12.14-slim-bookworm</code></td></tr>
-<tr><td><code>services/rl-trainer/Dockerfile</code></td><td>8095</td><td><code>python:3.12.14-slim-bookworm</code></td></tr>
-<tr><td><code>services/voice-agent/Dockerfile</code></td><td>8081</td><td><code>python:3.12.14-slim-bookworm</code></td></tr>
+<tr><td><code>services/sidecar/Dockerfile</code></td><td>8001</td><td><code>python:3.12.15-slim-trixie</code></td></tr>
+<tr><td><code>services/code-intel/Dockerfile</code></td><td>8090</td><td><code>python:3.12.15-slim-trixie</code></td></tr>
+<tr><td><code>services/app-builder/Dockerfile</code></td><td>8091</td><td><code>python:3.12.15-slim-trixie</code></td></tr>
+<tr><td><code>services/tool-sandbox/Dockerfile</code></td><td>8095</td><td><code>eclipse-temurin:21-jdk-jammy</code>, <code>python:3.12.15-slim-trixie</code></td></tr>
+<tr><td><code>services/rl-trainer/Dockerfile</code></td><td>8095</td><td><code>python:3.12.15-slim-trixie</code></td></tr>
+<tr><td><code>services/voice-agent/Dockerfile</code></td><td>8081</td><td><code>python:3.12.15-slim-trixie</code></td></tr>
 <tr><td><code>services/mcp-stdio-runner/Dockerfile</code></td><td>no <code>EXPOSE</code> line</td><td><code>node:22.23.3-bookworm-slim</code></td></tr>
 <tr><td><code>examples/mcp-servers/http-gateway/Dockerfile</code></td><td>8099</td><td><code>node:22.23.3-bookworm-slim</code></td></tr>
-<tr><td><code>deploy/mock-provider/Dockerfile</code></td><td>9101</td><td><code>python:3.12.14-slim</code></td></tr>
+<tr><td><code>deploy/mock-provider/Dockerfile</code></td><td>9101</td><td><code>python:3.12.15-slim-trixie</code></td></tr>
 <tr><td><code>deploy/postgres/Dockerfile</code></td><td>no <code>EXPOSE</code> line</td><td><code>${BASE_IMAGE}</code> (PostgreSQL 16)</td></tr>
 </tbody></table></div>
 

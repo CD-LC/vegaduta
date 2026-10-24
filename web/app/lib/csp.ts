@@ -47,7 +47,7 @@
 //   read. Razorpay: checkout, only reachable when billing is enabled.
 // - frame-src: lib/auth.ts's silent-SSO iframe passes through Keycloak's
 //   origin; the App Builder frames a deployed preview on any https host.
-import { getPublicEnv, type PublicEnvKey } from "./env";
+import { getPublicEnv, type PublicValueKey } from "./env";
 
 export const CSP_HEADER = "Content-Security-Policy";
 export const CSP_REPORT_ONLY_HEADER = "Content-Security-Policy-Report-Only";
@@ -60,7 +60,7 @@ export const SANDBOX_FRAME_PATH = "/sandbox-frame.html";
 export const APP_FRAME_PATH = "/app-frame.html";
 export const RUN_APP_PATH = "/run-app.html";
 
-type EnvReader = (key: PublicEnvKey) => string | undefined;
+type EnvReader = (key: PublicValueKey) => string | undefined;
 
 const EDGE_AND_TOOL_CONNECT_HOSTS = [
   "https://huggingface.co",
@@ -78,7 +78,7 @@ const EDGE_AND_TOOL_CONNECT_HOSTS = [
 ];
 
 // Browser-facing first-party services whose origin goes into connect-src.
-const CONNECT_ORIGIN_KEYS: PublicEnvKey[] = [
+const CONNECT_ORIGIN_KEYS: PublicValueKey[] = [
   "NEXT_PUBLIC_API_BASE_URL",
   "NEXT_PUBLIC_KEYCLOAK_URL",
   "NEXT_PUBLIC_CODE_INTEL_URL",
@@ -159,7 +159,13 @@ export interface PageCspOptions {
 export function buildPageCsp({ nonce, read = getPublicEnv, dev = false, frameable = false }: PageCspOptions): string {
   if (!NONCE_SHAPE.test(nonce)) throw new Error("buildPageCsp: malformed nonce");
   const authOrigin = originOf(read("NEXT_PUBLIC_KEYCLOAK_URL"));
-  const script = ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", "'wasm-unsafe-eval'", ...(dev ? ["'unsafe-eval'"] : [])];
+  const script = [
+    "'self'",
+    `'nonce-${nonce}'`,
+    "'strict-dynamic'",
+    "'wasm-unsafe-eval'",
+    ...(dev ? ["'unsafe-eval'"] : []),
+  ];
   return [
     "default-src 'self'",
     `script-src ${script.join(" ")}`,
@@ -170,8 +176,19 @@ export function buildPageCsp({ nonce, read = getPublicEnv, dev = false, frameabl
     "font-src 'self' data:",
     "media-src 'self' data: blob: https:",
     "worker-src 'self' blob:",
-    ["connect-src 'self' blob: data:", ...firstPartyOrigins(read), ...loopbackWebsockets(firstPartyOrigins(read)), "wss:", ...(dev ? ["ws:"] : []), ...EDGE_AND_TOOL_CONNECT_HOSTS].join(" "),
-    ["frame-src 'self' blob: https:", ...(authOrigin ? [authOrigin] : []), ...loopbackFrames(firstPartyOrigins(read))].join(" "),
+    [
+      "connect-src 'self' blob: data:",
+      ...firstPartyOrigins(read),
+      ...loopbackWebsockets(firstPartyOrigins(read)),
+      "wss:",
+      ...(dev ? ["ws:"] : []),
+      ...EDGE_AND_TOOL_CONNECT_HOSTS,
+    ].join(" "),
+    [
+      "frame-src 'self' blob: https:",
+      ...(authOrigin ? [authOrigin] : []),
+      ...loopbackFrames(firstPartyOrigins(read)),
+    ].join(" "),
     "manifest-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",

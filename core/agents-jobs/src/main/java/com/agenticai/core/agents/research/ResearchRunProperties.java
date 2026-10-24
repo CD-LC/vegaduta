@@ -32,7 +32,7 @@ public class ResearchRunProperties {
         @Value("${app.research.deep.max-fetches-per-run:12}") int maxFetchesPerRun,
         @Value("${app.research.deep.max-sources:8}") int maxSources,
         @Value("${app.research.deep.total-deadline-seconds:120}") int totalDeadlineSeconds,
-        @Value("${app.guardrails.run-budget.usd:0}") BigDecimal runBudgetUsd
+        @Value("${app.guardrails.run-budget.usd:2.0}") BigDecimal runBudgetUsd
     ) {
         this.runsEnabled = runsEnabled;
         this.maxPerUserPerDay = Math.max(0, maxPerUserPerDay);

@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.turn;
 
+import com.agenticai.core.prompts.PromptResolver;
 import java.util.UUID;
 
 /**
@@ -32,15 +33,20 @@ final class ArtifactsDirective {
     private ArtifactsDirective() {
     }
 
-    static final String TEXT = """
-        When you produce a self-contained deliverable the user will keep, run or edit (a web page or app, an SVG, a document, a code file, a Mermaid diagram, a CSV table), put it in ONE fenced block whose info string is artifact:<type>:<title>, with type one of html, svg, markdown, code:<lang>, mermaid, csv - for example ```artifact:html:Pricing page or ```artifact:code:python:Fizzbuzz. Put the COMPLETE content inside, never a diff or placeholder; HTML must be one self-contained file (inline CSS and JS, no external resources, no network). To revise it, reuse the exact same title and send the whole new version. If the content itself contains ``` fences, open and close the block with four backticks. Add at most a sentence or two outside the block. Do not use this for short snippets or ordinary answers.""";
+    static final String TEXT =
+            PromptResolver.defaultsOnly().catalog().defaultText(PromptDirectiveRegistry.Keys.ARTIFACTS);
 
     /** The directive for this agent, or {@code null} when it does not apply (the common case). */
     static String forAgent(boolean enabled, boolean allAgents, String agentIdsCsv, UUID agentId) {
+        return keyForAgent(enabled, allAgents, agentIdsCsv, agentId) == null ? null : TEXT;
+    }
+
+    /** {@code directive.artifacts} when the directive applies to this agent, else {@code null}. */
+    static String keyForAgent(boolean enabled, boolean allAgents, String agentIdsCsv, UUID agentId) {
         if (!enabled) {
             return null;
         }
-        return (allAgents || isListed(agentIdsCsv, agentId)) ? TEXT : null;
+        return (allAgents || isListed(agentIdsCsv, agentId)) ? PromptDirectiveRegistry.Keys.ARTIFACTS : null;
     }
 
     /** True when {@code agentId} appears in the comma-separated list (case-insensitive, whitespace-tolerant). */

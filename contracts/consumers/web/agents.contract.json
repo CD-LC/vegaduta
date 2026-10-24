@@ -1662,6 +1662,28 @@
       }
     },
     {
+      "id": "post-api-agents-agentId-prompt-preview",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/prompt-preview",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.blocks",
+          "$.memoryBlock",
+          "$.notes",
+          "$.overBudget",
+          "$.promptEstimatedTokens",
+          "$.smallModel",
+          "$.systemPrompt",
+          "$.tokenBudget",
+          "$.tokenEstimateNote",
+          "$.tools",
+          "$.toolsEstimatedTokens"
+        ]
+      }
+    },
+    {
       "id": "get-api-agents-agentId-quality-config",
       "method": "GET",
       "path": "/api/agents/{agentId}/quality/config",
@@ -2394,6 +2416,19 @@
       },
       "response": {
         "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-runtime-limits",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/runtime-limits",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.bounds",
+          "$.effective",
+          "$.overrides"
+        ]
       }
     },
     {
@@ -3159,6 +3194,19 @@
           "$.voiceModel",
           "$.voiceModelProvider",
           "$.xaiServerToolsEnabled"
+        ]
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-turn-journal",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/turn-journal",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.sessionId",
+          "$.turns"
         ]
       }
     },

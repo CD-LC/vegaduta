@@ -480,7 +480,7 @@ function EnvoyCard({ envoy, opening, onOpen }: { envoy: BriefListItem; opening: 
           </dd>
         </div>
       </dl>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1" aria-label={t("envoys.readiness")}>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1" role="group" aria-label={t("envoys.readiness")}>
         {DOT_ORDER.filter((d) => (envoy.readinessSummary?.[d.key] ?? 0) > 0).map((d) => (
           <span
             key={d.state}

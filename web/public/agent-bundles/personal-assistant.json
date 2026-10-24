@@ -15,7 +15,7 @@
     "temperature": 0.2,
     "topP": 0.9,
     "tuningMode": "SIMPLE",
-    "reasoningDepth": "BALANCED",
+    "reasoningDepth": "FAST",
     "autonomyTier": "SUPERVISED",
     "experienceMode": null,
     "knowledgeBaseEnabled": false,

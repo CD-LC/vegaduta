@@ -82,7 +82,7 @@ final class AgentMediaToolResolver {
             boolean rigorous) {
         return mediaToolSources.stream()
                 .filter(source -> source.kind() == kind)
-                .flatMap(source -> source.rawTools().stream())
+                .flatMap(source -> source.rawTools(agentId).stream())
                 .map(
                         raw ->
                                 guardAndLog(

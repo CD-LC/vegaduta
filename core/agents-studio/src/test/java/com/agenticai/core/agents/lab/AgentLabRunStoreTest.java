@@ -102,11 +102,12 @@ class AgentLabRunStoreTest {
     @Test
     void theCapabilitiesAndCancelBodiesUseTheContractFieldNames() throws Exception {
         JsonNode caps = objectMapper.readTree(objectMapper.writeValueAsString(
-            new AgentLabDtos.LabCapabilitiesResponse(true, null, 60, 120, 16, 8, 60)));
+            new AgentLabDtos.LabCapabilitiesResponse(true, null, 60, 120, 16, 8, 60, false)));
         assertEquals(
             List.of("allowed", "reason", "maxCells", "maxCallsPerRun", "maxSystemPrompts", "maxSimilarityCells",
-                "runTtlMinutes"),
+                "runTtlMinutes", "withToolsAvailable"),
             names(caps));
+        assertFalse(caps.get("withToolsAvailable").asBoolean());
         assertTrue(caps.get("reason").isNull());
 
         JsonNode cancel = objectMapper.readTree(objectMapper.writeValueAsString(

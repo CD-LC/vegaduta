@@ -66,23 +66,43 @@ class ChatClientToolCallVerifierServiceTest {
         assertThat(result.approved()).isTrue();
     }
 
+    // Behaviour change (was: always fail open): with no explicit app.guardrails.tool-verifier.fail-mode the
+    // verifier follows the global app.guardrails.fail-mode, which defaults to closed. An errored or blank
+    // verifier therefore REFUSES the call instead of waving it through.
     @Test
-    void failsOpenWhenModelReturnsBlankContent() {
+    void failsClosedByDefaultWhenModelReturnsBlankContent() {
         ChatClient chatClient = mockChatClientReturning("   ");
 
         VerificationResult result = verifier.verify(chatClient, "hello", "remember_fact", "{}");
 
-        assertThat(result.approved()).isTrue();
+        assertThat(result.approved()).isFalse();
+        assertThat(result.reason()).contains("failed closed");
     }
 
     @Test
-    void failsOpenWhenChatClientThrows() {
+    void failsClosedByDefaultWhenChatClientThrows() {
         ChatClient chatClient = mock(ChatClient.class);
         when(chatClient.prompt()).thenThrow(new RuntimeException("provider outage"));
 
         VerificationResult result = verifier.verify(chatClient, "hello", "remember_fact", "{}");
 
-        assertThat(result.approved()).isTrue();
+        assertThat(result.approved()).isFalse();
+        assertThat(result.reason()).contains("failed closed");
+    }
+
+    @Test
+    void followsTheGlobalFailModeWhenItIsOpen() {
+        ChatClient chatClient = mock(ChatClient.class);
+        when(chatClient.prompt()).thenThrow(new RuntimeException("provider outage"));
+        GuardrailFailMode.set(GuardrailFailMode.OPEN);
+        try {
+            VerificationResult result = verifier.verify(chatClient, "hello", "remember_fact", "{}");
+
+            assertThat(result.approved()).isTrue();
+            assertThat(result.reason()).contains("failed open");
+        } finally {
+            GuardrailFailMode.set(GuardrailFailMode.CLOSED);
+        }
     }
 
     private static ChatClient mockChatClientReturning(String content) {

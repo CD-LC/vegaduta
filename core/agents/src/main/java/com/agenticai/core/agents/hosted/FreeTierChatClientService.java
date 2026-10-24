@@ -531,7 +531,9 @@ public class FreeTierChatClientService {
                 reservedMicroCents,
                 guards,
                 sampling,
-                provider.effectiveSmallModel());
+                provider.effectiveSmallModel(),
+                provider.getToolCallGrade(),
+                hostedLlmChatClientFactory.isLocalOllamaRow(provider));
     }
 
     /**

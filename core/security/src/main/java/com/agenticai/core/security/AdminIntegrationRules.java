@@ -274,6 +274,9 @@ final class AdminIntegrationRules {
                 // permission; the service additionally needs VIEWER on the agent.
                 .requestMatchers(HttpMethod.GET, "/api/agents/*/turns/*/journal")
                 .hasAuthority("PERM_VIEW_AUDIT_LOG")
+                // The same evidence found by chat session instead of by turn id.
+                .requestMatchers(HttpMethod.GET, "/api/agents/*/turn-journal")
+                .hasAuthority("PERM_VIEW_AUDIT_LOG")
                 .requestMatchers(HttpMethod.POST, "/api/mcp/registry")
                 .hasAuthority("PERM_MANAGE_INTEGRATIONS")
                 // Pentest M8: POST /api/mcp/registry/{id}/connect

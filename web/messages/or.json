@@ -60,7 +60,9 @@
     "railJobs": "ଜବ୍ସ",
     "railSecrets": "ସିକ୍ରେଟ୍ସ",
     "railBrand": "ବ୍ରାଣ୍ଡିଂ",
-    "railLearn": "ଶିଖନ୍ତୁ"
+    "railLearn": "ଶିଖନ୍ତୁ",
+    "railRuntimeSettings": "ରନଟାଇମ୍ ସେଟିଂସ୍",
+    "railControls": "ମୁଁ କେଉଁଠି ନିୟନ୍ତ୍ରଣ କରିବି...?"
   },
   "languageSwitcher": {
     "label": "ଭାଷା",
@@ -753,7 +755,142 @@
     "edgeTier0Badge": "ଅନ୍-ଡିଭାଇସ୍ · କ୍ରୋମ୍ ବିଲ୍ଟ-ଇନ୍",
     "edgeTier0BadgeTitle": "କ୍ରୋମର ବିଲ୍ଟ-ଇନ୍ ମଡେଲ୍ (Gemini Nano) ଏହାର ଉତ୍ତର ଦେଇଛି - ଦ୍ରୁତ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ ବ୍ୟକ୍ତିଗତ, କିନ୍ତୁ କେବଳ ଚାଟ୍ ପାଇଁ: ଏହା ଟୁଲ୍ ବ୍ୟବହାର କରିପାରିବ ନାହିଁ ଏବଂ ଜଟିଳ ବିଷୟରେ କମ୍ ସଠିକ୍ ହୋଇପାରେ। ପ୍ରତ୍ୟେକ ପ୍ଲାନରେ ମାଗଣା।",
     "edgeTier1Badge": "ଅନ୍-ଡିଭାଇସ୍ · ସ୍ଥାନୀୟ ମଡେଲ୍",
-    "edgeTier1BadgeTitle": "ଏକ ଡାଉନଲୋଡ୍ ହୋଇଥିବା ଅନ୍-ଡିଭାଇସ୍ ମଡେଲ୍ ଏହାର ଉତ୍ତର ଦେଇଛି - ବ୍ୟକ୍ତିଗତ, ଏବଂ ଏହା ଟୁଲ୍ ବ୍ୟବହାର କରିପାରିବ (ସମାନ ସୁରକ୍ଷିତ ଟୁଲ୍)। ତଥାପି ହୋଷ୍ଟେଡ୍ ପୁଲ୍ ତୁଳନାରେ ଏକ ଛୋଟ ମଡେଲ୍, ତେଣୁ ଜଟିଳ ଅନୁରୋଧରେ କମ୍ ସଠିକ୍ ହୋଇପାରେ। ପ୍ରତ୍ୟେକ ପ୍ଲାନରେ ମାଗଣା।"
+    "edgeTier1BadgeTitle": "ଏକ ଡାଉନଲୋଡ୍ ହୋଇଥିବା ଅନ୍-ଡିଭାଇସ୍ ମଡେଲ୍ ଏହାର ଉତ୍ତର ଦେଇଛି - ବ୍ୟକ୍ତିଗତ, ଏବଂ ଏହା ଟୁଲ୍ ବ୍ୟବହାର କରିପାରିବ (ସମାନ ସୁରକ୍ଷିତ ଟୁଲ୍)। ତଥାପି ହୋଷ୍ଟେଡ୍ ପୁଲ୍ ତୁଳନାରେ ଏକ ଛୋଟ ମଡେଲ୍, ତେଣୁ ଜଟିଳ ଅନୁରୋଧରେ କମ୍ ସଠିକ୍ ହୋଇପାରେ। ପ୍ରତ୍ୟେକ ପ୍ଲାନରେ ମାଗଣା।",
+    "viewTurn": "ଟର୍ନ ଦେଖନ୍ତୁ",
+    "viewTurnTitle": "ଏହି କଥାବାର୍ତ୍ତାର ଟର୍ନଗୁଡ଼ିକର ପଦକ୍ଷେପ-ପଦକ୍ଷେପ ଟାଇମଲାଇନ୍ ଖୋଲନ୍ତୁ",
+    "headerRunning": "ଗୋଟିଏ ଟର୍ନ ଚାଲିଛି",
+    "headerReady": "ପ୍ରସ୍ତୁତ",
+    "clearContext": "ପ୍ରସଙ୍ଗ ସଫା କରନ୍ତୁ",
+    "clearContextTitle": "ନୂଆ କଥାବାର୍ତ୍ତା ଆରମ୍ଭ କରନ୍ତୁ। ଏହା ଏହି ଚାଟ୍‌ର ଡିଭାଇସ୍ ଓ ସର୍ଭର୍-ପାର୍ଶ୍ୱର ସେସନ୍ ମେମୋରୀ ସଫା କରେ।",
+    "stopRun": "ଏହି ଉତ୍ତର ବନ୍ଦ କରନ୍ତୁ",
+    "fallbackSendToPlatform": "ପ୍ଲାଟଫର୍ମକୁ ପଠାନ୍ତୁ",
+    "chipsLabel": "ଏଜେଣ୍ଟ ବର୍ତ୍ତମାନ କଣ କରୁଛି",
+    "chipPreparing": "ପ୍ରସ୍ତୁତ ହେଉଛି",
+    "chipModelCall": "ମଡେଲ୍ ପାଇଁ ଅପେକ୍ଷା",
+    "chipThinking": "ଚିନ୍ତା କରୁଛି",
+    "chipWriting": "ଉତ୍ତର ଲେଖୁଛି",
+    "chipTool": "ଟୁଲ୍ ଚାଲୁଛି: {tool}",
+    "chipToolUnnamed": "ଗୋଟିଏ ଟୁଲ୍ ଚାଲୁଛି",
+    "chipWaitingApproval": "ଆପଣଙ୍କ ଅନୁମୋଦନ ପାଇଁ ଅପେକ୍ଷା ({count})",
+    "chipContinuing": "ଉତ୍ତର ଜାରି ରଖୁଛି",
+    "chipContinuingPass": "ଉତ୍ତର ଜାରି ରଖୁଛି ({max} ମଧ୍ୟରୁ ପାସ୍ {pass})",
+    "chipContinuingApproval": "ଆପଣଙ୍କ ନିଷ୍ପତ୍ତି ପରେ ଜାରି ରଖୁଛି",
+    "chipRetrying": "ପୁଣି ଚେଷ୍ଟା କରୁଛି",
+    "chipRetryingReason": "ପୁଣି ଚେଷ୍ଟା କରୁଛି: {reason}",
+    "chipRetryingAttempt": "ପୁଣି ଚେଷ୍ଟା କରୁଛି (ଚେଷ୍ଟା {attempt}/{max})",
+    "chipRetryingAttemptReason": "ପୁଣି ଚେଷ୍ଟା କରୁଛି (ଚେଷ୍ଟା {attempt}/{max}): {reason}",
+    "chipFailover": "ବ୍ୟାକଅପ୍ ମଡେଲକୁ ବଦଳାଗଲା",
+    "chipFailoverReason": "ବ୍ୟାକଅପ୍ ମଡେଲକୁ ବଦଳାଗଲା: {reason}",
+    "chipFailoverTo": "{model}କୁ ବଦଳାଗଲା",
+    "chipFailoverToReason": "{model}କୁ ବଦଳାଗଲା: {reason}",
+    "outcomeTruncated": "ଏହି ଉତ୍ତର ସମ୍ପୂର୍ଣ୍ଣ ହେବା ପୂର୍ବରୁ କଟିଗଲା।",
+    "outcomeContinue": "ଜାରି ରଖନ୍ତୁ",
+    "outcomeLongerReplies": "ଲମ୍ବା ଉତ୍ତରକୁ ଅନୁମତି ଦିଅନ୍ତୁ",
+    "continueMessage": "ଆପଣ ଯେଉଁଠି ଅଟକିଥିଲେ ସେଠାରୁ ହିଁ, ଆଗରୁ ଯାହା ଲେଖିସାରିଛନ୍ତି ତାକୁ ପୁନରାବୃତ୍ତି ନକରି ଜାରି ରଖନ୍ତୁ।",
+    "outcomeRefused": "ସୁରକ୍ଷା କାରଣରୁ ମଡେଲ୍ ପ୍ରଦାତା ଏହି ଉତ୍ତର ବନ୍ଦ କରିଦେଲେ, ତେଣୁ ଦେଖାଇବାକୁ କୌଣସି ଉତ୍ତର ନାହିଁ। ଅନୁରୋଧ ବଦଳାଇ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।",
+    "outcomeRefusedReason": "ସୁରକ୍ଷା କାରଣରୁ ({reason}) ମଡେଲ୍ ପ୍ରଦାତା ଏହି ଉତ୍ତର ବନ୍ଦ କରିଦେଲେ, ତେଣୁ ଦେଖାଇବାକୁ କୌଣସି ଉତ୍ତର ନାହିଁ। ଅନୁରୋଧ ବଦଳାଇ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।",
+    "outcomeMalformedToolCall": "ମଡେଲ୍ ଟୁଲ୍ ବ୍ୟବହାର କରିବାକୁ ଚେଷ୍ଟା କଲା କିନ୍ତୁ ତାର ଅନୁରୋଧ ଅବୈଧ ଥିଲା, ତେଣୁ କିଛି ଚାଲିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।",
+    "outcomeEmpty": "ମଡେଲ୍ ଖାଲି ଉତ୍ତର ଫେରାଇଲା। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।",
+    "stopRaiseSteps": "ଟୁଲ୍-କଲ୍ ସୀମା ବଢ଼ାନ୍ତୁ",
+    "stopRaiseBudget": "ଖର୍ଚ୍ଚ ସୀମା ବଦଳାନ୍ତୁ",
+    "stopAskEditor": "ଏହି ଏଜେଣ୍ଟକୁ ସମ୍ପାଦନା କରିପାରୁଥିବା କାହାକୁ ସୀମା ବଢ଼ାଇବାକୁ କୁହନ୍ତୁ।",
+    "rsOpen": "ରନ୍ ସେଟିଂସ୍",
+    "rsTitle": "ରନ୍ ସେଟିଂସ୍",
+    "rsClose": "ରନ୍ ସେଟିଂସ୍ ବନ୍ଦ କରନ୍ତୁ",
+    "rsBack": "ରନ୍ ସେଟିଂସ୍‌କୁ ଫେରନ୍ତୁ",
+    "rsIntro": "{name}କୁ ପରବର୍ତ୍ତୀ ବାର୍ତ୍ତା କିପରି ଚାଲିବ। ଏସବୁକୁ ଏଜେଣ୍ଟର ଆଚରଣ ଟାବ୍‌ରେ ବଦଳାନ୍ତୁ।",
+    "rsLoading": "ଲୋଡ୍ ହେଉଛି",
+    "rsRetry": "ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ",
+    "rsOpenBehavior": "ଆଚରଣରେ ସମ୍ପାଦନା କରନ୍ତୁ",
+    "rsModelHeading": "ମଡେଲ୍ ଓ ସାମ୍ପଲିଂ",
+    "rsModel": "ମଡେଲ୍",
+    "rsModelNotSet": "ସେଟ୍ ହୋଇନାହିଁ",
+    "rsModelDefault": "ମଡେଲ୍ ଡିଫଲ୍ଟ",
+    "rsDepth": "ଯୁକ୍ତିର ଗଭୀରତା",
+    "rsSourceAgent": "ଏହି ଏଜେଣ୍ଟରେ ସେଟ୍ ହୋଇଛି",
+    "rsParam_temperature": "ତାପମାତ୍ରା",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "ଉତ୍ତରର ସର୍ବାଧିକ ଲମ୍ବ (ଟୋକେନ୍)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "ପୁନରାବୃତ୍ତି ଦଣ୍ଡ",
+    "rsParam_presencePenalty": "ଉପସ୍ଥିତି ଦଣ୍ଡ",
+    "rsParam_seed": "ସିଡ୍",
+    "rsParam_stopSequences": "ବନ୍ଦ କରିବା କ୍ରମ",
+    "rsParamDropped": "{param} ଏହି ଏଜେଣ୍ଟରେ ସେଟ୍ ହୋଇଛି, କିନ୍ତୁ {provider} {model} ପାଇଁ ଏହାକୁ ଅଣଦେଖା କରେ, ତେଣୁ ଏହାର କୌଣସି ପ୍ରଭାବ ନାହିଁ।",
+    "rsToolsRunHeading": "ଏହି ରନ୍ ପାଇଁ ଟୁଲ୍",
+    "rsToolsRunOnly": "କେବଳ ଏହି ରନ୍",
+    "rsToolsRunNote": "ଏହି ସୁଇଚ୍ ଗୁଡ଼ିକ ସ୍ଥିର କରେ ଯେ ଏହି ପ୍ଲେଗ୍ରାଉଣ୍ଡରୁ ଆପଣ ପଠାଇଥିବା ବାର୍ତ୍ତା ଏଜେଣ୍ଟର କେଉଁ ଟୁଲ୍ ବ୍ୟବହାର କରିପାରିବ। କିଛି ସଞ୍ଚିତ ହୁଏ ନାହିଁ: ଅନ୍ୟ ସମସ୍ତଙ୍କ ପାଇଁ ଏଜେଣ୍ଟ ନିଜର ଟୁଲ୍ ପ୍ରବେଶ ରଖେ। ଏଗୁଡ଼ିକ ଏଜେଣ୍ଟର ଟୁଲ୍ କେବଳ ବନ୍ଦ କରିପାରିବ, କେବେ ନୂଆ ଟୁଲ୍ ଦେଇପାରିବ ନାହିଁ।",
+    "rsToolsRunSummary": "ଏଜେଣ୍ଟର {total} ଟୁଲ୍ ମଧ୍ୟରୁ {on} ଏହି ରନ୍ ପାଇଁ ଚାଲୁ",
+    "rsToolsRunNone": "ଏହି ରନ୍ ପାଇଁ କୌଣସି ଟୁଲ୍ ନାହିଁ: ଏଜେଣ୍ଟ କେବଳ ଲେଖାରେ ଉତ୍ତର ଦେଇପାରିବ।",
+    "rsToolsReset": "ଏଜେଣ୍ଟର ଟୁଲ୍ ବ୍ୟବହାର କରନ୍ତୁ",
+    "rsToolsNotInAgent": "ଏହା ଏହି ଏଜେଣ୍ଟର ସଞ୍ଚିତ ଟୁଲ୍ ମଧ୍ୟରୁ ନୁହେଁ, ତେଣୁ ରନ୍ ପାଇଁ ଚାଲୁ କରାଯାଇପାରିବ ନାହିଁ।",
+    "rsToolsEditAgent": "ଏଜେଣ୍ଟର ସଞ୍ଚିତ ଟୁଲ୍ ବଦଳାନ୍ତୁ",
+    "rsToolsLimitedChip": "ଏହି ରନ୍ ପାଇଁ ଟୁଲ୍ ସୀମିତ",
+    "rsToolsEmpty": "ଏହି ଏଜେଣ୍ଟ ପାଇଁ କୌଣସି ଟୁଲ୍ ଉପଲବ୍ଧ ନାହିଁ।",
+    "rsToolsSummary": "{total} ମଧ୍ୟରୁ {on}ଟି ଟୁଲ୍ ଚାଲୁ",
+    "rsToolsFailed": "ଟୁଲ୍ ଲୋଡ୍ କରିହେଲା ନାହିଁ।",
+    "rsLimitsHeading": "ପ୍ରତ୍ୟେକ ଟର୍ନ ପାଇଁ ସୀମା",
+    "rsLimitsChange": "ସୀମା ବଦଳାନ୍ତୁ",
+    "rsLimitsView": "ସୀମା ଦେଖନ୍ତୁ",
+    "rsLimitsFailed": "ସୀମା ଲୋଡ୍ କରିହେଲା ନାହିଁ।",
+    "rsLimitsEmpty": "ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଦେଖାଇବାକୁ କୌଣସି ସୀମା ନାହିଁ।",
+    "rsNoLimit": "କୌଣସି ସୀମା ନାହିଁ",
+    "rsScoreAll": "ପ୍ରତ୍ୟେକ ମେଳ",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n}ଟି ଅକ୍ଷର",
+    "rsLimitRange": "ଅନୁମତିପ୍ରାପ୍ତ: {min} ରୁ {max}",
+    "rsLayer_AGENT": "ଏହି ଏଜେଣ୍ଟରେ ସେଟ୍ ହୋଇଛି",
+    "rsLayer_TENANT": "ୱାର୍କସ୍ପେସ୍ ଡିଫଲ୍ଟ",
+    "rsLayer_PLATFORM": "ପ୍ଲାଟଫର୍ମ ଡିଫଲ୍ଟ",
+    "rsLayer_REQUEST": "ଏହି ଅନୁରୋଧ ପାଇଁ ସେଟ୍",
+    "rsLimit_maxToolSteps": "ପ୍ରତ୍ୟେକ ଟର୍ନରେ ଟୁଲ୍ କଲ୍",
+    "rsLimit_turnTimeoutSeconds": "ଗୋଟିଏ ଟର୍ନର ସମୟ",
+    "rsLimit_toolTimeoutSeconds": "ଗୋଟିଏ ଟୁଲ୍ କଲ୍‌ର ସମୟ",
+    "rsLimit_toolOutputMaxChars": "ଟୁଲ୍ ଫଳାଫଳର ଆକାର",
+    "rsLimit_retrievalTopK": "ପ୍ରତ୍ୟେକ ସନ୍ଧାନରେ ଜ୍ଞାନ ଫଳାଫଳ",
+    "rsLimit_retrievalMinScore": "ଜ୍ଞାନ ମେଳର ସର୍ବନିମ୍ନ ପ୍ରାସଙ୍ଗିକତା",
+    "rsLimit_continuationPasses": "ଉତ୍ତର ଶେଷ କରିବାକୁ ଅତିରିକ୍ତ ପାସ୍",
+    "rsLimitHelp_maxToolSteps": "ଗୋଟିଏ ଉତ୍ତର କରିପାରୁଥିବା ସର୍ବାଧିକ ଟୁଲ୍ କଲ୍। ସୀମାରେ ପହଞ୍ଚିଲେ ଟର୍ନ ବନ୍ଦ ହୁଏ ଏବଂ ତାହା କହେ।",
+    "rsLimitHelp_turnTimeoutSeconds": "ଗୋଟିଏ ଟର୍ନ ବନ୍ଦ ହେବା ପୂର୍ବରୁ କେତେ ସମୟ ଚାଲିପାରିବ।",
+    "rsLimitHelp_toolTimeoutSeconds": "ଗୋଟିଏ ଟୁଲ୍ କଲ୍ ବନ୍ଦ ହେବା ପୂର୍ବରୁ କେତେ ସମୟ ଚାଲିପାରିବ।",
+    "rsLimitHelp_toolOutputMaxChars": "ଗୋଟିଏ ଟୁଲ୍ ଫଳାଫଳର କେତେ ଅଂଶ ମଡେଲ୍ ପଢ଼ିପାରିବ। ବାକି କଟିଯାଏ।",
+    "rsLimitHelp_retrievalTopK": "ଗୋଟିଏ ସନ୍ଧାନ ଜ୍ଞାନ ଭଣ୍ଡାରର କେତୋଟି ଅଂଶ ଫେରାଏ।",
+    "rsLimitHelp_retrievalMinScore": "ଏହାଠାରୁ କମ୍ ମେଳ ଖାଉଥିବା ଅଂଶ ବାଦ୍ ପଡ଼େ। ଶୂନ୍ୟ ପ୍ରତ୍ୟେକ ମେଳ ରଖେ।",
+    "rsLimitHelp_continuationPasses": "ଘୋଷଣା କରାଯାଇଥିବା କିନ୍ତୁ ନିଆଯାଇନଥିବା ପଦକ୍ଷେପରେ ଅଟକି ଯାଇଥିବା ଉତ୍ତର ଶେଷ କରିବାକୁ ଅତିରିକ୍ତ ଚେଷ୍ଟା।",
+    "rsPreviewButton": "ପ୍ରମ୍ପ୍ଟ ପ୍ରିଭ୍ୟୁ",
+    "rsPreviewTitle": "ପ୍ରମ୍ପ୍ଟ ପ୍ରିଭ୍ୟୁ",
+    "rsPreviewIntro": "ଏହି ଏଜେଣ୍ଟ ପଠାଇବାକୁ ଥିବା ସିଷ୍ଟମ ପ୍ରମ୍ପ୍ଟ ଓ ଟୁଲ୍ ତାଲିକା, ପ୍ରକୃତ ଟର୍ନ ଯେପରି ତିଆରି କରେ ସେହିପରି ତିଆରି। କୌଣସି ମଡେଲ୍‌କୁ କିଛି ପଠାଯାଏ ନାହିଁ।",
+    "rsPreviewBuilding": "ପ୍ରିଭ୍ୟୁ ତିଆରି ହେଉଛି",
+    "rsPreviewFailed": "ପ୍ରିଭ୍ୟୁ ତିଆରି କରିହେଲା ନାହିଁ।",
+    "rsPreviewTotals": "ପ୍ରାୟ {prompt} ଟୋକେନ୍ ସିଷ୍ଟମ ଟେକ୍ସଟ୍ ଏବଂ {tools} ଟୋକେନ୍ ଟୁଲ୍ ସଂଜ୍ଞା (ଅନୁମାନ)।",
+    "rsPreviewOverBudgetTitle": "ଟୋକେନ୍ ବଜେଟ୍ ଅତିକ୍ରମ",
+    "rsPreviewOverBudget": "ସ୍ଥାୟୀ ସିଷ୍ଟମ ଟେକ୍ସଟ୍ ବିନ୍ୟସ୍ତ {budget} ଟୋକେନ୍ ବଜେଟ୍ ଅତିକ୍ରମ କରିଛି। କିଛି କଟାଯାଏ ନାହିଁ; ଗୋଟିଏ ପ୍ରମ୍ପ୍ଟ ଛୋଟ କରିବା ବିଷୟରେ ଭାବନ୍ତୁ।",
+    "rsPreviewNoBlocks": "ଦେଖାଇବାକୁ କୌଣସି ପ୍ରମ୍ପ୍ଟ ବ୍ଲକ୍ ନାହିଁ।",
+    "rsPreviewMessage": "ବାର୍ତ୍ତା: {message}",
+    "rsPreviewTokens": "~{tokens} ଟୋକେନ୍",
+    "rsPreviewShowText": "ଟେକ୍ସଟ୍ ଦେଖାନ୍ତୁ",
+    "rsPreviewTools": "ଟୁଲ୍ ({count})",
+    "rsPreviewNoTools": "ଏହି ଏଜେଣ୍ଟ କୌଣସି ଟୁଲ୍ ଦିଏ ନାହିଁ।",
+    "rsPreviewNotes": "ଏହି ପ୍ରିଭ୍ୟୁ ଯାହା ଜାଣିପାରେ ନାହିଁ",
+    "rsPreviewOpenAdmin": "ପ୍ରତ୍ୟେକ ପ୍ରମ୍ପ୍ଟର ଶବ୍ଦାବଳୀ ଦେଖନ୍ତୁ ଓ ବଦଳାନ୍ତୁ",
+    "rsOriginDefault": "ଡିଫଲ୍ଟ ଭାବେ ମିଳିଥିବା",
+    "rsOriginOverride": "{scope} ଓଭରରାଇଡ୍ v{version}",
+    "rsOriginAgentConfig": "ଏଜେଣ୍ଟର ନିଜସ୍ୱ ସିଷ୍ଟମ ପ୍ରମ୍ପ୍ଟ",
+    "rsOriginCode": "ପ୍ଲାଟଫର୍ମ କୋଡ୍",
+    "rsRunBudget": "ପ୍ରତ୍ୟେକ ରନ୍ ପାଇଁ ଖର୍ଚ୍ଚ ସୀମା",
+    "rsNoCap": "କୌଣସି ସୀମା ନାହିଁ",
+    "rsRunBudgetHelp": "ଗୋଟିଏ ରନ୍ ଅନ୍ୟ ଏଜେଣ୍ଟଙ୍କୁ କାମ ଦେଲେ କିମ୍ବା ଗଭୀର ଗବେଷଣା ଚଲାଇଲେ ସର୍ବାଧିକ କେତେ ଖର୍ଚ୍ଚ କରିପାରେ। ଏହା ଅନୁମାନ, ବିଲିଂ ନୁହେଁ।",
+    "chipToolsOff": "ଟୁଲ୍ ବିନା ପୁଣି ଚେଷ୍ଟା କରୁଛି",
+    "chipFailoverBlocked": "ବ୍ୟାକଅପ୍ ମଡେଲ୍ ବ୍ୟବହୃତ ହେଲା ନାହିଁ: ଟୁଲ୍ ଆଗରୁ ଚାଲିସାରିଥିଲା",
+    "rsLimitChangeOne": "ବଦଳାନ୍ତୁ",
+    "reasonRateLimited": "ହାର ସୀମା ପହଞ୍ଚିଗଲା",
+    "reasonTimeout": "ସମୟ ଶେଷ ହେଲା",
+    "reasonProviderUnavailable": "ପ୍ରଦାତା ଉପଲବ୍ଧ ନୁହେଁ",
+    "reasonAuthFailed": "ପ୍ରଦାତା କ୍ରେଡେନସିଆଲ୍ ପ୍ରତ୍ୟାଖ୍ୟାନ କଲେ",
+    "reasonBilling": "ପ୍ରଦାତାଙ୍କ ବିଲିଂ ସମସ୍ୟା",
+    "reasonModelNotFound": "ମଡେଲ୍ ଉପଲବ୍ଧ ନୁହେଁ",
+    "reasonProviderError": "ପ୍ରଦାତାଙ୍କ ତ୍ରୁଟି",
+    "reasonMalformedToolCall": "ଟୁଲ୍ କଲ୍ ବ୍ୟବହାର କରାଯାଇପାରିଲା ନାହିଁ"
   },
   "nodeDefs": {
     "triggerLabel": "ଟ୍ରିଗର୍",
@@ -1399,7 +1536,50 @@
     "ttsProviderUpdatedSuccess": "TTS ପ୍ରୋଭାଇଡର୍ ଅପଡେଟ୍ ହୋଇଗଲା।",
     "updateTtsProviderError": "ଏହି ଏଜେଣ୍ଟର TTS ପ୍ରୋଭାଇଡର୍ ଅପଡେଟ୍ କରାଯାଇପାରିଲା ନାହିଁ।",
     "ttsProviderFreePlanTooltip": "TTS ପ୍ରୋଭାଇଡର୍ ଚୟନ ଏକ ପ୍ରିମିୟମ୍ ଫିଚର୍ ଅଟେ।",
-    "ttsProviderNotSet": "ପ୍ଲାଟଫର୍ମ ଡିଫଲ୍ଟ ବ୍ୟବହାର କରାଯାଉଛି"
+    "ttsProviderNotSet": "ପ୍ଲାଟଫର୍ମ ଡିଫଲ୍ଟ ବ୍ୟବହାର କରାଯାଉଛି",
+    "samplingTitle": "ଉନ୍ନତ ସାମ୍ପଲିଂ",
+    "samplingIntro": "ମଡେଲ୍ ଶବ୍ଦ କିପରି ବାଛେ ତାହା ସୂକ୍ଷ୍ମ ଭାବେ ସଜାଡ଼ନ୍ତୁ। ମଡେଲ୍ ଡିଫଲ୍ଟ ବ୍ୟବହାର କରିବାକୁ ବାକ୍ସ ଖାଲି ଛାଡ଼ନ୍ତୁ। ଯେଉଁ ପ୍ରଦାତା କୌଣସି ଫିଲ୍ଡକୁ ସମର୍ଥନ କରନ୍ତି ନାହିଁ ସେମାନେ ତାକୁ କେବଳ ଅଣଦେଖା କରନ୍ତି।",
+    "samplingIgnored": "ଏହି ମଡେଲ୍‌ର ପ୍ରଦାତା ଏହି ସେଟିଂକୁ ଅଣଦେଖା କରନ୍ତି, ତେଣୁ ଏହାକୁ ବଦଳାଇଲେ କୌଣସି ପ୍ରଭାବ ନାହିଁ।",
+    "samplingSaving": "ସେଭ୍ ହେଉଛି…",
+    "samplingSaved": "ସେଭ୍ ହେଲା",
+    "samplingNotSaved": "ସେଭ୍ ହୋଇନାହିଁ",
+    "samplingSaveFailed": "ସେହି ସେଟିଂ ସେଭ୍ କରିହେଲା ନାହିଁ।",
+    "samplingErrorWhole": "{label} {min} ରୁ {max} ମଧ୍ୟରେ ଏକ ପୂର୍ଣ୍ଣ ସଂଖ୍ୟା ହେବା ଆବଶ୍ୟକ, କିମ୍ବା ବନ୍ଦ କରିବାକୁ ଖାଲି।",
+    "samplingErrorNumber": "{label} {min} ରୁ {max} ମଧ୍ୟରେ ଏକ ସଂଖ୍ୟା ହେବା ଆବଶ୍ୟକ, କିମ୍ବା ବନ୍ଦ କରିବାକୁ ଖାଲି।",
+    "samplingStopTooLong": "ଗୋଟିଏ ବନ୍ଦ କରିବା କ୍ରମ ସର୍ବାଧିକ {max}ଟି ଅକ୍ଷରର ହୋଇପାରିବ।",
+    "samplingStopTooMany": "ସର୍ବାଧିକ {max}ଟି ବନ୍ଦ କରିବା କ୍ରମ।",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "କେବଳ ସବୁଠାରୁ ସମ୍ଭାବ୍ୟ K ପରବର୍ତ୍ତୀ ଶବ୍ଦକୁ ବିଚାର କରନ୍ତୁ। କମ୍ ଅର୍ଥ ଅଧିକ ସୁରକ୍ଷିତ, ପୂର୍ବାନୁମେୟ ଟେକ୍ସଟ୍। 1 ରୁ 1000।",
+    "samplingSeed": "ସିଡ୍",
+    "samplingSeedHelp": "ସମାନ ପ୍ରମ୍ପ୍ଟ ପାଇଁ ଉତ୍ତରକୁ ଅଧିକ ପୁନରାବୃତ୍ତିଯୋଗ୍ୟ କରିବାକୁ ଏକ ସଂଖ୍ୟା ସେଟ୍ କରନ୍ତୁ। ସବୁ ପ୍ରଦାତା ଏହାର ନିଶ୍ଚୟତା ଦିଅନ୍ତି ନାହିଁ।",
+    "samplingFrequency": "ପୁନରାବୃତ୍ତି ଦଣ୍ଡ",
+    "samplingFrequencyHelp": "ଧନାତ୍ମକ ମୂଲ୍ୟ ଏକା ଶବ୍ଦ ବାରମ୍ବାର ବ୍ୟବହାରକୁ ନିରୁତ୍ସାହିତ କରେ। -2 ରୁ 2।",
+    "samplingPresence": "ଉପସ୍ଥିତି ଦଣ୍ଡ",
+    "samplingPresenceHelp": "ଧନାତ୍ମକ ମୂଲ୍ୟ ମଡେଲ୍‌କୁ ଗୋଟିଏ ବିଷୟରେ ରହିବା ବଦଳରେ ନୂଆ ବିଷୟ ଆଡ଼କୁ ଠେଲେ। -2 ରୁ 2।",
+    "samplingPlaceholderDefault": "ଡିଫଲ୍ଟ",
+    "samplingPlaceholderRandom": "ଅନିୟମିତ",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "ବନ୍ଦ କରିବା କ୍ରମ",
+    "samplingStopPlaceholder": "ଏକ ବାକ୍ୟାଂଶ ଟାଇପ୍ କରନ୍ତୁ, Enter ଦବାନ୍ତୁ",
+    "samplingStopHelp": "ମଡେଲ୍ ଏସବୁ ମଧ୍ୟରୁ କିଛି ଲେଖିବା ମାତ୍ରେ ଉତ୍ତର ଶେଷ ହୁଏ। ସର୍ବାଧିକ {count}, ପ୍ରତ୍ୟେକ ସର୍ବାଧିକ {max}ଟି ଅକ୍ଷରର।",
+    "samplingStopCurrent": "ବର୍ତ୍ତମାନର ବନ୍ଦ କରିବା କ୍ରମ",
+    "samplingStopRemove": "ବନ୍ଦ କରିବା କ୍ରମ {value} ହଟାନ୍ତୁ",
+    "samplingAdd": "ଯୋଡ଼ନ୍ତୁ",
+    "reasoningDepthFASTCost": "Quickest and cheapest: one pass, and the reply streams in as it is written.",
+    "reasoningDepthPLANNEDCost": "Writes a plan before acting: more model calls per task, and the reply appears all at once instead of streaming.",
+    "reasoningDepthCAREFULCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming.",
+    "reasoningDepthRIGOROUSCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming. Uses the most tokens.",
+    "autonomyLabel": "Autonomy",
+    "autonomyTierSUPERVISED": "Supervised",
+    "autonomyTierSUPERVISEDHint": "Every tool call waits for a human to approve it, whatever the workspace policy says. Tighter step ceiling.",
+    "autonomyTierSUPERVISEDCost": "Asks you before every tool call, searches included.",
+    "autonomyTierSEMI_AUTONOMOUS": "Semi-autonomous",
+    "autonomyTierSEMI_AUTONOMOUSHint": "Follows the workspace's approval policy for each action type. The default for every agent.",
+    "autonomyTierSEMI_AUTONOMOUSCost": "Asks you only for the actions your workspace's approval rules name; the rest run without asking.",
+    "autonomyTierFULLY_AUTONOMOUS": "Fully autonomous",
+    "autonomyTierFULLY_AUTONOMOUSHint": "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
+    "autonomyTierFULLY_AUTONOMOUSCost": "Never asks you: every tool call runs as soon as the agent makes it, sends and payments included.",
+    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "ଏହାକୁ କନଫିଗର୍ କରିବାକୁ ଏକ ନୋଡ୍ ଚୟନ କରନ୍ତୁ, କିମ୍ବା ବାମ ପଟେ ଥିବା ପ୍ୟାଲେଟରୁ ଏକ ନୂଆ ନୋଡ୍ ଟାଣି ଆଣନ୍ତୁ।",
@@ -1875,6 +2055,9 @@
     "emptyWorkspaceTitle": "ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ସଂଗ୍ରହ ନାହିଁ",
     "noFilesUploadedHint": "ଏହି ସଂଗ୍ରହରେ ଫାଇଲ୍ ଅପଲୋଡ୍ କରନ୍ତୁ ଯାହାଦ୍ୱାରା ଆପଣଙ୍କ ଏଜେଣ୍ଟମାନେ ଏହାକୁ ଖୋଜିପାରିବେ।",
     "ocrComingSoonTooltip": "ଏପର୍ଯ୍ୟନ୍ତ ଉପଲବ୍ଧ ନୁହେଁ - ଅପଲୋଡଗୁଡିକ ବିଲ୍ଟ-ଇନ୍ Tesseract OCR କୁ ଫେରିଯିବ।"
+  },
+  "tutorPage": {
+    "backToHelp": "ସହାୟତାକୁ ଫେରନ୍ତୁ"
   },
   "knowledgePage": {
     "knowledgeLabel": "ଜ୍ଞାନ",
@@ -5759,6 +5942,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ଇମେଲ୍ ଏବଂ ଅଧିକ ସଂଯୋଗ କରନ୍ତୁ, ତା'ପରେ ପ୍ରତ୍ୟେକରେ କେଉଁ ଏଜେଣ୍ଟ ଉତ୍ତର ଦେବ ତାହା ବାଛନ୍ତୁ।",
     "channelsPoint1": "ମାଗଣା ପ୍ଲାନରେ WhatsApp, Telegram ଏବଂ ଇମେଲ୍",
     "channelsPoint2": "ଜଣେ ନୂଆ ପ୍ରେରକ ପ୍ରଥମେ ଆପଣଙ୍କ ଅନୁମୋଦନ ପାଇଁ ଅପେକ୍ଷା କରେ",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage କିମ୍ବା ଇମେଲ୍ ସଂଯୋଗ କରନ୍ତୁ, ତା'ପରେ ପ୍ରତ୍ୟେକ ଚ୍ୟାନେଲରେ କେଉଁ କଷ୍ଟମ୍ ଏଜେଣ୍ଟ ଉତ୍ତର ଦେବ ତାହା ବାଛନ୍ତୁ।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage ଏବଂ ଇମେଲ୍",
     "toolsTitle": "ଇଣ୍ଟିଗ୍ରେସନ୍‌ଗୁଡ଼ିକ ଏଜେଣ୍ଟମାନଙ୍କୁ ଟୁଲ୍ ଦିଏ",
     "toolsBody": "ଜଣେ ଏଜେଣ୍ଟ ବାର୍ତ୍ତାଳାପ ମଝିରେ କ'ଣ ବ୍ୟବହାର କରିପାରିବ ତାହା ଚାଲୁ କରନ୍ତୁ: ୱେବ୍ ସର୍ଚ୍ଚ, ଡାଟାବେସ୍, MCP ସର୍ଭର୍, ଏବଂ ଆପଣଙ୍କ ନିଜ ସ୍କ୍ରିପ୍ଟ।",
     "toolsPoint1": "ଏଠାରେ ସକ୍ଷମ କରନ୍ତୁ, ତା'ପରେ ପ୍ରତି ଏଜେଣ୍ଟ ପାଇଁ ଏହାକୁ ଅନୁମତି ଦିଅନ୍ତୁ",
@@ -14087,5 +14272,1495 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "ୱାର୍କସ୍ପେସ୍ ସେଟିଂସ୍",
+      "agent": "ଏଜେଣ୍ଟ ସେଟିଂସ୍"
+    },
+    "agentMissing": "ଏକ ଏଜେଣ୍ଟର ସେଟିଂସ୍ ଦେଖିବାକୁ ତାକୁ ବାଛନ୍ତୁ।",
+    "scopeNote": {
+      "agent": "ଏହି ମୂଲ୍ୟ କେବଳ ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଲାଗୁ ହୁଏ। ଆପଣ ଏଠାରେ ଯାହା ଓଭରରାଇଡ୍ କରନ୍ତି ନାହିଁ ତାହା ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍ ସେଟିଂସ୍‌ରୁ ଉତ୍ତରାଧିକାରସୂତ୍ରେ ଆସେ।"
+    },
+    "loading": "ସେଟିଂସ୍ ଲୋଡ୍ ହେଉଛି",
+    "loadError": "ସେଟିଂସ୍ ଲୋଡ୍ କରିହେଲା ନାହିଁ। {message}",
+    "retry": "ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ",
+    "filters": {
+      "label": "ସେଟିଂସ୍ ଫିଲ୍ଟର୍ କରନ୍ତୁ",
+      "search": "ସେଟିଂସ୍ ସନ୍ଧାନ କରନ୍ତୁ",
+      "searchPlaceholder": "ନାମ ବା ବିବରଣୀ ଦ୍ୱାରା ସନ୍ଧାନ କରନ୍ତୁ",
+      "group": "ଗୋଷ୍ଠୀ ଅନୁସାରେ ଫିଲ୍ଟର୍ କରନ୍ତୁ",
+      "allGroups": "ସମସ୍ତ ଗୋଷ୍ଠୀ",
+      "risk": "ବିପଦ ଅନୁସାରେ ଫିଲ୍ଟର୍ କରନ୍ତୁ",
+      "allRisks": "ସମସ୍ତ ବିପଦ ସ୍ତର",
+      "clear": "ଫିଲ୍ଟର୍ ସଫା କରନ୍ତୁ"
+    },
+    "empty": {
+      "none": "ଏଠାରେ ଆପଣ ବଦଳାଇପାରିବା ଭଳି କୌଣସି ସେଟିଂସ୍ ନାହିଁ।",
+      "filtered": "କୌଣସି ସେଟିଂ ଆପଣଙ୍କ ଫିଲ୍ଟର୍ ସହ ମେଳ ଖାଉନାହିଁ।"
+    },
+    "saved": "ସେଭ୍ ହେଲା। ଅପଡେଟ୍ ହୋଇଥିବା ସେଟିଂସ୍: {count}।",
+    "saveFailed": "ସେଭ୍ ହୋଇନାହିଁ। ବିଫଳ ସେଟିଂସ୍: {count}। ଆପଣଙ୍କ ସମ୍ପାଦନା ଏବେ ବି ଫର୍ମରେ ଅଛି।",
+    "resetDone": "{label} ବର୍ତ୍ତମାନ ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟ ବ୍ୟବହାର କରେ।",
+    "resetFailed": "ସେଟିଂ ରିସେଟ୍ କରିହେଲା ନାହିଁ।",
+    "unsaved": "ସେଭ୍ ହୋଇନଥିବା ପରିବର୍ତ୍ତନ",
+    "discardOne": "ପରିବର୍ତ୍ତନ ପରିତ୍ୟାଗ କରନ୍ତୁ",
+    "restartRequired": "ରିଷ୍ଟାର୍ଟ ଦରକାର",
+    "source": {
+      "default": "ଡିଫଲ୍ଟ",
+      "platform": "ପ୍ଲାଟଫର୍ମ",
+      "tenant": "ୱାର୍କସ୍ପେସ୍",
+      "agent": "ଏଜେଣ୍ଟ",
+      "tenantInherited": "ୱାର୍କସ୍ପେସ୍‌ରୁ ଉତ୍ତରାଧିକାରସୂତ୍ରେ",
+      "aria": "ମୂଲ୍ୟର ଉତ୍ସ: {source}"
+    },
+    "sourceHelp": {
+      "default": "କେହି ଏହାକୁ ବଦଳାଇ ନାହାଁନ୍ତି। ଏହା ଉତ୍ପାଦ ସହ ଆସୁଥିବା ମୂଲ୍ୟ ବ୍ୟବହାର କରେ।",
+      "platform": "ଆପଣଙ୍କ ପ୍ଲାଟଫର୍ମ ଅପରେଟର୍ ଏହାକୁ ସମ୍ପୂର୍ଣ୍ଣ ଡିପ୍ଲୟମେଣ୍ଟ ପାଇଁ ସେଟ୍ କରିଛନ୍ତି।",
+      "tenant": "ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍ ଡିଫଲ୍ଟକୁ ଓଭରରାଇଡ୍ କରେ। ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟକୁ ଫେରିବାକୁ ରିସେଟ୍ କରନ୍ତୁ।",
+      "agent": "ଏହି ଏଜେଣ୍ଟ ୱାର୍କସ୍ପେସ୍ ମୂଲ୍ୟକୁ ଓଭରରାଇଡ୍ କରେ। ୱାର୍କସ୍ପେସ୍ ମୂଲ୍ୟ ପୁଣି ଉତ୍ତରାଧିକାରସୂତ୍ରେ ପାଇବାକୁ ରିସେଟ୍ କରନ୍ତୁ।",
+      "tenantInherited": "ଏହି ଏଜେଣ୍ଟର ନିଜସ୍ୱ କୌଣସି ଓଭରରାଇଡ୍ ନାହିଁ, ତେଣୁ ଏହା ୱାର୍କସ୍ପେସ୍ ମୂଲ୍ୟ ବ୍ୟବହାର କରେ। ଏହାକୁ ସମ୍ପାଦନା କଲେ କେବଳ ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଓଭରରାଇଡ୍ ତିଆରି ହୁଏ।",
+      "lockedSuffix": "ଏହା ଲକ୍ ହୋଇଛି, ତେଣୁ ଏଠାରେ ବଦଳାଇ ହେବ ନାହିଁ।"
+    },
+    "risk": {
+      "low": "କମ୍ ବିପଦ",
+      "medium": "ମଧ୍ୟମ ବିପଦ",
+      "high": "ଅଧିକ ବିପଦ",
+      "security": "ସୁରକ୍ଷା"
+    },
+    "bool": {
+      "on": "On",
+      "off": "ବନ୍ଦ"
+    },
+    "value": {
+      "unset": "ସେଟ୍ ହୋଇନାହିଁ",
+      "empty": "ଖାଲି"
+    },
+    "select": {
+      "placeholder": "ଏକ ବିକଳ୍ପ ବାଛନ୍ତୁ"
+    },
+    "slider": {
+      "label": "{label} (ସ୍ଲାଇଡର୍)"
+    },
+    "duration": {
+      "unitLabel": "{label} ପାଇଁ ଏକକ"
+    },
+    "units": {
+      "chars": "ଅକ୍ଷର",
+      "tokens": "ଟୋକେନ୍",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "ସେକେଣ୍ଡ",
+      "min": "ମିନିଟ୍",
+      "h": "ଘଣ୍ଟା"
+    },
+    "groups": {
+      "agent": "ଏଜେଣ୍ଟ ରନଟାଇମ୍",
+      "approvals": "ଅନୁମୋଦନ",
+      "quality": "ଗୁଣବତ୍ତା ଯାଞ୍ଚ",
+      "guardrails": "ଗାର୍ଡରେଲ୍",
+      "chat": "ଚାଟ୍",
+      "tools": "ଟୁଲ୍",
+      "memory": "ମେମୋରୀ",
+      "knowledge": "ଜ୍ଞାନ",
+      "delegation": "କାମ ଅର୍ପଣ",
+      "aux": "ସହାୟକ ମଡେଲ୍",
+      "routing": "ମଡେଲ୍ ରୁଟିଂ"
+    },
+    "errors": {
+      "required": "ଏକ ମୂଲ୍ୟ ଦିଅନ୍ତୁ।",
+      "notNumber": "ଏକ ସଂଖ୍ୟା ଦିଅନ୍ତୁ।",
+      "notInteger": "ଏକ ପୂର୍ଣ୍ଣ ସଂଖ୍ୟା ଦିଅନ୍ତୁ।",
+      "belowMin": "ଅତି କମରେ {min} ହେବା ଆବଶ୍ୟକ।",
+      "aboveMax": "ସର୍ବାଧିକ {max} ହେବା ଆବଶ୍ୟକ।",
+      "notAllowed": "ତାଲିକାଭୁକ୍ତ ବିକଳ୍ପ ମଧ୍ୟରୁ ଗୋଟିଏ ବାଛନ୍ତୁ।",
+      "tooShort": "ବହୁତ ଛୋଟ। ଅତି କମରେ {min} ବ୍ୟବହାର କରନ୍ତୁ।",
+      "tooLong": "ବହୁତ ଲମ୍ବା। ସର୍ବାଧିକ {max} ବ୍ୟବହାର କରନ୍ତୁ।",
+      "precision": "ଏହି ଏକକ ଏହାକୁ ସଠିକ୍ ଭାବେ ପ୍ରକାଶ କରିପାରିବ ନାହିଁ। ସବୁଠାରୁ ଛୋଟ ଏକକର ପୂର୍ଣ୍ଣ ସଂଖ୍ୟା ବ୍ୟବହାର କରନ୍ତୁ କିମ୍ବା ଛୋଟ ଏକକ ବାଛନ୍ତୁ।",
+      "serverRange": "ଅନୁମତିପ୍ରାପ୍ତ ପରିସର: {min} ରୁ {max}।",
+      "serverOptions": "ଅନୁମତିପ୍ରାପ୍ତ ମୂଲ୍ୟ: {options}।",
+      "server": {
+        "invalid": "ସର୍ଭର୍ ଏହି ମୂଲ୍ୟ ଗ୍ରହଣ କଲା ନାହିଁ: {message}",
+        "locked": "ଏହି ସେଟିଂ ଆପଣଙ୍କ ପ୍ରଶାସକ ଲକ୍ କରିଛନ୍ତି, ତେଣୁ ଆପଣଙ୍କ ପରିବର୍ତ୍ତନ ସେଭ୍ ହେଲା ନାହିଁ।",
+        "notFound": "ଏହି ସେଟିଂ ଆଉ ନାହିଁ।",
+        "forbidden": "ଏହି ସେଟିଂ ବଦଳାଇବାକୁ ଆପଣଙ୍କର ଅନୁମତି ନାହିଁ।",
+        "reasonRequired": "ଏହି ପରିବର୍ତ୍ତନ ପାଇଁ ଏକ କାରଣ ଆବଶ୍ୟକ। ଗୋଟିଏ ଦିଅନ୍ତୁ ଏବଂ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।",
+        "network": "ସର୍ଭର୍‌କୁ ପହଞ୍ଚିହେଲା ନାହିଁ, ତେଣୁ ଆପଣଙ୍କ ପରିବର୍ତ୍ତନ ସେଭ୍ ହେଲା ନାହିଁ। {message}",
+        "other": "ପରିବର୍ତ୍ତନ ସେଭ୍ କରିହେଲା ନାହିଁ: {message}"
+      }
+    },
+    "effective": "ବର୍ତ୍ତମାନ ଲାଗୁ: {value}",
+    "hint": {
+      "range": "ଅନୁମତିପ୍ରାପ୍ତ: {min} ରୁ {max}।",
+      "min": "ସର୍ବନିମ୍ନ: {min}।",
+      "max": "ସର୍ବାଧିକ: {max}।",
+      "default": "ଡିଫଲ୍ଟ: {value}।",
+      "securityStricter": "ଏକ ସୁରକ୍ଷା ସେଟିଂକୁ କେବଳ ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟଠାରୁ କଡ଼ା କରାଯାଇପାରିବ, କେବେ ଦୁର୍ବଳ ନୁହେଁ।",
+      "inherited": "ଆପଣ ଏହାକୁ ରିସେଟ୍ କଲେ, ଏହା ଫେରିଯିବ: {value}।"
+    },
+    "locked": {
+      "withReason": "ଆପଣଙ୍କ ପ୍ରଶାସକଙ୍କ ଦ୍ୱାରା ଲକ୍: {reason}",
+      "noReason": "ଆପଣଙ୍କ ପ୍ରଶାସକଙ୍କ ଦ୍ୱାରା ଲକ୍। ଏଠାରେ ବଦଳାଇ ହେବ ନାହିଁ।"
+    },
+    "blocked": {
+      "role": "ଆପଣଙ୍କ ଭୂମିକା ଏହି ସେଟିଂ ବଦଳାଇପାରିବ ନାହିଁ। ଜଣେ ୱାର୍କସ୍ପେସ୍ ପ୍ରଶାସକଙ୍କୁ ପଚାରନ୍ତୁ।",
+      "scope": "ଏହି ସେଟିଂ ଏଠାରେ ଓଭରରାଇଡ୍ କରିହେବ ନାହିଁ।",
+      "readOnly": "ସେଟିଂସ୍ ବର୍ତ୍ତମାନ କେବଳ ପଢ଼ିବା ପାଇଁ।",
+      "adminOnly": "ଏହି ସୁରକ୍ଷା ସେଟିଂ କେବଳ ୱାର୍କସ୍ପେସ୍ ଏଡମିନ୍ ବଦଳାଇପାରିବେ। ଆପଣ ଏହାର ମୂଲ୍ୟ ଏଠାରେ ଦେଖିପାରିବେ, କିନ୍ତୁ ସମ୍ପାଦନ କରିପାରିବେ ନାହିଁ।"
+    },
+    "reset": {
+      "button": "ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟକୁ ରିସେଟ୍ କରନ୍ତୁ",
+      "aria": "ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟକୁ ରିସେଟ୍ କରନ୍ତୁ: {label}"
+    },
+    "help": {
+      "show": "ଅଧିକ ବିବରଣୀ",
+      "hide": "ବିବରଣୀ ଲୁଚାନ୍ତୁ"
+    },
+    "history": {
+      "button": "ଇତିହାସ",
+      "open": "ଇତିହାସ: {label}",
+      "title": "ଇତିହାସ: {label}",
+      "scopeTenant": "ୱାର୍କସ୍ପେସ୍ ପରିବର୍ତ୍ତନ",
+      "scopeAgent": "ଏହି ଏଜେଣ୍ଟ ପାଇଁ ପରିବର୍ତ୍ତନ",
+      "close": "ଇତିହାସ ବନ୍ଦ କରନ୍ତୁ",
+      "loading": "ଇତିହାସ ଲୋଡ୍ ହେଉଛି",
+      "error": "ଇତିହାସ ଲୋଡ୍ କରିହେଲା ନାହିଁ। {message}",
+      "empty": "ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ପରିବର୍ତ୍ତନ ରେକର୍ଡ ହୋଇନାହିଁ।",
+      "listLabel": "ପରିବର୍ତ୍ତନ ଇତିହାସ, ନୂଆ ପ୍ରଥମେ",
+      "version": "ସଂସ୍କରଣ {version}",
+      "before": "ପୂର୍ବରୁ:",
+      "after": "ପରେ:",
+      "by": "ବଦଳାଇଥିବା ବ୍ୟକ୍ତି",
+      "unknownActor": "ଅଜ୍ଞାତ",
+      "reason": "କାରଣ:"
+    },
+    "savebar": {
+      "count": "ସେଭ୍ ହୋଇନଥିବା ପରିବର୍ତ୍ତନ: {count}।",
+      "invalid": "ସେଭ୍ କରିବା ପୂର୍ବରୁ ହାଇଲାଇଟ୍ ହୋଇଥିବା ଫିଲ୍ଡ ସଜାଡ଼ନ୍ତୁ। ସଜାଡ଼ିବାକୁ ଥିବା ଫିଲ୍ଡ: {count}।",
+      "discard": "ପରିବର୍ତ୍ତନ ପରିତ୍ୟାଗ କରନ୍ତୁ",
+      "save": "ପରିବର୍ତ୍ତନ ସେଭ୍ କରନ୍ତୁ",
+      "saving": "ସେଭ୍ ହେଉଛି"
+    },
+    "risky": {
+      "title": "ବିପଦପୂର୍ଣ୍ଣ ପରିବର୍ତ୍ତନ ନିଶ୍ଚିତ କରନ୍ତୁ ({count})",
+      "description": "ଏହି ସେଟିଂସ୍ ଆପଣଙ୍କ ଏଜେଣ୍ଟ କିପରି ଆଚରଣ କରନ୍ତି କିମ୍ବା ସେମାନଙ୍କୁ କଣ କରିବାକୁ ଅନୁମତି ଅଛି ତାହା ବଦଳାଏ। ପ୍ରତ୍ୟେକ ପରିବର୍ତ୍ତନର ସମୀକ୍ଷା କରନ୍ତୁ ଏବଂ ଆପଣ କାହିଁକି କରୁଛନ୍ତି ତାହା ବୁଝାନ୍ତୁ। କାରଣ ଅଡିଟ୍ ଲଗ୍‌ରେ ସଂରକ୍ଷିତ ହୁଏ।",
+      "descriptionSecurity": "ଏସବୁ ମଧ୍ୟରୁ ଅତି କମରେ ଗୋଟିଏ ସୁରକ୍ଷା ସେଟିଂ। ଏହାକୁ କେବଳ ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟଠାରୁ କଡ଼ା କରାଯାଇପାରିବ। ପ୍ରତ୍ୟେକ ପରିବର୍ତ୍ତନର ସମୀକ୍ଷା କରନ୍ତୁ ଏବଂ ଆପଣ କାହିଁକି କରୁଛନ୍ତି ତାହା ବୁଝାନ୍ତୁ। କାରଣ ଅଡିଟ୍ ଲଗ୍‌ରେ ସଂରକ୍ଷିତ ହୁଏ।",
+      "listLabel": "ନିଶ୍ଚିତ କରିବାକୁ ଥିବା ପରିବର୍ତ୍ତନ",
+      "from": "ଠାରୁ",
+      "to": "to",
+      "securityNote": "ସୁରକ୍ଷା ସେଟିଂ: ଏହା ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟଠାରୁ ଦୁର୍ବଳ ହୋଇପାରିବ ନାହିଁ।",
+      "consequence": "ଏହା କଣ ବଦଳାଏ:",
+      "reasonLabel": "ଏହି ପରିବର୍ତ୍ତନର କାରଣ",
+      "reasonPlaceholder": "ଉଦାହରଣ: ସପୋର୍ଟ ଟିମ୍‌ର ଲମ୍ବା ତଦନ୍ତ ପାଇଁ ସୀମା ବଢ଼ାଇବା",
+      "reasonHint": "ଆବଶ୍ୟକ, ଅତି କମରେ {min}ଟି ଅକ୍ଷର। ପରିବର୍ତ୍ତନକାରୀ ଏବଂ ପୁରୁଣା ଓ ନୂଆ ମୂଲ୍ୟ ସହିତ ସେଭ୍ ହୁଏ।",
+      "acknowledge": "ମୁଁ ଏହି ସୁରକ୍ଷା ପରିବର୍ତ୍ତନର ପରିଣାମ ବୁଝୁଛି।",
+      "cancel": "ବାତିଲ୍ କରନ୍ତୁ",
+      "confirm": "ନିଶ୍ଚିତ କରି ସେଭ୍ କରନ୍ତୁ",
+      "resetNote": "ରିସେଟ୍: ଓଭରରାଇଡ୍ ହଟାଯାଏ ଏବଂ ସେଟିଂ ସେ ଉତ୍ତରାଧିକାରରେ ପାଉଥିବା ମୂଲ୍ୟକୁ ଫେରିଯାଏ।"
+    },
+    "strictness": {
+      "higher": "ଅଧିକ ମାନେ ଅଧିକ କଠୋର: ଅଧିକ ମୂଲ୍ୟ ଗ୍ରହଣ ହୁଏ, କମ୍ ପ୍ରତ୍ୟାଖ୍ୟାନ ହୁଏ।",
+      "lower": "କମ୍ ମାନେ ଅଧିକ କଠୋର: କମ୍ ମୂଲ୍ୟ ଗ୍ରହଣ ହୁଏ, ଅଧିକ ପ୍ରତ୍ୟାଖ୍ୟାନ ହୁଏ।",
+      "enumOrder": "ବିକଳ୍ପଗୁଡ଼ିକ ସବୁଠୁ କମ୍ ରୁ ସବୁଠୁ ଅଧିକ କଠୋର କ୍ରମରେ ଅଛି: {options}। ଆପଣ କେବଳ କଠୋର ପ୍ରାନ୍ତ ଆଡ଼କୁ ଯାଇପାରିବେ।"
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "ବାକି",
+    "status_APPROVED": "ଅନୁମୋଦିତ",
+    "status_REJECTED": "ପ୍ରତ୍ୟାଖ୍ୟାତ",
+    "status_EXPIRED": "ମିଆଦ ଶେଷ",
+    "status_EXECUTION_FAILED": "କାର୍ଯ୍ୟକାରୀ ବିଫଳ",
+    "status_DEAD_LETTERED": "ଡେଡ୍ ଲେଟର୍",
+    "filtersLabel": "ଅନୁରୋଧ ଫିଲ୍ଟର୍ କରନ୍ତୁ",
+    "filterAgentLabel": "ଏଜେଣ୍ଟ ଅନୁସାରେ ଫିଲ୍ଟର୍ କରନ୍ତୁ",
+    "filterToolLabel": "ଟୁଲ୍ ଅନୁସାରେ ଫିଲ୍ଟର୍ କରନ୍ତୁ",
+    "filterAgeLabel": "ବୟସ ଅନୁସାରେ ଫିଲ୍ଟର୍ କରନ୍ତୁ",
+    "filterAnyAgent": "ଯେକୌଣସି ଏଜେଣ୍ଟ",
+    "filterAnyTool": "ଯେକୌଣସି ଟୁଲ୍",
+    "filterAnyAge": "ଯେକୌଣସି ବୟସ",
+    "age_newer1h": "୧ ଘଣ୍ଟାରୁ ନୂଆ",
+    "age_older1h": "୧ ଘଣ୍ଟାରୁ ପୁରୁଣା",
+    "age_older24h": "୧ ଦିନରୁ ପୁରୁଣା",
+    "age_older7d": "୭ ଦିନରୁ ପୁରୁଣା",
+    "filtersClear": "ଫିଲ୍ଟର୍ ସଫା କରନ୍ତୁ",
+    "filterWindowNote": "ସବୁଠାରୁ ନୂଆ {count}ଟି ଅନୁରୋଧ ଫିଲ୍ଟର୍ ହେଉଛି। ପୁରୁଣା ଅନ୍ତର୍ଭୁକ୍ତ ନୁହେଁ।",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time}ରେ ମିଆଦ ଶେଷ ହେବ",
+    "expiresAt": "କେହି ନିଷ୍ପତ୍ତି ନନେଲେ {time}ରେ ସ୍ୱତଃ ବନ୍ଦ ହେବ",
+    "overdue": "ସମୟ ସୀମା ପାର ହୋଇଯାଇଛି, ପରବର୍ତ୍ତୀ ସଫେଇରେ ବନ୍ଦ ହେବ",
+    "neverExpires": "ଏହି ୱାର୍କସ୍ପେସ୍ ଅପେକ୍ଷା କରୁଥିବା ଅନୁରୋଧର ମିଆଦ ଶେଷ କରେ ନାହିଁ।",
+    "expiredNote": "{time} ମିଆଦ ଶେଷ: ସମୟରେ କେହି ନିଷ୍ପତ୍ତି ନେଲେ ନାହିଁ",
+    "expiredReasonPrefix": "ମିଆଦ ଶେଷ:",
+    "auditExpired": "ମିଆଦ ଶେଷ, ସମୟରେ କେହି ନିଷ୍ପତ୍ତି ନେଲେ ନାହିଁ",
+    "riskLow": "କମ୍ ବିପଦ",
+    "riskMedium": "ମଧ୍ୟମ ବିପଦ",
+    "riskHigh": "ଅଧିକ ବିପଦ",
+    "riskEstimateNote": "ବିପଦ ଟୁଲ୍‌ର ନାମରୁ କରାଯାଇଥିବା ଅନୁମାନ। ପ୍ଲାଟଫର୍ମ ଟୁଲ୍‌କୁ ବର୍ଗୀକୃତ କରେ ନାହିଁ, ତେଣୁ ଅନୁମୋଦନ କରିବା ପୂର୍ବରୁ ଆର୍ଗୁମେଣ୍ଟ ପଢ଼ନ୍ତୁ।",
+    "riskWhoDecides": "କଣ ଅନୁମୋଦନ ପାଇଁ ଅପେକ୍ଷା କରିବ ତାହା କିଏ ସ୍ଥିର କରେ?",
+    "previewGoal": "ଏହା ଯେଉଁ କାର୍ଯ୍ୟରେ କାମ କରୁଥିଲା:",
+    "previewArguments": "ଆର୍ଗୁମେଣ୍ଟ",
+    "previewNoArguments": "ଏହି କଲ୍ ପାଇଁ କୌଣସି ଆର୍ଗୁମେଣ୍ଟ ରେକର୍ଡ ହୋଇନାହିଁ।",
+    "previewRedacted": "{count}ଟି ସମ୍ବେଦନଶୀଳ ଭଳି ଦିଶୁଥିବା ମୂଲ୍ୟ ଏଠାରେ ଲୁଚାଯାଇଛି। ଆପଣ ଅନୁମୋଦନ କଲେ ସେଗୁଡ଼ିକ ତଥାପି ଟୁଲ୍‌କୁ ପଠାଯାଏ।",
+    "previewTruncated": "ଏହି ଆର୍ଗୁମେଣ୍ଟ ସମ୍ପୂର୍ଣ୍ଣ ଦେଖାଇବାକୁ ବହୁତ ଲମ୍ବା, ତେଣୁ ଏହି ଅନୁରୋଧ ଏଠାରୁ ଅନୁମୋଦନ କରିହେବ ନାହିଁ।",
+    "approveBlockedTooLong": "ଆପଣ ସମ୍ପୂର୍ଣ୍ଣ ଅନୁରୋଧର ସମୀକ୍ଷା କରିପାରୁନାହାଁନ୍ତି ବୋଲି ଅନୁମୋଦନ ବନ୍ଦ ଅଛି। ଆପଣ ତଥାପି ଏହାକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରିପାରିବେ।",
+    "ifApproveLabel": "ଆପଣ ଅନୁମୋଦନ କଲେ:",
+    "ifApprove": "{tool} ଉପରର ଆର୍ଗୁମେଣ୍ଟ ସହ ଏବେ ହିଁ ଚାଲେ, ଏବଂ ଏଜେଣ୍ଟ ତାର ଫଳାଫଳ ବ୍ୟବହାର କରି କାର୍ଯ୍ୟ ଜାରି ରଖେ।",
+    "ifDenyLabel": "ଆପଣ ପ୍ରତ୍ୟାଖ୍ୟାନ କଲେ:",
+    "ifDeny": "{tool} ଚାଲେ ନାହିଁ। ଏଜେଣ୍ଟକୁ କୁହାଯାଏ ଯେ ଆପଣ ନା କହିଲେ, କାରଣ ଦେଇଥିଲେ ତାହା ସହିତ, ଏବଂ ସେ ତାହା ବିନା ଆଗକୁ ବଢ଼େ।",
+    "whyGated": "ଏଜେଣ୍ଟ {tool} ବ୍ୟବହାର କରିବାକୁ ଚାହିଁଲା। ଏଜେଣ୍ଟ ତତ୍ତ୍ୱାବଧାନରେ ସେଟ୍ ହୋଇଥିବାରୁ, କିମ୍ବା ଏହି ୱାର୍କସ୍ପେସ୍ ସେହି ଟୁଲ୍ ପାଇଁ ଅନୁମୋଦନ ଆବଶ୍ୟକ କରୁଥିବାରୁ ଏହାକୁ ଆପଣଙ୍କ ନିଷ୍ପତ୍ତି ପାଇଁ ଅଟକାଯାଇଥିଲା।",
+    "denyReasonLabel": "ପ୍ରତ୍ୟାଖ୍ୟାନ କଲେ କାରଣ (ବୈକଳ୍ପିକ)",
+    "denyReasonPlaceholder": "ଉଦାହରଣ: ଭୁଲ୍ ପ୍ରାପ୍ତକର୍ତ୍ତା, ପଠାଇବା ପୂର୍ବରୁ ମୋତେ ପଚାରନ୍ତୁ",
+    "denyReasonHelp": "ଆପଣ ପ୍ରତ୍ୟାଖ୍ୟାନ କଲେ, ଏଜେଣ୍ଟ ଏହି କାରଣକୁ ପ୍ରତ୍ୟାଖ୍ୟାତ କଲ୍‌ର ଫଳାଫଳ ଭାବେ ପଢ଼େ ଏବଂ ଖାପ ଖୁଆଇ ନିଏ। କାରଣ ବିନା ପ୍ରତ୍ୟାଖ୍ୟାନ କରିବାକୁ ଖାଲି ଛାଡ଼ନ୍ତୁ।",
+    "denyButton": "ପ୍ରତ୍ୟାଖ୍ୟାନ କରନ୍ତୁ",
+    "detailRegionLabel": "ଅନୁରୋଧ ବିବରଣୀ",
+    "sessionLabel": "କଥାବାର୍ତ୍ତା",
+    "linkOpenAgent": "ଏଜେଣ୍ଟ ଖୋଲନ୍ତୁ",
+    "linkInspectTurns": "ତାର ଟର୍ନ ପରୀକ୍ଷା କରନ୍ତୁ",
+    "continuationLabel": "ଏଜେଣ୍ଟ ପରେ କଣ କଲା",
+    "continuationCompleted": "ଏଜେଣ୍ଟ କାର୍ଯ୍ୟ ଜାରି ରଖିବା ଶେଷ କଲା।",
+    "continuationFailed": "ଏହି ନିଷ୍ପତ୍ତି ପରେ ଏଜେଣ୍ଟ ଜାରି ରଖିପାରିଲା ନାହିଁ।",
+    "continuationRetry": "ତାକୁ ଜାରି ରଖିବାକୁ କୁହନ୍ତୁ",
+    "retryMessage": "ଦୟାକରି କାର୍ଯ୍ୟ ଜାରି ରଖନ୍ତୁ।",
+    "lastDecisionTitle": "ଆପଣଙ୍କ ଶେଷ ନିଷ୍ପତ୍ତି: {tool}",
+    "lastDecisionClose": "ବନ୍ଦ କରନ୍ତୁ",
+    "deepLinkNotFound": "ସେହି ଅନୁମୋଦନ ଅନୁରୋଧ ମିଳିଲା ନାହିଁ, କିମ୍ବା ଆପଣ ଏହାକୁ ଦେଖିପାରିବେ ନାହିଁ।",
+    "selectAllLabel": "ଏହି ପୃଷ୍ଠାର ସମସ୍ତ ବାକି ଟୁଲ୍ କଲ୍ ବାଛନ୍ତୁ",
+    "selectRowLabel": "{tool}ର ବାକି କଲ୍ ବାଛନ୍ତୁ",
+    "bulkSelected": "{count}ଟି ବଛାଗଲା",
+    "bulkApprove": "ବଛାଯାଇଥିବାକୁ ଅନୁମୋଦନ କରନ୍ତୁ",
+    "bulkDeny": "ବଛାଯାଇଥିବାକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରନ୍ତୁ",
+    "bulkClear": "ଚୟନ ସଫା କରନ୍ତୁ",
+    "bulkCancel": "ବାତିଲ୍ କରନ୍ତୁ",
+    "bulkDismiss": "ଖାରଜ କରନ୍ତୁ",
+    "bulkMixedTools": "ସାମୂହିକ ନିଷ୍ପତ୍ତି ପାଇଁ ବଛାଯାଇଥିବା ସମସ୍ତ ଅନୁରୋଧ ଗୋଟିଏ ଟୁଲ୍‌ର ହେବା ଆବଶ୍ୟକ।",
+    "bulkNotLowRisk": "ସାମୂହିକ ଅନୁମୋଦନ କେବଳ କମ୍ ବିପଦର ଟୁଲ୍ (ଲୁକଅପ୍) ପାଇଁ। ପ୍ରତ୍ୟାଖ୍ୟାନ ଯେକୌଣସି ଗୋଟିଏ ଟୁଲ୍ ପାଇଁ ଚାଲେ, କିମ୍ବା ଏସବୁକୁ ଗୋଟିଗୋଟି କରି ସ୍ଥିର କରନ୍ତୁ।",
+    "bulkNotToolCall": "ସାମୂହିକ ନିଷ୍ପତ୍ତି କେବଳ ଏଜେଣ୍ଟ ଟୁଲ୍ କଲ୍‌କୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ।",
+    "bulkNotPending": "ସାମୂହିକ ନିଷ୍ପତ୍ତି କେବଳ ଏପର୍ଯ୍ୟନ୍ତ ବାକି ଥିବା ଅନୁରୋଧକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ।",
+    "bulkConfirmApproveTitle": "{tool}ର {count}ଟି କଲ୍ ଅନୁମୋଦନ କରିବେ?",
+    "bulkConfirmApproveBody": "ଏଗୁଡ଼ିକ ମଧ୍ୟରୁ ପ୍ରତ୍ୟେକ ତଳେ ତାଲିକାଭୁକ୍ତ ନିଜ ଆର୍ଗୁମେଣ୍ଟ ସହ ଏବେ ହିଁ {tool} ଚଲାଏ, ଏବଂ ଏଜେଣ୍ଟ ଫଳାଫଳ ବ୍ୟବହାର କରି ଆଗକୁ ବଢ଼େ। ଏହାକୁ ପୂର୍ବାବସ୍ଥାକୁ ଫେରାଇହେବ ନାହିଁ।",
+    "bulkConfirmDenyTitle": "{tool}ର {count}ଟି କଲ୍ ପ୍ରତ୍ୟାଖ୍ୟାନ କରିବେ?",
+    "bulkConfirmDenyBody": "ଏଗୁଡ଼ିକ ମଧ୍ୟରୁ କିଛି ଚାଲିବ ନାହିଁ। ଏଜେଣ୍ଟକୁ କୁହାଯାଏ ଯେ ପ୍ରତ୍ୟେକ କଲ୍ ପ୍ରତ୍ୟାଖ୍ୟାତ ହେଲା, କାରଣ ଦେଇଥିଲେ ତାହା ସହିତ।",
+    "bulkConfirmApprove": "{count}ଟି ଅନୁମୋଦନ କରନ୍ତୁ",
+    "bulkConfirmDeny": "{count}ଟି ପ୍ରତ୍ୟାଖ୍ୟାନ କରନ୍ତୁ",
+    "bulkMore": "ଏବଂ ଆହୁରି {count}ଟି",
+    "bulkProgress": "{count} ମଧ୍ୟରୁ {done}ଟି ସରିଲା",
+    "bulkResult": "{done}ଟିର ନିଷ୍ପତ୍ତି ହେଲା, {failed}ଟି ବିଫଳ।",
+    "notifyOff": "ମୋତେ ଜଣାନ୍ତୁ",
+    "notifyOn": "ବିଜ୍ଞପ୍ତି ଚାଲୁ",
+    "notifyHelp": "ଏହି ଟାବ୍ ପୃଷ୍ଠଭୂମିରେ ଥିବା ବେଳେ ନୂଆ ଅନୁରୋଧ ଆସିଲେ ବ୍ରାଉଜର୍ ବିଜ୍ଞପ୍ତି ଦେଖାନ୍ତୁ",
+    "notifyUnsupported": "ଏହି ବ୍ରାଉଜର୍ ବିଜ୍ଞପ୍ତି ଦେଖାଇପାରିବ ନାହିଁ।",
+    "notifyBlocked": "ବିଜ୍ଞପ୍ତି ଅବରୋଧିତ। ଏହାକୁ ଚାଲୁ କରିବାକୁ ଆପଣଙ୍କ ବ୍ରାଉଜରର ସାଇଟ୍ ସେଟିଂସ୍‌ରେ ଅନୁମତି ଦିଅନ୍ତୁ।",
+    "notifyTitle": "ଏକ ଏଜେଣ୍ଟ ଅନୁମୋଦନ ପାଇଁ ଅପେକ୍ଷା କରୁଛି",
+    "notifyBodyOne": "{tool}କୁ ଆପଣଙ୍କ ନିଷ୍ପତ୍ତି ଦରକାର।",
+    "notifyBodyMany": "{count}ଟି ଅନୁରୋଧକୁ ଆପଣଙ୍କ ନିଷ୍ପତ୍ତି ଦରକାର।",
+    "newArrived": "{count}ଟି ନୂଆ ଅନୁମୋଦନ ଅନୁରୋଧ ଆସିଲା।",
+    "rulesTitle": "ଗୋଟିଏ ଟୁଲ୍ ପାଇଁ ନିୟମ",
+    "rulesIntro": "ଗୋଟିଏ ଟୁଲ୍ ସବୁବେଳେ ଜଣେ ବ୍ୟକ୍ତିଙ୍କୁ ଅପେକ୍ଷା କରିବ ନା କେବେ ନୁହେଁ ତାହା ବାଛନ୍ତୁ। ଏହି ନିୟମ ଅର୍ଦ୍ଧ-ସ୍ୱାୟତ୍ତରେ ସେଟ୍ ହୋଇଥିବା ପ୍ରତ୍ୟେକ ଏଜେଣ୍ଟରେ ଲାଗୁ ହୁଏ।",
+    "rulesNeedsScope": "ନିୟମ ବଦଳାଇବାକୁ ଆପଣଙ୍କୁ ଅନୁମୋଦନ ଅନୁମତି ଦରକାର।",
+    "rulesToolLabel": "ଟୁଲ୍‌ର ନାମ",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "ଅନୁରୋଧରେ ଟୁଲ୍ ଯେପରି ଦେଖାଯାଏ ଠିକ୍ ସେହିପରି, ଉଦାହରଣ ପାଇଁ send_email।",
+    "rulesToolNameInvalid": "ଟୁଲ୍ ନାମରେ ଖାଲି ସ୍ଥାନ ଥାଏ ନାହିଁ।",
+    "rulesModeLabel": "କଣ ହେବା ଉଚିତ",
+    "rulesAskName": "ସବୁବେଳେ ପଚାରନ୍ତୁ",
+    "rulesAskHint": "ଏହି ଟୁଲ୍‌ର ପ୍ରତ୍ୟେକ କଲ୍ ଜଣେ ବ୍ୟକ୍ତିଙ୍କ ଅନୁମୋଦନ ପାଇଁ ଅପେକ୍ଷା କରେ।",
+    "rulesNeverName": "କେବେ ପଚାରନ୍ତୁ ନାହିଁ",
+    "rulesNeverHint": "ଏହି ଟୁଲ୍‌ର କଲ୍ କାହାରି ଅନୁମୋଦନ ବିନା ତୁରନ୍ତ ଚାଲେ।",
+    "rulesNeverRiskyWarn": "ଏହି ଟୁଲ୍ ଜିନିଷ ବଦଳାଉଥିବା ପରି ଦିଶୁଛି। ନିଶ୍ଚିତ ରୁହନ୍ତୁ।",
+    "rulesScopeNote": "ନିୟମ ସମ୍ପୂର୍ଣ୍ଣ ୱାର୍କସ୍ପେସ୍‌ରେ ଲାଗୁ ହୁଏ, ଗୋଟିଏ ଏଜେଣ୍ଟରେ ନୁହେଁ। ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ଏବେ ବି ସବୁକିଛି ପାଇଁ ପଚାରନ୍ତି, ଏବଂ ପୂର୍ଣ୍ଣ ସ୍ୱାୟତ୍ତ ଏଜେଣ୍ଟ ନିୟମ ଯାହା କହିଲେ ବି କେବେ ପଚାରନ୍ତି ନାହିଁ। ଆପଣ ସେଟ୍ କରିଥିବା ନିୟମ ଏପର୍ଯ୍ୟନ୍ତ ଏଠାରେ ତାଲିକାଭୁକ୍ତ ହୁଏ ନାହିଁ।",
+    "rulesSave": "ନିୟମ ସେଭ୍ କରନ୍ତୁ",
+    "rulesSaveFailed": "ନିୟମ ସେଭ୍ କରିହେଲା ନାହିଁ।",
+    "rulesSavedAsk": "{tool} ସବୁବେଳେ ଅନୁମୋଦନ ମାଗିବ।",
+    "rulesSavedNever": "{tool} ଆଉ ଅନୁମୋଦନ ମାଗିବ ନାହିଁ।",
+    "rulesNeverConfirmTitle": "{tool} ଚାଲିବା ପୂର୍ବରୁ ପଚାରିବା ବନ୍ଦ କରିବେ?",
+    "rulesNeverConfirmBody": "ପ୍ରତ୍ୟେକ ଅର୍ଦ୍ଧ-ସ୍ୱାୟତ୍ତ ଏଜେଣ୍ଟ କାହାରି ଅନୁମୋଦନ ବିନା {tool} ଚଲାଇବ। ଏହା ଜିନିଷ ବଦଳାଇପାରେ କିମ୍ବା ପଠାଇପାରେ ବୋଲି ଲାଗୁଛି, ଏବଂ ଭୁଲକୁ ଫେରାଇହେବ ନାହିଁ।",
+    "rulesNeverConfirmBodyLow": "ପ୍ରତ୍ୟେକ ଅର୍ଦ୍ଧ-ସ୍ୱାୟତ୍ତ ଏଜେଣ୍ଟ ନପଚାରି {tool} ଚଲାଇବ। ଏହା ଲୁକଅପ୍ ପରି ଲାଗୁଛି, ତେଣୁ ଏହା ସାଧାରଣତଃ ସୁରକ୍ଷିତ।",
+    "rulesNeverConfirm": "ପଚାରିବା ବନ୍ଦ କରନ୍ତୁ",
+    "tiersTitle": "କଣ ଅନୁମୋଦନ ପାଇଁ ଅପେକ୍ଷା କରିବ ତାହା କିଏ ସ୍ଥିର କରେ?",
+    "tiersIntro": "ପ୍ରତ୍ୟେକ ଏଜେଣ୍ଟର ଏକ ସ୍ୱାୟତ୍ତତା ସ୍ତର ଅଛି। ୱାର୍କସ୍ପେସ୍‌ର ଅନୁମୋଦନ ନିୟମ ବ୍ୟବହୃତ ହେବ କି ନାହିଁ ତାହା ଏହା ସ୍ଥିର କରେ।",
+    "tierCurrent": "ଏହି ଏଜେଣ୍ଟ",
+    "tierConsequenceLabel": "ବ୍ୟବହାରରେ:",
+    "tierSupervisedName": "ତତ୍ତ୍ୱାବଧାନରେ",
+    "tierSupervisedWhat": "ୱାର୍କସ୍ପେସ୍ ନିୟମ ଯାହା କହିଲେ ବି ପ୍ରତ୍ୟେକ ଟୁଲ୍ କଲ୍ ଜଣେ ବ୍ୟକ୍ତିଙ୍କୁ ଅପେକ୍ଷା କରେ। ପ୍ରତ୍ୟେକ ଟର୍ନ ପାଇଁ ଟୁଲ୍ ପଦକ୍ଷେପର କମ୍ ସୀମା ମଧ୍ୟ ମିଳେ।",
+    "tierSupervisedConsequence": "ସବୁଠାରୁ ସୁରକ୍ଷିତ, କିନ୍ତୁ ଧାଡ଼ିରେ ଅନେକ ଅନୁରୋଧ ଓ ମନ୍ଥର ଏଜେଣ୍ଟ ଆଶା କରନ୍ତୁ।",
+    "tierSemiName": "ଅର୍ଦ୍ଧ-ସ୍ୱାୟତ୍ତ",
+    "tierSemiWhat": "ପ୍ରତ୍ୟେକ ଟୁଲ୍ ପାଇଁ ୱାର୍କସ୍ପେସ୍‌ର ନିୟମ ସ୍ଥିର କରେ: ପଠାଇବା, ଡିଲିଟ୍ ଓ ପେମେଣ୍ଟ ଭଳି ବିପଦପୂର୍ଣ୍ଣ ଟୁଲ୍ ଡିଫଲ୍ଟ ଭାବେ ପଚାରେ, ବାକି ଚାଲେ।",
+    "tierSemiConsequence": "ଏକ ଭଲ ଡିଫଲ୍ଟ। ଆପଣଙ୍କ ପ୍ରତି-ଟୁଲ୍ ନିୟମ ଏଠାରେ କାର୍ଯ୍ୟକାରୀ ହୁଏ।",
+    "tierFullName": "ପୂର୍ଣ୍ଣ ସ୍ୱାୟତ୍ତ",
+    "tierFullWhat": "କୌଣସି ଟୁଲ୍ କଲ୍ କେବେ ଅନୁମୋଦନ ପାଇଁ ଅପେକ୍ଷା କରେ ନାହିଁ ଏବଂ ଏଜେଣ୍ଟ ଟୁଲ୍ ପଦକ୍ଷେପର ଅଧିକ ସୀମା ପାଏ। ପ୍ରତି-ଟୁଲ୍ ନିୟମ ଅଣଦେଖା କରାଯାଏ।",
+    "tierFullConsequence": "ଏହା ନପଚାରି କାମ କରେ। କେବଳ ସେହି ଏଜେଣ୍ଟ ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ ଯାହାର ଭୁଲ ସହଜରେ ପୂର୍ବାବସ୍ଥାକୁ ଫେରାଇହେବ।",
+    "tiersRuleNote": "ଟୁଲ୍ ନିୟମ (ସବୁବେଳେ ପଚାରନ୍ତୁ, କେବେ ପଚାରନ୍ତୁ ନାହିଁ) କେବଳ ଅର୍ଦ୍ଧ-ସ୍ୱାୟତ୍ତ ଏଜେଣ୍ଟ ପାଇଁ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ।",
+    "agentModeTitle": "ଏହି ଏଜେଣ୍ଟକୁ ଅନୁମୋଦନ କେବେ ଦରକାର?",
+    "agentModeSupervised": "ଏହି ଏଜେଣ୍ଟ ତତ୍ତ୍ୱାବଧାନରେ ଅଛି: ପ୍ରତ୍ୟେକ ଟୁଲ୍ କଲ୍ ଜଣେ ବ୍ୟକ୍ତିଙ୍କୁ ଅପେକ୍ଷା କରେ, ଏବଂ ପ୍ରତି-ଟୁଲ୍ ନିୟମ ଅଣଦେଖା କରାଯାଏ।",
+    "agentModeSemi": "ଏହି ଏଜେଣ୍ଟ ଅର୍ଦ୍ଧ-ସ୍ୱାୟତ୍ତ: ପ୍ରତ୍ୟେକ ଟୁଲ୍ ୱାର୍କସ୍ପେସ୍‌ର ନିୟମ ଅନୁସରଣ କରେ। ପଠାଇବା, ଡିଲିଟ୍ ଓ ପେମେଣ୍ଟ ଡିଫଲ୍ଟ ଭାବେ ପଚାରେ।",
+    "agentModeFull": "ଏହି ଏଜେଣ୍ଟ ପୂର୍ଣ୍ଣ ସ୍ୱାୟତ୍ତ: ଏହା କେବେ ଅନୁମୋଦନ ପାଇଁ ଅପେକ୍ଷା କରେ ନାହିଁ, ଏବଂ ପ୍ରତି-ଟୁଲ୍ ନିୟମ ଅଣଦେଖା କରାଯାଏ।",
+    "agentModeQueueLink": "ଏହି ଏଜେଣ୍ଟର ଅନୁରୋଧ ଦେଖନ୍ତୁ",
+    "agentModeRulesLink": "ଗୋଟିଏ ଟୁଲ୍ ପାଇଁ ନିୟମ ସେଟ୍ କରନ୍ତୁ",
+    "agentModeShowTiers": "ତିନି ସ୍ତରର ତୁଳନା କରନ୍ତୁ",
+    "agentModeHideTiers": "ତୁଳନା ଲୁଚାନ୍ତୁ",
+    "agentModeScopeNote": "ଉପରର ସ୍ୱାୟତ୍ତତା ଚୟନ ଦ୍ୱାରା ସ୍ତର ବଦଳାନ୍ତୁ। ଟୁଲ୍ ନିୟମ ସମ୍ପୂର୍ଣ୍ଣ ୱାର୍କସ୍ପେସ୍‌ର, ପ୍ରତି ଏଜେଣ୍ଟର ନୁହେଁ।",
+    "policyThenApprovalNote": "ଏହି ନିୟମ ପାର ହୋଇଥିବା କଲ୍ ତଥାପି ଜଣେ ବ୍ୟକ୍ତିଙ୍କୁ ଅପେକ୍ଷା କରିପାରେ। ତାହା ଏଜେଣ୍ଟର ସ୍ୱାୟତ୍ତତା ସ୍ତର ଉପରେ ନିର୍ଭର କରେ, ଯାହା ତଳେ ବୁଝାଯାଇଛି।",
+    "chatReasonToggle": "ଏକ କାରଣ ଯୋଡ଼ନ୍ତୁ",
+    "chatReviewInQueue": "ଧାଡ଼ିରେ ସମୀକ୍ଷା କରନ୍ତୁ"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "ଇଭେଣ୍ଟ ଫିଲ୍ଟର୍ କରନ୍ତୁ",
+    "tlFilterCategories": "ଇଭେଣ୍ଟ ପ୍ରକାର",
+    "tlCatIntake": "ଇନଟେକ୍",
+    "tlCatModel": "ମଡେଲ୍",
+    "tlCatTool": "ଟୁଲ୍",
+    "tlCatApproval": "ଅନୁମୋଦନ",
+    "tlCatContinuation": "ନିରନ୍ତରତା",
+    "tlCatRetry": "ପୁନଃଚେଷ୍ଟା ଓ ଫେଲଓଭର୍",
+    "tlCatGuardrail": "ଗାର୍ଡରେଲ୍",
+    "tlCatCache": "କ୍ୟାଶ୍",
+    "tlCatVerify": "ଯାଞ୍ଚ",
+    "tlCatFinish": "ସମାପ୍ତି",
+    "tlProblemsOnly": "କେବଳ ସମସ୍ୟା",
+    "tlSearch": "ଇଭେଣ୍ଟ ସନ୍ଧାନ କରନ୍ତୁ",
+    "tlSearchPlaceholder": "ଟୁଲ୍, ମଡେଲ୍, ଗାର୍ଡ ବା ସ୍ଥିତି",
+    "tlClearFilters": "ଫିଲ୍ଟର୍ ସଫା କରନ୍ତୁ",
+    "tlShowing": "{total}ଟି ଇଭେଣ୍ଟ ମଧ୍ୟରୁ {shown}ଟି ଦେଖାଉଛି",
+    "tlNoMatch": "କୌଣସି ଇଭେଣ୍ଟ ଏହି ଫିଲ୍ଟର୍ ସହ ମେଳ ଖାଉନାହିଁ।",
+    "tlSevOk": "ସଫଳ",
+    "tlSevInfo": "ସୂଚନା",
+    "tlSevWarn": "ଧ୍ୟାନ ଦରକାର",
+    "tlSevError": "ବିଫଳ",
+    "tlIntake": "ଟର୍ନ ଆରମ୍ଭ ହେଲା: {chars}ଟି ଅକ୍ଷର, {tools}ଟି ଟୁଲ୍, {attachments}ଟି ସଂଲଗ୍ନକ",
+    "tlRunTools": "ଏହି ରନ୍ ପାଇଁ ଟୁଲ୍",
+    "tlRunToolsNone": "କିଛି ନାହିଁ (କେବଳ ଲେଖା)",
+    "tlModelCall": "{model} ({provider})କୁ ମଡେଲ୍ କଲ୍, ରୁଟ୍ {route}",
+    "tlFailover": "{model} ({provider})କୁ ଫେଲଓଭର୍ ହେଲା",
+    "tlRetryModel": "{model} ({provider})ରେ ପୁଣି ଚେଷ୍ଟା କରାଗଲା, ରୁଟ୍ {route}",
+    "tlRetry": "ପୁନଃଚେଷ୍ଟା: {guard} ({outcome})",
+    "tlCacheHit": "ରେସ୍ପନ୍ସ କ୍ୟାଶ୍‌ରୁ ଉତ୍ତର ଦିଆଗଲା",
+    "tlToolCall": "ଟୁଲ୍ କଲ୍ {tool}: {status}",
+    "tlApprovalRequested": "{tool} ଚାଲିବା ପୂର୍ବରୁ ଅନୁମୋଦନ ମାଗାଗଲା",
+    "tlApprovalDecided": "{tool} ପାଇଁ ଅନୁମୋଦନର ନିଷ୍ପତ୍ତି ହେଲା: {decision}",
+    "tlApprovalAutoAllowed": "{tool} ନପଚାରି ଚାଲିଲା: ତତ୍ତ୍ୱାବଧାନରେ କେବଳ-ପଢ଼ିବା କଲ୍",
+    "tlContinuation": "ନିରନ୍ତରତା: {guard} ({outcome})",
+    "tlGuard": "ଗାର୍ଡରେଲ୍ {guard}: {outcome}",
+    "tlVerifyPassed": "ଯାଞ୍ଚ ଉତ୍ତୀର୍ଣ୍ଣ: {check}",
+    "tlVerifyFailed": "ଯାଞ୍ଚ ଅନୁତ୍ତୀର୍ଣ୍ଣ: {check}",
+    "tlFinish": "ସମାପ୍ତ: {status} (ଉତ୍ତରରେ {chars}ଟି ଅକ୍ଷର)",
+    "tlOther": "ଇଭେଣ୍ଟ {type}",
+    "reasonFallbackProvider": "ପ୍ରାଥମିକ ମଡେଲ୍ ବିଫଳ ହେଲା, ତେଣୁ ଟର୍ନ ଏଜେଣ୍ଟର ଫଲବ୍ୟାକ୍ ପ୍ରଦାତାକୁ ଗଲା।",
+    "reasonToolsDisabledRetry": "ପ୍ରଦାତା ଟୁଲ୍-କଲ୍ ଇତିହାସ ପ୍ରତ୍ୟାଖ୍ୟାନ କଲେ, ତେଣୁ ଟର୍ନକୁ ଟୁଲ୍ ବିନା ଆଉ ଏକ ଥର ଉତ୍ତର ଦିଆଗଲା।",
+    "reasonRetryOther": "ମଡେଲ୍ କଲ୍ ପୁନରାବୃତ୍ତି କରାଗଲା।",
+    "reasonToolCallRetry": "ମଡେଲ୍ ତାର ଉତ୍ତର ବିକୃତ ଟୁଲ୍ କଲ୍‌ରେ ଶେଷ କଲା, ତେଣୁ ତାକୁ ପୁଣି ପଚରାଗଲା।",
+    "reasonCutOff": "ଉତ୍ତର ଲମ୍ବ ସୀମାରେ କଟିଗଲା, ତେଣୁ ମଡେଲ୍‌କୁ ଜାରି ରଖିବାକୁ କୁହାଗଲା।",
+    "reasonToolsContinue": "ଟୁଲ୍ କଲ୍ ପରେ ମଡେଲ୍‌କୁ ଅଧିକ ପଦକ୍ଷେପ ଦରକାର ହେଲା, ତେଣୁ ଟର୍ନ ଜାରି ରହିଲା।",
+    "reasonToolBlocked": "ଟୁଲ୍ ବଦଳରେ ଗୋଟିଏ ଗାର୍ଡ, ନୀତି, ହୁକ୍ କିମ୍ବା ସୀମା ଉତ୍ତର ଦେଲା, ତେଣୁ ଏହା ଚାଲିଲା ନାହିଁ।",
+    "reasonToolParked": "କଲ୍ ଜଣେ ବ୍ୟକ୍ତିଙ୍କ ଅନୁମୋଦନ ପାଇଁ ଅପେକ୍ଷା କରୁଛି; ଟୁଲ୍ ଚାଲିନାହିଁ।",
+    "reasonGuardAction": "ଗୋଟିଏ ଗାର୍ଡରେଲ୍ ଉତ୍ତର ବଦଳାଇଲା କିମ୍ବା ଅଟକାଇଲା।",
+    "tlAtStart": "ଆରମ୍ଭରୁ",
+    "tlGap": "ପୂର୍ବ ଇଭେଣ୍ଟରୁ",
+    "tlDuration": "ଅବଧି",
+    "tlTokens": "ଇନପୁଟ୍ / ଆଉଟପୁଟ୍ ଟୋକେନ୍",
+    "tlCost": "ଖର୍ଚ୍ଚ",
+    "tlDetails": "ହ୍ୟାସ୍ ଓ କଞ୍ଚା ସାରାଂଶ",
+    "tlArgsHash": "ଆର୍ଗୁମେଣ୍ଟର ହ୍ୟାସ୍",
+    "tlResultDigest": "ଫଳାଫଳର ଡାଇଜେଷ୍ଟ",
+    "tlContentNote": "ଆର୍ଗୁମେଣ୍ଟ ଓ ଫଳାଫଳ କେବେ ସଂରକ୍ଷିତ ହୁଏ ନାହିଁ। ଟୁଲ୍ କଲ୍ ପାଇଁ ଟାଇମଲାଇନ୍ ତାର ସ୍ଥିତି, ଅବଧି ଏବଂ ତାର ଆର୍ଗୁମେଣ୍ଟ ଓ ଫଳାଫଳର ହ୍ୟାସ୍ ଦେଖାଏ, ସେଗୁଡ଼ିକର ବିଷୟବସ୍ତୁ ନୁହେଁ।",
+    "tlStatFinish": "ସମାପ୍ତିର କାରଣ",
+    "tlStillOpen": "ଶେଷ ହୋଇନାହିଁ",
+    "tlProblemCount": "{count}ଟି ଇଭେଣ୍ଟରେ ଧ୍ୟାନ ଦରକାର",
+    "tlStatRetries": "ପୁନଃଚେଷ୍ଟା ଓ ଫେଲଓଭର୍",
+    "tlStatContinuations": "ନିରନ୍ତରତା",
+    "tlStatApprovals": "ଅନୁମୋଦନ",
+    "tlStatTokens": "ଇନପୁଟ୍ / ଆଉଟପୁଟ୍ ଟୋକେନ୍",
+    "tlTokensNotRecorded": "ଏହି ଟର୍ନ ପାଇଁ ରେକର୍ଡ ହୋଇନାହିଁ",
+    "tlTokensInOut": "ଇନପୁଟ୍ / ଆଉଟପୁଟ୍",
+    "tlCopyTurnId": "ଟର୍ନ ID କପି କରନ୍ତୁ",
+    "tlCopyTurnIdShort": "ID କପି କରନ୍ତୁ",
+    "tlCopied": "ଟର୍ନ ID କପି ହେଲା।",
+    "tlCopyFailed": "କପି କରିହେଲା ନାହିଁ। ID ଚୟନ କରି ହାତରେ କପି କରନ୍ତୁ।",
+    "sessTitle": "ଏକ ସେସନ୍‌ର ଟର୍ନ",
+    "sessSubtitle": "ରେକର୍ଡ ହୋଇଥିବା ଟର୍ନ ନୂଆ ପ୍ରଥମେ ଦେଖିବାକୁ ଏକ ଚାଟ୍ ସେସନ୍ ବାଛନ୍ତୁ। ଚାଟ୍ ବାର୍ତ୍ତାର ଟର୍ନ ଦେଖନ୍ତୁ ଲିଙ୍କ୍ ଖୋଲିଲେ ଏହା ଆପଣଙ୍କ ପାଇଁ ଆପେ ଭରିଯାଏ।",
+    "sessionIdLabel": "ସେସନ୍ ID",
+    "sessionIdPlaceholder": "ଚାଟ୍ ସେସନ୍ ID",
+    "sessFind": "ଟର୍ନ ଖୋଜନ୍ତୁ",
+    "sessInvalid": "ଏଜେଣ୍ଟ ID (ଏକ UUID) ଏବଂ ସେସନ୍ ID ଦିଅନ୍ତୁ।",
+    "sessLoading": "ସେସନ୍‌ର ଟର୍ନ ଲୋଡ୍ ହେଉଛି...",
+    "sessUnavailableTitle": "ସେସନ୍ ସନ୍ଧାନ ଉପଲବ୍ଧ ନାହିଁ",
+    "sessUnavailableBody": "ଏହି ସର୍ଭର୍ ଏକ ସେସନ୍‌ର ଟର୍ନ ତାଲିକାଭୁକ୍ତ କରିପାରିବ ନାହିଁ। ବଦଳରେ ତଳେ ID ଦ୍ୱାରା ଏକ ଟର୍ନ ଖୋଲନ୍ତୁ।",
+    "sessErrorTitle": "ସେସନ୍‌ର ଟର୍ନ ଲୋଡ୍ କରିହେଲା ନାହିଁ",
+    "sessEmptyTitle": "ଏହି ସେସନ୍‌ରେ କୌଣସି ଜର୍ଣ୍ଣାଲ୍ କରାଯାଇଥିବା ଟର୍ନ ନାହିଁ",
+    "sessEmptyBody": "ସେସନ୍ କିଛି ରେକର୍ଡ କରିନାହିଁ। ଏଥିରେ ସେସନ୍ ID ଭୁଲ୍ ଅଛି, କିମ୍ବା ତାର ଟର୍ନ ଚାଲିବା ବେଳେ ଟର୍ନ ଜର୍ଣ୍ଣାଲ୍ ବନ୍ଦ ଥିଲା।",
+    "sessListLabel": "{count}ଟି ଜର୍ଣ୍ଣାଲ୍ କରାଯାଇଥିବା ଟର୍ନ",
+    "sessEvents": "{count}ଟି ଇଭେଣ୍ଟ",
+    "sessStatusOpen": "ଖୋଲନ୍ତୁ",
+    "sessOpen": "ଟାଇମଲାଇନ୍ ଖୋଲନ୍ତୁ",
+    "sessOpened": "ତଳେ ଦେଖାଯାଇଛି"
+  },
+  "evalControls": {
+    "cancel": "ବାତିଲ୍ କରନ୍ତୁ",
+    "saving": "ସେଭ୍ ହେଉଛି...",
+    "saved": "ସେଭ୍ ହେଲା।",
+    "saveMode": "ରିପ୍ଲେ ମୋଡ୍ ସେଭ୍ କରନ୍ତୁ",
+    "discard": "ପରିବର୍ତ୍ତନ ପରିତ୍ୟାଗ କରନ୍ତୁ",
+    "saveFailed": "ରିପ୍ଲେ ମୋଡ୍ ସେଭ୍ କରିହେଲା ନାହିଁ।",
+    "unsavedChanges": "ସେଭ୍ ହୋଇନଥିବା ପରିବର୍ତ୍ତନ",
+    "modeTitle": "ଏହି ଡାଟାସେଟ୍ କିପରି ରିପ୍ଲେ ହୁଏ",
+    "modeHelp": "ରିପ୍ଲେ ଏଜେଣ୍ଟର ଟୁଲ୍ ବ୍ୟବହାର କରିପାରିବ କି ନାହିଁ ବାଛନ୍ତୁ। ଏହା ପରବର୍ତ୍ତୀ ରନ୍ କଣ ମାପେ ତାହା ବଦଳାଏ।",
+    "modeTextOnly": "କେବଳ ଟେକ୍ସଟ୍",
+    "modeTextOnlyHelp": "ଏଜେଣ୍ଟ ତାର ଟୁଲ୍ ବିନା ଉତ୍ତର ଦିଏ। ସୁରକ୍ଷିତ: ପ୍ରକୃତରେ କିଛି ହୁଏ ନାହିଁ। ଆଶାକୃତ-ଟୁଲ୍ ଯାଞ୍ଚ ପୂରଣ ହୋଇପାରିବ ନାହିଁ।",
+    "modeFull": "ଟୁଲ୍ ସହ ପୂର୍ଣ୍ଣ ପାଇପଲାଇନ୍",
+    "modeFullHelp": "ଜଣେ ପ୍ରକୃତ ଉପଯୋଗକର୍ତ୍ତା ପାଉଥିବା ସମାନ ଟୁଲ୍, ଗାର୍ଡରେଲ୍ ଓ ପଦକ୍ଷେପ ସୀମା। ଆଶାକୃତ-ଟୁଲ୍ ଓ ଟ୍ରାଜେକ୍ଟୋରୀ ଯାଞ୍ଚ ପାଇଁ ଆବଶ୍ୟକ।",
+    "modeFullNote": "ଯେଉଁ ଟୁଲ୍ କେବଳ ପଢ଼େ ସେଗୁଡ଼ିକ ପ୍ରକୃତରେ ଚାଲେ। ଯାହା ଡାଟା ବଦଳାଇପାରେ, ବାର୍ତ୍ତା ପଠାଇପାରେ କିମ୍ବା ଟଙ୍କା ଖର୍ଚ୍ଚ କରିପାରେ ତାହା ଅନୁକରଣ କରାଯାଇ ରନ୍‌ରେ ତାଲିକାଭୁକ୍ତ ହୁଏ, ତେଣୁ ପ୍ରକୃତରେ କିଛି ଘଟେ ନାହିଁ। ସୁରକ୍ଷା ବର୍ଗୀକରଣ ନଥିବା ଟୁଲ୍ ମଧ୍ୟ ଅନୁକରଣ ହୁଏ।",
+    "autoApproveLabel": "ଇଭାଲ୍ ସାଣ୍ଡବକ୍ସରେ ଟୁଲ୍ କଲ୍ ସ୍ୱତଃ-ଅନୁମୋଦନ କରନ୍ତୁ",
+    "autoApproveHelp": "ସାଧାରଣତଃ ଜଣେ ବ୍ୟକ୍ତିଙ୍କୁ ଅପେକ୍ଷା କରୁଥିବା ଟୁଲ୍ କଲ୍‌କୁ ଇଭାଲ୍ ସାଣ୍ଡବକ୍ସ ଅନୁମୋଦନ କରେ, ଯେପରି କେସ୍ ଶେଷ ହୋଇପାରିବ। ଏହା ବିନା କେସ୍ ପ୍ରଡକ୍ସନରେ ଯେପରି ହୁଏ ସେହିପରି ଉତ୍ତର ନମିଳିଥିବା ଅନୁମୋଦନରେ ଶେଷ ହୁଏ।",
+    "autoApproveWarnTitle": "କେବଳ ଅଣ-ପ୍ରଡକ୍ସନ୍ ୱାର୍କସ୍ପେସ୍ ପାଇଁ",
+    "autoApproveWarnBody": "ଟୁଲ୍ ପ୍ରକୃତ ଗ୍ରାହକ କିମ୍ବା ଡାଟାକୁ ଛୁଏଁ ସେଠାରେ ଏହାକୁ କେବେ ଚାଲୁ କରନ୍ତୁ ନାହିଁ। ଶେଲ୍, କୋଡିଂ, ସିଡ୍ୟୁଲିଂ, ଏଜେଣ୍ଟ-ରୁ-ଏଜେଣ୍ଟ, ପେମେଣ୍ଟ ଓ ଡିଲିଟ୍ ଟୁଲ୍ କେବେ ସ୍ୱତଃ-ଅନୁମୋଦିତ ହୁଏ ନାହିଁ। ଆପଣଙ୍କ ପ୍ରଶାସକ ଏହି ୱାର୍କସ୍ପେସ୍‌କୁ ଅଣ-ପ୍ରଡକ୍ସନ୍ ଭାବେ ଚିହ୍ନିତ କରିଥିବା ଆବଶ୍ୟକ।",
+    "autoApproveNeedsFull": "ପ୍ରଥମେ ପୂର୍ଣ୍ଣ ପାଇପଲାଇନ୍ ଚାଲୁ କରନ୍ତୁ: ସ୍ୱତଃ-ଅନୁମୋଦନ କେବଳ ଟୁଲ୍ ଚାଲିଲେ ହିଁ ଲାଗୁ ହୁଏ।",
+    "autoApproveRefused": "ଏହି ୱାର୍କସ୍ପେସ୍‌ରେ ଅନୁମତି ନାହିଁ: {reason}",
+    "autoApproveConfirmTitle": "ଇଭାଲ୍‌ରେ ଟୁଲ୍ କଲ୍ ସ୍ୱତଃ-ଅନୁମୋଦନ କରିବେ?",
+    "autoApproveConfirmBody": "ଏହି ଡାଟାସେଟ୍‌ର ରିପ୍ଲେରେ ବ୍ୟକ୍ତିଙ୍କ ପାଇଁ ଅପେକ୍ଷା କରୁଥିବା ପ୍ରତ୍ୟେକ ଟୁଲ୍ କଲ୍ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଅନୁମୋଦିତ ହେବ। ଅନୁମୋଦିତ କେବଳ-ପଢ଼ିବା ଟୁଲ୍ ପ୍ରକୃତରେ ଚାଲେ; ଯାହା କିଛି ବଦଳାଇପାରେ ସେଗୁଡ଼ିକ ତଥାପି ଅନୁକରଣ ହୁଏ। ଏହା କେବଳ ଟେଷ୍ଟ ଡାଟା ଥିବା ୱାର୍କସ୍ପେସ୍‌ରେ କରନ୍ତୁ। ରନ୍ ଗୁଡ଼ିକ ରେକର୍ଡ କରେ ଯେ ସେଗୁଡ଼ିକ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଅନୁମୋଦିତ ହୋଇଥିଲା।",
+    "autoApproveConfirm": "ସ୍ୱତଃ-ଅନୁମୋଦନ ଚାଲୁ କରନ୍ତୁ",
+    "trajectoryLabel": "ଟ୍ରାଜେକ୍ଟୋରୀ ଯାଞ୍ଚ",
+    "trajectoryOn": "On",
+    "trajectoryOff": "ଉପଲବ୍ଧ ନାହିଁ",
+    "trajectoryHelpOn": "ଆଶାକୃତ ଟ୍ରାଜେକ୍ଟୋରୀ ଥିବା କେସ୍‌କୁ ଏଜେଣ୍ଟ କେଉଁ ଟୁଲ୍ କେଉଁ କ୍ରମରେ କଲ୍ କଲା ତାହା ଆଧାରରେ ସ୍କୋର୍ ଦିଆଯାଏ। ଏହାକୁ ଆପଣଙ୍କ ପ୍ରଶାସକ ସମ୍ପୂର୍ଣ୍ଣ ଡିପ୍ଲୟମେଣ୍ଟ ପାଇଁ ଚାଲୁ କରନ୍ତି, ପ୍ରତ୍ୟେକ ଡାଟାସେଟ୍ ପାଇଁ ନୁହେଁ।",
+    "trajectoryHelpOff": "ଟ୍ରାଜେକ୍ଟୋରୀ ଯାଞ୍ଚ ଏଠାରେ ଉପଲବ୍ଧ ନାହିଁ। ସେଗୁଡ଼ିକୁ ଆପଣଙ୍କ ପ୍ରଶାସକ ସମ୍ପୂର୍ଣ୍ଣ ଡିପ୍ଲୟମେଣ୍ଟ ପାଇଁ ଚାଲୁ କରନ୍ତି, ଏବଂ ଇଭାଲ୍ ଅନ୍ତର୍ଭୁକ୍ତ ଥିବା ପ୍ଲାନ୍ ଦରକାର।",
+    "trajectoryNeedsFull": "ଏହି ଡାଟାସେଟ୍ କେବଳ ଟେକ୍ସଟ୍, ତେଣୁ ଆଶାକୃତ ଟ୍ରାଜେକ୍ଟୋରୀ ଥିବା କେସ୍‌କୁ ସ୍କୋର୍ ଦିଆଯିବ ନାହିଁ। ପୂର୍ଣ୍ଣ ପାଇପଲାଇନ୍ ଚାଲୁ କରନ୍ତୁ।",
+    "runAutoApproved": "ସ୍ୱତଃ-ଅନୁମୋଦିତ",
+    "runAutoApprovedTitle": "ଏହି ରନ୍‌ର କୌଣସି ଟୁଲ୍ କଲ୍‌ର ନିଷ୍ପତ୍ତି କୌଣସି ବ୍ୟକ୍ତି ନେଇନାହାଁନ୍ତି; ଇଭାଲ୍ ସାଣ୍ଡବକ୍ସ ସେଗୁଡ଼ିକୁ ଅନୁମୋଦନ କଲା।",
+    "toolCallsLabel": "ଏହି ରିପ୍ଲେରେ ଟୁଲ୍ କଲ୍",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "ବିଫଳ",
+    "toolStatusNotRun": "ଚାଲିଲା ନାହିଁ",
+    "toolStatusAwaitingApproval": "ଅନୁମୋଦନ ପାଇଁ ଅପେକ୍ଷା",
+    "toolStatusReplayed": "ରିପ୍ଲେ ହେଲା",
+    "samplingTitle": "ପୃଷ୍ଠଭୂମି ଗୁଣବତ୍ତା ସ୍କୋରିଂ",
+    "samplingLoading": "ସ୍କୋରିଂ ହାର ଲୋଡ୍ ହେଉଛି...",
+    "samplingUnavailable": "ପୃଷ୍ଠଭୂମି ବିଚାରକ କେତେ ଲାଇଭ୍ ଟର୍ନକୁ ସ୍କୋର୍ ଦିଏ ତାହା ଆପଣଙ୍କ ପ୍ଲାଟଫର୍ମ ପ୍ରଶାସକ ସ୍ଥିର କରନ୍ତି ଏବଂ ଏଠାରେ ଦେଖାଯାଏ ନାହିଁ।",
+    "samplingValue": "ପ୍ରାୟ {percent}% ଲାଇଭ୍ ଟର୍ନକୁ ପୃଷ୍ଠଭୂମି ଗୁଣବତ୍ତା ବିଚାରକ ସ୍କୋର୍ ଦିଅନ୍ତି।",
+    "samplingHelp": "କମ୍ ହାର ଖର୍ଚ୍ଚ କମାଏ ଏବଂ ଉପରର ଧାରାରେ କମ୍ ସ୍କୋର୍ ଥାଏ। ଏହି ମୂଲ୍ୟ ଏଠାରେ କେବଳ ପଢ଼ିବା ପାଇଁ।",
+    "samplingSource_default": "ଡିଫଲ୍ଟ",
+    "samplingSource_platform": "ପ୍ଲାଟଫର୍ମ ଦ୍ୱାରା ସେଟ୍",
+    "samplingSource_tenant": "ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍ ପାଇଁ ସେଟ୍",
+    "samplingSource_agent": "ଏହି ଏଜେଣ୍ଟ ପାଇଁ ସେଟ୍",
+    "modeDefault": "ୱାର୍କସ୍ପେସ୍ ଡିଫଲ୍ଟ",
+    "modeDefaultHelp": "ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍‌ର ସେଟିଂ ଅନୁସରଣ କରେ (ଏଡମିନ୍ ବଦଳାଇ ନଥିଲେ ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍)। ପ୍ରତ୍ୟେକ ରନ୍ ତଥାପି ନିଜର ମୋଡ୍ ବାଛିପାରେ।",
+    "modeDefaultCurrent": "ବର୍ତ୍ତମାନ: {mode}",
+    "modeNameFull": "ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍",
+    "modeNameQuick": "ଦ୍ରୁତ (କେବଳ ଲେଖା)",
+    "badgeFull": "ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍",
+    "badgeQuick": "ଦ୍ରୁତ",
+    "datasetModePinnedTitle": "ଏହି ଡାଟାସେଟ୍ ସର୍ବଦା ଏହିପରି ରିପ୍ଲେ ହୁଏ। ଗୋଟିଏ ରନ୍ ତଥାପି ଅନ୍ୟ ମୋଡ୍ ବାଛିପାରେ।",
+    "datasetModeDefaultTitle": "ରନ୍ କିପରି ରିପ୍ଲେ ହେବ ସେ ବିଷୟରେ ଏହି ଡାଟାସେଟ୍ ୱାର୍କସ୍ପେସ୍ ଡିଫଲ୍ଟ ଅନୁସରଣ କରେ।",
+    "runModeLabel": "ପରବର୍ତ୍ତୀ ରନ୍ ପାଇଁ ରିପ୍ଲେ ମୋଡ୍",
+    "runModeInherit": "ଡାଟାସେଟ୍‌ର ସେଟିଂ ବ୍ୟବହାର କରନ୍ତୁ",
+    "runModeHelp": "ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍ ଏଜେଣ୍ଟକୁ ତାର ଟୁଲ୍, ଗାର୍ଡରେଲ୍ ଓ ଅନୁମୋଦନ ସହ ସୁରକ୍ଷିତ ସାଣ୍ଡବକ୍ସରେ ଚଲାଏ: କେବଳ ପଢ଼ୁଥିବା ଟୁଲ୍ ପ୍ରକୃତରେ ଚାଲେ, ଡାଟା ବଦଳାଇପାରୁଥିବା କିମ୍ବା କିଛି ପଠାଇପାରୁଥିବା ସବୁକିଛି ଅନୁକରଣ ହୁଏ। ଦ୍ରୁତ ମୋଡ୍ ଟୁଲ୍ ଗୁଡ଼ିକୁ ଅଟକାଇ ରଖେ ଓ କେବଳ ଲିଖିତ ଉତ୍ତର ପରୀକ୍ଷା କରେ।",
+    "runModeFullTitle": "ଏହି ରନ୍ ଇଭାଲ୍ ସାଣ୍ଡବକ୍ସରେ ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍ ବ୍ୟବହାର କଲା।",
+    "runModeQuickTitle": "ଏହି ରନ୍ କେବଳ-ଲେଖା ଦ୍ରୁତ ରିପ୍ଲେ ଥିଲା: ଏଜେଣ୍ଟର ଟୁଲ୍ ଅଟକାଇ ରଖାଯାଇଥିଲା।",
+    "runSimulatedTools": "ଏହି ରନ୍‌ରେ ଅନୁକରଣ କରାଗଲା, ଚଲାଯାଇନାହିଁ (ସେଗୁଡ଼ିକ ଡାଟା ବଦଳାଇପାରିଥାନ୍ତା କିମ୍ବା ପ୍ଲାଟଫର୍ମ ବାହାରେ ପହଞ୍ଚିପାରିଥାନ୍ତା): {tools}।",
+    "toolStatusSimulated": "ଅନୁକରଣ କରାଗଲା, ଚଲାଯାଇନାହିଁ"
+  },
+  "assistant": {
+    "taskPhoneLabel": "ଆପଣଙ୍କ ଫୋନ୍ ନମ୍ବର",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "ସେହି ନମ୍ବର ସଞ୍ଚୟ କରାଯାଇପାରିଲା ନାହିଁ।",
+    "searchingWebFor": "Searching the web for “{target}”…",
+    "readingPageAt": "Reading {target}…",
+    "researchingTopic": "Researching “{target}”…",
+    "statusWriting": "Writing the answer…",
+    "quietFor": "still waiting on the model ({duration} since the last update)",
+    "toolStepsLabel": "Steps",
+    "chipDone": "finished",
+    "chipFailed": "failed",
+    "moreSteps": "+{n} more",
+    "sourcesLabel": "Sources",
+    "closePanel": "Close the panel",
+    "conversationLabel": "Conversation",
+    "copiedReply": "Copied",
+    "jumpToLatest": "Jump to the latest message"
+  },
+  "agentLab": {
+    "wtLabel": "ଏଜେଣ୍ଟର ଟୁଲ୍ ସହ ଚଲାନ୍ତୁ",
+    "wtHelp": "ବନ୍ଦ: ପ୍ରତ୍ୟେକ ଉତ୍ତର ଗୋଟିଏ ସାଧାରଣ ମଡେଲ୍ କଲ୍। ଚାଲୁ: ଉତ୍ତରଗୁଡ଼ିକ ଚାଟ୍ ଟର୍ନ ବ୍ୟବହାର କରୁଥିବା ସେହି ଟୁଲ୍ ପାଇପଲାଇନରୁ ଆସେ, ତେଣୁ ଟୁଲ୍ ଚାଲେ, ଗାର୍ଡରେଲ୍ ଲାଗୁ ହୁଏ ଏବଂ ପଦକ୍ଷେପ ସୀମା ମାନାଯାଏ। ଜଣେ ବ୍ୟକ୍ତିଙ୍କ ଅନୁମୋଦନ ଦରକାର ହେଉଥିବା କଲ୍ ବାକି ଅନୁମୋଦନ ଭାବେ ଅପେକ୍ଷା କରେ।",
+    "wtUnavailable": "ଏହି ଇନଷ୍ଟଲେସନରେ ଟୁଲ୍ ସହ ଲ୍ୟାବ୍ ଚଲାଇବା ବନ୍ଦ ଅଛି। ଏହାକୁ ସକ୍ଷମ କରିବାକୁ ଜଣେ ପ୍ରଶାସକଙ୍କୁ କୁହନ୍ତୁ।",
+    "wtRefused": "ଏହି ରନ୍ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଗଲା: {reason}",
+    "wtActive": "ଏହି ରନ୍‌ରେ ଟୁଲ୍ ବାସ୍ତବରେ ଚାଲିବ, ସେମାନଙ୍କ ପାର୍ଶ୍ୱ ପ୍ରଭାବ ସହିତ।",
+    "wtConfirmTitle": "ଏଜେଣ୍ଟର ଟୁଲ୍ ସହ ଲ୍ୟାବ୍ ଚଲାଇବେ?",
+    "wtConfirmBody": "ପ୍ରତ୍ୟେକ ନମୁନା ଏଜେଣ୍ଟର ପ୍ରକୃତ ଟୁଲ୍ କଲ୍ କରିପାରେ, ଏବଂ ସେହି କଲ୍‌ର ବାର୍ତ୍ତା ପଠାଇବା କିମ୍ବା ଡାଟା ଲେଖିବା ଭଳି ପ୍ରକୃତ ପ୍ରଭାବ ହୋଇପାରେ। ଅନୁମୋଦନ ଦରକାର ହେଉଥିବା କଲ୍ ଜଣେ ବ୍ୟକ୍ତିଙ୍କୁ ଅପେକ୍ଷା କରିବ। ଏହାକୁ କେବଳ ଟେଷ୍ଟ ଏଜେଣ୍ଟ କିମ୍ବା ଟେଷ୍ଟ ଡାଟା ସହ ବ୍ୟବହାର କରନ୍ତୁ।",
+    "wtConfirm": "ଟୁଲ୍ ବ୍ୟବହାର କରନ୍ତୁ"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "ଏଜେଣ୍ଟ ସୀମା",
+        "description": "ବନ୍ଦ ହେବା ପୂର୍ବରୁ ଗୋଟିଏ ଏଜେଣ୍ଟ ଟର୍ନ କେତେ କାମ କରିପାରେ।"
+      },
+      "approvals": {
+        "label": "ଅନୁମୋଦନ",
+        "description": "ଜଣେ ବ୍ୟକ୍ତି କାର୍ଯ୍ୟ ଅନୁମୋଦନ କିମ୍ବା ପ୍ରତ୍ୟାଖ୍ୟାନ କରିବା ପରେ କଣ ହୁଏ, ଏବଂ ଅନୁରୋଧ କେତେ ସମୟ ଅପେକ୍ଷା କରେ।"
+      },
+      "chat": {
+        "label": "କଥାବାର୍ତ୍ତାର ଆଚରଣ",
+        "description": "ଉତ୍ତର କିପରି ଶେଷ, ପୁନଃଚେଷ୍ଟା, କ୍ୟାଶ୍ ଓ ଜାରି ରଖାଯାଏ।"
+      },
+      "routing": {
+        "label": "ମଡେଲ୍ ରୁଟିଂ",
+        "description": "କେଉଁ ବାର୍ତ୍ତାକୁ ଦ୍ରୁତ ମଡେଲ୍ ପାଇଁ ଯଥେଷ୍ଟ ସରଳ ବୋଲି ଗଣାଯାଏ।"
+      },
+      "memory": {
+        "label": "ମେମୋରୀ",
+        "description": "ଏଜେଣ୍ଟ କେତୋଟି ସ୍ମୃତି ରଖେ ଓ ମନେପକାଏ।"
+      },
+      "attachments": {
+        "label": "ଚାଟ୍ ଅପଲୋଡ୍",
+        "description": "ଲୋକମାନେ ଚାଟ୍ ବାର୍ତ୍ତା ସହ କେତେ ବଡ଼ ଫାଇଲ୍ ଯୋଡ଼ିପାରିବେ।"
+      },
+      "skills": {
+        "label": "ସ୍କିଲ୍",
+        "description": "ସ୍ଥାପିତ ସ୍କିଲ୍‌ର ତାଲିକା ଏଜେଣ୍ଟର ନିର୍ଦ୍ଦେଶର କେତେ ଅଂଶ ବ୍ୟବହାର କରିପାରିବ।"
+      },
+      "aux": {
+        "label": "ପୃଷ୍ଠଭୂମି ମଡେଲ୍ କଲ୍",
+        "description": "ସାରାଂଶ, ସହାୟତା ଓ କମ୍ପାକ୍ସନ୍ କେଉଁ ମଡେଲ୍ ବ୍ୟବହାର କରେ।"
+      },
+      "guardrails": {
+        "label": "ସୁରକ୍ଷା ଯାଞ୍ଚ",
+        "description": "ସ୍ୱୟଂଚାଳିତ ସୁରକ୍ଷା ଯାଞ୍ଚ କେତେ କଠୋର। ଏଗୁଡ଼ିକୁ କେବଳ ପ୍ଲାଟଫର୍ମ ସେଟିଂଠାରୁ କଡ଼ା କରାଯାଇପାରିବ।"
+      },
+      "quality": {
+        "label": "ମୂଲ୍ୟାଙ୍କନ",
+        "description": "ଟେଷ୍ଟ ରନ୍ ଏବଂ AI ବିଚାରକ କିପରି ଆଚରଣ କରନ୍ତି।"
+      },
+      "delegation": {
+        "label": "କାମ ଅର୍ପଣ",
+        "description": "ଗୋଟିଏ ଏଜେଣ୍ଟ ଏକାସାଙ୍ଗରେ ଅନ୍ୟ ଏଜେଣ୍ଟଙ୍କୁ କେତେ କାମ ଦେଇପାରେ।"
+      },
+      "knowledge": {
+        "label": "ଜ୍ଞାନ ସନ୍ଧାନ",
+        "description": "ସର୍ବୋତ୍ତମ ଅଂଶ ବାଛିବା ପୂର୍ବରୁ ଆପଣଙ୍କ ଅପଲୋଡ୍ କରାଯାଇଥିବା ଡକ୍ୟୁମେଣ୍ଟର ସନ୍ଧାନ ପ୍ରାର୍ଥୀମାନଙ୍କୁ କେତେ ବ୍ୟାପକ ଭାବେ ସଂଗ୍ରହ କରେ।"
+      },
+      "learning": {
+        "label": "ଶିକ୍ଷଣ",
+        "description": "ଏଜେଣ୍ଟର ଶିକ୍ଷଣ ନୀତି ବିଭିନ୍ନ ବିକଳ୍ପ କିପରି ପରୀକ୍ଷା କରେ।"
+      },
+      "providers": {
+        "label": "AI ପ୍ରଦାତା",
+        "description": "ସଂଯୁକ୍ତ AI ପ୍ରଦାତା କି କାମ କରିବା ବନ୍ଦ କଲେ ସେଗୁଡ଼ିକ କିପରି ବ୍ୟବହୃତ ହୁଏ।"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "ପ୍ରତ୍ୟେକ ଟର୍ନରେ ସର୍ବାଧିକ ଟୁଲ୍ କଲ୍",
+          "description": "ଗୋଟିଏ ଟର୍ନକୁ ବନ୍ଦ କରି ତା ପାଖରେ ଯାହା ଅଛି ତାହା ସହ ଉତ୍ତର ଦେବାକୁ କୁହାଯିବା ପୂର୍ବରୁ ସେ ସର୍ବାଧିକ କେତୋଟି ଟୁଲ୍ କଲ୍ କରିପାରିବ।",
+          "help": "ଲମ୍ବା ବହୁ-ପଦକ୍ଷେପ କାମ କରୁଥିବା ଏଜେଣ୍ଟ ପାଇଁ ବଢ଼ାନ୍ତୁ। ନିୟନ୍ତ୍ରଣ ବାହାରର ଲୁପ୍ ଅଟକାଇବାକୁ ଓ ଖର୍ଚ୍ଚ ପୂର୍ବାନୁମେୟ ରଖିବାକୁ କମାନ୍ତୁ। ୱାର୍କସ୍ପେସ୍ କିମ୍ବା ପ୍ଲାଟଫର୍ମ ପାଇଁ ଦେଖାଯାଇଥିବା ମୂଲ୍ୟ ଏକ ମାନକ ଏଜେଣ୍ଟର ମୂଳ ସଂଖ୍ୟା: ଏଜେଣ୍ଟର ସ୍ୱାୟତ୍ତତା ସ୍ତର ରନ୍ ସମୟରେ ଏହାକୁ ଅଦଳବଦଳ କରେ, ତେଣୁ ଅଧିକ କିମ୍ବା କମ୍ ସ୍ୱାୟତ୍ତ ଏଜେଣ୍ଟ ଅନ୍ୟ ସଂଖ୍ୟା ବ୍ୟବହାର କରିପାରେ। ଏଜେଣ୍ଟର ନିଜସ୍ୱ ମୂଲ୍ୟ ଯେପରି ସେଟ୍ ହୋଇଛି ସେହିପରି ବ୍ୟବହୃତ ହୁଏ।"
+        },
+        "turnTimeoutSeconds": {
+          "label": "ପ୍ରତ୍ୟେକ ଟର୍ନରେ ସର୍ବାଧିକ ସମୟ",
+          "description": "ଗୋଟିଏ ଟର୍ନ ବନ୍ଦ ହେବା ପୂର୍ବରୁ କେତେ ସମୟ ଚାଲିପାରିବ।",
+          "help": "ମନ୍ଥର ଗବେଷଣା କିମ୍ବା କୋଡ୍ କାର୍ଯ୍ୟ ପାଇଁ ବଢ଼ାନ୍ତୁ। ସମୟ ସରିଯାଇଥିବା ଟର୍ନ ଏପର୍ଯ୍ୟନ୍ତ ଯାହା କରାଯାଇଛି ତାହା ସହ ଶେଷ ହୁଏ।"
+        },
+        "toolTimeoutSeconds": {
+          "label": "ପ୍ରତ୍ୟେକ ଟୁଲ୍ କଲ୍‌ରେ ସର୍ବାଧିକ ସମୟ",
+          "description": "ଗୋଟିଏ ଟୁଲ୍ କଲ୍ ବନ୍ଦ ହେବା ପୂର୍ବରୁ କେତେ ସମୟ ଚାଲିପାରେ। ପ୍ଲାଟଫର୍ମ ଡିଫଲ୍ଟରେ କୌଣସି ସୀମା ନାହିଁ; ସେତେବେଳେ ପ୍ରତ୍ୟେକ ଟୁଲ୍ ନିଜର ଟାଇମଆଉଟ୍ ରଖେ।",
+          "help": "ଗୋଟିଏ ମନ୍ଥର ଟୁଲ୍ ସମ୍ପୂର୍ଣ୍ଣ କଥାବାର୍ତ୍ତାକୁ ଅଟକାଇପାରେ ଯଦି, ସୀମା ସେଟ୍ କରନ୍ତୁ। ବନ୍ଦ କରାଯାଇଥିବା କଲ୍‌ର କୌଣସି ପ୍ରଭାବ ଥିଲା କି ନାହିଁ ଜଣାନାହିଁ, ତେଣୁ ଏଜେଣ୍ଟକୁ କୁହାଯାଏ ଯେ ଏହା ସଫଳ ହୋଇଥିଲା ବୋଲି ଧରନ୍ତୁ ନାହିଁ।"
+        },
+        "toolOutputMaxChars": {
+          "label": "ସବୁଠାରୁ ଲମ୍ବା ଟୁଲ୍ ଫଳାଫଳ",
+          "description": "ଗୋଟିଏ ଟୁଲ୍ ଫଳାଫଳର କେତୋଟି ଅକ୍ଷର ମଡେଲ୍‌କୁ ଦିଆଯାଏ; ବାକି କଟାଯାଏ।",
+          "help": "ଏଜେଣ୍ଟକୁ ଲମ୍ବା ଡକ୍ୟୁମେଣ୍ଟ କିମ୍ବା API ପ୍ରତିକ୍ରିୟା ସମ୍ପୂର୍ଣ୍ଣ ପଢ଼ିବାକୁ ହେଲେ ବଢ଼ାନ୍ତୁ, ପ୍ରତି ଟର୍ନରେ ଅଧିକ ଟୋକେନ୍‌ର ମୂଲ୍ୟରେ। ଖର୍ଚ୍ଚ ବଞ୍ଚାଇବାକୁ କମାନ୍ତୁ।"
+        },
+        "retrievalTopK": {
+          "label": "ପ୍ରତ୍ୟେକ ସନ୍ଧାନରେ ଜ୍ଞାନ ଅଂଶ",
+          "description": "ଗୋଟିଏ ଜ୍ଞାନ ଭଣ୍ଡାର ସନ୍ଧାନ ଏଜେଣ୍ଟକୁ କେତୋଟି ଅଂଶ ଫେରାଏ।",
+          "help": "ଅଧିକ ଅଂଶ ଏଜେଣ୍ଟକୁ କାମ କରିବାକୁ ଅଧିକ ସାମଗ୍ରୀ ଦିଏ କିନ୍ତୁ ଅଧିକ ଟୋକେନ୍ ଖର୍ଚ୍ଚ ହୁଏ ଏବଂ ଗୋଳମାଳ ବଢ଼ାଇପାରେ। କମ୍ ଅଂଶ ଦ୍ରୁତ ଓ ସସ୍ତା।"
+        },
+        "retrievalMinScore": {
+          "label": "ଗୋଟିଏ ଅଂଶର ସର୍ବନିମ୍ନ ପ୍ରାସଙ୍ଗିକତା",
+          "description": "ଗୋଟିଏ ଜ୍ଞାନ ଅଂଶ ଫେରିବା ପାଇଁ କେତେ ପ୍ରାସଙ୍ଗିକ ହେବା ଉଚିତ। 0 ପ୍ରତ୍ୟେକ ହିଟ୍ ଫେରାଏ।",
+          "help": "ଏଜେଣ୍ଟ ଅପ୍ରାସଙ୍ଗିକ ଅଂଶ ଉଦ୍ଧୃତ କଲେ ବଢ଼ାନ୍ତୁ। ବହୁତ ଅଧିକ ହେଲେ ତାକୁ କିଛି ମିଳିନପାରେ।"
+        },
+        "continuationPasses": {
+          "label": "ଅସମ୍ପୂର୍ଣ୍ଣ ଉତ୍ତର ପରେ ଅତିରିକ୍ତ ପାସ୍",
+          "description": "ଘୋଷଣା କରାଯାଇଥିବା କିନ୍ତୁ ନିଆଯାଇନଥିବା ପଦକ୍ଷେପରେ ମଡେଲ୍‌ର ଉତ୍ତର ଅଟକିଗଲେ ତାକୁ ଆଉ କେତେ ଥର ଜାରି ରଖିବାକୁ କୁହାଯାଏ।",
+          "help": "ଯେଉଁ ଏଜେଣ୍ଟ ପ୍ରାୟତଃ ଏକ ପଦକ୍ଷେପ ଘୋଷଣା କରି ଅଟକିଯାଆନ୍ତି ସେମାନଙ୍କ ପାଇଁ ବଢ଼ାନ୍ତୁ। ପ୍ରତ୍ୟେକ ଅତିରିକ୍ତ ପାସ୍ ଗୋଟିଏ ମଡେଲ୍ କଲ୍ ଖର୍ଚ୍ଚ କରେ।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "ସୀମା ପରେ ଉତ୍ତର ଦିଆଯାଇଥିବା କଲ୍",
+          "description": "ଟର୍ନର ଟୁଲ୍ ସୀମା ଶେଷ ହେବା ପରେ ମଡେଲ୍ ଆଉ କେତେ ଟୁଲ୍ କଲ୍ ଚେଷ୍ଟା କରିପାରିବ। ପ୍ରତ୍ୟେକକୁ \"ଯାହା ଅଛି ତାହା ଦ୍ୱାରା ଉତ୍ତର ଦିଅ\" ବୋଲି ଟିପ୍ପଣୀ ସହ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ; ଏହି ସଂଖ୍ୟା ପରେ ଟର୍ନ ତ୍ରୁଟି ସହ ବନ୍ଦ ହୁଏ।",
+          "help": "ମଡେଲ୍ ଟୁଲ୍ କଲ୍ କରିବା ବନ୍ଦ କରିବାକୁ କିଛି ଚେଷ୍ଟା ଆବଶ୍ୟକ କଲେ ଏହାକୁ ବଢ଼ାନ୍ତୁ। ଲୁପ୍‌ରେ ଥିବା ଟର୍ନ ଶୀଘ୍ର ଶେଷ କରିବାକୁ କମାନ୍ତୁ। 0 ସୀମା ଟପିଥିବା ପ୍ରଥମ କଲ୍‌ରେ ଟର୍ନ ବନ୍ଦ କରେ।"
+        },
+        "supervisedDivisor": {
+          "label": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ଟୁଲ୍ ସୀମାର 1/N ପାଆନ୍ତି",
+          "description": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ଟର୍ନର ଟୁଲ୍-କଲ୍ ସୀମାକୁ ଏହି ସଂଖ୍ୟାରେ ଭାଗ କରି ପାଏ, କିନ୍ତୁ ତଳେ ଥିବା ସର୍ବନିମ୍ନରୁ କେବେ କମ୍ ନୁହେଁ।",
+          "help": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟଙ୍କୁ ଅଧିକ କଡ଼ାକଡ଼ି ରଖିବାକୁ ବଢ଼ାନ୍ତୁ। 1 ସେମାନଙ୍କୁ ପୂର୍ଣ୍ଣ ସୀମା ଦିଏ।"
+        },
+        "supervisedMinSteps": {
+          "label": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ପାଇଁ ସର୍ବନିମ୍ନ ଟୁଲ୍ କଲ୍",
+          "description": "ଉପରର ସଂଖ୍ୟା ଯେତେ ଅଧିକ ହେଲେ ବି, ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ପାଉଥିବା ସବୁଠୁ ଛୋଟ ଟୁଲ୍-କଲ୍ ସୀମା।",
+          "help": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ଅନେକ ପଦକ୍ଷେପର ସରଳ କାମ ଶେଷ କରିପାରିବା ପାଇଁ ଏହାକୁ 3 କିମ୍ବା ଅଧିକ ରଖନ୍ତୁ।"
+        },
+        "autonomousMultiplier": {
+          "label": "ପୂର୍ଣ୍ଣ ସ୍ୱାୟତ୍ତ ଏଜେଣ୍ଟ ସୀମାର N ଗୁଣ ପାଆନ୍ତି",
+          "description": "ପୂର୍ଣ୍ଣ ସ୍ୱାୟତ୍ତ ଏଜେଣ୍ଟ ଟର୍ନର ଟୁଲ୍-କଲ୍ ସୀମାକୁ ଏହି ସଂଖ୍ୟା ଦ୍ୱାରା ଗୁଣନ କରି ପାଏ।",
+          "help": "କେହି ନଦେଖି ଲମ୍ବା କାମ ଚଳାଉଥିବା ଏଜେଣ୍ଟ ପାଇଁ ବଢ଼ାନ୍ତୁ; ତେବେ ସେମାନେ ଗୋଟିଏ ଟର୍ନରେ ଅଧିକ କଲ୍ ଓ ଟଙ୍କା ଖର୍ଚ୍ଚ କରିପାରିବେ। 1 ସେମାନଙ୍କୁ ମାନକ ସୀମା ଦିଏ।"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "ଅନୁମୋଦନ ପରେ ଜାରି ରଖନ୍ତୁ",
+          "description": "ଜଣେ ବ୍ୟକ୍ତି କାର୍ଯ୍ୟ ଅନୁମୋଦନ କଲେ, ଏଜେଣ୍ଟ ନୂଆ ବାର୍ତ୍ତା ପାଇଁ ଅପେକ୍ଷା ନକରି ନିଜେ କାର୍ଯ୍ୟ ଶେଷ କରେ।",
+          "help": "ପ୍ରତ୍ୟେକ ଅନୁମୋଦିତ କାର୍ଯ୍ୟ ଟର୍ନକୁ ଶେଷ କରୁ ଏବଂ ହାତରେ ଫଲୋ-ଅପ୍ ହେଉ ବୋଲି ଚାହୁଁଥିଲେ ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ।"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "ପ୍ରତ୍ୟାଖ୍ୟାନ ପରେ ମଧ୍ୟ ପୃଷ୍ଠଭୂମି ଜବ୍ ଜାରି ରହେ",
+          "description": "ପୃଷ୍ଠଭୂମି ଜବ୍‌ରେ ଜଣେ ବ୍ୟକ୍ତି କାର୍ଯ୍ୟ ପ୍ରତ୍ୟାଖ୍ୟାନ କଲେ, ଜବ୍ ବନ୍ଦ ନହୋଇ ପ୍ରତ୍ୟାଖ୍ୟାନ ଟିପି ଜାରି ରହେ।",
+          "help": "ପ୍ରତ୍ୟାଖ୍ୟାନରେ ଜବ୍ ବନ୍ଦ ହେବା ଉଚିତ ହେଲେ ଏହାକୁ ବନ୍ଦ ରଖନ୍ତୁ। ପ୍ରତ୍ୟାଖ୍ୟାତ ପଦକ୍ଷେପ ବିନା ଜବ୍ ସାଧାରଣତଃ ଶେଷ ହୋଇପାରିଲେ ଚାଲୁ କରନ୍ତୁ।"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "ଅନୁମୋଦନ ଅନୁରୋଧର ମିଆଦ ଶେଷ ହୁଏ",
+          "description": "ଗୋଟିଏ ଅନୁମୋଦନ ଅନୁରୋଧ ମିଆଦ ଶେଷ ହେବା ପୂର୍ବରୁ ନିଷ୍ପତ୍ତି ପାଇଁ କେତେ ସମୟ ଅପେକ୍ଷା କରେ। 0 ଅର୍ଥ ଅନୁରୋଧର ମିଆଦ କେବେ ଶେଷ ହୁଏ ନାହିଁ।",
+          "help": "ମିଆଦ ନଥିଲେ, ଭୁଲିଯାଇଥିବା ଅନୁରୋଧ ଅନିର୍ଦ୍ଦିଷ୍ଟକାଳ ଖୋଲା ରହେ ଏବଂ ଏଜେଣ୍ଟ ଅପେକ୍ଷା କରୁଥାଏ। ମିଆଦ ଶେଷ ଅନୁରୋଧ ଅନନୁମୋଦିତ ଗଣାଯାଏ।"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "କଟିଯାଇଥିବା ଉତ୍ତର ଶେଷ କରନ୍ତୁ",
+          "description": "ମଡେଲ୍‌ର ଲମ୍ବ ସୀମା କାରଣରୁ ଉତ୍ତର କଟିଗଲେ କିମ୍ବା ବିକୃତ ଟୁଲ୍ କଲ୍‌ରେ ଶେଷ ହେଲେ, ମଡେଲ୍‌କୁ ଜାରି ରଖିବାକୁ କିମ୍ବା ପୁଣି ଚେଷ୍ଟା କରିବାକୁ କୁହନ୍ତୁ।",
+          "help": "କେବଳ ମଡେଲ୍ ସମସ୍ୟା ନିଦାନ କରିବାକୁ ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ; ସେତେବେଳେ ଲୋକେ କଟିଯାଇଥିବା ଉତ୍ତର ଯେମିତି ଅଛି ସେମିତି ଦେଖନ୍ତି।"
+        },
+        "maxContinuations": {
+          "label": "କଟିଯାଇଥିବା ଉତ୍ତରର ସର୍ବାଧିକ ନିରନ୍ତରତା",
+          "description": "ଉତ୍ତର କଟିଗଲା ପରେ ମଡେଲ୍‌କୁ କେତେ ଥର ଜାରି ରଖିବାକୁ କୁହାଯାଏ।",
+          "help": "ପ୍ରତ୍ୟେକ ନିରନ୍ତରତା ଆଉ ଏକ ମଡେଲ୍ କଲ୍। ଲମ୍ବା ଉତ୍ତର ପାଇଁ ବଢ଼ାନ୍ତୁ, ଖର୍ଚ୍ଚ ବଞ୍ଚାଇବାକୁ କମାନ୍ତୁ।"
+        },
+        "maxToolCallRetries": {
+          "label": "ବିକୃତ ଟୁଲ୍ କଲ୍‌ର ସର୍ବାଧିକ ପୁନଃଚେଷ୍ଟା",
+          "description": "ବ୍ୟବହାର ଅଯୋଗ୍ୟ ଆର୍ଗୁମେଣ୍ଟ ସହ ଆସିଥିବା ଟୁଲ୍ କଲ୍‌କୁ ପୁନରାବୃତ୍ତି କରିବାକୁ ମଡେଲ୍‌କୁ କେତେ ଥର କୁହାଯାଏ।",
+          "help": "ଗୋଟିଏ ପୁନଃଚେଷ୍ଟା ଗୋଟିଏ ମଡେଲ୍ କଲ୍ ଖର୍ଚ୍ଚ କରେ। 0 ପ୍ରଥମ ବିକୃତ କଲ୍‌ରେ ହିଁ ହାର ମାନେ।"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "ପ୍ରତ୍ୟେକ ମଡେଲ୍ କଲ୍ ପାଇଁ ଚେଷ୍ଟା",
+          "description": "ପ୍ରଦାତା ବିଫଳ ହେଲେ କିମ୍ବା ବ୍ୟସ୍ତ ଥିଲେ, ପ୍ରଥମ ଚେଷ୍ଟା ସହିତ, ମଡେଲ୍ କଲ୍ କେତେ ଥର ଚେଷ୍ଟା କରାଯାଏ।",
+          "help": "ଅଧିକ ଚେଷ୍ଟା ପ୍ରଦାତାର ଛୋଟ ବାଧା ଲୁଚାଏ କିନ୍ତୁ ବିଫଳ ହେଉଥିବା ଅନୁରୋଧ ତ୍ରୁଟି ଜଣାଇବାକୁ ଅଧିକ ସମୟ ନିଏ।"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "ଟୁଲ୍ ଥିବା ଏଜେଣ୍ଟ ପାଇଁ ଉତ୍ତର ପୁନଃବ୍ୟବହାର କରନ୍ତୁ",
+          "description": "ଟୁଲ୍ ଥିବା ଏଜେଣ୍ଟ ପାଇଁ ସଂରକ୍ଷିତ ଉତ୍ତରର ପୁନଃବ୍ୟବହାରକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଟୁଲ୍ ପରବର୍ତ୍ତୀ ଥର ଅଲଗା କିଛି ଫେରାଇପାରେ ବୋଲି ଡିଫଲ୍ଟ ଭାବେ ବନ୍ଦ।",
+          "help": "ଟୁଲ୍ କେବଳ-ପଢ଼ିବା ଓ ଧୀରେ ବଦଳୁଥିଲେ, ଏବଂ ଆପଣ ଦ୍ରୁତ, ସସ୍ତା ପୁନରାବୃତ୍ତ ଉତ୍ତର ଚାହୁଁଥିଲେ ହିଁ ଚାଲୁ କରନ୍ତୁ। ଲୋକେ ଅଦ୍ୟତନ ନଥିବା ଉତ୍ତର ଦେଖିପାରନ୍ତି।"
+        },
+        "contextTurns": {
+          "label": "ପୁନରାବୃତ୍ତି ଚିହ୍ନଟ କରୁଥିବା ପୂର୍ବ ଟର୍ନ",
+          "description": "ଗୋଟିଏ ବାର୍ତ୍ତା ସଂରକ୍ଷିତ ଉତ୍ତର ପୁନଃବ୍ୟବହାର କରିପାରୁଥିବା ପୁନରାବୃତ୍ତି କି ନାହିଁ ସ୍ଥିର କରିବାକୁ କେତୋଟି ପୂର୍ବ ଟର୍ନର ତୁଳନା ହୁଏ।",
+          "help": "ଅଧିକ ଟର୍ନ ମେଳକୁ କଡ଼ା ଏବଂ କ୍ୟାଶ୍ ହିଟ୍‌କୁ ବିରଳ କରେ।"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "ଫଲୋ-ଅପ୍‌ରେ ଟୁଲ୍ ପ୍ରସ୍ତାବ କରି ରହନ୍ତୁ",
+          "description": "ପରବର୍ତ୍ତୀ ବାର୍ତ୍ତା ଛୋଟ ଫଲୋ-ଅପ୍ ହେଲେ କଥାବାର୍ତ୍ତା ଆଗରୁ ବ୍ୟବହାର କରିଥିବା ଟୁଲ୍ ପ୍ରସ୍ତାବ କରି ରହନ୍ତୁ।",
+          "help": "\"ହଁ\" ଭଳି ଛୋଟ ଉତ୍ତର ସାଧାରଣ ଟୁଲ୍ ଚୟନରୁ ଆରମ୍ଭ ହେବା ଉଚିତ ହେଲେ ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ।"
+        },
+        "stickyToolsWindow": {
+          "label": "ଫଲୋ-ଅପ୍ ଟୁଲ୍ କେତେ ସମୟ ପ୍ରସ୍ତାବିତ ରହେ",
+          "description": "ବ୍ୟବହାର ପରେ ଛୋଟ ଫଲୋ-ଅପ୍ ବାର୍ତ୍ତା ପାଇଁ ଗୋଟିଏ ଟୁଲ୍ କେତେ ସମୟ ପ୍ରସ୍ତାବିତ ରହେ।",
+          "help": "ଲମ୍ବା ୱିଣ୍ଡୋ ଦୀର୍ଘ କାମ ସେସନ୍‌ରେ ସାହାଯ୍ୟ କରେ, ଛୋଟ ୱିଣ୍ଡୋ ଟୁଲ୍ ତାଲିକାକୁ ଛୋଟ ରଖେ।"
+        },
+        "maxStickyTools": {
+          "label": "ଫଲୋ-ଅପ୍‌ରେ ପ୍ରସ୍ତାବିତ ରଖାଯାଉଥିବା ସର୍ବାଧିକ ଟୁଲ୍",
+          "description": "ଛୋଟ ଫଲୋ-ଅପ୍ ବାର୍ତ୍ତାକୁ ନିଆଯାଉଥିବା ସର୍ବାଧିକ ଟୁଲ୍। 0 କିଛି ରଖେ ନାହିଁ।",
+          "help": "ଗୋଟିଏ କାମ ଅନେକ ଟୁଲ୍ ବ୍ୟବହାର କଲେ ବଡ଼ ସଂଖ୍ୟା ସାହାଯ୍ୟ କରେ; ଛୋଟ ସଂଖ୍ୟା ଟୁଲ୍ ତାଲିକାକୁ ଛୋଟ ରଖେ।"
+        },
+        "keepPrimaryModel": {
+          "label": "ଫଲୋ-ଅପ୍ ପାଇଁ ମୁଖ୍ୟ ମଡେଲ୍ ରଖନ୍ତୁ",
+          "description": "ପୂର୍ବରୁ ଟୁଲ୍ ବ୍ୟବହାର କରିଥିବା କଥାବାର୍ତ୍ତାରେ ଛୋଟ ଫଲୋ-ଅପ୍ ଶସ୍ତା ମଡେଲ୍ ବଦଳରେ ଏଜେଣ୍ଟର ମୁଖ୍ୟ ମଡେଲ୍‌ରେ ହିଁ ରହେ।",
+          "help": "ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ ଯେପରି ଖର୍ଚ୍ଚ ରାଉଟିଂ \"ହଁ\" ଭଳି ଫଲୋ-ଅପ୍‌କୁ ଶସ୍ତା ମଡେଲ୍‌କୁ ପଠାଇବ, କିନ୍ତୁ ଚାଲିଥିବା କାମକୁ ଦୁର୍ବଳ ଭାବେ ସମ୍ଭାଳିବାର ଆଶଙ୍କା ଅଛି।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "ଉତ୍ତର ପୁନଃବ୍ୟବହାର ପାଇଁ ପ୍ରଶ୍ନ କେତେ ସମାନ ହେବା ଉଚିତ",
+          "description": "ସମାନ ପ୍ରଶ୍ନର ଉତ୍ତର ପୁନଃବ୍ୟବହାର କରୁଥିବା ଏଜେଣ୍ଟ ପାଇଁ: ସଞ୍ଚିତ ଉତ୍ତର ଦେବାକୁ ନୂଆ ପ୍ରଶ୍ନ ପୂର୍ବ ପ୍ରଶ୍ନର କେତେ ନିକଟ ହେବା ଦରକାର, 0.85 ରୁ 1।",
+          "help": "କମ୍ ସଂଖ୍ୟା ଅଧିକ ପୁନରାବୃତ୍ତିକୁ ଉତ୍ତର ଦିଏ କିନ୍ତୁ ଅନ୍ୟ ପ୍ରଶ୍ନ ପାଇଁ ଉଦ୍ଦିଷ୍ଟ ଉତ୍ତର ଦେବାର ଆଶଙ୍କା ଥାଏ। ଭୁଲ ଉତ୍ତର ମହଙ୍ଗା ପଡ଼ିଲେ ଏହାକୁ ଅଧିକ ରଖନ୍ତୁ। ଉତ୍ତର କେବଳ ସେହି ବ୍ୟକ୍ତିଙ୍କ ପାଇଁ ପୁନଃବ୍ୟବହାର ହୁଏ ଯାହାଙ୍କୁ ତାହା ଦିଆଯାଇଥିଲା।"
+        },
+        "ttl": {
+          "label": "ପୁନଃବ୍ୟବହାରଯୋଗ୍ୟ ଉତ୍ତର କେତେ ସମୟ ରଖାଯାଏ",
+          "description": "ସଞ୍ଚିତ ଉତ୍ତର ବାଦ୍ ଦିଆଯିବା ପୂର୍ବରୁ ସମାନ ପ୍ରଶ୍ନକୁ କେତେ ସମୟ ଦିଆଯାଇପାରେ।",
+          "help": "ଆପଣଙ୍କ ଉତ୍ତର ଶୀଘ୍ର ପୁରୁଣା ହୋଇଗଲେ ଏହାକୁ ଛୋଟ କରନ୍ତୁ।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "ପ୍ରତି ଏଜେଣ୍ଟ ସର୍ବାଧିକ ସଞ୍ଚିତ ଉତ୍ତର",
+          "description": "ଗୋଟିଏ ଏଜେଣ୍ଟ ପୁନଃବ୍ୟବହାର ପାଇଁ କେତେ ଉତ୍ତର ରଖେ। ଏହାଠାରୁ ଅଧିକ ହେଲେ ସବୁଠୁ ପୁରୁଣା ଗୁଡ଼ିକ ବାଦ୍ ଦିଆଯାଏ।",
+          "help": "ବଡ଼ ଭଣ୍ଡାର ଅଧିକ ପୁନରାବୃତ୍ତି ଖୋଜିପାଏ ଓ ଅଧିକ ଷ୍ଟୋରେଜ୍ ବ୍ୟବହାର କରେ।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "କଥାବାର୍ତ୍ତାରେ ଟୁଲ୍ କଲ୍‌ର ରେକର୍ଡ ରଖନ୍ତୁ",
+          "description": "ପ୍ରତ୍ୟେକ ଟର୍ନର ଟୁଲ୍ କଲ୍‌ର ଛୋଟ ରେକର୍ଡ କଥାବାର୍ତ୍ତା ସହ ସଞ୍ଚୟ କରନ୍ତୁ, ଯାହାଦ୍ୱାରା ପରବର୍ତ୍ତୀ ଟର୍ନ ଦେଖିପାରିବ କ'ଣ କରାଯାଇଥିଲା।",
+          "help": "କଥାବାର୍ତ୍ତାର ଇତିହାସ କେବଳ-ଲେଖା ରଖିବାକୁ ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ; ତେବେ ଏଜେଣ୍ଟ ଜାଣିପାରିବ ନାହିଁ ପୂର୍ବ ଟର୍ନରେ ତାର ଟୁଲ୍ କ'ଣ କରିଥିଲା। ଏହା ସମଗ୍ର ୱାର୍କସ୍ପେସ୍‌ରେ ଲାଗୁ ହୁଏ।"
+        },
+        "replayEnabled": {
+          "label": "ମଡେଲ୍‌କୁ ଟୁଲ୍ ରେକର୍ଡ ଦେଖାନ୍ତୁ",
+          "description": "ମଡେଲ୍‌କୁ କଥାବାର୍ତ୍ତା ଦେବା ସମୟରେ ପୂର୍ବ ଟୁଲ୍ କଲ୍‌ର ସଞ୍ଚିତ ରେକର୍ଡ ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ।",
+          "help": "ରେକର୍ଡ ସଞ୍ଚୟ ହେବା ଜାରି ରହିବା ପାଇଁ କିନ୍ତୁ ଏଥିପାଇଁ ମଡେଲ୍‌ର କାମ କରିବା ସ୍ଥାନ ବ୍ୟବହାର ନହେବା ପାଇଁ ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ।"
+        },
+        "replayTurns": {
+          "label": "ଯେଉଁ ପୂର୍ବ ଟର୍ନର ଟୁଲ୍ ରେକର୍ଡ ଦେଖାଯାଏ",
+          "description": "ଟୁଲ୍ ବ୍ୟବହାର କରିଥିବା ସବୁଠୁ ସାମ୍ପ୍ରତିକ ଟର୍ନ ମଧ୍ୟରୁ କେତେଟିର ରେକର୍ଡ ମଡେଲ୍‌କୁ ଦେଖାଯାଏ।",
+          "help": "ବଡ଼ ସଂଖ୍ୟା ଲମ୍ବା କାମ ସେସନ୍‌ରେ ସାହାଯ୍ୟ କରେ କିନ୍ତୁ ମଡେଲ୍‌ର କାମ କରିବା ସ୍ଥାନ ଅଧିକ ବ୍ୟବହାର କରେ।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "ପ୍ରତି ଟର୍ନରେ ତାଲିକାଭୁକ୍ତ ଟୁଲ୍ କଲ୍",
+          "description": "ଗୋଟିଏ ଟର୍ନର କେତେ ଟୁଲ୍ କଲ୍ ରେକର୍ଡରେ ଲେଖାଯାଏ। ପରବର୍ତ୍ତୀ କଲ୍ କେବଳ ଗଣାଯାଏ।",
+          "help": "ଅନେକ କଲ୍ କରୁଥିବା ଓ ପ୍ରତ୍ୟେକଟି ମନେ ରଖିବାକୁ ପଡ଼ୁଥିବା ଟର୍ନ ପାଇଁ ବଢ଼ାନ୍ତୁ।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "ପ୍ରତି ଟର୍ନରେ ସବୁଠୁ ଲମ୍ବା ଟୁଲ୍ ରେକର୍ଡ",
+          "description": "ଗୋଟିଏ ଟର୍ନର ରେକର୍ଡର କେତେ ଅକ୍ଷର ମଡେଲ୍‌କୁ ଦେଖାଯାଏ; ବାକି ଗଣାଯାଏ, ତାଲିକାଭୁକ୍ତ ହୁଏ ନାହିଁ।",
+          "help": "ପରବର୍ତ୍ତୀ ପ୍ରତ୍ୟେକ ଟର୍ନରେ ଖର୍ଚ୍ଚ ବଞ୍ଚାଇବାକୁ କମାନ୍ତୁ, ଅଧିକ ବିବରଣୀ ରଖିବାକୁ ବଢ଼ାନ୍ତୁ।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "ସବୁଠୁ ବଡ଼ ଛବି ଅପଲୋଡ୍ (MB)",
+          "description": "ଚାଟ୍ ବାର୍ତ୍ତା ସହ କେହି ଯୋଡ଼ିପାରିବା ସବୁଠୁ ବଡ଼ ଛବି, ମେଗାବାଇଟ୍‌ରେ। ପ୍ଲାଟଫର୍ମର ଏକ ସମଗ୍ର ଫାଇଲ୍ ସୀମା ମଧ୍ୟ ଅଛି ଯାହାକୁ ଏହା ଅତିକ୍ରମ କରିପାରିବ ନାହିଁ।",
+          "help": "ଫଟୋ ଓ ସ୍କ୍ରିନସଟ୍ ପାଇଁ ବଢ଼ାନ୍ତୁ; ବଡ଼ ଫାଇଲ୍ ପଠାଇବାରେ ମନ୍ଥର ଓ ମଡେଲ୍‌ର ଅଧିକ କୋଟା ବ୍ୟବହାର କରେ।"
+        },
+        "maxAudioMb": {
+          "label": "ସବୁଠୁ ବଡ଼ ଅଡିଓ ଅପଲୋଡ୍ (MB)",
+          "description": "ଚାଟ୍ ବାର୍ତ୍ତା ସହ କେହି ଯୋଡ଼ିପାରିବା ସବୁଠୁ ବଡ଼ ଅଡିଓ ଫାଇଲ୍, ମେଗାବାଇଟ୍‌ରେ। ପ୍ଲାଟଫର୍ମର ଏକ ସମଗ୍ର ଫାଇଲ୍ ସୀମା ମଧ୍ୟ ଅଛି ଯାହାକୁ ଏହା ଅତିକ୍ରମ କରିପାରିବ ନାହିଁ।",
+          "help": "ଲମ୍ବା ରେକର୍ଡିଂ ପାଇଁ ବଢ଼ାନ୍ତୁ; ବଡ଼ ଫାଇଲ୍ ପଠାଇବାରେ ମନ୍ଥର ଓ ମଡେଲ୍‌ର ଅଧିକ କୋଟା ବ୍ୟବହାର କରେ।"
+        },
+        "maxVideoMb": {
+          "label": "ସବୁଠୁ ବଡ଼ ଭିଡିଓ ଅପଲୋଡ୍ (MB)",
+          "description": "ଚାଟ୍ ବାର୍ତ୍ତା ସହ କେହି ଯୋଡ଼ିପାରିବା ସବୁଠୁ ବଡ଼ ଭିଡିଓ, ମେଗାବାଇଟ୍‌ରେ। ପ୍ଲାଟଫର୍ମର ଏକ ସମଗ୍ର ଫାଇଲ୍ ସୀମା ମଧ୍ୟ ଅଛି ଯାହାକୁ ଏହା ଅତିକ୍ରମ କରିପାରିବ ନାହିଁ।",
+          "help": "ଲମ୍ବା କ୍ଲିପ୍ ପାଇଁ ବଢ଼ାନ୍ତୁ; ବଡ଼ ଫାଇଲ୍ ପଠାଇବାରେ ମନ୍ଥର ଓ ମଡେଲ୍‌ର ଅଧିକ କୋଟା ବ୍ୟବହାର କରେ।"
+        },
+        "maxDocumentMb": {
+          "label": "ସବୁଠୁ ବଡ଼ ଦଲିଲ ଅପଲୋଡ୍ (MB)",
+          "description": "ଚାଟ୍ ବାର୍ତ୍ତା ସହ କେହି ଯୋଡ଼ିପାରିବା ସବୁଠୁ ବଡ଼ ଦଲିଲ କିମ୍ବା ସ୍ପ୍ରେଡସିଟ୍, ମେଗାବାଇଟ୍‌ରେ। ପ୍ଲାଟଫର୍ମର ଏକ ସମଗ୍ର ଫାଇଲ୍ ସୀମା ମଧ୍ୟ ଅଛି ଯାହାକୁ ଏହା ଅତିକ୍ରମ କରିପାରିବ ନାହିଁ।",
+          "help": "ଲମ୍ବା ରିପୋର୍ଟ ଓ ବଡ଼ ଡାଟା ଫାଇଲ୍ ପାଇଁ ବଢ଼ାନ୍ତୁ; ବଡ଼ ଫାଇଲ୍ ପ୍ରକ୍ରିୟାକରଣରେ ମନ୍ଥର।"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "ଅସମ୍ପୂର୍ଣ୍ଣ ଶବ୍ଦାବଳୀରେ ଧକ୍କା",
+          "description": "ଉତ୍ତର ଯାହା କରିବ ବୋଲି କହିଥିଲା ତାହା କରିବା ପୂର୍ବରୁ ଅଟକିଥିବା ପରି ଲାଗିଲେ ମଡେଲ୍‌କୁ ଜାରି ରଖିବାକୁ କୁହନ୍ତୁ।",
+          "help": "ଯେଉଁ ଉତ୍ତର ସେଠାରେ ହିଁ ଶେଷ ହେବା କଥା ସେଥିରେ ଧକ୍କା ଚାଲୁ ହେଲେ ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ।"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "ପୁରୁଣା ଟୁଲ୍ ଫଳାଫଳ ସଫା କରନ୍ତୁ",
+            "description": "ଲମ୍ବା ଟୁଲ୍ ରନ୍‌ରେ, କଥାବାର୍ତ୍ତା ମଡେଲ୍‌ର ସୀମା ମଧ୍ୟରେ ରହିବାକୁ ପୁରୁଣା ଟୁଲ୍ ଫଳାଫଳକୁ ଏକ ଛୋଟ ପ୍ଲେସହୋଲ୍ଡର୍ ଦ୍ୱାରା ବଦଳାନ୍ତୁ।",
+            "help": "ଏଜେଣ୍ଟକୁ ପ୍ରତ୍ୟେକ ପୂର୍ବ ଫଳାଫଳ ଦେଖିବାକୁ ପଡ଼ିଲେ ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ; ଲମ୍ବା ରନ୍ ସେତେବେଳେ ମଡେଲ୍‌ର ଆକାର ସୀମାରେ ପହଞ୍ଚିପାରେ।"
+          },
+          "thresholdChars": {
+            "label": "ସଫା କରିବା ଆରମ୍ଭ କରୁଥିବା ଆକାର",
+            "description": "ପୁରୁଣା ସଫା ହେବା ପୂର୍ବରୁ ଗୋଟିଏ ଟର୍ନର ଟୁଲ୍ ଫଳାଫଳ କେତେ ବଡ଼ ହୋଇପାରିବ।",
+            "help": "ଅଧିକ ଫଳାଫଳ ଦୃଶ୍ୟମାନ ରଖିବାକୁ ବଢ଼ାନ୍ତୁ, ଲମ୍ବା ରନ୍ ଛୋଟ ଓ ସସ୍ତା ରଖିବାକୁ କମାନ୍ତୁ।"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "ସବୁଠାରୁ ଲମ୍ବା ସରଳ ବାର୍ତ୍ତା",
+          "description": "ଏହାଠାରୁ ଲମ୍ବା ବାର୍ତ୍ତାକୁ କେବେ ସରଳ ଗଣାଯାଏ ନାହିଁ। ସରଳ ବାର୍ତ୍ତା ଦ୍ରୁତ, ସସ୍ତା ମଡେଲ୍‌କୁ ଯାଇପାରେ।",
+          "help": "ଗୁଣବତ୍ତା ପାଇଁ ଅଧିକ ବାର୍ତ୍ତା ମୁଖ୍ୟ ମଡେଲ୍‌କୁ ପଠାଇବାକୁ କମାନ୍ତୁ; ଖର୍ଚ୍ଚ ବଞ୍ଚାଇବାକୁ ବଢ଼ାନ୍ତୁ।"
+        },
+        "maxClauses": {
+          "label": "ସରଳ ବାର୍ତ୍ତାରେ ସର୍ବାଧିକ ବାକ୍ୟ",
+          "description": "ଏହାଠାରୁ ଅଧିକ ବାକ୍ୟ ଥିବା ବାର୍ତ୍ତାକୁ କେବେ ସରଳ ଗଣାଯାଏ ନାହିଁ।",
+          "help": "ଗୁଣବତ୍ତା ପାଇଁ ଅଧିକ ବାର୍ତ୍ତା ମୁଖ୍ୟ ମଡେଲ୍‌କୁ ପଠାଇବାକୁ କମାନ୍ତୁ।"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "ପ୍ରତ୍ୟେକ ଟର୍ନରେ ମନେପକାଯାଉଥିବା ଏଜେଣ୍ଟ ସ୍ମୃତି",
+          "description": "ପ୍ରତ୍ୟେକ ବାର୍ତ୍ତା ପାଇଁ ଏଜେଣ୍ଟର ନିଜ ସ୍ମୃତି ମଧ୍ୟରୁ କେତୋଟି ଦେଖାଯାଏ।",
+          "help": "ଅଧିକ ସ୍ମୃତି ଅଧିକ ପ୍ରସଙ୍ଗ ଦିଏ କିନ୍ତୁ ଅଧିକ ଟୋକେନ୍ ବ୍ୟବହାର କରେ।"
+        },
+        "tenantTopK": {
+          "label": "ପ୍ରତ୍ୟେକ ଟର୍ନରେ ମନେପକାଯାଉଥିବା ଅଂଶୀଦାର ସ୍ମୃତି",
+          "description": "ପ୍ରତ୍ୟେକ ବାର୍ତ୍ତା ପାଇଁ ୱାର୍କସ୍ପେସ୍ ସାରା ଅଂଶୀଦାର ହୋଇଥିବା ସ୍ମୃତି ମଧ୍ୟରୁ କେତୋଟି ଦେଖାଯାଏ।",
+          "help": "ଅଧିକ ସ୍ମୃତି ଅଧିକ ପ୍ରସଙ୍ଗ ଦିଏ କିନ୍ତୁ ଅଧିକ ଟୋକେନ୍ ବ୍ୟବହାର କରେ।"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "ପ୍ରତି ଏଜେଣ୍ଟ ସର୍ବାଧିକ ସ୍ମୃତି",
+          "description": "ଗୋଟିଏ ଏଜେଣ୍ଟ କେତୋଟି ସ୍ମୃତି ରଖିପାରେ। ଏହାଠାରୁ ଅଧିକ ହେଲେ ସବୁଠାରୁ ପୁରୁଣା ଓ କମ୍ ବ୍ୟବହୃତ ବାଦ୍ ପଡ଼େ।",
+          "help": "ଲୋକଙ୍କ ବିଷୟରେ ଅନେକ ମନେ ରଖିବାକୁ ଥିବା ସହାୟକ ପାଇଁ ବଢ଼ାନ୍ତୁ; ଏହା ସଂରକ୍ଷଣ ଓ ମନେପକାଇବା ଖର୍ଚ୍ଚ ମଧ୍ୟ ବଢ଼ାଏ।"
+        }
+      },
+      "tenant": {
+        "maxMemories": {
+          "label": "ସର୍ବାଧିକ ଭାଗ କରାଯାଇଥିବା ସ୍ମୃତି",
+          "description": "ୱାର୍କସ୍ପେସ୍‌ରେ ଭାଗ କରାଯାଇଥିବା କେତେ ସ୍ମୃତି ରଖାଯାଏ। ଏହାଠାରୁ ଅଧିକ ହେଲେ ସବୁଠୁ ପୁରୁଣା ଗୁଡ଼ିକ ବାଦ୍ ଦିଆଯାଏ।",
+          "help": "ଭାଗ କରାଯାଇଥିବା ଜ୍ଞାନ ଉପରେ ନିର୍ଭର କରୁଥିବା ବଡ଼ ଦଳ ପାଇଁ ବଢ଼ାନ୍ତୁ; ଏହା ଷ୍ଟୋରେଜ୍ ଓ ସ୍ମରଣ ଖର୍ଚ୍ଚ ମଧ୍ୟ ବଢ଼ାଏ। ଏହା ସମଗ୍ର ୱାର୍କସ୍ପେସ୍‌ରେ ଲାଗୁ ହୁଏ।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ଅନ୍-ଡିଭାଇସ୍ ଚାଟ୍‌କୁ ଦିଆଯାଉଥିବା ସ୍ମୃତି",
+          "description": "ଅନ୍-ଡିଭାଇସ୍ ସେସନ୍ ଆରମ୍ଭ ହେଲେ ତାକୁ କେତେ ସ୍ମୃତି ହସ୍ତାନ୍ତର କରାଯାଏ।",
+          "help": "ଅନ୍-ଡିଭାଇସ୍ ମଡେଲ୍‌ର କାମ କରିବା ସ୍ଥାନ ଛୋଟ, ତେଣୁ ଏହାକୁ କମ୍ ରଖନ୍ତୁ।"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "ଗ୍ରାଫ୍ ମେମୋରୀରୁ ମନେପକାଯାଉଥିବା ତଥ୍ୟ",
+          "description": "ଗୋଟିଏ ଲୁକଅପ୍‌ରେ ଏଜେଣ୍ଟକୁ ତାର ସମ୍ପର୍କ ମେମୋରୀରୁ ଦେଖାଯାଉଥିବା ସର୍ବାଧିକ ତଥ୍ୟ।",
+          "help": "ଅଧିକ ତଥ୍ୟ ଏଜେଣ୍ଟକୁ ଜଣେ ବ୍ୟକ୍ତି କିମ୍ବା ବିଷୟ ବିଷୟରେ ଅଧିକ ପୃଷ୍ଠଭୂମି ଦିଏ କିନ୍ତୁ ତାର କାର୍ଯ୍ୟ ସ୍ଥାନର ଅଧିକ ଅଂଶ ବ୍ୟବହାର କରେ। କମ୍ ତଥ୍ୟ ଉତ୍ତରକୁ ଧ୍ୟାନକେନ୍ଦ୍ରିତ ରଖେ। ଏହାକୁ ସମ୍ପୂର୍ଣ୍ଣ ୱାର୍କସ୍ପେସ୍ ପାଇଁ, କିମ୍ବା ଅଧିକ ବା କମ୍ ଦରକାର ହେଉଥିବା ଗୋଟିଏ ଏଜେଣ୍ଟ ପାଇଁ ସେଟ୍ କରନ୍ତୁ।"
+        },
+        "recallMaxPaths": {
+          "label": "ପ୍ରତି ଲୁକଅପ୍‌ରେ ପଢ଼ାଯାଉଥିବା ଗ୍ରାଫ୍ ପଥ",
+          "description": "ଗୋଟିଏ ଲୁକଅପ୍‌ର ତଥ୍ୟ ଖୋଜିବାକୁ ମେମୋରୀ ଗ୍ରାଫ୍‌ର କେତୋଟି ସଂଯୋଗ ପଢ଼ାଯାଏ।",
+          "help": "ଏକାଧିକ ସଂଯୋଗ ଏକା ତଥ୍ୟକୁ ନେଇପାରେ, ତେଣୁ ଘନ ଭାବେ ଯୋଡ଼ା ସ୍ମୃତିରେ ସବୁକିଛି ଖୋଜିବାକୁ ଅଧିକ ସଂଖ୍ୟା ଦରକାର ହୋଇପାରେ। ଅଧିକ ସଂଖ୍ୟା ପ୍ରତ୍ୟେକ ଲୁକଅପ୍‌କୁ ମନ୍ଥର କରେ।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "ପ୍ରମ୍ପ୍ଟରେ ତାଲିକାଭୁକ୍ତ ସର୍ବାଧିକ ସ୍କିଲ୍",
+          "description": "ଏଜେଣ୍ଟ ଜାଣିବାକୁ ଯେ ସେଗୁଡ଼ିକ ଅଛି, ତାର ନିର୍ଦ୍ଦେଶରେ ଆପଣଙ୍କ କେତେ ସ୍କିଲ୍‌ର ନାମ ଦିଆଯାଏ। ବାକି ଗଣାଯାଏ, ତାଲିକାଭୁକ୍ତ ହୁଏ ନାହିଁ।",
+          "help": "ଆପଣଙ୍କ ପାଖରେ ଅନେକ ସ୍କିଲ୍ ଥିଲେ ବଢ଼ାନ୍ତୁ; ତାଲିକାଭୁକ୍ତ ପ୍ରତ୍ୟେକ ସ୍କିଲ୍ ପ୍ରତ୍ୟେକ ଟର୍ନରେ ମଡେଲ୍‌ର କାମ କରିବା ସ୍ଥାନର ଟିକିଏ ବ୍ୟବହାର କରେ। ଏହା ସମଗ୍ର ୱାର୍କସ୍ପେସ୍‌ରେ ଲାଗୁ ହୁଏ।"
+        },
+        "maxBlockChars": {
+          "label": "ପ୍ରମ୍ପ୍ଟରେ ସ୍କିଲ୍ ତାଲିକାର ଆକାର",
+          "description": "ଏଜେଣ୍ଟର ନିର୍ଦ୍ଦେଶରେ ସ୍କିଲ୍ ତାଲିକା କେତେ ଅକ୍ଷର ନେଇପାରିବ। ଭରିଗଲେ ପରବର୍ତ୍ତୀ ସ୍କିଲ୍ କେବଳ ନାମକୁ ଛୋଟ କରାଯାଏ।",
+          "help": "ଅଧିକ ସ୍କିଲ୍‌ର ବର୍ଣ୍ଣନା ରଖିବାକୁ ବଢ଼ାନ୍ତୁ, ପ୍ରତ୍ୟେକ ଟର୍ନରେ ଟୋକେନ୍ ବଞ୍ଚାଇବାକୁ କମାନ୍ତୁ। ଏହା ସମଗ୍ର ୱାର୍କସ୍ପେସ୍‌ରେ ଲାଗୁ ହୁଏ।"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "ପୃଷ୍ଠଭୂମି କଲ୍ ଏଜେଣ୍ଟର ମଡେଲ୍ ବ୍ୟବହାର କରେ",
+        "description": "ସେଗୁଡ଼ିକ ପାଇଁ କୌଣସି ମଡେଲ୍ ବଛାଯାଇନଥିଲେ, ସାରାଂଶ, ସହାୟତା ଓ ପ୍ରସଙ୍ଗ କମ୍ପାକ୍ସନ୍ ସେମାନେ ଯେଉଁ ଏଜେଣ୍ଟ ପାଇଁ କାମ କରନ୍ତି ତାହାର ସମାନ ମଡେଲ୍ ବ୍ୟବହାର କରନ୍ତି।",
+        "help": "ଏହି କଲ୍ ପାଇଁ ପ୍ଲାଟଫର୍ମ ମଡେଲ୍ ବାଛୁ ବୋଲି ଏହାକୁ ବନ୍ଦ କରନ୍ତୁ, ଯାହା ସସ୍ତା କିମ୍ବା ଅନ୍ୟ ପ୍ରଦାତାର ହୋଇପାରେ।"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "ସୁରକ୍ଷା ଯାଞ୍ଚ ଭାଙ୍ଗିଲେ",
+        "description": "ସୁରକ୍ଷା ଯାଞ୍ଚ ନିଜେ ବିଫଳ ହେଲେ କଣ ହୁଏ, ଉଦାହରଣ ପାଇଁ ବିଚାରକ ମଡେଲ୍ ବନ୍ଦ ଥିଲେ। ବନ୍ଦ କାର୍ଯ୍ୟକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ; ଖୋଲା ଏହାକୁ ପାର ହେବାକୁ ଦିଏ।",
+        "help": "ଆପଣ ଏହାକୁ କେବଳ ପ୍ଲାଟଫର୍ମ ସେଟିଂଠାରୁ କଡ଼ା କରିପାରିବେ। କେହି ଜାଣିଶୁଣି ଯାଞ୍ଚକୁ ବିଫଳ କରାଇବା ବିରୁଦ୍ଧରେ ବନ୍ଦ ସୁରକ୍ଷା ଦିଏ, ବିଭ୍ରାଟ ସମୟରେ କାମ ପ୍ରତ୍ୟାଖ୍ୟାନ କରିବାର ମୂଲ୍ୟରେ।",
+        "options": {
+          "open": "ଖୋଲା: କାର୍ଯ୍ୟକୁ ପାର ହେବାକୁ ଦିଅନ୍ତୁ",
+          "closed": "ବନ୍ଦ: କାର୍ଯ୍ୟ ପ୍ରତ୍ୟାଖ୍ୟାନ କରନ୍ତୁ"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "ଟୁଲ୍-କଲ୍ ଯାଞ୍ଚ ଭାଙ୍ଗିଲେ",
+          "description": "ବିପଦପୂର୍ଣ୍ଣ ଟୁଲ୍ କଲ୍‌ର ସମୀକ୍ଷା କରୁଥିବା ଯାଞ୍ଚ ରାୟ ଦେଇପାରିଲେ ନାହିଁ ତେବେ କଣ କରେ। ଉତ୍ତରାଧିକାର ଉପରର ସୁରକ୍ଷା ଯାଞ୍ଚ ସେଟିଂକୁ ଅନୁସରଣ କରେ।",
+          "help": "ଆପଣ ଏହାକୁ କେବଳ ପ୍ଲାଟଫର୍ମ ସେଟିଂଠାରୁ କଡ଼ା କରିପାରିବେ। ଯାଞ୍ଚ ବିଫଳ ହେଲେ ବନ୍ଦ ଟୁଲ୍ କଲ୍‌କୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ।",
+          "options": {
+            "open": "ଖୋଲା: ଟୁଲ୍ କଲ୍‌କୁ ପାର ହେବାକୁ ଦିଅନ୍ତୁ",
+            "inherit": "ସୁରକ୍ଷା-ଯାଞ୍ଚ ସେଟିଂ ଅନୁସରଣ କରନ୍ତୁ",
+            "closed": "ବନ୍ଦ: ଟୁଲ୍ କଲ୍ ପ୍ରତ୍ୟାଖ୍ୟାନ କରନ୍ତୁ"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "ଅବରୋଧ କରୁଥିବା ବିଷାକ୍ତତା ସ୍କୋର୍",
+          "description": "ବିଚାରକଙ୍କ 0 ରୁ 100 ବିଷାକ୍ତତା ମାପରେ ଏହି କିମ୍ବା ଅଧିକ ସ୍କୋର୍ ପାଉଥିବା ବିଷୟବସ୍ତୁ ଅବରୋଧିତ ହୁଏ। କମ୍ ସଂଖ୍ୟା ଅଧିକ ଅବରୋଧ କରେ।",
+          "help": "ଆପଣ ଏହାକୁ କେବଳ କମାଇପାରିବେ, ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟଠାରୁ ଉପରକୁ କେବେ ବଢ଼ାଇପାରିବେ ନାହିଁ। ବହୁତ କମ୍ ମୂଲ୍ୟ ସାଧାରଣ ସ୍ପଷ୍ଟ ଶବ୍ଦାବଳୀକୁ ମଧ୍ୟ ଅବରୋଧ କରେ।"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "ଜେଲବ୍ରେକ୍ ପ୍ରୟାସ ପାଇଁ ସ୍କାନ୍ ହେଉଥିବା ଟେକ୍ସଟ୍",
+          "description": "ଜେଲବ୍ରେକ୍ ପ୍ୟାଟର୍ନ ପାଇଁ ଗୋଟିଏ ବାର୍ତ୍ତା କିମ୍ବା ଉତ୍ତରର କେତେ ଅଂଶ ସ୍କାନ୍ ହୁଏ। ତାହାଠାରୁ ଅଧିକ ଟେକ୍ସଟ୍ ସ୍କାନ୍ ହୁଏ ନାହିଁ।",
+          "help": "ଆପଣ ଏହାକୁ କେବଳ ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟଠାରୁ ଉପରକୁ ବଢ଼ାଇପାରିବେ। ଚଉଡ଼ା ୱିଣ୍ଡୋ ପ୍ୟାଡିଂ ପଛରେ ଲୁଚିଥିବା ଆକ୍ରମଣକୁ ଅଟକାଏ, ଟିକିଏ ଅଧିକ ପ୍ରକ୍ରିୟାକରଣର ମୂଲ୍ୟରେ।"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "ସୁରକ୍ଷା ବିଚାରକଙ୍କୁ ଦେଖାଯାଉଥିବା ଟେକ୍ସଟ୍",
+          "description": "ଯାଞ୍ଚ ହୋଇଥିବା ଟେକ୍ସଟ୍‌ର କେତେ ଅଂଶ AI ସୁରକ୍ଷା ବିଚାରକ ପଢ଼ନ୍ତି। ତାହାଠାରୁ ଅଧିକ ଟେକ୍ସଟ୍‌ର ବିଚାର ହୁଏ ନାହିଁ।",
+          "help": "ଆପଣ ଏହାକୁ କେବଳ ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟଠାରୁ ଉପରକୁ ବଢ଼ାଇପାରିବେ। ବଢ଼ାଇଲେ ଲମ୍ବା ଟୁଲ୍ ଫଳାଫଳର ସମ୍ପୂର୍ଣ୍ଣ ବିଚାର ହୁଏ କିନ୍ତୁ ପ୍ରତ୍ୟେକ ବିଚାରକ କଲ୍ ବଡ଼ ହୁଏ।"
+        }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "ତତ୍ତ୍ୱାବଧାନରେ ଥିବା ଏଜେଣ୍ଟ ଓ କେବଳ-ପଢ଼ିବା ଟୁଲ୍",
+          "description": "ତତ୍ତ୍ୱାବଧାନ ସ୍ୱାୟତ୍ତତା ସ୍ତରର ଏଜେଣ୍ଟ ସନ୍ଧାନ କିମ୍ବା ଲୁକଅପ୍ ଭଳି କେବଳ ପଢ଼ୁଥିବା ଟୁଲ୍ ପୂର୍ବରୁ ମଧ୍ୟ ଆପଣଙ୍କୁ ପଚାରେ କି ନାହିଁ। ଲେଖିବା, ପଠାଇବା ଏବଂ ପ୍ଲାଟଫର୍ମ ବର୍ଗୀକରଣ ନକରିଥିବା ଟୁଲ୍ ସର୍ବଦା ପଚାରେ।",
+          "help": "ଆପଣ ଏହାକୁ କେବଳ ପ୍ଲାଟଫର୍ମ ସେଟିଂ ଠାରୁ ଅଧିକ କଠୋର କରିପାରିବେ। ପ୍ରତ୍ୟେକ ଥର ପଚାରିବା ସବୁଠୁ ସୁରକ୍ଷିତ ପସନ୍ଦ; କେବଳ-ପଢ଼ିବା ଟୁଲ୍ ଚଳିବାକୁ ଦେଲେ ଗୋଟିଏ ପ୍ରଶ୍ନ କମ୍ ହୁଏ, କିନ୍ତୁ ଅପ୍ରତ୍ୟାଶିତ ସନ୍ଧାନକୁ ରୋକିବାର ଗୋଟିଏ ସୁଯୋଗ ମଧ୍ୟ ଯାଏ। ଯେଉଁ ଏଜେଣ୍ଟ ବ୍ୟକ୍ତିଗତ ଡାଟା ପଢ଼ିପାରେ, ଅବିଶ୍ୱସନୀୟ ବିଷୟବସ୍ତୁ ନେଇପାରେ ଏବଂ ଡାଟା ବାହାରକୁ ପଠାଇପାରେ, ଏହି ସେଟିଂ ଯାହା କହିଲେ ବି ତାକୁ ପ୍ରତ୍ୟେକ କଲ୍‌ରେ ପଚରାଯାଏ।",
+          "options": {
+            "auto-allow": "କେବଳ-ପଢ଼ିବା ଟୁଲ୍ ନପଚାରି ଚଳିବାକୁ ଦିଅନ୍ତୁ",
+            "gate": "ପ୍ରତ୍ୟେକ ଟୁଲ୍ କଲ୍ ପୂର୍ବରୁ ପଚାରନ୍ତୁ"
+          }
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI ବିଚାରକ ପାଇଁ ମଡେଲ୍",
+          "description": "ମୂଲ୍ୟାଙ୍କନ ରନ୍‌ର ବିଚାର କରିବାକୁ ବ୍ୟବହୃତ ମଡେଲ୍। ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍ ଆଗରୁ ଯାହା ବ୍ୟବହାର କରୁଛି ତାହା ମଧ୍ୟରୁ ପ୍ଲାଟଫର୍ମ ବାଛୁ ବୋଲି ଖାଲି ଛାଡ଼ନ୍ତୁ।",
+          "help": "ଅଧିକ ବିଶ୍ୱସନୀୟ ଗ୍ରେଡ୍ ପାଇଁ ଅଧିକ ସକ୍ଷମ ମଡେଲ୍ କିମ୍ବା ଖର୍ଚ୍ଚ ବଞ୍ଚାଇବାକୁ ସସ୍ତା ମଡେଲ୍ ବ୍ୟବହାର କରନ୍ତୁ। ମଡେଲ୍ ଆପଣଙ୍କ ସଂଯୁକ୍ତ ପ୍ରଦାତାରେ ଉପଲବ୍ଧ ହେବା ଆବଶ୍ୟକ।"
+        },
+        "callTimeoutSeconds": {
+          "label": "ପ୍ରତ୍ୟେକ ବିଚାରକ କଲ୍‌ରେ ସର୍ବାଧିକ ସମୟ",
+          "description": "ଗୋଟିଏ ବିଚାରକ କଲ୍ ବିଫଳ ଗଣାଯିବା ପୂର୍ବରୁ କେତେ ସମୟ ନେଇପାରେ।",
+          "help": "ମନ୍ଥର ମଡେଲ୍ ପ୍ରାୟତଃ ଟାଇମଆଉଟ୍ ହେଲେ ବଢ଼ାନ୍ତୁ; ବିଫଳ କଲ୍ ମୂଲ୍ୟାଙ୍କନ ଫଳାଫଳକୁ ଅସମ୍ପୂର୍ଣ୍ଣ କରେ।"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "ପ୍ରତ୍ୟେକ ଟେଷ୍ଟ କେସ୍‌ର ପୁନରାବୃତ୍ତି",
+          "description": "ରନ୍ ନକହିଲେ ପ୍ରତ୍ୟେକ ଟେଷ୍ଟ କେସ୍ କେତେ ଥର ଚଲାଯାଏ। ଅଧିକ ପୁନରାବୃତ୍ତି ଏଜେଣ୍ଟ କେତେ ସ୍ଥିର ତାହା ଦେଖାଏ।",
+          "help": "ପ୍ରତ୍ୟେକ ପୁନରାବୃତ୍ତି ଗୋଟିଏ ରନ୍‌ର ଖର୍ଚ୍ଚ ଓ ସମୟକୁ ଗୁଣନ କରେ।"
+        },
+        "defaultMode": {
+          "label": "ମୂଲ୍ୟାୟନ କିପରି ଚାଲେ",
+          "description": "ରନ୍ କିମ୍ବା ତାର ଡାଟାସେଟ୍ ନକହିଲେ, ମୂଲ୍ୟାୟନ ରନ୍ ଏଜେଣ୍ଟକୁ ତାର ଟୁଲ୍ ସହ ସୁରକ୍ଷିତ ସାଣ୍ଡବକ୍ସରେ ରିପ୍ଲେ କରେ (ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍) ନା କେବଳ ଲେଖାରେ ଉତ୍ତର ଦିଏ (ଦ୍ରୁତ)।",
+          "help": "ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍ ଆପଣଙ୍କ ଉପଯୋଗକର୍ତ୍ତା ଯାହା ପାଆନ୍ତି ତାହା, ଟୁଲ୍ ବ୍ୟବହାର ସମେତ, ପରୀକ୍ଷା କରେ ଏବଂ ଖର୍ଚ୍ଚ ଅଧିକ। ଏହାରେ କେବଳ ପଢ଼ୁଥିବା ଟୁଲ୍ ପ୍ରକୃତରେ ଚାଲେ; ଯାହା ଡାଟା ବଦଳାଇପାରେ, ବାର୍ତ୍ତା ପଠାଇପାରେ କିମ୍ବା ଟଙ୍କା ଖର୍ଚ୍ଚ କରିପାରେ ତାହା ଅନୁକରଣ ହୁଏ ଓ ରନ୍‌ରେ ତାଲିକାଭୁକ୍ତ ହୁଏ। ଦ୍ରୁତ ଶସ୍ତା ଏବଂ ଟୁଲ୍ ବ୍ୟବହାର ବିଷୟରେ କିଛି କହେ ନାହିଁ।",
+          "options": {
+            "full": "ସାଣ୍ଡବକ୍ସରେ ପୂର୍ଣ୍ଣ ପାଇପ୍‌ଲାଇନ୍",
+            "quick": "ଦ୍ରୁତ: କେବଳ ଲେଖା ଉତ୍ତର"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "ସର୍ବାଧିକ ସମାନ୍ତରାଳ ଉପ-କାର୍ଯ୍ୟ",
+        "description": "ଗୋଟିଏ କାମ ଅର୍ପଣ କଲ୍ ଏକାସାଙ୍ଗରେ କେତୋଟି ଉପ-କାର୍ଯ୍ୟ କିମ୍ବା ସହାୟକ ଏଜେଣ୍ଟ ଆରମ୍ଭ କରିପାରେ। ଅତିରିକ୍ତ ଗୁଡ଼ିକୁ ସୀମା ପାର ବୋଲି ରିପୋର୍ଟ କରାଯାଏ।",
+        "help": "ବ୍ୟାପକ ଗବେଷଣା କାମ ପାଇଁ ବଢ଼ାନ୍ତୁ, ଖର୍ଚ୍ଚ ଓ ଭାର କମ୍ ରଖିବାକୁ କମାନ୍ତୁ।"
+      },
+      "branchTimeoutSeconds": {
+        "label": "ପ୍ରତ୍ୟେକ ଉପ-କାର୍ଯ୍ୟରେ ସର୍ବାଧିକ ସମୟ",
+        "description": "ଅର୍ପିତ ଗୋଟିଏ ଉପ-କାର୍ଯ୍ୟ ଟାଇମଆଉଟ୍ ଭାବେ ରିପୋର୍ଟ ହେବା ପୂର୍ବରୁ କେତେ ସମୟ ଚାଲିପାରେ।",
+        "help": "ମନ୍ଥର ଉପ-କାର୍ଯ୍ୟ ପାଇଁ ବଢ଼ାନ୍ତୁ। ଅଟକିଯାଇଥିବା ଉପ-କାର୍ଯ୍ୟ ଏହି ସମୟ ପାର ହୋଇ ସମ୍ପୂର୍ଣ୍ଣ ଉତ୍ତରକୁ କେବେ ଅଟକାଏ ନାହିଁ।"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "ପ୍ରତ୍ୟେକ ଫଳାଫଳ ପାଇଁ ସନ୍ଧାନର ବିସ୍ତାର",
+          "description": "ଜ୍ଞାନ ସନ୍ଧାନ ଶେଷରେ ଫେରାଉଥିବା ପ୍ରତ୍ୟେକ ଅଂଶ ପାଇଁ କେତୋଟି ପ୍ରାର୍ଥୀ ଅଂଶ ସଂଗ୍ରହ କରେ।",
+          "help": "ଅଧିକ ସଂଖ୍ୟା ର‍୍ୟାଙ୍କିଂକୁ ବାଛିବାକୁ ଅଧିକ ଦିଏ, ଯାହା ଅନେକ ଡକ୍ୟୁମେଣ୍ଟ ସମାନ ହେଲେ ସାହାଯ୍ୟ କରେ, କିନ୍ତୁ ପ୍ରତ୍ୟେକ ସନ୍ଧାନରେ ଅଧିକ ସମୟ ଓ କମ୍ପ୍ୟୁଟ୍ ଲାଗେ। ସନ୍ଧାନ ମନ୍ଥର ଲାଗିଲେ କମାନ୍ତୁ। ଏହା ଏଜେଣ୍ଟ ଦେଖୁଥିବା ଅଂଶର ସଂଖ୍ୟା ବଦଳାଏ ନାହିଁ।"
+        },
+        "candidatePoolMax": {
+          "label": "ପ୍ରତି ସନ୍ଧାନରେ ସର୍ବାଧିକ ପ୍ରାର୍ଥୀ",
+          "description": "କେତେ ଫଳାଫଳ ମାଗାଗଲେ ବି, ଗୋଟିଏ ଜ୍ଞାନ ସନ୍ଧାନ ସଂଗ୍ରହ କରୁଥିବା ପ୍ରାର୍ଥୀ ଅଂଶର ଉପରସୀମା।",
+          "help": "ଏଜେଣ୍ଟ ଏକାସାଙ୍ଗରେ ଅନେକ ଫଳାଫଳ ମାଗିଲେ ଏହା ଗତି ଓ ଖର୍ଚ୍ଚ ରକ୍ଷା କରେ। ବଡ଼ ଜ୍ଞାନ ଭଣ୍ଡାରରେ ଉତ୍ତର ପ୍ରାସଙ୍ଗିକ ଅଂଶ ଛାଡ଼ିଦେଉଥିଲେ ହିଁ ବଢ଼ାନ୍ତୁ।"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "କମ୍ ପରୀକ୍ଷିତ ବିକଳ୍ପ ଚେଷ୍ଟା କରିବାର ଇଚ୍ଛା",
+          "description": "ବିଶ୍ୱାସ-ସୀମା ପଦ୍ଧତି ବ୍ୟବହାର କରୁଥିବା ଶିକ୍ଷଣ ନୀତି ନିଜେ କମ୍ ଥର ଚେଷ୍ଟା କରିଥିବା ବିକଳ୍ପକୁ କେତେ ଅଗ୍ରାଧିକାର ଦିଏ।",
+          "help": "ଶୂନ୍ୟ ସବୁବେଳେ ଏପର୍ଯ୍ୟନ୍ତର ସର୍ବୋତ୍ତମ ହାରାହାରି ଥିବା ବିକଳ୍ପ ବାଛେ। ଅଧିକ ମୂଲ୍ୟ ସ୍ଥିର ହେବା ପୂର୍ବରୁ ଅନ୍ୟ ବିକଳ୍ପ ଅଧିକ ସମୟ ଚେଷ୍ଟା କରି ଚାଲେ। ଡିଫଲ୍ଟ ପାଠ୍ୟପୁସ୍ତକ ସନ୍ତୁଳନ। କେବଳ ଏହି ପଦ୍ଧତି ବ୍ୟବହାର କରୁଥିବା ନୀତି ପ୍ରଭାବିତ ହୁଏ।"
+        },
+        "defaultExplorationRate": {
+          "label": "ନୂଆ ନୀତି ପାଇଁ ପ୍ରାରମ୍ଭିକ ଅନ୍ୱେଷଣ ହାର",
+          "description": "ନୂଆ ସୃଷ୍ଟି ହୋଇଥିବା ଶିକ୍ଷଣ ନୀତି ଅନିୟମିତ ବିକଳ୍ପ ଚେଷ୍ଟା କରିବାରେ ଟର୍ନର କେତେ ଅଂଶ ବିତାଏ।",
+          "help": "ଏହା କେବଳ ଆଜିଠାରୁ ସୃଷ୍ଟି ହେଉଥିବା ନୀତିର ଆରମ୍ଭ ବିନ୍ଦୁ ସେଟ୍ କରେ। ବିଦ୍ୟମାନ ନୀତି ନିଜ ହାର ରଖେ, ଯାହା ନୀତି ପରିଚାଳିତ ହେଉଥିବା ସ୍ଥାନରେ ଆପଣ ପ୍ରତି ଏଜେଣ୍ଟ ବଦଳାନ୍ତି। ଶୂନ୍ୟ ଅର୍ଥ ନୂଆ ନୀତି ଆରମ୍ଭରେ ଅନ୍ୱେଷଣ କରେ ନାହିଁ।"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "ପ୍ରଦାତା କି ପ୍ରତ୍ୟାଖ୍ୟାନ କଲା ପରେ ବିରାମ",
+          "description": "ପ୍ରଦାତା ସଂଯୁକ୍ତ ପ୍ରଦାତା କି ପ୍ରତ୍ୟାଖ୍ୟାନ କଲା ପରେ ପୃଷ୍ଠଭୂମି କାମ ତାକୁ କେତେ ସମୟ ଛାଡ଼ିଦିଏ।",
+          "help": "ବିରାମ ସମୟରେ, ନିର୍ଦ୍ଧାରିତ ଓ ସ୍ୱୟଂଚାଳିତ ଜବ୍ ବାରମ୍ବାର ବିଫଳ ହେଉଥିବା କି'କୁ କଲ୍ କରିବା ବଦଳରେ ଅନ୍ୟ ସଂଯୁକ୍ତ ପ୍ରଦାତା ବ୍ୟବହାର କରେ, କିମ୍ବା ଅପେକ୍ଷା କରେ। ଚାଟ୍ କରୁଥିବା ଲୋକ କେବେ ଅବରୋଧିତ ହୁଅନ୍ତି ନାହିଁ ଏବଂ ସବୁବେଳେ ପ୍ରଦାତାର ପ୍ରକୃତ ତ୍ରୁଟି ଦେଖନ୍ତି। ବିରାମ ଶେଷ ହେଲେ, କି' ଠିକ୍ ହେଲା କି ନାହିଁ ଯାଞ୍ଚ କରିବାକୁ ଗୋଟିଏ କଲ୍‌କୁ ଯିବାକୁ ଦିଆଯାଏ। ଶୂନ୍ୟ ବିରାମକୁ ବନ୍ଦ କରେ।"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "ପ୍ରଶାସନ",
+    "title": "ରନଟାଇମ୍ ସେଟିଂସ୍",
+    "subtitle": "ଏହି ୱାର୍କସ୍ପେସ୍ ସାରା ଏଜେଣ୍ଟ କିପରି ଆଚରଣ କରନ୍ତି ତାହା ସଜାଡ଼ନ୍ତୁ: ସୀମା, ଅନୁମୋଦନ, ଗୁଣବତ୍ତା ଯାଞ୍ଚ, ଗାର୍ଡରେଲ୍, ମେମୋରୀ ଓ ମଡେଲ୍। ଅନୁମତି ଥିବା ସ୍ଥାନରେ ଏଜେଣ୍ଟର ମାଲିକ ଏବେ ବି ଗୋଟିଏ ଏଜେଣ୍ଟ ପାଇଁ ସେଟିଂ ଓଭରରାଇଡ୍ କରିପାରିବେ।",
+    "docsLink": "ସହାୟତା ଓ ଡକ୍ୟୁମେଣ୍ଟେସନ୍",
+    "tabs": {
+      "label": "ରନଟାଇମ୍ ସେଟିଂସ୍‌ର ଦୃଶ୍ୟ",
+      "settings": "ସେଟିଂସ୍",
+      "history": "ପରିବର୍ତ୍ତନ ଇତିହାସ"
+    },
+    "readOnly": {
+      "title": "କେବଳ ଦେଖିବା",
+      "body": "କେବଳ ୱାର୍କସ୍ପେସ୍ ପ୍ରଶାସକ ଏହି ସେଟିଂସ୍ ବଦଳାଇପାରିବେ। ଆପଣ ପ୍ରତ୍ୟେକ ସେଟିଂର ଲାଗୁ ମୂଲ୍ୟ ଓ ତାହା କେଉଁଠାରୁ ଆସୁଛି ଦେଖିପାରିବେ।"
+    },
+    "summary": "ଏହି ୱାର୍କସ୍ପେସ୍‌ରେ {total}ଟି ସେଟିଂ ମଧ୍ୟରୁ {changed}ଟି ବଦଳାଯାଇଛି। ବାକି ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟ ବ୍ୟବହାର କରେ।",
+    "export": {
+      "button": "ଓଭରରାଇଡ୍ ରପ୍ତାନି କରନ୍ତୁ",
+      "done": "{count}ଟି ୱାର୍କସ୍ପେସ୍ ଓଭରରାଇଡ୍ ଏକ ଫାଇଲ୍‌କୁ ରପ୍ତାନି ହେଲା।",
+      "none": "ରପ୍ତାନି କରିବାକୁ କିଛି ନାହିଁ: ଏହି ୱାର୍କସ୍ପେସ୍ କୌଣସି ସେଟିଂ ବଦଳାଇନାହିଁ।"
+    },
+    "filters": {
+      "changedOnly": "କେବଳ ଏହି ୱାର୍କସ୍ପେସ୍‌ରେ ବଦଳାଯାଇଥିବା"
+    },
+    "jump": {
+      "label": "ଏକ ଗୋଷ୍ଠୀକୁ ଯାଆନ୍ତୁ"
+    },
+    "anchor": {
+      "unknown": "ଏହି ୱାର୍କସ୍ପେସ୍‌ରେ \"{key}\" ନାମର କୌଣସି ସେଟିଂ ନାହିଁ। ଏହାର ନାମ ବଦଳିଥାଇପାରେ କିମ୍ବା ଏହା ୱାର୍କସ୍ପେସ୍ ସ୍ତରରେ ଉପଲବ୍ଧ ନୁହେଁ।"
+    },
+    "empty": {
+      "noneChanged": "ଏହି ୱାର୍କସ୍ପେସ୍‌ରେ ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ସେଟିଂ ବଦଳାଯାଇନାହିଁ। ସବୁକିଛି ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟ ବ୍ୟବହାର କରେ।"
+    },
+    "risk": {
+      "high": "ଅଧିକ ବିପଦ",
+      "security": "ସୁରକ୍ଷା ସେଟିଂ"
+    },
+    "security": {
+      "title": "ସୁରକ୍ଷା ସେଟିଂସ୍",
+      "body": "ଏହି ସେଟିଂସ୍ ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍‌କୁ ସୁରକ୍ଷା ଦିଏ। ଏଗୁଡ଼ିକୁ କେବଳ ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟଠାରୁ କଡ଼ା କରାଯାଇପାରିବ, କେବେ ଦୁର୍ବଳ ନୁହେଁ। ପ୍ରତ୍ୟେକ ପରିବର୍ତ୍ତନ ପାଇଁ ଏକ କାରଣ ଦରକାର ଏବଂ ତାହା ଅଡିଟ୍ ଲଗ୍‌ରେ ରେକର୍ଡ ହୁଏ।"
+    },
+    "resetGroup": {
+      "count": "ଏହି ଗୋଷ୍ଠୀରେ {count}ଟି ବଦଳିଛି",
+      "button": "{group}କୁ ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟକୁ ରିସେଟ୍ କରନ୍ତୁ",
+      "confirmTitle": "{group}କୁ ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟକୁ ରିସେଟ୍ କରିବେ?",
+      "confirmBody": "ଏହା ଏହି ଗୋଷ୍ଠୀର {count}ଟି ୱାର୍କସ୍ପେସ୍ ଓଭରରାଇଡ୍ ହଟାଏ। ନିଜସ୍ୱ ଓଭରରାଇଡ୍ ନଥିବା ପ୍ରତ୍ୟେକ ଏଜେଣ୍ଟ ପାଇଁ ସେଟିଂସ୍ ତୁରନ୍ତ ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟକୁ ଫେରିଯାଏ। ପ୍ରତ୍ୟେକ ରିସେଟ୍ ଅଡିଟ୍ ଲଗ୍‌ରେ ରେକର୍ଡ ହୁଏ।",
+      "confirm": "ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟକୁ ରିସେଟ୍ କରନ୍ତୁ",
+      "cancel": "ବାତିଲ୍ କରନ୍ତୁ",
+      "done": "{count}ଟି ସେଟିଂକୁ ସେମାନଙ୍କ ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟକୁ ରିସେଟ୍ କରନ୍ତୁ।",
+      "partial": "{done}ଟି ସେଟିଂ ରିସେଟ୍ ହେଲା; {failed}ଟି ରିସେଟ୍ କରିହେଲା ନାହିଁ। ବିଫଳ ସେଟିଂସ୍‌ର ବାର୍ତ୍ତା ଦେଖନ୍ତୁ।",
+      "cancelled": "{done} ସେଟିଂ ରିସେଟ୍ ହେଲା। କାରଣ ଆବଶ୍ୟକ କରୁଥିବା {skipped} ଯେପରି ଥିଲା ସେପରି ରଖାଗଲା।"
+    },
+    "import": {
+      "button": "ଓଭରରାଇଡ୍ ଆମଦାନି କରନ୍ତୁ",
+      "title": "ୱାର୍କସ୍ପେସ୍ ଓଭରରାଇଡ୍ ଆମଦାନି କରନ୍ତୁ",
+      "intro": "ଏହି ପୃଷ୍ଠାରୁ ରପ୍ତାନି ହୋଇଥିବା ଫାଇଲ୍ ବାଛନ୍ତୁ, କିମ୍ବା ତାର ବିଷୟବସ୍ତୁ ଲଗାନ୍ତୁ। କିଛି ସେଭ୍ ହେବା ପୂର୍ବରୁ କଣ ବଦଳିବ ତାହା ଆପଣ ଠିକ୍ ଭାବେ ଦେଖିବେ।",
+      "reviewIntro": "ଏହି ଫାଇଲ୍ କଣ ବଦଳାଇବ ତାହାର ସମୀକ୍ଷା କରନ୍ତୁ। ଏପର୍ଯ୍ୟନ୍ତ କିଛି ସେଭ୍ ହୋଇନାହିଁ।",
+      "fileLabel": "ଓଭରରାଇଡ୍ ଫାଇଲ୍ (JSON)",
+      "pasteLabel": "କିମ୍ବା ଫାଇଲ୍ ବିଷୟବସ୍ତୁ ଲଗାନ୍ତୁ",
+      "fileError": {
+        "empty": "ପ୍ରଥମେ ଏକ ଫାଇଲ୍ ବାଛନ୍ତୁ କିମ୍ବା ତାର ବିଷୟବସ୍ତୁ ଲଗାନ୍ତୁ।",
+        "invalidJson": "ଏହା ବୈଧ JSON ନୁହେଁ। ସମ୍ପୂର୍ଣ୍ଣ ଫାଇଲ୍ କପି ହୋଇଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ।",
+        "wrongFormat": "ଏହା ଏହି ପୃଷ୍ଠାରୁ ରପ୍ତାନି ହୋଇଥିବା ସେଟିଂ ଓଭରରାଇଡ୍ ଫାଇଲ୍ ନୁହେଁ।",
+        "unsupportedVersion": "ଏହି ଫାଇଲ୍ ରପ୍ତାନିର ଅଲଗା ସଂସ୍କରଣ ଦ୍ୱାରା ତିଆରି ହୋଇଥିଲା ଏବଂ ପଢ଼ିହେବ ନାହିଁ।",
+        "noOverrides": "ଫାଇଲ୍‌ରେ ଓଭରରାଇଡ୍ ବିଭାଗ ନାହିଁ।",
+        "unreadable": "ଫାଇଲ୍ ପଢ଼ିହେଲା ନାହିଁ।"
+      },
+      "summary": "{changes}ଟି ବଦଳାଇବାକୁ, {unchanged}ଟି ଆଗରୁ ଲାଗୁ, {problems}ଟି ଲାଗୁ କରିହେବ ନାହିଁ।",
+      "changesHeading": "ପରିବର୍ତ୍ତନ ({count})",
+      "before": "ବର୍ତ୍ତମାନ:",
+      "after": "ଆମଦାନି ପରେ:",
+      "resetMissing": "ଫାଇଲ୍‌ରେ ନଥିବା ୱାର୍କସ୍ପେସ୍ ଓଭରରାଇଡ୍ ମଧ୍ୟ ହଟାନ୍ତୁ",
+      "resetMissingHelp": "ଏଠାରେ ବଦଳାଯାଇଥିବା କିନ୍ତୁ ଫାଇଲ୍‌ରେ ନଥିବା ସେଟିଂସ୍ ପ୍ଲାଟଫର୍ମ ମୂଲ୍ୟକୁ ଫେରିଯାଏ। କେବଳ ଯୋଡ଼ିବା କିମ୍ବା ଅପଡେଟ୍ କରିବା ପାଇଁ ଏହାକୁ ବନ୍ଦ ରଖନ୍ତୁ।",
+      "resetsHeading": "ହଟାଇବାକୁ ଥିବା ଓଭରରାଇଡ୍ ({count})",
+      "resetFrom": "ବର୍ତ୍ତମାନ {value}; ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟକୁ ଫେରିଯାଏ।",
+      "problemsHeading": "ଲାଗୁ କରିହେବ ନାହିଁ ({count})",
+      "problem": {
+        "unknownKey": "ଏହି କି'ର କୌଣସି ସେଟିଂ ନାହିଁ।",
+        "notWorkspaceSetting": "ଏହି ସେଟିଂ ସମ୍ପୂର୍ଣ୍ଣ ୱାର୍କସ୍ପେସ୍ ପାଇଁ ବଦଳାଇହେବ ନାହିଁ।",
+        "locked": "ପ୍ଲାଟଫର୍ମ ଅପରେଟର୍ ଏହି ସେଟିଂକୁ ପିନ୍ କରିଛନ୍ତି, ତେଣୁ ଏହାକୁ ବଦଳାଇହେବ ନାହିଁ।",
+        "wrongType": "ଏହି ସେଟିଂ ପାଇଁ ମୂଲ୍ୟର ପ୍ରକାର ଭୁଲ୍।",
+        "required": "ଏକ ମୂଲ୍ୟ ଆବଶ୍ୟକ।",
+        "notNumber": "ମୂଲ୍ୟ ଏକ ସଂଖ୍ୟା ହେବା ଆବଶ୍ୟକ।",
+        "notInteger": "ମୂଲ୍ୟ ଏକ ପୂର୍ଣ୍ଣ ସଂଖ୍ୟା ହେବା ଆବଶ୍ୟକ।",
+        "belowMin": "ମୂଲ୍ୟ ବହୁତ କମ୍। ସର୍ବନିମ୍ନ {min}।",
+        "aboveMax": "ମୂଲ୍ୟ ବହୁତ ଅଧିକ। ସର୍ବାଧିକ {max}।",
+        "notAllowed": "ଏହା ଅନୁମତିପ୍ରାପ୍ତ ବିକଳ୍ପ ମଧ୍ୟରୁ ଗୋଟିଏ ନୁହେଁ।",
+        "tooShort": "ଟେକ୍ସଟ୍ ବହୁତ ଛୋଟ। ସର୍ବନିମ୍ନ ଲମ୍ବ {min}।",
+        "tooLong": "ଟେକ୍ସଟ୍ ବହୁତ ଲମ୍ବା। ସର୍ବାଧିକ ଲମ୍ବ {max}।",
+        "precision": "ମୂଲ୍ୟ ଏହି ସେଟିଂ ଅନୁମତି ଦେଉଥିବାଠାରୁ ଅଧିକ ସଠିକ୍।"
+      },
+      "nothing": "ଏହି ଫାଇଲ୍‌ର କିଛି ବି କୌଣସି ସେଟିଂ ବଦଳାଇବ ନାହିଁ।",
+      "reasonNote": "ଏହି ସେଟିଂସ୍ ମଧ୍ୟରୁ କେତେକ ଅଧିକ ବିପଦର। ଲାଗୁ କରିବା ପରେ, ଆପଣଙ୍କୁ ଏକ କାରଣ ପଚରାଯିବ ଯାହା ଅଡିଟ୍ ଲଗ୍‌ରେ ରେକର୍ଡ ହୁଏ।",
+      "back": "ପଛକୁ",
+      "cancel": "ବାତିଲ୍ କରନ୍ତୁ",
+      "review": "ପରିବର୍ତ୍ତନର ସମୀକ୍ଷା କରନ୍ତୁ",
+      "apply": "{count}ଟି ପରିବର୍ତ୍ତନ ଲାଗୁ କରନ୍ତୁ",
+      "cancelled": "ଆମଦାନି ବାତିଲ୍ ହେଲା। କୌଣସି ସେଟିଂସ୍ ବଦଳାଯାଇନାହିଁ।",
+      "done": "ଆମଦାନି ସମ୍ପୂର୍ଣ୍ଣ: {applied}ଟି ସେଟିଂସ୍ ଅପଡେଟ୍ ହେଲା।",
+      "donePartial": "ଆମଦାନି ଆଂଶିକ ସମ୍ପୂର୍ଣ୍ଣ: {applied}ଟି ସେଟିଂସ୍ ଅପଡେଟ୍ ହେଲା, {failed}ଟି ଲାଗୁ କରିହେଲା ନାହିଁ। ଏପର୍ଯ୍ୟନ୍ତ କଣ ବାକି ଅଛି ତାହା ସମୀକ୍ଷା ଦେଖାଏ।"
+    },
+    "history": {
+      "adminOnly": "ୱାର୍କସ୍ପେସ୍ ସେଟିଂସ୍‌ର ପରିବର୍ତ୍ତନ ଇତିହାସ କେବଳ ୱାର୍କସ୍ପେସ୍ ପ୍ରଶାସକଙ୍କୁ ଦେଖାଯାଏ।",
+      "loading": "ପରିବର୍ତ୍ତନ ଇତିହାସ ଲୋଡ୍ ହେଉଛି",
+      "partial": "{count}ଟି ସେଟିଂସ୍‌ର ଇତିହାସ ଲୋଡ୍ କରିହେଲା ନାହିଁ, ତେଣୁ ଏହି ତାଲିକା ଅସମ୍ପୂର୍ଣ୍ଣ ହୋଇପାରେ।",
+      "retry": "ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ",
+      "search": "ପରିବର୍ତ୍ତନ ଇତିହାସ ସନ୍ଧାନ କରନ୍ତୁ",
+      "searchPlaceholder": "ସେଟିଂ, ବ୍ୟକ୍ତି କିମ୍ବା କାରଣ ଦ୍ୱାରା ସନ୍ଧାନ କରନ୍ତୁ",
+      "empty": "ଏହି ୱାର୍କସ୍ପେସ୍‌ରେ ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ସେଟିଂ ବଦଳାଯାଇନାହିଁ।",
+      "noMatch": "କୌଣସି ପରିବର୍ତ୍ତନ ଆପଣଙ୍କ ସନ୍ଧାନ ସହ ମେଳ ଖାଉନାହିଁ।",
+      "count": "{total}ଟି ପରିବର୍ତ୍ତନ ମଧ୍ୟରୁ {shown}ଟି ଦେଖାଉଛି, ନୂଆ ପ୍ରଥମେ।",
+      "tableLabel": "ୱାର୍କସ୍ପେସ୍ ସେଟିଂସ୍‌ର ପରିବର୍ତ୍ତନ ଇତିହାସ",
+      "when": "କେବେ",
+      "setting": "ସେଟିଂ",
+      "change": "ବଦଳାନ୍ତୁ",
+      "by": "ବଦଳାଇଥିବା ବ୍ୟକ୍ତି",
+      "reason": "କାରଣ",
+      "before": "ପୂର୍ବରୁ:",
+      "after": "ପରେ:",
+      "inherited": "ଉତ୍ତରାଧିକାରସୂତ୍ରେ ମିଳିଥିବା ମୂଲ୍ୟ",
+      "unknownActor": "ଅଜ୍ଞାତ",
+      "noReason": "କୌଣସି କାରଣ ଦିଆଯାଇନାହିଁ",
+      "showMore": "ଅଧିକ ଦେଖାନ୍ତୁ",
+      "scope": "ସ୍ତର",
+      "scopeWorkspace": "ୱାର୍କସ୍ପେସ୍",
+      "scopeAgent": "ଏଜେଣ୍ଟ {id}",
+      "scopeFilter": "ପରିବର୍ତ୍ତନ ଏହି ସ୍ତରରେ ଦେଖାନ୍ତୁ",
+      "filterAll": "ସମସ୍ତ ସ୍ତର",
+      "filterWorkspace": "କେବଳ ୱାର୍କସ୍ପେସ୍",
+      "filterAgents": "କେବଳ ଏଜେଣ୍ଟ",
+      "searchLoadedOnly": "ସନ୍ଧାନ ଏପର୍ଯ୍ୟନ୍ତ ଲୋଡ୍ ହୋଇଥିବା ପରିବର୍ତ୍ତନକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ।",
+      "loadError": "ପରିବର୍ତ୍ତନ ଇତିହାସ ଲୋଡ୍ କରାଯାଇପାରିଲା ନାହିଁ। {message}",
+      "moreFailed": "ଆହୁରି ପରିବର୍ତ୍ତନ ଲୋଡ୍ କରାଯାଇପାରିଲା ନାହିଁ। {message}",
+      "loadingMore": "ଲୋଡ୍ ହେଉଛି"
+    }
+  },
+  "agentBehavior": {
+    "title": "ଆଚରଣ ଓ ସୀମା",
+    "intro": "ଏହି ଏଜେଣ୍ଟ ଗୋଟିଏ ଟର୍ନରେ କେତେ ଦୂର ଯାଇପାରିବ ତାହା ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ: କେତୋଟି ଟୁଲ୍ କଲ୍ କରିପାରିବ, କେତେ ସମୟ ଚାଲିପାରିବ ଏବଂ କେତେ ପଢ଼ି ଫେରାଇବ। ଆପଣ ଏଠାରେ ଯାହା ବଦଳାନ୍ତି ନାହିଁ ତାହା ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍‌ରୁ ଉତ୍ତରାଧିକାରସୂତ୍ରେ ଆସେ।",
+    "saveFirst": "ପ୍ରଥମେ ଏଜେଣ୍ଟକୁ ସେଭ୍ କରନ୍ତୁ। ଏହା ତିଆରି ହେବା ପରେ ଏହାର ଆଚରଣ ଓ ସୀମା ସେଟ୍ କରାଯାଇପାରିବ।",
+    "pickAgent": "ଏହାର ଆଚରଣ ଓ ସୀମା ଟ୍ୟାବ୍ ଖୋଲିବାକୁ ତଳୁ ଗୋଟିଏ ଏଜେଣ୍ଟ ବାଛନ୍ତୁ।",
+    "tabs": {
+      "label": "ଏଜେଣ୍ଟ କନ୍ଫିଗରେସନ୍",
+      "setup": "ସେଟଅପ୍",
+      "behavior": "ଆଚରଣ ଓ ସୀମା",
+      "unsaved": "ସେଭ୍ ହୋଇନଥିବା ପରିବର୍ତ୍ତନ"
+    },
+    "links": {
+      "label": "ସମ୍ବନ୍ଧିତ ପୃଷ୍ଠା",
+      "tenant": "ୱାର୍କସ୍ପେସ୍ ଡିଫଲ୍ଟ ବଦଳାନ୍ତୁ",
+      "playground": "ପ୍ଲେଗ୍ରାଉଣ୍ଡରେ ଚେଷ୍ଟା କରନ୍ତୁ",
+      "prompts": "ଏହି ଏଜେଣ୍ଟର ପ୍ରମ୍ପ୍ଟ",
+      "promptsAria": "{name} ର ପ୍ରମ୍ପ୍ଟ: ପ୍ରମ୍ପ୍ଟ ରେଜିଷ୍ଟ୍ରିକୁ ଏହି ଏଜେଣ୍ଟରେ ଖୋଲନ୍ତୁ",
+      "approvals": "ଏହି ଏଜେଣ୍ଟର ଅନୁମୋଦନ",
+      "approvalsAria": "{name} ର ଅନୁମୋଦନ: ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଫିଲ୍ଟର୍ ହୋଇଥିବା ଅନୁମୋଦନ ଧାଡ଼ି ଖୋଲନ୍ତୁ",
+      "turns": "ଟର୍ନ ଟାଇମଲାଇନ୍",
+      "turnsAria": "{name} ର ଟର୍ନ ଟାଇମଲାଇନ୍: ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଟର୍ନ ଇନ୍ସପେକ୍ଟର୍ ଖୋଲନ୍ତୁ"
+    },
+    "readOnly": {
+      "locked": "ଏହି ଏଜେଣ୍ଟ ସମ୍ପାଦନା ପାଇଁ ଲକ୍ ହୋଇଛି, ତେଣୁ ଏହି ମୂଲ୍ୟ କେବଳ ପଢ଼ିବା ପାଇଁ।",
+      "access": "ଆପଣ ଏହି ମୂଲ୍ୟ ଦେଖିପାରିବେ କିନ୍ତୁ ଏହି ଏଜେଣ୍ଟରେ ଆପଣଙ୍କ ଆକ୍ସେସ୍ ସେଗୁଡ଼ିକୁ ବଦଳାଇବାକୁ ଦିଏ ନାହିଁ।"
+    },
+    "unsaved": "ଏହି ଟାବ୍‌ରେ ଆପଣଙ୍କର ସେଭ୍ ହୋଇନଥିବା ପରିବର୍ତ୍ତନ ଅଛି। ଯିବା ପୂର୍ବରୁ ତଳେ ସେଗୁଡ଼ିକୁ ସେଭ୍ କରନ୍ତୁ କିମ୍ବା ପରିତ୍ୟାଗ କରନ୍ତୁ।",
+    "inheritNote": "ପ୍ରତ୍ୟେକ ସେଟିଂ ଦେଖାଏ ତାର ମୂଲ୍ୟ କେଉଁଠାରୁ ଆସୁଛି। ଏଠାରେ ଗୋଟିଏ ବଦଳାଇଲେ ତାହା କେବଳ ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଓଭରରାଇଡ୍ ହୁଏ; ୱାର୍କସ୍ପେସ୍ ମୂଲ୍ୟ ପୁଣି ଉତ୍ତରାଧିକାରସୂତ୍ରେ ପାଇବାକୁ ରିସେଟ୍ କରନ୍ତୁ।",
+    "others": {
+      "title": "ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଅନ୍ୟ ନିୟନ୍ତ୍ରଣ",
+      "intro": "ଏହି ନିୟନ୍ତ୍ରଣ ଉପରର ସେଟିଂସ୍‌ର ଅଂଶ ନୁହେଁ, ତେଣୁ ସେଗୁଡ଼ିକ ସେଟଅପ୍ ଟାବ୍‌ରେ ରହେ।",
+      "generation": "ଉତ୍ତରର ସୃଜନଶୀଳତା ଓ ଲମ୍ବ (ତାପମାତ୍ରା, top-p, ସର୍ବାଧିକ ଟୋକେନ୍) ଏବଂ ଅତିରିକ୍ତ ସାମ୍ପଲିଂ ବିକଳ୍ପ।",
+      "generationLink": "ଜେନେରେସନ୍ ଟ୍ୟୁନିଂକୁ ଯାଆନ୍ତୁ",
+      "autonomy": "ସ୍ୱାୟତ୍ତତା ସ୍ତର, ପ୍ରତ୍ୟେକ ରନ୍ ପାଇଁ ଖର୍ଚ୍ଚ ସୀମା, ଟୁଲ୍ ନିୟମ ଏବଂ ଜଣେ ବ୍ୟକ୍ତି କେବେ ଅନୁମୋଦନ କରିବା ଆବଶ୍ୟକ।",
+      "autonomyLink": "ଯୁକ୍ତି ଓ ସ୍ୱାୟତ୍ତତାକୁ ଯାଆନ୍ତୁ"
+    },
+    "discard": {
+      "title": "ସେଭ୍ ନକରି ଛାଡ଼ିବେ?",
+      "description": "ଏହି ଏଜେଣ୍ଟର ଆଚରଣ ଓ ସୀମାରେ ଆପଣଙ୍କର ସେଭ୍ ହୋଇନଥିବା ପରିବର୍ତ୍ତନ ଅଛି। ଏବେ ଛାଡ଼ିଲେ ସେଗୁଡ଼ିକ ହଜିଯିବ।",
+      "stay": "ଏଠାରେ ରହି ସମ୍ପାଦନା ଜାରି ରଖନ୍ତୁ",
+      "leave": "ଛାଡ଼ନ୍ତୁ ଓ ପରିବର୍ତ୍ତନ ପରିତ୍ୟାଗ କରନ୍ତୁ"
+    },
+    "summary": {
+      "title": "ଏହି ଏଜେଣ୍ଟ ବର୍ତ୍ତମାନ କିପରି ଆଚରଣ କରେ",
+      "subtitle": "ଏଜେଣ୍ଟର ନିଜସ୍ୱ ଓଭରରାଇଡ୍, ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍ ସେଟିଂସ୍ ଓ ପ୍ଲାଟଫର୍ମ ସେଟିଂସ୍ ଲାଗୁ ହେବା ପରେ ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଲାଗୁ ମୂଲ୍ୟ।",
+      "loading": "ବର୍ତ୍ତମାନର ଆଚରଣ ଲୋଡ୍ ହେଉଛି",
+      "error": "ବର୍ତ୍ତମାନର ଆଚରଣ ଲୋଡ୍ କରିହେଲା ନାହିଁ। {message}",
+      "retry": "ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ",
+      "empty": "ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ଆଚରଣ ସେଟିଂସ୍ ଉପଲବ୍ଧ ନାହିଁ।",
+      "facts": {
+        "steps": "ପ୍ରତ୍ୟେକ ଟର୍ନରେ ଟୁଲ୍ କଲ୍",
+        "turnTimeout": "ପ୍ରତ୍ୟେକ ଟର୍ନରେ ସମୟ",
+        "toolTimeout": "ପ୍ରତ୍ୟେକ ଟୁଲ୍ କଲ୍‌ରେ ସମୟ",
+        "outputCap": "ରଖାଯାଇଥିବା ଟୁଲ୍ ଆଉଟପୁଟ୍",
+        "continuation": "ନିରନ୍ତରତା ପାସ୍",
+        "approvals": "ଅନୁମୋଦନ",
+        "judge": "ଗୁଣବତ୍ତା ବିଚାରକ ମଡେଲ୍",
+        "model": "ମଡେଲ୍"
+      },
+      "tier": {
+        "SUPERVISED": "ତତ୍ତ୍ୱାବଧାନରେ: ପ୍ରତ୍ୟେକ ଟୁଲ୍ କଲ୍ ଜଣେ ବ୍ୟକ୍ତିଙ୍କୁ ଅପେକ୍ଷା କରେ",
+        "SEMI_AUTONOMOUS": "ଅର୍ଦ୍ଧ-ସ୍ୱାୟତ୍ତ: ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍ ନିୟମ ସ୍ଥିର କରେ",
+        "FULLY_AUTONOMOUS": "ପୂର୍ଣ୍ଣ ସ୍ୱାୟତ୍ତ: ଟୁଲ୍ କଲ୍ କେବେ ଅପେକ୍ଷା କରେ ନାହିଁ"
+      },
+      "approvalResumes": "ଅନୁମୋଦନ ପରେ ନିଜେ ଜାରି ରଖେ",
+      "approvalStops": "ଅନୁମୋଦନ ପରେ ନୂଆ ବାର୍ତ୍ତା ପାଇଁ ଅପେକ୍ଷା କରେ",
+      "judgeDefault": "ପ୍ଲାଟଫର୍ମ ଦ୍ୱାରା ବଛାଯାଇଥିବା",
+      "overrides": {
+        "none": "ଏହି ଏଜେଣ୍ଟ ସବୁଠାରେ ଆପଣଙ୍କ ୱାର୍କସ୍ପେସ୍ ମୂଲ୍ୟ ବ୍ୟବହାର କରେ।",
+        "some": "ଏହି ଏଜେଣ୍ଟ ପାଇଁ ଓଭରରାଇଡ୍ ହୋଇଥିବା ସେଟିଂସ୍: {count}।"
+      }
+    },
+    "impact": {
+      "title": "ଏହାର ଅର୍ଥ କଣ",
+      "steps": "ଏହି ଏଜେଣ୍ଟ ଗୋଟିଏ ଟର୍ନରେ ସର୍ବାଧିକ {count}ଟି ଟୁଲ୍ କଲ୍ କରିପାରେ। ତା'ପରେ ତାକୁ ତା ପାଖରେ ଯାହା ଅଛି ତାହା ସହ ଉତ୍ତର ଦେବାକୁ କୁହାଯାଏ।",
+      "stepsTierSupervised": "ଏହି ଏଜେଣ୍ଟ ତତ୍ତ୍ୱାବଧାନରେ ଅଛି, ତେଣୁ ତାର ପ୍ରକୃତ ଉପରସୀମା ସେହି ମୂଳ ସଂଖ୍ୟାଠାରୁ କମ୍। ସଠିକ୍ ସଂଖ୍ୟା ବ୍ୟବହାର କରିବାକୁ ଏହି ଏଜେଣ୍ଟ ପାଇଁ ନିଜର ମୂଲ୍ୟ ସେଟ୍ କରନ୍ତୁ।",
+      "stepsTierFull": "ଏହି ଏଜେଣ୍ଟ ପୂର୍ଣ୍ଣ ସ୍ୱାୟତ୍ତ, ତେଣୁ ତାର ପ୍ରକୃତ ଉପରସୀମା ସେହି ମୂଳ ସଂଖ୍ୟାଠାରୁ ଅଧିକ। ସଠିକ୍ ସଂଖ୍ୟା ବ୍ୟବହାର କରିବାକୁ ଏହି ଏଜେଣ୍ଟ ପାଇଁ ନିଜର ମୂଲ୍ୟ ସେଟ୍ କରନ୍ତୁ।",
+      "turnTimeout": "ଗୋଟିଏ ଟର୍ନ {duration} ପରେ କଟାଯାଏ।",
+      "turnTimeoutNone": "ଟର୍ନର କୌଣସି ସମୟ ସୀମା ନାହିଁ।",
+      "toolTimeout": "ଗୋଟିଏ ଟୁଲ୍ କଲ୍ {duration} ପରେ କଟାଯାଏ।",
+      "toolTimeoutNone": "ଟୁଲ୍ କଲ୍‌ର କୌଣସି ସମୟ ସୀମା ନାହିଁ।",
+      "outputCap": "{chars}ଠାରୁ ଲମ୍ବା ଟୁଲ୍ ଫଳାଫଳ ଏଜେଣ୍ଟ ପଢ଼ିବା ପୂର୍ବରୁ ଛୋଟ କରାଯାଏ।",
+      "continuation": "ଉତ୍ତର କଟିଗଲେ, ଏଜେଣ୍ଟ ଏହାକୁ ଆହୁରି ସର୍ବାଧିକ {count} ଥର ଜାରି ରଖିପାରେ।",
+      "continuationNone": "କଟିଯାଇଥିବା ଉତ୍ତର ଜାରି ରଖାଯାଏ ନାହିଁ।",
+      "retrieval": "ପ୍ରତ୍ୟେକ ପ୍ରଶ୍ନ ପାଇଁ ଏହା ସର୍ବୋତ୍ତମ {count}ଟି ଜ୍ଞାନ ମେଳ ପଢ଼େ।",
+      "retrievalScored": "ପ୍ରତ୍ୟେକ ପ୍ରଶ୍ନ ପାଇଁ ଏହା ସର୍ବୋତ୍ତମ {count}ଟି ଜ୍ଞାନ ମେଳ ପଢ଼େ ଏବଂ {score}ଠାରୁ କମ୍ ସ୍କୋର୍ ଥିବା ମେଳକୁ ଅଣଦେଖା କରେ।",
+      "approvalContinuationOn": "ଜଣେ ବ୍ୟକ୍ତି ଅପେକ୍ଷା କରୁଥିବା କାର୍ଯ୍ୟ ଅନୁମୋଦନ କଲା ପରେ, ଏଜେଣ୍ଟ ନିଜେ କାର୍ଯ୍ୟ ଶେଷ କରେ।",
+      "approvalContinuationOff": "ଜଣେ ବ୍ୟକ୍ତି ଅପେକ୍ଷା କରୁଥିବା କାର୍ଯ୍ୟ ଅନୁମୋଦନ କଲା ପରେ, ଟର୍ନ ଶେଷ ହୁଏ ଏବଂ ହାତରେ ଫଲୋ-ଅପ୍ କରିବାକୁ ପଡ଼େ।",
+      "guardClosed": "ଗୋଟିଏ ସୁରକ୍ଷା ଯାଞ୍ଚ ଭାଙ୍ଗିଗଲେ, କାର୍ଯ୍ୟ ପ୍ରତ୍ୟାଖ୍ୟାନ ହୁଏ।",
+      "guardOpen": "ଗୋଟିଏ ସୁରକ୍ଷା ଯାଞ୍ଚ ଭାଙ୍ଗିଗଲେ, କାର୍ଯ୍ୟକୁ ପାର ହେବାକୁ ଦିଆଯାଏ।",
+      "branches": "ଗୋଟିଏ କାମ ଅର୍ପଣ କଲ୍ ଏକାସାଙ୍ଗରେ ସର୍ବାଧିକ {count}ଟି ଉପ-କାର୍ଯ୍ୟ ଆରମ୍ଭ କରିପାରେ।"
+    }
+  },
+  "controls": {
+    "eyebrow": "ସହାୟତା",
+    "title": "ମୁଁ କେଉଁଠି ନିୟନ୍ତ୍ରଣ କରିବି...?",
+    "subtitle": "ଆପଣଙ୍କ ଏଜେଣ୍ଟର ଆଚରଣ ଗଢ଼ିଥିବା ପ୍ରତ୍ୟେକ ନିୟନ୍ତ୍ରଣ, ଏବଂ ଯେଉଁ ପୃଷ୍ଠାରେ ତାହା ଅଛି। ଆପଣ ଯାହା ବଦଳାଇବାକୁ ଚାହୁଁଛନ୍ତି ତାହା ଦ୍ୱାରା ସନ୍ଧାନ କରନ୍ତୁ।",
+    "breadcrumb": {
+      "label": "ବ୍ରେଡକ୍ରମ୍ବ",
+      "console": "କନସୋଲ୍",
+      "controls": "ନିୟନ୍ତ୍ରଣ"
+    },
+    "related": {
+      "label": "ଅନ୍ୟ ନିୟନ୍ତ୍ରଣ"
+    },
+    "search": {
+      "label": "ନିୟନ୍ତ୍ରଣ ସନ୍ଧାନ କରନ୍ତୁ",
+      "placeholder": "ଉଦାହରଣ: ଟାଇମଆଉଟ୍, ଅନୁମୋଦନ, ପ୍ରମ୍ପ୍ଟ, ମେମୋରୀ",
+      "count": "{count}ଟି ମେଳ ଖାଉଥିବା ନିୟନ୍ତ୍ରଣ",
+      "none": "\"{query}\" ସହ କିଛି ମେଳ ଖାଉନାହିଁ। ଛୋଟ ଶବ୍ଦ ଚେଷ୍ଟା କରନ୍ତୁ।",
+      "noSettings": "କୌଣସି ସେଟିଂ ଆପଣଙ୍କ ସନ୍ଧାନ ସହ ମେଳ ଖାଉନାହିଁ।"
+    },
+    "areasHeading": "ନିୟନ୍ତ୍ରଣ କ୍ଷେତ୍ର",
+    "areasIntro": "ଏହି ପୃଷ୍ଠାଗୁଡ଼ିକରେ ସେହି ନିୟନ୍ତ୍ରଣ ଅଛି ଯାହା ଗୋଟିଏ ସଂଖ୍ୟା ନୁହେଁ: ନିର୍ଦ୍ଦେଶ, ଅନୁମୋଦନ ନିୟମ, ସୁରକ୍ଷା ନିୟମ ଏବଂ ଏକ ଟର୍ନ କଣ କଲା ତାହାର ରେକର୍ଡ।",
+    "openArea": "ଖୋଲନ୍ତୁ",
+    "needsAccess": "ଏହି ପୃଷ୍ଠାର ଆକ୍ସେସ୍ ପାଇଁ ଜଣେ ୱାର୍କସ୍ପେସ୍ ପ୍ରଶାସକଙ୍କୁ କୁହନ୍ତୁ।",
+    "settingsHeading": "ପ୍ରତ୍ୟେକ ରନଟାଇମ୍ ସେଟିଂ",
+    "settingsIntro": "ପ୍ରତ୍ୟେକ ସେଟିଂ ସମ୍ପୂର୍ଣ୍ଣ ୱାର୍କସ୍ପେସ୍ ପାଇଁ, ଗୋଟିଏ ଏଜେଣ୍ଟ ପାଇଁ, କିମ୍ବା ଉଭୟ ପାଇଁ ବଦଳାଯାଇପାରିବ। ଏଜେଣ୍ଟର ନିଜସ୍ୱ ମୂଲ୍ୟ ୱାର୍କସ୍ପେସ୍ ମୂଲ୍ୟକୁ ଅତିକ୍ରମ କରେ। ସେଟିଂରେ ସିଧା ପହଞ୍ଚିବାକୁ ଏକ ଲିଙ୍କ୍ ବାଛନ୍ତୁ।",
+    "loading": "ସେଟିଂସ୍ ତାଲିକା ଲୋଡ୍ ହେଉଛି",
+    "loadFailed": "ସେଟିଂସ୍ ତାଲିକା ଲୋଡ୍ କରିହେଲା ନାହିଁ। {message}",
+    "retry": "ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ",
+    "emptyCatalog": "ଏହି ୱାର୍କସ୍ପେସ୍‌ରେ ଦେଖାଇବାକୁ କୌଣସି ରନଟାଇମ୍ ସେଟିଂସ୍ ନାହିଁ।",
+    "changeWorkspace": "ୱାର୍କସ୍ପେସ୍ ପାଇଁ ବଦଳାନ୍ତୁ",
+    "changeAgent": "ଏକ ଏଜେଣ୍ଟରେ ବଦଳାନ୍ତୁ",
+    "workspaceOnly": "କେବଳ ୱାର୍କସ୍ପେସ୍-ବ୍ୟାପୀ",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "ଏଜେଣ୍ଟ ରନଟାଇମ୍ ସୀମା",
+        "intro": "ଗୋଟିଏ ଟର୍ନ କେତେ କାମ କରିପାରେ: ଟୁଲ୍ କଲ୍, ସମୟ, ଫଳାଫଳର ଆକାର ଓ ପୁନରୁଦ୍ଧାର।"
+      },
+      "behaviour-settings": {
+        "title": "ଆଚରଣ ସେଟିଂସ୍",
+        "intro": "ଉତ୍ତର କିପରି ଶେଷ ଓ କ୍ୟାଶ୍ ହୁଏ, ଅନୁମୋଦନ କିପରି ଜାରି ରହେ, ସୁରକ୍ଷା ଯାଞ୍ଚ କିପରି ଆଚରଣ କରେ, ଏବଂ ମେମୋରୀ, ସନ୍ଧାନ ଓ କାମ ଅର୍ପଣ କିପରି କାମ କରେ।"
+      },
+      "other": {
+        "title": "ଅନ୍ୟ ସେଟିଂସ୍",
+        "intro": "ନିଜସ୍ୱ ବିଭାଗ ନଥିବା ସେଟିଂସ୍।"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "ରନଟାଇମ୍ ସେଟିଂସ୍",
+        "summary": "ସମ୍ପୂର୍ଣ୍ଣ ୱାର୍କସ୍ପେସ୍ ପାଇଁ ସୀମା, ଅନୁମୋଦନ, ଗୁଣବତ୍ତା ଯାଞ୍ଚ, ସୁରକ୍ଷା କଠୋରତା, ମେମୋରୀ ଓ କାମ ଅର୍ପଣ।",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers ସୀମା ଟାଇମଆଉଟ୍ ଟୁଲ୍ ପଦକ୍ଷେପ ପୁନଃଚେଷ୍ଟା କ୍ୟାଶ୍ ମେମୋରୀ କାମ ଅର୍ପଣ ଗୁଣବତ୍ତା ବିଚାରକ ସେଟିଂସ୍ ସଂଖ୍ୟା"
+      },
+      "prompts": {
+        "title": "ନିର୍ଦ୍ଦେଶ",
+        "summary": "ପ୍ଲାଟଫର୍ମ ମଡେଲ୍‌କୁ ଦେଉଥିବା ପ୍ରମ୍ପ୍ଟ: ପ୍ରତ୍ୟେକଟି ଦେଖନ୍ତୁ, ୱାର୍କସ୍ପେସ୍ କିମ୍ବା ଏଜେଣ୍ଟ ପାଇଁ ଓଭରରାଇଡ୍ କରନ୍ତୁ, ଏବଂ ଫଳାଫଳର ପ୍ରିଭ୍ୟୁ ଦେଖନ୍ତୁ।",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry ପ୍ରମ୍ପ୍ଟ ନିର୍ଦ୍ଦେଶିକା ସିଷ୍ଟମ ପ୍ରମ୍ପ୍ଟ ନିର୍ଦ୍ଦେଶ ଓଭରରାଇଡ୍ ପ୍ରିଭ୍ୟୁ ରେଜିଷ୍ଟ୍ରି"
+      },
+      "approvals": {
+        "title": "ଅନୁମୋଦନ",
+        "summary": "ଜଣେ ବ୍ୟକ୍ତିଙ୍କୁ ଅପେକ୍ଷା କରୁଥିବା କାର୍ଯ୍ୟର ଧାଡ଼ି, କେଉଁ ଟୁଲ୍‌କୁ ଅନୁମୋଦନ ଦରକାର ତାହାର ନିୟମ, ଏବଂ ଆପଣଙ୍କ ନିଷ୍ପତ୍ତି ପରେ କଣ ହୁଏ।",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation ଅନୁମୋଦନ ପ୍ରତ୍ୟାଖ୍ୟାନ ଧାଡ଼ି ହ୍ୟୁମାନ୍ ଇନ୍ ଦି ଲୁପ୍ ଟୁଲ୍ ନିୟମ ମିଆଦ ନିରନ୍ତରତା"
+      },
+      "guardrails": {
+        "title": "ଗାର୍ଡରେଲ୍",
+        "summary": "ଏହି ୱାର୍କସ୍ପେସ୍ ପାର ହେବାକୁ ଦେବାକୁ ମନା କରୁଥିବା ପ୍ୟାଟର୍ନ, ଏବଂ ଟୁଲ୍ ଫଳାଫଳରେ ଲାଗୁ ବିଷୟବସ୍ତୁ ନୀତି।",
+        "keywords": "safety rules block filter policy content patterns ସୁରକ୍ଷା ନିୟମ ଅବରୋଧ ଫିଲ୍ଟର୍ ନୀତି ବିଷୟବସ୍ତୁ ପ୍ୟାଟର୍ନ"
+      },
+      "turns": {
+        "title": "ଟର୍ନ ଇନ୍ସପେକ୍ଟର୍",
+        "summary": "ଏକ ଏଜେଣ୍ଟ ଟର୍ନର ରେକର୍ଡ ହୋଇଥିବା ଟାଇମଲାଇନ୍: କଣ ପଚରାଗଲା, କେଉଁ ଟୁଲ୍ ଚାଲିଲା, ପ୍ରତ୍ୟେକ ପଦକ୍ଷେପର ଖର୍ଚ୍ଚ କେତେ ହେଲା ଏବଂ ଏହା କାହିଁକି ଅଟକିଲା।",
+        "keywords": "turn timeline journal trace replay history steps debug ଟର୍ନ ଟାଇମଲାଇନ୍ ଜର୍ଣ୍ଣାଲ୍ ଟ୍ରେସ୍ ରିପ୍ଲେ ଇତିହାସ ପଦକ୍ଷେପ ଡିବଗ୍"
+      },
+      "agentBehavior": {
+        "title": "ଏଜେଣ୍ଟ ଆଚରଣ ଓ ସୀମା",
+        "summary": "ଏକ ଏଜେଣ୍ଟର ପୃଷ୍ଠାରେ: ତାର ନିଜସ୍ୱ ସୀମା ଓ ଆଚରଣ ସେଟିଂସ୍, ପ୍ରତ୍ୟେକ ମୂଲ୍ୟ କେଉଁଠାରୁ ଆସୁଛି ଏବଂ ୱାର୍କସ୍ପେସ୍ ମୂଲ୍ୟକୁ ରିସେଟ୍ ସହିତ।",
+        "keywords": "agent override per agent behavior limits tab ଏଜେଣ୍ଟ ଓଭରରାଇଡ୍ ପ୍ରତି ଏଜେଣ୍ଟ ଆଚରଣ ସୀମା ଟାବ୍"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "ଏହି ପ୍ରମ୍ପ୍ଟ ବ୍ଲକ୍‌ରୁ ଗଠିତ",
+    "blocksCount": "{n}ଟି ବ୍ଲକ୍",
+    "blockDefault": "ଡିଫଲ୍ଟ ଭାବେ ମିଳିଥିବା",
+    "blockOverride": "{scope} ଓଭରରାଇଡ୍ v{version}",
+    "blockAgentConfig": "ଏଜେଣ୍ଟର ନିଜସ୍ୱ ପ୍ରମ୍ପ୍ଟ",
+    "blockCode": "ପ୍ଲାଟଫର୍ମ କୋଡ୍",
+    "blockTokens": "~{tokens} ଟୋକେନ୍",
+    "blockHash": "ଶବ୍ଦାବଳୀ ହ୍ୟାସ୍"
+  },
+  "toolApproval": {
+    "continuing": "ଏଜେଣ୍ଟ କାମ ଜାରି ରଖୁଛି।",
+    "continueNotStarted": "ଏହି ନିଷ୍ପତ୍ତି ପରେ ଏଜେଣ୍ଟ ସ୍ୱୟଂଚାଳିତ ଭାବେ ପୁନଃଆରମ୍ଭ ହେଲା ନାହିଁ। ଏହାକୁ ଆଗକୁ ବଢ଼ାଇବାକୁ ଏକ ବାର୍ତ୍ତା ପଠାନ୍ତୁ।",
+    "continueTimedOut": "ଏଜେଣ୍ଟ ଏପର୍ଯ୍ୟନ୍ତ ଜାରି ରଖିବା ଶେଷ କରିନାହିଁ। ଶେଷ ହେଲେ ତାର ଉତ୍ତର କଥାବାର୍ତ୍ତାରେ ଦେଖାଯିବ; ଯାଞ୍ଚ କରିବାକୁ ରିଲୋଡ୍ କରନ୍ତୁ।",
+    "continuingWaiting": "Your decision is recorded. The agent is picking the task back up.",
+    "continuingRunning": "The agent is working on the next step. Its reply appears here as soon as it is ready.",
+    "continuingStill": "Still working. A model running on this computer can take a few minutes; you can keep reading meanwhile.",
+    "continuingLongWait": "This is taking longer than usual, but the agent has not stopped. Its reply will appear here when it is done.",
+    "continuingStagesLabel": "Progress",
+    "continuingStageDecided": "Decision recorded",
+    "continuingStageRestarted": "Agent restarted",
+    "continuingStageWorking": "Working on it",
+    "panelLabel": "Tool approvals",
+    "queuePosition": "Approval {position} of {total}",
+    "queueMore": "{count} more waiting. The next one appears when you decide this one.",
+    "rawName": "Technical name",
+    "approveAll": "Approve all {count}",
+    "rejectAll": "Reject all",
+    "approvingProgress": "Approving {position} of {total}",
+    "rejectingProgress": "Rejecting {position} of {total}",
+    "bulkHint": "Decides the waiting calls one after another, oldest first, and stops at the first problem.",
+    "bulkStoppedTruncated": "Stopped: the next call's arguments are too long to show here, so it waits for your own decision.",
+    "bulkStoppedError": "Stopped after a problem; the calls below it are still waiting.",
+    "waitingList": "Waiting calls"
+  },
+  "promptDirectives": {
+    "tabRegistry": "ସମସ୍ତ ପ୍ରମ୍ପ୍ଟ",
+    "tabAgentPreview": "ଅନ୍ତିମ ପ୍ରମ୍ପ୍ଟ ପ୍ରିଭ୍ୟୁ",
+    "regTitle": "ପ୍ରତ୍ୟେକ ପ୍ରମ୍ପ୍ଟ",
+    "regIntro": "ମଡେଲ୍ ପାଇଁ ପ୍ଲାଟଫର୍ମ ଯାହା ଲେଖେ ସେହି ସବୁ ଟେକ୍ସଟ୍, ବର୍ତ୍ତମାନ ଲାଗୁ ଶବ୍ଦାବଳୀ, ତାର ଉତ୍ସ ଓ ସଂସ୍କରଣ ସହିତ। ଏକ ପରିସର ବାଛନ୍ତୁ, ବଦଳାଇବାକୁ ଏକ ପ୍ରମ୍ପ୍ଟ ଖୋଲନ୍ତୁ, ଏବଂ ପ୍ରତ୍ୟେକ ପୂର୍ବ ସଂସ୍କରଣ ଦେଖନ୍ତୁ। ପରିବର୍ତ୍ତନ ପ୍ରାୟ ଅଧ ମିନିଟ୍‌ରେ ସମସ୍ତ ସର୍ଭର୍‌ରେ ପହଞ୍ଚେ।",
+    "regScopeLabel": "ଯେଉଁ ପରିସରରେ ବଦଳାଇବେ",
+    "regScope_tenant": "ଏହି ୱାର୍କସ୍ପେସ୍",
+    "regScope_agent": "ଗୋଟିଏ ଏଜେଣ୍ଟ",
+    "regScope_platform": "ସମ୍ପୂର୍ଣ୍ଣ ପ୍ଲାଟଫର୍ମ",
+    "regAgentLabel": "ଏଜେଣ୍ଟ",
+    "regAgentPlaceholder": "ଏକ ଏଜେଣ୍ଟ ବାଛନ୍ତୁ",
+    "regAgentsFailed": "ଆପଣଙ୍କ ଏଜେଣ୍ଟ ଲୋଡ୍ କରିହେଲା ନାହିଁ।",
+    "regPickAgent": "ଏକ ଏଜେଣ୍ଟର ପ୍ରମ୍ପ୍ଟ ଦେଖିବାକୁ ଓ ବଦଳାଇବାକୁ ତାକୁ ବାଛନ୍ତୁ।",
+    "regAgentUnavailable": "ଲିଙ୍କ୍‌ରେ ଥିବା ଏଜେଣ୍ଟ ଆପଣଙ୍କ ପାଇଁ ଉପଲବ୍ଧ ନୁହେଁ, କାରଣ ଏହା ନାହିଁ କିମ୍ବା ଆପଣ ଏହାକୁ ଦେଖିପାରିବେ ନାହିଁ। ଏହା ବଦଳରେ ରେଜିଷ୍ଟ୍ରି ୱାର୍କସ୍ପେସ୍ ପରିସରରେ ଖୋଲିଲା।",
+    "regSearchLabel": "ପ୍ରମ୍ପ୍ଟ ସନ୍ଧାନ କରନ୍ତୁ",
+    "regSearchPlaceholder": "କି, ଶୀର୍ଷକ ବା ବିବରଣୀ",
+    "regRiskLabel": "ବିପଦ ଶ୍ରେଣୀ",
+    "regRiskAll": "ସମସ୍ତ ବିପଦ ଶ୍ରେଣୀ",
+    "regRisk_STEERS_EVERY_TURN": "ପ୍ରତ୍ୟେକ ଟର୍ନକୁ ପରିଚାଳନା କରେ",
+    "regRisk_SECONDARY_CALL": "ଦ୍ୱିତୀୟ ମଡେଲ୍ କଲ୍",
+    "regRisk_USER_VISIBLE": "ଲୋକଙ୍କୁ ଦେଖାଯାଏ",
+    "regRisk_TOOL_DESCRIPTION": "ଟୁଲ୍ ବିବରଣୀ",
+    "regOnlyCustomised": "କେବଳ କଷ୍ଟମାଇଜ୍ କରାଯାଇଥିବା",
+    "regPlatformReadOnly": "ପ୍ଲାଟଫର୍ମ-ବ୍ୟାପୀ ପ୍ରମ୍ପ୍ଟ ଏଠାରେ ପଢ଼ାଯାଇପାରିବ; କେବଳ ପ୍ଲାଟଫର୍ମ ପ୍ରଶାସକ ସେଗୁଡ଼ିକୁ ବଦଳାଇପାରିବେ।",
+    "regLoadFailed": "ପ୍ରମ୍ପ୍ଟ ଲୋଡ୍ କରିହେଲା ନାହିଁ।",
+    "regCount": "{total}ଟି ପ୍ରମ୍ପ୍ଟ ମଧ୍ୟରୁ {shown}ଟି ଦେଖାଉଛି।",
+    "regEmptyTitle": "କୌଣସି ପ୍ରମ୍ପ୍ଟ ମେଳ ଖାଉନାହିଁ",
+    "regEmptyBody": "ସନ୍ଧାନ କିମ୍ବା ଫିଲ୍ଟର୍ ବଦଳାନ୍ତୁ।",
+    "regSource_DEFAULT": "ଡିଫଲ୍ଟ ଭାବେ ମିଳିଥିବା",
+    "regSource_FALLBACK": "ଡିଫଲ୍ଟ ଭାବେ ମିଳିଥିବା (ଓଭରରାଇଡ୍ ଉପଲବ୍ଧ ନାହିଁ)",
+    "regSource_PLATFORM": "ପ୍ଲାଟଫର୍ମ",
+    "regSource_TENANT": "ୱାର୍କସ୍ପେସ୍",
+    "regSource_AGENT": "ଏଜେଣ୍ଟ",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "ଅବସରପ୍ରାପ୍ତ",
+    "regRetiredBody": "ଏହି ପ୍ରମ୍ପ୍ଟ ଆଉ କୌଣସି ଟେକ୍ସଟ୍ ପଠାଏ ନାହିଁ, ତେଣୁ ବଦଳାଇବାକୁ କିଛି ନାହିଁ।",
+    "regEffectiveOff": "ବନ୍ଦ: କିଛି ପଠାଯାଏ ନାହିଁ।",
+    "regEffectiveTokens": "ବର୍ତ୍ତମାନ ଲାଗୁ, ପ୍ରାୟ {tokens} ଟୋକେନ୍।",
+    "regEffectiveLabel": "{title} ପାଇଁ ଲାଗୁ ଶବ୍ଦାବଳୀ",
+    "regOpenEditor": "{title} ସମ୍ପାଦନା କରନ୍ତୁ",
+    "regCloseEditor": "{title} ବନ୍ଦ କରନ୍ତୁ",
+    "regEditingOverride": "{scope} ସଂସ୍କରଣ ସମ୍ପାଦନା ହେଉଛି, ବର୍ତ୍ତମାନ v{version}।",
+    "regEditingNone": "ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି {scope} ସଂସ୍କରଣ ନାହିଁ। ଏହା ତାହାର ତଳର ଶବ୍ଦାବଳୀରୁ ଆରମ୍ଭ ହୁଏ: {below}।",
+    "regPlaceholders": "ରନଟାଇମ୍‌ରେ ପୂରଣ ହୁଏ:",
+    "regRequired": "(ଆବଶ୍ୟକ)",
+    "regProblemsTitle": "ସେଭ୍ କରିବା ପୂର୍ବରୁ ଏହାକୁ ସଜାଡ଼ନ୍ତୁ",
+    "regReasonLabel": "ପରିବର୍ତ୍ତନର କାରଣ (ଇତିହାସରେ ରଖାଯାଏ)",
+    "regReasonPlaceholder": "ବୈକଳ୍ପିକ",
+    "regConflict": "ଆପଣ ସମ୍ପାଦନା କରୁଥିବା ବେଳେ କେହି ଏହି ପ୍ରମ୍ପ୍ଟ ବଦଳାଇଦେଲେ। ତାଙ୍କ ସଂସ୍କରଣ ଦେଖିବାକୁ ଏହାକୁ ବନ୍ଦ କରି ପୁଣି ଖୋଲନ୍ତୁ, ତା'ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।",
+    "regRevert": "{to}କୁ ଫେରାନ୍ତୁ",
+    "regShowHistory": "ଇତିହାସ",
+    "regHideHistory": "ଇତିହାସ ଲୁଚାନ୍ତୁ",
+    "regHistoryLoading": "ଇତିହାସ ଲୋଡ୍ ହେଉଛି…",
+    "regHistoryFailed": "ଇତିହାସ ଲୋଡ୍ କରିହେଲା ନାହିଁ।",
+    "regHistoryEmpty": "ଏହି ପରିସରରେ ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ସଂସ୍କରଣ ନାହିଁ।",
+    "regVersion": "ସଂସ୍କରଣ {version}",
+    "regAction_CREATE": "ସୃଷ୍ଟି",
+    "regAction_UPDATE": "ପରିବର୍ତ୍ତିତ",
+    "regAction_REVERT": "ଫେରାଯାଇଛି",
+    "regAction_MIGRATE": "ସ୍ଥାନାନ୍ତରିତ",
+    "regCurrent": "ବର୍ତ୍ତମାନର",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "ଅଜ୍ଞାତ",
+    "regReason": "କାରଣ: {reason}",
+    "regShowDiff": "ସଂସ୍କରଣ {version}ର ପରିବର୍ତ୍ତନ ଦେଖାନ୍ତୁ",
+    "regHideDiff": "ସଂସ୍କରଣ {version}ର ପରିବର୍ତ୍ତନ ଲୁଚାନ୍ତୁ",
+    "regDiffLabel": "ସଂସ୍କରଣ {version} ଦ୍ୱାରା କରାଯାଇଥିବା ପରିବର୍ତ୍ତନ",
+    "regNoDiff": "ଏହି ସଂସ୍କରଣରେ କୌଣସି ଟେକ୍ସଟ୍ ବଦଳିନାହିଁ।",
+    "regRestore": "ସଂସ୍କରଣ {version} ପୁନରୁଦ୍ଧାର କରନ୍ତୁ",
+    "regRestoreReason": "ସଂସ୍କରଣ {version}ର ଶବ୍ଦାବଳୀ ପୁନରୁଦ୍ଧାର ହେଲା",
+    "regRestoreFailed": "ସେହି ସଂସ୍କରଣ ପୁନରୁଦ୍ଧାର କରିହେଲା ନାହିଁ।",
+    "regRestoreAck": "ମୁଁ ବୁଝୁଛି ଯେ {title}ର ଏକ ସଂସ୍କରଣ ପୁନରୁଦ୍ଧାର କଲେ ସୁରକ୍ଷା ଦୁର୍ବଳ ହୋଇପାରେ।",
+    "regPreviewTitle": "ଅନ୍ତିମ ପ୍ରମ୍ପ୍ଟ ପ୍ରିଭ୍ୟୁ",
+    "regPreviewIntro": "ମଡେଲ୍‌କୁ କଲ୍ ନକରି, ଗୋଟିଏ ଟର୍ନ ଯେପରି କରନ୍ତା ସେହିପରି ଏକ ଏଜେଣ୍ଟର ପ୍ରକୃତ ସିଷ୍ଟମ ପ୍ରମ୍ପ୍ଟ ଓ ଟୁଲ୍ ତାଲିକା ତିଆରି କରେ। ପ୍ରତ୍ୟେକ ବ୍ଲକ୍ ପ୍ରମ୍ପ୍ଟ କି, ପରିସର ଏବଂ ତାର ଶବ୍ଦାବଳୀ ଆସିଥିବା ସଂସ୍କରଣ ଦେଖାଏ।",
+    "regPreviewMessageLabel": "ନମୁନା ଉପଯୋଗକର୍ତ୍ତା ବାର୍ତ୍ତା (ବୈକଳ୍ପିକ)",
+    "regPreviewMessagePlaceholder": "ପ୍ରକୃତ ବାର୍ତ୍ତା ପରି ଟୁଲ୍ ଓ ମନେପକାଯାଇଥିବା ମେମୋରୀ ବାଛିବାକୁ ବ୍ୟବହୃତ ହୁଏ।",
+    "regPreviewSmallModel": "ଛୋଟ ମଡେଲ୍ ପାଇଁ ପ୍ରିଭ୍ୟୁ",
+    "regPreviewBuild": "ପ୍ରିଭ୍ୟୁ ତିଆରି କରନ୍ତୁ",
+    "regPreviewBuilding": "ତିଆରି ହେଉଛି…",
+    "regPreviewFailed": "ପ୍ରିଭ୍ୟୁ ତିଆରି କରିହେଲା ନାହିଁ।",
+    "regPreviewTotals": "ପ୍ରାୟ {prompt} ଟୋକେନ୍ ସିଷ୍ଟମ ଟେକ୍ସଟ୍ ଏବଂ {tools} ଟୋକେନ୍ ଟୁଲ୍ ସଂଜ୍ଞା (ଅନୁମାନ)।",
+    "regPreviewOverBudgetTitle": "ଟୋକେନ୍ ବଜେଟ୍ ଅତିକ୍ରମ",
+    "regPreviewOverBudget": "ସ୍ଥାୟୀ ସିଷ୍ଟମ ଟେକ୍ସଟ୍ ବିନ୍ୟସ୍ତ {budget} ଟୋକେନ୍ ବଜେଟ୍ ଅତିକ୍ରମ କରିଛି। କିଛି କଟାଯାଏ ନାହିଁ; ଗୋଟିଏ ପ୍ରମ୍ପ୍ଟ ଛୋଟ କରିବା ବିଷୟରେ ଭାବନ୍ତୁ।",
+    "regPreviewMessageHeading": "ବାର୍ତ୍ତା: {message}",
+    "regPreviewTokens": "~{tokens} ଟୋକେନ୍",
+    "regPreviewTools": "ଟୁଲ୍ ({count})",
+    "regPreviewNoTools": "ଏହି ଏଜେଣ୍ଟ କୌଣସି ଟୁଲ୍ ଦିଏ ନାହିଁ।",
+    "regPreviewNotes": "ଏହି ପ୍ରିଭ୍ୟୁ ଯାହା ଜାଣିପାରେ ନାହିଁ",
+    "regOriginDefault": "ଡିଫଲ୍ଟ ଭାବେ ମିଳିଥିବା",
+    "regOriginOverride": "{scope} ଓଭରରାଇଡ୍ v{version}",
+    "regOriginAgentConfig": "ଏଜେଣ୍ଟର ନିଜସ୍ୱ ସିଷ୍ଟମ ପ୍ରମ୍ପ୍ଟ",
+    "regOriginCode": "ପ୍ଲାଟଫର୍ମ କୋଡ୍"
+  },
+  "toolLabels": {
+    "mcpTool": "{tool} ({server})",
+    "label_web_search": "Search the web",
+    "does_web_search": "Looks up public web pages that match a search and reads their titles and snippets.",
+    "label_fetch_web_page": "Open a web page",
+    "does_fetch_web_page": "Downloads one public web page and reads its text.",
+    "label_deep_research": "Research a topic on the web",
+    "does_deep_research": "Runs several web searches and reads the pages it finds.",
+    "label_verify_citations": "Check quotes against sources",
+    "does_verify_citations": "Compares quoted text with the web pages it was taken from.",
+    "label_http_request": "Call a web API",
+    "does_http_request": "Sends a request to a web address or API; depending on the request it can read or change something there.",
+    "label_http_request_write": "Send data to a web API",
+    "does_http_request_write": "Sends data to a web address, which can change something on that service.",
+    "label_schedule_task": "Schedule a task",
+    "does_schedule_task": "Sets up a task to run later or on a repeating schedule.",
+    "label_create_workflow": "Create a workflow",
+    "does_create_workflow": "Creates a new workflow in this workspace.",
+    "label_data_table_query": "Look up a data table",
+    "does_data_table_query": "Reads rows from one of this workspace's data tables.",
+    "label_data_table_write": "Change a data table",
+    "does_data_table_write": "Adds or changes rows in one of this workspace's data tables.",
+    "label_coding_task": "Run a coding task",
+    "does_coding_task": "Starts a coding task that can read and change files in a code workspace.",
+    "label_delegate_to_specialist": "Ask a specialist agent",
+    "does_delegate_to_specialist": "Hands part of the task to another agent and reads its answer.",
+    "label_delegate_parallel": "Ask several agents at once",
+    "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
+    "label_web_task": "Use a browser on a website",
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
   }
 }

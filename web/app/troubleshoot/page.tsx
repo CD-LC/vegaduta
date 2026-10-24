@@ -22,6 +22,7 @@ import PageHeader from "../components/ax/PageHeader";
 import { Button } from "../components/ui/button";
 import { localModelsApi, type LocalModelChoice, type LocalModelRecommendation } from "../lib/api/localModels";
 import { localModelAllowed, tierCommand } from "../lib/personalInstall";
+import { localModelManagedHere } from "../lib/api/localModels";
 import { academyHref, hasAcademy } from "../lib/academyUrl";
 import { useTranslations } from "../lib/i18n";
 
@@ -53,12 +54,17 @@ export default function TroubleshootPage() {
   const [using, setUsing] = useState<string | null>(null);
   const [useNote, setUseNote] = useState<{ state: State; text: string } | null>(null);
   const [probe, setProbe] = useState<{ state: State; text: string } | null>(null);
+  // Personal installs always diagnose their local model; on lite/full the
+  // page opens when the install actually runs one (a reachable model server
+  // or a pool row pointing at it), so a self-hosted operator still gets the
+  // checks while a hosted tenant sees the shared notice.
+  const [allowed, setAllowed] = useState<boolean | null>(() => (localModelAllowed() ? true : null));
 
   const set = (key: string, state: State, detail?: string) =>
     setChecks((cs) => cs.map((c) => (c.key === key ? { ...c, state, detail } : c)));
 
   const run = useCallback(async () => {
-    if (!localModelAllowed()) return;
+    if (allowed !== true) return;
     setRec(null);
     setProbe(null);
     setUseNote(null);
@@ -92,7 +98,18 @@ export default function TroubleshootPage() {
     } else {
       set("model", "fail", t("modelMissing", { tag: want }));
     }
-  }, [t]);
+  }, [t, allowed]);
+
+  useEffect(() => {
+    if (allowed !== null) return undefined;
+    let live = true;
+    void localModelManagedHere().then((v) => {
+      if (live) setAllowed(v);
+    });
+    return () => {
+      live = false;
+    };
+  }, [allowed]);
 
   useEffect(() => {
     void run();
@@ -180,7 +197,7 @@ export default function TroubleshootPage() {
         }
       />
       <div className="mx-auto w-full max-w-3xl space-y-3 px-4 pb-16">
-        {!localModelAllowed() && (
+        {allowed === false && (
           <div
             className="flex items-start gap-3 rounded-lg border border-border bg-card p-4"
             data-testid="troubleshoot-shared-notice"
@@ -191,7 +208,7 @@ export default function TroubleshootPage() {
             <p className="text-sm text-muted-foreground">{t("sharedBody")}</p>
           </div>
         )}
-        {localModelAllowed() && (
+        {allowed !== false && (
           <>
             {checks.map((c) => (
               <div key={c.key} className="flex items-start gap-3 rounded-lg border border-border bg-card p-4">

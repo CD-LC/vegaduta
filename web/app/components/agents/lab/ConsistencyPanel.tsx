@@ -14,6 +14,7 @@ import { Select } from "../../ui/select";
 import { Textarea } from "../../ui/textarea";
 import ConsistencyResults from "./ConsistencyResults";
 import { LabEstimate, LabRunButton, LabRunStatus } from "./LabRunControls";
+import LabWithToolsToggle, { useLabWithTools } from "./LabWithToolsToggle";
 import { buildConsistencyRequest, historyBefore, type ConsistencyContext } from "./consistencyPlan";
 import { LAB_DEFAULT_MAX_CALLS, LAB_MAX_MESSAGE_CHARS, plannedCalls } from "./labApi";
 import { clampText, listExchanges, type LabExchange } from "./labTurns";
@@ -35,6 +36,7 @@ function canSample(exchange: LabExchange): boolean {
 export default function ConsistencyPanel({ agent, turns, capabilities }: ConsistencyPanelProps): ReactElement {
   const t = useTranslations("agentLab");
   const lab = useLabRun<ConsistencyContext>(agent.id, "CONSISTENCY");
+  const tools = useLabWithTools(lab, capabilities);
   const fieldId = useId();
 
   const exchanges = useMemo(() => listExchanges(turns).filter(canSample), [turns]);
@@ -65,6 +67,8 @@ export default function ConsistencyPanel({ agent, turns, capabilities }: Consist
     history: fromTurn && includeHistory ? priorMessages : [],
     k,
     usedTools,
+    // Only present when set, so the stored context of an ordinary run is unchanged.
+    ...(tools.withTools ? { withTools: true } : {}),
   };
   const request = buildConsistencyRequest(ctx);
   // Nothing to ask yet = nothing to run, whatever k says.
@@ -137,7 +141,7 @@ export default function ConsistencyPanel({ agent, turns, capabilities }: Consist
                   {t("ccIncludeHistory", { count: priorMessages.length })}
                 </label>
               )}
-              {usedTools && <p className="text-xs text-muted-foreground">{t("ccToolsWarning")}</p>}
+              {usedTools && !tools.withTools && <p className="text-xs text-muted-foreground">{t("ccToolsWarning")}</p>}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">{t("ccNoTurns")}</p>
@@ -179,6 +183,8 @@ export default function ConsistencyPanel({ agent, turns, capabilities }: Consist
           {agent.temperature === 0 && <p className="text-xs text-muted-foreground">{t("ccZeroTempNote")}</p>}
         </div>
 
+        <LabWithToolsToggle state={tools} disabled={live} />
+
         <LabEstimate
           calls={calls}
           cap={cap}
@@ -191,7 +197,7 @@ export default function ConsistencyPanel({ agent, turns, capabilities }: Consist
             capabilities={capabilities}
             disabled={tooLong || live}
             disabledReason={blockedReason}
-            onRun={() => void lab.start(request, ctx)}
+            onRun={() => void lab.start(tools.withTools ? { ...request, withTools: true } : request, ctx)}
           />
           {blockedReason && (
             <p className="text-xs text-destructive" role="alert">

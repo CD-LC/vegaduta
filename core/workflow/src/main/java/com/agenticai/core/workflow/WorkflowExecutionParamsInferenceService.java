@@ -4,6 +4,8 @@ import com.agenticai.core.agents.hosted.FreeTierChatClientService;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
 import com.agenticai.core.chat.structured.StructuredOutput;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
@@ -49,21 +51,16 @@ public class WorkflowExecutionParamsInferenceService {
 
     private static final InferredLimits FALLBACK_ON_FAILURE = new InferredLimits(50, 30);
 
-    private static final String SYSTEM_PROMPT = """
-        You configure execution limits for an AI workflow based on its name and
-        description. Reply with ONLY a JSON object (no markdown fences, no
-        explanation) with exactly these two fields:
-        {"maxStepsPerRun": <integer>, "stepTimeoutSeconds": <integer>}
+    /** Registry key of the system prompt (default text: {@code prompts/en/workflow.params_inference.md}). */
+    static final String PROMPT_KEY = "workflow.params_inference";
 
-        Guidance:
-        - Linear flows (fetch → transform → output): 5-15 steps, 10-30 s each.
-        - Branching flows (conditions, approval gates, routing): 15-40 steps, 20-45 s each.
-        - Loop or parallel flows (fan-out, per-item processing, multi-agent):
-          40-100 steps, 30-60 s each.
-        - Complex orchestration (nested loops, multi-branch + parallel):
-          up to 200 steps, up to 120 s each.
-        Stay within [5, 200] for maxStepsPerRun and [10, 300] for stepTimeoutSeconds.
-        """;
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so a tenant override of {@link #PROMPT_KEY} applies; absent = shipped text. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     private final ProviderCredentialResolver credentialResolver;
     private final LlmGatewayService llmGatewayService;
@@ -100,7 +97,7 @@ public class WorkflowExecutionParamsInferenceService {
             ChatClient chatClient = buildChatClient();
             String user = "Workflow name: " + (workflowName == null ? "" : workflowName)
                 + "\nWorkflow description: " + (workflowDescription == null ? "" : workflowDescription);
-            String raw = chatClient.prompt().system(SYSTEM_PROMPT).user(user).call().content();
+            String raw = chatClient.prompt().system(prompts.text(PROMPT_KEY)).user(user).call().content();
             return parse(raw);
         } catch (Exception e) {
             log.warn("Workflow execution-params inference failed - falling back to conservative defaults", e);

@@ -1,6 +1,8 @@
 package com.agenticai.core.platform.ops;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
+import com.agenticai.core.security.edition.EditionFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -48,6 +50,7 @@ import org.springframework.stereotype.Component;
  * failure class (HTTP status, timeout, connection refused), never the header,
  * response bodies or the upstream URL.
  */
+@ConditionalOnEditionFeature(EditionFeature.OPERATOR_CONSOLE)
 @Component
 public class LangfuseApiClient {
 
@@ -93,7 +96,7 @@ public class LangfuseApiClient {
     @Autowired
     public LangfuseApiClient(
         @Value("${app.langfuse.base-url:}") String explicitBaseUrl,
-        @Value("${management.otlp.tracing.endpoint:}") String otlpTracesEndpoint,
+        @Value("${management.otlp.tracing.endpoint:http://langfuse-web:3000/api/public/otel/v1/traces}") String otlpTracesEndpoint,
         @Value("${app.langfuse.auth-header:${LANGFUSE_OTEL_AUTH_HEADER:}}") String authHeader
     ) {
         this(LangfuseEndpoints.baseUrl(explicitBaseUrl, otlpTracesEndpoint), authHeader, defaultTransport(),

@@ -1,0 +1,9 @@
+# Secret-shaped strings redacted from TOOL OUTPUT (PatternBasedGuardrailService). Not language dependent.
+# Format: label :: regex. The label names the match in the log.
+AWS access key :: AKIA[0-9A-Z]{16}
+Google API key :: AIza[0-9A-Za-z\-_]{35}
+GitHub token :: gh[pousr]_[A-Za-z0-9]{36,}
+Slack token :: xox[baprs]-[A-Za-z0-9-]{10,}
+OpenAI-style key :: sk-[A-Za-z0-9]{20,}
+PEM private key :: -----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----
+JWT :: eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}

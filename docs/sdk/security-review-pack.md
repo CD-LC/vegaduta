@@ -7,7 +7,7 @@ questionnaire, known limitations and a test checklist. The regulatory mapping is
 [compliance mapping](compliance-mapping.md); the design record is
 [ADR-0013](../architecture/ADR-0013-embeddable-agent-sdk.md).
 
-Status: the SDK is `0.1.0-SNAPSHOT`, unreleased, with no third-party assessment. Where a
+Status: the SDK is `0.1.0` (GitHub Release `sdk-v0.1.0`, not yet on Maven Central), with no third-party assessment. Where a
 mechanism is marked *(this change)* it is being added by parallel work and is `@Experimental`.
 Reviewers should read the source; the claims here are descriptions of code, not attestations.
 
@@ -157,7 +157,7 @@ Operational notes:
 | 3 | Does it send telemetry or usage data to the vendor? | No. Micrometer and OpenTelemetry integrations publish to the deployer's own backends and are optional. |
 | 4 | Does it require internet access to function? | No. It runs air-gapped. |
 | 5 | What are the third-party dependencies? | `agent-api`: JSpecify (annotations). `agent-core`: SLF4J, RE2/J; Micrometer and OpenTelemetry API optional. `agent-jdbc`: JDBC only. Adapters depend on Spring AI / Spring Boot. A CycloneDX SBOM is generated per artifact at build time. |
-| 6 | Is the build reproducible and signed? | The build is configured for reproducible jars, SBOM, GPG signing and SLSA provenance on release. No release has been published yet, so no signed artifact exists to verify today. |
+| 6 | Is the build reproducible and signed? | Reproducible jars, a CycloneDX SBOM per artifact, `SHA256SUMS` and SLSA build provenance are published with the GitHub Release `sdk-v0.1.0` (`sha256sum -c SHA256SUMS`; `gh attestation verify <jar> --repo CD-LC/vegaduta`). GPG signatures come with Maven Central publication, which has not happened yet. |
 | 7 | Where is the source and under which licence? | Apache-2.0, in the VegaDūta repository under `sdk/java`. |
 | 8 | Has it had a third-party security assessment? | No. Internal tests only (`mvn verify`). |
 | 9 | How does it authenticate users? | It does not. The host supplies a `RunContext` (tenant, principal, agent) and authenticates humans who decide approvals. The optional approvals endpoint is unauthenticated and must be secured by the host. |
@@ -178,7 +178,7 @@ Operational notes:
 | 24 | What happens when a dependency (DB, webhook) is down? | JDBC store failures surface as exceptions to the host (fail closed for approvals and journal). Webhook failure follows the registration's `FailMode` (open or closed). Audit sink failure is swallowed and logged. |
 | 25 | Does it run untrusted code? | No. It does not execute tool code itself beyond calling the delegate the host registered. |
 | 26 | Which standards does it map to? | OWASP Top 10 for Agentic Applications 2026 (ids in code), EU AI Act Art. 9/12/14/15, ISO/IEC 42001 Annex A, NIST AI RMF, SOC 2 CC6/CC7, FINRA 2026 agent guidance, SR 26-2 context. See the compliance mapping. Mapping, not certification. |
-| 27 | Versioning and breaking changes? | Semantic versioning; japicmp enforced from 1.0. `@Experimental` marks API that may move. Currently 0.1.0-SNAPSHOT: expect change. |
+| 27 | Versioning and breaking changes? | Semantic versioning; japicmp enforced from 1.0. `@Experimental` marks API that may move. Currently 0.1.0: expect change. |
 | 28 | How are vulnerabilities reported? | Through the VegaDūta repository's security policy (`SECURITY.md`). |
 
 ## 8. Known limitations

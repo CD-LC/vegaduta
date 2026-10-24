@@ -35,12 +35,12 @@ class DefaultCollaboratorToolFactoryTest {
         ToolCallback plain =
                 factory.delegateToTeam(
                         chat, members, null, budget, null, "s1", SwarmVerifierConfig.DISABLED,
-                        null, null, "goal");
+                        null, null, "goal", UUID.randomUUID());
         assertInstanceOf(DelegateToTeamToolCallback.class, plain);
         ToolCallback verified =
                 factory.delegateToTeam(
                         chat, members, null, budget, null, "s1",
-                        new SwarmVerifierConfig(true, 1, 500, 500), (s, u) -> "{}", null, "goal");
+                        new SwarmVerifierConfig(true, 1, 500, 500), (s, u) -> "{}", null, "goal", UUID.randomUUID());
         assertInstanceOf(DelegateToTeamToolCallback.class, verified);
         assertEquals(plain.getToolDefinition().name(), verified.getToolDefinition().name());
     }

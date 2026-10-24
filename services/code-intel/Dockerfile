@@ -1,5 +1,5 @@
 # Pinned patch + Debian release, identical across every Python service image.
-FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+FROM python:3.14.7-slim-trixie@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d
 
 # git is required for clone/fetch + incremental diff detection
 RUN apt-get update && apt-get install -y --no-install-recommends git \
@@ -25,7 +25,7 @@ VOLUME ["/data"]
 # still running as root - core/Dockerfile creates `agentic`, web/web-admin
 # create `nextjs`, this one had no USER directive at all.
 #
-# CAVEAT FOR WHOEVER REDEPLOYS THIS: deploy/docker-compose.yml mounts a
+# CAVEAT FOR WHOEVER REDEPLOYS THIS: deploy/compose/docker-compose.yml mounts a
 # named volume at /data (agentic-code-intel-data). If that volume already
 # has files written by the OLD root-running container, this new non-root
 # user will get EACCES on them until ownership is fixed - a Dockerfile

@@ -79,7 +79,7 @@ public class AgentHookConfigService {
         AgentHookConfigRepository repository,
         ObjectProvider<AgentService> agentService,
         AuditLogService auditLogService,
-        @Value("${app.agent-hooks.enabled:false}") boolean enabled,
+        @Value("${app.agent-hooks.enabled:true}") boolean enabled,
         @Value("${app.agent-hooks.webhook.allowed-hosts:}") String platformAllowedHosts,
         @Value("${app.agent-hooks.cache-ttl-ms:15000}") long cacheTtlMillis
     ) {

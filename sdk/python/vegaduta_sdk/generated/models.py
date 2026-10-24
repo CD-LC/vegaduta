@@ -175,6 +175,12 @@ ProcedureStatus = Literal["DRAFT", "ACTIVE", "ARCHIVED"]
 
 ProgressSource = Literal["AGENT", "RUNTIME"]
 
+PromptRiskClass = Literal["STEERS_EVERY_TURN", "SECONDARY_CALL", "USER_VISIBLE", "TOOL_DESCRIPTION"]
+
+PromptScope = Literal["AGENT", "TENANT", "PLATFORM"]
+
+PromptSource = Literal["DEFAULT", "PLATFORM", "TENANT", "AGENT", "FALLBACK"]
+
 ProviderName = Literal["ANTHROPIC", "OPENAI", "AZURE_OPENAI", "GOOGLE_VERTEX", "AWS_BEDROCK", "OLLAMA", "OPENROUTER", "GROK", "GEMINI", "SARVAM", "MISTRAL", "DEEPSEEK", "GROQ", "META", "LOCAL_OPENAI", "PLATFORM_HOSTED"]
 
 ProviderStatus = Literal["ACTIVE", "INVALID", "INACTIVE"]
@@ -198,6 +204,18 @@ SecretKind = Literal["API_KEY", "PASSWORD", "TOKEN", "BASIC_AUTH", "CUSTOM"]
 SecretScope = Literal["TENANT", "USER"]
 
 SecretStatus = Literal["ACTIVE", "REVOKED"]
+
+SettingRisk = Literal["low", "medium", "high", "security"]
+
+SettingRole = Literal["VIEWER", "EDITOR", "TENANT_ADMIN"]
+
+SettingScope = Literal["tenant", "agent"]
+
+SettingSource = Literal["default", "platform", "tenant", "agent"]
+
+SettingType = Literal["int", "long", "decimal", "duration", "bool", "enum", "string", "text", "percent"]
+
+SettingUnit = Literal["chars", "tokens", "ms", "s", "count", "usd", "percent"]
 
 SignalCredentialStatus = Literal["ACTIVE", "INVALID", "DISCONNECTED"]
 
@@ -933,6 +951,7 @@ class AgentLabDtos_LabCapabilitiesResponse(TypedDict, total=False):
     maxSystemPrompts: int
     maxSimilarityCells: int
     runTtlMinutes: int
+    withToolsAvailable: bool
 
 
 class AgentLabDtos_LabCellRequest(TypedDict, total=False):
@@ -966,6 +985,7 @@ class AgentLabDtos_LabRunRequest(TypedDict, total=False):
     cells: List[AgentLabDtos_LabCellRequest]
     scoring: str
     similarity: str
+    withTools: bool
 
 
 class AgentLabDtos_LabRunResponse(TypedDict, total=False):
@@ -1112,6 +1132,7 @@ class AgentResponse(TypedDict, total=False):
     createdBy: str
     updatedBy: str
     accessLevel: str
+    runtimeLimits: RuntimeLimits
 
 
 class AgentResponseCachingToggleRequest(TypedDict, total=False):
@@ -1131,6 +1152,11 @@ class AgentRunBudgetResponse(TypedDict, total=False):
     perBranchEstimateUsd: float
     scope: str
     estimate: bool
+
+
+class AgentRuntimeProperties_Range(TypedDict, total=False):
+    max: float
+    min: float
 
 
 class _AgentScheduleRequestRequired(TypedDict):
@@ -1421,6 +1447,7 @@ class AppBuilderGenerateFilesResult(TypedDict, total=False):
     files: List[AppBuilderFileEdit]
     providerName: str
     model: str
+    summary: str
 
 
 class ApplyDtos_ApplyRequest(TypedDict, total=False):
@@ -2093,6 +2120,28 @@ class CapabilityPolicyResponse(TypedDict, total=False):
     updatedAt: str
 
 
+class CatalogEntry(TypedDict, total=False):
+    key: str
+    group: str
+    labelKey: str
+    descriptionKey: str
+    helpKey: str
+    type: SettingType
+    unit: SettingUnit
+    min: float
+    max: float
+    step: float
+    enumValues: List[str]
+    risk: SettingRisk
+    scopes: List[SettingScope]
+    default: Any
+    minRole: SettingRole
+    restartRequired: bool
+    docsAnchor: str
+    strictness: str
+    platformProperty: str
+
+
 class _ChannelContactController_ContactRequestRequired(TypedDict):
     channel: str
     identifier: str
@@ -2420,6 +2469,7 @@ class ChatRequest(_ChatRequestRequired, total=False):
     visionSessionId: str
     forceFastDepth: bool
     stepEvents: bool
+    toolNames: List[str]
 
 
 class ChatTranscriptService_Transcript(TypedDict, total=False):
@@ -3533,6 +3583,20 @@ class EdgeAgentsConfigController_EdgeModelManifest(TypedDict, total=False):
     models: List[EdgeAgentsConfigController_EdgeModelEntry]
 
 
+class EdgePromptBundleController_EdgePrompt(TypedDict, total=False):
+    text: str
+    enabled: bool
+    switchable: bool
+    source: PromptSource
+    version: int
+    hash: str
+
+
+class EdgePromptBundleController_EdgePromptBundle(TypedDict, total=False):
+    version: str
+    prompts: Dict[str, EdgePromptBundleController_EdgePrompt]
+
+
 class _EdgeRelayController_FailRequestRequired(TypedDict):
     relayId: str
 
@@ -3611,6 +3675,13 @@ class EdgeTurnTelemetryController_EdgeTurnReportRequest(TypedDict, total=False):
     outcome: str
     reason: str
     latencyMs: int
+
+
+class EditionInfo(TypedDict, total=False):
+    tier: str
+    billingEnabled: bool
+    authMode: str
+    features: Dict[str, bool]
 
 
 class ElevenLabsCredentialActivationRequest(TypedDict):
@@ -3807,6 +3878,9 @@ class EvalDatasetDtos_DatasetResponse(TypedDict, total=False):
     description: str
     passThreshold: float
     toolExecutionEnabled: bool
+    autoApproveTools: bool
+    mode: str
+    effectiveMode: str
     caseCount: int
     contentHash: str
     createdBy: str
@@ -3839,11 +3913,13 @@ class EvalDatasetDtos_ReplayedToolCallResponse(TypedDict, total=False):
     toolName: str
     input: str
     output: str
+    status: str
 
 
 class EvalDatasetDtos_RunDetailResponse(TypedDict, total=False):
     run: EvalDatasetDtos_RunResponse
     caseResults: List[EvalDatasetDtos_CaseResultResponse]
+    simulatedTools: List[str]
 
 
 class EvalDatasetDtos_RunResponse(TypedDict, total=False):
@@ -3863,6 +3939,8 @@ class EvalDatasetDtos_RunResponse(TypedDict, total=False):
     datasetHash: str
     requestedJudgeModel: str
     strictJudge: bool
+    mode: str
+    autoApproved: bool
     repeats: int
     budgetUsd: float
     costUsd: float
@@ -3883,6 +3961,7 @@ class EvalDatasetDtos_TriggerRunRequest(TypedDict, total=False):
     strictJudge: bool
     repeats: int
     budgetUsd: float
+    mode: str
 
 
 class EvalDatasetDtos_UpsertCaseRequest(TypedDict, total=False):
@@ -3897,6 +3976,8 @@ class EvalDatasetDtos_UpsertDatasetRequest(TypedDict, total=False):
     description: str
     passThreshold: float
     toolExecutionEnabled: bool
+    autoApproveTools: bool
+    mode: str
 
 
 class EvalGateDtos_GateEvaluationResponse(TypedDict, total=False):
@@ -5003,6 +5084,7 @@ class LlmRequestSnapshot_Message(TypedDict, total=False):
     toolCalls: List[str]
     mediaCount: int
     payloadChars: int
+    blocks: List[PromptBlockTag]
 
 
 class LlmRequestSnapshot_Tool(TypedDict, total=False):
@@ -7460,6 +7542,50 @@ class ProductFeedController_FeedCheckoutResponse(TypedDict, total=False):
     expires_at: str
 
 
+class PromptAdminController_OverrideRequest(TypedDict, total=False):
+    text: str
+    enabled: bool
+    acknowledgeRisk: bool
+    reason: str
+    expectedVersion: int
+
+
+class PromptAdminController_RestoreRequest(TypedDict, total=False):
+    toVersion: int
+    acknowledgeRisk: bool
+    reason: str
+
+
+class PromptAdminController_ValidateRequest(TypedDict, total=False):
+    text: str
+    enabled: bool
+
+
+class PromptBlockTag(TypedDict, total=False):
+    id: str
+    key: str
+    scope: str
+    source: str
+    version: int
+    hash: str
+    chars: int
+    estimatedTokens: int
+
+
+class PromptDefinition(TypedDict, total=False):
+    key: str
+    title: str
+    description: str
+    riskClass: PromptRiskClass
+    securityCritical: bool
+    disableable: bool
+    retired: bool
+    strictPlaceholders: bool
+    placeholders: List[PromptPlaceholder]
+    minLength: int
+    maxLength: int
+
+
 class PromptDirectiveAdminService_CustomInstructions(TypedDict, total=False):
     enabled: bool
     text: str
@@ -7482,6 +7608,8 @@ class PromptDirectiveAdminService_Overview(TypedDict, total=False):
     directives: List[PromptDirectiveAdminService_DirectiveView]
     customInstructions: PromptDirectiveAdminService_CustomInstructions
     assembledPreview: str
+    assembledPreviewNote: str
+    promptPreviewPath: str
 
 
 class PromptDirectiveController_CustomInstructionsUpdate(TypedDict, total=False):
@@ -7493,6 +7621,114 @@ class PromptDirectiveController_DirectiveUpdate(TypedDict, total=False):
     enabled: bool
     text: str
     acknowledgeRisk: bool
+
+
+class PromptHistoryEntry(TypedDict, total=False):
+    id: int
+    scope: PromptScope
+    scopeId: str
+    key: str
+    locale: str
+    version: int
+    action: str
+    text: str
+    enabled: bool
+    previousText: str
+    previousEnabled: bool
+    reason: str
+    createdBy: str
+    createdAt: str
+
+
+class PromptOverride(TypedDict, total=False):
+    scope: PromptScope
+    scopeId: str
+    key: str
+    locale: str
+    text: str
+    enabled: bool
+    version: int
+    createdBy: str
+    createdAt: str
+
+
+class PromptOverrideService_Applied(TypedDict, total=False):
+    override: PromptOverride
+    history: PromptHistoryEntry
+    unchanged: bool
+
+
+class PromptOverrideService_OverrideView(TypedDict, total=False):
+    scope: PromptScope
+    scopeId: str
+    locale: str
+    text: str
+    enabled: bool
+    version: int
+    createdBy: str
+    createdAt: str
+
+
+class PromptOverrideService_PromptView(TypedDict, total=False):
+    definition: PromptDefinition
+    defaultText: str
+    effective: ResolvedPrompt
+    overrides: List[PromptOverrideService_OverrideView]
+
+
+class PromptOverrideService_Validation(TypedDict, total=False):
+    valid: bool
+    problems: List[str]
+    securityCritical: bool
+    requiresAcknowledgement: bool
+    length: int
+
+
+class PromptPlaceholder(TypedDict, total=False):
+    name: str
+    description: str
+    required: bool
+
+
+class PromptPreviewService_BlockView(TypedDict, total=False):
+    message: str
+    id: str
+    key: str
+    source: str
+    scope: str
+    version: int
+    hash: str
+    estimatedTokens: int
+    text: str
+
+
+class PromptPreviewService_Preview(TypedDict, total=False):
+    agentId: str
+    smallModel: bool
+    systemPrompt: str
+    memoryBlock: str
+    blocks: List[PromptPreviewService_BlockView]
+    tools: List[PromptPreviewService_ToolView]
+    promptEstimatedTokens: int
+    toolsEstimatedTokens: int
+    tokenBudget: int
+    overBudget: bool
+    tokenEstimateNote: str
+    notes: List[str]
+
+
+class PromptPreviewService_Request(TypedDict, total=False):
+    message: str
+    sessionId: str
+    smallModel: bool
+    includeMemoryRecall: bool
+
+
+class PromptPreviewService_ToolView(TypedDict, total=False):
+    name: str
+    description: str
+    inputSchema: str
+    estimatedTokens: int
 
 
 class PromptVersionResponse(TypedDict, total=False):
@@ -7566,6 +7802,7 @@ class PublicStatusController_PublicStatusResponse(TypedDict, total=False):
     components: List[PublicStatusController_Component]
     maintenance: PlatformBroadcastService_PublicMaintenance
     announcement: PlatformBroadcastService_PublicAnnouncement
+    edition: EditionInfo
 
 
 class QualityController_QualityConfigResponse(TypedDict, total=False):
@@ -8121,6 +8358,19 @@ class ResolutionDtos_ResolutionListResponse(TypedDict, total=False):
 ResolutionDtos_ResolutionSummaryResponse = TypedDict("ResolutionDtos_ResolutionSummaryResponse", {"from": "str", "to": "str", "totalEvents": "int", "byOutcome": "Dict[str, int]", "billableCount": "int", "billableTotalMinor": "int", "currency": "str", "configuredUnitPriceMinor": "int", "freeModeMeteringOnly": "bool"}, total=False)
 
 
+class ResolvedPrompt(TypedDict, total=False):
+    key: str
+    text: str
+    source: PromptSource
+    scope: PromptScope
+    version: int
+    locale: str
+    enabled: bool
+    known: bool
+    hash: str
+    estimatedTokens: int
+
+
 class ResumableChatStreamService_TurnSnapshot(TypedDict, total=False):
     turnId: str
     status: str
@@ -8444,6 +8694,33 @@ class RunCostTimeline_Summary(TypedDict, total=False):
     reasoningTokens: int
 
 
+class RuntimeLimits(TypedDict, total=False):
+    continuationPasses: int
+    maxToolSteps: int
+    retrievalMinScore: float
+    retrievalTopK: int
+    toolOutputMaxChars: int
+    toolTimeoutSeconds: int
+    turnTimeoutSeconds: int
+
+
+class RuntimeLimitsView(TypedDict, total=False):
+    overrides: RuntimeLimits
+    effective: RuntimeLimitsView_Effective
+    bounds: Dict[str, AgentRuntimeProperties_Range]
+
+
+class RuntimeLimitsView_Effective(TypedDict, total=False):
+    maxToolSteps: int
+    turnTimeoutSeconds: int
+    toolTimeoutSeconds: int
+    toolOutputMaxChars: int
+    retrievalTopK: int
+    retrievalMinScore: float
+    continuationPasses: int
+    layers: Dict[str, str]
+
+
 class SandboxResponse(TypedDict, total=False):
     sandboxId: str
     templateId: str
@@ -8674,6 +8951,70 @@ class SetUserPermissionsRequest(TypedDict):
 
 class SetUserRolesRequest(TypedDict):
     roles: List[str]
+
+
+class SettingHistoryEntry(TypedDict, total=False):
+    version: int
+    action: str
+    value: Any
+    previousValue: Any
+    reason: str
+    actor: str
+    at: str
+
+
+class SettingHistoryRow(TypedDict, total=False):
+    key: str
+    scope: SettingScope
+    agentId: str
+    version: int
+    action: str
+    value: Any
+    previousValue: Any
+    reason: str
+    actor: str
+    at: str
+
+
+class SettingValue(TypedDict, total=False):
+    value: Any
+    source: SettingSource
+    locked: bool
+    lockedReason: str
+    inherited: SettingValue_Inherited
+
+
+class SettingValue_Inherited(TypedDict, total=False):
+    value: Any
+    source: SettingSource
+
+
+class SettingsController_CatalogResponse(TypedDict, total=False):
+    entries: List[CatalogEntry]
+
+
+class SettingsController_EffectiveResponse(TypedDict, total=False):
+    values: Dict[str, SettingValue]
+
+
+class SettingsController_HistoryPageResponse(TypedDict, total=False):
+    entries: List[SettingHistoryRow]
+    total: int
+    offset: int
+    limit: int
+    hasMore: bool
+
+
+class SettingsController_ValueRequest(TypedDict, total=False):
+    value: Any
+    reason: str
+
+
+class SettingsController_WriteResponse(TypedDict, total=False):
+    key: str
+    effective: SettingValue
+    version: int
+    unchanged: bool
 
 
 class ShareController_GrantRequest(TypedDict):
@@ -10077,6 +10418,21 @@ class TurnJournalService_JournalView(TypedDict, total=False):
     brokenAtSeq: int
     verification: str
     events: List[TurnEvent]
+
+
+class TurnJournalService_SessionView(TypedDict, total=False):
+    agentId: str
+    sessionId: str
+    turns: List[TurnSummary]
+
+
+class TurnSummary(TypedDict, total=False):
+    turnId: str
+    agentId: str
+    startedAt: str
+    lastEventAt: str
+    events: int
+    status: str
 
 
 class TutorDtos_CreatePlanRequest(TypedDict, total=False):

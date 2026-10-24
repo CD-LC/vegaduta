@@ -648,6 +648,7 @@ export interface AgentLabDtos_LabCapabilitiesResponse {
   maxSystemPrompts?: number;
   maxSimilarityCells?: number;
   runTtlMinutes?: number;
+  withToolsAvailable?: boolean;
 }
 
 export interface AgentLabDtos_LabCellRequest {
@@ -681,6 +682,7 @@ export interface AgentLabDtos_LabRunRequest {
   cells?: AgentLabDtos_LabCellRequest[];
   scoring?: string;
   similarity?: string;
+  withTools?: boolean;
 }
 
 export interface AgentLabDtos_LabRunResponse {
@@ -827,6 +829,7 @@ export interface AgentResponse {
   createdBy?: string;
   updatedBy?: string;
   accessLevel?: string;
+  runtimeLimits?: RuntimeLimits;
 }
 
 export interface AgentResponseCachingToggleRequest {
@@ -846,6 +849,11 @@ export interface AgentRunBudgetResponse {
   perBranchEstimateUsd?: number;
   scope?: string;
   estimate?: boolean;
+}
+
+export interface AgentRuntimeProperties_Range {
+  max?: number;
+  min?: number;
 }
 
 export interface AgentScheduleRequest {
@@ -1131,6 +1139,7 @@ export interface AppBuilderGenerateFilesResult {
   files?: AppBuilderFileEdit[];
   providerName?: string;
   model?: string;
+  summary?: string;
 }
 
 export interface ApplyDtos_ApplyRequest {
@@ -1823,6 +1832,28 @@ export interface CapabilityPolicyResponse {
   updatedAt?: string;
 }
 
+export interface CatalogEntry {
+  key?: string;
+  group?: string;
+  labelKey?: string;
+  descriptionKey?: string;
+  helpKey?: string;
+  type?: SettingType;
+  unit?: SettingUnit;
+  min?: number;
+  max?: number;
+  step?: number;
+  enumValues?: string[];
+  risk?: SettingRisk;
+  scopes?: SettingScope[];
+  default?: unknown;
+  minRole?: SettingRole;
+  restartRequired?: boolean;
+  docsAnchor?: string;
+  strictness?: string;
+  platformProperty?: string;
+}
+
 export interface ChannelContactController_ContactRequest {
   channel: string;
   identifier: string;
@@ -2147,6 +2178,7 @@ export interface ChatRequest {
   visionSessionId?: string;
   forceFastDepth?: boolean;
   stepEvents?: boolean;
+  toolNames?: string[];
 }
 
 export interface ChatTranscriptService_Transcript {
@@ -3251,6 +3283,20 @@ export interface EdgeAgentsConfigController_EdgeModelManifest {
   models?: EdgeAgentsConfigController_EdgeModelEntry[];
 }
 
+export interface EdgePromptBundleController_EdgePrompt {
+  text?: string;
+  enabled?: boolean;
+  switchable?: boolean;
+  source?: PromptSource;
+  version?: number;
+  hash?: string;
+}
+
+export interface EdgePromptBundleController_EdgePromptBundle {
+  version?: string;
+  prompts?: Record<string, EdgePromptBundleController_EdgePrompt>;
+}
+
 export interface EdgeRelayController_FailRequest {
   relayId: string;
   reason?: string;
@@ -3325,6 +3371,13 @@ export interface EdgeTurnTelemetryController_EdgeTurnReportRequest {
   outcome?: string;
   reason?: string;
   latencyMs?: number;
+}
+
+export interface EditionInfo {
+  tier?: string;
+  billingEnabled?: boolean;
+  authMode?: string;
+  features?: Record<string, boolean>;
 }
 
 export interface ElevenLabsCredentialActivationRequest {
@@ -3525,6 +3578,9 @@ export interface EvalDatasetDtos_DatasetResponse {
   description?: string;
   passThreshold?: number;
   toolExecutionEnabled?: boolean;
+  autoApproveTools?: boolean;
+  mode?: string;
+  effectiveMode?: string;
   caseCount?: number;
   contentHash?: string;
   createdBy?: string;
@@ -3557,11 +3613,13 @@ export interface EvalDatasetDtos_ReplayedToolCallResponse {
   toolName?: string;
   input?: string;
   output?: string;
+  status?: string;
 }
 
 export interface EvalDatasetDtos_RunDetailResponse {
   run?: EvalDatasetDtos_RunResponse;
   caseResults?: EvalDatasetDtos_CaseResultResponse[];
+  simulatedTools?: string[];
 }
 
 export interface EvalDatasetDtos_RunResponse {
@@ -3581,6 +3639,8 @@ export interface EvalDatasetDtos_RunResponse {
   datasetHash?: string;
   requestedJudgeModel?: string;
   strictJudge?: boolean;
+  mode?: string;
+  autoApproved?: boolean;
   repeats?: number;
   budgetUsd?: number;
   costUsd?: number;
@@ -3601,6 +3661,7 @@ export interface EvalDatasetDtos_TriggerRunRequest {
   strictJudge?: boolean;
   repeats?: number;
   budgetUsd?: number;
+  mode?: string;
 }
 
 export interface EvalDatasetDtos_UpsertCaseRequest {
@@ -3615,6 +3676,8 @@ export interface EvalDatasetDtos_UpsertDatasetRequest {
   description?: string;
   passThreshold?: number;
   toolExecutionEnabled?: boolean;
+  autoApproveTools?: boolean;
+  mode?: string;
 }
 
 export interface EvalGateDtos_GateEvaluationResponse {
@@ -4734,6 +4797,7 @@ export interface LlmRequestSnapshot_Message {
   toolCalls?: string[];
   mediaCount?: number;
   payloadChars?: number;
+  blocks?: PromptBlockTag[];
 }
 
 export interface LlmRequestSnapshot_Tool {
@@ -7188,6 +7252,50 @@ export interface ProductFeedController_FeedCheckoutResponse {
 
 export type ProgressSource = "AGENT" | "RUNTIME";
 
+export interface PromptAdminController_OverrideRequest {
+  text?: string;
+  enabled?: boolean;
+  acknowledgeRisk?: boolean;
+  reason?: string;
+  expectedVersion?: number;
+}
+
+export interface PromptAdminController_RestoreRequest {
+  toVersion?: number;
+  acknowledgeRisk?: boolean;
+  reason?: string;
+}
+
+export interface PromptAdminController_ValidateRequest {
+  text?: string;
+  enabled?: boolean;
+}
+
+export interface PromptBlockTag {
+  id?: string;
+  key?: string;
+  scope?: string;
+  source?: string;
+  version?: number;
+  hash?: string;
+  chars?: number;
+  estimatedTokens?: number;
+}
+
+export interface PromptDefinition {
+  key?: string;
+  title?: string;
+  description?: string;
+  riskClass?: PromptRiskClass;
+  securityCritical?: boolean;
+  disableable?: boolean;
+  retired?: boolean;
+  strictPlaceholders?: boolean;
+  placeholders?: PromptPlaceholder[];
+  minLength?: number;
+  maxLength?: number;
+}
+
 export interface PromptDirectiveAdminService_CustomInstructions {
   enabled?: boolean;
   text?: string;
@@ -7210,6 +7318,8 @@ export interface PromptDirectiveAdminService_Overview {
   directives?: PromptDirectiveAdminService_DirectiveView[];
   customInstructions?: PromptDirectiveAdminService_CustomInstructions;
   assembledPreview?: string;
+  assembledPreviewNote?: string;
+  promptPreviewPath?: string;
 }
 
 export interface PromptDirectiveController_CustomInstructionsUpdate {
@@ -7222,6 +7332,120 @@ export interface PromptDirectiveController_DirectiveUpdate {
   text?: string;
   acknowledgeRisk?: boolean;
 }
+
+export interface PromptHistoryEntry {
+  id?: number;
+  scope?: PromptScope;
+  scopeId?: string;
+  key?: string;
+  locale?: string;
+  version?: number;
+  action?: string;
+  text?: string;
+  enabled?: boolean;
+  previousText?: string;
+  previousEnabled?: boolean;
+  reason?: string;
+  createdBy?: string;
+  createdAt?: string;
+}
+
+export interface PromptOverride {
+  scope?: PromptScope;
+  scopeId?: string;
+  key?: string;
+  locale?: string;
+  text?: string;
+  enabled?: boolean;
+  version?: number;
+  createdBy?: string;
+  createdAt?: string;
+}
+
+export interface PromptOverrideService_Applied {
+  override?: PromptOverride;
+  history?: PromptHistoryEntry;
+  unchanged?: boolean;
+}
+
+export interface PromptOverrideService_OverrideView {
+  scope?: PromptScope;
+  scopeId?: string;
+  locale?: string;
+  text?: string;
+  enabled?: boolean;
+  version?: number;
+  createdBy?: string;
+  createdAt?: string;
+}
+
+export interface PromptOverrideService_PromptView {
+  definition?: PromptDefinition;
+  defaultText?: string;
+  effective?: ResolvedPrompt;
+  overrides?: PromptOverrideService_OverrideView[];
+}
+
+export interface PromptOverrideService_Validation {
+  valid?: boolean;
+  problems?: string[];
+  securityCritical?: boolean;
+  requiresAcknowledgement?: boolean;
+  length?: number;
+}
+
+export interface PromptPlaceholder {
+  name?: string;
+  description?: string;
+  required?: boolean;
+}
+
+export interface PromptPreviewService_BlockView {
+  message?: string;
+  id?: string;
+  key?: string;
+  source?: string;
+  scope?: string;
+  version?: number;
+  hash?: string;
+  estimatedTokens?: number;
+  text?: string;
+}
+
+export interface PromptPreviewService_Preview {
+  agentId?: string;
+  smallModel?: boolean;
+  systemPrompt?: string;
+  memoryBlock?: string;
+  blocks?: PromptPreviewService_BlockView[];
+  tools?: PromptPreviewService_ToolView[];
+  promptEstimatedTokens?: number;
+  toolsEstimatedTokens?: number;
+  tokenBudget?: number;
+  overBudget?: boolean;
+  tokenEstimateNote?: string;
+  notes?: string[];
+}
+
+export interface PromptPreviewService_Request {
+  message?: string;
+  sessionId?: string;
+  smallModel?: boolean;
+  includeMemoryRecall?: boolean;
+}
+
+export interface PromptPreviewService_ToolView {
+  name?: string;
+  description?: string;
+  inputSchema?: string;
+  estimatedTokens?: number;
+}
+
+export type PromptRiskClass = "STEERS_EVERY_TURN" | "SECONDARY_CALL" | "USER_VISIBLE" | "TOOL_DESCRIPTION";
+
+export type PromptScope = "AGENT" | "TENANT" | "PLATFORM";
+
+export type PromptSource = "DEFAULT" | "PLATFORM" | "TENANT" | "AGENT" | "FALLBACK";
 
 export interface PromptVersionResponse {
   id?: string;
@@ -7298,6 +7522,7 @@ export interface PublicStatusController_PublicStatusResponse {
   components?: PublicStatusController_Component[];
   maintenance?: PlatformBroadcastService_PublicMaintenance;
   announcement?: PlatformBroadcastService_PublicAnnouncement;
+  edition?: EditionInfo;
 }
 
 export interface QualityController_QualityConfigResponse {
@@ -7861,6 +8086,19 @@ export interface ResolutionDtos_ResolutionSummaryResponse {
   freeModeMeteringOnly?: boolean;
 }
 
+export interface ResolvedPrompt {
+  key?: string;
+  text?: string;
+  source?: PromptSource;
+  scope?: PromptScope;
+  version?: number;
+  locale?: string;
+  enabled?: boolean;
+  known?: boolean;
+  hash?: string;
+  estimatedTokens?: number;
+}
+
 export type ResourceType = "AGENT" | "WORKFLOW";
 
 export interface ResumableChatStreamService_TurnSnapshot {
@@ -8196,6 +8434,33 @@ export interface RunCostTimeline_Summary {
   reasoningTokens?: number;
 }
 
+export interface RuntimeLimits {
+  continuationPasses?: number;
+  maxToolSteps?: number;
+  retrievalMinScore?: number;
+  retrievalTopK?: number;
+  toolOutputMaxChars?: number;
+  toolTimeoutSeconds?: number;
+  turnTimeoutSeconds?: number;
+}
+
+export interface RuntimeLimitsView {
+  overrides?: RuntimeLimits;
+  effective?: RuntimeLimitsView_Effective;
+  bounds?: Record<string, AgentRuntimeProperties_Range>;
+}
+
+export interface RuntimeLimitsView_Effective {
+  maxToolSteps?: number;
+  turnTimeoutSeconds?: number;
+  toolTimeoutSeconds?: number;
+  toolOutputMaxChars?: number;
+  retrievalTopK?: number;
+  retrievalMinScore?: number;
+  continuationPasses?: number;
+  layers?: Record<string, string>;
+}
+
 export type SampleUnit = "ROLLOUT" | "CASE" | "CASE_PAIR";
 
 export interface SandboxResponse {
@@ -8424,6 +8689,82 @@ export interface SetUserPermissionsRequest {
 
 export interface SetUserRolesRequest {
   roles: string[];
+}
+
+export interface SettingHistoryEntry {
+  version?: number;
+  action?: string;
+  value?: unknown;
+  previousValue?: unknown;
+  reason?: string;
+  actor?: string;
+  at?: string;
+}
+
+export interface SettingHistoryRow {
+  key?: string;
+  scope?: SettingScope;
+  agentId?: string;
+  version?: number;
+  action?: string;
+  value?: unknown;
+  previousValue?: unknown;
+  reason?: string;
+  actor?: string;
+  at?: string;
+}
+
+export type SettingRisk = "low" | "medium" | "high" | "security";
+
+export type SettingRole = "VIEWER" | "EDITOR" | "TENANT_ADMIN";
+
+export type SettingScope = "tenant" | "agent";
+
+export type SettingSource = "default" | "platform" | "tenant" | "agent";
+
+export type SettingType = "int" | "long" | "decimal" | "duration" | "bool" | "enum" | "string" | "text" | "percent";
+
+export type SettingUnit = "chars" | "tokens" | "ms" | "s" | "count" | "usd" | "percent";
+
+export interface SettingValue {
+  value?: unknown;
+  source?: SettingSource;
+  locked?: boolean;
+  lockedReason?: string;
+  inherited?: SettingValue_Inherited;
+}
+
+export interface SettingValue_Inherited {
+  value?: unknown;
+  source?: SettingSource;
+}
+
+export interface SettingsController_CatalogResponse {
+  entries?: CatalogEntry[];
+}
+
+export interface SettingsController_EffectiveResponse {
+  values?: Record<string, SettingValue>;
+}
+
+export interface SettingsController_HistoryPageResponse {
+  entries?: SettingHistoryRow[];
+  total?: number;
+  offset?: number;
+  limit?: number;
+  hasMore?: boolean;
+}
+
+export interface SettingsController_ValueRequest {
+  value?: unknown;
+  reason?: string;
+}
+
+export interface SettingsController_WriteResponse {
+  key?: string;
+  effective?: SettingValue;
+  version?: number;
+  unchanged?: boolean;
 }
 
 export interface ShareController_GrantRequest {
@@ -9851,6 +10192,21 @@ export interface TurnJournalService_JournalView {
   brokenAtSeq?: number;
   verification?: string;
   events?: TurnEvent[];
+}
+
+export interface TurnJournalService_SessionView {
+  agentId?: string;
+  sessionId?: string;
+  turns?: TurnSummary[];
+}
+
+export interface TurnSummary {
+  turnId?: string;
+  agentId?: string;
+  startedAt?: string;
+  lastEventAt?: string;
+  events?: number;
+  status?: string;
 }
 
 export interface TutorDtos_CreatePlanRequest {

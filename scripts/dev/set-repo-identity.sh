@@ -27,6 +27,9 @@
 #   --conduct-email ADDR     Code of Conduct report address
 #   --dry-run                print what would change; modify nothing
 #
+# If the security and conduct addresses are the same, --conduct-email rewrites
+# only CODE_OF_CONDUCT*.md and --security-email every other file.
+#
 # Only exact, token-bounded matches are replaced (e.g. "vegaduta/vegaduta" but
 # not "charts/vegaduta/values.yaml", and "ghcr.io/vegaduta/" including its
 # URL-encoded form in badge URLs). Review `git diff` afterwards.
@@ -58,7 +61,7 @@ while [ $# -gt 0 ]; do
     --lead) shift; TO_LEAD="${1:?--lead needs a value}"; TO_LEAD="${TO_LEAD#@}" ;;
     --security-email) shift; TO_SEC="${1:?--security-email needs a value}" ;;
     --conduct-email) shift; TO_CONDUCT="${1:?--conduct-email needs a value}" ;;
-    -h|--help) sed -n '2,36p' "$0"; exit 0 ;;
+    -h|--help) sed -n "2,38p" "$0"; exit 0 ;;
     *) echo "unknown option: $1 (see --help)" >&2; exit 2 ;;
   esac
   shift
@@ -110,14 +113,21 @@ rule("team",     $q->($E{FROM_TEAM}) . "(?![A-Za-z0-9_-])", $E{TO_TEAM});
 rule("lead",     "(?<![A-Za-z0-9_-])" . $q->($E{FROM_LEAD}) . "(?![A-Za-z0-9_-])", $E{TO_LEAD});
 rule("security-email", $q->($E{FROM_SEC}), $E{TO_SEC});
 rule("conduct-email",  $q->($E{FROM_CONDUCT}), $E{TO_CONDUCT});
+# The security and conduct contacts may be the same address. Then the conduct
+# rule applies only to CODE_OF_CONDUCT*.md and the security rule to every other
+# file, so changing one contact never rewrites the other contact file.
+my $same = $E{FROM_SEC} eq $E{FROM_CONDUCT};
 my %count; my $changed = 0;
 for my $file (@ARGV) {
+  my $coc = $file =~ m{(?:^|/)CODE_OF_CONDUCT[^/]*$};
   open(my $in, "<:raw", $file) or die "$file: $!";
   my @lines = <$in>; close $in;
   my $dirty = 0;
   for my $i (0 .. $#lines) {
     for my $r (@rules) {
       my ($label, $re, $to) = @$r;
+      next if $same && $label eq "conduct-email" && !$coc;
+      next if $same && $label eq "security-email" && $coc;
       next unless $lines[$i] =~ $re;
       my $n = () = $lines[$i] =~ /$re/g;
       if ($E{LISTING} || ($to ne "")) {
@@ -163,5 +173,4 @@ if [ "$DRY" = 0 ]; then
   set_env SECURITY_EMAIL "$TO_SEC"
   set_env CONDUCT_EMAIL "$TO_CONDUCT"
   echo "updated $ENV_FILE; review with: git diff"
-  echo "remaining TODO markers for the identity: grep -rn 'TODO(maintainers)' --include='*.md' ."
 fi

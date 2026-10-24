@@ -21,13 +21,13 @@ import org.springframework.ai.chat.client.ChatClient;
 class VerifierEscalationRouterTest {
 
     private static VerifierEscalationRouter on(SimpleMeterRegistry reg) {
-        return new VerifierEscalationRouter(reg, true, false, "", 2, 0.2);
+        return new VerifierEscalationRouter(reg, true, false, 2, 0.2);
     }
 
     @Test
     void flagOffIsInert() {
         SimpleMeterRegistry reg = new SimpleMeterRegistry();
-        VerifierEscalationRouter r = new VerifierEscalationRouter(reg, false, false, "", 2, 0.2);
+        VerifierEscalationRouter r = new VerifierEscalationRouter(reg, false, false, 2, 0.2);
         ChatClient cheap = mock(ChatClient.class);
         UUID agent = UUID.randomUUID();
         r.registerCheap(agent, cheap, () -> mock(ChatClient.class));
@@ -40,7 +40,7 @@ class VerifierEscalationRouterTest {
 
     @Test
     void killSwitchWinsOverEnabled() {
-        VerifierEscalationRouter r = new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, "", 2, 0.2);
+        VerifierEscalationRouter r = new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, 2, 0.2);
         assertFalse(r.isActive());
         assertTrue(r.shouldEscalate(new Signals(false, false, false, 0, true)).isEmpty());
     }
@@ -84,7 +84,12 @@ class VerifierEscalationRouterTest {
 
     @Test
     void customMarkersReplaceDefaults() {
-        VerifierEscalationRouter r = new VerifierEscalationRouter(new SimpleMeterRegistry(), true, false, "maybe, perhaps", 2, 0.2);
+        // app.chat.escalation.low-confidence-markers is a deprecated alias for the platform default of the key
+        VerifierEscalationRouter r = new VerifierEscalationRouter(new SimpleMeterRegistry(), true, false, 2, 0.2);
+        r.setPromptResolver(new com.agenticai.core.prompts.DefaultPromptResolver(
+            com.agenticai.core.prompts.PromptResolver.defaultsOnly().catalog(), null,
+            new com.agenticai.core.prompts.PromptProperties(),
+            java.util.List.of(PromptPropertyAliases.lowConfidenceMarkers("maybe, perhaps"))));
         assertTrue(r.inspect("Perhaps.", null, 0).lowConfidence());
         assertFalse(r.inspect("I'm not sure", null, 0).lowConfidence());
     }
@@ -195,7 +200,7 @@ class VerifierEscalationRouterTest {
         r.recordSkippedForSideEffects(UUID.randomUUID(), Reason.LOW_CONFIDENCE);
         assertEquals(1.0, reg.get(VerifierEscalationRouter.SKIPPED_METRIC).tags("reason", "low_confidence").counter().count());
         SimpleMeterRegistry offReg = new SimpleMeterRegistry();
-        new VerifierEscalationRouter(offReg, false, false, "", 2, 0.2)
+        new VerifierEscalationRouter(offReg, false, false, 2, 0.2)
             .recordSkippedForSideEffects(UUID.randomUUID(), Reason.LOW_CONFIDENCE);
         assertTrue(offReg.getMeters().isEmpty());
     }
@@ -321,8 +326,8 @@ class VerifierEscalationRouterTest {
 
     @Test
     void parseFailureDoesNotEscalateWhenTheFlagIsOffOrKilled() {
-        VerifierEscalationRouter off = new VerifierEscalationRouter(new SimpleMeterRegistry(), false, false, "", 2, 0.2);
-        VerifierEscalationRouter killed = new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, "", 2, 0.2);
+        VerifierEscalationRouter off = new VerifierEscalationRouter(new SimpleMeterRegistry(), false, false, 2, 0.2);
+        VerifierEscalationRouter killed = new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, 2, 0.2);
         for (VerifierEscalationRouter r : new VerifierEscalationRouter[] {off, killed}) {
             Signals s = r.inspect("not json", OBJECT_SCHEMA, 0);
             assertTrue(s.parseFailure()); // the verifier itself is pure ...

@@ -16,6 +16,7 @@ and Lite and Full behave exactly as before.
 | Sign-in | local, one owner (core) | Keycloak | Keycloak |
 | Container memory limits (sum) | about 2.5 GB for the four; 3.8 GB with web search and the connector runner (about 2.3 GB with `--minimal`); a local model needs its own memory | more (Keycloak alone is about 768 MB) | more |
 | Billing, plans, payments | off | on unless disabled | on unless disabled |
+| Edition (`VEGADUTA_EDITION`) | `personal`: operator and business features are not loaded (see [What a personal install leaves out](#what-a-personal-install-leaves-out)) | `lite`: everything on | `full`: everything on |
 | Meant for | one person | trying it | one server, a team |
 
 ## Requirements
@@ -162,13 +163,15 @@ and `uvx` resolve a version, not a hash, so the runner does not refuse a downloa
 remembered in the state file, and the choice is remembered (`search=` and `tools=` in `.vegaduta-state`). The Setup
 app passes `--no-search` itself when you untick web search. An install that **already existed** keeps what it had:
 with no remembered answer it is left alone until you pass `--search` or `--profile tools` once. Declining the
-interactive web-search question is now remembered as an explicit no. On Windows `scripts\vegaduta.ps1` has no
-search flag, so a Windows install does not get web search by default; it adds the connector runner when you pass
-`-Profile tools`.
+interactive web-search question is now remembered as an explicit no. On Windows `scripts\vegaduta.ps1` takes
+`-Search` / `-NoSearch` (and `VEGADUTA_SEARCH`), remembered in `search=` like the bash launcher, but a Windows
+install does **not** get web search by default: it is off until you pass `-Search` once (the Setup app does not
+offer it on Windows yet). It adds the connector runner when you pass `-Profile tools`.
 
 **What it costs.** Two more images to pull on the first start (SearXNG, and the runner with Node, uv and Python)
 and about 1.3 GB more of memory limits (512 MB + 768 MB; limits, not measured use), which takes the personal budget
-from about 2.5 GB to about 3.8 GB. The first start takes longer; `--wait-timeout` already defaults to 900 s. None of
+from about 2.5 GB to about 3.8 GB. The first start takes longer; `--wait-timeout` already defaults to 900 s and core's
+health check allows a 10-minute start period (failed checks inside it do not count). None of
 this was run on a real Docker stack when it was written: the launcher plan, the compose files and the registration
 logic are tested, the containers were not started.
 
@@ -247,7 +250,7 @@ How switching works, because core runs in a container and cannot start container
   app and ticking it in its Extras step, or by running the command the page shows. The command line can only add:
   `./scripts/vegaduta personal --profile ...` adds to the remembered profile list (it does not replace it), so
   switching an add-on **off** is done in the Setup app, which stops the container (it does not delete volumes,
-  projects, documents, sign-ins or downloaded models). PowerShell has no `--search` option.
+  projects, documents, sign-ins or downloaded models). On Windows the PowerShell form of `--search` is `-Search`.
 - **An add-on you already had** (documents installed with the checkbox, a model pulled with Ollama) is recognised
   automatically: core sees the sidecar enabled, the SearXNG URL set, the workspace runner URL set or the model in
   Ollama, and treats it as wanted.
@@ -452,8 +455,12 @@ laptop:
 - **WhatsApp QR, Signal, Matrix and iMessage** (below) reach out to a bridge you run. WhatsApp QR is the
   personal-WhatsApp option: scan once and your own number answers.
 - **Email** if you set `SMTP_*` in `.env`.
-- Business WhatsApp (Meta Cloud API or Twilio), Slack, Teams, SMS and voice all need a URL the provider can reach; see
+- Business WhatsApp (Meta Cloud API or Twilio), SMS and voice need a URL the provider can reach; see
   [Hosting behind a Cloudflare Tunnel](operations/tunnel-hosting.md) if you want that.
+- **Slack, Discord, Microsoft Teams and X are not part of a personal install.** core does not load their adapters,
+  webhooks or credential endpoints, and the Channels page does not list them. They come back with the
+  `social-channels` feature (see [What a personal install leaves out](#what-a-personal-install-leaves-out)), which
+  also needs a public URL for the provider to call.
 
 Every inbound channel is **default deny**. A stranger gets one pairing code (or is ignored, if you choose that) and
 nothing reaches the agent until you approve them in the console. Replies go through the approval gate as
@@ -597,9 +604,11 @@ host.
 autonomous agent - `local_shell` is on the tool guard's always-confirm list. The `personal` profile sets
 `app.assistant.local-shell.approval-required=false` (`APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED`), which lifts
 that pin: commands run inside the sandbox without asking, still logged to the tool-call audit. Two guardrails are
-untouched: a `SUPERVISED`-tier agent still asks before every tool call, and commands that leave the workspace (or a
-turn carrying content an outsider authored, under taint enforcement) can still be gated. Set it `=true` to restore
-per-command approval. Every key is in [Configuration](configuration.md#the-assistants-terminal).
+untouched: a `SUPERVISED`-tier agent still asks before every tool call that is not an explicitly classified read-only
+one (this profile sets `app.guardrails.supervised.gate-read-only=false`, so a search or a lookup no longer stops a
+supervised agent; a shell command, a write, an unclassified tool and an agent that holds the lethal trifecta are still
+asked), and commands that leave the workspace (or a turn carrying content an outsider authored, under taint
+enforcement) can still be gated. Set it `=true` to restore per-command approval. Every key is in [Configuration](configuration.md#the-assistants-terminal).
 
 **What you are accepting** when the approval pin is lifted. A command still runs only inside the sandbox or the
 workspace-runner container, and that container holds no platform secrets and mounts nothing but the projects
@@ -650,9 +659,10 @@ enforcement - a subsequent send action can still ask.
 check my mail and message me the summary" becomes a recurring unattended run - the heartbeat
 loop. Each firing is a normal agent job (your budget, the tenant caps, the kill switch); a
 tool call that still needs approval parks in the approvals inbox instead of running, so the
-agent never self-approves. Results deliver in-app, by email, Telegram, Slack or over the
+agent never self-approves. Results deliver in-app, by email, Telegram or over the
 linked **WhatsApp QR** channel (`delivery: whatsapp_qr`) - the notification that reaches you
-even when the console is closed. Every setting is under
+even when the console is closed (Slack and agent-to-agent delivery are not offered on a personal install; the
+list is `SCHEDULED_TASKS_DELIVERY_CHANNELS`). Every setting is under
 `app.scheduled-tasks.*` in [Configuration](configuration.md).
 
 ## Build projects with the Assistant
@@ -688,7 +698,9 @@ Boot project with a REST endpoint and tests" runs for as long as it takes:
   `local_shell` runs without a per-command approval (`APP_ASSISTANT_LOCAL_SHELL_APPROVAL_REQUIRED=false`; set it to
   `true` to ask each time). After any approval it does get, the Assistant carries on by itself while a folder
   is attached, so a long build needs no "continue" messages. A command may run up to 30
-  minutes (`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS`); Maven, Gradle and npm caches live in the runner's own volume.
+  minutes (`WORKSPACE_RUNNER_MAX_TIMEOUT_SECONDS`); Maven, Gradle and npm caches live in the runner's own volume. The container is
+  limited to 3 GB of memory (`WORKSPACE_RUNNER_MEM_LIMIT`) and 2048 processes and threads (`WORKSPACE_RUNNER_PIDS_LIMIT`), so a runaway
+  command cannot take the computer down with it.
 - **Model.** A turn may use up to 150 tool calls in the personal profile (`GUARDRAILS_MAX_TOOL_CALLS_PER_TURN`), and core waits up to 240 s for a local
   model's first token (`LLM_HTTP_STREAM_IDLE_TIMEOUT`; 90 s elsewhere). Building a real project needs a capable model:
   add a provider key (Anthropic, OpenAI, Gemini) for this. The 4B local default can make small edits but stalls on a
@@ -707,7 +719,7 @@ scripts/vegaduta personal --browser        # PowerShell: .\scripts\vegaduta.ps1 
 scripts/vegaduta personal --no-browser     # turn it off again (the choice is remembered)
 ```
 
-This adds one container, `browser-runner` (`services/browser-runner`, a Playwright 1.49.0 server with Chromium; about 2 GB to download, 3.4 GB on disk, a 2 GB memory limit you can change with `BROWSER_RUNNER_MEM_LIMIT`). Core stays on the slim image and attaches to it (`APP_BROWSERUSE_REMOTE_URL=ws://browser-runner:3000/`). A host JVM (`--native-core`) does not use it: install Chromium on the host and set `APP_BROWSERUSE_CHROMIUM_EXECUTABLE_PATH` instead. The older route still works and needs none of this: `CORE_IMAGE_VARIANT=-full` (the 6 GB `core-full` image with Chromium inside core; raise `CORE_MEM_LIMIT=2560m`).
+This adds one container, `browser-runner` (`services/browser-runner`, a Playwright 1.63.0 server with Chromium; about 2 GB to download, 3.4 GB on disk, a 2 GB memory limit you can change with `BROWSER_RUNNER_MEM_LIMIT`). Core stays on the slim image and attaches to it (`APP_BROWSERUSE_REMOTE_URL=ws://browser-runner:3000/`). A host JVM (`--native-core`) does not use it: install Chromium on the host and set `APP_BROWSERUSE_CHROMIUM_EXECUTABLE_PATH` instead. The older route still works and needs none of this: `CORE_IMAGE_VARIANT=-full` (the 6 GB `core-full` image with Chromium inside core; raise `CORE_MEM_LIMIT=2560m`).
 
 To let the agent sign in to a site, name it in `deploy/compose/.env`: `BROWSER_ALLOWED_DOMAINS=github.com,*.github.com`.
 
@@ -727,13 +739,47 @@ it. See [Security model](security-model.md) for what this does and does not stop
 
 `app.edition.billing-enabled=false` removes plans, prices, payments, receipts and upgrade prompts, and every limit
 resolves as unlimited. Usage and cost are still counted, so the Cost and ROI views stay truthful. The console hides
-billing screens unless `WEB_BILLING_ENABLED=1`.
+billing screens unless `WEB_BILLING_ENABLED=1`. This is the `billing-payments` feature below; on a personal install
+core does not even load the payment gateways, checkout, invoices, wallet and mandate code.
 
-Beyond billing, a local-auth install drops the surfaces a single user never reaches — from the nav rail, the
-command palette and the page-guide entries alike (`web/app/lib/personalInstall.ts` is the one list): Shared with
-me, the public agent Directory, Studio, Cost & ROI, and under Administration the agent trust, commerce and payments
-consoles, Branding, MCP access, API keys, SSO, Leads and Plans. The pages still answer on a deep link; they just are not
-advertised.
+## What a personal install leaves out
+
+core runs as one edition. A personal install sets `app.edition.tier=personal`, which switches off, by default, the
+groups of features that exist for operators, teams and businesses rather than for one person. "Off" means not loaded:
+the endpoints answer 404 and the schedulers do not run. Your data model is not touched, so nothing needs migrating
+to turn a group back on. Lite and Full load everything.
+
+| Feature id | Not loaded on a personal install |
+|---|---|
+| `billing-payments` | payment gateways (Razorpay, Stripe, PhonePe), checkout, invoices, subscriptions and upgrades, budget top-ups, the agent wallet and payment mandates, the commerce product feed, and the agent tools `create_payment_link`, `request_upi_collect` and `check_payment_status` |
+| `social-channels` | Slack, Discord, Microsoft Teams and X |
+| `a2a-directory` | agent-to-agent endpoints, agent cards and the public agent directory |
+| `mcp-server-exposure` | the developer API (`/api/dev/v1`) and exposing your tools as an MCP server to outside clients. The OpenAI-compatible API is separate: set `app.openai-compat.enabled=true` to use Open WebUI, Continue or LiteLLM against an agent |
+| `operator-console` | the endpoints for running a fleet of tenants (tenants, plans, spend, abuse, moderation, impersonation, audit) and SCIM user provisioning. The platform LLM pool, tool credentials and platform settings stay, so you can still add model keys |
+| `cloud-speech` | the Sarvam and ElevenLabs integrations. Without them WhatsApp voice notes and call transcription have no cloud speech backend |
+| `voice-realtime-share` | anonymous realtime voice on share links, call recording and the LiveKit egress |
+| `video-demo-media` | Vertex Veo video generation and the demo image and video endpoints |
+
+Public share links for agents and workflows and hosted forms are still available; only voice on a share link is
+left out.
+
+**Turning one back on.** Put `APP_EDITION_FEATURES_<ID>_ENABLED=true` in `deploy/compose/core.env` (the id with `-`
+written as `_`) and restart core, for example `APP_EDITION_FEATURES_CLOUD_SPEECH_ENABLED=true` to use Sarvam or
+ElevenLabs, and add the provider key in the console. The choice is made once at boot, so a restart is required. To
+get everything back at once set `VEGADUTA_EDITION=lite` (or `full`) in `deploy/compose/.env`: that single variable
+sets both core's tier and the console's `NEXT_PUBLIC_EDITION`, so the two agree. The launcher writes
+`VEGADUTA_EDITION=personal` into `.env` and never replaces a value you have set. How a feature is decided, the full
+list and the `GET /api/public/status` `edition` object are in
+[Configuration](configuration.md#edition-tier-and-features).
+
+**The console.** On a personal install the console leaves out the pages that need those features or a team, and the
+proxy answers a real 404 for them (`web/app/lib/edition.ts` holds the one table): single sign-on, Shared with me,
+Agent trust, API keys, Team access and Users, Plans, Cost & ROI, Agent payments and Agent commerce, the public
+Directory, Studio, Leads, Branding and MCP access, plus sign-up, the try-it page and view-as. Billing pages redirect.
+Platform administration shows only LLM & Providers, Voice & Tool Credentials and Platform Settings. Usage stays, without
+the top-up card. Cards and buttons for a feature core does not load (budget top-up, sharing with teammates,
+share-as-template, Sarvam and ElevenLabs, voice cloning) are hidden. The console takes its edition from
+`NEXT_PUBLIC_EDITION` and warns if core reports another one.
 
 ## Configuration
 
@@ -769,8 +815,8 @@ accounts do not migrate to Keycloak.
   unless you add them to `app.mcp.stdio.sandbox-extra-deny-read`. A server allowed the network gets outbound TCP only
   (no unix sockets, no loopback unless `sandbox-allow-loopback=true`).
 - **Matrix pairing is per room.** In the default `PAIRING` sender mode an approved room lets every member drive the
-  agent; use `ALLOWLIST` for rooms you do not control. The inbound rate limit (on in this profile) keys Slack,
-  Discord, Teams and X on the room or conversation, so a busy shared room shares one budget.
+  agent; use `ALLOWLIST` for rooms you do not control. The inbound rate limit (on in this profile) keys a room or
+  conversation, so a busy shared room shares one budget.
 - **Channels are young.** Signal, Matrix and iMessage have run against fakes, not against a real signal-cli, a
   real homeserver or a real Mac. No end-to-end encryption on Matrix. No inbound attachments are read on Signal or
   iMessage. None of the three has a workflow trigger yet.
@@ -784,9 +830,9 @@ accounts do not migrate to Keycloak.
 ## Features that need Lite or Full
 
 A personal install is one person on one machine, so some console pages have nothing behind them. The rail does not list
-them, and a direct link shows **"Not available in the personal installation"** with the reason and a pointer to the
-[installation guide](installation.md): install the Lite or Full edition (Docker Compose, or the Helm chart on your
-infrastructure) to use them. The pages are single sign-on (needs Keycloak), Shared with me, Agent trust and API keys
-(team features), Plans, Billing, Cost & ROI, Agent payments and Agent commerce (billing is off), and the public
-Directory, Studio, Leads, Branding and MCP access (multi-tenant surfaces). Code Intel shows a similar state on any install
-that has no Code Intel service configured. The list is one map, `web/app/lib/editionCapabilities.ts`.
+them, and a direct link answers 404 (or, where the install's own pages explain it, shows **"Not available in the
+personal installation"** with the reason). Install the Lite or Full edition (Docker Compose, or the Helm chart on your
+infrastructure, see the [installation guide](installation.md)) to use them. The pages are listed under
+[What a personal install leaves out](#what-a-personal-install-leaves-out). Code Intel shows a similar state on any
+install that has no Code Intel service configured. The list is one table, `EDITION_ROUTES` in
+`web/app/lib/edition.ts`.

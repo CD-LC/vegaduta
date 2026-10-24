@@ -561,3 +561,50 @@ describe("localcode/ask — failure shapes", () => {
     expect(state.searches).toEqual([]);
   });
 });
+
+describe("localcode/ask — the instruction comes from the registry key", () => {
+  const SHIPPED =
+    "You answer questions about a codebase using only the excerpts you are " +
+    "given. Each excerpt is labelled with its file path and line range. Cite " +
+    "the path and line range for every claim you make. If the excerpts do not " +
+    "contain the answer, say so plainly instead of guessing — the reader can " +
+    "see the same excerpts you can, so an invented file name is worse than a " +
+    "short admission that it was not in what you were shown.";
+
+  async function systemPromptHandedToTheModel(): Promise<string> {
+    const tier1 = await import("../edge/tier1");
+    const calls = vi.mocked(tier1.createTier1Session).mock.calls;
+    return (calls[0][1] as { systemPrompt: string }).systemPrompt;
+  }
+
+  it("is the shipped wording, byte for byte, when nothing was fetched", async () => {
+    mockEdge();
+    const { askLocalCode } = await importAsk();
+    await askLocalCode("where is alpha?");
+    expect(await systemPromptHandedToTheModel()).toBe(SHIPPED);
+  });
+
+  it("uses the wording the edge runtime already holds, and still makes no request of its own", async () => {
+    mockEdge();
+    vi.doMock("../auth", () => ({ auth: { getToken: vi.fn(async () => "tok") } }));
+    const bundleFetch = vi.fn<() => Promise<unknown>>(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ prompts: { "edge.localcode_ask.system": { text: "Answer from the excerpts only.", enabled: true } } }),
+      })
+    );
+    vi.stubGlobal("fetch", bundleFetch);
+    const edgePrompts = await import("../edge/edgePrompts");
+    await edgePrompts.primeEdgePrompts(); // what an earlier edge turn did
+    const callsBeforeAsk = bundleFetch.mock.calls.length;
+
+    const { askLocalCode } = await importAsk();
+    await askLocalCode("where is alpha?");
+
+    expect(await systemPromptHandedToTheModel()).toBe("Answer from the excerpts only.");
+    expect(bundleFetch.mock.calls.length).toBe(callsBeforeAsk);
+    expect(callsBeforeAsk).toBe(1);
+    vi.doUnmock("../auth");
+  });
+});

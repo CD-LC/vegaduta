@@ -139,6 +139,30 @@ class ApprovalRequestRecorder {
         return request;
     }
 
+    /**
+     * A request nobody decided in time. Same lock-and-check as an approve or reject (a human deciding
+     * in the same instant wins and this throws {@link ApprovalRequestAlreadyDecidedException}); recorded
+     * as a rejection by {@link ApprovalRequest#EXPIRY_ACTOR}, audited as {@code EXPIRED}, and published
+     * both as the lifecycle {@code approval.resolved} (decision {@code expired}) and as a settled
+     * request, so a parked agent job notices without waiting for its next sweep tick.
+     */
+    @Transactional
+    ApprovalRequest recordExpired(ApprovalRequest request, String reason) {
+        request = lockPending(request);
+        request.markExpired(reason);
+        request = requestRepository.save(request);
+        auditLogService.record(
+            ApprovalRequest.EXPIRY_ACTOR, request.getActionType(), TARGET_TYPE, request.getId().toString(),
+            AuditOutcome.EXPIRED, reason
+        );
+        publishLifecycle("approval.resolved", request, Map.of(
+            "decision", "expired",
+            "decidedBy", ApprovalRequest.EXPIRY_ACTOR,
+            "reason", reason == null ? "" : reason));
+        publishExecutionRecorded(request);
+        return request;
+    }
+
     @Transactional
     void recordExecutionFailed(ApprovalRequest request, String decidedBy, String errorMessage) {
         request.markExecutionFailed(errorMessage);

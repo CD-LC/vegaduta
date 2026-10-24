@@ -4,6 +4,8 @@ import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.StepJournal;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.DelegateOptions;
+import com.agenticai.core.prompts.PromptContext;
+import com.agenticai.core.prompts.PromptResolver;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,8 +40,8 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * write-capable {@code local_shell}. Reads, web and workspace-read tools stay. Approval gating of
  * the remaining tools is unchanged.
  *
- * <p><b>Bounded:</b> at most {@value #MAX_BRANCHES} workers per call, {@value
- * #BRANCH_TIMEOUT_SECONDS}s each, {@value #MAX_ANSWER_CHARS} chars of answer each, and the turn's
+ * <p><b>Bounded:</b> at most {@code app.agents.collaboration.max-branches} workers per call, {@code
+ * branch-timeout-seconds} each, {@code max-answer-chars} chars of answer each, and the turn's
  * shared {@link RunBudget} (a branch that is not affordable is reported as skipped). Inside a job
  * session with the step journal on, a worker that already completed for the same brief is not
  * re-run on a resumed attempt.
@@ -50,10 +52,6 @@ public class RunSubtasksToolCallback implements ToolCallback {
     private static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
 
     public static final String TOOL_NAME = "run_subtasks";
-    static final int MAX_BRANCHES = 8;
-    static final long BRANCH_TIMEOUT_SECONDS = 240;
-    static final int MAX_ANSWER_CHARS = 4000;
-    static final int MAX_ROLE_CHARS = 80;
     static final String ERR_BRIEF_REQUIRED = "brief is required";
 
     /** Tools a worker never gets: further delegation, scheduling, asking a human, shell writes. */
@@ -67,12 +65,10 @@ public class RunSubtasksToolCallback implements ToolCallback {
                     "coding_task",
                     "local_shell");
 
-    static final String WORKER_DIRECTIVE =
-            "You are a worker running one sub-task for another agent. Do only the sub-task in the"
-                    + " user message, with the tools you have, and finish it. You cannot ask"
-                    + " questions, delegate, schedule or message anyone: if something needed is"
-                    + " missing, say exactly what is missing. Reply with the result alone, plainly,"
-                    + " in the form the sub-task asks for. Never invent results.";
+    /** Prompt-registry keys of the worker's directive: the standing text, and the sentence added when a role was given. */
+    static final String WORKER_DIRECTIVE_KEY = "delegation.swarm_worker";
+
+    static final String WORKER_ROLE_KEY = "delegation.swarm_worker.role";
 
     /** True when a worker may be offered the tool with this name. */
     static boolean workerMayUse(String toolName) {
@@ -87,7 +83,78 @@ public class RunSubtasksToolCallback implements ToolCallback {
     private final RunBudget runBudget;
     private final StepJournal stepJournal;
     private final String journalRunId;
-    private final long branchTimeoutSeconds;
+    private volatile long branchTimeoutSeconds;
+
+    /** The prompt registry the worker directive is read from; the shipped text until {@link #withPromptResolver}. */
+    private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
+
+    /**
+     * Reads the worker directive from the prompt registry for the calling agent (the one whose turn runs the workers)
+     * and its tenant, so an override of {@code delegation.swarm_worker} applies to every worker; called by the factory
+     * right after construction. Null keeps the shipped text.
+     */
+    RunSubtasksToolCallback withPromptResolver(PromptResolver resolver) {
+        if (resolver != null) {
+            this.prompts = resolver;
+        }
+        return this;
+    }
+
+    /** The worker's system addendum; the tenant is the one {@link #runBranch} has applied to the thread. */
+    private String workerDirective(String role) {
+        PromptContext context = PromptContext.forAgent(agentId);
+        String directive = prompts.resolve(WORKER_DIRECTIVE_KEY, context).textOrNull();
+        if (directive == null) {
+            // a switched-off or unreadable directive must not leave a worker with no instructions at all
+            directive = PromptResolver.defaultsOnly().text(WORKER_DIRECTIVE_KEY, context);
+        }
+        if (role == null) {
+            return directive;
+        }
+        String roleSentence = prompts.resolve(WORKER_ROLE_KEY, context.withVariable("role", role)).textOrNull();
+        if (roleSentence == null) {
+            roleSentence = PromptResolver.defaultsOnly().text(WORKER_ROLE_KEY, context.withVariable("role", role));
+        }
+        return directive + " " + roleSentence;
+    }
+
+    /** Branch, answer and role bounds ({@code app.agents.collaboration.*}); the shipped defaults until {@link #withLimits}. */
+    private volatile CollaborationProperties limits = new CollaborationProperties();
+
+    /** Applies the bound {@code app.agents.collaboration.*} settings; called by the factory right after construction. */
+    RunSubtasksToolCallback withLimits(CollaborationProperties limits) {
+        this.limits = limits;
+        this.branchTimeoutSeconds = limits.getBranchTimeoutSeconds();
+        this.resolvedLimits = ResolvedCollaborationLimits.platformOnly(limits);
+        return this;
+    }
+
+    /** The worker-count and timeout bounds as the settings catalog resolves them; the platform values until {@link #withSettings}. */
+    private volatile ResolvedCollaborationLimits resolvedLimits = ResolvedCollaborationLimits.platformOnly(limits);
+
+    /** The bounds in force; the platform's own when no view was set (an instance made without its field initialisers). */
+    private ResolvedCollaborationLimits limitsView() {
+        ResolvedCollaborationLimits view = resolvedLimits;
+        return view != null ? view : ResolvedCollaborationLimits.platformOnly(limits);
+    }
+
+    /**
+     * Reads {@code delegation.maxBranches} and {@code delegation.branchTimeoutSeconds} through the settings catalog for the
+     * calling agent and the tenant captured at construction; called by the factory right after {@link #withLimits}. A null
+     * resolver keeps the platform values (and the constructor's timeout, the test seam).
+     */
+    RunSubtasksToolCallback withSettings(com.agenticai.core.settings.SettingsResolver settings) {
+        if (settings != null) {
+            this.resolvedLimits = new ResolvedCollaborationLimits(limits, settings, agentId, capturedContext);
+        }
+        return this;
+    }
+
+    /** Seconds one worker may run: the catalog's value when wired, else the platform's (or the test seam's) own. */
+    private long workerTimeoutSeconds() {
+        ResolvedCollaborationLimits resolved = limitsView();
+        return resolved.usesSettings() ? resolved.branchTimeoutSeconds() : branchTimeoutSeconds;
+    }
 
     public RunSubtasksToolCallback(
             AgentChatService agentChatService,
@@ -103,7 +170,7 @@ public class RunSubtasksToolCallback implements ToolCallback {
                 runBudget,
                 stepJournal,
                 sessionId,
-                BRANCH_TIMEOUT_SECONDS);
+                new CollaborationProperties().getBranchTimeoutSeconds());
     }
 
     /** Test seam: the per-worker limit is a constructor value so a timeout can be exercised fast. */
@@ -165,12 +232,12 @@ public class RunSubtasksToolCallback implements ToolCallback {
                                 },
                                 "required": ["brief"]
                             },
-                            "maxItems": 8
+                            "maxItems": %d
                         }
                     },
                     "required": ["tasks"]
                 }
-                """)
+                """.formatted(limitsView().maxBranches()))
                 .build();
     }
 
@@ -193,7 +260,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
         }
 
         String runId = UUID.randomUUID().toString().substring(0, 8);
-        int branchCap = Math.min(tasks.size(), MAX_BRANCHES);
+        int maxBranches = limitsView().maxBranches();
+        long workerTimeoutSeconds = workerTimeoutSeconds();
+        int branchCap = Math.min(tasks.size(), maxBranches);
         boolean budgeted = runBudget != null && runBudget.isEnabled();
         String estimateText = null;
         String budgetStop = null;
@@ -243,12 +312,12 @@ public class RunSubtasksToolCallback implements ToolCallback {
             for (int i = 0; i < futures.size(); i++) {
                 Future<Map<String, Object>> future = futures.get(i);
                 try {
-                    results.add(future.get(branchTimeoutSeconds, TimeUnit.SECONDS));
+                    results.add(future.get(workerTimeoutSeconds, TimeUnit.SECONDS));
                 } catch (java.util.concurrent.TimeoutException e) {
                     future.cancel(true);
                     Map<String, Object> out = base(i, runnable.get(i));
                     out.put("status", "timeout");
-                    out.put("error", "exceeded the " + branchTimeoutSeconds + "s worker limit");
+                    out.put("error", "exceeded the " + workerTimeoutSeconds + "s worker limit");
                     results.add(out);
                 } catch (Exception e) {
                     Map<String, Object> out = base(i, runnable.get(i));
@@ -266,9 +335,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
             out.put("status", "skipped");
             out.put(
                     "error",
-                    budgetStop != null && i < Math.min(tasks.size(), MAX_BRANCHES)
+                    budgetStop != null && i < Math.min(tasks.size(), maxBranches)
                             ? RunBudget.STOP_REASON + ": " + budgetStop
-                            : "over the " + MAX_BRANCHES + "-worker limit");
+                            : "over the " + maxBranches + "-worker limit");
             results.add(out);
         }
         emitter.ifPresent(e -> e.swarm("finish", runId, null, results));
@@ -290,22 +359,22 @@ public class RunSubtasksToolCallback implements ToolCallback {
         }
     }
 
-    private static String roleOf(Map<String, Object> task) {
+    private String roleOf(Map<String, Object> task) {
         Object role = task.get("role");
         if (role == null || role.toString().isBlank()) {
             return null;
         }
         String r = role.toString().trim().replaceAll("\\s+", " ");
-        return r.length() > MAX_ROLE_CHARS ? r.substring(0, MAX_ROLE_CHARS) : r;
+        return r.length() > limits.getMaxRoleChars() ? r.substring(0, limits.getMaxRoleChars()) : r;
     }
 
-    private static String label(int index, Map<String, Object> task) {
+    private String label(int index, Map<String, Object> task) {
         String role = roleOf(task);
         return role == null ? "subtask-" + (index + 1) : "subtask-" + (index + 1) + " (" + role + ")";
     }
 
     /** The result entry every outcome starts from: 1-based task number and the role, if given. */
-    private static Map<String, Object> base(int index, Map<String, Object> task) {
+    private Map<String, Object> base(int index, Map<String, Object> task) {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("task", index + 1);
         String role = roleOf(task);
@@ -348,8 +417,7 @@ public class RunSubtasksToolCallback implements ToolCallback {
                 }
                 stepJournal.begin(journalRunId, step, StepJournal.KIND_SWARM);
             }
-            String directive =
-                    role == null ? WORKER_DIRECTIVE : WORKER_DIRECTIVE + " Your role: " + role + ".";
+            String directive = workerDirective(role);
             String answer =
                     agentChatService.delegateCall(
                             agentId,
@@ -358,8 +426,8 @@ public class RunSubtasksToolCallback implements ToolCallback {
                             "delegated:subtasks:" + runId + ":" + index,
                             new DelegateOptions(directive, RunSubtasksToolCallback::workerMayUse));
             String capped =
-                    answer != null && answer.length() > MAX_ANSWER_CHARS
-                            ? answer.substring(0, MAX_ANSWER_CHARS) + "…"
+                    answer != null && answer.length() > limits.getMaxAnswerChars()
+                            ? answer.substring(0, limits.getMaxAnswerChars()) + "…"
                             : answer;
             if (step != null) {
                 stepJournal.complete(journalRunId, step, StepJournal.KIND_SWARM, capped);

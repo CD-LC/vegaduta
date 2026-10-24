@@ -35,6 +35,11 @@
 //     `text`). A true token-by-token screen would add per-token regex cost to
 //     the hot path for marginal benefit — documented tradeoff, not oversight.
 
+// The refusal wording is not here: each message is a registry key (edge.refusal.*, see edgePrompts.ts) whose
+// shipped text is the server guardrail's own message, so an admin can reword it for edge turns. Only wording comes
+// from there - whether a message is blocked is decided by the patterns below and nothing fetched.
+import { edgePrompt, type EdgePromptKey } from "./edgePrompts";
+
 // ---------------------------------------------------------------------------
 // PII patterns — ported from PiiGuardrail.java (field-for-field, same order).
 // ---------------------------------------------------------------------------
@@ -139,10 +144,9 @@ export function screenInput(text: string): GuardrailScreenResult {
       return {
         blocked: true,
         reason: "jailbreak",
-        // Verbatim from JailbreakDetectorGuardrail's fail message.
-        message:
-          "Your request appears to contain a prompt injection or jailbreak attempt. " +
-          "Please submit a direct, legitimate request.",
+        // The wording is the registry key `edge.refusal.jailbreak` (edgePrompts.ts); its shipped text is the
+        // JailbreakDetectorGuardrail fail message verbatim. Wording only: the verdict above never depends on it.
+        message: edgePrompt("edge.refusal.jailbreak"),
       };
     }
   }
@@ -158,22 +162,12 @@ export function screenInput(text: string): GuardrailScreenResult {
 export function screenOutput(text: string): GuardrailScreenResult {
   if (!text || !text.trim()) return PASS;
   const s = scanned(text);
-  const fail = (message: string): GuardrailScreenResult => ({ blocked: true, reason: "pii", message });
-  if (EMAIL_PATTERN.test(s)) {
-    return fail("Response contains email addresses. Please remove personally identifiable information.");
-  }
-  if (PHONE_PATTERN.test(s)) {
-    return fail("Response contains phone numbers. Please remove personally identifiable information.");
-  }
-  if (SSN_PATTERN.test(s)) {
-    return fail("Response contains social security numbers. This data must not be exposed.");
-  }
-  if (CREDIT_CARD_PATTERN.test(s)) {
-    return fail("Response contains credit card numbers. This data must not be exposed.");
-  }
-  if (PII_KEYWORD_PATTERN.test(s) && SUSPICIOUS_NUMBER_PATTERN.test(s)) {
-    return fail("Response appears to contain sensitive authentication or account data.");
-  }
+  const fail = (key: EdgePromptKey): GuardrailScreenResult => ({ blocked: true, reason: "pii", message: edgePrompt(key) });
+  if (EMAIL_PATTERN.test(s)) return fail("edge.refusal.pii_email");
+  if (PHONE_PATTERN.test(s)) return fail("edge.refusal.pii_phone");
+  if (SSN_PATTERN.test(s)) return fail("edge.refusal.pii_ssn");
+  if (CREDIT_CARD_PATTERN.test(s)) return fail("edge.refusal.pii_card");
+  if (PII_KEYWORD_PATTERN.test(s) && SUSPICIOUS_NUMBER_PATTERN.test(s)) return fail("edge.refusal.pii_credentials");
   return PASS;
 }
 

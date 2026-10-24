@@ -116,7 +116,7 @@ public class MistralAgentChatClientFactory implements AgentChatClientFactory {
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.MISTRAL)
             .defaultAdvisors(modelSupport.advisors(
                 new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.MISTRAL, model, meterRegistry, pricingCatalog)))
             .build();

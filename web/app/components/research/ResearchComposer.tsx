@@ -20,6 +20,7 @@ import {
 } from "./researchRun";
 import { RS } from "./researchStrings";
 import { appendTranscript, useDictation } from "./useDictation";
+import { isPersonalEdition } from "../../lib/edition";
 
 /**
  * The question box. Shown only when the status probe says research is ready;
@@ -224,7 +225,7 @@ export default function ResearchComposer({
           className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           {error.message}
-          {error.upgrade && (
+          {error.upgrade && !isPersonalEdition() && (
             <>
               {" "}
               <Link href="/admin/billing" className="font-medium underline underline-offset-2">

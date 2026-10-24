@@ -61,7 +61,9 @@
     "railBrand": "ब्रांडिंग",
     "railLearn": "सिक्खो",
     "railGuard": "गार्डरेल",
-    "brandIdentityAriaLabel": "VegaDūta ब्रांड दी पन्छान"
+    "brandIdentityAriaLabel": "VegaDūta ब्रांड दी पन्छान",
+    "railRuntimeSettings": "रनटाइम सेटिंग",
+    "railControls": "मैं किथें कंट्रोल करां...?"
   },
   "languageSwitcher": {
     "label": "भाशा",
@@ -754,7 +756,142 @@
     "edgeTier0Badge": "ऑन-डिवाइस · क्रोम बिल्ट-इन",
     "edgeTier0BadgeTitle": "क्रोम दे बिल्ट-इन मॉडल (जेमिनी नैनो) ने इसदा जवाब दित्ता - तेज ते पूरी चाल्ली निजी, पर सिर्फ गल्लबात आस्तै: एह् टूल इस्तेमाल नेईं करी सकदा ते कुसै बी जटिल चीज पर इक असली प्रदाता थमां घट्ट सटीक होई सकदा ऐ। हर प्लान पर मुफ्त।",
     "edgeTier1Badge": "ऑन-डिवाइस · स्थानीय मॉडल",
-    "edgeTier1BadgeTitle": "इक डाउनलोड कीते गेदे ऑन-डिवाइस मॉडल ने इसदा जवाब दित्ता - निजी, ते एह् टूल इस्तेमाल करी सकदा ऐ (उ'नें गै सुरक्षित टूलें गी जि'यां इक होस्टेड बारी करी सकदी ऐ)। अजे बी होस्टेड पूल थमां मता छोटा मॉडल ऐ, इस करी जटिल अनुरोधें पर घट्ट सटीक होई सकदा ऐ। हर प्लान पर मुफ्त।"
+    "edgeTier1BadgeTitle": "इक डाउनलोड कीते गेदे ऑन-डिवाइस मॉडल ने इसदा जवाब दित्ता - निजी, ते एह् टूल इस्तेमाल करी सकदा ऐ (उ'नें गै सुरक्षित टूलें गी जि'यां इक होस्टेड बारी करी सकदी ऐ)। अजे बी होस्टेड पूल थमां मता छोटा मॉडल ऐ, इस करी जटिल अनुरोधें पर घट्ट सटीक होई सकदा ऐ। हर प्लान पर मुफ्त।",
+    "viewTurn": "टर्न दिक्खो",
+    "viewTurnTitle": "इस गल्लबात दे टर्नें दी कदम-ब-कदम टाइमलाइन खोलो",
+    "headerRunning": "इक टर्न चली दा ऐ",
+    "headerReady": "तैयार",
+    "clearContext": "संदर्भ मटाओ",
+    "clearContextTitle": "नमीं गल्लबात शुरू करो। एह् इस चैट दे डिवाइस ते सर्वर पासे दी सेशन मेमोरी गी मटांदा ऐ।",
+    "stopRun": "इस जवाब गी बंद करो",
+    "fallbackSendToPlatform": "प्लेटफॉर्म गी भेजो",
+    "chipsLabel": "एजेंट हुन के करा दा ऐ",
+    "chipPreparing": "तैयार ऐ",
+    "chipModelCall": "मॉडल दा इंतजार",
+    "chipThinking": "सोचा दा ऐ",
+    "chipWriting": "जवाब लिखा दा ऐ",
+    "chipTool": "टूल चला दा ऐ: {tool}",
+    "chipToolUnnamed": "इक टूल चला दा ऐ",
+    "chipWaitingApproval": "तुंʼदी मंजूरी दा इंतजार ({count})",
+    "chipContinuing": "जवाब जारी रक्खा दा ऐ",
+    "chipContinuingPass": "जवाब जारी रक्खा दा ऐ ({max} चा पास {pass})",
+    "chipContinuingApproval": "तुंʼदे फैसले परैंत जारी रक्खा दा ऐ",
+    "chipRetrying": "दुबारा कोशश कर दा ऐ",
+    "chipRetryingReason": "दुबारा कोशश कर दा ऐ: {reason}",
+    "chipRetryingAttempt": "दुबारा कोशश कर दा ऐ (कोशश {attempt}/{max})",
+    "chipRetryingAttemptReason": "दुबारा कोशश कर दा ऐ (कोशश {attempt}/{max}): {reason}",
+    "chipFailover": "बैकअप मॉडल पर बदली गेआ",
+    "chipFailoverReason": "बैकअप मॉडल पर बदली गेआ: {reason}",
+    "chipFailoverTo": "{model} पर बदली गेआ",
+    "chipFailoverToReason": "{model} पर बदली गेआ: {reason}",
+    "outcomeTruncated": "ये जवाब पूरा होने थमां पैह्लें गै कटोई गेआ।",
+    "outcomeContinue": "जारी रक्खो",
+    "outcomeLongerReplies": "लम्मे जवाब दी इजाजत देओ",
+    "continueMessage": "जित्थें रुकेआ हा उत्थें थमां गै जारी रक्खो, पैह्लें लिखे दे गी दोहराए बगैर।",
+    "outcomeRefused": "सुरक्षा दे कारण मॉडल प्रोवाइडर ने ये जवाब बंद करी दित्ता, इस आस्तै दस्सने आस्तै कोई जवाब नेईं ऐ। अनुरोध बदलियै फी कोशश करो।",
+    "outcomeRefusedReason": "सुरक्षा दे कारण ({reason}) मॉडल प्रोवाइडर ने ये जवाब बंद करी दित्ता, इस आस्तै दस्सने आस्तै कोई जवाब नेईं ऐ। अनुरोध बदलियै फी कोशश करो।",
+    "outcomeMalformedToolCall": "मॉडल ने टूल बरतने दी कोशश कीती पर उसदा अनुरोध गलत हा, इस आस्तै किश नेईं चलेआ। फी कोशश करो।",
+    "outcomeEmpty": "मॉडल ने खाली जवाब दित्ता। फी कोशश करो।",
+    "stopRaiseSteps": "टूल-कॉल दी हद बधाओ",
+    "stopRaiseBudget": "खर्चे दी हद बदलो",
+    "stopAskEditor": "कुसै ऐसे बंदे गी आखो जेह्ड़ा इस एजेंट गी बदली सकदा ऐ, ओह् हद बधा देग।",
+    "rsOpen": "रन सेटिंग",
+    "rsTitle": "रन सेटिंग",
+    "rsClose": "रन सेटिंग बंद करो",
+    "rsBack": "रन सेटिंग पर परतो",
+    "rsIntro": "{name} आस्तै अगला मैसेज किʼयां चलग। इʼनें गी एजेंट दे बर्ताव टैब च बदलो।",
+    "rsLoading": "लोड होआ दा ऐ",
+    "rsRetry": "फी कोशश करो",
+    "rsOpenBehavior": "बर्ताव च बदलो",
+    "rsModelHeading": "मॉडल ते नमूना चुनाई",
+    "rsModel": "मॉडल",
+    "rsModelNotSet": "सेट नेईं कीता गेदा",
+    "rsModelDefault": "मॉडल दा डिफॉल्ट",
+    "rsDepth": "तर्क दी गहराई",
+    "rsSourceAgent": "इस एजेंट पर सेट कीता गेदा",
+    "rsParam_temperature": "तापमान",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "जवाब दी सब थमां लम्मी लंबाई (टोकन)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "दोहराऽ दी सजा",
+    "rsParam_presencePenalty": "मौजूदगी दी सजा",
+    "rsParam_seed": "सीड",
+    "rsParam_stopSequences": "बंद करने दा क्रम",
+    "rsParamDropped": "{param} इस एजेंट पर सेट ऐ, पर {provider} {model} आस्तै इसगी नजरअंदाज करदा ऐ, इस आस्तै इसदा कोई असर नेईं ऐ।",
+    "rsToolsRunHeading": "इस रन आस्तै टूल",
+    "rsToolsRunOnly": "सिर्फ इस रन आस्तै",
+    "rsToolsRunNote": "ये स्विच तय करदे न जे इस प्लेग्राउंड थमां भेजे गेदे मैसेज एजेंट दे कुन से टूल बरती सकदे न। किश बी सेव नेईं होंदा: बाकी सारें आस्तै एजेंट अपनी टूल पहुंच रखदा ऐ। ये एजेंट दे टूल सिर्फ बंद करी सकदे न, उसी कदें बी नमां टूल नेईं देई सकदे।",
+    "rsToolsRunSummary": "एजेंट दे {total} टूलें चा {on} इस रन आस्तै चालू न",
+    "rsToolsRunNone": "इस रन आस्तै कोई टूल नेईं: एजेंट सिर्फ लिखत च जवाब देई सकदा ऐ।",
+    "rsToolsReset": "एजेंट दे टूल बरतो",
+    "rsToolsNotInAgent": "ये इस एजेंट दे सेव कीते दे टूलें चा नेईं ऐ, इस आस्तै रन आस्तै चालू नेईं कीता जाई सकदा।",
+    "rsToolsEditAgent": "एजेंट दे सेव कीते दे टूल बदलो",
+    "rsToolsLimitedChip": "इस रन आस्तै टूल सीमित",
+    "rsToolsEmpty": "इस एजेंट आस्तै कोई टूल उपलब्ध नेईं ऐ।",
+    "rsToolsSummary": "{total} चा {on} टूल चालू",
+    "rsToolsFailed": "टूल लोड नेईं होई सके।",
+    "rsLimitsHeading": "हर टर्न दी हद",
+    "rsLimitsChange": "हद बदलो",
+    "rsLimitsView": "हद दिक्खो",
+    "rsLimitsFailed": "हद लोड नेईं होई सकी।",
+    "rsLimitsEmpty": "इस एजेंट आस्तै दस्सने आस्तै कोई हद नेईं ऐ।",
+    "rsNoLimit": "कोई हद नेईं",
+    "rsScoreAll": "हर मेल",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} अक्खर",
+    "rsLimitRange": "इजाजत: {min} थमां {max}",
+    "rsLayer_AGENT": "इस एजेंट पर सेट कीता गेदा",
+    "rsLayer_TENANT": "वर्कस्पेस डिफॉल्ट",
+    "rsLayer_PLATFORM": "प्लेटफॉर्म डिफॉल्ट",
+    "rsLayer_REQUEST": "इस अनुरोध आस्तै सेट कीता गेदा",
+    "rsLimit_maxToolSteps": "हर टर्न च टूल कॉल",
+    "rsLimit_turnTimeoutSeconds": "इक टर्न दा समां",
+    "rsLimit_toolTimeoutSeconds": "इक टूल कॉल दा समां",
+    "rsLimit_toolOutputMaxChars": "टूल नतीजे दा आकार",
+    "rsLimit_retrievalTopK": "हर खोज च ज्ञान दे नतीजे",
+    "rsLimit_retrievalMinScore": "ज्ञान मेल दी घट्ट थमां घट्ट प्रासंगिकता",
+    "rsLimit_continuationPasses": "जवाब पूरा करने आस्तै फालतू पास",
+    "rsLimitHelp_maxToolSteps": "इक जवाब जित्थें तकर टूल कॉल करी सकदा ऐ। हद पुजने पर टर्न बंद होई जंदा ऐ ते एह् दस्सेआ जंदा ऐ।",
+    "rsLimitHelp_turnTimeoutSeconds": "इक टर्न बंद होने थमां पैह्लें कुन्नी देर चली सकदा ऐ।",
+    "rsLimitHelp_toolTimeoutSeconds": "इक टूल कॉल बंद होने थमां पैह्लें कुन्नी देर चली सकदी ऐ।",
+    "rsLimitHelp_toolOutputMaxChars": "इक टूल नतीजे दा कन्ना हिस्सा मॉडल पढ़ी सकदा ऐ। बाकी कटोई दित्ता जंदा ऐ।",
+    "rsLimitHelp_retrievalTopK": "इक खोज ज्ञान भंडार चा कुन्ने टुकड़े परतांदी ऐ।",
+    "rsLimitHelp_retrievalMinScore": "इस थमां घट्ट मेल आले टुकड़े छोड़ी दित्ते जंदे न। सिफर हर मेल गी रखदा ऐ।",
+    "rsLimitHelp_continuationPasses": "ऐलान कीते दे पर नेईं कीते दे कदम पर रुकी गेदे जवाब गी पूरा करने आस्तै फालतू कोशशां।",
+    "rsPreviewButton": "प्रॉम्प्ट पूर्वावलोकन",
+    "rsPreviewTitle": "प्रॉम्प्ट पूर्वावलोकन",
+    "rsPreviewIntro": "ये एजेंट जेह्ड़ा सिस्टम प्रॉम्प्ट ते टूल सूची भेजग, असली टर्न दी तर्ज पर बनाई दी। मॉडल गी किश नेईं भेजेआ जंदा।",
+    "rsPreviewBuilding": "पूर्वावलोकन बनाया जा दा ऐ",
+    "rsPreviewFailed": "पूर्वावलोकन नेईं बनी सकेआ।",
+    "rsPreviewTotals": "सिस्टम लिखत आस्तै लगभग {prompt} टोकन ते टूल परिभाषा आस्तै {tools} टोकन (अंदाजा)।",
+    "rsPreviewOverBudgetTitle": "टोकन बजट थमां मता",
+    "rsPreviewOverBudget": "टिकी रौहने आली सिस्टम लिखत कन्फिगर कीते दे {budget} टोकन दे बजट थमां मता ऐ। किश नेईं कटोआ; इक प्रॉम्प्ट गी छोटा करने दा सोचो।",
+    "rsPreviewNoBlocks": "दस्सने आस्तै कोई प्रॉम्प्ट ब्लॉक नेईं ऐ।",
+    "rsPreviewMessage": "मैसेज: {message}",
+    "rsPreviewTokens": "~{tokens} टोकन",
+    "rsPreviewShowText": "लिखत दस्सो",
+    "rsPreviewTools": "टूल ({count})",
+    "rsPreviewNoTools": "ये एजेंट कोई टूल नेईं दिंदा।",
+    "rsPreviewNotes": "ये पूर्वावलोकन के नेईं जान सकदा",
+    "rsPreviewOpenAdmin": "हर प्रॉम्प्ट दे शब्द दिक्खो ते बदलो",
+    "rsOriginDefault": "डिफॉल्ट मताबक आया दा",
+    "rsOriginOverride": "{scope} ओवरराइड v{version}",
+    "rsOriginAgentConfig": "एजेंट दा अपना सिस्टम प्रॉम्प्ट",
+    "rsOriginCode": "प्लेटफॉर्म कोड",
+    "rsRunBudget": "हर रन दी खर्चे दी हद",
+    "rsNoCap": "कोई हद नेईं",
+    "rsRunBudgetHelp": "इक रन जदूं दूए एजेंटें गी कम्म दिंदा ऐ जां गहरी खोज चलांदा ऐ तां ज्यादा थमां ज्यादा कित्थें खर्च करी सकदा ऐ। एह् अंदाजा ऐ, बिल नेईं।",
+    "chipToolsOff": "टूलें दे बगैर दुबारा कोशश कर दा ऐ",
+    "chipFailoverBlocked": "बैकअप मॉडल नेईं बरतेआ गेआ: टूल पैह्लें गै चली चुके दे हे",
+    "rsLimitChangeOne": "बदलो",
+    "reasonRateLimited": "दर सीमा पुज्जी गेई",
+    "reasonTimeout": "समां खत्म होई गेआ",
+    "reasonProviderUnavailable": "प्रोवाइडर उपलब्ध नेईं",
+    "reasonAuthFailed": "प्रोवाइडर ने क्रेडेंशियल नामंजूर करी दित्ते",
+    "reasonBilling": "प्रोवाइडर दी बिलिंग दी समस्या",
+    "reasonModelNotFound": "मॉडल उपलब्ध नेईं",
+    "reasonProviderError": "प्रोवाइडर दी गलती",
+    "reasonMalformedToolCall": "टूल कॉल बरती नेईं जाई सकी"
   },
   "nodeDefs": {
     "triggerLabel": "ट्रिगर",
@@ -1360,7 +1497,50 @@
     "ttsProviderUpdatedSuccess": "TTS प्रदाता अपडेट होई गेआ।",
     "updateTtsProviderError": "इस एजेंट दा TTS प्रदाता अपडेट नेईं होई सक्या।",
     "ttsProviderFreePlanTooltip": "TTS प्रदाता दी चयन इक प्रीमियम फीचर ऐ।",
-    "ttsProviderNotSet": "प्लेटफार्म डिफ़ॉल्ट दा इस्तेमाल करदे"
+    "ttsProviderNotSet": "प्लेटफार्म डिफ़ॉल्ट दा इस्तेमाल करदे",
+    "samplingTitle": "उन्नत नमूना चुनाई",
+    "samplingIntro": "मॉडल शब्द किʼयां चुनदा ऐ इसगी बारीकी कन्नै ठीक करो। मॉडल दा डिफॉल्ट बरतने आस्तै डब्बे गी खाली रक्खो। जेह्ड़ा प्रोवाइडर कुसै खाने गी नेईं समझदा, ओह् इसगी बस नजरअंदाज करी दिंदा ऐ।",
+    "samplingIgnored": "इस मॉडल दा प्रोवाइडर इस सेटिंग गी नजरअंदाज करदा ऐ, इस आस्तै इसगी बदलने दा कोई असर नेईं।",
+    "samplingSaving": "सेव होआ दा ऐ…",
+    "samplingSaved": "सेव होई गेआ",
+    "samplingNotSaved": "सेव नेईं होआ",
+    "samplingSaveFailed": "ये सेटिंग सेव नेईं होई सकी।",
+    "samplingErrorWhole": "{label} {min} थमां {max} तकर पूरी संख्या होनी चाहिदी, जां बंद करने आस्तै खाली छोड़ो।",
+    "samplingErrorNumber": "{label} {min} थमां {max} तकर संख्या होनी चाहिदी, जां बंद करने आस्तै खाली छोड़ो।",
+    "samplingStopTooLong": "इक बंद करने दा क्रम ज्यादा थमां ज्यादा {max} अक्खरें दा होई सकदा ऐ।",
+    "samplingStopTooMany": "ज्यादा थमां ज्यादा {max} बंद करने दे क्रम।",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "सिर्फ सब थमां संभावित K अगले शब्दें गी सोचो। घट्ट दा मतलब ज्यादा सुरक्षित, अंदाजे जोग लिखत। 1 थमां 1000।",
+    "samplingSeed": "सीड",
+    "samplingSeedHelp": "इक्कै प्रॉम्प्ट आस्तै जवाबें गी ज्यादा दोहराने जोग बनाने आस्तै इक संख्या सेट करो। सारे प्रोवाइडर इसदी गारंटी नेईं दिंदे।",
+    "samplingFrequency": "दोहराऽ दी सजा",
+    "samplingFrequencyHelp": "धनात्मक मान इक्कै शब्द गी बार-बार बरतने थमां रोकदे न। -2 थमां 2।",
+    "samplingPresence": "मौजूदगी दी सजा",
+    "samplingPresenceHelp": "धनात्मक मान मॉडल गी इक्कै विषय पर टिकी रौहने दी जगहां नमें विषयें दे पासे धकेलदे न। -2 थमां 2।",
+    "samplingPlaceholderDefault": "डिफॉल्ट",
+    "samplingPlaceholderRandom": "बेतरतीब",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "बंद करने दा क्रम",
+    "samplingStopPlaceholder": "इक वाक्यांश लिखो, Enter दबाओ",
+    "samplingStopHelp": "मॉडल जिʼयां गै इʼनें चा कोई इक लिखदा ऐ, जवाब खत्म होई जंदा ऐ। ज्यादा थमां ज्यादा {count}, हर इक ज्यादा थमां ज्यादा {max} अक्खरें दा।",
+    "samplingStopCurrent": "मौजूदा बंद करने दे क्रम",
+    "samplingStopRemove": "बंद करने दा क्रम {value} हटाओ",
+    "samplingAdd": "जोड़ो",
+    "reasoningDepthFASTCost": "Quickest and cheapest: one pass, and the reply streams in as it is written.",
+    "reasoningDepthPLANNEDCost": "Writes a plan before acting: more model calls per task, and the reply appears all at once instead of streaming.",
+    "reasoningDepthCAREFULCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming.",
+    "reasoningDepthRIGOROUSCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming. Uses the most tokens.",
+    "autonomyLabel": "Autonomy",
+    "autonomyTierSUPERVISED": "Supervised",
+    "autonomyTierSUPERVISEDHint": "Every tool call waits for a human to approve it, whatever the workspace policy says. Tighter step ceiling.",
+    "autonomyTierSUPERVISEDCost": "Asks you before every tool call, searches included.",
+    "autonomyTierSEMI_AUTONOMOUS": "Semi-autonomous",
+    "autonomyTierSEMI_AUTONOMOUSHint": "Follows the workspace's approval policy for each action type. The default for every agent.",
+    "autonomyTierSEMI_AUTONOMOUSCost": "Asks you only for the actions your workspace's approval rules name; the rest run without asking.",
+    "autonomyTierFULLY_AUTONOMOUS": "Fully autonomous",
+    "autonomyTierFULLY_AUTONOMOUSHint": "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
+    "autonomyTierFULLY_AUTONOMOUSCost": "Never asks you: every tool call runs as soon as the agent makes it, sends and payments included.",
+    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "इक नोड गी कॉन्फ़िगर करने लेई चुनो, जां खब्बु पास्से दे पैलेट थमां इक नमां अंदर घसीटो।",
@@ -1836,6 +2016,9 @@
     "emptyWorkspaceTitle": "अज्जै तगर कोई संग्रह नेईं",
     "noFilesUploadedHint": "इस संग्रह च फाइलां अपलोड करो तां जे तु'आडे एजेंट उ'नेंगी खोजी सकन।",
     "ocrComingSoonTooltip": "अजे उपलब्ध नेईं ऐ - अपलोड अंतर्निर्मित Tesseract OCR पर वापस आई जंदे।"
+  },
+  "tutorPage": {
+    "backToHelp": "मदद पर परतो"
   },
   "knowledgePage": {
     "knowledgeLabel": "ज्ञान",
@@ -5724,6 +5907,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ईमेल ते होर जोड़ो, ते फिर चुनो जे कुस एजेंट हर इक पर जवाब दिंदा ऐ।",
     "channelsPoint1": "मुफ्त प्लान पर WhatsApp, Telegram ते ईमेल",
     "channelsPoint2": "इक नमां भेजने आह् ला पैह्ले तुंदी मंजूरी दी प्रतीक्षा करदा ऐ",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage जां ईमेल जोड़ो, फी चुनो जे हर चैनल पर कुन सा कस्टम एजेंट जवाब देग।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage ते ईमेल",
     "toolsTitle": "इंटीग्रेशन एजेंटें गी औजार दिंदे न",
     "toolsBody": "चालू करो जे इक एजेंट गल्लबात दे बिच क्या इस्तेमाल करी सकदा ऐ: वेब खोज, डेटाबेस, MCP सर्वर, ते तुंदी अपनी स्क्रिप्ट।",
     "toolsPoint1": "इत्थें सक्षम करो, ते फिर हर एजेंट लेई इसदी इजाजत देओ",
@@ -13991,5 +14176,1495 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "वर्कस्पेस सेटिंग",
+      "agent": "एजेंट सेटिंग"
+    },
+    "agentMissing": "कुसै एजेंट दी सेटिंग दिक्खने आस्तै उसी चुनो।",
+    "scopeNote": {
+      "agent": "ये मान सिर्फ इस एजेंट पर लागू होंदे न। जेह्ड़ा किश तुस इत्थें ओवरराइड नेईं करदे, ओह् तुंʼदी वर्कस्पेस सेटिंग थमां औंदा ऐ।"
+    },
+    "loading": "सेटिंग लोड होआ दी ऐ",
+    "loadError": "सेटिंग लोड नेईं होई सकी। {message}",
+    "retry": "फी कोशश करो",
+    "filters": {
+      "label": "सेटिंग फिल्टर करो",
+      "search": "सेटिंग खोजो",
+      "searchPlaceholder": "नांऽ जां विवरण कन्नै खोजो",
+      "group": "समूह कन्नै फिल्टर करो",
+      "allGroups": "सारे समूह",
+      "risk": "खतरे कन्नै फिल्टर करो",
+      "allRisks": "सारे खतरे दे स्तर",
+      "clear": "फिल्टर मटाओ"
+    },
+    "empty": {
+      "none": "इत्थें तुस बदलने जोग कोई सेटिंग नेईं ऐ।",
+      "filtered": "कोई सेटिंग तुंʼदे फिल्टर कन्नै नेईं मिलदी।"
+    },
+    "saved": "सेव होई गेआ। नमीं कीतियां सेटिंग: {count}।",
+    "saveFailed": "सेव नेईं होआ। नाकाम सेटिंग: {count}। तुंʼदे बदलाऽ हजें बी फार्म च न।",
+    "resetDone": "{label} हुन विरासत च मिले दे मान गी बरतदा ऐ।",
+    "resetFailed": "सेटिंग रीसेट नेईं होई सकी।",
+    "unsaved": "सेव नेईं कीते दे बदलाऽ",
+    "discardOne": "बदलाऽ रद्द करो",
+    "restartRequired": "रीस्टार्ट दी लोड़",
+    "source": {
+      "default": "डिफॉल्ट",
+      "platform": "प्लेटफॉर्म",
+      "tenant": "वर्कस्पेस",
+      "agent": "एजेंट",
+      "tenantInherited": "वर्कस्पेस थमां विरासत च मिलेआ",
+      "aria": "मान दा स्रोत: {source}"
+    },
+    "sourceHelp": {
+      "default": "कुसै ने इसगी नेईं बदलेआ। एह् उत्पाद कन्नै आया मान बरतदा ऐ।",
+      "platform": "तुंʼदे प्लेटफॉर्म ऑपरेटर ने इसगी पूरी तैनाती आस्तै सेट कीते दा ऐ।",
+      "tenant": "तुंʼदा वर्कस्पेस डिफॉल्ट गी ओवरराइड करदा ऐ। विरासत च मिले दे मान पर परतने आस्तै रीसेट करो।",
+      "agent": "ये एजेंट वर्कस्पेस दे मान गी ओवरराइड करदा ऐ। वर्कस्पेस दा मान फी विरासत च लैने आस्तै रीसेट करो।",
+      "tenantInherited": "इस एजेंट दा अपना कोई ओवरराइड नेईं ऐ, इस आस्तै एह् वर्कस्पेस दा मान बरतदा ऐ। इसगी बदलने कन्नै सिर्फ इस एजेंट आस्तै ओवरराइड बनदा ऐ।",
+      "lockedSuffix": "एह् ताला लग्गे दा ऐ, इस आस्तै इत्थें नेईं बदली सकदा।"
+    },
+    "risk": {
+      "low": "घट्ट खतरा",
+      "medium": "दरमियाना खतरा",
+      "high": "ज्यादा खतरा",
+      "security": "सुरक्षा"
+    },
+    "bool": {
+      "on": "On",
+      "off": "बंद"
+    },
+    "value": {
+      "unset": "सेट नेईं कीता गेदा",
+      "empty": "खाली"
+    },
+    "select": {
+      "placeholder": "इक विकल्प चुनो"
+    },
+    "slider": {
+      "label": "{label} (स्लाइडर)"
+    },
+    "duration": {
+      "unitLabel": "{label} दी इकाई"
+    },
+    "units": {
+      "chars": "अक्खर",
+      "tokens": "टोकन",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "सेकंड",
+      "min": "मिनट",
+      "h": "घंटे"
+    },
+    "groups": {
+      "agent": "एजेंट रनटाइम",
+      "approvals": "मंजूरी",
+      "quality": "गुणवत्ता जांच",
+      "guardrails": "गार्डरेल",
+      "chat": "चैट",
+      "tools": "टूल",
+      "memory": "मेमोरी",
+      "knowledge": "ज्ञान",
+      "delegation": "कम्म सौंपना",
+      "aux": "सहायक मॉडल",
+      "routing": "मॉडल रूटिंग"
+    },
+    "errors": {
+      "required": "इक मान देओ।",
+      "notNumber": "इक संख्या देओ।",
+      "notInteger": "इक पूरी संख्या देओ।",
+      "belowMin": "घट्ट थमां घट्ट {min} होना चाहिदा।",
+      "aboveMax": "ज्यादा थमां ज्यादा {max} होना चाहिदा।",
+      "notAllowed": "सूचीबद्ध विकल्पें चा इक चुनो।",
+      "tooShort": "बड़ा छोटा। घट्ट थमां घट्ट {min} बरतो।",
+      "tooLong": "बड़ा लम्मा। ज्यादा थमां ज्यादा {max} बरतो।",
+      "precision": "ये इकाई इसगी ठीक-ठीक नेईं दस्सी सकदी। सब थमां छोटी इकाई दी पूरी संख्या बरतो जां छोटी इकाई चुनो।",
+      "serverRange": "इजाजत आला दायरा: {min} थमां {max}।",
+      "serverOptions": "इजाजत आले मान: {options}।",
+      "server": {
+        "invalid": "सर्वर ने ये मान नेईं मन्नेआ: {message}",
+        "locked": "ये सेटिंग तुंʼदे एडमिन ने बंद कीती दी ऐ, इस आस्तै तुंʼदा बदलाऽ सेव नेईं होआ।",
+        "notFound": "ये सेटिंग हुन नेईं रेही।",
+        "forbidden": "तुसेंगी ये सेटिंग बदलने दी इजाजत नेईं ऐ।",
+        "reasonRequired": "इस बदलाऽ आस्तै कारण दी लोड़ ऐ। इक देओ ते फी कोशश करो।",
+        "network": "सर्वर तकर नेईं पुज्जी सके, इस आस्तै तुंʼदा बदलाऽ सेव नेईं होआ। {message}",
+        "other": "बदलाऽ सेव नेईं होई सकेआ: {message}"
+      }
+    },
+    "effective": "हुन लागू: {value}",
+    "hint": {
+      "range": "इजाजत: {min} थमां {max}।",
+      "min": "घट्ट थमां घट्ट: {min}।",
+      "max": "ज्यादा थमां ज्यादा: {max}।",
+      "default": "डिफॉल्ट: {value}।",
+      "securityStricter": "इक सुरक्षा सेटिंग गी सिर्फ प्लेटफॉर्म दे मान थमां मता सख्त कीता जाई सकदा ऐ, कदें कमजोर नेईं।",
+      "inherited": "जे तुस इसगी रीसेट करगे तां एह् इस पर परतोई जाग: {value}।"
+    },
+    "locked": {
+      "withReason": "तुंʼदे एडमिन ने बंद कीता: {reason}",
+      "noReason": "तुंʼदे एडमिन ने बंद कीता। इत्थें नेईं बदली सकदा।"
+    },
+    "blocked": {
+      "role": "तुंʼदी भूमिका ये सेटिंग नेईं बदली सकदी। कुसै वर्कस्पेस एडमिन थमां पुच्छो।",
+      "scope": "ये सेटिंग इत्थें ओवरराइड नेईं होई सकदी।",
+      "readOnly": "सेटिंग हुन सिर्फ पढ़ने आस्तै न।",
+      "adminOnly": "ये सुरक्षा सेटिंग सिर्फ वर्कस्पेस एडमिन गै बदली सकदा ऐ। तुस इसदा मान इत्थें दिक्खी सकदे ओ, पर संपादित नेईं करी सकदे।"
+    },
+    "reset": {
+      "button": "विरासत च मिले दे मान पर रीसेट करो",
+      "aria": "विरासत च मिले दे मान पर रीसेट करो: {label}"
+    },
+    "help": {
+      "show": "होर ब्यौरा",
+      "hide": "ब्यौरा लकाओ"
+    },
+    "history": {
+      "button": "इतिहास",
+      "open": "इतिहास: {label}",
+      "title": "इतिहास: {label}",
+      "scopeTenant": "वर्कस्पेस दे बदलाऽ",
+      "scopeAgent": "इस एजेंट दे बदलाऽ",
+      "close": "इतिहास बंद करो",
+      "loading": "इतिहास लोड होआ दा ऐ",
+      "error": "इतिहास लोड नेईं होई सकेआ। {message}",
+      "empty": "हजें तकर कोई बदलाऽ रिकॉर्ड नेईं कीता गेआ।",
+      "listLabel": "बदलावें दा इतिहास, पैह्लें सब थमां नमां",
+      "version": "संस्करण {version}",
+      "before": "पैह्लें:",
+      "after": "बाद च:",
+      "by": "बदलने आला",
+      "unknownActor": "अनजान",
+      "reason": "कारण:"
+    },
+    "savebar": {
+      "count": "सेव नेईं कीते दे बदलाऽ: {count}।",
+      "invalid": "सेव करने थमां पैह्लें उजागर कीते दे खानें गी ठीक करो। ठीक करने जोग खाने: {count}।",
+      "discard": "बदलाऽ रद्द करो",
+      "save": "बदलाऽ सेव करो",
+      "saving": "सेव होआ दा ऐ"
+    },
+    "risky": {
+      "title": "खतरे आले बदलाऽ पक्के करो ({count})",
+      "description": "ये सेटिंग तुंʼदे एजेंटें दे बर्ताव जां उʼनेंगी के करने दी इजाजत ऐ, उसगी बदलदियां न। हर बदलाऽ गी जांचो ते दस्सो जे तुस इयां क्यों करा दे ओ। कारण ऑडिट लॉग च रक्खेआ जंदा ऐ।",
+      "descriptionSecurity": "इʼनें चा घट्ट थमां घट्ट इक सुरक्षा सेटिंग ऐ। इसगी सिर्फ प्लेटफॉर्म दे मान थमां मता सख्त कीता जाई सकदा ऐ। हर बदलाऽ गी जांचो ते दस्सो जे तुस इयां क्यों करा दे ओ। कारण ऑडिट लॉग च रक्खेआ जंदा ऐ।",
+      "listLabel": "पक्के करने जोग बदलाऽ",
+      "from": "थमां",
+      "to": "to",
+      "securityNote": "सुरक्षा सेटिंग: एह् प्लेटफॉर्म दे मान थमां कमजोर नेईं होई सकदी।",
+      "consequence": "एह् के बदलदा ऐ:",
+      "reasonLabel": "इस बदलाऽ दा कारण",
+      "reasonPlaceholder": "मिसाल: सहायता टीम दी लम्मी जांच आस्तै हद बधाना",
+      "reasonHint": "जरूरी, घट्ट थमां घट्ट {min} अक्खर। बदलने आले ते पुराने ते नमें मान कन्नै सेव होंदा ऐ।",
+      "acknowledge": "मैं इस सुरक्षा बदलाऽ दे नतीजे समझदा/समझदी आं।",
+      "cancel": "रद्द करो",
+      "confirm": "पक्का करियै सेव करो",
+      "resetNote": "रीसेट: ओवरराइड हटाया जंदा ऐ ते सेटिंग उस मान पर परतोई जंदी ऐ जेह्ड़ा उसी विरासत च मिलदा ऐ।"
+    },
+    "strictness": {
+      "higher": "उच्चा मता सख्त ऐ: उच्चा मान मंजूर होंदा ऐ, नीवां नामंजूर।",
+      "lower": "नीवां मता सख्त ऐ: नीवां मान मंजूर होंदा ऐ, उच्चा नामंजूर।",
+      "enumOrder": "विकल्प घट्ट सख्त थमां मता सख्त तकर क्रम च न: {options}। तुस सिर्फ सख्त सिरे पासे जाई सकदे ओ।"
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "बाकी",
+    "status_APPROVED": "मंजूर कीता",
+    "status_REJECTED": "नामंजूर कीता",
+    "status_EXPIRED": "समां खत्म",
+    "status_EXECUTION_FAILED": "कार्यकारी नाकाम",
+    "status_DEAD_LETTERED": "डेड लेटर",
+    "filtersLabel": "अनुरोध फिल्टर करो",
+    "filterAgentLabel": "एजेंट कन्नै फिल्टर करो",
+    "filterToolLabel": "टूल कन्नै फिल्टर करो",
+    "filterAgeLabel": "उमर कन्नै फिल्टर करो",
+    "filterAnyAgent": "कोई बी एजेंट",
+    "filterAnyTool": "कोई बी टूल",
+    "filterAnyAge": "कोई बी उमर",
+    "age_newer1h": "१ घंटे थमां नमां",
+    "age_older1h": "१ घंटे थमां पुराना",
+    "age_older24h": "१ दिन थमां पुराना",
+    "age_older7d": "७ दिन थमां पुराना",
+    "filtersClear": "फिल्टर मटाओ",
+    "filterWindowNote": "सब थमां नमें {count} अनुरोध फिल्टर होआ दे न। पुराने इस च शामल नेईं न।",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time} पर समां खत्म होग",
+    "expiresAt": "जे कुसै ने फैसला नेईं कीता तां {time} पर अपने आप बंद होई जाग",
+    "overdue": "समां-सीमा पुज्जी गेई, अगली सफाई पर बंद होग",
+    "neverExpires": "ये वर्कस्पेस रुके दे अनुरोधें दा समां खत्म नेईं करदा।",
+    "expiredNote": "{time} पर समां खत्म होआ: समें सिर कुसै ने फैसला नेईं कीता",
+    "expiredReasonPrefix": "समां खत्म होआ:",
+    "auditExpired": "समां खत्म होआ, समें सिर कुसै ने फैसला नेईं कीता",
+    "riskLow": "घट्ट खतरा",
+    "riskMedium": "दरमियाना खतरा",
+    "riskHigh": "ज्यादा खतरा",
+    "riskEstimateNote": "खतरा टूल दे नांऽ थमां लाया दा इक अंदाजा ऐ। प्लेटफॉर्म टूलें दी श्रेणी नेईं बनांदा, इस आस्तै मंजूरी देने थमां पैह्लें तर्क पढ़ो।",
+    "riskWhoDecides": "कुसी गी मंजूरी आस्तै रुकना ऐ, ये कुन तय करदा ऐ?",
+    "previewGoal": "ये जिस कम्म पर कम्म करा दा हा:",
+    "previewArguments": "तर्क",
+    "previewNoArguments": "इस कॉल आस्तै कोई तर्क रिकॉर्ड नेईं कीता गेआ।",
+    "previewRedacted": "{count} संवेदनशील लगने आले मान इत्थें लकोए दे न। जे तुस मंजूर करगे तां उʼनेंगी फी बी टूल गी भेजेआ जंदा ऐ।",
+    "previewTruncated": "ये तर्क पूरे दस्सने आस्तै बड़े लम्मे न, इस आस्तै ये अनुरोध इत्थें थमां मंजूर नेईं कीता जाई सकदा।",
+    "approveBlockedTooLong": "तुस पूरे अनुरोध गी जांची नेईं सकदे, इस आस्तै मंजूरी बंद ऐ। तुस फी बी इसगी नामंजूर करी सकदे ओ।",
+    "ifApproveLabel": "जे तुस मंजूर करगे:",
+    "ifApprove": "{tool} उप्परले तर्कें कन्नै हुन गै चलदा ऐ, ते एजेंट इसदे नतीजे बरतियै कम्म जारी रखदा ऐ।",
+    "ifDenyLabel": "जे तुस नामंजूर करगे:",
+    "ifDeny": "{tool} नेईं चलदा। एजेंट गी दस्सेआ जंदा ऐ जे तुसें नांह् आखेआ, कारण देने पर उसदे कन्नै, ते ओह् उसदे बगैर अग्गें बधदा ऐ।",
+    "whyGated": "एजेंट {tool} बरतना चांहदा हा। इसगी तुंʼदे फैसले आस्तै इस आस्तै रोकेआ गेआ जे एजेंट गी निगरानी च सेट कीता गेदा ऐ, जां इस वर्कस्पेस ने उस टूल आस्तै मंजूरी जरूरी कीती दी ऐ।",
+    "denyReasonLabel": "नामंजूर करने दा कारण (मरजी दा)",
+    "denyReasonPlaceholder": "मिसाल: गलत पाने आला, भेजने थमां पैह्लें मिगी पुच्छो",
+    "denyReasonHelp": "जे तुस नामंजूर करगे तां एजेंट ये कारण नामंजूर कीती दी कॉल दे नतीजे दे तौर पर पढ़दा ऐ ते अपने आप गी ढालदा ऐ। कारण दे बगैर नामंजूर करने आस्तै खाली छोड़ो।",
+    "denyButton": "नामंजूर करो",
+    "detailRegionLabel": "अनुरोध दा ब्यौरा",
+    "sessionLabel": "गल्लबात",
+    "linkOpenAgent": "एजेंट खोलो",
+    "linkInspectTurns": "उसदे टर्न जांचो",
+    "continuationLabel": "एजेंट ने उसदे बाद के कीता",
+    "continuationCompleted": "एजेंट ने कम्म जारी रक्खना खत्म करी दित्ता।",
+    "continuationFailed": "इस फैसले परैंत एजेंट जारी नेईं रक्खी सकेआ।",
+    "continuationRetry": "उसी जारी रक्खने आस्तै आखो",
+    "retryMessage": "मेहरबानी करियै कम्म जारी रक्खो।",
+    "lastDecisionTitle": "तुंʼदा आखरी फैसला: {tool}",
+    "lastDecisionClose": "बंद करो",
+    "deepLinkNotFound": "ओह् मंजूरी दा अनुरोध नेईं लब्भेआ, जां तुस उसी दिक्खी नेईं सकदे।",
+    "selectAllLabel": "इस पन्ने दे सारे बाकी टूल कॉल चुनो",
+    "selectRowLabel": "{tool} दे बाकी कॉल चुनो",
+    "bulkSelected": "{count} चुने गे",
+    "bulkApprove": "चुने दे मंजूर करो",
+    "bulkDeny": "चुने दे नामंजूर करो",
+    "bulkClear": "चुनाई मटाओ",
+    "bulkCancel": "रद्द करो",
+    "bulkDismiss": "खारिज करो",
+    "bulkMixedTools": "सामूहिक फैसले आस्तै चुने दे सारे अनुरोध इक्कै टूल दे होने चाहिदे।",
+    "bulkNotLowRisk": "सामूहिक मंजूरी सिर्फ घट्ट खतरे आले टूलें (लुकअप) आस्तै ऐ। नामंजूरी कुसै बी इक टूल आस्तै चलदी ऐ, जां इʼनेंगी इक-इक करियै फैसला करो।",
+    "bulkNotToolCall": "सामूहिक फैसले सिर्फ एजेंट टूल कॉल गी शामल करदे न।",
+    "bulkNotPending": "सामूहिक फैसले सिर्फ हजें बाकी अनुरोधें गी शामल करदे न।",
+    "bulkConfirmApproveTitle": "{tool} दे {count} कॉल मंजूर करने न?",
+    "bulkConfirmApproveBody": "इʼनें चा हर इक हुन गै अपने थल्ले सूचीबद्ध तर्कें कन्नै {tool} चलांदा ऐ, ते एजेंट नतीजे बरतियै अग्गें बधदा ऐ। इसगी पिच्छें नेईं कीता जाई सकदा।",
+    "bulkConfirmDenyTitle": "{tool} दे {count} कॉल नामंजूर करने न?",
+    "bulkConfirmDenyBody": "इʼनें चा कोई बी नेईं चलदा। एजेंट गी दस्सेआ जंदा ऐ जे हर कॉल नामंजूर होई, कारण देने पर उसदे कन्नै।",
+    "bulkConfirmApprove": "{count} मंजूर करो",
+    "bulkConfirmDeny": "{count} नामंजूर करो",
+    "bulkMore": "ते {count} होर",
+    "bulkProgress": "{count} चा {done} पूरे",
+    "bulkResult": "{done} दा फैसला होआ, {failed} नाकाम होए।",
+    "notifyOff": "मिगी दस्सो",
+    "notifyOn": "सूचना चालू",
+    "notifyHelp": "जदूं ये टैब पृष्ठभूमि च होऐ ते नमां अनुरोध औऐ तां ब्राउजर सूचना दस्सो",
+    "notifyUnsupported": "ये ब्राउजर सूचना नेईं दस्सी सकदा।",
+    "notifyBlocked": "सूचना रुकी दी ऐ। इसगी चालू करने आस्तै अपने ब्राउजर दी साइट सेटिंग च इजाजत देओ।",
+    "notifyTitle": "इक एजेंट मंजूरी आस्तै रुकेआ दा ऐ",
+    "notifyBodyOne": "{tool} गी तुंʼदे फैसले दी लोड़ ऐ।",
+    "notifyBodyMany": "{count} अनुरोधें गी तुंʼदे फैसले दी लोड़ ऐ।",
+    "newArrived": "{count} नमें मंजूरी दे अनुरोध आए।",
+    "rulesTitle": "इक टूल आस्तै नियम",
+    "rulesIntro": "चुनो जे इक टूल गी हमेशा माह्नू आस्तै रुकना चाहिदा जां कदें नेईं। ये नियम अर्ध-स्वायत्त सेट कीते दे हर एजेंट पर लागू होंदा ऐ।",
+    "rulesNeedsScope": "नियम बदलने आस्तै तुसेंगी मंजूरी दी इजाजत चाहिदी ऐ।",
+    "rulesToolLabel": "टूल दा नांऽ",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "अनुरोध च टूल जिʼयां दिखदा ऐ बिल्कुल उʼयां गै, मिसाल आस्तै send_email।",
+    "rulesToolNameInvalid": "टूल दे नांऽ च खाली थाहर नेईं होंदी।",
+    "rulesModeLabel": "के होना चाहिदा",
+    "rulesAskName": "हमेशा पुच्छो",
+    "rulesAskHint": "इस टूल दा हर कॉल माह्नू दी मंजूरी आस्तै रुकदा ऐ।",
+    "rulesNeverName": "कदें नेईं पुच्छो",
+    "rulesNeverHint": "इस टूल दे कॉल कुसै दी मंजूरी दे बगैर तुरंत चलदे न।",
+    "rulesNeverRiskyWarn": "ये टूल चीजां बदलने आला लगदा ऐ। पक्का होओ।",
+    "rulesScopeNote": "नियम पूरे वर्कस्पेस पर लागू होंदा ऐ, इक एजेंट पर नेईं। निगरानी च रक्खेआ गेदा एजेंट हजें बी हर चीज़ आस्तै पुच्छदा ऐ, ते पूरा स्वायत्त एजेंट नियम जेह्ड़ा बी आखै कदें नेईं पुच्छदा। तुसें सेट कीते दे नियम हजें इत्थें सूचीबद्ध नेईं न।",
+    "rulesSave": "नियम सेव करो",
+    "rulesSaveFailed": "नियम सेव नेईं होई सकेआ।",
+    "rulesSavedAsk": "{tool} हमेशा मंजूरी मंगग।",
+    "rulesSavedNever": "{tool} हुन मंजूरी नेईं मंगग।",
+    "rulesNeverConfirmTitle": "{tool} चलाने थमां पैह्लें पुच्छना बंद करना ऐ?",
+    "rulesNeverConfirmBody": "हर अर्ध-स्वायत्त एजेंट कुसै दी मंजूरी दे बगैर {tool} चलाग। एह् चीजां बदली जां भेजी सकदा लगदा ऐ, ते गलती पिच्छें नेईं कीती जाई सकदी।",
+    "rulesNeverConfirmBodyLow": "हर अर्ध-स्वायत्त एजेंट बिना पुच्छे {tool} चलाग। एह् लुकअप आंगर लगदा ऐ, इस आस्तै एह् आमतौर पर सुरक्षित ऐ।",
+    "rulesNeverConfirm": "पुच्छना बंद करो",
+    "tiersTitle": "कुसी गी मंजूरी आस्तै रुकना ऐ, ये कुन तय करदा ऐ?",
+    "tiersIntro": "हर एजेंट दा इक स्वायत्तता दा स्तर होंदा ऐ। एह् तय करदा ऐ जे वर्कस्पेस दे मंजूरी नियम बिल्कुल बरते जांगन जां नेईं।",
+    "tierCurrent": "ये एजेंट",
+    "tierConsequenceLabel": "बरतोई दा:",
+    "tierSupervisedName": "निगरानी च",
+    "tierSupervisedWhat": "वर्कस्पेस दे नियम जेह्ड़े बी आखन, हर टूल कॉल माह्नू आस्तै रुकदा ऐ। इसगी हर टर्न च टूल कदमें दी घट्ट हद बी दित्ती जंदी ऐ।",
+    "tierSupervisedConsequence": "सब थमां सुरक्षित, पर कतार च मते अनुरोध ते धीमे एजेंट दी उम्मीद रक्खो।",
+    "tierSemiName": "अर्ध-स्वायत्त",
+    "tierSemiWhat": "वर्कस्पेस दा नियम हर टूल आस्तै तय करदा ऐ: भेजना, डिलीट ते पेमेंट जेह्ड़े खतरे आले टूल डिफॉल्ट रूप च पुच्छदे न, बाकी चलदे न।",
+    "tierSemiConsequence": "इक चंगा डिफॉल्ट। तुंʼदे हर-टूल नियम इत्थें कारगर होंदे न।",
+    "tierFullName": "पूरा स्वायत्त",
+    "tierFullWhat": "कोई टूल कॉल कदें बी मंजूरी आस्तै नेईं रुकदा ते एजेंट गी टूल कदमें दी मती हद मिलदी ऐ। हर-टूल नियमें गी नजरअंदाज कीता जंदा ऐ।",
+    "tierFullConsequence": "एह् बिना पुच्छे कम्म करदा ऐ। इसगी सिर्फ उस एजेंट आस्तै बरतो जिसदी गलतियां आसानी कन्नै पिच्छें कीतियां जाई सकदियां न।",
+    "tiersRuleNote": "टूल नियम (हमेशा पुच्छो, कदें नेईं पुच्छो) सिर्फ अर्ध-स्वायत्त एजेंटें आस्तै मायने रखदे न।",
+    "agentModeTitle": "इस एजेंट गी मंजूरी कदूं चाहिदी ऐ?",
+    "agentModeSupervised": "ये एजेंट निगरानी च ऐ: हर टूल कॉल माह्नू आस्तै रुकदा ऐ, ते हर-टूल नियम नजरअंदाज कीते जंदे न।",
+    "agentModeSemi": "ये एजेंट अर्ध-स्वायत्त ऐ: हर टूल वर्कस्पेस दे नियम गी मंनदा ऐ। भेजना, डिलीट ते पेमेंट डिफॉल्ट रूप च पुच्छदे न।",
+    "agentModeFull": "ये एजेंट पूरा स्वायत्त ऐ: एह् कदें बी मंजूरी आस्तै नेईं रुकदा, ते हर-टूल नियम नजरअंदाज कीते जंदे न।",
+    "agentModeQueueLink": "इस एजेंट दे अनुरोध दिक्खो",
+    "agentModeRulesLink": "इक टूल आस्तै नियम सेट करो",
+    "agentModeShowTiers": "त्रै स्तरें दी तुलना करो",
+    "agentModeHideTiers": "तुलना लकाओ",
+    "agentModeScopeNote": "उप्परले स्वायत्तता दे चुनाव कन्नै स्तर बदलो। टूल नियम पूरे वर्कस्पेस दे न, हर एजेंट दे नेईं।",
+    "policyThenApprovalNote": "जेह्ड़ी कॉल इʼनें नियमें चा लंघी जंदी ऐ, ओह् फी बी माह्नू आस्तै रुकी सकदी ऐ। एह् एजेंट दे स्वायत्तता दे स्तर पर निर्भर करदा ऐ, जिसदी व्याख्या थल्ले कीती गेदी ऐ।",
+    "chatReasonToggle": "इक कारण जोड़ो",
+    "chatReviewInQueue": "कतार च जांचो"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "इवेंट फिल्टर करो",
+    "tlFilterCategories": "इवेंट दी किस्म",
+    "tlCatIntake": "इनटेक",
+    "tlCatModel": "मॉडल",
+    "tlCatTool": "टूल",
+    "tlCatApproval": "मंजूरी",
+    "tlCatContinuation": "निरंतरता",
+    "tlCatRetry": "फी कोशश ते फेलओवर",
+    "tlCatGuardrail": "गार्डरेल",
+    "tlCatCache": "कैश",
+    "tlCatVerify": "जांच",
+    "tlCatFinish": "समापन",
+    "tlProblemsOnly": "सिर्फ समस्यां",
+    "tlSearch": "इवेंट खोजो",
+    "tlSearchPlaceholder": "टूल, मॉडल, गार्ड जां स्थिति",
+    "tlClearFilters": "फिल्टर मटाओ",
+    "tlShowing": "{total} इवेंटें चा {shown} दस्से दे न",
+    "tlNoMatch": "कोई इवेंट इस फिल्टर कन्नै नेईं मिलदा।",
+    "tlSevOk": "सफल",
+    "tlSevInfo": "जानकारी",
+    "tlSevWarn": "ध्यान देने दी लोड़",
+    "tlSevError": "नाकाम",
+    "tlIntake": "टर्न शुरू होआ: {chars} अक्खर, {tools} टूल, {attachments} संलग्न",
+    "tlRunTools": "इस रन आस्तै टूल",
+    "tlRunToolsNone": "कोई नेईं (सिर्फ लिखत)",
+    "tlModelCall": "{model} ({provider}) पर मॉडल कॉल, रूट {route}",
+    "tlFailover": "{model} ({provider}) पर फेलओवर होआ",
+    "tlRetryModel": "{model} ({provider}) पर फी कोशश कीती गेई, रूट {route}",
+    "tlRetry": "फी कोशश: {guard} ({outcome})",
+    "tlCacheHit": "रिस्पांस कैश थमां जवाब दित्ता गेआ",
+    "tlToolCall": "टूल कॉल {tool}: {status}",
+    "tlApprovalRequested": "{tool} चलने थमां पैह्लें मंजूरी मंगी गेई",
+    "tlApprovalDecided": "{tool} आस्तै मंजूरी दा फैसला होआ: {decision}",
+    "tlApprovalAutoAllowed": "{tool} बिना पुच्छे चलेआ: निगरानी च सिर्फ-पढ़ने आली कॉल",
+    "tlContinuation": "निरंतरता: {guard} ({outcome})",
+    "tlGuard": "गार्डरेल {guard}: {outcome}",
+    "tlVerifyPassed": "जांच पास: {check}",
+    "tlVerifyFailed": "जांच फेल: {check}",
+    "tlFinish": "समापन: {status} (जवाब च {chars} अक्खर)",
+    "tlOther": "इवेंट {type}",
+    "reasonFallbackProvider": "मुक्ख मॉडल नाकाम होई गेआ, इस आस्तै टर्न एजेंट दे फॉलबैक प्रोवाइडर पर चली गेआ।",
+    "reasonToolsDisabledRetry": "प्रोवाइडर ने टूल-कॉल दा इतिहास नामंजूर करी दित्ता, इस आस्तै टर्न दा जवाब इक होर बारी टूलें दे बगैर दित्ता गेआ।",
+    "reasonRetryOther": "मॉडल कॉल दोहराई गेई।",
+    "reasonToolCallRetry": "मॉडल ने अपना जवाब बिगड़ी दी टूल कॉल कन्नै खत्म कीता, इस आस्तै उसी फी पुच्छेआ गेआ।",
+    "reasonCutOff": "जवाब लंबाई दी हद पर कटोई गेआ, इस आस्तै मॉडल गी जारी रक्खने आस्तै आखेआ गेआ।",
+    "reasonToolsContinue": "टूल कॉल परैंत मॉडल गी होर कदमें दी लोड़ ही, इस आस्तै टर्न जारी रेहा।",
+    "reasonToolBlocked": "टूल दी जगहां कुसै गार्ड, नीति, हुक जां हद ने जवाब दित्ता, इस आस्तै ओह् नेईं चलेआ।",
+    "reasonToolParked": "कॉल कुसै माह्नू दी मंजूरी आस्तै रुकी दी ऐ; टूल नेईं चलेआ।",
+    "reasonGuardAction": "इक गार्डरेल ने जवाब बदली दित्ता जां रोकी लेआ।",
+    "tlAtStart": "शुरू थमां",
+    "tlGap": "पिछले इवेंट थमां",
+    "tlDuration": "समां-सीमा",
+    "tlTokens": "इनपुट / आउटपुट टोकन",
+    "tlCost": "खर्चा",
+    "tlDetails": "हैश ते कच्चा सार",
+    "tlArgsHash": "तर्कें दा हैश",
+    "tlResultDigest": "नतीजे दा डाइजेस्ट",
+    "tlContentNote": "तर्क ते नतीजे कदें बी सेव नेईं कीते जंदे। टूल कॉल आस्तै टाइमलाइन उसदी स्थिति, समां ते उसदे तर्कें ते नतीजे दा हैश दस्सदी ऐ, उंʼदी सामग्री नेईं।",
+    "tlStatFinish": "समापन दा कारण",
+    "tlStillOpen": "खत्म नेईं होआ",
+    "tlProblemCount": "{count} इवेंटें च ध्यान देने दी लोड़",
+    "tlStatRetries": "फी कोशश ते फेलओवर",
+    "tlStatContinuations": "निरंतरता",
+    "tlStatApprovals": "मंजूरी",
+    "tlStatTokens": "इनपुट / आउटपुट टोकन",
+    "tlTokensNotRecorded": "इस टर्न आस्तै रिकॉर्ड नेईं कीता गेआ",
+    "tlTokensInOut": "इनपुट / आउटपुट",
+    "tlCopyTurnId": "टर्न ID कॉपी करो",
+    "tlCopyTurnIdShort": "ID कॉपी करो",
+    "tlCopied": "टर्न ID कॉपी होई गेई।",
+    "tlCopyFailed": "कॉपी नेईं होई सकी। ID चुनियै हत्थें कॉपी करो।",
+    "sessTitle": "इक सेशन दे टर्न",
+    "sessSubtitle": "रिकॉर्ड कीते दे टर्न पैह्लें नमां दिक्खने आस्तै इक चैट सेशन चुनो। चैट मैसेज दा टर्न दिक्खो लिंक खोलने पर एह् तुंʼदे आस्तै अपने आप भरोची जंदा ऐ।",
+    "sessionIdLabel": "सेशन ID",
+    "sessionIdPlaceholder": "चैट सेशन ID",
+    "sessFind": "टर्न खोजने आला",
+    "sessInvalid": "एजेंट ID (इक UUID) ते सेशन ID देओ।",
+    "sessLoading": "सेशन दे टर्न लोड होआ दे न...",
+    "sessUnavailableTitle": "सेशन खोज उपलब्ध नेईं ऐ",
+    "sessUnavailableBody": "ये सर्वर कुसै सेशन दे टर्नें दी सूची नेईं बनाई सकदा। इसदी जगहां थल्ले ID कन्नै इक टर्न खोलो।",
+    "sessErrorTitle": "सेशन दे टर्न लोड नेईं होई सके",
+    "sessEmptyTitle": "इस सेशन च कोई जर्नल कीता दा टर्न नेईं ऐ",
+    "sessEmptyBody": "सेशन ने किश बी रिकॉर्ड नेईं कीता। जां तां सेशन ID गलत ऐ, जां उसदे टर्न चलने दे समें टर्न जर्नल बंद हा।",
+    "sessListLabel": "{count} जर्नल कीते दे टर्न",
+    "sessEvents": "{count} इवेंट",
+    "sessStatusOpen": "खोलो",
+    "sessOpen": "टाइमलाइन खोलो",
+    "sessOpened": "थल्ले दस्सेआ गेदा"
+  },
+  "evalControls": {
+    "cancel": "रद्द करो",
+    "saving": "सेव होआ दा ऐ...",
+    "saved": "सेव होई गेआ।",
+    "saveMode": "रीप्ले मोड सेव करो",
+    "discard": "बदलाऽ रद्द करो",
+    "saveFailed": "रीप्ले मोड सेव नेईं होई सकेआ।",
+    "unsavedChanges": "सेव नेईं कीते दे बदलाऽ",
+    "modeTitle": "ये डेटासेट किʼयां रीप्ले होंदा ऐ",
+    "modeHelp": "चुनो जे रीप्ले एजेंट दे टूल बरती सकदा ऐ जां नेईं। एह् अगले रनें दे मापने दे तरीके गी बदलदा ऐ।",
+    "modeTextOnly": "सिर्फ लिखत",
+    "modeTextOnlyHelp": "एजेंट अपने टूलें दे बगैर जवाब दिंदा ऐ। सुरक्षित: असल च किश नेईं चलदा। उम्मीद कीते दे टूल दी जांच पूरी नेईं होई सकदी।",
+    "modeFull": "टूलें कन्नै पूरी पाइपलाइन",
+    "modeFullHelp": "ओह्ʼई टूल, गार्डरेल ते कदमें दी हद जेह्ड़ी इक असली बरतोंकार गी मिलदी ऐ। उम्मीद कीते दे टूल ते ट्रैजेक्टरी जांचें आस्तै जरूरी।",
+    "modeFullNote": "जेह्ड़े टूल सिर्फ पढ़दे न ओह् असल च चलदे न। जेह्ड़ा किश डेटा बदली सकदा ऐ, मैसेज भेजी सकदा ऐ जां पैसे खर्च करी सकदा ऐ उसी सिमुलेट कीता जंदा ऐ ते रन च सूचीबद्ध कीता जंदा ऐ, इस आस्तै असल च किश नेईं होंदा। सुरक्षा वर्गीकरण दे बगैर टूल बी सिमुलेट होंदे न।",
+    "autoApproveLabel": "इवैल सैंडबॉक्स च टूल कॉल अपने आप मंजूर करो",
+    "autoApproveHelp": "आमतौर पर माह्नू आस्तै रुकी दे टूल कॉल गी इवैल सैंडबॉक्स मंजूर करी दिंदा ऐ, तां जे केस खत्म होई सकै। इसदे बगैर केस प्रोडक्शन च जिʼयां होंदा ऐ उʼयां गै बिना जवाब दी मंजूरी पर खत्म होंदा ऐ।",
+    "autoApproveWarnTitle": "सिर्फ गैर-प्रोडक्शन वर्कस्पेस आस्तै",
+    "autoApproveWarnBody": "इसगी कदें बी उत्थें चालू नेईं करो जित्थें टूल असली ग्राहकें जां डेटा गी छूई सकदे न। शैल, कोडिंग, शेड्यूल, एजेंट-थमां-एजेंट, पेमेंट ते डिलीट टूल कदें बी अपने आप मंजूर नेईं होंदे। तुंʼदा एडमिन इस वर्कस्पेस गी गैर-प्रोडक्शन दे तौर पर चिह्नत कीते दा होना चाहिदा।",
+    "autoApproveNeedsFull": "पैह्लें पूरी पाइपलाइन चालू करो: अपने आप मंजूरी सिर्फ तदूं लागू होंदी ऐ जदूं टूल चलदे न।",
+    "autoApproveRefused": "इस वर्कस्पेस च इजाजत नेईं ऐ: {reason}",
+    "autoApproveConfirmTitle": "इवैल च टूल कॉल अपने आप मंजूर करने न?",
+    "autoApproveConfirmBody": "इस डेटासेट दे रीप्ले च माह्नू दी उडीक करने आली हर टूल कॉल अपने आप मंजूर होई जाग। मंजूर कीते दे सिर्फ-पढ़ने आले टूल असल च चलदे न; किश बदलने आले अजें बी सिमुलेट होंदे न। इसगी सिर्फ टेस्ट डेटा आले वर्कस्पेस च करो। रन दर्ज करदे न जे ओह् अपने आप मंजूर होए हे।",
+    "autoApproveConfirm": "अपने आप मंजूरी चालू करो",
+    "trajectoryLabel": "ट्रैजेक्टरी जांच",
+    "trajectoryOn": "On",
+    "trajectoryOff": "उपलब्ध नेईं",
+    "trajectoryHelpOn": "उम्मीद कीती दी ट्रैजेक्टरी आले केसें गी इस आधार पर अंक दित्ते जंदे न जे एजेंट ने कुन्ने टूल कुस क्रम च कॉल कीते। इसगी तुंʼदा एडमिन पूरी तैनाती आस्तै चालू करदा ऐ, हर डेटासेट आस्तै नेईं।",
+    "trajectoryHelpOff": "ट्रैजेक्टरी जांच इत्थें उपलब्ध नेईं न। उʼनें गी तुंʼदा एडमिन पूरी तैनाती आस्तै चालू करदा ऐ, ते इवैल शामल आली योजना चाहिदी ऐ।",
+    "trajectoryNeedsFull": "ये डेटासेट सिर्फ लिखत ऐ, इस आस्तै उम्मीद कीती दी ट्रैजेक्टरी आले केसें गी अंक नेईं मिलङन। पूरी पाइपलाइन चालू करो।",
+    "runAutoApproved": "अपने आप मंजूर कीता गेआ",
+    "runAutoApprovedTitle": "इस रन दे कुसै बी टूल कॉल दा फैसला कुसै माह्नू ने नेईं कीता; इवैल सैंडबॉक्स ने उʼनेंगी मंजूर कीता।",
+    "toolCallsLabel": "इस रीप्ले च टूल कॉल",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "नाकाम",
+    "toolStatusNotRun": "नेईं चलेआ",
+    "toolStatusAwaitingApproval": "मंजूरी दा इंतजार",
+    "toolStatusReplayed": "रीप्ले होआ",
+    "samplingTitle": "पृष्ठभूमि दी गुणवत्ता अंक-निर्धारण",
+    "samplingLoading": "अंक-निर्धारण दी दर लोड होआ दी ऐ...",
+    "samplingUnavailable": "पृष्ठभूमि दा जज कुन्नें लाइव टर्नें गी अंक दिंदा ऐ, एह् तुंʼदा प्लेटफॉर्म एडमिन तय करदा ऐ ते इत्थें नेईं दस्सेआ जंदा।",
+    "samplingValue": "लगभग {percent}% लाइव टर्नें गी पृष्ठभूमि गुणवत्ता जज अंक दिंदा ऐ।",
+    "samplingHelp": "घट्ट दर खर्चा घटांदी ऐ ते उप्परले रुझान च घट्ट अंक रखदी ऐ। ये मान इत्थें सिर्फ पढ़ने आस्तै ऐ।",
+    "samplingSource_default": "डिफॉल्ट",
+    "samplingSource_platform": "प्लेटफॉर्म ने सेट कीता",
+    "samplingSource_tenant": "तुंʼदे वर्कस्पेस आस्तै सेट कीता",
+    "samplingSource_agent": "इस एजेंट आस्तै सेट कीता",
+    "modeDefault": "वर्कस्पेस डिफॉल्ट",
+    "modeDefaultHelp": "तुंʼदे वर्कस्पेस दी सेटिंग दी पालना करदा ऐ (पूरी पाइपलाइन, जदूं तकर कुसै एडमिन ने नेईं बदली)। हर रन फी बी अपना मोड चुनी सकदा ऐ।",
+    "modeDefaultCurrent": "हुन: {mode}",
+    "modeNameFull": "पूरी पाइपलाइन",
+    "modeNameQuick": "तेज (सिर्फ लिखत)",
+    "badgeFull": "पूरी पाइपलाइन",
+    "badgeQuick": "तेज",
+    "datasetModePinnedTitle": "ये डेटासेट हमेशा इयां गै रीप्ले होंदा ऐ। इक रन फी बी होर मोड चुनी सकदा ऐ।",
+    "datasetModeDefaultTitle": "रन किʼयां रीप्ले होन, इस बारे च ये डेटासेट वर्कस्पेस दे डिफॉल्ट दी पालना करदा ऐ।",
+    "runModeLabel": "अगले रन आस्तै रीप्ले मोड",
+    "runModeInherit": "डेटासेट दी सेटिंग बरतो",
+    "runModeHelp": "पूरी पाइपलाइन एजेंट गी उसदे टूल, गार्डरेल ते मंजूरियें कन्नै सुरक्षित सैंडबॉक्स च चलांदी ऐ: सिर्फ पढ़ने आले टूल सच्ची-मुच्ची चलदे न, ते जेह्ड़ा किश डेटा बदली सकदा ऐ जां किश भेजी सकदा ऐ उसी सिमुलेट कीता जंदा ऐ। तेज मोड टूल रोकी लैंदा ऐ ते सिर्फ लिखे दे जवाब गी परखदा ऐ।",
+    "runModeFullTitle": "इस रन ने इवैल सैंडबॉक्स च पूरी पाइपलाइन बरती।",
+    "runModeQuickTitle": "ये रन सिर्फ लिखत आला तेज रीप्ले हा: एजेंट दे टूल रोके गेदे हे।",
+    "runSimulatedTools": "इस रन च सिमुलेट कीते गे, चलाए नेईं गे (ओह् डेटा बदली सकदे हे जां प्लेटफॉर्म थमां बाह्र पुज्जी सकदे हे): {tools}।",
+    "toolStatusSimulated": "सिमुलेट कीता, चलाया नेईं"
+  },
+  "assistant": {
+    "taskPhoneLabel": "तुंʼदा फोन नंबर",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "ओह् नंबर सेव नेईं होई सकेआ।",
+    "searchingWebFor": "Searching the web for “{target}”…",
+    "readingPageAt": "Reading {target}…",
+    "researchingTopic": "Researching “{target}”…",
+    "statusWriting": "Writing the answer…",
+    "quietFor": "still waiting on the model ({duration} since the last update)",
+    "toolStepsLabel": "Steps",
+    "chipDone": "finished",
+    "chipFailed": "failed",
+    "moreSteps": "+{n} more",
+    "sourcesLabel": "Sources",
+    "closePanel": "Close the panel",
+    "conversationLabel": "Conversation",
+    "copiedReply": "Copied",
+    "jumpToLatest": "Jump to the latest message"
+  },
+  "agentLab": {
+    "wtLabel": "एजेंट दे टूलें कन्नै चलाओ",
+    "wtHelp": "बंद: हर जवाब इक आम मॉडल कॉल ऐ। चालू: जवाब उसी टूल पाइपलाइन थमां औंदे न जेह्ड़ी चैट टर्न बरतदा ऐ, इस आस्तै टूल चलदे न, गार्डरेल लागू होंदे न ते कदमें दी हद मन्नी जंदी ऐ। जिन्नां कॉलें गी माह्नू दी मंजूरी चाहिदी ऐ, ओह्ʼदे आस्तै बाकी मंजूरी बनियै रुकदियां न।",
+    "wtUnavailable": "इस इंस्टॉलेशन च टूलें कन्नै लैब चलाना बंद ऐ। इसगी चालू करने आस्तै कुसै एडमिन गी आखो।",
+    "wtRefused": "ये रन नामंजूर कीता गेआ: {reason}",
+    "wtActive": "इस रन च टूल सच्ची-मुच्ची चलङन, उंʼदे साइड इफेक्टें समेत।",
+    "wtConfirmTitle": "एजेंट दे टूलें कन्नै लैब चलाना ऐ?",
+    "wtConfirmBody": "हर नमूना एजेंट दे असली टूलें गी कॉल करी सकदा ऐ, ते उʼनें कॉलें दा असली असर होई सकदा ऐ, जि’यां मैसेज भेजना जां डेटा लिखना। मंजूरी आली कॉल कुसै माह्नू आस्तै रुकङन। इसगी सिर्फ टेस्ट एजेंटें जां टेस्ट डेटा कन्नै बरतो।",
+    "wtConfirm": "टूल बरतो"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "एजेंट दी हद",
+        "description": "बंद होने थमां पैह्लें इक एजेंट टर्न कन्ना कम्म करी सकदा ऐ।"
+      },
+      "approvals": {
+        "label": "मंजूरी",
+        "description": "कुसै माह्नू दे कार्रवाई गी मंजूर जां नामंजूर करने परैंत के होंदा ऐ, ते अनुरोध कुन्नी देर रुकदा ऐ।"
+      },
+      "chat": {
+        "label": "गल्लबात दा बर्ताव",
+        "description": "जवाब किʼयां खत्म होंदे न, फी कोशश, कैश ते जारी रक्खे जंदे न।"
+      },
+      "routing": {
+        "label": "मॉडल रूटिंग",
+        "description": "कुन से मैसेज गी तेज मॉडल आस्तै काफी सादा समझेआ जंदा ऐ।"
+      },
+      "memory": {
+        "label": "मेमोरी",
+        "description": "एजेंट कन्नी यादां रखदा ऐ ते याद करदा ऐ।"
+      },
+      "attachments": {
+        "label": "चैट अपलोड",
+        "description": "लोक चैट मैसेजें कन्नै कन्नियां बड्डियां फाइलां जोड़ी सकदे न।"
+      },
+      "skills": {
+        "label": "स्किल",
+        "description": "इंस्टॉल कीतियें स्किलें दी सूची एजेंट दियें हिदायतें दा कन्ना हिस्सा बरती सकदी ऐ।"
+      },
+      "aux": {
+        "label": "पृष्ठभूमि मॉडल कॉल",
+        "description": "सार, सहायता ते कंप्रेशन कुन्ना मॉडल बरतदे न।"
+      },
+      "guardrails": {
+        "label": "सुरक्षा जांच",
+        "description": "अपने आप होने आली सुरक्षा जांच कन्नी सख्त न। इʼनेंगी सिर्फ प्लेटफॉर्म सेटिंग थमां मता सख्त कीता जाई सकदा ऐ।"
+      },
+      "quality": {
+        "label": "मूल्यांकन",
+        "description": "टेस्ट रन ते AI जज किʼयां बर्ताव करदे न।"
+      },
+      "delegation": {
+        "label": "कम्म सौंपना",
+        "description": "इक एजेंट इक्कै बारी दूए एजेंटें गी कन्ना कम्म सौंपी सकदा ऐ।"
+      },
+      "knowledge": {
+        "label": "ज्ञान खोज",
+        "description": "सब थमां चंगे हिस्से चुनने थमां पैह्लें तुंʼदे अपलोड कीते दे दस्तावेजें दी खोज उम्मीदवार कन्ने चौड़े तौर पर जमा करदी ऐ।"
+      },
+      "learning": {
+        "label": "सिखलाई",
+        "description": "एजेंट दी सिखलाई नीति विकल्पें गी किʼयां अजमांदी ऐ।"
+      },
+      "providers": {
+        "label": "AI प्रोवाइडर",
+        "description": "जुड़े दे AI प्रोवाइडरें चा इक कम्म करना बंद करी दे तां उʼनेंगी किʼयां बरतेआ जंदा ऐ।"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "हर टर्न च ज्यादा थमां ज्यादा टूल कॉल",
+          "description": "इक टर्न गी बंद करियै उसी अपने कोल जेह्ड़ा किश ऐ उसदे कन्नै जवाब देने आस्तै आखने थमां पैह्लें एह् ज्यादा थमां ज्यादा कन्ने टूल कॉल करी सकदा ऐ।",
+          "help": "लम्मे, मते कदमें आले कम्में आले एजेंटें आस्तै बधाओ। कंट्रोल थमां बाह्र लूपें गी रोकने ते खर्चे गी अंदाजे जोग रक्खने आस्तै घटाओ। वर्कस्पेस जां प्लेटफॉर्म आस्तै दस्सेआ गेदा मान इक मुक्ख संख्या ऐ: एजेंट दा स्वायत्तता दा स्तर रन दे समें इसगी उप्पर-थल्ले करदा ऐ, इस आस्तै ज्यादा जां घट्ट स्वायत्त एजेंट अलग संख्या बरती सकदे न। एजेंट दा अपना मान सेट होने पर उसी जिʼयां ऐ उʼयां गै बरतेआ जंदा ऐ।"
+        },
+        "turnTimeoutSeconds": {
+          "label": "हर टर्न च ज्यादा थमां ज्यादा समां",
+          "description": "इक टर्न बंद होने थमां पैह्लें कुन्नी देर चली सकदा ऐ।",
+          "help": "धीमी खोज जां कोड कम्म आस्तै बधाओ। समां खत्म होने आला टर्न हुन तकर कीते दे कम्म कन्नै खत्म होंदा ऐ।"
+        },
+        "toolTimeoutSeconds": {
+          "label": "हर टूल कॉल च ज्यादा थमां ज्यादा समां",
+          "description": "इक टूल कॉल बंद होने थमां पैह्लें कुन्नी देर चली सकदी ऐ। प्लेटफॉर्म डिफॉल्ट च कोई हद नेईं ऐ; तदूं हर टूल अपना टाइमआउट रखदा ऐ।",
+          "help": "जे इक धीमा टूल सारी गल्लबात गी रोकी सकदा ऐ तां हद सेट करो। बंद कीती दी कॉल दा कोई असर हा जां नेईं, एह् पता नेईं लगदा, इस आस्तै एजेंट गी आखेआ जंदा ऐ जे ओह् ये नेईं मनै जे ओह् सफल होई ही।"
+        },
+        "toolOutputMaxChars": {
+          "label": "सब थमां लम्मा टूल नतीजा",
+          "description": "इक टूल नतीजे दे कन्ने अक्खर मॉडल गी दित्ते जंदे न; बाकी कटोई दित्ते जंदे न।",
+          "help": "जे एजेंट गी लम्मे दस्तावेज जां API जवाब पूरे पढ़ने न तां बधाओ, हर टर्न च मते टोकनें दी कीमत पर। खर्चा बचाने आस्तै घटाओ।"
+        },
+        "retrievalTopK": {
+          "label": "हर खोज च ज्ञान दे टुकड़े",
+          "description": "इक ज्ञान भंडार खोज एजेंट गी कन्ने टुकड़े परतांदी ऐ।",
+          "help": "मते टुकड़े एजेंट गी कम्म करने आस्तै ज्यादा सामग्री दिंदे न पर ज्यादा टोकन खर्च करदे न ते रौला बधाई सकदे न। घट्ट टुकड़े तेज ते सस्ते न।"
+        },
+        "retrievalMinScore": {
+          "label": "इक टुकड़े दी घट्ट थमां घट्ट प्रासंगिकता",
+          "description": "इक ज्ञान टुकड़े गी परतोने आस्तै कन्ना प्रासंगिक होना चाहिदा। 0 हर हिट गी परतांदा ऐ।",
+          "help": "जे एजेंट अप्रासंगिक टुकड़े उद्धृत करदा ऐ तां बधाओ। मता बधाने पर ओह् किश बी नेईं पाई सकदा।"
+        },
+        "continuationPasses": {
+          "label": "अधूरे जवाब परैंत फालतू पास",
+          "description": "जे मॉडल दा जवाब ऐलान कीते दे पर नेईं कीते दे कदम पर रुकी जंदा ऐ तां उसी कन्नी बारी जारी रक्खने आस्तै आखेआ जंदा ऐ।",
+          "help": "उस एजेंट आस्तै बधाओ जेह्ड़ा अक्सर इक कदम दा ऐलान करियै रुकी जंदा ऐ। हर फालतू पास इक मॉडल कॉल दा खर्चा करदा ऐ।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "सीमा परैंत जवाब दित्ती गेदियां कॉल",
+          "description": "टर्न दी टूल सीमा खत्म होने परैंत मॉडल होर कन्नियां टूल कॉल अजमाई सकदा ऐ। हर इक गी \"जेह्ड़ा ऐ उसी कन्नै जवाब दे\" दे नोट कन्नै नामंजूर कीता जंदा ऐ; इस गिनतरी थमां अग्गें टर्न गलती कन्नै रोकी दित्ता जंदा ऐ।",
+          "help": "जे मॉडल गी टूल कॉल करना बंद करने आस्तै किश कोशशां चाहिदियां न तां इसगी बधाओ। लूप च फसे दे टर्न जल्दी खत्म करने आस्तै घटाओ। 0 सीमा थमां उप्परली पैह्ली कॉल पर टर्न रोकी दिंदा ऐ।"
+        },
+        "supervisedDivisor": {
+          "label": "निगरानी च एजेंटें गी टूल सीमा दा 1/N मिलदा ऐ",
+          "description": "निगरानी च एजेंट गी टर्न दी टूल-कॉल सीमा इस संख्या कन्नै भाग होइयै मिलदी ऐ, पर थल्ले आले घट्ट थमां घट्ट मान थमां कदें बी घट्ट नेईं।",
+          "help": "निगरानी च एजेंटें गी होर सख्ती कन्नै रक्खने आस्तै इसगी बधाओ। 1 उंʼदे गी पूरी सीमा दिंदा ऐ।"
+        },
+        "supervisedMinSteps": {
+          "label": "निगरानी च एजेंट आस्तै घट्ट थमां घट्ट टूल कॉल",
+          "description": "उप्परली संख्या चाहे कन्नी बी उच्ची होऐ, निगरानी च एजेंट गी मिलने आली सब थमां नान्ही टूल-कॉल सीमा।",
+          "help": "इसगी 3 जां इस थमां मता रक्खो तां जे निगरानी च एजेंट मते कदमें आला सादा कम्म फी बी पूरा करी सकै।"
+        },
+        "autonomousMultiplier": {
+          "label": "पूरे स्वायत्त एजेंटें गी सीमा दे N गुणा मिलदे न",
+          "description": "पूरे स्वायत्त एजेंट गी टर्न दी टूल-कॉल सीमा इस संख्या कन्नै गुणा होइयै मिलदी ऐ।",
+          "help": "उʼनें एजेंटें आस्तै बधाओ जेह्ड़े बिना कुसै दी निगरानी दे लम्मे कम्म चलांदे न; तदूं ओह् इक टर्न च मतियां कॉल ते पैसे खर्च करी सकदे न। 1 उंʼदे गी मानक सीमा दिंदा ऐ।"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "मंजूरी परैंत जारी रक्खो",
+          "description": "जदूं कुसै माह्नू ने कार्रवाई मंजूर कीती, तां एजेंट नमें मैसेज दा इंतजार कीते बगैर अपने आप कम्म खत्म करदा ऐ।",
+          "help": "जे तुस चांदे ओ जे हर मंजूर कीती दी कार्रवाई टर्न गी खत्म करै ते फॉलो-अप हत्थें होऐ तां इसगी बंद करो।"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "नामंजूरी परैंत बी पृष्ठभूमि जॉब जारी रौहंदा ऐ",
+          "description": "पृष्ठभूमि जॉब च जदूं कुसै माह्नू ने कार्रवाई नामंजूर कीती, तां जॉब बंद होने दी जगहां नामंजूरी दर्ज करियै जारी रौहंदा ऐ।",
+          "help": "जे नामंजूरी जॉब गी बंद करना चाहिदा तां इसगी बंद रक्खो। जे जॉब नामंजूर कीते दे कदम दे बगैर आमतौर पर खत्म होई सकदा ऐ तां चालू करो।"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "मंजूरी दे अनुरोध दा समां खत्म होंदा ऐ",
+          "description": "इक मंजूरी दा अनुरोध समां खत्म होने थमां पैह्लें फैसले आस्तै कुन्नी देर रुकदा ऐ। 0 दा मतलब अनुरोध दा कदें समां खत्म नेईं होंदा।",
+          "help": "समां-सीमा दे बगैर, भुल्ले दे अनुरोध अनिश्चित काल तकर खुल्ले रौहंदे न ते एजेंट रुकेआ रौहंदा ऐ। समां खत्म होए दा अनुरोध मंजूर नेईं होए दे दे तौर पर गिनेआ जंदा ऐ।"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "कटोए दे जवाब पूरे करो",
+          "description": "जे मॉडल दी लंबाई दी हद जवाब गी कटोंदी ऐ जां ओह् बिगड़ी दी टूल कॉल पर खत्म होंदा ऐ, तां मॉडल गी जारी रक्खने जां फी कोशश करने आस्तै आखो।",
+          "help": "इसगी सिर्फ मॉडल दी समस्या दा निदान करने आस्तै बंद करो; तदूं माह्नू कटोए दे जवाब गी जिʼयां ऐ उʼयां गै दिक्खदे न।"
+        },
+        "maxContinuations": {
+          "label": "कटोए दे जवाब दी ज्यादा थमां ज्यादा निरंतरता",
+          "description": "जवाब कटोने परैंत मॉडल गी कन्नी बारी जारी रक्खने आस्तै आखेआ जंदा ऐ।",
+          "help": "हर निरंतरता इक होर मॉडल कॉल ऐ। लम्मे जवाबें आस्तै बधाओ, खर्चा बचाने आस्तै घटाओ।"
+        },
+        "maxToolCallRetries": {
+          "label": "बिगड़ी दी टूल कॉल दी ज्यादा थमां ज्यादा फी कोशश",
+          "description": "बरतने जोग नेईं तर्कें कन्नै औने आली टूल कॉल गी दोहराने आस्तै मॉडल गी कन्नी बारी आखेआ जंदा ऐ।",
+          "help": "इक फी कोशश इक मॉडल कॉल दा खर्चा करदी ऐ। 0 पैह्ली बिगड़ी दी कॉल पर गै हार मन्नी लैंदा ऐ।"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "हर मॉडल कॉल दी कोशशां",
+          "description": "जदूं प्रोवाइडर नाकाम होऐ जां व्यस्त होऐ, तां पैह्ली कोशश समेत, इक मॉडल कॉल कन्नी बारी कोशश कीती जंदी ऐ।",
+          "help": "मती कोशशां प्रोवाइडर दी छोटी रुकावट गी लकांदियां न पर नाकाम होने आला अनुरोध गलती दस्सने च मता समां लैंदा ऐ।"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "टूलें आले एजेंटें आस्तै जवाब फी बरतो",
+          "description": "टूलें आले एजेंटें आस्तै सेव कीते दे जवाब फी बरतने दी इजाजत देओ। टूल अगली बारी कुछ होर परतांदा ऐ, इस आस्तै डिफॉल्ट रूप च बंद ऐ।",
+          "help": "जे टूल सिर्फ पढ़ने आले न ते हौली-हौली बदलदे न, ते तुस तेज, सस्ते दोहराए दे जवाब चांदे ओ तां गै चालू करो। माह्नू नवीकृत नेईं होए दा जवाब दिक्खी सकदे न।"
+        },
+        "contextTurns": {
+          "label": "दोहराऽ पन्छानने आले पिछले टर्न",
+          "description": "इक मैसेज ऐसा दोहराऽ ऐ जिस पर सेव कीता दा जवाब फी बरतेआ जाई सकदा ऐ जां नेईं, एह् तय करने आस्तै कन्ने पिछले टर्नें दी तुलना कीती जंदी ऐ।",
+          "help": "मते टर्न मेल गी सख्त करदे न ते कैश हिट गी दुर्लभ।"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "फॉलो-अप च टूल सुझांदे रौहो",
+          "description": "जदूं अगला मैसेज छोटा फॉलो-अप ऐ तां गल्लबात ने पैह्लें गै बरते दे टूल सुझांदे रौहो।",
+          "help": "जे \"हां\" आंगर छोटे जवाब आम टूल चुनाई थमां शुरू होने चाहिदे तां इसगी बंद करो।"
+        },
+        "stickyToolsWindow": {
+          "label": "फॉलो-अप टूल कुन्नी देर सुझाए रौहंदे न",
+          "description": "बरतने परैंत छोटे फॉलो-अप मैसेजें आस्तै इक टूल कुन्नी देर सुझाया रौहंदा ऐ।",
+          "help": "लम्मी खिड़की लम्मे कम्में दे सेशनें च मदद करदी ऐ, छोटी टूल सूची गी नान्ही रखदी ऐ।"
+        },
+        "maxStickyTools": {
+          "label": "फॉलो-अप च सुझाए जाने आले ज्यादा थमां ज्यादा टूल",
+          "description": "छोटे फॉलो-अप मैसेज च अग्गें लेई जाने आले ज्यादा थमां ज्यादा टूल। 0 कोई नेईं रखदा।",
+          "help": "जदूं कोई कम्म मते टूल बरतदा ऐ तां बड्डी संख्या मदद करदी ऐ; छोटी संख्या टूल सूची गी छोटी रखदी ऐ।"
+        },
+        "keepPrimaryModel": {
+          "label": "फॉलो-अप आस्तै मुक्ख मॉडल रक्खो",
+          "description": "जिस गल्लबात च पैह्लें टूल बरते जाई चुके न उस च छोटा फॉलो-अप सस्ते मॉडल दी जगहां एजेंट दे मुक्ख मॉडल पर गै रौंहदा ऐ।",
+          "help": "इसगी बंद करो तां जे खर्चा रूटिंग \"हां\" आंगर फॉलो-अप सस्ते मॉडल गी भेजै, पर चली दे कम्म गी कमजोर ढंगै कन्नै संभालने दा जोखम रौंहदा ऐ।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "जवाब फी बरतने आस्तै सवाल कन्ना मिलदा-जुलदा होना चाहिदा",
+          "description": "मिलदे-जुलदे सवालें दे जवाब फी बरतने आले एजेंटें आस्तै: सेव कीता दा जवाब देने आस्तै नमां सवाल पिछले सवाल दे कन्ना नेड़े होना चाहिदा, 0.85 थमां 1 तकर।",
+          "help": "घट्ट संख्या मते दोहराऽ गी जवाब दिंदी ऐ पर कुसै होर सवाल आस्तै बने दे जवाब देने दा जोखम रौंहदा ऐ। गलत जवाब महंगे होन तां इसगी उच्चा रक्खो। जवाब सिर्फ उस माह्नू आस्तै गै फी बरतेआ जंदा ऐ जिसी ओह् दित्ता गेआ हा।"
+        },
+        "ttl": {
+          "label": "फी बरतने जोग जवाब कुन्नी देर रक्खेआ जंदा ऐ",
+          "description": "सेव कीते दे जवाब गी हटाए जाने थमां पैह्लें मिलदे-जुलदे सवाल गी कुन्नी देर तकर दित्ता जाई सकदा ऐ।",
+          "help": "जे तुंʼदे जवाब जल्दी पुराने होई जंदे न तां इसगी छोटा करो।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "हर एजेंट आस्तै ज्यादा थमां ज्यादा सेव कीते दे जवाब",
+          "description": "इक एजेंट फी बरतने आस्तै कन्ने जवाब रखदा ऐ। इस थमां मते होने पर सब थमां पुराने हटाई दित्ते जंदे न।",
+          "help": "बड्डा भंडार मते दोहराऽ लब्भदा ऐ ते मता स्टोरेज बरतदा ऐ।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "गल्लबात च टूल कॉलें दा रिकॉर्ड रक्खो",
+          "description": "हर टर्न दियें टूल कॉलें दा छोटा रिकॉर्ड गल्लबात कन्नै सेव करो, तां जे बाद दे टर्न दिक्खी सकन जे के कीता गेआ हा।",
+          "help": "गल्लबात दे इतिहास गी सिर्फ लिखत रक्खने आस्तै इसगी बंद करो; तदूं एजेंट नेईं जाने सकदा जे पिछले टर्नें च उसदे टूलें ने के कीता। ये पूरे वर्कस्पेस पर लागू होंदा ऐ।"
+        },
+        "replayEnabled": {
+          "label": "मॉडल गी टूल रिकॉर्ड दस्सो",
+          "description": "मॉडल गी गल्लबात देने दे समें पिछली टूल कॉलें दा सेव कीता दा रिकॉर्ड शामल करो।",
+          "help": "इसगी बंद करो तां जे रिकॉर्ड सेव होंदा रौह् पर उसदे आस्तै मॉडल दी कम्म करने दी थाहर नेईं बरती जाऐ।"
+        },
+        "replayTurns": {
+          "label": "पिछले टर्न जिंʼदा टूल रिकॉर्ड दस्सेआ जंदा ऐ",
+          "description": "टूल बरतने आले सब थमां हाल दे कन्नें टर्नें दा रिकॉर्ड मॉडल गी दस्सेआ जंदा ऐ।",
+          "help": "बड्डी संख्या लम्मे कम्में दे सेशनें च मदद करदी ऐ पर मॉडल दी कम्म करने दी थाहर मती बरतदी ऐ।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "हर टर्न च सूचीबद्ध टूल कॉल",
+          "description": "इक टर्न दियां कन्नियां टूल कॉल रिकॉर्ड च लिखियां जंदियां न। अग्गें दियां कॉल सिर्फ गिनी जंदियां न।",
+          "help": "मतियां कॉल करने आले ते हर इक गी याद रक्खने आले टर्नें आस्तै बधाओ।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "हर टर्न च सब थमां लम्मा टूल रिकॉर्ड",
+          "description": "इक टर्न दे रिकॉर्ड दे कन्ने अक्खर मॉडल गी दस्से जंदे न; बाकी गिने जंदे न, सूचीबद्ध नेईं कीते जंदे।",
+          "help": "बाद दे हर टर्न दा खर्चा बचाने आस्तै घटाओ, मता ब्यौरा रक्खने आस्तै बधाओ।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "सब थमां बड्डा फोटो अपलोड (MB)",
+          "description": "चैट मैसेज कन्नै कोई माह्नू सब थमां बड्डा कुन्ना फोटो जोड़ी सकदा ऐ, मेगाबाइट च। प्लेटफॉर्म दी इक कुल फाइल सीमा बी ऐ जिसी ये पार नेईं करी सकदा।",
+          "help": "फोटो ते स्क्रीनशॉट आस्तै बधाओ; बड्डियां फाइलां भेजने च हौली होंदियां न ते मॉडल दा मता कोटा बरतदियां न।"
+        },
+        "maxAudioMb": {
+          "label": "सब थमां बड्डा आडियो अपलोड (MB)",
+          "description": "चैट मैसेज कन्नै कोई माह्नू सब थमां बड्डी कुन्नी आडियो फाइल जोड़ी सकदा ऐ, मेगाबाइट च। प्लेटफॉर्म दी इक कुल फाइल सीमा बी ऐ जिसी ये पार नेईं करी सकदा।",
+          "help": "लम्मी रिकॉर्डिंगें आस्तै बधाओ; बड्डियां फाइलां भेजने च हौली होंदियां न ते मॉडल दा मता कोटा बरतदियां न।"
+        },
+        "maxVideoMb": {
+          "label": "सब थमां बड्डा वीडियो अपलोड (MB)",
+          "description": "चैट मैसेज कन्नै कोई माह्नू सब थमां बड्डा कुन्ना वीडियो जोड़ी सकदा ऐ, मेगाबाइट च। प्लेटफॉर्म दी इक कुल फाइल सीमा बी ऐ जिसी ये पार नेईं करी सकदा।",
+          "help": "लम्मी क्लिपें आस्तै बधाओ; बड्डियां फाइलां भेजने च हौली होंदियां न ते मॉडल दा मता कोटा बरतदियां न।"
+        },
+        "maxDocumentMb": {
+          "label": "सब थमां बड्डा दस्तावेज अपलोड (MB)",
+          "description": "चैट मैसेज कन्नै कोई माह्नू सब थमां बड्डा कुन्ना दस्तावेज जां स्प्रेडशीट जोड़ी सकदा ऐ, मेगाबाइट च। प्लेटफॉर्म दी इक कुल फाइल सीमा बी ऐ जिसी ये पार नेईं करी सकदा।",
+          "help": "लम्मी रिपोर्टें ते बड्डियें डेटा फाइलें आस्तै बधाओ; बड्डियां फाइलां प्रोसेस होने च हौली होंदियां न।"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "अधूरे शब्दें दी याद दुआई",
+          "description": "जे जवाब उस कम्म गी करने थमां पैह्लें रुकी दा लगदा ऐ जेह्ड़ा उसने करने दा आखेआ हा तां मॉडल गी जारी रक्खने आस्तै आखो।",
+          "help": "जे याद दुआई ऐसे जवाबें पर सक्रिय होऐ जिʼनें गी उत्थें गै खत्म होना चाहिदा हा तां इसगी बंद करो।"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "पुराने टूल नतीजे मटाओ",
+            "description": "लम्मे टूल रनें च, गल्लबात गी मॉडल दी हद दे अंदर रक्खने आस्तै पुराने टूल नतीजें गी इक छोटे प्लेसहोल्डर कन्नै बदलो।",
+            "help": "जे एजेंट गी हर पिछले नतीजे गी दिक्खना ऐ तां इसगी बंद करो; लम्मे रन तदूं मॉडल दी आकार हद पर पुज्जी सकदे न।"
+          },
+          "thresholdChars": {
+            "label": "मटाना शुरू करने दा आकार",
+            "description": "पुराने मटाने थमां पैह्लें इक टर्न दे टूल नतीजे कन्ने बड्डे होई सकदे न।",
+            "help": "मते नतीजे दिक्खने जोग रक्खने आस्तै बधाओ, लम्मे रनें गी छोटा ते सस्ता रक्खने आस्तै घटाओ।"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "सब थमां लम्मा सादा मैसेज",
+          "description": "इस थमां लम्मे मैसेज गी कदें बी सादा नेईं समझेआ जंदा। सादे मैसेज तेज, सस्ते मॉडल पर जाई सकदे न।",
+          "help": "गुणवत्ता आस्तै मते मैसेज मुक्ख मॉडल पर भेजने आस्तै घटाओ; खर्चा बचाने आस्तै बधाओ।"
+        },
+        "maxClauses": {
+          "label": "इक सादे मैसेज च ज्यादा थमां ज्यादा वाक्य",
+          "description": "इस थमां मते वाक्यें आले मैसेज गी कदें बी सादा नेईं समझेआ जंदा।",
+          "help": "गुणवत्ता आस्तै मते मैसेज मुक्ख मॉडल पर भेजने आस्तै घटाओ।"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "हर टर्न च याद कीतियां जाने आलियां एजेंट दियां यादां",
+          "description": "हर मैसेज आस्तै एजेंट दी अपनी यादें चा कन्नियां दिक्खियां जांदियां न।",
+          "help": "मतियां यादां ज्यादा संदर्भ दिंदियां न पर मते टोकन बरतदियां न।"
+        },
+        "tenantTopK": {
+          "label": "हर टर्न च याद कीतियां जाने आलियां सांझियां यादां",
+          "description": "हर मैसेज आस्तै वर्कस्पेस च सांझियां कीतियां यादें चा कन्नियां दिक्खियां जांदियां न।",
+          "help": "मतियां यादां ज्यादा संदर्भ दिंदियां न पर मते टोकन बरतदियां न।"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "हर एजेंट दियां ज्यादा थमां ज्यादा यादां",
+          "description": "इक एजेंट कन्नियां यादां रक्खी सकदा ऐ। इस थमां मतियां होने पर सब थमां पुरानियां ते घट्ट बरतियां जाने आलियां छोड़ियां जंदियां न।",
+          "help": "ऐसे सहायक आस्तै बधाओ जिसी लोकें दे बारे च मता याद रक्खना होंदा ऐ; एह् सेव करने ते याद करने दा खर्चा बी बधांदा ऐ।"
+        }
+      },
+      "tenant": {
+        "maxMemories": {
+          "label": "ज्यादा थमां ज्यादा सांझियां यादां",
+          "description": "वर्कस्पेस च सांझियां कीतियां कन्नियां यादां रक्खियां जंदियां न। इस थमां मते होने पर सब थमां पुरानियां हटाई दित्तियां जंदियां न।",
+          "help": "सांझे ज्ञान पर निर्भर बड्डी टीमें आस्तै बधाओ; इसकन्नै स्टोरेज ते याद करने दा खर्चा बी बधदा ऐ। ये पूरे वर्कस्पेस पर लागू होंदा ऐ।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "आन-डिवाइस चैट गी दित्तियां जाने आलियां यादां",
+          "description": "आन-डिवाइस सेशन शुरू होने पर उसी कन्नियां यादां सौंपियां जंदियां न।",
+          "help": "आन-डिवाइस मॉडलें दी कम्म करने दी थाहर छोटी होंदी ऐ, इस आस्तै इसगी घट्ट रक्खो।"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "ग्राफ मेमोरी चा याद कीते दे तथ्य",
+          "description": "इक लुकअप च एजेंट गी उसदी रिश्ते आली मेमोरी चा दस्सने आले ज्यादा थमां ज्यादा तथ्य।",
+          "help": "मते तथ्य एजेंट गी कुसै माह्नू जां विषय बारे मता पृष्ठभूमि दिंदे न पर उसदे कम्म करने दी थाहर दा मता हिस्सा बरतदे न। घट्ट तथ्य जवाब गी केंद्रित रखदे न। इसगी पूरे वर्कस्पेस आस्तै, जां ज्यादा जां घट्ट चाहिदे आले एजेंट आस्तै सेट करो।"
+        },
+        "recallMaxPaths": {
+          "label": "हर लुकअप च पढ़े जाने आले ग्राफ रस्ते",
+          "description": "इक लुकअप दे तथ्य लब्भने आस्तै मेमोरी ग्राफ दे कन्ने संपर्क पढ़े जंदे न।",
+          "help": "कई संपर्क इक्कै तथ्य तकर पुजाई सकदे न, इस आस्तै घने जुड़ी दी यादें च सब किश लब्भने आस्तै मती संख्या दी लोड़ होई सकदी ऐ। मतियां संख्यां हर लुकअप गी धीमा करदियां न।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "प्रॉम्प्ट च सूचीबद्ध ज्यादा थमां ज्यादा स्किल",
+          "description": "एजेंट गी पता रौह् जे ओह् हैन, इस आस्तै उसदियें हिदायतें च तुंʼदियें कन्नियें स्किलें दे नांऽ दित्ते जंदे न। बाकी गिनी जंदियां न, सूचीबद्ध नेईं कीतियां जंदियां।",
+          "help": "जे तुंʼदे कोल मतियां स्किल न तां बधाओ; सूचीबद्ध हर स्किल हर टर्न च मॉडल दी कम्म करने दी थाहर दा थोह्ड़ा हिस्सा बरतदी ऐ। ये पूरे वर्कस्पेस पर लागू होंदा ऐ।"
+        },
+        "maxBlockChars": {
+          "label": "प्रॉम्प्ट च स्किल सूची दा आकार",
+          "description": "एजेंट दियें हिदायतें च स्किलें दी सूची कन्ने अक्खर लेई सकदी ऐ। भरोची जाने पर बाद दियां स्किल सिर्फ नांऽ तकर छोटी करी दित्ती जंदियां न।",
+          "help": "मतियें स्किलें दे ब्यौरे रक्खने आस्तै बधाओ, हर टर्न च टोकन बचाने आस्तै घटाओ। ये पूरे वर्कस्पेस पर लागू होंदा ऐ।"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "पृष्ठभूमि कॉल एजेंट दा मॉडल बरतदे न",
+        "description": "जदूं उंʼदे आस्तै कोई मॉडल नेईं चुनेआ गेदा, तां सार, सहायता ते संदर्भ कंप्रेशन उसी एजेंट दा उसी मॉडल बरतदे न जिसदे आस्तै ओह् कम्म करदे न।",
+        "help": "इʼनें कॉलें आस्तै प्लेटफॉर्म मॉडल चुनै, इस आस्तै इसगी बंद करो, जेह्ड़ा सस्ता जां कुसै होर प्रोवाइडर दा होई सकदा ऐ।"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "सुरक्षा जांच नाकाम होने पर",
+        "description": "जदूं सुरक्षा जांच अपने आप नाकाम होई जंदी ऐ तां के होंदा ऐ, मिसाल आस्तै जज मॉडल बंद होने पर। बंद कार्रवाई गी नामंजूर करदा ऐ; खुल्ला उसी लंघने दिंदा ऐ।",
+        "help": "तुस इसगी सिर्फ प्लेटफॉर्म सेटिंग थमां मता सख्त करी सकदे ओ। बंद कुसै दे जान-बुज्झियै जांच गी नाकाम करने दे खलाफ सुरक्षा दिंदा ऐ, गड़बड़ दे समें कम्म नामंजूर करने दी कीमत पर।",
+        "options": {
+          "open": "खुल्ला: कार्रवाई गी लंघने देओ",
+          "closed": "बंद: कार्रवाई नामंजूर करो"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "टूल-कॉल जांच नाकाम होने पर",
+          "description": "खतरे आली टूल कॉलें दी समीक्षा करने आली जांच जदूं फैसला नेईं करी सकै तां के करदी ऐ। विरासत उप्परली सुरक्षा जांच सेटिंग गी मंनदी ऐ।",
+          "help": "तुस इसगी सिर्फ प्लेटफॉर्म सेटिंग थमां मता सख्त करी सकदे ओ। जांच नाकाम होने पर बंद टूल कॉल गी नामंजूर करदा ऐ।",
+          "options": {
+            "open": "खुल्ला: टूल कॉल गी लंघने देओ",
+            "inherit": "सुरक्षा-जांच सेटिंग गी मन्नो",
+            "closed": "बंद: टूल कॉल नामंजूर करो"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "रोकी जाने आला जहर दा अंक",
+          "description": "जज दे 0 थमां 100 जहर दे पैमाने पर इस जां इस थमां मते अंक आली सामग्री गी रोकेआ जंदा ऐ। घट्ट संख्या मता रोकदी ऐ।",
+          "help": "तुस इसगी सिर्फ घटाई सकदे ओ, प्लेटफॉर्म दे मान थमां उप्पर कदें नेईं बधाई सकदे। बड़ा घट्ट मान आम स्पष्ट शब्दें गी बी रोकी दिंदा ऐ।"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "जेलब्रेक कोशशें आस्तै स्कैन कीती जाने आली लिखत",
+          "description": "जेलब्रेक पैटर्नें आस्तै इक मैसेज जां जवाब दा कन्ना हिस्सा स्कैन कीता जंदा ऐ। इस थमां मती लिखत स्कैन नेईं कीती जंदी।",
+          "help": "तुस इसगी सिर्फ प्लेटफॉर्म दे मान थमां उप्पर बधाई सकदे ओ। चौड़ी खिड़की पैडिंग परैंत लकोए दे हमलें गी रोकदी ऐ, थोड़ी मती प्रोसेसिंग दी कीमत पर।"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "सुरक्षा जज गी दस्सी जाने आली लिखत",
+          "description": "जांची जाने आली लिखत दा कन्ना हिस्सा AI सुरक्षा जज पढ़दा ऐ। इस थमां मती लिखत दा फैसला नेईं कीता जंदा।",
+          "help": "तुस इसगी सिर्फ प्लेटफॉर्म दे मान थमां उप्पर बधाई सकदे ओ। बधाने पर लम्मे टूल नतीजें दा पूरा फैसला होंदा ऐ पर हर जज कॉल बड्डी होई जंदी ऐ।"
+        }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "निगरानी च एजेंट ते सिर्फ-पढ़ने आले टूल",
+          "description": "के निगरानी च स्वायत्तता स्तर आला एजेंट खोज जां लुकअप आंगर सिर्फ पढ़ने आले टूल थमां पैह्लें बी तुसेंगी पुच्छदा ऐ। लिखना, भेजना ते उʼनें टूलें गी जिंʼदा प्लेटफॉर्म ने वर्गीकरण नेईं कीता, हमेशा पुच्छदे न।",
+          "help": "तुस इसगी सिर्फ प्लेटफॉर्म सेटिंग थमां मता सख्त करी सकदे ओ। हर बारी पुच्छना सब थमां सुरक्षित चुनाव ऐ; सिर्फ-पढ़ने आले टूल गी चलने देने कन्नै इक सवाल घट्ट होंदा ऐ, पर अनजाने खोज गी रोकने दा इक मौका बी चली जंदा ऐ। जेह्ड़ा एजेंट निजी डेटा पढ़ी सकदा ऐ, भरोसे जोग नेईं सामग्री लेई सकदा ऐ ते डेटा बाह्र भेजी सकदा ऐ, उसी ये सेटिंग जेह्ड़ा बी आखै हर कॉल पर पुच्छेआ जंदा ऐ।",
+          "options": {
+            "auto-allow": "सिर्फ-पढ़ने आले टूल गी बिना पुच्छे चलने देओ",
+            "gate": "हर टूल कॉल थमां पैह्लें पुच्छो"
+          }
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI जज आस्तै मॉडल",
+          "description": "मूल्यांकन रनें दा फैसला करने आस्तै बरतेआ जाने आला मॉडल। तुंʼदे वर्कस्पेस ने पैह्लें गै बरते दे मॉडलें चा प्लेटफॉर्म चुनै, इस आस्तै खाली छोड़ो।",
+          "help": "ज्यादा भरोसे जोग ग्रेडें आस्तै मता ताकतवर मॉडल जां खर्चा बचाने आस्तै सस्ता मॉडल बरतो। मॉडल तुंʼदे जुड़े दे प्रोवाइडर च उपलब्ध होना चाहिदा।"
+        },
+        "callTimeoutSeconds": {
+          "label": "हर जज कॉल च ज्यादा थमां ज्यादा समां",
+          "description": "इक जज कॉल नाकाम गिनी जाने थमां पैह्लें कुन्नी देर लेई सकदी ऐ।",
+          "help": "जे धीमा मॉडल अक्सर टाइमआउट होंदा ऐ तां बधाओ; नाकाम कॉल मूल्यांकन दे नतीजे गी अधूरा करदियां न।"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "हर टेस्ट केस दे दोहराऽ",
+          "description": "जे रन नकल नेईं कीता गेआ तां हर टेस्ट केस कन्नी बारी चलाया जंदा ऐ। मते दोहराऽ दस्सदे न जे एजेंट कन्ना इकसार ऐ।",
+          "help": "हर दोहराऽ इक रन दे खर्चे ते समें गी गुणा करदा ऐ।"
+        },
+        "defaultMode": {
+          "label": "मूल्यांकन किʼयां चलदे न",
+          "description": "जदूं रन जां उसदा डेटासेट नेईं दस्सै, तां मूल्यांकन रन एजेंट गी उसदे टूलें कन्नै सुरक्षित सैंडबॉक्स च रीप्ले करदा ऐ (पूरी पाइपलाइन) जां सिर्फ लिखत च जवाब दिंदा ऐ (तेज)।",
+          "help": "पूरी पाइपलाइन उसी परखदी ऐ जेह्ड़ा तुंʼदे बरतोंकारें गी मिलदा ऐ, टूलें दे बरतोऽ समेत, ते उसदा खर्चा मता ऐ। इस च सिर्फ पढ़ने आले टूल सच्ची-मुच्ची चलदे न; जेह्ड़ा किश डेटा बदली सकदा ऐ, मैसेज भेजी सकदा ऐ जां पैसे खर्च करी सकदा ऐ उसी सिमुलेट कीता जंदा ऐ ते रन च सूचीबद्ध कीता जंदा ऐ। तेज सस्ता ऐ ते टूलें दे बरतोऽ बारे च किश नेईं दसदा।",
+          "options": {
+            "full": "सैंडबॉक्स च पूरी पाइपलाइन",
+            "quick": "तेज: सिर्फ लिखत जवाब"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "ज्यादा थमां ज्यादा समानांतर उप-कार्य",
+        "description": "इक कम्म सौंपना इक्कै बारी कन्ने उप-कार्य जां सहायक एजेंट शुरू करी सकदा ऐ। फालतू गी हद लंघी गेदे दे तौर पर रिपोर्ट कीता जंदा ऐ।",
+        "help": "चौड़े खोज कम्में आस्तै बधाओ, खर्चे ते बोझ गी घट्ट रखने आस्तै घटाओ।"
+      },
+      "branchTimeoutSeconds": {
+        "label": "हर उप-कार्य च ज्यादा थमां ज्यादा समां",
+        "description": "सौंपेआ गेदा उप-कार्य टाइमआउट रिपोर्ट होने थमां पैह्लें कुन्नी देर चली सकदा ऐ।",
+        "help": "धीमे उप-कार्यें आस्तै बधाओ। रुके दा उप-कार्य इस समें थमां मता पूरे जवाब गी कदें बी रोकी नेईं रखदा।"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "हर नतीजे आस्तै खोज दा फैलाऽ",
+          "description": "ज्ञान खोज आखर च परतोए जाने आले हर टुकड़े आस्तै कन्ने उम्मीदवार टुकड़े जमा करदी ऐ।",
+          "help": "मती संख्या रैंकिंग गी चुनने आस्तै मता दिंदी ऐ, जेह्ड़ा मते दस्तावेजें दे इक जेहे होने पर मदद करदा ऐ, पर हर खोज च मता समां ते कंप्यूट लगदा ऐ। खोज धीमी लगै तां घटाओ। एह् एजेंट गी दिक्खने आले टुकड़ें दी संख्या नेईं बदलदा।"
+        },
+        "candidatePoolMax": {
+          "label": "हर खोज च ज्यादा थमां ज्यादा उम्मीदवार",
+          "description": "कन्ने नतीजे मंगे जा दे न एह् चाहे जेह्ड़ा बी होऐ, इक ज्ञान खोज दे जमा कीते दे उम्मीदवार टुकड़ें दी उप्परली हद।",
+          "help": "जे एजेंट इक्कै बारी मते नतीजे मंगदा ऐ तां एह् गति ते खर्चे दी रक्षा करदा ऐ। बड्डे ज्ञान भंडारें च जदूं जवाब प्रासंगिक टुकड़े छोड़ी दे तां गै बधाओ।"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "घट्ट अजमाए दे विकल्प कोशश करने दी इच्छा",
+          "description": "भरोसा-हद तरीका बरतने आली सिखलाई नीति अपने आप घट्ट बारी अजमाए दे विकल्प गी कन्ना तरजीह दिंदी ऐ।",
+          "help": "सिफर हमेशा हुन तकर दा सब थमां चंगा औसत आला विकल्प चुनदा ऐ। मते मान होर विकल्पें गी तसल्ली होने थमां पैह्लें मता समां अजमांदे रौहंदे न। डिफॉल्ट पाठ्यपुस्तक दा संतुलन ऐ। सिर्फ ये तरीका बरतने आली नीतियां गै प्रभावित होंदियां न।"
+        },
+        "defaultExplorationRate": {
+          "label": "नमीं नीतियें आस्तै शुरुआती खोज दर",
+          "description": "नमीं बनाई दी सिखलाई नीति बेतरतीब विकल्प अजमाने च टर्नें दा कन्ना हिस्सा खर्च करदी ऐ।",
+          "help": "एह् सिर्फ हुन थमां बनने आली नीतियें दा शुरुआती बिंदु सेट करदा ऐ। मौजूदा नीतियां अपनी दर रखदियां न, जेह्ड़ी तुस नीति संभालने आली थाहर हर एजेंट पर बदलदे ओ। सिफर दा मतलब ऐ जे नमीं नीतियां शुरू च खोज नेईं करदियां।"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "प्रोवाइडर ने कुसै कुंजी गी नामंजूर कीता तां रुकाबट",
+          "description": "प्रोवाइडर ने जुड़ी दी कुंजी गी नामंजूर कीता तां पृष्ठभूमि दा कम्म उसी कुन्नी देर छोड़ी दिंदा ऐ।",
+          "help": "रुकाबट दे समें, शेड्यूल कीते दे ते अपने आप चलने आले जॉब बार-बार नाकाम होने आली कुंजी गी कॉल करने दी जगहां कुसै होर जुड़े दे प्रोवाइडर गी बरतदे न, जां रुकदे न। चैट करने आले माह्नू कदें बी रुके नेईं जंदे ते हमेशा प्रोवाइडर दी असली गलती दिक्खदे न। रुकाबट खत्म होने पर, कुंजी ठीक होई जां नेईं एह् जांचने आस्तै इक कॉल जाने दित्ती जंदी ऐ। सिफर रुकाबट गी बंद करदा ऐ।"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "प्रशासन",
+    "title": "रनटाइम सेटिंग",
+    "subtitle": "इस वर्कस्पेस दे हर एजेंट दा बर्ताव मिलाओ: हद, मंजूरी, गुणवत्ता जांच, गार्डरेल, मेमोरी ते मॉडल। जित्थें इजाजत ऐ उत्थें एजेंट दा मालिक हजें बी इक एजेंट आस्तै सेटिंग ओवरराइड करी सकदा ऐ।",
+    "docsLink": "सहायता ते दस्तावेज",
+    "tabs": {
+      "label": "रनटाइम सेटिंग दा दृश्य",
+      "settings": "सेटिंग",
+      "history": "बदलावें दा इतिहास"
+    },
+    "readOnly": {
+      "title": "सिर्फ दिक्खने आस्तै",
+      "body": "सिर्फ वर्कस्पेस एडमिन गै इʼनें सेटिंग गी बदली सकदे न। तुस हर सेटिंग दा लागू मान ते एह् कित्थें थमां औंदा ऐ, दिक्खी सकदे ओ।"
+    },
+    "summary": "इस वर्कस्पेस च {total} सेटिंग चा {changed} बदली गेदी ऐ। बाकी प्लेटफॉर्म दा मान बरतदी ऐ।",
+    "export": {
+      "button": "ओवरराइड निर्यात करो",
+      "done": "{count} वर्कस्पेस ओवरराइड इक फाइल च निर्यात होई गे।",
+      "none": "निर्यात करने आस्तै किश नेईं ऐ: इस वर्कस्पेस ने कोई सेटिंग नेईं बदली।"
+    },
+    "filters": {
+      "changedOnly": "सिर्फ इस वर्कस्पेस च बदली दी"
+    },
+    "jump": {
+      "label": "इक समूह पर जाओ"
+    },
+    "anchor": {
+      "unknown": "इस वर्कस्पेस च \"{key}\" नांऽ दी कोई सेटिंग नेईं ऐ। इसदा नांऽ बदली गेदा ऐ जां एह् वर्कस्पेस स्तर पर उपलब्ध नेईं ऐ।"
+    },
+    "empty": {
+      "noneChanged": "इस वर्कस्पेस च हजें तकर कोई सेटिंग नेईं बदली गेदी। सब प्लेटफॉर्म दा मान बरतदे न।"
+    },
+    "risk": {
+      "high": "ज्यादा खतरा",
+      "security": "सुरक्षा सेटिंग"
+    },
+    "security": {
+      "title": "सुरक्षा सेटिंग",
+      "body": "ये सेटिंग तुंʼदे वर्कस्पेस दी रक्षा करदियां न। इʼनेंगी सिर्फ प्लेटफॉर्म दे मान थमां मता सख्त कीता जाई सकदा ऐ, कदें बी कमजोर नेईं। हर बदलाऽ आस्तै इक कारण दी लोड़ ऐ ते एह् ऑडिट लॉग च रिकॉर्ड कीता जंदा ऐ।"
+    },
+    "resetGroup": {
+      "count": "इस समूह च {count} बदली दियां न",
+      "button": "{group} गी विरासत च मिले दे मान पर रीसेट करो",
+      "confirmTitle": "{group} गी विरासत च मिले दे मान पर रीसेट करना ऐ?",
+      "confirmBody": "एह् इस समूह दे {count} वर्कस्पेस ओवरराइड हटांदा ऐ। अपना ओवरराइड नेईं रखने आले हर एजेंट आस्तै सेटिंग तुरंत प्लेटफॉर्म दे मान पर परतोई जंदियां न। हर रीसेट ऑडिट लॉग च रिकॉर्ड कीता जंदा ऐ।",
+      "confirm": "विरासत च मिले दे मान पर रीसेट करो",
+      "cancel": "रद्द करो",
+      "done": "{count} सेटिंग गी उंʼदे विरासत च मिले दे मान पर रीसेट करो।",
+      "partial": "{done} सेटिंग रीसेट होइयां; {failed} रीसेट नेईं होई सकियां। नाकाम सेटिंगें दे मैसेज दिक्खो।",
+      "cancelled": "{done} सेटिंग रीसेट होइयां। जिʼनें {skipped} गी कारण चाहिदा हा ओह् जिʼयां हियां उʼयां गै छोड़ी दित्तियां गेइयां।"
+    },
+    "import": {
+      "button": "ओवरराइड आयात करो",
+      "title": "वर्कस्पेस ओवरराइड आयात करो",
+      "intro": "इस पन्ने थमां निर्यात कीती दी फाइल चुनो, जां उसदी सामग्री चेपो। किश बी सेव होने थमां पैह्लें तुस ठीक-ठीक दिक्खगे जे के बदलग।",
+      "reviewIntro": "इस फाइल दे बदलने आली चीजें गी जांचो। हजें तकर किश बी सेव नेईं कीता गेआ।",
+      "fileLabel": "ओवरराइड फाइल (JSON)",
+      "pasteLabel": "जां फाइल दी सामग्री चेपो",
+      "fileError": {
+        "empty": "पैह्लें फाइल चुनो जां उसदी सामग्री चेपो।",
+        "invalidJson": "एह् वैध JSON नेईं ऐ। जांचो जे पूरी फाइल कॉपी होई ऐ जां नेईं।",
+        "wrongFormat": "एह् इस पन्ने थमां निर्यात कीती दी सेटिंग ओवरराइड फाइल नेईं ऐ।",
+        "unsupportedVersion": "इस फाइल गी निर्यात दे अलग संस्करण ने बनाया हा ते पढ़ी नेईं जंदी।",
+        "noOverrides": "फाइल च ओवरराइड हिस्सा नेईं ऐ।",
+        "unreadable": "फाइल पढ़ी नेईं जाई सकी।"
+      },
+      "summary": "{changes} बदलने न, {unchanged} पैह्लें गै लागू न, {problems} लागू नेईं कीते जाई सकदे।",
+      "changesHeading": "बदलाऽ ({count})",
+      "before": "हुन:",
+      "after": "आयात परैंत:",
+      "resetMissing": "फाइल च नेईं आले वर्कस्पेस ओवरराइड बी हटाओ",
+      "resetMissingHelp": "इत्थें बदलियां दियां पर फाइल च नेईं आलियां सेटिंग प्लेटफॉर्म दे मान पर परतोई जंदियां न। सिर्फ जोड़ने जां नवीकृत करने आस्तै इसगी बंद रक्खो।",
+      "resetsHeading": "हटाए जाने आले ओवरराइड ({count})",
+      "resetFrom": "हुन {value}; विरासत च मिले दे मान पर परतोई जंदा ऐ।",
+      "problemsHeading": "लागू नेईं कीते जाई सकदे ({count})",
+      "problem": {
+        "unknownKey": "इस कुंजी आली कोई सेटिंग नेईं ऐ।",
+        "notWorkspaceSetting": "ये सेटिंग पूरे वर्कस्पेस आस्तै नेईं बदली जाई सकदी।",
+        "locked": "प्लेटफॉर्म ऑपरेटर ने ये सेटिंग पिन कीती दी ऐ, इस आस्तै इसगी नेईं बदली सकदे।",
+        "wrongType": "इस सेटिंग आस्तै मान दी किस्म गलत ऐ।",
+        "required": "इक मान जरूरी ऐ।",
+        "notNumber": "मान इक संख्या होना चाहिदा।",
+        "notInteger": "मान इक पूरी संख्या होना चाहिदा।",
+        "belowMin": "मान बड़ा घट्ट ऐ। घट्ट थमां घट्ट {min}।",
+        "aboveMax": "मान बड़ा मता ऐ। ज्यादा थमां ज्यादा {max}।",
+        "notAllowed": "एह् इजाजत आले विकल्पें चा नेईं ऐ।",
+        "tooShort": "लिखत बड़ी छोटी ऐ। घट्ट थमां घट्ट लंबाई {min}।",
+        "tooLong": "लिखत बड़ी लम्मी ऐ। ज्यादा थमां ज्यादा लंबाई {max}।",
+        "precision": "मान इस सेटिंग दी इजाजत थमां मता सटीक ऐ।"
+      },
+      "nothing": "इस फाइल दा कोई बी हिस्सा कोई सेटिंग नेईं बदलदा।",
+      "reasonNote": "इʼनें सेटिंगें चा किश ज्यादा खतरे आलियां न। लागू करने परैंत तुसेंगी इक कारण पुच्छेआ जाग जेह्ड़ा ऑडिट लॉग च रिकॉर्ड होंदा ऐ।",
+      "back": "परतो",
+      "cancel": "रद्द करो",
+      "review": "बदलावें दी समीक्षा करो",
+      "apply": "{count} बदलाऽ लागू करो",
+      "cancelled": "आयात रद्द होआ। कोई सेटिंग नेईं बदली गेई।",
+      "done": "आयात पूरा: {applied} सेटिंग नवीकृत होइयां।",
+      "donePartial": "आयात अधूरा पूरा: {applied} सेटिंग नवीकृत होइयां, {failed} लागू नेईं होई सकियां। समीक्षा दस्सदी ऐ जे हजें के बाकी ऐ।"
+    },
+    "history": {
+      "adminOnly": "वर्कस्पेस सेटिंग दे बदलावें दा इतिहास सिर्फ वर्कस्पेस एडमिन गै दिक्खी सकदे न।",
+      "loading": "बदलावें दा इतिहास लोड होआ दा ऐ",
+      "partial": "{count} सेटिंगें दा इतिहास लोड नेईं होई सकेआ, इस आस्तै एह् सूची अधूरी होई सकदी ऐ।",
+      "retry": "फी कोशश करो",
+      "search": "बदलावें दा इतिहास खोजो",
+      "searchPlaceholder": "सेटिंग, माह्नू जां कारण कन्नै खोजो",
+      "empty": "इस वर्कस्पेस च हजें तकर कोई सेटिंग नेईं बदली गेदी।",
+      "noMatch": "कोई बदलाऽ तुंʼदी खोज कन्नै नेईं मिलदा।",
+      "count": "{total} बदलावें चा {shown} दस्से दे न, पैह्लें सब थमां नमां।",
+      "tableLabel": "वर्कस्पेस सेटिंग दे बदलावें दा इतिहास",
+      "when": "कदूं",
+      "setting": "सेटिंग",
+      "change": "बदलो",
+      "by": "बदलने आला",
+      "reason": "कारण",
+      "before": "पैह्लें:",
+      "after": "बाद च:",
+      "inherited": "विरासत च मिलेआ मान",
+      "unknownActor": "अनजान",
+      "noReason": "कोई कारण नेईं दित्ता गेआ",
+      "showMore": "होर दस्सो",
+      "scope": "स्तर",
+      "scopeWorkspace": "वर्कस्पेस",
+      "scopeAgent": "एजेंट {id}",
+      "scopeFilter": "बदलाऽ इस स्तर पर दस्सो",
+      "filterAll": "सारे स्तर",
+      "filterWorkspace": "सिर्फ वर्कस्पेस",
+      "filterAgents": "सिर्फ एजेंट",
+      "searchLoadedOnly": "खोज हुन तकर लोड होए दे बदलावें गी कवर करदी ऐ।",
+      "loadError": "बदलावें दा इतिहास लोड नेईं होई सकेआ। {message}",
+      "moreFailed": "होर बदलाऽ लोड नेईं होई सके। {message}",
+      "loadingMore": "लोड होआ दा ऐ"
+    }
+  },
+  "agentBehavior": {
+    "title": "बर्ताव ते हद",
+    "intro": "ये काबू करो जे ये एजेंट इक टर्न च कन्ना अग्गें जाई सकदा ऐ: कन्ने टूल कॉल करी सकदा ऐ, कुन्नी देर चली सकदा ऐ ते कन्ना पिच्छें पढ़दा ऐ। जेह्ड़ा किश तुस इत्थें नेईं बदलदे, ओह् तुंʼदे वर्कस्पेस थमां विरासत च औंदा ऐ।",
+    "saveFirst": "पैह्लें एजेंट गी सेव करो। इसदे बनने परैंत इसदा बर्ताव ते हद सेट कीती जाई सकदी ऐ।",
+    "pickAgent": "उसदा बर्ताव ते हद टैब खोलने आस्तै थल्ले इक एजेंट चुनो।",
+    "tabs": {
+      "label": "एजेंट कन्फिगरेशन",
+      "setup": "सेटअप",
+      "behavior": "बर्ताव ते हद",
+      "unsaved": "सेव नेईं कीते दे बदलाऽ"
+    },
+    "links": {
+      "label": "संबंधित पन्ने",
+      "tenant": "वर्कस्पेस डिफॉल्ट बदलो",
+      "playground": "प्लेग्राउंड च अजमाओ",
+      "prompts": "इस एजेंट दे प्रॉम्प्ट",
+      "promptsAria": "{name} दे प्रॉम्प्ट: प्रॉम्प्ट रजिस्ट्री इस एजेंट पर खोलो",
+      "approvals": "इस एजेंट दियां मंजूरियां",
+      "approvalsAria": "{name} दियां मंजूरियां: इस एजेंट आस्तै फिल्टर कीती दी मंजूरी कतार खोलो",
+      "turns": "टर्न टाइमलाइन",
+      "turnsAria": "{name} दी टर्न टाइमलाइन: इस एजेंट आस्तै टर्न निरीक्षक खोलो"
+    },
+    "readOnly": {
+      "locked": "ये एजेंट बदलने आस्तै बंद ऐ, इस आस्तै ये मान सिर्फ पढ़ने आस्तै न।",
+      "access": "तुस ये मान दिक्खी सकदे ओ पर इस एजेंट तकर तुंʼदी पहुंच उʼनेंगी बदलने नेईं दिंदी।"
+    },
+    "unsaved": "इस टैब च तुंʼदे सेव नेईं कीते दे बदलाऽ न। जाने थमां पैह्लें थल्ले उʼनेंगी सेव करो जां रद्द करो।",
+    "inheritNote": "हर सेटिंग दस्सदी ऐ जे उसदा मान कित्थें थमां औंदा ऐ। इत्थें इक गी बदलना सिर्फ इस एजेंट आस्तै ओवरराइड ऐ; वर्कस्पेस दा मान फी विरासत च लैने आस्तै रीसेट करो।",
+    "others": {
+      "title": "इस एजेंट दे दूए कंट्रोल",
+      "intro": "ये कंट्रोल उप्परली सेटिंग दा हिस्सा नेईं न, इस आस्तै ओह् सेटअप टैब च न।",
+      "generation": "जवाबें दी रचनात्मकता ते लंबाई (तापमान, top-p, ज्यादा थमां ज्यादा टोकन) ते फालतू नमूना चुनाई दे विकल्प।",
+      "generationLink": "जेनरेशन ट्यूनिंग पर जाओ",
+      "autonomy": "स्वायत्तता दा स्तर, हर रन दे खर्चे दी हद, टूल नियम ते माह्नू गी कदूं मंजूरी देनी चाहिदी।",
+      "autonomyLink": "तर्क ते स्वायत्तता पर जाओ"
+    },
+    "discard": {
+      "title": "बिना सेव कीते दे छड्डना ऐ?",
+      "description": "इस एजेंट दे बर्ताव ते हद च तुंʼदे सेव नेईं कीते दे बदलाऽ न। हुन छड्डने पर ओह् गुम होई जांगन।",
+      "stay": "इत्थें गै रौहो ते बदलना जारी रक्खो",
+      "leave": "छड्डो ते बदलाऽ रद्द करो"
+    },
+    "summary": {
+      "title": "ये एजेंट हुन किʼयां बर्ताव करदा ऐ",
+      "subtitle": "एजेंट दे अपने ओवरराइड, तुंʼदी वर्कस्पेस सेटिंग ते प्लेटफॉर्म सेटिंग लागू होने परैंत इस एजेंट आस्तै लागू मान।",
+      "loading": "मौजूदा बर्ताव लोड होआ दा ऐ",
+      "error": "मौजूदा बर्ताव लोड नेईं होई सकेआ। {message}",
+      "retry": "फी कोशश करो",
+      "empty": "इस एजेंट आस्तै हजें तकर कोई बर्ताव सेटिंग उपलब्ध नेईं ऐ।",
+      "facts": {
+        "steps": "हर टर्न च टूल कॉल",
+        "turnTimeout": "हर टर्न दा समां",
+        "toolTimeout": "हर टूल कॉल दा समां",
+        "outputCap": "रक्खेआ गेआ टूल आउटपुट",
+        "continuation": "निरंतरता पास",
+        "approvals": "मंजूरी",
+        "judge": "गुणवत्ता जज मॉडल",
+        "model": "मॉडल"
+      },
+      "tier": {
+        "SUPERVISED": "निगरानी च: हर टूल कॉल माह्नू आस्तै रुकदा ऐ",
+        "SEMI_AUTONOMOUS": "अर्ध-स्वायत्त: तुंʼदा वर्कस्पेस नियम तय करदा ऐ",
+        "FULLY_AUTONOMOUS": "पूरा स्वायत्त: टूल कॉल कदें बी नेईं रुकदे"
+      },
+      "approvalResumes": "मंजूरी परैंत अपने आप जारी रखदा ऐ",
+      "approvalStops": "मंजूरी परैंत नमें मैसेज आस्तै रुकदा ऐ",
+      "judgeDefault": "प्लेटफॉर्म ने चुनेआ",
+      "overrides": {
+        "none": "ये एजेंट हर चीज़ आस्तै तुंʼदे वर्कस्पेस दा मान बरतदा ऐ।",
+        "some": "इस एजेंट आस्तै ओवरराइड कीतियां सेटिंग: {count}।"
+      }
+    },
+    "impact": {
+      "title": "इसदा के मतलब ऐ",
+      "steps": "ये एजेंट इक टर्न च ज्यादा थमां ज्यादा {count} टूल कॉल करी सकदा ऐ। उसदे परैंत उसी अपने कोल जेह्ड़ा किश ऐ उसदे कन्नै जवाब देने आस्तै आखेआ जंदा ऐ।",
+      "stepsTierSupervised": "ये एजेंट निगरानी च ऐ, इस आस्तै इसदी असली उप्परली हद उस मुक्ख संख्या थमां घट्ट ऐ। सटीक संख्या बरतने आस्तै इस एजेंट आस्तै अपना मान सेट करो।",
+      "stepsTierFull": "ये एजेंट पूरा स्वायत्त ऐ, इस आस्तै इसदी असली उप्परली हद उस मुक्ख संख्या थमां मती ऐ। सटीक संख्या बरतने आस्तै इस एजेंट आस्तै अपना मान सेट करो।",
+      "turnTimeout": "इक टर्न {duration} परैंत कटोई दित्ता जंदा ऐ।",
+      "turnTimeoutNone": "टर्न दी कोई समां-सीमा नेईं ऐ।",
+      "toolTimeout": "इक टूल कॉल {duration} परैंत कटोई दित्ती जंदी ऐ।",
+      "toolTimeoutNone": "टूल कॉल दी कोई समां-सीमा नेईं ऐ।",
+      "outputCap": "{chars} थमां लम्मे टूल नतीजे एजेंट दे पढ़ने थमां पैह्लें छोटे कीते जंदे न।",
+      "continuation": "जे जवाब कटोई जंदा ऐ तां एजेंट उसी ज्यादा थमां ज्यादा {count} बारी होर जारी रक्खी सकदा ऐ।",
+      "continuationNone": "कटोए दे जवाब जारी नेईं रक्खे जंदे।",
+      "retrieval": "हर सवाल आस्तै एह् सब थमां चंगे {count} ज्ञान मेल पढ़दा ऐ।",
+      "retrievalScored": "हर सवाल आस्तै एह् सब थमां चंगे {count} ज्ञान मेल पढ़दा ऐ ते {score} थमां घट्ट अंक आले मेल नजरअंदाज करदा ऐ।",
+      "approvalContinuationOn": "कुसै माह्नू ने रुकी दी कार्रवाई मंजूर कीती परैंत, एजेंट अपने आप कम्म खत्म करदा ऐ।",
+      "approvalContinuationOff": "कुसै माह्नू ने रुकी दी कार्रवाई मंजूर कीती परैंत, टर्न खत्म होई जंदा ऐ ते फॉलो-अप हत्थें करना पौंदा ऐ।",
+      "guardClosed": "जदूं सुरक्षा जांच नाकाम होंदी ऐ तां कार्रवाई नामंजूर कीती जंदी ऐ।",
+      "guardOpen": "जदूं सुरक्षा जांच नाकाम होंदी ऐ तां कार्रवाई गी लंघने दित्ता जंदा ऐ।",
+      "branches": "इक कम्म सौंपना इक्कै बारी ज्यादा थमां ज्यादा {count} उप-कार्य शुरू करी सकदा ऐ।"
+    }
+  },
+  "controls": {
+    "eyebrow": "सहायता",
+    "title": "मैं किथें कंट्रोल करां...?",
+    "subtitle": "तुंʼदे एजेंट दे बर्ताव गी घड़ने आला हर कंट्रोल, ते ओह् पन्ना जित्थें ओह् ऐ। जेह्ड़ा बदलना चांदे ओ उसदे कन्नै खोजो।",
+    "breadcrumb": {
+      "label": "ब्रेडक्रंब",
+      "console": "कंसोल",
+      "controls": "कंट्रोल"
+    },
+    "related": {
+      "label": "दूए कंट्रोल"
+    },
+    "search": {
+      "label": "कंट्रोल खोजो",
+      "placeholder": "मिसाल: टाइमआउट, मंजूरी, प्रॉम्प्ट, मेमोरी",
+      "count": "{count} मेल खांदे कंट्रोल",
+      "none": "\"{query}\" कन्नै किश नेईं मिलदा। छोटा शब्द अजमाओ।",
+      "noSettings": "कोई सेटिंग तुंʼदी खोज कन्नै नेईं मिलदी।"
+    },
+    "areasHeading": "कंट्रोल खेतर",
+    "areasIntro": "इʼनें पन्नें च ओह् कंट्रोल न जेह्ड़े इकल संख्या नेईं न: निर्देश, मंजूरी दे नियम, सुरक्षा दे नियम ते इक टर्न ने के कीता उसदा रिकॉर्ड।",
+    "openArea": "खोलो",
+    "needsAccess": "इस पन्ने तकर पहुंच आस्तै कुसै वर्कस्पेस एडमिन गी आखो।",
+    "settingsHeading": "हर रनटाइम सेटिंग",
+    "settingsIntro": "हर सेटिंग पूरे वर्कस्पेस आस्तै, इक एजेंट आस्तै, जां दोऐं आस्तै बदली जाई सकदी ऐ। एजेंट दा अपना मान वर्कस्पेस दे मान थमां मुक्ख रखदा ऐ। सेटिंग तकर सीधे पुजने आस्तै इक लिंक चुनो।",
+    "loading": "सेटिंग दी सूची लोड होआ दी ऐ",
+    "loadFailed": "सेटिंग दी सूची लोड नेईं होई सकी। {message}",
+    "retry": "फी कोशश करो",
+    "emptyCatalog": "इस वर्कस्पेस च दस्सने आस्तै कोई रनटाइम सेटिंग नेईं ऐ।",
+    "changeWorkspace": "वर्कस्पेस आस्तै बदलो",
+    "changeAgent": "इक एजेंट पर बदलो",
+    "workspaceOnly": "सिर्फ वर्कस्पेस-भर",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "एजेंट रनटाइम हद",
+        "intro": "इक टर्न कन्ना कम्म करी सकदा ऐ: टूल कॉल, समां, नतीजे दा आकार ते बहाली।"
+      },
+      "behaviour-settings": {
+        "title": "बर्ताव सेटिंग",
+        "intro": "जवाब किʼयां खत्म ते कैश होंदे न, मंजूरी किʼयां जारी रौहंदी ऐ, सुरक्षा जांच किʼयां बर्ताव करदी ऐ, ते मेमोरी, खोज ते कम्म सौंपना किʼयां कम्म करदे न।"
+      },
+      "other": {
+        "title": "दूई सेटिंग",
+        "intro": "ऐसी सेटिंग जिʼनें दा अपना हिस्सा नेईं ऐ।"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "रनटाइम सेटिंग",
+        "summary": "पूरे वर्कस्पेस आस्तै हद, मंजूरी, गुणवत्ता जांच, सुरक्षा दी सख्ती, मेमोरी ते कम्म सौंपना।",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers हद टाइमआउट टूल कदम फी कोशश कैश मेमोरी कम्म सौंपना गुणवत्ता जज सेटिंग संख्या"
+      },
+      "prompts": {
+        "title": "निर्देश",
+        "summary": "प्लेटफॉर्म मॉडल गी जेह्ड़े प्रॉम्प्ट दिंदा ऐ: हर इक दिक्खो, वर्कस्पेस जां इक एजेंट आस्तै ओवरराइड करो, ते नतीजे दा पूर्वावलोकन दिक्खो।",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry प्रॉम्प्ट निर्देश सिस्टम प्रॉम्प्ट ओवरराइड पूर्वावलोकन रजिस्ट्री"
+      },
+      "approvals": {
+        "title": "मंजूरी",
+        "summary": "माह्नू आस्तै रुकी दी कार्रवाई दी कतार, कुन से टूल गी मंजूरी चाहिदी ऐ उसदे नियम, ते तुंʼदे फैसले परैंत के होंदा ऐ।",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation मंजूरी नामंजूरी कतार ह्यूमन इन द लूप टूल नियम समां खत्म निरंतरता"
+      },
+      "guardrails": {
+        "title": "गार्डरेल",
+        "summary": "ओह् पैटर्न जिʼनेंगी ये वर्कस्पेस लंघने थमां मना करदा ऐ, ते टूल नतीजें पर लागू होने आली सामग्री नीति।",
+        "keywords": "safety rules block filter policy content patterns सुरक्षा नियम रोक फिल्टर नीति सामग्री पैटर्न"
+      },
+      "turns": {
+        "title": "टर्न निरीक्षक",
+        "summary": "इक एजेंट टर्न दी रिकॉर्ड कीती दी टाइमलाइन: के पुच्छेआ गेआ, कुन से टूल चले, हर कदम दा खर्चा कन्ना होआ ते ओह् क्यों रुकेआ।",
+        "keywords": "turn timeline journal trace replay history steps debug टर्न टाइमलाइन जर्नल ट्रेस रीप्ले इतिहास कदम डिबग"
+      },
+      "agentBehavior": {
+        "title": "एजेंट दा बर्ताव ते हद",
+        "summary": "इक एजेंट दे पन्ने च: उसदी अपनी हद ते बर्ताव सेटिंग, हर मान कित्थें थमां औंदा ऐ ते वर्कस्पेस दे मान पर रीसेट कन्नै।",
+        "keywords": "agent override per agent behavior limits tab एजेंट ओवरराइड हर एजेंट बर्ताव हद टैब"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "ये प्रॉम्प्ट ब्लॉकें कन्नै बने दा ऐ",
+    "blocksCount": "{n} ब्लॉक",
+    "blockDefault": "डिफॉल्ट मताबक आया दा",
+    "blockOverride": "{scope} ओवरराइड v{version}",
+    "blockAgentConfig": "एजेंट दा अपना प्रॉम्प्ट",
+    "blockCode": "प्लेटफॉर्म कोड",
+    "blockTokens": "~{tokens} टोकन",
+    "blockHash": "शब्दें दा हैश"
+  },
+  "toolApproval": {
+    "continuing": "एजेंट कम्म जारी रक्खा दा ऐ।",
+    "continueNotStarted": "इस फैसले परैंत एजेंट अपने आप दुबारा शुरू नेईं होआ। इसगी अग्गें बधाने आस्तै इक मैसेज भेजो।",
+    "continueTimedOut": "एजेंट ने हजें तकर जारी रक्खना खत्म नेईं कीता। जदूं खत्म होग, उसदा जवाब गल्लबात च औग; जांचने आस्तै रीलोड करो।",
+    "continuingWaiting": "Your decision is recorded. The agent is picking the task back up.",
+    "continuingRunning": "The agent is working on the next step. Its reply appears here as soon as it is ready.",
+    "continuingStill": "Still working. A model running on this computer can take a few minutes; you can keep reading meanwhile.",
+    "continuingLongWait": "This is taking longer than usual, but the agent has not stopped. Its reply will appear here when it is done.",
+    "continuingStagesLabel": "Progress",
+    "continuingStageDecided": "Decision recorded",
+    "continuingStageRestarted": "Agent restarted",
+    "continuingStageWorking": "Working on it",
+    "panelLabel": "Tool approvals",
+    "queuePosition": "Approval {position} of {total}",
+    "queueMore": "{count} more waiting. The next one appears when you decide this one.",
+    "rawName": "Technical name",
+    "approveAll": "Approve all {count}",
+    "rejectAll": "Reject all",
+    "approvingProgress": "Approving {position} of {total}",
+    "rejectingProgress": "Rejecting {position} of {total}",
+    "bulkHint": "Decides the waiting calls one after another, oldest first, and stops at the first problem.",
+    "bulkStoppedTruncated": "Stopped: the next call's arguments are too long to show here, so it waits for your own decision.",
+    "bulkStoppedError": "Stopped after a problem; the calls below it are still waiting.",
+    "waitingList": "Waiting calls"
+  },
+  "promptDirectives": {
+    "tabRegistry": "सारे प्रॉम्प्ट",
+    "tabAgentPreview": "आखरी प्रॉम्प्ट दा पूर्वावलोकन",
+    "regTitle": "हर प्रॉम्प्ट",
+    "regIntro": "मॉडल आस्तै प्लेटफॉर्म ने जेह्ड़ी बी लिखत लिखी दी ऐ, हुन लागू शब्द, उंʼदे स्रोत ते संस्करण कन्नै। इक दायरा चुनो, बदलने आस्तै इक प्रॉम्प्ट खोलो, ते हर पुराना संस्करण दिक्खो। बदलाऽ लगभग आधे मिनट च सारे सर्वरें पर पुज्जी जंदा ऐ।",
+    "regScopeLabel": "कुस दायरे च बदलना ऐ",
+    "regScope_tenant": "ये वर्कस्पेस",
+    "regScope_agent": "इक एजेंट",
+    "regScope_platform": "पूरा प्लेटफॉर्म",
+    "regAgentLabel": "एजेंट",
+    "regAgentPlaceholder": "इक एजेंट चुनो",
+    "regAgentsFailed": "तुंʼदे एजेंट लोड नेईं होई सके।",
+    "regPickAgent": "कुसै एजेंट दे प्रॉम्प्ट दिक्खने ते बदलने आस्तै उसी चुनो।",
+    "regAgentUnavailable": "लिंक आला एजेंट तुंʼदे आस्तै उपलब्ध नेईं ऐ, क्योंजे ओह् ऐ नेईं जां तुस उसी दिक्खी नेईं सकदे। इसदी जगहां रजिस्ट्री वर्कस्पेस दायरे च खुल्ली।",
+    "regSearchLabel": "प्रॉम्प्ट खोजो",
+    "regSearchPlaceholder": "के, शीर्षक जां विवरण",
+    "regRiskLabel": "खतरे दी श्रेणी",
+    "regRiskAll": "सारी खतरे दी श्रेणियां",
+    "regRisk_STEERS_EVERY_TURN": "हर टर्न गी संभालदा ऐ",
+    "regRisk_SECONDARY_CALL": "दूआ मॉडल कॉल",
+    "regRisk_USER_VISIBLE": "माह्नू गी दस्सेआ जंदा ऐ",
+    "regRisk_TOOL_DESCRIPTION": "टूल दा विवरण",
+    "regOnlyCustomised": "सिर्फ कस्टमाइज कीते दे",
+    "regPlatformReadOnly": "प्लेटफॉर्म-भर दे प्रॉम्प्ट इत्थें पढ़े जाई सकदे न; सिर्फ प्लेटफॉर्म एडमिन गै उʼनेंगी बदली सकदे न।",
+    "regLoadFailed": "प्रॉम्प्ट लोड नेईं होई सके।",
+    "regCount": "{total} प्रॉम्प्टें चा {shown} दस्से दे न।",
+    "regEmptyTitle": "कोई प्रॉम्प्ट नेईं मिलेआ",
+    "regEmptyBody": "खोज जां फिल्टर बदलो।",
+    "regSource_DEFAULT": "डिफॉल्ट मताबक आया दा",
+    "regSource_FALLBACK": "डिफॉल्ट मताबक आया दा (ओवरराइड उपलब्ध नेईं)",
+    "regSource_PLATFORM": "प्लेटफॉर्म",
+    "regSource_TENANT": "वर्कस्पेस",
+    "regSource_AGENT": "एजेंट",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "रिटायर कीता दा",
+    "regRetiredBody": "ये प्रॉम्प्ट हुन कोई लिखत नेईं भेजदा, इस आस्तै बदलने आस्तै किश नेईं ऐ।",
+    "regEffectiveOff": "बंद: किश नेईं भेजेआ जंदा।",
+    "regEffectiveTokens": "हुन लागू, लगभग {tokens} टोकन।",
+    "regEffectiveLabel": "{title} आस्तै लागू शब्द",
+    "regOpenEditor": "{title} बदलो",
+    "regCloseEditor": "{title} बंद करो",
+    "regEditingOverride": "{scope} संस्करण बदली दा ऐ, हुन v{version}।",
+    "regEditingNone": "हजें तकर कोई {scope} संस्करण नेईं ऐ। एह् इसदे थल्ले आले शब्दें थमां शुरू होंदा ऐ: {below}।",
+    "regPlaceholders": "रनटाइम पर भरोचदा ऐ:",
+    "regRequired": "(जरूरी)",
+    "regProblemsTitle": "सेव करने थमां पैह्लें इसगी ठीक करो",
+    "regReasonLabel": "बदलाऽ दा कारण (इतिहास च रक्खेआ जंदा ऐ)",
+    "regReasonPlaceholder": "मरजी दा",
+    "regConflict": "तुंʼदे बदलने दे समें कुसै ने इस प्रॉम्प्ट गी बदली दित्ता। उसदा संस्करण दिक्खने आस्तै इसगी बंद करियै फी खोलो, फी फी कोशश करो।",
+    "regRevert": "{to} पर परतो",
+    "regShowHistory": "इतिहास",
+    "regHideHistory": "इतिहास लकाओ",
+    "regHistoryLoading": "इतिहास लोड होआ दा ऐ…",
+    "regHistoryFailed": "इतिहास लोड नेईं होई सकेआ।",
+    "regHistoryEmpty": "इस दायरे च हजें तकर कोई संस्करण नेईं ऐ।",
+    "regVersion": "संस्करण {version}",
+    "regAction_CREATE": "बनाया",
+    "regAction_UPDATE": "बदलेआ",
+    "regAction_REVERT": "परतोआ दित्ता",
+    "regAction_MIGRATE": "बदली गेआ",
+    "regCurrent": "मौजूदा",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "अनजान",
+    "regReason": "कारण: {reason}",
+    "regShowDiff": "संस्करण {version} दा बदलाऽ दस्सो",
+    "regHideDiff": "संस्करण {version} दा बदलाऽ लकाओ",
+    "regDiffLabel": "संस्करण {version} ने कीता बदलाऽ",
+    "regNoDiff": "इस संस्करण च कोई लिखत नेईं बदलेआ।",
+    "regRestore": "संस्करण {version} बहाल करो",
+    "regRestoreReason": "संस्करण {version} दे शब्द बहाल होई गे",
+    "regRestoreFailed": "ये संस्करण बहाल नेईं होई सकेआ।",
+    "regRestoreAck": "मैं समझदा/समझदी आं जे {title} दा इक संस्करण बहाल करने कन्नै सुरक्षा कमजोर होई सकदी ऐ।",
+    "regPreviewTitle": "आखरी प्रॉम्प्ट दा पूर्वावलोकन",
+    "regPreviewIntro": "मॉडल गी कॉल कीते बगैर, इक टर्न जिʼयां करदा उʼयां गै एजेंट दा असली सिस्टम प्रॉम्प्ट ते टूल सूची बनांदा ऐ। हर ब्लॉक दस्सदा ऐ जे प्रॉम्प्ट के ऐ, उसदा दायरा, ते उसदे शब्द कुस संस्करण थमां औंदे न।",
+    "regPreviewMessageLabel": "नमूने दा बरतोंकार मैसेज (मरजी दा)",
+    "regPreviewMessagePlaceholder": "असली मैसेज दी तर्ज पर टूल ते याद कीती दी मेमोरी चुनने आस्तै बरतेआ जंदा ऐ।",
+    "regPreviewSmallModel": "नान्हे मॉडल आस्तै पूर्वावलोकन",
+    "regPreviewBuild": "पूर्वावलोकन बनाओ",
+    "regPreviewBuilding": "बनाया जा दा ऐ…",
+    "regPreviewFailed": "पूर्वावलोकन नेईं बनी सकेआ।",
+    "regPreviewTotals": "सिस्टम लिखत आस्तै लगभग {prompt} टोकन ते टूल परिभाषा आस्तै {tools} टोकन (अंदाजा)।",
+    "regPreviewOverBudgetTitle": "टोकन बजट थमां मता",
+    "regPreviewOverBudget": "टिकी रौहने आली सिस्टम लिखत कन्फिगर कीते दे {budget} टोकन दे बजट थमां मता ऐ। किश नेईं कटोआ; इक प्रॉम्प्ट गी छोटा करने दा सोचो।",
+    "regPreviewMessageHeading": "मैसेज: {message}",
+    "regPreviewTokens": "~{tokens} टोकन",
+    "regPreviewTools": "टूल ({count})",
+    "regPreviewNoTools": "ये एजेंट कोई टूल नेईं दिंदा।",
+    "regPreviewNotes": "ये पूर्वावलोकन के नेईं जान सकदा",
+    "regOriginDefault": "डिफॉल्ट मताबक आया दा",
+    "regOriginOverride": "{scope} ओवरराइड v{version}",
+    "regOriginAgentConfig": "एजेंट दा अपना सिस्टम प्रॉम्प्ट",
+    "regOriginCode": "प्लेटफॉर्म कोड"
+  },
+  "toolLabels": {
+    "mcpTool": "{tool} ({server})",
+    "label_web_search": "Search the web",
+    "does_web_search": "Looks up public web pages that match a search and reads their titles and snippets.",
+    "label_fetch_web_page": "Open a web page",
+    "does_fetch_web_page": "Downloads one public web page and reads its text.",
+    "label_deep_research": "Research a topic on the web",
+    "does_deep_research": "Runs several web searches and reads the pages it finds.",
+    "label_verify_citations": "Check quotes against sources",
+    "does_verify_citations": "Compares quoted text with the web pages it was taken from.",
+    "label_http_request": "Call a web API",
+    "does_http_request": "Sends a request to a web address or API; depending on the request it can read or change something there.",
+    "label_http_request_write": "Send data to a web API",
+    "does_http_request_write": "Sends data to a web address, which can change something on that service.",
+    "label_schedule_task": "Schedule a task",
+    "does_schedule_task": "Sets up a task to run later or on a repeating schedule.",
+    "label_create_workflow": "Create a workflow",
+    "does_create_workflow": "Creates a new workflow in this workspace.",
+    "label_data_table_query": "Look up a data table",
+    "does_data_table_query": "Reads rows from one of this workspace's data tables.",
+    "label_data_table_write": "Change a data table",
+    "does_data_table_write": "Adds or changes rows in one of this workspace's data tables.",
+    "label_coding_task": "Run a coding task",
+    "does_coding_task": "Starts a coding task that can read and change files in a code workspace.",
+    "label_delegate_to_specialist": "Ask a specialist agent",
+    "does_delegate_to_specialist": "Hands part of the task to another agent and reads its answer.",
+    "label_delegate_parallel": "Ask several agents at once",
+    "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
+    "label_web_task": "Use a browser on a website",
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
   }
 }

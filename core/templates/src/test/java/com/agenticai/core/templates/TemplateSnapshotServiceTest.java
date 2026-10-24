@@ -95,6 +95,34 @@ class TemplateSnapshotServiceTest {
     }
 
     @Test
+    void toAgentCreateRequest_rejectsAnUnknownEnumValueInsteadOfDefaulting() {
+        String configJson =
+                "{\"systemPrompt\":\"p\",\"providerName\":\"PLATFORM_HOSTED\","
+                        + "\"maxTokens\":1024,\"temperature\":0.2,\"topP\":0.9,"
+                        + "\"reasoningDepth\":\"BALANCED\",\"autonomyTier\":\"SUPERVISED\"}";
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> service.toAgentCreateRequest(configJson, "x"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("reasoningDepth")
+                .hasMessageContaining("'BALANCED'")
+                .hasMessageContaining("FAST, CAREFUL, RIGOROUS, PLANNED");
+    }
+
+    @Test
+    void toAgentCreateRequest_stillTreatsBlankAndAbsentEnumsAsUnset() {
+        String configJson =
+                "{\"systemPrompt\":\"p\",\"maxTokens\":1024,\"temperature\":0.2,\"topP\":0.9,"
+                        + "\"reasoningDepth\":\"\",\"tuningMode\":null}";
+
+        AgentCreateRequest request = service.toAgentCreateRequest(configJson, "x");
+
+        assertThat(request.reasoningDepth()).isNull();
+        assertThat(request.tuningMode()).isNull();
+        assertThat(request.providerName()).isEqualTo(ProviderName.PLATFORM_HOSTED);
+    }
+
+    @Test
     void workflowSnapshot_carriesOnlyTheGraphNotTheWebhookSecretOrOwner() throws Exception {
         String graphJson = "{\"nodes\":[{\"id\":\"n1\",\"type\":\"agent\"}],\"edges\":[]}";
         WorkflowDefinition definition =

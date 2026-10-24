@@ -17,6 +17,8 @@ import { Select } from "../components/ui/select";
 import { useAuth } from "../components/AuthProvider";
 import { errorMessage } from "../lib/errors";
 import { poolLabel } from "../lib/personalInstall";
+import PaginationControls from "../components/PaginationControls";
+import { usePagination } from "../lib/usePagination";
 
 // "AI Model Control" - per-tenant, per-feature preferred provider/model
 // overrides. Backed by TenantAiModelPreferenceController.java (core/tenancy) -
@@ -122,7 +124,9 @@ function EditForm({ row, providerOptions, busy, onSave, onCancel }: EditFormProp
             onValueChange={setProviderName}
             options={providerOptions.map((p) => ({
               value: p.name,
-              label: (PROVIDER_LABELS[p.name] || p.name) + (p.name === "PLATFORM_HOSTED" ? "" : p.connected ? " · Connected" : " · Not connected yet"),
+              label:
+                (PROVIDER_LABELS[p.name] || p.name) +
+                (p.name === "PLATFORM_HOSTED" ? "" : p.connected ? " · Connected" : " · Not connected yet"),
             }))}
           />
         </div>
@@ -144,8 +148,8 @@ function EditForm({ row, providerOptions, busy, onSave, onCancel }: EditFormProp
         <Link href="/providers" className="underline underline-offset-2">
           Providers
         </Link>
-        , or Platform-hosted) - it swaps the model, it can&apos;t reroute a call to a provider that isn&apos;t
-        already connected.
+        , or Platform-hosted) - it swaps the model, it can&apos;t reroute a call to a provider that isn&apos;t already
+        connected.
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <Button type="submit" size="sm" disabled={busy}>
@@ -194,6 +198,8 @@ export default function AiModelControlPage() {
     void refresh();
   }, [refresh]);
   usePageReady(loaded);
+
+  const pg = usePagination(rows);
 
   // Per-feature model overrides are a BYOK-adjacent capability - a plan that
   // can't activate a provider key (FREE) has nothing meaningful to point an
@@ -287,8 +293,8 @@ export default function AiModelControlPage() {
         <Card className="mb-4 gap-0 border-dashed p-4">
           <p className="text-sm text-muted-foreground">
             {poolLabel(
-              "Your plan routes every AI feature through the shared platform-hosted pool. Upgrade to connect your own provider keys and choose a model per feature — hover any \"Set override\" button below to upgrade.",
-              "Every AI feature runs on the local model (Ollama) on this machine. Connect a provider key to choose a cloud model per feature.",
+              'Your plan routes every AI feature through the shared platform-hosted pool. Upgrade to connect your own provider keys and choose a model per feature — hover any "Set override" button below to upgrade.',
+              "Every AI feature runs on the local model (Ollama) on this machine. Connect a provider key to choose a cloud model per feature."
             )}
           </p>
         </Card>
@@ -313,7 +319,7 @@ export default function AiModelControlPage() {
         }
         className="space-y-3"
       >
-        {rows.map((row) => {
+        {pg.pageItems.map((row) => {
           const hasOverride = !!(row.providerName && row.model);
           const editing = editingKey === row.featureKey;
           const busy = busyKey === row.featureKey;
@@ -336,7 +342,9 @@ export default function AiModelControlPage() {
                       {(PROVIDER_LABELS[row.providerName] || row.providerName) + " · " + row.model}
                     </Badge>
                   ) : (
-                    <p className="text-xs text-muted-foreground">No override set — uses the platform&apos;s built-in default.</p>
+                    <p className="text-xs text-muted-foreground">
+                      No override set — uses the platform&apos;s built-in default.
+                    </p>
                   )}
                 </div>
                 {canManageSettings && !editing && (
@@ -371,6 +379,14 @@ export default function AiModelControlPage() {
             </Card>
           );
         })}
+        <PaginationControls
+          page={pg.page}
+          totalPages={pg.totalPages}
+          totalItems={pg.totalItems}
+          pageSize={pg.pageSize}
+          onPageChange={pg.setPage}
+          onPageSizeChange={pg.setPageSize}
+        />
       </Section>
     </AppShell>
   );

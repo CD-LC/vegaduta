@@ -8,6 +8,10 @@ import com.agenticai.core.agents.modality.ModelModalitiesService;
 import com.agenticai.core.agents.modality.UnsupportedAttachmentTypeException;
 import com.agenticai.core.providers.ProviderModelCatalogService;
 import com.agenticai.core.providers.ProviderModelResponse;
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingSource;
+import com.agenticai.core.settings.SettingValue;
+import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.storage.FileStorageService;
 import java.io.IOException;
@@ -51,13 +55,71 @@ public class ChatAttachmentService {
      */
     static final String KEY_PREFIX = "chat-attachments/";
 
-    private static final long MAX_IMAGE_BYTES = 8L * 1024 * 1024;
-    private static final long MAX_AUDIO_BYTES = 15L * 1024 * 1024;
-    private static final long MAX_VIDEO_BYTES = 25L * 1024 * 1024;
-    // Matches the inline path's total-attachment ceiling (ModelModalities
-    // .MAX_ATTACHMENT_TOTAL_BYTES) so a PDF that would be accepted on the
-    // /playground page is accepted here too.
-    private static final long MAX_DOCUMENT_BYTES = 10L * 1024 * 1024;
+    // The size limit of each kind is app.chat.limits.attachments.* (ChatLimitsProperties); the document limit's
+    // default matches the inline path's total-attachment ceiling (ModelModalities.MAX_ATTACHMENT_TOTAL_BYTES) so
+    // a PDF that would be accepted on the /playground page is accepted here too.
+    private volatile ChatLimitsProperties.Attachments limits = new ChatLimitsProperties().getAttachments();
+
+    /** Sets {@code app.chat.limits.attachments.*}; until it is called the shipped defaults apply. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void useLimits(ChatLimitsProperties properties) {
+        this.limits = (properties == null ? new ChatLimitsProperties() : properties).getAttachments();
+    }
+
+    private volatile SettingsResolver settings;
+
+    /**
+     * The settings catalog, so a tenant's or an agent's {@code chat.attachments.max*Mb} replace {@code
+     * app.chat.limits.attachments.*} for uploads to that agent. An upload is an HTTP request of the caller's tenant.
+     * Absent (hand-built instances) or failing: the platform value.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setSettingsResolver(SettingsResolver resolver) {
+        this.settings = resolver;
+    }
+
+    static final String MAX_IMAGE_MB_KEY = "chat.attachments.maxImageMb";
+    static final String MAX_AUDIO_MB_KEY = "chat.attachments.maxAudioMb";
+    static final String MAX_VIDEO_MB_KEY = "chat.attachments.maxVideoMb";
+    static final String MAX_DOCUMENT_MB_KEY = "chat.attachments.maxDocumentMb";
+
+    /**
+     * The size cap of an upload of {@code category} to {@code agentId}: the tenant's or the agent's whole-megabyte
+     * setting when one was made, else the platform's exact byte count (a platform value that is not a whole number of
+     * megabytes is not rounded).
+     */
+    private long maxBytes(ChatAttachmentCategory category, UUID agentId) {
+        long platform =
+                switch (category) {
+                    case IMAGE -> limits.getMaxImageBytes();
+                    case AUDIO -> limits.getMaxAudioBytes();
+                    case VIDEO -> limits.getMaxVideoBytes();
+                    case DOCUMENT, SPREADSHEET -> limits.getMaxDocumentBytes();
+                };
+        SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return platform;
+        }
+        String key =
+                switch (category) {
+                    case IMAGE -> MAX_IMAGE_MB_KEY;
+                    case AUDIO -> MAX_AUDIO_MB_KEY;
+                    case VIDEO -> MAX_VIDEO_MB_KEY;
+                    case DOCUMENT, SPREADSHEET -> MAX_DOCUMENT_MB_KEY;
+                };
+        try {
+            SettingValue value = catalog.get(key, SettingContext.forAgent(agentId));
+            if (value.source() == SettingSource.TENANT || value.source() == SettingSource.AGENT) {
+                return ((Number) value.value()).longValue() * 1024 * 1024;
+            }
+            return platform;
+        } catch (RuntimeException e) {
+            log.warn("Could not read {}; using app.chat.limits.attachments.*: {}", key, e.toString());
+            return platform;
+        }
+    }
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ChatAttachmentService.class);
 
     private final AgentService agentService;
     private final ProviderModelCatalogService providerModelCatalogService;
@@ -106,13 +168,7 @@ public class ChatAttachmentService {
         ChatAttachmentCategory category =
                 ChatAttachmentCategory.fromContentType(file.getContentType());
 
-        long maxBytes =
-                switch (category) {
-                    case IMAGE -> MAX_IMAGE_BYTES;
-                    case AUDIO -> MAX_AUDIO_BYTES;
-                    case VIDEO -> MAX_VIDEO_BYTES;
-                    case DOCUMENT, SPREADSHEET -> MAX_DOCUMENT_BYTES;
-                };
+        long maxBytes = maxBytes(category, agentId);
         if (file.getSize() > maxBytes) {
             throw new AttachmentTooLargeException(
                     category.name().toLowerCase(java.util.Locale.ROOT)

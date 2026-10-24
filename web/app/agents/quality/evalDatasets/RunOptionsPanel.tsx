@@ -1,12 +1,16 @@
 "use client";
 
 import { Input } from "../../../components/ui/input";
+import { Select } from "../../../components/ui/select";
+import { useTranslations } from "../../../lib/i18n";
 
 export interface RunOptionValues {
   judgeModel: string;
   strictJudge: boolean;
   repeats: string;
   budget: string;
+  /** "" = the dataset's pinned mode, else the workspace default; FULL or QUICK = this run only. */
+  mode: "" | "FULL" | "QUICK";
 }
 
 /** Run options (V343) - applied to the NEXT triggered run. */
@@ -17,9 +21,26 @@ export default function RunOptionsPanel({
   values: RunOptionValues;
   onChange: (patch: Partial<RunOptionValues>) => void;
 }) {
+  const t = useTranslations("evalControls");
   return (
     <div className="space-y-3 rounded-md border border-border p-3">
       <h3 className="text-sm font-semibold text-foreground">Run options</h3>
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground" id="eval-run-mode-label">
+          {t("runModeLabel")}
+        </label>
+        <Select
+          aria-labelledby="eval-run-mode-label"
+          value={values.mode}
+          onValueChange={(next) => onChange({ mode: next === "FULL" || next === "QUICK" ? next : "" })}
+          options={[
+            { value: "", label: t("runModeInherit") },
+            { value: "FULL", label: t("modeNameFull") },
+            { value: "QUICK", label: t("modeNameQuick") },
+          ]}
+        />
+        <p className="text-xs text-muted-foreground">{t("runModeHelp")}</p>
+      </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-run-judge-model">

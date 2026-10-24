@@ -45,9 +45,6 @@ final class HookEngine {
 
     private static final Logger log = LoggerFactory.getLogger(HookEngine.class);
 
-    static final String DEFAULT_BLOCK_REASON = "this is blocked by a workspace policy";
-    static final String DEFAULT_LIMIT_REASON =
-            "the call limit set for this workspace has been reached";
     private static final int MAX_WEBHOOK_DATA_CHARS = 2_000;
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
@@ -100,6 +97,14 @@ final class HookEngine {
     private final long budgetMillis;
     private final long hardCapMillis;
     private final Executor async;
+
+    /** The words this engine writes; the shipped ones until {@link #usePrompts} wires the registry. */
+    private volatile HookTexts texts = HookTexts.DEFAULTS;
+
+    /** Wires the prompt registry ({@code message.hook.*}); null restores the shipped wording. */
+    void usePrompts(com.agenticai.core.prompts.PromptResolver resolver) {
+        this.texts = resolver == null ? HookTexts.DEFAULTS : new HookTexts(resolver);
+    }
 
     HookEngine(
             HookWebhookClient webhook,
@@ -219,9 +224,9 @@ final class HookEngine {
             switch (h.action()) {
                 case LIMIT -> {
                     if (!withinLimit(ctx, eh, run)) {
-                        String reason = limitReason(h);
+                        String reason = limitReason(ctx, h);
                         sink.record(ctx, eh, "limited", tool, reason);
-                        return ToolPre.deny(toolDenied(tool, reason));
+                        return ToolPre.deny(texts.toolDenied(ctx, tool, reason));
                     }
                 }
                 case REDACT -> {
@@ -236,14 +241,15 @@ final class HookEngine {
                                     "redaction would have produced invalid arguments");
                         }
                         return ToolPre.deny(
-                                toolDenied(tool, "the arguments could not be redacted safely"));
+                                texts.toolDenied(
+                                        ctx, tool, texts.text(ctx, HookTexts.ARGS_NOT_REDACTABLE)));
                     }
                     current = r.text();
                 }
                 case WEBHOOK -> {
                     Verdict v = webhookVerdict(ctx, eh, tool, current, budget);
                     if (!v.allow()) {
-                        return ToolPre.deny(toolDenied(tool, v.reason()));
+                        return ToolPre.deny(texts.toolDenied(ctx, tool, v.reason()));
                     }
                 }
                 case LOG -> sink.record(ctx, eh, "logged", tool, label(h));
@@ -272,25 +278,34 @@ final class HookEngine {
             }
             switch (h.action()) {
                 case BLOCK -> {
-                    String reason = authoredOr(h.str("reason"), DEFAULT_BLOCK_REASON);
+                    String reason =
+                            authoredOr(
+                                    h.str("reason"), texts.text(ctx, HookTexts.DEFAULT_BLOCK_REASON));
                     sink.record(ctx, eh, "deny", tool, reason);
-                    return withheldResult(tool, reason);
+                    return texts.withheldResult(ctx, tool, reason);
                 }
                 case REDACT -> {
                     Redacted r = redact(ctx, eh, tool, current, budget);
                     if (r.failed()) {
-                        return withheldResult(tool, "it could not be redacted safely");
+                        return texts.withheldResult(
+                                ctx, tool, texts.text(ctx, HookTexts.OUTPUT_NOT_REDACTABLE));
                     }
                     current = r.text();
                 }
                 case APPEND_CONTEXT -> {
-                    current = current + "\n\n[Workspace note] " + h.str("note");
+                    current =
+                            current
+                                    + "\n\n"
+                                    + texts.text(
+                                            ctx,
+                                            HookTexts.TOOL_RESULT_NOTE,
+                                            Map.of("note", String.valueOf(h.str("note"))));
                     sink.record(ctx, eh, "note", tool, null);
                 }
                 case WEBHOOK -> {
                     Verdict v = webhookVerdict(ctx, eh, tool, current, budget);
                     if (!v.allow()) {
-                        return withheldResult(tool, v.reason());
+                        return texts.withheldResult(ctx, tool, v.reason());
                     }
                 }
                 case LOG -> sink.record(ctx, eh, "logged", tool, label(h));
@@ -318,8 +333,7 @@ final class HookEngine {
                 case BLOCK -> {
                     String reason =
                             authoredOr(
-                                    h.str("reason"),
-                                    "This request was blocked by a workspace policy.");
+                                    h.str("reason"), texts.text(ctx, HookTexts.REQUEST_BLOCKED));
                     sink.record(ctx, eh, "deny", null, reason);
                     return new ModelPre(reason, null);
                 }
@@ -330,15 +344,19 @@ final class HookEngine {
                                     limitKey(ctx, eh), perMinute, HookRateLimiter.MINUTE_MILLIS)) {
                         String reason =
                                 authoredOr(
-                                        h.str("message"),
-                                        "Too many requests right now - please try again in a minute.");
+                                        h.str("message"), texts.text(ctx, HookTexts.RATE_LIMITED));
                         sink.record(ctx, eh, "limited", null, reason);
                         return new ModelPre(reason, null);
                     }
                 }
                 case APPEND_CONTEXT -> {
                     if (note == null) {
-                        note = new StringBuilder("Workspace note: ").append(h.str("note"));
+                        note =
+                                new StringBuilder(
+                                        texts.text(
+                                                ctx,
+                                                HookTexts.CONTEXT_NOTE,
+                                                Map.of("note", String.valueOf(h.str("note")))));
                     } else {
                         note.append(' ').append(h.str("note"));
                     }
@@ -348,9 +366,7 @@ final class HookEngine {
                     Verdict v = webhookVerdict(ctx, eh, null, userMessage, budget);
                     if (!v.allow()) {
                         return new ModelPre(
-                                authoredOr(
-                                        v.reason(),
-                                        "This request was blocked by a workspace policy."),
+                                authoredOr(v.reason(), texts.text(ctx, HookTexts.REQUEST_BLOCKED)),
                                 null);
                     }
                 }
@@ -382,23 +398,21 @@ final class HookEngine {
                 case BLOCK -> {
                     String reason =
                             authoredOr(
-                                    h.str("reason"),
-                                    "This reply was withheld by a workspace policy.");
+                                    h.str("reason"), texts.text(ctx, HookTexts.REPLY_WITHHELD));
                     sink.record(ctx, eh, "deny", null, reason);
                     return reason;
                 }
                 case REDACT -> {
                     Redacted r = redact(ctx, eh, null, current, budget);
                     if (r.failed()) {
-                        return "This reply was withheld because it could not be redacted safely.";
+                        return texts.text(ctx, HookTexts.REPLY_NOT_REDACTABLE);
                     }
                     current = r.text();
                 }
                 case WEBHOOK -> {
                     Verdict v = webhookVerdict(ctx, eh, null, current, budget);
                     if (!v.allow()) {
-                        return authoredOr(
-                                v.reason(), "This reply was withheld by a workspace policy.");
+                        return authoredOr(v.reason(), texts.text(ctx, HookTexts.REPLY_WITHHELD));
                     }
                 }
                 case LOG -> sink.record(ctx, eh, "logged", null, label(h));
@@ -504,8 +518,8 @@ final class HookEngine {
         return ctx.tenantId() + "|" + ctx.agentId() + "|" + eh.key();
     }
 
-    private static String limitReason(HookDefinition h) {
-        return authoredOr(h.str("message"), DEFAULT_LIMIT_REASON);
+    private String limitReason(HookCtx ctx, HookDefinition h) {
+        return authoredOr(h.str("message"), texts.text(ctx, HookTexts.DEFAULT_LIMIT_REASON));
     }
 
     /**
@@ -573,7 +587,7 @@ final class HookEngine {
     private Verdict webhookFailed(HookCtx ctx, EffectiveHook eh, String tool, String why) {
         sink.record(ctx, eh, "error", tool, why);
         if (eh.def().failMode() == FailMode.CLOSED) {
-            return new Verdict(false, "a required workspace hook check could not complete");
+            return new Verdict(false, texts.text(ctx, HookTexts.CHECK_INCOMPLETE));
         }
         return Verdict.ALLOW_VERDICT;
     }
@@ -623,32 +637,18 @@ final class HookEngine {
         }
     }
 
+    /** The shipped wording of the result for a stopped call (hook-free callers, tests). */
     static String toolDenied(String tool, String reason) {
-        return "This tool call ('"
-                + tool
-                + "') was not executed: "
-                + noTrailingPeriod(authoredOr(reason, DEFAULT_BLOCK_REASON))
-                + ". Do not retry this tool - proceed without it or tell the user it is unavailable.";
+        return HookTexts.DEFAULTS.toolDenied(null, tool, reason);
     }
 
+    /** The shipped wording of the result for withheld output (hook-free callers, tests). */
     static String withheldResult(String tool, String reason) {
-        return "Tool output from '"
-                + tool
-                + "' was withheld by a workspace policy and not returned to the model: "
-                + noTrailingPeriod(authoredOr(reason, DEFAULT_BLOCK_REASON))
-                + ". Try a different approach, or tell the user this result is not available.";
-    }
-
-    private static String noTrailingPeriod(String text) {
-        String t = text;
-        while (t.endsWith(".")) {
-            t = t.substring(0, t.length() - 1);
-        }
-        return t.isEmpty() ? text : t;
+        return HookTexts.DEFAULTS.withheldResult(null, tool, reason);
     }
 
     private static String authoredOr(String value, String fallback) {
-        return value == null || value.isBlank() ? fallback : value.strip();
+        return HookTexts.authoredOr(value, fallback);
     }
 
     private static String label(HookDefinition h) {

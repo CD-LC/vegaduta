@@ -151,4 +151,25 @@ class HostedLlmChatClientFactoryTest {
         assertFalse(HostedLlmChatClientFactory.isKeyless("sk-abc"));
         assertFalse(HostedLlmChatClientFactory.isKeyless("ollama"));
     }
+
+    @Test
+    void aLocalOllamaRowAsksTheServerToKeepTheModelLoaded() {
+        java.util.Map<String, Object> extra = HostedLlmChatClientFactory.localOllamaExtraBody(32768, null, "-1");
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.Map.of("num_ctx", 32768), extra.get("options"));
+        // A number, not the string "-1": Ollama answers 400 to a duration without a unit.
+        org.junit.jupiter.api.Assertions.assertEquals(-1L, extra.get("keep_alive"));
+    }
+
+    @Test
+    void theRowsOwnKeepAliveWinsAndADurationStaysText() {
+        org.junit.jupiter.api.Assertions.assertEquals(
+                "2h", HostedLlmChatClientFactory.localOllamaExtraBody(0, "2h", "-1").get("keep_alive"));
+        org.junit.jupiter.api.Assertions.assertFalse(
+                HostedLlmChatClientFactory.localOllamaExtraBody(0, "2h", "-1").containsKey("options"));
+    }
+
+    @Test
+    void noKeepAliveConfiguredSendsNone() {
+        org.junit.jupiter.api.Assertions.assertTrue(HostedLlmChatClientFactory.localOllamaExtraBody(0, " ", "").isEmpty());
+    }
 }

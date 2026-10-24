@@ -34,7 +34,7 @@ public class AgentRunBudgetService {
 
     public AgentRunBudgetService(
         AgentService agentService,
-        @Value("${app.guardrails.run-budget.usd:0}") BigDecimal globalCapUsd,
+        @Value("${app.guardrails.run-budget.usd:2.0}") BigDecimal globalCapUsd,
         @Value("${app.guardrails.run-budget.input-usd-per-m:3.00}") BigDecimal inputUsdPerM,
         @Value("${app.guardrails.run-budget.output-usd-per-m:15.00}") BigDecimal outputUsdPerM,
         @Value("${app.guardrails.run-budget.avg-branch-tokens:8000}") long avgBranchTokens,

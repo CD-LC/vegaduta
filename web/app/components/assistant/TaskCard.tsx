@@ -1,10 +1,25 @@
 "use client";
 
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { AlertTriangle, Bot, Check, FileText, Loader2, MessageCircle, MessageSquareText, Phone, Wrench, Zap } from "lucide-react";
+import {
+  AlertTriangle,
+  Bot,
+  Check,
+  FileText,
+  Loader2,
+  MessageCircle,
+  MessageSquareText,
+  Phone,
+  Wrench,
+  Zap,
+} from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
 import { cn } from "../../lib/utils";
+import { errorMessage } from "../../lib/errors";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import MediaCard from "../MediaCard";
 import WorkedForBlock from "./WorkedForBlock";
 import type { AssistantTask, AssistantTurn, TaskChannel } from "./assistantTypes";
@@ -20,6 +35,57 @@ export interface TaskCardHandlers {
   onConfirm: (cardId: string) => void;
   onCancel: (cardId: string) => void;
   onChannel: (cardId: string, channel: TaskChannel) => void;
+  /** Save the person's delivery number (PUT /api/account/phone); rejects with the reason if it fails. */
+  onSavePhone: (phone: string) => Promise<void>;
+}
+
+/** The "add your number" prompt on a card that cannot deliver by WhatsApp / SMS / call yet. */
+function PhonePrompt({ onSave, disabled }: { onSave: (phone: string) => Promise<void>; disabled: boolean }) {
+  const t = useTranslations("assistant");
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await onSave(draft.trim());
+    } catch (err) {
+      setError(errorMessage(err, t("taskPhoneSaveFailed")));
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-1.5">
+      <p className="text-xs text-muted-foreground">{t("taskNeedsPhone")}</p>
+      <Label htmlFor="task-card-phone" className="sr-only">
+        {t("taskPhoneLabel")}
+      </Label>
+      <div className="flex gap-2">
+        <Input
+          id="task-card-phone"
+          type="tel"
+          autoComplete="tel"
+          className="h-8 flex-1 text-xs"
+          placeholder={t("taskPhonePlaceholder")}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          required
+        />
+        <Button type="submit" size="sm" disabled={disabled || saving || !draft.trim()}>
+          {t("taskAddPhone")}
+        </Button>
+      </div>
+      {error && (
+        <p className="text-xs text-destructive" role="alert">
+          {error}
+        </p>
+      )}
+    </form>
+  );
 }
 
 /**
@@ -27,16 +93,32 @@ export interface TaskCardHandlers {
  * folded into one entry): which agent will run it, the tools it detected, where the result goes,
  * Confirm / Cancel; then the work trace while it runs and the answer when it is done.
  */
-export default function TaskCard({ turn, task, busy, handlers }: { turn: AssistantTurn; task: AssistantTask; busy: boolean; handlers: TaskCardHandlers }) {
+export default function TaskCard({
+  turn,
+  task,
+  busy,
+  handlers,
+}: {
+  turn: AssistantTurn;
+  task: AssistantTask;
+  busy: boolean;
+  handlers: TaskCardHandlers;
+}) {
   const t = useTranslations("assistant");
   const tools = task.preview?.detectedTools ?? [];
   const running = task.status === "running";
   return (
-    <div className="w-full max-w-[85%] space-y-2 rounded-xl border border-border bg-card p-3 text-sm" data-testid="task-card" data-status={task.status}>
+    <div
+      className="w-full max-w-[85%] space-y-2 rounded-xl border border-border bg-card p-3 text-sm"
+      data-testid="task-card"
+      data-status={task.status}
+    >
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         <Zap size={13} className="text-primary" aria-hidden="true" />
         {t("taskCardTitle")}
-        {task.taskId && <span className="ml-auto font-mono text-[10px] normal-case tracking-normal">{task.taskId.slice(0, 8)}</span>}
+        {task.taskId && (
+          <span className="ml-auto font-mono text-[10px] normal-case tracking-normal">{task.taskId.slice(0, 8)}</span>
+        )}
       </div>
 
       {task.status === "previewing" && (
@@ -57,7 +139,9 @@ export default function TaskCard({ turn, task, busy, handlers }: { turn: Assista
                 {!task.agentId && <span className="ml-1 font-normal text-muted-foreground">{t("taskAutoPicked")}</span>}
               </dd>
               {(task.preview.providerName || task.preview.model) && (
-                <dd className="text-muted-foreground">{[task.preview.providerName, task.preview.model].filter(Boolean).join(" · ")}</dd>
+                <dd className="text-muted-foreground">
+                  {[task.preview.providerName, task.preview.model].filter(Boolean).join(" · ")}
+                </dd>
               )}
             </div>
           </div>
@@ -66,7 +150,9 @@ export default function TaskCard({ turn, task, busy, handlers }: { turn: Assista
             <div className="min-w-0">
               <dt className="sr-only">{t("taskTools")}</dt>
               <dd className="text-muted-foreground">
-                {tools.length === 0 ? t("taskNoTools") : t("taskTools_n", { n: tools.length, names: tools.map((x) => x.name).join(", ") })}
+                {tools.length === 0
+                  ? t("taskNoTools")
+                  : t("taskTools_n", { n: tools.length, names: tools.map((x) => x.name).join(", ") })}
               </dd>
             </div>
           </div>
@@ -89,7 +175,9 @@ export default function TaskCard({ turn, task, busy, handlers }: { turn: Assista
                   onClick={() => handlers.onChannel(turn.id, key)}
                   className={cn(
                     "inline-flex h-7 items-center gap-1 rounded-full border px-2 text-xs",
-                    task.channel === key ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground",
+                    task.channel === key
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border text-muted-foreground",
                     locked && "opacity-50"
                   )}
                 >
@@ -99,17 +187,20 @@ export default function TaskCard({ turn, task, busy, handlers }: { turn: Assista
               );
             })}
           </div>
-          {task.needsPhone && (
+          {task.needsPhone && <PhonePrompt onSave={handlers.onSavePhone} disabled={busy} />}
+          {task.preview?.thirdPartyNumber && (
             <p className="text-xs text-muted-foreground">
-              {t("taskNeedsPhone")}{" "}
-              <Link href="/account" className="underline underline-offset-2">
-                {t("taskAddPhone")}
-              </Link>
+              {t("taskThirdParty", { number: task.preview.thirdPartyNumber })}
             </p>
           )}
-          {task.preview?.thirdPartyNumber && <p className="text-xs text-muted-foreground">{t("taskThirdParty", { number: task.preview.thirdPartyNumber })}</p>}
           <div className="flex items-center gap-2">
-            <Button type="button" size="sm" onClick={() => handlers.onConfirm(turn.id)} disabled={busy} data-testid="task-confirm">
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => handlers.onConfirm(turn.id)}
+              disabled={busy}
+              data-testid="task-confirm"
+            >
               <Check size={14} aria-hidden="true" />
               {t("taskConfirm")}
             </Button>
@@ -120,7 +211,14 @@ export default function TaskCard({ turn, task, busy, handlers }: { turn: Assista
         </>
       )}
 
-      {(running || task.status === "done") && <WorkedForBlock steps={turn.steps} startedAt={turn.startedAt} endedAt={running ? null : turn.endedAt} className="max-w-full" />}
+      {(running || task.status === "done") && (
+        <WorkedForBlock
+          steps={turn.steps}
+          startedAt={turn.startedAt}
+          endedAt={running ? null : turn.endedAt}
+          className="max-w-full"
+        />
+      )}
       {running && !(turn.steps?.length ?? 0) && (
         <p className="flex items-center gap-2 text-muted-foreground">
           <Loader2 size={14} className="animate-spin" aria-hidden="true" />
@@ -133,7 +231,10 @@ export default function TaskCard({ turn, task, busy, handlers }: { turn: Assista
           <MediaCard text={task.resultText || t("taskNoResult")} />
           {task.deliveryNote && <p className="text-xs text-muted-foreground">{task.deliveryNote}</p>}
           {task.taskId && (
-            <Link href={`/quick-task/history`} className="text-xs text-muted-foreground underline-offset-2 hover:underline">
+            <Link
+              href={`/quick-task/history`}
+              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+            >
               {t("taskHistory")}
             </Link>
           )}

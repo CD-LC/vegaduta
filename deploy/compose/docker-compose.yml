@@ -129,6 +129,10 @@ x-core-env: &core-env
   # Signing keys + admin API are fetched over the internal compose name.
   KEYCLOAK_ISSUER_URI: ${PUBLIC_AUTH_URL:-http://localhost:8180}/realms/${KEYCLOAK_REALM:-agentic-ai}
   KEYCLOAK_ADDITIONAL_ISSUERS: ${KEYCLOAK_ADDITIONAL_ISSUERS:-}
+  # Without SMTP a required "verify your email" step ends the first sign-up on "Failed to send email" and the
+  # person can never sign in. Off unless KEYCLOAK_REQUIRE_EMAIL_VERIFICATION=true (set it once KEYCLOAK_SMTP_* is
+  # configured); the --domain overlay turns it on by default.
+  APP_KEYCLOAK_REQUIRE_EMAIL_VERIFICATION: ${KEYCLOAK_REQUIRE_EMAIL_VERIFICATION:-false}
   # Private hosts tenant-configured outbound calls may reach (e.g. ollama:11434).
   APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS: ${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS:-}
   # Optional allow-list for tenant-configured outbound URLs (host or *.suffix, comma-separated); empty = no restriction.
@@ -163,7 +167,12 @@ x-core-env: &core-env
   # (application-mcp.yml) - only with the runner (profiles tools/browser/
   # sandbox; the CLI sets it) or the core-full image; the slim image refuses
   # to start with `mcp` and no runner (McpStdioLauncherPreflight).
-  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-security,knowledge,graph-memory,mcpserver${CORE_MCP_PROFILE:-}}${CORE_PROFILES_EXTRA:-}
+  # CORE_SHAPE_PROFILE=",shape-api" is the API half of the split with core-jobs
+  # (profile `jobs`): it makes the API skip every sweep and poller the jobs
+  # family owns (application-shape-api.yml). Compose cannot see which --profile
+  # flags are active, so set it whenever you start the `jobs` profile; leave it
+  # empty without core-jobs, or NO process runs the background work.
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-security,knowledge,graph-memory,mcpserver${CORE_MCP_PROFILE:-}}${CORE_PROFILES_EXTRA:-}${CORE_SHAPE_PROFILE:-}
   WORKFLOW_EXECUTION_ENGINE: ${WORKFLOW_EXECUTION_ENGINE:-legacy}
   TEMPORAL_TARGET: temporal:7233
   WORKFLOW_KAFKA_BOOTSTRAP_SERVERS: redpanda:9093
@@ -441,7 +450,7 @@ services:
 
   keycloak:
     # Same Keycloak release as deploy/helm/charts/keycloak (one version line).
-    image: quay.io/keycloak/keycloak:26.7.5
+    image: quay.io/keycloak/keycloak:26.8.1
     <<: [*restart, *logging, *nnp]
     # Production mode (`start`) against keycloak-db, HTTP only inside the
     # compose network / on the loopback port; TLS is terminated by Caddy in
@@ -507,7 +516,7 @@ services:
   # Idempotent; shares keycloak's network namespace so the script's
   # localhost:8080 is this realm's Keycloak.
   keycloak-reconcile:
-    image: quay.io/keycloak/keycloak:26.7.5
+    image: quay.io/keycloak/keycloak:26.8.1
     <<: [*logging, *nnp]
     restart: "no"
     network_mode: "service:keycloak"
@@ -626,7 +635,7 @@ services:
       NEXT_PUBLIC_ACADEMY_URL: ${WEB_ACADEMY_URL:-https://academy.vegaduta.ai}
       NEXT_PUBLIC_CONTACT_EMAIL: ${WEB_CONTACT_EMAIL:-}
       NEXT_PUBLIC_EDGE_AGENTS: ${WEB_EDGE_AGENTS:-}
-      NEXT_PUBLIC_DEPLOY_ENV: ${WEB_DEPLOY_ENV:-}
+      NEXT_PUBLIC_DEPLOY_ENV: ${WEB_DEPLOY_ENV:-full}
       NEXT_PUBLIC_FREE_MODE: ${WEB_FREE_MODE:-1}
       NEXT_PUBLIC_MCP_APPS: ${WEB_MCP_APPS:-}
       NEXT_PUBLIC_ARTIFACTS: ${WEB_ARTIFACTS:-}
@@ -752,7 +761,7 @@ services:
     networks: [agent-io]
 
   temporal-ui:
-    image: temporalio/ui:2.55.0
+    image: temporalio/ui:2.56.0
     profiles: ["temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -808,7 +817,7 @@ services:
 
   # ------------------------------------------------ profile: observability
   valkey-exporter:
-    image: oliver006/redis_exporter:v1.93.0
+    image: oliver006/redis_exporter:v1.94.0
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -829,7 +838,7 @@ services:
     networks: [data-tier, observability]
 
   loki:
-    image: grafana/loki:3.6.17
+    image: grafana/loki:3.7.8
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     command: -config.file=/etc/loki/loki-config.yaml
@@ -943,7 +952,7 @@ services:
     # The mounted config has no env interpolation; the webhook secret (and the
     # optional SMTP block, activated only when ALERT_EMAIL_TO+ALERT_SMTP_HOST
     # are set) are templated into /tmp at start.
-    image: prom/alertmanager:v0.28.1
+    image: prom/alertmanager:v0.34.1
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
@@ -990,7 +999,7 @@ services:
     networks: [observability]
 
   grafana:
-    image: grafana/grafana:13.2.3
+    image: grafana/grafana:13.2.4
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -1046,7 +1055,7 @@ services:
     networks: [observability]
 
   langfuse-clickhouse:
-    image: clickhouse/clickhouse-server:26.8.23.6
+    image: clickhouse/clickhouse-server:26.9.19.9
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     user: "101:101"
@@ -1129,7 +1138,7 @@ services:
     networks: [observability]
 
   langfuse-worker:
-    image: langfuse/langfuse-worker:4.56.0
+    image: langfuse/langfuse-worker:4.61.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: &langfuse-depends-on
@@ -1185,7 +1194,7 @@ services:
     networks: [observability]
 
   langfuse-web:
-    image: langfuse/langfuse:4.56.0
+    image: langfuse/langfuse:4.61.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: *langfuse-depends-on
@@ -1227,7 +1236,7 @@ services:
     # Self-hosted WebRTC SFU (Apache-2.0). Media needs UDP LIVEKIT_RTC_PORT_RANGE_START-_END
     # (default 50000-50100; move it if another process on the host, e.g. adb, holds a port in it) and a
     # reachable public IP; see deploy/livekit/livekit.yaml for TURN.
-    image: livekit/livekit-server:v1.13.9
+    image: livekit/livekit-server:v1.13.10
     profiles: ["voice"]
     <<: [*restart, *logging, *nnp]
     command: --config /etc/livekit.yaml

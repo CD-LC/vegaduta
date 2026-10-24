@@ -60,7 +60,9 @@
     "railJobs": "ਕੰਮ",
     "railSecrets": "ਗੁਪਤ",
     "railBrand": "ਬ੍ਰਾਂਡਿੰਗ",
-    "railLearn": "ਸਿੱਖੋ"
+    "railLearn": "ਸਿੱਖੋ",
+    "railRuntimeSettings": "ਰਨਟਾਈਮ ਸੈਟਿੰਗਾਂ",
+    "railControls": "ਮੈਂ ਕਿੱਥੇ ਕੰਟਰੋਲ ਕਰਾਂ...?"
   },
   "languageSwitcher": {
     "label": "ਭਾਸ਼ਾ",
@@ -753,7 +755,142 @@
     "edgeTier0Badge": "ਔਨ-ਡਿਵਾਈਸ · Chrome ਬਿਲਟ-ਇਨ",
     "edgeTier0BadgeTitle": "Chrome ਦੇ ਬਿਲਟ-ਇਨ ਮਾਡਲ (Gemini Nano) ਨੇ ਇਸਦਾ ਜਵਾਬ ਦਿੱਤਾ - ਤੇਜ਼ ਅਤੇ ਪੂਰੀ ਤਰ੍ਹਾਂ ਨਿੱਜੀ, ਪਰ ਸਿਰਫ਼ ਚੈਟ-ਲਈ: ਇਹ ਟੂਲਜ਼ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰ ਸਕਦਾ ਅਤੇ ਗੁੰਝਲਦਾਰ ਚੀਜ਼ਾਂ 'ਤੇ ਅਸਲ ਪ੍ਰਦਾਤਾ ਨਾਲੋਂ ਘੱਟ ਸਹੀ ਹੋ ਸਕਦਾ ਹੈ। ਹਰ ਪਲਾਨ 'ਤੇ ਮੁਫ਼ਤ।",
     "edgeTier1Badge": "ਔਨ-ਡਿਵਾਈਸ · ਸਥਾਨਕ ਮਾਡਲ",
-    "edgeTier1BadgeTitle": "ਇੱਕ ਡਾਊਨਲੋਡ ਕੀਤੇ ਔਨ-ਡਿਵਾਈਸ ਮਾਡਲ ਨੇ ਇਸਦਾ ਜਵਾਬ ਦਿੱਤਾ - ਨਿੱਜੀ, ਅਤੇ ਇਹ ਟੂਲਜ਼ ਦੀ ਵਰਤੋਂ ਕਰ ਸਕਦਾ ਹੈ (ਉਹੀ ਸੁਰੱਖਿਅਤ ਟੂਲਜ਼ ਜੋ ਇੱਕ ਹੋਸਟਡ ਵਾਰੀ ਕਰ ਸਕਦੀ ਹੈ)। ਫਿਰ ਵੀ ਹੋਸਟਡ ਪੂਲ ਨਾਲੋਂ ਬਹੁਤ ਛੋਟਾ ਮਾਡਲ ਹੈ, ਇਸ ਲਈ ਇਹ ਗੁੰਝਲਦਾਰ ਬੇਨਤੀਆਂ 'ਤੇ ਘੱਟ ਸਹੀ ਹੋ ਸਕਦਾ ਹੈ। ਹਰ ਪਲਾਨ 'ਤੇ ਮੁਫ਼ਤ।"
+    "edgeTier1BadgeTitle": "ਇੱਕ ਡਾਊਨਲੋਡ ਕੀਤੇ ਔਨ-ਡਿਵਾਈਸ ਮਾਡਲ ਨੇ ਇਸਦਾ ਜਵਾਬ ਦਿੱਤਾ - ਨਿੱਜੀ, ਅਤੇ ਇਹ ਟੂਲਜ਼ ਦੀ ਵਰਤੋਂ ਕਰ ਸਕਦਾ ਹੈ (ਉਹੀ ਸੁਰੱਖਿਅਤ ਟੂਲਜ਼ ਜੋ ਇੱਕ ਹੋਸਟਡ ਵਾਰੀ ਕਰ ਸਕਦੀ ਹੈ)। ਫਿਰ ਵੀ ਹੋਸਟਡ ਪੂਲ ਨਾਲੋਂ ਬਹੁਤ ਛੋਟਾ ਮਾਡਲ ਹੈ, ਇਸ ਲਈ ਇਹ ਗੁੰਝਲਦਾਰ ਬੇਨਤੀਆਂ 'ਤੇ ਘੱਟ ਸਹੀ ਹੋ ਸਕਦਾ ਹੈ। ਹਰ ਪਲਾਨ 'ਤੇ ਮੁਫ਼ਤ।",
+    "viewTurn": "ਟਰਨ ਵੇਖੋ",
+    "viewTurnTitle": "ਇਸ ਗੱਲਬਾਤ ਦੇ ਟਰਨਾਂ ਦੀ ਕਦਮ-ਦਰ-ਕਦਮ ਟਾਈਮਲਾਈਨ ਖੋਲ੍ਹੋ",
+    "headerRunning": "ਇੱਕ ਟਰਨ ਚੱਲ ਰਿਹਾ ਹੈ",
+    "headerReady": "ਤਿਆਰ",
+    "clearContext": "ਸੰਦਰਭ ਸਾਫ਼ ਕਰੋ",
+    "clearContextTitle": "ਨਵੀਂ ਗੱਲਬਾਤ ਸ਼ੁਰੂ ਕਰੋ। ਇਹ ਇਸ ਚੈਟ ਦੀ ਡਿਵਾਈਸ ਉੱਤੇ ਅਤੇ ਸਰਵਰ-ਪਾਸੇ ਦੀ ਸੈਸ਼ਨ ਮੈਮੋਰੀ ਸਾਫ਼ ਕਰਦਾ ਹੈ।",
+    "stopRun": "ਇਹ ਜਵਾਬ ਰੋਕੋ",
+    "fallbackSendToPlatform": "ਪਲੇਟਫ਼ਾਰਮ ਨੂੰ ਭੇਜੋ",
+    "chipsLabel": "ਏਜੰਟ ਹੁਣ ਕੀ ਕਰ ਰਿਹਾ ਹੈ",
+    "chipPreparing": "ਤਿਆਰੀ ਹੋ ਰਹੀ ਹੈ",
+    "chipModelCall": "ਮਾਡਲ ਦੀ ਉਡੀਕ",
+    "chipThinking": "ਸੋਚ ਰਿਹਾ ਹੈ",
+    "chipWriting": "ਜਵਾਬ ਲਿਖ ਰਿਹਾ ਹੈ",
+    "chipTool": "ਟੂਲ ਚੱਲ ਰਿਹਾ ਹੈ: {tool}",
+    "chipToolUnnamed": "ਇੱਕ ਟੂਲ ਚੱਲ ਰਿਹਾ ਹੈ",
+    "chipWaitingApproval": "ਤੁਹਾਡੀ ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ ({count})",
+    "chipContinuing": "ਜਵਾਬ ਅੱਗੇ ਵਧ ਰਿਹਾ ਹੈ",
+    "chipContinuingPass": "ਜਵਾਬ ਅੱਗੇ ਵਧ ਰਿਹਾ ਹੈ ({max} ਵਿੱਚੋਂ ਪਾਸ {pass})",
+    "chipContinuingApproval": "ਤੁਹਾਡੇ ਫ਼ੈਸਲੇ ਤੋਂ ਬਾਅਦ ਅੱਗੇ ਵਧ ਰਿਹਾ ਹੈ",
+    "chipRetrying": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਹੋ ਰਹੀ ਹੈ",
+    "chipRetryingReason": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਹੋ ਰਹੀ ਹੈ: {reason}",
+    "chipRetryingAttempt": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਹੋ ਰਹੀ ਹੈ (ਕੋਸ਼ਿਸ਼ {attempt}/{max})",
+    "chipRetryingAttemptReason": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਹੋ ਰਹੀ ਹੈ (ਕੋਸ਼ਿਸ਼ {attempt}/{max}): {reason}",
+    "chipFailover": "ਬੈਕਅੱਪ ਮਾਡਲ ਉੱਤੇ ਬਦਲਿਆ ਗਿਆ",
+    "chipFailoverReason": "ਬੈਕਅੱਪ ਮਾਡਲ ਉੱਤੇ ਬਦਲਿਆ ਗਿਆ: {reason}",
+    "chipFailoverTo": "{model} ਉੱਤੇ ਬਦਲਿਆ ਗਿਆ",
+    "chipFailoverToReason": "{model} ਉੱਤੇ ਬਦਲਿਆ ਗਿਆ: {reason}",
+    "outcomeTruncated": "ਇਹ ਜਵਾਬ ਪੂਰਾ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਹੀ ਕੱਟਿਆ ਗਿਆ।",
+    "outcomeContinue": "ਜਾਰੀ ਰੱਖੋ",
+    "outcomeLongerReplies": "ਲੰਬੇ ਜਵਾਬਾਂ ਦੀ ਆਗਿਆ ਦਿਓ",
+    "continueMessage": "ਜਿੱਥੇ ਰੁਕੇ ਸੀ ਉੱਥੋਂ ਹੀ, ਜੋ ਪਹਿਲਾਂ ਲਿਖ ਚੁੱਕੇ ਹੋ ਉਸਨੂੰ ਦੁਹਰਾਏ ਬਿਨਾਂ ਜਾਰੀ ਰੱਖੋ।",
+    "outcomeRefused": "ਸੁਰੱਖਿਆ ਕਾਰਨਾਂ ਕਰਕੇ ਮਾਡਲ ਪ੍ਰਦਾਤਾ ਨੇ ਇਹ ਜਵਾਬ ਰੋਕ ਦਿੱਤਾ, ਇਸ ਲਈ ਵਿਖਾਉਣ ਲਈ ਕੋਈ ਜਵਾਬ ਨਹੀਂ। ਬੇਨਤੀ ਬਦਲੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "outcomeRefusedReason": "ਸੁਰੱਖਿਆ ਕਾਰਨਾਂ ਕਰਕੇ ({reason}) ਮਾਡਲ ਪ੍ਰਦਾਤਾ ਨੇ ਇਹ ਜਵਾਬ ਰੋਕ ਦਿੱਤਾ, ਇਸ ਲਈ ਵਿਖਾਉਣ ਲਈ ਕੋਈ ਜਵਾਬ ਨਹੀਂ। ਬੇਨਤੀ ਬਦਲੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "outcomeMalformedToolCall": "ਮਾਡਲ ਨੇ ਟੂਲ ਵਰਤਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਪਰ ਉਸਦੀ ਬੇਨਤੀ ਅਵੈਧ ਸੀ, ਇਸ ਲਈ ਕੁਝ ਨਹੀਂ ਚੱਲਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "outcomeEmpty": "ਮਾਡਲ ਨੇ ਖਾਲੀ ਜਵਾਬ ਦਿੱਤਾ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "stopRaiseSteps": "ਟੂਲ-ਕਾਲ ਸੀਮਾ ਵਧਾਓ",
+    "stopRaiseBudget": "ਖਰਚ ਸੀਮਾ ਬਦਲੋ",
+    "stopAskEditor": "ਇਸ ਏਜੰਟ ਨੂੰ ਸੰਪਾਦਿਤ ਕਰ ਸਕਣ ਵਾਲੇ ਕਿਸੇ ਨੂੰ ਸੀਮਾ ਵਧਾਉਣ ਲਈ ਕਹੋ।",
+    "rsOpen": "ਰਨ ਸੈਟਿੰਗਾਂ",
+    "rsTitle": "ਰਨ ਸੈਟਿੰਗਾਂ",
+    "rsClose": "ਰਨ ਸੈਟਿੰਗਾਂ ਬੰਦ ਕਰੋ",
+    "rsBack": "ਰਨ ਸੈਟਿੰਗਾਂ ਉੱਤੇ ਵਾਪਸ ਜਾਓ",
+    "rsIntro": "{name} ਨੂੰ ਅਗਲਾ ਸੁਨੇਹਾ ਕਿਵੇਂ ਚੱਲੇਗਾ। ਇਹਨਾਂ ਨੂੰ ਏਜੰਟ ਦੇ ਵਿਹਾਰ ਟੈਬ ਵਿੱਚ ਬਦਲੋ।",
+    "rsLoading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ",
+    "rsRetry": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+    "rsOpenBehavior": "ਵਿਹਾਰ ਵਿੱਚ ਸੰਪਾਦਿਤ ਕਰੋ",
+    "rsModelHeading": "ਮਾਡਲ ਅਤੇ ਸੈਂਪਲਿੰਗ",
+    "rsModel": "ਮਾਡਲ",
+    "rsModelNotSet": "ਸੈੱਟ ਨਹੀਂ",
+    "rsModelDefault": "ਮਾਡਲ ਦਾ ਡਿਫ਼ਾਲਟ",
+    "rsDepth": "ਤਰਕ ਦੀ ਡੂੰਘਾਈ",
+    "rsSourceAgent": "ਇਸ ਏਜੰਟ ਉੱਤੇ ਸੈੱਟ ਹੈ",
+    "rsParam_temperature": "ਤਾਪਮਾਨ",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "ਜਵਾਬ ਦੀ ਵੱਧ ਤੋਂ ਵੱਧ ਲੰਬਾਈ (ਟੋਕਨ)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "ਬਾਰੰਬਾਰਤਾ ਜੁਰਮਾਨਾ",
+    "rsParam_presencePenalty": "ਮੌਜੂਦਗੀ ਜੁਰਮਾਨਾ",
+    "rsParam_seed": "ਸੀਡ",
+    "rsParam_stopSequences": "ਰੋਕਣ ਵਾਲੇ ਕ੍ਰਮ",
+    "rsParamDropped": "{param} ਇਸ ਏਜੰਟ ਉੱਤੇ ਸੈੱਟ ਹੈ, ਪਰ {provider} {model} ਲਈ ਇਸਨੂੰ ਅਣਡਿੱਠਾ ਕਰਦਾ ਹੈ, ਇਸ ਲਈ ਇਸਦਾ ਕੋਈ ਅਸਰ ਨਹੀਂ।",
+    "rsToolsRunHeading": "ਇਸ ਰਨ ਲਈ ਟੂਲ",
+    "rsToolsRunOnly": "ਸਿਰਫ਼ ਇਹ ਰਨ",
+    "rsToolsRunNote": "ਇਹ ਸਵਿੱਚ ਤੈਅ ਕਰਦੇ ਹਨ ਕਿ ਇਸ ਪਲੇਗ੍ਰਾਊਂਡ ਤੋਂ ਭੇਜੇ ਸੁਨੇਹੇ ਏਜੰਟ ਦੇ ਕਿਹੜੇ ਟੂਲ ਵਰਤ ਸਕਦੇ ਹਨ। ਕੁਝ ਵੀ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾਂਦਾ: ਬਾਕੀ ਸਭ ਲਈ ਏਜੰਟ ਆਪਣੀ ਟੂਲ ਪਹੁੰਚ ਰੱਖਦਾ ਹੈ। ਇਹ ਏਜੰਟ ਦੇ ਟੂਲ ਸਿਰਫ਼ ਬੰਦ ਕਰ ਸਕਦੇ ਹਨ, ਉਸਨੂੰ ਕਦੇ ਨਵਾਂ ਟੂਲ ਨਹੀਂ ਦੇ ਸਕਦੇ।",
+    "rsToolsRunSummary": "ਏਜੰਟ ਦੇ {total} ਟੂਲਾਂ ਵਿੱਚੋਂ {on} ਇਸ ਰਨ ਲਈ ਚਾਲੂ ਹਨ",
+    "rsToolsRunNone": "ਇਸ ਰਨ ਲਈ ਕੋਈ ਟੂਲ ਨਹੀਂ: ਏਜੰਟ ਸਿਰਫ਼ ਲਿਖਤ ਵਿੱਚ ਜਵਾਬ ਦੇ ਸਕਦਾ ਹੈ।",
+    "rsToolsReset": "ਏਜੰਟ ਦੇ ਟੂਲ ਵਰਤੋ",
+    "rsToolsNotInAgent": "ਇਹ ਇਸ ਏਜੰਟ ਦੇ ਸੰਭਾਲੇ ਟੂਲਾਂ ਵਿੱਚੋਂ ਨਹੀਂ ਹੈ, ਇਸ ਲਈ ਇਸਨੂੰ ਰਨ ਲਈ ਚਾਲੂ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ।",
+    "rsToolsEditAgent": "ਏਜੰਟ ਦੇ ਸੰਭਾਲੇ ਟੂਲ ਬਦਲੋ",
+    "rsToolsLimitedChip": "ਇਸ ਰਨ ਲਈ ਟੂਲ ਸੀਮਿਤ",
+    "rsToolsEmpty": "ਇਸ ਏਜੰਟ ਲਈ ਕੋਈ ਟੂਲ ਉਪਲਬਧ ਨਹੀਂ।",
+    "rsToolsSummary": "{total} ਵਿੱਚੋਂ {on} ਟੂਲ ਚਾਲੂ",
+    "rsToolsFailed": "ਟੂਲ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ।",
+    "rsLimitsHeading": "ਹਰ ਟਰਨ ਲਈ ਸੀਮਾਵਾਂ",
+    "rsLimitsChange": "ਸੀਮਾਵਾਂ ਬਦਲੋ",
+    "rsLimitsView": "ਸੀਮਾਵਾਂ ਵੇਖੋ",
+    "rsLimitsFailed": "ਸੀਮਾਵਾਂ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀਆਂ।",
+    "rsLimitsEmpty": "ਇਸ ਏਜੰਟ ਲਈ ਵਿਖਾਉਣ ਲਈ ਕੋਈ ਸੀਮਾ ਨਹੀਂ।",
+    "rsNoLimit": "ਕੋਈ ਸੀਮਾ ਨਹੀਂ",
+    "rsScoreAll": "ਹਰ ਮੇਲ",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} ਅੱਖਰ",
+    "rsLimitRange": "ਆਗਿਆ ਹੈ: {min} ਤੋਂ {max}",
+    "rsLayer_AGENT": "ਇਸ ਏਜੰਟ ਉੱਤੇ ਸੈੱਟ ਹੈ",
+    "rsLayer_TENANT": "ਵਰਕਸਪੇਸ ਡਿਫ਼ਾਲਟ",
+    "rsLayer_PLATFORM": "ਪਲੇਟਫ਼ਾਰਮ ਡਿਫ਼ਾਲਟ",
+    "rsLayer_REQUEST": "ਇਸ ਬੇਨਤੀ ਲਈ ਸੈੱਟ",
+    "rsLimit_maxToolSteps": "ਹਰ ਟਰਨ ਵਿੱਚ ਟੂਲ ਕਾਲਾਂ",
+    "rsLimit_turnTimeoutSeconds": "ਇੱਕ ਟਰਨ ਦਾ ਸਮਾਂ",
+    "rsLimit_toolTimeoutSeconds": "ਇੱਕ ਟੂਲ ਕਾਲ ਦਾ ਸਮਾਂ",
+    "rsLimit_toolOutputMaxChars": "ਟੂਲ ਨਤੀਜੇ ਦਾ ਆਕਾਰ",
+    "rsLimit_retrievalTopK": "ਹਰ ਖੋਜ ਲਈ ਗਿਆਨ ਨਤੀਜੇ",
+    "rsLimit_retrievalMinScore": "ਗਿਆਨ ਮੇਲ ਦੀ ਘੱਟੋ-ਘੱਟ ਸੰਬੰਧਤਾ",
+    "rsLimit_continuationPasses": "ਜਵਾਬ ਪੂਰਾ ਕਰਨ ਲਈ ਵਾਧੂ ਪਾਸ",
+    "rsLimitHelp_maxToolSteps": "ਇੱਕ ਜਵਾਬ ਵੱਧ ਤੋਂ ਵੱਧ ਕਿੰਨੀਆਂ ਟੂਲ ਕਾਲਾਂ ਕਰ ਸਕਦਾ ਹੈ। ਸੀਮਾ ਆਉਣ ਉੱਤੇ ਟਰਨ ਰੁਕ ਜਾਂਦਾ ਹੈ ਅਤੇ ਇਹ ਦੱਸਦਾ ਹੈ।",
+    "rsLimitHelp_turnTimeoutSeconds": "ਇੱਕ ਟਰਨ ਰੋਕੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿੰਨੀ ਦੇਰ ਚੱਲ ਸਕਦਾ ਹੈ।",
+    "rsLimitHelp_toolTimeoutSeconds": "ਇੱਕ ਟੂਲ ਕਾਲ ਰੋਕੀ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿੰਨੀ ਦੇਰ ਚੱਲ ਸਕਦੀ ਹੈ।",
+    "rsLimitHelp_toolOutputMaxChars": "ਮਾਡਲ ਇੱਕ ਟੂਲ ਨਤੀਜੇ ਦਾ ਕਿੰਨਾ ਹਿੱਸਾ ਪੜ੍ਹ ਸਕਦਾ ਹੈ। ਬਾਕੀ ਕੱਟ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।",
+    "rsLimitHelp_retrievalTopK": "ਇੱਕ ਖੋਜ ਗਿਆਨ ਭੰਡਾਰ ਦੇ ਕਿੰਨੇ ਟੁਕੜੇ ਵਾਪਸ ਲਿਆਉਂਦੀ ਹੈ।",
+    "rsLimitHelp_retrievalMinScore": "ਇਸ ਤੋਂ ਘੱਟ ਮੇਲ ਖਾਂਦੇ ਟੁਕੜੇ ਛੱਡ ਦਿੱਤੇ ਜਾਂਦੇ ਹਨ। ਸਿਫ਼ਰ ਹਰ ਮੇਲ ਰੱਖਦਾ ਹੈ।",
+    "rsLimitHelp_continuationPasses": "ਐਲਾਨੇ ਪਰ ਨਾ ਚੁੱਕੇ ਕਦਮ ਉੱਤੇ ਰੁਕ ਗਏ ਜਵਾਬ ਨੂੰ ਪੂਰਾ ਕਰਨ ਲਈ ਵਾਧੂ ਕੋਸ਼ਿਸ਼ਾਂ।",
+    "rsPreviewButton": "ਪ੍ਰੋਂਪਟ ਝਲਕ",
+    "rsPreviewTitle": "ਪ੍ਰੋਂਪਟ ਝਲਕ",
+    "rsPreviewIntro": "ਇਹ ਏਜੰਟ ਜੋ ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ ਅਤੇ ਟੂਲ ਸੂਚੀ ਭੇਜੇਗਾ, ਉਸੇ ਤਰ੍ਹਾਂ ਬਣਾਈ ਗਈ ਜਿਵੇਂ ਅਸਲੀ ਟਰਨ ਬਣਾਉਂਦਾ ਹੈ। ਕਿਸੇ ਮਾਡਲ ਨੂੰ ਕੁਝ ਨਹੀਂ ਭੇਜਿਆ ਜਾਂਦਾ।",
+    "rsPreviewBuilding": "ਝਲਕ ਬਣ ਰਹੀ ਹੈ",
+    "rsPreviewFailed": "ਝਲਕ ਨਹੀਂ ਬਣ ਸਕੀ।",
+    "rsPreviewTotals": "ਲਗਭਗ {prompt} ਟੋਕਨ ਸਿਸਟਮ ਟੈਕਸਟ ਅਤੇ {tools} ਟੋਕਨ ਟੂਲ ਪਰਿਭਾਸ਼ਾਵਾਂ (ਅੰਦਾਜ਼ੇ)।",
+    "rsPreviewOverBudgetTitle": "ਟੋਕਨ ਬਜਟ ਤੋਂ ਵੱਧ",
+    "rsPreviewOverBudget": "ਸਥਾਈ ਸਿਸਟਮ ਟੈਕਸਟ ਸੰਰਚਿਤ {budget} ਟੋਕਨ ਦੇ ਬਜਟ ਤੋਂ ਵੱਧ ਹੈ। ਕੁਝ ਨਹੀਂ ਕੱਟਿਆ ਜਾਂਦਾ; ਕਿਸੇ ਪ੍ਰੋਂਪਟ ਨੂੰ ਛੋਟਾ ਕਰਨ ਬਾਰੇ ਸੋਚੋ।",
+    "rsPreviewNoBlocks": "ਵਿਖਾਉਣ ਲਈ ਕੋਈ ਪ੍ਰੋਂਪਟ ਬਲਾਕ ਨਹੀਂ।",
+    "rsPreviewMessage": "ਸੁਨੇਹਾ: {message}",
+    "rsPreviewTokens": "~{tokens} ਟੋਕਨ",
+    "rsPreviewShowText": "ਟੈਕਸਟ ਵਿਖਾਓ",
+    "rsPreviewTools": "ਟੂਲ ({count})",
+    "rsPreviewNoTools": "ਇਹ ਏਜੰਟ ਕੋਈ ਟੂਲ ਪੇਸ਼ ਨਹੀਂ ਕਰਦਾ।",
+    "rsPreviewNotes": "ਇਹ ਝਲਕ ਜੋ ਨਹੀਂ ਜਾਣ ਸਕਦੀ",
+    "rsPreviewOpenAdmin": "ਹਰ ਪ੍ਰੋਂਪਟ ਦੀ ਸ਼ਬਦਾਵਲੀ ਵੇਖੋ ਅਤੇ ਬਦਲੋ",
+    "rsOriginDefault": "ਡਿਫ਼ਾਲਟ ਵਜੋਂ ਮਿਲਿਆ",
+    "rsOriginOverride": "{scope} ਓਵਰਰਾਈਡ v{version}",
+    "rsOriginAgentConfig": "ਏਜੰਟ ਦਾ ਆਪਣਾ ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ",
+    "rsOriginCode": "ਪਲੇਟਫ਼ਾਰਮ ਕੋਡ",
+    "rsRunBudget": "ਹਰ ਰਨ ਲਈ ਖਰਚ ਸੀਮਾ",
+    "rsNoCap": "ਕੋਈ ਸੀਮਾ ਨਹੀਂ",
+    "rsRunBudgetHelp": "ਇੱਕ ਰਨ ਜਦੋਂ ਹੋਰ ਏਜੰਟਾਂ ਨੂੰ ਕੰਮ ਸੌਂਪਦਾ ਹੈ ਜਾਂ ਡੂੰਘੀ ਖੋਜ ਚਲਾਉਂਦਾ ਹੈ ਤਾਂ ਵੱਧ ਤੋਂ ਵੱਧ ਕਿੰਨਾ ਖਰਚ ਕਰ ਸਕਦਾ ਹੈ। ਇਹ ਅੰਦਾਜ਼ਾ ਹੈ, ਬਿਲਿੰਗ ਨਹੀਂ।",
+    "chipToolsOff": "ਟੂਲਾਂ ਤੋਂ ਬਿਨਾਂ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਹੋ ਰਹੀ ਹੈ",
+    "chipFailoverBlocked": "ਬੈਕਅੱਪ ਮਾਡਲ ਨਹੀਂ ਵਰਤਿਆ ਗਿਆ: ਟੂਲ ਪਹਿਲਾਂ ਹੀ ਚੱਲ ਚੁੱਕੇ ਸਨ",
+    "rsLimitChangeOne": "ਬਦਲੋ",
+    "reasonRateLimited": "ਦਰ ਸੀਮਾ ਪਾਰ ਹੋ ਗਈ",
+    "reasonTimeout": "ਸਮਾਂ ਸਮਾਪਤ",
+    "reasonProviderUnavailable": "ਪ੍ਰਦਾਤਾ ਉਪਲਬਧ ਨਹੀਂ",
+    "reasonAuthFailed": "ਪ੍ਰਦਾਤਾ ਨੇ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਰੱਦ ਕਰ ਦਿੱਤੇ",
+    "reasonBilling": "ਪ੍ਰਦਾਤਾ ਦੀ ਬਿਲਿੰਗ ਸਮੱਸਿਆ",
+    "reasonModelNotFound": "ਮਾਡਲ ਉਪਲਬਧ ਨਹੀਂ",
+    "reasonProviderError": "ਪ੍ਰਦਾਤਾ ਦੀ ਗਲਤੀ",
+    "reasonMalformedToolCall": "ਟੂਲ ਕਾਲ ਵਰਤੀ ਨਹੀਂ ਜਾ ਸਕੀ"
   },
   "nodeDefs": {
     "triggerLabel": "ਟ੍ਰਿਗਰ",
@@ -1399,7 +1536,50 @@
     "ttsProviderUpdatedSuccess": "TTS ਪ੍ਰੋਵਾਈਡਰ ਅੱਪਡੇਟ ਹੋ ਗਿਆ ਹੈ।",
     "updateTtsProviderError": "ਇਸ ਏਜੰਟ ਦੇ TTS ਪ੍ਰੋਵਾਈਡਰ ਨੂੰ ਅੱਪਡੇਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ।",
     "ttsProviderFreePlanTooltip": "TTS ਪ੍ਰੋਵਾਈਡਰ ਦੀ ਚੋਣ ਇੱਕ ਪ੍ਰੀਮੀਅਮ ਵਿਸ਼ੇਸ਼ਤਾ ਹੈ।",
-    "ttsProviderNotSet": "ਪਲੇਟਫਾਰਮ ਡਿਫੌਲਟ ਦੀ ਵਰਤੋਂ ਕਰ ਰਿਹਾ ਹੈ"
+    "ttsProviderNotSet": "ਪਲੇਟਫਾਰਮ ਡਿਫੌਲਟ ਦੀ ਵਰਤੋਂ ਕਰ ਰਿਹਾ ਹੈ",
+    "samplingTitle": "ਉੱਨਤ ਸੈਂਪਲਿੰਗ",
+    "samplingIntro": "ਮਾਡਲ ਸ਼ਬਦ ਕਿਵੇਂ ਚੁਣਦਾ ਹੈ ਇਸਨੂੰ ਬਾਰੀਕੀ ਨਾਲ ਸੁਧਾਰੋ। ਮਾਡਲ ਡਿਫ਼ਾਲਟ ਵਰਤਣ ਲਈ ਡੱਬਾ ਖਾਲੀ ਛੱਡੋ। ਜੋ ਪ੍ਰਦਾਤਾ ਕਿਸੇ ਖੇਤਰ ਨੂੰ ਸਮਰਥਨ ਨਹੀਂ ਦਿੰਦੇ ਉਹ ਉਸਨੂੰ ਸਿਰਫ਼ ਅਣਡਿੱਠਾ ਕਰ ਦਿੰਦੇ ਹਨ।",
+    "samplingIgnored": "ਇਸ ਮਾਡਲ ਦਾ ਪ੍ਰਦਾਤਾ ਇਸ ਸੈਟਿੰਗ ਨੂੰ ਅਣਡਿੱਠਾ ਕਰਦਾ ਹੈ, ਇਸ ਲਈ ਇਸਨੂੰ ਬਦਲਣ ਦਾ ਕੋਈ ਅਸਰ ਨਹੀਂ।",
+    "samplingSaving": "ਸੰਭਾਲਿਆ ਜਾ ਰਿਹਾ ਹੈ…",
+    "samplingSaved": "ਸੰਭਾਲਿਆ ਗਿਆ",
+    "samplingNotSaved": "ਸੰਭਾਲਿਆ ਨਹੀਂ ਗਿਆ",
+    "samplingSaveFailed": "ਉਹ ਸੈਟਿੰਗ ਸੰਭਾਲੀ ਨਹੀਂ ਜਾ ਸਕੀ।",
+    "samplingErrorWhole": "{label} {min} ਤੋਂ {max} ਤੱਕ ਪੂਰਨ ਅੰਕ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ, ਜਾਂ ਬੰਦ ਕਰਨ ਲਈ ਖਾਲੀ।",
+    "samplingErrorNumber": "{label} {min} ਤੋਂ {max} ਤੱਕ ਸੰਖਿਆ ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ, ਜਾਂ ਬੰਦ ਕਰਨ ਲਈ ਖਾਲੀ।",
+    "samplingStopTooLong": "ਰੋਕਣ ਵਾਲਾ ਕ੍ਰਮ ਵੱਧ ਤੋਂ ਵੱਧ {max} ਅੱਖਰਾਂ ਦਾ ਹੋ ਸਕਦਾ ਹੈ।",
+    "samplingStopTooMany": "ਵੱਧ ਤੋਂ ਵੱਧ {max} ਰੋਕਣ ਵਾਲੇ ਕ੍ਰਮ।",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "ਸਿਰਫ਼ ਸਭ ਤੋਂ ਸੰਭਾਵੀ K ਅਗਲੇ ਸ਼ਬਦਾਂ ਉੱਤੇ ਵਿਚਾਰ ਕਰੋ। ਘੱਟ ਦਾ ਮਤਲਬ ਵਧੇਰੇ ਸੁਰੱਖਿਅਤ, ਅਨੁਮਾਨਯੋਗ ਟੈਕਸਟ। 1 ਤੋਂ 1000।",
+    "samplingSeed": "ਸੀਡ",
+    "samplingSeedHelp": "ਇੱਕੋ ਪ੍ਰੋਂਪਟ ਲਈ ਜਵਾਬਾਂ ਨੂੰ ਵਧੇਰੇ ਦੁਹਰਾਉਣਯੋਗ ਬਣਾਉਣ ਲਈ ਇੱਕ ਸੰਖਿਆ ਸੈੱਟ ਕਰੋ। ਹਰ ਪ੍ਰਦਾਤਾ ਇਸਦੀ ਗਾਰੰਟੀ ਨਹੀਂ ਦਿੰਦਾ।",
+    "samplingFrequency": "ਬਾਰੰਬਾਰਤਾ ਜੁਰਮਾਨਾ",
+    "samplingFrequencyHelp": "ਸਕਾਰਾਤਮਕ ਮੁੱਲ ਇੱਕੋ ਸ਼ਬਦ ਵਾਰ-ਵਾਰ ਵਰਤਣ ਨੂੰ ਨਿਰਉਤਸ਼ਾਹਿਤ ਕਰਦੇ ਹਨ। -2 ਤੋਂ 2।",
+    "samplingPresence": "ਮੌਜੂਦਗੀ ਜੁਰਮਾਨਾ",
+    "samplingPresenceHelp": "ਸਕਾਰਾਤਮਕ ਮੁੱਲ ਮਾਡਲ ਨੂੰ ਇੱਕ ਵਿਸ਼ੇ ਉੱਤੇ ਟਿਕੇ ਰਹਿਣ ਦੀ ਬਜਾਏ ਨਵੇਂ ਵਿਸ਼ਿਆਂ ਵੱਲ ਧੱਕਦੇ ਹਨ। -2 ਤੋਂ 2।",
+    "samplingPlaceholderDefault": "ਡਿਫ਼ਾਲਟ",
+    "samplingPlaceholderRandom": "ਬੇਤਰਤੀਬ",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "ਰੋਕਣ ਵਾਲੇ ਕ੍ਰਮ",
+    "samplingStopPlaceholder": "ਇੱਕ ਵਾਕੰਸ਼ ਟਾਈਪ ਕਰੋ, Enter ਦਬਾਓ",
+    "samplingStopHelp": "ਮਾਡਲ ਇਹਨਾਂ ਵਿੱਚੋਂ ਕੋਈ ਵੀ ਲਿਖਦਿਆਂ ਹੀ ਜਵਾਬ ਖਤਮ ਹੋ ਜਾਂਦਾ ਹੈ। ਵੱਧ ਤੋਂ ਵੱਧ {count}, ਹਰ ਇੱਕ ਵੱਧ ਤੋਂ ਵੱਧ {max} ਅੱਖਰਾਂ ਦਾ।",
+    "samplingStopCurrent": "ਮੌਜੂਦਾ ਰੋਕਣ ਵਾਲੇ ਕ੍ਰਮ",
+    "samplingStopRemove": "ਰੋਕਣ ਵਾਲਾ ਕ੍ਰਮ {value} ਹਟਾਓ",
+    "samplingAdd": "ਜੋੜੋ",
+    "reasoningDepthFASTCost": "Quickest and cheapest: one pass, and the reply streams in as it is written.",
+    "reasoningDepthPLANNEDCost": "Writes a plan before acting: more model calls per task, and the reply appears all at once instead of streaming.",
+    "reasoningDepthCAREFULCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming.",
+    "reasoningDepthRIGOROUSCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming. Uses the most tokens.",
+    "autonomyLabel": "Autonomy",
+    "autonomyTierSUPERVISED": "Supervised",
+    "autonomyTierSUPERVISEDHint": "Every tool call waits for a human to approve it, whatever the workspace policy says. Tighter step ceiling.",
+    "autonomyTierSUPERVISEDCost": "Asks you before every tool call, searches included.",
+    "autonomyTierSEMI_AUTONOMOUS": "Semi-autonomous",
+    "autonomyTierSEMI_AUTONOMOUSHint": "Follows the workspace's approval policy for each action type. The default for every agent.",
+    "autonomyTierSEMI_AUTONOMOUSCost": "Asks you only for the actions your workspace's approval rules name; the rest run without asking.",
+    "autonomyTierFULLY_AUTONOMOUS": "Fully autonomous",
+    "autonomyTierFULLY_AUTONOMOUSHint": "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
+    "autonomyTierFULLY_AUTONOMOUSCost": "Never asks you: every tool call runs as soon as the agent makes it, sends and payments included.",
+    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "ਇਸਨੂੰ ਕੌਂਫਿਗਰ ਕਰਨ ਲਈ ਇੱਕ ਨੋਡ ਚੁਣੋ, ਜਾਂ ਖੱਬੇ ਪਾਸੇ ਪੈਲੇਟ ਤੋਂ ਇੱਕ ਨਵਾਂ ਖਿੱਚੋ।",
@@ -1875,6 +2055,9 @@
     "emptyWorkspaceTitle": "ਹਾਲੇ ਕੋਈ ਸੰਗ੍ਰਹਿ ਨਹੀਂ",
     "noFilesUploadedHint": "ਇਸ ਸੰਗ੍ਰਹਿ ਵਿੱਚ ਫਾਈਲਾਂ ਅੱਪਲੋਡ ਕਰੋ ਤਾਂ ਜੋ ਤੁਹਾਡੇ ਏਜੰਟ ਉਹਨਾਂ ਨੂੰ ਖੋਜ ਸਕਣ।",
     "ocrComingSoonTooltip": "ਅਜੇ ਉਪਲਬਧ ਨਹੀਂ - ਅੱਪਲੋਡ ਬਿਲਟ-ਇਨ Tesseract OCR 'ਤੇ ਵਾਪਸ ਚਲੇ ਜਾਣਗੇ।"
+  },
+  "tutorPage": {
+    "backToHelp": "ਮਦਦ ’ਤੇ ਵਾਪਸ ਜਾਓ"
   },
   "knowledgePage": {
     "knowledgeLabel": "ਗਿਆਨ",
@@ -5763,6 +5946,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ਈਮੇਲ ਅਤੇ ਹੋਰ ਬਹੁਤ ਕੁਝ ਕਨੈਕਟ ਕਰੋ, ਫਿਰ ਚੁਣੋ ਕਿ ਹਰੇਕ 'ਤੇ ਕਿਹੜਾ ਏਜੰਟ ਜਵਾਬ ਦੇਵੇਗਾ।",
     "channelsPoint1": "ਮੁਫ਼ਤ ਪਲਾਨ 'ਤੇ WhatsApp, Telegram ਅਤੇ ਈਮੇਲ",
     "channelsPoint2": "ਇੱਕ ਨਵਾਂ ਭੇਜਣ ਵਾਲਾ ਪਹਿਲਾਂ ਤੁਹਾਡੀ ਪ੍ਰਵਾਨਗੀ ਦੀ ਉਡੀਕ ਕਰਦਾ ਹੈ",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage ਜਾਂ ਈਮੇਲ ਜੋੜੋ, ਫਿਰ ਚੁਣੋ ਕਿ ਹਰ ਚੈਨਲ ’ਤੇ ਕਿਹੜਾ ਕਸਟਮ ਏਜੰਟ ਜਵਾਬ ਦੇਵੇਗਾ।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage ਅਤੇ ਈਮੇਲ",
     "toolsTitle": "ਇੰਟੈਗਰੇਸ਼ਨ ਏਜੰਟਾਂ ਨੂੰ ਟੂਲ ਦਿੰਦੇ ਹਨ",
     "toolsBody": "ਚਾਲੂ ਕਰੋ ਕਿ ਇੱਕ ਏਜੰਟ ਗੱਲਬਾਤ ਦੇ ਵਿਚਕਾਰ ਕੀ ਵਰਤ ਸਕਦਾ ਹੈ: ਵੈੱਬ ਖੋਜ, ਡੇਟਾਬੇਸ, MCP ਸਰਵਰ, ਅਤੇ ਤੁਹਾਡੀਆਂ ਆਪਣੀਆਂ ਸਕ੍ਰਿਪਟਾਂ।",
     "toolsPoint1": "ਇੱਥੇ ਯੋਗ ਕਰੋ, ਫਿਰ ਪ੍ਰਤੀ ਏਜੰਟ ਇਸਦੀ ਆਗਿਆ ਦਿਓ",
@@ -14095,5 +14280,1495 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "ਵਰਕਸਪੇਸ ਸੈਟਿੰਗਾਂ",
+      "agent": "ਏਜੰਟ ਸੈਟਿੰਗਾਂ"
+    },
+    "agentMissing": "ਕਿਸੇ ਏਜੰਟ ਦੀਆਂ ਸੈਟਿੰਗਾਂ ਵੇਖਣ ਲਈ ਉਸਨੂੰ ਚੁਣੋ।",
+    "scopeNote": {
+      "agent": "ਇਹ ਮੁੱਲ ਸਿਰਫ਼ ਇਸ ਏਜੰਟ ਉੱਤੇ ਲਾਗੂ ਹੁੰਦੇ ਹਨ। ਜੋ ਤੁਸੀਂ ਇੱਥੇ ਓਵਰਰਾਈਡ ਨਹੀਂ ਕਰਦੇ ਉਹ ਸਭ ਤੁਹਾਡੀਆਂ ਵਰਕਸਪੇਸ ਸੈਟਿੰਗਾਂ ਤੋਂ ਵਿਰਸੇ ਵਿੱਚ ਆਉਂਦਾ ਹੈ।"
+    },
+    "loading": "ਸੈਟਿੰਗਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ",
+    "loadError": "ਸੈਟਿੰਗਾਂ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀਆਂ। {message}",
+    "retry": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+    "filters": {
+      "label": "ਸੈਟਿੰਗਾਂ ਫਿਲਟਰ ਕਰੋ",
+      "search": "ਸੈਟਿੰਗਾਂ ਖੋਜੋ",
+      "searchPlaceholder": "ਨਾਮ ਜਾਂ ਵੇਰਵੇ ਨਾਲ ਖੋਜੋ",
+      "group": "ਸਮੂਹ ਅਨੁਸਾਰ ਫਿਲਟਰ ਕਰੋ",
+      "allGroups": "ਸਾਰੇ ਸਮੂਹ",
+      "risk": "ਜੋਖਮ ਅਨੁਸਾਰ ਫਿਲਟਰ ਕਰੋ",
+      "allRisks": "ਸਾਰੇ ਜੋਖਮ ਪੱਧਰ",
+      "clear": "ਫਿਲਟਰ ਸਾਫ਼ ਕਰੋ"
+    },
+    "empty": {
+      "none": "ਇੱਥੇ ਕੋਈ ਸੈਟਿੰਗ ਨਹੀਂ ਜੋ ਤੁਸੀਂ ਬਦਲ ਸਕੋ।",
+      "filtered": "ਕੋਈ ਸੈਟਿੰਗ ਤੁਹਾਡੇ ਫਿਲਟਰਾਂ ਨਾਲ ਮੇਲ ਨਹੀਂ ਖਾਂਦੀ।"
+    },
+    "saved": "ਸੰਭਾਲਿਆ ਗਿਆ। ਅੱਪਡੇਟ ਹੋਈਆਂ ਸੈਟਿੰਗਾਂ: {count}।",
+    "saveFailed": "ਸੰਭਾਲਿਆ ਨਹੀਂ ਗਿਆ। ਅਸਫਲ ਸੈਟਿੰਗਾਂ: {count}। ਤੁਹਾਡੀਆਂ ਸੋਧਾਂ ਹਾਲੇ ਵੀ ਫਾਰਮ ਵਿੱਚ ਹਨ।",
+    "resetDone": "{label} ਹੁਣ ਵਿਰਸੇ ਵਿੱਚ ਮਿਲਿਆ ਮੁੱਲ ਵਰਤਦਾ ਹੈ।",
+    "resetFailed": "ਸੈਟਿੰਗ ਰੀਸੈੱਟ ਨਹੀਂ ਹੋ ਸਕੀ।",
+    "unsaved": "ਨਾ ਸੰਭਾਲਿਆ ਬਦਲਾਅ",
+    "discardOne": "ਬਦਲਾਅ ਰੱਦ ਕਰੋ",
+    "restartRequired": "ਰੀਸਟਾਰਟ ਦੀ ਲੋੜ",
+    "source": {
+      "default": "ਡਿਫ਼ਾਲਟ",
+      "platform": "ਪਲੇਟਫ਼ਾਰਮ",
+      "tenant": "ਵਰਕਸਪੇਸ",
+      "agent": "ਏਜੰਟ",
+      "tenantInherited": "ਵਰਕਸਪੇਸ ਤੋਂ ਵਿਰਸੇ ਵਿੱਚ",
+      "aria": "ਮੁੱਲ ਦਾ ਸਰੋਤ: {source}"
+    },
+    "sourceHelp": {
+      "default": "ਕਿਸੇ ਨੇ ਇਸਨੂੰ ਨਹੀਂ ਬਦਲਿਆ। ਇਹ ਉਹ ਮੁੱਲ ਵਰਤਦਾ ਹੈ ਜੋ ਉਤਪਾਦ ਨਾਲ ਆਉਂਦਾ ਹੈ।",
+      "platform": "ਤੁਹਾਡੇ ਪਲੇਟਫ਼ਾਰਮ ਆਪਰੇਟਰ ਨੇ ਇਸਨੂੰ ਪੂਰੀ ਤੈਨਾਤੀ ਲਈ ਸੈੱਟ ਕੀਤਾ ਹੈ।",
+      "tenant": "ਤੁਹਾਡਾ ਵਰਕਸਪੇਸ ਡਿਫ਼ਾਲਟ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦਾ ਹੈ। ਵਿਰਸੇ ਵਾਲੇ ਮੁੱਲ ਉੱਤੇ ਮੁੜਨ ਲਈ ਰੀਸੈੱਟ ਕਰੋ।",
+      "agent": "ਇਹ ਏਜੰਟ ਵਰਕਸਪੇਸ ਦੇ ਮੁੱਲ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦਾ ਹੈ। ਵਰਕਸਪੇਸ ਦਾ ਮੁੱਲ ਮੁੜ ਵਿਰਸੇ ਵਿੱਚ ਲੈਣ ਲਈ ਰੀਸੈੱਟ ਕਰੋ।",
+      "tenantInherited": "ਇਸ ਏਜੰਟ ਦਾ ਆਪਣਾ ਕੋਈ ਓਵਰਰਾਈਡ ਨਹੀਂ, ਇਸ ਲਈ ਇਹ ਵਰਕਸਪੇਸ ਦਾ ਮੁੱਲ ਵਰਤਦਾ ਹੈ। ਇਸਨੂੰ ਸੰਪਾਦਿਤ ਕਰਨ ਨਾਲ ਸਿਰਫ਼ ਇਸ ਏਜੰਟ ਲਈ ਓਵਰਰਾਈਡ ਬਣਦਾ ਹੈ।",
+      "lockedSuffix": "ਇਹ ਲਾਕ ਹੈ, ਇਸ ਲਈ ਇੱਥੇ ਬਦਲਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"
+    },
+    "risk": {
+      "low": "ਘੱਟ ਜੋਖਮ",
+      "medium": "ਦਰਮਿਆਨਾ ਜੋਖਮ",
+      "high": "ਵੱਧ ਜੋਖਮ",
+      "security": "ਸੁਰੱਖਿਆ"
+    },
+    "bool": {
+      "on": "On",
+      "off": "ਬੰਦ"
+    },
+    "value": {
+      "unset": "ਸੈੱਟ ਨਹੀਂ",
+      "empty": "ਖਾਲੀ"
+    },
+    "select": {
+      "placeholder": "ਇੱਕ ਵਿਕਲਪ ਚੁਣੋ"
+    },
+    "slider": {
+      "label": "{label} (ਸਲਾਈਡਰ)"
+    },
+    "duration": {
+      "unitLabel": "{label} ਲਈ ਇਕਾਈ"
+    },
+    "units": {
+      "chars": "ਅੱਖਰ",
+      "tokens": "ਟੋਕਨ",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "ਸਕਿੰਟ",
+      "min": "ਮਿੰਟ",
+      "h": "ਘੰਟੇ"
+    },
+    "groups": {
+      "agent": "ਏਜੰਟ ਰਨਟਾਈਮ",
+      "approvals": "ਮਨਜ਼ੂਰੀਆਂ",
+      "quality": "ਗੁਣਵੱਤਾ ਜਾਂਚਾਂ",
+      "guardrails": "ਗਾਰਡਰੇਲ",
+      "chat": "ਚੈਟ",
+      "tools": "ਟੂਲ",
+      "memory": "ਮੈਮੋਰੀ",
+      "knowledge": "ਗਿਆਨ",
+      "delegation": "ਕੰਮ ਸੌਂਪਣਾ",
+      "aux": "ਸਹਾਇਕ ਮਾਡਲ",
+      "routing": "ਮਾਡਲ ਰੂਟਿੰਗ"
+    },
+    "errors": {
+      "required": "ਇੱਕ ਮੁੱਲ ਦਾਖਲ ਕਰੋ।",
+      "notNumber": "ਇੱਕ ਸੰਖਿਆ ਦਾਖਲ ਕਰੋ।",
+      "notInteger": "ਇੱਕ ਪੂਰਨ ਅੰਕ ਦਾਖਲ ਕਰੋ।",
+      "belowMin": "ਘੱਟੋ-ਘੱਟ {min} ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।",
+      "aboveMax": "ਵੱਧ ਤੋਂ ਵੱਧ {max} ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।",
+      "notAllowed": "ਸੂਚੀਬੱਧ ਵਿਕਲਪਾਂ ਵਿੱਚੋਂ ਇੱਕ ਚੁਣੋ।",
+      "tooShort": "ਬਹੁਤ ਛੋਟਾ। ਘੱਟੋ-ਘੱਟ {min} ਵਰਤੋ।",
+      "tooLong": "ਬਹੁਤ ਲੰਬਾ। ਵੱਧ ਤੋਂ ਵੱਧ {max} ਵਰਤੋ।",
+      "precision": "ਇਹ ਇਕਾਈ ਇਸਨੂੰ ਸਹੀ ਢੰਗ ਨਾਲ ਪ੍ਰਗਟ ਨਹੀਂ ਕਰ ਸਕਦੀ। ਸਭ ਤੋਂ ਛੋਟੀ ਇਕਾਈ ਦਾ ਪੂਰਨ ਅੰਕ ਵਰਤੋ ਜਾਂ ਛੋਟੀ ਇਕਾਈ ਚੁਣੋ।",
+      "serverRange": "ਆਗਿਆ ਪ੍ਰਾਪਤ ਸੀਮਾ: {min} ਤੋਂ {max}।",
+      "serverOptions": "ਆਗਿਆ ਪ੍ਰਾਪਤ ਮੁੱਲ: {options}।",
+      "server": {
+        "invalid": "ਸਰਵਰ ਨੇ ਇਹ ਮੁੱਲ ਸਵੀਕਾਰ ਨਹੀਂ ਕੀਤਾ: {message}",
+        "locked": "ਇਹ ਸੈਟਿੰਗ ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਲਾਕ ਕੀਤੀ ਹੈ, ਇਸ ਲਈ ਤੁਹਾਡਾ ਬਦਲਾਅ ਸੰਭਾਲਿਆ ਨਹੀਂ ਗਿਆ।",
+        "notFound": "ਇਹ ਸੈਟਿੰਗ ਹੁਣ ਮੌਜੂਦ ਨਹੀਂ।",
+        "forbidden": "ਇਹ ਸੈਟਿੰਗ ਬਦਲਣ ਦੀ ਤੁਹਾਨੂੰ ਇਜਾਜ਼ਤ ਨਹੀਂ।",
+        "reasonRequired": "ਇਸ ਬਦਲਾਅ ਲਈ ਕਾਰਨ ਲੋੜੀਂਦਾ ਹੈ। ਇੱਕ ਦਾਖਲ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+        "network": "ਸਰਵਰ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਹੋ ਸਕੀ, ਇਸ ਲਈ ਤੁਹਾਡਾ ਬਦਲਾਅ ਸੰਭਾਲਿਆ ਨਹੀਂ ਗਿਆ। {message}",
+        "other": "ਬਦਲਾਅ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ: {message}"
+      }
+    },
+    "effective": "ਹੁਣ ਲਾਗੂ: {value}",
+    "hint": {
+      "range": "ਆਗਿਆ: {min} ਤੋਂ {max}।",
+      "min": "ਘੱਟੋ-ਘੱਟ: {min}।",
+      "max": "ਵੱਧ ਤੋਂ ਵੱਧ: {max}।",
+      "default": "ਡਿਫ਼ਾਲਟ: {value}।",
+      "securityStricter": "ਸੁਰੱਖਿਆ ਸੈਟਿੰਗ ਨੂੰ ਸਿਰਫ਼ ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲ ਨਾਲੋਂ ਸਖ਼ਤ ਬਣਾਇਆ ਜਾ ਸਕਦਾ ਹੈ, ਕਦੇ ਕਮਜ਼ੋਰ ਨਹੀਂ।",
+      "inherited": "ਜੇ ਤੁਸੀਂ ਇਸਨੂੰ ਰੀਸੈੱਟ ਕਰੋਗੇ, ਇਹ ਇਸ ਉੱਤੇ ਮੁੜ ਜਾਵੇਗੀ: {value}।"
+    },
+    "locked": {
+      "withReason": "ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਲਾਕ: {reason}",
+      "noReason": "ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਲਾਕ। ਇੱਥੇ ਬਦਲਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"
+    },
+    "blocked": {
+      "role": "ਤੁਹਾਡੀ ਭੂਮਿਕਾ ਇਹ ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲ ਸਕਦੀ। ਕਿਸੇ ਵਰਕਸਪੇਸ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਪੁੱਛੋ।",
+      "scope": "ਇਹ ਸੈਟਿੰਗ ਇੱਥੇ ਓਵਰਰਾਈਡ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।",
+      "readOnly": "ਸੈਟਿੰਗਾਂ ਇਸ ਵੇਲੇ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਲਈ ਹਨ।",
+      "adminOnly": "ਇਹ ਸੁਰੱਖਿਆ ਸੈਟਿੰਗ ਸਿਰਫ਼ ਵਰਕਸਪੇਸ ਐਡਮਿਨ ਬਦਲ ਸਕਦਾ ਹੈ। ਤੁਸੀਂ ਇਸਦਾ ਮੁੱਲ ਇੱਥੇ ਦੇਖ ਸਕਦੇ ਹੋ, ਪਰ ਸੰਪਾਦਿਤ ਨਹੀਂ ਕਰ ਸਕਦੇ।"
+    },
+    "reset": {
+      "button": "ਵਿਰਸੇ ਵਾਲੇ ਮੁੱਲ ਉੱਤੇ ਰੀਸੈੱਟ ਕਰੋ",
+      "aria": "ਵਿਰਸੇ ਵਾਲੇ ਮੁੱਲ ਉੱਤੇ ਰੀਸੈੱਟ ਕਰੋ: {label}"
+    },
+    "help": {
+      "show": "ਹੋਰ ਵੇਰਵੇ",
+      "hide": "ਵੇਰਵੇ ਲੁਕਾਓ"
+    },
+    "history": {
+      "button": "ਇਤਿਹਾਸ",
+      "open": "ਇਤਿਹਾਸ: {label}",
+      "title": "ਇਤਿਹਾਸ: {label}",
+      "scopeTenant": "ਵਰਕਸਪੇਸ ਬਦਲਾਅ",
+      "scopeAgent": "ਇਸ ਏਜੰਟ ਲਈ ਬਦਲਾਅ",
+      "close": "ਇਤਿਹਾਸ ਬੰਦ ਕਰੋ",
+      "loading": "ਇਤਿਹਾਸ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ",
+      "error": "ਇਤਿਹਾਸ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ। {message}",
+      "empty": "ਹਾਲੇ ਕੋਈ ਬਦਲਾਅ ਦਰਜ ਨਹੀਂ ਹੋਇਆ।",
+      "listLabel": "ਬਦਲਾਅ ਇਤਿਹਾਸ, ਨਵਾਂ ਪਹਿਲਾਂ",
+      "version": "ਵਰਜਨ {version}",
+      "before": "ਪਹਿਲਾਂ:",
+      "after": "ਬਾਅਦ:",
+      "by": "ਬਦਲਣ ਵਾਲਾ",
+      "unknownActor": "ਅਣਜਾਣ",
+      "reason": "ਕਾਰਨ:"
+    },
+    "savebar": {
+      "count": "ਨਾ ਸੰਭਾਲੇ ਬਦਲਾਅ: {count}।",
+      "invalid": "ਸੰਭਾਲਣ ਤੋਂ ਪਹਿਲਾਂ ਉਭਾਰੇ ਖੇਤਰ ਠੀਕ ਕਰੋ। ਠੀਕ ਕਰਨ ਵਾਲੇ ਖੇਤਰ: {count}।",
+      "discard": "ਬਦਲਾਅ ਰੱਦ ਕਰੋ",
+      "save": "ਬਦਲਾਅ ਸੰਭਾਲੋ",
+      "saving": "ਸੰਭਾਲਿਆ ਜਾ ਰਿਹਾ ਹੈ"
+    },
+    "risky": {
+      "title": "ਜੋਖਮ ਵਾਲੇ ਬਦਲਾਵਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ ({count})",
+      "description": "ਇਹ ਸੈਟਿੰਗਾਂ ਬਦਲਦੀਆਂ ਹਨ ਕਿ ਤੁਹਾਡੇ ਏਜੰਟ ਕਿਵੇਂ ਵਿਹਾਰ ਕਰਦੇ ਹਨ ਜਾਂ ਉਹਨਾਂ ਨੂੰ ਕੀ ਕਰਨ ਦੀ ਆਗਿਆ ਹੈ। ਹਰ ਬਦਲਾਅ ਦੀ ਸਮੀਖਿਆ ਕਰੋ ਅਤੇ ਦੱਸੋ ਕਿ ਤੁਸੀਂ ਇਹ ਕਿਉਂ ਕਰ ਰਹੇ ਹੋ। ਕਾਰਨ ਆਡਿਟ ਲੌਗ ਵਿੱਚ ਸਟੋਰ ਹੁੰਦਾ ਹੈ।",
+      "descriptionSecurity": "ਇਹਨਾਂ ਵਿੱਚੋਂ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਸੁਰੱਖਿਆ ਸੈਟਿੰਗ ਹੈ। ਇਸਨੂੰ ਸਿਰਫ਼ ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲ ਨਾਲੋਂ ਸਖ਼ਤ ਬਣਾਇਆ ਜਾ ਸਕਦਾ ਹੈ। ਹਰ ਬਦਲਾਅ ਦੀ ਸਮੀਖਿਆ ਕਰੋ ਅਤੇ ਦੱਸੋ ਕਿ ਤੁਸੀਂ ਇਹ ਕਿਉਂ ਕਰ ਰਹੇ ਹੋ। ਕਾਰਨ ਆਡਿਟ ਲੌਗ ਵਿੱਚ ਸਟੋਰ ਹੁੰਦਾ ਹੈ।",
+      "listLabel": "ਪੁਸ਼ਟੀ ਕਰਨ ਵਾਲੇ ਬਦਲਾਅ",
+      "from": "ਤੋਂ",
+      "to": "to",
+      "securityNote": "ਸੁਰੱਖਿਆ ਸੈਟਿੰਗ: ਇਹ ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲ ਨਾਲੋਂ ਕਮਜ਼ੋਰ ਨਹੀਂ ਹੋ ਸਕਦੀ।",
+      "consequence": "ਇਹ ਕੀ ਬਦਲਦਾ ਹੈ:",
+      "reasonLabel": "ਇਸ ਬਦਲਾਅ ਦਾ ਕਾਰਨ",
+      "reasonPlaceholder": "ਉਦਾਹਰਨ: ਸਹਾਇਤਾ ਟੀਮ ਦੀਆਂ ਲੰਬੀਆਂ ਜਾਂਚਾਂ ਲਈ ਸੀਮਾ ਵਧਾਉਣਾ",
+      "reasonHint": "ਲੋੜੀਂਦਾ, ਘੱਟੋ-ਘੱਟ {min} ਅੱਖਰ। ਬਦਲਣ ਵਾਲੇ ਅਤੇ ਪੁਰਾਣੇ ਤੇ ਨਵੇਂ ਮੁੱਲਾਂ ਸਮੇਤ ਸੰਭਾਲਿਆ ਜਾਂਦਾ ਹੈ।",
+      "acknowledge": "ਮੈਂ ਇਸ ਸੁਰੱਖਿਆ ਬਦਲਾਅ ਦੇ ਨਤੀਜੇ ਸਮਝਦਾ/ਸਮਝਦੀ ਹਾਂ।",
+      "cancel": "ਰੱਦ ਕਰੋ",
+      "confirm": "ਪੁਸ਼ਟੀ ਕਰੋ ਅਤੇ ਸੰਭਾਲੋ",
+      "resetNote": "ਰੀਸੈੱਟ: ਓਵਰਰਾਈਡ ਹਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਸੈਟਿੰਗ ਉਸ ਮੁੱਲ ’ਤੇ ਵਾਪਸ ਆ ਜਾਂਦੀ ਹੈ ਜੋ ਉਸਨੂੰ ਵਿਰਾਸਤ ਵਿੱਚ ਮਿਲਦਾ ਹੈ।"
+    },
+    "strictness": {
+      "higher": "ਉੱਚਾ ਵਧੇਰੇ ਸਖ਼ਤ ਹੈ: ਉੱਚਾ ਮੁੱਲ ਸਵੀਕਾਰ ਹੁੰਦਾ ਹੈ, ਨੀਵਾਂ ਰੱਦ।",
+      "lower": "ਨੀਵਾਂ ਵਧੇਰੇ ਸਖ਼ਤ ਹੈ: ਨੀਵਾਂ ਮੁੱਲ ਸਵੀਕਾਰ ਹੁੰਦਾ ਹੈ, ਉੱਚਾ ਰੱਦ।",
+      "enumOrder": "ਵਿਕਲਪ ਸਭ ਤੋਂ ਘੱਟ ਤੋਂ ਸਭ ਤੋਂ ਵੱਧ ਸਖ਼ਤ ਕ੍ਰਮ ਵਿੱਚ ਹਨ: {options}। ਤੁਸੀਂ ਸਿਰਫ਼ ਸਖ਼ਤ ਸਿਰੇ ਵੱਲ ਜਾ ਸਕਦੇ ਹੋ।"
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "ਬਕਾਇਆ",
+    "status_APPROVED": "ਮਨਜ਼ੂਰ",
+    "status_REJECTED": "ਰੱਦ",
+    "status_EXPIRED": "ਮਿਆਦ ਪੁੱਗੀ",
+    "status_EXECUTION_FAILED": "ਅਮਲ ਅਸਫਲ",
+    "status_DEAD_LETTERED": "ਡੈੱਡ ਲੈਟਰ",
+    "filtersLabel": "ਬੇਨਤੀਆਂ ਫਿਲਟਰ ਕਰੋ",
+    "filterAgentLabel": "ਏਜੰਟ ਅਨੁਸਾਰ ਫਿਲਟਰ ਕਰੋ",
+    "filterToolLabel": "ਟੂਲ ਅਨੁਸਾਰ ਫਿਲਟਰ ਕਰੋ",
+    "filterAgeLabel": "ਉਮਰ ਅਨੁਸਾਰ ਫਿਲਟਰ ਕਰੋ",
+    "filterAnyAgent": "ਕੋਈ ਵੀ ਏਜੰਟ",
+    "filterAnyTool": "ਕੋਈ ਵੀ ਟੂਲ",
+    "filterAnyAge": "ਕੋਈ ਵੀ ਉਮਰ",
+    "age_newer1h": "1 ਘੰਟੇ ਤੋਂ ਨਵੀਂ",
+    "age_older1h": "1 ਘੰਟੇ ਤੋਂ ਪੁਰਾਣੀ",
+    "age_older24h": "1 ਦਿਨ ਤੋਂ ਪੁਰਾਣੀ",
+    "age_older7d": "7 ਦਿਨਾਂ ਤੋਂ ਪੁਰਾਣੀ",
+    "filtersClear": "ਫਿਲਟਰ ਸਾਫ਼ ਕਰੋ",
+    "filterWindowNote": "ਸਭ ਤੋਂ ਨਵੀਆਂ {count} ਬੇਨਤੀਆਂ ਫਿਲਟਰ ਹੋ ਰਹੀਆਂ ਹਨ। ਪੁਰਾਣੀਆਂ ਸ਼ਾਮਲ ਨਹੀਂ।",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time} ਵਿੱਚ ਮਿਆਦ ਪੁੱਗੇਗੀ",
+    "expiresAt": "ਜੇ ਕੋਈ ਫ਼ੈਸਲਾ ਨਾ ਕਰੇ ਤਾਂ {time} ਉੱਤੇ ਆਪਣੇ-ਆਪ ਬੰਦ ਹੋ ਜਾਵੇਗੀ",
+    "overdue": "ਸਮਾਂ ਸੀਮਾ ਲੰਘ ਗਈ, ਅਗਲੀ ਸਫ਼ਾਈ ਵਿੱਚ ਬੰਦ ਹੋਵੇਗੀ",
+    "neverExpires": "ਇਹ ਵਰਕਸਪੇਸ ਉਡੀਕ ਕਰ ਰਹੀਆਂ ਬੇਨਤੀਆਂ ਦੀ ਮਿਆਦ ਨਹੀਂ ਖਤਮ ਕਰਦਾ।",
+    "expiredNote": "{time} ਮਿਆਦ ਪੁੱਗੀ: ਸਮੇਂ ਸਿਰ ਕਿਸੇ ਨੇ ਫ਼ੈਸਲਾ ਨਹੀਂ ਕੀਤਾ",
+    "expiredReasonPrefix": "ਮਿਆਦ ਪੁੱਗੀ:",
+    "auditExpired": "ਮਿਆਦ ਪੁੱਗੀ, ਸਮੇਂ ਸਿਰ ਕਿਸੇ ਨੇ ਫ਼ੈਸਲਾ ਨਹੀਂ ਕੀਤਾ",
+    "riskLow": "ਘੱਟ ਜੋਖਮ",
+    "riskMedium": "ਦਰਮਿਆਨਾ ਜੋਖਮ",
+    "riskHigh": "ਵੱਧ ਜੋਖਮ",
+    "riskEstimateNote": "ਜੋਖਮ ਟੂਲ ਦੇ ਨਾਮ ਤੋਂ ਲਾਇਆ ਅੰਦਾਜ਼ਾ ਹੈ। ਪਲੇਟਫ਼ਾਰਮ ਟੂਲਾਂ ਦਾ ਵਰਗੀਕਰਨ ਨਹੀਂ ਕਰਦਾ, ਇਸ ਲਈ ਮਨਜ਼ੂਰ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਆਰਗੂਮੈਂਟ ਪੜ੍ਹੋ।",
+    "riskWhoDecides": "ਕੌਣ ਤੈਅ ਕਰਦਾ ਹੈ ਕਿ ਕਿਸ ਚੀਜ਼ ਨੂੰ ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ ਕਰਨੀ ਹੈ?",
+    "previewGoal": "ਜਿਸ ਕੰਮ ਉੱਤੇ ਇਹ ਕੰਮ ਕਰ ਰਿਹਾ ਸੀ:",
+    "previewArguments": "ਆਰਗੂਮੈਂਟ",
+    "previewNoArguments": "ਇਸ ਕਾਲ ਲਈ ਕੋਈ ਆਰਗੂਮੈਂਟ ਦਰਜ ਨਹੀਂ ਹੋਏ।",
+    "previewRedacted": "{count} ਸੰਵੇਦਨਸ਼ੀਲ ਲੱਗਦੇ ਮੁੱਲ ਇੱਥੇ ਲੁਕਾਏ ਗਏ ਹਨ। ਜੇ ਤੁਸੀਂ ਮਨਜ਼ੂਰ ਕਰਦੇ ਹੋ ਤਾਂ ਉਹ ਫਿਰ ਵੀ ਟੂਲ ਨੂੰ ਭੇਜੇ ਜਾਂਦੇ ਹਨ।",
+    "previewTruncated": "ਇਹ ਆਰਗੂਮੈਂਟ ਪੂਰੇ ਵਿਖਾਉਣ ਲਈ ਬਹੁਤ ਲੰਬੇ ਹਨ, ਇਸ ਲਈ ਇਹ ਬੇਨਤੀ ਇੱਥੋਂ ਮਨਜ਼ੂਰ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।",
+    "approveBlockedTooLong": "ਮਨਜ਼ੂਰੀ ਬੰਦ ਹੈ ਕਿਉਂਕਿ ਤੁਸੀਂ ਪੂਰੀ ਬੇਨਤੀ ਦੀ ਸਮੀਖਿਆ ਨਹੀਂ ਕਰ ਸਕਦੇ। ਤੁਸੀਂ ਫਿਰ ਵੀ ਇਸਨੂੰ ਰੱਦ ਕਰ ਸਕਦੇ ਹੋ।",
+    "ifApproveLabel": "ਜੇ ਤੁਸੀਂ ਮਨਜ਼ੂਰ ਕਰਦੇ ਹੋ:",
+    "ifApprove": "{tool} ਉੱਪਰ ਦਿੱਤੇ ਆਰਗੂਮੈਂਟਾਂ ਨਾਲ ਹੁਣੇ ਚੱਲਦਾ ਹੈ, ਅਤੇ ਏਜੰਟ ਉਸਦੇ ਨਤੀਜੇ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਕੰਮ ਜਾਰੀ ਰੱਖਦਾ ਹੈ।",
+    "ifDenyLabel": "ਜੇ ਤੁਸੀਂ ਰੱਦ ਕਰਦੇ ਹੋ:",
+    "ifDeny": "{tool} ਨਹੀਂ ਚੱਲਦਾ। ਏਜੰਟ ਨੂੰ ਦੱਸਿਆ ਜਾਂਦਾ ਹੈ ਕਿ ਤੁਸੀਂ ਨਾਂਹ ਕਿਹਾ, ਕਾਰਨ ਦਿੱਤਾ ਹੋਵੇ ਤਾਂ ਉਸ ਸਮੇਤ, ਅਤੇ ਉਹ ਉਸ ਤੋਂ ਬਿਨਾਂ ਅੱਗੇ ਵਧਦਾ ਹੈ।",
+    "whyGated": "ਏਜੰਟ ਨੇ {tool} ਵਰਤਣ ਲਈ ਕਿਹਾ। ਇਹ ਤੁਹਾਡੇ ਫ਼ੈਸਲੇ ਲਈ ਰੋਕਿਆ ਗਿਆ ਕਿਉਂਕਿ ਏਜੰਟ ਨਿਗਰਾਨੀ ਅਧੀਨ ਉੱਤੇ ਸੈੱਟ ਹੈ, ਜਾਂ ਇਹ ਵਰਕਸਪੇਸ ਉਸ ਟੂਲ ਲਈ ਮਨਜ਼ੂਰੀ ਮੰਗਦਾ ਹੈ।",
+    "denyReasonLabel": "ਰੱਦ ਕਰਨ ਉੱਤੇ ਕਾਰਨ (ਵਿਕਲਪਿਕ)",
+    "denyReasonPlaceholder": "ਉਦਾਹਰਨ: ਗਲਤ ਪ੍ਰਾਪਤਕਰਤਾ, ਭੇਜਣ ਤੋਂ ਪਹਿਲਾਂ ਮੈਨੂੰ ਪੁੱਛੋ",
+    "denyReasonHelp": "ਜੇ ਤੁਸੀਂ ਰੱਦ ਕਰਦੇ ਹੋ, ਏਜੰਟ ਇਸ ਕਾਰਨ ਨੂੰ ਰੱਦ ਕੀਤੀ ਕਾਲ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਪੜ੍ਹਦਾ ਹੈ ਅਤੇ ਉਸ ਅਨੁਸਾਰ ਢਲ ਜਾਂਦਾ ਹੈ। ਕਾਰਨ ਤੋਂ ਬਿਨਾਂ ਰੱਦ ਕਰਨ ਲਈ ਖਾਲੀ ਛੱਡੋ।",
+    "denyButton": "ਰੱਦ ਕਰੋ",
+    "detailRegionLabel": "ਬੇਨਤੀ ਦੇ ਵੇਰਵੇ",
+    "sessionLabel": "ਗੱਲਬਾਤ",
+    "linkOpenAgent": "ਏਜੰਟ ਖੋਲ੍ਹੋ",
+    "linkInspectTurns": "ਇਸਦੇ ਟਰਨਾਂ ਦੀ ਜਾਂਚ ਕਰੋ",
+    "continuationLabel": "ਏਜੰਟ ਨੇ ਅੱਗੇ ਕੀ ਕੀਤਾ",
+    "continuationCompleted": "ਏਜੰਟ ਨੇ ਕੰਮ ਜਾਰੀ ਰੱਖਣਾ ਪੂਰਾ ਕਰ ਲਿਆ।",
+    "continuationFailed": "ਇਸ ਫ਼ੈਸਲੇ ਤੋਂ ਬਾਅਦ ਏਜੰਟ ਅੱਗੇ ਨਹੀਂ ਵਧ ਸਕਿਆ।",
+    "continuationRetry": "ਇਸਨੂੰ ਅੱਗੇ ਵਧਣ ਲਈ ਕਹੋ",
+    "retryMessage": "ਕਿਰਪਾ ਕਰਕੇ ਕੰਮ ਜਾਰੀ ਰੱਖੋ।",
+    "lastDecisionTitle": "ਤੁਹਾਡਾ ਪਿਛਲਾ ਫ਼ੈਸਲਾ: {tool}",
+    "lastDecisionClose": "ਬੰਦ ਕਰੋ",
+    "deepLinkNotFound": "ਉਹ ਮਨਜ਼ੂਰੀ ਬੇਨਤੀ ਨਹੀਂ ਮਿਲੀ, ਜਾਂ ਤੁਸੀਂ ਉਸਨੂੰ ਨਹੀਂ ਵੇਖ ਸਕਦੇ।",
+    "selectAllLabel": "ਇਸ ਪੰਨੇ ਦੀਆਂ ਸਾਰੀਆਂ ਬਕਾਇਆ ਟੂਲ ਕਾਲਾਂ ਚੁਣੋ",
+    "selectRowLabel": "{tool} ਦੀ ਬਕਾਇਆ ਕਾਲ ਚੁਣੋ",
+    "bulkSelected": "{count} ਚੁਣੇ ਗਏ",
+    "bulkApprove": "ਚੁਣੇ ਮਨਜ਼ੂਰ ਕਰੋ",
+    "bulkDeny": "ਚੁਣੇ ਰੱਦ ਕਰੋ",
+    "bulkClear": "ਚੋਣ ਸਾਫ਼ ਕਰੋ",
+    "bulkCancel": "ਰੱਦ ਕਰੋ",
+    "bulkDismiss": "ਖਾਰਜ ਕਰੋ",
+    "bulkMixedTools": "ਸਮੂਹਿਕ ਫ਼ੈਸਲਿਆਂ ਲਈ ਚੁਣੀਆਂ ਸਾਰੀਆਂ ਬੇਨਤੀਆਂ ਇੱਕੋ ਟੂਲ ਦੀਆਂ ਹੋਣੀਆਂ ਚਾਹੀਦੀਆਂ ਹਨ।",
+    "bulkNotLowRisk": "ਸਮੂਹਿਕ ਮਨਜ਼ੂਰੀ ਸਿਰਫ਼ ਘੱਟ ਜੋਖਮ ਵਾਲੇ ਟੂਲਾਂ (ਲੁਕਅੱਪ) ਲਈ ਹੈ। ਰੱਦ ਕਰਨਾ ਕਿਸੇ ਵੀ ਇੱਕ ਟੂਲ ਲਈ ਚੱਲਦਾ ਹੈ, ਜਾਂ ਇਹਨਾਂ ਨੂੰ ਇੱਕ-ਇੱਕ ਕਰਕੇ ਤੈਅ ਕਰੋ।",
+    "bulkNotToolCall": "ਸਮੂਹਿਕ ਫ਼ੈਸਲੇ ਸਿਰਫ਼ ਏਜੰਟ ਟੂਲ ਕਾਲਾਂ ਨੂੰ ਕਵਰ ਕਰਦੇ ਹਨ।",
+    "bulkNotPending": "ਸਮੂਹਿਕ ਫ਼ੈਸਲੇ ਸਿਰਫ਼ ਉਹਨਾਂ ਬੇਨਤੀਆਂ ਨੂੰ ਕਵਰ ਕਰਦੇ ਹਨ ਜੋ ਹਾਲੇ ਬਕਾਇਆ ਹਨ।",
+    "bulkConfirmApproveTitle": "{tool} ਦੀਆਂ {count} ਕਾਲਾਂ ਮਨਜ਼ੂਰ ਕਰਨੀਆਂ ਹਨ?",
+    "bulkConfirmApproveBody": "ਇਹਨਾਂ ਵਿੱਚੋਂ ਹਰ ਇੱਕ ਹੇਠਾਂ ਸੂਚੀਬੱਧ ਆਪਣੇ ਆਰਗੂਮੈਂਟਾਂ ਨਾਲ ਹੁਣੇ {tool} ਚਲਾਉਂਦਾ ਹੈ, ਅਤੇ ਏਜੰਟ ਨਤੀਜਿਆਂ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਅੱਗੇ ਵਧਦਾ ਹੈ। ਇਸਨੂੰ ਵਾਪਸ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ।",
+    "bulkConfirmDenyTitle": "{tool} ਦੀਆਂ {count} ਕਾਲਾਂ ਰੱਦ ਕਰਨੀਆਂ ਹਨ?",
+    "bulkConfirmDenyBody": "ਇਹਨਾਂ ਵਿੱਚੋਂ ਕੋਈ ਨਹੀਂ ਚੱਲਦੀ। ਏਜੰਟ ਨੂੰ ਦੱਸਿਆ ਜਾਂਦਾ ਹੈ ਕਿ ਹਰ ਕਾਲ ਰੱਦ ਹੋਈ, ਕਾਰਨ ਦਿੱਤਾ ਹੋਵੇ ਤਾਂ ਉਸ ਸਮੇਤ।",
+    "bulkConfirmApprove": "{count} ਮਨਜ਼ੂਰ ਕਰੋ",
+    "bulkConfirmDeny": "{count} ਰੱਦ ਕਰੋ",
+    "bulkMore": "ਅਤੇ {count} ਹੋਰ",
+    "bulkProgress": "{count} ਵਿੱਚੋਂ {done} ਪੂਰੇ",
+    "bulkResult": "{done} ਤੈਅ ਹੋਏ, {failed} ਅਸਫਲ।",
+    "notifyOff": "ਮੈਨੂੰ ਸੂਚਿਤ ਕਰੋ",
+    "notifyOn": "ਸੂਚਨਾਵਾਂ ਚਾਲੂ",
+    "notifyHelp": "ਜਦੋਂ ਇਹ ਟੈਬ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਹੋਵੇ ਅਤੇ ਨਵੀਂ ਬੇਨਤੀ ਆਵੇ ਤਾਂ ਬ੍ਰਾਊਜ਼ਰ ਸੂਚਨਾ ਵਿਖਾਓ",
+    "notifyUnsupported": "ਇਹ ਬ੍ਰਾਊਜ਼ਰ ਸੂਚਨਾਵਾਂ ਨਹੀਂ ਵਿਖਾ ਸਕਦਾ।",
+    "notifyBlocked": "ਸੂਚਨਾਵਾਂ ਬਲੌਕ ਹਨ। ਇਸਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ ਆਪਣੇ ਬ੍ਰਾਊਜ਼ਰ ਦੀਆਂ ਸਾਈਟ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਇਹਨਾਂ ਨੂੰ ਆਗਿਆ ਦਿਓ।",
+    "notifyTitle": "ਇੱਕ ਏਜੰਟ ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ ਕਰ ਰਿਹਾ ਹੈ",
+    "notifyBodyOne": "{tool} ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੈਸਲੇ ਦੀ ਲੋੜ ਹੈ।",
+    "notifyBodyMany": "{count} ਬੇਨਤੀਆਂ ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੈਸਲੇ ਦੀ ਲੋੜ ਹੈ।",
+    "newArrived": "{count} ਨਵੀਂ(ਆਂ) ਮਨਜ਼ੂਰੀ ਬੇਨਤੀ(ਆਂ) ਆਈ(ਆਂ)।",
+    "rulesTitle": "ਇੱਕ ਟੂਲ ਲਈ ਨਿਯਮ",
+    "rulesIntro": "ਚੁਣੋ ਕਿ ਟੂਲ ਹਮੇਸ਼ਾ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਉਡੀਕ ਕਰੇ ਜਾਂ ਕਦੇ ਨਹੀਂ। ਇਹ ਨਿਯਮ ਅਰਧ-ਖੁਦਮੁਖਤਿਆਰ ਉੱਤੇ ਸੈੱਟ ਹਰ ਏਜੰਟ ਉੱਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ।",
+    "rulesNeedsScope": "ਨਿਯਮ ਬਦਲਣ ਲਈ ਤੁਹਾਨੂੰ ਮਨਜ਼ੂਰੀਆਂ ਦੀ ਇਜਾਜ਼ਤ ਚਾਹੀਦੀ ਹੈ।",
+    "rulesToolLabel": "ਟੂਲ ਦਾ ਨਾਮ",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "ਬਿਲਕੁਲ ਉਸੇ ਤਰ੍ਹਾਂ ਜਿਵੇਂ ਟੂਲ ਬੇਨਤੀ ਵਿੱਚ ਦਿਸਦਾ ਹੈ, ਉਦਾਹਰਨ ਲਈ send_email।",
+    "rulesToolNameInvalid": "ਟੂਲ ਦੇ ਨਾਮ ਵਿੱਚ ਖਾਲੀ ਥਾਂ ਨਹੀਂ ਹੁੰਦੀ।",
+    "rulesModeLabel": "ਕੀ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ",
+    "rulesAskName": "ਹਮੇਸ਼ਾ ਪੁੱਛੋ",
+    "rulesAskHint": "ਇਸ ਟੂਲ ਦੀ ਹਰ ਕਾਲ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ ਕਰਦੀ ਹੈ।",
+    "rulesNeverName": "ਕਦੇ ਨਾ ਪੁੱਛੋ",
+    "rulesNeverHint": "ਇਸ ਟੂਲ ਦੀਆਂ ਕਾਲਾਂ ਕਿਸੇ ਦੀ ਮਨਜ਼ੂਰੀ ਤੋਂ ਬਿਨਾਂ ਤੁਰੰਤ ਚੱਲਦੀਆਂ ਹਨ।",
+    "rulesNeverRiskyWarn": "ਇਹ ਟੂਲ ਚੀਜ਼ਾਂ ਬਦਲਦਾ ਜਾਪਦਾ ਹੈ। ਪੱਕਾ ਕਰ ਲਓ।",
+    "rulesScopeNote": "ਨਿਯਮ ਪੂਰੇ ਵਰਕਸਪੇਸ ਉੱਤੇ ਲਾਗੂ ਹੁੰਦੇ ਹਨ, ਇੱਕ ਏਜੰਟ ਉੱਤੇ ਨਹੀਂ। ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟ ਹਾਲੇ ਵੀ ਹਰ ਚੀਜ਼ ਲਈ ਪੁੱਛਦੇ ਹਨ, ਅਤੇ ਪੂਰੇ ਖੁਦਮੁਖਤਿਆਰ ਏਜੰਟ ਨਿਯਮ ਜੋ ਵੀ ਕਹੇ ਕਦੇ ਨਹੀਂ ਪੁੱਛਦੇ। ਤੁਹਾਡੇ ਸੈੱਟ ਕੀਤੇ ਨਿਯਮ ਹਾਲੇ ਇੱਥੇ ਸੂਚੀਬੱਧ ਨਹੀਂ ਹੁੰਦੇ।",
+    "rulesSave": "ਨਿਯਮ ਸੰਭਾਲੋ",
+    "rulesSaveFailed": "ਨਿਯਮ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ।",
+    "rulesSavedAsk": "{tool} ਹਮੇਸ਼ਾ ਮਨਜ਼ੂਰੀ ਮੰਗੇਗਾ।",
+    "rulesSavedNever": "{tool} ਹੁਣ ਮਨਜ਼ੂਰੀ ਨਹੀਂ ਮੰਗੇਗਾ।",
+    "rulesNeverConfirmTitle": "{tool} ਚੱਲਣ ਤੋਂ ਪਹਿਲਾਂ ਪੁੱਛਣਾ ਬੰਦ ਕਰਨਾ ਹੈ?",
+    "rulesNeverConfirmBody": "ਹਰ ਅਰਧ-ਖੁਦਮੁਖਤਿਆਰ ਏਜੰਟ ਕਿਸੇ ਦੀ ਮਨਜ਼ੂਰੀ ਤੋਂ ਬਿਨਾਂ {tool} ਚਲਾਏਗਾ। ਇਹ ਚੀਜ਼ਾਂ ਬਦਲ ਜਾਂ ਭੇਜ ਸਕਦਾ ਜਾਪਦਾ ਹੈ, ਅਤੇ ਗਲਤੀ ਵਾਪਸ ਨਹੀਂ ਲਈ ਜਾ ਸਕਦੀ।",
+    "rulesNeverConfirmBodyLow": "ਹਰ ਅਰਧ-ਖੁਦਮੁਖਤਿਆਰ ਏਜੰਟ ਪੁੱਛੇ ਬਿਨਾਂ {tool} ਚਲਾਏਗਾ। ਇਹ ਲੁਕਅੱਪ ਵਰਗਾ ਲੱਗਦਾ ਹੈ, ਇਸ ਲਈ ਇਹ ਆਮ ਤੌਰ ਉੱਤੇ ਸੁਰੱਖਿਅਤ ਹੈ।",
+    "rulesNeverConfirm": "ਪੁੱਛਣਾ ਬੰਦ ਕਰੋ",
+    "tiersTitle": "ਕੌਣ ਤੈਅ ਕਰਦਾ ਹੈ ਕਿ ਕਿਸ ਚੀਜ਼ ਨੂੰ ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ ਕਰਨੀ ਹੈ?",
+    "tiersIntro": "ਹਰ ਏਜੰਟ ਦਾ ਇੱਕ ਖੁਦਮੁਖਤਿਆਰੀ ਪੱਧਰ ਹੁੰਦਾ ਹੈ। ਇਹ ਤੈਅ ਕਰਦਾ ਹੈ ਕਿ ਵਰਕਸਪੇਸ ਦੇ ਮਨਜ਼ੂਰੀ ਨਿਯਮ ਵਰਤੇ ਜਾਣ ਜਾਂ ਨਹੀਂ।",
+    "tierCurrent": "ਇਹ ਏਜੰਟ",
+    "tierConsequenceLabel": "ਅਮਲ ਵਿੱਚ:",
+    "tierSupervisedName": "ਨਿਗਰਾਨੀ ਅਧੀਨ",
+    "tierSupervisedWhat": "ਵਰਕਸਪੇਸ ਨਿਯਮ ਜੋ ਵੀ ਕਹਿਣ, ਹਰ ਟੂਲ ਕਾਲ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਉਡੀਕ ਕਰਦੀ ਹੈ। ਇਸਨੂੰ ਹਰ ਟਰਨ ਲਈ ਟੂਲ ਕਦਮਾਂ ਦੀ ਘੱਟ ਸੀਮਾ ਵੀ ਮਿਲਦੀ ਹੈ।",
+    "tierSupervisedConsequence": "ਸਭ ਤੋਂ ਸੁਰੱਖਿਅਤ, ਪਰ ਕਤਾਰ ਵਿੱਚ ਬਹੁਤ ਸਾਰੀਆਂ ਬੇਨਤੀਆਂ ਅਤੇ ਹੌਲੀ ਏਜੰਟ ਦੀ ਉਮੀਦ ਰੱਖੋ।",
+    "tierSemiName": "ਅਰਧ-ਖੁਦਮੁਖਤਿਆਰ",
+    "tierSemiWhat": "ਹਰ ਟੂਲ ਲਈ ਵਰਕਸਪੇਸ ਦਾ ਨਿਯਮ ਤੈਅ ਕਰਦਾ ਹੈ: ਭੇਜਣ, ਮਿਟਾਉਣ ਅਤੇ ਭੁਗਤਾਨ ਵਰਗੇ ਜੋਖਮ ਵਾਲੇ ਟੂਲ ਡਿਫ਼ਾਲਟ ਵਜੋਂ ਪੁੱਛਦੇ ਹਨ, ਬਾਕੀ ਚੱਲਦੇ ਹਨ।",
+    "tierSemiConsequence": "ਇੱਕ ਚੰਗਾ ਡਿਫ਼ਾਲਟ। ਤੁਹਾਡੇ ਹਰ-ਟੂਲ ਨਿਯਮ ਇੱਥੇ ਲਾਗੂ ਹੁੰਦੇ ਹਨ।",
+    "tierFullName": "ਪੂਰੀ ਖੁਦਮੁਖਤਿਆਰੀ",
+    "tierFullWhat": "ਕੋਈ ਟੂਲ ਕਾਲ ਕਦੇ ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ ਨਹੀਂ ਕਰਦੀ ਅਤੇ ਏਜੰਟ ਨੂੰ ਟੂਲ ਕਦਮਾਂ ਦੀ ਵੱਧ ਸੀਮਾ ਮਿਲਦੀ ਹੈ। ਹਰ-ਟੂਲ ਨਿਯਮ ਅਣਡਿੱਠੇ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।",
+    "tierFullConsequence": "ਇਹ ਪੁੱਛੇ ਬਿਨਾਂ ਕੰਮ ਕਰਦਾ ਹੈ। ਇਸਨੂੰ ਸਿਰਫ਼ ਉਹਨਾਂ ਏਜੰਟਾਂ ਲਈ ਵਰਤੋ ਜਿਨ੍ਹਾਂ ਦੀਆਂ ਗਲਤੀਆਂ ਆਸਾਨੀ ਨਾਲ ਵਾਪਸ ਕੀਤੀਆਂ ਜਾ ਸਕਦੀਆਂ ਹਨ।",
+    "tiersRuleNote": "ਟੂਲ ਨਿਯਮ (ਹਮੇਸ਼ਾ ਪੁੱਛੋ, ਕਦੇ ਨਾ ਪੁੱਛੋ) ਸਿਰਫ਼ ਅਰਧ-ਖੁਦਮੁਖਤਿਆਰ ਏਜੰਟਾਂ ਲਈ ਮਾਇਨੇ ਰੱਖਦੇ ਹਨ।",
+    "agentModeTitle": "ਇਸ ਏਜੰਟ ਨੂੰ ਮਨਜ਼ੂਰੀ ਕਦੋਂ ਚਾਹੀਦੀ ਹੈ?",
+    "agentModeSupervised": "ਇਹ ਏਜੰਟ ਨਿਗਰਾਨੀ ਅਧੀਨ ਹੈ: ਹਰ ਟੂਲ ਕਾਲ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਉਡੀਕ ਕਰਦੀ ਹੈ, ਅਤੇ ਹਰ-ਟੂਲ ਨਿਯਮ ਅਣਡਿੱਠੇ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।",
+    "agentModeSemi": "ਇਹ ਏਜੰਟ ਅਰਧ-ਖੁਦਮੁਖਤਿਆਰ ਹੈ: ਹਰ ਟੂਲ ਵਰਕਸਪੇਸ ਦੇ ਨਿਯਮ ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ। ਭੇਜਣਾ, ਮਿਟਾਉਣਾ ਅਤੇ ਭੁਗਤਾਨ ਡਿਫ਼ਾਲਟ ਵਜੋਂ ਪੁੱਛਦੇ ਹਨ।",
+    "agentModeFull": "ਇਹ ਏਜੰਟ ਪੂਰਾ ਖੁਦਮੁਖਤਿਆਰ ਹੈ: ਇਹ ਕਦੇ ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ ਨਹੀਂ ਕਰਦਾ, ਅਤੇ ਹਰ-ਟੂਲ ਨਿਯਮ ਅਣਡਿੱਠੇ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।",
+    "agentModeQueueLink": "ਇਸ ਏਜੰਟ ਦੀਆਂ ਬੇਨਤੀਆਂ ਵੇਖੋ",
+    "agentModeRulesLink": "ਕਿਸੇ ਟੂਲ ਲਈ ਨਿਯਮ ਸੈੱਟ ਕਰੋ",
+    "agentModeShowTiers": "ਤਿੰਨੋਂ ਪੱਧਰਾਂ ਦੀ ਤੁਲਨਾ ਕਰੋ",
+    "agentModeHideTiers": "ਤੁਲਨਾ ਲੁਕਾਓ",
+    "agentModeScopeNote": "ਉੱਪਰ ਦਿੱਤੀ ਖੁਦਮੁਖਤਿਆਰੀ ਦੀ ਚੋਣ ਨਾਲ ਪੱਧਰ ਬਦਲੋ। ਟੂਲ ਨਿਯਮ ਪੂਰੇ ਵਰਕਸਪੇਸ ਦੇ ਹਨ, ਹਰ ਏਜੰਟ ਦੇ ਨਹੀਂ।",
+    "policyThenApprovalNote": "ਜੋ ਕਾਲ ਇਹਨਾਂ ਨਿਯਮਾਂ ਵਿੱਚੋਂ ਲੰਘ ਜਾਂਦੀ ਹੈ ਉਹ ਫਿਰ ਵੀ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਉਡੀਕ ਕਰ ਸਕਦੀ ਹੈ। ਇਹ ਏਜੰਟ ਦੇ ਖੁਦਮੁਖਤਿਆਰੀ ਪੱਧਰ ਉੱਤੇ ਨਿਰਭਰ ਹੈ, ਜੋ ਹੇਠਾਂ ਸਮਝਾਇਆ ਗਿਆ ਹੈ।",
+    "chatReasonToggle": "ਕਾਰਨ ਜੋੜੋ",
+    "chatReviewInQueue": "ਕਤਾਰ ਵਿੱਚ ਸਮੀਖਿਆ ਕਰੋ"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "ਇਵੈਂਟ ਫਿਲਟਰ ਕਰੋ",
+    "tlFilterCategories": "ਇਵੈਂਟ ਕਿਸਮਾਂ",
+    "tlCatIntake": "ਇਨਟੇਕ",
+    "tlCatModel": "ਮਾਡਲ",
+    "tlCatTool": "ਟੂਲ",
+    "tlCatApproval": "ਮਨਜ਼ੂਰੀਆਂ",
+    "tlCatContinuation": "ਨਿਰੰਤਰਤਾਵਾਂ",
+    "tlCatRetry": "ਮੁੜ-ਕੋਸ਼ਿਸ਼ਾਂ ਅਤੇ ਫੇਲਓਵਰ",
+    "tlCatGuardrail": "ਗਾਰਡਰੇਲ",
+    "tlCatCache": "ਕੈਸ਼",
+    "tlCatVerify": "ਜਾਂਚਾਂ",
+    "tlCatFinish": "ਸਮਾਪਤੀ",
+    "tlProblemsOnly": "ਸਿਰਫ਼ ਸਮੱਸਿਆਵਾਂ",
+    "tlSearch": "ਇਵੈਂਟ ਖੋਜੋ",
+    "tlSearchPlaceholder": "ਟੂਲ, ਮਾਡਲ, ਗਾਰਡ ਜਾਂ ਸਥਿਤੀ",
+    "tlClearFilters": "ਫਿਲਟਰ ਸਾਫ਼ ਕਰੋ",
+    "tlShowing": "{total} ਇਵੈਂਟਾਂ ਵਿੱਚੋਂ {shown} ਵਿਖਾ ਰਹੇ ਹਾਂ",
+    "tlNoMatch": "ਕੋਈ ਇਵੈਂਟ ਇਹਨਾਂ ਫਿਲਟਰਾਂ ਨਾਲ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ।",
+    "tlSevOk": "ਸਫਲ",
+    "tlSevInfo": "ਜਾਣਕਾਰੀ",
+    "tlSevWarn": "ਧਿਆਨ ਦੀ ਲੋੜ",
+    "tlSevError": "ਅਸਫਲ",
+    "tlIntake": "ਟਰਨ ਸ਼ੁਰੂ ਹੋਇਆ: {chars} ਅੱਖਰ, {tools} ਟੂਲ, {attachments} ਅਟੈਚਮੈਂਟ",
+    "tlRunTools": "ਇਸ ਰਨ ਲਈ ਟੂਲ",
+    "tlRunToolsNone": "ਕੋਈ ਨਹੀਂ (ਸਿਰਫ਼ ਲਿਖਤ)",
+    "tlModelCall": "{model} ({provider}) ਨੂੰ ਮਾਡਲ ਕਾਲ, ਰੂਟ {route}",
+    "tlFailover": "{model} ({provider}) ਉੱਤੇ ਫੇਲਓਵਰ ਹੋਇਆ",
+    "tlRetryModel": "{model} ({provider}) ਉੱਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ, ਰੂਟ {route}",
+    "tlRetry": "ਮੁੜ-ਕੋਸ਼ਿਸ਼: {guard} ({outcome})",
+    "tlCacheHit": "ਰਿਸਪਾਂਸ ਕੈਸ਼ ਤੋਂ ਜਵਾਬ ਦਿੱਤਾ ਗਿਆ",
+    "tlToolCall": "ਟੂਲ ਕਾਲ {tool}: {status}",
+    "tlApprovalRequested": "{tool} ਚੱਲਣ ਤੋਂ ਪਹਿਲਾਂ ਮਨਜ਼ੂਰੀ ਮੰਗੀ ਗਈ",
+    "tlApprovalDecided": "{tool} ਲਈ ਮਨਜ਼ੂਰੀ ਦਾ ਫ਼ੈਸਲਾ ਹੋਇਆ: {decision}",
+    "tlApprovalAutoAllowed": "{tool} ਬਿਨਾਂ ਪੁੱਛੇ ਚੱਲਿਆ: ਨਿਗਰਾਨੀ ਅਧੀਨ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਵਾਲੀ ਕਾਲ",
+    "tlContinuation": "ਨਿਰੰਤਰਤਾ: {guard} ({outcome})",
+    "tlGuard": "ਗਾਰਡਰੇਲ {guard}: {outcome}",
+    "tlVerifyPassed": "ਜਾਂਚ ਪਾਸ: {check}",
+    "tlVerifyFailed": "ਜਾਂਚ ਫੇਲ੍ਹ: {check}",
+    "tlFinish": "ਮੁਕੰਮਲ: {status} (ਜਵਾਬ ਵਿੱਚ {chars} ਅੱਖਰ)",
+    "tlOther": "ਇਵੈਂਟ {type}",
+    "reasonFallbackProvider": "ਪ੍ਰਾਇਮਰੀ ਮਾਡਲ ਫੇਲ੍ਹ ਹੋ ਗਿਆ, ਇਸ ਲਈ ਟਰਨ ਏਜੰਟ ਦੇ ਫਾਲਬੈਕ ਪ੍ਰਦਾਤਾ ਕੋਲ ਚਲਾ ਗਿਆ।",
+    "reasonToolsDisabledRetry": "ਪ੍ਰਦਾਤਾ ਨੇ ਟੂਲ-ਕਾਲ ਇਤਿਹਾਸ ਨਕਾਰ ਦਿੱਤਾ, ਇਸ ਲਈ ਟਰਨ ਦਾ ਇੱਕ ਵਾਰ ਫਿਰ ਟੂਲਾਂ ਤੋਂ ਬਿਨਾਂ ਜਵਾਬ ਦਿੱਤਾ ਗਿਆ।",
+    "reasonRetryOther": "ਮਾਡਲ ਕਾਲ ਦੁਹਰਾਈ ਗਈ।",
+    "reasonToolCallRetry": "ਮਾਡਲ ਨੇ ਆਪਣਾ ਜਵਾਬ ਵਿਗੜੀ ਹੋਈ ਟੂਲ ਕਾਲ ਨਾਲ ਖਤਮ ਕੀਤਾ, ਇਸ ਲਈ ਉਸਨੂੰ ਦੁਬਾਰਾ ਪੁੱਛਿਆ ਗਿਆ।",
+    "reasonCutOff": "ਜਵਾਬ ਲੰਬਾਈ ਦੀ ਸੀਮਾ ਉੱਤੇ ਕੱਟਿਆ ਗਿਆ, ਇਸ ਲਈ ਮਾਡਲ ਨੂੰ ਅੱਗੇ ਵਧਣ ਲਈ ਕਿਹਾ ਗਿਆ।",
+    "reasonToolsContinue": "ਟੂਲ ਕਾਲਾਂ ਤੋਂ ਬਾਅਦ ਮਾਡਲ ਨੂੰ ਹੋਰ ਕਦਮਾਂ ਦੀ ਲੋੜ ਸੀ, ਇਸ ਲਈ ਟਰਨ ਅੱਗੇ ਵਧਿਆ।",
+    "reasonToolBlocked": "ਟੂਲ ਦੀ ਥਾਂ ਕਿਸੇ ਗਾਰਡ, ਨੀਤੀ, ਹੁੱਕ ਜਾਂ ਸੀਮਾ ਨੇ ਜਵਾਬ ਦਿੱਤਾ, ਇਸ ਲਈ ਉਹ ਨਹੀਂ ਚੱਲਿਆ।",
+    "reasonToolParked": "ਕਾਲ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ ਕਰ ਰਹੀ ਹੈ; ਟੂਲ ਨਹੀਂ ਚੱਲਿਆ।",
+    "reasonGuardAction": "ਇੱਕ ਗਾਰਡਰੇਲ ਨੇ ਜਵਾਬ ਬਦਲਿਆ ਜਾਂ ਰੋਕ ਲਿਆ।",
+    "tlAtStart": "ਸ਼ੁਰੂ ਤੋਂ",
+    "tlGap": "ਪਿਛਲੇ ਇਵੈਂਟ ਤੋਂ",
+    "tlDuration": "ਮਿਆਦ",
+    "tlTokens": "ਇਨਪੁੱਟ / ਆਊਟਪੁੱਟ ਟੋਕਨ",
+    "tlCost": "ਲਾਗਤ",
+    "tlDetails": "ਹੈਸ਼ ਅਤੇ ਕੱਚਾ ਸਾਰ",
+    "tlArgsHash": "ਆਰਗੂਮੈਂਟਾਂ ਦਾ ਹੈਸ਼",
+    "tlResultDigest": "ਨਤੀਜੇ ਦਾ ਡਾਇਜੈਸਟ",
+    "tlContentNote": "ਆਰਗੂਮੈਂਟ ਅਤੇ ਨਤੀਜੇ ਕਦੇ ਸਟੋਰ ਨਹੀਂ ਕੀਤੇ ਜਾਂਦੇ। ਟੂਲ ਕਾਲ ਲਈ ਟਾਈਮਲਾਈਨ ਉਸਦੀ ਸਥਿਤੀ, ਮਿਆਦ ਅਤੇ ਉਸਦੇ ਆਰਗੂਮੈਂਟਾਂ ਤੇ ਨਤੀਜੇ ਦੇ ਹੈਸ਼ ਵਿਖਾਉਂਦੀ ਹੈ, ਉਹਨਾਂ ਦੀ ਸਮੱਗਰੀ ਨਹੀਂ।",
+    "tlStatFinish": "ਸਮਾਪਤੀ ਦਾ ਕਾਰਨ",
+    "tlStillOpen": "ਪੂਰਾ ਨਹੀਂ ਹੋਇਆ",
+    "tlProblemCount": "{count} ਇਵੈਂਟਾਂ ਨੂੰ ਧਿਆਨ ਦੀ ਲੋੜ ਹੈ",
+    "tlStatRetries": "ਮੁੜ-ਕੋਸ਼ਿਸ਼ਾਂ ਅਤੇ ਫੇਲਓਵਰ",
+    "tlStatContinuations": "ਨਿਰੰਤਰਤਾਵਾਂ",
+    "tlStatApprovals": "ਮਨਜ਼ੂਰੀਆਂ",
+    "tlStatTokens": "ਇਨਪੁੱਟ / ਆਊਟਪੁੱਟ ਟੋਕਨ",
+    "tlTokensNotRecorded": "ਇਸ ਟਰਨ ਲਈ ਦਰਜ ਨਹੀਂ",
+    "tlTokensInOut": "ਇਨਪੁੱਟ / ਆਊਟਪੁੱਟ",
+    "tlCopyTurnId": "ਟਰਨ ID ਕਾਪੀ ਕਰੋ",
+    "tlCopyTurnIdShort": "ID ਕਾਪੀ ਕਰੋ",
+    "tlCopied": "ਟਰਨ ID ਕਾਪੀ ਹੋ ਗਈ।",
+    "tlCopyFailed": "ਕਾਪੀ ਨਹੀਂ ਹੋ ਸਕੀ। ID ਚੁਣੋ ਅਤੇ ਹੱਥੀਂ ਕਾਪੀ ਕਰੋ।",
+    "sessTitle": "ਇੱਕ ਸੈਸ਼ਨ ਦੇ ਟਰਨ",
+    "sessSubtitle": "ਦਰਜ ਟਰਨ ਨਵੇਂ ਪਹਿਲਾਂ ਵੇਖਣ ਲਈ ਇੱਕ ਚੈਟ ਸੈਸ਼ਨ ਚੁਣੋ। ਚੈਟ ਸੁਨੇਹੇ ਦਾ ਟਰਨ ਵੇਖੋ ਲਿੰਕ ਖੋਲ੍ਹਣ ਨਾਲ ਇਹ ਤੁਹਾਡੇ ਲਈ ਆਪਣੇ-ਆਪ ਭਰ ਜਾਂਦਾ ਹੈ।",
+    "sessionIdLabel": "ਸੈਸ਼ਨ ID",
+    "sessionIdPlaceholder": "ਚੈਟ ਸੈਸ਼ਨ ID",
+    "sessFind": "ਟਰਨ ਲੱਭੋ",
+    "sessInvalid": "ਏਜੰਟ ID (ਇੱਕ UUID) ਅਤੇ ਸੈਸ਼ਨ ID ਦਾਖਲ ਕਰੋ।",
+    "sessLoading": "ਸੈਸ਼ਨ ਦੇ ਟਰਨ ਲੋਡ ਹੋ ਰਹੇ ਹਨ...",
+    "sessUnavailableTitle": "ਸੈਸ਼ਨ ਖੋਜ ਉਪਲਬਧ ਨਹੀਂ",
+    "sessUnavailableBody": "ਇਹ ਸਰਵਰ ਸੈਸ਼ਨ ਦੇ ਟਰਨਾਂ ਦੀ ਸੂਚੀ ਨਹੀਂ ਬਣਾ ਸਕਦਾ। ਇਸਦੀ ਥਾਂ ਹੇਠਾਂ ID ਨਾਲ ਟਰਨ ਖੋਲ੍ਹੋ।",
+    "sessErrorTitle": "ਸੈਸ਼ਨ ਦੇ ਟਰਨ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ",
+    "sessEmptyTitle": "ਇਸ ਸੈਸ਼ਨ ਵਿੱਚ ਕੋਈ ਜਰਨਲ ਕੀਤਾ ਟਰਨ ਨਹੀਂ",
+    "sessEmptyBody": "ਸੈਸ਼ਨ ਨੇ ਕੁਝ ਦਰਜ ਨਹੀਂ ਕੀਤਾ। ਜਾਂ ਤਾਂ ਸੈਸ਼ਨ ID ਗਲਤ ਹੈ, ਜਾਂ ਉਸਦੇ ਟਰਨ ਚੱਲਣ ਵੇਲੇ ਟਰਨ ਜਰਨਲ ਬੰਦ ਸੀ।",
+    "sessListLabel": "{count} ਜਰਨਲ ਕੀਤੇ ਟਰਨ",
+    "sessEvents": "{count} ਇਵੈਂਟ",
+    "sessStatusOpen": "ਖੋਲ੍ਹੋ",
+    "sessOpen": "ਟਾਈਮਲਾਈਨ ਖੋਲ੍ਹੋ",
+    "sessOpened": "ਹੇਠਾਂ ਵਿਖਾਇਆ ਗਿਆ"
+  },
+  "evalControls": {
+    "cancel": "ਰੱਦ ਕਰੋ",
+    "saving": "ਸੰਭਾਲਿਆ ਜਾ ਰਿਹਾ ਹੈ...",
+    "saved": "ਸੰਭਾਲਿਆ ਗਿਆ।",
+    "saveMode": "ਰੀਪਲੇ ਮੋਡ ਸੰਭਾਲੋ",
+    "discard": "ਬਦਲਾਅ ਰੱਦ ਕਰੋ",
+    "saveFailed": "ਰੀਪਲੇ ਮੋਡ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ।",
+    "unsavedChanges": "ਨਾ ਸੰਭਾਲੇ ਬਦਲਾਅ",
+    "modeTitle": "ਇਹ ਡੇਟਾਸੈੱਟ ਕਿਵੇਂ ਰੀਪਲੇ ਹੁੰਦਾ ਹੈ",
+    "modeHelp": "ਚੁਣੋ ਕਿ ਰੀਪਲੇ ਏਜੰਟ ਦੇ ਟੂਲ ਵਰਤ ਸਕਦਾ ਹੈ ਜਾਂ ਨਹੀਂ। ਇਹ ਬਦਲਦਾ ਹੈ ਕਿ ਅਗਲਾ ਰਨ ਕੀ ਮਾਪਦਾ ਹੈ।",
+    "modeTextOnly": "ਸਿਰਫ਼ ਟੈਕਸਟ",
+    "modeTextOnlyHelp": "ਏਜੰਟ ਆਪਣੇ ਟੂਲਾਂ ਤੋਂ ਬਿਨਾਂ ਜਵਾਬ ਦਿੰਦਾ ਹੈ। ਸੁਰੱਖਿਅਤ: ਕੁਝ ਅਸਲੀ ਨਹੀਂ ਹੁੰਦਾ। ਉਮੀਦ-ਕੀਤੇ-ਟੂਲ ਜਾਂਚਾਂ ਪੂਰੀਆਂ ਨਹੀਂ ਹੋ ਸਕਦੀਆਂ।",
+    "modeFull": "ਟੂਲਾਂ ਸਮੇਤ ਪੂਰੀ ਪਾਈਪਲਾਈਨ",
+    "modeFullHelp": "ਉਹੀ ਟੂਲ, ਗਾਰਡਰੇਲ ਅਤੇ ਕਦਮ ਸੀਮਾਵਾਂ ਜੋ ਅਸਲੀ ਵਰਤੋਂਕਾਰ ਨੂੰ ਮਿਲਦੀਆਂ ਹਨ। ਉਮੀਦ-ਕੀਤੇ-ਟੂਲ ਅਤੇ ਟ੍ਰੈਜੈਕਟਰੀ ਜਾਂਚਾਂ ਲਈ ਲੋੜੀਂਦੀ।",
+    "modeFullNote": "ਜੋ ਟੂਲ ਸਿਰਫ਼ ਪੜ੍ਹਦੇ ਹਨ ਉਹ ਅਸਲ ਵਿੱਚ ਚੱਲਦੇ ਹਨ। ਜੋ ਕੁਝ ਡਾਟਾ ਬਦਲ ਸਕਦਾ ਹੈ, ਸੁਨੇਹਾ ਭੇਜ ਸਕਦਾ ਹੈ ਜਾਂ ਪੈਸੇ ਖਰਚ ਸਕਦਾ ਹੈ, ਉਸਨੂੰ ਸਿਮੂਲੇਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਰਨ ਵਿੱਚ ਸੂਚੀਬੱਧ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਇਸ ਲਈ ਕੁਝ ਅਸਲੀ ਨਹੀਂ ਹੁੰਦਾ। ਸੁਰੱਖਿਆ ਵਰਗੀਕਰਨ ਤੋਂ ਬਿਨਾਂ ਟੂਲ ਵੀ ਸਿਮੂਲੇਟ ਹੁੰਦੇ ਹਨ।",
+    "autoApproveLabel": "ਇਵੈਲ ਸੈਂਡਬਾਕਸ ਵਿੱਚ ਟੂਲ ਕਾਲਾਂ ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰ ਕਰੋ",
+    "autoApproveHelp": "ਜੋ ਟੂਲ ਕਾਲ ਆਮ ਤੌਰ ਉੱਤੇ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਉਡੀਕ ਕਰਦੀ ਉਸਨੂੰ ਇਵੈਲ ਸੈਂਡਬਾਕਸ ਮਨਜ਼ੂਰ ਕਰ ਦਿੰਦਾ ਹੈ ਤਾਂ ਜੋ ਕੇਸ ਪੂਰਾ ਹੋ ਸਕੇ। ਇਸ ਤੋਂ ਬਿਨਾਂ ਕੇਸ ਪ੍ਰੋਡਕਸ਼ਨ ਵਾਂਗ ਬਿਨਾਂ ਜਵਾਬ ਵਾਲੀ ਮਨਜ਼ੂਰੀ ਉੱਤੇ ਹੀ ਖਤਮ ਹੁੰਦਾ ਹੈ।",
+    "autoApproveWarnTitle": "ਸਿਰਫ਼ ਨਾਨ-ਪ੍ਰੋਡਕਸ਼ਨ ਵਰਕਸਪੇਸਾਂ ਲਈ",
+    "autoApproveWarnBody": "ਇਸਨੂੰ ਉੱਥੇ ਕਦੇ ਚਾਲੂ ਨਾ ਕਰੋ ਜਿੱਥੇ ਟੂਲ ਅਸਲੀ ਗਾਹਕਾਂ ਜਾਂ ਡੇਟਾ ਤੱਕ ਪਹੁੰਚਦੇ ਹਨ। ਸ਼ੈੱਲ, ਕੋਡਿੰਗ, ਸ਼ੈਡਿਊਲਿੰਗ, ਏਜੰਟ-ਤੋਂ-ਏਜੰਟ, ਭੁਗਤਾਨ ਅਤੇ ਮਿਟਾਉਣ ਵਾਲੇ ਟੂਲ ਕਦੇ ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰ ਨਹੀਂ ਹੁੰਦੇ। ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਇਸ ਵਰਕਸਪੇਸ ਨੂੰ ਨਾਨ-ਪ੍ਰੋਡਕਸ਼ਨ ਵਜੋਂ ਚਿੰਨ੍ਹਿਤ ਕੀਤਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।",
+    "autoApproveNeedsFull": "ਪਹਿਲਾਂ ਪੂਰੀ ਪਾਈਪਲਾਈਨ ਚਾਲੂ ਕਰੋ: ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰੀ ਸਿਰਫ਼ ਉਦੋਂ ਲਾਗੂ ਹੁੰਦੀ ਹੈ ਜਦੋਂ ਟੂਲ ਚੱਲਦੇ ਹਨ।",
+    "autoApproveRefused": "ਇਸ ਵਰਕਸਪੇਸ ਵਿੱਚ ਆਗਿਆ ਨਹੀਂ: {reason}",
+    "autoApproveConfirmTitle": "ਇਵੈਲ ਵਿੱਚ ਟੂਲ ਕਾਲਾਂ ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰ ਕਰਨੀਆਂ ਹਨ?",
+    "autoApproveConfirmBody": "ਇਸ ਡਾਟਾਸੈੱਟ ਦੇ ਰੀਪਲੇਅ ਵਿੱਚ ਹਰ ਉਹ ਟੂਲ ਕਾਲ ਜੋ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਉਡੀਕ ਕਰਦੀ, ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰ ਹੋ ਜਾਵੇਗੀ। ਮਨਜ਼ੂਰ ਹੋਏ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲ ਅਸਲ ਵਿੱਚ ਚੱਲਦੇ ਹਨ; ਜੋ ਕੁਝ ਬਦਲ ਸਕਦੇ ਹਨ ਉਹ ਹਾਲੇ ਵੀ ਸਿਮੂਲੇਟ ਹੁੰਦੇ ਹਨ। ਇਹ ਸਿਰਫ਼ ਟੈਸਟ ਡਾਟਾ ਵਾਲੇ ਵਰਕਸਪੇਸ ਵਿੱਚ ਹੀ ਕਰੋ। ਰਨ ਦਰਜ ਕਰਦੇ ਹਨ ਕਿ ਉਹ ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰ ਹੋਏ ਸਨ।",
+    "autoApproveConfirm": "ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰੀ ਚਾਲੂ ਕਰੋ",
+    "trajectoryLabel": "ਟ੍ਰੈਜੈਕਟਰੀ ਜਾਂਚਾਂ",
+    "trajectoryOn": "On",
+    "trajectoryOff": "ਉਪਲਬਧ ਨਹੀਂ",
+    "trajectoryHelpOn": "ਉਮੀਦ-ਕੀਤੀ ਟ੍ਰੈਜੈਕਟਰੀ ਵਾਲੇ ਕੇਸਾਂ ਨੂੰ ਇਸ ਆਧਾਰ ਉੱਤੇ ਅੰਕ ਮਿਲਦੇ ਹਨ ਕਿ ਏਜੰਟ ਨੇ ਕਿਹੜੇ ਟੂਲ ਕਿਸ ਕ੍ਰਮ ਵਿੱਚ ਕਾਲ ਕੀਤੇ। ਇਹ ਤੁਹਾਡਾ ਪ੍ਰਸ਼ਾਸਕ ਪੂਰੀ ਤੈਨਾਤੀ ਲਈ ਚਾਲੂ ਕਰਦਾ ਹੈ, ਹਰ ਡੇਟਾਸੈੱਟ ਲਈ ਨਹੀਂ।",
+    "trajectoryHelpOff": "ਟ੍ਰੈਜੈਕਟਰੀ ਜਾਂਚਾਂ ਇੱਥੇ ਉਪਲਬਧ ਨਹੀਂ। ਇਹ ਤੁਹਾਡਾ ਪ੍ਰਸ਼ਾਸਕ ਪੂਰੀ ਤੈਨਾਤੀ ਲਈ ਚਾਲੂ ਕਰਦਾ ਹੈ, ਅਤੇ ਇਹਨਾਂ ਲਈ ਇਵੈਲ ਸਮੇਤ ਪਲਾਨ ਚਾਹੀਦਾ ਹੈ।",
+    "trajectoryNeedsFull": "ਇਹ ਡੇਟਾਸੈੱਟ ਸਿਰਫ਼ ਟੈਕਸਟ ਹੈ, ਇਸ ਲਈ ਉਮੀਦ-ਕੀਤੀ ਟ੍ਰੈਜੈਕਟਰੀ ਵਾਲੇ ਕੇਸਾਂ ਨੂੰ ਅੰਕ ਨਹੀਂ ਮਿਲਣਗੇ। ਪੂਰੀ ਪਾਈਪਲਾਈਨ ਚਾਲੂ ਕਰੋ।",
+    "runAutoApproved": "ਆਪਣੇ-ਆਪ ਮਨਜ਼ੂਰ",
+    "runAutoApprovedTitle": "ਇਸ ਰਨ ਦੀਆਂ ਟੂਲ ਕਾਲਾਂ ਵਿੱਚੋਂ ਕਿਸੇ ਦਾ ਫ਼ੈਸਲਾ ਕਿਸੇ ਵਿਅਕਤੀ ਨੇ ਨਹੀਂ ਕੀਤਾ; ਇਵੈਲ ਸੈਂਡਬਾਕਸ ਨੇ ਉਹਨਾਂ ਨੂੰ ਮਨਜ਼ੂਰ ਕੀਤਾ।",
+    "toolCallsLabel": "ਇਸ ਰੀਪਲੇ ਵਿੱਚ ਟੂਲ ਕਾਲਾਂ",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "ਅਸਫਲ",
+    "toolStatusNotRun": "ਨਹੀਂ ਚੱਲਿਆ",
+    "toolStatusAwaitingApproval": "ਮਨਜ਼ੂਰੀ ਦੀ ਉਡੀਕ",
+    "toolStatusReplayed": "ਰੀਪਲੇ ਕੀਤਾ ਗਿਆ",
+    "samplingTitle": "ਬੈਕਗ੍ਰਾਊਂਡ ਗੁਣਵੱਤਾ ਸਕੋਰਿੰਗ",
+    "samplingLoading": "ਸਕੋਰਿੰਗ ਦਰ ਲੋਡ ਹੋ ਰਹੀ ਹੈ...",
+    "samplingUnavailable": "ਬੈਕਗ੍ਰਾਊਂਡ ਜੱਜ ਦੁਆਰਾ ਸਕੋਰ ਕੀਤੇ ਜਾਣ ਵਾਲੇ ਲਾਈਵ ਟਰਨਾਂ ਦਾ ਹਿੱਸਾ ਤੁਹਾਡਾ ਪਲੇਟਫ਼ਾਰਮ ਪ੍ਰਸ਼ਾਸਕ ਤੈਅ ਕਰਦਾ ਹੈ ਅਤੇ ਇੱਥੇ ਨਹੀਂ ਵਿਖਾਇਆ ਜਾਂਦਾ।",
+    "samplingValue": "ਲਗਭਗ {percent}% ਲਾਈਵ ਟਰਨ ਬੈਕਗ੍ਰਾਊਂਡ ਗੁਣਵੱਤਾ ਜੱਜ ਦੁਆਰਾ ਸਕੋਰ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।",
+    "samplingHelp": "ਘੱਟ ਦਰ ਦੀ ਲਾਗਤ ਘੱਟ ਹੁੰਦੀ ਹੈ ਅਤੇ ਉੱਪਰਲੇ ਰੁਝਾਨ ਵਿੱਚ ਘੱਟ ਸਕੋਰ ਹੁੰਦੇ ਹਨ। ਇਹ ਮੁੱਲ ਇੱਥੇ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਲਈ ਹੈ।",
+    "samplingSource_default": "ਡਿਫ਼ਾਲਟ",
+    "samplingSource_platform": "ਪਲੇਟਫ਼ਾਰਮ ਦੁਆਰਾ ਸੈੱਟ",
+    "samplingSource_tenant": "ਤੁਹਾਡੇ ਵਰਕਸਪੇਸ ਲਈ ਸੈੱਟ",
+    "samplingSource_agent": "ਇਸ ਏਜੰਟ ਲਈ ਸੈੱਟ",
+    "modeDefault": "ਵਰਕਸਪੇਸ ਡਿਫ਼ਾਲਟ",
+    "modeDefaultHelp": "ਤੁਹਾਡੇ ਵਰਕਸਪੇਸ ਦੀ ਸੈਟਿੰਗ ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ (ਪੂਰੀ ਪਾਈਪਲਾਈਨ, ਜਦੋਂ ਤੱਕ ਕਿਸੇ ਐਡਮਿਨ ਨੇ ਇਸਨੂੰ ਨਾ ਬਦਲਿਆ ਹੋਵੇ)। ਹਰ ਰਨ ਫਿਰ ਵੀ ਆਪਣਾ ਮੋਡ ਚੁਣ ਸਕਦਾ ਹੈ।",
+    "modeDefaultCurrent": "ਇਸ ਵੇਲੇ: {mode}",
+    "modeNameFull": "ਪੂਰੀ ਪਾਈਪਲਾਈਨ",
+    "modeNameQuick": "ਤੇਜ਼ (ਸਿਰਫ਼ ਲਿਖਤ)",
+    "badgeFull": "ਪੂਰੀ ਪਾਈਪਲਾਈਨ",
+    "badgeQuick": "ਤੇਜ਼",
+    "datasetModePinnedTitle": "ਇਹ ਡਾਟਾਸੈੱਟ ਹਮੇਸ਼ਾ ਇਸੇ ਤਰ੍ਹਾਂ ਰੀਪਲੇਅ ਹੁੰਦਾ ਹੈ। ਕੋਈ ਇੱਕ ਰਨ ਫਿਰ ਵੀ ਹੋਰ ਮੋਡ ਚੁਣ ਸਕਦਾ ਹੈ।",
+    "datasetModeDefaultTitle": "ਰਨ ਕਿਵੇਂ ਰੀਪਲੇਅ ਹੋਣ, ਇਸ ਬਾਰੇ ਇਹ ਡਾਟਾਸੈੱਟ ਵਰਕਸਪੇਸ ਦੇ ਡਿਫੌਲਟ ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ।",
+    "runModeLabel": "ਅਗਲੇ ਰਨ ਲਈ ਰੀਪਲੇਅ ਮੋਡ",
+    "runModeInherit": "ਡਾਟਾਸੈੱਟ ਦੀ ਸੈਟਿੰਗ ਵਰਤੋ",
+    "runModeHelp": "ਪੂਰੀ ਪਾਈਪਲਾਈਨ ਏਜੰਟ ਨੂੰ ਉਸਦੇ ਟੂਲਾਂ, ਗਾਰਡਰੇਲ ਅਤੇ ਮਨਜ਼ੂਰੀਆਂ ਸਮੇਤ ਸੁਰੱਖਿਅਤ ਸੈਂਡਬਾਕਸ ਵਿੱਚ ਚਲਾਉਂਦੀ ਹੈ: ਸਿਰਫ਼ ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲ ਸੱਚਮੁੱਚ ਚੱਲਦੇ ਹਨ, ਅਤੇ ਜੋ ਕੁਝ ਡਾਟਾ ਬਦਲ ਸਕਦਾ ਹੈ ਜਾਂ ਕੁਝ ਭੇਜ ਸਕਦਾ ਹੈ ਉਸਨੂੰ ਸਿਮੂਲੇਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਤੇਜ਼ ਮੋਡ ਟੂਲ ਰੋਕ ਲੈਂਦਾ ਹੈ ਅਤੇ ਸਿਰਫ਼ ਲਿਖੇ ਜਵਾਬ ਨੂੰ ਪਰਖਦਾ ਹੈ।",
+    "runModeFullTitle": "ਇਸ ਰਨ ਨੇ ਇਵਾਲ ਸੈਂਡਬਾਕਸ ਵਿੱਚ ਪੂਰੀ ਪਾਈਪਲਾਈਨ ਵਰਤੀ।",
+    "runModeQuickTitle": "ਇਹ ਰਨ ਸਿਰਫ਼ ਲਿਖਤ ਵਾਲਾ ਤੇਜ਼ ਰੀਪਲੇਅ ਸੀ: ਏਜੰਟ ਦੇ ਟੂਲ ਰੋਕ ਲਏ ਗਏ ਸਨ।",
+    "runSimulatedTools": "ਇਸ ਰਨ ਵਿੱਚ ਸਿਮੂਲੇਟ ਕੀਤੇ ਗਏ, ਚਲਾਏ ਨਹੀਂ ਗਏ (ਉਹ ਡਾਟਾ ਬਦਲ ਸਕਦੇ ਜਾਂ ਪਲੇਟਫਾਰਮ ਤੋਂ ਬਾਹਰ ਪਹੁੰਚ ਸਕਦੇ ਸਨ): {tools}।",
+    "toolStatusSimulated": "ਸਿਮੂਲੇਟ ਕੀਤਾ, ਚਲਾਇਆ ਨਹੀਂ"
+  },
+  "assistant": {
+    "taskPhoneLabel": "ਤੁਹਾਡਾ ਫ਼ੋਨ ਨੰਬਰ",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "ਉਹ ਨੰਬਰ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ।",
+    "searchingWebFor": "Searching the web for “{target}”…",
+    "readingPageAt": "Reading {target}…",
+    "researchingTopic": "Researching “{target}”…",
+    "statusWriting": "Writing the answer…",
+    "quietFor": "still waiting on the model ({duration} since the last update)",
+    "toolStepsLabel": "Steps",
+    "chipDone": "finished",
+    "chipFailed": "failed",
+    "moreSteps": "+{n} more",
+    "sourcesLabel": "Sources",
+    "closePanel": "Close the panel",
+    "conversationLabel": "Conversation",
+    "copiedReply": "Copied",
+    "jumpToLatest": "Jump to the latest message"
+  },
+  "agentLab": {
+    "wtLabel": "ਏਜੰਟ ਦੇ ਟੂਲਾਂ ਨਾਲ ਚਲਾਓ",
+    "wtHelp": "ਬੰਦ: ਹਰ ਜਵਾਬ ਇੱਕ ਸਾਦਾ ਮਾਡਲ ਕਾਲ ਹੈ। ਚਾਲੂ: ਜਵਾਬ ਚੈਟ ਟਰਨ ਵਾਲੀ ਉਸੇ ਟੂਲ ਪਾਈਪਲਾਈਨ ਤੋਂ ਆਉਂਦੇ ਹਨ, ਇਸ ਲਈ ਟੂਲ ਚੱਲਦੇ ਹਨ, ਗਾਰਡਰੇਲ ਲਾਗੂ ਹੁੰਦੇ ਹਨ ਅਤੇ ਕਦਮ ਸੀਮਾਵਾਂ ਮੰਨੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਜਿਸ ਕਾਲ ਨੂੰ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਮਨਜ਼ੂਰੀ ਚਾਹੀਦੀ ਹੈ ਉਹ ਬਕਾਇਆ ਮਨਜ਼ੂਰੀ ਵਜੋਂ ਉਡੀਕ ਕਰਦੀ ਹੈ।",
+    "wtUnavailable": "ਇਸ ਇੰਸਟਾਲੇਸ਼ਨ ਉੱਤੇ ਟੂਲਾਂ ਨਾਲ ਲੈਬ ਚਲਾਉਣਾ ਬੰਦ ਹੈ। ਇਸਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ ਕਿਸੇ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਕਹੋ।",
+    "wtRefused": "ਇਹ ਰਨ ਰੱਦ ਕੀਤਾ ਗਿਆ: {reason}",
+    "wtActive": "ਇਸ ਰਨ ਵਿੱਚ ਟੂਲ ਸੱਚਮੁੱਚ ਚੱਲਣਗੇ, ਉਨ੍ਹਾਂ ਦੇ ਸਾਈਡ ਇਫ਼ੈਕਟਾਂ ਸਮੇਤ।",
+    "wtConfirmTitle": "ਏਜੰਟ ਦੇ ਟੂਲਾਂ ਨਾਲ ਲੈਬ ਚਲਾਉਣੀ ਹੈ?",
+    "wtConfirmBody": "ਹਰ ਨਮੂਨਾ ਏਜੰਟ ਦੇ ਅਸਲੀ ਟੂਲਾਂ ਨੂੰ ਕਾਲ ਕਰ ਸਕਦਾ ਹੈ, ਅਤੇ ਉਨ੍ਹਾਂ ਕਾਲਾਂ ਦੇ ਸੁਨੇਹਾ ਭੇਜਣ ਜਾਂ ਡੇਟਾ ਲਿਖਣ ਵਰਗੇ ਅਸਲੀ ਪ੍ਰਭਾਵ ਹੋ ਸਕਦੇ ਹਨ। ਜਿਨ੍ਹਾਂ ਕਾਲਾਂ ਨੂੰ ਮਨਜ਼ੂਰੀ ਚਾਹੀਦੀ ਹੈ ਉਹ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਉਡੀਕ ਕਰਨਗੀਆਂ। ਇਸਨੂੰ ਸਿਰਫ਼ ਟੈਸਟ ਏਜੰਟ ਜਾਂ ਟੈਸਟ ਡੇਟਾ ਨਾਲ ਵਰਤੋ।",
+    "wtConfirm": "ਟੂਲ ਵਰਤੋ"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "ਏਜੰਟ ਸੀਮਾਵਾਂ",
+        "description": "ਰੋਕੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਇੱਕ ਏਜੰਟ ਟਰਨ ਕਿੰਨਾ ਕੰਮ ਕਰ ਸਕਦਾ ਹੈ।"
+      },
+      "approvals": {
+        "label": "ਮਨਜ਼ੂਰੀਆਂ",
+        "description": "ਕਿਸੇ ਵਿਅਕਤੀ ਦੇ ਕਿਸੇ ਕਾਰਵਾਈ ਨੂੰ ਮਨਜ਼ੂਰ ਜਾਂ ਰੱਦ ਕਰਨ ਤੋਂ ਬਾਅਦ ਕੀ ਹੁੰਦਾ ਹੈ, ਅਤੇ ਬੇਨਤੀ ਕਿੰਨੀ ਦੇਰ ਉਡੀਕ ਕਰਦੀ ਹੈ।"
+      },
+      "chat": {
+        "label": "ਗੱਲਬਾਤ ਦਾ ਵਿਹਾਰ",
+        "description": "ਜਵਾਬ ਕਿਵੇਂ ਪੂਰਾ, ਮੁੜ-ਕੋਸ਼ਿਸ਼, ਕੈਸ਼ ਅਤੇ ਜਾਰੀ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"
+      },
+      "routing": {
+        "label": "ਮਾਡਲ ਰੂਟਿੰਗ",
+        "description": "ਕਿਹੜੇ ਸੁਨੇਹੇ ਤੇਜ਼ ਮਾਡਲ ਲਈ ਕਾਫ਼ੀ ਸਾਦੇ ਮੰਨੇ ਜਾਂਦੇ ਹਨ।"
+      },
+      "memory": {
+        "label": "ਮੈਮੋਰੀ",
+        "description": "ਏਜੰਟ ਕਿੰਨੀਆਂ ਯਾਦਾਂ ਰੱਖਦਾ ਅਤੇ ਯਾਦ ਕਰਦਾ ਹੈ।"
+      },
+      "attachments": {
+        "label": "ਚੈਟ ਅੱਪਲੋਡ",
+        "description": "ਲੋਕ ਚੈਟ ਸੁਨੇਹਿਆਂ ਨਾਲ ਕਿੰਨੀਆਂ ਵੱਡੀਆਂ ਫਾਈਲਾਂ ਜੋੜ ਸਕਦੇ ਹਨ।"
+      },
+      "skills": {
+        "label": "ਸਕਿੱਲ",
+        "description": "ਇੰਸਟਾਲ ਕੀਤੀਆਂ ਸਕਿੱਲਾਂ ਦੀ ਸੂਚੀ ਏਜੰਟ ਦੀਆਂ ਹਦਾਇਤਾਂ ਦਾ ਕਿੰਨਾ ਹਿੱਸਾ ਵਰਤ ਸਕਦੀ ਹੈ।"
+      },
+      "aux": {
+        "label": "ਬੈਕਗ੍ਰਾਊਂਡ ਮਾਡਲ ਕਾਲਾਂ",
+        "description": "ਸਾਰ, ਸਹਾਇਤਾਵਾਂ ਅਤੇ ਕੰਪੈਕਸ਼ਨ ਕਿਹੜਾ ਮਾਡਲ ਵਰਤਦੇ ਹਨ।"
+      },
+      "guardrails": {
+        "label": "ਸੁਰੱਖਿਆ ਜਾਂਚਾਂ",
+        "description": "ਆਟੋਮੈਟਿਕ ਸੁਰੱਖਿਆ ਜਾਂਚਾਂ ਕਿੰਨੀਆਂ ਸਖ਼ਤ ਹਨ। ਇਹਨਾਂ ਨੂੰ ਸਿਰਫ਼ ਪਲੇਟਫ਼ਾਰਮ ਸੈਟਿੰਗ ਨਾਲੋਂ ਸਖ਼ਤ ਬਣਾਇਆ ਜਾ ਸਕਦਾ ਹੈ।"
+      },
+      "quality": {
+        "label": "ਮੁਲਾਂਕਣ",
+        "description": "ਟੈਸਟ ਰਨ ਅਤੇ AI ਜੱਜ ਕਿਵੇਂ ਵਿਹਾਰ ਕਰਦੇ ਹਨ।"
+      },
+      "delegation": {
+        "label": "ਕੰਮ ਸੌਂਪਣਾ",
+        "description": "ਇੱਕ ਏਜੰਟ ਇੱਕੋ ਸਮੇਂ ਹੋਰ ਏਜੰਟਾਂ ਨੂੰ ਕਿੰਨਾ ਕੰਮ ਸੌਂਪ ਸਕਦਾ ਹੈ।"
+      },
+      "knowledge": {
+        "label": "ਗਿਆਨ ਖੋਜ",
+        "description": "ਸਭ ਤੋਂ ਵਧੀਆ ਅੰਸ਼ ਚੁਣਨ ਤੋਂ ਪਹਿਲਾਂ ਤੁਹਾਡੇ ਅੱਪਲੋਡ ਕੀਤੇ ਦਸਤਾਵੇਜ਼ਾਂ ਦੀ ਖੋਜ ਉਮੀਦਵਾਰਾਂ ਨੂੰ ਕਿੰਨੇ ਵਿਆਪਕ ਤੌਰ ਉੱਤੇ ਇਕੱਠਾ ਕਰਦੀ ਹੈ।"
+      },
+      "learning": {
+        "label": "ਸਿੱਖਣਾ",
+        "description": "ਏਜੰਟ ਦੀਆਂ ਸਿੱਖਣ ਨੀਤੀਆਂ ਵੱਖ-ਵੱਖ ਵਿਕਲਪ ਕਿਵੇਂ ਅਜ਼ਮਾਉਂਦੀਆਂ ਹਨ।"
+      },
+      "providers": {
+        "label": "AI ਪ੍ਰਦਾਤਾ",
+        "description": "ਜਦੋਂ ਕੋਈ ਜੁੜੀ AI ਪ੍ਰਦਾਤਾ ਕੁੰਜੀ ਕੰਮ ਕਰਨਾ ਬੰਦ ਕਰ ਦੇਵੇ ਤਾਂ ਉਹ ਕਿਵੇਂ ਵਰਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "ਹਰ ਟਰਨ ਵਿੱਚ ਵੱਧ ਤੋਂ ਵੱਧ ਟੂਲ ਕਾਲਾਂ",
+          "description": "ਟਰਨ ਨੂੰ ਰੋਕ ਕੇ ਉਸ ਕੋਲ ਜੋ ਹੈ ਉਸ ਨਾਲ ਜਵਾਬ ਦੇਣ ਲਈ ਕਹੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਉਹ ਵੱਧ ਤੋਂ ਵੱਧ ਕਿੰਨੀਆਂ ਟੂਲ ਕਾਲਾਂ ਕਰ ਸਕਦਾ ਹੈ।",
+          "help": "ਲੰਬੇ ਬਹੁ-ਕਦਮ ਕੰਮ ਕਰਨ ਵਾਲੇ ਏਜੰਟਾਂ ਲਈ ਵਧਾਓ। ਬੇਕਾਬੂ ਲੂਪ ਰੋਕਣ ਅਤੇ ਲਾਗਤ ਅਨੁਮਾਨਯੋਗ ਰੱਖਣ ਲਈ ਘਟਾਓ। ਵਰਕਸਪੇਸ ਜਾਂ ਪਲੇਟਫ਼ਾਰਮ ਲਈ ਵਿਖਾਇਆ ਮੁੱਲ ਇੱਕ ਮਿਆਰੀ ਏਜੰਟ ਦਾ ਆਧਾਰ ਅੰਕੜਾ ਹੈ: ਏਜੰਟ ਦਾ ਖੁਦਮੁਖਤਿਆਰੀ ਪੱਧਰ ਰਨ ਵੇਲੇ ਇਸਨੂੰ ਘਟਾਉਂਦਾ-ਵਧਾਉਂਦਾ ਹੈ, ਇਸ ਲਈ ਵੱਧ ਜਾਂ ਘੱਟ ਖੁਦਮੁਖਤਿਆਰ ਏਜੰਟ ਵੱਖਰੀ ਸੰਖਿਆ ਵਰਤ ਸਕਦਾ ਹੈ। ਏਜੰਟ ਦਾ ਆਪਣਾ ਮੁੱਲ ਜਿਵੇਂ ਸੈੱਟ ਕੀਤਾ ਉਸੇ ਤਰ੍ਹਾਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।"
+        },
+        "turnTimeoutSeconds": {
+          "label": "ਹਰ ਟਰਨ ਲਈ ਵੱਧ ਤੋਂ ਵੱਧ ਸਮਾਂ",
+          "description": "ਇੱਕ ਟਰਨ ਰੋਕੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿੰਨੀ ਦੇਰ ਚੱਲ ਸਕਦਾ ਹੈ।",
+          "help": "ਹੌਲੀ ਖੋਜ ਜਾਂ ਕੋਡ ਕੰਮਾਂ ਲਈ ਵਧਾਓ। ਜਿਸ ਟਰਨ ਦਾ ਸਮਾਂ ਮੁੱਕ ਜਾਂਦਾ ਹੈ ਉਹ ਹੁਣ ਤੱਕ ਜੋ ਕੀਤਾ ਉਸ ਸਮੇਤ ਖਤਮ ਹੁੰਦਾ ਹੈ।"
+        },
+        "toolTimeoutSeconds": {
+          "label": "ਹਰ ਟੂਲ ਕਾਲ ਲਈ ਵੱਧ ਤੋਂ ਵੱਧ ਸਮਾਂ",
+          "description": "ਇੱਕ ਟੂਲ ਕਾਲ ਰੋਕੀ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿੰਨੀ ਦੇਰ ਚੱਲ ਸਕਦੀ ਹੈ। ਪਲੇਟਫ਼ਾਰਮ ਡਿਫ਼ਾਲਟ ਦੀ ਕੋਈ ਸੀਮਾ ਨਹੀਂ; ਫਿਰ ਹਰ ਟੂਲ ਆਪਣਾ ਟਾਈਮਆਊਟ ਰੱਖਦਾ ਹੈ।",
+          "help": "ਜੇ ਕੋਈ ਹੌਲੀ ਟੂਲ ਪੂਰੀਆਂ ਗੱਲਬਾਤਾਂ ਨੂੰ ਰੋਕ ਸਕਦਾ ਹੈ ਤਾਂ ਸੀਮਾ ਸੈੱਟ ਕਰੋ। ਇਹ ਪਤਾ ਨਹੀਂ ਕਿ ਰੋਕੀ ਕਾਲ ਦਾ ਕੋਈ ਅਸਰ ਹੋਇਆ ਜਾਂ ਨਹੀਂ, ਇਸ ਲਈ ਏਜੰਟ ਨੂੰ ਕਿਹਾ ਜਾਂਦਾ ਹੈ ਕਿ ਉਹ ਇਹ ਨਾ ਮੰਨੇ ਕਿ ਇਹ ਸਫਲ ਹੋਈ।"
+        },
+        "toolOutputMaxChars": {
+          "label": "ਸਭ ਤੋਂ ਲੰਬਾ ਟੂਲ ਨਤੀਜਾ",
+          "description": "ਇੱਕ ਟੂਲ ਨਤੀਜੇ ਦੇ ਕਿੰਨੇ ਅੱਖਰ ਮਾਡਲ ਨੂੰ ਦਿੱਤੇ ਜਾਂਦੇ ਹਨ; ਬਾਕੀ ਕੱਟ ਦਿੱਤੇ ਜਾਂਦੇ ਹਨ।",
+          "help": "ਜਦੋਂ ਏਜੰਟ ਨੂੰ ਲੰਬੇ ਦਸਤਾਵੇਜ਼ ਜਾਂ API ਜਵਾਬ ਪੂਰੇ ਪੜ੍ਹਨੇ ਹੋਣ ਤਾਂ ਵਧਾਓ, ਹਰ ਟਰਨ ਵਿੱਚ ਵੱਧ ਟੋਕਨਾਂ ਦੀ ਕੀਮਤ ਉੱਤੇ। ਲਾਗਤ ਬਚਾਉਣ ਲਈ ਘਟਾਓ।"
+        },
+        "retrievalTopK": {
+          "label": "ਹਰ ਖੋਜ ਲਈ ਗਿਆਨ ਅੰਸ਼",
+          "description": "ਇੱਕ ਗਿਆਨ ਭੰਡਾਰ ਖੋਜ ਏਜੰਟ ਨੂੰ ਕਿੰਨੇ ਅੰਸ਼ ਵਾਪਸ ਕਰਦੀ ਹੈ।",
+          "help": "ਵੱਧ ਅੰਸ਼ ਏਜੰਟ ਨੂੰ ਕੰਮ ਕਰਨ ਲਈ ਵੱਧ ਸਮੱਗਰੀ ਦਿੰਦੇ ਹਨ ਪਰ ਵੱਧ ਟੋਕਨ ਖਰਚਦੇ ਹਨ ਅਤੇ ਰੌਲਾ ਜੋੜ ਸਕਦੇ ਹਨ। ਘੱਟ ਅੰਸ਼ ਤੇਜ਼ ਅਤੇ ਸਸਤੇ ਹਨ।"
+        },
+        "retrievalMinScore": {
+          "label": "ਅੰਸ਼ ਦੀ ਘੱਟੋ-ਘੱਟ ਸੰਬੰਧਤਾ",
+          "description": "ਵਾਪਸ ਕੀਤੇ ਜਾਣ ਲਈ ਗਿਆਨ ਅੰਸ਼ ਕਿੰਨਾ ਸੰਬੰਧਿਤ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ। 0 ਹਰ ਹਿੱਟ ਵਾਪਸ ਕਰਦਾ ਹੈ।",
+          "help": "ਜੇ ਏਜੰਟ ਅਸੰਬੰਧਿਤ ਅੰਸ਼ ਹਵਾਲੇ ਵਜੋਂ ਦਿੰਦਾ ਹੈ ਤਾਂ ਵਧਾਓ। ਬਹੁਤ ਉੱਚਾ ਹੋਵੇ ਤਾਂ ਉਸਨੂੰ ਕੁਝ ਨਾ ਮਿਲੇ।"
+        },
+        "continuationPasses": {
+          "label": "ਅਧੂਰੇ ਜਵਾਬ ਤੋਂ ਬਾਅਦ ਵਾਧੂ ਪਾਸ",
+          "description": "ਐਲਾਨੇ ਪਰ ਨਾ ਚੁੱਕੇ ਕਦਮ ਉੱਤੇ ਮਾਡਲ ਦਾ ਜਵਾਬ ਰੁਕ ਜਾਵੇ ਤਾਂ ਉਸਨੂੰ ਹੋਰ ਕਿੰਨੀ ਵਾਰ ਅੱਗੇ ਵਧਣ ਲਈ ਕਿਹਾ ਜਾਂਦਾ ਹੈ।",
+          "help": "ਉਹਨਾਂ ਏਜੰਟਾਂ ਲਈ ਵਧਾਓ ਜੋ ਅਕਸਰ ਕਦਮ ਐਲਾਨ ਕਰਕੇ ਰੁਕ ਜਾਂਦੇ ਹਨ। ਹਰ ਵਾਧੂ ਪਾਸ ਇੱਕ ਮਾਡਲ ਕਾਲ ਖਰਚਦਾ ਹੈ।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "ਸੀਮਾ ਤੋਂ ਬਾਅਦ ਜਵਾਬ ਦਿੱਤੀਆਂ ਕਾਲਾਂ",
+          "description": "ਟਰਨ ਦੀ ਟੂਲ ਸੀਮਾ ਮੁੱਕਣ ਤੋਂ ਬਾਅਦ ਮਾਡਲ ਹੋਰ ਕਿੰਨੀਆਂ ਟੂਲ ਕਾਲਾਂ ਅਜ਼ਮਾ ਸਕਦਾ ਹੈ। ਹਰ ਇੱਕ ਨੂੰ \"ਜੋ ਹੈ ਉਸੇ ਨਾਲ ਜਵਾਬ ਦੇ\" ਨੋਟ ਸਮੇਤ ਰੱਦ ਕੀਤਾ ਜਾਂਦਾ ਹੈ; ਇਸ ਗਿਣਤੀ ਤੋਂ ਅੱਗੇ ਟਰਨ ਗਲਤੀ ਨਾਲ ਰੋਕ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।",
+          "help": "ਜੇ ਮਾਡਲ ਨੂੰ ਟੂਲ ਕਾਲ ਕਰਨੀਆਂ ਬੰਦ ਕਰਨ ਲਈ ਕੁਝ ਕੋਸ਼ਿਸ਼ਾਂ ਚਾਹੀਦੀਆਂ ਹਨ ਤਾਂ ਵਧਾਓ। ਲੂਪ ਵਿੱਚ ਫਸੇ ਟਰਨ ਜਲਦੀ ਖ਼ਤਮ ਕਰਨ ਲਈ ਘਟਾਓ। 0 ਸੀਮਾ ਤੋਂ ਉੱਪਰ ਦੀ ਪਹਿਲੀ ਕਾਲ ’ਤੇ ਟਰਨ ਰੋਕ ਦਿੰਦਾ ਹੈ।"
+        },
+        "supervisedDivisor": {
+          "label": "ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟਾਂ ਨੂੰ ਟੂਲ ਸੀਮਾ ਦਾ 1/N ਮਿਲਦਾ ਹੈ",
+          "description": "ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟ ਨੂੰ ਟਰਨ ਦੀ ਟੂਲ-ਕਾਲ ਸੀਮਾ ਇਸ ਸੰਖਿਆ ਨਾਲ ਭਾਗ ਹੋ ਕੇ ਮਿਲਦੀ ਹੈ, ਪਰ ਹੇਠਲੇ ਘੱਟੋ-ਘੱਟ ਮੁੱਲ ਤੋਂ ਕਦੇ ਘੱਟ ਨਹੀਂ।",
+          "help": "ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟਾਂ ਨੂੰ ਵਧੇਰੇ ਸਖ਼ਤੀ ਨਾਲ ਰੱਖਣ ਲਈ ਵਧਾਓ। 1 ਉਨ੍ਹਾਂ ਨੂੰ ਪੂਰੀ ਸੀਮਾ ਦਿੰਦਾ ਹੈ।"
+        },
+        "supervisedMinSteps": {
+          "label": "ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟ ਲਈ ਘੱਟੋ-ਘੱਟ ਟੂਲ ਕਾਲਾਂ",
+          "description": "ਉੱਪਰਲੀ ਸੰਖਿਆ ਭਾਵੇਂ ਕਿੰਨੀ ਵੀ ਉੱਚੀ ਹੋਵੇ, ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟ ਨੂੰ ਮਿਲਣ ਵਾਲੀ ਸਭ ਤੋਂ ਛੋਟੀ ਟੂਲ-ਕਾਲ ਸੀਮਾ।",
+          "help": "ਇਸਨੂੰ 3 ਜਾਂ ਵੱਧ ਰੱਖੋ ਤਾਂ ਜੋ ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟ ਕਈ ਪੜਾਵਾਂ ਵਾਲਾ ਸਾਧਾਰਨ ਕੰਮ ਫਿਰ ਵੀ ਪੂਰਾ ਕਰ ਸਕੇ।"
+        },
+        "autonomousMultiplier": {
+          "label": "ਪੂਰੀ ਖੁਦਮੁਖਤਿਆਰੀ ਵਾਲੇ ਏਜੰਟਾਂ ਨੂੰ ਸੀਮਾ ਦੇ N ਗੁਣਾ ਮਿਲਦੇ ਹਨ",
+          "description": "ਪੂਰੀ ਖੁਦਮੁਖਤਿਆਰੀ ਵਾਲੇ ਏਜੰਟ ਨੂੰ ਟਰਨ ਦੀ ਟੂਲ-ਕਾਲ ਸੀਮਾ ਇਸ ਸੰਖਿਆ ਨਾਲ ਗੁਣਾ ਹੋ ਕੇ ਮਿਲਦੀ ਹੈ।",
+          "help": "ਉਨ੍ਹਾਂ ਏਜੰਟਾਂ ਲਈ ਵਧਾਓ ਜੋ ਬਿਨਾਂ ਕਿਸੇ ਦੀ ਨਿਗਰਾਨੀ ਦੇ ਲੰਮੇ ਕੰਮ ਚਲਾਉਂਦੇ ਹਨ; ਫਿਰ ਉਹ ਇੱਕ ਟਰਨ ਵਿੱਚ ਵੱਧ ਕਾਲਾਂ ਅਤੇ ਪੈਸੇ ਖਰਚ ਸਕਦੇ ਹਨ। 1 ਉਨ੍ਹਾਂ ਨੂੰ ਮਿਆਰੀ ਸੀਮਾ ਦਿੰਦਾ ਹੈ।"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "ਮਨਜ਼ੂਰੀ ਤੋਂ ਬਾਅਦ ਜਾਰੀ ਰੱਖੋ",
+          "description": "ਜਦੋਂ ਕੋਈ ਵਿਅਕਤੀ ਕਾਰਵਾਈ ਮਨਜ਼ੂਰ ਕਰਦਾ ਹੈ, ਏਜੰਟ ਨਵੇਂ ਸੁਨੇਹੇ ਦੀ ਉਡੀਕ ਕਰਨ ਦੀ ਬਜਾਏ ਕੰਮ ਆਪ ਪੂਰਾ ਕਰਦਾ ਹੈ।",
+          "help": "ਜੇ ਤੁਸੀਂ ਚਾਹੁੰਦੇ ਹੋ ਕਿ ਹਰ ਮਨਜ਼ੂਰ ਕਾਰਵਾਈ ਟਰਨ ਨੂੰ ਖਤਮ ਕਰੇ ਅਤੇ ਹੱਥੀਂ ਫਾਲੋ-ਅੱਪ ਹੋਵੇ ਤਾਂ ਇਸਨੂੰ ਬੰਦ ਕਰੋ।"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "ਰੱਦ ਕਰਨ ਤੋਂ ਬਾਅਦ ਵੀ ਬੈਕਗ੍ਰਾਊਂਡ ਜੌਬ ਜਾਰੀ ਰਹਿੰਦੇ ਹਨ",
+          "description": "ਜਦੋਂ ਕੋਈ ਵਿਅਕਤੀ ਬੈਕਗ੍ਰਾਊਂਡ ਜੌਬ ਵਿੱਚ ਕਾਰਵਾਈ ਰੱਦ ਕਰਦਾ ਹੈ, ਜੌਬ ਰੁਕਣ ਦੀ ਬਜਾਏ ਰੱਦ ਕਰਨ ਨੂੰ ਦਰਜ ਕਰਕੇ ਜਾਰੀ ਰਹਿੰਦਾ ਹੈ।",
+          "help": "ਜੇ ਰੱਦ ਕਰਨ ਨਾਲ ਜੌਬ ਰੁਕਣਾ ਚਾਹੀਦਾ ਹੈ ਤਾਂ ਇਸਨੂੰ ਬੰਦ ਰੱਖੋ। ਜਦੋਂ ਜੌਬ ਆਮ ਤੌਰ ਉੱਤੇ ਰੱਦ ਕੀਤੇ ਕਦਮ ਤੋਂ ਬਿਨਾਂ ਪੂਰਾ ਹੋ ਸਕਦਾ ਹੈ ਤਾਂ ਚਾਲੂ ਕਰੋ।"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "ਮਨਜ਼ੂਰੀ ਬੇਨਤੀਆਂ ਦੀ ਮਿਆਦ ਪੁੱਗਦੀ ਹੈ",
+          "description": "ਮਨਜ਼ੂਰੀ ਬੇਨਤੀ ਮਿਆਦ ਪੁੱਗਣ ਤੋਂ ਪਹਿਲਾਂ ਫ਼ੈਸਲੇ ਲਈ ਕਿੰਨੀ ਦੇਰ ਉਡੀਕ ਕਰਦੀ ਹੈ। 0 ਦਾ ਮਤਲਬ ਹੈ ਬੇਨਤੀਆਂ ਦੀ ਮਿਆਦ ਕਦੇ ਨਹੀਂ ਪੁੱਗਦੀ।",
+          "help": "ਮਿਆਦ ਨਾ ਹੋਵੇ ਤਾਂ ਭੁੱਲੀਆਂ ਬੇਨਤੀਆਂ ਅਣਮਿੱਥੇ ਸਮੇਂ ਲਈ ਖੁੱਲ੍ਹੀਆਂ ਰਹਿੰਦੀਆਂ ਹਨ ਅਤੇ ਏਜੰਟ ਉਡੀਕਦਾ ਰਹਿੰਦਾ ਹੈ। ਮਿਆਦ ਪੁੱਗੀ ਬੇਨਤੀ ਮਨਜ਼ੂਰ ਨਹੀਂ ਗਿਣੀ ਜਾਂਦੀ।"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "ਕੱਟੇ ਜਵਾਬ ਪੂਰੇ ਕਰੋ",
+          "description": "ਜਦੋਂ ਜਵਾਬ ਮਾਡਲ ਦੀ ਲੰਬਾਈ ਸੀਮਾ ਨਾਲ ਕੱਟਿਆ ਜਾਵੇ ਜਾਂ ਵਿਗੜੀ ਟੂਲ ਕਾਲ ਉੱਤੇ ਖਤਮ ਹੋਵੇ, ਮਾਡਲ ਨੂੰ ਅੱਗੇ ਵਧਣ ਜਾਂ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਕਹੋ।",
+          "help": "ਇਸਨੂੰ ਸਿਰਫ਼ ਮਾਡਲ ਦੀ ਸਮੱਸਿਆ ਦਾ ਨਿਦਾਨ ਕਰਨ ਲਈ ਬੰਦ ਕਰੋ; ਤਦ ਲੋਕ ਕੱਟੇ ਜਵਾਬ ਜਿਵੇਂ ਹਨ ਉਵੇਂ ਵੇਖਦੇ ਹਨ।"
+        },
+        "maxContinuations": {
+          "label": "ਕੱਟੇ ਜਵਾਬ ਦੀਆਂ ਵੱਧ ਤੋਂ ਵੱਧ ਨਿਰੰਤਰਤਾਵਾਂ",
+          "description": "ਜਵਾਬ ਕੱਟੇ ਜਾਣ ਤੋਂ ਬਾਅਦ ਮਾਡਲ ਨੂੰ ਕਿੰਨੀ ਵਾਰ ਅੱਗੇ ਵਧਣ ਲਈ ਕਿਹਾ ਜਾਂਦਾ ਹੈ।",
+          "help": "ਹਰ ਨਿਰੰਤਰਤਾ ਇੱਕ ਹੋਰ ਮਾਡਲ ਕਾਲ ਹੈ। ਲੰਬੇ ਜਵਾਬਾਂ ਲਈ ਵਧਾਓ, ਲਾਗਤ ਬਚਾਉਣ ਲਈ ਘਟਾਓ।"
+        },
+        "maxToolCallRetries": {
+          "label": "ਵਿਗੜੀ ਟੂਲ ਕਾਲ ਦੀਆਂ ਵੱਧ ਤੋਂ ਵੱਧ ਮੁੜ-ਕੋਸ਼ਿਸ਼ਾਂ",
+          "description": "ਵਰਤੋਂ ਯੋਗ ਨਾ ਹੋਣ ਵਾਲੇ ਆਰਗੂਮੈਂਟਾਂ ਨਾਲ ਆਈ ਟੂਲ ਕਾਲ ਨੂੰ ਦੁਹਰਾਉਣ ਲਈ ਮਾਡਲ ਨੂੰ ਕਿੰਨੀ ਵਾਰ ਕਿਹਾ ਜਾਂਦਾ ਹੈ।",
+          "help": "ਇੱਕ ਮੁੜ-ਕੋਸ਼ਿਸ਼ ਇੱਕ ਮਾਡਲ ਕਾਲ ਖਰਚਦੀ ਹੈ। 0 ਪਹਿਲੀ ਵਿਗੜੀ ਕਾਲ ਉੱਤੇ ਹੀ ਹਾਰ ਮੰਨ ਲੈਂਦਾ ਹੈ।"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "ਹਰ ਮਾਡਲ ਕਾਲ ਲਈ ਕੋਸ਼ਿਸ਼ਾਂ",
+          "description": "ਜਦੋਂ ਪ੍ਰਦਾਤਾ ਫੇਲ੍ਹ ਹੋਵੇ ਜਾਂ ਰੁੱਝਿਆ ਹੋਵੇ ਤਾਂ ਮਾਡਲ ਕਾਲ ਕਿੰਨੀ ਵਾਰ ਅਜ਼ਮਾਈ ਜਾਂਦੀ ਹੈ, ਪਹਿਲੀ ਕੋਸ਼ਿਸ਼ ਸਮੇਤ।",
+          "help": "ਵੱਧ ਕੋਸ਼ਿਸ਼ਾਂ ਪ੍ਰਦਾਤਾ ਦੀਆਂ ਛੋਟੀਆਂ ਰੁਕਾਵਟਾਂ ਨੂੰ ਛੁਪਾਉਂਦੀਆਂ ਹਨ ਪਰ ਫੇਲ੍ਹ ਹੋ ਰਹੀ ਬੇਨਤੀ ਨੂੰ ਗਲਤੀ ਦੱਸਣ ਵਿੱਚ ਵੱਧ ਸਮਾਂ ਲੱਗਦਾ ਹੈ।"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "ਟੂਲਾਂ ਵਾਲੇ ਏਜੰਟਾਂ ਲਈ ਜਵਾਬ ਮੁੜ ਵਰਤੋ",
+          "description": "ਟੂਲ ਰੱਖਣ ਵਾਲੇ ਏਜੰਟਾਂ ਲਈ ਸਟੋਰ ਕੀਤੇ ਜਵਾਬਾਂ ਦੀ ਮੁੜ ਵਰਤੋਂ ਦੀ ਆਗਿਆ ਦਿਓ। ਡਿਫ਼ਾਲਟ ਵਜੋਂ ਬੰਦ ਕਿਉਂਕਿ ਟੂਲ ਅਗਲੀ ਵਾਰ ਕੁਝ ਵੱਖਰਾ ਵਾਪਸ ਕਰ ਸਕਦਾ ਹੈ।",
+          "help": "ਇਸਨੂੰ ਉਦੋਂ ਹੀ ਚਾਲੂ ਕਰੋ ਜਦੋਂ ਟੂਲ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਵਾਲੇ ਅਤੇ ਹੌਲੀ ਬਦਲਣ ਵਾਲੇ ਹੋਣ, ਅਤੇ ਤੁਸੀਂ ਤੇਜ਼, ਸਸਤੇ ਦੁਹਰਾਏ ਜਵਾਬ ਚਾਹੁੰਦੇ ਹੋ। ਲੋਕ ਅਜਿਹਾ ਜਵਾਬ ਵੇਖ ਸਕਦੇ ਹਨ ਜੋ ਤਾਜ਼ਾ ਨਹੀਂ।"
+        },
+        "contextTurns": {
+          "label": "ਦੁਹਰਾਓ ਪਛਾਣਨ ਵਾਲੇ ਪਿਛਲੇ ਟਰਨ",
+          "description": "ਇਹ ਤੈਅ ਕਰਨ ਲਈ ਕਿ ਕੋਈ ਸੁਨੇਹਾ ਸਟੋਰ ਕੀਤੇ ਜਵਾਬ ਦੀ ਮੁੜ ਵਰਤੋਂ ਕਰ ਸਕਣ ਵਾਲਾ ਦੁਹਰਾਓ ਹੈ ਜਾਂ ਨਹੀਂ, ਕਿੰਨੇ ਪਿਛਲੇ ਟਰਨਾਂ ਦੀ ਤੁਲਨਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।",
+          "help": "ਵੱਧ ਟਰਨ ਮੇਲ ਨੂੰ ਸਖ਼ਤ ਅਤੇ ਕੈਸ਼ ਹਿੱਟਾਂ ਨੂੰ ਦੁਰਲੱਭ ਬਣਾਉਂਦੇ ਹਨ।"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "ਫਾਲੋ-ਅੱਪ ਵਿੱਚ ਟੂਲ ਪੇਸ਼ ਕਰਦੇ ਰਹੋ",
+          "description": "ਜਦੋਂ ਅਗਲਾ ਸੁਨੇਹਾ ਛੋਟਾ ਫਾਲੋ-ਅੱਪ ਹੋਵੇ ਤਾਂ ਉਹ ਟੂਲ ਪੇਸ਼ ਕਰਦੇ ਰਹੋ ਜੋ ਗੱਲਬਾਤ ਪਹਿਲਾਂ ਹੀ ਵਰਤ ਚੁੱਕੀ ਹੈ।",
+          "help": "ਜੇ \"ਹਾਂ\" ਵਰਗੇ ਛੋਟੇ ਜਵਾਬ ਆਮ ਟੂਲ ਚੋਣ ਤੋਂ ਸ਼ੁਰੂ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ ਤਾਂ ਇਸਨੂੰ ਬੰਦ ਕਰੋ।"
+        },
+        "stickyToolsWindow": {
+          "label": "ਫਾਲੋ-ਅੱਪ ਟੂਲ ਕਿੰਨੀ ਦੇਰ ਪੇਸ਼ ਰਹਿੰਦੇ ਹਨ",
+          "description": "ਵਰਤੋਂ ਤੋਂ ਬਾਅਦ ਛੋਟੇ ਫਾਲੋ-ਅੱਪ ਸੁਨੇਹਿਆਂ ਲਈ ਟੂਲ ਕਿੰਨੀ ਦੇਰ ਪੇਸ਼ ਰਹਿੰਦਾ ਹੈ।",
+          "help": "ਲੰਬੀ ਵਿੰਡੋ ਲੰਬੇ ਕੰਮ ਸੈਸ਼ਨਾਂ ਵਿੱਚ ਮਦਦ ਕਰਦੀ ਹੈ, ਛੋਟੀ ਟੂਲ ਸੂਚੀ ਨੂੰ ਛੋਟਾ ਰੱਖਦੀ ਹੈ।"
+        },
+        "maxStickyTools": {
+          "label": "ਫਾਲੋ-ਅੱਪ ਵਿੱਚ ਸੁਝਾਏ ਜਾਂਦੇ ਵੱਧ ਤੋਂ ਵੱਧ ਟੂਲ",
+          "description": "ਛੋਟੇ ਫਾਲੋ-ਅੱਪ ਸੁਨੇਹੇ ਵਿੱਚ ਅੱਗੇ ਲਿਜਾਏ ਜਾਂਦੇ ਟੂਲਾਂ ਦੀ ਵੱਧ ਤੋਂ ਵੱਧ ਗਿਣਤੀ। 0 ਕੋਈ ਨਹੀਂ ਰੱਖਦਾ।",
+          "help": "ਜਦੋਂ ਕੋਈ ਕੰਮ ਕਈ ਟੂਲ ਵਰਤਦਾ ਹੈ ਤਾਂ ਵੱਡੀ ਸੰਖਿਆ ਮਦਦ ਕਰਦੀ ਹੈ; ਛੋਟੀ ਸੰਖਿਆ ਟੂਲ ਸੂਚੀ ਨੂੰ ਛੋਟੀ ਰੱਖਦੀ ਹੈ।"
+        },
+        "keepPrimaryModel": {
+          "label": "ਫਾਲੋ-ਅੱਪ ਲਈ ਮੁੱਖ ਮਾਡਲ ਰੱਖੋ",
+          "description": "ਉਸ ਗੱਲਬਾਤ ਵਿੱਚ ਛੋਟਾ ਫਾਲੋ-ਅੱਪ ਜਿਸ ਵਿੱਚ ਪਹਿਲਾਂ ਟੂਲ ਵਰਤੇ ਜਾ ਚੁੱਕੇ ਹਨ, ਸਸਤੇ ਮਾਡਲ ਦੀ ਥਾਂ ਏਜੰਟ ਦੇ ਮੁੱਖ ਮਾਡਲ ’ਤੇ ਹੀ ਰਹਿੰਦਾ ਹੈ।",
+          "help": "ਇਸਨੂੰ ਬੰਦ ਕਰੋ ਤਾਂ ਜੋ ਲਾਗਤ ਰੂਟਿੰਗ \"ਹਾਂ\" ਵਰਗੇ ਫਾਲੋ-ਅੱਪ ਸਸਤੇ ਮਾਡਲ ਨੂੰ ਭੇਜੇ, ਪਰ ਚੱਲ ਰਹੇ ਕੰਮ ਨੂੰ ਕਮਜ਼ੋਰ ਢੰਗ ਨਾਲ ਸੰਭਾਲਣ ਦਾ ਜੋਖਮ ਰਹਿੰਦਾ ਹੈ।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "ਜਵਾਬ ਮੁੜ ਵਰਤਣ ਲਈ ਸਵਾਲ ਕਿੰਨਾ ਮਿਲਦਾ-ਜੁਲਦਾ ਹੋਵੇ",
+          "description": "ਉਨ੍ਹਾਂ ਏਜੰਟਾਂ ਲਈ ਜੋ ਮਿਲਦੇ-ਜੁਲਦੇ ਸਵਾਲਾਂ ਦੇ ਜਵਾਬ ਮੁੜ ਵਰਤਦੇ ਹਨ: ਸੰਭਾਲਿਆ ਜਵਾਬ ਦੇਣ ਲਈ ਨਵਾਂ ਸਵਾਲ ਪਿਛਲੇ ਸਵਾਲ ਦੇ ਕਿੰਨਾ ਨੇੜੇ ਹੋਵੇ, 0.85 ਤੋਂ 1।",
+          "help": "ਘੱਟ ਸੰਖਿਆ ਵੱਧ ਦੁਹਰਾਓ ਨੂੰ ਜਵਾਬ ਦਿੰਦੀ ਹੈ ਪਰ ਕਿਸੇ ਹੋਰ ਸਵਾਲ ਲਈ ਬਣਿਆ ਜਵਾਬ ਦੇ ਦੇਣ ਦਾ ਜੋਖਮ ਹੁੰਦਾ ਹੈ। ਗਲਤ ਜਵਾਬ ਮਹਿੰਗੇ ਹੋਣ ਤਾਂ ਇਸਨੂੰ ਉੱਚਾ ਰੱਖੋ। ਜਵਾਬ ਸਿਰਫ਼ ਉਸੇ ਵਿਅਕਤੀ ਲਈ ਮੁੜ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ ਜਿਸਨੂੰ ਉਹ ਦਿੱਤਾ ਗਿਆ ਸੀ।"
+        },
+        "ttl": {
+          "label": "ਮੁੜ ਵਰਤਣਯੋਗ ਜਵਾਬ ਕਿੰਨੀ ਦੇਰ ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ",
+          "description": "ਸੰਭਾਲੇ ਜਵਾਬ ਨੂੰ ਹਟਾਏ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਮਿਲਦੇ-ਜੁਲਦੇ ਸਵਾਲ ਨੂੰ ਕਿੰਨੀ ਦੇਰ ਤੱਕ ਦਿੱਤਾ ਜਾ ਸਕਦਾ ਹੈ।",
+          "help": "ਜੇ ਤੁਹਾਡੇ ਜਵਾਬ ਜਲਦੀ ਪੁਰਾਣੇ ਹੋ ਜਾਂਦੇ ਹਨ ਤਾਂ ਇਸਨੂੰ ਛੋਟਾ ਕਰੋ।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "ਪ੍ਰਤੀ ਏਜੰਟ ਵੱਧ ਤੋਂ ਵੱਧ ਸੰਭਾਲੇ ਜਵਾਬ",
+          "description": "ਇੱਕ ਏਜੰਟ ਮੁੜ ਵਰਤੋਂ ਲਈ ਕਿੰਨੇ ਜਵਾਬ ਰੱਖਦਾ ਹੈ। ਇਸ ਤੋਂ ਵੱਧ ਹੋਣ ’ਤੇ ਸਭ ਤੋਂ ਪੁਰਾਣੇ ਹਟਾ ਦਿੱਤੇ ਜਾਂਦੇ ਹਨ।",
+          "help": "ਵੱਡਾ ਭੰਡਾਰ ਵੱਧ ਦੁਹਰਾਓ ਲੱਭਦਾ ਹੈ ਅਤੇ ਵੱਧ ਸਟੋਰੇਜ ਵਰਤਦਾ ਹੈ।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "ਗੱਲਬਾਤ ਵਿੱਚ ਟੂਲ ਕਾਲਾਂ ਦਾ ਰਿਕਾਰਡ ਰੱਖੋ",
+          "description": "ਹਰ ਟਰਨ ਦੀਆਂ ਟੂਲ ਕਾਲਾਂ ਦਾ ਛੋਟਾ ਰਿਕਾਰਡ ਗੱਲਬਾਤ ਨਾਲ ਸੰਭਾਲੋ, ਤਾਂ ਜੋ ਬਾਅਦ ਦੇ ਟਰਨ ਦੇਖ ਸਕਣ ਕਿ ਕੀ ਕੀਤਾ ਗਿਆ ਸੀ।",
+          "help": "ਗੱਲਬਾਤ ਦਾ ਇਤਿਹਾਸ ਸਿਰਫ਼ ਲਿਖਤ ਰੱਖਣ ਲਈ ਇਸਨੂੰ ਬੰਦ ਕਰੋ; ਤਦ ਏਜੰਟ ਨਹੀਂ ਜਾਣ ਸਕਦਾ ਕਿ ਪਿਛਲੇ ਟਰਨਾਂ ਵਿੱਚ ਉਸਦੇ ਟੂਲਾਂ ਨੇ ਕੀ ਕੀਤਾ। ਇਹ ਪੂਰੇ ਵਰਕਸਪੇਸ ’ਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ।"
+        },
+        "replayEnabled": {
+          "label": "ਮਾਡਲ ਨੂੰ ਟੂਲ ਰਿਕਾਰਡ ਦਿਖਾਓ",
+          "description": "ਮਾਡਲ ਨੂੰ ਗੱਲਬਾਤ ਦਿੰਦੇ ਸਮੇਂ ਪਿਛਲੀਆਂ ਟੂਲ ਕਾਲਾਂ ਦਾ ਸੰਭਾਲਿਆ ਰਿਕਾਰਡ ਸ਼ਾਮਲ ਕਰੋ।",
+          "help": "ਇਸਨੂੰ ਬੰਦ ਕਰੋ ਤਾਂ ਜੋ ਰਿਕਾਰਡ ਸੰਭਾਲਿਆ ਜਾਂਦਾ ਰਹੇ ਪਰ ਉਸ ਲਈ ਮਾਡਲ ਦੀ ਕੰਮ ਵਾਲੀ ਥਾਂ ਨਾ ਵਰਤੀ ਜਾਵੇ।"
+        },
+        "replayTurns": {
+          "label": "ਪਿਛਲੇ ਟਰਨ ਜਿਨ੍ਹਾਂ ਦਾ ਟੂਲ ਰਿਕਾਰਡ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ",
+          "description": "ਟੂਲ ਵਰਤਣ ਵਾਲੇ ਸਭ ਤੋਂ ਹਾਲੀਆ ਕਿੰਨੇ ਟਰਨਾਂ ਦਾ ਰਿਕਾਰਡ ਮਾਡਲ ਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ।",
+          "help": "ਵੱਡੀ ਸੰਖਿਆ ਲੰਮੇ ਕੰਮ ਦੇ ਸੈਸ਼ਨਾਂ ਵਿੱਚ ਮਦਦ ਕਰਦੀ ਹੈ ਪਰ ਮਾਡਲ ਦੀ ਕੰਮ ਵਾਲੀ ਥਾਂ ਵੱਧ ਵਰਤਦੀ ਹੈ।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "ਪ੍ਰਤੀ ਟਰਨ ਸੂਚੀਬੱਧ ਟੂਲ ਕਾਲਾਂ",
+          "description": "ਇੱਕ ਟਰਨ ਦੀਆਂ ਕਿੰਨੀਆਂ ਟੂਲ ਕਾਲਾਂ ਰਿਕਾਰਡ ਵਿੱਚ ਲਿਖੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਅੱਗੇ ਦੀਆਂ ਕਾਲਾਂ ਸਿਰਫ਼ ਗਿਣੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+          "help": "ਉਨ੍ਹਾਂ ਟਰਨਾਂ ਲਈ ਵਧਾਓ ਜੋ ਬਹੁਤ ਕਾਲਾਂ ਕਰਦੇ ਹਨ ਅਤੇ ਜਿੱਥੇ ਹਰ ਇੱਕ ਯਾਦ ਰੱਖਣੀ ਹੋਵੇ।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "ਪ੍ਰਤੀ ਟਰਨ ਸਭ ਤੋਂ ਲੰਮਾ ਟੂਲ ਰਿਕਾਰਡ",
+          "description": "ਇੱਕ ਟਰਨ ਦੇ ਰਿਕਾਰਡ ਦੇ ਕਿੰਨੇ ਅੱਖਰ ਮਾਡਲ ਨੂੰ ਦਿਖਾਏ ਜਾਂਦੇ ਹਨ; ਬਾਕੀ ਗਿਣੇ ਜਾਂਦੇ ਹਨ, ਸੂਚੀਬੱਧ ਨਹੀਂ ਹੁੰਦੇ।",
+          "help": "ਬਾਅਦ ਦੇ ਹਰ ਟਰਨ ’ਤੇ ਲਾਗਤ ਬਚਾਉਣ ਲਈ ਘਟਾਓ, ਵੱਧ ਵੇਰਵਾ ਰੱਖਣ ਲਈ ਵਧਾਓ।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "ਸਭ ਤੋਂ ਵੱਡਾ ਚਿੱਤਰ ਅੱਪਲੋਡ (MB)",
+          "description": "ਚੈਟ ਸੁਨੇਹੇ ਨਾਲ ਕੋਈ ਵਿਅਕਤੀ ਸਭ ਤੋਂ ਵੱਡਾ ਕਿੰਨਾ ਚਿੱਤਰ ਜੋੜ ਸਕਦਾ ਹੈ, ਮੈਗਾਬਾਈਟ ਵਿੱਚ। ਪਲੇਟਫਾਰਮ ਦੀ ਇੱਕ ਸਮੁੱਚੀ ਫਾਈਲ ਸੀਮਾ ਵੀ ਹੈ ਜਿਸਨੂੰ ਇਹ ਪਾਰ ਨਹੀਂ ਕਰ ਸਕਦਾ।",
+          "help": "ਫੋਟੋਆਂ ਅਤੇ ਸਕ੍ਰੀਨਸ਼ਾਟਾਂ ਲਈ ਵਧਾਓ; ਵੱਡੀਆਂ ਫਾਈਲਾਂ ਭੇਜਣ ਵਿੱਚ ਹੌਲੀ ਹੁੰਦੀਆਂ ਹਨ ਅਤੇ ਮਾਡਲ ਦਾ ਵੱਧ ਕੋਟਾ ਵਰਤਦੀਆਂ ਹਨ।"
+        },
+        "maxAudioMb": {
+          "label": "ਸਭ ਤੋਂ ਵੱਡਾ ਆਡੀਓ ਅੱਪਲੋਡ (MB)",
+          "description": "ਚੈਟ ਸੁਨੇਹੇ ਨਾਲ ਕੋਈ ਵਿਅਕਤੀ ਸਭ ਤੋਂ ਵੱਡੀ ਕਿੰਨੀ ਆਡੀਓ ਫਾਈਲ ਜੋੜ ਸਕਦਾ ਹੈ, ਮੈਗਾਬਾਈਟ ਵਿੱਚ। ਪਲੇਟਫਾਰਮ ਦੀ ਇੱਕ ਸਮੁੱਚੀ ਫਾਈਲ ਸੀਮਾ ਵੀ ਹੈ ਜਿਸਨੂੰ ਇਹ ਪਾਰ ਨਹੀਂ ਕਰ ਸਕਦਾ।",
+          "help": "ਲੰਮੀਆਂ ਰਿਕਾਰਡਿੰਗਾਂ ਲਈ ਵਧਾਓ; ਵੱਡੀਆਂ ਫਾਈਲਾਂ ਭੇਜਣ ਵਿੱਚ ਹੌਲੀ ਹੁੰਦੀਆਂ ਹਨ ਅਤੇ ਮਾਡਲ ਦਾ ਵੱਧ ਕੋਟਾ ਵਰਤਦੀਆਂ ਹਨ।"
+        },
+        "maxVideoMb": {
+          "label": "ਸਭ ਤੋਂ ਵੱਡਾ ਵੀਡੀਓ ਅੱਪਲੋਡ (MB)",
+          "description": "ਚੈਟ ਸੁਨੇਹੇ ਨਾਲ ਕੋਈ ਵਿਅਕਤੀ ਸਭ ਤੋਂ ਵੱਡੀ ਕਿੰਨੀ ਵੀਡੀਓ ਜੋੜ ਸਕਦਾ ਹੈ, ਮੈਗਾਬਾਈਟ ਵਿੱਚ। ਪਲੇਟਫਾਰਮ ਦੀ ਇੱਕ ਸਮੁੱਚੀ ਫਾਈਲ ਸੀਮਾ ਵੀ ਹੈ ਜਿਸਨੂੰ ਇਹ ਪਾਰ ਨਹੀਂ ਕਰ ਸਕਦਾ।",
+          "help": "ਲੰਮੀਆਂ ਕਲਿੱਪਾਂ ਲਈ ਵਧਾਓ; ਵੱਡੀਆਂ ਫਾਈਲਾਂ ਭੇਜਣ ਵਿੱਚ ਹੌਲੀ ਹੁੰਦੀਆਂ ਹਨ ਅਤੇ ਮਾਡਲ ਦਾ ਵੱਧ ਕੋਟਾ ਵਰਤਦੀਆਂ ਹਨ।"
+        },
+        "maxDocumentMb": {
+          "label": "ਸਭ ਤੋਂ ਵੱਡਾ ਦਸਤਾਵੇਜ਼ ਅੱਪਲੋਡ (MB)",
+          "description": "ਚੈਟ ਸੁਨੇਹੇ ਨਾਲ ਕੋਈ ਵਿਅਕਤੀ ਸਭ ਤੋਂ ਵੱਡਾ ਕਿੰਨਾ ਦਸਤਾਵੇਜ਼ ਜਾਂ ਸਪ੍ਰੈੱਡਸ਼ੀਟ ਜੋੜ ਸਕਦਾ ਹੈ, ਮੈਗਾਬਾਈਟ ਵਿੱਚ। ਪਲੇਟਫਾਰਮ ਦੀ ਇੱਕ ਸਮੁੱਚੀ ਫਾਈਲ ਸੀਮਾ ਵੀ ਹੈ ਜਿਸਨੂੰ ਇਹ ਪਾਰ ਨਹੀਂ ਕਰ ਸਕਦਾ।",
+          "help": "ਲੰਮੀਆਂ ਰਿਪੋਰਟਾਂ ਅਤੇ ਵੱਡੀਆਂ ਡਾਟਾ ਫਾਈਲਾਂ ਲਈ ਵਧਾਓ; ਵੱਡੀਆਂ ਫਾਈਲਾਂ ਪ੍ਰਕਿਰਿਆ ਕਰਨ ਵਿੱਚ ਹੌਲੀ ਹੁੰਦੀਆਂ ਹਨ।"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "ਅਧੂਰੀ ਸ਼ਬਦਾਵਲੀ ਉੱਤੇ ਹੁਲਾਰਾ",
+          "description": "ਜਦੋਂ ਜਵਾਬ ਅਜਿਹਾ ਲੱਗੇ ਕਿ ਉਹ ਜੋ ਕਰਨ ਦੀ ਗੱਲ ਕਹੀ ਉਹ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਰੁਕ ਗਿਆ, ਤਾਂ ਮਾਡਲ ਨੂੰ ਅੱਗੇ ਵਧਣ ਲਈ ਕਹੋ।",
+          "help": "ਜੇ ਹੁਲਾਰੇ ਉਹਨਾਂ ਜਵਾਬਾਂ ਉੱਤੇ ਚੱਲਦੇ ਹਨ ਜਿਨ੍ਹਾਂ ਨੂੰ ਉੱਥੇ ਹੀ ਖਤਮ ਹੋਣਾ ਸੀ ਤਾਂ ਇਸਨੂੰ ਬੰਦ ਕਰੋ।"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "ਪੁਰਾਣੇ ਟੂਲ ਨਤੀਜੇ ਸਾਫ਼ ਕਰੋ",
+            "description": "ਲੰਬੇ ਟੂਲ ਰਨ ਵਿੱਚ, ਪੁਰਾਣੇ ਟੂਲ ਨਤੀਜਿਆਂ ਨੂੰ ਛੋਟੇ ਪਲੇਸਹੋਲਡਰ ਨਾਲ ਬਦਲੋ ਤਾਂ ਜੋ ਗੱਲਬਾਤ ਮਾਡਲ ਦੀ ਸੀਮਾ ਅੰਦਰ ਰਹੇ।",
+            "help": "ਜੇ ਏਜੰਟ ਨੂੰ ਹਰ ਪਿਛਲਾ ਨਤੀਜਾ ਵੇਖਣਾ ਜ਼ਰੂਰੀ ਹੈ ਤਾਂ ਇਸਨੂੰ ਬੰਦ ਕਰੋ; ਲੰਬੇ ਰਨ ਤਦ ਮਾਡਲ ਦੀ ਆਕਾਰ ਸੀਮਾ ਤੱਕ ਪਹੁੰਚ ਸਕਦੇ ਹਨ।"
+          },
+          "thresholdChars": {
+            "label": "ਸਾਫ਼ ਕਰਨਾ ਸ਼ੁਰੂ ਕਰਨ ਵਾਲਾ ਆਕਾਰ",
+            "description": "ਪੁਰਾਣੇ ਸਾਫ਼ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਇੱਕ ਟਰਨ ਦੇ ਟੂਲ ਨਤੀਜੇ ਕਿੰਨੇ ਵੱਡੇ ਹੋ ਸਕਦੇ ਹਨ।",
+            "help": "ਵੱਧ ਨਤੀਜੇ ਦਿਖਾਈ ਦੇਣ ਲਈ ਵਧਾਓ, ਲੰਬੇ ਰਨ ਛੋਟੇ ਅਤੇ ਸਸਤੇ ਰੱਖਣ ਲਈ ਘਟਾਓ।"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "ਸਭ ਤੋਂ ਲੰਬਾ ਸਾਦਾ ਸੁਨੇਹਾ",
+          "description": "ਇਸ ਤੋਂ ਲੰਬਾ ਸੁਨੇਹਾ ਕਦੇ ਸਾਦਾ ਨਹੀਂ ਮੰਨਿਆ ਜਾਂਦਾ। ਸਾਦੇ ਸੁਨੇਹੇ ਤੇਜ਼, ਸਸਤੇ ਮਾਡਲ ਕੋਲ ਜਾ ਸਕਦੇ ਹਨ।",
+          "help": "ਗੁਣਵੱਤਾ ਲਈ ਵੱਧ ਸੁਨੇਹੇ ਮੁੱਖ ਮਾਡਲ ਨੂੰ ਭੇਜਣ ਲਈ ਘਟਾਓ; ਲਾਗਤ ਬਚਾਉਣ ਲਈ ਵਧਾਓ।"
+        },
+        "maxClauses": {
+          "label": "ਸਾਦੇ ਸੁਨੇਹੇ ਵਿੱਚ ਵੱਧ ਤੋਂ ਵੱਧ ਵਾਕ",
+          "description": "ਇਸ ਤੋਂ ਵੱਧ ਵਾਕਾਂ ਵਾਲਾ ਸੁਨੇਹਾ ਕਦੇ ਸਾਦਾ ਨਹੀਂ ਮੰਨਿਆ ਜਾਂਦਾ।",
+          "help": "ਗੁਣਵੱਤਾ ਲਈ ਵੱਧ ਸੁਨੇਹੇ ਮੁੱਖ ਮਾਡਲ ਨੂੰ ਭੇਜਣ ਲਈ ਘਟਾਓ।"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "ਹਰ ਟਰਨ ਵਿੱਚ ਯਾਦ ਕੀਤੀਆਂ ਏਜੰਟ ਯਾਦਾਂ",
+          "description": "ਹਰ ਸੁਨੇਹੇ ਲਈ ਏਜੰਟ ਦੀਆਂ ਆਪਣੀਆਂ ਕਿੰਨੀਆਂ ਯਾਦਾਂ ਵੇਖੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+          "help": "ਵੱਧ ਯਾਦਾਂ ਵੱਧ ਸੰਦਰਭ ਦਿੰਦੀਆਂ ਹਨ ਪਰ ਵੱਧ ਟੋਕਨ ਵਰਤਦੀਆਂ ਹਨ।"
+        },
+        "tenantTopK": {
+          "label": "ਹਰ ਟਰਨ ਵਿੱਚ ਯਾਦ ਕੀਤੀਆਂ ਸਾਂਝੀਆਂ ਯਾਦਾਂ",
+          "description": "ਹਰ ਸੁਨੇਹੇ ਲਈ ਵਰਕਸਪੇਸ ਵਿੱਚ ਸਾਂਝੀਆਂ ਕਿੰਨੀਆਂ ਯਾਦਾਂ ਵੇਖੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+          "help": "ਵੱਧ ਯਾਦਾਂ ਵੱਧ ਸੰਦਰਭ ਦਿੰਦੀਆਂ ਹਨ ਪਰ ਵੱਧ ਟੋਕਨ ਵਰਤਦੀਆਂ ਹਨ।"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "ਪ੍ਰਤੀ ਏਜੰਟ ਵੱਧ ਤੋਂ ਵੱਧ ਯਾਦਾਂ",
+          "description": "ਇੱਕ ਏਜੰਟ ਕਿੰਨੀਆਂ ਯਾਦਾਂ ਰੱਖ ਸਕਦਾ ਹੈ। ਇਸ ਤੋਂ ਪਰੇ ਸਭ ਤੋਂ ਪੁਰਾਣੀਆਂ ਅਤੇ ਸਭ ਤੋਂ ਘੱਟ ਵਰਤੀਆਂ ਛੱਡ ਦਿੱਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+          "help": "ਉਹਨਾਂ ਸਹਾਇਕਾਂ ਲਈ ਵਧਾਓ ਜਿਨ੍ਹਾਂ ਨੂੰ ਲੋਕਾਂ ਬਾਰੇ ਬਹੁਤ ਕੁਝ ਯਾਦ ਰੱਖਣਾ ਚਾਹੀਦਾ ਹੈ; ਇਹ ਸਟੋਰੇਜ ਅਤੇ ਯਾਦ ਕਰਨ ਦੀ ਲਾਗਤ ਵੀ ਵਧਾਉਂਦਾ ਹੈ।"
+        }
+      },
+      "tenant": {
+        "maxMemories": {
+          "label": "ਵੱਧ ਤੋਂ ਵੱਧ ਸਾਂਝੀਆਂ ਯਾਦਾਂ",
+          "description": "ਵਰਕਸਪੇਸ ਵਿੱਚ ਸਾਂਝੀਆਂ ਕੀਤੀਆਂ ਕਿੰਨੀਆਂ ਯਾਦਾਂ ਰੱਖੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਇਸ ਤੋਂ ਵੱਧ ਹੋਣ ’ਤੇ ਸਭ ਤੋਂ ਪੁਰਾਣੀਆਂ ਹਟਾ ਦਿੱਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+          "help": "ਸਾਂਝੇ ਗਿਆਨ ’ਤੇ ਨਿਰਭਰ ਵੱਡੀਆਂ ਟੀਮਾਂ ਲਈ ਵਧਾਓ; ਇਸ ਨਾਲ ਸਟੋਰੇਜ ਅਤੇ ਯਾਦ ਕਰਨ ਦੀ ਲਾਗਤ ਵੀ ਵਧਦੀ ਹੈ। ਇਹ ਪੂਰੇ ਵਰਕਸਪੇਸ ’ਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ਆਨ-ਡਿਵਾਈਸ ਚੈਟ ਨੂੰ ਦਿੱਤੀਆਂ ਯਾਦਾਂ",
+          "description": "ਆਨ-ਡਿਵਾਈਸ ਸੈਸ਼ਨ ਦੇ ਸ਼ੁਰੂ ਹੋਣ ’ਤੇ ਉਸਨੂੰ ਕਿੰਨੀਆਂ ਯਾਦਾਂ ਸੌਂਪੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+          "help": "ਆਨ-ਡਿਵਾਈਸ ਮਾਡਲਾਂ ਦੀ ਕੰਮ ਵਾਲੀ ਥਾਂ ਛੋਟੀ ਹੁੰਦੀ ਹੈ, ਇਸ ਲਈ ਇਸਨੂੰ ਘੱਟ ਰੱਖੋ।"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "ਗ੍ਰਾਫ਼ ਮੈਮੋਰੀ ਤੋਂ ਯਾਦ ਕੀਤੇ ਤੱਥ",
+          "description": "ਇੱਕ ਲੁਕਅੱਪ ਵਿੱਚ ਏਜੰਟ ਨੂੰ ਉਸਦੀ ਸਬੰਧ ਮੈਮੋਰੀ ਤੋਂ ਵੱਧ ਤੋਂ ਵੱਧ ਕਿੰਨੇ ਤੱਥ ਵਿਖਾਏ ਜਾਂਦੇ ਹਨ।",
+          "help": "ਵੱਧ ਤੱਥ ਏਜੰਟ ਨੂੰ ਕਿਸੇ ਵਿਅਕਤੀ ਜਾਂ ਵਿਸ਼ੇ ਬਾਰੇ ਵੱਧ ਪਿਛੋਕੜ ਦਿੰਦੇ ਹਨ ਪਰ ਉਸਦੀ ਕਾਰਜ-ਥਾਂ ਦਾ ਵੱਧ ਹਿੱਸਾ ਵਰਤਦੇ ਹਨ। ਘੱਟ ਤੱਥ ਜਵਾਬਾਂ ਨੂੰ ਕੇਂਦਰਿਤ ਰੱਖਦੇ ਹਨ। ਇਸਨੂੰ ਪੂਰੇ ਵਰਕਸਪੇਸ ਲਈ, ਜਾਂ ਵੱਧ ਜਾਂ ਘੱਟ ਦੀ ਲੋੜ ਵਾਲੇ ਇੱਕ ਏਜੰਟ ਲਈ ਸੈੱਟ ਕਰੋ।"
+        },
+        "recallMaxPaths": {
+          "label": "ਹਰ ਲੁਕਅੱਪ ਵਿੱਚ ਪੜ੍ਹੇ ਗ੍ਰਾਫ਼ ਮਾਰਗ",
+          "description": "ਇੱਕ ਲੁਕਅੱਪ ਦੇ ਤੱਥ ਲੱਭਣ ਲਈ ਮੈਮੋਰੀ ਗ੍ਰਾਫ਼ ਦੇ ਕਿੰਨੇ ਕਨੈਕਸ਼ਨ ਪੜ੍ਹੇ ਜਾਂਦੇ ਹਨ।",
+          "help": "ਕਈ ਕਨੈਕਸ਼ਨ ਇੱਕੋ ਤੱਥ ਤੱਕ ਲਿਜਾ ਸਕਦੇ ਹਨ, ਇਸ ਲਈ ਸੰਘਣੇ ਜੁੜੇ ਯਾਦਾਂ ਨੂੰ ਸਭ ਕੁਝ ਲੱਭਣ ਲਈ ਵੱਧ ਸੰਖਿਆ ਚਾਹੀਦੀ ਹੋ ਸਕਦੀ ਹੈ। ਵੱਧ ਸੰਖਿਆ ਹਰ ਲੁਕਅੱਪ ਨੂੰ ਹੌਲੀ ਕਰਦੀ ਹੈ।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "ਪ੍ਰੋਂਪਟ ਵਿੱਚ ਸੂਚੀਬੱਧ ਵੱਧ ਤੋਂ ਵੱਧ ਸਕਿੱਲਾਂ",
+          "description": "ਏਜੰਟ ਨੂੰ ਪਤਾ ਹੋਵੇ ਕਿ ਉਹ ਮੌਜੂਦ ਹਨ, ਇਸ ਲਈ ਉਸਦੀਆਂ ਹਦਾਇਤਾਂ ਵਿੱਚ ਤੁਹਾਡੀਆਂ ਕਿੰਨੀਆਂ ਸਕਿੱਲਾਂ ਦੇ ਨਾਮ ਦਿੱਤੇ ਜਾਂਦੇ ਹਨ। ਬਾਕੀ ਗਿਣੀਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਸੂਚੀਬੱਧ ਨਹੀਂ ਹੁੰਦੀਆਂ।",
+          "help": "ਜੇ ਤੁਹਾਡੇ ਕੋਲ ਬਹੁਤ ਸਕਿੱਲਾਂ ਹਨ ਤਾਂ ਵਧਾਓ; ਸੂਚੀਬੱਧ ਹਰ ਸਕਿੱਲ ਹਰ ਟਰਨ ਵਿੱਚ ਮਾਡਲ ਦੀ ਥੋੜ੍ਹੀ ਕੰਮ ਵਾਲੀ ਥਾਂ ਵਰਤਦੀ ਹੈ। ਇਹ ਪੂਰੇ ਵਰਕਸਪੇਸ ’ਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ।"
+        },
+        "maxBlockChars": {
+          "label": "ਪ੍ਰੋਂਪਟ ਵਿੱਚ ਸਕਿੱਲ ਸੂਚੀ ਦਾ ਆਕਾਰ",
+          "description": "ਏਜੰਟ ਦੀਆਂ ਹਦਾਇਤਾਂ ਵਿੱਚ ਸਕਿੱਲਾਂ ਦੀ ਸੂਚੀ ਕਿੰਨੇ ਅੱਖਰ ਲੈ ਸਕਦੀ ਹੈ। ਭਰ ਜਾਣ ’ਤੇ ਬਾਅਦ ਦੀਆਂ ਸਕਿੱਲਾਂ ਸਿਰਫ਼ ਨਾਮ ਤੱਕ ਛੋਟੀਆਂ ਕਰ ਦਿੱਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+          "help": "ਵੱਧ ਸਕਿੱਲਾਂ ਦੇ ਵੇਰਵੇ ਰੱਖਣ ਲਈ ਵਧਾਓ, ਹਰ ਟਰਨ ਵਿੱਚ ਟੋਕਨ ਬਚਾਉਣ ਲਈ ਘਟਾਓ। ਇਹ ਪੂਰੇ ਵਰਕਸਪੇਸ ’ਤੇ ਲਾਗੂ ਹੁੰਦਾ ਹੈ।"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "ਬੈਕਗ੍ਰਾਊਂਡ ਕਾਲਾਂ ਏਜੰਟ ਦਾ ਮਾਡਲ ਵਰਤਦੀਆਂ ਹਨ",
+        "description": "ਜਦੋਂ ਉਹਨਾਂ ਲਈ ਕੋਈ ਮਾਡਲ ਨਾ ਚੁਣਿਆ ਹੋਵੇ, ਸਾਰ, ਸਹਾਇਤਾਵਾਂ ਅਤੇ ਸੰਦਰਭ ਕੰਪੈਕਸ਼ਨ ਉਸੇ ਏਜੰਟ ਦਾ ਮਾਡਲ ਵਰਤਦੇ ਹਨ ਜਿਸ ਲਈ ਉਹ ਕੰਮ ਕਰਦੇ ਹਨ।",
+        "help": "ਇਹਨਾਂ ਕਾਲਾਂ ਲਈ ਪਲੇਟਫ਼ਾਰਮ ਨੂੰ ਮਾਡਲ ਚੁਣਨ ਦੇਣ ਲਈ ਇਸਨੂੰ ਬੰਦ ਕਰੋ, ਜੋ ਸਸਤਾ ਜਾਂ ਕਿਸੇ ਹੋਰ ਪ੍ਰਦਾਤਾ ਦਾ ਹੋ ਸਕਦਾ ਹੈ।"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "ਜਦੋਂ ਸੁਰੱਖਿਆ ਜਾਂਚ ਟੁੱਟ ਜਾਵੇ",
+        "description": "ਜਦੋਂ ਸੁਰੱਖਿਆ ਜਾਂਚ ਆਪ ਹੀ ਫੇਲ੍ਹ ਹੋ ਜਾਵੇ, ਉਦਾਹਰਨ ਲਈ ਜੱਜ ਮਾਡਲ ਬੰਦ ਹੋਵੇ, ਤਾਂ ਕੀ ਹੁੰਦਾ ਹੈ। ਬੰਦ ਕਾਰਵਾਈ ਨੂੰ ਰੱਦ ਕਰਦਾ ਹੈ; ਖੁੱਲ੍ਹਾ ਇਸਨੂੰ ਲੰਘਣ ਦਿੰਦਾ ਹੈ।",
+        "help": "ਤੁਸੀਂ ਇਸਨੂੰ ਸਿਰਫ਼ ਪਲੇਟਫ਼ਾਰਮ ਸੈਟਿੰਗ ਨਾਲੋਂ ਸਖ਼ਤ ਬਣਾ ਸਕਦੇ ਹੋ। ਬੰਦ ਉਸ ਤੋਂ ਬਚਾਉਂਦਾ ਹੈ ਜੋ ਜਾਣਬੁੱਝ ਕੇ ਜਾਂਚ ਨੂੰ ਫੇਲ੍ਹ ਕਰਵਾਏ, ਰੁਕਾਵਟ ਦੌਰਾਨ ਕੰਮ ਰੱਦ ਕਰਨ ਦੀ ਕੀਮਤ ਉੱਤੇ।",
+        "options": {
+          "open": "ਖੁੱਲ੍ਹਾ: ਕਾਰਵਾਈ ਨੂੰ ਲੰਘਣ ਦਿਓ",
+          "closed": "ਬੰਦ: ਕਾਰਵਾਈ ਰੱਦ ਕਰੋ"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "ਜਦੋਂ ਟੂਲ-ਕਾਲ ਜਾਂਚ ਟੁੱਟ ਜਾਵੇ",
+          "description": "ਜੋਖਮ ਵਾਲੀਆਂ ਟੂਲ ਕਾਲਾਂ ਦੀ ਸਮੀਖਿਆ ਕਰਨ ਵਾਲੀ ਜਾਂਚ ਜਦੋਂ ਫ਼ੈਸਲਾ ਨਾ ਦੇ ਸਕੇ ਤਾਂ ਕੀ ਕਰਦੀ ਹੈ। ਵਿਰਸਾ ਉੱਪਰ ਦੀ ਸੁਰੱਖਿਆ ਜਾਂਚ ਸੈਟਿੰਗ ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ।",
+          "help": "ਤੁਸੀਂ ਇਸਨੂੰ ਸਿਰਫ਼ ਪਲੇਟਫ਼ਾਰਮ ਸੈਟਿੰਗ ਨਾਲੋਂ ਸਖ਼ਤ ਬਣਾ ਸਕਦੇ ਹੋ। ਜੇ ਜਾਂਚ ਫੇਲ੍ਹ ਹੋ ਜਾਵੇ ਤਾਂ ਬੰਦ ਟੂਲ ਕਾਲ ਨੂੰ ਰੱਦ ਕਰਦਾ ਹੈ।",
+          "options": {
+            "open": "ਖੁੱਲ੍ਹਾ: ਟੂਲ ਕਾਲ ਨੂੰ ਲੰਘਣ ਦਿਓ",
+            "inherit": "ਸੁਰੱਖਿਆ-ਜਾਂਚ ਸੈਟਿੰਗ ਦੀ ਪਾਲਣਾ ਕਰੋ",
+            "closed": "ਬੰਦ: ਟੂਲ ਕਾਲ ਰੱਦ ਕਰੋ"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "ਰੋਕਣ ਵਾਲਾ ਜ਼ਹਿਰੀਲਾਪਣ ਸਕੋਰ",
+          "description": "ਜੱਜ ਦੇ 0 ਤੋਂ 100 ਜ਼ਹਿਰੀਲਾਪਣ ਪੈਮਾਨੇ ਉੱਤੇ ਇਸ ਜਾਂ ਇਸ ਤੋਂ ਵੱਧ ਸਕੋਰ ਵਾਲੀ ਸਮੱਗਰੀ ਰੋਕੀ ਜਾਂਦੀ ਹੈ। ਘੱਟ ਸੰਖਿਆ ਵੱਧ ਰੋਕਦੀ ਹੈ।",
+          "help": "ਤੁਸੀਂ ਇਸਨੂੰ ਸਿਰਫ਼ ਘਟਾ ਸਕਦੇ ਹੋ, ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲ ਤੋਂ ਉੱਪਰ ਕਦੇ ਨਹੀਂ ਵਧਾ ਸਕਦੇ। ਬਹੁਤ ਘੱਟ ਮੁੱਲ ਆਮ ਸਿੱਧੀ ਸ਼ਬਦਾਵਲੀ ਨੂੰ ਵੀ ਰੋਕਦਾ ਹੈ।"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "ਜੇਲ੍ਹਬ੍ਰੇਕ ਕੋਸ਼ਿਸ਼ਾਂ ਲਈ ਸਕੈਨ ਕੀਤਾ ਟੈਕਸਟ",
+          "description": "ਜੇਲ੍ਹਬ੍ਰੇਕ ਪੈਟਰਨਾਂ ਲਈ ਸੁਨੇਹੇ ਜਾਂ ਜਵਾਬ ਦਾ ਕਿੰਨਾ ਹਿੱਸਾ ਸਕੈਨ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਉਸ ਤੋਂ ਪਰੇ ਦਾ ਟੈਕਸਟ ਸਕੈਨ ਨਹੀਂ ਹੁੰਦਾ।",
+          "help": "ਤੁਸੀਂ ਇਸਨੂੰ ਸਿਰਫ਼ ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲ ਤੋਂ ਉੱਪਰ ਵਧਾ ਸਕਦੇ ਹੋ। ਚੌੜੀ ਵਿੰਡੋ ਪੈਡਿੰਗ ਪਿੱਛੇ ਛੁਪੇ ਹਮਲਿਆਂ ਨੂੰ ਰੋਕਦੀ ਹੈ, ਥੋੜ੍ਹੀ ਵੱਧ ਪ੍ਰੋਸੈਸਿੰਗ ਦੀ ਕੀਮਤ ਉੱਤੇ।"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "ਸੁਰੱਖਿਆ ਜੱਜ ਨੂੰ ਵਿਖਾਇਆ ਟੈਕਸਟ",
+          "description": "ਜਾਂਚੇ ਟੈਕਸਟ ਦਾ ਕਿੰਨਾ ਹਿੱਸਾ AI ਸੁਰੱਖਿਆ ਜੱਜ ਪੜ੍ਹਦੇ ਹਨ। ਉਸ ਤੋਂ ਪਰੇ ਦੇ ਟੈਕਸਟ ਦਾ ਫ਼ੈਸਲਾ ਨਹੀਂ ਹੁੰਦਾ।",
+          "help": "ਤੁਸੀਂ ਇਸਨੂੰ ਸਿਰਫ਼ ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲ ਤੋਂ ਉੱਪਰ ਵਧਾ ਸਕਦੇ ਹੋ। ਵਧਾਉਣ ਨਾਲ ਲੰਬੇ ਟੂਲ ਨਤੀਜਿਆਂ ਦਾ ਪੂਰਾ ਫ਼ੈਸਲਾ ਹੁੰਦਾ ਹੈ ਪਰ ਹਰ ਜੱਜ ਕਾਲ ਵੱਡੀ ਹੋ ਜਾਂਦੀ ਹੈ।"
+        }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "ਨਿਗਰਾਨੀ ਅਧੀਨ ਏਜੰਟ ਅਤੇ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲ",
+          "description": "ਕੀ ਨਿਗਰਾਨੀ ਅਧੀਨ ਖੁਦਮੁਖਤਿਆਰੀ ਪੱਧਰ ਵਾਲਾ ਏਜੰਟ ਖੋਜ ਜਾਂ ਲੁੱਕਅੱਪ ਵਰਗੇ ਸਿਰਫ਼ ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲ ਤੋਂ ਪਹਿਲਾਂ ਵੀ ਤੁਹਾਨੂੰ ਪੁੱਛਦਾ ਹੈ। ਲਿਖਣਾ, ਭੇਜਣਾ ਅਤੇ ਉਹ ਟੂਲ ਜਿਨ੍ਹਾਂ ਨੂੰ ਪਲੇਟਫਾਰਮ ਨੇ ਸ਼੍ਰੇਣੀਬੱਧ ਨਹੀਂ ਕੀਤਾ, ਹਮੇਸ਼ਾ ਪੁੱਛਦੇ ਹਨ।",
+          "help": "ਤੁਸੀਂ ਇਸਨੂੰ ਸਿਰਫ਼ ਪਲੇਟਫਾਰਮ ਦੀ ਸੈਟਿੰਗ ਨਾਲੋਂ ਵੱਧ ਸਖ਼ਤ ਕਰ ਸਕਦੇ ਹੋ। ਹਰ ਵਾਰ ਪੁੱਛਣਾ ਸਭ ਤੋਂ ਸੁਰੱਖਿਅਤ ਚੋਣ ਹੈ; ਸਿਰਫ਼-ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲਾਂ ਨੂੰ ਚੱਲਣ ਦੇਣ ਨਾਲ ਇੱਕ ਸਵਾਲ ਘੱਟ ਹੁੰਦਾ ਹੈ, ਪਰ ਅਣਕਿਆਸੀ ਖੋਜ ਨੂੰ ਰੋਕਣ ਦਾ ਇੱਕ ਮੌਕਾ ਵੀ ਚਲਾ ਜਾਂਦਾ ਹੈ। ਜੋ ਏਜੰਟ ਨਿੱਜੀ ਡਾਟਾ ਪੜ੍ਹ ਸਕਦਾ ਹੈ, ਅਵਿਸ਼ਵਾਸਯੋਗ ਸਮੱਗਰੀ ਲੈ ਸਕਦਾ ਹੈ ਅਤੇ ਡਾਟਾ ਬਾਹਰ ਭੇਜ ਸਕਦਾ ਹੈ, ਉਸ ਤੋਂ ਇਸ ਸੈਟਿੰਗ ਦੇ ਬਾਵਜੂਦ ਹਰ ਕਾਲ ’ਤੇ ਪੁੱਛਿਆ ਜਾਂਦਾ ਹੈ।",
+          "options": {
+            "auto-allow": "ਸਿਰਫ਼-ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲਾਂ ਨੂੰ ਬਿਨਾਂ ਪੁੱਛੇ ਚੱਲਣ ਦਿਓ",
+            "gate": "ਹਰ ਟੂਲ ਕਾਲ ਤੋਂ ਪਹਿਲਾਂ ਪੁੱਛੋ"
+          }
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI ਜੱਜ ਲਈ ਮਾਡਲ",
+          "description": "ਮੁਲਾਂਕਣ ਰਨਾਂ ਦਾ ਫ਼ੈਸਲਾ ਕਰਨ ਲਈ ਵਰਤਿਆ ਜਾਂਦਾ ਮਾਡਲ। ਪਲੇਟਫ਼ਾਰਮ ਨੂੰ ਉਸ ਵਿੱਚੋਂ ਚੁਣਨ ਦੇਣ ਲਈ ਖਾਲੀ ਛੱਡੋ ਜੋ ਤੁਹਾਡਾ ਵਰਕਸਪੇਸ ਪਹਿਲਾਂ ਹੀ ਵਰਤਦਾ ਹੈ।",
+          "help": "ਵੱਧ ਭਰੋਸੇਯੋਗ ਗ੍ਰੇਡਾਂ ਲਈ ਵੱਧ ਸਮਰੱਥ ਮਾਡਲ ਜਾਂ ਲਾਗਤ ਬਚਾਉਣ ਲਈ ਸਸਤਾ ਮਾਡਲ ਵਰਤੋ। ਮਾਡਲ ਤੁਹਾਡੇ ਜੁੜੇ ਪ੍ਰਦਾਤਾ ਉੱਤੇ ਉਪਲਬਧ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।"
+        },
+        "callTimeoutSeconds": {
+          "label": "ਹਰ ਜੱਜ ਕਾਲ ਲਈ ਵੱਧ ਤੋਂ ਵੱਧ ਸਮਾਂ",
+          "description": "ਇੱਕ ਜੱਜ ਕਾਲ ਫੇਲ੍ਹ ਗਿਣੀ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿੰਨਾ ਸਮਾਂ ਲੈ ਸਕਦੀ ਹੈ।",
+          "help": "ਜੇ ਹੌਲੀ ਮਾਡਲ ਅਕਸਰ ਟਾਈਮਆਊਟ ਹੁੰਦਾ ਹੈ ਤਾਂ ਵਧਾਓ; ਫੇਲ੍ਹ ਕਾਲਾਂ ਮੁਲਾਂਕਣ ਨਤੀਜਿਆਂ ਨੂੰ ਅਧੂਰਾ ਬਣਾਉਂਦੀਆਂ ਹਨ।"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "ਹਰ ਟੈਸਟ ਕੇਸ ਲਈ ਦੁਹਰਾਓ",
+          "description": "ਜਦੋਂ ਰਨ ਨਾ ਦੱਸੇ ਤਾਂ ਹਰ ਟੈਸਟ ਕੇਸ ਕਿੰਨੀ ਵਾਰ ਚਲਾਇਆ ਜਾਂਦਾ ਹੈ। ਵੱਧ ਦੁਹਰਾਓ ਵਿਖਾਉਂਦੇ ਹਨ ਕਿ ਏਜੰਟ ਕਿੰਨਾ ਇਕਸਾਰ ਹੈ।",
+          "help": "ਹਰ ਦੁਹਰਾਓ ਰਨ ਦੀ ਲਾਗਤ ਅਤੇ ਸਮੇਂ ਨੂੰ ਗੁਣਾ ਕਰਦਾ ਹੈ।"
+        },
+        "defaultMode": {
+          "label": "ਮੁਲਾਂਕਣ ਕਿਵੇਂ ਚੱਲਦੇ ਹਨ",
+          "description": "ਜਦੋਂ ਰਨ ਜਾਂ ਉਸਦਾ ਡਾਟਾਸੈੱਟ ਨਾ ਦੱਸੇ, ਤਾਂ ਮੁਲਾਂਕਣ ਰਨ ਏਜੰਟ ਨੂੰ ਉਸਦੇ ਟੂਲਾਂ ਸਮੇਤ ਸੁਰੱਖਿਅਤ ਸੈਂਡਬਾਕਸ ਵਿੱਚ ਰੀਪਲੇਅ ਕਰਦਾ ਹੈ (ਪੂਰੀ ਪਾਈਪਲਾਈਨ) ਜਾਂ ਸਿਰਫ਼ ਲਿਖਤ ਵਿੱਚ ਜਵਾਬ ਦਿੰਦਾ ਹੈ (ਤੇਜ਼)।",
+          "help": "ਪੂਰੀ ਪਾਈਪਲਾਈਨ ਉਹ ਪਰਖਦੀ ਹੈ ਜੋ ਤੁਹਾਡੇ ਵਰਤੋਂਕਾਰਾਂ ਨੂੰ ਮਿਲਦਾ ਹੈ, ਟੂਲਾਂ ਦੀ ਵਰਤੋਂ ਸਮੇਤ, ਅਤੇ ਵੱਧ ਖਰਚੀਲੀ ਹੈ। ਇਸ ਵਿੱਚ ਸਿਰਫ਼ ਪੜ੍ਹਨ ਵਾਲੇ ਟੂਲ ਸੱਚਮੁੱਚ ਚੱਲਦੇ ਹਨ; ਜੋ ਕੁਝ ਡਾਟਾ ਬਦਲ ਸਕਦਾ ਹੈ, ਸੁਨੇਹਾ ਭੇਜ ਸਕਦਾ ਹੈ ਜਾਂ ਪੈਸੇ ਖਰਚ ਸਕਦਾ ਹੈ ਉਸਨੂੰ ਸਿਮੂਲੇਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਰਨ ਵਿੱਚ ਸੂਚੀਬੱਧ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਤੇਜ਼ ਸਸਤਾ ਹੈ ਅਤੇ ਟੂਲਾਂ ਦੀ ਵਰਤੋਂ ਬਾਰੇ ਕੁਝ ਨਹੀਂ ਦੱਸਦਾ।",
+          "options": {
+            "full": "ਸੈਂਡਬਾਕਸ ਵਿੱਚ ਪੂਰੀ ਪਾਈਪਲਾਈਨ",
+            "quick": "ਤੇਜ਼: ਸਿਰਫ਼ ਲਿਖਤ ਜਵਾਬ"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "ਵੱਧ ਤੋਂ ਵੱਧ ਸਮਾਂਤਰ ਉਪ-ਕਾਰਜ",
+        "description": "ਇੱਕ ਕੰਮ ਸੌਂਪਣ ਵਾਲੀ ਕਾਲ ਇੱਕੋ ਸਮੇਂ ਕਿੰਨੇ ਉਪ-ਕਾਰਜ ਜਾਂ ਸਹਾਇਕ ਏਜੰਟ ਸ਼ੁਰੂ ਕਰ ਸਕਦੀ ਹੈ। ਵਾਧੂ ਵਾਲਿਆਂ ਨੂੰ ਸੀਮਾ ਤੋਂ ਪਾਰ ਦੱਸਿਆ ਜਾਂਦਾ ਹੈ।",
+        "help": "ਵਿਆਪਕ ਖੋਜ ਕੰਮਾਂ ਲਈ ਵਧਾਓ, ਲਾਗਤ ਅਤੇ ਬੋਝ ਘੱਟ ਰੱਖਣ ਲਈ ਘਟਾਓ।"
+      },
+      "branchTimeoutSeconds": {
+        "label": "ਹਰ ਉਪ-ਕਾਰਜ ਲਈ ਵੱਧ ਤੋਂ ਵੱਧ ਸਮਾਂ",
+        "description": "ਸੌਂਪਿਆ ਗਿਆ ਇੱਕ ਉਪ-ਕਾਰਜ ਟਾਈਮਆਊਟ ਵਜੋਂ ਦੱਸੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿੰਨੀ ਦੇਰ ਚੱਲ ਸਕਦਾ ਹੈ।",
+        "help": "ਹੌਲੀ ਉਪ-ਕਾਰਜਾਂ ਲਈ ਵਧਾਓ। ਲਟਕਿਆ ਉਪ-ਕਾਰਜ ਇਸ ਸਮੇਂ ਤੋਂ ਪਰੇ ਪੂਰੇ ਜਵਾਬ ਨੂੰ ਕਦੇ ਨਹੀਂ ਰੋਕਦਾ।"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "ਹਰ ਨਤੀਜੇ ਲਈ ਖੋਜ ਦੀ ਚੌੜਾਈ",
+          "description": "ਇੱਕ ਗਿਆਨ ਖੋਜ ਅੰਤ ਵਿੱਚ ਵਾਪਸ ਕੀਤੇ ਹਰ ਅੰਸ਼ ਲਈ ਕਿੰਨੇ ਉਮੀਦਵਾਰ ਅੰਸ਼ ਇਕੱਠੇ ਕਰਦੀ ਹੈ।",
+          "help": "ਵੱਧ ਸੰਖਿਆ ਦਰਜਾਬੰਦੀ ਨੂੰ ਚੁਣਨ ਲਈ ਵੱਧ ਦਿੰਦੀ ਹੈ, ਜੋ ਉਦੋਂ ਮਦਦ ਕਰਦਾ ਹੈ ਜਦੋਂ ਕਈ ਦਸਤਾਵੇਜ਼ ਮਿਲਦੇ-ਜੁਲਦੇ ਹੋਣ, ਪਰ ਹਰ ਖੋਜ ਵਿੱਚ ਵੱਧ ਸਮਾਂ ਅਤੇ ਕੰਪਿਊਟ ਲੱਗਦਾ ਹੈ। ਜੇ ਖੋਜਾਂ ਹੌਲੀ ਲੱਗਣ ਤਾਂ ਘਟਾਓ। ਇਹ ਏਜੰਟ ਵੱਲੋਂ ਵੇਖੇ ਅੰਸ਼ਾਂ ਦੀ ਗਿਣਤੀ ਨਹੀਂ ਬਦਲਦਾ।"
+        },
+        "candidatePoolMax": {
+          "label": "ਹਰ ਖੋਜ ਲਈ ਵੱਧ ਤੋਂ ਵੱਧ ਉਮੀਦਵਾਰ",
+          "description": "ਭਾਵੇਂ ਕਿੰਨੇ ਵੀ ਨਤੀਜੇ ਮੰਗੇ ਜਾਣ, ਇੱਕ ਗਿਆਨ ਖੋਜ ਕਿੰਨੇ ਉਮੀਦਵਾਰ ਅੰਸ਼ ਇਕੱਠੇ ਕਰਦੀ ਹੈ ਇਸਦੀ ਉੱਪਰਲੀ ਹੱਦ।",
+          "help": "ਇਹ ਗਤੀ ਅਤੇ ਲਾਗਤ ਦੀ ਰੱਖਿਆ ਕਰਦਾ ਹੈ ਜਦੋਂ ਏਜੰਟ ਇੱਕੋ ਵਾਰ ਬਹੁਤ ਸਾਰੇ ਨਤੀਜੇ ਮੰਗਦਾ ਹੈ। ਇਸਨੂੰ ਸਿਰਫ਼ ਉਦੋਂ ਵਧਾਓ ਜਦੋਂ ਵੱਡੇ ਗਿਆਨ ਭੰਡਾਰਾਂ ਵਿੱਚ ਜਵਾਬ ਸੰਬੰਧਿਤ ਅੰਸ਼ ਖੁੰਝਾ ਰਹੇ ਹੋਣ।"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "ਘੱਟ ਪਰਖੇ ਵਿਕਲਪ ਅਜ਼ਮਾਉਣ ਦੀ ਇੱਛਾ",
+          "description": "ਭਰੋਸਾ-ਸੀਮਾ ਵਿਧੀ ਵਰਤਣ ਵਾਲੀ ਸਿੱਖਣ ਨੀਤੀ ਉਹਨਾਂ ਵਿਕਲਪਾਂ ਨੂੰ ਕਿੰਨੀ ਤਰਜੀਹ ਦਿੰਦੀ ਹੈ ਜੋ ਉਸਨੇ ਘੱਟ ਵਾਰ ਅਜ਼ਮਾਏ ਹਨ।",
+          "help": "ਸਿਫ਼ਰ ਹਮੇਸ਼ਾ ਹੁਣ ਤੱਕ ਦੀ ਸਭ ਤੋਂ ਵਧੀਆ ਔਸਤ ਵਾਲਾ ਵਿਕਲਪ ਚੁਣਦਾ ਹੈ। ਉੱਚੇ ਮੁੱਲ ਟਿਕਣ ਤੋਂ ਪਹਿਲਾਂ ਹੋਰ ਵਿਕਲਪ ਲੰਬੇ ਸਮੇਂ ਤੱਕ ਅਜ਼ਮਾਉਂਦੇ ਰਹਿੰਦੇ ਹਨ। ਡਿਫ਼ਾਲਟ ਪਾਠ-ਪੁਸਤਕ ਵਾਲਾ ਸੰਤੁਲਨ ਹੈ। ਸਿਰਫ਼ ਉਹ ਨੀਤੀਆਂ ਪ੍ਰਭਾਵਿਤ ਹੁੰਦੀਆਂ ਹਨ ਜੋ ਇਹ ਵਿਧੀ ਵਰਤਦੀਆਂ ਹਨ।"
+        },
+        "defaultExplorationRate": {
+          "label": "ਨਵੀਆਂ ਨੀਤੀਆਂ ਲਈ ਸ਼ੁਰੂਆਤੀ ਖੋਜ-ਦਰ",
+          "description": "ਨਵੀਂ ਬਣਾਈ ਸਿੱਖਣ ਨੀਤੀ ਬੇਤਰਤੀਬ ਵਿਕਲਪ ਅਜ਼ਮਾਉਣ ਵਿੱਚ ਟਰਨਾਂ ਦਾ ਕਿੰਨਾ ਹਿੱਸਾ ਲਾਉਂਦੀ ਹੈ।",
+          "help": "ਇਹ ਹੁਣ ਤੋਂ ਬਣਾਈਆਂ ਜਾਣ ਵਾਲੀਆਂ ਨੀਤੀਆਂ ਦਾ ਸ਼ੁਰੂਆਤੀ ਬਿੰਦੂ ਹੀ ਸੈੱਟ ਕਰਦਾ ਹੈ। ਮੌਜੂਦਾ ਨੀਤੀਆਂ ਆਪਣੀ ਦਰ ਰੱਖਦੀਆਂ ਹਨ, ਜੋ ਤੁਸੀਂ ਉੱਥੇ ਹਰ ਏਜੰਟ ਲਈ ਬਦਲਦੇ ਹੋ ਜਿੱਥੇ ਨੀਤੀ ਦਾ ਪ੍ਰਬੰਧ ਹੁੰਦਾ ਹੈ। ਸਿਫ਼ਰ ਦਾ ਮਤਲਬ ਹੈ ਨਵੀਂ ਨੀਤੀ ਸ਼ੁਰੂ ਵਿੱਚ ਖੋਜ ਨਹੀਂ ਕਰਦੀ।"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "ਪ੍ਰਦਾਤਾ ਵੱਲੋਂ ਕੁੰਜੀ ਠੁਕਰਾਉਣ ਤੋਂ ਬਾਅਦ ਵਿਰਾਮ",
+          "description": "ਪ੍ਰਦਾਤਾ ਵੱਲੋਂ ਜੁੜੀ ਪ੍ਰਦਾਤਾ ਕੁੰਜੀ ਠੁਕਰਾਉਣ ਤੋਂ ਬਾਅਦ ਬੈਕਗ੍ਰਾਊਂਡ ਕੰਮ ਉਸਨੂੰ ਕਿੰਨੀ ਦੇਰ ਛੱਡ ਦਿੰਦਾ ਹੈ।",
+          "help": "ਵਿਰਾਮ ਦੌਰਾਨ, ਨਿਰਧਾਰਤ ਅਤੇ ਆਟੋਮੈਟਿਕ ਜੌਬ ਲਗਾਤਾਰ ਫੇਲ੍ਹ ਹੋ ਰਹੀ ਕੁੰਜੀ ਨੂੰ ਕਾਲ ਕਰਨ ਦੀ ਬਜਾਏ ਕਿਸੇ ਹੋਰ ਜੁੜੇ ਪ੍ਰਦਾਤਾ ਨੂੰ ਵਰਤਦੇ ਹਨ, ਜਾਂ ਉਡੀਕ ਕਰਦੇ ਹਨ। ਚੈਟ ਕਰਨ ਵਾਲੇ ਲੋਕ ਕਦੇ ਬਲੌਕ ਨਹੀਂ ਹੁੰਦੇ ਅਤੇ ਹਮੇਸ਼ਾ ਪ੍ਰਦਾਤਾ ਦੀ ਅਸਲੀ ਗਲਤੀ ਵੇਖਦੇ ਹਨ। ਵਿਰਾਮ ਖਤਮ ਹੋਣ ਉੱਤੇ, ਇਹ ਜਾਂਚਣ ਲਈ ਇੱਕ ਕਾਲ ਲੰਘਣ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ ਕਿ ਕੁੰਜੀ ਠੀਕ ਹੋਈ ਜਾਂ ਨਹੀਂ। ਸਿਫ਼ਰ ਵਿਰਾਮ ਬੰਦ ਕਰ ਦਿੰਦਾ ਹੈ।"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "ਪ੍ਰਸ਼ਾਸਨ",
+    "title": "ਰਨਟਾਈਮ ਸੈਟਿੰਗਾਂ",
+    "subtitle": "ਇਸ ਵਰਕਸਪੇਸ ਵਿੱਚ ਏਜੰਟ ਕਿਵੇਂ ਵਿਹਾਰ ਕਰਦੇ ਹਨ ਇਸਨੂੰ ਸੁਧਾਰੋ: ਸੀਮਾਵਾਂ, ਮਨਜ਼ੂਰੀਆਂ, ਗੁਣਵੱਤਾ ਜਾਂਚਾਂ, ਗਾਰਡਰੇਲ, ਮੈਮੋਰੀ ਅਤੇ ਮਾਡਲ। ਜਿੱਥੇ ਆਗਿਆ ਹੋਵੇ ਏਜੰਟ ਦਾ ਮਾਲਕ ਅਜੇ ਵੀ ਇੱਕ ਏਜੰਟ ਲਈ ਸੈਟਿੰਗ ਓਵਰਰਾਈਡ ਕਰ ਸਕਦਾ ਹੈ।",
+    "docsLink": "ਮਦਦ ਅਤੇ ਦਸਤਾਵੇਜ਼",
+    "tabs": {
+      "label": "ਰਨਟਾਈਮ ਸੈਟਿੰਗਾਂ ਦੇ ਦ੍ਰਿਸ਼",
+      "settings": "ਸੈਟਿੰਗਾਂ",
+      "history": "ਬਦਲਾਅ ਇਤਿਹਾਸ"
+    },
+    "readOnly": {
+      "title": "ਸਿਰਫ਼ ਵੇਖੋ",
+      "body": "ਸਿਰਫ਼ ਵਰਕਸਪੇਸ ਪ੍ਰਸ਼ਾਸਕ ਇਹ ਸੈਟਿੰਗਾਂ ਬਦਲ ਸਕਦੇ ਹਨ। ਤੁਸੀਂ ਹਰ ਸੈਟਿੰਗ ਦਾ ਲਾਗੂ ਮੁੱਲ ਅਤੇ ਉਹ ਕਿੱਥੋਂ ਆਉਂਦਾ ਹੈ ਵੇਖ ਸਕਦੇ ਹੋ।"
+    },
+    "summary": "ਇਸ ਵਰਕਸਪੇਸ ਵਿੱਚ {total} ਸੈਟਿੰਗਾਂ ਵਿੱਚੋਂ {changed} ਬਦਲੀਆਂ ਗਈਆਂ ਹਨ। ਬਾਕੀ ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲ ਵਰਤਦੀਆਂ ਹਨ।",
+    "export": {
+      "button": "ਓਵਰਰਾਈਡ ਨਿਰਯਾਤ ਕਰੋ",
+      "done": "{count} ਵਰਕਸਪੇਸ ਓਵਰਰਾਈਡ ਇੱਕ ਫਾਈਲ ਵਿੱਚ ਨਿਰਯਾਤ ਕੀਤੇ ਗਏ।",
+      "none": "ਨਿਰਯਾਤ ਕਰਨ ਲਈ ਕੁਝ ਨਹੀਂ: ਇਸ ਵਰਕਸਪੇਸ ਨੇ ਕੋਈ ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲੀ।"
+    },
+    "filters": {
+      "changedOnly": "ਸਿਰਫ਼ ਇਸ ਵਰਕਸਪੇਸ ਵਿੱਚ ਬਦਲੇ"
+    },
+    "jump": {
+      "label": "ਕਿਸੇ ਸਮੂਹ ਉੱਤੇ ਜਾਓ"
+    },
+    "anchor": {
+      "unknown": "ਇਸ ਵਰਕਸਪੇਸ ਵਿੱਚ \"{key}\" ਨਾਮ ਦੀ ਕੋਈ ਸੈਟਿੰਗ ਨਹੀਂ ਹੈ। ਸ਼ਾਇਦ ਇਸਦਾ ਨਾਮ ਬਦਲ ਗਿਆ ਹੈ ਜਾਂ ਇਹ ਵਰਕਸਪੇਸ ਪੱਧਰ ਉੱਤੇ ਉਪਲਬਧ ਨਹੀਂ।"
+    },
+    "empty": {
+      "noneChanged": "ਇਸ ਵਰਕਸਪੇਸ ਵਿੱਚ ਹਾਲੇ ਕੋਈ ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲੀ ਗਈ। ਸਭ ਕੁਝ ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲ ਵਰਤਦਾ ਹੈ।"
+    },
+    "risk": {
+      "high": "ਵੱਧ ਜੋਖਮ",
+      "security": "ਸੁਰੱਖਿਆ ਸੈਟਿੰਗ"
+    },
+    "security": {
+      "title": "ਸੁਰੱਖਿਆ ਸੈਟਿੰਗਾਂ",
+      "body": "ਇਹ ਸੈਟਿੰਗਾਂ ਤੁਹਾਡੇ ਵਰਕਸਪੇਸ ਦੀ ਰੱਖਿਆ ਕਰਦੀਆਂ ਹਨ। ਇਹਨਾਂ ਨੂੰ ਸਿਰਫ਼ ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲ ਨਾਲੋਂ ਸਖ਼ਤ ਬਣਾਇਆ ਜਾ ਸਕਦਾ ਹੈ, ਕਦੇ ਕਮਜ਼ੋਰ ਨਹੀਂ। ਹਰ ਬਦਲਾਅ ਲਈ ਕਾਰਨ ਚਾਹੀਦਾ ਹੈ ਅਤੇ ਇਹ ਆਡਿਟ ਲੌਗ ਵਿੱਚ ਦਰਜ ਹੁੰਦਾ ਹੈ।"
+    },
+    "resetGroup": {
+      "count": "ਇਸ ਸਮੂਹ ਵਿੱਚ {count} ਬਦਲੇ",
+      "button": "{group} ਨੂੰ ਵਿਰਸੇ ਵਾਲੇ ਮੁੱਲਾਂ ਉੱਤੇ ਰੀਸੈੱਟ ਕਰੋ",
+      "confirmTitle": "{group} ਨੂੰ ਵਿਰਸੇ ਵਾਲੇ ਮੁੱਲਾਂ ਉੱਤੇ ਰੀਸੈੱਟ ਕਰਨਾ ਹੈ?",
+      "confirmBody": "ਇਹ ਇਸ ਸਮੂਹ ਵਿੱਚ {count} ਵਰਕਸਪੇਸ ਓਵਰਰਾਈਡ ਹਟਾ ਦਿੰਦਾ ਹੈ। ਸੈਟਿੰਗਾਂ ਉਹਨਾਂ ਹਰ ਏਜੰਟ ਲਈ ਤੁਰੰਤ ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲਾਂ ਉੱਤੇ ਮੁੜ ਜਾਂਦੀਆਂ ਹਨ ਜਿਨ੍ਹਾਂ ਦਾ ਆਪਣਾ ਓਵਰਰਾਈਡ ਨਹੀਂ। ਹਰ ਰੀਸੈੱਟ ਆਡਿਟ ਲੌਗ ਵਿੱਚ ਦਰਜ ਹੁੰਦਾ ਹੈ।",
+      "confirm": "ਵਿਰਸੇ ਵਾਲੇ ਮੁੱਲ ਉੱਤੇ ਰੀਸੈੱਟ ਕਰੋ",
+      "cancel": "ਰੱਦ ਕਰੋ",
+      "done": "{count} ਸੈਟਿੰਗਾਂ ਨੂੰ ਉਹਨਾਂ ਦੇ ਵਿਰਸੇ ਵਾਲੇ ਮੁੱਲਾਂ ਉੱਤੇ ਰੀਸੈੱਟ ਕਰੋ।",
+      "partial": "{done} ਸੈਟਿੰਗਾਂ ਰੀਸੈੱਟ ਹੋਈਆਂ; {failed} ਰੀਸੈੱਟ ਨਹੀਂ ਹੋ ਸਕੀਆਂ। ਅਸਫਲ ਸੈਟਿੰਗਾਂ ਉੱਤੇ ਸੁਨੇਹੇ ਵੇਖੋ।",
+      "cancelled": "{done} ਸੈਟਿੰਗਾਂ ਰੀਸੈੱਟ ਹੋਈਆਂ। ਜਿਨ੍ਹਾਂ {skipped} ਨੂੰ ਕਾਰਨ ਚਾਹੀਦਾ ਸੀ ਉਹ ਜਿਵੇਂ ਸਨ ਉਵੇਂ ਹੀ ਛੱਡ ਦਿੱਤੀਆਂ ਗਈਆਂ।"
+    },
+    "import": {
+      "button": "ਓਵਰਰਾਈਡ ਆਯਾਤ ਕਰੋ",
+      "title": "ਵਰਕਸਪੇਸ ਓਵਰਰਾਈਡ ਆਯਾਤ ਕਰੋ",
+      "intro": "ਇਸ ਪੰਨੇ ਤੋਂ ਨਿਰਯਾਤ ਕੀਤੀ ਫਾਈਲ ਚੁਣੋ, ਜਾਂ ਉਸਦੀ ਸਮੱਗਰੀ ਪੇਸਟ ਕਰੋ। ਕੁਝ ਵੀ ਸੰਭਾਲਣ ਤੋਂ ਪਹਿਲਾਂ ਤੁਸੀਂ ਬਿਲਕੁਲ ਵੇਖੋਗੇ ਕਿ ਕੀ ਬਦਲੇਗਾ।",
+      "reviewIntro": "ਸਮੀਖਿਆ ਕਰੋ ਕਿ ਇਹ ਫਾਈਲ ਕੀ ਬਦਲੇਗੀ। ਹਾਲੇ ਕੁਝ ਸੰਭਾਲਿਆ ਨਹੀਂ ਗਿਆ।",
+      "fileLabel": "ਓਵਰਰਾਈਡ ਫਾਈਲ (JSON)",
+      "pasteLabel": "ਜਾਂ ਫਾਈਲ ਦੀ ਸਮੱਗਰੀ ਪੇਸਟ ਕਰੋ",
+      "fileError": {
+        "empty": "ਪਹਿਲਾਂ ਇੱਕ ਫਾਈਲ ਚੁਣੋ ਜਾਂ ਉਸਦੀ ਸਮੱਗਰੀ ਪੇਸਟ ਕਰੋ।",
+        "invalidJson": "ਇਹ ਵੈਧ JSON ਨਹੀਂ ਹੈ। ਜਾਂਚ ਕਰੋ ਕਿ ਪੂਰੀ ਫਾਈਲ ਕਾਪੀ ਹੋਈ ਹੈ।",
+        "wrongFormat": "ਇਹ ਇਸ ਪੰਨੇ ਤੋਂ ਨਿਰਯਾਤ ਕੀਤੀ ਸੈਟਿੰਗ ਓਵਰਰਾਈਡ ਫਾਈਲ ਨਹੀਂ ਹੈ।",
+        "unsupportedVersion": "ਇਹ ਫਾਈਲ ਨਿਰਯਾਤ ਦੇ ਕਿਸੇ ਵੱਖਰੇ ਵਰਜਨ ਨਾਲ ਬਣਾਈ ਗਈ ਸੀ ਅਤੇ ਪੜ੍ਹੀ ਨਹੀਂ ਜਾ ਸਕਦੀ।",
+        "noOverrides": "ਫਾਈਲ ਵਿੱਚ ਓਵਰਰਾਈਡ ਭਾਗ ਨਹੀਂ ਹੈ।",
+        "unreadable": "ਫਾਈਲ ਪੜ੍ਹੀ ਨਹੀਂ ਜਾ ਸਕੀ।"
+      },
+      "summary": "{changes} ਬਦਲਣ ਲਈ, {unchanged} ਪਹਿਲਾਂ ਹੀ ਲਾਗੂ, {problems} ਲਾਗੂ ਨਹੀਂ ਹੋ ਸਕਦੇ।",
+      "changesHeading": "ਬਦਲਾਅ ({count})",
+      "before": "ਹੁਣ:",
+      "after": "ਆਯਾਤ ਤੋਂ ਬਾਅਦ:",
+      "resetMissing": "ਫਾਈਲ ਵਿੱਚ ਨਾ ਹੋਣ ਵਾਲੇ ਵਰਕਸਪੇਸ ਓਵਰਰਾਈਡ ਵੀ ਹਟਾਓ",
+      "resetMissingHelp": "ਇੱਥੇ ਬਦਲੀਆਂ ਪਰ ਫਾਈਲ ਵਿੱਚ ਨਾ ਹੋਣ ਵਾਲੀਆਂ ਸੈਟਿੰਗਾਂ ਪਲੇਟਫ਼ਾਰਮ ਮੁੱਲ ਉੱਤੇ ਮੁੜ ਜਾਂਦੀਆਂ ਹਨ। ਸਿਰਫ਼ ਜੋੜਨ ਜਾਂ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਇਸਨੂੰ ਬੰਦ ਰੱਖੋ।",
+      "resetsHeading": "ਹਟਾਉਣ ਵਾਲੇ ਓਵਰਰਾਈਡ ({count})",
+      "resetFrom": "ਹੁਣ {value}; ਵਿਰਸੇ ਵਾਲੇ ਮੁੱਲ ਉੱਤੇ ਮੁੜ ਜਾਂਦੀ ਹੈ।",
+      "problemsHeading": "ਲਾਗੂ ਨਹੀਂ ਹੋ ਸਕਦੇ ({count})",
+      "problem": {
+        "unknownKey": "ਇਸ ਕੁੰਜੀ ਵਾਲੀ ਕੋਈ ਸੈਟਿੰਗ ਨਹੀਂ।",
+        "notWorkspaceSetting": "ਇਹ ਸੈਟਿੰਗ ਪੂਰੇ ਵਰਕਸਪੇਸ ਲਈ ਨਹੀਂ ਬਦਲੀ ਜਾ ਸਕਦੀ।",
+        "locked": "ਪਲੇਟਫ਼ਾਰਮ ਆਪਰੇਟਰ ਨੇ ਇਹ ਸੈਟਿੰਗ ਪਿੰਨ ਕੀਤੀ ਹੈ, ਇਸ ਲਈ ਇਹ ਬਦਲੀ ਨਹੀਂ ਜਾ ਸਕਦੀ।",
+        "wrongType": "ਇਸ ਸੈਟਿੰਗ ਲਈ ਮੁੱਲ ਦੀ ਕਿਸਮ ਗਲਤ ਹੈ।",
+        "required": "ਇੱਕ ਮੁੱਲ ਲੋੜੀਂਦਾ ਹੈ।",
+        "notNumber": "ਮੁੱਲ ਇੱਕ ਸੰਖਿਆ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।",
+        "notInteger": "ਮੁੱਲ ਇੱਕ ਪੂਰਨ ਅੰਕ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।",
+        "belowMin": "ਮੁੱਲ ਬਹੁਤ ਘੱਟ ਹੈ। ਘੱਟੋ-ਘੱਟ {min} ਹੈ।",
+        "aboveMax": "ਮੁੱਲ ਬਹੁਤ ਵੱਧ ਹੈ। ਵੱਧ ਤੋਂ ਵੱਧ {max} ਹੈ।",
+        "notAllowed": "ਇਹ ਆਗਿਆ ਪ੍ਰਾਪਤ ਵਿਕਲਪਾਂ ਵਿੱਚੋਂ ਨਹੀਂ ਹੈ।",
+        "tooShort": "ਟੈਕਸਟ ਬਹੁਤ ਛੋਟਾ ਹੈ। ਘੱਟੋ-ਘੱਟ ਲੰਬਾਈ {min} ਹੈ।",
+        "tooLong": "ਟੈਕਸਟ ਬਹੁਤ ਲੰਬਾ ਹੈ। ਵੱਧ ਤੋਂ ਵੱਧ ਲੰਬਾਈ {max} ਹੈ।",
+        "precision": "ਮੁੱਲ ਇਸ ਸੈਟਿੰਗ ਦੀ ਆਗਿਆ ਨਾਲੋਂ ਵੱਧ ਸਟੀਕ ਹੈ।"
+      },
+      "nothing": "ਇਸ ਫਾਈਲ ਵਿੱਚ ਕੁਝ ਵੀ ਕਿਸੇ ਸੈਟਿੰਗ ਨੂੰ ਨਹੀਂ ਬਦਲੇਗਾ।",
+      "reasonNote": "ਇਹਨਾਂ ਸੈਟਿੰਗਾਂ ਵਿੱਚੋਂ ਕੁਝ ਵੱਧ ਜੋਖਮ ਵਾਲੀਆਂ ਹਨ। ਲਾਗੂ ਕਰਨ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਇੱਕ ਕਾਰਨ ਪੁੱਛਿਆ ਜਾਵੇਗਾ ਜੋ ਆਡਿਟ ਲੌਗ ਵਿੱਚ ਦਰਜ ਹੁੰਦਾ ਹੈ।",
+      "back": "ਪਿੱਛੇ",
+      "cancel": "ਰੱਦ ਕਰੋ",
+      "review": "ਬਦਲਾਵਾਂ ਦੀ ਸਮੀਖਿਆ ਕਰੋ",
+      "apply": "{count} ਬਦਲਾਅ ਲਾਗੂ ਕਰੋ",
+      "cancelled": "ਆਯਾਤ ਰੱਦ ਕੀਤਾ ਗਿਆ। ਕੋਈ ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲੀ ਗਈ।",
+      "done": "ਆਯਾਤ ਪੂਰਾ ਹੋਇਆ: {applied} ਸੈਟਿੰਗਾਂ ਅੱਪਡੇਟ ਹੋਈਆਂ।",
+      "donePartial": "ਆਯਾਤ ਅੰਸ਼ਕ ਤੌਰ ਉੱਤੇ ਪੂਰਾ ਹੋਇਆ: {applied} ਸੈਟਿੰਗਾਂ ਅੱਪਡੇਟ ਹੋਈਆਂ, {failed} ਲਾਗੂ ਨਹੀਂ ਹੋ ਸਕੀਆਂ। ਸਮੀਖਿਆ ਵਿਖਾਉਂਦੀ ਹੈ ਕਿ ਹਾਲੇ ਕੀ ਬਾਕੀ ਹੈ।"
+    },
+    "history": {
+      "adminOnly": "ਵਰਕਸਪੇਸ ਸੈਟਿੰਗਾਂ ਦਾ ਬਦਲਾਅ ਇਤਿਹਾਸ ਸਿਰਫ਼ ਵਰਕਸਪੇਸ ਪ੍ਰਸ਼ਾਸਕਾਂ ਨੂੰ ਦਿਸਦਾ ਹੈ।",
+      "loading": "ਬਦਲਾਅ ਇਤਿਹਾਸ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ",
+      "partial": "{count} ਸੈਟਿੰਗਾਂ ਦਾ ਇਤਿਹਾਸ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ, ਇਸ ਲਈ ਇਹ ਸੂਚੀ ਅਧੂਰੀ ਹੋ ਸਕਦੀ ਹੈ।",
+      "retry": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+      "search": "ਬਦਲਾਅ ਇਤਿਹਾਸ ਖੋਜੋ",
+      "searchPlaceholder": "ਸੈਟਿੰਗ, ਵਿਅਕਤੀ ਜਾਂ ਕਾਰਨ ਨਾਲ ਖੋਜੋ",
+      "empty": "ਇਸ ਵਰਕਸਪੇਸ ਵਿੱਚ ਹਾਲੇ ਕੋਈ ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲੀ ਗਈ।",
+      "noMatch": "ਕੋਈ ਬਦਲਾਅ ਤੁਹਾਡੀ ਖੋਜ ਨਾਲ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ।",
+      "count": "{total} ਬਦਲਾਵਾਂ ਵਿੱਚੋਂ {shown} ਵਿਖਾ ਰਹੇ ਹਾਂ, ਨਵਾਂ ਪਹਿਲਾਂ।",
+      "tableLabel": "ਵਰਕਸਪੇਸ ਸੈਟਿੰਗਾਂ ਦਾ ਬਦਲਾਅ ਇਤਿਹਾਸ",
+      "when": "ਕਦੋਂ",
+      "setting": "ਸੈਟਿੰਗ",
+      "change": "ਬਦਲੋ",
+      "by": "ਬਦਲਣ ਵਾਲਾ",
+      "reason": "ਕਾਰਨ",
+      "before": "ਪਹਿਲਾਂ:",
+      "after": "ਬਾਅਦ:",
+      "inherited": "ਵਿਰਸੇ ਵਾਲਾ ਮੁੱਲ",
+      "unknownActor": "ਅਣਜਾਣ",
+      "noReason": "ਕੋਈ ਕਾਰਨ ਨਹੀਂ ਦਿੱਤਾ ਗਿਆ",
+      "showMore": "ਹੋਰ ਵਿਖਾਓ",
+      "scope": "ਪੱਧਰ",
+      "scopeWorkspace": "ਵਰਕਸਪੇਸ",
+      "scopeAgent": "ਏਜੰਟ {id}",
+      "scopeFilter": "ਤਬਦੀਲੀਆਂ ਇਸ ਪੱਧਰ ’ਤੇ ਦਿਖਾਓ",
+      "filterAll": "ਸਾਰੇ ਪੱਧਰ",
+      "filterWorkspace": "ਸਿਰਫ਼ ਵਰਕਸਪੇਸ",
+      "filterAgents": "ਸਿਰਫ਼ ਏਜੰਟ",
+      "searchLoadedOnly": "ਖੋਜ ਹੁਣ ਤੱਕ ਲੋਡ ਹੋਈਆਂ ਤਬਦੀਲੀਆਂ ਨੂੰ ਕਵਰ ਕਰਦੀ ਹੈ।",
+      "loadError": "ਤਬਦੀਲੀ ਦਾ ਇਤਿਹਾਸ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ। {message}",
+      "moreFailed": "ਹੋਰ ਤਬਦੀਲੀਆਂ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀਆਂ। {message}",
+      "loadingMore": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ"
+    }
+  },
+  "agentBehavior": {
+    "title": "ਵਿਹਾਰ ਅਤੇ ਸੀਮਾਵਾਂ",
+    "intro": "ਕੰਟਰੋਲ ਕਰੋ ਕਿ ਇਹ ਏਜੰਟ ਇੱਕ ਟਰਨ ਵਿੱਚ ਕਿੰਨੀ ਦੂਰ ਜਾ ਸਕਦਾ ਹੈ: ਕਿੰਨੇ ਟੂਲ ਕਾਲ ਕਰ ਸਕਦਾ ਹੈ, ਕਿੰਨੀ ਦੇਰ ਚੱਲ ਸਕਦਾ ਹੈ ਅਤੇ ਕਿੰਨਾ ਵਾਪਸ ਪੜ੍ਹਦਾ ਹੈ। ਜੋ ਤੁਸੀਂ ਇੱਥੇ ਨਹੀਂ ਬਦਲਦੇ ਉਹ ਤੁਹਾਡੇ ਵਰਕਸਪੇਸ ਤੋਂ ਵਿਰਸੇ ਵਿੱਚ ਆਉਂਦਾ ਹੈ।",
+    "saveFirst": "ਪਹਿਲਾਂ ਏਜੰਟ ਨੂੰ ਸੰਭਾਲੋ। ਇਸਦਾ ਵਿਹਾਰ ਅਤੇ ਸੀਮਾਵਾਂ ਇਸਦੇ ਬਣਨ ਤੋਂ ਬਾਅਦ ਸੈੱਟ ਕੀਤੀਆਂ ਜਾ ਸਕਦੀਆਂ ਹਨ।",
+    "pickAgent": "ਇਸਦਾ ਵਿਹਾਰ ਅਤੇ ਸੀਮਾਵਾਂ ਟੈਬ ਖੋਲ੍ਹਣ ਲਈ ਹੇਠਾਂ ਇੱਕ ਏਜੰਟ ਚੁਣੋ।",
+    "tabs": {
+      "label": "ਏਜੰਟ ਸੰਰਚਨਾ",
+      "setup": "ਸੈੱਟਅੱਪ",
+      "behavior": "ਵਿਹਾਰ ਅਤੇ ਸੀਮਾਵਾਂ",
+      "unsaved": "ਨਾ ਸੰਭਾਲੇ ਬਦਲਾਅ"
+    },
+    "links": {
+      "label": "ਸੰਬੰਧਿਤ ਪੰਨੇ",
+      "tenant": "ਵਰਕਸਪੇਸ ਡਿਫ਼ਾਲਟ ਬਦਲੋ",
+      "playground": "ਪਲੇਗ੍ਰਾਊਂਡ ਵਿੱਚ ਅਜ਼ਮਾਓ",
+      "prompts": "ਇਸ ਏਜੰਟ ਦੇ ਪ੍ਰੋਂਪਟ",
+      "promptsAria": "{name} ਦੇ ਪ੍ਰੋਂਪਟ: ਪ੍ਰੋਂਪਟ ਰਜਿਸਟਰੀ ਇਸ ਏਜੰਟ ’ਤੇ ਖੋਲ੍ਹੋ",
+      "approvals": "ਇਸ ਏਜੰਟ ਦੀਆਂ ਮਨਜ਼ੂਰੀਆਂ",
+      "approvalsAria": "{name} ਦੀਆਂ ਮਨਜ਼ੂਰੀਆਂ: ਇਸ ਏਜੰਟ ਲਈ ਫਿਲਟਰ ਕੀਤੀ ਮਨਜ਼ੂਰੀ ਕਤਾਰ ਖੋਲ੍ਹੋ",
+      "turns": "ਟਰਨ ਟਾਈਮਲਾਈਨ",
+      "turnsAria": "{name} ਦੀ ਟਰਨ ਟਾਈਮਲਾਈਨ: ਇਸ ਏਜੰਟ ਲਈ ਟਰਨ ਇੰਸਪੈਕਟਰ ਖੋਲ੍ਹੋ"
+    },
+    "readOnly": {
+      "locked": "ਇਹ ਏਜੰਟ ਸੰਪਾਦਨ ਲਈ ਲਾਕ ਹੈ, ਇਸ ਲਈ ਇਹ ਮੁੱਲ ਸਿਰਫ਼-ਪੜ੍ਹਨ ਲਈ ਹਨ।",
+      "access": "ਤੁਸੀਂ ਇਹ ਮੁੱਲ ਵੇਖ ਸਕਦੇ ਹੋ ਪਰ ਇਸ ਏਜੰਟ ਤੱਕ ਤੁਹਾਡੀ ਪਹੁੰਚ ਉਹਨਾਂ ਨੂੰ ਬਦਲਣ ਦੀ ਆਗਿਆ ਨਹੀਂ ਦਿੰਦੀ।"
+    },
+    "unsaved": "ਇਸ ਟੈਬ ਵਿੱਚ ਤੁਹਾਡੇ ਨਾ ਸੰਭਾਲੇ ਬਦਲਾਅ ਹਨ। ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਹੇਠਾਂ ਉਹਨਾਂ ਨੂੰ ਸੰਭਾਲੋ ਜਾਂ ਰੱਦ ਕਰੋ।",
+    "inheritNote": "ਹਰ ਸੈਟਿੰਗ ਵਿਖਾਉਂਦੀ ਹੈ ਕਿ ਉਸਦਾ ਮੁੱਲ ਕਿੱਥੋਂ ਆਉਂਦਾ ਹੈ। ਇੱਥੇ ਇੱਕ ਨੂੰ ਬਦਲਣਾ ਇਸਨੂੰ ਸਿਰਫ਼ ਇਸ ਏਜੰਟ ਲਈ ਓਵਰਰਾਈਡ ਕਰਦਾ ਹੈ; ਵਰਕਸਪੇਸ ਦਾ ਮੁੱਲ ਮੁੜ ਵਿਰਸੇ ਵਿੱਚ ਲੈਣ ਲਈ ਰੀਸੈੱਟ ਕਰੋ।",
+    "others": {
+      "title": "ਇਸ ਏਜੰਟ ਲਈ ਹੋਰ ਨਿਯੰਤਰਣ",
+      "intro": "ਇਹ ਨਿਯੰਤਰਣ ਉੱਪਰ ਦੀਆਂ ਸੈਟਿੰਗਾਂ ਦਾ ਹਿੱਸਾ ਨਹੀਂ ਹਨ, ਇਸ ਲਈ ਇਹ ਸੈੱਟਅੱਪ ਟੈਬ ਉੱਤੇ ਰਹਿੰਦੇ ਹਨ।",
+      "generation": "ਜਵਾਬਾਂ ਦੀ ਰਚਨਾਤਮਕਤਾ ਅਤੇ ਲੰਬਾਈ (ਤਾਪਮਾਨ, top-p, ਵੱਧ ਤੋਂ ਵੱਧ ਟੋਕਨ) ਅਤੇ ਵਾਧੂ ਸੈਂਪਲਿੰਗ ਵਿਕਲਪ।",
+      "generationLink": "ਜਨਰੇਸ਼ਨ ਟਿਊਨਿੰਗ ਉੱਤੇ ਜਾਓ",
+      "autonomy": "ਖੁਦਮੁਖਤਿਆਰੀ ਪੱਧਰ, ਹਰ ਰਨ ਲਈ ਖਰਚ ਸੀਮਾ, ਟੂਲ ਨਿਯਮ ਅਤੇ ਕਦੋਂ ਕਿਸੇ ਵਿਅਕਤੀ ਨੂੰ ਮਨਜ਼ੂਰ ਕਰਨਾ ਪੈਂਦਾ ਹੈ।",
+      "autonomyLink": "ਤਰਕ ਅਤੇ ਖੁਦਮੁਖਤਿਆਰੀ ਉੱਤੇ ਜਾਓ"
+    },
+    "discard": {
+      "title": "ਬਿਨਾਂ ਸੰਭਾਲੇ ਛੱਡਣਾ ਹੈ?",
+      "description": "ਇਸ ਏਜੰਟ ਦੇ ਵਿਹਾਰ ਅਤੇ ਸੀਮਾਵਾਂ ਵਿੱਚ ਤੁਹਾਡੇ ਨਾ ਸੰਭਾਲੇ ਬਦਲਾਅ ਹਨ। ਹੁਣ ਛੱਡੋਗੇ ਤਾਂ ਉਹ ਗੁਆਚ ਜਾਣਗੇ।",
+      "stay": "ਇੱਥੇ ਰਹਿ ਕੇ ਸੰਪਾਦਨ ਜਾਰੀ ਰੱਖੋ",
+      "leave": "ਛੱਡੋ ਅਤੇ ਬਦਲਾਅ ਰੱਦ ਕਰੋ"
+    },
+    "summary": {
+      "title": "ਇਹ ਏਜੰਟ ਹੁਣ ਕਿਵੇਂ ਵਿਹਾਰ ਕਰਦਾ ਹੈ",
+      "subtitle": "ਏਜੰਟ ਦੇ ਆਪਣੇ ਓਵਰਰਾਈਡ, ਤੁਹਾਡੀਆਂ ਵਰਕਸਪੇਸ ਸੈਟਿੰਗਾਂ ਅਤੇ ਪਲੇਟਫ਼ਾਰਮ ਸੈਟਿੰਗਾਂ ਲਾਗੂ ਹੋਣ ਤੋਂ ਬਾਅਦ ਇਸ ਏਜੰਟ ਲਈ ਲਾਗੂ ਮੁੱਲ।",
+      "loading": "ਮੌਜੂਦਾ ਵਿਹਾਰ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ",
+      "error": "ਮੌਜੂਦਾ ਵਿਹਾਰ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ। {message}",
+      "retry": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+      "empty": "ਇਸ ਏਜੰਟ ਲਈ ਹਾਲੇ ਕੋਈ ਵਿਹਾਰ ਸੈਟਿੰਗਾਂ ਉਪਲਬਧ ਨਹੀਂ।",
+      "facts": {
+        "steps": "ਹਰ ਟਰਨ ਵਿੱਚ ਟੂਲ ਕਾਲਾਂ",
+        "turnTimeout": "ਹਰ ਟਰਨ ਲਈ ਸਮਾਂ",
+        "toolTimeout": "ਹਰ ਟੂਲ ਕਾਲ ਲਈ ਸਮਾਂ",
+        "outputCap": "ਰੱਖਿਆ ਟੂਲ ਆਊਟਪੁੱਟ",
+        "continuation": "ਨਿਰੰਤਰਤਾ ਪਾਸ",
+        "approvals": "ਮਨਜ਼ੂਰੀਆਂ",
+        "judge": "ਗੁਣਵੱਤਾ ਜੱਜ ਮਾਡਲ",
+        "model": "ਮਾਡਲ"
+      },
+      "tier": {
+        "SUPERVISED": "ਨਿਗਰਾਨੀ ਅਧੀਨ: ਹਰ ਟੂਲ ਕਾਲ ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਉਡੀਕ ਕਰਦੀ ਹੈ",
+        "SEMI_AUTONOMOUS": "ਅਰਧ-ਖੁਦਮੁਖਤਿਆਰ: ਤੁਹਾਡੇ ਵਰਕਸਪੇਸ ਨਿਯਮ ਤੈਅ ਕਰਦੇ ਹਨ",
+        "FULLY_AUTONOMOUS": "ਪੂਰਾ ਖੁਦਮੁਖਤਿਆਰ: ਟੂਲ ਕਾਲਾਂ ਕਦੇ ਉਡੀਕ ਨਹੀਂ ਕਰਦੀਆਂ"
+      },
+      "approvalResumes": "ਮਨਜ਼ੂਰੀ ਤੋਂ ਬਾਅਦ ਆਪੇ ਜਾਰੀ ਰਹਿੰਦਾ ਹੈ",
+      "approvalStops": "ਮਨਜ਼ੂਰੀ ਤੋਂ ਬਾਅਦ ਨਵੇਂ ਸੁਨੇਹੇ ਦੀ ਉਡੀਕ ਕਰਦਾ ਹੈ",
+      "judgeDefault": "ਪਲੇਟਫ਼ਾਰਮ ਵੱਲੋਂ ਚੁਣਿਆ",
+      "overrides": {
+        "none": "ਇਹ ਏਜੰਟ ਹਰ ਥਾਂ ਤੁਹਾਡੇ ਵਰਕਸਪੇਸ ਦੇ ਮੁੱਲ ਵਰਤਦਾ ਹੈ।",
+        "some": "ਇਸ ਏਜੰਟ ਲਈ ਓਵਰਰਾਈਡ ਕੀਤੀਆਂ ਸੈਟਿੰਗਾਂ: {count}।"
+      }
+    },
+    "impact": {
+      "title": "ਇਸਦਾ ਕੀ ਮਤਲਬ ਹੈ",
+      "steps": "ਇਹ ਏਜੰਟ ਇੱਕ ਟਰਨ ਵਿੱਚ ਵੱਧ ਤੋਂ ਵੱਧ {count} ਟੂਲ ਕਾਲ ਕਰ ਸਕਦਾ ਹੈ। ਉਸ ਤੋਂ ਬਾਅਦ ਇਸਨੂੰ ਜੋ ਇਸ ਕੋਲ ਹੈ ਉਸ ਨਾਲ ਜਵਾਬ ਦੇਣ ਲਈ ਕਿਹਾ ਜਾਂਦਾ ਹੈ।",
+      "stepsTierSupervised": "ਇਹ ਏਜੰਟ ਨਿਗਰਾਨੀ ਅਧੀਨ ਹੈ, ਇਸ ਲਈ ਇਸਦੀ ਅਸਲੀ ਉੱਪਰਲੀ ਹੱਦ ਉਸ ਆਧਾਰ ਅੰਕੜੇ ਤੋਂ ਘੱਟ ਹੈ। ਸਹੀ ਸੰਖਿਆ ਵਰਤਣ ਲਈ ਇਸ ਏਜੰਟ ਲਈ ਆਪਣਾ ਮੁੱਲ ਸੈੱਟ ਕਰੋ।",
+      "stepsTierFull": "ਇਹ ਏਜੰਟ ਪੂਰਾ ਖੁਦਮੁਖਤਿਆਰ ਹੈ, ਇਸ ਲਈ ਇਸਦੀ ਅਸਲੀ ਉੱਪਰਲੀ ਹੱਦ ਉਸ ਆਧਾਰ ਅੰਕੜੇ ਤੋਂ ਵੱਧ ਹੈ। ਸਹੀ ਸੰਖਿਆ ਵਰਤਣ ਲਈ ਇਸ ਏਜੰਟ ਲਈ ਆਪਣਾ ਮੁੱਲ ਸੈੱਟ ਕਰੋ।",
+      "turnTimeout": "ਇੱਕ ਟਰਨ {duration} ਬਾਅਦ ਕੱਟ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।",
+      "turnTimeoutNone": "ਇੱਕ ਟਰਨ ਦੀ ਕੋਈ ਸਮਾਂ ਸੀਮਾ ਨਹੀਂ।",
+      "toolTimeout": "ਇੱਕ ਟੂਲ ਕਾਲ {duration} ਬਾਅਦ ਕੱਟ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ।",
+      "toolTimeoutNone": "ਟੂਲ ਕਾਲ ਦੀ ਕੋਈ ਸਮਾਂ ਸੀਮਾ ਨਹੀਂ।",
+      "outputCap": "{chars} ਤੋਂ ਲੰਬਾ ਟੂਲ ਨਤੀਜਾ ਏਜੰਟ ਦੇ ਪੜ੍ਹਨ ਤੋਂ ਪਹਿਲਾਂ ਛੋਟਾ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।",
+      "continuation": "ਜੇ ਜਵਾਬ ਕੱਟਿਆ ਜਾਵੇ, ਏਜੰਟ ਇਸਨੂੰ ਹੋਰ ਵੱਧ ਤੋਂ ਵੱਧ {count} ਵਾਰ ਜਾਰੀ ਰੱਖ ਸਕਦਾ ਹੈ।",
+      "continuationNone": "ਕੱਟਿਆ ਗਿਆ ਜਵਾਬ ਜਾਰੀ ਨਹੀਂ ਰੱਖਿਆ ਜਾਂਦਾ।",
+      "retrieval": "ਹਰ ਸਵਾਲ ਲਈ ਇਹ ਸਭ ਤੋਂ ਵਧੀਆ {count} ਗਿਆਨ ਮੇਲ ਪੜ੍ਹਦਾ ਹੈ।",
+      "retrievalScored": "ਹਰ ਸਵਾਲ ਲਈ ਇਹ ਸਭ ਤੋਂ ਵਧੀਆ {count} ਗਿਆਨ ਮੇਲ ਪੜ੍ਹਦਾ ਹੈ ਅਤੇ {score} ਤੋਂ ਘੱਟ ਸਕੋਰ ਵਾਲੇ ਮੇਲਾਂ ਨੂੰ ਅਣਡਿੱਠਾ ਕਰਦਾ ਹੈ।",
+      "approvalContinuationOn": "ਜਦੋਂ ਕੋਈ ਵਿਅਕਤੀ ਉਡੀਕ ਕਰ ਰਹੀ ਕਾਰਵਾਈ ਨੂੰ ਮਨਜ਼ੂਰ ਕਰਦਾ ਹੈ, ਏਜੰਟ ਕੰਮ ਆਪ ਪੂਰਾ ਕਰਦਾ ਹੈ।",
+      "approvalContinuationOff": "ਜਦੋਂ ਕੋਈ ਵਿਅਕਤੀ ਉਡੀਕ ਕਰ ਰਹੀ ਕਾਰਵਾਈ ਨੂੰ ਮਨਜ਼ੂਰ ਕਰਦਾ ਹੈ, ਟਰਨ ਖਤਮ ਹੋ ਜਾਂਦਾ ਹੈ ਅਤੇ ਹੱਥੀਂ ਫਾਲੋ-ਅੱਪ ਕਰਨਾ ਪੈਂਦਾ ਹੈ।",
+      "guardClosed": "ਜੇ ਕੋਈ ਸੁਰੱਖਿਆ ਜਾਂਚ ਟੁੱਟ ਜਾਵੇ, ਕਾਰਵਾਈ ਰੱਦ ਕਰ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ।",
+      "guardOpen": "ਜੇ ਕੋਈ ਸੁਰੱਖਿਆ ਜਾਂਚ ਟੁੱਟ ਜਾਵੇ, ਕਾਰਵਾਈ ਨੂੰ ਲੰਘਣ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।",
+      "branches": "ਇੱਕ ਕੰਮ ਸੌਂਪਣ ਵਾਲੀ ਕਾਲ ਇੱਕੋ ਸਮੇਂ ਵੱਧ ਤੋਂ ਵੱਧ {count} ਉਪ-ਕਾਰਜ ਸ਼ੁਰੂ ਕਰ ਸਕਦੀ ਹੈ।"
+    }
+  },
+  "controls": {
+    "eyebrow": "ਮਦਦ",
+    "title": "ਮੈਂ ਕਿੱਥੇ ਕੰਟਰੋਲ ਕਰਾਂ...?",
+    "subtitle": "ਹਰ ਨਿਯੰਤਰਣ ਜੋ ਤੁਹਾਡੇ ਏਜੰਟਾਂ ਦੇ ਵਿਹਾਰ ਨੂੰ ਢਾਲਦਾ ਹੈ, ਅਤੇ ਉਹ ਪੰਨਾ ਜਿੱਥੇ ਉਹ ਹੈ। ਜੋ ਬਦਲਣਾ ਚਾਹੁੰਦੇ ਹੋ ਉਸ ਨਾਲ ਖੋਜੋ।",
+    "breadcrumb": {
+      "label": "ਬ੍ਰੈੱਡਕ੍ਰੰਬ",
+      "console": "ਕੰਸੋਲ",
+      "controls": "ਨਿਯੰਤਰਣ"
+    },
+    "related": {
+      "label": "ਹੋਰ ਨਿਯੰਤਰਣ"
+    },
+    "search": {
+      "label": "ਨਿਯੰਤਰਣ ਖੋਜੋ",
+      "placeholder": "ਉਦਾਹਰਨ: ਟਾਈਮਆਊਟ, ਮਨਜ਼ੂਰੀ, ਪ੍ਰੋਂਪਟ, ਮੈਮੋਰੀ",
+      "count": "{count} ਮੇਲ ਖਾਂਦੇ ਨਿਯੰਤਰਣ",
+      "none": "\"{query}\" ਨਾਲ ਕੁਝ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ। ਛੋਟਾ ਸ਼ਬਦ ਅਜ਼ਮਾਓ।",
+      "noSettings": "ਕੋਈ ਸੈਟਿੰਗ ਤੁਹਾਡੀ ਖੋਜ ਨਾਲ ਮੇਲ ਨਹੀਂ ਖਾਂਦੀ।"
+    },
+    "areasHeading": "ਨਿਯੰਤਰਣ ਖੇਤਰ",
+    "areasIntro": "ਇਹਨਾਂ ਪੰਨਿਆਂ ਵਿੱਚ ਉਹ ਨਿਯੰਤਰਣ ਹਨ ਜੋ ਇੱਕ ਸੰਖਿਆ ਨਹੀਂ ਹਨ: ਹਦਾਇਤਾਂ, ਮਨਜ਼ੂਰੀ ਨਿਯਮ, ਸੁਰੱਖਿਆ ਨਿਯਮ ਅਤੇ ਇਸ ਗੱਲ ਦਾ ਰਿਕਾਰਡ ਕਿ ਟਰਨ ਨੇ ਕੀ ਕੀਤਾ।",
+    "openArea": "ਖੋਲ੍ਹੋ",
+    "needsAccess": "ਇਸ ਪੰਨੇ ਤੱਕ ਪਹੁੰਚ ਲਈ ਕਿਸੇ ਵਰਕਸਪੇਸ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਕਹੋ।",
+    "settingsHeading": "ਹਰ ਰਨਟਾਈਮ ਸੈਟਿੰਗ",
+    "settingsIntro": "ਹਰ ਸੈਟਿੰਗ ਪੂਰੇ ਵਰਕਸਪੇਸ ਲਈ, ਇੱਕ ਏਜੰਟ ਲਈ, ਜਾਂ ਦੋਵਾਂ ਲਈ ਬਦਲੀ ਜਾ ਸਕਦੀ ਹੈ। ਏਜੰਟ ਦਾ ਆਪਣਾ ਮੁੱਲ ਵਰਕਸਪੇਸ ਮੁੱਲ ਉੱਤੇ ਭਾਰੂ ਹੁੰਦਾ ਹੈ। ਸੈਟਿੰਗ ਤੱਕ ਪਹੁੰਚਣ ਲਈ ਕੋਈ ਲਿੰਕ ਚੁਣੋ।",
+    "loading": "ਸੈਟਿੰਗਾਂ ਦੀ ਸੂਚੀ ਲੋਡ ਹੋ ਰਹੀ ਹੈ",
+    "loadFailed": "ਸੈਟਿੰਗਾਂ ਦੀ ਸੂਚੀ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀ। {message}",
+    "retry": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+    "emptyCatalog": "ਇਸ ਵਰਕਸਪੇਸ ਵਿੱਚ ਵਿਖਾਉਣ ਲਈ ਕੋਈ ਰਨਟਾਈਮ ਸੈਟਿੰਗ ਨਹੀਂ।",
+    "changeWorkspace": "ਵਰਕਸਪੇਸ ਲਈ ਬਦਲੋ",
+    "changeAgent": "ਏਜੰਟ ਉੱਤੇ ਬਦਲੋ",
+    "workspaceOnly": "ਸਿਰਫ਼ ਵਰਕਸਪੇਸ-ਵਿਆਪੀ",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "ਏਜੰਟ ਰਨਟਾਈਮ ਸੀਮਾਵਾਂ",
+        "intro": "ਇੱਕ ਟਰਨ ਕਿੰਨਾ ਕੰਮ ਕਰ ਸਕਦਾ ਹੈ: ਟੂਲ ਕਾਲਾਂ, ਸਮਾਂ, ਨਤੀਜੇ ਦਾ ਆਕਾਰ ਅਤੇ ਮੁੜ-ਪ੍ਰਾਪਤੀ।"
+      },
+      "behaviour-settings": {
+        "title": "ਵਿਹਾਰ ਸੈਟਿੰਗਾਂ",
+        "intro": "ਜਵਾਬ ਕਿਵੇਂ ਪੂਰੇ ਅਤੇ ਕੈਸ਼ ਕੀਤੇ ਜਾਂਦੇ ਹਨ, ਮਨਜ਼ੂਰੀਆਂ ਕਿਵੇਂ ਜਾਰੀ ਰਹਿੰਦੀਆਂ ਹਨ, ਸੁਰੱਖਿਆ ਜਾਂਚਾਂ ਕਿਵੇਂ ਵਿਹਾਰ ਕਰਦੀਆਂ ਹਨ, ਅਤੇ ਮੈਮੋਰੀ, ਖੋਜ ਤੇ ਕੰਮ ਸੌਂਪਣਾ ਕਿਵੇਂ ਕੰਮ ਕਰਦੇ ਹਨ।"
+      },
+      "other": {
+        "title": "ਹੋਰ ਸੈਟਿੰਗਾਂ",
+        "intro": "ਉਹ ਸੈਟਿੰਗਾਂ ਜਿਨ੍ਹਾਂ ਦਾ ਆਪਣਾ ਭਾਗ ਨਹੀਂ।"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "ਰਨਟਾਈਮ ਸੈਟਿੰਗਾਂ",
+        "summary": "ਪੂਰੇ ਵਰਕਸਪੇਸ ਲਈ ਸੀਮਾਵਾਂ, ਮਨਜ਼ੂਰੀਆਂ, ਗੁਣਵੱਤਾ ਜਾਂਚਾਂ, ਸੁਰੱਖਿਆ ਸਖ਼ਤੀ, ਮੈਮੋਰੀ ਅਤੇ ਕੰਮ ਸੌਂਪਣਾ।",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers ਸੀਮਾਵਾਂ ਟਾਈਮਆਊਟ ਟੂਲ ਕਦਮ ਮੁੜ-ਕੋਸ਼ਿਸ਼ਾਂ ਕੈਸ਼ ਮੈਮੋਰੀ ਕੰਮ ਸੌਂਪਣਾ ਗੁਣਵੱਤਾ ਜੱਜ ਸੈਟਿੰਗਾਂ ਸੰਖਿਆਵਾਂ"
+      },
+      "prompts": {
+        "title": "ਹਦਾਇਤਾਂ",
+        "summary": "ਉਹ ਪ੍ਰੋਂਪਟ ਜੋ ਪਲੇਟਫ਼ਾਰਮ ਮਾਡਲ ਨੂੰ ਦਿੰਦਾ ਹੈ: ਹਰ ਇੱਕ ਵੇਖੋ, ਵਰਕਸਪੇਸ ਜਾਂ ਏਜੰਟ ਲਈ ਓਵਰਰਾਈਡ ਕਰੋ, ਅਤੇ ਨਤੀਜੇ ਦੀ ਝਲਕ ਵੇਖੋ।",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry ਪ੍ਰੋਂਪਟ ਨਿਰਦੇਸ਼ ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ ਹਦਾਇਤਾਂ ਓਵਰਰਾਈਡ ਝਲਕ ਰਜਿਸਟਰੀ"
+      },
+      "approvals": {
+        "title": "ਮਨਜ਼ੂਰੀਆਂ",
+        "summary": "ਕਿਸੇ ਵਿਅਕਤੀ ਦੀ ਉਡੀਕ ਕਰਦੀਆਂ ਕਾਰਵਾਈਆਂ ਦੀ ਕਤਾਰ, ਕਿਹੜੇ ਟੂਲਾਂ ਨੂੰ ਮਨਜ਼ੂਰੀ ਚਾਹੀਦੀ ਹੈ ਇਸਦੇ ਨਿਯਮ, ਅਤੇ ਤੁਹਾਡੇ ਫ਼ੈਸਲੇ ਤੋਂ ਬਾਅਦ ਕੀ ਹੁੰਦਾ ਹੈ।",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation ਮਨਜ਼ੂਰ ਰੱਦ ਕਤਾਰ ਹਿਊਮਨ ਇਨ ਦਿ ਲੂਪ ਟੂਲ ਨਿਯਮ ਮਿਆਦ ਨਿਰੰਤਰਤਾ"
+      },
+      "guardrails": {
+        "title": "ਗਾਰਡਰੇਲ",
+        "summary": "ਉਹ ਪੈਟਰਨ ਜੋ ਇਹ ਵਰਕਸਪੇਸ ਲੰਘਣ ਦੇਣ ਤੋਂ ਇਨਕਾਰ ਕਰਦਾ ਹੈ, ਅਤੇ ਟੂਲ ਨਤੀਜਿਆਂ ਉੱਤੇ ਲਾਗੂ ਸਮੱਗਰੀ ਨੀਤੀ।",
+        "keywords": "safety rules block filter policy content patterns ਸੁਰੱਖਿਆ ਨਿਯਮ ਰੋਕ ਫਿਲਟਰ ਨੀਤੀ ਸਮੱਗਰੀ ਪੈਟਰਨ"
+      },
+      "turns": {
+        "title": "ਟਰਨ ਇੰਸਪੈਕਟਰ",
+        "summary": "ਇੱਕ ਏਜੰਟ ਟਰਨ ਦੀ ਦਰਜ ਟਾਈਮਲਾਈਨ: ਕੀ ਪੁੱਛਿਆ ਗਿਆ, ਕਿਹੜੇ ਟੂਲ ਚੱਲੇ, ਹਰ ਕਦਮ ਦੀ ਲਾਗਤ ਕੀ ਰਹੀ ਅਤੇ ਇਹ ਕਿਉਂ ਰੁਕਿਆ।",
+        "keywords": "turn timeline journal trace replay history steps debug ਟਰਨ ਟਾਈਮਲਾਈਨ ਜਰਨਲ ਟਰੇਸ ਰੀਪਲੇ ਇਤਿਹਾਸ ਕਦਮ ਡੀਬੱਗ"
+      },
+      "agentBehavior": {
+        "title": "ਏਜੰਟ ਵਿਹਾਰ ਅਤੇ ਸੀਮਾਵਾਂ",
+        "summary": "ਏਜੰਟ ਦੇ ਪੰਨੇ ਉੱਤੇ: ਇਸਦੀਆਂ ਆਪਣੀਆਂ ਸੀਮਾਵਾਂ ਅਤੇ ਵਿਹਾਰ ਸੈਟਿੰਗਾਂ, ਹਰ ਮੁੱਲ ਕਿੱਥੋਂ ਆਉਂਦਾ ਹੈ ਅਤੇ ਵਰਕਸਪੇਸ ਮੁੱਲ ਉੱਤੇ ਰੀਸੈੱਟ ਸਮੇਤ।",
+        "keywords": "agent override per agent behavior limits tab ਏਜੰਟ ਓਵਰਰਾਈਡ ਹਰ ਏਜੰਟ ਵਿਹਾਰ ਸੀਮਾਵਾਂ ਟੈਬ"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "ਇਹਨਾਂ ਪ੍ਰੋਂਪਟ ਬਲਾਕਾਂ ਤੋਂ ਬਣਿਆ",
+    "blocksCount": "{n} ਬਲਾਕ",
+    "blockDefault": "ਡਿਫ਼ਾਲਟ ਵਜੋਂ ਮਿਲਿਆ",
+    "blockOverride": "{scope} ਓਵਰਰਾਈਡ v{version}",
+    "blockAgentConfig": "ਏਜੰਟ ਦਾ ਆਪਣਾ ਪ੍ਰੋਂਪਟ",
+    "blockCode": "ਪਲੇਟਫ਼ਾਰਮ ਕੋਡ",
+    "blockTokens": "~{tokens} ਟੋਕਨ",
+    "blockHash": "ਸ਼ਬਦਾਵਲੀ ਹੈਸ਼"
+  },
+  "toolApproval": {
+    "continuing": "ਏਜੰਟ ਕੰਮ ਜਾਰੀ ਰੱਖ ਰਿਹਾ ਹੈ।",
+    "continueNotStarted": "ਇਸ ਫ਼ੈਸਲੇ ਤੋਂ ਬਾਅਦ ਏਜੰਟ ਆਪਣੇ-ਆਪ ਮੁੜ ਸ਼ੁਰੂ ਨਹੀਂ ਹੋਇਆ। ਇਸਨੂੰ ਅੱਗੇ ਵਧਾਉਣ ਲਈ ਸੁਨੇਹਾ ਭੇਜੋ।",
+    "continueTimedOut": "ਏਜੰਟ ਨੇ ਹਾਲੇ ਅੱਗੇ ਵਧਣਾ ਪੂਰਾ ਨਹੀਂ ਕੀਤਾ। ਪੂਰਾ ਹੋਣ ਉੱਤੇ ਉਸਦਾ ਜਵਾਬ ਗੱਲਬਾਤ ਵਿੱਚ ਆਵੇਗਾ; ਜਾਂਚਣ ਲਈ ਰੀਲੋਡ ਕਰੋ।",
+    "continuingWaiting": "Your decision is recorded. The agent is picking the task back up.",
+    "continuingRunning": "The agent is working on the next step. Its reply appears here as soon as it is ready.",
+    "continuingStill": "Still working. A model running on this computer can take a few minutes; you can keep reading meanwhile.",
+    "continuingLongWait": "This is taking longer than usual, but the agent has not stopped. Its reply will appear here when it is done.",
+    "continuingStagesLabel": "Progress",
+    "continuingStageDecided": "Decision recorded",
+    "continuingStageRestarted": "Agent restarted",
+    "continuingStageWorking": "Working on it",
+    "panelLabel": "Tool approvals",
+    "queuePosition": "Approval {position} of {total}",
+    "queueMore": "{count} more waiting. The next one appears when you decide this one.",
+    "rawName": "Technical name",
+    "approveAll": "Approve all {count}",
+    "rejectAll": "Reject all",
+    "approvingProgress": "Approving {position} of {total}",
+    "rejectingProgress": "Rejecting {position} of {total}",
+    "bulkHint": "Decides the waiting calls one after another, oldest first, and stops at the first problem.",
+    "bulkStoppedTruncated": "Stopped: the next call's arguments are too long to show here, so it waits for your own decision.",
+    "bulkStoppedError": "Stopped after a problem; the calls below it are still waiting.",
+    "waitingList": "Waiting calls"
+  },
+  "promptDirectives": {
+    "tabRegistry": "ਸਾਰੇ ਪ੍ਰੋਂਪਟ",
+    "tabAgentPreview": "ਅੰਤਿਮ ਪ੍ਰੋਂਪਟ ਦੀ ਝਲਕ",
+    "regTitle": "ਹਰ ਪ੍ਰੋਂਪਟ",
+    "regIntro": "ਮਾਡਲ ਲਈ ਪਲੇਟਫ਼ਾਰਮ ਜੋ ਵੀ ਟੈਕਸਟ ਲਿਖਦਾ ਹੈ, ਹੁਣ ਲਾਗੂ ਸ਼ਬਦਾਵਲੀ, ਉਸਦੇ ਸਰੋਤ ਅਤੇ ਵਰਜਨ ਸਮੇਤ। ਇੱਕ ਦਾਇਰਾ ਚੁਣੋ, ਬਦਲਣ ਲਈ ਕੋਈ ਪ੍ਰੋਂਪਟ ਖੋਲ੍ਹੋ, ਅਤੇ ਹਰ ਪਿਛਲਾ ਵਰਜਨ ਵੇਖੋ। ਬਦਲਾਅ ਲਗਭਗ ਅੱਧੇ ਮਿੰਟ ਵਿੱਚ ਸਾਰੇ ਸਰਵਰਾਂ ਤੱਕ ਪਹੁੰਚਦਾ ਹੈ।",
+    "regScopeLabel": "ਜਿਸ ਦਾਇਰੇ ਵਿੱਚ ਬਦਲਣਾ ਹੈ",
+    "regScope_tenant": "ਇਹ ਵਰਕਸਪੇਸ",
+    "regScope_agent": "ਇੱਕ ਏਜੰਟ",
+    "regScope_platform": "ਪੂਰਾ ਪਲੇਟਫ਼ਾਰਮ",
+    "regAgentLabel": "ਏਜੰਟ",
+    "regAgentPlaceholder": "ਇੱਕ ਏਜੰਟ ਚੁਣੋ",
+    "regAgentsFailed": "ਤੁਹਾਡੇ ਏਜੰਟ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ।",
+    "regPickAgent": "ਕਿਸੇ ਏਜੰਟ ਦੇ ਪ੍ਰੋਂਪਟ ਵੇਖਣ ਅਤੇ ਬਦਲਣ ਲਈ ਉਸਨੂੰ ਚੁਣੋ।",
+    "regAgentUnavailable": "ਲਿੰਕ ਵਾਲਾ ਏਜੰਟ ਤੁਹਾਡੇ ਲਈ ਉਪਲਬਧ ਨਹੀਂ, ਕਿਉਂਕਿ ਉਹ ਮੌਜੂਦ ਨਹੀਂ ਜਾਂ ਤੁਸੀਂ ਉਸਨੂੰ ਦੇਖ ਨਹੀਂ ਸਕਦੇ। ਇਸਦੀ ਥਾਂ ਰਜਿਸਟਰੀ ਵਰਕਸਪੇਸ ਦਾਇਰੇ ਵਿੱਚ ਖੁੱਲ੍ਹੀ।",
+    "regSearchLabel": "ਪ੍ਰੋਂਪਟ ਖੋਜੋ",
+    "regSearchPlaceholder": "ਕੁੰਜੀ, ਸਿਰਲੇਖ ਜਾਂ ਵੇਰਵਾ",
+    "regRiskLabel": "ਜੋਖਮ ਸ਼੍ਰੇਣੀ",
+    "regRiskAll": "ਸਾਰੀਆਂ ਜੋਖਮ ਸ਼੍ਰੇਣੀਆਂ",
+    "regRisk_STEERS_EVERY_TURN": "ਹਰ ਟਰਨ ਨੂੰ ਸੇਧ ਦਿੰਦਾ ਹੈ",
+    "regRisk_SECONDARY_CALL": "ਸੈਕੰਡਰੀ ਮਾਡਲ ਕਾਲ",
+    "regRisk_USER_VISIBLE": "ਲੋਕਾਂ ਨੂੰ ਵਿਖਾਇਆ ਜਾਂਦਾ ਹੈ",
+    "regRisk_TOOL_DESCRIPTION": "ਟੂਲ ਵੇਰਵਾ",
+    "regOnlyCustomised": "ਸਿਰਫ਼ ਕਸਟਮਾਈਜ਼ ਕੀਤੇ",
+    "regPlatformReadOnly": "ਪਲੇਟਫ਼ਾਰਮ-ਵਿਆਪੀ ਪ੍ਰੋਂਪਟ ਇੱਥੇ ਪੜ੍ਹੇ ਜਾ ਸਕਦੇ ਹਨ; ਸਿਰਫ਼ ਪਲੇਟਫ਼ਾਰਮ ਪ੍ਰਸ਼ਾਸਕ ਹੀ ਉਹਨਾਂ ਨੂੰ ਬਦਲ ਸਕਦਾ ਹੈ।",
+    "regLoadFailed": "ਪ੍ਰੋਂਪਟ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੇ।",
+    "regCount": "{total} ਪ੍ਰੋਂਪਟਾਂ ਵਿੱਚੋਂ {shown} ਵਿਖਾ ਰਹੇ ਹਾਂ।",
+    "regEmptyTitle": "ਕੋਈ ਪ੍ਰੋਂਪਟ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ",
+    "regEmptyBody": "ਖੋਜ ਜਾਂ ਫਿਲਟਰ ਬਦਲੋ।",
+    "regSource_DEFAULT": "ਡਿਫ਼ਾਲਟ ਵਜੋਂ ਮਿਲਿਆ",
+    "regSource_FALLBACK": "ਡਿਫ਼ਾਲਟ ਵਜੋਂ ਮਿਲਿਆ (ਓਵਰਰਾਈਡ ਉਪਲਬਧ ਨਹੀਂ)",
+    "regSource_PLATFORM": "ਪਲੇਟਫ਼ਾਰਮ",
+    "regSource_TENANT": "ਵਰਕਸਪੇਸ",
+    "regSource_AGENT": "ਏਜੰਟ",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "ਸੇਵਾਮੁਕਤ",
+    "regRetiredBody": "ਇਹ ਪ੍ਰੋਂਪਟ ਹੁਣ ਕੋਈ ਟੈਕਸਟ ਨਹੀਂ ਭੇਜਦਾ, ਇਸ ਲਈ ਬਦਲਣ ਲਈ ਕੁਝ ਨਹੀਂ।",
+    "regEffectiveOff": "ਬੰਦ: ਕੁਝ ਨਹੀਂ ਭੇਜਿਆ ਜਾਂਦਾ।",
+    "regEffectiveTokens": "ਹੁਣ ਲਾਗੂ, ਲਗਭਗ {tokens} ਟੋਕਨ।",
+    "regEffectiveLabel": "{title} ਲਈ ਲਾਗੂ ਸ਼ਬਦਾਵਲੀ",
+    "regOpenEditor": "{title} ਸੰਪਾਦਿਤ ਕਰੋ",
+    "regCloseEditor": "{title} ਬੰਦ ਕਰੋ",
+    "regEditingOverride": "{scope} ਵਰਜਨ ਸੰਪਾਦਿਤ ਹੋ ਰਿਹਾ ਹੈ, ਹੁਣ v{version}।",
+    "regEditingNone": "ਹਾਲੇ ਕੋਈ {scope} ਵਰਜਨ ਨਹੀਂ। ਇਹ ਉਸ ਤੋਂ ਹੇਠਲੀ ਸ਼ਬਦਾਵਲੀ ਤੋਂ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ: {below}।",
+    "regPlaceholders": "ਰਨਟਾਈਮ ਵੇਲੇ ਭਰਿਆ ਜਾਂਦਾ ਹੈ:",
+    "regRequired": "(ਲੋੜੀਂਦਾ)",
+    "regProblemsTitle": "ਸੰਭਾਲਣ ਤੋਂ ਪਹਿਲਾਂ ਇਸਨੂੰ ਠੀਕ ਕਰੋ",
+    "regReasonLabel": "ਬਦਲਾਅ ਦਾ ਕਾਰਨ (ਇਤਿਹਾਸ ਵਿੱਚ ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ)",
+    "regReasonPlaceholder": "ਵਿਕਲਪਿਕ",
+    "regConflict": "ਤੁਹਾਡੇ ਸੰਪਾਦਿਤ ਕਰਦਿਆਂ ਕਿਸੇ ਨੇ ਇਹ ਪ੍ਰੋਂਪਟ ਬਦਲ ਦਿੱਤਾ। ਉਹਨਾਂ ਦਾ ਵਰਜਨ ਵੇਖਣ ਲਈ ਇਸਨੂੰ ਬੰਦ ਕਰਕੇ ਮੁੜ ਖੋਲ੍ਹੋ, ਫਿਰ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "regRevert": "{to} ਉੱਤੇ ਵਾਪਸ ਕਰੋ",
+    "regShowHistory": "ਇਤਿਹਾਸ",
+    "regHideHistory": "ਇਤਿਹਾਸ ਲੁਕਾਓ",
+    "regHistoryLoading": "ਇਤਿਹਾਸ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+    "regHistoryFailed": "ਇਤਿਹਾਸ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕਿਆ।",
+    "regHistoryEmpty": "ਇਸ ਦਾਇਰੇ ਵਿੱਚ ਹਾਲੇ ਕੋਈ ਵਰਜਨ ਨਹੀਂ।",
+    "regVersion": "ਵਰਜਨ {version}",
+    "regAction_CREATE": "ਬਣਾਇਆ",
+    "regAction_UPDATE": "ਬਦਲਿਆ",
+    "regAction_REVERT": "ਵਾਪਸ ਕੀਤਾ",
+    "regAction_MIGRATE": "ਮਾਈਗ੍ਰੇਟ ਕੀਤਾ",
+    "regCurrent": "ਮੌਜੂਦਾ",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "ਅਣਜਾਣ",
+    "regReason": "ਕਾਰਨ: {reason}",
+    "regShowDiff": "ਵਰਜਨ {version} ਵਿੱਚ ਬਦਲਾਅ ਵਿਖਾਓ",
+    "regHideDiff": "ਵਰਜਨ {version} ਵਿੱਚ ਬਦਲਾਅ ਲੁਕਾਓ",
+    "regDiffLabel": "ਵਰਜਨ {version} ਦੁਆਰਾ ਕੀਤੇ ਬਦਲਾਅ",
+    "regNoDiff": "ਇਸ ਵਰਜਨ ਵਿੱਚ ਕੋਈ ਟੈਕਸਟ ਨਹੀਂ ਬਦਲਿਆ।",
+    "regRestore": "ਵਰਜਨ {version} ਬਹਾਲ ਕਰੋ",
+    "regRestoreReason": "ਵਰਜਨ {version} ਦੀ ਸ਼ਬਦਾਵਲੀ ਬਹਾਲ ਕੀਤੀ ਗਈ",
+    "regRestoreFailed": "ਉਹ ਵਰਜਨ ਬਹਾਲ ਨਹੀਂ ਹੋ ਸਕਿਆ।",
+    "regRestoreAck": "ਮੈਂ ਸਮਝਦਾ/ਸਮਝਦੀ ਹਾਂ ਕਿ {title} ਦਾ ਵਰਜਨ ਬਹਾਲ ਕਰਨ ਨਾਲ ਸੁਰੱਖਿਆ ਕਮਜ਼ੋਰ ਹੋ ਸਕਦੀ ਹੈ।",
+    "regPreviewTitle": "ਅੰਤਿਮ ਪ੍ਰੋਂਪਟ ਦੀ ਝਲਕ",
+    "regPreviewIntro": "ਮਾਡਲ ਨੂੰ ਕਾਲ ਕੀਤੇ ਬਿਨਾਂ, ਕਿਸੇ ਏਜੰਟ ਦਾ ਅਸਲੀ ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ ਅਤੇ ਟੂਲ ਸੂਚੀ ਬਿਲਕੁਲ ਉਸੇ ਤਰ੍ਹਾਂ ਬਣਾਉਂਦਾ ਹੈ ਜਿਵੇਂ ਟਰਨ ਬਣਾਉਂਦਾ। ਹਰ ਬਲਾਕ ਪ੍ਰੋਂਪਟ ਕੁੰਜੀ, ਦਾਇਰਾ ਅਤੇ ਉਹ ਵਰਜਨ ਵਿਖਾਉਂਦਾ ਹੈ ਜਿੱਥੋਂ ਉਸਦੀ ਸ਼ਬਦਾਵਲੀ ਆਉਂਦੀ ਹੈ।",
+    "regPreviewMessageLabel": "ਨਮੂਨਾ ਵਰਤੋਂਕਾਰ ਸੁਨੇਹਾ (ਵਿਕਲਪਿਕ)",
+    "regPreviewMessagePlaceholder": "ਅਸਲੀ ਸੁਨੇਹੇ ਵਾਂਗ ਟੂਲ ਅਤੇ ਯਾਦ ਕੀਤੀ ਮੈਮੋਰੀ ਚੁਣਨ ਲਈ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।",
+    "regPreviewSmallModel": "ਛੋਟੇ ਮਾਡਲ ਲਈ ਝਲਕ",
+    "regPreviewBuild": "ਝਲਕ ਬਣਾਓ",
+    "regPreviewBuilding": "ਬਣ ਰਹੀ ਹੈ…",
+    "regPreviewFailed": "ਝਲਕ ਨਹੀਂ ਬਣ ਸਕੀ।",
+    "regPreviewTotals": "ਲਗਭਗ {prompt} ਟੋਕਨ ਸਿਸਟਮ ਟੈਕਸਟ ਅਤੇ {tools} ਟੋਕਨ ਟੂਲ ਪਰਿਭਾਸ਼ਾਵਾਂ (ਅੰਦਾਜ਼ੇ)।",
+    "regPreviewOverBudgetTitle": "ਟੋਕਨ ਬਜਟ ਤੋਂ ਵੱਧ",
+    "regPreviewOverBudget": "ਸਥਾਈ ਸਿਸਟਮ ਟੈਕਸਟ ਸੰਰਚਿਤ {budget} ਟੋਕਨ ਦੇ ਬਜਟ ਤੋਂ ਵੱਧ ਹੈ। ਕੁਝ ਨਹੀਂ ਕੱਟਿਆ ਜਾਂਦਾ; ਕਿਸੇ ਪ੍ਰੋਂਪਟ ਨੂੰ ਛੋਟਾ ਕਰਨ ਬਾਰੇ ਸੋਚੋ।",
+    "regPreviewMessageHeading": "ਸੁਨੇਹਾ: {message}",
+    "regPreviewTokens": "~{tokens} ਟੋਕਨ",
+    "regPreviewTools": "ਟੂਲ ({count})",
+    "regPreviewNoTools": "ਇਹ ਏਜੰਟ ਕੋਈ ਟੂਲ ਪੇਸ਼ ਨਹੀਂ ਕਰਦਾ।",
+    "regPreviewNotes": "ਇਹ ਝਲਕ ਜੋ ਨਹੀਂ ਜਾਣ ਸਕਦੀ",
+    "regOriginDefault": "ਡਿਫ਼ਾਲਟ ਵਜੋਂ ਮਿਲਿਆ",
+    "regOriginOverride": "{scope} ਓਵਰਰਾਈਡ v{version}",
+    "regOriginAgentConfig": "ਏਜੰਟ ਦਾ ਆਪਣਾ ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ",
+    "regOriginCode": "ਪਲੇਟਫ਼ਾਰਮ ਕੋਡ"
+  },
+  "toolLabels": {
+    "mcpTool": "{tool} ({server})",
+    "label_web_search": "Search the web",
+    "does_web_search": "Looks up public web pages that match a search and reads their titles and snippets.",
+    "label_fetch_web_page": "Open a web page",
+    "does_fetch_web_page": "Downloads one public web page and reads its text.",
+    "label_deep_research": "Research a topic on the web",
+    "does_deep_research": "Runs several web searches and reads the pages it finds.",
+    "label_verify_citations": "Check quotes against sources",
+    "does_verify_citations": "Compares quoted text with the web pages it was taken from.",
+    "label_http_request": "Call a web API",
+    "does_http_request": "Sends a request to a web address or API; depending on the request it can read or change something there.",
+    "label_http_request_write": "Send data to a web API",
+    "does_http_request_write": "Sends data to a web address, which can change something on that service.",
+    "label_schedule_task": "Schedule a task",
+    "does_schedule_task": "Sets up a task to run later or on a repeating schedule.",
+    "label_create_workflow": "Create a workflow",
+    "does_create_workflow": "Creates a new workflow in this workspace.",
+    "label_data_table_query": "Look up a data table",
+    "does_data_table_query": "Reads rows from one of this workspace's data tables.",
+    "label_data_table_write": "Change a data table",
+    "does_data_table_write": "Adds or changes rows in one of this workspace's data tables.",
+    "label_coding_task": "Run a coding task",
+    "does_coding_task": "Starts a coding task that can read and change files in a code workspace.",
+    "label_delegate_to_specialist": "Ask a specialist agent",
+    "does_delegate_to_specialist": "Hands part of the task to another agent and reads its answer.",
+    "label_delegate_parallel": "Ask several agents at once",
+    "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
+    "label_web_task": "Use a browser on a website",
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
   }
 }

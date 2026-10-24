@@ -54,8 +54,26 @@ export function tourSuppressed(): boolean {
   }
 }
 
+/** Attribute a conversation surface sets to say whether first-run overlays may cover it (see conversationHold). */
+export const ONBOARDING_HOLD_ATTR = "data-onboarding-hold";
+
+/**
+ * A chat surface (the Assistant) knows something the tour cannot: whether the person already has conversations.
+ * It marks itself `data-onboarding-hold="returning"` when they do, or when a conversation is open on screen -
+ * they are not new here, and a modal would land on their work - and "pending" while it is still finding out.
+ * Returning: no first-run overlay on this page load. Pending: wait, like a turn in flight.
+ */
+export function conversationHold(doc: Document = document): OverlayHold {
+  const value = doc.querySelector(`[${ONBOARDING_HOLD_ATTR}]`)?.getAttribute(ONBOARDING_HOLD_ATTR);
+  if (value === "returning") return "surface";
+  if (value === "pending") return "busy";
+  return "none";
+}
+
 export function overlayHold(pathname: string, doc: Document = document): OverlayHold {
   if (tourSuppressed() || isEditingSurface(pathname)) return "surface";
+  const conversation = conversationHold(doc);
+  if (conversation !== "none") return conversation;
   return userIsBusy(doc) ? "busy" : "none";
 }
 

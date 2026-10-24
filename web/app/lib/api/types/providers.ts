@@ -61,6 +61,14 @@ export interface ProviderModelInfo {
    */
   inputCostPerMillionUsd?: number | null;
   outputCostPerMillionUsd?: number | null;
+  /**
+   * Request parameters (temperature, top_p, max_tokens, ...) the provider ignores or rejects for this model, so
+   * a value set on an agent has no effect. Optional and additive: absent means "nothing known", never "all fine".
+   * The Run settings drawer reads whichever of these three the catalog sends and warns per ignored parameter.
+   */
+  unsupportedParams?: string[] | null;
+  ignoredParams?: string[] | null;
+  droppedParams?: string[] | null;
 }
 
 // One row of GET /api/model-pricing?modelIds=... (ModelPricingController).

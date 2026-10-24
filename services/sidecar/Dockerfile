@@ -1,5 +1,5 @@
 # Pinned patch + Debian release, identical across every Python service image.
-FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+FROM python:3.14.7-slim-trixie@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d
 
 WORKDIR /app
 
@@ -66,7 +66,7 @@ RUN python -c "import re; t = open('requirements.lock').read(); open('/tmp/torch
 COPY app ./app
 
 # Security review 2026-07-27: no service dir here holds a persistent volume
-# (see deploy/docker-compose.yml's `sidecar` service - no `volumes:` entry),
+# (see deploy/compose/docker-compose.yml's `sidecar` service - no `volumes:` entry),
 # so switching to a non-root runtime user carries no existing-volume
 # ownership migration risk, unlike code-intel/Dockerfile's /data mount.
 #

@@ -8,6 +8,12 @@ import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.agenticai.core.agents.auxiliary.AuxiliaryModelProperties;
+import com.agenticai.core.agents.auxiliary.AuxiliaryModelResolver;
+import com.agenticai.core.agents.core.AgentService;
+import com.agenticai.core.agents.turn.AgentServiceAuxiliaryAgentModels;
+import com.agenticai.core.tenancy.TenantAiModelPreferenceService;
+import org.springframework.beans.factory.ObjectProvider;
 import com.agenticai.core.agents.hosted.FreeTierChatClientService;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
 import com.agenticai.core.providers.ProviderCredentialResolver;
@@ -59,9 +65,13 @@ class SessionSummaryServiceTest {
     }
 
     private SessionSummaryService newService(boolean enabled) {
+        @SuppressWarnings("unchecked")
+        ObjectProvider<TenantAiModelPreferenceService> noPreferences = mock(ObjectProvider.class);
+        AuxiliaryModelResolver auxiliary = new AuxiliaryModelResolver(
+            new AuxiliaryModelProperties(), credentialResolver, providerModelCatalogService, new AgentServiceAuxiliaryAgentModels(mock(AgentService.class)),
+            noPreferences, "claude-sonnet-4-20250514");
         return new SessionSummaryService(
-            credentialResolver, llmGatewayService, providerModelCatalogService, tenantLimits, freeTierChatClientService,
-            "claude-sonnet-4-20250514", enabled, 600, 4000, 800, 24000
+            auxiliary, llmGatewayService, tenantLimits, freeTierChatClientService, enabled, 600, 4000, 800, 24000
         );
     }
 
@@ -173,7 +183,7 @@ class SessionSummaryServiceTest {
      * which consumes a message unit against the tenant's usage cap.
      */
     private void verifyNoProviderResolutionAttempted() {
-        verify(credentialResolver, never()).resolveAnyActiveKey();
+        verify(credentialResolver, never()).resolveBest(org.mockito.ArgumentMatchers.anyBoolean());
         verify(tenantLimits, never()).plan(anyString());
         // Mockito's own view of the mock, so this stays true even if the
         // free-tier builder grows another overload.

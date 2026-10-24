@@ -4,6 +4,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Check, Loader2, X } from "lucide-react";
 import { api } from "../../lib/api";
 import type { AgentSamplingFields } from "../../lib/api/agents";
+import { useTranslations } from "../../lib/i18n";
+import { normalizeSamplingParam, type SamplingParam } from "./playground/runSettingsModel";
 
 // Advanced sampling controls for one agent: top-K, stop sequences, frequency /
 // presence penalty and seed. Saves through PATCH /api/agents/{id}/generation-params
@@ -30,6 +32,12 @@ export interface AgentSamplingControlsProps {
   disabledReason?: string;
   /** Called with the updated agent returned by the server after each save. */
   onSaved?: (updated: any) => void;
+  /**
+   * Parameter names (any common spelling: top_k, topK...) the agent's provider ignores for its model, from the
+   * model catalog. A field in this list shows a warning that changing it has no effect. Absent or empty: no
+   * warning is shown - nothing is guessed.
+   */
+  ignoredParams?: readonly string[] | null;
 }
 
 /** Parses a numeric text field. "" -> null (clears); invalid -> undefined. */
@@ -48,8 +56,18 @@ function fieldText(v: number | null | undefined): string {
 
 type NumKey = "topK" | "frequencyPenalty" | "presencePenalty" | "seed";
 
-export default function AgentSamplingControls({ agent, disabled, disabledReason, onSaved }: AgentSamplingControlsProps) {
+export default function AgentSamplingControls({
+  agent,
+  disabled,
+  disabledReason,
+  onSaved,
+  ignoredParams,
+}: AgentSamplingControlsProps) {
+  const t = useTranslations("agentWorkbench");
   const uid = useId();
+  const ignored = new Set<SamplingParam>(
+    (ignoredParams ?? []).map((n) => normalizeSamplingParam(n)).filter((p): p is SamplingParam => p !== null)
+  );
   const [state, setState] = useState<Record<string, SaveState>>({});
   const [message, setMessage] = useState<string | null>(null);
   const [topK, setTopK] = useState(fieldText(agent.topK));
@@ -101,7 +119,7 @@ export default function AgentSamplingControls({ agent, disabled, disabledReason,
       onSaved?.(updated);
     } catch (e: unknown) {
       setState((s) => ({ ...s, [key]: "error" }));
-      setMessage(e instanceof Error ? e.message : "Could not save that setting.");
+      setMessage(e instanceof Error && e.message ? e.message : t("samplingSaveFailed"));
     }
   }
 
@@ -123,9 +141,7 @@ export default function AgentSamplingControls({ agent, disabled, disabledReason,
     const parsed = parseBounded(text, min, max, integer);
     if (parsed === undefined) {
       setState((s) => ({ ...s, [key]: "error" }));
-      setMessage(
-        `${label} must be ${integer ? "a whole number" : "a number"} from ${min} to ${max}, or empty to turn it off.`,
-      );
+      setMessage(t(integer ? "samplingErrorWhole" : "samplingErrorNumber", { label, min, max }));
       reset(fieldText(current));
       return;
     }
@@ -137,11 +153,11 @@ export default function AgentSamplingControls({ agent, disabled, disabledReason,
     const v = stopDraft;
     if (v.trim() === "") return;
     if (v.length > MAX_STOP_LENGTH) {
-      setMessage(`A stop sequence can be at most ${MAX_STOP_LENGTH} characters.`);
+      setMessage(t("samplingStopTooLong", { max: MAX_STOP_LENGTH }));
       return;
     }
     if (stops.length >= MAX_STOP_SEQUENCES) {
-      setMessage(`At most ${MAX_STOP_SEQUENCES} stop sequences.`);
+      setMessage(t("samplingStopTooMany", { max: MAX_STOP_SEQUENCES }));
       return;
     }
     if (stops.includes(v)) {
@@ -170,16 +186,16 @@ export default function AgentSamplingControls({ agent, disabled, disabledReason,
         {s === "saving" && (
           <>
             <Loader2 className="mr-1 size-3 animate-spin" aria-hidden="true" />
-            Saving…
+            {t("samplingSaving")}
           </>
         )}
         {s === "saved" && (
           <>
             <Check className="mr-1 size-3" aria-hidden="true" />
-            Saved
+            {t("samplingSaved")}
           </>
         )}
-        {s === "error" && <span className="text-destructive">Not saved</span>}
+        {s === "error" && <span className="text-destructive">{t("samplingNotSaved")}</span>}
       </span>
     );
   };
@@ -227,77 +243,79 @@ export default function AgentSamplingControls({ agent, disabled, disabledReason,
         <p id={`${id}-help`} className="mt-1 text-[12.5px] text-muted-foreground">
           {help}
         </p>
+        {ignored.has(key) && (
+          <p className="mt-1 text-[12.5px] text-[var(--state-warning)]" data-testid={`sampling-ignored-${key}`}>
+            {t("samplingIgnored")}
+          </p>
+        )}
       </div>
     );
   };
 
   return (
     <section
-      aria-label="Advanced sampling"
+      aria-label={t("samplingTitle")}
       data-testid="agent-sampling-controls"
       className={disabled ? "opacity-70" : ""}
     >
-      <p className="text-[12.5px] text-muted-foreground">
-        Fine-tune how the model picks words. Leave a box empty to use the model default. Providers that do not support a
-        field simply ignore it.
-      </p>
+      <p className="text-[12.5px] text-muted-foreground">{t("samplingIntro")}</p>
       {disabled && disabledReason && <p className="mt-2 text-[12.5px] text-muted-foreground">{disabledReason}</p>}
 
       <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {numberField(
           "topK",
-          "Top-K",
-          "Only consider the K most likely next words. Lower means safer, more predictable text. 1 to 1000.",
+          t("samplingTopK"),
+          t("samplingTopKHelp"),
           topK,
           setTopK,
           agent.topK,
           1,
           1000,
           true,
-          "Default",
+          t("samplingPlaceholderDefault"),
         )}
         {numberField(
           "seed",
-          "Seed",
-          "Set a number to make replies more repeatable for the same prompt. Not every provider guarantees it.",
+          t("samplingSeed"),
+          t("samplingSeedHelp"),
           seed,
           setSeed,
           agent.seed,
           -2147483648,
           2147483647,
           true,
-          "Random",
+          t("samplingPlaceholderRandom"),
         )}
         {numberField(
           "frequencyPenalty",
-          "Frequency penalty",
-          "Positive values discourage repeating the same words again and again. -2 to 2.",
+          t("samplingFrequency"),
+          t("samplingFrequencyHelp"),
           freq,
           setFreq,
           agent.frequencyPenalty,
           -2,
           2,
           false,
-          "0",
+          t("samplingPlaceholderZero"),
         )}
         {numberField(
           "presencePenalty",
-          "Presence penalty",
-          "Positive values nudge the model toward new topics instead of staying on one. -2 to 2.",
+          t("samplingPresence"),
+          t("samplingPresenceHelp"),
           pres,
           setPres,
           agent.presencePenalty,
           -2,
           2,
           false,
-          "0",
+          t("samplingPlaceholderZero"),
         )}
       </div>
 
       <div className="mt-4">
         <div className="mb-1 flex items-center justify-between gap-2">
           <label htmlFor={`${uid}-stop`} className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-            Stop sequences
+            {t("samplingStop")}
           </label>
           {status("stopSequences")}
         </div>
@@ -308,7 +326,7 @@ export default function AgentSamplingControls({ agent, disabled, disabledReason,
             className={inputCls}
             value={stopDraft}
             maxLength={MAX_STOP_LENGTH}
-            placeholder="Type a phrase, press Enter"
+            placeholder={t("samplingStopPlaceholder")}
             disabled={disabled || stops.length >= MAX_STOP_SEQUENCES}
             aria-describedby={`${uid}-stop-help`}
             onChange={(e) => setStopDraft(e.target.value)}
@@ -325,15 +343,19 @@ export default function AgentSamplingControls({ agent, disabled, disabledReason,
             disabled={disabled || stopDraft.trim() === "" || stops.length >= MAX_STOP_SEQUENCES}
             onClick={addStop}
           >
-            Add
+            {t("samplingAdd")}
           </button>
         </div>
         <p id={`${uid}-stop-help`} className="mt-1 text-[12.5px] text-muted-foreground">
-          The reply ends as soon as the model writes one of these. Up to {MAX_STOP_SEQUENCES}, each up to{" "}
-          {MAX_STOP_LENGTH} characters.
+          {t("samplingStopHelp", { count: MAX_STOP_SEQUENCES, max: MAX_STOP_LENGTH })}
         </p>
+        {ignored.has("stopSequences") && (
+          <p className="mt-1 text-[12.5px] text-[var(--state-warning)]" data-testid="sampling-ignored-stopSequences">
+            {t("samplingIgnored")}
+          </p>
+        )}
         {stops.length > 0 && (
-          <ul className="mt-2 flex flex-wrap gap-2" aria-label="Current stop sequences">
+          <ul className="mt-2 flex flex-wrap gap-2" aria-label={t("samplingStopCurrent")}>
             {stops.map((s) => (
               <li
                 key={s}
@@ -342,7 +364,7 @@ export default function AgentSamplingControls({ agent, disabled, disabledReason,
                 <code className="truncate">{JSON.stringify(s).slice(1, -1)}</code>
                 <button
                   type="button"
-                  aria-label={`Remove stop sequence ${s}`}
+                  aria-label={t("samplingStopRemove", { value: s })}
                   className="rounded-full p-0.5 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={disabled}
                   onClick={() => removeStop(s)}

@@ -8,6 +8,7 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.omnichannel.session.ChannelSession;
 import com.agenticai.core.omnichannel.session.ChannelSessionService;
 import com.agenticai.core.omnichannel.session.ChannelType;
+import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
@@ -21,6 +22,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -101,6 +105,8 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
     private static final String ATTR_SAFE_SESSION = "voiceRelay.safeSession";
     private static final String ATTR_ACTIVE_SUBSCRIPTION = "voiceRelay.activeSubscription";
 
+    private static final String VOICE_TICKET_SCOPE = "VOICE_TICKET";
+
     private static final int SEND_TIME_LIMIT_MS = 10_000;
     private static final int SEND_BUFFER_SIZE_LIMIT = 512 * 1024;
 
@@ -110,11 +116,31 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
     private final VoiceDtmfMappingService voiceDtmfMappingService;
     private final VoiceNumberAgentService voiceNumberAgentService;
     private final VoiceRelayTicketService voiceRelayTicketService;
+    // Makes a ticket single-use. Null only for the package-private test constructor below.
+    private final InboundMessageDedupService dedupService;
 
     /**
      * Where a prompt's chat turn is subscribed; package-private so a test can pin it to one thread.
      */
     Scheduler promptScheduler = TenantAwareSchedulers.boundedElastic();
+
+    /** For tests that exercise something other than ticket replay: tickets stay reusable. */
+    VoiceRelayWebSocketHandler(
+            TenantResolutionService tenantResolutionService,
+            ChannelSessionService channelSessionService,
+            AgentChatService agentChatService,
+            VoiceDtmfMappingService voiceDtmfMappingService,
+            VoiceNumberAgentService voiceNumberAgentService,
+            VoiceRelayTicketService voiceRelayTicketService) {
+        this(
+                tenantResolutionService,
+                channelSessionService,
+                agentChatService,
+                voiceDtmfMappingService,
+                voiceNumberAgentService,
+                voiceRelayTicketService,
+                null);
+    }
 
     public VoiceRelayWebSocketHandler(
             TenantResolutionService tenantResolutionService,
@@ -122,7 +148,9 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
             AgentChatService agentChatService,
             VoiceDtmfMappingService voiceDtmfMappingService,
             VoiceNumberAgentService voiceNumberAgentService,
-            VoiceRelayTicketService voiceRelayTicketService) {
+            VoiceRelayTicketService voiceRelayTicketService,
+            InboundMessageDedupService dedupService) {
+        this.dedupService = dedupService;
         this.voiceRelayTicketService = voiceRelayTicketService;
         this.tenantResolutionService = tenantResolutionService;
         this.channelSessionService = channelSessionService;
@@ -186,6 +214,18 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
             log.warn(
                     "Rejected voice relay setup on session {} - missing, expired or mismatched"
                             + " admission ticket",
+                    session.getId());
+            closeQuietly(session);
+            return;
+        }
+        // Single-use: a ticket that was already presented is refused, so one captured from a log or
+        // a proxy cannot open a second socket during its 5-minute life. Claimed on the ticket's
+        // digest (each mint is unique), shared across replicas through the same Redis claim the
+        // webhooks use, and failing open on a Redis outage like they do.
+        if (dedupService != null
+                && !dedupService.tryClaim(VOICE_TICKET_SCOPE, ticketDigest(presented))) {
+            log.warn(
+                    "Rejected voice relay setup on session {} - admission ticket was already used",
                     session.getId());
             closeQuietly(session);
             return;
@@ -418,6 +458,17 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
             return fromSetup;
         }
         return queryParam(session.getUri(), "to").orElse("");
+    }
+
+    private static String ticketDigest(String ticket) {
+        try {
+            return HexFormat.of()
+                    .formatHex(
+                            MessageDigest.getInstance("SHA-256")
+                                    .digest(ticket.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is not available", e);
+        }
     }
 
     private static void closeQuietly(WebSocketSession session) {

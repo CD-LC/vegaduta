@@ -32,19 +32,17 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 public class AgentTurnController {
 
-    /** Request bounds. An agent conversation is large; these bound a request, not a task. */
-    static final int MAX_MESSAGES = 400;
-
-    static final int MAX_TOTAL_CHARS = 600_000;
-    static final int MAX_TOOLS = 40;
-    static final int MAX_TOOL_CALLS_PER_MESSAGE = 32;
     private static final Pattern TOOL_NAME = Pattern.compile("^[a-zA-Z0-9_-]{1,64}$");
     private static final Set<String> ROLES = Set.of("system", "user", "assistant", "tool");
 
     private final AgentTurnService service;
 
-    public AgentTurnController(AgentTurnService service) {
+    /** Request bounds ({@code app.agent-turn.limits.*}). An agent conversation is large; these bound a request, not a task. */
+    private final AgentTurnLimitsProperties limits;
+
+    public AgentTurnController(AgentTurnService service, AgentTurnLimitsProperties limits) {
         this.service = service;
+        this.limits = limits;
     }
 
     @PostMapping(
@@ -52,7 +50,7 @@ public class AgentTurnController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public AgentTurn.Result agentTurn(@RequestBody AgentTurn.Request request) {
-        validate(request);
+        validate(request, limits);
         try {
             return service.turn(request);
         } catch (AgentTurnService.EntitlementsUnavailableException
@@ -68,13 +66,13 @@ public class AgentTurnController {
         }
     }
 
-    static void validate(AgentTurn.Request request) {
+    static void validate(AgentTurn.Request request, AgentTurnLimitsProperties limits) {
         if (request == null || request.messages() == null || request.messages().isEmpty()) {
             throw bad("'messages' is required");
         }
         List<Message> messages = request.messages();
-        if (messages.size() > MAX_MESSAGES) {
-            throw bad("at most " + MAX_MESSAGES + " messages per turn");
+        if (messages.size() > limits.getMaxMessages()) {
+            throw bad("at most " + limits.getMaxMessages() + " messages per turn");
         }
         long chars = 0;
         for (int i = 0; i < messages.size(); i++) {
@@ -85,13 +83,13 @@ public class AgentTurnController {
             }
             chars += m.content() == null ? 0 : m.content().length();
             if (m.toolCalls() != null) {
-                if (m.toolCalls().size() > MAX_TOOL_CALLS_PER_MESSAGE
+                if (m.toolCalls().size() > limits.getMaxToolCallsPerMessage()
                         || !"assistant".equals(m.role())) {
                     throw bad(
                             "message "
                                     + (i + 1)
                                     + ": tool calls are only valid on assistant messages (max "
-                                    + MAX_TOOL_CALLS_PER_MESSAGE
+                                    + limits.getMaxToolCallsPerMessage()
                                     + ")");
                 }
                 for (ToolCall call : m.toolCalls()) {
@@ -110,11 +108,11 @@ public class AgentTurnController {
                 throw bad("message " + (i + 1) + ": a tool message needs 'toolCallId'");
             }
         }
-        if (chars > MAX_TOTAL_CHARS) {
+        if (chars > limits.getMaxTotalChars()) {
             throw new ResponseStatusException(
                     HttpStatus.PAYLOAD_TOO_LARGE,
                     "the conversation must be at most "
-                            + MAX_TOTAL_CHARS
+                            + limits.getMaxTotalChars()
                             + " characters - the client should trim older tool output");
         }
         String last = messages.get(messages.size() - 1).role();
@@ -122,8 +120,8 @@ public class AgentTurnController {
             throw bad("the last message must be from the user or a tool result");
         }
         if (request.tools() != null) {
-            if (request.tools().size() > MAX_TOOLS) {
-                throw bad("at most " + MAX_TOOLS + " tools");
+            if (request.tools().size() > limits.getMaxTools()) {
+                throw bad("at most " + limits.getMaxTools() + " tools");
             }
             for (Tool tool : request.tools()) {
                 if (tool == null

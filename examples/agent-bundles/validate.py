@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Offline check of every bundle in this folder against the rules the server enforces on import
-(TemplateBundleService): format, required fields, size, autonomy tier, tool list, and that no
-secret-shaped value or knowledge-base id is carried.
+(TemplateBundleService): format, required fields, size, every enum-typed field (an unknown value is
+rejected, never defaulted), tool list, and that no secret-shaped value or knowledge-base id is carried.
 
 Usage: python3 examples/agent-bundles/validate.py [FILE...]   (default: every *.json here)
 """
@@ -14,6 +14,23 @@ FORMAT = "vegaduta.agent-bundle/1"
 MAX_AGENT_CHARS = 64_000
 MAX_TOOLS = 100
 TIERS = {"SUPERVISED", "SEMI_AUTONOMOUS", "FULLY_AUTONOMOUS"}
+# Every enum-typed field of the agent design and its allowed values. The server rejects any other
+# non-blank value on import (TemplateSnapshotService.AGENT_ENUM_FIELDS); TemplateBundleServiceTest
+# fails if this table drifts from the Java enums. Null or absent means "use the default".
+ENUM_FIELDS = {
+    "providerName": {"ANTHROPIC", "OPENAI", "AZURE_OPENAI", "GOOGLE_VERTEX", "AWS_BEDROCK", "OLLAMA",
+                     "OPENROUTER", "GROK", "GEMINI", "SARVAM", "MISTRAL", "DEEPSEEK", "GROQ", "META",
+                     "LOCAL_OPENAI", "PLATFORM_HOSTED"},
+    "tuningMode": {"SIMPLE", "MANUAL"},
+    "reasoningDepth": {"FAST", "CAREFUL", "RIGOROUS", "PLANNED"},
+    "autonomyTier": TIERS,
+    "experienceMode": {"SIMPLE", "ADVANCED"},
+    "voiceModelProvider": {"SIDECAR_WHISPER", "SARVAM", "ELEVENLABS", "VIDEO_PROVIDER_RESERVED_1"},
+    "videoModelProvider": {"OPENAI_WHISPER_VIDEO", "SIDECAR_WHISPER_VIDEO", "SARVAM_VIDEO", "VERTEX_VIDEO",
+                           "CUSTOM_CV_MODEL"},
+}
+ENUM_FIELDS["economyProviderName"] = ENUM_FIELDS["providerName"]
+ENUM_FIELDS["fallbackProviderName"] = ENUM_FIELDS["providerName"]
 # Tools a bundle may list. Keep in step with the built-in tool catalog.
 KNOWN_TOOLS = {
     "search_knowledge_base", "list_knowledge_collections", "request_human", "remember_fact",
@@ -43,6 +60,12 @@ def check(path: Path) -> list[str]:
         errors.append("agent design over the size cap")
     if not str(agent.get("systemPrompt", "")).strip():
         errors.append("agent has no systemPrompt")
+    for field, allowed in ENUM_FIELDS.items():
+        value = agent.get(field)
+        if value is None or value == "":
+            continue
+        if value not in allowed:
+            errors.append(f"{field} '{value}' is not valid; allowed: {sorted(allowed)}")
     tier = agent.get("autonomyTier")
     if tier not in TIERS:
         errors.append(f"autonomyTier must be one of {sorted(TIERS)}")

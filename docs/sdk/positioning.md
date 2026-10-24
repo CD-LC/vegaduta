@@ -40,8 +40,8 @@ State these first, because every competitor comparison below is only fair agains
 
 ## Where it is unproven
 
-- **Snapshot, not a release.** `0.1.0-SNAPSHOT`, not on Maven Central, namespace verification
-  pending. japicmp compatibility enforcement starts at 1.0.
+- **A first release, not a mature one.** `0.1.0` is a GitHub Release (`sdk-v0.1.0`), not yet on
+  Maven Central; namespace verification and the Central upload are pending. japicmp compatibility enforcement starts at 1.0.
 - **No third-party audit.** No penetration test, no SOC 2 report, no code audit by an outside
   firm. The test suite and CI gates are first-party.
 - **No named production user.** The platform in this repository consumes the artifacts
@@ -200,7 +200,7 @@ These are the maintainers' expectations, not facts. Revisit quarterly.
 four-eyes rule, budgets that cannot be overspent, an effect journal so retries do not pay twice,
 guardrails, hooks and one audit record tagged with OWASP agentic risk ids. It runs on Spring AI
 today and on any framework through its API. It does not orchestrate, call models or ship a UI.
-It is a snapshot without a third-party audit or a named production user yet; the evidence it
+It is a 0.1.0 release without a third-party audit or a named production user yet; the evidence it
 produces is what a security reviewer asks for, and the adoption playbook shows how to produce
 it in a week without changing behaviour."
 

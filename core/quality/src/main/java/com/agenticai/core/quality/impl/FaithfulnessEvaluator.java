@@ -4,6 +4,7 @@ import com.agenticai.core.quality.EvaluationContext;
 import com.agenticai.core.quality.EvaluationType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
@@ -55,6 +56,9 @@ public class FaithfulnessEvaluator extends AbstractLlmJudgeEvaluator {
     static final String NOT_APPLICABLE =
         "Not applicable - no retrieved context was supplied for this turn, so there is nothing to judge groundedness against";
 
+    /** Registry key of the judge prompt (default text: {@code prompts/en/eval.judge.faithfulness.md}). */
+    static final String PROMPT_KEY = "eval.judge.faithfulness";
+
     public FaithfulnessEvaluator(JudgeChatClientFactory judgeChatClientFactory) {
         super(judgeChatClientFactory);
     }
@@ -71,39 +75,14 @@ public class FaithfulnessEvaluator extends AbstractLlmJudgeEvaluator {
 
     @Override
     protected String buildPrompt(EvaluationContext context) {
-        return String.format(
-            """
-            You are a strict fact-checker evaluating whether an AI agent's answer is FAITHFUL to the
-            documents that were retrieved for it. Judge ONLY against the RETRIEVED CONTEXT below -
-            not against your own knowledge. A claim that is true in the world but absent from the
-            context is UNSUPPORTED. A claim that contradicts the context is UNSUPPORTED.
-
-            USER QUESTION:
-            %s
-
-            RETRIEVED CONTEXT (numbered chunks, in retrieval order):
-            %s
-
-            AGENT ANSWER:
-            %s
-
-            Instructions:
-            1. Break the AGENT ANSWER into its individual factual claims. Ignore greetings, filler,
-               hedges, and restatements of the question - they are not claims.
-            2. For each claim, decide whether it is directly stated in, or clearly inferable from,
-               the RETRIEVED CONTEXT.
-            3. SCORE = (number of supported claims) / (total number of claims). If the answer makes
-               no factual claims at all (e.g. it only says it could not find the information),
-               SCORE is 1.0.
-
-            Respond in this exact format:
-            SCORE: <number from 0.0 to 1.0>
-            UNSUPPORTED: <the unsupported claims, separated by " | ", or NONE>
-            FEEDBACK: <one or two sentences summarising how well the answer is grounded>
-            """,
-            context.userMessage(),
-            renderContext(context.retrievedContext()),
-            context.agentResponse()
+        return prompts.text(
+            PROMPT_KEY,
+            context.agentId(),
+            Map.of(
+                "question", v(context.userMessage()),
+                "context", v(renderContext(context.retrievedContext())),
+                "answer", v(context.agentResponse())
+            )
         );
     }
 

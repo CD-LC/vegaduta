@@ -188,13 +188,66 @@ On a machine where Docker has little memory the launcher also lowers the model's
 
 Check each model's licence on its Ollama library page before redistributing it.
 
+### Response speed
+
+How soon the first words appear depends on three things: how much of the prompt the model has to read before it
+writes, whether the model server can answer that part from its cache, and whether the machine has the memory to
+keep the model loaded.
+
+**What the platform does.**
+
+* **Replies stream as they are written.** A turn that offers a generation or MCP tool used to be held whole so an
+  invented download link could be replaced; now the words stream live and only the part from the first link on is
+  held until the reply is complete (`app.chat.parity.fast-buffering-mode`, see
+  [configuration.md](configuration.md#session-history-stream-versus-buffered-parity-and-response-caches)). This is the same for
+  every provider.
+* **A local model sees the same tools every turn.** Ollama's templates put the tool definitions ahead of the
+  system prompt, and the server keeps one prompt cache. A tool list chosen per message changed that prompt start on
+  most turns, so the whole prompt was read again. On the install's local model, and on a bring-your-own Ollama or
+  local OpenAI-compatible server, the agent's tools are now offered unchanged and in a fixed order
+  (`app.chat.local-model.stable-tools`), so every turn after the first is answered from the cache, and a tool the
+  message did not name, such as web search, is never missing. A model in small-model mode keeps its short list
+  instead (below).
+* **Thinking is off by default** for local models (`app.llm.ollama.reasoning-effort: none`). A thinking model
+  spends tens of seconds reasoning before its first visible word.
+
+**Measured on a 24 GB Apple M5 laptop with `qwen3.5:9b` (Ollama 0.40, MLX):** the prompt is read at about 600
+tokens a second and written at about 23-27 tokens a second. A first message that has to read 9,000 prompt tokens
+waits about 15 seconds; the same prompt from the cache starts in under 1.5 seconds. Ollama's log shows each request
+as `cache hit total=... cached=... left=...`: `left` is what had to be read.
+
+**Your machine.**
+
+| Machine | Model | Notes |
+|---|---|---|
+| Apple Silicon, 16 GB or more | `qwen3.5:4b` (8B or less runs in small-model mode); `qwen3.5:9b` on 24 GB or more | Use the Ollama on the Mac (option 2), not Ollama in Docker: Docker on a Mac has no GPU |
+| NVIDIA GPU | the largest model that fits in GPU memory with room for a 16K-32K context | Ollama in Compose with the GPU, or the host's Ollama |
+| CPU only | `qwen3.5:2b` or `qwen3.5:4b` | Reading the prompt is many times slower than on a GPU, so the short small-model prompt (six tools, compact directives) matters most; expect the first message of a conversation to take longest and later ones to start from the cache |
+| 8 GB of memory or less | `qwen3.5:2b` | Close other apps; a model that is swapped out answers erratically |
+
+**Memory.** The model, Docker's virtual machine and your other apps share the machine's memory, and a model that is
+pushed into swap writes in fits and starts. The personal stack's containers are limited to about 2.5-3.8 GB (see
+[personal-mode.md](personal-mode.md)), so Docker needs about 4 GB; a much larger Docker allowance (Docker Desktop,
+Settings, Resources) only leaves less for the model on a small machine. Check with `ollama ps` (what is loaded) and
+your system's swap use (on a Mac, `sysctl vm.swapusage`); remove models you do not use (`ollama rm`).
+
+**Settings that trade speed for capability.**
+
+| Setting | Default | Effect on speed |
+|---|---|---|
+| `app.chat.local-model.stable-tools` | `true` | `false` goes back to a per-message tool list: a shorter prompt, but read again on most turns |
+| `app.providers.small-model-max-billions` | `8.0` | raise it to put a larger model in small-model mode (six tools, compact directives, fast depth); a row's own "Small-model mode" control overrides it |
+| `app.chat.small-model.tool-cap` | `6` | tools on a small-model turn |
+| `app.llm.ollama.reasoning-effort` | `none` | `low`, `medium` or `high` turn thinking on: better on hard questions, much later first word |
+| `LOCAL_LLM_NUM_CTX` | by Docker memory | a smaller window saves memory on a small machine |
+
 ### Tool calls from small models
 
 Small and free models often write a tool call as text instead of sending it
 through the provider's tool-calling channel, or narrate "I will now generate
-the report" and never call anything. Core has four layers for this; the first
-two apply to every provider, the last two only to platform-pool rows that need
-them.
+the report" and never call anything. Core has four layers for this; the second
+applies to every provider, the first to the models that need it (below), the
+last two only to platform-pool rows that need them.
 
 1. **Recovery of text-form calls.** A reply that is entirely a call to a tool
    the agent was offered (`{"name": ..., "parameters": ...}`, a `<tool_call>`
@@ -202,7 +255,16 @@ them.
    normal tool loop and the model is called again with the result. While
    streaming, a reply is held back only while its first characters could still
    be a call. Bounded by `app.chat.tools.text-call-recovery.max-per-invocation`
-   (3); metric `chat.tool.text_call_recovery{outcome}`.
+   (3); metric `chat.tool.text_call_recovery{outcome}`. This is a small-model
+   workaround, so it wraps a model by what is known of it
+   (`app.chat.tools.text-call-recovery.scope`, default `WEAK_TOOL_CALLERS`): a
+   bring-your-own provider that serves local or open-weight models
+   (`providers`: Ollama, a local OpenAI-compatible server, OpenRouter, Groq,
+   Meta, Sarvam), a pool row in small-model mode or measured at a weak grade
+   (`tool-grades`, below), and a pool row never measured
+   (`apply-to-unmeasured-rows`). A frontier provider and a row measured
+   `STRUCTURED` keep live streaming of a reply that starts with `{` or a code
+   fence. `scope: ALL_MODELS` wraps every model.
 2. **Argument validation.** Before any tool runs, its arguments are checked
    against the tool's schema. A call missing a `required` property is not run;
    the model gets a tool result naming what is missing and the schema, and
@@ -221,6 +283,10 @@ them.
    The grade is shown as a badge in Platform Admin, LLM providers.
    `./scripts/vegaduta models pull TAG` measures the same thing after a pull,
    and `models list` shows the catalog's expected value in its TOOLS column.
+   `scripts/vegaduta personal` measures the model once on the first start and records the
+   result in `.env` as `LOCAL_MODEL_GRADE`; a restart reuses it until the model changes, so it
+   does not load the model cold on every start. `VEGADUTA_REPROBE=1 scripts/vegaduta personal`
+   measures again.
    The probe is short and permissive by design: `llama3.2:3b` passes it
    (STRUCTURED on Ollama 0.19) yet narrates tool runs once it sees a real
    agent prompt with a dozen tools, which is why the catalog marks it chat
@@ -365,7 +431,7 @@ row that already exists.
 | First reply takes minutes | The model is still downloading. `docker compose ... logs ollama`, or wait for the `ollama` container to turn healthy. |
 | `host.docker.internal` does not resolve (Linux) | Use `--local-ai=host`, which adds the mapping, and listen on `0.0.0.0`. |
 | Very slow replies | CPU-only. Use a smaller model, or run Ollama natively (Option 2). |
-| "Every model this workspace can use failed" after about four minutes | A CAREFUL/RIGOROUS/PLANNED agent ran out of time (`app.llm.http.buffered-turn-timeout`, 240 s): those depths make several model calls per turn, which a small local model cannot fit. Core now answers such a turn at FAST depth without tools and says so in the trace; to stop it recurring set the agent's reasoning depth to FAST (small-model mode does this on its own for models of 8B or fewer, judged by the model tag when the stored size disagrees). |
+| "Every model this workspace can use failed" after about four minutes | A CAREFUL/RIGOROUS/PLANNED agent ran out of time (`app.llm.http.buffered-turn-timeout`, 240 s): those depths make several model calls per turn, which a small local model cannot fit. When it ran out of time before any tool ran, core answers it again at FAST depth (tools still on offer) and says so in the trace; when it ran out of time after tools ran, core reports which steps ran instead of writing an answer without their results (`app.chat.resilience`). A job given more time than that limit (its own `timeoutSeconds`) is not cut at it. To stop it recurring set the agent's reasoning depth to FAST (small-model mode does this on its own for models of 8B or fewer, judged by the model tag when the stored size disagrees). |
 | A reply fails with "every model failed" and the log shows `HTTP 500 ... XML syntax error on line 3: element <function> closed by </parameter>` | Ollama could not parse a tool call the model wrote (seen with `qwen3.5:4b` after a tool result, mostly on multi-step browser use). Core replays the request once when it sees this (log: "replaying the request once", counter `llm.ollama.toolcall_parse_retry`), which helps when the model's next try is well-formed; it did not help in the browsing case that was reproduced, so a bigger model (`qwen3.5:9b`) or a hosted key is the reliable way past it. Cause still open; see the personal-install audit. |
 | Replies are poor or truncated with a long system prompt on Apple Silicon | The MLX runner ignores the per-request `num_ctx` core sends and loads the server default (4096). Set `OLLAMA_CONTEXT_LENGTH=16384` (or the value of `APP_LLM_OLLAMA_NUM_CTX`) in the Ollama server's environment and restart it; core logs a warning with this hint after each warm-up when the loaded context is smaller than requested. |
 | The first reply after a pause is slow, later ones are fine | Ollama unloaded the model. On an Ollama you run yourself set `OLLAMA_KEEP_ALIVE=30m` (or `-1`) on the server; the Compose overlay already keeps it loaded. See "Keep the model warm" under Option 2. The chat shows "Model is working…" with a clock while it reloads. |

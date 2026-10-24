@@ -6,9 +6,17 @@
 # Toolchains: JDK 21 (Temurin), Maven, Node 22 + npm, git, and the usual build basics. Gradle
 # projects bring their own ./gradlew; Maven projects may use ./mvnw too.
 ARG NODE_IMAGE=node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa
-ARG JDK_IMAGE=eclipse-temurin:21-jdk-noble
+ARG JDK_IMAGE=eclipse-temurin:21.0.12.1_1-jdk-noble@sha256:107215954359f1ab0be058a247d7c64ed6e69c71c1682d471d38ef751ec8e964
 
 FROM ${NODE_IMAGE} AS node
+# The npm CLI bundled with the Node image carries High advisories in its own dependencies
+# (brace-expansion, ip-address, picomatch, pacote, sigstore) that the base tag has not
+# picked up. Builds here run `npm`, so it stays; replace it with a pinned release whose
+# bundled dependencies are fixed. Keep NPM_VERSION in step with the other Node runner images
+# (services/mcp-stdio-runner/dockerfile-npm.test.js checks that).
+ARG NPM_VERSION=11.21.1
+RUN npm install -g "npm@${NPM_VERSION}" \
+    && npm cache clean --force
 
 FROM ${JDK_IMAGE}
 

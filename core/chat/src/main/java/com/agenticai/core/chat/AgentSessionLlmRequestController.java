@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * "What was sent to the model" for ONE agent chat session: the final prompt
  * (system blocks, history, user turn), sampling options and tool list of every
- * model call, oldest first. Backed by the in-memory {@link LlmRequestSnapshotStore}
- * - tenant-scoped by key, so a session id from another tenant returns empty.
+ * model call, oldest first. Backed by {@link LlmRequestSnapshotStore}: this replica's copies plus, with
+ * {@code app.llm.request-snapshot-store.mode=redis}, the ones other replicas took (and any that outlived a
+ * restart) for the store's time-to-live. Tenant-scoped by key, so a session id from another tenant returns empty.
+ * Each system message says which prompt-registry blocks it is made of (key, scope, version) when the turn's
+ * assembler recorded them ({@link PromptBlockProvenance}).
  * The playground fetches it after each turn to render the Request Inspector.
  */
 @RestController

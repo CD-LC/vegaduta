@@ -135,6 +135,35 @@ public class AgentJobService implements AgentJobLauncher {
         return submit(agentId, request, false);
     }
 
+    /**
+     * The one resolver of the per-tenant / per-agent runtime limits: a job that names no tool-call budget gets
+     * {@code maxTurns} times what one turn of ITS agent may make. Null (unit tests, slim contexts) = the single
+     * global {@code app.guardrails.max-tool-calls-per-turn}.
+     */
+    private volatile com.agenticai.core.agents.runtime.AgentRuntime runtimeSettings;
+
+    @Autowired(required = false)
+    void setRuntimeSettings(com.agenticai.core.agents.runtime.AgentRuntime resolver) {
+        this.runtimeSettings = resolver;
+    }
+
+    /** What one turn of {@code agentId} may make: its runtime ceiling, else the global per-turn ceiling. */
+    private int toolCallsPerTurn(UUID agentId) {
+        com.agenticai.core.agents.runtime.AgentRuntime resolver = runtimeSettings;
+        if (resolver != null) {
+            try {
+                return Math.max(1, resolver.forAgent(agentId).maxToolSteps());
+            } catch (RuntimeException e) {
+                log.warn(
+                        "Could not resolve the runtime ceiling of agent {}; the job's default tool budget uses the"
+                                + " global per-turn ceiling: {}",
+                        agentId,
+                        e.toString());
+            }
+        }
+        return maxToolCallsPerTurn;
+    }
+
     private AgentJobOutcomes outcomes;
 
     @Autowired(required = false)
@@ -172,7 +201,7 @@ public class AgentJobService implements AgentJobLauncher {
         int maxToolCalls =
                 request.maxToolCalls() != null && request.maxToolCalls() > 0
                         ? request.maxToolCalls()
-                        : maxTurns * maxToolCallsPerTurn;
+                        : maxTurns * toolCallsPerTurn(agentId);
 
         // Per-job schema if supplied, else the agent's own default. Snapshotted
         // onto the row either way, so editing the agent mid-flight can never
@@ -470,7 +499,7 @@ public class AgentJobService implements AgentJobLauncher {
                         launch.originRef(),
                         timeoutSeconds,
                         maxTurns,
-                        maxTurns * maxToolCallsPerTurn,
+                        maxTurns * toolCallsPerTurn(launch.agentId()),
                         resultSchemaJson);
         if (launch.scheduleId() != null) {
             // Must be part of the same INSERT: V208's two unique indexes (one live

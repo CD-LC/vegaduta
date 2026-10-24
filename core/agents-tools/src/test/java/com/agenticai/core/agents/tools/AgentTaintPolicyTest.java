@@ -188,14 +188,27 @@ class AgentTaintPolicyTest {
     }
 
     @Test
-    void theLayerIsOffUnlessConfiguredSoDefaultInstallsAreUnchanged() throws Exception {
+    void theLayerObservesByDefaultAndIsInertWhenSwitchedOff() throws Exception {
         var ctor = AgentTaintPolicy.class.getConstructors()[0];
         String expr =
             ctor.getParameters()[0].getAnnotation(org.springframework.beans.factory.annotation.Value.class).value();
 
-        assertEquals("${app.agents.taint.mode:off}", expr);
+        // Owner decision 2026-10-23 (defaults review row 3): observe in the base profile (the code default equals
+        // application.yml, ConfigurationDriftTest); personal ships enforce, APP_AGENTS_TAINT_MODE=off switches it off.
+        assertEquals("${app.agents.taint.mode:observe}", expr);
         AgentTaintPolicy off = policy("off", "", builtInRegistry());
         assertEquals(null, off.gateFor(new java.util.concurrent.atomic.AtomicInteger(), java.util.UUID.randomUUID(), "s"));
+    }
+
+    @Test
+    void observeTracksTaintButNeverAsksForApprovalSoTheDefaultChangesNoBehaviour() {
+        AgentTaintPolicy policy = policy("observe", "", builtInRegistry());
+        AtomicInteger turn = new AtomicInteger();
+        policy.seed(turn, "channel:non-owner");
+        TaintGate gate = policy.gateFor(turn, UUID.randomUUID(), "s");
+
+        assertTrue(gate.turn().isTainted(), "observe still records that the turn is tainted");
+        assertFalse(gate.check("google_gmail", "{}").requiresApproval(), "but a consequential call is not parked");
     }
 
     @Test

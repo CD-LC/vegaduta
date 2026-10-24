@@ -245,8 +245,8 @@ class EvalDatasetTurnImportAndTraceLinkTest {
         assertEquals(EvalDatasetService.GOLDEN_DATASET_NAME, dataset.getName());
         assertEquals(AGENT_ID, dataset.getAgentId());
         assertTrue(dataset.getDescription().contains(goldenCount + " cases"));
-        // Text-only golden set: tool execution stays off by default.
-        assertTrue(!dataset.isToolExecutionEnabled());
+        // The golden set pins no mode: it follows the workspace default like any other dataset.
+        assertNull(dataset.getToolExecutionEnabled());
         @SuppressWarnings("unchecked")
         org.mockito.ArgumentCaptor<List<EvalDatasetCase>> captor =
                 org.mockito.ArgumentCaptor.forClass(List.class);
@@ -336,6 +336,7 @@ class EvalDatasetTurnImportAndTraceLinkTest {
         existingDataset();
         UUID runId = UUID.randomUUID();
         EvalRun run = mock(EvalRun.class);
+        when(run.getEvalMode()).thenReturn(EvalMode.FULL);
         when(run.getId()).thenReturn(runId);
         when(run.getDatasetId()).thenReturn(DATASET_ID);
         when(run.getAgentId()).thenReturn(AGENT_ID);
@@ -460,6 +461,7 @@ class EvalDatasetTurnImportAndTraceLinkTest {
         asPlan(TenantPlan.FREE);
         EvalDatasetService service = mock(EvalDatasetService.class);
         EvalRun run = mock(EvalRun.class);
+        when(run.getEvalMode()).thenReturn(EvalMode.FULL);
         when(run.getStatus()).thenReturn(EvalRunStatus.QUEUED);
         when(runService.triggerRun(eq(AGENT_ID), eq(DATASET_ID), any())).thenReturn(run);
 

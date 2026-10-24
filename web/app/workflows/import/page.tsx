@@ -41,6 +41,7 @@ import {
   sameMappings,
   unmappedCount,
 } from "./workflowImportHelpers";
+import { isPersonalEdition } from "../../lib/edition";
 
 /**
  * Import workflow - migration funnel. Paste or drop a workflow file (a VegaDuta export, an n8n export or a Dify app
@@ -191,7 +192,9 @@ export default function WorkflowImportPage() {
 
   // The existing resources a placeholder can be pointed at. Loaded once, and only when a preview needs them; a failed
   // load leaves a list empty (the person can still pick later on the node), it never blocks the import.
-  const needed: Array<ReturnType<typeof pickerSourceFor>> = preview ? preview.data.placeholders.filter((p) => p.mappable).map((p) => pickerSourceFor(p.kind)) : [];
+  const needed: Array<ReturnType<typeof pickerSourceFor>> = preview
+    ? preview.data.placeholders.filter((p) => p.mappable).map((p) => pickerSourceFor(p.kind))
+    : [];
   const needsAgents = needed.includes("agents");
   const needsKnowledge = needed.includes("knowledge");
   const needsWorkflows = needed.includes("workflows");
@@ -240,7 +243,10 @@ export default function WorkflowImportPage() {
       };
       setPreview({ source, text, mappings: picks, data: safe });
       // Keep a name the person already typed; otherwise start from the one the file carries.
-      setName((current) => current || String(data?.workflow?.name || nameFromFileName(fileName || "")).slice(0, MAX_WORKFLOW_NAME_LENGTH));
+      setName(
+        (current) =>
+          current || String(data?.workflow?.name || nameFromFileName(fileName || "")).slice(0, MAX_WORKFLOW_NAME_LENGTH)
+      );
     } catch (err) {
       failWith(err);
     } finally {
@@ -253,7 +259,9 @@ export default function WorkflowImportPage() {
     setError(null);
     setBusy("create");
     try {
-      const res = await api.importWorkflowFile(buildPortabilityEnvelope(preview.source, preview.text, name, preview.mappings));
+      const res = await api.importWorkflowFile(
+        buildPortabilityEnvelope(preview.source, preview.text, name, preview.mappings)
+      );
       if (res?.workflowId) {
         // Stay "busy" while the route changes so a second click cannot create a duplicate.
         router.push(`/workflows/${encodeURIComponent(res.workflowId)}`);
@@ -301,7 +309,8 @@ export default function WorkflowImportPage() {
   }
 
   const data = preview?.data;
-  const isCurrent = !!preview && preview.text === text && preview.source === source && sameMappings(preview.mappings, mappings);
+  const isCurrent =
+    !!preview && preview.text === text && preview.source === source && sameMappings(preview.mappings, mappings);
   const detectedLabel = detected ? t(SOURCE_LABEL_KEY[detected]) : "";
   const previewSourceLabel = data ? t(SOURCE_LABEL_KEY[data.detectedSource] || "sourceAuto") : "";
   const groups = data ? groupPlaceholders(data.placeholders) : [];
@@ -407,13 +416,21 @@ export default function WorkflowImportPage() {
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <FileUp size={13} aria-hidden="true" /> {t("dropHint")}
                 </span>
-                {fileName && <span className="min-w-0 break-all text-xs text-muted-foreground">{t("fileLoaded", { name: fileName })}</span>}
+                {fileName && (
+                  <span className="min-w-0 break-all text-xs text-muted-foreground">
+                    {t("fileLoaded", { name: fileName })}
+                  </span>
+                )}
               </div>
               <p className="text-xs text-muted-foreground">{t("sizeLimitHint")}</p>
             </div>
 
             <Button type="button" onClick={runPreview} disabled={busy !== null || !text.trim()}>
-              {busy === "preview" ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Sparkles aria-hidden="true" />}
+              {busy === "preview" ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Sparkles aria-hidden="true" />
+              )}
               {busy === "preview" ? t("previewing") : t("previewButton")}
             </Button>
           </CardContent>
@@ -425,11 +442,13 @@ export default function WorkflowImportPage() {
             <AlertDescription>
               <p className="font-medium">{t("upgradeTitle")}</p>
               <p>{error.message || t("upgradeBody")}</p>
-              <Button asChild size="sm" variant="outline" className="mt-2">
-                <Link href="/admin/billing">
-                  <Sparkles size={14} /> {t("upgradeCta")}
-                </Link>
-              </Button>
+              {!isPersonalEdition() && (
+                <Button asChild size="sm" variant="outline" className="mt-2">
+                  <Link href="/admin/billing">
+                    <Sparkles size={14} /> {t("upgradeCta")}
+                  </Link>
+                </Button>
+              )}
             </AlertDescription>
           </Alert>
         )}
@@ -475,10 +494,15 @@ export default function WorkflowImportPage() {
               <div className="space-y-2" data-testid="workflow-import-fidelity">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-sm font-medium text-foreground">{t("fidelityTitle")}</p>
-                  <Badge variant={fidelityBadgeVariant(data.fidelity.level)}>{t(FIDELITY_LABEL_KEY[data.fidelity.level])}</Badge>
+                  <Badge variant={fidelityBadgeVariant(data.fidelity.level)}>
+                    {t(FIDELITY_LABEL_KEY[data.fidelity.level])}
+                  </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {t("fidelitySummary", { percent: fidelityPercent(data.fidelity), count: data.fidelity.sourceNodes - data.fidelity.skipped })}
+                  {t("fidelitySummary", {
+                    percent: fidelityPercent(data.fidelity),
+                    count: data.fidelity.sourceNodes - data.fidelity.skipped,
+                  })}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {t("fidelityStats", {
@@ -487,7 +511,10 @@ export default function WorkflowImportPage() {
                     placeholders: data.fidelity.placeholders,
                     skipped: data.fidelity.skipped,
                   })}{" "}
-                  {t("connectionsSummary", { kept: data.fidelity.connectionsKept, total: data.fidelity.sourceConnections })}
+                  {t("connectionsSummary", {
+                    kept: data.fidelity.connectionsKept,
+                    total: data.fidelity.sourceConnections,
+                  })}
                 </p>
               </div>
 
@@ -514,11 +541,19 @@ export default function WorkflowImportPage() {
                   <div>
                     <p className="text-sm font-medium text-foreground">{t("placeholdersTitle")}</p>
                     <p className="text-xs text-muted-foreground">{t("placeholdersIntro")}</p>
-                    {pending > 0 && <p className="text-xs text-muted-foreground">{t("pendingMappings", { count: pending })}</p>}
+                    {pending > 0 && (
+                      <p className="text-xs text-muted-foreground">{t("pendingMappings", { count: pending })}</p>
+                    )}
                   </div>
                   {groups.map((group) => (
-                    <section key={group.kind} aria-label={t(KIND_LABEL_KEY[group.kind] || "kindUnknown")} className="rounded-lg border border-border bg-card/40">
-                      <h3 className="px-4 py-2 text-sm font-semibold text-foreground">{t(KIND_LABEL_KEY[group.kind] || "kindUnknown")}</h3>
+                    <section
+                      key={group.kind}
+                      aria-label={t(KIND_LABEL_KEY[group.kind] || "kindUnknown")}
+                      className="rounded-lg border border-border bg-card/40"
+                    >
+                      <h3 className="px-4 py-2 text-sm font-semibold text-foreground">
+                        {t(KIND_LABEL_KEY[group.kind] || "kindUnknown")}
+                      </h3>
                       {KIND_HINT_KEY[group.kind] && (
                         <p className="px-4 pb-2 text-xs text-muted-foreground">{t(KIND_HINT_KEY[group.kind])}</p>
                       )}
@@ -526,8 +561,12 @@ export default function WorkflowImportPage() {
                         {group.items.map((item: PortabilityPlaceholder) => (
                           <li key={item.key} className="space-y-2 px-4 py-3 text-sm">
                             <div className="flex flex-wrap items-center justify-between gap-2">
-                              <span className="min-w-0 break-words font-medium text-foreground">{item.label || item.key}</span>
-                              <span className="text-xs text-muted-foreground">{t("usedIn", { count: item.usedBy.length })}</span>
+                              <span className="min-w-0 break-words font-medium text-foreground">
+                                {item.label || item.key}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {t("usedIn", { count: item.usedBy.length })}
+                              </span>
                             </div>
                             {item.mappable && (
                               <Select

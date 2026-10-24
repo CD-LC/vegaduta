@@ -60,7 +60,9 @@
     "railJobs": "ジョブ",
     "railSecrets": "シークレット",
     "railBrand": "ブランディング",
-    "railLearn": "学習"
+    "railLearn": "学習",
+    "railRuntimeSettings": "ランタイム設定",
+    "railControls": "どこで制御できますか?"
   },
   "languageSwitcher": {
     "label": "言語",
@@ -753,7 +755,142 @@
     "edgeTier0Badge": "デバイス上 · Chrome内蔵",
     "edgeTier0BadgeTitle": "Chrome内蔵モデル (Gemini Nano) が回答しました。高速かつ完全にプライベートですが、チャット専用でツールは使用できません。複雑なリクエストでは精度が劣る場合があります。全てのプランで無料です。",
     "edgeTier1Badge": "デバイス上 · ローカルモデル",
-    "edgeTier1BadgeTitle": "ダウンロードされたデバイス上のモデルが回答しました。プライベートで、ツールも使用できます (ホストモデルと同じ保護されたツール)。ホストモデルよりはるかに小さいため、複雑なリクエストでは精度が低い場合があります。全てのプランで無料です。"
+    "edgeTier1BadgeTitle": "ダウンロードされたデバイス上のモデルが回答しました。プライベートで、ツールも使用できます (ホストモデルと同じ保護されたツール)。ホストモデルよりはるかに小さいため、複雑なリクエストでは精度が低い場合があります。全てのプランで無料です。",
+    "viewTurn": "ターンを表示",
+    "viewTurnTitle": "この会話のターンをステップ単位のタイムラインで開きます",
+    "headerRunning": "ターンを実行中",
+    "headerReady": "準備完了",
+    "clearContext": "コンテキストをクリア",
+    "clearContextTitle": "新しい会話を開始します。このチャットのデバイス上とサーバー側のセッションメモリが消去されます。",
+    "stopRun": "この返信を停止",
+    "fallbackSendToPlatform": "プラットフォームに送信",
+    "chipsLabel": "エージェントが今していること",
+    "chipPreparing": "準備中",
+    "chipModelCall": "モデルの応答待ち",
+    "chipThinking": "考え中",
+    "chipWriting": "返信を作成中",
+    "chipTool": "ツールを実行中: {tool}",
+    "chipToolUnnamed": "ツールを実行中",
+    "chipWaitingApproval": "承認待ち ({count})",
+    "chipContinuing": "返信を継続中",
+    "chipContinuingPass": "返信を継続中 ({max} 回中 {pass} 回目)",
+    "chipContinuingApproval": "ご判断を受けて継続中",
+    "chipRetrying": "再試行中",
+    "chipRetryingReason": "再試行中: {reason}",
+    "chipRetryingAttempt": "再試行中 (試行 {attempt}/{max})",
+    "chipRetryingAttemptReason": "再試行中 (試行 {attempt}/{max}): {reason}",
+    "chipFailover": "バックアップモデルに切り替えました",
+    "chipFailoverReason": "バックアップモデルに切り替えました: {reason}",
+    "chipFailoverTo": "{model} に切り替えました",
+    "chipFailoverToReason": "{model} に切り替えました: {reason}",
+    "outcomeTruncated": "この返信は完了前に途切れました。",
+    "outcomeContinue": "続ける",
+    "outcomeLongerReplies": "より長い返信を許可",
+    "continueMessage": "書いた内容を繰り返さずに、止まったところからそのまま続けてください。",
+    "outcomeRefused": "モデルプロバイダーが安全上の理由でこの返信を停止したため、表示できる回答がありません。リクエストを変更して、もう一度お試しください。",
+    "outcomeRefusedReason": "モデルプロバイダーが安全上の理由 ({reason}) でこの返信を停止したため、表示できる回答がありません。リクエストを変更して、もう一度お試しください。",
+    "outcomeMalformedToolCall": "モデルがツールを使おうとしましたが、リクエストが無効だったため何も実行されませんでした。もう一度お試しください。",
+    "outcomeEmpty": "モデルが空の返信を返しました。もう一度お試しください。",
+    "stopRaiseSteps": "ツール呼び出しの上限を引き上げる",
+    "stopRaiseBudget": "支出上限を変更",
+    "stopAskEditor": "このエージェントを編集できる人に、上限の引き上げを依頼してください。",
+    "rsOpen": "実行設定",
+    "rsTitle": "実行設定",
+    "rsClose": "実行設定を閉じる",
+    "rsBack": "実行設定に戻る",
+    "rsIntro": "{name} への次のメッセージがどのように実行されるかを示します。変更はエージェントの「動作」タブで行います。",
+    "rsLoading": "読み込み中",
+    "rsRetry": "再試行",
+    "rsOpenBehavior": "「動作」で編集",
+    "rsModelHeading": "モデルとサンプリング",
+    "rsModel": "モデル",
+    "rsModelNotSet": "未設定",
+    "rsModelDefault": "モデルのデフォルト",
+    "rsDepth": "推論の深さ",
+    "rsSourceAgent": "このエージェントで設定済み",
+    "rsParam_temperature": "温度",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "返信の最大長 (トークン)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "頻度ペナルティ",
+    "rsParam_presencePenalty": "存在ペナルティ",
+    "rsParam_seed": "シード",
+    "rsParam_stopSequences": "停止シーケンス",
+    "rsParamDropped": "{param} はこのエージェントで設定されていますが、{provider} は {model} に対してこれを無視するため、効果はありません。",
+    "rsToolsRunHeading": "この実行で使うツール",
+    "rsToolsRunOnly": "この実行のみ",
+    "rsToolsRunNote": "これらのスイッチは、このプレイグラウンドから送るメッセージがエージェントのどのツールを使えるかを選びます。何も保存されません。ほかのすべての人に対しては、エージェントは自身のツールアクセスを保ちます。エージェントのツールをオフにすることしかできず、新しいツールを与えることはできません。",
+    "rsToolsRunSummary": "この実行ではエージェントの{total}個のツールのうち{on}個がオン",
+    "rsToolsRunNone": "この実行ではツールなし: エージェントはテキストでしか回答できません。",
+    "rsToolsReset": "エージェントのツールを使う",
+    "rsToolsNotInAgent": "このエージェントの保存済みツールではないため、実行でオンにすることはできません。",
+    "rsToolsEditAgent": "エージェントの保存済みツールを変更",
+    "rsToolsLimitedChip": "この実行ではツールが制限されています",
+    "rsToolsEmpty": "このエージェントには使用できるツールがありません。",
+    "rsToolsSummary": "{total} 個中 {on} 個のツールがオン",
+    "rsToolsFailed": "ツールを読み込めませんでした。",
+    "rsLimitsHeading": "ターンごとの上限",
+    "rsLimitsChange": "上限を変更",
+    "rsLimitsView": "上限を見る",
+    "rsLimitsFailed": "上限を読み込めませんでした。",
+    "rsLimitsEmpty": "このエージェントに表示する上限はありません。",
+    "rsNoLimit": "上限なし",
+    "rsScoreAll": "すべての一致",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} 文字",
+    "rsLimitRange": "許容範囲: {min} ～ {max}",
+    "rsLayer_AGENT": "このエージェントで設定済み",
+    "rsLayer_TENANT": "ワークスペースのデフォルト",
+    "rsLayer_PLATFORM": "プラットフォームのデフォルト",
+    "rsLayer_REQUEST": "このリクエストに設定",
+    "rsLimit_maxToolSteps": "ターンあたりのツール呼び出し",
+    "rsLimit_turnTimeoutSeconds": "1 ターンの時間",
+    "rsLimit_toolTimeoutSeconds": "1 回のツール呼び出しの時間",
+    "rsLimit_toolOutputMaxChars": "ツール結果のサイズ",
+    "rsLimit_retrievalTopK": "検索あたりのナレッジ結果数",
+    "rsLimit_retrievalMinScore": "ナレッジ一致の最低関連度",
+    "rsLimit_continuationPasses": "返信を完了するための追加パス",
+    "rsLimitHelp_maxToolSteps": "1 つの返信で行えるツール呼び出しの最大数です。上限に達するとターンは停止し、その旨が表示されます。",
+    "rsLimitHelp_turnTimeoutSeconds": "1 ターンが停止されるまでに実行できる時間です。",
+    "rsLimitHelp_toolTimeoutSeconds": "1 回のツール呼び出しが停止されるまでに実行できる時間です。",
+    "rsLimitHelp_toolOutputMaxChars": "モデルが読み取れる 1 つのツール結果の量です。残りは切り捨てられます。",
+    "rsLimitHelp_retrievalTopK": "1 回の検索でナレッジベースから返される断片の数です。",
+    "rsLimitHelp_retrievalMinScore": "これより一致度が低い断片は除外されます。0 ではすべての一致が残ります。",
+    "rsLimitHelp_continuationPasses": "予告したステップを実行せずに止まった返信を完了させるための追加の試行回数です。",
+    "rsPreviewButton": "プロンプトをプレビュー",
+    "rsPreviewTitle": "プロンプトのプレビュー",
+    "rsPreviewIntro": "このエージェントが送信するシステムプロンプトとツール一覧を、実際のターンと同じ方法で組み立てたものです。モデルには何も送信されません。",
+    "rsPreviewBuilding": "プレビューを作成中",
+    "rsPreviewFailed": "プレビューを作成できませんでした。",
+    "rsPreviewTotals": "システムテキストが約 {prompt} トークン、ツール定義が約 {tools} トークンです (推定値)。",
+    "rsPreviewOverBudgetTitle": "トークン予算を超過",
+    "rsPreviewOverBudget": "常時送信されるシステムテキストが、設定された {budget} トークンの予算を超えています。何も切り捨てられません。プロンプトを短くすることをご検討ください。",
+    "rsPreviewNoBlocks": "表示するプロンプトブロックがありません。",
+    "rsPreviewMessage": "メッセージ: {message}",
+    "rsPreviewTokens": "約 {tokens} トークン",
+    "rsPreviewShowText": "テキストを表示",
+    "rsPreviewTools": "ツール ({count})",
+    "rsPreviewNoTools": "このエージェントにはツールがありません。",
+    "rsPreviewNotes": "このプレビューでは分からないこと",
+    "rsPreviewOpenAdmin": "すべてのプロンプトの文面を表示・変更",
+    "rsOriginDefault": "出荷時のデフォルト",
+    "rsOriginOverride": "{scope}の上書き v{version}",
+    "rsOriginAgentConfig": "エージェント独自のシステムプロンプト",
+    "rsOriginCode": "プラットフォームのコード",
+    "rsRunBudget": "1 回の実行あたりの支出上限",
+    "rsNoCap": "上限なし",
+    "rsRunBudgetHelp": "他のエージェントに委任したりディープリサーチを実行したりする際に、1 回の実行で使える最大額です。請求額ではなく見積もりです。",
+    "chipToolsOff": "ツールなしで再試行中",
+    "chipFailoverBlocked": "バックアップモデルは使用されませんでした: すでにツールが実行されています",
+    "rsLimitChangeOne": "変更",
+    "reasonRateLimited": "レート制限",
+    "reasonTimeout": "タイムアウト",
+    "reasonProviderUnavailable": "プロバイダーが利用できません",
+    "reasonAuthFailed": "プロバイダーが認証情報を拒否しました",
+    "reasonBilling": "プロバイダーの請求の問題",
+    "reasonModelNotFound": "モデルが利用できません",
+    "reasonProviderError": "プロバイダーのエラー",
+    "reasonMalformedToolCall": "ツール呼び出しを利用できませんでした"
   },
   "nodeDefs": {
     "triggerLabel": "トリガー",
@@ -1399,7 +1536,50 @@
     "ttsProviderUpdatedSuccess": "TTSプロバイダーを更新しました。",
     "updateTtsProviderError": "このエージェントのTTSプロバイダーを更新できませんでした。",
     "ttsProviderFreePlanTooltip": "TTSプロバイダーの選択はプレミアム機能です。",
-    "ttsProviderNotSet": "プラットフォームのデフォルトを使用中"
+    "ttsProviderNotSet": "プラットフォームのデフォルトを使用中",
+    "samplingTitle": "詳細なサンプリング",
+    "samplingIntro": "モデルが単語を選ぶ方法を細かく調整します。空欄にするとモデルのデフォルトを使用します。フィールドに対応していないプロバイダーでは無視されます。",
+    "samplingIgnored": "このモデルのプロバイダーはこの設定を無視するため、変更しても効果はありません。",
+    "samplingSaving": "保存中…",
+    "samplingSaved": "保存しました",
+    "samplingNotSaved": "保存されていません",
+    "samplingSaveFailed": "その設定を保存できませんでした。",
+    "samplingErrorWhole": "{label} は {min} ～ {max} の整数にするか、無効にするには空欄にしてください。",
+    "samplingErrorNumber": "{label} は {min} ～ {max} の数値にするか、無効にするには空欄にしてください。",
+    "samplingStopTooLong": "停止シーケンスは最大 {max} 文字です。",
+    "samplingStopTooMany": "停止シーケンスは最大 {max} 個です。",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "可能性の高い次の単語の上位 K 個だけを考慮します。小さいほど安全で予測しやすいテキストになります。1 ～ 1000。",
+    "samplingSeed": "シード",
+    "samplingSeedHelp": "数値を設定すると、同じプロンプトに対する返信の再現性が高まります。すべてのプロバイダーが保証するわけではありません。",
+    "samplingFrequency": "頻度ペナルティ",
+    "samplingFrequencyHelp": "正の値にすると、同じ単語の繰り返しを抑えます。-2 ～ 2。",
+    "samplingPresence": "存在ペナルティ",
+    "samplingPresenceHelp": "正の値にすると、1 つの話題にとどまらず新しい話題に向かいやすくなります。-2 ～ 2。",
+    "samplingPlaceholderDefault": "デフォルト",
+    "samplingPlaceholderRandom": "ランダム",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "停止シーケンス",
+    "samplingStopPlaceholder": "フレーズを入力して Enter を押す",
+    "samplingStopHelp": "モデルがこれらのいずれかを書いた時点で返信が終了します。最大 {count} 個、それぞれ最大 {max} 文字です。",
+    "samplingStopCurrent": "現在の停止シーケンス",
+    "samplingStopRemove": "停止シーケンス {value} を削除",
+    "samplingAdd": "追加",
+    "reasoningDepthFASTCost": "Quickest and cheapest: one pass, and the reply streams in as it is written.",
+    "reasoningDepthPLANNEDCost": "Writes a plan before acting: more model calls per task, and the reply appears all at once instead of streaming.",
+    "reasoningDepthCAREFULCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming.",
+    "reasoningDepthRIGOROUSCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming. Uses the most tokens.",
+    "autonomyLabel": "Autonomy",
+    "autonomyTierSUPERVISED": "Supervised",
+    "autonomyTierSUPERVISEDHint": "Every tool call waits for a human to approve it, whatever the workspace policy says. Tighter step ceiling.",
+    "autonomyTierSUPERVISEDCost": "Asks you before every tool call, searches included.",
+    "autonomyTierSEMI_AUTONOMOUS": "Semi-autonomous",
+    "autonomyTierSEMI_AUTONOMOUSHint": "Follows the workspace's approval policy for each action type. The default for every agent.",
+    "autonomyTierSEMI_AUTONOMOUSCost": "Asks you only for the actions your workspace's approval rules name; the rest run without asking.",
+    "autonomyTierFULLY_AUTONOMOUS": "Fully autonomous",
+    "autonomyTierFULLY_AUTONOMOUSHint": "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
+    "autonomyTierFULLY_AUTONOMOUSCost": "Never asks you: every tool call runs as soon as the agent makes it, sends and payments included.",
+    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "ノードを選択して設定するか、左のパレットから新しいノードをドラッグしてください。",
@@ -1875,6 +2055,9 @@
     "emptyWorkspaceTitle": "コレクションがまだありません",
     "noFilesUploadedHint": "このコレクションにファイルをアップロードすると、エージェントが検索できるようになります。",
     "ocrComingSoonTooltip": "まだ利用できません。アップロードは内蔵の Tesseract OCR にフォールバックします。"
+  },
+  "tutorPage": {
+    "backToHelp": "ヘルプに戻る"
   },
   "knowledgePage": {
     "knowledgeLabel": "ナレッジ",
@@ -5763,6 +5946,8 @@
     "channelsBody": "WhatsApp、Telegram、Instagram、Slack、メールなどを接続し、それぞれでどのエージェントが応答するかを選択します。",
     "channelsPoint1": "無料プランでWhatsApp、Telegram、メールを利用",
     "channelsPoint2": "新しい送信者はまず承認が必要です",
+    "channelsPersonalBody": "WhatsApp、Telegram、Signal、iMessage、またはメールを接続し、チャンネルごとにどのカスタムエージェントが応答するかを選びます。",
+    "channelsPersonalPoint1": "WhatsApp、Telegram、Signal、iMessage、メール",
     "toolsTitle": "統合でエージェントにツールを提供",
     "toolsBody": "エージェントが会話中に使用できるウェブ検索、データベース、MCPサーバー、独自のスクリプトなどのツールを有効にします。",
     "toolsPoint1": "ここで有効化し、エージェントごとに許可",
@@ -14110,5 +14295,1495 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "ワークスペース設定",
+      "agent": "エージェント設定"
+    },
+    "agentMissing": "エージェントを選択すると設定を表示します。",
+    "scopeNote": {
+      "agent": "これらの値はこのエージェントにのみ適用されます。ここで上書きしない項目は、ワークスペース設定から継承されます。"
+    },
+    "loading": "設定を読み込み中",
+    "loadError": "設定を読み込めませんでした。{message}",
+    "retry": "再試行",
+    "filters": {
+      "label": "設定を絞り込む",
+      "search": "設定を検索",
+      "searchPlaceholder": "名前または説明で検索",
+      "group": "グループで絞り込む",
+      "allGroups": "すべてのグループ",
+      "risk": "リスクで絞り込む",
+      "allRisks": "すべてのリスクレベル",
+      "clear": "フィルターをクリア"
+    },
+    "empty": {
+      "none": "ここで変更できる設定はありません。",
+      "filtered": "フィルターに一致する設定がありません。"
+    },
+    "saved": "保存しました。更新された設定: {count} 件。",
+    "saveFailed": "保存されていません。失敗した設定: {count} 件。編集内容はフォームに残っています。",
+    "resetDone": "{label} は継承された値を使用するようになりました。",
+    "resetFailed": "設定をリセットできませんでした。",
+    "unsaved": "未保存の変更",
+    "discardOne": "変更を破棄",
+    "restartRequired": "再起動が必要",
+    "source": {
+      "default": "デフォルト",
+      "platform": "プラットフォーム",
+      "tenant": "ワークスペース",
+      "agent": "エージェント",
+      "tenantInherited": "ワークスペースから継承",
+      "aria": "値の出どころ: {source}"
+    },
+    "sourceHelp": {
+      "default": "誰も変更していません。製品の出荷時の値を使用しています。",
+      "platform": "プラットフォーム運用者がデプロイ全体に対して設定しました。",
+      "tenant": "ワークスペースがデフォルトを上書きしています。リセットすると継承された値に戻ります。",
+      "agent": "このエージェントがワークスペースの値を上書きしています。リセットすると再びワークスペースの値を継承します。",
+      "tenantInherited": "このエージェントには独自の上書きがないため、ワークスペースの値を使用しています。編集すると、このエージェントだけの上書きが作成されます。",
+      "lockedSuffix": "ロックされているため、ここでは変更できません。"
+    },
+    "risk": {
+      "low": "低リスク",
+      "medium": "中リスク",
+      "high": "高リスク",
+      "security": "セキュリティ"
+    },
+    "bool": {
+      "on": "On",
+      "off": "オフ"
+    },
+    "value": {
+      "unset": "未設定",
+      "empty": "空"
+    },
+    "select": {
+      "placeholder": "オプションを選択"
+    },
+    "slider": {
+      "label": "{label} (スライダー)"
+    },
+    "duration": {
+      "unitLabel": "{label} の単位"
+    },
+    "units": {
+      "chars": "文字",
+      "tokens": "トークン",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "秒",
+      "min": "分",
+      "h": "時間"
+    },
+    "groups": {
+      "agent": "エージェントランタイム",
+      "approvals": "承認",
+      "quality": "品質チェック",
+      "guardrails": "ガードレール",
+      "chat": "チャット",
+      "tools": "ツール",
+      "memory": "メモリ",
+      "knowledge": "ナレッジ",
+      "delegation": "委任",
+      "aux": "ヘルパーモデル",
+      "routing": "モデルルーティング"
+    },
+    "errors": {
+      "required": "値を入力してください。",
+      "notNumber": "数値を入力してください。",
+      "notInteger": "整数を入力してください。",
+      "belowMin": "{min} 以上である必要があります。",
+      "aboveMax": "{max} 以下である必要があります。",
+      "notAllowed": "リストにあるオプションから選択してください。",
+      "tooShort": "短すぎます。{min} 以上にしてください。",
+      "tooLong": "長すぎます。{max} 以下にしてください。",
+      "precision": "この単位では正確に表現できません。最小単位の整数を使用するか、より小さい単位を選択してください。",
+      "serverRange": "許容範囲: {min} ～ {max}。",
+      "serverOptions": "許可される値: {options}。",
+      "server": {
+        "invalid": "サーバーがこの値を受け付けませんでした: {message}",
+        "locked": "この設定は管理者によってロックされたため、変更は保存されませんでした。",
+        "notFound": "この設定は存在しなくなりました。",
+        "forbidden": "この設定を変更する権限がありません。",
+        "reasonRequired": "この変更には理由が必要です。入力してもう一度お試しください。",
+        "network": "サーバーに接続できなかったため、変更は保存されませんでした。{message}",
+        "other": "変更を保存できませんでした: {message}"
+      }
+    },
+    "effective": "現在有効: {value}",
+    "hint": {
+      "range": "許容範囲: {min} ～ {max}。",
+      "min": "最小: {min}。",
+      "max": "最大: {max}。",
+      "default": "デフォルト: {value}。",
+      "securityStricter": "セキュリティ設定は、プラットフォームの値より厳しくすることのみ可能で、緩めることはできません。",
+      "inherited": "リセットすると次の値に戻ります: {value}。"
+    },
+    "locked": {
+      "withReason": "管理者によりロック: {reason}",
+      "noReason": "管理者によりロックされています。ここでは変更できません。"
+    },
+    "blocked": {
+      "role": "お使いのロールではこの設定を変更できません。ワークスペース管理者に依頼してください。",
+      "scope": "この設定はここでは上書きできません。",
+      "readOnly": "現在、設定は読み取り専用です。",
+      "adminOnly": "このセキュリティ設定を変更できるのはワークスペース管理者のみです。値は確認できますが、編集はできません。"
+    },
+    "reset": {
+      "button": "継承値にリセット",
+      "aria": "継承値にリセット: {label}"
+    },
+    "help": {
+      "show": "詳細を表示",
+      "hide": "詳細を隠す"
+    },
+    "history": {
+      "button": "履歴",
+      "open": "履歴: {label}",
+      "title": "履歴: {label}",
+      "scopeTenant": "ワークスペースの変更",
+      "scopeAgent": "このエージェントの変更",
+      "close": "履歴を閉じる",
+      "loading": "履歴を読み込み中",
+      "error": "履歴を読み込めませんでした。{message}",
+      "empty": "まだ変更は記録されていません。",
+      "listLabel": "変更履歴 (新しい順)",
+      "version": "バージョン {version}",
+      "before": "変更前:",
+      "after": "変更後:",
+      "by": "変更者",
+      "unknownActor": "不明",
+      "reason": "理由:"
+    },
+    "savebar": {
+      "count": "未保存の変更: {count} 件。",
+      "invalid": "保存する前に、強調表示されたフィールドを修正してください。修正が必要なフィールド: {count} 件。",
+      "discard": "変更を破棄",
+      "save": "変更を保存",
+      "saving": "保存中"
+    },
+    "risky": {
+      "title": "リスクのある変更を確認 ({count})",
+      "description": "これらの設定は、エージェントの動作や許可される内容を変更します。各変更を確認し、変更する理由を入力してください。理由は監査ログに保存されます。",
+      "descriptionSecurity": "これらのうち少なくとも 1 つはセキュリティ設定です。プラットフォームの値より厳しくすることのみ可能です。各変更を確認し、変更する理由を入力してください。理由は監査ログに保存されます。",
+      "listLabel": "確認する変更",
+      "from": "変更前",
+      "to": "to",
+      "securityNote": "セキュリティ設定: プラットフォームの値より緩くすることはできません。",
+      "consequence": "この変更の影響:",
+      "reasonLabel": "この変更の理由",
+      "reasonPlaceholder": "例: サポートチームの長時間の調査に合わせて上限を引き上げる",
+      "reasonHint": "必須、{min} 文字以上。変更者と変更前後の値とともに保存されます。",
+      "acknowledge": "このセキュリティ変更の影響を理解しました。",
+      "cancel": "キャンセル",
+      "confirm": "確認して保存",
+      "resetNote": "リセット: 上書きが削除され、設定は継承する値に戻ります。"
+    },
+    "strictness": {
+      "higher": "高いほど厳格: 高い値は受け入れられ、低い値は拒否されます。",
+      "lower": "低いほど厳格: 低い値は受け入れられ、高い値は拒否されます。",
+      "enumOrder": "選択肢は緩い順から厳しい順に並んでいます: {options}。厳しい側にしか動かせません。"
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "保留中",
+    "status_APPROVED": "承認済み",
+    "status_REJECTED": "却下",
+    "status_EXPIRED": "期限切れ",
+    "status_EXECUTION_FAILED": "実行失敗",
+    "status_DEAD_LETTERED": "デッドレター",
+    "filtersLabel": "リクエストを絞り込む",
+    "filterAgentLabel": "エージェントで絞り込む",
+    "filterToolLabel": "ツールで絞り込む",
+    "filterAgeLabel": "経過時間で絞り込む",
+    "filterAnyAgent": "すべてのエージェント",
+    "filterAnyTool": "すべてのツール",
+    "filterAnyAge": "すべての期間",
+    "age_newer1h": "1 時間以内",
+    "age_older1h": "1 時間より前",
+    "age_older24h": "1 日より前",
+    "age_older7d": "7 日より前",
+    "filtersClear": "フィルターをクリア",
+    "filterWindowNote": "最新の {count} 件のリクエストを絞り込み中です。それより古いものは含まれません。",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time} 後に期限切れ",
+    "expiresAt": "誰も判断しない場合、{time} に自動的に閉じられます",
+    "overdue": "制限時間を過ぎており、次回の整理で閉じられます",
+    "neverExpires": "このワークスペースでは、待機中のリクエストは期限切れになりません。",
+    "expiredNote": "{time} に期限切れ: 時間内に誰も判断しませんでした",
+    "expiredReasonPrefix": "期限切れ:",
+    "auditExpired": "期限切れ、時間内に誰も判断しませんでした",
+    "riskLow": "低リスク",
+    "riskMedium": "中リスク",
+    "riskHigh": "高リスク",
+    "riskEstimateNote": "リスクはツール名からの推定です。プラットフォームはツールを分類しないため、承認する前に引数を確認してください。",
+    "riskWhoDecides": "承認待ちの対象は誰が決めますか?",
+    "previewGoal": "取り組んでいたタスク:",
+    "previewArguments": "引数",
+    "previewNoArguments": "この呼び出しに引数は記録されていません。",
+    "previewRedacted": "機密と思われる値が {count} 件ここでは非表示になっています。承認した場合でもツールには送信されます。",
+    "previewTruncated": "これらの引数は長すぎて全体を表示できないため、このリクエストはここから承認できません。",
+    "approveBlockedTooLong": "リクエスト全体を確認できないため、承認はオフになっています。拒否することは可能です。",
+    "ifApproveLabel": "承認した場合:",
+    "ifApprove": "上記の引数で {tool} が今すぐ実行され、エージェントはその結果を使ってタスクを続行します。",
+    "ifDenyLabel": "拒否した場合:",
+    "ifDeny": "{tool} は実行されません。エージェントには、拒否されたこと (理由を入力した場合はその理由も) が伝えられ、ツールなしで続行します。",
+    "whyGated": "エージェントが {tool} の使用を要求しました。エージェントが「監視付き」に設定されているか、このワークスペースがそのツールに承認を必須としているため、判断待ちで保留されました。",
+    "denyReasonLabel": "拒否する場合の理由 (任意)",
+    "denyReasonPlaceholder": "例: 宛先が違います。送信前に確認してください",
+    "denyReasonHelp": "拒否すると、エージェントはこの理由を拒否された呼び出しの結果として読み取り、対応を調整します。理由なしで拒否するには空のままにしてください。",
+    "denyButton": "拒否",
+    "detailRegionLabel": "リクエストの詳細",
+    "sessionLabel": "会話",
+    "linkOpenAgent": "エージェントを開く",
+    "linkInspectTurns": "ターンを調査",
+    "continuationLabel": "エージェントがその後に行ったこと",
+    "continuationCompleted": "エージェントはタスクの続行を完了しました。",
+    "continuationFailed": "この判断の後、エージェントは続行できませんでした。",
+    "continuationRetry": "続行を依頼する",
+    "retryMessage": "タスクを続行してください。",
+    "lastDecisionTitle": "直前の判断: {tool}",
+    "lastDecisionClose": "閉じる",
+    "deepLinkNotFound": "その承認リクエストが見つからないか、表示する権限がありません。",
+    "selectAllLabel": "このページの保留中のツール呼び出しをすべて選択",
+    "selectRowLabel": "{tool} の保留中の呼び出しを選択",
+    "bulkSelected": "{count} 件選択中",
+    "bulkApprove": "選択を承認",
+    "bulkDeny": "選択を拒否",
+    "bulkClear": "選択を解除",
+    "bulkCancel": "キャンセル",
+    "bulkDismiss": "閉じる",
+    "bulkMixedTools": "一括判断では、選択したすべてのリクエストが同じツールのものである必要があります。",
+    "bulkNotLowRisk": "一括承認は低リスクのツール (参照系) のみ対象です。拒否は 1 つのツールであれば使用でき、それ以外は個別に判断してください。",
+    "bulkNotToolCall": "一括判断はエージェントのツール呼び出しのみが対象です。",
+    "bulkNotPending": "一括判断はまだ保留中のリクエストのみが対象です。",
+    "bulkConfirmApproveTitle": "{tool} への {count} 件の呼び出しを承認しますか?",
+    "bulkConfirmApproveBody": "これらはそれぞれ、下に表示された各自の引数で {tool} を今すぐ実行し、エージェントは結果を使って続行します。この操作は取り消せません。",
+    "bulkConfirmDenyTitle": "{tool} への {count} 件の呼び出しを拒否しますか?",
+    "bulkConfirmDenyBody": "これらはいずれも実行されません。エージェントには、各呼び出しが拒否されたこと (理由を入力した場合はその理由も) が伝えられます。",
+    "bulkConfirmApprove": "{count} 件を承認",
+    "bulkConfirmDeny": "{count} 件を拒否",
+    "bulkMore": "ほか {count} 件",
+    "bulkProgress": "{count} 件中 {done} 件完了",
+    "bulkResult": "{done} 件を判断済み、{failed} 件が失敗しました。",
+    "notifyOff": "通知する",
+    "notifyOn": "通知オン",
+    "notifyHelp": "このタブがバックグラウンドにある間に新しいリクエストが届いたら、ブラウザー通知を表示します",
+    "notifyUnsupported": "このブラウザーは通知を表示できません。",
+    "notifyBlocked": "通知がブロックされています。オンにするには、ブラウザーのサイト設定で許可してください。",
+    "notifyTitle": "エージェントが承認を待っています",
+    "notifyBodyOne": "{tool} について判断が必要です。",
+    "notifyBodyMany": "{count} 件のリクエストについて判断が必要です。",
+    "newArrived": "新しい承認リクエストが {count} 件届きました。",
+    "rulesTitle": "1 つのツールのルール",
+    "rulesIntro": "ツールが常に人の承認を待つか、まったく待たないかを選択します。このルールは「半自律」に設定されたすべてのエージェントに適用されます。",
+    "rulesNeedsScope": "ルールを変更するには承認の権限が必要です。",
+    "rulesToolLabel": "ツール名",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "リクエストに表示されるとおりに入力してください。例: send_email。",
+    "rulesToolNameInvalid": "ツール名にスペースは使用できません。",
+    "rulesModeLabel": "どうしますか",
+    "rulesAskName": "常に確認する",
+    "rulesAskHint": "このツールへのすべての呼び出しは、人の承認を待ちます。",
+    "rulesNeverName": "確認しない",
+    "rulesNeverHint": "このツールへの呼び出しは、誰の承認もなくそのまま実行されます。",
+    "rulesNeverRiskyWarn": "このツールは何かを変更するように見えます。慎重に判断してください。",
+    "rulesScopeNote": "ルールは 1 つのエージェントではなくワークスペース全体に適用されます。監視付きエージェントは引き続きすべてについて確認し、完全自律のエージェントはルールに関係なく確認しません。設定したルールは、まだここには一覧表示されません。",
+    "rulesSave": "ルールを保存",
+    "rulesSaveFailed": "ルールを保存できませんでした。",
+    "rulesSavedAsk": "{tool} は常に承認を求めるようになります。",
+    "rulesSavedNever": "{tool} は今後、承認を求めなくなります。",
+    "rulesNeverConfirmTitle": "{tool} の実行前の確認をやめますか?",
+    "rulesNeverConfirmBody": "すべての半自律エージェントが、誰の承認もなく {tool} を実行するようになります。このツールは何かを変更したり送信したりできるように見え、間違いは取り消せません。",
+    "rulesNeverConfirmBodyLow": "すべての半自律エージェントが、確認なしで {tool} を実行するようになります。参照系のように見えるため、通常は安全です。",
+    "rulesNeverConfirm": "確認をやめる",
+    "tiersTitle": "承認待ちの対象は誰が決めますか?",
+    "tiersIntro": "各エージェントには自律レベルがあります。これは、ワークスペースの承認ルールを使用するかどうかを決定します。",
+    "tierCurrent": "このエージェント",
+    "tierConsequenceLabel": "実際には:",
+    "tierSupervisedName": "監視付き",
+    "tierSupervisedWhat": "ワークスペースのルールに関係なく、すべてのツール呼び出しが人の承認を待ちます。ターンあたりのツールステップ数の上限も低くなります。",
+    "tierSupervisedConsequence": "最も安全ですが、キューに多くのリクエストがたまり、エージェントの動作が遅くなります。",
+    "tierSemiName": "半自律",
+    "tierSemiWhat": "ツールごとのワークスペースのルールで決まります。送信、削除、支払いなどのリスクの高いツールはデフォルトで確認し、それ以外は実行されます。",
+    "tierSemiConsequence": "適切なデフォルトです。ここではツールごとのルールが有効になります。",
+    "tierFullName": "完全自律",
+    "tierFullWhat": "ツール呼び出しが承認を待つことはなく、エージェントのツールステップ数の上限も高くなります。ツールごとのルールは無視されます。",
+    "tierFullConsequence": "確認なしで動作します。ミスを簡単に取り消せるエージェントにのみ使用してください。",
+    "tiersRuleNote": "ツールのルール (常に確認する、確認しない) は、半自律のエージェントにのみ意味があります。",
+    "agentModeTitle": "このエージェントが承認を必要とするのはいつですか?",
+    "agentModeSupervised": "このエージェントは「監視付き」です。すべてのツール呼び出しが人の承認を待ち、ツールごとのルールは無視されます。",
+    "agentModeSemi": "このエージェントは「半自律」です。各ツールはワークスペースのルールに従います。送信、削除、支払いはデフォルトで確認します。",
+    "agentModeFull": "このエージェントは「完全自律」です。承認を待つことはなく、ツールごとのルールは無視されます。",
+    "agentModeQueueLink": "このエージェントのリクエストを見る",
+    "agentModeRulesLink": "ツールのルールを設定する",
+    "agentModeShowTiers": "3 つのレベルを比較",
+    "agentModeHideTiers": "比較を隠す",
+    "agentModeScopeNote": "レベルは上の自律性の選択で変更します。ツールのルールはエージェント単位ではなく、ワークスペース全体に適用されます。",
+    "policyThenApprovalNote": "これらのルールを通過した呼び出しでも、人の承認を待つことがあります。これは、下で説明しているエージェントの自律レベルによって決まります。",
+    "chatReasonToggle": "理由を追加",
+    "chatReviewInQueue": "キューで確認"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "イベントを絞り込む",
+    "tlFilterCategories": "イベントの種類",
+    "tlCatIntake": "受付",
+    "tlCatModel": "モデル",
+    "tlCatTool": "ツール",
+    "tlCatApproval": "承認",
+    "tlCatContinuation": "継続",
+    "tlCatRetry": "再試行とフェイルオーバー",
+    "tlCatGuardrail": "ガードレール",
+    "tlCatCache": "キャッシュ",
+    "tlCatVerify": "チェック",
+    "tlCatFinish": "完了",
+    "tlProblemsOnly": "問題のみ",
+    "tlSearch": "イベントを検索",
+    "tlSearchPlaceholder": "ツール、モデル、ガード、またはステータス",
+    "tlClearFilters": "フィルターをクリア",
+    "tlShowing": "{total} 件中 {shown} 件のイベントを表示中",
+    "tlNoMatch": "これらのフィルターに一致するイベントはありません。",
+    "tlSevOk": "成功",
+    "tlSevInfo": "情報",
+    "tlSevWarn": "要確認",
+    "tlSevError": "失敗",
+    "tlIntake": "ターン開始: {chars} 文字、ツール {tools} 個、添付ファイル {attachments} 件",
+    "tlRunTools": "この実行で使うツール",
+    "tlRunToolsNone": "なし(テキストのみ)",
+    "tlModelCall": "{model} ({provider}) へのモデル呼び出し、ルート {route}",
+    "tlFailover": "{model} ({provider}) にフェイルオーバーしました",
+    "tlRetryModel": "{model} ({provider}) で再試行、ルート {route}",
+    "tlRetry": "再試行: {guard} ({outcome})",
+    "tlCacheHit": "レスポンスキャッシュから回答しました",
+    "tlToolCall": "ツール呼び出し {tool}: {status}",
+    "tlApprovalRequested": "{tool} の実行前に承認がリクエストされました",
+    "tlApprovalDecided": "{tool} の承認が決定されました: {decision}",
+    "tlApprovalAutoAllowed": "{tool}は確認なしで実行されました: 監視付きでの読み取り専用の呼び出し",
+    "tlContinuation": "継続: {guard} ({outcome})",
+    "tlGuard": "ガードレール {guard}: {outcome}",
+    "tlVerifyPassed": "チェック合格: {check}",
+    "tlVerifyFailed": "チェック不合格: {check}",
+    "tlFinish": "完了: {status} (回答は {chars} 文字)",
+    "tlOther": "イベント {type}",
+    "reasonFallbackProvider": "プライマリモデルが失敗したため、ターンはエージェントのフォールバックプロバイダーに切り替わりました。",
+    "reasonToolsDisabledRetry": "プロバイダーがツール呼び出し履歴を拒否したため、ターンはツールなしでもう一度回答されました。",
+    "reasonRetryOther": "モデル呼び出しが繰り返されました。",
+    "reasonToolCallRetry": "モデルが不正なツール呼び出しで回答を終えたため、もう一度問い合わせました。",
+    "reasonCutOff": "回答が長さの上限で途切れたため、モデルに続きを依頼しました。",
+    "reasonToolsContinue": "ツール呼び出しの後にモデルがさらにステップを必要としたため、ターンが続行されました。",
+    "reasonToolBlocked": "ツールの代わりにガード、ポリシー、フック、または上限が応答したため、ツールは実行されませんでした。",
+    "reasonToolParked": "呼び出しは人の承認を待っています。ツールは実行されていません。",
+    "reasonGuardAction": "ガードレールが回答を変更または保留しました。",
+    "tlAtStart": "開始から",
+    "tlGap": "前のイベントから",
+    "tlDuration": "所要時間",
+    "tlTokens": "入力 / 出力トークン",
+    "tlCost": "コスト",
+    "tlDetails": "ハッシュと生の要約",
+    "tlArgsHash": "引数のハッシュ",
+    "tlResultDigest": "結果のダイジェスト",
+    "tlContentNote": "引数と結果は保存されません。ツール呼び出しについては、タイムラインにステータス、所要時間、引数と結果のハッシュが表示され、内容は表示されません。",
+    "tlStatFinish": "終了理由",
+    "tlStillOpen": "未完了",
+    "tlProblemCount": "{count} 件のイベントに対応が必要です",
+    "tlStatRetries": "再試行とフェイルオーバー",
+    "tlStatContinuations": "継続",
+    "tlStatApprovals": "承認",
+    "tlStatTokens": "入力 / 出力トークン",
+    "tlTokensNotRecorded": "このターンでは記録されていません",
+    "tlTokensInOut": "入力 / 出力",
+    "tlCopyTurnId": "ターン ID をコピー",
+    "tlCopyTurnIdShort": "ID をコピー",
+    "tlCopied": "ターン ID をコピーしました。",
+    "tlCopyFailed": "コピーできませんでした。ID を選択して手動でコピーしてください。",
+    "sessTitle": "セッションのターン",
+    "sessSubtitle": "チャットセッションを選ぶと、記録されたターンが新しい順に表示されます。チャットメッセージの「ターンを表示」リンクを開くと、ここに自動入力されます。",
+    "sessionIdLabel": "セッション ID",
+    "sessionIdPlaceholder": "チャットセッション ID",
+    "sessFind": "ターンを検索",
+    "sessInvalid": "エージェント ID (UUID) とセッション ID を入力してください。",
+    "sessLoading": "セッションのターンを読み込み中...",
+    "sessUnavailableTitle": "セッション検索は利用できません",
+    "sessUnavailableBody": "このサーバーではセッションのターンを一覧表示できません。代わりに、下でターン ID を指定してターンを開いてください。",
+    "sessErrorTitle": "セッションのターンを読み込めませんでした",
+    "sessEmptyTitle": "このセッションには記録されたターンがありません",
+    "sessEmptyBody": "セッションには何も記録されていません。セッション ID が間違っているか、ターンの実行時にターンジャーナルがオフだった可能性があります。",
+    "sessListLabel": "記録されたターン {count} 件",
+    "sessEvents": "{count} 件のイベント",
+    "sessStatusOpen": "開く",
+    "sessOpen": "タイムラインを開く",
+    "sessOpened": "下に表示中"
+  },
+  "evalControls": {
+    "cancel": "キャンセル",
+    "saving": "保存中...",
+    "saved": "保存しました。",
+    "saveMode": "リプレイモードを保存",
+    "discard": "変更を破棄",
+    "saveFailed": "リプレイモードを保存できませんでした。",
+    "unsavedChanges": "未保存の変更",
+    "modeTitle": "このデータセットのリプレイ方法",
+    "modeHelp": "リプレイでエージェントのツールを使用できるかどうかを選択します。次回の実行で測定される内容が変わります。",
+    "modeTextOnly": "テキストのみ",
+    "modeTextOnlyHelp": "エージェントはツールなしで回答します。安全で、実際には何も起こりません。期待ツールのチェックは満たせません。",
+    "modeFull": "ツール付きのフルパイプライン",
+    "modeFullHelp": "実際のユーザーと同じツール、ガードレール、ステップ上限を使用します。期待ツールおよびトラジェクトリのチェックに必要です。",
+    "modeFullNote": "読み取りだけを行うツールは実際に実行されます。データの変更、メッセージの送信、お金の使用につながり得るものはシミュレートされ、実行内に一覧表示されるため、実際には何も起きません。安全性の分類がないツールもシミュレートされます。",
+    "autoApproveLabel": "評価サンドボックスでツール呼び出しを自動承認",
+    "autoApproveHelp": "通常は人の承認を待つツール呼び出しを評価サンドボックスが承認し、ケースを完了できるようにします。これがない場合、ケースは本番と同様に、応答のない承認で終了します。",
+    "autoApproveWarnTitle": "非本番ワークスペース専用",
+    "autoApproveWarnBody": "ツールが実際の顧客やデータに届く環境では、絶対にオンにしないでください。シェル、コーディング、スケジュール、エージェント間、決済、削除のツールは自動承認されません。管理者がこのワークスペースを非本番としてマークしている必要があります。",
+    "autoApproveNeedsFull": "最初にフルパイプラインをオンにしてください。自動承認はツールが実行される場合にのみ適用されます。",
+    "autoApproveRefused": "このワークスペースでは許可されていません: {reason}",
+    "autoApproveConfirmTitle": "評価でツール呼び出しを自動承認しますか?",
+    "autoApproveConfirmBody": "このデータセットのリプレイで人の判断を待つことになるすべてのツール呼び出しが自動的に承認されます。承認された読み取り専用のツールは実際に実行され、何かを変更し得る承認済みツールは引き続きシミュレートされます。テストデータのあるワークスペースでのみ行ってください。実行には自動承認されたことが記録されます。",
+    "autoApproveConfirm": "自動承認をオンにする",
+    "trajectoryLabel": "トラジェクトリチェック",
+    "trajectoryOn": "On",
+    "trajectoryOff": "利用できません",
+    "trajectoryHelpOn": "期待されるトラジェクトリを持つケースは、エージェントがどのツールをどの順序で呼び出したかで採点されます。これはデータセットごとではなく、管理者がデプロイ全体に対してオンにします。",
+    "trajectoryHelpOff": "ここではトラジェクトリチェックを利用できません。管理者がデプロイ全体に対してオンにする必要があり、評価を含むプランが必要です。",
+    "trajectoryNeedsFull": "このデータセットはテキストのみのため、期待されるトラジェクトリを持つケースは採点されません。フルパイプラインをオンにしてください。",
+    "runAutoApproved": "自動承認",
+    "runAutoApprovedTitle": "この実行のツール呼び出しは人が判断したものではなく、評価サンドボックスが承認しました。",
+    "toolCallsLabel": "このリプレイのツール呼び出し",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "失敗",
+    "toolStatusNotRun": "未実行",
+    "toolStatusAwaitingApproval": "承認待ち",
+    "toolStatusReplayed": "リプレイ済み",
+    "samplingTitle": "バックグラウンドの品質スコアリング",
+    "samplingLoading": "スコアリング率を読み込み中...",
+    "samplingUnavailable": "バックグラウンドの判定モデルが採点するライブターンの割合は、プラットフォーム管理者が設定しており、ここには表示されません。",
+    "samplingValue": "ライブターンの約 {percent}% がバックグラウンドの品質判定モデルで採点されます。",
+    "samplingHelp": "率が低いほどコストは下がりますが、上のトレンドのスコア数も減ります。この値はここでは読み取り専用です。",
+    "samplingSource_default": "デフォルト",
+    "samplingSource_platform": "プラットフォームで設定",
+    "samplingSource_tenant": "ワークスペースで設定",
+    "samplingSource_agent": "このエージェントで設定",
+    "modeDefault": "ワークスペースのデフォルト",
+    "modeDefaultHelp": "ワークスペースの設定に従います(管理者が変更していなければ完全なパイプライン)。各実行は引き続き独自のモードを選べます。",
+    "modeDefaultCurrent": "現在: {mode}",
+    "modeNameFull": "完全なパイプライン",
+    "modeNameQuick": "クイック(テキストのみ)",
+    "badgeFull": "完全なパイプライン",
+    "badgeQuick": "クイック",
+    "datasetModePinnedTitle": "このデータセットは常にこの方法でリプレイされます。個々の実行は別のモードを選ぶこともできます。",
+    "datasetModeDefaultTitle": "このデータセットは、実行のリプレイ方法についてワークスペースの既定値に従います。",
+    "runModeLabel": "次の実行のリプレイモード",
+    "runModeInherit": "データセットの設定を使う",
+    "runModeHelp": "完全なパイプラインは、エージェントをそのツール、ガードレール、承認とともに安全なサンドボックスで実行します。読み取りだけのツールは実際に実行され、データを変更したり何かを送信したりし得るものはシミュレートされます。クイックはツールを使わせず、書かれた回答だけをテストします。",
+    "runModeFullTitle": "この実行は評価サンドボックスで完全なパイプラインを使用しました。",
+    "runModeQuickTitle": "この実行はテキストのみのクイックリプレイでした: エージェントのツールは使われませんでした。",
+    "runSimulatedTools": "この実行ではシミュレートのみで実行されませんでした(データを変更したりプラットフォーム外に影響したりし得るため): {tools}。",
+    "toolStatusSimulated": "シミュレート済み、未実行"
+  },
+  "assistant": {
+    "taskPhoneLabel": "あなたの電話番号",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "その番号を保存できませんでした。",
+    "searchingWebFor": "Searching the web for “{target}”…",
+    "readingPageAt": "Reading {target}…",
+    "researchingTopic": "Researching “{target}”…",
+    "statusWriting": "Writing the answer…",
+    "quietFor": "still waiting on the model ({duration} since the last update)",
+    "toolStepsLabel": "Steps",
+    "chipDone": "finished",
+    "chipFailed": "failed",
+    "moreSteps": "+{n} more",
+    "sourcesLabel": "Sources",
+    "closePanel": "Close the panel",
+    "conversationLabel": "Conversation",
+    "copiedReply": "Copied",
+    "jumpToLatest": "Jump to the latest message"
+  },
+  "agentLab": {
+    "wtLabel": "エージェントのツールで実行",
+    "wtHelp": "オフ: 各回答は単純なモデル呼び出し 1 回です。オン: チャットのターンと同じツールパイプラインで回答するため、ツールが実行され、ガードレールが適用され、ステップ上限も守られます。人の承認が必要な呼び出しは、承認待ちとして待機します。",
+    "wtUnavailable": "このインストールでは、ツール付きでのラボ実行は無効になっています。管理者に有効化を依頼してください。",
+    "wtRefused": "この実行は拒否されました: {reason}",
+    "wtActive": "この実行ではツールが実際に動作し、副作用も発生します。",
+    "wtConfirmTitle": "エージェントのツールでラボを実行しますか?",
+    "wtConfirmBody": "各サンプルはエージェントの実際のツールを呼び出すことがあり、メッセージの送信やデータの書き込みなど、実際の影響が生じる可能性があります。承認が必要な呼び出しは人の承認を待ちます。テスト用のエージェントまたはテストデータでのみ使用してください。",
+    "wtConfirm": "ツールを使用"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "エージェントの上限",
+        "description": "停止されるまでに 1 回のエージェントターンが行える作業量です。"
+      },
+      "approvals": {
+        "label": "承認",
+        "description": "人が行動を承認または拒否した後の動作と、リクエストが待機する時間です。"
+      },
+      "chat": {
+        "label": "会話の動作",
+        "description": "返信を完了、再試行、キャッシュ、継続する方法です。"
+      },
+      "routing": {
+        "label": "モデルルーティング",
+        "description": "より高速なモデル向けの簡単なメッセージとみなす条件です。"
+      },
+      "memory": {
+        "label": "メモリ",
+        "description": "エージェントが保持・呼び出すメモリの数です。"
+      },
+      "attachments": {
+        "label": "チャットのアップロード",
+        "description": "チャットメッセージに添付できるファイルの大きさ。"
+      },
+      "skills": {
+        "label": "スキル",
+        "description": "インストール済みスキルの一覧が使えるエージェントの指示の量。"
+      },
+      "aux": {
+        "label": "バックグラウンドのモデル呼び出し",
+        "description": "要約、アシスト、コンパクションが使用するモデルです。"
+      },
+      "guardrails": {
+        "label": "安全性チェック",
+        "description": "自動安全性チェックの厳しさです。これらはプラットフォーム設定より厳しくすることのみ可能です。"
+      },
+      "quality": {
+        "label": "評価",
+        "description": "テスト実行と AI 判定モデルの動作です。"
+      },
+      "delegation": {
+        "label": "委任",
+        "description": "エージェントが一度に他のエージェントへ任せられる作業量です。"
+      },
+      "knowledge": {
+        "label": "ナレッジ検索",
+        "description": "最適な箇所を選ぶ前に、アップロードしたドキュメントの検索が候補をどれだけ広く集めるかです。"
+      },
+      "learning": {
+        "label": "学習",
+        "description": "エージェントの学習ポリシーがさまざまな選択肢を試す方法です。"
+      },
+      "providers": {
+        "label": "AI プロバイダー",
+        "description": "接続済みの AI プロバイダーのキーが使えなくなった場合の使い方です。"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "ターンあたりの最大ツール呼び出し数",
+          "description": "ターンが停止され、手元の情報で回答するよう求められるまでに行えるツール呼び出しの最大数です。",
+          "help": "長い複数ステップの作業を行うエージェントでは増やします。暴走したループを止めてコストを予測可能に保つには減らします。ワークスペースまたはプラットフォームに表示される値は標準的なエージェントの基準値で、エージェントの自律レベルに応じて実行時に増減するため、自律性が高いまたは低いエージェントでは異なる数が使われることがあります。エージェント自身の値は、設定したとおりに使用されます。"
+        },
+        "turnTimeoutSeconds": {
+          "label": "ターンあたりの最長時間",
+          "description": "1 ターンが停止されるまでに実行できる時間です。",
+          "help": "遅い調査やコードのタスクでは増やします。時間切れになったターンは、それまでに行った内容で終了します。"
+        },
+        "toolTimeoutSeconds": {
+          "label": "ツール呼び出しあたりの最長時間",
+          "description": "1 回のツール呼び出しが停止されるまでに実行できる時間です。プラットフォームのデフォルトには上限がなく、その場合は各ツールが独自のタイムアウトを維持します。",
+          "help": "遅いツールが会話全体を止めてしまう場合は上限を設定します。停止された呼び出しが何らかの影響を与えたかどうかは不明のため、エージェントには成功したと見なさないよう伝えられます。"
+        },
+        "toolOutputMaxChars": {
+          "label": "ツール結果の最大長",
+          "description": "1 つのツール結果のうち、モデルに渡される文字数です。残りは切り捨てられます。",
+          "help": "エージェントが長いドキュメントや API レスポンスを全文読む必要がある場合は増やします。その分ターンあたりのトークンが増えます。コストを抑えるには減らします。"
+        },
+        "retrievalTopK": {
+          "label": "検索あたりのナレッジ断片数",
+          "description": "1 回のナレッジベース検索でエージェントに返される断片の数です。",
+          "help": "断片が多いほどエージェントの材料は増えますが、トークンが増えてノイズも増える可能性があります。少ないほうが高速で低コストです。"
+        },
+        "retrievalMinScore": {
+          "label": "断片の最低関連度",
+          "description": "ナレッジ断片が返されるために必要な関連度です。0 ではすべてのヒットを返します。",
+          "help": "エージェントが無関係な断片を引用する場合は上げます。高すぎると何も見つからなくなることがあります。"
+        },
+        "continuationPasses": {
+          "label": "未完了の返信後の追加パス",
+          "description": "予告したステップを実行せずに返信が止まった場合に、モデルに続行を依頼する追加回数です。",
+          "help": "ステップを予告して止まることが多いエージェントでは増やします。追加パスのたびにモデル呼び出しが 1 回発生します。"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "上限後に応答する呼び出し",
+          "description": "ターンのツール上限を使い切った後で、モデルがさらに試みてよいツール呼び出しの数。それぞれ「手元にあるもので回答する」というメモ付きで拒否され、この数を超えるとターンはエラーで停止します。",
+          "help": "モデルがツール呼び出しをやめるまでに数回かかる場合は上げてください。ループするターンを早く終わらせるには下げてください。0にすると上限を超えた最初の呼び出しでターンが停止します。"
+        },
+        "supervisedDivisor": {
+          "label": "監視付きエージェントはツール上限の1/Nを受け取る",
+          "description": "監視付きエージェントは、ターンのツール呼び出し上限をこの数で割った値を受け取りますが、下の最小値を下回ることはありません。",
+          "help": "監視付きエージェントをより厳しく抑えるには上げてください。1にすると上限全体を受け取ります。"
+        },
+        "supervisedMinSteps": {
+          "label": "監視付きエージェントの最小ツール呼び出し数",
+          "description": "上の数がどれほど大きくても、監視付きエージェントが受け取る最小のツール呼び出し上限。",
+          "help": "監視付きエージェントが複数ステップの簡単な作業を完了できるよう、3以上に保ってください。"
+        },
+        "autonomousMultiplier": {
+          "label": "完全自律エージェントは上限のN倍を受け取る",
+          "description": "完全自律エージェントは、ターンのツール呼び出し上限にこの数を掛けた値を受け取ります。",
+          "help": "人が見ていない長い作業を実行するエージェントには上げてください。1ターンでより多くの呼び出しと費用を使えるようになります。1にすると標準の上限になります。"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "承認後に続行",
+          "description": "人が行動を承認すると、新しいメッセージを待たずに、エージェントが自分でタスクを完了します。",
+          "help": "承認された各行動でターンを終了し、手動でフォローアップしたい場合はオフにします。"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "拒否後もバックグラウンドジョブを続行",
+          "description": "バックグラウンドジョブで人が行動を拒否した場合、ジョブは停止せずに、拒否を記録して続行します。",
+          "help": "拒否でジョブを停止させたい場合はオフのままにします。拒否されたステップがなくてもジョブが通常は完了できる場合はオンにします。"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "承認リクエストの有効期限",
+          "description": "承認リクエストが判断を待つ時間です。この時間を過ぎると期限切れになります。0 はリクエストが期限切れにならないことを意味します。",
+          "help": "有効期限がない場合、忘れられたリクエストは無期限に開いたままになり、エージェントは待ち続けます。期限切れのリクエストは未承認として扱われます。"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "途切れた返信を完了させる",
+          "description": "モデルの長さ制限で返信が途切れた場合や、不正なツール呼び出しで終わった場合に、モデルに続行または再試行を依頼します。",
+          "help": "モデルの問題を診断するときにのみオフにします。オフの場合、途切れた返信はそのまま表示されます。"
+        },
+        "maxContinuations": {
+          "label": "途切れた返信の最大継続回数",
+          "description": "返信が途切れた後に、モデルに続行を依頼する回数です。",
+          "help": "継続のたびにモデル呼び出しがもう 1 回発生します。長い回答では増やし、コストを抑えるには減らします。"
+        },
+        "maxToolCallRetries": {
+          "label": "不正なツール呼び出しの最大再試行回数",
+          "description": "使用できない引数で届いたツール呼び出しを、モデルに繰り返すよう依頼する回数です。",
+          "help": "再試行のたびにモデル呼び出しが 1 回発生します。0 では最初の不正な呼び出しで諦めます。"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "モデル呼び出しあたりの試行回数",
+          "description": "プロバイダーが失敗したりビジー状態だったりした場合に、最初の試行を含めてモデル呼び出しを試す回数です。",
+          "help": "試行回数を増やすとプロバイダーの短時間の障害を隠せますが、失敗するリクエストのエラー報告は遅くなります。"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "ツール付きエージェントで返信を再利用",
+          "description": "ツールを持つエージェントに対して、保存された返信の再利用を許可します。ツールは次回に異なる結果を返す可能性があるため、デフォルトではオフです。",
+          "help": "ツールが読み取り専用でほとんど変化せず、繰り返しの回答をより速く低コストにしたい場合にのみオンにします。最新ではない回答が表示される場合があります。"
+        },
+        "contextTurns": {
+          "label": "繰り返しを判定する過去のターン数",
+          "description": "メッセージが、保存された返信を再利用できる繰り返しかどうかを判断するために比較する過去のターン数です。",
+          "help": "ターン数を増やすと一致判定が厳しくなり、キャッシュヒットが減ります。"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "フォローアップでツールの提示を維持",
+          "description": "次のメッセージが短いフォローアップの場合、会話ですでに使われたツールを引き続き提示します。",
+          "help": "「はい」のような短い返信を通常のツール選択から始めたい場合はオフにします。"
+        },
+        "stickyToolsWindow": {
+          "label": "フォローアップ用ツールを提示し続ける時間",
+          "description": "短いフォローアップメッセージに対して、使用後どのくらいの間ツールを提示し続けるかです。",
+          "help": "長いほど長い作業セッションに役立ち、短いほどツール一覧が小さく保たれます。"
+        },
+        "maxStickyTools": {
+          "label": "フォローアップで提示し続けるツールの最大数",
+          "description": "短いフォローアップメッセージに引き継がれるツールの最大数。0にすると何も引き継ぎません。",
+          "help": "タスクで多くのツールを使う場合は大きい値が役立ち、小さい値はツール一覧を短く保ちます。"
+        },
+        "keepPrimaryModel": {
+          "label": "フォローアップでメインモデルを維持",
+          "description": "すでにツールを使った会話での短いフォローアップは、安価なモデルではなくエージェントのメインモデルのままになります。",
+          "help": "オフにすると、コストルーティングが「はい」のようなフォローアップを安価なモデルに送ります。進行中のタスクの扱いが弱くなるおそれがあります。"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "回答を再利用するために質問がどれだけ似ている必要があるか",
+          "description": "似た質問への回答を再利用するエージェント向け: 保存済みの回答を返すために、新しい質問が過去の質問にどれだけ近い必要があるか(0.85〜1)。",
+          "help": "低くすると再利用が増えますが、別の質問向けの回答を返すおそれがあります。誤答のコストが大きい場合は高く保ってください。回答は、それを受け取った本人にのみ再利用されます。"
+        },
+        "ttl": {
+          "label": "再利用できる回答を保持する期間",
+          "description": "保存済みの回答が、破棄されるまで似た質問に返され得る期間。",
+          "help": "回答がすぐに古くなる場合は短くしてください。"
+        },
+        "maxEntriesPerAgent": {
+          "label": "エージェントごとの保存回答の最大数",
+          "description": "1つのエージェントが再利用のために保持する回答の数。これを超えると古いものから破棄されます。",
+          "help": "保存数を増やすと再利用が増えますが、ストレージも多く使います。"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "会話にツール呼び出しの記録を残す",
+          "description": "各ターンのツール呼び出しの短い記録を会話とともに保存し、後のターンで何が行われたかを確認できるようにします。",
+          "help": "会話履歴をテキストのみにするにはオフにしてください。その場合、エージェントは以前のターンでツールが何をしたかを知ることができません。ワークスペース全体に適用されます。"
+        },
+        "replayEnabled": {
+          "label": "ツール記録をモデルに見せる",
+          "description": "会話をモデルに渡すとき、保存済みの過去のツール呼び出しの記録を含めます。",
+          "help": "記録の保存は続けつつ、モデルの作業領域を使わないようにするにはオフにしてください。"
+        },
+        "replayTurns": {
+          "label": "ツール記録を表示する過去のターン",
+          "description": "ツールを使った直近のターンのうち、いくつ分の記録をモデルに見せるか。",
+          "help": "大きい値は長い作業セッションで役立ちますが、モデルの作業領域をより多く使います。"
+        },
+        "maxEntriesPerTurn": {
+          "label": "ターンごとに列挙するツール呼び出し",
+          "description": "1つのターンのツール呼び出しのうち、いくつを記録に書き込むか。それ以降の呼び出しは数えるだけです。",
+          "help": "多くの呼び出しを行い、そのすべてを覚えておく必要があるターンでは上げてください。"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "ターンごとの最長のツール記録",
+          "description": "1つのターンの記録のうち、何文字をモデルに見せるか。残りは数えるだけで列挙されません。",
+          "help": "後続のすべてのターンのコストを節約するには下げ、より多くの詳細を残すには上げてください。"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "画像アップロードの最大サイズ (MB)",
+          "description": "チャットメッセージに添付できる画像の最大サイズ(メガバイト)。プラットフォームにはファイル全体の上限もあり、これはそれを超えられません。",
+          "help": "写真やスクリーンショットには上げてください。大きなファイルは送信が遅く、モデルの許容量をより多く使います。"
+        },
+        "maxAudioMb": {
+          "label": "音声アップロードの最大サイズ (MB)",
+          "description": "チャットメッセージに添付できる音声ファイルの最大サイズ(メガバイト)。プラットフォームにはファイル全体の上限もあり、これはそれを超えられません。",
+          "help": "長い録音には上げてください。大きなファイルは送信が遅く、モデルの許容量をより多く使います。"
+        },
+        "maxVideoMb": {
+          "label": "動画アップロードの最大サイズ (MB)",
+          "description": "チャットメッセージに添付できる動画の最大サイズ(メガバイト)。プラットフォームにはファイル全体の上限もあり、これはそれを超えられません。",
+          "help": "長いクリップには上げてください。大きなファイルは送信が遅く、モデルの許容量をより多く使います。"
+        },
+        "maxDocumentMb": {
+          "label": "ドキュメントアップロードの最大サイズ (MB)",
+          "description": "チャットメッセージに添付できるドキュメントまたはスプレッドシートの最大サイズ(メガバイト)。プラットフォームにはファイル全体の上限もあり、これはそれを超えられません。",
+          "help": "長いレポートや大きなデータファイルには上げてください。大きなファイルは処理が遅くなります。"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "未完了の言い回しへの催促",
+          "description": "返信が、言ったことを実行する前に止まったように聞こえる場合、モデルに続行を依頼します。",
+          "help": "終了を意図した返信で催促が発動する場合はオフにします。"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "古いツール結果をクリア",
+            "description": "長いツール実行中に、古いツール結果を短いプレースホルダーに置き換えて、会話がモデルの上限内に収まるようにします。",
+            "help": "エージェントがこれまでのすべての結果を見る必要がある場合はオフにします。長い実行ではモデルのサイズ上限に達することがあります。"
+          },
+          "thresholdChars": {
+            "label": "クリアを開始するサイズ",
+            "description": "古い結果がクリアされるまでに、ターン内のツール結果が大きくなってよいサイズです。",
+            "help": "より多くの結果を表示したままにするには増やし、長い実行を小さく低コストに保つには減らします。"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "簡単なメッセージの最大長",
+          "description": "これより長いメッセージは簡単なメッセージとして扱われません。簡単なメッセージは、より高速で低コストなモデルに送られることがあります。",
+          "help": "品質重視でより多くのメッセージをメインモデルに送るには減らし、コストを抑えるには増やします。"
+        },
+        "maxClauses": {
+          "label": "簡単なメッセージの最大文数",
+          "description": "これより多くの文を含むメッセージは簡単なメッセージとして扱われません。",
+          "help": "品質重視でより多くのメッセージをメインモデルに送るには減らします。"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "ターンごとに呼び出すエージェントのメモリ数",
+          "description": "各メッセージでエージェント自身のメモリをいくつ検索するかです。",
+          "help": "メモリが多いほどコンテキストが増えますが、トークンも多く使います。"
+        },
+        "tenantTopK": {
+          "label": "ターンごとに呼び出す共有メモリ数",
+          "description": "各メッセージでワークスペース全体で共有されているメモリをいくつ検索するかです。",
+          "help": "メモリが多いほどコンテキストが増えますが、トークンも多く使います。"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "エージェントあたりの最大メモリ数",
+          "description": "1 つのエージェントが保持できるメモリの数です。これを超えると、最も古くて使用頻度の低いものから削除されます。",
+          "help": "人についてたくさん覚えておくべきアシスタントでは増やします。ストレージと呼び出しのコストも増えます。"
+        }
+      },
+      "tenant": {
+        "maxMemories": {
+          "label": "共有メモリの最大数",
+          "description": "ワークスペースで共有されるメモリを何件保持するか。これを超えると古いものから破棄されます。",
+          "help": "共有知識に頼る大規模なチーム向けに上げてください。保存と呼び出しのコストも上がります。ワークスペース全体に適用されます。"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "オンデバイスチャットに渡すメモリ",
+          "description": "オンデバイスのセッション開始時に渡すメモリの数。",
+          "help": "オンデバイスモデルは作業領域が小さいため、低く保ってください。"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "グラフメモリから呼び出すファクト数",
+          "description": "1 回の検索で、エージェントが関係メモリから見ることができるファクトの最大数です。",
+          "help": "ファクトが多いほど、人やトピックに関する背景情報が増えますが、作業領域の消費も増えます。少ないと回答が絞られます。ワークスペース全体、またはもっと多く(少なく)必要な 1 つのエージェントに設定します。"
+        },
+        "recallMaxPaths": {
+          "label": "検索ごとに読み取るグラフパス数",
+          "description": "1 回の検索でファクトを見つけるために、メモリグラフの接続をいくつ読み取るかです。",
+          "help": "複数の接続が同じファクトにつながることがあるため、密に結びついたメモリではすべてを見つけるのに大きい値が必要な場合があります。値を大きくすると各検索は遅くなります。"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "プロンプトに列挙するスキルの最大数",
+          "description": "エージェントがスキルの存在を知るために、指示にスキル名を何件載せるか。残りは数えるだけで列挙されません。",
+          "help": "スキルが多い場合は上げてください。列挙されたスキルはターンごとにモデルの作業領域を少し使います。ワークスペース全体に適用されます。"
+        },
+        "maxBlockChars": {
+          "label": "プロンプト内のスキル一覧のサイズ",
+          "description": "エージェントの指示のなかでスキル一覧が占められる文字数。いっぱいになると、後ろのスキルは名前だけに短縮されます。",
+          "help": "より多くのスキルの説明を残すには上げ、ターンごとのトークンを節約するには下げてください。ワークスペース全体に適用されます。"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "バックグラウンド呼び出しにエージェントのモデルを使用",
+        "description": "要約、アシスト、コンテキストのコンパクションは、専用のモデルが選択されていない場合、対象となるエージェントと同じモデルを使用します。",
+        "help": "オフにすると、プラットフォームがこれらの呼び出しのモデルを選択します。より低コストだったり、別のプロバイダーだったりする場合があります。"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "安全性チェックが故障した場合",
+        "description": "判定モデルのダウンなど、安全性チェック自体が失敗した場合の動作です。クローズは行動を拒否し、オープンは通過させます。",
+        "help": "プラットフォーム設定より厳しくすることのみ可能です。クローズは、誰かが意図的にチェックを失敗させることへの防御になりますが、障害中は作業が拒否されます。",
+        "options": {
+          "open": "オープン: 行動を通過させる",
+          "closed": "クローズ: 行動を拒否する"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "ツール呼び出しチェックが故障した場合",
+          "description": "リスクのあるツール呼び出しを確認するチェックが判定を出せない場合の動作です。「継承」は上の安全性チェックの設定に従います。",
+          "help": "プラットフォーム設定より厳しくすることのみ可能です。クローズは、チェックが失敗した場合にツール呼び出しを拒否します。",
+          "options": {
+            "open": "オープン: ツール呼び出しを通過させる",
+            "inherit": "安全性チェックの設定に従う",
+            "closed": "クローズ: ツール呼び出しを拒否する"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "ブロックする毒性スコア",
+          "description": "判定モデルの 0 ～ 100 の毒性スケールでこの値以上と採点されたコンテンツはブロックされます。数値が小さいほど多くブロックされます。",
+          "help": "下げることのみ可能で、プラットフォームの値より上げることはできません。非常に低い値にすると、通常の率直な表現もブロックされます。"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "脱獄の試行についてスキャンするテキスト",
+          "description": "脱獄パターンについてスキャンするメッセージまたは返信の範囲です。それを超えるテキストはスキャンされません。",
+          "help": "プラットフォームの値より上げることのみ可能です。範囲を広げると、水増しの後ろに隠された攻撃を防げますが、処理がわずかに増えます。"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "安全性判定モデルに表示するテキスト",
+          "description": "AI の安全性判定モデルが、チェック対象のテキストをどこまで読むかです。それを超えるテキストは判定されません。",
+          "help": "プラットフォームの値より上げることのみ可能です。上げると長いツール結果を全文判定できますが、判定モデルの呼び出しが大きくなります。"
+        }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "監視付きエージェントと読み取り専用ツール",
+          "description": "自律性レベルが監視付きのエージェントが、検索や参照のように読み取りだけを行うツールの前にも確認を求めるかどうか。書き込み、送信、プラットフォームが分類していないツールは常に確認を求めます。",
+          "help": "プラットフォームの設定より厳しくすることしかできません。毎回確認するのが最も安全です。読み取り専用ツールを実行させると確認が1つ減りますが、予期しない検索を止める機会も失います。非公開データを読み、信頼できない内容を取り込み、データを送信できるエージェントは、この設定にかかわらず呼び出しごとに確認されます。",
+          "options": {
+            "auto-allow": "読み取り専用ツールを確認なしで実行させる",
+            "gate": "ツール呼び出しのたびに確認する"
+          }
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI 判定モデルのモデル",
+          "description": "評価実行の判定に使用するモデルです。空欄にすると、ワークスペースがすでに使用しているものからプラットフォームが選択します。",
+          "help": "より信頼できる採点には強力なモデルを、コストを抑えるには安価なモデルを使用します。モデルは接続済みのプロバイダーで利用可能である必要があります。"
+        },
+        "callTimeoutSeconds": {
+          "label": "判定モデル呼び出しあたりの最長時間",
+          "description": "1 回の判定呼び出しが失敗とみなされるまでの時間です。",
+          "help": "遅いモデルが頻繁にタイムアウトする場合は増やします。呼び出しが失敗すると評価結果が不完全になります。"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "テストケースあたりの繰り返し回数",
+          "description": "実行で指定がない場合に、各テストケースを実行する回数です。繰り返しが多いほど、エージェントの一貫性が分かります。",
+          "help": "繰り返しのたびに実行のコストと時間が倍になります。"
+        },
+        "defaultMode": {
+          "label": "評価の実行方法",
+          "description": "実行やそのデータセットが指定していないとき、評価の実行が安全なサンドボックスでエージェントをツール付きでリプレイするか(完全なパイプライン)、テキストのみで回答するか(クイック)。",
+          "help": "完全なパイプラインは、ツールの使用を含め、ユーザーが受け取るものをテストし、コストが高くなります。そこでは読み取りだけのツールは実際に実行され、データの変更、メッセージの送信、お金の使用につながり得るものはシミュレートされ、実行内に一覧表示されます。クイックは安価ですが、ツールの使用については何も示しません。",
+          "options": {
+            "full": "サンドボックスでの完全なパイプライン",
+            "quick": "クイック: テキストの回答のみ"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "並列サブタスクの最大数",
+        "description": "1 回の委任呼び出しで同時に開始できるサブタスクまたはヘルパーエージェントの数です。超過分は上限超過として報告されます。",
+        "help": "幅広い調査作業では増やし、コストと負荷を抑えるには減らします。"
+      },
+      "branchTimeoutSeconds": {
+        "label": "サブタスクあたりの最長時間",
+        "description": "委任された 1 つのサブタスクがタイムアウトとして報告されるまでに実行できる時間です。",
+        "help": "遅いサブタスクでは増やします。ハングしたサブタスクが、この時間を超えて回答全体を止めることはありません。"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "結果あたりの検索の広さ",
+          "description": "ナレッジ検索が、最終的に返す断片 1 つにつき集める候補断片の数です。",
+          "help": "大きくするとランキングの選択肢が増え、似たドキュメントが多い場合に役立ちますが、各検索に時間と計算が余分にかかります。検索が遅く感じる場合は減らします。エージェントが見る断片の数は変わりません。"
+        },
+        "candidatePoolMax": {
+          "label": "検索あたりの最大候補数",
+          "description": "要求された結果数にかかわらず、1 回のナレッジ検索が集める候補断片数の上限です。",
+          "help": "エージェントが一度に多くの結果を要求した場合に、速度とコストを守ります。大規模なナレッジベースで回答が関連する断片を見逃す場合にのみ増やしてください。"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "試行の少ない選択肢を試す積極性",
+          "description": "信頼区間上限法を使用する学習ポリシーが、試した回数の少ない選択肢をどれだけ優先するかです。",
+          "help": "0 では常に、これまでの平均が最良の選択肢を選びます。大きくすると、落ち着く前により長く他の選択肢を試し続けます。デフォルトは教科書的なバランスです。この方法を使用するポリシーにのみ影響します。"
+        },
+        "defaultExplorationRate": {
+          "label": "新しいポリシーの初期探索率",
+          "description": "新しく作成された学習ポリシーが、ランダムな選択肢を試すことに費やすターンの割合です。",
+          "help": "これは今後作成されるポリシーの開始点を設定するだけです。既存のポリシーは独自の率を維持しており、ポリシーを管理している場所でエージェントごとに変更できます。0 は、新しいポリシーが開始時に探索しないことを意味します。"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "プロバイダーがキーを拒否した後の一時停止",
+          "description": "プロバイダーがキーを拒否した後、バックグラウンド処理が接続済みプロバイダーのキーをスキップする時間です。",
+          "help": "一時停止中は、スケジュールされたジョブや自動ジョブは、失敗し続けるキーを呼び出す代わりに、別の接続済みプロバイダーを使用するか待機します。チャット中のユーザーはブロックされず、常にプロバイダーの実際のエラーが表示されます。一時停止が終わると、キーが修正されたかを確認するため 1 回の呼び出しが通されます。0 では一時停止がオフになります。"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "管理",
+    "title": "ランタイム設定",
+    "subtitle": "このワークスペース全体でのエージェントの動作を調整します。上限、承認、品質チェック、ガードレール、メモリ、モデルが対象です。許可されている場合、エージェントの所有者は 1 つのエージェントについて設定を上書きできます。",
+    "docsLink": "ヘルプとドキュメント",
+    "tabs": {
+      "label": "ランタイム設定のビュー",
+      "settings": "設定",
+      "history": "変更履歴"
+    },
+    "readOnly": {
+      "title": "表示のみ",
+      "body": "これらの設定を変更できるのはワークスペース管理者のみです。各設定の有効な値とその出どころを確認できます。"
+    },
+    "summary": "このワークスペースでは {total} 件中 {changed} 件の設定が変更されています。残りはプラットフォームの値を使用しています。",
+    "export": {
+      "button": "上書きをエクスポート",
+      "done": "{count} 件のワークスペースの上書きをファイルにエクスポートしました。",
+      "none": "エクスポートするものがありません: このワークスペースでは設定が変更されていません。"
+    },
+    "filters": {
+      "changedOnly": "このワークスペースでのみ変更"
+    },
+    "jump": {
+      "label": "グループへ移動"
+    },
+    "anchor": {
+      "unknown": "このワークスペースに「{key}」という設定はありません。名前が変更されたか、ワークスペースレベルでは利用できない可能性があります。"
+    },
+    "empty": {
+      "noneChanged": "このワークスペースではまだ設定が変更されていません。すべてプラットフォームの値を使用しています。"
+    },
+    "risk": {
+      "high": "高リスク",
+      "security": "セキュリティ設定"
+    },
+    "security": {
+      "title": "セキュリティ設定",
+      "body": "これらの設定はワークスペースを保護します。プラットフォームの値より厳しくすることのみ可能で、緩めることはできません。変更には理由が必要で、監査ログに記録されます。"
+    },
+    "resetGroup": {
+      "count": "このグループで {count} 件変更",
+      "button": "{group} を継承値にリセット",
+      "confirmTitle": "{group} を継承値にリセットしますか?",
+      "confirmBody": "このグループ内の {count} 件のワークスペースの上書きを削除します。独自の上書きを持たないすべてのエージェントについて、設定は直ちにプラットフォームの値に戻ります。リセットはそれぞれ監査ログに記録されます。",
+      "confirm": "継承値にリセット",
+      "cancel": "キャンセル",
+      "done": "{count} 件の設定を継承値にリセットします。",
+      "partial": "{done} 件の設定をリセットしました。{failed} 件はリセットできませんでした。失敗した設定のメッセージをご確認ください。",
+      "cancelled": "{done}件の設定をリセットしました。理由が必要な{skipped}件はそのままにしました。"
+    },
+    "import": {
+      "button": "上書きをインポート",
+      "title": "ワークスペースの上書きをインポート",
+      "intro": "このページからエクスポートしたファイルを選択するか、その内容を貼り付けてください。何かを保存する前に、変更内容が正確に表示されます。",
+      "reviewIntro": "このファイルによって変更される内容を確認してください。まだ何も保存されていません。",
+      "fileLabel": "上書きファイル (JSON)",
+      "pasteLabel": "またはファイルの内容を貼り付け",
+      "fileError": {
+        "empty": "先にファイルを選択するか、内容を貼り付けてください。",
+        "invalidJson": "有効な JSON ではありません。ファイル全体がコピーされているか確認してください。",
+        "wrongFormat": "このページからエクスポートされた設定の上書きファイルではありません。",
+        "unsupportedVersion": "このファイルは、異なるバージョンのエクスポートで作成されたため、読み取れません。",
+        "noOverrides": "ファイルに上書きのセクションがありません。",
+        "unreadable": "ファイルを読み取れませんでした。"
+      },
+      "summary": "変更 {changes} 件、すでに有効 {unchanged} 件、適用不可 {problems} 件。",
+      "changesHeading": "変更 ({count})",
+      "before": "現在:",
+      "after": "インポート後:",
+      "resetMissing": "ファイルにないワークスペースの上書きも削除する",
+      "resetMissingHelp": "ここで変更されていてファイルにない設定は、プラットフォームの値に戻ります。追加または更新のみにするにはオフのままにしてください。",
+      "resetsHeading": "削除する上書き ({count})",
+      "resetFrom": "現在 {value}。継承された値に戻ります。",
+      "problemsHeading": "適用不可 ({count})",
+      "problem": {
+        "unknownKey": "このキーの設定はありません。",
+        "notWorkspaceSetting": "この設定はワークスペース全体では変更できません。",
+        "locked": "プラットフォーム運用者がこの設定を固定しているため、変更できません。",
+        "wrongType": "この設定に対して値の型が正しくありません。",
+        "required": "値が必要です。",
+        "notNumber": "値は数値である必要があります。",
+        "notInteger": "値は整数である必要があります。",
+        "belowMin": "値が小さすぎます。最小値は {min} です。",
+        "aboveMax": "値が大きすぎます。最大値は {max} です。",
+        "notAllowed": "許可されているオプションではありません。",
+        "tooShort": "テキストが短すぎます。最小の長さは {min} です。",
+        "tooLong": "テキストが長すぎます。最大の長さは {max} です。",
+        "precision": "この設定が許容するより精度の高い値です。"
+      },
+      "nothing": "このファイルには、設定を変更するものがありません。",
+      "reasonNote": "これらの設定の一部はリスクが高いものです。適用後に、監査ログに記録される理由の入力を求められます。",
+      "back": "戻る",
+      "cancel": "キャンセル",
+      "review": "変更を確認",
+      "apply": "{count} 件の変更を適用",
+      "cancelled": "インポートをキャンセルしました。設定は変更されていません。",
+      "done": "インポートが完了しました: {applied} 件の設定を更新しました。",
+      "donePartial": "インポートが一部完了しました: {applied} 件の設定を更新、{failed} 件は適用できませんでした。残っている内容は確認画面で確認できます。"
+    },
+    "history": {
+      "adminOnly": "ワークスペース設定の変更履歴は、ワークスペース管理者のみが閲覧できます。",
+      "loading": "変更履歴を読み込み中",
+      "partial": "{count} 件の設定の履歴を読み込めなかったため、この一覧は不完全な可能性があります。",
+      "retry": "再試行",
+      "search": "変更履歴を検索",
+      "searchPlaceholder": "設定、ユーザー、または理由で検索",
+      "empty": "このワークスペースではまだ設定が変更されていません。",
+      "noMatch": "検索に一致する変更はありません。",
+      "count": "{total} 件中 {shown} 件の変更を新しい順に表示中。",
+      "tableLabel": "ワークスペース設定の変更履歴",
+      "when": "日時",
+      "setting": "設定",
+      "change": "変更",
+      "by": "変更者",
+      "reason": "理由",
+      "before": "変更前:",
+      "after": "変更後:",
+      "inherited": "継承された値",
+      "unknownActor": "不明",
+      "noReason": "理由なし",
+      "showMore": "さらに表示",
+      "scope": "レベル",
+      "scopeWorkspace": "ワークスペース",
+      "scopeAgent": "エージェント {id}",
+      "scopeFilter": "変更を表示するレベル",
+      "filterAll": "すべてのレベル",
+      "filterWorkspace": "ワークスペースのみ",
+      "filterAgents": "エージェントのみ",
+      "searchLoadedOnly": "検索は、ここまでに読み込まれた変更を対象にします。",
+      "loadError": "変更履歴を読み込めませんでした。{message}",
+      "moreFailed": "これ以上の変更を読み込めませんでした。{message}",
+      "loadingMore": "読み込み中"
+    }
+  },
+  "agentBehavior": {
+    "title": "動作と上限",
+    "intro": "このエージェントが 1 ターンでどこまで行えるかを制御します。呼び出せるツールの数、実行できる時間、読み戻す量などです。ここで変更しない項目は、ワークスペースから継承されます。",
+    "saveFirst": "先にエージェントを保存してください。動作と上限は、エージェントが作成された後に設定できます。",
+    "pickAgent": "下でエージェントを選ぶと、その「動作と上限」タブが開きます。",
+    "tabs": {
+      "label": "エージェント設定",
+      "setup": "セットアップ",
+      "behavior": "動作と上限",
+      "unsaved": "未保存の変更"
+    },
+    "links": {
+      "label": "関連ページ",
+      "tenant": "ワークスペースのデフォルトを変更",
+      "playground": "プレイグラウンドで試す",
+      "prompts": "このエージェントのプロンプト",
+      "promptsAria": "{name}のプロンプト: このエージェントでプロンプトレジストリを開く",
+      "approvals": "このエージェントの承認",
+      "approvalsAria": "{name}の承認: このエージェントで絞り込んだ承認キューを開く",
+      "turns": "ターンタイムライン",
+      "turnsAria": "{name}のターンタイムライン: このエージェントのターンインスペクターを開く"
+    },
+    "readOnly": {
+      "locked": "このエージェントは編集がロックされているため、これらの値は読み取り専用です。",
+      "access": "これらの値を表示できますが、このエージェントへのアクセス権では変更できません。"
+    },
+    "unsaved": "このタブに未保存の変更があります。移動する前に、下で保存または破棄してください。",
+    "inheritNote": "各設定には値の出どころが表示されます。ここで変更すると、このエージェントだけで上書きされます。リセットすると、再びワークスペースの値を継承します。",
+    "others": {
+      "title": "このエージェントのその他のコントロール",
+      "intro": "これらのコントロールは上の設定には含まれないため、「セットアップ」タブにあります。",
+      "generation": "返信の創造性と長さ (温度、top-p、最大トークン数) と、追加のサンプリングオプションです。",
+      "generationLink": "生成のチューニングへ移動",
+      "autonomy": "自律レベル、1 回の実行あたりの支出上限、ツールのルール、人が承認する必要があるタイミングです。",
+      "autonomyLink": "推論と自律性へ移動"
+    },
+    "discard": {
+      "title": "保存せずに移動しますか?",
+      "description": "このエージェントの動作と上限に未保存の変更があります。今移動すると失われます。",
+      "stay": "とどまって編集を続ける",
+      "leave": "移動して変更を破棄"
+    },
+    "summary": {
+      "title": "このエージェントの現在の動作",
+      "subtitle": "エージェント自身の上書き、ワークスペース設定、プラットフォーム設定を適用した後の、このエージェントで有効な値です。",
+      "loading": "現在の動作を読み込み中",
+      "error": "現在の動作を読み込めませんでした。{message}",
+      "retry": "再試行",
+      "empty": "このエージェントで利用できる動作設定はまだありません。",
+      "facts": {
+        "steps": "ターンあたりのツール呼び出し",
+        "turnTimeout": "ターンあたりの時間",
+        "toolTimeout": "ツール呼び出しあたりの時間",
+        "outputCap": "保持するツール出力",
+        "continuation": "継続パス",
+        "approvals": "承認",
+        "judge": "品質判定モデル",
+        "model": "モデル"
+      },
+      "tier": {
+        "SUPERVISED": "監視付き: すべてのツール呼び出しが人の承認を待つ",
+        "SEMI_AUTONOMOUS": "半自律: ワークスペースのルールで決定",
+        "FULLY_AUTONOMOUS": "完全自律: ツール呼び出しは待機しない"
+      },
+      "approvalResumes": "承認後に自動で続行する",
+      "approvalStops": "承認後に新しいメッセージを待つ",
+      "judgeDefault": "プラットフォームが選択",
+      "overrides": {
+        "none": "このエージェントは、すべての項目でワークスペースの値を使用しています。",
+        "some": "このエージェントで上書きされている設定: {count} 件。"
+      }
+    },
+    "impact": {
+      "title": "これが意味すること",
+      "steps": "このエージェントは、1 ターンで最大 {count} 個のツールを呼び出せます。それ以降は、手元の情報で回答するよう求められます。",
+      "stepsTierSupervised": "このエージェントは「監視付き」のため、実際の上限はこの基準値より低くなります。正確な数を使用するには、このエージェント用に独自の値を設定してください。",
+      "stepsTierFull": "このエージェントは「完全自律」のため、実際の上限はこの基準値より高くなります。正確な数を使用するには、このエージェント用に独自の値を設定してください。",
+      "turnTimeout": "1 ターンは {duration} 後に打ち切られます。",
+      "turnTimeoutNone": "ターンに時間制限はありません。",
+      "toolTimeout": "1 回のツール呼び出しは {duration} 後に打ち切られます。",
+      "toolTimeoutNone": "ツール呼び出しに時間制限はありません。",
+      "outputCap": "{chars} を超えるツール結果は、エージェントが読む前に短縮されます。",
+      "continuation": "返信が途切れた場合、エージェントは最大 {count} 回まで続きを書けます。",
+      "continuationNone": "途切れた返信は続行されません。",
+      "retrieval": "質問ごとに、上位 {count} 件のナレッジ一致を読み取ります。",
+      "retrievalScored": "質問ごとに、上位 {count} 件のナレッジ一致を読み取り、スコアが {score} 未満の一致は無視します。",
+      "approvalContinuationOn": "人が待機中の行動を承認すると、エージェントが自分でタスクを完了します。",
+      "approvalContinuationOff": "人が待機中の行動を承認すると、ターンが終了し、手動でフォローアップする必要があります。",
+      "guardClosed": "安全性チェックが故障した場合、行動は拒否されます。",
+      "guardOpen": "安全性チェックが故障した場合、行動は通過します。",
+      "branches": "1 回の委任呼び出しで、最大 {count} 個のサブタスクを同時に開始できます。"
+    }
+  },
+  "controls": {
+    "eyebrow": "ヘルプ",
+    "title": "どこで制御できますか?",
+    "subtitle": "エージェントの動作を形作るすべてのコントロールと、それがあるページです。変更したい内容で検索してください。",
+    "breadcrumb": {
+      "label": "パンくずリスト",
+      "console": "コンソール",
+      "controls": "コントロール"
+    },
+    "related": {
+      "label": "その他のコントロール"
+    },
+    "search": {
+      "label": "コントロールを検索",
+      "placeholder": "例: タイムアウト、承認、プロンプト、メモリ",
+      "count": "一致するコントロール {count} 件",
+      "none": "「{query}」に一致するものはありません。より短い語でお試しください。",
+      "noSettings": "検索に一致する設定はありません。"
+    },
+    "areasHeading": "コントロール領域",
+    "areasIntro": "これらのページには、単一の数値ではないコントロール (指示、承認ルール、安全ルール、ターンの実行記録) があります。",
+    "openArea": "開く",
+    "needsAccess": "このページへのアクセスをワークスペース管理者に依頼してください。",
+    "settingsHeading": "すべてのランタイム設定",
+    "settingsIntro": "各設定は、ワークスペース全体、1 つのエージェント、またはその両方に対して変更できます。エージェント自身の値がワークスペースの値より優先されます。リンクを選ぶと、その設定へ移動します。",
+    "loading": "設定の一覧を読み込み中",
+    "loadFailed": "設定の一覧を読み込めませんでした。{message}",
+    "retry": "再試行",
+    "emptyCatalog": "このワークスペースには表示するランタイム設定がありません。",
+    "changeWorkspace": "ワークスペースで変更",
+    "changeAgent": "エージェントで変更",
+    "workspaceOnly": "ワークスペース全体のみ",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "エージェントのランタイム上限",
+        "intro": "1 ターンが行える作業量です: ツール呼び出し、時間、結果サイズ、取得。"
+      },
+      "behaviour-settings": {
+        "title": "動作の設定",
+        "intro": "返信の完了とキャッシュ、承認後の継続、安全性チェックの動作、メモリ・検索・委任の働きです。"
+      },
+      "other": {
+        "title": "その他の設定",
+        "intro": "専用のセクションがない設定です。"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "ランタイム設定",
+        "summary": "ワークスペース全体の上限、承認、品質チェック、安全性の厳しさ、メモリ、委任です。",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers 上限 タイムアウト ツールステップ 再試行 キャッシュ メモリ 委任 品質 判定 設定 数値"
+      },
+      "prompts": {
+        "title": "指示",
+        "summary": "プラットフォームがモデルに渡すプロンプトです。すべてを表示し、ワークスペースまたはエージェント向けに上書きして、結果をプレビューできます。",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry プロンプト ディレクティブ システムプロンプト 指示 上書き プレビュー レジストリ"
+      },
+      "approvals": {
+        "title": "承認",
+        "summary": "人の承認を待つ行動のキュー、どのツールに承認が必要かのルール、判断後に起こることです。",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation 承認 却下 キュー ヒューマンインザループ ツールのルール 有効期限 継続"
+      },
+      "guardrails": {
+        "title": "ガードレール",
+        "summary": "このワークスペースが通過を拒否するパターンと、ツール結果に適用されるコンテンツポリシーです。",
+        "keywords": "safety rules block filter policy content patterns 安全ルール ブロック フィルター ポリシー コンテンツ パターン"
+      },
+      "turns": {
+        "title": "ターンインスペクター",
+        "summary": "1 つのエージェントターンの記録されたタイムライン: 何が依頼され、どのツールが実行され、各ステップのコストと、停止した理由です。",
+        "keywords": "turn timeline journal trace replay history steps debug ターン タイムライン ジャーナル トレース リプレイ 履歴 ステップ デバッグ"
+      },
+      "agentBehavior": {
+        "title": "エージェントの動作と上限",
+        "summary": "エージェントのページ上で、独自の上限と動作設定を、各値の出どころとワークスペースの値へのリセットとともに表示します。",
+        "keywords": "agent override per agent behavior limits tab エージェント 上書き エージェントごと 動作 上限 タブ"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "次のプロンプトブロックで構成されています",
+    "blocksCount": "{n} 個のブロック",
+    "blockDefault": "出荷時のデフォルト",
+    "blockOverride": "{scope}の上書き v{version}",
+    "blockAgentConfig": "エージェント独自のプロンプト",
+    "blockCode": "プラットフォームのコード",
+    "blockTokens": "約 {tokens} トークン",
+    "blockHash": "文面ハッシュ"
+  },
+  "toolApproval": {
+    "continuing": "エージェントはタスクを続行しています。",
+    "continueNotStarted": "この判断の後、エージェントは自動的には再開されませんでした。続行させるにはメッセージを送信してください。",
+    "continueTimedOut": "エージェントはまだ続行を完了していません。完了すると返信が会話に表示されます。確認するには再読み込みしてください。",
+    "continuingWaiting": "Your decision is recorded. The agent is picking the task back up.",
+    "continuingRunning": "The agent is working on the next step. Its reply appears here as soon as it is ready.",
+    "continuingStill": "Still working. A model running on this computer can take a few minutes; you can keep reading meanwhile.",
+    "continuingLongWait": "This is taking longer than usual, but the agent has not stopped. Its reply will appear here when it is done.",
+    "continuingStagesLabel": "Progress",
+    "continuingStageDecided": "Decision recorded",
+    "continuingStageRestarted": "Agent restarted",
+    "continuingStageWorking": "Working on it",
+    "panelLabel": "Tool approvals",
+    "queuePosition": "Approval {position} of {total}",
+    "queueMore": "{count} more waiting. The next one appears when you decide this one.",
+    "rawName": "Technical name",
+    "approveAll": "Approve all {count}",
+    "rejectAll": "Reject all",
+    "approvingProgress": "Approving {position} of {total}",
+    "rejectingProgress": "Rejecting {position} of {total}",
+    "bulkHint": "Decides the waiting calls one after another, oldest first, and stops at the first problem.",
+    "bulkStoppedTruncated": "Stopped: the next call's arguments are too long to show here, so it waits for your own decision.",
+    "bulkStoppedError": "Stopped after a problem; the calls below it are still waiting.",
+    "waitingList": "Waiting calls"
+  },
+  "promptDirectives": {
+    "tabRegistry": "すべてのプロンプト",
+    "tabAgentPreview": "最終プロンプトをプレビュー",
+    "regTitle": "すべてのプロンプト",
+    "regIntro": "プラットフォームがモデル向けに書くすべてのテキストを、現在有効な文面、その出どころ、バージョンとともに表示します。スコープを選び、プロンプトを開いて変更し、過去のすべてのバージョンを確認できます。変更はおよそ 30 秒ですべてのサーバーに反映されます。",
+    "regScopeLabel": "変更するスコープ",
+    "regScope_tenant": "このワークスペース",
+    "regScope_agent": "1 つのエージェント",
+    "regScope_platform": "プラットフォーム全体",
+    "regAgentLabel": "エージェント",
+    "regAgentPlaceholder": "エージェントを選択",
+    "regAgentsFailed": "エージェントを読み込めませんでした。",
+    "regPickAgent": "エージェントを選択すると、そのプロンプトを表示・変更できます。",
+    "regAgentUnavailable": "リンク先のエージェントは、存在しないか見る権限がないため、利用できません。代わりにワークスペースのスコープでレジストリを開きました。",
+    "regSearchLabel": "プロンプトを検索",
+    "regSearchPlaceholder": "キー、タイトル、または説明",
+    "regRiskLabel": "リスククラス",
+    "regRiskAll": "すべてのリスククラス",
+    "regRisk_STEERS_EVERY_TURN": "すべてのターンを左右する",
+    "regRisk_SECONDARY_CALL": "二次的なモデル呼び出し",
+    "regRisk_USER_VISIBLE": "ユーザーに表示される",
+    "regRisk_TOOL_DESCRIPTION": "ツールの説明",
+    "regOnlyCustomised": "カスタマイズ済みのみ",
+    "regPlatformReadOnly": "プラットフォーム全体のプロンプトはここで閲覧できますが、変更できるのはプラットフォーム管理者のみです。",
+    "regLoadFailed": "プロンプトを読み込めませんでした。",
+    "regCount": "{total} 件中 {shown} 件のプロンプトを表示中。",
+    "regEmptyTitle": "一致するプロンプトがありません",
+    "regEmptyBody": "検索条件またはフィルターを変更してください。",
+    "regSource_DEFAULT": "出荷時のデフォルト",
+    "regSource_FALLBACK": "出荷時のデフォルト (上書きは利用不可)",
+    "regSource_PLATFORM": "プラットフォーム",
+    "regSource_TENANT": "ワークスペース",
+    "regSource_AGENT": "エージェント",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "廃止",
+    "regRetiredBody": "このプロンプトはテキストを送信しなくなったため、変更するものはありません。",
+    "regEffectiveOff": "オフ: 何も送信されません。",
+    "regEffectiveTokens": "現在有効、約 {tokens} トークン。",
+    "regEffectiveLabel": "{title} の有効な文面",
+    "regOpenEditor": "{title} を編集",
+    "regCloseEditor": "{title} を閉じる",
+    "regEditingOverride": "{scope}のバージョンを編集中です (現在 v{version})。",
+    "regEditingNone": "{scope}のバージョンはまだありません。その下の文面から始まります: {below}。",
+    "regPlaceholders": "実行時に挿入される内容:",
+    "regRequired": "(必須)",
+    "regProblemsTitle": "保存する前に修正してください",
+    "regReasonLabel": "変更の理由 (履歴に保存されます)",
+    "regReasonPlaceholder": "任意",
+    "regConflict": "編集中に他の人がこのプロンプトを変更しました。閉じて開き直し、その人のバージョンを確認してからもう一度お試しください。",
+    "regRevert": "{to} に戻す",
+    "regShowHistory": "履歴",
+    "regHideHistory": "履歴を隠す",
+    "regHistoryLoading": "履歴を読み込み中…",
+    "regHistoryFailed": "履歴を読み込めませんでした。",
+    "regHistoryEmpty": "このスコープにはまだバージョンがありません。",
+    "regVersion": "バージョン {version}",
+    "regAction_CREATE": "作成",
+    "regAction_UPDATE": "変更",
+    "regAction_REVERT": "差し戻し",
+    "regAction_MIGRATE": "移行",
+    "regCurrent": "現在",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "不明",
+    "regReason": "理由: {reason}",
+    "regShowDiff": "バージョン {version} の変更を表示",
+    "regHideDiff": "バージョン {version} の変更を隠す",
+    "regDiffLabel": "バージョン {version} による変更",
+    "regNoDiff": "このバージョンではテキストが変更されていません。",
+    "regRestore": "バージョン {version} を復元",
+    "regRestoreReason": "バージョン {version} の文面を復元しました",
+    "regRestoreFailed": "そのバージョンを復元できませんでした。",
+    "regRestoreAck": "{title} のバージョンを復元すると安全性が低下する可能性があることを理解しました。",
+    "regPreviewTitle": "最終プロンプトをプレビュー",
+    "regPreviewIntro": "モデルを呼び出さずに、ターンが組み立てるのとまったく同じ方法で、エージェントの実際のシステムプロンプトとツール一覧を組み立てます。各ブロックには、プロンプトのキー、スコープ、文面の出どころのバージョンが表示されます。",
+    "regPreviewMessageLabel": "サンプルのユーザーメッセージ (任意)",
+    "regPreviewMessagePlaceholder": "実際のメッセージと同様に、ツールと呼び出すメモリの選択に使用されます。",
+    "regPreviewSmallModel": "小型モデル向けのプレビュー",
+    "regPreviewBuild": "プレビューを作成",
+    "regPreviewBuilding": "作成中…",
+    "regPreviewFailed": "プレビューを作成できませんでした。",
+    "regPreviewTotals": "システムテキストが約 {prompt} トークン、ツール定義が約 {tools} トークンです (推定値)。",
+    "regPreviewOverBudgetTitle": "トークン予算を超過",
+    "regPreviewOverBudget": "常時送信されるシステムテキストが、設定された {budget} トークンの予算を超えています。何も切り捨てられません。プロンプトを短くすることをご検討ください。",
+    "regPreviewMessageHeading": "メッセージ: {message}",
+    "regPreviewTokens": "約 {tokens} トークン",
+    "regPreviewTools": "ツール ({count})",
+    "regPreviewNoTools": "このエージェントにはツールがありません。",
+    "regPreviewNotes": "このプレビューでは分からないこと",
+    "regOriginDefault": "出荷時のデフォルト",
+    "regOriginOverride": "{scope}の上書き v{version}",
+    "regOriginAgentConfig": "エージェント独自のシステムプロンプト",
+    "regOriginCode": "プラットフォームのコード"
+  },
+  "toolLabels": {
+    "mcpTool": "{tool} ({server})",
+    "label_web_search": "Search the web",
+    "does_web_search": "Looks up public web pages that match a search and reads their titles and snippets.",
+    "label_fetch_web_page": "Open a web page",
+    "does_fetch_web_page": "Downloads one public web page and reads its text.",
+    "label_deep_research": "Research a topic on the web",
+    "does_deep_research": "Runs several web searches and reads the pages it finds.",
+    "label_verify_citations": "Check quotes against sources",
+    "does_verify_citations": "Compares quoted text with the web pages it was taken from.",
+    "label_http_request": "Call a web API",
+    "does_http_request": "Sends a request to a web address or API; depending on the request it can read or change something there.",
+    "label_http_request_write": "Send data to a web API",
+    "does_http_request_write": "Sends data to a web address, which can change something on that service.",
+    "label_schedule_task": "Schedule a task",
+    "does_schedule_task": "Sets up a task to run later or on a repeating schedule.",
+    "label_create_workflow": "Create a workflow",
+    "does_create_workflow": "Creates a new workflow in this workspace.",
+    "label_data_table_query": "Look up a data table",
+    "does_data_table_query": "Reads rows from one of this workspace's data tables.",
+    "label_data_table_write": "Change a data table",
+    "does_data_table_write": "Adds or changes rows in one of this workspace's data tables.",
+    "label_coding_task": "Run a coding task",
+    "does_coding_task": "Starts a coding task that can read and change files in a code workspace.",
+    "label_delegate_to_specialist": "Ask a specialist agent",
+    "does_delegate_to_specialist": "Hands part of the task to another agent and reads its answer.",
+    "label_delegate_parallel": "Ask several agents at once",
+    "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
+    "label_web_task": "Use a browser on a website",
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
   }
 }

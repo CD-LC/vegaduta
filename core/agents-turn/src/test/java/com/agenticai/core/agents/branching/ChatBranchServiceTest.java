@@ -282,8 +282,14 @@ class ChatBranchServiceTest extends ChatBranchServiceTestBase {
 
         assertEquals("q2", prepared.text());
         assertEquals(List.of("q1", "r1"), liveTexts(live));
-        // The cached answer for that text must not be served straight back.
-        verify(responseCache).evict(TENANT, agentId, "alice", "q2");
+        // The cached answer for that text must not be served straight back. The cache keys on the
+        // conversation before the message too (app.chat.cache.*), so it is that very key that is dropped.
+        String key =
+                new com.agenticai.core.agents.turn.ChatCachePolicy(new com.agenticai.core.agents.turn.ChatCacheProperties())
+                        .conversationKey(List.of(
+                                new ChatTurn(MessageRole.USER, "q1", Instant.parse("2026-10-01T10:00:00Z")),
+                                new ChatTurn(MessageRole.ASSISTANT, "r1", Instant.parse("2026-10-01T10:00:01Z"))));
+        verify(responseCache).evict(TENANT, agentId, "alice", "q2", key);
         verify(semanticCache).evict(agentId, "q2");
         chat("q2", "r2 again");
 

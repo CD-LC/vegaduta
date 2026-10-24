@@ -30,12 +30,22 @@ import org.springframework.stereotype.Component;
  * failures degrade to memory-only, never break the tool call. Enabled by default since 2026-10-02
  * ({@code app.tools.effect-journal.enabled=true}; memory store unless redis is chosen).
  *
- * <p><b>Scope limits (known, deliberate).</b> The caller supplies the "run" and "step" parts of the
- * key: today that is the session id plus a per-chat-turn id, so only an identical call repeated
- * within one turn (a model retry/loop) is de-duplicated, not a retry across turns. A model that
- * legitimately repeats an identical write inside one turn gets the recorded result without the
- * effect running again. Redis is opt-in ({@code store=redis}) and is not used by default even when
- * a Redis template exists. Hence the flag is off by default.
+ * <p><b>What it covers.</b> Only tools the tool classification marks {@code DURABLE} (see {@code
+ * AgentToolGovernance#isDurableTool}); {@code LoggingToolCallback} is the only caller, so only calls that
+ * pass through the platform's tool wrapper are protected. The caller supplies the "run" and "step" parts
+ * of the key: the session id plus a per-chat-turn id (or, in an agent-job session with the durable step
+ * journal on, a fixed step so a resumed attempt recognises the call). So an IDENTICAL call (same tool,
+ * same arguments) repeated within one turn - a model retry or loop, or the replay of the turn on another
+ * provider - is de-duplicated within {@code ttl-minutes}.
+ *
+ * <p><b>What it does not cover.</b> A call that threw (a failure after the provider acted cannot be told
+ * from one before it, so nothing is recorded); the same tool with different arguments; tools classified
+ * {@code SIDE_EFFECT} or not classified; a repeat in a LATER turn of an ordinary chat session (a model that
+ * legitimately repeats an identical write inside one turn gets the recorded result without the effect
+ * running again, and one that repeats it next turn runs it again); and a restart or another replica unless
+ * {@code store=redis} (or the durable job store). The turn's failover gate ({@code FailoverReplayGate})
+ * relies on exactly this: a turn that ran write/send tools is replayed on another provider only when the
+ * journal recorded each of them. Enabled by default; see docs/configuration.md.
  */
 @Component
 public class EffectJournal {
