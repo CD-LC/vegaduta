@@ -15738,5 +15738,10 @@
     "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
     "label_web_task": "Use a browser on a website",
     "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
+  },
+  "localModelWizard": {
+    "firstRunServingTitle": "Your local model is running",
+    "firstRunServingBody": "Agents on this install already answer with {tag} for free, no API key. Add a cloud provider key if you ever need a bigger or different model.",
+    "firstRunServingCta": "Create an agent"
   }
 }
