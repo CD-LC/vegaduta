@@ -94,7 +94,10 @@ export default function ApprovalDetail({
         </p>
         <ExpiryCountdown item={item} ttlSeconds={ttlSeconds} showWhenNever />
         {ids && (
-          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground" data-testid="approval-links">
+          <p
+            className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground"
+            data-testid="approval-links"
+          >
             <span>
               {q("sessionLabel")} <code className="break-all font-mono">{ids.sessionId}</code>
             </span>
@@ -254,13 +257,16 @@ export default function ApprovalDetail({
           <ol className="grid gap-1.5 text-sm">
             <li className="flex gap-3">
               <time className="w-40 shrink-0 text-xs text-muted-foreground">{fmtTime(item.createdAt)}</time>
-              <span className="min-w-0 break-words">{t("requestedByRow", { name: item.requestedBy || t("unknownActor") })}</span>
+              <span className="min-w-0 break-words">
+                {t("requestedByRow", { name: item.requestedBy || t("unknownActor") })}
+              </span>
             </li>
             {item.decidedAt && (
               <li className="flex gap-3">
                 <time className="w-40 shrink-0 text-xs text-muted-foreground">{fmtTime(item.decidedAt)}</time>
                 <span className="min-w-0 break-words">
-                  {expired ? q("auditExpired") : item.status.toLowerCase()} {t("byActorSuffix", { name: item.decidedBy || t("unknownActor") })}
+                  {expired ? q("auditExpired") : item.status.toLowerCase()}{" "}
+                  {t("byActorSuffix", { name: item.decidedBy || t("unknownActor") })}
                 </span>
               </li>
             )}
