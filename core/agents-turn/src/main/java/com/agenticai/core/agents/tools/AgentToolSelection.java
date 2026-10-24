@@ -111,6 +111,10 @@ public final class AgentToolSelection {
                     "remember_shared_fact",
                     "list_knowledge_collections",
                     "search_knowledge_base",
+                    // "search the repository" shares words with search_knowledge_base, not with
+                    // this tool's code-specific description - the wrong pick then reads as an
+                    // empty-result loop. Keep the code index visible whenever code-intel offers it.
+                    "search_code",
                     "recall_related_facts",
                     "recall_shared_graph_facts",
                     "request_human",
@@ -134,7 +138,8 @@ public final class AgentToolSelection {
                     // then a cleared placeholder points
                     // at it, so keyword relevance must never trim it away.
                     RestoreToolResultToolCallback.NAME,
-                    // The Assistant's file tools and terminal: resolved only on a one-person install
+                    // The Assistant's file tools and terminal: resolved only on a one-person
+                    // install
                     // (projects folder / sandbox or workspace runner), for an agent that allows
                     // them. A build request ("make a Spring project") shares no words with
                     // "workspace_write" or "local_shell", so keyword relevance trimmed them on
@@ -146,8 +151,10 @@ public final class AgentToolSelection {
                     "workspace_search",
                     "workspace_write",
                     "workspace_edit",
-                    // The platform guides: "how do I connect Jira" shares no words with the tool's name,
-                    // yet is exactly when the Assistant must look the answer up instead of guessing.
+                    // The platform guides: "how do I connect Jira" shares no words with the tool's
+                    // name,
+                    // yet is exactly when the Assistant must look the answer up instead of
+                    // guessing.
                     "vegaduta_setup_guide",
                     "vegaduta_api_guide",
                     // Document skills (pptx/docx/xlsx/...) load via load_skill and tell the model
@@ -233,7 +240,8 @@ public final class AgentToolSelection {
         return result;
     }
 
-    // Small-model mode (V501): the tools offered on one turn, the browsing quota and the ranking weights are
+    // Small-model mode (V501): the tools offered on one turn, the browsing quota and the ranking
+    // weights are
     // app.chat.small-model.* - see SmallModelProperties.
 
     /**
@@ -244,21 +252,29 @@ public final class AgentToolSelection {
      * the resolved order; a tool named in the message always wins. A list already within the cap is
      * returned as it is. Returns a mutable list, like the resolver does.
      */
-    public static List<ToolCallback> capForSmallModel(List<ToolCallback> tools, String userMessage, int cap) {
+    public static List<ToolCallback> capForSmallModel(
+            List<ToolCallback> tools, String userMessage, int cap) {
         return capForSmallModel(tools, userMessage, cap, Set.of());
     }
 
-    /** As above, with the cap and ranking weights taken from {@code settings} ({@code app.chat.small-model.*}). */
+    /**
+     * As above, with the cap and ranking weights taken from {@code settings} ({@code
+     * app.chat.small-model.*}).
+     */
     public static List<ToolCallback> capForSmallModel(
-            List<ToolCallback> tools, String userMessage, Set<String> stickyTools, SmallModelProperties settings) {
+            List<ToolCallback> tools,
+            String userMessage,
+            Set<String> stickyTools,
+            SmallModelProperties settings) {
         return capForSmallModel(tools, userMessage, settings.getToolCap(), stickyTools, settings);
     }
 
     /**
      * As {@link #capForSmallModel(List, String, int)}, for a turn whose message may be a short
-     * follow-up: {@code stickyTools} are the tools the conversation already used (most recent first),
-     * kept ahead of the message-driven choice, so a task does not lose its tools to a message
-     * ("continue") that names none. They never take the slots of a tool the message names itself.
+     * follow-up: {@code stickyTools} are the tools the conversation already used (most recent
+     * first), kept ahead of the message-driven choice, so a task does not lose its tools to a
+     * message ("continue") that names none. They never take the slots of a tool the message names
+     * itself.
      */
     public static List<ToolCallback> capForSmallModel(
             List<ToolCallback> tools, String userMessage, int cap, Set<String> stickyTools) {
@@ -281,23 +297,31 @@ public final class AgentToolSelection {
             scores.put(tool, smallModelScore(query, tool, userMessage, settings));
         }
         List<ToolCallback> ranked = new ArrayList<>(tools);
-        // Stable sort: equal scores keep the resolved order (always-relevant tools come first there).
-        ranked.sort(java.util.Comparator.comparingInt((ToolCallback t) -> scores.get(t)).reversed());
+        // Stable sort: equal scores keep the resolved order (always-relevant tools come first
+        // there).
+        ranked.sort(
+                java.util.Comparator.comparingInt((ToolCallback t) -> scores.get(t)).reversed());
         // A request that signals several intents ("search the web ... then list my files") used to
         // lose a whole family: every boosted tool scores the same, the resolved order puts the
         // Assistant's seven workspace/shell tools first, and web_search fell off the end. Take the
         // best tool of each signalled intent first (round-robin, in the order the tools rank), then
         // fill the rest by score, so every intent the person voiced keeps at least one tool.
         List<ToolCallback> kept = new ArrayList<>(cap);
-        Set<ToolCallback> taken = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        Set<ToolCallback> taken =
+                java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
         if (stickyTools != null && !stickyTools.isEmpty()) {
-            int named = (int) ranked.stream().filter(t -> scores.get(t) >= settings.getNamedToolScore()).count();
+            int named =
+                    (int)
+                            ranked.stream()
+                                    .filter(t -> scores.get(t) >= settings.getNamedToolScore())
+                                    .count();
             for (String sticky : stickyTools) {
                 for (ToolCallback tool : ranked) {
                     if (kept.size() >= cap - named) {
                         break;
                     }
-                    if (tool.getToolDefinition().name().equals(sticky) && scores.get(tool) < settings.getNamedToolScore()) {
+                    if (tool.getToolDefinition().name().equals(sticky)
+                            && scores.get(tool) < settings.getNamedToolScore()) {
                         taken.add(tool);
                         kept.add(tool);
                     }
@@ -315,9 +339,14 @@ public final class AgentToolSelection {
         while (kept.size() < cap && progress) {
             progress = false;
             for (Map.Entry<Integer, List<ToolCallback>> family : byIntent.entrySet()) {
-                // One tool per intent per pass, except a family that only works as a set (driving a page needs
-                // navigate, read and click together; one of them alone sent the model round in circles).
-                int quota = INTENTS.get(family.getKey()).getValue().get(0).startsWith("browser_") ? settings.getBrowserFamilyQuota() : 1;
+                // One tool per intent per pass, except a family that only works as a set (driving a
+                // page needs
+                // navigate, read and click together; one of them alone sent the model round in
+                // circles).
+                int quota =
+                        INTENTS.get(family.getKey()).getValue().get(0).startsWith("browser_")
+                                ? settings.getBrowserFamilyQuota()
+                                : 1;
                 for (ToolCallback candidate : family.getValue()) {
                     if (kept.size() >= cap || quota == 0) {
                         break;
@@ -352,51 +381,190 @@ public final class AgentToolSelection {
      * What a person says -> the tool families that do it. Lexical overlap with a tool's name and
      * description (the base score below) misses most real requests: "what is the weather in Goa"
      * shares no word with {@code web_search}, "my meeting tomorrow" none with a calendar tool, so a
-     * small model was offered six unrelated tools and answered from memory or invented a call
-     * (seen 2026-10-18: it asked for fetch_web_page, which was not among the six). Each entry is
-     * (words that signal the intent, name fragments of the tools that serve it); a matching tool
-     * scores {@code app.chat.small-model.intent-boost}, enough to outrank any overlap score but not an explicit
-     * tool-name mention.
+     * small model was offered six unrelated tools and answered from memory or invented a call (seen
+     * 2026-10-18: it asked for fetch_web_page, which was not among the six). Each entry is (words
+     * that signal the intent, name fragments of the tools that serve it); a matching tool scores
+     * {@code app.chat.small-model.intent-boost}, enough to outrank any overlap score but not an
+     * explicit tool-name mention.
      */
     private static final List<Map.Entry<Set<String>, List<String>>> INTENTS =
             List.of(
                     Map.entry(
-                            Set.of("search", "latest", "news", "today", "weather", "price", "current", "who", "when", "find", "google", "lookup", "online", "web"),
+                            Set.of(
+                                    "search", "latest", "news", "today", "weather", "price",
+                                    "current", "who", "when", "find", "google", "lookup", "online",
+                                    "web"),
                             List.of("web_search", "fetch_web_page")),
-                    Map.entry(Set.of("http", "https", "www", "url", "link", "website", "webpage", "page", "site"), List.of("fetch_web_page", "web_search")),
                     Map.entry(
-                            Set.of("email", "gmail", "mail", "inbox", "calendar", "meeting", "schedule", "event", "invite", "drive", "sheet", "sheets", "spreadsheet", "doc", "docs", "contacts"),
-                            List.of("google", "gmail", "calendar", "sheets", "drive", "email", "mail")),
+                            Set.of(
+                                    "http", "https", "www", "url", "link", "website", "webpage",
+                                    "page", "site"),
+                            List.of("fetch_web_page", "web_search")),
                     Map.entry(
-                            Set.of("file", "files", "folder", "directory", "code", "script", "project", "run", "build", "install", "edit", "write", "read", "create", "repo",
-                                    "terminal", "command", "shell", "disk", "space", "process", "processes", "largest", "git", "npm", "python", "copy", "move", "delete", "rename", "list"),
+                            Set.of(
+                                    "email",
+                                    "gmail",
+                                    "mail",
+                                    "inbox",
+                                    "calendar",
+                                    "meeting",
+                                    "schedule",
+                                    "event",
+                                    "invite",
+                                    "drive",
+                                    "sheet",
+                                    "sheets",
+                                    "spreadsheet",
+                                    "doc",
+                                    "docs",
+                                    "contacts"),
+                            List.of(
+                                    "google",
+                                    "gmail",
+                                    "calendar",
+                                    "sheets",
+                                    "drive",
+                                    "email",
+                                    "mail")),
+                    Map.entry(
+                            Set.of(
+                                    "file",
+                                    "files",
+                                    "folder",
+                                    "directory",
+                                    "code",
+                                    "script",
+                                    "project",
+                                    "run",
+                                    "build",
+                                    "install",
+                                    "edit",
+                                    "write",
+                                    "read",
+                                    "create",
+                                    "repo",
+                                    "terminal",
+                                    "command",
+                                    "shell",
+                                    "disk",
+                                    "space",
+                                    "process",
+                                    "processes",
+                                    "largest",
+                                    "git",
+                                    "npm",
+                                    "python",
+                                    "copy",
+                                    "move",
+                                    "delete",
+                                    "rename",
+                                    "list"),
                             List.of("workspace_", "local_shell")),
-                    // Driving a page: opening a site, clicking, signing in, filling a form. The agent's own browser
-                    // (browser_*) is a different tool from fetching a page's text; the first fragment is the best fit.
+                    // Driving a page: opening a site, clicking, signing in, filling a form. The
+                    // agent's own browser
+                    // (browser_*) is a different tool from fetching a page's text; the first
+                    // fragment is the best fit.
                     Map.entry(
-                            Set.of("browser", "browse", "click", "screenshot", "login", "log", "sign", "form", "button", "fill", "submit", "navigate", "tab"),
-                            List.of("browser_navigate", "browser_snapshot", "browser_read_page_text", "browser_click_element", "browser_type_into", "browser_screenshot")),
-                    // Routines and reminders: without this a 6-tool cap drops schedule_task on about half of them.
+                            Set.of(
+                                    "browser",
+                                    "browse",
+                                    "click",
+                                    "screenshot",
+                                    "login",
+                                    "log",
+                                    "sign",
+                                    "form",
+                                    "button",
+                                    "fill",
+                                    "submit",
+                                    "navigate",
+                                    "tab"),
+                            List.of(
+                                    "browser_navigate",
+                                    "browser_snapshot",
+                                    "browser_read_page_text",
+                                    "browser_click_element",
+                                    "browser_type_into",
+                                    "browser_screenshot")),
+                    // Routines and reminders: without this a 6-tool cap drops schedule_task on
+                    // about half of them.
                     Map.entry(
-                            Set.of("schedule", "remind", "reminder", "reminders", "every", "daily", "weekly", "hourly", "monthly", "cron", "recurring", "repeat"),
+                            Set.of(
+                                    "schedule",
+                                    "remind",
+                                    "reminder",
+                                    "reminders",
+                                    "every",
+                                    "daily",
+                                    "weekly",
+                                    "hourly",
+                                    "monthly",
+                                    "cron",
+                                    "recurring",
+                                    "repeat"),
                             List.of("schedule_task")),
-                    Map.entry(Set.of("remember", "recall", "memory", "forget", "earlier", "told"), List.of("remember", "recall", "search_conversation")),
-                    Map.entry(Set.of("document", "report", "pdf", "docx", "slides", "presentation"), List.of("generate_document")),
-                    // Setting something up or asking how the platform works: the guide, never a guess.
                     Map.entry(
-                            Set.of("connect", "integrate", "integration", "configure", "setup", "enable", "install", "mcp", "jira", "slack", "whatsapp",
-                                    "telegram", "github", "notion", "linear", "provider", "sso", "saml", "plugin", "skill", "credential"),
+                            Set.of("remember", "recall", "memory", "forget", "earlier", "told"),
+                            List.of("remember", "recall", "search_conversation")),
+                    Map.entry(
+                            Set.of("document", "report", "pdf", "docx", "slides", "presentation"),
+                            List.of("generate_document")),
+                    // Setting something up or asking how the platform works: the guide, never a
+                    // guess.
+                    Map.entry(
+                            Set.of(
+                                    "connect",
+                                    "integrate",
+                                    "integration",
+                                    "configure",
+                                    "setup",
+                                    "enable",
+                                    "install",
+                                    "mcp",
+                                    "jira",
+                                    "slack",
+                                    "whatsapp",
+                                    "telegram",
+                                    "github",
+                                    "notion",
+                                    "linear",
+                                    "provider",
+                                    "sso",
+                                    "saml",
+                                    "plugin",
+                                    "skill",
+                                    "credential"),
                             List.of("vegaduta_setup_guide")),
-                    Map.entry(Set.of("api", "endpoint", "openapi", "swagger", "rest", "curl"), List.of("vegaduta_api_guide", "vegaduta_setup_guide")),
+                    Map.entry(
+                            Set.of("api", "endpoint", "openapi", "swagger", "rest", "curl"),
+                            List.of("vegaduta_api_guide", "vegaduta_setup_guide")),
                     // The person's own documents: "what does my PDF say", "according to my notes".
                     Map.entry(
-                            Set.of("knowledge", "uploaded", "upload", "document", "documents", "pdf", "notes", "paper", "according", "summarise", "summarize", "summary"),
+                            Set.of(
+                                    "knowledge",
+                                    "uploaded",
+                                    "upload",
+                                    "document",
+                                    "documents",
+                                    "pdf",
+                                    "notes",
+                                    "paper",
+                                    "according",
+                                    "summarise",
+                                    "summarize",
+                                    "summary"),
                             List.of("search_knowledge_base", "list_knowledge_collections")));
 
     private static int smallModelScore(
-            Set<String> query, ToolCallback tool, String userMessage, SmallModelProperties settings) {
+            Set<String> query,
+            ToolCallback tool,
+            String userMessage,
+            SmallModelProperties settings) {
         String name = tool.getToolDefinition().name();
-        if (userMessage != null && userMessage.toLowerCase(java.util.Locale.ROOT).contains(name.toLowerCase(java.util.Locale.ROOT))) {
+        if (userMessage != null
+                && userMessage
+                        .toLowerCase(java.util.Locale.ROOT)
+                        .contains(name.toLowerCase(java.util.Locale.ROOT))) {
             return settings.getNamedToolScore();
         }
         int score = intentScore(query, userMessage, name, settings.getIntentBoost());
@@ -413,7 +581,8 @@ public final class AgentToolSelection {
         return score;
     }
 
-    private static int intentScore(Set<String> query, String userMessage, String toolName, int intentBoost) {
+    private static int intentScore(
+            Set<String> query, String userMessage, String toolName, int intentBoost) {
         String lowerName = toolName.toLowerCase(java.util.Locale.ROOT);
         boolean hasUrl = hasUrl(userMessage);
         int best = 0;
@@ -455,14 +624,19 @@ public final class AgentToolSelection {
         return userMessage != null && userMessage.matches("(?s).*(https?://|www\\.)\\S+.*");
     }
 
-    private static boolean signalled(Map.Entry<Set<String>, List<String>> intent, Set<String> query, boolean hasUrl) {
-        return query.stream().anyMatch(intent.getKey()::contains) || (hasUrl && intent.getKey().contains("url"));
+    private static boolean signalled(
+            Map.Entry<Set<String>, List<String>> intent, Set<String> query, boolean hasUrl) {
+        return query.stream().anyMatch(intent.getKey()::contains)
+                || (hasUrl && intent.getKey().contains("url"));
     }
 
     private static Set<String> tokens(String text) {
         Set<String> out = new java.util.HashSet<>();
         for (String raw : WordTokens.words(text)) {
-            out.add(raw.endsWith("s") && raw.length() > 4 ? raw.substring(0, raw.length() - 1) : raw);
+            out.add(
+                    raw.endsWith("s") && raw.length() > 4
+                            ? raw.substring(0, raw.length() - 1)
+                            : raw);
         }
         return out;
     }

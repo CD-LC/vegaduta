@@ -76,7 +76,11 @@ export function useTranscript(speakingTurnIndex: number | null) {
   useEffect(() => {
     if (restoreScrollRef.current) return; // a window expansion is mid-flight; that owns the scroll position
     if (!stickToBottomRef.current) return;
-    bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight, behavior: "smooth" });
+    // "smooth" while a turn streams restarts the animation on every chunk
+    // (the visible flicker); instant during a pending turn, smooth for the
+    // discrete jumps (new turn, restored history).
+    const streaming = turns[turns.length - 1]?.pending === true;
+    bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight, behavior: streaming ? "auto" : "smooth" });
   }, [turns]);
 
   // Deliberately keyed on visibleCount ONLY, so "show earlier"/"collapse"

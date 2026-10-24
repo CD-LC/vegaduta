@@ -24,7 +24,7 @@ import type { PlaygroundContext } from "./playground/sendContext";
 import type { PlaygroundAgent, VisionFallbackOffer } from "./playground/types";
 import { useAttachments } from "./playground/useAttachments";
 import { useChatStream } from "./playground/useChatStream";
-import { useApprovalContinuation } from "./useApprovalContinuation";
+import { useApprovalContinuation, type ApprovalContinuationWatch } from "./useApprovalContinuation";
 import { useEdgeState } from "./playground/useEdgeState";
 import { useEdgeTurns } from "./playground/useEdgeTurns";
 import { useFaceRecognition } from "./playground/useFaceRecognition";
@@ -95,15 +95,23 @@ export default function AgentPlayground({
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   // A decided tool approval: core carries the task on itself; its reply is appended to the transcript here and
   // the composer stays off until it has (a message typed meanwhile would race the agent's own turn).
+  const approvalContinuationRef = useRef<ApprovalContinuationWatch | null>(null);
   const approvalContinuation = useApprovalContinuation({
     agentId: agent?.id ?? null,
     sessionId,
-    onReply: (reply) =>
+    onReply: (reply) => {
       setTurns((prev) => [
         ...prev,
-        reply.failed ? { role: "assistant", content: reply.content, failed: true } : { role: "assistant", content: reply.content },
-      ]),
+        reply.failed
+          ? { role: "assistant", content: reply.content, failed: true, continuation: true }
+          : { role: "assistant", content: reply.content, continuation: true },
+      ]);
+      // The reply itself is the receipt: dismiss the "completed" status line
+      // now instead of letting it sit under the final answer for seconds.
+      approvalContinuationRef.current?.dismiss();
+    },
   });
+  approvalContinuationRef.current = approvalContinuation;
   const busy = sending || approvalContinuation.continuing;
   // Artifacts pane (flag-gated, default off), the same hook ChatPanel uses, so
   // a reply gets the same code block and "Open as artifact" offer whichever
