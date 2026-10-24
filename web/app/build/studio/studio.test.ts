@@ -9,6 +9,9 @@ import { HARNESS_LINES, findInSource, withHarness } from "./runtime";
 import { addVersion, newProject, MAX_VERSIONS } from "./store";
 import { describeTarget, fixRequest, fromModelView, isWholePageRequest, locateRuntimeError, toModelView } from "./scope";
 import { editPrompt } from "./engine";
+import { parseQuestions, shouldClarify } from "./buildPlan";
+import { splitThink } from "./thinking";
+import { studioSuggestions } from "./suggestions";
 
 const APP = `<!doctype html>
 <html><head><style>
@@ -123,6 +126,43 @@ describe("patch", () => {
       'import { x } from "./y.js";\nexport const z = x;'
     );
     expect(looksLikeValidApp(mod)).toBe(true);
+  });
+
+  it("parseQuestions reads only real question lines, READY means build now", () => {
+    expect(parseQuestions("READY")).toEqual([]);
+    expect(parseQuestions("")).toEqual([]);
+    expect(parseQuestions("Looks clear enough, build it.")).toEqual([]);
+    expect(parseQuestions("1. Who uses this?\n2. What goes on the main screen?\n3. Which features matter most?")).toEqual([
+      "Who uses this?",
+      "What goes on the main screen?",
+      "Which features matter most?",
+    ]);
+    // a fourth question is dropped, prose without a ? is dropped
+    const four = "Who uses this app?\nWhat goes on screen?\nWhich features matter?\nWhat else changes?\nsome note";
+    expect(parseQuestions(four)).toHaveLength(3);
+  });
+
+  it("shouldClarify skips a detailed brief", () => {
+    expect(shouldClarify("a todo app")).toBe(true);
+    expect(shouldClarify("x".repeat(241))).toBe(false);
+  });
+
+  it("splitThink separates streamed reasoning from the reply", () => {
+    expect(splitThink("hello")).toEqual({ thinking: "", visible: "hello" });
+    const r = splitThink("pre<think>reasoning here</think>answer");
+    expect(r.thinking).toBe("reasoning here");
+    expect(r.visible).toBe("preanswer");
+    // an unclosed block mid-stream is still reasoning, not visible text
+    expect(splitThink("<think>still thinking").visible).toBe("");
+  });
+
+  it("studioSuggestions follows what the app lacks", () => {
+    const plain = studioSuggestions(APP);
+    expect(plain.length).toBeGreaterThan(0);
+    expect(plain.length).toBeLessThanOrEqual(3);
+    // an app that already persists, searches and dark-modes gets the tail rules
+    const rich = APP.replace("const x = 1;", "save('k',[]); load('k',[]); function searchInput(){} function settings(){} function addItem(){} function undo(){} dark mode");
+    expect(studioSuggestions(rich).map((s) => s.label)).not.toContain("Add a dark mode");
   });
 
   it("skips the script check when no parser is registered", () => {
