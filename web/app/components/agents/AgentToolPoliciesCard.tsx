@@ -181,11 +181,11 @@ export default function AgentToolPoliciesCard({
           <ul className="mt-1 space-y-1">
             {summaries.map((p, i) => (
               <li key={`${p.tool}-${i}`} className="text-xs text-muted-foreground">
-                <code className="font-mono text-foreground">{p.tool}</code>
+                <code className="break-all font-mono text-foreground">{p.tool}</code>
                 {p.denyUnlistedArgs ? <span> - {t("denyUnlisted")}</span> : null}
                 {p.rules.map((r, j) => (
                   <div key={`${r.path}-${j}`} className="ml-3">
-                    <code className="font-mono">{r.path}</code>
+                    <code className="break-all font-mono">{r.path}</code>
                     {r.checks.length > 0 ? <span>: {r.checks.join(" · ")}</span> : null}
                   </div>
                 ))}

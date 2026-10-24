@@ -421,7 +421,7 @@ export default function ApprovalsPanel({
         <Card className="gap-2 py-3" data-testid="last-decision">
           <CardContent className="grid gap-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-medium">{q("lastDecisionTitle", { tool: requestToolName(lastDecided) })}</span>
+              <span className="min-w-0 break-words text-sm font-medium">{q("lastDecisionTitle", { tool: requestToolName(lastDecided) })}</span>
               <button
                 type="button"
                 aria-label={q("lastDecisionClose")}

@@ -163,7 +163,7 @@ export default function TraceView({
                   <div className="mb-1 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     <Brain aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Plan
                   </div>
-                  <p className="whitespace-pre-wrap leading-relaxed">{row.text}</p>
+                  <p className="whitespace-pre-wrap break-all leading-relaxed">{row.text}</p>
                 </div>
               )}
               {row.kind === "tool" && (
@@ -184,13 +184,13 @@ export default function TraceView({
                       <span className="ml-auto text-xs text-muted-foreground animate-pulse">running…</span>
                     )}
                   </div>
-                  <pre className="mt-2 max-h-28 overflow-auto whitespace-pre-wrap rounded bg-muted/40 p-2 text-xs text-muted-foreground">
+                  <pre className="mt-2 max-h-28 overflow-auto whitespace-pre-wrap break-all rounded bg-muted/40 p-2 text-xs text-muted-foreground">
                     {prettyArgs(row.args)}
                   </pre>
                   {row.preview && (
                     <div className="mt-2 text-xs">
                       <div className="mb-1 font-medium text-muted-foreground">Result</div>
-                      <pre className="max-h-32 overflow-auto whitespace-pre-wrap rounded bg-muted/40 p-2 text-muted-foreground">
+                      <pre className="max-h-32 overflow-auto whitespace-pre-wrap break-all rounded bg-muted/40 p-2 text-muted-foreground">
                         {row.preview}
                       </pre>
                     </div>
