@@ -6,7 +6,6 @@ import {
   Boxes,
   Container,
   Download,
-  Github,
   Laptop,
   Package,
   ShieldCheck,
@@ -14,9 +13,15 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import BrandName from "../components/BrandName";
+import { Github } from "../components/lucideBrandIcons";
 import TemplatesPublicChrome from "../components/templates/TemplatesPublicChrome";
 import { REPO_URL, docsHref, docPageHref } from "../lib/siteLinks";
-import { fetchLatestRelease, pickAssets, type DownloadSet, type ReleaseAsset } from "../components/downloads/releaseInfo";
+import {
+  fetchLatestRelease,
+  pickAssets,
+  type DownloadSet,
+  type ReleaseAsset,
+} from "../components/downloads/releaseInfo";
 
 // PUBLIC page: the install artifacts of the latest GitHub Release, plus the
 // source tarball, container images, the Helm chart and the SDKs. The asset
@@ -96,14 +101,17 @@ export default async function DownloadsPage() {
   const release = await fetchLatestRelease();
   const assets: DownloadSet = pickAssets(release?.assets ?? []);
   const released = release != null;
-  const date = released && release.publishedAt ? new Date(release.publishedAt).toLocaleDateString("en", { dateStyle: "long" }) : null;
+  const date =
+    released && release.publishedAt
+      ? new Date(release.publishedAt).toLocaleDateString("en", { dateStyle: "long" })
+      : null;
 
   return (
     <TemplatesPublicChrome
       footer={
         <p>
-          Every release asset is checksummed and signed by the release workflow; verify downloads with
-          the SHA256SUMS file before running them.{" "}
+          Every release asset is checksummed and signed by the release workflow; verify downloads with the SHA256SUMS
+          file before running them.{" "}
           <Link href={docsHref()} className="underline underline-offset-2 hover:text-foreground">
             Documentation
           </Link>
@@ -124,20 +132,26 @@ export default async function DownloadsPage() {
             {released ? (
               <>
                 Latest release <span className="font-mono text-foreground">{release.tag}</span>
-                {date ? `, published ${date}` : ""}. Pick the Setup app for your machine - it checks
-                Docker, downloads the verified release and opens the console - or run the one-line
-                terminal installer.{" "}
-                <a href={RELEASES} className="underline underline-offset-2 hover:text-foreground" rel="noopener noreferrer">
+                {date ? `, published ${date}` : ""}. Pick the Setup app for your machine - it checks Docker, downloads
+                the verified release and opens the console - or run the one-line terminal installer.{" "}
+                <a
+                  href={RELEASES}
+                  className="underline underline-offset-2 hover:text-foreground"
+                  rel="noopener noreferrer"
+                >
                   All releases
                 </a>
                 .
               </>
             ) : (
               <>
-                VegaDūta installs from source today; the first tagged release with signed installers
-                is on its way. The build-from-source path below is the same one the release tarballs
-                run.{" "}
-                <a href={RELEASES} className="underline underline-offset-2 hover:text-foreground" rel="noopener noreferrer">
+                VegaDūta installs from source today; the first tagged release with signed installers is on its way. The
+                build-from-source path below is the same one the release tarballs run.{" "}
+                <a
+                  href={RELEASES}
+                  className="underline underline-offset-2 hover:text-foreground"
+                  rel="noopener noreferrer"
+                >
                   Releases on GitHub
                 </a>
                 .
@@ -154,8 +168,8 @@ export default async function DownloadsPage() {
             <BrandName /> Setup - the guided installer
           </h2>
           <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
-            A small app that checks your machine, starts Docker if needed, downloads the signed
-            release and starts VegaDūta, then opens the console in your browser. Pick your platform.
+            A small app that checks your machine, starts Docker if needed, downloads the signed release and starts
+            VegaDūta, then opens the console in your browser. Pick your platform.
           </p>
           <div className="grid gap-4 md:grid-cols-3">
             <OsCard
@@ -199,8 +213,8 @@ export default async function DownloadsPage() {
             One line in a terminal
           </h2>
           <p className="mb-3 max-w-2xl text-sm text-muted-foreground">
-            Downloads the latest release tarball and walks you through the same install the Setup app
-            drives. Works on macOS and Linux; on Windows use the zip above.
+            Downloads the latest release tarball and walks you through the same install the Setup app drives. Works on
+            macOS and Linux; on Windows use the zip above.
           </p>
           <pre className="overflow-x-auto rounded-md bg-muted px-4 py-3 font-mono text-xs text-foreground sm:text-sm">
             curl -fsSL {REPO_URL.replace("github.com", "raw.githubusercontent.com")}/main/install.sh | sh
@@ -265,19 +279,25 @@ export default async function DownloadsPage() {
               <li className="flex items-start gap-2">
                 <Container className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
                 <span>
-                  <a href={PACKAGES} className="text-primary underline underline-offset-2 hover:opacity-80" rel="noopener noreferrer">
+                  <a
+                    href={PACKAGES}
+                    className="text-primary underline underline-offset-2 hover:opacity-80"
+                    rel="noopener noreferrer"
+                  >
                     Container images on GHCR
                   </a>{" "}
                   - multi-arch, signed with cosign, SBOM and SLSA provenance attached
                 </span>
               </li>
               <li>
-                Helm chart:{" "}
-                <code className="break-all font-mono text-xs">oci://ghcr.io/cd-lc/charts/vegaduta</code>
+                Helm chart: <code className="break-all font-mono text-xs">oci://ghcr.io/cd-lc/charts/vegaduta</code>
                 {released ? ` (version ${release.tag.replace(/^v/, "")})` : ""}
               </li>
               <li>
-                <Link href={docPageHref("installation")} className="text-primary underline underline-offset-2 hover:opacity-80">
+                <Link
+                  href={docPageHref("installation")}
+                  className="text-primary underline underline-offset-2 hover:opacity-80"
+                >
                   Installation guide
                 </Link>
               </li>
@@ -293,24 +313,34 @@ export default async function DownloadsPage() {
           <ul className="m-0 list-none space-y-3 p-0 text-sm text-muted-foreground">
             <li>
               <span className="font-medium text-foreground">Java Agent SDK</span>{" "}
-              <code className="font-mono text-xs">io.vegaduta:vegaduta-agent-*</code> - governance
-              (approvals, budgets, audit, guardrails) around Spring AI tools.{" "}
-              <Link href={docPageHref("javaSdk")} className="text-primary underline underline-offset-2 hover:opacity-80">
+              <code className="font-mono text-xs">io.vegaduta:vegaduta-agent-*</code> - governance (approvals, budgets,
+              audit, guardrails) around Spring AI tools.{" "}
+              <Link
+                href={docPageHref("javaSdk")}
+                className="text-primary underline underline-offset-2 hover:opacity-80"
+              >
                 Docs and build
               </Link>
             </li>
             <li>
               <span className="font-medium text-foreground">Python Agent SDK</span>{" "}
-              <code className="font-mono text-xs">pip install vegaduta-agent</code> - the same
-              governance contracts, dependency-free.{" "}
-              <Link href={docPageHref("sdkOverview")} className="text-primary underline underline-offset-2 hover:opacity-80">
+              <code className="font-mono text-xs">pip install vegaduta-agent</code> - the same governance contracts,
+              dependency-free.{" "}
+              <Link
+                href={docPageHref("sdkOverview")}
+                className="text-primary underline underline-offset-2 hover:opacity-80"
+              >
                 SDK overview
               </Link>
             </li>
             <li>
-              <span className="font-medium text-foreground">TypeScript / Python REST clients</span> -
-              generated from the platform&apos;s OpenAPI document.{" "}
-              <a href={`${REPO_URL}/tree/main/sdk`} className="text-primary underline underline-offset-2 hover:opacity-80" rel="noopener noreferrer">
+              <span className="font-medium text-foreground">TypeScript / Python REST clients</span> - generated from the
+              platform&apos;s OpenAPI document.{" "}
+              <a
+                href={`${REPO_URL}/tree/main/sdk`}
+                className="text-primary underline underline-offset-2 hover:opacity-80"
+                rel="noopener noreferrer"
+              >
                 sdk/ in the repository
               </a>
             </li>

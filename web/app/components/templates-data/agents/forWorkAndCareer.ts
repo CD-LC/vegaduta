@@ -1,4 +1,5 @@
-import { Briefcase, FileSpreadsheet, FileText, Linkedin, ListChecks, ScrollText, Wallet } from "lucide-react";
+import { Briefcase, FileSpreadsheet, FileText, ListChecks, ScrollText, Wallet } from "lucide-react";
+import { Linkedin } from "../../lucideBrandIcons";
 import type { AgentTemplateEntry } from "./types";
 
 // Agent templates: For work & career.
