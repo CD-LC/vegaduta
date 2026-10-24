@@ -3,7 +3,8 @@
 
 // Split out of page.tsx (behaviour unchanged).
 import Link from "next/link";
-import { ExternalLink, Github, GitBranch, GitPullRequest } from "lucide-react";
+import { ExternalLink, GitBranch, GitPullRequest } from "lucide-react";
+import { Github } from "../components/lucideBrandIcons";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
