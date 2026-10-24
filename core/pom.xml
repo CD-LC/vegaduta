@@ -340,13 +340,26 @@
            (reproduced via WorkflowController.generateGraph's AI workflow
            generator, but this would hit any Gemini call path). Explicit
            dependencyManagement entries win regardless of tree depth, so this
-           fixes it no matter which dependency was actually "nearest". 4.12.0
-           matches the version already used in mobile-app/mobile-sdk's
-           Android modules elsewhere in this repo. -->
+           fixes it no matter which dependency was actually "nearest". -->
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>okhttp</artifactId>
         <version>5.5.0</version>
+      </dependency>
+      <!-- OkHttp 5.x: the plain "okhttp" artifact is a KMP shell with no classes
+           under Maven; okhttp-jvm carries them and is declared in core/chat.
+           Its kotlin-stdlib floor (2.1.21) is also pinned because google-genai's
+           older stdlib request would otherwise win mediation and OkHttp 5's
+           Kotlin-2.1 bytecode can hit missing stdlib members at runtime. -->
+      <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>okhttp-jvm</artifactId>
+        <version>5.5.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib</artifactId>
+        <version>2.1.21</version>
       </dependency>
 
       <!-- Inter-module versions, so every module can depend on a sibling
