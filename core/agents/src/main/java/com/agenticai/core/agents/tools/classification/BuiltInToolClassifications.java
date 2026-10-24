@@ -372,6 +372,13 @@ public final class BuiltInToolClassifications {
                 "create_custom_tool",
                 new ToolClassification(
                         "create_custom_tool",
+                        ToolTrustTier.TENANT_SCOPED,
+                        ToolSensitivity.WRITE_TENANT,
+                        ToolDeterminism.DURABLE,
+                        null,
+                        false,
+                        true));
+
         // ---- Agent jobs (app.agent-jobs.*) ------------------
         // continue_in_background hands the unfinished task to a background agent_job: a
         // tenant-scoped DURABLE write (the job row persists; a blind retry would submit a
@@ -384,7 +391,6 @@ public final class BuiltInToolClassifications {
                 "continue_in_background",
                 new ToolClassification(
                         "continue_in_background",
-
                         ToolTrustTier.TENANT_SCOPED,
                         ToolSensitivity.WRITE_TENANT,
                         ToolDeterminism.DURABLE,

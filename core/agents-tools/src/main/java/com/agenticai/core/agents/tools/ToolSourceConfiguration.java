@@ -227,7 +227,6 @@ class ToolSourceConfiguration {
     ToolSource toolAuthoringToolSource(AgentCustomToolResolver custom) {
         return ToolSource.ofResolver(
                 "toolAuthoring", ToolSource.Kind.BUILT_IN, custom::resolveToolAuthoringTools);
-
     }
 
     @Bean
@@ -265,7 +264,6 @@ class ToolSourceConfiguration {
                 "backgroundJob",
                 ToolSource.Kind.BUILT_IN,
                 backgroundJobs::resolveBackgroundJobTools);
-
     }
 
     @Bean
