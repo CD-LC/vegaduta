@@ -887,6 +887,31 @@ public final class ApprovalTurnHarness implements AutoCloseable {
     }
 
     /**
+     * Waits (up to 5s) until at least {@code expected} requests are recorded and every recorded
+     * request shows {@code expectedStatus}. Approve/deny propagate through the executor on a worker
+     * thread, so a status read taken right after {@code approve(...)} returned can still see the old
+     * value; callers that assert on statuses should go through this rather than
+     * {@link #requestStatuses()} directly. True when the statuses settled, false on timeout.
+     */
+    public boolean awaitRequestStatuses(ApprovalStatus expectedStatus, int expected) {
+        long deadline = System.nanoTime() + 5_000_000_000L;
+        while (System.nanoTime() < deadline) {
+            List<ApprovalStatus> statuses = requestStatuses();
+            if (statuses.size() >= expected
+                    && statuses.stream().allMatch(s -> s == expectedStatus)) {
+                return true;
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Delivers approval-stack events (e.g. "execution recorded") to a listener, like Spring would.
      */
     public void onApprovalEvent(java.util.function.Consumer<ApplicationEvent> listener) {
