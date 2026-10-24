@@ -25,8 +25,14 @@ export interface ApplyResult {
   failed: EditBlock[];
 }
 
+// The separator and end markers are line-anchored (`\n=`/`\n>`, not
+// `\n?=`/`\n?>`): without the anchor a comment divider a small model writes
+// inside a block body - `// ====== Section ======` - falsely matches as the
+// SEARCH/REPLACE separator, truncates the block mid-content, and can splice
+// a raw `=======` line into the document ("Unexpected token '==='" inside
+// <script>). Line-start markers are the documented contract anyway.
 const BLOCK_RE =
-  /<{5,9}\s*SEARCH[^\n]*\n([\s\S]*?)\n?={5,9}[^\n]*\n([\s\S]*?)\n?>{5,9}\s*REPLACE/g;
+  /<{5,9}\s*SEARCH[^\n]*\n([\s\S]*?)\n={5,9}[^\n]*\n([\s\S]*?)\n>{5,9}\s*REPLACE/g;
 
 /** Tolerant fallback for small models that get the KEYWORDS right but the
  * marker widths or casing wrong - `<<< SEARCH`, `====`, `>>>>>>> replace`
@@ -35,7 +41,7 @@ const BLOCK_RE =
  * that was a few marker characters off). Only consulted when the strict
  * pattern finds nothing; the SEARCH/REPLACE keywords keep it specific. */
 const BLOCK_RE_LOOSE =
-  /<{3,}\s*SEARCH[^\n]*\n([\s\S]*?)\n?\s*={3,}[^\n]*\n([\s\S]*?)\n?\s*>{3,}\s*REPLACE/gi;
+  /<{3,}\s*SEARCH[^\n]*\n([\s\S]*?)\n[ \t]*={3,}[^\n]*\n([\s\S]*?)\n[ \t]*>{3,}\s*REPLACE/gi;
 
 /** Extract every SEARCH/REPLACE block from a model reply. Tolerant of
  * surrounding prose and ``` fences (small models add both). */
@@ -178,14 +184,19 @@ export function applyEditBlocks(html: string, blocks: EditBlock[]): ApplyResult 
 }
 
 /** Cheap structural sanity check before an edit is accepted as a new
- * version: the document still has its skeleton and <script>/<style> tags
- * are balanced. Not a parser - a guard against obviously broken output. */
+ * version: the document still has its skeleton, <script>/<style> tags are
+ * balanced, and no SEARCH/REPLACE marker line leaked in. A bare `=======`
+ * inside <script> is "Unexpected token '==='" at parse time - it slipped
+ * through on small-model replies because the loose separator matched a
+ * comment divider mid-line. Not a parser - a guard against obviously
+ * broken output. */
 export function looksLikeValidApp(html: string): boolean {
   const lower = html.toLowerCase();
   if (!lower.includes("<body") || !lower.includes("</body>")) return false;
   const count = (re: RegExp) => (lower.match(re) || []).length;
   if (count(/<script[\s>]/g) !== count(/<\/script>/g)) return false;
   if (count(/<style[\s>]/g) !== count(/<\/style>/g)) return false;
+  if (/^\s*(?:<{3,}\s*SEARCH|={5,}|>{3,}\s*REPLACE)\s*$/im.test(html)) return false;
   return true;
 }
 
