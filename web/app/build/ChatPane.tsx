@@ -47,6 +47,10 @@ export default function ChatPane({
   const [instruction, setInstruction] = useState(() => loadDraft(pid));
   const [busy, setBusy] = useState(false);
   const [busyLabel, setBusyLabel] = useState("");
+  // Mid-turn detail from /generate/stream: the model's own summary and the
+  // files it just wrote - shown live so the turn is not a bare spinner.
+  const [liveSummary, setLiveSummary] = useState<string | null>(null);
+  const [liveFiles, setLiveFiles] = useState<string[] | null>(null);
   const handledFix = useRef(0);
   // Design inputs attached to the NEXT message: dropped images/SVGs and
   // the SketchPad's wireframe. Composed into `context` at send time.
@@ -323,7 +327,15 @@ export default function ChatPane({
           if (stage === "context") setBusyLabel("Reading your app…");
           else if (stage === "writing")
             setBusyLabel(evt?.attempt > 1 ? `Rewriting the change (try ${evt.attempt})…` : "Writing your change…");
+          else if (stage === "summary") setLiveSummary(evt?.summary || null);
           else if (stage === "files") {
+            // The applied set arrives before the build/test check - name the
+            // files it touches in the busy card while the preview renders.
+            setLiveFiles(
+              Array.isArray(evt?.files_changed)
+                ? evt.files_changed
+                : (evt?.files || []).map((f) => f.path)
+            );
             if (evt?.files?.length) {
               previewFilesShown = true;
               onFiles?.(evt.files);
@@ -420,6 +432,8 @@ export default function ChatPane({
       if (!unmounted.current) {
         setBusy(false);
         setBusyLabel("");
+        setLiveSummary(null);
+        setLiveFiles(null);
       }
     }
   };
@@ -458,8 +472,20 @@ export default function ChatPane({
             )
           )}
           {busy && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground" role="status">
-              <Loader2 aria-hidden="true" size={13} className="animate-spin" /> {busyLabel || t("generatingText")}
+            <div className="space-y-1.5 text-xs text-muted-foreground" role="status">
+              <div className="flex items-center gap-2">
+                <Loader2 aria-hidden="true" size={13} className="animate-spin" /> {busyLabel || t("generatingText")}
+              </div>
+              {liveSummary && <p className="pl-5 italic">{liveSummary}</p>}
+              {liveFiles && liveFiles.length > 0 && (
+                <div className="flex max-h-20 flex-wrap gap-1 overflow-y-auto pl-5" data-testid="live-file-chips">
+                  {liveFiles.map((p) => (
+                    <span key={p} className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
           <div ref={bottomRef} />
