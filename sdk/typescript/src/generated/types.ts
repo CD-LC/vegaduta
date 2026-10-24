@@ -608,6 +608,7 @@ export interface AgentJobStartRequest {
   timeoutSeconds?: number;
   resultSchemaJson?: string;
   maxToolCalls?: number;
+  maxTurns?: number;
 }
 
 export type AgentJobStatus = "QUEUED" | "RUNNING" | "AWAITING_APPROVAL" | "SUCCEEDED" | "FAILED" | "CANCELLED";

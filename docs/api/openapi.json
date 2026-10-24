@@ -91281,6 +91281,10 @@
           "maxToolCalls": {
             "type": "integer",
             "format": "int32"
+          },
+          "maxTurns": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "required": [
