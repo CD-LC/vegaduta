@@ -1,5 +1,5 @@
 # Pinned patch + Debian release, identical across every Python service image.
-FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+FROM python:3.14.7-slim-trixie@sha256:51dafde81dbdb6ebde285137a295cf18a47ca95234fe388a343719cb97305b3d
 
 WORKDIR /app
 
@@ -34,10 +34,9 @@ USER voiceagent
 # AgentServer's own health-check HTTP server (see livekit/agents/worker.py's
 # `run()`: a plain HttpServer exposing GET / and GET /worker) - defaults to
 # port 8081 in production mode (`start`, used below), 0 (disabled/random) in
-# `dev` mode. Not wired into deploy/docker-compose.yml yet - see README.md's
-# "Known gaps" section; a parallel/follow-up change owns adding the actual
-# `voice-agent` service block there (out of this pass's scope, which is
-# voice-agent/ only).
+# `dev` mode. Wired into deploy/compose/docker-compose.yml as the `voice-agent`
+# service (compose profile `voice`, health check on this port) and into the Helm
+# chart deploy/helm/charts/voice-agent.
 EXPOSE 8081
 
 # "start" = production mode (see livekit/agents/cli/_legacy.py's `start`

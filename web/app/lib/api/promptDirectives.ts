@@ -31,7 +31,12 @@ export interface CustomInstructions {
 export interface PromptDirectivesOverview {
   directives: PromptDirective[];
   customInstructions: CustomInstructions;
+  /** Illustrative only: the workspace-wide directives with a sample date, not the prompt an agent gets. */
   assembledPreview: string;
+  /** Says so, and where the real prompt is (set by servers with the prompt registry). */
+  assembledPreviewNote?: string;
+  /** `POST` here, with an agent id in place of `{agentId}`, for the real prompt of an agent. */
+  promptPreviewPath?: string;
 }
 
 export interface SavePromptDirectiveRequest {

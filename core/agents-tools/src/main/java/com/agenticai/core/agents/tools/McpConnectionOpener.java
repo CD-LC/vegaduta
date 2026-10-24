@@ -39,6 +39,7 @@ final class McpConnectionOpener {
     private final Map<String, Map<UUID, List<ToolCallback>>> liveToolCallbacks;
     private final McpToolCache toolCache;
     private final McpConnectionLifecycle lifecycle;
+    private final java.util.function.Supplier<java.time.Duration> requestTimeout;
 
     McpConnectionOpener(
             DynamicMcpConnectionManager owner,
@@ -51,7 +52,8 @@ final class McpConnectionOpener {
             Map<String, Map<UUID, McpSyncClient>> liveClients,
             Map<String, Map<UUID, List<ToolCallback>>> liveToolCallbacks,
             McpToolCache toolCache,
-            McpConnectionLifecycle lifecycle) {
+            McpConnectionLifecycle lifecycle,
+            java.util.function.Supplier<java.time.Duration> requestTimeout) {
         this.owner = owner;
         this.registryService = registryService;
         this.guards = guards;
@@ -63,6 +65,7 @@ final class McpConnectionOpener {
         this.liveToolCallbacks = liveToolCallbacks;
         this.toolCache = toolCache;
         this.lifecycle = lifecycle;
+        this.requestTimeout = requestTimeout;
     }
 
     /** Connects {@code registrationId} for {@code tenant}; never throws (see the manager). */
@@ -164,7 +167,7 @@ final class McpConnectionOpener {
             String changeServerName = config.name();
             McpSyncClient client =
                     McpClient.sync(transport)
-                            .requestTimeout(DynamicMcpConnectionManager.REQUEST_TIMEOUT)
+                            .requestTimeout(requestTimeout.get())
                             .toolsChangeConsumer(
                                     tools -> {
                                         // The SDK hands over the new list, so re-record its

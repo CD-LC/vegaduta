@@ -32,6 +32,29 @@ describe("goToGuideAnchor", () => {
     expect(sec.dataset.guideOutline).toBeUndefined();
   });
 
+  it("shows the tab of a hidden tab panel before scrolling to a section inside it", () => {
+    document.body.innerHTML = `
+      <button id="tab-setup">Setup</button>
+      <div role="tabpanel" aria-labelledby="tab-setup" hidden><div id="sec"><button data-guide-trigger="" data-state="open">Tools</button></div></div>`;
+    const tabClicked = vi.fn();
+    document.getElementById("tab-setup")!.addEventListener("click", tabClicked);
+    const sec = document.getElementById("sec") as HTMLElement;
+    sec.scrollIntoView = vi.fn();
+    expect(goToGuideAnchor("sec")).toBe(true);
+    expect(tabClicked).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not click any tab when the panel is already showing", () => {
+    document.body.innerHTML = `
+      <button id="tab-setup">Setup</button>
+      <div role="tabpanel" aria-labelledby="tab-setup"><div id="sec"><button data-guide-trigger="" data-state="open">Tools</button></div></div>`;
+    const tabClicked = vi.fn();
+    document.getElementById("tab-setup")!.addEventListener("click", tabClicked);
+    (document.getElementById("sec") as HTMLElement).scrollIntoView = vi.fn();
+    goToGuideAnchor("sec");
+    expect(tabClicked).not.toHaveBeenCalled();
+  });
+
   it("does not click an already-open section", () => {
     document.body.innerHTML = `<div id="sec"><button data-guide-trigger="" data-state="open" aria-controls="c1">Tools</button></div>`;
     const sec = document.getElementById("sec") as HTMLElement;

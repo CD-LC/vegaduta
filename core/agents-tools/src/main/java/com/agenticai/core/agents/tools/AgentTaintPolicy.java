@@ -97,7 +97,7 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
         Collections.synchronizedMap(new WeakHashMap<>());
 
     public AgentTaintPolicy(
-        @Value("${app.agents.taint.mode:off}") String mode,
+        @Value("${app.agents.taint.mode:observe}") String mode,
         @Value("${app.agents.taint.http-get-allow-hosts:}") String getAllowHosts,
         ObjectProvider<ToolClassificationRegistry> registry,
         ObjectProvider<MeterRegistry> meters,
@@ -108,6 +108,14 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
         this.registry = registry;
         this.meters = meters;
         this.audit = audit;
+    }
+
+    /** The prompt registry, for the wording of the spotlight banner; absent = the shipped text. */
+    private volatile com.agenticai.core.prompts.PromptResolver prompts;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPromptResolver(com.agenticai.core.prompts.PromptResolver prompts) {
+        this.prompts = prompts;
     }
 
     public TaintMode mode() {
@@ -139,7 +147,8 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
         if (turn == null) {
             return null;
         }
-        return new TaintGate(mode, turn, this, meters.getIfAvailable(), this::audit, agentId, sessionId);
+        return new TaintGate(mode, turn, this, meters.getIfAvailable(), this::audit, agentId, sessionId)
+            .withPrompts(prompts);
     }
 
     @Override

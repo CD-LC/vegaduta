@@ -26,6 +26,11 @@ final class McpToolOutputSanitizer {
 
     /**
      * 64KB of characters - beyond this a tool result is truncated with {@link #TRUNCATION_MARKER}.
+     *
+     * <p>This is a SECURITY ceiling on what the platform will hold and scan from an untrusted MCP
+     * server, not the model-facing cap: the result then goes through {@code GuardedToolCallback},
+     * which cuts it to {@code app.tools.output.*} (20,000 characters by default) with a marker that
+     * states how much was cut. It is deliberately a constant above that cap.
      */
     static final int MAX_RESULT_CHARS = 64 * 1024;
 
@@ -33,25 +38,6 @@ final class McpToolOutputSanitizer {
     static final int MAX_DESCRIPTION_CHARS = 2048;
     static final String TRUNCATION_MARKER =
             "\n...[truncated by platform: tool result exceeded 64KB]";
-
-    /** Per-result cap for BUILT-IN tools (cheaper than the 64KB MCP ceiling; ~4k tokens). */
-    static final int MAX_BUILTIN_RESULT_CHARS = 16 * 1024;
-
-    /**
-     * Caps a built-in tool result at {@value #MAX_BUILTIN_RESULT_CHARS} chars with a "[truncated N
-     * chars]" marker so one oversized result is not re-sent on every later iteration of the tool
-     * loop. Null and in-limit values pass through unchanged.
-     */
-    static String capBuiltInResult(String result) {
-        if (result == null || result.length() <= MAX_BUILTIN_RESULT_CHARS) {
-            return result;
-        }
-        int dropped = result.length() - MAX_BUILTIN_RESULT_CHARS;
-        return result.substring(0, MAX_BUILTIN_RESULT_CHARS)
-                + "\n...[truncated "
-                + dropped
-                + " chars]";
-    }
 
     private static final char ESC = (char) 0x1B;
     private static final char BEL = (char) 0x07;

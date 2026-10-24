@@ -4,6 +4,7 @@ import com.agenticai.core.providers.PlatformHostedLlmProviderService.ResolvedReq
 import com.agenticai.core.providers.validation.ProviderValidationException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.util.StringUtils;
 
@@ -27,12 +28,23 @@ final class HostedPoolRequestResolver {
      * resolves to *something* rather than failing.
      */
     static final List<String> AUTO_MODEL_PREFERENCE_KEYWORDS =
-            List.of("flash-lite", "flash", "mini", "haiku", "lite", "8b", "instant");
+            new ProviderModelDefaultsProperties().getHostedPoolAutoKeywords();
 
     private final ProviderModelCatalogService providerModelCatalogService;
+    private final Map<ProviderName, HostedPoolKnownEndpoints.KnownEndpoint> knownEndpoints;
+    private final ProviderModelDefaultsProperties modelDefaults;
 
     HostedPoolRequestResolver(ProviderModelCatalogService providerModelCatalogService) {
+        this(providerModelCatalogService, new ProviderEndpoints(), null);
+    }
+
+    HostedPoolRequestResolver(
+            ProviderModelCatalogService providerModelCatalogService,
+            ProviderEndpoints endpoints,
+            ProviderModelDefaultsProperties modelDefaults) {
         this.providerModelCatalogService = providerModelCatalogService;
+        this.knownEndpoints = HostedPoolKnownEndpoints.from(endpoints);
+        this.modelDefaults = modelDefaults != null ? modelDefaults : new ProviderModelDefaultsProperties();
     }
 
     /**
@@ -78,7 +90,7 @@ final class HostedPoolRequestResolver {
         String rawCompletionsPath = HostedPoolEndpointProbe.trimToNull(request.completionsPath());
         if (!StringUtils.hasText(rawBaseUrl) && providerName != null) {
             HostedPoolKnownEndpoints.KnownEndpoint known =
-                    HostedPoolKnownEndpoints.KNOWN_PROVIDER_ENDPOINTS.get(providerName);
+                    knownEndpoints.get(providerName);
             rawBaseUrl = known.baseUrl();
             if (rawCompletionsPath == null) {
                 rawCompletionsPath = known.completionsPath();
@@ -124,7 +136,7 @@ final class HostedPoolRequestResolver {
         String picked =
                 byCost != null && byCost.isPresent()
                         ? byCost.get()
-                        : pickBestModel(providerName, models);
+                        : pickBestModel(providerName, models, modelDefaults);
         if (picked == null) {
             throw new ProviderValidationException(
                     "Could not auto-select a model for "
@@ -148,15 +160,20 @@ final class HostedPoolRequestResolver {
      * last resort for a null provider.
      */
     static String pickBestModel(ProviderName provider, List<ProviderModelResponse> models) {
-        for (String keyword : AUTO_MODEL_PREFERENCE_KEYWORDS) {
+        return pickBestModel(provider, models, new ProviderModelDefaultsProperties());
+    }
+
+    static String pickBestModel(
+            ProviderName provider, List<ProviderModelResponse> models, ProviderModelDefaultsProperties defaults) {
+        for (String keyword : defaults.getHostedPoolAutoKeywords()) {
             for (ProviderModelResponse model : models) {
-                if (model.modelId().toLowerCase(Locale.ROOT).contains(keyword)) {
+                if (model.modelId().toLowerCase(Locale.ROOT).contains(keyword.toLowerCase(Locale.ROOT))) {
                     return model.modelId();
                 }
             }
         }
         if (provider != null) {
-            String preferred = ProviderModelCatalogService.pickDefaultModel(provider, models);
+            String preferred = ProviderModelCatalogService.pickDefaultModel(provider, models, defaults);
             if (preferred != null) {
                 return preferred;
             }

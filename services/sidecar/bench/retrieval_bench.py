@@ -26,6 +26,7 @@ is encoded is NOT separated: the number is encode + score), index time, and stor
 document (the real cost of multi-vector). The metric/MaxSim helpers are pure numpy so
 tests/test_retrieval_bench.py needs no model.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -42,6 +43,7 @@ STORAGE_DIMENSIONS = 768
 
 
 # ---------------------------------------------------------------- pure scoring / metrics
+
 
 def l2_normalize(m: np.ndarray) -> np.ndarray:
     n = np.linalg.norm(m, axis=-1, keepdims=True)
@@ -89,14 +91,16 @@ def evaluate(rankings: dict[str, list[str]], queries: list[dict], ks: list[int])
 
 def percentile(xs: list[float], p: float) -> float:
     s = sorted(xs)
-    return s[min(len(s) - 1, int(round(p / 100 * (len(s) - 1))))] if s else 0.0
+    return s[min(len(s) - 1, round(p / 100 * (len(s) - 1)))] if s else 0.0
 
 
 # ---------------------------------------------------------------- systems (lazy model imports)
 
+
 class DenseSystem:
     def __init__(self, key: str):
         from app.embeddings import get_model  # lazy: heavy import
+
         self.name = f"dense:{key}"
         self.model = get_model(key)
 
@@ -109,12 +113,13 @@ class DenseSystem:
         self.floats_per_doc = STORAGE_DIMENSIONS  # one padded vector per chunk
 
     def search(self, query: str) -> dict[str, float]:
-        return dict(zip(self.ids, (self.mat @ self._enc([query])[0]).tolist()))
+        return dict(zip(self.ids, (self.mat @ self._enc([query])[0]).tolist(), strict=False))
 
 
 class LateSystem:
     def __init__(self, repo: str):
         from sentence_transformers import SentenceTransformer  # lazy
+
         self.name = f"late:{repo}"
         self.model = SentenceTransformer(repo)
 
@@ -145,29 +150,52 @@ def run_system(system, data: dict, ks: list[int], repeat: int) -> dict:
         rankings[item["q"]] = rank_by_score(scores)
     res = {"system": system.name}
     res.update(evaluate(rankings, data["queries"], ks))
-    res.update(index_seconds=round(index_s, 3), query_ms_p50=round(percentile(lat, 50), 2),
-               query_ms_p95=round(percentile(lat, 95), 2), floats_per_doc=system.floats_per_doc)
+    res.update(
+        index_seconds=round(index_s, 3),
+        query_ms_p50=round(percentile(lat, 50), 2),
+        query_ms_p95=round(percentile(lat, 95), 2),
+        floats_per_doc=system.floats_per_doc,
+    )
     return res
 
 
 def format_table(rows: list[dict], ks: list[int]) -> str:
-    cols = ["system"] + [f"recall@{k}" for k in ks] + ["mrr", "query_ms_p50", "query_ms_p95", "index_seconds", "floats_per_doc"]
+    cols = [
+        "system",
+        *[f"recall@{k}" for k in ks],
+        "mrr",
+        "query_ms_p50",
+        "query_ms_p95",
+        "index_seconds",
+        "floats_per_doc",
+    ]
     return "\n".join(["\t".join(cols)] + ["\t".join(str(r[c]) for c in cols) for r in rows])
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--eval", type=Path, default=DEFAULT_EVAL)
-    ap.add_argument("--dense", default="minilm-l6-v2,multilingual-minilm", help="comma list of MODEL_REGISTRY keys")
-    ap.add_argument("--late", default="sentence-transformers/all-MiniLM-L6-v2",
-                    help="comma list of token-level encoder repos (use a ColBERT checkpoint for the real test)")
+    ap.add_argument(
+        "--dense",
+        default="minilm-l6-v2,multilingual-minilm",
+        help="comma list of MODEL_REGISTRY keys",
+    )
+    ap.add_argument(
+        "--late",
+        default="sentence-transformers/all-MiniLM-L6-v2",
+        help="comma list of token-level encoder repos (use a ColBERT checkpoint for the real test)",
+    )
     ap.add_argument("--k", default="1,3,5")
     ap.add_argument("--repeat", type=int, default=3)
     ap.add_argument("--json", type=Path)
     a = ap.parse_args(argv)
     ks = [int(x) for x in a.k.split(",")]
     data = json.loads(a.eval.read_text(encoding="utf-8"))
-    systems = [DenseSystem(k) for k in a.dense.split(",") if k] + [LateSystem(r) for r in a.late.split(",") if r]
+    systems = [DenseSystem(k) for k in a.dense.split(",") if k] + [
+        LateSystem(r) for r in a.late.split(",") if r
+    ]
     rows = [run_system(s, data, ks, a.repeat) for s in systems]
     print(format_table(rows, ks))
     if a.json:

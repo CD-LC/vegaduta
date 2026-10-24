@@ -94,6 +94,10 @@ confirm the risk before you turn them off or reword them. The **Preview** tab sh
 The layers combine in order: built-in directives, then these workspace instructions, then each agent's own System
 prompt; the later layer wins. The row also shows on a personal install. API: `GET /api/prompt-directives`,
 `PUT/DELETE /api/prompt-directives/{key}`, `PUT /api/prompt-directives/custom-instructions`.
+The **Preview** tab is illustrative only (the workspace-wide directives with a sample date); the real prompt of an agent,
+block by block with the key, scope and version of each, is `POST /api/agents/{agentId}/prompt-preview`. The same texts
+can also be set for one agent or for the whole install, with a version history, through the prompt registry
+(`/api/prompts`); see [prompts](../prompts.md).
 
 ## Branding (`/admin/branding`)
 

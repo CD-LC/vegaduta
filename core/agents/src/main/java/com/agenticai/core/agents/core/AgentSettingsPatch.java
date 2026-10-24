@@ -26,6 +26,7 @@ public sealed interface AgentSettingsPatch {
         RUN_BUDGET,
         AUTONOMY,
         REASONING_DEPTH,
+        RUNTIME_LIMITS,
         SCOPE
     }
 
@@ -81,6 +82,15 @@ public sealed interface AgentSettingsPatch {
         @Override
         public Facet facet() {
             return Facet.RUN_BUDGET;
+        }
+    }
+
+    /** The agent's runtime-limit overrides; null or empty clears them all. */
+    record RuntimeLimitsPatch(com.agenticai.core.agents.runtime.RuntimeLimits limits)
+            implements AgentSettingsPatch {
+        @Override
+        public Facet facet() {
+            return Facet.RUNTIME_LIMITS;
         }
     }
 

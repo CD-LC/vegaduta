@@ -19,8 +19,9 @@ import org.springframework.stereotype.Component;
  * write/send tool that already ran is not re-fired after a restart), and {@code delegate_parallel}
  * SWARM branches (a finished branch is not re-run).
  *
- * <p><b>Off by default</b> ({@code app.agent-jobs.durability.step-journal-enabled=false}): every
- * method is a no-op / empty then, so the flag-off path is today's behaviour.
+ * <p><b>On by default</b> since 2026-10-23 ({@code app.agent-jobs.durability.step-journal-enabled=true}; resume,
+ * rerun and ownership stay off, so on its own it only records). With the flag set to false every
+ * method is a no-op / empty, so the flag-off path is the earlier behaviour.
  *
  * <p><b>Best-effort, never throws.</b> A journal failure must not fail a user's job. The failure
  * mode is safe by construction: a missing COMPLETED row only ever means "no safe resume point / run
@@ -82,7 +83,7 @@ public class StepJournal implements EffectJournal.DurableStore {
     @Autowired
     public StepJournal(
             StepJournalRepository repository,
-            @Value("${app.agent-jobs.durability.step-journal-enabled:false}") boolean enabled,
+            @Value("${app.agent-jobs.durability.step-journal-enabled:true}") boolean enabled,
             @Value("${app.agent-jobs.durability.resume-from-journal:false}")
                     boolean resumeFromJournal) {
         this(repository, enabled, resumeFromJournal, Clock.systemUTC());

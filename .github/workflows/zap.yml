@@ -52,8 +52,11 @@ jobs:
 
       - name: Boot the lite stack
         run: |
-          # shellcheck disable=SC2086
-          docker compose $COMPOSE_ARGS --env-file "$RUNNER_TEMP/ci.env" up -d --build --wait --wait-timeout 600
+          # Not a plain `up --wait`: it exits 1 when the keycloak-reconcile
+          # one-shot exits (0) while it waits, so the scan never ran
+          # (run 39586118141). compose-up-wait.sh waits on the long-running
+          # services and runs the one-shot to completion separately.
+          bash scripts/ci/compose-up-wait.sh "$RUNNER_TEMP/ci.env" --build
 
       - name: Health gate
         run: bash scripts/ci/stack-health-gate.sh
@@ -94,7 +97,7 @@ jobs:
 
       - name: Upload SARIF to code scanning
         if: steps.codescan.outputs.enabled == 'true'
-        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
         with:
           sarif_file: zap.sarif
           category: zap-baseline
@@ -111,7 +114,7 @@ jobs:
           DEFECTDOJO_CLOSE_OLD_FINDINGS: "false"
         run: bash scripts/ci/defectdojo-import.sh "ZAP Scan" report_json.json
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: zap-report
@@ -129,7 +132,7 @@ jobs:
           # shellcheck disable=SC2086
           docker compose $COMPOSE_ARGS --env-file "$RUNNER_TEMP/ci.env" logs --no-color > compose-logs.txt 2>&1 || true
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: zap-compose-logs

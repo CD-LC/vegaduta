@@ -1,8 +1,11 @@
 "use client";
 
+import { useCallback, useRef, useState } from "react";
+import DiscardChangesDialog from "./AgentWorkbench/DiscardChangesDialog";
 import AutonomySection from "./workbench/AutonomySection";
 import CachingAndTeamSection from "./workbench/CachingAndTeamSection";
 import CapabilitiesSection from "./workbench/CapabilitiesSection";
+import ConfigTabs from "./workbench/ConfigTabs";
 import { WorkbenchContext } from "./workbench/context";
 import GenerationTuningSection from "./workbench/GenerationTuningSection";
 import IdentitySection from "./workbench/IdentitySection";
@@ -12,6 +15,7 @@ import ModelAndGenerationSection from "./workbench/ModelAndGenerationSection";
 import ReliabilitySection from "./workbench/ReliabilitySection";
 import RoutingSection from "./workbench/RoutingSection";
 import ShareSection from "./workbench/ShareSection";
+import { isPersonalEdition } from "../../lib/edition";
 import ToolsSection from "./workbench/ToolsSection";
 import TranscriptionSection from "./workbench/TranscriptionSection";
 import type { WorkbenchProps } from "./workbench/types";
@@ -41,7 +45,20 @@ export type {
  * endpoints. The honest per-section behaviour notes sit next to the code.
  */
 export default function AgentWorkbench(props: WorkbenchProps) {
-  const controller = useWorkbenchController(props);
+  // Unsaved edits on the Behavior tab are lost when another agent is opened (its settings replace them), so a
+  // switch asks first. The tab reports its dirty state; the guard wraps onSelect for the whole controller.
+  const behaviorDirty = useRef(false);
+  const latest = useRef(props);
+  latest.current = props;
+  const [heldSelect, setHeldSelect] = useState<{ id: string | null } | null>(null);
+  const guardedSelect = useCallback((agentId: string | null) => {
+    if (behaviorDirty.current && agentId !== latest.current.selectedAgentId) {
+      setHeldSelect({ id: agentId });
+      return;
+    }
+    latest.current.onSelect(agentId);
+  }, []);
+  const controller = useWorkbenchController({ ...props, onSelect: guardedSelect });
   return (
     <WorkbenchContext.Provider value={controller}>
       <div className="flex min-w-0 flex-col gap-4">
@@ -50,8 +67,12 @@ export default function AgentWorkbench(props: WorkbenchProps) {
         <WorkbenchBanners />
 
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,460px)]">
-          {/* ---- CONFIG PANEL ---- */}
-          <div className="flex min-w-0 flex-col gap-4">
+          {/* ---- CONFIG PANEL: Setup tab (the sections below) + Behavior & limits tab ---- */}
+          <ConfigTabs
+            onBehaviorDirtyChange={(dirty) => {
+              behaviorDirty.current = dirty;
+            }}
+          >
             <IdentitySection />
             <ModelAndGenerationSection />
 
@@ -73,14 +94,25 @@ export default function AgentWorkbench(props: WorkbenchProps) {
 
             <CapabilitiesSection />
 
-            <ShareSection />
+            {/* Named-teammate grants: one person on one machine has no teammates (lib/edition.ts). */}
+            {!isPersonalEdition() && <ShareSection />}
 
             <VersionsSection />
-          </div>
+          </ConfigTabs>
 
           <LabSection />
         </div>
       </div>
+      <DiscardChangesDialog
+        open={heldSelect != null}
+        onStay={() => setHeldSelect(null)}
+        onDiscard={() => {
+          const held = heldSelect;
+          setHeldSelect(null);
+          behaviorDirty.current = false;
+          if (held) latest.current.onSelect(held.id);
+        }}
+      />
     </WorkbenchContext.Provider>
   );
 }

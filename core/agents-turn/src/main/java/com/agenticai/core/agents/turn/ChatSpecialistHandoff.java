@@ -10,6 +10,7 @@ import com.agenticai.core.agents.crew.HandoffChain;
 import com.agenticai.core.agents.crew.HandoffStatus;
 import com.agenticai.core.agents.crew.SpecialistCandidate;
 import com.agenticai.core.agents.crew.SpecialistHandoffService;
+import com.agenticai.core.agents.skills.SkillPromptBlock;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.AgentToolPort;
 import com.agenticai.core.agents.turn.quality.LlmQualityJudgeService;
@@ -17,8 +18,6 @@ import com.agenticai.core.chat.LlmMetricsAdvisor;
 import com.agenticai.core.chat.ProviderErrorTranslator;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
-import com.agenticai.core.guardrails.GuardrailViolationException;
-import com.agenticai.core.guardrails.ToolStepLimitExceededException;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
@@ -52,6 +51,7 @@ final class ChatSpecialistHandoff {
     private final ChatTurnExecutor turns;
     private final Function<String, String> experimentVariants;
     private final ChatPromptDirectives.DirectiveGates directiveGates;
+    private final SubAgentTurn subTurn;
 
     /**
      * Null = specialist handoff unavailable (slim test/module context); set by AgentChatService's
@@ -69,7 +69,9 @@ final class ChatSpecialistHandoff {
             ProviderErrorTranslator providerErrorTranslator,
             ChatTurnExecutor turns,
             Function<String, String> experimentVariants,
-            ChatPromptDirectives.DirectiveGates directiveGates) {
+            ChatPromptDirectives.DirectiveGates directiveGates,
+            SubAgentTurn subTurn) {
+        this.subTurn = subTurn;
         this.agentService = agentService;
         this.resourceAccessService = resourceAccessService;
         this.credentialResolver = credentialResolver;
@@ -208,19 +210,25 @@ final class ChatSpecialistHandoff {
                         targetAgentId, delegatedSessionId, subTask, chatClient, nextChain);
         String variants = experimentVariants.apply(tenantId);
 
+        // The delegate's own overrides (agent, tenant, platform) for every text below, not the built-in text.
+        ResolvedDirectives promptsForDelegate = directiveGates.directivesForAgent().apply(targetAgentId);
         String delegatePrompt =
                 withSkillsBlock(
                         withSkillsBlock(
                                 agent.getSystemPrompt(),
                                 agentToolProvider.proceduresPromptBlock(targetAgentId)),
-                        agentToolProvider.skillsPromptBlock(targetAgentId, tools));
+                        SkillPromptBlock.withHeader(
+                                agentToolProvider.skillsPromptBlock(targetAgentId, tools),
+                                promptsForDelegate.text(SkillPromptBlock.HEADER_KEY),
+                                false));
         String basePrompt =
                 (contextSummary == null || contextSummary.isBlank())
                         ? delegatePrompt
                         : delegatePrompt
-                                + "\n\nContext forwarded by the delegating agent (a short summary, not the full "
-                                + "conversation - use it only if relevant to the sub-task below):\n"
-                                + contextSummary;
+                                + "\n\n"
+                                + promptsForDelegate.textOrShipped(
+                                        "delegation.context_header.specialist",
+                                        java.util.Map.of("context", contextSummary));
         // Same 2026-10-01 audit fix as ChatDelegateCall: the specialist resolves
         // its own tools (MCP included) but previously got none of the standing
         // directives. Appended last in the system text, matching the outer
@@ -232,46 +240,29 @@ final class ChatSpecialistHandoff {
                         tools,
                         directiveGates.mcpUntrusted().getAsBoolean()
                                 && agentToolProvider.anyMcpToolsOfferedFor(
-                                        targetAgentId, delegatedSessionId, subTask, chatClient));
+                                        targetAgentId, delegatedSessionId, subTask, chatClient),
+                        // The target's own overrides (agent, tenant, platform), not the built-in text.
+                        promptsForDelegate);
         String systemPrompt =
                 directiveBlock == null ? basePrompt : basePrompt + "\n\n" + directiveBlock;
 
         try {
-            String answer =
-                    turns.callWithProviderFallback(
-                            tenantId,
-                            agent,
-                            chatClient,
-                            client ->
-                                    client.prompt()
-                                            .system(systemPrompt)
-                                            .user(subTask)
-                                            .toolCallbacks(tools)
-                                            .advisors(
-                                                    a -> {
-                                                        a.param(
-                                                                        LlmMetricsAdvisor
-                                                                                .AGENT_ID_PARAM,
-                                                                        targetAgentId)
-                                                                .param(
-                                                                        LlmMetricsAdvisor
-                                                                                .SESSION_ID_PARAM,
-                                                                        delegatedSessionId);
-                                                        if (variants != null) {
-                                                            a.param(
-                                                                    LlmMetricsAdvisor
-                                                                            .EXPERIMENT_VARIANTS_PARAM,
-                                                                    variants);
-                                                        }
-                                                    })
-                                            .call()
-                                            .content());
+            // Screening, hooks, journal, guardrails and the continuation policy run in the sub-turn, the same stages
+            // a buffered turn has (see SubAgentTurn); it also keeps the provider fallback this call always had.
             String result =
-                    (answer == null || answer.isBlank())
-                            ? "The specialist agent returned an empty answer."
-                            : answer;
-            llmQualityJudgeService.sampleAsync(
-                    chatClient, targetAgentId, delegatedSessionId, subTask, result);
+                    subTurn.run(
+                            new SubAgentTurn.Request(
+                                    "specialist",
+                                    agent,
+                                    targetAgentId,
+                                    delegatedSessionId,
+                                    subTask,
+                                    systemPrompt,
+                                    chatClient,
+                                    tools,
+                                    variants,
+                                    tenantId,
+                                    promptsForDelegate.textOrShipped("delegation.empty_answer.specialist")));
             handoff.recordHandoffOutcome(auditId, HandoffStatus.SUCCESS, null);
             return result;
         } catch (RuntimeException e) {
@@ -281,10 +272,8 @@ final class ChatSpecialistHandoff {
                     capabilityTag,
                     e);
             handoff.recordHandoffOutcome(auditId, HandoffStatus.FAILED, e.getMessage());
-            throw (e instanceof ToolStepLimitExceededException
-                            || e instanceof GuardrailViolationException)
-                    ? e
-                    : providerErrorTranslator.translate(e, agent.getProviderName());
+            // Already translated (or deliberately left alone) by the sub-turn.
+            throw e;
         }
     }
 }

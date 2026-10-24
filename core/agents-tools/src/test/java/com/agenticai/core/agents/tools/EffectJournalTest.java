@@ -264,6 +264,10 @@ class EffectJournalTest {
                         com.agenticai.core.guardrails.ToolCallOutputValidator
                                         .VALIDATION_FAILURE_PREFIX
                                 + "x"));
+        // The turn's tool budget was used up: the call was answered, not run, so it is not an effect.
+        assertFalse(
+                LoggingToolCallback.wasExecuted(
+                        com.agenticai.core.guardrails.ToolBudgetExhausted.result("Do not call more tools.")));
         assertFalse(LoggingToolCallback.wasExecuted(null));
         assertTrue(LoggingToolCallback.wasExecuted("{\"status\":\"sent\"}"));
     }

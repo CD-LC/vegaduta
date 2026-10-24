@@ -2,8 +2,13 @@ package com.agenticai.core.agents.turn.quality;
 
 import com.agenticai.core.agents.decision.DecisionEngine;
 import com.agenticai.core.agents.decision.DecisionPolicyView;
+import com.agenticai.core.agents.tools.WordTokens;
 import com.agenticai.core.agents.turn.cache.LlmResponseCacheService;
-import java.util.Set;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingsResolver;
+import java.util.List;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,63 +69,70 @@ public class QueryComplexityClassifier {
      * below then keeps the asymmetric-risk posture - Jev must be quite sure
      * before we hand a turn the heuristic rejected to the economy model.
      */
-    static final String JEV_SIMPLE_INSTRUCTIONS =
-        "Could a smaller, cheaper AI model answer this user message just as well as a large frontier "
-            + "model? Answer YES for short factual questions, greetings, simple lookups and single "
-            + "instructions; NO for anything needing multi-step reasoning, code, analysis, long or "
-            + "structured output, or careful judgment.";
+    static final String COMPLEXITY_KEY = "router.complexity";
+
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so a tenant or agent override of {@link #COMPLEXITY_KEY} applies; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     /** Rescue-only posture: Jev must be this sure it's economy-safe to override a heuristic "not simple". */
     private final DecisionEngine decisions;
     private final boolean jevComplexityEnabled;
     private final double jevSimpleThreshold;
 
-    /**
-     * Turns longer than this are assumed to be doing more than asking one
-     * short question - most single-sentence FAQ-style questions ("what are
-     * your hours", "how do I reset my password") comfortably fit under this;
-     * anything longer is treated as at least possibly requiring real
-     * reasoning, multi-step instructions, or provided context to work with.
-     */
-    private static final int SIMPLE_MAX_LENGTH = 160;
+    private volatile SettingsResolver settings;
 
-    /** More than one real sentence/question in a single turn reads as a compound, multi-part ask. */
-    private static final int SIMPLE_MAX_CLAUSES = 2;
+    /**
+     * The settings catalog, so a tenant's or an agent's {@code routing.simple.maxChars} / {@code routing.simple.maxClauses}
+     * decide what is simple for their turns. Absent (hand-built instances): the {@code app.routing.simple.*} values.
+     */
+    @Autowired(required = false)
+    public void setSettingsResolver(SettingsResolver resolver) {
+        this.settings = resolver;
+    }
+
+    static final String MAX_CHARS_KEY = "routing.simple.maxChars";
+    static final String MAX_CLAUSES_KEY = "routing.simple.maxClauses";
+
+    private final RoutingSimpleProperties simple;
+    private final Pattern clauseBoundary;
+    private final List<String> signalPhrases;
 
     private static final Pattern CODE_FENCE = Pattern.compile("```|`[^`]+`");
-    private static final Pattern CLAUSE_BOUNDARY = Pattern.compile("[.?!]+\\s+");
-
-    /**
-     * Keywords that signal the turn wants analysis, multi-step work,
-     * generation of a substantial artifact, or explicit reasoning - all
-     * cases a downgraded model is more likely to visibly underperform on.
-     * Deliberately case-insensitive, deliberately broad (a false "complex"
-     * classification costs nothing but the primary model's normal price;
-     * see the class javadoc's asymmetric-risk note).
-     */
-    private static final Set<String> COMPLEX_SIGNAL_WORDS = Set.of(
-        "compare", "analyze", "analyse", "design", "architecture", "debug", "refactor", "optimize",
-        "step by step", "step-by-step", "write a", "generate a", "draft a", "plan", "strategy",
-        "summarize the following", "translate the following", "explain in detail", "pros and cons",
-        "code", "function", "algorithm", "query", "script", "regex", "sql"
-    );
 
     @Autowired
     public QueryComplexityClassifier(
         ObjectProvider<DecisionEngine> decisions,
         @Value("${app.jev.complexity.enabled:true}") boolean jevComplexityEnabled,
-        @Value("${app.jev.complexity.simple-threshold:0.75}") double jevSimpleThreshold
+        @Value("${app.jev.complexity.simple-threshold:0.75}") double jevSimpleThreshold,
+        ObjectProvider<RoutingSimpleProperties> simple
     ) {
-        this.decisions = decisions.getIfAvailable();
-        this.jevComplexityEnabled = jevComplexityEnabled;
-        this.jevSimpleThreshold = jevSimpleThreshold;
+        this(decisions.getIfAvailable(), jevComplexityEnabled, jevSimpleThreshold, simple.getIfAvailable(RoutingSimpleProperties::new));
     }
 
-    /** Test seam: no Spring, explicit decision-engine wiring. */
+    /** Test seam: no Spring, explicit decision-engine wiring, the shipped {@code app.routing.simple.*} defaults. */
     QueryComplexityClassifier(DecisionEngine decisions, boolean jevComplexityEnabled, double jevSimpleThreshold) {
+        this(decisions, jevComplexityEnabled, jevSimpleThreshold, new RoutingSimpleProperties());
+    }
+
+    /** Test seam: explicit decision-engine wiring and routing thresholds. */
+    QueryComplexityClassifier(
+        DecisionEngine decisions, boolean jevComplexityEnabled, double jevSimpleThreshold, RoutingSimpleProperties simple
+    ) {
         this.decisions = decisions;
         this.jevComplexityEnabled = jevComplexityEnabled;
         this.jevSimpleThreshold = jevSimpleThreshold;
+        this.simple = simple;
+        this.clauseBoundary = Pattern.compile(simple.getClauseBoundary());
+        this.signalPhrases = simple.getSignalWords().values().stream()
+            .flatMap(list -> java.util.Arrays.stream(list.split(",")))
+            .map(phrase -> phrase.strip().toLowerCase(java.util.Locale.ROOT))
+            .filter(phrase -> !phrase.isEmpty())
+            .toList();
     }
 
     /**
@@ -153,7 +165,15 @@ public class QueryComplexityClassifier {
      * cost-routing say off entirely and keep the pure-heuristic behavior.
      */
     public boolean isSimple(String userMessage, Double agentJevThreshold) {
-        if (!isHeuristicSimple(userMessage)) {
+        return isSimple(userMessage, agentJevThreshold, null);
+    }
+
+    /**
+     * As {@link #isSimple(String, Double)}; {@code agentId} (null = unknown) lets an agent-scope
+     * override of the {@value #COMPLEXITY_KEY} question apply to this agent's routing.
+     */
+    public boolean isSimple(String userMessage, Double agentJevThreshold, java.util.UUID agentId) {
+        if (!isHeuristicSimple(userMessage, agentId)) {
             // The heuristic's known failure mode is false negatives on
             // keyword collisions ("what's your refund plan?"). Jev - a
             // decision model, not a chat model - answers exactly this shape
@@ -176,7 +196,7 @@ public class QueryComplexityClassifier {
                 double threshold = agentJevThreshold != null
                     ? agentJevThreshold
                     : (tenantThreshold != null ? tenantThreshold : jevSimpleThreshold);
-                return decisions.noul(userMessage, JEV_SIMPLE_INSTRUCTIONS)
+                return decisions.noul(userMessage, prompts.text(COMPLEXITY_KEY, agentId))
                     .map(p -> p >= threshold)
                     .orElse(false);
             }
@@ -185,26 +205,56 @@ public class QueryComplexityClassifier {
         return true;
     }
 
-    private boolean isHeuristicSimple(String userMessage) {
+    private boolean isHeuristicSimple(String userMessage, java.util.UUID agentId) {
         if (userMessage == null) {
             return false;
         }
         String trimmed = userMessage.trim();
-        if (trimmed.isEmpty() || trimmed.length() > SIMPLE_MAX_LENGTH) {
+        if (trimmed.isEmpty() || trimmed.length() > limit(MAX_CHARS_KEY, agentId, simple.getMaxChars())) {
             return false;
         }
         if (CODE_FENCE.matcher(trimmed).find()) {
             return false;
         }
-        if (CLAUSE_BOUNDARY.split(trimmed).length > SIMPLE_MAX_CLAUSES) {
+        if (clauseBoundary.split(trimmed).length > limit(MAX_CLAUSES_KEY, agentId, simple.getMaxClauses())) {
+            return false;
+        }
+        // The signal words cannot say whether a message written in another script is a hard question.
+        if (!simple.isNonLatinSimple() && WordTokens.hasLettersOutsideLatin(trimmed)) {
+            return false;
+        }
+        // Same for accented Latin text: the shipped signal words are English.
+        if (!simple.isAccentedLatinSimple() && hasAccentedLatinLetters(trimmed)) {
             return false;
         }
         String lower = trimmed.toLowerCase(java.util.Locale.ROOT);
-        for (String signal : COMPLEX_SIGNAL_WORDS) {
+        for (String signal : signalPhrases) {
             if (lower.contains(signal)) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * The limit for {@code agentId} of the calling thread's tenant: the catalog's value (their override, else the platform
+     * value) or {@code platform} when there is no catalog or it cannot answer. The routing decision runs on the turn's
+     * own thread, where the tenant is set (the Jev call below needs it too).
+     */
+    private int limit(String key, java.util.UUID agentId, int platform) {
+        SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return platform;
+        }
+        try {
+            return catalog.getInt(key, SettingContext.forAgent(agentId));
+        } catch (RuntimeException e) {
+            return platform;
+        }
+    }
+
+    private static boolean hasAccentedLatinLetters(String text) {
+        return text.codePoints()
+            .anyMatch(cp -> cp > 127 && Character.isLetter(cp) && Character.UnicodeScript.of(cp) == Character.UnicodeScript.LATIN);
     }
 }

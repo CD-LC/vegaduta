@@ -213,7 +213,7 @@ export function prefetchApiGets(paths: string[]): void {
 // server state, so they must not flush the GET cache or drop the reads on the wire - model-pricing runs on every
 // Agents page load and used to empty the cache under providers/availability and friends each time.
 function isReadOnlyPost(path: string): boolean {
-  return /^\/api\/(model-pricing|workflows\/import\/preview)(\?|$)/.test(path);
+  return /^\/api\/(model-pricing|workflows\/import\/preview|prompts\/[^/?]+\/validate|agents\/[^/?]+\/prompt-preview)(\?|$)/.test(path);
 }
 
 /**

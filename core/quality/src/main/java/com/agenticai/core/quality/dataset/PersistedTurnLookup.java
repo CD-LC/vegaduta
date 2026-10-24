@@ -13,7 +13,7 @@ import org.springframework.context.ApplicationContext;
  * Reads one persisted Playground turn (core/rl's {@code Episode} + {@code TrajectoryStep} rows) for
  * {@link EvalDatasetService#importTurnCase}, reflectively through the merged application context because
  * {@code core/rl} is not - and per this module's pom boundary cannot be - a compile-time dependency. Same
- * runtime-lookup trick {@link ReflectiveAgentChatTurnReplayer} uses.
+ * runtime-lookup trick the eval replay bridge used before it became a typed bean.
  */
 final class PersistedTurnLookup {
 

@@ -6,6 +6,8 @@ import com.agenticai.core.agents.job.AgentJobProperties;
 import com.agenticai.core.agents.job.AgentJobRepository;
 import com.agenticai.core.agents.job.AgentJobSession;
 import com.agenticai.core.agents.job.AgentJobStatus;
+import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
+import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.ApprovalRequestExecutionRecordedEvent;
 import com.agenticai.core.approval.ApprovalStatus;
@@ -13,7 +15,6 @@ import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
 import io.micrometer.core.instrument.MeterRegistry;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +55,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
  * not a second resume path</h2>
  * The 60s bound above was never free - work that already spent hours waiting
  * for a human then waits up to another minute for the tick, on top of the 90s
- * {@link #REPLAY_GRACE} window below. {@code AgentToolCallApprovalExecutor}
+ * the replay grace ({@code app.agent-jobs.approval.replay-grace}) window below. {@code AgentToolCallApprovalExecutor}
  * (and every other {@code ApprovalActionExecutor}) already know, precisely,
  * the instant their replay's outcome becomes durable - they just have nowhere
  * safe to say so, for the exact registry reason above. {@link
@@ -65,7 +66,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
  * listener does nothing {@link #settleOne} could not already do on the next
  * tick - it just calls {@link #settleOne} early, for the one row the event
  * names, and every decision inside it (PENDING/REJECTED short-circuit, the
- * {@link #REPLAY_GRACE} check, the guarded {@code resumeClaim}) still applies
+ * the replay grace ({@code app.agent-jobs.approval.replay-grace}) check, the guarded {@code resumeClaim}) still applies
  * unchanged. A missed, duplicated, or late event changes only how many
  * milliseconds a job waits - never whether it resumes correctly - because the
  * tick still runs regardless and {@code resumeClaim} is a guarded conditional
@@ -84,10 +85,17 @@ import org.springframework.transaction.event.TransactionalEventListener;
  * <p>A fresh turn continues rather than repeats because {@code
  * AgentToolCallApprovalExecutor} has already re-run the approved tool under the
  * recorded tenant/subject and appended {@code [approved action '<tool>'
- * completed: ...]} to {@code SessionMemoryService} under the originating session
- * id - and a job's session id is {@code job:<jobId>}. The outcome is therefore
+ * completed: ...]} to {@code SessionMemoryService} - under the SCOPED memory id
+ * the parked turn recorded in the approval's replay envelope, which is the id
+ * the resumed turn reads its history under (a job's raw session id is {@code
+ * job:<jobId>}; history is never keyed by the raw id). The outcome is therefore
  * already in the parked job's conversation history before this sweep dispatches
- * anything. Re-running the parked turn instead would be actively unsafe: nothing
+ * anything - and the resumed turn's own message is built by {@link
+ * AgentJobApprovalResume}, with the same continuation builder a chat session's
+ * server-started turn uses: the job's goal restated and the approved tool's FULL
+ * result (or failure, or denial) rather than only the history note. {@code
+ * AgentJobApprovalContinuationE2ETest} runs that whole loop through the real turn
+ * pipeline. Re-running the parked turn instead would be actively unsafe: nothing
  * dedupes tool calls, so image generation, document generation, knowledge writes
  * and channel sends would all re-fire.
  *
@@ -143,7 +151,8 @@ public class AgentJobApprovalSweep {
 
     /**
      * How long a decided-but-not-yet-executed approval is left alone before this
-     * sweep resumes the job anyway.
+     * sweep resumes the job anyway ({@code app.agent-jobs.approval.replay-grace},
+     * default 90 seconds).
      *
      * <p>{@code HumanApprovalGateService#approve} commits the decision and only
      * then runs the executor, outside any transaction, on the admin's HTTP
@@ -155,8 +164,6 @@ public class AgentJobApprovalSweep {
      * strand the job), so it is a bounded wait: one extra sweep tick at most in
      * the normal case.
      */
-    private static final Duration REPLAY_GRACE = Duration.ofSeconds(90);
-
     private final AgentJobRepository repository;
     private final AgentJobApprovalLookup approvalLookup;
     private final AgentJobProperties properties;
@@ -419,7 +426,7 @@ public class AgentJobApprovalSweep {
      *       actually in flight and resuming into them can run the gated tool
      *       twice: {@code EXECUTION_FAILED} with {@code nextRetryAt} set (a
      *       retry is scheduled), and {@code APPROVED} with no {@code
-     *       executionResult} inside {@link #REPLAY_GRACE} of the decision (the
+     *       executionResult} inside the replay grace of the decision (the
      *       replay is running right now, outside any transaction). See the
      *       inline comment for the full argument and the honest residual.</li>
      *   <li><b>Anything else &rarr; dispatch.</b> APPROVED-with-result is the
@@ -454,15 +461,25 @@ public class AgentJobApprovalSweep {
             return;
         }
 
-        if (!approvalLookup.findByRequestedByAndStatusOrderByCreatedAtAsc(label, ApprovalStatus.REJECTED).isEmpty()) {
-            String message = "A human rejected the action this job stopped on, so the job cannot continue. "
-                + "See the approval request recorded against '" + label + "' for the reason.";
-            if (repository.failIfAwaitingApproval(job.getId(), ERROR_APPROVAL_REJECTED, message, now) > 0) {
-                meterRegistry.counter(METRIC_REJECTED).increment();
-                log.info("Agent job {} (agent {}) was failed: its approval request was rejected",
-                    job.getId(), job.getAgentId());
+        if (!continueAfterDenial(job)) {
+            List<ApprovalRequest> rejected =
+                approvalLookup.findByRequestedByAndStatusOrderByCreatedAtAsc(label, ApprovalStatus.REJECTED);
+            if (!rejected.isEmpty()) {
+                // A request that expired undecided (app.approvals.expiry) is stored as a rejection by the
+                // expiry actor; saying "a human rejected" would send an operator looking for a person.
+                boolean onlyExpired = rejected.stream().allMatch(ApprovalRequest::isExpired);
+                String code = onlyExpired ? ERROR_APPROVAL_TIMEOUT : ERROR_APPROVAL_REJECTED;
+                String message = onlyExpired
+                    ? properties.getApproval().getExpiredFailureMessage().replace("{label}", label)
+                    : "A human rejected the action this job stopped on, so the job cannot continue. "
+                        + "See the approval request recorded against '" + label + "' for the reason.";
+                if (repository.failIfAwaitingApproval(job.getId(), code, message, now) > 0) {
+                    meterRegistry.counter(onlyExpired ? METRIC_TIMED_OUT : METRIC_REJECTED).increment();
+                    log.info("Agent job {} (agent {}) was failed: its approval request was {}",
+                        job.getId(), job.getAgentId(), onlyExpired ? "expired" : "rejected");
+                }
+                return;
             }
-            return;
         }
 
         // Nothing pending and nothing rejected: a decision exists (or the
@@ -480,7 +497,7 @@ public class AgentJobApprovalSweep {
         //      A retry job that is broken outright cannot strand the job
         //      forever - the expiry pass still times the park out.
         //
-        //   2. APPROVED with no executionResult inside REPLAY_GRACE of the
+        //   2. APPROVED with no executionResult inside the replay grace of the
         //      decision: approve() commits the decision FIRST and replays the
         //      tool afterwards, outside any transaction, so this window is the
         //      replay actually running. Dispatching inside it costs a billed
@@ -529,7 +546,7 @@ public class AgentJobApprovalSweep {
             if (request.getStatus() == ApprovalStatus.APPROVED
                 && request.getExecutionResult() == null
                 && request.getDecidedAt() != null
-                && request.getDecidedAt().isAfter(now.minus(REPLAY_GRACE))) {
+                && request.getDecidedAt().isAfter(now.minus(properties.getApproval().getReplayGrace()))) {
                 return request;
             }
         }
@@ -608,6 +625,38 @@ public class AgentJobApprovalSweep {
         }
         return pool.tryDispatch(job.getId(), job.getTenantId());
     }
+
+    /**
+     * {@code app.approvals.continuation.jobs-continue-after-denial}: when on, a denied approval does
+     * not end the job; the job resumes and its first turn is told the call was denied (see {@link
+     * AgentJobApprovalResume}), so the agent can reach the goal another way. Off (the default), or in
+     * a context with no continuation properties, a denial fails the job as {@code APPROVAL_REJECTED}.
+     */
+    private boolean continueAfterDenial(AgentJob job) {
+        ApprovalContinuationProperties continuation = continuationProperties;
+        SettingsResolver resolver = settings;
+        return ApprovalContinuationSettings.enabled(continuation, resolver, job.getAgentId())
+                && ApprovalContinuationSettings.jobsContinueAfterDenial(continuation, resolver, job.getAgentId());
+    }
+
+    /** Optional, like the other late-bound collaborators: null = a denial fails the job. */
+    @Autowired(required = false)
+    public void setContinuationProperties(ApprovalContinuationProperties continuationProperties) {
+        this.continuationProperties = continuationProperties;
+    }
+
+    private volatile ApprovalContinuationProperties continuationProperties;
+
+    /**
+     * The settings catalog, so a workspace or an agent can turn these on or off for itself ({@code approvals.continuation.*});
+     * optional: absent, the platform properties above decide.
+     */
+    @Autowired(required = false)
+    public void setSettingsResolver(SettingsResolver settings) {
+        this.settings = settings;
+    }
+
+    private volatile SettingsResolver settings;
 
     /** Floored at 1 for the same reason the detector floors it: {@code 0} must not mean "never park". */
     private int parkCap() {

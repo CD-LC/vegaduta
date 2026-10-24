@@ -11,6 +11,9 @@ description = "Test fixtures with fake credentials, and vendored minified bundle
 paths = [
   '''(^|/)src/test/''',
   '''\.(spec|test)\.(js|jsx|ts|tsx)$''',
+  # The console tests' snapshot of the settings catalog: setting keys such as "rl.policy.ucb1ExplorationConstant"
+  # trip generic-api-key ("key" : "<high-entropy name>"); only tests read this folder.
+  '''^web/app/lib/api/fixtures/''',
   '''(^|/)tests?/.*\.py$''',
   '''\.min\.js$''',
   # UI translation catalogs: message keys like "apiKey_hint" are copy, not credentials.

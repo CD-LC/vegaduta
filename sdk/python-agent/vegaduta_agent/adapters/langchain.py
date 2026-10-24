@@ -1,6 +1,6 @@
 """LangChain adapter: turn a ``GovernedTool`` into a LangChain ``BaseTool``.
 
-Requires ``langchain-core`` (``pip install vegaduta-agent[langchain]``). The
+Requires ``langchain-core`` (the ``langchain`` extra). The
 governance pipeline stays in ``vegaduta_agent`` — this file only translates
 the call surface, so approvals, budgets, the journal and the audit record are
 identical whether the agent runs on LangChain, a hand-rolled loop or another
@@ -23,7 +23,7 @@ def to_langchain_tool(tool: GovernedTool, context: RunContext | None = None):
         from langchain_core.tools import StructuredTool  # noqa: PLC0415
     except ImportError as exc:
         raise ImportError(
-            "the langchain adapter needs the langchain extra: pip install vegaduta-agent[langchain]"
+            "the langchain adapter needs langchain-core (the langchain extra): pip install langchain-core"
         ) from exc
 
     def _invoke(**kwargs: Any) -> str:

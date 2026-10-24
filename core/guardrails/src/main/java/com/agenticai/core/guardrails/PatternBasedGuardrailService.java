@@ -1,9 +1,11 @@
 package com.agenticai.core.guardrails;
 
+import com.agenticai.core.prompts.PromptResolver;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +42,7 @@ import org.springframework.stereotype.Service;
  *       .env file) shouldn't silently poison the model's context with a
  *       live secret, but the rest of that output is still useful to the
  *       agent.</li>
- *   <li><b>Context-budget cap</b> ({@link #MAX_TOOL_OUTPUT_CHARS}, applied
+ *   <li><b>Context-budget cap</b> ({@link ToolOutputProperties}, applied
  *       first, before either pattern pass) - a single tool call otherwise
  *       hands back an unbounded string straight into the model's context.
  *       Text tools stay well under this cap in practice; the failure mode
@@ -63,33 +65,43 @@ public class PatternBasedGuardrailService implements GuardrailService {
 
     private static final Logger log = LoggerFactory.getLogger(PatternBasedGuardrailService.class);
 
-    // ~5k tokens' worth of plain text (roughly 4 chars/token) - generous for
-    // any legitimate text tool result (a knowledge-base hit, an email body,
-    // an API response) while still keeping a single tool call from being
-    // able to single-handedly exhaust a model's context window. See the
-    // class javadoc's "Context-budget cap" entry for the incident this
-    // closes.
-    private static final int MAX_TOOL_OUTPUT_CHARS = 20_000;
+    // The context-budget cap is app.tools.output.* (ToolOutputProperties): one cap for every tool,
+    // shared with GuardedToolCallback, which has usually applied it already by the time a result gets
+    // here. A result cut there is no longer than the cap, so cutting it again changes nothing.
+    private final ToolOutputProperties outputLimits;
 
-    private static final List<Pattern> HARD_BLOCK_PATTERNS = List.of(
-        Pattern.compile("ignore\\s+(all\\s+)?(the\\s+)?(above|previous)\\s+instructions", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("disregard\\s+(your|the)\\s+system\\s+prompt", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("reveal\\s+(your|the)\\s+system\\s+prompt", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("you\\s+are\\s+now\\s+in\\s+(developer|dan|jailbreak)\\s+mode", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("###\\s*(system|admin|override)\\s*###", Pattern.CASE_INSENSITIVE)
-    );
+    /** Code defaults for the output cap (a context without {@code ToolOutputProperties}). */
+    public PatternBasedGuardrailService() {
+        this(null);
+    }
+
+    @Autowired
+    public PatternBasedGuardrailService(ToolOutputProperties outputLimits) {
+        this.outputLimits = outputLimits != null ? outputLimits : new ToolOutputProperties();
+    }
+
+    // The patterns are classpath resources (guardrails/patterns/<locale>/injection-markers.txt, every locale on the
+    // classpath, English first; guardrails/patterns/redaction.txt), not Java literals: the shipped files hold exactly
+    // the patterns this class compiled before they moved. See PatternSets.
+    private static final List<Pattern> HARD_BLOCK_PATTERNS = PatternSets.localized("injection-markers").stream()
+        .map(PatternSets.Entry::pattern)
+        .toList();
 
     // Named so a match's source is obvious in logs/error messages without
     // re-deriving it from the pattern itself.
-    private static final List<NamedPattern> REDACTION_PATTERNS = List.of(
-        new NamedPattern("AWS access key", Pattern.compile("AKIA[0-9A-Z]{16}")),
-        new NamedPattern("Google API key", Pattern.compile("AIza[0-9A-Za-z\\-_]{35}")),
-        new NamedPattern("GitHub token", Pattern.compile("gh[pousr]_[A-Za-z0-9]{36,}")),
-        new NamedPattern("Slack token", Pattern.compile("xox[baprs]-[A-Za-z0-9-]{10,}")),
-        new NamedPattern("OpenAI-style key", Pattern.compile("sk-[A-Za-z0-9]{20,}")),
-        new NamedPattern("PEM private key", Pattern.compile("-----BEGIN [A-Z ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE KEY-----")),
-        new NamedPattern("JWT", Pattern.compile("eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}"))
-    );
+    private static final List<NamedPattern> REDACTION_PATTERNS = PatternSets.shared("redaction").stream()
+        .map(e -> new NamedPattern(e.label(), e.pattern()))
+        .toList();
+
+    /** Where the withhold reason comes from ({@code toolresult.guard.pattern_injection_marker}); the shipped text unless wired. */
+    private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
+
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        if (resolver != null) {
+            this.prompts = resolver;
+        }
+    }
 
     @Override
     public String sanitizeToolOutput(String toolName, String rawOutput) {
@@ -97,29 +109,25 @@ public class PatternBasedGuardrailService implements GuardrailService {
             return rawOutput;
         }
 
-        // #815 Governance follow-up - this cap was documented in this class's own javadoc
-        // ("applied first, before either pattern pass") since the class was written but was
-        // never actually implemented here - a real, live gap (not a stale doc) found while
-        // adding test coverage for this class, confirmed by grepping MAX_TOOL_OUTPUT_CHARS's
-        // only other reference being its own declaration. SemanticGuardrailService (the
-        // platform's DEFAULT GuardrailService, matchIfMissing = true) delegates its base pass
-        // to this exact method, so this gap was live for every tool call platform-wide, not just
-        // the opt-in pattern-only deployment mode - including against the exact base64-screenshot
-        // incident this class's javadoc describes as the reason this cap exists.
+        // The cap is applied before either pattern pass: bound the context first, no exceptions. It was
+        // documented here for a long time before it was implemented (#815 Governance follow-up) and,
+        // once implemented, was unreachable through GuardedToolCallback because a length check in front
+        // of it refused the same output. Now both use the same cap and the same marker.
         String output = rawOutput;
-        if (output.length() > MAX_TOOL_OUTPUT_CHARS) {
+        if (output.length() > outputLimits.limitFor(toolName)) {
             log.warn(
                 "Tool '{}' returned {} chars - truncating to the {}-char context-budget cap before any pattern check "
                     + "(see this class's javadoc's \"Context-budget cap\" entry)",
-                toolName, output.length(), MAX_TOOL_OUTPUT_CHARS
+                toolName, output.length(), outputLimits.limitFor(toolName)
             );
-            output = output.substring(0, MAX_TOOL_OUTPUT_CHARS);
+            output = outputLimits.limit(toolName, output);
         }
 
         for (Pattern hardBlock : HARD_BLOCK_PATTERNS) {
             if (hardBlock.matcher(output).find()) {
                 log.warn("Guardrail hard-blocked output from tool '{}' - matched pattern: {}", toolName, hardBlock);
-                throw new GuardrailViolationException(toolName, "output contained a prompt-injection marker");
+                throw new GuardrailViolationException(
+                    toolName, GuardrailPrompts.scopedText(prompts, GuardrailPrompts.PATTERN_INJECTION_MARKER));
             }
         }
 

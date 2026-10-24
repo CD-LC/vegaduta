@@ -1,14 +1,14 @@
 package com.agenticai.core.agents.decision;
 
 import com.agenticai.core.agents.dto.AgentResponse;
+import com.agenticai.core.agents.tools.WordTokens;
+import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.prompts.PromptSlot;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,21 +56,20 @@ import org.springframework.util.StringUtils;
 public class AgentRelevanceSelector {
 
     /**
-     * The {@code choice} question for {@link #selectBest}. Criteria carry each agent's name +
-     * purpose, so Jev decides on capability fit, not keyword overlap.
+     * Registry keys of the two questions put to the decision engine (default text: {@code
+     * prompts/en/router.agent_select.md} and {@code router.agent_additional.md}; the second has the
+     * placeholder {@code {agent}}).
      */
-    static final String JEV_SELECT_INSTRUCTIONS =
-            "Which single agent is best suited to handle the user's task? Consider each agent's name and "
-                    + "purpose, and pick the one whose capabilities the task actually needs.";
+    static final String SELECT_KEY = "router.agent_select";
+    static final String ADDITIONAL_KEY = "router.agent_additional";
 
-    /**
-     * Per-candidate {@code noul} question for {@link #selectAdditionalRelevant}; {@code %s} = agent
-     * description.
-     */
-    static final String JEV_ADDITIONAL_INSTRUCTIONS =
-            "The user's task may need more than one specialist. Would the agent \"%s\" meaningfully "
-                    + "contribute to completing it? YES only if the task plausibly needs that agent's specific "
-                    + "capabilities; NO if it is unrelated or only tangentially connected.";
+    private final PromptSlot prompts = new PromptSlot();
+
+    /** The prompt registry, so a tenant override of the keys above applies; absent = shipped text. */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        prompts.use(resolver);
+    }
 
     /**
      * Agent description length cap inside Jev criteria/questions - keeps per-call input spend
@@ -104,7 +103,6 @@ public class AgentRelevanceSelector {
         this.jevRoutingEnabled = jevRoutingEnabled;
     }
 
-    private static final Pattern WORD_PATTERN = Pattern.compile("[a-z0-9]+");
     private static final Set<String> STOPWORDS =
             Set.of(
                     "a", "an", "the", "is", "are", "was", "were", "be", "been", "being", "to", "of",
@@ -133,7 +131,7 @@ public class AgentRelevanceSelector {
             }
             AgentResponse picked =
                     decisions
-                            .choose(taskMessage, JEV_SELECT_INSTRUCTIONS, criteria)
+                            .choose(taskMessage, prompts.text(SELECT_KEY), criteria)
                             .flatMap(
                                     choice ->
                                             agents.stream()
@@ -203,7 +201,8 @@ public class AgentRelevanceSelector {
             for (AgentResponse agent : candidates) {
                 questions.put(
                         agent.id().toString(),
-                        JEV_ADDITIONAL_INSTRUCTIONS.formatted(jevAgentDescription(agent)));
+                        prompts.text(
+                                ADDITIONAL_KEY, null, Map.of("agent", jevAgentDescription(agent))));
             }
             Map<String, Double> probs = decisions.nouls(taskMessage, questions);
             if (!probs.isEmpty()) {
@@ -275,17 +274,8 @@ public class AgentRelevanceSelector {
     }
 
     private static Set<String> tokenize(String text) {
-        if (text == null || text.isBlank()) {
-            return Set.of();
-        }
-        Matcher matcher = WORD_PATTERN.matcher(text.toLowerCase(Locale.ROOT));
-        Set<String> tokens = new HashSet<>();
-        while (matcher.find()) {
-            String token = matcher.group();
-            if (token.length() > 2 && !STOPWORDS.contains(token)) {
-                tokens.add(token);
-            }
-        }
+        Set<String> tokens = new HashSet<>(WordTokens.words(text));
+        tokens.removeAll(STOPWORDS);
         return tokens;
     }
 }

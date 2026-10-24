@@ -2,11 +2,13 @@ package com.agenticai.core.agents.turn;
 
 import com.agenticai.core.agents.budget.PerUserBudgetService;
 import com.agenticai.core.agents.core.Agent;
+import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.core.TenantUnavailableException;
 import com.agenticai.core.agents.hosted.FreeTierChatClientService;
 import com.agenticai.core.agents.hosted.FreeTierProviderPoolEmptyException;
 import com.agenticai.core.agents.hosted.HostedChainLink;
+import com.agenticai.core.agents.tools.AgentToolPort;
 import com.agenticai.core.chat.LlmMetricsAdvisor;
 import com.agenticai.core.chat.ProviderErrorTranslator;
 import com.agenticai.core.chat.SamplingOptions;
@@ -31,6 +33,9 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -53,6 +58,14 @@ import org.springframework.stereotype.Service;
  * respects only - hosted pool versus BYOK, and the agent's explicit
  * text-model provider - so a lab answer comes from the model a real turn
  * would normally use. The lab UI states this scope.
+ *
+ * <p><b>Optional: with tools.</b> A request may set {@link LabCompletionRequest#withTools}, which runs the same
+ * completion with the agent's REAL tool set attached, resolved by the tool pipeline a chat turn uses (the guard
+ * chain: step ceiling, argument policies, output caps, guardrails, and the approval gate - a call that needs a
+ * person parks as a pending approval for the lab's session, exactly as in chat). It is behind {@code
+ * app.agent-lab.with-tools.enabled}, off as shipped: with the setting off a request for tools is refused, never
+ * quietly answered without them, and every caller that does not ask (lessons, skills, the score judge, the coding
+ * seams) stays tool-less whatever the setting says. Still no memory, moderation or response cache.
  *
  * <p><b>What still applies.</b> The client is built once per {@link
  * #complete} call, never once per run, because the spend gates fire at build
@@ -82,6 +95,7 @@ public class AgentLabCompletionService {
      * @param maxTokens null = the agent's own
      * @param subjectKey the human requester, metered against the hosted pool's per-user budget
      * @param attributionSessionId written to {@code llm_call_log}, e.g. {@code lab:<runId>:<n>}
+     * @param withTools run with the agent's real tools (see the class doc); false = the tool-less completion
      */
     public record LabCompletionRequest(
         UUID agentId,
@@ -91,8 +105,25 @@ public class AgentLabCompletionService {
         Double temperature,
         Integer maxTokens,
         String subjectKey,
-        String attributionSessionId
-    ) {}
+        String attributionSessionId,
+        boolean withTools
+    ) {
+
+        /** The tool-less request every caller made before the with-tools mode existed. */
+        public LabCompletionRequest(
+            UUID agentId,
+            String systemPrompt,
+            List<LabTurnMessage> history,
+            String userMessage,
+            Double temperature,
+            Integer maxTokens,
+            String subjectKey,
+            String attributionSessionId
+        ) {
+            this(agentId, systemPrompt, history, userMessage, temperature, maxTokens, subjectKey,
+                attributionSessionId, false);
+        }
+    }
 
     private final AgentService agentService;
     private final TenantLimits tenantLimits;
@@ -100,6 +131,21 @@ public class AgentLabCompletionService {
     private final ProviderCredentialResolver credentialResolver;
     private final LlmGatewayService llmGatewayService;
     private final ProviderErrorTranslator providerErrorTranslator;
+
+    /**
+     * {@code app.agent-lab.with-tools.enabled}: whether a request may ask for the agent's real tools. Off as
+     * shipped. Field-injected so the constructor stays as callers and tests build it.
+     */
+    @Value("${app.agent-lab.with-tools.enabled:false}")
+    boolean withToolsEnabled = false;
+
+    /** The tool pipeline the with-tools mode resolves tools through; null in a context without it. */
+    private volatile AgentToolPort toolPort;
+
+    @Autowired(required = false)
+    void useToolPort(AgentToolPort toolPort) {
+        this.toolPort = toolPort;
+    }
 
     public AgentLabCompletionService(
         AgentService agentService,
@@ -141,6 +187,9 @@ public class AgentLabCompletionService {
      * @throws UpstreamProviderException when the provider call itself failed
      */
     public String complete(LabCompletionRequest request) {
+        if (request.withTools()) {
+            requireWithToolsAvailable();
+        }
         Agent agent = agentService.getEntity(request.agentId());
         String tenantId = TenantContext.current().map(TenantContext::getTenantId)
             .orElseThrow(() -> new IllegalStateException("A lab completion needs a tenant context on the calling thread."));
@@ -187,9 +236,7 @@ public class AgentLabCompletionService {
         for (int i = 0; i < chain.size(); i++) {
             HostedChainLink link = chain.get(i);
             try {
-                return invoke(
-                    link.client(), systemPrompt, history, request.userMessage(), request.agentId(),
-                    request.attributionSessionId());
+                return answer(link.client(), systemPrompt, history, request);
             } catch (RuntimeException e) {
                 if (isLimitFailure(e) || e instanceof LlmGatewayContentPolicyViolationException) {
                     releaseReservations(tenantId, plan, subjectKey, first);
@@ -252,21 +299,53 @@ public class AgentLabCompletionService {
         if (apiKey == null) {
             apiKey = credentialResolver.resolveActiveKey(provider);
         }
-        // Chat's spec without the xAI server-tool options: this call stays tool-less.
+        // Chat's spec without the xAI server-tool options (the agent's own tools, when a request asks for them, are
+        // attached per call by invokeWithTools).
         Map<String, Object> providerOptions =
             sampling.isEmpty() ? Map.of() : Map.of(SamplingOptions.OPTION_KEY, sampling);
         ChatClient client = llmGatewayService.resolveClient(tenantId, new GatewayCallSpec(
             provider, apiKey, model, maxTokens, temperature, agent.getTopP(), null, providerOptions));
         try {
-            return invoke(
-                client, systemPrompt, history, request.userMessage(), request.agentId(),
-                request.attributionSessionId());
+            return answer(client, systemPrompt, history, request);
         } catch (RuntimeException e) {
             if (isLimitFailure(e) || e instanceof LlmGatewayContentPolicyViolationException) {
                 throw e;
             }
             throw providerErrorTranslator.translate(e, provider);
         }
+    }
+
+    /**
+     * Whether a lab request for the agent's real tools can be served: the setting is on and the tool pipeline
+     * exists. Public so the lab's run service can refuse a run up front, with a sentence, rather than fail every
+     * cell of it.
+     */
+    public boolean withToolsAvailable() {
+        return withToolsEnabled && toolPort != null;
+    }
+
+    private void requireWithToolsAvailable() {
+        if (!withToolsEnabled) {
+            throw new IllegalArgumentException(
+                "Running the lab with the agent's tools is turned off on this install"
+                    + " (app.agent-lab.with-tools.enabled). Run it without tools, or ask an administrator to enable it.");
+        }
+        if (toolPort == null) {
+            throw new IllegalStateException("The lab's with-tools mode needs the agent tool pipeline, which is not available here.");
+        }
+    }
+
+    /** The one call of a cell: tool-less through {@link #invoke}, or with the agent's tools through {@link #invokeWithTools}. */
+    private String answer(
+        ChatClient client, String systemPrompt, List<LabTurnMessage> history, LabCompletionRequest request
+    ) {
+        if (request.withTools()) {
+            return invokeWithTools(
+                client, systemPrompt, history, request.userMessage(), request.agentId(),
+                request.attributionSessionId(), request.subjectKey());
+        }
+        return invoke(
+            client, systemPrompt, history, request.userMessage(), request.agentId(), request.attributionSessionId());
     }
 
     /**
@@ -281,6 +360,35 @@ public class AgentLabCompletionService {
         ChatClient client, String systemPrompt, List<LabTurnMessage> history, String userMessage,
         UUID agentId, String sessionId
     ) {
+        return call(client, systemPrompt, history, userMessage, agentId, sessionId, List.of());
+    }
+
+    /**
+     * {@link #invoke} with the agent's real tools attached. They come from the same resolver a chat turn uses, so
+     * every tool is wrapped in the production guard chain (step ceiling, argument policies, output caps,
+     * guardrails, the approval gate); the model's tool loop then runs them. Resolved at FAST depth, as a prompt
+     * preview does: the RIGOROUS per-tool verifier is a property of a chat turn's reasoning depth, which the lab does
+     * not have. A tool resolution that fails fails the call - a lab answer must never silently come from a
+     * tool-less run when tools were asked for. Public so end-to-end tests in other modules can drive the call with a
+     * scripted client.
+     */
+    public String invokeWithTools(
+        ChatClient client, String systemPrompt, List<LabTurnMessage> history, String userMessage,
+        UUID agentId, String sessionId, String subjectKey
+    ) {
+        AgentToolPort port = toolPort;
+        if (port == null) {
+            throw new IllegalStateException("The lab's with-tools mode needs the agent tool pipeline, which is not available here.");
+        }
+        List<ToolCallback> tools =
+            port.resolveToolsFor(agentId, sessionId, subjectKey, userMessage, client, ReasoningDepth.FAST);
+        return call(client, systemPrompt, history, userMessage, agentId, sessionId, tools);
+    }
+
+    private String call(
+        ChatClient client, String systemPrompt, List<LabTurnMessage> history, String userMessage,
+        UUID agentId, String sessionId, List<ToolCallback> tools
+    ) {
         ChatClient.ChatClientRequestSpec spec = client.prompt();
         if (systemPrompt != null && !systemPrompt.isBlank()) {
             spec = spec.system(systemPrompt);
@@ -293,6 +401,9 @@ public class AgentLabCompletionService {
                     : new UserMessage(turn.content()));
             }
             spec = spec.messages(messages);
+        }
+        if (tools != null && !tools.isEmpty()) {
+            spec = spec.toolCallbacks(tools);
         }
         String content = spec.user(userMessage)
             .advisors(LlmMetricsAdvisor.attributeTo(agentId, sessionId))

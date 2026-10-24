@@ -61,7 +61,9 @@
     "railSecrets": "ᱩᱠᱩᱠᱚ",
     "railBrand": "ᱪᱤᱱᱦᱟᱹ",
     "railLearn": "ᱪᱮᱫᱚᱜ",
-    "railGuard": "ᱨᱮਖᱟ"
+    "railGuard": "ᱨᱮਖᱟ",
+    "railRuntimeSettings": "ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ ᱠᱚ",
+    "railControls": "ᱤᱧ ᱪᱮᱫ ᱠᱷᱟᱛᱨᱟ ᱪᱷᱟᱸᱪᱚ...?"
   },
   "signup": {
     "fieldPassword": "ᱯᱟᱥᱣᱚᱨᱰ",
@@ -750,7 +752,142 @@
     "edgeTier0Badge": "ᱚᱱ-ᱰᱤᱵᱷᱟᱭᱤᱥ · ᱠᱨᱚᱢ ᱨᱮᱭᱟᱜ ᱵᱷᱤᱛᱨᱤ ᱨᱮ",
     "edgeTier0BadgeTitle": "ᱠᱨᱚᱢ ᱨᱮᱭᱟᱜ ᱵᱷᱤᱛᱨᱤ ᱢᱚᱰᱮᱞ (ᱡᱮᱢᱤᱱᱤ ᱱᱟᱱᱚ) ᱱᱚᱣᱟᱭ ᱛᱮᱞᱟ ᱠᱮᱫᱟ - ᱞᱚᱜᱚᱱ ᱟᱨ ᱯᱩᱨᱟᱹ ᱱᱤᱡᱮᱨᱟᱜ, ᱢᱮᱱᱠᱷᱟᱱ ᱠᱷᱟᱹᱞᱤ ᱜᱟᱞᱢᱟᱨᱟᱣ ᱞᱟᱹᱜᱤᱫ: ᱱᱚᱣᱟ ᱴᱩᱞᱥ ᱵᱟᱭ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱟᱨ ᱮᱴᱠᱮᱴᱚᱬᱮ ᱡᱤᱱᱤᱥ ᱨᱮ ᱥᱟᱹᱨᱤ ᱯᱨᱚᱵᱷᱟᱭᱰᱟᱨ ᱠᱷᱚᱱ ᱠᱚᱢ ᱥᱟᱹᱴᱤᱠ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾ ᱡᱚᱛᱚ ᱯᱞᱟᱱ ᱨᱮ ᱯᱷᱨᱤ᱾",
     "edgeTier1Badge": "ᱚᱱ-ᱰᱤᱵᱷᱟᱭᱤᱥ · ᱞᱚᱠᱟᱞ ᱢᱚᱰᱮᱞ",
-    "edgeTier1BadgeTitle": "ᱰᱟᱣᱩᱱᱞᱚᱰ ᱟᱠᱟᱱ ᱚᱱ-ᱰᱤᱵᱷᱟᱭᱤᱥ ᱢᱚᱰᱮᱞ ᱱᱚᱣᱟᱭ ᱛᱮᱞᱟ ᱠᱮᱫᱟ - ᱱᱤᱡᱮᱨᱟᱜ, ᱟᱨ ᱱᱚᱣᱟ ᱴᱩᱞᱥ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ (ᱦᱚᱥᱴᱮᱰ ᱴᱟᱨᱱ ᱞᱮᱠᱟ ᱜᱮ ᱥᱩᱨᱟᱹᱠᱪᱷᱤᱛ ᱴᱩᱞᱥ)᱾ ᱛᱚᱵᱮ ᱦᱚᱸ ᱦᱚᱥᱴᱮᱰ ᱯᱩᱞ ᱠᱷᱚᱱ ᱟᱹᱰᱤ ᱦᱩᱰᱤᱧ ᱢᱚᱰᱮᱞ ᱠᱟᱱᱟ, ᱚᱱᱟᱛᱮ ᱮᱴᱠᱮᱴᱚᱬᱮ ᱠᱟᱹᱢᱤ ᱨᱮ ᱠᱚᱢ ᱥᱟᱹᱴᱤᱠ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾ ᱡᱚᱛᱚ ᱯᱞᱟᱱ ᱨᱮ ᱯᱷᱨᱤ᱾"
+    "edgeTier1BadgeTitle": "ᱰᱟᱣᱩᱱᱞᱚᱰ ᱟᱠᱟᱱ ᱚᱱ-ᱰᱤᱵᱷᱟᱭᱤᱥ ᱢᱚᱰᱮᱞ ᱱᱚᱣᱟᱭ ᱛᱮᱞᱟ ᱠᱮᱫᱟ - ᱱᱤᱡᱮᱨᱟᱜ, ᱟᱨ ᱱᱚᱣᱟ ᱴᱩᱞᱥ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ (ᱦᱚᱥᱴᱮᱰ ᱴᱟᱨᱱ ᱞᱮᱠᱟ ᱜᱮ ᱥᱩᱨᱟᱹᱠᱪᱷᱤᱛ ᱴᱩᱞᱥ)᱾ ᱛᱚᱵᱮ ᱦᱚᱸ ᱦᱚᱥᱴᱮᱰ ᱯᱩᱞ ᱠᱷᱚᱱ ᱟᱹᱰᱤ ᱦᱩᱰᱤᱧ ᱢᱚᱰᱮᱞ ᱠᱟᱱᱟ, ᱚᱱᱟᱛᱮ ᱮᱴᱠᱮᱴᱚᱬᱮ ᱠᱟᱹᱢᱤ ᱨᱮ ᱠᱚᱢ ᱥᱟᱹᱴᱤᱠ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾ ᱡᱚᱛᱚ ᱯᱞᱟᱱ ᱨᱮ ᱯᱷᱨᱤ᱾",
+    "viewTurn": "ᱴᱚᱨᱱ ᱠᱚ ᱧᱮᱞ ᱢᱮ",
+    "viewTurnTitle": "ᱱᱚᱶᱟ ᱵᱟᱛ ᱪᱤᱛ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ ᱟᱜ ᱯᱟᱦᱴᱟ-ᱯᱟᱦᱴᱟ ᱴᱟᱭᱢᱞᱟᱭᱱ ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+    "headerRunning": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
+    "headerReady": "ᱛᱮᱭᱟᱨ",
+    "clearContext": "ᱥᱚᱸᱥᱟᱨ ᱥᱟᱯᱷᱟ ᱢᱮ",
+    "clearContextTitle": "ᱱᱟᱣᱟ ᱵᱟᱛ ᱪᱤᱛ ᱮᱦᱚᱵ ᱢᱮ। ᱱᱚᱶᱟ ᱫᱚ ᱪᱮᱴ ᱟᱜ ᱰᱤᱵᱟᱭᱥ ᱟᱨ ᱥᱟᱨᱵᱟᱨ ᱯᱟᱥ ᱟᱜ ᱥᱮᱥᱚᱱ ᱢᱮᱢᱚᱨᱤ ᱥᱟᱯᱷᱟ ᱮᱫᱟ।",
+    "stopRun": "ᱱᱚᱶᱟ ᱡᱚᱵᱟᱵ ᱵᱚᱸᱫ ᱢᱮ",
+    "fallbackSendToPlatform": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱢᱮ",
+    "chipsLabel": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱤᱛᱚᱜ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱮᱫᱟ",
+    "chipPreparing": "ᱛᱮᱭᱟᱨ ᱢᱮᱱᱟᱜᱼᱟ",
+    "chipModelCall": "ᱢᱚᱰᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱠᱟᱱᱟ",
+    "chipThinking": "ᱪᱤᱛᱟ ᱮᱫᱟ",
+    "chipWriting": "ᱡᱚᱵᱟᱵ ᱚᱞ ᱮᱫᱟ",
+    "chipTool": "ᱴᱩᱞ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ: {tool}",
+    "chipToolUnnamed": "ᱢᱤᱫ ᱴᱩᱞ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
+    "chipWaitingApproval": "ᱟᱢᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱠᱟᱱᱟ ({count})",
+    "chipContinuing": "ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
+    "chipContinuingPass": "ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ ({max} ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱯᱟᱥ {pass})",
+    "chipContinuingApproval": "ᱟᱢᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱠᱷᱚᱱ ᱛᱟᱭᱚᱢ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
+    "chipRetrying": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱮᱫᱟ",
+    "chipRetryingReason": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱮᱫᱟ: {reason}",
+    "chipRetryingAttempt": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱮᱫᱟ (ᱪᱮᱥᱴᱟ {attempt}/{max})",
+    "chipRetryingAttemptReason": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱮᱫᱟ (ᱪᱮᱥᱴᱟ {attempt}/{max}): {reason}",
+    "chipFailover": "ᱵᱮᱠᱟᱯ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ",
+    "chipFailoverReason": "ᱵᱮᱠᱟᱯ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ: {reason}",
+    "chipFailoverTo": "{model} ᱥᱮᱱ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ",
+    "chipFailoverToReason": "{model} ᱥᱮᱱ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ: {reason}",
+    "outcomeTruncated": "ᱱᱚᱶᱟ ᱡᱚᱵᱟᱵ ᱯᱩᱨᱟᱹ ᱪᱷᱚᱭ ᱵᱷᱟᱜᱮ ᱠᱟᱴᱟ ᱞᱮᱱᱟ।",
+    "outcomeContinue": "ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+    "outcomeLongerReplies": "ᱞᱟᱢᱟ ᱡᱚᱵᱟᱵ ᱥᱟᱹᱠᱷᱤ ᱮᱢ ᱢᱮ",
+    "continueMessage": "ᱚᱠᱟ ᱪᱷᱚᱭ ᱛᱮ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ ᱚᱸᱰᱮ ᱠᱷᱚᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ, ᱢᱩᱨᱩᱛ ᱚᱞ ᱟᱠᱟᱱ ᱠᱚ ᱵᱟᱝ ᱯᱷᱤᱨ ᱚᱞ ᱠᱟᱛᱮ।",
+    "outcomeRefused": "ᱥᱩᱨᱠᱷᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱰᱮᱞ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱱᱚᱶᱟ ᱡᱚᱵᱟᱵ ᱵᱚᱸᱫ ᱠᱟᱫᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱵᱟᱵ ᱵᱟᱹᱱᱩᱜᱼᱟ। ᱚᱱᱚᱠᱚᱞ ᱵᱚᱫᱚᱞ ᱠᱟᱛᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+    "outcomeRefusedReason": "ᱥᱩᱨᱠᱷᱟ ᱞᱟᱹᱜᱤᱫ ({reason}) ᱢᱚᱰᱮᱞ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱱᱚᱶᱟ ᱡᱚᱵᱟᱵ ᱵᱚᱸᱫ ᱠᱟᱫᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱵᱟᱵ ᱵᱟᱹᱱᱩᱜᱼᱟ। ᱚᱱᱚᱠᱚᱞ ᱵᱚᱫᱚᱞ ᱠᱟᱛᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+    "outcomeMalformedToolCall": "ᱢᱚᱰᱮᱞ ᱫᱚ ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱪᱮᱥᱴᱟ ᱞᱮᱱᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱚᱱᱟ ᱟᱜ ᱚᱱᱚᱠᱚᱞ ᱵᱷᱩᱞ ᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱵᱟᱝ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ। ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+    "outcomeEmpty": "ᱢᱚᱰᱮᱞ ᱫᱚ ᱠᱷᱟᱞᱤ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱮᱱᱟ। ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+    "stopRaiseSteps": "ᱴᱩᱞ-ᱠᱚᱞ ᱥᱤᱢᱟ ᱵᱟᱲᱦᱟᱣ ᱢᱮ",
+    "stopRaiseBudget": "ᱠᱷᱚᱨᱪᱟ ᱥᱤᱢᱟ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "stopAskEditor": "ᱮᱡᱮᱱᱴ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱡᱤᱛᱟᱜ ᱯᱟᱱᱛᱮ ᱥᱮᱱ ᱥᱤᱢᱟ ᱵᱟᱲᱦᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱢᱮ।",
+    "rsOpen": "ᱨᱚᱱ ᱥᱮᱴᱤᱝ ᱠᱚ",
+    "rsTitle": "ᱨᱚᱱ ᱥᱮᱴᱤᱝ ᱠᱚ",
+    "rsClose": "ᱨᱚᱱ ᱥᱮᱴᱤᱝ ᱠᱚ ᱵᱚᱸᱫ ᱢᱮ",
+    "rsBack": "ᱨᱚᱱ ᱥᱮᱴᱤᱝ ᱠᱚ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+    "rsIntro": "{name} ᱞᱟᱹᱜᱤᱫ ᱛᱟᱭᱚᱢ ᱵᱷᱮᱡᱟᱣ ᱪᱮᱠᱟ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ। ᱚᱱᱟ ᱠᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱴᱮᱵ ᱨᱮ ᱵᱚᱫᱚᱞ ᱢᱮ।",
+    "rsLoading": "ᱞᱚᱰ ᱮᱫᱟ",
+    "rsRetry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ",
+    "rsOpenBehavior": "ᱵᱮᱵᱷᱟᱨ ᱨᱮ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "rsModelHeading": "ᱢᱚᱰᱮᱞ ᱟᱨ ᱱᱢᱩᱱᱟ ᱵᱟᱪᱷᱟᱣ",
+    "rsModel": "ᱢᱚᱰᱮᱞ",
+    "rsModelNotSet": "ᱥᱮᱴ ᱵᱟᱝ ᱟᱠᱟᱱᱟ",
+    "rsModelDefault": "ᱢᱚᱰᱮᱞ ᱟᱜ ᱰᱤᱯᱷᱚᱞᱴ",
+    "rsDepth": "ᱨᱤᱡᱚᱱᱤᱝ ᱨᱮᱭᱟᱜ ᱜᱷᱟᱨᱟ",
+    "rsSourceAgent": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
+    "rsParam_temperature": "ᱛᱟᱯᱢᱟᱱ",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "ᱡᱚᱵᱟᱵ ᱟᱜ ᱵᱟᱲᱛᱤ ᱞᱚᱸᱜᱚ (ᱴᱚᱠᱮᱱ)",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱥᱟᱡᱟᱭ",
+    "rsParam_presencePenalty": "ᱢᱮᱱᱟᱜ ᱟᱜ ᱥᱟᱡᱟᱭ",
+    "rsParam_seed": "ᱥᱤᱰ",
+    "rsParam_stopSequences": "ᱵᱚᱸᱫ ᱟᱜ ᱠᱷᱟᱛᱨᱟ",
+    "rsParamDropped": "{param} ᱫᱚ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱥᱮᱴ ᱟᱠᱟᱱᱟ, ᱢᱮᱱᱠᱷᱟᱱ {provider} ᱫᱚ {model} ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱟᱝ ᱢᱟᱱᱟᱣᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱟᱜ ᱪᱮᱫᱽ ᱵᱟᱝ ᱯᱷᱚᱞ ᱢᱮᱱᱟᱜᱼᱟ।",
+    "rsToolsRunHeading": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱴᱩᱞ",
+    "rsToolsRunOnly": "ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱨᱚᱱ",
+    "rsToolsRunNote": "ᱱᱚᱶᱟ ᱥᱩᱭᱪ ᱠᱚ ᱫᱚ ᱱᱚᱶᱟ ᱯᱞᱮᱜᱨᱟᱣᱱᱰ ᱠᱷᱚᱱ ᱟᱢ ᱵᱷᱮᱡᱟᱣ ᱵᱷᱮᱡᱟᱣ ᱮᱡᱮᱱᱴ ᱟᱜ ᱪᱮᱫ ᱴᱩᱞ ᱠᱚ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱮᱫᱟ। ᱪᱮᱫᱽ ᱵᱟᱝ ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱟ: ᱮᱴᱟᱜ ᱡᱷᱚᱛᱚ ᱞᱟᱹᱜᱤᱫ ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱡ ᱴᱩᱞ ᱵᱚᱸᱫᱷᱚᱜ ᱛᱟᱦᱮᱱ ᱮᱫᱟ। ᱱᱚᱶᱟ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱷᱟᱞᱤ ᱵᱚᱸᱫ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱱᱟᱣᱟ ᱴᱩᱞ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rsToolsRunSummary": "ᱮᱡᱮᱱᱴ ᱟᱜ {total} ᱴᱩᱞ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {on} ᱱᱚᱶᱟ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱪᱟᱹᱞᱩ",
+    "rsToolsRunNone": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜᱼᱟ: ᱮᱡᱮᱱᱴ ᱫᱚ ᱚᱞ ᱨᱮ ᱜᱮ ᱡᱚᱵᱟᱵ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rsToolsReset": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱵᱮᱵᱷᱟᱨ ᱢᱮ",
+    "rsToolsNotInAgent": "ᱱᱚᱶᱟ ᱫᱚ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱴᱩᱞ ᱛᱟᱞᱟ ᱨᱮ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱪᱟᱹᱞᱩ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rsToolsEditAgent": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱴᱩᱞ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "rsToolsLimitedChip": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱴᱩᱞ ᱥᱤᱢᱟ ᱨᱮ",
+    "rsToolsEmpty": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "rsToolsSummary": "{total} ᱴᱩᱞ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {on} ᱪᱟᱹᱞᱩ",
+    "rsToolsFailed": "ᱴᱩᱞ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "rsLimitsHeading": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱟᱜ ᱥᱤᱢᱟ",
+    "rsLimitsChange": "ᱥᱤᱢᱟ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "rsLimitsView": "ᱥᱤᱢᱟ ᱧᱮᱞ ᱢᱮ",
+    "rsLimitsFailed": "ᱥᱤᱢᱟ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "rsLimitsEmpty": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "rsNoLimit": "ᱪᱮᱫᱽ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ",
+    "rsScoreAll": "ᱥᱟᱱᱟᱢ ᱢᱤᱞᱟᱣ",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} ᱚᱠᱷᱚᱨ",
+    "rsLimitRange": "ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ: {min} ᱠᱷᱚᱱ {max} ᱦᱟᱹᱵᱤᱡ",
+    "rsLayer_AGENT": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
+    "rsLayer_TENANT": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱰᱤᱯᱷᱚᱞᱴ",
+    "rsLayer_PLATFORM": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱰᱤᱯᱷᱚᱞᱴ",
+    "rsLayer_REQUEST": "ᱱᱚᱶᱟ ᱚᱱᱚᱠᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
+    "rsLimit_maxToolSteps": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ",
+    "rsLimit_turnTimeoutSeconds": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱟᱜ ᱚᱠᱛᱚ",
+    "rsLimit_toolTimeoutSeconds": "ᱢᱤᱫ ᱴᱩᱞ ᱠᱚᱞ ᱟᱜ ᱚᱠᱛᱚ",
+    "rsLimit_toolOutputMaxChars": "ᱴᱩᱞ ᱯᱷᱚᱞ ᱟᱜ ᱚᱠᱛᱚ ᱞᱚᱸᱜᱚ",
+    "rsLimit_retrievalTopK": "ᱠᱷᱚᱡᱮᱛ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱰᱟᱭ ᱯᱷᱚᱞ",
+    "rsLimit_retrievalMinScore": "ᱵᱟᱰᱟᱭ ᱢᱤᱞᱟᱣ ᱟᱜ ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱥᱟᱸᱜᱤᱛ",
+    "rsLimit_continuationPasses": "ᱡᱚᱵᱟᱵ ᱯᱩᱨᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱞᱮᱫ ᱯᱟᱥ",
+    "rsLimitHelp_maxToolSteps": "ᱢᱤᱫ ᱡᱚᱵᱟᱵ ᱵᱟᱲᱛᱤ ᱫᱚ ᱪᱮᱫ ᱴᱩᱞ ᱠᱚᱞ ᱪᱷᱚᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱥᱤᱢᱟ ᱨᱮ ᱥᱮᱫᱚᱜ ᱠᱷᱟᱱ ᱴᱚᱨᱱ ᱵᱚᱸᱫ ᱦᱩᱭᱜᱼᱟ ᱟᱨ ᱚᱱᱟ ᱢᱮᱛ ᱮᱫᱟ।",
+    "rsLimitHelp_turnTimeoutSeconds": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱵᱚᱸᱫ ᱦᱩᱭ ᱠᱷᱚᱱ ᱥᱟᱵᱟᱭ ᱢᱤᱫ ᱪᱷᱚᱭ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rsLimitHelp_toolTimeoutSeconds": "ᱢᱤᱫ ᱴᱩᱞ ᱠᱚᱞ ᱵᱚᱸᱫ ᱦᱩᱭ ᱠᱷᱚᱱ ᱥᱟᱵᱟᱭ ᱢᱤᱫ ᱪᱷᱚᱭ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rsLimitHelp_toolOutputMaxChars": "ᱢᱤᱫ ᱴᱩᱞ ᱯᱷᱚᱞ ᱟᱜ ᱪᱮᱫ ᱚᱠᱛᱚ ᱢᱚᱰᱮᱞ ᱯᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱟᱠᱤ ᱠᱚ ᱠᱟᱴᱟ ᱟᱠᱚᱜᱼᱟ।",
+    "rsLimitHelp_retrievalTopK": "ᱢᱤᱫ ᱠᱷᱚᱡᱮᱛ ᱫᱚ ᱵᱟᱰᱟᱭ ᱵᱷᱟᱱᱰᱟᱨ ᱠᱷᱚᱱ ᱪᱮᱫ ᱴᱩᱠᱨᱟ ᱯᱷᱤᱨ ᱟᱹᱜᱩ ᱮᱫᱟ।",
+    "rsLimitHelp_retrievalMinScore": "ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱠᱚᱢ ᱢᱤᱞᱟᱣ ᱟᱠᱟᱱ ᱴᱩᱠᱨᱟ ᱠᱚ ᱵᱟᱛᱼᱟᱣ ᱟᱠᱚᱜᱼᱟ। ᱥᱩᱱᱱᱟ ᱫᱚ ᱡᱷᱚᱛᱚ ᱢᱤᱞᱟᱣ ᱛᱟᱦᱮᱱ ᱮᱫᱟ।",
+    "rsLimitHelp_continuationPasses": "ᱛᱮᱞᱟ ᱥᱮᱞᱮᱫ ᱟᱠᱟᱱ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱝ ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ ᱡᱚᱵᱟᱵ ᱯᱩᱨᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱞᱮᱫ ᱪᱮᱥᱴᱟ ᱠᱚ।",
+    "rsPreviewButton": "ᱯᱨᱚᱢᱯᱴ ᱯᱩᱨᱟᱹ ᱧᱮᱞ",
+    "rsPreviewTitle": "ᱯᱨᱚᱢᱯᱴ ᱯᱩᱨᱟᱹ ᱧᱮᱞ",
+    "rsPreviewIntro": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱵᱷᱮᱡᱟᱣ ᱟᱜ ᱥᱤᱥᱴᱚᱢ ᱯᱨᱚᱢᱯᱴ ᱟᱨ ᱴᱩᱞ ᱞᱮᱠᱟᱱ, ᱥᱟᱹᱨᱤ ᱴᱚᱨᱱ ᱞᱮᱠᱟ ᱛᱮ ᱵᱟᱱᱟᱣ ᱟᱠᱟᱱᱟ। ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱪᱮᱫᱽ ᱵᱟᱝ ᱵᱷᱮᱡᱟᱜᱼᱟ।",
+    "rsPreviewBuilding": "ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱵᱟᱱᱟᱣ ᱮᱫᱟ",
+    "rsPreviewFailed": "ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱵᱟᱝ ᱵᱟᱱᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "rsPreviewTotals": "ᱥᱤᱥᱴᱚᱢ ᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱚᱞᱟᱜ {prompt} ᱴᱚᱠᱮᱱ ᱟᱨ ᱴᱩᱞ ᱵᱩᱡᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ {tools} ᱴᱚᱠᱮᱱ (ᱟᱱᱟᱡ)।",
+    "rsPreviewOverBudgetTitle": "ᱴᱚᱠᱮᱱ ᱵᱟᱡᱮᱴ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ",
+    "rsPreviewOverBudget": "ᱛᱟᱦᱮᱱ ᱥᱤᱥᱴᱚᱢ ᱚᱞ ᱫᱚ ᱥᱮᱴ ᱟᱠᱟᱱ {budget} ᱴᱚᱠᱮᱱ ᱵᱟᱡᱮᱴ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱱᱟ। ᱪᱮᱫᱽ ᱵᱟᱝ ᱠᱟᱴᱟ ᱞᱮᱱᱟ; ᱢᱤᱫ ᱯᱨᱚᱢᱯᱴ ᱪᱤᱛᱚᱜ ᱢᱮ ᱢᱮᱱ ᱪᱤᱛᱟ ᱢᱮ।",
+    "rsPreviewNoBlocks": "ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱯᱨᱚᱢᱯᱴ ᱵᱞᱚᱠ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "rsPreviewMessage": "ᱵᱷᱮᱡᱟᱣ: {message}",
+    "rsPreviewTokens": "~{tokens} ᱴᱚᱠᱮᱱ",
+    "rsPreviewShowText": "ᱚᱞ ᱧᱮᱞᱟᱹ ᱢᱮ",
+    "rsPreviewTools": "ᱴᱩᱞ ({count})",
+    "rsPreviewNoTools": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱪᱮᱫᱽ ᱴᱩᱞ ᱵᱟᱝ ᱮᱢᱟ।",
+    "rsPreviewNotes": "ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱫᱚ ᱪᱮᱫ ᱵᱟᱝ ᱵᱟᱰᱟᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ",
+    "rsPreviewOpenAdmin": "ᱥᱟᱱᱟᱢ ᱯᱨᱚᱢᱯᱴ ᱟᱜ ᱥᱟᱵᱟᱫ ᱧᱮᱞ ᱟᱨ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "rsOriginDefault": "ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱᱟ",
+    "rsOriginOverride": "{scope} ᱚᱣᱟᱨᱟᱭᱰ v{version}",
+    "rsOriginAgentConfig": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱥᱤᱥᱴᱚᱢ ᱯᱨᱚᱢᱯᱴ",
+    "rsOriginCode": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱠᱳᱰ",
+    "rsRunBudget": "ᱨᱚᱱ ᱥᱟᱱᱟᱢ ᱟᱜ ᱠᱷᱚᱨᱪᱟ ᱥᱤᱢᱟ",
+    "rsNoCap": "ᱪᱮᱫᱽ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ",
+    "rsRunBudgetHelp": "ᱢᱤᱫ ᱨᱚᱱ ᱫᱚ ᱮᱴᱟᱜ ᱮᱡᱮᱱᱴ ᱠᱚ ᱠᱟᱹᱢᱤ ᱮᱢ ᱥᱮ ᱜᱟᱦᱱᱟ ᱥᱚᱫᱷᱚ ᱪᱟᱞᱟᱣ ᱚᱠᱛᱚ ᱵᱟᱲᱛᱤ ᱪᱮᱫ ᱠᱷᱚᱨᱪᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱱᱚᱶᱟ ᱫᱚ ᱟᱱᱟᱡ ᱠᱟᱱᱟ, ᱵᱤᱞ ᱵᱟᱝ।",
+    "chipToolsOff": "ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱮᱫᱟ",
+    "chipFailoverBlocked": "ᱵᱮᱠᱟᱯ ᱢᱚᱰᱮᱞ ᱵᱟᱝ ᱵᱮᱵᱷᱟᱨ ᱞᱮᱱᱟ: ᱴᱩᱞ ᱠᱚ ᱫᱚ ᱫᱚᱦᱚᱜ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟ",
+    "rsLimitChangeOne": "ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "reasonRateLimited": "ᱦᱟᱨ ᱥᱤᱢᱟ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱞᱮᱱᱟ",
+    "reasonTimeout": "ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭᱞᱮᱱᱟ",
+    "reasonProviderUnavailable": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ",
+    "reasonAuthFailed": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱠᱨᱮᱰᱮᱱᱥᱤᱭᱟᱞ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱠᱟᱫᱼᱟ",
+    "reasonBilling": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱵᱤᱞᱤᱝ ᱥᱚᱢᱥᱭᱟ",
+    "reasonModelNotFound": "ᱢᱚᱰᱮᱞ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ",
+    "reasonProviderError": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱵᱷᱩᱞ",
+    "reasonMalformedToolCall": "ᱴᱩᱞ ᱠᱚᱞ ᱵᱮᱵᱷᱟᱨ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ"
   },
   "nodeDefs": {
     "triggerLabel": "ᱮᱛᱚᱦᱚᱵ",
@@ -1356,7 +1493,50 @@
     "ttsProviderUpdatedSuccess": "TTS ᱯᱨᱚᱵᱷᱟᱭᱰᱚᱨ ᱟᱹᱯᱰᱮᱴᱮᱱᱟ᱾",
     "updateTtsProviderError": "ᱱᱩᱭ ᱮᱡᱮᱱᱴᱟᱜ TTS ᱯᱨᱚᱵᱷᱟᱭᱰᱚᱨ ᱵᱟᱝ ᱟᱹᱯᱰᱮᱴ ᱞᱮᱱᱟ᱾",
     "ttsProviderFreePlanTooltip": "TTS ᱯᱨᱚᱵᱷᱟᱭᱰᱚᱨ ᱵᱟᱪᱷᱟᱣ ᱫᱚ ᱢᱤᱫ ᱯᱨᱤᱢᱤᱭᱚᱢ ᱯᱷᱤᱪᱟᱹᱨ ᱠᱟᱱᱟ᱾",
-    "ttsProviderNotSet": "ᱯᱞᱮᱴᱯᱷᱚᱨᱢ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱮᱵᱷᱟᱨᱚᱜ ᱠᱟᱱᱟ"
+    "ttsProviderNotSet": "ᱯᱞᱮᱴᱯᱷᱚᱨᱢ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱮᱵᱷᱟᱨᱚᱜ ᱠᱟᱱᱟ",
+    "samplingTitle": "ᱪᱷᱚᱠᱚᱵ ᱱᱢᱩᱱᱟ ᱵᱟᱪᱷᱟᱣ",
+    "samplingIntro": "ᱢᱚᱰᱮᱞ ᱪᱮᱠᱟ ᱛᱮ ᱥᱟᱵᱟᱫ ᱵᱟᱪᱷᱟᱣᱟ ᱚᱱᱟ ᱥᱟᱯᱷᱟ ᱛᱮ ᱥᱚᱡᱷᱮ ᱢᱮ। ᱢᱚᱰᱮᱞ ᱟᱜ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱠᱥᱟ ᱠᱷᱟᱞᱤ ᱛᱟᱦᱮᱱᱟ ᱢᱮ। ᱚᱠᱟ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱪᱮᱫᱽ ᱠᱷᱮᱛᱨᱚ ᱵᱟᱝ ᱵᱩᱡᱷᱟᱣᱟ ᱚᱱᱟ ᱫᱚ ᱚᱱᱟ ᱵᱟᱛᱼᱟᱣ ᱮᱫᱟ।",
+    "samplingIgnored": "ᱱᱚᱶᱟ ᱢᱚᱰᱮᱞ ᱟᱜ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱢᱟᱱᱟᱣᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱨᱮ ᱪᱮᱫᱽ ᱯᱷᱚᱞ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "samplingSaving": "ᱥᱟᱸᱪᱟᱣ ᱮᱫᱟ…",
+    "samplingSaved": "ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ",
+    "samplingNotSaved": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "samplingSaveFailed": "ᱚᱱᱟ ᱥᱮᱴᱤᱝ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "samplingErrorWhole": "{label} ᱫᱚ {min} ᱠᱷᱚᱱ {max} ᱦᱟᱹᱵᱤᱡ ᱯᱩᱨᱟᱹ ᱜᱚᱱᱚᱝ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ, ᱥᱮ ᱵᱚᱸᱫ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱟᱞᱤ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+    "samplingErrorNumber": "{label} ᱫᱚ {min} ᱠᱷᱚᱱ {max} ᱦᱟᱹᱵᱤᱡ ᱜᱚᱱᱚᱝ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ, ᱥᱮ ᱵᱚᱸᱫ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱟᱞᱤ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+    "samplingStopTooLong": "ᱢᱤᱫ ᱵᱚᱸᱫ ᱠᱷᱟᱛᱨᱟ ᱫᱚ ᱵᱟᱲᱛᱤ ᱛᱮ {max} ᱚᱠᱷᱚᱨ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "samplingStopTooMany": "ᱵᱟᱲᱛᱤ ᱛᱮ {max} ᱵᱚᱸᱫ ᱠᱷᱟᱛᱨᱟ।",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "ᱠᱷᱟᱞᱤ ᱥᱟᱱᱟᱢ ᱠᱷᱚᱱ ᱥᱟᱸᱜᱤᱛ K ᱛᱟᱭᱚᱢ ᱥᱟᱵᱟᱫ ᱠᱚ ᱪᱤᱱᱛᱟᱣ ᱢᱮ। ᱠᱚᱢ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱲᱛᱤ ᱥᱩᱨᱠᱷᱤᱛ, ᱟᱱᱟᱡ ᱫᱟᱲᱮᱭᱟᱜ ᱚᱞ। 1 ᱠᱷᱚᱱ 1000।",
+    "samplingSeed": "ᱥᱤᱰ",
+    "samplingSeedHelp": "ᱢᱤᱫ ᱯᱨᱚᱢᱯᱴ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱵᱟᱵ ᱠᱚ ᱵᱟᱲᱛᱤ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱦᱩᱭ ᱞᱟᱹᱜᱤᱫ ᱜᱚᱱᱚᱝ ᱥᱮᱴ ᱢᱮ। ᱡᱷᱚᱛᱚ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱚᱱᱟ ᱵᱟᱝ ᱜᱟᱨᱮᱱᱴᱤ ᱮᱢᱟ।",
+    "samplingFrequency": "ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱥᱟᱡᱟᱭ",
+    "samplingFrequencyHelp": "ᱫᱷᱚᱱᱟᱛᱢᱚᱠ ᱢᱟᱱ ᱫᱚ ᱢᱤᱫ ᱥᱟᱵᱟᱫ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱵᱟᱛᱼᱟᱣ ᱮᱫᱟ। -2 ᱠᱷᱚᱱ 2।",
+    "samplingPresence": "ᱢᱮᱱᱟᱜ ᱟᱜ ᱥᱟᱡᱟᱭ",
+    "samplingPresenceHelp": "ᱫᱷᱚᱱᱟᱛᱢᱚᱠ ᱢᱟᱱ ᱫᱚ ᱢᱚᱰᱮᱞ ᱠᱚ ᱢᱤᱫ ᱵᱤᱥᱚᱭ ᱨᱮ ᱛᱟᱦᱮᱱ ᱞᱮᱠᱟ ᱵᱟᱝ ᱱᱟᱣᱟ ᱵᱤᱥᱚᱭ ᱥᱮᱱ ᱥᱟᱡᱟᱣ ᱮᱫᱟ। -2 ᱠᱷᱚᱱ 2।",
+    "samplingPlaceholderDefault": "ᱰᱤᱯᱷᱚᱞᱴ",
+    "samplingPlaceholderRandom": "ᱨᱮᱱᱰᱚᱢ",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "ᱵᱚᱸᱫ ᱟᱜ ᱠᱷᱟᱛᱨᱟ",
+    "samplingStopPlaceholder": "ᱢᱤᱫ ᱥᱟᱵᱟᱫ ᱚᱞ ᱢᱮ, Enter ᱦᱟᱯᱼᱟᱣ ᱢᱮ",
+    "samplingStopHelp": "ᱢᱚᱰᱮᱞ ᱫᱚ ᱱᱚᱶᱟ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱪᱮᱫ ᱚᱞ ᱠᱷᱟᱱ ᱡᱚᱵᱟᱵ ᱪᱷᱚᱭ ᱦᱩᱭᱜᱼᱟ। ᱵᱟᱲᱛᱤ ᱛᱮ {count}, ᱥᱟᱱᱟᱢ ᱵᱟᱲᱛᱤ ᱛᱮ {max} ᱚᱠᱷᱚᱨ।",
+    "samplingStopCurrent": "ᱱᱤᱛᱚᱜ ᱟᱜ ᱵᱚᱸᱫ ᱠᱷᱟᱛᱨᱟ",
+    "samplingStopRemove": "ᱵᱚᱸᱫ ᱠᱷᱟᱛᱨᱟ {value} ᱚᱪᱚᱜ ᱢᱮ",
+    "samplingAdd": "ᱥᱮᱞᱮᱫ ᱢᱮ",
+    "reasoningDepthFASTCost": "Quickest and cheapest: one pass, and the reply streams in as it is written.",
+    "reasoningDepthPLANNEDCost": "Writes a plan before acting: more model calls per task, and the reply appears all at once instead of streaming.",
+    "reasoningDepthCAREFULCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming.",
+    "reasoningDepthRIGOROUSCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming. Uses the most tokens.",
+    "autonomyLabel": "Autonomy",
+    "autonomyTierSUPERVISED": "Supervised",
+    "autonomyTierSUPERVISEDHint": "Every tool call waits for a human to approve it, whatever the workspace policy says. Tighter step ceiling.",
+    "autonomyTierSUPERVISEDCost": "Asks you before every tool call, searches included.",
+    "autonomyTierSEMI_AUTONOMOUS": "Semi-autonomous",
+    "autonomyTierSEMI_AUTONOMOUSHint": "Follows the workspace's approval policy for each action type. The default for every agent.",
+    "autonomyTierSEMI_AUTONOMOUSCost": "Asks you only for the actions your workspace's approval rules name; the rest run without asking.",
+    "autonomyTierFULLY_AUTONOMOUS": "Fully autonomous",
+    "autonomyTierFULLY_AUTONOMOUSHint": "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
+    "autonomyTierFULLY_AUTONOMOUSCost": "Never asks you: every tool call runs as soon as the agent makes it, sends and payments included.",
+    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "ᱱᱚᱰ ᱥᱮᱞᱮᱠᱴ ᱢᱮ ᱠᱚᱱᱯᱷᱤᱜᱟᱹᱨ ᱞᱟᱹᱜᱤᱫ, ᱥᱮ ᱞᱮᱸᱜᱟ ᱥᱮᱡᱟᱜ ᱯᱮᱞᱮᱴ ᱠᱷᱚᱱ ᱱᱟᱣᱟ ᱢᱤᱫᱴᱟᱝ ᱚᱨ ᱟᱹᱜᱩᱭ ᱢᱮ᱾",
@@ -1836,6 +2016,9 @@
     "emptyWorkspaceTitle": "ᱱᱤᱛ ᱫᱷᱟᱹᱵᱤᱡ ᱥᱟᱢᱩᱝ ᱵᱟᱹᱱᱩᱜᱼᱟ",
     "noFilesUploadedHint": "ᱮᱡᱮᱱᱴᱠᱚ ᱫ୍ଵାରᱟ ᱥᱮᱸᱫᱽᱨᱟ ᱜᱟᱱᱚᱜ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱣᱟ ᱥᱟᱢᱩᱝ ᱨᱮ ᱯᱷᱟᱭᱤᱞ ᱨᱟᱠᱟᱵᱽ ᱢᱮ᱾",
     "ocrComingSoonTooltip": "ད་ལྟ་ ᱵᱟᱹᱱᱩᱜᱼᱟ - ᱟᱯᱞᱚᱰ ᱠᱚᱫᱚ ᱵᱷᱤᱛᱤᱨ ᱨᱮᱭᱟᱜ Tesseract OCR ᱨᱮ ᱨᱩᱣᱟᱹᱲᱚᱜᱼᱟ᱾"
+  },
+  "tutorPage": {
+    "backToHelp": "ᱜᱚᱲᱚ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ"
   },
   "knowledgePage": {
     "knowledgeLabel": "ᱡᱟᱱᱠᱟᱨᱤ",
@@ -5719,6 +5902,8 @@
     "channelsBody": "WhatsApp, Telegram, Instagram, Slack, ᱤᱢᱮᱞ ᱟᱨ ᱟᱨᱦᱚᱸ ᱡᱚᱲᱟᱣ ᱢᱮ, ᱤᱱᱟᱹ ᱯᱚᱨᱮ ᱵᱟᱪᱷᱟᱣ ᱢᱮ ᱡᱮ ᱚᱠᱚᱭ ᱮᱡᱮᱱᱴ ᱚᱠᱟ ᱨᱮᱭ ᱛᱮᱞᱟᱭᱟ᱾",
     "channelsPoint1": "ᱯᱷᱨᱤ ᱯᱞᱟᱱ ᱨᱮ WhatsApp, Telegram ᱟᱨ ᱤᱢᱮᱞ",
     "channelsPoint2": "ᱢᱤᱫ ᱱᱟᱣᱟ ᱵᱷᱮᱡᱟᱣᱤᱡ ᱞᱟᱦᱟ ᱨᱮ ᱟᱢᱟᱜ ᱮᱯᱨᱩᱵᱷᱟᱞ ᱞᱟᱹᱜᱤᱫᱮ ᱛᱟᱺᱜᱤᱭᱟ",
+    "channelsPersonalBody": "WhatsApp, Telegram, Signal, iMessage ᱥᱮ ᱤᱢᱮᱞ ᱡᱚᱰᱟᱣ ᱢᱮ, ᱚᱱᱟ ᱛᱟᱭᱚᱢ ᱥᱟᱱᱟᱢ ᱪᱮᱱᱮᱞ ᱨᱮ ᱪᱮᱫ ᱠᱚᱥᱴᱚᱢ ᱮᱡᱮᱱᱴ ᱡᱚᱵᱟᱵ ᱮᱢ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
+    "channelsPersonalPoint1": "WhatsApp, Telegram, Signal, iMessage ᱟᱨ ᱤᱢᱮᱞ",
     "toolsTitle": "ᱤᱱᱴᱤᱜᱽᱨᱮᱥᱚᱱ ᱠᱚ ᱮᱡᱮᱱᱴ ᱠᱚ ᱴᱩᱞᱥ ᱠᱚ ᱮᱢᱟᱠᱚᱣᱟ",
     "toolsBody": "ᱮᱡᱮᱱᱴ ᱜᱟᱞᱢᱟᱨᱟᱣ ᱛᱟᱞᱟ ᱨᱮ ᱪᱮᱫᱼᱪᱮᱫᱮ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱚᱱᱟ ᱮᱛᱚᱦᱚᱵᱽ ᱢᱮ: ᱣᱮᱵᱽ ᱥᱟᱨᱪ, ᱰᱟᱴᱟᱵᱮᱥ, MCP ᱥᱟᱨᱵᱷᱟᱨ, ᱟᱨ ᱟᱢᱟᱜ ᱥᱠᱨᱤᱯᱴ ᱠᱚ᱾",
     "toolsPoint1": "ᱱᱚᱰᱮ ᱮᱛᱚᱦᱚᱵᱽ ᱢᱮ, ᱤᱱᱟᱹ ᱛᱟᱭᱚᱢ ᱮᱡᱮᱱᱴ ᱯᱤᱪᱷᱤ ᱨᱮ ᱟᱹᱱᱩᱢᱟᱹᱛᱤ ᱮᱢᱚᱜ ᱢᱮ᱾",
@@ -13981,5 +14166,1495 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮᱴᱤᱝ ᱠᱚ",
+      "agent": "ᱮᱡᱮᱱᱴ ᱥᱮᱴᱤᱝ ᱠᱚ"
+    },
+    "agentMissing": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱮᱴᱤᱝ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
+    "scopeNote": {
+      "agent": "ᱱᱚᱶᱟ ᱢᱟᱱ ᱠᱚ ᱫᱚ ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ। ᱟᱢ ᱱᱚᱸᱰᱮ ᱪᱮᱫ ᱵᱟᱝ ᱚᱣᱟᱨᱟᱭᱰ ᱪᱷᱚᱭᱟ ᱚᱱᱟ ᱫᱚ ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮᱴᱤᱝ ᱠᱷᱚᱱ ᱤᱫᱷᱤᱛ ᱟᱹᱜᱩ ᱠᱟᱱᱟ।"
+    },
+    "loading": "ᱥᱮᱴᱤᱝ ᱠᱚ ᱞᱚᱰ ᱮᱫᱟ",
+    "loadError": "ᱥᱮᱴᱤᱝ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+    "retry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ",
+    "filters": {
+      "label": "ᱥᱮᱴᱤᱝ ᱠᱚ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+      "search": "ᱥᱮᱴᱤᱝ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+      "searchPlaceholder": "ᱵᱚᱸᱥᱟ ᱥᱮ ᱵᱩᱡᱷᱟᱣ ᱛᱮ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+      "group": "ᱡᱩᱛ ᱛᱮ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+      "allGroups": "ᱡᱷᱚᱛᱚ ᱡᱩᱛ",
+      "risk": "ᱡᱷᱩᱠᱤ ᱛᱮ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+      "allRisks": "ᱡᱷᱚᱛᱚ ᱡᱷᱩᱠᱤ ᱥᱛᱚᱨ",
+      "clear": "ᱪᱷᱟᱸᱪᱚ ᱥᱟᱯᱷᱟ ᱢᱮ"
+    },
+    "empty": {
+      "none": "ᱱᱚᱸᱰᱮ ᱟᱢ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+      "filtered": "ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱟᱢᱟᱜ ᱪᱷᱟᱸᱪᱚ ᱥᱟᱶ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ।"
+    },
+    "saved": "ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ। ᱱᱟᱣᱟ ᱟᱠᱟᱱ ᱥᱮᱴᱤᱝ ᱠᱚ: {count}।",
+    "saveFailed": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। ᱵᱟᱭᱡᱷᱮᱛ ᱥᱮᱴᱤᱝ ᱠᱚ: {count}। ᱟᱢᱟᱜ ᱵᱚᱫᱚᱞ ᱫᱚ ᱫᱚᱦᱚᱜ ᱯᱷᱚᱨᱢ ᱨᱮ ᱢᱮᱱᱟᱜᱼᱟ।",
+    "resetDone": "{label} ᱫᱚ ᱱᱤᱛᱚᱜ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।",
+    "resetFailed": "ᱥᱮᱴᱤᱝ ᱨᱤᱥᱮᱴ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "unsaved": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ",
+    "discardOne": "ᱵᱚᱫᱚᱞ ᱠᱚ ᱵᱟᱛᱤᱞ ᱢᱮ",
+    "restartRequired": "ᱨᱤᱥᱴᱟᱨᱴ ᱞᱟᱹᱠᱛᱤ",
+    "source": {
+      "default": "ᱰᱤᱯᱷᱚᱞᱴ",
+      "platform": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ",
+      "tenant": "ᱣᱟᱨᱠᱥᱯᱮᱥ",
+      "agent": "ᱮᱡᱮᱱᱴ",
+      "tenantInherited": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱠᱷᱚᱱ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ",
+      "aria": "ᱢᱟᱱ ᱟᱜ ᱥᱚᱨᱥ: {source}"
+    },
+    "sourceHelp": {
+      "default": "ᱵᱟᱝ ᱪᱮᱫ ᱠᱚ ᱱᱚᱶᱟ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ। ᱚᱱᱟ ᱫᱚ ᱯᱨᱚᱰᱚᱠᱴ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।",
+      "platform": "ᱟᱢᱟᱜ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱚᱯᱷᱚᱨᱮᱴᱚᱨ ᱫᱚ ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱰᱤᱯᱞᱚᱭᱢᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱠᱟᱫᱼᱟ।",
+      "tenant": "ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱫᱚ ᱰᱤᱯᱷᱚᱞᱴ ᱚᱣᱟᱨᱟᱭᱰ ᱮᱫᱟ। ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱨᱤᱥᱮᱴ ᱢᱮ।",
+      "agent": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱚᱣᱟᱨᱟᱭᱰ ᱮᱫᱟ। ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱯᱷᱤᱨ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱨᱤᱥᱮᱴ ᱢᱮ।",
+      "tenantInherited": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱟᱡ ᱪᱮᱫᱽ ᱚᱣᱟᱨᱟᱭᱰ ᱵᱟᱹᱱᱩᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ। ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱨᱮ ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱚᱣᱟᱨᱟᱭᱰ ᱵᱟᱱᱟᱣ ᱦᱩᱭᱟ।",
+      "lockedSuffix": "ᱱᱚᱶᱟ ᱛᱟᱞᱟ ᱟᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱸᱰᱮ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।"
+    },
+    "risk": {
+      "low": "ᱠᱚᱢ ᱡᱷᱩᱠᱤ",
+      "medium": "ᱢᱟᱞᱟᱢ ᱡᱷᱩᱠᱤ",
+      "high": "ᱵᱟᱲᱛᱤ ᱡᱷᱩᱠᱤ",
+      "security": "ᱥᱩᱨᱠᱷᱟ"
+    },
+    "bool": {
+      "on": "On",
+      "off": "ᱵᱚᱸᱫ"
+    },
+    "value": {
+      "unset": "ᱥᱮᱴ ᱵᱟᱝ ᱟᱠᱟᱱᱟ",
+      "empty": "ᱠᱷᱟᱞᱤ"
+    },
+    "select": {
+      "placeholder": "ᱢᱤᱫ ᱵᱤᱠᱚᱞᱯᱚ ᱵᱟᱪᱷᱟᱣ ᱢᱮ"
+    },
+    "slider": {
+      "label": "{label} (ᱥᱞᱟᱭᱰᱟᱨ)"
+    },
+    "duration": {
+      "unitLabel": "{label} ᱟᱜ ᱤᱠᱟᱭ"
+    },
+    "units": {
+      "chars": "ᱚᱠᱷᱚᱨ",
+      "tokens": "ᱴᱚᱠᱮᱱ",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "ᱥᱮᱠᱮᱱᱰ",
+      "min": "ᱢᱤᱱᱤᱴ",
+      "h": "ᱜᱷᱚᱱᱴᱟ"
+    },
+    "groups": {
+      "agent": "ᱮᱡᱮᱱᱴ ᱨᱚᱱᱴᱟᱭᱢ",
+      "approvals": "ᱢᱚᱱᱡᱩᱨᱤ",
+      "quality": "ᱜᱩᱱ ᱪᱮᱠ",
+      "guardrails": "ᱜᱟᱨᱰᱨᱮᱞ",
+      "chat": "ᱪᱮᱴ",
+      "tools": "ᱴᱩᱞ",
+      "memory": "ᱢᱮᱢᱚᱨᱤ",
+      "knowledge": "ᱵᱟᱰᱟᱭ",
+      "delegation": "ᱠᱟᱹᱢᱤ ᱮᱢ",
+      "aux": "ᱜᱚᱲᱚ ᱢᱚᱰᱮᱞ",
+      "routing": "ᱢᱚᱰᱮᱞ ᱨᱩᱴᱤᱝ"
+    },
+    "errors": {
+      "required": "ᱢᱤᱫ ᱢᱟᱱ ᱮᱢ ᱢᱮ।",
+      "notNumber": "ᱢᱤᱫ ᱜᱚᱱᱚᱝ ᱮᱢ ᱢᱮ।",
+      "notInteger": "ᱢᱤᱫ ᱯᱩᱨᱟᱹ ᱜᱚᱱᱚᱝ ᱮᱢ ᱢᱮ।",
+      "belowMin": "ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ {min} ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ।",
+      "aboveMax": "ᱵᱟᱲᱛᱤ ᱛᱮ {max} ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ।",
+      "notAllowed": "ᱞᱮᱠᱟ ᱟᱠᱟᱱ ᱵᱤᱠᱚᱞᱯᱚ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱢᱤᱫ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
+      "tooShort": "ᱟᱹᱰᱤ ᱪᱷᱚᱴᱚ। ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ {min} ᱵᱮᱵᱷᱟᱨ ᱢᱮ।",
+      "tooLong": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ। ᱵᱟᱲᱛᱤ ᱛᱮ {max} ᱵᱮᱵᱷᱟᱨ ᱢᱮ।",
+      "precision": "ᱱᱚᱶᱟ ᱤᱠᱟᱭ ᱛᱮ ᱚᱱᱟ ᱴᱷᱤᱠ ᱛᱮ ᱵᱟᱝ ᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱥᱟᱱᱟᱢ ᱠᱷᱚᱱ ᱪᱷᱚᱴᱚ ᱤᱠᱟᱭ ᱟᱜ ᱯᱩᱨᱟᱹ ᱜᱚᱱᱚᱝ ᱵᱮᱵᱷᱟᱨ ᱢᱮ ᱥᱮ ᱪᱷᱚᱴᱚ ᱤᱠᱟᱭ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
+      "serverRange": "ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ ᱥᱤᱢᱟ: {min} ᱠᱷᱚᱱ {max}।",
+      "serverOptions": "ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ ᱢᱟᱱ: {options}।",
+      "server": {
+        "invalid": "ᱥᱟᱨᱵᱟᱨ ᱫᱚ ᱱᱚᱶᱟ ᱢᱟᱱ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱞᱮᱱᱟ: {message}",
+        "locked": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱫᱚ ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱛᱮ ᱛᱟᱞᱟ ᱟᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱟᱢᱟᱜ ᱵᱚᱫᱚᱞ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+        "notFound": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱫᱚ ᱟᱨ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।",
+        "forbidden": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱟᱢ ᱟᱜ ᱵᱟᱛᱟᱣ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+        "reasonRequired": "ᱱᱚᱶᱟ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱨᱚᱱ ᱞᱟᱹᱠᱛᱤ। ᱢᱤᱫ ᱮᱢ ᱠᱟᱛᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+        "network": "ᱥᱟᱨᱵᱟᱨ ᱥᱮᱱ ᱵᱟᱝ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱟᱢᱟᱜ ᱵᱚᱫᱚᱞ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+        "other": "ᱵᱚᱫᱚᱞ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ: {message}"
+      }
+    },
+    "effective": "ᱱᱤᱛᱚᱜ ᱞᱟᱜᱩ: {value}",
+    "hint": {
+      "range": "ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ: {min} ᱠᱷᱚᱱ {max}।",
+      "min": "ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ: {min}।",
+      "max": "ᱵᱟᱲᱛᱤ ᱛᱮ: {max}।",
+      "default": "ᱰᱤᱯᱷᱚᱞᱴ: {value}।",
+      "securityStricter": "ᱢᱤᱫ ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ ᱫᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱷᱟᱴᱚ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱛᱟᱠᱠᱟᱣ ᱠᱚᱢᱡᱚᱨ ᱵᱟᱝ।",
+      "inherited": "ᱟᱢ ᱱᱚᱶᱟ ᱨᱤᱥᱮᱴ ᱠᱷᱟᱱ ᱚᱱᱟ ᱫᱚ ᱱᱚᱸᱰᱮ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ: {value}।"
+    },
+    "locked": {
+      "withReason": "ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱛᱮ ᱛᱟᱞᱟ ᱟᱠᱟᱱ: {reason}",
+      "noReason": "ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱛᱮ ᱛᱟᱞᱟ ᱟᱠᱟᱱ। ᱱᱚᱸᱰᱮ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।"
+    },
+    "blocked": {
+      "role": "ᱟᱢᱟᱜ ᱵᱷᱩᱢᱤᱠᱟ ᱛᱮ ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ। ᱣᱟᱨᱠᱥᱯᱮᱥ ᱮᱰᱢᱤᱱ ᱥᱮᱱ ᱪᱷᱚᱞ ᱢᱮ।",
+      "scope": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱱᱚᱸᱰᱮ ᱚᱣᱟᱨᱟᱭᱰ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+      "readOnly": "ᱥᱮᱴᱤᱝ ᱫᱚ ᱱᱤᱛᱚᱜ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱱᱟ।",
+      "adminOnly": "ᱱᱚᱶᱟ ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ ᱠᱚ ᱠᱷᱟᱞᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱮᱰᱢᱤᱱ ᱜᱮ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱟᱢ ᱚᱱᱟ ᱟᱜ ᱢᱟᱱ ᱱᱚᱸᱰᱮ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱢᱮᱱᱠᱷᱟᱱ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+    },
+    "reset": {
+      "button": "ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ",
+      "aria": "ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ: {label}"
+    },
+    "help": {
+      "show": "ᱮᱴᱟᱜ ᱵᱩᱡᱷᱟᱣ",
+      "hide": "ᱵᱩᱡᱷᱟᱣ ᱤᱫᱤ ᱢᱮ"
+    },
+    "history": {
+      "button": "ᱤᱛᱤᱦᱟᱥ",
+      "open": "ᱤᱛᱤᱦᱟᱥ: {label}",
+      "title": "ᱤᱛᱤᱦᱟᱥ: {label}",
+      "scopeTenant": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱵᱚᱫᱚᱞ",
+      "scopeAgent": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱚᱫᱚᱞ",
+      "close": "ᱤᱛᱤᱦᱟᱥ ᱵᱚᱸᱫ ᱢᱮ",
+      "loading": "ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱮᱫᱟ",
+      "error": "ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+      "empty": "ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱵᱚᱫᱚᱞ ᱨᱮᱠᱚᱨᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+      "listLabel": "ᱵᱚᱫᱚᱞ ᱟᱜ ᱤᱛᱤᱦᱟᱥ, ᱱᱟᱣᱟ ᱢᱟᱲᱟᱝ",
+      "version": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version}",
+      "before": "ᱢᱟᱲᱟᱝ:",
+      "after": "ᱛᱟᱭᱚᱢ:",
+      "by": "ᱵᱚᱫᱚᱞ ᱠᱟᱹᱢᱤᱭᱟᱹ",
+      "unknownActor": "ᱵᱟᱝ ᱪᱤᱱᱦᱟᱹ ᱟᱠᱟᱱ",
+      "reason": "ᱠᱟᱨᱚᱱ:"
+    },
+    "savebar": {
+      "count": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ: {count}।",
+      "invalid": "ᱥᱟᱸᱪᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱤᱱᱦᱟᱹ ᱟᱠᱟᱱ ᱠᱷᱮᱛᱨᱚ ᱠᱚ ᱴᱷᱤᱠ ᱢᱮ। ᱴᱷᱤᱠ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱮᱛᱨᱚ: {count}।",
+      "discard": "ᱵᱚᱫᱚᱞ ᱠᱚ ᱵᱟᱛᱤᱞ ᱢᱮ",
+      "save": "ᱵᱚᱫᱚᱞ ᱥᱟᱸᱪᱟᱣ ᱢᱮ",
+      "saving": "ᱥᱟᱸᱪᱟᱣ ᱮᱫᱟ"
+    },
+    "risky": {
+      "title": "ᱡᱷᱩᱠᱤ ᱵᱚᱫᱚᱞ ᱠᱚ ᱴᱷᱤᱠ ᱢᱮ ({count})",
+      "description": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱠᱚ ᱫᱚ ᱟᱢᱟᱜ ᱮᱡᱮᱱᱴ ᱠᱚ ᱪᱮᱠᱟ ᱛᱮ ᱠᱟᱹᱢᱤ ᱮᱫᱟ ᱥᱮ ᱚᱠᱚᱭ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱛᱟᱣ ᱢᱮᱱᱟᱜᱼᱟ ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱮᱫᱟ। ᱥᱟᱱᱟᱢ ᱵᱚᱫᱚᱞ ᱧᱮᱞ ᱢᱮ ᱟᱨ ᱟᱢ ᱪᱮᱫ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱮᱫᱟ ᱚᱱᱟ ᱵᱟᱛᱟᱣ ᱢᱮ। ᱠᱟᱨᱚᱱ ᱫᱚ ᱚᱰᱤᱴ ᱞᱚᱜ ᱨᱮ ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱜᱼᱟ।",
+      "descriptionSecurity": "ᱱᱚᱶᱟ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱢᱤᱫ ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ ᱢᱮᱱᱟᱜᱼᱟ। ᱚᱱᱟ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱷᱟᱴᱚ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱥᱟᱱᱟᱢ ᱵᱚᱫᱚᱞ ᱧᱮᱞ ᱢᱮ ᱟᱨ ᱟᱢ ᱪᱮᱫ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱮᱫᱟ ᱚᱱᱟ ᱵᱟᱛᱟᱣ ᱢᱮ। ᱠᱟᱨᱚᱱ ᱫᱚ ᱚᱰᱤᱴ ᱞᱚᱜ ᱨᱮ ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱜᱼᱟ।",
+      "listLabel": "ᱴᱷᱤᱠ ᱞᱟᱹᱠᱛᱤ ᱵᱚᱫᱚᱞ",
+      "from": "ᱠᱷᱚᱱ",
+      "to": "to",
+      "securityNote": "ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ: ᱚᱱᱟ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱠᱚᱢᱡᱚᱨ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+      "consequence": "ᱱᱚᱶᱟ ᱪᱮᱫ ᱵᱚᱫᱚᱞ ᱮᱫᱟ:",
+      "reasonLabel": "ᱱᱚᱶᱟ ᱵᱚᱫᱚᱞ ᱟᱜ ᱠᱟᱨᱚᱱ",
+      "reasonPlaceholder": "ᱱᱢᱩᱱᱟ: ᱥᱚᱯᱚᱨᱴ ᱴᱤᱢ ᱟᱜ ᱞᱟᱢᱟ ᱥᱚᱫᱷᱚ ᱞᱟᱹᱜᱤᱫ ᱥᱤᱢᱟ ᱵᱟᱲᱦᱟᱣ",
+      "reasonHint": "ᱞᱟᱹᱠᱛᱤ, ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ {min} ᱚᱠᱷᱚᱨ। ᱵᱚᱫᱚᱞ ᱠᱟᱹᱢᱤᱭᱟᱹ ᱟᱨ ᱯᱩᱨᱟᱹᱱᱤ ᱟᱨ ᱱᱟᱣᱟ ᱢᱟᱱ ᱥᱟᱶ ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱟ।",
+      "acknowledge": "ᱤᱧ ᱱᱚᱶᱟ ᱥᱩᱨᱠᱷᱟ ᱵᱚᱫᱚᱞ ᱟᱜ ᱯᱷᱚᱞ ᱵᱩᱡᱷᱟᱣ ᱠᱟᱱᱟ।",
+      "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+      "confirm": "ᱴᱷᱤᱠ ᱠᱟᱛᱮ ᱥᱟᱸᱪᱟᱣ ᱢᱮ",
+      "resetNote": "ᱨᱤᱥᱮᱴ: ᱚᱣᱟᱨᱟᱭᱰ ᱚᱪᱚᱜ ᱦᱩᱭᱟ ᱟᱨ ᱥᱮᱴᱤᱝ ᱫᱚ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ।"
+    },
+    "strictness": {
+      "higher": "ᱞᱟᱢᱟ ᱢᱮᱱᱛᱮ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ: ᱞᱟᱢᱟ ᱢᱟᱱ ᱫᱚ ᱢᱟᱱᱟᱣ ᱦᱩᱭᱟ, ᱠᱚᱢ ᱫᱚ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱟ।",
+      "lower": "ᱠᱚᱢ ᱢᱮᱱᱛᱮ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ: ᱠᱚᱢ ᱢᱟᱱ ᱫᱚ ᱢᱟᱱᱟᱣ ᱦᱩᱭᱟ, ᱞᱟᱢᱟ ᱫᱚ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱟ।",
+      "enumOrder": "ᱵᱤᱠᱚᱞᱯᱚ ᱠᱚ ᱠᱚᱢ ᱠᱟᱲᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱠᱷᱟᱛᱨᱟ ᱨᱮ ᱢᱮᱱᱟᱜᱼᱟ: {options}। ᱟᱢ ᱠᱷᱟᱞᱤ ᱠᱟᱲᱟ ᱥᱮᱸᱫᱽᱨᱟ ᱥᱮᱱ ᱜᱮ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "ᱵᱟᱠᱤ",
+    "status_APPROVED": "ᱢᱚᱱᱡᱩᱨ ᱟᱠᱟᱱ",
+    "status_REJECTED": "ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱟᱠᱟᱱ",
+    "status_EXPIRED": "ᱚᱠᱛᱚ ᱪᱷᱚᱭ",
+    "status_EXECUTION_FAILED": "ᱠᱟᱹᱢᱤ ᱵᱟᱭᱡᱷᱮᱛ",
+    "status_DEAD_LETTERED": "ᱰᱮᱰ ᱞᱮᱴᱚᱨ",
+    "filtersLabel": "ᱚᱱᱚᱠᱚᱞ ᱠᱚ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+    "filterAgentLabel": "ᱮᱡᱮᱱᱴ ᱛᱮ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+    "filterToolLabel": "ᱴᱩᱞ ᱛᱮ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+    "filterAgeLabel": "ᱵᱚᱭᱥ ᱛᱮ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+    "filterAnyAgent": "ᱪᱮᱫᱽ ᱮᱡᱮᱱᱴ",
+    "filterAnyTool": "ᱪᱮᱫᱽ ᱴᱩᱞ",
+    "filterAnyAge": "ᱪᱮᱫᱽ ᱵᱚᱭᱥ",
+    "age_newer1h": "1 ᱜᱷᱚᱱᱴᱟ ᱠᱷᱚᱱ ᱱᱟᱣᱟ",
+    "age_older1h": "1 ᱜᱷᱚᱱᱴᱟ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ",
+    "age_older24h": "1 ᱢᱤᱛᱷᱤᱱ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ",
+    "age_older7d": "7 ᱢᱤᱛᱷᱤᱱ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ",
+    "filtersClear": "ᱪᱷᱟᱸᱪᱚ ᱥᱟᱯᱷᱟ ᱢᱮ",
+    "filterWindowNote": "ᱱᱟᱣᱟ {count} ᱚᱱᱚᱠᱚᱞ ᱠᱚ ᱪᱷᱟᱸᱪᱚ ᱮᱫᱟ। ᱯᱩᱨᱟᱹᱱᱤ ᱠᱚ ᱱᱚᱸᱰᱮ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time} ᱨᱮ ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭᱜᱼᱟ",
+    "expiresAt": "ᱵᱟᱝ ᱪᱮᱫ ᱠᱚ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱮᱢ ᱠᱷᱟᱱ {time} ᱨᱮ ᱟᱡᱼᱛᱮ ᱵᱚᱸᱫ ᱦᱩᱭᱜᱼᱟ",
+    "overdue": "ᱚᱠᱛᱚ ᱥᱤᱢᱟ ᱯᱟᱨ ᱞᱮᱱᱟ, ᱛᱟᱭᱚᱢ ᱥᱟᱯᱷᱟ ᱨᱮ ᱵᱚᱸᱫ ᱦᱩᱭᱜᱼᱟ",
+    "neverExpires": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱫᱚ ᱡᱚᱜᱟᱣ ᱟᱠᱟᱱ ᱚᱱᱚᱠᱚᱞ ᱟᱜ ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱵᱟᱝ ᱮᱫᱟ।",
+    "expiredNote": "{time} ᱨᱮ ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭᱞᱮᱱᱟ: ᱚᱠᱛᱚ ᱨᱮ ᱪᱮᱫ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "expiredReasonPrefix": "ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭᱞᱮᱱᱟ:",
+    "auditExpired": "ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭᱞᱮᱱᱟ, ᱚᱠᱛᱚ ᱨᱮ ᱪᱮᱫ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "riskLow": "ᱠᱚᱢ ᱡᱷᱩᱠᱤ",
+    "riskMedium": "ᱢᱟᱞᱟᱢ ᱡᱷᱩᱠᱤ",
+    "riskHigh": "ᱵᱟᱲᱛᱤ ᱡᱷᱩᱠᱤ",
+    "riskEstimateNote": "ᱡᱷᱩᱠᱤ ᱫᱚ ᱴᱩᱞ ᱟᱜ ᱵᱚᱸᱥᱟ ᱠᱷᱚᱱ ᱞᱟᱜᱟᱣ ᱟᱠᱟᱱ ᱟᱱᱟᱡ ᱠᱟᱱᱟ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱫᱚ ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱯᱷᱚᱨᱛᱟᱞ ᱵᱟᱝ ᱮᱫᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱯᱟᱲᱦᱟᱣ ᱢᱮ।",
+    "riskWhoDecides": "ᱪᱮᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱟ ᱚᱱᱟ ᱚᱠᱚᱭ ᱴᱷᱤᱠ ᱮᱫᱟ?",
+    "previewGoal": "ᱚᱱᱟ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱨᱮ ᱠᱟᱹᱢᱤ ᱮᱫᱟ:",
+    "previewArguments": "ᱟᱨᱜᱩᱢᱮᱱᱴ",
+    "previewNoArguments": "ᱱᱚᱶᱟ ᱠᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱨᱮᱠᱚᱨᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "previewRedacted": "{count} ᱜᱚᱯᱚᱱ ᱞᱮᱠᱟ ᱢᱟᱱ ᱱᱚᱸᱰᱮ ᱞᱩᱠᱟᱣ ᱟᱠᱟᱱᱟ। ᱟᱢ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚ ᱫᱚ ᱴᱩᱞ ᱥᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱦᱩᱭᱟ।",
+    "previewTruncated": "ᱱᱚᱶᱟ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱠᱚ ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱟᱹᱰᱤ ᱞᱟᱢᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱚᱱᱚᱠᱚᱞ ᱱᱚᱸᱰᱮ ᱠᱷᱚᱱ ᱢᱚᱱᱡᱩᱨ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+    "approveBlockedTooLong": "ᱟᱢ ᱯᱩᱨᱟᱹ ᱚᱱᱚᱠᱚᱞ ᱪᱮᱠ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱵᱚᱸᱫ ᱢᱮᱱᱟᱜᱼᱟ। ᱟᱢ ᱠᱷᱟᱞᱤ ᱚᱱᱟ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "ifApproveLabel": "ᱟᱢ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ:",
+    "ifApprove": "{tool} ᱫᱚ ᱞᱟᱛᱟᱨ ᱨᱮᱭᱟᱜ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱥᱟᱶ ᱱᱤᱛᱚᱜ ᱜᱮ ᱪᱟᱞᱟᱜᱼᱟ, ᱟᱨ ᱮᱡᱮᱱᱴ ᱫᱚ ᱚᱱᱟ ᱟᱜ ᱯᱷᱚᱞ ᱵᱮᱵᱷᱟᱨ ᱠᱟᱛᱮ ᱠᱟᱹᱢᱤ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱣᱟ।",
+    "ifDenyLabel": "ᱟᱢ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ:",
+    "ifDeny": "{tool} ᱵᱟᱝ ᱪᱟᱞᱟᱜᱼᱟ। ᱮᱡᱮᱱᱴ ᱠᱚ ᱢᱮᱛ ᱮᱫᱟ ᱪᱮᱫ ᱟᱢ ᱵᱟᱝ ᱢᱮᱱ ᱠᱟᱫᱼᱟ, ᱠᱟᱨᱚᱱ ᱮᱢ ᱠᱷᱟᱱ ᱚᱱᱟ ᱥᱟᱶ, ᱟᱨ ᱚᱱᱟ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱮᱡᱮᱱᱴ ᱥᱟᱱᱟᱢ ᱥᱮᱱ ᱪᱟᱞᱟᱜᱼᱟ।",
+    "whyGated": "ᱮᱡᱮᱱᱴ ᱫᱚ {tool} ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱪᱟᱦᱟᱭ ᱞᱮᱱᱟ। ᱮᱡᱮᱱᱴ ᱥᱮᱴ ᱟᱠᱟᱱ ᱛᱟᱦᱮᱱ ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱥᱮ ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱫᱚ ᱚᱱᱟ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱠᱛᱤ ᱮᱫᱟ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱟᱢᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱞᱮᱱᱟ।",
+    "denyReasonLabel": "ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱟᱜ ᱠᱟᱨᱚᱱ (ᱪᱷᱚᱠᱟᱛ)",
+    "denyReasonPlaceholder": "ᱱᱢᱩᱱᱟ: ᱵᱷᱩᱞ ᱧᱟᱢᱚᱜᱼᱟ, ᱵᱷᱮᱡᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱤᱧ ᱠᱚ ᱪᱷᱚᱞ ᱢᱮ",
+    "denyReasonHelp": "ᱟᱢ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ, ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱚᱶᱟ ᱠᱟᱨᱚᱱ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱠᱚᱞ ᱟᱜ ᱯᱷᱚᱞ ᱞᱮᱠᱟ ᱯᱟᱲᱦᱟᱣᱟ ᱟᱨ ᱟᱡ ᱠᱚ ᱥᱟᱯᱲᱟᱣᱟ। ᱠᱟᱨᱚᱱ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱟᱞᱤ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+    "denyButton": "ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "detailRegionLabel": "ᱚᱱᱚᱠᱚᱞ ᱟᱜ ᱵᱩᱡᱷᱟᱣ",
+    "sessionLabel": "ᱵᱟᱛ ᱪᱤᱛ",
+    "linkOpenAgent": "ᱮᱡᱮᱱᱴ ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+    "linkInspectTurns": "ᱚᱱᱟ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ ᱪᱮᱠ ᱢᱮ",
+    "continuationLabel": "ᱚᱱᱟ ᱛᱟᱭᱚᱢ ᱮᱡᱮᱱᱴ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱞᱮᱱᱟ",
+    "continuationCompleted": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱠᱟᱹᱢᱤ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱪᱷᱚᱭ ᱠᱟᱫᱼᱟ।",
+    "continuationFailed": "ᱱᱚᱶᱟ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱛᱟᱭᱚᱢ ᱮᱡᱮᱱᱴ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "continuationRetry": "ᱚᱱᱟ ᱠᱚ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱢᱮ",
+    "retryMessage": "ᱫᱟᱭᱟ ᱠᱟᱛᱮ ᱠᱟᱹᱢᱤ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ।",
+    "lastDecisionTitle": "ᱟᱢᱟᱜ ᱢᱩᱨᱩᱛ ᱯᱷᱚᱭᱥᱟᱞᱟ: {tool}",
+    "lastDecisionClose": "ᱵᱚᱸᱫ ᱢᱮ",
+    "deepLinkNotFound": "ᱚᱱᱟ ᱢᱚᱱᱡᱩᱨᱤ ᱚᱱᱚᱠᱚᱞ ᱵᱟᱝ ᱧᱟᱢᱞᱮᱱᱟ, ᱥᱮ ᱟᱢ ᱚᱱᱟ ᱵᱟᱝ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "selectAllLabel": "ᱱᱚᱶᱟ ᱥᱟᱦᱴᱟ ᱟᱜ ᱡᱷᱚᱛᱚ ᱵᱟᱠᱤ ᱴᱩᱞ ᱠᱚᱞ ᱠᱚ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
+    "selectRowLabel": "{tool} ᱟᱜ ᱵᱟᱠᱤ ᱠᱚᱞ ᱠᱚ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
+    "bulkSelected": "{count} ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ",
+    "bulkApprove": "ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "bulkDeny": "ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "bulkClear": "ᱵᱟᱪᱷᱟᱣ ᱥᱟᱯᱷᱟ ᱢᱮ",
+    "bulkCancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+    "bulkDismiss": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+    "bulkMixedTools": "ᱡᱩᱛ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ ᱡᱷᱚᱛᱚ ᱚᱱᱚᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱴᱩᱞ ᱟᱜ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ।",
+    "bulkNotLowRisk": "ᱡᱩᱛ ᱢᱚᱱᱡᱩᱨᱤ ᱫᱚ ᱠᱷᱟᱞᱤ ᱠᱚᱢ ᱡᱷᱩᱠᱤ ᱴᱩᱞ (ᱞᱩᱠᱟᱯ) ᱞᱟᱹᱜᱤᱫ ᱠᱟᱱᱟ। ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱫᱚ ᱪᱮᱫᱽ ᱢᱤᱫ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱹᱢᱤ ᱮᱫᱟ, ᱥᱮ ᱱᱚᱶᱟ ᱠᱚ ᱢᱤᱫ ᱢᱤᱫ ᱠᱟᱛᱮ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱢᱮ।",
+    "bulkNotToolCall": "ᱡᱩᱛ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱫᱚ ᱠᱷᱟᱞᱤ ᱮᱡᱮᱱᱴ ᱴᱩᱞ ᱠᱚᱞ ᱠᱚ ᱥᱮᱞᱮᱫ ᱮᱫᱟ।",
+    "bulkNotPending": "ᱡᱩᱛ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱫᱚ ᱠᱷᱟᱞᱤ ᱱᱤᱛᱚᱜ ᱵᱟᱠᱤ ᱚᱱᱚᱠᱚᱞ ᱠᱚ ᱥᱮᱞᱮᱫ ᱮᱫᱟ।",
+    "bulkConfirmApproveTitle": "{tool} ᱟᱜ {count} ᱠᱚᱞ ᱢᱚᱱᱡᱩᱨ ᱟ?",
+    "bulkConfirmApproveBody": "ᱱᱚᱶᱟ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱥᱟᱱᱟᱢ ᱫᱚ ᱱᱤᱛᱚᱜ ᱜᱮ {tool} ᱪᱟᱞᱟᱣᱟ, ᱞᱟᱛᱟᱨ ᱞᱮᱠᱟ ᱟᱠᱟᱱ ᱟᱡ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱥᱟᱶ, ᱟᱨ ᱮᱡᱮᱱᱴ ᱫᱚ ᱯᱷᱚᱞ ᱵᱮᱵᱷᱟᱨ ᱠᱟᱛᱮ ᱥᱟᱱᱟᱢ ᱥᱮᱱ ᱪᱟᱞᱟᱜᱼᱟ। ᱱᱚᱶᱟ ᱯᱷᱤᱨ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "bulkConfirmDenyTitle": "{tool} ᱟᱜ {count} ᱠᱚᱞ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱟ?",
+    "bulkConfirmDenyBody": "ᱱᱚᱶᱟ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱪᱮᱫᱽ ᱵᱟᱝ ᱪᱟᱞᱟᱜᱼᱟ। ᱮᱡᱮᱱᱴ ᱠᱚ ᱢᱮᱛ ᱮᱫᱟ ᱥᱟᱱᱟᱢ ᱠᱚᱞ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱞᱮᱱᱟ, ᱠᱟᱨᱚᱱ ᱮᱢ ᱠᱷᱟᱱ ᱚᱱᱟ ᱥᱟᱶ।",
+    "bulkConfirmApprove": "{count} ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "bulkConfirmDeny": "{count} ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "bulkMore": "ᱟᱨ {count} ᱮᱴᱟᱜ",
+    "bulkProgress": "{count} ᱛᱟᱞᱟ ᱠᱷᱚᱱ {done} ᱪᱷᱚᱭ",
+    "bulkResult": "{done} ᱯᱷᱚᱭᱥᱟᱞᱟ ᱦᱩᱭᱞᱮᱱᱟ, {failed} ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "notifyOff": "ᱤᱧ ᱠᱚ ᱢᱮᱛ ᱢᱮ",
+    "notifyOn": "ᱥᱩᱪᱚᱱᱟ ᱪᱟᱹᱞᱩ",
+    "notifyHelp": "ᱱᱚᱶᱟ ᱴᱮᱵ ᱥᱚᱨᱮᱥ ᱨᱮ ᱛᱟᱦᱮᱱ ᱚᱠᱛᱚ ᱱᱟᱣᱟ ᱚᱱᱚᱠᱚᱞ ᱦᱩᱭ ᱠᱷᱟᱱ ᱵᱨᱟᱣᱡᱟᱨ ᱥᱩᱪᱚᱱᱟ ᱧᱮᱞᱟᱹ ᱢᱮ",
+    "notifyUnsupported": "ᱱᱚᱶᱟ ᱵᱨᱟᱣᱡᱟᱨ ᱥᱩᱪᱚᱱᱟ ᱧᱮᱞᱟᱹ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "notifyBlocked": "ᱥᱩᱪᱚᱱᱟ ᱵᱚᱸᱫ ᱟᱠᱟᱱᱟ। ᱚᱱᱟ ᱪᱟᱹᱞᱩ ᱞᱟᱹᱜᱤᱫ ᱟᱢᱟᱜ ᱵᱨᱟᱣᱡᱟᱨ ᱥᱟᱭᱴ ᱥᱮᱴᱤᱝ ᱨᱮ ᱵᱟᱛᱟᱣ ᱮᱢ ᱢᱮ।",
+    "notifyTitle": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱫᱚ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱠᱟᱱᱟ",
+    "notifyBodyOne": "{tool} ᱨᱮ ᱟᱢᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱠᱛᱤ।",
+    "notifyBodyMany": "{count} ᱚᱱᱚᱠᱚᱞ ᱨᱮ ᱟᱢᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱠᱛᱤ।",
+    "newArrived": "{count} ᱱᱟᱣᱟ ᱢᱚᱱᱡᱩᱨᱤ ᱚᱱᱚᱠᱚᱞ ᱮᱦᱚᱵ ᱞᱮᱱᱟ।",
+    "rulesTitle": "ᱢᱤᱫ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱱᱤᱭᱚᱢ",
+    "rulesIntro": "ᱢᱤᱫ ᱴᱩᱞ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱟ ᱥᱮ ᱢᱩᱨᱩᱛ ᱵᱟᱝ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ। ᱱᱚᱶᱟ ᱱᱤᱭᱚᱢ ᱫᱚ ᱟᱫᱷᱟ-ᱟᱡ ᱥᱮᱴ ᱟᱠᱟᱱ ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ।",
+    "rulesNeedsScope": "ᱱᱤᱭᱚᱢ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱟᱢᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱟᱜ ᱵᱟᱛᱟᱣ ᱞᱟᱹᱠᱛᱤ।",
+    "rulesToolLabel": "ᱴᱩᱞ ᱟᱜ ᱧᱩᱛᱩᱢ",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "ᱚᱱᱚᱠᱚᱞ ᱨᱮ ᱴᱩᱞ ᱪᱮᱠᱟ ᱛᱮ ᱧᱮᱞᱚᱜᱼᱟ ᱚᱱᱟ ᱞᱮᱠᱟᱜ, ᱱᱢᱩᱱᱟ ᱞᱟᱹᱜᱤᱫ send_email।",
+    "rulesToolNameInvalid": "ᱴᱩᱞ ᱧᱩᱛᱩᱢ ᱨᱮ ᱠᱷᱟᱞᱤ ᱴᱷᱟᱸᱣ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+    "rulesModeLabel": "ᱪᱮᱫ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ",
+    "rulesAskName": "ᱛᱟᱠᱠᱟᱣ ᱪᱷᱚᱞ ᱢᱮ",
+    "rulesAskHint": "ᱱᱚᱶᱟ ᱴᱩᱞ ᱟᱜ ᱥᱟᱱᱟᱢ ᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱮᱫᱟ।",
+    "rulesNeverName": "ᱢᱩᱨᱩᱛ ᱵᱟᱝ ᱪᱷᱚᱞ ᱢᱮ",
+    "rulesNeverHint": "ᱱᱚᱶᱟ ᱴᱩᱞ ᱟᱜ ᱠᱚᱞ ᱠᱚ ᱪᱮᱫᱽ ᱵᱟᱹᱱᱩᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱛᱮ ᱱᱤᱛᱚᱜ ᱜᱮ ᱪᱟᱞᱟᱜᱼᱟ।",
+    "rulesNeverRiskyWarn": "ᱱᱚᱶᱟ ᱴᱩᱞ ᱫᱚ ᱪᱤᱡ ᱵᱚᱫᱚᱞ ᱞᱮᱠᱟ ᱧᱮᱞᱚᱜᱼᱟ। ᱴᱷᱤᱠ ᱛᱮ ᱵᱟᱛᱟᱣ ᱢᱮ।",
+    "rulesScopeNote": "ᱱᱤᱭᱚᱢ ᱫᱚ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ, ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱨᱮ ᱵᱟᱝ। ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱛᱟᱦᱮᱱ ᱮᱡᱮᱱᱴ ᱫᱚ ᱫᱚᱦᱚᱜ ᱡᱷᱚᱛᱚ ᱞᱟᱹᱜᱤᱫ ᱪᱷᱚᱞᱟ, ᱟᱨ ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱤᱭᱚᱢ ᱪᱮᱫ ᱢᱮᱱ ᱠᱷᱟᱱ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱪᱷᱚᱞᱟ। ᱟᱢ ᱥᱮᱴ ᱟᱠᱟᱱ ᱱᱤᱭᱚᱢ ᱫᱚ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱱᱚᱸᱰᱮ ᱞᱮᱠᱟ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।",
+    "rulesSave": "ᱱᱤᱭᱚᱢ ᱥᱟᱸᱪᱟᱣ ᱢᱮ",
+    "rulesSaveFailed": "ᱱᱤᱭᱚᱢ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "rulesSavedAsk": "{tool} ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱢᱚᱱᱡᱩᱨᱤ ᱠᱷᱚᱡᱚᱜᱼᱟ।",
+    "rulesSavedNever": "{tool} ᱫᱚ ᱟᱨ ᱢᱚᱱᱡᱩᱨᱤ ᱵᱟᱝ ᱠᱷᱚᱡᱚᱜᱼᱟ।",
+    "rulesNeverConfirmTitle": "{tool} ᱪᱟᱞᱟᱜ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱷᱚᱞ ᱵᱚᱸᱫ ᱟ?",
+    "rulesNeverConfirmBody": "ᱥᱟᱱᱟᱢ ᱟᱫᱷᱟ-ᱟᱡ ᱮᱡᱮᱱᱴ ᱫᱚ ᱪᱮᱫᱽ ᱢᱚᱱᱡᱩᱨᱤ ᱵᱟᱹᱱᱩᱜ ᱛᱮ {tool} ᱪᱟᱞᱟᱣᱟ। ᱚᱱᱟ ᱪᱤᱡ ᱵᱚᱫᱚᱞ ᱥᱮ ᱵᱷᱮᱡᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱞᱮᱠᱟ ᱧᱮᱞᱚᱜᱼᱟ, ᱟᱨ ᱵᱷᱩᱞ ᱯᱷᱤᱨ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "rulesNeverConfirmBodyLow": "ᱥᱟᱱᱟᱢ ᱟᱫᱷᱟ-ᱟᱡ ᱮᱡᱮᱱᱴ ᱫᱚ ᱵᱟᱹᱱᱩᱜ ᱪᱷᱚᱞ ᱛᱮ {tool} ᱪᱟᱞᱟᱣᱟ। ᱚᱱᱟ ᱞᱩᱠᱟᱯ ᱞᱮᱠᱟ ᱧᱮᱞᱚᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱛᱮ ᱥᱩᱨᱠᱷᱤᱛ ᱠᱟᱱᱟ।",
+    "rulesNeverConfirm": "ᱪᱷᱚᱞ ᱵᱚᱸᱫ ᱢᱮ",
+    "tiersTitle": "ᱪᱮᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱟ ᱚᱱᱟ ᱚᱠᱚᱭ ᱴᱷᱤᱠ ᱮᱫᱟ?",
+    "tiersIntro": "ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱨᱮ ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱥᱛᱚᱨ ᱢᱮᱱᱟᱜᱼᱟ। ᱚᱱᱟ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱱᱤᱭᱚᱢ ᱠᱚ ᱵᱮᱵᱷᱟᱨ ᱦᱩᱭᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱴᱷᱤᱠ ᱮᱫᱟ।",
+    "tierCurrent": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ",
+    "tierConsequenceLabel": "ᱵᱮᱵᱷᱟᱨ ᱨᱮ:",
+    "tierSupervisedName": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ",
+    "tierSupervisedWhat": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱱᱤᱭᱚᱢ ᱪᱮᱫ ᱢᱮᱱ ᱠᱷᱟᱱ, ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱮᱫᱟ। ᱚᱱᱟ ᱠᱚ ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱴᱩᱞ ᱯᱟᱦᱴᱟ ᱟᱜ ᱠᱚᱢ ᱥᱤᱢᱟ ᱵᱟᱝ ᱮᱢᱟ।",
+    "tierSupervisedConsequence": "ᱟᱹᱰᱤ ᱥᱩᱨᱠᱷᱤᱛ, ᱢᱮᱱᱠᱷᱟᱱ ᱞᱟᱭᱱ ᱨᱮ ᱵᱟᱲᱛᱤ ᱚᱱᱚᱠᱚᱞ ᱟᱨ ᱥᱮᱛᱟ ᱮᱡᱮᱱᱴ ᱥᱟᱢᱟᱨ ᱢᱮ।",
+    "tierSemiName": "ᱟᱫᱷᱟ-ᱟᱡ",
+    "tierSemiWhat": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱱᱤᱭᱚᱢ ᱫᱚ ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱴᱷᱤᱠ ᱮᱫᱟ: ᱵᱷᱮᱡᱟᱣ, ᱰᱤᱞᱤᱴ ᱟᱨ ᱯᱮᱢᱮᱱᱴ ᱞᱮᱠᱟ ᱡᱷᱩᱠᱤ ᱴᱩᱞ ᱫᱚ ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱪᱷᱚᱞᱟ, ᱵᱟᱠᱤ ᱠᱚ ᱪᱟᱞᱟᱜᱼᱟ।",
+    "tierSemiConsequence": "ᱢᱤᱫ ᱪᱷᱚᱠᱟᱛ ᱰᱤᱯᱷᱚᱞᱴ। ᱟᱢᱟᱜ ᱴᱩᱞ-ᱥᱟᱱᱟᱢ ᱱᱤᱭᱚᱢ ᱠᱚ ᱱᱚᱸᱰᱮ ᱯᱷᱚᱞ ᱮᱢᱟ।",
+    "tierFullName": "ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ",
+    "tierFullWhat": "ᱪᱮᱫᱽ ᱴᱩᱞ ᱠᱚᱞ ᱛᱟᱠᱠᱟᱣ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱵᱟᱝ ᱮᱫᱟ ᱟᱨ ᱮᱡᱮᱱᱴ ᱫᱚ ᱴᱩᱞ ᱯᱟᱦᱴᱟ ᱟᱜ ᱞᱟᱢᱟ ᱥᱤᱢᱟ ᱧᱟᱢᱟ। ᱴᱩᱞ-ᱥᱟᱱᱟᱢ ᱱᱤᱭᱚᱢ ᱠᱚ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱮᱫᱟ।",
+    "tierFullConsequence": "ᱚᱱᱟ ᱵᱟᱹᱱᱩᱜ ᱪᱷᱚᱞ ᱛᱮ ᱠᱟᱹᱢᱤ ᱮᱫᱟ। ᱚᱱᱟ ᱠᱷᱟᱞᱤ ᱚᱱᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱵᱮᱵᱷᱟᱨ ᱢᱮ ᱡᱟᱦᱟᱸ ᱟᱜ ᱵᱷᱩᱞ ᱠᱚ ᱥᱚᱡᱷᱮ ᱛᱮ ᱯᱷᱤᱨ ᱨᱩᱣᱟᱹᱲ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "tiersRuleNote": "ᱴᱩᱞ ᱱᱤᱭᱚᱢ (ᱛᱟᱠᱠᱟᱣ ᱪᱷᱚᱞ ᱢᱮ, ᱢᱩᱨᱩᱛ ᱵᱟᱝ ᱪᱷᱚᱞ ᱢᱮ) ᱫᱚ ᱠᱷᱟᱞᱤ ᱟᱫᱷᱟ-ᱟᱡ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱱᱟᱜᱼᱟ।",
+    "agentModeTitle": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱪᱷᱚᱠᱛᱮ ᱞᱟᱹᱠᱛᱤ?",
+    "agentModeSupervised": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜᱼᱟ: ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱮᱫᱟ, ᱟᱨ ᱴᱩᱞ-ᱥᱟᱱᱟᱢ ᱱᱤᱭᱚᱢ ᱠᱚ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱮᱫᱟ।",
+    "agentModeSemi": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱫᱷᱟ-ᱟᱡ ᱠᱟᱱᱟ: ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱱᱤᱭᱚᱢ ᱢᱟᱱᱟᱣᱟ। ᱵᱷᱮᱡᱟᱣ, ᱰᱤᱞᱤᱴ ᱟᱨ ᱯᱮᱢᱮᱱᱴ ᱫᱚ ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱪᱷᱚᱞᱟ।",
+    "agentModeFull": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ ᱠᱟᱱᱟ: ᱚᱱᱟ ᱛᱟᱠᱠᱟᱣ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱵᱟᱝ ᱮᱫᱟ, ᱟᱨ ᱴᱩᱞ-ᱥᱟᱱᱟᱢ ᱱᱤᱭᱚᱢ ᱠᱚ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱮᱫᱟ।",
+    "agentModeQueueLink": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱚᱱᱚᱠᱚᱞ ᱠᱚ ᱧᱮᱞ ᱢᱮ",
+    "agentModeRulesLink": "ᱢᱤᱫ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱱᱤᱭᱚᱢ ᱥᱮᱴ ᱢᱮ",
+    "agentModeShowTiers": "ᱯᱮ ᱥᱛᱚᱨ ᱠᱚ ᱠᱷᱟᱛᱨᱟ ᱪᱷᱟᱸᱪᱚ ᱢᱮ",
+    "agentModeHideTiers": "ᱠᱷᱟᱛᱨᱟ ᱤᱫᱤ ᱢᱮ",
+    "agentModeScopeNote": "ᱛᱟᱞᱟ ᱨᱮᱭᱟᱜ ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱛᱮ ᱥᱛᱚᱨ ᱵᱚᱫᱚᱞ ᱢᱮ। ᱴᱩᱞ ᱱᱤᱭᱚᱢ ᱫᱚ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ, ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱟᱝ।",
+    "policyThenApprovalNote": "ᱱᱚᱶᱟ ᱱᱤᱭᱚᱢ ᱠᱚ ᱠᱷᱚᱱ ᱯᱟᱨ ᱦᱩᱭ ᱟᱠᱟᱱ ᱠᱚᱞ ᱫᱚ ᱛᱚᱵᱮᱛ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱚᱱᱟ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱥᱛᱚᱨ ᱨᱮ ᱞᱟᱹᱠᱛᱤ, ᱚᱱᱟ ᱞᱟᱛᱟᱨ ᱵᱩᱡᱷᱟᱣ ᱟᱠᱟᱱᱟ।",
+    "chatReasonToggle": "ᱢᱤᱫ ᱠᱟᱨᱚᱱ ᱥᱮᱞᱮᱫ ᱢᱮ",
+    "chatReviewInQueue": "ᱞᱟᱭᱱ ᱨᱮ ᱪᱮᱠ ᱢᱮ"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "ᱤᱵᱷᱮᱱᱴ ᱪᱷᱟᱸᱪᱚ",
+    "tlFilterCategories": "ᱤᱵᱷᱮᱱᱴ ᱥᱟᱶ",
+    "tlCatIntake": "ᱤᱱᱴᱮᱠ",
+    "tlCatModel": "ᱢᱚᱰᱮᱞ",
+    "tlCatTool": "ᱴᱩᱞ",
+    "tlCatApproval": "ᱢᱚᱱᱡᱩᱨᱤ",
+    "tlCatContinuation": "ᱞᱟᱜᱟᱛᱟᱨ",
+    "tlCatRetry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱟᱨ ᱯᱷᱮᱞᱚᱣᱟᱨ",
+    "tlCatGuardrail": "ᱜᱟᱨᱰᱨᱮᱞ",
+    "tlCatCache": "ᱠᱮᱥ",
+    "tlCatVerify": "ᱪᱮᱠ",
+    "tlCatFinish": "ᱪᱷᱚᱭ",
+    "tlProblemsOnly": "ᱠᱷᱟᱞᱤ ᱥᱚᱢᱥᱭᱟ ᱠᱚ",
+    "tlSearch": "ᱤᱵᱷᱮᱱᱴ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+    "tlSearchPlaceholder": "ᱴᱩᱞ, ᱢᱚᱰᱮᱞ, ᱜᱟᱨᱰ ᱥᱮ ᱚᱵᱚᱥᱛᱷᱟ",
+    "tlClearFilters": "ᱪᱷᱟᱸᱪᱚ ᱥᱟᱯᱷᱟ ᱢᱮ",
+    "tlShowing": "{total} ᱤᱵᱷᱮᱱᱴ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {shown} ᱧᱮᱞᱟᱹ ᱮᱫᱟ",
+    "tlNoMatch": "ᱪᱮᱫᱽ ᱤᱵᱷᱮᱱᱴ ᱱᱚᱶᱟ ᱪᱷᱟᱸᱪᱚ ᱥᱟᱶ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ।",
+    "tlSevOk": "ᱥᱟᱯᱷᱚᱞ",
+    "tlSevInfo": "ᱵᱟᱰᱟᱭ",
+    "tlSevWarn": "ᱱᱚᱨᱚᱡ ᱞᱟᱹᱠᱛᱤ",
+    "tlSevError": "ᱵᱟᱭᱡᱷᱮᱛ",
+    "tlIntake": "ᱴᱚᱨᱱ ᱮᱦᱚᱵ ᱞᱮᱱᱟ: {chars} ᱚᱠᱷᱚᱨ, {tools} ᱴᱩᱞ, {attachments} ᱥᱟᱶᱛᱮ",
+    "tlRunTools": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱴᱩᱞ",
+    "tlRunToolsNone": "ᱪᱮᱫᱽ ᱵᱟᱹᱱᱩᱜᱼᱟ (ᱠᱷᱟᱞᱤ ᱚᱞ)",
+    "tlModelCall": "{model} ({provider}) ᱥᱮᱱ ᱢᱚᱰᱮᱞ ᱠᱚᱞ, ᱨᱩᱴ {route}",
+    "tlFailover": "{model} ({provider}) ᱥᱮᱱ ᱯᱷᱮᱞᱚᱣᱟᱨ ᱦᱩᱭᱞᱮᱱᱟ",
+    "tlRetryModel": "{model} ({provider}) ᱨᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱞᱮᱱᱟ, ᱨᱩᱴ {route}",
+    "tlRetry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ: {guard} ({outcome})",
+    "tlCacheHit": "ᱨᱤᱥᱯᱚᱱᱥ ᱠᱮᱥ ᱠᱷᱚᱱ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱮᱱᱟ",
+    "tlToolCall": "ᱴᱩᱞ ᱠᱚᱞ {tool}: {status}",
+    "tlApprovalRequested": "{tool} ᱪᱟᱞᱟᱜ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱢᱚᱱᱡᱩᱨᱤ ᱠᱷᱚᱡ ᱞᱮᱱᱟ",
+    "tlApprovalDecided": "{tool} ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱦᱩᱭᱞᱮᱱᱟ: {decision}",
+    "tlApprovalAutoAllowed": "{tool} ᱫᱚ ᱵᱟᱝ ᱪᱷᱚᱞ ᱠᱟᱛᱮ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ: ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱠᱚᱞ",
+    "tlContinuation": "ᱞᱟᱜᱟᱛᱟᱨ: {guard} ({outcome})",
+    "tlGuard": "ᱜᱟᱨᱰᱨᱮᱞ {guard}: {outcome}",
+    "tlVerifyPassed": "ᱪᱮᱠ ᱯᱟᱥ: {check}",
+    "tlVerifyFailed": "ᱪᱮᱠ ᱯᱷᱮᱞ: {check}",
+    "tlFinish": "ᱪᱷᱚᱭ: {status} (ᱡᱚᱵᱟᱵ ᱨᱮ {chars} ᱚᱠᱷᱚᱨ)",
+    "tlOther": "ᱤᱵᱷᱮᱱᱴ {type}",
+    "reasonFallbackProvider": "ᱢᱩᱞ ᱢᱚᱰᱮᱞ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱴᱚᱨᱱ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱯᱷᱚᱞᱵᱮᱠ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱥᱮᱱ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ।",
+    "reasonToolsDisabledRetry": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱫᱚ ᱴᱩᱞ-ᱠᱚᱞ ᱤᱛᱤᱦᱟᱥ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱴᱚᱨᱱ ᱟᱜ ᱡᱚᱵᱟᱵ ᱫᱚ ᱟᱨ ᱢᱤᱫ ᱥᱮᱨᱢᱟ ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱮᱢ ᱞᱮᱱᱟ।",
+    "reasonRetryOther": "ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱣ ᱞᱮᱱᱟ।",
+    "reasonToolCallRetry": "ᱢᱚᱰᱮᱞ ᱫᱚ ᱟᱡ ᱡᱚᱵᱟᱵ ᱵᱷᱩᱞ ᱴᱩᱞ ᱠᱚᱞ ᱥᱟᱶ ᱪᱷᱚᱭ ᱠᱟᱫᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱠᱚ ᱯᱷᱤᱨ ᱪᱷᱚᱞᱮᱱᱟ।",
+    "reasonCutOff": "ᱡᱚᱵᱟᱵ ᱫᱚ ᱞᱚᱸᱜᱚ ᱥᱤᱢᱟ ᱨᱮ ᱠᱟᱴᱟ ᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱞᱮᱱᱟ।",
+    "reasonToolsContinue": "ᱴᱩᱞ ᱠᱚᱞ ᱛᱟᱭᱚᱢ ᱢᱚᱰᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱮᱴᱟᱜ ᱯᱟᱦᱴᱟ ᱞᱟᱹᱠᱛᱤ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱴᱚᱨᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ।",
+    "reasonToolBlocked": "ᱴᱩᱞ ᱢᱚᱱ ᱛᱟᱞᱟ ᱪᱮᱫᱽ ᱜᱟᱨᱰ, ᱱᱤᱛᱤ, ᱦᱩᱠ ᱥᱮ ᱥᱤᱢᱟ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱟᱝ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ।",
+    "reasonToolParked": "ᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱠᱟᱱᱟ; ᱴᱩᱞ ᱵᱟᱝ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ।",
+    "reasonGuardAction": "ᱢᱤᱫ ᱜᱟᱨᱰᱨᱮᱞ ᱫᱚ ᱡᱚᱵᱟᱵ ᱵᱚᱫᱚᱞ ᱠᱟᱫᱼᱟ ᱥᱮ ᱨᱩᱠᱷᱤᱭᱟ ᱠᱟᱫᱼᱟ।",
+    "tlAtStart": "ᱮᱦᱚᱵ ᱠᱷᱚᱱ",
+    "tlGap": "ᱢᱟᱲᱟᱝ ᱤᱵᱷᱮᱱᱴ ᱠᱷᱚᱱ",
+    "tlDuration": "ᱚᱠᱛᱚ ᱥᱤᱢᱟ",
+    "tlTokens": "ᱤᱱᱯᱩᱴ / ᱟᱣᱴᱯᱩᱴ ᱴᱚᱠᱮᱱ",
+    "tlCost": "ᱠᱷᱚᱨᱪᱟ",
+    "tlDetails": "ᱦᱮᱥ ᱟᱨ ᱠᱟᱸᱪᱟ ᱥᱟᱨ",
+    "tlArgsHash": "ᱟᱨᱜᱩᱢᱮᱱᱴ ᱠᱚ ᱟᱜ ᱦᱮᱥ",
+    "tlResultDigest": "ᱯᱷᱚᱞ ᱟᱜ ᱰᱟᱭᱡᱮᱥᱴ",
+    "tlContentNote": "ᱟᱨᱜᱩᱢᱮᱱᱴ ᱟᱨ ᱯᱷᱚᱞ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱟ। ᱴᱩᱞ ᱠᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱴᱟᱭᱢᱞᱟᱭᱱ ᱫᱚ ᱚᱱᱟ ᱟᱜ ᱚᱵᱚᱥᱛᱷᱟ, ᱚᱠᱛᱚ, ᱟᱨ ᱚᱱᱟ ᱟᱜ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱟᱨ ᱯᱷᱚᱞ ᱟᱜ ᱦᱮᱥ ᱧᱮᱞᱟᱹᱭᱟ, ᱚᱱᱟ ᱟᱜ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱵᱟᱝ।",
+    "tlStatFinish": "ᱪᱷᱚᱭ ᱟᱜ ᱠᱟᱨᱚᱱ",
+    "tlStillOpen": "ᱪᱷᱚᱭ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "tlProblemCount": "{count} ᱤᱵᱷᱮᱱᱴ ᱨᱮ ᱱᱚᱨᱚᱡ ᱞᱟᱹᱠᱛᱤ",
+    "tlStatRetries": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱟᱨ ᱯᱷᱮᱞᱚᱣᱟᱨ",
+    "tlStatContinuations": "ᱞᱟᱜᱟᱛᱟᱨ",
+    "tlStatApprovals": "ᱢᱚᱱᱡᱩᱨᱤ",
+    "tlStatTokens": "ᱤᱱᱯᱩᱴ / ᱟᱣᱴᱯᱩᱴ ᱴᱚᱠᱮᱱ",
+    "tlTokensNotRecorded": "ᱱᱚᱶᱟ ᱴᱚᱨᱱ ᱞᱟᱹᱜᱤᱫ ᱨᱮᱠᱚᱨᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "tlTokensInOut": "ᱤᱱᱯᱩᱴ / ᱟᱣᱴᱯᱩᱴ",
+    "tlCopyTurnId": "ᱴᱚᱨᱱ ID ᱠᱚᱯᱤ ᱢᱮ",
+    "tlCopyTurnIdShort": "ID ᱠᱚᱯᱤ ᱢᱮ",
+    "tlCopied": "ᱴᱚᱨᱱ ID ᱠᱚᱯᱤ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "tlCopyFailed": "ᱠᱚᱯᱤ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। ID ᱵᱟᱪᱷᱟᱣ ᱠᱟᱛᱮ ᱦᱟᱛ ᱛᱮ ᱠᱚᱯᱤ ᱢᱮ।",
+    "sessTitle": "ᱢᱤᱫ ᱥᱮᱥᱚᱱ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ",
+    "sessSubtitle": "ᱨᱮᱠᱚᱨᱰ ᱟᱠᱟᱱ ᱴᱚᱨᱱ ᱠᱚ ᱱᱟᱣᱟ ᱢᱟᱲᱟᱝ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱪᱮᱴ ᱥᱮᱥᱚᱱ ᱵᱟᱪᱷᱟᱣ ᱢᱮ। ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱟᱜ ᱴᱚᱨᱱ ᱧᱮᱞ ᱞᱤᱝᱠ ᱠᱷᱩᱞᱟᱹ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱫᱚ ᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱟᱡᱼᱛᱮ ᱯᱩᱨᱟᱹ ᱦᱩᱭᱜᱼᱟ।",
+    "sessionIdLabel": "ᱥᱮᱥᱚᱱ ID",
+    "sessionIdPlaceholder": "ᱪᱮᱴ ᱥᱮᱥᱚᱱ ID",
+    "sessFind": "ᱴᱚᱨᱱ ᱠᱷᱚᱡᱮᱛ",
+    "sessInvalid": "ᱮᱡᱮᱱᱴ ID (ᱢᱤᱫ UUID) ᱟᱨ ᱥᱮᱥᱚᱱ ID ᱮᱢ ᱢᱮ।",
+    "sessLoading": "ᱥᱮᱥᱚᱱ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ ᱞᱚᱰ ᱮᱫᱟ...",
+    "sessUnavailableTitle": "ᱥᱮᱥᱚᱱ ᱠᱷᱚᱡᱮᱛ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ",
+    "sessUnavailableBody": "ᱱᱚᱶᱟ ᱥᱟᱨᱵᱟᱨ ᱫᱚ ᱢᱤᱫ ᱥᱮᱥᱚᱱ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ ᱞᱮᱠᱟ ᱵᱟᱝ ᱵᱟᱱᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱨᱮ ᱞᱟᱛᱟᱨ ID ᱛᱮ ᱢᱤᱫ ᱴᱚᱨᱱ ᱠᱷᱩᱞᱟᱹ ᱢᱮ।",
+    "sessErrorTitle": "ᱥᱮᱥᱚᱱ ᱟᱜ ᱴᱚᱨᱱ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "sessEmptyTitle": "ᱱᱚᱶᱟ ᱥᱮᱥᱚᱱ ᱨᱮ ᱪᱮᱫᱽ ᱡᱚᱨᱱᱮᱞ ᱟᱠᱟᱱ ᱴᱚᱨᱱ ᱵᱟᱹᱱᱩᱜᱼᱟ",
+    "sessEmptyBody": "ᱥᱮᱥᱚᱱ ᱫᱚ ᱪᱮᱫᱽ ᱵᱟᱝ ᱨᱮᱠᱚᱨᱰ ᱞᱮᱱᱟ। ᱥᱮ ᱥᱮᱥᱚᱱ ID ᱵᱷᱩᱞ ᱠᱟᱱᱟ, ᱥᱮ ᱚᱱᱟ ᱟᱜ ᱴᱚᱨᱱ ᱪᱟᱞᱟᱜ ᱚᱠᱛᱚ ᱴᱚᱨᱱ ᱡᱚᱨᱱᱮᱞ ᱵᱚᱸᱫ ᱠᱟᱱᱟ।",
+    "sessListLabel": "{count} ᱡᱚᱨᱱᱮᱞ ᱟᱠᱟᱱ ᱴᱚᱨᱱ",
+    "sessEvents": "{count} ᱤᱵᱷᱮᱱᱴ",
+    "sessStatusOpen": "ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+    "sessOpen": "ᱴᱟᱭᱢᱞᱟᱭᱱ ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+    "sessOpened": "ᱞᱟᱛᱟᱨ ᱧᱮᱞᱟᱹ ᱟᱠᱟᱱᱟ"
+  },
+  "evalControls": {
+    "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+    "saving": "ᱥᱟᱸᱪᱟᱣ ᱮᱫᱟ...",
+    "saved": "ᱥᱟᱸᱪᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "saveMode": "ᱨᱤᱯᱞᱮ ᱢᱚᱰ ᱥᱟᱸᱪᱟᱣ ᱢᱮ",
+    "discard": "ᱵᱚᱫᱚᱞ ᱠᱚ ᱵᱟᱛᱤᱞ ᱢᱮ",
+    "saveFailed": "ᱨᱤᱯᱞᱮ ᱢᱚᱰ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "unsavedChanges": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ ᱠᱚ",
+    "modeTitle": "ᱱᱚᱶᱟ ᱰᱮᱴᱟᱥᱮᱴ ᱫᱚ ᱪᱮᱠᱟ ᱛᱮ ᱨᱤᱯᱞᱮ ᱦᱩᱭᱜᱼᱟ",
+    "modeHelp": "ᱨᱤᱯᱞᱮ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ। ᱚᱱᱟ ᱫᱚ ᱛᱟᱭᱚᱢ ᱨᱚᱱ ᱠᱚ ᱪᱮᱫ ᱢᱟᱯ ᱮᱫᱟ ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱮᱫᱟ।",
+    "modeTextOnly": "ᱠᱷᱟᱞᱤ ᱚᱞ",
+    "modeTextOnlyHelp": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱡ ᱴᱩᱞ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱡᱚᱵᱟᱵ ᱮᱢᱟ। ᱥᱩᱨᱠᱷᱤᱛ: ᱥᱟᱹᱨᱤ ᱨᱮ ᱪᱮᱫᱽ ᱵᱟᱝ ᱪᱟᱞᱟᱜᱼᱟ। ᱟᱱᱟᱡ ᱟᱠᱟᱱ-ᱴᱩᱞ ᱪᱮᱠ ᱠᱚ ᱯᱩᱨᱟᱹ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+    "modeFull": "ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ",
+    "modeFullHelp": "ᱚᱱᱟ ᱞᱮᱠᱟ ᱴᱩᱞ, ᱜᱟᱨᱰᱨᱮᱞ ᱟᱨ ᱯᱟᱦᱴᱟ ᱥᱤᱢᱟ ᱡᱟᱦᱟᱸ ᱢᱤᱫ ᱥᱟᱹᱨᱤ ᱵᱮᱵᱷᱟᱨᱤ ᱠᱚ ᱧᱟᱢᱟ। ᱟᱱᱟᱡ ᱟᱠᱟᱱ-ᱴᱩᱞ ᱟᱨ ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱪᱮᱠ ᱞᱟᱹᱜᱤᱫ ᱞᱟᱹᱠᱛᱤ।",
+    "modeFullNote": "ᱡᱟᱦᱟᱸ ᱴᱩᱞ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣᱟ ᱚᱱᱟ ᱫᱚ ᱥᱟᱹᱨᱤ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ। ᱰᱮᱴᱟ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ, ᱵᱷᱮᱡᱟᱣ ᱵᱷᱮᱡᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱥᱮ ᱯᱟᱭᱥᱟ ᱠᱷᱚᱨᱪᱟ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱪᱮᱫᱽ ᱫᱚ ᱱᱚᱠᱚᱞ ᱠᱟᱛᱮ ᱨᱚᱱ ᱨᱮ ᱛᱟᱞᱤᱠᱟ ᱦᱩᱭᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱥᱟᱹᱨᱤ ᱨᱮ ᱪᱮᱫᱽ ᱵᱟᱝ ᱦᱩᱭᱟ। ᱥᱩᱨᱠᱷᱟ ᱵᱟᱠᱷᱟᱸᱴ ᱵᱟᱹᱱᱩᱜ ᱴᱩᱞ ᱦᱚᱸ ᱱᱚᱠᱚᱞ ᱦᱩᱭᱟ।",
+    "autoApproveLabel": "ᱤᱵᱷᱟᱞ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱢᱮ",
+    "autoApproveHelp": "ᱥᱟᱫᱷᱟᱨᱚᱬ ᱛᱮ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱟᱠᱟᱱ ᱴᱩᱞ ᱠᱚᱞ ᱠᱚ ᱤᱵᱷᱟᱞ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱫᱚ ᱢᱚᱱᱡᱩᱨ ᱮᱫᱟ, ᱠᱮᱥ ᱪᱷᱚᱭ ᱞᱟᱹᱜᱤᱫ। ᱚᱱᱟ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱠᱮᱥ ᱫᱚ ᱯᱨᱚᱰᱚᱠᱥᱚᱱ ᱨᱮ ᱪᱮᱠᱟ ᱦᱩᱭᱟ ᱚᱱᱟ ᱞᱮᱠᱟ ᱡᱚᱵᱟᱵ ᱵᱟᱹᱱᱩᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱨᱮ ᱪᱷᱚᱭ ᱦᱩᱭᱟ।",
+    "autoApproveWarnTitle": "ᱠᱷᱟᱞᱤ ᱯᱨᱚᱰᱚᱠᱥᱚᱱ ᱵᱟᱝ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ",
+    "autoApproveWarnBody": "ᱚᱠᱟᱸ ᱴᱩᱞ ᱠᱚ ᱥᱟᱹᱨᱤ ᱜᱨᱟᱦᱚᱠ ᱥᱮ ᱰᱮᱴᱟ ᱵᱩᱞᱟᱹ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱚᱸᱰᱮ ᱱᱚᱶᱟ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱪᱟᱹᱞᱩ ᱢᱮ। ᱥᱮᱞ, ᱠᱳᱰᱤᱝ, ᱥᱮᱰᱭᱩᱞ, ᱮᱡᱮᱱᱴ-ᱠᱷᱚᱱ-ᱮᱡᱮᱱᱴ, ᱯᱮᱢᱮᱱᱴ ᱟᱨ ᱰᱤᱞᱤᱴ ᱴᱩᱞ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱟᱡᱼᱛᱮ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱟ। ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱫᱚ ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱯᱨᱚᱰᱚᱠᱥᱚᱱ ᱵᱟᱝ ᱞᱮᱠᱟ ᱪᱤᱱᱦᱟᱹ ᱟᱠᱟᱱ ᱞᱟᱹᱠᱛᱤ।",
+    "autoApproveNeedsFull": "ᱢᱟᱲᱟᱝ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱪᱟᱹᱞᱩ ᱢᱮ: ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨᱤ ᱫᱚ ᱴᱩᱞ ᱪᱟᱞᱟᱜ ᱚᱠᱛᱚ ᱜᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱜᱼᱟ।",
+    "autoApproveRefused": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱵᱟᱛᱟᱣ ᱵᱟᱹᱱᱩᱜᱼᱟ: {reason}",
+    "autoApproveConfirmTitle": "ᱤᱵᱷᱟᱞ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱟ?",
+    "autoApproveConfirmBody": "ᱱᱚᱶᱟ ᱰᱮᱴᱟᱥᱮᱴ ᱟᱜ ᱨᱤᱯᱞᱮ ᱨᱮ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱠᱟᱱ ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱠᱚᱞ ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱜᱼᱟ। ᱢᱚᱱᱡᱩᱨ ᱟᱠᱟᱱ ᱠᱷᱟᱞᱤ-ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱫᱚ ᱥᱟᱹᱨᱤ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ; ᱪᱮᱫᱽ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱫᱚ ᱫᱚᱦᱚᱜ ᱱᱚᱠᱚᱞ ᱦᱩᱭᱟ। ᱱᱚᱶᱟ ᱠᱷᱟᱞᱤ ᱴᱮᱥᱴ ᱰᱮᱴᱟ ᱛᱟᱦᱮᱱ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱜᱮ ᱢᱮ। ᱨᱚᱱ ᱫᱚ ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭ ᱞᱮᱱᱟ ᱚᱱᱟ ᱨᱮᱠᱚᱨᱰ ᱮᱫᱟ।",
+    "autoApproveConfirm": "ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨᱤ ᱪᱟᱹᱞᱩ ᱢᱮ",
+    "trajectoryLabel": "ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱪᱮᱠ",
+    "trajectoryOn": "On",
+    "trajectoryOff": "ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ",
+    "trajectoryHelpOn": "ᱟᱱᱟᱡ ᱟᱠᱟᱱ ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱛᱟᱦᱮᱱ ᱠᱮᱥ ᱠᱚ ᱫᱚ ᱮᱡᱮᱱᱴ ᱪᱮᱫ ᱴᱩᱞ ᱪᱮᱫ ᱠᱷᱟᱛᱨᱟ ᱛᱮ ᱠᱚᱞ ᱞᱮᱱᱟ ᱚᱱᱟ ᱟᱹᱲᱟ ᱛᱮ ᱥᱟᱢᱟᱨ ᱮᱢ ᱠᱚᱜᱼᱟ। ᱱᱚᱶᱟ ᱫᱚ ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱯᱩᱨᱟᱹ ᱰᱤᱯᱞᱚᱭᱢᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱪᱟᱹᱞᱩ ᱮᱫᱟ, ᱥᱟᱱᱟᱢ ᱰᱮᱴᱟᱥᱮᱴ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱝ।",
+    "trajectoryHelpOff": "ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱪᱮᱠ ᱠᱚ ᱱᱚᱸᱰᱮ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ। ᱚᱱᱟ ᱠᱚ ᱟᱢᱟᱜ ᱮᱰᱢᱤᱱ ᱯᱩᱨᱟᱹ ᱰᱤᱯᱞᱚᱭᱢᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱪᱟᱹᱞᱩ ᱮᱫᱟ, ᱟᱨ ᱤᱵᱷᱟᱞ ᱥᱮᱞᱮᱫ ᱟᱠᱟᱱ ᱯᱞᱟᱱ ᱞᱟᱹᱠᱛᱤ।",
+    "trajectoryNeedsFull": "ᱱᱚᱶᱟ ᱰᱮᱴᱟᱥᱮᱴ ᱫᱚ ᱠᱷᱟᱞᱤ ᱚᱞ ᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱟᱱᱟᱡ ᱟᱠᱟᱱ ᱴᱨᱟᱡᱮᱠᱴᱚᱨᱤ ᱛᱟᱦᱮᱱ ᱠᱮᱥ ᱠᱚ ᱟᱹᱲᱟ ᱵᱟᱝ ᱧᱟᱢᱚᱜᱼᱟ। ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱪᱟᱹᱞᱩ ᱢᱮ।",
+    "runAutoApproved": "ᱟᱡᱼᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱞᱮᱱᱟ",
+    "runAutoApprovedTitle": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱟᱜ ᱪᱮᱫᱽ ᱴᱩᱞ ᱠᱚᱞ ᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱢᱟᱱᱩᱸ ᱵᱟᱝ ᱮᱢ ᱞᱮᱱᱟ; ᱤᱵᱷᱟᱞ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱫᱚ ᱚᱱᱟ ᱠᱚ ᱢᱚᱱᱡᱩᱨ ᱠᱟᱫᱼᱟ।",
+    "toolCallsLabel": "ᱱᱚᱶᱟ ᱨᱤᱯᱞᱮ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "ᱵᱟᱭᱡᱷᱮᱛ",
+    "toolStatusNotRun": "ᱵᱟᱝ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ",
+    "toolStatusAwaitingApproval": "ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ",
+    "toolStatusReplayed": "ᱨᱤᱯᱞᱮ ᱦᱩᱭᱞᱮᱱᱟ",
+    "samplingTitle": "ᱥᱚᱨᱮᱥ ᱟᱜ ᱜᱩᱱ ᱥᱠᱳᱨ",
+    "samplingLoading": "ᱥᱠᱳᱨᱤᱝ ᱟᱜ ᱦᱟᱨ ᱞᱚᱰ ᱮᱫᱟ...",
+    "samplingUnavailable": "ᱥᱚᱨᱮᱥ ᱟᱜ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱫᱚ ᱪᱮᱫ ᱞᱟᱭᱣ ᱴᱚᱨᱱ ᱠᱚ ᱥᱠᱳᱨ ᱮᱢᱟ ᱚᱱᱟ ᱟᱢᱟᱜ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱮᱰᱢᱤᱱ ᱴᱷᱤᱠ ᱮᱫᱟ ᱟᱨ ᱱᱚᱸᱰᱮ ᱵᱟᱝ ᱧᱮᱞᱟᱹᱭᱟ।",
+    "samplingValue": "ᱚᱞᱟᱜ {percent}% ᱞᱟᱭᱣ ᱴᱚᱨᱱ ᱠᱚ ᱥᱚᱨᱮᱥ ᱜᱩᱱ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱫᱚ ᱥᱠᱳᱨ ᱮᱢᱟ।",
+    "samplingHelp": "ᱠᱚᱢ ᱦᱟᱨ ᱫᱚ ᱠᱷᱚᱨᱪᱟ ᱠᱚᱢ ᱮᱫᱟ ᱟᱨ ᱪᱮᱛᱟᱱ ᱯᱨᱚᱵᱷᱟᱵ ᱨᱮ ᱠᱚᱢ ᱥᱠᱳᱨ ᱛᱟᱦᱮᱱ ᱮᱫᱟ। ᱱᱚᱶᱟ ᱢᱟᱱ ᱫᱚ ᱱᱚᱸᱰᱮ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱞᱟᱹᱜᱤᱫ।",
+    "samplingSource_default": "ᱰᱤᱯᱷᱚᱞᱴ",
+    "samplingSource_platform": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴ ᱠᱟᱫᱼᱟ",
+    "samplingSource_tenant": "ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
+    "samplingSource_agent": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱟᱠᱟᱱᱟ",
+    "modeDefault": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱰᱤᱯᱷᱚᱞᱴ",
+    "modeDefaultHelp": "ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱥᱮᱴᱤᱝ ᱵᱟᱨᱟᱭ ᱮᱫᱟ (ᱮᱰᱢᱤᱱ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱞᱮᱱᱟ ᱠᱷᱟᱱ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ)। ᱥᱟᱱᱟᱢ ᱨᱚᱱ ᱫᱚ ᱫᱚᱦᱚᱜ ᱟᱡ ᱢᱚᱰ ᱵᱟᱪᱷᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "modeDefaultCurrent": "ᱱᱤᱛᱚᱜ: {mode}",
+    "modeNameFull": "ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ",
+    "modeNameQuick": "ᱥᱮᱛᱟ (ᱠᱷᱟᱞᱤ ᱚᱞ)",
+    "badgeFull": "ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ",
+    "badgeQuick": "ᱥᱮᱛᱟ",
+    "datasetModePinnedTitle": "ᱱᱚᱶᱟ ᱰᱮᱴᱟᱥᱮᱴ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱱᱚᱶᱟ ᱞᱮᱠᱟ ᱛᱮ ᱨᱤᱯᱞᱮ ᱦᱩᱭᱟ। ᱢᱤᱫ ᱨᱚᱱ ᱫᱚ ᱫᱚᱦᱚᱜ ᱮᱴᱟᱜ ᱢᱚᱰ ᱵᱟᱪᱷᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "datasetModeDefaultTitle": "ᱨᱚᱱ ᱪᱮᱠᱟ ᱛᱮ ᱨᱤᱯᱞᱮ ᱦᱩᱭᱟ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱰᱮᱴᱟᱥᱮᱴ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱟᱨᱟᱭ ᱮᱫᱟ।",
+    "runModeLabel": "ᱛᱟᱭᱚᱢ ᱨᱚᱱ ᱞᱟᱹᱜᱤᱫ ᱨᱤᱯᱞᱮ ᱢᱚᱰ",
+    "runModeInherit": "ᱰᱮᱴᱟᱥᱮᱴ ᱟᱜ ᱥᱮᱴᱤᱝ ᱵᱮᱵᱷᱟᱨ ᱢᱮ",
+    "runModeHelp": "ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱫᱚ ᱮᱡᱮᱱᱴ ᱠᱚ ᱟᱡ ᱴᱩᱞ, ᱜᱟᱨᱰᱨᱮᱞ ᱟᱨ ᱢᱚᱱᱡᱩᱨᱤ ᱥᱟᱶ ᱥᱩᱨᱠᱷᱤᱛ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱨᱮ ᱪᱟᱞᱟᱣᱟ: ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱠᱚ ᱥᱟᱹᱨᱤ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ, ᱟᱨ ᱰᱮᱴᱟ ᱵᱚᱫᱚᱞ ᱥᱮ ᱪᱮᱫᱽ ᱵᱷᱮᱡᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱡᱷᱚᱛᱚ ᱱᱚᱠᱚᱞ ᱦᱩᱭᱟ। ᱥᱮᱛᱟ ᱢᱚᱰ ᱫᱚ ᱴᱩᱞ ᱠᱚ ᱛᱟᱞᱟ ᱨᱮ ᱞᱟᱹᱜᱩᱣᱟ ᱟᱨ ᱠᱷᱟᱞᱤ ᱚᱞᱟᱜ ᱡᱚᱵᱟᱵ ᱠᱚ ᱪᱮᱠ ᱮᱫᱟ।",
+    "runModeFullTitle": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱫᱚ ᱤᱵᱷᱟᱞ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱨᱮ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱵᱮᱵᱷᱟᱨ ᱞᱮᱱᱟ।",
+    "runModeQuickTitle": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱫᱚ ᱠᱷᱟᱞᱤ ᱚᱞ ᱨᱮᱭᱟᱜ ᱥᱮᱛᱟ ᱨᱤᱯᱞᱮ ᱛᱟᱦᱮᱱᱟ: ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱛᱟᱞᱟ ᱨᱮ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ।",
+    "runSimulatedTools": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱨᱮ ᱱᱚᱠᱚᱞ ᱞᱮᱱᱟ, ᱪᱟᱞᱟᱣ ᱵᱟᱝ ᱞᱮᱱᱟ (ᱚᱱᱟ ᱠᱚ ᱰᱮᱴᱟ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ ᱛᱟᱦᱮᱱᱟ ᱥᱮ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱵᱟᱦᱨᱮ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱛᱟᱦᱮᱱᱟ): {tools}।",
+    "toolStatusSimulated": "ᱱᱚᱠᱚᱞ ᱞᱮᱱᱟ, ᱪᱟᱞᱟᱣ ᱵᱟᱝ ᱞᱮᱱᱟ"
+  },
+  "assistant": {
+    "taskPhoneLabel": "ᱟᱢᱟᱜ ᱯᱷᱚᱱ ᱱᱚᱢᱵᱚᱨ",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "ᱚᱱᱟ ᱱᱚᱢᱵᱚᱨ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "searchingWebFor": "Searching the web for “{target}”…",
+    "readingPageAt": "Reading {target}…",
+    "researchingTopic": "Researching “{target}”…",
+    "statusWriting": "Writing the answer…",
+    "quietFor": "still waiting on the model ({duration} since the last update)",
+    "toolStepsLabel": "Steps",
+    "chipDone": "finished",
+    "chipFailed": "failed",
+    "moreSteps": "+{n} more",
+    "sourcesLabel": "Sources",
+    "closePanel": "Close the panel",
+    "conversationLabel": "Conversation",
+    "copiedReply": "Copied",
+    "jumpToLatest": "Jump to the latest message"
+  },
+  "agentLab": {
+    "wtLabel": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱪᱟᱞᱟᱣ ᱢᱮ",
+    "wtHelp": "ᱵᱚᱸᱫ: ᱥᱟᱱᱟᱢ ᱡᱚᱵᱟᱵ ᱫᱚ ᱢᱤᱫ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱠᱟᱱᱟ। ᱪᱟᱹᱞᱩ: ᱡᱚᱵᱟᱵ ᱠᱚ ᱫᱚ ᱪᱮᱴ ᱴᱚᱨᱱ ᱵᱮᱵᱷᱟᱨ ᱠᱟᱱ ᱴᱩᱞ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱠᱷᱚᱱ ᱛᱟᱦᱮᱱ ᱠᱟᱱᱟ, ᱚᱱᱟ ᱪᱷᱚᱵ ᱴᱩᱞ ᱠᱚ ᱪᱟᱞᱟᱜᱼᱟ, ᱜᱟᱨᱰᱨᱮᱞ ᱠᱚ ᱞᱟᱜᱩ ᱟᱠᱚᱜᱼᱟ ᱟᱨ ᱯᱟᱠᱷᱟᱛ ᱟᱜ ᱥᱤᱢᱟ ᱠᱚ ᱢᱟᱱᱟᱣᱜᱼᱟ। ᱢᱟᱱᱩᱸ ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ ᱥᱮ ᱞᱟᱹᱠᱛᱤᱭᱟᱱ ᱠᱚᱞ ᱠᱚ ᱫᱚ ᱵᱟᱠᱤ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱮᱠᱟ ᱛᱮ ᱵᱚᱸᱫᱷᱚᱜᱼᱟ।",
+    "wtUnavailable": "ᱱᱚᱶᱟ ᱤᱱᱥᱴᱚᱞᱮᱥᱚᱱ ᱨᱮ ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱞᱮᱵ ᱪᱟᱞᱟᱣ ᱫᱚ ᱵᱚᱸᱫ ᱢᱮᱱᱟᱜᱼᱟ। ᱚᱱᱟ ᱪᱟᱹᱞᱩ ᱞᱟᱹᱜᱤᱫ ᱮᱰᱢᱤᱱ ᱥᱮᱱ ᱢᱮ ᱟᱲᱟᱜ ᱢᱮ।",
+    "wtRefused": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱞᱮᱱᱟ: {reason}",
+    "wtActive": "ᱱᱚᱶᱟ ᱨᱚᱱ ᱨᱮ ᱴᱩᱞ ᱠᱚ ᱫᱚ ᱥᱟᱹᱨᱤ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ, ᱚᱱᱟ ᱟᱜ ᱯᱟᱥᱼᱟᱣ ᱠᱚ ᱥᱟᱶ ᱥᱟᱶᱛᱮ।",
+    "wtConfirmTitle": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱞᱮᱵ ᱪᱟᱞᱟᱣ ᱟ?",
+    "wtConfirmBody": "ᱥᱟᱱᱟᱢ ᱱᱢᱩᱱᱟ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱹᱨᱤ ᱴᱩᱞ ᱠᱚ ᱠᱚᱞ ᱪᱷᱚᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱟᱨ ᱚᱱᱟ ᱠᱚᱞ ᱠᱚ ᱟᱜ ᱥᱟᱹᱨᱤ ᱯᱷᱚᱞ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱞᱮᱠᱟ ᱵᱟᱨᱛᱟ ᱵᱷᱮᱡᱟᱣ ᱥᱮ ᱰᱮᱴᱟ ᱚᱞ। ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱠᱛᱤᱭᱟᱱ ᱠᱚᱞ ᱠᱚ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱸᱫᱷᱚᱜᱼᱟ। ᱱᱚᱶᱟ ᱫᱚ ᱴᱮᱥᱴ ᱮᱡᱮᱱᱴ ᱥᱮ ᱴᱮᱥᱴ ᱰᱮᱴᱟ ᱥᱟᱶ ᱜᱮ ᱵᱮᱵᱷᱟᱨ ᱢᱮ।",
+    "wtConfirm": "ᱴᱩᱞ ᱠᱚ ᱵᱮᱵᱷᱟᱨ ᱢᱮ"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱤᱢᱟ ᱠᱚ",
+        "description": "ᱵᱚᱸᱫ ᱦᱩᱭ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱴᱚᱨᱱ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+      },
+      "approvals": {
+        "label": "ᱢᱚᱱᱡᱩᱨᱤ",
+        "description": "ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱠᱟᱹᱢᱤ ᱢᱚᱱᱡᱩᱨ ᱥᱮ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱛᱟᱭᱚᱢ ᱪᱮᱫ ᱦᱩᱭᱟ, ᱟᱨ ᱚᱱᱚᱠᱚᱞ ᱪᱮᱫ ᱚᱠᱛᱚ ᱡᱚᱜᱟᱣᱟ।"
+      },
+      "chat": {
+        "label": "ᱵᱟᱛ ᱪᱤᱛ ᱟᱜ ᱵᱮᱵᱷᱟᱨ",
+        "description": "ᱡᱚᱵᱟᱵ ᱪᱮᱠᱟ ᱛᱮ ᱪᱷᱚᱭ ᱦᱩᱭᱟ, ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ, ᱠᱮᱥ ᱟᱨ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱠᱚ।"
+      },
+      "routing": {
+        "label": "ᱢᱚᱰᱮᱞ ᱨᱩᱴᱤᱝ",
+        "description": "ᱪᱮᱫ ᱵᱷᱮᱡᱟᱣ ᱫᱚ ᱥᱮᱛᱟ ᱢᱚᱰᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱥᱟᱸᱜᱤᱛ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱢᱟᱱᱟᱣᱟ।"
+      },
+      "memory": {
+        "label": "ᱢᱮᱢᱚᱨᱤ",
+        "description": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱪᱮᱫ ᱢᱮᱢᱚᱨᱤ ᱛᱟᱦᱮᱱ ᱟᱨ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱮᱫᱟ।"
+      },
+      "attachments": {
+        "label": "ᱪᱮᱴ ᱟᱯᱞᱚᱰ",
+        "description": "ᱢᱟᱱᱩᱸ ᱠᱚ ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱶ ᱪᱮᱫ ᱞᱟᱢᱟ ᱯᱷᱟᱭᱞ ᱡᱚᱰᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+      },
+      "skills": {
+        "label": "ᱥᱠᱤᱞ",
+        "description": "ᱤᱱᱥᱴᱚᱞ ᱟᱠᱟᱱ ᱥᱠᱤᱞ ᱛᱟᱞᱤᱠᱟ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱱᱤᱨᱫᱮᱥ ᱨᱮᱭᱟᱜ ᱪᱮᱫ ᱵᱷᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+      },
+      "aux": {
+        "label": "ᱥᱚᱨᱮᱥ ᱢᱚᱰᱮᱞ ᱠᱚᱞ",
+        "description": "ᱥᱟᱨ, ᱜᱚᱲᱚ ᱟᱨ ᱠᱚᱢᱯᱨᱮᱥᱚᱱ ᱫᱚ ᱚᱠᱟ ᱢᱚᱰᱮᱞ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
+      },
+      "guardrails": {
+        "label": "ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ",
+        "description": "ᱟᱡᱼᱛᱮ ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱪᱮᱫ ᱠᱟᱲᱟ ᱠᱟᱱᱟ। ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴᱤᱝ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+      },
+      "quality": {
+        "label": "ᱢᱩᱞᱭᱟᱸᱠᱚᱱ",
+        "description": "ᱴᱮᱥᱴ ᱨᱚᱱ ᱟᱨ AI ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱪᱮᱠᱟ ᱛᱮ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
+      },
+      "delegation": {
+        "label": "ᱠᱟᱹᱢᱤ ᱮᱢ",
+        "description": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱫᱚ ᱢᱤᱫ ᱚᱠᱛᱚ ᱨᱮ ᱮᱴᱟᱜ ᱮᱡᱮᱱᱴ ᱠᱚ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+      },
+      "knowledge": {
+        "label": "ᱵᱟᱰᱟᱭ ᱠᱷᱚᱡᱮᱛ",
+        "description": "ᱥᱟᱸᱜᱤᱛ ᱵᱷᱟᱜ ᱵᱟᱪᱷᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱟᱢᱟᱜ ᱟᱯᱞᱚᱰ ᱟᱠᱟᱱ ᱫᱚᱠᱩᱢᱮᱱᱴ ᱟᱜ ᱠᱷᱚᱡᱮᱛ ᱪᱮᱫ ᱞᱟᱢᱟ ᱛᱮ ᱠᱷᱚᱡ ᱥᱟᱯᱷᱟ ᱮᱫᱟ।"
+      },
+      "learning": {
+        "label": "ᱥᱮᱪᱮᱫ",
+        "description": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱮᱪᱮᱫ ᱱᱤᱛᱤ ᱫᱚ ᱵᱤᱠᱚᱞᱯᱚ ᱠᱚ ᱪᱮᱠᱟ ᱛᱮ ᱪᱮᱠ ᱮᱫᱟ।"
+      },
+      "providers": {
+        "label": "AI ᱯᱨᱚᱵᱟᱭᱰᱟᱨ",
+        "description": "ᱡᱚᱰᱟᱣ ᱟᱠᱟᱱ AI ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱢᱤᱫ ᱠᱟᱹᱢᱤ ᱵᱚᱸᱫ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚ ᱪᱮᱠᱟ ᱛᱮ ᱵᱮᱵᱷᱟᱨ ᱦᱩᱭᱟ।"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱴᱩᱞ ᱠᱚᱞ",
+          "description": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱠᱚ ᱵᱚᱸᱫ ᱠᱟᱛᱮ ᱚᱱᱟ ᱥᱟᱶ ᱢᱮᱱᱟᱜ ᱞᱮᱠᱟ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱮᱫ ᱴᱩᱞ ᱠᱚᱞ ᱠᱚ ᱵᱟᱲᱛᱤ ᱛᱮ ᱠᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱞᱟᱢᱟ, ᱵᱟᱲᱛᱤ ᱯᱟᱦᱴᱟ ᱠᱟᱹᱢᱤ ᱟᱜ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱠᱷᱟᱛᱨᱟ ᱠᱷᱚᱱ ᱵᱟᱦᱨᱮ ᱞᱩᱯ ᱠᱚ ᱨᱩᱠᱷᱤᱭᱟ ᱟᱨ ᱠᱷᱚᱨᱪᱟ ᱟᱱᱟᱡ ᱫᱟᱲᱮᱭᱟᱜ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ। ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱞᱟᱹᱜᱤᱫ ᱧᱮᱞᱟᱹ ᱟᱠᱟᱱ ᱢᱟᱱ ᱫᱚ ᱢᱤᱫ ᱢᱩᱞ ᱜᱚᱱᱚᱝ ᱠᱟᱱᱟ: ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱥᱛᱚᱨ ᱫᱚ ᱨᱚᱱ ᱚᱠᱛᱚ ᱚᱱᱟ ᱪᱮᱛᱟᱱ-ᱞᱟᱛᱟᱨ ᱮᱫᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱥᱮ ᱠᱚᱢ ᱟᱡ ᱮᱡᱮᱱᱴ ᱫᱚ ᱵᱷᱮᱜᱟᱨ ᱜᱚᱱᱚᱝ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱢᱟᱱ ᱥᱮᱴ ᱠᱷᱟᱱ ᱚᱱᱟ ᱪᱮᱠᱟ ᱛᱮ ᱢᱮᱱᱟᱜᱼᱟ ᱚᱱᱟ ᱞᱮᱠᱟ ᱵᱮᱵᱷᱟᱨ ᱦᱩᱭᱟ।"
+        },
+        "turnTimeoutSeconds": {
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱚᱠᱛᱚ",
+          "description": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱵᱚᱸᱫ ᱦᱩᱭ ᱠᱷᱚᱱ ᱥᱟᱵᱟᱭ ᱢᱤᱫ ᱪᱷᱚᱭ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱥᱮᱛᱟ ᱥᱚᱫᱷᱚ ᱥᱮ ᱠᱳᱰ ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱟᱠᱟᱱ ᱴᱚᱨᱱ ᱫᱚ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱠᱟᱹᱢᱤ ᱥᱟᱶ ᱪᱷᱚᱭ ᱦᱩᱭᱟ।"
+        },
+        "toolTimeoutSeconds": {
+          "label": "ᱴᱩᱞ ᱠᱚᱞ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱚᱠᱛᱚ",
+          "description": "ᱢᱤᱫ ᱴᱩᱞ ᱠᱚᱞ ᱵᱚᱸᱫ ᱦᱩᱭ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱮᱫ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱰᱤᱯᱷᱚᱞᱴ ᱨᱮ ᱪᱮᱫᱽ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ; ᱚᱱᱟ ᱚᱠᱛᱚ ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱟᱡ ᱴᱟᱭᱢᱟᱣᱴ ᱛᱟᱦᱮᱱᱟ।",
+          "help": "ᱢᱤᱫ ᱥᱮᱛᱟ ᱴᱩᱞ ᱫᱚ ᱯᱩᱨᱟᱹ ᱵᱟᱛ ᱪᱤᱛ ᱨᱩᱠᱷᱤᱭᱟ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱷᱟᱱ ᱥᱤᱢᱟ ᱥᱮᱴ ᱢᱮ। ᱵᱚᱸᱫ ᱟᱠᱟᱱ ᱠᱚᱞ ᱟᱜ ᱪᱮᱫᱽ ᱯᱷᱚᱞ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱵᱟᱝ ᱵᱟᱰᱟᱭᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱮᱡᱮᱱᱴ ᱠᱚ ᱢᱮᱛ ᱮᱫᱟ ᱚᱱᱟ ᱥᱟᱯᱷᱚᱞ ᱞᱮᱱᱟ ᱢᱮᱱ ᱵᱟᱝ ᱢᱟᱱᱟᱣ ᱞᱟᱹᱜᱤᱫ।"
+        },
+        "toolOutputMaxChars": {
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱴᱩᱞ ᱯᱷᱚᱞ",
+          "description": "ᱢᱤᱫ ᱴᱩᱞ ᱯᱷᱚᱞ ᱟᱜ ᱪᱮᱫ ᱚᱠᱷᱚᱨ ᱢᱚᱰᱮᱞ ᱠᱚ ᱮᱢᱚᱜᱼᱟ; ᱵᱟᱠᱤ ᱠᱚ ᱠᱟᱴᱟ ᱟᱠᱚᱜᱼᱟ।",
+          "help": "ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱞᱟᱢᱟ ᱫᱚᱠᱩᱢᱮᱱᱴ ᱥᱮ API ᱡᱚᱵᱟᱵ ᱯᱩᱨᱟᱹ ᱯᱟᱲᱦᱟᱣ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱵᱟᱲᱦᱟᱣ ᱢᱮ, ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱴᱚᱠᱮᱱ ᱟᱜ ᱢᱩᱞ ᱛᱮ। ᱠᱷᱚᱨᱪᱟ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ।"
+        },
+        "retrievalTopK": {
+          "label": "ᱠᱷᱚᱡᱮᱛ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱰᱟᱭ ᱴᱩᱠᱨᱟ",
+          "description": "ᱢᱤᱫ ᱵᱟᱰᱟᱭ ᱵᱷᱟᱱᱰᱟᱨ ᱠᱷᱚᱡᱮᱛ ᱫᱚ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱪᱮᱫ ᱴᱩᱠᱨᱟ ᱯᱷᱤᱨ ᱮᱢᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱴᱩᱠᱨᱟ ᱫᱚ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱥᱟᱢᱟᱱ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱲᱛᱤ ᱴᱚᱠᱮᱱ ᱠᱷᱚᱨᱪᱟ ᱟᱨ ᱥᱚᱨ ᱵᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱠᱚᱢ ᱴᱩᱠᱨᱟ ᱫᱚ ᱥᱮᱛᱟ ᱟᱨ ᱥᱚᱥᱛᱟ ᱠᱟᱱᱟ।"
+        },
+        "retrievalMinScore": {
+          "label": "ᱢᱤᱫ ᱴᱩᱠᱨᱟ ᱟᱜ ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱥᱟᱸᱜᱤᱛ",
+          "description": "ᱢᱤᱫ ᱵᱟᱰᱟᱭ ᱴᱩᱠᱨᱟ ᱯᱷᱤᱨ ᱮᱢ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱥᱟᱸᱜᱤᱛ ᱞᱟᱹᱠᱛᱤ। 0 ᱫᱚ ᱥᱟᱱᱟᱢ ᱦᱤᱴ ᱯᱷᱤᱨ ᱮᱢᱟ।",
+          "help": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱵᱟᱝ ᱥᱟᱸᱜᱤᱛ ᱴᱩᱠᱨᱟ ᱠᱚ ᱢᱮᱱᱛᱮ ᱠᱷᱟᱱ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱟᱹᱰᱤ ᱵᱟᱲᱦᱟᱣ ᱠᱷᱟᱱ ᱚᱱᱟ ᱪᱮᱫᱽ ᱵᱟᱝ ᱧᱟᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+        },
+        "continuationPasses": {
+          "label": "ᱵᱟᱝ ᱯᱩᱨᱟᱹ ᱡᱚᱵᱟᱵ ᱛᱟᱭᱚᱢ ᱥᱮᱞᱮᱫ ᱯᱟᱥ",
+          "description": "ᱢᱚᱰᱮᱞ ᱟᱜ ᱡᱚᱵᱟᱵ ᱛᱮᱞᱟ ᱥᱮᱞᱮᱫ ᱟᱠᱟᱱ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱝ ᱠᱟᱹᱢᱤ ᱟᱠᱟᱱ ᱯᱟᱦᱴᱟ ᱨᱮ ᱛᱟᱦᱮᱱ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱮᱫᱟ।",
+          "help": "ᱢᱤᱫ ᱯᱟᱦᱴᱟ ᱢᱮᱛ ᱠᱟᱛᱮ ᱛᱟᱦᱮᱱ ᱟᱠᱟᱱ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱥᱟᱱᱟᱢ ᱥᱮᱞᱮᱫ ᱯᱟᱥ ᱫᱚ ᱢᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱠᱷᱚᱨᱪᱟ ᱮᱫᱟ।"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "ᱥᱤᱢᱟ ᱛᱟᱭᱚᱢ ᱡᱚᱵᱟᱵ ᱮᱢ ᱟᱠᱟᱱ ᱠᱚᱞ",
+          "description": "ᱴᱚᱨᱱ ᱟᱜ ᱴᱩᱞ ᱥᱤᱢᱟ ᱪᱷᱚᱭ ᱦᱩᱭ ᱛᱟᱭᱚᱢ ᱢᱚᱰᱮᱞ ᱪᱮᱫ ᱟᱨ ᱴᱩᱞ ᱠᱚᱞ ᱪᱮᱥᱴᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱡᱷᱚᱛᱚ ᱫᱚ \"ᱢᱮᱱᱟᱜ ᱞᱮᱠᱟ ᱡᱚᱵᱟᱵ ᱮᱢ\" ᱢᱮᱱ ᱴᱤᱯᱯᱚᱱᱤ ᱥᱟᱶ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱟ; ᱱᱚᱶᱟ ᱜᱚᱱᱚᱝ ᱛᱟᱭᱚᱢ ᱴᱚᱨᱱ ᱵᱷᱩᱞ ᱥᱟᱶ ᱵᱚᱸᱫ ᱦᱩᱭᱟ।",
+          "help": "ᱢᱚᱰᱮᱞ ᱫᱚ ᱴᱩᱞ ᱠᱚᱞ ᱵᱚᱸᱫ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱟᱨ ᱪᱮᱥᱴᱟ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱞᱩᱯ ᱨᱮ ᱛᱟᱦᱮᱱ ᱴᱚᱨᱱ ᱥᱮᱛᱟ ᱪᱷᱚᱭ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ। 0 ᱫᱚ ᱥᱤᱢᱟ ᱯᱟᱨ ᱟᱠᱟᱱ ᱢᱟᱲᱟᱝ ᱠᱚᱞ ᱨᱮ ᱴᱚᱨᱱ ᱵᱚᱸᱫ ᱮᱫᱟ।"
+        },
+        "supervisedDivisor": {
+          "label": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱴᱩᱞ ᱥᱤᱢᱟ ᱟᱜ 1/N ᱧᱟᱢᱟ",
+          "description": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱴᱚᱨᱱ ᱟᱜ ᱴᱩᱞ-ᱠᱚᱞ ᱥᱤᱢᱟ ᱠᱚ ᱱᱚᱶᱟ ᱜᱚᱱᱚᱝ ᱥᱟᱶ ᱵᱷᱟᱜ ᱠᱟᱛᱮ ᱧᱟᱢᱟ, ᱢᱮᱱᱠᱷᱟᱱ ᱞᱟᱛᱟᱨ ᱨᱮᱭᱟᱜ ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱢᱟᱱ ᱠᱷᱚᱱ ᱛᱟᱠᱠᱟᱣ ᱠᱚᱢ ᱵᱟᱝ।",
+          "help": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱠᱚ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱛᱮ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। 1 ᱫᱚ ᱚᱱᱟ ᱠᱚ ᱯᱩᱨᱟᱹ ᱥᱤᱢᱟ ᱮᱢᱟ।"
+        },
+        "supervisedMinSteps": {
+          "label": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱴᱩᱞ ᱠᱚᱞ",
+          "description": "ᱛᱟᱞᱟ ᱨᱮᱭᱟᱜ ᱜᱚᱱᱚᱝ ᱪᱮᱫ ᱞᱟᱢᱟ ᱦᱩᱭᱥᱮ, ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱪᱮᱫ ᱥᱟᱸᱜᱤᱛ ᱪᱷᱚᱴᱚ ᱴᱩᱞ-ᱠᱚᱞ ᱥᱤᱢᱟ ᱧᱟᱢᱟ।",
+          "help": "ᱱᱚᱶᱟ ᱠᱚ 3 ᱥᱮ ᱵᱟᱲᱛᱤ ᱛᱟᱦᱮᱱ ᱢᱮ ᱡᱟᱦᱟᱸ ᱛᱮ ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱵᱟᱲᱛᱤ ᱯᱟᱦᱴᱟ ᱟᱜ ᱥᱚᱡᱷᱮ ᱠᱟᱹᱢᱤ ᱫᱚᱦᱚᱜ ᱯᱩᱨᱟᱹ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+        },
+        "autonomousMultiplier": {
+          "label": "ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ ᱮᱡᱮᱱᱴ ᱫᱚ ᱥᱤᱢᱟ ᱟᱜ N ᱜᱩᱱ ᱧᱟᱢᱟ",
+          "description": "ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ ᱮᱡᱮᱱᱴ ᱫᱚ ᱴᱚᱨᱱ ᱟᱜ ᱴᱩᱞ-ᱠᱚᱞ ᱥᱤᱢᱟ ᱠᱚ ᱱᱚᱶᱟ ᱜᱚᱱᱚᱝ ᱥᱟᱶ ᱜᱩᱱ ᱠᱟᱛᱮ ᱧᱟᱢᱟ।",
+          "help": "ᱡᱟᱦᱟᱸ ᱮᱡᱮᱱᱴ ᱠᱚ ᱪᱮᱫᱽ ᱵᱟᱝ ᱧᱮᱞ ᱠᱟᱛᱮ ᱞᱟᱢᱟ ᱠᱟᱹᱢᱤ ᱪᱟᱞᱟᱣᱟ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱚᱱᱟ ᱥᱮᱱ ᱚᱱᱟ ᱠᱚ ᱢᱤᱫ ᱴᱚᱨᱱ ᱨᱮ ᱵᱟᱲᱛᱤ ᱠᱚᱞ ᱟᱨ ᱯᱟᱭᱥᱟ ᱠᱷᱚᱨᱪᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। 1 ᱫᱚ ᱚᱱᱟ ᱠᱚ ᱢᱟᱱᱠ ᱥᱤᱢᱟ ᱮᱢᱟ।"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "ᱢᱚᱱᱡᱩᱨᱤ ᱛᱟᱭᱚᱢ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+          "description": "ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱠᱟᱹᱢᱤ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ, ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱟᱣᱟ ᱵᱷᱮᱡᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱝ ᱡᱚᱜᱟᱣ ᱠᱟᱛᱮ ᱟᱡᱼᱛᱮ ᱠᱟᱹᱢᱤ ᱪᱷᱚᱭᱟ।",
+          "help": "ᱥᱟᱱᱟᱢ ᱢᱚᱱᱡᱩᱨ ᱟᱠᱟᱱ ᱠᱟᱹᱢᱤ ᱴᱚᱨᱱ ᱪᱷᱚᱭ ᱟᱨ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱦᱟᱛ ᱛᱮ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ।"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱛᱟᱭᱚᱢ ᱦᱚᱸ ᱥᱚᱨᱮᱥ ᱡᱚᱵ ᱪᱟᱞᱟᱜᱼᱟ",
+          "description": "ᱥᱚᱨᱮᱥ ᱡᱚᱵ ᱨᱮ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱠᱟᱹᱢᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱠᱷᱟᱱ, ᱡᱚᱵ ᱵᱚᱸᱫ ᱵᱟᱝ ᱦᱩᱭ, ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱚᱞ ᱠᱟᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ।",
+          "help": "ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱛᱮ ᱡᱚᱵ ᱵᱚᱸᱫ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱛᱟᱦᱮᱱᱟ ᱢᱮ। ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱯᱟᱦᱴᱟ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱡᱚᱵ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱛᱮ ᱪᱷᱚᱭ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱷᱟᱱ ᱪᱟᱹᱞᱩ ᱢᱮ।"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "ᱢᱚᱱᱡᱩᱨᱤ ᱚᱱᱚᱠᱚᱞ ᱟᱜ ᱚᱠᱛᱚ ᱪᱷᱚᱭ",
+          "description": "ᱢᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱚᱱᱚᱠᱚᱞ ᱫᱚ ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱦᱩᱭ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱚᱠᱛᱚ ᱡᱚᱜᱟᱣᱟ। 0 ᱢᱮᱱᱛᱮ ᱚᱱᱚᱠᱚᱞ ᱟᱜ ᱚᱠᱛᱚ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱪᱷᱚᱭᱟ।",
+          "help": "ᱚᱠᱛᱚ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜ ᱛᱮ, ᱵᱷᱩᱞ ᱟᱠᱟᱱ ᱚᱱᱚᱠᱚᱞ ᱫᱚ ᱵᱟᱝ ᱥᱤᱢᱟ ᱚᱠᱛᱚ ᱠᱷᱩᱞᱟᱹ ᱛᱟᱦᱮᱱᱟ ᱟᱨ ᱮᱡᱮᱱᱴ ᱡᱚᱜᱟᱣ ᱛᱟᱦᱮᱱᱟ। ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱟᱠᱟᱱ ᱚᱱᱚᱠᱚᱞ ᱫᱚ ᱢᱚᱱᱡᱩᱨ ᱵᱟᱝ ᱦᱩᱭ ᱞᱮᱠᱟ ᱢᱟᱱᱟᱣ ᱦᱩᱭᱟ।"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "ᱠᱟᱴᱟ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱯᱩᱨᱟᱹ ᱢᱮ",
+          "description": "ᱢᱚᱰᱮᱞ ᱟᱜ ᱞᱚᱸᱜᱚ ᱥᱤᱢᱟ ᱡᱚᱵᱟᱵ ᱠᱟᱴᱟ ᱠᱷᱟᱱ ᱥᱮ ᱵᱷᱩᱞ ᱴᱩᱞ ᱠᱚᱞ ᱨᱮ ᱪᱷᱚᱭ ᱠᱷᱟᱱ, ᱢᱚᱰᱮᱞ ᱠᱚ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱥᱮ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱢᱮ।",
+          "help": "ᱱᱚᱶᱟ ᱠᱷᱟᱞᱤ ᱢᱚᱰᱮᱞ ᱟᱜ ᱥᱚᱢᱥᱭᱟ ᱪᱤᱱᱦᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱸᱫ ᱢᱮ; ᱚᱱᱟ ᱚᱠᱛᱚ ᱢᱟᱱᱩᱸ ᱠᱚ ᱠᱟᱴᱟ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱚᱱᱟ ᱞᱮᱠᱟ ᱜᱮ ᱧᱮᱞᱚᱜᱼᱟ।"
+        },
+        "maxContinuations": {
+          "label": "ᱠᱟᱴᱟ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱟᱜ ᱵᱟᱲᱛᱤ ᱞᱟᱜᱟᱛᱟᱨ",
+          "description": "ᱡᱚᱵᱟᱵ ᱠᱟᱴᱟ ᱛᱟᱭᱚᱢ ᱢᱚᱰᱮᱞ ᱠᱚ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱮᱫᱟ।",
+          "help": "ᱥᱟᱱᱟᱢ ᱞᱟᱜᱟᱛᱟᱨ ᱫᱚ ᱮᱴᱟᱜ ᱢᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱠᱟᱱᱟ। ᱞᱟᱢᱟ ᱡᱚᱵᱟᱵ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ, ᱠᱷᱚᱨᱪᱟ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ।"
+        },
+        "maxToolCallRetries": {
+          "label": "ᱵᱷᱩᱞ ᱴᱩᱞ ᱠᱚᱞ ᱟᱜ ᱵᱟᱲᱛᱤ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ",
+          "description": "ᱵᱮᱵᱷᱟᱨ ᱵᱟᱝ ᱟᱨᱜᱩᱢᱮᱱᱴ ᱥᱟᱶ ᱟᱹᱜᱩ ᱴᱩᱞ ᱠᱚᱞ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱢᱮᱛ ᱮᱫᱟ।",
+          "help": "ᱢᱤᱫ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱫᱚ ᱢᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱠᱷᱚᱨᱪᱟ ᱮᱫᱟ। 0 ᱫᱚ ᱢᱟᱲᱟᱝ ᱵᱷᱩᱞ ᱠᱚᱞ ᱨᱮ ᱜᱮ ᱦᱟᱨ ᱢᱟᱱᱟᱣᱟ।"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱥᱟᱱᱟᱢ ᱨᱮ ᱪᱮᱥᱴᱟ",
+          "description": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱵᱟᱭᱡᱷᱮᱛ ᱥᱮ ᱵᱷᱮᱜᱟᱨ ᱠᱷᱟᱱ, ᱢᱟᱲᱟᱝ ᱪᱮᱥᱴᱟ ᱥᱟᱶ, ᱢᱤᱫ ᱢᱚᱰᱮᱞ ᱠᱚᱞ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱪᱮᱥᱴᱟ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱪᱮᱥᱴᱟ ᱫᱚ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱪᱷᱚᱴᱚ ᱵᱟᱫᱷᱟ ᱠᱚ ᱞᱩᱠᱟᱣᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱭᱡᱷᱮᱛ ᱚᱱᱚᱠᱚᱞ ᱨᱮ ᱵᱷᱩᱞ ᱧᱮᱞᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱚᱠᱛᱚ ᱞᱟᱜᱟᱣᱟ।"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "ᱴᱩᱞ ᱛᱟᱦᱮᱱ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱢᱮ",
+          "description": "ᱴᱩᱞ ᱛᱟᱦᱮᱱ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱛᱟᱣ ᱮᱢ ᱢᱮ। ᱴᱩᱞ ᱛᱟᱭᱚᱢ ᱵᱟᱨ ᱮᱴᱟᱜ ᱪᱮᱫ ᱯᱷᱤᱨ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱵᱚᱸᱫ।",
+          "help": "ᱴᱩᱞ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ-ᱞᱟᱹᱜᱤᱫ ᱟᱨ ᱥᱮᱛᱟ ᱵᱚᱫᱚᱞ ᱠᱷᱟᱱ, ᱟᱨ ᱟᱢ ᱥᱮᱛᱟ, ᱥᱚᱥᱛᱟ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱡᱚᱵᱟᱵ ᱪᱟᱦᱟᱭ ᱠᱷᱟᱱ ᱜᱮ ᱪᱟᱹᱞᱩ ᱢᱮ। ᱢᱟᱱᱩᱸ ᱠᱚ ᱵᱟᱝ ᱱᱟᱣᱟ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+        },
+        "contextTurns": {
+          "label": "ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱪᱤᱱᱦᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱢᱟᱲᱟᱝ ᱴᱚᱨᱱ",
+          "description": "ᱢᱤᱫ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱠᱟᱱᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱴᱷᱤᱠ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱢᱟᱲᱟᱝ ᱴᱚᱨᱱ ᱠᱚ ᱪᱷᱟᱸᱪᱚ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱴᱚᱨᱱ ᱫᱚ ᱢᱤᱞᱟᱣ ᱠᱟᱲᱟ ᱟᱨ ᱠᱮᱥ ᱦᱤᱴ ᱠᱚᱢ ᱮᱫᱟ।"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "ᱯᱷᱚᱞᱚ-ᱟᱯ ᱨᱮ ᱴᱩᱞ ᱥᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱᱟ ᱢᱮ",
+          "description": "ᱛᱟᱭᱚᱢ ᱵᱷᱮᱡᱟᱣ ᱪᱷᱚᱴᱚ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱦᱩᱭ ᱠᱷᱟᱱ, ᱵᱟᱛ ᱪᱤᱛ ᱫᱚ ᱫᱚᱦᱚᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱴᱩᱞ ᱥᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+          "help": "\"ᱦᱚᱭ\" ᱞᱮᱠᱟ ᱪᱷᱚᱴᱚ ᱡᱚᱵᱟᱵ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱴᱩᱞ ᱵᱟᱪᱷᱟᱣ ᱠᱷᱚᱱ ᱮᱦᱚᱵ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ।"
+        },
+        "stickyToolsWindow": {
+          "label": "ᱯᱷᱚᱞᱚ-ᱟᱯ ᱴᱩᱞ ᱪᱮᱫ ᱚᱠᱛᱚ ᱥᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱᱟ",
+          "description": "ᱵᱮᱵᱷᱟᱨ ᱛᱟᱭᱚᱢ ᱪᱷᱚᱴᱚ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱵᱷᱮᱡᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱴᱩᱞ ᱪᱮᱫ ᱚᱠᱛᱚ ᱥᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱᱟ।",
+          "help": "ᱞᱟᱢᱟ ᱤᱱᱰᱚ ᱫᱚ ᱞᱟᱢᱟ ᱠᱟᱹᱢᱤ ᱥᱮᱥᱚᱱ ᱨᱮ ᱜᱚᱲᱚ ᱮᱫᱟ, ᱪᱷᱚᱴᱚ ᱫᱚ ᱴᱩᱞ ᱞᱮᱠᱟ ᱪᱷᱚᱴᱚ ᱛᱟᱦᱮᱱ ᱮᱫᱟ।"
+        },
+        "maxStickyTools": {
+          "label": "ᱯᱷᱚᱞᱚ-ᱟᱯ ᱨᱮ ᱥᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱ ᱟᱠᱟᱱ ᱵᱟᱲᱛᱤ ᱛᱮ ᱴᱩᱞ",
+          "description": "ᱪᱷᱚᱴᱚ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱵᱷᱮᱡᱟᱣ ᱨᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱟᱠᱟᱱ ᱵᱟᱲᱛᱤ ᱛᱮ ᱴᱩᱞ। 0 ᱫᱚ ᱪᱮᱫᱽ ᱵᱟᱝ ᱛᱟᱦᱮᱱᱟ।",
+          "help": "ᱢᱤᱫ ᱠᱟᱹᱢᱤ ᱫᱚ ᱵᱟᱲᱛᱤ ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱠᱷᱟᱱ ᱞᱟᱢᱟ ᱜᱚᱱᱚᱝ ᱜᱚᱲᱚ ᱮᱫᱟ; ᱪᱷᱚᱴᱚ ᱫᱚ ᱴᱩᱞ ᱛᱟᱞᱤᱠᱟ ᱪᱷᱚᱴᱚ ᱛᱟᱦᱮᱱ ᱮᱫᱟ।"
+        },
+        "keepPrimaryModel": {
+          "label": "ᱯᱷᱚᱞᱚ-ᱟᱯ ᱞᱟᱹᱜᱤᱫ ᱢᱩᱞ ᱢᱚᱰᱮᱞ ᱛᱟᱦᱮᱱ ᱢᱮ",
+          "description": "ᱫᱚᱦᱚᱜ ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱵᱟᱛ ᱪᱤᱛ ᱨᱮ ᱪᱷᱚᱴᱚ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱫᱚ ᱥᱚᱥᱛᱟ ᱢᱚᱰᱮᱞ ᱵᱚᱫᱚᱞ ᱮᱡᱮᱱᱴ ᱟᱜ ᱢᱩᱞ ᱢᱚᱰᱮᱞ ᱨᱮ ᱜᱮ ᱛᱟᱦᱮᱱᱟ।",
+          "help": "ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ ᱡᱟᱦᱟᱸ ᱛᱮ ᱠᱷᱚᱨᱪᱟ ᱨᱩᱴᱤᱝ ᱫᱚ \"ᱦᱚᱭ\" ᱞᱮᱠᱟ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱠᱚ ᱥᱚᱥᱛᱟ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱮᱫᱟ, ᱢᱮᱱᱠᱷᱟᱱ ᱪᱟᱞᱟᱜ ᱠᱟᱱ ᱠᱟᱹᱢᱤ ᱠᱚᱢᱡᱚᱨ ᱞᱮᱠᱟ ᱥᱟᱸᱢᱟᱞᱟ ᱥᱮ ᱡᱷᱩᱠᱤ ᱢᱮᱱᱟᱜᱼᱟ।"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱥᱚᱨᱮᱥ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱥᱟᱢᱟᱱ ᱞᱟᱹᱠᱛᱤ",
+          "description": "ᱥᱟᱢᱟᱱ ᱥᱚᱨᱮᱥ ᱨᱮᱭᱟᱜ ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ ᱚᱱᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ: ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱟᱹᱜᱤᱫ ᱱᱟᱣᱟ ᱥᱚᱨᱮᱥ ᱫᱚ ᱢᱟᱲᱟᱝ ᱥᱚᱨᱮᱥ ᱨᱮᱭᱟᱜ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱞᱟᱹᱠᱛᱤ, 0.85 ᱠᱷᱚᱱ 1 ᱦᱟᱹᱵᱤᱡ।",
+          "help": "ᱠᱚᱢ ᱜᱚᱱᱚᱝ ᱫᱚ ᱵᱟᱲᱛᱤ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱠᱚ ᱡᱚᱵᱟᱵ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱮᱴᱟᱜ ᱥᱚᱨᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜ ᱡᱷᱩᱠᱤ ᱢᱮᱱᱟᱜᱼᱟ। ᱵᱷᱩᱞ ᱡᱚᱵᱟᱵ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱚᱨᱪᱟ ᱵᱟᱲᱛᱤ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚ ᱞᱟᱢᱟ ᱛᱟᱦᱮᱱ ᱢᱮ। ᱡᱚᱵᱟᱵ ᱫᱚ ᱡᱟᱦᱟᱸ ᱠᱚ ᱮᱢ ᱟᱠᱟᱱ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱜᱮ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱦᱩᱭᱟ।"
+        },
+        "ttl": {
+          "label": "ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜ ᱡᱚᱵᱟᱵ ᱪᱮᱫ ᱚᱠᱛᱚ ᱛᱟᱦᱮᱱ ᱦᱩᱭᱟ",
+          "description": "ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱚᱪᱚᱜ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱥᱟᱢᱟᱱ ᱥᱚᱨᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱚᱠᱛᱚ ᱮᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱟᱢᱟᱜ ᱡᱚᱵᱟᱵ ᱥᱮᱛᱟ ᱯᱩᱨᱟᱹᱱᱤ ᱦᱩᱭ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚᱢ ᱢᱮ।"
+        },
+        "maxEntriesPerAgent": {
+          "label": "ᱮᱡᱮᱱᱴ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ",
+          "description": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱫᱚ ᱯᱷᱤᱨ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱡᱚᱵᱟᱵ ᱛᱟᱦᱮᱱ ᱮᱫᱟ। ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱦᱩᱭ ᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ ᱠᱚ ᱵᱟᱛᱼᱟᱣ ᱟᱠᱚᱜᱼᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱵᱷᱟᱱᱰᱟᱨ ᱫᱚ ᱵᱟᱲᱛᱤ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱠᱚ ᱧᱟᱢᱟ ᱟᱨ ᱵᱟᱲᱛᱤ ᱥᱴᱚᱨᱮᱡ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "ᱵᱟᱛ ᱪᱤᱛ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ ᱟᱜ ᱨᱮᱠᱚᱨᱰ ᱛᱟᱦᱮᱱ ᱢᱮ",
+          "description": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱟᱜ ᱴᱩᱞ ᱠᱚᱞ ᱨᱮᱭᱟᱜ ᱪᱷᱚᱴᱚ ᱨᱮᱠᱚᱨᱰ ᱵᱟᱛ ᱪᱤᱛ ᱥᱟᱶ ᱥᱟᱸᱪᱟᱣ ᱢᱮ, ᱡᱟᱦᱟᱸ ᱛᱮ ᱛᱟᱭᱚᱢ ᱴᱚᱨᱱ ᱠᱚ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱞᱮᱱᱟ ᱚᱱᱟ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱵᱟᱛ ᱪᱤᱛ ᱤᱛᱤᱦᱟᱥ ᱠᱷᱟᱞᱤ ᱚᱞ ᱞᱮᱠᱟ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ; ᱚᱱᱟ ᱥᱮᱱ ᱮᱡᱮᱱᱴ ᱫᱚ ᱢᱟᱲᱟᱝ ᱴᱚᱨᱱ ᱨᱮ ᱟᱡ ᱴᱩᱞ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱞᱮᱱᱟ ᱚᱱᱟ ᱵᱟᱝ ᱵᱟᱰᱟᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱱᱚᱶᱟ ᱫᱚ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ।"
+        },
+        "replayEnabled": {
+          "label": "ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱴᱩᱞ ᱨᱮᱠᱚᱨᱰ ᱧᱮᱞᱟᱹ ᱢᱮ",
+          "description": "ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱟᱛ ᱪᱤᱛ ᱮᱢ ᱚᱠᱛᱚ ᱢᱟᱲᱟᱝ ᱴᱩᱞ ᱠᱚᱞ ᱨᱮᱭᱟᱜ ᱥᱟᱸᱪᱟᱣ ᱟᱠᱟᱱ ᱨᱮᱠᱚᱨᱰ ᱥᱮᱞᱮᱫ ᱢᱮ।",
+          "help": "ᱨᱮᱠᱚᱨᱰ ᱥᱟᱸᱪᱟᱣ ᱛᱟᱦᱮᱱ ᱢᱮᱱᱠᱷᱟᱱ ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱰᱮᱞ ᱟᱜ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱸᱣ ᱵᱟᱝ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ।"
+        },
+        "replayTurns": {
+          "label": "ᱢᱟᱲᱟᱝ ᱴᱚᱨᱱ ᱡᱟᱦᱟᱸ ᱟᱜ ᱴᱩᱞ ᱨᱮᱠᱚᱨᱰ ᱧᱮᱞᱟᱹ ᱦᱩᱭᱟ",
+          "description": "ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱱᱟᱣᱟ ᱴᱚᱨᱱ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱪᱮᱫ ᱟᱜ ᱨᱮᱠᱚᱨᱰ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱧᱮᱞᱟᱹ ᱦᱩᱭᱟ।",
+          "help": "ᱞᱟᱢᱟ ᱜᱚᱱᱚᱝ ᱫᱚ ᱞᱟᱢᱟ ᱠᱟᱹᱢᱤ ᱥᱮᱥᱚᱱ ᱨᱮ ᱜᱚᱲᱚ ᱮᱫᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱢᱚᱰᱮᱞ ᱟᱜ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱸᱣ ᱵᱟᱲᱛᱤ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
+        },
+        "maxEntriesPerTurn": {
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱛᱟᱞᱤᱠᱟ ᱟᱠᱟᱱ ᱴᱩᱞ ᱠᱚᱞ",
+          "description": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱟᱜ ᱪᱮᱫ ᱴᱩᱞ ᱠᱚᱞ ᱨᱮᱠᱚᱨᱰ ᱨᱮ ᱚᱞ ᱦᱩᱭᱟ। ᱛᱟᱭᱚᱢ ᱠᱚᱞ ᱠᱚ ᱠᱷᱟᱞᱤ ᱜᱚᱱᱚᱝ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱠᱚᱞ ᱪᱷᱚᱭ ᱟᱨ ᱥᱟᱱᱟᱢ ᱢᱤᱫ ᱢᱤᱫ ᱠᱚ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱞᱟᱹᱠᱛᱤ ᱠᱟᱱ ᱴᱚᱨᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ।"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱴᱩᱞ ᱨᱮᱠᱚᱨᱰ",
+          "description": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱟᱜ ᱨᱮᱠᱚᱨᱰ ᱨᱮᱭᱟᱜ ᱪᱮᱫ ᱚᱠᱷᱚᱨ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱧᱮᱞᱟᱹ ᱦᱩᱭᱟ; ᱵᱟᱠᱤ ᱠᱚ ᱜᱚᱱᱚᱝ ᱦᱩᱭᱟ, ᱛᱟᱞᱤᱠᱟ ᱵᱟᱝ ᱦᱩᱭᱟ।",
+          "help": "ᱛᱟᱭᱚᱢ ᱥᱟᱱᱟᱢ ᱴᱚᱨᱱ ᱨᱮ ᱠᱷᱚᱨᱪᱟ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ, ᱵᱟᱲᱛᱤ ᱵᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ।"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱪᱤᱛᱟᱹᱨ ᱟᱯᱞᱚᱰ (MB)",
+          "description": "ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱶ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱰᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱪᱤᱛᱟᱹᱨ, ᱢᱮᱜᱟᱵᱟᱭᱴ ᱨᱮ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱤᱫ ᱡᱷᱚᱛᱚ ᱯᱷᱟᱭᱞ ᱥᱤᱢᱟ ᱦᱚᱸ ᱢᱮᱱᱟᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱱᱚᱶᱟ ᱯᱟᱨ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱯᱷᱚᱴᱚ ᱟᱨ ᱥᱠᱨᱤᱱᱥᱚᱴ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱞᱟᱢᱟ ᱯᱷᱟᱭᱞ ᱠᱚ ᱵᱷᱮᱡᱟᱣ ᱨᱮ ᱥᱮᱛᱟ ᱟᱨ ᱢᱚᱰᱮᱞ ᱟᱜ ᱵᱟᱲᱛᱤ ᱠᱳᱴᱟ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
+        },
+        "maxAudioMb": {
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱚᱰᱤᱭᱳ ᱟᱯᱞᱚᱰ (MB)",
+          "description": "ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱶ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱰᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱚᱰᱤᱭᱳ ᱯᱷᱟᱭᱞ, ᱢᱮᱜᱟᱵᱟᱭᱴ ᱨᱮ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱤᱫ ᱡᱷᱚᱛᱚ ᱯᱷᱟᱭᱞ ᱥᱤᱢᱟ ᱦᱚᱸ ᱢᱮᱱᱟᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱱᱚᱶᱟ ᱯᱟᱨ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱞᱟᱢᱟ ᱨᱮᱠᱚᱨᱰᱤᱝ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱞᱟᱢᱟ ᱯᱷᱟᱭᱞ ᱠᱚ ᱵᱷᱮᱡᱟᱣ ᱨᱮ ᱥᱮᱛᱟ ᱟᱨ ᱢᱚᱰᱮᱞ ᱟᱜ ᱵᱟᱲᱛᱤ ᱠᱳᱴᱟ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
+        },
+        "maxVideoMb": {
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱵᱷᱤᱰᱤᱭᱳ ᱟᱯᱞᱚᱰ (MB)",
+          "description": "ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱶ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱰᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱵᱷᱤᱰᱤᱭᱳ, ᱢᱮᱜᱟᱵᱟᱭᱴ ᱨᱮ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱤᱫ ᱡᱷᱚᱛᱚ ᱯᱷᱟᱭᱞ ᱥᱤᱢᱟ ᱦᱚᱸ ᱢᱮᱱᱟᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱱᱚᱶᱟ ᱯᱟᱨ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱞᱟᱢᱟ ᱠᱞᱤᱯ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱞᱟᱢᱟ ᱯᱷᱟᱭᱞ ᱠᱚ ᱵᱷᱮᱡᱟᱣ ᱨᱮ ᱥᱮᱛᱟ ᱟᱨ ᱢᱚᱰᱮᱞ ᱟᱜ ᱵᱟᱲᱛᱤ ᱠᱳᱴᱟ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
+        },
+        "maxDocumentMb": {
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱫᱚᱠᱩᱢᱮᱱᱴ ᱟᱯᱞᱚᱰ (MB)",
+          "description": "ᱪᱮᱴ ᱵᱷᱮᱡᱟᱣ ᱥᱟᱶ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱰᱟᱣ ᱫᱟᱲᱮᱭᱟᱜ ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱫᱚᱠᱩᱢᱮᱱᱴ ᱥᱮ ᱥᱯᱨᱮᱰᱥᱤᱴ, ᱢᱮᱜᱟᱵᱟᱭᱴ ᱨᱮ। ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱤᱫ ᱡᱷᱚᱛᱚ ᱯᱷᱟᱭᱞ ᱥᱤᱢᱟ ᱦᱚᱸ ᱢᱮᱱᱟᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱱᱚᱶᱟ ᱯᱟᱨ ᱵᱟᱝ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱞᱟᱢᱟ ᱨᱤᱯᱚᱨᱴ ᱟᱨ ᱞᱟᱢᱟ ᱰᱮᱴᱟ ᱯᱷᱟᱭᱞ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱞᱟᱢᱟ ᱯᱷᱟᱭᱞ ᱠᱚ ᱯᱨᱚᱥᱮᱥ ᱨᱮ ᱥᱮᱛᱟ ᱮᱫᱟ।"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "ᱵᱟᱝ ᱯᱩᱨᱟᱹ ᱥᱟᱵᱟᱫ ᱨᱮ ᱡᱟᱹᱱᱟᱹᱨᱤ",
+          "description": "ᱡᱚᱵᱟᱵ ᱫᱚ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱢᱮᱱ ᱞᱮᱱᱟ ᱚᱱᱟ ᱵᱟᱝ ᱪᱷᱚᱭ ᱠᱟᱛᱮ ᱛᱟᱦᱮᱱ ᱞᱮᱠᱟ ᱧᱮᱞ ᱠᱷᱟᱱ ᱢᱚᱰᱮᱞ ᱠᱚ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱢᱮ।",
+          "help": "ᱚᱱᱚᱸ ᱨᱮ ᱜᱮ ᱪᱷᱚᱭ ᱞᱟᱹᱠᱛᱤ ᱛᱟᱦᱮᱱ ᱡᱚᱵᱟᱵ ᱨᱮ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱥᱠᱨᱤᱭ ᱦᱩᱭ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ।"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "ᱯᱩᱨᱟᱹᱱᱤ ᱴᱩᱞ ᱯᱷᱚᱞ ᱥᱟᱯᱷᱟ ᱢᱮ",
+            "description": "ᱞᱟᱢᱟ ᱴᱩᱞ ᱨᱚᱱ ᱨᱮ, ᱵᱟᱛ ᱪᱤᱛ ᱠᱚ ᱢᱚᱰᱮᱞ ᱟᱜ ᱥᱤᱢᱟ ᱛᱟᱞᱟ ᱨᱮ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱯᱩᱨᱟᱹᱱᱤ ᱴᱩᱞ ᱯᱷᱚᱞ ᱠᱚ ᱢᱤᱫ ᱪᱷᱚᱴᱚ ᱯᱞᱮᱥᱦᱚᱞᱰᱟᱨ ᱥᱟᱶ ᱵᱚᱫᱚᱞ ᱢᱮ।",
+            "help": "ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱡᱷᱚᱛᱚ ᱢᱟᱲᱟᱝ ᱯᱷᱚᱞ ᱧᱮᱞ ᱞᱟᱹᱠᱛᱤ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ; ᱞᱟᱢᱟ ᱨᱚᱱ ᱚᱠᱛᱚ ᱢᱚᱰᱮᱞ ᱟᱜ ᱞᱚᱸᱜᱚ ᱥᱤᱢᱟ ᱨᱮ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+          },
+          "thresholdChars": {
+            "label": "ᱥᱟᱯᱷᱟ ᱮᱦᱚᱵ ᱟᱜ ᱞᱚᱸᱜᱚ",
+            "description": "ᱯᱩᱨᱟᱹᱱᱤ ᱥᱟᱯᱷᱟ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱢᱤᱫ ᱴᱚᱨᱱ ᱟᱜ ᱴᱩᱞ ᱯᱷᱚᱞ ᱪᱮᱫ ᱞᱟᱢᱟ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+            "help": "ᱵᱟᱲᱛᱤ ᱯᱷᱚᱞ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ, ᱞᱟᱢᱟ ᱨᱚᱱ ᱪᱷᱚᱴᱚ ᱟᱨ ᱥᱚᱥᱛᱟ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ।"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "ᱟᱹᱰᱤ ᱞᱟᱢᱟ ᱥᱟᱸᱜᱤᱛ ᱵᱷᱮᱡᱟᱣ",
+          "description": "ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱞᱟᱢᱟ ᱵᱷᱮᱡᱟᱣ ᱠᱚ ᱛᱟᱠᱠᱟᱣ ᱥᱟᱸᱜᱤᱛ ᱵᱟᱝ ᱢᱟᱱᱟᱣᱟ। ᱥᱟᱸᱜᱤᱛ ᱵᱷᱮᱡᱟᱣ ᱫᱚ ᱥᱮᱛᱟ, ᱥᱚᱥᱛᱟ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱜᱩᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱵᱷᱮᱡᱟᱣ ᱢᱩᱞ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ; ᱠᱷᱚᱨᱪᱟ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ।"
+        },
+        "maxClauses": {
+          "label": "ᱢᱤᱫ ᱥᱟᱸᱜᱤᱛ ᱵᱷᱮᱡᱟᱣ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱵᱟᱠᱭᱟ",
+          "description": "ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱵᱟᱠᱭᱟ ᱛᱟᱦᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱠᱚ ᱛᱟᱠᱠᱟᱣ ᱥᱟᱸᱜᱤᱛ ᱵᱟᱝ ᱢᱟᱱᱟᱣᱟ।",
+          "help": "ᱜᱩᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱵᱷᱮᱡᱟᱣ ᱢᱩᱞ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱵᱷᱮᱡᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ।"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱟᱠᱟᱱ ᱮᱡᱮᱱᱴ ᱢᱮᱢᱚᱨᱤ",
+          "description": "ᱵᱷᱮᱡᱟᱣ ᱥᱟᱱᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱢᱮᱢᱚᱨᱤ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱪᱮᱫ ᱠᱚ ᱧᱮᱞ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱢᱮᱢᱚᱨᱤ ᱫᱚ ᱵᱟᱲᱛᱤ ᱥᱟᱸᱥᱟᱨ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱲᱛᱤ ᱴᱚᱠᱮᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
+        },
+        "tenantTopK": {
+          "label": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱟᱠᱟᱱ ᱛᱮᱦᱮᱸ ᱢᱮᱢᱚᱨᱤ",
+          "description": "ᱵᱷᱮᱡᱟᱣ ᱥᱟᱱᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱛᱮᱦᱮᱸ ᱟᱠᱟᱱ ᱢᱮᱢᱚᱨᱤ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱪᱮᱫ ᱠᱚ ᱧᱮᱞ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱢᱮᱢᱚᱨᱤ ᱫᱚ ᱵᱟᱲᱛᱤ ᱥᱟᱸᱥᱟᱨ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱲᱛᱤ ᱴᱚᱠᱮᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "ᱮᱡᱮᱱᱴ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱢᱮᱢᱚᱨᱤ",
+          "description": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱪᱮᱫ ᱢᱮᱢᱚᱨᱤ ᱛᱟᱦᱮᱱ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱦᱩᱭ ᱠᱷᱟᱱ ᱡᱷᱚᱛᱚ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ ᱟᱨ ᱠᱚᱢ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱠᱚ ᱵᱟᱛᱼᱟᱣ ᱟᱠᱚᱜᱼᱟ।",
+          "help": "ᱢᱟᱱᱩᱸ ᱨᱮᱭᱟᱜ ᱵᱟᱲᱛᱤ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱞᱟᱹᱠᱛᱤ ᱜᱚᱲᱚᱭᱤᱭᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱱᱚᱶᱟ ᱥᱟᱸᱪᱟᱣ ᱟᱨ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱠᱷᱚᱨᱪᱟ ᱦᱚᱸ ᱵᱟᱲᱦᱟᱣᱟ।"
+        }
+      },
+      "tenant": {
+        "maxMemories": {
+          "label": "ᱵᱟᱲᱛᱤ ᱛᱮ ᱛᱮᱦᱮᱸ ᱟᱠᱟᱱ ᱡᱟᱹᱱᱟᱹᱨᱤ",
+          "description": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱛᱮᱦᱮᱸ ᱟᱠᱟᱱ ᱪᱮᱫ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱛᱟᱦᱮᱱ ᱦᱩᱭᱟ। ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱦᱩᱭ ᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱠᱷᱚᱱ ᱯᱩᱨᱟᱹᱱᱤ ᱠᱚ ᱵᱟᱛᱼᱟᱣ ᱟᱠᱚᱜᱼᱟ।",
+          "help": "ᱛᱮᱦᱮᱸ ᱟᱠᱟᱱ ᱵᱟᱰᱟᱭ ᱨᱮ ᱵᱷᱚᱨᱚᱥᱟ ᱠᱟᱱ ᱞᱟᱢᱟ ᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱱᱚᱶᱟ ᱥᱴᱚᱨᱮᱡ ᱟᱨ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱠᱷᱚᱨᱪᱟ ᱦᱚᱸ ᱵᱟᱲᱦᱟᱣᱟ। ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ।"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "ᱰᱤᱵᱟᱭᱥ ᱪᱮᱴ ᱥᱮᱱ ᱮᱢ ᱟᱠᱟᱱ ᱡᱟᱹᱱᱟᱹᱨᱤ",
+          "description": "ᱰᱤᱵᱟᱭᱥ ᱥᱮᱥᱚᱱ ᱮᱦᱚᱵ ᱚᱠᱛᱚ ᱚᱱᱟ ᱥᱮᱱ ᱪᱮᱫ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱥᱚᱯᱷᱮᱨ ᱦᱩᱭᱟ।",
+          "help": "ᱰᱤᱵᱟᱭᱥ ᱢᱚᱰᱮᱞ ᱟᱜ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱸᱣ ᱪᱷᱚᱴᱚ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱠᱚᱢ ᱛᱟᱦᱮᱱ ᱢᱮ।"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "ᱜᱨᱟᱯᱷ ᱢᱮᱢᱚᱨᱤ ᱠᱷᱚᱱ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱟᱠᱟᱱ ᱛᱷᱚᱠ",
+          "description": "ᱢᱤᱫ ᱞᱩᱠᱟᱯ ᱨᱮ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱚᱱᱟ ᱟᱜ ᱥᱚᱵᱟᱱᱫᱷ ᱢᱮᱢᱚᱨᱤ ᱠᱷᱚᱱ ᱧᱮᱞᱟᱹ ᱟᱠᱟᱱ ᱵᱟᱲᱛᱤ ᱛᱮ ᱛᱷᱚᱠ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱛᱷᱚᱠ ᱫᱚ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱥᱮ ᱵᱤᱥᱚᱭ ᱟᱜ ᱵᱟᱲᱛᱤ ᱥᱚᱨᱮᱥ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱚᱱᱟ ᱟᱜ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱸᱣ ᱟᱜ ᱵᱟᱲᱛᱤ ᱵᱷᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ। ᱠᱚᱢ ᱛᱷᱚᱠ ᱫᱚ ᱡᱚᱵᱟᱵ ᱠᱚ ᱢᱤᱫ ᱴᱷᱟᱸᱣ ᱨᱮ ᱛᱟᱦᱮᱱ ᱮᱫᱟ। ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ, ᱥᱮ ᱵᱟᱲᱛᱤ ᱥᱮ ᱠᱚᱢ ᱞᱟᱹᱠᱛᱤ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴ ᱢᱮ।"
+        },
+        "recallMaxPaths": {
+          "label": "ᱞᱩᱠᱟᱯ ᱥᱟᱱᱟᱢ ᱨᱮ ᱯᱟᱲᱦᱟᱣ ᱟᱠᱟᱱ ᱜᱨᱟᱯᱷ ᱨᱟᱥᱛᱟ",
+          "description": "ᱢᱤᱫ ᱞᱩᱠᱟᱯ ᱟᱜ ᱛᱷᱚᱠ ᱠᱷᱚᱡ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱢᱚᱨᱤ ᱜᱨᱟᱯᱷ ᱟᱜ ᱪᱮᱫ ᱡᱚᱰᱟᱣ ᱠᱚ ᱯᱟᱲᱦᱟᱣ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱡᱚᱰᱟᱣ ᱫᱚ ᱢᱤᱫ ᱛᱷᱚᱠ ᱥᱮᱱ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱜᱷᱟᱱᱟ ᱡᱚᱰᱟᱣ ᱟᱠᱟᱱ ᱢᱮᱢᱚᱨᱤ ᱨᱮ ᱡᱷᱚᱛᱚ ᱠᱷᱚᱡ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱜᱚᱱᱚᱝ ᱞᱟᱹᱠᱛᱤ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱟᱲᱛᱤ ᱜᱚᱱᱚᱝ ᱫᱚ ᱥᱟᱱᱟᱢ ᱞᱩᱠᱟᱯ ᱥᱮᱛᱟ ᱮᱫᱟ।"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "ᱯᱨᱚᱢᱯᱴ ᱨᱮ ᱛᱟᱞᱤᱠᱟ ᱟᱠᱟᱱ ᱵᱟᱲᱛᱤ ᱛᱮ ᱥᱠᱤᱞ",
+          "description": "ᱮᱡᱮᱱᱴ ᱠᱚ ᱚᱱᱟ ᱢᱮᱱᱟᱜ ᱞᱮᱠᱟ ᱵᱟᱰᱟᱭ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱟᱜ ᱱᱤᱨᱫᱮᱥ ᱨᱮ ᱟᱢᱟᱜ ᱪᱮᱫ ᱥᱠᱤᱞ ᱟᱜ ᱧᱩᱛᱩᱢ ᱮᱢ ᱦᱩᱭᱟ। ᱵᱟᱠᱤ ᱠᱚ ᱜᱚᱱᱚᱝ ᱦᱩᱭᱟ, ᱛᱟᱞᱤᱠᱟ ᱵᱟᱝ ᱦᱩᱭᱟ।",
+          "help": "ᱟᱢᱟᱜ ᱵᱟᱲᱛᱤ ᱥᱠᱤᱞ ᱢᱮᱱᱟᱜ ᱠᱷᱟᱱ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱛᱟᱞᱤᱠᱟ ᱟᱠᱟᱱ ᱥᱟᱱᱟᱢ ᱥᱠᱤᱞ ᱫᱚ ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱢᱚᱰᱮᱞ ᱟᱜ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱸᱣ ᱟᱜ ᱪᱷᱚᱴᱚ ᱵᱷᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ। ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ।"
+        },
+        "maxBlockChars": {
+          "label": "ᱯᱨᱚᱢᱯᱴ ᱨᱮ ᱥᱠᱤᱞ ᱛᱟᱞᱤᱠᱟ ᱟᱜ ᱞᱚᱸᱜᱚ",
+          "description": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱱᱤᱨᱫᱮᱥ ᱨᱮ ᱥᱠᱤᱞ ᱛᱟᱞᱤᱠᱟ ᱪᱮᱫ ᱚᱠᱷᱚᱨ ᱞᱟᱹᱜᱩᱣᱟ। ᱯᱩᱨᱟᱹ ᱦᱩᱭ ᱠᱷᱟᱱ ᱛᱟᱭᱚᱢ ᱥᱠᱤᱞ ᱠᱚ ᱧᱩᱛᱩᱢ ᱦᱟᱹᱵᱤᱡ ᱪᱷᱚᱴᱚ ᱦᱩᱭᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱥᱠᱤᱞ ᱟᱜ ᱵᱩᱡᱷᱟᱣ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ, ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱴᱚᱠᱮᱱ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ। ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱞᱟᱜᱩ ᱦᱩᱭᱟ।"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "ᱥᱚᱨᱮᱥ ᱠᱚᱞ ᱫᱚ ᱮᱡᱮᱱᱴ ᱟᱜ ᱢᱚᱰᱮᱞ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ",
+        "description": "ᱚᱱᱟ ᱠᱚ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱢᱚᱰᱮᱞ ᱵᱟᱪᱷᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱠᱷᱟᱱ, ᱥᱟᱨ, ᱜᱚᱲᱚ ᱟᱨ ᱥᱟᱸᱥᱟᱨ ᱠᱚᱢᱯᱨᱮᱥᱚᱱ ᱫᱚ ᱚᱱᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱶ ᱜᱮ ᱢᱚᱰᱮᱞ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ ᱡᱟᱹᱭᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱠᱟᱹᱢᱤ ᱮᱫᱟ।",
+        "help": "ᱱᱚᱶᱟ ᱠᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱢᱚᱰᱮᱞ ᱵᱟᱪᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱢᱮ, ᱡᱟᱦᱟᱸ ᱥᱚᱥᱛᱟ ᱥᱮ ᱮᱴᱟᱜ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ",
+        "description": "ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱟᱡ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ ᱪᱮᱫ ᱦᱩᱭᱟ, ᱱᱢᱩᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱢᱚᱰᱮᱞ ᱵᱚᱸᱫ ᱛᱟᱦᱮᱱ ᱠᱷᱟᱱ। ᱵᱚᱸᱫ ᱫᱚ ᱠᱟᱹᱢᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱫᱟ; ᱠᱷᱩᱞᱟᱹ ᱫᱚ ᱚᱱᱟ ᱠᱚ ᱯᱟᱨ ᱦᱩᱭ ᱮᱢᱟ।",
+        "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴᱤᱝ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱚᱸᱫ ᱫᱚ ᱪᱮᱫ ᱠᱚ ᱡᱟᱹᱱᱟᱹᱜ ᱛᱮ ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱮᱫᱟ ᱚᱱᱟ ᱵᱷᱮᱛᱟ ᱥᱩᱨᱠᱷᱟ ᱮᱢᱟ, ᱵᱷᱮᱜᱟᱨ ᱚᱠᱛᱚ ᱠᱟᱹᱢᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱫᱟ ᱚᱱᱟ ᱟᱜ ᱢᱩᱞ ᱛᱮ।",
+        "options": {
+          "open": "ᱠᱷᱩᱞᱟᱹ: ᱠᱟᱹᱢᱤ ᱯᱟᱨ ᱦᱩᱭ ᱮᱢ ᱢᱮ",
+          "closed": "ᱵᱚᱸᱫ: ᱠᱟᱹᱢᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱢᱮ"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "ᱴᱩᱞ-ᱠᱚᱞ ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ",
+          "description": "ᱡᱷᱩᱠᱤ ᱴᱩᱞ ᱠᱚᱞ ᱪᱮᱠ ᱮᱫᱟ ᱚᱱᱟ ᱪᱮᱠ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱵᱟᱝ ᱮᱢ ᱫᱟᱲᱮ ᱠᱷᱟᱱ ᱪᱮᱫ ᱦᱩᱭᱟ। ᱤᱫᱷᱤᱛ ᱫᱚ ᱛᱟᱞᱟ ᱨᱮᱭᱟᱜ ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱥᱮᱴᱤᱝ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।",
+          "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴᱤᱝ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ ᱵᱚᱸᱫ ᱫᱚ ᱴᱩᱞ ᱠᱚᱞ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱫᱟ।",
+          "options": {
+            "open": "ᱠᱷᱩᱞᱟᱹ: ᱴᱩᱞ ᱠᱚᱞ ᱯᱟᱨ ᱦᱩᱭ ᱮᱢ ᱢᱮ",
+            "inherit": "ᱥᱩᱨᱠᱷᱟ-ᱪᱮᱠ ᱥᱮᱴᱤᱝ ᱢᱟᱱᱟᱣ ᱢᱮ",
+            "closed": "ᱵᱚᱸᱫ: ᱴᱩᱞ ᱠᱚᱞ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱢᱮ"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "ᱨᱩᱠᱷᱤᱭᱟ ᱟᱜ ᱵᱤᱥ ᱥᱠᱳᱨ",
+          "description": "ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱟᱜ 0 ᱠᱷᱚᱱ 100 ᱵᱤᱥ ᱢᱟᱯ ᱨᱮ ᱱᱚᱶᱟ ᱥᱮ ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱥᱠᱳᱨ ᱧᱟᱢ ᱟᱠᱟᱱ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱨᱩᱠᱷᱤᱭᱟ ᱦᱩᱭᱟ। ᱠᱚᱢ ᱜᱚᱱᱚᱝ ᱫᱚ ᱵᱟᱲᱛᱤ ᱨᱩᱠᱷᱤᱭᱟ ᱮᱫᱟ।",
+          "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱷᱟᱞᱤ ᱠᱚᱢ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱪᱮᱛᱟᱱ ᱛᱮ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱵᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱟᱹᱰᱤ ᱠᱚᱢ ᱢᱟᱱ ᱫᱚ ᱥᱟᱫᱷᱟᱨᱚᱬ ᱥᱟᱯᱷᱟ ᱥᱟᱵᱟᱫ ᱠᱚ ᱦᱚᱸ ᱨᱩᱠᱷᱤᱭᱟ ᱮᱫᱟ।"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "ᱡᱮᱞᱵᱨᱮᱠ ᱪᱮᱥᱴᱟ ᱞᱟᱹᱜᱤᱫ ᱥᱠᱮᱱ ᱟᱠᱟᱱ ᱚᱞ",
+          "description": "ᱡᱮᱞᱵᱨᱮᱠ ᱯᱮᱴᱟᱨᱱ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱵᱷᱮᱡᱟᱣ ᱥᱮ ᱡᱚᱵᱟᱵ ᱟᱜ ᱪᱮᱫ ᱵᱷᱟᱜ ᱥᱠᱮᱱ ᱦᱩᱭᱟ। ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱚᱞ ᱥᱠᱮᱱ ᱵᱟᱝ ᱦᱩᱭᱟ।",
+          "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱪᱮᱛᱟᱱ ᱛᱮ ᱵᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱟᱲᱛᱤ ᱨᱟᱯᱟ ᱤᱱᱰᱚ ᱫᱚ ᱯᱮᱰᱤᱝ ᱛᱟᱭᱚᱢ ᱞᱩᱠᱟᱣ ᱟᱠᱟᱱ ᱟᱠᱨᱚᱢᱚᱬ ᱠᱚ ᱨᱩᱠᱷᱤᱭᱟ ᱮᱫᱟ, ᱠᱚᱢ ᱵᱟᱲᱛᱤ ᱯᱨᱚᱥᱮᱥᱤᱝ ᱟᱜ ᱢᱩᱞ ᱛᱮ।"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "ᱥᱩᱨᱠᱷᱟ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱥᱮᱱ ᱧᱮᱞᱟᱹ ᱟᱠᱟᱱ ᱚᱞ",
+          "description": "ᱪᱮᱠ ᱟᱠᱟᱱ ᱚᱞ ᱟᱜ ᱪᱮᱫ ᱵᱷᱟᱜ AI ᱥᱩᱨᱠᱷᱟ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱯᱟᱲᱦᱟᱣᱟ। ᱱᱚᱶᱟ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱚᱞ ᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱵᱟᱝ ᱦᱩᱭᱟ।",
+          "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱪᱮᱛᱟᱱ ᱛᱮ ᱵᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱟᱲᱦᱟᱣ ᱫᱚ ᱞᱟᱢᱟ ᱴᱩᱞ ᱯᱷᱚᱞ ᱠᱚ ᱯᱩᱨᱟᱹ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱮᱢᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱠᱚᱞ ᱪᱚᱲᱚ ᱦᱩᱭᱟ।"
+        }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱟᱨ ᱠᱷᱟᱞᱤ-ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ",
+          "description": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱥᱛᱚᱨ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱠᱷᱚᱡᱮᱛ ᱥᱮ ᱞᱩᱠᱟᱯ ᱞᱮᱠᱟ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱦᱚᱸ ᱟᱢᱠᱚ ᱪᱷᱚᱞᱟ ᱥᱮ ᱵᱟᱝ। ᱚᱞ, ᱵᱷᱮᱡᱟᱣ ᱟᱨ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱵᱟᱝ ᱥᱟᱸᱜᱤᱛ ᱞᱮᱱᱟ ᱴᱩᱞ ᱠᱚ ᱛᱟᱠᱠᱟᱣ ᱪᱷᱚᱞᱟ।",
+          "help": "ᱟᱢ ᱱᱚᱶᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴᱤᱝ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱥᱟᱱᱟᱢ ᱵᱷᱮᱛᱟ ᱪᱷᱚᱞ ᱫᱚ ᱟᱹᱰᱤ ᱥᱩᱨᱠᱷᱤᱛ ᱵᱟᱪᱷᱟᱣ ᱠᱟᱱᱟ; ᱠᱷᱟᱞᱤ-ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱠᱚ ᱪᱟᱞᱟᱜ ᱮᱢ ᱠᱷᱟᱱ ᱢᱤᱫ ᱥᱚᱨᱮᱥ ᱠᱚᱢ ᱦᱩᱭᱟ, ᱢᱮᱱᱠᱷᱟᱱ ᱵᱟᱝ ᱵᱤᱥᱚᱭ ᱠᱷᱚᱡᱮᱛ ᱵᱚᱸᱫ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱢᱚᱠᱟ ᱦᱚᱸ ᱪᱟᱞᱟᱜᱼᱟ। ᱡᱟᱦᱟᱸ ᱮᱡᱮᱱᱴ ᱫᱚ ᱵᱷᱮᱛᱟ ᱰᱮᱴᱟ ᱯᱟᱲᱦᱟᱣ, ᱵᱟᱝ ᱵᱷᱚᱨᱚᱥᱟ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱵᱷᱮᱡᱟᱣ ᱟᱨ ᱰᱮᱴᱟ ᱵᱟᱦᱨᱮ ᱵᱷᱮᱡᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱪᱮᱫ ᱢᱮᱱᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱠᱚᱞ ᱨᱮ ᱚᱱᱟ ᱠᱚ ᱪᱷᱚᱞᱟ।",
+          "options": {
+            "auto-allow": "ᱠᱷᱟᱞᱤ-ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱠᱚ ᱵᱟᱝ ᱪᱷᱚᱞ ᱠᱟᱛᱮ ᱪᱟᱞᱟᱜ ᱮᱢ ᱢᱮ",
+            "gate": "ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱠᱚᱞ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱷᱚᱞ ᱢᱮ"
+          }
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱰᱮᱞ",
+          "description": "ᱢᱩᱞᱭᱟᱸᱠᱚᱱ ᱨᱚᱱ ᱠᱚ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱞᱟᱹᱜᱤᱫ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱢᱚᱰᱮᱞ। ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱫᱚᱦᱚᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱠᱟᱱ ᱢᱚᱰᱮᱞ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱵᱟᱪᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱟᱞᱤ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+          "help": "ᱞᱟᱢᱟ ᱵᱷᱚᱨᱚᱥᱟ ᱟᱜ ᱜᱨᱮᱰ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱞᱟᱜᱩ ᱢᱚᱰᱮᱞ ᱥᱮ ᱠᱷᱚᱨᱪᱟ ᱵᱷᱮᱜᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱥᱚᱥᱛᱟ ᱢᱚᱰᱮᱞ ᱵᱮᱵᱷᱟᱨ ᱢᱮ। ᱢᱚᱰᱮᱞ ᱫᱚ ᱟᱢᱟᱜ ᱡᱚᱰᱟᱣ ᱟᱠᱟᱱ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱨᱮ ᱢᱮᱱᱟᱜ ᱞᱟᱹᱠᱛᱤ।"
+        },
+        "callTimeoutSeconds": {
+          "label": "ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱠᱚᱞ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱚᱠᱛᱚ",
+          "description": "ᱢᱤᱫ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱠᱚᱞ ᱵᱟᱭᱡᱷᱮᱛ ᱜᱚᱱᱚᱝ ᱦᱩᱭ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱮᱫ ᱚᱠᱛᱚ ᱞᱟᱜᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+          "help": "ᱥᱮᱛᱟ ᱢᱚᱰᱮᱞ ᱪᱮᱛᱟᱱ ᱴᱟᱭᱢᱟᱣᱴ ᱦᱩᱭ ᱠᱷᱟᱱ ᱵᱟᱲᱦᱟᱣ ᱢᱮ; ᱵᱟᱭᱡᱷᱮᱛ ᱠᱚᱞ ᱫᱚ ᱢᱩᱞᱭᱟᱸᱠᱚᱱ ᱯᱷᱚᱞ ᱵᱟᱝ ᱯᱩᱨᱟᱹ ᱮᱫᱟ।"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "ᱴᱮᱥᱴ ᱠᱮᱥ ᱥᱟᱱᱟᱢ ᱟᱜ ᱯᱷᱤᱨ ᱯᱷᱤᱨ",
+          "description": "ᱨᱚᱱ ᱱᱚᱠᱚᱞ ᱵᱟᱝ ᱟᱠᱟᱱ ᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱴᱮᱥᱴ ᱠᱮᱥ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱪᱟᱞᱟᱣ ᱦᱩᱭᱟ। ᱵᱟᱲᱛᱤ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱫᱚ ᱮᱡᱮᱱᱴ ᱪᱮᱫ ᱥᱟᱢᱟᱱ ᱠᱟᱱᱟ ᱚᱱᱟ ᱧᱮᱞᱟᱹᱭᱟ।",
+          "help": "ᱥᱟᱱᱟᱢ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱫᱚ ᱢᱤᱫ ᱨᱚᱱ ᱟᱜ ᱠᱷᱚᱨᱪᱟ ᱟᱨ ᱚᱠᱛᱚ ᱵᱟᱲᱦᱟᱣᱟ।"
+        },
+        "defaultMode": {
+          "label": "ᱢᱩᱞᱭᱟᱸᱠᱚᱱ ᱪᱮᱠᱟ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ",
+          "description": "ᱨᱚᱱ ᱥᱮ ᱚᱱᱟ ᱟᱜ ᱰᱮᱴᱟᱥᱮᱴ ᱵᱟᱝ ᱢᱮᱛ ᱠᱷᱟᱱ, ᱢᱩᱞᱭᱟᱸᱠᱚᱱ ᱨᱚᱱ ᱫᱚ ᱮᱡᱮᱱᱴ ᱠᱚ ᱟᱡ ᱴᱩᱞ ᱥᱟᱶ ᱥᱩᱨᱠᱷᱤᱛ ᱥᱮᱱᱰᱵᱚᱠᱥ ᱨᱮ ᱨᱤᱯᱞᱮ ᱮᱫᱟ (ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ) ᱥᱮ ᱠᱷᱟᱞᱤ ᱚᱞ ᱨᱮ ᱡᱚᱵᱟᱵ ᱮᱢᱟ (ᱥᱮᱛᱟ)।",
+          "help": "ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ ᱫᱚ ᱟᱢᱟᱜ ᱵᱮᱵᱷᱟᱨᱤᱭᱟᱹ ᱠᱚ ᱡᱟᱦᱟᱸ ᱧᱟᱢᱟ ᱚᱱᱟ, ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱥᱮᱞᱮᱫ, ᱪᱮᱠ ᱮᱫᱟ ᱟᱨ ᱠᱷᱚᱨᱪᱟ ᱵᱟᱲᱛᱤ ᱠᱟᱱᱟ। ᱚᱱᱟ ᱨᱮ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱴᱩᱞ ᱠᱚ ᱥᱟᱹᱨᱤ ᱛᱮ ᱪᱟᱞᱟᱜᱼᱟ; ᱰᱮᱴᱟ ᱵᱚᱫᱚᱞ, ᱵᱷᱮᱡᱟᱣ ᱵᱷᱮᱡᱟᱣ ᱥᱮ ᱯᱟᱭᱥᱟ ᱠᱷᱚᱨᱪᱟ ᱫᱟᱲᱮᱭᱟᱜ ᱠᱟᱱ ᱡᱷᱚᱛᱚ ᱱᱚᱠᱚᱞ ᱦᱩᱭᱟ ᱟᱨ ᱨᱚᱱ ᱨᱮ ᱛᱟᱞᱤᱠᱟ ᱦᱩᱭᱟ। ᱥᱮᱛᱟ ᱫᱚ ᱥᱚᱥᱛᱟ ᱟᱨ ᱴᱩᱞ ᱵᱮᱵᱷᱟᱨ ᱵᱤᱥᱚᱭ ᱨᱮ ᱪᱮᱫᱽ ᱵᱟᱝ ᱢᱮᱛᱟ।",
+          "options": {
+            "full": "ᱥᱮᱱᱰᱵᱚᱠᱥ ᱨᱮ ᱯᱩᱨᱟᱹ ᱯᱟᱭᱯᱞᱟᱭᱱ",
+            "quick": "ᱥᱮᱛᱟ: ᱠᱷᱟᱞᱤ ᱚᱞ ᱡᱚᱵᱟᱵ"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "ᱵᱟᱲᱛᱤ ᱛᱮ ᱥᱟᱶᱛᱮ ᱪᱟᱞᱟᱜ ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ",
+        "description": "ᱢᱤᱫ ᱠᱟᱹᱢᱤ ᱮᱢ ᱫᱚ ᱢᱤᱫ ᱚᱠᱛᱚ ᱨᱮ ᱪᱮᱫ ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱥᱮ ᱜᱚᱲᱚ ᱮᱡᱮᱱᱴ ᱮᱦᱚᱵ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱵᱷᱮᱜᱟᱨ ᱠᱚ ᱥᱤᱢᱟ ᱯᱟᱨ ᱦᱩᱭ ᱞᱮᱠᱟ ᱢᱮᱛ ᱮᱫᱟ।",
+        "help": "ᱞᱟᱢᱟ ᱥᱚᱫᱷᱚ ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ, ᱠᱷᱚᱨᱪᱟ ᱟᱨ ᱵᱚᱡᱷᱟ ᱠᱚᱢ ᱛᱟᱦᱮᱱ ᱞᱟᱹᱜᱤᱫ ᱠᱚᱢ ᱢᱮ।"
+      },
+      "branchTimeoutSeconds": {
+        "label": "ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱚᱠᱛᱚ",
+        "description": "ᱮᱢ ᱟᱠᱟᱱ ᱢᱤᱫ ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱴᱟᱭᱢᱟᱣᱴ ᱢᱮᱛ ᱠᱚ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱮᱫ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+        "help": "ᱥᱮᱛᱟ ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱦᱟᱣ ᱢᱮ। ᱛᱟᱦᱮᱱ ᱟᱠᱟᱱ ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱫᱚ ᱱᱚᱶᱟ ᱚᱠᱛᱚ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱯᱩᱨᱟᱹ ᱡᱚᱵᱟᱵ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱨᱩᱠᱷᱤᱭᱟᱭᱟ।"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "ᱥᱟᱱᱟᱢ ᱯᱷᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱠᱷᱚᱡᱮᱛ ᱟᱜ ᱯᱷᱮᱞᱟᱣ",
+          "description": "ᱵᱟᱰᱟᱭ ᱠᱷᱚᱡᱮᱛ ᱫᱚ ᱢᱩᱨᱩᱛ ᱨᱮ ᱯᱷᱤᱨ ᱮᱢ ᱟᱠᱟᱱ ᱥᱟᱱᱟᱢ ᱴᱩᱠᱨᱟ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱥᱟᱸᱜᱤᱛ ᱴᱩᱠᱨᱟ ᱡᱚᱢᱟ ᱮᱫᱟ।",
+          "help": "ᱵᱟᱲᱛᱤ ᱜᱚᱱᱚᱝ ᱫᱚ ᱨᱮᱱᱠᱤᱝ ᱵᱟᱪᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱲᱛᱤ ᱮᱢᱟ, ᱡᱟᱦᱟᱸ ᱫᱚ ᱵᱟᱲᱛᱤ ᱫᱚᱠᱩᱢᱮᱱᱴ ᱢᱤᱫ ᱞᱮᱠᱟ ᱠᱷᱟᱱ ᱜᱚᱲᱚ ᱮᱫᱟ, ᱢᱮᱱᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱠᱷᱚᱡᱮᱛ ᱨᱮ ᱵᱟᱲᱛᱤ ᱚᱠᱛᱚ ᱟᱨ ᱠᱚᱢᱯᱩᱴ ᱞᱟᱹᱠᱛᱤ। ᱠᱷᱚᱡᱮᱛ ᱥᱮᱛᱟ ᱧᱮᱞᱚᱜ ᱠᱷᱟᱱ ᱠᱚᱢ ᱢᱮ। ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱧᱮᱞᱟᱹ ᱴᱩᱠᱨᱟ ᱜᱚᱱᱚᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞᱟ।"
+        },
+        "candidatePoolMax": {
+          "label": "ᱠᱷᱚᱡᱮᱛ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ ᱥᱟᱸᱜᱤᱛ",
+          "description": "ᱪᱮᱫ ᱯᱷᱚᱞ ᱠᱷᱚᱡ ᱟᱠᱟᱱᱟ ᱚᱱᱟ ᱪᱮᱫ ᱦᱩᱭ ᱞᱮᱠᱟ, ᱢᱤᱫ ᱵᱟᱰᱟᱭ ᱠᱷᱚᱡᱮᱛ ᱛᱮ ᱡᱚᱢᱟ ᱟᱠᱟᱱ ᱥᱟᱸᱜᱤᱛ ᱴᱩᱠᱨᱟ ᱟᱜ ᱞᱟᱛᱟᱨ ᱥᱤᱢᱟ।",
+          "help": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱢᱤᱫ ᱚᱠᱛᱚ ᱨᱮ ᱵᱟᱲᱛᱤ ᱯᱷᱚᱞ ᱠᱷᱚᱡᱚᱜ ᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱜᱟᱱᱟ ᱟᱨ ᱠᱷᱚᱨᱪᱟ ᱨᱩᱠᱷᱤᱭᱟ ᱮᱫᱟ। ᱞᱟᱢᱟ ᱵᱟᱰᱟᱭ ᱵᱷᱟᱱᱰᱟᱨ ᱨᱮ ᱡᱚᱵᱟᱵ ᱥᱟᱸᱜᱤᱛ ᱴᱩᱠᱨᱟ ᱵᱟᱛᱼᱟᱣ ᱠᱷᱟᱱ ᱜᱮ ᱵᱟᱲᱦᱟᱣ ᱢᱮ।"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "ᱠᱚᱢ ᱪᱮᱠ ᱟᱠᱟᱱ ᱵᱤᱠᱚᱞᱯᱚ ᱪᱮᱥᱴᱟ ᱟᱜ ᱤᱪᱷᱟ",
+          "description": "ᱵᱷᱚᱨᱚᱥᱟ-ᱥᱤᱢᱟ ᱵᱤᱫᱷᱤ ᱵᱮᱵᱷᱟᱨ ᱥᱮᱪᱮᱫ ᱱᱤᱛᱤ ᱫᱚ ᱟᱡ ᱠᱚᱢ ᱵᱟᱨ ᱪᱮᱠ ᱟᱠᱟᱱ ᱵᱤᱠᱚᱞᱯᱚ ᱠᱚ ᱪᱮᱫ ᱠᱷᱮᱛᱮ ᱟᱜᱨᱟᱫᱷᱤᱠᱟᱨ ᱮᱢᱟ।",
+          "help": "ᱥᱩᱱᱱᱟ ᱫᱚ ᱛᱟᱠᱠᱟᱣ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱟᱜ ᱟᱹᱰᱤ ᱞᱟᱜᱩ ᱜᱷᱟᱴᱷᱤᱱ ᱥᱟᱶ ᱵᱤᱠᱚᱞᱯᱚ ᱵᱟᱪᱷᱟᱣᱟ। ᱵᱟᱲᱛᱤ ᱢᱟᱱ ᱫᱚ ᱮᱴᱟᱜ ᱵᱤᱠᱚᱞᱯᱚ ᱠᱚ ᱛᱟᱞᱟ ᱥᱮᱛᱟ ᱵᱟᱲᱛᱤ ᱚᱠᱛᱚ ᱪᱮᱠ ᱮᱫᱟ ᱥᱚᱛᱷᱤᱨ ᱦᱩᱭ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ। ᱰᱤᱯᱷᱚᱞᱴ ᱫᱚ ᱯᱟᱲᱦᱟᱣ-ᱯᱩᱛᱷᱤ ᱥᱟᱢᱟᱱ ᱠᱟᱱᱟ। ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱵᱤᱫᱷᱤ ᱵᱮᱵᱷᱟᱨ ᱱᱤᱛᱤ ᱠᱚ ᱵᱚᱫᱚᱞᱟ।"
+        },
+        "defaultExplorationRate": {
+          "label": "ᱱᱟᱣᱟ ᱱᱤᱛᱤ ᱞᱟᱹᱜᱤᱫ ᱢᱟᱲᱟᱝ ᱠᱷᱚᱡ ᱦᱟᱨ",
+          "description": "ᱱᱟᱣᱟ ᱵᱟᱱᱟᱣ ᱟᱠᱟᱱ ᱥᱮᱪᱮᱫ ᱱᱤᱛᱤ ᱫᱚ ᱨᱮᱱᱰᱚᱢ ᱵᱤᱠᱚᱞᱯᱚ ᱪᱮᱠ ᱨᱮ ᱴᱚᱨᱱ ᱟᱜ ᱪᱮᱫ ᱵᱷᱟᱜ ᱠᱷᱚᱨᱪᱟ ᱮᱫᱟ।",
+          "help": "ᱱᱚᱶᱟ ᱫᱚ ᱠᱷᱟᱞᱤ ᱱᱤᱛᱚᱜ ᱠᱷᱚᱱ ᱵᱟᱱᱟᱣ ᱦᱩᱭ ᱱᱤᱛᱤ ᱟᱜ ᱢᱟᱲᱟᱝ ᱵᱤᱱᱫᱩ ᱥᱮᱴ ᱮᱫᱟ। ᱢᱮᱱᱟᱜ ᱱᱤᱛᱤ ᱫᱚ ᱟᱡ ᱦᱟᱨ ᱛᱟᱦᱮᱱᱟ, ᱡᱟᱦᱟᱸ ᱱᱤᱛᱤ ᱥᱟᱸᱢᱟᱞᱟ ᱴᱷᱟᱸᱣ ᱨᱮ ᱟᱢ ᱮᱡᱮᱱᱴ ᱥᱟᱱᱟᱢ ᱨᱮ ᱵᱚᱫᱚᱞᱟ। ᱥᱩᱱᱱᱟ ᱢᱮᱱᱛᱮ ᱱᱟᱣᱟ ᱱᱤᱛᱤ ᱫᱚ ᱢᱟᱲᱟᱝ ᱨᱮ ᱠᱷᱚᱡ ᱵᱟᱝ ᱮᱫᱟ।"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱪᱟᱵᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱛᱟᱭᱚᱢ ᱵᱷᱮᱛᱟ",
+          "description": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱡᱚᱰᱟᱣ ᱟᱠᱟᱱ ᱪᱟᱵᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱛᱟᱭᱚᱢ ᱥᱚᱨᱮᱥ ᱠᱟᱹᱢᱤ ᱚᱱᱟ ᱠᱚ ᱪᱮᱫ ᱚᱠᱛᱚ ᱵᱟᱛᱼᱟᱣᱟ।",
+          "help": "ᱵᱷᱮᱛᱟ ᱚᱠᱛᱚ ᱨᱮ, ᱥᱮᱰᱭᱩᱞ ᱟᱨ ᱟᱡᱼᱛᱮ ᱡᱚᱵ ᱠᱚ ᱯᱷᱤᱨ ᱯᱷᱤᱨ ᱵᱟᱭᱡᱷᱮᱛ ᱪᱟᱵᱤ ᱠᱚᱞ ᱵᱟᱛᱼᱟᱣ ᱮᱴᱟᱜ ᱡᱚᱰᱟᱣ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱵᱮᱵᱷᱟᱨᱟ, ᱥᱮ ᱡᱚᱜᱟᱣᱟ। ᱪᱮᱴ ᱢᱟᱱᱩᱸ ᱠᱚ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱨᱩᱠᱷᱤᱭᱟᱜ ᱟᱨ ᱛᱟᱠᱠᱟᱣ ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱥᱟᱹᱨᱤ ᱵᱷᱩᱞ ᱧᱮᱞᱚᱜᱼᱟ। ᱵᱷᱮᱛᱟ ᱪᱷᱚᱭ ᱠᱷᱟᱱ, ᱪᱟᱵᱤ ᱴᱷᱤᱠ ᱦᱩᱭᱞᱮᱱᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱪᱮᱠ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱠᱚᱞ ᱪᱟᱞᱟᱜ ᱮᱢ ᱦᱩᱭᱟ। ᱥᱩᱱᱱᱟ ᱫᱚ ᱵᱷᱮᱛᱟ ᱵᱚᱸᱫ ᱮᱫᱟ।"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "ᱯᱨᱚᱥᱟᱥᱚᱱ",
+    "title": "ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ ᱠᱚ",
+    "subtitle": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮᱭᱟᱜ ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱪᱮᱠᱟ ᱛᱮ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ ᱚᱱᱟ ᱢᱤᱞᱟᱣ ᱢᱮ: ᱥᱤᱢᱟ, ᱢᱚᱱᱡᱩᱨᱤ, ᱜᱩᱱ ᱪᱮᱠ, ᱜᱟᱨᱰᱨᱮᱞ, ᱢᱮᱢᱚᱨᱤ ᱟᱨ ᱢᱚᱰᱮᱞ। ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ ᱴᱷᱟᱸᱣ ᱨᱮ ᱮᱡᱮᱱᱴ ᱟᱜ ᱢᱟᱨᱟᱝ ᱫᱚ ᱫᱚᱦᱚᱜ ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴᱤᱝ ᱚᱣᱟᱨᱟᱭᱰ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "docsLink": "ᱜᱚᱲᱚ ᱟᱨ ᱫᱚᱠᱩᱢᱮᱱᱴ",
+    "tabs": {
+      "label": "ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ ᱟᱜ ᱧᱮᱞ",
+      "settings": "ᱥᱮᱴᱤᱝ ᱠᱚ",
+      "history": "ᱵᱚᱫᱚᱞ ᱟᱜ ᱤᱛᱤᱦᱟᱥ"
+    },
+    "readOnly": {
+      "title": "ᱠᱷᱟᱞᱤ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ",
+      "body": "ᱠᱷᱟᱞᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱮᱰᱢᱤᱱ ᱜᱮ ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱠᱚ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱟᱢ ᱥᱟᱱᱟᱢ ᱥᱮᱴᱤᱝ ᱟᱜ ᱞᱟᱜᱩ ᱢᱟᱱ ᱟᱨ ᱚᱱᱟ ᱚᱠᱟᱸ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱠᱟᱱᱟ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+    },
+    "summary": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ {total} ᱥᱮᱴᱤᱝ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {changed} ᱵᱚᱫᱚᱞ ᱟᱠᱟᱱᱟ। ᱵᱟᱠᱤ ᱠᱚ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।",
+    "export": {
+      "button": "ᱚᱣᱟᱨᱟᱭᱰ ᱠᱚ ᱟᱹᱜᱩ ᱢᱮ",
+      "done": "{count} ᱣᱟᱨᱠᱥᱯᱮᱥ ᱚᱣᱟᱨᱟᱭᱰ ᱢᱤᱫ ᱯᱷᱟᱭᱞ ᱨᱮ ᱟᱹᱜᱩ ᱞᱮᱱᱟ।",
+      "none": "ᱟᱹᱜᱩ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱵᱟᱹᱱᱩᱜᱼᱟ: ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ।"
+    },
+    "filters": {
+      "changedOnly": "ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱵᱚᱫᱚᱞ ᱟᱠᱟᱱ"
+    },
+    "jump": {
+      "label": "ᱢᱤᱫ ᱡᱩᱛ ᱥᱮᱱ ᱪᱟᱞᱟᱜ ᱢᱮ"
+    },
+    "anchor": {
+      "unknown": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ \"{key}\" ᱧᱩᱛᱩᱢ ᱟᱜ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱹᱱᱩᱜᱼᱟ। ᱚᱱᱟ ᱟᱜ ᱧᱩᱛᱩᱢ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ ᱥᱮ ᱚᱱᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱛᱚᱨ ᱨᱮ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।"
+    },
+    "empty": {
+      "noneChanged": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ। ᱡᱷᱚᱛᱚ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।"
+    },
+    "risk": {
+      "high": "ᱵᱟᱲᱛᱤ ᱡᱷᱩᱠᱤ",
+      "security": "ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ ᱠᱚ"
+    },
+    "security": {
+      "title": "ᱥᱩᱨᱠᱷᱟ ᱥᱮᱴᱤᱝ ᱠᱚ",
+      "body": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱠᱚ ᱫᱚ ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱩᱠᱷᱤᱭᱟ ᱮᱫᱟ। ᱚᱱᱟ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱲᱟ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱛᱟᱠᱠᱟᱣ ᱠᱚᱢᱡᱚᱨ ᱵᱟᱝ। ᱥᱟᱱᱟᱢ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱨᱚᱱ ᱞᱟᱹᱠᱛᱤ ᱟᱨ ᱚᱱᱟ ᱚᱰᱤᱴ ᱞᱚᱜ ᱨᱮ ᱨᱮᱠᱚᱨᱰ ᱦᱩᱭᱟ।"
+    },
+    "resetGroup": {
+      "count": "ᱱᱚᱶᱟ ᱡᱩᱛ ᱨᱮ {count} ᱵᱚᱫᱚᱞ ᱟᱠᱟᱱᱟ",
+      "button": "{group} ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ",
+      "confirmTitle": "{group} ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱟ?",
+      "confirmBody": "ᱱᱚᱶᱟ ᱫᱚ ᱱᱚᱶᱟ ᱡᱩᱛ ᱟᱜ {count} ᱣᱟᱨᱠᱥᱯᱮᱥ ᱚᱣᱟᱨᱟᱭᱰ ᱚᱪᱚᱜᱼᱟ। ᱟᱡ ᱚᱣᱟᱨᱟᱭᱰ ᱵᱟᱹᱱᱩᱜ ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱴᱤᱝ ᱱᱤᱛᱚᱜ ᱜᱮ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ। ᱥᱟᱱᱟᱢ ᱨᱤᱥᱮᱴ ᱚᱰᱤᱴ ᱞᱚᱜ ᱨᱮ ᱨᱮᱠᱚᱨᱰ ᱦᱩᱭᱟ।",
+      "confirm": "ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ",
+      "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+      "done": "{count} ᱥᱮᱴᱤᱝ ᱠᱚ ᱚᱱᱟ ᱟᱜ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱢᱮ।",
+      "partial": "{done} ᱥᱮᱴᱤᱝ ᱨᱤᱥᱮᱴ ᱦᱩᱭᱞᱮᱱᱟ; {failed} ᱨᱤᱥᱮᱴ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। ᱵᱟᱭᱡᱷᱮᱛ ᱥᱮᱴᱤᱝ ᱟᱜ ᱵᱷᱮᱡᱟᱣ ᱧᱮᱞ ᱢᱮ।",
+      "cancelled": "{done} ᱥᱮᱴᱤᱝ ᱨᱤᱥᱮᱴ ᱦᱩᱭᱞᱮᱱᱟ। ᱠᱟᱨᱚᱱ ᱞᱟᱹᱠᱛᱤ ᱠᱟᱱ {skipped} ᱫᱚ ᱢᱮᱱᱟᱜ ᱞᱮᱠᱟ ᱜᱮ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ।"
+    },
+    "import": {
+      "button": "ᱚᱣᱟᱨᱟᱭᱰ ᱠᱚ ᱟᱹᱜᱩ ᱛᱷᱟᱸᱣ ᱢᱮ",
+      "title": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱚᱣᱟᱨᱟᱭᱰ ᱠᱚ ᱟᱹᱜᱩ ᱛᱷᱟᱸᱣ ᱢᱮ",
+      "intro": "ᱱᱚᱶᱟ ᱥᱟᱦᱴᱟ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱟᱠᱟᱱ ᱢᱤᱫ ᱯᱷᱟᱭᱞ ᱵᱟᱪᱷᱟᱣ ᱢᱮ, ᱥᱮ ᱚᱱᱟ ᱟᱜ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱯᱮᱥᱴ ᱢᱮ। ᱪᱮᱫᱽ ᱥᱟᱸᱪᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱮᱫ ᱵᱚᱫᱚᱞ ᱦᱩᱭᱟ ᱚᱱᱟ ᱟᱢ ᱴᱷᱤᱠ ᱛᱮ ᱧᱮᱞᱟ।",
+      "reviewIntro": "ᱱᱚᱶᱟ ᱯᱷᱟᱭᱞ ᱪᱮᱫ ᱵᱚᱫᱚᱞ ᱟ ᱚᱱᱟ ᱪᱮᱠ ᱢᱮ। ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+      "fileLabel": "ᱚᱣᱟᱨᱟᱭᱰ ᱯᱷᱟᱭᱞ (JSON)",
+      "pasteLabel": "ᱥᱮ ᱯᱷᱟᱭᱞ ᱟᱜ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱯᱮᱥᱴ ᱢᱮ",
+      "fileError": {
+        "empty": "ᱢᱟᱲᱟᱝ ᱢᱤᱫ ᱯᱷᱟᱭᱞ ᱵᱟᱪᱷᱟᱣ ᱢᱮ ᱥᱮ ᱚᱱᱟ ᱟᱜ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱯᱮᱥᱴ ᱢᱮ।",
+        "invalidJson": "ᱱᱚᱶᱟ ᱥᱟᱹᱨᱤ JSON ᱵᱟᱝ ᱠᱟᱱᱟ। ᱯᱩᱨᱟᱹ ᱯᱷᱟᱭᱞ ᱠᱚᱯᱤ ᱦᱩᱭᱞᱮᱱᱟ ᱥᱮ ᱵᱟᱝ ᱚᱱᱟ ᱪᱮᱠ ᱢᱮ।",
+        "wrongFormat": "ᱱᱚᱶᱟ ᱫᱚ ᱱᱚᱶᱟ ᱥᱟᱦᱴᱟ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱟᱠᱟᱱ ᱥᱮᱴᱤᱝ ᱚᱣᱟᱨᱟᱭᱰ ᱯᱷᱟᱭᱞ ᱵᱟᱝ ᱠᱟᱱᱟ।",
+        "unsupportedVersion": "ᱱᱚᱶᱟ ᱯᱷᱟᱭᱞ ᱫᱚ ᱟᱹᱜᱩ ᱟᱜ ᱮᱴᱟᱜ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱛᱮ ᱵᱟᱱᱟᱣ ᱟᱠᱟᱱᱟ ᱟᱨ ᱯᱟᱲᱦᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+        "noOverrides": "ᱯᱷᱟᱭᱞ ᱨᱮ ᱚᱣᱟᱨᱟᱭᱰ ᱵᱷᱟᱜ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+        "unreadable": "ᱯᱷᱟᱭᱞ ᱯᱟᱲᱦᱟᱣ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।"
+      },
+      "summary": "{changes} ᱵᱚᱫᱚᱞ ᱞᱟᱹᱠᱛᱤ, {unchanged} ᱫᱚᱦᱚᱜ ᱞᱟᱜᱩ, {problems} ᱞᱟᱜᱩ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+      "changesHeading": "ᱵᱚᱫᱚᱞ ({count})",
+      "before": "ᱱᱤᱛᱚᱜ:",
+      "after": "ᱟᱹᱜᱩ ᱛᱟᱭᱚᱢ:",
+      "resetMissing": "ᱯᱷᱟᱭᱞ ᱨᱮ ᱵᱟᱹᱱᱩᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱚᱣᱟᱨᱟᱭᱰ ᱦᱚᱸ ᱚᱪᱚᱜ ᱢᱮ",
+      "resetMissingHelp": "ᱱᱚᱸᱰᱮ ᱵᱚᱫᱚᱞ ᱢᱮᱱᱠᱷᱟᱱ ᱯᱷᱟᱭᱞ ᱨᱮ ᱵᱟᱹᱱᱩᱜ ᱥᱮᱴᱤᱝ ᱠᱚ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱟᱜ ᱢᱟᱱ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ। ᱠᱷᱟᱞᱤ ᱥᱮᱞᱮᱫ ᱥᱮ ᱱᱟᱣᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱛᱟᱦᱮᱱᱟ ᱢᱮ।",
+      "resetsHeading": "ᱚᱪᱚᱜ ᱞᱟᱹᱠᱛᱤ ᱚᱣᱟᱨᱟᱭᱰ ({count})",
+      "resetFrom": "ᱱᱤᱛᱚᱜ {value}; ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ।",
+      "problemsHeading": "ᱞᱟᱜᱩ ᱵᱟᱝ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ({count})",
+      "problem": {
+        "unknownKey": "ᱱᱚᱶᱟ ᱪᱟᱵᱤ ᱛᱟᱦᱮᱱ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+        "notWorkspaceSetting": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+        "locked": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱚᱯᱷᱚᱨᱮᱴᱚᱨ ᱫᱚ ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱯᱤᱱ ᱠᱟᱫᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱵᱟᱝ ᱦᱩᱭᱜᱼᱟ।",
+        "wrongType": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱞᱟᱹᱜᱤᱫ ᱢᱟᱱ ᱟᱜ ᱥᱟᱶ ᱵᱷᱩᱞ ᱠᱟᱱᱟ।",
+        "required": "ᱢᱤᱫ ᱢᱟᱱ ᱞᱟᱹᱠᱛᱤ।",
+        "notNumber": "ᱢᱟᱱ ᱫᱚ ᱢᱤᱫ ᱜᱚᱱᱚᱝ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ।",
+        "notInteger": "ᱢᱟᱱ ᱫᱚ ᱢᱤᱫ ᱯᱩᱨᱟᱹ ᱜᱚᱱᱚᱝ ᱦᱩᱭ ᱞᱟᱹᱠᱛᱤ।",
+        "belowMin": "ᱢᱟᱱ ᱟᱹᱰᱤ ᱠᱚᱢ। ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ {min}।",
+        "aboveMax": "ᱢᱟᱱ ᱟᱹᱰᱤ ᱵᱟᱲᱛᱤ। ᱵᱟᱲᱛᱤ ᱛᱮ {max}।",
+        "notAllowed": "ᱱᱚᱶᱟ ᱫᱚ ᱵᱟᱛᱟᱣ ᱟᱠᱟᱱ ᱵᱤᱠᱚᱞᱯᱚ ᱛᱟᱞᱟ ᱨᱮ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।",
+        "tooShort": "ᱚᱞ ᱟᱹᱰᱤ ᱪᱷᱚᱴᱚ। ᱠᱚᱢ ᱠᱷᱚᱱ ᱠᱚᱢ ᱞᱚᱸᱜᱚ {min}।",
+        "tooLong": "ᱚᱞ ᱟᱹᱰᱤ ᱞᱟᱢᱟ। ᱵᱟᱲᱛᱤ ᱛᱮ ᱞᱚᱸᱜᱚ {max}।",
+        "precision": "ᱢᱟᱱ ᱫᱚ ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱵᱟᱛᱟᱣ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱴᱷᱤᱠ ᱠᱟᱱᱟ।"
+      },
+      "nothing": "ᱱᱚᱶᱟ ᱯᱷᱟᱭᱞ ᱟᱜ ᱪᱮᱫᱽ ᱛᱮᱞᱟ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞᱟ।",
+      "reasonNote": "ᱱᱚᱶᱟ ᱥᱮᱴᱤᱝ ᱠᱚ ᱛᱟᱞᱟ ᱠᱷᱚᱱ ᱠᱷᱚᱨᱟ ᱵᱟᱲᱛᱤ ᱡᱷᱩᱠᱤ ᱞᱮᱠᱟᱱ ᱠᱟᱱᱟ। ᱞᱟᱜᱩ ᱛᱟᱭᱚᱢ ᱟᱢ ᱠᱚ ᱢᱤᱫ ᱠᱟᱨᱚᱱ ᱪᱷᱚᱞᱚᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱚᱰᱤᱴ ᱞᱚᱜ ᱨᱮ ᱨᱮᱠᱚᱨᱰ ᱦᱩᱭᱟ।",
+      "back": "ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+      "cancel": "ᱵᱟᱛᱤᱞ ᱢᱮ",
+      "review": "ᱵᱚᱫᱚᱞ ᱠᱚ ᱪᱮᱠ ᱢᱮ",
+      "apply": "{count} ᱵᱚᱫᱚᱞ ᱞᱟᱜᱩ ᱢᱮ",
+      "cancelled": "ᱟᱹᱜᱩ ᱵᱟᱛᱤᱞ ᱦᱩᱭᱞᱮᱱᱟ। ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ।",
+      "done": "ᱟᱹᱜᱩ ᱪᱷᱚᱭ: {applied} ᱥᱮᱴᱤᱝ ᱱᱟᱣᱟ ᱦᱩᱭᱞᱮᱱᱟ।",
+      "donePartial": "ᱟᱹᱜᱩ ᱟᱫᱷᱟ ᱪᱷᱚᱭ: {applied} ᱥᱮᱴᱤᱝ ᱱᱟᱣᱟ ᱦᱩᱭᱞᱮᱱᱟ, {failed} ᱞᱟᱜᱩ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। ᱪᱮᱠ ᱫᱚ ᱱᱤᱛᱚᱜ ᱪᱮᱫ ᱵᱟᱠᱤ ᱢᱮᱱᱟᱜᱼᱟ ᱚᱱᱟ ᱧᱮᱞᱟᱹᱭᱟ।"
+    },
+    "history": {
+      "adminOnly": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮᱴᱤᱝ ᱟᱜ ᱵᱚᱫᱚᱞ ᱤᱛᱤᱦᱟᱥ ᱠᱷᱟᱞᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱮᱰᱢᱤᱱ ᱛᱮ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+      "loading": "ᱵᱚᱫᱚᱞ ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱮᱫᱟ",
+      "partial": "{count} ᱥᱮᱴᱤᱝ ᱟᱜ ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱞᱮᱠᱟ ᱵᱟᱝ ᱯᱩᱨᱟᱹ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+      "retry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ",
+      "search": "ᱵᱚᱫᱚᱞ ᱤᱛᱤᱦᱟᱥ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+      "searchPlaceholder": "ᱥᱮᱴᱤᱝ, ᱢᱟᱱᱩᱸ ᱥᱮ ᱠᱟᱨᱚᱱ ᱛᱮ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+      "empty": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ।",
+      "noMatch": "ᱪᱮᱫᱽ ᱵᱚᱫᱚᱞ ᱟᱢᱟᱜ ᱠᱷᱚᱡᱮᱛ ᱥᱟᱶ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ।",
+      "count": "{total} ᱵᱚᱫᱚᱞ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {shown} ᱧᱮᱞᱟᱹ ᱮᱫᱟ, ᱱᱟᱣᱟ ᱢᱟᱲᱟᱝ।",
+      "tableLabel": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮᱴᱤᱝ ᱟᱜ ᱵᱚᱫᱚᱞ ᱤᱛᱤᱦᱟᱥ",
+      "when": "ᱪᱤᱠᱟ",
+      "setting": "ᱥᱮᱴᱤᱝ",
+      "change": "ᱵᱚᱫᱚᱞ ᱢᱮ",
+      "by": "ᱵᱚᱫᱚᱞ ᱠᱟᱹᱢᱤᱭᱟᱹ",
+      "reason": "ᱠᱟᱨᱚᱱ",
+      "before": "ᱢᱟᱲᱟᱝ:",
+      "after": "ᱛᱟᱭᱚᱢ:",
+      "inherited": "ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱟᱠᱟᱱ ᱢᱟᱱ",
+      "unknownActor": "ᱵᱟᱝ ᱪᱤᱱᱦᱟᱹ ᱟᱠᱟᱱ",
+      "noReason": "ᱪᱮᱫᱽ ᱠᱟᱨᱚᱱ ᱵᱟᱝ ᱮᱢ ᱞᱮᱱᱟ",
+      "showMore": "ᱵᱟᱲᱛᱤ ᱧᱮᱞᱟᱹ ᱢᱮ",
+      "scope": "ᱥᱛᱚᱨ",
+      "scopeWorkspace": "ᱣᱟᱨᱠᱥᱯᱮᱥ",
+      "scopeAgent": "ᱮᱡᱮᱱᱴ {id}",
+      "scopeFilter": "ᱵᱚᱫᱚᱞ ᱱᱚᱶᱟ ᱥᱛᱚᱨ ᱨᱮ ᱧᱮᱞᱟᱹ ᱢᱮ",
+      "filterAll": "ᱡᱷᱚᱛᱚ ᱥᱛᱚᱨ",
+      "filterWorkspace": "ᱠᱷᱟᱞᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ",
+      "filterAgents": "ᱠᱷᱟᱞᱤ ᱮᱡᱮᱱᱴ",
+      "searchLoadedOnly": "ᱠᱷᱚᱡᱮᱛ ᱫᱚ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱞᱚᱰ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ ᱠᱚ ᱥᱮᱞᱮᱫ ᱮᱫᱟ।",
+      "loadError": "ᱵᱚᱫᱚᱞ ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+      "moreFailed": "ᱵᱟᱲᱛᱤ ᱵᱚᱫᱚᱞ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+      "loadingMore": "ᱞᱚᱰ ᱮᱫᱟ"
+    }
+  },
+  "agentBehavior": {
+    "title": "ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ",
+    "intro": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱢᱤᱫ ᱴᱚᱨᱱ ᱨᱮ ᱪᱮᱫ ᱥᱮᱛᱟ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱚᱱᱟ ᱠᱷᱟᱛᱨᱟ ᱪᱷᱟᱸᱪᱚ ᱢᱮ: ᱪᱮᱫ ᱴᱩᱞ ᱠᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱪᱮᱫ ᱚᱠᱛᱚ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ, ᱟᱨ ᱪᱮᱫ ᱯᱷᱤᱨ ᱯᱟᱲᱦᱟᱣᱟ। ᱟᱢ ᱱᱚᱸᱰᱮ ᱪᱮᱫ ᱵᱟᱝ ᱵᱚᱫᱚᱞᱟ ᱚᱱᱟ ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱠᱷᱚᱱ ᱤᱫᱷᱤᱛ ᱟᱹᱜᱩ ᱠᱟᱱᱟ।",
+    "saveFirst": "ᱢᱟᱲᱟᱝ ᱮᱡᱮᱱᱴ ᱥᱟᱸᱪᱟᱣ ᱢᱮ। ᱚᱱᱟ ᱵᱟᱱᱟᱣ ᱛᱟᱭᱚᱢ ᱚᱱᱟ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ ᱥᱮᱴ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "pickAgent": "ᱚᱱᱟ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ ᱴᱮᱵ ᱠᱷᱩᱞᱟᱹ ᱞᱟᱹᱜᱤᱫ ᱞᱟᱛᱟᱨ ᱠᱷᱚᱱ ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
+    "tabs": {
+      "label": "ᱮᱡᱮᱱᱴ ᱠᱚᱱᱯᱷᱤᱜᱩᱨᱮᱥᱚᱱ",
+      "setup": "ᱥᱮᱴᱟᱯ",
+      "behavior": "ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ",
+      "unsaved": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ ᱠᱚ"
+    },
+    "links": {
+      "label": "ᱥᱚᱵᱟᱱᱫᱷ ᱥᱟᱦᱴᱟ",
+      "tenant": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱰᱤᱯᱷᱚᱞᱴ ᱵᱚᱫᱚᱞ ᱢᱮ",
+      "playground": "ᱯᱞᱮᱜᱨᱟᱣᱱᱰ ᱨᱮ ᱪᱮᱥᱴᱟ ᱢᱮ",
+      "prompts": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱯᱨᱚᱢᱯᱴ",
+      "promptsAria": "{name} ᱟᱜ ᱯᱨᱚᱢᱯᱴ: ᱯᱨᱚᱢᱯᱴ ᱨᱮᱡᱤᱥᱴᱨᱤ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱨᱮ ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+      "approvals": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ",
+      "approvalsAria": "{name} ᱟᱜ ᱢᱚᱱᱡᱩᱨᱤ: ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱪᱷᱟᱸᱪᱚ ᱟᱠᱟᱱ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱭᱱ ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+      "turns": "ᱴᱚᱨᱱ ᱴᱟᱭᱢᱞᱟᱭᱱ",
+      "turnsAria": "{name} ᱟᱜ ᱴᱚᱨᱱ ᱴᱟᱭᱢᱞᱟᱭᱱ: ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱴᱚᱨᱱ ᱪᱮᱠᱚᱨ ᱠᱷᱩᱞᱟᱹ ᱢᱮ"
+    },
+    "readOnly": {
+      "locked": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱛᱟᱞᱟ ᱟᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱢᱟᱱ ᱠᱚ ᱠᱷᱟᱞᱤ ᱯᱟᱲᱦᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱠᱟᱱᱟ।",
+      "access": "ᱟᱢ ᱱᱚᱶᱟ ᱢᱟᱱ ᱠᱚ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ ᱢᱮᱱᱠᱷᱟᱱ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱥᱮᱱ ᱟᱢᱟᱜ ᱯᱷᱚᱞᱚ ᱚᱱᱟ ᱠᱚ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱝ ᱮᱢᱟ।"
+    },
+    "unsaved": "ᱱᱚᱶᱟ ᱴᱮᱵ ᱨᱮ ᱟᱢᱟᱜ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ ᱢᱮᱱᱟᱜᱼᱟ। ᱪᱟᱞᱟᱜ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱞᱟᱛᱟᱨ ᱚᱱᱟ ᱠᱚ ᱥᱟᱸᱪᱟᱣ ᱥᱮ ᱵᱟᱛᱤᱞ ᱢᱮ।",
+    "inheritNote": "ᱥᱟᱱᱟᱢ ᱥᱮᱴᱤᱝ ᱫᱚ ᱚᱱᱟ ᱟᱜ ᱢᱟᱱ ᱚᱠᱟᱸ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱠᱟᱱᱟ ᱧᱮᱞᱟᱹᱭᱟ। ᱱᱚᱸᱰᱮ ᱢᱤᱫ ᱵᱚᱫᱚᱞ ᱫᱚ ᱠᱷᱟᱞᱤ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱚᱣᱟᱨᱟᱭᱰ ᱠᱟᱱᱟ; ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱯᱷᱤᱨ ᱤᱫᱷᱤᱛ ᱧᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱨᱤᱥᱮᱴ ᱢᱮ।",
+    "others": {
+      "title": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱮᱴᱟᱜ ᱠᱷᱟᱛᱨᱟ",
+      "intro": "ᱱᱚᱶᱟ ᱠᱷᱟᱛᱨᱟ ᱠᱚ ᱛᱟᱞᱟ ᱨᱮᱭᱟᱜ ᱥᱮᱴᱤᱝ ᱟᱜ ᱵᱷᱟᱜ ᱵᱟᱝ ᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱠᱚ ᱥᱮᱴᱟᱯ ᱴᱮᱵ ᱨᱮ ᱢᱮᱱᱟᱜᱼᱟ।",
+      "generation": "ᱡᱚᱵᱟᱵ ᱟᱜ ᱥᱨᱤᱡᱚᱱᱥᱤᱞᱛᱟ ᱟᱨ ᱞᱚᱸᱜᱚ (ᱛᱟᱯᱢᱟᱱ, top-p, ᱵᱟᱲᱛᱤ ᱴᱚᱠᱮᱱ) ᱟᱨ ᱥᱮᱞᱮᱫ ᱱᱢᱩᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱵᱤᱠᱚᱞᱯᱚ ᱠᱚ।",
+      "generationLink": "ᱡᱮᱱᱮᱨᱮᱥᱚᱱ ᱴᱤᱭᱩᱱᱤᱝ ᱥᱮᱱ ᱪᱟᱞᱟᱜ ᱢᱮ",
+      "autonomy": "ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱥᱛᱚᱨ, ᱨᱚᱱ ᱥᱟᱱᱟᱢ ᱟᱜ ᱠᱷᱚᱨᱪᱟ ᱥᱤᱢᱟ, ᱴᱩᱞ ᱱᱤᱭᱚᱢ ᱟᱨ ᱢᱟᱱᱩᱸ ᱪᱷᱚᱠᱛᱮ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱞᱟᱹᱠᱛᱤ।",
+      "autonomyLink": "ᱨᱤᱡᱚᱱᱤᱝ ᱟᱨ ᱟᱡ ᱵᱟᱪᱷᱟᱣ ᱥᱮᱱ ᱪᱟᱞᱟᱜ ᱢᱮ"
+    },
+    "discard": {
+      "title": "ᱥᱟᱸᱪᱟᱣ ᱵᱟᱹᱱᱩᱜ ᱛᱮ ᱪᱟᱞᱟᱜ ᱟ?",
+      "description": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ ᱨᱮ ᱟᱢᱟᱜ ᱥᱟᱸᱪᱟᱣ ᱵᱟᱝ ᱟᱠᱟᱱ ᱵᱚᱫᱚᱞ ᱢᱮᱱᱟᱜᱼᱟ। ᱱᱤᱛᱚᱜ ᱪᱟᱞᱟᱜ ᱠᱷᱟᱱ ᱚᱱᱟ ᱠᱚ ᱦᱟᱨᱟᱣᱜᱼᱟ।",
+      "stay": "ᱱᱚᱸᱰᱮ ᱛᱟᱦᱮᱱ ᱠᱟᱛᱮ ᱵᱚᱫᱚᱞ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+      "leave": "ᱪᱟᱞᱟᱜ ᱠᱟᱛᱮ ᱵᱚᱫᱚᱞ ᱵᱟᱛᱤᱞ ᱢᱮ"
+    },
+    "summary": {
+      "title": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱤᱛᱚᱜ ᱪᱮᱠᱟ ᱛᱮ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ",
+      "subtitle": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱚᱣᱟᱨᱟᱭᱰ, ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮᱴᱤᱝ ᱟᱨ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱥᱮᱴᱤᱝ ᱞᱟᱜᱩ ᱛᱟᱭᱚᱢ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱞᱟᱜᱩ ᱢᱟᱱ ᱠᱚ।",
+      "loading": "ᱱᱤᱛᱚᱜ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱞᱚᱰ ᱮᱫᱟ",
+      "error": "ᱱᱤᱛᱚᱜ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+      "retry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ",
+      "empty": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱵᱮᱵᱷᱟᱨ ᱥᱮᱴᱤᱝ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ।",
+      "facts": {
+        "steps": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱨᱮ ᱴᱩᱞ ᱠᱚᱞ",
+        "turnTimeout": "ᱴᱚᱨᱱ ᱥᱟᱱᱟᱢ ᱟᱜ ᱚᱠᱛᱚ",
+        "toolTimeout": "ᱴᱩᱞ ᱠᱚᱞ ᱥᱟᱱᱟᱢ ᱟᱜ ᱚᱠᱛᱚ",
+        "outputCap": "ᱛᱟᱦᱮᱱ ᱴᱩᱞ ᱟᱣᱴᱯᱩᱴ",
+        "continuation": "ᱞᱟᱜᱟᱛᱟᱨ ᱯᱟᱥ",
+        "approvals": "ᱢᱚᱱᱡᱩᱨᱤ",
+        "judge": "ᱜᱩᱱ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱢᱚᱰᱮᱞ",
+        "model": "ᱢᱚᱰᱮᱞ"
+      },
+      "tier": {
+        "SUPERVISED": "ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ: ᱥᱟᱱᱟᱢ ᱴᱩᱞ ᱠᱚᱞ ᱫᱚ ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱮᱫᱟ",
+        "SEMI_AUTONOMOUS": "ᱟᱫᱷᱟ-ᱟᱡ: ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱱᱤᱭᱚᱢ ᱴᱷᱤᱠ ᱮᱫᱟ",
+        "FULLY_AUTONOMOUS": "ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ: ᱴᱩᱞ ᱠᱚᱞ ᱛᱟᱠᱠᱟᱣ ᱵᱟᱝ ᱡᱚᱜᱟᱣᱟ"
+      },
+      "approvalResumes": "ᱢᱚᱱᱡᱩᱨᱤ ᱛᱟᱭᱚᱢ ᱟᱡᱼᱛᱮ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ",
+      "approvalStops": "ᱢᱚᱱᱡᱩᱨᱤ ᱛᱟᱭᱚᱢ ᱱᱟᱣᱟ ᱵᱷᱮᱡᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣᱟ",
+      "judgeDefault": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱛᱮ ᱵᱟᱪᱷᱟᱣ ᱟᱠᱟᱱ",
+      "overrides": {
+        "none": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱡᱷᱚᱛᱚ ᱨᱮ ᱟᱢᱟᱜ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ।",
+        "some": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱚᱣᱟᱨᱟᱭᱰ ᱟᱠᱟᱱ ᱥᱮᱴᱤᱝ ᱠᱚ: {count}।"
+      }
+    },
+    "impact": {
+      "title": "ᱱᱚᱶᱟ ᱟᱜ ᱵᱟᱰᱟᱭ ᱪᱮᱫ",
+      "steps": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱢᱤᱫ ᱴᱚᱨᱱ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ {count} ᱴᱩᱞ ᱠᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱚᱱᱟ ᱛᱟᱭᱚᱢ ᱚᱱᱟ ᱠᱚ ᱢᱮᱱᱟᱜ ᱞᱮᱠᱟ ᱡᱚᱵᱟᱵ ᱮᱢ ᱞᱟᱹᱜᱤᱫ ᱢᱮᱛ ᱦᱩᱭᱟ।",
+      "stepsTierSupervised": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱱᱟᱜᱟᱨᱟᱱᱤ ᱨᱮ ᱢᱮᱱᱟᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱟᱜ ᱥᱟᱹᱨᱤ ᱪᱮᱛᱟᱱ ᱥᱤᱢᱟ ᱚᱱᱟ ᱢᱩᱞ ᱜᱚᱱᱚᱝ ᱠᱷᱚᱱ ᱠᱚᱢ ᱠᱟᱱᱟ। ᱴᱷᱤᱠ ᱜᱚᱱᱚᱝ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱟᱡ ᱢᱟᱱ ᱥᱮᱴ ᱢᱮ।",
+      "stepsTierFull": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱯᱩᱨᱟᱹ ᱟᱡᱼᱛᱮ ᱠᱟᱱᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱟᱜ ᱥᱟᱹᱨᱤ ᱪᱮᱛᱟᱱ ᱥᱤᱢᱟ ᱚᱱᱟ ᱢᱩᱞ ᱜᱚᱱᱚᱝ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱱᱟ। ᱴᱷᱤᱠ ᱜᱚᱱᱚᱝ ᱵᱮᱵᱷᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱟᱡ ᱢᱟᱱ ᱥᱮᱴ ᱢᱮ।",
+      "turnTimeout": "ᱢᱤᱫ ᱴᱚᱨᱱ {duration} ᱛᱟᱭᱚᱢ ᱠᱟᱴᱟ ᱦᱩᱭᱟ।",
+      "turnTimeoutNone": "ᱴᱚᱨᱱ ᱟᱜ ᱚᱠᱛᱚ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+      "toolTimeout": "ᱢᱤᱫ ᱴᱩᱞ ᱠᱚᱞ {duration} ᱛᱟᱭᱚᱢ ᱠᱟᱴᱟ ᱦᱩᱭᱟ।",
+      "toolTimeoutNone": "ᱴᱩᱞ ᱠᱚᱞ ᱟᱜ ᱚᱠᱛᱚ ᱥᱤᱢᱟ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+      "outputCap": "{chars} ᱠᱷᱚᱱ ᱞᱟᱢᱟ ᱴᱩᱞ ᱯᱷᱚᱞ ᱮᱡᱮᱱᱴ ᱯᱟᱲᱦᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱪᱷᱚᱴᱚ ᱦᱩᱭᱟ।",
+      "continuation": "ᱡᱚᱵᱟᱵ ᱠᱟᱴᱟ ᱠᱷᱟᱱ, ᱮᱡᱮᱱᱴ ᱚᱱᱟ ᱵᱟᱲᱛᱤ ᱛᱮ ᱮᱴᱟᱜ {count} ᱵᱟᱨ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+      "continuationNone": "ᱠᱟᱴᱟ ᱟᱠᱟᱱ ᱡᱚᱵᱟᱵ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱵᱟᱝ ᱦᱩᱭᱟ।",
+      "retrieval": "ᱥᱟᱱᱟᱢ ᱠᱷᱚᱡᱮᱛ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱥᱟᱸᱜᱤᱛ {count} ᱵᱟᱰᱟᱭ ᱢᱤᱞᱟᱣ ᱯᱟᱲᱦᱟᱣᱟ।",
+      "retrievalScored": "ᱥᱟᱱᱟᱢ ᱠᱷᱚᱡᱮᱛ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱥᱟᱸᱜᱤᱛ {count} ᱵᱟᱰᱟᱭ ᱢᱤᱞᱟᱣ ᱯᱟᱲᱦᱟᱣᱟ ᱟᱨ {score} ᱠᱷᱚᱱ ᱠᱚᱢ ᱥᱠᱳᱨ ᱢᱤᱞᱟᱣ ᱠᱚ ᱵᱟᱛᱼᱟᱣᱟ।",
+      "approvalContinuationOn": "ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱜᱟᱣ ᱟᱠᱟᱱ ᱠᱟᱹᱢᱤ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱛᱟᱭᱚᱢ, ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱡᱼᱛᱮ ᱠᱟᱹᱢᱤ ᱪᱷᱚᱭᱟ।",
+      "approvalContinuationOff": "ᱢᱤᱫ ᱢᱟᱱᱩᱸ ᱡᱚᱜᱟᱣ ᱟᱠᱟᱱ ᱠᱟᱹᱢᱤ ᱢᱚᱱᱡᱩᱨ ᱮᱢ ᱛᱟᱭᱚᱢ, ᱴᱚᱨᱱ ᱪᱷᱚᱭ ᱦᱩᱭᱟ ᱟᱨ ᱯᱷᱚᱞᱚ-ᱟᱯ ᱦᱟᱛ ᱛᱮ ᱞᱟᱹᱠᱛᱤ।",
+      "guardClosed": "ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ, ᱠᱟᱹᱢᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱦᱩᱭᱟ।",
+      "guardOpen": "ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱵᱟᱭᱡᱷᱮᱛ ᱦᱩᱭ ᱠᱷᱟᱱ, ᱠᱟᱹᱢᱤ ᱯᱟᱨ ᱦᱩᱭ ᱮᱢᱟ।",
+      "branches": "ᱢᱤᱫ ᱠᱟᱹᱢᱤ ᱮᱢ ᱫᱚ ᱢᱤᱫ ᱚᱠᱛᱚ ᱨᱮ ᱵᱟᱲᱛᱤ ᱛᱮ {count} ᱠᱷᱟᱱᱰ-ᱠᱟᱹᱢᱤ ᱮᱦᱚᱵ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।"
+    }
+  },
+  "controls": {
+    "eyebrow": "ᱜᱚᱲᱚ",
+    "title": "ᱤᱧ ᱪᱮᱫ ᱠᱷᱟᱛᱨᱟ ᱪᱷᱟᱸᱪᱚ...?",
+    "subtitle": "ᱟᱢᱟᱜ ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱵᱟᱱᱟᱣ ᱮᱫᱟ ᱚᱱᱟ ᱥᱟᱱᱟᱢ ᱠᱷᱟᱛᱨᱟ, ᱟᱨ ᱚᱱᱟ ᱢᱮᱱᱟᱜ ᱥᱟᱦᱴᱟ। ᱟᱢ ᱪᱮᱫ ᱵᱚᱫᱚᱞ ᱪᱟᱦᱟᱭ ᱚᱱᱟ ᱛᱮ ᱠᱷᱚᱡᱮᱛ ᱢᱮ।",
+    "breadcrumb": {
+      "label": "ᱵᱨᱮᱰᱠᱨᱟᱢᱵ",
+      "console": "ᱠᱚᱱᱥᱳᱞ",
+      "controls": "ᱠᱷᱟᱛᱨᱟ"
+    },
+    "related": {
+      "label": "ᱮᱴᱟᱜ ᱠᱷᱟᱛᱨᱟ"
+    },
+    "search": {
+      "label": "ᱠᱷᱟᱛᱨᱟ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+      "placeholder": "ᱱᱢᱩᱱᱟ: ᱴᱟᱭᱢᱟᱣᱴ, ᱢᱚᱱᱡᱩᱨᱤ, ᱯᱨᱚᱢᱯᱴ, ᱢᱮᱢᱚᱨᱤ",
+      "count": "{count} ᱢᱤᱞᱟᱣ ᱟᱠᱟᱱ ᱠᱷᱟᱛᱨᱟ",
+      "none": "\"{query}\" ᱥᱟᱶ ᱪᱮᱫᱽ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ। ᱪᱷᱚᱴᱚ ᱥᱟᱵᱟᱫ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+      "noSettings": "ᱪᱮᱫᱽ ᱥᱮᱴᱤᱝ ᱟᱢᱟᱜ ᱠᱷᱚᱡᱮᱛ ᱥᱟᱶ ᱵᱟᱝ ᱢᱤᱞᱟᱜᱼᱟ।"
+    },
+    "areasHeading": "ᱠᱷᱟᱛᱨᱟ ᱠᱷᱮᱛᱨᱚ",
+    "areasIntro": "ᱱᱚᱶᱟ ᱥᱟᱦᱴᱟ ᱨᱮ ᱚᱱᱟ ᱠᱷᱟᱛᱨᱟ ᱢᱮᱱᱟᱜᱼᱟ ᱡᱟᱦᱟᱸ ᱢᱤᱫ ᱜᱚᱱᱚᱝ ᱵᱟᱝ ᱠᱟᱱᱟ: ᱱᱤᱨᱫᱮᱥ, ᱢᱚᱱᱡᱩᱨᱤ ᱱᱤᱭᱚᱢ, ᱥᱩᱨᱠᱷᱟ ᱱᱤᱭᱚᱢ ᱟᱨ ᱢᱤᱫ ᱴᱚᱨᱱ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱞᱮᱱᱟ ᱚᱱᱟ ᱟᱜ ᱨᱮᱠᱚᱨᱰ।",
+    "openArea": "ᱠᱷᱩᱞᱟᱹ ᱢᱮ",
+    "needsAccess": "ᱱᱚᱶᱟ ᱥᱟᱦᱴᱟ ᱥᱮᱱ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱮᱰᱢᱤᱱ ᱥᱮᱱ ᱪᱷᱚᱞ ᱢᱮ।",
+    "settingsHeading": "ᱥᱟᱱᱟᱢ ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ",
+    "settingsIntro": "ᱥᱟᱱᱟᱢ ᱥᱮᱴᱤᱝ ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ, ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ, ᱥᱮ ᱵᱟᱨ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱢᱟᱱ ᱫᱚ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱠᱷᱚᱱ ᱪᱮᱛᱟᱱ ᱛᱮ ᱢᱮᱱᱟᱜᱼᱟ। ᱥᱮᱴᱤᱝ ᱥᱮᱱ ᱥᱚᱡᱷᱮ ᱪᱟᱞᱟᱜ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱞᱤᱝᱠ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
+    "loading": "ᱥᱮᱴᱤᱝ ᱞᱮᱠᱟ ᱞᱚᱰ ᱮᱫᱟ",
+    "loadFailed": "ᱥᱮᱴᱤᱝ ᱞᱮᱠᱟ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ। {message}",
+    "retry": "ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ",
+    "emptyCatalog": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱨᱮ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "changeWorkspace": "ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "changeAgent": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱨᱮ ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "workspaceOnly": "ᱠᱷᱟᱞᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ-ᱡᱷᱚᱛᱚ",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "ᱮᱡᱮᱱᱴ ᱨᱚᱱᱴᱟᱭᱢ ᱥᱤᱢᱟ",
+        "intro": "ᱢᱤᱫ ᱴᱚᱨᱱ ᱪᱮᱫ ᱠᱟᱹᱢᱤ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ: ᱴᱩᱞ ᱠᱚᱞ, ᱚᱠᱛᱚ, ᱯᱷᱚᱞ ᱞᱚᱸᱜᱚ ᱟᱨ ᱯᱷᱤᱨ ᱧᱟᱢ।"
+      },
+      "behaviour-settings": {
+        "title": "ᱵᱮᱵᱷᱟᱨ ᱥᱮᱴᱤᱝ",
+        "intro": "ᱡᱚᱵᱟᱵ ᱪᱮᱠᱟ ᱛᱮ ᱪᱷᱚᱭ ᱟᱨ ᱠᱮᱥ ᱦᱩᱭᱟ, ᱢᱚᱱᱡᱩᱨᱤ ᱪᱮᱠᱟ ᱛᱮ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜᱼᱟ, ᱥᱩᱨᱠᱷᱟ ᱪᱮᱠ ᱪᱮᱠᱟ ᱛᱮ ᱵᱮᱵᱷᱟᱨ ᱮᱫᱟ, ᱟᱨ ᱢᱮᱢᱚᱨᱤ, ᱠᱷᱚᱡᱮᱛ ᱟᱨ ᱠᱟᱹᱢᱤ ᱮᱢ ᱪᱮᱠᱟ ᱛᱮ ᱠᱟᱹᱢᱤ ᱮᱫᱟ।"
+      },
+      "other": {
+        "title": "ᱮᱴᱟᱜ ᱥᱮᱴᱤᱝ",
+        "intro": "ᱥᱮᱴᱤᱝ ᱡᱟᱦᱟᱸ ᱟᱜ ᱟᱡ ᱵᱷᱟᱜ ᱵᱟᱹᱱᱩᱜᱼᱟ।"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "ᱨᱚᱱᱴᱟᱭᱢ ᱥᱮᱴᱤᱝ ᱠᱚ",
+        "summary": "ᱯᱩᱨᱟᱹ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱞᱟᱹᱜᱤᱫ ᱥᱤᱢᱟ, ᱢᱚᱱᱡᱩᱨᱤ, ᱜᱩᱱ ᱪᱮᱠ, ᱥᱩᱨᱠᱷᱟ ᱠᱟᱲᱟ, ᱢᱮᱢᱚᱨᱤ ᱟᱨ ᱠᱟᱹᱢᱤ ᱮᱢ।",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers ᱥᱤᱢᱟ ᱴᱟᱭᱢᱟᱣᱴ ᱴᱩᱞ ᱯᱟᱦᱴᱟ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱠᱮᱥ ᱢᱮᱢᱚᱨᱤ ᱠᱟᱹᱢᱤ ᱮᱢ ᱜᱩᱱ ᱡᱚᱵᱟᱠᱷᱟᱸᱴ ᱥᱮᱴᱤᱝ ᱜᱚᱱᱚᱝ"
+      },
+      "prompts": {
+        "title": "ᱱᱤᱨᱫᱮᱥ",
+        "summary": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱢᱚᱰᱮᱞ ᱥᱮᱱ ᱮᱢᱚᱜ ᱯᱨᱚᱢᱯᱴ: ᱥᱟᱱᱟᱢ ᱧᱮᱞ ᱢᱮ, ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱮ ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱞᱟᱹᱜᱤᱫ ᱚᱣᱟᱨᱟᱭᱰ ᱢᱮ, ᱟᱨ ᱯᱷᱚᱞ ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱢᱮ।",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry ᱯᱨᱚᱢᱯᱴ ᱱᱤᱨᱫᱮᱥ ᱥᱤᱥᱴᱚᱢ ᱯᱨᱚᱢᱯᱴ ᱚᱣᱟᱨᱟᱭᱰ ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱨᱮᱡᱤᱥᱴᱨᱤ"
+      },
+      "approvals": {
+        "title": "ᱢᱚᱱᱡᱩᱨᱤ",
+        "summary": "ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱡᱚᱜᱟᱣ ᱟᱠᱟᱱ ᱠᱟᱹᱢᱤ ᱟᱜ ᱞᱟᱭᱱ, ᱪᱮᱫ ᱴᱩᱞ ᱞᱟᱹᱜᱤᱫ ᱢᱚᱱᱡᱩᱨᱤ ᱞᱟᱹᱠᱛᱤ ᱚᱱᱟ ᱟᱜ ᱱᱤᱭᱚᱢ, ᱟᱨ ᱟᱢᱟᱜ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱛᱟᱭᱚᱢ ᱪᱮᱫ ᱦᱩᱭᱟ।",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation ᱢᱚᱱᱡᱩᱨᱤ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱞᱟᱭᱱ ᱦᱤᱭᱩᱢᱮᱱ ᱤᱱ ᱫᱷᱮ ᱞᱩᱯ ᱴᱩᱞ ᱱᱤᱭᱚᱢ ᱚᱠᱛᱚ ᱪᱷᱚᱭ ᱞᱟᱜᱟᱛᱟᱨ"
+      },
+      "guardrails": {
+        "title": "ᱜᱟᱨᱰᱨᱮᱞ",
+        "summary": "ᱚᱱᱟ ᱯᱮᱴᱟᱨᱱ ᱡᱟᱦᱟᱸ ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱯᱟᱨ ᱦᱩᱭ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱝ ᱢᱚᱱᱡᱩᱨ ᱮᱫᱟ, ᱟᱨ ᱴᱩᱞ ᱯᱷᱚᱞ ᱨᱮ ᱞᱟᱜᱩ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱱᱤᱛᱤ।",
+        "keywords": "safety rules block filter policy content patterns ᱥᱩᱨᱠᱷᱟ ᱱᱤᱭᱚᱢ ᱨᱩᱠᱷᱤᱭᱟ ᱪᱷᱟᱸᱪᱚ ᱱᱤᱛᱤ ᱵᱤᱥᱚᱭᱵᱚᱥᱛᱩ ᱯᱮᱴᱟᱨᱱ"
+      },
+      "turns": {
+        "title": "ᱴᱚᱨᱱ ᱪᱮᱠᱚᱨ",
+        "summary": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱴᱚᱨᱱ ᱟᱜ ᱨᱮᱠᱚᱨᱰ ᱴᱟᱭᱢᱞᱟᱭᱱ: ᱪᱮᱫ ᱪᱷᱚᱞ ᱞᱮᱱᱟ, ᱪᱮᱫ ᱴᱩᱞ ᱪᱟᱞᱟᱜ ᱞᱮᱱᱟ, ᱥᱟᱱᱟᱢ ᱯᱟᱦᱴᱟ ᱨᱮ ᱪᱮᱫ ᱠᱷᱚᱨᱪᱟ ᱦᱩᱭᱞᱮᱱᱟ, ᱟᱨ ᱪᱮᱫ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ।",
+        "keywords": "turn timeline journal trace replay history steps debug ᱴᱚᱨᱱ ᱴᱟᱭᱢᱞᱟᱭᱱ ᱡᱚᱨᱱᱮᱞ ᱴᱨᱮᱥ ᱨᱤᱯᱞᱮ ᱤᱛᱤᱦᱟᱥ ᱯᱟᱦᱴᱟ ᱰᱤᱵᱚᱜ"
+      },
+      "agentBehavior": {
+        "title": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱵᱮᱵᱷᱟᱨ ᱟᱨ ᱥᱤᱢᱟ",
+        "summary": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱦᱴᱟ ᱨᱮ: ᱚᱱᱟ ᱟᱜ ᱟᱡ ᱥᱤᱢᱟ ᱟᱨ ᱵᱮᱵᱷᱟᱨ ᱥᱮᱴᱤᱝ, ᱥᱟᱱᱟᱢ ᱢᱟᱱ ᱚᱠᱟᱸ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱠᱟᱱᱟ ᱟᱨ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱟᱜ ᱢᱟᱱ ᱥᱮᱱ ᱨᱤᱥᱮᱴ ᱥᱟᱶ।",
+        "keywords": "agent override per agent behavior limits tab ᱮᱡᱮᱱᱴ ᱚᱣᱟᱨᱟᱭᱰ ᱥᱟᱱᱟᱢ ᱮᱡᱮᱱᱴ ᱵᱮᱵᱷᱟᱨ ᱥᱤᱢᱟ ᱴᱮᱵ"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "ᱱᱚᱶᱟ ᱯᱨᱚᱢᱯᱴ ᱵᱞᱚᱠ ᱠᱚ ᱢᱮᱱ ᱛᱟᱞᱟ ᱛᱮ ᱵᱟᱱᱟᱣ ᱠᱟᱱᱟ",
+    "blocksCount": "{n} ᱵᱞᱚᱠ",
+    "blockDefault": "ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱᱟ",
+    "blockOverride": "{scope} ᱚᱣᱟᱨᱟᱭᱰ v{version}",
+    "blockAgentConfig": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱯᱨᱚᱢᱯᱴ",
+    "blockCode": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱠᱳᱰ",
+    "blockTokens": "~{tokens} ᱴᱚᱠᱮᱱ",
+    "blockHash": "ᱥᱟᱵᱟᱫ ᱟᱜ ᱦᱮᱥ"
+  },
+  "toolApproval": {
+    "continuing": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱠᱟᱹᱢᱤ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱮᱫᱟ।",
+    "continueNotStarted": "ᱱᱚᱶᱟ ᱯᱷᱚᱭᱥᱟᱞᱟ ᱛᱟᱭᱚᱢ ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱡᱼᱛᱮ ᱯᱷᱤᱨ ᱮᱦᱚᱵ ᱵᱟᱝ ᱞᱮᱱᱟ। ᱚᱱᱟ ᱥᱮᱫ ᱥᱮᱱ ᱪᱟᱞᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱵᱷᱮᱡᱟᱣ ᱢᱤᱫ ᱵᱷᱮᱡᱟᱣ ᱢᱮ।",
+    "continueTimedOut": "ᱮᱡᱮᱱᱴ ᱫᱚ ᱫᱚᱦᱚᱜ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱪᱷᱚᱭ ᱵᱟᱝ ᱠᱟᱫᱼᱟ। ᱪᱷᱚᱭ ᱠᱷᱟᱱ ᱚᱱᱟ ᱟᱜ ᱡᱚᱵᱟᱵ ᱵᱟᱛ ᱪᱤᱛ ᱨᱮ ᱧᱮᱞᱚᱜᱼᱟ; ᱪᱮᱠ ᱞᱟᱹᱜᱤᱫ ᱨᱤᱞᱚᱰ ᱢᱮ।",
+    "continuingWaiting": "Your decision is recorded. The agent is picking the task back up.",
+    "continuingRunning": "The agent is working on the next step. Its reply appears here as soon as it is ready.",
+    "continuingStill": "Still working. A model running on this computer can take a few minutes; you can keep reading meanwhile.",
+    "continuingLongWait": "This is taking longer than usual, but the agent has not stopped. Its reply will appear here when it is done.",
+    "continuingStagesLabel": "Progress",
+    "continuingStageDecided": "Decision recorded",
+    "continuingStageRestarted": "Agent restarted",
+    "continuingStageWorking": "Working on it",
+    "panelLabel": "Tool approvals",
+    "queuePosition": "Approval {position} of {total}",
+    "queueMore": "{count} more waiting. The next one appears when you decide this one.",
+    "rawName": "Technical name",
+    "approveAll": "Approve all {count}",
+    "rejectAll": "Reject all",
+    "approvingProgress": "Approving {position} of {total}",
+    "rejectingProgress": "Rejecting {position} of {total}",
+    "bulkHint": "Decides the waiting calls one after another, oldest first, and stops at the first problem.",
+    "bulkStoppedTruncated": "Stopped: the next call's arguments are too long to show here, so it waits for your own decision.",
+    "bulkStoppedError": "Stopped after a problem; the calls below it are still waiting.",
+    "waitingList": "Waiting calls"
+  },
+  "promptDirectives": {
+    "tabRegistry": "ᱡᱷᱚᱛᱚ ᱯᱨᱚᱢᱯᱴ",
+    "tabAgentPreview": "ᱢᱩᱨᱩᱛ ᱯᱨᱚᱢᱯᱴ ᱯᱩᱨᱟᱹ ᱧᱮᱞ",
+    "regTitle": "ᱥᱟᱱᱟᱢ ᱯᱨᱚᱢᱯᱴ",
+    "regIntro": "ᱢᱚᱰᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱚᱞ ᱟᱠᱟᱱ ᱡᱷᱚᱛᱚ ᱚᱞ, ᱱᱤᱛᱚᱜ ᱞᱟᱜᱩ ᱟᱠᱟᱱ ᱥᱟᱵᱟᱫ, ᱚᱱᱟ ᱟᱜ ᱥᱚᱨᱥ ᱟᱨ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱥᱟᱶ। ᱢᱤᱫ ᱥᱤᱢᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ, ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱯᱨᱚᱢᱯᱴ ᱠᱷᱩᱞᱟᱹ ᱢᱮ, ᱟᱨ ᱥᱟᱱᱟᱢ ᱢᱟᱲᱟᱝ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱧᱮᱞ ᱢᱮ। ᱵᱚᱫᱚᱞ ᱫᱚ ᱚᱞᱟᱜ ᱟᱫᱷᱟ ᱢᱤᱱᱤᱴ ᱨᱮ ᱡᱷᱚᱛᱚ ᱥᱟᱨᱵᱟᱨ ᱨᱮ ᱯᱟᱦᱩᱸᱪᱟᱣ ᱮᱫᱟ।",
+    "regScopeLabel": "ᱚᱠᱟ ᱥᱤᱢᱟ ᱨᱮ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱠᱛᱤ",
+    "regScope_tenant": "ᱱᱚᱶᱟ ᱣᱟᱨᱠᱥᱯᱮᱥ",
+    "regScope_agent": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ",
+    "regScope_platform": "ᱡᱷᱚᱛᱚ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ",
+    "regAgentLabel": "ᱮᱡᱮᱱᱴ",
+    "regAgentPlaceholder": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
+    "regAgentsFailed": "ᱟᱢᱟᱜ ᱮᱡᱮᱱᱴ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "regPickAgent": "ᱢᱤᱫ ᱮᱡᱮᱱᱴ ᱟᱜ ᱯᱨᱚᱢᱯᱴ ᱠᱚ ᱧᱮᱞ ᱟᱨ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱚᱱᱟ ᱵᱟᱪᱷᱟᱣ ᱢᱮ।",
+    "regAgentUnavailable": "ᱞᱤᱝᱠ ᱨᱮ ᱢᱮᱱᱟᱜ ᱮᱡᱮᱱᱴ ᱫᱚ ᱟᱢ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ, ᱠᱷᱟᱱᱟ ᱚᱱᱟ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ ᱥᱮ ᱟᱢ ᱚᱱᱟ ᱵᱟᱝ ᱧᱮᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ। ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱨᱮ ᱨᱮᱡᱤᱥᱴᱨᱤ ᱣᱟᱨᱠᱥᱯᱮᱥ ᱥᱤᱢᱟ ᱨᱮ ᱠᱷᱩᱞᱟᱹ ᱞᱮᱱᱟ।",
+    "regSearchLabel": "ᱯᱨᱚᱢᱯᱴ ᱠᱷᱚᱡᱮᱛ ᱢᱮ",
+    "regSearchPlaceholder": "ᱪᱮᱫ, ᱢᱩᱲᱩᱫ ᱥᱮ ᱵᱩᱡᱷᱟᱣ",
+    "regRiskLabel": "ᱡᱷᱩᱠᱤ ᱥᱟᱶ",
+    "regRiskAll": "ᱡᱷᱚᱛᱚ ᱡᱷᱩᱠᱤ ᱥᱟᱶ",
+    "regRisk_STEERS_EVERY_TURN": "ᱥᱟᱱᱟᱢ ᱴᱚᱨᱱ ᱠᱚ ᱥᱟᱸᱢᱟᱞᱟ",
+    "regRisk_SECONDARY_CALL": "ᱥᱮᱨᱢᱟ ᱢᱚᱰᱮᱞ ᱠᱚᱞ",
+    "regRisk_USER_VISIBLE": "ᱢᱟᱱᱩᱸ ᱞᱟᱹᱜᱤᱫ ᱧᱮᱞᱟᱹᱭᱟ",
+    "regRisk_TOOL_DESCRIPTION": "ᱴᱩᱞ ᱵᱩᱡᱷᱟᱣ",
+    "regOnlyCustomised": "ᱠᱷᱟᱞᱤ ᱠᱚᱥᱴᱚᱢᱟᱭᱡ ᱟᱠᱟᱱ",
+    "regPlatformReadOnly": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ-ᱡᱷᱚᱛᱚ ᱯᱨᱚᱢᱯᱴ ᱠᱚ ᱱᱚᱸᱰᱮ ᱯᱟᱲᱦᱟᱣ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ; ᱠᱷᱟᱞᱤ ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱮᱰᱢᱤᱱ ᱜᱮ ᱚᱱᱟ ᱠᱚ ᱵᱚᱫᱚᱞ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "regLoadFailed": "ᱯᱨᱚᱢᱯᱴ ᱠᱚ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "regCount": "{total} ᱯᱨᱚᱢᱯᱴ ᱛᱟᱞᱟ ᱠᱷᱚᱱ {shown} ᱧᱮᱞᱟᱹ ᱮᱫᱟ।",
+    "regEmptyTitle": "ᱪᱮᱫᱽ ᱯᱨᱚᱢᱯᱴ ᱵᱟᱝ ᱢᱤᱞᱟᱜ ᱞᱮᱱᱟ",
+    "regEmptyBody": "ᱠᱷᱚᱡᱮᱛ ᱥᱮ ᱪᱷᱟᱸᱪᱚ ᱵᱚᱫᱚᱞ ᱢᱮ।",
+    "regSource_DEFAULT": "ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱᱟ",
+    "regSource_FALLBACK": "ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱᱟ (ᱚᱣᱟᱨᱟᱭᱰ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ)",
+    "regSource_PLATFORM": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ",
+    "regSource_TENANT": "ᱣᱟᱨᱠᱥᱯᱮᱥ",
+    "regSource_AGENT": "ᱮᱡᱮᱱᱴ",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "ᱨᱤᱴᱟᱭᱟᱨ ᱟᱠᱟᱱ",
+    "regRetiredBody": "ᱱᱚᱶᱟ ᱯᱨᱚᱢᱯᱴ ᱫᱚ ᱟᱨ ᱚᱞ ᱵᱟᱝ ᱵᱷᱮᱡᱟᱜᱼᱟ, ᱚᱱᱟ ᱞᱟᱹᱜᱤᱫ ᱵᱚᱫᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱫᱽ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "regEffectiveOff": "ᱵᱚᱸᱫ: ᱪᱮᱫᱽ ᱵᱟᱝ ᱵᱷᱮᱡᱟᱜᱼᱟ।",
+    "regEffectiveTokens": "ᱱᱤᱛᱚᱜ ᱞᱟᱜᱩ, ᱚᱞᱟᱜ {tokens} ᱴᱚᱠᱮᱱ।",
+    "regEffectiveLabel": "{title} ᱞᱟᱹᱜᱤᱫ ᱞᱟᱜᱩ ᱥᱟᱵᱟᱫ",
+    "regOpenEditor": "{title} ᱵᱚᱫᱚᱞ ᱢᱮ",
+    "regCloseEditor": "{title} ᱵᱚᱸᱫ ᱢᱮ",
+    "regEditingOverride": "{scope} ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱵᱚᱫᱚᱞ ᱮᱫᱟ, ᱱᱤᱛᱚᱜ v{version}।",
+    "regEditingNone": "ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ {scope} ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱵᱟᱹᱱᱩᱜᱼᱟ। ᱚᱱᱟ ᱫᱚ ᱚᱱᱟ ᱞᱟᱛᱟᱨ ᱨᱮᱭᱟᱜ ᱥᱟᱵᱟᱫ ᱠᱷᱚᱱ ᱮᱦᱚᱵ ᱮᱫᱟ: {below}।",
+    "regPlaceholders": "ᱨᱚᱱᱴᱟᱭᱢ ᱨᱮ ᱯᱩᱨᱟᱹ ᱦᱩᱭᱟ:",
+    "regRequired": "(ᱞᱟᱹᱠᱛᱤ)",
+    "regProblemsTitle": "ᱥᱟᱸᱪᱟᱣ ᱠᱷᱚᱱ ᱯᱷᱚᱞᱚ ᱱᱚᱶᱟ ᱴᱷᱤᱠ ᱢᱮ",
+    "regReasonLabel": "ᱵᱚᱫᱚᱞ ᱟᱜ ᱠᱟᱨᱚᱱ (ᱤᱛᱤᱦᱟᱥ ᱨᱮ ᱛᱟᱦᱮᱱᱟ)",
+    "regReasonPlaceholder": "ᱪᱷᱚᱠᱟᱛ",
+    "regConflict": "ᱟᱢ ᱵᱚᱫᱚᱞ ᱮᱫᱟ ᱚᱠᱛᱚ ᱪᱮᱫᱽ ᱡᱤᱛᱟᱜ ᱫᱚ ᱱᱚᱶᱟ ᱯᱨᱚᱢᱯᱴ ᱵᱚᱫᱚᱞ ᱠᱟᱫᱼᱟ। ᱚᱱᱟ ᱟᱜ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱧᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱱᱚᱶᱟ ᱵᱚᱸᱫ ᱠᱟᱛᱮ ᱯᱷᱤᱨ ᱠᱷᱩᱞᱟᱹ ᱢᱮ, ᱛᱟᱭᱚᱢ ᱯᱷᱤᱨ ᱪᱮᱥᱴᱟ ᱢᱮ।",
+    "regRevert": "{to} ᱥᱮᱱ ᱯᱷᱤᱨ ᱪᱟᱞᱟᱜ ᱢᱮ",
+    "regShowHistory": "ᱤᱛᱤᱦᱟᱥ",
+    "regHideHistory": "ᱤᱛᱤᱦᱟᱥ ᱤᱫᱤ ᱢᱮ",
+    "regHistoryLoading": "ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱮᱫᱟ…",
+    "regHistoryFailed": "ᱤᱛᱤᱦᱟᱥ ᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "regHistoryEmpty": "ᱱᱚᱶᱟ ᱥᱤᱢᱟ ᱨᱮ ᱱᱤᱛᱚᱜ ᱦᱟᱹᱵᱤᱡ ᱪᱮᱫᱽ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱵᱟᱹᱱᱩᱜᱼᱟ।",
+    "regVersion": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version}",
+    "regAction_CREATE": "ᱵᱟᱱᱟᱣ ᱟᱠᱟᱱ",
+    "regAction_UPDATE": "ᱵᱚᱫᱚᱞ ᱟᱠᱟᱱ",
+    "regAction_REVERT": "ᱯᱷᱤᱨ ᱨᱩᱣᱟᱹᱲ ᱟᱠᱟᱱ",
+    "regAction_MIGRATE": "ᱚᱪᱚᱜ ᱟᱠᱟᱱ",
+    "regCurrent": "ᱱᱤᱛᱚᱜ",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "ᱵᱟᱝ ᱪᱤᱱᱦᱟᱹ ᱟᱠᱟᱱ",
+    "regReason": "ᱠᱟᱨᱚᱱ: {reason}",
+    "regShowDiff": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version} ᱟᱜ ᱵᱚᱫᱚᱞ ᱧᱮᱞᱟᱹ ᱢᱮ",
+    "regHideDiff": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version} ᱟᱜ ᱵᱚᱫᱚᱞ ᱤᱫᱤ ᱢᱮ",
+    "regDiffLabel": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version} ᱛᱮ ᱠᱟᱱ ᱵᱚᱫᱚᱞ",
+    "regNoDiff": "ᱱᱚᱶᱟ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱨᱮ ᱪᱮᱫᱽ ᱚᱞ ᱵᱟᱝ ᱵᱚᱫᱚᱞ ᱞᱮᱱᱟ।",
+    "regRestore": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version} ᱯᱷᱤᱨ ᱛᱟᱦᱮᱱ ᱢᱮ",
+    "regRestoreReason": "ᱥᱚᱸᱥᱠᱚᱨᱚᱬ {version} ᱟᱜ ᱥᱟᱵᱟᱫ ᱯᱷᱤᱨ ᱛᱟᱦᱮᱱ ᱞᱮᱱᱟ",
+    "regRestoreFailed": "ᱚᱱᱟ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱯᱷᱤᱨ ᱛᱟᱦᱮᱱ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "regRestoreAck": "ᱤᱧ ᱵᱩᱡᱷᱟᱣ ᱠᱟᱱᱟ ᱪᱮᱫ {title} ᱟᱜ ᱢᱤᱫ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱯᱷᱤᱨ ᱛᱟᱦᱮᱱ ᱠᱟᱛᱮ ᱥᱩᱨᱠᱷᱟ ᱠᱚᱢᱡᱚᱨ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ।",
+    "regPreviewTitle": "ᱢᱩᱨᱩᱛ ᱯᱨᱚᱢᱯᱴ ᱯᱩᱨᱟᱹ ᱧᱮᱞ",
+    "regPreviewIntro": "ᱢᱚᱰᱮᱞ ᱠᱚ ᱠᱚᱞ ᱵᱟᱝ ᱪᱷᱚᱭ, ᱢᱤᱫ ᱴᱚᱨᱱ ᱪᱮᱠᱟ ᱛᱮ ᱠᱚᱨᱚ ᱚᱱᱟ ᱞᱮᱠᱟ ᱮᱡᱮᱱᱴ ᱟᱜ ᱥᱟᱹᱨᱤ ᱥᱤᱥᱴᱚᱢ ᱯᱨᱚᱢᱯᱴ ᱟᱨ ᱴᱩᱞ ᱞᱮᱠᱟᱱ ᱵᱟᱱᱟᱣᱟ। ᱥᱟᱱᱟᱢ ᱵᱞᱚᱠ ᱫᱚ ᱯᱨᱚᱢᱯᱴ ᱪᱮᱫ, ᱚᱱᱟ ᱟᱜ ᱥᱤᱢᱟ, ᱟᱨ ᱚᱱᱟ ᱟᱜ ᱥᱟᱵᱟᱫ ᱚᱠᱟ ᱥᱚᱸᱥᱠᱚᱨᱚᱬ ᱠᱷᱚᱱ ᱟᱹᱜᱩ ᱠᱟᱱᱟ ᱧᱮᱞᱟᱹᱭᱟ।",
+    "regPreviewMessageLabel": "ᱱᱢᱩᱱᱟ ᱵᱮᱵᱷᱟᱨᱤ ᱵᱷᱮᱡᱟᱣ (ᱪᱷᱚᱠᱟᱛ)",
+    "regPreviewMessagePlaceholder": "ᱥᱟᱹᱨᱤ ᱵᱷᱮᱡᱟᱣ ᱞᱮᱠᱟ ᱴᱩᱞ ᱟᱨ ᱡᱟᱹᱱᱟᱹᱨᱤ ᱢᱮᱢᱚᱨᱤ ᱵᱟᱪᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱵᱮᱵᱷᱟᱨ ᱦᱩᱭᱟ।",
+    "regPreviewSmallModel": "ᱪᱷᱚᱴᱚ ᱢᱚᱰᱮᱞ ᱞᱟᱹᱜᱤᱫ ᱯᱩᱨᱟᱹ ᱧᱮᱞ",
+    "regPreviewBuild": "ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱵᱟᱱᱟᱣ ᱢᱮ",
+    "regPreviewBuilding": "ᱵᱟᱱᱟᱣ ᱮᱫᱟ…",
+    "regPreviewFailed": "ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱵᱟᱝ ᱵᱟᱱᱟᱣ ᱦᱩᱭᱞᱮᱱᱟ।",
+    "regPreviewTotals": "ᱥᱤᱥᱴᱚᱢ ᱚᱞ ᱞᱟᱹᱜᱤᱫ ᱚᱞᱟᱜ {prompt} ᱴᱚᱠᱮᱱ ᱟᱨ ᱴᱩᱞ ᱵᱩᱡᱷᱟᱣ ᱞᱟᱹᱜᱤᱫ {tools} ᱴᱚᱠᱮᱱ (ᱟᱱᱟᱡ)।",
+    "regPreviewOverBudgetTitle": "ᱴᱚᱠᱮᱱ ᱵᱟᱡᱮᱴ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ",
+    "regPreviewOverBudget": "ᱛᱟᱦᱮᱱ ᱥᱤᱥᱴᱚᱢ ᱚᱞ ᱫᱚ ᱥᱮᱴ ᱟᱠᱟᱱ {budget} ᱴᱚᱠᱮᱱ ᱵᱟᱡᱮᱴ ᱠᱷᱚᱱ ᱵᱟᱲᱛᱤ ᱠᱟᱱᱟ। ᱪᱮᱫᱽ ᱵᱟᱝ ᱠᱟᱴᱟ ᱞᱮᱱᱟ; ᱢᱤᱫ ᱯᱨᱚᱢᱯᱴ ᱪᱤᱛᱚᱜ ᱢᱮ ᱢᱮᱱ ᱪᱤᱛᱟ ᱢᱮ।",
+    "regPreviewMessageHeading": "ᱵᱷᱮᱡᱟᱣ: {message}",
+    "regPreviewTokens": "~{tokens} ᱴᱚᱠᱮᱱ",
+    "regPreviewTools": "ᱴᱩᱞ ({count})",
+    "regPreviewNoTools": "ᱱᱚᱶᱟ ᱮᱡᱮᱱᱴ ᱫᱚ ᱪᱮᱫᱽ ᱴᱩᱞ ᱵᱟᱝ ᱮᱢᱟ।",
+    "regPreviewNotes": "ᱱᱚᱶᱟ ᱯᱩᱨᱟᱹ ᱧᱮᱞ ᱫᱚ ᱪᱮᱫ ᱵᱟᱝ ᱵᱟᱰᱟᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ",
+    "regOriginDefault": "ᱰᱤᱯᱷᱚᱞᱴ ᱛᱮ ᱥᱟᱶ ᱟᱹᱜᱩ ᱠᱟᱱᱟ",
+    "regOriginOverride": "{scope} ᱚᱣᱟᱨᱟᱭᱰ v{version}",
+    "regOriginAgentConfig": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱟᱡ ᱥᱤᱥᱴᱚᱢ ᱯᱨᱚᱢᱯᱴ",
+    "regOriginCode": "ᱯᱞᱟᱴᱯᱷᱚᱨᱢ ᱠᱳᱰ"
+  },
+  "toolLabels": {
+    "mcpTool": "{tool} ({server})",
+    "label_web_search": "Search the web",
+    "does_web_search": "Looks up public web pages that match a search and reads their titles and snippets.",
+    "label_fetch_web_page": "Open a web page",
+    "does_fetch_web_page": "Downloads one public web page and reads its text.",
+    "label_deep_research": "Research a topic on the web",
+    "does_deep_research": "Runs several web searches and reads the pages it finds.",
+    "label_verify_citations": "Check quotes against sources",
+    "does_verify_citations": "Compares quoted text with the web pages it was taken from.",
+    "label_http_request": "Call a web API",
+    "does_http_request": "Sends a request to a web address or API; depending on the request it can read or change something there.",
+    "label_http_request_write": "Send data to a web API",
+    "does_http_request_write": "Sends data to a web address, which can change something on that service.",
+    "label_schedule_task": "Schedule a task",
+    "does_schedule_task": "Sets up a task to run later or on a repeating schedule.",
+    "label_create_workflow": "Create a workflow",
+    "does_create_workflow": "Creates a new workflow in this workspace.",
+    "label_data_table_query": "Look up a data table",
+    "does_data_table_query": "Reads rows from one of this workspace's data tables.",
+    "label_data_table_write": "Change a data table",
+    "does_data_table_write": "Adds or changes rows in one of this workspace's data tables.",
+    "label_coding_task": "Run a coding task",
+    "does_coding_task": "Starts a coding task that can read and change files in a code workspace.",
+    "label_delegate_to_specialist": "Ask a specialist agent",
+    "does_delegate_to_specialist": "Hands part of the task to another agent and reads its answer.",
+    "label_delegate_parallel": "Ask several agents at once",
+    "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
+    "label_web_task": "Use a browser on a website",
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
   }
 }

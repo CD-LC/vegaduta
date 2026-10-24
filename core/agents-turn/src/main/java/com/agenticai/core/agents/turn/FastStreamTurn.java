@@ -1,6 +1,5 @@
 package com.agenticai.core.agents.turn;
 
-import static com.agenticai.core.agents.turn.AgentChatService.EMPTY_REPLY_FALLBACK;
 import static com.agenticai.core.agents.turn.ChatAttachments.userSpec;
 import static com.agenticai.core.agents.turn.ChatPromptDirectives.containsFabricatedGenerationUrl;
 
@@ -11,12 +10,15 @@ import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.turnjournal.TurnJournalGateway;
 import com.agenticai.core.agents.turnjournal.TurnRecorder;
+import com.agenticai.core.agents.turn.TurnReplyOutcome.Kind;
+import com.agenticai.core.chat.FinishReason;
+import com.agenticai.core.chat.FinishReasonAdvisor;
+import com.agenticai.core.chat.FinishReasonCapture;
 import com.agenticai.core.chat.LlmMetricsAdvisor;
-import com.agenticai.core.chat.gateway.LlmGatewayContentPolicyViolationException;
-import com.agenticai.core.guardrails.GuardrailViolationException;
-import com.agenticai.core.guardrails.ToolStepLimitExceededException;
+import com.agenticai.core.chat.ToolLoopTranscript;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
@@ -60,6 +62,33 @@ final class FastStreamTurn {
     final StringBuilder accumulated = new StringBuilder();
 
     /**
+     * Where the provider's finish reason of the latest model call is left (see {@link
+     * FinishReasonAdvisor}); read after each pass to decide whether the reply is an answer.
+     */
+    final FinishReasonCapture finish = new FinishReasonCapture();
+
+    /**
+     * The conversation after each tool round of the primary pass, recorded by the tool loop inside
+     * Spring AI: what a continuation pass is sent so it resumes from the real transcript.
+     */
+    final ToolLoopTranscript transcript;
+
+    /** How many tool calls had finished when this turn started, to tell what a pass called. */
+    final int callsAtStart;
+
+    /** Where a platform-written notice starts in {@link #accumulated}, or -1 when none was added. */
+    private volatile int noticeStart = -1;
+
+    private int lengthPasses;
+    private int toolCallRetryPasses;
+
+    /** Stands in for the outcome of a turn built without a context (a unit-test fixture). */
+    private final TurnReplyOutcome detachedReply = new TurnReplyOutcome();
+
+    /** Stands in for the tool activity of a turn built without a context (a unit-test fixture). */
+    private final TurnToolActivity detachedActivity = new TurnToolActivity();
+
+    /**
      * Fabricated-generation-URL guard (2026-08-10): live incident, confirmed twice despite
      * TOOL_TRUST_DIRECTIVE already forbidding it in the system prompt - a hosted model still
      * emitted a fake oaidalleapiprodscus.blob.core.windows.net URL with an invented SAS signature
@@ -94,6 +123,7 @@ final class FastStreamTurn {
         List<ChatAttachmentPayload> attachments = prompt.attachments();
         this.owner = owner;
         this.context = context;
+        this.transcript = owner.newTranscript(context, agentId);
         this.agent = agent;
         this.agentId = agentId;
         this.sessionId = sessionId;
@@ -108,13 +138,37 @@ final class FastStreamTurn {
         // Statement order is the original streamFast's: bound memory id, journal, wrapped tools,
         // then the fabrication-check start instant.
         this.memorySessionId = SessionMemoryService.boundMemorySessionId();
-        this.turn = TurnJournalGateway.begin(agentId);
+        // The turn's own id (TurnContext#turnId), the same one the response header names, so the client can open
+        // this turn; every attempt of the turn (a hosted-chain failover) appends to the same chain.
+        this.turn = TurnJournalGateway.begin(agentId, context == null ? null : context.turnId(), sessionId);
         turn.intake(
                 userMessage,
                 attachments == null ? 0 : attachments.size(),
-                tools == null ? 0 : tools.size());
-        this.journaledTools = turn.wrapTools(tools);
+                tools == null ? 0 : tools.size(),
+                null,
+                TurnJournals.runToolNames(context));
+        TurnJournals.recordApprovalDecision(turn, context);
+        this.journaledTools = turn.wrapTools(tools, context == null ? null : context.approval());
         this.fabricationCheckStartedAt = Instant.now();
+        this.callsAtStart = activity().finishedCalls();
+        // A new reply attempt (the hosted chain re-runs a turn on the next provider): whatever the
+        // attempt before it ended with does not apply to this one.
+        reply().begin();
+    }
+
+    /** What this turn's tools are doing; shared with the tool wrappers that report it. */
+    TurnToolActivity activity() {
+        return context == null ? detachedActivity : context.toolActivity();
+    }
+
+    /** One pass's idle timeout: model silence only, never tool time (see {@link StreamIdleWatch}). */
+    Flux<String> idleTimeout(Flux<String> stream) {
+        return owner.idleTimeout(stream, activity());
+    }
+
+    /** How this turn's reply ends; shared with the stages that cache and store it. */
+    TurnReplyOutcome reply() {
+        return context == null ? detachedReply : context.reply();
     }
 
     /**
@@ -133,15 +187,24 @@ final class FastStreamTurn {
                 // context to attribute the LlmCallLog row it writes back to this agent/
                 // conversation; without them, the row still gets written (cost, tokens,
                 // success/error, latency) just with a null agent/session.
-                content(chatClient, true)
-                        // Genuine mid-stream idle timeout - see ChatTurnExecutor#streamIdleTimeout
-                        // and app.llm.http.stream-idle-timeout's comment in application.yml.
-                        // Resets on every emitted token; fires
-                        // java.util.concurrent.TimeoutException (already a recognized category
-                        // in ProviderErrorTranslator.translate, handled identically to a
-                        // transport-level timeout) the first time a gap between tokens exceeds
-                        // this duration, independent of how long the stream has run in total.
-                        .timeout(owner.streamIdleTimeout)
+                // A transient failure before the first token (429, 5xx) is retried here, on the
+                // same provider, before the recovery ladder below considers another one.
+                idleTimeout(
+                                owner.retryBeforeFirstToken(
+                                        content(chatClient, true),
+                                        () -> content(chatClient, true),
+                                        activity(),
+                                        context.scope(),
+                                        agentId,
+                                        sessionId,
+                                        stepEvents))
+                        // Genuine mid-stream idle timeout - see ChatTurnExecutor#idleTimeout and
+                        // app.llm.http.stream-idle-timeout's comment in application.yml. Resets on
+                        // every emitted token AND on tool activity (a running tool emits no token);
+                        // fires java.util.concurrent.TimeoutException (already a recognized
+                        // category in ProviderErrorTranslator.translate, handled identically to a
+                        // transport-level timeout) the first time the model is silent for longer
+                        // than this duration with no tool running.
                         // Translates provider failures (billing, rate limit, invalid model, auth)
                         // into a clean UpstreamProviderException instead of letting Spring AI's
                         // generic RuntimeException fall through as an opaque 500. If the failure
@@ -161,17 +224,18 @@ final class FastStreamTurn {
                         // LLM provider call failed" and mislead anyone debugging it.
                         .onErrorMap(
                                 e ->
-                                        e instanceof ToolStepLimitExceededException
-                                                        || e instanceof GuardrailViolationException
-                                                        || e
-                                                                instanceof
-                                                                LlmGatewayContentPolicyViolationException
+                                        FastStreamRecovery.isPolicyStop(e)
                                                 ? e
                                                 : owner.providerErrorTranslator.translate(
                                                         e, agent.getProviderName()))
                         .onErrorResume(recovery::retryWithoutToolsOnThoughtSignatureBug)
                         .onErrorResume(recovery::retryOnFallbackProvider)
                         .onErrorResume(recovery::closeHalfResponse)
+                        // Finish-reason handling: the stream completed normally, but the provider may
+                        // have stopped it for a reason that makes the text something other than an
+                        // answer - cut off at the output limit (continue it), stopped by the safety
+                        // system (say so), an unusable tool call (retry once). See settleFinish.
+                        .concatWith(Flux.defer(this::settleFinish))
                         // Empty-response fix (2026-08-10): distinct from the "half response" case
                         // above - this is a stream that completes NORMALLY, no error at all, but
                         // the provider emitted zero real tokens (a genuinely blank completion - a
@@ -183,7 +247,9 @@ final class FastStreamTurn {
                         // already been appended to accumulated - never fires while content is
                         // still arriving, and adds nothing when accumulated is non-empty (the
                         // overwhelmingly common case stays byte-for-byte identical to before this
-                        // operator existed).
+                        // operator existed). The line shown is app.chat.finish.empty-reply-message,
+                        // and the reply is marked as not an answer: it is neither cached nor stored
+                        // as something the agent said.
                         .concatWith(
                                 Flux.defer(
                                         () -> {
@@ -195,16 +261,26 @@ final class FastStreamTurn {
                                                             + " empty response - no tokens, no error",
                                                     agentId,
                                                     sessionId);
-                                            return Flux.just(EMPTY_REPLY_FALLBACK);
+                                            reply().mark(Kind.EMPTY);
+                                            noticeStart = 0;
+                                            return Flux.just(finishNotice(reply().snapshot()));
                                         }));
         // Turn-loss fix (2026-08-07): the complete-path body below is the old doOnComplete body
         // unchanged; withAssistantTurnPersistence adds the once-guard around it plus the
         // error/cancel partial-persist. Everything else about this stream (operators above, error
         // propagation to the caller) is untouched.
-        if (owner.maxContinuations > 0 && tools != null && !tools.isEmpty()) {
+        if (owner.continuationPasses(context) > 0 && tools != null && !tools.isEmpty()) {
             // Evaluated only after the primary pass completes normally (concatWith), by which time
-            // every token of it is already in {@code accumulated}.
-            stream = stream.concatWith(Flux.defer(() -> continueIfUnfinished(0, 0, Instant.now())));
+            // every token of it is already in {@code accumulated}. Only a finished answer can be
+            // "unfinished": a reply that was cut off, refused or replaced by a notice has already been
+            // dealt with by the finish-reason handling above.
+            stream =
+                    stream.concatWith(
+                            Flux.defer(
+                                    () ->
+                                            reply().isComplete()
+                                                    ? new FastStreamContinuation(this).afterPrimaryPass()
+                                                    : Flux.empty()));
         }
         if (turn.active()) {
             stream =
@@ -213,99 +289,31 @@ final class FastStreamTurn {
                             .doOnCancel(() -> turn.commit(null, "cancelled"));
         }
         return owner.withAssistantTurnPersistence(
-                stream, agentId, sessionId, memorySessionId, accumulated, this::onCompleteFullAnswer);
+                stream,
+                agentId,
+                sessionId,
+                memorySessionId,
+                accumulated,
+                this::onCompleteFullAnswer,
+                () -> activity().ledger().snapshotOrNull());
     }
 
     /**
-     * Keeps a task going when the model stops at "let me do X" without doing it: the last pass's
-     * reply is checked by {@link TurnContinuation}, and if it reads as unfinished the model is
-     * called again with what was said and what the tools returned plus a nudge to act. Bounded by
-     * {@code app.chat.continuation.max-passes}; stops when a pass made no tool call (no progress),
-     * when the reply is a question, a summary or an approval wait, or on any error (the earlier
-     * output is already delivered and persisted).
-     *
-     * @param passes continuation passes run so far
-     * @param segmentStart where the previous pass's text starts in {@link #accumulated}
-     * @param passStartedAt when the previous pass began, to find its tool calls
+     * One continuation pass: the conversation so far ({@link ContinuationThread}) plus the nudge, with
+     * the turn's tools on offer, recording its own tool rounds into {@code passTranscript}.
      */
-    private Flux<String> continueIfUnfinished(int passes, int segmentStart, Instant passStartedAt) {
-        if (passes >= owner.maxContinuations) {
-            return Flux.empty();
+    Flux<String> continuationContent(ContinuationThread.Request request, ToolLoopTranscript passTranscript) {
+        ChatClient.ChatClientRequestSpec spec = chatClient.prompt();
+        if (request.systemPrompt() != null) {
+            spec = spec.system(request.systemPrompt());
         }
-        String segment = accumulated.substring(Math.min(segmentStart, accumulated.length()));
-        if (!TurnContinuation.looksUnfinished(segment)) {
-            return Flux.empty();
-        }
-        String evidence;
-        try {
-            evidence =
-                    context.scope()
-                            .get(
-                                    () ->
-                                            owner.collectToolEvidenceSince(
-                                                    agentId, sessionId, passStartedAt));
-        } catch (RuntimeException e) {
-            return Flux.empty();
-        }
-        if (passes > 0 && evidence == null) {
-            ChatTurnExecutor.log.info(
-                    "Agent {} session {}: continuation pass {} made no tool call; stopping",
-                    agentId,
-                    sessionId,
-                    passes);
-            return Flux.empty();
-        }
-        ChatTurnExecutor.log.info(
-                "Agent {} session {}: reply stopped at an unfinished step; continuation pass {}",
-                agentId,
-                sessionId,
-                passes + 1);
-        turn.guard("continuation", "pass-" + (passes + 1));
-        String nudge = TurnContinuation.NUDGE;
-        if (evidence != null) {
-            String shown = evidence.length() > 4000 ? evidence.substring(0, 4000) + "..." : evidence;
-            nudge = "Tool results so far:\n" + shown + "\n\n" + nudge;
-        }
-        List<Message> next = new java.util.ArrayList<>(history);
-        next.add(new org.springframework.ai.chat.messages.UserMessage(userMessage));
-        next.add(new org.springframework.ai.chat.messages.AssistantMessage(segment));
-        int nextStart = accumulated.length() + 2;
-        Instant started = Instant.now();
-        String nudgeFinal = nudge;
-        // The previous pass completes on an HTTP-client thread that holds no TenantContext, and
-        // concatWith(Flux.defer(...)) subscribes this pass from there. Subscribe it in the turn's
-        // captured scope so the advisors (LlmMetricsAdvisor, RlTrajectoryAdvisor) see the tenant and
-        // their llm_call_log / rl_episode writes land in the tenant schema instead of the fail-closed
-        // "tenant_context_missing" one (AGENTS.md rule 12).
-        Flux<String> pass =
-                TenantScopedFlux.subscribeInScope(
-                                context.scope(),
-                                () ->
-                                        chatClient
-                                                .prompt()
-                                                .system(systemPrompt)
-                                                .messages(next)
-                                                .user(nudgeFinal)
-                                                .toolCallbacks(ChatTurnExecutor.stableToolOrder(journaledTools))
-                                                .advisors(
-                                                        a ->
-                                                                a.param(LlmMetricsAdvisor.AGENT_ID_PARAM, agentId)
-                                                                        .param(LlmMetricsAdvisor.SESSION_ID_PARAM, sessionId))
-                                                .stream()
-                                                .content())
-                        .timeout(owner.streamIdleTimeout)
-                        .onErrorResume(
-                                e -> {
-                                    ChatTurnExecutor.log.warn(
-                                            "Continuation pass failed for agent {} session {}",
-                                            agentId,
-                                            sessionId,
-                                            e);
-                                    return Flux.empty();
-                                });
-        return Flux.just("\n\n")
-                .concatWith(pass)
-                .concatWith(Flux.defer(() -> continueIfUnfinished(passes + 1, nextStart, started)));
+        return spec.messages(request.messages())
+                .user(request.user())
+                .toolCallbacks(ChatTurnExecutor.stableToolOrder(journaledTools))
+                .toolContext(Map.of(ToolLoopTranscript.TOOL_CONTEXT_KEY, passTranscript))
+                .advisors(this::configureAdvisors)
+                .stream()
+                .content();
     }
 
     /**
@@ -320,46 +328,229 @@ final class FastStreamTurn {
                         .messages(history)
                         .user(userSpec(userMessage, attachments));
         if (offerTools) {
-            spec = spec.toolCallbacks(ChatTurnExecutor.stableToolOrder(journaledTools));
+            spec =
+                    spec.toolCallbacks(ChatTurnExecutor.stableToolOrder(journaledTools))
+                            .toolContext(Map.of(ToolLoopTranscript.TOOL_CONTEXT_KEY, transcript));
         }
-        return spec.advisors(
-                        a -> {
-                            a.param(LlmMetricsAdvisor.AGENT_ID_PARAM, agentId)
-                                    .param(LlmMetricsAdvisor.SESSION_ID_PARAM, sessionId);
-                            // Forwards provider reasoning (Ollama "reasoning",
-                            // reasoning_content elsewhere) into step events so
-                            // the console can show live thinking. No-op when the
-                            // turn opted out of step events (shared disabled emitter).
-                            a.advisors(new ReasoningEmitAdvisor(stepEvents));
-                            // #1102 (direct feedback: opaque "value cannot be null" 400 on every
-                            // single chat turn) - resolveExperimentVariants() returns null
-                            // whenever a tenant has no active feature-flag experiment (the common
-                            // case), but Spring AI's DefaultChatClient$DefaultAdvisorSpec#param(k,
-                            // v) asserts its value argument non-null and throws exactly that
-                            // generic message - unconditionally passing experimentVariants through
-                            // crashed every turn, not just ones under an experiment.
-                            // LlmMetricsAdvisor#paramAsString already treats an absent key the
-                            // same as an explicitly-null one (chatClientRequest.context().get
-                            // returns null either way), so simply omitting the .param() call when
-                            // there's nothing to record is behaviorally identical to before, minus
-                            // the crash.
-                            if (experimentVariants != null) {
-                                a.param(
-                                        LlmMetricsAdvisor.EXPERIMENT_VARIANTS_PARAM,
-                                        experimentVariants);
-                            }
-                        })
+        return spec.advisors(this::configureAdvisors).stream().content();
+    }
+
+    /**
+     * The prompt of the reply written without tools after the provider refused the tool-call history
+     * (see {@link ThoughtSignatureDegrade}): the same system prompt, history and attachments, with
+     * {@code userText} - the user's message plus what the tools returned - as the request.
+     */
+    Flux<String> contentWithoutTools(String userText) {
+        return chatClient
+                .prompt()
+                .system(systemPrompt)
+                .messages(history)
+                .user(userSpec(userText, attachments))
+                .advisors(this::configureAdvisors)
                 .stream()
                 .content();
     }
 
+    /** What every model call of this turn carries: attribution, step events, the finish reason. */
+    void configureAdvisors(ChatClient.AdvisorSpec a) {
+        a.param(LlmMetricsAdvisor.AGENT_ID_PARAM, agentId)
+                .param(LlmMetricsAdvisor.SESSION_ID_PARAM, sessionId);
+        // Forwards provider reasoning (Ollama "reasoning",
+        // reasoning_content elsewhere) into step events so
+        // the console can show live thinking. No-op when the
+        // turn opted out of step events (shared disabled emitter).
+        a.advisors(new ReasoningEmitAdvisor(stepEvents));
+        // The provider's stop reason (max_tokens, safety, ...): the tool loop runs inside Spring
+        // AI and .content() discards the response metadata that carries it.
+        a.advisors(new FinishReasonAdvisor(finish));
+        // #1102 (direct feedback: opaque "value cannot be null" 400 on every
+        // single chat turn) - resolveExperimentVariants() returns null
+        // whenever a tenant has no active feature-flag experiment (the common
+        // case), but Spring AI's DefaultChatClient$DefaultAdvisorSpec#param(k,
+        // v) asserts its value argument non-null and throws exactly that
+        // generic message - unconditionally passing experimentVariants through
+        // crashed every turn, not just ones under an experiment.
+        // LlmMetricsAdvisor#paramAsString already treats an absent key the
+        // same as an explicitly-null one (chatClientRequest.context().get
+        // returns null either way), so simply omitting the .param() call when
+        // there's nothing to record is behaviorally identical to before, minus
+        // the crash.
+        if (experimentVariants != null) {
+            a.param(LlmMetricsAdvisor.EXPERIMENT_VARIANTS_PARAM, experimentVariants);
+        }
+    }
+
+    // ------------------------------------------------------------------ finish-reason handling
+
+    /** What the finish reason makes this turn do, for its tenant and agent; read once per turn. */
+    private TurnFinishLimits finishLimits() {
+        TurnFinishLimits limits = finishLimits;
+        if (limits == null) {
+            limits = owner.finishLimits(context, agentId);
+            finishLimits = limits;
+        }
+        return limits;
+    }
+
+    private volatile TurnFinishLimits finishLimits;
+
+    /**
+     * Acts on the provider's finish reason once a pass has completed normally. Cut off at the output
+     * limit: another pass continues the reply, up to {@code app.chat.finish.max-continuations}, and
+     * the pieces are joined. Stopped by the provider's safety system: the person is told so. An
+     * unusable tool call: one more pass, tools offered. A reply that is still unfinished when the
+     * passes run out says so. Nothing here fires for a reply that ended for another reason, or that a
+     * failure already closed.
+     */
+    Flux<String> settleFinish() {
+        if (!finishLimits().enabled() || reply().kind() == Kind.INTERRUPTED) {
+            return Flux.empty();
+        }
+        return switch (finish.reason()) {
+            case LENGTH -> finishPass(FinishReason.LENGTH);
+            case MALFORMED_TOOL_CALL -> finishPass(FinishReason.MALFORMED_TOOL_CALL);
+            case SAFETY -> endWith(Kind.REFUSED, finish.raw());
+            default -> Flux.empty();
+        };
+    }
+
+    private Flux<String> finishPass(FinishReason reason) {
+        boolean cutOff = reason == FinishReason.LENGTH;
+        int used = cutOff ? lengthPasses : toolCallRetryPasses;
+        TurnFinishLimits limits = finishLimits();
+        int limit = cutOff ? limits.maxContinuations() : limits.maxToolCallRetries();
+        boolean mayPass = used < limit && (cutOff || mayRetryToolCall());
+        if (!mayPass) {
+            return endWith(cutOff ? Kind.TRUNCATED : Kind.MALFORMED_TOOL_CALL, null);
+        }
+        if (cutOff) {
+            lengthPasses++;
+        } else {
+            toolCallRetryPasses++;
+        }
+        ChatTurnExecutor.log.info(
+                "Agent {} session {}: the provider ended the reply with {} ({}); {} pass {} of {}",
+                agentId,
+                sessionId,
+                finish.raw(),
+                reason,
+                cutOff ? "continuation" : "tool-call retry",
+                used + 1,
+                limit);
+        turn.guard(cutOff ? "finish-continuation" : "finish-tool-call-retry", "pass-" + (used + 1));
+        TurnLifecycleEvents.finishPass(stepEvents, cutOff, used, limit);
+        // The nudge is the prompt nudge.reply_cut_off / nudge.retry_tool_call: the agent's, the tenant's or the
+        // platform's text, else the shipped one; read in the turn's tenant.
+        ResolvedDirectives promptsForTurn = context.scope().get(() -> owner.prompts.apply(agentId));
+        String nudge = promptsForTurn.text(cutOff ? NudgeTexts.REPLY_CUT_OFF : NudgeTexts.RETRY_TOOL_CALL);
+        ReplyFinish.PassPrompt prompt =
+                ReplyFinish.passPrompt(history, userMessage, accumulated.toString(), nudge);
+        // A continuation is prose: offering the tools again would let a cut-off answer rerun the
+        // calls that produced it. A retry is about the tool call, so the tools stay on offer.
+        boolean offerTools = !cutOff;
+        // The previous pass completes on an HTTP-client thread that holds no TenantContext, and the
+        // next one is subscribed from there: subscribe it in the turn's captured scope (AGENTS.md
+        // rule 12) so the advisors' llm_call_log writes land in the tenant schema.
+        Flux<String> pass =
+                TenantScopedFlux.subscribeInScope(
+                                context.scope(), () -> passContent(prompt, offerTools))
+                        .transform(this::idleTimeout)
+                        .onErrorResume(
+                                e -> {
+                                    ChatTurnExecutor.log.warn(
+                                            "Finish-reason pass failed for agent {} session {}",
+                                            agentId,
+                                            sessionId,
+                                            e);
+                                    if (FastStreamRecovery.isPolicyStop(e)) {
+                                        return Flux.error(e);
+                                    }
+                                    reply().mark(Kind.INTERRUPTED);
+                                    return Flux.just(AgentChatService.INTERRUPTED_REPLY_MARKER);
+                                });
+        return pass.concatWith(Flux.defer(this::settleFinish));
+    }
+
+    /**
+     * A tool call the provider could not use is retried only when no tool has run this turn: the
+     * retry re-sends the conversation without the tool results of this turn (Spring AI keeps them
+     * inside its loop), so after a tool ran it could repeat the call's side effect.
+     */
+    private boolean mayRetryToolCall() {
+        if (context.approval() != null && context.approval().isParked()) {
+            return false;
+        }
+        try {
+            return context.scope()
+                            .get(
+                                    () ->
+                                            owner.collectToolEvidenceSince(
+                                                    agentId, sessionId, fabricationCheckStartedAt))
+                    == null;
+        } catch (RuntimeException e) {
+            ChatTurnExecutor.log.warn(
+                    "Agent {} session {}: could not tell whether a tool ran this turn; not retrying the tool call",
+                    agentId,
+                    sessionId,
+                    e);
+            return false;
+        }
+    }
+
+    private Flux<String> passContent(ReplyFinish.PassPrompt prompt, boolean offerTools) {
+        ChatClient.ChatClientRequestSpec spec =
+                chatClient.prompt().system(systemPrompt).messages(prompt.messages()).user(prompt.user());
+        if (offerTools) {
+            spec = spec.toolCallbacks(ChatTurnExecutor.stableToolOrder(journaledTools));
+        }
+        return spec.advisors(this::configureAdvisors).stream().content();
+    }
+
+    /** The notice for {@code state} from the prompt registry, for this turn's agent and tenant. */
+    private String finishNotice(TurnReplyOutcome.State state) {
+        ResolvedDirectives promptsForTurn = context.scope().get(() -> owner.prompts.apply(agentId));
+        return ReplyFinish.notice(owner.finish, state, promptsForTurn);
+    }
+
+    /** Ends the reply as {@code kind}: marks it not-an-answer and tells the person why. */
+    private Flux<String> endWith(Kind kind, String detail) {
+        return Flux.defer(
+                () -> {
+                    reply().mark(kind, detail);
+                    noticeStart = accumulated.length();
+                    String notice = finishNotice(reply().snapshot());
+                    return Flux.just(ReplyFinish.separator(!accumulated.isEmpty()) + notice);
+                });
+    }
+
     /** The complete-path body: outbound audit, fabrication check, persistence, judge sampling. */
     private void onCompleteFullAnswer(String fullAnswer) {
-        // Content guardrails, OUTPUT path, FAST depth: detection + audit only - tokens are
-        // already delivered, see auditStreamedOutboundViolation's javadoc for the tradeoff.
-        owner.guardrails.auditStreamedOutboundViolation(
-                agent, agentId, sessionId, context.tenantId(), fullAnswer, context.tenantContext());
-        turn.guard("outbound-audit", "ran");
+        if (reply().isHeldForOutputCheck() && reply().isComplete()) {
+            // app.chat.parity.fast-buffering-triggers contains OUTPUT_GUARDRAILS: nothing has been sent
+            // yet (the dispatcher holds the reply), so a violating answer can genuinely be withheld, as on
+            // the buffered depths - and what is stored below is what the person is shown. Pattern-based
+            // guardrails only: this runs on the stream-completion thread, where the semantic toxicity
+            // check (a blocking model call) must not run; the buffered depths run that one too.
+            final String held = fullAnswer;
+            String checked =
+                    context.scope()
+                            .get(
+                                    () ->
+                                            owner.guardrails.enforceOutboundGuardrails(
+                                                    agent, agentId, sessionId, context.tenantId(), null, held));
+            boolean withheld = checked != null && !checked.equals(held);
+            if (withheld) {
+                reply().replaceWith(checked);
+                fullAnswer = checked;
+            }
+            turn.guard("outbound-enforced", withheld ? "withheld" : "passed");
+        } else {
+            // Content guardrails, OUTPUT path, FAST depth: detection + audit only - tokens are
+            // already delivered, see auditStreamedOutboundViolation's javadoc for the tradeoff.
+            owner.guardrails.auditStreamedOutboundViolation(
+                    agent, agentId, sessionId, context.tenantId(), fullAnswer, context.tenantContext());
+            turn.guard("outbound-audit", "ran");
+        }
         // Fabricated-generation-URL guard: same "tokens already delivered, detect for the record"
         // tradeoff as the guardrail audit above - this cannot recall what already streamed live,
         // but it keeps the lie from being replayed as trusted context on the NEXT turn and gives
@@ -367,8 +558,10 @@ final class FastStreamTurn {
         // fabrication when triggered. The tool-log read runs in the turn's tenant scope: this
         // fires on the stream-completion thread.
         String toPersist = fullAnswer;
+        // The prompt settings are read in the turn's tenant: this runs on the completion thread.
+        ResolvedDirectives promptsForTurn = context.scope().get(() -> owner.prompts.apply(agentId));
         boolean fabricatedUrl =
-                containsFabricatedGenerationUrl(fullAnswer)
+                containsFabricatedGenerationUrl(fullAnswer, promptsForTurn)
                         && context.scope()
                                         .get(
                                                 () ->
@@ -381,10 +574,28 @@ final class FastStreamTurn {
         if (fabricatedUrl) {
             toPersist =
                     owner.issues.recordAndCorrectFabricatedGenerationUrl(
-                            agentId, sessionId, fullAnswer);
+                            agentId, sessionId, fullAnswer, promptsForTurn);
+        }
+        TurnReplyOutcome.State outcome = reply().snapshot();
+        if (outcome.kind() != Kind.COMPLETE) {
+            // Not an answer: a reply that was cut off, stopped by the safety system, closed after a
+            // failure or replaced by the "no response" line. It is kept in the transcript so the
+            // person sees what happened, marked so the model is not shown it as something it said,
+            // and it is neither announced as a completed message nor sent to the quality judge (the
+            // dispatcher does not cache it either).
+            int cut = noticeStart < 0 ? -1 : Math.min(noticeStart, toPersist.length());
+            String body = cut < 0 ? toPersist : toPersist.substring(0, cut);
+            String notice = cut < 0 ? null : toPersist.substring(cut).strip();
+            turn.commit(toPersist, outcome.kind().name().toLowerCase(java.util.Locale.ROOT));
+            owner.sessionMemoryService.appendTurn(
+                    memorySessionId,
+                    ReplyFinish.storedTurn(outcome.kind(), body, notice, toPersist)
+                            .withTools(activity().ledger().snapshotOrNull()));
+            return;
         }
         turn.commit(toPersist, "completed");
-        owner.sessionMemoryService.appendTurn(memorySessionId, ChatTurn.assistant(toPersist));
+        owner.sessionMemoryService.appendTurn(
+                memorySessionId, ChatTurn.assistant(toPersist, activity().ledger().snapshotOrNull()));
         StreamedReplyCompletion.afterPersisted(
                 owner.events,
                 owner.llmQualityJudgeService,

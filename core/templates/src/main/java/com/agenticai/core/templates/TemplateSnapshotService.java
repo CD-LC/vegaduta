@@ -1,10 +1,13 @@
 package com.agenticai.core.templates;
 
 import com.agenticai.core.agents.core.Agent;
+import com.agenticai.core.agents.core.AgentAutonomyTier;
 import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.agents.core.TuningMode;
 import com.agenticai.core.agents.dto.AgentCreateRequest;
 import com.agenticai.core.providers.ProviderName;
+import com.agenticai.core.providers.modality.VideoModelProvider;
+import com.agenticai.core.providers.modality.VoiceModelProvider;
 import com.agenticai.core.security.ExperienceMode;
 import com.agenticai.core.workflow.WorkflowDefinition;
 import com.agenticai.core.workflow.dto.WorkflowGraphDto;
@@ -12,6 +15,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,6 +190,7 @@ public class TemplateSnapshotService {
      */
     public AgentCreateRequest toAgentCreateRequest(String configJson, String newName) {
         AgentSnapshot s = read(configJson, AgentSnapshot.class);
+        requireValidEnums(s);
         return new AgentCreateRequest(
             newName,
             s.systemPrompt(),
@@ -281,6 +286,12 @@ public class TemplateSnapshotService {
         return parsed != null ? parsed : fallback;
     }
 
+    /**
+     * Blank or absent means "not set" and yields {@code null}. A non-blank value that is not a
+     * constant of {@code type} is a defect in the design, never a reason to quietly fall back to a
+     * default: this used to swallow an invalid value such as {@code "BALANCED"} into FAST, so the
+     * author believed they had configured something they had not.
+     */
     private static <E extends Enum<E>> E parseEnumNullable(Class<E> type, String value) {
         if (value == null || value.isBlank()) {
             return null;
@@ -288,10 +299,74 @@ public class TemplateSnapshotService {
         try {
             return Enum.valueOf(type, value);
         } catch (IllegalArgumentException e) {
-            // Snapshot came from a possibly newer/older version whose enum value no
-            // longer exists here - degrade to "unset" rather than failing the import.
-            return null;
+            throw new IllegalArgumentException(unknownValueMessage(type.getSimpleName(), value, type), e);
         }
+    }
+
+    /**
+     * The enum-typed fields of {@link AgentSnapshot}: JSON field name to the enum that defines its
+     * allowed values. Single source of truth for {@link #validateEnums}; the offline checker
+     * {@code examples/agent-bundles/validate.py} mirrors it and a test keeps the two equal.
+     */
+    public static final java.util.Map<String, Class<? extends Enum<?>>> AGENT_ENUM_FIELDS = enumFields();
+
+    private static java.util.Map<String, Class<? extends Enum<?>>> enumFields() {
+        java.util.Map<String, Class<? extends Enum<?>>> m = new java.util.LinkedHashMap<>();
+        m.put("providerName", ProviderName.class);
+        m.put("tuningMode", TuningMode.class);
+        m.put("reasoningDepth", ReasoningDepth.class);
+        m.put("autonomyTier", AgentAutonomyTier.class);
+        m.put("experienceMode", ExperienceMode.class);
+        m.put("economyProviderName", ProviderName.class);
+        m.put("fallbackProviderName", ProviderName.class);
+        m.put("voiceModelProvider", VoiceModelProvider.class);
+        m.put("videoModelProvider", VideoModelProvider.class);
+        return java.util.Collections.unmodifiableMap(m);
+    }
+
+    /**
+     * Every problem with the enum-typed fields of {@code snapshot}, one human-readable line each
+     * (field, the bad value, the allowed values). Empty when all set values are real constants;
+     * blank/absent values are fine ("use the default").
+     */
+    public List<String> validateEnums(AgentSnapshot snapshot) {
+        java.util.Map<String, String> values = new java.util.LinkedHashMap<>();
+        values.put("providerName", snapshot.providerName());
+        values.put("tuningMode", snapshot.tuningMode());
+        values.put("reasoningDepth", snapshot.reasoningDepth());
+        values.put("autonomyTier", snapshot.autonomyTier());
+        values.put("experienceMode", snapshot.experienceMode());
+        values.put("economyProviderName", snapshot.economyProviderName());
+        values.put("fallbackProviderName", snapshot.fallbackProviderName());
+        values.put("voiceModelProvider", snapshot.voiceModelProvider());
+        values.put("videoModelProvider", snapshot.videoModelProvider());
+        List<String> problems = new ArrayList<>();
+        values.forEach((field, value) -> {
+            if (value == null || value.isBlank()) {
+                return;
+            }
+            Class<? extends Enum<?>> type = AGENT_ENUM_FIELDS.get(field);
+            boolean known = Arrays.stream(type.getEnumConstants()).anyMatch(c -> c.name().equals(value));
+            if (!known) {
+                problems.add(unknownValueMessage(field, value, type));
+            }
+        });
+        return problems;
+    }
+
+    /** Throws {@link IllegalArgumentException} listing every invalid enum value in the design. */
+    public void requireValidEnums(AgentSnapshot snapshot) {
+        List<String> problems = validateEnums(snapshot);
+        if (!problems.isEmpty()) {
+            throw new IllegalArgumentException(String.join("; ", problems));
+        }
+    }
+
+    private static String unknownValueMessage(String field, String value, Class<?> type) {
+        String allowed = Arrays.stream(type.getEnumConstants())
+            .map(c -> ((Enum<?>) c).name())
+            .collect(java.util.stream.Collectors.joining(", "));
+        return "Unknown value '" + value + "' for " + field + " (allowed: " + allowed + ")";
     }
 
     private String write(Object value) {

@@ -18,6 +18,12 @@
       <groupId>com.agenticai</groupId>
       <artifactId>json</artifactId>
     </dependency>
+    <!-- The settings catalog: this module's entries (SettingsContributor) and SettingsResolver for its use sites
+         (docs/settings.md). settings depends only on security and audit, so this adds no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>settings</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.agenticai</groupId>
       <artifactId>crypto</artifactId>

@@ -1,5 +1,5 @@
 // "Is the personal tutor switched on for this deployment?" - asked once per
-// page life and shared by every entry point (the card on /learn, the jump
+// page life and shared by every entry point (the Help page, the jump
 // palette row), so a deployment with the feature off shows no link to it.
 //
 // The probe is GET /api/tutor/status. With the server flag off no /api/tutor

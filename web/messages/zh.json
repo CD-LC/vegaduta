@@ -60,7 +60,9 @@
     "railJobs": "任务",
     "railSecrets": "机密",
     "railBrand": "品牌",
-    "railLearn": "学习"
+    "railLearn": "学习",
+    "railRuntimeSettings": "运行时设置",
+    "railControls": "在哪里控制……？"
   },
   "languageSwitcher": {
     "label": "语言",
@@ -852,7 +854,142 @@
     "edgeTier0Badge": "设备端 · Chrome 内置",
     "edgeTier0BadgeTitle": "此回答由 Chrome 的内置模型 (Gemini Nano) 提供——快速且完全私密，但仅限聊天：它无法使用工具，在处理复杂问题时可能不如托管模型准确。所有套餐均免费。",
     "edgeTier1Badge": "设备端 · 本地模型",
-    "edgeTier1BadgeTitle": "此回答由已下载的设备端模型提供——私密，且可使用工具（与托管模型可用的受保护工具相同）。该模型仍远小于托管模型池，因此处理复杂请求时可能不太准确。所有套餐均免费。"
+    "edgeTier1BadgeTitle": "此回答由已下载的设备端模型提供——私密，且可使用工具（与托管模型可用的受保护工具相同）。该模型仍远小于托管模型池，因此处理复杂请求时可能不太准确。所有套餐均免费。",
+    "viewTurn": "查看轮次",
+    "viewTurnTitle": "打开此对话各轮次的分步时间线",
+    "headerRunning": "正在运行一个轮次",
+    "headerReady": "就绪",
+    "clearContext": "清除上下文",
+    "clearContextTitle": "开始新的对话。这会清除此聊天在设备端和服务器端的会话记忆。",
+    "stopRun": "停止此回复",
+    "fallbackSendToPlatform": "发送到平台",
+    "chipsLabel": "智能体当前正在做什么",
+    "chipPreparing": "准备中",
+    "chipModelCall": "等待模型",
+    "chipThinking": "思考中",
+    "chipWriting": "撰写回复中",
+    "chipTool": "正在运行工具：{tool}",
+    "chipToolUnnamed": "正在运行工具",
+    "chipWaitingApproval": "等待您的批准（{count}）",
+    "chipContinuing": "正在继续回复",
+    "chipContinuingPass": "正在继续回复（第 {pass} 轮，共 {max} 轮）",
+    "chipContinuingApproval": "根据您的决定继续",
+    "chipRetrying": "重试中",
+    "chipRetryingReason": "重试中：{reason}",
+    "chipRetryingAttempt": "重试中（第 {attempt} 次，共 {max} 次）",
+    "chipRetryingAttemptReason": "重试中（第 {attempt} 次，共 {max} 次）：{reason}",
+    "chipFailover": "已切换到备用模型",
+    "chipFailoverReason": "已切换到备用模型：{reason}",
+    "chipFailoverTo": "已切换到 {model}",
+    "chipFailoverToReason": "已切换到 {model}：{reason}",
+    "outcomeTruncated": "此回复在完成前被截断。",
+    "outcomeContinue": "继续",
+    "outcomeLongerReplies": "允许更长的回复",
+    "continueMessage": "请从停下的地方准确地继续，不要重复你已经写过的内容。",
+    "outcomeRefused": "模型提供商出于安全原因停止了此回复，因此没有可显示的答案。请修改请求后重试。",
+    "outcomeRefusedReason": "模型提供商出于安全原因（{reason}）停止了此回复，因此没有可显示的答案。请修改请求后重试。",
+    "outcomeMalformedToolCall": "模型尝试使用工具，但请求无效，因此没有运行任何内容。请重试。",
+    "outcomeEmpty": "模型返回了空回复。请重试。",
+    "stopRaiseSteps": "提高工具调用上限",
+    "stopRaiseBudget": "更改支出上限",
+    "stopAskEditor": "请让能编辑此智能体的人提高上限。",
+    "rsOpen": "运行设置",
+    "rsTitle": "运行设置",
+    "rsClose": "关闭运行设置",
+    "rsBack": "返回运行设置",
+    "rsIntro": "发给 {name} 的下一条消息将如何运行。请在智能体的“行为”标签页中更改。",
+    "rsLoading": "加载中",
+    "rsRetry": "重试",
+    "rsOpenBehavior": "在“行为”中编辑",
+    "rsModelHeading": "模型与采样",
+    "rsModel": "模型",
+    "rsModelNotSet": "未设置",
+    "rsModelDefault": "模型默认值",
+    "rsDepth": "推理深度",
+    "rsSourceAgent": "已在此智能体上设置",
+    "rsParam_temperature": "温度",
+    "rsParam_topP": "Top-P",
+    "rsParam_maxTokens": "回复最大长度（token）",
+    "rsParam_topK": "Top-K",
+    "rsParam_frequencyPenalty": "频率惩罚",
+    "rsParam_presencePenalty": "存在惩罚",
+    "rsParam_seed": "随机种子",
+    "rsParam_stopSequences": "停止序列",
+    "rsParamDropped": "{param} 已在此智能体上设置，但 {provider} 对 {model} 会忽略它，因此没有效果。",
+    "rsToolsRunHeading": "本次运行的工具",
+    "rsToolsRunOnly": "仅限本次运行",
+    "rsToolsRunNote": "这些开关用于选择你从此试验场发送的消息可以使用智能体的哪些工具。不会保存任何内容:智能体对其他所有人仍保留自己的工具访问权限。它们只能关闭智能体的工具,不能给它新的工具。",
+    "rsToolsRunSummary": "智能体的 {total} 个工具中有 {on} 个在本次运行中开启",
+    "rsToolsRunNone": "本次运行没有工具:智能体只能用文字回答。",
+    "rsToolsReset": "使用智能体的工具",
+    "rsToolsNotInAgent": "不属于该智能体已保存的工具,因此无法在运行中开启。",
+    "rsToolsEditAgent": "更改智能体已保存的工具",
+    "rsToolsLimitedChip": "本次运行的工具受限",
+    "rsToolsEmpty": "此智能体没有可用的工具。",
+    "rsToolsSummary": "已开启 {on} 个工具，共 {total} 个",
+    "rsToolsFailed": "无法加载工具。",
+    "rsLimitsHeading": "每个轮次的上限",
+    "rsLimitsChange": "更改上限",
+    "rsLimitsView": "查看上限",
+    "rsLimitsFailed": "无法加载上限。",
+    "rsLimitsEmpty": "此智能体没有可显示的上限。",
+    "rsNoLimit": "无上限",
+    "rsScoreAll": "所有匹配项",
+    "rsUnitSeconds": "{n} s",
+    "rsUnitChars": "{n} 个字符",
+    "rsLimitRange": "允许范围：{min} 至 {max}",
+    "rsLayer_AGENT": "已在此智能体上设置",
+    "rsLayer_TENANT": "工作区默认值",
+    "rsLayer_PLATFORM": "平台默认值",
+    "rsLayer_REQUEST": "为此请求设置",
+    "rsLimit_maxToolSteps": "每轮工具调用次数",
+    "rsLimit_turnTimeoutSeconds": "单个轮次的时间",
+    "rsLimit_toolTimeoutSeconds": "单次工具调用的时间",
+    "rsLimit_toolOutputMaxChars": "工具结果大小",
+    "rsLimit_retrievalTopK": "每次搜索的知识结果数",
+    "rsLimit_retrievalMinScore": "知识匹配的最低相关度",
+    "rsLimit_continuationPasses": "完成回复的额外轮次",
+    "rsLimitHelp_maxToolSteps": "一次回复最多可进行的工具调用次数。达到后该轮次会停止并说明原因。",
+    "rsLimitHelp_turnTimeoutSeconds": "一个轮次在被停止前可以运行多久。",
+    "rsLimitHelp_toolTimeoutSeconds": "单次工具调用在被停止前可以运行多久。",
+    "rsLimitHelp_toolOutputMaxChars": "模型可以读取一个工具结果的多少内容。其余部分会被截断。",
+    "rsLimitHelp_retrievalTopK": "一次搜索返回知识库中的多少个片段。",
+    "rsLimitHelp_retrievalMinScore": "匹配度低于此值的片段会被排除。设为 0 则保留所有匹配项。",
+    "rsLimitHelp_continuationPasses": "对于停在已宣布但未执行步骤处的回复，额外尝试完成的次数。",
+    "rsPreviewButton": "预览提示词",
+    "rsPreviewTitle": "提示词预览",
+    "rsPreviewIntro": "此智能体将发送的系统提示词和工具列表，其构建方式与真实轮次相同。不会向任何模型发送内容。",
+    "rsPreviewBuilding": "正在生成预览",
+    "rsPreviewFailed": "无法生成预览。",
+    "rsPreviewTotals": "约 {prompt} 个 token 的系统文本和 {tools} 个 token 的工具定义（估算值）。",
+    "rsPreviewOverBudgetTitle": "超出 token 预算",
+    "rsPreviewOverBudget": "常驻系统文本超出了配置的 {budget} token 预算。不会截断任何内容；请考虑缩短某个提示词。",
+    "rsPreviewNoBlocks": "没有可显示的提示词块。",
+    "rsPreviewMessage": "消息：{message}",
+    "rsPreviewTokens": "约 {tokens} 个 token",
+    "rsPreviewShowText": "显示文本",
+    "rsPreviewTools": "工具（{count}）",
+    "rsPreviewNoTools": "此智能体未提供任何工具。",
+    "rsPreviewNotes": "此预览无法得知的内容",
+    "rsPreviewOpenAdmin": "查看并更改每个提示词的措辞",
+    "rsOriginDefault": "出厂默认",
+    "rsOriginOverride": "{scope}覆盖 v{version}",
+    "rsOriginAgentConfig": "智能体自己的系统提示词",
+    "rsOriginCode": "平台代码",
+    "rsRunBudget": "每次运行的支出上限",
+    "rsNoCap": "无上限",
+    "rsRunBudgetHelp": "一次运行在委派给其他智能体或执行深度研究时最多可花费的金额。这是估算值，不是账单。",
+    "chipToolsOff": "不使用工具重试",
+    "chipFailoverBlocked": "未使用备用模型：工具已经运行过",
+    "rsLimitChangeOne": "更改",
+    "reasonRateLimited": "已被限流",
+    "reasonTimeout": "已超时",
+    "reasonProviderUnavailable": "提供商不可用",
+    "reasonAuthFailed": "提供商拒绝了凭据",
+    "reasonBilling": "提供商账单问题",
+    "reasonModelNotFound": "模型不可用",
+    "reasonProviderError": "提供商错误",
+    "reasonMalformedToolCall": "该工具调用无法使用"
   },
   "nodeDefs": {
     "triggerLabel": "触发器",
@@ -1498,7 +1635,50 @@
     "ttsProviderUpdatedSuccess": "TTS 提供商已更新。",
     "updateTtsProviderError": "无法更新此智能体的 TTS 提供商。",
     "ttsProviderFreePlanTooltip": "TTS 提供商选择是高级功能。",
-    "ttsProviderNotSet": "使用平台默认设置"
+    "ttsProviderNotSet": "使用平台默认设置",
+    "samplingTitle": "高级采样",
+    "samplingIntro": "微调模型选词的方式。留空则使用模型默认值。不支持某字段的提供商会直接忽略它。",
+    "samplingIgnored": "此模型的提供商会忽略此设置，因此更改它没有效果。",
+    "samplingSaving": "正在保存…",
+    "samplingSaved": "已保存",
+    "samplingNotSaved": "未保存",
+    "samplingSaveFailed": "无法保存该设置。",
+    "samplingErrorWhole": "{label} 必须是 {min} 到 {max} 之间的整数，或留空以关闭。",
+    "samplingErrorNumber": "{label} 必须是 {min} 到 {max} 之间的数字，或留空以关闭。",
+    "samplingStopTooLong": "停止序列最多 {max} 个字符。",
+    "samplingStopTooMany": "最多 {max} 个停止序列。",
+    "samplingTopK": "Top-K",
+    "samplingTopKHelp": "只考虑可能性最高的 K 个下一个词。越小文本越安全、越可预测。范围 1 到 1000。",
+    "samplingSeed": "随机种子",
+    "samplingSeedHelp": "设置一个数字，可让相同提示词的回复更具可重复性。并非所有提供商都能保证。",
+    "samplingFrequency": "频率惩罚",
+    "samplingFrequencyHelp": "正值会抑制反复出现相同的词。范围 -2 到 2。",
+    "samplingPresence": "存在惩罚",
+    "samplingPresenceHelp": "正值会促使模型转向新话题，而不是停留在同一话题上。范围 -2 到 2。",
+    "samplingPlaceholderDefault": "默认",
+    "samplingPlaceholderRandom": "随机",
+    "samplingPlaceholderZero": "0",
+    "samplingStop": "停止序列",
+    "samplingStopPlaceholder": "输入短语，按 Enter 键",
+    "samplingStopHelp": "模型写出其中任何一个时，回复就会结束。最多 {count} 个，每个最多 {max} 个字符。",
+    "samplingStopCurrent": "当前停止序列",
+    "samplingStopRemove": "移除停止序列 {value}",
+    "samplingAdd": "添加",
+    "reasoningDepthFASTCost": "Quickest and cheapest: one pass, and the reply streams in as it is written.",
+    "reasoningDepthPLANNEDCost": "Writes a plan before acting: more model calls per task, and the reply appears all at once instead of streaming.",
+    "reasoningDepthCAREFULCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming.",
+    "reasoningDepthRIGOROUSCost": "Checks its answer before showing it: slower, and the reply appears all at once instead of streaming. Uses the most tokens.",
+    "autonomyLabel": "Autonomy",
+    "autonomyTierSUPERVISED": "Supervised",
+    "autonomyTierSUPERVISEDHint": "Every tool call waits for a human to approve it, whatever the workspace policy says. Tighter step ceiling.",
+    "autonomyTierSUPERVISEDCost": "Asks you before every tool call, searches included.",
+    "autonomyTierSEMI_AUTONOMOUS": "Semi-autonomous",
+    "autonomyTierSEMI_AUTONOMOUSHint": "Follows the workspace's approval policy for each action type. The default for every agent.",
+    "autonomyTierSEMI_AUTONOMOUSCost": "Asks you only for the actions your workspace's approval rules name; the rest run without asking.",
+    "autonomyTierFULLY_AUTONOMOUS": "Fully autonomous",
+    "autonomyTierFULLY_AUTONOMOUSHint": "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
+    "autonomyTierFULLY_AUTONOMOUSCost": "Never asks you: every tool call runs as soon as the agent makes it, sends and payments included.",
+    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "选择一个节点进行配置，或从左侧面板拖入一个新节点。",
@@ -1974,6 +2154,9 @@
     "emptyWorkspaceTitle": "尚无集合",
     "noFilesUploadedHint": "将文件上传到此集合，以便您的智能体可以搜索它们。",
     "ocrComingSoonTooltip": "暂不可用 - 上传的文件将回退使用内置的 Tesseract OCR。"
+  },
+  "tutorPage": {
+    "backToHelp": "返回帮助"
   },
   "knowledgePage": {
     "knowledgeLabel": "知识库",
@@ -5943,6 +6126,8 @@
     "channelsBody": "连接 WhatsApp、Telegram、Instagram、Slack、电子邮件等渠道，然后为每个渠道选择应答的代理。",
     "channelsPoint1": "免费方案支持 WhatsApp、Telegram 和电子邮件。",
     "channelsPoint2": "新的发件人需经您批准。",
+    "channelsPersonalBody": "连接 WhatsApp、Telegram、Signal、iMessage 或电子邮件,然后选择每个渠道由哪个自定义智能体应答。",
+    "channelsPersonalPoint1": "WhatsApp、Telegram、Signal、iMessage 和电子邮件",
     "toolsTitle": "集成为代理提供工具",
     "toolsBody": "开启代理在对话中可用的功能：网络搜索、数据库、MCP 服务器和您自己的脚本。",
     "toolsPoint1": "在此启用，再按代理授权。",
@@ -14471,5 +14656,1495 @@
     "replaceConfirmBody": "This workspace already has a skill with that name. Replacing it overwrites its instructions and bundled files.",
     "genericError": "That didn't work. Please try again.",
     "itemLabelSkills": "skills"
+  },
+  "settingsUi": {
+    "title": {
+      "tenant": "工作区设置",
+      "agent": "智能体设置"
+    },
+    "agentMissing": "选择一个智能体以查看其设置。",
+    "scopeNote": {
+      "agent": "这些值仅适用于此智能体。您在此处未覆盖的所有内容都继承自您的工作区设置。"
+    },
+    "loading": "正在加载设置",
+    "loadError": "无法加载设置。{message}",
+    "retry": "重试",
+    "filters": {
+      "label": "筛选设置",
+      "search": "搜索设置",
+      "searchPlaceholder": "按名称或描述搜索",
+      "group": "按分组筛选",
+      "allGroups": "所有分组",
+      "risk": "按风险筛选",
+      "allRisks": "所有风险级别",
+      "clear": "清除筛选"
+    },
+    "empty": {
+      "none": "这里没有您可以更改的设置。",
+      "filtered": "没有设置符合您的筛选条件。"
+    },
+    "saved": "已保存。已更新的设置：{count}。",
+    "saveFailed": "未保存。失败的设置：{count}。您的修改仍保留在表单中。",
+    "resetDone": "{label} 现在使用继承的值。",
+    "resetFailed": "无法重置该设置。",
+    "unsaved": "未保存的更改",
+    "discardOne": "放弃更改",
+    "restartRequired": "需要重启",
+    "source": {
+      "default": "默认",
+      "platform": "平台",
+      "tenant": "工作区",
+      "agent": "智能体",
+      "tenantInherited": "继承自工作区",
+      "aria": "值的来源：{source}"
+    },
+    "sourceHelp": {
+      "default": "没有人更改过它。使用的是产品出厂自带的值。",
+      "platform": "您的平台运营方为整个部署设置了此项。",
+      "tenant": "您的工作区覆盖了默认值。重置后会回到继承的值。",
+      "agent": "此智能体覆盖了工作区的值。重置后会重新继承工作区的值。",
+      "tenantInherited": "此智能体没有自己的覆盖，因此使用工作区的值。编辑它只会为此智能体创建覆盖。",
+      "lockedSuffix": "已锁定，因此无法在此更改。"
+    },
+    "risk": {
+      "low": "低风险",
+      "medium": "中风险",
+      "high": "高风险",
+      "security": "安全"
+    },
+    "bool": {
+      "on": "On",
+      "off": "关闭"
+    },
+    "value": {
+      "unset": "未设置",
+      "empty": "空"
+    },
+    "select": {
+      "placeholder": "选择一个选项"
+    },
+    "slider": {
+      "label": "{label}（滑块）"
+    },
+    "duration": {
+      "unitLabel": "{label} 的单位"
+    },
+    "units": {
+      "chars": "字符",
+      "tokens": "token",
+      "usd": "USD",
+      "percent": "%"
+    },
+    "durationUnits": {
+      "ms": "ms",
+      "s": "秒",
+      "min": "分钟",
+      "h": "小时"
+    },
+    "groups": {
+      "agent": "智能体运行时",
+      "approvals": "审批",
+      "quality": "质量检查",
+      "guardrails": "护栏",
+      "chat": "聊天",
+      "tools": "工具",
+      "memory": "记忆",
+      "knowledge": "知识",
+      "delegation": "委派",
+      "aux": "辅助模型",
+      "routing": "模型路由"
+    },
+    "errors": {
+      "required": "请输入值。",
+      "notNumber": "请输入数字。",
+      "notInteger": "请输入整数。",
+      "belowMin": "不得小于 {min}。",
+      "aboveMax": "不得大于 {max}。",
+      "notAllowed": "请选择列出的选项之一。",
+      "tooShort": "太短。至少使用 {min}。",
+      "tooLong": "太长。最多使用 {max}。",
+      "precision": "此单位无法精确表示该值。请使用最小单位的整数，或选择更小的单位。",
+      "serverRange": "允许范围：{min} 至 {max}。",
+      "serverOptions": "允许的值：{options}。",
+      "server": {
+        "invalid": "服务器未接受此值：{message}",
+        "locked": "此设置已被您的管理员锁定，因此您的更改未保存。",
+        "notFound": "此设置已不存在。",
+        "forbidden": "您没有更改此设置的权限。",
+        "reasonRequired": "此更改需要填写原因。请输入后重试。",
+        "network": "无法连接到服务器，因此您的更改未保存。{message}",
+        "other": "无法保存更改：{message}"
+      }
+    },
+    "effective": "当前生效：{value}",
+    "hint": {
+      "range": "允许：{min} 至 {max}。",
+      "min": "最小值：{min}。",
+      "max": "最大值：{max}。",
+      "default": "默认值：{value}。",
+      "securityStricter": "安全设置只能比平台值更严格，不能更宽松。",
+      "inherited": "如果重置，它将恢复为：{value}。"
+    },
+    "locked": {
+      "withReason": "已被您的管理员锁定：{reason}",
+      "noReason": "已被您的管理员锁定。无法在此更改。"
+    },
+    "blocked": {
+      "role": "您的角色无法更改此设置。请联系工作区管理员。",
+      "scope": "此设置无法在此覆盖。",
+      "readOnly": "设置目前为只读。",
+      "adminOnly": "只有工作区管理员可以更改此安全设置。你可以在此查看其值,但不能编辑。"
+    },
+    "reset": {
+      "button": "重置为继承值",
+      "aria": "重置为继承值：{label}"
+    },
+    "help": {
+      "show": "更多详情",
+      "hide": "隐藏详情"
+    },
+    "history": {
+      "button": "历史",
+      "open": "历史：{label}",
+      "title": "历史：{label}",
+      "scopeTenant": "工作区更改",
+      "scopeAgent": "此智能体的更改",
+      "close": "关闭历史",
+      "loading": "正在加载历史",
+      "error": "无法加载历史。{message}",
+      "empty": "尚未记录任何更改。",
+      "listLabel": "更改历史，最新的在前",
+      "version": "版本 {version}",
+      "before": "之前：",
+      "after": "之后：",
+      "by": "更改者",
+      "unknownActor": "未知",
+      "reason": "原因："
+    },
+    "savebar": {
+      "count": "未保存的更改：{count}。",
+      "invalid": "保存前请修复高亮显示的字段。需修复的字段：{count}。",
+      "discard": "放弃更改",
+      "save": "保存更改",
+      "saving": "保存中"
+    },
+    "risky": {
+      "title": "确认有风险的更改（{count}）",
+      "description": "这些设置会改变您的智能体的行为或其被允许执行的操作。请检查每项更改，并说明您更改的原因。原因会存入审计日志。",
+      "descriptionSecurity": "其中至少有一项是安全设置。它只能比平台值更严格。请检查每项更改，并说明您更改的原因。原因会存入审计日志。",
+      "listLabel": "待确认的更改",
+      "from": "从",
+      "to": "to",
+      "securityNote": "安全设置：不能比平台值更宽松。",
+      "consequence": "这会改变什么：",
+      "reasonLabel": "此更改的原因",
+      "reasonPlaceholder": "例如：为支持团队的长时间调查提高上限",
+      "reasonHint": "必填，至少 {min} 个字符。会连同更改人以及旧值和新值一起保存。",
+      "acknowledge": "我了解此安全更改的后果。",
+      "cancel": "取消",
+      "confirm": "确认并保存",
+      "resetNote": "重置:覆盖值会被移除,设置恢复为它继承的值。"
+    },
+    "strictness": {
+      "higher": "越高越严格:较高的值会被接受,较低的值会被拒绝。",
+      "lower": "越低越严格:较低的值会被接受,较高的值会被拒绝。",
+      "enumOrder": "选项从最宽松到最严格排列:{options}。你只能向严格的一端调整。"
+    }
+  },
+  "approvalsQueue": {
+    "status_PENDING": "待处理",
+    "status_APPROVED": "已批准",
+    "status_REJECTED": "已拒绝",
+    "status_EXPIRED": "已过期",
+    "status_EXECUTION_FAILED": "执行失败",
+    "status_DEAD_LETTERED": "死信",
+    "filtersLabel": "筛选请求",
+    "filterAgentLabel": "按智能体筛选",
+    "filterToolLabel": "按工具筛选",
+    "filterAgeLabel": "按时长筛选",
+    "filterAnyAgent": "任意智能体",
+    "filterAnyTool": "任意工具",
+    "filterAnyAge": "任意时长",
+    "age_newer1h": "1 小时以内",
+    "age_older1h": "超过 1 小时",
+    "age_older24h": "超过 1 天",
+    "age_older7d": "超过 7 天",
+    "filtersClear": "清除筛选",
+    "filterWindowNote": "正在筛选最新的 {count} 个请求。更早的请求不包括在内。",
+    "durationDaysHours": "{d}d {h}h",
+    "durationHoursMinutes": "{h}h {m}m",
+    "durationMinutes": "{m}m",
+    "durationSeconds": "{s}s",
+    "expiresIn": "{time}后过期",
+    "expiresAt": "如果无人决定，将于 {time} 自动关闭",
+    "overdue": "已超过时限，将在下次清理时关闭",
+    "neverExpires": "此工作区不会让等待中的请求过期。",
+    "expiredNote": "{time}已过期：无人在时限内决定",
+    "expiredReasonPrefix": "已过期：",
+    "auditExpired": "已过期，无人在时限内决定",
+    "riskLow": "低风险",
+    "riskMedium": "中风险",
+    "riskHigh": "高风险",
+    "riskEstimateNote": "风险是根据工具名称估算的。平台不对工具进行分类，因此批准前请阅读参数。",
+    "riskWhoDecides": "谁来决定哪些内容需要等待批准？",
+    "previewGoal": "它正在处理的任务：",
+    "previewArguments": "参数",
+    "previewNoArguments": "此调用没有记录任何参数。",
+    "previewRedacted": "此处隐藏了 {count} 个看起来敏感的值。如果您批准，它们仍会发送给工具。",
+    "previewTruncated": "这些参数太长，无法完整显示，因此无法在此处批准此请求。",
+    "approveBlockedTooLong": "由于您无法审阅整个请求，批准已被关闭。您仍可以拒绝。",
+    "ifApproveLabel": "如果您批准：",
+    "ifApprove": "{tool} 将立即使用上述参数运行，智能体会使用其结果继续执行任务。",
+    "ifDenyLabel": "如果您拒绝：",
+    "ifDeny": "{tool} 不会运行。智能体会被告知您拒绝了（如果您填写了原因，也会附上），并在没有它的情况下继续。",
+    "whyGated": "智能体请求使用 {tool}。由于该智能体设为“受监督”，或此工作区要求该工具必须经批准，因此该请求被扣留等待您的决定。",
+    "denyReasonLabel": "拒绝的原因（可选）",
+    "denyReasonPlaceholder": "例如：收件人错误，发送前请先问我",
+    "denyReasonHelp": "如果您拒绝，智能体会把此原因当作被拒绝调用的结果并据此调整。留空则不附原因直接拒绝。",
+    "denyButton": "拒绝",
+    "detailRegionLabel": "请求详情",
+    "sessionLabel": "对话",
+    "linkOpenAgent": "打开智能体",
+    "linkInspectTurns": "检查其轮次",
+    "continuationLabel": "智能体接下来做了什么",
+    "continuationCompleted": "智能体已完成对任务的继续执行。",
+    "continuationFailed": "此决定之后，智能体无法继续。",
+    "continuationRetry": "请它继续",
+    "retryMessage": "请继续执行任务。",
+    "lastDecisionTitle": "您的上一个决定：{tool}",
+    "lastDecisionClose": "关闭",
+    "deepLinkNotFound": "找不到该批准请求，或您无权查看。",
+    "selectAllLabel": "选择此页上所有待处理的工具调用",
+    "selectRowLabel": "选择对 {tool} 的待处理调用",
+    "bulkSelected": "已选择 {count} 个",
+    "bulkApprove": "批准所选",
+    "bulkDeny": "拒绝所选",
+    "bulkClear": "清除选择",
+    "bulkCancel": "取消",
+    "bulkDismiss": "忽略",
+    "bulkMixedTools": "批量决定要求所有选中的请求针对同一个工具。",
+    "bulkNotLowRisk": "批量批准仅适用于低风险工具（查询类）。拒绝适用于任意单个工具，或逐个决定这些请求。",
+    "bulkNotToolCall": "批量决定仅涵盖智能体的工具调用。",
+    "bulkNotPending": "批量决定仅涵盖仍处于待处理状态的请求。",
+    "bulkConfirmApproveTitle": "批准对 {tool} 的 {count} 次调用？",
+    "bulkConfirmApproveBody": "其中每一个都会立即使用下面列出的各自参数运行 {tool}，智能体会使用结果继续。此操作无法撤销。",
+    "bulkConfirmDenyTitle": "拒绝对 {tool} 的 {count} 次调用？",
+    "bulkConfirmDenyBody": "其中任何一个都不会运行。智能体会被告知每次调用都被拒绝了（如果您填写了原因，也会附上）。",
+    "bulkConfirmApprove": "批准 {count} 个",
+    "bulkConfirmDeny": "拒绝 {count} 个",
+    "bulkMore": "以及另外 {count} 个",
+    "bulkProgress": "已完成 {done} / {count}",
+    "bulkResult": "已决定 {done} 个，失败 {failed} 个。",
+    "notifyOff": "通知我",
+    "notifyOn": "通知已开启",
+    "notifyHelp": "当此标签页在后台时有新请求到达，则显示浏览器通知",
+    "notifyUnsupported": "此浏览器无法显示通知。",
+    "notifyBlocked": "通知已被阻止。请在浏览器的网站设置中允许通知以开启此功能。",
+    "notifyTitle": "有智能体正在等待批准",
+    "notifyBodyOne": "{tool} 需要您的决定。",
+    "notifyBodyMany": "有 {count} 个请求需要您的决定。",
+    "newArrived": "收到 {count} 个新的批准请求。",
+    "rulesTitle": "针对单个工具的规则",
+    "rulesIntro": "选择某个工具是始终等待人工，还是从不等待。该规则适用于每个设为“半自主”的智能体。",
+    "rulesNeedsScope": "您需要批准权限才能更改规则。",
+    "rulesToolLabel": "工具名称",
+    "rulesToolPlaceholder": "send_email",
+    "rulesToolHelp": "与该工具在请求中显示的名称完全一致，例如 send_email。",
+    "rulesToolNameInvalid": "工具名称不能包含空格。",
+    "rulesModeLabel": "应该怎么处理",
+    "rulesAskName": "始终询问",
+    "rulesAskHint": "对此工具的每次调用都会等待人工批准。",
+    "rulesNeverName": "从不询问",
+    "rulesNeverHint": "对此工具的调用会立即运行，无需任何人批准。",
+    "rulesNeverRiskyWarn": "此工具看起来会修改内容。请务必谨慎。",
+    "rulesScopeNote": "规则覆盖整个工作区，而不是单个智能体。受监督的智能体仍会对所有操作询问，完全自主的智能体则无论规则如何都不会询问。您设置的规则目前还不会在此处列出。",
+    "rulesSave": "保存规则",
+    "rulesSaveFailed": "无法保存规则。",
+    "rulesSavedAsk": "{tool} 将始终要求批准。",
+    "rulesSavedNever": "{tool} 将不再要求批准。",
+    "rulesNeverConfirmTitle": "在 {tool} 运行前停止询问？",
+    "rulesNeverConfirmBody": "每个半自主智能体都将在无人批准的情况下运行 {tool}。它看起来可以修改或发送内容，而且错误无法撤销。",
+    "rulesNeverConfirmBodyLow": "每个半自主智能体都将在不询问的情况下运行 {tool}。它看起来像是查询类工具，因此通常是安全的。",
+    "rulesNeverConfirm": "停止询问",
+    "tiersTitle": "谁来决定哪些内容需要等待批准？",
+    "tiersIntro": "每个智能体都有一个自主级别。它决定是否使用工作区的批准规则。",
+    "tierCurrent": "此智能体",
+    "tierConsequenceLabel": "实际情况：",
+    "tierSupervisedName": "受监督",
+    "tierSupervisedWhat": "无论工作区规则如何，每次工具调用都要等待人工。它每个轮次的工具步骤上限也更低。",
+    "tierSupervisedConsequence": "最安全，但队列中会有大量请求，智能体也会更慢。",
+    "tierSemiName": "半自主",
+    "tierSemiWhat": "由工作区对每个工具的规则决定：发送、删除和支付等有风险的工具默认询问，其余的直接运行。",
+    "tierSemiConsequence": "一个不错的默认选择。您针对各工具的规则在此生效。",
+    "tierFullName": "完全自主",
+    "tierFullWhat": "任何工具调用都不会等待批准，智能体的工具步骤上限也更高。针对各工具的规则会被忽略。",
+    "tierFullConsequence": "它会在不询问的情况下行动。仅用于错误代价很小、易于撤销的智能体。",
+    "tiersRuleNote": "工具规则（始终询问、从不询问）仅对半自主智能体有意义。",
+    "agentModeTitle": "此智能体何时需要批准？",
+    "agentModeSupervised": "此智能体为“受监督”：每次工具调用都要等待人工，针对各工具的规则会被忽略。",
+    "agentModeSemi": "此智能体为“半自主”：每个工具遵循工作区的规则。发送、删除和支付默认询问。",
+    "agentModeFull": "此智能体为“完全自主”：从不等待批准，针对各工具的规则会被忽略。",
+    "agentModeQueueLink": "查看此智能体的请求",
+    "agentModeRulesLink": "为工具设置规则",
+    "agentModeShowTiers": "比较三个级别",
+    "agentModeHideTiers": "隐藏比较",
+    "agentModeScopeNote": "请通过上方的自主性选项更改级别。工具规则作用于整个工作区，而非按智能体。",
+    "policyThenApprovalNote": "通过这些规则的调用仍可能等待人工。这取决于下方说明的智能体自主级别。",
+    "chatReasonToggle": "添加原因",
+    "chatReviewInQueue": "在队列中审阅"
+  },
+  "turnInspector": {
+    "tlFilterTitle": "筛选事件",
+    "tlFilterCategories": "事件类型",
+    "tlCatIntake": "接收",
+    "tlCatModel": "模型",
+    "tlCatTool": "工具",
+    "tlCatApproval": "审批",
+    "tlCatContinuation": "续写",
+    "tlCatRetry": "重试与故障转移",
+    "tlCatGuardrail": "护栏",
+    "tlCatCache": "缓存",
+    "tlCatVerify": "检查",
+    "tlCatFinish": "完成",
+    "tlProblemsOnly": "仅问题",
+    "tlSearch": "搜索事件",
+    "tlSearchPlaceholder": "工具、模型、守卫或状态",
+    "tlClearFilters": "清除筛选",
+    "tlShowing": "显示 {total} 个事件中的 {shown} 个",
+    "tlNoMatch": "没有事件符合这些筛选条件。",
+    "tlSevOk": "成功",
+    "tlSevInfo": "信息",
+    "tlSevWarn": "需要关注",
+    "tlSevError": "失败",
+    "tlIntake": "轮次已开始：{chars} 个字符，{tools} 个工具，{attachments} 个附件",
+    "tlRunTools": "本次运行的工具",
+    "tlRunToolsNone": "无(仅文字)",
+    "tlModelCall": "调用 {model}（{provider}）的模型，路由 {route}",
+    "tlFailover": "已故障转移到 {model}（{provider}）",
+    "tlRetryModel": "已在 {model}（{provider}）上重试，路由 {route}",
+    "tlRetry": "重试：{guard}（{outcome}）",
+    "tlCacheHit": "已从响应缓存中回答",
+    "tlToolCall": "工具调用 {tool}：{status}",
+    "tlApprovalRequested": "运行 {tool} 之前已请求批准",
+    "tlApprovalDecided": "{tool} 的批准已决定：{decision}",
+    "tlApprovalAutoAllowed": "{tool} 未经询问就运行了:受监督模式下的只读调用",
+    "tlContinuation": "续写：{guard}（{outcome}）",
+    "tlGuard": "护栏 {guard}：{outcome}",
+    "tlVerifyPassed": "检查通过：{check}",
+    "tlVerifyFailed": "检查失败：{check}",
+    "tlFinish": "已完成：{status}（回答含 {chars} 个字符）",
+    "tlOther": "事件 {type}",
+    "reasonFallbackProvider": "主模型失败，因此该轮次切换到了智能体的备用提供商。",
+    "reasonToolsDisabledRetry": "提供商拒绝了工具调用历史，因此该轮次在不使用工具的情况下再次作答。",
+    "reasonRetryOther": "模型调用被重复了一次。",
+    "reasonToolCallRetry": "模型以格式错误的工具调用结束了回答，因此再次向它发出了请求。",
+    "reasonCutOff": "回答在长度上限处被截断，因此要求模型继续。",
+    "reasonToolsContinue": "模型在工具调用之后需要更多步骤，因此该轮次继续进行。",
+    "reasonToolBlocked": "由守卫、策略、钩子或上限代替工具作出了响应，因此工具没有运行。",
+    "reasonToolParked": "该调用正在等待人工批准；工具尚未运行。",
+    "reasonGuardAction": "护栏更改或扣留了回答。",
+    "tlAtStart": "自开始起",
+    "tlGap": "自上一个事件起",
+    "tlDuration": "时长",
+    "tlTokens": "输入 / 输出 token",
+    "tlCost": "成本",
+    "tlDetails": "哈希与原始摘要",
+    "tlArgsHash": "参数哈希",
+    "tlResultDigest": "结果摘要",
+    "tlContentNote": "参数和结果绝不会被存储。对于工具调用，时间线显示其状态、时长以及参数和结果的哈希，而不是内容。",
+    "tlStatFinish": "结束原因",
+    "tlStillOpen": "未完成",
+    "tlProblemCount": "{count} 个事件需要关注",
+    "tlStatRetries": "重试与故障转移",
+    "tlStatContinuations": "续写",
+    "tlStatApprovals": "审批",
+    "tlStatTokens": "输入 / 输出 token",
+    "tlTokensNotRecorded": "此轮次未记录",
+    "tlTokensInOut": "输入 / 输出",
+    "tlCopyTurnId": "复制轮次 ID",
+    "tlCopyTurnIdShort": "复制 ID",
+    "tlCopied": "已复制轮次 ID。",
+    "tlCopyFailed": "无法复制。请选中该 ID 并手动复制。",
+    "sessTitle": "会话中的轮次",
+    "sessSubtitle": "选择一个聊天会话以查看其已记录的轮次，最新的在前。打开聊天消息的“查看轮次”链接会自动为您填入。",
+    "sessionIdLabel": "会话 ID",
+    "sessionIdPlaceholder": "聊天会话 ID",
+    "sessFind": "查找轮次",
+    "sessInvalid": "请输入智能体 ID（UUID）和会话 ID。",
+    "sessLoading": "正在加载该会话的轮次...",
+    "sessUnavailableTitle": "会话查询不可用",
+    "sessUnavailableBody": "此服务器无法列出会话的轮次。请改为在下方按 ID 打开某个轮次。",
+    "sessErrorTitle": "无法加载该会话的轮次",
+    "sessEmptyTitle": "此会话中没有已记录的轮次",
+    "sessEmptyBody": "该会话没有记录任何内容。可能是会话 ID 有误，也可能是其轮次运行时轮次日志已关闭。",
+    "sessListLabel": "{count} 个已记录的轮次",
+    "sessEvents": "{count} 个事件",
+    "sessStatusOpen": "打开",
+    "sessOpen": "打开时间线",
+    "sessOpened": "显示在下方"
+  },
+  "evalControls": {
+    "cancel": "取消",
+    "saving": "正在保存...",
+    "saved": "已保存。",
+    "saveMode": "保存回放模式",
+    "discard": "放弃更改",
+    "saveFailed": "无法保存回放模式。",
+    "unsavedChanges": "未保存的更改",
+    "modeTitle": "此数据集的回放方式",
+    "modeHelp": "选择回放是否可以使用智能体的工具。这会改变下次运行所衡量的内容。",
+    "modeTextOnly": "仅文本",
+    "modeTextOnlyHelp": "智能体不使用工具作答。安全：不会发生任何真实操作。无法满足预期工具检查。",
+    "modeFull": "带工具的完整流水线",
+    "modeFullHelp": "与真实用户相同的工具、护栏和步骤上限。预期工具和轨迹检查需要此项。",
+    "modeFullNote": "只读取数据的工具会真实运行。任何可能更改数据、发送消息或花钱的操作都会被模拟并列在运行记录中,因此不会发生任何真实影响。没有安全分类的工具同样会被模拟。",
+    "autoApproveLabel": "在评估沙盒中自动批准工具调用",
+    "autoApproveHelp": "原本需要等待人工的工具调用会由评估沙盒批准，使该用例得以完成。否则，该用例会像在生产环境中一样停在未答复的批准处。",
+    "autoApproveWarnTitle": "仅限非生产工作区",
+    "autoApproveWarnBody": "切勿在工具会触及真实客户或数据的地方开启此项。Shell、编码、计划、智能体对智能体、支付和删除类工具永远不会被自动批准。您的管理员必须已将此工作区标记为非生产。",
+    "autoApproveNeedsFull": "请先开启完整流水线：自动批准仅在工具运行时才适用。",
+    "autoApproveRefused": "此工作区不允许：{reason}",
+    "autoApproveConfirmTitle": "在评估中自动批准工具调用？",
+    "autoApproveConfirmBody": "此数据集重放中每个需要等待人工的工具调用都会被自动批准。获批后只读取数据的工具会真实运行;可能更改内容的获批工具仍会被模拟。请仅在含有测试数据的工作区中这样做。运行会记录它们是自动批准的。",
+    "autoApproveConfirm": "开启自动批准",
+    "trajectoryLabel": "轨迹检查",
+    "trajectoryOn": "On",
+    "trajectoryOff": "不可用",
+    "trajectoryHelpOn": "具有预期轨迹的用例，会根据智能体调用了哪些工具以及顺序来评分。这由您的管理员针对整个部署开启，而不是按数据集。",
+    "trajectoryHelpOff": "此处无法使用轨迹检查。它们由您的管理员针对整个部署开启，并且需要包含评估功能的套餐。",
+    "trajectoryNeedsFull": "此数据集仅为文本，因此具有预期轨迹的用例不会被评分。请开启完整流水线。",
+    "runAutoApproved": "已自动批准",
+    "runAutoApprovedTitle": "此次运行的工具调用均非人工决定；由评估沙盒批准。",
+    "toolCallsLabel": "此回放中的工具调用",
+    "toolStatusOk": "ok",
+    "toolStatusFailed": "失败",
+    "toolStatusNotRun": "未运行",
+    "toolStatusAwaitingApproval": "等待批准",
+    "toolStatusReplayed": "已回放",
+    "samplingTitle": "后台质量评分",
+    "samplingLoading": "正在加载评分比例...",
+    "samplingUnavailable": "由后台评审评分的实时轮次占比由您的平台管理员设置，此处不显示。",
+    "samplingValue": "约有 {percent}% 的实时轮次由后台质量评审评分。",
+    "samplingHelp": "比例越低成本越低，上方趋势中的评分也越少。此值在此处为只读。",
+    "samplingSource_default": "默认",
+    "samplingSource_platform": "由平台设置",
+    "samplingSource_tenant": "为您的工作区设置",
+    "samplingSource_agent": "为此智能体设置",
+    "modeDefault": "工作区默认值",
+    "modeDefaultHelp": "沿用你的工作区设置(除非管理员更改,否则为完整流水线)。每次运行仍可选择自己的模式。",
+    "modeDefaultCurrent": "当前:{mode}",
+    "modeNameFull": "完整流水线",
+    "modeNameQuick": "快速(仅文字)",
+    "badgeFull": "完整流水线",
+    "badgeQuick": "快速",
+    "datasetModePinnedTitle": "此数据集始终以这种方式重放。单次运行仍可选择其他模式。",
+    "datasetModeDefaultTitle": "此数据集的运行重放方式沿用工作区默认值。",
+    "runModeLabel": "下一次运行的重放模式",
+    "runModeInherit": "使用数据集的设置",
+    "runModeHelp": "完整流水线会在安全沙盒中连同智能体的工具、护栏和审批一起运行:只读取数据的工具会真实运行,任何可能更改数据或发送内容的操作都会被模拟。快速模式不提供工具,只测试书面回答。",
+    "runModeFullTitle": "本次运行在评估沙盒中使用了完整流水线。",
+    "runModeQuickTitle": "本次运行是仅文字的快速重放:智能体的工具未被提供。",
+    "runSimulatedTools": "本次运行中仅模拟,未执行(它们可能更改数据或影响平台之外):{tools}。",
+    "toolStatusSimulated": "已模拟,未执行"
+  },
+  "assistant": {
+    "taskPhoneLabel": "你的电话号码",
+    "taskPhonePlaceholder": "+14155552671",
+    "taskPhoneSaveFailed": "无法保存该号码。",
+    "searchingWebFor": "Searching the web for “{target}”…",
+    "readingPageAt": "Reading {target}…",
+    "researchingTopic": "Researching “{target}”…",
+    "statusWriting": "Writing the answer…",
+    "quietFor": "still waiting on the model ({duration} since the last update)",
+    "toolStepsLabel": "Steps",
+    "chipDone": "finished",
+    "chipFailed": "failed",
+    "moreSteps": "+{n} more",
+    "sourcesLabel": "Sources",
+    "closePanel": "Close the panel",
+    "conversationLabel": "Conversation",
+    "copiedReply": "Copied",
+    "jumpToLatest": "Jump to the latest message"
+  },
+  "agentLab": {
+    "wtLabel": "使用智能体的工具运行",
+    "wtHelp": "关闭：每次回答只是一次普通的模型调用。开启：回答走与聊天轮次相同的工具流水线，因此工具会运行、护栏会生效、步骤上限也会起作用。需要人工批准的调用会作为待批准项等待。",
+    "wtUnavailable": "此安装已关闭带工具运行实验室的功能。请联系管理员启用。",
+    "wtRefused": "此次运行被拒绝：{reason}",
+    "wtActive": "此次运行中工具将真实执行，包括其副作用。",
+    "wtConfirmTitle": "使用智能体的工具运行实验室？",
+    "wtConfirmBody": "每个样本都可能调用智能体的真实工具，这些调用可能产生真实影响，例如发送消息或写入数据。需要批准的调用将等待人工处理。请仅在测试智能体或测试数据上使用。",
+    "wtConfirm": "使用工具"
+  },
+  "settings": {
+    "groups": {
+      "agent-limits": {
+        "label": "智能体上限",
+        "description": "一个智能体轮次在被停止前可以做多少工作。"
+      },
+      "approvals": {
+        "label": "审批",
+        "description": "有人批准或拒绝某个操作之后会发生什么，以及请求会等待多久。"
+      },
+      "chat": {
+        "label": "对话行为",
+        "description": "回复如何完成、重试、缓存和继续。"
+      },
+      "routing": {
+        "label": "模型路由",
+        "description": "哪些消息被视为足够简单，可交给更快的模型。"
+      },
+      "memory": {
+        "label": "记忆",
+        "description": "智能体保留并召回多少条记忆。"
+      },
+      "attachments": {
+        "label": "聊天上传",
+        "description": "用户可附加到聊天消息的文件大小上限。"
+      },
+      "skills": {
+        "label": "技能",
+        "description": "已安装技能列表最多可占用智能体指令的多少。"
+      },
+      "aux": {
+        "label": "后台模型调用",
+        "description": "摘要、辅助和压缩使用哪个模型。"
+      },
+      "guardrails": {
+        "label": "安全检查",
+        "description": "自动安全检查的严格程度。这些只能比平台设置更严格。"
+      },
+      "quality": {
+        "label": "评估",
+        "description": "测试运行和 AI 评审的行为方式。"
+      },
+      "delegation": {
+        "label": "委派",
+        "description": "一个智能体一次最多可以把多少工作交给其他智能体。"
+      },
+      "knowledge": {
+        "label": "知识搜索",
+        "description": "在挑选最佳段落之前，对您上传文档的搜索会广泛收集多少候选项。"
+      },
+      "learning": {
+        "label": "学习",
+        "description": "智能体的学习策略如何尝试不同的选项。"
+      },
+      "providers": {
+        "label": "AI 提供商",
+        "description": "当某个已连接的 AI 提供商密钥失效时，其他密钥如何被使用。"
+      }
+    },
+    "agent": {
+      "limits": {
+        "maxToolSteps": {
+          "label": "每轮最多工具调用次数",
+          "description": "一个轮次在被停止并被要求用已有信息作答之前，最多可进行的工具调用次数。",
+          "help": "对于处理长时间多步骤任务的智能体，请调高。要阻止失控循环并让成本可预测，请调低。为工作区或平台显示的值是标准智能体的基准数字：智能体的自主级别会在运行时对其进行缩放，因此自主程度更高或更低的智能体可能使用不同的数字。智能体自己的值会按所设置的值原样使用。"
+        },
+        "turnTimeoutSeconds": {
+          "label": "每轮最长时间",
+          "description": "一个轮次在被停止前可以运行多久。",
+          "help": "对于缓慢的研究或代码任务，请调高。时间耗尽的轮次会以截至当时已完成的内容结束。"
+        },
+        "toolTimeoutSeconds": {
+          "label": "每次工具调用最长时间",
+          "description": "单次工具调用在被停止前可以运行多久。平台默认没有上限；此时每个工具保留各自的超时。",
+          "help": "如果某个缓慢的工具可能拖住整个对话，请设置上限。被停止的调用是否产生了任何效果是未知的，因此会告知智能体不要假定它已成功。"
+        },
+        "toolOutputMaxChars": {
+          "label": "最长工具结果",
+          "description": "一个工具结果传给模型的字符数；其余部分会被截断。",
+          "help": "当智能体需要完整阅读长文档或 API 响应时请调高，代价是每轮使用更多 token。要节省成本请调低。"
+        },
+        "retrievalTopK": {
+          "label": "每次搜索的知识段落数",
+          "description": "一次知识库搜索向智能体返回多少个段落。",
+          "help": "更多段落能给智能体更多素材，但会花费更多 token，并可能引入噪声。更少则更快、更便宜。"
+        },
+        "retrievalMinScore": {
+          "label": "段落的最低相关度",
+          "description": "知识段落需要多相关才会被返回。0 表示返回所有命中项。",
+          "help": "如果智能体引用不相关的段落，请调高。太高则可能什么都找不到。"
+        },
+        "continuationPasses": {
+          "label": "回复未完成后的额外轮次",
+          "description": "当模型的回复停在已宣布但未执行的步骤时，额外要求它继续的次数。",
+          "help": "对于经常宣布一个步骤后就停下的智能体，请调高。每增加一轮都会多花一次模型调用。"
+        }
+      },
+      "steps": {
+        "graceCalls": {
+          "label": "超出上限后仍回应的调用",
+          "description": "在本轮的工具上限用尽后,模型还可以再尝试多少次工具调用。每次调用都会被拒绝,并附上要求其用现有信息作答的提示;超过此数量,本轮会因错误而停止。",
+          "help": "如果模型需要尝试几次才会停止调用工具,请调高。要更早结束陷入循环的轮次,请调低。0 表示在超出上限的第一次调用时停止本轮。"
+        },
+        "supervisedDivisor": {
+          "label": "受监督的智能体获得工具上限的 1/N",
+          "description": "受监督的智能体获得本轮工具调用上限除以此数的结果,但绝不会低于下方的最小值。",
+          "help": "调高可让受监督的智能体受到更严格的约束。1 表示给予完整上限。"
+        },
+        "supervisedMinSteps": {
+          "label": "受监督智能体的最少工具调用数",
+          "description": "无论上面的数字多高,受监督智能体获得的最小工具调用上限。",
+          "help": "请保持在 3 或以上,以便受监督的智能体仍能完成包含多个步骤的简单任务。"
+        },
+        "autonomousMultiplier": {
+          "label": "完全自主的智能体获得 N 倍上限",
+          "description": "完全自主的智能体获得本轮工具调用上限乘以此数的结果。",
+          "help": "对于无人看管、运行长任务的智能体可调高;这样它们在一轮中可以花费更多调用次数和费用。1 表示标准上限。"
+        }
+      }
+    },
+    "approvals": {
+      "continuation": {
+        "enabled": {
+          "label": "批准后继续",
+          "description": "当有人批准某个操作时，智能体会自行完成任务，而不是等待新消息。",
+          "help": "如果您希望每个被批准的操作都结束当前轮次并手动跟进，请关闭它。"
+        },
+        "jobsContinueAfterDenial": {
+          "label": "拒绝后后台作业继续",
+          "description": "当有人在后台作业中拒绝某个操作时，作业会记下该拒绝并继续，而不是停止。",
+          "help": "如果拒绝应当让作业停止，请保持关闭。如果作业在没有被拒绝步骤的情况下通常也能完成，请开启。"
+        }
+      },
+      "expiry": {
+        "ttl": {
+          "label": "批准请求的过期时间",
+          "description": "批准请求在过期前等待决定的时长。0 表示请求永不过期。",
+          "help": "不设过期时，被遗忘的请求会无限期保持打开，智能体会一直等待。已过期的请求视为未批准。"
+        }
+      }
+    },
+    "chat": {
+      "finish": {
+        "enabled": {
+          "label": "完成被截断的回复",
+          "description": "当回复因模型的长度上限而被截断，或以格式错误的工具调用结束时，要求模型继续或重试。",
+          "help": "仅在诊断模型问题时才关闭；关闭后用户看到的就是被截断的原样回复。"
+        },
+        "maxContinuations": {
+          "label": "被截断回复的最大续写次数",
+          "description": "回复被截断后，要求模型继续的次数。",
+          "help": "每次续写都是又一次模型调用。长回答时请调高，要节省成本请调低。"
+        },
+        "maxToolCallRetries": {
+          "label": "格式错误的工具调用最大重试次数",
+          "description": "对于带着无法使用的参数到达的工具调用，要求模型重复调用的次数。",
+          "help": "每次重试都会花费一次模型调用。设为 0 则在第一次错误调用时就放弃。"
+        }
+      },
+      "retry": {
+        "maxAttempts": {
+          "label": "每次模型调用的尝试次数",
+          "description": "当提供商失败或繁忙时，模型调用的尝试次数（含第一次）。",
+          "help": "更多尝试可以掩盖提供商的短暂中断，但失败的请求会更晚才报告错误。"
+        }
+      },
+      "cache": {
+        "eligibleWithTools": {
+          "label": "为带工具的智能体复用回复",
+          "description": "允许为带有工具的智能体复用已存储的回复。默认关闭，因为工具下次可能返回不同的结果。",
+          "help": "仅当工具是只读且变化缓慢，并且您希望重复问题得到更快、更便宜的回答时才开启。用户可能看到不是最新的回答。"
+        },
+        "contextTurns": {
+          "label": "用于识别重复的先前轮次",
+          "description": "在判断某条消息是否为可以复用已存储回复的重复消息时，比较多少个先前的轮次。",
+          "help": "轮次越多，匹配越严格，缓存命中越少。"
+        }
+      },
+      "followUp": {
+        "stickyToolsEnabled": {
+          "label": "后续追问中保留提供工具",
+          "description": "当下一条消息是简短的追问时，继续提供对话已使用过的工具。",
+          "help": "如果“是”这样的简短回复应从常规的工具选择开始，请关闭。"
+        },
+        "stickyToolsWindow": {
+          "label": "后续追问工具保持提供的时长",
+          "description": "工具在被使用后，对简短追问消息继续保持提供的时长。",
+          "help": "较长的时间窗口有助于长时间的工作会话，较短的则能让工具列表保持精简。"
+        },
+        "maxStickyTools": {
+          "label": "后续消息中继续提供的工具上限",
+          "description": "带入简短后续消息的工具最多数量。0 表示一个都不保留。",
+          "help": "数值较大有助于任务使用大量工具,数值较小则让工具列表保持简短。"
+        },
+        "keepPrimaryModel": {
+          "label": "后续消息保留主模型",
+          "description": "已使用过工具的对话中的简短后续消息会继续使用智能体的主模型,而不是更便宜的模型。",
+          "help": "关闭后,成本路由会把“好的”之类的后续消息发给更便宜的模型,但可能会降低对进行中任务的处理质量。"
+        }
+      },
+      "semanticCache": {
+        "similarityThreshold": {
+          "label": "问题需要多相似才会复用回答",
+          "description": "适用于会复用相似问题回答的智能体:新问题与之前的问题需要多接近(0.85 到 1),才会返回已存储的回答。",
+          "help": "数值较低会复用更多回答,但可能给出本是为另一个问题准备的答案。回答出错代价高时请保持较高。回答只会复用给收到它的那个人。"
+        },
+        "ttl": {
+          "label": "可复用回答的保留时长",
+          "description": "已存储的回答在被丢弃前可以回应相似问题多久。",
+          "help": "如果你的回答很快就会过时,请缩短。"
+        },
+        "maxEntriesPerAgent": {
+          "label": "每个智能体存储回答的上限",
+          "description": "一个智能体保留多少条回答以供复用。超出后最旧的会被丢弃。",
+          "help": "存储量越大,越容易命中重复问题,但占用的存储也越多。"
+        }
+      },
+      "toolLedger": {
+        "enabled": {
+          "label": "在对话中保留工具调用记录",
+          "description": "随对话存储每一轮工具调用的简短记录,以便后续轮次了解做过什么。",
+          "help": "关闭后对话历史将只保留文字;智能体就无法得知它的工具在之前的轮次里做了什么。这适用于整个工作区。"
+        },
+        "replayEnabled": {
+          "label": "向模型显示工具记录",
+          "description": "在把对话提供给模型时,包含已存储的以往工具调用记录。",
+          "help": "关闭后仍会存储记录,但不占用模型的任何工作空间。"
+        },
+        "replayTurns": {
+          "label": "显示工具记录的以往轮次数",
+          "description": "在最近使用过工具的轮次中,有多少轮的记录会显示给模型。",
+          "help": "数值较大对长时间的工作会话有帮助,但会占用模型更多的工作空间。"
+        },
+        "maxEntriesPerTurn": {
+          "label": "每轮列出的工具调用数",
+          "description": "一轮中有多少次工具调用会写入记录。其余调用只计数。",
+          "help": "对于调用很多、需要记住每一次的轮次,请调高。"
+        },
+        "maxReplayCharsPerTurn": {
+          "label": "每轮最长的工具记录",
+          "description": "一轮的记录中有多少字符会显示给模型;其余部分只计数,不列出。",
+          "help": "调低可节省之后每一轮的成本,调高可保留更多细节。"
+        }
+      },
+      "attachments": {
+        "maxImageMb": {
+          "label": "图片上传大小上限 (MB)",
+          "description": "用户可附加到聊天消息的最大图片,单位为兆字节。平台还有整体的文件上限,此值不能超过它。",
+          "help": "拍照和截图可调高;大文件发送更慢,并占用更多模型额度。"
+        },
+        "maxAudioMb": {
+          "label": "音频上传大小上限 (MB)",
+          "description": "用户可附加到聊天消息的最大音频文件,单位为兆字节。平台还有整体的文件上限,此值不能超过它。",
+          "help": "较长的录音可调高;大文件发送更慢,并占用更多模型额度。"
+        },
+        "maxVideoMb": {
+          "label": "视频上传大小上限 (MB)",
+          "description": "用户可附加到聊天消息的最大视频,单位为兆字节。平台还有整体的文件上限,此值不能超过它。",
+          "help": "较长的视频片段可调高;大文件发送更慢,并占用更多模型额度。"
+        },
+        "maxDocumentMb": {
+          "label": "文档上传大小上限 (MB)",
+          "description": "用户可附加到聊天消息的最大文档或电子表格,单位为兆字节。平台还有整体的文件上限,此值不能超过它。",
+          "help": "长报告和大型数据文件可调高;大文件处理更慢。"
+        }
+      },
+      "continuation": {
+        "heuristicEnabled": {
+          "label": "对未完成措辞的提醒",
+          "description": "当回复听起来像是在做完它所说的事情之前就停了，要求模型继续。",
+          "help": "如果提醒在本应就此结束的回复上触发，请关闭。"
+        }
+      },
+      "toolLoop": {
+        "resultClearing": {
+          "enabled": {
+            "label": "清除旧的工具结果",
+            "description": "在较长的工具运行中，用简短的占位符替换较早的工具结果，使对话保持在模型上限之内。",
+            "help": "如果智能体必须看到之前的每个结果，请关闭；较长的运行可能因此触及模型的大小上限。"
+          },
+          "thresholdChars": {
+            "label": "触发清除的大小",
+            "description": "一个轮次中的工具结果增长到多大后，会清除较早的结果。",
+            "help": "调高可保留更多可见结果，调低可使长时间运行保持小巧且便宜。"
+          }
+        }
+      }
+    },
+    "routing": {
+      "simple": {
+        "maxChars": {
+          "label": "最长的简单消息",
+          "description": "比此更长的消息永远不会被视为简单消息。简单消息可以交给更快、更便宜的模型。",
+          "help": "调低可为了质量把更多消息交给主模型；调高可节省成本。"
+        },
+        "maxClauses": {
+          "label": "简单消息的最大句数",
+          "description": "句子数多于此的消息永远不会被视为简单消息。",
+          "help": "调低可为了质量把更多消息交给主模型。"
+        }
+      }
+    },
+    "memory": {
+      "recall": {
+        "agentTopK": {
+          "label": "每轮召回的智能体记忆数",
+          "description": "对每条消息会查找多少条智能体自己的记忆。",
+          "help": "更多记忆提供更多上下文，但会使用更多 token。"
+        },
+        "tenantTopK": {
+          "label": "每轮召回的共享记忆数",
+          "description": "对每条消息会查找多少条在工作区内共享的记忆。",
+          "help": "更多记忆提供更多上下文，但会使用更多 token。"
+        }
+      },
+      "agent": {
+        "maxMemories": {
+          "label": "每个智能体的最大记忆数",
+          "description": "一个智能体最多可保留多少条记忆。超出后最旧且最少使用的会被丢弃。",
+          "help": "对于应该记住很多关于人的信息的助手，请调高；这也会增加存储和召回成本。"
+        }
+      },
+      "tenant": {
+        "maxMemories": {
+          "label": "共享记忆上限",
+          "description": "工作区内共享的记忆保留多少条。超出后最旧的会被丢弃。",
+          "help": "依赖共享知识的大型团队可调高;这也会增加存储和召回的成本。这适用于整个工作区。"
+        }
+      },
+      "edge": {
+        "maxFacts": {
+          "label": "提供给设备端聊天的记忆数",
+          "description": "设备端会话启动时交给它多少条记忆。",
+          "help": "设备端模型的工作空间较小,所以请保持较低。"
+        }
+      },
+      "graph": {
+        "recallMaxFacts": {
+          "label": "从图记忆召回的事实数",
+          "description": "一次查找中，智能体从其关系记忆中看到的最大事实数量。",
+          "help": "更多事实能为智能体提供关于某个人或主题的更多背景，但会占用更多工作空间。更少则让回答更聚焦。可对整个工作区设置，也可对需要更多或更少的某个智能体设置。"
+        },
+        "recallMaxPaths": {
+          "label": "每次查找读取的图路径数",
+          "description": "为查找一次的事实，会读取记忆图中的多少条连接。",
+          "help": "多条连接可能通向同一个事实，因此关联紧密的记忆可能需要更大的数值才能找全。数值越大，每次查找越慢。"
+        }
+      }
+    },
+    "skills": {
+      "prompt": {
+        "maxSkills": {
+          "label": "提示词中列出的技能上限",
+          "description": "在智能体的指令中列出多少个技能名称,让它知道这些技能存在。其余的只计数,不列出。",
+          "help": "技能很多时可调高;每个被列出的技能在每一轮都会占用模型的一点工作空间。这适用于整个工作区。"
+        },
+        "maxBlockChars": {
+          "label": "提示词中技能列表的大小",
+          "description": "技能列表最多可占用智能体指令中的多少字符。列表满了之后,后面的技能会缩短为只有名称。",
+          "help": "调高可为更多技能保留描述,调低可在每一轮节省令牌。这适用于整个工作区。"
+        }
+      }
+    },
+    "aux": {
+      "useAgentModel": {
+        "label": "后台调用使用智能体的模型",
+        "description": "当没有为摘要、辅助和上下文压缩选择模型时，它们使用与其所服务的智能体相同的模型。",
+        "help": "关闭后，由平台为这些调用选择模型，可能更便宜，也可能来自其他提供商。"
+      }
+    },
+    "guardrails": {
+      "failMode": {
+        "label": "当安全检查出故障时",
+        "description": "当安全检查本身失败时会发生什么，例如评审模型宕机。“关闭”会拒绝该操作；“开放”会放行。",
+        "help": "只能比平台设置更严格。“关闭”可防止有人故意让检查失败，代价是在故障期间拒绝工作。",
+        "options": {
+          "open": "开放：放行该操作",
+          "closed": "关闭：拒绝该操作"
+        }
+      },
+      "toolVerifier": {
+        "failMode": {
+          "label": "当工具调用检查出故障时",
+          "description": "审查高风险工具调用的检查在无法给出结论时的行为。“继承”遵循上方安全检查的设置。",
+          "help": "只能比平台设置更严格。“关闭”会在检查失败时拒绝该工具调用。",
+          "options": {
+            "open": "开放：放行该工具调用",
+            "inherit": "遵循安全检查设置",
+            "closed": "关闭：拒绝该工具调用"
+          }
+        }
+      },
+      "toxicity": {
+        "blockScore": {
+          "label": "触发拦截的毒性分数",
+          "description": "在评审的 0 到 100 毒性量表上得分达到或超过此值的内容会被拦截。数值越低，拦截越多。",
+          "help": "只能调低，不能调高到平台值以上。过低的值会拦截普通的直率措辞。"
+        }
+      },
+      "jailbreak": {
+        "maxScannedChars": {
+          "label": "扫描越狱尝试的文本量",
+          "description": "对一条消息或回复扫描越狱模式的范围。超出部分不会被扫描。",
+          "help": "只能调高到平台值以上。更宽的窗口可阻止藏在填充内容后面的攻击，代价是略多一些处理。"
+        }
+      },
+      "judge": {
+        "maxInputChars": {
+          "label": "展示给安全评审的文本量",
+          "description": "AI 安全评审会阅读被检查文本的多少内容。超出部分不会被评审。",
+          "help": "只能调高到平台值以上。调高后会完整评审较长的工具结果，但每次评审调用会更大。"
+        }
+      },
+      "supervised": {
+        "readOnlyCalls": {
+          "label": "受监督的智能体与只读工具",
+          "description": "自主级别为受监督的智能体,在使用只读取数据的工具(如搜索或查询)之前是否仍会询问你。写入、发送以及平台未分类的工具始终会询问。",
+          "help": "你只能把它设置得比平台设置更严格。每次都询问是最安全的选择;让只读工具直接运行可以少一次询问,但也少了一次拦下意外搜索的机会。能读取私密数据、接收不可信内容并向外发送数据的智能体,无论此项如何设置,每次调用都会询问。",
+          "options": {
+            "auto-allow": "让只读工具无需询问直接运行",
+            "gate": "每次工具调用前都询问"
+          }
+        }
+      }
+    },
+    "quality": {
+      "judge": {
+        "model": {
+          "label": "AI 评审使用的模型",
+          "description": "用于评审评估运行的模型。留空则由平台从您的工作区已在使用的模型中选择。",
+          "help": "使用更强的模型可获得更可靠的评分，使用更便宜的模型可节省成本。该模型必须在您已连接的提供商上可用。"
+        },
+        "callTimeoutSeconds": {
+          "label": "每次评审调用最长时间",
+          "description": "一次评审调用在被视为失败之前可以花多长时间。",
+          "help": "如果较慢的模型经常超时，请调高；失败的调用会让评估结果不完整。"
+        }
+      },
+      "eval": {
+        "defaultRepeats": {
+          "label": "每个测试用例的重复次数",
+          "description": "当运行没有指定时，每个测试用例运行多少次。重复次数越多，越能看出智能体的一致性。",
+          "help": "每次重复都会使运行的成本和时间成倍增加。"
+        },
+        "defaultMode": {
+          "label": "评估的运行方式",
+          "description": "当运行或其数据集没有指定时,评估运行是在安全沙盒中带着工具重放智能体(完整流水线),还是仅用文字回答(快速)。",
+          "help": "完整流水线会测试用户实际得到的内容,包括工具的使用,成本更高。其中只读取数据的工具会真实运行;任何可能更改数据、发送消息或花钱的操作都会被模拟并列在运行记录中。快速模式更便宜,但无法反映工具的使用情况。",
+          "options": {
+            "full": "沙盒中的完整流水线",
+            "quick": "快速:仅文字回答"
+          }
+        }
+      }
+    },
+    "delegation": {
+      "maxBranches": {
+        "label": "最大并行子任务数",
+        "description": "一次委派调用最多可同时启动多少个子任务或辅助智能体。多出的会被报告为超出限制。",
+        "help": "对于范围广的研究任务请调高，要降低成本和负载请调低。"
+      },
+      "branchTimeoutSeconds": {
+        "label": "每个子任务最长时间",
+        "description": "一个被委派的子任务在被报告为超时之前可以运行多久。",
+        "help": "对于缓慢的子任务请调高。挂起的子任务不会让整个回答的等待超过此时间。"
+      }
+    },
+    "knowledge": {
+      "search": {
+        "candidatePoolMultiplier": {
+          "label": "每个结果的搜索广度",
+          "description": "知识搜索为最终返回的每个段落会收集多少个候选段落。",
+          "help": "数值更高会给排序更多选择，在许多文档相似时有帮助，但每次搜索会花费更多时间和算力。如果搜索感觉很慢，请调低。这不会改变智能体看到的段落数量。"
+        },
+        "candidatePoolMax": {
+          "label": "每次搜索的最大候选数",
+          "description": "无论请求多少个结果，一次知识搜索收集的候选段落数量的上限。",
+          "help": "当智能体一次请求很多结果时，这可保护速度和成本。仅当在大型知识库中回答遗漏了相关段落时才调高。"
+        }
+      }
+    },
+    "rl": {
+      "policy": {
+        "ucb1ExplorationConstant": {
+          "label": "尝试较少测试过的选项的意愿",
+          "description": "使用置信上界方法的学习策略在多大程度上偏向它尝试得较少的选项。",
+          "help": "0 表示始终选择目前平均表现最好的选项。数值越高，在定下来之前尝试其他选项的时间越长。默认值是教科书式的平衡。只有使用此方法的策略会受影响。"
+        },
+        "defaultExplorationRate": {
+          "label": "新策略的初始探索率",
+          "description": "新创建的学习策略将多大比例的轮次用于尝试随机选项。",
+          "help": "这只设定从现在起创建的策略的起点。现有策略保留各自的探索率，可在管理该策略的位置按智能体更改。0 表示新策略一开始从不探索。"
+        }
+      }
+    },
+    "providers": {
+      "credential": {
+        "rejectedCooldown": {
+          "label": "提供商拒绝密钥后的暂停",
+          "description": "提供商拒绝某个已连接的提供商密钥后，后台工作跳过该密钥的时长。",
+          "help": "暂停期间，计划任务和自动作业会改用另一个已连接的提供商，或者等待，而不是调用一个持续失败的密钥。正在聊天的人不会被阻止，并且始终会看到提供商的真实错误。暂停结束时，会放行一次调用以检查密钥是否已修复。0 表示关闭暂停。"
+        }
+      }
+    }
+  },
+  "runtimeSettings": {
+    "eyebrow": "管理",
+    "title": "运行时设置",
+    "subtitle": "调整智能体在此工作区中的行为：上限、批准、质量检查、护栏、记忆和模型。在允许的情况下，智能体的所有者仍可以为单个智能体覆盖某项设置。",
+    "docsLink": "帮助与文档",
+    "tabs": {
+      "label": "运行时设置视图",
+      "settings": "设置",
+      "history": "更改历史"
+    },
+    "readOnly": {
+      "title": "仅查看",
+      "body": "只有工作区管理员可以更改这些设置。您可以查看每项设置当前生效的值及其来源。"
+    },
+    "summary": "此工作区中有 {changed} 项设置（共 {total} 项）已被更改。其余使用平台的值。",
+    "export": {
+      "button": "导出覆盖",
+      "done": "已将 {count} 项工作区覆盖导出到文件。",
+      "none": "没有可导出的内容：此工作区尚未更改任何设置。"
+    },
+    "filters": {
+      "changedOnly": "仅在此工作区中更改"
+    },
+    "jump": {
+      "label": "跳转到分组"
+    },
+    "anchor": {
+      "unknown": "此工作区中没有名为“{key}”的设置。它可能已被重命名，或在工作区级别不可用。"
+    },
+    "empty": {
+      "noneChanged": "此工作区尚未更改任何设置。一切都使用平台的值。"
+    },
+    "risk": {
+      "high": "高风险",
+      "security": "安全设置"
+    },
+    "security": {
+      "title": "安全设置",
+      "body": "这些设置保护您的工作区。它们只能比平台值更严格，不能更宽松。每次更改都需要填写原因，并记录在审计日志中。"
+    },
+    "resetGroup": {
+      "count": "此分组中有 {count} 项已更改",
+      "button": "将 {group} 重置为继承值",
+      "confirmTitle": "将 {group} 重置为继承值？",
+      "confirmBody": "这将移除此分组中的 {count} 项工作区覆盖。对于没有自己覆盖的每个智能体，设置会立即恢复为平台的值。每次重置都会记录在审计日志中。",
+      "confirm": "重置为继承值",
+      "cancel": "取消",
+      "done": "将 {count} 项设置重置为其继承值。",
+      "partial": "已重置 {done} 项设置；{failed} 项无法重置。请查看失败设置上的消息。",
+      "cancelled": "已重置 {done} 项设置。需要理由的 {skipped} 项保持原样。"
+    },
+    "import": {
+      "button": "导入覆盖",
+      "title": "导入工作区覆盖",
+      "intro": "选择从此页面导出的文件，或粘贴其内容。在保存任何内容之前，您会准确看到将有哪些更改。",
+      "reviewIntro": "请检查此文件将更改的内容。目前尚未保存任何内容。",
+      "fileLabel": "覆盖文件（JSON）",
+      "pasteLabel": "或粘贴文件内容",
+      "fileError": {
+        "empty": "请先选择文件或粘贴其内容。",
+        "invalidJson": "这不是有效的 JSON。请检查整个文件是否都已复制。",
+        "wrongFormat": "这不是从此页面导出的设置覆盖文件。",
+        "unsupportedVersion": "此文件由不同版本的导出生成，无法读取。",
+        "noOverrides": "该文件没有覆盖部分。",
+        "unreadable": "无法读取该文件。"
+      },
+      "summary": "{changes} 项待更改，{unchanged} 项已生效，{problems} 项无法应用。",
+      "changesHeading": "更改（{count}）",
+      "before": "当前：",
+      "after": "导入后：",
+      "resetMissing": "同时移除文件中没有的工作区覆盖",
+      "resetMissingHelp": "在此处更改但文件中缺失的设置会恢复为平台的值。保持关闭则只添加或更新。",
+      "resetsHeading": "待移除的覆盖（{count}）",
+      "resetFrom": "当前为 {value}；将恢复为继承的值。",
+      "problemsHeading": "无法应用（{count}）",
+      "problem": {
+        "unknownKey": "没有使用此键的设置。",
+        "notWorkspaceSetting": "此设置无法针对整个工作区更改。",
+        "locked": "平台运营方已固定此设置，因此无法更改。",
+        "wrongType": "该值的类型对此设置不正确。",
+        "required": "必须提供一个值。",
+        "notNumber": "该值必须是数字。",
+        "notInteger": "该值必须是整数。",
+        "belowMin": "该值太小。最小值为 {min}。",
+        "aboveMax": "该值太大。最大值为 {max}。",
+        "notAllowed": "这不是允许的选项之一。",
+        "tooShort": "文本太短。最小长度为 {min}。",
+        "tooLong": "文本太长。最大长度为 {max}。",
+        "precision": "该值的精度超出了此设置的允许范围。"
+      },
+      "nothing": "此文件中没有任何内容会更改设置。",
+      "reasonNote": "其中一些设置是高风险的。应用后，系统会要求您填写原因，并记录在审计日志中。",
+      "back": "返回",
+      "cancel": "取消",
+      "review": "审阅更改",
+      "apply": "应用 {count} 项更改",
+      "cancelled": "已取消导入。没有更改任何设置。",
+      "done": "导入完成：已更新 {applied} 项设置。",
+      "donePartial": "导入部分完成：已更新 {applied} 项设置，{failed} 项无法应用。审阅页面会显示剩余内容。"
+    },
+    "history": {
+      "adminOnly": "工作区设置的更改历史仅对工作区管理员可见。",
+      "loading": "正在加载更改历史",
+      "partial": "无法加载 {count} 项设置的历史，因此此列表可能不完整。",
+      "retry": "重试",
+      "search": "搜索更改历史",
+      "searchPlaceholder": "按设置、人员或原因搜索",
+      "empty": "此工作区尚未更改任何设置。",
+      "noMatch": "没有符合您搜索的更改。",
+      "count": "显示 {total} 项更改中的 {shown} 项，最新的在前。",
+      "tableLabel": "工作区设置的更改历史",
+      "when": "时间",
+      "setting": "设置",
+      "change": "更改",
+      "by": "更改者",
+      "reason": "原因",
+      "before": "之前：",
+      "after": "之后：",
+      "inherited": "继承的值",
+      "unknownActor": "未知",
+      "noReason": "未给出原因",
+      "showMore": "显示更多",
+      "scope": "级别",
+      "scopeWorkspace": "工作区",
+      "scopeAgent": "智能体 {id}",
+      "scopeFilter": "显示以下级别的更改",
+      "filterAll": "所有级别",
+      "filterWorkspace": "仅工作区",
+      "filterAgents": "仅智能体",
+      "searchLoadedOnly": "搜索范围为目前已加载的更改。",
+      "loadError": "无法加载更改历史。{message}",
+      "moreFailed": "无法加载更多更改。{message}",
+      "loadingMore": "加载中"
+    }
+  },
+  "agentBehavior": {
+    "title": "行为与上限",
+    "intro": "控制此智能体在一个轮次中能做到什么程度：可以调用多少个工具、可以运行多久，以及回读多少内容。您在此未更改的内容都继承自您的工作区。",
+    "saveFirst": "请先保存智能体。智能体创建后即可设置其行为与上限。",
+    "pickAgent": "在下方选择一个智能体,即可打开它的“行为与上限”标签页。",
+    "tabs": {
+      "label": "智能体配置",
+      "setup": "设置",
+      "behavior": "行为与上限",
+      "unsaved": "未保存的更改"
+    },
+    "links": {
+      "label": "相关页面",
+      "tenant": "更改工作区默认值",
+      "playground": "在测试场中试用",
+      "prompts": "此智能体的提示词",
+      "promptsAria": "{name} 的提示词:在此智能体处打开提示词注册表",
+      "approvals": "此智能体的审批",
+      "approvalsAria": "{name} 的审批:打开按此智能体筛选的审批队列",
+      "turns": "轮次时间线",
+      "turnsAria": "{name} 的轮次时间线:为此智能体打开轮次检查器"
+    },
+    "readOnly": {
+      "locked": "此智能体已锁定编辑，因此这些值为只读。",
+      "access": "您可以查看这些值，但您对此智能体的访问权限不允许更改。"
+    },
+    "unsaved": "此标签页中有未保存的更改。离开之前请在下方保存或放弃。",
+    "inheritNote": "每项设置都会显示其值的来源。在此更改某项只会为此智能体覆盖它；重置后会重新继承工作区的值。",
+    "others": {
+      "title": "此智能体的其他控件",
+      "intro": "这些控件不属于上方的设置，因此保留在“设置”标签页中。",
+      "generation": "回复的创造性与长度（温度、top-p、最大 token 数）以及额外的采样选项。",
+      "generationLink": "前往生成调优",
+      "autonomy": "自主级别、每次运行的支出上限、工具规则，以及何时必须由人批准。",
+      "autonomyLink": "前往推理与自主性"
+    },
+    "discard": {
+      "title": "不保存就离开？",
+      "description": "您对此智能体的行为与上限有未保存的更改。如果现在离开，这些更改将丢失。",
+      "stay": "留下继续编辑",
+      "leave": "离开并放弃更改"
+    },
+    "summary": {
+      "title": "此智能体目前的行为",
+      "subtitle": "应用了智能体自己的覆盖、您的工作区设置和平台设置之后，对此智能体生效的值。",
+      "loading": "正在加载当前行为",
+      "error": "无法加载当前行为。{message}",
+      "retry": "重试",
+      "empty": "此智能体尚无可用的行为设置。",
+      "facts": {
+        "steps": "每轮工具调用次数",
+        "turnTimeout": "每轮时间",
+        "toolTimeout": "每次工具调用时间",
+        "outputCap": "保留的工具输出",
+        "continuation": "续写轮次",
+        "approvals": "审批",
+        "judge": "质量评审模型",
+        "model": "模型"
+      },
+      "tier": {
+        "SUPERVISED": "受监督：每次工具调用都要等待人工",
+        "SEMI_AUTONOMOUS": "半自主：由您的工作区规则决定",
+        "FULLY_AUTONOMOUS": "完全自主：工具调用从不等待"
+      },
+      "approvalResumes": "批准后自行继续",
+      "approvalStops": "批准后等待新消息",
+      "judgeDefault": "由平台选择",
+      "overrides": {
+        "none": "此智能体在所有地方都使用您工作区的值。",
+        "some": "为此智能体覆盖的设置：{count}。"
+      }
+    },
+    "impact": {
+      "title": "这意味着什么",
+      "steps": "此智能体在一个轮次中最多可调用 {count} 个工具。之后会被要求用已有信息作答。",
+      "stepsTierSupervised": "此智能体为“受监督”，因此其实际上限低于该基准数字。请为此智能体设置自己的值以使用确切的数字。",
+      "stepsTierFull": "此智能体为“完全自主”，因此其实际上限高于该基准数字。请为此智能体设置自己的值以使用确切的数字。",
+      "turnTimeout": "一个轮次在 {duration} 后被截止。",
+      "turnTimeoutNone": "轮次没有时间限制。",
+      "toolTimeout": "一次工具调用在 {duration} 后被截止。",
+      "toolTimeoutNone": "工具调用没有时间限制。",
+      "outputCap": "长度超过 {chars} 的工具结果会在智能体读取之前被缩短。",
+      "continuation": "如果回复被截断，智能体最多可再继续 {count} 次。",
+      "continuationNone": "被截断的回复不会被续写。",
+      "retrieval": "对于每个问题，它会读取最佳的 {count} 个知识匹配项。",
+      "retrievalScored": "对于每个问题，它会读取最佳的 {count} 个知识匹配项，并忽略得分低于 {score} 的匹配项。",
+      "approvalContinuationOn": "有人批准一个等待中的操作后，智能体会自行完成任务。",
+      "approvalContinuationOff": "有人批准一个等待中的操作后，该轮次结束，需要手动跟进。",
+      "guardClosed": "如果安全检查出故障，该操作会被拒绝。",
+      "guardOpen": "如果安全检查出故障，该操作会被放行。",
+      "branches": "一次委派调用最多可同时启动 {count} 个子任务。"
+    }
+  },
+  "controls": {
+    "eyebrow": "帮助",
+    "title": "在哪里控制……？",
+    "subtitle": "所有影响智能体行为的控件，以及它们所在的页面。按您想更改的内容搜索。",
+    "breadcrumb": {
+      "label": "面包屑导航",
+      "console": "控制台",
+      "controls": "控件"
+    },
+    "related": {
+      "label": "其他控件"
+    },
+    "search": {
+      "label": "搜索控件",
+      "placeholder": "例如：超时、批准、提示词、记忆",
+      "count": "{count} 个匹配的控件",
+      "none": "没有与“{query}”匹配的内容。请尝试更短的词。",
+      "noSettings": "没有设置符合您的搜索。"
+    },
+    "areasHeading": "控件区域",
+    "areasIntro": "这些页面包含不是单个数字的控件：指令、批准规则、安全规则，以及某个轮次所做操作的记录。",
+    "openArea": "打开",
+    "needsAccess": "请向工作区管理员申请访问此页面。",
+    "settingsHeading": "所有运行时设置",
+    "settingsIntro": "每项设置都可以针对整个工作区、单个智能体或两者更改。智能体自己的值优先于工作区的值。选择一个链接即可直达该设置本身。",
+    "loading": "正在加载设置列表",
+    "loadFailed": "无法加载设置列表。{message}",
+    "retry": "重试",
+    "emptyCatalog": "此工作区没有可显示的运行时设置。",
+    "changeWorkspace": "为工作区更改",
+    "changeAgent": "在智能体上更改",
+    "workspaceOnly": "仅限整个工作区",
+    "anchors": {
+      "agent-runtime-limits": {
+        "title": "智能体运行时上限",
+        "intro": "一个轮次可以做多少工作：工具调用、时间、结果大小和检索。"
+      },
+      "behaviour-settings": {
+        "title": "行为设置",
+        "intro": "回复如何完成和缓存、批准如何继续、安全检查如何运作，以及记忆、搜索和委派如何工作。"
+      },
+      "other": {
+        "title": "其他设置",
+        "intro": "没有独立分区的设置。"
+      }
+    },
+    "areas": {
+      "runtimeSettings": {
+        "title": "运行时设置",
+        "summary": "整个工作区的上限、批准、质量检查、安全严格度、记忆和委派。",
+        "keywords": "limits timeout tool steps retries cache memory delegation quality judge settings numbers 上限 超时 工具步骤 重试 缓存 记忆 委派 质量 评审 设置 数字"
+      },
+      "prompts": {
+        "title": "指令",
+        "summary": "平台提供给模型的提示词：查看每一个，为工作区或智能体覆盖它，并预览结果。",
+        "keywords": "prompts prompt directives system prompt instructions override preview registry 提示词 指令 系统提示词 覆盖 预览 注册表"
+      },
+      "approvals": {
+        "title": "审批",
+        "summary": "等待人工处理的操作队列、哪些工具需要批准的规则，以及您做出决定后会发生什么。",
+        "keywords": "approve reject queue human in the loop tool rules expiry continuation 批准 拒绝 队列 人工参与 工具规则 过期 续写"
+      },
+      "guardrails": {
+        "title": "护栏",
+        "summary": "此工作区拒绝放行的模式，以及应用于工具结果的内容策略。",
+        "keywords": "safety rules block filter policy content patterns 安全规则 拦截 过滤 策略 内容 模式"
+      },
+      "turns": {
+        "title": "轮次检查器",
+        "summary": "某个智能体轮次的已记录时间线：问了什么、运行了哪些工具、每一步花费多少，以及为何停止。",
+        "keywords": "turn timeline journal trace replay history steps debug 轮次 时间线 日志 追踪 回放 历史 步骤 调试"
+      },
+      "agentBehavior": {
+        "title": "智能体行为与上限",
+        "summary": "在智能体页面上：其自己的上限和行为设置，显示每个值的来源，并可重置为工作区的值。",
+        "keywords": "agent override per agent behavior limits tab 智能体 覆盖 按智能体 行为 上限 标签页"
+      }
+    }
+  },
+  "requestInspector": {
+    "blocksHeading": "由以下提示词块组成",
+    "blocksCount": "{n} 个块",
+    "blockDefault": "出厂默认",
+    "blockOverride": "{scope}覆盖 v{version}",
+    "blockAgentConfig": "智能体自己的提示词",
+    "blockCode": "平台代码",
+    "blockTokens": "约 {tokens} 个 token",
+    "blockHash": "文本哈希"
+  },
+  "toolApproval": {
+    "continuing": "智能体正在继续执行任务。",
+    "continueNotStarted": "此决定之后，智能体没有被自动重新启动。请发送一条消息让它继续。",
+    "continueTimedOut": "智能体尚未完成继续。完成后它的回复会出现在对话中；请刷新页面查看。",
+    "continuingWaiting": "Your decision is recorded. The agent is picking the task back up.",
+    "continuingRunning": "The agent is working on the next step. Its reply appears here as soon as it is ready.",
+    "continuingStill": "Still working. A model running on this computer can take a few minutes; you can keep reading meanwhile.",
+    "continuingLongWait": "This is taking longer than usual, but the agent has not stopped. Its reply will appear here when it is done.",
+    "continuingStagesLabel": "Progress",
+    "continuingStageDecided": "Decision recorded",
+    "continuingStageRestarted": "Agent restarted",
+    "continuingStageWorking": "Working on it",
+    "panelLabel": "Tool approvals",
+    "queuePosition": "Approval {position} of {total}",
+    "queueMore": "{count} more waiting. The next one appears when you decide this one.",
+    "rawName": "Technical name",
+    "approveAll": "Approve all {count}",
+    "rejectAll": "Reject all",
+    "approvingProgress": "Approving {position} of {total}",
+    "rejectingProgress": "Rejecting {position} of {total}",
+    "bulkHint": "Decides the waiting calls one after another, oldest first, and stops at the first problem.",
+    "bulkStoppedTruncated": "Stopped: the next call's arguments are too long to show here, so it waits for your own decision.",
+    "bulkStoppedError": "Stopped after a problem; the calls below it are still waiting.",
+    "waitingList": "Waiting calls"
+  },
+  "promptDirectives": {
+    "tabRegistry": "所有提示词",
+    "tabAgentPreview": "预览最终提示词",
+    "regTitle": "所有提示词",
+    "regIntro": "平台为模型撰写的所有文本，包含当前生效的措辞、来源和版本。选择一个范围，打开某个提示词进行更改，并查看所有历史版本。更改会在约半分钟内到达所有服务器。",
+    "regScopeLabel": "更改范围",
+    "regScope_tenant": "此工作区",
+    "regScope_agent": "单个智能体",
+    "regScope_platform": "整个平台",
+    "regAgentLabel": "智能体",
+    "regAgentPlaceholder": "选择智能体",
+    "regAgentsFailed": "无法加载您的智能体。",
+    "regPickAgent": "选择一个智能体以查看并更改其提示词。",
+    "regAgentUnavailable": "链接中的智能体对你不可用,原因是它不存在或你无法查看。注册表已改为在工作区范围打开。",
+    "regSearchLabel": "搜索提示词",
+    "regSearchPlaceholder": "键、标题或描述",
+    "regRiskLabel": "风险类别",
+    "regRiskAll": "所有风险类别",
+    "regRisk_STEERS_EVERY_TURN": "引导每个轮次",
+    "regRisk_SECONDARY_CALL": "辅助模型调用",
+    "regRisk_USER_VISIBLE": "向用户显示",
+    "regRisk_TOOL_DESCRIPTION": "工具描述",
+    "regOnlyCustomised": "仅已自定义",
+    "regPlatformReadOnly": "此处可以查看平台级提示词；只有平台管理员才能更改。",
+    "regLoadFailed": "无法加载提示词。",
+    "regCount": "显示 {total} 个提示词中的 {shown} 个。",
+    "regEmptyTitle": "没有匹配的提示词",
+    "regEmptyBody": "请更改搜索或筛选条件。",
+    "regSource_DEFAULT": "出厂默认",
+    "regSource_FALLBACK": "出厂默认（覆盖不可用）",
+    "regSource_PLATFORM": "平台",
+    "regSource_TENANT": "工作区",
+    "regSource_AGENT": "智能体",
+    "regSourceVersion": "{source} v{version}",
+    "regRetired": "已停用",
+    "regRetiredBody": "此提示词不再发送任何文本，因此没有可更改的内容。",
+    "regEffectiveOff": "已关闭：不发送任何内容。",
+    "regEffectiveTokens": "当前生效，约 {tokens} 个 token。",
+    "regEffectiveLabel": "{title} 当前生效的措辞",
+    "regOpenEditor": "编辑 {title}",
+    "regCloseEditor": "关闭 {title}",
+    "regEditingOverride": "正在编辑{scope}版本，当前为 v{version}。",
+    "regEditingNone": "尚无{scope}版本。它以下方的措辞为起点：{below}。",
+    "regPlaceholders": "运行时填入：",
+    "regRequired": "（必填）",
+    "regProblemsTitle": "保存前请先修复此项",
+    "regReasonLabel": "更改原因（保存在历史中）",
+    "regReasonPlaceholder": "可选",
+    "regConflict": "您编辑期间有人更改了此提示词。请关闭后重新打开以查看对方的版本，然后重试。",
+    "regRevert": "还原到 {to}",
+    "regShowHistory": "历史",
+    "regHideHistory": "隐藏历史",
+    "regHistoryLoading": "正在加载历史…",
+    "regHistoryFailed": "无法加载历史。",
+    "regHistoryEmpty": "此范围内尚无版本。",
+    "regVersion": "版本 {version}",
+    "regAction_CREATE": "已创建",
+    "regAction_UPDATE": "已更改",
+    "regAction_REVERT": "已还原",
+    "regAction_MIGRATE": "已迁移",
+    "regCurrent": "当前",
+    "regBy": "by {who} on {when}",
+    "regUnknownAuthor": "未知",
+    "regReason": "原因：{reason}",
+    "regShowDiff": "显示版本 {version} 中的更改",
+    "regHideDiff": "隐藏版本 {version} 中的更改",
+    "regDiffLabel": "版本 {version} 所做的更改",
+    "regNoDiff": "此版本没有更改任何文本。",
+    "regRestore": "恢复版本 {version}",
+    "regRestoreReason": "已恢复版本 {version} 的措辞",
+    "regRestoreFailed": "无法恢复该版本。",
+    "regRestoreAck": "我了解恢复 {title} 的某个版本可能会削弱安全性。",
+    "regPreviewTitle": "预览最终提示词",
+    "regPreviewIntro": "完全按照轮次的方式构建智能体的真实系统提示词和工具列表，而不调用模型。每个块显示提示词键、范围以及其措辞来自的版本。",
+    "regPreviewMessageLabel": "示例用户消息（可选）",
+    "regPreviewMessagePlaceholder": "用于选择工具和召回的记忆，与真实消息一样。",
+    "regPreviewSmallModel": "为小模型预览",
+    "regPreviewBuild": "生成预览",
+    "regPreviewBuilding": "生成中…",
+    "regPreviewFailed": "无法生成预览。",
+    "regPreviewTotals": "约 {prompt} 个 token 的系统文本和 {tools} 个 token 的工具定义（估算值）。",
+    "regPreviewOverBudgetTitle": "超出 token 预算",
+    "regPreviewOverBudget": "常驻系统文本超出了配置的 {budget} token 预算。不会截断任何内容；请考虑缩短某个提示词。",
+    "regPreviewMessageHeading": "消息：{message}",
+    "regPreviewTokens": "约 {tokens} 个 token",
+    "regPreviewTools": "工具（{count}）",
+    "regPreviewNoTools": "此智能体未提供任何工具。",
+    "regPreviewNotes": "此预览无法得知的内容",
+    "regOriginDefault": "出厂默认",
+    "regOriginOverride": "{scope}覆盖 v{version}",
+    "regOriginAgentConfig": "智能体自己的系统提示词",
+    "regOriginCode": "平台代码"
+  },
+  "toolLabels": {
+    "mcpTool": "{tool} ({server})",
+    "label_web_search": "Search the web",
+    "does_web_search": "Looks up public web pages that match a search and reads their titles and snippets.",
+    "label_fetch_web_page": "Open a web page",
+    "does_fetch_web_page": "Downloads one public web page and reads its text.",
+    "label_deep_research": "Research a topic on the web",
+    "does_deep_research": "Runs several web searches and reads the pages it finds.",
+    "label_verify_citations": "Check quotes against sources",
+    "does_verify_citations": "Compares quoted text with the web pages it was taken from.",
+    "label_http_request": "Call a web API",
+    "does_http_request": "Sends a request to a web address or API; depending on the request it can read or change something there.",
+    "label_http_request_write": "Send data to a web API",
+    "does_http_request_write": "Sends data to a web address, which can change something on that service.",
+    "label_schedule_task": "Schedule a task",
+    "does_schedule_task": "Sets up a task to run later or on a repeating schedule.",
+    "label_create_workflow": "Create a workflow",
+    "does_create_workflow": "Creates a new workflow in this workspace.",
+    "label_data_table_query": "Look up a data table",
+    "does_data_table_query": "Reads rows from one of this workspace's data tables.",
+    "label_data_table_write": "Change a data table",
+    "does_data_table_write": "Adds or changes rows in one of this workspace's data tables.",
+    "label_coding_task": "Run a coding task",
+    "does_coding_task": "Starts a coding task that can read and change files in a code workspace.",
+    "label_delegate_to_specialist": "Ask a specialist agent",
+    "does_delegate_to_specialist": "Hands part of the task to another agent and reads its answer.",
+    "label_delegate_parallel": "Ask several agents at once",
+    "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
+    "label_web_task": "Use a browser on a website",
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
   }
 }

@@ -1,7 +1,9 @@
 "use client";
 
-import { RotateCcw, Volume2, VolumeX } from "lucide-react";
+import type { MutableRefObject } from "react";
+import { RotateCcw, SlidersHorizontal, Volume2, VolumeX } from "lucide-react";
 import { useTranslations } from "../../../lib/i18n";
+import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 import BrandText from "../../BrandText";
@@ -19,6 +21,10 @@ export function PlaygroundHeader({
   stopSpeaking,
   onOpenLab,
   onNewSession,
+  runSettingsOpen = false,
+  onToggleRunSettings,
+  runSettingsButtonRef,
+  runToolsLimited = false,
 }: {
   agent: PlaygroundAgent | null;
   sessionId: string | null;
@@ -28,6 +34,13 @@ export function PlaygroundHeader({
   stopSpeaking: () => void;
   onOpenLab: () => void;
   onNewSession: () => void;
+  /** The "Run settings" drawer is open (drives aria-expanded). */
+  runSettingsOpen?: boolean;
+  /** Absent: the button is not shown (a host that has no drawer). */
+  onToggleRunSettings?: () => void;
+  runSettingsButtonRef?: MutableRefObject<HTMLButtonElement | null>;
+  /** The tool switches of the Run settings drawer narrow this session's runs: say so where it cannot be forgotten. */
+  runToolsLimited?: boolean;
 }) {
   const t = useTranslations("agentPlayground");
   return (
@@ -53,7 +66,7 @@ export function PlaygroundHeader({
                   : "var(--state-idle)",
             } as any
           }
-          title={sending ? "Running a turn" : agent ? "Ready" : "No agent selected"}
+          title={sending ? t("headerRunning") : agent ? t("headerReady") : t("noAgentSelected")}
           aria-hidden="true"
         />
         <span
@@ -68,6 +81,27 @@ export function PlaygroundHeader({
       </div>
       <div data-testid="playground-actions" className="flex min-w-0 flex-wrap items-center gap-2">
         <RunCostCard agentId={agent?.id} sessionId={sessionId} turnInFlight={sending} showPlanNote />
+        {onToggleRunSettings && (
+          <Button
+            ref={runSettingsButtonRef}
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!agent}
+            onClick={onToggleRunSettings}
+            aria-expanded={runSettingsOpen}
+            aria-haspopup="dialog"
+            data-testid="run-settings-button"
+          >
+            <SlidersHorizontal size={12} className="size-3" aria-hidden="true" />
+            {t("rsOpen")}
+          </Button>
+        )}
+        {runToolsLimited && (
+          <Badge variant="accent" data-testid="run-tools-limited">
+            {t("rsToolsLimitedChip")}
+          </Badge>
+        )}
         <AgentLabLauncher disabled={!agent} onOpen={onOpenLab} />
         {/* Mute-the-whole-playground control. Default is MUTED (ask
           2026-09-30); unmuting opts back into auto-speak for every
@@ -97,18 +131,15 @@ export function PlaygroundHeader({
           every chat) - same newSession handler as the old Reset control:
           a null sessionId makes the next streamChat start a fresh server
           session, and resetEdgeSession drops the on-device model's local
-          context. Inline English on purpose - newer surfaces skip the
-          fragile en.json (see CLAUDE.md note). */}
+          context. */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button type="button" variant="ghost" size="sm" onClick={onNewSession} disabled={!agent}>
               <RotateCcw size={12} className="size-3" />
-              Clear context
+              {t("clearContext")}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
-            Start a fresh conversation — clears on-device and server-side session memory for this chat
-          </TooltipContent>
+          <TooltipContent>{t("clearContextTitle")}</TooltipContent>
         </Tooltip>
       </div>
     </div>

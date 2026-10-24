@@ -14,6 +14,7 @@
 import { useState, type ReactNode } from "react";
 import {
   AlertDialog,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -74,9 +75,13 @@ function ConfirmDialog({
           <Textarea aria-label={reasonLabel} placeholder={reasonLabel} value={reason} onChange={(e) => setReason(e.target.value)} />
         ) : null}
         <AlertDialogFooter>
-          <Button variant="outline" disabled={busy} onClick={() => { setReason(""); onOpenChange(false); }}>
-            {cancelLabel}
-          </Button>
+          {/* AlertDialogCancel (asChild) is what tells Radix where to put focus when the dialog opens; a bare
+              Button leaves focus on the control underneath the overlay, out of keyboard reach. */}
+          <AlertDialogCancel asChild>
+            <Button variant="outline" disabled={busy} onClick={() => { setReason(""); onOpenChange(false); }}>
+              {cancelLabel}
+            </Button>
+          </AlertDialogCancel>
           <Button variant={destructive ? "destructive" : "default"} disabled={blocked} onClick={() => void submit()}>
             {confirmLabel}
           </Button>

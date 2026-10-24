@@ -1,5 +1,6 @@
 package com.agenticai.core.chat;
 
+import com.agenticai.core.prompts.PromptResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.function.BiConsumer;
 import org.springframework.ai.chat.model.ToolContext;
@@ -18,14 +19,27 @@ final class ArgumentValidatingToolCallback implements ToolCallback {
     private final ToolCallback delegate;
     private final ObjectMapper objectMapper;
     private final BiConsumer<String, ToolArgumentValidator.Result> onRejected;
+    private final PromptResolver prompts;
+    private final ChatPrompts.Run run;
 
     ArgumentValidatingToolCallback(
         ToolCallback delegate, ObjectMapper objectMapper,
         BiConsumer<String, ToolArgumentValidator.Result> onRejected
     ) {
+        this(delegate, objectMapper, onRejected, PromptResolver.defaultsOnly(), ChatPrompts.Run.NONE);
+    }
+
+    /** {@code prompts} and {@code run}: where the wording of a rejection comes from, for whom (agent, tenant). */
+    ArgumentValidatingToolCallback(
+        ToolCallback delegate, ObjectMapper objectMapper,
+        BiConsumer<String, ToolArgumentValidator.Result> onRejected,
+        PromptResolver prompts, ChatPrompts.Run run
+    ) {
         this.delegate = delegate;
         this.objectMapper = objectMapper;
         this.onRejected = onRejected;
+        this.prompts = prompts;
+        this.run = run;
     }
 
     @Override
@@ -53,11 +67,12 @@ final class ArgumentValidatingToolCallback implements ToolCallback {
     private String reject(String toolInput) {
         ToolDefinition definition = delegate.getToolDefinition();
         ToolArgumentValidator.Result result =
-            ToolArgumentValidator.validate(toolInput, definition.inputSchema(), objectMapper);
+            ToolArgumentValidator.validate(toolInput, definition.inputSchema(), objectMapper, prompts, run);
         if (result.valid()) {
             return null;
         }
         onRejected.accept(definition.name(), result);
-        return ToolArgumentValidator.feedback(definition.name(), result, definition.inputSchema(), objectMapper);
+        return ToolArgumentValidator.feedback(
+            definition.name(), result, definition.inputSchema(), objectMapper, prompts, run);
     }
 }

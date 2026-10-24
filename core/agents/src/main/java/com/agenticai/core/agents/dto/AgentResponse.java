@@ -5,6 +5,7 @@ import com.agenticai.core.agents.core.AgentAutonomyTier;
 import com.agenticai.core.agents.core.EdgeRoutingPolicy;
 import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.agents.core.TuningMode;
+import com.agenticai.core.agents.runtime.RuntimeLimits;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.providers.modality.TtsModelProvider;
 import com.agenticai.core.providers.modality.VideoModelProvider;
@@ -201,7 +202,13 @@ public record AgentResponse(
     // Caller's effective share level on this agent: "EDITOR" (owner, admin or EDITOR grant),
     // "RUNNER" or "VIEWER". Null when not resolved (internal construction paths, grant-based MCP
     // reads). Display hint only - every endpoint still enforces its own level.
-    String accessLevel
+    String accessLevel,
+    // The agent's own runtime-limit overrides (migration V671): tool-step ceiling, timeouts, tool-output
+    // cap, retrieval top-k/min-score, continuation passes. Fields the agent does not override are
+    // omitted; the whole object is omitted when it overrides nothing. The values in force are at
+    // GET /api/agents/{id}/runtime-limits. Set via PUT on that path.
+    @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+    RuntimeLimits runtimeLimits
 ) {
     /** Internal/non-request callers (no tenant plan to resolve) - always editable. */
     public static AgentResponse from(Agent agent) {
@@ -274,7 +281,8 @@ public record AgentResponse(
             agent.getSeed(),
             agent.getCreatedBy(),
             agent.getUpdatedBy(),
-            accessLevel
+            accessLevel,
+            agent.getRuntimeLimits().isEmpty() ? null : agent.getRuntimeLimits()
         );
     }
 }

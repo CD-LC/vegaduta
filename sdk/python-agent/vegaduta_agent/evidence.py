@@ -317,9 +317,7 @@ class EvidenceBundle:
                 "breakAtSeq": self.verification.break_at_seq,
                 "detail": self.verification.detail,
             },
-            "asiCoverage": [
-                {"id": i, "title": t, "events": n} for i, t, n in self.asi_coverage
-            ],
+            "asiCoverage": [{"id": i, "title": t, "events": n} for i, t, n in self.asi_coverage],
             "events": list(self.events_json),
         }
 
@@ -361,9 +359,7 @@ def evidence_bundle(
     for event in events:
         for risk in event.risks:
             counts[risk] = counts.get(risk, 0) + 1
-    coverage = tuple(
-        (risk.id, risk.title, counts.get(risk, 0)) for risk in AsiRisk if risk in counts
-    )
+    coverage = tuple((risk.id, risk.title, counts.get(risk, 0)) for risk in AsiRisk if risk in counts)
     return EvidenceBundle(
         run_id=run_id,
         generated_at=datetime.now(timezone.utc),

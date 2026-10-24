@@ -10,6 +10,7 @@ import { Badge } from "../ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Section, StatCard, EmptyState } from "../ax/page-kit";
 import { UpgradeLock } from "../ui/upgrade-lock";
+import JudgeSamplingNote from "./JudgeSamplingNote";
 
 // EvaluationType.name() -> display name, mirroring EvaluationType.getDisplayName()
 // (core/quality) since the summary/config endpoints echo the enum name, not the
@@ -273,6 +274,8 @@ export default function AgentQualityPanel({
           )}
         </div>
       </Section>
+
+      <JudgeSamplingNote agentId={agent.id} />
     </div>
   );
 }

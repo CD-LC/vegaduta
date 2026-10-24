@@ -92,7 +92,7 @@ public class DeepSeekAgentChatClientFactory implements AgentChatClientFactory {
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.DEEPSEEK)
             .defaultAdvisors(modelSupport.advisors(
                 new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.DEEPSEEK, model, meterRegistry, pricingCatalog)))
             .build();

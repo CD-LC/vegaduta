@@ -51,6 +51,9 @@ final class LlmCallObserver {
             Instant startedAt,
             Span span,
             boolean streamCancelled) {
+        if (Boolean.TRUE.equals(request.context().get(LlmMetricsAdvisor.SKIP_OBSERVATION_PARAM))) {
+            return;
+        }
         LlmCallObservation observation;
         try {
             observation =
@@ -65,7 +68,10 @@ final class LlmCallObserver {
                             span,
                             streamCancelled);
         } catch (RuntimeException e) {
-            log.warn("LLM call observation could not be built for model {} - {}", model, e.toString());
+            log.warn(
+                    "LLM call observation could not be built for model {} - {}",
+                    model,
+                    e.toString());
             return;
         }
         for (LlmCallSink sink : sinks) {

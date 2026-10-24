@@ -5,7 +5,7 @@ import { chatStreamReducer, initialChatStreamState, isBusyPhase, type ChatStream
 
 export interface ChatStream {
   phase: ChatStreamPhase;
-  /** A turn is in flight (streaming or waiting on a tool approval). */
+  /** A turn is in flight. */
   sending: boolean;
   error: string | null;
   /** The failure kept partial reply text, so continuing or retrying makes sense. */
@@ -13,8 +13,6 @@ export interface ChatStream {
   setSending: (busy: boolean) => void;
   /** null clears the error; `resumable` marks a failure that kept partial text. */
   setError: (message: string | null, opts?: { resumable?: boolean }) => void;
-  awaitApproval: () => void;
-  approvalResolved: () => void;
 }
 
 /** The chat stream state machine as a hook; `sending`/`error` keep the shapes the playground always had. */
@@ -26,8 +24,6 @@ export function useChatStream(): ChatStream {
       dispatch(message ? { type: "fail", message, resumable: opts?.resumable } : { type: "clear-error" }),
     []
   );
-  const awaitApproval = useCallback(() => dispatch({ type: "await-approval" }), []);
-  const approvalResolved = useCallback(() => dispatch({ type: "approval-resolved" }), []);
   return {
     phase: state.phase,
     sending: isBusyPhase(state.phase),
@@ -35,7 +31,5 @@ export function useChatStream(): ChatStream {
     resumable: state.resumable,
     setSending,
     setError,
-    awaitApproval,
-    approvalResolved,
   };
 }

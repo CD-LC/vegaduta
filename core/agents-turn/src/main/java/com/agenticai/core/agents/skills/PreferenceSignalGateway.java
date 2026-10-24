@@ -35,6 +35,11 @@ public final class PreferenceSignalGateway {
         observer = installed;
     }
 
+    /** True once an observer is installed, whether or not it reports itself enabled (the startup wiring check). */
+    public static boolean installed() {
+        return observer != null;
+    }
+
     public static void observe(
             UUID agentId, String sessionId, String userMessage, Optional<TenantContext> tenant) {
         Observer o = observer;

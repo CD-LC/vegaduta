@@ -13,6 +13,9 @@
 // - Twilio Conversation Relay messages: contracts/inbound/twilio-conversation-relay/schemas
 // The workflow-run stream is the one SSE stream with named events; its names are listed below and
 // --check verifies each still exists in core/workflow (WorkflowRunStreamHub, NodeStreamSink).
+// The chat streams carry the turn-lifecycle step events (finish, retry, failover, continuation,
+// approval_required) in-band when the request sets stepEvents; they are listed below and --check
+// verifies each type and field still exists in core's AgentStepEventPayloads.
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -36,6 +39,87 @@ const RUN_EVENTS = [
   ["node.agent_event", "Another agent step event."],
   ["error", "The stream itself failed; the client should reconnect with Last-Event-ID."],
 ];
+
+const STEP_EVENT_PATHS = ["/api/agents/{agentId}/chat", "/api/chat/turns/{turnId}/stream"];
+const STEP_EVENT_MARKER = "@@AGENT_STEP_EVENT_4d81ba@@";
+const STEP_EVENTS_SOURCE = "core/agents/src/main/java/com/agenticai/core/agents/tools/AgentStepEventPayloads.java";
+// [type, summary, { field: schema }, required fields]. The values are machine codes, counts, names and ids,
+// never wording: a client keys its chips and notices on them (see TurnLifecycleStepEvents in core/agents).
+const STEP_EVENTS = [
+  [
+    "finish",
+    "The reply ended. Sent once per reply, before run_finished. A client offers Continue on length or interrupted and shows its refusal notice on safety, instead of matching the notice text appended to the reply.",
+    {
+      finishReason: {
+        type: "string",
+        enum: ["stop", "length", "safety", "malformed_tool_call", "empty", "interrupted"],
+        description: "How the reply ended: an answer, cut off at the output limit, stopped by the provider's safety system, an unusable tool call, empty, or broken off after some text.",
+      },
+      detail: { type: "string", description: "The provider's own word for a refusal (for example content_filter). Optional." },
+    },
+    ["finishReason"],
+  ],
+  [
+    "retry",
+    "The same model is being called again after a failure before its first token, or the reply is asked for again after an unusable tool call.",
+    {
+      attempt: { type: "integer", description: "The try about to run; 1 is the first." },
+      maxAttempts: { type: "integer", description: "How many tries the platform will make in all." },
+      reason: {
+        type: "string",
+        description: "A short code: rate_limited, timeout, provider_unavailable, auth_failed, billing, model_not_found, provider_error or malformed_tool_call. A client may show an unknown code with its underscores read as spaces.",
+      },
+    },
+    ["attempt", "maxAttempts", "reason"],
+  ],
+  [
+    "failover",
+    "The turn moved to another model after the one before it failed (the agent's fallback provider, or the next rung of the platform-hosted pool).",
+    {
+      toModel: { type: "string", description: "The model the turn moved to. Absent when it is not known by name." },
+      reason: { type: "string", description: "Why the turn moved; the same codes as retry." },
+    },
+    ["reason"],
+  ],
+  [
+    "continuation",
+    "Another model pass is carrying the reply on.",
+    {
+      pass: { type: "integer", description: "The pass that is starting; 1 is the first continuation." },
+      maxPasses: { type: "integer", description: "How many passes of this kind the platform will make." },
+      reason: {
+        type: "string",
+        enum: ["cut_off", "unfinished_step", "approval"],
+        description: "Why: the reply hit the output limit, the reply stopped at a step it announced but did not take, or the platform is carrying the task on after a person decided a held tool call.",
+      },
+    },
+    ["pass", "maxPasses"],
+  ],
+  [
+    "approval_required",
+    "A tool call was recorded as a pending approval and the turn is waiting for a person. Sent after the call's tool_result.",
+    {
+      tool: { type: "string", description: "The tool whose call is held." },
+      approvalId: { type: "string", format: "uuid", description: "The pending approval request, as listed by the approvals API." },
+    },
+    ["tool", "approvalId"],
+  ],
+];
+
+function stepEventMessage(type, summary, fields, required) {
+  return {
+    name: type,
+    title: type,
+    summary,
+    description: `Sent in-band on a stream whose request set stepEvents=true: the SSE data is ${STEP_EVENT_MARKER} immediately followed by this JSON on one line. A stream that did not ask never carries it.`,
+    contentType: "application/json",
+    payload: {
+      type: "object",
+      properties: { type: { type: "string", const: type }, ...fields },
+      required: ["type", ...required],
+    },
+  };
+}
 
 function slug(s) {
   return s.replace(/[{}]/g, "").replace(/[^A-Za-z0-9]+/g, "_").replace(/^_|_$/g, "");
@@ -105,6 +189,13 @@ function build() {
           payload,
         };
         channelMessages[name] = { $ref: `#/components/messages/${name}` };
+        if (STEP_EVENT_PATHS.includes(path)) {
+          for (const [type, summary, fields, required] of STEP_EVENTS) {
+            const stepName = `agentStep_${slug(type)}`;
+            messages[stepName] = stepEventMessage(type, summary, fields, required);
+            channelMessages[stepName] = { $ref: `#/components/messages/${stepName}` };
+          }
+        }
       }
       channels[ch] = {
         address: path,
@@ -233,6 +324,20 @@ if (process.argv.includes("--check")) {
   const problems = [];
   const src = workflowSources();
   for (const [event] of RUN_EVENTS) if (!src.includes(`"${event}"`)) problems.push(`workflow run event "${event}" not found in core/workflow`);
+  const payloads = existsSync(join(root, STEP_EVENTS_SOURCE)) ? readFileSync(join(root, STEP_EVENTS_SOURCE), "utf8") : null;
+  if (payloads) {
+    for (const [type, , fields] of STEP_EVENTS) {
+      const at = payloads.indexOf(`event.put("type", "${type}")`);
+      if (at < 0) {
+        problems.push(`step event "${type}" not built by AgentStepEventPayloads`);
+        continue;
+      }
+      const body = payloads.slice(at, payloads.indexOf("return event;", at));
+      const sent = [...body.matchAll(/event\.put\("([A-Za-z]+)"/g)].map((m) => m[1]).filter((f) => f !== "type");
+      const documented = Object.keys(fields);
+      if (sent.join() !== documented.join()) problems.push(`step event "${type}" sends fields [${sent}] but asyncapi.mjs documents [${documented}]`);
+    }
+  }
   if (!existsSync(OUT) || readFileSync(OUT, "utf8") !== text) problems.push("docs/api/asyncapi.json is stale. Run: node scripts/docs/asyncapi.mjs");
   if (problems.length) {
     console.error(problems.join("\n"));

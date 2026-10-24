@@ -13,7 +13,9 @@ name: Trivy (fs scan)
 #                                  secrets.DEFECTDOJO_API_KEY are set)
 #
 # Report-only: nothing here fails the run. To gate on severity later, set
-# exit-code: "1" and severity: "CRITICAL" on the scan steps. Triage goes in a
+# exit-code: "1" and severity: "CRITICAL" on the scan steps. Both scan steps
+# read trivy.yaml at the repository root, which skips the example and
+# load-test manifests (and says why); triage of single findings goes in a
 # .trivyignore at the repository root.
 
 on:
@@ -49,6 +51,7 @@ jobs:
         with:
           scan-type: fs
           scanners: vuln,misconfig
+          trivy-config: trivy.yaml
           format: sarif
           output: trivy.sarif
 
@@ -59,6 +62,7 @@ jobs:
         with:
           scan-type: fs
           scanners: vuln,misconfig
+          trivy-config: trivy.yaml
           format: json
           output: trivy.json
 
@@ -84,12 +88,12 @@ jobs:
       # same-repo PRs; a fork's read-only token would fail the upload.
       - name: Upload SARIF to code scanning
         if: steps.codescan.outputs.enabled == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
-        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
         with:
           sarif_file: trivy.sarif
           category: trivy-fs
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: trivy-report

@@ -1,7 +1,7 @@
 ---
 title: "Close the DNS-rebinding window on outbound MCP connections"
 labels: [security, owasp, high]
-status: draft
+status: partly-done
 owasp: MCP07, ASI02
 ---
 
@@ -25,4 +25,6 @@ Fake resolver that answers public then private: connect must fail. Redirect to a
 
 ## Status
 
-None yet.
+The pinning half is done. The SDK transports now take a `GuardedHttpClientBuilder` (`core/security/.../net`) through their `clientBuilder(..)` hook, so the HTTP client they use is `GuardedJdkHttpClient`, backed by `SafeHttpClients`: every connect, and every reconnect of the long-lived SSE stream, resolves through `SsrfGuard` and goes to the address it validated (a smaller change than an Apache transport of our own, and the SDK's code is untouched). `McpGuardedSocketTest` proves a loopback server is refused with the default guard and that both transports still complete the handshake over the guarded socket.
+
+Still open: the pre-buffer response-size cap. Redirect hops need no re-validation because redirects are off (`Redirect.NEVER`) on both transports.

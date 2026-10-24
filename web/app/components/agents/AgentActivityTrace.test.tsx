@@ -111,6 +111,21 @@ describe("buildTraceRows", () => {
       "run_finished",
     ]);
   });
+
+  it("keeps the finish event out of the trace (it feeds the outcome notice) but lists the recoveries", () => {
+    const steps: ActivityStep[] = [
+      { type: "retry", id: 1, origin: "server", details: { attempt: 2, maxAttempts: 3, reason: "timeout" } },
+      { type: "failover", id: 2, origin: "server", details: { toModel: "gpt-4o-mini", reason: "timeout" } },
+      { type: "approval_required", id: 3, tool: "send_email", origin: "server" },
+      { type: "finish", id: 4, origin: "server", details: { finishReason: "stop" } },
+    ];
+    expect(buildTraceRows(steps).map((r) => (r.kind === "event" ? r.step.type : "tool"))).toEqual([
+      "retry",
+      "failover",
+      "approval_required",
+    ]);
+    expect(buildTraceRows([steps[3]])).toEqual([]);
+  });
 });
 
 describe("<AgentActivityTrace />", () => {

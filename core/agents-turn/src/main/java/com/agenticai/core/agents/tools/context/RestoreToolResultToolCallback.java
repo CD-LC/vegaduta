@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.tools.context;
 
+import com.agenticai.core.agents.context.ContextCompactionProperties;
 import com.agenticai.core.agents.context.ToolResultRestoreIds;
 import com.agenticai.core.agents.tools.ToolCallLog;
 import com.agenticai.core.agents.tools.ToolCallLogService;
@@ -42,19 +43,26 @@ public class RestoreToolResultToolCallback implements ToolCallback {
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
     /**
-     * Same ceiling built-in tool results are capped at, and safely under the output validator's
-     * 20,000.
+     * The default of {@code app.context.compaction.restore-result-max-chars}: the same ceiling built-in tool
+     * results are capped at, and safely under the output validator's 20,000.
      */
-    static final int MAX_RESULT_CHARS = 16 * 1024;
+    static final int MAX_RESULT_CHARS = ContextCompactionProperties.DEFAULT_RESTORE_RESULT_MAX_CHARS;
 
     private final ToolCallLogService logs;
     private final UUID agentId;
     private final String sessionId;
+    private final int maxResultChars;
 
     public RestoreToolResultToolCallback(ToolCallLogService logs, UUID agentId, String sessionId) {
+        this(logs, agentId, sessionId, MAX_RESULT_CHARS);
+    }
+
+    public RestoreToolResultToolCallback(
+            ToolCallLogService logs, UUID agentId, String sessionId, int maxResultChars) {
         this.logs = logs;
         this.agentId = agentId;
         this.sessionId = sessionId;
+        this.maxResultChars = Math.max(1, maxResultChars);
     }
 
     @Override
@@ -148,14 +156,14 @@ public class RestoreToolResultToolCallback implements ToolCallback {
                 && sessionId.equals(row.getSessionId());
     }
 
-    private static String render(ToolCallLog row) {
+    private String render(ToolCallLog row) {
         String text = row.getToolOutput();
         if (text == null) {
             text = "The tool call failed: " + row.getErrorMessage();
         }
-        if (text.length() > MAX_RESULT_CHARS) {
-            int dropped = text.length() - MAX_RESULT_CHARS;
-            return text.substring(0, MAX_RESULT_CHARS) + "\n...[truncated " + dropped + " chars]";
+        if (text.length() > maxResultChars) {
+            int dropped = text.length() - maxResultChars;
+            return text.substring(0, maxResultChars) + "\n...[truncated " + dropped + " chars]";
         }
         return text;
     }

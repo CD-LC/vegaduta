@@ -1,6 +1,7 @@
 package com.agenticai.core.chat;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.prompts.PromptResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Locale;
 import java.util.Map;
@@ -48,41 +49,22 @@ public final class UnavailableToolCallback implements ToolCallback {
      * Tools that genuinely exist in this platform but are gated behind a
      * tenant-level configuration step, so "it does not exist" would be a lie
      * and "add a key" is the actual next action. Keyed by the exact tool name
-     * the corresponding {@code ToolCallback} publishes.
+     * the corresponding {@code ToolCallback} publishes; the value is the key in
+     * the prompt registry of the explanation handed back to the model
+     * ({@code toolresult.unavailable.*}).
+     *
+     * <p>The two legacy aliases (renamed to "speak" 2026-08-02, unifying the previously separate ElevenLabs and
+     * Sarvam speak tools) are kept so a model with stale context (or a resumed session from before the rename) that
+     * still calls the old name gets a useful answer instead of the generic "you invented this name" hint, which would
+     * be actively wrong here.
      */
-    private static final Map<String, String> GATED_TOOL_HINTS = Map.of(
-        "generate_image",
-        "Image generation is not switched on for this workspace, so this tool cannot run. It needs an "
-            + "OpenAI API key to be added and activated on the Providers page of the console "
-            + "(image generation reuses the same OpenAI key as chat). Tell the user exactly that, in "
-            + "their own language, and answer the rest of their message normally. Do not call this tool "
-            + "again in this conversation.",
-        "speak",
-        "Voice/text-to-speech is not switched on for this workspace, so this tool cannot run. It needs "
-            + "either an ElevenLabs API key on the Providers page plus at least one cloned voice, or a "
-            + "Sarvam credential attached to this agent. Tell the user that and do not call this tool "
-            + "again in this conversation.",
-        // Legacy aliases (renamed to "speak" 2026-08-02, unifying the previously separate ElevenLabs
-        // and Sarvam speak tools) - kept so a model with stale context (or a resumed session from
-        // before the rename) that still calls the old name gets a useful answer instead of the
-        // generic "you invented this name" hint, which would be actively wrong here.
-        "speak_with_cloned_voice",
-        "This tool was renamed to \"speak\". Call \"speak\" instead - if it is also not offered, "
-            + "voice/text-to-speech is not switched on for this workspace. Do not call this name again.",
-        "sarvam_speak",
-        "This tool was renamed to \"speak\". Call \"speak\" instead - if it is also not offered, "
-            + "voice/text-to-speech is not switched on for this workspace. Do not call this name again.",
-        "run_code",
-        "Code execution is not switched on for this workspace, so this tool cannot run. It needs an "
-            + "E2B API key on the Providers page. Tell the user that and do not call this tool again "
-            + "in this conversation."
+    private static final Map<String, String> GATED_TOOL_KEYS = Map.of(
+        "generate_image", "toolresult.unavailable.generate_image",
+        "speak", "toolresult.unavailable.speak",
+        "speak_with_cloned_voice", "toolresult.unavailable.renamed_speak",
+        "sarvam_speak", "toolresult.unavailable.renamed_speak",
+        "run_code", "toolresult.unavailable.run_code"
     );
-
-    private static final String UNKNOWN_TOOL_HINT_FORMAT =
-        "There is no tool called \"%s\". It was not among the tools provided with this request, so it "
-            + "cannot be called - you invented the name. Do not call it again. Answer the user directly "
-            + "using only the tools you were actually given, and if what they asked for genuinely needs "
-            + "a capability you do not have, say so plainly and briefly.";
 
     private static final String EMPTY_OBJECT_SCHEMA = """
         {"type": "object", "properties": {}}
@@ -103,11 +85,21 @@ public final class UnavailableToolCallback implements ToolCallback {
      *     model can tell which of several parallel calls this answers.
      */
     public static UnavailableToolCallback forToolName(String toolName) {
+        return forToolName(toolName, PromptResolver.defaultsOnly(), ChatPrompts.Run.NONE);
+    }
+
+    /**
+     * As {@link #forToolName(String)}, with the explanation read from the prompt registry for {@code run}'s agent and
+     * tenant, so an override of {@code toolresult.unavailable.*} applies.
+     */
+    static UnavailableToolCallback forToolName(String toolName, PromptResolver prompts, ChatPrompts.Run run) {
         String normalized = toolName == null ? "" : toolName.trim().toLowerCase(Locale.ROOT);
-        String hint = GATED_TOOL_HINTS.get(normalized);
+        String gatedKey = GATED_TOOL_KEYS.get(normalized);
         return new UnavailableToolCallback(
             toolName == null ? "" : toolName,
-            hint != null ? hint : String.format(UNKNOWN_TOOL_HINT_FORMAT, toolName)
+            gatedKey != null
+                ? ChatPrompts.text(prompts, gatedKey, run)
+                : ChatPrompts.text(prompts, ChatPrompts.UNKNOWN_TOOL, run, "tool", toolName)
         );
     }
 

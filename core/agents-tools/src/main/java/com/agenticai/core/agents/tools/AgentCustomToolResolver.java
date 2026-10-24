@@ -334,7 +334,8 @@ final class AgentCustomToolResolver {
                                                     swarmVerifierConfig,
                                                     verifierModel,
                                                     verifierMeters,
-                                                    userMessage),
+                                                    userMessage,
+                                                    agentId),
                                             stepCounter),
                                     runBudget,
                                     false),
@@ -545,12 +546,12 @@ final class AgentCustomToolResolver {
         final String loadedKey = gateKey(agentId, sessionId);
         skillTools.add(
                 new LoadSkillToolCallback(skillService, agentId, scriptsRunnable) {
-                    @Override
-                    public String call(String toolInput) {
-                        skillGate.markLoaded(loadedKey);
-                        return super.call(toolInput);
-                    }
-                });
+                            @Override
+                            public String call(String toolInput) {
+                                skillGate.markLoaded(loadedKey);
+                                return super.call(toolInput);
+                            }
+                        }.withPrompts(toolGuard.promptResolver()));
         skillTools.add(new ReadSkillFileToolCallback(skillService, agentId));
         skillTools.add(new ProposeSkillToolCallback(skillService, agentId));
         // Self-improvement loop (V243): propose_skill can only ADD; this is

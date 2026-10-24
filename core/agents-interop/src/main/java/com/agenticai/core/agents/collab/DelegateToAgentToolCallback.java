@@ -3,6 +3,7 @@ package com.agenticai.core.agents.collab;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.prompts.tool.ToolPromptTexts;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
@@ -34,6 +35,15 @@ public class DelegateToAgentToolCallback implements ToolCallback {
     private final String collaboratorName;
     private final String collaboratorDescription;
 
+    /** Registry id of the description template ({@code tool.template.delegate_to_agent}) shared by every collaborator tool. */
+    static final String TEMPLATE_ID = "delegate_to_agent";
+
+    /**
+     * The prompt registry as it stands for the agent whose tools are being resolved (captured at
+     * construction, on the request thread). Outside a tool resolution it serves the shipped text.
+     */
+    private final ToolPromptTexts promptTexts = ToolPromptTexts.current();
+
     public DelegateToAgentToolCallback(
         AgentChatService agentChatService,
         UUID collaboratorAgentId,
@@ -48,19 +58,8 @@ public class DelegateToAgentToolCallback implements ToolCallback {
         this.collaboratorDescription = collaboratorDescription;
     }
 
-    @Override
-    public ToolDefinition getToolDefinition() {
-        return ToolDefinition.builder()
-            .name(toolName)
-            .description(
-                "Delegates a specific question to \"" + collaboratorName + "\", a specialist agent"
-                    + (collaboratorDescription == null || collaboratorDescription.isBlank() ? "." : ": " + collaboratorDescription + ".")
-                    + " Use this when part of the user's request falls squarely in this specialist's area rather "
-                    + "than your own - ask it a focused, self-contained question and use its answer. It will NOT "
-                    + "see this conversation's history, only the exact question you send plus, if you provide one, "
-                    + "a short context summary."
-            )
-            .inputSchema("""
+    private static final String INPUT_SCHEMA =
+            """
                 {
                     "type": "object",
                     "properties": {
@@ -75,7 +74,22 @@ public class DelegateToAgentToolCallback implements ToolCallback {
                     },
                     "required": ["question"]
                 }
-                """)
+                """;
+
+    @Override
+    public ToolDefinition getToolDefinition() {
+        return ToolDefinition.builder()
+            .name(toolName)
+            .description(
+                promptTexts.description(
+                    TEMPLATE_ID,
+                    Map.of(
+                        "name", String.valueOf(collaboratorName),
+                        "specialty",
+                            collaboratorDescription == null || collaboratorDescription.isBlank()
+                                ? "."
+                                : ": " + collaboratorDescription + ".")))
+            .inputSchema(promptTexts.schema(TEMPLATE_ID, INPUT_SCHEMA))
             .build();
     }
 

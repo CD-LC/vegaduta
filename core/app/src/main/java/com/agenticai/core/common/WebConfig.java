@@ -55,6 +55,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .exposedHeaders(
                         "X-Session-Id",
                         "X-Turn-Id",
+                        "X-Journal-Turn-Id",
                         "Content-Disposition",
                         "X-Total-Count",
                         "X-Has-More",

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { applyEditBlocks, dedupeSkeletonHelpers, extractHtmlDocument, looksLikeValidApp, parseEditBlocks } from "./patch";
+import { parse } from "@babel/parser";
+import { applyEditBlocks, dedupeSkeletonHelpers, extractHtmlDocument, firstBrokenScript, looksLikeValidApp, parseEditBlocks, setScriptChecker } from "./patch";
 import { readAppBlock, stripConnections, writeConnections } from "./connect";
 import { aliasOf, extractResponsePath, renderConnectionTemplate } from "./payload";
 import { contrastRatio, readTheme, writeTheme } from "./theme";
@@ -8,6 +9,9 @@ import { HARNESS_LINES, findInSource, withHarness } from "./runtime";
 import { addVersion, newProject, MAX_VERSIONS } from "./store";
 import { describeTarget, fixRequest, fromModelView, isWholePageRequest, locateRuntimeError, toModelView } from "./scope";
 import { editPrompt } from "./engine";
+import { parseQuestions, shouldClarify } from "./buildPlan";
+import { splitThink } from "./thinking";
+import { studioSuggestions } from "./suggestions";
 
 const APP = `<!doctype html>
 <html><head><style>
@@ -22,6 +26,12 @@ const APP = `<!doctype html>
 </body></html>`;
 
 describe("patch", () => {
+  // The browser registers Babel (app/lib/babel.ts); tests register the real
+  // @babel/parser so the script-syntax gate is exercised end to end.
+  setScriptChecker((body, opts) => {
+    parse(body, { sourceType: opts.module ? "module" : "script" });
+  });
+
   it("parses blocks surrounded by prose and fences", () => {
     const reply = "Sure! Here:\n```\n<<<<<<< SEARCH\n  <h1>Hello</h1>\n=======\n  <h1>Hi there</h1>\n>>>>>>> REPLACE\n```\nDone.";
     const blocks = parseEditBlocks(reply);
@@ -80,6 +90,92 @@ describe("patch", () => {
   it("validates app structure", () => {
     expect(looksLikeValidApp(APP)).toBe(true);
     expect(looksLikeValidApp(APP.replace("</script>", ""))).toBe(false);
+  });
+
+  it("does not split a block on a comment divider inside its body", () => {
+    // A `// ====== Section ======` divider inside the REPLACE body must not
+    // be mistaken for the SEARCH/REPLACE separator - that splice is how a
+    // raw `=======` line ended up inside <script> ("Unexpected token '==='").
+    const reply =
+      "<<<<<<< SEARCH\n  <h1>Hello</h1>\n=======\n  <h1>Hi</h1>\n  // ====== greeting section ======\n  render();\n>>>>>>> REPLACE";
+    const blocks = parseEditBlocks(reply);
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0].replace).toContain("greeting section");
+    expect(blocks[0].replace).toContain("render()");
+  });
+
+  it("rejects a document with a leaked edit-marker line", () => {
+    const leaked = APP.replace("const x = 1;", "const x = 1;\n=======\nconst y = 2;");
+    expect(looksLikeValidApp(leaked)).toBe(false);
+    const leakedSearch = APP.replace("const x = 1;", "const x = 1;\n<<<<<<< SEARCH\nconst y = 2;");
+    expect(looksLikeValidApp(leakedSearch)).toBe(false);
+  });
+
+  it("rejects a document whose inline script does not parse, and names the script", () => {
+    // "Uncaught SyntaxError ... Unexpected token 'const'" - the doc ships dead
+    // unless validation catches it before commit.
+    const broken = APP.replace("const x = 1;", "const x = 1;\nconst x = ;");
+    expect(firstBrokenScript(broken)).toContain("const x = ;");
+    expect(looksLikeValidApp(broken)).toBe(false);
+  });
+
+  it("still accepts a valid app and a type=module script", () => {
+    expect(looksLikeValidApp(APP)).toBe(true);
+    const mod = APP.replace("<script>", '<script type="module">').replace(
+      "const x = 1;",
+      'import { x } from "./y.js";\nexport const z = x;'
+    );
+    expect(looksLikeValidApp(mod)).toBe(true);
+  });
+
+  it("parseQuestions reads only real question lines, READY means build now", () => {
+    expect(parseQuestions("READY")).toEqual([]);
+    expect(parseQuestions("")).toEqual([]);
+    expect(parseQuestions("Looks clear enough, build it.")).toEqual([]);
+    expect(parseQuestions("1. Who uses this?\n2. What goes on the main screen?\n3. Which features matter most?")).toEqual([
+      "Who uses this?",
+      "What goes on the main screen?",
+      "Which features matter most?",
+    ]);
+    // a fourth question is dropped, prose without a ? is dropped
+    const four = "Who uses this app?\nWhat goes on screen?\nWhich features matter?\nWhat else changes?\nsome note";
+    expect(parseQuestions(four)).toHaveLength(3);
+  });
+
+  it("shouldClarify skips a detailed brief", () => {
+    expect(shouldClarify("a todo app")).toBe(true);
+    expect(shouldClarify("x".repeat(241))).toBe(false);
+  });
+
+  it("splitThink separates streamed reasoning from the reply", () => {
+    expect(splitThink("hello")).toEqual({ thinking: "", visible: "hello" });
+    const r = splitThink("pre<think>reasoning here</think>answer");
+    expect(r.thinking).toBe("reasoning here");
+    expect(r.visible).toBe("preanswer");
+    // an unclosed block mid-stream is still reasoning, not visible text
+    expect(splitThink("<think>still thinking").visible).toBe("");
+  });
+
+  it("studioSuggestions follows what the app lacks", () => {
+    const plain = studioSuggestions(APP);
+    expect(plain.length).toBeGreaterThan(0);
+    expect(plain.length).toBeLessThanOrEqual(3);
+    // an app that already persists, searches and dark-modes gets the tail rules
+    const rich = APP.replace("const x = 1;", "save('k',[]); load('k',[]); function searchInput(){} function settings(){} function addItem(){} function undo(){} dark mode");
+    expect(studioSuggestions(rich).map((s) => s.label)).not.toContain("Add a dark mode");
+  });
+
+  it("skips the script check when no parser is registered", () => {
+    setScriptChecker(null);
+    try {
+      const broken = APP.replace("const x = 1;", "const x = ;");
+      expect(firstBrokenScript(broken)).toBeNull();
+      expect(looksLikeValidApp(broken)).toBe(true);
+    } finally {
+      setScriptChecker((body, opts) => {
+        parse(body, { sourceType: opts.module ? "module" : "script" });
+      });
+    }
   });
 });
 

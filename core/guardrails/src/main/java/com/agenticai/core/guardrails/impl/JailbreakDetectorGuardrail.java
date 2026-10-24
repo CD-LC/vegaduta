@@ -3,7 +3,15 @@ package com.agenticai.core.guardrails.impl;
 import com.agenticai.core.guardrails.ContentGuardrail;
 import com.agenticai.core.guardrails.ContentGuardrailResult;
 import com.agenticai.core.guardrails.ContentGuardrailType;
+import com.agenticai.core.guardrails.GuardrailPrompts;
+import com.agenticai.core.guardrails.GuardrailSettings;
+import com.agenticai.core.guardrails.GuardrailTuningProperties;
+import com.agenticai.core.guardrails.PatternSets;
+import com.agenticai.core.prompts.PromptResolver;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -102,13 +110,25 @@ public class JailbreakDetectorGuardrail implements ContentGuardrail {
      * before this class is reached, so for user messages this cap is
      * unreachable and nothing a real user types is ever truncated.
      *
-     * <p>16,000 is deliberately double the chat DTO cap so the two limits
-     * cannot interact: no accepted user message can ever be partially scanned.
-     * With the bounded patterns above, scanning 16,000 characters costs well
-     * under a millisecond, so this exists as a structural ceiling on future
-     * pattern edits rather than as a hot-path optimisation.
+     * <p>The window is {@code app.guardrails.jailbreak.max-scanned-chars}; this constant is its
+     * default (16,000, deliberately double the chat DTO cap so the two limits cannot interact: no
+     * accepted user message can ever be partially scanned). With the bounded patterns above, scanning
+     * 16,000 characters costs well under a millisecond, so the window exists as a structural ceiling on
+     * future pattern edits rather than as a hot-path optimisation. Raise it to scan longer text.
      */
-    static final int MAX_SCANNED_CHARS = 16_000;
+    static final int MAX_SCANNED_CHARS = GuardrailTuningProperties.Jailbreak.DEFAULT_MAX_SCANNED_CHARS;
+
+    private final GuardrailTuningProperties tuning;
+
+    /** Code default window (no {@link GuardrailTuningProperties} bean). */
+    public JailbreakDetectorGuardrail() {
+        this(new GuardrailTuningProperties());
+    }
+
+    @Autowired
+    public JailbreakDetectorGuardrail(GuardrailTuningProperties tuning) {
+        this.tuning = tuning;
+    }
 
     /** {@code [^\n]{0,40}?} - the bounded, lazy replacement for the old unbounded {@code .*}. See {@link #MAX_GAP}. */
     private static final String GAP = "[^\\n]{0," + MAX_GAP + "}?";
@@ -127,45 +147,24 @@ public class JailbreakDetectorGuardrail implements ContentGuardrail {
      */
     private static final Pattern WHITESPACE_RUN = Pattern.compile("[\\s\\u0085\\u2028\\u2029]+");
 
-    private static final Pattern[] JAILBREAK_PATTERNS = {
-        // Role override / instruction ignore
-        Pattern.compile("ignore" + GAP + "previous" + GAP + "instruction", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("disregard" + GAP + "prompt", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("forget" + GAP + "your" + GAP + "instruction", Pattern.CASE_INSENSITIVE),
+    /**
+     * The patterns, from {@code guardrails/patterns/<locale>/jailbreak.txt} (every locale on the classpath, English
+     * first; see {@link PatternSets}). The English file holds exactly the patterns this class compiled before they
+     * moved; each is bounded with {@link #GAP}.
+     */
+    private static final List<Pattern> JAILBREAK_PATTERNS = PatternSets.localized("jailbreak", Map.of("GAP", GAP)).stream()
+        .map(PatternSets.Entry::pattern)
+        .toList();
 
-        // Prompt extraction attempts
-        Pattern.compile(
-            "show" + GAP + "(?:me|us)" + GAP + "(?:your|the)" + GAP + "(?:system" + GAP + ")?prompt",
-            Pattern.CASE_INSENSITIVE),
-        Pattern.compile("(?:system|original)" + GAP + "prompt" + GAP + "(?:was|is)", Pattern.CASE_INSENSITIVE),
-        Pattern.compile(
-            "what" + GAP + "(?:are|is)" + GAP + "your" + GAP + "(?:system" + GAP + ")?instruction",
-            Pattern.CASE_INSENSITIVE),
+    /** Where the refusal text comes from ({@code refusal.guardrail.jailbreak}); the shipped text unless the application wires the registry. */
+    private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
 
-        // Authority spoofing
-        Pattern.compile("i" + GAP + "(?:am|'m)" + GAP + "(?:admin|developer|owner|creator)", Pattern.CASE_INSENSITIVE),
-        Pattern.compile("you" + GAP + "must" + GAP + "listen" + GAP + "to" + GAP + "me", Pattern.CASE_INSENSITIVE),
-
-        // Format override
-        Pattern.compile(
-            "respond" + GAP + "only" + GAP + "(?:in|as|like)" + GAP + "(?:json|xml|html|markdown|code)",
-            Pattern.CASE_INSENSITIVE),
-        Pattern.compile("output" + GAP + "format" + GAP + "override", Pattern.CASE_INSENSITIVE),
-
-        // Direct injection markers
-        Pattern.compile("\\[\\[JAILBREAK\\]\\]", Pattern.CASE_INSENSITIVE),
-        // Bounded for the same reason as the gaps above: "<<<" repeated with no
-        // closing ">>>" made the old unbounded ".*" quadratic on its own.
-        Pattern.compile("<<<[^\\n]{0,200}?>>>", Pattern.CASE_INSENSITIVE),
-
-        // Common attack prefixes. MULTILINE so "^" anchors at every line
-        // start, not just the string start - burying the prefix one newline
-        // deep ("hello\nDAN: ...") is the same newline evasion the
-        // WHITESPACE_RUN normalisation closes for the gap patterns (this
-        // anchored pattern is why evaluate() scans the RAW text too: the
-        // collapsed form has no line starts left to anchor to).
-        Pattern.compile("^(DAN|UCAR|ALPACA|GPT-4|REAL-ME):", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE)
-    };
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        if (resolver != null) {
+            this.prompts = resolver;
+        }
+    }
 
     @Override
     public ContentGuardrailType getType() {
@@ -179,8 +178,10 @@ public class JailbreakDetectorGuardrail implements ContentGuardrail {
         }
 
         // Defensive, independent of any caller's validation - see MAX_SCANNED_CHARS.
-        String scanned = content.length() > MAX_SCANNED_CHARS
-            ? content.substring(0, MAX_SCANNED_CHARS)
+        // The window is read per call: a workspace or agent may widen it (never narrow it) in the settings catalog.
+        int maxScannedChars = GuardrailSettings.jailbreakMaxScannedChars(tuning);
+        String scanned = content.length() > maxScannedChars
+            ? content.substring(0, maxScannedChars)
             : content;
 
         // Scan both forms: the whitespace-collapsed form so a payload split
@@ -194,8 +195,7 @@ public class JailbreakDetectorGuardrail implements ContentGuardrail {
             if (pattern.matcher(normalized).find() || pattern.matcher(scanned).find()) {
                 return ContentGuardrailResult.fail(
                     ContentGuardrailType.JAILBREAK,
-                    "Your request appears to contain a prompt injection or jailbreak attempt. "
-                        + "Please submit a direct, legitimate request.",
+                    GuardrailPrompts.scopedText(prompts, GuardrailPrompts.REFUSAL_JAILBREAK),
                     90
                 );
             }

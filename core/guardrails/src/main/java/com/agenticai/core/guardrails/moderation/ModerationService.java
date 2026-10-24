@@ -2,6 +2,7 @@ package com.agenticai.core.guardrails.moderation;
 
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
+import com.agenticai.core.guardrails.GuardrailPromptScope;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,6 +131,14 @@ public class ModerationService {
      *     null skips the semantic layer entirely (fail-open)
      */
     public ModerationOutcome moderate(String content, ModerationContext context, ChatClient chatClient) {
+        // The semantic layer reads its judge prompt from the prompt registry for the agent the content is for
+        // (see GuardrailPromptScope).
+        try (GuardrailPromptScope scope = GuardrailPromptScope.openIfKnown(context != null ? context.agentId() : null)) {
+            return moderateInScope(content, context, chatClient);
+        }
+    }
+
+    private ModerationOutcome moderateInScope(String content, ModerationContext context, ChatClient chatClient) {
         if (content == null || content.isBlank()) {
             return ModerationOutcome.allow();
         }

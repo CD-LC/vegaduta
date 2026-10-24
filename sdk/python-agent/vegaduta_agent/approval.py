@@ -301,6 +301,7 @@ def allowed_deciders(*decider_ids: str) -> ApprovalDecisionAuthorizer:
 
 # -- signed decision receipts ------------------------------------------------
 
+
 def _receipt_fields(request: ApprovalRequest) -> dict[str, str]:
     return {
         "approvalId": str(request.id),

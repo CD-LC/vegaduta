@@ -114,7 +114,7 @@ public class RememberSharedFactToolCallback implements ToolCallback {
             return;
         }
         try {
-            List<GraphTriple> triples = entityExtractionService.extractTriples(chatClient, fact);
+            List<GraphTriple> triples = entityExtractionService.extractTriples(chatClient, fact, agentId);
             graphMemoryService.rememberShared(subjectKey, triples);
         } catch (Exception e) {
             log.warn("Shared graph memory enrichment failed for remember_shared_fact - vector memory is unaffected", e);

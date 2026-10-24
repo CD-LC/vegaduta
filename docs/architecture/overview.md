@@ -123,8 +123,9 @@ flowchart TB
   `agents.branching`) stores every message in Postgres for
   `app.chat.branching.retention-days` (30) when `APP_CHAT_BRANCHING_ENABLED` is
   on. The code default is off; `lite.yml`, `docker-compose.yml` and the Helm chart
-  (`core.branchingEnabled`) turn it on (since v0.1.8); `personal.yml` does not set
-  it. Without it, session history
+  (`core.branchingEnabled`) turn it on (since v0.1.8); the `personal` Spring profile
+  (`application-personal.yml`, which `deploy/compose/personal.yml` activates) turns
+  it on too. Without it, session history
   lives only in Valkey for the 24 h session window. `GET /api/chat/threads`
   (v0.1.9) lists a user's conversations from this tree.
 
@@ -176,8 +177,23 @@ See [SDKs and dependencies](../sdk/README.md).
 
 The path of an agent turn is: authenticate, load agent and tenant settings,
 guardrails on the input, retrieval, one or more LLM calls interleaved with tool
-calls, guardrails on the output, persist, stream. All of it runs in the api
-process, and that is deliberate:
+calls, a check of the finished answer against the output guardrails, persist,
+stream. All of it runs in the api process, and that is deliberate.
+
+The output check does not act the same way on every path. At the default `FAST`
+reasoning depth the reply streams token by token, so by the time the complete
+answer can be checked the client has already read it: the check **detects and
+audits only** (`guardrail.output.blocked` in the audit log) and cannot withhold
+anything. The buffered depths (`CAREFUL`, `RIGOROUS`, `PLANNED`) hold the answer
+until it has been checked, so a violating answer is replaced by a short notice
+and what is stored is the replacement. A `FAST` turn is also held and checked
+like that when `OUTPUT_GUARDRAILS` is added to `app.chat.parity.fast-buffering-triggers`
+(not in the default list, which is `GENERATION_TOOLS,MCP_TOOLS`); on `FAST` only
+the pattern-based guardrails run on the output, because the semantic toxicity
+check is a blocking model call. See [configuration](../configuration.md) and
+`ChatGuardrailGate`.
+
+Why the path stays in one process:
 
 - **Latency adds up per hop.** An in-process call costs nanoseconds; a network
   hop costs from a fraction of a millisecond to tens of milliseconds, and a
@@ -281,7 +297,7 @@ contributor meets; each has a step-by-step guide in [Extending](../extending.md)
 | Tools offered to an agent turn | `core/agents-tools/.../tools`: `ToolSource` beans (33 today, declared in `ToolSourceConfiguration`) merged by `ToolResolver` | Composite | [section 10](../extending.md#10-add-a-tool-source) |
 | Outbound HTTP for agents and workflows | `core/agents-browser/.../tools/web`: validate, resolve secrets, host policy, send, redirect, read and redact | Pipeline of stage classes | [section 11](../extending.md#11-change-the-http-request-pipeline) |
 | Observing every LLM call | `core/chat`: `LlmMetricsAdvisor` builds an `LlmCallObservation`, `LlmCallSink`s consume it | Observer; a failing sink never reaches the call | [section 12](../extending.md#12-add-an-llm-call-sink) |
-| Recording a turn | `core/agents-turn/.../turnjournal`: `TurnJournal` SPI, `TurnRecorder`; off by default | Append-only hash-chained log | [section 13](../extending.md#13-record-more-of-a-turn-in-the-turn-journal), [ADR-0020](ADR-0020-turn-journal.md) |
+| Recording a turn | `core/agents-turn/.../turnjournal`: `TurnJournal` SPI, `TurnRecorder`; off by default (`app.turn-journal.enabled`); when on, written for every reasoning depth (`FastStreamTurn`, `BufferedTurnRunner`) and for delegated or specialist turns (`SubAgentTurn`), including `APPROVAL` events, with the turn id in the `X-Journal-Turn-Id` response header; no retention purge exists, workflow runs are not journaled | Append-only hash-chained log | [section 13](../extending.md#13-record-more-of-a-turn-in-the-turn-journal), [ADR-0020](ADR-0020-turn-journal.md) |
 | Console: workflow node forms | `web/app/components/workflow/nodeConfig`: `NODE_FORMS` registry and `SIMPLE_FORMS` descriptors | Registry | [section 5](../extending.md#5-add-a-workflow-node-type) |
 | Console: channel inspectors | `web/app/components/channels/adapters`: `CHANNEL_ADAPTERS` | Registry | [section 6](../extending.md#6-add-a-channel) |
 

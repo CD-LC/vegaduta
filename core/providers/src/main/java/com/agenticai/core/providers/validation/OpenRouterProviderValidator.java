@@ -1,8 +1,10 @@
 package com.agenticai.core.providers.validation;
 
+import com.agenticai.core.providers.ProviderEndpoints;
 import com.agenticai.core.providers.ProviderName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -22,12 +24,19 @@ import org.springframework.web.client.RestClientResponseException;
 public class OpenRouterProviderValidator implements ProviderValidator {
 
     private static final Logger log = LoggerFactory.getLogger(OpenRouterProviderValidator.class);
-    private static final String AUTH_KEY_URL = "https://openrouter.ai/api/v1/auth/key";
+    private final String authKeyUrl;
 
     private final RestClient restClient;
 
+    /** Vendor defaults; OpenRouter is called at the address {@code app.llm.endpoints} names. */
     public OpenRouterProviderValidator(RestClient.Builder restClientBuilder) {
+        this(restClientBuilder, new ProviderEndpoints());
+    }
+
+    @Autowired
+    public OpenRouterProviderValidator(RestClient.Builder restClientBuilder, ProviderEndpoints endpoints) {
         this.restClient = restClientBuilder.build();
+        this.authKeyUrl = endpoints.openrouterAuthKeyUrl();
     }
 
     @Override
@@ -39,7 +48,7 @@ public class OpenRouterProviderValidator implements ProviderValidator {
     public void validate(String apiKey) {
         try {
             restClient.get()
-                .uri(AUTH_KEY_URL)
+                .uri(authKeyUrl)
                 .header("Authorization", "Bearer " + apiKey)
                 .retrieve()
                 .toBodilessEntity();

@@ -1,6 +1,7 @@
 package com.agenticai.core.rl.export;
 
 import com.agenticai.core.rl.domain.Episode;
+import com.agenticai.core.rl.feedback.RlFeedbackProperties;
 import com.agenticai.core.rl.domain.FeedbackSignal;
 import com.agenticai.core.rl.domain.TrajectoryStep;
 import com.agenticai.core.rl.domain.TurnFeedback;
@@ -29,8 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RlExportService {
 
-    private static final int RATING_DESIRABLE_MIN = 4;
-    private static final int RATING_UNDESIRABLE_MAX = 2;
+    private RlFeedbackProperties feedbackProperties = new RlFeedbackProperties();
 
     private final TurnFeedbackRepository feedbackRepository;
     private final EpisodeRepository episodeRepository;
@@ -43,6 +43,12 @@ public class RlExportService {
         this.feedbackRepository = feedbackRepository;
         this.episodeRepository = episodeRepository;
         this.stepRepository = stepRepository;
+    }
+
+    /** {@code rl.feedback.*}: the rating thresholds. Without it the built-in 4 / 2 apply. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setFeedbackProperties(RlFeedbackProperties feedbackProperties) {
+        this.feedbackProperties = feedbackProperties == null ? new RlFeedbackProperties() : feedbackProperties;
     }
 
     @Transactional(readOnly = true)
@@ -95,9 +101,9 @@ public class RlExportService {
                     return;
                 }
                 int r = fb.getRating();
-                if (r >= RATING_DESIRABLE_MIN) {
+                if (r >= feedbackProperties.getExportDesirableMinRating()) {
                     ktoIfAnswer(kto, prompt, answer, true, fb.getSignal());
-                } else if (r <= RATING_UNDESIRABLE_MAX) {
+                } else if (r <= feedbackProperties.getExportUndesirableMaxRating()) {
                     ktoIfAnswer(kto, prompt, answer, false, fb.getSignal());
                 }
                 // A neutral 3-star rating trains nothing.

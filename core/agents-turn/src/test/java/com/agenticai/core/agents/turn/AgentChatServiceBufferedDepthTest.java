@@ -113,8 +113,8 @@ class AgentChatServiceBufferedDepthTest {
     /**
      * Before the audit, a buffered depth whose completion came back null or blank returned {@code
      * Flux.just("")} - one EMPTY SSE chunk. The user saw an empty assistant bubble with no error
-     * anywhere, nothing was persisted, and nothing was logged. FAST has had {@code
-     * EMPTY_REPLY_FALLBACK} for exactly this shape since 2026-08-10; the buffered depths now share
+     * anywhere, nothing was persisted, and nothing was logged. FAST has had
+     * the empty-reply finish notice for exactly this shape since 2026-08-10; the buffered depths now share
      * it.
      */
     @Test
@@ -129,9 +129,11 @@ class AgentChatServiceBufferedDepthTest {
                         .block();
 
         assertNotNull(emitted);
-        assertEquals(List.of(AgentChatService.EMPTY_REPLY_FALLBACK), emitted);
+        assertEquals(List.of(ChatFinishProperties.defaultEmptyReplyMessage()), emitted);
         // ...and unlike before, the assistant turn IS persisted (alongside the user turn the
         // caller already appended), so the next turn's history is honest about what was shown.
+        // It is stored as a FAILED reply carrying the fallback line, not as something the agent
+        // said: the model is not shown the platform's "no response" line as its own words later.
         ArgumentCaptor<ChatTurn> turns = ArgumentCaptor.forClass(ChatTurn.class);
         verify(sessionMemoryService, times(2))
                 .appendTurn(
@@ -141,8 +143,11 @@ class AgentChatServiceBufferedDepthTest {
                         turns.capture());
         assertTrue(
                 turns.getAllValues().stream()
-                        .anyMatch(t -> AgentChatService.EMPTY_REPLY_FALLBACK.equals(t.content())),
-                "the fallback text should have been persisted as the assistant turn");
+                        .anyMatch(
+                                t ->
+                                        ChatTurn.isFailedReply(t)
+                                                && t.content().contains(ChatFinishProperties.defaultEmptyReplyMessage())),
+                "the fallback text should have been persisted as a failed assistant turn");
     }
 
     /**
@@ -191,6 +196,7 @@ class AgentChatServiceBufferedDepthTest {
                         .user(any(java.util.function.Consumer.class));
         RuntimeException failure = new IllegalStateException("provider exploded");
         when(base.toolCallbacks(any(List.class))
+                        .toolContext(any(Map.class))
                         .advisors(any(java.util.function.Consumer.class))
                         .call()
                         .content())
@@ -218,14 +224,57 @@ class AgentChatServiceBufferedDepthTest {
     }
 
     /**
-     * {@code streamFast} retries the known Spring AI Gemini {@code thought_signature} bug
-     * (spring-projects/spring-ai#5466) once on the SAME provider with tools disabled. The buffered
-     * depths had no such retry, so a Gemini tool-calling turn that FAST silently rescues
-     * hard-failed the moment a customer switched the agent to CAREFUL, RIGOROUS or PLANNED - same
-     * provider, same model, same tools, only the depth changed.
+     * When Gemini still refuses the tool-call history ({@code thought_signature}), the buffered depths
+     * answer once without tools exactly as the streamed depth does - and say so: the reply opens with a
+     * notice that it was written without tools. (They used to fail the turn outright, and the streamed
+     * depth used to rescue it silently.)
      */
     @Test
-    void theGeminiThoughtSignatureBugIsRetriedWithoutToolsOnABufferedDepth() {
+    void theGeminiThoughtSignatureRefusalIsAnsweredWithoutToolsAndSaidSoOnABufferedDepth() {
+        stubThoughtSignatureRefusalThenAnAnswerWithoutTools();
+        AgentChatService service = buildService();
+        // Off by default (a last resort the operator opts into); this test is about what it does when on.
+        service.turns.resilience.setThoughtSignatureDegrade(true);
+
+        List<String> emitted =
+                service.chat(AGENT_ID, "sess-2", "subject-2", "book me a flight", null, null)
+                        .collectList()
+                        .block();
+
+        assertNotNull(emitted);
+        assertEquals(1, emitted.size());
+        assertTrue(emitted.get(0).contains("written without any tools"), emitted.get(0));
+        assertTrue(emitted.get(0).endsWith("recovered without tools"), emitted.get(0));
+    }
+
+    /**
+     * The no-tools rescue is a last resort and OFF by default: with the platform now sending the function
+     * call back with its own signature, a refusal is a provider fault to report, not a turn to quietly
+     * re-run without its tools.
+     */
+    @Test
+    void theGeminiThoughtSignatureRefusalIsReportedNotAnsweredWithoutToolsByDefault() {
+        stubThoughtSignatureRefusalThenAnAnswerWithoutTools();
+        AgentChatService service = buildService();
+        assertTrue(!service.turns.resilience.isThoughtSignatureDegrade());
+
+        List<String> emitted = null;
+        try {
+            emitted = service.chat(AGENT_ID, "sess-2", "subject-2", "book me a flight", null, null)
+                    .collectList()
+                    .block();
+        } catch (RuntimeException reported) {
+            // the provider's refusal reaches the caller
+        }
+
+        assertTrue(
+                emitted == null
+                        || emitted.stream()
+                                .noneMatch(t -> t.contains("recovered without tools") || t.contains("written without any tools")),
+                String.valueOf(emitted));
+    }
+
+    private void stubThoughtSignatureRefusalThenAnAnswerWithoutTools() {
         ToolCallback tool = mock(ToolCallback.class, RETURNS_DEEP_STUBS);
         when(tool.getToolDefinition().name()).thenReturn("search_flights");
         when(agentToolProvider.resolveToolsFor(
@@ -236,10 +285,9 @@ class AgentChatServiceBufferedDepthTest {
                         400,
                         "Function call is missing a thought_signature",
                         "The provider rejected the request.");
-        // Two DISTINCT deep-stub chains, which is the whole point: bufferedCall omits
-        // .toolCallbacks() entirely on the retry (matching how streamFast builds its own
-        // tools-disabled retry), so the tools-ful chain and the tools-free chain are
-        // different mocks. The first throws the bug; only the second returns an answer.
+        // Two DISTINCT deep-stub chains, which is the whole point: the tools-free pass omits
+        // .toolCallbacks() entirely, so the tools-ful chain and the tools-free chain are different
+        // mocks. The first throws the refusal; only the second returns an answer.
         ChatClient.ChatClientRequestSpec withoutTools =
                 chatClient
                         .prompt()
@@ -248,6 +296,7 @@ class AgentChatServiceBufferedDepthTest {
                         .user(any(java.util.function.Consumer.class));
         when(withoutTools
                         .toolCallbacks(any(List.class))
+                        .toolContext(any(Map.class))
                         .advisors(any(java.util.function.Consumer.class))
                         .call()
                         .content())
@@ -255,15 +304,6 @@ class AgentChatServiceBufferedDepthTest {
         when(withoutTools.advisors(any(java.util.function.Consumer.class)).call().content())
                 .thenReturn("recovered without tools");
 
-        AgentChatService service = buildService();
-
-        List<String> emitted =
-                service.chat(AGENT_ID, "sess-2", "subject-2", "book me a flight", null, null)
-                        .collectList()
-                        .block();
-
-        assertNotNull(emitted);
-        assertEquals(List.of("recovered without tools"), emitted);
     }
 
     /**
@@ -345,7 +385,7 @@ class AgentChatServiceBufferedDepthTest {
     void l4FlagOffKeepsTheCheapAnswerAndNeverCallsTheStrongClient() {
         routeCheapToGrok("I'm not sure about that.", "strong answer");
         VerifierEscalationRouter router =
-                new VerifierEscalationRouter(new SimpleMeterRegistry(), false, false, "", 2, 0.2);
+                new VerifierEscalationRouter(new SimpleMeterRegistry(), false, false, 2, 0.2);
         AgentChatService service = buildService(router, true);
 
         assertEquals(List.of("I'm not sure about that."), chatOnce(service));
@@ -356,7 +396,7 @@ class AgentChatServiceBufferedDepthTest {
     void l4KillSwitchWinsAndKeepsTheCheapAnswer() {
         routeCheapToGrok("I'm not sure about that.", "strong answer");
         VerifierEscalationRouter router =
-                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, "", 2, 0.2);
+                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, true, 2, 0.2);
         AgentChatService service = buildService(router, true);
 
         assertEquals(List.of("I'm not sure about that."), chatOnce(service));
@@ -368,7 +408,7 @@ class AgentChatServiceBufferedDepthTest {
         routeCheapToGrok("I'm not sure about that.", "strong answer");
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         VerifierEscalationRouter router =
-                new VerifierEscalationRouter(registry, true, false, "", 2, 0.2);
+                new VerifierEscalationRouter(registry, true, false, 2, 0.2);
         AgentChatService service = buildService(router, true);
 
         assertEquals(List.of("strong answer"), chatOnce(service));
@@ -384,7 +424,7 @@ class AgentChatServiceBufferedDepthTest {
     void l4ActiveRouterKeepsAConfidentCheapAnswer() {
         routeCheapToGrok("Paris.", "strong answer");
         VerifierEscalationRouter router =
-                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, false, "", 2, 0.2);
+                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, false, 2, 0.2);
         AgentChatService service = buildService(router, true);
 
         assertEquals(List.of("Paris."), chatOnce(service));
@@ -399,7 +439,7 @@ class AgentChatServiceBufferedDepthTest {
         when(strongClient.prompt())
                 .thenThrow(new IllegalStateException("strong model unavailable"));
         VerifierEscalationRouter router =
-                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, false, "", 2, 0.2);
+                new VerifierEscalationRouter(new SimpleMeterRegistry(), true, false, 2, 0.2);
         AgentChatService service = buildService(router, true);
 
         assertEquals(List.of("I'm not sure about that."), chatOnce(service));
@@ -419,7 +459,7 @@ class AgentChatServiceBufferedDepthTest {
                 .thenReturn(List.of(sent, sent));
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         VerifierEscalationRouter router =
-                new VerifierEscalationRouter(registry, true, false, "", 2, 0.2);
+                new VerifierEscalationRouter(registry, true, false, 2, 0.2);
         AgentChatService service = buildService(router, true);
 
         assertEquals(List.of("Here is what I managed."), chatOnce(service));
@@ -466,7 +506,7 @@ class AgentChatServiceBufferedDepthTest {
 
         QueryComplexityClassifier classifier = mock(QueryComplexityClassifier.class);
         when(classifier.isSimple(any())).thenReturn(economySimple);
-        when(classifier.isSimple(any(), any())).thenReturn(economySimple);
+        when(classifier.isSimple(any(), any(), any())).thenReturn(economySimple);
 
         AgentChatService built =
                 AgentChatServiceTestFactory.create(

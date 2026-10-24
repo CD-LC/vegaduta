@@ -83,13 +83,21 @@ export const qualityApi = {
   deleteEvalDatasetCase: (agentId: string, datasetId: string, caseId: string) =>
     apiFetch(`/api/agents/${agentId}/quality/datasets/${datasetId}/cases/${caseId}`, { method: "DELETE" }).then(toJson),
   // triggerEvalRun accepts optional V343 run options (judgeModel override,
-  // strictJudge self-grading guard, repeats 1-5, budgetUsd default $5) and an
+  // strictJudge self-grading guard, repeats 1-5, budgetUsd default $5, mode FULL|QUICK: the
+  // production pipeline in the eval sandbox, or text only) and an
   // idempotencyKey sent as the Idempotency-Key header (the CI contract: a
   // retried trigger returns the same run row, never a duplicate or a 409).
   triggerEvalRun: (
     agentId: string,
     datasetId: string,
-    options?: { judgeModel?: string; strictJudge?: boolean; repeats?: number; budgetUsd?: number; idempotencyKey?: string }
+    options?: {
+      judgeModel?: string;
+      strictJudge?: boolean;
+      repeats?: number;
+      budgetUsd?: number;
+      idempotencyKey?: string;
+      mode?: "FULL" | "QUICK";
+    }
   ) =>
     apiFetch(`/api/agents/${agentId}/quality/datasets/${datasetId}/runs`, {
       method: "POST",
@@ -100,6 +108,7 @@ export const qualityApi = {
               strictJudge: options.strictJudge === true ? true : undefined,
               repeats: options.repeats,
               budgetUsd: options.budgetUsd,
+              mode: options.mode || undefined,
             }),
             headers: {
               "Content-Type": "application/json",

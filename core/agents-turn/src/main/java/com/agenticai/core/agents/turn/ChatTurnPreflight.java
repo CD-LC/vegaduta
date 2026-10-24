@@ -63,7 +63,8 @@ final class ChatTurnPreflight {
             boolean semanticEligible,
             SemanticResponseCacheService semanticCache,
             Map<String, String> activeFlags,
-            TurnContext context) {}
+            TurnContext context,
+            String cacheConversationKey) {}
 
     private final AgentChatService svc;
 
@@ -115,6 +116,11 @@ final class ChatTurnPreflight {
         // AgentChatService#chat built from this same thread's TenantContext a moment earlier.
         UUID requestedAgentId = context.requestedAgentId();
         String sessionId = context.sessionId();
+        // What the screening below judges: on the continuation after an approval, the person's
+        // original goal, not the platform-written message wrapped around the approved tool's output
+        // (the output was already checked by the tool guard when the approved call ran).
+        final String screenedMessage = context.decisionMessage(userMessage);
+        final boolean continuation = context.continuation() != null;
         String currentTenantId = context.tenantId();
         if (currentTenantId != null && !tenantStatusGuard.isUsable(currentTenantId)) {
             throw new TenantUnavailableException(
@@ -220,7 +226,7 @@ final class ChatTurnPreflight {
         com.agenticai.core.agents.consent.ConversationConsentGate consentGate = this.consentGate;
         if (consentGate != null) {
             Flux<String> consentReply =
-                    consentGate.intercept(requestedAgentId, sessionId, subjectKey, userMessage);
+                    consentGate.intercept(requestedAgentId, sessionId, subjectKey, screenedMessage);
             if (consentReply != null) {
                 return Outcome.earlyReturn(consentReply);
             }
@@ -242,7 +248,7 @@ final class ChatTurnPreflight {
                         agentId,
                         sessionId,
                         subjectKey,
-                        userMessage,
+                        screenedMessage,
                         currentTenantId,
                         currentTenantPlan);
         if (moderationRefusal != null) {
@@ -260,7 +266,7 @@ final class ChatTurnPreflight {
         // fail-closed (refusal, turn never starts) on an actual violation.
         Flux<String> guardrailRefusal =
                 guardrails.enforceInboundGuardrails(
-                        agent, agentId, sessionId, userMessage, currentTenantId, currentTenantPlan);
+                        agent, agentId, sessionId, screenedMessage, currentTenantId, currentTenantPlan);
         if (guardrailRefusal != null) {
             // Step-event vocabulary (2026-09-09): a step-event turn also gets a
             // typed `guardrail` event on the side channel, so a trace UI / the
@@ -284,7 +290,7 @@ final class ChatTurnPreflight {
         // no-ops otherwise.
         com.agenticai.core.agents.hooks.HookRun hookRun =
                 agentHooks == null ? null : agentHooks.beginRun(agentId, sessionId, stepEvents);
-        String hookRefusal = hookRun == null ? null : hookRun.beforeModel(userMessage);
+        String hookRefusal = hookRun == null ? null : hookRun.beforeModel(screenedMessage);
         if (hookRefusal != null) {
             return Outcome.earlyReturn(hookRun.refusal(hookRefusal));
         }
@@ -296,15 +302,51 @@ final class ChatTurnPreflight {
         // so a cache lookup wouldn't even find anything reusable across
         // callers anyway. See LlmResponseCacheService's javadoc for the full
         // exact-match-only reasoning and the live-tool-data caveat.
+        // Never for a continuation: its message is unique to one approved result, so a hit is
+        // impossible, and caching an answer built from a person's tool output helps nobody.
         boolean cacheEligible =
                 agent.isResponseCachingEnabled()
+                        && !continuation
                         && (hookRun == null || !hookRun.needsFreshModelReply())
                         && safeAttachmentKey == null
                         && (inlineAttachments == null || inlineAttachments.isEmpty())
                         && (extraTools == null || extraTools.isEmpty());
+        // Gated semantic (embedding-similarity) cache - a stronger, SEPARATE
+        // opt-in tried only after an exact-match miss. Present only under the
+        // "knowledge" profile (ObjectProvider), and consulted only when this
+        // agent opted in AND the turn is the plain cacheable shape (no
+        // attachment, no per-call extra tools). A hit is recorded and returned
+        // exactly like an exact-match hit. See SemanticResponseCacheService
+        // for the quality gates that keep this from returning a wrong answer.
+        SemanticResponseCacheService semanticCache = semanticResponseCacheService.getIfAvailable();
+        boolean semanticEligible =
+                agent.isSemanticResponseCachingEnabled()
+                        && !continuation
+                        && semanticCache != null
+                        && (hookRun == null || !hookRun.needsFreshModelReply())
+                        && safeAttachmentKey == null
+                        && (inlineAttachments == null || inlineAttachments.isEmpty())
+                        && (extraTools == null || extraTools.isEmpty());
+        // What the caches may do with this turn beyond the shape above (app.chat.cache.*): an agent that
+        // offers tools is not cacheable (a turn that read live data must not be answered from, or stored
+        // in, a cache), and the key includes the conversation before the message. Looked up only for a
+        // turn that could use a cache at all, so an agent without caching pays nothing.
+        ChatCachePolicy cachePolicy = svc.turns.cachePolicy;
+        String cacheConversationKey = "";
+        if ((cacheEligible || semanticEligible)
+                && !cachePolicy.eligibleWithTools(context.scope(), agentId)
+                && offersTools(agentId, sessionId, subjectKey)) {
+            cacheEligible = false;
+            semanticEligible = false;
+        }
+        if ((cacheEligible || semanticEligible) && cachePolicy.keyOnConversation()) {
+            cacheConversationKey = cachePolicy.conversationKey(
+                            sessionMemoryService.getHistory(memorySessionId), context.scope(), agentId);
+        }
         if (cacheEligible) {
             Optional<String> cached =
-                    responseCacheService.get(currentTenantId, agentId, subjectKey, userMessage);
+                    responseCacheService.get(
+                            currentTenantId, agentId, subjectKey, userMessage, cacheConversationKey);
             if (cached.isPresent()) {
                 // Recorded exactly like a live turn so later messages in this
                 // session still see a coherent back-and-forth - the caller
@@ -323,24 +365,9 @@ final class ChatTurnPreflight {
                                 ttftStartNanos));
             }
         }
-
-        // Gated semantic (embedding-similarity) cache - a stronger, SEPARATE
-        // opt-in tried only after an exact-match miss. Present only under the
-        // "knowledge" profile (ObjectProvider), and consulted only when this
-        // agent opted in AND the turn is the plain cacheable shape (no
-        // attachment, no per-call extra tools). A hit is recorded and returned
-        // exactly like an exact-match hit above. See SemanticResponseCacheService
-        // for the quality gates that keep this from returning a wrong answer.
-        SemanticResponseCacheService semanticCache = semanticResponseCacheService.getIfAvailable();
-        boolean semanticEligible =
-                agent.isSemanticResponseCachingEnabled()
-                        && semanticCache != null
-                        && (hookRun == null || !hookRun.needsFreshModelReply())
-                        && safeAttachmentKey == null
-                        && (inlineAttachments == null || inlineAttachments.isEmpty())
-                        && (extraTools == null || extraTools.isEmpty());
         if (semanticEligible) {
-            Optional<String> semanticHit = semanticCache.get(agentId, subjectKey, userMessage);
+            Optional<String> semanticHit =
+                    semanticCache.get(agentId, subjectKey, userMessage, cacheConversationKey);
             if (semanticHit.isPresent()) {
                 sessionMemoryService.appendTurn(memorySessionId, ChatTurn.user(userMessage));
                 sessionMemoryService.appendTurn(
@@ -368,6 +395,25 @@ final class ChatTurnPreflight {
                         semanticEligible,
                         semanticCache,
                         activeFlags,
-                        context));
+                        context,
+                        cacheConversationKey));
+    }
+
+    /**
+     * Whether the agent would be offered at least one tool: the same merged, allow-list-filtered candidate
+     * set a turn resolves its tools from, without the per-message trimming. A failure to tell is answered
+     * "yes": the turn is then not cacheable, never cached on a guess.
+     */
+    private boolean offersTools(UUID agentId, String sessionId, String subjectKey) {
+        try {
+            List<ToolCallback> candidates = svc.agentToolProvider.resolveToolCandidatesFor(agentId, sessionId, subjectKey);
+            return candidates != null && !candidates.isEmpty();
+        } catch (RuntimeException e) {
+            AgentChatService.log.warn(
+                    "Could not tell whether agent {} offers tools - treating the turn as not cacheable: {}",
+                    agentId,
+                    e.toString());
+            return true;
+        }
     }
 }

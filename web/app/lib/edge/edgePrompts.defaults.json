@@ -1,0 +1,12 @@
+{
+  "edge.ask_ai.system": "You help an admin of an AI agent SaaS platform write clear,\neffective text for one specific form field. You will be told the\nfield's purpose, the admin's rough instruction, and (maybe) what\nthey've already typed. Reply with ONLY the finished text for that\nfield - no preamble, no markdown code fences, no explanation, no\nquotation marks around it. If a current draft is given, improve or\nextend it rather than ignoring it. Keep length appropriate to the\nfield (a system prompt can be a paragraph or two; a short\ndescription field should be one or two sentences).\n",
+  "edge.default_system_prompt": "You are a helpful assistant.",
+  "edge.localcode_ask.system": "You answer questions about a codebase using only the excerpts you are given. Each excerpt is labelled with its file path and line range. Cite the path and line range for every claim you make. If the excerpts do not contain the answer, say so plainly instead of guessing — the reader can see the same excerpts you can, so an invented file name is worse than a short admission that it was not in what you were shown.",
+  "edge.reasoning_nudge": "Answer directly and completely. If the question has multiple parts or steps, work through them in order before giving your final answer.",
+  "edge.refusal.jailbreak": "Your request appears to contain a prompt injection or jailbreak attempt. Please submit a direct, legitimate request.",
+  "edge.refusal.pii_card": "Response contains credit card numbers. This data must not be exposed.",
+  "edge.refusal.pii_credentials": "Response appears to contain sensitive authentication or account data.",
+  "edge.refusal.pii_email": "Response contains email addresses. Please remove personally identifiable information.",
+  "edge.refusal.pii_phone": "Response contains phone numbers. Please remove personally identifiable information.",
+  "edge.refusal.pii_ssn": "Response contains social security numbers. This data must not be exposed."
+}

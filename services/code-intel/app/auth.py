@@ -7,7 +7,7 @@ Three modes (settings.auth_mode):
   2026-07-15 hardening): an authenticated token WITHOUT a tenant_id claim
   is rejected with 403 unless it carries ROLE_platform-admin. Also accepts
   an internal-token call transparently (see the dual-mode comment in
-  authenticate() below) - deploy/docker-compose.yml runs this service in
+  authenticate() below) - deploy/compose/docker-compose.yml runs this service in
   keycloak mode by default (for the web module's /code-intel page), and
   core's own CodeIntelClient needs to keep working against that same
   default without every deployment having to flip a second env var.
@@ -52,7 +52,7 @@ def authenticate(headers: dict[str, str], settings: Settings) -> TenantContext:
     if mode == "internal":
         return _internal_auth(h, settings)
     if mode == "keycloak":
-        # Dual-mode fallback: deploy/docker-compose.yml's `code-intel`
+        # Dual-mode fallback: deploy/compose/docker-compose.yml's `code-intel`
         # service defaults CODE_INTEL_AUTH_MODE to keycloak so the web
         # module's /code-intel page can authenticate with its existing
         # browser session, but core's own server-to-server CodeIntelClient
