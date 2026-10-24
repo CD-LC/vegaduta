@@ -17,6 +17,7 @@ import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.memory.SessionSummaryService;
 import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
+import com.agenticai.core.agents.turn.ToolLedger;
 import com.agenticai.core.approval.ApprovalReplayGrant;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.ApprovalRequestRepository;
@@ -174,6 +175,40 @@ class AgentToolCallApprovalExecutorMemoryNoteTest {
                 List.of(),
                 memory.getHistory(RAW_SESSION),
                 "nothing may be written under the raw client session id");
+    }
+
+    @Test
+    void theOutcomeReachesTheModelAsAToolRecordButNeverTheTranscriptAsAnAssistantMessage() {
+        toolReturns("[UNTRUSTED CONTENT from tool 'send_invoice' <<<UNTRUSTED_DATA id=7>>> CONF-77 ]");
+        String scoped = "c1:from-the-envelope";
+
+        executor.execute(
+                request(
+                        ",\"memorySessionId\":\""
+                                + scoped
+                                + "\",\"tenantId\":\""
+                                + TENANT
+                                + "\",\"subject\":\""
+                                + SUBJECT
+                                + "\""));
+
+        // What is stored: an assistant turn with no text and one OK entry for the tool.
+        List<ChatTurn> stored = memory.getFullHistory(scoped);
+        assertEquals(1, stored.size());
+        ChatTurn turn = stored.get(0);
+        assertTrue(ChatTurn.isToolRecordOnly(turn), "stored as a tool record, not as assistant text: " + turn);
+        assertEquals("", turn.content());
+        ToolLedger.Entry entry = turn.tools().entries().get(0);
+        assertEquals(TOOL, entry.tool());
+        assertEquals(ToolLedger.Status.OK, entry.status());
+        assertTrue(entry.arguments().contains("\"to\""), entry.arguments());
+        assertTrue(entry.result().contains("CONF-77"), entry.result());
+
+        // The model's view: the record folded into the text, with the configured note and the output.
+        List<ChatTurn> modelView = memory.getHistory(scoped);
+        assertTrue(hasNote(modelView, "[approved action '" + TOOL + "' completed"), modelView.toString());
+        assertTrue(hasNote(modelView, "CONF-77"), modelView.toString());
+        assertTrue(hasNote(modelView, TOOL + "("), "rendered as a tool record line: " + modelView);
     }
 
     @Test

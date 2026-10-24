@@ -1,4 +1,4 @@
--- V662: agent runtime limits - per-agent and per-tenant overrides of the turn's tool-step ceiling, timeouts,
+-- V671: agent runtime limits - per-agent and per-tenant overrides of the turn's tool-step ceiling, timeouts,
 -- tool-output cap, knowledge-retrieval top-k / min-score and continuation passes.
 -- Tenant schema: unqualified, no tenant_id (the schema is the tenancy). Shared Flyway namespace with controlplane/.
 --

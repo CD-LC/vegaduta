@@ -110,6 +110,16 @@ public class ApprovalContinuationProperties {
      */
     private int maxNoteResultChars = Integer.parseInt(DEFAULTS.getProperty("max-note-result-chars"));
 
+    /**
+     * Longest argument summary in the history note. The note is stored as a platform tool record ({@link
+     * ToolLedger}) on an assistant turn with no text, so the model reads it on later turns and the person's
+     * transcript never shows it; the record's fields are capped at {@link ToolLedgerSummary#MAX_FIELD_CHARS}.
+     */
+    private int maxNoteArgumentsChars = Integer.parseInt(DEFAULTS.getProperty("max-note-arguments-chars"));
+
+    /** The approval detail of that record ({@code {requestId}}, {@code {approver}}). */
+    private String noteApproval = DEFAULTS.getProperty("note-approval");
+
     /** Introduces the list of other actions still waiting for a human decision. */
     private String otherPendingHeader = DEFAULTS.getProperty("other-pending-header");
 
@@ -277,6 +287,30 @@ public class ApprovalContinuationProperties {
 
     public void setMaxNoteResultChars(int maxNoteResultChars) {
         this.maxNoteResultChars = Math.max(0, maxNoteResultChars);
+    }
+
+    public int getMaxNoteArgumentsChars() {
+        return maxNoteArgumentsChars;
+    }
+
+    public void setMaxNoteArgumentsChars(int maxNoteArgumentsChars) {
+        this.maxNoteArgumentsChars = Math.max(0, maxNoteArgumentsChars);
+    }
+
+    public String getNoteApproval() {
+        return noteApproval;
+    }
+
+    public void setNoteApproval(String noteApproval) {
+        this.noteApproval = noteApproval;
+    }
+
+    /** Fills {@code {requestId}} and {@code {approver}} in {@link #getNoteApproval}. */
+    public String renderNoteApproval(Object requestId, String decidedBy) {
+        String approver = decidedBy == null || decidedBy.isBlank() ? approverUnknown : decidedBy.strip();
+        return noteApproval
+                .replace("{requestId}", requestId == null ? "" : requestId.toString())
+                .replace("{approver}", approver);
     }
 
     /** Fills {@code {tool}} and {@code {result}} in {@link #getCompletedNote}. */

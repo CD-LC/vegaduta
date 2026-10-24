@@ -31,7 +31,10 @@ export default function TopBar({
   profileHref,
   coreHealthy,
   status,
+  quietStatus = false,
 }: {
+  /** Status chips as quiet icons (their words stay in the tooltip and for screen readers): AppShell quietStatus. */
+  quietStatus?: boolean;
   headerRef: RefObject<HTMLElement | null>;
   mobileMenuButtonRef: RefObject<HTMLButtonElement | null>;
   mobileNavOpen: boolean;
@@ -56,6 +59,7 @@ export default function TopBar({
       // while it names the controls inside it (page guide, alerts, theme,
       // language, the ? menu). Present on every console route.
       data-tour="topbar"
+      data-quiet-status={quietStatus ? "" : undefined}
       className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-[var(--surface-border)] px-4 backdrop-blur-xl sm:px-6"
       style={{ backgroundColor: "color-mix(in srgb, var(--surface-card) 90%, transparent)" }}
     >

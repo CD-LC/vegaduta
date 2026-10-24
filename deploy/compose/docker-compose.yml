@@ -129,6 +129,10 @@ x-core-env: &core-env
   # Signing keys + admin API are fetched over the internal compose name.
   KEYCLOAK_ISSUER_URI: ${PUBLIC_AUTH_URL:-http://localhost:8180}/realms/${KEYCLOAK_REALM:-agentic-ai}
   KEYCLOAK_ADDITIONAL_ISSUERS: ${KEYCLOAK_ADDITIONAL_ISSUERS:-}
+  # Without SMTP a required "verify your email" step ends the first sign-up on "Failed to send email" and the
+  # person can never sign in. Off unless KEYCLOAK_REQUIRE_EMAIL_VERIFICATION=true (set it once KEYCLOAK_SMTP_* is
+  # configured); the --domain overlay turns it on by default.
+  APP_KEYCLOAK_REQUIRE_EMAIL_VERIFICATION: ${KEYCLOAK_REQUIRE_EMAIL_VERIFICATION:-false}
   # Private hosts tenant-configured outbound calls may reach (e.g. ollama:11434).
   APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS: ${APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS:-}
   # Optional allow-list for tenant-configured outbound URLs (host or *.suffix, comma-separated); empty = no restriction.

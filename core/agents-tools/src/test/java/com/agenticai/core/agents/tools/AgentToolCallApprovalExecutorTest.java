@@ -546,9 +546,13 @@ class AgentToolCallApprovalExecutorTest {
                         anyString(),
                         org.mockito.ArgumentMatchers.argThat(
                                 turn ->
-                                        turn.content().contains("DENIED by admin-sub")
-                                                && turn.content().contains("Not before the audit")
-                                                && turn.content().contains("did not run")));
+                                        ChatTurn.isToolRecordOnly(turn)
+                                                && turn.tools().entries().get(0).status()
+                                                        == com.agenticai.core.agents.turn.ToolLedger.Status.NOT_RUN
+                                                && turn.tools().entries().get(0).result().contains("DENIED by admin-sub")
+                                                && turn.tools().entries().get(0).result().contains("Not before the audit")
+                                                && turn.tools().entries().get(0).result().contains("did not run")
+                                                && turn.tools().entries().get(0).approval().contains("admin-sub")));
         // The tool never ran, and the decider's own context is untouched.
         verify(toolProvider, never()).resolveToolCandidatesFor(any(), anyString(), anyString());
         assertEquals("caller-tenant", TenantContext.current().orElseThrow().getTenantId());

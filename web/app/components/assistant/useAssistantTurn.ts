@@ -180,12 +180,17 @@ export function useAssistantTurn(agentId: string | null) {
           ownSession ? sessionIdRef.current : null,
           (chunk) => {
             text += chunk;
-            patchTurn(replyId, { content: text });
+            patchTurn(replyId, { content: text, lastEventAt: Date.now() });
           },
           (event) => {
-            if (event?.type === "heartbeat") return;
+            // A heartbeat is not activity (no row in the trace), but it is proof the turn is alive:
+            // it resets the "still waiting on the model" clock of the live line.
+            if (event?.type === "heartbeat") {
+              patchTurn(replyId, { lastEventAt: Date.now() });
+              return;
+            }
             steps = [...steps, normalizeServerStep(event, steps.length + 1)];
-            patchTurn(replyId, { steps });
+            patchTurn(replyId, { steps, lastEventAt: Date.now() });
           },
           {
             turnRef,

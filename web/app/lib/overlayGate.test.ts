@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  ONBOARDING_HOLD_ATTR,
   TOUR_OFF_KEY,
+  conversationHold,
   higherEscapeLayerOpen,
   isEditingSurface,
   overlayHold,
@@ -72,6 +74,18 @@ describe("overlayHold", () => {
     window.localStorage.setItem(TOUR_OFF_KEY, "1");
     expect(tourSuppressed()).toBe(true);
     expect(overlayHold("/home")).toBe("surface");
+  });
+});
+
+describe("conversationHold", () => {
+  it("keeps first-run overlays off a returning person's conversation, and waits while that is unknown", () => {
+    expect(conversationHold()).toBe("none");
+    document.body.innerHTML = `<div ${ONBOARDING_HOLD_ATTR}="pending"></div>`;
+    expect(overlayHold("/assistant")).toBe("busy");
+    document.body.innerHTML = `<div ${ONBOARDING_HOLD_ATTR}="returning"></div>`;
+    expect(overlayHold("/assistant")).toBe("surface");
+    document.body.innerHTML = `<div ${ONBOARDING_HOLD_ATTR}="first-run"></div>`;
+    expect(overlayHold("/assistant")).toBe("none");
   });
 });
 

@@ -72,7 +72,8 @@ public class ResumableTurnReplyService {
             Instant startedAt = Instant.ofEpochMilli(startedAtMs);
             for (int i = history.size() - 1; i >= 0; i--) {
                 ChatTurn turn = history.get(i);
-                if (turn.role() != MessageRole.ASSISTANT) {
+                // A record-only turn (a decided action's outcome) is not anyone's reply.
+                if (turn.role() != MessageRole.ASSISTANT || ChatTurn.isToolRecordOnly(turn)) {
                     continue;
                 }
                 if (turn.timestamp() != null && !turn.timestamp().isBefore(startedAt)

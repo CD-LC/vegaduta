@@ -11,7 +11,7 @@
 -- setting_override_history  every change ever made, with actor, reason, the value after and the value before. IMMUTABLE:
 --                           a trigger refuses UPDATE and DELETE (the same device as V664 for prompt_override_history).
 --
--- The seven agent.limits.* keys are NOT stored here: they keep living in tenant_runtime_limits and the agent table (V662),
+-- The seven agent.limits.* keys are NOT stored here: they keep living in tenant_runtime_limits and the agent table (V671),
 -- exactly where /api/agents/{id}/runtime-limits reads and writes them; only their history rows land in the table below.
 CREATE TABLE IF NOT EXISTS setting_override (
     scope        VARCHAR(16)  NOT NULL,

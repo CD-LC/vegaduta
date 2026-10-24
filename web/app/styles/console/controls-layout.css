@@ -225,6 +225,25 @@ header.sticky[data-compact="2"] .topbar-collapsible {
   display: none;
 }
 
+/* Conversation pages (AppShell quietStatus, the Assistant): the status chips - system health, browser
+   models - drop to their icon or dot so they stop competing with the chat. The words stay in the tooltip
+   and for screen readers (visually hidden, not display:none). */
+header.sticky[data-quiet-status] .topbar-status-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+header.sticky[data-quiet-status] .topbar-status {
+  background: transparent;
+  padding-inline: 0.35rem;
+}
+
 /* Below lg the rail is an off-canvas drawer (AppShell: -translate-x-full →
    lg:translate-x-0). Only its surface is touched here: same glass as the
    header so the drawer reads as part of the chrome when it slides in. */
