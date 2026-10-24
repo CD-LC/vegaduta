@@ -201,7 +201,11 @@ WORKDIR /app
 # without pulling in a second base image or a JVM-based check. ~1MB, cached
 # as its own layer so it never gets re-fetched by an app-source-only
 # rebuild. See Platform-Tech-Stack-Audit-2026.md P1 (infra/ops section).
-RUN apt-get update && apt-get install -y --no-install-recommends curl \
+# libatomic1: Node 26's arm64 binary links libatomic.so.1 (the amd64 build does
+# not) - the node binary is copied out of the official image into the
+# toolchain stages below, so its shared libraries must be here rather than in
+# node-relay. Cheap (~0.2MB) and harmless on amd64, so it is unconditional.
+RUN apt-get update && apt-get install -y --no-install-recommends curl libatomic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Non-root runtime user - defense-in-depth, no functional dependency on it.
@@ -216,7 +220,8 @@ ENV HOME=/home/agentic
 # no npm/npx/corepack, so nothing here can fetch or run an MCP package - it
 # exists solely to execute /opt/mcp-stdio-proxy/proxy.js (zero-dependency,
 # see core/mcp-stdio-proxy/framing.js). The official binary targets glibc
-# >= 2.28 and links only libc/libstdc++/libgcc_s, all present in jammy.
+# >= 2.28 and links libc/libstdc++/libgcc_s plus, on arm64, libatomic (the
+# libatomic1 package installed above - Node 26 added that dependency).
 FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0 AS node-relay
 
 # The full variant also needs npm/npx. The npm CLI bundled with the Node image carries High
