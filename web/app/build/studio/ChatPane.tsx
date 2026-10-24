@@ -6,6 +6,7 @@ import { Textarea } from "../../components/ui/textarea";
 import { HARNESS_LINES } from "./runtime";
 import { ATTACH_ACCEPT, MAX_ATTACHMENTS } from "./attachments";
 import { fixRequest, locateRuntimeError } from "./scope";
+import { firstBrokenScript } from "./patch";
 import type { ProjectSession } from "./useProjectSession";
 import { SOURCE_LABEL, timeAgo } from "./sessionTypes";
 
@@ -208,10 +209,13 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
               className="gap-1.5"
               onClick={() => {
                 const where = locateRuntimeError(html, runtimeError, HARNESS_LINES);
+                const broken = /syntaxerror|unexpected token/i.test(runtimeError.message)
+                  ? firstBrokenScript(html)
+                  : null;
                 const repeated = lastFixRef.current === runtimeError.message;
                 lastFixRef.current = runtimeError.message;
                 pushLog({ kind: "user", text: repeated ? "Fix the error (again, differently)" : "Fix the error" });
-                void runEdit(fixRequest(runtimeError, where, repeated));
+                void runEdit(fixRequest(runtimeError, where, repeated, broken));
               }}
             >
               <Wrench aria-hidden="true" size={12} /> Fix it with AI
