@@ -10,6 +10,24 @@ import type { ProjectSession } from "./useProjectSession";
 import { SOURCE_LABEL, timeAgo } from "./sessionTypes";
 
 /** Left column: the conversation with the builder, the request box, attachments and the version history. */
+/** What the live-output box shows before the model's first word arrives.
+ * On-device engines stream tokens, so `stream` fills quickly; the cloud
+ * legs answer in ONE non-streamed reply, so without this the box would sit
+ * on a dead "waiting" line for the whole turn. Phase the note on elapsed
+ * time so it keeps moving and stays honest about why nothing is arriving. */
+function waitingLine(engineLabel: string, elapsed: number): string {
+  const device = /^on your device/i.test(engineLabel || "");
+  if (elapsed < 15) {
+    return device ? "Waking up the on-device model…" : "Sending your request to the model…";
+  }
+  if (elapsed < 45) {
+    return device
+      ? "Model is ready — the first words are on their way…"
+      : "The model is writing — cloud replies arrive all at once, not word-by-word…";
+  }
+  return `Still writing (${elapsed}s) — a whole-app change can take a couple of minutes on this model. Stop cancels safely.`;
+}
+
 export default function ChatPane({ s }: { s: ProjectSession }) {
   const {
     attached, busy, dictation, editable, elapsed, fileInputRef, html, inspect, lastFixRef, log, pickFiles, project, pushLog, request, restore, runEdit, runtimeError, scopeAsk, selected, send, setAttached, setDiffFrom, setInspect, setRequest, setScopeAsk, setSelected, stop, stream, undo, undoTarget
@@ -174,7 +192,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
             <span className="ml-auto tabular-nums text-muted-foreground">{elapsed}s</span>
           </div>
           <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-neutral-950 p-2 font-mono text-[10px] leading-snug text-emerald-300">
-            {stream ? stream.slice(-1800) : "Waiting for the first words…"}
+            {stream ? stream.slice(-1800) : waitingLine(busy.engineLabel, elapsed)}
           </pre>
         </div>
       )}
