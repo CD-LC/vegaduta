@@ -379,6 +379,25 @@ public final class BuiltInToolClassifications {
                         false,
                         true));
 
+        // ---- Agent jobs (app.agent-jobs.*) ------------------
+        // continue_in_background hands the unfinished task to a background agent_job: a
+        // tenant-scoped DURABLE write (the job row persists; a blind retry would submit a
+        // second one) whose every call inside it still passes the normal per-turn ceiling
+        // and the approval gate - it buys more turns, not more privilege. Reversible: the
+        // job is cancelable while queued or running, and a finished one produced output,
+        // not standing authority (unlike schedule_task's recurring unattended runs). So it
+        // stays off the human-confirmation path; the per-agent allow-list is the opt-in.
+        exact.put(
+                "continue_in_background",
+                new ToolClassification(
+                        "continue_in_background",
+                        ToolTrustTier.TENANT_SCOPED,
+                        ToolSensitivity.WRITE_TENANT,
+                        ToolDeterminism.DURABLE,
+                        null,
+                        false,
+                        true));
+
         // ---- Google Workspace (verified scopes from GoogleScopes) ----------
         // google_gmail is UNTRUSTED_EXTERNAL on the READ side - an inbound mailbox
         // is a channel any stranger can write to, which is the whole point of a

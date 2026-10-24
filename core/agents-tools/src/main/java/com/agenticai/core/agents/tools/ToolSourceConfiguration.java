@@ -258,6 +258,15 @@ class ToolSourceConfiguration {
     }
 
     @Bean
+    @Order(292)
+    ToolSource backgroundJobToolSource(AgentBackgroundJobToolResolver backgroundJobs) {
+        return ToolSource.ofResolver(
+                "backgroundJob",
+                ToolSource.Kind.BUILT_IN,
+                backgroundJobs::resolveBackgroundJobTools);
+    }
+
+    @Bean
     @Order(295)
     ToolSource workflowDraftToolSource(AgentWorkflowDraftToolResolver workflowDrafts) {
         return ToolSource.ofResolver(
