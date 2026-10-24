@@ -71,27 +71,27 @@
     <spring-boot.version>4.1.1</spring-boot.version>
     <spring-ai.version>2.0.1</spring-ai.version>
 
-    <jspecify.version>1.0.0</jspecify.version>
+    <jspecify.version>1.0.1</jspecify.version>
     <re2j.version>1.8</re2j.version>
-    <h2.version>2.3.232</h2.version>
+    <h2.version>2.5.252</h2.version>
 
     <!-- Plugins -->
-    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
-    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
-    <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-    <maven-javadoc-plugin.version>3.11.1</maven-javadoc-plugin.version>
-    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
-    <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
-    <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
-    <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
-    <japicmp-maven-plugin.version>0.23.1</japicmp-maven-plugin.version>
+    <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
+    <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
+    <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+    <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+    <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
+    <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+    <flatten-maven-plugin.version>1.8.0</flatten-maven-plugin.version>
+    <cyclonedx-maven-plugin.version>2.9.3</cyclonedx-maven-plugin.version>
+    <japicmp-maven-plugin.version>0.26.5</japicmp-maven-plugin.version>
     <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
     <spotless.version>2.44.4</spotless.version>
     <!-- Same formatter version as core/. google-java-format does not run on JDK 17.0.20+ (a javac
          internal it calls changed), so run spotless with a JDK 21: see .github/workflows/ci.yml. -->
     <google-java-format.version>1.25.2</google-java-format.version>
-    <jacoco.version>0.8.13</jacoco.version>
+    <jacoco.version>0.8.15</jacoco.version>
 
     <!-- japicmp compares against the last released version of each artifact. Until 0.1.0 is on
          Maven Central there is no baseline, so the check is skipped. Set
@@ -162,7 +162,7 @@
       <dependency>
         <groupId>tools.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>3.1.7</version>
+        <version>3.2.3</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
