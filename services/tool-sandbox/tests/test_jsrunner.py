@@ -107,10 +107,11 @@ function run(input) { return { touched: "never reached by the model" }; }
     # A tenant program whose ONLY check at runtime is the permission model:
     # the scan denies `process`, so craft the probe via the footer position is
     # not possible here - instead assert the argv carries the grants it must.
-    argv = r._js_argv(Path("/tmp/x/tool.mjs"), Path("/tmp/x"))
+    argv = r._js_argv(Path("/tmp/x/tool.mjs"), Path("/tmp/x"), 256)
     joined = " ".join(argv)
     assert "--experimental-permission" in argv or "--permission" in argv
     assert "--allow-fs-write=/tmp/x/result.json" in joined
+    assert "--max-old-space-size=256" in joined
     outcome = r.execute("javascript", "acme", source, {}, 10_000, 256)
     assert outcome.ok
     assert outcome.result == {"touched": "never reached by the model"}

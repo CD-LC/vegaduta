@@ -384,7 +384,7 @@ class Runner:
     def _js_suffix(self, language: str) -> str:
         return ".mts" if language == TYPESCRIPT else ".mjs"
 
-    def _js_argv(self, tool_file: Path, work: Path) -> list[str]:
+    def _js_argv(self, tool_file: Path, work: Path, memory_mb: int) -> list[str]:
         # Node's permission model: every fs write anywhere except the result
         # file, every fs read outside the run's own directory, and all
         # child_process/worker/addons/wasi use throws ERR_ACCESS_DENIED. The
@@ -398,6 +398,10 @@ class Runner:
             "--allow-fs-read=" + str(work),
             "--allow-fs-write=" + str(work / "result.json"),
             "--no-warnings",
+            # The heap cap that actually bounds committed memory (V8's virtual
+            # reservation is untouched - RLIMIT_AS kills node at startup, so the
+            # run limit leaves address space unbounded; see _execute_js).
+            f"--max-old-space-size={max(16, memory_mb)}",
             str(tool_file),
         ]
 
@@ -511,9 +515,14 @@ class Runner:
         self._make_writable(result_file, ident)
 
         run = proc.run(
-            self._js_argv(tool_file, work),
+            self._js_argv(tool_file, work, memory_mb),
             cwd=work,
-            limits=self._run_limits(timeout_ms, address_space_mb=memory_mb),
+            # V8 reserves far more virtual address space than it commits (the code
+            # range alone is ~1 GB), exactly like the JVM's compressed class
+            # space, so an RLIMIT_AS near the heap size makes node fail at
+            # startup instead of bounding it. --max-old-space-size caps what is
+            # actually committed; the container cgroup bounds the rest.
+            limits=self._run_limits(timeout_ms, address_space_mb=None),
             stdin_data=input_text.encode("utf-8"),
             # No secrets: JS tools cannot declare vault secrets yet - the JS
             # harness has no narrow-API equivalent of vega.Secrets, and the
