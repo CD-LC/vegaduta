@@ -183,13 +183,49 @@ export function applyEditBlocks(html: string, blocks: EditBlock[]): ApplyResult 
   return { html: doc, applied, failed };
 }
 
-/** Cheap structural sanity check before an edit is accepted as a new
- * version: the document still has its skeleton, <script>/<style> tags are
- * balanced, and no SEARCH/REPLACE marker line leaked in. A bare `=======`
- * inside <script> is "Unexpected token '==='" at parse time - it slipped
- * through on small-model replies because the loose separator matched a
- * comment divider mid-line. Not a parser - a guard against obviously
- * broken output. */
+/** A real parser registered by the session once @babel/standalone has loaded
+ * (app/lib/babel.ts); tests register their own. Until one is registered the
+ * script check below is a no-op so a parser that fails to load never rejects
+ * a good document. `new Function` is deliberately not the fallback: the
+ * production CSP has no 'unsafe-eval', so it would throw on every script. */
+type ScriptChecker = (body: string, opts: { module: boolean }) => void;
+let scriptChecker: ScriptChecker | null = null;
+export function setScriptChecker(checker: ScriptChecker | null): void {
+  scriptChecker = checker;
+}
+
+/** Compile-checks each inline <script> body with the registered parser and
+ * returns the first body that fails, or null when every script parses (or no
+ * parser is registered). src= links, non-JS types (JSON, importmap) are
+ * skipped; `type="module"` bodies are parsed as modules so import/export is
+ * legal. A failure here is the exact "Uncaught SyntaxError ... Unexpected
+ * token" class the preview reports: marker leakage the regexes missed, a
+ * truncated block, a mangled `const`. */
+export function firstBrokenScript(html: string): string | null {
+  if (!scriptChecker) return null;
+  for (const m of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/gi)) {
+    const attrs = m[1];
+    const body = m[2];
+    if (!body.trim()) continue;
+    if (/\bsrc\s*=/i.test(attrs)) continue;
+    const type = /\btype\s*=\s*["']?([^"'\s>]+)/i.exec(attrs)?.[1]?.toLowerCase() ?? "";
+    if (type && type !== "text/javascript" && type !== "application/javascript" && type !== "module") continue;
+    try {
+      scriptChecker(body, { module: type === "module" });
+    } catch {
+      return body;
+    }
+  }
+  return null;
+}
+
+/** Cheap sanity check before an edit is accepted as a new version: the
+ * document still has its skeleton, <script>/<style> tags are balanced, no
+ * SEARCH/REPLACE marker line leaked in, and - once a script checker is
+ * registered - every inline script actually parses. A bare `=======` or a
+ * mangled `const` inside <script> is "Unexpected token 'X'" at parse time -
+ * the preview is dead on arrival and "Fix it with AI" used to ship another
+ * broken document the same way. */
 export function looksLikeValidApp(html: string): boolean {
   const lower = html.toLowerCase();
   if (!lower.includes("<body") || !lower.includes("</body>")) return false;
@@ -197,6 +233,7 @@ export function looksLikeValidApp(html: string): boolean {
   if (count(/<script[\s>]/g) !== count(/<\/script>/g)) return false;
   if (count(/<style[\s>]/g) !== count(/<\/style>/g)) return false;
   if (/^\s*(?:<{3,}\s*SEARCH|={5,}|>{3,}\s*REPLACE)\s*$/im.test(html)) return false;
+  if (firstBrokenScript(html) != null) return false;
   return true;
 }
 
