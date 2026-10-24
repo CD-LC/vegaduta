@@ -115,17 +115,19 @@
     </dependency>
     <!-- Structured job output (JobResultSchemaValidator / StructuredResultCoercer)
          compiles a tenant-authored JSON Schema. Moved here from core/agents with
-         the code that imports it; same pinned version (2.0.0) that spring-ai's
-         MCP client already pulls transitively.
+         the code that imports it.
 
-         NOTE for anyone bumping this: 2.0.0 is an API BREAK from 1.x. The types
-         are SchemaRegistry / Schema / Error / SpecificationVersion - NOT the
+         NOTE for anyone bumping this: 2.0.0 was an API BREAK from 1.x (types are
+         SchemaRegistry / Schema / Error / SpecificationVersion - NOT the
          JsonSchemaFactory / JsonSchema / ValidationMessage names every 1.x
-         example on the internet uses. -->
+         example on the internet uses), and 3.0.0 moved the engine's tree type
+         to Jackson 3 (tools.jackson.databind.JsonNode) while the codebase is
+         on Jackson 2. JobResultSchemaValidator therefore uses only the
+         String-based entry points so no tools.jackson type crosses in. -->
     <dependency>
       <groupId>com.networknt</groupId>
       <artifactId>json-schema-validator</artifactId>
-      <version>2.0.0</version>
+      <version>3.0.8</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
