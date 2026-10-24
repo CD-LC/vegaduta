@@ -369,7 +369,7 @@ services:
   valkey:
     # Valkey (BSD-3) — drop-in Redis-protocol replacement. The password is
     # templated into a config file at start so it never sits in argv.
-    image: valkey/valkey:8.1.10-alpine
+    image: valkey/valkey:9.1.2-alpine
     <<: [*restart, *logging, *nnp]
     command:
       - sh
@@ -1094,7 +1094,7 @@ services:
     networks: [observability]
 
   langfuse-valkey:
-    image: valkey/valkey:8.1.10-alpine
+    image: valkey/valkey:9.1.2-alpine
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     command:
