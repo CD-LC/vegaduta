@@ -9,6 +9,7 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.lang.ArchRule;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -45,6 +46,16 @@ class IdentityAdminPortRulesTest {
                 new ClassFileImporter()
                         .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
                         .importPackages(ModuleBoundaryRulesTest.ROOT);
+    }
+
+    /**
+     * Releases the imported class graphs. Surefire runs all of this module's tests in one JVM, so
+     * the statics of a finished test class would otherwise stay on the heap for the rest of the
+     * run, and the other ArchUnit tests import the classpath again.
+     */
+    @AfterAll
+    static void releaseImports() {
+        classes = null;
     }
 
     @Test

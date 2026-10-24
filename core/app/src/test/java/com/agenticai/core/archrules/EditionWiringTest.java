@@ -15,6 +15,7 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
@@ -59,6 +60,17 @@ class EditionWiringTest {
         fixtureGated =
                 EditionClosureRulesTest.gatedClasses(
                         new ClassFileImporter().importPackagesOf(EditionFixtures.class));
+    }
+
+    /**
+     * Releases the imported class graphs. Surefire runs all of this module's tests in one JVM, so
+     * the statics of a finished test class would otherwise stay on the heap for the rest of the
+     * run, and the other ArchUnit tests import the classpath again.
+     */
+    @AfterAll
+    static void releaseImports() {
+        productionGated = null;
+        fixtureGated = null;
     }
 
     private static StandardEnvironment env(Map<String, Object> props) {
