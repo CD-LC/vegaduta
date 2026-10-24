@@ -35,6 +35,7 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 | App Builder change-turn agent (Devin) | local editor, branch `feat/build-change-progress` | the /build change turn: `POST /generate/stream` (SSE stages) + summary + parallel file reads in `services/app-builder`, the `summary` field in `core/agents-studio/.../appbuilder` (generate-files contract), and `web/app/build/**` (`lib.ts` `generateStream`, `ChatPane.tsx` progress/revert, `ChatResultEntry.tsx` summary + per-file +/-, `edgeFiles.ts`, `studio/{patch,engine,useProjectSession}.ts`, `suggestions.ts` `diffFileStats`) - overlaps the release-readiness lead's `web/app/**` claim, so the PR says so in its title and waits for their review. Java compiles on CI only (no JDK 21 on this machine) |
 | Build/troubleshoot agent (Devin) | local editor, branches `fix/studio-waiting-progress`, `feat/local-model-gates` | `web/app/build/studio/**` (turn progress text, cloud timeout, SEARCH/REPLACE marker-leak fix) and the local-model capability gate: `localModelManagedHere` in `web/app/lib/api/localModels.ts`, `web/app/troubleshoot/page.tsx`, `web/app/providers/{page,local-model/page}.tsx`, `web/app/lib/personalInstall.ts` (route table) - overlaps the release-readiness lead's `web/app/**` claim, so the PRs say so in their titles and wait for their review |
 | Production agent | local editor | the production deployment: which release it runs, its configuration and its verification. Does not change application code without a PR |
+| Agent-authored tools agent (Devin) | local editor, branch `feat/agent-authored-tools` (PR #156) | agent-authored custom tools: `services/tool-sandbox/**` (JS/TS runtime + jsvalidate + Dockerfile + tests), `core/agents-tools/**` (`CreateCustomToolToolCallback`, `CustomCodeToolEnableApprovalExecutor`, `CustomCodeToolService`, `AgentCustomToolResolver`, `ToolResolverConfiguration`, `ToolSourceConfiguration`, `AgentToolDiscovery`), `core/agents/.../CustomCodeToolLanguage.java` + `BuiltInToolClassifications`, `core/approval/ApprovalPolicyService`, `core/agents-jobs/.../ApprovalActionLabel`, `web/app/components/customCodeTools/**`, `web/app/lib/edge/codegen.ts`, `deploy/compose/{personal,lite}.yml` sandbox service + `scripts/vegaduta` profile wiring, `tests/install/vegaduta-personal.test.sh`, `docs/configuration.md`, `CHANGELOG.md` - overlaps the release / install agent (launcher, compose, install tests) and the release-readiness lead (web/app), so the PR says so in its title and waits for their review |
 
 ## What production must run
 
@@ -115,6 +116,13 @@ break the build standalone.
 ## Log
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
+
+- 2026-10-24, agent-authored tools (local Devin session): opened PR #156
+  (`feat/agent-authored-tools`) - `create_custom_tool` built-in, structural human approval
+  (`custom_code_tool.enable` executor, default-gated so NEVER_GATE agents cannot bypass),
+  JavaScript/TypeScript in tool-sandbox (jsvalidate + Node `--experimental-permission`), and
+  tool-sandbox on personal/lite via the `tools` profile. Touches release/install and
+  release-readiness areas; waits for their review.
 
 - 2026-10-24, production deploy (local Devin session): deployed **v0.1.9** to the Azure Container Apps
   production (`vegaduta-ai-az-rg` / `vegadutaaiazacr`), in the documented order core → web + web-admin →
