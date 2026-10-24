@@ -8,6 +8,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.10] - 2026-10-24
+
 ### Added
 
 - **Agents can author their own tools.** The new built-in `create_custom_tool` lets an
