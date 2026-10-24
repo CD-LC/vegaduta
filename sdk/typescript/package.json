@@ -45,6 +45,6 @@
   "bugs": "https://github.com/CD-LC/vegaduta/issues",
   "sideEffects": false,
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   }
 }
