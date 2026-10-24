@@ -177,7 +177,8 @@ class RawExecutorBanRulesTest {
                                                 .startsWith(FACTORY_PACKAGE + ".TenantAware"))
                         .count();
         assertThat(factoryCalls)
-                .as("the scan must see core's executors being built by the factory, or it is vacuous")
+                .as(
+                        "the scan must see core's executors being built by the factory, or it is vacuous")
                 .isGreaterThan(50);
 
         Set<String> offenders = new TreeSet<>(sites.keySet());
@@ -204,7 +205,8 @@ class RawExecutorBanRulesTest {
                                             + message)
                             .isEmpty();
                     soft.assertThat(stale)
-                            .as("These ALLOWED entries no longer create a raw executor: delete them")
+                            .as(
+                                    "These ALLOWED entries no longer create a raw executor: delete them")
                             .isEmpty();
                 });
     }
@@ -220,20 +222,35 @@ class RawExecutorBanRulesTest {
 
         assertThat(sites).isNotNull();
         assertThat(sites)
-                .anySatisfy(s -> assertThat(s).startsWith("executorsFactory: Executors.newFixedThreadPool"))
+                .anySatisfy(
+                        s ->
+                                assertThat(s)
+                                        .startsWith(
+                                                "executorsFactory: Executors.newFixedThreadPool"))
                 .anySatisfy(s -> assertThat(s).startsWith("rawThread: new Thread"))
                 .anySatisfy(s -> assertThat(s).startsWith("virtualThread: Thread.ofVirtual"))
                 .anySatisfy(s -> assertThat(s).startsWith("platformThread: Thread.ofPlatform"))
-                .anySatisfy(s -> assertThat(s).startsWith("threadPoolConstructor: new ThreadPoolExecutor"))
+                .anySatisfy(
+                        s ->
+                                assertThat(s)
+                                        .startsWith(
+                                                "threadPoolConstructor: new ThreadPoolExecutor"))
                 .anySatisfy(
                         s ->
                                 assertThat(s)
                                         .startsWith(
                                                 "scheduledPoolConstructor: new"
                                                         + " ScheduledThreadPoolExecutor"))
-                .anySatisfy(s -> assertThat(s).startsWith("forkJoinCommonPool: ForkJoinPool.commonPool"))
+                .anySatisfy(
+                        s ->
+                                assertThat(s)
+                                        .startsWith("forkJoinCommonPool: ForkJoinPool.commonPool"))
                 .anySatisfy(s -> assertThat(s).startsWith("springPool: new ThreadPoolTaskExecutor"))
-                .anySatisfy(s -> assertThat(s).startsWith("springSimpleAsync: new SimpleAsyncTaskExecutor"))
+                .anySatisfy(
+                        s ->
+                                assertThat(s)
+                                        .startsWith(
+                                                "springSimpleAsync: new SimpleAsyncTaskExecutor"))
                 .anySatisfy(
                         s ->
                                 assertThat(s)
@@ -246,7 +263,11 @@ class RawExecutorBanRulesTest {
                                         .startsWith(
                                                 "thenApplyAsyncWithoutExecutor:"
                                                         + " CompletableFuture.thenApplyAsync"))
-                .anySatisfy(s -> assertThat(s).startsWith("reactorSchedulers: Schedulers.boundedElastic"));
+                .anySatisfy(
+                        s ->
+                                assertThat(s)
+                                        .startsWith(
+                                                "reactorSchedulers: Schedulers.boundedElastic"));
         assertThat(sites)
                 .as("an executor argument and the factory are allowed")
                 .noneMatch(s -> s.startsWith("allowed"));
