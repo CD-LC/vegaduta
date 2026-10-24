@@ -19,7 +19,8 @@
 // just an Alert if the service turns out to be unreachable.
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Sparkles, Loader2, RotateCw, XCircle, Plus, FolderOpen, Github, LayoutTemplate, Bot, Smartphone, X } from "lucide-react";
+import { Sparkles, Loader2, RotateCw, XCircle, Plus, FolderOpen, LayoutTemplate, Bot, Smartphone, X } from "lucide-react";
+import { Github } from "../components/lucideBrandIcons";
 import AppShell from "../components/AppShell";
 import { usePageReady } from "../components/RouteTransition";
 import Select from "../components/Select";

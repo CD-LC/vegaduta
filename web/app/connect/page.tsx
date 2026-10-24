@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, Check, Mail, MessageCircle, PackageOpen, Phone, Send, Slack, type LucideIcon } from "lucide-react";
+import { BookOpen, Check, Mail, MessageCircle, PackageOpen, Phone, Send, type LucideIcon } from "lucide-react";
+import { Slack } from "../components/lucideBrandIcons";
 import { api } from "../lib/api";
 import { useTranslations } from "../lib/i18n";
 import AppShell from "../components/AppShell";
