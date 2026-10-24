@@ -23,7 +23,6 @@
 // "App Builder is not available" block in ../page.tsx.
 import { useCallback, useEffect, useState } from "react";
 import {
-  Github,
   KeyRound,
   Loader2,
   ShieldCheck,
@@ -48,6 +47,7 @@ import {
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog";
 import { buttonVariants } from "../../components/ui/button";
+import { Github } from "../../components/lucideBrandIcons";
 import { appBuilder, type AppBuilderGithubStatus } from "../lib";
 
 const REPO_PATTERN = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;

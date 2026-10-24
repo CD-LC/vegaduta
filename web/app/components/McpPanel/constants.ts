@@ -1,6 +1,5 @@
 import {
   HardDrive,
-  Github,
   Database,
   Search,
   MessageSquare,
@@ -19,6 +18,7 @@ import {
   Calendar as CalendarIcon,
   Table as TableIcon,
 } from "lucide-react";
+import { Github } from "../lucideBrandIcons";
 
 // Maps McpCatalogEntry.iconKey (a stable string from the backend, not a URL)
 // to a brand-consistent icon - keeps the catalog free of any external asset

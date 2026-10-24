@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Braces, Check, Chrome, Code2, Copy, Download, ExternalLink, Puzzle } from "lucide-react";
+import { Braces, Check, Code2, Copy, Download, ExternalLink, Puzzle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Chrome } from "../lucideBrandIcons";
 import { API_BASE } from "../../lib/api";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
@@ -131,9 +132,7 @@ export default function PluginCard({ plugin }: { plugin: PluginEntry }) {
               </a>
             </Button>
           ) : (
-            <span className="text-xs text-muted-foreground">
-              No build published yet - check back soon.
-            </span>
+            <span className="text-xs text-muted-foreground">No build published yet - check back soon.</span>
           )}
           {plugin.externalStoreUrl && (
             <Button asChild variant="outline" size="sm">

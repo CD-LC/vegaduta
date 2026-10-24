@@ -5,7 +5,8 @@
 // localStorage), never put in a URL, cleared on success and on close.
 
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { Figma, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { Figma } from "../components/lucideBrandIcons";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { appBuilder } from "./lib";
