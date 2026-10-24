@@ -20,7 +20,7 @@
 # same image; a value passed at runtime simply wins over the baked one.
 # See web/docs/RUNTIME-CONFIG.md for the full key list.
 
-FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS build
+FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0 AS build
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -74,7 +74,7 @@ RUN NODE_OPTIONS=--max-old-space-size=3072 npm run build
 # managers (npm, corepack, yarn), which the app never runs and which carry
 # their own bundled dependencies (brace-expansion, ip-address, picomatch,
 # pacote, sigstore) with High advisories, so they are removed below.
-FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS runtime
+FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0 AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
