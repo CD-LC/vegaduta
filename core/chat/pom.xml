@@ -111,6 +111,16 @@
       <groupId>org.springframework.ai</groupId>
       <artifactId>spring-ai-google-genai</artifactId>
     </dependency>
+    <!-- OkHttp 5 split the artifact: com.squareup.okhttp3:okhttp (which
+         google-genai declares) is now an EMPTY Kotlin-multiplatform shell for
+         Maven consumers - the real okhttp3 classes live in okhttp-jvm, and only
+         Gradle module metadata redirects between them. Declared explicitly so
+         google-genai's ApiClient finds OkHttpClient on the classpath; version
+         pinned in core/pom.xml next to the okhttp entry. -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp-jvm</artifactId>
+    </dependency>
     <!-- Section2.1 in-memory-state fix: LlmGatewayRateLimiterService moves from a
          per-instance ConcurrentHashMap to a Redis-backed counter, same shape
          as ToolCircuitBreakerService (core.agents) / WorkflowTriggerRateLimiter
