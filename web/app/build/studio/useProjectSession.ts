@@ -3,7 +3,8 @@ import { useDictation } from "./dictation";
 import { canAdminister, canEdit } from "./collab";
 import { CREATE_SYSTEM, EDIT_SYSTEM, createPrompt, editPrompt, runModel, type EngineKind } from "./engine";
 import { PLAN_SYSTEM, findDuplicateDeclarations, integrationPrompt, needsPlan, parsePlan, planPrompt, repairPrompt, stepPrompt } from "./buildPlan";
-import { applyEditBlocks, dedupeSkeletonHelpers, extractEditNote, extractHtmlDocument, looksLikeValidApp, parseEditBlocks } from "./patch";
+import { applyEditBlocks, dedupeSkeletonHelpers, extractEditNote, extractHtmlDocument, firstBrokenScript, looksLikeValidApp, parseEditBlocks, setScriptChecker } from "./patch";
+import { loadBabel } from "../../lib/babel";
 import { DEFAULT_ENV, HARNESS_LINES, findInSource, serializeDoc, withHarness, type PreviewEnv, type SelectedElement } from "./runtime";
 import { MAX_ATTACHMENTS, readAttachment, resolveAssets, withAttachments, type Attachment } from "./attachments";
 import { addVersion, currentHtml, type StudioProject, type VersionSource } from "./store";
@@ -84,6 +85,14 @@ export function useProjectSession({
   const lastFixRef = useRef<string | null>(null);
   const [busy, setBusy] = useState<{ label: string; started: number; engineLabel: string } | null>(null);
   const [stream, setStream] = useState("");
+  // Warm the vendored Babel once so firstBrokenScript has a real parser when
+  // the first edit reply arrives - looksLikeValidApp can then reject a
+  // document whose <script> does not parse instead of shipping it dead.
+  useEffect(() => {
+    void loadBabel()
+      .then((B) => setScriptChecker((body, opts) => void B.transform(body, { sourceType: opts.module ? "module" : "script" })))
+      .catch(() => {});
+  }, []);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [request, setRequest] = useState(prefill ?? "");
   useEffect(() => {
@@ -423,7 +432,8 @@ export function useProjectSession({
             if (!err || ctrl.signal.aborted) return;
             const html = lastHtmlRef.current || "";
             pushLog({ kind: "user", text: k ? "Fix the error (again, differently)" : "Fix the error (automatic)" });
-            const healed = await runEdit(fixRequest(err, locateRuntimeError(html, err, HARNESS_LINES), k > 0), {
+            const broken = /syntaxerror|unexpected token/i.test(err.message) ? firstBrokenScript(html) : null;
+            const healed = await runEdit(fixRequest(err, locateRuntimeError(html, err, HARNESS_LINES), k > 0, broken), {
               prefer: "cloud",
               baseHtml: html || BLANK_APP,
             });
