@@ -140,7 +140,7 @@ scripts/vegaduta backup                       # -> deploy/compose/backups/<times
 scripts/vegaduta restore deploy/compose/backups/<timestamp>   # asks first; stops writers, pg_restore, up
 ```
 
-A backup holds `app-db.dump` (and `keycloak-db.dump` on full; `pg_dump -Fc`), `files.tar.gz` (the `seaweedfs-data` or `core-storage` volume; skipped for an external S3 bucket, back that up yourself), `env` (a copy of `.env`) and a `MANIFEST`. Move `env` to a separate secret store before the backup leaves the machine: it holds `APP_ENCRYPTION_KEY`, and a dump stored next to its key is a dump stored in the clear (see [docs/operations/key-rotation.md](../docs/operations/key-rotation.md)). Lite keeps Keycloak users in the `keycloak-data` volume (dev-file store): archive it with the stack stopped, e.g. `docker run --rm -v vegaduta-lite_keycloak-data:/d -v "$PWD":/b alpine tar czf /b/keycloak-data.tgz -C /d .`. `restore` does not unpack `files.tar.gz`; extract it into the volume with the stack stopped. Test a restore on a spare machine before you need it.
+A backup holds `app-db.dump` (and `keycloak-db.dump` on full; `pg_dump -Fc`), dumps of the profiled auxiliary databases when they run (`temporal-postgresql.dump`, `langfuse-postgres.dump`), `files.tar.gz` (the `seaweedfs-data` or `core-storage` volume; skipped for an external S3 bucket, back that up yourself), `env` (a copy of `.env`) and a `MANIFEST`. Move `env` to a separate secret store before the backup leaves the machine: it holds `APP_ENCRYPTION_KEY`, and a dump stored next to its key is a dump stored in the clear (see [docs/operations/key-rotation.md](../docs/operations/key-rotation.md)). Lite keeps Keycloak users in the `keycloak-data` volume (dev-file store): archive it with the stack stopped, e.g. `docker run --rm -v vegaduta-lite_keycloak-data:/d -v "$PWD":/b alpine tar czf /b/keycloak-data.tgz -C /d .`. `restore` does not unpack `files.tar.gz`; extract it into the volume with the stack stopped. Test a restore on a spare machine before you need it.
 
 ### Upgrade
 
@@ -149,6 +149,19 @@ scripts/vegaduta upgrade --version 1.2.0   # backup, verify + fetch release file
 ```
 
 `upgrade` takes a `backup` first and aborts when that fails (`--no-backup` skips it). On an install from a release tarball it downloads the target release's compose files, verifies them against the release `SHA256SUMS` (and its Sigstore bundle when `cosign` is installed) and continues with them; in a git checkout, `git checkout v1.2.0` first. Database migrations (Flyway) run when core starts and are forward-only: when the new version does not become healthy, `upgrade` prints the rollback (`upgrade --version <previous> --no-backup`, then `restore <backup>`). It never regenerates existing secrets but adds new ones. Read the release notes first.
+
+**Auxiliary Postgres 16/17 → 18.** `keycloak-db`, `temporal-postgresql` and `langfuse-postgres` run the stock `postgres` image, which moved to PostgreSQL 18. From 18 the official image keeps the cluster at `/var/lib/postgresql/<major>/docker` inside the mounted volume and refuses to start while it finds a pre-18 cluster (or anything mounted at the old `/var/lib/postgresql/data` path), so an **existing volume does not carry over** — that container exits with the upstream "PostgreSQL data in /var/lib/postgresql" error until the data is migrated. The pre-upgrade `backup` already dumps all three databases. To migrate one of them afterwards, recreate its volume and replay the dump (repeat per service; `vegaduta` is the default compose project name — check `docker volume ls` if `COMPOSE_PROJECT_NAME` was set):
+
+```sh
+scripts/vegaduta compose rm -fs keycloak-db
+docker volume rm vegaduta_keycloak-db-data          # drops the pg16 cluster; the dump is in the backup
+scripts/vegaduta compose up -d --wait keycloak-db   # initdb a fresh pg18 cluster
+scripts/vegaduta compose exec -T keycloak-db sh -c \
+  'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists --no-owner --exit-on-error' \
+  < deploy/compose/backups/<timestamp>/keycloak-db.dump
+```
+
+For `temporal-postgresql` (`temporal-db-data`, `temporal-postgresql.dump`) and `langfuse-postgres` (`langfuse-postgres-data`, `langfuse-postgres.dump`) use `"${POSTGRES_DB:-$POSTGRES_USER}"` as the `-d` argument, and only bother when the profile ran and the data matters: Temporal's `auto-setup` recreates an empty schema, Keycloak re-imports the realm on boot, and Langfuse keeps traces in ClickHouse/S3 — skipping the migration costs Keycloak users created after install, workflow history and Langfuse accounts, nothing else. `pg_upgrade` is not available here (the stock images ship one major each); staying on the previous release's compose pin is a valid alternative until the migration can be scheduled.
 
 ### Lite → full
 
