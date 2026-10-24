@@ -182,6 +182,13 @@ export function locateRuntimeError(html: string, report: RuntimeErrorReport, har
  * back after an earlier fix, so the model is told to try something else. */
 export function fixRequest(report: RuntimeErrorReport, where: ErrorLocation, repeated = false): string {
   const parts = [`The app throws this error at runtime - fix the ROOT CAUSE: ${report.message.slice(0, 600)}`];
+  if (/syntaxerror|unexpected token/i.test(report.message)) {
+    // A parse error means nothing ran, so there is no stack line to point
+    // at - name the likely culprit explicitly or the model just guesses.
+    parts.push(
+      "This is a PARSE error: the app's <script> fails to compile, so no line number exists. The usual cause is text that is not JavaScript inside the script - a leftover <<<<<<< SEARCH / ======= / >>>>>>> REPLACE marker line, a stray line of '=' characters, or un-commented prose. Find and remove that line."
+    );
+  }
   if (where.code) {
     parts.push(`It is thrown at this line of APP:\n${where.code}`);
     if (where.nearby) parts.push(`Surrounding code in APP (copy SEARCH lines from APP):\n${where.nearby}`);
