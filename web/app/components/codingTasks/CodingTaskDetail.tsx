@@ -131,8 +131,8 @@ export default function CodingTaskDetail({
                 })}
               </span>
             </div>
-            <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">{task.instruction}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-2 whitespace-pre-wrap break-words text-sm text-foreground">{task.instruction}</p>
+            <p className="mt-1 break-words text-xs text-muted-foreground">
               {task.sourceKind === "GIT" ? task.repoUrl : t("sourceArchiveShort")} - <code>{task.testCommand}</code>
             </p>
           </div>

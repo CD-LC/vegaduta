@@ -40,7 +40,7 @@ function ProposalRow({ proposal, learned }: { proposal: LearningProposal; learne
   const edited = editing && draft.trim() !== proposal.body ? draft.trim() : undefined;
   return (
     <li className="rounded-lg border border-border p-2.5 text-xs" data-testid={`learned-proposal-${proposal.id}`}>
-      {proposal.title && proposal.title !== proposal.body && <p className="font-medium text-foreground">{proposal.title}</p>}
+      {proposal.title && proposal.title !== proposal.body && <p className="break-words font-medium text-foreground">{proposal.title}</p>}
       {editing ? (
         <textarea
           value={draft}

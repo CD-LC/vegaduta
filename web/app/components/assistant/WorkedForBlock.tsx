@@ -297,7 +297,7 @@ function EventRow({ step }: { step: ActivityStep }) {
       {text && (
         <p
           className={cn(
-            "whitespace-pre-wrap text-xs text-muted-foreground",
+            "whitespace-pre-wrap break-words text-xs text-muted-foreground",
             step.type === "thinking" && "italic"
           )}
           title={text}

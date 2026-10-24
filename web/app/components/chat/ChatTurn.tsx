@@ -93,7 +93,7 @@ export default function ChatTurn({
           className={cn(
             "max-w-[85%] rounded-xl px-4 py-2.5 text-sm leading-relaxed",
             turn.role === "user"
-              ? "whitespace-pre-wrap bg-primary text-primary-foreground"
+              ? "whitespace-pre-wrap break-words bg-primary text-primary-foreground"
               : "border border-border bg-secondary/40 text-foreground",
             branching.editingIndex === i && turn.role === "user" && "hidden"
           )}

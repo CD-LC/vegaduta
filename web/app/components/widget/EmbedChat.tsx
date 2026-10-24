@@ -454,7 +454,7 @@ function ChatBubble({ bubble }: { bubble: Bubble }) {
             : "max-w-[85%] rounded-2xl rounded-bl-sm border border-border/60 bg-card/70 px-3 py-2 text-sm"
         }
       >
-        <p className="whitespace-pre-wrap leading-relaxed">{bubble.text}</p>
+        <p className="whitespace-pre-wrap break-words leading-relaxed">{bubble.text}</p>
       </div>
     </div>
   );
