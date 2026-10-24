@@ -10,7 +10,7 @@
       "installMaven": true,
       "installGradle": false
     },
-    "ghcr.io/devcontainers/features/node:1": {
+    "ghcr.io/devcontainers/features/node:2": {
       "version": "22"
     },
     "ghcr.io/devcontainers/features/python:1": {
@@ -19,7 +19,7 @@
     // docker-in-docker so `scripts/vegaduta` / `scripts/dev-up.sh` can run the compose
     // stack inside the container. docker-outside-of-docker is NOT used on
     // purpose: a contributor on a fresh machine has no host daemon to bind.
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:4": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
