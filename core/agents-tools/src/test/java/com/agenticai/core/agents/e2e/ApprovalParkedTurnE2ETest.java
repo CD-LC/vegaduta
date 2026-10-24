@@ -35,9 +35,9 @@ class ApprovalParkedTurnE2ETest {
     private ApprovalTurnHarness harness;
 
     /**
-     * The wording check applies to every model here: these tests are about WHY a stopped reply is or is not
-     * continued (a turn parked on an approval is not), and under the default scope the harness's model is not
-     * a weak tool caller, so a "not continued" outcome would prove nothing.
+     * The wording check applies to every model here: these tests are about WHY a stopped reply is
+     * or is not continued (a turn parked on an approval is not), and under the default scope the
+     * harness's model is not a weak tool caller, so a "not continued" outcome would prove nothing.
      */
     private static void everyModel(com.agenticai.core.agents.turn.ContinuationProperties p) {
         p.setHeuristicScope(com.agenticai.core.agents.turn.ContinuationProperties.Scope.ALL_MODELS);
@@ -74,7 +74,8 @@ class ApprovalParkedTurnE2ETest {
                                         request.hasToolResult()
                                                 ? ScriptedLlm.text(
                                                         "I will send the invoice as soon as you say go.")
-                                                : ScriptedLlm.callTool("c1", INVOICE, "{\"to\":\"a\"}"))
+                                                : ScriptedLlm.callTool(
+                                                        "c1", INVOICE, "{\"to\":\"a\"}"))
                         .build();
 
         String reply = harness.chat(GOAL);
@@ -172,9 +173,15 @@ class ApprovalParkedTurnE2ETest {
                                                         "",
                                                         List.of(
                                                                 new AssistantMessage.ToolCall(
-                                                                        "c1", "function", INVOICE, "{\"to\":\"a\"}"),
+                                                                        "c1",
+                                                                        "function",
+                                                                        INVOICE,
+                                                                        "{\"to\":\"a\"}"),
                                                                 new AssistantMessage.ToolCall(
-                                                                        "c2", "function", RECEIPT, "{\"to\":\"b\"}")),
+                                                                        "c2",
+                                                                        "function",
+                                                                        RECEIPT,
+                                                                        "{\"to\":\"b\"}")),
                                                         "tool_calls"))
                         .build();
 
@@ -196,13 +203,23 @@ class ApprovalParkedTurnE2ETest {
                                                 r ->
                                                         r.contains(RECEIPT)
                                                                 && r.contains("NOT executed")
-                                                                && r.contains(requests.get(1).getId().toString())),
+                                                                && r.contains(
+                                                                        requests.get(1)
+                                                                                .getId()
+                                                                                .toString())),
                                 "the model is told the sibling was queued and under which request: "
                                         + harness.llm().lastRequest().toolResults()));
 
         for (ApprovalRequest request : requests) {
             harness.approvalService().approve(request.getId(), ApprovalTurnHarness.APPROVER);
         }
+
+        // The request row's status flip happens on the executor path: under load it can still
+        // read PENDING a moment after approve() returned. Give the propagation a moment instead
+        // of asserting on the first read.
+        assertTrue(
+                harness.awaitRequestStatuses(ApprovalStatus.APPROVED, requests.size()),
+                "all requests landed APPROVED: " + harness.requestStatuses());
 
         assertAll(
                 () -> assertEquals(1, invoice.executions()),
@@ -217,8 +234,13 @@ class ApprovalParkedTurnE2ETest {
                     List<ChatTurn> history = harness.historyTheNextTurnWillSee();
                     assertTrue(
                             history.stream()
-                                    .anyMatch(t -> t.content().contains("'" + RECEIPT + "' completed")),
-                            "the sibling's outcome is in the history the next turn reads: " + history);
+                                    .anyMatch(
+                                            t ->
+                                                    t.content()
+                                                            .contains(
+                                                                    "'" + RECEIPT + "' completed")),
+                            "the sibling's outcome is in the history the next turn reads: "
+                                    + history);
                 });
     }
 
@@ -241,7 +263,8 @@ class ApprovalParkedTurnE2ETest {
                                     if (request.number() == 2) {
                                         return ScriptedLlm.callTool("c2", LOOKUP, "{}");
                                     }
-                                    return ScriptedLlm.text("Could not submit the invoice; looked it up instead.");
+                                    return ScriptedLlm.text(
+                                            "Could not submit the invoice; looked it up instead.");
                                 })
                         .build();
         when(harness.approvals().requestRepository().save(any(ApprovalRequest.class)))
@@ -259,8 +282,11 @@ class ApprovalParkedTurnE2ETest {
                                                 r ->
                                                         r.contains(INVOICE)
                                                                 && r.contains("NOT executed")
-                                                                && r.toLowerCase().contains("could not be recorded")),
-                                "the model is told plainly that nothing is waiting: " + toolResults),
+                                                                && r.toLowerCase()
+                                                                        .contains(
+                                                                                "could not be recorded")),
+                                "the model is told plainly that nothing is waiting: "
+                                        + toolResults),
                 () ->
                         assertEquals(
                                 1,
@@ -268,7 +294,12 @@ class ApprovalParkedTurnE2ETest {
                                 "the turn is not stuck 'parked': the next tool call runs"),
                 () ->
                         assertFalse(
-                                toolResults.stream().anyMatch(r -> r.contains(LOOKUP) && r.contains("waiting for human approval")),
+                                toolResults.stream()
+                                        .anyMatch(
+                                                r ->
+                                                        r.contains(LOOKUP)
+                                                                && r.contains(
+                                                                        "waiting for human approval")),
                                 toolResults.toString()));
     }
 
@@ -295,7 +326,9 @@ class ApprovalParkedTurnE2ETest {
                                                                 "c" + request.number(),
                                                                 "function",
                                                                 LOOKUP,
-                                                                "{\"n\":" + request.number() + "}")),
+                                                                "{\"n\":"
+                                                                        + request.number()
+                                                                        + "}")),
                                                 "tool_calls"))
                         .build();
 

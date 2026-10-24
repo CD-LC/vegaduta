@@ -10,13 +10,13 @@ import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.AgentAutonomyTier;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.core.ReasoningDepth;
-import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.limits.AgentRuntimeProperties;
 import com.agenticai.core.agents.limits.AgentRuntimeSettingsResolver;
-import com.agenticai.core.agents.runtime.RuntimeLimits;
 import com.agenticai.core.agents.limits.TenantRuntimeLimitsService;
+import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
+import com.agenticai.core.agents.runtime.RuntimeLimits;
 import com.agenticai.core.agents.tools.AgentToolCallApprovalExecutor;
 import com.agenticai.core.agents.tools.AgentToolProvider;
 import com.agenticai.core.agents.tools.ToolCallLog;
@@ -24,6 +24,7 @@ import com.agenticai.core.agents.tools.ToolCallLogRepository;
 import com.agenticai.core.agents.tools.ToolCallLogService;
 import com.agenticai.core.agents.tools.ToolHarnessBridge;
 import com.agenticai.core.agents.turn.AgentChatService;
+import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.agents.turn.ChatFinishProperties;
 import com.agenticai.core.agents.turn.ChatResilienceProperties;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
@@ -32,7 +33,6 @@ import com.agenticai.core.agents.turn.TurnHarnessBridge;
 import com.agenticai.core.agents.turn.approval.ApprovalContinuationClaims;
 import com.agenticai.core.agents.turn.approval.ApprovalContinuationFactory;
 import com.agenticai.core.agents.turn.approval.ApprovalContinuationLauncher;
-import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.agents.turn.approval.ApprovalContinuationPrompt;
 import com.agenticai.core.approval.ApprovalActionExecutor;
 import com.agenticai.core.approval.ApprovalHarnessBridge;
@@ -68,8 +68,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -128,7 +128,10 @@ public final class ApprovalTurnHarness implements AutoCloseable {
     public static final String DEFAULT_SUBJECT = "user-1";
     public static final String APPROVER = "admin-1";
 
-    /** The model name cost routing sends a simple message to, when {@link Builder#costRouting} is on. */
+    /**
+     * The model name cost routing sends a simple message to, when {@link Builder#costRouting} is
+     * on.
+     */
     public static final String ECONOMY_MODEL = "economy-model";
 
     /** The model name the agent runs on. */
@@ -162,17 +165,35 @@ public final class ApprovalTurnHarness implements AutoCloseable {
     private final List<String> gatewayModels = new CopyOnWriteArrayList<>();
     private final ToolCallLogService toolCallLogService;
     private final AgentRuntimeSettingsResolver runtime;
-    /** The settings catalog the turn reads its behaviour settings from; null unless {@link Builder#settingsCatalog}. */
+
+    /**
+     * The settings catalog the turn reads its behaviour settings from; null unless {@link
+     * Builder#settingsCatalog}.
+     */
     private final com.agenticai.core.settings.DefaultSettingsResolver settingsResolver;
-    /** The catalog again, for the pieces that are built before it exists (the tool guard asks it lazily). */
-    private final java.util.concurrent.atomic.AtomicReference<com.agenticai.core.settings.SettingsResolver> settingsRef =
-            new java.util.concurrent.atomic.AtomicReference<>();
+
+    /**
+     * The catalog again, for the pieces that are built before it exists (the tool guard asks it
+     * lazily).
+     */
+    private final java.util.concurrent.atomic.AtomicReference<
+                    com.agenticai.core.settings.SettingsResolver>
+            settingsRef = new java.util.concurrent.atomic.AtomicReference<>();
+
     private final com.agenticai.core.settings.InMemorySettingsStore settingsStore =
             new com.agenticai.core.settings.InMemorySettingsStore();
-    /** The scoped history size just before the last human decision (see {@link #awaitContinuation}). */
+
+    /**
+     * The scoped history size just before the last human decision (see {@link #awaitContinuation}).
+     */
     private volatile int historySizeBeforeDecision;
-    /** The audit log the tool guard writes its reviewable decisions to (see {@link Builder#classifications()}). */
-    private final com.agenticai.core.audit.AuditLogService auditLog = mock(com.agenticai.core.audit.AuditLogService.class);
+
+    /**
+     * The audit log the tool guard writes its reviewable decisions to (see {@link
+     * Builder#classifications()}).
+     */
+    private final com.agenticai.core.audit.AuditLogService auditLog =
+            mock(com.agenticai.core.audit.AuditLogService.class);
 
     private ApprovalTurnHarness(Builder b) {
         this.sessionId = b.sessionId;
@@ -222,8 +243,10 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         when(agentService.getAutonomyTier(any())).thenReturn(b.autonomy);
         when(agentService.getAllowedToolNames(any())).thenReturn(b.allowedTools);
         when(agentService.getReasoningDepth(any())).thenReturn(b.depth);
-        // The one resolver of the per-tenant / per-agent runtime limits, real, over the layers the test sets.
-        // With none set every limit is the platform value the harness was built with, so the existing tests
+        // The one resolver of the per-tenant / per-agent runtime limits, real, over the layers the
+        // test sets.
+        // With none set every limit is the platform value the harness was built with, so the
+        // existing tests
         // run through the same resolver and must not notice it.
         AgentRuntimeProperties runtimeProperties = new AgentRuntimeProperties();
         b.runtimeTuning.accept(runtimeProperties);
@@ -256,10 +279,14 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         when(gateway.resolveClient(any(), any(), any()))
                 .thenAnswer(
                         inv -> {
-                            gatewayModels.add(inv.<com.agenticai.core.chat.gateway.GatewayCallSpec>getArgument(1).model());
+                            gatewayModels.add(
+                                    inv.<com.agenticai.core.chat.gateway.GatewayCallSpec>
+                                                    getArgument(1)
+                                            .model());
                             return chatClient;
                         });
-        // The fallback provider and the delegated calls resolve their client through the two-argument form.
+        // The fallback provider and the delegated calls resolve their client through the
+        // two-argument form.
         when(gateway.resolveClient(any(), any())).thenReturn(chatClient);
 
         // --- session memory: the real service over an in-memory Redis ---
@@ -288,7 +315,8 @@ public final class ApprovalTurnHarness implements AutoCloseable {
             approvals.requireApprovalFor("mcp_tool." + gated);
         }
         AtomicReference<AgentToolProvider> providerRef = new AtomicReference<>();
-        AtomicReference<com.agenticai.core.agents.turn.ApprovalContinuationPort> launcherRef = new AtomicReference<>();
+        AtomicReference<com.agenticai.core.agents.turn.ApprovalContinuationPort> launcherRef =
+                new AtomicReference<>();
         this.continuationProperties = new ApprovalContinuationProperties();
         b.continuationTuning.accept(continuationProperties);
         org.springframework.beans.factory.support.StaticListableBeanFactory textBeans =
@@ -310,7 +338,8 @@ public final class ApprovalTurnHarness implements AutoCloseable {
                         new ObjectMapper(),
                         approvals.eventPublisher());
         List<ApprovalActionExecutor> allExecutors = new ArrayList<>(List.of(executor));
-        for (java.util.function.Function<ApprovalHarnessBridge, ApprovalActionExecutor> extra : b.extraExecutors) {
+        for (java.util.function.Function<ApprovalHarnessBridge, ApprovalActionExecutor> extra :
+                b.extraExecutors) {
             allExecutors.add(extra.apply(approvals));
         }
         for (String actionType : b.gatedActions) {
@@ -320,8 +349,10 @@ public final class ApprovalTurnHarness implements AutoCloseable {
             approvals.allowWithoutApproval(actionType);
         }
         this.gate = approvals.gateService(allExecutors);
-        // The gate reports how every approval ended through the same port the application wires: this is what makes
-        // a code-workspace run, an apply or a channel send resume the agent without its executor knowing how.
+        // The gate reports how every approval ended through the same port the application wires:
+        // this is what makes
+        // a code-workspace run, an apply or a channel send resume the agent without its executor
+        // knowing how.
         gate.setOutcomePort(
                 new com.agenticai.core.agents.tools.ApprovalOutcomeFollowUp(
                         HarnessProviders.provider(memory),
@@ -329,7 +360,8 @@ public final class ApprovalTurnHarness implements AutoCloseable {
                         continuationTexts,
                         new ObjectMapper()));
         List<ToolCallback> allTools = new ArrayList<ToolCallback>(tools);
-        for (java.util.function.Function<HumanApprovalGateService, ToolCallback> factory : b.selfGatingTools) {
+        for (java.util.function.Function<HumanApprovalGateService, ToolCallback> factory :
+                b.selfGatingTools) {
             allTools.add(factory.apply(gate));
         }
         // The tool-call log is the one thing besides session memory the continuation reads (which
@@ -361,7 +393,8 @@ public final class ApprovalTurnHarness implements AutoCloseable {
                                                                                                 .Instant
                                                                                                 .class)))
                                         .toList());
-        // The whole log of one run, oldest first: what a turn reads back as evidence of its tool calls.
+        // The whole log of one run, oldest first: what a turn reads back as evidence of its tool
+        // calls.
         when(toolCallLogs.findByAgentIdAndSessionIdOrderByStartedAtAsc(any(), anyString()))
                 .thenAnswer(
                         inv ->
@@ -372,33 +405,46 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         this.toolCallLogService = new ToolCallLogService(toolCallLogs);
         com.agenticai.core.agents.tools.AgentToolGovernance governance = null;
         if (b.classifications) {
-            // The classification registry over the compiled-in declarations (no stored rows), a real lethal-trifecta
-            // service over it and the agent's allow-list, the platform guardrail tuning and an audit log: the governance
+            // The classification registry over the compiled-in declarations (no stored rows), a
+            // real lethal-trifecta
+            // service over it and the agent's allow-list, the platform guardrail tuning and an
+            // audit log: the governance
             // the application wires, so a tool is judged by its REAL classification.
-            com.agenticai.core.agents.tools.classification.ToolClassificationRepository classificationRows =
-                    mock(com.agenticai.core.agents.tools.classification.ToolClassificationRepository.class);
-            when(classificationRows.findByToolName(anyString())).thenReturn(java.util.Optional.empty());
+            com.agenticai.core.agents.tools.classification.ToolClassificationRepository
+                    classificationRows =
+                            mock(
+                                    com.agenticai.core.agents.tools.classification
+                                            .ToolClassificationRepository.class);
+            when(classificationRows.findByToolName(anyString()))
+                    .thenReturn(java.util.Optional.empty());
             when(classificationRows.findPatternRows()).thenReturn(List.of());
             io.micrometer.core.instrument.simple.SimpleMeterRegistry meters =
                     new io.micrometer.core.instrument.simple.SimpleMeterRegistry();
-            com.agenticai.core.agents.tools.classification.ToolClassificationRegistry classificationRegistry =
-                    new com.agenticai.core.agents.tools.classification.ToolClassificationRegistry(classificationRows, meters);
+            com.agenticai.core.agents.tools.classification.ToolClassificationRegistry
+                    classificationRegistry =
+                            new com.agenticai.core.agents.tools.classification
+                                    .ToolClassificationRegistry(classificationRows, meters);
             governance =
                     new com.agenticai.core.agents.tools.AgentToolGovernance(
                             HarnessProviders.provider(classificationRegistry),
                             HarnessProviders.provider(meters),
                             new StaticListableBeanFactory()
-                                    .getBeanProvider(com.agenticai.core.chat.gateway.LlmGatewayToolOutputRedactor.class),
+                                    .getBeanProvider(
+                                            com.agenticai.core.chat.gateway
+                                                    .LlmGatewayToolOutputRedactor.class),
                             true,
                             "");
             governance.setTrifectaEnforcement(
                     new com.agenticai.core.agents.tools.TrifectaEnforcementService(
                             HarnessProviders.provider(
-                                    new com.agenticai.core.agents.tools.classification.LethalTrifectaDetector(
-                                            classificationRegistry, HarnessProviders.provider(meters))),
+                                    new com.agenticai.core.agents.tools.classification
+                                            .LethalTrifectaDetector(
+                                            classificationRegistry,
+                                            HarnessProviders.provider(meters))),
                             HarnessProviders.provider(agentService),
                             new StaticListableBeanFactory()
-                                    .getBeanProvider(com.agenticai.core.agents.tools.AgentToolPort.class),
+                                    .getBeanProvider(
+                                            com.agenticai.core.agents.tools.AgentToolPort.class),
                             HarnessProviders.provider(meters),
                             "warn",
                             true,
@@ -432,25 +478,32 @@ public final class ApprovalTurnHarness implements AutoCloseable {
 
         ChatFinishProperties finishProperties = new ChatFinishProperties();
         b.finishTuning.accept(finishProperties);
-        // The behaviour settings catalog over the SAME property objects the runtime reads, so an override in the
+        // The behaviour settings catalog over the SAME property objects the runtime reads, so an
+        // override in the
         // store is the only thing that can make a use site differ from its property.
         if (b.settingsCatalog) {
-            com.agenticai.core.settings.SettingsProperties noCache = new com.agenticai.core.settings.SettingsProperties();
+            com.agenticai.core.settings.SettingsProperties noCache =
+                    new com.agenticai.core.settings.SettingsProperties();
             noCache.setCacheTtl(Duration.ZERO);
             this.settingsResolver =
                     new com.agenticai.core.settings.DefaultSettingsResolver(
                             new com.agenticai.core.settings.SettingsRegistry(
                                     List.of(
-                                            new com.agenticai.core.agents.limits.StepLimitSettings(b.stepLimits),
-                                            new com.agenticai.core.agents.settings.ProductControlsCatalog(
+                                            new com.agenticai.core.agents.limits.StepLimitSettings(
+                                                    b.stepLimits),
+                                            new com.agenticai.core.agents.settings
+                                                    .ProductControlsCatalog(
                                                     b.semanticCache,
-                                                    new com.agenticai.core.agents.turn.ChatLimitsProperties(),
+                                                    new com.agenticai.core.agents.turn
+                                                            .ChatLimitsProperties(),
                                                     b.followUp,
                                                     b.memory,
                                                     b.toolLedger),
-                                            new com.agenticai.core.agents.settings.BehaviourSettingsCatalog(
+                                            new com.agenticai.core.agents.settings
+                                                    .BehaviourSettingsCatalog(
                                                     continuationProperties,
-                                                    new com.agenticai.core.approval.ApprovalExpiryProperties(),
+                                                    new com.agenticai.core.approval
+                                                            .ApprovalExpiryProperties(),
                                                     finishProperties,
                                                     b.retry,
                                                     b.cache,
@@ -460,13 +513,15 @@ public final class ApprovalTurnHarness implements AutoCloseable {
                                                     b.routing,
                                                     b.memory,
                                                     b.guardrailTuning,
-                                                    new com.agenticai.core.agents.auxiliary.AuxiliaryModelProperties()))),
+                                                    new com.agenticai.core.agents.auxiliary
+                                                            .AuxiliaryModelProperties()))),
                             settingsStore,
                             List.of(),
                             noCache,
                             null);
             settingsRef.set(this.settingsResolver);
-            // The guardrail checks read their strictness settings through this static holder, as the application's
+            // The guardrail checks read their strictness settings through this static holder, as
+            // the application's
             // GuardrailSettingsConfiguration sets it at startup; released in close().
             com.agenticai.core.guardrails.GuardrailSettings.use(this.settingsResolver);
             runtime.useSettings(settingsRef::get);
@@ -478,10 +533,16 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         if (b.costRouting) {
             costClassifier =
                     new com.agenticai.core.agents.turn.quality.QueryComplexityClassifier(
-                            new StaticListableBeanFactory().getBeanProvider(com.agenticai.core.agents.decision.DecisionEngine.class),
+                            new StaticListableBeanFactory()
+                                    .getBeanProvider(
+                                            com.agenticai.core.agents.decision.DecisionEngine
+                                                    .class),
                             false,
                             0.75,
-                            new StaticListableBeanFactory().getBeanProvider(com.agenticai.core.agents.turn.quality.RoutingSimpleProperties.class));
+                            new StaticListableBeanFactory()
+                                    .getBeanProvider(
+                                            com.agenticai.core.agents.turn.quality
+                                                    .RoutingSimpleProperties.class));
             if (settingsResolver != null) {
                 costClassifier.setSettingsResolver(settingsResolver);
             }
@@ -543,8 +604,8 @@ public final class ApprovalTurnHarness implements AutoCloseable {
     }
 
     /**
-     * A tenant-scope override in the harness's settings catalog ({@link Builder#settingsCatalog}), as the tenant admin's
-     * write leaves it: the very next turn reads it.
+     * A tenant-scope override in the harness's settings catalog ({@link Builder#settingsCatalog}),
+     * as the tenant admin's write leaves it: the very next turn reads it.
      */
     public void tenantSetting(String key, Object value) {
         writeSetting(com.agenticai.core.settings.SettingScope.TENANT, "", key, value);
@@ -552,12 +613,18 @@ public final class ApprovalTurnHarness implements AutoCloseable {
 
     /** An agent-scope override for the harness's agent. */
     public void agentSetting(String key, Object value) {
-        writeSetting(com.agenticai.core.settings.SettingScope.AGENT, agentId.toString(), key, value);
+        writeSetting(
+                com.agenticai.core.settings.SettingScope.AGENT, agentId.toString(), key, value);
     }
 
-    private void writeSetting(com.agenticai.core.settings.SettingScope scope, String scopeId, String key, Object value) {
+    private void writeSetting(
+            com.agenticai.core.settings.SettingScope scope,
+            String scopeId,
+            String key,
+            Object value) {
         if (settingsResolver == null) {
-            throw new IllegalStateException("build the harness with settingsCatalog() to set settings");
+            throw new IllegalStateException(
+                    "build the harness with settingsCatalog() to set settings");
         }
         TenantContext.set(tenant);
         settingsStore.saveCurrent(
@@ -571,7 +638,10 @@ public final class ApprovalTurnHarness implements AutoCloseable {
 
     // ------------------------------------------------------------------ driving a conversation
 
-    /** One user message through the real turn pipeline; the reply as the separate chunks the person's client receives. */
+    /**
+     * One user message through the real turn pipeline; the reply as the separate chunks the
+     * person's client receives.
+     */
     public List<String> chatChunks(String userMessage) {
         TenantContext.set(tenant);
         ChatTurnRequest request =
@@ -585,22 +655,28 @@ public final class ApprovalTurnHarness implements AutoCloseable {
     }
 
     /**
-     * One user message through the real turn pipeline for a client that asked for step events: the reply, how the
-     * stream ended, and the step events the turn sent beside it (see {@link StepEventTurn}).
+     * One user message through the real turn pipeline for a client that asked for step events: the
+     * reply, how the stream ended, and the step events the turn sent beside it (see {@link
+     * StepEventTurn}).
      */
     public StepEventTurn chatWithStepEvents(String userMessage) {
         return chatWithStepEvents(userMessage, null);
     }
 
-    /** As {@link #chatWithStepEvents(String)} for the turn the platform starts after a human decided {@code continuation}'s call. */
+    /**
+     * As {@link #chatWithStepEvents(String)} for the turn the platform starts after a human decided
+     * {@code continuation}'s call.
+     */
     public StepEventTurn chatWithStepEvents(
             String userMessage, com.agenticai.core.agents.turn.ApprovalContinuation continuation) {
         TenantContext.set(tenant);
         com.agenticai.core.agents.tools.AgentStepEventEmitter events =
                 com.agenticai.core.agents.tools.AgentStepEventEmitter.active();
         ChatTurnRequest.Builder builder =
-                ChatTurnRequest.builder(agentId, sessionId, subject, userMessage).stepEvents(events);
-        ChatTurnRequest request = (continuation == null ? builder : builder.continuation(continuation)).build();
+                ChatTurnRequest.builder(agentId, sessionId, subject, userMessage)
+                        .stepEvents(events);
+        ChatTurnRequest request =
+                (continuation == null ? builder : builder.continuation(continuation)).build();
         String reply = null;
         Throwable failure = null;
         try {
@@ -628,37 +704,47 @@ public final class ApprovalTurnHarness implements AutoCloseable {
     }
 
     /**
-     * As {@link #chat(String)} for a turn with an enclosing deadline - an agent job's own timeout - which
-     * the buffered depths use as their time limit when it is longer than {@code buffered-turn-timeout}.
+     * As {@link #chat(String)} for a turn with an enclosing deadline - an agent job's own timeout -
+     * which the buffered depths use as their time limit when it is longer than {@code
+     * buffered-turn-timeout}.
      */
     public String chatWithDeadline(String userMessage, Duration fromNow) {
         return chat(userMessage, sessionId, java.time.Instant.now().plus(fromNow));
     }
 
     /**
-     * As {@link #chat(String)} for a run that carries request-layer {@code caps} (an agent job's remaining tool
-     * budget) and an enclosing deadline, the way {@code AgentJobTurns} builds its turn. Either may be null.
+     * As {@link #chat(String)} for a run that carries request-layer {@code caps} (an agent job's
+     * remaining tool budget) and an enclosing deadline, the way {@code AgentJobTurns} builds its
+     * turn. Either may be null.
      */
     public String chatWithCaps(String userMessage, RuntimeLimits caps, Duration deadlineFromNow) {
         TenantContext.set(tenant);
         ChatTurnRequest request =
-                ChatTurnRequest.builder(agentId, sessionId, subject, userMessage).caps(caps).build();
+                ChatTurnRequest.builder(agentId, sessionId, subject, userMessage)
+                        .caps(caps)
+                        .build();
         TurnContext context =
                 TurnContext.forEntry(tenant, request)
-                        .withDeadline(deadlineFromNow == null ? null : java.time.Instant.now().plus(deadlineFromNow));
+                        .withDeadline(
+                                deadlineFromNow == null
+                                        ? null
+                                        : java.time.Instant.now().plus(deadlineFromNow));
         List<String> chunks =
                 chatService.chat(context, request).collectList().block(Duration.ofSeconds(60));
         return chunks == null ? "" : String.join("", chunks);
     }
 
     /**
-     * One user message with a run-scoped tool selection ({@code ChatRequest.toolNames}): the run may use only these
-     * of the agent's tools. {@code null} is "no selection", an empty list "no tools for this run".
+     * One user message with a run-scoped tool selection ({@code ChatRequest.toolNames}): the run
+     * may use only these of the agent's tools. {@code null} is "no selection", an empty list "no
+     * tools for this run".
      */
     public String chatWithTools(String userMessage, List<String> toolNames) {
         TenantContext.set(tenant);
         ChatTurnRequest request =
-                ChatTurnRequest.builder(agentId, sessionId, subject, userMessage).toolNames(toolNames).build();
+                ChatTurnRequest.builder(agentId, sessionId, subject, userMessage)
+                        .toolNames(toolNames)
+                        .build();
         List<String> chunks =
                 chatService
                         .chat(TurnContext.forEntry(tenant, request), request)
@@ -667,7 +753,10 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         return chunks == null ? "" : String.join("", chunks);
     }
 
-    /** As {@link #chatWithTools}; the error the turn ends with (the refusal of an unusable selection), or null. */
+    /**
+     * As {@link #chatWithTools}; the error the turn ends with (the refusal of an unusable
+     * selection), or null.
+     */
     public Throwable chatWithToolsFailure(String userMessage, List<String> toolNames) {
         try {
             chatWithTools(userMessage, toolNames);
@@ -688,7 +777,8 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         ChatTurnRequest request =
                 ChatTurnRequest.builder(agentId, sessionId, subject, userMessage).build();
         try {
-            chatService.chat(TurnContext.forEntry(tenant, request), request)
+            chatService
+                    .chat(TurnContext.forEntry(tenant, request), request)
                     .collectList()
                     .block(Duration.ofSeconds(60));
             return null;
@@ -755,16 +845,18 @@ public final class ApprovalTurnHarness implements AutoCloseable {
     /**
      * Waits for the turn the SERVER starts after a decision, with no message from the client, and
      * returns the assistant reply that turn produced. The continuation is recognised the way the
-     * web recognises it: a stored USER turn that opens with the {@value
-     * #CONTINUATION_MARKER} tag, followed by an assistant turn. Fails with the transcript when none
-     * appears in time, which is exactly the symptom of "approved, and nothing happened".
+     * web recognises it: a stored USER turn that opens with the {@value #CONTINUATION_MARKER} tag,
+     * followed by an assistant turn. Fails with the transcript when none appears in time, which is
+     * exactly the symptom of "approved, and nothing happened".
      */
     public String awaitContinuation() {
         long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
         List<ChatTurn> history = storedTranscript();
         while (System.nanoTime() < deadline) {
             history = storedTranscript();
-            for (int i = Math.min(historySizeBeforeDecision, history.size()); i < history.size(); i++) {
+            for (int i = Math.min(historySizeBeforeDecision, history.size());
+                    i < history.size();
+                    i++) {
                 ChatTurn turn = history.get(i);
                 if (turn.role() == MessageRole.USER
                         && turn.content() != null
@@ -862,10 +954,14 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         return continuationProperties;
     }
 
-    /** Makes every tool call logged so far {@code by} older, as if that much time had passed since the conversation used them. */
+    /**
+     * Makes every tool call logged so far {@code by} older, as if that much time had passed since
+     * the conversation used them.
+     */
     public void ageToolCallLog(Duration by) {
         for (ToolCallLog row : toolCallLogRows) {
-            org.springframework.test.util.ReflectionTestUtils.setField(row, "startedAt", row.getStartedAt().minus(by));
+            org.springframework.test.util.ReflectionTestUtils.setField(
+                    row, "startedAt", row.getStartedAt().minus(by));
         }
     }
 
@@ -884,6 +980,31 @@ public final class ApprovalTurnHarness implements AutoCloseable {
     /** The status of every approval request recorded so far, oldest first. */
     public List<ApprovalStatus> requestStatuses() {
         return approvals.requests().stream().map(ApprovalRequest::getStatus).toList();
+    }
+
+    /**
+     * Waits (up to 5s) until at least {@code expected} requests are recorded and every recorded
+     * request shows {@code expectedStatus}. Approve/deny propagate through the executor on a worker
+     * thread, so a status read taken right after {@code approve(...)} returned can still see the
+     * old value; callers that assert on statuses should go through this rather than {@link
+     * #requestStatuses()} directly. True when the statuses settled, false on timeout.
+     */
+    public boolean awaitRequestStatuses(ApprovalStatus expectedStatus, int expected) {
+        long deadline = System.nanoTime() + 5_000_000_000L;
+        while (System.nanoTime() < deadline) {
+            List<ApprovalStatus> statuses = requestStatuses();
+            if (statuses.size() >= expected
+                    && statuses.stream().allMatch(s -> s == expectedStatus)) {
+                return true;
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return false;
     }
 
     /**
@@ -934,7 +1055,10 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         }
     }
 
-    /** The audit log the tool guard recorded its reviewable decisions in (a mock; needs {@link Builder#classifications()}). */
+    /**
+     * The audit log the tool guard recorded its reviewable decisions in (a mock; needs {@link
+     * Builder#classifications()}).
+     */
     public com.agenticai.core.audit.AuditLogService auditLog() {
         return auditLog;
     }
@@ -976,10 +1100,11 @@ public final class ApprovalTurnHarness implements AutoCloseable {
     public static final class Builder {
         private final List<RecordingTool> tools = new ArrayList<>();
         private final List<String> gatedTools = new ArrayList<>();
-        private final List<java.util.function.Function<HumanApprovalGateService, ToolCallback>> selfGatingTools =
-                new ArrayList<>();
-        private final List<java.util.function.Function<ApprovalHarnessBridge, ApprovalActionExecutor>> extraExecutors =
-                new ArrayList<>();
+        private final List<java.util.function.Function<HumanApprovalGateService, ToolCallback>>
+                selfGatingTools = new ArrayList<>();
+        private final List<
+                        java.util.function.Function<ApprovalHarnessBridge, ApprovalActionExecutor>>
+                extraExecutors = new ArrayList<>();
         private final List<String> gatedActions = new ArrayList<>();
         private final List<String> allowedActions = new ArrayList<>();
         private ScriptedLlm.Responder responder;
@@ -1039,9 +1164,10 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         private java.util.function.Consumer<AgentRuntimeProperties> runtimeTuning = p -> {};
 
         /**
-         * The turn reads its curated behaviour settings (docs/settings.md) from a real catalog over this harness's
-         * property objects; {@link ApprovalTurnHarness#tenantSetting} and {@link ApprovalTurnHarness#agentSetting} then
-         * change what the next turn does. Without it every setting is its platform value.
+         * The turn reads its curated behaviour settings (docs/settings.md) from a real catalog over
+         * this harness's property objects; {@link ApprovalTurnHarness#tenantSetting} and {@link
+         * ApprovalTurnHarness#agentSetting} then change what the next turn does. Without it every
+         * setting is its platform value.
          */
         public Builder settingsCatalog() {
             this.settingsCatalog = true;
@@ -1049,10 +1175,11 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         }
 
         /**
-         * The tool guard judges tools by their REAL classification (the compiled-in declarations, no stored rows) and
-         * holds a real lethal-trifecta service over the agent's allow-list ({@link #allowedTools}), the platform
-         * guardrail tuning ({@link #guardrailTuning}) and an audit log ({@link ApprovalTurnHarness#auditLog()}).
-         * Without it the guard has no classification at all, as in every other harness test.
+         * The tool guard judges tools by their REAL classification (the compiled-in declarations,
+         * no stored rows) and holds a real lethal-trifecta service over the agent's allow-list
+         * ({@link #allowedTools}), the platform guardrail tuning ({@link #guardrailTuning}) and an
+         * audit log ({@link ApprovalTurnHarness#auditLog()}). Without it the guard has no
+         * classification at all, as in every other harness test.
          */
         public Builder classifications() {
             this.classifications = true;
@@ -1065,8 +1192,13 @@ public final class ApprovalTurnHarness implements AutoCloseable {
             return this;
         }
 
-        /** The platform's {@code app.guardrails.*} tuning object (also the settings catalog's platform values). */
-        public Builder guardrailTuning(java.util.function.Consumer<com.agenticai.core.guardrails.GuardrailTuningProperties> tuning) {
+        /**
+         * The platform's {@code app.guardrails.*} tuning object (also the settings catalog's
+         * platform values).
+         */
+        public Builder guardrailTuning(
+                java.util.function.Consumer<com.agenticai.core.guardrails.GuardrailTuningProperties>
+                        tuning) {
             tuning.accept(this.guardrailTuning);
             return this;
         }
@@ -1083,8 +1215,12 @@ public final class ApprovalTurnHarness implements AutoCloseable {
             return this;
         }
 
-        /** Overrides {@code app.agent-runtime.*} (the bounds, the new platform defaults) for this harness. */
-        public Builder runtimeProperties(java.util.function.Consumer<AgentRuntimeProperties> tuning) {
+        /**
+         * Overrides {@code app.agent-runtime.*} (the bounds, the new platform defaults) for this
+         * harness.
+         */
+        public Builder runtimeProperties(
+                java.util.function.Consumer<AgentRuntimeProperties> tuning) {
             this.runtimeTuning = tuning;
             return this;
         }
@@ -1097,7 +1233,10 @@ public final class ApprovalTurnHarness implements AutoCloseable {
             return p;
         }
 
-        /** {@code app.llm.http.stream-idle-timeout} and {@code buffered-turn-timeout} for this harness. */
+        /**
+         * {@code app.llm.http.stream-idle-timeout} and {@code buffered-turn-timeout} for this
+         * harness.
+         */
         public Builder timeouts(java.time.Duration streamIdle, java.time.Duration bufferedTurn) {
             this.streamIdle = streamIdle;
             this.bufferedTurn = bufferedTurn;
@@ -1105,19 +1244,22 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         }
 
         /**
-         * Overrides {@code app.chat.continuation.*} (when a stopped reply is re-prompted, and the patterns
-         * that say so) for this harness. The harness agent runs on a BYOK OPENAI provider, which is not a
-         * weak tool caller, so a test of the wording check sets the scope to ALL_MODELS or lists OPENAI.
+         * Overrides {@code app.chat.continuation.*} (when a stopped reply is re-prompted, and the
+         * patterns that say so) for this harness. The harness agent runs on a BYOK OPENAI provider,
+         * which is not a weak tool caller, so a test of the wording check sets the scope to
+         * ALL_MODELS or lists OPENAI.
          */
         public Builder continuationPolicy(
-                java.util.function.Consumer<com.agenticai.core.agents.turn.ContinuationProperties> tuning) {
+                java.util.function.Consumer<com.agenticai.core.agents.turn.ContinuationProperties>
+                        tuning) {
             tuning.accept(continuationPolicy);
             return this;
         }
 
         /**
-         * Cost routing on: the agent has an economy model ({@link ApprovalTurnHarness#ECONOMY_MODEL}) and a
-         * message the heuristic classifier judges simple is sent to it instead of the primary one.
+         * Cost routing on: the agent has an economy model ({@link
+         * ApprovalTurnHarness#ECONOMY_MODEL}) and a message the heuristic classifier judges simple
+         * is sent to it instead of the primary one.
          */
         public Builder costRouting() {
             this.costRouting = true;
@@ -1125,48 +1267,66 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         }
 
         /**
-         * The agent has these content guardrails switched on (for example {@code "profanity"}), enforced by
-         * the real {@link com.agenticai.core.guardrails.ContentGuardrailEngine} over {@code implementations}.
+         * The agent has these content guardrails switched on (for example {@code "profanity"}),
+         * enforced by the real {@link com.agenticai.core.guardrails.ContentGuardrailEngine} over
+         * {@code implementations}.
          */
         public Builder contentGuardrails(
-                Set<String> enabled, java.util.List<com.agenticai.core.guardrails.ContentGuardrail> implementations) {
+                Set<String> enabled,
+                java.util.List<com.agenticai.core.guardrails.ContentGuardrail> implementations) {
             this.enabledGuardrails = Set.copyOf(enabled);
-            java.util.List<com.agenticai.core.guardrails.ContentGuardrail> impls = java.util.List.copyOf(implementations);
+            java.util.List<com.agenticai.core.guardrails.ContentGuardrail> impls =
+                    java.util.List.copyOf(implementations);
             this.guardrailEngine =
                     new com.agenticai.core.guardrails.ContentGuardrailEngine(
                             new ObjectProvider<>() {
                                 @Override
-                                public java.util.List<com.agenticai.core.guardrails.ContentGuardrail> getIfAvailable() {
+                                public java.util.List<
+                                                com.agenticai.core.guardrails.ContentGuardrail>
+                                        getIfAvailable() {
                                     return new ArrayList<>(impls);
                                 }
                             });
             return this;
         }
 
-        /** Overrides {@code app.chat.tool-ledger.*} (the stored, replayed record of what tools did) for this harness. */
+        /**
+         * Overrides {@code app.chat.tool-ledger.*} (the stored, replayed record of what tools did)
+         * for this harness.
+         */
         public Builder toolLedger(
-                java.util.function.Consumer<com.agenticai.core.agents.turn.ToolLedgerProperties> tuning) {
+                java.util.function.Consumer<com.agenticai.core.agents.turn.ToolLedgerProperties>
+                        tuning) {
             tuning.accept(toolLedger);
             return this;
         }
 
-        /** Overrides {@code app.chat.cache.*} (what the response caches may serve and what they key on) for this harness. */
+        /**
+         * Overrides {@code app.chat.cache.*} (what the response caches may serve and what they key
+         * on) for this harness.
+         */
         public Builder cache(
-                java.util.function.Consumer<com.agenticai.core.agents.turn.ChatCacheProperties> tuning) {
+                java.util.function.Consumer<com.agenticai.core.agents.turn.ChatCacheProperties>
+                        tuning) {
             tuning.accept(cache);
             return this;
         }
 
-        /** Overrides {@code app.chat.parity.*} (the explicit stream-versus-buffered differences) for this harness. */
+        /**
+         * Overrides {@code app.chat.parity.*} (the explicit stream-versus-buffered differences) for
+         * this harness.
+         */
         public Builder parity(
-                java.util.function.Consumer<com.agenticai.core.agents.turn.ChatParityProperties> tuning) {
+                java.util.function.Consumer<com.agenticai.core.agents.turn.ChatParityProperties>
+                        tuning) {
             tuning.accept(parity);
             return this;
         }
 
         /** Overrides {@code app.chat.follow-up.*} (short follow-up handling) for this harness. */
         public Builder followUp(
-                java.util.function.Consumer<com.agenticai.core.agents.turn.FollowUpProperties> tuning) {
+                java.util.function.Consumer<com.agenticai.core.agents.turn.FollowUpProperties>
+                        tuning) {
             tuning.accept(followUp);
             return this;
         }
@@ -1177,19 +1337,27 @@ public final class ApprovalTurnHarness implements AutoCloseable {
             return this;
         }
 
-        /** Overrides {@code app.llm.retry.*} (backoff is clamped to a few milliseconds by default). */
+        /**
+         * Overrides {@code app.llm.retry.*} (backoff is clamped to a few milliseconds by default).
+         */
         public Builder retry(java.util.function.Consumer<LlmRetryProperties> tuning) {
             tuning.accept(retry);
             return this;
         }
 
-        /** Provider errors are classified by the real translator (the default mock maps every error to null). */
+        /**
+         * Provider errors are classified by the real translator (the default mock maps every error
+         * to null).
+         */
         public Builder realErrorTranslation() {
             this.realErrorTranslation = true;
             return this;
         }
 
-        /** The agent has a BYOK fallback provider, which the harness answers with the same scripted model. */
+        /**
+         * The agent has a BYOK fallback provider, which the harness answers with the same scripted
+         * model.
+         */
         public Builder fallbackProvider() {
             this.fallbackProvider = true;
             return this;
@@ -1201,16 +1369,23 @@ public final class ApprovalTurnHarness implements AutoCloseable {
         }
 
         /**
-         * A tool that holds its OWN approval inside {@code call()} (a code-workspace run, a channel send) rather than
-         * leaving it to the tool guard; built over the harness's real gate, wrapped by the same guard chain as any tool.
+         * A tool that holds its OWN approval inside {@code call()} (a code-workspace run, a channel
+         * send) rather than leaving it to the tool guard; built over the harness's real gate,
+         * wrapped by the same guard chain as any tool.
          */
-        public Builder selfGatingTool(java.util.function.Function<HumanApprovalGateService, ToolCallback> factory) {
+        public Builder selfGatingTool(
+                java.util.function.Function<HumanApprovalGateService, ToolCallback> factory) {
             selfGatingTools.add(factory);
             return this;
         }
 
-        /** An extra executor registered next to the tool-replay one (for a code-workspace or channel action type). */
-        public Builder executor(java.util.function.Function<ApprovalHarnessBridge, ApprovalActionExecutor> factory) {
+        /**
+         * An extra executor registered next to the tool-replay one (for a code-workspace or channel
+         * action type).
+         */
+        public Builder executor(
+                java.util.function.Function<ApprovalHarnessBridge, ApprovalActionExecutor>
+                        factory) {
             extraExecutors.add(factory);
             return this;
         }
@@ -1285,7 +1460,10 @@ public final class ApprovalTurnHarness implements AutoCloseable {
             return this;
         }
 
-        /** The agent's reasoning depth; FAST (the default) streams, the others buffer the whole reply. */
+        /**
+         * The agent's reasoning depth; FAST (the default) streams, the others buffer the whole
+         * reply.
+         */
         public Builder depth(ReasoningDepth depth) {
             this.depth = depth;
             return this;
@@ -1309,20 +1487,23 @@ public final class ApprovalTurnHarness implements AutoCloseable {
 
         /** Overrides {@code app.guardrails.step-limit.*} for this harness. */
         public Builder stepLimits(
-                java.util.function.Consumer<com.agenticai.core.guardrails.ToolStepLimitProperties> tuning) {
+                java.util.function.Consumer<com.agenticai.core.guardrails.ToolStepLimitProperties>
+                        tuning) {
             tuning.accept(stepLimits);
             return this;
         }
 
         /** Overrides {@code app.tools.output.*} for this harness. */
         public Builder toolOutput(
-                java.util.function.Consumer<com.agenticai.core.guardrails.ToolOutputProperties> tuning) {
+                java.util.function.Consumer<com.agenticai.core.guardrails.ToolOutputProperties>
+                        tuning) {
             tuning.accept(toolOutput);
             return this;
         }
 
         /** Overrides {@code app.chat.tools.*} (round cap, stop wording) for this harness. */
-        public Builder toolLoop(java.util.function.Consumer<com.agenticai.core.chat.ToolLoopProperties> tuning) {
+        public Builder toolLoop(
+                java.util.function.Consumer<com.agenticai.core.chat.ToolLoopProperties> tuning) {
             tuning.accept(toolLoop);
             return this;
         }
