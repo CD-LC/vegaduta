@@ -70,7 +70,10 @@ RUN NODE_OPTIONS=--max-old-space-size=3072 npm run build
 # ---- Runtime stage -------------------------------------------------------
 # next.config.js sets output: "standalone", so .next/standalone holds
 # server.js plus only the node_modules it actually traces - no full
-# dependency tree, no npm, no source.
+# dependency tree, no source. The node base image still ships its own package
+# managers (npm, corepack, yarn), which the app never runs and which carry
+# their own bundled dependencies (brace-expansion, ip-address, picomatch,
+# pacote, sigstore) with High advisories, so they are removed below.
 FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
@@ -81,6 +84,12 @@ ENV NODE_ENV=production \
 # Same user creation as before (system uid/gid, 999 on node:*-trixie-slim) -
 # deploy/helm/charts/web values.yaml pins runAsUser 999 against it.
 RUN groupadd -r nextjs && useradd -r -g nextjs nextjs
+
+# HEALTHCHECK and CMD below only run `node`; nothing at runtime needs a package
+# manager. scripts/ci/web-image-deps.sh fails CI if this line goes away.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+        /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+        /usr/local/bin/yarn /usr/local/bin/yarnpkg /opt/yarn-*
 
 # Application files stay ROOT-owned (INF-031): the runtime user can read and
 # execute its code but not rewrite it. Runtime config is read from the env at

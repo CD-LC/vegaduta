@@ -67,6 +67,7 @@ public final class EvalJsonlExport {
         head.put("judgeModel", run.getJudgeModel());
         head.put("requestedJudgeModel", run.getRequestedJudgeModel());
         head.put("strictJudge", run.isStrictJudge());
+        head.put("mode", run.getEvalMode().name());
         head.put("repeats", run.getRepeats());
         head.put("budgetUsd", run.getBudgetUsd());
         head.put("costUsd", run.getCostUsd());
@@ -110,7 +111,7 @@ public final class EvalJsonlExport {
         head.put("agentId", str(dataset.getAgentId()));
         head.put("name", dataset.getName());
         head.put("passThreshold", dataset.getPassThreshold());
-        head.put("toolExecutionEnabled", dataset.isToolExecutionEnabled());
+        head.put("toolExecutionEnabled", dataset.getToolExecutionEnabled());
         head.put("contentHash", dataset.getContentHash());
         head.put("caseCount", cases.size());
         line(out, head);

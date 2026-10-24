@@ -36,6 +36,21 @@
       "messages": {
         "AgentController_chat_chunk": {
           "$ref": "#/components/messages/AgentController_chat_chunk"
+        },
+        "agentStep_finish": {
+          "$ref": "#/components/messages/agentStep_finish"
+        },
+        "agentStep_retry": {
+          "$ref": "#/components/messages/agentStep_retry"
+        },
+        "agentStep_failover": {
+          "$ref": "#/components/messages/agentStep_failover"
+        },
+        "agentStep_continuation": {
+          "$ref": "#/components/messages/agentStep_continuation"
+        },
+        "agentStep_approval_required": {
+          "$ref": "#/components/messages/agentStep_approval_required"
         }
       },
       "bindings": {
@@ -249,6 +264,21 @@
       "messages": {
         "ResumableChatTurnController_stream_chunk": {
           "$ref": "#/components/messages/ResumableChatTurnController_stream_chunk"
+        },
+        "agentStep_finish": {
+          "$ref": "#/components/messages/agentStep_finish"
+        },
+        "agentStep_retry": {
+          "$ref": "#/components/messages/agentStep_retry"
+        },
+        "agentStep_failover": {
+          "$ref": "#/components/messages/agentStep_failover"
+        },
+        "agentStep_continuation": {
+          "$ref": "#/components/messages/agentStep_continuation"
+        },
+        "agentStep_approval_required": {
+          "$ref": "#/components/messages/agentStep_approval_required"
         }
       },
       "bindings": {
@@ -387,6 +417,21 @@
       "messages": [
         {
           "$ref": "#/channels/AgentController_chat/messages/AgentController_chat_chunk"
+        },
+        {
+          "$ref": "#/channels/AgentController_chat/messages/agentStep_finish"
+        },
+        {
+          "$ref": "#/channels/AgentController_chat/messages/agentStep_retry"
+        },
+        {
+          "$ref": "#/channels/AgentController_chat/messages/agentStep_failover"
+        },
+        {
+          "$ref": "#/channels/AgentController_chat/messages/agentStep_continuation"
+        },
+        {
+          "$ref": "#/channels/AgentController_chat/messages/agentStep_approval_required"
         }
       ],
       "security": [
@@ -559,6 +604,21 @@
       "messages": [
         {
           "$ref": "#/channels/ResumableChatTurnController_stream/messages/ResumableChatTurnController_stream_chunk"
+        },
+        {
+          "$ref": "#/channels/ResumableChatTurnController_stream/messages/agentStep_finish"
+        },
+        {
+          "$ref": "#/channels/ResumableChatTurnController_stream/messages/agentStep_retry"
+        },
+        {
+          "$ref": "#/channels/ResumableChatTurnController_stream/messages/agentStep_failover"
+        },
+        {
+          "$ref": "#/channels/ResumableChatTurnController_stream/messages/agentStep_continuation"
+        },
+        {
+          "$ref": "#/channels/ResumableChatTurnController_stream/messages/agentStep_approval_required"
         }
       ],
       "security": [
@@ -680,6 +740,172 @@
         "payload": {
           "type": "string",
           "description": "One chunk of the streamed reply."
+        }
+      },
+      "agentStep_approval_required": {
+        "name": "approval_required",
+        "title": "approval_required",
+        "summary": "A tool call was recorded as a pending approval and the turn is waiting for a person. Sent after the call's tool_result.",
+        "description": "Sent in-band on a stream whose request set stepEvents=true: the SSE data is @@AGENT_STEP_EVENT_4d81ba@@ immediately followed by this JSON on one line. A stream that did not ask never carries it.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "approval_required"
+            },
+            "tool": {
+              "type": "string",
+              "description": "The tool whose call is held."
+            },
+            "approvalId": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The pending approval request, as listed by the approvals API."
+            }
+          },
+          "required": [
+            "type",
+            "tool",
+            "approvalId"
+          ]
+        }
+      },
+      "agentStep_continuation": {
+        "name": "continuation",
+        "title": "continuation",
+        "summary": "Another model pass is carrying the reply on.",
+        "description": "Sent in-band on a stream whose request set stepEvents=true: the SSE data is @@AGENT_STEP_EVENT_4d81ba@@ immediately followed by this JSON on one line. A stream that did not ask never carries it.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "continuation"
+            },
+            "pass": {
+              "type": "integer",
+              "description": "The pass that is starting; 1 is the first continuation."
+            },
+            "maxPasses": {
+              "type": "integer",
+              "description": "How many passes of this kind the platform will make."
+            },
+            "reason": {
+              "type": "string",
+              "enum": [
+                "cut_off",
+                "unfinished_step",
+                "approval"
+              ],
+              "description": "Why: the reply hit the output limit, the reply stopped at a step it announced but did not take, or the platform is carrying the task on after a person decided a held tool call."
+            }
+          },
+          "required": [
+            "type",
+            "pass",
+            "maxPasses"
+          ]
+        }
+      },
+      "agentStep_failover": {
+        "name": "failover",
+        "title": "failover",
+        "summary": "The turn moved to another model after the one before it failed (the agent's fallback provider, or the next rung of the platform-hosted pool).",
+        "description": "Sent in-band on a stream whose request set stepEvents=true: the SSE data is @@AGENT_STEP_EVENT_4d81ba@@ immediately followed by this JSON on one line. A stream that did not ask never carries it.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "failover"
+            },
+            "toModel": {
+              "type": "string",
+              "description": "The model the turn moved to. Absent when it is not known by name."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Why the turn moved; the same codes as retry."
+            }
+          },
+          "required": [
+            "type",
+            "reason"
+          ]
+        }
+      },
+      "agentStep_finish": {
+        "name": "finish",
+        "title": "finish",
+        "summary": "The reply ended. Sent once per reply, before run_finished. A client offers Continue on length or interrupted and shows its refusal notice on safety, instead of matching the notice text appended to the reply.",
+        "description": "Sent in-band on a stream whose request set stepEvents=true: the SSE data is @@AGENT_STEP_EVENT_4d81ba@@ immediately followed by this JSON on one line. A stream that did not ask never carries it.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "finish"
+            },
+            "finishReason": {
+              "type": "string",
+              "enum": [
+                "stop",
+                "length",
+                "safety",
+                "malformed_tool_call",
+                "empty",
+                "interrupted"
+              ],
+              "description": "How the reply ended: an answer, cut off at the output limit, stopped by the provider's safety system, an unusable tool call, empty, or broken off after some text."
+            },
+            "detail": {
+              "type": "string",
+              "description": "The provider's own word for a refusal (for example content_filter). Optional."
+            }
+          },
+          "required": [
+            "type",
+            "finishReason"
+          ]
+        }
+      },
+      "agentStep_retry": {
+        "name": "retry",
+        "title": "retry",
+        "summary": "The same model is being called again after a failure before its first token, or the reply is asked for again after an unusable tool call.",
+        "description": "Sent in-band on a stream whose request set stepEvents=true: the SSE data is @@AGENT_STEP_EVENT_4d81ba@@ immediately followed by this JSON on one line. A stream that did not ask never carries it.",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "retry"
+            },
+            "attempt": {
+              "type": "integer",
+              "description": "The try about to run; 1 is the first."
+            },
+            "maxAttempts": {
+              "type": "integer",
+              "description": "How many tries the platform will make in all."
+            },
+            "reason": {
+              "type": "string",
+              "description": "A short code: rate_limited, timeout, provider_unavailable, auth_failed, billing, model_not_found, provider_error or malformed_tool_call. A client may show an unknown code with its underscores read as spaces."
+            }
+          },
+          "required": [
+            "type",
+            "attempt",
+            "maxAttempts",
+            "reason"
+          ]
         }
       },
       "AgUiRunController_events_chunk": {

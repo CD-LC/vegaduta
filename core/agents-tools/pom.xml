@@ -51,6 +51,12 @@
       <groupId>com.agenticai</groupId>
       <artifactId>agentspi</artifactId>
     </dependency>
+    <!-- The prompt registry: tool and parameter descriptions are keys in it
+         (tool.description.*, tool.param.*), applied by ToolDescriptionResolver. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>prompts</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.agenticai</groupId>
       <artifactId>json</artifactId>
@@ -174,4 +180,23 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Publishes this module's test classes so downstream modules' tests can reuse the
+           end-to-end approval harness (com.agenticai.core.agents.e2e) instead of copying it.
+           Test-only: nothing at runtime depends on this jar. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

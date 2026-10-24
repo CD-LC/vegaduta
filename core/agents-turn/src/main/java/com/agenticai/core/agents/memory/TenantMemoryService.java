@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.memory;
 
 import com.agenticai.core.knowledge.SidecarClient;
+import com.agenticai.core.security.logging.LogSafe;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Service;
  * (see {@link TenantMemorySchemaSupport}), same "knowledge" profile gate (the profile that
  * guarantees a pgvector-enabled Postgres and a running sidecar exist).
  *
- * <p><b>Bounded, tenant-wide memory space:</b> capped at {@value #MAX_MEMORIES_PER_TENANT} total
+ * <p><b>Bounded, tenant-wide memory space:</b> capped at {@code app.memory.limits.tenant-max-memories} (default 300) total
  * across every subject and every contributing agent - larger than {@link AgentMemoryService}'s
  * 50/agent cap since this single pool is shared by every sharing-enabled agent in the tenant, not
  * one agent's own bank. Same oldest-first pruning strategy after an over-cap insert.
@@ -41,8 +42,6 @@ import org.springframework.stereotype.Service;
 public class TenantMemoryService {
 
     private static final Logger log = LoggerFactory.getLogger(TenantMemoryService.class);
-    private static final int DEFAULT_RECALL_TOP_K = 5;
-    private static final int MAX_MEMORIES_PER_TENANT = 300;
 
     private final SidecarClient sidecarClient;
     private final JdbcTemplate jdbcTemplate;
@@ -58,7 +57,8 @@ public class TenantMemoryService {
             @Value("${app.memory.blocks.enabled:true}") boolean blocksEnabled,
             @Value("${app.memory.blocks.max-chars-per-block:1200}") int maxCharsPerBlock,
             @Value("${app.memory.blocks.max-project-blocks:20}") int maxProjectBlocks,
-            @Value("${app.memory.blocks.max-total-chars:4000}") int maxTotalChars,
+            @Value("${app.memory.blocks.max-total-chars:" + MemoryBlocks.DEFAULT_MAX_TOTAL_CHARS + "}")
+                    int maxTotalChars,
             @Value("${app.memory.blocks.active-project-enabled:true}")
                     boolean activeProjectEnabled) {
         this.sidecarClient = sidecarClient;
@@ -68,6 +68,62 @@ public class TenantMemoryService {
         this.maxProjectBlocks = Math.max(0, maxProjectBlocks);
         this.maxTotalChars = Math.max(1, maxTotalChars);
         this.activeProjectEnabled = activeProjectEnabled;
+    }
+
+    /**
+     * {@code app.memory.limits.*}: the per-tenant cap ({@code tenant-max-memories}) and the recall top-k
+     * ({@code tenant-recall-top-k}). A hand-built instance keeps the shipped defaults, which is also what
+     * Spring supplies when the properties bean is absent.
+     */
+    private volatile MemoryLimitsProperties limits = new MemoryLimitsProperties();
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setLimits(MemoryLimitsProperties limits) {
+        this.limits = limits == null ? new MemoryLimitsProperties() : limits;
+    }
+
+    private volatile com.agenticai.core.settings.SettingsResolver settings;
+
+    /**
+     * The settings catalog, so a tenant's or an agent's {@code memory.recall.tenantTopK} applies to the shared recall made
+     * for that agent. Absent (hand-built instances): {@code app.memory.limits.tenant-recall-top-k}. The recall runs on the
+     * turn's own thread, where the tenant is set.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setSettingsResolver(com.agenticai.core.settings.SettingsResolver resolver) {
+        this.settings = resolver;
+    }
+
+    static final String RECALL_TOP_K_KEY = "memory.recall.tenantTopK";
+    static final String MAX_MEMORIES_KEY = "memory.tenant.maxMemories";
+
+    /**
+     * How many shared memories the calling tenant keeps: its {@code memory.tenant.maxMemories} setting, else {@code
+     * app.memory.limits.tenant-max-memories}. Shared memory belongs to the workspace, so the key has no agent scope.
+     */
+    int maxMemories() {
+        com.agenticai.core.settings.SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return limits.getTenantMaxMemories();
+        }
+        try {
+            return catalog.getInt(MAX_MEMORIES_KEY, com.agenticai.core.settings.SettingContext.tenant());
+        } catch (RuntimeException e) {
+            return limits.getTenantMaxMemories();
+        }
+    }
+
+    /** The recall top-k for {@code agentId} (null = the tenant level): the catalog's value, else the platform's. */
+    int recallTopK(UUID agentId) {
+        com.agenticai.core.settings.SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return limits.getTenantRecallTopK();
+        }
+        try {
+            return catalog.getInt(RECALL_TOP_K_KEY, com.agenticai.core.settings.SettingContext.forAgent(agentId));
+        } catch (RuntimeException e) {
+            return limits.getTenantRecallTopK();
+        }
     }
 
     /**
@@ -303,8 +359,9 @@ public class TenantMemoryService {
     }
 
     /**
-     * Up to {@code limit} distinct people (subject keys) who have a shared fact in the current tenant; the
-     * user-visible memory blocks (a different key) are left out. For background reviews, not request paths.
+     * Up to {@code limit} distinct people (subject keys) who have a shared fact in the current
+     * tenant; the user-visible memory blocks (a different key) are left out. For background
+     * reviews, not request paths.
      */
     public List<String> listFactSubjects(int limit) {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
@@ -413,7 +470,7 @@ public class TenantMemoryService {
                         own == null ? 0 : own,
                         total == null ? 0 : total,
                         maxOwn,
-                        MAX_MEMORIES_PER_TENANT);
+                        maxMemories());
         if (evict > 0) {
             jdbcTemplate.update(
                     "DELETE FROM "
@@ -438,10 +495,11 @@ public class TenantMemoryService {
                                 + MemoryBlocks.KEY_MARKER
                                 + "' in subject_key) = 0",
                         Integer.class);
-        if (count == null || count <= MAX_MEMORIES_PER_TENANT) {
+        int cap = maxMemories();
+        if (count == null || count <= cap) {
             return;
         }
-        int overflow = count - MAX_MEMORIES_PER_TENANT;
+        int overflow = count - cap;
         jdbcTemplate.update(
                 "DELETE FROM "
                         + table
@@ -455,7 +513,7 @@ public class TenantMemoryService {
         log.debug(
                 "Pruned {} oldest shared memories (over the {}-memory tenant-wide cap)",
                 overflow,
-                MAX_MEMORIES_PER_TENANT);
+                cap);
     }
 
     /**
@@ -511,8 +569,8 @@ public class TenantMemoryService {
         log.debug(
                 "Recalled {} shared memories for subject '{}' (query='{}')",
                 results.size(),
-                subjectKey,
-                query);
+                LogSafe.clean(subjectKey),
+                LogSafe.clean(query));
         return results;
     }
 
@@ -521,13 +579,22 @@ public class TenantMemoryService {
      * com.agenticai.core.agents.turn.AgentChatService}.
      */
     public List<TenantMemoryEntry> recall(String subjectKey, String query) {
-        return recall(subjectKey, query, DEFAULT_RECALL_TOP_K);
+        return recall(subjectKey, query, recallTopK(null));
     }
 
     /** Default-topK recall that shares {@code embedding}; see {@link QueryEmbedding}. */
     public List<TenantMemoryEntry> recall(
             String subjectKey, String query, QueryEmbedding embedding) {
-        return recall(subjectKey, query, DEFAULT_RECALL_TOP_K, embedding);
+        return recall(subjectKey, query, embedding, null);
+    }
+
+    /**
+     * As {@link #recall(String, String, QueryEmbedding)} for the shared recall made on behalf of {@code agentId}: how many
+     * facts it returns follows that agent's (or its tenant's) {@code memory.recall.tenantTopK}.
+     */
+    public List<TenantMemoryEntry> recall(
+            String subjectKey, String query, QueryEmbedding embedding, UUID agentId) {
+        return recall(subjectKey, query, recallTopK(agentId), embedding);
     }
 
     /**

@@ -2,6 +2,7 @@ package com.agenticai.core.quality.impl;
 
 import com.agenticai.core.quality.EvaluationContext;
 import com.agenticai.core.quality.EvaluationType;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,6 +16,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ToneEvaluator extends AbstractLlmJudgeEvaluator {
 
+    /** Registry key of the judge prompt (default text: {@code prompts/en/eval.judge.tone.md}). */
+    static final String PROMPT_KEY = "eval.judge.tone";
+
     public ToneEvaluator(JudgeChatClientFactory judgeChatClientFactory) {
         super(judgeChatClientFactory);
     }
@@ -26,37 +30,13 @@ public class ToneEvaluator extends AbstractLlmJudgeEvaluator {
 
     @Override
     protected String buildPrompt(EvaluationContext context) {
-        return String.format(
-            """
-            You are evaluating whether an agent's response tone is appropriate for its configured persona.
-
-            AGENT SYSTEM PROMPT (defines the persona):
-            %s
-
-            AGENT RESPONSE:
-            %s
-
-            Analyze the tone and style of the response. Does it match what the system prompt defines?
-
-            Consider:
-            - Is the tone consistent with the persona described?
-            - Is the language/vocabulary level appropriate?
-            - Is the formality/informality level correct?
-            - Does it avoid contradicting the persona?
-
-            Score on a scale of 0.0 to 1.0, where:
-            - 1.0: Tone perfectly matches the persona
-            - 0.75: Tone is mostly consistent with minor deviations
-            - 0.5: Tone is partially consistent with some mismatches
-            - 0.25: Tone frequently conflicts with the persona
-            - 0.0: Tone completely contradicts the persona
-
-            Respond in this exact format:
-            SCORE: <number from 0.0 to 1.0>
-            FEEDBACK: <brief explanation of tone consistency>
-            """,
-            context.systemPrompt(),
-            context.agentResponse()
+        return prompts.text(
+            PROMPT_KEY,
+            context.agentId(),
+            Map.of(
+                "system_prompt", v(context.systemPrompt()),
+                "response", v(context.agentResponse())
+            )
         );
     }
 }

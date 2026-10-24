@@ -77,6 +77,7 @@ class AgentToolGuardHooksTest {
                         anyString(),
                         any(),
                         anyString(),
+                        any(),
                         any()))
                 .thenReturn(new ApprovalRequest("mcp_tool." + TOOL, "Tool call", "{}", "agent"));
         when(raw.getToolDefinition())

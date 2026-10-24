@@ -38,10 +38,18 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
 
     private static final Logger log = LoggerFactory.getLogger(KnowledgeSearchToolCallback.class);
     private static final ObjectMapper MAPPER = JsonMappers.plain();
-    private static final int DEFAULT_TOP_K = 3;
+
+    /**
+     * Chunks one search returns when the caller sets no top-k: the value the tool always used. The agent's
+     * own setting ({@code retrievalTopK} of the runtime settings) replaces it through the four-argument
+     * constructor.
+     */
+    public static final int DEFAULT_TOP_K = 3;
 
     private final KnowledgeSearchService searchService;
     private final Set<UUID> allowedCollectionIds;
+    private final int topK;
+    private final double minScore;
 
     /**
      * @param allowedCollectionIds empty means "no restriction, this agent
@@ -49,8 +57,23 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
      *     {@code Agent.allowedKnowledgeCollectionIds}.
      */
     public KnowledgeSearchToolCallback(KnowledgeSearchService searchService, Set<UUID> allowedCollectionIds) {
+        this(searchService, allowedCollectionIds, DEFAULT_TOP_K, 0.0);
+    }
+
+    /**
+     * @param topK chunks one search asks for; below 1 falls back to {@link #DEFAULT_TOP_K}
+     * @param minScore least relevance a chunk needs to be returned, where relevance is {@code -distance}
+     *     (the hybrid search reports the negated fused / reranked score as the distance, so a better chunk has
+     *     a larger relevance; fused scores are small, a few hundredths, and a reranker's follow its own
+     *     scale). {@code 0} (or less) returns every hit.
+     */
+    public KnowledgeSearchToolCallback(
+        KnowledgeSearchService searchService, Set<UUID> allowedCollectionIds, int topK, double minScore
+    ) {
         this.searchService = searchService;
         this.allowedCollectionIds = allowedCollectionIds;
+        this.topK = topK > 0 ? topK : DEFAULT_TOP_K;
+        this.minScore = minScore;
     }
 
     @Override
@@ -126,7 +149,10 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
             boolean excludeImageSourced = Boolean.parseBoolean(String.valueOf(args.getOrDefault("exclude_image_sourced", false)));
 
             List<SearchResultResponse> results =
-                searchService.search(queryValue.toString(), DEFAULT_TOP_K, scopedCollectionIds, excludeImageSourced);
+                searchService.search(queryValue.toString(), topK, scopedCollectionIds, excludeImageSourced);
+            if (minScore > 0.0) {
+                results = results.stream().filter(r -> -r.distance() >= minScore).toList();
+            }
             return MAPPER.writeValueAsString(results);
         } catch (Exception e) {
             log.warn("search_knowledge_base tool call failed", e);

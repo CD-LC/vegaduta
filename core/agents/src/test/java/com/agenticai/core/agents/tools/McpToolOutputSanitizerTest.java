@@ -234,18 +234,4 @@ class McpToolOutputSanitizerTest {
         assertTrue(result.contains("\\\""));
         assertTrue(result.contains("\\\\"));
     }
-
-    @Test
-    void builtInResultOverCapIsTruncatedWithMarker() {
-        String big = "x".repeat(McpToolOutputSanitizer.MAX_BUILTIN_RESULT_CHARS + 10);
-        String out = McpToolOutputSanitizer.capBuiltInResult(big);
-        assertTrue(out.endsWith("\n...[truncated 10 chars]"));
-        assertTrue(out.startsWith("x".repeat(100)));
-    }
-
-    @Test
-    void builtInResultWithinCapIsUnchanged() {
-        assertEquals("small", McpToolOutputSanitizer.capBuiltInResult("small"));
-        assertNull(McpToolOutputSanitizer.capBuiltInResult(null));
-    }
 }

@@ -40,6 +40,7 @@ import {
   type SpendSummaryDto,
 } from "../lib/api/insights";
 import { useTranslations } from "../lib/i18n";
+import { hiddenOnPersonalInstall } from "../lib/personalInstall";
 import {
   PERIODS,
   buildDailySeries,
@@ -134,7 +135,8 @@ export default function InsightsPage() {
         if (!cancelled) setJobs({ key: jobsKey, data, error: null });
       })
       .catch((err) => {
-        if (!cancelled) setJobs({ key: jobsKey, data: null, error: err instanceof Error && err.message ? err.message : "error" });
+        if (!cancelled)
+          setJobs({ key: jobsKey, data: null, error: err instanceof Error && err.message ? err.message : "error" });
       });
     return () => {
       cancelled = true;
@@ -152,7 +154,8 @@ export default function InsightsPage() {
         if (cancelled || !Array.isArray(list)) return;
         const names = new Map<string, string>();
         for (const agent of list as Array<{ id?: unknown; name?: unknown }>) {
-          if (typeof agent?.id === "string" && typeof agent?.name === "string" && agent.name) names.set(agent.id, agent.name);
+          if (typeof agent?.id === "string" && typeof agent?.name === "string" && agent.name)
+            names.set(agent.id, agent.name);
         }
         setAgentNames(names);
       })
@@ -214,7 +217,11 @@ export default function InsightsPage() {
   );
 
   const rowLabel = (row: RankedRow, noneLabel: string) =>
-    row.kind === "named" && row.label ? row.label : row.kind === "unknown" ? t("unknownAgent", { id: row.shortId ?? "" }) : noneLabel;
+    row.kind === "named" && row.label
+      ? row.label
+      : row.kind === "unknown"
+        ? t("unknownAgent", { id: row.shortId ?? "" })
+        : noneLabel;
 
   const rankingCard = (title: string, nameHeader: string, ranking: Ranking, noneLabel: string) => {
     const summary = rankingSummary(ranking);
@@ -248,7 +255,10 @@ export default function InsightsPage() {
               key: row.key,
               label: rowLabel(row, noneLabel),
               value: row.costUsd,
-              valueText: t(row.calls === 1 ? "rankValueOne" : "rankValue", { cost: row.costText, count: formatCount(row.calls) }),
+              valueText: t(row.calls === 1 ? "rankValueOne" : "rankValue", {
+                cost: row.costText,
+                count: formatCount(row.calls),
+              }),
             }))}
           />
         </ChartFrame>
@@ -259,13 +269,20 @@ export default function InsightsPage() {
   let spendBody: ReactNode = null;
   if (forbidden) {
     spendBody = (
-      <p data-testid="insights-admin-only" className="rounded-xl border border-border bg-card/40 px-4 py-3 text-sm text-muted-foreground">
+      <p
+        data-testid="insights-admin-only"
+        className="rounded-xl border border-border bg-card/40 px-4 py-3 text-sm text-muted-foreground"
+      >
         {t("adminOnlyNote")}
       </p>
     );
   } else if (spendLoading) {
     spendBody = (
-      <div aria-busy="true" data-testid="insights-spend-loading" className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
+      <div
+        aria-busy="true"
+        data-testid="insights-spend-loading"
+        className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4"
+      >
         {[0, 1, 2, 3].map((i) => (
           <Skeleton key={i} className="h-28 w-full rounded-xl" />
         ))}
@@ -279,7 +296,8 @@ export default function InsightsPage() {
     const to = formatDayLabel(kpis.toDate);
     const soFar = t("soFar");
     const lastIndex = series.days.length - 1;
-    const dayName = (label: string, index: number) => (series.partialLast && index === lastIndex ? `${label} (${soFar})` : label);
+    const dayName = (label: string, index: number) =>
+      series.partialLast && index === lastIndex ? `${label} (${soFar})` : label;
     const callsMsg = callsSummary(kpis);
     const costMsg = costSummary(kpis);
     const dayTable = {
@@ -368,7 +386,12 @@ export default function InsightsPage() {
         ) : (
           <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2">
             <Card className="min-w-0 gap-0 p-5">
-              <ChartFrame title={t("callsChartTitle")} summary={callsMsg ? say(callsMsg) : ""} table={dayTable} footer={partialFooter}>
+              <ChartFrame
+                title={t("callsChartTitle")}
+                summary={callsMsg ? say(callsMsg) : ""}
+                table={dayTable}
+                footer={partialFooter}
+              >
                 <MiniBars
                   data={series.days.map((day) => ({
                     label: day.label,
@@ -381,7 +404,12 @@ export default function InsightsPage() {
               </ChartFrame>
             </Card>
             <Card className="min-w-0 gap-0 p-5">
-              <ChartFrame title={t("costChartTitle")} summary={costMsg ? say(costMsg) : ""} table={dayTable} footer={partialFooter}>
+              <ChartFrame
+                title={t("costChartTitle")}
+                summary={costMsg ? say(costMsg) : ""}
+                table={dayTable}
+                footer={partialFooter}
+              >
                 <MiniBars
                   data={series.days.map((day) => ({
                     label: day.label,
@@ -414,9 +442,11 @@ export default function InsightsPage() {
         actions={
           <div className="flex flex-wrap items-center gap-3">
             {periodSwitch}
-            <Button asChild variant="outline" size="sm">
-              <Link href="/roi">{t("linkRoi")}</Link>
-            </Button>
+            {!hiddenOnPersonalInstall("/roi") && (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/roi">{t("linkRoi")}</Link>
+              </Button>
+            )}
           </div>
         }
       />
@@ -480,7 +510,9 @@ export default function InsightsPage() {
                 jobsView ? (
                   <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <span>{t("jobsFooter", { window: windowText })}</span>
-                    {jobsView.cancelled > 0 && <span>{t("jobsCancelled", { count: formatCount(jobsView.cancelled) })}</span>}
+                    {jobsView.cancelled > 0 && (
+                      <span>{t("jobsCancelled", { count: formatCount(jobsView.cancelled) })}</span>
+                    )}
                     <Link href="/jobs" className="text-primary underline-offset-4 hover:underline">
                       {t("linkJobs")}
                     </Link>

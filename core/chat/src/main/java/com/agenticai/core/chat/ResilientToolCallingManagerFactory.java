@@ -1,8 +1,11 @@
 package com.agenticai.core.chat;
 
+import com.agenticai.core.prompts.PromptResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.observation.ObservationRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +47,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ResilientToolCallingManagerFactory {
 
+    private static final Logger log = LoggerFactory.getLogger(ResilientToolCallingManagerFactory.class);
+
     /**
      * One shared instance, matching what these factories effectively had
      * before: each Spring AI {@code ChatModel.Builder} defaults its manager to
@@ -70,19 +75,27 @@ public class ResilientToolCallingManagerFactory {
      *       capped before it is sent to the provider as a tool result.</li>
      * </ul>
      * The wrapper additionally caps the internal tool loop per model invocation
-     * ({@code app.chat.tools.max-rounds-per-invocation}, default {@value
-     * ArgumentSanitizingToolCallingManager#DEFAULT_MAX_TOOL_ROUNDS}) and turns
-     * plain runtime exceptions from a callback into tool results - see {@link
-     * ArgumentSanitizingToolCallingManager}'s javadoc.
+     * ({@code app.chat.tools.max-rounds-per-invocation}; by default derived from
+     * the per-turn call ceiling, see {@link ToolLoopProperties#effectiveMaxRounds})
+     * and turns plain runtime exceptions from a callback into tool results - see
+     * {@link ArgumentSanitizingToolCallingManager}'s javadoc.
      */
     private final ToolCallingManager manager;
 
-    /** Test/legacy seam: no observations, no metrics, default caps. */
+    /** Shipped value of {@code app.guardrails.max-tool-calls-per-turn} (application.yml), for a build without it. */
+    public static final int DEFAULT_CALLS_PER_TURN = 15;
+    /** Shipped value of {@code app.guardrails.step-limit.autonomous-multiplier}, for a build without it. */
+    public static final int DEFAULT_AUTONOMOUS_MULTIPLIER = 2;
+    /** Shipped value of {@code app.guardrails.step-limit.grace-calls}, for a build without it. */
+    public static final int DEFAULT_GRACE_CALLS = 10;
+
+    /**
+     * Test/legacy seam: no observations, no metrics, the shipped defaults - which is a round cap that
+     * follows the default call ceiling (15 calls, doubled for the most autonomous tier).
+     */
     public ResilientToolCallingManagerFactory(ObjectMapper objectMapper) {
-        this(objectMapper, null, null,
-            ArgumentSanitizingToolCallingManager.DEFAULT_MAX_TOOL_ROUNDS,
-            ArgumentSanitizingToolCallingManager.DEFAULT_MAX_UNKNOWN_TOOL_CALLS,
-            true, ToolResultClearing.DEFAULT_THRESHOLD_CHARS, ToolResultClearing.DEFAULT_KEEP_LAST);
+        this(objectMapper, null, null, new ToolLoopProperties(), DEFAULT_CALLS_PER_TURN,
+            DEFAULT_AUTONOMOUS_MULTIPLIER, DEFAULT_GRACE_CALLS, true, RepeatToolCallGuard.DEFAULT_TOOLS);
     }
 
     /** Pre-argument-validation signature (test harnesses); validation on, as in production. */
@@ -117,20 +130,54 @@ public class ResilientToolCallingManagerFactory {
             RepeatToolCallGuard.DEFAULT_TOOLS);
     }
 
+    /** Explicit-values signature (test harnesses): the caps are exactly the numbers given. */
+    public ResilientToolCallingManagerFactory(
+        ObjectMapper objectMapper,
+        ObjectProvider<ObservationRegistry> observationRegistry,
+        ObjectProvider<MeterRegistry> meterRegistry,
+        int maxToolRounds,
+        int maxUnknownToolCalls,
+        boolean clearingEnabled,
+        int clearingThresholdChars,
+        int clearingKeepLast,
+        boolean argumentValidation,
+        String repeatGuardTools
+    ) {
+        this(objectMapper, observationRegistry, meterRegistry,
+            explicit(maxToolRounds, maxUnknownToolCalls, clearingEnabled, clearingThresholdChars, clearingKeepLast),
+            DEFAULT_CALLS_PER_TURN, DEFAULT_AUTONOMOUS_MULTIPLIER, DEFAULT_GRACE_CALLS, argumentValidation,
+            repeatGuardTools);
+    }
+
+    private static ToolLoopProperties explicit(
+        int maxToolRounds, int maxUnknownToolCalls, boolean clearingEnabled, int thresholdChars, int keepLast
+    ) {
+        ToolLoopProperties props = new ToolLoopProperties();
+        props.setMaxRoundsPerInvocation(maxToolRounds);
+        if (maxUnknownToolCalls > 0) {
+            props.setMaxUnknownCallsPerInvocation(maxUnknownToolCalls);
+        }
+        props.getResultClearing().setEnabled(clearingEnabled);
+        props.getResultClearing().setThresholdChars(thresholdChars);
+        props.getResultClearing().setKeepLast(keepLast);
+        return props;
+    }
+
     @Autowired
     public ResilientToolCallingManagerFactory(
         ObjectMapper objectMapper,
         ObjectProvider<ObservationRegistry> observationRegistry,
         ObjectProvider<MeterRegistry> meterRegistry,
-        @Value("${app.chat.tools.max-rounds-per-invocation:"
-            + ArgumentSanitizingToolCallingManager.DEFAULT_MAX_TOOL_ROUNDS + "}") int maxToolRounds,
-        @Value("${app.chat.tools.max-unknown-calls-per-invocation:"
-            + ArgumentSanitizingToolCallingManager.DEFAULT_MAX_UNKNOWN_TOOL_CALLS + "}") int maxUnknownToolCalls,
-        @Value("${app.chat.tools.result-clearing.enabled:true}") boolean clearingEnabled,
-        @Value("${app.chat.tools.result-clearing.threshold-chars:" + ToolResultClearing.DEFAULT_THRESHOLD_CHARS
-            + "}") int clearingThresholdChars,
-        @Value("${app.chat.tools.result-clearing.keep-last:" + ToolResultClearing.DEFAULT_KEEP_LAST
-            + "}") int clearingKeepLast,
+        // app.chat.tools.*: round cap, unknown-tool cap, result clearing, the wording of the stops.
+        ToolLoopProperties loop,
+        // The turn's call budget, the top autonomy multiplier and the grace past the ceiling, only to derive
+        // the round cap from them when app.chat.tools.max-rounds-per-invocation is 0. guardrails owns all
+        // three keys; this module cannot depend on it, so it reads the keys (the defaults repeated here are
+        // pinned against application.yml and guardrails' own by a test in core/app).
+        @Value("${app.guardrails.max-tool-calls-per-turn:" + DEFAULT_CALLS_PER_TURN + "}") int callsPerTurn,
+        @Value("${app.guardrails.step-limit.autonomous-multiplier:" + DEFAULT_AUTONOMOUS_MULTIPLIER
+            + "}") int autonomousMultiplier,
+        @Value("${app.guardrails.step-limit.grace-calls:" + DEFAULT_GRACE_CALLS + "}") int graceCalls,
         // A call whose arguments miss a required property is answered with the schema instead of
         // being run - see ArgumentSanitizingToolCallingManager#withArgumentValidation.
         @Value("${app.chat.tools.argument-validation.enabled:true}") boolean argumentValidation,
@@ -142,6 +189,14 @@ public class ResilientToolCallingManagerFactory {
             ? ObservationRegistry.NOOP
             : observationRegistry.getIfAvailable(() -> ObservationRegistry.NOOP);
         MeterRegistry meters = meterRegistry == null ? null : meterRegistry.getIfAvailable();
+        ToolLoopProperties props = loop != null ? loop : new ToolLoopProperties();
+        int highestCallCeiling = Math.max(1, callsPerTurn) * Math.max(1, autonomousMultiplier);
+        int maxToolRounds = props.effectiveMaxRounds(callsPerTurn, autonomousMultiplier, graceCalls);
+        if (maxToolRounds < highestCallCeiling) {
+            log.warn("app.chat.tools.max-rounds-per-invocation={} is below the highest per-turn tool-call ceiling "
+                + "({}): a reply is stopped at {} tool rounds even where the call ceiling allows more. Set it to 0 "
+                + "to derive it from the call ceiling.", maxToolRounds, highestCallCeiling, maxToolRounds);
+        }
         org.springframework.ai.model.tool.DefaultToolCallingManager delegate = ToolCallingManager.builder()
             .observationRegistry(observations)
             .toolExecutionExceptionProcessor(new RedactingToolExecutionExceptionProcessor())
@@ -149,10 +204,23 @@ public class ResilientToolCallingManagerFactory {
         // OTel GenAI shape for the tool spans: "execute_tool <name>", content off.
         delegate.setObservationConvention(new GenAiToolObservationConvention());
         this.manager = new ArgumentSanitizingToolCallingManager(
-            delegate, objectMapper, maxToolRounds, maxUnknownToolCalls, true, meters)
-            .withResultClearing(new ToolResultClearing(clearingEnabled, clearingThresholdChars, clearingKeepLast))
+            delegate, objectMapper, maxToolRounds, props.getMaxUnknownCallsPerInvocation(), true, meters)
+            .withResultClearing(ToolResultClearing.from(props.getResultClearing()))
+            .withStopTexts(props.getBudgetExhaustedMessage(), props.getHardStopReply())
             .withArgumentValidation(argumentValidation)
             .withRepeatGuard(repeatGuardTools);
+    }
+
+    /**
+     * The prompt registry the manager reads the text of its stops from (the tool-budget results and the closing
+     * reply, the answer to an unknown tool name). Setter-injected so the constructor, built by hand in tests,
+     * stays as it is; without it the manager uses the shipped wording.
+     */
+    @Autowired(required = false)
+    public void setPromptResolver(PromptResolver resolver) {
+        if (manager instanceof ArgumentSanitizingToolCallingManager sanitizing) {
+            sanitizing.withPrompts(resolver);
+        }
     }
 
     /** The manager to hand to {@code ChatModel.Builder#toolCallingManager}. */

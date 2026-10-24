@@ -132,7 +132,7 @@ public class GeminiAgentChatClientFactory implements AgentChatClientFactory {
             genAiClient, options, toolCallingManagers.create(),
             modelSupport.retry(), modelSupport.observationRegistry());
 
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.GEMINI)
             .defaultAdvisors(modelSupport.advisors(
                 // Gemini rejects >1 system message; see SystemMessageMergingAdvisor's javadoc.
                 new SystemMessageMergingAdvisor(),

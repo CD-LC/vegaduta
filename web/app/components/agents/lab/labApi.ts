@@ -17,6 +17,10 @@ export interface LabCapabilities {
   allowed: boolean; reason: "PLAN" | null;
   maxCells: number; maxCallsPerRun: number; maxSystemPrompts: number;
   maxSimilarityCells: number; runTtlMinutes: number;
+  /** Whether a run may use the agent's real tools (app.agent-lab.with-tools.enabled and the tool pipeline present).
+   *  Always sent by the current core; optional only so an older core still parses (the toggle then stays usable and a
+   *  refused run explains itself). */
+  withToolsAvailable?: boolean;
 }
 export interface LabMessage { role: "user" | "assistant"; content: string }
 export interface LabCellRequest {
@@ -26,6 +30,8 @@ export interface LabCellRequest {
 export interface LabRunRequest {
   kind: LabRunKind; systemPrompts: string[]; cells: LabCellRequest[];
   scoring: "NONE" | "JUDGE"; similarity: "NONE" | "JUDGE";
+  /** true = answer with the agent's real tools (the chat turn pipeline); omitted = the tool-less completion. */
+  withTools?: boolean;
 }
 export interface LabCellResult {
   key: string; status: "PENDING" | "DONE" | "ERROR";

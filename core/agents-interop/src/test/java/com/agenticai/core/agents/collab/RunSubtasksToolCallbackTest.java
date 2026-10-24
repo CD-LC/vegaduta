@@ -186,13 +186,13 @@ class RunSubtasksToolCallbackTest {
     @Test
     void longAnswersAreCapped() throws Exception {
         when(chatService.delegateCall(any(), any(), any(), any(), any()))
-                .thenReturn("y".repeat(RunSubtasksToolCallback.MAX_ANSWER_CHARS * 2));
+                .thenReturn("y".repeat(new CollaborationProperties().getMaxAnswerChars() * 2));
 
         JsonNode results = MAPPER.readTree(tool().call(tasks(1))).get("results");
 
         assertTrue(
                 results.get(0).get("answer").asText().length()
-                        <= RunSubtasksToolCallback.MAX_ANSWER_CHARS + 100);
+                        <= new CollaborationProperties().getMaxAnswerChars() + 100);
     }
 
     @Test

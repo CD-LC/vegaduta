@@ -148,10 +148,9 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
         if (url.isEmpty() || !StringUtils.hasText(tag)) {
             return Optional.empty();
         }
-        ObjectNode body = MAPPER.createObjectNode()
-                .put("model", tag)
-                .put("keep_alive", keep)
-                .put("stream", false);
+        ObjectNode body = MAPPER.createObjectNode().put("model", tag).put("stream", false);
+        // "-1" must go out as the number -1 (see OllamaKeepAlive): as a string Ollama answers 400 and the load fails.
+        body.set("keep_alive", MAPPER.valueToTree(OllamaKeepAlive.jsonValue(keep)));
         long started = System.nanoTime();
         try {
             // The pull client: a cold load is silent for longer than the quick client's 8 s read timeout.

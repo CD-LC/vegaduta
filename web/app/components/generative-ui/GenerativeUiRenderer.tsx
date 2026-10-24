@@ -93,8 +93,10 @@ function Node({ node, onAction }: { node: UiNode; onAction: GenerativeUiActionHa
     case "card":
       return (
         <div className="rounded-xl border border-border bg-card p-4">
-          {str(p.title) && <h3 className="text-sm font-semibold text-foreground">{p.title as string}</h3>}
-          {str(p.subtitle) && <p className="mt-0.5 text-xs text-muted-foreground">{p.subtitle as string}</p>}
+          {str(p.title) && <h3 className="break-words text-sm font-semibold text-foreground">{p.title as string}</h3>}
+          {str(p.subtitle) && (
+            <p className="mt-0.5 break-words text-xs text-muted-foreground">{p.subtitle as string}</p>
+          )}
           <div className={p.title ? "mt-3" : ""}>{kids}</div>
         </div>
       );
@@ -127,7 +129,9 @@ function Node({ node, onAction }: { node: UiNode; onAction: GenerativeUiActionHa
       return (
         <Tag className={`text-sm text-foreground ${p.ordered ? "list-decimal" : "list-disc"} space-y-1 pl-5`}>
           {items.map((i, k) => (
-            <li key={k}>{i}</li>
+            <li key={k} className="break-words">
+              {i}
+            </li>
           ))}
         </Tag>
       );
@@ -165,13 +169,13 @@ function Node({ node, onAction }: { node: UiNode; onAction: GenerativeUiActionHa
     case "keyValue": {
       const entries = Array.isArray(p.entries) ? p.entries : [];
       return (
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-sm">
           {entries.map((e, i) => {
             const pair = e && typeof e === "object" ? (e as Record<string, unknown>) : {};
             return (
               <div key={i} className="contents">
-                <dt className="text-muted-foreground">{str(pair.key)}</dt>
-                <dd className="text-foreground">{str(pair.value)}</dd>
+                <dt className="break-words text-muted-foreground">{str(pair.key)}</dt>
+                <dd className="break-words text-foreground">{str(pair.value)}</dd>
               </div>
             );
           })}
@@ -360,7 +364,7 @@ function FormNode({
   );
   return (
     <form onSubmit={submit} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
-      {str(p.title) && <h3 className="text-sm font-semibold text-foreground">{p.title as string}</h3>}
+      {str(p.title) && <h3 className="break-words text-sm font-semibold text-foreground">{p.title as string}</h3>}
       {children}
       <button
         type="submit"

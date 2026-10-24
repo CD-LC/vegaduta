@@ -90,6 +90,13 @@ panel is also embedded in [Maintenance](administration.md#maintenance-adminmaint
 `PUT /api/approvals/policy/{actionType}` (`PERM_MANAGE_APPROVALS`). The list endpoint supports `limit`/`offset`
 ([list endpoint paging](../api/LIST-ENDPOINT-PAGING.md)).
 
+Who may decide a request depends on its kind. A gated agent tool call, and any request marked admin-only, needs
+`PERM_MANAGE_APPROVALS`. A workflow node's approval needs run access to that workflow, and an ambient-mode sentinel's
+`agent.proposal` needs run access to the agent it proposes for (approving it starts a job of that agent as you); a
+holder of `PERM_MANAGE_APPROVALS` may decide either. Nobody but a holder of `PERM_MANAGE_APPROVALS` may decide a
+request they raised themselves. Channel sends (`channel.*.send`) can still be decided by any other member of the
+workspace.
+
 ## Input requests (`/admin/input-requests`)
 
 The queue that **Human Input** workflow nodes write to: a run that pauses for structured input shows up here as a

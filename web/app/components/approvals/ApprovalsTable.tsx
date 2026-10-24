@@ -4,8 +4,13 @@ import { Inbox } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Skeleton } from "../ui/skeleton";
 import EmptyState from "../EmptyState";
+import { Checkbox } from "../ui/checkbox";
+import { useTranslations } from "../../lib/i18n";
 import ApprovalStatusBadge from "./ApprovalStatusBadge";
+import ExpiryCountdown from "./ExpiryCountdown";
+import RiskBadge from "./RiskBadge";
 import { actionLabel, actorLabel, relTime, type ApprovalRequestItem, type Translate } from "./approvalsModel";
+import { isToolCallRequest, requestRisk, requestToolName } from "./approvalsQueueModel";
 
 /** Selectable list of approval requests. Rows are keyboard focusable; Enter/Space selects. */
 export default function ApprovalsTable({
@@ -14,13 +19,28 @@ export default function ApprovalsTable({
   selectedId,
   onSelect,
   t,
+  checkedIds,
+  onToggleChecked,
+  onToggleAll,
+  ttlSeconds = null,
 }: {
   rows: ApprovalRequestItem[];
   loading: boolean;
   selectedId: string | null;
   onSelect: (id: string) => void;
   t: Translate;
+  /** Rows ticked for a bulk decision; omit to hide the tick column. */
+  checkedIds?: ReadonlySet<string>;
+  onToggleChecked?: (id: string) => void;
+  /** Tick or clear every selectable row on this page. */
+  onToggleAll?: (ids: string[], checked: boolean) => void;
+  ttlSeconds?: number | null;
 }) {
+  const q = useTranslations("approvalsQueue");
+  const selectable = !!checkedIds && !!onToggleChecked;
+  // Only pending tool calls can be decided in bulk.
+  const selectableRows = selectable ? rows.filter((r) => r.status === "PENDING" && isToolCallRequest(r)) : [];
+  const ticked = selectableRows.filter((r) => checkedIds?.has(r.id)).length;
   if (loading && rows.length === 0) {
     return (
       <div className="grid gap-2 p-4" aria-busy="true" aria-label={t("loadingLabel")}>
@@ -37,6 +57,16 @@ export default function ApprovalsTable({
     <Table aria-label={t("title")}>
       <TableHeader>
         <TableRow>
+          {selectable && (
+            <TableHead className="w-px">
+              <Checkbox
+                aria-label={q("selectAllLabel")}
+                disabled={selectableRows.length === 0}
+                checked={selectableRows.length > 0 && ticked === selectableRows.length ? true : ticked > 0 ? "indeterminate" : false}
+                onCheckedChange={(next) => onToggleAll?.(selectableRows.map((r) => r.id), next)}
+              />
+            </TableHead>
+          )}
           <TableHead>{t("colStatus")}</TableHead>
           <TableHead>{t("colAction")}</TableHead>
           <TableHead className="hidden md:table-cell">{t("colRequester")}</TableHead>
@@ -63,12 +93,26 @@ export default function ApprovalsTable({
                 }
               }}
             >
+              {selectable && (
+                <TableCell className="w-px" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+                  {r.status === "PENDING" && isToolCallRequest(r) ? (
+                    <Checkbox
+                      aria-label={q("selectRowLabel", { tool: requestToolName(r) })}
+                      checked={checkedIds?.has(r.id) ?? false}
+                      onCheckedChange={() => onToggleChecked?.(r.id)}
+                    />
+                  ) : null}
+                </TableCell>
+              )}
               <TableCell className="w-px whitespace-nowrap">
-                <ApprovalStatusBadge status={r.status} />
+                <ApprovalStatusBadge status={r.status} decidedBy={r.decidedBy} />
               </TableCell>
               <TableCell className="max-w-0 min-w-40">
-                <div className="truncate font-medium" title={r.actionType}>
-                  {actionLabel(r.actionType, t)}
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="truncate font-medium" title={r.actionType}>
+                    {isToolCallRequest(r) ? requestToolName(r) : actionLabel(r.actionType, t)}
+                  </span>
+                  {r.status === "PENDING" && <RiskBadge risk={requestRisk(r)} />}
                 </div>
                 <div className="truncate text-xs text-muted-foreground" title={summary}>
                   {summary}
@@ -87,7 +131,8 @@ export default function ApprovalsTable({
                 </div>
               </TableCell>
               <TableCell className="whitespace-nowrap text-right text-sm text-muted-foreground">
-                {relTime(r.createdAt, t)}
+                <div>{relTime(r.createdAt, t)}</div>
+                <ExpiryCountdown item={r} ttlSeconds={ttlSeconds} />
               </TableCell>
             </TableRow>
           );

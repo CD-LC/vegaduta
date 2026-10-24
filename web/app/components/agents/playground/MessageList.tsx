@@ -9,8 +9,11 @@ import FailedReplyBubble from "../../FailedReplyBubble";
 import { Button } from "../../ui/button";
 import type { useArtifactsPane } from "../../artifacts/useArtifactsPane";
 import PendingToolApprovals from "../PendingToolApprovals";
+import ApprovalContinuationStatus from "../ApprovalContinuationStatus";
+import type { ApprovalContinuationWatch } from "../useApprovalContinuation";
 import BrowserTakeoverPanel from "../BrowserTakeoverPanel";
 import TurnStopNotice from "../TurnStopNotice";
+import { StopLimitAction } from "./StopLimitAction";
 import { AssistantTurn, type TurnVoiceControls } from "./AssistantTurn";
 import { UserTurn } from "./UserTurn";
 import type { PlaygroundAgent, PlaygroundTurn } from "./types";
@@ -24,6 +27,7 @@ export function MessageList({
   agent,
   sessionId,
   sending,
+  approvalContinuation,
   error,
   turns,
   visibleTurns,
@@ -44,10 +48,13 @@ export function MessageList({
   retryFailedTurn,
   onResendHosted,
   onExpand,
+  onWaitingApprovalsChange,
 }: {
   agent: PlaygroundAgent | null;
   sessionId: string | null;
   sending: boolean;
+  /** Follows the agent carrying on after a tool approval is decided (core continues the task itself). */
+  approvalContinuation: ApprovalContinuationWatch;
   error: string | null;
   turns: PlaygroundTurn[];
   visibleTurns: PlaygroundTurn[];
@@ -69,6 +76,8 @@ export function MessageList({
   retryFailedTurn: (index: number) => void;
   onResendHosted: (userMessage: string) => void;
   onExpand: (index: number, trigger: HTMLButtonElement) => void;
+  /** Tool calls parked for a decision in this conversation (feeds the live status chips). */
+  onWaitingApprovalsChange?: (waiting: number) => void;
 }) {
   const t = useTranslations("agentPlayground");
   return (
@@ -132,7 +141,14 @@ export function MessageList({
           />
         );
       })}
-      <PendingToolApprovals agentId={agent?.id} sessionId={sessionId} turnInFlight={sending} />
+      <PendingToolApprovals
+        agentId={agent?.id}
+        sessionId={sessionId}
+        turnInFlight={sending}
+        onDecided={(_outcome, requestId) => approvalContinuation.watch(requestId)}
+        onWaitingChange={onWaitingApprovalsChange}
+      />
+      <ApprovalContinuationStatus continuation={approvalContinuation} />
       {/* Human takeover of the agent's browser (captcha / 2FA / login): self-hiding unless core has it on. */}
       <BrowserTakeoverPanel
         agentId={agent?.id}
@@ -144,7 +160,7 @@ export function MessageList({
       {error && !(turns[turns.length - 1]?.failed && turns[turns.length - 1].content === error) && (
         <p className="text-sm text-destructive">{error}</p>
       )}
-      <TurnStopNotice message={error} />
+      <TurnStopNotice message={error} action={(kind) => <StopLimitAction agent={agent} kind={kind} />} />
     </div>
   );
 }

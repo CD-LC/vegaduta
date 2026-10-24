@@ -45,7 +45,15 @@ public final class AgentTurn {
     public record Usage(Long promptTokens, Long completionTokens) {
     }
 
-    /** {@code finishReason}: "tool_calls" | "stop" | the provider's own value (e.g. "length"). */
+    /**
+     * {@code finishReason}, one vocabulary whatever the provider: {@code tool_calls} (the reply
+     * carries calls to run), {@code stop} (finished), {@code length} (cut off at the output limit -
+     * also when it was a tool call that was cut off and could not be used), {@code content_filter}
+     * (stopped by the provider's safety system), {@code malformed_tool_call} (the model's tool call
+     * could not be used). A provider reason this service does not recognise is passed through
+     * unchanged. Tool-call ids are always present and non-blank: one is generated for providers
+     * (Gemini) that send none.
+     */
     public record Result(String content, List<ToolCall> toolCalls, String model, String finishReason, Usage usage) {
     }
 }

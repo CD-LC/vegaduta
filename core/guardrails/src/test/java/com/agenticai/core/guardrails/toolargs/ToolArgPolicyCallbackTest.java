@@ -12,9 +12,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.agenticai.core.guardrails.GuardrailFailMode;
+import com.agenticai.core.guardrails.ToolBudgetExhausted;
 import com.agenticai.core.guardrails.ToolStepLimitExceededException;
+import com.agenticai.core.guardrails.ToolStepLimitProperties;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.model.ToolContext;
@@ -140,12 +144,43 @@ class ToolArgPolicyCallbackTest {
         assertEquals(1, source.lookups);
     }
 
+    @AfterEach
+    void restoreFailMode() {
+        GuardrailFailMode.set(GuardrailFailMode.CLOSED);
+    }
+
+    /** Behaviour change: the lookup used to fail open whatever app.guardrails.fail-mode said. */
     @Test
-    void aFailingLookupFailsOpen() {
+    void aFailingLookupFollowsTheGlobalFailModeAndRefusesByDefault() {
         FakeSource source = new FakeSource();
         source.lookupFailure = new IllegalStateException("db down");
+
+        String result = wrap(source, null, 0).call(GOOD);
+
+        assertTrue(result.contains("was not executed"), result);
+        assertTrue(result.contains("could not be checked"), result);
+        verify(delegate, never()).call(anyString());
+    }
+
+    @Test
+    void aFailingLookupIsAllowedOnlyWhenTheGlobalFailModeIsOpen() {
+        GuardrailFailMode.set(GuardrailFailMode.OPEN);
+        FakeSource source = new FakeSource();
+        source.lookupFailure = new IllegalStateException("db down");
+
         assertEquals("fetched", wrap(source, null, 0).call(BAD));
         verify(delegate).call(BAD);
+    }
+
+    @Test
+    void aRefusedLookupFailureSpendsAStepLikeAnyOtherRefusal() {
+        FakeSource source = new FakeSource();
+        source.lookupFailure = new IllegalStateException("db down");
+        AtomicInteger steps = new AtomicInteger();
+
+        wrap(source, steps, 10).call(GOOD);
+
+        assertEquals(1, steps.get());
     }
 
     @Test
@@ -170,7 +205,14 @@ class ToolArgPolicyCallbackTest {
         assertTrue(cb.call(BAD).contains("was not executed"));
         assertTrue(cb.call(BAD).contains("was not executed"));
         assertEquals(2, steps.get());
-        assertThrows(ToolStepLimitExceededException.class, () -> cb.call(BAD));
+        // Past the ceiling the model is told the budget is gone (same result as GuardedToolCallback's),
+        // not thrown at; only a model that keeps going past the grace is stopped.
+        String exhausted = cb.call(BAD);
+        assertTrue(ToolBudgetExhausted.isBudgetExhausted(exhausted), exhausted);
+        ToolStepLimitProperties noGrace = new ToolStepLimitProperties();
+        noGrace.setGraceCalls(0);
+        ToolArgPolicyCallback strict = wrap(source, new AtomicInteger(2), 2).withStepLimits(noGrace);
+        assertThrows(ToolStepLimitExceededException.class, () -> strict.call(BAD));
         // A compliant call is NOT counted here - GuardedToolCallback counts it when it actually runs.
         AtomicInteger untouched = new AtomicInteger(0);
         assertEquals("fetched", wrap(source, untouched, 2).call(GOOD));

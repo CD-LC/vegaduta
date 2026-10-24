@@ -1,0 +1,203 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "manual-get-api-settings-catalog",
+      "method": "GET",
+      "path": "/api/settings/catalog",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.entries",
+          "$.entries[*].default",
+          "$.entries[*].descriptionKey",
+          "$.entries[*].enumValues",
+          "$.entries[*].group",
+          "$.entries[*].helpKey",
+          "$.entries[*].key",
+          "$.entries[*].labelKey",
+          "$.entries[*].max",
+          "$.entries[*].min",
+          "$.entries[*].minRole",
+          "$.entries[*].risk",
+          "$.entries[*].scopes",
+          "$.entries[*].step",
+          "$.entries[*].type",
+          "$.entries[*].unit"
+        ]
+      },
+      "//": "Called through web/app/lib/api/settings.ts, whose fetcher is injected (createSettingsClient(fetcher = apiFetch)) so tests can stub it at the client boundary; the contract extractor cannot follow an injected fetcher or the path builder. Hand-written until the client passes literal paths to apiFetch."
+    },
+    {
+      "id": "manual-get-api-settings-effective",
+      "method": "GET",
+      "path": "/api/settings/effective",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.values"
+        ]
+      },
+      "//": "Called through web/app/lib/api/settings.ts, whose fetcher is injected (createSettingsClient(fetcher = apiFetch)) so tests can stub it at the client boundary; the contract extractor cannot follow an injected fetcher or the path builder. Hand-written until the client passes literal paths to apiFetch."
+    },
+    {
+      "id": "manual-put-api-settings-tenant-key",
+      "method": "PUT",
+      "path": "/api/settings/tenant/{key}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason",
+          "$.value"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.effective",
+          "$.key",
+          "$.unchanged",
+          "$.version"
+        ]
+      },
+      "//": "Called through web/app/lib/api/settings.ts, whose fetcher is injected (createSettingsClient(fetcher = apiFetch)) so tests can stub it at the client boundary; the contract extractor cannot follow an injected fetcher or the path builder. Hand-written until the client passes literal paths to apiFetch."
+    },
+    {
+      "id": "manual-delete-api-settings-tenant-key",
+      "method": "DELETE",
+      "path": "/api/settings/tenant/{key}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.effective",
+          "$.key",
+          "$.unchanged",
+          "$.version"
+        ]
+      },
+      "//": "Called through web/app/lib/api/settings.ts, whose fetcher is injected (createSettingsClient(fetcher = apiFetch)) so tests can stub it at the client boundary; the contract extractor cannot follow an injected fetcher or the path builder. Hand-written until the client passes literal paths to apiFetch."
+    },
+    {
+      "id": "manual-put-api-agents-agentId-settings-key",
+      "method": "PUT",
+      "path": "/api/agents/{agentId}/settings/{key}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.reason",
+          "$.value"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.effective",
+          "$.key",
+          "$.unchanged",
+          "$.version"
+        ]
+      },
+      "//": "Called through web/app/lib/api/settings.ts, whose fetcher is injected (createSettingsClient(fetcher = apiFetch)) so tests can stub it at the client boundary; the contract extractor cannot follow an injected fetcher or the path builder. Hand-written until the client passes literal paths to apiFetch."
+    },
+    {
+      "id": "manual-delete-api-agents-agentId-settings-key",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/settings/{key}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.effective",
+          "$.key",
+          "$.unchanged",
+          "$.version"
+        ]
+      },
+      "//": "Called through web/app/lib/api/settings.ts, whose fetcher is injected (createSettingsClient(fetcher = apiFetch)) so tests can stub it at the client boundary; the contract extractor cannot follow an injected fetcher or the path builder. Hand-written until the client passes literal paths to apiFetch."
+    },
+    {
+      "id": "manual-get-api-settings-key-history",
+      "method": "GET",
+      "path": "/api/settings/{key}/history",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].action",
+          "$[*].actor",
+          "$[*].at",
+          "$[*].previousValue",
+          "$[*].reason",
+          "$[*].value",
+          "$[*].version"
+        ]
+      },
+      "//": "Called through web/app/lib/api/settings.ts, whose fetcher is injected (createSettingsClient(fetcher = apiFetch)) so tests can stub it at the client boundary; the contract extractor cannot follow an injected fetcher or the path builder. Hand-written until the client passes literal paths to apiFetch."
+    },
+    {
+      "id": "manual-post-api-agents-agentId-chat-tool-names",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/chat",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.message",
+          "$.toolNames"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      },
+      "//": "The playground sends the Run settings drawer's tool switches as toolNames (a run-scoped narrowing of the agent's tools, nothing saved). The chat body is built inside streamChat's resumable wrapper (lib/api/chat.ts), whose request fields the extractor does not read, so the one field the console adds there is declared by hand."
+    },
+    {
+      "id": "manual-get-api-settings-history",
+      "method": "GET",
+      "path": "/api/settings/history",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.entries",
+          "$.entries[*].action",
+          "$.entries[*].actor",
+          "$.entries[*].agentId",
+          "$.entries[*].at",
+          "$.entries[*].key",
+          "$.entries[*].previousValue",
+          "$.entries[*].reason",
+          "$.entries[*].scope",
+          "$.entries[*].value",
+          "$.entries[*].version",
+          "$.hasMore",
+          "$.limit",
+          "$.offset",
+          "$.total"
+        ]
+      },
+      "//": "Called through web/app/lib/api/settings.ts, whose fetcher is injected (createSettingsClient(fetcher = apiFetch)) so tests can stub it at the client boundary; the contract extractor cannot follow an injected fetcher or the path builder. Hand-written until the client passes literal paths to apiFetch."
+    },
+    {
+      "id": "manual-get-api-agents-agentId-settings-history",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/settings/history",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.entries",
+          "$.entries[*].action",
+          "$.entries[*].actor",
+          "$.entries[*].agentId",
+          "$.entries[*].at",
+          "$.entries[*].key",
+          "$.entries[*].previousValue",
+          "$.entries[*].reason",
+          "$.entries[*].scope",
+          "$.entries[*].value",
+          "$.entries[*].version",
+          "$.hasMore",
+          "$.limit",
+          "$.offset",
+          "$.total"
+        ]
+      },
+      "//": "Called through web/app/lib/api/settings.ts, whose fetcher is injected (createSettingsClient(fetcher = apiFetch)) so tests can stub it at the client boundary; the contract extractor cannot follow an injected fetcher or the path builder. Hand-written until the client passes literal paths to apiFetch."
+    }
+  ]
+}

@@ -13,7 +13,9 @@ name: Trivy (fs scan)
 #                                  secrets.DEFECTDOJO_API_KEY are set)
 #
 # Report-only: nothing here fails the run. To gate on severity later, set
-# exit-code: "1" and severity: "CRITICAL" on the scan steps. Triage goes in a
+# exit-code: "1" and severity: "CRITICAL" on the scan steps. Both scan steps
+# read trivy.yaml at the repository root, which skips the example and
+# load-test manifests (and says why); triage of single findings goes in a
 # .trivyignore at the repository root.
 
 on:
@@ -49,6 +51,7 @@ jobs:
         with:
           scan-type: fs
           scanners: vuln,misconfig
+          trivy-config: trivy.yaml
           format: sarif
           output: trivy.sarif
 
@@ -59,6 +62,7 @@ jobs:
         with:
           scan-type: fs
           scanners: vuln,misconfig
+          trivy-config: trivy.yaml
           format: json
           output: trivy.json
 

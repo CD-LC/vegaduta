@@ -252,17 +252,30 @@ async function runDevice(info: DeviceEngineInfo, o: RunOptions): Promise<string>
 
 let codeEditMissing = false;
 
+// The cloud assist endpoints answer in ONE non-streamed reply, so a slow
+// turn (a whole-app write on a small pool model can run minutes) currently
+// hangs the UI until the response or the user gives up. Cap the wait so a
+// stalled backend still ends the turn with a clear message instead of an
+// eternal "waiting".
+const CLOUD_TURN_TIMEOUT_MS = 300_000;
+
 async function runCloud(o: RunOptions): Promise<string> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   const token = await auth.getToken({ silent: true }).catch((): string | null => null);
   if (token) headers.Authorization = `Bearer ${token}`;
   applyViewAsHeader(headers);
+  // Combine the caller's stop signal with the ceiling; whichever fires
+  // first aborts the fetch. A timeout abort surfaces as TimeoutError and is
+  // translated in runModel's catch.
+  const signal = o.signal
+    ? AbortSignal.any([o.signal, AbortSignal.timeout(CLOUD_TURN_TIMEOUT_MS)])
+    : AbortSignal.timeout(CLOUD_TURN_TIMEOUT_MS);
   let res: Response | null = null;
   if (!codeEditMissing) {
     res = await fetch(`${API_BASE}/api/assist/code-edit`, {
       method: "POST",
       headers,
-      signal: o.signal,
+      signal,
       body: JSON.stringify({ system: o.system, prompt: o.user }),
     });
     // Web can ship before core: an older core has no /code-edit.
@@ -275,7 +288,7 @@ async function runCloud(o: RunOptions): Promise<string> {
     res = await fetch(`${API_BASE}/api/assist/draft`, {
       method: "POST",
       headers,
-      signal: o.signal,
+      signal,
       body: JSON.stringify({
         fieldLabel: "Code edit for a single-file mobile web app (reply in the exact format requested, no commentary)",
         instruction: `${o.system}\n\n${o.user}`,
@@ -328,7 +341,10 @@ export async function runModel(o: RunOptions): Promise<EngineResult> {
     return { ok: true, text, engine: "cloud", modelName: route.label, triedCloud: true };
   } catch (e) {
     if (o.signal?.aborted) return { ok: false, text: "", engine: null, modelName: null, error: "Stopped." };
-    const msg = e instanceof Error ? e.message : String(e);
+    const timedOut = e instanceof Error && e.name === "TimeoutError";
+    const msg = timedOut
+      ? "The model took too long to answer. Try a smaller change, or check that the model pool on your install is healthy."
+      : e instanceof Error ? e.message : String(e);
     return { ok: false, text: "", engine: null, modelName: null, error: deviceError ? `${deviceError} ${msg}` : msg, triedCloud: true };
   }
 }
@@ -350,6 +366,7 @@ export const EDIT_SYSTEM = [
   "- Never edit or copy the vd:connect placeholder comment - the studio manages it.",
   "- To add something, SEARCH a nearby existing line and repeat it in REPLACE together with the new code.",
   "- Use several blocks for several changes. Change only what the request needs.",
+  "- After the last block, write exactly one line: NOTE: <one plain sentence describing what changed, for a non-technical user - no file names, no jargon>.",
   "- Keep it offline: no external scripts, fonts or frameworks. Plain JavaScript.",
   "- The skeleton script already defines esc(s), load(key, default) and save(key, value) at top level. Use them; NEVER declare const/let/var/function esc, load or save again (that throws a SyntaxError and blanks the app).",
   "- File upload for end users: use <input type=\"file\"> (add accept=\"image/*\" for photos), read it with FileReader, preview images in an <img>, keep the result in localStorage when small, and show a friendly message for oversized or wrong files. Never post files to made-up URLs.",

@@ -253,7 +253,7 @@ public class AgentJobExecutor {
         // not racing a worker that is still unwinding. A worker stuck in non-interruptible I/O simply times
         // out here: the release still happens (the adopter's claim is then a duplicate read-only call at worst;
         // durable calls are protected by the planner and the effect journal).
-        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(QUIESCE_WORKER_WAIT_MS);
+        long deadline = System.nanoTime() + properties.getQuiesceWorkerWait().toNanos();
         while (!active.isEmpty() && System.nanoTime() < deadline) {
             try {
                 Thread.sleep(25L);
@@ -362,9 +362,6 @@ public class AgentJobExecutor {
     }
 
     private static final String HEARTBEAT_ACTOR = "system:agent-job-heartbeat";
-
-    /** Max time {@link #quiesceForShutdown} waits for interrupted workers to unwind (well inside the 30 s SIGTERM grace). */
-    private static final long QUIESCE_WORKER_WAIT_MS = 3_000L;
 
     private static String computeInstanceId() {
         String host;

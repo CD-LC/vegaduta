@@ -93,7 +93,7 @@ class TelegramWebhookControllerTriggerAndAgentEventBothFireTest {
                 .thenReturn(Optional.of("tenant_test"));
 
         TelegramCredential credential = mock(TelegramCredential.class);
-        when(credential.getWebhookSecret()).thenReturn(SECRET);
+        when(credential.getWebhookSecret()).thenReturn(TelegramWebhookSecret.hash(SECRET));
         when(credential.getEncryptedBotToken()).thenReturn("encrypted-token");
         when(credentialRepository.findFirstByOrderByCreatedAtAsc())
                 .thenReturn(Optional.of(credential));

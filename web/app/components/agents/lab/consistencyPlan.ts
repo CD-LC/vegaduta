@@ -20,6 +20,8 @@ export interface ConsistencyContext {
   /** The playground turn this question came from called a tool. Samples
    * never do, so the results carry a warning. */
   usedTools: boolean;
+  /** The run answered with the agent's real tools, so the "samples are generated without tools" note does not apply. */
+  withTools?: boolean;
 }
 
 /** k cells keyed k0..k{k-1}, all with the same message and history.

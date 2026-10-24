@@ -62,15 +62,17 @@ def _limits() -> tuple[int, int, int]:
     checking existing repos fit (or raising CODE_INTEL_MAX_REPO_MB/FILES).
     """
     mb = 1024 * 1024
-    enforce = os.environ.get(
-        "CODE_INTEL_ENFORCE_REPO_LIMITS", "").strip().lower() == "true"
-    return ((_env_int("CODE_INTEL_MAX_REPO_MB", 500) * mb) if enforce else 0,
-            _env_int("CODE_INTEL_MAX_REPO_FILES", 50000) if enforce else 0,
-            _env_int("CODE_INTEL_TENANT_QUOTA_MB", 0) * mb)
+    enforce = os.environ.get("CODE_INTEL_ENFORCE_REPO_LIMITS", "").strip().lower() == "true"
+    return (
+        (_env_int("CODE_INTEL_MAX_REPO_MB", 500) * mb) if enforce else 0,
+        _env_int("CODE_INTEL_MAX_REPO_FILES", 50000) if enforce else 0,
+        _env_int("CODE_INTEL_TENANT_QUOTA_MB", 0) * mb,
+    )
 
 
-def _tree_usage(root: str, max_bytes: int = 0, max_files: int = 0,
-                skip_git: bool = False) -> tuple[int, int, bool]:
+def _tree_usage(
+    root: str, max_bytes: int = 0, max_files: int = 0, skip_git: bool = False
+) -> tuple[int, int, bool]:
     """Walk `root` -> (bytes, files, exceeded). Stops early once a non-zero
     cap is passed so a hostile repo cannot make the check itself expensive.
     Symlinks are not followed."""
@@ -92,8 +94,7 @@ def _tree_usage(root: str, max_bytes: int = 0, max_files: int = 0,
                         total += e.stat(follow_symlinks=False).st_size
                     except OSError:
                         continue
-                    if (max_bytes and total > max_bytes) or \
-                            (max_files and files > max_files):
+                    if (max_bytes and total > max_bytes) or (max_files and files > max_files):
                         return total, files, True
         except OSError:
             continue
@@ -104,12 +105,12 @@ def _check_repo_size(checkout: str) -> None:
     max_bytes, max_files, _ = _limits()
     if not (max_bytes or max_files):
         return
-    total, files, exceeded = _tree_usage(
-        checkout, max_bytes, max_files, skip_git=True)
+    total, files, exceeded = _tree_usage(checkout, max_bytes, max_files, skip_git=True)
     if exceeded:
         raise RepoTooLargeError(
             f"repository exceeds the size limit "
-            f"({max_bytes // (1024 * 1024)} MB / {max_files} files)")
+            f"({max_bytes // (1024 * 1024)} MB / {max_files} files)"
+        )
 
 
 def _check_tenant_quota(tenant_dir: str) -> None:
@@ -120,7 +121,8 @@ def _check_tenant_quota(tenant_dir: str) -> None:
     if exceeded:
         raise RepoTooLargeError(
             f"tenant disk quota exceeded ({quota // (1024 * 1024)} MB); "
-            "delete unused repos before adding more")
+            "delete unused repos before adding more"
+        )
 
 
 def _within_data_root(path: str, data_root: str) -> bool:
@@ -185,15 +187,14 @@ def _gitdir_for(repo_dir: str) -> str:
     relocates the root (tests, operators); default is the system temp dir.
     """
     root = os.environ.get("CODE_INTEL_GITDIR_ROOT") or os.path.join(
-        tempfile.gettempdir(), "code-intel-gitdirs")
-    digest = hashlib.sha256(
-        os.path.realpath(repo_dir).encode("utf-8")).hexdigest()[:16]
+        tempfile.gettempdir(), "code-intel-gitdirs"
+    )
+    digest = hashlib.sha256(os.path.realpath(repo_dir).encode("utf-8")).hexdigest()[:16]
     base = os.path.basename(os.path.normpath(repo_dir)) or "repo"
     return os.path.join(root, f"{base}-{digest}")
 
 
-def _rmtree_retry_readonly(func: Callable[[str], object], path: str,
-                           _exc: object) -> None:
+def _rmtree_retry_readonly(func: Callable[[str], object], path: str, _exc: object) -> None:
     """rmtree onerror hook: git pack files are read-only, which some
     filesystems (Windows, some NFS) refuse to unlink - clear the bit and
     retry. POSIX unlinks never consult the file's own mode, so on the
@@ -239,7 +240,7 @@ def _existing_git_dir(checkout: str) -> str | None:
         return None
     if not target.startswith("gitdir:"):
         return None
-    gitdir = target[len("gitdir:"):].strip()
+    gitdir = target[len("gitdir:") :].strip()
     if not os.path.isabs(gitdir):
         gitdir = os.path.join(checkout, gitdir)
     return gitdir if os.path.isdir(gitdir) else None
@@ -324,18 +325,18 @@ def validate_git_source(git_url: str, git_ref: str | None) -> PinnedHost | None:
     """
     if git_url.startswith("-") or any(c in git_url for c in "\r\n\0"):
         raise GitOpsValidationError("git_url is not a valid URL")
-    if git_ref is not None and not _GIT_REF_RE.match(git_ref):
+    if git_ref is not None and not _GIT_REF_RE.fullmatch(git_ref):
         raise GitOpsValidationError("git_ref is not a valid branch or tag name")
     parts = urlsplit(git_url)
     scheme = parts.scheme.lower()
     if scheme not in _allowed_schemes():
         raise GitOpsValidationError(
-            f"git_url scheme '{scheme or '(none)'}' is not allowed; use https")
+            f"git_url scheme '{scheme or '(none)'}' is not allowed; use https"
+        )
     if scheme == "file":
         return None
     if parts.username or parts.password:
-        raise GitOpsValidationError(
-            "git_url must not embed credentials; use auth_token")
+        raise GitOpsValidationError("git_url must not embed credentials; use auth_token")
     host = parts.hostname
     if not host:
         raise GitOpsValidationError("git_url has no host")
@@ -351,19 +352,20 @@ def validate_git_source(git_url: str, git_ref: str | None) -> PinnedHost | None:
     # EVERY address must be public: a name with one public and one private
     # record would otherwise pass here and connect to the private one.
     if not addresses or not all(_is_public_address(a) for a in addresses):
-        raise GitOpsValidationError(
-            "git_url resolves to a private or internal address")
+        raise GitOpsValidationError("git_url resolves to a private or internal address")
     try:
         ipaddress.ip_address(host)
         return None  # IP literal: git connects to it as-is, nothing to rebind
     except ValueError:
         pass
-    return PinnedHost(scheme=scheme, host=host.lower(), port=port,
-                      addresses=tuple(dict.fromkeys(addresses)))
+    return PinnedHost(
+        scheme=scheme, host=host.lower(), port=port, addresses=tuple(dict.fromkeys(addresses))
+    )
 
 
-def _run(args: list[str], cwd: str | None, timeout: int,
-         token: str | None, pin: PinnedHost | None = None) -> str:
+def _run(
+    args: list[str], cwd: str | None, timeout: int, token: str | None, pin: PinnedHost | None = None
+) -> str:
     env = dict(os.environ)
     # Never let git prompt, and restrict transports at the git layer too, so a
     # redirect or a submodule cannot move the fetch onto ext::/ssh/file even
@@ -373,9 +375,15 @@ def _run(args: list[str], cwd: str | None, timeout: int,
     # plain file holding the link text, so nothing downstream (indexer,
     # workspaces) can be steered at another tenant's files. Persisted into
     # new clones too (see ensure_checkout) for git commands run elsewhere.
-    cmd = ["git", "-c", "protocol.allow=never",
-           "-c", "http.followRedirects=false",
-           "-c", "core.symlinks=false"]
+    cmd = [
+        "git",
+        "-c",
+        "protocol.allow=never",
+        "-c",
+        "http.followRedirects=false",
+        "-c",
+        "core.symlinks=false",
+    ]
     if cwd:
         # Mounts like Azure Files report every file as root-owned while the
         # container runs as `codeintel` - git then refuses to touch the
@@ -395,22 +403,27 @@ def _run(args: list[str], cwd: str | None, timeout: int,
         # time. Nothing lands in .git/config or argv (argv shows the
         # helper script, not the secret).
         env["CODE_INTEL_GIT_TOKEN"] = token
-        helper = "!f() { echo username=x-access-token; echo \"password=$CODE_INTEL_GIT_TOKEN\"; }; f"  # noqa: E501
+        helper = '!f() { echo username=x-access-token; echo "password=$CODE_INTEL_GIT_TOKEN"; }; f'
         cmd += ["-c", f"credential.helper={helper}"]
     cmd += args
-    result = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True,
-                            text=True, timeout=timeout)
+    result = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True, timeout=timeout)
     if result.returncode != 0:
         # stderr may echo the URL; tokens never appear (helper-based auth).
-        raise GitOpsError(f"git {' '.join(args[:2])} failed: "
-                          f"{result.stderr.strip()[:500]}")
+        raise GitOpsError(f"git {' '.join(args[:2])} failed: {result.stderr.strip()[:500]}")
     return result.stdout
 
 
 def _rev(checkout: str, rev: str, timeout: int) -> str | None:
     try:
-        return _run(["rev-parse", "--verify", "-q", rev + "^{commit}"],
-                    cwd=checkout, timeout=timeout, token=None).strip() or None
+        return (
+            _run(
+                ["rev-parse", "--verify", "-q", rev + "^{commit}"],
+                cwd=checkout,
+                timeout=timeout,
+                token=None,
+            ).strip()
+            or None
+        )
     except GitOpsError:
         return None
 
@@ -424,8 +437,8 @@ _REJECTED: dict[str, str] = {}
 def _too_large() -> RepoTooLargeError:
     max_bytes, max_files, _ = _limits()
     return RepoTooLargeError(
-        f"repository exceeds the size limit "
-        f"({max_bytes // (1024 * 1024)} MB / {max_files} files)")
+        f"repository exceeds the size limit ({max_bytes // (1024 * 1024)} MB / {max_files} files)"
+    )
 
 
 def _update_checkout(
@@ -446,20 +459,19 @@ def _update_checkout(
         return  # nothing changed -> nothing to enforce
     max_bytes, max_files, _ = _limits()
     if not (max_bytes or max_files):
-        _run(["reset", "--hard", target], cwd=checkout, timeout=timeout,
-             token=None, pin=pin)
+        _run(["reset", "--hard", target], cwd=checkout, timeout=timeout, token=None, pin=pin)
         return
     key = os.path.realpath(checkout)
     if new and _REJECTED.get(key) == new:
         raise _too_large()  # known-oversized commit: leave the tree alone
     if max_files and new:
-        n = _run(["ls-tree", "-r", "--name-only", new], cwd=checkout,
-                 timeout=timeout, token=None).count("\n")
+        n = _run(
+            ["ls-tree", "-r", "--name-only", new], cwd=checkout, timeout=timeout, token=None
+        ).count("\n")
         if n > max_files:
             _REJECTED[key] = new
             raise _too_large()
-    _run(["reset", "--hard", target], cwd=checkout, timeout=timeout,
-         token=None, pin=pin)
+    _run(["reset", "--hard", target], cwd=checkout, timeout=timeout, token=None, pin=pin)
     try:
         _check_repo_size(checkout)
     except RepoTooLargeError:
@@ -467,22 +479,21 @@ def _update_checkout(
             _REJECTED[key] = new
         if old is not None:
             try:
-                _run(["reset", "--hard", old], cwd=checkout,
-                     timeout=timeout, token=None, pin=pin)
+                _run(["reset", "--hard", old], cwd=checkout, timeout=timeout, token=None, pin=pin)
             except GitOpsError:
                 pass
         raise
 
 
-def ensure_checkout(entry: RepoEntry, repo_dir: str, timeout: int,
-                    data_root: str | None = None) -> str:
+def ensure_checkout(
+    entry: RepoEntry, repo_dir: str, timeout: int, data_root: str | None = None
+) -> str:
     """Return the working-tree path for this repo, cloning/updating as
     needed. Local-source repos are returned as-is (must exist AND be confined
     to `data_root` when it is supplied)."""
     if entry.source_type == "local":
         if not entry.path or not os.path.isdir(entry.path):
-            raise GitOpsValidationError(
-                f"local path does not exist: {entry.path}")
+            raise GitOpsValidationError(f"local path does not exist: {entry.path}")
         # Confine caller-supplied local paths to the confinement root the
         # caller passes (service.py passes the REQUESTING TENANT'S own
         # subtree, not the shared data root) so a tenant cannot register
@@ -491,7 +502,8 @@ def ensure_checkout(entry: RepoEntry, repo_dir: str, timeout: int,
         # must live under the tenant's own subtree to resolve.
         if data_root is not None and not _within_data_root(entry.path, data_root):
             raise GitOpsValidationError(
-                f"local path escapes the tenant's data subtree: {entry.path}")
+                f"local path escapes the tenant's data subtree: {entry.path}"
+            )
         return entry.path
 
     if not entry.git_url:
@@ -512,8 +524,8 @@ def ensure_checkout(entry: RepoEntry, repo_dir: str, timeout: int,
         # toward their own git_url.
         if entry.auth_env not in allowed_auth_env():
             raise GitOpsValidationError(
-                f"auth_env '{entry.auth_env}' is not an allowed credential "
-                "env var name")
+                f"auth_env '{entry.auth_env}' is not an allowed credential env var name"
+            )
         # The name allowlist alone is not enough: every tenant can name the
         # built-in CODE_INTEL_GIT_TOKEN next to a git_url THEY control, and the
         # credential helper would hand the operator's token to that remote.
@@ -523,12 +535,13 @@ def ensure_checkout(entry: RepoEntry, repo_dir: str, timeout: int,
             raise GitOpsValidationError(
                 "auth_env credentials are only sent to operator-approved "
                 "repositories (CODE_INTEL_AUTH_ENV_URL_PREFIXES); supply "
-                "auth_token for your own repository")
+                "auth_token for your own repository"
+            )
         token = os.environ.get(entry.auth_env)
         if not token:
             raise GitOpsValidationError(
-                f"auth_env '{entry.auth_env}' is not set in "
-                "the service environment")
+                f"auth_env '{entry.auth_env}' is not set in the service environment"
+            )
     else:
         token = None
 
@@ -537,10 +550,13 @@ def ensure_checkout(entry: RepoEntry, repo_dir: str, timeout: int,
         # Fetch from the URL that was just validated and pinned, not whatever
         # an older registration left in remote.origin.url - otherwise the pin
         # (keyed on the validated host) would not apply to the connection.
-        _run(["remote", "set-url", "origin", entry.git_url], cwd=checkout,
-             timeout=timeout, token=None)
-        _run(["fetch", "--prune", "origin"], cwd=checkout,
-             timeout=timeout, token=token, pin=pin)
+        _run(
+            ["remote", "set-url", "origin", entry.git_url],
+            cwd=checkout,
+            timeout=timeout,
+            token=None,
+        )
+        _run(["fetch", "--prune", "origin"], cwd=checkout, timeout=timeout, token=token, pin=pin)
         ref = entry.git_ref or "HEAD"
         target = f"origin/{ref}" if entry.git_ref else "origin/HEAD"
         # reset --hard checks out the new tree; in a --filter=blob:none clone
@@ -594,5 +610,9 @@ def _persist_pin(checkout: str, pin: PinnedHost | None, timeout: int) -> None:
     """
     if pin is None or not pin.git_config_args():
         return
-    _run(["config", "--local", "--replace-all", "http.curloptResolve",
-          pin.curl_resolve()], cwd=checkout, timeout=timeout, token=None)
+    _run(
+        ["config", "--local", "--replace-all", "http.curloptResolve", pin.curl_resolve()],
+        cwd=checkout,
+        timeout=timeout,
+        token=None,
+    )

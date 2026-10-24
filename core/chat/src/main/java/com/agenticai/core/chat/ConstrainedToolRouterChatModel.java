@@ -1,5 +1,6 @@
 package com.agenticai.core.chat;
 
+import com.agenticai.core.prompts.PromptResolver;
 import com.agenticai.core.providers.ToolRouterMode;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -76,6 +77,19 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
     private final ObjectMapper objectMapper;
     private final int maxRounds;
     private final MeterRegistry meterRegistry;
+    private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
+
+    /**
+     * Reads the router's instructions ({@code shim.router.format}, {@code shim.router.required}) from the prompt
+     * registry for the agent and tenant of each request (carried in the request's tool context, see {@link
+     * ToolLoopTranscript#forPrompts}); the shipped wording until set.
+     */
+    public ConstrainedToolRouterChatModel withPrompts(PromptResolver resolver) {
+        if (resolver != null) {
+            this.prompts = resolver;
+        }
+        return this;
+    }
 
     public ConstrainedToolRouterChatModel(
         ChatModel delegate, ToolRouterMode mode, ToolCallingManager toolCallingManager, ObjectMapper objectMapper,
@@ -266,7 +280,7 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
         options.setInternalToolExecutionEnabled(false);
         options = com.agenticai.core.chat.structured.StructuredOutput.withOllamaFormat(
             options, SCHEMA_NAME, routerSchema(tools).toString());
-        return new Prompt(withRouterInstructions(original.getInstructions(), tools), options);
+        return new Prompt(withRouterInstructions(original, tools), options);
     }
 
     /** The original prompt plus a {@code final_answer} tool and {@code tool_choice: required}; tools run here, not in the provider. */
@@ -280,8 +294,8 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
         options.setToolChoice("required");
         List<Message> messages = new ArrayList<>(original.getInstructions());
         messages.add(insertionIndex(messages), new SystemMessage(
-            "Every reply must be a tool call. Call " + FINAL_ANSWER_TOOL
-                + " with your reply to the user when no other tool is needed or you have the results you need."));
+            ChatPrompts.text(prompts, ChatPrompts.ROUTER_REQUIRED, ToolLoopRunHooks.promptRun(original),
+                "tool", FINAL_ANSWER_TOOL)));
         return new Prompt(messages, options);
     }
 
@@ -300,14 +314,10 @@ public final class ConstrainedToolRouterChatModel implements ChatModel {
         return schema;
     }
 
-    private List<Message> withRouterInstructions(List<Message> instructions, List<ToolCallback> tools) {
+    private List<Message> withRouterInstructions(Prompt original, List<ToolCallback> tools) {
+        List<Message> instructions = original.getInstructions();
         StringBuilder text = new StringBuilder(
-            "You can use the tools below. Reply with exactly one JSON object and nothing else: "
-                + "{\"action\":\"call\",\"tool\":\"<name>\",\"arguments\":{...}} to run a tool "
-                + "(arguments must follow that tool's parameters), or "
-                + "{\"action\":\"answer\",\"answer\":\"<your reply to the user>\"} when no tool is needed "
-                + "or you already have the results you need. Call one tool at a time; the result comes back "
-                + "as a tool message.\nTools:\n");
+            ChatPrompts.text(prompts, ChatPrompts.ROUTER_FORMAT, ToolLoopRunHooks.promptRun(original)) + "\nTools:\n");
         for (ToolCallback tool : tools) {
             ToolDefinition definition = tool.getToolDefinition();
             text.append("- ").append(definition.name()).append(": ").append(oneLine(definition.description()))

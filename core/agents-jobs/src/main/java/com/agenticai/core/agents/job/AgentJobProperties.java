@@ -65,7 +65,16 @@ public class AgentJobProperties {
 
     private Duration heartbeatInterval = Duration.ofSeconds(15);
 
-    private Duration deadlineSweepInterval = Duration.ofSeconds(15);
+    // app.agent-jobs.deadline-sweep-interval (15s) backs the deadline and orphan sweeps of AgentJobRunner; it is read
+    // by their @Scheduled placeholders alone, so it has no field here (a field would be a second, unread copy).
+
+    /**
+     * How long a shutting-down replica waits for its interrupted job workers to unwind before it
+     * releases their ownership leases ({@code AgentJobExecutor#quiesceForShutdown}). Keep it well inside
+     * the container's SIGTERM grace period (30 s on the default deployment). A worker stuck in
+     * non-interruptible I/O simply times out here; the release still happens.
+     */
+    private Duration quiesceWorkerWait = Duration.ofSeconds(3);
 
     /**
      * Where a freshly submitted job first runs. {@link RunNowMode#INLINE} (the
@@ -158,20 +167,22 @@ public class AgentJobProperties {
         this.pollInterval = pollInterval;
     }
 
+    public Duration getQuiesceWorkerWait() {
+        return quiesceWorkerWait;
+    }
+
+    public void setQuiesceWorkerWait(Duration quiesceWorkerWait) {
+        if (quiesceWorkerWait != null && !quiesceWorkerWait.isNegative()) {
+            this.quiesceWorkerWait = quiesceWorkerWait;
+        }
+    }
+
     public Duration getHeartbeatInterval() {
         return heartbeatInterval;
     }
 
     public void setHeartbeatInterval(Duration heartbeatInterval) {
         this.heartbeatInterval = heartbeatInterval;
-    }
-
-    public Duration getDeadlineSweepInterval() {
-        return deadlineSweepInterval;
-    }
-
-    public void setDeadlineSweepInterval(Duration deadlineSweepInterval) {
-        this.deadlineSweepInterval = deadlineSweepInterval;
     }
 
     public RunNowMode getRunNowMode() {
@@ -375,6 +386,44 @@ public class AgentJobProperties {
          * this value is the upper bound on resume latency.
          */
         private Duration sweepInterval = Duration.ofSeconds(60);
+
+        /**
+         * How long a decided-but-not-yet-executed approval is left alone before the sweep resumes the
+         * job anyway. {@code HumanApprovalGateService#approve} commits the decision and only then replays
+         * the gated tool, outside any transaction, so for a while the request is APPROVED with no
+         * result; resuming inside that window costs a billed turn that re-asks for the same gate or races
+         * the replay into a duplicate side effect. Waiting forever would strand a job whose replay died
+         * with its JVM, so the wait is bounded. Raise it for tools that replay slowly (long builds).
+         */
+        private Duration replayGrace = Duration.ofSeconds(90);
+
+        /**
+         * The failure message of a job whose blocking approval request expired undecided
+         * ({@code app.approvals.expiry}) while {@code app.approvals.continuation.jobs-continue-after-denial}
+         * is off. {@code {label}} is the {@code requested_by} label to look the request up under.
+         */
+        private String expiredFailureMessage = "An approval request this job stopped on expired without a decision, "
+            + "so the job cannot continue. See the approval request recorded against '{label}' for the reason.";
+
+        public Duration getReplayGrace() {
+            return replayGrace;
+        }
+
+        public void setReplayGrace(Duration replayGrace) {
+            if (replayGrace != null && !replayGrace.isNegative()) {
+                this.replayGrace = replayGrace;
+            }
+        }
+
+        public String getExpiredFailureMessage() {
+            return expiredFailureMessage;
+        }
+
+        public void setExpiredFailureMessage(String expiredFailureMessage) {
+            if (expiredFailureMessage != null && !expiredFailureMessage.isBlank()) {
+                this.expiredFailureMessage = expiredFailureMessage;
+            }
+        }
 
         public Duration getParkTimeout() {
             return parkTimeout;

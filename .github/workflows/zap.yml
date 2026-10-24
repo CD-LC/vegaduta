@@ -52,8 +52,11 @@ jobs:
 
       - name: Boot the lite stack
         run: |
-          # shellcheck disable=SC2086
-          docker compose $COMPOSE_ARGS --env-file "$RUNNER_TEMP/ci.env" up -d --build --wait --wait-timeout 600
+          # Not a plain `up --wait`: it exits 1 when the keycloak-reconcile
+          # one-shot exits (0) while it waits, so the scan never ran
+          # (run 39586118141). compose-up-wait.sh waits on the long-running
+          # services and runs the one-shot to completion separately.
+          bash scripts/ci/compose-up-wait.sh "$RUNNER_TEMP/ci.env" --build
 
       - name: Health gate
         run: bash scripts/ci/stack-health-gate.sh

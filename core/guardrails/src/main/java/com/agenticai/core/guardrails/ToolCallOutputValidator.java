@@ -1,94 +1,31 @@
 package com.agenticai.core.guardrails;
 
-import com.agenticai.core.json.JsonMappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
- * 2026 Reliability Gap Analysis (task #815), Gap 1 - "no deterministic,
- * 100%-of-outputs schema/format validation layer on tool calls." Runs on
- * every tool call's raw output before it's handed back to the model,
- * distinct from and complementary to {@link GuardrailService#sanitizeToolOutput}
- * (which screens for unsafe *content*, not structural validity):
+ * The marker for a tool result that failed a structural check.
  *
- * <ol>
- *   <li>Length bound - catches a runaway/looping tool response before it
- *       blows the context budget, same ceiling {@code PatternBasedGuardrailService}
- *       already truncates to (kept as its own constant here rather than a
- *       cross-class reference, since that field is private and this check is
- *       "reject and let the model retry," not "truncate and continue" - a
- *       different response to the same threshold).</li>
- *   <li>JSON well-formedness - if a tool's output *looks* like JSON (starts
- *       with {@code {} or {@code [}), it must actually parse. A tool that
- *       emits truncated/malformed JSON is a strong signal something broke
- *       server-side (a timeout mid-stream, an upstream API error dropped
- *       into the payload, etc.) - better to tell the model plainly than let
- *       it try to reason over garbage.</li>
- * </ol>
+ * <p>2026-10-23: the checks this class used to run on every tool result are gone, because both
+ * turned a result the tool had already produced into nothing. Output over the length bound is now
+ * TRUNCATED to {@link ToolOutputProperties} (with a marker that says how much was cut), and output
+ * that merely starts with {@code [} or {@code {} is no longer required to parse as JSON: a log line,
+ * a numbered list or a half-written object is still something the model can read, and the
+ * provider-side JSON wrapping ({@code McpToolOutputSanitizer.ensureJsonObject}) already makes any
+ * text safe to replay. Withholding the result left the model with "try a smaller request" for a call
+ * whose side effect had happened.
  *
- * <p>Deliberately has zero LLM calls in it - the entire point (per the 2026
- * research this gap analysis is based on) is a cheap, deterministic check
- * that runs on every single tool call at effectively zero latency/cost,
- * distinct from the sampled LLM-as-judge pass (Gap 2) reserved for
- * catching subtler "technically valid but wrong" failures.
+ * <p>Nothing in this module produces {@link #VALIDATION_FAILURE_PREFIX} now. It stays because {@code
+ * LoggingToolCallback} still recognises it (to flag {@code ToolCallLog.validationFailed} and strip it
+ * before the text is shown or stored), so rows written before the change and any future structural
+ * check keep working without a second marker.
  */
 public final class ToolCallOutputValidator {
 
     /**
-     * Matches {@code PatternBasedGuardrailService.MAX_TOOL_OUTPUT_CHARS} -
-     * same ceiling, different response (see class javadoc).
-     */
-    static final int MAX_OUTPUT_CHARS = 20_000;
-
-    /**
-     * Prefix {@link com.agenticai.core.guardrails.GuardedToolCallback} puts
-     * on the synthetic error message it returns to the model on a failed
-     * validation, so {@code LoggingToolCallback} can detect the failure
-     * (to flag {@code ToolCallLog.validationFailed}) and strip the marker
-     * before it's persisted/re-shown - the model and any human reading the
-     * log should see a clean sentence, never this internal tag.
+     * Prefix a guard puts on a synthetic "this output failed validation" tool result, so {@code
+     * LoggingToolCallback} can detect the failure and strip the marker before it is persisted or
+     * re-shown: the model and anyone reading the log see a clean sentence, never this internal tag.
      */
     public static final String VALIDATION_FAILURE_PREFIX = "[TOOL_OUTPUT_VALIDATION_FAILED] ";
 
-    private static final ObjectMapper MAPPER = JsonMappers.plain();
-
     private ToolCallOutputValidator() {
-    }
-
-    public static ValidationResult validate(String toolName, String rawOutput) {
-        if (rawOutput == null) {
-            return ValidationResult.ok();
-        }
-        if (rawOutput.length() > MAX_OUTPUT_CHARS) {
-            return ValidationResult.invalid(
-                "output was " + rawOutput.length() + " characters, over the " + MAX_OUTPUT_CHARS + "-character limit"
-            );
-        }
-        String trimmed = rawOutput.trim();
-        boolean looksLikeJson = trimmed.startsWith("{") || trimmed.startsWith("[");
-        if (looksLikeJson) {
-            try {
-                MAPPER.readTree(trimmed);
-            } catch (Exception e) {
-                return ValidationResult.invalid(
-                    "output looked like JSON (started with '" + trimmed.charAt(0) + "') but failed to parse - "
-                        + "the tool ('" + toolName + "') likely returned a truncated or malformed response"
-                );
-            }
-        }
-        return ValidationResult.ok();
-    }
-
-    public record ValidationResult(boolean valid, String reason) {
-        // Named "ok", not "valid" - a static factory method named the same as
-        // the record's own "valid" component would collide with the compiler-
-        // generated accessor valid() (same erasure, incompatible return types:
-        // ValidationResult vs boolean), which is exactly what broke the build.
-        public static ValidationResult ok() {
-            return new ValidationResult(true, null);
-        }
-
-        public static ValidationResult invalid(String reason) {
-            return new ValidationResult(false, reason);
-        }
     }
 }

@@ -4,6 +4,7 @@ import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
+import com.agenticai.core.agents.memory.MemoryLimitsProperties;
 import com.agenticai.core.agents.tools.AgentToolPort;
 import com.agenticai.core.devices.DeviceAuthResolver;
 import com.agenticai.core.sharing.PermissionLevel;
@@ -99,11 +100,44 @@ public class EdgeToolExecutionController {
      * Ceiling on facts returned to an edge session. These go straight into the on-device model's
      * system prompt, where context is the scarcest resource on the whole platform - a tier-1 WebLLM
      * model runs a 4k-8k window, and every fact spent here is a token the conversation itself
-     * cannot use. 24 is deliberately below what a hosted turn would tolerate: hosted recall is
+     * cannot use. The default of 24 is deliberately below what a hosted turn would tolerate: hosted recall is
      * relevance-ranked per message, this list is fetched blind once per session, so it must stay
      * small enough to be harmless when most of it is irrelevant to the turn actually being asked.
      */
-    private static final int EDGE_MEMORY_MAX_FACTS = 24;
+    private volatile MemoryLimitsProperties memoryLimits = new MemoryLimitsProperties();
+
+    /** Sets {@code app.memory.limits.edge-memory-max-facts}; until it is called the shipped default (24) applies. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void useMemoryLimits(MemoryLimitsProperties limits) {
+        this.memoryLimits = limits == null ? new MemoryLimitsProperties() : limits;
+    }
+
+    private volatile com.agenticai.core.settings.SettingsResolver settings;
+
+    /**
+     * The settings catalog, so a tenant's or an agent's {@code memory.edge.maxFacts} replaces {@code
+     * app.memory.limits.edge-memory-max-facts} for that agent's edge sessions (the tenant is set on the request, by the
+     * JWT filter or the device-token resolver). Absent (hand-built instances) or failing: the platform value.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void useSettings(com.agenticai.core.settings.SettingsResolver resolver) {
+        this.settings = resolver;
+    }
+
+    static final String EDGE_MAX_FACTS_KEY = "memory.edge.maxFacts";
+
+    private int edgeMaxFacts(UUID agentId) {
+        com.agenticai.core.settings.SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return memoryLimits.getEdgeMemoryMaxFacts();
+        }
+        try {
+            return catalog.getInt(EDGE_MAX_FACTS_KEY, com.agenticai.core.settings.SettingContext.forAgent(agentId));
+        } catch (RuntimeException e) {
+            log.warn("Could not read {}; using app.memory.limits.edge-memory-max-facts: {}", EDGE_MAX_FACTS_KEY, e.toString());
+            return memoryLimits.getEdgeMemoryMaxFacts();
+        }
+    }
 
     private final AgentService agentService;
     private final AgentToolPort agentToolProvider;
@@ -292,7 +326,7 @@ public class EdgeToolExecutionController {
      * controller, one auth path.
      *
      * <p><b>Query-independent by default.</b> With no {@code q} this returns {@link
-     * AgentMemoryService#listAll} capped at {@link #EDGE_MEMORY_MAX_FACTS}, because the client
+     * AgentMemoryService#listAll} capped at {@code app.memory.limits.edge-memory-max-facts}, because the client
      * fetches this ONCE PER SESSION (before any message exists to score relevance against) exactly
      * as {@code fetchEdgeTools} does - a per-turn server call would defeat the point of answering
      * locally. Passing {@code q} opts into the same relevance-ranked {@code recall} a hosted turn
@@ -321,16 +355,16 @@ public class EdgeToolExecutionController {
                         return ResponseEntity.ok(new EdgeMemoryResponse(List.of()));
                     }
                     try {
+                        int maxFacts = edgeMaxFacts(agentId);
                         List<AgentMemoryEntry> entries =
                                 StringUtils.hasText(query)
-                                        ? memoryService.recall(
-                                                agentId, subjectKey, query, EDGE_MEMORY_MAX_FACTS)
+                                        ? memoryService.recall(agentId, subjectKey, query, maxFacts)
                                         : memoryService.listAll(agentId, subjectKey);
                         List<String> facts =
                                 entries.stream()
                                         .map(AgentMemoryEntry::content)
                                         .filter(StringUtils::hasText)
-                                        .limit(EDGE_MEMORY_MAX_FACTS)
+                                        .limit(maxFacts)
                                         .toList();
                         return ResponseEntity.ok(new EdgeMemoryResponse(facts));
                     } catch (RuntimeException e) {

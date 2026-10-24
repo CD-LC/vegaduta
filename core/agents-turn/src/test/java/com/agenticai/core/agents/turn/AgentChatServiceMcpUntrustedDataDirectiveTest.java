@@ -163,7 +163,7 @@ class AgentChatServiceMcpUntrustedDataDirectiveTest {
                 mock(VisionSessionService.class),
                 providerOf((com.agenticai.core.providers.PlatformHostedLlmProviderService) null),
                 mock(LoadTestTenantAllowlist.class),
-                mock(ChatTurnCancelService.class),
+                NeverCancelledTurns.service(),
                 java.time.Duration.ofSeconds(90),
                 // Buffered-depth total-turn ceiling and SSE keepalive interval
                 // (2026-09-17). Neither fires in this suite - every turn here resolves

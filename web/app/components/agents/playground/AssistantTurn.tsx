@@ -9,8 +9,12 @@ import TurnFeedback from "../TurnFeedback";
 import RequestInspector from "../RequestInspector";
 import SaveRunAsRecipe from "../SaveRunAsRecipe";
 import TurnStopNotice from "../TurnStopNotice";
+import { StopLimitAction } from "./StopLimitAction";
+import { TurnOutcomeNotice } from "./TurnOutcomeNotice";
+import { deriveTurnOutcome } from "./turnOutcome";
 import AgentActivityTrace from "../AgentActivityTrace";
 import SaveAsEvalCaseButton from "../../../agents/quality/SaveAsEvalCaseButton";
+import ViewTurnLink from "../ViewTurnLink";
 import type { useArtifactsPane } from "../../artifacts/useArtifactsPane";
 import { ToolCallCard } from "./ToolCallCard";
 import { TurnMetricsRow } from "./TurnMetricsRow";
@@ -61,6 +65,7 @@ export function AssistantTurn({
 }) {
   const t = useTranslations("agentPlayground");
   const i = index;
+  const outcome = deriveTurnOutcome(turn);
   return (
         <div className="flex flex-col items-start gap-1.5">
           <div className="flex items-center gap-2">
@@ -138,7 +143,15 @@ export function AssistantTurn({
           {!turn.pending && agent?.id && (
             <SaveRunAsRecipe agentId={agent.id} sessionId={sessionId} steps={turn.steps} />
           )}
-          <TurnStopNotice steps={turn.steps} />
+          <TurnStopNotice steps={turn.steps} action={(kind) => <StopLimitAction agent={agent} kind={kind} />} />
+          {!turn.pending && outcome && (
+            <TurnOutcomeNotice
+              outcome={outcome}
+              agent={agent}
+              canContinue={!sending && i === turns.length - 1}
+              onContinue={() => onResendHosted(t("continueMessage"))}
+            />
+          )}
           {!(turn.steps?.length > 0) && turn.trace?.length > 0 && <ToolCallCard trace={turn.trace} />}
           {turn.requests && turn.requests.length > 0 && <RequestInspector snapshots={turn.requests} />}
           {/* Assistant output goes through MediaCard, which renders
@@ -195,6 +208,9 @@ export function AssistantTurn({
                 userMessage={turns[i - 1]?.role === "user" ? turns[i - 1].content : undefined}
                 agentResponse={turn.content}
               />
+              {/* Step-by-step timeline of this conversation's recorded turns (the journal is off by default;
+                the page explains that when nothing was recorded). */}
+              <ViewTurnLink agentId={agent.id} sessionId={sessionId} />
             </div>
           )}
         </div>

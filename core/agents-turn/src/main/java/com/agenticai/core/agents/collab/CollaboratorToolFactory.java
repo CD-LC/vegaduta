@@ -51,6 +51,8 @@ public interface CollaboratorToolFactory {
      *
      * @param verifierModel null = no swarm goal verifier (also when {@code verifierConfig} is
      *     disabled)
+     * @param callerAgentId the agent whose turn offers the tool: its {@code delegation.*} settings (and its
+     *     workspace's) bound the fan-out; null = workspace level
      */
     ToolCallback delegateToTeam(
             AgentChatService chatService,
@@ -62,5 +64,6 @@ public interface CollaboratorToolFactory {
             SwarmVerifierConfig verifierConfig,
             VerifierModel verifierModel,
             MeterRegistry meters,
-            String goal);
+            String goal,
+            UUID callerAgentId);
 }

@@ -151,5 +151,6 @@ default 50 / max 200 unless noted.
 | `GET /api/handoff/inbox` | 50 / 200 | The needs-attention queue. |
 | `GET /api/email/messages?runId=` | 50 / 200 | |
 | `GET /api/data-tables` | 50 / 200 | |
+| `GET /api/prompts` | 1..500 (`app.prompts.list-max-limit`) | The prompt registry, filtered by `family` / `q`; adds `limit` / `offset`, `X-Total-Count`, `X-Has-More`. No `limit` returns every key (unchanged). Tenant-admin only. |
 
 Not touched on purpose: billing, payments, subscription and `/api/platform/**` lists.

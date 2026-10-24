@@ -9,7 +9,7 @@ import { Check, CheckCircle2, Copy, ExternalLink, GitBranch, GitPullRequest, Loa
 import { Button } from "../components/ui/button";
 import { useTranslations } from "../lib/i18n";
 import PoweredByChip from "../components/PoweredByChip";
-import { parseDiff } from "./suggestions";
+import { parseDiff, diffFileStats } from "./suggestions";
 import { BUILD_STRINGS as S } from "./buildStrings";
 
 /** Unified diff, collapsed by default, with +/- colouring that does not rely
@@ -52,6 +52,13 @@ function DiffView({ diff }: { diff: string }) {
 
 export function ChatResultEntry({ entry, index, undoable, fileSet, copiedPath, onCopyFile, busy, disabled, undoing, onUndo }) {
   const t = useTranslations("appBuilder");
+  // Per-file +/- counts from the turn's diff — the "where is the change"
+  // answer on every file chip, without opening the folded diff.
+  const fileStats = useMemo(() => {
+    const m = new Map<string, { adds: number; dels: number }>();
+    for (const s of diffFileStats(entry.diff || "")) m.set(s.path, s);
+    return m;
+  }, [entry.diff]);
   return (
     <div
       className={`rounded-lg border px-3 py-2 text-sm text-foreground ${
@@ -94,10 +101,14 @@ export function ChatResultEntry({ entry, index, undoable, fileSet, copiedPath, o
           />
         )}
       </div>
+      {entry.success && entry.summary && (
+        <p className="mt-1.5 text-sm text-foreground/90">{entry.summary}</p>
+      )}
       {entry.success && entry.filesChanged?.length > 0 && (
         <div className="mt-1.5 flex flex-wrap gap-1">
           {entry.filesChanged.map((path) => {
             const available = (fileSet || []).some((f) => f.path === path);
+            const stat = fileStats.get(path);
             return (
               <button
                 key={path}
@@ -109,6 +120,12 @@ export function ChatResultEntry({ entry, index, undoable, fileSet, copiedPath, o
                 className="inline-flex items-center gap-1 rounded border border-border bg-muted/40 px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground hover:bg-accent/60 hover:text-foreground disabled:cursor-default disabled:opacity-70 disabled:hover:bg-muted/40"
               >
                 {path}
+                {stat && (stat.adds > 0 || stat.dels > 0) && (
+                  <span className="tabular-nums">
+                    <span className="text-[var(--state-success)]">+{stat.adds}</span>{" "}
+                    <span className="text-[var(--state-error)]">−{stat.dels}</span>
+                  </span>
+                )}
                 {available &&
                   (copiedPath === path ? <Check size={11} aria-hidden="true" /> : <Copy size={11} aria-hidden="true" />)}
               </button>

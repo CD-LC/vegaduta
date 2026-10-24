@@ -37,10 +37,31 @@ public interface ToolCallVerifierService {
      *     otherwise. Never throws for an ordinary "this looks wrong"
      *     judgment - a rejection is fed back to the model as a tool result
      *     it can react to (ask for clarification, try something else), not
-     *     a hard stop. Implementations should fail open (return approved)
-     *     on their own internal errors (verifier model unreachable, etc.)
-     *     - a broken verifier must never be able to block every tool call
-     *     platform-wide.
+     *     a hard stop. On the verifier's own internal errors (model
+     *     unreachable, blank answer) an implementation follows {@code
+     *     app.guardrails.tool-verifier.fail-mode}, which defaults to the
+     *     global {@code app.guardrails.fail-mode} (closed: the call is
+     *     refused). Set it to {@code open} where a verifier outage must not
+     *     stop RIGOROUS agents' tool calls.
      */
     VerificationResult verify(ChatClient chatClient, String userMessage, String toolName, String toolInput);
+
+    /** The end of the conversation, asked for lazily and only by a verifier that has a use for it. */
+    @FunctionalInterface
+    interface ConversationTail {
+
+        /** At most {@code maxMessages} messages, oldest first, within {@code maxChars}; empty when none. */
+        String get(int maxMessages, int maxChars);
+    }
+
+    /**
+     * As {@link #verify(ChatClient, String, String, String)} with the end of the conversation available as
+     * context: a short follow-up ("yes, send it") can only be judged against what it answers. The default
+     * ignores {@code conversationTail}, so an implementation that does not use it is unchanged.
+     */
+    default VerificationResult verify(
+        ChatClient chatClient, String userMessage, ConversationTail conversationTail, String toolName, String toolInput
+    ) {
+        return verify(chatClient, userMessage, toolName, toolInput);
+    }
 }

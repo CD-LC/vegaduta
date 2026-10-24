@@ -39,14 +39,21 @@ class ChatTurnExecutorTurnJournalTest {
         TurnJournalGateway.install(null, false);
     }
 
-    @SuppressWarnings("unchecked")
     private List<String> run(UUID agentId) {
+        return run(
+                agentId,
+                TurnContext.fromCurrentThread(agentId, "s1", "req-1", java.time.Instant.now(), null));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> run(UUID agentId, TurnContext context) {
         ChatClient client = mock(ChatClient.class, RETURNS_DEEP_STUBS);
         when(client.prompt()
                         .system(anyString())
                         .messages(anyList())
                         .user(any(Consumer.class))
                         .toolCallbacks(anyList())
+                        .toolContext(org.mockito.ArgumentMatchers.anyMap())
                         .advisors(any(Consumer.class))
                         .stream()
                         .content())
@@ -67,9 +74,6 @@ class ChatTurnExecutorTurnJournalTest {
         String previous =
                 com.agenticai.core.agents.memory.SessionMemoryService.bindMemorySessionId("c1:s1");
         try {
-            TurnContext context =
-                    TurnContext.fromCurrentThread(
-                            agentId, "s1", "req-1", java.time.Instant.now(), null);
             return executor.streamFast(
                             context, agent, agentId, "s1", client, "sys", List.of(), PROMPT,
                             List.of(), List.of(), null)
@@ -126,6 +130,27 @@ class ChatTurnExecutorTurnJournalTest {
         assertEquals(TurnHashChain.sha256(PROMPT), events.get(0).payloadHash());
         assertFalse(events.toString().contains("confidential"));
         assertFalse(events.toString().contains("Hello"));
+    }
+
+    @Test
+    void theRecordIsKeyedByTheTurnContextsOwnIdAndFoundBySession() {
+        UUID agentId = UUID.randomUUID();
+        InMemoryTurnJournal journal = new InMemoryTurnJournal();
+        TurnJournalGateway.install(journal, true);
+        TurnContext context =
+                TurnContext.fromCurrentThread(agentId, "s1", "req-1", java.time.Instant.now(), null);
+
+        run(agentId, context);
+
+        // The id the response header names is the id of the journal record, not one made up inside the stream.
+        List<TurnEvent> events = journal.read(agentId, context.turnId());
+        assertEquals(TurnEventType.INTAKE, events.get(0).type());
+        assertTrue(TurnHashChain.verify(events).intact());
+        assertEquals(
+                List.of(context.turnId()),
+                journal.listBySession(agentId, "s1", 10).stream()
+                        .map(com.agenticai.core.agents.turnjournal.TurnSummary::turnId)
+                        .toList());
     }
 
     private static UUID turnIdOf(InMemoryTurnJournal journal, UUID agentId) {

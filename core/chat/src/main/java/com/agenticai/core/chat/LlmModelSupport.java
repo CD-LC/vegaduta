@@ -73,7 +73,8 @@ public class LlmModelSupport implements DisposableBean {
 
     private static final Logger log = LoggerFactory.getLogger(LlmModelSupport.class);
 
-    private final LlmRetry retry;
+    private volatile LlmRetry retry;
+    private volatile LlmRetryPolicy retryPolicy;
     private final ObservationRegistry observationRegistry;
     // Resolved lazily at each create(): DefaultAgentAdvisor beans live in other
     // modules (core/rl) whose own graphs may reach back to the chat factories,
@@ -133,7 +134,11 @@ public class LlmModelSupport implements DisposableBean {
         @Value("${app.llm.structured-output.native-enabled:false}") boolean nativeStructuredOutputs
     ) {
         this.nativeStructuredOutputs = nativeStructuredOutputs;
-        this.retry = new SpringRetryLlmRetry(retryMaxAttempts, retryInitialBackoff, retryMaxBackoff);
+        this.retry = new SpringRetryLlmRetry(
+            SpringRetryLlmRetry.policyOf(retryMaxAttempts, retryInitialBackoff, retryMaxBackoff)
+                .useSettings(this::settingsResolver),
+            new org.springframework.retry.backoff.ThreadWaitSleeper());
+        this.retryPolicy = LlmRetryPolicy.defaults();
         this.observationRegistry = observationsEnabled
             ? observationRegistry.getIfAvailable(() -> ObservationRegistry.NOOP)
             : ObservationRegistry.NOOP;
@@ -240,9 +245,53 @@ public class LlmModelSupport implements DisposableBean {
 
     // ------------------------------------------------------------------ retry
 
+    /**
+     * The operator's {@code app.llm.retry.*} (jitter, 429, Retry-After, streaming), replacing the policy the
+     * constructor built from the three classic keys. Setter-injected so hand-built instances keep their
+     * constructor; it runs before any model is built from {@link #retryTemplate()}.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void useRetryProperties(LlmRetryProperties properties) {
+        if (properties == null) {
+            return;
+        }
+        LlmRetryPolicy policy = new LlmRetryPolicy(properties).useSettings(this::settingsResolver);
+        this.retryPolicy = policy;
+        this.retry = new SpringRetryLlmRetry(policy, new org.springframework.retry.backoff.ThreadWaitSleeper());
+    }
+
+    /**
+     * The settings catalog, so a tenant's {@code chat.retry.maxAttempts} replaces {@code app.llm.retry.max-attempts} for
+     * its calls. Looked up when a call is retried, not now (the resolver's own wiring is not needed to build a model);
+     * hand-built instances have none and keep the platform value.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void useSettings(ObjectProvider<com.agenticai.core.settings.SettingsResolver> resolver) {
+        this.settingsProvider = resolver;
+    }
+
+    private volatile ObjectProvider<com.agenticai.core.settings.SettingsResolver> settingsProvider;
+
+    private volatile com.agenticai.core.settings.SettingsResolver resolvedSettings;
+
+    private com.agenticai.core.settings.SettingsResolver settingsResolver() {
+        com.agenticai.core.settings.SettingsResolver resolved = resolvedSettings;
+        if (resolved == null) {
+            ObjectProvider<com.agenticai.core.settings.SettingsResolver> provider = settingsProvider;
+            resolved = provider == null ? null : provider.getIfAvailable();
+            resolvedSettings = resolved;
+        }
+        return resolved;
+    }
+
     /** The bounded retry policy (see {@link LlmRetry}) every {@code ChatModel} shares. */
     public LlmRetry retry() {
         return retry;
+    }
+
+    /** The classification and backoff behind {@link #retry()}, for the streaming turn's pre-first-token retry. */
+    public LlmRetryPolicy retryPolicy() {
+        return retryPolicy;
     }
 
     /** The bounded retry policy as the spring-retry template Spring AI 1.x model builders take. */
@@ -294,7 +343,27 @@ public class LlmModelSupport implements DisposableBean {
      * so a provider added later is covered without wiring of its own.
      */
     public ChatClient.Builder chatClientBuilder(ChatModel chatModel) {
-        return chatClientBuilder(chatModel, null);
+        return chatClientBuilder(chatModel, (com.agenticai.core.providers.ToolRouterMode) null, null);
+    }
+
+    /**
+     * As {@link #chatClientBuilder(ChatModel)} for a bring-your-own provider: the text-form tool-call
+     * recovery is applied when that provider is a known weak tool caller (see {@link ToolCallRecovery}).
+     */
+    public ChatClient.Builder chatClientBuilder(ChatModel chatModel, ProviderName provider) {
+        return chatClientBuilder(chatModel, null, capabilityOf(provider));
+    }
+
+    /** What the recovery knows of a bring-your-own provider; {@code null} when it is not wired. */
+    public ToolCallRecovery.Capability capabilityOf(ProviderName provider) {
+        return toolCallRecovery == null ? null : toolCallRecovery.capabilityOf(provider);
+    }
+
+    /** What the recovery knows of a platform-hosted row; {@code null} when it is not wired. */
+    public ToolCallRecovery.Capability capabilityOf(
+        com.agenticai.core.providers.ToolCallGrade grade, boolean smallModel
+    ) {
+        return toolCallRecovery == null ? null : toolCallRecovery.capabilityOf(grade, smallModel);
     }
 
     // Constrained tool router for hosted-pool rows that opted in (see ConstrainedToolRouterChatModel).
@@ -314,11 +383,30 @@ public class LlmModelSupport implements DisposableBean {
     public ChatClient.Builder chatClientBuilder(
         ChatModel chatModel, com.agenticai.core.providers.ToolRouterMode routerMode
     ) {
-        ChatModel model = toolCallRecovery == null ? chatModel : toolCallRecovery.wrap(chatModel);
+        return chatClientBuilder(chatModel, routerMode, null);
+    }
+
+    /**
+     * As above, saying what is known of the model's tool calling ({@code null} = not known), which decides
+     * whether the small-model text-call recovery wraps it.
+     */
+    public ChatClient.Builder chatClientBuilder(
+        ChatModel chatModel, com.agenticai.core.providers.ToolRouterMode routerMode,
+        ToolCallRecovery.Capability capability
+    ) {
+        return ChatClient.builder(prepareModel(chatModel, routerMode, capability), observationRegistry, null, null);
+    }
+
+    /** The model a client is built over: recovery by capability, then the constrained router outermost. */
+    ChatModel prepareModel(
+        ChatModel chatModel, com.agenticai.core.providers.ToolRouterMode routerMode,
+        ToolCallRecovery.Capability capability
+    ) {
+        ChatModel model = toolCallRecovery == null ? chatModel : toolCallRecovery.wrap(chatModel, capability);
         if (routerMode != null && constrainedToolRouting != null) {
             model = constrainedToolRouting.wrap(model, routerMode);
         }
-        return ChatClient.builder(model, observationRegistry, null, null);
+        return model;
     }
 
     /**

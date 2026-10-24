@@ -63,6 +63,19 @@ public final class TrajectoryCaseGrader {
         return grade(spec, TrajectoryExtractor.fromReplayed(toolCalls));
     }
 
+    /**
+     * The dimension stored for a trajectory case replayed text-only: the replay offered the agent no tools, so
+     * there is no trajectory to score. {@code UNAVAILABLE} with the reason, no score - never a pass or a fail.
+     */
+    public static Map<String, Object> textOnlyDimension() {
+        Map<String, Object> dimension = new HashMap<>();
+        dimension.put("score", null);
+        dimension.put("status", "UNAVAILABLE");
+        dimension.put("feedback", "Not scored: this dataset replays text-only, so the agent made no tool calls."
+            + " Turn on tool execution for the dataset to grade the trajectory.");
+        return dimension;
+    }
+
     /** Grades already-extracted steps (also what the stored-run views use). */
     public static Graded grade(TrajectorySpec spec, List<TrajectoryToolCall> actual) {
         TrajectoryReport report = TrajectoryEvaluator.evaluate(spec, actual);

@@ -4,16 +4,22 @@ import com.agenticai.core.agents.job.AgentJobLookup;
 import com.agenticai.core.agents.job.AgentJobSession;
 import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.SessionMemoryService;
+import com.agenticai.core.agents.turn.ApprovalContinuation.Outcome;
+import com.agenticai.core.agents.turn.ApprovalContinuationPort;
+import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
+import com.agenticai.core.agents.turn.ToolLedger;
 import com.agenticai.core.approval.ApprovalActionExecutor;
 import com.agenticai.core.approval.ApprovalReplayGrant;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.ApprovalRequestExecutionRecordedEvent;
 import com.agenticai.core.approval.ApprovalRequestRepository;
+import com.agenticai.core.approval.RetryableActionFailure;
 import com.agenticai.core.audit.NotificationCategory;
 import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
 import com.agenticai.core.guardrails.ToolDefinitionDigest;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -64,16 +70,19 @@ import org.springframework.stereotype.Component;
  * human actually approved, so it wins, and a legacy row with no recorded tenant simply inherits the
  * caller's (correct) context unchanged.
  *
- * <p><b>Honest limits:</b> the result is delivered as a notification-bell entry (and persisted onto
- * the request's {@code executionResult}, same as {@code RunCodeWorkspaceApprovalExecutor}), NOT
- * injected back into the live chat stream - by approval time that stream is long gone, and the
- * model that asked never sees the answer mid-turn. What DOES happen now (Phase 2 autonomy
- * follow-up): a compact bracketed note is appended to the originating session's {@link
- * SessionMemoryService} history, so the agent's NEXT turn in that conversation knows the approved
- * action actually ran (or failed) - see {@link #appendSessionMemoryNote} for the exact
- * representation and its guards. Also note {@code GuardedToolCallback}'s soft-stop design means
- * many tool-level failures come back as explanatory STRINGS, not exceptions - those are recorded
- * and notified as the result verbatim, which is exactly what the approver needs to see either way.
+ * <p><b>What the agent gets back.</b> The result is delivered as a notification-bell entry and
+ * persisted onto the request's {@code executionResult} (same as {@code
+ * RunCodeWorkspaceApprovalExecutor}). The turn that asked is over by approval time, so a compact
+ * bracketed note is appended to the originating session's {@link SessionMemoryService} history -
+ * under the SCOPED id the turn reads, captured in the replay envelope (see {@link
+ * #appendSessionMemoryNote}) - and then the platform CONTINUES the task by itself: {@link
+ * ApprovalContinuationPort} (implemented by the turn path's launcher) starts a turn for the same conversation that restates the user's
+ * goal and hands the model the tool's full result (or the failure, or the denial), so nobody has to
+ * send "carry on". A job session is not continued from here: its sweep resumes the job and builds
+ * the job's turn with the same continuation builder. Also note {@code GuardedToolCallback}'s
+ * soft-stop design means many tool-level failures come back as explanatory STRINGS, not exceptions
+ * - those are recorded and notified as the result verbatim, which is exactly what the approver
+ * needs to see either way.
  */
 @Component
 public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
@@ -90,22 +99,6 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
     private static final int MAX_RESULT_CHARS = 32 * 1024;
 
     private static final int MAX_NOTIFICATION_BODY_CHARS = 2_000;
-
-    /**
-     * Much tighter than {@link #MAX_RESULT_CHARS} on purpose: a session-memory turn is re-sent to
-     * the LLM on EVERY subsequent turn of that conversation, so a 32KB tool result pasted in
-     * verbatim would tax every later prompt. The full result still lives on the request's {@code
-     * executionResult}; the memory note only needs enough for the model to know what happened.
-     */
-    private static final int MAX_MEMORY_NOTE_RESULT_CHARS = 500;
-
-    private static final String TRUNCATED_SUFFIX = "\n...[truncated]";
-
-    /**
-     * Kept as a constant so {@link #appendSessionMemoryNote} can recognize (and skip) synthetic
-     * ids.
-     */
-    private static final String FALLBACK_SESSION_PREFIX = "approval-replay:";
 
     private static final Logger log = LoggerFactory.getLogger(AgentToolCallApprovalExecutor.class);
 
@@ -134,6 +127,16 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
      */
     private final ObjectProvider<AgentJobLookup> agentJobLookup;
 
+    /**
+     * Continues the conversation once the outcome is known. ObjectProvider: the launcher needs the
+     * whole turn pipeline ({@code AgentChatService}), which itself reaches this class through the
+     * tool provider, and a slim context has none - the note alone is then the trace, as before.
+     */
+    private final ObjectProvider<ApprovalContinuationPort> continuationLauncher;
+
+    /** The wording of the denial note and the stand-in for a missing reason (model-facing text). */
+    private final ObjectProvider<ApprovalContinuationProperties> continuationTexts;
+
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -143,6 +146,8 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
             ObjectProvider<NotificationService> notificationService,
             ObjectProvider<SessionMemoryService> sessionMemoryService,
             ObjectProvider<AgentJobLookup> agentJobLookup,
+            ObjectProvider<ApprovalContinuationPort> continuationLauncher,
+            ObjectProvider<ApprovalContinuationProperties> continuationTexts,
             ObjectMapper objectMapper,
             ApplicationEventPublisher eventPublisher) {
         this.agentToolProvider = agentToolProvider;
@@ -150,6 +155,8 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
         this.notificationService = notificationService;
         this.sessionMemoryService = sessionMemoryService;
         this.agentJobLookup = agentJobLookup;
+        this.continuationLauncher = continuationLauncher;
+        this.continuationTexts = continuationTexts;
         this.objectMapper = objectMapper;
         this.eventPublisher = eventPublisher;
     }
@@ -171,36 +178,58 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
                 && actionType.length() > ACTION_TYPE_PREFIX.length();
     }
 
+    /**
+     * The executor reports the outcome itself (note and continuation, see {@link #continueTask}), so the gate
+     * must not report it a second time through {@code ApprovalOutcomePort}.
+     */
+    @Override
+    public boolean reportsOutcomeItself() {
+        return true;
+    }
+
+    /** The wording and cut of the history notes (model-facing text; the shipped defaults when no bean). */
+    private ApprovalContinuationProperties notes() {
+        return continuationTexts.getIfAvailable(ApprovalContinuationProperties::new);
+    }
+
     @Override
     public void execute(ApprovalRequest request) {
-        ReplayTarget target = resolveTarget(request);
+        ReplayTarget target = ReplayTarget.resolve(request, objectMapper);
         // Save/restore rather than set/clear, copying
         // TenantContextPropagatingToolCallback's idiom - never clobber a
         // context the calling thread (admin request or retry job) had set
         // for its own, still-in-progress work.
         Optional<TenantContext> previous = TenantContext.current();
         if (target.tenantId() != null) {
-            TenantContext.set(TenantContext.of(target.tenantId(), replaySubject(target), Set.of()));
+            TenantContext.set(TenantContext.of(target.tenantId(), target.replaySubject(), Set.of()));
         }
         try {
             refuseIfJobTerminal(target);
             String result = invokeTool(request, target);
             persistExecutionResult(request, result);
-            appendSessionMemoryNote(
-                    target,
-                    "[approved action '"
-                            + target.toolName()
-                            + "' completed: "
-                            + truncate(result, MAX_MEMORY_NOTE_RESULT_CHARS)
-                            + "]");
+            String noteProblem =
+                    appendSessionMemoryNote(
+                            request,
+                            target,
+                            ApprovalOutcomeNotes.outcomeRecord(
+                                    notes(), request, target, ToolLedger.Status.OK, request.getDecidedBy(), result));
+            // The tool ran and its result is persisted; a note that could not be written does not
+            // change that outcome (rethrowing would record a failure and could retry a real side
+            // effect). It is surfaced to the approver instead of being only a log line.
             notify(
                     target,
-                    NotificationSeverity.INFO,
+                    noteProblem == null ? NotificationSeverity.INFO : NotificationSeverity.WARNING,
                     "Approved action ran: " + target.toolName(),
                     "Your approved tool call '"
                             + target.toolName()
                             + "' has been executed. Result:\n"
-                            + truncate(result, MAX_NOTIFICATION_BODY_CHARS));
+                            + truncate(result, MAX_NOTIFICATION_BODY_CHARS)
+                            + (noteProblem == null
+                                    ? ""
+                                    : "\n\nThe agent was NOT told this result ("
+                                            + noteProblem
+                                            + "): it may ask for the action again."));
+            continueTask(request, Outcome.COMPLETED, result);
         } catch (RuntimeException e) {
             // Best-effort notify, then rethrow unchanged so
             // HumanApprovalGateService records the failure against the
@@ -215,13 +244,12 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
             // The failure note matters as much as the success one: without it
             // the agent's next turn would assume its pending action simply
             // vanished and might silently re-attempt it.
-            appendSessionMemoryNote(
-                    target,
-                    "[approved action '"
-                            + target.toolName()
-                            + "' failed: "
-                            + truncate(failure, MAX_MEMORY_NOTE_RESULT_CHARS)
-                            + "]");
+            String noteProblem =
+                    appendSessionMemoryNote(
+                            request,
+                            target,
+                            ApprovalOutcomeNotes.outcomeRecord(
+                                    notes(), request, target, ToolLedger.Status.FAILED, request.getDecidedBy(), failure));
             notify(
                     target,
                     NotificationSeverity.ERROR,
@@ -229,10 +257,73 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
                     "Your approved tool call '"
                             + target.toolName()
                             + "' was attempted but failed: "
-                            + failure);
+                            + failure
+                            + (noteProblem == null
+                                    ? ""
+                                    : "\n\nThe agent was NOT told this ("
+                                            + noteProblem
+                                            + "): it may ask for the action again."));
+            // A failure that will be retried is not the end of the call; the retry that finally
+            // succeeds (or the dead letter) is what the agent should hear about.
+            if (!(e instanceof RetryableActionFailure)) {
+                continueTask(request, Outcome.FAILED, failure);
+            }
             throw e;
         } finally {
             previous.ifPresentOrElse(TenantContext::set, TenantContext::clear);
+        }
+    }
+
+    /**
+     * A human DENIED the call. Nothing runs, but the agent must not be left waiting on an answer
+     * that has come: the conversation gets a note (like a completed or failed call) and then the
+     * task continues with a clear "denied" result carrying the reviewer's reason, so the agent can
+     * reach the goal another way or tell the user what it could not do. Best-effort by contract
+     * ({@code HumanApprovalGateService} logs and swallows anything thrown here).
+     */
+    @Override
+    public void onRejected(ApprovalRequest request, String decidedBy, String reason) {
+        ReplayTarget target;
+        try {
+            target = ReplayTarget.resolve(request, objectMapper);
+        } catch (RuntimeException unreadable) {
+            // A row with no usable envelope has no conversation to tell.
+            log.info("Rejected approval request {} has no replayable envelope; nobody is told", request.getId());
+            return;
+        }
+        Optional<TenantContext> previous = TenantContext.current();
+        if (target.tenantId() != null) {
+            TenantContext.set(TenantContext.of(target.tenantId(), target.replaySubject(), Set.of()));
+        }
+        try {
+            ApprovalContinuationProperties texts =
+                    continuationTexts.getIfAvailable(ApprovalContinuationProperties::new);
+            String shown = reason == null || reason.isBlank() ? texts.getNoReasonText() : reason.strip();
+            appendSessionMemoryNote(
+                    request,
+                    target,
+                    ApprovalOutcomeNotes.outcomeRecord(
+                            texts, request, target, ToolLedger.Status.NOT_RUN, decidedBy, shown));
+            continueTask(request, Outcome.DENIED, shown);
+        } finally {
+            previous.ifPresentOrElse(TenantContext::set, TenantContext::clear);
+        }
+    }
+
+    /**
+     * Hands the decided call to the launcher, which continues the conversation's task (or declines:
+     * a job session, a request recorded without a goal, a decision already continued). Never
+     * throws - the call already ran, or was refused, and that stands whatever happens next.
+     */
+    private void continueTask(ApprovalRequest request, Outcome outcome, String text) {
+        try {
+            ApprovalContinuationPort launcher = continuationLauncher.getIfAvailable();
+            if (launcher != null) {
+                launcher.afterDecision(request, outcome, text);
+            }
+        } catch (RuntimeException e) {
+            log.warn("Could not continue the task after the {} decision on approval request {}",
+                    outcome, request.getId(), e);
         }
     }
 
@@ -400,188 +491,12 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
         }
     }
 
-    /**
-     * Everything replay needs, resolved from either payload shape. Nullable: {@code tenantId},
-     * {@code subject}.
-     */
-    record ReplayTarget(
-            UUID agentId,
-            String sessionId,
-            String toolName,
-            String argumentsJson,
-            String tenantId,
-            String subject,
-            String toolDigest) {}
-
-    /**
-     * Two payload shapes exist in the wild and both must replay:
-     *
-     * <ol>
-     *   <li><b>Envelope</b> (7-arg {@code recordToolCallForApproval}, the shape everything records
-     *       now): {@code {"replay": {...}, "arguments": ...}}. Discriminated by {@code
-     *       replay.toolName} being present, not by the {@code "replay"} key alone - the legacy
-     *       payload is model-authored tool input and could contain a {@code "replay"} key of its
-     *       own.
-     *   <li><b>Legacy</b> (raw tool arguments, rows recorded before the envelope existed): tool
-     *       name recovered from the action type, agent/session from {@code requestedBy}'s {@code
-     *       "agent:<id>:session:<id>"} label, tenant inherited from the calling thread (the
-     *       approve/retry paths both set it correctly - see class javadoc).
-     * </ol>
-     */
-    private ReplayTarget resolveTarget(ApprovalRequest request) {
-        String payloadJson = request.getPayloadJson();
-        JsonNode payload = null;
-        if (payloadJson != null && !payloadJson.isBlank()) {
-            try {
-                payload = objectMapper.readTree(payloadJson);
-            } catch (Exception e) {
-                throw new AgentToolReplayException(
-                        "Approval request "
-                                + request.getId()
-                                + " has an unparseable payload - cannot replay: "
-                                + e.getMessage(),
-                        e);
-            }
-        }
-        if (payload != null && payload.path("replay").hasNonNull("toolName")) {
-            return fromEnvelope(request, payload);
-        }
-        return fromLegacyPayload(request, payloadJson);
-    }
-
-    private ReplayTarget fromEnvelope(ApprovalRequest request, JsonNode payload) {
-        JsonNode replay = payload.path("replay");
-        UUID agentId = parseUuid(replay.path("agentId").asText(null));
-        if (agentId == null) {
-            throw new AgentToolReplayException(
-                    "Approval request "
-                            + request.getId()
-                            + " has a replay envelope with no valid agentId - cannot replay.");
-        }
-        String arguments;
-        if (payload.has("arguments")) {
-            arguments = payload.get("arguments").toString();
-        } else {
-            arguments = payload.path("argumentsRaw").asText("{}");
-        }
-        String sessionId = replay.path("sessionId").asText(null);
-        return new ReplayTarget(
-                agentId,
-                sessionId != null && !sessionId.isBlank() ? sessionId : fallbackSessionId(request),
-                replay.path("toolName").asText(),
-                arguments,
-                replay.path("tenantId").asText(null),
-                replay.path("subject").asText(null),
-                replay.path("toolDigest").asText(null));
-    }
-
-    private ReplayTarget fromLegacyPayload(ApprovalRequest request, String payloadJson) {
-        String actionType = request.getActionType();
-        String toolName = actionType.substring(ACTION_TYPE_PREFIX.length());
-        UUID agentId = null;
-        String sessionId = null;
-        String requestedBy = request.getRequestedBy();
-        // GuardedToolCallback's label: "agent:<uuid>:session:<sessionId>".
-        if (requestedBy != null && requestedBy.startsWith("agent:")) {
-            int sessionMarker = requestedBy.indexOf(":session:");
-            if (sessionMarker > "agent:".length()) {
-                agentId = parseUuid(requestedBy.substring("agent:".length(), sessionMarker));
-                sessionId = requestedBy.substring(sessionMarker + ":session:".length());
-            }
-        }
-        if (agentId == null) {
-            throw new AgentToolReplayException(
-                    "Approval request "
-                            + request.getId()
-                            + " predates the replay envelope and its requestedBy label ('"
-                            + requestedBy
-                            + "') does not identify the requesting agent - cannot replay. "
-                            + "Ask the user to retry the action in chat.");
-        }
-        return new ReplayTarget(
-                agentId,
-                sessionId != null && !sessionId.isBlank() ? sessionId : fallbackSessionId(request),
-                toolName,
-                payloadJson == null || payloadJson.isBlank() ? "{}" : payloadJson,
-                null,
-                null,
-                null);
-    }
-
-    private static String fallbackSessionId(ApprovalRequest request) {
-        return FALLBACK_SESSION_PREFIX + request.getId();
-    }
-
-    /**
-     * Closes the "the model that asked never learns the answer" gap this class's javadoc used to
-     * document as future work: a compact bracketed note (e.g. {@code [approved action
-     * 'send_message' completed: ...]}) is appended to the originating conversation's Redis-backed
-     * history, so the agent's NEXT turn in that session sees the outcome in-context and doesn't
-     * re-request an action a human already ran.
-     *
-     * <p><b>Representation choice, documented honestly:</b> the note is an {@link
-     * ChatTurn#assistant ASSISTANT}-role turn, because {@code MessageRole} has only USER/ASSISTANT
-     * and {@code AgentChatService#toSpringAiMessage} maps every non-USER turn to an {@code
-     * AssistantMessage} anyway - adding a SYSTEM role today would be inert without also changing
-     * that mapping (deliberately out of this change's scope). Assistant-voiced is also the
-     * least-wrong semantic: the action was performed on the agent's behalf, and the bracketed shape
-     * keeps it visually distinct from genuine model prose.
-     *
-     * <p>Guards: skipped when the recorded sessionId is missing or is the synthetic {@value
-     * #FALLBACK_SESSION_PREFIX}-prefixed placeholder (no real conversation exists to inform), and
-     * any failure here is logged and swallowed - a Redis hiccup must never change the outcome of an
-     * approval that already executed (or already failed for its own reason).
-     */
-    private void appendSessionMemoryNote(ReplayTarget target, String note) {
-        String sessionId = target.sessionId();
-        if (sessionId == null
-                || sessionId.isBlank()
-                || sessionId.startsWith(FALLBACK_SESSION_PREFIX)) {
-            return;
-        }
-        SessionMemoryService memory = sessionMemoryService.getIfAvailable();
-        if (memory == null) {
-            return;
-        }
-        try {
-            memory.appendTurn(sessionId, ChatTurn.assistant(note));
-        } catch (RuntimeException e) {
-            log.warn(
-                    "Failed to append approval-outcome note to session '{}' memory (approval outcome unaffected): {}",
-                    sessionId,
-                    e.getMessage());
-        }
-    }
-
-    /**
-     * The subject stamped on the replay's {@link TenantContext} - the originating human when
-     * recorded, a system label otherwise, so audit writes made during the replay never attribute to
-     * the deciding admin something an agent's session actually asked for.
-     */
-    private static String replaySubject(ReplayTarget target) {
-        return target.subject() != null && !target.subject().isBlank()
-                ? target.subject()
-                : "system:approval-replay";
-    }
-
-    private static UUID parseUuid(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        try {
-            return UUID.fromString(value);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+    /** See {@link ApprovalOutcomeNotes#append}; returns why the note could not be written, or {@code null}. */
+    private String appendSessionMemoryNote(ApprovalRequest request, ReplayTarget target, ToolLedger record) {
+        return ApprovalOutcomeNotes.append(sessionMemoryService, request, target, record, log);
     }
 
     private static String truncate(String value, int maxChars) {
-        if (value == null) {
-            return "";
-        }
-        if (value.length() <= maxChars) {
-            return value;
-        }
-        return value.substring(0, maxChars) + TRUNCATED_SUFFIX;
+        return ApprovalOutcomeNotes.truncate(value, maxChars);
     }
 }

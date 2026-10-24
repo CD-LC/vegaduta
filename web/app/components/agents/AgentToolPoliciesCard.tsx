@@ -44,6 +44,7 @@ export default function AgentToolPoliciesCard({
   lockedTooltip?: string;
 }) {
   const t = useTranslations("toolPolicies");
+  const q = useTranslations("approvalsQueue");
   // Keyed by the agent it was fetched for, so switching agents can never show (or save against) the previous
   // agent's policies while the new fetch is in flight.
   const [loaded, setLoaded] = useState<{ agentId: string; view: ToolPoliciesView } | null>(null);
@@ -54,7 +55,11 @@ export default function AgentToolPoliciesCard({
   // Who the stored "last changed by" id is: the viewer, or - for someone allowed to list members - a teammate.
   // Anyone else sees "a teammate", never the raw id.
   // useContext, not useAuth(): this card must still render where no provider is mounted.
-  const authCtx = useContext(AuthContext) as { username?: string | null; firstName?: string | null; isAdmin?: boolean } | null;
+  const authCtx = useContext(AuthContext) as {
+    username?: string | null;
+    firstName?: string | null;
+    isAdmin?: boolean;
+  } | null;
   const username = authCtx?.username ?? null;
   const firstName = authCtx?.firstName ?? null;
   const isAdmin = !!authCtx?.isAdmin;
@@ -81,8 +86,9 @@ export default function AgentToolPoliciesCard({
     };
   }, [needsLookup]);
   const updatedBy = useMemo(
-    () => updatedByLabel(updatedByRaw, { selfId: auth.getUserId(), selfName: firstName || username, names: memberNames }),
-    [updatedByRaw, firstName, username, memberNames],
+    () =>
+      updatedByLabel(updatedByRaw, { selfId: auth.getUserId(), selfName: firstName || username, names: memberNames }),
+    [updatedByRaw, firstName, username, memberNames]
   );
 
   useEffect(() => {
@@ -118,7 +124,8 @@ export default function AgentToolPoliciesCard({
   const dirty = isTextDirty(text, stored);
   const check = parsePolicyText(text, view.limits);
   // An empty editor is not an error to shout about - Save is simply unavailable.
-  const inlineError = text.trim() === "" || check.error == null ? null : precheckMessage(check.error, check.policy, check.limit);
+  const inlineError =
+    text.trim() === "" || check.error == null ? null : precheckMessage(check.error, check.policy, check.limit);
   const summaries = policySummaries(stored);
 
   function precheckMessage(error: PolicyTextError, policy: number, limit: number): string {
@@ -167,6 +174,9 @@ export default function AgentToolPoliciesCard({
       </label>
       <p className="mb-2 text-xs text-muted-foreground">{t("intro")}</p>
       <ToolPolicyExplainer className="mb-2" />
+      <p className="mb-2 text-xs text-muted-foreground" data-testid="agent-tool-policies-approval-note">
+        {q("policyThenApprovalNote")}
+      </p>
       <GuardrailActivity kind="toolPolicy" agentId={agentId} />
 
       <div className="mb-2 rounded-md border border-border p-2" data-testid="agent-tool-policies-summary">
@@ -177,11 +187,11 @@ export default function AgentToolPoliciesCard({
           <ul className="mt-1 space-y-1">
             {summaries.map((p, i) => (
               <li key={`${p.tool}-${i}`} className="text-xs text-muted-foreground">
-                <code className="font-mono text-foreground">{p.tool}</code>
+                <code className="break-all font-mono text-foreground">{p.tool}</code>
                 {p.denyUnlistedArgs ? <span> - {t("denyUnlisted")}</span> : null}
                 {p.rules.map((r, j) => (
                   <div key={`${r.path}-${j}`} className="ml-3">
-                    <code className="font-mono">{r.path}</code>
+                    <code className="break-all font-mono">{r.path}</code>
                     {r.checks.length > 0 ? <span>: {r.checks.join(" · ")}</span> : null}
                   </div>
                 ))}

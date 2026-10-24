@@ -117,8 +117,6 @@ export function useAssistantDispatch({
         note?: string | null;
         targetAgentId?: string | null;
         replyNote?: string | null;
-        /** Extra facts for the app_context block (e.g. what an approved command returned). */
-        contextLines?: string[];
       } = {}
     ) => {
       const sent = attachments.items;
@@ -130,7 +128,6 @@ export function useAssistantDispatch({
             message,
             assistantContext(connections.latest.current, folder?.current ?? null, [
               ...attachedFilesContextLines(sent),
-              ...(opts.contextLines ?? []),
             ])
           );
       const outcome = await turn.runTurn(message, sent, { ...opts, sendText });
@@ -273,7 +270,7 @@ export function useAssistantDispatch({
   const send = useCallback(
     async (
       text: string,
-      opts: { skipGate?: boolean; contextLines?: string[]; /** The composer's "In background" mode: rung 2 without typing /background. */ background?: boolean } = {}
+      opts: { skipGate?: boolean; /** The composer's "In background" mode: rung 2 without typing /background. */ background?: boolean } = {}
     ) => {
       if (!agent) return;
       const plan = dispatch(text, caps, { background: opts.background });
@@ -284,7 +281,6 @@ export function useAssistantDispatch({
           if (!opts.skipGate && agent.isAssistant !== false && (await holdForConnection(plan.message))) return;
           await plainTurn(plan.message, {
             note: plan.degradedFrom ? t(`degraded_${plan.degradedFrom}`) : null,
-            contextLines: opts.contextLines,
           });
           return;
         case "job":

@@ -186,9 +186,9 @@ export default function TutorPage() {
         description={t("unavailableBody")}
         action={
           <Button asChild variant="outline">
-            <Link href="/learn">
+            <Link href="/help">
               <ArrowLeft aria-hidden="true" />
-              {t("backToLearn")}
+              {t("backToHelp")}
             </Link>
           </Button>
         }

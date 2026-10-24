@@ -482,6 +482,7 @@ public final class OpenApiSpecGenerator {
             if (PATH_VAR.matcher(path).find()) {
                 responses.put("404", OpenApiFixedComponents.errorRef("NotFound"));
             }
+            OpenApiExtraErrors.apply(verb, path, responses);
             if (PublicEndpointRateLimitFilter.throttles(verb, path)) {
                 responses.put("429", OpenApiFixedComponents.errorRef("TooManyRequests"));
             }

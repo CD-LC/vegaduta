@@ -171,7 +171,7 @@ public class SarvamAgentChatClientFactory implements AgentChatClientFactory {
         // package shares (via OpenAiCompatModelBuilder).
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
 
-        return modelSupport.chatClientBuilder(chatModel)
+        return modelSupport.chatClientBuilder(chatModel, ProviderName.SARVAM)
             .defaultAdvisors(modelSupport.advisors(
                 new LlmMetricsAdvisor(llmCallMetricsService, llmCallLogService, ProviderName.SARVAM, model, meterRegistry, pricingCatalog)))
             .build();

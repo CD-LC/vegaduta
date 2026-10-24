@@ -17,6 +17,7 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.InMemorySessionMemory;
 import com.agenticai.core.agents.memory.SessionMemoryService;
+import com.agenticai.core.agents.turn.ToolLedger;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
 import java.time.Instant;
@@ -146,6 +147,59 @@ class ChatTranscriptServiceTest {
         assertTrue(transcript.messages().get(1).error());
         assertEquals("failed", transcript.messages().get(1).status());
         verify(sessions, never()).getFullHistory(mine("s1"));
+    }
+
+    @Test
+    void aDecidedActionsToolRecordIsKeptForTheModelButNeverReloadedAsAnAssistantMessage() {
+        when(sessions.isOwnedBy(mine("s1"), "t1", "alice")).thenReturn(true);
+        ToolLedger record =
+                new ToolLedger(
+                        List.of(
+                                new ToolLedger.Entry(
+                                        "web_search",
+                                        "{\"q\":\"x\"}",
+                                        "[approved action 'web_search' completed: [UNTRUSTED CONTENT from tool"
+                                                + " 'web_search' <<<UNTRUSTED_DATA id=1>>>]",
+                                        ToolLedger.Status.OK,
+                                        "r1, decided by alice")),
+                        0);
+        when(sessions.getFullHistory(mine("s1")))
+                .thenReturn(
+                        List.of(
+                                ChatTurn.user("Search for x."),
+                                ChatTurn.assistant("This needs your approval."),
+                                ChatTurn.toolRecord(record),
+                                ChatTurn.assistant("Here is what I found.")));
+
+        ChatTranscriptService.Transcript transcript = service.transcript(agentId, "s1");
+
+        assertEquals(3, transcript.messages().size());
+        assertEquals("Here is what I found.", transcript.messages().get(2).content());
+        for (var m : transcript.messages()) {
+            assertFalse(m.content().isBlank(), "no empty bubble");
+            assertFalse(m.content().contains("approved action"), m.content());
+            assertFalse(m.content().contains("UNTRUSTED"), m.content());
+        }
+    }
+
+    @Test
+    void aRecordOnlyTurnTheTreeAbsorbedAsAnEmptyAssistantNodeIsNotReloaded() {
+        when(sessions.isOwnedBy(mine("s1"), "t1", "alice")).thenReturn(false);
+        when(branchService.isEnabled()).thenReturn(true);
+        when(branchService.activePath(agentId, "s1"))
+                .thenReturn(
+                        new ActivePathResponse(
+                                "s1",
+                                null,
+                                List.of(
+                                        view("user", "Search for x.", "ok"),
+                                        view("assistant", "", "ok"),
+                                        view("assistant", "Found it.", "ok"))));
+
+        ChatTranscriptService.Transcript transcript = service.transcript(agentId, "s1");
+
+        assertEquals(2, transcript.messages().size());
+        assertEquals("Found it.", transcript.messages().get(1).content());
     }
 
     @Test

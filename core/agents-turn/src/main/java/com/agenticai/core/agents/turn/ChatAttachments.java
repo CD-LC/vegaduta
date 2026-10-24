@@ -303,6 +303,23 @@ final class ChatAttachments {
     }
 
     /**
+     * The same user message as {@link #userSpec}, as a message object: for a pass that replays the
+     * conversation as a message list, where the original request must keep its attachments.
+     */
+    static org.springframework.ai.chat.messages.UserMessage userMessage(
+            String userMessage, List<ChatAttachmentPayload> attachments) {
+        org.springframework.ai.chat.messages.UserMessage.Builder builder =
+                org.springframework.ai.chat.messages.UserMessage.builder().text(userMessage);
+        if (attachments != null && !attachments.isEmpty()) {
+            builder.media(
+                    attachments.stream()
+                            .map(a -> new org.springframework.ai.content.Media(a.mimeType(), a.resource()))
+                            .toList());
+        }
+        return builder.build();
+    }
+
+    /**
      * Builds the {@code .user(...)} spec for one turn - plain text, or text plus this turn's {@link
      * ChatAttachmentPayload} media (Spring AI's fluent multimodal builder, see {@code
      * AnthropicAgentChatClientFactory} javadoc history / Stage 4 build notes for why the fluent

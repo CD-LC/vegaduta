@@ -2,11 +2,7 @@ package com.agenticai.core.agents.turn;
 
 import static com.agenticai.core.agents.turn.ChatAttachments.countVisionFrames;
 import static com.agenticai.core.agents.turn.ChatAttachments.withAttachmentNote;
-import static com.agenticai.core.agents.turn.ChatPromptDirectives.joinMemoryBlocks;
-import static com.agenticai.core.agents.turn.ChatPromptDirectives.mediaGenerationHonestyDirective;
-import static com.agenticai.core.agents.turn.ChatPromptDirectives.memoryUsageDirective;
 import static com.agenticai.core.agents.turn.ChatPromptDirectives.prependMemoryBlock;
-import static com.agenticai.core.agents.turn.ChatPromptDirectives.withSkillsBlock;
 
 import com.agenticai.core.agents.context.ChatContextCompaction;
 import com.agenticai.core.agents.context.CompactionRun;
@@ -32,6 +28,7 @@ import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.security.TenantScope;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -54,6 +51,12 @@ import org.springframework.ai.tool.ToolCallback;
  * TurnContext#scope()} on their virtual threads and tool resolution receives the context itself.
  */
 final class ChatPromptAssembler {
+
+    /**
+     * The conversation replayed to the model, and whether any of its assistant turns starts with the
+     * platform's tool record ({@link ToolLedger}) - the cue to tell the model the record is reliable.
+     */
+    private record ReplayedHistory(List<Message> messages, boolean hasToolRecord) {}
 
     /** The assembled turn. {@code tools} is the live list the dispatch lambda captures. */
     record AssembledPrompt(
@@ -88,7 +91,8 @@ final class ChatPromptAssembler {
             String visionSessionId,
             boolean forceFastDepth,
             AgentStepEventEmitter stepEvents,
-            boolean suppressAgentTools) {
+            boolean suppressAgentTools,
+            List<String> runToolNames) {
         // Read at call time: the directive flags are @Value field-injected and the compaction /
         // sandbox collaborators are setter-injected after the service is constructed.
         ChatHotpath hotpath = svc.hotpath;
@@ -102,14 +106,11 @@ final class ChatPromptAssembler {
         RlEpisodeRecorder rlEpisodes = svc.rlEpisodes;
         ChatContextCompaction contextCompaction = svc.contextCompaction;
         SandboxFileRegistry sandboxFiles = svc.sandboxFiles;
-        boolean memoryUsageDirectiveEnabled = svc.memoryUsageDirectiveEnabled;
-        boolean toolSearchDirectiveEnabled = svc.toolSearchDirectiveEnabled;
-        boolean contextCompactionDirectiveEnabled = svc.contextCompactionDirectiveEnabled;
-        boolean browserV2DirectiveEnabled = svc.browserV2DirectiveEnabled;
-        boolean artifactsDirectiveEnabled = svc.artifactsDirectiveEnabled;
-        boolean artifactsDirectiveAllAgents = svc.artifactsDirectiveAllAgents;
-        String artifactsDirectiveAgentIds = svc.artifactsDirectiveAgentIds;
         TurnContext context = clients.context();
+        // What tool selection, the RIGOROUS tool-call verifier and memory recall match against: the
+        // person's message, or the original goal on the continuation after an approval (a generic
+        // "carry on" message with the tool output in it matches none of the tools the next step needs).
+        String decisionMessage = context.decisionMessage(userMessage);
         String currentTenantId = context.tenantId();
         TenantPlan currentTenantPlan = turn.currentTenantPlan();
         UUID agentId = turn.agentId();
@@ -187,13 +188,15 @@ final class ChatPromptAssembler {
         // its use site below; kicking all three off here is what overlaps them.
         // ADR-0022: the scope is the turn's explicit context, equal to this request thread's.
         TenantScope preTurnTenant = context.scope();
-        CompletableFuture<List<Message>> historyFuture =
+        CompletableFuture<ReplayedHistory> historyFuture =
                 supplyPreTurn(
                         preTurnTenant,
-                        () ->
-                                sessionMemoryService.getHistory(memorySessionId).stream()
-                                        .map(ChatPromptAssembler::toSpringAiMessage)
-                                        .toList());
+                        () -> {
+                            List<ChatTurn> replayed = sessionMemoryService.getHistory(memorySessionId);
+                            return new ReplayedHistory(
+                                    replayed.stream().map(ChatPromptAssembler::toSpringAiMessage).toList(),
+                                    replayed.stream().anyMatch(t -> t.tools() != null));
+                        });
         // stepEvents (2026-08-17) is threaded into tool resolution rather than
         // anywhere downstream because resolution is where every tool gets its
         // wrapper chain built - AgentToolProvider#guardAndLog is the ONE point
@@ -235,7 +238,7 @@ final class ChatPromptAssembler {
                                                         agentId,
                                                         sessionId,
                                                         subjectKey,
-                                                        userMessage,
+                                                        decisionMessage,
                                                         chatClient,
                                                         stepEvents,
                                                         turnDepth)));
@@ -244,7 +247,7 @@ final class ChatPromptAssembler {
                         preTurnTenant,
                         () ->
                                 memoryRecall.recallMemoryFactsBlock(
-                                        agentId, subjectKey, userMessage, stepEvents));
+                                        agentId, subjectKey, decisionMessage, stepEvents));
 
         // Stage 4: empty unless the "mcp" profile is active and at least one
         // registry entry is enabled - see AgentToolProvider for why.
@@ -256,7 +259,18 @@ final class ChatPromptAssembler {
         // resolving a second set of credentials - see resolveToolsFor's
         // chatClient javadoc.
         List<ToolCallback> tools = joinPreTurn(toolsFuture);
-        rl.filterToolSubset(tools);
+        if (runToolNames != null && !suppressAgentTools) {
+            // The run-scoped tool selection (ChatRequest.toolNames): narrows the agent's own resolved tools -
+            // already behind their approval, autonomy and guardrail wrappers, which stay as they are - to the
+            // named ones, and refuses a name the agent does not offer. The person's choice replaces the RL
+            // TOOL_SUBSET bandit's for this run (a bandit arm silently removing a tool the person switched on
+            // would be a second, hidden selection); the arm is dropped from the episode so it is not credited.
+            // A continuation after an approval narrows leniently (a tool that disappeared since is dropped).
+            RunToolSelection.narrow(tools, runToolNames, context.continuation() == null);
+            rl.dropToolSubsetArm();
+        } else {
+            rl.filterToolSubset(tools);
+        }
         // #911 - QuickTaskService's per-run ad-hoc delegation tools (see this
         // overload's own javadoc); empty for every other caller.
         if (extraTools != null && !extraTools.isEmpty()) {
@@ -278,11 +292,15 @@ final class ChatPromptAssembler {
                 mcpOfferedByResolution != null
                         ? mcpOfferedByResolution
                         : agentToolProvider.anyMcpToolsOfferedFor(
-                                agentId, sessionId, userMessage, chatClient);
+                                agentId, sessionId, decisionMessage, chatClient);
         if (smallModelTurn) {
             tools =
                     AgentToolSelection.capForSmallModel(
-                            tools, userMessage, AgentToolSelection.SMALL_MODEL_TOOL_CAP);
+                            tools,
+                            decisionMessage,
+                            // The tools the conversation already used, for a short follow-up.
+                            context.approval() == null ? Set.of() : context.approval().stickyTools(),
+                            svc.smallModel);
         }
 
         // "Smarter, more dynamic agents" roadmap - automatic long-term memory
@@ -325,14 +343,9 @@ final class ChatPromptAssembler {
         // so it stays inside the cached prefix the comment above protects.
         // Procedures go FIRST: binding business rules outrank the skills
         // advertisement and should read as part of the operating contract.
-        String systemPrompt =
-                withSkillsBlock(
-                        withSkillsBlock(
-                                rlPromptOverride != null
-                                        ? rlPromptOverride
-                                        : agent.getSystemPrompt(),
-                                agentToolProvider.proceduresPromptBlock(agentId)),
-                        agentToolProvider.skillsPromptBlock(agentId, tools, smallModelTurn));
+        String basePrompt = rlPromptOverride != null ? rlPromptOverride : agent.getSystemPrompt();
+        String proceduresBlock = agentToolProvider.proceduresPromptBlock(agentId);
+        String skillsBlock = agentToolProvider.skillsPromptBlock(agentId, tools, smallModelTurn);
         // Repairs any non-JSON tool-call arguments PERSISTED into history
         // from an earlier turn - see ArgumentSanitizingToolCallingManager
         // #sanitizeHistory's javadoc for the live incident this closes
@@ -341,9 +354,10 @@ final class ChatPromptAssembler {
         // from SessionMemoryService, so a poisoned entry from many turns ago
         // replayed forever - 400ing every later turn regardless of whether
         // THAT turn's own model response has any tool calls at all).
+        ReplayedHistory replayedHistory = joinPreTurn(historyFuture);
         List<Message> history =
                 ArgumentSanitizingToolCallingManager.sanitizeHistory(
-                        joinPreTurn(historyFuture), AgentChatService.HISTORY_SANITIZE_MAPPER);
+                        replayedHistory.messages(), AgentChatService.HISTORY_SANITIZE_MAPPER);
         // Two independently-optional halves of the same per-turn memory system
         // block: the WRITE-side directive (present whenever remember_fact is
         // actually on this turn's tool list) and the READ-side recalled facts
@@ -354,51 +368,33 @@ final class ChatPromptAssembler {
         // app.chat.directives.* fields above) - a null contribution is simply
         // skipped by joinMemoryBlocks, so a flag-off directive vanishes from
         // block 2 cleanly.
-        // Per-tenant owner overrides (switch a directive off or reword it), resolved once per
-        // turn from an in-process cache; no overrides = exactly the built-in text.
+        // Per-agent, per-tenant and platform overrides of the standing directives (switch one off or
+        // reword it), resolved through the prompt registry (cached in process); no overrides = exactly
+        // the built-in text. ChatSystemPromptComposer is the single place that orders the blocks - the
+        // prompt preview calls the same method, so what it shows is what a turn sends.
         java.time.LocalDate todayUtc = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
-        ResolvedDirectives pd = svc.promptDirectiveSettings.forToday(todayUtc);
-        String memoryBlock =
-                joinMemoryBlocks(
-                        pd.resolve(
-                                PromptDirectiveRegistry.CURRENT_DATE,
-                                ChatPromptDirectives.currentDateDirective(todayUtc)),
-                        pd.resolve(
-                                PromptDirectiveRegistry.MEMORY_USAGE,
-                                memoryUsageDirectiveEnabled ? memoryUsageDirective(tools) : null),
-                        pd.resolve(
-                                PromptDirectiveRegistry.MEDIA_HONESTY,
-                                mediaGenerationHonestyDirective(tools)),
-                        svc.directiveComposer.compose(
-                                new PromptDirectiveComposer.Context(
-                                        tools, anyMcpToolsOffered, smallModelTurn, pd)),
-                        pd.resolve(
-                                PromptDirectiveRegistry.TOOL_SEARCH,
-                                toolSearchDirectiveEnabled
-                                        ? ChatPromptDirectives.toolSearchDirective(tools)
-                                        : null),
-                        hookRun == null ? null : hookRun.contextNote(),
-                        pd.resolve(
-                                PromptDirectiveRegistry.CONTEXT_COMPACTION,
-                                ChatPromptDirectives.contextCompactionDirective(
-                                        contextCompactionDirectiveEnabled
-                                                && contextCompaction != null
-                                                && contextCompaction.isEnabled(),
-                                        tools)),
-                        pd.resolve(
-                                PromptDirectiveRegistry.BROWSER_V2,
-                                browserV2DirectiveEnabled
-                                        ? ChatPromptDirectives.browserV2Directive(tools)
-                                        : null),
-                        pd.resolve(
-                                PromptDirectiveRegistry.ARTIFACTS,
-                                ChatPromptDirectives.artifactsDirective(
-                                        artifactsDirectiveEnabled,
-                                        artifactsDirectiveAllAgents,
-                                        artifactsDirectiveAgentIds,
-                                        agentId)),
-                        pd.customInstructionsBlock(),
-                        joinPreTurn(memoryFuture));
+        ChatSystemPromptComposer.Composed composed =
+                ChatSystemPromptComposer.compose(
+                        new ChatSystemPromptComposer.Input(
+                                basePrompt,
+                                rlPromptOverride != null,
+                                proceduresBlock,
+                                skillsBlock,
+                                todayUtc,
+                                svc.promptDirectiveSettings.forTurn(todayUtc, agentId),
+                                svc.directiveComposer,
+                                tools,
+                                anyMcpToolsOffered,
+                                smallModelTurn,
+                                ChatSystemPromptComposer.Switches.of(svc),
+                                agentId,
+                                hookRun == null ? null : hookRun.contextNote(),
+                                replayedHistory.hasToolRecord() ? svc.turns.toolLedger.getTrustNote() : null,
+                                joinPreTurn(memoryFuture)));
+        String systemPrompt = composed.systemPrompt();
+        String memoryBlock = composed.memoryBlock();
+        // Tells the request inspector which registry key / scope / version each block of the system text came from.
+        PromptBlockProvenanceRecorder.record(sessionId, composed);
         List<Message> baseMessages =
                 memoryBlock == null ? history : prependMemoryBlock(memoryBlock, history);
         // Context compaction (default OFF -> compactionRun is null and `messages` is baseMessages

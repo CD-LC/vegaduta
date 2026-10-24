@@ -9,13 +9,15 @@ import { Badge } from "../ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Skeleton } from "../ui/skeleton";
 import { EmptyState, StatCard } from "../ax/page-kit";
-import { useTranslations } from "../../lib/i18n";
+import { useLocale, useTranslations } from "../../lib/i18n";
 import { getTurnJournal, type TurnJournalView } from "../../lib/api/turns";
 import { triggerBrowserDownload } from "../../lib/api/core";
 import { errorMessage } from "../../lib/errors";
 import { turnTotals, verifyChain, type ChainCheck } from "./journalChain";
 import { buildTurnFixture, fixtureFilename, serializeFixture } from "./turnFixture";
 import TurnTimeline from "./TurnTimeline";
+import CopyTurnId from "./CopyTurnId";
+import { buildTimeline, formatCostMinor, timelineStats } from "./timelineModel";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -29,6 +31,7 @@ type Load =
 
 export default function TurnInspector({ initialAgentId = "", initialTurnId = "" }: { initialAgentId?: string; initialTurnId?: string }) {
   const t = useTranslations("turnInspector");
+  const locale = useLocale();
   const [agentId, setAgentId] = useState(initialAgentId);
   const [turnId, setTurnId] = useState(initialTurnId);
   const [load, setLoad] = useState<Load>({ kind: "idle" });
@@ -83,6 +86,7 @@ export default function TurnInspector({ initialAgentId = "", initialTurnId = "" 
   }, [view]);
 
   const totals = useMemo(() => (view ? turnTotals(view.events) : null), [view]);
+  const stats = useMemo(() => (view ? timelineStats(buildTimeline(view.events)) : null), [view]);
 
   const exportFixture = () => {
     if (!view) return;
@@ -162,8 +166,13 @@ export default function TurnInspector({ initialAgentId = "", initialTurnId = "" 
         </Alert>
       )}
 
-      {view && totals && (
+      {view && totals && stats && (
         <>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm font-medium text-foreground">{t("turnIdLabel")}</span>
+            <CopyTurnId turnId={view.turnId} />
+          </div>
+
           <section aria-label={t("chainTitle")} className="rounded-lg border border-border bg-card p-4">
             <div className="flex flex-wrap items-center gap-3">
               <Badge variant={intact && !disagree ? "default" : "destructive"} data-testid="chain-badge">
@@ -194,8 +203,23 @@ export default function TurnInspector({ initialAgentId = "", initialTurnId = "" 
             <StatCard label={t("statTools")} value={`${totals.toolMillis} ms`} sub={`${totals.toolCalls}`} />
             <StatCard
               label={t("statCost")}
-              value={totals.costMinor === null ? t("costNotRecorded") : String(totals.costMinor)}
+              value={totals.costMinor === null ? t("costNotRecorded") : formatCostMinor(totals.costMinor, locale)}
               sub={`${t("statModelCalls")}: ${totals.modelCalls}`}
+            />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              label={t("tlStatFinish")}
+              value={stats.finishStatus ?? t("tlStillOpen")}
+              sub={stats.problems > 0 ? t("tlProblemCount", { count: stats.problems }) : undefined}
+            />
+            <StatCard label={t("tlStatRetries")} value={String(stats.retries)} sub={`${t("tlStatContinuations")}: ${stats.continuations}`} />
+            <StatCard label={t("tlStatApprovals")} value={String(stats.approvals)} />
+            <StatCard
+              label={t("tlStatTokens")}
+              value={stats.tokensIn === null && stats.tokensOut === null ? "-" : `${stats.tokensIn ?? "-"} / ${stats.tokensOut ?? "-"}`}
+              sub={stats.tokensIn === null && stats.tokensOut === null ? t("tlTokensNotRecorded") : t("tlTokensInOut")}
             />
           </div>
 

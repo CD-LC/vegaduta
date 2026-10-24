@@ -8,6 +8,8 @@ import com.agenticai.core.knowledge.rag.QueryRewriter;
 import com.agenticai.core.knowledge.rag.RagRetrievalConfig;
 import com.agenticai.core.knowledge.rag.RankFusion;
 import com.agenticai.core.knowledge.rag.RetrievalOptions;
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingsResolver;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -61,22 +63,44 @@ public class KnowledgeSearchService {
 
     private static final Logger log = LoggerFactory.getLogger(KnowledgeSearchService.class);
 
-    // Standard RRF constant (Cormack et al.) - large enough that rank 1 vs
-    // rank 2 in a single list isn't wildly more valuable than appearing in
-    // BOTH lists at a middling rank, which is the entire point of fusing
-    // two independently-scored lists rather than just picking one.
-    private static final int RRF_K = 60;
+    // The RRF constant (standard 60, Cormack et al.) and the candidate-pool sizing (each underlying search fetches
+    // more than topK so fusion has real candidates to combine; fusing two lists already truncated to exactly topK
+    // would favor whichever list ranked the true best chunk higher) are app.knowledge.search.* - see
+    // KnowledgeSearchProperties for the rationale of each.
+    private KnowledgeSearchProperties searchProperties = new KnowledgeSearchProperties();
 
-    // Each underlying search (vector, keyword) fetches more than topK so
-    // fusion has real candidates to combine - fusing two lists that were
-    // each already truncated to exactly topK would silently favor whichever
-    // list happened to rank the true best chunk higher, defeating the point
-    // of hybrid search. Capped rather than proportional-only so a topK=1
-    // "quick answer" query still gets a reasonably-sized fusion pool, and an
-    // unusually large topK doesn't blow up the reranker's per-call cost.
-    private static final int MIN_CANDIDATE_POOL = 20;
-    private static final int MAX_CANDIDATE_POOL = 50;
-    private static final int CANDIDATE_POOL_MULTIPLIER = 4;
+    /** {@code app.knowledge.search.*}; without it the built-in defaults apply (unit tests, non-Spring callers). */
+    @Autowired(required = false)
+    void setSearchProperties(KnowledgeSearchProperties searchProperties) {
+        this.searchProperties = searchProperties == null ? new KnowledgeSearchProperties() : searchProperties;
+    }
+
+    /**
+     * The settings catalog ({@code knowledge.search.*}): a workspace's candidate-pool multiplier and ceiling replace
+     * the property values. Setter-injected; without it (unit tests, non-Spring callers) the properties apply.
+     */
+    private SettingsResolver settings;
+
+    @Autowired(required = false)
+    void setSettings(SettingsResolver settings) {
+        this.settings = settings;
+    }
+
+    /** The candidate pool for a search asking {@code topK} chunks, under the calling thread's workspace settings. */
+    private int candidatePoolSize(int topK) {
+        if (settings != null) {
+            try {
+                SettingContext ctx = SettingContext.tenant();
+                return searchProperties.candidatePoolSize(topK,
+                    settings.getInt(KnowledgeSettings.CANDIDATE_POOL_MULTIPLIER, ctx),
+                    settings.getInt(KnowledgeSettings.CANDIDATE_POOL_MAX, ctx));
+            } catch (RuntimeException e) {
+                // The settings are a refinement of the property values, never a reason for a search to fail.
+                log.warn("Could not read the knowledge search settings, using the configured pool: {}", e.toString());
+            }
+        }
+        return searchProperties.candidatePoolSize(topK);
+    }
 
     private final SidecarClient sidecarClient;
     private final KnowledgeChunkScanner scanner;
@@ -266,9 +290,7 @@ public class KnowledgeSearchService {
             return List.of();
         }
 
-        int candidatePoolSize = Math.min(
-            MAX_CANDIDATE_POOL, Math.max(MIN_CANDIDATE_POOL, topK * CANDIDATE_POOL_MULTIPLIER)
-        );
+        int candidatePoolSize = candidatePoolSize(topK);
         String table = KnowledgeSchemaSupport.qualifiedTableName();
 
         if (options != null && !options.isLegacy()) {
@@ -410,7 +432,7 @@ public class KnowledgeSearchService {
 
     /**
      * Reciprocal Rank Fusion: {@code score(chunk) = sum over every list the
-     * chunk appears in of 1/(RRF_K + rank)}, rank being that chunk's
+     * chunk appears in of 1/(rrf-k + rank)}, rank being that chunk's
      * 1-indexed position within that specific list. A chunk in both lists
      * accumulates both contributions; a chunk in only one list still scores
      * (just lower, typically) rather than being dropped - hybrid search
@@ -439,11 +461,11 @@ public class KnowledgeSearchService {
             .toList();
     }
 
-    private static void accumulateRrf(List<SearchResultResponse> results, Map<UUID, SearchResultResponse> byId, Map<UUID, Double> rrfScore) {
+    private void accumulateRrf(List<SearchResultResponse> results, Map<UUID, SearchResultResponse> byId, Map<UUID, Double> rrfScore) {
         for (int i = 0; i < results.size(); i++) {
             SearchResultResponse r = results.get(i);
             byId.putIfAbsent(r.id(), r);
-            rrfScore.merge(r.id(), 1.0 / (RRF_K + i + 1), Double::sum);
+            rrfScore.merge(r.id(), 1.0 / (searchProperties.getRrfK() + i + 1), Double::sum);
         }
     }
 

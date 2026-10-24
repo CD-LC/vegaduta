@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
 // web/app/signup/page.tsx - a wizard rendered in-page as IntroStep -> DetailsForm
-// -> a result step, with a StepIndicator showing 3 labels (Account / Organization
+// -> a result step, with a StepIndicator showing 3 labels (Account / Workspace
 // / Launch). The Terms-of-Service checkbox lives on DetailsForm and is enforced
 // in JS (handleSubmit checks `agreedToTerms` before anything else, including
 // before the POST /api/signup call) - so exercising this validation path is
@@ -10,18 +10,18 @@ import { test, expect, type Page } from "@playwright/test";
 
 async function goToDetailsStep(page: Page) {
   await page.goto("/signup");
-  await page.getByRole("button", { name: /register now/i }).click();
-  // DetailsForm is identified by its "Organization name" field.
-  await expect(page.getByLabel("Organization name")).toBeVisible();
+  await page.getByRole("button", { name: /create free account/i }).click();
+  // DetailsForm is identified by its "Workspace name" field.
+  await expect(page.getByLabel("Workspace name")).toBeVisible();
 }
 
 test.describe("Signup wizard", () => {
   test("renders the multi-step wizard with its step indicator", async ({ page }) => {
     await page.goto("/signup");
-    await expect(page.getByRole("heading", { name: /Establish the/i })).toBeVisible();
-    // Step labels from StepIndicator (Account / Organization / Launch).
+    await expect(page.getByRole("heading", { name: /Create your free workspace/i })).toBeVisible();
+    // Step labels from StepIndicator (Account / Workspace / Launch).
     await expect(page.getByText("Account", { exact: true })).toBeVisible();
-    await expect(page.getByText("Organization", { exact: true })).toBeVisible();
+    await expect(page.getByText("Workspace", { exact: true })).toBeVisible();
     await expect(page.getByText("Launch", { exact: true })).toBeVisible();
 
     await goToDetailsStepFields(page);
@@ -34,7 +34,7 @@ test.describe("Signup wizard", () => {
     // would otherwise block on, so the submit actually reaches handleSubmit's
     // JS-level Terms check rather than stalling on a browser validation
     // tooltip for an unrelated empty field.
-    await page.getByLabel("Organization name").fill("Playwright Test Co");
+    await page.getByLabel("Workspace name").fill("Playwright Test Co");
     await page.getByLabel("First name").fill("Ada");
     await page.getByLabel("Last name").fill("Lovelace");
     await page.getByLabel(/^email$/i).fill(`e2e-${Date.now()}@example.com`);
@@ -47,7 +47,7 @@ test.describe("Signup wizard", () => {
     const termsCheckbox = page.getByLabel(/I agree to the/i);
     await expect(termsCheckbox).not.toBeChecked();
 
-    await page.getByRole("button", { name: /launch your control panel/i }).click();
+    await page.getByRole("button", { name: /create my workspace/i }).click();
 
     await expect(
       page.getByText("Please agree to the Terms of Service and Privacy Policy to continue.")
@@ -56,7 +56,7 @@ test.describe("Signup wizard", () => {
     // Must still be on the signup page, on the details step (not the
     // post-signup result step, and no navigation away from /signup).
     await expect(page).toHaveURL(/\/signup$/);
-    await expect(page.getByLabel("Organization name")).toBeVisible();
+    await expect(page.getByLabel("Workspace name")).toBeVisible();
   });
 
   test("Terms of Service and Privacy Policy links resolve", async ({ page }) => {
@@ -79,8 +79,8 @@ test.describe("Signup wizard", () => {
 // separate from goToDetailsStep because that test wants to assert the intro
 // step's own content first, then move forward.
 async function goToDetailsStepFields(page: Page) {
-  await page.getByRole("button", { name: /register now/i }).click();
-  await expect(page.getByLabel("Organization name")).toBeVisible();
+  await page.getByRole("button", { name: /create free account/i }).click();
+  await expect(page.getByLabel("Workspace name")).toBeVisible();
   await expect(page.getByLabel("First name")).toBeVisible();
   await expect(page.getByLabel("Last name")).toBeVisible();
   await expect(page.getByLabel(/^email$/i)).toBeVisible();
