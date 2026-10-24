@@ -259,6 +259,10 @@
     <!-- JaCoCo agent argLine, filled in by jacoco:prepare-agent. Must be defined
          (empty) so surefire's ${jacocoArgLine} resolves when the agent is skipped. -->
     <jacocoArgLine></jacocoArgLine>
+    <!-- Extra JVM options appended to every test fork's argLine; empty by
+         default. A module whose suite outgrows the JVM's default max heap (a
+         quarter of physical RAM) overrides it in its own <properties>. -->
+    <testForkJvmArgs></testForkJvmArgs>
     <jacoco.version>0.8.13</jacoco.version>
     <spotless.version>2.44.4</spotless.version>
     <google-java-format.version>1.25.2</google-java-format.version>
@@ -661,7 +665,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>@{jacocoArgLine} -XX:+IgnoreUnrecognizedVMOptions -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
+          <argLine>@{jacocoArgLine} ${testForkJvmArgs} -XX:+IgnoreUnrecognizedVMOptions -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
         </configuration>
       </plugin>
 

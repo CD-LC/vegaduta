@@ -23,6 +23,17 @@
     between packages, not how this thing runs.
   </description>
 
+  <properties>
+    <!-- The assembly module's test fork runs ~800 unit tests in ONE JVM:
+         hundreds of cached Spring test contexts plus a dozen ArchUnit tests that
+         each import the whole com.agenticai.core classpath (they release their
+         graphs in @AfterAll, but the rest of the suite's residue accumulates).
+         The fork OOM'd ("Java heap space", CI on a 4 GB default heap, Oct 2026)
+         at ~4 GB, so give it explicit headroom; -Xmx is a ceiling, not a
+         reservation, so this is safe on smaller machines too. -->
+    <testForkJvmArgs>-Xmx8g</testForkJvmArgs>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.agenticai</groupId>
@@ -423,7 +434,7 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <argLine>@{jacocoArgLine} -XX:+IgnoreUnrecognizedVMOptions -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
+              <argLine>@{jacocoArgLine} ${testForkJvmArgs} -XX:+IgnoreUnrecognizedVMOptions -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
               <includes>
                 <include>**/*IT.java</include>
               </includes>
