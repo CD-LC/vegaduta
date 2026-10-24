@@ -1,15 +1,15 @@
-fastapi==0.142.0
+fastapi==0.143.2
 # Explicit security floor: fastapi 0.115.0 capped starlette at 0.38.x, which
 # carries 7 advisories (PYSEC-2026-161/1941/1943/2280/2281/248/249; fixed by
 # 1.3.1). fastapi 0.142 only floors starlette, so pin it here directly.
-starlette==1.7.0
+starlette==1.8.0
 uvicorn[standard]==0.54.0
 sentence-transformers==6.1.0
 
 # Knowledge Stage F3a - text extraction for PDF/docx/html uploads.
 pypdf==6.21.2
-python-docx==1.1.2
-beautifulsoup4==4.12.3
+python-docx==1.2.0
+beautifulsoup4==4.15.0
 
 # Knowledge Stage F3b - OCR for image uploads. pytesseract is only a thin
 # wrapper around the tesseract-ocr system binary (see Dockerfile) - this
