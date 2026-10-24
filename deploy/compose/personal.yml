@@ -132,7 +132,7 @@ services:
     # without the profile now skips it (rate limiters and counters then live
     # in core's in-process fallback).
     profiles: ["valkey"]
-    image: valkey/valkey:8.1.10-alpine
+    image: valkey/valkey:9.1.2-alpine
     <<: [*restart, *logging, *nnp]
     # allkeys-lru at 128 MB (a rate-limit counter evicted under pressure fails open, so keep headroom): everything kept here is a cache, a counter or a short-lived
     # session buffer. Persistence is off (save ""); nothing in it is a system of record.

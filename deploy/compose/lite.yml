@@ -103,7 +103,7 @@ services:
           memory: 64m
 
   valkey:
-    image: valkey/valkey:8.1.10-alpine
+    image: valkey/valkey:9.1.2-alpine
     <<: [*restart, *logging, *nnp]
     command:
       - sh
