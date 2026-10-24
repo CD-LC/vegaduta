@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Check, Cloud, History, Loader2, Paperclip, MousePointerClick, Send, Square, Wrench, X, GitCompare, Mic } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Textarea } from "../../components/ui/textarea";
@@ -7,6 +8,8 @@ import { HARNESS_LINES } from "./runtime";
 import { ATTACH_ACCEPT, MAX_ATTACHMENTS } from "./attachments";
 import { fixRequest, locateRuntimeError } from "./scope";
 import { firstBrokenScript } from "./patch";
+import { splitThink } from "./thinking";
+import { studioSuggestions } from "./suggestions";
 import type { ProjectSession } from "./useProjectSession";
 import { SOURCE_LABEL, timeAgo } from "./sessionTypes";
 
@@ -31,8 +34,13 @@ function waitingLine(engineLabel: string, elapsed: number): string {
 
 export default function ChatPane({ s }: { s: ProjectSession }) {
   const {
-    attached, busy, dictation, editable, elapsed, fileInputRef, html, inspect, lastFixRef, log, pickFiles, project, pushLog, request, restore, runEdit, runtimeError, scopeAsk, selected, send, setAttached, setDiffFrom, setInspect, setRequest, setScopeAsk, setSelected, stop, stream, undo, undoTarget
+    answerClarify, attached, busy, clarify, dictation, editable, elapsed, fileInputRef, html, inspect, lastFixRef, log, pickFiles, planState, project, pushLog, request, restore, runEdit, runtimeError, scopeAsk, selected, send, setAttached, setDiffFrom, setInspect, setRequest, setScopeAsk, setSelected, stop, stream, undo, undoTarget
   } = s;
+  const [clarifyText, setClarifyText] = useState("");
+  // Local engines stream <think>…reasoning…</think> - render it dimmed above
+  // the visible reply instead of as part of the message.
+  const { thinking, visible } = splitThink(stream);
+  const suggestions = studioSuggestions(html);
   return (
     <div className="order-2 flex min-h-0 flex-col gap-3 lg:order-1">
       <fieldset disabled={!editable} className="m-0 flex min-w-0 flex-col gap-2 rounded-2xl border border-border bg-card p-3">
@@ -61,6 +69,20 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
           className="resize-none"
           aria-label="Ask for a change"
         />
+        {!busy && suggestions.length > 0 && (
+          <div role="group" aria-label="Suggested next changes" className="flex gap-1.5 overflow-x-auto pb-0.5">
+            {suggestions.map((s) => (
+              <button
+                key={s.label}
+                type="button"
+                onClick={() => send({ text: s.prompt })}
+                className="shrink-0 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-[11px] font-medium text-primary transition hover:bg-primary/15"
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        )}
         {attached.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {attached.map((a) => (
@@ -165,7 +187,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
           </p>
           <p className="text-muted-foreground">If you wish to continue with the whole page anyway, click Yes.</p>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={() => send({ wholePage: true })}>
+            <Button size="sm" onClick={() => send({ wholePage: true, text: scopeAsk ?? undefined })}>
               Yes, continue
             </Button>
             <Button
@@ -183,6 +205,33 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
         </div>
       )}
 
+      {clarify && !busy && (
+        <div role="alertdialog" aria-labelledby="clarify-title" className="flex flex-col gap-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-3 text-xs">
+          <p id="clarify-title" className="font-medium text-foreground">Before I build - a few quick questions</p>
+          <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+            {clarify.questions.map((q) => (
+              <li key={q}>{q}</li>
+            ))}
+          </ul>
+          <Textarea
+            value={clarifyText}
+            onChange={(e) => setClarifyText(e.target.value)}
+            rows={2}
+            placeholder="Answer any or all in one line - or just build it as described."
+            className="resize-none"
+            aria-label="Answers to the questions"
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" onClick={() => { answerClarify(clarifyText || null); setClarifyText(""); }}>
+              Build it
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => answerClarify(null)}>
+              Skip - build as described
+            </Button>
+          </div>
+        </div>
+      )}
+
       {busy && (
         <div className="flex flex-col gap-2 rounded-2xl border border-primary/30 bg-primary/[0.04] p-3">
           <div className="flex items-center gap-2 text-xs font-medium text-foreground">
@@ -192,8 +241,19 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
             </span>
             <span className="ml-auto tabular-nums text-muted-foreground">{elapsed}s</span>
           </div>
+          {planState && (
+            <ol className="flex flex-col gap-0.5 text-[11px]">
+              {planState.steps.map((s, i) => (
+                <li key={s} className={`flex items-center gap-1.5 ${i < planState.current ? "text-emerald-600 dark:text-emerald-400" : i === planState.current ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+                  {i < planState.current ? <Check aria-hidden="true" size={11} /> : i === planState.current ? <Loader2 aria-hidden="true" size={11} className="animate-spin" /> : <span className="inline-block size-[11px] rounded-full border border-muted-foreground/40" />}
+                  <span className="truncate">{s}</span>
+                </li>
+              ))}
+            </ol>
+          )}
           <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-neutral-950 p-2 font-mono text-[10px] leading-snug text-emerald-300">
-            {stream ? stream.slice(-1800) : waitingLine(busy.engineLabel, elapsed)}
+            {thinking && <span className="text-emerald-700">{thinking.slice(-600)}{"\n\n"}</span>}
+            {stream ? visible.slice(-1800) || " " : waitingLine(busy.engineLabel, elapsed)}
           </pre>
         </div>
       )}
