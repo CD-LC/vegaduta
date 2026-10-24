@@ -263,20 +263,20 @@
          default. A module whose suite outgrows the JVM's default max heap (a
          quarter of physical RAM) overrides it in its own <properties>. -->
     <testForkJvmArgs></testForkJvmArgs>
-    <jacoco.version>0.8.13</jacoco.version>
+    <jacoco.version>0.8.15</jacoco.version>
     <spotless.version>2.44.4</spotless.version>
     <google-java-format.version>1.25.2</google-java-format.version>
     <!-- Git ref Spotless ratchets against. CI fetches origin/main (fetch-depth 0);
          a clone without that remote can pass -Dspotless.ratchet.ref=main (or HEAD). -->
     <spotless.ratchet.ref>origin/main</spotless.ratchet.ref>
-    <archunit.version>1.4.1</archunit.version>
+    <archunit.version>1.5.1</archunit.version>
     <!-- JSpecify nullness annotations (@NullMarked/@Nullable). Compile-scope,
          annotation-only jar; the NullAway pilot in -Pstatic-analysis checks
          only packages marked @NullMarked. -->
-    <jspecify.version>1.0.0</jspecify.version>
+    <jspecify.version>1.0.1</jspecify.version>
     <!-- Google Application Default Credentials: core/providers (Vertex AI) and core/dbauth (Cloud SQL IAM login)
          must use the same one. Managed in dependencyManagement below. -->
-    <google-auth.version>1.33.0</google-auth.version>
+    <google-auth.version>1.54.0</google-auth.version>
     <webauthn4j.version>0.31.11.RELEASE</webauthn4j.version>
     <!-- Apache POI (documentgen writes DOCX/XLSX/PPTX; omnichannel reads the contacts XLSX).
          One version for both. 5.4.0 fixed the advisories that Dependabot alerts #5 and #6 list
@@ -300,7 +300,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.21.0</version>
+        <version>2.22.0</version>
       </dependency>
       <!-- Pin jackson-annotations 2.22: webauthn4j 0.31.x (passkeys, core/admin) parses with Jackson 3.2
            (tools.jackson), which calls JsonTypeInfo.Value.getWriteTypeIdForDefaultImpl(), a method added in
@@ -317,7 +317,7 @@
       <dependency>
         <groupId>at.yawk.lz4</groupId>
         <artifactId>lz4-java</artifactId>
-        <version>1.11.4</version>
+        <version>1.12.0</version>
       </dependency>
       <dependency>
         <groupId>org.springframework.ai</groupId>
