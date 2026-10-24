@@ -1,4 +1,5 @@
 import { apiFetch, jsonBody, toJson } from "./core";
+import { isPersonalEdition } from "../edition";
 
 /** Tool-calling grade the backend assigns a model: native function calling, constrained-JSON emulation, or none. */
 export type ToolCallingGrade = "native" | "constrained" | "none";
@@ -127,3 +128,30 @@ export const localModelsApi = {
   useLocalModel: (tag: string) =>
     apiFetch(`/api/local-models/use`, { method: "POST", ...jsonBody({ tag }) }).then(toJson<LocalModelUseResult>),
 };
+
+/**
+ * The install's local-model state, fetched once and cached: the recommendation, or null
+ * when the endpoint refuses/answers wrong (non-admin caller, older core). Surfaces that
+ * need the serving tag or the installed list use this directly; surfaces that only need
+ * yes/no use {@link localModelManagedHere}.
+ */
+let probe: Promise<LocalModelRecommendation | null> | null = null;
+export function localModelProbe(): Promise<LocalModelRecommendation | null> {
+  probe ??= localModelsApi.getLocalModelRecommendation().catch((): null => null);
+  return probe;
+}
+
+/**
+ * Capability check for the surfaces that manage or diagnose the install's local model
+ * (/troubleshoot, /providers/local-model). Always true on a personal install; on lite and
+ * full it is true when core reports a local model the caller can act on - the configured
+ * model server answering, or a platform-pool row already pointing at it (`servingModel`,
+ * which is set even while the row is temporarily blocked, e.g. by the SSRF allow-list).
+ * A hosted/shared tenant with no local model gets false and sees the operator-managed
+ * notice instead. Lives here, not in personalInstall.ts, because that module stays in the
+ * server-component import graph while the API layer is client-only.
+ */
+export function localModelManagedHere(): Promise<boolean> {
+  if (isPersonalEdition()) return Promise.resolve(true);
+  return localModelProbe().then((r): boolean => !!r && (r.ollama.reachable || r.servingModel != null));
+}

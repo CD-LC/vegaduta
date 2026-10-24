@@ -35,10 +35,11 @@ In `enforce` mode, two things follow:
    already have (the same `mcp_tool.<name>` action, the same replay check) with the summary flagged
    "untrusted content from X". This applies to agents that normally never ask for approval, too.
 
-`observe` (opt-in; the default outside personal mode is `off`) changes nothing a user sees: it counts and audits what
-would have needed approval (`agent.taint.*` metrics, and one `tool.taint.would_block` audit entry per tool per tainted
-turn, without arguments or output). It does write audit rows and classifies every guarded tool call, so turn it on
-deliberately. `off` disables it. The `personal` profile uses `enforce`.
+`observe` (the default outside personal mode since 2026-10-23; it was `off`) changes nothing a user sees: it counts and
+audits what would have needed approval (`agent.taint.*` metrics, and one `tool.taint.would_block` audit entry per tool per
+tainted turn, without arguments or output). It does write audit rows and classifies every guarded tool call; review those
+rows before moving a shared deployment to `enforce`. `off` disables it (`APP_AGENTS_TAINT_MODE=off`). The `personal`
+profile uses `enforce`.
 
 **What it does not do.**
 

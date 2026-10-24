@@ -11,6 +11,7 @@ import ProvidersPanel from "../components/ProvidersPanel";
 import { useTranslations } from "../lib/i18n";
 import LocalModelFirstRun from "../components/localModel/LocalModelFirstRun";
 import { localModelAllowed } from "../lib/personalInstall";
+import { localModelProbe, type LocalModelRecommendation } from "../lib/api/localModels";
 import { SetupHint } from "../components/setup/SetupLinks";
 import { Button } from "../components/ui/button";
 
@@ -29,6 +30,27 @@ export default function ProvidersPage() {
   const tl = useTranslations("localModelWizard");
   const [providers, setProviders] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  // Local-model surfaces open on personal always and on lite/full when the
+  // install actually runs a local model (reachable server or a pool row
+  // serving it) - a hosted tenant still gets the operator-managed view. The
+  // probe also carries the serving tag, so the empty state can tell a pool
+  // that already serves from a genuinely unstarted install.
+  const [localRec, setLocalRec] = useState<LocalModelRecommendation | null>(null);
+  const [localProbed, setLocalProbed] = useState<boolean>(() => false);
+  useEffect(() => {
+    let live = true;
+    void localModelProbe().then((r) => {
+      if (!live) return;
+      setLocalRec(r);
+      setLocalProbed(true);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+  const localModel =
+    localModelAllowed() ||
+    (localProbed && localRec != null && (localRec.ollama.reachable || localRec.servingModel != null));
 
   const refresh = useCallback(() => {
     api
@@ -78,9 +100,10 @@ export default function ProvidersPage() {
                 {tp("decisionProviders")} <ArrowRight size={14} />
               </Link>
             </Button>
-            {/* Local-model wizard is personal-only (localModelAllowed): on lite and
-             * full the pools are operator-managed, so the entry point stays off. */}
-            {localModelAllowed() && (
+            {/* The local-model wizard opens wherever this install manages a local
+             * model (localModelManagedHere): personal always, lite/full when one is
+             * configured, never on a hosted shared install. */}
+            {localModel && (
               <Button asChild variant="outline" size="sm">
                 <Link href="/providers/local-model">{tl("providersEntry")}</Link>
               </Button>
@@ -93,7 +116,9 @@ export default function ProvidersPage() {
           </>
         }
       />
-      {localModelAllowed() && loaded && providers.length === 0 && <LocalModelFirstRun />}
+      {localModel && loaded && localProbed && providers.length === 0 && (
+        <LocalModelFirstRun servingTag={localRec?.servingModel ?? null} />
+      )}
       <SetupHint className="mb-4" lead={tp("providersSetupLead")} targets={["agents", "edge", "tools", "workflows"]} />
       <ProvidersPanel providers={providers} onChanged={refresh} />
     </AppShell>

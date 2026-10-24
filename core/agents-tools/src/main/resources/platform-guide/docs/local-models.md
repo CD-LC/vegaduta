@@ -188,6 +188,59 @@ On a machine where Docker has little memory the launcher also lowers the model's
 
 Check each model's licence on its Ollama library page before redistributing it.
 
+### Response speed
+
+How soon the first words appear depends on three things: how much of the prompt the model has to read before it
+writes, whether the model server can answer that part from its cache, and whether the machine has the memory to
+keep the model loaded.
+
+**What the platform does.**
+
+* **Replies stream as they are written.** A turn that offers a generation or MCP tool used to be held whole so an
+  invented download link could be replaced; now the words stream live and only the part from the first link on is
+  held until the reply is complete (`app.chat.parity.fast-buffering-mode`, see
+  [configuration.md](configuration.md#session-history-stream-versus-buffered-parity-and-response-caches)). This is the same for
+  every provider.
+* **A local model sees the same tools every turn.** Ollama's templates put the tool definitions ahead of the
+  system prompt, and the server keeps one prompt cache. A tool list chosen per message changed that prompt start on
+  most turns, so the whole prompt was read again. On the install's local model, and on a bring-your-own Ollama or
+  local OpenAI-compatible server, the agent's tools are now offered unchanged and in a fixed order
+  (`app.chat.local-model.stable-tools`), so every turn after the first is answered from the cache, and a tool the
+  message did not name, such as web search, is never missing. A model in small-model mode keeps its short list
+  instead (below).
+* **Thinking is off by default** for local models (`app.llm.ollama.reasoning-effort: none`). A thinking model
+  spends tens of seconds reasoning before its first visible word.
+
+**Measured on a 24 GB Apple M5 laptop with `qwen3.5:9b` (Ollama 0.40, MLX):** the prompt is read at about 600
+tokens a second and written at about 23-27 tokens a second. A first message that has to read 9,000 prompt tokens
+waits about 15 seconds; the same prompt from the cache starts in under 1.5 seconds. Ollama's log shows each request
+as `cache hit total=... cached=... left=...`: `left` is what had to be read.
+
+**Your machine.**
+
+| Machine | Model | Notes |
+|---|---|---|
+| Apple Silicon, 16 GB or more | `qwen3.5:4b` (8B or less runs in small-model mode); `qwen3.5:9b` on 24 GB or more | Use the Ollama on the Mac (option 2), not Ollama in Docker: Docker on a Mac has no GPU |
+| NVIDIA GPU | the largest model that fits in GPU memory with room for a 16K-32K context | Ollama in Compose with the GPU, or the host's Ollama |
+| CPU only | `qwen3.5:2b` or `qwen3.5:4b` | Reading the prompt is many times slower than on a GPU, so the short small-model prompt (six tools, compact directives) matters most; expect the first message of a conversation to take longest and later ones to start from the cache |
+| 8 GB of memory or less | `qwen3.5:2b` | Close other apps; a model that is swapped out answers erratically |
+
+**Memory.** The model, Docker's virtual machine and your other apps share the machine's memory, and a model that is
+pushed into swap writes in fits and starts. The personal stack's containers are limited to about 2.5-3.8 GB (see
+[personal-mode.md](personal-mode.md)), so Docker needs about 4 GB; a much larger Docker allowance (Docker Desktop,
+Settings, Resources) only leaves less for the model on a small machine. Check with `ollama ps` (what is loaded) and
+your system's swap use (on a Mac, `sysctl vm.swapusage`); remove models you do not use (`ollama rm`).
+
+**Settings that trade speed for capability.**
+
+| Setting | Default | Effect on speed |
+|---|---|---|
+| `app.chat.local-model.stable-tools` | `true` | `false` goes back to a per-message tool list: a shorter prompt, but read again on most turns |
+| `app.providers.small-model-max-billions` | `8.0` | raise it to put a larger model in small-model mode (six tools, compact directives, fast depth); a row's own "Small-model mode" control overrides it |
+| `app.chat.small-model.tool-cap` | `6` | tools on a small-model turn |
+| `app.llm.ollama.reasoning-effort` | `none` | `low`, `medium` or `high` turn thinking on: better on hard questions, much later first word |
+| `LOCAL_LLM_NUM_CTX` | by Docker memory | a smaller window saves memory on a small machine |
+
 ### Tool calls from small models
 
 Small and free models often write a tool call as text instead of sending it

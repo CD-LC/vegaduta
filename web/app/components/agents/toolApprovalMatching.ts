@@ -26,6 +26,8 @@ export interface ToolApprovalRow {
 /** Must stay in sync with GuardedToolCallback.ACTION_TYPE_PREFIX. */
 export const TOOL_CALL_ACTION_PREFIX = "mcp_tool.";
 const SUMMARY_PREFIX = "Tool call: ";
+/** Trailing annotations core adds to a summary (ApprovalParking): "[queued behind: x]", "[flagged: reason]". */
+const CORE_SUMMARY_ANNOTATION = /(\s*\[(?:queued behind|flagged):[^\]]*\])+$/;
 
 /**
  * Cap for the arguments shown on a card. Deliberately large: the card is
@@ -107,7 +109,10 @@ export function toolNameOf(row: ToolApprovalRow): string {
   if (envelope) return envelope.toolName;
   const summary = typeof row.summary === "string" ? row.summary : "";
   if (summary.startsWith(SUMMARY_PREFIX) && summary.length > SUMMARY_PREFIX.length) {
-    return summary.slice(SUMMARY_PREFIX.length).trim();
+    // ApprovalParking appends " [queued behind: <tool>]" / " [flagged: <reason>]" to the summary; neither is
+    // part of the tool's name (and left in, three queued web_search calls read as three different tools).
+    const name = summary.slice(SUMMARY_PREFIX.length).replace(CORE_SUMMARY_ANNOTATION, "").trim();
+    if (name) return name;
   }
   const actionType = typeof row.actionType === "string" ? row.actionType : "";
   if (actionType.startsWith(TOOL_CALL_ACTION_PREFIX) && actionType.length > TOOL_CALL_ACTION_PREFIX.length) {

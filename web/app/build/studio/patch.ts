@@ -25,8 +25,14 @@ export interface ApplyResult {
   failed: EditBlock[];
 }
 
+// The separator and end markers are line-anchored (`\n=`/`\n>`, not
+// `\n?=`/`\n?>`): without the anchor a comment divider a small model writes
+// inside a block body - `// ====== Section ======` - falsely matches as the
+// SEARCH/REPLACE separator, truncates the block mid-content, and can splice
+// a raw `=======` line into the document ("Unexpected token '==='" inside
+// <script>). Line-start markers are the documented contract anyway.
 const BLOCK_RE =
-  /<{5,9}\s*SEARCH[^\n]*\n([\s\S]*?)\n?={5,9}[^\n]*\n([\s\S]*?)\n?>{5,9}\s*REPLACE/g;
+  /<{5,9}\s*SEARCH[^\n]*\n([\s\S]*?)\n={5,9}[^\n]*\n([\s\S]*?)\n>{5,9}\s*REPLACE/g;
 
 /** Tolerant fallback for small models that get the KEYWORDS right but the
  * marker widths or casing wrong - `<<< SEARCH`, `====`, `>>>>>>> replace`
@@ -35,7 +41,7 @@ const BLOCK_RE =
  * that was a few marker characters off). Only consulted when the strict
  * pattern finds nothing; the SEARCH/REPLACE keywords keep it specific. */
 const BLOCK_RE_LOOSE =
-  /<{3,}\s*SEARCH[^\n]*\n([\s\S]*?)\n?\s*={3,}[^\n]*\n([\s\S]*?)\n?\s*>{3,}\s*REPLACE/gi;
+  /<{3,}\s*SEARCH[^\n]*\n([\s\S]*?)\n[ \t]*={3,}[^\n]*\n([\s\S]*?)\n[ \t]*>{3,}\s*REPLACE/gi;
 
 /** Extract every SEARCH/REPLACE block from a model reply. Tolerant of
  * surrounding prose and ``` fences (small models add both). */
@@ -55,6 +61,19 @@ export function parseEditBlocks(reply: string): EditBlock[] {
 
 function stripFence(s: string): string {
   return s.replace(/^```[a-zA-Z]*\n/, "").replace(/\n```\s*$/, "");
+}
+
+/** The model's own one-sentence explanation, when it ended its reply with
+ * the `NOTE:` line EDIT_SYSTEM asks for. Tolerant of case, spacing and the
+ * note appearing anywhere (small models rarely respect "after the last
+ * block" exactly); the LAST NOTE wins. Null when absent — callers fall
+ * back to the mechanical "N changes applied" line. */
+export function extractEditNote(reply: string): string | null {
+  let note: string | null = null;
+  for (const m of String(reply || "").matchAll(/^\s*NOTE\s*:\s*(.+?)\s*$/gim)) {
+    note = m[1];
+  }
+  return note;
 }
 
 /** Pull a full HTML document out of a reply, or null. Used when the model
@@ -164,15 +183,57 @@ export function applyEditBlocks(html: string, blocks: EditBlock[]): ApplyResult 
   return { html: doc, applied, failed };
 }
 
-/** Cheap structural sanity check before an edit is accepted as a new
- * version: the document still has its skeleton and <script>/<style> tags
- * are balanced. Not a parser - a guard against obviously broken output. */
+/** A real parser registered by the session once @babel/standalone has loaded
+ * (app/lib/babel.ts); tests register their own. Until one is registered the
+ * script check below is a no-op so a parser that fails to load never rejects
+ * a good document. `new Function` is deliberately not the fallback: the
+ * production CSP has no 'unsafe-eval', so it would throw on every script. */
+type ScriptChecker = (body: string, opts: { module: boolean }) => void;
+let scriptChecker: ScriptChecker | null = null;
+export function setScriptChecker(checker: ScriptChecker | null): void {
+  scriptChecker = checker;
+}
+
+/** Compile-checks each inline <script> body with the registered parser and
+ * returns the first body that fails, or null when every script parses (or no
+ * parser is registered). src= links, non-JS types (JSON, importmap) are
+ * skipped; `type="module"` bodies are parsed as modules so import/export is
+ * legal. A failure here is the exact "Uncaught SyntaxError ... Unexpected
+ * token" class the preview reports: marker leakage the regexes missed, a
+ * truncated block, a mangled `const`. */
+export function firstBrokenScript(html: string): string | null {
+  if (!scriptChecker) return null;
+  for (const m of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script[^>]*>/gi)) {
+    const attrs = m[1];
+    const body = m[2];
+    if (!body.trim()) continue;
+    if (/\bsrc\s*=/i.test(attrs)) continue;
+    const type = /\btype\s*=\s*["']?([^"'\s>]+)/i.exec(attrs)?.[1]?.toLowerCase() ?? "";
+    if (type && type !== "text/javascript" && type !== "application/javascript" && type !== "module") continue;
+    try {
+      scriptChecker(body, { module: type === "module" });
+    } catch {
+      return body;
+    }
+  }
+  return null;
+}
+
+/** Cheap sanity check before an edit is accepted as a new version: the
+ * document still has its skeleton, <script>/<style> tags are balanced, no
+ * SEARCH/REPLACE marker line leaked in, and - once a script checker is
+ * registered - every inline script actually parses. A bare `=======` or a
+ * mangled `const` inside <script> is "Unexpected token 'X'" at parse time -
+ * the preview is dead on arrival and "Fix it with AI" used to ship another
+ * broken document the same way. */
 export function looksLikeValidApp(html: string): boolean {
   const lower = html.toLowerCase();
   if (!lower.includes("<body") || !lower.includes("</body>")) return false;
   const count = (re: RegExp) => (lower.match(re) || []).length;
-  if (count(/<script[\s>]/g) !== count(/<\/script>/g)) return false;
-  if (count(/<style[\s>]/g) !== count(/<\/style>/g)) return false;
+  if (count(/<script[\s>]/gi) !== count(/<\/script[^>]*>/gi)) return false;
+  if (count(/<style[\s>]/gi) !== count(/<\/style[^>]*>/gi)) return false;
+  if (/^\s*(?:<{3,}\s*SEARCH|={5,}|>{3,}\s*REPLACE)\s*$/im.test(html)) return false;
+  if (firstBrokenScript(html) != null) return false;
   return true;
 }
 

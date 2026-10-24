@@ -28,9 +28,20 @@ export type ContinuationProblem =
 /** How the last followed continuation ended: the agent replied, or its turn broke (the reply is the reason). */
 export type ContinuationOutcome = "completed" | "failed";
 
+/**
+ * Where a running continuation is, as far as the browser can see. Core runs the turn detached and streams it to
+ * nobody, so this is what the stored conversation tells: "waiting" until core's continuation message appears (the
+ * agent is picking the task back up), "running" once it has (the agent is working on it).
+ */
+export type ContinuationPhase = "waiting" | "running";
+
 export interface ApprovalContinuationWatch {
   /** A continuation is expected or running: the surface keeps its input off and shows the status line. */
   continuing: boolean;
+  /** While continuing: when the newest followed continuation began (epoch ms), for an elapsed timer. */
+  since?: number | null;
+  /** While continuing: what the stored conversation shows of the newest followed continuation. */
+  phase?: ContinuationPhase | null;
   problem: ContinuationProblem | null;
   /** How the last continuation ended; cleared by `dismiss`, by `retry` and when the next one starts. */
   outcome: ContinuationOutcome | null;
@@ -71,6 +82,7 @@ export function useApprovalContinuation(options: UseApprovalContinuationOptions)
   const [active, setActive] = useState<ReadonlySet<string>>(() => new Set());
   const [problem, setProblem] = useState<ContinuationProblem | null>(null);
   const [outcome, setOutcome] = useState<ContinuationOutcome | null>(null);
+  const [live, setLive] = useState<LiveContinuation | null>(null);
   const optionsRef = useRef(options);
   optionsRef.current = options;
   // Per request id: the stop function of its loop. Ids stay in `seen` after they finish, so one is watched once.
@@ -96,6 +108,7 @@ export function useApprovalContinuation(options: UseApprovalContinuationOptions)
     setActive(new Set());
     setProblem(null);
     setOutcome(null);
+    setLive(null);
   }, []);
 
   // A different conversation (or none): nothing watched for the old one may land in the new one.
@@ -118,6 +131,10 @@ export function useApprovalContinuation(options: UseApprovalContinuationOptions)
       const session = current.sessionId;
       const read = current.fetchTranscript ?? ((a: string, s: string) => assistantApi.getChatTranscript(a, s));
       const startedAt = Date.now();
+      setLive({ id: requestId, since: startedAt, phase: "waiting" });
+      // Progress of THIS request only: a newer watch owns the live line.
+      const note = (phase: ContinuationPhase) =>
+        setLive((prev) => (prev && prev.id === requestId && prev.phase !== phase ? { ...prev, phase } : prev));
       let timer: ReturnType<typeof setTimeout> | null = null;
       let stopped = false;
       let started = false;
@@ -153,6 +170,7 @@ export function useApprovalContinuation(options: UseApprovalContinuationOptions)
           return;
         }
         if (progress.phase === "running") started = true;
+        note(started ? "running" : "waiting");
         const waited = Date.now() - startedAt;
         const { startWaitMs = CONTINUATION_START_WAIT_MS, maxWaitMs = CONTINUATION_MAX_WAIT_MS } = optionsRef.current;
         if (!started && waited >= startWaitMs) return end("notStarted");
@@ -176,5 +194,21 @@ export function useApprovalContinuation(options: UseApprovalContinuationOptions)
     optionsRef.current.onRetry?.();
   }, []);
 
-  return { continuing: active.size > 0, problem, outcome, retry: hasRetry ? retry : undefined, watch, dismiss };
+  const continuing = active.size > 0;
+  return {
+    continuing,
+    since: continuing ? (live?.since ?? null) : null,
+    phase: continuing ? (live?.phase ?? null) : null,
+    problem,
+    outcome,
+    retry: hasRetry ? retry : undefined,
+    watch,
+    dismiss,
+  };
+}
+
+interface LiveContinuation {
+  id: string;
+  since: number;
+  phase: ContinuationPhase;
 }

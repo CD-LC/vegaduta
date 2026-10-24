@@ -93,6 +93,10 @@ public class HostedLlmChatClientFactory {
     @Value("${app.llm.ollama.num-ctx:32768}")
     private int ollamaNumCtx = 32768;
 
+    /** How long a local model stays loaded after a request (Ollama keep_alive); see OllamaKeepAlive. */
+    @Value("${app.local-models.keep-alive:30m}")
+    private String localModelsKeepAlive = "30m";
+
     @Value("${app.llm.ollama.reasoning-effort:none}")
     private String ollamaReasoningEffort = "none";
 
@@ -249,8 +253,11 @@ public class HostedLlmChatClientFactory {
             optionsBuilder.reasoningEffort(effectiveReasoningEffort(provider));
         }
         OpenAiChatOptions options = optionsBuilder.build();
-        if (localOllama && ollamaNumCtx > 0) {
-            options.setExtraBody(Map.of("options", Map.of("num_ctx", ollamaNumCtx)));
+        if (localOllama) {
+            Map<String, Object> extra = localOllamaExtraBody(ollamaNumCtx, provider.getKeepAlive(), localModelsKeepAlive);
+            if (!extra.isEmpty()) {
+                options.setExtraBody(extra);
+            }
         }
 
         OpenAiChatModel chatModel = modelBuilder.chatModel(openAiApi, options);
@@ -313,6 +320,25 @@ public class HostedLlmChatClientFactory {
     String effectiveReasoningEffort(PlatformHostedLlmProvider provider) {
         String value = provider.getReasoningEffort() != null ? provider.getReasoningEffort() : ollamaReasoningEffort;
         return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    /**
+     * The Ollama-only fields of a local row's request: the context window, and how long the model stays loaded (the
+     * row's own keep-alive, else {@code app.local-models.keep-alive}). Without keep_alive Ollama applies its
+     * five-minute default, the model unloads after a short pause and the next message waits for a reload plus a full
+     * prompt read. Package-private for tests.
+     */
+    static Map<String, Object> localOllamaExtraBody(int numCtx, String rowKeepAlive, String defaultKeepAlive) {
+        Map<String, Object> extra = new java.util.LinkedHashMap<>();
+        if (numCtx > 0) {
+            extra.put("options", Map.of("num_ctx", numCtx));
+        }
+        Object keepAlive = com.agenticai.core.providers.localmodels.OllamaKeepAlive.jsonValue(
+                rowKeepAlive != null && !rowKeepAlive.isBlank() ? rowKeepAlive : defaultKeepAlive);
+        if (keepAlive != null) {
+            extra.put("keep_alive", keepAlive);
+        }
+        return extra;
     }
 
     /** True when a pool row carries no usable API key, so no Authorization header is sent. */

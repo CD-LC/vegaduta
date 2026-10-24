@@ -22,6 +22,45 @@ export function planPrompt(description: string): string {
   return `APP IDEA: ${description}`;
 }
 
+/** A fast pre-build turn (~150 reply tokens) that decides whether the idea is
+ * clear enough to build well or needs one round of questions first. The model
+ * answers READY or up to MAX_CLARIFY questions - only things that change what
+ * gets built, never styling or tech choices it can pick itself. */
+export const MAX_CLARIFY = 3;
+
+export const CLARIFY_SYSTEM = [
+  "You scope mobile web app ideas for a builder that gets ONE description and then has to build.",
+  "Read the idea. If the essentials are clear enough to build a good first version - what the app does, who it is for, what the main screens show - reply with exactly: READY",
+  `If something important genuinely changes what gets built, ask up to ${MAX_CLARIFY} short questions, one per line, no numbering.`,
+  "Ask only questions whose answers change the build: what goes on the main screen, what data is tracked, who uses it, which features matter most. NEVER ask about colours, layout, tech stack, or anything you can choose sensibly yourself.",
+  "Do not ask what the description already answers. When in doubt, reply READY - a mediocre question wastes the user's time more than a missing detail.",
+].join("\n");
+
+export function clarifyPrompt(description: string): string {
+  return `APP IDEA: ${description}`;
+}
+
+/** READY or a non-question reply means the model wants to build now. Only
+ * lines ending in ? count as questions, so a chatty preamble never stalls the
+ * build. */
+export function parseQuestions(reply: string): string[] {
+  const text = (reply || "").trim();
+  if (!text || /^\s*READY/i.test(text)) return [];
+  const qs = text
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((l) => l.replace(/^\s*(?:\d+[.)]|[-*•])\s*/, "").replace(/\*\*/g, "").trim())
+    .filter((l) => l.length >= 8 && l.endsWith("?"));
+  return qs.slice(0, MAX_CLARIFY);
+}
+
+/** A detailed brief needs no second look: over ~240 chars the user has done
+ * the PM's job already and a clarify turn is pure latency. Under that, a
+ * one-line idea genuinely benefits from one question round. */
+export function shouldClarify(description: string): boolean {
+  return description.trim().length < 240;
+}
+
 /** Parse a numbered/bulleted reply into clean steps, capped at MAX_PLAN_STEPS. */
 export function parsePlan(reply: string): string[] {
   const steps: string[] = [];

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseDiff, speechLang, suggestionsFor } from "./suggestions";
+import { parseDiff, diffFileStats, speechLang, suggestionsFor } from "./suggestions";
 
 describe("suggestionsFor", () => {
   it("returns at most four chips with real prompts", () => {
@@ -38,6 +38,32 @@ describe("parseDiff", () => {
       truncated: true,
     });
     expect(parseDiff("").lines).toEqual([]);
+  });
+});
+
+describe("diffFileStats", () => {
+  const d =
+    "diff --git a/a.ts b/a.ts\n--- a/a.ts\n+++ b/a.ts\n@@ -1,3 +1,4 @@\n" +
+    " old1\n+new1\n+new2\n-old2\n ctx\n" +
+    "diff --git a/b.css b/b.css\n--- a/b.css\n+++ b/b.css\n@@ -1 +1 @@\n-a\n+b\n";
+  it("counts +/- lines per file across hunks", () => {
+    expect(diffFileStats(d)).toEqual([
+      { path: "a.ts", adds: 2, dels: 1 },
+      { path: "b.css", adds: 1, dels: 1 },
+    ]);
+  });
+  it("handles deleted and new files, and tolerates empty input", () => {
+    expect(
+      diffFileStats("diff --git a/x b/x\n--- a/x\n+++ /dev/null\n@@ -1 +0,0 @@\n-gone\n")
+    ).toEqual([]);
+    expect(diffFileStats("--- /dev/null\n+++ b/new.ts\n@@ -0,0 +1 @@\n+hi\n")).toEqual([
+      { path: "new.ts", adds: 1, dels: 0 },
+    ]);
+    expect(diffFileStats("")).toEqual([]);
+    expect(diffFileStats(null as unknown as string)).toEqual([]);
+  });
+  it("does not count +++ header lines as additions", () => {
+    expect(diffFileStats("+++ b/a.ts\n@@ x\n+b\n")).toEqual([{ path: "a.ts", adds: 1, dels: 0 }]);
   });
 });
 

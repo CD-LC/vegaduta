@@ -50,11 +50,25 @@ class SanitizedMcpToolCallbackTest {
     void benignArgumentsReachTheDelegateOnTheToolContextOverloadToo() {
         ToolCallback delegate = fakeDelegate("search");
         ToolContext context = new ToolContext(java.util.Map.of());
-        when(delegate.call("{\"q\":\"invoices\"}", context)).thenReturn("ok");
+        when(delegate.call("{\"q\":\"invoices\"}")).thenReturn("ok");
         SanitizedMcpToolCallback wrapped = new SanitizedMcpToolCallback(delegate);
 
         assertEquals("ok", wrapped.call("{\"q\":\"invoices\"}", context));
-        verify(delegate).call("{\"q\":\"invoices\"}", context);
+        verify(delegate).call("{\"q\":\"invoices\"}");
+    }
+
+    @Test
+    void thePlatformsToolContextIsNeverForwardedToTheMcpServer() {
+        // The turn puts its own state in the tool context (the tool-loop transcript); Spring AI's MCP callback
+        // would copy it into the request's _meta, leaking it and failing on an object Jackson cannot write.
+        ToolCallback delegate = fakeDelegate("get_current_time");
+        Object internalState = new Object() {};
+        ToolContext context = new ToolContext(java.util.Map.of("vegaduta.toolLoopTranscript", internalState));
+        when(delegate.call("{\"timezone\":\"Asia/Tokyo\"}")).thenReturn("{\"time\":\"10:00\"}");
+        SanitizedMcpToolCallback wrapped = new SanitizedMcpToolCallback(delegate);
+
+        assertEquals("{\"time\":\"10:00\"}", wrapped.call("{\"timezone\":\"Asia/Tokyo\"}", context));
+        verify(delegate, never()).call(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any(ToolContext.class));
     }
 
     @Test
@@ -149,7 +163,7 @@ class SanitizedMcpToolCallbackTest {
         ToolCallback delegate = fakeDelegate("jira_create_issue");
         ToolContext context = new ToolContext(java.util.Map.of());
         RuntimeException failure = new RuntimeException("Connection not found: SCRUM");
-        when(delegate.call("{\"project\":\"SCRUM\"}", context)).thenThrow(failure);
+        when(delegate.call("{\"project\":\"SCRUM\"}")).thenThrow(failure);
         SanitizedMcpToolCallback wrapped = new SanitizedMcpToolCallback(delegate);
 
         RuntimeException thrown =

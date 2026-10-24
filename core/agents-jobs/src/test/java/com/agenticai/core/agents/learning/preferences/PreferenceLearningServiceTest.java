@@ -288,4 +288,42 @@ class PreferenceLearningServiceTest {
         service(3).scanApprovals(ME, AGENT);
         filed(3);
     }
+
+    @Test
+    void theProposalNamesTheToolTheWayAPersonReadsIt() {
+        List<ApprovalRequest> decided = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            decided.add(decision("mcp_tool.web_search", ApprovalStatus.APPROVED, 45));
+        }
+        when(approvalRepo.decidedBy(eq(ME), any(Instant.class))).thenReturn(decided);
+        service(3).scanApprovals(ME, AGENT);
+        Proposal p = filed(1).getValue();
+        assertTrue(p.title().startsWith("You approved \"Search the web\" 6 times"), p.title());
+        assertFalse(p.title().contains("mcp_tool"), p.title());
+        assertFalse(p.body().contains("mcp_tool"), p.body());
+        assertEquals("mcp_tool.web_search", p.evidence().get("actionType")); // the exact name stays in the evidence
+    }
+
+    @Test
+    void aProposalFiledWithTheRawNameBeforeIsNotFiledAgain() {
+        known.add(existing(
+                "Usually approves \"mcp_tool.web_search\" requests when asked (informational: approvals are still asked for)",
+                LearningProposalStatus.PENDING));
+        List<ApprovalRequest> decided = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            decided.add(decision("mcp_tool.web_search", ApprovalStatus.APPROVED, 45));
+        }
+        when(approvalRepo.decidedBy(eq(ME), any(Instant.class))).thenReturn(decided);
+        service(3).scanApprovals(ME, AGENT);
+        verify(proposals, never()).propose(any());
+    }
+
+    @Test
+    void actionLabelsCoverBuiltInMcpAndUnknownNames() {
+        assertEquals("Search the web", ApprovalActionLabel.of("mcp_tool.web_search"));
+        assertEquals("Open a web page", ApprovalActionLabel.of("fetch_web_page"));
+        assertEquals("create_issue (github)", ApprovalActionLabel.of("mcp_tool.mcp__github__create_issue"));
+        assertEquals("calendar_create", ApprovalActionLabel.of("mcp_tool.calendar_create"));
+        assertEquals("payment", ApprovalActionLabel.of("payment"));
+    }
 }

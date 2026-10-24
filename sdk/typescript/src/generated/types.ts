@@ -1139,6 +1139,7 @@ export interface AppBuilderGenerateFilesResult {
   files?: AppBuilderFileEdit[];
   providerName?: string;
   model?: string;
+  summary?: string;
 }
 
 export interface ApplyDtos_ApplyRequest {
