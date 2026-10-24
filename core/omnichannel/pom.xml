@@ -116,14 +116,17 @@
       <scope>runtime</scope>
     </dependency>
     <!--
-      Version confirmed via Maven Central at write time (12.1.1) - double-check
+      Version confirmed via Maven Central at write time (13.0.2) - double-check
       https://central.sonatype.com/artifact/com.twilio.sdk/twilio for anything
-      newer, same caveat as the original core/pom.xml.
+      newer, same caveat as the original core/pom.xml. The 13.x major only
+      renamed nested models in the conversations-v2 / messaging-v2 surfaces;
+      this module uses rest.api.v2010 (Account/Message/Call), TwiML and
+      RequestValidator, all unaffected.
     -->
     <dependency>
       <groupId>com.twilio.sdk</groupId>
       <artifactId>twilio</artifactId>
-      <version>12.1.1</version>
+      <version>13.0.2</version>
     </dependency>
     <!-- Email/IMAP channel (#472) - JavaMailSender for outbound replies
          (EmailChannelAdapter) and jakarta.mail's Store/Folder IMAP client for
