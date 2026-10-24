@@ -328,7 +328,17 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # dependency - upstream deprecated, so these versions are frozen; bump
     # both together if the connection block ever changes) into
     # $HOME/.cache/puppeteer, which the chown below hands to the runtime user.
-    && npm exec --yes --package=@modelcontextprotocol/server-puppeteer -- node -e "process.exit(0)" \
+    # PUPPETEER_SKIP_DOWNLOAD on the pre-warm: puppeteer's install.mjs postinstall
+    # downloads its OWN pinned chrome/headless-shell builds, and under npm 11's
+    # install-script gating that download can be left half-extracted on arm64
+    # (folder present, binary missing) - the later `npx puppeteer browsers
+    # install` postinstall then fails closed ("browser folder exists but the
+    # executable is missing") and kills the whole RUN. The pre-warm only needs
+    # the package tree in the npx cache; the real browser comes from the
+    # explicit `browsers install` below. The same env on THAT call skips the
+    # redundant postinstall download while still letting the install command
+    # fetch chrome@stable (verified: linux-156 landed, exit 0, on arm64).
+    && PUPPETEER_SKIP_DOWNLOAD=1 npm exec --yes --package=@modelcontextprotocol/server-puppeteer -- node -e "process.exit(0)" \
     # The pre-warm above uses the SAME unversioned spec as application-mcp.yml's runtime
     # `npx -y @modelcontextprotocol/server-puppeteer`, so npx reuses this tree (its cache
     # directory is keyed by the spec). The deprecated 2025.5.12 pins @modelcontextprotocol/sdk
@@ -354,7 +364,7 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # image carries only the fixed one.
     # puppeteer@23.11.1 is used here only for its browser installer. Its own npx tree (basic-ftp
     # 5.x, High) is not needed afterwards, so it goes to a throwaway cache, not ~/.npm.
-    && npm_config_cache=/tmp/npx-puppeteer-install npx --yes puppeteer@23.11.1 browsers install chrome@stable \
+    && PUPPETEER_SKIP_DOWNLOAD=1 npm_config_cache=/tmp/npx-puppeteer-install npx --yes puppeteer@23.11.1 browsers install chrome@stable \
     && rm -rf /tmp/npx-puppeteer-install \
     && rm -rf /home/agentic/.cache/puppeteer/chrome/linux-131.0.6778.204 /home/agentic/.cache/puppeteer/chrome-headless-shell/linux-131.0.6778.204 \
     && ln -sfn "$(ls -d /home/agentic/.cache/puppeteer/chrome/linux-* | sort -V | tail -n 1)" /home/agentic/.cache/puppeteer/chrome/current \
