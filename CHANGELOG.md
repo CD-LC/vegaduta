@@ -8,6 +8,23 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Agents can author their own tools.** The new built-in `create_custom_tool` lets an
+  agent write a small program when no existing tool fits - a Java `Tool.run(Map)`, a Python
+  `run(input)`, or a JavaScript/TypeScript `run(input)` (new sandbox languages). The program is
+  compiled and statically verified by the tool-sandbox service and stored as a DISABLED draft; a
+  `custom_code_tool.enable` approval request (default-gated, so no approval-policy or autonomy
+  tier can bypass it) is what enables it, for every agent in the workspace at once. Rejected
+  programs stay on disk as drafts with the verifier's diagnostics. Personal and lite installs get
+  tool-sandbox automatically with the `tools` profile (so `--no-tools` declines it); `--native-core`
+  keeps it off since a host JVM cannot reach the container-only sandbox network.
+- **Custom code tools now support JavaScript and TypeScript** in the console editor, the
+  AI-generate flow and the sandbox. JS/TS tools run under Node 22 with `--experimental-permission`
+  (fs, child_process, worker, addons and wasi calls throw) plus an identifier policy that rejects
+  `import`/`require`, `process`, `globalThis`, the eval family, the network globals and
+  `.constructor` access; vault-secret grants are currently Java/Python only.
+
 ### Changed
 
 - Fresh personal, lite and full installs now start the out-of-box tool surface by

@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Textarea } from "../ui/textarea";
-import { GEN_TEMPLATE_PRESETS, type CustomCodeToolLanguage } from "./model";
+import { GEN_TEMPLATE_PRESETS, LANGUAGE_LABELS, LANGUAGE_ORDER, type CustomCodeToolLanguage } from "./model";
 import type { ToolGeneration } from "./useToolGeneration";
 
 /** "Ask AI to generate the tool" popover. State lives in useToolGeneration. */
@@ -79,7 +79,7 @@ export default function AskAiPopover({
         <div className="space-y-1.5">
           <Label>{t("languageLabel")}</Label>
           <div className="flex gap-2">
-            {(["JAVA", "PYTHON"] as CustomCodeToolLanguage[]).map((lang) => (
+            {LANGUAGE_ORDER.map((lang) => (
               <Button
                 key={lang}
                 type="button"
@@ -88,7 +88,7 @@ export default function AskAiPopover({
                 aria-pressed={language === lang}
                 onClick={() => onChooseLanguage(lang)}
               >
-                {lang === "PYTHON" ? t("languagePython") : t("languageJava")}
+                {LANGUAGE_LABELS[lang]}
               </Button>
             ))}
           </div>

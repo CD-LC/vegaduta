@@ -1,7 +1,8 @@
 # tool-sandbox
 
-Compiles, statically verifies and executes **tenant-authored Java and Python
-programs** that become agent tools ("custom code tools").
+Compiles, statically verifies and executes **tenant-authored Java, Python,
+JavaScript and TypeScript programs** that become agent tools ("custom code
+tools").
 
 A tenant-admin writes a program in the console describing what the tool is for,
 what it does and what it returns. `core` stores it, offers it to that tenant's
@@ -31,9 +32,31 @@ def run(input):
     return {"greeting": f"Hello, {input.get('name', 'world')}!"}
 ```
 
+**JavaScript / TypeScript** — a top-level `run` function (type annotations are
+stripped by the Node runtime; `enum` and other type-generating TS syntax are
+not supported):
+
+```javascript
+function run(input) {
+    return { greeting: `Hello, ${input.name ?? "world"}!` };
+}
+```
+
 The return value is serialized to JSON and handed to the model. `vega.Log.info(...)`
-(Java) and `print(...)` (Python) write to a stdout stream that is returned to the
-tool's *author* in a test run and never shown to the model.
+(Java), `print(...)` (Python) and `console.log(...)` (JavaScript/TypeScript)
+write to a stdout stream that is returned to the tool's *author* in a test run
+and never shown to the model.
+
+JavaScript/TypeScript notes: there is **no module system** - `import`,
+`require` and dynamic `import()` are rejected statically, along with `process`,
+`globalThis`, `eval`, `Function`, the network globals (`fetch`, `WebSocket`,
+`XMLHttpRequest`), `Worker`, `WebAssembly`, `__dirname`/`__filename`,
+`__proto__` and property access to `constructor` (the Function-constructor
+escape). At runtime Node's permission model (`--experimental-permission` on
+the pinned 22.x image) makes fs, child_process, worker, native-addons and wasi
+calls throw `ERR_ACCESS_DENIED`, with the fs-write grant scoped to exactly the
+result file. Declared vault secrets are currently Java/Python only - a JS/TS
+tool receives no secret values.
 
 ---
 
@@ -178,6 +201,15 @@ If you need a boundary for Python as strong as the Java one, the answer is not
 a longer denylist — it is one-process-per-execution in a separate kernel
 namespace (gVisor, or a per-call container), which is a larger piece of
 infrastructure than this.
+
+**JavaScript/TypeScript sit between the two.** There is no bytecode verifier —
+`jsvalidate.py` is an identifier/access-pattern scan, structurally the same
+honesty caveat as the Python AST check — but the runtime adds a control Python
+lacks: Node's permission model (`--experimental-permission`) turns every fs,
+child_process, worker, native-addon and wasi call into `ERR_ACCESS_DENIED`,
+with the only fs grants being read of the run directory and write of the one
+result file. Layers 0–3 remain the real boundary; the permission model is a
+meaningful fourth wall on top of them, not a substitute.
 
 ### Layer 5 — budgets and accountability
 

@@ -303,6 +303,12 @@ services:
       MCP_STDIO_SIDECAR_URL: mcp-stdio-runner:8097
       MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:-}
       APP_MCP_STDIO_SANDBOX: ${APP_MCP_STDIO_SANDBOX:-none}
+      # Custom code tools (agent-authored Java/Python/JavaScript programs) compile and run in
+      # tool-sandbox, which rides the `tools` profile on this tier. The sandbox container holds no
+      # platform secret and sits on sandbox-net, an internal network with no route out.
+      TOOL_SANDBOX_ENABLED: ${TOOL_SANDBOX_ENABLED:-false}
+      TOOL_SANDBOX_BASE_URL: http://tool-sandbox:8095
+      TOOL_SANDBOX_INTERNAL_TOKEN: ${TOOL_SANDBOX_INTERNAL_TOKEN:-}
       # Starter connectors (fetch, time, sequential-thinking) registered for every
       # workspace at start when the runner is on. A deleted or edited one is never
       # put back.
@@ -366,6 +372,7 @@ services:
     networks:
       - default
       - mcp-stdio-net
+      - sandbox-net
     volumes:
       - core-storage:/data/storage
       - core-mcp-data:/app/mcp-data
@@ -504,6 +511,44 @@ services:
           pids: 256
     networks: [mcp-stdio-net]
 
+  # Runs agent-authored custom code tools (Java, Python, JavaScript), verified and compiled inside
+  # this container. It holds no platform credential - the whole environment is the internal token
+  # and the numeric budgets - and sits on sandbox-net, an internal network shared with core alone,
+  # so there is no route to postgres, valkey or the internet from tenant code.
+  tool-sandbox:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/tool-sandbox:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["tools"]
+    <<: [*restart, *logging]
+    environment:
+      TOOL_SANDBOX_INTERNAL_TOKEN: ${TOOL_SANDBOX_INTERNAL_TOKEN:?run scripts/vegaduta secrets}
+      TOOL_SANDBOX_MAX_CONCURRENT: ${TOOL_SANDBOX_MAX_CONCURRENT:-4}
+      TOOL_SANDBOX_MAX_TIMEOUT_MS: ${TOOL_SANDBOX_MAX_TIMEOUT_MS:-15000}
+      TOOL_SANDBOX_MAX_MEMORY_MB: ${TOOL_SANDBOX_MAX_MEMORY_MB:-512}
+      TOOL_SANDBOX_REQUIRE_PRIVILEGE_DROP: "true"
+      TOOL_SANDBOX_SECCOMP: ${TOOL_SANDBOX_SECCOMP:-false}
+    # runc shares the host kernel with tenant code. Install gVisor and set
+    # TOOL_SANDBOX_RUNTIME=runsc for a user-space kernel (doctor warns on runc).
+    runtime: ${TOOL_SANDBOX_RUNTIME:-runc}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add: [SETUID, SETGID, KILL]
+    tmpfs:
+      - /var/sandbox/work:mode=711,uid=0,gid=0,noexec,nosuid,nodev,size=256m
+      - /var/sandbox/cache:mode=755,uid=0,gid=0,noexec,nosuid,nodev,size=256m
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8095/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: ${TOOL_SANDBOX_MEM_LIMIT:-1g}
+          pids: 512
+    networks: [sandbox-net]
+
   # ------------------------------------------------------- profile: workspace
   # The Assistant's build terminal (services/workspace-runner): runs the
   # commands the user approves, in the folder they attached, with JDK 21, Maven,
@@ -554,3 +599,5 @@ volumes:
 # route to postgres or valkey.
 networks:
   mcp-stdio-net: {}
+  sandbox-net:
+    internal: true   # core <-> tool-sandbox only; tenant code has no egress

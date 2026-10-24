@@ -71,7 +71,8 @@ app = FastAPI(
     title="VegaDuta tool-sandbox",
     version=VERSION,
     description=(
-        "Compiles, verifies and executes tenant-authored Java and Python tools in isolation."
+        "Compiles, verifies and executes tenant-authored Java, Python, JavaScript and "
+        "TypeScript tools in isolation."
     ),
     docs_url=None,  # no interactive docs on a service that executes code
     redoc_url=None,
