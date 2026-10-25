@@ -538,6 +538,8 @@ services:
       LIVEKIT_KEYS: "${LIVEKIT_API_KEY:?run scripts/vegaduta secrets}: ${LIVEKIT_API_SECRET:?run scripts/vegaduta secrets}"
       LIVEKIT_RTC_PORT_RANGE_START: ${LIVEKIT_RTC_PORT_RANGE_START:-50000}
       LIVEKIT_RTC_PORT_RANGE_END: ${LIVEKIT_RTC_PORT_RANGE_END:-50100}
+      # Advertised ICE candidate: loopback by default (single-machine caller);
+      # set LIVEKIT_NODE_IP to the LAN IP when lite callers sit on other hosts.
       NODE_IP: ${LIVEKIT_NODE_IP:-127.0.0.1}
     volumes:
       - ../livekit/livekit.local.yaml:/etc/livekit.yaml:ro

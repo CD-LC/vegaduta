@@ -30,5 +30,8 @@ requests==2.34.2
 # system binary is required on most platforms.
 faster-whisper==1.2.1
 # faster-whisper's av<13 pin (1.0.x) dragged PyAV builds that vendored ffmpeg
-# 6.1.x; 1.2.1 accepts av>=11 so pin the newest wheel (bundled ffmpeg 7.1.x).
-av==19.0.1
+# 6.1.x; 1.2.1 accepts av>=11 so pin the newest wheel that still keeps the
+# `metadata_errors` open() kwarg faster-whisper/audio.py calls: av 19 dropped
+# it (only `options` survives) and every /transcribe call then 400s with
+# "open() got an unexpected keyword argument" - live voice STT included.
+av==15.1.0

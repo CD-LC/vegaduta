@@ -83,9 +83,29 @@ All calls need `Authorization: Bearer $DESKTOP_AGENT_SECRET` (`/health` aside):
 | POST | `/notify` | `{title, body}` | `{ok}` |
 | GET | `/clipboard` | — | `{text}` |
 | POST | `/clipboard` | `{text}` | `{ok}` |
+| GET | `/frame` | `?scale&max` query | image bytes — `image/jpeg` or `image/png` + `X-Frame-Format` |
+| GET | `/capabilities` | — | `{screenshotFormats, ui, clipboard, stream}` — unauthenticated, like `/health` |
 
 Env: `DESKTOP_AGENT_PORT` (8787), `DESKTOP_AGENT_BIND` (127.0.0.1),
 `DESKTOP_AGENT_SECRET` (required), `DESKTOP_AGENT_DATA_DIR`
 (`~/vegaduta-workspace/screenshots`).
+
+## Live monitor
+
+`GET /frame` grabs a single screen frame for the console's live monitor view.
+`?scale=0.6` and/or `?max=1280` downscale it (macOS: `sips -Z`; Linux:
+ImageMagick `-resize`). The response is the image itself — `Content-Type` and
+`X-Frame-Format: jpeg|png` tell the core proxy which format came back. Captures
+serialize: a second call while one is running gets `429 {error:"busy"}`, every
+capture child is killed after ~5s, and a capture error answers `500 {error}`.
+
+macOS captures `screencapture -x -t jpg` straight to jpeg and falls back to the
+regular png `/screenshot` path if that fails. Linux prefers
+`import -window root` → jpeg, then `maim -f jpg`, then the png tools — so on
+Wayland, where the X11-only `import`/`maim` fail, you get a png via `grim`.
+
+`GET /capabilities` is the console's cheap feature probe: which frame formats to
+expect, whether the accessibility tree and clipboard work on this host, and that
+no video `stream` exists.
 
 Tests: `node --test server.test.js` (route/auth/validation against a stubbed action layer).

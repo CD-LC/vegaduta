@@ -10,6 +10,4 @@ import java.util.UUID;
  * carry these fields.
  */
 public record AgentKnowledgeWriteAccessResponse(
-    boolean knowledgeWriteEnabled,
-    Set<UUID> allowedKnowledgeWriteCollectionIds) {
-}
+        boolean knowledgeWriteEnabled, Set<UUID> allowedKnowledgeWriteCollectionIds) {}

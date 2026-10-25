@@ -240,7 +240,8 @@ public class AgentController {
     public ResponseEntity<AgentResponse> setToolAccess(
             @PathVariable UUID agentId, @Valid @RequestBody AgentToolAccessUpdateRequest request) {
         // Soft-check against the agent's currently-resolvable tool set (logged, never rejected).
-        ToolAllowListCheck.warnOnUnknownNames(agentToolProvider, agentId, request.allowedToolNames());
+        ToolAllowListCheck.warnOnUnknownNames(
+                agentToolProvider, agentId, request.allowedToolNames());
         AgentResponse saved =
                 agentService.setAllowedToolNamesEnforced(agentId, request.allowedToolNames());
         ResponseEntity.BodyBuilder response = ResponseEntity.ok();
@@ -323,7 +324,10 @@ public class AgentController {
         return knowledgeWriteAccess(agentId);
     }
 
-    /** The agent's write opt-in ({@code {enabled}} body, same shape as {@link #setKnowledgeBaseEnabled}). */
+    /**
+     * The agent's write opt-in ({@code {enabled}} body, same shape as {@link
+     * #setKnowledgeBaseEnabled}).
+     */
     @PatchMapping("/{agentId}/knowledge-write")
     public AgentKnowledgeWriteAccessResponse setKnowledgeWrite(
             @PathVariable UUID agentId,
@@ -358,12 +362,11 @@ public class AgentController {
     }
 
     /**
-     * Opt-in per-agent
-     * collaborator list (see {@code Agent.collaboratorAgentIds}' javadoc for why this is opt-in,
-     * same reasoning as {@link #setToolAccess}/{@link #setKnowledgeAccess}). Each id must be
-     * another existing agent in this same tenant - {@link AgentService#setCollaboratorAgentIds}
-     * validates and rejects self-reference or an unknown id with a clear error rather than silently
-     * dropping it.
+     * Opt-in per-agent collaborator list (see {@code Agent.collaboratorAgentIds}' javadoc for why
+     * this is opt-in, same reasoning as {@link #setToolAccess}/{@link #setKnowledgeAccess}). Each
+     * id must be another existing agent in this same tenant - {@link
+     * AgentService#setCollaboratorAgentIds} validates and rejects self-reference or an unknown id
+     * with a clear error rather than silently dropping it.
      */
     @PatchMapping("/{agentId}/collaborators")
     public AgentResponse setCollaborators(

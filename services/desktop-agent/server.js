@@ -7,7 +7,7 @@
 // notify and read the clipboard.
 //
 // Security model: it listens on 127.0.0.1 only and every call needs
-// `Authorization: Bearer $DESKTOP_AGENT_SECRET` (/health aside). The actions it
+// `Authorization: Bearer $DESKTOP_AGENT_SECRET` (no exceptions - an unauthenticated
 // performs are NOT sandboxed - this process can touch anything the logged-in
 // user can. Core's tool guard still gates each call (classification gate plus
 // the optional approval pin), and every request is logged on the core side.
@@ -19,7 +19,7 @@
 // Linux uses xdotool / gnome-screenshot / scrot / xclip / notify-send when
 // present and answers 501 with the missing tool otherwise.
 //
-// API (all calls need the Bearer secret, /health aside):
+// API (every call needs the Bearer secret):
 //   POST   /screenshot      {}                    -> {path, bytes}           PNG under DATA_DIR
 //   POST   /ui              {app?}                -> {app, window, elements:[{role,label,x,y,w,h}]}
 //   POST   /ui/press        {label, role?, app?}  -> {ok:true, matched:{...}}   press a named element
@@ -31,6 +31,8 @@
 //   POST   /notify          {title, body}         -> {ok:true}
 //   GET    /clipboard                             -> {text}
 //   POST   /clipboard       {text}                -> {ok:true}
+//   GET    /frame?scale&max                       -> image/jpeg|png bytes + X-Frame-Format
+//   GET    /capabilities                          -> {screenshotFormats, ui, clipboard, stream}
 
 const http = require('node:http');
 const crypto = require('node:crypto');
@@ -49,6 +51,7 @@ const MAX_BODY_BYTES = 256 * 1024;
 const MAX_ELEMENTS = 250;
 const MAX_LABEL_CHARS = 120;
 const EXEC_TIMEOUT_MS = 15000;
+const FRAME_TIMEOUT_MS = 5000;
 const PLATFORM = process.platform;
 
 const KEY_CODES_MAC = {
@@ -220,20 +223,60 @@ async function macType(text) {
   return { chars: String(text).length };
 }
 
+const MAC_MODIFIERS = {
+  cmd: 'command down', command: 'command down',
+  ctrl: 'control down', control: 'control down',
+  alt: 'option down', option: 'option down',
+  shift: 'shift down',
+};
+
 async function macKey(key) {
-  const code = KEY_CODES_MAC[String(key).toLowerCase()];
-  if (code === undefined) {
-    const err = new Error(`unknown key "${key}" - one of ${Object.keys(KEY_CODES_MAC).join(', ')}`);
+  const parts = String(key).toLowerCase().split('+').map((p) => p.trim()).filter(Boolean);
+  const keyName = parts.pop();
+  const mods = parts.map((m) => {
+    const mod = MAC_MODIFIERS[m];
+    if (!mod) {
+      const err = new Error(`unknown modifier "${m}" - one of ${Object.keys(MAC_MODIFIERS).join(', ')}`);
+      err.status = 400;
+      throw err;
+    }
+    return mod;
+  });
+  // A single letter/character presses it as a keystroke (respects modifiers);
+  // a named key goes through key code.
+  const script =
+    mods.length === 0
+      ? namedKeyScript(keyName)
+      : keyName && keyName.length === 1
+        ? `tell application "System Events" to keystroke "${appleQuote(keyName)}" using {${mods.join(', ')}}`
+        : namedKeyScript(keyName, mods);
+  if (!script) {
+    const err = new Error(`unknown key "${keyName}" - one of ${Object.keys(KEY_CODES_MAC).join(', ')}, a single letter, or modifier+key (cmd+s)`);
     err.status = 400;
     throw err;
   }
-  await appleScript(`tell application "System Events" to key code ${code}`);
+  await appleScript(script);
+}
+
+function namedKeyScript(name, mods = []) {
+  const code = KEY_CODES_MAC[name];
+  if (code === undefined) return null;
+  return mods.length
+    ? `tell application "System Events" to key code ${code} using {${mods.join(', ')}}`
+    : `tell application "System Events" to key code ${code}`;
 }
 
 async function macOpen(target, application) {
+  const t = String(target);
   const argv = ['open'];
   if (application) argv.push('-a', application);
-  argv.push(String(target));
+  else if (!t.startsWith('http://') && !t.startsWith('https://') && !fs.existsSync(t)) {
+    // No handler named and the target is not a file that exists: treat it as an
+    // app name ('open -a TextEdit'), not a path - plain 'open TextEdit' only
+    // looks for a file and fails with "does not exist".
+    argv.push('-a');
+  }
+  argv.push(t);
   await run(argv);
 }
 
@@ -289,14 +332,33 @@ async function linuxType(text) {
   return { chars: String(text).length };
 }
 
+const XDOTOOL_MODIFIERS = {
+  cmd: 'super', command: 'super', super: 'super',
+  ctrl: 'ctrl', control: 'ctrl',
+  alt: 'alt', option: 'alt', meta: 'meta',
+  shift: 'shift',
+};
+
 async function linuxKey(key) {
   if (!(await hasBinary('xdotool'))) {
     const err = new Error('xdotool not installed');
     err.status = 501;
     throw err;
   }
-  const name = KEY_NAMES_XDOTOOL[String(key).toLowerCase()] || String(key);
-  await run(['xdotool', 'key', name]);
+  // Modifier combos land as "ctrl+s"/"super+n" in xdotool's own syntax.
+  const parts = String(key).toLowerCase().split('+').map((p) => p.trim()).filter(Boolean);
+  const keyName = parts.pop();
+  const mods = parts.map((m) => {
+    const mod = XDOTOOL_MODIFIERS[m];
+    if (!mod) {
+      const err = new Error(`unknown modifier "${m}" - one of ${Object.keys(XDOTOOL_MODIFIERS).join(', ')}`);
+      err.status = 400;
+      throw err;
+    }
+    return mod;
+  });
+  const name = KEY_NAMES_XDOTOOL[keyName] || keyName;
+  await run(['xdotool', 'key', ...mods, name]);
 }
 
 async function linuxOpen(target, application) {
@@ -350,6 +412,114 @@ function runStdin(argv, input) {
       err ? reject(err) : resolve());
     child.stdin.end(input);
   });
+}
+
+// ---------------------------------------------------------------------------
+// Live monitor frames - one serialized capture at a time, ~5s child budget.
+// The action answers {frame:{bytes, format:'jpeg'|'png'}} and the HTTP layer
+// writes the bytes with the matching Content-Type / X-Frame-Format headers.
+// ---------------------------------------------------------------------------
+
+/** Parse the /frame query: scale is (0,1], max is a positive pixel bound. */
+function frameParams(params) {
+  let scale = Number(params && params.scale);
+  if (!Number.isFinite(scale) || scale <= 0 || scale > 1) scale = 1;
+  let max = parseInt(params && params.max, 10);
+  if (!Number.isFinite(max) || max <= 0) max = 0;
+  return { scale, max };
+}
+
+/**
+ * Downscale `file` in place with the built-in `sips`: `max` caps the largest
+ * side directly; `scale` < 1 shrinks it to that fraction of the native size.
+ * No-op when neither applies. `left()` returns the remaining frame budget.
+ */
+async function sipsShrink(file, scale, max, left) {
+  let target = max;
+  if (scale < 1) {
+    const out = await run(
+      ['sips', '-g', 'pixelWidth', '-g', 'pixelHeight', file], left());
+    const sides = [...out.matchAll(/pixel(?:Width|Height):\s*(\d+)/g)]
+      .map((m) => Number(m[1]));
+    const biggest = Math.max(0, ...sides);
+    if (biggest > 0) {
+      const scaled = Math.max(1, Math.round(biggest * scale));
+      target = target ? Math.min(target, scaled) : scaled;
+    }
+  }
+  if (target) await run(['sips', '-Z', String(target), file], left());
+}
+
+async function macFrame(scale, max) {
+  const deadline = Date.now() + FRAME_TIMEOUT_MS;
+  const left = () => Math.max(200, deadline - Date.now());
+  const file = path.join(
+    os.tmpdir(), `desktop-agent-frame-${process.pid}-${Date.now()}.jpg`);
+  try {
+    await run(['screencapture', '-x', '-t', 'jpg', file], left());
+    // Read once and judge the bytes: stat-then-read here trips the
+    // file-system-race check, and an empty file fails the capture the same way.
+    let bytes = fs.readFileSync(file);
+    if (!bytes.length) throw new Error('empty capture');
+    await sipsShrink(file, scale, max, left);
+    return { frame: { bytes: fs.readFileSync(file), format: 'jpeg' } };
+  } catch {
+    // The jpeg path failed (no Screen Recording permission, sips trouble...) -
+    // hand back the same png /screenshot would have produced.
+    const shot = await macScreenshot();
+    return { frame: { bytes: fs.readFileSync(shot.path), format: 'png' } };
+  } finally {
+    fs.rmSync(file, { force: true });
+  }
+}
+
+async function linuxFrame(scale, max) {
+  const deadline = Date.now() + FRAME_TIMEOUT_MS;
+  const left = () => Math.max(200, deadline - Date.now());
+  const file = path.join(
+    os.tmpdir(), `desktop-agent-frame-${process.pid}-${Date.now()}.jpg`);
+  try {
+    if (await hasBinary('import')) {
+      const argv = ['import', '-window', 'root'];
+      if (scale < 1) argv.push('-resize', `${Math.round(scale * 100)}%`);
+      if (max) argv.push('-resize', `${max}x${max}>`);
+      argv.push(`jpg:${file}`);
+      if (await tryCapture(argv, file, left)) {
+        return { frame: { bytes: fs.readFileSync(file), format: 'jpeg' } };
+      }
+    }
+    if (await hasBinary('maim') &&
+        await tryCapture(['maim', '-f', 'jpg', file], file, left)) {
+      return { frame: { bytes: fs.readFileSync(file), format: 'jpeg' } };
+    }
+    // No jpeg-capable tool, or they failed (import/maim are X11-only) - the png
+    // path still covers Wayland through grim.
+    const shot = await linuxScreenshot();
+    return { frame: { bytes: fs.readFileSync(shot.path), format: 'png' } };
+  } finally {
+    fs.rmSync(file, { force: true });
+  }
+}
+
+/** Run a frame capture; true when the tool wrote a non-empty file. */
+async function tryCapture(argv, file, left) {
+  try {
+    await run(argv, left());
+    return fs.existsSync(file) && fs.statSync(file).size > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** What the console's feature probe needs to know - cheap, and honest on both platforms. */
+async function capabilities() {
+  const jpeg = mac || (await hasBinary('import')) || (await hasBinary('maim'));
+  return {
+    screenshotFormats: jpeg ? ['jpeg', 'png'] : ['png'],
+    ui: mac,
+    clipboard: true,
+    stream: false,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -409,6 +579,12 @@ const actions = {
     else await linuxClipboardSet(b.text);
     return { ok: true };
   },
+  // One screen frame for the console's live monitor. Answers
+  // {frame:{bytes, format}}; the HTTP layer ships the raw bytes.
+  'GET /frame': async (params) => {
+    const { scale, max } = frameParams(params);
+    return mac ? macFrame(scale, max) : linuxFrame(scale, max);
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -448,17 +624,31 @@ function authorized(req) {
     crypto.timingSafeEqual(presented, expected);
 }
 
+// One frame capture at a time - the screen tools are not reentrant and the
+// monitor only ever wants the freshest frame anyway.
+let frameBusy = false;
+
 function createServer() {
   return http.createServer(async (req, res) => {
     try {
-      if (req.url === '/health') {
-        return json(res, 200, { ok: true, platform: PLATFORM });
-      }
+      const q = req.url.indexOf('?');
+      const pathname = q === -1 ? req.url : req.url.slice(0, q);
+      // Every route requires the bearer token - no unauthenticated bypass.
+      // A 401 from /health still answers the liveness question for anyone
+      // checking whether the agent is up.
       if (!authorized(req)) {
         return json(res, 401, { error: 'unauthorized' });
       }
-      const route = `${req.method} ${req.url.split('?')[0]}`;
-      const action = actions[route];
+      if (pathname === '/health') {
+        return json(res, 200, { ok: true, platform: PLATFORM });
+      }
+      if (pathname === '/capabilities') {
+        return json(res, 200, await capabilities());
+      }
+      const route = `${req.method} ${pathname}`;
+      // hasOwn (not just truthiness) keeps the dynamic call provably a member
+      // of the fixed actions table - nothing user-supplied can dispatch.
+      const action = Object.hasOwn(actions, route) ? actions[route] : undefined;
       if (!action) {
         return json(res, 404, { error: `no route ${route}` });
       }
@@ -473,8 +663,29 @@ function createServer() {
           }
         }
       }
-      const result = (await action(body)) || { ok: true };
-      return json(res, 200, { ok: true, ...result });
+      const isFrame = route === 'GET /frame';
+      if (isFrame) {
+        if (frameBusy) return json(res, 429, { error: 'busy' });
+        frameBusy = true;
+      }
+      try {
+        const arg = req.method === 'POST'
+          ? body
+          : Object.fromEntries(new URLSearchParams(q === -1 ? '' : req.url.slice(q + 1)));
+        const result = (await action(arg)) || { ok: true };
+        if (result.frame && Buffer.isBuffer(result.frame.bytes)) {
+          const format = result.frame.format === 'jpeg' ? 'jpeg' : 'png';
+          res.writeHead(200, {
+            'content-type': `image/${format}`,
+            'x-frame-format': format,
+            'content-length': result.frame.bytes.length,
+          });
+          return res.end(result.frame.bytes);
+        }
+        return json(res, 200, { ok: true, ...result });
+      } finally {
+        if (isFrame) frameBusy = false;
+      }
     } catch (e) {
       let message = e.message || 'internal error';
       if (message.includes('-25211') || message.includes('assistive access')) {
