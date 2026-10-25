@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Track, type DisconnectReason, type Room } from "livekit-client";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { cn } from "../../lib/utils";
+import type { DisconnectReason, Room } from "livekit-client";
 import { useLocale, useTranslations } from "../../lib/i18n";
 import { edgeEnabled } from "../../lib/edge/capabilities";
 import { STT_MODEL_SIZE_BYTES } from "../../lib/edge/audio/whisper";
@@ -32,30 +30,17 @@ import {
   startFailureMessage as startFailureMessageFor,
 } from "./CallPanel/callErrors";
 import type { CallStage } from "./CallPanel/callStage";
-import { ASK_FALLBACK_TIMEOUT_MS } from "./CallPanel/constants";
+import { useFallbackAsk } from "./call/useFallbackAsk";
+import { useCameraSelfView } from "./call/useCameraSelfView";
 import { playBrowserTTS } from "./CallPanel/browserTts";
 import { useReplyPlayback } from "./call/useReplyPlayback";
 import { useCallVoiceover } from "./call/useCallVoiceover";
 import VoiceoverControls from "./CallPanel/VoiceoverControls";
+import CallPanelToggle from "./CallPanel/CallPanelToggle";
 import type { CallCtx, CallPanelAgent } from "./call/callContext";
-import {
-  startCallImpl,
-  toggleCameraImpl,
-  toggleScreenShareImpl,
-  endCallImpl,
-  toggleMuteImpl,
-  toggleAgentAudioImpl,
-} from "./call/liveCall";
-import { startPushToTalkImpl, stopPushToTalkImpl } from "./call/pushToTalk";
-import {
-  primeVoiceOutputFromGestureImpl,
-  speakFragmentImpl,
-  kokoroWouldSpeakImpl,
-  speakWholeReplyImpl,
-  makeAudioChunkQueueImpl,
-} from "./call/voiceActions";
-import { sendTurnViaLocalSttImpl, trySendTurnLocallyImpl, sendHostedTextTurnImpl } from "./call/localTurn";
-import { sendTurnImpl } from "./call/serverTurn";
+import { bindCallActions } from "./call/callActions";
+import { endCallImpl } from "./call/liveCall";
+import { sendTurnViaLocalSttImpl } from "./call/localTurn";
 
 // playBrowserTTS lives in CallPanel/browserTts.ts; re-exported so the public
 // import path of this module is unchanged.
@@ -175,31 +160,9 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
   const [edgeHandledSummary, setEdgeHandledSummary] = useState<string | null>(null);
   // Fallback policy / on-device opt-in / vision gate (call/useCallCapabilities.ts).
   const { fallbackPolicy, setFallbackPolicyState, edgeOptInActive, canSee } = useCallCapabilities(agent);
-  // "ask" policy support: the message for a pending inline confirm/cancel
-  // prompt (null when nothing is pending), and the resolver for the Promise
-  // askToFallback below is currently awaiting. The resolver lives in a ref,
-  // not state, so a later button click (or the timeout) can settle that
-  // Promise without re-running any async function.
-  const [pendingFallbackAsk, setPendingFallbackAsk] = useState<string | null>(null);
-  const fallbackAskResolverRef = useRef<((confirmed: boolean) => void) | null>(null);
-
-  /** Shows the inline confirm/cancel prompt and resolves once the person
-   * answers (or ASK_FALLBACK_TIMEOUT_MS elapses, which resolves to `false` -
-   * silence reads as Cancel, never as consent). Only ever called from
-   * resolveAutomaticFallback below when fallbackPolicy === "ask". */
-  function askToFallback(message: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      fallbackAskResolverRef.current = (confirmed: boolean) => {
-        fallbackAskResolverRef.current = null;
-        setPendingFallbackAsk(null);
-        resolve(confirmed);
-      };
-      setPendingFallbackAsk(message);
-      setTimeout(() => {
-        fallbackAskResolverRef.current?.(false);
-      }, ASK_FALLBACK_TIMEOUT_MS);
-    });
-  }
+  // "ask" policy support: the inline confirm/cancel prompt state + resolver
+  // + the asker itself (call/useFallbackAsk.ts).
+  const { pendingFallbackAsk, setPendingFallbackAsk, fallbackAskResolverRef, askToFallback } = useFallbackAsk();
 
   // Microphone diagnostics (see CallPanel/useMicTest.ts)
   const {
@@ -459,32 +422,31 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
     return startFailureMessageFor(t, err);
   }
 
-  // Attaches/detaches the local camera track's self-view. Runs on cameraOn
-  // changes rather than inline in startCall because the <video> element only
-  // exists once React has rendered the cameraOn branch below.
-  useEffect(() => {
-    if (!cameraOn) return undefined;
-    const el = localVideoRef.current;
-    // Edge sight: the self-view shows the LOCAL (never-published) stream,
-    // and doubles as edgeSightTick's frame source.
-    if (edgeStreamRef.current) {
-      if (el) {
-        el.srcObject = edgeStreamRef.current;
-        el.play?.().catch(() => {});
-      }
-      return () => {
-        if (el) el.srcObject = null;
-      };
-    }
-    const track = roomRef.current?.localParticipant?.getTrackPublication(Track.Source.Camera)?.videoTrack;
-    if (el && track) track.attach(el);
-    return () => {
-      if (el && track) track.detach(el);
-    };
-  }, [cameraOn]);
+  // The local camera track's self-view onto the <video> element
+  // (call/useCameraSelfView.ts).
+  useCameraSelfView(cameraOn, roomRef, localVideoRef, edgeStreamRef);
 
-  // The action modules under call/ read everything through this per-render bag;
-  // the wrappers below are hoisted so hooks above can be handed them early.
+  // The action modules under call/ read everything through this per-render bag.
+  // The bound actions come first because ctx lists them by name; the getter is
+  // lazy so destructuring before ctx exists is safe - getCtx() only runs when a
+  // person actually clicks something.
+  const {
+    startCall,
+    toggleCamera,
+    toggleScreenShare,
+    toggleMute,
+    toggleAgentAudio,
+    startPushToTalk,
+    stopPushToTalk,
+    primeVoiceOutputFromGesture,
+    speakFragment,
+    kokoroWouldSpeak,
+    speakWholeReply,
+    makeAudioChunkQueue,
+    trySendTurnLocally,
+    sendHostedTextTurn,
+    sendTurn,
+  } = bindCallActions(() => ctx);
   const ctx: CallCtx = {
     agent,
     sessionId,
@@ -568,56 +530,15 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
     sendTurn,
     endCall,
   };
-  function startCall(withCamera = false) {
-    return startCallImpl(ctx, withCamera);
-  }
-  function toggleCamera() {
-    return toggleCameraImpl(ctx);
-  }
-  function toggleScreenShare() {
-    return toggleScreenShareImpl(ctx);
-  }
+
+  // endCall and sendTurnViaLocalStt are hoisted declarations (not part of the
+  // bound bundle): hooks above - the reconnect ceiling and the voice-model
+  // downloads - were handed them before ctx exists.
   function endCall() {
     return endCallImpl(ctx);
   }
-  function toggleMute() {
-    return toggleMuteImpl(ctx);
-  }
-  function toggleAgentAudio() {
-    return toggleAgentAudioImpl(ctx);
-  }
-  function startPushToTalk() {
-    return startPushToTalkImpl(ctx);
-  }
-  function stopPushToTalk() {
-    return stopPushToTalkImpl(ctx);
-  }
-  function primeVoiceOutputFromGesture() {
-    return primeVoiceOutputFromGestureImpl(ctx);
-  }
-  function speakFragment(...args: Parameters<CallCtx["speakFragment"]>) {
-    return speakFragmentImpl(ctx, ...args);
-  }
-  function kokoroWouldSpeak(text: string | null | undefined) {
-    return kokoroWouldSpeakImpl(ctx, text);
-  }
-  function speakWholeReply(...args: Parameters<CallCtx["speakWholeReply"]>) {
-    return speakWholeReplyImpl(ctx, ...args);
-  }
-  function makeAudioChunkQueue(callbacks: Parameters<CallCtx["makeAudioChunkQueue"]>[0] = {}) {
-    return makeAudioChunkQueueImpl(ctx, callbacks);
-  }
   function sendTurnViaLocalStt(blob: Blob) {
     return sendTurnViaLocalSttImpl(ctx, blob);
-  }
-  function trySendTurnLocally(blob: Blob) {
-    return trySendTurnLocallyImpl(ctx, blob);
-  }
-  function sendHostedTextTurn(transcript: string, options: { scrub?: boolean } = {}) {
-    return sendHostedTextTurnImpl(ctx, transcript, options);
-  }
-  function sendTurn(blob: Blob) {
-    return sendTurnImpl(ctx, blob);
   }
 
   if (!agent) return null;
@@ -646,52 +567,14 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
   // Collapse hides the body via a class, never unmounts: the hidden branch
   // keeps the LiveKit room, MediaRecorder and reply-audio chain alive, which
   // is exactly what a live call needs when the person wants more chat space.
-  const statusLabel =
-    status === "connected"
-      ? reconnecting
-        ? t("reconnecting")
-        : t("statusInCall")
-      : status === "connecting"
-        ? t("statusConnecting")
-        : status === "error"
-          ? t("statusFailed")
-          : t("statusIdle");
-
   return (
     <div className="flex flex-col gap-2 border-t border-border px-5 py-3" data-call-phase={phase}>
-      <button
-        type="button"
-        className="flex w-full items-center gap-2 text-left text-xs font-medium text-muted-foreground hover:text-foreground"
-        aria-expanded={callPanelOpen}
-        data-testid="call-panel-toggle"
-        onClick={() => setCallPanelOpen((o) => !o)}
-      >
-        <span
-          className={cn("state-dot", (status === "connected" || status === "connecting") && "state-dot-live")}
-          style={
-            {
-              ["--state" as any]:
-                status === "connected"
-                  ? reconnecting
-                    ? "var(--state-warning)"
-                    : "var(--state-success)"
-                  : status === "connecting"
-                    ? "var(--state-warning)"
-                    : status === "error"
-                      ? "var(--state-error)"
-                      : "var(--state-idle)",
-            } as any
-          }
-          aria-hidden="true"
-        />
-        {t("sectionTitle")}
-        <span className="text-muted-foreground/70">· {statusLabel}</span>
-        {callPanelOpen ? (
-          <ChevronUp className="ml-auto size-3.5" aria-hidden="true" />
-        ) : (
-          <ChevronDown className="ml-auto size-3.5" aria-hidden="true" />
-        )}
-      </button>
+      <CallPanelToggle
+        open={callPanelOpen}
+        status={status}
+        reconnecting={reconnecting}
+        onToggle={() => setCallPanelOpen((o) => !o)}
+      />
       <div className={callPanelOpen ? "flex flex-col gap-2" : "hidden"} data-testid="call-panel-body">
         <CallLivePane
           controls={{
