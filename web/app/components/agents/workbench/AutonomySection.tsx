@@ -4,6 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import McpExposureField from "../../McpExposureField";
 import AgentBrowserAutomation from "../AgentBrowserAutomation";
+import AgentDesktopAutomation from "../../desktop/AgentDesktopAutomation";
 import AgentGuardrailsCard from "../AgentGuardrailsCard";
 import AgentHooksCard from "../AgentHooksCard";
 import AgentSafetyControls from "../AgentSafetyControls";
@@ -208,6 +209,16 @@ export default function AutonomySection() {
            * until a deployment switches the feature on, so this card is invisible by default. */}
           {!isDraft && selectedAgent && (
             <AgentBrowserAutomation
+              agentId={selectedAgent.id}
+              locked={!!locked}
+              editLockedTooltip={t("editLockedTooltip")}
+            />
+          )}
+
+          {/* Desktop automation: recorded desktop tasks (core /api/desktop/recipes). Same self-hiding
+           * contract as the browser card above - renders nothing until the feature answers. */}
+          {!isDraft && selectedAgent && (
+            <AgentDesktopAutomation
               agentId={selectedAgent.id}
               locked={!!locked}
               editLockedTooltip={t("editLockedTooltip")}

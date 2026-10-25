@@ -53,7 +53,7 @@ final class ToolSearchDeferral {
             "remember_fact,remember_shared_fact,recall_related_facts,recall_shared_graph_facts,"
                     + "list_knowledge_collections,search_knowledge_base,search_code,request_human,load_skill,read_skill_file,"
                     + "run_skill_script,propose_skill,improve_skill,ask_agent_*,delegate_to_specialist,run_subtasks,create_workflow,restore_tool_result,generate_document,"
-                    + "local_shell,local_shell_read,workspace_list,workspace_read,workspace_search,workspace_write,workspace_edit,vegaduta_setup_guide,vegaduta_api_guide,local_desktop_*";
+                    + "local_shell,local_shell_read,workspace_list,workspace_read,workspace_search,workspace_write,workspace_edit,vegaduta_setup_guide,vegaduta_api_guide,local_desktop_*,run_desktop_recipe";
 
     static final int DEFAULT_THRESHOLD = 25;
     static final int DEFAULT_MAX_CARRY_OVER = 6;
@@ -107,8 +107,9 @@ final class ToolSearchDeferral {
     }
 
     /**
-     * Wires the catalog-entry screen ({@link SearchCatalogScreen}) from the {@code GuardrailService}
-     * the per-call output screen uses; null = no screen, and search results stay unmarked.
+     * Wires the catalog-entry screen ({@link SearchCatalogScreen}) from the {@code
+     * GuardrailService} the per-call output screen uses; null = no screen, and search results stay
+     * unmarked.
      */
     void withCatalogScreen(com.agenticai.core.guardrails.GuardrailService guardrailService) {
         this.catalogScreen =
@@ -181,7 +182,8 @@ final class ToolSearchDeferral {
         }
 
         ToolSearchState state =
-                new ToolSearchState(exposed, deferred, service, registry, key, carry, screen != null);
+                new ToolSearchState(
+                        exposed, deferred, service, registry, key, carry, screen != null);
         List<ToolCallback> offered = new ArrayList<>(exposedInOrder.size() + 2);
         offered.add(wrapper.wrap(new SearchToolsToolCallback(state), true));
         offered.add(wrapper.wrap(new CallToolToolCallback(state, agentId, sessionId), false));

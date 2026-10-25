@@ -318,6 +318,12 @@
       "name": "DemoWhatsAppWebhook"
     },
     {
+      "name": "DesktopMonitor"
+    },
+    {
+      "name": "DesktopRecipe"
+    },
+    {
       "name": "DeveloperApi"
     },
     {
@@ -40631,6 +40637,494 @@
         "security": []
       }
     },
+    "/api/desktop/monitor/frame": {
+      "get": {
+        "tags": [
+          "DesktopMonitor"
+        ],
+        "summary": "Frame",
+        "operationId": "DesktopMonitorController_frame",
+        "x-feature-flag": "app.assistant.desktop.monitor.enabled=true",
+        "description": "Only available when the feature flag app.assistant.desktop.monitor.enabled=true is on; otherwise this route answers 404.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/desktop/recipes": {
+      "get": {
+        "tags": [
+          "DesktopRecipe"
+        ],
+        "summary": "List",
+        "operationId": "DesktopRecipeController_list",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "X-Has-More": {
+                "$ref": "#/components/headers/X-Has-More"
+              },
+              "X-Total-Count": {
+                "$ref": "#/components/headers/X-Total-Count"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DesktopRecipeDtos_RecipeSummary"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "DesktopRecipe"
+        ],
+        "summary": "Create",
+        "operationId": "DesktopRecipeController_create",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DesktopRecipeDtos_CreateRecipeRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesktopRecipeDtos_RecipeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/desktop/recipes/from-run": {
+      "post": {
+        "tags": [
+          "DesktopRecipe"
+        ],
+        "summary": "From run",
+        "operationId": "DesktopRecipeController_fromRun",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DesktopRecipeDtos_RecipeFromRunRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesktopRecipeDtos_RecipeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/desktop/recipes/{id}": {
+      "get": {
+        "tags": [
+          "DesktopRecipe"
+        ],
+        "summary": "Get",
+        "operationId": "DesktopRecipeController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesktopRecipeDtos_RecipeDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "DesktopRecipe"
+        ],
+        "summary": "Delete",
+        "operationId": "DesktopRecipeController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "DesktopRecipe"
+        ],
+        "summary": "Update",
+        "operationId": "DesktopRecipeController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DesktopRecipeDtos_UpdateRecipeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesktopRecipeDtos_RecipeSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/desktop/recipes/{id}/run": {
+      "post": {
+        "tags": [
+          "DesktopRecipe"
+        ],
+        "summary": "Run",
+        "operationId": "DesktopRecipeController_run",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DesktopRecipeDtos_RunRecipeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesktopRecipeDtos_RunRecipeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
     "/api/dev/v1/agents": {
       "get": {
         "tags": [
@@ -46291,11 +46785,20 @@
             }
           }
         },
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_AGENTS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
+        "description": "Requires PERM_MANAGE_AGENTS (or the tenant-admin role).",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -100083,6 +100586,351 @@
           "DEGRADED",
           "DOWN",
           "UNKNOWN"
+        ]
+      },
+      "DesktopRecipeDtos_CreateRecipeRequest": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "defaultMode": {
+            "type": "string"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/DesktopRecipeSpec"
+          }
+        }
+      },
+      "DesktopRecipeDtos_RecipeDetail": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/DesktopRecipeDtos_RecipeSummary"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/DesktopRecipeSpec"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DesktopRecipeDtos_RecipeFromRunRequest": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "allowLiteralText": {
+            "type": "boolean"
+          },
+          "defaultMode": {
+            "type": "string"
+          }
+        }
+      },
+      "DesktopRecipeDtos_RecipeSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "allowedApps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stepCount": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "runCount": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "failCount": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "lastRunAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastFailure": {
+            "type": "string"
+          },
+          "defaultMode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "stepCount",
+          "runCount",
+          "failCount"
+        ]
+      },
+      "DesktopRecipeDtos_RunRecipeRequest": {
+        "type": "object",
+        "properties": {
+          "params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "confirmIrreversible": {
+            "type": "boolean"
+          },
+          "fromStep": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mode": {
+            "type": "string"
+          }
+        }
+      },
+      "DesktopRecipeDtos_RunRecipeResponse": {
+        "type": "object",
+        "properties": {
+          "recipeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean",
+            "default": false
+          },
+          "stepsRun": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "stepsTotal": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "failure": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DesktopRecipeReplayer_StepResult"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "stepsRun",
+          "stepsTotal"
+        ]
+      },
+      "DesktopRecipeDtos_UpdateRecipeRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "defaultMode": {
+            "type": "string"
+          }
+        }
+      },
+      "DesktopRecipeReplayer_StepResult": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "action": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean",
+            "default": false
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "ok"
+        ]
+      },
+      "DesktopRecipeSpec": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "allowedApps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DesktopRecipeSpec_ParamSpec"
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DesktopRecipeSpec_RecipeStep"
+            }
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "DesktopRecipeSpec_Expect": {
+        "type": "object",
+        "properties": {
+          "elementLabel": {
+            "type": "string"
+          },
+          "appFrontmost": {
+            "type": "string"
+          }
+        }
+      },
+      "DesktopRecipeSpec_ParamSpec": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "required"
+        ]
+      },
+      "DesktopRecipeSpec_RecipeStep": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "app": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "x": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "y": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "text": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "waitMs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expect": {
+            "$ref": "#/components/schemas/DesktopRecipeSpec_Expect"
+          },
+          "timeoutMs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "irreversible": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "irreversible"
         ]
       },
       "DeveloperApiController_AgentSummaryDto": {

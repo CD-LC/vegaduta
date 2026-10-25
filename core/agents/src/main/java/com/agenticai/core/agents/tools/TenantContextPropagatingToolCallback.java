@@ -177,8 +177,10 @@ public class TenantContextPropagatingToolCallback implements ToolCallback {
                             : delegate.call(toolInput);
             return McpToolOutputSanitizer.ensureJsonObject(output);
         } catch (RuntimeException e) {
-            // A deliberate turn-level stop (the tool-step ceiling, a hard guardrail violation) is not
-            // "a failed tool call": it must reach the turn, exactly as ToolExceptionTranslatingCallback
+            // A deliberate turn-level stop (the tool-step ceiling, a hard guardrail violation) is
+            // not
+            // "a failed tool call": it must reach the turn, exactly as
+            // ToolExceptionTranslatingCallback
             // and the exception processor already let it. Papering it over as a friendly result let
             // the model carry on calling tools past a ceiling it had just hit.
             if (RedactingToolExecutionExceptionProcessor.isPropagated(e)) {
@@ -210,7 +212,10 @@ public class TenantContextPropagatingToolCallback implements ToolCallback {
             // A redaction mints a new String too: carry a platform-answer mark across it, same as
             // ensureJsonObject's wrap above, or a marked answer could be journaled as executed.
             return com.agenticai.core.guardrails.ToolResultMarker.kindOf(result)
-                    .map(kind -> com.agenticai.core.guardrails.ToolResultMarker.mark(redacted, kind))
+                    .map(
+                            kind ->
+                                    com.agenticai.core.guardrails.ToolResultMarker.mark(
+                                            redacted, kind))
                     .orElse(redacted);
         } catch (RuntimeException e) {
             return result;

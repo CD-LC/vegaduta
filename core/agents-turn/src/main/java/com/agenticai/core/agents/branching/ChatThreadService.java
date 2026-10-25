@@ -6,6 +6,7 @@ import com.agenticai.core.agents.memory.CallerSessionIds;
 import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.memory.TranscriptView;
+import com.agenticai.core.agents.text.AppContextText;
 import com.agenticai.core.security.TenantContext;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -124,25 +125,26 @@ public class ChatThreadService {
     }
 
     /**
-     * The block the console puts ahead of what the person typed ({@code <app_context>...</app_context>}:
-     * what is connected, the attached folder - written by the app, for the model). Not the person's
-     * words, so never their thread's title.
+     * The block the console puts ahead of what the person typed ({@code
+     * <app_context>...</app_context>}: what is connected, the attached folder - written by the app,
+     * for the model). Not the person's words, so never their thread's title.
      */
-    static final String APP_CONTEXT_OPEN = "<app_context>";
+    static final String APP_CONTEXT_OPEN = AppContextText.OPEN;
 
-    static final String APP_CONTEXT_CLOSE = "</app_context>";
+    static final String APP_CONTEXT_CLOSE = AppContextText.CLOSE;
 
     /**
      * The first user line as stored, marker-free, without the console's leading app-context block,
-     * whitespace-trimmed and cut to {@link #TITLE_MAX_CHARS}; null for none. Derived at read time, so
-     * threads stored before the block was stripped get a proper title too.
+     * whitespace-trimmed and cut to {@link #TITLE_MAX_CHARS}; null for none. Derived at read time,
+     * so threads stored before the block was stripped get a proper title too.
      */
     static String titleOf(String firstUserMessage) {
         if (firstUserMessage == null) {
             return null;
         }
         String text =
-                withoutAppContext(TranscriptView.textOf(MessageRole.USER, firstUserMessage)).strip();
+                withoutAppContext(TranscriptView.textOf(MessageRole.USER, firstUserMessage))
+                        .strip();
         if (text.isEmpty()) {
             return null;
         }
@@ -150,16 +152,11 @@ public class ChatThreadService {
     }
 
     /**
-     * {@code text} without a leading app-context block. A block that is opened and never closed is all
-     * app text, so nothing of it is kept.
+     * {@code text} without a leading app-context block. A block that is opened and never closed is
+     * all app text, so nothing of it is kept.
      */
-    static String withoutAppContext(String text) {
-        String trimmed = text == null ? "" : text.stripLeading();
-        if (!trimmed.startsWith(APP_CONTEXT_OPEN)) {
-            return text == null ? "" : text;
-        }
-        int close = trimmed.indexOf(APP_CONTEXT_CLOSE);
-        return close < 0 ? "" : trimmed.substring(close + APP_CONTEXT_CLOSE.length());
+    public static String withoutAppContext(String text) {
+        return AppContextText.withoutAppContext(text);
     }
 
     /**

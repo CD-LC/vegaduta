@@ -9,5 +9,5 @@ import java.util.UUID;
  * AgentKnowledgeAccessUpdateRequest}'s "empty means unrestricted" convention, matching {@code
  * Agent.allowedKnowledgeWriteCollectionIds}' javadoc exactly.
  */
-public record AgentKnowledgeWriteAccessUpdateRequest(Set<UUID> allowedKnowledgeWriteCollectionIds) {
-}
+public record AgentKnowledgeWriteAccessUpdateRequest(
+        Set<UUID> allowedKnowledgeWriteCollectionIds) {}

@@ -570,6 +570,21 @@ final class TenantFeatureRules {
                 // #requireVisible + #requireManage
                 .requestMatchers(
                         HttpMethod.POST,
+                        "/api/desktop/recipes",
+                        "/api/desktop/recipes/from-run",
+                        "/api/desktop/recipes/*/run")
+                .authenticated() // DesktopRecipeService#requireManage:
+                // EDITOR on the recipe's agent,
+                // tenant-wide recipes need
+                // PERM_MANAGE_AGENTS
+                .requestMatchers(HttpMethod.PATCH, "/api/desktop/recipes/*")
+                .authenticated() // DesktopRecipeService#update ->
+                // #requireVisible + #requireManage
+                .requestMatchers(HttpMethod.DELETE, "/api/desktop/recipes/*")
+                .authenticated() // DesktopRecipeService#delete ->
+                // #requireVisible + #requireManage
+                .requestMatchers(
+                        HttpMethod.POST,
                         "/api/browser/takeover/pause",
                         "/api/browser/takeover/*/begin",
                         "/api/browser/takeover/*/cancel",

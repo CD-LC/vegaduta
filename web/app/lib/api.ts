@@ -49,6 +49,7 @@ import { codingTasksApi } from "./api/codingTasks";
 import { workflowPortabilityApi } from "./api/workflowPortability";
 import { browserAutomationApi } from "./api/browserAutomation";
 import { browserTakeoverApi } from "./api/browserTakeover";
+import { desktopRecipesApi } from "./api/desktopRecipes";
 import { chatBranchingApi } from "./api/chatBranching";
 import { chatPortabilityApi } from "./api/chatPortability";
 import { apiKeysApi } from "./api/apiKeys";
@@ -100,6 +101,7 @@ export const api = {
   ...workflowPortabilityApi,
   ...browserAutomationApi,
   ...browserTakeoverApi,
+  ...desktopRecipesApi,
   ...chatBranchingApi,
   ...chatPortabilityApi,
   ...apiKeysApi,

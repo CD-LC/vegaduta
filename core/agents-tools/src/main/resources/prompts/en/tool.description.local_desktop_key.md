@@ -10,4 +10,4 @@ placeholders: approval_note
 placeholder.approval_note: A sentence the platform appends when each call is shown to the user for approval before it runs; empty when approval is off
 maxLength: 4000
 ---
-Press one named key: return, enter, tab, space, delete, escape, left, right, down, up or f1-f12.{approval_note}
+Press a named key (return, enter, tab, space, delete, escape, left, right, down, up, f1-f12) or a modifier combo like 'cmd+s' (save), 'cmd+n' (new document), 'cmd+a', 'ctrl+c'. Modifiers: cmd/command, ctrl, alt/option, shift.{approval_note}

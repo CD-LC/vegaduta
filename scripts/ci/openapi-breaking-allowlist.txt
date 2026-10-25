@@ -7,3 +7,4 @@
 #
 # An entry is only needed while the change is unmerged: once it is on the base branch the merge base
 # moves past it and the entry matches nothing (the script warns). Remove such entries.
+access-tightened POST /api/knowledge/ingest-url  # endpoint added this release (not yet shipped); the regenerated spec now records the tenant-admin gate the code already had - no released client can depend on the weaker shape

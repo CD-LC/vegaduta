@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
+- Fixed live voice transcription: sidecar pinned PyAV 19, which removed the `metadata_errors` kwarg `faster-whisper` passes to `av.open`, so every `/transcribe` call 400'd and calls hung at "Transcribing". Pinned `av==15.1.0` (newest release that keeps the kwarg).
+- Approval cards for `local_desktop_*` and `run_desktop_recipe` calls now show readable labels ("Open an app, file, or link") instead of raw wire names.
+- "The task it was working on" on approval cards now shows the user's actual message: the console's `<app_context>` preamble is stripped when core records the goal and when the web renders already-parked rows.
+- Playground call controls: the screen-share button is always visible while connected (explains itself when on-device sight is not configured), and "Call + camera" renders disabled with a reason instead of disappearing for text-only models.
+
+- Fixed voice calls on single-box installs: LiveKit now advertises the loopback/node IP (`LIVEKIT_NODE_IP`, default 127.0.0.1) instead of the WAN address discovered by STUN, which browsers could not reach - the media path died at "Media connection blocked".
+
+- Voice calling (livekit + voice-agent) is now available on the personal and lite tiers: `personal --profile voice` / `up --lite --profile voice` start both services and imply `rag` for Whisper STT (previously only the full stack declared them).
+
+- Personal install footprint: default memory ceilings tightened (tool-sandbox 1g to 512m, sidecar 2g to 1536m, browser-runner 2g to 1g; all stay env-overridable) and the sidecar build gained `SIDECAR_BAKE_EXTRA_MODELS=false` to slim a local image by ~550MB.
+
+
+### Added
+
+- **Desktop tools are always offered when enabled**: `local_desktop_*` (and `run_desktop_recipe`) join the always-relevant tool set and the small-model intent table gets a desktop family — a request like "play minesweeper" or "open Notes" shares no word with `local_desktop_click`, and a relevance-trimmed turn hid the whole capability (the model then correctly answered "I have no desktop tools"). Only applies where the desktop sidecar is already opted in.
+- **Desktop recipes (personal tier, opt-in)**: a finished desktop run can be saved as a `desktop_recipe` — a placeholder-only replay of the `local_desktop_*` sequence (`open`/`activate`/`press`/`click`/`type`/`key`/`wait`), recorded from the run's tool journal with the same "no secrets or user values stored" rules as browser recipes (`{{param}}`/`{{secret.NAME}}`, literal typed text refused unless explicitly allowed). `run_desktop_recipe` replays it deterministically with per-step verification and a pause-before-irreversible gate; it sits behind `app.assistant.desktop.recipes.enabled` (`DESKTOP_RECIPES_ENABLED`, default off) plus the existing `app.assistant.desktop.approval-required` pin.
+- **Monitor-or-auto replay**: each recipe carries a `default_mode` (`AUTO`/`MONITOR`); MONITOR paces the replay (`monitor-step-delay-ms`, default 800 ms) so a person can follow it live on the console's desktop monitor (`GET /api/desktop/monitor/frame` → the sidecar's new `GET /frame`, `app.assistant.desktop.monitor.enabled`, default off). Browser recipes gain the matching "Watch" affordance — the console polls the run's tool-call journal (`watchSessionId` in the `run_browser_recipe` result) — which also works on lite/full tiers.
 
 ### Added
 
