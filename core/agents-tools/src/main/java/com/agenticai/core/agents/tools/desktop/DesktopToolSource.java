@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.tools.desktop;
 
+import com.agenticai.core.agents.tools.DesktopToolNames;
 import com.agenticai.core.agentspi.WorkspaceToolSource;
 import com.agenticai.core.audit.AuditLogService;
 import jakarta.annotation.PostConstruct;
@@ -40,16 +41,10 @@ public class DesktopToolSource implements WorkspaceToolSource {
 
     /**
      * The actuating tools - read-only ones (screen, elements, notify, clipboard) are never pinned.
+     * Lives in {@link DesktopToolNames} (kernel) so governance can read it without a tools ->
+     * tools.desktop package edge.
      */
-    public static final Set<String> GATED_NAMES =
-            Set.of(
-                    DesktopToolCallback.Action.PRESS.toolName,
-                    DesktopToolCallback.Action.CLICK.toolName,
-                    DesktopToolCallback.Action.TYPE.toolName,
-                    DesktopToolCallback.Action.KEY.toolName,
-                    DesktopToolCallback.Action.OPEN.toolName,
-                    DesktopToolCallback.Action.ACTIVATE.toolName,
-                    RunDesktopRecipeToolCallback.NAME);
+    public static final Set<String> GATED_NAMES = DesktopToolNames.GATED;
 
     private final boolean enabled;
     private final boolean singleUser;

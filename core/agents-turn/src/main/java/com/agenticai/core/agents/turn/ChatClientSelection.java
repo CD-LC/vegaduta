@@ -1,6 +1,5 @@
 package com.agenticai.core.agents.turn;
 
-import com.agenticai.core.agents.branching.ChatThreadService;
 import com.agenticai.core.agents.budget.PerUserBudgetService;
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.hosted.FreeTierChatClientService;
@@ -8,6 +7,7 @@ import com.agenticai.core.agents.hosted.FreeTierProviderPoolEmptyException;
 import com.agenticai.core.agents.hosted.HostedChainLink;
 import com.agenticai.core.agents.loadtest.LoadTestChatClientFactory;
 import com.agenticai.core.agents.loadtest.LoadTestTenantAllowlist;
+import com.agenticai.core.agents.text.AppContextText;
 import com.agenticai.core.guardrails.SandboxApprovalGrants;
 import com.agenticai.core.guardrails.TurnApprovalState;
 import com.agenticai.core.security.TenantPlan;
@@ -289,7 +289,7 @@ final class ChatClientSelection {
                         // The goal shown on the approval card must be the person's words, not the
                         // console's <app_context> preamble the decorated message still carries
                         // here.
-                        ChatThreadService.withoutAppContext(context.decisionMessage(userMessage)),
+                        AppContextText.withoutAppContext(context.decisionMessage(userMessage)),
                         context.requestedAgentId(),
                         subjectKey,
                         approvalContinuation == null
