@@ -413,6 +413,11 @@ Deferred [Mvc [pattern='/api/browser/recipes', POST], Ant [pattern='/api/browser
 Deferred [Mvc [pattern='/api/browser/recipes/from-run', POST], Ant [pattern='/api/browser/recipes/from-run', POST]] => -YYYYYYYYYYYYYYYYYYYY
 Deferred [Mvc [pattern='/api/browser/recipes/*', PATCH], Ant [pattern='/api/browser/recipes/*', PATCH]] => -YYYYYYYYYYYYYYYYYYYY
 Deferred [Mvc [pattern='/api/browser/recipes/*', DELETE], Ant [pattern='/api/browser/recipes/*', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/desktop/recipes', POST], Ant [pattern='/api/desktop/recipes', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/desktop/recipes/from-run', POST], Ant [pattern='/api/desktop/recipes/from-run', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/desktop/recipes/*/run', POST], Ant [pattern='/api/desktop/recipes/*/run', POST]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/desktop/recipes/*', PATCH], Ant [pattern='/api/desktop/recipes/*', PATCH]] => -YYYYYYYYYYYYYYYYYYYY
+Deferred [Mvc [pattern='/api/desktop/recipes/*', DELETE], Ant [pattern='/api/desktop/recipes/*', DELETE]] => -YYYYYYYYYYYYYYYYYYYY
 Deferred [Mvc [pattern='/api/browser/takeover/pause', POST], Ant [pattern='/api/browser/takeover/pause', POST]] => -YYYYYYYYYYYYYYYYYYYY
 Deferred [Mvc [pattern='/api/browser/takeover/*/begin', POST], Ant [pattern='/api/browser/takeover/*/begin', POST]] => -YYYYYYYYYYYYYYYYYYYY
 Deferred [Mvc [pattern='/api/browser/takeover/*/cancel', POST], Ant [pattern='/api/browser/takeover/*/cancel', POST]] => -YYYYYYYYYYYYYYYYYYYY
