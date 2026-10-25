@@ -191,12 +191,23 @@ export function redactedArguments(payload: string | null | undefined, max: numbe
   return { text: truncateText(text, max), redactedCount: counter.n, truncated: text.length > max };
 }
 
+/**
+ * Strips the console's `<app_context>...</app_context>` preamble from a recorded goal. Rows parked before the
+ * server-side strip (core now records the person's words via ChatThreadService.withoutAppContext) still carry
+ * the platform block, so the card reads it off too rather than showing an old row the plumbing.
+ */
+export function stripAppContext(goal: string): string {
+  const m = /^\s*<app_context>[\s\S]*?<\/app_context>/i.exec(goal);
+  const stripped = (m ? goal.slice(m[0].length) : goal).trim();
+  return stripped || goal.trim();
+}
+
 /** The task the person had asked for when the call was parked (replay.goal), if core recorded it. */
 export function replayGoal(payload: string | null | undefined): string | null {
   if (typeof payload !== "string" || !payload.trim()) return null;
   try {
     const goal = JSON.parse(payload)?.replay?.goal;
-    return typeof goal === "string" && goal.trim() ? goal.trim() : null;
+    return typeof goal === "string" && goal.trim() ? stripAppContext(goal) : null;
   } catch {
     return null;
   }

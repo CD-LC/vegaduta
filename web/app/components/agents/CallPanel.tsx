@@ -605,7 +605,6 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
           agentAudioMuted,
           canSee,
           screenSharing: edgeSightSource === "screen",
-          canShareScreen: !sightRoomRef.current && edgeSightModeRef.current,
           toggleMute: () => void toggleMute(),
           toggleCamera: () => void toggleCamera(),
           toggleScreenShare: () => void toggleScreenShare(),

@@ -17,7 +17,6 @@ interface CallControlsBarProps {
   canSee: boolean;
   /** In-call screen share (edge sight only - frames never leave the device). */
   screenSharing: boolean;
-  canShareScreen: boolean;
   toggleMute: () => void;
   toggleCamera: () => void;
   toggleScreenShare: () => void;
@@ -26,7 +25,7 @@ interface CallControlsBarProps {
   startCall: (withCamera?: boolean) => void;
 }
 
-export default function CallControlsBar({ t, status, reconnecting, muted, cameraOn, agentAudioMuted, canSee, screenSharing, canShareScreen, toggleMute, toggleCamera, toggleScreenShare, toggleAgentAudio, endCall, startCall }: CallControlsBarProps) {
+export default function CallControlsBar({ t, status, reconnecting, muted, cameraOn, agentAudioMuted, canSee, screenSharing, toggleMute, toggleCamera, toggleScreenShare, toggleAgentAudio, endCall, startCall }: CallControlsBarProps) {
   const statusLabel =
     status === "connected"
       ? reconnecting
@@ -81,18 +80,19 @@ export default function CallControlsBar({ t, status, reconnecting, muted, camera
             >
               {cameraOn ? <VideoOff size={14} /> : <Video size={14} />}
             </Button>
-            {canShareScreen && (
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={toggleScreenShare}
-                aria-label={screenSharing ? t("screenShareOffLabel") : t("screenShareOnLabel")}
-                title={screenSharing ? t("screenShareOffLabel") : t("screenShareOnLabel")}
-              >
-                {screenSharing ? <MonitorX size={14} /> : <MonitorUp size={14} />}
-              </Button>
-            )}
+            {/* Always rendered: without edge sight the click surfaces the
+                "needs the on-device vision model" notice instead of silently
+                hiding the control (users asked where the button was). */}
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={toggleScreenShare}
+              aria-label={screenSharing ? t("screenShareOffLabel") : t("screenShareOnLabel")}
+              title={screenSharing ? t("screenShareOffLabel") : t("screenShareOnLabel")}
+            >
+              {screenSharing ? <MonitorX size={14} /> : <MonitorUp size={14} />}
+            </Button>
             <Button
               type="button"
               variant="outline"
@@ -116,20 +116,19 @@ export default function CallControlsBar({ t, status, reconnecting, muted, camera
             {/* Fix #9 (P1): gated on the same canSee capability CameraPanel's
                 own gate uses - a text-only agent (or a model with no vision
                 support) must never be able to open a live server-side vision
-                session. */}
-            {canSee && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => startCall(true)}
-                disabled={status === "connecting"}
-                title={t("callWithCameraTitle")}
-              >
-                <Video size={12} />
-                {t("callWithCamera")}
-              </Button>
-            )}
+                session. Rendered disabled (not hidden) so the control is
+                discoverable; the title explains why it stays off. */}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => startCall(true)}
+              disabled={status === "connecting" || !canSee}
+              title={canSee ? t("callWithCameraTitle") : t("callWithCameraNeedsVision")}
+            >
+              <Video size={12} />
+              {t("callWithCamera")}
+            </Button>
           </div>
         )}
       </div>

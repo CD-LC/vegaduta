@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.turn;
 
+import com.agenticai.core.agents.branching.ChatThreadService;
 import com.agenticai.core.agents.budget.PerUserBudgetService;
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.hosted.FreeTierChatClientService;
@@ -276,7 +277,9 @@ final class ChatClientSelection {
         TurnApprovalState approvalState =
                 new TurnApprovalState(
                         turn.memorySessionId(),
-                        context.decisionMessage(userMessage),
+                        // The goal shown on the approval card must be the person's words, not the
+                        // console's <app_context> preamble the decorated message still carries here.
+                        ChatThreadService.withoutAppContext(context.decisionMessage(userMessage)),
                         context.requestedAgentId(),
                         subjectKey,
                         approvalContinuation == null
