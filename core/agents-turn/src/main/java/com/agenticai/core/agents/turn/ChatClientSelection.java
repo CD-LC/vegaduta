@@ -58,7 +58,8 @@ final class ChatClientSelection {
     private final ContinuationProperties continuation;
     private final LocalModelTurnProperties localModel;
 
-    ChatClientSelection(AgentChatService svc, FollowUpTools followUp, ContinuationProperties continuation) {
+    ChatClientSelection(
+            AgentChatService svc, FollowUpTools followUp, ContinuationProperties continuation) {
         this(svc, followUp, continuation, new LocalModelTurnProperties());
     }
 
@@ -74,10 +75,12 @@ final class ChatClientSelection {
     }
 
     /**
-     * Whether this turn offers the agent's tool set unchanged (see {@link TurnModelTraits#stableToolSet}): the model it
-     * starts on is served on the person's own machine (the install's local pool row, or a bring-your-own provider in
-     * {@code app.chat.local-model.providers}), {@code app.chat.local-model.stable-tools} is on, and the model is not
-     * in small-model mode (that mode's short tool list matters more than a cached prompt on a slow machine).
+     * Whether this turn offers the agent's tool set unchanged (see {@link
+     * TurnModelTraits#stableToolSet}): the model it starts on is served on the person's own machine
+     * (the install's local pool row, or a bring-your-own provider in {@code
+     * app.chat.local-model.providers}), {@code app.chat.local-model.stable-tools} is on, and the
+     * model is not in small-model mode (that mode's short tool list matters more than a cached
+     * prompt on a slow machine).
      */
     boolean stableToolSet(Agent agent, List<HostedChainLink> hostedChain) {
         if (!localModel.isStableTools()) {
@@ -102,7 +105,9 @@ final class ChatClientSelection {
             HostedChainLink head = hostedChain.get(0);
             return head.smallModel()
                     || (head.toolCallGrade() != null
-                            && continuation.getHeuristicToolGrades().contains(head.toolCallGrade()));
+                            && continuation
+                                    .getHeuristicToolGrades()
+                                    .contains(head.toolCallGrade()));
         }
         return agent.getProviderName() != null
                 && continuation.getHeuristicProviders().contains(agent.getProviderName());
@@ -212,7 +217,8 @@ final class ChatClientSelection {
         }
         context.modelTraits().weakToolCaller(weakToolCaller(agent, hostedChain));
         context.modelTraits().stableToolSet(stableToolSet(agent, hostedChain));
-        // A short follow-up ("yes", "continue") carries no words to select tools or a model by: it keeps
+        // A short follow-up ("yes", "continue") carries no words to select tools or a model by: it
+        // keeps
         // the tools the conversation already used and stays on the model that started the task. The
         // continuation after an approval has its own goal and tool list.
         Set<String> conversationTools =
@@ -221,7 +227,8 @@ final class ChatClientSelection {
                                 agentId,
                                 context.sessionId(),
                                 userMessage,
-                                // The tenant's and the agent's chat.followUp.stickyTools* settings, asked only for a follow-up.
+                                // The tenant's and the agent's chat.followUp.stickyTools* settings,
+                                // asked only for a follow-up.
                                 () -> {
                                     FollowUpTools.StickyPolicy platform = followUp.platformPolicy();
                                     return new FollowUpTools.StickyPolicy(
@@ -259,8 +266,10 @@ final class ChatClientSelection {
                                 ? hostedChain.get(0).client()
                                 : clientResolver.buildChatClientFor(
                                         agent,
-                                        // Cost routing judges the TASK; on a continuation that is the
-                                        // original goal (a platform-written message is never "simple").
+                                        // Cost routing judges the TASK; on a continuation that is
+                                        // the
+                                        // original goal (a platform-written message is never
+                                        // "simple").
                                         context.decisionMessage(userMessage),
                                         rlModelOverride,
                                         currentTenantId,
@@ -278,19 +287,24 @@ final class ChatClientSelection {
                 new TurnApprovalState(
                         turn.memorySessionId(),
                         // The goal shown on the approval card must be the person's words, not the
-                        // console's <app_context> preamble the decorated message still carries here.
+                        // console's <app_context> preamble the decorated message still carries
+                        // here.
                         ChatThreadService.withoutAppContext(context.decisionMessage(userMessage)),
                         context.requestedAgentId(),
                         subjectKey,
                         approvalContinuation == null
                                 ? conversationTools
                                 : Set.copyOf(approvalContinuation.stickyTools()),
-                        // The run-scoped tool selection (null = not narrowed): the journal shows it, tool
-                        // resolution keeps it out of relevance trimming and the approval gate passes it on to
+                        // The run-scoped tool selection (null = not narrowed): the journal shows
+                        // it, tool
+                        // resolution keeps it out of relevance trimming and the approval gate
+                        // passes it on to
                         // the continuation.
                         runToolNames);
-        // An offline eval turn the server itself started under a sandbox auto-approval (registered under this
-        // turn's request id by whoever started the turn; see SandboxApprovalGrants). Every other turn has none.
+        // An offline eval turn the server itself started under a sandbox auto-approval (registered
+        // under this
+        // turn's request id by whoever started the turn; see SandboxApprovalGrants). Every other
+        // turn has none.
         approvalState.enableSandboxGrant(SandboxApprovalGrants.forTurn(context.requestId()));
         TurnContext withApproval = context.withApproval(approvalState);
         TurnContext turnContext =

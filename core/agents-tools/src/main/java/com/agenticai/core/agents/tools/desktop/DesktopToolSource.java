@@ -27,18 +27,20 @@ import org.springframework.stereotype.Component;
  * URL being set IS the opt-in: nobody runs the agent by accident, because it lives on the laptop,
  * not in the compose stack.
  *
- * <p>{@code run_desktop_recipe} is appended only when a {@link DesktopRecipeService} bean exists AND
- * is enabled ({@code app.assistant.desktop.recipes.enabled}, default off), so the desktop surface
- * stays exactly what it was unless both the sidecar opt-in and the recipe flag are set. It is an
- * ACTUATING tool - the whole replay can click/type/submit - so it joins {@link #GATED_NAMES} and is
- * pinned for approval by the same {@code app.assistant.desktop.approval-required} dial.
+ * <p>{@code run_desktop_recipe} is appended only when a {@link DesktopRecipeService} bean exists
+ * AND is enabled ({@code app.assistant.desktop.recipes.enabled}, default off), so the desktop
+ * surface stays exactly what it was unless both the sidecar opt-in and the recipe flag are set. It
+ * is an ACTUATING tool - the whole replay can click/type/submit - so it joins {@link #GATED_NAMES}
+ * and is pinned for approval by the same {@code app.assistant.desktop.approval-required} dial.
  */
 @Component
 public class DesktopToolSource implements WorkspaceToolSource {
 
     private static final Logger log = LoggerFactory.getLogger(DesktopToolSource.class);
 
-    /** The actuating tools - read-only ones (screen, elements, notify, clipboard) are never pinned. */
+    /**
+     * The actuating tools - read-only ones (screen, elements, notify, clipboard) are never pinned.
+     */
     public static final Set<String> GATED_NAMES =
             Set.of(
                     DesktopToolCallback.Action.PRESS.toolName,
@@ -53,6 +55,7 @@ public class DesktopToolSource implements WorkspaceToolSource {
     private final boolean singleUser;
     private final List<ToolCallback> tools;
     private final String refusal;
+
     /** The one sidecar client every tool callback (and the monitor endpoint) shares. */
     private final DesktopAgentClient client;
 
@@ -63,13 +66,15 @@ public class DesktopToolSource implements WorkspaceToolSource {
      */
     public DesktopToolSource(
             Environment environment,
-            @Value("${app.assistant.local-shell.acknowledge-shared-host:false}") boolean acknowledgeSharedHost,
+            @Value("${app.assistant.local-shell.acknowledge-shared-host:false}")
+                    boolean acknowledgeSharedHost,
             @Value("${app.assistant.desktop.agent-url:}") String agentUrl,
             @Value("${app.assistant.desktop.agent-secret:}") String agentSecret,
             @Value("${app.assistant.desktop.approval-required:true}") boolean approvalRequired,
             ObjectProvider<DesktopRecipeService> recipes,
             ObjectProvider<AuditLogService> audit) {
-        this.singleUser = acknowledgeSharedHost || environment.acceptsProfiles(Profiles.of("personal"));
+        this.singleUser =
+                acknowledgeSharedHost || environment.acceptsProfiles(Profiles.of("personal"));
         boolean configured = agentUrl != null && !agentUrl.isBlank();
         this.enabled = configured && singleUser;
         this.refusal =
@@ -86,20 +91,30 @@ public class DesktopToolSource implements WorkspaceToolSource {
     @PostConstruct
     void report() {
         if (refusal != null) {
-            log.warn("app.assistant.desktop.agent-url is set but the desktop tools are not offered: {}", refusal);
+            log.warn(
+                    "app.assistant.desktop.agent-url is set but the desktop tools are not offered: {}",
+                    refusal);
         } else if (enabled) {
-            log.info("Desktop tools on: {} local_desktop_* tools via the desktop-agent sidecar", tools.size());
+            log.info(
+                    "Desktop tools on: {} local_desktop_* tools via the desktop-agent sidecar",
+                    tools.size());
         }
     }
 
     private static List<ToolCallback> callbacksOn(
-            DesktopAgentClient client, boolean approvalRequired,
+            DesktopAgentClient client,
+            boolean approvalRequired,
             ObjectProvider<DesktopRecipeService> recipes,
             ObjectProvider<AuditLogService> audit) {
-        List<ToolCallback> callbacks = new ArrayList<>(
-                java.util.Arrays.stream(DesktopToolCallback.Action.values())
-                        .map(a -> (ToolCallback) new DesktopToolCallback(client, a, approvalRequired, audit))
-                        .toList());
+        List<ToolCallback> callbacks =
+                new ArrayList<>(
+                        java.util.Arrays.stream(DesktopToolCallback.Action.values())
+                                .map(
+                                        a ->
+                                                (ToolCallback)
+                                                        new DesktopToolCallback(
+                                                                client, a, approvalRequired, audit))
+                                .toList());
         DesktopRecipeService recipeService = recipes == null ? null : recipes.getIfAvailable();
         if (recipeService != null && recipeService.isEnabled()) {
             callbacks.add(new RunDesktopRecipeToolCallback(recipeService, approvalRequired));

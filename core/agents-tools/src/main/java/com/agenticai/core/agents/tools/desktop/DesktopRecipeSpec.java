@@ -6,16 +6,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 
 /**
- * A "desktop recipe": the compact, replayable JSON form of a successful {@code local_desktop_*}
- * run - the action sequence (open, activate, press, click, type, key, wait) with per-step
- * verification, recorded once with AI and replayed deterministically later against the
- * desktop-agent sidecar on the person's laptop ("run once with AI, replay without it"). The
- * desktop analogue of {@code BrowserRecipeSpec}.
+ * A "desktop recipe": the compact, replayable JSON form of a successful {@code local_desktop_*} run
+ * - the action sequence (open, activate, press, click, type, key, wait) with per-step verification,
+ * recorded once with AI and replayed deterministically later against the desktop-agent sidecar on
+ * the person's laptop ("run once with AI, replay without it"). The desktop analogue of {@code
+ * BrowserRecipeSpec}.
  *
  * <p>Placeholders only. Anything variable is a {@code {{param}}}, anything secret a {@code
  * {{secret.NAME}}} (see {@link DesktopRecipePlaceholders}); {@link DesktopRecipeValidator} refuses
- * a spec that uses a placeholder it cannot honour, so no credential or user-supplied value is
- * ever stored.
+ * a spec that uses a placeholder it cannot honour, so no credential or user-supplied value is ever
+ * stored.
  *
  * <p>Absent fields are omitted from the JSON ({@code NON_NULL}) to keep a stored recipe small.
  *
@@ -52,8 +52,8 @@ public record DesktopRecipeSpec(
      * app), so an expectation never needs a screenshot or a model. Text may contain {@code
      * {{param}}} placeholders.
      *
-     * @param elementLabel an interactive element whose label contains this (case-insensitive)
-     *     must exist in the frontmost app's UI tree
+     * @param elementLabel an interactive element whose label contains this (case-insensitive) must
+     *     exist in the frontmost app's UI tree
      * @param appFrontmost the frontmost application's name must equal this (case-insensitive)
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)

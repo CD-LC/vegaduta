@@ -100,7 +100,9 @@ describe("watch ticker", () => {
     fireEvent.click(await screen.findByRole("button", { name: "watch" }));
 
     const pane = await screen.findByTestId("browser-recipe-watch-r1");
-    await waitFor(() => expect(apiFetchMock).toHaveBeenCalledWith("/api/agents/agent-1/tool-calls", { skipGetCache: true }));
+    await waitFor(() =>
+      expect(apiFetchMock).toHaveBeenCalledWith("/api/agents/agent-1/tool-calls", { skipGetCache: true })
+    );
     await waitFor(() => expect(pane).toHaveTextContent("watchRunning"));
     expect(pane).toHaveTextContent("watchDone");
     // A replay of a different recipe is filtered out.

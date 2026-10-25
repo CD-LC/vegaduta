@@ -7,12 +7,10 @@ vi.mock("./core", () => ({
     const text = await res.text();
     return text ? JSON.parse(text) : null;
   },
-  toJsonQuietOn:
-    () =>
-    async (res: Response) => {
-      const text = await res.text();
-      return text ? JSON.parse(text) : null;
-    },
+  toJsonQuietOn: () => async (res: Response) => {
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  },
   jsonBody: (payload: unknown) => ({ headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
   friendlyStatusFallback: (status: number) => `friendly-${status}`,
 }));
@@ -130,9 +128,7 @@ describe("desktopRecipesApi", () => {
   describe("fetchDesktopMonitorFrame", () => {
     it("reads the frame as a Blob and always skips the GET cache", async () => {
       const bytes = new Uint8Array([1, 2, 3]);
-      apiFetchMock.mockResolvedValue(
-        new Response(bytes, { status: 200, headers: { "Content-Type": "image/jpeg" } })
-      );
+      apiFetchMock.mockResolvedValue(new Response(bytes, { status: 200, headers: { "Content-Type": "image/jpeg" } }));
       const blob = await desktopRecipesApi.fetchDesktopMonitorFrame();
       expect(apiFetchMock).toHaveBeenLastCalledWith("/api/desktop/monitor/frame", { skipGetCache: true });
       expect(blob.size).toBe(3);

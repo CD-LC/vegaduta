@@ -124,9 +124,9 @@ public class ChatThreadService {
     }
 
     /**
-     * The block the console puts ahead of what the person typed ({@code <app_context>...</app_context>}:
-     * what is connected, the attached folder - written by the app, for the model). Not the person's
-     * words, so never their thread's title.
+     * The block the console puts ahead of what the person typed ({@code
+     * <app_context>...</app_context>}: what is connected, the attached folder - written by the app,
+     * for the model). Not the person's words, so never their thread's title.
      */
     static final String APP_CONTEXT_OPEN = "<app_context>";
 
@@ -134,15 +134,16 @@ public class ChatThreadService {
 
     /**
      * The first user line as stored, marker-free, without the console's leading app-context block,
-     * whitespace-trimmed and cut to {@link #TITLE_MAX_CHARS}; null for none. Derived at read time, so
-     * threads stored before the block was stripped get a proper title too.
+     * whitespace-trimmed and cut to {@link #TITLE_MAX_CHARS}; null for none. Derived at read time,
+     * so threads stored before the block was stripped get a proper title too.
      */
     static String titleOf(String firstUserMessage) {
         if (firstUserMessage == null) {
             return null;
         }
         String text =
-                withoutAppContext(TranscriptView.textOf(MessageRole.USER, firstUserMessage)).strip();
+                withoutAppContext(TranscriptView.textOf(MessageRole.USER, firstUserMessage))
+                        .strip();
         if (text.isEmpty()) {
             return null;
         }
@@ -150,8 +151,8 @@ public class ChatThreadService {
     }
 
     /**
-     * {@code text} without a leading app-context block. A block that is opened and never closed is all
-     * app text, so nothing of it is kept.
+     * {@code text} without a leading app-context block. A block that is opened and never closed is
+     * all app text, so nothing of it is kept.
      */
     public static String withoutAppContext(String text) {
         String trimmed = text == null ? "" : text.stripLeading();

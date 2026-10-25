@@ -76,7 +76,9 @@ function listQuery(agentId?: string, limit?: number, offset?: number): string {
 
 export const desktopRecipesApi = {
   listDesktopRecipes: (agentId?: string, limit?: number, offset?: number): Promise<DesktopRecipeSummary[]> =>
-    apiFetch(`/api/desktop/recipes${listQuery(agentId, limit, offset)}`).then(toJsonQuietOn<DesktopRecipeSummary[]>(QUIET)),
+    apiFetch(`/api/desktop/recipes${listQuery(agentId, limit, offset)}`).then(
+      toJsonQuietOn<DesktopRecipeSummary[]>(QUIET)
+    ),
 
   getDesktopRecipe: (id: string): Promise<DesktopRecipeDetail> =>
     apiFetch(`/api/desktop/recipes/${enc(id)}`).then(toJson<DesktopRecipeDetail>),

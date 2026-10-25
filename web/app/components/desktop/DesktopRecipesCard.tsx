@@ -25,7 +25,9 @@ import DesktopMonitor from "./DesktopMonitor";
 export type DesktopRecipeHealth = "new" | "healthy" | "failing";
 
 /** A recipe whose latest replay failed needs a look; one never replayed is just new. */
-export function desktopRecipeHealth(recipe: Pick<DesktopRecipeSummary, "runCount" | "lastFailure">): DesktopRecipeHealth {
+export function desktopRecipeHealth(
+  recipe: Pick<DesktopRecipeSummary, "runCount" | "lastFailure">
+): DesktopRecipeHealth {
   if (recipe.lastFailure) return "failing";
   return recipe.runCount > 0 ? "healthy" : "new";
 }
@@ -74,7 +76,9 @@ export default function DesktopRecipesCard({
     setFailed(false);
     api
       .listDesktopRecipes(agentId)
-      .then((list: DesktopRecipeSummary[]) => setRecipes(Array.isArray(list) ? desktopRecipesForAgent(list, agentId) : []))
+      .then((list: DesktopRecipeSummary[]) =>
+        setRecipes(Array.isArray(list) ? desktopRecipesForAgent(list, agentId) : [])
+      )
       .catch(() => setFailed(true));
   }, [agentId]);
 
@@ -242,11 +246,16 @@ export default function DesktopRecipesCard({
                   {r.runCount > 0 ? t("recipeRuns", { runs: r.runCount, fails: r.failCount }) : t("recipeNeverRun")}
                 </div>
                 {r.lastFailure && (
-                  <div className="mt-0.5 text-xs text-destructive">{t("recipeLastFailure", { reason: r.lastFailure })}</div>
+                  <div className="mt-0.5 text-xs text-destructive">
+                    {t("recipeLastFailure", { reason: r.lastFailure })}
+                  </div>
                 )}
 
                 {runOpen && (
-                  <div className="mt-2 space-y-2 rounded-md border border-dashed border-border px-3 py-2" data-testid={`desktop-run-${r.id}`}>
+                  <div
+                    className="mt-2 space-y-2 rounded-md border border-dashed border-border px-3 py-2"
+                    data-testid={`desktop-run-${r.id}`}
+                  >
                     {detailLoading && (
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
@@ -306,7 +315,9 @@ export default function DesktopRecipesCard({
                         <Button
                           type="button"
                           size="sm"
-                          disabled={disabled || runningId !== null || (specHasIrreversible(detail) && !confirmIrreversible)}
+                          disabled={
+                            disabled || runningId !== null || (specHasIrreversible(detail) && !confirmIrreversible)
+                          }
                           title={locked ? editLockedTooltip : undefined}
                           onClick={() => void run(r)}
                         >

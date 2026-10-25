@@ -26,7 +26,10 @@ export default function DesktopMonitorPanel({
   const t = useTranslations("desktopAutomation");
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="mt-1.5 w-full max-w-[85%] rounded-md border border-border bg-card" data-testid="desktop-monitor-panel">
+    <div
+      className="mt-1.5 w-full max-w-[85%] rounded-md border border-border bg-card"
+      data-testid="desktop-monitor-panel"
+    >
       <button
         type="button"
         className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs font-medium text-foreground"

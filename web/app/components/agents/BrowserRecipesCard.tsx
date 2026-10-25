@@ -47,7 +47,9 @@ export function replayEntriesForRecipe(
     const input = e.toolInput ?? "";
     return input.includes(recipe.id) || (recipe.name.length > 0 && input.includes(recipe.name));
   };
-  return entries.filter((e) => e.toolName === RUN_RECIPE_TOOL && matches(e)).sort((a, b) => a.startedAt.localeCompare(b.startedAt));
+  return entries
+    .filter((e) => e.toolName === RUN_RECIPE_TOOL && matches(e))
+    .sort((a, b) => a.startedAt.localeCompare(b.startedAt));
 }
 
 export default function BrowserRecipesCard({

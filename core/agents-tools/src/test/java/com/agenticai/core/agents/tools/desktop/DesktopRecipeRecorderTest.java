@@ -79,7 +79,9 @@ class DesktopRecipeRecorderTest {
         Recorded r =
                 DesktopRecipeRecorder.record(
                         List.of(
-                                call("local_desktop_open", "{\"target\":\"https://shop.example/orders?q=Paris\"}"),
+                                call(
+                                        "local_desktop_open",
+                                        "{\"target\":\"https://shop.example/orders?q=Paris\"}"),
                                 call("local_desktop_activate", "{\"app\":\"Safari\"}"),
                                 call("local_desktop_type", "{\"text\":\"Paris\"}")),
                         Map.of("city", "Paris"),
@@ -150,8 +152,7 @@ class DesktopRecipeRecorderTest {
         assertThatThrownBy(
                         () ->
                                 DesktopRecipeRecorder.record(
-                                        List.of(
-                                                call("local_desktop_click", "{\"x\":10,\"y\":20}")),
+                                        List.of(call("local_desktop_click", "{\"x\":10,\"y\":20}")),
                                         Map.of(),
                                         true))
                 .isInstanceOf(IllegalArgumentException.class)

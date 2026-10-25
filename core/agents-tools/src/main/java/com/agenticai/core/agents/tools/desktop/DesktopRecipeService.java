@@ -40,20 +40,20 @@ import org.springframework.web.server.ResponseStatusException;
  * run_desktop_recipe} for deterministic replay through the desktop-agent sidecar on the person's
  * laptop. The personal tier's equivalent of {@code BrowserRecipeService}.
  *
- * <p>The journal it records from is {@code tool_call_log} - the row the platform already writes
- * for every tool call of a run - so no new write path exists on the live run. Recording and
- * replay logic is in the pure {@link DesktopRecipeRecorder} / {@link DesktopRecipeReplayer}; this
- * class is the persistence, access control and flag gate around them.
+ * <p>The journal it records from is {@code tool_call_log} - the row the platform already writes for
+ * every tool call of a run - so no new write path exists on the live run. Recording and replay
+ * logic is in the pure {@link DesktopRecipeRecorder} / {@link DesktopRecipeReplayer}; this class is
+ * the persistence, access control and flag gate around them.
  *
- * <p>Access: a recipe with an {@code agentId} is managed by an EDITOR of that agent and visible
- * to its RUNNERs; a tenant-wide recipe (no agent) is managed by a manager of agents ({@code
- * PERM_MANAGE_AGENTS}) and visible to everyone. With the flag off every management call answers
- * 404 and the runtime lookups return nothing.
+ * <p>Access: a recipe with an {@code agentId} is managed by an EDITOR of that agent and visible to
+ * its RUNNERs; a tenant-wide recipe (no agent) is managed by a manager of agents ({@code
+ * PERM_MANAGE_AGENTS}) and visible to everyone. With the flag off every management call answers 404
+ * and the runtime lookups return nothing.
  *
- * <p>{@link #replayForAgent} deliberately does NOT record the run's outcome - the caller does,
- * via {@link #recordRun}, exactly like {@code run_browser_recipe} does for browser recipes. The
- * REST path ({@link #run}) is the exception: it records itself because there is no tool wrapper
- * around it.
+ * <p>{@link #replayForAgent} deliberately does NOT record the run's outcome - the caller does, via
+ * {@link #recordRun}, exactly like {@code run_browser_recipe} does for browser recipes. The REST
+ * path ({@link #run}) is the exception: it records itself because there is no tool wrapper around
+ * it.
  */
 @Service
 public class DesktopRecipeService {
@@ -87,8 +87,10 @@ public class DesktopRecipeService {
             @Value("${app.assistant.desktop.recipes.max-per-tenant:50}") int maxPerTenant,
             @Value("${app.assistant.desktop.recipes.step-timeout-ms:15000}") int stepTimeoutMs,
             @Value("${app.assistant.desktop.recipes.max-replay-seconds:120}") int maxReplaySeconds,
-            @Value("${app.assistant.desktop.recipes.monitor-step-delay-ms:800}") int monitorStepDelayMs,
-            @Value("${app.assistant.desktop.recipes.secret-name-prefix:DESKTOP_}") String secretNamePrefix) {
+            @Value("${app.assistant.desktop.recipes.monitor-step-delay-ms:800}")
+                    int monitorStepDelayMs,
+            @Value("${app.assistant.desktop.recipes.secret-name-prefix:DESKTOP_}")
+                    String secretNamePrefix) {
         this.recipes = recipes;
         this.agentService = agentService;
         this.toolCallLogs = toolCallLogs;
@@ -103,9 +105,7 @@ public class DesktopRecipeService {
         this.maxReplaySeconds = Math.max(5, maxReplaySeconds);
         this.monitorStepDelayMs = Math.max(0, monitorStepDelayMs);
         this.secretNamePrefix =
-                secretNamePrefix == null
-                        ? ""
-                        : secretNamePrefix.strip().toUpperCase(Locale.ROOT);
+                secretNamePrefix == null ? "" : secretNamePrefix.strip().toUpperCase(Locale.ROOT);
         this.clock = Clock.systemUTC();
     }
 
@@ -233,7 +233,8 @@ public class DesktopRecipeService {
         if (request == null) {
             throw new IllegalArgumentException("a request body is required");
         }
-        String name = request.name() == null ? null : DesktopRecipeSupport.cleanName(request.name());
+        String name =
+                request.name() == null ? null : DesktopRecipeSupport.cleanName(request.name());
         if (name != null
                 && !name.equalsIgnoreCase(recipe.getName())
                 && nameTaken(recipe.getAgentId(), name)) {
@@ -261,19 +262,17 @@ public class DesktopRecipeService {
     }
 
     /**
-     * The REST replay path ({@code POST /api/desktop/recipes/{id}/run}). Not {@code
-     * @Transactional} on purpose: the replay makes blocking calls to the laptop's sidecar and
-     * sleeps between steps, so no transaction may be held across it - each repository call and
-     * {@link #recordRun} commits on its own, and a vault audit write inside the replay gets its
-     * own transaction too.
+     * The REST replay path ({@code POST /api/desktop/recipes/{id}/run}). Not {@code @Transactional}
+     * on purpose: the replay makes blocking calls to the laptop's sidecar and sleeps between steps,
+     * so no transaction may be held across it - each repository call and {@link #recordRun} commits
+     * on its own, and a vault audit write inside the replay gets its own transaction too.
      */
     public RunRecipeResponse run(UUID id, RunRecipeRequest request) {
         requireEnabled();
         DesktopRecipe recipe = requireVisible(id);
         DesktopRecipeSpec spec = parse(recipe);
         boolean monitor =
-                resolveMonitor(
-                        recipe.getDefaultMode(), request == null ? null : request.mode());
+                resolveMonitor(recipe.getDefaultMode(), request == null ? null : request.mode());
         Map<String, String> params = request == null ? null : request.params();
         boolean confirm = request != null && Boolean.TRUE.equals(request.confirmIrreversible());
         int fromStep = request == null || request.fromStep() == null ? 1 : request.fromStep();
@@ -306,8 +305,8 @@ public class DesktopRecipeService {
      * Looks a runnable recipe up by id or (case-insensitive) name. {@code agentId} null searches
      * every recipe of the tenant; otherwise the agent's own plus tenant-wide recipes.
      *
-     * @throws IllegalArgumentException when a name matches more than one recipe (the caller
-     *     should retry with the id)
+     * @throws IllegalArgumentException when a name matches more than one recipe (the caller should
+     *     retry with the id)
      */
     @Transactional(readOnly = true)
     public Optional<DesktopRecipe> findRunnable(UUID agentId, String idOrName) {
@@ -327,9 +326,7 @@ public class DesktopRecipeService {
                     candidates.stream().filter(r -> r.getName().equalsIgnoreCase(ref)).toList();
             if (named.size() > 1) {
                 throw new IllegalArgumentException(
-                        "more than one desktop recipe is named '"
-                                + ref
-                                + "' - use its id instead");
+                        "more than one desktop recipe is named '" + ref + "' - use its id instead");
             }
             return named.stream().findFirst();
         }
@@ -384,8 +381,8 @@ public class DesktopRecipeService {
     }
 
     /**
-     * Parses and re-validates the stored spec: a row edited out of band can never replay
-     * something the validator refuses.
+     * Parses and re-validates the stored spec: a row edited out of band can never replay something
+     * the validator refuses.
      */
     DesktopRecipeSpec parse(DesktopRecipe recipe) {
         try {
@@ -421,9 +418,9 @@ public class DesktopRecipeService {
     // ---- replay internals ---------------------------------------------------------------------
 
     /**
-     * The shared replay path for the tool ({@link #replayForAgent}) and REST ({@link #run}).
-     * Builds the sidecar executor and the vault-backed secret resolver and hands both to the
-     * pure {@link DesktopRecipeReplayer}. Not transactional: it performs blocking calls.
+     * The shared replay path for the tool ({@link #replayForAgent}) and REST ({@link #run}). Builds
+     * the sidecar executor and the vault-backed secret resolver and hands both to the pure {@link
+     * DesktopRecipeReplayer}. Not transactional: it performs blocking calls.
      */
     private Outcome doReplay(
             DesktopRecipeSpec spec,
@@ -453,9 +450,9 @@ public class DesktopRecipeService {
 
     /**
      * The sidecar port the replay posts steps through: the SAME client the {@code local_desktop_*}
-     * tools use, so "the desktop agent is available" has one source of truth (configured URL AND
-     * a single-user install - {@link DesktopToolSource#isEnabled()}). Null when the tools are
-     * off. Package-private so tests can substitute a fake without a loopback server.
+     * tools use, so "the desktop agent is available" has one source of truth (configured URL AND a
+     * single-user install - {@link DesktopToolSource#isEnabled()}). Null when the tools are off.
+     * Package-private so tests can substitute a fake without a loopback server.
      */
     DesktopRecipeReplayer.Executor executor() {
         DesktopToolSource source = desktopTools.getIfAvailable();
@@ -595,8 +592,8 @@ public class DesktopRecipeService {
     }
 
     /**
-     * Agent access check; throws ResourceAccessDeniedException (404) when the caller cannot see
-     * the agent.
+     * Agent access check; throws ResourceAccessDeniedException (404) when the caller cannot see the
+     * agent.
      */
     private void requireAgent(UUID agentId, PermissionLevel level) {
         AgentService agents = agentService.getIfAvailable();

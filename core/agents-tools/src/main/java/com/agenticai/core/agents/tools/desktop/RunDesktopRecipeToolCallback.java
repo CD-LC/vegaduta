@@ -288,7 +288,9 @@ public class RunDesktopRecipeToolCallback implements ToolCallback, ToolConfirmat
         }
     }
 
-    /** Same hand-built-JSON bug class {@code DesktopToolCallback#error} fixed: a map, never concat. */
+    /**
+     * Same hand-built-JSON bug class {@code DesktopToolCallback#error} fixed: a map, never concat.
+     */
     private static String error(String message) {
         try {
             return MAPPER.writeValueAsString(Map.of("error", message));

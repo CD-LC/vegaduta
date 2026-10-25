@@ -15,8 +15,8 @@ import java.util.UUID;
  * #getRecipeJson()} is a serialized {@link DesktopRecipeSpec}; it never holds a secret or a
  * user-supplied value (enforced by {@link DesktopRecipeValidator} on every write and again before
  * every replay). {@code agentId} null means every agent of the tenant may run it. {@code
- * defaultMode} is the replay posture: {@code AUTO} runs steps back-to-back, {@code MONITOR}
- * pauses between them so the person can watch.
+ * defaultMode} is the replay posture: {@code AUTO} runs steps back-to-back, {@code MONITOR} pauses
+ * between them so the person can watch.
  */
 @Entity
 @Table(name = "desktop_recipe")

@@ -71,21 +71,106 @@ export type ToolRisk = "low" | "medium" | "high";
 // Verbs that act on the world. Mirrors the server's own default-sensitive action patterns (ApprovalPolicyService:
 // send, delete, payment, refund, charge, transfer, code run/apply).
 const ACTION_VERBS = new Set([
-  "send", "post", "publish", "reply", "tweet", "invite", "broadcast", "notify",
-  "delete", "remove", "drop", "destroy", "purge", "wipe", "erase", "cancel", "revoke", "terminate",
-  "pay", "refund", "charge", "transfer", "purchase", "buy", "withdraw",
-  "exec", "execute", "run", "deploy", "apply", "commit", "push", "merge", "install",
-  "write", "overwrite", "upload", "grant", "share", "sudo",
+  "send",
+  "post",
+  "publish",
+  "reply",
+  "tweet",
+  "invite",
+  "broadcast",
+  "notify",
+  "delete",
+  "remove",
+  "drop",
+  "destroy",
+  "purge",
+  "wipe",
+  "erase",
+  "cancel",
+  "revoke",
+  "terminate",
+  "pay",
+  "refund",
+  "charge",
+  "transfer",
+  "purchase",
+  "buy",
+  "withdraw",
+  "exec",
+  "execute",
+  "run",
+  "deploy",
+  "apply",
+  "commit",
+  "push",
+  "merge",
+  "install",
+  "write",
+  "overwrite",
+  "upload",
+  "grant",
+  "share",
+  "sudo",
 ]);
 // Nouns that make a tool sensitive on their own (create_invoice, payment_link, run via shell) - but NOT when the
 // name leads with a read verb ("get_invoice", "list_messages" are lookups).
 const SENSITIVE_NOUNS = new Set([
-  "payment", "payments", "invoice", "billing", "order", "email", "sms", "message", "shell", "bash", "command",
+  "payment",
+  "payments",
+  "invoice",
+  "billing",
+  "order",
+  "email",
+  "sms",
+  "message",
+  "shell",
+  "bash",
+  "command",
 ]);
-const MEDIUM_VERBS = new Set(["create", "update", "set", "edit", "add", "insert", "save", "put", "patch", "move", "rename", "schedule", "book", "assign", "tag", "label", "archive", "enable", "disable"]);
+const MEDIUM_VERBS = new Set([
+  "create",
+  "update",
+  "set",
+  "edit",
+  "add",
+  "insert",
+  "save",
+  "put",
+  "patch",
+  "move",
+  "rename",
+  "schedule",
+  "book",
+  "assign",
+  "tag",
+  "label",
+  "archive",
+  "enable",
+  "disable",
+]);
 const READ_VERBS = new Set([
-  "get", "list", "read", "search", "find", "fetch", "lookup", "query", "view", "describe", "show", "count", "check",
-  "status", "summarize", "summarise", "preview", "inspect", "retrieve", "browse", "download", "extract",
+  "get",
+  "list",
+  "read",
+  "search",
+  "find",
+  "fetch",
+  "lookup",
+  "query",
+  "view",
+  "describe",
+  "show",
+  "count",
+  "check",
+  "status",
+  "summarize",
+  "summarise",
+  "preview",
+  "inspect",
+  "retrieve",
+  "browse",
+  "download",
+  "extract",
 ]);
 
 function nameTokens(name: string): string[] {
@@ -120,7 +205,8 @@ export function requestRisk(item: ApprovalRequestItem): ToolRisk {
 // Arguments: redacted preview
 // ---------------------------------------------------------------------------------------------------------------
 
-const SENSITIVE_KEY = /pass(word|wd)?|secret|token|api[-_]?key|authorization|credential|cookie|bearer|private[-_]?key|session[-_]?id|otp|cvv|ssn/i;
+const SENSITIVE_KEY =
+  /pass(word|wd)?|secret|token|api[-_]?key|authorization|credential|cookie|bearer|private[-_]?key|session[-_]?id|otp|cvv|ssn/i;
 export const REDACTED_MARK = "••••••";
 
 function redactValue(value: unknown, counter: { n: number }): unknown {
@@ -154,7 +240,10 @@ export interface RedactedArguments {
  * envelope's plumbing (tenant, subject, ids) is never shown. Truncation is reported so the caller can refuse a
  * one-click approve of something the person could not read in full.
  */
-export function redactedArguments(payload: string | null | undefined, max: number = ARGS_PREVIEW_MAX_CHARS): RedactedArguments {
+export function redactedArguments(
+  payload: string | null | undefined,
+  max: number = ARGS_PREVIEW_MAX_CHARS
+): RedactedArguments {
   if (typeof payload !== "string" || !payload.trim()) return { text: null, redactedCount: 0, truncated: false };
   const counter = { n: 0 };
   let text: string;
@@ -163,7 +252,8 @@ export function redactedArguments(payload: string | null | undefined, max: numbe
     let args: unknown = parsed;
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && "replay" in parsed) {
       if ("arguments" in parsed) args = (parsed as { arguments: unknown }).arguments;
-      else if (typeof (parsed as { argumentsRaw?: unknown }).argumentsRaw === "string") args = (parsed as { argumentsRaw: string }).argumentsRaw;
+      else if (typeof (parsed as { argumentsRaw?: unknown }).argumentsRaw === "string")
+        args = (parsed as { argumentsRaw: string }).argumentsRaw;
       else {
         // An action a tool gated itself on (code-workspace run/apply, channel send) keeps its own fields at the
         // top level next to the envelope: they are what would run.
@@ -244,7 +334,12 @@ export function hasClientFilters(filters: QueueFilters, statusFilter: string): b
   return !!(filters.agent || filters.tool || filters.age) || statusFilter === EXPIRED_FILTER;
 }
 
-export function matchesFilters(item: ApprovalRequestItem, filters: QueueFilters, statusFilter: string, now: number): boolean {
+export function matchesFilters(
+  item: ApprovalRequestItem,
+  filters: QueueFilters,
+  statusFilter: string,
+  now: number
+): boolean {
   if (statusFilter === EXPIRED_FILTER && !isExpiredRequest(item)) return false;
   if (filters.agent && requestAgentId(item.requestedBy) !== filters.agent) return false;
   if (filters.tool && requestToolName(item) !== filters.tool) return false;

@@ -113,11 +113,7 @@ export default function DesktopMonitor({
           {steps!.map((s) => (
             <li key={s.index} className={s.ok ? "text-muted-foreground" : "text-destructive"}>
               <span className="mr-1 inline-flex align-middle">
-                {s.ok ? (
-                  <Check className="size-3" aria-hidden="true" />
-                ) : (
-                  <X className="size-3" aria-hidden="true" />
-                )}
+                {s.ok ? <Check className="size-3" aria-hidden="true" /> : <X className="size-3" aria-hidden="true" />}
               </span>
               {t("monitorStep", { index: s.index, action: s.action })}
               {s.note ? ` — ${s.note}` : ""}

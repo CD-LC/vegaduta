@@ -54,7 +54,9 @@ public class DesktopMonitorController {
 
     private static final Logger log = LoggerFactory.getLogger(DesktopMonitorController.class);
 
-    /** Callers with a frame request in flight; emptied in a finally so a failure never wedges it. */
+    /**
+     * Callers with a frame request in flight; emptied in a finally so a failure never wedges it.
+     */
     private final Set<String> inFlight = ConcurrentHashMap.newKeySet();
 
     /** The shared sidecar client, or null when the desktop tools are off and the endpoint 404s. */
