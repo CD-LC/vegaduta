@@ -1418,6 +1418,10 @@ app:
       fast-buffering-mode: ${APP_CHAT_PARITY_FAST_BUFFERING_MODE:FROM_FIRST_LINK}
       # Text that starts the held part, ignoring case; the invented-link guard's host markers are always added.
       fast-hold-markers: ${APP_CHAT_PARITY_FAST_HOLD_MARKERS:http,www.}
+      # A streamed turn emits only the tool loop's terminal round: mid-loop narration between tool
+      # calls (search chatter, retry apologies) is held and dropped; the final synthesis round is
+      # emitted as one burst once its finish reason proves it terminal. false = every round streams.
+      fast-terminal-rounds-only: ${APP_CHAT_PARITY_FAST_TERMINAL_ROUNDS_ONLY:true}
       # The buffered verifiers see the newest this-many characters of the turn's tool results. 0 = all of it.
       verifier-max-evidence-chars: ${APP_CHAT_PARITY_VERIFIER_MAX_EVIDENCE_CHARS:12000}
       # A verifier rewrites a flagged answer WITHOUT tools (re-running them could repeat a side effect). A rewrite

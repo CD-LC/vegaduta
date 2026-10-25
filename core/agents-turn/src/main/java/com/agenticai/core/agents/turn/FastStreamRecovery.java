@@ -276,6 +276,10 @@ final class FastStreamRecovery {
      * which is propagated.
      */
     Flux<String> closeHalfResponse(Throwable e) {
+        // Under terminal-only streaming (app.chat.parity.fast-terminal-rounds-only) accumulated only
+        // fills at the terminal round's end, so a mid-loop failure arrives here "empty" too - the
+        // error path stays identical: nothing the person saw was delivered, and the exception
+        // mapper reports the failure rather than a graceful close pretending mid-work was output.
         if (t.accumulated.isEmpty()) {
             return Flux.error(e);
         }

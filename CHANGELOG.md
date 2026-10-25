@@ -49,6 +49,16 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **A turn parked on a human approval no longer asks the model to write its closing reply.** The
+  tool loop now ends the round the marker lands in (`returnDirect`), and the person reads the
+  platform's fixed pause text (new prompt key `message.approval.parked`) - a structured pause,
+  not model prose - while the pending approval stays in the inbox and the journal. Queued
+  post-park calls are answered with the `approval_parked` marker result.
+- **A streamed (FAST) turn emits only the tool loop's terminal round.** Mid-loop narration -
+  the assistant text of rounds that ended in `tool_calls` - is held and dropped; the final
+  synthesis round arrives as one burst once its finish reason proves it terminal. New:
+  `app.chat.parity.fast-terminal-rounds-only` (default `true`; `false` restores per-round
+  streaming).
 - **A streamed (FAST) turn now has a total wall-clock ceiling.** The idle watchdog
   (`stream-idle-timeout`) only bounds model silence and re-arms on every tool round, so a turn
   that kept calling tools (each call answering quickly) could run for hours. One streamed turn

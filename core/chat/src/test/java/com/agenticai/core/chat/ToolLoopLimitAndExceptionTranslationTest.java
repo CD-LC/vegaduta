@@ -142,10 +142,17 @@ class ToolLoopLimitAndExceptionTranslationTest {
             new Prompt(history, optionsOffering(tool)), responseCalling(TOOL));
 
         assertEquals(0, tool.calls.get(), "a post-park call must not execute");
-        assertTrue(lastToolResponses(result).get(0).responseData()
-            .contains(ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED));
+        // returnDirect: the loop closes without another model call; the fixed pause reply rides the
+        // first response and the rest keep the approval_parked marker.
+        assertTrue(result.returnDirect());
+        List<ToolResponseMessage.ToolResponse> responses = lastToolResponses(result);
+        assertTrue(responses.get(0).responseData().contains("waiting"),
+            responses.get(0).responseData());
+        assertTrue(responses.stream().skip(1).allMatch(r ->
+            r.responseData().contains("\"approval_parked\"")),
+            responses.toString());
         assertEquals(1.0, meters.counter(ArgumentSanitizingToolCallingManager.LOOP_LIMIT_METRIC,
-            "stage", "soft", "reason", "approval_parked").count());
+            "stage", "parked", "reason", "approval_parked").count());
     }
 
     // --- exception translation ------------------------------------------

@@ -277,3 +277,12 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   `ToolSearchDeferral.java` (deferred-name list), `core/app-config/application.yml`,
   `deploy/compose/.env.example`, `docs/configuration.md`, `CHANGELOG.md`, `web/messages/en.json`,
   `web/app/lib/api/fixtures/settingsCatalog.snapshot.json`, `docs/prompts.md`.
+- 2026-10-25, Devin - ACTIVE CLAIM, strict HITL + terminal-only streaming on
+  `fix/kb-url-ingest-mcp-static-upgrade` (PR #166): parked turns close without a
+  model call (`ArgumentSanitizingToolCallingManager`, `ToolLoopParkedClose`,
+  `message.approval.parked` prompt, `ChatPrompts`), streamed turns emit only the
+  terminal round (`TerminalRoundStreamAdvisor`, `app.chat.parity.fast-terminal-rounds-only`,
+  `ChatParityProperties`, `parity.properties`, `application.yml`,
+  `docs/configuration.md`, `CHANGELOG.md`, `scripts/ci/file-size-baseline.txt`),
+  plus null-translate guard + soft/hard-stop extraction (`ToolLoopSoftStops`,
+  `FastStreamRecovery` comment, `FastStreamTurn`).

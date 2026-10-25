@@ -261,6 +261,10 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 executable = withExceptionTranslation(executable);
             }
             result = delegate.executeToolCalls(executable, chatResponse);
+            // A call that parked this round (the guard wrote the approval_parked marker into its
+            // result) ends the turn without another model call: the loop hands back the parked
+            // reply - the platform's fixed pause text - instead of letting the model write one.
+            result = ToolLoopParkedClose.close(prompts, prompt, result);
         }
         List<Message> sanitized = sanitizeHistory(result.conversationHistory(), objectMapper);
         List<Message> history = result.returnDirect()
@@ -329,7 +333,13 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         List<Message> history = new ArrayList<>(prompt.getInstructions());
         history.add(requesting);
         List<AssistantMessage.ToolCall> calls = requesting.getToolCalls();
-        List<ToolResponseMessage.ToolResponse> responses = new ArrayList<>(calls.size());
+
+        if (parked) {
+            // A parked turn ends without another model call (ToolLoopParkedClose): queued calls get
+            // the parked marker and the fixed pause reply - not model prose - closes the turn.
+            increment(LOOP_LIMIT_METRIC, 1, "stage", "parked", "reason", reason);
+            return ToolLoopParkedClose.closeQueued(prompts, prompt, history, calls);
+        }
 
         if (!softStopAlreadySent) {
             log.warn(
@@ -338,13 +348,9 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 reason, round, roundCap, unknownCalls, maxUnknownToolCalls, calls.size()
             );
             increment(LOOP_LIMIT_METRIC, 1, "stage", "soft", "reason", reason);
-            String softStop =
-                    tokensExceeded ? softStopTokenResult(prompt) : softStopResult(prompt, round - 1);
-            for (AssistantMessage.ToolCall call : calls) {
-                responses.add(new ToolResponseMessage.ToolResponse(call.id(), call.name(), softStop));
-            }
-            history.add(ToolResponseMessage.builder().responses(responses).build());
-            return ToolExecutionResult.builder().conversationHistory(history).returnDirect(false).build();
+            return ToolLoopSoftStops.soft(
+                prompts, objectMapper, budgetExhaustedMessage, prompt, tokensExceeded, round - 1,
+                history, calls);
         }
 
         log.warn(
@@ -352,30 +358,7 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 + "loop with returnDirect", reason, round
         );
         increment(LOOP_LIMIT_METRIC, 1, "stage", "hard", "reason", reason);
-        for (int i = 0; i < calls.size(); i++) {
-            // ToolExecutionResult.buildGenerations turns each response into one
-            // Generation and ChatClient#content() reads only the first, so the
-            // closing message goes on the first response and the rest stay
-            // empty rather than repeating it in a multi-generation consumer.
-            responses.add(new ToolResponseMessage.ToolResponse(
-                calls.get(i).id(), calls.get(i).name(), i == 0 ? hardStopReply(prompt) : ""));
-        }
-        history.add(ToolResponseMessage.builder().responses(responses).build());
-        return ToolExecutionResult.builder().conversationHistory(history).returnDirect(true).build();
-    }
-
-    /** The closing reply (also stored in the history): the registry's, else the operator's property, else the shipped one. */
-    private String hardStopReply(Prompt prompt) {
-        return ChatPrompts.textWithConfiguredAlias(
-            prompts, ChatPrompts.HARD_STOP, ToolLoopRunHooks.promptRun(prompt), hardStopReply);
-    }
-
-    private String softStopResult(Prompt prompt, int roundsUsed) {
-        return ToolLoopSoftStops.rounds(prompts, objectMapper, budgetExhaustedMessage, prompt, roundsUsed);
-    }
-
-    private String softStopTokenResult(Prompt prompt) {
-        return ToolLoopSoftStops.tokens(prompts, objectMapper, prompt);
+        return ToolLoopSoftStops.hard(prompts, hardStopReply, prompt, history, calls);
     }
 
     /**
