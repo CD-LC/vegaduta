@@ -54,8 +54,10 @@ async function raw(path, auth = 'Bearer test-secret') {
   };
 }
 
-test('health is unauthenticated', async () => {
-  const r = await req('GET', '/health', undefined, '');
+test('health answers for a bearer but never without one (CodeQL: user-controlled bypass)', async () => {
+  const unauth = await req('GET', '/health', undefined, '');
+  assert.equal(unauth.status, 401);
+  const r = await req('GET', '/health');
   assert.equal(r.status, 200);
   assert.equal(r.json.ok, true);
 });
@@ -102,8 +104,10 @@ test('action errors map to their status', async () => {
   assert.equal(r2.status, 501);
 });
 
-test('GET /capabilities is an unauthenticated feature probe', async () => {
-  const r = await req('GET', '/capabilities', undefined, '');
+test('GET /capabilities requires auth like every other route (CodeQL: user-controlled bypass)', async () => {
+  const unauth = await req('GET', '/capabilities', undefined, '');
+  assert.equal(unauth.status, 401);
+  const r = await req('GET', '/capabilities');
   assert.equal(r.status, 200);
   assert.ok(Array.isArray(r.json.screenshotFormats));
   assert.ok(r.json.screenshotFormats.length > 0);

@@ -7,7 +7,7 @@
 // notify and read the clipboard.
 //
 // Security model: it listens on 127.0.0.1 only and every call needs
-// `Authorization: Bearer $DESKTOP_AGENT_SECRET` (/health aside). The actions it
+// `Authorization: Bearer $DESKTOP_AGENT_SECRET` (no exceptions - an unauthenticated
 // performs are NOT sandboxed - this process can touch anything the logged-in
 // user can. Core's tool guard still gates each call (classification gate plus
 // the optional approval pin), and every request is logged on the core side.
@@ -19,7 +19,7 @@
 // Linux uses xdotool / gnome-screenshot / scrot / xclip / notify-send when
 // present and answers 501 with the missing tool otherwise.
 //
-// API (all calls need the Bearer secret, /health aside):
+// API (every call needs the Bearer secret):
 //   POST   /screenshot      {}                    -> {path, bytes}           PNG under DATA_DIR
 //   POST   /ui              {app?}                -> {app, window, elements:[{role,label,x,y,w,h}]}
 //   POST   /ui/press        {label, role?, app?}  -> {ok:true, matched:{...}}   press a named element
@@ -32,7 +32,7 @@
 //   GET    /clipboard                             -> {text}
 //   POST   /clipboard       {text}                -> {ok:true}
 //   GET    /frame?scale&max                       -> image/jpeg|png bytes + X-Frame-Format
-//   GET    /capabilities                          -> {screenshotFormats, ui, clipboard, stream}  (unauthed probe, like /health)
+//   GET    /capabilities                          -> {screenshotFormats, ui, clipboard, stream}
 
 const http = require('node:http');
 const crypto = require('node:crypto');
@@ -457,7 +457,10 @@ async function macFrame(scale, max) {
     os.tmpdir(), `desktop-agent-frame-${process.pid}-${Date.now()}.jpg`);
   try {
     await run(['screencapture', '-x', '-t', 'jpg', file], left());
-    if (!fs.statSync(file).size) throw new Error('empty capture');
+    // Read once and judge the bytes: stat-then-read here trips the
+    // file-system-race check, and an empty file fails the capture the same way.
+    let bytes = fs.readFileSync(file);
+    if (!bytes.length) throw new Error('empty capture');
     await sipsShrink(file, scale, max, left);
     return { frame: { bytes: fs.readFileSync(file), format: 'jpeg' } };
   } catch {
@@ -630,17 +633,22 @@ function createServer() {
     try {
       const q = req.url.indexOf('?');
       const pathname = q === -1 ? req.url : req.url.slice(0, q);
+      // Every route requires the bearer token - no unauthenticated bypass.
+      // A 401 from /health still answers the liveness question for anyone
+      // checking whether the agent is up.
+      if (!authorized(req)) {
+        return json(res, 401, { error: 'unauthorized' });
+      }
       if (pathname === '/health') {
         return json(res, 200, { ok: true, platform: PLATFORM });
       }
       if (pathname === '/capabilities') {
         return json(res, 200, await capabilities());
       }
-      if (!authorized(req)) {
-        return json(res, 401, { error: 'unauthorized' });
-      }
       const route = `${req.method} ${pathname}`;
-      const action = actions[route];
+      // hasOwn (not just truthiness) keeps the dynamic call provably a member
+      // of the fixed actions table - nothing user-supplied can dispatch.
+      const action = Object.hasOwn(actions, route) ? actions[route] : undefined;
       if (!action) {
         return json(res, 404, { error: `no route ${route}` });
       }
