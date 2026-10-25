@@ -121,6 +121,40 @@ class ToolLoopLimitAndExceptionTranslationTest {
             "stage", "soft", "reason", "unknown_tools").count());
     }
 
+    @Test
+    void aParkedTurnEndsTheLoopInsteadOfQueueingCallsForever() {
+        CountingTool tool = new CountingTool(TOOL, "ok");
+        SimpleMeterRegistry meters = new SimpleMeterRegistry();
+        ToolCallingManager manager = managerWithCaps(25, 8, meters);
+
+        // One prior round ended parked on a human approval; the model ignores the parked text and
+        // calls another tool anyway. Without the parked check this would loop to the round cap.
+        List<Message> history = new ArrayList<>();
+        history.add(new UserMessage("send the invoice"));
+        history.add(AssistantMessage.builder().content("")
+            .toolCalls(List.of(new AssistantMessage.ToolCall("p1", "function", TOOL, "{}"))).build());
+        history.add(ToolResponseMessage.builder()
+            .responses(List.of(new ToolResponseMessage.ToolResponse("p1", TOOL,
+                "{\"error\":\"" + ArgumentSanitizingToolCallingManager.APPROVAL_PARKED + "\",\"result\":\"waiting on approval\"}")))
+            .build());
+
+        ToolExecutionResult result = manager.executeToolCalls(
+            new Prompt(history, optionsOffering(tool)), responseCalling(TOOL));
+
+        assertEquals(0, tool.calls.get(), "a post-park call must not execute");
+        // returnDirect: the loop closes without another model call; the fixed pause reply rides the
+        // first response and the rest keep the approval_parked marker.
+        assertTrue(result.returnDirect());
+        List<ToolResponseMessage.ToolResponse> responses = lastToolResponses(result);
+        assertTrue(responses.get(0).responseData().contains("waiting"),
+            responses.get(0).responseData());
+        assertTrue(responses.stream().skip(1).allMatch(r ->
+            r.responseData().contains("\"approval_parked\"")),
+            responses.toString());
+        assertEquals(1.0, meters.counter(ArgumentSanitizingToolCallingManager.LOOP_LIMIT_METRIC,
+            "stage", "parked", "reason", "approval_parked").count());
+    }
+
     // --- exception translation ------------------------------------------
 
     @Test

@@ -699,6 +699,27 @@ class AgentApi:
         """
         return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-base", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
+    def set_knowledge_write(self, agent_id: str, body: m.AgentKnowledgeBaseToggleRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentKnowledgeWriteAccessResponse:
+        """Set knowledge write.
+
+        PATCH /api/agents/{agentId}/knowledge-write
+        """
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-write", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
+
+    def get_knowledge_write_access(self, agent_id: str) -> m.AgentKnowledgeWriteAccessResponse:
+        """Get knowledge write access.
+
+        GET /api/agents/{agentId}/knowledge-write-access
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/knowledge-write-access")
+
+    def set_knowledge_write_access(self, agent_id: str, body: m.AgentKnowledgeWriteAccessUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentKnowledgeWriteAccessResponse:
+        """Set knowledge write access.
+
+        PATCH /api/agents/{agentId}/knowledge-write-access
+        """
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-write-access", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
+
     def update_model(self, agent_id: str, body: m.AgentModelUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Update model.
 
@@ -5536,6 +5557,13 @@ class KnowledgeApi:
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
         return self._http.request("POST", "/api/knowledge/ingest", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def ingest_url(self, body: m.IngestUrlRequest, *, idempotency_key: Optional[str] = None) -> m.KnowledgeUrlIngester_UrlIngestResult:
+        """Ingest url.
+
+        POST /api/knowledge/ingest-url
+        """
+        return self._http.request("POST", "/api/knowledge/ingest-url", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def reembed_job(self, job_id: str) -> m.KnowledgeReembedJobResponse:
         """Reembed job.

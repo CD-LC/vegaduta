@@ -803,6 +803,30 @@ export class AgentApi {
   }
 
   /**
+   * Set knowledge write.
+   * `PATCH /api/agents/{agentId}/knowledge-write`
+   */
+  setKnowledgeWrite(agentId: string, body: T.AgentKnowledgeBaseToggleRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string; "If-Match"?: string }>): Promise<T.AgentKnowledgeWriteAccessResponse> {
+    return this.http.request<T.AgentKnowledgeWriteAccessResponse>({ ...options, method: "PATCH", path: `/api/agents/${encodeURIComponent(String(agentId))}/knowledge-write`, body });
+  }
+
+  /**
+   * Get knowledge write access.
+   * `GET /api/agents/{agentId}/knowledge-write-access`
+   */
+  getKnowledgeWriteAccess(agentId: string, options?: CallOptions): Promise<T.AgentKnowledgeWriteAccessResponse> {
+    return this.http.request<T.AgentKnowledgeWriteAccessResponse>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/knowledge-write-access` });
+  }
+
+  /**
+   * Set knowledge write access.
+   * `PATCH /api/agents/{agentId}/knowledge-write-access`
+   */
+  setKnowledgeWriteAccess(agentId: string, body: T.AgentKnowledgeWriteAccessUpdateRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string; "If-Match"?: string }>): Promise<T.AgentKnowledgeWriteAccessResponse> {
+    return this.http.request<T.AgentKnowledgeWriteAccessResponse>({ ...options, method: "PATCH", path: `/api/agents/${encodeURIComponent(String(agentId))}/knowledge-write-access`, body });
+  }
+
+  /**
    * Update model.
    * `PATCH /api/agents/{agentId}/model`
    */
@@ -6546,6 +6570,14 @@ export class KnowledgeApi {
    */
   ingest(body: T.IngestRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.IngestResponse> {
     return this.http.request<T.IngestResponse>({ ...options, method: "POST", path: "/api/knowledge/ingest", body });
+  }
+
+  /**
+   * Ingest url.
+   * `POST /api/knowledge/ingest-url`
+   */
+  ingestUrl(body: T.IngestUrlRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.KnowledgeUrlIngester_UrlIngestResult> {
+    return this.http.request<T.KnowledgeUrlIngester_UrlIngestResult>({ ...options, method: "POST", path: "/api/knowledge/ingest-url", body });
   }
 
   /**

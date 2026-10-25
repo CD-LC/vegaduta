@@ -26,6 +26,9 @@ sa-*.json
 # --- Agent / tool scratch ---------------------------------------------------
 .claude/
 scratchpad/
+# ...but the real Java package of the same name in core/agents-tools is source,
+# not scratch - a bare "scratchpad/" matches directories at any depth.
+!core/agents-tools/src/**/scratchpad/
 .aider*
 .cursor/
 .windsurf/

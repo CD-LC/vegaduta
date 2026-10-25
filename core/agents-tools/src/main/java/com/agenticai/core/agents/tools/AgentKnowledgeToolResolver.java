@@ -29,6 +29,7 @@ import com.agenticai.core.knowledge.KnowledgeCollectionService;
 import com.agenticai.core.knowledge.KnowledgeIngestionService;
 import com.agenticai.core.knowledge.KnowledgeSearchService;
 import com.agenticai.core.knowledge.KnowledgeSearchToolCallback;
+import com.agenticai.core.knowledge.KnowledgeUrlIngester;
 import com.agenticai.core.knowledge.ListKnowledgeCollectionsToolCallback;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,17 +44,29 @@ import org.springframework.beans.factory.ObjectProvider;
  * Tool-resolution group extracted from {@link AgentToolProvider} (extract-only, no behavior
  * change). Not a Spring bean: constructed by AgentToolProvider.
  */
+/**
+ * The four "knowledge"-profile-gated services {@link AgentKnowledgeToolResolver} resolves tools
+ * from, bundled so the resolver's constructor stays under the 12-collaborator architecture cap
+ * (StructureRulesTest) now that {@link KnowledgeUrlIngester} joined them. Every member is an
+ * ObjectProvider for the same reason they always were: {@code @Profile("knowledge")}-scoped,
+ * absent when that profile is off.
+ */
+record KnowledgeServiceProviders(
+        ObjectProvider<KnowledgeSearchService> search,
+        ObjectProvider<KnowledgeCollectionService> collections,
+        ObjectProvider<KnowledgeIngestionService> ingestion,
+        // Backs add_to_knowledge_base's `url` argument (server-side document download into a
+        // collection). Null provider value -> the tool still resolves but explains that url
+        // ingestion is unavailable, matching every other optional surface here.
+        ObjectProvider<KnowledgeUrlIngester> urlIngester) {}
+
 final class AgentKnowledgeToolResolver {
 
     private final AgentToolGuard toolGuard;
 
-    private final ObjectProvider<KnowledgeSearchService> knowledgeSearchService;
-    private final ObjectProvider<KnowledgeCollectionService> knowledgeCollectionService;
     // New feature - backs AddToKnowledgeBaseToolCallback (the write/insert companion to
-    // search_knowledge_base). ObjectProvider for the same reason knowledgeSearchService/
-    // knowledgeCollectionService are ones: @Profile("knowledge")-scoped, absent when that profile
-    // is off.
-    private final ObjectProvider<KnowledgeIngestionService> knowledgeIngestionService;
+    // search_knowledge_base) plus the two search/list tools; see the record's javadoc.
+    private final KnowledgeServiceProviders knowledgeProviders;
     private final ObjectProvider<AgentMemoryService> agentMemoryService;
     // Shared cross-agent memory tier (#847).
     private final ObjectProvider<TenantMemoryService> tenantMemoryService;
@@ -83,9 +96,7 @@ final class AgentKnowledgeToolResolver {
 
     AgentKnowledgeToolResolver(
             AgentToolGuard toolGuard,
-            ObjectProvider<KnowledgeSearchService> knowledgeSearchService,
-            ObjectProvider<KnowledgeCollectionService> knowledgeCollectionService,
-            ObjectProvider<KnowledgeIngestionService> knowledgeIngestionService,
+            KnowledgeServiceProviders knowledgeProviders,
             ObjectProvider<AgentMemoryService> agentMemoryService,
             ObjectProvider<TenantMemoryService> tenantMemoryService,
             AgentService agentService,
@@ -95,9 +106,7 @@ final class AgentKnowledgeToolResolver {
             MemoryWriteArbitrationService memoryWriteArbitrationService,
             ObjectProvider<CodeIntelClient> codeIntelClient) {
         this.toolGuard = toolGuard;
-        this.knowledgeSearchService = knowledgeSearchService;
-        this.knowledgeCollectionService = knowledgeCollectionService;
-        this.knowledgeIngestionService = knowledgeIngestionService;
+        this.knowledgeProviders = knowledgeProviders;
         this.agentMemoryService = agentMemoryService;
         this.tenantMemoryService = tenantMemoryService;
         this.agentService = agentService;
@@ -145,8 +154,8 @@ final class AgentKnowledgeToolResolver {
             String userMessage,
             ChatClient chatClient,
             boolean rigorous) {
-        KnowledgeSearchService searchService = knowledgeSearchService.getIfAvailable();
-        KnowledgeCollectionService collectionService = knowledgeCollectionService.getIfAvailable();
+        KnowledgeSearchService searchService = knowledgeProviders.search().getIfAvailable();
+        KnowledgeCollectionService collectionService = knowledgeProviders.collections().getIfAvailable();
         if (searchService == null
                 || collectionService == null
                 || !agentService.isKnowledgeBaseEnabled(agentId)) {
@@ -187,7 +196,7 @@ final class AgentKnowledgeToolResolver {
                         chatClient,
                         rigorous));
 
-        KnowledgeIngestionService ingestionService = knowledgeIngestionService.getIfAvailable();
+        KnowledgeIngestionService ingestionService = knowledgeProviders.ingestion().getIfAvailable();
         if (ingestionService != null && agentService.isKnowledgeWriteEnabled(agentId)) {
             Set<UUID> allowedWriteCollectionIds =
                     purposeFiltered(
@@ -198,7 +207,8 @@ final class AgentKnowledgeToolResolver {
                             collectionService,
                             allowedWriteCollectionIds,
                             agentId,
-                            sessionId);
+                            sessionId,
+                            knowledgeProviders.urlIngester().getIfAvailable());
             tools.add(
                     guardAndLog(
                             addTool,

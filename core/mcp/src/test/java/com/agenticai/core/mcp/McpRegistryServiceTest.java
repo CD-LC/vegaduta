@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,6 +14,8 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.mcp.dto.McpServerRegistrationRequest;
 import com.agenticai.core.mcp.dto.McpServerRegistrationResponse;
+import com.agenticai.core.secrets.SecretReferenceResolver;
+import com.agenticai.core.secrets.SecretVaultService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -273,6 +276,79 @@ class McpRegistryServiceTest extends McpRegistryServiceFixture {
 
         assertTrue(response.wasUpdate());
         assertTrue(response.warnings().stream().anyMatch(w -> w.contains("already existed")));
+    }
+
+    // --- the dead static-reference upgrade (McpStaticReferenceUpgrader) ------
+    // The fixture's own service sees every name as statically served (so nothing upgrades);
+    // these build a service whose lookup says the static server can NOT serve this name -
+    // the "mcp profile off / hidden by the exposure policy" situation the fix is for.
+
+    private McpRegistryService serviceWithUnservedStatics() {
+        McpStaticReferenceUpgrader upgrader = new McpStaticReferenceUpgrader(
+            repository, catalogService, new McpStdioCommandGuard(""), encryptionService,
+            new SecretReferenceResolver(mock(SecretVaultService.class)),
+            () -> (McpStaticServerAvailability) name -> false);
+        return new McpRegistryService(
+            repository, encryptionService,
+            new McpRemoteUrlGuard(""), new McpStdioCommandGuard(""),
+            tenantLimits, catalogService,
+            new SecretReferenceResolver(mock(SecretVaultService.class)),
+            upgrader);
+    }
+
+    @Test
+    void aNameOnlyReadyEntryUpgradesToItsCatalogSpecWhenTheStaticServerIsUnserved() {
+        when(repository.findByName("puppeteer")).thenReturn(Optional.empty());
+        McpServerRegistrationRequest request =
+            new McpServerRegistrationRequest("puppeteer", McpServerType.STDIO, "desc", true);
+
+        McpServerRegistrationResponse response = serviceWithUnservedStatics().register(request);
+
+        assertTrue(response.dynamic(), "unserved static reference should upgrade to dynamic");
+        assertEquals("npx", response.command());
+        assertTrue(response.args().contains("@modelcontextprotocol/server-puppeteer"),
+            "the catalog's own launch spec: " + response.args());
+    }
+
+    @Test
+    void aNameOnlyReadyEntryStaysAReferenceWhenTheStaticServerCanServeIt() {
+        when(repository.findByName("puppeteer")).thenReturn(Optional.empty());
+        McpServerRegistrationRequest request =
+            new McpServerRegistrationRequest("puppeteer", McpServerType.STDIO, "desc", true);
+
+        McpServerRegistrationResponse response = service.register(request);
+
+        assertFalse(response.dynamic(), "the fixture's lookup serves every name - no upgrade");
+        assertFalse(response.command() != null && response.command().equals("npx"));
+    }
+
+    @Test
+    void anEntryWithNoCatalogLaunchSpecNeverUpgrades() {
+        // filesystem has no dynamicCommand in the catalog (its root dir is per-tenant input) -
+        // even with nothing statically served it must stay a plain reference.
+        when(repository.findByName("filesystem")).thenReturn(Optional.empty());
+        McpServerRegistrationRequest request =
+            new McpServerRegistrationRequest("filesystem", McpServerType.STDIO, "desc", true);
+
+        McpServerRegistrationResponse response = serviceWithUnservedStatics().register(request);
+
+        assertFalse(response.dynamic());
+    }
+
+    @Test
+    void reEnablingADeadStaticReferenceUpgradesItToDynamic() {
+        // The repair path for rows written before the fix: enabled=true on a still-static row
+        // that this deployment can't serve.
+        McpServerRegistration entity =
+            new McpServerRegistration("playwright-vision", McpServerType.STDIO, "desc", false);
+        UUID id = UUID.randomUUID();
+        when(repository.findById(id)).thenReturn(Optional.of(entity));
+
+        serviceWithUnservedStatics().setEnabled(id, true);
+
+        assertTrue(entity.isDynamic());
+        assertTrue(entity.getArgs().contains("@playwright/mcp@0.0.83"),
+            "the pinned catalog spec: " + entity.getArgs());
     }
 
     // --- markConnecting/markConnected/markError -----------------------------

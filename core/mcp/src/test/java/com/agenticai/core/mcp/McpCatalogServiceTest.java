@@ -216,8 +216,16 @@ class McpCatalogServiceTest {
     @Test
     void strictMatchReadyEntriesWithoutADynamicCommandNeverMatchACommand() {
         McpCatalogService catalog = new McpCatalogService();
-        assertTrue(catalog.isStrictCatalogMatch("puppeteer", McpServerType.STDIO, null, null, null, null));
-        assertFalse(catalog.isStrictCatalogMatch("puppeteer", McpServerType.STDIO, "npx",
+        // filesystem is the ready entry with NO launch spec (its root dir is per-tenant input, so
+        // it can't be auto-connected) - puppeteer/playwright-vision/memory/sequential-thinking now
+        // carry specs for the static-reference upgrade, so their exact spec DOES strict-match.
+        assertTrue(catalog.isStrictCatalogMatch("filesystem", McpServerType.STDIO, null, null, null, null));
+        assertFalse(catalog.isStrictCatalogMatch("filesystem", McpServerType.STDIO, "npx",
+            List.of("-y", "@modelcontextprotocol/server-filesystem", "/data"), Set.of(), null));
+        // ...but a ready entry that DOES carry its launch spec strict-matches that exact spec:
+        // that's what lets the auto-upgrade in McpRegistryService land as catalog-sourced
+        // (no review), and a hand-typed registration of the same spec counts as curated too.
+        assertTrue(catalog.isStrictCatalogMatch("puppeteer", McpServerType.STDIO, "npx",
             List.of("-y", "@modelcontextprotocol/server-puppeteer"), Set.of(), null));
     }
 

@@ -36,8 +36,9 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 | Build/troubleshoot agent (Devin) | local editor, branches `fix/studio-waiting-progress`, `feat/local-model-gates` | `web/app/build/studio/**` (turn progress text, cloud timeout, SEARCH/REPLACE marker-leak fix) and the local-model capability gate: `localModelManagedHere` in `web/app/lib/api/localModels.ts`, `web/app/troubleshoot/page.tsx`, `web/app/providers/{page,local-model/page}.tsx`, `web/app/lib/personalInstall.ts` (route table) - overlaps the release-readiness lead's `web/app/**` claim, so the PRs say so in their titles and wait for their review |
 | Production agent | local editor | the production deployment: which release it runs, its configuration and its verification. Does not change application code without a PR |
 | Agent-authored tools agent (Devin) | local editor, branch `feat/agent-authored-tools` (PR #156) | agent-authored custom tools: `services/tool-sandbox/**` (JS/TS runtime + jsvalidate + Dockerfile + tests), `core/agents-tools/**` (`CreateCustomToolToolCallback`, `CustomCodeToolEnableApprovalExecutor`, `CustomCodeToolService`, `AgentCustomToolResolver`, `ToolResolverConfiguration`, `ToolSourceConfiguration`, `AgentToolDiscovery`), `core/agents/.../CustomCodeToolLanguage.java` + `BuiltInToolClassifications`, `core/approval/ApprovalPolicyService`, `core/agents-jobs/.../ApprovalActionLabel`, `web/app/components/customCodeTools/**`, `web/app/lib/edge/codegen.ts`, `deploy/compose/{personal,lite}.yml` sandbox service + `scripts/vegaduta` profile wiring, `tests/install/vegaduta-personal.test.sh`, `docs/configuration.md`, `CHANGELOG.md` - overlaps the release / install agent (launcher, compose, install tests) and the release-readiness lead (web/app), so the PR says so in its title and waits for their review |
-| Search-capability-honesty agent (Devin) | local editor, worktree `vd-capfix-wt`, branch `fix/search-capability-honesty` (PR #167) | web_search offered as a refusing stub when no provider is configured + boot WARN; cumulative per-run prompt-token budget (`app.chat.tools.max-prompt-tokens-per-turn`, `chat.toolLoop.maxPromptTokensPerTurn`); context-compaction output reserve (`app.context.compaction.reserve-output-tokens`): `core/agents-browser/.../web/**`, `core/chat/**`, `core/agents-turn` context/settings/turn files, `application.yml`, `web/messages/en.json` + settings snapshot, docs - overlaps the KB/MCP audit PR #166 in shared files (disjoint methods, take both), waits for rr-lead + #166-owner review |
-| Desktop-recipes lead (Devin, 5-agent fan-out) | local editor, worktree `vd-capfix-wt`, branch `feat/desktop-recipes` | "record once, replay later, monitor-or-auto" for the PERSONAL tier's `local_desktop_*` surface, mirroring browser recipes: new `desktop/` classes in `core/agents-tools` (entity `desktop_recipe` = tenant Flyway **V672** - number claimed here, spec/validator/recorder/replayer/service, `/api/desktop/recipes`, `run_desktop_recipe`, `/api/desktop/monitor/frame` proxy), small edits to `DesktopToolSource`/`DesktopAgentClient`/`RunBrowserRecipeToolCallback`/`BuiltInToolClassifications*`, `services/desktop-agent` (`GET /frame`, `GET /capabilities`), `application.yml` + `.env.example` + `docs/configuration.md`, new `web/app/components/desktop/**` + `web/app/lib/api/desktopRecipes.ts` + `web/messages/en.json` + a mount next to the browser-recipes card, `CHANGELOG.md` - feature is OFF by default and personal-tier only; browser-side "watch" reuses the tool-call journal, no schema change beyond V672. Overlaps the release-readiness lead (`web/app/**`), so the PR says so and waits for their review |
+| KB-URL-ingest / MCP static-upgrade agent (Devin) | local editor, branch `fix/kb-url-ingest-mcp-static-upgrade` | web-document ingestion into the knowledge base (`core/knowledge` `KnowledgeUrlFetcher`/`KnowledgeUrlIngester`, `AddToKnowledgeBaseToolCallback` `url` arg, `KnowledgeController` `POST /api/knowledge/ingest-url`, `IngestUrlRequest`), per-agent KB write config (`core/agents` `AgentController` knowledge-write endpoints + new DTOs), dead static-MCP repair (`core/mcp` `McpStaticReferenceUpgrader`, `McpStaticServerAvailability`, `McpReferenceServerCatalog` launch specs, `McpRegistryService`/`McpRegistryController`, `core/agents-tools` `StaticMcpServerAvailabilityAdapter`, `AgentKnowledgeToolResolver` + `ToolResolverConfiguration`), `web/app/lib/api/agents.ts`, `web/app/components/agents/workbench/{KnowledgeSection,KnowledgeWriteSection}.tsx`, `web/messages/en.json`, `deploy/compose/{personal.build,lite,docker-compose}.yml` + `.env.example`, `core/app-config/application.yml`, `docs/configuration.md`, `CHANGELOG.md` - overlaps the release-readiness lead (`web/app/**`, `core/agents-tools`, docs), the release / install agent (`deploy/compose`, `.env.example`) and the agent-authored-tools agent (`ToolResolverConfiguration`), so the PR says so in its title and waits for their reviews |
+| Search-capability-honesty agent (Devin) | local editor, worktree `vd-capfix-wt`, branch `fix/search-capability-honesty` | fixes for the incident where an agent with no configured search provider told the user it had no web access, then burned ~125k prompt tokens answering from memory: `core/agents-browser/.../web/WebSearchToolCallback` + `WebSearchProviderWiring` + `BuiltInWebTools` (a refusing `web_search` stub instead of silent absence, boot WARN on an unconfigured chain), `core/chat/` `ToolLoopTranscript`/`ToolLoopRunHooks`/`ToolLoopProperties`/`ArgumentSanitizingToolCallingManager`/`ChatPrompts` + `tool-loop.properties` + `prompts/en/toolresult.tool_budget.tokens.md` (cumulative per-run prompt-token soft stop, `app.chat.tools.maxPromptTokensPerTurn`), `core/agents-turn` `ChatContextCompaction`/`ContextCompactionProperties` (reserve headroom off the window) + `ChatTurnExecutor`/`BehaviourSettingsCatalog` (`chat.toolLoop.maxPromptTokensPerTurn`), `core/app-config/application.yml`, `web/messages/en.json` + the generated `settingsCatalog.snapshot.json`, `docs/configuration.md`, `docs/prompts.md`, `CHANGELOG.md` - **overlaps the KB/MCP agent's parallel audit work** (their `ArgumentSanitizingToolCallingManager`/`ChatTurnExecutor`/`application.yml`/`tool-loop.properties`/`docs/configuration.md`/`CHANGELOG.md` edits; see `AGENT-COORDINATION-NOTE.md` they left in the worktree - our edits sit in disjoint methods, take both on merge) and the release-readiness lead (`web/`), so the PR says so in its title and waits for their review |
+| Desktop-recipes lead (Devin, 5-agent fan-out) | local editor, worktree `vd-capfix-wt`, branch `feat/desktop-recipes` (PR #168) | "record once, replay later, monitor-or-auto" for the PERSONAL tier's `local_desktop_*` surface, mirroring browser recipes: new `desktop/` classes in `core/agents-tools` (entity `desktop_recipe` - spec/validator/recorder/replayer/service, `/api/desktop/recipes`, `run_desktop_recipe`, `/api/desktop/monitor/frame` proxy), `DesktopToolSource`/`DesktopAgentClient`/`RunBrowserRecipeToolCallback`/`BuiltInToolClassifications*` small edits, `services/desktop-agent` (`GET /frame`, `GET /capabilities`, bearer-auth on every route), `application.yml` + `.env.example` + `docs/configuration.md`, `web/app/components/desktop/**` + `web/app/lib/api/desktopRecipes.ts` + in-turn live monitor + console screen dock, `CHANGELOG.md` - feature is OFF by default, personal-tier only. V672 was adopted by the scratchpad agent, so the recipe table renumbered to a fresh version. Overlaps the release-readiness lead (`web/app/**`), so the PR says so and waits for their review |
 
 ## What production must run
 
@@ -118,6 +119,17 @@ break the build standalone.
 ## Log
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
+
+- 2026-10-25, search-capability-honesty agent (local Devin session): fixes for the research-run incident
+  (agent reported "no web access" on a misconfigured provider, then spent 133 s / ~125k prompt tokens
+  answering from memory). `web_search` is always offered - a refusing stub when no provider in the chain
+  is configured - plus a boot WARN naming the gap; a cumulative per-run prompt-token budget
+  (`app.chat.tools.max-prompt-tokens-per-turn`, tenant/agent `chat.toolLoop.maxPromptTokensPerTurn`)
+  soft-stops the loop; context compaction now reserves output headroom
+  (`app.context.compaction.reserve-output-tokens`, 8192) so the trigger is not at the window's brink.
+  In isolated worktree `vd-capfix-wt` on `fix/search-capability-honesty`. Overlaps the KB/MCP agent's
+  parallel audit PR (#166 files per their AGENT-COORDINATION-NOTE.md) - disjoint methods, take both on
+  merge; PR title flags it and waits for rr-lead + #166-owner review.
 
 - 2026-10-24, merge queue + background-handoff (local Devin session): root-caused the
   `HotPathQueryBudgetIT` regression blocking every core PR (bisect to `f29212078`: +3 legitimate
@@ -203,3 +215,75 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   the release agent re-ran it. Rule 3 above comes from this.
 - 2026-10-23, IDE plugins / console pagination agent (Devin): opened a PR off `main` adding the standard `usePagination` + `PaginationControls` to the record lists that did not page (AI Model Control features, prompt registry catalog, prompt history, admin access matrix, Sentinels synced events, Clip Studio image picker, semantic-search scope chips, face enrollments) and updated the registry test for the pager's second `role=status` live region. Everything else already pages client- or server-side. Merged as #138 (`15c449ae9`) after green `CI OK`/`CodeQL OK`; the PR also regenerated `docs/architecture/core-module-graph.md` (stale on `main` since the agents-jobs/providers additions).
 - 2026-10-23, App Builder change-turn agent (Devin): the /build change turn now streams its stages (`POST /projects/{id}/generate/stream`: context/writing/files/checking/publishing/done), the browser renders the applied files' preview while the build check still runs (reverted on failure), the model returns a plain-English `summary` shown as the result headline with per-file +/- counts, retrieval reads project files in parallel, and the Studio surface shows the model's `NOTE:` line instead of "N changes applied". Maintainer merged #140 mid-CI (squash `1332ccca3`) ahead of the spotless/ruff-format fix-ups; #141 carries the identical code with the required formatting and waits on green. Verified locally: 25/25 app-builder pytest, 316 web vitest, tsc/eslint/prettier/ruff clean; Java compiles on CI only (no JDK 21 on this machine).
+- 2026-10-25, KB-URL-ingest / MCP static-upgrade agent (Devin): pushed `fix/kb-url-ingest-mcp-static-upgrade` as **PR #166** (waits on green CI + the review overlaps it names). Also deployed it onto the maintainer's **local personal stack** (`vegaduta-personal` compose project, build overlay, images tagged 0.1.10 locally): `MCP_STDIO_SIDECAR_ENABLED=true` + `MCP_STDIO_RUNNER_WITH_BROWSERS=true` were set in `deploy/compose/.env` so the browser-capable runner serves dynamic MCP spawns. The live boot caught two wiring bugs unit tests could not - `final` on a `@Transactional` bean (CGLIB) and a two-ctor bean without `@Autowired` - both fixed in follow-up commits on the PR before the stack went healthy. Note: the edge media-gen agent's `git stash` earlier swept this work's tracked files into `stash@{0}` ("WIP on feat/edge-media-gen"); they were recovered and are what the PR carries - that stash should not be popped onto the edge branch.
+- 2026-10-25, agent-loop forensics agent (Devin, same branch/PR #166): after a live incident report
+  (133 s / 125k tokens / hallucinated reply on a parked SUPERVISED turn) audited the tool loop and
+  fixed, on `df499ddcd`: parked/queued tool results now carry an `approval_parked` marker that ends
+  the invocation (soft stop then hard stop) instead of letting post-park calls loop unbudgeted;
+  dispatch plumbing (`search_tools`, `call_tool`, `restore_tool_result`) is refused behind a park
+  without minting an approval request; the tool-loop round backstop follows the turn's own ceiling
+  instead of the platform's largest; platform-origin tool answers registered with `ToolResultMarker`
+  bypass the untrusted-content screen (the platform's own "call search_tools first" hint was being
+  withheld as prompt injection); `search_tools` no-match answers now list the deferred catalog
+  (names, groups, generic fallbacks, `select:`). Also cleared the app-module gate fallout from the
+  KB-url work: `POST /api/knowledge/ingest-url` joins the PERM_MANAGE_AGENTS rule, knowledge-write
+  endpoints allowlisted, openapi.json + SDK regenerated, tool-description registry defaults updated.
+  Verified: chat 1113 / guardrails 483 / agents-tools 1408 / agents-turn 2189 / app gate tests all
+  green; rebuilt and deployed to `vegaduta-personal` - core healthy in ~14 s, `time` MCP reconnected.
+  KNOWN PRE-EXISTING ISSUE (not touched): `scripts/ci/file-size-baseline.txt` is comments-only in
+  this repo (entries lost in the history rewrite) which makes check-file-size.sh pass vacuously -
+  awk's FNR==NR treats the whole scan as baseline when the baseline file is empty. A real baseline
+  reset needs a maintainer decision (merge-base ratchet fails on any newly added path).
+- 2026-10-25, agent-loop forensics agent (Devin) - ACTIVE CLAIM, uncommitted in-flight work on
+  `fix/kb-url-ingest-mcp-static-upgrade` (PR #166). Claiming these files for the remaining audit
+  findings (F2/F5/F6/F7/F8/F9): `core/chat/.../ArgumentSanitizingToolCallingManager.java`,
+  `ToolLoopTranscript.java`, `ToolLoopRunHooks.java`, `ToolLoopProperties.java`;
+  `core/agents-turn/.../turn/{ChatTurnExecutor,ChatTurnDispatcher,ChatTimeouts,TurnTimeLimit,
+  FastStreamTurn,FastStreamContinuation,BufferedTurnCalls,BufferedTurnContinuation,ChatServiceParts}.java`;
+  `core/agents/.../tools/{McpToolOutputSanitizer,TenantContextPropagatingToolCallback}.java`;
+  `core/agents-tools/.../search/*` and `tools/{ToolResolver,ToolResolverConfiguration,
+  ToolSearchDeferral}.java`; `core/app-config/.../application.yml`; `scripts/ci/check-file-size.sh`
+  + `file-size-baseline.txt` (reseeded - the empty-baseline FNR==NR vacuity is FIXED, the gate is
+  real now; baselined files may not grow).
+  ⚠ OVERLAP: an agent on `fix/search-capability-honesty` (worktree /private/tmp/vd-capfix) has
+  UNCOMMITTED work on some of the same files - their prompt-token budget
+  (ToolLoopTranscript.maxPromptTokens, ToolLoopRunHooks.overPromptBudget, toolresult.tool_budget.tokens)
+  and web_search unavailable-stub (BuiltInWebTools, WebSearchToolCallback) are complementary, not
+  conflicting semantically. Merge guidance for whoever lands second: take BOTH - their token-budget
+  seam + my cumulative-rounds/FAST-ceiling changes touch disjoint methods of the same files
+  (ArgumentSanitizingToolCallingManager, ToolLoopTranscript, ChatTurnExecutor, application.yml,
+  tool-loop.properties).
+- 2026-10-25, agent-loop forensics agent (Devin) - CLAIM COMPLETE, committed as 8d4956ad8 on
+  `fix/kb-url-ingest-mcp-static-upgrade` (PR #166): FAST wall-clock ceiling (FastTurnCeiling),
+  cumulative round budget (roundsSpentBefore across passes), Redis ToolActivationStore,
+  no-identity call_tool refusal bound, marker-through-wrap + catalog build-time screening
+  (SearchCatalogScreen), file-size ratchet repaired + reseeded then shrunk (dispatcher 688,
+  executor 769, BufferedTurnCalls extracted under cap). Overlap guidance for
+  fix/search-capability-honesty stands (their stash@{0} in this clone is just my note file;
+  their real work is committed at 374fdf6ac on their branch).
+- 2026-10-25, Devin - SDK publishing repair on `fix/kb-url-ingest-mcp-static-upgrade` (PR #166):
+  sdk/java bumped 0.1.0 -> 0.1.1 (sdk-v0.1.0's Central upload was rejected - plugin 0.7.0 produced a
+  bundle with no .pom in any artifact dir; 0.12.0's bundle verified correct via local dry-run;
+  coordinate retired since its GitHub Release already shipped). Added <organization> to the parent
+  pom, NOTICE to license-files in sdk/python-agent and sdk/python (Apache-2.0 §4 - verified in both
+  wheels+sdists). Releasing-sdk.md gained a credential-free bundle dry-run recipe + the incident
+  note. Remaining one-time setup is maintainer-side: tag sdk-v0.1.1 then run SDK release on it,
+  tag pysdk-v0.1.0 for the Python SDK (SDK_PUBLISH_PYPI already true; needs the `pypi` GitHub
+  environment + PyPI trusted-publisher entry), restsdk-v* needs SDK_PUBLISH_NPM + NPM_TOKEN + the
+  npm name reserved first.
+- 2026-10-25, Devin - ACTIVE CLAIM, scratchpad feature on `fix/kb-url-ingest-mcp-static-upgrade`
+  (PR #166): three parallel workers. Files: `core/app/.../tenant/V672__agent_scratchpad.sql`,
+  `core/agents-tools/.../tools/scratchpad/**` (entity/repo/service/properties + callbacks + tests),
+  `core/agents/.../BuiltInToolClassificationsExtended.java`, `ToolResolverConfiguration.java`,
+  `ToolSearchDeferral.java` (deferred-name list), `core/app-config/application.yml`,
+  `deploy/compose/.env.example`, `docs/configuration.md`, `CHANGELOG.md`, `web/messages/en.json`,
+  `web/app/lib/api/fixtures/settingsCatalog.snapshot.json`, `docs/prompts.md`.
+- 2026-10-25, Devin - ACTIVE CLAIM, strict HITL + terminal-only streaming on
+  `fix/kb-url-ingest-mcp-static-upgrade` (PR #166): parked turns close without a
+  model call (`ArgumentSanitizingToolCallingManager`, `ToolLoopParkedClose`,
+  `message.approval.parked` prompt, `ChatPrompts`), streamed turns emit only the
+  terminal round (`TerminalRoundStreamAdvisor`, `app.chat.parity.fast-terminal-rounds-only`,
+  `ChatParityProperties`, `parity.properties`, `application.yml`,
+  `docs/configuration.md`, `CHANGELOG.md`, `scripts/ci/file-size-baseline.txt`),
+  plus null-translate guard + soft/hard-stop extraction (`ToolLoopSoftStops`,
+  `FastStreamRecovery` comment, `FastStreamTurn`).

@@ -332,6 +332,54 @@ final class BuiltInToolClassificationsExtended {
                         false,
                         true));
 
+        // The agent scratchpad (core/agents-tools scratchpad): the agent's own key-value notes,
+        // session-scoped or agent-scoped. Internal tenant state - a note only ever touches this
+        // agent's pad, so nothing here asks first. Reads/list return note text the agent itself
+        // wrote earlier (which can carry injection harvested from earlier tool output), so the
+        // results stay on the normal untrusted-content screen, not the platform-answer bypass;
+        // TENANT_SCOPED rather than UNTRUSTED_EXTERNAL on the same judgement as workspace_read.
+        // The write pair is DURABLE: a note persists past the call.
+        exact.put(
+                "scratchpad_write",
+                new ToolClassification(
+                        "scratchpad_write",
+                        ToolTrustTier.TENANT_SCOPED,
+                        ToolSensitivity.WRITE_TENANT,
+                        ToolDeterminism.DURABLE,
+                        null,
+                        false,
+                        true));
+        exact.put(
+                "scratchpad_read",
+                new ToolClassification(
+                        "scratchpad_read",
+                        ToolTrustTier.TENANT_SCOPED,
+                        ToolSensitivity.READ_TENANT,
+                        ToolDeterminism.SIDE_EFFECT,
+                        null,
+                        false,
+                        true));
+        exact.put(
+                "scratchpad_list",
+                new ToolClassification(
+                        "scratchpad_list",
+                        ToolTrustTier.TENANT_SCOPED,
+                        ToolSensitivity.READ_TENANT,
+                        ToolDeterminism.SIDE_EFFECT,
+                        null,
+                        false,
+                        true));
+        exact.put(
+                "scratchpad_delete",
+                new ToolClassification(
+                        "scratchpad_delete",
+                        ToolTrustTier.TENANT_SCOPED,
+                        ToolSensitivity.WRITE_TENANT,
+                        ToolDeterminism.DURABLE,
+                        null,
+                        false,
+                        true));
+
         // The Assistant's platform guides: read the bundled docs/catalogue and the generated
         // OpenAPI spec
         // and report setup state; they change nothing and call nothing.

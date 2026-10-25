@@ -190,6 +190,10 @@ final class ChatTurnDispatcher {
                                             fastDispatchStartedAt,
                                             parity.getFastHoldMarkers());
                         };
+        // A FAST stream gets the overall wall-clock ceiling too (audit F2) - see FastTurnCeiling for
+        // why the idle watchdog alone could not bound the turn.
+        java.util.function.UnaryOperator<Flux<String>> capFastTurn =
+                fast -> FastTurnCeiling.cap(fast, turns, context, agent);
         // A CAREFUL/RIGOROUS/PLANNED turn that hits its time limit (app.llm.http.buffered-turn-timeout, or
         // an enclosing job deadline when that is longer) used to surface as "every model failed", and
         // then (2026-10-18) was answered at FAST depth with its tools REMOVED - but the buffered attempt
@@ -210,7 +214,8 @@ final class ChatTurnDispatcher {
                                     if (!ran.anyToolRan() && resilience.isRetryAtFastWhenNoToolRan()) {
                                         DegradedRetrySignal.flagDepthTimeout(
                                                 turns.meterRegistry(), agent, depthName, resilience, stepEvents);
-                                        return fastTurn.apply(client, tools);
+                                        // A FAST retry is a FAST stream: the same ceiling applies.
+                                        return capFastTurn.apply(fastTurn.apply(client, tools));
                                     }
                                     DegradedRetrySignal.flagDepthTimeoutPartial(
                                             turns.meterRegistry(),
@@ -242,34 +247,6 @@ final class ChatTurnDispatcher {
                                     }
                                     return Flux.just(report);
                                 });
-        // The FAST stream has no overall limit of its own; one applies when a tenant or the agent set a turn
-        // timeout or an agent job gave the turn its deadline (see TurnTimeLimit). A stream that runs past it
-        // is cut and the person is told what ran, in the same wording a buffered depth uses. The tokens already
-        // streamed were stored as an interrupted reply when the stream was cut, so nothing is stored here.
-        java.util.function.UnaryOperator<Flux<String>> capFastTurn =
-                fast ->
-                        TurnTimeLimit.fast(context, Instant.now())
-                                .map(
-                                        limit ->
-                                                TurnTimeLimit.cap(fast, limit)
-                                                        .onErrorResume(
-                                                                TurnTimeLimit.Exceeded.class,
-                                                                exceeded ->
-                                                                        Flux.defer(
-                                                                                () -> {
-                                                                                    ChatResilienceProperties resilience = turns.resilience;
-                                                                                    TurnToolActivity.Snapshot ran = context.toolActivity().snapshot();
-                                                                                    DegradedRetrySignal.flagDepthTimeoutPartial(
-                                                                                            turns.meterRegistry(),
-                                                                                            agent,
-                                                                                            "FAST",
-                                                                                            DepthTimeoutReport.completed(resilience, ran));
-                                                                                    context.reply().mark(TurnReplyOutcome.Kind.INTERRUPTED);
-                                                                                    return Flux.just(
-                                                                                            DepthTimeoutReport.text(
-                                                                                                    resilience, "FAST", exceeded.limitRoundedUp(), ran));
-                                                                                })))
-                                .orElse(fast);
         Function<ChatClient, Flux<String>> dispatchTurn =
                 turnClient -> {
                     ChatClient client =
@@ -617,6 +594,10 @@ final class ChatTurnDispatcher {
         boolean semanticPutEligible =
                 semanticEligible && tools.isEmpty() && (cacheEligibleWithTools || toolFree);
         String cacheConversationKey = turn.cacheConversationKey();
+        System.err.println(
+                "DBG cacheEligible=" + cacheEligible + " semanticEligible=" + semanticEligible
+                        + " ewt=" + cacheEligibleWithTools + " toolFree=" + toolFree
+                        + " toolsEmpty=" + tools.isEmpty() + " ran=" + context.toolActivity().anyToolRan());
         Flux<Long> cancelled =
                 chatTurnCancelService.watchForCancellation(requestedAgentId, memorySessionId);
         if (!exactPutEligible && !semanticPutEligible) {
@@ -703,4 +684,5 @@ final class ChatTurnDispatcher {
         String prefix = "Guardrail blocked output from tool '" + violation.getToolName() + "': ";
         return message.startsWith(prefix) ? message.substring(prefix.length()) : message;
     }
+
 }

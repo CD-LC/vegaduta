@@ -1,6 +1,7 @@
 package com.agenticai.core.knowledge;
 
 import com.agenticai.core.knowledge.dto.IngestRequest;
+import com.agenticai.core.knowledge.dto.IngestUrlRequest;
 import com.agenticai.core.knowledge.dto.IngestResponse;
 import com.agenticai.core.knowledge.dto.KnowledgeIngestionJobResponse;
 import com.agenticai.core.knowledge.dto.KnowledgeReembedJobResponse;
@@ -92,6 +93,7 @@ public class KnowledgeController {
     private final KnowledgeDocumentService documentService;
     private final FileStorageService fileStorageService;
     private final KnowledgeReembedService reembedService;
+    private final KnowledgeUrlIngester urlIngester;
 
     public KnowledgeController(
         KnowledgeIngestionService ingestionService,
@@ -100,7 +102,8 @@ public class KnowledgeController {
         KnowledgeIngestionJobService jobService,
         KnowledgeDocumentService documentService,
         FileStorageService fileStorageService,
-        KnowledgeReembedService reembedService
+        KnowledgeReembedService reembedService,
+        KnowledgeUrlIngester urlIngester
     ) {
         this.ingestionService = ingestionService;
         this.searchService = searchService;
@@ -109,6 +112,7 @@ public class KnowledgeController {
         this.documentService = documentService;
         this.fileStorageService = fileStorageService;
         this.reembedService = reembedService;
+        this.urlIngester = urlIngester;
     }
 
     @PostMapping("/ingest")
@@ -118,6 +122,25 @@ public class KnowledgeController {
         // Request value > collection's configured value (V361) > platform default - see Chunker.
         Chunker.Settings chunking = collectionService.resolveChunking(collectionId, request.chunkSize(), request.chunkOverlap());
         return ingestionService.ingest(source, request.text(), chunking.chunkSize(), chunking.chunkOverlap(), collectionId);
+    }
+
+    /**
+     * Download a document/page from a public URL and ingest it through the exact {@link #upload}
+     * pipeline (dedup, document row, stored original, extraction) - the human-facing twin of
+     * {@code add_to_knowledge_base}'s {@code url} argument. {@link
+     * KnowledgeUrlIngester} owns the fetch (SSRF-guarded, 5MB cap, redirect re-validation) and the
+     * document-vs-text decision; failures surface as its exceptions (HTTP 400-class for bad
+     * URLs/unsupported content, 409 on a duplicate).
+     */
+    @PostMapping("/ingest-url")
+    public KnowledgeUrlIngester.UrlIngestResult ingestUrl(@Valid @RequestBody IngestUrlRequest request) {
+        UUID resolvedCollectionId = resolveCollectionId(request.collectionId());
+        return urlIngester.ingestUrl(
+            request.url(),
+            resolvedCollectionId,
+            "url: " + request.url(),
+            request.chunkSize(),
+            request.chunkOverlap());
     }
 
     /**
