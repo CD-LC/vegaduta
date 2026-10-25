@@ -284,10 +284,12 @@ class ToolSearchDeferralTest {
                         "improve_skill")) {
             assertTrue(defaults.contains(name), name);
         }
-        // every always-relevant tool of the relevance selector is also kept visible by default
+        // every always-relevant tool of the relevance selector is also kept visible by default -
+        // isAlwaysOn (not contains) because the default list may cover a family with a prefix*
+        // pattern (local_desktop_* keeps the whole computer-use set visible).
         for (String name : AgentToolSelection.ALWAYS_RELEVANT_TOOL_NAMES) {
             assertTrue(
-                    defaults.contains(name),
+                    ToolSearchDeferral.isAlwaysOn(defaults, name),
                     "ALWAYS_RELEVANT tool missing from the default always-on list: " + name);
         }
     }
