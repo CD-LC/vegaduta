@@ -2031,6 +2031,23 @@ app:
       # completions and PLANNED can run a whole second completion on a
       # mid-plan retry (a real measured PLANNED Jira turn: 65.6s).
       buffered-turn-timeout: ${LLM_HTTP_BUFFERED_TURN_TIMEOUT:240s}
+      # The streaming (FAST) depth's counterpart to buffered-turn-timeout: a
+      # TOTAL-duration ceiling for one streamed turn, elapsed time since the
+      # stream began. stream-idle-timeout cannot play this role - it counts
+      # model SILENCE and re-arms on every tool round, so a turn that kept
+      # calling tools (each call returning quickly) had no deadline at all and
+      # could loop for hours (audit F2). A turn past the ceiling ends
+      # gracefully: the stream is cut, the tokens already sent stay stored as
+      # an interrupted reply, and the same "ran past the N-second limit; steps
+      # that ran: ..." notice a buffered timeout emits is appended. 600s is
+      # deliberately looser than buffered-turn-timeout's 240s: a streamed turn
+      # legitimately outlives a buffered one (continuation passes keep working
+      # the task while the person watches, and a resumable stream may be
+      # detached up to 900s). A tenant's or agent's own turnTimeoutSeconds
+      # replaces it; an agent job's deadline still ends the turn sooner, but a
+      # LATER deadline does not extend it - a job that needs longer than ten
+      # minutes sets turnTimeoutSeconds. 0 disables the platform ceiling.
+      fast-turn-timeout: ${LLM_HTTP_FAST_TURN_TIMEOUT:600s}
     # Package 3c-2: caps on one copy of a model request kept by the LLM request inspector (in memory, display only;
     # LlmRequestSnapshotProperties, code defaults in chat/request-snapshot.properties). They never change what the
     # model receives.
@@ -3689,8 +3706,15 @@ app:
       # capabilities a keyword search could not be expected to surface: memory, knowledge, skills, delegation).
       always-on: ${TOOL_SEARCH_ALWAYS_ON:remember_fact,remember_shared_fact,recall_related_facts,recall_shared_graph_facts,list_knowledge_collections,search_knowledge_base,search_code,request_human,load_skill,read_skill_file,run_skill_script,propose_skill,improve_skill,ask_agent_*,delegate_to_specialist,run_subtasks,create_workflow,restore_tool_result,generate_document,local_shell,local_shell_read,workspace_list,workspace_read,workspace_search,workspace_write,workspace_edit,vegaduta_setup_guide,vegaduta_api_guide,local_desktop_*}
       # How many already-searched tools stay offered directly on later turns of the same session
-      # (in-memory, best-effort; 0 = no carry-over, the model searches again each turn).
+      # (best-effort; 0 = no carry-over, the model searches again each turn).
       max-carry-over: ${TOOL_SEARCH_MAX_CARRY_OVER:6}
+      # Where that carry-over lives. auto (default): Redis when a StringRedisTemplate bean exists -
+      # activations then survive restarts and follow the session to any replica - else per-replica
+      # memory; memory: always per-replica; redis: require Redis (degrades to memory with a warning
+      # when no template is available, like app.mcp.registry-store).
+      activation-store: ${TOOL_SEARCH_ACTIVATION_STORE:auto}
+      # How long a session's activations survive untouched (sliding: every read or write renews it).
+      activation-ttl: ${TOOL_SEARCH_ACTIVATION_TTL:PT2H}
     # MCP tool annotations (readOnlyHint / destructiveHint / idempotentHint / openWorldHint, MCP spec 2025-06-18).
     # true: when an MCP server publishes them, tools nobody classified (no tool_classification row, which still
     # wins) are classified from the hints so the existing confirmation / taint / trifecta gates apply:

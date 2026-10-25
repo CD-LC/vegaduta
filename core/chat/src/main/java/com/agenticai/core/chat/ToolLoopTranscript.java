@@ -4,7 +4,9 @@ import com.agenticai.core.security.TenantScope;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
 
 /**
  * The real conversation of one run's tool loop, handed back to the application after every tool round.
@@ -105,6 +107,51 @@ public final class ToolLoopTranscript {
     /** This run's own round cap, or null. */
     Integer maxRounds() {
         return maxRounds;
+    }
+
+    /**
+     * Tool rounds earlier passes of the same run already spent; 0 = this invocation counts alone.
+     * A continuation pass is a fresh model invocation whose prompt hides the earlier passes behind its
+     * nudge (the loop counts rounds only after the last user message), so the run's round cap would
+     * refill on every pass without this - the caller carries the count across passes of one turn.
+     */
+    private volatile int roundsSpentBefore;
+
+    /**
+     * Tells this run how many tool rounds earlier passes of the same turn already ran; they count
+     * against the run's round cap together with this invocation's own.
+     */
+    public ToolLoopTranscript roundsSpentBefore(int rounds) {
+        this.roundsSpentBefore = Math.max(0, rounds);
+        return this;
+    }
+
+    /** Rounds earlier passes of the same run already spent (0 for a lone invocation). */
+    int roundsSpentBefore() {
+        return roundsSpentBefore;
+    }
+
+    /**
+     * The tool rounds this run's recorded conversation shows: the assistant tool-call messages after
+     * its last user message - the same span {@link ArgumentSanitizingToolCallingManager} counts a round
+     * on. 0 before the first round is recorded.
+     */
+    public int rounds() {
+        List<Message> messages = latest.get();
+        int first = 0;
+        for (int i = messages.size() - 1; i >= 0; i--) {
+            if (messages.get(i) instanceof UserMessage) {
+                first = i + 1;
+                break;
+            }
+        }
+        int rounds = 0;
+        for (int i = first; i < messages.size(); i++) {
+            if (messages.get(i) instanceof AssistantMessage assistant && assistant.hasToolCalls()) {
+                rounds++;
+            }
+        }
+        return rounds;
     }
 
     /** Replaces the transcript with {@code conversation}, the history the next model round is sent. */

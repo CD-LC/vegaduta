@@ -29,6 +29,7 @@ class ChatTimeoutsConversationPolicyTest {
                 D,
                 D,
                 D,
+                D,
                 8,
                 providerOf(ChatFinishProperties.class, null),
                 providerOf(ChatResilienceProperties.class, null),

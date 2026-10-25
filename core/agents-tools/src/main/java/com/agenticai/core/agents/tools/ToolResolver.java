@@ -191,7 +191,8 @@ final class ToolResolver {
                                                     : new AtomicInteger(0),
                                             ctx.userMessage(),
                                             ctx.chatClient(),
-                                            false));
+                                            false),
+                            ctx.chatClient());
             if (deferred != allowed) {
                 // search_tools / call_tool are added here, after the pass above.
                 return new ResolvedToolList(

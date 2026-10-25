@@ -129,4 +129,27 @@ class TenantContextPropagatingToolCallbackTest {
             TenantContext.clear();
         }
     }
+
+    @Test
+    void aMarkedPlatformAnswerKeepsItsKindThroughWrapAndRedaction() {
+        // Both model-facing transforms in this class mint a new String - the JSON wrap in safeCall
+        // and the tenant output redactor - and ToolResultMarker registers by identity. The mark
+        // must ride along or a refusal/park is journaled as an executed effect.
+        ToolCallback delegate = fakeDelegate();
+        when(delegate.call("{}"))
+                .thenReturn(
+                        com.agenticai.core.guardrails.ToolResultMarker.mark(
+                                "This action ('send') waits on a person " + System.nanoTime(),
+                                com.agenticai.core.guardrails.ToolResultMarker.Kind.PARKED));
+        TenantContextPropagatingToolCallback wrapped =
+                new TenantContextPropagatingToolCallback(delegate, null, s -> s + " [redacted]");
+
+        String result = wrapped.call("{}");
+
+        assertTrue(result.startsWith("{\"result\":"), result);
+        assertTrue(result.endsWith("[redacted]"), result);
+        assertEquals(
+                com.agenticai.core.guardrails.ToolResultMarker.Kind.PARKED,
+                com.agenticai.core.guardrails.ToolResultMarker.kindOf(result).orElseThrow());
+    }
 }

@@ -204,7 +204,14 @@ public class TenantContextPropagatingToolCallback implements ToolCallback {
         }
         try {
             String redacted = outputRedactor.apply(result);
-            return redacted != null ? redacted : result;
+            if (redacted == null || redacted == result) {
+                return result;
+            }
+            // A redaction mints a new String too: carry a platform-answer mark across it, same as
+            // ensureJsonObject's wrap above, or a marked answer could be journaled as executed.
+            return com.agenticai.core.guardrails.ToolResultMarker.kindOf(result)
+                    .map(kind -> com.agenticai.core.guardrails.ToolResultMarker.mark(redacted, kind))
+                    .orElse(redacted);
         } catch (RuntimeException e) {
             return result;
         }

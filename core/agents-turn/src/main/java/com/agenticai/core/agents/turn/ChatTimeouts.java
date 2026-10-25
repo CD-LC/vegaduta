@@ -25,6 +25,14 @@ final class ChatTimeouts {
 
     private final Duration streamIdleTimeout;
     private final Duration bufferedTurnTimeout;
+
+    /**
+     * The FAST stream's overall wall-clock ceiling ({@code app.llm.http.fast-turn-timeout}) - see the
+     * matching field on {@link ChatTurnExecutor}. The shipped default stands in for the test-seam
+     * constructors, which take only the older three durations.
+     */
+    private Duration fastTurnTimeout = Duration.ofMinutes(10);
+
     private final Duration bufferedKeepAliveInterval;
     private final int maxContinuations;
     private final ChatFinishProperties finish;
@@ -105,6 +113,7 @@ final class ChatTimeouts {
     ChatTimeouts(
             @Value("${app.llm.http.stream-idle-timeout:90s}") Duration streamIdleTimeout,
             @Value("${app.llm.http.buffered-turn-timeout:240s}") Duration bufferedTurnTimeout,
+            @Value("${app.llm.http.fast-turn-timeout:600s}") Duration fastTurnTimeout,
             @Value("${app.chat.sse.buffered-keepalive-interval:20s}")
                     Duration bufferedKeepAliveInterval,
             @Value("${app.chat.continuation.max-passes:8}") int maxContinuations,
@@ -127,6 +136,7 @@ final class ChatTimeouts {
                     ToolReplaySafety safety = replaySafety.getIfAvailable();
                     return safety == null ? Optional.empty() : safety.replaySafeVerdict(name);
                 });
+        this.fastTurnTimeout = fastTurnTimeout == null ? Duration.ofMinutes(10) : fastTurnTimeout;
         useConversationPolicies(
                 continuationProperties.getIfAvailable(ContinuationProperties::new),
                 followUp.getIfAvailable(FollowUpProperties::new));
@@ -322,6 +332,11 @@ final class ChatTimeouts {
 
     Duration bufferedTurnTimeout() {
         return bufferedTurnTimeout;
+    }
+
+    /** {@code app.llm.http.fast-turn-timeout}: the FAST stream's overall wall-clock ceiling. */
+    Duration fastTurnTimeout() {
+        return fastTurnTimeout;
     }
 
     Duration bufferedKeepAliveInterval() {

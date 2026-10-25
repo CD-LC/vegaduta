@@ -29,6 +29,40 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **A streamed (FAST) turn now has a total wall-clock ceiling.** The idle watchdog
+  (`stream-idle-timeout`) only bounds model silence and re-arms on every tool round, so a turn
+  that kept calling tools (each call answering quickly) could run for hours. One streamed turn
+  is now capped at `app.llm.http.fast-turn-timeout` (default 600 s, tenant/agent
+  `turnTimeoutSeconds` replaces it, an agent-job deadline still ends it sooner, `0` disables):
+  past the ceiling the stream is cut, the partial answer stays stored as interrupted, and the
+  same "steps that ran" notice a buffered timeout emits is appended. New env:
+  `LLM_HTTP_FAST_TURN_TIMEOUT`.
+- **A turn's tool-round budget now counts all of its passes together.** Each continuation
+  and tool-call-retry pass used to start a fresh tool loop with the round cap refilled, so a
+  turn could spend its budget several times over; every pass's transcript now carries the
+  rounds earlier passes already ran (`ToolLoopTranscript.roundsSpentBefore`).
+- **`call_tool` refusals are bounded even without an agent identity.** The consecutive
+  refusal ceiling only engaged for instances built with an `agentId`; the no-identity path
+  could refuse forever. After the ceiling it now returns the same marked budget-exhausted
+  result, which ends the loop the same way.
+- **Tool results keep their platform marker through a `{"result": ...}` wrap.** The JSON
+  wrap minted a new String, losing the `ToolResultMarker` identity (a WeakHashMap), so a
+  wrapped platform answer could be mislabelled in the journal or re-screened as untrusted
+  tool output. The marker is re-applied across the wrap.
+- **`search_tools` results can't be wholesale withheld by one hostile description.** Deferred
+  tool descriptions are screened once when the catalog is built; a screened catalog marks the
+  search result as the platform's own answer instead of re-screening MCP-supplied text on
+  every call.
+- **The file-size ratchet actually gates again.** An empty `file-size-baseline.txt` made
+  awk's `FNR==NR` match every scanned file, silently adopting all oversized files as
+  "baseline"; the check now compares by filename and the baseline is reseeded.
+- **`search_tools` activations now survive restarts and follow the session across replicas.**
+  The carry-over of already-searched deferred tools was kept in per-replica memory, so a turn
+  landing on another replica (or any restart) silently re-deferred every tool. Behind a new
+  `ToolActivationStore` seam, `app.tools.search.activation-store=auto` (default) keeps them in
+  Redis when a `StringRedisTemplate` bean exists and per-replica memory otherwise;
+  `memory`/`redis` force one. New env: `TOOL_SEARCH_ACTIVATION_STORE`,
+  `TOOL_SEARCH_ACTIVATION_TTL`.
 - **Platform tool-dispatch diagnostics no longer trip the output guardrail.** A
   `call_tool` refusal (e.g. "the tool has not been loaded yet - call `search_tools`
   first") or a `search_tools` input error is the platform's own answer, not tool

@@ -381,7 +381,8 @@ public final class ToolSearchService {
         return token;
     }
 
-    private static List<String> parameterNames(String inputSchema) {
+    /** The declared top-level parameter names of a schema (empty when it does not parse). */
+    static List<String> parameterNames(String inputSchema) {
         if (inputSchema == null || inputSchema.isBlank()) {
             return List.of();
         }

@@ -73,7 +73,10 @@ grep -v '^[[:space:]]*\(#\|$\)' "$BASELINE" > "$TMP.base" || true
 FAIL=0
 # Path = everything but the last field (paths may contain spaces).
 if ! awk -v t="$THRESHOLD" -v cap="$CAP" -v pct="$PCT" '
-  FNR==NR { n=$NF; p=$0; sub(/ [0-9]+$/,"",p); base[p]=n; next }
+  # First file is the baseline. Compare FILENAME, not FNR==NR: when the
+  # baseline file is empty, FNR==NR also matches every record of the second
+  # file and all oversized paths are silently adopted into `base`.
+  FILENAME==ARGV[1] { n=$NF; p=$0; sub(/ [0-9]+$/,"",p); base[p]=n; next }
   { n=$NF; p=$0; sub(/ [0-9]+$/,"",p); seen[p]=1
     if (!(p in base)) {
       if (n+0 > cap+0) printf "FAIL: %s has %d lines: over cap (> %d) and not in the baseline\n", p, n, cap
@@ -92,11 +95,18 @@ fi
 BASE_REF=${FILE_SIZE_BASE_REF:-}
 if [ -z "$BASE_REF" ] && [ -n "${GITHUB_BASE_REF:-}" ]; then BASE_REF="origin/$GITHUB_BASE_REF"; fi
 [ -n "$BASE_REF" ] || BASE_REF=origin/main
+# The last grep skips the ratchet when the merge-base baseline has zero data
+# entries: an empty baseline cannot shrink, it can only be established, so a
+# legitimate bootstrap (e.g. after history loss) must not fail. A non-empty
+# merge-base baseline still rejects added paths.
 if MB=$(git merge-base HEAD "$BASE_REF" 2>/dev/null) \
    && git show "$MB:$BASELINE" > "$TMP.mb" 2>/dev/null \
-   && grep -qxF "$CAP_LINE" "$TMP.mb"; then
+   && grep -qxF "$CAP_LINE" "$TMP.mb" \
+   && grep -q '^[[:space:]]*[^#[:space:]]' "$TMP.mb"; then
   if ! awk '
-    FNR==NR { if ($0 !~ /^[[:space:]]*(#|$)/) { p=$0; sub(/ [0-9]+$/,"",p); old[p]=1 } next }
+    # See above: FILENAME, not FNR==NR, so an empty merge-base file cannot
+    # swallow the current-baseline records into `old`.
+    FILENAME==ARGV[1] { if ($0 !~ /^[[:space:]]*(#|$)/) { p=$0; sub(/ [0-9]+$/,"",p); old[p]=1 } next }
     { p=$0; sub(/ [0-9]+$/,"",p)
       if (!(p in old)) { printf "FAIL: %s was added to the baseline (not in it at the merge-base) - the baseline may only shrink; split the file\n", p; fail=1 } }
     END { exit fail }' "$TMP.mb" "$TMP.base"; then

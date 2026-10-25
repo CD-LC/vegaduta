@@ -43,6 +43,14 @@ final class ToolLoopRunHooks {
         }
     }
 
+    /** Rounds earlier passes of the same run already spent, carried by the run's transcript; 0 for a lone invocation. */
+    static int roundsSpentBefore(Prompt prompt) {
+        if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript) {
+            return transcript.roundsSpentBefore();
+        }
+        return 0;
+    }
+
     /** The round cap this run asked for through its transcript, or {@code fallback} when it asked for none. */
     static int maxRounds(Prompt prompt, int fallback) {
         if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript) {

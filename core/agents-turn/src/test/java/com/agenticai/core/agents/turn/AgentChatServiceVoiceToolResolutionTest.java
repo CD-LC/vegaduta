@@ -120,6 +120,11 @@ class AgentChatServiceVoiceToolResolutionTest {
     }
 
     private AgentChatService buildService() {
+        // The stream wraps its result in takeUntilOther(watchForCancellation): a real Flux runs the
+        // operator's non-null check, so the watch must return a Flux, not the mock's default null.
+        ChatTurnCancelService cancelService = mock(ChatTurnCancelService.class);
+        when(cancelService.watchForCancellation(any(), any()))
+                .thenReturn(reactor.core.publisher.Flux.never());
         LlmGatewayService llmGatewayService = mock(LlmGatewayService.class);
         when(llmGatewayService.resolveClient(any(), any(), any())).thenReturn(chatClient);
 
@@ -191,7 +196,7 @@ class AgentChatServiceVoiceToolResolutionTest {
                 mock(VisionSessionService.class),
                 providerOf((com.agenticai.core.providers.PlatformHostedLlmProviderService) null),
                 mock(LoadTestTenantAllowlist.class),
-                mock(ChatTurnCancelService.class),
+                cancelService,
                 java.time.Duration.ofSeconds(90),
                 // Buffered-depth total-turn ceiling and SSE keepalive interval
                 // (2026-09-17). Neither fires in this suite - every turn here resolves
