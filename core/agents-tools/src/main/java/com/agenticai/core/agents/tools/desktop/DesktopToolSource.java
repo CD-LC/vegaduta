@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.tools.desktop;
 
 import com.agenticai.core.agentspi.WorkspaceToolSource;
+import com.agenticai.core.audit.AuditLogService;
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +67,8 @@ public class DesktopToolSource implements WorkspaceToolSource {
             @Value("${app.assistant.desktop.agent-url:}") String agentUrl,
             @Value("${app.assistant.desktop.agent-secret:}") String agentSecret,
             @Value("${app.assistant.desktop.approval-required:true}") boolean approvalRequired,
-            ObjectProvider<DesktopRecipeService> recipes) {
+            ObjectProvider<DesktopRecipeService> recipes,
+            ObjectProvider<AuditLogService> audit) {
         this.singleUser = acknowledgeSharedHost || environment.acceptsProfiles(Profiles.of("personal"));
         boolean configured = agentUrl != null && !agentUrl.isBlank();
         this.enabled = configured && singleUser;
@@ -78,7 +80,7 @@ public class DesktopToolSource implements WorkspaceToolSource {
                                 : "this is not a single-user install (personal profile or"
                                         + " app.assistant.local-shell.acknowledge-shared-host=true)";
         this.client = enabled ? new DesktopAgentClient(agentUrl.strip(), agentSecret) : null;
-        this.tools = enabled ? callbacksOn(client, approvalRequired, recipes) : List.of();
+        this.tools = enabled ? callbacksOn(client, approvalRequired, recipes, audit) : List.of();
     }
 
     @PostConstruct
@@ -92,10 +94,11 @@ public class DesktopToolSource implements WorkspaceToolSource {
 
     private static List<ToolCallback> callbacksOn(
             DesktopAgentClient client, boolean approvalRequired,
-            ObjectProvider<DesktopRecipeService> recipes) {
+            ObjectProvider<DesktopRecipeService> recipes,
+            ObjectProvider<AuditLogService> audit) {
         List<ToolCallback> callbacks = new ArrayList<>(
                 java.util.Arrays.stream(DesktopToolCallback.Action.values())
-                        .map(a -> (ToolCallback) new DesktopToolCallback(client, a, approvalRequired))
+                        .map(a -> (ToolCallback) new DesktopToolCallback(client, a, approvalRequired, audit))
                         .toList());
         DesktopRecipeService recipeService = recipes == null ? null : recipes.getIfAvailable();
         if (recipeService != null && recipeService.isEnabled()) {

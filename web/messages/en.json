@@ -6551,7 +6551,10 @@
     "monitorLiveTitle": "Live screen",
     "monitorLiveRunning": "Streaming the screen - you are watching the agent work in real time.",
     "monitorPanelTitle": "Live screen",
-    "monitorPanelHint": "You are watching the agent drive this machine in real time - each click and keystroke lands as you see it. Collapse to pause the stream."
+    "monitorPanelHint": "You are watching the agent drive this machine in real time - each click and keystroke lands as you see it. Collapse to pause the stream.",
+    "screenDockTitle": "Screen",
+    "screenDockOpen": "Open live screen",
+    "screenDockClose": "Close live screen"
   },
   "agentVersionsCard": {
     "explainer": "A snapshot is saved automatically every time this agent's configuration changes. Labels mark the version you consider good - \"Restore\" is the action that actually rolls the agent back (and is itself recorded, so it can be undone).",
