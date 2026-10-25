@@ -410,7 +410,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${SIDECAR_MEM_LIMIT:-2g}
+          memory: ${SIDECAR_MEM_LIMIT:-1536m}
 
   # ----------------------------------------------------------- profile: tools
   # STDIO MCP servers (tenant-registered `npx <pkg>` / `uvx <pkg>` and the starter connectors) run HERE, in
@@ -483,7 +483,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${TOOL_SANDBOX_MEM_LIMIT:-1g}
+          memory: ${TOOL_SANDBOX_MEM_LIMIT:-512m}
           pids: 512
     networks: [sandbox-net]
 
