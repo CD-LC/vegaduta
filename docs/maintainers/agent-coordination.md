@@ -248,3 +248,13 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   executor 769, BufferedTurnCalls extracted under cap). Overlap guidance for
   fix/search-capability-honesty stands (their stash@{0} in this clone is just my note file;
   their real work is committed at 374fdf6ac on their branch).
+- 2026-10-25, Devin - SDK publishing repair on `fix/kb-url-ingest-mcp-static-upgrade` (PR #166):
+  sdk/java bumped 0.1.0 -> 0.1.1 (sdk-v0.1.0's Central upload was rejected - plugin 0.7.0 produced a
+  bundle with no .pom in any artifact dir; 0.12.0's bundle verified correct via local dry-run;
+  coordinate retired since its GitHub Release already shipped). Added <organization> to the parent
+  pom, NOTICE to license-files in sdk/python-agent and sdk/python (Apache-2.0 §4 - verified in both
+  wheels+sdists). Releasing-sdk.md gained a credential-free bundle dry-run recipe + the incident
+  note. Remaining one-time setup is maintainer-side: tag sdk-v0.1.1 then run SDK release on it,
+  tag pysdk-v0.1.0 for the Python SDK (SDK_PUBLISH_PYPI already true; needs the `pypi` GitHub
+  environment + PyPI trusted-publisher entry), restsdk-v* needs SDK_PUBLISH_NPM + NPM_TOKEN + the
+  npm name reserved first.
