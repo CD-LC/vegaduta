@@ -76,7 +76,10 @@ final class FastStreamContinuation {
                         t.context
                                 .scope()
                                 .get(() -> policy.nudge(decision.locale(), t.owner.prompts.apply(t.agentId))));
-        ToolLoopTranscript transcript = t.owner.newTranscript(t.context, t.agentId);
+        // The pass's own invocation transcript, seeded with the rounds the turn already spent so the
+        // loop's round cap counts all of the turn's passes instead of refilling on each one.
+        ToolLoopTranscript transcript =
+                t.owner.newTranscript(t.context, t.agentId).roundsSpentBefore(t.toolRoundsSpent());
         int nextStart = t.accumulated.length() + 2;
         int callsAtStart = t.activity().finishedCalls();
         // The previous pass completes on an HTTP-client thread that holds no TenantContext, and
@@ -113,6 +116,7 @@ final class FastStreamContinuation {
                         Flux.defer(
                                 () -> {
                                     thread.passFinished(transcript);
+                                    t.spendPassRounds(transcript);
                                     return t.settleFinish();
                                 }))
                 .concatWith(

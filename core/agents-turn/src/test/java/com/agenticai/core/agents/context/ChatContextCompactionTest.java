@@ -61,7 +61,8 @@ class ChatContextCompactionTest {
                 2,
                 64_000,
                 100,
-                3);
+                3,
+                0);
     }
 
     private static ProviderModelCatalogService catalogReturning(Integer window) {
@@ -329,11 +330,76 @@ class ChatContextCompactionTest {
                         2,
                         64_000,
                         100,
-                        3);
+                        3,
+                        0);
         CompactionRun run = c.openRun(ProviderName.ANTHROPIC, "m", AGENT, "s", List.of(), null);
 
         run.transform(toolRun(5), "m");
 
         assertEquals(3.0, registry.counter("chat.context.compaction", "action", "clear").count());
+    }
+
+    @Test
+    void theOutputReserveShrinksTheWindowBeforeFractionsApply() {
+        // Catalog window 10_000, keep-recent-tool-results 1. toolRun(2) is ~4.1k estimated tokens:
+        // under clear-at 0.6 of the raw window (6_000) it is untouched, but with an 8_000-token
+        // response reserve the usable window is 2_000 and clearing engages at 1_200.
+        ChatContextCompaction noReserve =
+                new ChatContextCompaction(
+                        providerOf((LlmCompactionSummarizer) null),
+                        providerOf(catalogReturning(10_000)),
+                        providerOf((ToolCallLogService) null),
+                        providerOf((io.micrometer.core.instrument.MeterRegistry) null),
+                        true,
+                        0.6,
+                        0.85,
+                        1,
+                        true,
+                        2,
+                        64_000,
+                        100,
+                        3,
+                        0);
+        List<Message> history = toolRun(2);
+        assertSame(
+                history,
+                noReserve
+                        .openRun(ProviderName.ANTHROPIC, "m", AGENT, "s", List.of(), null)
+                        .transform(history, "m"));
+
+        ChatContextCompaction reserved =
+                new ChatContextCompaction(
+                        providerOf((LlmCompactionSummarizer) null),
+                        providerOf(catalogReturning(10_000)),
+                        providerOf((ToolCallLogService) null),
+                        providerOf((io.micrometer.core.instrument.MeterRegistry) null),
+                        true,
+                        0.6,
+                        0.85,
+                        1,
+                        true,
+                        2,
+                        64_000,
+                        100,
+                        3,
+                        8_000);
+        List<Message> out =
+                reserved
+                        .openRun(ProviderName.ANTHROPIC, "m", AGENT, "s", List.of(), null)
+                        .transform(toolRun(2), "m");
+
+        // After clearing, auto-compact may also have folded the oldest turns, so the assertion is on
+        // the whole result, not a fixed index.
+        assertNotSame(history, out);
+        boolean cleared =
+                out.stream()
+                        .filter(ToolResponseMessage.class::isInstance)
+                        .flatMap(m -> ((ToolResponseMessage) m).getResponses().stream())
+                        .anyMatch(r -> r.responseData().contains("context_cleared"));
+        String text =
+                out.stream()
+                        .map(m -> m.getText() == null ? "" : m.getText())
+                        .reduce("", String::concat);
+        assertTrue(cleared || text.contains("summary"), out.toString());
     }
 }

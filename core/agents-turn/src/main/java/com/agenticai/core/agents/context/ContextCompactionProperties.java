@@ -33,6 +33,13 @@ public class ContextCompactionProperties {
     /** Window of a model neither the catalog nor a name rule knows. */
     public static final int DEFAULT_WINDOW_TOKENS = 128_000;
 
+    /**
+     * Tokens of the window reserved for the model's reply before the clear/compact fractions apply.
+     * Without it a run may fill the window to {@code compact-at} and leave no headroom for the
+     * answer itself, so compaction engages at the very brink of the context limit.
+     */
+    public static final int DEFAULT_RESERVE_OUTPUT_TOKENS = 8_192;
+
     /** Estimated tokens of one cleared-result placeholder. */
     public static final int DEFAULT_PLACEHOLDER_TOKENS = 48;
 

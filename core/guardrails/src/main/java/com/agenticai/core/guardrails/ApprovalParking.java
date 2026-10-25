@@ -86,10 +86,16 @@ final class ApprovalParking {
     /**
      * A call made after the turn parked. It does not run (it may depend on the parked one, or be
      * gated itself), but it is recorded as its own pending approval so approving it later runs it.
-     * An identical call already queued is not recorded again; past the limit the call is refused
+     * An identical call already queued is not recorded again; past the limit - or when the caller
+     * says the tool cannot be meaningfully replayed ({@code recordable}=false: dispatch plumbing
+     * such as search_tools/call_tool, which approval replay cannot resolve) - the call is refused
      * without a record.
      */
     Outcome queueBehindPark(String toolName, String toolInput) {
+        return queueBehindPark(toolName, toolInput, true);
+    }
+
+    Outcome queueBehindPark(String toolName, String toolInput, boolean recordable) {
         String parked = state.parkedTool();
         String key = TurnApprovalState.callKey(toolName, toolInput);
         String already = state.recordedRequestId(key);
@@ -99,6 +105,10 @@ final class ApprovalParking {
         }
         if (already != null) {
             return queued(toolName, already, parked);
+        }
+        if (!recordable) {
+            return new Outcome(
+                text(GuardrailPrompts.PARK_NOT_QUEUED, texts.getNotQueuedMessage(), "tool", toolName, "parkedTool", parked), false);
         }
         if (state.queuedCount() >= texts.getMaxQueuedCalls()) {
             return new Outcome(

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
@@ -411,6 +412,10 @@ final class BufferedTurnCalls {
                         // tool with side effects ran (see FailoverReplayGate).
                         context.toolActivity(),
                         context.stepEvents());
+        // The turn's cumulative tool-round count, shared by every later invocation this turn makes
+        // (a tool-call retry, each continuation pass): the loop's round cap counts the turn's
+        // passes together instead of refilling on each one.
+        AtomicInteger roundsSpent = new AtomicInteger(transcript.rounds());
         String settled =
                 settleFinish(
                         text,
@@ -424,12 +429,14 @@ final class BufferedTurnCalls {
                         tools,
                         experimentVariants,
                         context,
-                        attemptStartedAt);
+                        attemptStartedAt,
+                        roundsSpent);
         // One continuation policy for every depth (see BufferedTurnContinuation): the same decision and the
         // same replay of the real conversation the streamed path uses.
         ChatClient answerer = answeredBy.get();
         return new BufferedTurnContinuation(turns.continuation, turns.continuationPasses(context))
                 .withTranscripts(() -> turns.newTranscript(context, agentId))
+                .withRoundsSpent(roundsSpent)
                 .withPrompts(forAgent -> turns.prompts.apply(forAgent))
                 .withBehaviour(turns.behaviour)
                 .apply(
@@ -443,7 +450,7 @@ final class BufferedTurnCalls {
                         context,
                         settled,
                         BufferedTurnContinuation.modelPass(answerer, agentId, sessionId, tools, experimentVariants),
-                        (more, passFinish) ->
+                        (more, passFinish, spent) ->
                                 settleFinish(
                                         more,
                                         passFinish,
@@ -456,7 +463,8 @@ final class BufferedTurnCalls {
                                         tools,
                                         experimentVariants,
                                         context,
-                                        attemptStartedAt));
+                                        attemptStartedAt,
+                                        spent));
     }
 
     /**
@@ -479,7 +487,8 @@ final class BufferedTurnCalls {
             List<ToolCallback> tools,
             String experimentVariants,
             TurnContext context,
-            Instant attemptStartedAt) {
+            Instant attemptStartedAt,
+            AtomicInteger roundsSpent) {
         // The switch and the two limits as they apply to this tenant and agent (the catalog; else app.chat.finish.*).
         TurnFinishLimits limits = turns.finishLimits(context, agentId);
         TurnReplyOutcome reply = context.reply();
@@ -528,7 +537,9 @@ final class BufferedTurnCalls {
                                     experimentVariants,
                                     finish,
                                     reply,
-                                    Kind.TRUNCATED);
+                                    Kind.TRUNCATED,
+                                    null,
+                                    roundsSpent);
                     if (more == null) {
                         return text;
                     }
@@ -536,7 +547,7 @@ final class BufferedTurnCalls {
                 }
                 case MALFORMED_TOOL_CALL -> {
                     if (toolCallRetries >= limits.maxToolCallRetries()
-                            || !noToolRanSince(agentId, sessionId, attemptStartedAt)) {
+                            || !BufferedTurnEvidence.noToolRanSince(turns, agentId, sessionId, attemptStartedAt)) {
                         reply.mark(Kind.MALFORMED_TOOL_CALL);
                         return text;
                     }
@@ -550,6 +561,10 @@ final class BufferedTurnCalls {
                             limits.maxToolCallRetries());
                     TurnLifecycleEvents.finishPass(
                             context.stepEvents(), false, toolCallRetries - 1, limits.maxToolCallRetries());
+                    // The retry's tool loop shares the turn's round budget: a transcript seeded
+                    // with the rounds already spent, like the continuation passes get.
+                    ToolLoopTranscript passTranscript =
+                            turns.newTranscript(context, agentId).roundsSpentBefore(roundsSpent.get());
                     String more =
                             finishPass(
                                     client,
@@ -569,7 +584,9 @@ final class BufferedTurnCalls {
                                     experimentVariants,
                                     finish,
                                     reply,
-                                    Kind.MALFORMED_TOOL_CALL);
+                                    Kind.MALFORMED_TOOL_CALL,
+                                    passTranscript,
+                                    roundsSpent);
                     if (more == null) {
                         return text;
                     }
@@ -601,16 +618,26 @@ final class BufferedTurnCalls {
             String experimentVariants,
             FinishReasonCapture finish,
             TurnReplyOutcome reply,
-            Kind onFailure) {
+            Kind onFailure,
+            ToolLoopTranscript passTranscript,
+            AtomicInteger roundsSpent) {
         ReplyFinish.PassPrompt prompt = ReplyFinish.passPrompt(messages, userMessage, replySoFar, nudge);
         ChatClient.ChatClientRequestSpec spec =
                 client.prompt().system(systemPrompt).messages(prompt.messages()).user(prompt.user());
         if (!passTools.isEmpty()) {
             spec = spec.toolCallbacks(ChatTurnExecutor.stableToolOrder(passTools));
+            if (passTranscript != null) {
+                spec =
+                        spec.toolContext(
+                                Map.of(ToolLoopTranscript.TOOL_CONTEXT_KEY, passTranscript));
+            }
         }
         try {
             String content =
                     advised(spec, agentId, sessionId, experimentVariants, finish).call().content();
+            if (passTranscript != null) {
+                roundsSpent.addAndGet(passTranscript.rounds());
+            }
             return content == null ? "" : content;
         } catch (RuntimeException e) {
             if (FastStreamRecovery.isPolicyStop(e)) {
@@ -626,37 +653,8 @@ final class BufferedTurnCalls {
         }
     }
 
-    /** True when the tool-call log shows no tool call for this session since {@code since}. */
-    private boolean noToolRanSince(UUID agentId, String sessionId, Instant since) {
-        try {
-            return turns.collectToolEvidenceSince(agentId, sessionId, since) == null;
-        } catch (RuntimeException e) {
-            log.warn(
-                    "Agent {} session {}: could not tell whether a tool ran this turn; not retrying the tool call",
-                    agentId,
-                    sessionId,
-                    e);
-            return false;
-        }
-    }
-
-    /**
-     * The cheapest reliable "did this plan just break" signal available - see {@link
-     * TaskPlanningService}'s javadoc for why this deliberately isn't a separate LLM classification
-     * call after every tool result. {@code toolCallLogService} already records every tool call
-     * (success or failure) for this session via {@code LoggingToolCallback}; filtering to {@code
-     * since} (captured right before this turn's {@code .call()}) isolates THIS turn's tool calls
-     * from the session's full history.
-     */
+    /** See {@link BufferedTurnEvidence#firstToolFailureSince}. */
     String firstToolFailureSince(UUID agentId, String sessionId, Instant since) {
-        return toolCallLogService.findByAgentIdAndSessionId(agentId, sessionId).stream()
-                .filter(
-                        entry ->
-                                entry.getStartedAt().isAfter(since)
-                                        && entry.getErrorMessage() != null
-                                        && !entry.getErrorMessage().isBlank())
-                .findFirst()
-                .map(entry -> entry.getToolName() + ": " + entry.getErrorMessage())
-                .orElse(null);
+        return BufferedTurnEvidence.firstToolFailureSince(toolCallLogService, agentId, sessionId, since);
     }
 }

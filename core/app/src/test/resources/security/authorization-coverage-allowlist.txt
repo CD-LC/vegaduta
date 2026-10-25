@@ -39,6 +39,8 @@ PATCH /api/agents/{agentId}/fallback  # HANDLER: AgentService (requireAccess EDI
 PATCH /api/agents/{agentId}/generation-params  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
 PATCH /api/agents/{agentId}/knowledge-access  # HANDLER: AgentService EDITOR; collections have no per-user ACL and every member can already read and search them, so attaching one grants nothing new
 PATCH /api/agents/{agentId}/knowledge-base  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/knowledge-write  # HANDLER: AgentService (requireAccess EDITOR via AgentSettingsService.apply; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/knowledge-write-access  # HANDLER: AgentService (requireAccess EDITOR via AgentSettingsService.apply; grants are deny-all until an EDITOR names a collection)
 PATCH /api/agents/{agentId}/model  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
 PATCH /api/agents/{agentId}/prompt  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
 PATCH /api/agents/{agentId}/reasoning-depth  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)

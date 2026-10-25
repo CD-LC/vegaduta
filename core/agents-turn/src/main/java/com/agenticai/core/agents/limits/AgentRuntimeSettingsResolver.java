@@ -336,22 +336,23 @@ public class AgentRuntimeSettingsResolver implements AgentRuntime {
 
     /**
      * The tool loop's per-invocation round cap for a turn. The cap is a backstop for loops that make no
-     * countable call, so it follows the call ceiling: an explicit {@code app.chat.tools.max-rounds-per-invocation}
-     * wins; otherwise the larger of the platform's derived cap and the one this turn's ceiling needs, so an
-     * agent given more steps than the platform's highest ceiling is not stopped by the backstop, and no agent is
-     * stopped sooner than before.
+     * countable call (parked, refused, withheld, unknown - the guard answers them without spending the
+     * step budget), so it follows the ceiling this turn ACTUALLY enforces: an explicit {@code
+     * app.chat.tools.max-rounds-per-invocation} wins; then the cap derived from the platform ceiling is
+     * used only when there is no turn-specific settings to follow; otherwise the cap is derived from
+     * this turn's own (autonomy-scaled) ceiling plus its grace - not the platform's largest one, which
+     * let a parked SUPERVISED turn keep looping for dozens of rounds past what its ceiling needed.
      */
     @Override
     public int toolLoopRounds(AgentRuntimeSettings settings) {
         int platformGrace = stepLimits.getGraceCalls();
-        int platformRounds = toolLoop.effectiveMaxRounds(
-                platformKeys.maxToolCallsPerTurn(), stepLimits.getAutonomousMultiplier(), platformGrace);
         if (settings == null || toolLoop.getMaxRoundsPerInvocation() > 0) {
-            return platformRounds;
+            return toolLoop.effectiveMaxRounds(
+                    platformKeys.maxToolCallsPerTurn(), stepLimits.getAutonomousMultiplier(), platformGrace);
         }
         // The grace this turn's guard applies (a tenant or an agent may have raised it): the backstop must outlast it.
         int grace = settings.hasGraceCalls() ? settings.graceCalls() : platformGrace;
-        return Math.max(platformRounds, toolLoop.effectiveMaxRounds(settings.maxToolSteps(), 1, grace));
+        return toolLoop.effectiveMaxRounds(settings.maxToolSteps(), 1, grace);
     }
 
     /** What the model is told when a tool call outlives the tool timeout ({@code app.agent-runtime.tool-timeout-message}). */

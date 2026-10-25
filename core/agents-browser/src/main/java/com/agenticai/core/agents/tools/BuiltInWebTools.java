@@ -148,14 +148,19 @@ final class BuiltInWebTools implements WebToolPort {
         ToolCallback webSearch = null;
         ToolCallback deepResearch = null;
         ToolCallback verify = null;
-        // web_search: offered only when a platform Brave key exists (multi-provider mode: when
-        // ANY provider in the chain is configured); a dead tool costs prompt tokens every turn. The
-        // key itself is resolved at CALL time, so rotating or removing it needs no redeploy.
+        // web_search: a live callback when a platform Brave key exists (multi-provider mode: when
+        // ANY provider in the chain is configured); otherwise the refusing stub. A silently absent
+        // tool is worse than a cheap refusal: the model then concludes it has no web access and
+        // answers a research request from stale memory. The key itself is resolved at CALL time, so
+        // rotating or removing it needs no redeploy.
         WebSearchProviderRegistry searchRegistry = research.activeSearchRegistry();
-        if (searchRegistry != null
-                ? searchRegistry.anyConfigured()
-                : credentials != null
-                        && credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH).isPresent()) {
+        boolean searchConfigured =
+                searchRegistry != null
+                        ? searchRegistry.anyConfigured()
+                        : credentials != null
+                                && credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH).isPresent();
+        webSearch = WebSearchToolCallback.unavailable();
+        if (searchConfigured) {
             webSearch =
                     searchRegistry != null
                             ? new WebSearchToolCallback(searchRegistry)

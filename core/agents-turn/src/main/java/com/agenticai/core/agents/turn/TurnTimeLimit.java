@@ -18,8 +18,14 @@ import reactor.core.publisher.Mono;
  *       turn ends at the deadline when that is sooner; a deadline LATER than the platform default extends
  *       it (a job has no browser that gives up at 300 s, and its own timeout is the authority), but never an
  *       explicit tenant/agent limit, which the owner set on purpose.
- *   <li><b>FAST streams</b> have no overall limit of their own (only the idle timer), so one applies only
- *       when a tenant or agent set it or a deadline gives it: the sooner of the two.
+ *   <li><b>FAST streams</b> have their own overall ceiling ({@code app.llm.http.fast-turn-timeout}):
+ *       the idle timer only bounds model SILENCE - every tool round re-arms it - so without a total
+ *       limit a turn that kept calling tools could run for hours. An explicit tenant/agent turn
+ *       timeout replaces the platform ceiling; an enclosing deadline (an agent job's) still ends the
+ *       turn sooner, but unlike a buffered depth a later deadline does NOT extend it: a stream that
+ *       outlives the ceiling has outlived what a user-facing turn may take, and a job that
+ *       legitimately needs longer sets {@code turnTimeoutSeconds}. A non-positive configured ceiling
+ *       means the platform sets none.
  * </ul>
  */
 final class TurnTimeLimit {
@@ -63,18 +69,23 @@ final class TurnTimeLimit {
         return left.compareTo(limit) < 0 ? left : limit;
     }
 
-    /** The overall limit of a FAST stream, or empty when it has none. */
-    static Optional<Duration> fast(TurnContext context, Instant now) {
+    /**
+     * The overall limit of a FAST stream: {@code configured} (the platform's {@code
+     * fast-turn-timeout}) unless a tenant or agent set the turn timeout - theirs wins as set - or
+     * the enclosing deadline is sooner. Empty when neither applies (a non-positive {@code
+     * configured} and no deadline, the pre-ceiling behavior).
+     */
+    static Optional<Duration> fast(TurnContext context, Instant now, Duration configured) {
         AgentRuntimeSettings settings = context.runtimeSettings();
-        Optional<Duration> own =
+        Duration limit =
                 settings != null && settings.turnTimeoutOverridden()
-                        ? Optional.of(settings.turnTimeout())
-                        : Optional.empty();
+                        ? settings.turnTimeout()
+                        : configured;
         Optional<Duration> deadline = context.remaining(now).filter(left -> !left.isZero());
-        if (own.isPresent() && deadline.isPresent()) {
-            return Optional.of(own.get().compareTo(deadline.get()) < 0 ? own.get() : deadline.get());
+        if (limit == null || !limit.isPositive()) {
+            return deadline;
         }
-        return own.isPresent() ? own : deadline;
+        return Optional.of(deadline.map(left -> left.compareTo(limit) < 0 ? left : limit).orElse(limit));
     }
 
     /**
@@ -83,10 +94,15 @@ final class TurnTimeLimit {
      * and only signals, so it touches no tenant state.
      */
     static <T> Flux<T> cap(Flux<T> source, Duration limit) {
+        return cap(source, limit, TenantAwareSchedulers.parallel());
+    }
+
+    /** As {@link #cap(Flux, Duration)} on {@code scheduler} (a test's manual clock). */
+    static <T> Flux<T> cap(Flux<T> source, Duration limit, reactor.core.scheduler.Scheduler scheduler) {
         return Flux.defer(
                 () ->
                         source.takeUntilOther(
-                                Mono.delay(limit, TenantAwareSchedulers.parallel())
+                                Mono.delay(limit, scheduler)
                                         .<Object>flatMap(tick -> Mono.error(new Exceeded(limit)))));
     }
 }

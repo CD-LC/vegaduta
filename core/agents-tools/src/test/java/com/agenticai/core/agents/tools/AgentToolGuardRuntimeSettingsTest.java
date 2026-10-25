@@ -183,8 +183,11 @@ class AgentToolGuardRuntimeSettingsTest {
         when(search.search(anyString(), anyInt(), any(), anyBoolean())).thenReturn(List.of(
                 hit("strong", -0.5), hit("weak", -0.01)));
         AgentKnowledgeToolResolver resolver = new AgentKnowledgeToolResolver(
-                guard(resolver()), providerOf(search), providerOf(mock(KnowledgeCollectionService.class)),
-                providerOf(null), providerOf(null), providerOf(null), agentService, mock(HumanApprovalGateService.class),
+                guard(resolver()),
+                new KnowledgeServiceProviders(
+                        providerOf(search), providerOf(mock(KnowledgeCollectionService.class)),
+                        providerOf(null), providerOf(null)),
+                providerOf(null), providerOf(null), agentService, mock(HumanApprovalGateService.class),
                 providerOf(null), null, null, providerOf(null));
 
         List<ToolCallback> tools = resolver.resolveKnowledgeTools(AGENT, "sess", new AtomicInteger(), "hello", null, false);

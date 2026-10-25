@@ -47,6 +47,9 @@ public final class ToolResultClearing {
      */
     public static final int MAX_PLACEHOLDER_CHARS = 1_000;
     private static final String BUDGET_MARKER = "tool_budget_exhausted";
+    // The parked-turn marker is likewise preserved: the loop limiter reads it to end an invocation
+    // whose model keeps calling tools while the turn waits on a human approval.
+    private static final String PARKED_MARKER = "approval_parked";
 
     private static final ObjectMapper JSON = JsonMappers.plain();
 
@@ -167,7 +170,7 @@ public final class ToolResultClearing {
     private static boolean clearable(String data) {
         boolean alreadyCleared = data != null && data.length() <= MAX_PLACEHOLDER_CHARS
             && (data.startsWith(PLACEHOLDER_PREFIX) || data.startsWith(CONTEXT_CLEARED_JSON_PREFIX));
-        return data != null && !alreadyCleared && !data.contains(BUDGET_MARKER);
+        return data != null && !alreadyCleared && !data.contains(BUDGET_MARKER) && !data.contains(PARKED_MARKER);
     }
 
     private static int length(String s) {

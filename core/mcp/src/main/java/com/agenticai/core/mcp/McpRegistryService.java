@@ -36,6 +36,10 @@ public class McpRegistryService {
     // 2026-07-27 billing audit fix: this module had zero plan-awareness - see
     // McpConnectorPlanLimits and McpRegistrationPlanGate.
     private final McpRegistrationPlanGate planGate;
+    // The "ready catalog entry whose shared static connection isn't servable" repair - see
+    // McpStaticReferenceUpgrader's javadoc. A bean in this module: it owns the catalog spec +
+    // static-availability lookup + env codec that path needs.
+    private final McpStaticReferenceUpgrader staticReferenceUpgrader;
 
     public McpRegistryService(
             McpServerRegistrationRepository repository,
@@ -44,13 +48,15 @@ public class McpRegistryService {
             McpStdioCommandGuard stdioCommandGuard,
             TenantLimits tenantLimits,
             McpCatalogService catalogService,
-            SecretReferenceResolver secretReferenceResolver) {
+            SecretReferenceResolver secretReferenceResolver,
+            McpStaticReferenceUpgrader staticReferenceUpgrader) {
         this.repository = repository;
         this.remoteUrlGuard = remoteUrlGuard;
         this.stdioCommandGuard = stdioCommandGuard;
         this.envCodec = new McpRegistrationEnv(encryptionService, secretReferenceResolver);
         this.planGate =
                 new McpRegistrationPlanGate(repository, tenantLimits, catalogService, envCodec);
+        this.staticReferenceUpgrader = staticReferenceUpgrader;
     }
 
     /**
@@ -174,6 +180,12 @@ public class McpRegistryService {
             // Different threat model entirely (network-only, already
             // SSRF-guarded) - never subject to the STDIO review gate.
             entity.markReviewNotRequired();
+        } else {
+            // Name-only request (the catalog's one-click "Activate" for a `ready` server): a pure
+            // reference to a statically wired connection. When this deployment can't serve that
+            // shared connection it silently connected nothing before - the upgrade turns the
+            // registration into a real per-tenant dynamic one the caller then connects.
+            staticReferenceUpgrader.upgradeIfUnserved(entity);
         }
 
         if (wasUpdate) {
@@ -205,6 +217,12 @@ public class McpRegistryService {
                         .findById(id)
                         .orElseThrow(() -> new McpServerRegistrationNotFoundException(id));
         entity.setEnabled(enabled);
+        if (enabled) {
+            // Same dead-reference repair as register()'s name-only branch: a static-reference row
+            // enabled before this fix (or before the static wiring went away) upgrades to its
+            // catalog launch spec here too, so re-enabling actually connects.
+            staticReferenceUpgrader.upgradeIfUnserved(entity);
+        }
         if (!enabled && entity.isDynamic()) {
             // Real connection teardown is DynamicMcpConnectionManager's job
             // (it holds the live McpSyncClient) - this just records that no
