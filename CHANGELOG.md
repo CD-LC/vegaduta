@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
+- Fixed voice calls on single-box installs: LiveKit now advertises the loopback/node IP (`LIVEKIT_NODE_IP`, default 127.0.0.1) instead of the WAN address discovered by STUN, which browsers could not reach - the media path died at "Media connection blocked".
+
 - Voice calling (livekit + voice-agent) is now available on the personal and lite tiers: `personal --profile voice` / `up --lite --profile voice` start both services and imply `rag` for Whisper STT (previously only the full stack declared them).
 
 - Personal install footprint: default memory ceilings tightened (tool-sandbox 1g to 512m, sidecar 2g to 1536m, browser-runner 2g to 1g; all stay env-overridable) and the sidecar build gained `SIDECAR_BAKE_EXTRA_MODELS=false` to slim a local image by ~550MB.
