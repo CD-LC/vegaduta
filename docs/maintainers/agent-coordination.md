@@ -270,3 +270,10 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   tag pysdk-v0.1.0 for the Python SDK (SDK_PUBLISH_PYPI already true; needs the `pypi` GitHub
   environment + PyPI trusted-publisher entry), restsdk-v* needs SDK_PUBLISH_NPM + NPM_TOKEN + the
   npm name reserved first.
+- 2026-10-25, Devin - ACTIVE CLAIM, scratchpad feature on `fix/kb-url-ingest-mcp-static-upgrade`
+  (PR #166): three parallel workers. Files: `core/app/.../tenant/V672__agent_scratchpad.sql`,
+  `core/agents-tools/.../tools/scratchpad/**` (entity/repo/service/properties + callbacks + tests),
+  `core/agents/.../BuiltInToolClassificationsExtended.java`, `ToolResolverConfiguration.java`,
+  `ToolSearchDeferral.java` (deferred-name list), `core/app-config/application.yml`,
+  `deploy/compose/.env.example`, `docs/configuration.md`, `CHANGELOG.md`, `web/messages/en.json`,
+  `web/app/lib/api/fixtures/settingsCatalog.snapshot.json`, `docs/prompts.md`.

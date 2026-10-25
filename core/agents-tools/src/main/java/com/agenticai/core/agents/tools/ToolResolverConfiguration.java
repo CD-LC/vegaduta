@@ -524,4 +524,25 @@ class ToolResolverConfiguration {
         resolver.setFactory(factory);
         return resolver;
     }
+
+    /**
+     * The agent scratchpad (app.tools.scratchpad.*). Both collaborators stay optional: a slim
+     * context without the storage bean offers no scratchpad tools, and a missing properties bean
+     * falls back to the shipped defaults.
+     */
+    @Bean
+    AgentScratchpadToolResolver agentScratchpadToolResolver(
+            AgentToolGuard toolGuard,
+            ObjectProvider<com.agenticai.core.agents.tools.scratchpad.AgentScratchpadService>
+                    scratchpadService,
+            ObjectProvider<com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties>
+                    scratchpadProperties,
+            ObjectProvider<com.agenticai.core.agents.tunables.BehaviourSettings> behaviour) {
+        return new AgentScratchpadToolResolver(
+                toolGuard,
+                scratchpadService,
+                scratchpadProperties.getIfAvailable(
+                        com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties::new),
+                behaviour);
+    }
 }

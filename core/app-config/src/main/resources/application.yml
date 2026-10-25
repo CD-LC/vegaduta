@@ -3745,6 +3745,15 @@ app:
     # tool from every agent.
     create-workflow:
       enabled: ${TOOL_CREATE_WORKFLOW_ENABLED:true}
+    # The scratchpad tools (scratchpad_write / scratchpad_read / scratchpad_list / scratchpad_delete):
+    # each agent's persistent, agent-authored notepad - session-scoped working notes plus an
+    # agent-long-term pad. Deferred built-ins (reachable through search_tools -> call_tool). Default
+    # true; false removes all four from every agent. max-notes caps notes per agent+session,
+    # max-note-bytes the size of one note.
+    scratchpad:
+      enabled: ${APP_TOOLS_SCRATCHPAD_ENABLED:true}
+      max-notes: ${APP_TOOLS_SCRATCHPAD_MAX_NOTES:200}
+      max-note-bytes: ${APP_TOOLS_SCRATCHPAD_MAX_NOTE_BYTES:65536}
     # Built-in http_request ("call any HTTP API"). enabled: offer the tool at all (default true - it already
     # shipped unconditionally, so this keeps today's behaviour; false removes it from agents).
     # safe-mode (default OFF = today's tool exactly): http_request narrows to GET/HEAD/OPTIONS and a separate
