@@ -41,3 +41,5 @@ services:
         # puppeteer/playwright-vision MCP servers, which the static-reference upgrade
         # now connects through this runner.
         WITH_BROWSERS: ${MCP_STDIO_RUNNER_WITH_BROWSERS:-false}
+  voice-agent:
+    build: ../../services/voice-agent
