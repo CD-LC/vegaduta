@@ -29,9 +29,14 @@ class McpRegistryServiceOAuthMarkerTest {
     @BeforeEach
     void setUp() {
         repository = mock(McpServerRegistrationRepository.class);
-        service = new McpRegistryService(repository, mock(EncryptionService.class), new McpRemoteUrlGuard(""),
+        SecretReferenceResolver secrets = new SecretReferenceResolver(mock(SecretVaultService.class));
+        EncryptionService encryption = mock(EncryptionService.class);
+        service = new McpRegistryService(repository, encryption, new McpRemoteUrlGuard(""),
             new McpStdioCommandGuard(""), mock(TenantLimits.class), new McpCatalogService(),
-            new SecretReferenceResolver(mock(SecretVaultService.class)));
+            secrets,
+            new McpStaticReferenceUpgrader(repository, new McpCatalogService(),
+                new McpStdioCommandGuard(""), encryption, secrets,
+                () -> (McpStaticServerAvailability) name -> true));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
     }
 

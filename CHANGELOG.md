@@ -8,6 +8,25 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Agents can download web documents into the knowledge base.** `add_to_knowledge_base`
+  gained an optional `url` argument: the platform downloads the page/document server-side
+  (SSRF-guarded, redirects re-validated, 5 MB cap) and runs it through the exact upload
+  pipeline - a PDF/DOCX/HTML/Markdown file gets a document row, dedup and text extraction,
+  plain text lands as a fetched note. `POST /api/knowledge/ingest-url` is the same flow for
+  the UI/API. Knowledge write is now configurable per agent: `PATCH
+  /api/agents/{id}/knowledge-write` opts in, `GET`/`PATCH /knowledge-write-access` manages
+  the deny-by-default writable-collection grant list, and the agent workbench shows both
+  under Knowledge collections.
+- **Enabling a built-in MCP server that can't be served connects a per-tenant copy.** A
+  catalog "Activate" for a stateful static server (puppeteer, playwright-vision, memory,
+  sequential-thinking) used to silently do nothing when the deployment had no shared static
+  connection (no `mcp` profile, e.g. lite) or the server was hidden by the cross-tenant
+  exposure policy. The registration now upgrades itself to the catalog's own launch spec and
+  connects through `mcp-stdio-runner` - each tenant gets an isolated server process. New
+  env: `MCP_STATIC_STATELESS_SERVERS`, `MCP_STATIC_SHARED_STATEFUL_ENABLED`.
+
 ## [0.1.10] - 2026-10-24
 
 ### Added

@@ -274,6 +274,7 @@ class ToolResolverConfiguration {
             ObjectProvider<KnowledgeSearchService> knowledgeSearchService,
             ObjectProvider<KnowledgeCollectionService> knowledgeCollectionService,
             ObjectProvider<KnowledgeIngestionService> knowledgeIngestionService,
+            ObjectProvider<com.agenticai.core.knowledge.KnowledgeUrlIngester> knowledgeUrlIngester,
             ObjectProvider<AgentMemoryService> agentMemoryService,
             ObjectProvider<TenantMemoryService> tenantMemoryService,
             AgentService agentService,
@@ -286,9 +287,11 @@ class ToolResolverConfiguration {
         AgentKnowledgeToolResolver resolver =
                 new AgentKnowledgeToolResolver(
                         toolGuard,
-                        knowledgeSearchService,
-                        knowledgeCollectionService,
-                        knowledgeIngestionService,
+                        new KnowledgeServiceProviders(
+                                knowledgeSearchService,
+                                knowledgeCollectionService,
+                                knowledgeIngestionService,
+                                knowledgeUrlIngester),
                         agentMemoryService,
                         tenantMemoryService,
                         agentService,

@@ -2628,6 +2628,16 @@ app:
     # enable only with Redis auth/TLS. registry-store / registry-exclusive-clients keep their code
     # defaults (memory / false) and are deliberately not redeclared here.
     registry-route-tool-calls: ${APP_MCP_REGISTRY_ROUTE_TOOL_CALLS:false}
+    # Which of application-mcp.yml's STATIC (JVM-wide, "mcp" Spring profile) MCP servers agents may
+    # be offered (StaticMcpExposurePolicy). stateless-servers is an allowlist: a server not named
+    # here is hidden - the stateful ones (filesystem/memory/puppeteer/playwright-vision) are ONE
+    # subprocess shared by every tenant, so cross-tenant tool calls would share files, memory and
+    # browser sessions. shared-stateful-enabled opens them all anyway - only safe on single-tenant
+    # deployments. platform.mcp.static.shared-stateful-enabled (admin settings UI) overrides at
+    # runtime; this is the fallback.
+    static:
+      stateless-servers: ${MCP_STATIC_STATELESS_SERVERS:sequential-thinking}
+      shared-stateful-enabled: ${MCP_STATIC_SHARED_STATEFUL_ENABLED:false}
     # Tool-definition pinning (docs/architecture/mcp-spec-alignment.md). A remote MCP server can change tool
     # descriptions after an admin reviewed it; the pin records a hash of the tool list agents see and flags a
     # difference (audit event mcp.tools.changed, GET /api/mcp/tool-pins). off = nothing recorded; warn

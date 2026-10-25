@@ -117,11 +117,18 @@ class McpStarterCatalogTest {
         assertTrue(
                 catalog.isStrictCatalogMatch(
                         "sequential-thinking", McpServerType.STDIO, starter.dynamicCommand(), starter.dynamicArgs(), List.of(), null));
-        assertFalse(
+        assertTrue(
                 catalog.isStrictCatalogMatch(
                         "sequential-thinking", McpServerType.STDIO, "npx",
                         List.of("-y", "@modelcontextprotocol/server-sequential-thinking"), List.of(), null),
-                "the gallery entry has no launch spec, so an unpinned command is still custom");
+                "the gallery entry now carries the same launch spec (the static-reference upgrade),"
+                        + " so that exact spec is catalog-sourced too");
+        assertFalse(
+                catalog.isStrictCatalogMatch(
+                        "sequential-thinking", McpServerType.STDIO, "npx",
+                        List.of("-y", "@modelcontextprotocol/server-sequential-thinking@2099.1.1"),
+                        List.of(), null),
+                "a different version of the package is still custom");
     }
 
     @Test

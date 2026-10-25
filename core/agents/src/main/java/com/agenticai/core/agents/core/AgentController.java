@@ -14,6 +14,8 @@ import com.agenticai.core.agents.dto.AgentFallbackUpdateRequest;
 import com.agenticai.core.agents.dto.AgentGenerationParamsUpdateRequest;
 import com.agenticai.core.agents.dto.AgentKnowledgeAccessUpdateRequest;
 import com.agenticai.core.agents.dto.AgentKnowledgeBaseToggleRequest;
+import com.agenticai.core.agents.dto.AgentKnowledgeWriteAccessResponse;
+import com.agenticai.core.agents.dto.AgentKnowledgeWriteAccessUpdateRequest;
 import com.agenticai.core.agents.dto.AgentModelUpdateRequest;
 import com.agenticai.core.agents.dto.AgentPromptUpdateRequest;
 import com.agenticai.core.agents.dto.AgentReasoningDepthUpdateRequest;
@@ -306,6 +308,53 @@ public class AgentController {
         }
         return agentService.setAllowedKnowledgeCollectionIds(
                 agentId, request.allowedKnowledgeCollectionIds());
+    }
+
+    /**
+     * Migration V198 - the knowledge-WRITE posture (the {@code add_to_knowledge_base} tool): the
+     * opt-in flag plus the deny-by-default collection grant list. {@link AgentResponse} carries
+     * neither field, so these endpoints read and write a dedicated view; the pair is also what was
+     * missing for the feature to be usable at all (the columns and {@code AgentService} setters
+     * existed, the set path did not).
+     */
+    @GetMapping("/{agentId}/knowledge-write-access")
+    public AgentKnowledgeWriteAccessResponse getKnowledgeWriteAccess(@PathVariable UUID agentId) {
+        agentService.requireAccess(agentId, PermissionLevel.VIEWER);
+        return knowledgeWriteAccess(agentId);
+    }
+
+    /** The agent's write opt-in ({@code {enabled}} body, same shape as {@link #setKnowledgeBaseEnabled}). */
+    @PatchMapping("/{agentId}/knowledge-write")
+    public AgentKnowledgeWriteAccessResponse setKnowledgeWrite(
+            @PathVariable UUID agentId,
+            @Valid @RequestBody AgentKnowledgeBaseToggleRequest request) {
+        agentService.setKnowledgeWriteEnabled(agentId, request.enabled());
+        return knowledgeWriteAccess(agentId);
+    }
+
+    /**
+     * The collection grant list for {@link #setKnowledgeWrite}. Empty/null clears every grant back
+     * to deny-all - the OPPOSITE of {@link #setKnowledgeAccess}'s "empty means unrestricted"; an
+     * unknown id is a 404, same {@code requireExists} reasoning as there.
+     */
+    @PatchMapping("/{agentId}/knowledge-write-access")
+    public AgentKnowledgeWriteAccessResponse setKnowledgeWriteAccess(
+            @PathVariable UUID agentId,
+            @Valid @RequestBody AgentKnowledgeWriteAccessUpdateRequest request) {
+        if (request.allowedKnowledgeWriteCollectionIds() != null) {
+            for (UUID collectionId : request.allowedKnowledgeWriteCollectionIds()) {
+                knowledgeCollectionService.requireExists(collectionId);
+            }
+        }
+        agentService.setAllowedKnowledgeWriteCollectionIds(
+                agentId, request.allowedKnowledgeWriteCollectionIds());
+        return knowledgeWriteAccess(agentId);
+    }
+
+    private AgentKnowledgeWriteAccessResponse knowledgeWriteAccess(UUID agentId) {
+        return new AgentKnowledgeWriteAccessResponse(
+                agentService.isKnowledgeWriteEnabled(agentId),
+                agentService.getAllowedKnowledgeWriteCollectionIds(agentId));
     }
 
     /**
