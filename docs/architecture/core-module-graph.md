@@ -27,7 +27,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | Module | Kind | Main src files | Depends on (sibling modules) | Notes |
 |---|---|---:|---|---|
 | admin | kernel | 70 | audit, crypto, json, security |  |
-| agents | kernel | 290 | agents-budget, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, providers, rl, sdlc, secrets, security, sharing, storage, tenancy |  |
+| agents | kernel | 292 | agents-budget, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, providers, rl, sdlc, secrets, security, sharing, storage, tenancy |  |
 | agents-browser | kernel | 134 | agents, agents-tools, audit, devices, json, knowledge, providers, secrets, security, sharing, tenancy |  |
 | agents-budget | kernel | 11 | audit, chat, providers, security, tenancy |  |
 | agents-chatport | kernel | 21 | agents, agents-turn, audit, json, security, sharing, tenancy |  |

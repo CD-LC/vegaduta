@@ -121,9 +121,8 @@ public class AgentToolGovernance implements ToolReplaySafety {
      * {@code app.assistant.desktop.approval-required} (default {@code true}): the same dial for the
      * {@code local_desktop_*} actuating tools ({@code DesktopToolNames.GATED} - press, click, type,
      * key, open, activate). Unlike the shell these are NOT sandboxed, so the pin exists on every
-     * profile by default; {@code false} lets them run like ordinary unconfirmed tools while
-     * SUPERVISED still gates. Read-side tools (screen, elements, clipboard, notify) are never
-     * pinned by either mechanism.
+     * profile by default; {@code false} lets them run unconfirmed while SUPERVISED still gates.
+     * Read-side tools (screen, elements, clipboard, notify) are never pinned.
      */
     private final boolean desktopApprovalRequired;
 
@@ -197,8 +196,7 @@ public class AgentToolGovernance implements ToolReplaySafety {
     /**
      * The always-confirm pin, minus the one carve-out the operator can make: {@code local_shell}
      * when {@code app.assistant.local-shell.approval-required=false}. Everything else on {@code
-     * AgentToolGuard.ALWAYS_CONFIRM_TOOLS} (a2a calls, schedule_task, coding_task) stays pinned on
-     * every install.
+     * AgentToolGuard.ALWAYS_CONFIRM_TOOLS} (a2a calls, schedule_task, coding_task) stays pinned.
      */
     boolean alwaysConfirm(String toolName) {
         if (DesktopToolNames.GATED.contains(toolName)) {
