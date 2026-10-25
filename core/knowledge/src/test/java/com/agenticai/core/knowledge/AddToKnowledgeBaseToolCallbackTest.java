@@ -103,7 +103,7 @@ class AddToKnowledgeBaseToolCallbackTest {
     @Test
     void rejectsMissingContent() {
         String out = tool(Set.of(allowedCollectionId)).call("{\"collection_id\":\"" + allowedCollectionId + "\"}");
-        assertTrue(out.contains("content is required"));
+        assertTrue(out.contains("Either content or url is required"));
         verify(ingestionService, never()).ingest(anyString(), anyString(), anyInt(), anyInt(), any());
     }
 
@@ -227,5 +227,74 @@ class AddToKnowledgeBaseToolCallbackTest {
         // quotes - same "route error text through Jackson, never string-concat it" fix
         // KnowledgeSearchToolCallback's own javadoc documents for the identical failure mode.
         assertTrue(out.startsWith("{") && out.endsWith("}"), "expected valid-looking JSON, got: " + out);
+    }
+
+    // ------------------------------------------------------------------ //
+    // the `url` argument - "download that PDF into the knowledge base"
+
+    private AddToKnowledgeBaseToolCallback toolWithUrl(
+            Set<UUID> allowedWriteCollectionIds, KnowledgeUrlIngester urlIngester) {
+        return new AddToKnowledgeBaseToolCallback(
+            ingestionService, collectionService, allowedWriteCollectionIds, agentId, "sess-1",
+            urlIngester);
+    }
+
+    @Test
+    void urlDelegatesToTheIngesterAndReportsBack() {
+        KnowledgeUrlIngester urlIngester = mock(KnowledgeUrlIngester.class);
+        when(urlIngester.ingestUrl(anyString(), eq(allowedCollectionId), anyString(), any(), any()))
+            .thenReturn(new KnowledgeUrlIngester.UrlIngestResult(
+                "report.pdf", "source", 7, UUID.randomUUID(), true));
+
+        String out = toolWithUrl(Set.of(allowedCollectionId), urlIngester).call(
+            "{\"url\":\"https://example.com/report.pdf\",\"collection_id\":\"" + allowedCollectionId + "\"}");
+
+        assertTrue(out.contains("chunksSaved"), out);
+        assertTrue(out.contains("report.pdf"), out);
+        assertTrue(out.contains("\"document\""), out);
+        // The URL route never touches the pasted-text ingest path.
+        verify(ingestionService, never()).ingest(anyString(), anyString(), anyInt(), anyInt(), any());
+        // The fetched-from source label carries the agent attribution AND the url.
+        verify(urlIngester).ingestUrl(
+            eq("https://example.com/report.pdf"), eq(allowedCollectionId),
+            org.mockito.ArgumentMatchers.argThat(
+                s -> s.contains(agentId.toString()) && s.contains("https://example.com/report.pdf")),
+            any(), any());
+    }
+
+    @Test
+    void urlStillEnforcesTheWriteAllowListBeforeFetching() {
+        KnowledgeUrlIngester urlIngester = mock(KnowledgeUrlIngester.class);
+        UUID otherCollectionId = UUID.randomUUID();
+
+        String out = toolWithUrl(Set.of(allowedCollectionId), urlIngester).call(
+            "{\"url\":\"https://example.com/x.pdf\",\"collection_id\":\"" + otherCollectionId + "\"}");
+
+        assertTrue(out.contains("does not have write access"), out);
+        verify(urlIngester, never()).ingestUrl(anyString(), any(), anyString(), any(), any());
+    }
+
+    @Test
+    void urlWithoutAnIngesterReportsUnavailableRatherThanThrowing() {
+        // urlIngester == null: a deployment where the "knowledge" profile didn't build
+        // KnowledgeUrlIngester - the tool explains instead of failing.
+        String out = tool(Set.of(allowedCollectionId)).call(
+            "{\"url\":\"https://example.com/x.pdf\",\"collection_id\":\"" + allowedCollectionId + "\"}");
+
+        assertTrue(out.contains("not available"), out);
+        verify(ingestionService, never()).ingest(anyString(), anyString(), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    void aUrlFetchFailureSurfacesAsCleanJson() {
+        KnowledgeUrlIngester urlIngester = mock(KnowledgeUrlIngester.class);
+        when(urlIngester.ingestUrl(anyString(), any(), anyString(), any(), any()))
+            .thenThrow(new InvalidKnowledgeUploadException("The URL returned HTTP 404"));
+
+        String out = toolWithUrl(Set.of(allowedCollectionId), urlIngester).call(
+            "{\"url\":\"https://example.com/missing.pdf\",\"collection_id\":\"" + allowedCollectionId + "\"}");
+
+        assertTrue(out.contains("error"), out);
+        assertTrue(out.contains("404"), out);
     }
 }

@@ -114,6 +114,23 @@ How the `mcp` profile and the runner fit together:
 - core-worker and core-jobs are published slim only. Give them MCP tools
   through the runner.
 
+Which static servers agents see, and what "Enable" does when they aren't served:
+
+- `MCP_STATIC_STATELESS_SERVERS` (default `sequential-thinking`) is the
+  allowlist of shared static servers agents may use. The stateful built-ins
+  (`filesystem`, `memory`, `puppeteer`, `playwright-vision`) are one subprocess
+  shared by every tenant — hidden by default because tool calls would share
+  files, memory and browser sessions across tenants.
+- `MCP_STATIC_SHARED_STATEFUL_ENABLED=true` exposes the stateful ones anyway.
+  Safe only on a single-tenant install. The admin settings value
+  `platform.mcp.static.shared-stateful-enabled` overrides this at runtime.
+- When a catalog "Activate" for a built-in can't be served by the shared
+  static connection (no `mcp` profile — e.g. lite — or the server is hidden by
+  the allowlist), the registration is upgraded to a **per-tenant dynamic
+  connection** launched in `mcp-stdio-runner` (`MCP_STDIO_SIDECAR_ENABLED=true`
+  + profile `tools`/`browser`). Each tenant then gets its own isolated server
+  process — which is also the required isolation for the stateful servers.
+
 ## Required secrets
 
 | Variable | What | Notes |
