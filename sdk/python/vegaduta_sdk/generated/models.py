@@ -939,6 +939,15 @@ class AgentKnowledgeBaseToggleRequest(TypedDict, total=False):
     enabled: bool
 
 
+class AgentKnowledgeWriteAccessResponse(TypedDict, total=False):
+    knowledgeWriteEnabled: bool
+    allowedKnowledgeWriteCollectionIds: List[str]
+
+
+class AgentKnowledgeWriteAccessUpdateRequest(TypedDict, total=False):
+    allowedKnowledgeWriteCollectionIds: List[str]
+
+
 class AgentLabDtos_LabCancelResponse(TypedDict, total=False):
     runId: str
     cancelRequested: bool
@@ -4478,6 +4487,16 @@ class IngestSmsRequest_Item(_IngestSmsRequest_ItemRequired, total=False):
     smsTimestamp: str
 
 
+class _IngestUrlRequestRequired(TypedDict):
+    url: str
+
+
+class IngestUrlRequest(_IngestUrlRequestRequired, total=False):
+    chunkSize: int
+    chunkOverlap: int
+    collectionId: str
+
+
 class InvoiceController_BillingProfileBody(TypedDict, total=False):
     gstin: str
     billingName: str
@@ -4757,6 +4776,14 @@ class KnowledgeStatsResponse(TypedDict, total=False):
     totalDocuments: int
     totalChunks: int
     totalVectors: int
+
+
+class KnowledgeUrlIngester_UrlIngestResult(TypedDict, total=False):
+    filename: str
+    source: str
+    chunkCount: int
+    documentId: str
+    document: bool
 
 
 class LandingEventController_LandingEventRequest(TypedDict, total=False):

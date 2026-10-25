@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.tools.search;
 
 import com.agenticai.core.agents.tools.ToolSearchToolNames;
+import com.agenticai.core.guardrails.ToolResultMarker;
 import com.agenticai.core.guardrails.ToolStepLimitExceededException;
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -151,7 +152,12 @@ public class CallToolToolCallback implements ToolCallback {
         if (agentId != null && refused > MAX_CONSECUTIVE_REFUSALS) {
             throw new ToolStepLimitExceededException(agentId, sessionId, MAX_CONSECUTIVE_REFUSALS);
         }
-        return message;
+        // A refusal is the platform's answer, not a tool's output - registered so the guard's
+        // output screen passes it through (a "call search_tools first" hint reads like an
+        // injection instruction to a content judge, and withholding it loops the model) and the
+        // journals know nothing ran. Only successful dispatches return unmarked: they carry the
+        // TARGET's already-guarded result.
+        return ToolResultMarker.mark(message, ToolResultMarker.Kind.BLOCKED);
     }
 
     /**

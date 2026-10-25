@@ -12,6 +12,7 @@ import com.agenticai.core.approval.ApprovalPolicyService;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.audit.PlatformIssueService;
+import com.agenticai.core.guardrails.ApprovalParked;
 import com.agenticai.core.guardrails.ApprovalParkProperties;
 import com.agenticai.core.guardrails.GuardedToolCallback;
 import com.agenticai.core.guardrails.GuardrailService;
@@ -91,7 +92,7 @@ class LoggingToolCallbackTypedResultTest {
 
         String result = chain(raw, journal, texts).call("{\"to\":\"a\"}");
 
-        assertEquals("Waiting on a person for send_invoice.", result);
+        assertEquals(ApprovalParked.result("Waiting on a person for send_invoice."), result);
         assertEquals(0, raw.calls, "the tool never ran");
         assertTrue(
                 journal.lookup(EffectJournal.keyFor(SESSION, TURN, "send_invoice", "{\"to\":\"a\"}")).isEmpty(),

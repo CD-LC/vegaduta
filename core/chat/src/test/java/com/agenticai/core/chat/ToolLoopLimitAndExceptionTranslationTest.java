@@ -121,6 +121,33 @@ class ToolLoopLimitAndExceptionTranslationTest {
             "stage", "soft", "reason", "unknown_tools").count());
     }
 
+    @Test
+    void aParkedTurnEndsTheLoopInsteadOfQueueingCallsForever() {
+        CountingTool tool = new CountingTool(TOOL, "ok");
+        SimpleMeterRegistry meters = new SimpleMeterRegistry();
+        ToolCallingManager manager = managerWithCaps(25, 8, meters);
+
+        // One prior round ended parked on a human approval; the model ignores the parked text and
+        // calls another tool anyway. Without the parked check this would loop to the round cap.
+        List<Message> history = new ArrayList<>();
+        history.add(new UserMessage("send the invoice"));
+        history.add(AssistantMessage.builder().content("")
+            .toolCalls(List.of(new AssistantMessage.ToolCall("p1", "function", TOOL, "{}"))).build());
+        history.add(ToolResponseMessage.builder()
+            .responses(List.of(new ToolResponseMessage.ToolResponse("p1", TOOL,
+                "{\"error\":\"" + ArgumentSanitizingToolCallingManager.APPROVAL_PARKED + "\",\"result\":\"waiting on approval\"}")))
+            .build());
+
+        ToolExecutionResult result = manager.executeToolCalls(
+            new Prompt(history, optionsOffering(tool)), responseCalling(TOOL));
+
+        assertEquals(0, tool.calls.get(), "a post-park call must not execute");
+        assertTrue(lastToolResponses(result).get(0).responseData()
+            .contains(ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED));
+        assertEquals(1.0, meters.counter(ArgumentSanitizingToolCallingManager.LOOP_LIMIT_METRIC,
+            "stage", "soft", "reason", "approval_parked").count());
+    }
+
     // --- exception translation ------------------------------------------
 
     @Test

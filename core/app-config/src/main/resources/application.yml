@@ -3135,6 +3135,10 @@ app:
       # A call made after the park once max-queued-calls are already queued.
       queue-full-message: >-
         This tool call ('{tool}') was NOT executed and was not queued: an earlier action in this turn ('{parkedTool}') is waiting for human approval and enough follow-up calls are already queued behind it. Do not call more tools. Your goal has not changed: briefly tell the user what is waiting for approval and end this turn; your task is resumed automatically once the approvals are decided.
+      # A call made after the park whose tool cannot be replayed after the decision (dispatch
+      # plumbing such as search_tools/call_tool): refused without an approval request.
+      not-queued-message: >-
+        This tool call ('{tool}') was NOT executed and cannot be queued: an earlier action in this turn ('{parkedTool}') is waiting for human approval, and this kind of call cannot be replayed after the decision, so nothing was recorded for it. Do not call more tools. Your goal has not changed: briefly tell the user what is waiting for approval and end this turn; your task is resumed automatically once the approval is decided.
       # The approval request itself could not be recorded: nothing is waiting, the turn is NOT parked.
       record-failed-message: >-
         This action ('{tool}') requires human approval, but the approval request could not be recorded, so it was NOT executed and nothing is waiting for approval. Do not retry it. Tell the user plainly that the action could not be submitted for approval and that they can ask again, then carry on with any part of the task that does not need this action.

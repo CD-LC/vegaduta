@@ -84,8 +84,8 @@ class GuardedToolCallbackResultMarkerTest {
 
         String result = guard(tool("send_invoice", "ran"), 10, null).withApprovalParkTexts(texts).call("{}");
 
-        assertEquals("custom park text for send_invoice", result);
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.kindOf(result).orElseThrow());
+        assertEquals(ApprovalParked.result("custom park text for send_invoice"), result);
+        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result).orElseThrow());
         assertTrue(ToolResultMarker.isPlatformAnswer(result));
     }
 
@@ -93,7 +93,7 @@ class GuardedToolCallbackResultMarkerTest {
     void theDefaultParkTextIsMarkedParked() {
         String result = guard(tool("send_invoice", "ran"), 10, null).call("{}");
 
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.kindOf(result).orElseThrow());
+        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result).orElseThrow());
     }
 
     @Test

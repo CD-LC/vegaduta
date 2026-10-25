@@ -133,6 +133,14 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
      */
     public static final String TOOL_BUDGET_EXHAUSTED = "tool_budget_exhausted";
 
+    /**
+     * Machine-readable marker in a parked-turn tool result: {@code GuardedToolCallback} writes it
+     * (core/guardrails cannot depend on this module, so it repeats the string in
+     * {@code ApprovalParked}; a test pins that they agree). A turn parked on a human approval must
+     * end - post-park calls consume no step budget, so the loop stops them here instead.
+     */
+    public static final String APPROVAL_PARKED = "approval_parked";
+
     static final String LOOP_LIMIT_METRIC = "chat.tool_loop.limit";
     static final String UNKNOWN_TOOL_METRIC = "chat.tool.unknown_calls";
     static final String ARGUMENT_REJECTED_METRIC = "chat.tool.argument_rejected";
@@ -282,12 +290,18 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         int priorRounds = 0;
         int unknownCalls = 0;
         boolean softStopAlreadySent = false;
+        boolean parked = false;
         for (Message message : currentInvocation(prompt.getInstructions())) {
             if (message instanceof AssistantMessage assistant && assistant.hasToolCalls()) {
                 priorRounds++;
                 unknownCalls += countUnknown(assistant.getToolCalls(), known);
-            } else if (message instanceof ToolResponseMessage toolResponses && carriesBudgetMarker(toolResponses)) {
-                softStopAlreadySent = true;
+            } else if (message instanceof ToolResponseMessage toolResponses) {
+                if (ToolLoopMarkers.carriesBudgetMarker(toolResponses)) {
+                    softStopAlreadySent = true;
+                }
+                if (ToolLoopMarkers.carriesParkedMarker(toolResponses)) {
+                    parked = true;
+                }
             }
         }
         int newUnknown = countUnknown(requesting.getToolCalls(), known);
@@ -301,10 +315,13 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         int roundCap = ToolLoopRunHooks.maxRounds(prompt, maxToolRounds);
         boolean roundsExceeded = round > roundCap;
         boolean unknownExceeded = unknownCalls > maxUnknownToolCalls;
-        if (!roundsExceeded && !unknownExceeded) {
+        // A parked turn (a tool call waiting on human approval) must end: post-park calls are
+        // answered by the guard and consume no step budget, so without this check a model that
+        // keeps calling tools loops to the round cap burning tokens on queue refusals.
+        if (!roundsExceeded && !unknownExceeded && !parked) {
             return null;
         }
-        String reason = roundsExceeded ? "rounds" : "unknown_tools";
+        String reason = parked ? "approval_parked" : roundsExceeded ? "rounds" : "unknown_tools";
         List<Message> history = new ArrayList<>(prompt.getInstructions());
         history.add(requesting);
         List<AssistantMessage.ToolCall> calls = requesting.getToolCalls();
@@ -359,28 +376,8 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             body.put("result", instruction);
             return objectMapper.writeValueAsString(body);
         } catch (Exception e) {
-            return fallbackSoftStop(instruction);
+            return ToolLoopMarkers.fallbackSoftStop(instruction);
         }
-    }
-
-    /**
-     * The soft-stop JSON written by hand, for the case the serializer fails (unreachable for a map of strings). It
-     * carries no English of its own: the instruction is the registry's text.
-     */
-    static String fallbackSoftStop(String instruction) {
-        return "{\"error\":\"" + TOOL_BUDGET_EXHAUSTED + "\",\"result\":\""
-            + new String(com.fasterxml.jackson.core.io.JsonStringEncoder.getInstance().quoteAsString(String.valueOf(instruction)))
-            + "\"}";
-    }
-
-    private static boolean carriesBudgetMarker(ToolResponseMessage message) {
-        for (ToolResponseMessage.ToolResponse response : message.getResponses()) {
-            String data = response.responseData();
-            if (data != null && data.contains("\"" + TOOL_BUDGET_EXHAUSTED + "\"")) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

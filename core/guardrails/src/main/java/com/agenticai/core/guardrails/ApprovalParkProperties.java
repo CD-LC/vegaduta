@@ -39,6 +39,13 @@ public class ApprovalParkProperties {
     /** Tool result for a call made after the park when the queue is already at its limit. */
     private String queueFullMessage = DEFAULTS.getProperty("queue-full-message");
 
+    /**
+     * Tool result for a call made after the park whose tool cannot be replayed after the decision
+     * (dispatch plumbing such as search_tools/call_tool): nothing is recorded for it. Falls back to
+     * the queue-full text on an operator override written before this key existed.
+     */
+    private String notQueuedMessage = DEFAULTS.getProperty("not-queued-message", DEFAULTS.getProperty("queue-full-message"));
+
     /** Tool result when the approval request itself could not be recorded (nothing is waiting). */
     private String recordFailedMessage = DEFAULTS.getProperty("record-failed-message");
 
@@ -106,6 +113,14 @@ public class ApprovalParkProperties {
 
     public void setQueueFullMessage(String queueFullMessage) {
         this.queueFullMessage = queueFullMessage;
+    }
+
+    public String getNotQueuedMessage() {
+        return notQueuedMessage;
+    }
+
+    public void setNotQueuedMessage(String notQueuedMessage) {
+        this.notQueuedMessage = notQueuedMessage;
     }
 
     public String getRecordFailedMessage() {
