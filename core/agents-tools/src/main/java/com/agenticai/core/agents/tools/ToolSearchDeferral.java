@@ -107,8 +107,9 @@ final class ToolSearchDeferral {
     }
 
     /**
-     * Wires the catalog-entry screen ({@link SearchCatalogScreen}) from the {@code GuardrailService}
-     * the per-call output screen uses; null = no screen, and search results stay unmarked.
+     * Wires the catalog-entry screen ({@link SearchCatalogScreen}) from the {@code
+     * GuardrailService} the per-call output screen uses; null = no screen, and search results stay
+     * unmarked.
      */
     void withCatalogScreen(com.agenticai.core.guardrails.GuardrailService guardrailService) {
         this.catalogScreen =
@@ -181,7 +182,8 @@ final class ToolSearchDeferral {
         }
 
         ToolSearchState state =
-                new ToolSearchState(exposed, deferred, service, registry, key, carry, screen != null);
+                new ToolSearchState(
+                        exposed, deferred, service, registry, key, carry, screen != null);
         List<ToolCallback> offered = new ArrayList<>(exposedInOrder.size() + 2);
         offered.add(wrapper.wrap(new SearchToolsToolCallback(state), true));
         offered.add(wrapper.wrap(new CallToolToolCallback(state, agentId, sessionId), false));
