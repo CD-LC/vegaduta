@@ -14,6 +14,7 @@ import AvatarUploadModal from "./AvatarUploadModal";
 import { useShellLoadingCover, RouteTransitionOverlay } from "./RouteTransition";
 import { UsageAlertBanner } from "./UsageQuota";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
+import DesktopScreenDock from "./desktop/DesktopScreenDock";
 import { useAppChrome } from "./AppChromeProvider";
 // Rail "Jump to..." box + global Cmd/Ctrl+K both open this - a hand-rolled
 // modal. Fed the SAME already-filtered `navSections` this file renders, not a
@@ -412,6 +413,9 @@ function AppShellBody({
       </div>
 
       <PanelAccentAssigner />
+      {/* Persistent live-screen dock: renders nothing until the desktop feature answers,
+          and polls the screen only while the person keeps it open. */}
+      <DesktopScreenDock />
       {/* Never mounted-open for a white-labeled tenant - the rail brand has no
           way to open it (isWhiteLabel branch has no onClick), but skip
           rendering the modal entirely too so there's no path back to our own

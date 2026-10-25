@@ -89,6 +89,7 @@ class DesktopMonitorControllerTest {
                 agentUrl,
                 "s3cret",
                 true,
+                mock(ObjectProvider.class),
                 mock(ObjectProvider.class));
     }
 

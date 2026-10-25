@@ -1,5 +1,7 @@
 package com.agenticai.core.agents.tools.desktop;
 
+import com.agenticai.core.audit.AuditLogService;
+import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.guardrails.ToolConfirmationDescriber;
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,8 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import org.springframework.beans.factory.ObjectProvider;
 
 /**
  * One {@code local_desktop_*} tool over the desktop-agent sidecar (services/desktop-agent). The
@@ -25,6 +30,7 @@ import org.springframework.ai.tool.definition.ToolDefinition;
 public final class DesktopToolCallback implements ToolCallback, ToolConfirmationDescriber {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
+    private static final Logger log = LoggerFactory.getLogger(DesktopToolCallback.class);
     private static final int SUMMARY_CHARS = 120;
 
     /** What the tool does at the desktop agent, how it is described, and the approval summary. */
@@ -112,11 +118,21 @@ public final class DesktopToolCallback implements ToolCallback, ToolConfirmation
     private final DesktopAgentClient client;
     private final Action action;
     private final boolean approvalRequired;
+    private final ObjectProvider<AuditLogService> audit;
 
     public DesktopToolCallback(DesktopAgentClient client, Action action, boolean approvalRequired) {
+        this(client, action, approvalRequired, null);
+    }
+
+    public DesktopToolCallback(
+            DesktopAgentClient client,
+            Action action,
+            boolean approvalRequired,
+            ObjectProvider<AuditLogService> audit) {
         this.client = client;
         this.action = action;
         this.approvalRequired = approvalRequired;
+        this.audit = audit;
     }
 
     Action action() {
@@ -151,11 +167,38 @@ public final class DesktopToolCallback implements ToolCallback, ToolConfirmation
                 args.properties().forEach(e -> body.put(e.getKey(), e.getValue()));
                 reply = client.post(action.path, body);
             }
-            return MAPPER.writeValueAsString(reply);
+            String out = MAPPER.writeValueAsString(reply);
+            record(toolInput, "ok");
+            return out;
         } catch (IOException e) {
+            record(toolInput, "failed: " + e.getMessage());
             return error(e.getMessage());
         } catch (RuntimeException e) {
+            record(toolInput, "failed: " + e.getMessage());
             return error("The action could not run: " + e.getMessage());
+        }
+    }
+
+    /** Strict audit for screen actions: every actuating call (and the screen reads) lands an audit
+     * event with the same wording the person saw on the approval card plus the outcome - never the
+     * raw arguments, so typed text (which may be a secret) is not stored. Best-effort: a missing or
+     * failing audit service must never break the action itself, exactly like the gate above. */
+    private void record(String toolInput, String outcome) {
+        AuditLogService svc = audit == null ? null : audit.getIfAvailable();
+        if (svc == null) {
+            return;
+        }
+        try {
+            String what = describeForConfirmation(toolInput);
+            svc.record(
+                    "agent",
+                    "DESKTOP_" + action.name(),
+                    "local_desktop",
+                    action.toolName,
+                    outcome.startsWith("ok") ? AuditOutcome.SUCCESS : AuditOutcome.FAILURE,
+                    (what == null ? action.toolName : what) + " -> " + outcome);
+        } catch (RuntimeException e) {
+            log.warn("Could not write desktop audit event for {}", action.toolName, e);
         }
     }
 
