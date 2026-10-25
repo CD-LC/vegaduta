@@ -254,14 +254,14 @@ describe("monitor pane", () => {
 
 describe("save this run as a desktop recipe", () => {
   const desktopRun = [
-    { type: "tool_call", tool: "desktop_click" },
-    { type: "tool_call", tool: "desktop_type" },
-    { type: "tool_result", tool: "desktop_type" },
+    { type: "tool_call", tool: "local_desktop_click" },
+    { type: "tool_call", tool: "local_desktop_type" },
+    { type: "tool_result", tool: "local_desktop_type" },
   ];
 
   it("isDesktopRun needs at least two desktop action calls", () => {
     expect(isDesktopRun(desktopRun)).toBe(true);
-    expect(isDesktopRun([{ type: "tool_call", tool: "desktop_screen" }])).toBe(false);
+    expect(isDesktopRun([{ type: "tool_call", tool: "local_desktop_screen" }])).toBe(false);
     expect(isDesktopRun([{ type: "tool_call", tool: "browser_click" }, { type: "tool_call", tool: "browser_type" }])).toBe(false);
   });
 
