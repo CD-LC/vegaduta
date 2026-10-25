@@ -15,6 +15,8 @@ import com.agenticai.core.chat.FinishReason;
 import com.agenticai.core.chat.FinishReasonAdvisor;
 import com.agenticai.core.chat.FinishReasonCapture;
 import com.agenticai.core.chat.LlmMetricsAdvisor;
+import com.agenticai.core.chat.TerminalRoundStreamAdvisor;
+import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.chat.ToolLoopTranscript;
 import java.time.Instant;
 import java.util.List;
@@ -244,11 +246,18 @@ final class FastStreamTurn {
                         // unconditionally, which would relabel "tool step limit exceeded" as "the
                         // LLM provider call failed" and mislead anyone debugging it.
                         .onErrorMap(
-                                e ->
-                                        FastStreamRecovery.isPolicyStop(e)
-                                                ? e
-                                                : owner.providerErrorTranslator.translate(
-                                                        e, agent.getProviderName()))
+                                e -> {
+                                    if (FastStreamRecovery.isPolicyStop(e)) {
+                                        return e;
+                                    }
+                                    // translate wraps every Throwable unconditionally in the real
+                                    // provider; an inert (mock) translator may return null - map
+                                    // that to the original error, never Mono.error(null).
+                                    UpstreamProviderException translated =
+                                            owner.providerErrorTranslator.translate(
+                                                    e, agent.getProviderName());
+                                    return translated == null ? e : translated;
+                                })
                         .onErrorResume(recovery::retryWithoutToolsOnThoughtSignatureBug)
                         .onErrorResume(recovery::retryOnFallbackProvider)
                         .onErrorResume(recovery::closeHalfResponse)
@@ -384,6 +393,11 @@ final class FastStreamTurn {
         // The provider's stop reason (max_tokens, safety, ...): the tool loop runs inside Spring
         // AI and .content() discards the response metadata that carries it.
         a.advisors(new FinishReasonAdvisor(finish));
+        // app.chat.parity.fast-terminal-rounds-only: stream only the tool loop's terminal round - the
+        // mid-loop narration of rounds that ended in tool calls never reaches the client.
+        if (owner.parity != null && owner.parity.isFastTerminalRoundsOnly()) {
+            a.advisors(new TerminalRoundStreamAdvisor());
+        }
         // #1102 (direct feedback: opaque "value cannot be null" 400 on every
         // single chat turn) - resolveExperimentVariants() returns null
         // whenever a tenant has no active feature-flag experiment (the common
