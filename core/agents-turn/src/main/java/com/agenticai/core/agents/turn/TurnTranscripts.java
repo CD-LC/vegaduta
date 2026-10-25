@@ -12,6 +12,8 @@ import java.util.UUID;
  */
 final class TurnTranscripts {
 
+    private static final String TOOL_LOOP_MAX_PROMPT_TOKENS_KEY = "chat.toolLoop.maxPromptTokensPerTurn";
+
     private TurnTranscripts() {}
 
     /** As {@link ChatTurnExecutor#newTranscript(TurnContext)} for the agent that answers (the routed one when an experiment chose a variant). */
@@ -25,6 +27,11 @@ final class TurnTranscripts {
                             ChatTurnExecutor.TOOL_RESULT_CLEARING_ENABLED_KEY, context.scope(), agentId),
                     turns.behaviour.integerOrNull(
                             ChatTurnExecutor.TOOL_RESULT_CLEARING_THRESHOLD_KEY, context.scope(), agentId));
+            // Cumulative prompt-token cap for this run (chat.toolLoop.maxPromptTokensPerTurn); null = uncapped.
+            Integer tokenCap =
+                    turns.behaviour.integerOrNull(
+                            TOOL_LOOP_MAX_PROMPT_TOKENS_KEY, context.scope(), agentId);
+            transcript.promptTokenBudget(tokenCap == null ? null : tokenCap.longValue());
         }
         com.agenticai.core.agents.runtime.AgentRuntime resolver = turns.runtime;
         com.agenticai.core.agents.runtime.AgentRuntimeSettings settings = context == null ? null : context.runtimeSettings();

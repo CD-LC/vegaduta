@@ -3,6 +3,7 @@ package com.agenticai.core.chat;
 import com.agenticai.core.security.TenantScope;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -33,6 +34,32 @@ public final class ToolLoopTranscript {
 
     /** This run's own round cap; null = the manager's. */
     private volatile Integer maxRounds;
+
+    /**
+     * This run's own cap on CUMULATIVE prompt tokens sent to the model across the whole tool loop
+     * ({@code chat.toolLoop.maxPromptTokensPerTurn} of its tenant and agent); null = uncapped. The
+     * per-call budget is in tool CALLS ({@code app.guardrails.max-tool-calls-per-turn}); this one is
+     * in prompt tokens - the runaway shape a call cap misses is the loop whose every round resends a
+     * near-full context window.
+     */
+    private volatile Long maxPromptTokens;
+    private final AtomicLong promptTokensUsed = new AtomicLong();
+
+    /** Gives this run a cumulative prompt-token budget; null or not positive leaves it uncapped. */
+    public ToolLoopTranscript promptTokenBudget(Long maxTokens) {
+        this.maxPromptTokens = maxTokens != null && maxTokens > 0 ? maxTokens : null;
+        return this;
+    }
+
+    /** This run's prompt-token cap, or null. */
+    Long maxPromptTokens() {
+        return maxPromptTokens;
+    }
+
+    /** Adds one round's prompt size; returns the running total. */
+    long addPromptTokens(long tokens) {
+        return promptTokensUsed.addAndGet(Math.max(0, tokens));
+    }
 
     /**
      * Gives this run its own cap on tool rounds per model invocation, in place of the manager's
