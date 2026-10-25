@@ -203,3 +203,21 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
 - 2026-10-23, IDE plugins / console pagination agent (Devin): opened a PR off `main` adding the standard `usePagination` + `PaginationControls` to the record lists that did not page (AI Model Control features, prompt registry catalog, prompt history, admin access matrix, Sentinels synced events, Clip Studio image picker, semantic-search scope chips, face enrollments) and updated the registry test for the pager's second `role=status` live region. Everything else already pages client- or server-side. Merged as #138 (`15c449ae9`) after green `CI OK`/`CodeQL OK`; the PR also regenerated `docs/architecture/core-module-graph.md` (stale on `main` since the agents-jobs/providers additions).
 - 2026-10-23, App Builder change-turn agent (Devin): the /build change turn now streams its stages (`POST /projects/{id}/generate/stream`: context/writing/files/checking/publishing/done), the browser renders the applied files' preview while the build check still runs (reverted on failure), the model returns a plain-English `summary` shown as the result headline with per-file +/- counts, retrieval reads project files in parallel, and the Studio surface shows the model's `NOTE:` line instead of "N changes applied". Maintainer merged #140 mid-CI (squash `1332ccca3`) ahead of the spotless/ruff-format fix-ups; #141 carries the identical code with the required formatting and waits on green. Verified locally: 25/25 app-builder pytest, 316 web vitest, tsc/eslint/prettier/ruff clean; Java compiles on CI only (no JDK 21 on this machine).
 - 2026-10-25, KB-URL-ingest / MCP static-upgrade agent (Devin): pushed `fix/kb-url-ingest-mcp-static-upgrade` as **PR #166** (waits on green CI + the review overlaps it names). Also deployed it onto the maintainer's **local personal stack** (`vegaduta-personal` compose project, build overlay, images tagged 0.1.10 locally): `MCP_STDIO_SIDECAR_ENABLED=true` + `MCP_STDIO_RUNNER_WITH_BROWSERS=true` were set in `deploy/compose/.env` so the browser-capable runner serves dynamic MCP spawns. The live boot caught two wiring bugs unit tests could not - `final` on a `@Transactional` bean (CGLIB) and a two-ctor bean without `@Autowired` - both fixed in follow-up commits on the PR before the stack went healthy. Note: the edge media-gen agent's `git stash` earlier swept this work's tracked files into `stash@{0}` ("WIP on feat/edge-media-gen"); they were recovered and are what the PR carries - that stash should not be popped onto the edge branch.
+- 2026-10-25, agent-loop forensics agent (Devin, same branch/PR #166): after a live incident report
+  (133 s / 125k tokens / hallucinated reply on a parked SUPERVISED turn) audited the tool loop and
+  fixed, on `df499ddcd`: parked/queued tool results now carry an `approval_parked` marker that ends
+  the invocation (soft stop then hard stop) instead of letting post-park calls loop unbudgeted;
+  dispatch plumbing (`search_tools`, `call_tool`, `restore_tool_result`) is refused behind a park
+  without minting an approval request; the tool-loop round backstop follows the turn's own ceiling
+  instead of the platform's largest; platform-origin tool answers registered with `ToolResultMarker`
+  bypass the untrusted-content screen (the platform's own "call search_tools first" hint was being
+  withheld as prompt injection); `search_tools` no-match answers now list the deferred catalog
+  (names, groups, generic fallbacks, `select:`). Also cleared the app-module gate fallout from the
+  KB-url work: `POST /api/knowledge/ingest-url` joins the PERM_MANAGE_AGENTS rule, knowledge-write
+  endpoints allowlisted, openapi.json + SDK regenerated, tool-description registry defaults updated.
+  Verified: chat 1113 / guardrails 483 / agents-tools 1408 / agents-turn 2189 / app gate tests all
+  green; rebuilt and deployed to `vegaduta-personal` - core healthy in ~14 s, `time` MCP reconnected.
+  KNOWN PRE-EXISTING ISSUE (not touched): `scripts/ci/file-size-baseline.txt` is comments-only in
+  this repo (entries lost in the history rewrite) which makes check-file-size.sh pass vacuously -
+  awk's FNR==NR treats the whole scan as baseline when the baseline file is empty. A real baseline
+  reset needs a maintainer decision (merge-base ratchet fails on any newly added path).
