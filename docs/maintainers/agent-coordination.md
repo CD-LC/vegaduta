@@ -221,3 +221,22 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   this repo (entries lost in the history rewrite) which makes check-file-size.sh pass vacuously -
   awk's FNR==NR treats the whole scan as baseline when the baseline file is empty. A real baseline
   reset needs a maintainer decision (merge-base ratchet fails on any newly added path).
+- 2026-10-25, agent-loop forensics agent (Devin) - ACTIVE CLAIM, uncommitted in-flight work on
+  `fix/kb-url-ingest-mcp-static-upgrade` (PR #166). Claiming these files for the remaining audit
+  findings (F2/F5/F6/F7/F8/F9): `core/chat/.../ArgumentSanitizingToolCallingManager.java`,
+  `ToolLoopTranscript.java`, `ToolLoopRunHooks.java`, `ToolLoopProperties.java`;
+  `core/agents-turn/.../turn/{ChatTurnExecutor,ChatTurnDispatcher,ChatTimeouts,TurnTimeLimit,
+  FastStreamTurn,FastStreamContinuation,BufferedTurnCalls,BufferedTurnContinuation,ChatServiceParts}.java`;
+  `core/agents/.../tools/{McpToolOutputSanitizer,TenantContextPropagatingToolCallback}.java`;
+  `core/agents-tools/.../search/*` and `tools/{ToolResolver,ToolResolverConfiguration,
+  ToolSearchDeferral}.java`; `core/app-config/.../application.yml`; `scripts/ci/check-file-size.sh`
+  + `file-size-baseline.txt` (reseeded - the empty-baseline FNR==NR vacuity is FIXED, the gate is
+  real now; baselined files may not grow).
+  ⚠ OVERLAP: an agent on `fix/search-capability-honesty` (worktree /private/tmp/vd-capfix) has
+  UNCOMMITTED work on some of the same files - their prompt-token budget
+  (ToolLoopTranscript.maxPromptTokens, ToolLoopRunHooks.overPromptBudget, toolresult.tool_budget.tokens)
+  and web_search unavailable-stub (BuiltInWebTools, WebSearchToolCallback) are complementary, not
+  conflicting semantically. Merge guidance for whoever lands second: take BOTH - their token-budget
+  seam + my cumulative-rounds/FAST-ceiling changes touch disjoint methods of the same files
+  (ArgumentSanitizingToolCallingManager, ToolLoopTranscript, ChatTurnExecutor, application.yml,
+  tool-loop.properties).
