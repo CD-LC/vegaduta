@@ -25,6 +25,7 @@ final class ChatPrompts {
     private static final Logger log = LoggerFactory.getLogger(ChatPrompts.class);
 
     static final String TOOL_BUDGET_ROUNDS = "toolresult.tool_budget.rounds";
+    static final String TOOL_BUDGET_TOKENS = "toolresult.tool_budget.tokens";
     static final String HARD_STOP = "message.tool_budget.hard_stop";
     static final String UNKNOWN_TOOL = "toolresult.unavailable.unknown_tool";
     static final String INVALID_ARGUMENTS_HINT = "toolresult.invalid_arguments.hint";

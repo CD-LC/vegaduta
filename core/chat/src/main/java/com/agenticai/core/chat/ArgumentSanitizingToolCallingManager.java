@@ -315,13 +315,17 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         int roundCap = ToolLoopRunHooks.maxRounds(prompt, maxToolRounds);
         boolean roundsExceeded = round > roundCap;
         boolean unknownExceeded = unknownCalls > maxUnknownToolCalls;
+        boolean tokensExceeded = ToolLoopRunHooks.overPromptBudget(prompt, chatResponse);
         // A parked turn (a tool call waiting on human approval) must end: post-park calls are
         // answered by the guard and consume no step budget, so without this check a model that
         // keeps calling tools loops to the round cap burning tokens on queue refusals.
-        if (!roundsExceeded && !unknownExceeded && !parked) {
+        if (!roundsExceeded && !unknownExceeded && !tokensExceeded && !parked) {
             return null;
         }
-        String reason = parked ? "approval_parked" : roundsExceeded ? "rounds" : "unknown_tools";
+        String reason =
+                parked
+                        ? "approval_parked"
+                        : roundsExceeded ? "rounds" : unknownExceeded ? "unknown_tools" : "prompt_tokens";
         List<Message> history = new ArrayList<>(prompt.getInstructions());
         history.add(requesting);
         List<AssistantMessage.ToolCall> calls = requesting.getToolCalls();
@@ -334,7 +338,8 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 reason, round, roundCap, unknownCalls, maxUnknownToolCalls, calls.size()
             );
             increment(LOOP_LIMIT_METRIC, 1, "stage", "soft", "reason", reason);
-            String softStop = softStopResult(prompt, round - 1);
+            String softStop =
+                    tokensExceeded ? softStopTokenResult(prompt) : softStopResult(prompt, round - 1);
             for (AssistantMessage.ToolCall call : calls) {
                 responses.add(new ToolResponseMessage.ToolResponse(call.id(), call.name(), softStop));
             }
@@ -366,18 +371,11 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
     }
 
     private String softStopResult(Prompt prompt, int roundsUsed) {
-        String instruction = ChatPrompts.textWithConfiguredAlias(
-            prompts, ChatPrompts.TOOL_BUDGET_ROUNDS, ToolLoopRunHooks.promptRun(prompt), budgetExhaustedMessage,
-            "rounds", String.valueOf(roundsUsed));
-        try {
-            // Ordered: error first, the same shape GuardedToolCallback writes for its call ceiling.
-            Map<String, Object> body = new java.util.LinkedHashMap<>();
-            body.put("error", TOOL_BUDGET_EXHAUSTED);
-            body.put("result", instruction);
-            return objectMapper.writeValueAsString(body);
-        } catch (Exception e) {
-            return ToolLoopMarkers.fallbackSoftStop(instruction);
-        }
+        return ToolLoopSoftStops.rounds(prompts, objectMapper, budgetExhaustedMessage, prompt, roundsUsed);
+    }
+
+    private String softStopTokenResult(Prompt prompt) {
+        return ToolLoopSoftStops.tokens(prompts, objectMapper, prompt);
     }
 
     /**

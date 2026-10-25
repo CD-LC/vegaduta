@@ -107,6 +107,26 @@ Release notes on GitHub are generated from the section for each version.
   now derived from the ceiling this turn actually enforces plus its grace; an explicit
   `app.chat.tools.max-rounds-per-invocation` still wins.
 
+
+- **`web_search` no longer vanishes silently when no provider is configured.** The tool was
+  omitted from the payload unless a search provider was set up, so a misconfigured deployment
+  made the model correctly conclude it had no web access and answer research requests from stale
+  memory instead of failing fast. When nothing in `app.web-search.provider`/`fallback` is usable,
+  `web_search` is now offered as a stub whose call returns an operator-facing explanation ("web
+  search is not configured on this deployment..."), and a boot WARN names the gap
+  (`WEB_SEARCH_PROVIDER`/`WEB_SEARCH_SEARXNG_BASE_URL` or a provider key). Per-agent deny lists
+  still filter it; `deep_research`/`verify_citations` still require a configured provider.
+- **A run's tool loop now has a cumulative prompt-token budget**
+  (`app.chat.tools.max-prompt-tokens-per-turn`, tenant/agent override
+  `chat.toolLoop.maxPromptTokensPerTurn`, `0` = uncapped). The per-turn call ceiling bounds rounds,
+  not size: it missed the runaway shape where every loop round resends a near-full context window.
+  Over the cap, calls are answered with the `tool_budget_exhausted` soft stop and the model writes
+  its closing answer, so a runaway cannot resend an unbounded context.
+- **Context compaction now reserves output headroom.** `app.context.compaction.reserve-output-tokens`
+  (`APP_CONTEXT_COMPACTION_RESERVE_OUTPUT_TOKENS`, default 8,192) is subtracted from the model's
+  context window before the clear/compact fractions apply, so a run at the compaction trigger still
+  leaves room for the answer instead of riding at ~98% of the real window.
+
 ## [0.1.10] - 2026-10-24
 
 ### Added

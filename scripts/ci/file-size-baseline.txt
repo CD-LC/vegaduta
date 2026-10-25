@@ -29,7 +29,7 @@ core/agents-turn/src/main/java/com/agenticai/core/agents/turn/HostedChainFailove
 core/agents/src/main/java/com/agenticai/core/agents/core/AgentService.java 685
 core/agents/src/main/java/com/agenticai/core/agents/tools/AgentStepEventEmitter.java 693
 core/approval/src/test/java/com/agenticai/core/approval/HumanApprovalGateServiceTest.java 701
-core/chat/src/main/java/com/agenticai/core/chat/ArgumentSanitizingToolCallingManager.java 677
+core/chat/src/main/java/com/agenticai/core/chat/ArgumentSanitizingToolCallingManager.java 675
 core/chat/src/main/java/com/agenticai/core/chat/LlmModelSupport.java 678
 core/google/src/main/java/com/agenticai/core/google/GoogleOAuthService.java 692
 core/guardrails/src/main/java/com/agenticai/core/guardrails/GuardedToolCallback.java 853
