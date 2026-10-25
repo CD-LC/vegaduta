@@ -256,11 +256,14 @@ class ToolResolverConfiguration {
         }
         StringRedisTemplate redis = redisProvider == null ? null : redisProvider.getIfAvailable();
         if (redis != null) {
+            log.info("Tool activation carry-over stored in Redis ({})", mode.toLowerCase());
             return new ToolActivationRegistry(new RedisToolActivationStore(redis), ttl);
         }
         if ("redis".equalsIgnoreCase(mode)) {
             log.warn(
                     "app.tools.search.activation-store=redis but no StringRedisTemplate is available - using in-memory activations");
+        } else {
+            log.info("Tool activation carry-over held in per-replica memory (no StringRedisTemplate)");
         }
         return new ToolActivationRegistry(
                 ToolActivationRegistry.DEFAULT_MAX_SESSIONS, ttl, Clock.systemUTC());
