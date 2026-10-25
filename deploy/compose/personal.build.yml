@@ -33,4 +33,13 @@ services:
   workspace-runner:
     build: ../../services/workspace-runner
   mcp-stdio-runner:
-    build: ../../services/mcp-stdio-runner
+    build:
+      context: ../../services/mcp-stdio-runner
+      args:
+        # MCP_STDIO_RUNNER_WITH_BROWSERS=true builds the runner that carries Chromium
+        # (same wiring as docker-compose.build.yml) - required for per-tenant dynamic
+        # puppeteer/playwright-vision MCP servers, which the static-reference upgrade
+        # now connects through this runner.
+        WITH_BROWSERS: ${MCP_STDIO_RUNNER_WITH_BROWSERS:-false}
+  voice-agent:
+    build: ../../services/voice-agent

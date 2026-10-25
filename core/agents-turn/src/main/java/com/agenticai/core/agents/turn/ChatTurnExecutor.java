@@ -70,6 +70,9 @@ final class ChatTurnExecutor {
      */
     final Duration streamIdleTimeout;
 
+    /** The FAST stream's overall wall-clock ceiling ({@code app.llm.http.fast-turn-timeout}); see {@link FastTurnCeiling}. Set from {@link ChatTimeouts#fastTurnTimeout()} when the service is built. */
+    volatile Duration fastTurnTimeout = Duration.ofMinutes(10);
+
     /**
      * How many extra model passes a FAST turn may run when a reply stops at an announced-but-undone
      * step ({@link TurnContinuation}); 0 turns it off. Set from {@code app.chat.continuation.max-passes}.
@@ -114,30 +117,9 @@ final class ChatTurnExecutor {
         return newTranscript(context, context == null ? null : context.requestedAgentId());
     }
 
-    /**
-     * As {@link #newTranscript(TurnContext)} for the agent that answers (the routed one when an experiment chose a
-     * variant): the transcript also carries this tenant's and agent's tool-result clearing settings
-     * ({@code chat.toolLoop.resultClearing.*}), which the tool loop applies instead of the process-wide ones.
-     */
+    /** As {@link #newTranscript(TurnContext)} for the agent that answers (the routed one when an experiment chose a variant). */
     com.agenticai.core.chat.ToolLoopTranscript newTranscript(TurnContext context, UUID agentId) {
-        com.agenticai.core.chat.ToolLoopTranscript transcript = new com.agenticai.core.chat.ToolLoopTranscript();
-        if (context != null) {
-            // null = the tool loop's own (platform) value; set only when the catalog answers for this tenant and agent.
-            transcript.resultClearing(
-                    behaviour.boolOrNull(TOOL_RESULT_CLEARING_ENABLED_KEY, context.scope(), agentId),
-                    behaviour.integerOrNull(TOOL_RESULT_CLEARING_THRESHOLD_KEY, context.scope(), agentId));
-        }
-        com.agenticai.core.agents.runtime.AgentRuntime resolver = runtime;
-        com.agenticai.core.agents.runtime.AgentRuntimeSettings settings = context == null ? null : context.runtimeSettings();
-        if (resolver != null && settings != null) {
-            transcript.limitRounds(resolver.toolLoopRounds(settings));
-        }
-        // The tool loop writes text of its own (the "tool budget used up" result, the closing reply, the answer to a
-        // tool name that was never offered): it looks it up in the prompt registry for THIS turn's agent and tenant.
-        if (context != null) {
-            transcript.forPrompts(context.requestedAgentId(), context.scope());
-        }
-        return transcript;
+        return TurnTranscripts.create(this, context, agentId);
     }
 
     /**

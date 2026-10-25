@@ -3338,6 +3338,9 @@
     "alwaysOnSimpleModeSuffix": " - always on in Simple mode",
     "unrestrictedAccessHint": "Leave everything unchecked for unrestricted access to every collection.",
     "saveKnowledgeAccess": "✓ save knowledge access",
+    "knowledgeWriteLabel": "Allow writing to the knowledge base (add_to_knowledge_base tool)",
+    "knowledgeWriteLoadError": "Could not load this agent's knowledge-write settings.",
+    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected.",
     "toolsMcpLabel": "TOOLS · MCP",
     "sharingSectionLabel": "SHARING",
     "versionsSectionLabel": "VERSIONS",
@@ -15681,6 +15684,10 @@
       "providers": {
         "label": "AI providers",
         "description": "How connected AI provider keys are used when one stops working."
+      },
+      "tools": {
+        "label": "Agent tools",
+        "description": "Which built-in tool helpers an agent keeps."
       }
     },
     "agent": {
@@ -15909,6 +15916,11 @@
             "description": "How large the tool results in a turn may grow before older ones are cleared.",
             "help": "Raise it to keep more results visible, lower it to keep long runs small and cheap."
           }
+        },
+        "maxPromptTokensPerTurn": {
+          "label": "Prompt-token budget per reply",
+          "description": "Total prompt tokens one reply's tool loop may send the model before it is told to stop calling tools and answer with what it has.",
+          "help": "0 means no cap. Lower it to stop a runaway tool loop that keeps resending a large context; the per-turn tool-call limit bounds rounds, this bounds their size."
         }
       }
     },
@@ -16125,6 +16137,15 @@
           "label": "Pause after a provider refuses a key",
           "description": "How long background work skips a connected provider key after the provider refused it.",
           "help": "While paused, scheduled and automatic jobs use another connected provider, or wait, instead of calling a key that keeps failing. People chatting are never blocked and always see the provider's real error. When the pause ends, one call is let through to check whether the key was fixed. Zero turns the pause off."
+        }
+      }
+    },
+    "tools": {
+      "scratchpad": {
+        "enabled": {
+          "label": "Agent scratchpad",
+          "description": "Give the agent its scratchpad tools: a persistent notepad with session-scoped working notes and a long-term pad it writes and reads itself.",
+          "help": "Turn it off to remove the four scratchpad tools (write, read, list, delete) from the agent. Notes already stored are kept but the agent can no longer reach them."
         }
       }
     }

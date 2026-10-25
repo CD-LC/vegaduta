@@ -37,13 +37,24 @@ public class ToolLoopProperties {
      * Tool rounds one model invocation may run before the soft stop. {@code 0} (default) = derived: the
      * highest per-turn call ceiling ({@code max-tool-calls-per-turn} times the autonomous multiplier)
      * plus the step-limit grace, so the call policy is what ends a turn; a positive number is an
-     * explicit cap and wins even when it is lower than that.
+     * explicit cap and wins even when it is lower than that. A run whose passes carry their earlier
+     * tool rounds ({@link ToolLoopTranscript#roundsSpentBefore}) is held to the cap across the whole
+     * run, so a continuation pass cannot refill it.
      */
     private int maxRoundsPerInvocation = Integer.parseInt(DEFAULTS.getProperty("max-rounds-per-invocation"));
 
     /** Calls to tool names that were never offered that one model invocation may make before the soft stop. */
     private int maxUnknownCallsPerInvocation =
         Integer.parseInt(DEFAULTS.getProperty("max-unknown-calls-per-invocation"));
+
+    /**
+     * Cumulative prompt tokens one run's tool loop may send before the soft stop
+     * ({@code app.chat.tools.max-prompt-tokens-per-turn}); 0 = uncapped. Applied per run through the
+     * run's transcript ({@link ToolLoopTranscript#promptTokenBudget}), so a tenant or agent override
+     * wins over the platform value.
+     */
+    private long maxPromptTokensPerTurn =
+        Long.parseLong(DEFAULTS.getProperty("max-prompt-tokens-per-turn"));
 
     /** The tool result for every call after the round cap; {@code {rounds}} is how many rounds were used. */
     private String budgetExhaustedMessage = DEFAULTS.getProperty("budget-exhausted-message");
@@ -98,6 +109,14 @@ public class ToolLoopProperties {
 
     public void setMaxUnknownCallsPerInvocation(int maxUnknownCallsPerInvocation) {
         this.maxUnknownCallsPerInvocation = maxUnknownCallsPerInvocation;
+    }
+
+    public long getMaxPromptTokensPerTurn() {
+        return maxPromptTokensPerTurn;
+    }
+
+    public void setMaxPromptTokensPerTurn(long maxPromptTokensPerTurn) {
+        this.maxPromptTokensPerTurn = Math.max(0, maxPromptTokensPerTurn);
     }
 
     public String getBudgetExhaustedMessage() {

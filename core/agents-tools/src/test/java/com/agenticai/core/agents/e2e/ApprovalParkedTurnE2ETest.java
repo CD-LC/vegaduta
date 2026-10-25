@@ -57,13 +57,13 @@ class ApprovalParkedTurnE2ETest {
     // ------------------------------------------------------------- the parked turn is not nudged
 
     /**
-     * The model parks, then says it will carry on - in words that avoid "approval"/"approve", which
-     * is the only thing the old reply heuristic keyed on. The continuation loop used to treat that
-     * as a stopped task and re-prompt ("call the tools and do it") against tools that are all
-     * stubbed while the turn is parked.
+     * The model parks, and the turn ends there - the platform's fixed pause reply closes it; the
+     * model is never called to write a wrap-up. The continuation loop used to treat a model's
+     * "I will carry on" prose as a stopped task and re-prompt ("call the tools and do it") against
+     * tools that are all stubbed while the turn is parked.
      */
     @Test
-    void aParkedTurnIsNotRePromptedEvenWhenTheReplySoundsUnfinished() {
+    void aParkedTurnEndsWithoutAskingTheModelToWriteTheClosingReply() {
         harness =
                 ApprovalTurnHarness.builder()
                         .continuationPolicy(ApprovalParkedTurnE2ETest::everyModel)
@@ -83,13 +83,13 @@ class ApprovalParkedTurnE2ETest {
         assertAll(
                 () ->
                         assertEquals(
-                                2,
+                                1,
                                 harness.llm().modelCalls(),
-                                "one call that parks, one reply; no continuation pass against a parked turn. Requests:\n"
+                                "one call that parks; the pause reply is platform text - the model is not asked again. Requests:\n"
                                         + harness.llm().requests().stream()
                                                 .map(r -> r.number() + ": " + r.conversation())
                                                 .toList()),
-                () -> assertTrue(reply.contains("as soon as you say go"), reply),
+                () -> assertTrue(reply.contains("approval"), reply),
                 () -> assertEquals(1, harness.approvalRequests().size()));
     }
 
@@ -198,17 +198,15 @@ class ApprovalParkedTurnE2ETest {
                                 requests.stream().map(ApprovalRequest::getActionType).toList()),
                 () ->
                         assertTrue(
-                                harness.llm().lastRequest().toolResults().stream()
-                                        .anyMatch(
-                                                r ->
-                                                        r.contains(RECEIPT)
-                                                                && r.contains("NOT executed")
-                                                                && r.contains(
-                                                                        requests.get(1)
-                                                                                .getId()
-                                                                                .toString())),
-                                "the model is told the sibling was queued and under which request: "
-                                        + harness.llm().lastRequest().toolResults()));
+                                requests.get(1).getPayloadJson() != null
+                                        && requests.get(1).getPayloadJson().contains(RECEIPT),
+                                "the sibling is recorded as its own pending approval with its args: "
+                                        + requests.get(1).getPayloadJson()),
+                () ->
+                        assertEquals(
+                                1,
+                                harness.llm().modelCalls(),
+                                "the turn ends on the park - the model is never called to close it"));
 
         for (ApprovalRequest request : requests) {
             harness.approvalService().approve(request.getId(), ApprovalTurnHarness.APPROVER);

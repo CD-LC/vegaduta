@@ -59,6 +59,13 @@ public class ChatParityProperties {
      */
     private List<String> fastHoldMarkers = markers(DEFAULTS.getProperty("fast-hold-markers"));
 
+    /**
+     * A streamed turn emits only the tool loop's terminal round's assistant text; false streams every round's
+     * text (the mid-loop narration included).
+     */
+    private boolean fastTerminalRoundsOnly =
+            Boolean.parseBoolean(DEFAULTS.getProperty("fast-terminal-rounds-only", "true"));
+
     /** The verifiers see the newest this-many characters of the turn's tool results; 0 = all of it. */
     private int verifierMaxEvidenceChars = Integer.parseInt(DEFAULTS.getProperty("verifier-max-evidence-chars"));
 
@@ -121,6 +128,14 @@ public class ChatParityProperties {
 
     public void setFastHoldMarkers(List<String> fastHoldMarkers) {
         this.fastHoldMarkers = fastHoldMarkers == null ? List.of() : markers(String.join(",", fastHoldMarkers));
+    }
+
+    public boolean isFastTerminalRoundsOnly() {
+        return fastTerminalRoundsOnly;
+    }
+
+    public void setFastTerminalRoundsOnly(boolean fastTerminalRoundsOnly) {
+        this.fastTerminalRoundsOnly = fastTerminalRoundsOnly;
     }
 
     public Set<FastBufferTrigger> getFastBufferingTriggers() {

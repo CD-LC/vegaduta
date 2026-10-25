@@ -48,16 +48,18 @@ public class WebSearchToolCallback implements ToolCallback {
     }
 
     private final Backend backend;
+    private final boolean unavailable;
 
     /**
      * The original wiring - a direct call to the Brave client with the key resolved per call (see
      * class javadoc on why it is not an offer-time value). Unchanged behaviour: no note, no date.
      */
     public WebSearchToolCallback(BraveWebSearchClient client, Supplier<String> apiKeySupplier) {
-        this.backend =
+        this(
                 (query, count) ->
                         new WebSearchProviderRegistry.Outcome(
-                                client.search(query, count, apiKeySupplier.get()), "brave", null);
+                                client.search(query, count, apiKeySupplier.get()), "brave", null),
+                false);
     }
 
     /**
@@ -65,7 +67,38 @@ public class WebSearchToolCallback implements ToolCallback {
      * and degrades down its fallback list; when it had to skip one the tool result says so.
      */
     public WebSearchToolCallback(WebSearchProviderRegistry registry) {
-        this.backend = registry::search;
+        this(registry::search, false);
+    }
+
+    private WebSearchToolCallback(Backend backend, boolean unavailable) {
+        this.backend = backend;
+        this.unavailable = unavailable;
+    }
+
+    /** True for the unconfigured-deployment stub ({@link #unavailable()}); a live callback is false. */
+    public boolean isUnavailable() {
+        return unavailable;
+    }
+
+    /**
+     * Offered in place of the live tool when NO provider in the chain is configured. Keeping the
+     * schema in the payload is deliberate: when the tool simply does not exist, the model's honest
+     * conclusion is "I have no web access" and it answers a research request from stale memory
+     * instead of failing fast - the invisible-absence failure mode. The stub costs ~50 idle prompt
+     * tokens a turn and converts a silent capability gap into one cheap call that returns the
+     * operator-facing reason; per-agent deny lists still filter it like the real tool.
+     */
+    public static WebSearchToolCallback unavailable() {
+        return new WebSearchToolCallback(
+                (query, count) -> {
+                    throw new WebSearchException(
+                            "web search is not configured on this deployment (no provider in "
+                                    + "app.web-search.provider/fallback is set up - e.g. no Brave key and no "
+                                    + "WEB_SEARCH_SEARXNG_BASE_URL). Tell the user this deployment cannot search "
+                                    + "the web until the operator configures a provider; do NOT fill the gap "
+                                    + "from memory. A URL the user pasted can still be read with fetch_web_page.");
+                },
+                true);
     }
 
     @Override

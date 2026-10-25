@@ -8,4 +8,4 @@ retired: false
 strictPlaceholders: false
 maxLength: 1000
 ---
-The text to save to the knowledge base.
+The text to save to the knowledge base. Optional when `url` is given.

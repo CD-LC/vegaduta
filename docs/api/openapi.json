@@ -10270,6 +10270,219 @@
         ]
       }
     },
+    "/api/agents/{agentId}/knowledge-write": {
+      "patch": {
+        "tags": [
+          "Agent"
+        ],
+        "summary": "Set knowledge write",
+        "operationId": "AgentController_setKnowledgeWrite",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentKnowledgeBaseToggleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentKnowledgeWriteAccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/agents/{agentId}/knowledge-write-access": {
+      "get": {
+        "tags": [
+          "Agent"
+        ],
+        "summary": "Get knowledge write access",
+        "operationId": "AgentController_getKnowledgeWriteAccess",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentKnowledgeWriteAccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Agent"
+        ],
+        "summary": "Set knowledge write access",
+        "operationId": "AgentController_setKnowledgeWriteAccess",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentKnowledgeWriteAccessUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentKnowledgeWriteAccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
     "/api/agents/{agentId}/lab/capabilities": {
       "get": {
         "tags": [
@@ -46028,6 +46241,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/IngestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/knowledge/ingest-url": {
+      "post": {
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Ingest url",
+        "operationId": "KnowledgeController_ingestUrl",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestUrlRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeUrlIngester_UrlIngestResult"
                 }
               }
             }
@@ -91375,6 +91650,39 @@
           "enabled"
         ]
       },
+      "AgentKnowledgeWriteAccessResponse": {
+        "type": "object",
+        "properties": {
+          "knowledgeWriteEnabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "allowedKnowledgeWriteCollectionIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "knowledgeWriteEnabled"
+        ]
+      },
+      "AgentKnowledgeWriteAccessUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "allowedKnowledgeWriteCollectionIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          }
+        }
+      },
       "AgentLabDtos_LabCancelResponse": {
         "type": "object",
         "properties": {
@@ -103244,6 +103552,30 @@
           "direction"
         ]
       },
+      "IngestUrlRequest": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1
+          },
+          "chunkSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chunkOverlap": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "collectionId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
       "IntervalMethod": {
         "type": "string",
         "enum": [
@@ -104259,6 +104591,34 @@
           "totalDocuments",
           "totalChunks",
           "totalVectors"
+        ]
+      },
+      "KnowledgeUrlIngester_UrlIngestResult": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "chunkCount": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "documentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "document": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "chunkCount",
+          "document"
         ]
       },
       "LandingEventController_LandingEventRequest": {

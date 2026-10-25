@@ -114,6 +114,23 @@ How the `mcp` profile and the runner fit together:
 - core-worker and core-jobs are published slim only. Give them MCP tools
   through the runner.
 
+Which static servers agents see, and what "Enable" does when they aren't served:
+
+- `MCP_STATIC_STATELESS_SERVERS` (default `sequential-thinking`) is the
+  allowlist of shared static servers agents may use. The stateful built-ins
+  (`filesystem`, `memory`, `puppeteer`, `playwright-vision`) are one subprocess
+  shared by every tenant — hidden by default because tool calls would share
+  files, memory and browser sessions across tenants.
+- `MCP_STATIC_SHARED_STATEFUL_ENABLED=true` exposes the stateful ones anyway.
+  Safe only on a single-tenant install. The admin settings value
+  `platform.mcp.static.shared-stateful-enabled` overrides this at runtime.
+- When a catalog "Activate" for a built-in can't be served by the shared
+  static connection (no `mcp` profile — e.g. lite — or the server is hidden by
+  the allowlist), the registration is upgraded to a **per-tenant dynamic
+  connection** launched in `mcp-stdio-runner` (`MCP_STDIO_SIDECAR_ENABLED=true`
+  + profile `tools`/`browser`). Each tenant then gets its own isolated server
+  process — which is also the required isolation for the stateful servers.
+
 ## Required secrets
 
 | Variable | What | Notes |
@@ -710,6 +727,7 @@ job resume, rerun and ownership, reasoning depth and injection screening keep th
 | `APP_AGENTS_TAINT_MODE` | `app.agents.taint.mode` | `observe` | `enforce` (as before) | after a turn read content an outsider could write, count and audit the consequential calls that WOULD need approval. Behaviour unchanged; one audit row and one WARN per tool per tainted turn. `enforce` is the next step once the audit rows have been reviewed; `off` switches the layer off. |
 | `SKILLS_SUPPLY_CHAIN_ENFORCE` | `app.skills.supply-chain.enforce` | `true` | `false` | a custom skill whose content changed since an admin approved it, or that scans HIGH and was never approved, is withheld from `load_skill` and the skill list until an admin re-approves it on the Skills page or in the platform-admin Skill security page. Built-in skills are never withheld. The scan and the pins (`SKILLS_SUPPLY_CHAIN_ENABLED`) stay on in personal. |
 | `APP_CONTEXT_COMPACTION_ENABLED` | `app.context.compaction.enabled` | `true` | `true` | context budget planner and compaction in the chat turn (`restore_tool_result` stays on with it). A prompt inside the model's window is untouched; above 60% old tool results become restorable placeholders, above 85% the oldest turns become one summary written by the agent's own model unless `app.auxiliary-model.compaction` names another (a failed summary call is skipped). Costs: a compaction changes the prompt prefix, so a provider prompt cache misses once. |
+| `APP_CONTEXT_COMPACTION_RESERVE_OUTPUT_TOKENS` | `app.context.compaction.reserve-output-tokens` | `8192` | `8192` | tokens of the window kept back for the model's reply before the clear/compact fractions apply - headroom so a run at the compaction trigger still leaves room for the answer instead of riding at ~98% of the real window |
 | `AGENT_JOB_STEP_JOURNAL_ENABLED` | `app.agent-jobs.durability.step-journal-enabled` | `true` | `true` | durable step journal of agent-job turns (observability only; fail-soft; rows purged after `AGENT_JOB_STEP_JOURNAL_RETENTION_DAYS`, 14). `AGENT_JOB_RESUME_FROM_JOURNAL`, `AGENT_JOB_RESUME_RERUN_INCOMPLETE_TURN` and `AGENT_JOB_OWNERSHIP_ENABLED` stay `false`. |
 
 Other new settings:
@@ -808,6 +826,10 @@ Other new settings:
   SearXNG `WEB_SEARCH_SEARXNG_BASE_URL`, `_CATEGORIES`, `_ENGINES`, `_LANGUAGE`.
   Tavily, Exa and Serper keys are entered in the admin console. A self-hosted
   SearXNG is in `deploy/compose/docker-compose.search.yml` (profile `search`).
+  When nothing in the chain is configured, `web_search` is still offered as a
+  stub whose call answers "web search is not configured on this deployment":
+  an absent tool made the model conclude it had no web access and answer
+  research requests from memory, so the refusal is surfaced instead of hidden.
 - Billing: `DEFAULT_PAYMENT_GATEWAY` (`razorpay`); Stripe via
   `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`,
   `STRIPE_PRICE_ID_PREMIUM`, `STRIPE_PRICE_ID_UNLIMITED` (blank = Stripe
@@ -828,6 +850,7 @@ Verified against `application.yml` and `application-workflow.yml`. Spring proper
 | `app.llm.http.stream-timeouts-enabled` | `LLM_HTTP_STREAM_TIMEOUTS_ENABLED` | `true` | escape hatch: `false` hands back the auto-detected streaming connector and gives up streaming-path timeouts |
 | `app.llm.http.stream-idle-timeout` | `LLM_HTTP_STREAM_IDLE_TIMEOUT` | `90s` | the model may be silent this long before the fast-depth stream ends with a timeout. It counts model silence only: while a tool runs (a browser task, a coding task, an agent-to-agent call) the timer is suspended, up to `app.chat.resilience.tool-idle-ceiling`, and it starts again when the tool finishes. The `personal` profile sets `240s` because a local model can spend that long evaluating a prompt before its first token |
 | `app.llm.http.buffered-turn-timeout` | `LLM_HTTP_BUFFERED_TURN_TIMEOUT` | `240s` | total ceiling for one buffered-depth turn (careful, rigorous, planned). A turn that carries an enclosing deadline longer than this (an agent job's own `timeoutSeconds`) runs until that deadline instead, so a job given 30 minutes is not cut at four. When it is reached after tools ran, the turn is reported with the steps that ran (see `app.chat.resilience`); it is no longer answered again at fast depth without its tools |
+| `app.llm.http.fast-turn-timeout` | `LLM_HTTP_FAST_TURN_TIMEOUT` | `600s` | total ceiling for one streamed (fast) turn, elapsed time since the stream began. The idle timer only bounds model silence and re-arms on every tool round, so without this a turn that kept calling tools had no deadline at all. Deliberately looser than the buffered timeout (continuation passes keep working while the person watches). An explicit tenant/agent `turnTimeoutSeconds` replaces it; an enclosing deadline still ends the turn sooner but, unlike a buffered turn, does not extend it. `0` disables the platform ceiling |
 | `app.llm.retry.max-attempts` | `LLM_RETRY_MAX_ATTEMPTS` | `2` | Group `app.llm.retry`. Attempts per model call, the first one included, for a transient failure: HTTP 5xx, HTTP 429, a connection that failed before a response. Applies to every non-streaming call (per HTTP round trip: a tool loop is never replayed by it) and, with `stream-pre-first-token`, to a streaming turn that fails before its first token and before any tool ran. A read timeout, a refused model-server URL and any other 4xx are never retried. `1` never retries |
 | `app.llm.retry.initial-backoff` | `LLM_RETRY_INITIAL_BACKOFF` | `1s` | Wait before the first retry; each further retry doubles it |
 | `app.llm.retry.max-backoff` | `LLM_RETRY_MAX_BACKOFF` | `10s` | The longest the exponential backoff grows to |
@@ -841,8 +864,13 @@ Verified against `application.yml` and `application-workflow.yml`. Spring proper
 | `app.tools.search.enabled` / `threshold` | `TOOL_SEARCH_ENABLED` / `TOOL_SEARCH_THRESHOLD` | `false` / `25` | on-demand tool loading ([flag](#flags-added-in-the-october-2026-sync)); deferral applies only to an agent with more tools than the threshold |
 | `app.tools.search.always-on` | `TOOL_SEARCH_ALWAYS_ON` | memory, knowledge, skills, delegation and `restore_tool_result` tools | comma-separated exact tool names or `prefix*` patterns that always stay in the tool list |
 | `app.tools.search.max-carry-over` | `TOOL_SEARCH_MAX_CARRY_OVER` | `6` | already-searched tools still offered directly on later turns of the same session; `0` = none |
+| `app.tools.search.activation-store` | `TOOL_SEARCH_ACTIVATION_STORE` | `auto` | where the carry-over lives: `auto` uses Redis when a `StringRedisTemplate` bean exists (activations survive restarts and follow the session across replicas), else per-replica memory; `memory`/`redis` force one |
+| `app.tools.search.activation-ttl` | `TOOL_SEARCH_ACTIVATION_TTL` | `PT2H` | sliding lifetime of a session's remembered activations |
 | `app.tools.run-subtasks.enabled` | `TOOL_RUN_SUBTASKS_ENABLED` | `true` | offers `run_subtasks` to every agent that may delegate: up to 8 independent briefs run in parallel as throwaway copies of the agent (no delegation, scheduling, human-request or terminal-write tools inside a branch). `false` removes the tool |
 | `app.tools.create-workflow.enabled` | `TOOL_CREATE_WORKFLOW_ENABLED` | `true` | offers `create_workflow` to an agent that lists it in its tool allow-list (the Assistant does): drafts a workflow graph from a plain-language instruction and saves it as a DRAFT. It is never activated or run. `false` removes the tool |
+| `app.tools.scratchpad.enabled` | `APP_TOOLS_SCRATCHPAD_ENABLED` | `true` | offers each agent the four deferred scratchpad tools (`scratchpad_write`, `scratchpad_read`, `scratchpad_list`, `scratchpad_delete`): a persistent agent-authored notepad - session-scoped working notes plus an agent-long-term pad. `false` removes all four. Per agent: `tools.scratchpad.enabled` in the [settings catalog](settings.md) |
+| `app.tools.scratchpad.max-notes` | `APP_TOOLS_SCRATCHPAD_MAX_NOTES` | `200` | most notes one agent may keep per session scope |
+| `app.tools.scratchpad.max-note-bytes` | `APP_TOOLS_SCRATCHPAD_MAX_NOTE_BYTES` | `65536` | most bytes one note may hold |
 
 ### Timeouts, failover and retries when tools are involved
 
@@ -875,6 +903,7 @@ Three different limits apply to a turn that uses tools. They count different thi
 | `app.guardrails.step-limit.exhausted-message` | (none) | text in `application.yml` | model-facing. The `result` of the budget-exhausted tool result for a call over the ceiling; `{limit}` is the ceiling that applied A registry override of `toolresult.tool_budget.calls` ([prompts](prompts.md)) wins over this value; changing this value still works and is used when no override exists. |
 | `app.chat.tools.max-rounds-per-invocation` | `CHAT_TOOL_MAX_ROUNDS_PER_INVOCATION` | `0` | rounds one model invocation may run before the soft stop (every call answered with the budget-exhausted result, then a closing message if the model ignores it). `0` = derived from the call ceiling as described above |
 | `app.chat.tools.max-unknown-calls-per-invocation` | `CHAT_TOOL_MAX_UNKNOWN_CALLS_PER_INVOCATION` | `8` | calls to tool names the model was never offered, per model invocation, before the soft stop |
+| `app.chat.tools.max-prompt-tokens-per-turn` | `APP_CHAT_TOOLS_MAX_PROMPT_TOKENS_PER_TURN` | `0` | cumulative PROMPT tokens one run's tool loop may send the model before the soft stop (the calls are answered with the `tool_budget_exhausted` result and the model writes its closing answer). The per-turn call cap bounds rounds, not size: the runaway it misses is a loop whose every round resends a near-full context window. Tenant/agent override: `chat.toolLoop.maxPromptTokensPerTurn`. `0` = uncapped |
 | `app.chat.tools.budget-exhausted-message` | (none) | text in `application.yml` | model-facing. The `result` of the round-cap soft stop; `{rounds}` is the rounds used A registry override of `toolresult.tool_budget.rounds` ([prompts](prompts.md)) wins over this value; changing this value still works and is used when no override exists. |
 | `app.chat.tools.hard-stop-reply` | (none) | text in `application.yml` | the closing reply when the model keeps calling tools after the round-cap soft stop A registry override of `message.tool_budget.hard_stop` ([prompts](prompts.md)) wins over this value; changing this value still works and is used when no override exists. |
 | `app.chat.tools.result-clearing.enabled` / `threshold-chars` / `keep-last` | `CHAT_TOOL_RESULT_CLEARING_ENABLED` / `_THRESHOLD_CHARS` / `_KEEP_LAST` | `true` / `24000` / `3` | once the tool results of one reply total more than the threshold, older results beyond the newest `keep-last` are replaced by a placeholder on the next loop iteration. The placeholder is a JSON object (`{"context_cleared":true,"tool":...,"chars":...,"restore":...}`): Spring AI's Gemini adapter parses every tool result as JSON and failed the turn on the earlier plain-text form |
@@ -907,7 +936,7 @@ The settings group is `app.agent-runtime` (with the sub-groups `app.agent-runtim
 | Setting (API name) | Platform value comes from | Meaning |
 |---|---|---|
 | `maxToolSteps` | `app.guardrails.max-tool-calls-per-turn`, scaled by the autonomy tier | tool calls one turn may make. A tenant value is a base the autonomy tier scales like the platform's; an agent's own value is the ceiling itself and is not scaled again. The tool loop's round backstop follows it (never below the platform's) |
-| `turnTimeoutSeconds` | `app.llm.http.buffered-turn-timeout` (240 s) | wall-clock limit of a turn. A buffered turn always has one. A FAST stream has none unless a tenant or agent sets one or an agent job gives it its deadline. A job deadline sooner than the limit ends the turn at the deadline; a later one extends the platform default but not an explicit tenant or agent limit |
+| `turnTimeoutSeconds` | `app.llm.http.buffered-turn-timeout` (240 s); `app.llm.http.fast-turn-timeout` (600 s) for streamed turns | wall-clock limit of a turn. A buffered turn always has one; a FAST stream has the platform's `fast-turn-timeout` ceiling unless a tenant or agent sets one or an agent job gives it its deadline. A job deadline sooner than the limit ends the turn at the deadline; a later one extends the buffered default but not an explicit tenant or agent limit |
 | `toolTimeoutSeconds` | `app.agent-runtime.defaults.tool-timeout-seconds` (`0` = none) | wall-clock limit of one tool call. A call that outlives it is interrupted and the model is told (`app.agent-runtime.tool-timeout-message`); it counts as a tool failure for the circuit breaker. Runs the call on its own virtual thread (the tenant, version pin and MDC are carried over); a tool that ignores the interrupt keeps running in the background but no longer holds the turn |
 | `toolOutputMaxChars` | `app.tools.output.max-chars` | characters of one tool result that reach the model. Replaces the default every tool gets; a tool the operator gave its own `app.tools.output.per-tool.*` cap keeps it |
 | `retrievalTopK` | `app.agent-runtime.defaults.retrieval-top-k` (3) | chunks one `search_knowledge_base` call returns |
@@ -1016,6 +1045,7 @@ Three groups of settings make the agent behave the same whichever way a turn is 
 | `app.chat.parity.fast-buffering-triggers` | `APP_CHAT_PARITY_FAST_BUFFERING_TRIGGERS` | `GENERATION_TOOLS,MCP_TOOLS` | what makes a FAST turn buffer its reply instead of streaming it |
 | `app.chat.parity.fast-buffering-mode` | `APP_CHAT_PARITY_FAST_BUFFERING_MODE` | `FROM_FIRST_LINK` | how a turn that matches a trigger reaches the person: `FROM_FIRST_LINK` streams it live and holds only the part from the first link on until the reply is complete; `WHOLE_REPLY` holds all of it (the behaviour before 2026-10-23). An `OUTPUT_GUARDRAILS` hold is always whole |
 | `app.chat.parity.fast-hold-markers` | `APP_CHAT_PARITY_FAST_HOLD_MARKERS` | `http,www.` | text that starts the held part, ignoring case; the invented-link guard's host markers are always added. Keep it covering every link shape the guard detects |
+| `app.chat.parity.fast-terminal-rounds-only` | `APP_CHAT_PARITY_FAST_TERMINAL_ROUNDS_ONLY` | `true` | a streamed turn emits only the tool loop's terminal round - the final synthesis - as one burst; mid-loop narration rounds (which end in `tool_calls`) are held and dropped. `false` streams every round's assistant text as before |
 | `app.chat.parity.verifier-max-evidence-chars` | `APP_CHAT_PARITY_VERIFIER_MAX_EVIDENCE_CHARS` | `12000` | the buffered verifiers see the newest this-many characters of the turn's tool results; `0` = all |
 | `app.chat.parity.verifier-min-revision-ratio` | `APP_CHAT_PARITY_VERIFIER_MIN_REVISION_RATIO` | `0.3` | a verifier's rewrite shorter than this fraction of the answer is not accepted; `0` accepts any |
 | `app.chat.parity.verifier-ratio-applies-above-chars` | `APP_CHAT_PARITY_VERIFIER_RATIO_APPLIES_ABOVE_CHARS` | `400` | the ratio check applies to answers longer than this |
@@ -2135,7 +2165,7 @@ The Default column is read from the code, not typed: `make config-docs` (`script
 | `app.agent-jobs.max-concurrent-per-tenant` | `2` | all shapes | Ceiling on how many of those workers ONE tenant may occupy, so a single tenant submitting twenty jobs cannot starve every other tenant on the replica. |
 | `app.agent-jobs.max-timeout` | `60m` | all shapes | Clamped to, never rejected against: a client asking for longer than the platform allows is asking for "as long as you'll give me". |
 | `app.agent-jobs.max-turns` | `1` | all shapes | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.max-turns-cap` | `APP_AGENT_JOBS_MAX_TURNS_CAP` | `8` | The most turns a single job may be submitted with (`AgentJobStartRequest.maxTurns` is clamped to it). `continue_in_background` — the per-agent opted-in tool that hands an over-budget task to a background job — uses it to keep working past one reply's tool budget; each job turn still runs under the normal per-turn ceiling and approval gates |
+| `app.agent-jobs.max-turns-cap` | `${APP_AGENT_JOBS_MAX_TURNS_CAP:8}` | `8` | The most turns a single job may be submitted with (`AgentJobStartRequest.maxTurns` is clamped to it). `continue_in_background` — the per-agent opted-in tool that hands an over-budget task to a background job — uses it to keep working past one reply's tool budget; each job turn still runs under the normal per-turn ceiling and approval gates |
 | `app.agent-jobs.output-schema` |  | shapes that load the module | Read by the OBSERVABILITY half (structured job output). |
 | `app.agent-jobs.ownership` |  | shapes that load the module | Cross-replica job OWNERSHIP LEASE + adoption (core/agents job/ownership). |
 | `app.agent-jobs.poll-interval` | `10s` | all shapes | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |

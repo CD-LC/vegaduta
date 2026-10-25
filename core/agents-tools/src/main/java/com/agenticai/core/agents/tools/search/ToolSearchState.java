@@ -33,6 +33,12 @@ public final class ToolSearchState {
     private final ToolActivationRegistry registry;
     private final String registryKey;
     private final int maxCarryOver;
+    /**
+     * True when every deferred entry's catalog text was screened at build time (the {@code
+     * SearchCatalogScreen} of {@code ToolSearchDeferral}), which is what lets a search RESULT be
+     * marked the platform's answer instead of re-screening it per call.
+     */
+    private final boolean catalogScreened;
     private final Set<String> activated = Collections.synchronizedSet(new LinkedHashSet<>());
     private volatile ToolSearchService.Index index;
 
@@ -52,12 +58,28 @@ public final class ToolSearchState {
             ToolActivationRegistry registry,
             String registryKey,
             int maxCarryOver) {
+        this(exposed, deferred, service, registry, registryKey, maxCarryOver, false);
+    }
+
+    /**
+     * @param catalogScreened true when {@code deferred} was built through the catalog screen, so
+     *     every description a result can show was screened already
+     */
+    public ToolSearchState(
+            Map<String, ToolCallback> exposed,
+            Map<String, ToolCallback> deferred,
+            ToolSearchService service,
+            ToolActivationRegistry registry,
+            String registryKey,
+            int maxCarryOver,
+            boolean catalogScreened) {
         this.exposed = Collections.unmodifiableMap(new LinkedHashMap<>(exposed));
         this.deferred = Collections.unmodifiableMap(new LinkedHashMap<>(deferred));
         this.service = service;
         this.registry = registry;
         this.registryKey = registryKey;
         this.maxCarryOver = maxCarryOver;
+        this.catalogScreened = catalogScreened;
     }
 
     /** Number of tools hidden behind search this turn. */
@@ -85,6 +107,14 @@ public final class ToolSearchState {
 
     ToolSearchService service() {
         return service;
+    }
+
+    /**
+     * Whether the deferred catalog's text was screened at build time - the condition under which a
+     * search result may skip the per-call untrusted-content screen.
+     */
+    boolean catalogScreened() {
+        return catalogScreened;
     }
 
     /** The deferred callback for an exact name, if there is one. */

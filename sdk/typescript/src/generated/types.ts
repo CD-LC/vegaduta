@@ -636,6 +636,15 @@ export interface AgentKnowledgeBaseToggleRequest {
   enabled?: boolean;
 }
 
+export interface AgentKnowledgeWriteAccessResponse {
+  knowledgeWriteEnabled?: boolean;
+  allowedKnowledgeWriteCollectionIds?: string[];
+}
+
+export interface AgentKnowledgeWriteAccessUpdateRequest {
+  allowedKnowledgeWriteCollectionIds?: string[];
+}
+
 export interface AgentLabDtos_LabCancelResponse {
   runId?: string;
   cancelRequested?: boolean;
@@ -4175,6 +4184,13 @@ export interface IngestSmsRequest_Item {
   smsTimestamp?: string;
 }
 
+export interface IngestUrlRequest {
+  url: string;
+  chunkSize?: number;
+  chunkOverlap?: number;
+  collectionId?: string;
+}
+
 export type IntervalMethod = "WILSON_SCORE" | "PERCENTILE_BOOTSTRAP" | "HIERARCHICAL_BOOTSTRAP" | "PAIRED_BOOTSTRAP";
 
 export interface InvoiceController_BillingProfileBody {
@@ -4466,6 +4482,14 @@ export interface KnowledgeStatsResponse {
   totalDocuments?: number;
   totalChunks?: number;
   totalVectors?: number;
+}
+
+export interface KnowledgeUrlIngester_UrlIngestResult {
+  filename?: string;
+  source?: string;
+  chunkCount?: number;
+  documentId?: string;
+  document?: boolean;
 }
 
 export interface LandingEventController_LandingEventRequest {
