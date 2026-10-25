@@ -3,6 +3,41 @@
   "dynamicCallSites": {},
   "unmatched": [
     {
+      "method": "GET",
+      "path": "/api/desktop/monitor/frame",
+      "file": "app/lib/api/desktopRecipes.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/desktop/recipes",
+      "file": "app/lib/api/desktopRecipes.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/desktop/recipes",
+      "file": "app/lib/api/desktopRecipes.ts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/desktop/recipes/{}",
+      "file": "app/lib/api/desktopRecipes.ts"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/desktop/recipes/{}",
+      "file": "app/lib/api/desktopRecipes.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/desktop/recipes/{}/run",
+      "file": "app/lib/api/desktopRecipes.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/desktop/recipes/from-run",
+      "file": "app/lib/api/desktopRecipes.ts"
+    },
+    {
       "method": "POST",
       "path": "/api/mcp/registry/{}/acknowledge",
       "file": "app/lib/api/mcp.ts"
