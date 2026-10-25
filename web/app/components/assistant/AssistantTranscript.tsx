@@ -29,7 +29,7 @@ import SourceChips from "./SourceChips";
 import { replySources } from "./sources";
 import TaskCard, { type TaskCardHandlers } from "./TaskCard";
 import DesktopMonitorPanel from "../desktop/DesktopMonitorPanel";
-import { desktopActionCount } from "../desktop/SaveRunAsDesktopRecipe";
+import { usesDesktopTools } from "../desktop/SaveRunAsDesktopRecipe";
 import type { AssistantHandoff, AssistantTurn } from "./assistantTypes";
 
 const STICK_TO_BOTTOM_PX = 120;
@@ -300,7 +300,7 @@ function TurnEntry({
         moment the first local_desktop_* step lands - "what is it doing right now" belongs where the
         action is, not buried in the agent workbench. Answers its own "monitor unavailable" line
         when app.assistant.desktop.monitor is off. */}
-      {live && desktopActionCount(turn.steps) > 0 && <DesktopMonitorPanel active />}
+      {live && usesDesktopTools(turn.steps) && <DesktopMonitorPanel active />}
       {text && (
         <div
           className={cn(

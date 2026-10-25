@@ -17,16 +17,23 @@ import { useDesktopAvailability } from "./useDesktopAvailability";
 // never stored. Mirrors SaveRunAsRecipe; the parameter rules (names, reserved words, minimum length)
 // are the same, so the shared buildParameterMap is reused as-is.
 
-// The desktop_* calls that DO something on screen - the ones worth recording into a recipe. Pure reads
-// (desktop_screen / desktop_elements) and notifications don't count toward "the run drove the desktop".
+// The local_desktop_* calls that DO something on screen - the ones worth recording into a recipe.
+// Pure reads (local_desktop_screen / local_desktop_elements) and notifications don't count toward
+// "the run drove the desktop".
 const DESKTOP_ACTION_TOOLS = new Set([
-  "desktop_open",
-  "desktop_click",
-  "desktop_type",
-  "desktop_press",
-  "desktop_key",
-  "desktop_activate",
+  "local_desktop_open",
+  "local_desktop_click",
+  "local_desktop_type",
+  "local_desktop_press",
+  "local_desktop_key",
+  "local_desktop_activate",
 ]);
+
+/** Any local_desktop_* step at all - including the read calls, since the agent looking at the
+ * screen is exactly when the person wants the live view too. */
+export function usesDesktopTools(steps: TraceStepLike[] | null | undefined): boolean {
+  return !!steps && steps.some((s) => s.type === "tool_call" && !!s.tool && s.tool.startsWith("local_desktop_"));
+}
 
 interface TraceStepLike {
   type: string;
