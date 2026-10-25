@@ -69,6 +69,7 @@ public class KnowledgeUrlIngester {
     private final FileStorageService fileStorageService;
     private final KnowledgeUrlFetcher fetcher;
 
+    @org.springframework.beans.factory.annotation.Autowired
     public KnowledgeUrlIngester(
             KnowledgeIngestionService ingestionService,
             KnowledgeCollectionService collectionService,
