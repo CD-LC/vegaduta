@@ -1662,7 +1662,14 @@ one-person install while `agent-url` is set — the URL being configured IS the 
 |---|---|---|---|
 | `app.assistant.desktop.agent-url` | `APP_ASSISTANT_DESKTOP_AGENT_URL` | empty | The sidecar (`http://127.0.0.1:8787`, or `http://host.docker.internal:8787` when core runs in Docker) |
 | `app.assistant.desktop.agent-secret` | `APP_ASSISTANT_DESKTOP_AGENT_SECRET` | empty | Bearer secret; must match the sidecar's `DESKTOP_AGENT_SECRET` |
-| `app.assistant.desktop.approval-required` | `APP_ASSISTANT_DESKTOP_APPROVAL_REQUIRED` | `true` (`false` in the `personal` profile) | Pin `local_desktop_press/click/type/key/open/activate` for approval — these actions are NOT sandboxed. `false` lets them run like ordinary tools; a `SUPERVISED` agent still asks |
+| `app.assistant.desktop.approval-required` | `APP_ASSISTANT_DESKTOP_APPROVAL_REQUIRED` | `true` (`false` in the `personal` profile) | Pin `local_desktop_press/click/type/key/open/activate` **and `run_desktop_recipe`** for approval — these actions are NOT sandboxed. `false` lets them run like ordinary tools; a `SUPERVISED` agent still asks |
+| `app.assistant.desktop.recipes.enabled` | `DESKTOP_RECIPES_ENABLED` | `false` | `run_desktop_recipe` — record once, replay a saved click/type/open sequence on the same screen through the sidecar. Keep it OUT of `app.tools.classification.confirmation-gate-exempt-tools`: the model supplies `confirmIrreversible`/`fromStep` itself, so the human approval of the call is the real check |
+| `app.assistant.desktop.recipes.max-per-tenant` | `DESKTOP_RECIPES_MAX_PER_TENANT` | `50` | saved recipes per tenant |
+| `app.assistant.desktop.recipes.step-timeout-ms` | `DESKTOP_RECIPES_STEP_TIMEOUT_MS` | `15000` | one replayed step's budget |
+| `app.assistant.desktop.recipes.max-replay-seconds` | `DESKTOP_RECIPES_MAX_REPLAY_SECONDS` | `120` | whole-replay wall-clock cap |
+| `app.assistant.desktop.recipes.monitor-step-delay-ms` | `DESKTOP_RECIPES_MONITOR_STEP_DELAY_MS` | `800` | MONITOR mode's pause between steps, so a person can follow the replay on the live monitor |
+| `app.assistant.desktop.recipes.secret-name-prefix` | `DESKTOP_RECIPES_SECRET_NAME_PREFIX` | `DESKTOP_` | `{{secret.NAME}}` in a recipe's typed text resolves at replay through the secret vault under this prefix (mirrors `app.browser.secret-name-prefix`) |
+| `app.assistant.desktop.monitor.enabled` | `DESKTOP_MONITOR_ENABLED` | `false` | the live monitor (`GET /api/desktop/monitor/frame` proxies the sidecar's `GET /frame`) — every poll captures the whole screen, so it stays opt-in |
 
 Scheduled tasks (`app.scheduled-tasks.enabled`, `SCHEDULED_TASKS_ENABLED`) are `true` in the
 `personal` profile — the recurring "check X every morning and ping me" loop; delivery
@@ -2135,7 +2142,7 @@ The Default column is read from the code, not typed: `make config-docs` (`script
 | `app.agent-jobs.max-concurrent-per-tenant` | `2` | all shapes | Ceiling on how many of those workers ONE tenant may occupy, so a single tenant submitting twenty jobs cannot starve every other tenant on the replica. |
 | `app.agent-jobs.max-timeout` | `60m` | all shapes | Clamped to, never rejected against: a client asking for longer than the platform allows is asking for "as long as you'll give me". |
 | `app.agent-jobs.max-turns` | `1` | all shapes | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |
-| `app.agent-jobs.max-turns-cap` | `APP_AGENT_JOBS_MAX_TURNS_CAP` | `8` | The most turns a single job may be submitted with (`AgentJobStartRequest.maxTurns` is clamped to it). `continue_in_background` — the per-agent opted-in tool that hands an over-budget task to a background job — uses it to keep working past one reply's tool budget; each job turn still runs under the normal per-turn ceiling and approval gates |
+| `app.agent-jobs.max-turns-cap` | `${APP_AGENT_JOBS_MAX_TURNS_CAP:8}` | `8` | The most turns a single job may be submitted with (`AgentJobStartRequest.maxTurns` is clamped to it). `continue_in_background` — the per-agent opted-in tool that hands an over-budget task to a background job — uses it to keep working past one reply's tool budget; each job turn still runs under the normal per-turn ceiling and approval gates |
 | `app.agent-jobs.output-schema` |  | shapes that load the module | Read by the OBSERVABILITY half (structured job output). |
 | `app.agent-jobs.ownership` |  | shapes that load the module | Cross-replica job OWNERSHIP LEASE + adoption (core/agents job/ownership). |
 | `app.agent-jobs.poll-interval` | `10s` | all shapes | Group `app.agent-jobs`: The app.agent-jobs.* block (see application.yml). (see source: `core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobProperties.java`) |

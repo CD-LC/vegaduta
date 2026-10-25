@@ -8,6 +8,7 @@ import MediaCard from "../../MediaCard";
 import TurnFeedback from "../TurnFeedback";
 import RequestInspector from "../RequestInspector";
 import SaveRunAsRecipe from "../SaveRunAsRecipe";
+import SaveRunAsDesktopRecipe from "../../desktop/SaveRunAsDesktopRecipe";
 import TurnStopNotice from "../TurnStopNotice";
 import { StopLimitAction } from "./StopLimitAction";
 import { TurnOutcomeNotice } from "./TurnOutcomeNotice";
@@ -148,6 +149,11 @@ export function AssistantTurn({
       )}
       {/* "Save this run as a recipe": self-hiding unless recipes are on and this turn drove the browser. */}
       {!turn.pending && agent?.id && <SaveRunAsRecipe agentId={agent.id} sessionId={sessionId} steps={turn.steps} />}
+      {/* Same for a run that drove the desktop agent (desktop_* tools) - self-hides when the feature
+            or the run does not qualify. */}
+      {!turn.pending && agent?.id && (
+        <SaveRunAsDesktopRecipe agentId={agent.id} sessionId={sessionId} steps={turn.steps} />
+      )}
       <TurnStopNotice steps={turn.steps} action={(kind) => <StopLimitAction agent={agent} kind={kind} />} />
       {!turn.pending && outcome && (
         <TurnOutcomeNotice

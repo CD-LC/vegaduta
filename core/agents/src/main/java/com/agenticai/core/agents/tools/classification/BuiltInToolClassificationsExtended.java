@@ -349,6 +349,17 @@ final class BuiltInToolClassificationsExtended {
         exact.put("run_browser_recipe", new ToolClassification(
             "run_browser_recipe", ToolTrustTier.UNTRUSTED_EXTERNAL, ToolSensitivity.EGRESS,
             ToolDeterminism.DURABLE, null, true, true));
+        // run_desktop_recipe (app.assistant.desktop.recipes.enabled): replays a recorded click/type/open
+        // sequence on the person's own screen through the desktop-agent sidecar - the local_desktop_* twin of
+        // run_browser_recipe, so it is classified IDENTICALLY: a replayed step can submit a form, confirm a
+        // purchase or delete a file (EGRESS, DURABLE, irreversible), and it is deliberately NOT in the
+        // confirmation-gate exempt list - the whole replay is approved once, arguments included, and steps
+        // flagged irreversible inside the recipe additionally need confirmIrreversible=true. It is also on
+        // DesktopToolSource.GATED_NAMES, so app.assistant.desktop.approval-required pins it for a fully
+        // autonomous agent exactly like the single actuating tools.
+        exact.put("run_desktop_recipe", new ToolClassification(
+            "run_desktop_recipe", ToolTrustTier.UNTRUSTED_EXTERNAL, ToolSensitivity.EGRESS,
+            ToolDeterminism.DURABLE, null, true, true));
 
         // ---- Browser agent v2 (app.browser.v2.enabled, default off) ----------
         // Read side: same classification as browser_read_page_text. snapshot/extract_text return
