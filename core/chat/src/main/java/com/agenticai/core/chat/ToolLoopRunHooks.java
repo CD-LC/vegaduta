@@ -5,6 +5,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 
@@ -41,6 +42,33 @@ final class ToolLoopRunHooks {
         if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript) {
             transcript.record(history);
         }
+    }
+
+    /**
+     * Adds this round's prompt size ({@code chatResponse} usage) to the run's token budget and answers
+     * whether the run is now over it. A request without a transcript, or a run without a cap, is never
+     * over; a response that reports no usage counts nothing.
+     */
+    static boolean overPromptBudget(Prompt prompt, ChatResponse chatResponse) {
+        if (!(toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript)) {
+            return false;
+        }
+        Long cap = transcript.maxPromptTokens();
+        if (cap == null) {
+            return false;
+        }
+        long promptTokens = 0;
+        if (chatResponse.getMetadata() != null
+                && chatResponse.getMetadata().getUsage() != null
+                && chatResponse.getMetadata().getUsage().getPromptTokens() != null) {
+            promptTokens = chatResponse.getMetadata().getUsage().getPromptTokens();
+        }
+        long used = transcript.addPromptTokens(promptTokens);
+        if (used > cap) {
+            log.warn("Run exceeded its prompt-token budget (used={} cap={}) - stopping the tool loop", used, cap);
+            return true;
+        }
+        return false;
     }
 
     /** The round cap this run asked for through its transcript, or {@code fallback} when it asked for none. */

@@ -45,6 +45,15 @@ public class ToolLoopProperties {
     private int maxUnknownCallsPerInvocation =
         Integer.parseInt(DEFAULTS.getProperty("max-unknown-calls-per-invocation"));
 
+    /**
+     * Cumulative prompt tokens one run's tool loop may send before the soft stop
+     * ({@code app.chat.tools.max-prompt-tokens-per-turn}); 0 = uncapped. Applied per run through the
+     * run's transcript ({@link ToolLoopTranscript#promptTokenBudget}), so a tenant or agent override
+     * wins over the platform value.
+     */
+    private long maxPromptTokensPerTurn =
+        Long.parseLong(DEFAULTS.getProperty("max-prompt-tokens-per-turn"));
+
     /** The tool result for every call after the round cap; {@code {rounds}} is how many rounds were used. */
     private String budgetExhaustedMessage = DEFAULTS.getProperty("budget-exhausted-message");
 
@@ -98,6 +107,14 @@ public class ToolLoopProperties {
 
     public void setMaxUnknownCallsPerInvocation(int maxUnknownCallsPerInvocation) {
         this.maxUnknownCallsPerInvocation = maxUnknownCallsPerInvocation;
+    }
+
+    public long getMaxPromptTokensPerTurn() {
+        return maxPromptTokensPerTurn;
+    }
+
+    public void setMaxPromptTokensPerTurn(long maxPromptTokensPerTurn) {
+        this.maxPromptTokensPerTurn = Math.max(0, maxPromptTokensPerTurn);
     }
 
     public String getBudgetExhaustedMessage() {

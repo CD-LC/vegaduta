@@ -301,10 +301,11 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         int roundCap = ToolLoopRunHooks.maxRounds(prompt, maxToolRounds);
         boolean roundsExceeded = round > roundCap;
         boolean unknownExceeded = unknownCalls > maxUnknownToolCalls;
-        if (!roundsExceeded && !unknownExceeded) {
+        boolean tokensExceeded = ToolLoopRunHooks.overPromptBudget(prompt, chatResponse);
+        if (!roundsExceeded && !unknownExceeded && !tokensExceeded) {
             return null;
         }
-        String reason = roundsExceeded ? "rounds" : "unknown_tools";
+        String reason = roundsExceeded ? "rounds" : unknownExceeded ? "unknown_tools" : "prompt_tokens";
         List<Message> history = new ArrayList<>(prompt.getInstructions());
         history.add(requesting);
         List<AssistantMessage.ToolCall> calls = requesting.getToolCalls();
@@ -317,7 +318,8 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 reason, round, roundCap, unknownCalls, maxUnknownToolCalls, calls.size()
             );
             increment(LOOP_LIMIT_METRIC, 1, "stage", "soft", "reason", reason);
-            String softStop = softStopResult(prompt, priorRounds);
+            String softStop =
+                    tokensExceeded ? softStopTokenResult(prompt) : softStopResult(prompt, priorRounds);
             for (AssistantMessage.ToolCall call : calls) {
                 responses.add(new ToolResponseMessage.ToolResponse(call.id(), call.name(), softStop));
             }
@@ -352,6 +354,17 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         String instruction = ChatPrompts.textWithConfiguredAlias(
             prompts, ChatPrompts.TOOL_BUDGET_ROUNDS, ToolLoopRunHooks.promptRun(prompt), budgetExhaustedMessage,
             "rounds", String.valueOf(roundsUsed));
+        return softStopBody(instruction);
+    }
+
+    /** The run's cumulative prompt-token budget is spent: same marker JSON, a token worded instruction. */
+    private String softStopTokenResult(Prompt prompt) {
+        String instruction = ChatPrompts.text(
+            prompts, ChatPrompts.TOOL_BUDGET_TOKENS, ToolLoopRunHooks.promptRun(prompt));
+        return softStopBody(instruction);
+    }
+
+    private String softStopBody(String instruction) {
         try {
             // Ordered: error first, the same shape GuardedToolCallback writes for its call ceiling.
             Map<String, Object> body = new java.util.LinkedHashMap<>();
