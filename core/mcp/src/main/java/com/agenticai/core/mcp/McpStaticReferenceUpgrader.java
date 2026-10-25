@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
  * explicit-connect path.
  */
 @Component
-final class McpStaticReferenceUpgrader {
+class McpStaticReferenceUpgrader {
 
     private static final Logger log = LoggerFactory.getLogger(McpStaticReferenceUpgrader.class);
 
