@@ -2318,7 +2318,8 @@
     "statusInCall": "In call",
     "statusConnecting": "Connecting…",
     "statusFailed": "Call failed",
-    "statusIdle": "Not in a call"
+    "statusIdle": "Not in a call",
+    "callWithCameraNeedsVision": "Call + camera needs an agent whose model can see - pick a vision model or enable on-device sight."
   },
   "nodeDefs": {
     "triggerLabel": "Trigger",
@@ -6222,7 +6223,29 @@
     "label_delegate_parallel": "Ask several agents at once",
     "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
     "label_web_task": "Use a browser on a website",
-    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits.",
+    "label_local_desktop_activate": "Bring an app to the front",
+    "does_local_desktop_activate": "Brings the named application to the foreground on this computer.",
+    "label_local_desktop_click": "Click on the screen",
+    "does_local_desktop_click": "Clicks a point or element on your screen.",
+    "label_local_desktop_clipboard": "Read or write the clipboard",
+    "does_local_desktop_clipboard": "Reads from or writes to the clipboard on this computer.",
+    "label_local_desktop_elements": "List on-screen controls",
+    "does_local_desktop_elements": "Lists the buttons and fields currently on screen (read-only).",
+    "label_local_desktop_key": "Press a key",
+    "does_local_desktop_key": "Presses a key or a key combination (for example Cmd+S) on this computer.",
+    "label_local_desktop_notify": "Show a desktop notification",
+    "does_local_desktop_notify": "Shows a notification on this computer.",
+    "label_local_desktop_open": "Open an app, file, or link",
+    "does_local_desktop_open": "Opens an application, a file, or a web link on this computer.",
+    "label_local_desktop_press": "Press a named control",
+    "does_local_desktop_press": "Presses a named button or menu on your screen.",
+    "label_local_desktop_screen": "Take a screenshot",
+    "does_local_desktop_screen": "Captures what is currently on your screen (read-only).",
+    "label_local_desktop_type": "Type into the frontmost app",
+    "does_local_desktop_type": "Types text into the app currently in the foreground.",
+    "label_run_desktop_recipe": "Replay a desktop recipe",
+    "does_run_desktop_recipe": "Replays a recorded run of desktop actions on this computer."
   },
   "approvalsPanel": {
     "channelWildcardOption": "All channels (wildcard policy)",

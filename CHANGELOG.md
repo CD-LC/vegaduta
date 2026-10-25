@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
+- Fixed live voice transcription: sidecar pinned PyAV 19, which removed the `metadata_errors` kwarg `faster-whisper` passes to `av.open`, so every `/transcribe` call 400'd and calls hung at "Transcribing". Pinned `av==15.1.0` (newest release that keeps the kwarg).
+- Approval cards for `local_desktop_*` and `run_desktop_recipe` calls now show readable labels ("Open an app, file, or link") instead of raw wire names.
+- "The task it was working on" on approval cards now shows the user's actual message: the console's `<app_context>` preamble is stripped when core records the goal and when the web renders already-parked rows.
+- Playground call controls: the screen-share button is always visible while connected (explains itself when on-device sight is not configured), and "Call + camera" renders disabled with a reason instead of disappearing for text-only models.
+
 - Fixed voice calls on single-box installs: LiveKit now advertises the loopback/node IP (`LIVEKIT_NODE_IP`, default 127.0.0.1) instead of the WAN address discovered by STUN, which browsers could not reach - the media path died at "Media connection blocked".
 
 - Voice calling (livekit + voice-agent) is now available on the personal and lite tiers: `personal --profile voice` / `up --lite --profile voice` start both services and imply `rag` for Whisper STT (previously only the full stack declared them).

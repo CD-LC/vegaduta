@@ -153,7 +153,7 @@ public class ChatThreadService {
      * {@code text} without a leading app-context block. A block that is opened and never closed is all
      * app text, so nothing of it is kept.
      */
-    static String withoutAppContext(String text) {
+    public static String withoutAppContext(String text) {
         String trimmed = text == null ? "" : text.stripLeading();
         if (!trimmed.startsWith(APP_CONTEXT_OPEN)) {
             return text == null ? "" : text;
