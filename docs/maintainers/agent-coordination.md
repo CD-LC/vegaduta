@@ -240,3 +240,11 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   seam + my cumulative-rounds/FAST-ceiling changes touch disjoint methods of the same files
   (ArgumentSanitizingToolCallingManager, ToolLoopTranscript, ChatTurnExecutor, application.yml,
   tool-loop.properties).
+- 2026-10-25, agent-loop forensics agent (Devin) - CLAIM COMPLETE, committed as 8d4956ad8 on
+  `fix/kb-url-ingest-mcp-static-upgrade` (PR #166): FAST wall-clock ceiling (FastTurnCeiling),
+  cumulative round budget (roundsSpentBefore across passes), Redis ToolActivationStore,
+  no-identity call_tool refusal bound, marker-through-wrap + catalog build-time screening
+  (SearchCatalogScreen), file-size ratchet repaired + reseeded then shrunk (dispatcher 688,
+  executor 769, BufferedTurnCalls extracted under cap). Overlap guidance for
+  fix/search-capability-honesty stands (their stash@{0} in this clone is just my note file;
+  their real work is committed at 374fdf6ac on their branch).
