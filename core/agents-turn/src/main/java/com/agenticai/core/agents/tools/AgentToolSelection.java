@@ -151,6 +151,23 @@ public final class AgentToolSelection {
                     "workspace_search",
                     "workspace_write",
                     "workspace_edit",
+                    // The person's own screen: the local_desktop_* computer-use set, resolved only
+                    // where DesktopToolSource offers it (one-person install + the sidecar opted
+                    // in). "Play minesweeper" or "open Notes and type hi" shares no word with
+                    // "local_desktop_click", and the family only works as a set (see the screen,
+                    // decide, act) - a relevance-trimmed turn hid the whole capability and the
+                    // model answered "I have no desktop tools".
+                    "local_desktop_screen",
+                    "local_desktop_elements",
+                    "local_desktop_press",
+                    "local_desktop_click",
+                    "local_desktop_type",
+                    "local_desktop_key",
+                    "local_desktop_open",
+                    "local_desktop_activate",
+                    "local_desktop_notify",
+                    "local_desktop_clipboard",
+                    "run_desktop_recipe",
                     // The platform guides: "how do I connect Jira" shares no words with the tool's
                     // name,
                     // yet is exactly when the Assistant must look the answer up instead of
@@ -340,11 +357,15 @@ public final class AgentToolSelection {
             progress = false;
             for (Map.Entry<Integer, List<ToolCallback>> family : byIntent.entrySet()) {
                 // One tool per intent per pass, except a family that only works as a set (driving a
-                // page needs
-                // navigate, read and click together; one of them alone sent the model round in
-                // circles).
+                // page needs navigate, read and click together, and driving the screen needs
+                // screen, elements and press/click together - one of them alone sent the model
+                // round in circles).
                 int quota =
                         INTENTS.get(family.getKey()).getValue().get(0).startsWith("browser_")
+                                        || INTENTS.get(family.getKey())
+                                                .getValue()
+                                                .get(0)
+                                                .startsWith("local_desktop_")
                                 ? settings.getBrowserFamilyQuota()
                                 : 1;
                 for (ToolCallback candidate : family.getValue()) {
@@ -553,7 +574,30 @@ public final class AgentToolSelection {
                                     "summarise",
                                     "summarize",
                                     "summary"),
-                            List.of("search_knowledge_base", "list_knowledge_collections")));
+                            List.of("search_knowledge_base", "list_knowledge_collections")),
+                    // The person's own screen: "play minesweeper", "open Notes", "click the
+                    // button", "what is on my screen" - a desktop request shares no word with
+                    // local_desktop_click, and like the browser family it only works as a set
+                    // (see the screen, decide, act), so the family quota below covers it too.
+                    Map.entry(
+                            Set.of(
+                                    "desktop",
+                                    "screen",
+                                    "screenshot",
+                                    "computer",
+                                    "monitor",
+                                    "window",
+                                    "app",
+                                    "game",
+                                    "play",
+                                    "click",
+                                    "type",
+                                    "press",
+                                    "keyboard",
+                                    "mouse",
+                                    "gui",
+                                    "open"),
+                            List.of("local_desktop_", "run_desktop_recipe")));
 
     private static int smallModelScore(
             Set<String> query,

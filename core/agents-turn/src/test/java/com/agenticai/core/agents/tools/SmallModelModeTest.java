@@ -183,6 +183,30 @@ class SmallModelModeTest {
         assertEquals("request_human", names(AgentToolSelection.capForSmallModel(tools, "search the web, or use request_human", 6)).get(0));
     }
 
+    /** "Play a game on my computer" shares no word with local_desktop_click - the desktop intent must
+     * surface the see-decide-act family as a set, or the model answers "I have no desktop tools". */
+    @Test
+    void aDesktopRequestKeepsTheDesktopFamilyAsASet() {
+        List<ToolCallback> tools = new ArrayList<>();
+        for (String n : List.of("remember_fact", "request_human", "generate_document", "local_shell", "workspace_write",
+                "web_search", "search_knowledge_base", "schedule_task")) {
+            tools.add(tool(n, "does something unrelated"));
+        }
+        tools.add(tool("local_desktop_screen", "does something unrelated"));
+        tools.add(tool("local_desktop_elements", "does something unrelated"));
+        tools.add(tool("local_desktop_press", "does something unrelated"));
+        tools.add(tool("local_desktop_click", "does something unrelated"));
+        tools.add(tool("local_desktop_type", "does something unrelated"));
+        tools.add(tool("run_desktop_recipe", "does something unrelated"));
+
+        List<String> game = names(AgentToolSelection.capForSmallModel(tools, "play minesweeper on my computer", 6));
+        long desktopKept = game.stream().filter(n -> n.startsWith("local_desktop_")).count();
+        assertTrue(desktopKept >= 3, "desktop family kept as a set: " + game);
+
+        List<String> recipe = names(AgentToolSelection.capForSmallModel(tools, "run_desktop_recipe open-notes", 6));
+        assertEquals("run_desktop_recipe", recipe.get(0), "named tool wins: " + recipe);
+    }
+
     @Test
     void setupAndApiQuestionsKeepTheGuideToolsEvenWhenAFileWordIsPresent() {
         List<ToolCallback> tools = new ArrayList<>();
