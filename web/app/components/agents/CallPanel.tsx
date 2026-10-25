@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Track, type DisconnectReason, type Room } from "livekit-client";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { cn } from "../../lib/utils";
 import { useLocale, useTranslations } from "../../lib/i18n";
 import { edgeEnabled } from "../../lib/edge/capabilities";
 import { STT_MODEL_SIZE_BYTES } from "../../lib/edge/audio/whisper";
@@ -94,6 +96,9 @@ interface CallPanelProps {
 export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelProps) {
   const t = useTranslations("callPanel");
   const [status, setStatus] = useState("idle"); // idle | connecting | connected | error
+  // Collapsed by default - the call UI earned its space only when the person
+  // asks for it (the zone above the chat already cost them a 30/70 split).
+  const [callPanelOpen, setCallPanelOpen] = useState(false);
   const [muted, setMuted] = useState(false);
   // Live vision (Program S1 seam): whether this call is publishing the local
   // camera. Only ever true for a call started via "Call + camera" (token mode
@@ -537,8 +542,59 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
     ttsSizeBytes: TTS_MODEL_SIZE_BYTES,
   });
 
+  // Collapse hides the body via a class, never unmounts: the hidden branch
+  // keeps the LiveKit room, MediaRecorder and reply-audio chain alive, which
+  // is exactly what a live call needs when the person wants more chat space.
+  const statusLabel =
+    status === "connected"
+      ? reconnecting
+        ? t("reconnecting")
+        : t("statusInCall")
+      : status === "connecting"
+        ? t("statusConnecting")
+        : status === "error"
+          ? t("statusFailed")
+          : t("statusIdle");
+
   return (
     <div className="flex flex-col gap-2 border-t border-border px-5 py-3" data-call-phase={phase}>
+      <button
+        type="button"
+        className="flex w-full items-center gap-2 text-left text-xs font-medium text-muted-foreground hover:text-foreground"
+        aria-expanded={callPanelOpen}
+        data-testid="call-panel-toggle"
+        onClick={() => setCallPanelOpen((o) => !o)}
+      >
+        <span
+          className={cn(
+            "state-dot",
+            (status === "connected" || status === "connecting") && "state-dot-live",
+          )}
+          style={
+            {
+              ["--state" as any]:
+                status === "connected"
+                  ? reconnecting
+                    ? "var(--state-warning)"
+                    : "var(--state-success)"
+                  : status === "connecting"
+                    ? "var(--state-warning)"
+                    : status === "error"
+                      ? "var(--state-error)"
+                      : "var(--state-idle)",
+            } as any
+          }
+          aria-hidden="true"
+        />
+        {t("sectionTitle")}
+        <span className="text-muted-foreground/70">· {statusLabel}</span>
+        {callPanelOpen ? (
+          <ChevronUp className="ml-auto size-3.5" aria-hidden="true" />
+        ) : (
+          <ChevronDown className="ml-auto size-3.5" aria-hidden="true" />
+        )}
+      </button>
+      <div className={callPanelOpen ? "flex flex-col gap-2" : "hidden"} data-testid="call-panel-body">
       <CallLivePane
         controls={{
           t,
@@ -610,6 +666,7 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
         }}
         error={{ callError, pipelineError, setShowMicTest }}
       />
+      </div>
       <audio ref={audioElRef} className="hidden" />
       <div ref={remoteAudioContainerRef} className="hidden" />
     </div>

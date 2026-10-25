@@ -2210,7 +2210,8 @@
     "rsOriginCode": "platform code",
     "rsRunBudget": "Spending cap per run",
     "rsNoCap": "No cap",
-    "rsRunBudgetHelp": "The most one run may spend when it delegates to other agents or runs deep research. An estimate, not billing."
+    "rsRunBudgetHelp": "The most one run may spend when it delegates to other agents or runs deep research. An estimate, not billing.",
+    "controlsToggle": "Call & controls"
   },
   "cameraPanel": {
     "title": "Sight",
@@ -2312,7 +2313,12 @@
     "edgeSightOn": "Camera analyzed on this device - frames never leave your browser",
     "edgeSightStopped": "On-device camera analysis stopped ({reason}) - the call continues voice-only.",
     "micDenied": "Microphone access was denied - a call needs the mic. Check your browser permissions and try again.",
-    "couldNotStart": "Could not start the call."
+    "couldNotStart": "Could not start the call.",
+    "sectionTitle": "Call",
+    "statusInCall": "In call",
+    "statusConnecting": "Connecting…",
+    "statusFailed": "Call failed",
+    "statusIdle": "Not in a call"
   },
   "nodeDefs": {
     "triggerLabel": "Trigger",
