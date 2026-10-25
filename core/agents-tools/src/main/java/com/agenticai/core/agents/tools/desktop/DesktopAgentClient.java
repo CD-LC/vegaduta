@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
@@ -24,6 +25,9 @@ import org.springframework.web.client.RestClientResponseException;
  * app.assistant.desktop.agent-secret}.
  */
 final class DesktopAgentClient {
+
+    /** Response header the agent stamps on {@code /frame} to say what the frame bytes are. */
+    static final String FRAME_FORMAT_HEADER = "X-Frame-Format";
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
@@ -88,6 +92,41 @@ final class DesktopAgentClient {
             JsonNode err = parse(e.getResponseBodyAsString());
             String why = err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
             throw new IOException("The desktop agent refused the action: " + why, e);
+        } catch (RuntimeException e) {
+            throw new IOException(
+                    "The desktop agent could not be reached - is it running? Start it with"
+                            + " `node services/desktop-agent/server.js` on the laptop.",
+                    e);
+        }
+    }
+
+    /**
+     * A non-JSON answer: the raw body plus the two headers the caller must pass through verbatim.
+     * The frame proxy must not re-encode or interpret the bytes, so nothing is parsed here.
+     */
+    record RawReply(byte[] body, String contentType, String frameFormat) {}
+
+    /**
+     * GET for endpoints that answer bytes rather than JSON (today only the monitor's {@code
+     * /frame}). Same server-side Bearer header and the same error contract as {@link #get(String)}.
+     */
+    RawReply getRaw(String path) throws IOException {
+        try {
+            ResponseEntity<byte[]> reply =
+                    client.get()
+                            .uri(path)
+                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + secret)
+                            .retrieve()
+                            .toEntity(byte[].class);
+            MediaType contentType = reply.getHeaders().getContentType();
+            return new RawReply(
+                    reply.getBody() == null ? new byte[0] : reply.getBody(),
+                    contentType == null ? null : contentType.toString(),
+                    reply.getHeaders().getFirst(FRAME_FORMAT_HEADER));
+        } catch (RestClientResponseException e) {
+            JsonNode err = parse(e.getResponseBodyAsString());
+            String why = err == null ? e.getStatusText() : err.path("error").asText(e.getStatusText());
+            throw new IOException("The desktop agent refused the request: " + why, e);
         } catch (RuntimeException e) {
             throw new IOException(
                     "The desktop agent could not be reached - is it running? Start it with"

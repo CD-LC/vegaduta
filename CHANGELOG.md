@@ -8,6 +8,11 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Desktop recipes (personal tier, opt-in)**: a finished desktop run can be saved as a `desktop_recipe` — a placeholder-only replay of the `local_desktop_*` sequence (`open`/`activate`/`press`/`click`/`type`/`key`/`wait`), recorded from the run's tool journal with the same "no secrets or user values stored" rules as browser recipes (`{{param}}`/`{{secret.NAME}}`, literal typed text refused unless explicitly allowed). `run_desktop_recipe` replays it deterministically with per-step verification and a pause-before-irreversible gate; it sits behind `app.assistant.desktop.recipes.enabled` (`DESKTOP_RECIPES_ENABLED`, default off) plus the existing `app.assistant.desktop.approval-required` pin.
+- **Monitor-or-auto replay**: each recipe carries a `default_mode` (`AUTO`/`MONITOR`); MONITOR paces the replay (`monitor-step-delay-ms`, default 800 ms) so a person can follow it live on the console's desktop monitor (`GET /api/desktop/monitor/frame` → the sidecar's new `GET /frame`, `app.assistant.desktop.monitor.enabled`, default off). Browser recipes gain the matching "Watch" affordance — the console polls the run's tool-call journal (`watchSessionId` in the `run_browser_recipe` result) — which also works on lite/full tiers.
+
 ## [0.1.10] - 2026-10-24
 
 ### Added

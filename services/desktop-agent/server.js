@@ -31,6 +31,8 @@
 //   POST   /notify          {title, body}         -> {ok:true}
 //   GET    /clipboard                             -> {text}
 //   POST   /clipboard       {text}                -> {ok:true}
+//   GET    /frame?scale&max                       -> image/jpeg|png bytes + X-Frame-Format
+//   GET    /capabilities                          -> {screenshotFormats, ui, clipboard, stream}  (unauthed probe, like /health)
 
 const http = require('node:http');
 const crypto = require('node:crypto');
@@ -49,6 +51,7 @@ const MAX_BODY_BYTES = 256 * 1024;
 const MAX_ELEMENTS = 250;
 const MAX_LABEL_CHARS = 120;
 const EXEC_TIMEOUT_MS = 15000;
+const FRAME_TIMEOUT_MS = 5000;
 const PLATFORM = process.platform;
 
 const KEY_CODES_MAC = {
@@ -353,6 +356,111 @@ function runStdin(argv, input) {
 }
 
 // ---------------------------------------------------------------------------
+// Live monitor frames - one serialized capture at a time, ~5s child budget.
+// The action answers {frame:{bytes, format:'jpeg'|'png'}} and the HTTP layer
+// writes the bytes with the matching Content-Type / X-Frame-Format headers.
+// ---------------------------------------------------------------------------
+
+/** Parse the /frame query: scale is (0,1], max is a positive pixel bound. */
+function frameParams(params) {
+  let scale = Number(params && params.scale);
+  if (!Number.isFinite(scale) || scale <= 0 || scale > 1) scale = 1;
+  let max = parseInt(params && params.max, 10);
+  if (!Number.isFinite(max) || max <= 0) max = 0;
+  return { scale, max };
+}
+
+/**
+ * Downscale `file` in place with the built-in `sips`: `max` caps the largest
+ * side directly; `scale` < 1 shrinks it to that fraction of the native size.
+ * No-op when neither applies. `left()` returns the remaining frame budget.
+ */
+async function sipsShrink(file, scale, max, left) {
+  let target = max;
+  if (scale < 1) {
+    const out = await run(
+      ['sips', '-g', 'pixelWidth', '-g', 'pixelHeight', file], left());
+    const sides = [...out.matchAll(/pixel(?:Width|Height):\s*(\d+)/g)]
+      .map((m) => Number(m[1]));
+    const biggest = Math.max(0, ...sides);
+    if (biggest > 0) {
+      const scaled = Math.max(1, Math.round(biggest * scale));
+      target = target ? Math.min(target, scaled) : scaled;
+    }
+  }
+  if (target) await run(['sips', '-Z', String(target), file], left());
+}
+
+async function macFrame(scale, max) {
+  const deadline = Date.now() + FRAME_TIMEOUT_MS;
+  const left = () => Math.max(200, deadline - Date.now());
+  const file = path.join(
+    os.tmpdir(), `desktop-agent-frame-${process.pid}-${Date.now()}.jpg`);
+  try {
+    await run(['screencapture', '-x', '-t', 'jpg', file], left());
+    if (!fs.statSync(file).size) throw new Error('empty capture');
+    await sipsShrink(file, scale, max, left);
+    return { frame: { bytes: fs.readFileSync(file), format: 'jpeg' } };
+  } catch {
+    // The jpeg path failed (no Screen Recording permission, sips trouble...) -
+    // hand back the same png /screenshot would have produced.
+    const shot = await macScreenshot();
+    return { frame: { bytes: fs.readFileSync(shot.path), format: 'png' } };
+  } finally {
+    fs.rmSync(file, { force: true });
+  }
+}
+
+async function linuxFrame(scale, max) {
+  const deadline = Date.now() + FRAME_TIMEOUT_MS;
+  const left = () => Math.max(200, deadline - Date.now());
+  const file = path.join(
+    os.tmpdir(), `desktop-agent-frame-${process.pid}-${Date.now()}.jpg`);
+  try {
+    if (await hasBinary('import')) {
+      const argv = ['import', '-window', 'root'];
+      if (scale < 1) argv.push('-resize', `${Math.round(scale * 100)}%`);
+      if (max) argv.push('-resize', `${max}x${max}>`);
+      argv.push(`jpg:${file}`);
+      if (await tryCapture(argv, file, left)) {
+        return { frame: { bytes: fs.readFileSync(file), format: 'jpeg' } };
+      }
+    }
+    if (await hasBinary('maim') &&
+        await tryCapture(['maim', '-f', 'jpg', file], file, left)) {
+      return { frame: { bytes: fs.readFileSync(file), format: 'jpeg' } };
+    }
+    // No jpeg-capable tool, or they failed (import/maim are X11-only) - the png
+    // path still covers Wayland through grim.
+    const shot = await linuxScreenshot();
+    return { frame: { bytes: fs.readFileSync(shot.path), format: 'png' } };
+  } finally {
+    fs.rmSync(file, { force: true });
+  }
+}
+
+/** Run a frame capture; true when the tool wrote a non-empty file. */
+async function tryCapture(argv, file, left) {
+  try {
+    await run(argv, left());
+    return fs.existsSync(file) && fs.statSync(file).size > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** What the console's feature probe needs to know - cheap, and honest on both platforms. */
+async function capabilities() {
+  const jpeg = mac || (await hasBinary('import')) || (await hasBinary('maim'));
+  return {
+    screenshotFormats: jpeg ? ['jpeg', 'png'] : ['png'],
+    ui: mac,
+    clipboard: true,
+    stream: false,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Dispatch
 // ---------------------------------------------------------------------------
 
@@ -409,6 +517,12 @@ const actions = {
     else await linuxClipboardSet(b.text);
     return { ok: true };
   },
+  // One screen frame for the console's live monitor. Answers
+  // {frame:{bytes, format}}; the HTTP layer ships the raw bytes.
+  'GET /frame': async (params) => {
+    const { scale, max } = frameParams(params);
+    return mac ? macFrame(scale, max) : linuxFrame(scale, max);
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -448,16 +562,25 @@ function authorized(req) {
     crypto.timingSafeEqual(presented, expected);
 }
 
+// One frame capture at a time - the screen tools are not reentrant and the
+// monitor only ever wants the freshest frame anyway.
+let frameBusy = false;
+
 function createServer() {
   return http.createServer(async (req, res) => {
     try {
-      if (req.url === '/health') {
+      const q = req.url.indexOf('?');
+      const pathname = q === -1 ? req.url : req.url.slice(0, q);
+      if (pathname === '/health') {
         return json(res, 200, { ok: true, platform: PLATFORM });
+      }
+      if (pathname === '/capabilities') {
+        return json(res, 200, await capabilities());
       }
       if (!authorized(req)) {
         return json(res, 401, { error: 'unauthorized' });
       }
-      const route = `${req.method} ${req.url.split('?')[0]}`;
+      const route = `${req.method} ${pathname}`;
       const action = actions[route];
       if (!action) {
         return json(res, 404, { error: `no route ${route}` });
@@ -473,8 +596,29 @@ function createServer() {
           }
         }
       }
-      const result = (await action(body)) || { ok: true };
-      return json(res, 200, { ok: true, ...result });
+      const isFrame = route === 'GET /frame';
+      if (isFrame) {
+        if (frameBusy) return json(res, 429, { error: 'busy' });
+        frameBusy = true;
+      }
+      try {
+        const arg = req.method === 'POST'
+          ? body
+          : Object.fromEntries(new URLSearchParams(q === -1 ? '' : req.url.slice(q + 1)));
+        const result = (await action(arg)) || { ok: true };
+        if (result.frame && Buffer.isBuffer(result.frame.bytes)) {
+          const format = result.frame.format === 'jpeg' ? 'jpeg' : 'png';
+          res.writeHead(200, {
+            'content-type': `image/${format}`,
+            'x-frame-format': format,
+            'content-length': result.frame.bytes.length,
+          });
+          return res.end(result.frame.bytes);
+        }
+        return json(res, 200, { ok: true, ...result });
+      } finally {
+        if (isFrame) frameBusy = false;
+      }
     } catch (e) {
       let message = e.message || 'internal error';
       if (message.includes('-25211') || message.includes('assistive access')) {
