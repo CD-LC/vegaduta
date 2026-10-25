@@ -25,13 +25,6 @@ const MANUAL = "manual.contract.json";
 // - the extractor can only contract routes the spec declares. Remove each entry
 // as a regen moves it into the contract files.
 const KNOWN_UNMATCHED = [
-  "DELETE /api/desktop/recipes/{} app/lib/api/desktopRecipes.ts",
-  "GET /api/desktop/monitor/frame app/lib/api/desktopRecipes.ts",
-  "GET /api/desktop/recipes app/lib/api/desktopRecipes.ts",
-  "PATCH /api/desktop/recipes/{} app/lib/api/desktopRecipes.ts",
-  "POST /api/desktop/recipes app/lib/api/desktopRecipes.ts",
-  "POST /api/desktop/recipes/from-run app/lib/api/desktopRecipes.ts",
-  "POST /api/desktop/recipes/{}/run app/lib/api/desktopRecipes.ts",
   "POST /api/mcp/registry/{}/acknowledge app/lib/api/mcp.ts",
   "POST /api/mcp/registry/{}/test app/lib/api/mcp.ts",
 ];
