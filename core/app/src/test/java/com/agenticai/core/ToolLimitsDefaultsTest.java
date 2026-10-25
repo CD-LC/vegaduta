@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.agenticai.core.chat.ArgumentSanitizingToolCallingManager;
 import com.agenticai.core.chat.ResilientToolCallingManagerFactory;
 import com.agenticai.core.chat.ToolLoopProperties;
+import com.agenticai.core.guardrails.ApprovalParked;
 import com.agenticai.core.guardrails.ToolBudgetExhausted;
 import com.agenticai.core.guardrails.ToolOutputProperties;
 import com.agenticai.core.guardrails.ToolStepLimitProperties;
@@ -145,5 +146,11 @@ class ToolLimitsDefaultsTest {
     void theBudgetExhaustedMarkerIsTheSameStringInTheToolLoopAndInTheGuard() {
         assertThat(ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED).isEqualTo(ToolBudgetExhausted.MARKER);
         assertThat(ToolBudgetExhausted.isBudgetExhausted(new ToolStepLimitProperties().exhaustedResult(15))).isTrue();
+    }
+
+    @Test
+    void theApprovalParkedMarkerIsTheSameStringInTheToolLoopAndInTheGuard() {
+        assertThat(ArgumentSanitizingToolCallingManager.APPROVAL_PARKED).isEqualTo(ApprovalParked.MARKER);
+        assertThat(ApprovalParked.isParked(ApprovalParked.result("wait"))).isTrue();
     }
 }

@@ -14,6 +14,8 @@ import com.agenticai.core.agents.dto.AgentFallbackUpdateRequest;
 import com.agenticai.core.agents.dto.AgentGenerationParamsUpdateRequest;
 import com.agenticai.core.agents.dto.AgentKnowledgeAccessUpdateRequest;
 import com.agenticai.core.agents.dto.AgentKnowledgeBaseToggleRequest;
+import com.agenticai.core.agents.dto.AgentKnowledgeWriteAccessResponse;
+import com.agenticai.core.agents.dto.AgentKnowledgeWriteAccessUpdateRequest;
 import com.agenticai.core.agents.dto.AgentModelUpdateRequest;
 import com.agenticai.core.agents.dto.AgentPromptUpdateRequest;
 import com.agenticai.core.agents.dto.AgentReasoningDepthUpdateRequest;
@@ -238,7 +240,8 @@ public class AgentController {
     public ResponseEntity<AgentResponse> setToolAccess(
             @PathVariable UUID agentId, @Valid @RequestBody AgentToolAccessUpdateRequest request) {
         // Soft-check against the agent's currently-resolvable tool set (logged, never rejected).
-        ToolAllowListCheck.warnOnUnknownNames(agentToolProvider, agentId, request.allowedToolNames());
+        ToolAllowListCheck.warnOnUnknownNames(
+                agentToolProvider, agentId, request.allowedToolNames());
         AgentResponse saved =
                 agentService.setAllowedToolNamesEnforced(agentId, request.allowedToolNames());
         ResponseEntity.BodyBuilder response = ResponseEntity.ok();
@@ -309,12 +312,61 @@ public class AgentController {
     }
 
     /**
-     * Opt-in per-agent
-     * collaborator list (see {@code Agent.collaboratorAgentIds}' javadoc for why this is opt-in,
-     * same reasoning as {@link #setToolAccess}/{@link #setKnowledgeAccess}). Each id must be
-     * another existing agent in this same tenant - {@link AgentService#setCollaboratorAgentIds}
-     * validates and rejects self-reference or an unknown id with a clear error rather than silently
-     * dropping it.
+     * Migration V198 - the knowledge-WRITE posture (the {@code add_to_knowledge_base} tool): the
+     * opt-in flag plus the deny-by-default collection grant list. {@link AgentResponse} carries
+     * neither field, so these endpoints read and write a dedicated view; the pair is also what was
+     * missing for the feature to be usable at all (the columns and {@code AgentService} setters
+     * existed, the set path did not).
+     */
+    @GetMapping("/{agentId}/knowledge-write-access")
+    public AgentKnowledgeWriteAccessResponse getKnowledgeWriteAccess(@PathVariable UUID agentId) {
+        agentService.requireAccess(agentId, PermissionLevel.VIEWER);
+        return knowledgeWriteAccess(agentId);
+    }
+
+    /**
+     * The agent's write opt-in ({@code {enabled}} body, same shape as {@link
+     * #setKnowledgeBaseEnabled}).
+     */
+    @PatchMapping("/{agentId}/knowledge-write")
+    public AgentKnowledgeWriteAccessResponse setKnowledgeWrite(
+            @PathVariable UUID agentId,
+            @Valid @RequestBody AgentKnowledgeBaseToggleRequest request) {
+        agentService.setKnowledgeWriteEnabled(agentId, request.enabled());
+        return knowledgeWriteAccess(agentId);
+    }
+
+    /**
+     * The collection grant list for {@link #setKnowledgeWrite}. Empty/null clears every grant back
+     * to deny-all - the OPPOSITE of {@link #setKnowledgeAccess}'s "empty means unrestricted"; an
+     * unknown id is a 404, same {@code requireExists} reasoning as there.
+     */
+    @PatchMapping("/{agentId}/knowledge-write-access")
+    public AgentKnowledgeWriteAccessResponse setKnowledgeWriteAccess(
+            @PathVariable UUID agentId,
+            @Valid @RequestBody AgentKnowledgeWriteAccessUpdateRequest request) {
+        if (request.allowedKnowledgeWriteCollectionIds() != null) {
+            for (UUID collectionId : request.allowedKnowledgeWriteCollectionIds()) {
+                knowledgeCollectionService.requireExists(collectionId);
+            }
+        }
+        agentService.setAllowedKnowledgeWriteCollectionIds(
+                agentId, request.allowedKnowledgeWriteCollectionIds());
+        return knowledgeWriteAccess(agentId);
+    }
+
+    private AgentKnowledgeWriteAccessResponse knowledgeWriteAccess(UUID agentId) {
+        return new AgentKnowledgeWriteAccessResponse(
+                agentService.isKnowledgeWriteEnabled(agentId),
+                agentService.getAllowedKnowledgeWriteCollectionIds(agentId));
+    }
+
+    /**
+     * Opt-in per-agent collaborator list (see {@code Agent.collaboratorAgentIds}' javadoc for why
+     * this is opt-in, same reasoning as {@link #setToolAccess}/{@link #setKnowledgeAccess}). Each
+     * id must be another existing agent in this same tenant - {@link
+     * AgentService#setCollaboratorAgentIds} validates and rejects self-reference or an unknown id
+     * with a clear error rather than silently dropping it.
      */
     @PatchMapping("/{agentId}/collaborators")
     public AgentResponse setCollaborators(

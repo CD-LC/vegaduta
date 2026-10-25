@@ -131,7 +131,8 @@ class ContextCompactionDefaultOnHarnessTest {
                         6,
                         128_000,
                         800,
-                        3);
+                        3,
+                        0);
     }
 
     @AfterEach

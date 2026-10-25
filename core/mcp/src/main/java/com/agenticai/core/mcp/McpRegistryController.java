@@ -69,6 +69,16 @@ public class McpRegistryController {
         this.oauthProviderRegistry = registry;
     }
 
+    // Same setter-injected-optional shape as the field above (keeps the unit-test constructor
+    // unchanged): the dead-static-reference repair the explicit-connect path runs first - see
+    // #connectNow.
+    private McpStaticReferenceUpgrader staticReferenceUpgrader;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setStaticReferenceUpgrader(McpStaticReferenceUpgrader upgrader) {
+        this.staticReferenceUpgrader = upgrader;
+    }
+
     public McpRegistryController(
         McpRegistryService service,
         McpCatalogService catalogService,
@@ -177,7 +187,11 @@ public class McpRegistryController {
     @PostMapping
     public ResponseEntity<McpServerRegistrationResponse> register(@Valid @RequestBody McpServerRegistrationRequest request) {
         McpServerRegistrationResponse saved = service.register(request);
-        boolean dynamic = StringUtils.hasText(request.command()) || StringUtils.hasText(request.url());
+        // Decide from the SAVED registration, not the request: a name-only request can land as a
+        // dynamic row (McpRegistryService#upgradeUnservedStaticReference turns a "ready" catalog
+        // reference whose static server isn't servable into a per-tenant connection) and then the
+        // connect must happen here or the row sits NOT_CONFIGURED forever.
+        boolean dynamic = saved.dynamic();
         if (dynamic && request.enabled()) {
             McpDynamicConnector c = connector.getIfAvailable();
             if (c != null) {
@@ -267,14 +281,21 @@ public class McpRegistryController {
      */
     @PostMapping("/{id}/connect")
     public McpServerRegistrationResponse connectNow(@PathVariable UUID id) {
+        // Repair first: a dead static-reference registration (enabled while the deployment's
+        // shared static server can't serve it) upgrades to its catalog launch spec here, so the
+        // connect below has a real dynamic config to open instead of skipping quietly.
+        McpServerRegistrationResponse updated =
+            staticReferenceUpgrader == null
+                ? service.listAll().stream()
+                    .filter(r -> r.id().equals(id))
+                    .findFirst()
+                    .orElseThrow(() -> new McpServerRegistrationNotFoundException(id))
+                : staticReferenceUpgrader.ensureConnectable(id);
         McpDynamicConnector c = connector.getIfAvailable();
         if (c != null) {
             connectDispatcher.dispatch(c, id);
         }
-        return service.listAll().stream()
-            .filter(r -> r.id().equals(id))
-            .findFirst()
-            .orElseThrow(() -> new McpServerRegistrationNotFoundException(id));
+        return updated;
     }
 
     /**

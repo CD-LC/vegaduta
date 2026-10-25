@@ -11,11 +11,12 @@ Lives in `sdk/java/` next to the generated TypeScript and Python REST clients (`
 runs inside your own application. Apache-2.0. Java 17+. Group `io.github.cd-lc`. Design record:
 [ADR-0013](../../docs/architecture/ADR-0013-embeddable-agent-sdk.md).
 
-> Status: `0.1.0`, released as the GitHub Release `sdk-v0.1.0` (jars, sources, javadoc, CycloneDX
-> SBOMs, `SHA256SUMS` and SLSA provenance), not yet on Maven Central. Until it is, take the jars from
-> that release or build them with `mvn -f sdk/java/pom.xml install` and depend on `0.1.0`. The public
-> API is annotated and checked by japicmp from the first release on; anything marked `@Experimental`
-> may move.
+> Status: `0.1.1` is the first version headed to Maven Central (`io.github.cd-lc`); the earlier
+> GitHub Release `sdk-v0.1.0` (jars, sources, javadoc, CycloneDX SBOMs, `SHA256SUMS` and SLSA
+> provenance) predates the Central fix and its 0.1.0 coordinate is retired unused. Until Central
+> publishes, take the jars from the GitHub release or build with
+> `mvn -f sdk/java/pom.xml install` and depend on `0.1.1`. The public API is annotated and
+> checked by japicmp from the first release on; anything marked `@Experimental` may move.
 
 ## What's new
 
@@ -100,7 +101,7 @@ run with. From Java: `new RiskMapScanner(policy).scan(classes).toMarkdown()`.
 <dependency>
   <groupId>io.github.cd-lc</groupId>
   <artifactId>vegaduta-agent-spring-boot-starter</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 </dependency>
 ```
 

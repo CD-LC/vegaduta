@@ -19,6 +19,8 @@ import com.agenticai.core.agents.tools.openapi.OpenApiToolExecutor;
 import com.agenticai.core.agents.tools.openapi.OpenApiToolSourceService;
 import com.agenticai.core.agents.tools.script.UserToolScriptEvaluator;
 import com.agenticai.core.agents.tools.script.UserToolScriptService;
+import com.agenticai.core.agents.tools.search.RedisToolActivationStore;
+import com.agenticai.core.agents.tools.search.ToolActivationRegistry;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agentspi.MandatePaymentToolSource;
 import com.agenticai.core.agentspi.MediaToolSource;
@@ -45,6 +47,7 @@ import com.agenticai.core.sdlc.SdlcSandboxService;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.modelcontextprotocol.client.McpSyncClient;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
@@ -56,6 +59,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
  * The shared plumbing and the per-area resolvers behind the {@link ToolSource} beans. These used to
@@ -224,10 +228,45 @@ class ToolResolverConfiguration {
             @Value("${app.tools.search.threshold:25}") int threshold,
             @Value("${app.tools.search.always-on:" + ToolSearchDeferral.DEFAULT_ALWAYS_ON + "}")
                     String alwaysOn,
-            @Value("${app.tools.search.max-carry-over:6}") int maxCarryOver) {
+            @Value("${app.tools.search.max-carry-over:6}") int maxCarryOver,
+            @Value("${app.tools.search.activation-store:auto}") String activationStore,
+            @Value("${app.tools.search.activation-ttl:PT2H}") Duration activationTtl,
+            ObjectProvider<StringRedisTemplate> redisProvider,
+            GuardrailService guardrailService) {
         ToolSearchDeferral deferral = new ToolSearchDeferral();
         deferral.configure(enabled, threshold, alwaysOn, maxCarryOver);
+        deferral.activations(activationRegistry(activationStore, activationTtl, redisProvider));
+        deferral.withCatalogScreen(guardrailService);
         return deferral;
+    }
+
+    /**
+     * {@code app.tools.search.activation-store=auto|memory|redis}: auto (default) uses Redis when a
+     * {@link StringRedisTemplate} bean exists (activations survive restarts and follow a session
+     * across replicas), else per-replica memory; memory never resolves the template; redis
+     * requires it and degrades to memory with a warning, matching {@code app.mcp.registry-store}.
+     */
+    static ToolActivationRegistry activationRegistry(
+            String store, Duration ttl, ObjectProvider<StringRedisTemplate> redisProvider) {
+        String mode = store == null ? "" : store.trim();
+        boolean wantsRedis = "redis".equalsIgnoreCase(mode) || "auto".equalsIgnoreCase(mode);
+        if (!wantsRedis) {
+            return new ToolActivationRegistry(
+                    ToolActivationRegistry.DEFAULT_MAX_SESSIONS, ttl, Clock.systemUTC());
+        }
+        StringRedisTemplate redis = redisProvider == null ? null : redisProvider.getIfAvailable();
+        if (redis != null) {
+            log.info("Tool activation carry-over stored in Redis ({})", mode.toLowerCase());
+            return new ToolActivationRegistry(new RedisToolActivationStore(redis), ttl);
+        }
+        if ("redis".equalsIgnoreCase(mode)) {
+            log.warn(
+                    "app.tools.search.activation-store=redis but no StringRedisTemplate is available - using in-memory activations");
+        } else {
+            log.info("Tool activation carry-over held in per-replica memory (no StringRedisTemplate)");
+        }
+        return new ToolActivationRegistry(
+                ToolActivationRegistry.DEFAULT_MAX_SESSIONS, ttl, Clock.systemUTC());
     }
 
     /** Swarm goal verifier ({@code app.swarm.verifier.*}, default OFF). */
@@ -274,6 +313,7 @@ class ToolResolverConfiguration {
             ObjectProvider<KnowledgeSearchService> knowledgeSearchService,
             ObjectProvider<KnowledgeCollectionService> knowledgeCollectionService,
             ObjectProvider<KnowledgeIngestionService> knowledgeIngestionService,
+            ObjectProvider<com.agenticai.core.knowledge.KnowledgeUrlIngester> knowledgeUrlIngester,
             ObjectProvider<AgentMemoryService> agentMemoryService,
             ObjectProvider<TenantMemoryService> tenantMemoryService,
             AgentService agentService,
@@ -286,9 +326,11 @@ class ToolResolverConfiguration {
         AgentKnowledgeToolResolver resolver =
                 new AgentKnowledgeToolResolver(
                         toolGuard,
-                        knowledgeSearchService,
-                        knowledgeCollectionService,
-                        knowledgeIngestionService,
+                        new KnowledgeServiceProviders(
+                                knowledgeSearchService,
+                                knowledgeCollectionService,
+                                knowledgeIngestionService,
+                                knowledgeUrlIngester),
                         agentMemoryService,
                         tenantMemoryService,
                         agentService,
@@ -481,5 +523,26 @@ class ToolResolverConfiguration {
                 new AgentCodingTaskToolResolver(toolGuard, agentService);
         resolver.setFactory(factory);
         return resolver;
+    }
+
+    /**
+     * The agent scratchpad (app.tools.scratchpad.*). Both collaborators stay optional: a slim
+     * context without the storage bean offers no scratchpad tools, and a missing properties bean
+     * falls back to the shipped defaults.
+     */
+    @Bean
+    AgentScratchpadToolResolver agentScratchpadToolResolver(
+            AgentToolGuard toolGuard,
+            ObjectProvider<com.agenticai.core.agents.tools.scratchpad.AgentScratchpadService>
+                    scratchpadService,
+            ObjectProvider<com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties>
+                    scratchpadProperties,
+            ObjectProvider<com.agenticai.core.agents.tunables.BehaviourSettings> behaviour) {
+        return new AgentScratchpadToolResolver(
+                toolGuard,
+                scratchpadService,
+                scratchpadProperties.getIfAvailable(
+                        com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties::new),
+                behaviour);
     }
 }

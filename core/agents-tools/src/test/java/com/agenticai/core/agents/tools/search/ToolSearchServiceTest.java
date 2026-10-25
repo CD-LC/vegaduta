@@ -243,6 +243,23 @@ class ToolSearchServiceTest {
     }
 
     @Test
+    void namesListsEveryIndexedToolInSortedOrderForTheNoMatchHint() {
+        Index index = catalog();
+
+        assertEquals(
+                List.of(
+                        "fetch_web_page",
+                        "generate_image",
+                        "google_calendar",
+                        "google_gmail",
+                        "mcp__github__create_issue",
+                        "mcp__github__list_issues",
+                        "mcp__slack__post_message"),
+                index.names());
+        assertTrue(service.index(List.of()).names().isEmpty());
+    }
+
+    @Test
     void parameterNamesComeFromTheSchemaIncludingNestedProperties() {
         Index index =
                 service.index(

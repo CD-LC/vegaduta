@@ -262,6 +262,9 @@ final class AgentToolGuard {
         if (approvalPark != null) {
             core.withApprovalParkTexts(approvalPark.getIfAvailable());
         }
+        // Dispatch plumbing can never be replayed by an approval (replay resolves tools by exact
+        // name without deferral), so a post-park call to one is refused without an approval row.
+        core.withQueueExcludedTools(QUEUE_EXCLUDED_TOOLS);
         core.withStepLimits(stepLimits(runtime));
         core.withPrompts(prompts());
         if (governance != null && gateMode == ApprovalGateMode.GATE_UNLESS_READ_ONLY) {
@@ -594,6 +597,16 @@ final class AgentToolGuard {
      */
     static final Set<String> ALWAYS_CONFIRM_TOOLS =
             Set.of("a2a_call_agent", "schedule_task", "coding_task", "local_shell");
+
+    /**
+     * Dispatch plumbing a post-park queue must never file an approval request for: approval replay
+     * resolves tools by exact name without deferral, so an approved {@code search_tools} or {@code
+     * call_tool} resolves to a refusal - recording one only pollutes the approver's inbox.
+     * {@code restore_tool_result} is a context-compaction placeholder that likewise cannot be
+     * replayed meaningfully.
+     */
+    static final Set<String> QUEUE_EXCLUDED_TOOLS =
+            Set.of(SearchToolsToolCallback.NAME, CallToolToolCallback.NAME, "restore_tool_result");
 
     /**
      * Tool-aware mapping: as {@link #approvalGateModeFor(AgentAutonomyTier)} but never NEVER_GATE

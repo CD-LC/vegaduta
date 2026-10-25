@@ -133,6 +133,14 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
      */
     public static final String TOOL_BUDGET_EXHAUSTED = "tool_budget_exhausted";
 
+    /**
+     * Machine-readable marker in a parked-turn tool result: {@code GuardedToolCallback} writes it
+     * (core/guardrails cannot depend on this module, so it repeats the string in
+     * {@code ApprovalParked}; a test pins that they agree). A turn parked on a human approval must
+     * end - post-park calls consume no step budget, so the loop stops them here instead.
+     */
+    public static final String APPROVAL_PARKED = "approval_parked";
+
     static final String LOOP_LIMIT_METRIC = "chat.tool_loop.limit";
     static final String UNKNOWN_TOOL_METRIC = "chat.tool.unknown_calls";
     static final String ARGUMENT_REJECTED_METRIC = "chat.tool.argument_rejected";
@@ -253,6 +261,10 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 executable = withExceptionTranslation(executable);
             }
             result = delegate.executeToolCalls(executable, chatResponse);
+            // A call that parked this round (the guard wrote the approval_parked marker into its
+            // result) ends the turn without another model call: the loop hands back the parked
+            // reply - the platform's fixed pause text - instead of letting the model write one.
+            result = ToolLoopParkedClose.close(prompts, prompt, result);
         }
         List<Message> sanitized = sanitizeHistory(result.conversationHistory(), objectMapper);
         List<Message> history = result.returnDirect()
@@ -282,12 +294,18 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         int priorRounds = 0;
         int unknownCalls = 0;
         boolean softStopAlreadySent = false;
+        boolean parked = false;
         for (Message message : currentInvocation(prompt.getInstructions())) {
             if (message instanceof AssistantMessage assistant && assistant.hasToolCalls()) {
                 priorRounds++;
                 unknownCalls += countUnknown(assistant.getToolCalls(), known);
-            } else if (message instanceof ToolResponseMessage toolResponses && carriesBudgetMarker(toolResponses)) {
-                softStopAlreadySent = true;
+            } else if (message instanceof ToolResponseMessage toolResponses) {
+                if (ToolLoopMarkers.carriesBudgetMarker(toolResponses)) {
+                    softStopAlreadySent = true;
+                }
+                if (ToolLoopMarkers.carriesParkedMarker(toolResponses)) {
+                    parked = true;
+                }
             }
         }
         int newUnknown = countUnknown(requesting.getToolCalls(), known);
@@ -295,20 +313,33 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             increment(UNKNOWN_TOOL_METRIC, newUnknown);
         }
         unknownCalls += newUnknown;
-        int round = priorRounds + 1;
+        int round = ToolLoopRunHooks.roundsSpentBefore(prompt) + priorRounds + 1; // + earlier passes' rounds, so the cap counts the turn's total
 
         // A run may carry its own cap (the agent's tool-step ceiling decides how many rounds its backstop needs).
         int roundCap = ToolLoopRunHooks.maxRounds(prompt, maxToolRounds);
         boolean roundsExceeded = round > roundCap;
         boolean unknownExceeded = unknownCalls > maxUnknownToolCalls;
-        if (!roundsExceeded && !unknownExceeded) {
+        boolean tokensExceeded = ToolLoopRunHooks.overPromptBudget(prompt, chatResponse);
+        // A parked turn (a tool call waiting on human approval) must end: post-park calls are
+        // answered by the guard and consume no step budget, so without this check a model that
+        // keeps calling tools loops to the round cap burning tokens on queue refusals.
+        if (!roundsExceeded && !unknownExceeded && !tokensExceeded && !parked) {
             return null;
         }
-        String reason = roundsExceeded ? "rounds" : "unknown_tools";
+        String reason =
+                parked
+                        ? "approval_parked"
+                        : roundsExceeded ? "rounds" : unknownExceeded ? "unknown_tools" : "prompt_tokens";
         List<Message> history = new ArrayList<>(prompt.getInstructions());
         history.add(requesting);
         List<AssistantMessage.ToolCall> calls = requesting.getToolCalls();
-        List<ToolResponseMessage.ToolResponse> responses = new ArrayList<>(calls.size());
+
+        if (parked) {
+            // A parked turn ends without another model call (ToolLoopParkedClose): queued calls get
+            // the parked marker and the fixed pause reply - not model prose - closes the turn.
+            increment(LOOP_LIMIT_METRIC, 1, "stage", "parked", "reason", reason);
+            return ToolLoopParkedClose.closeQueued(prompts, prompt, history, calls);
+        }
 
         if (!softStopAlreadySent) {
             log.warn(
@@ -317,12 +348,9 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 reason, round, roundCap, unknownCalls, maxUnknownToolCalls, calls.size()
             );
             increment(LOOP_LIMIT_METRIC, 1, "stage", "soft", "reason", reason);
-            String softStop = softStopResult(prompt, priorRounds);
-            for (AssistantMessage.ToolCall call : calls) {
-                responses.add(new ToolResponseMessage.ToolResponse(call.id(), call.name(), softStop));
-            }
-            history.add(ToolResponseMessage.builder().responses(responses).build());
-            return ToolExecutionResult.builder().conversationHistory(history).returnDirect(false).build();
+            return ToolLoopSoftStops.soft(
+                prompts, objectMapper, budgetExhaustedMessage, prompt, tokensExceeded, round - 1,
+                history, calls);
         }
 
         log.warn(
@@ -330,57 +358,7 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 + "loop with returnDirect", reason, round
         );
         increment(LOOP_LIMIT_METRIC, 1, "stage", "hard", "reason", reason);
-        for (int i = 0; i < calls.size(); i++) {
-            // ToolExecutionResult.buildGenerations turns each response into one
-            // Generation and ChatClient#content() reads only the first, so the
-            // closing message goes on the first response and the rest stay
-            // empty rather than repeating it in a multi-generation consumer.
-            responses.add(new ToolResponseMessage.ToolResponse(
-                calls.get(i).id(), calls.get(i).name(), i == 0 ? hardStopReply(prompt) : ""));
-        }
-        history.add(ToolResponseMessage.builder().responses(responses).build());
-        return ToolExecutionResult.builder().conversationHistory(history).returnDirect(true).build();
-    }
-
-    /** The closing reply (also stored in the history): the registry's, else the operator's property, else the shipped one. */
-    private String hardStopReply(Prompt prompt) {
-        return ChatPrompts.textWithConfiguredAlias(
-            prompts, ChatPrompts.HARD_STOP, ToolLoopRunHooks.promptRun(prompt), hardStopReply);
-    }
-
-    private String softStopResult(Prompt prompt, int roundsUsed) {
-        String instruction = ChatPrompts.textWithConfiguredAlias(
-            prompts, ChatPrompts.TOOL_BUDGET_ROUNDS, ToolLoopRunHooks.promptRun(prompt), budgetExhaustedMessage,
-            "rounds", String.valueOf(roundsUsed));
-        try {
-            // Ordered: error first, the same shape GuardedToolCallback writes for its call ceiling.
-            Map<String, Object> body = new java.util.LinkedHashMap<>();
-            body.put("error", TOOL_BUDGET_EXHAUSTED);
-            body.put("result", instruction);
-            return objectMapper.writeValueAsString(body);
-        } catch (Exception e) {
-            return fallbackSoftStop(instruction);
-        }
-    }
-
-    /**
-     * The soft-stop JSON written by hand, for the case the serializer fails (unreachable for a map of strings). It
-     * carries no English of its own: the instruction is the registry's text.
-     */
-    static String fallbackSoftStop(String instruction) {
-        return "{\"error\":\"" + TOOL_BUDGET_EXHAUSTED + "\",\"result\":\""
-            + new String(com.fasterxml.jackson.core.io.JsonStringEncoder.getInstance().quoteAsString(String.valueOf(instruction)))
-            + "\"}";
-    }
-
-    private static boolean carriesBudgetMarker(ToolResponseMessage message) {
-        for (ToolResponseMessage.ToolResponse response : message.getResponses()) {
-            String data = response.responseData();
-            if (data != null && data.contains("\"" + TOOL_BUDGET_EXHAUSTED + "\"")) {
-                return true;
-            }
-        }
-        return false;
+        return ToolLoopSoftStops.hard(prompts, hardStopReply, prompt, history, calls);
     }
 
     /**

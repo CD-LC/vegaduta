@@ -235,6 +235,11 @@ x-core-env: &core-env
   MCP_STDIO_SIDECAR_ENABLED: ${MCP_STDIO_SIDECAR_ENABLED:-false}
   MCP_STDIO_SIDECAR_URL: mcp-stdio-runner:8097
   MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:-}
+  # Static MCP exposure policy: agents only get the stateless names on this
+  # allowlist; shared-stateful opens filesystem/memory/browsers to EVERY tenant
+  # (single-tenant installs only) - see docs/configuration.md.
+  MCP_STATIC_STATELESS_SERVERS: ${MCP_STATIC_STATELESS_SERVERS:-sequential-thinking}
+  MCP_STATIC_SHARED_STATEFUL_ENABLED: ${MCP_STATIC_SHARED_STATEFUL_ENABLED:-false}
   APP_BUILDER_CORE_SERVICE_TOKEN: ${APP_BUILDER_CORE_SERVICE_TOKEN:-}
   PLATFORM_ALERTS_WEBHOOK_SECRET: ${PLATFORM_ALERTS_WEBHOOK_SECRET:-}
   # Voice (profile `voice`). LIVEKIT_URL is BROWSER-facing.

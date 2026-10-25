@@ -534,7 +534,6 @@ services:
     profiles: ["voice"]
     <<: [*restart, *logging, *nnp]
     command: --config /etc/livekit.yaml
-
     environment:
       LIVEKIT_KEYS: "${LIVEKIT_API_KEY:?run scripts/vegaduta secrets}: ${LIVEKIT_API_SECRET:?run scripts/vegaduta secrets}"
       LIVEKIT_RTC_PORT_RANGE_START: ${LIVEKIT_RTC_PORT_RANGE_START:-50000}

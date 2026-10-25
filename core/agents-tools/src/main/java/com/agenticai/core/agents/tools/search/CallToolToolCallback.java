@@ -1,6 +1,8 @@
 package com.agenticai.core.agents.tools.search;
 
 import com.agenticai.core.agents.tools.ToolSearchToolNames;
+import com.agenticai.core.guardrails.GuardrailPrompts;
+import com.agenticai.core.guardrails.ToolResultMarker;
 import com.agenticai.core.guardrails.ToolStepLimitExceededException;
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -50,7 +52,11 @@ public class CallToolToolCallback implements ToolCallback {
      */
     private final AtomicInteger consecutiveRefusals = new AtomicInteger();
 
-    /** No refusal ceiling (tests and callers that have no agent context). */
+    /**
+     * For tests and callers with no agent context: the refusal ceiling still applies but is
+     * expressed as the shared {@code tool_budget_exhausted} result the tool loop honours (and
+     * hard-stops a model that ignores it), not a thrown {@link ToolStepLimitExceededException}.
+     */
     public CallToolToolCallback(ToolSearchState state) {
         this(state, null, null);
     }
@@ -148,10 +154,25 @@ public class CallToolToolCallback implements ToolCallback {
      */
     private String refuse(String message) {
         int refused = consecutiveRefusals.incrementAndGet();
-        if (agentId != null && refused > MAX_CONSECUTIVE_REFUSALS) {
-            throw new ToolStepLimitExceededException(agentId, sessionId, MAX_CONSECUTIVE_REFUSALS);
+        if (refused > MAX_CONSECUTIVE_REFUSALS) {
+            if (agentId != null) {
+                throw new ToolStepLimitExceededException(
+                        agentId, sessionId, MAX_CONSECUTIVE_REFUSALS);
+            }
+            // No agent identity to stop the turn with: the shared tool_budget_exhausted result
+            // still bounds the loop - the model is told to answer now, and a model that keeps
+            // calling anyway trips the tool loop's own cap and is hard-stopped there.
+            return ToolResultMarker.mark(
+                    GuardrailPrompts.budgetCallsResult(
+                            null, null, null, MAX_CONSECUTIVE_REFUSALS),
+                    ToolResultMarker.Kind.BUDGET_EXHAUSTED);
         }
-        return message;
+        // A refusal is the platform's answer, not a tool's output - registered so the guard's
+        // output screen passes it through (a "call search_tools first" hint reads like an
+        // injection instruction to a content judge, and withholding it loops the model) and the
+        // journals know nothing ran. Only successful dispatches return unmarked: they carry the
+        // TARGET's already-guarded result.
+        return ToolResultMarker.mark(message, ToolResultMarker.Kind.BLOCKED);
     }
 
     /**

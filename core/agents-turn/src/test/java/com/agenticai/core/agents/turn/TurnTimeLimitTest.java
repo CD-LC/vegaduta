@@ -86,19 +86,31 @@ class TurnTimeLimitTest {
 
     @Test
     void aFastTurnWithOnlyPlatformSettingsHasNoOverallLimit() {
-        assertThat(TurnTimeLimit.fast(turn(null, settings(PLATFORM, RuntimeLayer.PLATFORM)), T0)).isEmpty();
-        assertThat(TurnTimeLimit.fast(turn(null, null), T0)).isEmpty();
+        assertThat(TurnTimeLimit.fast(turn(null, settings(PLATFORM, RuntimeLayer.PLATFORM)), T0, null)).isEmpty();
+        assertThat(TurnTimeLimit.fast(turn(null, null), T0, null)).isEmpty();
+    }
+
+    @Test
+    void aFastTurnIsLimitedByTheConfiguredCeilingUnlessTheDeadlineOrTheAgentIsSooner() {
+        assertThat(TurnTimeLimit.fast(turn(null, null), T0, Duration.ofMinutes(10)))
+            .contains(Duration.ofMinutes(10));
+        assertThat(TurnTimeLimit.fast(turn(T0.plusSeconds(30), null), T0, Duration.ofMinutes(10)))
+            .contains(Duration.ofSeconds(30));
+        assertThat(TurnTimeLimit.fast(turn(null, settings(Duration.ofSeconds(90), RuntimeLayer.AGENT)), T0,
+                        Duration.ofMinutes(10)))
+            .contains(Duration.ofSeconds(90));
+        assertThat(TurnTimeLimit.fast(turn(null, null), T0, Duration.ZERO)).isEmpty();
     }
 
     @Test
     void aFastTurnIsLimitedByTheAgentsTimeoutByTheDeadlineOrByTheSooner() {
         AgentRuntimeSettings agent = settings(Duration.ofSeconds(90), RuntimeLayer.AGENT);
 
-        assertThat(TurnTimeLimit.fast(turn(null, agent), T0)).contains(Duration.ofSeconds(90));
-        assertThat(TurnTimeLimit.fast(turn(T0.plusSeconds(30), settings(PLATFORM, RuntimeLayer.PLATFORM)), T0))
+        assertThat(TurnTimeLimit.fast(turn(null, agent), T0, null)).contains(Duration.ofSeconds(90));
+        assertThat(TurnTimeLimit.fast(turn(T0.plusSeconds(30), settings(PLATFORM, RuntimeLayer.PLATFORM)), T0, null))
             .contains(Duration.ofSeconds(30));
-        assertThat(TurnTimeLimit.fast(turn(T0.plusSeconds(30), agent), T0)).contains(Duration.ofSeconds(30));
-        assertThat(TurnTimeLimit.fast(turn(T0.plusSeconds(300), agent), T0)).contains(Duration.ofSeconds(90));
+        assertThat(TurnTimeLimit.fast(turn(T0.plusSeconds(30), agent), T0, null)).contains(Duration.ofSeconds(30));
+        assertThat(TurnTimeLimit.fast(turn(T0.plusSeconds(300), agent), T0, null)).contains(Duration.ofSeconds(90));
     }
 
     // --- the cap -----------------------------------------------------------------------------------

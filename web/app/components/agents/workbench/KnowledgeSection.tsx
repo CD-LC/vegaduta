@@ -1,6 +1,7 @@
 "use client";
 
 import KnowledgeCollectionsSection from "../KnowledgeCollectionsSection";
+import KnowledgeWriteSection from "./KnowledgeWriteSection";
 import { useWorkbench } from "./context";
 
 export default function KnowledgeSection() {
@@ -45,6 +46,16 @@ export default function KnowledgeSection() {
         toggleKnowledgeDraft={toggleKnowledgeDraft}
         saveKnowledge={saveKnowledge}
         knowledgeBusy={knowledgeBusy}
+      />
+      {/* The write side (add_to_knowledge_base): its own opt-in + deny-by-default grant
+          list on /knowledge-write-access - fetched per agent inside the component; drafts
+          have no id yet and see nothing here. */}
+      <KnowledgeWriteSection
+        key={`write-${selectedAgentId ?? "draft"}`}
+        t={t}
+        locked={!!locked}
+        agentId={isDraft ? null : (selectedAgentId ?? null)}
+        collections={collections}
       />
     </>
   );

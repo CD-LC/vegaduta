@@ -302,6 +302,11 @@ services:
       MCP_STDIO_SIDECAR_ENABLED: ${MCP_STDIO_SIDECAR_ENABLED:-false}
       MCP_STDIO_SIDECAR_URL: mcp-stdio-runner:8097
       MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:-}
+      # Static MCP exposure policy (the "mcp" profile's shared servers). Agents only get
+      # stateless names on this allowlist; shared-stateful opens filesystem/memory/browsers
+      # to every tenant - single-tenant installs only (this tier IS single-tenant).
+      MCP_STATIC_STATELESS_SERVERS: ${MCP_STATIC_STATELESS_SERVERS:-sequential-thinking}
+      MCP_STATIC_SHARED_STATEFUL_ENABLED: ${MCP_STATIC_SHARED_STATEFUL_ENABLED:-false}
       APP_MCP_STDIO_SANDBOX: ${APP_MCP_STDIO_SANDBOX:-none}
       # Custom code tools (agent-authored Java/Python/JavaScript programs) compile and run in
       # tool-sandbox, which rides the `tools` profile on this tier. The sandbox container holds no

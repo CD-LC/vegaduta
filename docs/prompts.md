@@ -275,7 +275,8 @@ workspace file (`workspace_list|read|search|write|edit`), code-intelligence (`se
 `google_calendar_find_free_slots`, `google_calendar_move_event`, `google_calendar_cancel_event`, `google_gmail`,
 `google_drive`, `google_sheets`, `youtube_content_performance`, `upload_video_to_youtube`), graph-memory recall,
 `generate_image|video|music`, knowledge (`search_knowledge_base`, `add_to_knowledge_base`,
-`list_knowledge_collections`), mandate payment (`create_payment_link.mandate`, `check_payment_status.mandate`,
+`list_knowledge_collections`), the agent's scratchpad (`scratchpad_write`, `scratchpad_read`,
+`scratchpad_list`, `scratchpad_delete`), mandate payment (`create_payment_link.mandate`, `check_payment_status.mandate`,
 `request_upi_collect`), Sarvam, and `create_workflow` tools are keys in the module that owns them. The two payment
 tools share their names with the commerce tools of `core/agents-tools`, so they are the `.mandate` variants. The
 workspace file tools fill the label of the projects folder into their description, so theirs are templates with the
@@ -304,7 +305,7 @@ These keys steer what the model does after a block, a hold or a stop. They are `
 | `toolresult.guard.tenant_rule_matched`, `.pattern_injection_marker`, `.semantic_default_reason`, `.semantic_unavailable` | the reason sentence inside `toolresult.guard.output_withheld` |
 | `toolresult.park.awaiting`, `.queued`, `.queue_full`, `.record_failed` | a call held for human approval; compatibility aliases `app.guardrails.approval-park.*-message` |
 | `toolresult.eval_sandbox.simulated` | the tool result of a call an offline eval turn answers instead of running the tool, because the tool could change data or reach outside the platform; it tells the model nothing was changed or sent and to carry on as after a success (`GuardedToolCallback`; see "Evals ... on the real pipeline" in `configuration.md`) |
-| `toolresult.tool_budget.calls`, `toolresult.tool_budget.rounds`, `message.tool_budget.hard_stop` | the tool-call ceiling, the tool-round cap and the closing reply; aliases `app.guardrails.step-limit.exhausted-message`, `app.chat.tools.budget-exhausted-message`, `app.chat.tools.hard-stop-reply` |
+| `toolresult.tool_budget.calls`, `toolresult.tool_budget.rounds`, `toolresult.tool_budget.tokens`, `message.tool_budget.hard_stop` | the tool-call ceiling, the tool-round cap, the cumulative prompt-token budget and the closing reply; aliases `app.guardrails.step-limit.exhausted-message`, `app.chat.tools.budget-exhausted-message`, `app.chat.tools.hard-stop-reply` |
 | `toolresult.unavailable.*` | a tool that exists but is not switched on for the workspace, or a name the model invented. `toolresult.unavailable.generate_image` is the chat module's answer to a never-offered `generate_image` (OpenAI wording); the tool's own answer when no image provider is active is `toolresult.image_generation.not_configured` (names OpenAI and Google Vertex AI), a separate key so each keeps its shipped wording |
 | `toolresult.tool_breaker.disabled`, `.last_error`, `.wait.one`, `.wait.many` | the result of a call to a tool whose circuit breaker is open (`LoggingToolCallback`); `last_error` and the wait are fragments filled into `{last_error}` and `{wait}` of the first |
 | `toolresult.invalid_arguments.hint`, `.unknown_keys`, `.problem.not_json`, `.problem.not_object`, `.problem.missing_required` | the "NOT executed" feedback when a tool call's arguments do not match its input schema (`ToolArgumentValidator`); the machine-readable `error` and the schema in the same result are code |

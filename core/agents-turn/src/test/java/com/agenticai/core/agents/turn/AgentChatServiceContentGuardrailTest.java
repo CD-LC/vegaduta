@@ -108,6 +108,10 @@ class AgentChatServiceContentGuardrailTest {
      * / plan lookups for a non-null tenant, neither of which these tests exercise).
      */
     private AgentChatService buildService(ObjectProvider<ContentGuardrailEngine> engineProvider) {
+        // The stream wraps its result in takeUntilOther(watchForCancellation): a real Flux runs the
+        // operator's non-null check, so the watch must return a Flux, not the mock's default null.
+        ChatTurnCancelService cancelService = mock(ChatTurnCancelService.class);
+        when(cancelService.watchForCancellation(any(), any())).thenReturn(Flux.never());
         ProviderCredentialResolver credentialResolver = mock(ProviderCredentialResolver.class);
         when(credentialResolver.resolveActiveKey(any())).thenReturn("test-key");
 
@@ -167,7 +171,7 @@ class AgentChatServiceContentGuardrailTest {
                 // Load-test seam - unstubbed mock is false for every tenantId,
                 // matching this suite's existing (non-load-test) assumptions.
                 mock(LoadTestTenantAllowlist.class),
-                mock(ChatTurnCancelService.class),
+                cancelService,
                 java.time.Duration.ofSeconds(90),
                 // Buffered-depth total-turn ceiling and SSE keepalive interval
                 // (2026-09-17). Neither fires in this suite - every turn here resolves

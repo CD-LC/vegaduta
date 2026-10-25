@@ -11,3 +11,43 @@
 #
 # Format: "<path> <max lines>". The "# cap:" line below is written by --update.
 # cap: 700 near-cap-pct: 5 threshold: 665
+core/agents-browser/src/main/java/com/agenticai/core/agents/tools/browseruse/BrowserUseSessionManager.java 731
+core/agents-interop/src/test/java/com/agenticai/core/agents/a2a/A2aJsonRpcControllerTest.java 756
+core/agents-jobs/src/main/java/com/agenticai/core/agents/job/AgentJobService.java 690
+core/agents-studio/src/main/java/com/agenticai/core/agents/demo/studio/DemoStudioService.java 672
+core/agents-tools/src/main/java/com/agenticai/core/agents/tools/AgentToolGuard.java 668
+core/agents-tools/src/main/java/com/agenticai/core/agents/tools/DynamicMcpConnectionManager.java 685
+core/agents-tools/src/test/java/com/agenticai/core/agents/e2e/ApprovalTurnHarness.java 1524
+core/agents-turn/src/main/java/com/agenticai/core/agents/memory/SessionMemoryService.java 745
+core/agents-turn/src/main/java/com/agenticai/core/agents/memory/TenantMemoryService.java 667
+core/agents-turn/src/main/java/com/agenticai/core/agents/skills/SkillService.java 676
+core/agents-turn/src/main/java/com/agenticai/core/agents/tools/AgentToolSelection.java 781
+core/agents-turn/src/main/java/com/agenticai/core/agents/turn/AgentChatService.java 706
+core/agents-turn/src/main/java/com/agenticai/core/agents/turn/ChatTurnDispatcher.java 688
+core/agents-turn/src/main/java/com/agenticai/core/agents/turn/ChatTurnExecutor.java 769
+core/agents-turn/src/main/java/com/agenticai/core/agents/turn/HostedChainFailover.java 703
+core/agents/src/main/java/com/agenticai/core/agents/core/AgentService.java 685
+core/agents/src/main/java/com/agenticai/core/agents/tools/AgentStepEventEmitter.java 693
+core/approval/src/test/java/com/agenticai/core/approval/HumanApprovalGateServiceTest.java 701
+core/chat/src/main/java/com/agenticai/core/chat/LlmModelSupport.java 678
+core/google/src/main/java/com/agenticai/core/google/GoogleOAuthService.java 692
+core/guardrails/src/main/java/com/agenticai/core/guardrails/GuardedToolCallback.java 853
+core/guardrails/src/test/java/com/agenticai/core/guardrails/GuardrailPromptRegistryTest.java 830
+core/mcpserver/src/test/java/com/agenticai/core/mcpserver/expose/McpExposedToolInvokerTest.java 718
+core/omnichannel/src/test/java/com/agenticai/core/omnichannel/whatsappvoice/WhatsAppVoiceNoteServiceTest.java 672
+core/platform/src/main/java/com/agenticai/core/platform/abuse/AbuseSignalService.java 730
+core/platform/src/main/java/com/agenticai/core/platform/impersonation/ImpersonationService.java 683
+core/providers/src/main/java/com/agenticai/core/providers/PlatformHostedLlmProviderService.java 691
+core/providers/src/test/java/com/agenticai/core/providers/localmodels/LocalModelsApiTest.java 682
+core/quality/src/main/java/com/agenticai/core/quality/dataset/EvalDatasetService.java 717
+core/workflow-expression/src/main/java/com/agenticai/core/workflow/expression/ExpressionEngine.java 727
+core/workflow-portability/src/main/java/com/agenticai/core/workflow/portability/DifyImportMapper.java 688
+core/workflow-portability/src/main/java/com/agenticai/core/workflow/portability/N8nImportMapper.java 759
+core/workflow-portability/src/main/java/com/agenticai/core/workflow/portability/WorkflowPortabilityService.java 808
+scripts/ci/conformance-report.py 683
+services/app-builder/app/generate.py 772
+services/app-builder/app/github_client.py 681
+services/voice-agent/app/main.py 678
+web/app/build/ChatPane.tsx 666
+web/app/components/billing/LlmSpendSection.tsx 681
+web/app/components/settings/SettingsPanel.test.tsx 685
