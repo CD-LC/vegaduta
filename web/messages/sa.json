@@ -891,7 +891,9 @@
     "reasonBilling": "प्रदातुः देयक-समस्या",
     "reasonModelNotFound": "मॉडलम् उपलब्धं नास्ति",
     "reasonProviderError": "प्रदातुः दोषः",
-    "reasonMalformedToolCall": "साधन-आह्वानम् उपयोक्तुं न शक्तम्"
+    "reasonMalformedToolCall": "साधन-आह्वानम् उपयोक्तुं न शक्तम्",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "प्रवर्तकः",
@@ -5803,7 +5805,11 @@
       "builtinDetail": "जालप्रदर्शकस्य स्वकीयः प्रतिमानः। क्रोम् १२७+ स्वयं अवतरति नवीकरोति च। अनेन अनुप्रयुक्तेन किमपि न संगृह्यते।",
       "motionDetail": "स्थिरचित्राणि सुगमगति-चलचित्रेषु परिवर्तयति। क्लिप्-स्टूडियो-मध्ये प्रथमवारे Motion+ इत्यस्य उपयोगे स्वयमेव अवतरति।",
       "motionNotPublished": "अद्यापि न प्रकाशितम् — शीघ्रम् आगमिष्यति",
-      "motionOpenClips": "क्लिप्-स्टूडियो उद्घाटय"
+      "motionOpenClips": "क्लिप्-स्टूडियो उद्घाटय",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "अस्मिन् उपकरणे स्थापितम्",

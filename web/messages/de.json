@@ -890,7 +890,9 @@
     "reasonBilling": "Abrechnungsproblem beim Anbieter",
     "reasonModelNotFound": "Modell nicht verfügbar",
     "reasonProviderError": "Anbieterfehler",
-    "reasonMalformedToolCall": "der Tool-Aufruf war nicht verwendbar"
+    "reasonMalformedToolCall": "der Tool-Aufruf war nicht verwendbar",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "Auslöser",
@@ -5807,7 +5809,11 @@
       "builtinDetail": "Das eigene Modell Ihres Browsers. Chrome 127+ lädt es selbst herunter und aktualisiert es; diese App speichert keine Daten.",
       "motionDetail": "Wandelt Standbilder in flüssige Videoclips um. Wird bei der ersten Nutzung von Motion+ in Clip Studio automatisch heruntergeladen.",
       "motionNotPublished": "Noch nicht veröffentlicht — bald verfügbar",
-      "motionOpenClips": "Clip Studio öffnen"
+      "motionOpenClips": "Clip Studio öffnen",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "Auf diesem Gerät installiert",

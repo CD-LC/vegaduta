@@ -46,6 +46,7 @@ import { LOCAL_FILE_TOOLS } from "./localToolsFiles";
 import { WEB_LOCAL_TOOLS } from "./localToolsWeb";
 import { BROWSER_AI_TOOLS } from "./browserAi";
 import { LOCAL_DEVICE_TOOLS, describeBluetoothSupport } from "./deviceTools";
+import { MEDIA_LOCAL_TOOLS } from "./localToolsMedia";
 import { LOCAL_TOOL_TIMEOUT_MS, LocalToolRefusal, MAX_RESULT_CHARS, capResult } from "./tools/common";
 import { COMPUTE_LOCAL_TOOLS } from "./tools/computeTools";
 
@@ -67,13 +68,15 @@ export interface LocalTool extends EdgeToolDefinition {
   network: "none" | { hosts: string[] };
   /** True when the tool writes to the person's disk, clipboard or storage. */
   consequential: boolean;
+  /** Optional per-tool timeout override (ms). The shared 2s ceiling fits the
+   * phase-1 pure-compute tools; media generation (local_generate_image,
+   * local_generate_audio) legitimately runs for minutes and declares its own. */
+  timeoutMs?: number;
 }
 
 /** The prefix every local tool name carries. Exported so the loop can tell a
  * proposed local call from a proposed server call without a lookup. */
 export const LOCAL_TOOL_PREFIX = "local_";
-
-
 
 /**
  * Capability gates live HERE rather than as a field on LocalTool, so the pinned
@@ -83,7 +86,17 @@ export const LOCAL_TOOL_PREFIX = "local_";
  * table is the seam for the ones that will (a screenshot tool needs a display
  * surface, a speech tool needs the Web Speech API).
  */
-const CAPABILITY_GATES: Record<string, (caps: EdgeCapabilities | null) => boolean> = {};
+/**
+ * Media generation is the first tool set with a real hardware floor: the image
+ * pipeline is unusable without WebGPU (a 512px diffusion on wasm is minutes),
+ * and the audio one tolerates wasm only on an 8GB+ device. Advertising them on
+ * a phone would spend prompt budget to say "the model can make images" to a
+ * model that will then refuse every call.
+ */
+const CAPABILITY_GATES: Record<string, (caps: EdgeCapabilities | null) => boolean> = {
+  local_generate_image: (caps) => caps?.webgpu?.available === true,
+  local_generate_audio: (caps) => caps?.webgpu?.available === true || (caps?.deviceMemoryGB ?? 0) >= 8,
+};
 
 /**
  * The local tools available on this device, in advertisement order. `caps` may
@@ -135,6 +148,12 @@ function allLocalTools(): LocalTool[] {
   } catch {
     // A probe that throws hides its tools rather than breaking the list.
   }
+
+  // Media generation tools - "the model can make things" out of the box. The
+  // capability gates above decide whether this device can run them at all;
+  // the handlers themselves refuse honestly when the person hasn't enabled the
+  // model in the Edge console (a tool call never starts a download - E-0b).
+  tools.push(...MEDIA_LOCAL_TOOLS);
 
   if (getNetworkToolsEnabled()) tools.push(...WEB_LOCAL_TOOLS);
 
@@ -242,10 +261,7 @@ function gatedTools(caps: EdgeCapabilities): LocalTool[] {
 
 /** The tools offered to the model this turn: capability-gated, then trimmed to
  * what the prompt budget can afford (see TOOL_ADVERTISEMENT_CHAR_BUDGET). */
-export function listLocalTools(
-  caps: EdgeCapabilities,
-  budget: number = TOOL_ADVERTISEMENT_CHAR_BUDGET
-): LocalTool[] {
+export function listLocalTools(caps: EdgeCapabilities, budget: number = TOOL_ADVERTISEMENT_CHAR_BUDGET): LocalTool[] {
   return describeToolBudget(caps, budget).advertised;
 }
 
@@ -307,7 +323,7 @@ export async function runLocalTool(tool: LocalTool, args: unknown): Promise<Edge
   try {
     const TIMED_OUT = Symbol("local-tool-timeout");
     const timeout = new Promise<typeof TIMED_OUT>((resolve) => {
-      timer = setTimeout(() => resolve(TIMED_OUT), LOCAL_TOOL_TIMEOUT_MS);
+      timer = setTimeout(() => resolve(TIMED_OUT), tool.timeoutMs ?? LOCAL_TOOL_TIMEOUT_MS);
     });
     // Promise.resolve() wraps a handler that throws SYNCHRONOUSLY before its
     // first await — that rejection would otherwise escape the race entirely.
@@ -319,7 +335,7 @@ export async function runLocalTool(tool: LocalTool, args: unknown): Promise<Edge
       return {
         ok: false,
         code: "failed",
-        detail: `${tool.name} did not finish within ${LOCAL_TOOL_TIMEOUT_MS}ms and was abandoned.`,
+        detail: `${tool.name} did not finish within ${tool.timeoutMs ?? LOCAL_TOOL_TIMEOUT_MS}ms and was abandoned.`,
       };
     }
     if (typeof outcome !== "string") {

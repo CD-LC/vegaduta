@@ -890,7 +890,9 @@
     "reasonBilling": "problema de cobrança do provedor",
     "reasonModelNotFound": "modelo indisponível",
     "reasonProviderError": "erro do provedor",
-    "reasonMalformedToolCall": "a chamada da ferramenta não pôde ser usada"
+    "reasonMalformedToolCall": "a chamada da ferramenta não pôde ser usada",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "Gatilho",
@@ -5987,7 +5989,11 @@
       "builtinDetail": "O modelo do seu navegador. O Chrome 127+ descarrega-o e atualiza-o; nada é guardado por esta aplicação.",
       "motionDetail": "Transforma imagens estáticas em clipes de movimento suave. Descarrega automaticamente na primeira utilização do Motion+ no Clip Studio.",
       "motionNotPublished": "Ainda não publicado — em breve",
-      "motionOpenClips": "Abrir Clip Studio"
+      "motionOpenClips": "Abrir Clip Studio",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "Instalado neste dispositivo",

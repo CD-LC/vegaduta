@@ -890,7 +890,9 @@
     "reasonBilling": "ਪ੍ਰਦਾਤਾ ਦੀ ਬਿਲਿੰਗ ਸਮੱਸਿਆ",
     "reasonModelNotFound": "ਮਾਡਲ ਉਪਲਬਧ ਨਹੀਂ",
     "reasonProviderError": "ਪ੍ਰਦਾਤਾ ਦੀ ਗਲਤੀ",
-    "reasonMalformedToolCall": "ਟੂਲ ਕਾਲ ਵਰਤੀ ਨਹੀਂ ਜਾ ਸਕੀ"
+    "reasonMalformedToolCall": "ਟੂਲ ਕਾਲ ਵਰਤੀ ਨਹੀਂ ਜਾ ਸਕੀ",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ਟ੍ਰਿਗਰ",
@@ -5807,7 +5809,11 @@
       "builtinDetail": "ਤੁਹਾਡੇ ਬ੍ਰਾਊਜ਼ਰ ਦਾ ਆਪਣਾ ਮਾਡਲ। Chrome 127+ ਇਸਨੂੰ ਖੁਦ ਡਾਊਨਲੋਡ ਅਤੇ ਅੱਪਡੇਟ ਕਰਦਾ ਹੈ; ਇਸ ਐਪ ਦੁਆਰਾ ਕੁਝ ਵੀ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ।",
       "motionDetail": "ਸਥਿਰ ਚਿੱਤਰਾਂ ਨੂੰ ਨਿਰਵਿਘਨ ਮੋਸ਼ਨ ਕਲਿੱਪਾਂ ਵਿੱਚ ਬਦਲਦਾ ਹੈ। ਜਦੋਂ ਤੁਸੀਂ ਕਲਿੱਪ ਸਟੂਡੀਓ ਵਿੱਚ ਪਹਿਲੀ ਵਾਰ Motion+ ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹੋ ਤਾਂ ਆਪਣੇ ਆਪ ਡਾਊਨਲੋਡ ਹੋ ਜਾਂਦਾ ਹੈ।",
       "motionNotPublished": "ਅਜੇ ਪ੍ਰਕਾਸ਼ਿਤ ਨਹੀਂ ਹੋਇਆ — ਜਲਦੀ ਆ ਰਿਹਾ ਹੈ",
-      "motionOpenClips": "ਕਲਿੱਪ ਸਟੂਡੀਓ ਖੋਲ੍ਹੋ"
+      "motionOpenClips": "ਕਲਿੱਪ ਸਟੂਡੀਓ ਖੋਲ੍ਹੋ",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ਇਸ ਡਿਵਾਈਸ 'ਤੇ ਇੰਸਟਾਲ ਹੈ",

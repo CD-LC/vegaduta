@@ -890,7 +890,9 @@
     "reasonBilling": "プロバイダーの請求の問題",
     "reasonModelNotFound": "モデルが利用できません",
     "reasonProviderError": "プロバイダーのエラー",
-    "reasonMalformedToolCall": "ツール呼び出しを利用できませんでした"
+    "reasonMalformedToolCall": "ツール呼び出しを利用できませんでした",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "トリガー",
@@ -5807,7 +5809,11 @@
       "builtinDetail": "お使いのブラウザ独自のモデルです。Chrome 127+が自動でダウンロード・更新するため、このアプリには何も保存されません。",
       "motionDetail": "静止画を滑らかなモーションクリップに変換します。Clip StudioでMotion+を初めて使用する際に自動でダウンロードされます。",
       "motionNotPublished": "未公開 — 近日公開予定",
-      "motionOpenClips": "Clip Studioを開く"
+      "motionOpenClips": "Clip Studioを開く",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "このデバイスにインストール済み",

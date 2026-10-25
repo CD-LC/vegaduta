@@ -989,7 +989,9 @@
     "reasonBilling": "ప్రొవైడర్ బిల్లింగ్ సమస్య",
     "reasonModelNotFound": "మోడల్ అందుబాటులో లేదు",
     "reasonProviderError": "ప్రొవైడర్ లోపం",
-    "reasonMalformedToolCall": "టూల్ కాల్‌ను ఉపయోగించలేకపోయింది"
+    "reasonMalformedToolCall": "టూల్ కాల్‌ను ఉపయోగించలేకపోయింది",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ట్రిగ్గర్",
@@ -5987,7 +5989,11 @@
       "builtinDetail": "మీ బ్రౌజర్ సొంత మోడల్. Chrome 127+ దానంతట అదే డౌన్‌లోడ్ చేసి, అప్‌డేట్ చేస్తుంది; ఈ యాప్ ద్వారా ఏదీ నిల్వ చేయబడదు.",
       "motionDetail": "నిశ్చల చిత్రాలను సున్నితమైన మోషన్ క్లిప్‌లుగా మారుస్తుంది. మీరు క్లిప్ స్టూడియోలో మొదటిసారి Motion+ ఉపయోగించినప్పుడు ఆటోమేటిక్‌గా డౌన్‌లోడ్ అవుతుంది.",
       "motionNotPublished": "ఇంకా ప్రచురించబడలేదు — త్వరలో వస్తుంది",
-      "motionOpenClips": "క్లిప్ స్టూడియో తెరవండి"
+      "motionOpenClips": "క్లిప్ స్టూడియో తెరవండి",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ఈ పరికరంలో ఇన్‌స్టాల్ చేయబడినవి",

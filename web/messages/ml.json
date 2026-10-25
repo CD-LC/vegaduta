@@ -890,7 +890,9 @@
     "reasonBilling": "ദാതാവിന്റെ ബില്ലിംഗ് പ്രശ്നം",
     "reasonModelNotFound": "മോഡൽ ലഭ്യമല്ല",
     "reasonProviderError": "ദാതാവിന്റെ പിശക്",
-    "reasonMalformedToolCall": "ടൂൾ കോൾ ഉപയോഗിക്കാനായില്ല"
+    "reasonMalformedToolCall": "ടൂൾ കോൾ ഉപയോഗിക്കാനായില്ല",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ട്രിഗർ",
@@ -5807,7 +5809,11 @@
       "builtinDetail": "നിങ്ങളുടെ ബ്രൗസറിന്റെ സ്വന്തം മോഡൽ. Chrome 127+ ഇത് സ്വയം ഡൗൺലോഡ് ചെയ്യുകയും അപ്ഡേറ്റ് ചെയ്യുകയും ചെയ്യുന്നു; ഈ ആപ്പ് ഒന്നും സംഭരിക്കുന്നില്ല.",
       "motionDetail": "നിശ്ചല ചിത്രങ്ങളെ ചലിക്കുന്ന ക്ലിപ്പുകളാക്കി മാറ്റുന്നു. Clip Studio-യിൽ ആദ്യമായി Motion+ ഉപയോഗിക്കുമ്പോൾ സ്വയമേവ ഡൗൺലോഡ് ചെയ്യും.",
       "motionNotPublished": "ഇതുവരെ പ്രസിദ്ധീകരിച്ചിട്ടില്ല — ഉടൻ വരുന്നു",
-      "motionOpenClips": "Clip Studio തുറക്കുക"
+      "motionOpenClips": "Clip Studio തുറക്കുക",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ഈ ഉപകരണത്തിൽ ഇൻസ്റ്റാൾ ചെയ്തവ",
