@@ -35,6 +35,7 @@ public final class GuardrailPrompts {
     public static final String PARK_AWAITING = "toolresult.park.awaiting";
     public static final String PARK_QUEUED = "toolresult.park.queued";
     public static final String PARK_QUEUE_FULL = "toolresult.park.queue_full";
+    public static final String PARK_NOT_QUEUED = "toolresult.park.not_queued";
     public static final String PARK_RECORD_FAILED = "toolresult.park.record_failed";
     public static final String TOOL_BUDGET_CALLS = "toolresult.tool_budget.calls";
     public static final String EVAL_SANDBOX_SIMULATED = "toolresult.eval_sandbox.simulated";

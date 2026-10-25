@@ -232,12 +232,16 @@ class AgentRuntimeSettingsResolverTest {
     }
 
     @Test
-    void theRoundCapNeverFallsBelowThePlatformsAndRisesWithAHigherCeiling() {
-        int platformRounds = loop.effectiveMaxRounds(15, stepLimits.getAutonomousMultiplier(), stepLimits.getGraceCalls());
+    void theRoundCapFollowsTheTurnsOwnCeilingNotThePlatformsLargest() {
         AgentRuntimeSettings small = resolver().resolve(SEMI, null, RuntimeLimits.capToolSteps(3), null);
         AgentRuntimeSettings big = resolver().resolve(SEMI, null, RuntimeLimits.none().with(RuntimeSetting.MAX_TOOL_STEPS, 200), null);
 
-        assertEquals(platformRounds, resolver().toolLoopRounds(small));
+        // The backstop is sized for the ceiling this turn actually enforces, plus its grace - no
+        // more. A small-ceiling turn must not get the platform's largest allowance (a parked
+        // SUPERVISED turn once looped 41 rounds on queue refusals because it did).
+        int grace = small.hasGraceCalls() ? small.graceCalls() : stepLimits.getGraceCalls();
+        assertEquals(loop.effectiveMaxRounds(small.maxToolSteps(), 1, grace),
+            resolver().toolLoopRounds(small));
         assertEquals(200 + stepLimits.getGraceCalls() + 1, resolver().toolLoopRounds(big));
     }
 

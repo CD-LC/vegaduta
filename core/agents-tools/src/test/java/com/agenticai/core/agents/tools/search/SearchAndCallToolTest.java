@@ -145,6 +145,63 @@ class SearchAndCallToolTest {
     }
 
     @Test
+    void aNoMatchListsEverySearchableToolNameAndKeepsTheSelectEscapeHatch() {
+        String result = search.call("{\"query\":\"zzzqqq\"}");
+
+        // A model whose task keywords missed can recover: the names are its next search terms
+        // and select: loads one directly.
+        assertTrue(result.contains("Searchable tool names: "), result);
+        assertTrue(result.contains("google_gmail"), result);
+        assertTrue(result.contains("mcp__github__create_issue"), result);
+        assertTrue(result.contains("mcp__slack__post_message"), result);
+        assertTrue(result.contains("select:name1,name2"), result);
+        assertFalse(result.contains("remember_fact"), "exposed tools are not searchable");
+    }
+
+    @Test
+    void aNoMatchOnALargeCatalogListsNameGroupsAndGenericToolsNotEveryName() {
+        Map<String, ToolCallback> deferred = new LinkedHashMap<>();
+        deferred.put(
+                "fetch_web_page",
+                new RecordingTool("fetch_web_page", "Fetches a web page", "{}"));
+        deferred.put(
+                "mcp__files__read_file",
+                new RecordingTool("mcp__files__read_file", "Reads a file", "{}"));
+        for (int i = 0; i < 70; i++) {
+            String name = "group" + (i % 25) + "_tool_" + i;
+            deferred.put(name, new RecordingTool(name, "tool " + i, "{}"));
+        }
+        ToolSearchState bigState =
+                new ToolSearchState(
+                        Map.of(), deferred, new ToolSearchService(), null, "key-big", 0);
+
+        String result =
+                new SearchToolsToolCallback(bigState).call("{\"query\":\"zzzqqq\"}");
+
+        assertTrue(result.contains("Tool name groups: "), result);
+        assertTrue(result.contains("(+"), result);
+        assertFalse(result.contains("_tool_69"), "individual names are not enumerated");
+        // The deterministic fallback names the broadly useful tools the model likely needs.
+        assertTrue(result.contains("Common searchable tools: "), result);
+        assertTrue(result.contains("fetch_web_page"), result);
+        assertTrue(result.contains("mcp__files__read_file"), result);
+        assertTrue(result.contains("select:name1,name2"), result);
+        assertTrue(result.length() < 4_000, "the hint stays small: " + result.length());
+    }
+
+    @Test
+    void aNoMatchOnAnEmptyCatalogStillPointsAtKeywords() {
+        ToolSearchState empty =
+                new ToolSearchState(
+                        Map.of(), Map.of(), new ToolSearchService(), null, "key-0", 0);
+
+        String result = new SearchToolsToolCallback(empty).call("{\"query\":\"anything\"}");
+
+        assertTrue(result.startsWith("No tools matched"), result);
+        assertFalse(result.contains("Searchable tools by source"), result);
+    }
+
+    @Test
     void searchHonoursTheLimitAndSelectSyntax() {
         String selected =
                 search.call(

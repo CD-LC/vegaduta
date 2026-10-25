@@ -95,6 +95,7 @@ public final class ToolSearchService {
     public static final class Index {
 
         private final List<Doc> docs;
+        private final List<String> sortedNames;
         private final Map<String, Doc> byLowerName;
         private final Map<String, Integer> docFrequency;
         private final double averageLength;
@@ -103,14 +104,18 @@ public final class ToolSearchService {
             this.docs = Collections.unmodifiableList(docs);
             Map<String, Doc> names = new HashMap<>();
             Map<String, Integer> df = new HashMap<>();
+            List<String> sorted = new ArrayList<>(docs.size());
             long totalLength = 0;
             for (Doc doc : docs) {
                 names.put(doc.name.toLowerCase(Locale.ROOT), doc);
+                sorted.add(doc.name);
                 for (String term : doc.termFrequency.keySet()) {
                     df.merge(term, 1, Integer::sum);
                 }
                 totalLength += doc.length;
             }
+            Collections.sort(sorted);
+            this.sortedNames = Collections.unmodifiableList(sorted);
             this.byLowerName = names;
             this.docFrequency = df;
             this.averageLength =
@@ -123,6 +128,14 @@ public final class ToolSearchService {
 
         public boolean contains(String name) {
             return name != null && byLowerName.containsKey(name.trim().toLowerCase(Locale.ROOT));
+        }
+
+        /**
+         * Every indexed tool name, in natural sorted order - the deterministic "what exists" map a
+         * no-match response can show the model.
+         */
+        public List<String> names() {
+            return sortedNames;
         }
 
         /**

@@ -2,13 +2,17 @@ package com.agenticai.core.agents.tools.search;
 
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.ToolSearchToolNames;
+import com.agenticai.core.guardrails.ToolResultMarker;
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
@@ -53,6 +57,23 @@ public class SearchToolsToolCallback implements ToolCallback {
     private static final int MAX_PARAMETER_LIST_CHARS = 400;
     private static final int MAX_SOURCES_IN_HINT = 12;
 
+    /**
+     * Below this catalog size a no-match response lists every deferred tool name - the cheapest
+     * recovery map for a model whose keywords missed (task words rarely overlap tool names).
+     * Larger catalogs list name groups plus a few generic tools instead.
+     */
+    static final int MAX_NAMES_IN_HINT = 60;
+
+    private static final int MAX_GROUPS_IN_HINT = 20;
+    private static final int MAX_GENERIC_HINTS = 12;
+
+    /**
+     * Name words that mark a broadly useful tool worth naming even when the catalog is too big to
+     * list: web/fetch/search/file reach is what agents most often fail to discover.
+     */
+    private static final Set<String> GENERIC_NAME_WORDS =
+            Set.of("web", "fetch", "search", "browse", "browser", "http", "url", "file", "read");
+
     private final ToolSearchState state;
 
     public SearchToolsToolCallback(ToolSearchState state) {
@@ -91,18 +112,21 @@ public class SearchToolsToolCallback implements ToolCallback {
             query = args.path("query").asText("").trim();
             limit = args.path("limit").asInt(ToolSearchService.DEFAULT_LIMIT);
         } catch (Exception e) {
-            return "Could not search tools: the tool input was not valid JSON. Call search_tools with {\"query\": \"keywords\"}.";
+            return platformAnswer(
+                    "Could not search tools: the tool input was not valid JSON. Call search_tools with {\"query\": \"keywords\"}.");
         }
         if (query.isEmpty()) {
-            return "Could not search tools: no query was given. Call search_tools with a few keywords, e.g. "
-                    + "{\"query\": \"send email\"}.";
+            return platformAnswer(
+                    "Could not search tools: no query was given. Call search_tools with a few keywords, e.g. "
+                            + "{\"query\": \"send email\"}.");
         }
         List<ToolSearchService.Hit> hits;
         try {
             hits = state.service().search(state.index(), query, limit);
         } catch (RuntimeException e) {
             log.warn("search_tools failed for query '{}': {}", query, e.toString());
-            return "Tool search is unavailable right now. Continue with the tools you already have.";
+            return platformAnswer(
+                    "Tool search is unavailable right now. Continue with the tools you already have.");
         }
         List<String> names = new ArrayList<>(hits.size());
         for (ToolSearchService.Hit hit : hits) {
@@ -179,11 +203,16 @@ public class SearchToolsToolCallback implements ToolCallback {
     }
 
     private String noMatch(String query) {
+        ToolSearchService.Index index = state.index();
         StringBuilder sb = new StringBuilder();
-        sb.append("No tools matched \"")
-                .append(query)
-                .append("\". Try different or fewer keywords.");
-        Map<String, Integer> sources = state.index().sources();
+        sb.append("No tools matched \"").append(query).append("\".");
+        List<String> names = index.names();
+        if (names.isEmpty()) {
+            sb.append(
+                    " Try different or fewer keywords; nothing is waiting behind search right now.");
+            return sb.toString();
+        }
+        Map<String, Integer> sources = index.sources();
         if (!sources.isEmpty()) {
             sb.append(" Searchable tools by source: ");
             int shown = 0;
@@ -199,7 +228,89 @@ public class SearchToolsToolCallback implements ToolCallback {
             }
             sb.append('.');
         }
+        if (names.size() <= MAX_NAMES_IN_HINT) {
+            sb.append(" Searchable tool names: ").append(String.join(", ", names)).append('.');
+        } else {
+            appendLargeCatalogHint(sb, names);
+        }
+        sb.append(
+                " Search again with one of these names or a keyword from them, or load a tool by "
+                        + "exact name with select:name1,name2.");
         return sb.toString();
+    }
+
+    /**
+     * The catalog is too big to enumerate: show the distinct name prefixes ({@code mcp__<server>}
+     * for MCP tools, the first word otherwise) plus a few broadly useful tool names, so a model
+     * that missed lexically can still see what the catalog can do.
+     */
+    private static void appendLargeCatalogHint(StringBuilder sb, List<String> names) {
+        List<String> groups = nameGroups(names);
+        sb.append(" Tool name groups: ");
+        int shown = Math.min(groups.size(), MAX_GROUPS_IN_HINT);
+        for (int i = 0; i < shown; i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(groups.get(i));
+        }
+        if (groups.size() > shown) {
+            sb.append(" (+").append(groups.size() - shown).append(" more)");
+        }
+        sb.append('.');
+        List<String> generic = genericTools(names);
+        if (!generic.isEmpty()) {
+            sb.append(" Common searchable tools: ")
+                    .append(String.join(", ", generic))
+                    .append('.');
+        }
+    }
+
+    /** Distinct leading name words ({@code mcp__<server>} for MCP tools), in first-seen order. */
+    static List<String> nameGroups(List<String> names) {
+        Set<String> groups = new LinkedHashSet<>();
+        for (String name : names) {
+            groups.add(groupOf(name));
+        }
+        return List.copyOf(groups);
+    }
+
+    private static String groupOf(String name) {
+        if (name.startsWith("mcp__")) {
+            int end = name.indexOf("__", 5);
+            return end > 5 ? name.substring(0, end) : name;
+        }
+        int underscore = name.indexOf('_');
+        return underscore > 0 ? name.substring(0, underscore) : name;
+    }
+
+    /** Up to {@link #MAX_GENERIC_HINTS} catalog names that mention a generic capability word. */
+    private static List<String> genericTools(List<String> names) {
+        List<String> picked = new ArrayList<>(MAX_GENERIC_HINTS);
+        for (String name : names) {
+            if (picked.size() >= MAX_GENERIC_HINTS) {
+                break;
+            }
+            for (String word : name.toLowerCase(Locale.ROOT).split("_")) {
+                if (GENERIC_NAME_WORDS.contains(word)) {
+                    picked.add(name);
+                    break;
+                }
+            }
+        }
+        return picked;
+    }
+
+    /**
+     * An answer the platform authored in full - an input or availability diagnostic - is
+     * registered with {@link ToolResultMarker} so the guard's untrusted-content screen passes it
+     * through (these read like injection instructions to a content judge) and the journals know
+     * nothing ran. The search RESULTS ({@link #format}, {@link #noMatch}) are deliberately NOT
+     * marked: they embed tool names and descriptions an MCP server can author, which is exactly
+     * the content the screen exists for.
+     */
+    private static String platformAnswer(String message) {
+        return ToolResultMarker.mark(message, ToolResultMarker.Kind.BLOCKED);
     }
 
     private static void emitStep(String query, List<String> activated) {

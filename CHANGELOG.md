@@ -27,6 +27,40 @@ Release notes on GitHub are generated from the section for each version.
   connects through `mcp-stdio-runner` - each tenant gets an isolated server process. New
   env: `MCP_STATIC_STATELESS_SERVERS`, `MCP_STATIC_SHARED_STATEFUL_ENABLED`.
 
+### Fixed
+
+- **Platform tool-dispatch diagnostics no longer trip the output guardrail.** A
+  `call_tool` refusal (e.g. "the tool has not been loaded yet - call `search_tools`
+  first") or a `search_tools` input error is the platform's own answer, not tool
+  output; the content-safety screen used to read it as a prompt-injection attempt
+  and withhold it, looping the model on instructions it could not see. Results a
+  producer registers with `ToolResultMarker` now bypass the untrusted-content
+  screen; real tool output is still screened exactly as before.
+- **`search_tools` no-match answers now name what is searchable.** When keyword search over
+  deferred tools finds nothing, the response lists every deferred tool name (up to 60; larger
+  catalogs get tool-name groups plus a few generic tools such as web/fetch/file helpers) and the
+  `select:name1,name2` escape hatch. A model that searched task words - which rarely overlap tool
+  names - used to get only a source count and could loop without ever discovering the deferred
+  catalog.
+- **A turn parked on human approval now actually ends instead of looping.** After the first
+  gated call parked, post-park tool calls were answered by the guard without consuming the step
+  budget - a model that kept calling tools could burn the whole round allowance (41 rounds;
+  more on raised ceilings) on "queued behind approval" answers, each resending the full
+  conversation. Parked and queued results now carry an `approval_parked` marker the tool loop
+  reads: the next round gets the budget-exhausted soft stop, and a model that still calls tools
+  is ended with the hard stop. Parked results also survive tool-result clearing so the marker
+  cannot be garbage-collected mid-turn.
+- **Dispatch plumbing no longer files phantom approvals when queued behind a park.**
+  `search_tools`, `call_tool` and `restore_tool_result` calls made after a turn parked used to
+  each mint an `mcp_tool.*` approval request - but approval replay resolves tools by exact name
+  without deferral, so an approved `call_tool` could only ever replay to a refusal. They are now
+  refused without a record (`app.guardrails.approval-park.not-queued-message`).
+- **The tool-loop round backstop now follows the turn's own ceiling.** It used to be the larger
+  of the platform's derived cap and the turn's - so a SUPERVISED turn (ceiling 7) got the
+  platform's 41-round allowance, and a personal install's raised ceiling gave 311. The cap is
+  now derived from the ceiling this turn actually enforces plus its grace; an explicit
+  `app.chat.tools.max-rounds-per-invocation` still wins.
+
 ## [0.1.10] - 2026-10-24
 
 ### Added

@@ -107,7 +107,8 @@ public final class ToolResultMarker {
             }
         }
         return result.startsWith(ToolCallOutputValidator.VALIDATION_FAILURE_PREFIX)
-                || ToolBudgetExhausted.isBudgetExhausted(result);
+                || ToolBudgetExhausted.isBudgetExhausted(result)
+                || ApprovalParked.isParked(result);
     }
 
     /**
@@ -126,6 +127,9 @@ public final class ToolResultMarker {
         }
         if (ToolBudgetExhausted.isBudgetExhausted(result)) {
             return Optional.of(Kind.BUDGET_EXHAUSTED);
+        }
+        if (ApprovalParked.isParked(result)) {
+            return Optional.of(Kind.PARKED);
         }
         if (result.startsWith("This action (")) {
             return Optional.of(Kind.PARKED);
