@@ -1,0 +1,22 @@
+# LiveKit config for the single-box tiers (personal.yml, lite.yml) - loopback
+# callers only.
+#
+# Why this differs from livekit.yaml: with use_external_ip=true the server
+# discovers the host's public IP over STUN and hands THAT to browsers as the
+# ICE candidate. On a laptop that candidate is the router's WAN address - the
+# browser sends media at it, nothing forwards it back, and the call dies at
+# "Media connection blocked". Loopback installs instead advertise 127.0.0.1,
+# which is exactly where the compose service publishes its ports.
+#
+# LAN callers on lite: set LIVEKIT_NODE_IP to this machine's LAN address in
+# .env (the same address browsers use for PUBLIC_LIVEKIT_URL) so the ICE
+# candidate is reachable from other machines - 127.0.0.1 is per-host.
+# rtc.node_ip itself comes from the compose service's --node-ip flag
+# (${LIVEKIT_NODE_IP:-127.0.0.1}) - keeping it out of this file avoids relying
+# on env expansion inside the yaml.
+port: 7880
+rtc:
+  tcp_port: 7881
+  use_external_ip: false
+logging:
+  level: info
