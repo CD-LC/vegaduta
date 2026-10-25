@@ -119,9 +119,9 @@ public class AgentToolGovernance implements ToolReplaySafety {
 
     /**
      * {@code app.assistant.desktop.approval-required} (default {@code true}): the same dial for the
-     * {@code local_desktop_*} actuating tools ({@code DesktopToolSource.GATED_NAMES} - press, click,
-     * type, key, open, activate). Unlike the shell these are NOT sandboxed, so the pin exists on
-     * every profile by default; {@code false} lets them run like ordinary unconfirmed tools while
+     * {@code local_desktop_*} actuating tools ({@code DesktopToolNames.GATED} - press, click, type,
+     * key, open, activate). Unlike the shell these are NOT sandboxed, so the pin exists on every
+     * profile by default; {@code false} lets them run like ordinary unconfirmed tools while
      * SUPERVISED still gates. Read-side tools (screen, elements, clipboard, notify) are never
      * pinned by either mechanism.
      */
@@ -201,8 +201,7 @@ public class AgentToolGovernance implements ToolReplaySafety {
      * every install.
      */
     boolean alwaysConfirm(String toolName) {
-        if (com.agenticai.core.agents.tools.desktop.DesktopToolSource.GATED_NAMES.contains(
-                toolName)) {
+        if (DesktopToolNames.GATED.contains(toolName)) {
             return desktopApprovalRequired;
         }
         if (!AgentToolGuard.ALWAYS_CONFIRM_TOOLS.contains(toolName)) {
@@ -236,17 +235,22 @@ public class AgentToolGovernance implements ToolReplaySafety {
     private volatile com.agenticai.core.guardrails.GuardrailTuningProperties guardrailTuning;
 
     /**
-     * Optional: the platform value of {@code app.guardrails.supervised.gate-read-only}. Absent (slim/test contexts)
-     * means the shipped default, {@code true}: a SUPERVISED agent is gated on every call.
+     * Optional: the platform value of {@code app.guardrails.supervised.gate-read-only}. Absent
+     * (slim/test contexts) means the shipped default, {@code true}: a SUPERVISED agent is gated on
+     * every call.
      */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
-    public void setGuardrailTuning(com.agenticai.core.guardrails.GuardrailTuningProperties guardrailTuning) {
+    public void setGuardrailTuning(
+            com.agenticai.core.guardrails.GuardrailTuningProperties guardrailTuning) {
         this.guardrailTuning = guardrailTuning;
     }
 
     private volatile ObjectProvider<com.agenticai.core.audit.AuditLogService> auditLog;
 
-    /** Optional: where a read-only call let through under SUPERVISED is audited. Absent means it is logged and journaled only. */
+    /**
+     * Optional: where a read-only call let through under SUPERVISED is audited. Absent means it is
+     * logged and journaled only.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setAuditLog(ObjectProvider<com.agenticai.core.audit.AuditLogService> auditLog) {
         this.auditLog = auditLog;
@@ -254,25 +258,29 @@ public class AgentToolGovernance implements ToolReplaySafety {
 
     /**
      * Whether a SUPERVISED agent's explicitly classified read-only tool calls run without a human
-     * ({@code app.guardrails.supervised.gate-read-only=false}, as the platform, the tenant and the agent
-     * resolve it). True only when ALL of these hold; any doubt answers false, which is the gate every SUPERVISED
-     * call has always had:
+     * ({@code app.guardrails.supervised.gate-read-only=false}, as the platform, the tenant and the
+     * agent resolve it). True only when ALL of these hold; any doubt answers false, which is the
+     * gate every SUPERVISED call has always had:
+     *
      * <ul>
      *   <li>the setting says so for this agent (a tenant or agent can only turn it back to gated);
      *   <li>the classification registry is present, so a tool can be judged at all;
      *   <li>the lethal-trifecta detector positively judged the agent as not holding the trifecta
-     *       ({@link TrifectaEnforcementService#definitelyNotLethal}); an agent that does, or that cannot be judged,
-     *       keeps full gating.
+     *       ({@link TrifectaEnforcementService#definitelyNotLethal}); an agent that does, or that
+     *       cannot be judged, keeps full gating.
      * </ul>
-     * Whether the particular CALL qualifies (its tool's own classification) is decided per call by the dispatch gate
-     * built with {@code markReadOnly}; nothing else about the call is relaxed.
+     *
+     * Whether the particular CALL qualifies (its tool's own classification) is decided per call by
+     * the dispatch gate built with {@code markReadOnly}; nothing else about the call is relaxed.
      */
     boolean supervisedAutoAllowsReadOnly(UUID agentId) {
         if (agentId == null || registry.getIfAvailable() == null) {
             return false;
         }
         com.agenticai.core.guardrails.GuardrailTuningProperties tuning = guardrailTuning;
-        if (tuning == null || com.agenticai.core.guardrails.GuardrailSettings.supervisedGatesReadOnly(tuning, agentId)) {
+        if (tuning == null
+                || com.agenticai.core.guardrails.GuardrailSettings.supervisedGatesReadOnly(
+                        tuning, agentId)) {
             return false;
         }
         TrifectaEnforcementService trifecta = trifectaEnforcement;
@@ -281,25 +289,35 @@ public class AgentToolGovernance implements ToolReplaySafety {
 
     /**
      * Reports a read-only call let through under SUPERVISED to the audit log ({@link
-     * com.agenticai.core.guardrails.ReadOnlyAutoAllow}); the sink handed to {@code GuardedToolCallback}. Never throws.
+     * com.agenticai.core.guardrails.ReadOnlyAutoAllow}); the sink handed to {@code
+     * GuardedToolCallback}. Never throws.
      */
     com.agenticai.core.guardrails.ReadOnlyAutoAllow.Audit readOnlyAutoAllowAudit() {
         return (toolName, agentId, sessionId, detail) -> {
             ObjectProvider<com.agenticai.core.audit.AuditLogService> provider = auditLog;
-            com.agenticai.core.audit.AuditLogService service = provider == null ? null : provider.getIfAvailable();
+            com.agenticai.core.audit.AuditLogService service =
+                    provider == null ? null : provider.getIfAvailable();
             if (service == null) {
                 return;
             }
             try {
                 // audit_log_entry.target_id is varchar(128); an MCP tool name can exceed it.
-                String target = toolName != null && toolName.length() > AUDIT_TARGET_MAX
-                        ? toolName.substring(0, AUDIT_TARGET_MAX) : toolName;
-                service.record("agent-supervised",
-                        com.agenticai.core.guardrails.ReadOnlyAutoAllow.AUDIT_ACTION, "tool", target,
+                String target =
+                        toolName != null && toolName.length() > AUDIT_TARGET_MAX
+                                ? toolName.substring(0, AUDIT_TARGET_MAX)
+                                : toolName;
+                service.record(
+                        "agent-supervised",
+                        com.agenticai.core.guardrails.ReadOnlyAutoAllow.AUDIT_ACTION,
+                        "tool",
+                        target,
                         com.agenticai.core.audit.AuditOutcome.AUTO_APPROVED,
                         detail + " (agent " + agentId + ", session " + sessionId + ")");
             } catch (RuntimeException e) {
-                log.warn("Could not record the supervised read-only audit entry for tool '{}'", toolName, e);
+                log.warn(
+                        "Could not record the supervised read-only audit entry for tool '{}'",
+                        toolName,
+                        e);
             }
         };
     }
@@ -483,9 +501,11 @@ public class AgentToolGovernance implements ToolReplaySafety {
     }
 
     /**
-     * As {@link #dispatchGate(UUID)}; with {@code markReadOnly} an ALLOW for a tool with an explicit read-only
-     * classification is returned as {@link ToolDispatchGate.Verdict#allowReadOnly()}, which a SUPERVISED agent's
-     * {@code GATE_UNLESS_READ_ONLY} mode reads. Costs one more registry lookup per such call, so only that mode asks.
+     * As {@link #dispatchGate(UUID)}; with {@code markReadOnly} an ALLOW for a tool with an
+     * explicit read-only classification is returned as {@link
+     * ToolDispatchGate.Verdict#allowReadOnly()}, which a SUPERVISED agent's {@code
+     * GATE_UNLESS_READ_ONLY} mode reads. Costs one more registry lookup per such call, so only that
+     * mode asks.
      */
     ToolDispatchGate dispatchGate(UUID agentId, boolean markReadOnly) {
         ToolClassificationRegistry resolved = registry.getIfAvailable();
@@ -519,7 +539,10 @@ public class AgentToolGovernance implements ToolReplaySafety {
     }
 
     ToolDispatchGate.Verdict decide(
-            ToolClassificationRegistry resolved, String toolName, UUID agentId, boolean markReadOnly) {
+            ToolClassificationRegistry resolved,
+            String toolName,
+            UUID agentId,
+            boolean markReadOnly) {
         ToolClassificationDecision decision = resolved.resolve(toolName);
         return switch (decision) {
             case ToolClassificationDecision.Blocked blocked ->
@@ -580,10 +603,10 @@ public class AgentToolGovernance implements ToolReplaySafety {
                         confirmationExempt.contains(toolName)
                                 || (!localShellApprovalRequired
                                         && com.agenticai.core.agents.tools.localshell
-                                                .LocalShellToolCallback.RUN_NAME.equals(toolName))
+                                                .LocalShellToolCallback.RUN_NAME
+                                                .equals(toolName))
                                 || (!desktopApprovalRequired
-                                        && com.agenticai.core.agents.tools.desktop.DesktopToolSource
-                                                .GATED_NAMES.contains(toolName));
+                                        && DesktopToolNames.GATED.contains(toolName));
                 // Only an exempt tool on a gate-on, per-agent dispatch pays for the trifecta lookup
                 // (a cached
                 // map read), so ordinary tools never touch it.
@@ -605,17 +628,19 @@ public class AgentToolGovernance implements ToolReplaySafety {
     }
 
     /**
-     * True when the tool has an EXPLICIT classification row (a stored row or a compiled-in declaration) that is
-     * neither consequential (write, credentialed, egress) nor irreversible, and it is not one of the tools pinned to
-     * always confirm. A classification derived from an MCP server's own annotations does not count: that hint is a
-     * third party's claim, and a "read-only" lie must not make a mutating tool run unattended. A tool that is
-     * unclassified, quarantined or invalid is never read-only.
+     * True when the tool has an EXPLICIT classification row (a stored row or a compiled-in
+     * declaration) that is neither consequential (write, credentialed, egress) nor irreversible,
+     * and it is not one of the tools pinned to always confirm. A classification derived from an MCP
+     * server's own annotations does not count: that hint is a third party's claim, and a
+     * "read-only" lie must not make a mutating tool run unattended. A tool that is unclassified,
+     * quarantined or invalid is never read-only.
      */
     private boolean explicitlyReadOnly(ToolClassificationRegistry resolved, String toolName) {
         if (alwaysConfirm(toolName)) {
             return false;
         }
-        return resolved.resolveIgnoringMcpAnnotations(toolName) instanceof ToolClassificationDecision.Classified c
+        return resolved.resolveIgnoringMcpAnnotations(toolName)
+                        instanceof ToolClassificationDecision.Classified c
                 && isReadOnly(c.classification());
     }
 

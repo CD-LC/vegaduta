@@ -3124,6 +3124,110 @@ export interface DemoVideoController_DemoVideoResponse {
 
 export type DependencyStatus = "UP" | "DEGRADED" | "DOWN" | "UNKNOWN";
 
+export interface DesktopRecipeDtos_CreateRecipeRequest {
+  agentId?: string;
+  name?: string;
+  description?: string;
+  defaultMode?: string;
+  spec?: DesktopRecipeSpec;
+}
+
+export interface DesktopRecipeDtos_RecipeDetail {
+  summary?: DesktopRecipeDtos_RecipeSummary;
+  spec?: DesktopRecipeSpec;
+  warnings?: string[];
+}
+
+export interface DesktopRecipeDtos_RecipeFromRunRequest {
+  agentId?: string;
+  sessionId?: string;
+  name?: string;
+  description?: string;
+  parameters?: Record<string, string>;
+  allowLiteralText?: boolean;
+  defaultMode?: string;
+}
+
+export interface DesktopRecipeDtos_RecipeSummary {
+  id?: string;
+  agentId?: string;
+  name?: string;
+  description?: string;
+  allowedApps?: string[];
+  parameters?: string[];
+  stepCount?: number;
+  runCount?: number;
+  failCount?: number;
+  lastRunAt?: string;
+  lastFailure?: string;
+  defaultMode?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DesktopRecipeDtos_RunRecipeRequest {
+  params?: Record<string, string>;
+  confirmIrreversible?: boolean;
+  fromStep?: number;
+  mode?: string;
+}
+
+export interface DesktopRecipeDtos_RunRecipeResponse {
+  recipeId?: string;
+  name?: string;
+  success?: boolean;
+  stepsRun?: number;
+  stepsTotal?: number;
+  failure?: string;
+  steps?: DesktopRecipeReplayer_StepResult[];
+}
+
+export interface DesktopRecipeDtos_UpdateRecipeRequest {
+  name?: string;
+  description?: string;
+  defaultMode?: string;
+}
+
+export interface DesktopRecipeReplayer_StepResult {
+  index?: number;
+  action?: string;
+  ok?: boolean;
+  note?: string;
+}
+
+export interface DesktopRecipeSpec {
+  version?: number;
+  allowedApps?: string[];
+  params?: DesktopRecipeSpec_ParamSpec[];
+  steps?: DesktopRecipeSpec_RecipeStep[];
+}
+
+export interface DesktopRecipeSpec_Expect {
+  elementLabel?: string;
+  appFrontmost?: string;
+}
+
+export interface DesktopRecipeSpec_ParamSpec {
+  name?: string;
+  required?: boolean;
+}
+
+export interface DesktopRecipeSpec_RecipeStep {
+  action?: string;
+  app?: string;
+  label?: string;
+  role?: string;
+  x?: number;
+  y?: number;
+  text?: string;
+  key?: string;
+  target?: string;
+  waitMs?: number;
+  expect?: DesktopRecipeSpec_Expect;
+  timeoutMs?: number;
+  irreversible?: boolean;
+}
+
 export interface DeveloperApiController_AgentSummaryDto {
   id?: string;
   name?: string;

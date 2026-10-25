@@ -6,6 +6,7 @@ import com.agenticai.core.agents.memory.CallerSessionIds;
 import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.memory.TranscriptView;
+import com.agenticai.core.agents.text.AppContextText;
 import com.agenticai.core.security.TenantContext;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -128,9 +129,9 @@ public class ChatThreadService {
      * <app_context>...</app_context>}: what is connected, the attached folder - written by the app,
      * for the model). Not the person's words, so never their thread's title.
      */
-    static final String APP_CONTEXT_OPEN = "<app_context>";
+    static final String APP_CONTEXT_OPEN = AppContextText.OPEN;
 
-    static final String APP_CONTEXT_CLOSE = "</app_context>";
+    static final String APP_CONTEXT_CLOSE = AppContextText.CLOSE;
 
     /**
      * The first user line as stored, marker-free, without the console's leading app-context block,
@@ -155,12 +156,7 @@ public class ChatThreadService {
      * all app text, so nothing of it is kept.
      */
     public static String withoutAppContext(String text) {
-        String trimmed = text == null ? "" : text.stripLeading();
-        if (!trimmed.startsWith(APP_CONTEXT_OPEN)) {
-            return text == null ? "" : text;
-        }
-        int close = trimmed.indexOf(APP_CONTEXT_CLOSE);
-        return close < 0 ? "" : trimmed.substring(close + APP_CONTEXT_CLOSE.length());
+        return AppContextText.withoutAppContext(text);
     }
 
     /**

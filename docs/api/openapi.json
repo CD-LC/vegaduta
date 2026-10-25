@@ -46291,11 +46291,20 @@
             }
           }
         },
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_AGENTS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
+        "description": "Requires PERM_MANAGE_AGENTS (or the tenant-admin role).",
         "responses": {
           "200": {
             "description": "Successful response.",
