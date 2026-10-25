@@ -915,12 +915,18 @@ jobs:
           REPO: ${{ github.repository }}
           GH_REPO: ${{ github.repository }}
         run: |
-          # The CHANGELOG section for this version, if there is one.
+          # The CHANGELOG section for this version, if there is one. Release
+          # bodies cap at 125000 bytes (HTTP 422 "body is too long"); a big
+          # release section (0.1.10 was ~126KB) would otherwise abort the
+          # draft create, so the excerpt is truncated safely below the limit.
           awk -v v="$VERSION" '
             $0 ~ "^## \\[" v "\\]" {on=1; next}
             on && /^## \[/ {exit}
             on {print}
-          ' CHANGELOG.md > notes.md
+          ' CHANGELOG.md | head -c 100000 > notes.md
+          if [ "$(wc -c < notes.md)" = "100000" ]; then
+            printf '\n\n_(section truncated - the full notes are in CHANGELOG.md in the tarball)_\n' >> notes.md
+          fi
           generate=false
           grep -q '[^[:space:]]' notes.md || generate=true
           {
