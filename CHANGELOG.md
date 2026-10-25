@@ -27,6 +27,18 @@ Release notes on GitHub are generated from the section for each version.
   connects through `mcp-stdio-runner` - each tenant gets an isolated server process. New
   env: `MCP_STATIC_STATELESS_SERVERS`, `MCP_STATIC_SHARED_STATEFUL_ENABLED`.
 
+- **SDK publishing ready.** The Java Agent SDK moves to `0.1.1` (the 0.1.0 coordinate is
+  retired: `sdk-v0.1.0`'s Central Portal upload was rejected because central-publishing-maven-plugin
+  0.7.0 produced a bundle where no artifact directory held a `.pom`; the now-pinned 0.12.0 stages
+  `io/github/cd-lc/<artifact>/<version>/<artifact>-<version>.pom` correctly - verified by a local
+  dry-run bundle). The parent pom gains the `<organization>` block, both Python packages ship the
+  `NOTICE` file (Apache-2.0 §4) via `license-files`, and `docs/maintainers/releasing-sdk.md` gains a
+  credential-free bundle dry-run plus the incident write-up. Publish paths: tag `sdk-v0.1.1` →
+  SDK release workflow → Central Portal "Publish"; tag `pysdk-v0.1.0` → Python SDK release → PyPI
+  (`SDK_PUBLISH_PYPI` is already `true`; the `pypi` environment/trusted publisher are one-time PyPI
+  setup); `restsdk-v*` + `SDK_PUBLISH_NPM` for the generated REST clients once the npm name and
+  `NPM_TOKEN` exist.
+
 ### Fixed
 
 - **A streamed (FAST) turn now has a total wall-clock ceiling.** The idle watchdog
