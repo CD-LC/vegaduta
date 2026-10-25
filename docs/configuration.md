@@ -868,6 +868,9 @@ Verified against `application.yml` and `application-workflow.yml`. Spring proper
 | `app.tools.search.activation-ttl` | `TOOL_SEARCH_ACTIVATION_TTL` | `PT2H` | sliding lifetime of a session's remembered activations |
 | `app.tools.run-subtasks.enabled` | `TOOL_RUN_SUBTASKS_ENABLED` | `true` | offers `run_subtasks` to every agent that may delegate: up to 8 independent briefs run in parallel as throwaway copies of the agent (no delegation, scheduling, human-request or terminal-write tools inside a branch). `false` removes the tool |
 | `app.tools.create-workflow.enabled` | `TOOL_CREATE_WORKFLOW_ENABLED` | `true` | offers `create_workflow` to an agent that lists it in its tool allow-list (the Assistant does): drafts a workflow graph from a plain-language instruction and saves it as a DRAFT. It is never activated or run. `false` removes the tool |
+| `app.tools.scratchpad.enabled` | `APP_TOOLS_SCRATCHPAD_ENABLED` | `true` | offers each agent the four deferred scratchpad tools (`scratchpad_write`, `scratchpad_read`, `scratchpad_list`, `scratchpad_delete`): a persistent agent-authored notepad - session-scoped working notes plus an agent-long-term pad. `false` removes all four. Per agent: `tools.scratchpad.enabled` in the [settings catalog](settings.md) |
+| `app.tools.scratchpad.max-notes` | `APP_TOOLS_SCRATCHPAD_MAX_NOTES` | `200` | most notes one agent may keep per session scope |
+| `app.tools.scratchpad.max-note-bytes` | `APP_TOOLS_SCRATCHPAD_MAX_NOTE_BYTES` | `65536` | most bytes one note may hold |
 
 ### Timeouts, failover and retries when tools are involved
 

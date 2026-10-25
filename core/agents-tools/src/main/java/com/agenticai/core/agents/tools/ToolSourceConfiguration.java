@@ -283,6 +283,20 @@ class ToolSourceConfiguration {
     }
 
     /**
+     * The agent scratchpad (app.tools.scratchpad.*): the agent's own notes, offered to every agent
+     * once the flag is on - there is no per-agent opt-in, and the resolver's gate already covers the
+     * service-bean-absent and disabled cases. Not in the tool-search always-on list: a note pad is
+     * an occasional tool, so it stays deferred behind search_tools rather than costing schema space
+     * on every prompt.
+     */
+    @Bean
+    @Order(305)
+    ToolSource scratchpadToolSource(AgentScratchpadToolResolver scratchpad) {
+        return ToolSource.ofResolver(
+                "scratchpad", ToolSource.Kind.BUILT_IN, scratchpad::resolveScratchpadTools);
+    }
+
+    /**
      * Agent Skills: joins AFTER the allow-list filter on purpose - see {@code
      * AgentCustomToolResolver#resolveSkillTools}.
      */

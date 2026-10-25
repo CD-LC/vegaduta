@@ -38,6 +38,14 @@ Release notes on GitHub are generated from the section for each version.
   (`SDK_PUBLISH_PYPI` is already `true`; the `pypi` environment/trusted publisher are one-time PyPI
   setup); `restsdk-v*` + `SDK_PUBLISH_NPM` for the generated REST clients once the npm name and
   `NPM_TOKEN` exist.
+- **Each agent gets a persistent scratchpad.** Four deferred built-in tools -
+  `scratchpad_write`, `scratchpad_read`, `scratchpad_list` and `scratchpad_delete` - give an agent an
+  agent-authored notepad: session-scoped working notes plus an agent-long-term pad. Caps:
+  `app.tools.scratchpad.max-notes` (per agent+session, default 200) and
+  `app.tools.scratchpad.max-note-bytes` (per note, default 65536); the platform switch is
+  `app.tools.scratchpad.enabled` and the per-agent toggle `tools.scratchpad.enabled` in the behaviour
+  settings catalog. New env: `APP_TOOLS_SCRATCHPAD_ENABLED`, `APP_TOOLS_SCRATCHPAD_MAX_NOTES`,
+  `APP_TOOLS_SCRATCHPAD_MAX_NOTE_BYTES`.
 
 ### Fixed
 

@@ -15684,6 +15684,10 @@
       "providers": {
         "label": "AI providers",
         "description": "How connected AI provider keys are used when one stops working."
+      },
+      "tools": {
+        "label": "Agent tools",
+        "description": "Which built-in tool helpers an agent keeps."
       }
     },
     "agent": {
@@ -16133,6 +16137,15 @@
           "label": "Pause after a provider refuses a key",
           "description": "How long background work skips a connected provider key after the provider refused it.",
           "help": "While paused, scheduled and automatic jobs use another connected provider, or wait, instead of calling a key that keeps failing. People chatting are never blocked and always see the provider's real error. When the pause ends, one call is let through to check whether the key was fixed. Zero turns the pause off."
+        }
+      }
+    },
+    "tools": {
+      "scratchpad": {
+        "enabled": {
+          "label": "Agent scratchpad",
+          "description": "Give the agent its scratchpad tools: a persistent notepad with session-scoped working notes and a long-term pad it writes and reads itself.",
+          "help": "Turn it off to remove the four scratchpad tools (write, read, list, delete) from the agent. Notes already stored are kept but the agent can no longer reach them."
         }
       }
     }

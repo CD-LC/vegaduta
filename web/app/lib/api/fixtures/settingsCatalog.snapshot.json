@@ -839,6 +839,20 @@
     "docsAnchor" : "agent-runtime-limits",
     "platformProperty" : "app.guardrails.step-limit.autonomous-multiplier"
   }, {
+    "key" : "tools.scratchpad.enabled",
+    "group" : "tools",
+    "labelKey" : "settings.tools.scratchpad.enabled.label",
+    "descriptionKey" : "settings.tools.scratchpad.enabled.description",
+    "helpKey" : "settings.tools.scratchpad.enabled.help",
+    "type" : "bool",
+    "risk" : "low",
+    "scopes" : [ "tenant", "agent" ],
+    "default" : true,
+    "minRole" : "EDITOR",
+    "restartRequired" : false,
+    "docsAnchor" : "behaviour-settings",
+    "platformProperty" : "app.tools.scratchpad.enabled"
+  }, {
     "key" : "skills.prompt.maxSkills",
     "group" : "skills",
     "labelKey" : "settings.skills.prompt.maxSkills.label",

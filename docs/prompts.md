@@ -275,7 +275,8 @@ workspace file (`workspace_list|read|search|write|edit`), code-intelligence (`se
 `google_calendar_find_free_slots`, `google_calendar_move_event`, `google_calendar_cancel_event`, `google_gmail`,
 `google_drive`, `google_sheets`, `youtube_content_performance`, `upload_video_to_youtube`), graph-memory recall,
 `generate_image|video|music`, knowledge (`search_knowledge_base`, `add_to_knowledge_base`,
-`list_knowledge_collections`), mandate payment (`create_payment_link.mandate`, `check_payment_status.mandate`,
+`list_knowledge_collections`), the agent's scratchpad (`scratchpad_write`, `scratchpad_read`,
+`scratchpad_list`, `scratchpad_delete`), mandate payment (`create_payment_link.mandate`, `check_payment_status.mandate`,
 `request_upi_collect`), Sarvam, and `create_workflow` tools are keys in the module that owns them. The two payment
 tools share their names with the commerce tools of `core/agents-tools`, so they are the `.mandate` variants. The
 workspace file tools fill the label of the projects folder into their description, so theirs are templates with the
