@@ -891,7 +891,9 @@
     "reasonBilling": "प्रोभाइडारनि बिलिं समस्या",
     "reasonModelNotFound": "मडेल मोनो हाया",
     "reasonProviderError": "प्रोभाइडारनि भुल",
-    "reasonMalformedToolCall": "टुल कल बाहाय खालामनो हाया"
+    "reasonMalformedToolCall": "टुल कल बाहाय खालामनो हाया",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ट्रिगार",
@@ -5808,7 +5810,11 @@
       "builtinDetail": "नोंनि ब्राउजारनि गावबानो मडेल। क्रोम 127+ आ गावबानो डाउनलोड आरो आपडेट खालामो; बे एपआ जेबो दोनथ'आ।",
       "motionDetail": "स्थिर सावगारिखौ गोमोथाव मोसन क्लिपआव सोलायो। क्लिप स्टुडिआव गिबिसिन खेब मोसन+ बाहायब्ला गावबानो डाउनलोड जायो।",
       "motionNotPublished": "दासिम फोसावजायाखै — थाबैनो फैगोन",
-      "motionOpenClips": "क्लिप स्टुडिअखौ खेव"
+      "motionOpenClips": "क्लिप स्टुडिअखौ खेव",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "बे डिभाइसाव इन्स्टल खालामनाय",

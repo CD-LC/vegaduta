@@ -890,7 +890,9 @@
     "reasonBilling": "ପ୍ରଦାତାଙ୍କ ବିଲିଂ ସମସ୍ୟା",
     "reasonModelNotFound": "ମଡେଲ୍ ଉପଲବ୍ଧ ନୁହେଁ",
     "reasonProviderError": "ପ୍ରଦାତାଙ୍କ ତ୍ରୁଟି",
-    "reasonMalformedToolCall": "ଟୁଲ୍ କଲ୍ ବ୍ୟବହାର କରାଯାଇପାରିଲା ନାହିଁ"
+    "reasonMalformedToolCall": "ଟୁଲ୍ କଲ୍ ବ୍ୟବହାର କରାଯାଇପାରିଲା ନାହିଁ",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ଟ୍ରିଗର୍",
@@ -5803,7 +5805,11 @@
       "builtinDetail": "ଆପଣଙ୍କ ବ୍ରାଉଜରର ନିଜସ୍ୱ ମଡେଲ। Chrome 127+ ଏହାକୁ ନିଜେ ଡାଉନଲୋଡ୍ ଓ ଅପଡେଟ୍ କରେ; ଏହି ଆପ୍ ଦ୍ୱାରା କିଛି ସଂରକ୍ଷିତ ହୁଏ ନାହିଁ।",
       "motionDetail": "ସ୍ଥିର ଚିତ୍ରକୁ ସୁଗମ ମୋସନ୍ କ୍ଲିପରେ ପରିଣତ କରେ। କ୍ଲିପ୍ ଷ୍ଟୁଡିଓରେ ପ୍ରଥମ ଥର Motion+ ବ୍ୟବହାର କଲେ ସ୍ୱୟଂଚାଳିତ ଭାବେ ଡାଉନଲୋଡ୍ ହୁଏ।",
       "motionNotPublished": "ଏପର୍ଯ୍ୟନ୍ତ ପ୍ରକାଶିତ ହୋଇନାହିଁ — ଶୀଘ୍ର ଆସୁଛି",
-      "motionOpenClips": "କ୍ଲିପ୍ ଷ୍ଟୁଡିଓ ଖୋଲନ୍ତୁ"
+      "motionOpenClips": "କ୍ଲିପ୍ ଷ୍ଟୁଡିଓ ଖୋଲନ୍ତୁ",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ଏହି ଡିଭାଇସରେ ଇନଷ୍ଟଲ୍ ହୋଇଛି",

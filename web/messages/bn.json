@@ -989,7 +989,9 @@
     "reasonBilling": "প্রদানকারীর বিলিং সমস্যা",
     "reasonModelNotFound": "মডেল উপলব্ধ নয়",
     "reasonProviderError": "প্রদানকারীর ত্রুটি",
-    "reasonMalformedToolCall": "টুল কলটি ব্যবহার করা যায়নি"
+    "reasonMalformedToolCall": "টুল কলটি ব্যবহার করা যায়নি",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ট্রিগার",
@@ -5802,7 +5804,11 @@
       "builtinDetail": "আপনার ব্রাউজারের নিজস্ব মডেল। Chrome 127+ এটি নিজে ডাউনলোড এবং আপডেট করে; এই অ্যাপে কিছু সঞ্চয় করা হয় না।",
       "motionDetail": "স্থির ছবিকে মসৃণ মোশন ক্লিপে পরিণত করে। Clip Studio-তে প্রথমবার Motion+ ব্যবহার করলে এটি স্বয়ংক্রিয়ভাবে ডাউনলোড হয়।",
       "motionNotPublished": "এখনও প্রকাশিত হয়নি — শীঘ্রই আসছে",
-      "motionOpenClips": "Clip Studio খুলুন"
+      "motionOpenClips": "Clip Studio খুলুন",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "এই ডিভাইসে ইনস্টল করা",

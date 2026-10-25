@@ -890,7 +890,9 @@
     "reasonBilling": "प्रदात्याची बिलिंग समस्या",
     "reasonModelNotFound": "मॉडेल उपलब्ध ना",
     "reasonProviderError": "प्रदात्याची चूक",
-    "reasonMalformedToolCall": "साधन कॉल वापरूंक जालो ना"
+    "reasonMalformedToolCall": "साधन कॉल वापरूंक जालो ना",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ट्रिगर",
@@ -5762,7 +5764,11 @@
       "builtinDetail": "तुमच्या ब्राउझराचें स्वताचें मॉडेल. Chrome 127+ तें आपशींच डाउनलोड आनी अपडेट करता; ह्या ॲपांत कांयच सांठयना.",
       "motionDetail": "स्थिर प्रतिमांच्यो सुळसुळीत गती क्लिप तयार करता. क्लिप स्टुडिओंत पयलेच फावट Motion+ वापरतना आपशींच डाउनलोड जाता.",
       "motionNotPublished": "अजून प्रसिद्ध जावंक ना — बेगीनच येतले",
-      "motionOpenClips": "क्लिप स्टुडिओ उगड"
+      "motionOpenClips": "क्लिप स्टुडिओ उगड",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ह्या डिव्हायसाचेर स्थापीत",

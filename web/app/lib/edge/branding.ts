@@ -95,6 +95,21 @@ export const EDGE_BRANDING = {
     "On-device voice — about 90 MB, one-time download from the Hugging Face model hub. " +
     "Cached on this device and reused offline; replies are spoken without a per-message cost.",
 
+  // -- On-device generation: images (SD-Turbo) + audio (MusicGen) ----------
+  /** Chip/details display name for the local image-generation asset. */
+  imageGenModelDisplayName: "On-device image generation (SD-Turbo)",
+  /** E-0b rule 2 one-line consent copy, shown BEFORE ensureImageGenModel() runs. */
+  imageGenDownloadDetails:
+    "On-device image generation — about 2.4 GB, one-time download from the Hugging Face model hub. " +
+    "Needs WebGPU. Cached on this device and reused offline; prompts and images never leave your browser.",
+
+  /** Chip/details display name for the local audio-generation asset. */
+  audioGenModelDisplayName: "On-device audio generation (MusicGen)",
+  /** E-0b rule 2 one-line consent copy, shown BEFORE ensureAudioGenModel() runs. */
+  audioGenDownloadDetails:
+    "On-device audio generation — about 1.8 GB, one-time download from the Hugging Face model hub. " +
+    "Cached on this device and reused offline; prompts and clips never leave your browser.",
+
   // -- F-1 update channel (chip + panel) -----------------------------------
   /** Chip-label suffix — deliberately quiet ("On-device AI · update available"). */
   updateBadge: "update available",
@@ -122,8 +137,7 @@ export const EDGE_BRANDING = {
 
   // -- Model marketplace / management (Wave 3) -----------------------------
   marketplaceTitle: "On-device models",
-  marketplaceSubtitle:
-    "Download once, then replies run in your browser — free, private, and available offline.",
+  marketplaceSubtitle: "Download once, then replies run in your browser — free, private, and available offline.",
   installedSectionTitle: "On this device",
   notInstalledLabel: "Not downloaded",
   installedLabel: "Downloaded",
@@ -132,16 +146,14 @@ export const EDGE_BRANDING = {
   resumeAction: "Resume",
   cancelAction: "Cancel",
   deleteAction: "Remove from this device",
-  deleteConfirmBody:
-    "Removes the downloaded model files from this device. You can download them again any time.",
+  deleteConfirmBody: "Removes the downloaded model files from this device. You can download them again any time.",
   switchAction: "Use this model",
   inUseLabel: "In use",
 
   // -- Routing preference (edge-first default) -----------------------------
   routingPrefTitle: "Where replies run",
   routingPrefEdgeFirstLabel: "On-device first (recommended)",
-  routingPrefEdgeFirstSubtitle:
-    "Answers run on your device when it can handle them; hosted covers the rest.",
+  routingPrefEdgeFirstSubtitle: "Answers run on your device when it can handle them; hosted covers the rest.",
   routingPrefHostedOnlyLabel: "Hosted only",
   routingPrefHostedOnlySubtitle: "Replies always run on our servers.",
   routingPrefAskLabel: "Let me choose",

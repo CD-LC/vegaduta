@@ -968,7 +968,9 @@
     "reasonBilling": "problema de facturación del proveedor",
     "reasonModelNotFound": "modelo no disponible",
     "reasonProviderError": "error del proveedor",
-    "reasonMalformedToolCall": "la llamada a la herramienta no se pudo usar"
+    "reasonMalformedToolCall": "la llamada a la herramienta no se pudo usar",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "Disparador",
@@ -5807,7 +5809,11 @@
       "builtinDetail": "El modelo propio de tu navegador. Chrome 127+ lo descarga y actualiza por sí mismo; esta app no almacena nada.",
       "motionDetail": "Convierte imágenes fijas en clips con movimiento fluido. Se descarga automáticamente la primera vez que usas Motion+ en Clip Studio.",
       "motionNotPublished": "Aún no publicado — próximamente",
-      "motionOpenClips": "Abrir Clip Studio"
+      "motionOpenClips": "Abrir Clip Studio",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "Instalados en este dispositivo",

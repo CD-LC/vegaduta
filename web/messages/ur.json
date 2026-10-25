@@ -890,7 +890,9 @@
     "reasonBilling": "فراہم کنندہ کی بلنگ میں مسئلہ",
     "reasonModelNotFound": "ماڈل دستیاب نہیں",
     "reasonProviderError": "فراہم کنندہ کی خرابی",
-    "reasonMalformedToolCall": "ٹول کال استعمال نہیں ہو سکی"
+    "reasonMalformedToolCall": "ٹول کال استعمال نہیں ہو سکی",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ٹرگر",
@@ -5789,7 +5791,11 @@
       "builtinDetail": "آپ کے براؤزر کا اپنا ماڈل۔ Chrome 127+ اسے خود ڈاؤن لوڈ اور اپ ڈیٹ کرتا ہے؛ اس ایپ میں کچھ بھی محفوظ نہیں ہوتا۔",
       "motionDetail": "ساکن تصاویر کو ہموار موشن کلپس میں بدلتا ہے۔ Clip Studio میں پہلی بار Motion+ استعمال کرنے پر خود بخود ڈاؤن لوڈ ہو جاتا ہے۔",
       "motionNotPublished": "ابھی شائع نہیں ہوا — جلد آرہا ہے",
-      "motionOpenClips": "Clip Studio کھولیں"
+      "motionOpenClips": "Clip Studio کھولیں",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "اس ڈیوائس پر انسٹال شدہ",

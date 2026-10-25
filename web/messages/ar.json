@@ -1024,7 +1024,9 @@
     "reasonBilling": "مشكلة في فوترة المزوّد",
     "reasonModelNotFound": "النموذج غير متاح",
     "reasonProviderError": "خطأ من المزوّد",
-    "reasonMalformedToolCall": "تعذّر استخدام استدعاء الأداة"
+    "reasonMalformedToolCall": "تعذّر استخدام استدعاء الأداة",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "المُحفِّز",
@@ -5987,7 +5989,11 @@
       "builtinDetail": "نموذج متصفحك الخاص. يقوم Chrome 127+ بتنزيله وتحديثه بنفسه؛ لا يخزن هذا التطبيق أي شيء.",
       "motionDetail": "يحول الصور الثابتة إلى مقاطع متحركة سلسة. يتم تنزيله تلقائيًا عند أول استخدام لـ Motion+ في Clip Studio.",
       "motionNotPublished": "لم يُنشر بعد — قريبًا",
-      "motionOpenClips": "فتح Clip Studio"
+      "motionOpenClips": "فتح Clip Studio",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "المثبتة على هذا الجهاز",

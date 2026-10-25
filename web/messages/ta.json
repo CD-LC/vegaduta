@@ -988,7 +988,9 @@
     "reasonBilling": "வழங்குநரின் பில்லிங் சிக்கல்",
     "reasonModelNotFound": "மாடல் கிடைக்கவில்லை",
     "reasonProviderError": "வழங்குநர் பிழை",
-    "reasonMalformedToolCall": "கருவி அழைப்பைப் பயன்படுத்த முடியவில்லை"
+    "reasonMalformedToolCall": "கருவி அழைப்பைப் பயன்படுத்த முடியவில்லை",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "தூண்டுதல்",
@@ -5972,7 +5974,11 @@
       "builtinDetail": "உங்கள் உலாவியின் சொந்த மாதிரி. Chrome 127+ அதைத் தானாகவே பதிவிறக்கிப் புதுப்பிக்கிறது; இந்தச் செயலி எதையும் சேமிப்பதில்லை.",
       "motionDetail": "நிலையான படங்களை மென்மையான அசைவுக் கிளிப்களாக மாற்றுகிறது. Clip Studio-வில் Motion+ ஐ முதன்முறை பயன்படுத்தும்போது தானாகவே பதிவிறக்கப்படும்.",
       "motionNotPublished": "இன்னும் வெளியிடப்படவில்லை — விரைவில் வரும்",
-      "motionOpenClips": "Clip Studio-ஐத் திறக்கவும்"
+      "motionOpenClips": "Clip Studio-ஐத் திறக்கவும்",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "இந்தச் சாதனத்தில் நிறுவப்பட்டது",

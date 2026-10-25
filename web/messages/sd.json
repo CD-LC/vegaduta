@@ -891,7 +891,9 @@
     "reasonBilling": "پرووائيڊر جي بلنگ جو مسئلو",
     "reasonModelNotFound": "ماڊل موجود ناهي",
     "reasonProviderError": "پرووائيڊر جي غلطي",
-    "reasonMalformedToolCall": "ٽول ڪال استعمال نه ٿي سگهي"
+    "reasonMalformedToolCall": "ٽول ڪال استعمال نه ٿي سگهي",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ٽرگر",
@@ -5807,7 +5809,11 @@
       "builtinDetail": "توهان جي برائوزر جو پنهنجو ماڊل. ڪروم 127+ ان کي پاڻ ڊائون لوڊ ۽ اپڊيٽ ڪري ٿو؛ هن ايپ ۾ ڪجھ به محفوظ ناهي.",
       "motionDetail": "بيٺل تصويرن کي رواني حرڪت واري ڪلپس ۾ تبديل ڪري ٿو. ڪلپ اسٽوڊيو ۾ Motion+ جي پهرين استعمال تي پاڻمرادو ڊائون لوڊ ٿئي ٿو.",
       "motionNotPublished": "اڃا شايع نه ٿيو آهي — جلد اچي رهيو آهي",
-      "motionOpenClips": "ڪلپ اسٽوڊيو کوليو"
+      "motionOpenClips": "ڪلپ اسٽوڊيو کوليو",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "هن ڊوائيس تي انسٽال ٿيل",

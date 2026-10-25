@@ -890,7 +890,9 @@
     "reasonBilling": "প্ৰদানকাৰীৰ বিলিঙৰ সমস্যা",
     "reasonModelNotFound": "মডেল উপলব্ধ নহয়",
     "reasonProviderError": "প্ৰদানকাৰীৰ ত্ৰুটি",
-    "reasonMalformedToolCall": "টুল কলটো ব্যৱহাৰ কৰিব পৰা নগ'ল"
+    "reasonMalformedToolCall": "টুল কলটো ব্যৱহাৰ কৰিব পৰা নগ'ল",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ট্ৰিগাৰ",
@@ -5802,7 +5804,11 @@
       "builtinDetail": "আপোনাৰ ব্ৰাউজাৰৰ নিজা মডেল। Chrome 127+ এ নিজেই ডাউনলোড আৰু আপডেট কৰে; এই এপটোৱে একো সংৰক্ষণ নকৰে।",
       "motionDetail": "স্থিৰ ছবিক মসৃণ গতিৰ ক্লিপলৈ ৰূপান্তৰ কৰে। ক্লিপ ষ্টুডিঅ'ত Motion+ প্ৰথমবাৰ ব্যৱহাৰ কৰিলে স্বয়ংক্ৰিয়ভাৱে ডাউনলোড হয়।",
       "motionNotPublished": "এতিয়াও প্ৰকাশ হোৱা নাই — সোনকালেই আহিব",
-      "motionOpenClips": "ক্লিপ ষ্টুডিঅ' খোলক"
+      "motionOpenClips": "ক্লিপ ষ্টুডিঅ' খোলক",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "এই ডিভাইচত ইনষ্টল কৰা",

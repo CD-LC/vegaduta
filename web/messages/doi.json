@@ -891,7 +891,9 @@
     "reasonBilling": "प्रोवाइडर दी बिलिंग दी समस्या",
     "reasonModelNotFound": "मॉडल उपलब्ध नेईं",
     "reasonProviderError": "प्रोवाइडर दी गलती",
-    "reasonMalformedToolCall": "टूल कॉल बरती नेईं जाई सकी"
+    "reasonMalformedToolCall": "टूल कॉल बरती नेईं जाई सकी",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ट्रिगर",
@@ -5768,7 +5770,11 @@
       "builtinDetail": "तुंदे ब्राउज़र दा अपना मॉडल। क्रोम 127+ इसगी अपने आप डाउनलोड ते अपडेट करदा ऐ; इस ऐप आसेआ किश बी स्टोर नेईं कीता जंदा।",
       "motionDetail": "स्थिर छवियें गी सुचारू गति क्लिप च बदलदा ऐ। पैहली बारी क्लिप स्टूडियो च मोशन+ इस्तेमाल करने पर अपने आप डाउनलोड होई जंदा ऐ।",
       "motionNotPublished": "अजे तगर प्रकाशित नेईं — जल्दी गै औग",
-      "motionOpenClips": "क्लिप स्टूडियो खोलो"
+      "motionOpenClips": "क्लिप स्टूडियो खोलो",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "इस डिवाइस पर इंस्टॉल कीता गेदा ऐ",

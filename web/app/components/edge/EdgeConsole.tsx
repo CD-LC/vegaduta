@@ -29,7 +29,7 @@ import { deviceVerdict, type DeviceVerdict } from "./edgeConsoleHelpers";
 import { formatBytes } from "../../lib/format";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Download, Eye, Film, Globe, Mic, ShieldCheck, Trash2, Volume2 } from "lucide-react";
+import { Download, Eye, Film, Globe, Image as ImageIcon, Mic, Music, ShieldCheck, Trash2, Volume2 } from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
 import PaginationControls from "../PaginationControls";
 import { usePagination } from "../../lib/usePagination";
@@ -52,12 +52,23 @@ import { createTier0Session, tier0Availability, TIER0_ASSET_ID } from "../../lib
 import { ensureVisionModel } from "../../lib/edge/vision";
 import { ensureSttModel } from "../../lib/edge/audio/whisper";
 import { ensureTtsModel } from "../../lib/edge/audio/kokoro";
+import { ensureImageGenModel } from "../../lib/edge/imagegen";
+import { ensureAudioGenModel } from "../../lib/edge/audiogen";
+import { listMediaArtifacts } from "../../lib/edge/mediaRegistry";
 import { EDGE_BRANDING } from "../../lib/edge/branding";
 import {
+  AUDIO_GEN_ASSET_ID,
+  AUDIO_GEN_MODEL_SIZE_BYTES,
+  deleteAudioGenModel,
+  deleteImageGenModel,
   deleteSttModel,
   deleteTier1Model,
   deleteTtsModel,
   deleteVisionModel,
+  IMAGE_GEN_ASSET_ID,
+  IMAGE_GEN_MODEL_SIZE_BYTES,
+  isAudioGenModelInstalled,
+  isImageGenModelInstalled,
   isSttModelInstalled,
   isTtsModelInstalled,
   isVisionModelInstalled,
@@ -255,6 +266,9 @@ export default function EdgeConsole() {
   const visionInstalled = isVisionModelInstalled();
   const sttInstalled = isSttModelInstalled();
   const ttsInstalled = isTtsModelInstalled();
+  const imageGenInstalled = isImageGenModelInstalled();
+  const audioGenInstalled = isAudioGenModelInstalled();
+  const generatedMedia = listMediaArtifacts();
 
   // UX gap fix: vision/STT/TTS are structurally useless for a chat/call turn
   // without a reasoning (text) model also ready — routeTurn's "never
@@ -434,6 +448,44 @@ export default function EdgeConsole() {
             onDelete={() => void confirmAndDelete(TTS_ASSET_ID, EDGE_BRANDING.ttsModelDisplayName, deleteTtsModel)}
           />
 
+          {/* On-device image generation (SD-Turbo) — powers local_generate_image */}
+          <OnDeviceModelCard
+            icon={<ImageIcon size={14} aria-hidden="true" />}
+            name={EDGE_BRANDING.imageGenModelDisplayName}
+            purpose={t("market.purposeImageGen")}
+            sizeBytes={IMAGE_GEN_MODEL_SIZE_BYTES}
+            detail={EDGE_BRANDING.imageGenDownloadDetails}
+            caps={caps}
+            reasoningModelReady={reasoningModelReady}
+            asset={assetById.get(IMAGE_GEN_ASSET_ID) || null}
+            installed={imageGenInstalled}
+            busy={!!busyIds[IMAGE_GEN_ASSET_ID]}
+            t={t}
+            onDownload={() => void downloadAsset(IMAGE_GEN_ASSET_ID, ensureImageGenModel)}
+            onDelete={() =>
+              void confirmAndDelete(IMAGE_GEN_ASSET_ID, EDGE_BRANDING.imageGenModelDisplayName, deleteImageGenModel)
+            }
+          />
+
+          {/* On-device audio generation (MusicGen) — powers local_generate_audio */}
+          <OnDeviceModelCard
+            icon={<Music size={14} aria-hidden="true" />}
+            name={EDGE_BRANDING.audioGenModelDisplayName}
+            purpose={t("market.purposeAudioGen")}
+            sizeBytes={AUDIO_GEN_MODEL_SIZE_BYTES}
+            detail={EDGE_BRANDING.audioGenDownloadDetails}
+            caps={caps}
+            reasoningModelReady={reasoningModelReady}
+            asset={assetById.get(AUDIO_GEN_ASSET_ID) || null}
+            installed={audioGenInstalled}
+            busy={!!busyIds[AUDIO_GEN_ASSET_ID]}
+            t={t}
+            onDownload={() => void downloadAsset(AUDIO_GEN_ASSET_ID, ensureAudioGenModel)}
+            onDelete={() =>
+              void confirmAndDelete(AUDIO_GEN_ASSET_ID, EDGE_BRANDING.audioGenModelDisplayName, deleteAudioGenModel)
+            }
+          />
+
           {/* Clip Studio motion engine(s) — one card per published/candidate
               interpolation engine (fast RIFE-class, quality FILM-class). */}
           {enginesPagination.pageItems.map((engine) => {
@@ -493,6 +545,51 @@ export default function EdgeConsole() {
           )}
         </div>
       </section>
+
+      {/* ------- 2b. GENERATED MEDIA (this session) ------- */}
+      {(imageGenInstalled || audioGenInstalled || generatedMedia.length > 0) && (
+        <section>
+          <div className="mb-3">
+            <h2 className="text-base font-semibold text-foreground">{t("market.generatedMediaTitle")}</h2>
+          </div>
+          <div className="overflow-hidden rounded-lg border border-border">
+            {generatedMedia.length === 0 ? (
+              <div className="p-4 text-sm text-muted-foreground">{t("market.generatedMediaEmpty")}</div>
+            ) : (
+              <ul className="divide-y divide-border">
+                {generatedMedia.map((m) => (
+                  <li key={m.id} className="flex items-center gap-3 px-4 py-3">
+                    {m.kind === "image" ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- session-local blob URL, not a remote asset
+                      <img
+                        src={m.url}
+                        alt={m.description}
+                        className="h-12 w-12 rounded border border-border object-cover"
+                      />
+                    ) : (
+                      // eslint-disable-next-line jsx-a11y/media-has-caption -- generated clip previews have no caption source
+                      <audio src={m.url} controls preload="metadata" className="h-8 w-56" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm text-foreground">{m.description}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {m.kind === "image" ? `${m.width}×${m.height}` : `${m.durationSeconds?.toFixed(1)}s`}
+                        {" · "}
+                        {formatBytes(m.byteSize)}
+                      </p>
+                    </div>
+                    <Button size="sm" variant="ghost" asChild>
+                      <a href={m.url} download={`${m.id}${m.kind === "image" ? ".png" : ".wav"}`}>
+                        <Download size={13} aria-hidden="true" />
+                      </a>
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ---------------- 3. INSTALLED section ---------------- */}
       <section>

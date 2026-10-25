@@ -887,7 +887,9 @@
     "reasonBilling": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱵᱤᱞᱤᱝ ᱥᱚᱢᱥᱭᱟ",
     "reasonModelNotFound": "ᱢᱚᱰᱮᱞ ᱵᱟᱝ ᱢᱮᱱᱟᱜᱼᱟ",
     "reasonProviderError": "ᱯᱨᱚᱵᱟᱭᱰᱟᱨ ᱟᱜ ᱵᱷᱩᱞ",
-    "reasonMalformedToolCall": "ᱴᱩᱞ ᱠᱚᱞ ᱵᱮᱵᱷᱟᱨ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ"
+    "reasonMalformedToolCall": "ᱴᱩᱞ ᱠᱚᱞ ᱵᱮᱵᱷᱟᱨ ᱵᱟᱝ ᱦᱩᱭᱞᱮᱱᱟ",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ᱮᱛᱚᱦᱚᱵ",
@@ -5763,7 +5765,11 @@
       "builtinDetail": "ᱟᱢᱟᱜ ᱵᱨᱟᱣᱡᱟᱹᱨ ᱨᱮᱱᱟᱜ ᱱᱤᱡᱮᱨᱟᱜ ᱢᱚᱰᱮᱞ᱾ ᱠᱨᱚᱢ ᱑᱒᱗+ ᱱᱤᱡᱮᱛᱮᱭ ᱰᱟᱣᱩᱱᱞᱚᱰ ᱟᱨ ᱟᱯᱰᱮᱴᱟ; ᱱᱚᱣᱟ ᱮᱯ ᱨᱮ ᱪᱮᱫ ᱦᱚᱸ ᱵᱟᱝ ᱡᱚᱜᱟᱣ ᱛᱟᱦᱮᱱᱟ᱾",
       "motionDetail": "ᱛᱷᱤᱨ ᱪᱤᱛᱟᱹᱨ ᱠᱚ ᱥᱩᱢᱩᱫᱽ ᱢᱚᱥᱚᱱ ᱠᱞᱤᱯ ᱨᱮᱭ ᱵᱚᱫᱚᱞᱟ᱾ ᱠᱞᱤᱯ ᱤᱥᱴᱩᱰᱤᱭᱳ ᱨᱮ ᱯᱩᱭᱞᱩ ᱫᱷᱟᱣ ᱢᱚᱥᱚᱱ+ ᱵᱮᱵᱷᱟᱨ ᱨᱮ ᱟᱡᱽᱛᱮᱜᱮ ᱰᱟᱣᱩᱱᱞᱚᱰᱚᱜᱼᱟ᱾",
       "motionNotPublished": "ᱱᱤᱛ ᱫᱷᱟᱹᱵᱤᱡ ᱵᱟᱝ ᱩᱪᱷᱟᱹᱱ ᱟᱠᱟᱱᱟ — ᱩᱥᱟᱹᱨᱟ ᱦᱤᱡᱩᱜ ᱠᱟᱱᱟ",
-      "motionOpenClips": "ᱠᱞᱤᱯ ᱤᱥᱴᱩᱰᱤᱭᱳ ᱡᱷᱤᱡᱽ ᱢᱮ"
+      "motionOpenClips": "ᱠᱞᱤᱯ ᱤᱥᱴᱩᱰᱤᱭᱳ ᱡᱷᱤᱡᱽ ᱢᱮ",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ᱱᱚᱣᱟ ᱰᱤᱵᱷᱟᱭᱤᱥ ᱨᱮ ᱤᱱᱥᱴᱚᱞ ᱟᱠᱟᱱᱟ",

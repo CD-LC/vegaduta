@@ -989,7 +989,9 @@
     "reasonBilling": "problème de facturation chez le fournisseur",
     "reasonModelNotFound": "modèle indisponible",
     "reasonProviderError": "erreur du fournisseur",
-    "reasonMalformedToolCall": "l'appel d'outil était inutilisable"
+    "reasonMalformedToolCall": "l'appel d'outil était inutilisable",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "Déclencheur",
@@ -5987,7 +5989,11 @@
       "builtinDetail": "Le modèle de votre navigateur. Chrome 127+ le télécharge et le met à jour ; rien n'est stocké par cette app.",
       "motionDetail": "Transforme les images fixes en clips animés fluides. Se télécharge automatiquement à la première utilisation de Motion+ dans Clip Studio.",
       "motionNotPublished": "Pas encore publié — bientôt disponible",
-      "motionOpenClips": "Ouvrir Clip Studio"
+      "motionOpenClips": "Ouvrir Clip Studio",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "Installé sur cet appareil",

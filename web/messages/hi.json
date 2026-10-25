@@ -989,7 +989,9 @@
     "reasonBilling": "प्रदाता की बिलिंग में समस्या",
     "reasonModelNotFound": "मॉडल उपलब्ध नहीं है",
     "reasonProviderError": "प्रदाता की त्रुटि",
-    "reasonMalformedToolCall": "टूल कॉल का उपयोग नहीं हो सका"
+    "reasonMalformedToolCall": "टूल कॉल का उपयोग नहीं हो सका",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ट्रिगर",
@@ -5987,7 +5989,11 @@
       "builtinDetail": "आपके ब्राउज़र का अपना मॉडल। Chrome 127+ इसे खुद डाउनलोड और अपडेट करता है; इस ऐप द्वारा कुछ भी स्टोर नहीं किया जाता है।",
       "motionDetail": "स्थिर छवियों को स्मूथ मोशन क्लिप में बदलता है। क्लिप स्टूडियो में पहली बार Motion+ का उपयोग करने पर यह अपने आप डाउनलोड हो जाता है।",
       "motionNotPublished": "अभी प्रकाशित नहीं हुआ — जल्द ही आ रहा है",
-      "motionOpenClips": "क्लिप स्टूडियो खोलें"
+      "motionOpenClips": "क्लिप स्टूडियो खोलें",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "इस डिवाइस पर इंस्टॉल किया गया",

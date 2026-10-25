@@ -955,7 +955,9 @@
     "reasonBilling": "ಪೂರೈಕೆದಾರರ ಬಿಲ್ಲಿಂಗ್ ಸಮಸ್ಯೆ",
     "reasonModelNotFound": "ಮಾಡೆಲ್ ಲಭ್ಯವಿಲ್ಲ",
     "reasonProviderError": "ಪೂರೈಕೆದಾರರ ದೋಷ",
-    "reasonMalformedToolCall": "ಟೂಲ್ ಕರೆಯನ್ನು ಬಳಸಲಾಗಲಿಲ್ಲ"
+    "reasonMalformedToolCall": "ಟೂಲ್ ಕರೆಯನ್ನು ಬಳಸಲಾಗಲಿಲ್ಲ",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ಪ್ರಚೋದಕ",
@@ -5969,7 +5971,11 @@
       "builtinDetail": "ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನ ಸ್ವಂತ ಮಾಡೆಲ್. Chrome 127+ ತಾನಾಗಿಯೇ ಡೌನ್‌ಲೋಡ್ ಮತ್ತು ಅಪ್‌ಡೇಟ್ ಮಾಡುತ್ತದೆ; ಈ ಆ್ಯಪ್ ಏನನ್ನೂ ಸಂಗ್ರಹಿಸುವುದಿಲ್ಲ.",
       "motionDetail": "ಸ್ಥಿರ ಚಿತ್ರಗಳನ್ನು ಸುಗಮ ಚಲನೆಯ ಕ್ಲಿಪ್‌ಗಳಾಗಿ ಪರಿವರ್ತಿಸುತ್ತದೆ. Clip Studio ನಲ್ಲಿ ಮೊದಲ ಬಾರಿಗೆ Motion+ ಬಳಸಿದಾಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಡೌನ್‌ಲೋಡ್ ಆಗುತ್ತದೆ.",
       "motionNotPublished": "ಇನ್ನೂ ಪ್ರಕಟವಾಗಿಲ್ಲ — ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ",
-      "motionOpenClips": "Clip Studio ತೆರೆಯಿರಿ"
+      "motionOpenClips": "Clip Studio ತೆರೆಯಿರಿ",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ಈ ಡಿವೈಸ್‌ನಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್ ಆದವು",

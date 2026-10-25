@@ -891,7 +891,9 @@
     "reasonBilling": "প্রোভাইডরগী বিলিং সমস্যা",
     "reasonModelNotFound": "মডেল ফংদে",
     "reasonProviderError": "প্রোভাইডরগী ভুল",
-    "reasonMalformedToolCall": "টুল কল ব্যবহার তৌবা ঙম্দ্রে"
+    "reasonMalformedToolCall": "টুল কল ব্যবহার তৌবা ঙম্দ্রে",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "হৌদোকপা",
@@ -5803,7 +5805,11 @@
       "builtinDetail": "নংগী ব্রাউজরগী মোডেল। ক্রোম 127+ না মশা মথন্তা ডাউনলোড অমসুং অপডেট তৌই; এপ অসিনা অমত্তা স্তোর তৌদে।",
       "motionDetail": "লেপ্লবা লাইশিংবু মোশন ক্লিপশিংদা ওন্থোকই। ক্লিপ স্টুডিওদা মোশন+ অহানবা শিজিন্নবদা মশা মথন্তা ডাউনলোড তৌই।",
       "motionNotPublished": "হৌজিক ফোঙদ্রি — থুনা লাক্লগনি",
-      "motionOpenClips": "ক্লিপ স্টুডিও হাংদোকউ"
+      "motionOpenClips": "ক্লিপ স্টুডিও হাংদোকউ",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ডিভাইস অসিদা ইন্সটোল তৌখ্রবা",

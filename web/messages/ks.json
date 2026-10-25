@@ -891,7 +891,9 @@
     "reasonBilling": "پرووائیڈرک بلنگ مسئلہ",
     "reasonModelNotFound": "ماڈل دستیاب چھُنہ",
     "reasonProviderError": "پرووائیڈرک خرابی",
-    "reasonMalformedToolCall": "ٹول کال ورتاونہ آیہ نہ"
+    "reasonMalformedToolCall": "ٹول کال ورتاونہ آیہ نہ",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
   },
   "nodeDefs": {
     "triggerLabel": "ٹرِگر",
@@ -5803,7 +5805,11 @@
       "builtinDetail": "تُہنٛدِ براؤزرُک پنُن ماڈل۔ کروم 127+ چھُ یہِ پانے ڈاؤن لوڈ تہٕ اپ ڈیٹ کران؛ اَتھ ایپہِ ذریعہٕ چھُ نہٕ کیٚنٛہہ تہِ ذخیرٕ کرنہٕ یوان۔",
       "motionDetail": "ساکن تصویرن چھُ ہموار موشن کلپن منز تبدیٖل کران۔ گۄڈٕنِچہِ لٹہِ کلپ سٹوڈیوس منز موشن+ اِستِعمال کرنہٕ وقتہٕ چھُ پانے ڈاؤن لوڈ گژھان۔",
       "motionNotPublished": "وۆنؠ تام چھُ نہٕ شایع گۆمُت — جلدی یِنہٕ وول",
-      "motionOpenClips": "کلپ سٹوڈیو کھۄلِو"
+      "motionOpenClips": "کلپ سٹوڈیو کھۄلِو",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "اَتھ ڈیوایسس پؠٹھ اِنسٹال کٔرِتھ",
