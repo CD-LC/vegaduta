@@ -1594,6 +1594,13 @@ app:
       max-rounds-per-invocation: ${CHAT_TOOL_MAX_ROUNDS_PER_INVOCATION:0}
       # Calls to tool names the model was never offered, per model invocation, before the soft stop.
       max-unknown-calls-per-invocation: ${CHAT_TOOL_MAX_UNKNOWN_CALLS_PER_INVOCATION:8}
+      # Cumulative PROMPT tokens one tool loop may send the model before the soft stop (the same
+      # tool_budget_exhausted result, worded for tokens). The per-turn call cap bounds rounds, not size:
+      # the runaway it misses is the loop whose every round resends a near-full window - a research turn
+      # that should cost ~10k prompt tokens can cost six figures before max-tool-calls ever engages.
+      # Counted per run through the run's transcript, so the cap follows the turn, not the process.
+      # Tenant/agent overrides: chat.toolLoop.maxPromptTokensPerTurn. 0 = uncapped.
+      max-prompt-tokens-per-turn: ${APP_CHAT_TOOLS_MAX_PROMPT_TOKENS_PER_TURN:0}
       # Model-facing wording of the two stops. {rounds} = tool rounds used. No ${...} env override: placeholders.
       budget-exhausted-message: >-
         Tool budget for this reply is exhausted after {rounds} tool round(s), so this call was NOT executed. Do not call any more tools. Answer the user now using only what you already have, say briefly if anything is incomplete, and if the work needs more calls than one reply allows, tell the user it can continue in the background as a job.
@@ -2169,6 +2176,11 @@ app:
       summary-input-chars: ${APP_CONTEXT_COMPACTION_SUMMARY_INPUT_CHARS:24000}
       summary-turn-excerpt-chars: ${APP_CONTEXT_COMPACTION_SUMMARY_TURN_EXCERPT_CHARS:2000}
       max-summaries-per-run: ${APP_CONTEXT_COMPACTION_MAX_SUMMARIES_PER_RUN:3}
+      # Tokens of the window kept back for the model's own reply before clear-at / compact-at apply.
+      # Without it a turn may fill right up to compact-at and leave no room for the answer (the
+      # compaction trigger never fires in time on small windows, and on big ones the prompt rides at
+      # ~98% of the limit). 0 restores the old fractions-of-raw-window behaviour.
+      reserve-output-tokens: ${APP_CONTEXT_COMPACTION_RESERVE_OUTPUT_TOKENS:8192}
       # --- Package 3c-1 (ContextCompactionProperties): the token estimates and the window name rules. Every
       # default is the old constant; ContextCompactionDefaultsTest pins them. ---
       # Tokens every message costs beyond its text.

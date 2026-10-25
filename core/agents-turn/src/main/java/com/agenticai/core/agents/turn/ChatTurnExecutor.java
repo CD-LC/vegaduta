@@ -126,6 +126,9 @@ final class ChatTurnExecutor {
             transcript.resultClearing(
                     behaviour.boolOrNull(TOOL_RESULT_CLEARING_ENABLED_KEY, context.scope(), agentId),
                     behaviour.integerOrNull(TOOL_RESULT_CLEARING_THRESHOLD_KEY, context.scope(), agentId));
+            // Cumulative prompt-token cap for this run (chat.toolLoop.maxPromptTokensPerTurn); null = uncapped.
+            Integer tokenCap = behaviour.integerOrNull(TOOL_LOOP_MAX_PROMPT_TOKENS_KEY, context.scope(), agentId);
+            transcript.promptTokenBudget(tokenCap == null ? null : tokenCap.longValue());
         }
         com.agenticai.core.agents.runtime.AgentRuntime resolver = runtime;
         com.agenticai.core.agents.runtime.AgentRuntimeSettings settings = context == null ? null : context.runtimeSettings();
@@ -164,6 +167,7 @@ final class ChatTurnExecutor {
 
     static final String TOOL_RESULT_CLEARING_ENABLED_KEY = "chat.toolLoop.resultClearing.enabled";
     static final String TOOL_RESULT_CLEARING_THRESHOLD_KEY = "chat.toolLoop.resultClearing.thresholdChars";
+    static final String TOOL_LOOP_MAX_PROMPT_TOKENS_KEY = "chat.toolLoop.maxPromptTokensPerTurn";
 
     /** What the provider's finish reason makes this turn do, for its tenant and agent; see {@link TurnFinishLimits}. */
     TurnFinishLimits finishLimits(TurnContext context, UUID agentId) {

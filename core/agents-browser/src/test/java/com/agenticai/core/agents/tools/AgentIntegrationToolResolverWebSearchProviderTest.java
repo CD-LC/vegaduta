@@ -120,53 +120,81 @@ class AgentIntegrationToolResolverWebSearchProviderTest {
         return provider;
     }
 
-    private boolean webSearchOffered() {
+    /**
+     * The offered {@code web_search} callback, or null. The schema is ALWAYS offered now - what the
+     * gate decides is whether the tool is LIVE or the refusing stub ({@code isUnavailable()}), so a
+     * misconfigured deployment is an honest tool result instead of a tool the model cannot see.
+     */
+    private com.agenticai.core.agents.tools.web.WebSearchToolCallback webSearch() {
         List<ToolCallback> tools =
                 resolver.resolveWebTools(
                         UUID.randomUUID(), "s1", new AtomicInteger(), "hello", null, false);
-        return tools.stream().anyMatch(t -> "web_search".equals(t.getToolDefinition().name()));
+        return tools.stream()
+                .filter(t -> "web_search".equals(t.getToolDefinition().name()))
+                .map(t -> (com.agenticai.core.agents.tools.web.WebSearchToolCallback) t)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean liveSearchOffered() {
+        var t = webSearch();
+        return t != null && !t.isUnavailable();
+    }
+
+    private boolean stubSearchOffered() {
+        var t = webSearch();
+        return t != null && t.isUnavailable();
     }
 
     @Test
     void noRegistryWired_theBraveKeyDecidesExactlyAsBefore() {
-        assertFalse(webSearchOffered());
+        assertTrue(stubSearchOffered());
         when(credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH))
                 .thenReturn(Optional.of("k"));
-        assertTrue(webSearchOffered());
+        assertTrue(liveSearchOffered());
+    }
+
+    @Test
+    void theStubAnswersWithTheOperatorFacingReason() {
+        String out = webSearch().call("{\"query\":\"atlas electric robot\"}");
+        assertTrue(out.contains("Could not search"));
+        assertTrue(out.contains("not configured"));
+        // Points at the escape hatch that still works without a provider.
+        assertTrue(out.contains("fetch_web_page"));
     }
 
     @Test
     void defaultsKeepTheBraveGateEvenWhenAnotherProviderIsConfigured() {
         // provider=brave, no fallback: the layer is inactive, so a configured SearXNG/Tavily must
-        // NOT offer the tool.
+        // NOT light the tool.
         webTools.research().setWebSearchRegistry(provide("brave", "", false, true, true));
-        assertFalse(webSearchOffered());
+        assertTrue(stubSearchOffered());
         when(credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH))
                 .thenReturn(Optional.of("k"));
-        assertTrue(webSearchOffered());
+        assertTrue(liveSearchOffered());
     }
 
     @Test
     void anActiveLayerOffersTheToolWithoutAnyBraveKeyWhenTheChosenProviderIsConfigured() {
         webTools.research().setWebSearchRegistry(provide("searxng", "", false, false, true));
-        assertTrue(webSearchOffered());
+        assertTrue(liveSearchOffered());
     }
 
     @Test
-    void anActiveLayerWithNothingConfiguredOffersNothingEvenIfABraveKeyExists() {
+    void anActiveLayerWithNothingConfiguredOffersTheStubEvenIfABraveKeyExists() {
         // searxng is chosen and unconfigured; Brave is not in the chain, so its key is irrelevant.
         when(credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH))
                 .thenReturn(Optional.of("k"));
         webTools.research().setWebSearchRegistry(provide("searxng", "", true, false, false));
-        assertFalse(webSearchOffered());
+        assertTrue(stubSearchOffered());
     }
 
     @Test
     void aFallbackOnlyNeedsOneConfiguredMemberOfTheChain() {
         webTools.research().setWebSearchRegistry(provide("brave", "tavily", false, true, false));
-        assertTrue(webSearchOffered());
+        assertTrue(liveSearchOffered());
         webTools.research().setWebSearchRegistry(provide("brave", "tavily", false, false, false));
-        assertFalse(webSearchOffered());
+        assertTrue(stubSearchOffered());
         assertEquals(
                 2, provide("brave", "tavily", false, false, false).getIfAvailable().chain().size());
     }
