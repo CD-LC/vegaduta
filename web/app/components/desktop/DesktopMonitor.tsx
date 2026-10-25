@@ -20,11 +20,15 @@ const POLL_MS = 1_000;
 export default function DesktopMonitor({
   active,
   steps,
+  live,
 }: {
   /** True while the run call is in flight - frames are polled only then. */
   active: boolean;
   /** Step results from the finished run response; the ticker keeps them on screen after the run ends. */
   steps?: DesktopRecipeStepResult[] | null;
+  /** Live-watch variant: frames of the whole screen while the person chose "Watch live" - the copy
+   * says "what the agent is doing right now" instead of naming a recipe run. */
+  live?: boolean;
 }) {
   const t = useTranslations("desktopAutomation");
   const [frameUrl, setFrameUrl] = useState<string | null>(null);
@@ -80,9 +84,13 @@ export default function DesktopMonitor({
         ) : (
           <span className="size-3.5" aria-hidden="true" />
         )}
-        {t("monitorTitle")}
+        {live ? t("monitorLiveTitle") : t("monitorTitle")}
       </div>
-      {active && <p className="mt-0.5 text-[11px] text-muted-foreground">{t("monitorRunning")}</p>}
+      {active && (
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          {live ? t("monitorLiveRunning") : t("monitorRunning")}
+        </p>
+      )}
       {down && (
         <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground" role="status">
           <MonitorX className="size-3.5" aria-hidden="true" />

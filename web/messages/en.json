@@ -6545,7 +6545,11 @@
     "cancel": "Cancel",
     "recipeSaved": "Saved \"{name}\" with {count} steps.",
     "saveWarnings": "Check before you rely on it",
-    "needRecipeName": "Give the recipe a name."
+    "needRecipeName": "Give the recipe a name.",
+    "watchLive": "Watch live",
+    "stopWatching": "Stop watching",
+    "monitorLiveTitle": "Live screen",
+    "monitorLiveRunning": "Streaming the screen - you are watching the agent work in real time."
   },
   "agentVersionsCard": {
     "explainer": "A snapshot is saved automatically every time this agent's configuration changes. Labels mark the version you consider good - \"Restore\" is the action that actually rolls the agent back (and is itself recorded, so it can be undone).",
