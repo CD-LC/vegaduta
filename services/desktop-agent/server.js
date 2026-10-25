@@ -223,20 +223,60 @@ async function macType(text) {
   return { chars: String(text).length };
 }
 
+const MAC_MODIFIERS = {
+  cmd: 'command down', command: 'command down',
+  ctrl: 'control down', control: 'control down',
+  alt: 'option down', option: 'option down',
+  shift: 'shift down',
+};
+
 async function macKey(key) {
-  const code = KEY_CODES_MAC[String(key).toLowerCase()];
-  if (code === undefined) {
-    const err = new Error(`unknown key "${key}" - one of ${Object.keys(KEY_CODES_MAC).join(', ')}`);
+  const parts = String(key).toLowerCase().split('+').map((p) => p.trim()).filter(Boolean);
+  const keyName = parts.pop();
+  const mods = parts.map((m) => {
+    const mod = MAC_MODIFIERS[m];
+    if (!mod) {
+      const err = new Error(`unknown modifier "${m}" - one of ${Object.keys(MAC_MODIFIERS).join(', ')}`);
+      err.status = 400;
+      throw err;
+    }
+    return mod;
+  });
+  // A single letter/character presses it as a keystroke (respects modifiers);
+  // a named key goes through key code.
+  const script =
+    mods.length === 0
+      ? namedKeyScript(keyName)
+      : keyName && keyName.length === 1
+        ? `tell application "System Events" to keystroke "${appleQuote(keyName)}" using {${mods.join(', ')}}`
+        : namedKeyScript(keyName, mods);
+  if (!script) {
+    const err = new Error(`unknown key "${keyName}" - one of ${Object.keys(KEY_CODES_MAC).join(', ')}, a single letter, or modifier+key (cmd+s)`);
     err.status = 400;
     throw err;
   }
-  await appleScript(`tell application "System Events" to key code ${code}`);
+  await appleScript(script);
+}
+
+function namedKeyScript(name, mods = []) {
+  const code = KEY_CODES_MAC[name];
+  if (code === undefined) return null;
+  return mods.length
+    ? `tell application "System Events" to key code ${code} using {${mods.join(', ')}}`
+    : `tell application "System Events" to key code ${code}`;
 }
 
 async function macOpen(target, application) {
+  const t = String(target);
   const argv = ['open'];
   if (application) argv.push('-a', application);
-  argv.push(String(target));
+  else if (!t.startsWith('http://') && !t.startsWith('https://') && !fs.existsSync(t)) {
+    // No handler named and the target is not a file that exists: treat it as an
+    // app name ('open -a TextEdit'), not a path - plain 'open TextEdit' only
+    // looks for a file and fails with "does not exist".
+    argv.push('-a');
+  }
+  argv.push(t);
   await run(argv);
 }
 
@@ -292,14 +332,33 @@ async function linuxType(text) {
   return { chars: String(text).length };
 }
 
+const XDOTOOL_MODIFIERS = {
+  cmd: 'super', command: 'super', super: 'super',
+  ctrl: 'ctrl', control: 'ctrl',
+  alt: 'alt', option: 'alt', meta: 'meta',
+  shift: 'shift',
+};
+
 async function linuxKey(key) {
   if (!(await hasBinary('xdotool'))) {
     const err = new Error('xdotool not installed');
     err.status = 501;
     throw err;
   }
-  const name = KEY_NAMES_XDOTOOL[String(key).toLowerCase()] || String(key);
-  await run(['xdotool', 'key', name]);
+  // Modifier combos land as "ctrl+s"/"super+n" in xdotool's own syntax.
+  const parts = String(key).toLowerCase().split('+').map((p) => p.trim()).filter(Boolean);
+  const keyName = parts.pop();
+  const mods = parts.map((m) => {
+    const mod = XDOTOOL_MODIFIERS[m];
+    if (!mod) {
+      const err = new Error(`unknown modifier "${m}" - one of ${Object.keys(XDOTOOL_MODIFIERS).join(', ')}`);
+      err.status = 400;
+      throw err;
+    }
+    return mod;
+  });
+  const name = KEY_NAMES_XDOTOOL[keyName] || keyName;
+  await run(['xdotool', 'key', ...mods, name]);
 }
 
 async function linuxOpen(target, application) {
