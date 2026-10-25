@@ -54,13 +54,17 @@ public final class DesktopToolCallback implements ToolCallback, ToolConfirmation
                 "POST", "/click", false),
         TYPE(
                 "local_desktop_type",
-                "Type `text` with the keyboard into whatever has focus. Bring the right app or field to "
-                        + "the front first (local_desktop_activate, local_desktop_click).",
+                "Type `text` with the keyboard into whatever has focus - it does NOT save anything. Bring "
+                        + "the right app or field to the front first (local_desktop_activate, "
+                        + "local_desktop_click); a text editor with no document window needs "
+                        + "'local_desktop_key cmd+n' before typing lands, and 'local_desktop_key cmd+s' "
+                        + "plus the save dialog to keep it.",
                 "POST", "/type", false),
         KEY(
                 "local_desktop_key",
-                "Press one named key: return, enter, tab, space, delete, escape, left, right, down, up "
-                        + "or f1-f12.",
+                "Press a named key (return, enter, tab, space, delete, escape, left, right, down, up, "
+                        + "f1-f12) or a modifier combo like 'cmd+s' (save), 'cmd+n' (new document), "
+                        + "'cmd+a', 'ctrl+c'. Modifiers: cmd/command, ctrl, alt/option, shift.",
                 "POST", "/key", false),
         OPEN(
                 "local_desktop_open",
