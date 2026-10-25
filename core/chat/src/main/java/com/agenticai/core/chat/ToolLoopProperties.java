@@ -37,7 +37,9 @@ public class ToolLoopProperties {
      * Tool rounds one model invocation may run before the soft stop. {@code 0} (default) = derived: the
      * highest per-turn call ceiling ({@code max-tool-calls-per-turn} times the autonomous multiplier)
      * plus the step-limit grace, so the call policy is what ends a turn; a positive number is an
-     * explicit cap and wins even when it is lower than that.
+     * explicit cap and wins even when it is lower than that. A run whose passes carry their earlier
+     * tool rounds ({@link ToolLoopTranscript#roundsSpentBefore}) is held to the cap across the whole
+     * run, so a continuation pass cannot refill it.
      */
     private int maxRoundsPerInvocation = Integer.parseInt(DEFAULTS.getProperty("max-rounds-per-invocation"));
 

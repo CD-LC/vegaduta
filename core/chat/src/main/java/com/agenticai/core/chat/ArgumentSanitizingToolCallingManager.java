@@ -309,7 +309,7 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             increment(UNKNOWN_TOOL_METRIC, newUnknown);
         }
         unknownCalls += newUnknown;
-        int round = priorRounds + 1;
+        int round = ToolLoopRunHooks.roundsSpentBefore(prompt) + priorRounds + 1; // + earlier passes' rounds, so the cap counts the turn's total
 
         // A run may carry its own cap (the agent's tool-step ceiling decides how many rounds its backstop needs).
         int roundCap = ToolLoopRunHooks.maxRounds(prompt, maxToolRounds);
@@ -334,7 +334,7 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 reason, round, roundCap, unknownCalls, maxUnknownToolCalls, calls.size()
             );
             increment(LOOP_LIMIT_METRIC, 1, "stage", "soft", "reason", reason);
-            String softStop = softStopResult(prompt, priorRounds);
+            String softStop = softStopResult(prompt, round - 1);
             for (AssistantMessage.ToolCall call : calls) {
                 responses.add(new ToolResponseMessage.ToolResponse(call.id(), call.name(), softStop));
             }

@@ -429,6 +429,39 @@ class SearchAndCallToolTest {
     }
 
     @Test
+    void withoutAnAgentIdentityTheRefusalCeilingAnswersWithTheBudgetExhaustedResult() {
+        // `callTool` was built with no agent/session (see setUp): there is no turn identity to
+        // throw away, so past the ceiling the refusal is the shared tool_budget_exhausted result
+        // the tool loop honours - bounded, never thrown.
+        for (int i = 0; i < CallToolToolCallback.MAX_CONSECUTIVE_REFUSALS; i++) {
+            assertTrue(
+                    callTool.call("{\"name\":\"nope\",\"argsJson\":\"{}\"}")
+                            .startsWith("There is no tool named"));
+        }
+
+        String exhausted = callTool.call("{\"name\":\"nope\",\"argsJson\":\"{}\"}");
+
+        assertTrue(
+                com.agenticai.core.guardrails.ToolBudgetExhausted.isBudgetExhausted(exhausted),
+                exhausted);
+        assertEquals(
+                java.util.Optional.of(
+                        com.agenticai.core.guardrails.ToolResultMarker.Kind.BUDGET_EXHAUSTED),
+                com.agenticai.core.guardrails.ToolResultMarker.kindOf(exhausted));
+        // Every later refusal is answered the same way; a successful dispatch still resets.
+        assertTrue(
+                com.agenticai.core.guardrails.ToolBudgetExhausted.isBudgetExhausted(
+                        callTool.call("{\"name\":\"nope\",\"argsJson\":\"{}\"}")));
+        search.call("{\"query\":\"send email\"}");
+        assertEquals(
+                "google_gmail:{}",
+                callTool.call("{\"name\":\"google_gmail\",\"argsJson\":\"{}\"}"));
+        assertTrue(
+                callTool.call("{\"name\":\"nope\",\"argsJson\":\"{}\"}")
+                        .startsWith("There is no tool named"));
+    }
+
+    @Test
     void aDispatchedCallResetsTheRefusalCount() {
         CallToolToolCallback bounded =
                 new CallToolToolCallback(state, java.util.UUID.randomUUID(), "session-1");

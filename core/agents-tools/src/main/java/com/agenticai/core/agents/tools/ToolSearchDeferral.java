@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.agents.tools.search.CallToolToolCallback;
+import com.agenticai.core.agents.tools.search.SearchCatalogScreen;
 import com.agenticai.core.agents.tools.search.SearchToolsToolCallback;
 import com.agenticai.core.agents.tools.search.ToolActivationRegistry;
 import com.agenticai.core.agents.tools.search.ToolSearchService;
@@ -69,7 +70,14 @@ final class ToolSearchDeferral {
     }
 
     private final ToolSearchService service = new ToolSearchService();
-    private final ToolActivationRegistry registry = new ToolActivationRegistry();
+    private volatile ToolActivationRegistry registry = new ToolActivationRegistry();
+
+    /**
+     * The one-shot content screen run over every deferred tool's catalog text (name, description,
+     * schema) as the catalog is built; null = descriptions enter the index unscreened and search
+     * results keep going through the per-call screen like every other tool output.
+     */
+    private volatile SearchCatalogScreen catalogScreen;
 
     private volatile boolean enabled = false;
     private volatile int threshold = DEFAULT_THRESHOLD;
@@ -89,6 +97,25 @@ final class ToolSearchDeferral {
     }
 
     /**
+     * Swaps the activation carry-over registry ({@code ToolResolverConfiguration} picks a
+     * replica-safe store when Redis is available). Null keeps the in-memory default.
+     */
+    void activations(ToolActivationRegistry registry) {
+        if (registry != null) {
+            this.registry = registry;
+        }
+    }
+
+    /**
+     * Wires the catalog-entry screen ({@link SearchCatalogScreen}) from the {@code GuardrailService}
+     * the per-call output screen uses; null = no screen, and search results stay unmarked.
+     */
+    void withCatalogScreen(com.agenticai.core.guardrails.GuardrailService guardrailService) {
+        this.catalogScreen =
+                guardrailService == null ? null : new SearchCatalogScreen(guardrailService);
+    }
+
+    /**
      * @param allowed the agent's resolved, allow-list-filtered tools (already guard-wrapped)
      * @return {@code allowed} itself (same instance) when deferral does not apply; otherwise the
      *     tools to offer the model: {@code search_tools}, {@code call_tool}, then the tools that
@@ -96,6 +123,19 @@ final class ToolSearchDeferral {
      */
     List<ToolCallback> apply(
             List<ToolCallback> allowed, UUID agentId, String sessionId, Wrapper wrapper) {
+        return apply(allowed, agentId, sessionId, wrapper, null);
+    }
+
+    /**
+     * As {@link #apply(List, UUID, String, Wrapper)}, with the turn's {@code chatClient} for the
+     * catalog screen's semantic layer; null runs the pattern layer only.
+     */
+    List<ToolCallback> apply(
+            List<ToolCallback> allowed,
+            UUID agentId,
+            String sessionId,
+            Wrapper wrapper,
+            org.springframework.ai.chat.client.ChatClient chatClient) {
         if (!enabled || allowed == null || allowed.size() <= threshold) {
             return allowed;
         }
@@ -105,6 +145,8 @@ final class ToolSearchDeferral {
         Set<String> carried = carry > 0 ? Set.copyOf(registry.recall(key, carry)) : Set.of();
         List<String> keepVisible = alwaysOn;
 
+        SearchCatalogScreen screen = catalogScreen;
+        boolean screenDroppedAny = false;
         List<ToolCallback> exposedInOrder = new ArrayList<>();
         Map<String, ToolCallback> exposed = new LinkedHashMap<>();
         Map<String, ToolCallback> deferred = new LinkedHashMap<>();
@@ -119,17 +161,27 @@ final class ToolSearchDeferral {
                     exposed.putIfAbsent(name, tool);
                 }
             } else {
-                deferred.putIfAbsent(name, tool);
+                // A description/schema the screen withholds is replaced in the catalog entry itself
+                // (the tool stays searchable by name); a withheld NAME has no safe listing, so the
+                // tool leaves this turn's catalog entirely.
+                ToolCallback entry =
+                        screen != null ? screen.screened(tool, chatClient, agentId) : tool;
+                if (entry != null) {
+                    deferred.putIfAbsent(name, entry);
+                } else {
+                    screenDroppedAny = true;
+                }
             }
         }
         if (deferred.isEmpty()) {
             // Everything is standing capability: nothing to search for, so offer the list
-            // untouched.
-            return allowed;
+            // untouched - unless the screen withheld every deferrable tool's name, in which case
+            // `allowed` still contains them and only the exposed list is safe to offer.
+            return screenDroppedAny ? exposedInOrder : allowed;
         }
 
         ToolSearchState state =
-                new ToolSearchState(exposed, deferred, service, registry, key, carry);
+                new ToolSearchState(exposed, deferred, service, registry, key, carry, screen != null);
         List<ToolCallback> offered = new ArrayList<>(exposedInOrder.size() + 2);
         offered.add(wrapper.wrap(new SearchToolsToolCallback(state), true));
         offered.add(wrapper.wrap(new CallToolToolCallback(state, agentId, sessionId), false));

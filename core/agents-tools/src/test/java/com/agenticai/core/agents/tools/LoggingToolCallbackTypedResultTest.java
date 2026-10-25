@@ -144,4 +144,39 @@ class LoggingToolCallbackTypedResultTest {
         assertFalse(LoggingToolCallback.wasExecuted(null));
         assertTrue(LoggingToolCallback.wasExecuted("{\"status\":\"sent\"}"));
     }
+
+    @Test
+    void aPlatformAnswerWrappedAsAJsonObjectIsStillNotAnExecutedEffect() {
+        // The outermost wrapper (TenantContextPropagatingToolCallback.ensureJsonObject) mints a new
+        // String for non-JSON output; the mark must survive that wrap or a refusal relayed through
+        // call_tool would be journaled - and later replayed - as if the tool had run.
+        ToolCallback delegate = mock(ToolCallback.class);
+        String marked =
+                ToolResultMarker.mark(
+                        "This tool call ('send_invoice') was refused " + System.nanoTime(),
+                        ToolResultMarker.Kind.BLOCKED);
+        when(delegate.call("{}")).thenReturn(marked);
+
+        String out =
+                new TenantContextPropagatingToolCallback(delegate, null).call("{}");
+
+        assertTrue(out.startsWith("{\"result\":"), out);
+        assertEquals(
+                ToolResultMarker.Kind.BLOCKED, ToolResultMarker.kindOf(out).orElseThrow());
+        assertFalse(LoggingToolCallback.wasExecuted(out));
+    }
+
+    @Test
+    void aToolResultThatOnlyMentionsAMarkerWordIsNotAPlatformAnswer() {
+        // No mark is invented by the wrap: an executed tool's own text stays executed, and the
+        // screen still sees it.
+        ToolCallback delegate = mock(ToolCallback.class);
+        when(delegate.call("{}")).thenReturn("job log: state approval_parked " + System.nanoTime());
+
+        String out =
+                new TenantContextPropagatingToolCallback(delegate, null).call("{}");
+
+        assertTrue(ToolResultMarker.kindOf(out).isEmpty(), out);
+        assertTrue(LoggingToolCallback.wasExecuted(out));
+    }
 }

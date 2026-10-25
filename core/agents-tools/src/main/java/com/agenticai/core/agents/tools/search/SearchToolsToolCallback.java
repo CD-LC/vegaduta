@@ -135,9 +135,9 @@ public class SearchToolsToolCallback implements ToolCallback {
         List<String> activated = state.activate(names);
         emitStep(query, activated);
         if (activated.isEmpty()) {
-            return noMatch(query);
+            return catalogResult(noMatch(query));
         }
-        return format(query, activated);
+        return catalogResult(format(query, activated));
     }
 
     private String format(String query, List<String> activated) {
@@ -305,12 +305,21 @@ public class SearchToolsToolCallback implements ToolCallback {
      * An answer the platform authored in full - an input or availability diagnostic - is
      * registered with {@link ToolResultMarker} so the guard's untrusted-content screen passes it
      * through (these read like injection instructions to a content judge) and the journals know
-     * nothing ran. The search RESULTS ({@link #format}, {@link #noMatch}) are deliberately NOT
-     * marked: they embed tool names and descriptions an MCP server can author, which is exactly
-     * the content the screen exists for.
+     * nothing ran.
      */
     private static String platformAnswer(String message) {
         return ToolResultMarker.mark(message, ToolResultMarker.Kind.BLOCKED);
+    }
+
+    /**
+     * The search RESULT embeds tool names, descriptions and schemas an MCP server can author, so it
+     * is only marked the platform's answer when the catalog was screened at build time ({@link
+     * ToolSearchState#catalogScreened()} - {@code SearchCatalogScreen} screens each deferred tool's
+     * text once, as it enters the catalog). An unscreened catalog keeps the old contract: results
+     * unmarked, screened per call like any tool output.
+     */
+    private String catalogResult(String text) {
+        return state.catalogScreened() ? platformAnswer(text) : text;
     }
 
     private static void emitStep(String query, List<String> activated) {

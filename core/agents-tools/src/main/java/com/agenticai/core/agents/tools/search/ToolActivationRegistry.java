@@ -2,26 +2,19 @@ package com.agenticai.core.agents.tools.search;
 
 import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Remembers which deferred tools a conversation has already searched for, so the next turn of the
  * same session can offer them directly instead of making the model search again.
  *
- * <p>In-memory and best-effort by design: it is a latency/token optimisation, never a source of
- * truth. A restart, an eviction or a second replica simply means the model searches once more.
- * Bounded two ways (an LRU cap on sessions and a time-to-live) so an unbounded stream of one-off
- * sessions cannot grow it. The key is built by the caller from tenant + agent + session, so one
- * tenant's activations can never be read back under another's key.
- *
- * <p>Thread-safe: every operation takes the map's monitor, and the critical sections are a few map
- * operations on a handful of names.
+ * <p>Best-effort by design: it is a latency/token optimisation, never a source of truth. The
+ * backing {@link ToolActivationStore} is the in-memory LRU by default (a restart, an eviction or a
+ * second replica simply means the model searches once more) and Redis when {@code
+ * app.tools.search.activation-store} selects it (replica-safe). The key is built by the caller
+ * from tenant + agent + session, so one tenant's activations can never be read back under
+ * another's key.
  */
 public final class ToolActivationRegistry {
 
@@ -34,35 +27,28 @@ public final class ToolActivationRegistry {
     /** Hard ceiling on remembered names per session, whatever the caller asks for. */
     static final int MAX_NAMES_PER_SESSION = 32;
 
-    private static final class SessionActivations {
-        final LinkedHashSet<String> names = new LinkedHashSet<>();
-        Instant touchedAt;
-
-        SessionActivations(Instant touchedAt) {
-            this.touchedAt = touchedAt;
-        }
-    }
-
+    private final ToolActivationStore store;
     private final Duration ttl;
-    private final Clock clock;
-    private final Map<String, SessionActivations> sessions;
 
     public ToolActivationRegistry() {
-        this(DEFAULT_MAX_SESSIONS, DEFAULT_TTL, Clock.systemUTC());
+        this(new MemoryToolActivationStore(DEFAULT_MAX_SESSIONS, Clock.systemUTC()), DEFAULT_TTL);
     }
 
     public ToolActivationRegistry(int maxSessions, Duration ttl, Clock clock) {
-        int cap = Math.max(1, maxSessions);
+        this(new MemoryToolActivationStore(maxSessions, clock), ttl);
+    }
+
+    /**
+     * A registry over an explicit {@code store} (e.g. {@link RedisToolActivationStore} for a
+     * multi-replica deploy); {@code ttl} defaults to {@link #DEFAULT_TTL} when unset or
+     * non-positive. A null {@code store} falls back to the in-memory default.
+     */
+    public ToolActivationRegistry(ToolActivationStore store, Duration ttl) {
+        this.store =
+                store == null
+                        ? new MemoryToolActivationStore(DEFAULT_MAX_SESSIONS, Clock.systemUTC())
+                        : store;
         this.ttl = ttl == null || ttl.isNegative() || ttl.isZero() ? DEFAULT_TTL : ttl;
-        this.clock = clock == null ? Clock.systemUTC() : clock;
-        this.sessions =
-                new LinkedHashMap<>(16, 0.75f, true) {
-                    @Override
-                    protected boolean removeEldestEntry(
-                            Map.Entry<String, SessionActivations> eldest) {
-                        return size() > cap;
-                    }
-                };
     }
 
     /** Stable per-conversation key; never null. */
@@ -83,27 +69,7 @@ public final class ToolActivationRegistry {
         if (key == null || names == null || names.isEmpty() || maxNames <= 0) {
             return;
         }
-        int keep = Math.min(maxNames, MAX_NAMES_PER_SESSION);
-        Instant now = clock.instant();
-        synchronized (sessions) {
-            SessionActivations entry = sessions.get(key);
-            if (entry == null || expired(entry, now)) {
-                entry = new SessionActivations(now);
-                sessions.put(key, entry);
-            }
-            for (String name : names) {
-                if (name == null || name.isBlank()) {
-                    continue;
-                }
-                entry.names.remove(name);
-                entry.names.add(name);
-            }
-            while (entry.names.size() > keep) {
-                String oldest = entry.names.iterator().next();
-                entry.names.remove(oldest);
-            }
-            entry.touchedAt = now;
-        }
+        store.remember(key, names, Math.min(maxNames, MAX_NAMES_PER_SESSION), ttl);
     }
 
     /**
@@ -114,30 +80,12 @@ public final class ToolActivationRegistry {
         if (key == null || limit <= 0) {
             return List.of();
         }
-        Instant now = clock.instant();
-        synchronized (sessions) {
-            SessionActivations entry = sessions.get(key);
-            if (entry == null) {
-                return List.of();
-            }
-            if (expired(entry, now)) {
-                sessions.remove(key);
-                return List.of();
-            }
-            entry.touchedAt = now;
-            List<String> all = new ArrayList<>(entry.names);
-            return List.copyOf(all.subList(Math.max(0, all.size() - limit), all.size()));
-        }
+        List<String> names = store.recall(key, limit, ttl);
+        return names == null ? List.of() : names;
     }
 
     /** Number of sessions currently held (for tests and diagnostics). */
     public int sessionCount() {
-        synchronized (sessions) {
-            return sessions.size();
-        }
-    }
-
-    private boolean expired(SessionActivations entry, Instant now) {
-        return entry.touchedAt.plus(ttl).isBefore(now);
+        return store.sessionCount();
     }
 }
