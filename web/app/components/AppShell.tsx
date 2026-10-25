@@ -164,8 +164,15 @@ function AppShellBody({
   // hovering pointer and no active tour (every data-tour anchor lives in the
   // classic rows, which must stay mounted while a tour runs).
   const hubMode = collapsibleRail && isDesktop && isHoverCapable && !tourActive;
-  const { flyout, setFlyout, flyoutPanelRef, cancelFlyoutClose, scheduleFlyoutClose, openFlyout, openFlyoutAndFocusFirst } =
-    useHubFlyout(pathname, hubMode);
+  const {
+    flyout,
+    setFlyout,
+    flyoutPanelRef,
+    cancelFlyoutClose,
+    scheduleFlyoutClose,
+    openFlyout,
+    openFlyoutAndFocusFirst,
+  } = useHubFlyout(pathname, hubMode);
   const flyoutSection = flyout ? navSections.find((s) => s.labelKey === flyout.key) : undefined;
   const { railLabelCls, railRowCollapse } = railClasses(collapsibleRail, hubMode);
 

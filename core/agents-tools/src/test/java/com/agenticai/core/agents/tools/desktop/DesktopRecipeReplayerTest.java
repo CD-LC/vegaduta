@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The replay engine against a fake desktop agent: step ordering and endpoints, the stop-on-first-
- * failure contract, the irreversible pause, verification through {@code /ui}, secret resolution
- * and scrubbing, monitor pacing and the overall time budget.
+ * failure contract, the irreversible pause, verification through {@code /ui}, secret resolution and
+ * scrubbing, monitor pacing and the overall time budget.
  */
 class DesktopRecipeReplayerTest {
 
@@ -49,10 +49,30 @@ class DesktopRecipeReplayerTest {
     }
 
     private static RecipeStep step(
-            String action, String app, String label, Integer x, Integer y, String text,
-            String key, String target, Integer waitMs, Expect expect, boolean irreversible) {
+            String action,
+            String app,
+            String label,
+            Integer x,
+            Integer y,
+            String text,
+            String key,
+            String target,
+            Integer waitMs,
+            Expect expect,
+            boolean irreversible) {
         return new RecipeStep(
-                action, app, label, null, x, y, text, key, target, waitMs, expect, null,
+                action,
+                app,
+                label,
+                null,
+                x,
+                y,
+                text,
+                key,
+                target,
+                waitMs,
+                expect,
+                null,
                 irreversible);
     }
 
@@ -85,12 +105,42 @@ class DesktopRecipeReplayerTest {
         DesktopRecipeSpec s =
                 spec(
                         List.of(
-                                step("open", null, null, null, null, null, null, "https://x.example", null, null, false),
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("press", "Safari", "Allow", null, null, null, null, null, null, null, false),
-                                step("click", null, null, 10, 20, null, null, null, null, null, false),
-                                step("type", null, null, null, null, "hi", null, null, null, null, false),
-                                step("key", null, null, null, null, null, "tab", null, null, null, false)));
+                                step(
+                                        "open",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        "https://x.example",
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "press", "Safari", "Allow", null, null, null, null, null,
+                                        null, null, false),
+                                step(
+                                        "click", null, null, 10, 20, null, null, null, null, null,
+                                        false),
+                                step(
+                                        "type", null, null, null, null, "hi", null, null, null,
+                                        null, false),
+                                step(
+                                        "key", null, null, null, null, null, "tab", null, null,
+                                        null, false)));
 
         DesktopRecipeReplayer.Outcome o =
                 replayer.replay(s, Map.of(), fake, null, options(false, 1, 0));
@@ -113,8 +163,21 @@ class DesktopRecipeReplayerTest {
         DesktopRecipeSpec s =
                 spec(
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("wait", null, null, null, null, null, null, null, 1_500, null, false)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "wait", null, null, null, null, null, null, null, 1_500,
+                                        null, false)));
         replies.add(ok());
         DesktopRecipeReplayer.Outcome o =
                 replayer.replay(s, Map.of(), fake, null, options(false, 1, 0));
@@ -130,9 +193,24 @@ class DesktopRecipeReplayerTest {
         DesktopRecipeSpec s =
                 spec(
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("press", "Safari", "Save", null, null, null, null, null, null, null, false),
-                                step("type", null, null, null, null, "x", null, null, null, null, false)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "press", "Safari", "Save", null, null, null, null, null,
+                                        null, null, false),
+                                step(
+                                        "type", null, null, null, null, "x", null, null, null, null,
+                                        false)));
 
         DesktopRecipeReplayer.Outcome o =
                 replayer.replay(s, Map.of(), fake, null, options(false, 1, 0));
@@ -150,9 +228,24 @@ class DesktopRecipeReplayerTest {
         DesktopRecipeSpec s =
                 spec(
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("press", "Safari", "Pay now", null, null, null, null, null, null, null, true),
-                                step("type", null, null, null, null, "x", null, null, null, null, false)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "press", "Safari", "Pay now", null, null, null, null, null,
+                                        null, null, true),
+                                step(
+                                        "type", null, null, null, null, "x", null, null, null, null,
+                                        false)));
 
         DesktopRecipeReplayer.Outcome o =
                 replayer.replay(s, Map.of(), fake, null, options(false, 1, 0));
@@ -182,7 +275,18 @@ class DesktopRecipeReplayerTest {
                         List.of("safari"),
                         List.of(new ParamSpec("city", true)),
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false)));
 
         DesktopRecipeReplayer.Outcome o =
                 replayer.replay(s, Map.of(), fake, null, options(false, 1, 0));
@@ -202,8 +306,30 @@ class DesktopRecipeReplayerTest {
                         List.of("safari"),
                         List.of(new ParamSpec("name", true)),
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("type", null, null, null, null, "hello {{name}}", null, null, null, null, false)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "type",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        "hello {{name}}",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false)));
 
         replayer.replay(s, Map.of("name", "Ada"), fake, null, options(false, 1, 0));
         assertThat(calls.get(1)).isEqualTo("/type {text=hello Ada}");
@@ -219,15 +345,40 @@ class DesktopRecipeReplayerTest {
                         List.of("safari"),
                         List.of(),
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("type", null, null, null, null, "{{secret.DESKTOP_PW}}", null, null, null, null, false)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "type",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        "{{secret.DESKTOP_PW}}",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false)));
 
         DesktopRecipeReplayer.Outcome o =
                 replayer.replay(
                         s,
                         Map.of(),
                         fake,
-                        name -> "DESKTOP_PW".equals(name) ? java.util.Optional.of("hunter2secret") : java.util.Optional.empty(),
+                        name ->
+                                "DESKTOP_PW".equals(name)
+                                        ? java.util.Optional.of("hunter2secret")
+                                        : java.util.Optional.empty(),
                         options(false, 1, 0));
 
         assertThat(calls.get(1)).isEqualTo("/type {text=hunter2secret}");
@@ -244,10 +395,36 @@ class DesktopRecipeReplayerTest {
                         List.of("safari"),
                         List.of(),
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("type", null, null, null, null, "{{secret.DESKTOP_PW}}", null, null, null, null, false)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "type",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        "{{secret.DESKTOP_PW}}",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false)));
         DesktopRecipeReplayer.Outcome o =
-                replayer.replay(s, Map.of(), fake, DesktopRecipeReplayer.SecretValues.NONE,
+                replayer.replay(
+                        s,
+                        Map.of(),
+                        fake,
+                        DesktopRecipeReplayer.SecretValues.NONE,
                         options(false, 1, 0));
         assertThat(o.success()).isFalse();
         assertThat(o.failure()).contains("DESKTOP_PW");
@@ -258,13 +435,36 @@ class DesktopRecipeReplayerTest {
         replies.add(ok()); // the activate
         replies.add(ok()); // the press itself
         replies.add(json("{\"app\":\"Safari\",\"elements\":[{\"label\":\"Loading...\"}]}"));
-        replies.add(json("{\"app\":\"Safari\",\"elements\":[{\"label\":\"Sent\",\"role\":\"AXStaticText\"}]}"));
+        replies.add(
+                json(
+                        "{\"app\":\"Safari\",\"elements\":[{\"label\":\"Sent\",\"role\":\"AXStaticText\"}]}"));
         DesktopRecipeSpec s =
                 spec(
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("press", "Safari", "Send", null, null, null, null, null,
-                                        null, new Expect("Sent", "safari"), true)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "press",
+                                        "Safari",
+                                        "Send",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        new Expect("Sent", "safari"),
+                                        true)));
 
         DesktopRecipeReplayer.Outcome o =
                 replayer.replay(s, Map.of(), fake, null, options(true, 1, 0));
@@ -284,9 +484,30 @@ class DesktopRecipeReplayerTest {
         DesktopRecipeSpec s =
                 spec(
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("press", "Safari", "Go", null, null, null, null, null,
-                                        null, new Expect("Done", null), false)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "press",
+                                        "Safari",
+                                        "Go",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        new Expect("Done", null),
+                                        false)));
 
         // The clock reads: start, the two per-step budget checks, the verify deadline, then the
         // post-poll re-check - that last one lands past the step's 5s timeout so one poll runs
@@ -313,9 +534,24 @@ class DesktopRecipeReplayerTest {
         DesktopRecipeSpec s =
                 spec(
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("press", "Safari", "A", null, null, null, null, null, null, null, false),
-                                step("press", "Safari", "B", null, null, null, null, null, null, null, false)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "press", "Safari", "A", null, null, null, null, null, null,
+                                        null, false),
+                                step(
+                                        "press", "Safari", "B", null, null, null, null, null, null,
+                                        null, false)));
 
         replayer.replay(s, Map.of(), fake, null, options(false, 1, 800));
         assertThat(sleeps).containsExactly(800L, 800L); // between steps, not after the last
@@ -328,9 +564,24 @@ class DesktopRecipeReplayerTest {
         DesktopRecipeSpec s =
                 spec(
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("press", "Safari", "A", null, null, null, null, null, null, null, false),
-                                step("press", "Safari", "B", null, null, null, null, null, null, null, false)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "press", "Safari", "A", null, null, null, null, null, null,
+                                        null, false),
+                                step(
+                                        "press", "Safari", "B", null, null, null, null, null, null,
+                                        null, false)));
         // The second clock read lands past the 60s budget, so the replay stops before step 1.
         AtomicLong clock = new AtomicLong();
         DesktopRecipeReplayer fast =
@@ -349,8 +600,21 @@ class DesktopRecipeReplayerTest {
         DesktopRecipeSpec s =
                 spec(
                         List.of(
-                                step("activate", "Safari", null, null, null, null, null, null, null, null, false),
-                                step("press", "Safari", "X", null, null, null, null, null, null, null, false)));
+                                step(
+                                        "activate",
+                                        "Safari",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        false),
+                                step(
+                                        "press", "Safari", "X", null, null, null, null, null, null,
+                                        null, false)));
         DesktopRecipeReplayer.Outcome o =
                 replayer.replay(s, Map.of(), fake, null, options(false, 1, 0));
         assertThat(o.success()).isFalse();

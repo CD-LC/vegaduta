@@ -205,7 +205,11 @@ class RunDesktopRecipeToolCallbackTest {
 
         verify(service)
                 .replayForAgent(
-                        eq(AGENT), anyString(), anyMap(), anyBoolean(), anyInt(),
+                        eq(AGENT),
+                        anyString(),
+                        anyMap(),
+                        anyBoolean(),
+                        anyInt(),
                         monitor.capture());
         assertThat(monitor.getValue()).isTrue();
     }
@@ -262,9 +266,7 @@ class RunDesktopRecipeToolCallbackTest {
     void theConfirmationCardNamesTheRecipeStepsAndMode() {
         when(service.findRunnable(isNull(), eq("Tidy desk"))).thenReturn(Optional.of(recipe));
 
-        assertThat(
-                        tool.describeForConfirmation(
-                                "{\"recipe\":\"Tidy desk\",\"mode\":\"MONITOR\"}"))
+        assertThat(tool.describeForConfirmation("{\"recipe\":\"Tidy desk\",\"mode\":\"MONITOR\"}"))
                 .isEqualTo("Run desktop recipe 'Tidy desk' (2 steps, mode MONITOR)");
         // Mode omitted: the recipe's stored default is shown.
         assertThat(tool.describeForConfirmation("{\"recipe\":\"Tidy desk\"}"))

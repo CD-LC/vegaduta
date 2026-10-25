@@ -24,13 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Desktop recipe management: list, read, create by hand, save a finished run as a recipe, replay
- * one, rename, delete. Thin on purpose - the flag gate, access checks, validation and every
- * status code are decided in {@link DesktopRecipeService}, which throws only types {@code
+ * one, rename, delete. Thin on purpose - the flag gate, access checks, validation and every status
+ * code are decided in {@link DesktopRecipeService}, which throws only types {@code
  * GlobalExceptionHandler} already maps ({@code IllegalArgumentException} 400, {@code
  * ResponseStatusException} 403/404/409/503 and the agent-access {@code
  * ResourceAccessDeniedException} 404). A recipe in a response contains placeholders only, never a
- * secret or a value the user supplied. No {@code SecurityConfig} entry (authenticated by
- * default). Mirrors {@code BrowserRecipeController}.
+ * secret or a value the user supplied. No {@code SecurityConfig} entry (authenticated by default).
+ * Mirrors {@code BrowserRecipeController}.
  */
 @RestController
 @RequestMapping("/api/desktop/recipes")
@@ -71,8 +71,8 @@ public class DesktopRecipeController {
 
     /**
      * Replay over REST: the same engine {@code run_desktop_recipe} uses, against the laptop's
-     * desktop-agent sidecar. 200 always carries the run report; a failed or paused step is data
-     * in the report ({@code success=false} plus the remedy), not an HTTP error.
+     * desktop-agent sidecar. 200 always carries the run report; a failed or paused step is data in
+     * the report ({@code success=false} plus the remedy), not an HTTP error.
      */
     @PostMapping("/{id}/run")
     public RunRecipeResponse run(@PathVariable UUID id, @RequestBody RunRecipeRequest request) {

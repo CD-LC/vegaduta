@@ -12,8 +12,8 @@ import java.util.Locale;
 /**
  * Small pure helpers {@link DesktopRecipeService} shares with the rest of the desktop-recipe
  * surface: caller identity, input cleaning and the entity-to-summary mapping. Package-private on
- * purpose - nothing here is part of the feature's API, the way {@code BrowserStorageState}'s
- * domain helpers are not part of the browser feature's.
+ * purpose - nothing here is part of the feature's API, the way {@code BrowserStorageState}'s domain
+ * helpers are not part of the browser feature's.
  */
 final class DesktopRecipeSupport {
 
@@ -84,8 +84,8 @@ final class DesktopRecipeSupport {
 
     /**
      * The summary a list or detail endpoint returns: metadata plus the recipe's parameter NAMES
-     * (never values). A row whose stored JSON cannot be parsed still renders a summary - the
-     * replay path re-validates and refuses it there.
+     * (never values). A row whose stored JSON cannot be parsed still renders a summary - the replay
+     * path re-validates and refuses it there.
      */
     static RecipeSummary summary(DesktopRecipe r) {
         List<String> paramNames = new ArrayList<>();

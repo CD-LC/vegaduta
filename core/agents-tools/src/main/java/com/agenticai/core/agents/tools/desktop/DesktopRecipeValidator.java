@@ -18,19 +18,19 @@ import java.util.regex.Pattern;
  * run, created by hand, or read back from the table. Pure and dependency-free. Mirrors {@code
  * BrowserRecipeValidator}.
  *
- * <p>What it guarantees: a known action vocabulary and the shape each action needs; the first
- * step is {@code open} or {@code activate} (a replay starts cold, so it must establish which app
- * it works in); every named app sits inside the recipe's allowed apps and is a literal (a
- * placeholder cannot choose which application is driven); every placeholder is well-formed and
- * every {@code {{param}}} is declared; and a {@code {{secret.NAME}}} appears only inside a {@code
- * type} step's text - nowhere else, so a secret can only ever reach the keyboard.
+ * <p>What it guarantees: a known action vocabulary and the shape each action needs; the first step
+ * is {@code open} or {@code activate} (a replay starts cold, so it must establish which app it
+ * works in); every named app sits inside the recipe's allowed apps and is a literal (a placeholder
+ * cannot choose which application is driven); every placeholder is well-formed and every {@code
+ * {{param}}} is declared; and a {@code {{secret.NAME}}} appears only inside a {@code type} step's
+ * text - nowhere else, so a secret can only ever reach the keyboard.
  *
  * <p>Irreversibility heuristics (what the recorder and hand-authors mark): a {@code press} whose
  * label says it commits something - submit, pay, delete, send, publish... ({@link
- * #looksIrreversible}), and a bare {@code key} press of Return/Enter, which is how a typed
- * command or a half-filled form gets submitted on a desktop ({@link #looksIrreversibleKey}).
- * An {@code open} of a file, app or URL is deliberately NOT flagged: opening is what the first
- * step always does and the person already saw it run once.
+ * #looksIrreversible}), and a bare {@code key} press of Return/Enter, which is how a typed command
+ * or a half-filled form gets submitted on a desktop ({@link #looksIrreversibleKey}). An {@code
+ * open} of a file, app or URL is deliberately NOT flagged: opening is what the first step always
+ * does and the person already saw it run once.
  */
 final class DesktopRecipeValidator {
 
@@ -53,9 +53,9 @@ final class DesktopRecipeValidator {
                     Pattern.CASE_INSENSITIVE);
 
     /**
-     * Press targets whose label says the action commits something: submit, pay, buy, delete,
-     * send, publish... Same vocabulary the browser recipes use, matched case-insensitively
-     * against the element label the model pressed.
+     * Press targets whose label says the action commits something: submit, pay, buy, delete, send,
+     * publish... Same vocabulary the browser recipes use, matched case-insensitively against the
+     * element label the model pressed.
      */
     private static final Pattern IRREVERSIBLE_TARGET =
             Pattern.compile(
@@ -72,11 +72,13 @@ final class DesktopRecipeValidator {
 
     /**
      * True for Return/Enter: on a desktop a bare Return is how a typed command runs or a form
-     * submits, with no label to warn about, so it is flagged as irreversible and the replay
-     * pauses before it.
+     * submits, with no label to warn about, so it is flagged as irreversible and the replay pauses
+     * before it.
      */
     static boolean looksIrreversibleKey(String key) {
-        return key != null && ("return".equalsIgnoreCase(key.strip()) || "enter".equalsIgnoreCase(key.strip()));
+        return key != null
+                && ("return".equalsIgnoreCase(key.strip())
+                        || "enter".equalsIgnoreCase(key.strip()));
     }
 
     /**
@@ -119,8 +121,8 @@ final class DesktopRecipeValidator {
     }
 
     /**
-     * Lowercases, trims and de-duplicates the allowed-app list; rejects blanks, control
-     * characters and placeholders (an allowed app is a literal name).
+     * Lowercases, trims and de-duplicates the allowed-app list; rejects blanks, control characters
+     * and placeholders (an allowed app is a literal name).
      */
     static List<String> normalizeApps(List<String> raw) {
         Set<String> out = new LinkedHashSet<>();

@@ -1,6 +1,18 @@
 "use client";
 
-import { Loader2, Mic, MicOff, MonitorUp, MonitorX, Phone, PhoneOff, Video, VideoOff, Volume2, VolumeX } from "lucide-react";
+import {
+  Loader2,
+  Mic,
+  MicOff,
+  MonitorUp,
+  MonitorX,
+  Phone,
+  PhoneOff,
+  Video,
+  VideoOff,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { Button } from "../../ui/button";
 import { cn } from "../../../lib/utils";
 import type { useTranslations } from "../../../lib/i18n";
@@ -25,7 +37,22 @@ interface CallControlsBarProps {
   startCall: (withCamera?: boolean) => void;
 }
 
-export default function CallControlsBar({ t, status, reconnecting, muted, cameraOn, agentAudioMuted, canSee, screenSharing, toggleMute, toggleCamera, toggleScreenShare, toggleAgentAudio, endCall, startCall }: CallControlsBarProps) {
+export default function CallControlsBar({
+  t,
+  status,
+  reconnecting,
+  muted,
+  cameraOn,
+  agentAudioMuted,
+  canSee,
+  screenSharing,
+  toggleMute,
+  toggleCamera,
+  toggleScreenShare,
+  toggleAgentAudio,
+  endCall,
+  startCall,
+}: CallControlsBarProps) {
   const statusLabel =
     status === "connected"
       ? reconnecting
@@ -36,7 +63,6 @@ export default function CallControlsBar({ t, status, reconnecting, muted, camera
         : status === "error"
           ? "Call failed"
           : "Not in a call";
-
 
   return (
     <>
@@ -67,7 +93,13 @@ export default function CallControlsBar({ t, status, reconnecting, muted, camera
         </div>
         {status === "connected" ? (
           <div className="flex items-center gap-1.5">
-            <Button type="button" variant="outline" size="icon" onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"}>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={toggleMute}
+              aria-label={muted ? "Unmute" : "Mute"}
+            >
               {muted ? <MicOff size={14} /> : <Mic size={14} />}
             </Button>
             <Button
@@ -109,7 +141,13 @@ export default function CallControlsBar({ t, status, reconnecting, muted, camera
           </div>
         ) : (
           <div className="flex items-center gap-1.5">
-            <Button type="button" variant="outline" size="sm" onClick={() => startCall()} disabled={status === "connecting"}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => startCall()}
+              disabled={status === "connecting"}
+            >
               {status === "connecting" ? <Loader2 size={12} className="animate-spin" /> : <Phone size={12} />}
               Call
             </Button>

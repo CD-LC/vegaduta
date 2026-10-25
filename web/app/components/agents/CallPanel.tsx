@@ -27,7 +27,10 @@ import { useCallMachine } from "./call/useCallMachine";
 import { useVoiceModelDownloads } from "./call/useVoiceModelDownloads";
 import { speechLikelyEnglish as speechLikelyEnglishFor } from "./call/voiceHelpers";
 import { useMicTest } from "./CallPanel/useMicTest";
-import { disconnectMessage as disconnectMessageFor, startFailureMessage as startFailureMessageFor } from "./CallPanel/callErrors";
+import {
+  disconnectMessage as disconnectMessageFor,
+  startFailureMessage as startFailureMessageFor,
+} from "./CallPanel/callErrors";
 import type { CallStage } from "./CallPanel/callStage";
 import { ASK_FALLBACK_TIMEOUT_MS } from "./CallPanel/constants";
 import { playBrowserTTS } from "./CallPanel/browserTts";
@@ -199,7 +202,15 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
   }
 
   // Microphone diagnostics (see CallPanel/useMicTest.ts)
-  const { testingMicrophone, micTestResult, setMicTestResult, audioLevel, showMicTest, setShowMicTest, testMicrophone } = useMicTest(t);
+  const {
+    testingMicrophone,
+    micTestResult,
+    setMicTestResult,
+    audioLevel,
+    showMicTest,
+    setShowMicTest,
+    testMicrophone,
+  } = useMicTest(t);
 
   // ---- Call preflight + default voice (2026-09-19) -----------------------
   // Everything the preflight (lib/voice/callPreflight.ts) needs to know about
@@ -262,30 +273,25 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
   recordingRef.current = recording;
   pipelineBusyRef.current = pipelineBusy;
 
-  const {
-    sttDownload,
-    ttsDownload,
-    serverVoiceMissing,
-    noteServerVoiceMissing,
-    handlePreflightAction,
-  } = useVoiceModelDownloads({
-    unmountedRef,
-    callStartedRef,
-    pendingSttRef,
-    recordingRef,
-    pipelineBusyRef,
-    serverSttFailedAtRef,
-    setServerSttFailedAt,
-    setLocalTtsInstalled,
-    setLocalSttInstalled,
-    setAudioUnavailableNotice,
-    setPipelineError,
-    setCallStage,
-    setSttReadyNotice,
-    setShowMicTest,
-    refreshSystemHealth: () => systemHealth.refresh(),
-    sendTurnViaLocalStt,
-  });
+  const { sttDownload, ttsDownload, serverVoiceMissing, noteServerVoiceMissing, handlePreflightAction } =
+    useVoiceModelDownloads({
+      unmountedRef,
+      callStartedRef,
+      pendingSttRef,
+      recordingRef,
+      pipelineBusyRef,
+      serverSttFailedAtRef,
+      setServerSttFailedAt,
+      setLocalTtsInstalled,
+      setLocalSttInstalled,
+      setAudioUnavailableNotice,
+      setPipelineError,
+      setCallStage,
+      setSttReadyNotice,
+      setShowMicTest,
+      refreshSystemHealth: () => systemHealth.refresh(),
+      sendTurnViaLocalStt,
+    });
 
   // In-browser Whisper is whisper-tiny.EN: only used or offered when the
   // browser language AND the UI locale both say English (see
@@ -357,7 +363,15 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
   // moment any remote participant connects, and on every teardown path.
   const agentJoinTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Edge-sight and reconnect-ceiling machinery lives in call/ (hooks below).
-  const { edgeSightActive, edgeSightSource, edgeSightModeRef, sightRoomRef, edgeStreamRef, startEdgeSight, stopEdgeSight } = useEdgeSight({
+  const {
+    edgeSightActive,
+    edgeSightSource,
+    edgeSightModeRef,
+    sightRoomRef,
+    edgeStreamRef,
+    startEdgeSight,
+    stopEdgeSight,
+  } = useEdgeSight({
     t,
     roomRef,
     localVideoRef,
@@ -445,7 +459,6 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
     return startFailureMessageFor(t, err);
   }
 
-
   // Attaches/detaches the local camera track's self-view. Runs on cameraOn
   // changes rather than inline in startCall because the <video> element only
   // exists once React has rendered the cameraOn branch below.
@@ -470,54 +483,142 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
     };
   }, [cameraOn]);
 
-
-
-
-
-
-
-
   // The action modules under call/ read everything through this per-render bag;
   // the wrappers below are hoisted so hooks above can be handed them early.
   const ctx: CallCtx = {
-    agent, sessionId, onSessionId, t,
-    status, muted, cameraOn, agentAudioMuted, recording, pipelineBusy,
-    setStatus, setMuted, setCameraOn, setAgentAudioMuted, setCallError, setCallNotice, setReconnecting,
-    setAgentMissing, setRecording, setPipelineBusy, setPipelineError, setLastTranscript, setLastReply,
-    setCallTranscript, setCallStage, setAudioUnavailableNotice, setEdgeFallbackNotice, setEdgeHandledSummary,
-    setPendingFallbackAsk, setSttReadyNotice, setServerSttFailedAt, setMicState, setRecorderSupported,
-    capturedTurnKeyRef, fallbackAskResolverRef, serverSttFailedAtRef, pendingSttRef, systemHealthRef,
-    activeAgentIdRef, unmountedRef, voiceEpochRef, audioUnlockedRef, callStartedRef, recordingStartedAtRef,
-    roomRef, mediaStreamRef, mediaRecorderRef, chunksRef, audioElRef, remoteAudioContainerRef,
-    agentAudioMutedRef, liveTranscriptIdsRef, repliesMutedRef, callVoiceRef,
-    agentJoinTimerRef, edgeSightModeRef, sightRoomRef, edgeSightSource,
-    startEdgeSight, stopEdgeSight, armReconnectCeiling, disarmReconnectCeiling,
-    markDialing, markConnected, markHangingUp, markEnded, noteServerVoiceMissing,
-    askToFallback, speechLikelyEnglish, disconnectMessage, startFailureMessage,
-    primeVoiceOutputFromGesture, speakFragment, kokoroWouldSpeak, speakWholeReply, makeAudioChunkQueue,
-    sendTurnViaLocalStt, trySendTurnLocally, sendHostedTextTurn, sendTurn, endCall,
+    agent,
+    sessionId,
+    onSessionId,
+    t,
+    status,
+    muted,
+    cameraOn,
+    agentAudioMuted,
+    recording,
+    pipelineBusy,
+    setStatus,
+    setMuted,
+    setCameraOn,
+    setAgentAudioMuted,
+    setCallError,
+    setCallNotice,
+    setReconnecting,
+    setAgentMissing,
+    setRecording,
+    setPipelineBusy,
+    setPipelineError,
+    setLastTranscript,
+    setLastReply,
+    setCallTranscript,
+    setCallStage,
+    setAudioUnavailableNotice,
+    setEdgeFallbackNotice,
+    setEdgeHandledSummary,
+    setPendingFallbackAsk,
+    setSttReadyNotice,
+    setServerSttFailedAt,
+    setMicState,
+    setRecorderSupported,
+    capturedTurnKeyRef,
+    fallbackAskResolverRef,
+    serverSttFailedAtRef,
+    pendingSttRef,
+    systemHealthRef,
+    activeAgentIdRef,
+    unmountedRef,
+    voiceEpochRef,
+    audioUnlockedRef,
+    callStartedRef,
+    recordingStartedAtRef,
+    roomRef,
+    mediaStreamRef,
+    mediaRecorderRef,
+    chunksRef,
+    audioElRef,
+    remoteAudioContainerRef,
+    agentAudioMutedRef,
+    liveTranscriptIdsRef,
+    repliesMutedRef,
+    callVoiceRef,
+    agentJoinTimerRef,
+    edgeSightModeRef,
+    sightRoomRef,
+    edgeSightSource,
+    startEdgeSight,
+    stopEdgeSight,
+    armReconnectCeiling,
+    disarmReconnectCeiling,
+    markDialing,
+    markConnected,
+    markHangingUp,
+    markEnded,
+    noteServerVoiceMissing,
+    askToFallback,
+    speechLikelyEnglish,
+    disconnectMessage,
+    startFailureMessage,
+    primeVoiceOutputFromGesture,
+    speakFragment,
+    kokoroWouldSpeak,
+    speakWholeReply,
+    makeAudioChunkQueue,
+    sendTurnViaLocalStt,
+    trySendTurnLocally,
+    sendHostedTextTurn,
+    sendTurn,
+    endCall,
   };
-  function startCall(withCamera = false) { return startCallImpl(ctx, withCamera); }
-  function toggleCamera() { return toggleCameraImpl(ctx); }
-  function toggleScreenShare() { return toggleScreenShareImpl(ctx); }
-  function endCall() { return endCallImpl(ctx); }
-  function toggleMute() { return toggleMuteImpl(ctx); }
-  function toggleAgentAudio() { return toggleAgentAudioImpl(ctx); }
-  function startPushToTalk() { return startPushToTalkImpl(ctx); }
-  function stopPushToTalk() { return stopPushToTalkImpl(ctx); }
-  function primeVoiceOutputFromGesture() { return primeVoiceOutputFromGestureImpl(ctx); }
-  function speakFragment(...args: Parameters<CallCtx["speakFragment"]>) { return speakFragmentImpl(ctx, ...args); }
-  function kokoroWouldSpeak(text: string | null | undefined) { return kokoroWouldSpeakImpl(ctx, text); }
-  function speakWholeReply(...args: Parameters<CallCtx["speakWholeReply"]>) { return speakWholeReplyImpl(ctx, ...args); }
+  function startCall(withCamera = false) {
+    return startCallImpl(ctx, withCamera);
+  }
+  function toggleCamera() {
+    return toggleCameraImpl(ctx);
+  }
+  function toggleScreenShare() {
+    return toggleScreenShareImpl(ctx);
+  }
+  function endCall() {
+    return endCallImpl(ctx);
+  }
+  function toggleMute() {
+    return toggleMuteImpl(ctx);
+  }
+  function toggleAgentAudio() {
+    return toggleAgentAudioImpl(ctx);
+  }
+  function startPushToTalk() {
+    return startPushToTalkImpl(ctx);
+  }
+  function stopPushToTalk() {
+    return stopPushToTalkImpl(ctx);
+  }
+  function primeVoiceOutputFromGesture() {
+    return primeVoiceOutputFromGestureImpl(ctx);
+  }
+  function speakFragment(...args: Parameters<CallCtx["speakFragment"]>) {
+    return speakFragmentImpl(ctx, ...args);
+  }
+  function kokoroWouldSpeak(text: string | null | undefined) {
+    return kokoroWouldSpeakImpl(ctx, text);
+  }
+  function speakWholeReply(...args: Parameters<CallCtx["speakWholeReply"]>) {
+    return speakWholeReplyImpl(ctx, ...args);
+  }
   function makeAudioChunkQueue(callbacks: Parameters<CallCtx["makeAudioChunkQueue"]>[0] = {}) {
     return makeAudioChunkQueueImpl(ctx, callbacks);
   }
-  function sendTurnViaLocalStt(blob: Blob) { return sendTurnViaLocalSttImpl(ctx, blob); }
-  function trySendTurnLocally(blob: Blob) { return trySendTurnLocallyImpl(ctx, blob); }
+  function sendTurnViaLocalStt(blob: Blob) {
+    return sendTurnViaLocalSttImpl(ctx, blob);
+  }
+  function trySendTurnLocally(blob: Blob) {
+    return trySendTurnLocallyImpl(ctx, blob);
+  }
   function sendHostedTextTurn(transcript: string, options: { scrub?: boolean } = {}) {
     return sendHostedTextTurnImpl(ctx, transcript, options);
   }
-  function sendTurn(blob: Blob) { return sendTurnImpl(ctx, blob); }
+  function sendTurn(blob: Blob) {
+    return sendTurnImpl(ctx, blob);
+  }
 
   if (!agent) return null;
 
@@ -566,10 +667,7 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
         onClick={() => setCallPanelOpen((o) => !o)}
       >
         <span
-          className={cn(
-            "state-dot",
-            (status === "connected" || status === "connecting") && "state-dot-live",
-          )}
+          className={cn("state-dot", (status === "connected" || status === "connecting") && "state-dot-live")}
           style={
             {
               ["--state" as any]:
@@ -595,76 +693,81 @@ export default function CallPanel({ agent, sessionId, onSessionId }: CallPanelPr
         )}
       </button>
       <div className={callPanelOpen ? "flex flex-col gap-2" : "hidden"} data-testid="call-panel-body">
-      <CallLivePane
-        controls={{
-          t,
-          status,
-          reconnecting,
-          muted,
-          cameraOn,
-          agentAudioMuted,
-          canSee,
-          screenSharing: edgeSightSource === "screen",
-          toggleMute: () => void toggleMute(),
-          toggleCamera: () => void toggleCamera(),
-          toggleScreenShare: () => void toggleScreenShare(),
-          toggleAgentAudio,
-          endCall: () => void endCall(),
-          startCall: (withCamera?: boolean) => void startCall(withCamera),
-        }}
-        notices={{ t, status, agentMissing, callNotice, callStage, cameraOn, edgeSightActive, localVideoRef }}
-        pushToTalk={{
-          recording,
-          pipelineBusy,
-          pendingFallbackAsk,
-          showMicTest,
-          testingMicrophone,
-          callStage,
-          startPushToTalk: () => void startPushToTalk(),
-          stopPushToTalk,
-          setShowMicTest,
-        }}
-      />
+        <CallLivePane
+          controls={{
+            t,
+            status,
+            reconnecting,
+            muted,
+            cameraOn,
+            agentAudioMuted,
+            canSee,
+            screenSharing: edgeSightSource === "screen",
+            toggleMute: () => void toggleMute(),
+            toggleCamera: () => void toggleCamera(),
+            toggleScreenShare: () => void toggleScreenShare(),
+            toggleAgentAudio,
+            endCall: () => void endCall(),
+            startCall: (withCamera?: boolean) => void startCall(withCamera),
+          }}
+          notices={{ t, status, agentMissing, callNotice, callStage, cameraOn, edgeSightActive, localVideoRef }}
+          pushToTalk={{
+            recording,
+            pipelineBusy,
+            pendingFallbackAsk,
+            showMicTest,
+            testingMicrophone,
+            callStage,
+            startPushToTalk: () => void startPushToTalk(),
+            stopPushToTalk,
+            setShowMicTest,
+          }}
+        />
 
-      <CallSetupPane
-        preflight={{ issues: preflightIssues, onAction: handlePreflightAction, disabled: recording }}
-        sttReadyNotice={!recording && !pipelineBusy ? sttReadyNotice : null}
-        micTest={{
-          showMicTest,
-          micTestResult,
-          testingMicrophone,
-          audioLevel,
-          testMicrophone: () => void testMicrophone(),
-          setShowMicTest,
-          setMicTestResult,
-        }}
-        edgeNotices={{ edgeHandledSummary, audioUnavailableNotice, edgeFallbackNotice }}
-        fallbackAsk={{ pendingFallbackAsk, fallbackAskResolverRef }}
-        policyRow={{ fallbackPolicy, edgeOptInActive, setFallbackPolicyState }}
-      />
+        <CallSetupPane
+          preflight={{ issues: preflightIssues, onAction: handlePreflightAction, disabled: recording }}
+          sttReadyNotice={!recording && !pipelineBusy ? sttReadyNotice : null}
+          micTest={{
+            showMicTest,
+            micTestResult,
+            testingMicrophone,
+            audioLevel,
+            testMicrophone: () => void testMicrophone(),
+            setShowMicTest,
+            setMicTestResult,
+          }}
+          edgeNotices={{ edgeHandledSummary, audioUnavailableNotice, edgeFallbackNotice }}
+          fallbackAsk={{ pendingFallbackAsk, fallbackAskResolverRef }}
+          policyRow={{ fallbackPolicy, edgeOptInActive, setFallbackPolicyState }}
+        />
 
-      {/* Voice-over controls (reply voice pick + speaker mute + call voice +
+        {/* Voice-over controls (reply voice pick + speaker mute + call voice +
           agent TTS provider) - the audio-controls row; see the component's
           own header for what each row does and when each is rendered. */}
-      <VoiceoverControls
-        agent={agent}
-        repliesMuted={repliesMuted}
-        onToggleRepliesMuted={toggleRepliesMuted}
-        callVoice={callVoice}
-        onCallVoiceChange={changeCallVoice}
-      />
+        <VoiceoverControls
+          agent={agent}
+          repliesMuted={repliesMuted}
+          onToggleRepliesMuted={toggleRepliesMuted}
+          callVoice={callVoice}
+          onCallVoiceChange={changeCallVoice}
+        />
 
-      <CallSummaryPane
-        transcript={{
-          callTranscript,
-          pipelineBusy,
-          lastTranscript,
-          lastReply,
-          transcriptScrollRef,
-          replay: { state: replay, onReplay: (i, text) => void replayReply(i, text), onStop: stopReplay, onSkip: skipReplay },
-        }}
-        error={{ callError, pipelineError, setShowMicTest }}
-      />
+        <CallSummaryPane
+          transcript={{
+            callTranscript,
+            pipelineBusy,
+            lastTranscript,
+            lastReply,
+            transcriptScrollRef,
+            replay: {
+              state: replay,
+              onReplay: (i, text) => void replayReply(i, text),
+              onStop: stopReplay,
+              onSkip: skipReplay,
+            },
+          }}
+          error={{ callError, pipelineError, setShowMicTest }}
+        />
       </div>
       <audio ref={audioElRef} className="hidden" />
       <div ref={remoteAudioContainerRef} className="hidden" />

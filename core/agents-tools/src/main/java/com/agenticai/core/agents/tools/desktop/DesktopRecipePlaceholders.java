@@ -14,8 +14,8 @@ import java.util.regex.Pattern;
  * <ul>
  *   <li>{@code {{name}}} - a parameter the caller supplies per run (letters/digits/underscore,
  *       starts with a letter, at most 32 chars; {@code secret} is reserved);
- *   <li>{@code {{secret.NAME}}} - a vault secret, resolved server-side at replay and never shown
- *       to the model.
+ *   <li>{@code {{secret.NAME}}} - a vault secret, resolved server-side at replay and never shown to
+ *       the model.
  * </ul>
  *
  * There is deliberately no {@code {{totp.NAME}}} here: the desktop step vocabulary types into
@@ -89,8 +89,8 @@ final class DesktopRecipePlaceholders {
     }
 
     /**
-     * Replaces each placeholder with {@code resolver}'s result (never re-scanned, so a value
-     * cannot inject another token).
+     * Replaces each placeholder with {@code resolver}'s result (never re-scanned, so a value cannot
+     * inject another token).
      */
     static String substitute(String text, Function<Token, String> resolver) {
         if (text == null || text.isEmpty()) {

@@ -29,9 +29,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The flag gate and the lookup contract: off means management calls 404 and runtime lookups
- * return nothing; on, an ambiguous recipe name refuses and a missing sidecar is a clean
- * failure outcome, never a crash.
+ * The flag gate and the lookup contract: off means management calls 404 and runtime lookups return
+ * nothing; on, an ambiguous recipe name refuses and a missing sidecar is a clean failure outcome,
+ * never a crash.
  */
 class DesktopRecipeServiceTest {
 
@@ -63,8 +63,17 @@ class DesktopRecipeServiceTest {
 
     private DesktopRecipeService service(boolean enabled) {
         return new DesktopRecipeService(
-                recipes, agents, journal, vault, desktop,
-                enabled, 50, 15_000, 120, 800, "DESKTOP_");
+                recipes,
+                agents,
+                journal,
+                vault,
+                desktop,
+                enabled,
+                50,
+                15_000,
+                120,
+                800,
+                "DESKTOP_");
     }
 
     private static void assertNotFound(Runnable r) {
@@ -83,11 +92,7 @@ class DesktopRecipeServiceTest {
         assertThat(off.isEnabled()).isFalse();
         assertNotFound(() -> off.list(agentId));
         assertNotFound(() -> off.get(id));
-        assertNotFound(
-                () ->
-                        off.create(
-                                new CreateRecipeRequest(
-                                        agentId, "n", null, null, null)));
+        assertNotFound(() -> off.create(new CreateRecipeRequest(agentId, "n", null, null, null)));
         assertNotFound(
                 () ->
                         off.saveFromRun(
@@ -99,16 +104,26 @@ class DesktopRecipeServiceTest {
 
         assertThat(off.listRunnable(agentId)).isEmpty();
         assertThat(off.findRunnable(agentId, "x")).isEmpty();
-        assertThat(off.replayForAgent(agentId, "x", Map.of(), false, 1, false).success())
-                .isFalse();
+        assertThat(off.replayForAgent(agentId, "x", Map.of(), false, 1, false).success()).isFalse();
         off.recordRun(id, "failure"); // silently a no-op, like the browser twin
     }
 
     private static DesktopRecipeSpec validSpec() throws Exception {
         RecipeStep activate =
                 new RecipeStep(
-                        DesktopRecipeSpec.ACTIVATE, "notes", null, null, null, null, null, null,
-                        null, null, null, null, false);
+                        DesktopRecipeSpec.ACTIVATE,
+                        "notes",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        false);
         return new DesktopRecipeSpec(
                 DesktopRecipeSpec.CURRENT_VERSION, List.of("notes"), List.of(), List.of(activate));
     }
@@ -145,8 +160,7 @@ class DesktopRecipeServiceTest {
     void replayForAgentReportsAMissingRecipeInsideTheOutcome() {
         DesktopRecipeService on = service(true);
         UUID agentId = UUID.randomUUID();
-        when(recipes.findByAgentIdOrAgentIdIsNullOrderByNameAsc(agentId))
-                .thenReturn(List.of());
+        when(recipes.findByAgentIdOrAgentIdIsNullOrderByNameAsc(agentId)).thenReturn(List.of());
 
         DesktopRecipeReplayer.Outcome o =
                 on.replayForAgent(agentId, "nope", Map.of(), false, 1, false);
@@ -173,8 +187,17 @@ class DesktopRecipeServiceTest {
         List<String> calls = new java.util.ArrayList<>();
         DesktopRecipeService on =
                 new DesktopRecipeService(
-                        recipes, agents, journal, vault, desktop,
-                        true, 50, 15_000, 120, 800, "DESKTOP_") {
+                        recipes,
+                        agents,
+                        journal,
+                        vault,
+                        desktop,
+                        true,
+                        50,
+                        15_000,
+                        120,
+                        800,
+                        "DESKTOP_") {
                     @Override
                     DesktopRecipeReplayer.Executor executor() {
                         return (path, body) -> {
@@ -232,23 +255,45 @@ class DesktopRecipeServiceTest {
         AgentService agentService = mock(AgentService.class);
         when(agents.getIfAvailable()).thenReturn(agentService);
         RecipeStep activate =
-                new RecipeStep(DesktopRecipeSpec.ACTIVATE, "notes", null, null, null, null,
-                        null, null, null, null, null, null, false);
+                new RecipeStep(
+                        DesktopRecipeSpec.ACTIVATE,
+                        "notes",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        false);
         RecipeStep type =
-                new RecipeStep(DesktopRecipeSpec.TYPE, null, null, null, null, null,
-                        "{{secret.OTHER_PW}}", null, null, null, null, null, false);
+                new RecipeStep(
+                        DesktopRecipeSpec.TYPE,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "{{secret.OTHER_PW}}",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        false);
         DesktopRecipeSpec spec =
                 new DesktopRecipeSpec(
-                        DesktopRecipeSpec.CURRENT_VERSION, List.of("notes"), List.of(),
+                        DesktopRecipeSpec.CURRENT_VERSION,
+                        List.of("notes"),
+                        List.of(),
                         List.of(activate, type));
         when(recipes.existsByAgentIdAndNameIgnoreCase(any(), any())).thenReturn(false);
         when(recipes.count()).thenReturn(0L);
 
-        assertThatThrownBy(
-                        () ->
-                                on.create(
-                                        new CreateRecipeRequest(
-                                                agentId, "n", null, null, spec)))
+        assertThatThrownBy(() -> on.create(new CreateRecipeRequest(agentId, "n", null, null, spec)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("DESKTOP_");
     }

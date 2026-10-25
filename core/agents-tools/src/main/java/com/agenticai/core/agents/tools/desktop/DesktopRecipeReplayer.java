@@ -20,11 +20,11 @@ import java.util.function.LongSupplier;
 /**
  * Deterministic replay of a {@link DesktopRecipeSpec} with per-step verification - the "replay"
  * half of run-to-script for the {@code local_desktop_*} tools. No AI in the loop: each step is
- * executed through an {@link Executor} (the {@link DesktopAgentClient} port), then verified
- * through the sidecar's {@code POST /ui} accessibility tree; on ANY failed verification (or
- * failed action, missing parameter or secret, exhausted time budget) the replay STOPS and
- * reports which step failed and why. It never skips a failed step and never silently continues.
- * Mirrors {@code BrowserRecipeReplayer}.
+ * executed through an {@link Executor} (the {@link DesktopAgentClient} port), then verified through
+ * the sidecar's {@code POST /ui} accessibility tree; on ANY failed verification (or failed action,
+ * missing parameter or secret, exhausted time budget) the replay STOPS and reports which step
+ * failed and why. It never skips a failed step and never silently continues. Mirrors {@code
+ * BrowserRecipeReplayer}.
  *
  * <p>Safety properties, each pinned by DesktopRecipeReplayerTest:
  *
@@ -33,12 +33,12 @@ import java.util.function.LongSupplier;
  *       (server-side), used for exactly one action, and scrubbed from every message in the {@link
  *       Outcome} - the model only ever sees placeholders and step numbers.
  *   <li>Irreversible steps (a press labelled submit/pay/delete/send, a bare Return) are NOT
- *       executed unless {@link Options#allowIrreversible()}; the replay pauses before them and
- *       says how to resume.
+ *       executed unless {@link Options#allowIrreversible()}; the replay pauses before them and says
+ *       how to resume.
  *   <li>Time: each step's verification waits at most its timeout, and the whole replay at most
  *       {@link Options#maxReplayMs()}.
- *   <li>Pace: {@link Options#monitorStepDelayMs()} inserts a pause between steps so the person
- *       can watch the replay happen (the recipe's MONITOR mode).
+ *   <li>Pace: {@link Options#monitorStepDelayMs()} inserts a pause between steps so the person can
+ *       watch the replay happen (the recipe's MONITOR mode).
  * </ul>
  */
 public final class DesktopRecipeReplayer {
@@ -47,8 +47,8 @@ public final class DesktopRecipeReplayer {
     private static final int MAX_PARAM_VALUE_LENGTH = 2_000;
 
     /**
-     * What the replay asks of the desktop agent - one POST. {@link DesktopAgentClient} satisfies
-     * it 1:1 (a method reference), and tests fake it with a lambda.
+     * What the replay asks of the desktop agent - one POST. {@link DesktopAgentClient} satisfies it
+     * 1:1 (a method reference), and tests fake it with a lambda.
      */
     @FunctionalInterface
     public interface Executor {
@@ -71,8 +71,7 @@ public final class DesktopRecipeReplayer {
     /**
      * Replay settings.
      *
-     * @param allowIrreversible execute steps flagged irreversible (the caller has confirmed
-     *     them)
+     * @param allowIrreversible execute steps flagged irreversible (the caller has confirmed them)
      * @param stepTimeoutMs verification budget for a step with no timeout of its own
      * @param maxReplayMs wall-clock budget for the whole replay
      * @param fromStep 1-based step to start at (resume after a confirmation); 1 = from the start
@@ -102,7 +101,11 @@ public final class DesktopRecipeReplayer {
      * @param stepsRun steps that completed successfully this call
      */
     public record Outcome(
-            boolean success, int stepsRun, int stepsTotal, String failure, List<StepResult> steps) {}
+            boolean success,
+            int stepsRun,
+            int stepsTotal,
+            String failure,
+            List<StepResult> steps) {}
 
     private final LongSupplier nowMs;
     private final LongConsumer sleepMs;
@@ -211,10 +214,7 @@ public final class DesktopRecipeReplayer {
             } catch (StepFailure failure) {
                 results.add(
                         new StepResult(
-                                n,
-                                step.action(),
-                                false,
-                                scrubbed(failure.getMessage(), scrub)));
+                                n, step.action(), false, scrubbed(failure.getMessage(), scrub)));
                 return new Outcome(
                         false,
                         succeeded(results),
@@ -284,7 +284,10 @@ public final class DesktopRecipeReplayer {
                 }
                 JsonNode reply = post(executor, "/ui/press", body);
                 String matched = reply.path("matched").path("label").asText(null);
-                note = matched == null ? "pressed " + abbreviate(step.label()) : "matched '" + matched + "'";
+                note =
+                        matched == null
+                                ? "pressed " + abbreviate(step.label())
+                                : "matched '" + matched + "'";
             }
             case DesktopRecipeSpec.CLICK -> {
                 Map<String, Object> body = new LinkedHashMap<>();
@@ -338,8 +341,8 @@ public final class DesktopRecipeReplayer {
     }
 
     /**
-     * Null when the frontmost app's UI tree satisfies the step's expectation, else why not.
-     * Polls {@code POST /ui} until the expectation holds or the step's timeout expires.
+     * Null when the frontmost app's UI tree satisfies the step's expectation, else why not. Polls
+     * {@code POST /ui} until the expectation holds or the step's timeout expires.
      */
     private String verify(
             Expect expect, Map<String, String> values, Executor executor, int timeoutMs) {
@@ -361,8 +364,7 @@ public final class DesktopRecipeReplayer {
         }
     }
 
-    private static String checkOnce(
-            String elementLabel, String appFrontmost, Executor executor) {
+    private static String checkOnce(String elementLabel, String appFrontmost, Executor executor) {
         JsonNode ui;
         try {
             ui = executor.post("/ui", Map.of());
@@ -372,7 +374,9 @@ public final class DesktopRecipeReplayer {
         }
         if (ui == null || ui.path("error").isTextual()) {
             return "could not inspect the screen: "
-                    + (ui == null ? "the desktop agent sent an empty reply" : ui.path("error").asText());
+                    + (ui == null
+                            ? "the desktop agent sent an empty reply"
+                            : ui.path("error").asText());
         }
         if (appFrontmost != null && !appFrontmost.isBlank()) {
             String front = ui.path("app").asText("");
@@ -393,7 +397,9 @@ public final class DesktopRecipeReplayer {
                 }
             }
             if (!found) {
-                return "expected an element labelled '" + abbreviate(elementLabel.strip()) + "' on screen";
+                return "expected an element labelled '"
+                        + abbreviate(elementLabel.strip())
+                        + "' on screen";
             }
         }
         return null;
@@ -402,8 +408,8 @@ public final class DesktopRecipeReplayer {
     // ---- placeholder resolution ------------------------------------------------------------
 
     /**
-     * Resolves parameter and secret placeholders; resolved secret values are added to {@code
-     * scrub} so they can never reach an outcome message.
+     * Resolves parameter and secret placeholders; resolved secret values are added to {@code scrub}
+     * so they can never reach an outcome message.
      */
     private static String fill(
             String template, Map<String, String> values, SecretValues vault, Set<String> scrub) {

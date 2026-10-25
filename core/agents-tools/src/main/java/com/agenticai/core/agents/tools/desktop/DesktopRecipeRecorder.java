@@ -15,35 +15,34 @@ import java.util.Set;
 /**
  * Turns a finished run's tool-call journal into a replayable {@link DesktopRecipeSpec} - the
  * "record" half of run-to-script for the {@code local_desktop_*} tools. Pure: it takes
- * already-loaded journal rows (see {@link JournalCall}) and the parameters the user supplied, so
- * it is unit-testable with a fake journal. Mirrors {@code BrowserRecipeRecorder}.
+ * already-loaded journal rows (see {@link JournalCall}) and the parameters the user supplied, so it
+ * is unit-testable with a fake journal. Mirrors {@code BrowserRecipeRecorder}.
  *
- * <p>What it keeps: the SUCCESSFUL {@code local_desktop_open} / {@code _activate} / {@code
- * _press} / {@code _click} / {@code _type} / {@code _key} calls, in order. Failed attempts,
- * reads (screen, elements, clipboard get), notifications and clipboard writes are dropped. What
- * it never keeps:
+ * <p>What it keeps: the SUCCESSFUL {@code local_desktop_open} / {@code _activate} / {@code _press}
+ * / {@code _click} / {@code _type} / {@code _key} calls, in order. Failed attempts, reads (screen,
+ * elements, clipboard get), notifications and clipboard writes are dropped. What it never keeps:
  *
  * <ul>
  *   <li>a user-supplied value - each occurrence of a supplied parameter's value in a press label,
  *       an open target or a typed text becomes {@code {{name}}} and the value is discarded;
- *   <li>a literal typed text - any {@code type} text that is not one of the supplied parameters
- *       (or a {@code {{secret.NAME}}} placeholder) aborts the recording unless {@code
- *       allowLiteralText} was asked for explicitly, because an unfocused field can hold a secret
- *       just as well as a labelled one.
+ *   <li>a literal typed text - any {@code type} text that is not one of the supplied parameters (or
+ *       a {@code {{secret.NAME}}} placeholder) aborts the recording unless {@code allowLiteralText}
+ *       was asked for explicitly, because an unfocused field can hold a secret just as well as a
+ *       labelled one.
  * </ul>
  *
  * App names are never parameterized: an {@code app} field decides which application is driven and
- * the validator insists it stay a literal inside {@code allowedApps}. A recorded right-button
- * click becomes a plain {@code click} with a warning - the step vocabulary has no button field,
- * so replays always use the primary button.
+ * the validator insists it stay a literal inside {@code allowedApps}. A recorded right-button click
+ * becomes a plain {@code click} with a warning - the step vocabulary has no button field, so
+ * replays always use the primary button.
  */
 final class DesktopRecipeRecorder {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
     /**
-     * Shortest user value that is replaced by a placeholder; shorter ones would corrupt
-     * unrelated text.
+     * Shortest user value that is replaced by a placeholder; shorter ones would corrupt unrelated
+     * text.
      */
     static final int MIN_PARAM_VALUE_LENGTH = 3;
 
@@ -157,8 +156,7 @@ final class DesktopRecipeRecorder {
             } else if (DesktopToolCallback.Action.TYPE.toolName.equals(tool)) {
                 Object rawText = input.get("text");
                 String typed = rawText == null ? "" : rawText.toString();
-                String stored =
-                        typedText(n, typed, params, usedParams, allowLiteralText, warnings);
+                String stored = typedText(n, typed, params, usedParams, allowLiteralText, warnings);
                 steps.add(
                         new RecipeStep(
                                 DesktopRecipeSpec.TYPE,

@@ -47,29 +47,31 @@ class DesktopMonitorControllerTest {
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         executor = Executors.newCachedThreadPool();
         server.setExecutor(executor);
-        server.createContext("/", exchange -> {
-            lastRequest.set(
-                    exchange.getRequestMethod()
-                            + " "
-                            + exchange.getRequestURI().getPath()
-                            + " auth="
-                            + exchange.getRequestHeaders().getFirst("Authorization"));
-            entered.countDown();
-            if (block.get()) {
-                try {
-                    release.await(10, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-            exchange.getResponseHeaders().set("Content-Type", replyType);
-            exchange.getResponseHeaders().set("X-Frame-Format", "jpeg");
-            exchange.sendResponseHeaders(replyStatus, reply.length);
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(reply);
-            }
-            exchange.close();
-        });
+        server.createContext(
+                "/",
+                exchange -> {
+                    lastRequest.set(
+                            exchange.getRequestMethod()
+                                    + " "
+                                    + exchange.getRequestURI().getPath()
+                                    + " auth="
+                                    + exchange.getRequestHeaders().getFirst("Authorization"));
+                    entered.countDown();
+                    if (block.get()) {
+                        try {
+                            release.await(10, TimeUnit.SECONDS);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    exchange.getResponseHeaders().set("Content-Type", replyType);
+                    exchange.getResponseHeaders().set("X-Frame-Format", "jpeg");
+                    exchange.sendResponseHeaders(replyStatus, reply.length);
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(reply);
+                    }
+                    exchange.close();
+                });
         server.start();
     }
 
@@ -122,8 +124,7 @@ class DesktopMonitorControllerTest {
     @Test
     void aMissingOrDisabledToolSourceIs404LikeAnyUnknownPath() {
         assertEquals(
-                HttpStatus.NOT_FOUND,
-                controller(source("")).frame(() -> "alice").getStatusCode());
+                HttpStatus.NOT_FOUND, controller(source("")).frame(() -> "alice").getStatusCode());
         ObjectProvider<DesktopToolSource> absent = mock(ObjectProvider.class);
         assertEquals(
                 HttpStatus.NOT_FOUND,
@@ -150,9 +151,7 @@ class DesktopMonitorControllerTest {
         Future<ResponseEntity<?>> first = executor.submit(() -> controller.frame(() -> "alice"));
         entered.await(10, TimeUnit.SECONDS);
 
-        assertEquals(
-                HttpStatus.TOO_MANY_REQUESTS,
-                controller.frame(() -> "alice").getStatusCode());
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS, controller.frame(() -> "alice").getStatusCode());
 
         release.countDown();
         assertEquals(HttpStatus.OK, first.get(10, TimeUnit.SECONDS).getStatusCode());
