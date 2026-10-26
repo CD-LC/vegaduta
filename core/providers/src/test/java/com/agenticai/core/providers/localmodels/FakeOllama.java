@@ -22,6 +22,13 @@ final class FakeOllama implements AutoCloseable {
     /** Held open between the first and the remaining pull lines when set, so a test can poll mid-pull. */
     volatile java.util.concurrent.CountDownLatch holdPull;
     final List<String> pullBodies = new CopyOnWriteArrayList<>();
+    final List<String> generateBodies = new CopyOnWriteArrayList<>();
+    final List<String> createBodies = new CopyOnWriteArrayList<>();
+    /** The window {@code /api/ps} claims the running model has; null = /api/ps unreachable. */
+    volatile Integer loadedContextLength;
+    /** The name {@code /api/ps} reports the running model under - must equal the warmed tag. */
+    volatile String loadedModelName = "m";
+    volatile boolean generateFails;
 
     FakeOllama() throws IOException {
         server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
@@ -58,6 +65,46 @@ final class FakeOllama implements AutoCloseable {
                         }
                     }
                 }
+            }
+        });
+        server.createContext("/api/generate", exchange -> {
+            generateBodies.add(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            if (generateFails) {
+                exchange.sendResponseHeaders(500, -1);
+                return;
+            }
+            byte[] body = "{\"response\":\"\"}".getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, body.length);
+            try (OutputStream out = exchange.getResponseBody()) {
+                out.write(body);
+            }
+        });
+        server.createContext("/api/ps", exchange -> {
+            if (loadedContextLength == null) {
+                exchange.sendResponseHeaders(404, -1);
+                return;
+            }
+            byte[] body =
+                    ("{\"models\":[{\"name\":\""
+                                    + loadedModelName
+                                    + "\",\"context_length\":"
+                                    + loadedContextLength
+                                    + "}]}")
+                            .getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, body.length);
+            try (OutputStream out = exchange.getResponseBody()) {
+                out.write(body);
+            }
+        });
+        server.createContext("/api/create", exchange -> {
+            createBodies.add(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            byte[] body = "{\"status\":\"success\"}".getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, body.length);
+            try (OutputStream out = exchange.getResponseBody()) {
+                out.write(body);
             }
         });
         server.start();

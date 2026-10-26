@@ -207,4 +207,45 @@ class LocalModelOllamaGatewayAndPullTest {
     void anUnknownJobIdIsEmpty() {
         assertEquals(Optional.empty(), pulls.status("nope"));
     }
+
+    @Test
+    void aShortWindowDerivesACtxVariant() {
+        fake.loadedModelName = "qwen3.5:9b";
+        fake.loadedContextLength = 4096;
+
+        Optional<String> derived = gateway.ensureSufficientContext("qwen3.5:9b");
+
+        assertEquals(Optional.of("qwen3.5:9b-ctx32k"), derived);
+        assertEquals(1, fake.createBodies.size());
+        assertTrue(fake.createBodies.get(0).contains("\"from\":\"qwen3.5:9b\""));
+        assertTrue(fake.createBodies.get(0).contains("\"num_ctx\":32768"));
+    }
+
+    @Test
+    void aSufficientWindowIsLeftAlone() {
+        fake.loadedModelName = "qwen3.5:9b";
+        fake.loadedContextLength = 32768;
+
+        assertEquals(Optional.empty(), gateway.ensureSufficientContext("qwen3.5:9b"));
+        assertTrue(fake.createBodies.isEmpty());
+    }
+
+    @Test
+    void anAlreadyDerivedTagDoesNotLoop() {
+        // The served tag already names the wanted window but the runner still loaded 4k - deriving
+        // would produce the same tag, so it must no-op rather than re-create forever.
+        fake.loadedModelName = "qwen3.5:9b-ctx32k";
+        fake.loadedContextLength = 4096;
+
+        assertEquals(Optional.empty(), gateway.ensureSufficientContext("qwen3.5:9b-ctx32k"));
+        assertTrue(fake.createBodies.isEmpty());
+    }
+
+    @Test
+    void anUnreachablePsLeavesTheTagAlone() {
+        fake.loadedContextLength = null;
+
+        assertEquals(Optional.empty(), gateway.ensureSufficientContext("qwen3.5:9b"));
+        assertTrue(fake.createBodies.isEmpty());
+    }
 }
