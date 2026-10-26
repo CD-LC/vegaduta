@@ -104,7 +104,7 @@ class ToolArgumentFeedbackPromptTest {
     @Test
     void theSoftStopFallbackJsonCarriesTheRegistryInstructionAndNoEnglishOfItsOwn() throws Exception {
         String instruction = "Stop \"now\"\n{rounds}";
-        JsonNode parsed = MAPPER.readTree(ArgumentSanitizingToolCallingManager.fallbackSoftStop(instruction));
+        JsonNode parsed = MAPPER.readTree(ToolLoopMarkers.fallbackSoftStop(instruction));
         assertThat(parsed.get("error").asText()).isEqualTo(ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED);
         assertThat(parsed.get("result").asText()).isEqualTo(instruction);
     }

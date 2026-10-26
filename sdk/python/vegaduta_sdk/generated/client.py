@@ -699,6 +699,27 @@ class AgentApi:
         """
         return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-base", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
+    def set_knowledge_write(self, agent_id: str, body: m.AgentKnowledgeBaseToggleRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentKnowledgeWriteAccessResponse:
+        """Set knowledge write.
+
+        PATCH /api/agents/{agentId}/knowledge-write
+        """
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-write", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
+
+    def get_knowledge_write_access(self, agent_id: str) -> m.AgentKnowledgeWriteAccessResponse:
+        """Get knowledge write access.
+
+        GET /api/agents/{agentId}/knowledge-write-access
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/knowledge-write-access")
+
+    def set_knowledge_write_access(self, agent_id: str, body: m.AgentKnowledgeWriteAccessUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentKnowledgeWriteAccessResponse:
+        """Set knowledge write access.
+
+        PATCH /api/agents/{agentId}/knowledge-write-access
+        """
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-write-access", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
+
     def update_model(self, agent_id: str, body: m.AgentModelUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Update model.
 
@@ -4086,6 +4107,74 @@ class DemoWhatsAppWebhookApi:
         return self._http.request("POST", "/webhook/demo/whatsapp", headers={"X-Hub-Signature-256": x_hub_signature_256}, body=body, response="void")
 
 
+class DesktopMonitorApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def frame(self) -> Any:
+        """Frame.
+
+        GET /api/desktop/monitor/frame
+
+        Only available when the feature flag app.assistant.desktop.monitor.enabled=true is on; otherwise this route answers 404.
+        """
+        return self._http.request("GET", "/api/desktop/monitor/frame")
+
+
+class DesktopRecipeApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, *, agent_id: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.DesktopRecipeDtos_RecipeSummary]:
+        """List.
+
+        GET /api/desktop/recipes
+        """
+        return self._http.request("GET", "/api/desktop/recipes", query={"agentId": agent_id, "limit": limit, "offset": offset})
+
+    def create(self, body: m.DesktopRecipeDtos_CreateRecipeRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RecipeDetail:
+        """Create.
+
+        POST /api/desktop/recipes
+        """
+        return self._http.request("POST", "/api/desktop/recipes", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def from_run(self, body: m.DesktopRecipeDtos_RecipeFromRunRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RecipeDetail:
+        """From run.
+
+        POST /api/desktop/recipes/from-run
+        """
+        return self._http.request("POST", "/api/desktop/recipes/from-run", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def get(self, id: str) -> m.DesktopRecipeDtos_RecipeDetail:
+        """Get.
+
+        GET /api/desktop/recipes/{id}
+        """
+        return self._http.request("GET", f"/api/desktop/recipes/{quote_path(id)}")
+
+    def delete(self, id: str) -> None:
+        """Delete.
+
+        DELETE /api/desktop/recipes/{id}
+        """
+        return self._http.request("DELETE", f"/api/desktop/recipes/{quote_path(id)}", response="void")
+
+    def update(self, id: str, body: m.DesktopRecipeDtos_UpdateRecipeRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RecipeSummary:
+        """Update.
+
+        PATCH /api/desktop/recipes/{id}
+        """
+        return self._http.request("PATCH", f"/api/desktop/recipes/{quote_path(id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def run(self, id: str, body: m.DesktopRecipeDtos_RunRecipeRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RunRecipeResponse:
+        """Run.
+
+        POST /api/desktop/recipes/{id}/run
+        """
+        return self._http.request("POST", f"/api/desktop/recipes/{quote_path(id)}/run", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+
 class DeveloperApiApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -5536,6 +5625,15 @@ class KnowledgeApi:
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
         return self._http.request("POST", "/api/knowledge/ingest", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def ingest_url(self, body: m.IngestUrlRequest, *, idempotency_key: Optional[str] = None) -> m.KnowledgeUrlIngester_UrlIngestResult:
+        """Ingest url.
+
+        POST /api/knowledge/ingest-url
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+        """
+        return self._http.request("POST", "/api/knowledge/ingest-url", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def reembed_job(self, job_id: str) -> m.KnowledgeReembedJobResponse:
         """Reembed job.
@@ -13297,6 +13395,8 @@ class VegadutaClient:
         self.demo_transcript_email = DemoTranscriptEmailApi(self.http)
         self.demo_video = DemoVideoApi(self.http)
         self.demo_whats_app_webhook = DemoWhatsAppWebhookApi(self.http)
+        self.desktop_monitor = DesktopMonitorApi(self.http)
+        self.desktop_recipe = DesktopRecipeApi(self.http)
         self.developer_api = DeveloperApiApi(self.http)
         self.device = DeviceApi(self.http)
         self.device_data_ingestion = DeviceDataIngestionApi(self.http)

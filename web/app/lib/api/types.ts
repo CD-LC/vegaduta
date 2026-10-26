@@ -25,3 +25,4 @@ export * from "./types/system";
 export * from "./types/tools";
 export * from "./types/research";
 export * from "./types/browser";
+export * from "./types/desktop";

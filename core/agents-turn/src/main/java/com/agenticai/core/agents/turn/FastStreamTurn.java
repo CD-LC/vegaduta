@@ -15,6 +15,8 @@ import com.agenticai.core.chat.FinishReason;
 import com.agenticai.core.chat.FinishReasonAdvisor;
 import com.agenticai.core.chat.FinishReasonCapture;
 import com.agenticai.core.chat.LlmMetricsAdvisor;
+import com.agenticai.core.chat.TerminalRoundStreamAdvisor;
+import com.agenticai.core.chat.UpstreamProviderException;
 import com.agenticai.core.chat.ToolLoopTranscript;
 import java.time.Instant;
 import java.util.List;
@@ -81,6 +83,15 @@ final class FastStreamTurn {
 
     private int lengthPasses;
     private int toolCallRetryPasses;
+
+    /**
+     * Tool-loop rounds the turn's extra passes (continuation, tool-call retry) already ran. The primary
+     * pass's rounds are read straight off its {@link #transcript}; each later pass's transcript is
+     * seeded with the running total ({@link ToolLoopTranscript#roundsSpentBefore}) so the loop's round
+     * cap counts the turn's passes together instead of refilling on each one.
+     */
+    private final java.util.concurrent.atomic.AtomicInteger extraToolRounds =
+            new java.util.concurrent.atomic.AtomicInteger();
 
     /** Stands in for the outcome of a turn built without a context (a unit-test fixture). */
     private final TurnReplyOutcome detachedReply = new TurnReplyOutcome();
@@ -161,6 +172,18 @@ final class FastStreamTurn {
         return context == null ? detachedActivity : context.toolActivity();
     }
 
+    /** Tool-loop rounds the turn's finished passes ran: the primary pass's plus each extra pass's. */
+    int toolRoundsSpent() {
+        return transcript.rounds() + extraToolRounds.get();
+    }
+
+    /** Counts a finished extra pass's tool rounds into the turn's total ({@link #toolRoundsSpent()}). */
+    void spendPassRounds(ToolLoopTranscript passTranscript) {
+        if (passTranscript != null) {
+            extraToolRounds.addAndGet(passTranscript.rounds());
+        }
+    }
+
     /** One pass's idle timeout: model silence only, never tool time (see {@link StreamIdleWatch}). */
     Flux<String> idleTimeout(Flux<String> stream) {
         return owner.idleTimeout(stream, activity());
@@ -223,11 +246,18 @@ final class FastStreamTurn {
                         // unconditionally, which would relabel "tool step limit exceeded" as "the
                         // LLM provider call failed" and mislead anyone debugging it.
                         .onErrorMap(
-                                e ->
-                                        FastStreamRecovery.isPolicyStop(e)
-                                                ? e
-                                                : owner.providerErrorTranslator.translate(
-                                                        e, agent.getProviderName()))
+                                e -> {
+                                    if (FastStreamRecovery.isPolicyStop(e)) {
+                                        return e;
+                                    }
+                                    // translate wraps every Throwable unconditionally in the real
+                                    // provider; an inert (mock) translator may return null - map
+                                    // that to the original error, never Mono.error(null).
+                                    UpstreamProviderException translated =
+                                            owner.providerErrorTranslator.translate(
+                                                    e, agent.getProviderName());
+                                    return translated == null ? e : translated;
+                                })
                         .onErrorResume(recovery::retryWithoutToolsOnThoughtSignatureBug)
                         .onErrorResume(recovery::retryOnFallbackProvider)
                         .onErrorResume(recovery::closeHalfResponse)
@@ -363,6 +393,11 @@ final class FastStreamTurn {
         // The provider's stop reason (max_tokens, safety, ...): the tool loop runs inside Spring
         // AI and .content() discards the response metadata that carries it.
         a.advisors(new FinishReasonAdvisor(finish));
+        // app.chat.parity.fast-terminal-rounds-only: stream only the tool loop's terminal round - the
+        // mid-loop narration of rounds that ended in tool calls never reaches the client.
+        if (owner.parity != null && owner.parity.isFastTerminalRoundsOnly()) {
+            a.advisors(new TerminalRoundStreamAdvisor());
+        }
         // #1102 (direct feedback: opaque "value cannot be null" 400 on every
         // single chat turn) - resolveExperimentVariants() returns null
         // whenever a tenant has no active feature-flag experiment (the common
@@ -448,12 +483,16 @@ final class FastStreamTurn {
         // A continuation is prose: offering the tools again would let a cut-off answer rerun the
         // calls that produced it. A retry is about the tool call, so the tools stay on offer.
         boolean offerTools = !cutOff;
+        // A retry is a fresh tool-loop invocation; it shares the turn's round budget, so it carries a
+        // transcript like the primary pass's, seeded with the rounds the turn already spent.
+        ToolLoopTranscript passTranscript =
+                offerTools ? owner.newTranscript(context, agentId).roundsSpentBefore(toolRoundsSpent()) : null;
         // The previous pass completes on an HTTP-client thread that holds no TenantContext, and the
         // next one is subscribed from there: subscribe it in the turn's captured scope (AGENTS.md
         // rule 12) so the advisors' llm_call_log writes land in the tenant schema.
         Flux<String> pass =
                 TenantScopedFlux.subscribeInScope(
-                                context.scope(), () -> passContent(prompt, offerTools))
+                                context.scope(), () -> passContent(prompt, passTranscript))
                         .transform(this::idleTimeout)
                         .onErrorResume(
                                 e -> {
@@ -468,7 +507,14 @@ final class FastStreamTurn {
                                     reply().mark(Kind.INTERRUPTED);
                                     return Flux.just(AgentChatService.INTERRUPTED_REPLY_MARKER);
                                 });
-        return pass.concatWith(Flux.defer(this::settleFinish));
+        // Count the pass's tool rounds before the finish check may start another pass that seeds its
+        // transcript with the total: the deferred supplier runs after this pass terminated.
+        return pass.concatWith(
+                Flux.defer(
+                        () -> {
+                            spendPassRounds(passTranscript);
+                            return settleFinish();
+                        }));
     }
 
     /**
@@ -497,11 +543,12 @@ final class FastStreamTurn {
         }
     }
 
-    private Flux<String> passContent(ReplyFinish.PassPrompt prompt, boolean offerTools) {
+    private Flux<String> passContent(ReplyFinish.PassPrompt prompt, ToolLoopTranscript passTranscript) {
         ChatClient.ChatClientRequestSpec spec =
                 chatClient.prompt().system(systemPrompt).messages(prompt.messages()).user(prompt.user());
-        if (offerTools) {
-            spec = spec.toolCallbacks(ChatTurnExecutor.stableToolOrder(journaledTools));
+        if (passTranscript != null) {
+            spec = spec.toolCallbacks(ChatTurnExecutor.stableToolOrder(journaledTools))
+                    .toolContext(Map.of(ToolLoopTranscript.TOOL_CONTEXT_KEY, passTranscript));
         }
         return spec.advisors(this::configureAdvisors).stream().content();
     }

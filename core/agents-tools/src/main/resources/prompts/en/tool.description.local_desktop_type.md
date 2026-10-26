@@ -10,4 +10,4 @@ placeholders: approval_note
 placeholder.approval_note: A sentence the platform appends when each call is shown to the user for approval before it runs; empty when approval is off
 maxLength: 4000
 ---
-Type `text` with the keyboard into whatever has focus. Bring the right app or field to the front first (local_desktop_activate, local_desktop_click).{approval_note}
+Type `text` with the keyboard into whatever has focus - it does NOT save anything. Bring the right app or field to the front first (local_desktop_activate, local_desktop_click); a text editor with no document window needs 'local_desktop_key cmd+n' before typing lands, and 'local_desktop_key cmd+s' plus the save dialog to keep it.{approval_note}

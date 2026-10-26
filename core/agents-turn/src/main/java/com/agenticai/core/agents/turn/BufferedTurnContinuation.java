@@ -7,6 +7,7 @@ import com.agenticai.core.agents.turn.TurnReplyOutcome.Kind;
 import com.agenticai.core.chat.FinishReasonCapture;
 import com.agenticai.core.chat.ToolLoopTranscript;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +34,14 @@ final class BufferedTurnContinuation {
         String run(ContinuationThread.Request request, ToolLoopTranscript transcript, FinishReasonCapture finish);
     }
 
-    /** Applies the finish-reason handling (cut off, refused, ...) to the text of a pass. */
+    /**
+     * Applies the finish-reason handling (cut off, refused, ...) to the text of a pass. {@code
+     * roundsSpent} is the turn's shared tool-round counter - the passes before this one already
+     * spent it, and a tool-enabled pass it starts spends more.
+     */
     @FunctionalInterface
     interface Settle {
-        String apply(String text, FinishReasonCapture finish);
+        String apply(String text, FinishReasonCapture finish, AtomicInteger roundsSpent);
     }
 
     /** What the turn knows when its first pass has finished. */
@@ -81,6 +86,14 @@ final class BufferedTurnContinuation {
 
     private java.util.function.Supplier<ToolLoopTranscript> transcripts = ToolLoopTranscript::new;
 
+    /**
+     * The run's cumulative tool-round count, shared with the pass that ran before this continuation
+     * and every pass here: each pass's transcript is seeded with it ({@link
+     * ToolLoopTranscript#roundsSpentBefore}) so the loop's round cap covers the whole turn instead
+     * of refilling on each pass. Default: a fresh counter (the turn's earlier calls uncounted).
+     */
+    private AtomicInteger roundsSpent = new AtomicInteger();
+
     BufferedTurnContinuation(TurnContinuation policy, int maxPasses) {
         this.policy = policy;
         this.maxPasses = maxPasses;
@@ -106,6 +119,12 @@ final class BufferedTurnContinuation {
     /** Where each pass's transcript comes from (the turn's own, carrying its round cap); default a plain one. */
     BufferedTurnContinuation withTranscripts(java.util.function.Supplier<ToolLoopTranscript> source) {
         this.transcripts = source;
+        return this;
+    }
+
+    /** The turn's shared tool-round counter (see the field); default a fresh one. */
+    BufferedTurnContinuation withRoundsSpent(AtomicInteger counter) {
+        this.roundsSpent = counter == null ? new AtomicInteger() : counter;
         return this;
     }
 
@@ -163,11 +182,17 @@ final class BufferedTurnContinuation {
                                                             policy.nudge(
                                                                     decision.locale(),
                                                                     prompts.apply(run.agentId()))));
-            ToolLoopTranscript transcript = transcripts.get();
+            // A fresh invocation per pass, seeded with the rounds the turn already spent: the
+            // loop's round cap counts the turn's passes together instead of refilling on each one.
+            ToolLoopTranscript transcript = transcripts.get().roundsSpentBefore(roundsSpent.get());
             FinishReasonCapture finish = new FinishReasonCapture();
             callsAtPassStart = context.toolActivity().finishedCalls();
             try {
-                segment = settle.apply(pass.run(request, transcript, finish), finish);
+                String passText = pass.run(request, transcript, finish);
+                // Counted before the settle: it may start another tool-enabled pass that seeds
+                // its own transcript with the running total.
+                roundsSpent.addAndGet(transcript.rounds());
+                segment = settle.apply(passText, finish, roundsSpent);
             } catch (RuntimeException e) {
                 if (FastStreamRecovery.isPolicyStop(e)) {
                     throw e;

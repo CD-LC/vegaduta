@@ -9,7 +9,7 @@ description = "Governance for AI agents in Python: tool risk classification, hum
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
-license-files = ["LICENSE"]
+license-files = ["LICENSE", "NOTICE"]
 authors = [{ name = "VegaDūta contributors" }]
 keywords = ["ai", "agents", "governance", "guardrails", "llm", "mcp", "owasp"]
 classifiers = [

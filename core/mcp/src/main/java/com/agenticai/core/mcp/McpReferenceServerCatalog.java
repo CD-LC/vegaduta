@@ -142,7 +142,13 @@ final class McpReferenceServerCatalog {
                         puppeteer:
                           command: npx
                           args: ["-y", "@modelcontextprotocol/server-puppeteer"]
-            """
+            """,
+            // The per-tenant fallback spec McpRegistryService#upgradeUnservedStaticReference uses
+            // when this deployment's shared static connection can't serve the tenant (no "mcp"
+            // profile, or the stateful server hidden by the exposure policy) - enabling still
+            // connects something real.
+            "npx",
+            List.of("-y", "@modelcontextprotocol/server-puppeteer")
         ),
         // Master-Roadmap-2026.md item #10 ("Vision-driven browser automation
         // upgrade") - "@playwright/mcp" is Microsoft's official, actively
@@ -181,8 +187,13 @@ final class McpReferenceServerCatalog {
                       connections:
                         playwright-vision:
                           command: npx
-                          args: ["-y", "@playwright/mcp@0.0.79", "--caps=vision", "--browser=chromium"]
-            """
+                          args: ["-y", "@playwright/mcp@0.0.83", "--caps=vision", "--browser=chromium", "--isolated"]
+            """,
+            // Same pin as application-mcp.yml's playwright-vision connection (bump them together -
+            // the runner/core-full images install this version's browser at build time; @latest
+            // there caused the 2026-08-09 browser-not-found incident the yml comment documents).
+            "npx",
+            List.of("-y", "@playwright/mcp@0.0.83", "--caps=vision", "--browser=chromium", "--isolated")
         ),
         // The following are further official Anthropic reference servers
         // (github.com/modelcontextprotocol/servers) - added per the "should
@@ -308,7 +319,12 @@ final class McpReferenceServerCatalog {
                         memory:
                           command: npx
                           args: ["-y", "@modelcontextprotocol/server-memory"]
-            """
+            """,
+            // Per-tenant copy the registry falls back to when the shared static server is hidden
+            // (memory is stateful - its own knowledge graph per tenant is the correct isolation
+            // anyway, unlike a stateless shared server).
+            "npx",
+            List.of("-y", "@modelcontextprotocol/server-memory")
         ),
         new McpCatalogEntry(
             "sequential-thinking",
@@ -329,7 +345,9 @@ final class McpReferenceServerCatalog {
                         sequential-thinking:
                           command: npx
                           args: ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-            """
+            """,
+            "npx",
+            List.of("-y", "@modelcontextprotocol/server-sequential-thinking")
         ),
         // "fetch" and "time" catalog entries were removed here - see this
         // class's javadoc above for why (npm packages that never existed,

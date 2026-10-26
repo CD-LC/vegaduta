@@ -803,6 +803,30 @@ export class AgentApi {
   }
 
   /**
+   * Set knowledge write.
+   * `PATCH /api/agents/{agentId}/knowledge-write`
+   */
+  setKnowledgeWrite(agentId: string, body: T.AgentKnowledgeBaseToggleRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string; "If-Match"?: string }>): Promise<T.AgentKnowledgeWriteAccessResponse> {
+    return this.http.request<T.AgentKnowledgeWriteAccessResponse>({ ...options, method: "PATCH", path: `/api/agents/${encodeURIComponent(String(agentId))}/knowledge-write`, body });
+  }
+
+  /**
+   * Get knowledge write access.
+   * `GET /api/agents/{agentId}/knowledge-write-access`
+   */
+  getKnowledgeWriteAccess(agentId: string, options?: CallOptions): Promise<T.AgentKnowledgeWriteAccessResponse> {
+    return this.http.request<T.AgentKnowledgeWriteAccessResponse>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/knowledge-write-access` });
+  }
+
+  /**
+   * Set knowledge write access.
+   * `PATCH /api/agents/{agentId}/knowledge-write-access`
+   */
+  setKnowledgeWriteAccess(agentId: string, body: T.AgentKnowledgeWriteAccessUpdateRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string; "If-Match"?: string }>): Promise<T.AgentKnowledgeWriteAccessResponse> {
+    return this.http.request<T.AgentKnowledgeWriteAccessResponse>({ ...options, method: "PATCH", path: `/api/agents/${encodeURIComponent(String(agentId))}/knowledge-write-access`, body });
+  }
+
+  /**
    * Update model.
    * `PATCH /api/agents/{agentId}/model`
    */
@@ -4821,6 +4845,88 @@ export class DemoWhatsAppWebhookApi {
   }
 }
 
+export class DesktopMonitorApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Frame.
+   * `GET /api/desktop/monitor/frame`
+   *
+   * Only available when the feature flag app.assistant.desktop.monitor.enabled=true is on; otherwise this route answers 404.
+   */
+  frame(options?: CallOptions): Promise<unknown> {
+    return this.http.request<unknown>({ ...options, method: "GET", path: "/api/desktop/monitor/frame" });
+  }
+}
+
+export class DesktopRecipeApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/desktop/recipes`
+   */
+  list(options?: CallOptions<{ agentId?: string; limit?: number; offset?: number }, HeaderParams>): Promise<T.DesktopRecipeDtos_RecipeSummary[]> {
+    return this.http.request<T.DesktopRecipeDtos_RecipeSummary[]>({ ...options, method: "GET", path: "/api/desktop/recipes" });
+  }
+
+  /**
+   * Create.
+   * `POST /api/desktop/recipes`
+   */
+  create(body: T.DesktopRecipeDtos_CreateRecipeRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.DesktopRecipeDtos_RecipeDetail> {
+    return this.http.request<T.DesktopRecipeDtos_RecipeDetail>({ ...options, method: "POST", path: "/api/desktop/recipes", body });
+  }
+
+  /**
+   * From run.
+   * `POST /api/desktop/recipes/from-run`
+   */
+  fromRun(body: T.DesktopRecipeDtos_RecipeFromRunRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.DesktopRecipeDtos_RecipeDetail> {
+    return this.http.request<T.DesktopRecipeDtos_RecipeDetail>({ ...options, method: "POST", path: "/api/desktop/recipes/from-run", body });
+  }
+
+  /**
+   * Get.
+   * `GET /api/desktop/recipes/{id}`
+   */
+  get(id: string, options?: CallOptions): Promise<T.DesktopRecipeDtos_RecipeDetail> {
+    return this.http.request<T.DesktopRecipeDtos_RecipeDetail>({ ...options, method: "GET", path: `/api/desktop/recipes/${encodeURIComponent(String(id))}` });
+  }
+
+  /**
+   * Delete.
+   * `DELETE /api/desktop/recipes/{id}`
+   */
+  delete(id: string, options?: CallOptions): Promise<void> {
+    return this.http.request<void>({ ...options, method: "DELETE", path: `/api/desktop/recipes/${encodeURIComponent(String(id))}`, response: "void" });
+  }
+
+  /**
+   * Update.
+   * `PATCH /api/desktop/recipes/{id}`
+   */
+  update(id: string, body: T.DesktopRecipeDtos_UpdateRecipeRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.DesktopRecipeDtos_RecipeSummary> {
+    return this.http.request<T.DesktopRecipeDtos_RecipeSummary>({ ...options, method: "PATCH", path: `/api/desktop/recipes/${encodeURIComponent(String(id))}`, body });
+  }
+
+  /**
+   * Run.
+   * `POST /api/desktop/recipes/{id}/run`
+   */
+  run(id: string, body: T.DesktopRecipeDtos_RunRecipeRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.DesktopRecipeDtos_RunRecipeResponse> {
+    return this.http.request<T.DesktopRecipeDtos_RunRecipeResponse>({ ...options, method: "POST", path: `/api/desktop/recipes/${encodeURIComponent(String(id))}/run`, body });
+  }
+}
+
 export class DeveloperApiApi {
   private readonly http: HttpClient;
 
@@ -6546,6 +6652,16 @@ export class KnowledgeApi {
    */
   ingest(body: T.IngestRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.IngestResponse> {
     return this.http.request<T.IngestResponse>({ ...options, method: "POST", path: "/api/knowledge/ingest", body });
+  }
+
+  /**
+   * Ingest url.
+   * `POST /api/knowledge/ingest-url`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+   */
+  ingestUrl(body: T.IngestUrlRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.KnowledgeUrlIngester_UrlIngestResult> {
+    return this.http.request<T.KnowledgeUrlIngester_UrlIngestResult>({ ...options, method: "POST", path: "/api/knowledge/ingest-url", body });
   }
 
   /**
@@ -15696,6 +15812,8 @@ export class VegadutaClient {
   readonly demoTranscriptEmail: DemoTranscriptEmailApi;
   readonly demoVideo: DemoVideoApi;
   readonly demoWhatsAppWebhook: DemoWhatsAppWebhookApi;
+  readonly desktopMonitor: DesktopMonitorApi;
+  readonly desktopRecipe: DesktopRecipeApi;
   readonly developerApi: DeveloperApiApi;
   readonly device: DeviceApi;
   readonly deviceDataIngestion: DeviceDataIngestionApi;
@@ -16033,6 +16151,8 @@ export class VegadutaClient {
     this.demoTranscriptEmail = new DemoTranscriptEmailApi(this.http);
     this.demoVideo = new DemoVideoApi(this.http);
     this.demoWhatsAppWebhook = new DemoWhatsAppWebhookApi(this.http);
+    this.desktopMonitor = new DesktopMonitorApi(this.http);
+    this.desktopRecipe = new DesktopRecipeApi(this.http);
     this.developerApi = new DeveloperApiApi(this.http);
     this.device = new DeviceApi(this.http);
     this.deviceDataIngestion = new DeviceDataIngestionApi(this.http);

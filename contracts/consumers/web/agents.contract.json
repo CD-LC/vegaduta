@@ -1464,6 +1464,46 @@
       }
     },
     {
+      "id": "patch-api-agents-agentId-knowledge-write",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/knowledge-write",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.enabled"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-agents-agentId-knowledge-write-access",
+      "method": "GET",
+      "path": "/api/agents/{agentId}/knowledge-write-access",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.allowedKnowledgeWriteCollectionIds",
+          "$.knowledgeWriteEnabled"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-agents-agentId-knowledge-write-access",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/knowledge-write-access",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.allowedKnowledgeWriteCollectionIds"
+        ]
+      },
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
       "id": "get-api-agents-agentId-lab-capabilities",
       "method": "GET",
       "path": "/api/agents/{agentId}/lab/capabilities",

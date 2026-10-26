@@ -410,7 +410,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${SIDECAR_MEM_LIMIT:-2g}
+          memory: ${SIDECAR_MEM_LIMIT:-1536m}
 
   # ----------------------------------------------------------- profile: tools
   # STDIO MCP servers (tenant-registered `npx <pkg>` / `uvx <pkg>` and the starter connectors) run HERE, in
@@ -483,7 +483,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${TOOL_SANDBOX_MEM_LIMIT:-1g}
+          memory: ${TOOL_SANDBOX_MEM_LIMIT:-512m}
           pids: 512
     networks: [sandbox-net]
 
@@ -518,6 +518,80 @@ services:
           # Processes and threads together (every thread is a pid): a JVM or Gradle build uses a few
           # hundred, so this is far above a real build and only stops a runaway command.
           pids: ${WORKSPACE_RUNNER_PIDS_LIMIT:-2048}
+
+  # ----------------------------------------------------------- profile: voice
+  # Self-hosted voice calling for the single-user install: the same two
+  # services docker-compose.yml's `voice` profile runs (LiveKit SFU + the
+  # voice-agent worker), absent here until now - the call button in the
+  # console needs a LiveKit server to connect to, which a personal file
+  # that never declared one could never offer. `--profile voice` starts
+  # them; the voice-agent also needs the `rag` profile's Python sidecar
+  # for Whisper STT, so start voice with `--profile rag --profile voice`.
+  # TTS falls back to the caller's browser when no provider key is set
+  # (voice-agent's own comment on a keyless TTS provider).
+  livekit:
+    image: livekit/livekit-server:v1.13.10
+    profiles: ["voice"]
+    <<: [*restart, *logging, *nnp]
+    command: --config /etc/livekit.yaml
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:?run scripts/vegaduta secrets}: ${LIVEKIT_API_SECRET:?run scripts/vegaduta secrets}"
+      LIVEKIT_RTC_PORT_RANGE_START: ${LIVEKIT_RTC_PORT_RANGE_START:-50000}
+      LIVEKIT_RTC_PORT_RANGE_END: ${LIVEKIT_RTC_PORT_RANGE_END:-50100}
+      # Advertised ICE candidate: loopback by default (single-machine caller);
+      # set LIVEKIT_NODE_IP to the LAN IP when lite callers sit on other hosts.
+      NODE_IP: ${LIVEKIT_NODE_IP:-127.0.0.1}
+    volumes:
+      - ../livekit/livekit.local.yaml:/etc/livekit.yaml:ro
+    ports:
+      - "${LIVEKIT_BIND_ADDR:-127.0.0.1}:7880:7880"
+      - "${LIVEKIT_BIND_ADDR:-127.0.0.1}:7881:7881"
+      - "${LIVEKIT_BIND_ADDR:-127.0.0.1}:${LIVEKIT_RTC_PORT_RANGE_START:-50000}-${LIVEKIT_RTC_PORT_RANGE_END:-50100}:${LIVEKIT_RTC_PORT_RANGE_START:-50000}-${LIVEKIT_RTC_PORT_RANGE_END:-50100}/udp"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7880/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  voice-agent:
+    # LiveKit Agents worker: STT -> core chat -> TTS. Outbound-only.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/voice-agent:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["voice"]
+    <<: [*restart, *logging, *hardened]
+    depends_on:
+      livekit:
+        condition: service_healthy
+      core:
+        condition: service_healthy
+      sidecar:
+        condition: service_started
+    environment:
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:?run scripts/vegaduta secrets}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:?run scripts/vegaduta secrets}
+      LIVEKIT_URL: ws://livekit:7880
+      CORE_API_BASE_URL: http://core:8080
+      SIDECAR_BASE_URL: http://sidecar:8001
+      SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+      ELEVENLABS_VOICE_ID: ${ELEVENLABS_VOICE_ID:-21m00Tcm4TlvDq8ikWAM}
+      SARVAM_API_KEY: ${SARVAM_API_KEY:-}
+      VOICE_AGENT_TTS_PROVIDER: ${VOICE_AGENT_TTS_PROVIDER:-auto}
+      PERCEPTION_MAX_ROOMS: ${PERCEPTION_MAX_ROOMS:-4}
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import socket; socket.create_connection(('127.0.0.1', 8081), 3)\" || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
 
 volumes:
   postgres-data:

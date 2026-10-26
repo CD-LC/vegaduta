@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +27,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  */
 @Configuration
 public class WebSearchProviderWiring {
+
+    private static final Logger log = LoggerFactory.getLogger(WebSearchProviderWiring.class);
 
     @Bean
     public WebSearchProviderRegistry webSearchProviderRegistry(
@@ -66,27 +70,43 @@ public class WebSearchProviderWiring {
         caps.put("serper", capSerper);
 
         DailyWindowCounter counter = new DailyWindowCounter(redis);
-        return new WebSearchProviderRegistry(
-                all,
-                provider,
-                WebSearchProviderRegistry.parseList(fallback),
-                caps,
-                new WebSearchProviderRegistry.CapCounter() {
-                    @Override
-                    public long add(String key, long by) {
-                        return counter.add(key, by);
-                    }
+        WebSearchProviderRegistry registry =
+                new WebSearchProviderRegistry(
+                        all,
+                        provider,
+                        WebSearchProviderRegistry.parseList(fallback),
+                        caps,
+                        new WebSearchProviderRegistry.CapCounter() {
+                            @Override
+                            public long add(String key, long by) {
+                                return counter.add(key, by);
+                            }
 
-                    @Override
-                    public void undo(String key, long by) {
-                        counter.undo(key, by);
-                    }
+                            @Override
+                            public void undo(String key, long by) {
+                                counter.undo(key, by);
+                            }
 
-                    @Override
-                    public long current(String key) {
-                        return counter.current(key);
-                    }
-                });
+                            @Override
+                            public long current(String key) {
+                                return counter.current(key);
+                            }
+                        });
+        // Misconfiguration used to surface only as agents claiming they had no web access: the tool
+        // was silently absent. It is now offered as a refusing stub, but the WARN still tells the
+        // operator before a user ever finds out.
+        if (!registry.anyConfigured()) {
+            log.warn(
+                    "No web-search provider is configured (app.web-search.provider={}, fallback={}, "
+                            + "searxng base-url {}): agents' web_search calls will answer that search "
+                            + "is unavailable until a provider is set up - e.g. a platform Brave/Tavily/Exa/Serper "
+                            + "key in Tool Credentials or WEB_SEARCH_PROVIDER=searxng with "
+                            + "WEB_SEARCH_SEARXNG_BASE_URL",
+                    provider,
+                    fallback,
+                    searxngBaseUrl == null || searxngBaseUrl.isBlank() ? "empty" : "set");
+        }
+        return registry;
     }
 
     /**

@@ -32,6 +32,17 @@ export const KNOWN_TOOL_LABELS = [
   "delegate_to_specialist",
   "delegate_parallel",
   "web_task",
+  "local_desktop_activate",
+  "local_desktop_click",
+  "local_desktop_clipboard",
+  "local_desktop_elements",
+  "local_desktop_key",
+  "local_desktop_notify",
+  "local_desktop_open",
+  "local_desktop_press",
+  "local_desktop_screen",
+  "local_desktop_type",
+  "run_desktop_recipe",
 ] as const;
 
 const KNOWN = new Set<string>(KNOWN_TOOL_LABELS);
