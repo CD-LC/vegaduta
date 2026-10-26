@@ -32,7 +32,7 @@ class ChatTimeoutsConversationPolicyTest {
                 D,
                 D,
                 8,
-                D,
+                Duration.ofSeconds(5),
                 providerOf(ChatFinishProperties.class, null),
                 providerOf(ChatResilienceProperties.class, null),
                 providerOf(LlmRetryProperties.class, null),
