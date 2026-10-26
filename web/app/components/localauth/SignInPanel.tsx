@@ -43,7 +43,16 @@ type View = "main" | "password" | "recovery" | "forgot";
  * PIN is possible here (an older core, an unsupported browser, no enrolled device) the password
  * form is simply the screen.
  */
-export default function SignInPanel({ methods, passkey, device, reauth, setupRequired, initialEmail, onSession, onDeviceChange }: Props) {
+export default function SignInPanel({
+  methods,
+  passkey,
+  device,
+  reauth,
+  setupRequired,
+  initialEmail,
+  onSession,
+  onDeviceChange,
+}: Props) {
   const t = useTranslations("signin");
   const canPasskey = methods.includes("passkey") && passkey.supported;
   const canPin = methods.includes("pin") && device.known;
@@ -84,7 +93,10 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
     setView(next);
   }
 
-  async function attempt(context: ErrorContext, action: () => Promise<{ payload: LocalSessionPayload; via: SignInVia; email?: string; password?: string }>) {
+  async function attempt(
+    context: ErrorContext,
+    action: () => Promise<{ payload: LocalSessionPayload; via: SignInVia; email?: string; password?: string }>
+  ) {
     setBusy(true);
     setActive(context);
     setError(null);
@@ -184,7 +196,15 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
   ) : null;
 
   const forgotLink = (
-    <button type="button" className="underline" onClick={() => { setResetDone(false); go("forgot"); }} data-testid="local-forgot-password">
+    <button
+      type="button"
+      className="underline"
+      onClick={() => {
+        setResetDone(false);
+        go("forgot");
+      }}
+      data-testid="local-forgot-password"
+    >
       {t("local.signin.forgotPassword")}
     </button>
   );
@@ -201,7 +221,12 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
                 : t("local.forgot.done")}
             </p>
             <p className="vd-auth__switch">
-              <button type="button" className="underline" onClick={() => go("password")} data-testid="local-forgot-back-done">
+              <button
+                type="button"
+                className="underline"
+                onClick={() => go("password")}
+                data-testid="local-forgot-back-done"
+              >
                 {t("local.signin.back")}
               </button>
             </p>
@@ -223,11 +248,22 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
               <p className="text-xs text-muted-foreground">{t("local.forgot.hint")}</p>
             </div>
             {status}
-            <Button type="submit" size="lg" className="w-full" disabled={busy || locked} data-testid="local-forgot-submit">
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full"
+              disabled={busy || locked}
+              data-testid="local-forgot-submit"
+            >
               {busy ? t("local.forgot.sending") : t("local.forgot.button")}
             </Button>
             <p className="vd-auth__switch">
-              <button type="button" className="underline" onClick={() => go("password")} data-testid="local-forgot-back">
+              <button
+                type="button"
+                className="underline"
+                onClick={() => go("password")}
+                data-testid="local-forgot-back"
+              >
                 {t("local.signin.back")}
               </button>
             </p>
@@ -257,7 +293,13 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
           />
         </div>
         {status}
-        <Button type="submit" size="lg" className="w-full" disabled={busy || locked} data-testid="local-recovery-submit">
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          disabled={busy || locked}
+          data-testid="local-recovery-submit"
+        >
           {busy ? t("local.signingIn") : t("local.recovery.button")}
         </Button>
         <p className="vd-auth__switch">
@@ -322,7 +364,14 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
     <div className="vd-auth__form" data-testid="local-signin-main">
       {notices}
       {canPasskey && (
-        <Button type="button" size="lg" className="w-full" disabled={busy || locked} onClick={onPasskey} data-testid="local-passkey-signin">
+        <Button
+          type="button"
+          size="lg"
+          className="w-full"
+          disabled={busy || locked}
+          onClick={onPasskey}
+          data-testid="local-passkey-signin"
+        >
           <Fingerprint aria-hidden="true" />
           {busy && active === "passkey" ? t("local.signingIn") : t("local.signin.passkeyButton")}
         </Button>
@@ -336,7 +385,9 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
         <form onSubmit={onPin} className="vd-auth__form" data-testid="local-pin-form">
           <PinField
             id="local-pin"
-            label={device.label ? t("local.signin.pinLabelDevice", { device: device.label }) : t("local.signin.pinLabel")}
+            label={
+              device.label ? t("local.signin.pinLabelDevice", { device: device.label }) : t("local.signin.pinLabel")
+            }
             value={pin}
             onChange={setPin}
             disabled={busy || locked}
@@ -345,7 +396,13 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
             testId="local-pin"
           />
           {status}
-          <Button type="submit" size="lg" className="w-full" disabled={busy || locked || pin.length < PIN_MIN} data-testid="local-pin-submit">
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full"
+            disabled={busy || locked || pin.length < PIN_MIN}
+            data-testid="local-pin-submit"
+          >
             {busy && active === "pin" ? t("local.signingIn") : t("local.signin.pinButton")}
           </Button>
         </form>
