@@ -348,6 +348,14 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
 
 
 
+
+ADD (Devin, 2026-10-26): `code-intel` service on the personal tier - the
+profile-gated service was missing from personal.yml entirely (the whole
+reason repo management showed nothing on local installs). New `code-intel`
+profile + service (auth_mode=internal - personal has no Keycloak; core and
+the console proxy carry X-Internal-Token) + core wiring
+(CODE_INTEL_ENABLED/BASE_URL/INTERNAL_TOKEN) + code-intel-data volume.
+Live and healthy on the local personal stack.
 FIX (Devin, 2026-10-26): "users can't sign up on a personal install" - by
 design POST /api/signup is closed in local mode (anyone on the LAN would
 get a full tenant on the owner's box) and the proxy 404s /signup AND the
