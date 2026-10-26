@@ -91,6 +91,21 @@ final class OpenApiSecurity {
         new PublicRule("POST", "/api/internal/app-builder/generate-image")
     );
 
+    /**
+     * The local-auth filter chain ({@code LocalAuthSecurityConfig}) is separate from the main
+     * {@code SecurityConfig} the list above mirrors: everything under {@code /api/auth/local/**}
+     * is permitAll EXCEPT these paths, which need a signed-in session (its {@code
+     * BEARER_REQUIRED}). Keep the two in step.
+     */
+    private static final List<String> LOCAL_AUTH_BEARER_REQUIRED =
+            List.of(
+                    "/api/auth/local/change-password",
+                    "/api/auth/local/unlock/methods",
+                    "/api/auth/local/unlock/devices",
+                    "/api/auth/local/unlock/devices/*",
+                    "/api/auth/local/unlock/passkeys/*",
+                    "/api/auth/local/unlock/recovery-codes");
+
     private static final AntPathMatcher MATCHER = new AntPathMatcher();
 
     private OpenApiSecurity() {
@@ -98,6 +113,14 @@ final class OpenApiSecurity {
 
     /** True when the (method, path-template) pair is a permitAll route. */
     static boolean isPublic(String httpMethod, String path) {
+        if (MATCHER.match("/api/auth/local/**", path)) {
+            for (String required : LOCAL_AUTH_BEARER_REQUIRED) {
+                if (MATCHER.match(required, path)) {
+                    return false;
+                }
+            }
+            return true;
+        }
         for (PublicRule rule : PUBLIC_RULES) {
             if (rule.method() != null && !rule.method().equalsIgnoreCase(httpMethod)) {
                 continue;
