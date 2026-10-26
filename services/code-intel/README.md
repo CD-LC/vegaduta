@@ -59,6 +59,21 @@ GET  /repos/{repo_id}/graph/callees/{symbol}
 GET  /repos/{repo_id}/graph/impact/{symbol}?depth=3
 GET  /repos/{repo_id}/graph/stats
 
+# analysis suite (codebase_rag/analysis.py) - deterministic read-only reads
+# over the built graph; cheap SQLite lookups, no rebuild, no exec gate
+GET  /repos/{repo_id}/map?budget=16000&top_n=200     PageRank-ranked repo skeleton (signatures, not bodies)
+GET  /repos/{repo_id}/symbols?q=&kind=&path_prefix=&limit=&include_tests=
+GET  /repos/{repo_id}/symbols/{qualified_name}?include_body=true
+GET  /repos/{repo_id}/outline?path=<file>
+GET  /repos/{repo_id}/references/{symbol}            calls + inherits + value/type refs
+GET  /repos/{repo_id}/graph/implementations/{symbol}?depth=4
+GET  /repos/{repo_id}/graph/path?src=&dst=&max_depth=8
+GET  /repos/{repo_id}/dead-code?limit=100
+GET  /repos/{repo_id}/tests/{symbol}                 test-file linkage
+GET  /repos/{repo_id}/api-surface                    extracted HTTP routes
+GET  /repos/{repo_id}/hotspots?days=90&limit=30      git churn x size
+GET  /repos/{repo_id}/import-cycles                  file-level import SCCs
+
 # code execution / rework loop (403 unless CODE_INTEL_ALLOW_EXEC=true)
 POST /repos/{repo_id}/workspaces                     -> {workspace_id}
 POST /repos/{repo_id}/workspaces/{ws}/apply          {files:[{path,content}|{path,delete}]}
@@ -74,6 +89,37 @@ DEL  /repos/{repo_id}/workspaces/{ws}/processes/{process_id}
 ```
 
 Errors use the platform's `{timestamp, status, error}` JSON shape.
+
+## The analysis suite (out-of-the-box code intelligence)
+
+Beyond raw search and call-graph hops, the graph build extracts everything
+the "read" tools need to answer architecture-level questions deterministically:
+
+- **Enriched symbols** — every symbol carries its `signature` (first line of
+  the definition), a `doc` snippet (leading comment or docstring) and an
+  `is_test` flag (conventional test paths/names), so queries can filter and
+  summarize without reading files.
+- **`references` edges** — value/type-position uses (type annotations,
+  member reads, constants), deduplicated per enclosing symbol and distinct
+  from `calls`: `GET .../references/{symbol}` is "find all references",
+  not just "find callers".
+- **`api_routes` rows** — framework-shaped HTTP route lines are captured
+  during extraction (FastAPI/Starlette/Flask/Django, Express/Koa/Hono/Nest,
+  Spring MVC + JAX-RS, net/http/Gin/Echo/chi, axum, ASP.NET attributes) into
+  `api_routes`, served by `/api-surface`. Dynamic routers and computed paths
+  are honestly not reported (see the endpoint's `coverage` field).
+- **Repo map** — PageRank over call/inherit/reference edges ranks symbols by
+  centrality; `/map` emits the top signatures grouped by file under a char
+  budget. It is the designed *first call* for an agent learning a codebase:
+  the shape of the repo without a single file body.
+- **Structure queries** — recursive `implementations`, BFS `graph/path`,
+  `dead-code` (zero-inbound-edge candidates, entrypoint names excluded),
+  `tests/{symbol}` (which test-file symbols reach it), `import-cycles`
+  (file-level Tarjan SCCs) and `hotspots` (`git log --numstat` churn x size;
+  non-git checkouts return an honest empty result).
+
+All of it is deterministic — an answer exists only if the parsers produced
+it — and all of it is read-only: no approval, no `ALLOW_EXEC`, no heavy gate.
 
 ## Code execution with automatic rework
 
@@ -187,15 +233,19 @@ env:
 ```
 
 It exposes `search_code`, `code_callers`, `code_callees`, `code_impact`,
-`create_workspace`, `apply_files`, `run_code`, `workspace_diff`. The agent
-sees the rework loop spelled out in the tool descriptions and drives it
-itself — no orchestration code in core. (`CODE_INTEL_DIRECT=1` makes the
-bridge call the service in-process, used by the tests.)
+`code_map`, `find_symbols`, `symbol_detail`, `code_outline`,
+`code_references`, `code_implementations`, `code_path`, `dead_code`,
+`code_tests`, `api_surface`, `code_hotspots`, `import_cycles` (the full
+read-only suite) plus `create_workspace`, `apply_files`, `run_code`,
+`workspace_diff`. The agent sees the rework loop spelled out in the tool
+descriptions and drives it itself — no orchestration code in core.
+(`CODE_INTEL_DIRECT=1` makes the bridge call the service in-process, used
+by the tests.)
 
 **Read-only by default over the registry path.** When registered in the
 platform's MCP registry (the HTTP backend, reachable by arbitrary agents),
-the bridge exposes **only** the four read tools (`search_code`,
-`code_callers`, `code_callees`, `code_impact`) unless
+the bridge exposes **only** the read tools (`search_code`, `code_callers`,
+`code_callees`, `code_impact` and the twelve analysis tools) unless
 `CODE_INTEL_MCP_READONLY=false`. This is deliberate and load-bearing: the
 bridge reaches the service over the *same* shared `X-Internal-Token` core
 uses, and the service now treats any internal-token caller as
@@ -208,8 +258,9 @@ core's MCP gallery (`McpCatalogService`, key `code-intel`).
 
 ### Two ways core talks to this service (both wired)
 
-1. **Native Java tools** (`core/codeintel`): every agent gets the five
-   read-only code-intel tools when `code-intel.enabled=true`, and the five
+1. **Native Java tools** (`core/codeintel`): every agent gets seventeen
+   read-only code-intel tools when `code-intel.enabled=true` (search, graph
+   and the analysis suite), and the five
    approval-gated write/execute tools when its agent is code-workspace-enabled
    with a repo grant. These are also usable as **workflow steps** via the
    workflow designer's generic **Tool / MCP Call** node — pick a

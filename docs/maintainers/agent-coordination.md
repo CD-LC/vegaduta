@@ -322,3 +322,60 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   `docs/personal-mode.md` - ⚠ OVERLAP with the docs agent's open PR #203 (`docs/today-changes`)
   on those same files + CHANGELOG/coordination-log: my edits are additive in different sections;
   whoever lands second takes BOTH hunks.
+
+### Rollout note: prod fixes 2026-10-26 (Devin)
+
+- **Stale-IP outage fixed on `vegaduta-ai-az-core`**: `MCP_STDIO_SIDECAR_URL` pointed at dead
+  external IP `52.172.129.99:8097` (reassigned long ago). Repointed to
+  `vegaduta-ai-az-mcp-stdio-runner.internal.mangosand-cef7f848.centralindia.azurecontainerapps.io:8097`
+  (TCP ingress, exposedPort 8097). This was the root cause of "MCP tools not available to agents".
+- `TOOL_SANDBOX_BASE_URL` (`http://52.172.129.99:8095`) and `LIVEKIT_URL` (`ws://52.172.129.99:7880`)
+  point at the same dead IP AND their container apps do not exist in `vegaduta-ai-az-rg` at all.
+  `TOOL_SANDBOX_ENABLED` set to `false` for honest unavailability; LiveKit needs a real deployment
+  (or the env var cleared) before voice works on prod.
+- **Version skew fixed**: `vegaduta-ai-az-code-intel` and `vegaduta-ai-az-app-builder` were running
+  the pre-0.1.8 image `9a8139f2` while core/web ran `0.1.10`. Pushed amd64 `0.1.10` to
+  `vegadutaaiazacr` ACR (NB: `docker tag && docker push` of a local tag pushes the LOCAL arch -
+  pull `--platform linux/amd64` by manifest digest first) and updated both apps; healthy at
+  traffic weight 100.
+- Not fixed (needs user/GCP-side work): Google OAuth env is fully configured
+  (`GOOGLE_OAUTH_CLIENT_ID` set, redirect `https://api.vegaduta.ai/oauth/google/callback`,
+  console redirect `https://app.vegaduta.ai/tools`); if connect still fails the remaining causes
+  are on the Google Cloud OAuth client itself (redirect URI not registered, consent screen not
+  published, missing scopes). `GOOGLE_OAUTH_MODE` should be `web` (or unset - the default).
+
+
+
+SPLIT (both agents, 2026-10-26): a parallel agent's `ruff format` commit grew
+app/main.py (700) + app/mcp_bridge.py (672) over the 665-line ratchet. The
+other agent landed `analysis_routes.py` + `deps.py` (shared service/tenant)
++ `mcp_analysis_tools.py` + `mcp_tool_schema.py` - I removed a dead
+dispatch_analysis duplicate and verified include_router mounts all 12
+routes via TestClient (this FastAPI version defers include into
+_IncludedRouter placeholders; import-time app.routes listing is misleading).
+LOCAL DEPLOY + local auth (Devin, 2026-10-26): deployed the branch's images to the
+local full stack (`docker compose ... build code-intel core web`, `up -d`) - all healthy;
+/new analysis endpoints verified live against a smoke repo (map/symbols/api-surface/
+dead-code all answered). Wired the two documented-but-unmapped auth-mode vars into
+docker-compose.yml (`APP_AUTH_MODE` on x-core-env, `NEXT_PUBLIC_AUTH_MODE` on web-env,
+`WEB_AUTH_MODE` in .env drives it) - the deployment now runs `app.auth.mode=local`, so
+the console's own unlock screen handles owner setup (password/passkey/PIN/recovery).
+Verified: LocalFirstRunBootstrap emitted the setup link, `/api/auth/local/unlock/*`
+endpoints live, `window.__ENV` carries `NEXT_PUBLIC_AUTH_MODE:"local"`.
+### CLAIM COMPLETE: services/code-intel capability expansion (Devin, 2026-10-26)
+
+Shipped on `feat/code-intel-out-of-the-box`: 12 deterministic read-only analysis
+endpoints + agent tools - repo map (PageRank skeleton under char budget), find_symbols,
+symbol_detail (exact body), outline, references (calls+inherits+value/type refs),
+implementations, call-path BFS, dead-code candidates, tests-for linkage, api-surface
+(FastAPI/Flask/Express/Spring/Go/Rust/ASP.NET route extraction), hotspots (git churn x
+size), import-cycles (file-level SCCs). Extraction gains signature/doc/is_test on symbols,
+`references` edges, api_routes table (schema auto-migrates via ALTER). Core side:
+`CodeIntelAnalysis` (split out of CodeIntelClient for the 700-line ratchet) +
+spec-driven `CodeIntelAnalysisToolCallback`/`CodeIntelAnalysisTools` - all togglable per
+agent via existing allowedToolNames/ToolsGrid, scoped by allowedCodeIntelRepoIds.
+Workbench: repo-access editor un-gated from codeWorkspaceEnabled (read-only agents
+couldn't reach their own scope). Tests: tests/test_analysis.py 27 checks +
+CodeIntelAnalysisToolCallbackTest 6 tests; full suites green (ci ~380 py, codeintel 38,
+agents-tools 1531). mcp_bridge also fixed: GET params were sent as a JSON body FastAPI
+ignored - now real query strings.
