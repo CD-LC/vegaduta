@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
+
+- Shared-agent voice works without server speech services: the public share page's call panel now offers one-tap downloads of the on-device models (whisper speech-to-text ~45 MB + kokoro voice ~90 MB) on the visitor's device. With whisper installed, hold-to-talk transcribes locally and only the text crosses the wire (the shared chat endpoint), so talking works even when the platform's STT, TTS and LiveKit legs are all down; any miss falls back to the server voice turn as before. Loading indicators on the share page were strengthened (larger spinner + clearer thinking bubble).
 ### Added
 
 - **On-device media generation, out of the box.** The edge tool surface gains

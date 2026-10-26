@@ -300,3 +300,15 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   `docs/configuration.md`, `CHANGELOG.md`, `scripts/ci/file-size-baseline.txt`),
   plus null-translate guard + soft/hard-stop extraction (`ToolLoopSoftStops`,
   `FastStreamRecovery` comment, `FastStreamTurn`).
+- 2026-10-26, Devin - CLAIM COMPLETE, shared-agent on-device voice on `feat/share-on-device-voice`
+  (PR #201): `web/app/agent/[shareId]/` gained `shareLocalTurn.ts` (whisper on-device -> shared
+  /chat -> kokoro/browser voice), `shareLiveCall.ts` + `useShareVoiceSetup.ts` (extractions),
+  `ShareVoiceSetup.tsx` (one-tap STT+TTS downloads on the visitor's device), plus panel/page edits
+  for the local turn fallback and stronger loading indicators. ALSO on the branch: dropped the
+  self-referential `web/node_modules` symlink that was tracked in git (broke every local npm run),
+  and two main-repair fixes - `GenerationClaimGuard` extracted from `ChatTurnExecutor` (spotless
+  growth had pushed it to 837 > the 769 baseline; now 763) and the `ChatTimeoutsConversationPolicyTest`
+  constructor seam updated for `preTurnMaxWait`. Docs touched: `docs/local-models.md`,
+  `docs/personal-mode.md` - ⚠ OVERLAP with the docs agent's open PR #203 (`docs/today-changes`)
+  on those same files + CHANGELOG/coordination-log: my edits are additive in different sections;
+  whoever lands second takes BOTH hunks.

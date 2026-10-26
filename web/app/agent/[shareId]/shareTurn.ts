@@ -34,6 +34,9 @@ export interface ShareTurnDeps {
   setServerVoiceMissing: (v: boolean) => void;
   appendCallLog: (entry: { role: "user" | "agent"; text: string }) => void;
   setMode: (m: "idle" | "push-to-talk" | "call") => void;
+  /** Fires when the server turn errors out - lets the panel offer the
+   *  on-device speech-to-text download as the fallback path. */
+  onServerError?: () => void;
 }
 
 export async function sendShareTurn(deps: ShareTurnDeps, blob: Blob) {
@@ -144,6 +147,7 @@ export async function sendShareTurn(deps: ShareTurnDeps, blob: Blob) {
       onError: (message) => {
         setError(message);
         setStage("error");
+        deps.onServerError?.();
       },
     });
   } finally {
