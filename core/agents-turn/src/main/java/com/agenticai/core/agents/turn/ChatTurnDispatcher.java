@@ -558,25 +558,11 @@ final class ChatTurnDispatcher {
                         agentId,
                         memorySessionId,
                         () -> context.toolActivity().ledger().snapshotOrNull());
-        // Skill-learning loop (app.skills.learning.enabled, off by default): reports how the turn
-        // ended. Returns the same Flux, untouched, while the loop is off.
+        // The turn-completion observers (learning loops - all off by default, each returning the
+        // same Flux untouched while its loop is off).
         result =
-                com.agenticai.core.agents.skills.SkillLearningGateway.observe(
-                        result,
-                        agentId,
-                        sessionId,
-                        userMessage,
-                        fastDispatchStartedAt,
-                        context.tenantContext());
-        // Lessons loop (app.learning.lessons.enabled, off by default): same contract, same no-op.
-        result =
-                com.agenticai.core.agents.skills.LessonLearningGateway.observe(
-                        result,
-                        agentId,
-                        sessionId,
-                        userMessage,
-                        fastDispatchStartedAt,
-                        context.tenantContext());
+                com.agenticai.core.agents.skills.TurnCompletionObservers.observe(
+                        result, agentId, sessionId, userMessage, fastDispatchStartedAt, context.tenantContext());
         // Preferences-from-behavior loop (app.learning.preferences.enabled, off by default): hands over the
         // person's message only; the reply stream is not touched and nothing blocks.
         com.agenticai.core.agents.skills.PreferenceSignalGateway.observe(

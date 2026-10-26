@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.tools.desktop;
 
 import com.agenticai.core.agents.core.AgentService;
+import com.agenticai.core.agents.tools.DesktopRecipeSavePort;
 import com.agenticai.core.agents.tools.ToolCallLog;
 import com.agenticai.core.agents.tools.ToolCallLogRepository;
 import com.agenticai.core.agents.tools.desktop.DesktopRecipeDtos.CreateRecipeRequest;
@@ -19,6 +20,7 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -56,7 +58,7 @@ import org.springframework.web.server.ResponseStatusException;
  * it.
  */
 @Service
-public class DesktopRecipeService {
+public class DesktopRecipeService implements DesktopRecipeSavePort {
 
     private static final Logger log = LoggerFactory.getLogger(DesktopRecipeService.class);
 
@@ -177,6 +179,37 @@ public class DesktopRecipeService {
      * {@code tool_call_log} (only ones this agent made in that session), builds the recipe with
      * {@link DesktopRecipeRecorder} and stores it.
      */
+    /**
+     * {@link DesktopRecipeSavePort}: the learning loop's "save
+     * this run" apply path. Literal text steps are refused ({@code allowLiteralText=false}), the
+     * recipe defaults to MONITOR (each step asks before it runs) and a generated name when the
+     * proposal carried none. The caller's own EDITOR permission on the agent applies, exactly like
+     * the REST save.
+     */
+    @Override
+    @Transactional
+    public Optional<UUID> saveRunAsRecipe(UUID agentId, String sessionId, String name) {
+        try {
+            String recipeName =
+                    name == null || name.isBlank()
+                            ? "Desktop run " + Instant.now().toString().substring(0, 16)
+                            : name;
+            RecipeDetail saved =
+                    saveFromRun(
+                            new RecipeFromRunRequest(
+                                    agentId,
+                                    sessionId,
+                                    recipeName,
+                                    null,
+                                    Map.of(),
+                                    Boolean.FALSE,
+                                    DesktopRecipe.MODE_MONITOR));
+            return Optional.ofNullable(saved.summary().id());
+        } catch (IllegalArgumentException | ResponseStatusException e) {
+            return Optional.empty();
+        }
+    }
+
     @Transactional
     public RecipeDetail saveFromRun(RecipeFromRunRequest request) {
         requireEnabled();
@@ -459,7 +492,10 @@ public class DesktopRecipeService {
         if (source == null || !source.isEnabled()) {
             return null;
         }
-        return source.client()::post;
+        // One journal row per replayed step under the calling turn's tool scope (a REST-driven
+        // run has none and is not journaled) - the run journal, Issues portal and learning loops
+        // could otherwise only see the single run_desktop_recipe row.
+        return DesktopRecipeStepJournal.wrap(source.client()::post, toolCallLogs.getIfAvailable());
     }
 
     /**

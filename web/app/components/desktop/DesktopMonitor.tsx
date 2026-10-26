@@ -21,6 +21,7 @@ export default function DesktopMonitor({
   active,
   steps,
   live,
+  background,
 }: {
   /** True while the run call is in flight - frames are polled only then. */
   active: boolean;
@@ -29,6 +30,9 @@ export default function DesktopMonitor({
   /** Live-watch variant: frames of the whole screen while the person chose "Watch live" - the copy
    * says "what the agent is doing right now" instead of naming a recipe run. */
   live?: boolean;
+  /** Keep polling while the console tab is hidden - set when the frames render into a popped-out
+   * Picture-in-Picture window the person is still watching (DesktopScreenDock). */
+  background?: boolean;
 }) {
   const t = useTranslations("desktopAutomation");
   const [frameUrl, setFrameUrl] = useState<string | null>(null);
@@ -40,7 +44,7 @@ export default function DesktopMonitor({
     if (!active) return undefined;
     let stopped = false;
     const tick = async () => {
-      if (typeof document !== "undefined" && document.hidden) return;
+      if (!background && typeof document !== "undefined" && document.hidden) return;
       try {
         const blob = await api.fetchDesktopMonitorFrame();
         if (stopped) return;
@@ -60,7 +64,7 @@ export default function DesktopMonitor({
       stopped = true;
       clearInterval(timer);
     };
-  }, [active]);
+  }, [active, background]);
 
   // Revoke whichever object URL is still held when the pane unmounts.
   useEffect(

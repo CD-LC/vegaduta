@@ -8,6 +8,33 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Approvals that park a task now actually resume it.** An approval request recorded
+  without the chat turn's origin (a caller with no conversation subject key, or one recorded
+  before the origin fields existed) used to show "The agent was not restarted automatically
+  after this decision" and then answer a typed "carry on" with no memory of the task. The
+  continuation and the outcome note now derive the conversation from the fields every request
+  does carry - agent, session, tenant, subject - verify the derived session really holds the
+  conversation, and restate its last request when the goal is missing. A wrong derivation
+  (a caller whose subject key is not its tenant subject) is still refused.
+
+### Added
+
+- **Desktop watch pops out of the console tab.** The live-screen dock now has a "Pop out"
+  button (browsers with the document Picture-in-Picture API) that moves the feed into a real
+  always-on-top OS window, so the console tab can be minimized and the desktop left free for
+  the agent to work in while the person watches from the floating window; frames keep polling
+  while the tab is hidden in that mode.
+- **Desktop runs are journaled per step and proposed as recipes.** Each replayed recipe step
+  writes its own `tool_call_log` row under the calling turn (the sidecar path and non-secret
+  fields only - resolved `{{secret.*}}` values are never journaled), so the run journal, the
+  Issues portal and the learning loops see which step did what instead of one opaque
+  `run_desktop_recipe` row. New `app.learning.desktop-recipes.enabled` (on in the `personal`
+  profile): a finished turn that ran two or more `local_desktop_*` actions files a
+  "Save this desktop run as a recipe?" proposal; approving it materializes the recipe through
+  the same save-from-run path the button uses.
+
 ## [0.1.11] - 2026-10-26
 
 - Shared-agent voice works without server speech services: the public share page's call panel now offers one-tap downloads of the on-device models (whisper speech-to-text ~45 MB + kokoro voice ~90 MB) on the visitor's device. With whisper installed, hold-to-talk transcribes locally and only the text crosses the wire (the shared chat endpoint), so talking works even when the platform's STT, TTS and LiveKit legs are all down; any miss falls back to the server voice turn as before. Loading indicators on the share page were strengthened (larger spinner + clearer thinking bubble).
