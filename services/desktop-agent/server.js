@@ -18,6 +18,10 @@
 // Recording permissions in System Settings > Privacy & Security.
 // Linux uses xdotool / gnome-screenshot / scrot / xclip / notify-send when
 // present and answers 501 with the missing tool otherwise.
+// Windows uses PowerShell (ships with the OS): input through user32
+// SendInput/mouse_event via an inline C# interop class, screen capture through
+// System.Drawing.CopyFromScreen, clipboard through Get/Set-Clipboard. The /ui
+// accessibility tree is macOS-only for now - it answers 501 elsewhere.
 //
 // API (every call needs the Bearer secret):
 //   POST   /screenshot      {}                    -> {path, bytes}           PNG under DATA_DIR
@@ -405,13 +409,242 @@ async function linuxClipboardSet(text) {
   throw err;
 }
 
-function runStdin(argv, input) {
+function runStdin(argv, input, timeoutMs = EXEC_TIMEOUT_MS) {
   return new Promise((resolve, reject) => {
     const [cmd, ...args] = argv;
-    const child = execFile(cmd, args, { timeout: EXEC_TIMEOUT_MS }, (err) =>
-      err ? reject(err) : resolve());
+    const child = execFile(
+      cmd,
+      args,
+      { timeout: timeoutMs, maxBuffer: 8 * 1024 * 1024 },
+      (err, stdout, stderr) => {
+        if (err) {
+          const detail = (stderr || err.message || '').toString().trim().split('\n').pop();
+          reject(Object.assign(new Error(detail || 'command failed'), { code: err.code }));
+          return;
+        }
+        resolve(stdout ? stdout.toString() : '');
+      });
     child.stdin.end(input);
   });
+}
+
+// ---------------------------------------------------------------------------
+// Actions - Windows (win32): everything goes through Windows PowerShell, which
+// ships with the OS - user32 SendInput/mouse_event via an inline C# interop
+// class for input, System.Drawing.CopyFromScreen for the screen, and the
+// Get/Set-Clipboard cmdlets. Scripts travel over stdin (`-Command -`) so no
+// user text ever needs argv quoting; payloads go in as base64. /ui stays 501:
+// the accessibility tree is macOS-only for now (same posture as Linux).
+// ---------------------------------------------------------------------------
+
+const PS = ['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', '-'];
+
+function ps(script, timeoutMs) {
+  return runStdin(PS, script, timeoutMs);
+}
+
+/** Escape a JS string for a PowerShell single-quoted literal. */
+function psQuote(s) {
+  return String(s).replace(/'/g, "''");
+}
+
+/** UTF-8 base64: how user text crosses into a script without quoting hazards. */
+function b64(s) {
+  return Buffer.from(String(s), 'utf8').toString('base64');
+}
+
+/**
+ * The interop class every input action shares. MOUSEINPUT must stay in the
+ * union even though only keyboard input is used - it is what keeps
+ * Marshal.SizeOf(INPUT) at the 40 bytes SendInput requires on 64-bit Windows.
+ */
+const PS_WININ = `
+Add-Type -TypeDefinition @"
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+public static class WinIn {
+  [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
+  [DllImport("user32.dll")] public static extern void mouse_event(uint flags, int dx, int dy, uint data, UIntPtr extra);
+  [DllImport("user32.dll", SetLastError=true)] public static extern uint SendInput(uint n, INPUT[] inputs, int size);
+  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+  const uint KEYUP = 0x0002, UNICODE = 0x0004;
+  [StructLayout(LayoutKind.Sequential)] public struct MOUSEINPUT { public int dx, dy; public uint data, flags, time; public UIntPtr extra; }
+  [StructLayout(LayoutKind.Sequential)] public struct KEYBDINPUT { public ushort vk, scan; public uint flags, time; public UIntPtr extra; }
+  [StructLayout(LayoutKind.Explicit)] public struct INPUTU { [FieldOffset(0)] public MOUSEINPUT m; [FieldOffset(0)] public KEYBDINPUT k; }
+  [StructLayout(LayoutKind.Sequential)] public struct INPUT { public uint type; public INPUTU u; }
+  static INPUT Key(ushort vk, ushort scan, uint flags) {
+    return new INPUT { type = 1, u = new INPUTU { k = new KEYBDINPUT { vk = vk, scan = scan, flags = flags } } };
+  }
+  static void Send(List<INPUT> ins) {
+    if (SendInput((uint)ins.Count, ins.ToArray(), Marshal.SizeOf(typeof(INPUT))) != (uint)ins.Count) {
+      throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+    }
+  }
+  // KEYEVENTF_UNICODE types text by UTF-16 code unit - layout-independent, no
+  // dead-key or IME surprises the way SendKeys has.
+  public static void TypeText(string s) {
+    var ins = new List<INPUT>(s.Length * 2);
+    foreach (char c in s) { ins.Add(Key(0, c, UNICODE)); ins.Add(Key(0, c, UNICODE | KEYUP)); }
+    Send(ins);
+  }
+  public static void Press(ushort[] mods, ushort vk) {
+    var ins = new List<INPUT>();
+    foreach (var m in mods) ins.Add(Key(m, 0, 0));
+    ins.Add(Key(vk, 0, 0)); ins.Add(Key(vk, 0, KEYUP));
+    for (int i = mods.Length - 1; i >= 0; i--) ins.Add(Key(mods[i], 0, KEYUP));
+    Send(ins);
+  }
+  public static void Click(int x, int y, bool right) {
+    SetCursorPos(x, y);
+    mouse_event(right ? 0x0008u | 0x0010u : 0x0002u | 0x0004u, 0, 0, 0, UIntPtr.Zero);
+  }
+}
+"@`;
+
+/** The capture preamble shared by /screenshot and /frame. */
+const PS_SCREEN = `
+Add-Type -AssemblyName System.Drawing
+Add-Type -AssemblyName System.Windows.Forms
+$v = [System.Windows.Forms.SystemInformation]::VirtualScreen
+$bmp = New-Object System.Drawing.Bitmap $v.Width, $v.Height
+$g = [System.Drawing.Graphics]::FromImage($bmp)
+$g.CopyFromScreen($v.Left, $v.Top, 0, 0, $bmp.Size)`;
+
+const KEY_CODES_WIN = {
+  return: 0x0d, enter: 0x0d, tab: 0x09, space: 0x20, delete: 0x2e,
+  backspace: 0x08, escape: 0x1b,
+  left: 0x25, up: 0x26, right: 0x27, down: 0x28,
+  f1: 0x70, f2: 0x71, f3: 0x72, f4: 0x73, f5: 0x74, f6: 0x75,
+  f7: 0x76, f8: 0x77, f9: 0x78, f10: 0x79, f11: 0x7a, f12: 0x7b,
+};
+
+const WIN_MODIFIERS = {
+  ctrl: 0x11, control: 0x11,
+  alt: 0x12, option: 0x12, meta: 0x12,
+  shift: 0x10,
+  // The Windows key is VK_LWIN; the mac-style name maps to it like xdotool's super.
+  cmd: 0x5b, command: 0x5b, super: 0x5b, win: 0x5b,
+};
+
+/**
+ * "ctrl+s" / "cmd+enter" / "f5" / "a" -> {mods, vk}. Pure so it can be tested
+ * without a Windows host.
+ */
+function winKeySpec(key) {
+  const parts = String(key).toLowerCase().split('+').map((p) => p.trim()).filter(Boolean);
+  const keyName = parts.pop();
+  const mods = parts.map((m) => {
+    const code = WIN_MODIFIERS[m];
+    if (code === undefined) {
+      const err = new Error(`unknown modifier "${m}" - one of ${Object.keys(WIN_MODIFIERS).join(', ')}`);
+      err.status = 400;
+      throw err;
+    }
+    return code;
+  });
+  let vk = KEY_CODES_WIN[keyName];
+  // A single alnum presses that key (its virtual key is the uppercase code point).
+  if (vk === undefined && keyName && /^[a-z0-9]$/.test(keyName)) {
+    vk = keyName.toUpperCase().charCodeAt(0);
+  }
+  if (vk === undefined) {
+    const err = new Error(`unknown key "${keyName}" - one of ${Object.keys(KEY_CODES_WIN).join(', ')}, a letter/digit, or modifier+key (ctrl+s)`);
+    err.status = 400;
+    throw err;
+  }
+  return { mods, vk };
+}
+
+async function winScreenshot() {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  const file = path.join(DATA_DIR, `screenshot-${Date.now()}.png`);
+  await ps(
+    `${PS_SCREEN}\n$bmp.Save('${psQuote(file)}', [System.Drawing.Imaging.ImageFormat]::Png)`,
+    20000);
+  return { path: file, bytes: fs.statSync(file).size };
+}
+
+async function winClick(x, y, button) {
+  await ps(`${PS_WININ}\n[WinIn]::Click(${Math.round(x)}, ${Math.round(y)}, $${button === 'right' ? 'true' : 'false'})`);
+}
+
+async function winType(text) {
+  const s = String(text);
+  for (const chunk of s.match(/.{1,200}/gs) || []) {
+    await ps(
+      `${PS_WININ}\n[WinIn]::TypeText([System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${b64(chunk)}')))`);
+  }
+  return { chars: s.length };
+}
+
+async function winKey(key) {
+  const { mods, vk } = winKeySpec(key);
+  const modsArr = mods.length ? `[uint16[]](${mods.join(', ')})` : '@()';
+  await ps(`${PS_WININ}\n[WinIn]::Press(${modsArr}, ${vk})`);
+}
+
+async function winOpen(target, application) {
+  await ps(
+    application
+      ? `Start-Process -FilePath '${psQuote(application)}' -ArgumentList '${psQuote(target)}'`
+      : `Start-Process '${psQuote(target)}'`);
+}
+
+async function winActivate(app) {
+  await ps(
+    `${PS_WININ}
+$p = Get-Process | Where-Object { $_.MainWindowTitle -like '*${psQuote(app)}*' } | Select-Object -First 1
+if (-not $p) { throw "no window with a title matching '${psQuote(app)}'" }
+[WinIn]::SetForegroundWindow($p.MainWindowHandle) | Out-Null`);
+}
+
+async function winNotify(title, body) {
+  await ps(
+    `Add-Type -AssemblyName System.Windows.Forms,System.Drawing
+$n = New-Object System.Windows.Forms.NotifyIcon
+$n.Icon = [System.Drawing.SystemIcons]::Information
+$n.Visible = $true
+$n.ShowBalloonTip(4000, '${psQuote(title)}', '${psQuote(body)}', [System.Windows.Forms.ToolTipIcon]::Info)
+Start-Sleep -Milliseconds 800`);
+}
+
+async function winClipboardGet() {
+  const out = await ps('Get-Clipboard -Raw');
+  return { text: out.replace(/\r?\n$/, '') };
+}
+
+async function winClipboardSet(text) {
+  await ps(
+    `Set-Clipboard -Value ([System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${b64(text)}')))`);
+}
+
+async function winFrame(scale, max) {
+  const file = path.join(
+    os.tmpdir(), `desktop-agent-frame-${process.pid}-${Date.now()}.jpg`);
+  try {
+    const scaleDown =
+      `$f = ${scale}\n` +
+      (max
+        ? `$m = ${max} / [Math]::Max($v.Width, $v.Height)\nif ($m -lt $f) { $f = $m }\n`
+        : '');
+    await ps(
+      `${PS_SCREEN}\n${scaleDown}` +
+      `$out = $bmp\n` +
+      `if ($f -lt 1) { $out = New-Object System.Drawing.Bitmap $bmp, [int]($v.Width * $f), [int]($v.Height * $f) }\n` +
+      `$out.Save('${psQuote(file)}', [System.Drawing.Imaging.ImageFormat]::Jpeg)`,
+      20000);
+    const bytes = fs.readFileSync(file);
+    if (!bytes.length) throw new Error('empty capture');
+    return { frame: { bytes, format: 'jpeg' } };
+  } catch {
+    // Same posture as macFrame: any jpeg-path trouble falls back to the png
+    // /screenshot would have produced.
+    const shot = await winScreenshot();
+    return { frame: { bytes: fs.readFileSync(shot.path), format: 'png' } };
+  } finally {
+    fs.rmSync(file, { force: true });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -511,9 +744,9 @@ async function tryCapture(argv, file, left) {
   }
 }
 
-/** What the console's feature probe needs to know - cheap, and honest on both platforms. */
+/** What the console's feature probe needs to know - cheap, and honest on every platform. */
 async function capabilities() {
-  const jpeg = mac || (await hasBinary('import')) || (await hasBinary('maim'));
+  const jpeg = mac || win || (await hasBinary('import')) || (await hasBinary('maim'));
   return {
     screenshotFormats: jpeg ? ['jpeg', 'png'] : ['png'],
     ui: mac,
@@ -527,9 +760,11 @@ async function capabilities() {
 // ---------------------------------------------------------------------------
 
 const mac = PLATFORM === 'darwin';
+const win = PLATFORM === 'win32';
 
 const actions = {
-  'POST /screenshot': async () => (mac ? macScreenshot() : linuxScreenshot()),
+  'POST /screenshot': async () =>
+    win ? winScreenshot() : mac ? macScreenshot() : linuxScreenshot(),
   'POST /ui': async (b) => {
     if (!mac) throw Object.assign(new Error('UI tree needs macOS accessibility; not implemented on ' + PLATFORM), { status: 501 });
     return macUiTree(b.app);
@@ -543,39 +778,40 @@ const actions = {
     if (!Number.isFinite(b.x) || !Number.isFinite(b.y)) {
       throw Object.assign(new Error('x and y are required numbers'), { status: 400 });
     }
-    return mac ? macClick(b.x, b.y, b.button) : linuxClick(b.x, b.y, b.button);
+    return win ? winClick(b.x, b.y, b.button) : mac ? macClick(b.x, b.y, b.button) : linuxClick(b.x, b.y, b.button);
   },
   'POST /type': async (b) => {
     if (typeof b.text !== 'string' || !b.text) {
       throw Object.assign(new Error('text is required'), { status: 400 });
     }
-    return mac ? macType(b.text) : linuxType(b.text);
+    return win ? winType(b.text) : mac ? macType(b.text) : linuxType(b.text);
   },
   'POST /key': async (b) => {
     if (!b.key) throw Object.assign(new Error('key is required'), { status: 400 });
-    return mac ? macKey(b.key) : linuxKey(b.key);
+    return win ? winKey(b.key) : mac ? macKey(b.key) : linuxKey(b.key);
   },
   'POST /open': async (b) => {
     if (!b.target) throw Object.assign(new Error('target is required'), { status: 400 });
-    return mac ? macOpen(b.target, b.application) : linuxOpen(b.target, b.application);
+    return win ? winOpen(b.target, b.application) : mac ? macOpen(b.target, b.application) : linuxOpen(b.target, b.application);
   },
   'POST /activate': async (b) => {
     if (!b.app) throw Object.assign(new Error('app is required'), { status: 400 });
-    return mac ? macActivate(b.app) : linuxActivate(b.app);
+    return win ? winActivate(b.app) : mac ? macActivate(b.app) : linuxActivate(b.app);
   },
   'POST /notify': async (b) => {
     if (!b.title) throw Object.assign(new Error('title is required'), { status: 400 });
-    return mac ? macNotify(b.title, b.body || '') : linuxNotify(b.title, b.body || '');
+    return win ? winNotify(b.title, b.body || '') : mac ? macNotify(b.title, b.body || '') : linuxNotify(b.title, b.body || '');
   },
   'GET /clipboard': async () => {
     if (mac) return { text: await run(['pbpaste']) };
-    return linuxClipboardGet();
+    return win ? winClipboardGet() : linuxClipboardGet();
   },
   'POST /clipboard': async (b) => {
     if (typeof b.text !== 'string') {
       throw Object.assign(new Error('text is required'), { status: 400 });
     }
     if (mac) await runStdin(['pbcopy'], b.text);
+    else if (win) await winClipboardSet(b.text);
     else await linuxClipboardSet(b.text);
     return { ok: true };
   },
@@ -583,7 +819,7 @@ const actions = {
   // {frame:{bytes, format}}; the HTTP layer ships the raw bytes.
   'GET /frame': async (params) => {
     const { scale, max } = frameParams(params);
-    return mac ? macFrame(scale, max) : linuxFrame(scale, max);
+    return win ? winFrame(scale, max) : mac ? macFrame(scale, max) : linuxFrame(scale, max);
   },
 };
 
@@ -713,4 +949,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { createServer, actions, appleQuote };
+module.exports = { createServer, actions, appleQuote, winKeySpec, psQuote };
