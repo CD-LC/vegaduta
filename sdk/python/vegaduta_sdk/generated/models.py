@@ -5251,6 +5251,10 @@ class LocalAuthController_RefreshRequest(TypedDict):
     refreshToken: str
 
 
+class LocalAuthController_ResetRequest(TypedDict, total=False):
+    email: str
+
+
 class LocalAuthController_SessionResponse(TypedDict, total=False):
     accessToken: str
     tokenType: str

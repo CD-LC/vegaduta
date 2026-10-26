@@ -16,6 +16,14 @@ final class OpenApiCoreDescriptions {
     static {
         Map<String, String> m = new LinkedHashMap<>();
         m.put(
+                "POST /api/auth/local/reset-request",
+                "Ask for a password reset on a personal install. The one-time reset link is never"
+                        + " returned here: core writes it to password-reset.txt in the install's"
+                        + " auth data directory (scripts/vegaduta reset-password prints it), so"
+                        + " only someone with access to the machine itself can use it. The answer"
+                        + " is the same for an unknown e-mail - it reveals nothing about the"
+                        + " account. A blank e-mail resolves to the install's only account.");
+        m.put(
                 "GET /api/agents",
                 "The tenant's agents the caller can see, newest first. Pass limit (and offset)"
                         + " for a page with X-Total-Count and X-Has-More.");

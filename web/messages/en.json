@@ -450,9 +450,19 @@
         "passkeyButton": "Sign in with a passkey",
         "usePassword": "Use a password instead",
         "lostDevice": "I lost my device",
+        "forgotPassword": "Forgot password?",
         "pinLabel": "PIN",
         "pinLabelDevice": "PIN for {device}",
         "pinButton": "Unlock"
+      },
+      "forgot": {
+        "intro": "Request a reset link. It is saved to a file on the computer running this install - that is how it knows it is really you, since anyone can reach this page.",
+        "label": "Account e-mail",
+        "hint": "On a personal install this is usually the one account, so you can leave it blank.",
+        "button": "Request reset link",
+        "sending": "Requesting…",
+        "done": "If the account exists, a reset link was saved on this machine. Run scripts/vegaduta reset-password to see it, then open the link it prints and choose a new password.",
+        "doneWindows": "If the account exists, a reset link was saved on this machine. Run .\\scripts\\vegaduta.ps1 reset-password to see it, then open the link it prints and choose a new password."
       },
       "pin": {
         "newLabel": "PIN ({min} to {max} digits)",
