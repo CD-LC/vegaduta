@@ -344,6 +344,16 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   are on the Google Cloud OAuth client itself (redirect URI not registered, consent screen not
   published, missing scopes). `GOOGLE_OAUTH_MODE` should be `web` (or unset - the default).
 
+
+LOCAL DEPLOY + local auth (Devin, 2026-10-26): deployed the branch's images to the
+local full stack (`docker compose ... build code-intel core web`, `up -d`) - all healthy;
+/new analysis endpoints verified live against a smoke repo (map/symbols/api-surface/
+dead-code all answered). Wired the two documented-but-unmapped auth-mode vars into
+docker-compose.yml (`APP_AUTH_MODE` on x-core-env, `NEXT_PUBLIC_AUTH_MODE` on web-env,
+`WEB_AUTH_MODE` in .env drives it) - the deployment now runs `app.auth.mode=local`, so
+the console's own unlock screen handles owner setup (password/passkey/PIN/recovery).
+Verified: LocalFirstRunBootstrap emitted the setup link, `/api/auth/local/unlock/*`
+endpoints live, `window.__ENV` carries `NEXT_PUBLIC_AUTH_MODE:"local"`.
 ### CLAIM COMPLETE: services/code-intel capability expansion (Devin, 2026-10-26)
 
 Shipped on `feat/code-intel-out-of-the-box`: 12 deterministic read-only analysis
