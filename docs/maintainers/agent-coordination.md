@@ -346,6 +346,13 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
 
 
 
+
+FIX (Devin, 2026-10-26): the local-auth setup screen failed "Could not reach
+the server" on submit - web's server-side proxy routes fetch core via
+CORE_INTERNAL_URL which compose never set, so they fell back to the public
+host:port inside the container. Wired CORE_INTERNAL_URL (default
+http://core:8080) into web-env + documented it in .env.example; the unlock
+proxy now returns real responses (passkey challenge verified end-to-end).
 SPLIT (both agents, 2026-10-26): a parallel agent's `ruff format` commit grew
 app/main.py (700) + app/mcp_bridge.py (672) over the 665-line ratchet. The
 other agent landed `analysis_routes.py` + `deps.py` (shared service/tenant)
