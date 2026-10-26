@@ -55,9 +55,8 @@ describe("hiddenOnPersonalInstall", () => {
       "/admin/sso",
       "/admin/leads",
       "/features",
-      // Team access: one person on one machine (owner decision assumed per the lean-edition plan).
-      "/admin/access",
-      "/admin/users",
+      // /admin/access and /admin/users stay: local auth has no public signup, so the
+      // owner's invite links (minted there) are the only way teammates join.
     ]) {
       expect(hiddenOnPersonalInstall(href), href).toBe(true);
     }
