@@ -8,6 +8,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.11] - 2026-10-26
+
 - Shared-agent voice works without server speech services: the public share page's call panel now offers one-tap downloads of the on-device models (whisper speech-to-text ~45 MB + kokoro voice ~90 MB) on the visitor's device. With whisper installed, hold-to-talk transcribes locally and only the text crosses the wire (the shared chat endpoint), so talking works even when the platform's STT, TTS and LiveKit legs are all down; any miss falls back to the server voice turn as before. Loading indicators on the share page were strengthened (larger spinner + clearer thinking bubble).
 ### Added
 
@@ -1348,5 +1350,6 @@ Release notes on GitHub are generated from the section for each version.
   identity yes; IMDS and Pod Identity need an `extraEgress` rule), and that `core`, `core-jobs` and `core-worker`
   each need the ServiceAccount annotation.
 
-[Unreleased]: https://github.com/CD-LC/vegaduta/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/CD-LC/vegaduta/compare/v0.1.11...HEAD
+[0.1.11]: https://github.com/CD-LC/vegaduta/compare/v0.1.10...v0.1.11
 [0.1.3]: https://github.com/CD-LC/vegaduta/releases/tag/v0.1.3
