@@ -103,8 +103,11 @@ jobs:
           # the flag goes before it is packed (`npm publish` refuses a private manifest, also in a tarball).
           npm pkg delete private
           npm pack  # prepack: typecheck + build, so dist/ is in the tarball
+          # List once, then grep the file: under `set -o pipefail`, `tar | grep -q` can
+          # fail on tar's SIGPIPE after grep matched and exited - a false "missing file".
+          tar -tzf vegaduta-sdk-*.tgz > tarball-files.txt
           for f in package/dist/index.js package/dist/index.d.ts package/LICENSE package/package.json; do
-            tar -tzf vegaduta-sdk-*.tgz | grep -qx "$f" || { echo "::error::the packed tarball has no $f"; exit 1; }
+            grep -qx "$f" tarball-files.txt || { echo "::error::the packed tarball has no $f"; exit 1; }
           done
           mv vegaduta-sdk-*.tgz ../.. --verbose
       - name: Build the Python package
