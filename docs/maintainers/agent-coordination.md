@@ -349,6 +349,16 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
 
 
 
+
+MERGE/RELEASE (Devin, 2026-10-26): PR #217 merged at 15:06 BEFORE the
+last five branch commits (CORE_INTERNAL_URL, personal invites, personal
+code-intel, golden fix, AGENTS rule 14), so v0.1.11 (tagged on the merge)
+failed its own release gate. Followed up: #218 (the five commits),
+#219 (editionCapabilities/personalInstall test updates - the web job
+pinning the same deny row), #221 (ToolSearchDeferral async hop carried
+no tenant - AsyncHopTenantScopeRulesTest on main; TenantScope.wrapSupplier
+applied). v0.1.11 retagged to the fixed HEAD (c7e35d31d) - the first
+release run produced no artifacts, so the move invalidates nothing.
 ADD (Devin, 2026-10-26): `code-intel` service on the personal tier - the
 profile-gated service was missing from personal.yml entirely (the whole
 reason repo management showed nothing on local installs). New `code-intel`
