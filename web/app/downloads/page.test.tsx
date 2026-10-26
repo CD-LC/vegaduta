@@ -44,21 +44,31 @@ describe("pickAssets", () => {
 describe("/downloads", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("links the real assets of the latest release", async () => {
+  it("links the real assets of the latest platform release", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => ({
         ok: true,
-        json: async () => ({
-          tag_name: "v1.2.3",
-          html_url: "https://github.com/CD-LC/vegaduta/releases/tag/v1.2.3",
-          published_at: "2026-10-20T00:00:00Z",
-          assets: ASSETS.map((a) => ({
-            name: a.name,
-            browser_download_url: a.url,
-            size: a.sizeMb * 1048576,
-          })),
-        }),
+        json: async () => [
+          // A component release published after the platform tag: /releases/latest
+          // would follow it, so the page must skip non-vX.Y.Z tags.
+          {
+            tag_name: "sdk-v9.9.9",
+            html_url: "https://github.com/CD-LC/vegaduta/releases/tag/sdk-v9.9.9",
+            published_at: "2026-10-25T00:00:00Z",
+            assets: [],
+          },
+          {
+            tag_name: "v1.2.3",
+            html_url: "https://github.com/CD-LC/vegaduta/releases/tag/v1.2.3",
+            published_at: "2026-10-20T00:00:00Z",
+            assets: ASSETS.map((a) => ({
+              name: a.name,
+              browser_download_url: a.url,
+              size: a.sizeMb * 1048576,
+            })),
+          },
+        ],
       })),
     );
     render(await DownloadsPage());
