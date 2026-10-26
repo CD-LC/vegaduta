@@ -2,6 +2,7 @@ package com.agenticai.core.agents.turn;
 
 import static com.agenticai.core.agents.turn.ChatPromptDirectives.containsFabricatedGenerationUrl;
 
+import com.agenticai.core.agents.tools.ToolCallLogService;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -11,14 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 
-import com.agenticai.core.agents.tools.ToolCallLogService;
-
 /**
  * The fabricated-generation-URL guard: replies that invent a link to a generation service get
  * checked against the turn's tool-call evidence and, when nothing corroborates them, replaced by
  * the platform's honest correction. Extracted from {@link ChatTurnExecutor} (file-size ratchet)
- * with the {@link #collectToolEvidenceSince} read it shares; behavior is byte-for-byte what the
- * two methods had there - the javadoc below is theirs.
+ * with the {@link #collectToolEvidenceSince} read it shares; behavior is byte-for-byte what the two
+ * methods had there - the javadoc below is theirs.
  *
  * <p>{@code prompts} is read through a supplier because {@link ChatTurnExecutor#prompts} is a
  * volatile field wired after construction ({@code ChatServiceParts}); capturing the field itself
