@@ -14,6 +14,7 @@ import threading
 import time
 from dataclasses import dataclass
 
+from codebase_rag import analysis as cr_analysis
 from codebase_rag import graph as cr_graph
 from codebase_rag.config import Config
 from codebase_rag.embedders import make_embedder
@@ -75,9 +76,11 @@ class CodeIntelService(GovernedExecutionMixin):
         self._locks: dict[tuple[str, str], threading.Lock] = {}
         self._locks_guard = threading.Lock()
         self._heavy = HeavyGate(
-            settings.max_heavy_jobs, settings.max_tenant_heavy_jobs,
+            settings.max_heavy_jobs,
+            settings.max_tenant_heavy_jobs,
             settings.max_queued_heavy_jobs,
-            settings.heavy_retry_after_seconds)
+            settings.heavy_retry_after_seconds,
+        )
 
     # ------------------------------------------------------------------ #
 
@@ -96,8 +99,7 @@ class CodeIntelService(GovernedExecutionMixin):
         finally:
             self._heavy.release(ctx.tenant_id)
 
-    def _handles(self, ctx: TenantContext, repo_id: str,
-                 refresh_checkout: bool) -> _RepoHandles:
+    def _handles(self, ctx: TenantContext, repo_id: str, refresh_checkout: bool) -> _RepoHandles:
         entry = registry.get(self.settings.data_dir, ctx, repo_id)
         if entry is None:
             raise RepoNotFoundError(repo_id)
@@ -108,12 +110,11 @@ class CodeIntelService(GovernedExecutionMixin):
         troot = tenant_root(self.settings.data_dir, ctx)
         if refresh_checkout:
             worktree = gitops.ensure_checkout(
-                entry, rdir, self.settings.git_timeout_seconds,
-                data_root=troot)
+                entry, rdir, self.settings.git_timeout_seconds, data_root=troot
+            )
         else:
             try:
-                worktree = gitops.ensure_checkout(
-                    entry, rdir, 5, data_root=troot)
+                worktree = gitops.ensure_checkout(entry, rdir, 5, data_root=troot)
             except Exception:
                 # The fallback (reuse the last checkout) only makes sense for a
                 # git repo whose quick fetch failed transiently. A local repo
@@ -123,18 +124,18 @@ class CodeIntelService(GovernedExecutionMixin):
                 if entry.source_type == "local":
                     raise
                 import os
+
                 # entry.path is unset for git sources; the last-synced tree
                 # in checkout/ is still searchable content, rdir itself is
                 # just the state container - never index it directly.
                 checkout_dir = os.path.join(rdir, "checkout")
-                worktree = entry.path or (
-                    checkout_dir if os.path.isdir(checkout_dir) else rdir)
+                worktree = entry.path or (checkout_dir if os.path.isdir(checkout_dir) else rdir)
         cfg = self._build_config(entry, worktree, rdir)
         return _RepoHandles(cfg=cfg, entry=entry)
 
-    def _build_config(self, entry: RepoEntry, worktree: str,
-                      repo_dir: str) -> Config:
+    def _build_config(self, entry: RepoEntry, worktree: str, repo_dir: str) -> Config:
         import os
+
         d_emb = self.settings.default_embedder
         d_model = self.settings.default_embed_model
         embedder = entry.embedder or d_emb
@@ -157,6 +158,7 @@ class CodeIntelService(GovernedExecutionMixin):
         # in a shared service they are arbitrary command execution.
         try:
             from codebase_rag.config import load_config
+
             repo_cfg = load_config(worktree)
             cfg.max_chunk_lines = repo_cfg.max_chunk_lines
             cfg.min_chunk_lines = repo_cfg.min_chunk_lines
@@ -177,15 +179,17 @@ class CodeIntelService(GovernedExecutionMixin):
         if entry.source_type == "git":
             rdir = repo_root(self.settings.data_dir, ctx, entry.repo_id)
             with self._heavy_slot(ctx):  # the clone is a heavy op
-                gitops.ensure_checkout(entry, rdir,
-                                       self.settings.git_timeout_seconds,
-                                       data_root=tenant_root(
-                                           self.settings.data_dir, ctx))
+                gitops.ensure_checkout(
+                    entry,
+                    rdir,
+                    self.settings.git_timeout_seconds,
+                    data_root=tenant_root(self.settings.data_dir, ctx),
+                )
         elif entry.source_type == "local":
             import os
+
             if not entry.path or not os.path.isdir(entry.path):
-                raise gitops.GitOpsValidationError(
-                    f"local path does not exist: {entry.path}")
+                raise gitops.GitOpsValidationError(f"local path does not exist: {entry.path}")
             # Confine caller-supplied local paths to the REQUESTING tenant's
             # own subtree (mirrors gitops.ensure_checkout's check) so
             # registration itself rejects path=/proc/self, /etc, /app AND
@@ -194,7 +198,8 @@ class CodeIntelService(GovernedExecutionMixin):
             resolved = os.path.realpath(entry.path)
             if resolved != troot and not resolved.startswith(troot + os.sep):
                 raise gitops.GitOpsValidationError(
-                    f"local path escapes the tenant's data subtree: {entry.path}")
+                    f"local path escapes the tenant's data subtree: {entry.path}"
+                )
         else:
             raise ValueError(f"unknown source_type: {entry.source_type}")
         return registry.upsert(self.settings.data_dir, ctx, entry)
@@ -204,6 +209,7 @@ class CodeIntelService(GovernedExecutionMixin):
 
     def delete_repo(self, ctx: TenantContext, repo_id: str) -> bool:
         import shutil
+
         ok = registry.delete(self.settings.data_dir, ctx, repo_id)
         if ok:
             rdir = repo_root(self.settings.data_dir, ctx, repo_id)
@@ -223,19 +229,17 @@ class CodeIntelService(GovernedExecutionMixin):
         is success, not a failure.
         """
         import shutil
+
         # Container-local git dirs (--separate-git-dir on chmod-less mounts)
         # survive the tenant-subtree rmtree - drop them explicitly first.
         for rid in registry.load(self.settings.data_dir, ctx):
-            gitops.discard_gitdir(
-                repo_root(self.settings.data_dir, ctx, rid))
-        shutil.rmtree(tenant_root(self.settings.data_dir, ctx),
-                      ignore_errors=True)
+            gitops.discard_gitdir(repo_root(self.settings.data_dir, ctx, rid))
+        shutil.rmtree(tenant_root(self.settings.data_dir, ctx), ignore_errors=True)
 
     # ------------------------------------------------------------------ #
     # index / search
 
-    def index(self, ctx: TenantContext, repo_id: str,
-              full: bool = False, wait: float = 0) -> dict:
+    def index(self, ctx: TenantContext, repo_id: str, full: bool = False, wait: float = 0) -> dict:
         """`wait` > 0 (background indexes) queues FIFO for a heavy-job slot
         that long instead of failing fast with HeavyJobBusyError."""
         # Slot first (queued FIFO when wait > 0), then the per-repo lock, so a
@@ -248,8 +252,7 @@ class CodeIntelService(GovernedExecutionMixin):
                 entry = registry.get(self.settings.data_dir, ctx, repo_id)
                 if entry:
                     # Separate field: never overwrite the last good last_index.
-                    entry.last_capacity_error = {
-                        "error": str(e)[:500], "at": time.time()}
+                    entry.last_capacity_error = {"error": str(e)[:500], "at": time.time()}
                     registry.upsert(self.settings.data_dir, ctx, entry)
             raise
         lock = self._lock_for(ctx, repo_id)
@@ -299,17 +302,26 @@ class CodeIntelService(GovernedExecutionMixin):
         except Exception as e:
             entry = registry.get(self.settings.data_dir, ctx, repo_id)
             if entry:
-                entry.last_index = {"status": "error", "error": str(e)[:500],
-                                    "started_at": started,
-                                    "finished_at": time.time()}
+                entry.last_index = {
+                    "status": "error",
+                    "error": str(e)[:500],
+                    "started_at": started,
+                    "finished_at": time.time(),
+                }
                 registry.upsert(self.settings.data_dir, ctx, entry)
             raise
         finally:
             self._heavy.release(ctx.tenant_id)
             lock.release()
 
-    def search(self, ctx: TenantContext, repo_id: str, query: str,
-               top_k: int = 8, path_prefix: str | None = None) -> list[dict]:
+    def search(
+        self,
+        ctx: TenantContext,
+        repo_id: str,
+        query: str,
+        top_k: int = 8,
+        path_prefix: str | None = None,
+    ) -> list[dict]:
         h = self._handles(ctx, repo_id, refresh_checkout=False)
         store = Store(h.cfg.db_path)
         try:
@@ -320,27 +332,33 @@ class CodeIntelService(GovernedExecutionMixin):
             # content/context, then reranked to boost symbol-name matches.
             # Falls back to pure cosine search transparently if FTS5 is
             # unavailable in the local SQLite build (see Store.__init__).
-            hits = store.hybrid_search(qvec, query, top_k=top_k,
-                                       path_prefix=path_prefix)
-            return [{
-                "path": x.path, "symbol": x.symbol,
-                "start_line": x.start_line, "end_line": x.end_line,
-                "score": x.score, "content": x.content, "context": x.context,
-            } for x in hits]
+            hits = store.hybrid_search(qvec, query, top_k=top_k, path_prefix=path_prefix)
+            return [
+                {
+                    "path": x.path,
+                    "symbol": x.symbol,
+                    "start_line": x.start_line,
+                    "end_line": x.end_line,
+                    "score": x.score,
+                    "content": x.content,
+                    "context": x.context,
+                }
+                for x in hits
+            ]
         finally:
             store.close()
 
     # ------------------------------------------------------------------ #
     # knowledge-base bridge (read-only, grounded, cross-repo)
 
-    def knowledge_query(self, ctx: TenantContext, query: str,
-                        repo_id: str | None = None, top_k: int = 6) -> dict:
+    def knowledge_query(
+        self, ctx: TenantContext, query: str, repo_id: str | None = None, top_k: int = 6
+    ) -> dict:
         """Grounded code retrieval for the knowledge experience. Every
         returned passage carries a citation (repo, path, line span); the
         response is retrieval only — no execution, no generation without a
         source — which keeps this endpoint zero-risk to expose broadly."""
-        repos = ([repo_id] if repo_id
-                 else [e.repo_id for e in self.list_repos(ctx)])
+        repos = [repo_id] if repo_id else [e.repo_id for e in self.list_repos(ctx)]
         passages: list[dict] = []
         for rid in repos:
             try:
@@ -348,22 +366,24 @@ class CodeIntelService(GovernedExecutionMixin):
             except Exception:
                 continue
             for h in hits:
-                passages.append({
-                    "repo_id": rid,
-                    "path": h["path"],
-                    "symbol": h.get("symbol"),
-                    "start_line": h["start_line"],
-                    "end_line": h["end_line"],
-                    "score": h["score"],
-                    "citation": f"{rid}/{h['path']}:{h['start_line']}-{h['end_line']}",
-                    "content": h["content"],
-                })
+                passages.append(
+                    {
+                        "repo_id": rid,
+                        "path": h["path"],
+                        "symbol": h.get("symbol"),
+                        "start_line": h["start_line"],
+                        "end_line": h["end_line"],
+                        "score": h["score"],
+                        "citation": f"{rid}/{h['path']}:{h['start_line']}-{h['end_line']}",
+                        "content": h["content"],
+                    }
+                )
         passages.sort(key=lambda p: p["score"], reverse=True)
         passages = passages[:top_k]
         return {
             "query": query,
-            "grounded": bool(passages),   # no passages => the caller must not
-                                          # fabricate an answer (RAG guardrail)
+            "grounded": bool(passages),  # no passages => the caller must not
+            # fabricate an answer (RAG guardrail)
             "passages": passages,
             "citations": [p["citation"] for p in passages],
         }
@@ -380,26 +400,22 @@ class CodeIntelService(GovernedExecutionMixin):
         try:
             h = self._handles(ctx, repo_id, refresh_checkout=True)
             stats = cr_graph.build_graph(h.cfg, quiet=True)
-            h.entry.last_graph = {"status": "ok", "stats": stats,
-                                  "finished_at": time.time()}
+            h.entry.last_graph = {"status": "ok", "stats": stats, "finished_at": time.time()}
             registry.upsert(self.settings.data_dir, ctx, h.entry)
             return stats
         finally:
             self._heavy.release(ctx.tenant_id)
             lock.release()
 
-    def graph_callers(self, ctx: TenantContext, repo_id: str,
-                      symbol: str) -> list[dict]:
+    def graph_callers(self, ctx: TenantContext, repo_id: str, symbol: str) -> list[dict]:
         h = self._handles(ctx, repo_id, refresh_checkout=False)
         return cr_graph.callers_of(h.cfg, symbol)
 
-    def graph_callees(self, ctx: TenantContext, repo_id: str,
-                      symbol: str) -> list[dict]:
+    def graph_callees(self, ctx: TenantContext, repo_id: str, symbol: str) -> list[dict]:
         h = self._handles(ctx, repo_id, refresh_checkout=False)
         return cr_graph.callees_of(h.cfg, symbol)
 
-    def graph_impact(self, ctx: TenantContext, repo_id: str,
-                     symbol: str, depth: int = 3) -> dict:
+    def graph_impact(self, ctx: TenantContext, repo_id: str, symbol: str, depth: int = 3) -> dict:
         h = self._handles(ctx, repo_id, refresh_checkout=False)
         return cr_graph.impact_of(h.cfg, symbol, depth=depth)
 
@@ -407,3 +423,80 @@ class CodeIntelService(GovernedExecutionMixin):
         h = self._handles(ctx, repo_id, refresh_checkout=False)
         return cr_graph.graph_stats(h.cfg)
 
+    # Analysis endpoints (codebase_rag/analysis.py) - deterministic reads over
+    # the graph tables; no heavy gate needed (SQLite lookups, not rebuilds).
+
+    def repo_map(
+        self, ctx: TenantContext, repo_id: str, budget: int = 16000, top_n: int = 200
+    ) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.repo_map(h.cfg, budget=budget, top_n=top_n)
+
+    def find_symbols(
+        self,
+        ctx: TenantContext,
+        repo_id: str,
+        query: str = "",
+        kind: str = "",
+        path_prefix: str = "",
+        limit: int = 50,
+        include_tests: bool = True,
+    ) -> list[dict]:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.find_symbols(
+            h.cfg,
+            query=query,
+            kind=kind,
+            path_prefix=path_prefix,
+            limit=limit,
+            include_tests=include_tests,
+        )
+
+    def symbol_detail(
+        self, ctx: TenantContext, repo_id: str, qualified_name: str, include_body: bool = True
+    ):
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        out = cr_analysis.symbol_detail(h.cfg, qualified_name, include_body=include_body)
+        if out is None:
+            raise RepoNotFoundError(f"symbol '{qualified_name}'")
+        return out
+
+    def file_outline(self, ctx: TenantContext, repo_id: str, path: str) -> list[dict]:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.file_outline(h.cfg, path)
+
+    def references_of(self, ctx: TenantContext, repo_id: str, symbol: str) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.references_of(h.cfg, symbol)
+
+    def implementations_of(
+        self, ctx: TenantContext, repo_id: str, symbol: str, depth: int = 4
+    ) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.implementations_of(h.cfg, symbol, depth=depth)
+
+    def call_path(
+        self, ctx: TenantContext, repo_id: str, src: str, dst: str, max_depth: int = 8
+    ) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.call_path(h.cfg, src, dst, max_depth=max_depth)
+
+    def dead_code(self, ctx: TenantContext, repo_id: str, limit: int = 100) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.dead_code(h.cfg, limit=limit)
+
+    def tests_for(self, ctx: TenantContext, repo_id: str, symbol: str) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.tests_for(h.cfg, symbol)
+
+    def api_surface(self, ctx: TenantContext, repo_id: str) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.api_surface(h.cfg)
+
+    def import_cycles(self, ctx: TenantContext, repo_id: str) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.import_cycles(h.cfg)
+
+    def hotspots(self, ctx: TenantContext, repo_id: str, days: int = 90, limit: int = 30) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.hotspots(h.cfg, days=days, limit=limit)
