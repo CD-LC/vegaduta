@@ -26,6 +26,12 @@ Release notes on GitHub are generated from the section for each version.
   always-on-top OS window, so the console tab can be minimized and the desktop left free for
   the agent to work in while the person watches from the floating window; frames keep polling
   while the tab is hidden in that mode.
+- **Personal installs turn on deferred tool search.** A one-person agent resolves far more
+  tools than a small local model should see at once; with `app.tools.search.enabled` off a
+  relevance-trimmed tool was unreachable for the turn and the model reported "limited tools"
+  for capabilities it actually has. The personal profile now enables `search_tools` /
+  `call_tool` (env: `TOOL_SEARCH_ENABLED`) so every tool stays reachable and the model is told
+  to search instead of claiming a capability is missing.
 - **Desktop runs are journaled per step and proposed as recipes.** Each replayed recipe step
   writes its own `tool_call_log` row under the calling turn (the sidecar path and non-secret
   fields only - resolved `{{secret.*}}` values are never journaled), so the run journal, the
