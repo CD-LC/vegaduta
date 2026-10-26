@@ -150,11 +150,18 @@ jobs:
           PRERELEASE: ${{ needs.verify.outputs.prerelease }}
         run: |
           set -euo pipefail
-          args=(--generate-notes --verify-tag)
-          [ "$PRERELEASE" = "true" ] && args+=(--prerelease)
-          gh release create "$GITHUB_REF_NAME" "${args[@]}" dist/* vegaduta-sdk-*.tgz \
-            --notes-start-tag "$GITHUB_REF_NAME" || \
-          gh release upload "$GITHUB_REF_NAME" dist/* vegaduta-sdk-*.tgz --clobber
+          flags=(--repo "$GITHUB_REPOSITORY")
+          [ "$PRERELEASE" = "true" ] && flags+=(--prerelease)
+          # No checkout in this job, so no git: --verify-tag/--generate-notes make gh
+          # shell out to git and fail. Point every call at the repo explicitly.
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* vegaduta-sdk-*.tgz --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* vegaduta-sdk-*.tgz \
+              --title "REST client SDKs ${{ needs.verify.outputs.version }}" \
+              --notes "TypeScript (npm) and Python (PyPI) REST clients ${{ needs.verify.outputs.version }}, generated from docs/api/openapi.json. Verify with \`sha256sum -c SHA256SUMS\` and \`gh attestation verify <file> --repo $GITHUB_REPOSITORY\`." \
+              "${flags[@]}"
+          fi
 
   pypi:
     name: Publish to PyPI
@@ -174,7 +181,7 @@ jobs:
       # (and the check this action runs first) rejects it in packages-dir.
       - run: rm -f dist/SHA256SUMS
       - name: Publish to PyPI (trusted publishing)
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd790c9bec43f9625a9b9ad1e8 # v1.13.0
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
         with:
           skip-existing: true
           packages-dir: dist
