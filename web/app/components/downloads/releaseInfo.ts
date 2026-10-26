@@ -40,7 +40,7 @@ export async function fetchLatestRelease(): Promise<LatestRelease | null> {
       ? list.find(
           (r: unknown) =>
             typeof (r as Record<string, unknown>)?.tag_name === "string" &&
-            /^v\d+\.\d+\.\d+$/.test((r as { tag_name: string }).tag_name),
+            /^v\d+\.\d+\.\d+$/.test((r as { tag_name: string }).tag_name)
         )
       : null;
     if (body == null) return null;
@@ -65,7 +65,9 @@ export async function fetchLatestRelease(): Promise<LatestRelease | null> {
 
 /** "<owner>/<repo>" out of REPO_URL, for the API path. */
 function repoPath(): string {
-  return REPO_URL.replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").replace(/\/+$/, "");
+  return REPO_URL.replace(/^https?:\/\/github\.com\//, "")
+    .replace(/\.git$/, "")
+    .replace(/\/+$/, "");
 }
 
 export interface DownloadSet {
