@@ -9,11 +9,7 @@
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { edgeEnabled } from "../../lib/edge/capabilities";
 import { edgeTtsAvailable, ensureTtsModel, isTtsModelCached } from "../../lib/edge/audio/kokoro";
-import {
-  edgeSttAvailable,
-  ensureSttModel,
-  isSttModelCached,
-} from "../../lib/edge/audio/whisper";
+import { edgeSttAvailable, ensureSttModel, isSttModelCached } from "../../lib/edge/audio/whisper";
 import { displaySafeDownloadError, type DownloadState } from "../../lib/voice/callPreflight";
 import { progressPercent } from "../../lib/voice/callEnvironment";
 
