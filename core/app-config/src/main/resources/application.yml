@@ -1702,6 +1702,14 @@ app:
         # facts were put into context (labels, counts and ids only - never the text). Opt-in side
         # channel only; false = no such event. Turns without step events are unaffected either way.
         enabled: ${APP_CHAT_SSE_MEMORY_EVENTS_ENABLED:true}
+    # First-token latency: the longest ANY of the three concurrent pre-turn reads (session history,
+    # tool resolution incl. MCP connects, long-term memory recall) may hold the model call open
+    # before the turn proceeds without it - a dead MCP connect or a stalled sidecar otherwise blocks
+    # the model call indefinitely, which on a laptop install reads as minutes of silence. All three
+    # reads share this one deadline because they run in parallel, so it caps the whole pre-token
+    # stage. A timed-out read is cancelled and its prompt contribution dropped (no history replay,
+    # empty tool list, no memory block) so the model call still starts. 0 disables the bound.
+    pre-turn-max-wait: ${APP_CHAT_PRE_TURN_MAX_WAIT:3500ms}
     # Resumable chat streams (ResumableChatStreamService): a long answer survives a page refresh, a sleeping tab,
     # a flaky mobile network or a navigation. Default OFF = byte-identical behaviour: nothing is buffered, nothing
     # is detached, GET /api/chat/turns/** answers 404. When ON, ONLY requests that send the header

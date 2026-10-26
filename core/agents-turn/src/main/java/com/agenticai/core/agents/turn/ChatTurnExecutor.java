@@ -72,7 +72,7 @@ final class ChatTurnExecutor {
 
     /** The FAST stream's overall wall-clock ceiling ({@code app.llm.http.fast-turn-timeout}); see {@link FastTurnCeiling}. Set from {@link ChatTimeouts#fastTurnTimeout()} when the service is built. */
     volatile Duration fastTurnTimeout = Duration.ofMinutes(10);
-
+    volatile Duration preTurnMaxWait = Duration.ofMillis(3500);
     /**
      * How many extra model passes a FAST turn may run when a reply stops at an announced-but-undone
      * step ({@link TurnContinuation}); 0 turns it off. Set from {@code app.chat.continuation.max-passes}.
