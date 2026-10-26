@@ -410,8 +410,8 @@ final class ChatTurnExecutor {
     }
 
     /**
-     * The streamed form ({@code app.chat.parity.fast-buffering-mode} = FROM_FIRST_LINK) - body lives
-     * in {@link GenerationClaimGuard}.
+     * The streamed form ({@code app.chat.parity.fast-buffering-mode} = FROM_FIRST_LINK) - body
+     * lives in {@link GenerationClaimGuard}.
      */
     Flux<String> streamAndGuardGenerationClaims(
             TurnContext context,
@@ -758,5 +758,4 @@ final class ChatTurnExecutor {
     String collectToolEvidenceSince(UUID agentId, String sessionId, Instant since) {
         return generationClaims.collectToolEvidenceSince(agentId, sessionId, since);
     }
-
 }
