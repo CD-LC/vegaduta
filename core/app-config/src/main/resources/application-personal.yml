@@ -51,11 +51,19 @@ app:
       # off | observe | enforce
       mode: ${APP_AGENTS_TAINT_MODE:enforce}
   tools:
+    search:
+      # A personal install resolves far more tools than a small local model should see at once, so the
+      # relevance trim below is necessary - but on the shared default (off) it is a one-way door: a trimmed
+      # tool is unreachable that turn and the model truthfully reports "I only have limited tools" even
+      # though the capability exists. On, an over-threshold catalog keeps the always-on tools plus
+      # search_tools/call_tool, so the model is told the rest exist and can fetch any of them.
+      enabled: ${TOOL_SEARCH_ENABLED:true}
     auto-selection:
       # One person's agent keeps about 15 tools on every turn (memory, guides, workspace, terminal) against the
       # shared default cap of 12, so a request naming a family that only works as a set (driving a page:
       # navigate, read, click, type) got one or two of its tools. 24 leaves room for the family; small-model mode
-      # still caps what a small model is shown.
+      # still caps what a small model is shown. With tools.search.enabled above this only applies to
+      # catalogs at or under the deferral threshold - larger ones go through search_tools instead.
       max-tools-per-turn: ${TOOL_AUTO_SELECTION_MAX_TOOLS:24}
       # The always-kept tools alone use most of the shared 3000-token default, which left a matching family
       # (the rest of the browser tools) no room even with the count raised.

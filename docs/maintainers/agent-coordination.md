@@ -421,6 +421,11 @@ proposal applied through the new agents-kernel DesktopRecipeSavePort. The
 dispatcher learning-loop wraps moved to TurnCompletionObservers (ratchet,
 baseline 674).
 
+Follow-up on the same branch: `app.tools.search.enabled` defaults ON in the
+personal profile (`TOOL_SEARCH_ENABLED`); a relevance-trimmed tool was otherwise
+unreachable for the turn and the model reported "limited tools". Personal
+`.env.example`/`configuration.md` updated.
+
 ### CLAIM COMPLETE: services/code-intel capability expansion (Devin, 2026-10-26)
 
 Shipped on `feat/code-intel-out-of-the-box`: 12 deterministic read-only analysis
