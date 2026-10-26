@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.tools;
 
+import com.agenticai.core.guardrails.ToolResultMarker;
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,6 +84,20 @@ final class McpToolOutputSanitizer {
                 // Not actually valid JSON despite the leading brace - fall through to wrap.
             }
         }
+        // The wrap mints a new String, and {@link ToolResultMarker}'s registry keys on identity:
+        // without re-registration a platform answer (a refusal, a park, a withheld result relayed
+        // through call_tool) would come out of here unmarked - unrecognised by the guard's
+        // platform-answer bypass and journalable as an executed effect. Carrying the kind over is
+        // not new detection: {@code classify} reads exactly what consumers would have read off the
+        // unwrapped text, so a tool's own output that merely reads like a refusal is no more and no
+        // less classified than it was before the wrap.
+        String wrapped = wrap(result);
+        return ToolResultMarker.classify(result)
+                .map(kind -> ToolResultMarker.mark(wrapped, kind))
+                .orElse(wrapped);
+    }
+
+    private static String wrap(String result) {
         try {
             return JSON_MAPPER.writeValueAsString(Map.of("result", result));
         } catch (Exception e) {

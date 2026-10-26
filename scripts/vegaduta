@@ -4,8 +4,9 @@
 #
 #   scripts/vegaduta up [--lite|--full] [--profile NAME]... [--build] [--domain D]
 #                       [--local-ai[=container|host]] [--local-model TAG] [--cloud] [--search] [--browser] [--dry-run]
-#                       (lite profiles: rag, tools, workspace; full: temporal events jobs observability
-#                       tracing voice rl code-intel builder sandbox tools browser)
+#                       (lite/personal profiles: rag, tools, workspace, voice (implies rag);
+#                       full: temporal events jobs observability tracing voice rl
+#                       code-intel builder sandbox tools browser)
 #   scripts/vegaduta personal [--native-core] [--build] [--local-ai[=container|host]] [--local-model TAG]
 #                       [--cloud] [--no-search] [--no-tools] [--no-valkey|--valkey] [--minimal] [--browser] [--dry-run]
 #                       (one-person laptop mode: postgres + valkey + core + web, no Keycloak; docs: deploy/compose/personal.yml)
@@ -129,12 +130,16 @@ shipped_version() {
 
 # resolve_version: every image tag comes from VEGADUTA_VERSION (no `latest`
 # default). With --build and no version, images are built and tagged `local`.
-# X.Y.Z of the newest published (non-pre) release, or nothing when GitHub is unreachable.
+# X.Y.Z of the newest published PLATFORM release, or nothing when GitHub is
+# unreachable. /releases/latest follows whichever release was published most
+# recently - a component release (sdk-v0.1.1, ...) beats the platform's tag -
+# so the newest tag matching v<digit>.<digit>.<digit> is picked from the list.
 latest_release_version() {
-  local eff tag
-  eff="$(curl -fsSLI --proto '=https' --tlsv1.2 --max-time 20 -o /dev/null -w '%{url_effective}' \
-    "https://github.com/${VEGADUTA_REPO:-CD-LC/vegaduta}/releases/latest" 2>/dev/null)" || return 0
-  tag="${eff##*/}"
+  local body tag
+  body="$(curl -fsSL --proto '=https' --tlsv1.2 --max-time 20 \
+    -H 'Accept: application/vnd.github+json' -H 'User-Agent: vegaduta' \
+    "https://api.github.com/repos/${VEGADUTA_REPO:-CD-LC/vegaduta}/releases?per_page=30" 2>/dev/null)" || return 0
+  tag="$(printf '%s\n' "$body" | grep -oE '"tag_name"[^:]*:[[:space:]]*"v[0-9][0-9.]*"' | head -n1 | sed 's/.*"\(v[0-9][0-9.]*\)"/\1/')"
   case "$tag" in v[0-9]*) printf '%s' "${tag#v}" ;; esac
 }
 
@@ -365,15 +370,18 @@ resolve_profiles() {
   case " $PROFILES " in *" temporal "*) add_profile events ;; esac
   case " $PROFILES " in *" builder "*) add_profile code-intel ;; esac
   for p in $PROFILES; do
-    case " $ALL_PROFILES rag workspace " in *" $p "*) ;; *) die "unknown profile '$p' (valid: $ALL_PROFILES; single-box tiers: rag workspace tools browser)" ;; esac
+    case " $ALL_PROFILES rag workspace " in *" $p "*) ;; *) die "unknown profile '$p' (valid: $ALL_PROFILES; single-box tiers: rag workspace tools browser voice)" ;; esac
   done
   if [ "$TIER" = personal ] || [ "$TIER" = lite ]; then
-    # personal and lite have no Kafka/Temporal: only `rag`, `workspace`, `tools` and `browser`
-    # select anything. Say so instead of silently ignoring (COMPOSE_PROFILES in a shared .env
-    # may name full-stack profiles).
+    # personal and lite have no Kafka/Temporal: only `rag`, `workspace`, `tools`, `browser` and
+    # `voice` select anything. Say so instead of silently ignoring (COMPOSE_PROFILES in a shared
+    # .env may name full-stack profiles).
     for p in $PROFILES; do
-      case "$p" in rag|workspace|tools|browser) ;; *) warn "profile '$p' is not available in $TIER mode and is ignored" ;; esac
+      case "$p" in rag|workspace|tools|browser|voice) ;; *) warn "profile '$p' is not available in $TIER mode and is ignored" ;; esac
     done
+    # Voice calling (livekit + voice-agent) needs the sidecar for Whisper STT - picking `voice`
+    # implies `rag` on both single-box tiers, the same way `builder` implies `code-intel` above.
+    case " $PROFILES " in *" voice "*) add_profile rag ;; esac
     # `tools` (the MCP runner) is a choice like web search: it lives in TOOLS and the state file, not in PROFILES,
     # so a caller that passes its own --profile list (the Setup app) cannot drop it. An explicit
     # `--profile tools` turns it on.

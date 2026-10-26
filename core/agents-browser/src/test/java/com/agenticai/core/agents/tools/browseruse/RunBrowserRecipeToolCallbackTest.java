@@ -39,6 +39,7 @@ class RunBrowserRecipeToolCallbackTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final UUID AGENT = UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
+    private static final String SESSION = "chat-session-1";
     private static final String PASSWORD = "S3cretPw!";
 
     /** Minimal scripted page: navigates, types, and clicks "Sign in" into a dashboard. */
@@ -151,6 +152,7 @@ class RunBrowserRecipeToolCallbackTest {
         return new RunBrowserRecipeToolCallback(
                 recipes,
                 AGENT,
+                SESSION,
                 tenantId -> page,
                 subject -> vault,
                 new BrowserRecipeReplayer(clock::get, clock::addAndGet));
@@ -281,7 +283,9 @@ class RunBrowserRecipeToolCallbackTest {
         assertThat(result)
                 .contains("\"status\":\"success\"")
                 .contains("\"stepsCompleted\":5")
-                .contains("shop.example.com/dashboard");
+                .contains("shop.example.com/dashboard")
+                // the journal session id a watcher polls /api/agents/{id}/tool-calls with
+                .contains("\"watchSessionId\":\"" + SESSION + "\"");
         assertThat(page.log).endsWith("click Place order");
         assertThat(recipe.getRunCount()).isEqualTo(1);
         assertThat(recipe.getFailCount()).isZero();

@@ -101,6 +101,8 @@ class SettingsCatalogContractTest {
                 new RlSettings(new RlPolicyProperties()),
                 new ProviderSettings(new MockEnvironment()),
                 new StepLimitSettings(new ToolStepLimitProperties()),
+                new com.agenticai.core.agents.tools.scratchpad.ScratchpadSettings(
+                        new com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties()),
                 new SkillPromptSettings(),
                 new ProductControlsCatalog(
                         new SemanticCacheProperties(), new ChatLimitsProperties(), new FollowUpProperties(),

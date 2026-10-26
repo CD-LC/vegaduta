@@ -8,6 +8,8 @@ import MediaCard from "../../MediaCard";
 import TurnFeedback from "../TurnFeedback";
 import RequestInspector from "../RequestInspector";
 import SaveRunAsRecipe from "../SaveRunAsRecipe";
+import SaveRunAsDesktopRecipe, { usesDesktopTools } from "../../desktop/SaveRunAsDesktopRecipe";
+import DesktopMonitorPanel from "../../desktop/DesktopMonitorPanel";
 import TurnStopNotice from "../TurnStopNotice";
 import { StopLimitAction } from "./StopLimitAction";
 import { TurnOutcomeNotice } from "./TurnOutcomeNotice";
@@ -146,8 +148,18 @@ export function AssistantTurn({
           }
         />
       )}
+      {/* Live screen while the agent drives the desktop: the monitor appears in the turn the
+            moment the first local_desktop_* step lands - "what is it doing right now" belongs
+            inline, where the action is, not only in the workbench card. The pane answers its own
+            "monitor unavailable" line when app.assistant.desktop.monitor is off. */}
+      {turn.pending && usesDesktopTools(turn.steps) && <DesktopMonitorPanel active />}
       {/* "Save this run as a recipe": self-hiding unless recipes are on and this turn drove the browser. */}
       {!turn.pending && agent?.id && <SaveRunAsRecipe agentId={agent.id} sessionId={sessionId} steps={turn.steps} />}
+      {/* Same for a run that drove the desktop agent (desktop_* tools) - self-hides when the feature
+            or the run does not qualify. */}
+      {!turn.pending && agent?.id && (
+        <SaveRunAsDesktopRecipe agentId={agent.id} sessionId={sessionId} steps={turn.steps} />
+      )}
       <TurnStopNotice steps={turn.steps} action={(kind) => <StopLimitAction agent={agent} kind={kind} />} />
       {!turn.pending && outcome && (
         <TurnOutcomeNotice

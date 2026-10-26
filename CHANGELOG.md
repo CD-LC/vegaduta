@@ -10,6 +10,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Added
 
+<<<<<<< HEAD
 - **On-device media generation, out of the box.** The edge tool surface gains
   `local_generate_image` (Stable Diffusion Turbo via onnxruntime-web/WebGPU, ~2.4 GB
   model) and `local_generate_audio` (MusicGen-small via transformers.js, ~1.8 GB
@@ -20,6 +21,182 @@ Release notes on GitHub are generated from the section for each version.
   a tool call on a device without the model refuses with a pointer, never a silent
   download), and report into a session media gallery in the Edge console where the
   person can preview and download artifacts.
+=======
+- **Windows support in `desktop-agent`** (`services/desktop-agent`): `win32`
+  hosts previously fell through to the Linux path and every action answered
+  501. Input now goes through user32 `SendInput`/`mouse_event` via an inline C#
+  interop class, screen capture and monitor frames through
+  `System.Drawing.CopyFromScreen`, and the clipboard through
+  `Get/Set-Clipboard` - all via the bundled Windows PowerShell, no external
+  installs. `/ui` accessibility tree remains macOS-only (honest 501 elsewhere).
+  README gains a Task Scheduler autostart recipe.
+- Fixed live voice transcription: sidecar pinned PyAV 19, which removed the `metadata_errors` kwarg `faster-whisper` passes to `av.open`, so every `/transcribe` call 400'd and calls hung at "Transcribing". Pinned `av==15.1.0` (newest release that keeps the kwarg).
+- Approval cards for `local_desktop_*` and `run_desktop_recipe` calls now show readable labels ("Open an app, file, or link") instead of raw wire names.
+- "The task it was working on" on approval cards now shows the user's actual message: the console's `<app_context>` preamble is stripped when core records the goal and when the web renders already-parked rows.
+- Playground call controls: the screen-share button is always visible while connected (explains itself when on-device sight is not configured), and "Call + camera" renders disabled with a reason instead of disappearing for text-only models.
+
+- Fixed voice calls on single-box installs: LiveKit now advertises the loopback/node IP (`LIVEKIT_NODE_IP`, default 127.0.0.1) instead of the WAN address discovered by STUN, which browsers could not reach - the media path died at "Media connection blocked".
+
+- Voice calling (livekit + voice-agent) is now available on the personal and lite tiers: `personal --profile voice` / `up --lite --profile voice` start both services and imply `rag` for Whisper STT (previously only the full stack declared them).
+
+- Personal install footprint: default memory ceilings tightened (tool-sandbox 1g to 512m, sidecar 2g to 1536m, browser-runner 2g to 1g; all stay env-overridable) and the sidecar build gained `SIDECAR_BAKE_EXTRA_MODELS=false` to slim a local image by ~550MB.
+
+
+### Added
+
+- **Desktop tools are always offered when enabled**: `local_desktop_*` (and `run_desktop_recipe`) join the always-relevant tool set and the small-model intent table gets a desktop family — a request like "play minesweeper" or "open Notes" shares no word with `local_desktop_click`, and a relevance-trimmed turn hid the whole capability (the model then correctly answered "I have no desktop tools"). Only applies where the desktop sidecar is already opted in.
+- **Desktop recipes (personal tier, opt-in)**: a finished desktop run can be saved as a `desktop_recipe` — a placeholder-only replay of the `local_desktop_*` sequence (`open`/`activate`/`press`/`click`/`type`/`key`/`wait`), recorded from the run's tool journal with the same "no secrets or user values stored" rules as browser recipes (`{{param}}`/`{{secret.NAME}}`, literal typed text refused unless explicitly allowed). `run_desktop_recipe` replays it deterministically with per-step verification and a pause-before-irreversible gate; it sits behind `app.assistant.desktop.recipes.enabled` (`DESKTOP_RECIPES_ENABLED`, default off) plus the existing `app.assistant.desktop.approval-required` pin.
+- **Monitor-or-auto replay**: each recipe carries a `default_mode` (`AUTO`/`MONITOR`); MONITOR paces the replay (`monitor-step-delay-ms`, default 800 ms) so a person can follow it live on the console's desktop monitor (`GET /api/desktop/monitor/frame` → the sidecar's new `GET /frame`, `app.assistant.desktop.monitor.enabled`, default off). Browser recipes gain the matching "Watch" affordance — the console polls the run's tool-call journal (`watchSessionId` in the `run_browser_recipe` result) — which also works on lite/full tiers.
+
+### Added
+
+- **Agents can download web documents into the knowledge base.** `add_to_knowledge_base`
+  gained an optional `url` argument: the platform downloads the page/document server-side
+  (SSRF-guarded, redirects re-validated, 5 MB cap) and runs it through the exact upload
+  pipeline - a PDF/DOCX/HTML/Markdown file gets a document row, dedup and text extraction,
+  plain text lands as a fetched note. `POST /api/knowledge/ingest-url` is the same flow for
+  the UI/API. Knowledge write is now configurable per agent: `PATCH
+  /api/agents/{id}/knowledge-write` opts in, `GET`/`PATCH /knowledge-write-access` manages
+  the deny-by-default writable-collection grant list, and the agent workbench shows both
+  under Knowledge collections.
+- **Enabling a built-in MCP server that can't be served connects a per-tenant copy.** A
+  catalog "Activate" for a stateful static server (puppeteer, playwright-vision, memory,
+  sequential-thinking) used to silently do nothing when the deployment had no shared static
+  connection (no `mcp` profile, e.g. lite) or the server was hidden by the cross-tenant
+  exposure policy. The registration now upgrades itself to the catalog's own launch spec and
+  connects through `mcp-stdio-runner` - each tenant gets an isolated server process. New
+  env: `MCP_STATIC_STATELESS_SERVERS`, `MCP_STATIC_SHARED_STATEFUL_ENABLED`.
+
+- **SDK publishing ready.** The Java Agent SDK moves to `0.1.1` (the 0.1.0 coordinate is
+  retired: `sdk-v0.1.0`'s Central Portal upload was rejected because central-publishing-maven-plugin
+  0.7.0 produced a bundle where no artifact directory held a `.pom`; the now-pinned 0.12.0 stages
+  `io/github/cd-lc/<artifact>/<version>/<artifact>-<version>.pom` correctly - verified by a local
+  dry-run bundle). The parent pom gains the `<organization>` block, both Python packages ship the
+  `NOTICE` file (Apache-2.0 §4) via `license-files`, and `docs/maintainers/releasing-sdk.md` gains a
+  credential-free bundle dry-run plus the incident write-up. Publish paths: tag `sdk-v0.1.1` →
+  SDK release workflow → Central Portal "Publish"; tag `pysdk-v0.1.0` → Python SDK release → PyPI
+  (`SDK_PUBLISH_PYPI` is already `true`; the `pypi` environment/trusted publisher are one-time PyPI
+  setup); `restsdk-v*` + `SDK_PUBLISH_NPM` for the generated REST clients once the npm name and
+  `NPM_TOKEN` exist.
+- **Each agent gets a persistent scratchpad.** Four deferred built-in tools -
+  `scratchpad_write`, `scratchpad_read`, `scratchpad_list` and `scratchpad_delete` - give an agent an
+  agent-authored notepad: session-scoped working notes plus an agent-long-term pad. Caps:
+  `app.tools.scratchpad.max-notes` (per agent+session, default 200) and
+  `app.tools.scratchpad.max-note-bytes` (per note, default 65536); the platform switch is
+  `app.tools.scratchpad.enabled` and the per-agent toggle `tools.scratchpad.enabled` in the behaviour
+  settings catalog. New env: `APP_TOOLS_SCRATCHPAD_ENABLED`, `APP_TOOLS_SCRATCHPAD_MAX_NOTES`,
+  `APP_TOOLS_SCRATCHPAD_MAX_NOTE_BYTES`.
+
+### Fixed
+
+- **Turn start no longer waits on catalog screening.** When deferral is active
+  (`app.tools.search.*`), each deferred tool's name/description/schema was judged by the
+  guardrail model BEFORE the turn's first model call - ~90 sequential calls on a 59-tool catalog,
+  over two minutes of "Gathering context" on a local model. Two changes: platform-authored tool
+  text skips the semantic judge (it is repo-authored; the judge is for MCP/custom descriptions)
+  and the remaining screen runs on a background virtual thread - only `search_tools`/`call_tool`
+  join it, so a turn that never searches pays nothing.
+- **`browser_navigate` now tells the model the sandboxed browser is invisible and inaudible to
+  the person.** The reply is directed to describe it as the agent's own browser (never "your
+  Chrome"), to say when `local_desktop_*` control is unavailable instead of silently substituting
+  the sandbox, and to finish visual tasks with `browser_screenshot` so the person sees proof of
+  what actually happened.
+- **A turn parked on a human approval no longer asks the model to write its closing reply.** The
+  tool loop now ends the round the marker lands in (`returnDirect`), and the person reads the
+  platform's fixed pause text (new prompt key `message.approval.parked`) - a structured pause,
+  not model prose - while the pending approval stays in the inbox and the journal. Queued
+  post-park calls are answered with the `approval_parked` marker result.
+- **A streamed (FAST) turn emits only the tool loop's terminal round.** Mid-loop narration -
+  the assistant text of rounds that ended in `tool_calls` - is held and dropped; the final
+  synthesis round arrives as one burst once its finish reason proves it terminal. New:
+  `app.chat.parity.fast-terminal-rounds-only` (default `true`; `false` restores per-round
+  streaming).
+- **A streamed (FAST) turn now has a total wall-clock ceiling.** The idle watchdog
+  (`stream-idle-timeout`) only bounds model silence and re-arms on every tool round, so a turn
+  that kept calling tools (each call answering quickly) could run for hours. One streamed turn
+  is now capped at `app.llm.http.fast-turn-timeout` (default 600 s, tenant/agent
+  `turnTimeoutSeconds` replaces it, an agent-job deadline still ends it sooner, `0` disables):
+  past the ceiling the stream is cut, the partial answer stays stored as interrupted, and the
+  same "steps that ran" notice a buffered timeout emits is appended. New env:
+  `LLM_HTTP_FAST_TURN_TIMEOUT`.
+- **A turn's tool-round budget now counts all of its passes together.** Each continuation
+  and tool-call-retry pass used to start a fresh tool loop with the round cap refilled, so a
+  turn could spend its budget several times over; every pass's transcript now carries the
+  rounds earlier passes already ran (`ToolLoopTranscript.roundsSpentBefore`).
+- **`call_tool` refusals are bounded even without an agent identity.** The consecutive
+  refusal ceiling only engaged for instances built with an `agentId`; the no-identity path
+  could refuse forever. After the ceiling it now returns the same marked budget-exhausted
+  result, which ends the loop the same way.
+- **Tool results keep their platform marker through a `{"result": ...}` wrap.** The JSON
+  wrap minted a new String, losing the `ToolResultMarker` identity (a WeakHashMap), so a
+  wrapped platform answer could be mislabelled in the journal or re-screened as untrusted
+  tool output. The marker is re-applied across the wrap.
+- **`search_tools` results can't be wholesale withheld by one hostile description.** Deferred
+  tool descriptions are screened once when the catalog is built; a screened catalog marks the
+  search result as the platform's own answer instead of re-screening MCP-supplied text on
+  every call.
+- **The file-size ratchet actually gates again.** An empty `file-size-baseline.txt` made
+  awk's `FNR==NR` match every scanned file, silently adopting all oversized files as
+  "baseline"; the check now compares by filename and the baseline is reseeded.
+- **`search_tools` activations now survive restarts and follow the session across replicas.**
+  The carry-over of already-searched deferred tools was kept in per-replica memory, so a turn
+  landing on another replica (or any restart) silently re-deferred every tool. Behind a new
+  `ToolActivationStore` seam, `app.tools.search.activation-store=auto` (default) keeps them in
+  Redis when a `StringRedisTemplate` bean exists and per-replica memory otherwise;
+  `memory`/`redis` force one. New env: `TOOL_SEARCH_ACTIVATION_STORE`,
+  `TOOL_SEARCH_ACTIVATION_TTL`.
+- **Platform tool-dispatch diagnostics no longer trip the output guardrail.** A
+  `call_tool` refusal (e.g. "the tool has not been loaded yet - call `search_tools`
+  first") or a `search_tools` input error is the platform's own answer, not tool
+  output; the content-safety screen used to read it as a prompt-injection attempt
+  and withhold it, looping the model on instructions it could not see. Results a
+  producer registers with `ToolResultMarker` now bypass the untrusted-content
+  screen; real tool output is still screened exactly as before.
+- **`search_tools` no-match answers now name what is searchable.** When keyword search over
+  deferred tools finds nothing, the response lists every deferred tool name (up to 60; larger
+  catalogs get tool-name groups plus a few generic tools such as web/fetch/file helpers) and the
+  `select:name1,name2` escape hatch. A model that searched task words - which rarely overlap tool
+  names - used to get only a source count and could loop without ever discovering the deferred
+  catalog.
+- **A turn parked on human approval now actually ends instead of looping.** After the first
+  gated call parked, post-park tool calls were answered by the guard without consuming the step
+  budget - a model that kept calling tools could burn the whole round allowance (41 rounds;
+  more on raised ceilings) on "queued behind approval" answers, each resending the full
+  conversation. Parked and queued results now carry an `approval_parked` marker the tool loop
+  reads: the next round gets the budget-exhausted soft stop, and a model that still calls tools
+  is ended with the hard stop. Parked results also survive tool-result clearing so the marker
+  cannot be garbage-collected mid-turn.
+- **Dispatch plumbing no longer files phantom approvals when queued behind a park.**
+  `search_tools`, `call_tool` and `restore_tool_result` calls made after a turn parked used to
+  each mint an `mcp_tool.*` approval request - but approval replay resolves tools by exact name
+  without deferral, so an approved `call_tool` could only ever replay to a refusal. They are now
+  refused without a record (`app.guardrails.approval-park.not-queued-message`).
+- **The tool-loop round backstop now follows the turn's own ceiling.** It used to be the larger
+  of the platform's derived cap and the turn's - so a SUPERVISED turn (ceiling 7) got the
+  platform's 41-round allowance, and a personal install's raised ceiling gave 311. The cap is
+  now derived from the ceiling this turn actually enforces plus its grace; an explicit
+  `app.chat.tools.max-rounds-per-invocation` still wins.
+
+
+- **`web_search` no longer vanishes silently when no provider is configured.** The tool was
+  omitted from the payload unless a search provider was set up, so a misconfigured deployment
+  made the model correctly conclude it had no web access and answer research requests from stale
+  memory instead of failing fast. When nothing in `app.web-search.provider`/`fallback` is usable,
+  `web_search` is now offered as a stub whose call returns an operator-facing explanation ("web
+  search is not configured on this deployment..."), and a boot WARN names the gap
+  (`WEB_SEARCH_PROVIDER`/`WEB_SEARCH_SEARXNG_BASE_URL` or a provider key). Per-agent deny lists
+  still filter it; `deep_research`/`verify_citations` still require a configured provider.
+- **A run's tool loop now has a cumulative prompt-token budget**
+  (`app.chat.tools.max-prompt-tokens-per-turn`, tenant/agent override
+  `chat.toolLoop.maxPromptTokensPerTurn`, `0` = uncapped). The per-turn call ceiling bounds rounds,
+  not size: it missed the runaway shape where every loop round resends a near-full context window.
+  Over the cap, calls are answered with the `tool_budget_exhausted` soft stop and the model writes
+  its closing answer, so a runaway cannot resend an unbounded context.
+- **Context compaction now reserves output headroom.** `app.context.compaction.reserve-output-tokens`
+  (`APP_CONTEXT_COMPACTION_RESERVE_OUTPUT_TOKENS`, default 8,192) is subtracted from the model's
+  context window before the clear/compact fractions apply, so a run at the compaction trigger still
+  leaves room for the answer instead of riding at ~98% of the real window.
+>>>>>>> origin/main
 
 ## [0.1.10] - 2026-10-24
 

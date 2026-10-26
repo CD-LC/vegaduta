@@ -564,12 +564,14 @@ class DeepResearchToolRegistrationTest {
     }
 
     @Test
-    void omittedWhenBraveKeyMissing() {
+    void offeredAsUnavailableStubWhenBraveKeyMissing() {
         when(credentials.resolveActiveApiKey(PlatformToolKey.BRAVE_SEARCH))
                 .thenReturn(Optional.empty());
         List<String> names =
                 webToolNames(resolver(DeepResearchConfig.defaults(), credentialProvider));
-        assertFalse(names.contains("web_search"));
+        // web_search is still in the payload - as the refusing stub, so a misconfigured deployment
+        // is an honest tool result instead of the model concluding it has no web access.
+        assertTrue(names.contains("web_search"));
         assertFalse(names.contains("deep_research"));
         assertFalse(names.contains("verify_citations"));
         assertTrue(names.contains("fetch_web_page"));

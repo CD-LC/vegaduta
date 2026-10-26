@@ -33,3 +33,5 @@ services:
     build: ../../services/mcp-stdio-runner
   workspace-runner:
     build: ../../services/workspace-runner
+  voice-agent:
+    build: ../../services/voice-agent

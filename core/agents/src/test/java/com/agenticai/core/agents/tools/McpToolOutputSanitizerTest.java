@@ -234,4 +234,42 @@ class McpToolOutputSanitizerTest {
         assertTrue(result.contains("\\\""));
         assertTrue(result.contains("\\\\"));
     }
+
+    // --- the wrap must not lose a ToolResultMarker registration -------------------
+
+    @Test
+    void aMarkedPlatformAnswerStaysMarkedThroughTheWrap() {
+        // A refusal/park relayed through a wrapper that mints a new String used to lose its
+        // ToolResultMarker registration (the registry keys on identity) - then the guard's
+        // platform-answer bypass and the journals could no longer tell it from tool output.
+        String marked =
+                com.agenticai.core.guardrails.ToolResultMarker.mark(
+                        "This tool call ('x') was refused for test " + System.nanoTime(),
+                        com.agenticai.core.guardrails.ToolResultMarker.Kind.BLOCKED);
+
+        String wrapped = McpToolOutputSanitizer.ensureJsonObject(marked);
+
+        assertEquals(
+                com.agenticai.core.guardrails.ToolResultMarker.Kind.BLOCKED,
+                com.agenticai.core.guardrails.ToolResultMarker.kindOf(wrapped).orElseThrow());
+        assertTrue(com.agenticai.core.guardrails.ToolResultMarker.isPlatformAnswer(wrapped));
+        // Wrapping a second time passes the already-marked object through, mark intact.
+        assertEquals(
+                com.agenticai.core.guardrails.ToolResultMarker.Kind.BLOCKED,
+                com.agenticai.core.guardrails.ToolResultMarker.kindOf(
+                                McpToolOutputSanitizer.ensureJsonObject(wrapped))
+                        .orElseThrow());
+    }
+
+    @Test
+    void aToolOutputThatOnlyReadsLikeAPlatformAnswerGetsNoNewMark() {
+        // Carrying a kind across the wrap is not new detection: unregistered text that merely
+        // mentions a marker word must come out as unregistered as it went in.
+        String prose = "job log: task ended with state approval_parked " + System.nanoTime();
+        String wrapped = McpToolOutputSanitizer.ensureJsonObject(prose);
+        assertTrue(
+                com.agenticai.core.guardrails.ToolResultMarker.kindOf(wrapped).isEmpty(),
+                "wrapped tool output must not be registered: " + wrapped);
+        assertTrue(com.agenticai.core.guardrails.ToolResultMarker.kindOf(prose).isEmpty());
+    }
 }

@@ -88,12 +88,9 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * KnowledgeIngestionService}'s {@code source_type} metadata already gives image-vs-text
  * provenance.
  *
- * <p><b>Explicit named follow-ups, not done tonight</b> (ship-conservatively call per this
- * feature's own build note): (1) no REST endpoint/DTO yet to actually set {@code
- * knowledgeWriteEnabled}/{@code allowedKnowledgeWriteCollectionIds} from the admin console - only
- * {@code AgentService#setKnowledgeWriteEnabled}/{@code #setAllowedKnowledgeWriteCollectionIds}
- * exist, mirroring {@code AgentController#setCodeWorkspaceEnabled}/{@code
- * #setCodeIntelRepoAccess} is the follow-up; (2) nothing stops a tenant-admin from granting write
+ * <p><b>Still-open follow-up</b> (ship-conservatively call per this feature's own build note; the
+ * {@code knowledge-write}/{@code knowledge-write-access} endpoints that used to be item (1) below
+ * now exist): nothing stops a tenant-admin from granting write
  * access to a collection ALSO used for read by an unrelated agent - a stronger design would
  * refuse that combination (or require a collection be flagged "agent-writable" at creation) to
  * make single-purpose scoping the only option instead of an admin convention.
@@ -114,6 +111,11 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
     private final Set<UUID> allowedWriteCollectionIds;
     private final UUID agentId;
     private final String sessionId;
+    // Optional url-fetch pipeline (null in tests or when the "knowledge" profile's
+    // KnowledgeUrlIngester isn't around): when set, a `url` argument downloads the document
+    // server-side and runs the exact upload pipeline - how "download that PDF into the
+    // knowledge base" actually lands.
+    private final KnowledgeUrlIngester urlIngester;
 
     /**
      * @param allowedWriteCollectionIds empty means DENY-ALL - the opposite of {@code
@@ -126,11 +128,23 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
         UUID agentId,
         String sessionId
     ) {
+        this(ingestionService, collectionService, allowedWriteCollectionIds, agentId, sessionId, null);
+    }
+
+    public AddToKnowledgeBaseToolCallback(
+        KnowledgeIngestionService ingestionService,
+        KnowledgeCollectionService collectionService,
+        Set<UUID> allowedWriteCollectionIds,
+        UUID agentId,
+        String sessionId,
+        KnowledgeUrlIngester urlIngester
+    ) {
         this.ingestionService = ingestionService;
         this.collectionService = collectionService;
         this.allowedWriteCollectionIds = allowedWriteCollectionIds;
         this.agentId = agentId;
         this.sessionId = sessionId;
+        this.urlIngester = urlIngester;
     }
 
     @Override
@@ -138,10 +152,12 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
         return ToolDefinition.builder()
             .name("add_to_knowledge_base")
             .description(
-                "Saves a piece of text to a knowledge collection so it can be found later by "
-                    + "search_knowledge_base, in this or a future conversation. Use this to record a durable "
-                    + "fact, decision, or piece of information the user asked you to remember for the "
-                    + "knowledge base specifically (for a private per-user memory instead, use remember_fact). "
+                "Saves content to a knowledge collection so it can be found later by "
+                    + "search_knowledge_base, in this or a future conversation. Provide EITHER `content` (text you "
+                    + "write yourself, to record a durable fact or decision - for a private per-user memory "
+                    + "instead, use remember_fact) OR `url` (a public http/https address to download and ingest "
+                    + "directly: use this when the user asks you to save a web page, PDF or other document into "
+                    + "the knowledge base - you do NOT need to fetch it first). "
                     + "You must pass the id of a collection you have write access to - call "
                     + "list_knowledge_collections first if you don't already know it; this tool will reject "
                     + "any collection you have not been explicitly granted write access to, even one you can "
@@ -157,7 +173,11 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
                     "properties": {
                         "content": {
                             "type": "string",
-                            "description": "The text to save to the knowledge base."
+                            "description": "The text to save to the knowledge base. Optional when `url` is given."
+                        },
+                        "url": {
+                            "type": "string",
+                            "description": "A public http/https URL to download and ingest directly into the collection (e.g. a PDF, DOCX, HTML page or Markdown file). Optional when `content` is given."
                         },
                         "collection_id": {
                             "type": "string",
@@ -168,7 +188,7 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
                             "description": "Optional short label describing what this content is, stored alongside it so it's easy to identify later."
                         }
                     },
-                    "required": ["content", "collection_id"]
+                    "required": ["collection_id"]
                 }
                 """)
             .build();
@@ -180,23 +200,30 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
         try {
             Map<String, Object> args = MAPPER.readValue(toolInput, Map.class);
 
+            Object urlValue = args.get("url");
+            String url = urlValue == null || urlValue.toString().isBlank()
+                ? null : urlValue.toString().strip();
             Object contentValue = args.get("content");
-            if (contentValue == null || contentValue.toString().isBlank()) {
-                return errorJson("content is required");
+            String content = contentValue == null || contentValue.toString().isBlank()
+                ? null : contentValue.toString();
+            if (url == null && content == null) {
+                return errorJson("Either content or url is required");
             }
-            String content = contentValue.toString();
-            if (content.length() > MAX_CONTENT_LENGTH) {
-                return errorJson(
-                    "content is too long (" + content.length() + " characters, max " + MAX_CONTENT_LENGTH
-                        + ") - summarize it or split it into multiple smaller notes"
-                );
-            }
-
-            // Stored-injection / credential tripwire (ASI06, LLM04, LLM02): see KnowledgeWriteScreen.
-            var refusal = KnowledgeWriteScreen.refusal(content);
-            if (refusal.isPresent()) {
-                log.warn("add_to_knowledge_base refused content for agent {}: screen tripped", agentId);
-                return errorJson(refusal.get());
+            if (content != null) {
+                if (content.length() > MAX_CONTENT_LENGTH) {
+                    return errorJson(
+                        "content is too long (" + content.length() + " characters, max " + MAX_CONTENT_LENGTH
+                            + ") - summarize it or split it into multiple smaller notes"
+                    );
+                }
+                // Stored-injection / credential tripwire (ASI06, LLM04, LLM02): see KnowledgeWriteScreen.
+                // A `url` download is ingested like an upload (binary/extracted), not screened here -
+                // the same posture the human upload flow takes.
+                var refusal = KnowledgeWriteScreen.refusal(content);
+                if (refusal.isPresent()) {
+                    log.warn("add_to_knowledge_base refused content for agent {}: screen tripped", agentId);
+                    return errorJson(refusal.get());
+                }
             }
 
             Object collectionIdValue = args.get("collection_id");
@@ -235,6 +262,24 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
             String title = titleValue == null || titleValue.toString().isBlank() ? null : titleValue.toString();
 
             String source = buildSource(title);
+            if (url != null) {
+                if (urlIngester == null) {
+                    return errorJson(
+                        "Downloading URLs into the knowledge base is not available in this deployment");
+                }
+                // Downloads the document server-side (SSRF-guarded, size-capped) and ingests it
+                // through the exact /upload pipeline: a PDF/DOCX/HTML file gets a document row,
+                // dedup and extraction; plain text lands as a fetched note. The source keeps the
+                // same agent-attribution audit shape as a text note, plus where it came from.
+                KnowledgeUrlIngester.UrlIngestResult result = urlIngester.ingestUrl(
+                    url, collectionId, source + " - fetched from " + url, null, null);
+                return MAPPER.writeValueAsString(Map.of(
+                    "chunksSaved", result.chunkCount(),
+                    "collectionId", collectionId.toString(),
+                    "filename", result.filename(),
+                    "ingestedAs", result.document() ? "document" : "text"
+                ));
+            }
             // Same resolution KnowledgeController's /ingest uses (the collection's own V361 chunking
             // config, else Chunker's 150/30 defaults) and the same shared Chunker inside ingest() -
             // this tool is a thin agent-facing front end onto the exact same pipeline, not a

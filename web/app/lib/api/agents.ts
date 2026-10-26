@@ -481,6 +481,27 @@ export const agentsApi = {
       ...jsonBody({ allowedKnowledgeCollectionIds }),
     }).then(toJson<AgentResponse>),
 
+  // Migration V198 - the knowledge-WRITE pair (add_to_knowledge_base), served
+  // by a dedicated view rather than AgentResponse (which carries neither
+  // field). knowledgeWriteEnabled opts the agent in; the grant list is
+  // DENY-ALL when empty - the OPPOSITE of setAgentKnowledgeAccess's
+  // "empty means unrestricted".
+  getAgentKnowledgeWriteAccess: (
+    agentId: string
+  ): Promise<{ knowledgeWriteEnabled: boolean; allowedKnowledgeWriteCollectionIds: string[] }> =>
+    apiFetch(`/api/agents/${agentId}/knowledge-write-access`)
+      .then(toJson<{ knowledgeWriteEnabled: boolean; allowedKnowledgeWriteCollectionIds: string[] }>),
+  setAgentKnowledgeWrite: (agentId: string, enabled: boolean) =>
+    apiFetch(`/api/agents/${agentId}/knowledge-write`, {
+      method: "PATCH",
+      ...jsonBody({ enabled }),
+    }).then(toJson),
+  setAgentKnowledgeWriteAccess: (agentId: string, allowedKnowledgeWriteCollectionIds: string[]) =>
+    apiFetch(`/api/agents/${agentId}/knowledge-write-access`, {
+      method: "PATCH",
+      ...jsonBody({ allowedKnowledgeWriteCollectionIds }),
+    }).then(toJson),
+
   // Opt-in
   // per-agent collaborator list ("specialists working together"), same
   // empty-clears-restriction semantics as setAgentToolAccess/

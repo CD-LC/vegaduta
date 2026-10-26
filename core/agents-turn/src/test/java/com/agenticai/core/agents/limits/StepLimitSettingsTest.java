@@ -158,16 +158,16 @@ class StepLimitSettingsTest {
     }
 
     @Test
-    void aTenantMayLowerTheGraceBelowThePlatformAndTheBackstopStaysAtLeastThePlatforms() {
+    void aTenantMayLowerTheGraceAndTheBackstopFollowsTheTurnsOwnCeilingAndGrace() {
         rig.tenant(TENANT, StepLimitSettings.GRACE_CALLS, 0);
         AgentRuntimeSettingsResolver r = resolver(true);
-        AgentRuntimeSettingsResolver platformOnly = resolver(false);
 
         SettingsRig.inTenant(TENANT, () -> {
             AgentRuntimeSettings s = turn(r, agentId, AgentAutonomyTier.SEMI_AUTONOMOUS);
             assertThat(s.graceCalls()).isZero();
-            assertThat(r.toolLoopRounds(s)).as("no agent is stopped sooner by the backstop than before")
-                    .isGreaterThanOrEqualTo(platformOnly.toolLoopRounds(turn(platformOnly, agentId, AgentAutonomyTier.SEMI_AUTONOMOUS)));
+            // The backstop is sized for this turn's own ceiling and grace - a lowered grace is
+            // honoured, not padded back up to the platform's.
+            assertThat(r.toolLoopRounds(s)).isEqualTo(s.maxToolSteps() + s.graceCalls() + 1);
         });
     }
 

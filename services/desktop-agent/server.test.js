@@ -9,7 +9,7 @@ process.env.DESKTOP_AGENT_DATA_DIR = require('node:os').tmpdir() + '/da-test-' +
 
 const { test, before, after } = require('node:test');
 const assert = require('node:assert');
-const { createServer, actions, appleQuote } = require('./server.js');
+const { createServer, actions, appleQuote, winKeySpec, psQuote } = require('./server.js');
 
 let server;
 let base;
@@ -44,8 +44,20 @@ async function req(method, path, body, auth = 'Bearer test-secret') {
   return { status: res.status, json: await res.json() };
 }
 
-test('health is unauthenticated', async () => {
-  const r = await req('GET', '/health', undefined, '');
+// For the binary /frame route - no JSON parse, keep the headers.
+async function raw(path, auth = 'Bearer test-secret') {
+  const res = await fetch(base + path, { headers: { authorization: auth } });
+  return {
+    status: res.status,
+    headers: res.headers,
+    body: Buffer.from(await res.arrayBuffer()),
+  };
+}
+
+test('health answers for a bearer but never without one (CodeQL: user-controlled bypass)', async () => {
+  const unauth = await req('GET', '/health', undefined, '');
+  assert.equal(unauth.status, 401);
+  const r = await req('GET', '/health');
   assert.equal(r.status, 200);
   assert.equal(r.json.ok, true);
 });
@@ -54,6 +66,7 @@ test('every other route needs the bearer secret', async () => {
   for (const [method, path] of [
     ['POST', '/screenshot'], ['POST', '/ui'], ['POST', '/click'],
     ['POST', '/notify'], ['GET', '/clipboard'], ['POST', '/clipboard'],
+    ['GET', '/frame'],
   ]) {
     const r = await req(method, path, method === 'POST' ? {} : undefined, '');
     assert.equal(r.status, 401, `${method} ${path} should be 401`);
@@ -91,6 +104,103 @@ test('action errors map to their status', async () => {
   assert.equal(r2.status, 501);
 });
 
+test('GET /capabilities requires auth like every other route (CodeQL: user-controlled bypass)', async () => {
+  const unauth = await req('GET', '/capabilities', undefined, '');
+  assert.equal(unauth.status, 401);
+  const r = await req('GET', '/capabilities');
+  assert.equal(r.status, 200);
+  assert.ok(Array.isArray(r.json.screenshotFormats));
+  assert.ok(r.json.screenshotFormats.length > 0);
+  assert.ok(r.json.screenshotFormats.every((f) => ['jpeg', 'png'].includes(f)));
+  assert.equal(typeof r.json.ui, 'boolean');
+  assert.equal(r.json.clipboard, true);
+  assert.equal(r.json.stream, false);
+});
+
+test('GET /frame returns image bytes with the frame headers', async () => {
+  const payload = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
+  let seen;
+  stub('GET /frame', async (params) => {
+    seen = params;
+    return { frame: { bytes: payload, format: 'jpeg' } };
+  });
+  const r = await raw('/frame?scale=0.5&max=800');
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get('content-type'), 'image/jpeg');
+  assert.equal(r.headers.get('x-frame-format'), 'jpeg');
+  assert.deepEqual(r.body, payload);
+  assert.deepEqual(seen, { scale: '0.5', max: '800' });
+});
+
+test('GET /frame maps a png frame to image/png', async () => {
+  const payload = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+  stub('GET /frame', async () => ({ frame: { bytes: payload, format: 'png' } }));
+  const r = await raw('/frame');
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get('content-type'), 'image/png');
+  assert.equal(r.headers.get('x-frame-format'), 'png');
+});
+
+test('GET /frame serializes captures - a concurrent call gets 429', async () => {
+  let release;
+  let entered;
+  const gate = new Promise((r) => { release = r; });
+  const inside = new Promise((r) => { entered = r; });
+  stub('GET /frame', async () => {
+    entered();
+    await gate;
+    return { frame: { bytes: Buffer.from('x'), format: 'jpeg' } };
+  });
+  const pending = fetch(`${base}/frame`, {
+    headers: { authorization: 'Bearer test-secret' },
+  });
+  await inside; // the first capture holds the busy flag now
+  const r = await req('GET', '/frame');
+  assert.equal(r.status, 429);
+  assert.equal(r.json.error, 'busy');
+  release();
+  const res = await pending;
+  assert.equal(res.status, 200);
+});
+
+test('GET /frame failure answers 500 json and frees the slot', async () => {
+  stub('GET /frame', async () => {
+    throw new Error('capture exploded');
+  });
+  const r = await req('GET', '/frame');
+  assert.equal(r.status, 500);
+  assert.equal(r.json.error, 'capture exploded');
+  // The busy flag must be released or the next frame would see 429.
+  stub('GET /frame', async () => ({
+    frame: { bytes: Buffer.from('y'), format: 'jpeg' },
+  }));
+  const r2 = await raw('/frame');
+  assert.equal(r2.status, 200);
+});
+
 test('appleQuote escapes quotes and backslashes', () => {
   assert.equal(appleQuote('say "hi"\\path'), 'say \\"hi\\"\\\\path');
+});
+
+// ---------------------------------------------------------------------------
+// Windows (win32) helpers - the pure parts are host-independent.
+// ---------------------------------------------------------------------------
+
+test('winKeySpec maps modifiers, named keys and single keys to virtual keys', () => {
+  assert.deepEqual(winKeySpec('ctrl+s'), { mods: [0x11], vk: 0x53 });
+  assert.deepEqual(winKeySpec('cmd+enter'), { mods: [0x5b], vk: 0x0d });
+  assert.deepEqual(winKeySpec('shift+ctrl+left'), { mods: [0x10, 0x11], vk: 0x25 });
+  assert.deepEqual(winKeySpec('f5'), { mods: [], vk: 0x74 });
+  assert.deepEqual(winKeySpec('a'), { mods: [], vk: 0x41 });
+});
+
+test('winKeySpec rejects unknown modifiers and key names with 400', () => {
+  for (const bad of ['hyper+x', 'whatisthis', 'ctrl+hyper+q']) {
+    assert.throws(() => winKeySpec(bad), (e) => e.status === 400, bad);
+  }
+});
+
+test('psQuote escapes single quotes for PowerShell literals', () => {
+  assert.equal(psQuote("it's a 'test'"), "it''s a ''test''");
+  assert.equal(psQuote('plain'), 'plain');
 });

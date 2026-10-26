@@ -78,6 +78,7 @@ public class ChatContextCompaction {
     private final int defaultWindowTokens;
     private final int summaryMaxTokens;
     private final int maxSummariesPerRun;
+    private final int reserveOutputTokens;
 
     /**
      * {@code app.context.compaction.*}: the token estimates, the window name rules and the size of a restored
@@ -110,7 +111,9 @@ public class ChatContextCompaction {
                     int defaultWindowTokens,
             @Value("${app.context.compaction.summary-max-tokens:" + ContextCompactionProperties.DEFAULT_SUMMARY_TOKENS + "}")
                     int summaryMaxTokens,
-            @Value("${app.context.compaction.max-summaries-per-run:3}") int maxSummariesPerRun) {
+            @Value("${app.context.compaction.max-summaries-per-run:3}") int maxSummariesPerRun,
+            @Value("${app.context.compaction.reserve-output-tokens:" + ContextCompactionProperties.DEFAULT_RESERVE_OUTPUT_TOKENS + "}")
+                    int reserveOutputTokens) {
         this.summarizer = summarizer;
         this.catalog = catalog;
         this.toolCallLogs = toolCallLogs;
@@ -127,6 +130,7 @@ public class ChatContextCompaction {
                         : ModelContextWindows.DEFAULT_WINDOW_TOKENS;
         this.summaryMaxTokens = Math.max(summaryMaxTokens, 64);
         this.maxSummariesPerRun = maxSummariesPerRun;
+        this.reserveOutputTokens = Math.max(0, reserveOutputTokens);
     }
 
     /**
@@ -191,7 +195,9 @@ public class ChatContextCompaction {
         if (!enabled) {
             return null;
         }
-        int window = resolveWindow(provider, model);
+        // Fractions apply to the window MINUS the response headroom: a run filling to compact-at
+        // still leaves the model room to answer instead of overflowing at 98% of the real window.
+        int window = Math.max(0, resolveWindow(provider, model) - reserveOutputTokens);
         boolean restoreOffered =
                 tools != null
                         && tools.stream()

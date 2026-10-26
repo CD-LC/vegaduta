@@ -123,6 +123,11 @@ class AgentChatServiceModerationTest {
         when(agentService.getEntity(any())).thenReturn(agent);
         when(agentService.resolveEffectiveModel(agent)).thenReturn("gpt-4o-mini");
 
+        // The stream wraps its result in takeUntilOther(watchForCancellation): a real Flux runs the
+        // operator's non-null check, so the watch must return a Flux, not the mock's default null.
+        ChatTurnCancelService cancelService = mock(ChatTurnCancelService.class);
+        when(cancelService.watchForCancellation(any(), any())).thenReturn(Flux.never());
+
         service =
                 AgentChatServiceTestFactory.create(
                         agentService,
@@ -176,7 +181,7 @@ class AgentChatServiceModerationTest {
                         // Load-test seam - unstubbed mock is false for every tenantId,
                         // matching this suite's existing (non-load-test) assumptions.
                         mock(LoadTestTenantAllowlist.class),
-                        mock(ChatTurnCancelService.class),
+                        cancelService,
                         java.time.Duration.ofSeconds(90),
                         // Buffered-depth total-turn ceiling and SSE keepalive interval
                         // (2026-09-17). Neither fires in this suite - every turn here resolves

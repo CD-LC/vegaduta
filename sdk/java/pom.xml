@@ -6,7 +6,7 @@
 
   <groupId>io.github.cd-lc</groupId>
   <artifactId>vegaduta-agent-parent</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <packaging>pom</packaging>
 
   <name>VegaDuta Agent SDK</name>
@@ -17,6 +17,10 @@
   </description>
   <url>https://github.com/CD-LC/vegaduta</url>
   <inceptionYear>2026</inceptionYear>
+  <organization>
+    <name>VegaDuta</name>
+    <url>https://vegaduta.ai</url>
+  </organization>
 
   <licenses>
     <license>
@@ -64,7 +68,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Reproducible builds (https://maven.apache.org/guides/mini/guide-reproducible-builds.html).
          Bump when cutting a release. -->
-    <project.build.outputTimestamp>2026-10-22T07:57:34Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-10-25T15:00:00Z</project.build.outputTimestamp>
 
     <!-- Framework baselines. The adapters are built and tested against these; consumers may
          run newer patch versions. -->

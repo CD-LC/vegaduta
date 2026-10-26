@@ -3,6 +3,7 @@ package com.agenticai.core.agents.e2e;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -273,11 +274,13 @@ class FinishReasonTurnE2ETest {
                         .tool(lookup)
                         .build();
 
-        String reply = harness.chat(QUESTION);
+        Throwable failure = harness.chatFailure(QUESTION);
 
         assertAll(
-                () -> assertTrue(reply.startsWith("Checking that now"), reply),
-                () -> assertTrue(reply.endsWith(ChatTurn.INTERRUPTED_REPLY_SUFFIX), reply),
+                // Terminal-only streaming: "Checking that now" was mid-loop narration that never
+                // reached the client, so the mid-loop provider failure is an honest turn failure
+                // (same shape as the other tools-ran failures in TurnResilienceE2ETest).
+                () -> assertNotNull(failure, "a failed mid-loop turn surfaces as an error, not a reply"),
                 () -> assertNeverCachedNorJudged());
     }
 

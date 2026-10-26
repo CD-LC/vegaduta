@@ -29,8 +29,24 @@ services:
         NEXT_PUBLIC_DEPLOY_ENV: ${WEB_DEPLOY_ENV:-personal}
         NEXT_PUBLIC_FREE_MODE: ${WEB_FREE_MODE:-1}
   sidecar:
-    build: ../../services/sidecar
+    build:
+      context: ../../services/sidecar
+      args:
+        # true bakes the reranker + multilingual embedder into the image
+        # (~+550MB, first-call correctness where HF egress is blocked);
+        # false slims a personal install - those models then download on
+        # first use. services/sidecar/Dockerfile has the full reasoning.
+        BAKE_EXTRA_MODELS: ${SIDECAR_BAKE_EXTRA_MODELS:-true}
   workspace-runner:
     build: ../../services/workspace-runner
   mcp-stdio-runner:
-    build: ../../services/mcp-stdio-runner
+    build:
+      context: ../../services/mcp-stdio-runner
+      args:
+        # MCP_STDIO_RUNNER_WITH_BROWSERS=true builds the runner that carries Chromium
+        # (same wiring as docker-compose.build.yml) - required for per-tenant dynamic
+        # puppeteer/playwright-vision MCP servers, which the static-reference upgrade
+        # now connects through this runner.
+        WITH_BROWSERS: ${MCP_STDIO_RUNNER_WITH_BROWSERS:-false}
+  voice-agent:
+    build: ../../services/voice-agent

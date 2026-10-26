@@ -131,6 +131,9 @@ public class BehaviourSettingsCatalog implements SettingsContributor {
                 integer("chat.toolLoop.resultClearing.thresholdChars", "chat", SettingUnit.CHARS, 500, 200_000, SettingRisk.LOW,
                                 "app.chat.tools.result-clearing.threshold-chars", TENANT_AND_AGENT)
                         .platform(() -> toolLoop.getResultClearing().getThresholdChars()).build(),
+                integer("chat.toolLoop.maxPromptTokensPerTurn", "chat", SettingUnit.TOKENS, 0, 10_000_000, SettingRisk.MEDIUM,
+                                "app.chat.tools.max-prompt-tokens-per-turn", TENANT_AND_AGENT)
+                        .platform(() -> (int) Math.min(Integer.MAX_VALUE, toolLoop.getMaxPromptTokensPerTurn())).build(),
 
                 // ---- routing
                 integer("routing.simple.maxChars", "routing", SettingUnit.CHARS, 0, 2_000, SettingRisk.LOW, "app.routing.simple.max-chars", TENANT_AND_AGENT)

@@ -749,6 +749,31 @@ app:
       max-timeout-seconds: ${APP_ASSISTANT_LOCAL_SHELL_MAX_TIMEOUT_SECONDS:300}
     desktop:
       approval-required: ${APP_ASSISTANT_DESKTOP_APPROVAL_REQUIRED:true}
+      recipes:
+        # run_desktop_recipe: replay a recorded click/type/open sequence on the person's own screen,
+        # the local_desktop_* twin of run_browser_recipe (needs the desktop sidecar, so it only ever
+        # runs where the desktop tools already do). Same caveat as the browser tool: keep
+        # app.tools.classification.confirmation-gate on and run_desktop_recipe OUT of
+        # confirmation-gate-exempt-tools - the model itself supplies confirmIrreversible/fromStep,
+        # so the human approval of the call is the real check. It is also pinned by
+        # app.assistant.desktop.approval-required like the single local_desktop_* actions.
+        enabled: ${DESKTOP_RECIPES_ENABLED:false}
+        max-per-tenant: ${DESKTOP_RECIPES_MAX_PER_TENANT:50}
+        step-timeout-ms: ${DESKTOP_RECIPES_STEP_TIMEOUT_MS:15000}
+        max-replay-seconds: ${DESKTOP_RECIPES_MAX_REPLAY_SECONDS:120}
+        # MONITOR mode pauses this long between steps so a person can follow the replay on the
+        # console's live monitor - long enough to see each action land, short enough that a recipe
+        # does not take noticeably longer than narrating it.
+        monitor-step-delay-ms: ${DESKTOP_RECIPES_MONITOR_STEP_DELAY_MS:800}
+        # {{secret.NAME}} in a recipe's typed text resolves at replay through the secret vault under
+        # this name prefix (mirrors app.browser.secret-name-prefix): a recipe author cannot aim the
+        # keyboard at a secret outside the DESKTOP_* names.
+        secret-name-prefix: ${DESKTOP_RECIPES_SECRET_NAME_PREFIX:DESKTOP_}
+      monitor:
+        # The console's live monitor (GET /api/desktop/monitor/frame, proxied to the sidecar's
+        # GET /frame). Off by default: every poll captures the whole screen, so even on the
+        # one-person install where the desktop tools live it stays an explicit opt-in.
+        enabled: ${DESKTOP_MONITOR_ENABLED:false}
   # Edition. false (the `personal` profile) = no plans, quotas, prices or payment gateways.
   edition:
     billing-enabled: ${APP_EDITION_BILLING_ENABLED:true}
@@ -1418,6 +1443,10 @@ app:
       fast-buffering-mode: ${APP_CHAT_PARITY_FAST_BUFFERING_MODE:FROM_FIRST_LINK}
       # Text that starts the held part, ignoring case; the invented-link guard's host markers are always added.
       fast-hold-markers: ${APP_CHAT_PARITY_FAST_HOLD_MARKERS:http,www.}
+      # A streamed turn emits only the tool loop's terminal round: mid-loop narration between tool
+      # calls (search chatter, retry apologies) is held and dropped; the final synthesis round is
+      # emitted as one burst once its finish reason proves it terminal. false = every round streams.
+      fast-terminal-rounds-only: ${APP_CHAT_PARITY_FAST_TERMINAL_ROUNDS_ONLY:true}
       # The buffered verifiers see the newest this-many characters of the turn's tool results. 0 = all of it.
       verifier-max-evidence-chars: ${APP_CHAT_PARITY_VERIFIER_MAX_EVIDENCE_CHARS:12000}
       # A verifier rewrites a flagged answer WITHOUT tools (re-running them could repeat a side effect). A rewrite
@@ -1594,6 +1623,13 @@ app:
       max-rounds-per-invocation: ${CHAT_TOOL_MAX_ROUNDS_PER_INVOCATION:0}
       # Calls to tool names the model was never offered, per model invocation, before the soft stop.
       max-unknown-calls-per-invocation: ${CHAT_TOOL_MAX_UNKNOWN_CALLS_PER_INVOCATION:8}
+      # Cumulative PROMPT tokens one tool loop may send the model before the soft stop (the same
+      # tool_budget_exhausted result, worded for tokens). The per-turn call cap bounds rounds, not size:
+      # the runaway it misses is the loop whose every round resends a near-full window - a research turn
+      # that should cost ~10k prompt tokens can cost six figures before max-tool-calls ever engages.
+      # Counted per run through the run's transcript, so the cap follows the turn, not the process.
+      # Tenant/agent overrides: chat.toolLoop.maxPromptTokensPerTurn. 0 = uncapped.
+      max-prompt-tokens-per-turn: ${APP_CHAT_TOOLS_MAX_PROMPT_TOKENS_PER_TURN:0}
       # Model-facing wording of the two stops. {rounds} = tool rounds used. No ${...} env override: placeholders.
       budget-exhausted-message: >-
         Tool budget for this reply is exhausted after {rounds} tool round(s), so this call was NOT executed. Do not call any more tools. Answer the user now using only what you already have, say briefly if anything is incomplete, and if the work needs more calls than one reply allows, tell the user it can continue in the background as a job.
@@ -2031,6 +2067,23 @@ app:
       # completions and PLANNED can run a whole second completion on a
       # mid-plan retry (a real measured PLANNED Jira turn: 65.6s).
       buffered-turn-timeout: ${LLM_HTTP_BUFFERED_TURN_TIMEOUT:240s}
+      # The streaming (FAST) depth's counterpart to buffered-turn-timeout: a
+      # TOTAL-duration ceiling for one streamed turn, elapsed time since the
+      # stream began. stream-idle-timeout cannot play this role - it counts
+      # model SILENCE and re-arms on every tool round, so a turn that kept
+      # calling tools (each call returning quickly) had no deadline at all and
+      # could loop for hours (audit F2). A turn past the ceiling ends
+      # gracefully: the stream is cut, the tokens already sent stay stored as
+      # an interrupted reply, and the same "ran past the N-second limit; steps
+      # that ran: ..." notice a buffered timeout emits is appended. 600s is
+      # deliberately looser than buffered-turn-timeout's 240s: a streamed turn
+      # legitimately outlives a buffered one (continuation passes keep working
+      # the task while the person watches, and a resumable stream may be
+      # detached up to 900s). A tenant's or agent's own turnTimeoutSeconds
+      # replaces it; an agent job's deadline still ends the turn sooner, but a
+      # LATER deadline does not extend it - a job that needs longer than ten
+      # minutes sets turnTimeoutSeconds. 0 disables the platform ceiling.
+      fast-turn-timeout: ${LLM_HTTP_FAST_TURN_TIMEOUT:600s}
     # Package 3c-2: caps on one copy of a model request kept by the LLM request inspector (in memory, display only;
     # LlmRequestSnapshotProperties, code defaults in chat/request-snapshot.properties). They never change what the
     # model receives.
@@ -2169,6 +2222,11 @@ app:
       summary-input-chars: ${APP_CONTEXT_COMPACTION_SUMMARY_INPUT_CHARS:24000}
       summary-turn-excerpt-chars: ${APP_CONTEXT_COMPACTION_SUMMARY_TURN_EXCERPT_CHARS:2000}
       max-summaries-per-run: ${APP_CONTEXT_COMPACTION_MAX_SUMMARIES_PER_RUN:3}
+      # Tokens of the window kept back for the model's own reply before clear-at / compact-at apply.
+      # Without it a turn may fill right up to compact-at and leave no room for the answer (the
+      # compaction trigger never fires in time on small windows, and on big ones the prompt rides at
+      # ~98% of the limit). 0 restores the old fractions-of-raw-window behaviour.
+      reserve-output-tokens: ${APP_CONTEXT_COMPACTION_RESERVE_OUTPUT_TOKENS:8192}
       # --- Package 3c-1 (ContextCompactionProperties): the token estimates and the window name rules. Every
       # default is the old constant; ContextCompactionDefaultsTest pins them. ---
       # Tokens every message costs beyond its text.
@@ -2628,6 +2686,16 @@ app:
     # enable only with Redis auth/TLS. registry-store / registry-exclusive-clients keep their code
     # defaults (memory / false) and are deliberately not redeclared here.
     registry-route-tool-calls: ${APP_MCP_REGISTRY_ROUTE_TOOL_CALLS:false}
+    # Which of application-mcp.yml's STATIC (JVM-wide, "mcp" Spring profile) MCP servers agents may
+    # be offered (StaticMcpExposurePolicy). stateless-servers is an allowlist: a server not named
+    # here is hidden - the stateful ones (filesystem/memory/puppeteer/playwright-vision) are ONE
+    # subprocess shared by every tenant, so cross-tenant tool calls would share files, memory and
+    # browser sessions. shared-stateful-enabled opens them all anyway - only safe on single-tenant
+    # deployments. platform.mcp.static.shared-stateful-enabled (admin settings UI) overrides at
+    # runtime; this is the fallback.
+    static:
+      stateless-servers: ${MCP_STATIC_STATELESS_SERVERS:sequential-thinking}
+      shared-stateful-enabled: ${MCP_STATIC_SHARED_STATEFUL_ENABLED:false}
     # Tool-definition pinning (docs/architecture/mcp-spec-alignment.md). A remote MCP server can change tool
     # descriptions after an admin reviewed it; the pin records a hash of the tool list agents see and flags a
     # difference (audit event mcp.tools.changed, GET /api/mcp/tool-pins). off = nothing recorded; warn
@@ -3125,6 +3193,10 @@ app:
       # A call made after the park once max-queued-calls are already queued.
       queue-full-message: >-
         This tool call ('{tool}') was NOT executed and was not queued: an earlier action in this turn ('{parkedTool}') is waiting for human approval and enough follow-up calls are already queued behind it. Do not call more tools. Your goal has not changed: briefly tell the user what is waiting for approval and end this turn; your task is resumed automatically once the approvals are decided.
+      # A call made after the park whose tool cannot be replayed after the decision (dispatch
+      # plumbing such as search_tools/call_tool): refused without an approval request.
+      not-queued-message: >-
+        This tool call ('{tool}') was NOT executed and cannot be queued: an earlier action in this turn ('{parkedTool}') is waiting for human approval, and this kind of call cannot be replayed after the decision, so nothing was recorded for it. Do not call more tools. Your goal has not changed: briefly tell the user what is waiting for approval and end this turn; your task is resumed automatically once the approval is decided.
       # The approval request itself could not be recorded: nothing is waiting, the turn is NOT parked.
       record-failed-message: >-
         This action ('{tool}') requires human approval, but the approval request could not be recorded, so it was NOT executed and nothing is waiting for approval. Do not retry it. Tell the user plainly that the action could not be submitted for approval and that they can ask again, then carry on with any part of the task that does not need this action.
@@ -3673,10 +3745,17 @@ app:
       threshold: ${TOOL_SEARCH_THRESHOLD:25}
       # Comma-separated exact tool names or prefix* patterns that always stay in the tool list (standing
       # capabilities a keyword search could not be expected to surface: memory, knowledge, skills, delegation).
-      always-on: ${TOOL_SEARCH_ALWAYS_ON:remember_fact,remember_shared_fact,recall_related_facts,recall_shared_graph_facts,list_knowledge_collections,search_knowledge_base,search_code,request_human,load_skill,read_skill_file,run_skill_script,propose_skill,improve_skill,ask_agent_*,delegate_to_specialist,run_subtasks,create_workflow,restore_tool_result,generate_document,local_shell,local_shell_read,workspace_list,workspace_read,workspace_search,workspace_write,workspace_edit,vegaduta_setup_guide,vegaduta_api_guide,local_desktop_*}
+      always-on: ${TOOL_SEARCH_ALWAYS_ON:remember_fact,remember_shared_fact,recall_related_facts,recall_shared_graph_facts,list_knowledge_collections,search_knowledge_base,search_code,request_human,load_skill,read_skill_file,run_skill_script,propose_skill,improve_skill,ask_agent_*,delegate_to_specialist,run_subtasks,create_workflow,restore_tool_result,generate_document,local_shell,local_shell_read,workspace_list,workspace_read,workspace_search,workspace_write,workspace_edit,vegaduta_setup_guide,vegaduta_api_guide,local_desktop_*,run_desktop_recipe}
       # How many already-searched tools stay offered directly on later turns of the same session
-      # (in-memory, best-effort; 0 = no carry-over, the model searches again each turn).
+      # (best-effort; 0 = no carry-over, the model searches again each turn).
       max-carry-over: ${TOOL_SEARCH_MAX_CARRY_OVER:6}
+      # Where that carry-over lives. auto (default): Redis when a StringRedisTemplate bean exists -
+      # activations then survive restarts and follow the session to any replica - else per-replica
+      # memory; memory: always per-replica; redis: require Redis (degrades to memory with a warning
+      # when no template is available, like app.mcp.registry-store).
+      activation-store: ${TOOL_SEARCH_ACTIVATION_STORE:auto}
+      # How long a session's activations survive untouched (sliding: every read or write renews it).
+      activation-ttl: ${TOOL_SEARCH_ACTIVATION_TTL:PT2H}
     # MCP tool annotations (readOnlyHint / destructiveHint / idempotentHint / openWorldHint, MCP spec 2025-06-18).
     # true: when an MCP server publishes them, tools nobody classified (no tool_classification row, which still
     # wins) are classified from the hints so the existing confirmation / taint / trifecta gates apply:
@@ -3695,6 +3774,15 @@ app:
     # tool from every agent.
     create-workflow:
       enabled: ${TOOL_CREATE_WORKFLOW_ENABLED:true}
+    # The scratchpad tools (scratchpad_write / scratchpad_read / scratchpad_list / scratchpad_delete):
+    # each agent's persistent, agent-authored notepad - session-scoped working notes plus an
+    # agent-long-term pad. Deferred built-ins (reachable through search_tools -> call_tool). Default
+    # true; false removes all four from every agent. max-notes caps notes per agent+session,
+    # max-note-bytes the size of one note.
+    scratchpad:
+      enabled: ${APP_TOOLS_SCRATCHPAD_ENABLED:true}
+      max-notes: ${APP_TOOLS_SCRATCHPAD_MAX_NOTES:200}
+      max-note-bytes: ${APP_TOOLS_SCRATCHPAD_MAX_NOTE_BYTES:65536}
     # Built-in http_request ("call any HTTP API"). enabled: offer the tool at all (default true - it already
     # shipped unconditionally, so this keeps today's behaviour; false removes it from agents).
     # safe-mode (default OFF = today's tool exactly): http_request narrows to GET/HEAD/OPTIONS and a separate

@@ -12,6 +12,7 @@ import com.agenticai.core.approval.ApprovalPolicyService;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.audit.PlatformIssueService;
+import com.agenticai.core.guardrails.ApprovalParked;
 import com.agenticai.core.guardrails.ApprovalParkProperties;
 import com.agenticai.core.guardrails.GuardedToolCallback;
 import com.agenticai.core.guardrails.GuardrailService;
@@ -91,7 +92,7 @@ class LoggingToolCallbackTypedResultTest {
 
         String result = chain(raw, journal, texts).call("{\"to\":\"a\"}");
 
-        assertEquals("Waiting on a person for send_invoice.", result);
+        assertEquals(ApprovalParked.result("Waiting on a person for send_invoice."), result);
         assertEquals(0, raw.calls, "the tool never ran");
         assertTrue(
                 journal.lookup(EffectJournal.keyFor(SESSION, TURN, "send_invoice", "{\"to\":\"a\"}")).isEmpty(),
@@ -142,5 +143,40 @@ class LoggingToolCallbackTypedResultTest {
         assertFalse(LoggingToolCallback.wasExecuted("This action ('t') requires human approval"));
         assertFalse(LoggingToolCallback.wasExecuted(null));
         assertTrue(LoggingToolCallback.wasExecuted("{\"status\":\"sent\"}"));
+    }
+
+    @Test
+    void aPlatformAnswerWrappedAsAJsonObjectIsStillNotAnExecutedEffect() {
+        // The outermost wrapper (TenantContextPropagatingToolCallback.ensureJsonObject) mints a new
+        // String for non-JSON output; the mark must survive that wrap or a refusal relayed through
+        // call_tool would be journaled - and later replayed - as if the tool had run.
+        ToolCallback delegate = mock(ToolCallback.class);
+        String marked =
+                ToolResultMarker.mark(
+                        "This tool call ('send_invoice') was refused " + System.nanoTime(),
+                        ToolResultMarker.Kind.BLOCKED);
+        when(delegate.call("{}")).thenReturn(marked);
+
+        String out =
+                new TenantContextPropagatingToolCallback(delegate, null).call("{}");
+
+        assertTrue(out.startsWith("{\"result\":"), out);
+        assertEquals(
+                ToolResultMarker.Kind.BLOCKED, ToolResultMarker.kindOf(out).orElseThrow());
+        assertFalse(LoggingToolCallback.wasExecuted(out));
+    }
+
+    @Test
+    void aToolResultThatOnlyMentionsAMarkerWordIsNotAPlatformAnswer() {
+        // No mark is invented by the wrap: an executed tool's own text stays executed, and the
+        // screen still sees it.
+        ToolCallback delegate = mock(ToolCallback.class);
+        when(delegate.call("{}")).thenReturn("job log: state approval_parked " + System.nanoTime());
+
+        String out =
+                new TenantContextPropagatingToolCallback(delegate, null).call("{}");
+
+        assertTrue(ToolResultMarker.kindOf(out).isEmpty(), out);
+        assertTrue(LoggingToolCallback.wasExecuted(out));
     }
 }

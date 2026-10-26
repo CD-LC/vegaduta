@@ -892,7 +892,8 @@
     "reasonProviderError": "প্ৰদানকাৰীৰ ত্ৰুটি",
     "reasonMalformedToolCall": "টুল কলটো ব্যৱহাৰ কৰিব পৰা নগ'ল",
     "continuationBadge": "after approval",
-    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on."
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on.",
+    "controlsToggle": "Call & controls"
   },
   "nodeDefs": {
     "triggerLabel": "ট্ৰিগাৰ",
@@ -1581,7 +1582,10 @@
     "autonomyTierFULLY_AUTONOMOUS": "Fully autonomous",
     "autonomyTierFULLY_AUTONOMOUSHint": "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
     "autonomyTierFULLY_AUTONOMOUSCost": "Never asks you: every tool call runs as soon as the agent makes it, sends and payments included.",
-    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn."
+    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn.",
+    "knowledgeWriteLabel": "Allow writing to the knowledge base (add_to_knowledge_base tool)",
+    "knowledgeWriteLoadError": "Could not load this agent's knowledge-write settings.",
+    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "এটা নোড কনফিগাৰ কৰিবলৈ বাছনি কৰক, বা বাওঁফালৰ পেলেতৰ পৰা এটা নতুন নোড টানি আনক।",
@@ -5604,7 +5608,13 @@
     "edgeSightOn": "এই ডিভাইচত কেমেৰা বিশ্লেষণ কৰা হৈছে - ফ্ৰেমবোৰে আপোনাৰ ব্ৰাউজাৰ কেতিয়াও নেৰে।",
     "edgeSightStopped": "ডিভাইচত কেমেৰা বিশ্লেষণ বন্ধ হ'ল ({reason}) - কলটো কেৱল ভইচত চলি আছে।",
     "micDenied": "মাইক্ৰ'ফোনৰ অনুমতি দিয়া নহ'ল - কলৰ বাবে মাইকৰ প্ৰয়োজন। আপোনাৰ ব্ৰাউজাৰৰ অনুমতি পৰীক্ষা কৰি পুনৰ চেষ্টা কৰক।",
-    "couldNotStart": "কলটো আৰম্ভ কৰিব পৰা নগ'ল।"
+    "couldNotStart": "কলটো আৰম্ভ কৰিব পৰা নগ'ল।",
+    "sectionTitle": "Call",
+    "statusInCall": "In call",
+    "statusConnecting": "Connecting…",
+    "statusFailed": "Call failed",
+    "statusIdle": "Not in a call",
+    "callWithCameraNeedsVision": "Call + camera needs an agent whose model can see - pick a vision model or enable on-device sight."
   },
   "customCodeTools": {
     "pageTitle": "কাষ্টম কোড সঁজুলি",
@@ -5804,11 +5814,7 @@
       "builtinDetail": "আপোনাৰ ব্ৰাউজাৰৰ নিজা মডেল। Chrome 127+ এ নিজেই ডাউনলোড আৰু আপডেট কৰে; এই এপটোৱে একো সংৰক্ষণ নকৰে।",
       "motionDetail": "স্থিৰ ছবিক মসৃণ গতিৰ ক্লিপলৈ ৰূপান্তৰ কৰে। ক্লিপ ষ্টুডিঅ'ত Motion+ প্ৰথমবাৰ ব্যৱহাৰ কৰিলে স্বয়ংক্ৰিয়ভাৱে ডাউনলোড হয়।",
       "motionNotPublished": "এতিয়াও প্ৰকাশ হোৱা নাই — সোনকালেই আহিব",
-      "motionOpenClips": "ক্লিপ ষ্টুডিঅ' খোলক",
-      "purposeImageGen": "Generates images from a text prompt, fully on-device",
-      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
-      "generatedMediaTitle": "Generated on this device",
-      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
+      "motionOpenClips": "ক্লিপ ষ্টুডিঅ' খোলক"
     },
     "installed": {
       "title": "এই ডিভাইচত ইনষ্টল কৰা",
@@ -14769,6 +14775,10 @@
       "providers": {
         "label": "AI প্ৰদানকাৰী",
         "description": "সংযুক্ত AI প্ৰদানকাৰীৰ কি এটাই কাম কৰা বন্ধ কৰিলে সেইবোৰ কেনেকৈ ব্যৱহাৰ কৰা হয়।"
+      },
+      "tools": {
+        "label": "Agent tools",
+        "description": "Which built-in tool helpers an agent keeps."
       }
     },
     "agent": {
@@ -14997,6 +15007,11 @@
             "description": "পুৰণিবোৰ মচাৰ আগতে এটা টাৰ্নৰ টুল ফলাফল কিমান ডাঙৰ হ'ব পাৰে।",
             "help": "অধিক ফলাফল দৃশ্যমান ৰাখিবলৈ বঢ়াওক, দীঘল ৰান সৰু আৰু সস্তা ৰাখিবলৈ কমাওক।"
           }
+        },
+        "maxPromptTokensPerTurn": {
+          "label": "Prompt-token budget per reply",
+          "description": "Total prompt tokens one reply's tool loop may send the model before it is told to stop calling tools and answer with what it has.",
+          "help": "0 means no cap. Lower it to stop a runaway tool loop that keeps resending a large context; the per-turn tool-call limit bounds rounds, this bounds their size."
         }
       }
     },
@@ -15213,6 +15228,15 @@
           "label": "প্ৰদানকাৰীয়ে কি প্ৰত্যাখ্যান কৰাৰ পিছত বিৰতি",
           "description": "প্ৰদানকাৰীয়ে সংযুক্ত প্ৰদানকাৰী কি প্ৰত্যাখ্যান কৰাৰ পিছত পটভূমিৰ কামে তাক কিমান সময় এৰি দিয়ে।",
           "help": "বিৰতিৰ সময়ত, সময়সূচীবদ্ধ আৰু স্বয়ংক্ৰিয় জবে বাৰে বাৰে বিফল হোৱা কি কল কৰাৰ সলনি অন্য সংযুক্ত প্ৰদানকাৰী ব্যৱহাৰ কৰে, বা অপেক্ষা কৰে। চেট কৰা মানুহ কেতিয়াও অৱৰোধিত নহয় আৰু সদায় প্ৰদানকাৰীৰ প্ৰকৃত ত্ৰুটি দেখে। বিৰতি শেষ হ'লে, কি' শুধৰোৱা হ'ল নে নাই পৰীক্ষা কৰিবলৈ এটা কল যাবলৈ দিয়া হয়। শূন্যই বিৰতি বন্ধ কৰে।"
+        }
+      }
+    },
+    "tools": {
+      "scratchpad": {
+        "enabled": {
+          "label": "Agent scratchpad",
+          "description": "Give the agent its scratchpad tools: a persistent notepad with session-scoped working notes and a long-term pad it writes and reads itself.",
+          "help": "Turn it off to remove the four scratchpad tools (write, read, list, delete) from the agent. Notes already stored are kept but the agent can no longer reach them."
         }
       }
     }
@@ -15681,11 +15705,116 @@
     "label_delegate_parallel": "Ask several agents at once",
     "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
     "label_web_task": "Use a browser on a website",
-    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits.",
+    "label_local_desktop_activate": "Bring an app to the front",
+    "does_local_desktop_activate": "Brings the named application to the foreground on this computer.",
+    "label_local_desktop_click": "Click on the screen",
+    "does_local_desktop_click": "Clicks a point or element on your screen.",
+    "label_local_desktop_clipboard": "Read or write the clipboard",
+    "does_local_desktop_clipboard": "Reads from or writes to the clipboard on this computer.",
+    "label_local_desktop_elements": "List on-screen controls",
+    "does_local_desktop_elements": "Lists the buttons and fields currently on screen (read-only).",
+    "label_local_desktop_key": "Press a key",
+    "does_local_desktop_key": "Presses a key or a key combination (for example Cmd+S) on this computer.",
+    "label_local_desktop_notify": "Show a desktop notification",
+    "does_local_desktop_notify": "Shows a notification on this computer.",
+    "label_local_desktop_open": "Open an app, file, or link",
+    "does_local_desktop_open": "Opens an application, a file, or a web link on this computer.",
+    "label_local_desktop_press": "Press a named control",
+    "does_local_desktop_press": "Presses a named button or menu on your screen.",
+    "label_local_desktop_screen": "Take a screenshot",
+    "does_local_desktop_screen": "Captures what is currently on your screen (read-only).",
+    "label_local_desktop_type": "Type into the frontmost app",
+    "does_local_desktop_type": "Types text into the app currently in the foreground.",
+    "label_run_desktop_recipe": "Replay a desktop recipe",
+    "does_run_desktop_recipe": "Replays a recorded run of desktop actions on this computer."
   },
   "localModelWizard": {
     "firstRunServingTitle": "Your local model is running",
     "firstRunServingBody": "Agents on this install already answer with {tag} for free, no API key. Add a cloud provider key if you ever need a bigger or different model.",
     "firstRunServingCta": "Create an agent"
+  },
+  "browserAutomation": {
+    "watch": "Watch",
+    "watchStop": "Stop watching",
+    "watchTitle": "Replays of this recipe",
+    "watchEmpty": "No replay of this recipe is in the log yet. One appears here as soon as the agent runs it.",
+    "watchRunning": "Running…",
+    "watchDone": "Done",
+    "watchFailed": "Failed"
+  },
+  "desktopAutomation": {
+    "title": "Desktop automation",
+    "subtitle": "Replay a recorded desktop task - opening apps, clicking, typing - without asking the AI at every step.",
+    "loading": "Loading…",
+    "loadFailed": "Couldn't load desktop automation. Reload the page to try again.",
+    "actionFailed": "That didn't work. Try again.",
+    "recipesTitle": "Recorded desktop tasks",
+    "recipesHelp": "A desktop recipe replays a successful run step by step on this machine, checking each step, and stops as soon as something differs. Recipes keep placeholders only - never the values you typed.",
+    "recipesEmpty": "No desktop recipes for this agent yet. After a run that drove the desktop in the playground, choose \"Save this run as a desktop recipe\".",
+    "recipeSteps": "{count} steps",
+    "recipeScopeAll": "All agents",
+    "recipeRuns": "{runs} run(s), {fails} failed",
+    "recipeNeverRun": "Never run",
+    "recipeLastFailure": "Last failure: {reason}",
+    "healthNew": "New",
+    "healthHealthy": "Working",
+    "healthFailing": "Needs a look",
+    "deleteRecipe": "Delete",
+    "confirmDelete": "Confirm delete",
+    "runRecipe": "Run…",
+    "closeRun": "Close",
+    "runNow": "Run now",
+    "running": "Running…",
+    "needParam": "Enter a value for \"{name}\".",
+    "modeLabel": "How to run it",
+    "modeAuto": "Automatic",
+    "modeAutoHint": "Runs every step at full speed; the live monitor still shows what happened afterwards.",
+    "modeMonitor": "Monitored",
+    "modeMonitorHint": "Shows the desktop live while the steps run - use this the first few times you trust a recipe.",
+    "defaultModeLabel": "Default way to run it",
+    "confirmIrreversible": "This recipe contains steps that commit or submit something. I approve running them.",
+    "paramRequired": "(required)",
+    "runDone": "Finished - {done} of {total} steps ran.",
+    "runFailed": "The run did not complete.",
+    "runFailedAt": "Stopped: {reason}",
+    "monitorTitle": "Live monitor",
+    "monitorRunning": "The recipe is running on this machine's desktop.",
+    "monitorDown": "The live monitor is unavailable - the desktop agent may be off. The run continues either way.",
+    "monitorNoFrame": "Waiting for the first frame…",
+    "monitorFrameAlt": "Current desktop frame",
+    "monitorStep": "Step {index}: {action}",
+    "saveRun": "Save this run as a desktop recipe",
+    "saveRunTitle": "Save this run as a desktop recipe",
+    "saveRunIntro": "The desktop steps from this run are saved so they can be replayed later. Values you typed are never kept - list them below so they become parameters.",
+    "recipeName": "Recipe name",
+    "recipeNamePlaceholder": "File the weekly report",
+    "recipeDescription": "What it does (optional)",
+    "paramsTitle": "Values you gave in this run",
+    "paramsHelp": "For each value you supplied, name it. It is swapped for a placeholder and the value is discarded.",
+    "paramName": "Parameter name",
+    "paramValue": "Value used in this run",
+    "addParam": "Add a value",
+    "removeParam": "Remove",
+    "paramBadName": "Use letters, digits and underscores, starting with a letter.",
+    "paramReserved": "\"secret\" and \"totp\" are reserved names.",
+    "paramDuplicate": "Each parameter needs its own name.",
+    "paramShort": "Enter the value (at least 3 characters).",
+    "allowLiteral": "Keep any other typed text as written (only for fixed text that is not personal or secret)",
+    "saveRecipe": "Save recipe",
+    "savingRecipe": "Saving…",
+    "cancel": "Cancel",
+    "recipeSaved": "Saved \"{name}\" with {count} steps.",
+    "saveWarnings": "Check before you rely on it",
+    "needRecipeName": "Give the recipe a name.",
+    "watchLive": "Watch live",
+    "stopWatching": "Stop watching",
+    "monitorLiveTitle": "Live screen",
+    "monitorLiveRunning": "Streaming the screen - you are watching the agent work in real time.",
+    "monitorPanelTitle": "Live screen",
+    "monitorPanelHint": "You are watching the agent drive this machine in real time - each click and keystroke lands as you see it. Collapse to pause the stream.",
+    "screenDockTitle": "Screen",
+    "screenDockOpen": "Open live screen",
+    "screenDockClose": "Close live screen"
   }
 }
