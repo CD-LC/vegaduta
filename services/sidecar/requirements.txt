@@ -34,4 +34,4 @@ faster-whisper==1.2.1
 # `metadata_errors` open() kwarg faster-whisper/audio.py calls: av 19 dropped
 # it (only `options` survives) and every /transcribe call then 400s with
 # "open() got an unexpected keyword argument" - live voice STT included.
-av==15.1.0
+av==19.0.1
