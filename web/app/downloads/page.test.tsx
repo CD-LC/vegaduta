@@ -59,7 +59,7 @@ describe("/downloads", () => {
             size: a.sizeMb * 1048576,
           })),
         }),
-      })),
+      }))
     );
     render(await DownloadsPage());
     // BrandName splits the wordmark into accent spans; match the level-1 heading, not a flattened name.
@@ -72,14 +72,17 @@ describe("/downloads", () => {
   });
 
   it("falls back to the releases page when no release exists yet", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({ ok: false }))
+    );
     render(await DownloadsPage());
     expect(screen.getByRole("link", { name: /Releases on GitHub/ }).getAttribute("href")).toBe(
-      "https://github.com/CD-LC/vegaduta/releases",
+      "https://github.com/CD-LC/vegaduta/releases"
     );
     // Cards still render with a button that lands on the releases tab - no dead links.
     expect(screen.getByRole("link", { name: /macOS \.dmg/ }).getAttribute("href")).toBe(
-      "https://github.com/CD-LC/vegaduta/releases",
+      "https://github.com/CD-LC/vegaduta/releases"
     );
   });
 });
