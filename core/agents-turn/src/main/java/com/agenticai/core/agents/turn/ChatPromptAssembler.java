@@ -32,7 +32,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -52,9 +56,12 @@ import org.springframework.ai.tool.ToolCallback;
  */
 final class ChatPromptAssembler {
 
+    private static final Logger log = LoggerFactory.getLogger(ChatPromptAssembler.class);
+
     /**
-     * The conversation replayed to the model, and whether any of its assistant turns starts with the
-     * platform's tool record ({@link ToolLedger}) - the cue to tell the model the record is reliable.
+     * The conversation replayed to the model, and whether any of its assistant turns starts with
+     * the platform's tool record ({@link ToolLedger}) - the cue to tell the model the record is
+     * reliable.
      */
     private record ReplayedHistory(List<Message> messages, boolean hasToolRecord) {}
 
@@ -109,7 +116,8 @@ final class ChatPromptAssembler {
         TurnContext context = clients.context();
         // What tool selection, the RIGOROUS tool-call verifier and memory recall match against: the
         // person's message, or the original goal on the continuation after an approval (a generic
-        // "carry on" message with the tool output in it matches none of the tools the next step needs).
+        // "carry on" message with the tool output in it matches none of the tools the next step
+        // needs).
         String decisionMessage = context.decisionMessage(userMessage);
         String currentTenantId = context.tenantId();
         TenantPlan currentTenantPlan = turn.currentTenantPlan();
@@ -188,13 +196,23 @@ final class ChatPromptAssembler {
         // its use site below; kicking all three off here is what overlaps them.
         // ADR-0022: the scope is the turn's explicit context, equal to this request thread's.
         TenantScope preTurnTenant = context.scope();
+        // One deadline for all three reads: they were kicked off together and run in parallel, so
+        // joinPreTurnOrDegrade counts the wait from HERE - a stalled read never adds its own full
+        // wait after the others already consumed it.
+        long preTurnDeadlineNanos =
+                svc.turns.preTurnMaxWait == null
+                        ? Long.MIN_VALUE
+                        : System.nanoTime() + svc.turns.preTurnMaxWait.toNanos();
         CompletableFuture<ReplayedHistory> historyFuture =
                 supplyPreTurn(
                         preTurnTenant,
                         () -> {
-                            List<ChatTurn> replayed = sessionMemoryService.getHistory(memorySessionId);
+                            List<ChatTurn> replayed =
+                                    sessionMemoryService.getHistory(memorySessionId);
                             return new ReplayedHistory(
-                                    replayed.stream().map(ChatPromptAssembler::toSpringAiMessage).toList(),
+                                    replayed.stream()
+                                            .map(ChatPromptAssembler::toSpringAiMessage)
+                                            .toList(),
                                     replayed.stream().anyMatch(t -> t.tools() != null));
                         });
         // stepEvents (2026-08-17) is threaded into tool resolution rather than
@@ -258,14 +276,22 @@ final class ChatPromptAssembler {
         // reused by RIGOROUS-mode tool-call verification instead of
         // resolving a second set of credentials - see resolveToolsFor's
         // chatClient javadoc.
-        List<ToolCallback> tools = joinPreTurn(toolsFuture);
+        List<ToolCallback> tools =
+                joinPreTurnOrDegrade(
+                        toolsFuture, ResolvedToolList.empty(), "tools", preTurnDeadlineNanos);
         if (runToolNames != null && !suppressAgentTools) {
-            // The run-scoped tool selection (ChatRequest.toolNames): narrows the agent's own resolved tools -
-            // already behind their approval, autonomy and guardrail wrappers, which stay as they are - to the
-            // named ones, and refuses a name the agent does not offer. The person's choice replaces the RL
-            // TOOL_SUBSET bandit's for this run (a bandit arm silently removing a tool the person switched on
-            // would be a second, hidden selection); the arm is dropped from the episode so it is not credited.
-            // A continuation after an approval narrows leniently (a tool that disappeared since is dropped).
+            // The run-scoped tool selection (ChatRequest.toolNames): narrows the agent's own
+            // resolved tools -
+            // already behind their approval, autonomy and guardrail wrappers, which stay as they
+            // are - to the
+            // named ones, and refuses a name the agent does not offer. The person's choice replaces
+            // the RL
+            // TOOL_SUBSET bandit's for this run (a bandit arm silently removing a tool the person
+            // switched on
+            // would be a second, hidden selection); the arm is dropped from the episode so it is
+            // not credited.
+            // A continuation after an approval narrows leniently (a tool that disappeared since is
+            // dropped).
             RunToolSelection.narrow(tools, runToolNames, context.continuation() == null);
             rl.dropToolSubsetArm();
         } else {
@@ -299,7 +325,9 @@ final class ChatPromptAssembler {
                             tools,
                             decisionMessage,
                             // The tools the conversation already used, for a short follow-up.
-                            context.approval() == null ? Set.of() : context.approval().stickyTools(),
+                            context.approval() == null
+                                    ? Set.of()
+                                    : context.approval().stickyTools(),
                             svc.smallModel);
         }
 
@@ -354,7 +382,12 @@ final class ChatPromptAssembler {
         // from SessionMemoryService, so a poisoned entry from many turns ago
         // replayed forever - 400ing every later turn regardless of whether
         // THAT turn's own model response has any tool calls at all).
-        ReplayedHistory replayedHistory = joinPreTurn(historyFuture);
+        ReplayedHistory replayedHistory =
+                joinPreTurnOrDegrade(
+                        historyFuture,
+                        new ReplayedHistory(List.of(), false),
+                        "history",
+                        preTurnDeadlineNanos);
         List<Message> history =
                 ArgumentSanitizingToolCallingManager.sanitizeHistory(
                         replayedHistory.messages(), AgentChatService.HISTORY_SANITIZE_MAPPER);
@@ -368,9 +401,12 @@ final class ChatPromptAssembler {
         // app.chat.directives.* fields above) - a null contribution is simply
         // skipped by joinMemoryBlocks, so a flag-off directive vanishes from
         // block 2 cleanly.
-        // Per-agent, per-tenant and platform overrides of the standing directives (switch one off or
-        // reword it), resolved through the prompt registry (cached in process); no overrides = exactly
-        // the built-in text. ChatSystemPromptComposer is the single place that orders the blocks - the
+        // Per-agent, per-tenant and platform overrides of the standing directives (switch one off
+        // or
+        // reword it), resolved through the prompt registry (cached in process); no overrides =
+        // exactly
+        // the built-in text. ChatSystemPromptComposer is the single place that orders the blocks -
+        // the
         // prompt preview calls the same method, so what it shows is what a turn sends.
         java.time.LocalDate todayUtc = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
         ChatSystemPromptComposer.Composed composed =
@@ -389,11 +425,15 @@ final class ChatPromptAssembler {
                                 ChatSystemPromptComposer.Switches.of(svc),
                                 agentId,
                                 hookRun == null ? null : hookRun.contextNote(),
-                                replayedHistory.hasToolRecord() ? svc.turns.toolLedger.getTrustNote() : null,
-                                joinPreTurn(memoryFuture)));
+                                replayedHistory.hasToolRecord()
+                                        ? svc.turns.toolLedger.getTrustNote()
+                                        : null,
+                                joinPreTurnOrDegrade(
+                                        memoryFuture, null, "memory", preTurnDeadlineNanos)));
         String systemPrompt = composed.systemPrompt();
         String memoryBlock = composed.memoryBlock();
-        // Tells the request inspector which registry key / scope / version each block of the system text came from.
+        // Tells the request inspector which registry key / scope / version each block of the system
+        // text came from.
         PromptBlockProvenanceRecorder.record(sessionId, composed);
         List<Message> baseMessages =
                 memoryBlock == null ? history : prependMemoryBlock(memoryBlock, history);
@@ -439,7 +479,8 @@ final class ChatPromptAssembler {
         // (upload accepted it only because of the sandbox); otherwise it goes to both.
         final List<ChatAttachmentPayload> attachments =
                 ChatAttachments.withoutSandboxOnly(
-                        allAttachments, sandboxActive && !svc.agentRouting.modelTakesDocuments(agent));
+                        allAttachments,
+                        sandboxActive && !svc.agentRouting.modelTakesDocuments(agent));
 
         // Open this turn's RL episode (best-effort, Playground-only) BEFORE the
         // LLM call, so RlTrajectoryAdvisor's per-call steps attach to it, and
@@ -487,6 +528,49 @@ final class ChatPromptAssembler {
                 throw re;
             }
             throw e;
+        }
+    }
+
+    /**
+     * First-token latency: a pre-turn read that stalls (a dead MCP connect, a sidecar that stopped
+     * answering) used to hold the model call open indefinitely - on a laptop install the console
+     * showed silence for minutes. Every read shares one deadline measured from the fan-out point,
+     * so three parallel reads never sum past it; past it the read hands back {@code fallback} and
+     * the turn runs with a reduced prompt (e.g. no memory block, no tools) instead of not running
+     * at all. The abandoned future is cancelled so a wedged virtual thread does not linger. 0 =
+     * unbounded, the original behaviour.
+     */
+    private <T> T joinPreTurnOrDegrade(
+            CompletableFuture<T> future, T fallback, String what, long deadlineNanos) {
+        if (deadlineNanos == Long.MIN_VALUE
+                || svc.turns.preTurnMaxWait == null
+                || svc.turns.preTurnMaxWait.isZero()
+                || svc.turns.preTurnMaxWait.isNegative()) {
+            return joinPreTurn(future);
+        }
+        long remainingMillis = (deadlineNanos - System.nanoTime()) / 1_000_000;
+        if (remainingMillis <= 0) {
+            future.cancel(true);
+            return fallback;
+        }
+        try {
+            return future.get(remainingMillis, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            log.warn(
+                    "Pre-turn read '{}' exceeded {}ms - continuing without it so the model call starts",
+                    what,
+                    svc.turns.preTurnMaxWait.toMillis());
+            future.cancel(true);
+            return fallback;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            future.cancel(true);
+            return fallback;
+        } catch (java.util.concurrent.ExecutionException e) {
+            if (e.getCause() instanceof RuntimeException re) {
+                throw re;
+            }
+            throw new CompletionException(e.getCause());
         }
     }
 

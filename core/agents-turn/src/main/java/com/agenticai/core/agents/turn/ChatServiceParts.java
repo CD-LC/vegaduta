@@ -111,6 +111,7 @@ final class ChatServiceParts {
                         timeouts.streamIdleTimeout());
         this.turns.maxContinuations = timeouts.maxContinuations();
         this.turns.fastTurnTimeout = timeouts.fastTurnTimeout();
+        this.turns.preTurnMaxWait = timeouts.preTurnMaxWait();
         this.turns.runtime = timeouts.runtime();
         this.turns.continuation = timeouts.continuation();
         this.followUp = new FollowUpTools(toolCallLogService, timeouts.followUp());
@@ -136,8 +137,10 @@ final class ChatServiceParts {
                         quality.taskPlanningService(),
                         timeouts.bufferedTurnTimeout(),
                         timeouts.bufferedKeepAliveInterval());
-        // The prompt registry's view for an agent, for every text the turn pipeline writes besides the
-        // standing directives (refusals, nudges, framing lines). Read at call time: the settings bean
+        // The prompt registry's view for an agent, for every text the turn pipeline writes besides
+        // the
+        // standing directives (refusals, nudges, framing lines). Read at call time: the settings
+        // bean
         // is injected after construction.
         java.util.function.Function<java.util.UUID, ResolvedDirectives> promptsForAgent =
                 agentId ->
@@ -158,9 +161,12 @@ final class ChatServiceParts {
                         // Read at call time: the settings bean is injected after construction.
                         delegateAgentId ->
                                 svc.promptDirectiveSettings.forTurn(
-                                        java.time.LocalDate.now(java.time.ZoneOffset.UTC), delegateAgentId));
-        // The turn a delegated or specialist agent runs for another agent's tool call: screening, hooks, journal,
-        // guardrails and the continuation policy, like a buffered turn. Hooks and the tenant plan are read at turn
+                                        java.time.LocalDate.now(java.time.ZoneOffset.UTC),
+                                        delegateAgentId));
+        // The turn a delegated or specialist agent runs for another agent's tool call: screening,
+        // hooks, journal,
+        // guardrails and the continuation policy, like a buffered turn. Hooks and the tenant plan
+        // are read at turn
         // time (the hook runtime and the hot path are set after construction).
         SubAgentTurn subTurn =
                 new SubAgentTurn(
@@ -198,7 +204,8 @@ final class ChatServiceParts {
                         subTurn);
         this.directiveComposer =
                 PromptDirectiveComposer.standard(
-                        () -> svc.toolTrustDirectiveEnabled, () -> svc.mcpUntrustedDirectiveEnabled);
+                        () -> svc.toolTrustDirectiveEnabled,
+                        () -> svc.mcpUntrustedDirectiveEnabled);
         this.failedReplies = new ChatFailedReply(sessionMemoryService);
         this.failedReplies.prompts = promptsForAgent;
     }
