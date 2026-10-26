@@ -214,7 +214,9 @@ jobs:
             PUBLISHING|PUBLISHED) ;;
             *)
               # The API's error body carries the reason - keep it in the log, not just the status.
-              code="$(curl -sS -o publish-resp.txt -w '%{http_code}' -X POST -H "Authorization: Bearer $token" \
+              # -d '' so a Content-Length: 0 goes out - a bodiless POST gets 400 from
+              # the portal's edge even though the same call is valid.
+              code="$(curl -sS -o publish-resp.txt -w '%{http_code}' -X POST -d '' -H "Authorization: Bearer $token" \
                 "https://central.sonatype.com/api/v1/publisher/deployment/$id")"
               echo "publish call: HTTP $code - $(cat publish-resp.txt 2>/dev/null || true)"
               [ "$code" = "204" ] || [ "$code" = "200" ] || { echo "::error::publish call failed (HTTP $code)"; exit 1; }
