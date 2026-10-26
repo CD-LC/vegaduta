@@ -8,6 +8,7 @@ import com.agenticai.core.agents.tools.search.ToolActivationRegistry;
 import com.agenticai.core.agents.tools.search.ToolSearchService;
 import com.agenticai.core.agents.tools.search.ToolSearchState;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -199,7 +200,14 @@ final class ToolSearchDeferral {
             // more wall-clock than a fan-out would.
             catalog =
                     CompletableFuture.supplyAsync(
-                                    () -> screenCatalog(toScreen, screen, chatClient, agentId),
+                                    TenantScope.capture()
+                                            .wrapSupplier(
+                                                    () ->
+                                                            screenCatalog(
+                                                                    toScreen,
+                                                                    screen,
+                                                                    chatClient,
+                                                                    agentId)),
                                     CATALOG_EXECUTOR)
                             .exceptionally(
                                     e -> {
