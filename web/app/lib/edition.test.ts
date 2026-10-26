@@ -179,8 +179,6 @@ describe("EDITION_ROUTES", () => {
       "/admin/sso",
       "/admin/leads",
       "/admin/billing",
-      "/admin/access",
-      "/admin/users",
       "/playground",
       "/quick-task",
       "/jobs",
@@ -225,7 +223,7 @@ describe("EDITION_ROUTES", () => {
     asPersonal();
     for (const r of personalRows) expect(railHidden(r.route), r.route).toBe(r.rail);
     expect(railHidden("/admin/payments/mandates")).toBe(true);
-    expect(railHidden("/admin/access?tab=roles")).toBe(true);
+    expect(railHidden("/admin/access?tab=roles")).toBe(false);
     for (const keep of [
       "/assistant",
       "/agents",
@@ -256,8 +254,6 @@ describe("proxy deny list", () => {
       "/admin/sso",
       "/admin/payments/mandates",
       "/shared-with-me",
-      "/admin/access",
-      "/admin/users",
       "/directory",
       "/signup",
       "/signup/complete",

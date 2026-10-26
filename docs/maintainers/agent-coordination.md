@@ -346,6 +346,34 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
 
 
 
+
+
+
+ADD (Devin, 2026-10-26): `code-intel` service on the personal tier - the
+profile-gated service was missing from personal.yml entirely (the whole
+reason repo management showed nothing on local installs). New `code-intel`
+profile + service (auth_mode=internal - personal has no Keycloak; core and
+the console proxy carry X-Internal-Token) + core wiring
+(CODE_INTEL_ENABLED/BASE_URL/INTERNAL_TOKEN) + code-intel-data volume.
+Live and healthy on the local personal stack.
+FIX (Devin, 2026-10-26): "users can't sign up on a personal install" - by
+design POST /api/signup is closed in local mode (anyone on the LAN would
+get a full tenant on the owner's box) and the proxy 404s /signup AND the
+admin pages the owner would use instead. Un-denied /admin/access and
+/admin/users (a redirect to access) in web/app/lib/edition.ts: the
+LocalUserAdminClient invite path (createUserForInvite + issueInviteLink,
+minting /login?setup= links since local mode has no mail server) is the
+shipped way to add people on personal - the UI was the only missing piece.
+ALSO: the personal stack itself was crash-looping - .env leaked
+CORE_PROFILES_EXTRA=,workflow,temporal into personal core, which has no
+Temporal service (env_file vs environment: scoping). Removed the extra
+profiles; personal core is healthy.
+FIX (Devin, 2026-10-26): the local-auth setup screen failed "Could not reach
+the server" on submit - web's server-side proxy routes fetch core via
+CORE_INTERNAL_URL which compose never set, so they fell back to the public
+host:port inside the container. Wired CORE_INTERNAL_URL (default
+http://core:8080) into web-env + documented it in .env.example; the unlock
+proxy now returns real responses (passkey challenge verified end-to-end).
 SPLIT (both agents, 2026-10-26): a parallel agent's `ruff format` commit grew
 app/main.py (700) + app/mcp_bridge.py (672) over the 665-line ratchet. The
 other agent landed `analysis_routes.py` + `deps.py` (shared service/tenant)

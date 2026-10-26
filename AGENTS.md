@@ -140,6 +140,15 @@ Docker with Compose v2.
     smaller store; never refreeze to make a build pass. Details and commands are in the
     javadoc of `ModuleBoundaryRulesTest`; background in
     [the structural audit](docs/architecture/STRUCTURAL-AUDIT-2026-10-14.md).
+14. **Test locally before you open or update a PR.** CI is the last check, not
+    the first. Before pushing or raising a PR: `make gates` (the pre-push hook
+    from `make hooks` runs them automatically), the test suite of every touched
+    component (see the Build-and-test table: `mvn -B -ntp -pl <module> test`,
+    `npm test`, the code-intel script harness, `node --test`), and when a golden
+    or generated artifact is in play (prompt catalog md files, OpenAPI fixtures,
+    i18n keys) regenerate or hand-sync it and run the test that pins it - a
+    code change without its golden is the most common CI-only failure. Compose
+    changes get `make compose-validate`. Report what you ran in the PR body.
 
 ## Conventions
 
