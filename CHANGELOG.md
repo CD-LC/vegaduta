@@ -66,6 +66,11 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **`browser_navigate` now tells the model the sandboxed browser is invisible and inaudible to
+  the person.** The reply is directed to describe it as the agent's own browser (never "your
+  Chrome"), to say when `local_desktop_*` control is unavailable instead of silently substituting
+  the sandbox, and to finish visual tasks with `browser_screenshot` so the person sees proof of
+  what actually happened.
 - **A turn parked on a human approval no longer asks the model to write its closing reply.** The
   tool loop now ends the round the marker lands in (`returnDirect`), and the person reads the
   platform's fixed pause text (new prompt key `message.approval.parked`) - a structured pause,
