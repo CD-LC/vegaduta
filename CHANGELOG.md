@@ -10,6 +10,12 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Personal/lite installs never enabled the tool-sandbox client.** `scripts/vegaduta`
+  started the tool-sandbox container with the `tools` choice but exported
+  `TOOL_SANDBOX_ENABLED` only from the profile list - which `tools` never joins on
+  single-box tiers - so core kept `TOOL_SANDBOX_ENABLED=false` and `create_custom_tool`
+  (agents authoring their own tools) never resolved on any personal or lite install.
+  The launcher now exports it whenever the sandbox container ships.
 - **Approvals that park a task now actually resume it.** An approval request recorded
   without the chat turn's origin (a caller with no conversation subject key, or one recorded
   before the origin fields existed) used to show "The agent was not restarted automatically
