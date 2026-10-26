@@ -13,7 +13,11 @@ import com.agenticai.core.guardrails.ToolResultMarker;
 import com.agenticai.core.guardrails.ToolStepLimitExceededException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
@@ -371,6 +375,97 @@ class ToolSearchDeferralTest {
     private static boolean callToolRefusalIsUnknownName(ToolCallback callTool, String name) {
         String refused = callTool.call("{\"name\":\"" + name + "\",\"argsJson\":\"{}\"}");
         return refused.contains("no tool named");
+    }
+
+    @Test
+    void catalogScreeningRunsOffTheTurnsCriticalPath() {
+        // The model's first call must not wait on per-tool screening: apply() returns while the
+        // screen is still blocked; the join happens inside search_tools, where it belongs.
+        CountDownLatch release = new CountDownLatch(1);
+        ToolSearchDeferral deferral = enabled(25, "remember_fact", 6);
+        deferral.withCatalogScreen(
+                new GuardrailService() {
+                    @Override
+                    public String sanitizeToolOutput(String toolName, String rawOutput) {
+                        return rawOutput;
+                    }
+
+                    @Override
+                    public String sanitizeToolOutput(
+                            String toolName,
+                            String rawOutput,
+                            org.springframework.ai.chat.client.ChatClient chatClient) {
+                        try {
+                            if (!release.await(10, TimeUnit.SECONDS)) {
+                                throw new IllegalStateException("test latch never released");
+                            }
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                        return rawOutput;
+                    }
+                });
+
+        long started = System.nanoTime();
+        List<ToolCallback> result =
+                deferral.apply(catalog(30), AGENT, "s1", new RecordingWrapper(), null);
+        long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
+        assertTrue(
+                elapsedMs < 2_000,
+                "apply() must not wait on the catalog screen, took " + elapsedMs + " ms");
+
+        release.countDown();
+        String found =
+                offered(result, SearchToolsToolCallback.NAME).call("{\"query\":\"filler_tool_3\"}");
+        assertTrue(found.contains("filler_tool_3"), found);
+    }
+
+    @Test
+    void platformAuthoredToolsSkipTheSemanticJudgeCall() {
+        // The judge's model call exists for outside-authored text; a built-in's own description
+        // pays only the pattern layer - the catalog screen's hot path is the semantic call.
+        Set<String> judged = ConcurrentHashMap.newKeySet();
+        ToolSearchDeferral deferral = enabled(1, "remember_fact", 6);
+        deferral.withCatalogScreen(
+                new GuardrailService() {
+                    @Override
+                    public String sanitizeToolOutput(String toolName, String rawOutput) {
+                        return rawOutput;
+                    }
+
+                    @Override
+                    public String sanitizeToolOutput(
+                            String toolName,
+                            String rawOutput,
+                            org.springframework.ai.chat.client.ChatClient chatClient) {
+                        if (chatClient != null) {
+                            judged.add(toolName);
+                        }
+                        return rawOutput;
+                    }
+                });
+
+        List<ToolCallback> tools =
+                List.of(
+                        // classified built-in - description text is authored in this repo
+                        new Stub("search_knowledge_base", "Searches the knowledge base"),
+                        // not a built-in - MCP-server-authored text, must still be judged
+                        new Stub("mcp__github__create_issue", "Creates an issue"));
+        // A non-null client is what turns the semantic layer on for outside-authored text.
+        org.springframework.ai.chat.client.ChatClient chatClient =
+                org.mockito.Mockito.mock(org.springframework.ai.chat.client.ChatClient.class);
+        List<ToolCallback> result =
+                deferral.apply(tools, AGENT, "s1", new RecordingWrapper(), chatClient);
+
+        // The search call joins the background catalog pass, then answers from it - both tools
+        // reached the catalog (query "the" matches both descriptions).
+        String found = offered(result, SearchToolsToolCallback.NAME).call("{\"query\":\"the\"}");
+        assertTrue(found.contains("mcp__github__create_issue"), found);
+        assertTrue(found.contains("search_knowledge_base"), found);
+        assertTrue(judged.contains("mcp__github__create_issue"), judged.toString());
+        assertFalse(
+                judged.contains("search_knowledge_base"),
+                "a platform tool's description must not pay the judge: " + judged);
     }
 
     @Test
