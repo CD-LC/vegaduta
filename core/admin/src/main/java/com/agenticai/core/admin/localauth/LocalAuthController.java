@@ -63,6 +63,8 @@ public class LocalAuthController {
     public record SetupRequest(
             @NotBlank @Size(max = 256) String token, @NotBlank @Size(max = 1024) String password) {}
 
+    public record ResetRequest(@Size(max = 320) String email) {}
+
     public record RefreshRequest(@NotBlank @Size(max = 256) String refreshToken) {}
 
     public record ChangePasswordRequest(
@@ -70,7 +72,12 @@ public class LocalAuthController {
             @NotBlank @Size(max = 1024) String newPassword) {}
 
     public record UserView(
-            String id, String email, String firstName, String lastName, String tenantId, Set<String> roles) {}
+            String id,
+            String email,
+            String firstName,
+            String lastName,
+            String tenantId,
+            Set<String> roles) {}
 
     public record SessionResponse(
             String accessToken,
@@ -82,7 +89,10 @@ public class LocalAuthController {
             UserView user) {}
 
     public record ConfigResponse(
-            String mode, boolean setupRequired, List<String> credentialTypes, int passwordMinLength) {}
+            String mode,
+            boolean setupRequired,
+            List<String> credentialTypes,
+            int passwordMinLength) {}
 
     @GetMapping("/config")
     @PreAuthorize("permitAll()")
@@ -90,21 +100,53 @@ public class LocalAuthController {
         LocalAuthService.Status status = auth.status();
         return noStore(
                 ResponseEntity.ok(
-                        new ConfigResponse("local", status.setupRequired(), status.credentialTypes(), status.passwordMinLength())));
+                        new ConfigResponse(
+                                "local",
+                                status.setupRequired(),
+                                status.credentialTypes(),
+                                status.passwordMinLength())));
     }
 
     @PostMapping("/login")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<SessionResponse> login(@Valid @RequestBody LoginRequest body, HttpServletRequest request) {
+    public ResponseEntity<SessionResponse> login(
+            @Valid @RequestBody LoginRequest body, HttpServletRequest request) {
         Session session =
-                auth.login(body.type(), body.identifier(), Map.of("password", body.password()), request.getRemoteAddr());
+                auth.login(
+                        body.type(),
+                        body.identifier(),
+                        Map.of("password", body.password()),
+                        request.getRemoteAddr());
         return noStore(ResponseEntity.ok(view(session)));
+    }
+
+    /**
+     * A locked-out person asks for a reset link. The response never carries it - that would let
+     * anyone who can reach the port reset the owner's password. Core writes it to a file on the
+     * machine instead, and the person reads it with {@code scripts/vegaduta reset-password}.
+     */
+    @PostMapping("/reset-request")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<Map<String, String>> resetRequest(
+            @RequestBody(required = false) ResetRequest body, HttpServletRequest request) {
+        auth.requestPasswordReset(body == null ? null : body.email(), request.getRemoteAddr());
+        return noStore(
+                ResponseEntity.ok(
+                        Map.of(
+                                "status",
+                                "If the account exists, a reset link was saved on this machine. "
+                                        + "Run `scripts/vegaduta reset-password` to see it.")));
     }
 
     @PostMapping("/setup")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<SessionResponse> setup(@Valid @RequestBody SetupRequest body, HttpServletRequest request) {
-        return noStore(ResponseEntity.ok(view(auth.completeSetup(body.token(), body.password(), request.getRemoteAddr()))));
+    public ResponseEntity<SessionResponse> setup(
+            @Valid @RequestBody SetupRequest body, HttpServletRequest request) {
+        return noStore(
+                ResponseEntity.ok(
+                        view(
+                                auth.completeSetup(
+                                        body.token(), body.password(), request.getRemoteAddr()))));
     }
 
     @PostMapping("/refresh")
@@ -129,7 +171,11 @@ public class LocalAuthController {
             @Valid @RequestBody ChangePasswordRequest body,
             HttpServletRequest request) {
         Session session =
-                auth.changePassword(jwt.getSubject(), body.currentPassword(), body.newPassword(), request.getRemoteAddr());
+                auth.changePassword(
+                        jwt.getSubject(),
+                        body.currentPassword(),
+                        body.newPassword(),
+                        request.getRemoteAddr());
         return noStore(ResponseEntity.ok(view(session)));
     }
 
@@ -143,7 +189,8 @@ public class LocalAuthController {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("error", e.code());
         body.put("message", e.getMessage());
-        ResponseEntity.BodyBuilder response = ResponseEntity.status(e.status()).cacheControl(CacheControl.noStore());
+        ResponseEntity.BodyBuilder response =
+                ResponseEntity.status(e.status()).cacheControl(CacheControl.noStore());
         if (e.retryAfterSeconds() != null) {
             body.put("retryAfterSeconds", e.retryAfterSeconds());
             response.header("Retry-After", String.valueOf(e.retryAfterSeconds()));
@@ -161,7 +208,8 @@ public class LocalAuthController {
                 s.refreshToken(),
                 Math.max(0, Duration.between(now, s.refreshExpiresAt()).toSeconds()),
                 a.mustChangePassword(),
-                new UserView(a.id(), a.email(), a.firstName(), a.lastName(), a.tenantId(), a.roles()));
+                new UserView(
+                        a.id(), a.email(), a.firstName(), a.lastName(), a.tenantId(), a.roles()));
     }
 
     static <T> ResponseEntity<T> noStore(ResponseEntity<T> response) {

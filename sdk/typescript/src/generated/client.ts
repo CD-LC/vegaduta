@@ -7182,7 +7182,7 @@ export class LocalAuthApi {
    * Config.
    * `GET /api/auth/local/config`
    *
-   * Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+   * Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
    */
   config(options?: CallOptions): Promise<T.LocalAuthController_ConfigResponse> {
     return this.http.request<T.LocalAuthController_ConfigResponse>({ ...options, method: "GET", path: "/api/auth/local/config" });
@@ -7192,9 +7192,9 @@ export class LocalAuthApi {
    * Login.
    * `POST /api/auth/local/login`
    *
-   * Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+   * Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
    */
-  login(body: T.LocalAuthController_LoginRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.LocalAuthController_SessionResponse> {
+  login(body: T.LocalAuthController_LoginRequest, options?: CallOptions): Promise<T.LocalAuthController_SessionResponse> {
     return this.http.request<T.LocalAuthController_SessionResponse>({ ...options, method: "POST", path: "/api/auth/local/login", body });
   }
 
@@ -7202,9 +7202,9 @@ export class LocalAuthApi {
    * Logout.
    * `POST /api/auth/local/logout`
    *
-   * Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+   * Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
    */
-  logout(body?: T.LocalAuthController_RefreshRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+  logout(body?: T.LocalAuthController_RefreshRequest, options?: CallOptions): Promise<void> {
     return this.http.request<void>({ ...options, method: "POST", path: "/api/auth/local/logout", body, response: "void" });
   }
 
@@ -7212,19 +7212,29 @@ export class LocalAuthApi {
    * Refresh.
    * `POST /api/auth/local/refresh`
    *
-   * Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+   * Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
    */
-  refresh(body: T.LocalAuthController_RefreshRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.LocalAuthController_SessionResponse> {
+  refresh(body: T.LocalAuthController_RefreshRequest, options?: CallOptions): Promise<T.LocalAuthController_SessionResponse> {
     return this.http.request<T.LocalAuthController_SessionResponse>({ ...options, method: "POST", path: "/api/auth/local/refresh", body });
+  }
+
+  /**
+   * Reset request.
+   * `POST /api/auth/local/reset-request`
+   *
+   * Ask for a password reset on a personal install. The one-time reset link is never returned here: core writes it to password-reset.txt in the install's auth data directory (scripts/vegaduta reset-password prints it), so only someone with access to the machine itself can use it. The answer is the same for an unknown e-mail - it reveals nothing about the account. A blank e-mail resolves to the install's only account. Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+   */
+  resetRequest(body?: T.LocalAuthController_ResetRequest, options?: CallOptions): Promise<Record<string, string>> {
+    return this.http.request<Record<string, string>>({ ...options, method: "POST", path: "/api/auth/local/reset-request", body });
   }
 
   /**
    * Setup.
    * `POST /api/auth/local/setup`
    *
-   * Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+   * Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
    */
-  setup(body: T.LocalAuthController_SetupRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.LocalAuthController_SessionResponse> {
+  setup(body: T.LocalAuthController_SetupRequest, options?: CallOptions): Promise<T.LocalAuthController_SessionResponse> {
     return this.http.request<T.LocalAuthController_SessionResponse>({ ...options, method: "POST", path: "/api/auth/local/setup", body });
   }
 }
@@ -7350,9 +7360,9 @@ export class LocalUnlockApi {
    * Login.
    * `POST /api/auth/local/unlock/login`
    *
-   * Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+   * Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
    */
-  login(body: T.LocalUnlockController_UnlockLoginRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.LocalAuthController_SessionResponse> {
+  login(body: T.LocalUnlockController_UnlockLoginRequest, options?: CallOptions): Promise<T.LocalAuthController_SessionResponse> {
     return this.http.request<T.LocalAuthController_SessionResponse>({ ...options, method: "POST", path: "/api/auth/local/unlock/login", body });
   }
 
@@ -7370,9 +7380,9 @@ export class LocalUnlockApi {
    * Login options.
    * `POST /api/auth/local/unlock/passkey/login-options`
    *
-   * Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+   * Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
    */
-  loginOptions(options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.LocalPasskeyService_Options> {
+  loginOptions(options?: CallOptions): Promise<T.LocalPasskeyService_Options> {
     return this.http.request<T.LocalPasskeyService_Options>({ ...options, method: "POST", path: "/api/auth/local/unlock/passkey/login-options" });
   }
 
@@ -7380,9 +7390,9 @@ export class LocalUnlockApi {
    * Register.
    * `POST /api/auth/local/unlock/passkey/register`
    *
-   * Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+   * Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
    */
-  register(body: T.LocalUnlockController_RegisterRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.LocalUnlockController_RegisterResponse> {
+  register(body: T.LocalUnlockController_RegisterRequest, options?: CallOptions): Promise<T.LocalUnlockController_RegisterResponse> {
     return this.http.request<T.LocalUnlockController_RegisterResponse>({ ...options, method: "POST", path: "/api/auth/local/unlock/passkey/register", body });
   }
 
@@ -7390,9 +7400,9 @@ export class LocalUnlockApi {
    * Register options.
    * `POST /api/auth/local/unlock/passkey/register-options`
    *
-   * Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+   * Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
    */
-  registerOptions(body?: T.LocalUnlockController_RegisterOptionsRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.LocalPasskeyService_Options> {
+  registerOptions(body?: T.LocalUnlockController_RegisterOptionsRequest, options?: CallOptions): Promise<T.LocalPasskeyService_Options> {
     return this.http.request<T.LocalPasskeyService_Options>({ ...options, method: "POST", path: "/api/auth/local/unlock/passkey/register-options", body });
   }
 
@@ -7420,9 +7430,9 @@ export class LocalUnlockApi {
    * Setup with pin.
    * `POST /api/auth/local/unlock/setup/pin`
    *
-   * Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+   * Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
    */
-  setupWithPin(body: T.LocalUnlockController_SetupPinRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.LocalUnlockController_SetupPinResponse> {
+  setupWithPin(body: T.LocalUnlockController_SetupPinRequest, options?: CallOptions): Promise<T.LocalUnlockController_SetupPinResponse> {
     return this.http.request<T.LocalUnlockController_SetupPinResponse>({ ...options, method: "POST", path: "/api/auth/local/unlock/setup/pin", body });
   }
 }

@@ -4958,6 +4958,10 @@ export interface LocalAuthController_RefreshRequest {
   refreshToken: string;
 }
 
+export interface LocalAuthController_ResetRequest {
+  email?: string;
+}
+
 export interface LocalAuthController_SessionResponse {
   accessToken?: string;
   tokenType?: string;

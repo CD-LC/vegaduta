@@ -21643,7 +21643,7 @@
         "summary": "Config",
         "operationId": "LocalAuthController_config",
         "x-feature-flag": "app.auth.mode=local",
-        "description": "Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
+        "description": "Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -21655,24 +21655,11 @@
               }
             }
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "tenantApiKey": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/local/login": {
@@ -21693,12 +21680,7 @@
           }
         },
         "x-feature-flag": "app.auth.mode=local",
-        "description": "Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
+        "description": "Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -21713,30 +21695,11 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "tenantApiKey": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/local/logout": {
@@ -21757,12 +21720,7 @@
           }
         },
         "x-feature-flag": "app.auth.mode=local",
-        "description": "Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
+        "description": "Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
         "responses": {
           "200": {
             "description": "Successful response."
@@ -21770,30 +21728,11 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "tenantApiKey": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/local/refresh": {
@@ -21814,12 +21753,7 @@
           }
         },
         "x-feature-flag": "app.auth.mode=local",
-        "description": "Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
+        "description": "Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -21834,30 +21768,54 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/local/reset-request": {
+      "post": {
+        "tags": [
+          "LocalAuth"
+        ],
+        "summary": "Reset request",
+        "operationId": "LocalAuthController_resetRequest",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalAuthController_ResetRequest"
+              }
+            }
+          }
+        },
+        "x-feature-flag": "app.auth.mode=local",
+        "description": "Ask for a password reset on a personal install. The one-time reset link is never returned here: core writes it to password-reset.txt in the install's auth data directory (scripts/vegaduta reset-password prints it), so only someone with access to the machine itself can use it. The answer is the same for an unknown e-mail - it reveals nothing about the account. A blank e-mail resolves to the install's only account. Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
           },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "tenantApiKey": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/local/setup": {
@@ -21878,12 +21836,7 @@
           }
         },
         "x-feature-flag": "app.auth.mode=local",
-        "description": "Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
+        "description": "Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -21898,30 +21851,11 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "tenantApiKey": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/local/unlock/devices": {
@@ -22055,12 +21989,7 @@
           }
         },
         "x-feature-flag": "app.auth.mode=local",
-        "description": "Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
+        "description": "Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -22075,30 +22004,11 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "tenantApiKey": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/local/unlock/methods": {
@@ -22149,12 +22059,7 @@
         "summary": "Login options",
         "operationId": "LocalUnlockController_loginOptions",
         "x-feature-flag": "app.auth.mode=local",
-        "description": "Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
+        "description": "Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -22166,30 +22071,11 @@
               }
             }
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "tenantApiKey": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/local/unlock/passkey/register": {
@@ -22210,12 +22096,7 @@
           }
         },
         "x-feature-flag": "app.auth.mode=local",
-        "description": "Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
+        "description": "Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -22230,30 +22111,11 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "tenantApiKey": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/local/unlock/passkey/register-options": {
@@ -22274,12 +22136,7 @@
           }
         },
         "x-feature-flag": "app.auth.mode=local",
-        "description": "Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
+        "description": "Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -22294,30 +22151,11 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "tenantApiKey": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/local/unlock/passkeys/{id}": {
@@ -22438,12 +22276,7 @@
           }
         },
         "x-feature-flag": "app.auth.mode=local",
-        "description": "Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
+        "description": "Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -22458,30 +22291,11 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "tenantApiKey": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/social-providers": {
@@ -106714,6 +106528,15 @@
         "required": [
           "refreshToken"
         ]
+      },
+      "LocalAuthController_ResetRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 320
+          }
+        }
       },
       "LocalAuthController_SessionResponse": {
         "type": "object",

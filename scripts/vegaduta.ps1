@@ -983,6 +983,24 @@ switch ($Command) {
     [void](Invoke-Dc $ca ($la + $Rest))
   }
   'doctor' { Parse-TierFlags; if (-not (Invoke-Doctor)) { exit 1 } }
+  'reset-password' {
+    # Owner forgot the password: ask core to write a one-time reset link to password-reset.txt on
+    # this machine (file access = proof of ownership, like the first-run link), then print it.
+    $ca = Prepare
+    $email = if ($Rest.Count -gt 0) { $Rest[0] } else { '' }
+    $api = Get-EnvValue 'PUBLIC_API_URL'; if (-not $api) { $port = Get-EnvValue 'CORE_HOST_PORT'; if (-not $port) { $port = '8080' }; $api = "http://localhost:$port" }
+    $body = if ($email) { @{ email = $email } | ConvertTo-Json -Compress } else { '{}' }
+    try {
+      Invoke-RestMethod -Method Post -Uri "$api/api/auth/local/reset-request" -ContentType 'application/json' -Body $body | Out-Null
+    } catch { Die "core at $api did not answer the reset request - is it running? (.\scripts\vegaduta.ps1 status)" }
+    $txt = (Invoke-Native docker (@('compose') + $ca + @('exec', '-T', 'core', 'cat', '/data/storage/.auth/password-reset.txt'))) -join "`n"
+    $m = [regex]::Matches($txt, 'https?://\S+/login\?setup=[A-Za-z0-9_-]+')
+    if ($m.Count -eq 0) { Write-Host $txt; Die 'no reset link in password-reset.txt - check the account e-mail and try again' }
+    Write-Host ''
+    Write-Host 'Password reset link (one use):'
+    Write-Host "  $($m[$m.Count - 1].Value)"
+    Write-Host 'Open it in your browser, choose a new password, and you are signed in.'
+  }
   'secrets' { Invoke-Secrets $Domain }
   'backup' { $ca = Prepare; [void](Invoke-Backup $ca $(if ($Rest.Count -gt 0) { $Rest[0] } else { '' })) }
   'restore' {
