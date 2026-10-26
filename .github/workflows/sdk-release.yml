@@ -21,6 +21,11 @@ name: SDK release
 # instead, add `push: tags: ["sdk-v*.*.*"]` here.
 on:
   workflow_dispatch:
+    inputs:
+      publish-deployment:
+        description: "Publish the uploaded deployment via the Central Portal API (autoPublish is off - this replaces the manual Publish click in the portal UI)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -180,4 +185,35 @@ jobs:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.SDK_GPG_PASSPHRASE }}
-        run: mvn -B -ntp -Prelease -DskipTests deploy
+        run: |
+          set -o pipefail
+          mvn -B -ntp -Prelease -DskipTests deploy 2>&1 | tee deploy-log.txt
+      # autoPublish is off on purpose - a release is a human decision. The dispatch
+      # input publish-deployment is that decision: it calls the same Portal publish
+      # endpoint the UI's Publish button does, so no portal login is needed.
+      - name: Publish the validated deployment
+        if: inputs.publish-deployment
+        working-directory: sdk/java
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+        run: |
+          set -euo pipefail
+          id="$(grep -oE 'deploymentId: [a-f0-9-]+' deploy-log.txt | tail -1 | awk '{print $2}')"
+          [ -n "$id" ] || { echo "::error::no deploymentId in the deploy log - the upload step reported none"; exit 1; }
+          token="$(printf '%s:%s' "$CENTRAL_USERNAME" "$CENTRAL_PASSWORD" | base64 -w0)"
+          curl -fsS -X POST -H "Authorization: Bearer $token" \
+            "https://central.sonatype.com/api/v1/publisher/deployment/$id"
+          for i in $(seq 1 30); do
+            state="$(curl -fsS -H "Authorization: Bearer $token" \
+              "https://central.sonatype.com/api/v1/publisher/status?id=$id" \
+              | python3 -c 'import json,sys; print(json.load(sys.stdin).get("deploymentState",""))')"
+            echo "deployment $id: $state"
+            case "$state" in
+              PUBLISHED) exit 0 ;;
+              FAILED|DROPPED) echo "::error::deployment $id ended $state"; exit 1 ;;
+            esac
+            sleep 20
+          done
+          echo "::error::deployment $id still not PUBLISHED after 10 min - check https://central.sonatype.com/publishing/deployments"
+          exit 1
