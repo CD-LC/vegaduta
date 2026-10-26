@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.tools;
 
+import com.agenticai.core.agents.tools.classification.BuiltInToolClassifications;
 import com.agenticai.core.agents.tools.search.CallToolToolCallback;
 import com.agenticai.core.agents.tools.search.SearchCatalogScreen;
 import com.agenticai.core.agents.tools.search.SearchToolsToolCallback;
@@ -7,12 +8,18 @@ import com.agenticai.core.agents.tools.search.ToolActivationRegistry;
 import com.agenticai.core.agents.tools.search.ToolSearchService;
 import com.agenticai.core.agents.tools.search.ToolSearchState;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 
 /**
@@ -38,6 +45,15 @@ import org.springframework.ai.tool.ToolCallback;
  * ToolSearchState}.
  */
 final class ToolSearchDeferral {
+
+    private static final Logger log = LoggerFactory.getLogger(ToolSearchDeferral.class);
+
+    /**
+     * Virtual threads for the background catalog screen; the executor carries the calling thread's
+     * tenant onto the worker (AGENTS.md #12), which {@code sanitizeToolOutput} reads.
+     */
+    private static final ExecutorService CATALOG_EXECUTOR =
+            TenantAwareExecutors.newVirtualThreadPerTaskExecutor("tool-catalog-screen-");
 
     /**
      * Standing capabilities that must stay visible: the memory and knowledge tools {@code
@@ -147,10 +163,10 @@ final class ToolSearchDeferral {
         List<String> keepVisible = alwaysOn;
 
         SearchCatalogScreen screen = catalogScreen;
-        boolean screenDroppedAny = false;
         List<ToolCallback> exposedInOrder = new ArrayList<>();
         Map<String, ToolCallback> exposed = new LinkedHashMap<>();
         Map<String, ToolCallback> deferred = new LinkedHashMap<>();
+        List<ToolCallback> toScreen = screen == null ? null : new ArrayList<>();
         for (ToolCallback tool : allowed) {
             String name = tool.getToolDefinition().name();
             if (name == null
@@ -161,34 +177,83 @@ final class ToolSearchDeferral {
                 if (name != null) {
                     exposed.putIfAbsent(name, tool);
                 }
+            } else if (toScreen != null) {
+                toScreen.add(tool);
             } else {
-                // A description/schema the screen withholds is replaced in the catalog entry itself
-                // (the tool stays searchable by name); a withheld NAME has no safe listing, so the
-                // tool leaves this turn's catalog entirely.
-                ToolCallback entry =
-                        screen != null ? screen.screened(tool, chatClient, agentId) : tool;
-                if (entry != null) {
-                    deferred.putIfAbsent(name, entry);
-                } else {
-                    screenDroppedAny = true;
-                }
+                deferred.putIfAbsent(name, tool);
             }
         }
-        if (deferred.isEmpty()) {
+
+        CompletableFuture<Map<String, ToolCallback>> catalog;
+        if (toScreen == null) {
+            catalog = CompletableFuture.completedFuture(
+                    Collections.unmodifiableMap(new LinkedHashMap<>(deferred)));
+        } else {
+            // The catalog screen runs on a background virtual thread, off the reply's critical
+            // path: deferred tools never reach the model's prompt, so the turn starts on the
+            // model call immediately and only a search_tools/call_tool call joins the screening
+            // (usually long finished by then - or a turn that never searches pays nothing).
+            // Screening is per-tool semantic model calls; serialising them on one thread keeps the
+            // screen's own per-text cache coherent and, on a single-model local provider, costs no
+            // more wall-clock than a fan-out would.
+            catalog =
+                    CompletableFuture.supplyAsync(
+                                    () -> screenCatalog(toScreen, screen, chatClient, agentId),
+                                    CATALOG_EXECUTOR)
+                            .exceptionally(
+                                    e -> {
+                                        log.warn(
+                                                "Catalog screen failed wholesale; deferred catalog"
+                                                        + " empty this turn",
+                                                e);
+                                        return Map.of();
+                                    });
+        }
+        boolean anythingDeferred =
+                toScreen == null ? !deferred.isEmpty() : !toScreen.isEmpty();
+        if (!anythingDeferred) {
             // Everything is standing capability: nothing to search for, so offer the list
-            // untouched - unless the screen withheld every deferrable tool's name, in which case
-            // `allowed` still contains them and only the exposed list is safe to offer.
-            return screenDroppedAny ? exposedInOrder : allowed;
+            // untouched.
+            return allowed;
         }
 
         ToolSearchState state =
                 new ToolSearchState(
-                        exposed, deferred, service, registry, key, carry, screen != null);
+                        exposed, catalog, service, registry, key, carry, screen != null);
         List<ToolCallback> offered = new ArrayList<>(exposedInOrder.size() + 2);
         offered.add(wrapper.wrap(new SearchToolsToolCallback(state), true));
         offered.add(wrapper.wrap(new CallToolToolCallback(state, agentId, sessionId), false));
         offered.addAll(exposedInOrder);
         return offered;
+    }
+
+    /**
+     * Screens each deferrable tool into its catalog entry. A description/schema the screen
+     * withholds is replaced in the catalog entry itself (the tool stays searchable by name); a
+     * withheld NAME has no safe listing, so the tool leaves this turn's catalog entirely.
+     * Platform-authored text needs no judge: the semantic layer's model call exists to catch
+     * hostile text authored OUTSIDE this codebase (MCP servers, tenant/custom tools) - running it
+     * on a built-in's own description costs one judge call per deferred tool per cold turn
+     * (measured: ~1.3 s each on a local model, a 2-minute "gathering context" stall on a 59-tool
+     * catalog) and can flag platform text as injected while adding nothing. Built-ins still take
+     * the pattern layer - {@code screened()} with a null chatClient.
+     */
+    private Map<String, ToolCallback> screenCatalog(
+            List<ToolCallback> deferrable,
+            SearchCatalogScreen screen,
+            org.springframework.ai.chat.client.ChatClient chatClient,
+            UUID agentId) {
+        Map<String, ToolCallback> screenedMap = new LinkedHashMap<>();
+        for (ToolCallback tool : deferrable) {
+            String name = tool.getToolDefinition().name();
+            boolean platformAuthored = BuiltInToolClassifications.find(name) != null;
+            ToolCallback entry =
+                    screen.screened(tool, platformAuthored ? null : chatClient, agentId);
+            if (entry != null) {
+                screenedMap.putIfAbsent(name, entry);
+            }
+        }
+        return Collections.unmodifiableMap(screenedMap);
     }
 
     static boolean isAlwaysOn(List<String> patterns, String name) {
