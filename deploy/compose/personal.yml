@@ -235,6 +235,11 @@ services:
       # profile, so the container default is `none`. Set APP_MCP_STDIO_SANDBOX=container in .env
       # only if core can reach a Docker or Podman socket; use --native-core for the `os` sandbox.
       APP_MCP_STDIO_SANDBOX: ${APP_MCP_STDIO_SANDBOX:-none}
+      # Code Intelligence (--profile code-intel): graph + analysis service agents reach over the
+      # internal token; core proxies the console's /code-intel page too, so there is no bearer hop.
+      CODE_INTEL_ENABLED: ${CODE_INTEL_ENABLED:-false}
+      CODE_INTEL_BASE_URL: http://code-intel:8090
+      CODE_INTEL_INTERNAL_TOKEN: ${CODE_INTEL_INTERNAL_TOKEN:-}
       # Local-auth signing keys and the one-time setup link. The default (~/.vegaduta/auth) is a
       # tmpfs here, so keys would be regenerated on every restart; keep them on the storage volume.
       APP_AUTH_LOCAL_DATA_DIR: /data/storage/.auth
@@ -388,6 +393,43 @@ services:
       resources:
         limits:
           memory: ${WEB_MEM_LIMIT:-384m}
+
+  # -------------------------------------------------- profile: code-intel
+  code-intel:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/code-intel:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["code-intel"]
+    <<: [*restart, *logging, *hardened]
+    init: true   # reaps orphaned git grandchildren
+    environment:
+      # `internal`, not `keycloak`: personal has no Keycloak. Every call - core's
+      # agent tools and the console page through core's proxy - carries
+      # X-Internal-Token, which is the only credential this mode accepts.
+      CODE_INTEL_AUTH_MODE: internal
+      CODE_INTEL_INTERNAL_TOKEN: ${CODE_INTEL_INTERNAL_TOKEN:?run scripts/vegaduta secrets}
+      CODE_INTEL_GIT_TOKEN: ${CODE_INTEL_GIT_TOKEN:-}
+      HF_HOME: /data/.hf
+      HF_HUB_CACHE: /data/.hf/hub
+      FASTEMBED_CACHE_PATH: /data/.fastembed
+      CODE_INTEL_EMBEDDER: ${CODE_INTEL_EMBEDDER:-fastembed}
+      CODE_INTEL_ALLOW_CONTEXT_SCRIPTS: "false"
+      # Exec stays off on personal (no dind sandbox exists here): indexing,
+      # search, the code graph and the analysis suite all work without it.
+      CODE_INTEL_ALLOW_EXEC: "false"
+      CODE_INTEL_EXPOSE_DOCS: "false"
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${CODE_INTEL_HOST_PORT:-8090}:8090"
+    volumes:
+      - code-intel-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${CODE_INTEL_MEM_LIMIT:-2g}
 
   # ----------------------------------------------------------- profile: rag
   sidecar:
@@ -596,6 +638,7 @@ services:
 volumes:
   postgres-data:
   core-storage:
+  code-intel-data:
   core-mcp-data:
   sidecar-workspace:
   core-projects:

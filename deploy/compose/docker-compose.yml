@@ -643,6 +643,11 @@ services:
       # PIN/recovery); anything else = Keycloak SSO. Pair with core's
       # APP_AUTH_MODE above - WEB_AUTH_MODE in .env, documented in .env.example.
       NEXT_PUBLIC_AUTH_MODE: ${WEB_AUTH_MODE:-}
+      # Server-side proxy routes (local-auth unlock/setup, agent-card) fetch
+      # core from INSIDE the container, where the public host:port does not
+      # resolve - without this they hit localhost:8080 and report
+      # "The server could not be reached."
+      CORE_INTERNAL_URL: ${CORE_INTERNAL_URL:-http://core:8080}
       NEXT_PUBLIC_KEYCLOAK_URL: ${PUBLIC_AUTH_URL:-http://localhost:8180}
       NEXT_PUBLIC_KEYCLOAK_REALM: ${KEYCLOAK_REALM:-agentic-ai}
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: agentic-ai-web
