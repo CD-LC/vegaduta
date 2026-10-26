@@ -8,6 +8,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.12] - 2026-10-26
+
 ### Fixed
 
 - **Personal/lite installs never enabled the tool-sandbox client.** `scripts/vegaduta`
@@ -1416,6 +1418,7 @@ Release notes on GitHub are generated from the section for each version.
   identity yes; IMDS and Pod Identity need an `extraEgress` rule), and that `core`, `core-jobs` and `core-worker`
   each need the ServiceAccount annotation.
 
-[Unreleased]: https://github.com/CD-LC/vegaduta/compare/v0.1.11...HEAD
+[Unreleased]: https://github.com/CD-LC/vegaduta/compare/v0.1.12...HEAD
+[0.1.12]: https://github.com/CD-LC/vegaduta/compare/v0.1.11...v0.1.12
 [0.1.11]: https://github.com/CD-LC/vegaduta/compare/v0.1.10...v0.1.11
 [0.1.3]: https://github.com/CD-LC/vegaduta/releases/tag/v0.1.3

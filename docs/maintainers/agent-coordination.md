@@ -443,3 +443,13 @@ couldn't reach their own scope). Tests: tests/test_analysis.py 27 checks +
 CodeIntelAnalysisToolCallbackTest 6 tests; full suites green (ci ~380 py, codeintel 38,
 agents-tools 1531). mcp_bridge also fixed: GET params were sent as a JSON body FastAPI
 ignored - now real query strings.
+
+### v0.1.12 release cut (Devin, 2026-10-26)
+
+The v0.1.11 release run failed at the verify gate (CI on the tagged commit
+399ee43aa failed on BrowserToolDescriptionGoldenTest - fixed later by #218);
+the v0.1.11 tag remains but no GitHub release was ever published for it.
+Rather than retag a pushed ref, the cut moves to v0.1.12 at the post-#223
+main tip: approval-resume + desktop watch/learning (#220), deferred tool
+search in the personal profile + tool-sandbox export fix (#223), code-intel
+suite (#217) and the release-follow-up fixes (#218-#224).
