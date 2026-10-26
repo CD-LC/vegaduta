@@ -30,25 +30,24 @@
 // This page NEVER starts a model download by itself: an anonymous visitor
 // only ever gets a one-tap offer with the size stated (VOICE_OFFER below).
 import { useEffect, useRef, useState } from "react";
-import { Room, RoomEvent, Track } from "livekit-client";
 import { Loader2, Mic, Phone, PhoneOff, Video, VideoOff, Volume2, VolumeX } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { cn } from "../../lib/utils";
-import { getShareVoiceToken, sendSharedVoiceTurn } from "./api";
+import { getShareVoiceToken, sendSharedChat, sendSharedVoiceTurn } from "./api";
 import { sendShareTurn, speakShareLine } from "./shareTurn";
+import { sendLocalShareTurn } from "./shareLocalTurn";
+import { startShareLiveCall, endShareLiveCall } from "./shareLiveCall";
 import CallPreflight from "../../components/agents/call/CallPreflight";
 import ShareCallLog from "./ShareCallLog";
 import ShareVoiceoverRow from "./ShareVoiceoverRow";
+import ShareVoiceSetup from "./ShareVoiceSetup";
 import { edgeEnabled } from "../../lib/edge/capabilities";
-import { TTS_MODEL_SIZE_BYTES, edgeTtsAvailable, ensureTtsModel, isTtsModelCached } from "../../lib/edge/audio/kokoro";
+import { TTS_MODEL_SIZE_BYTES } from "../../lib/edge/audio/kokoro";
+import { STT_MODEL_SIZE_BYTES, isSttModelCached } from "../../lib/edge/audio/whisper";
+import { useShareVoiceSetup } from "./useShareVoiceSetup";
 import { stopAllSpeech, unlockAudioElement, unlockWebSpeech, webSpeechPresent } from "../../lib/voice/voicePlayers";
-import {
-  displaySafeDownloadError,
-  evaluateCallPreflight,
-  type DownloadState,
-  type PreflightActionKind,
-} from "../../lib/voice/callPreflight";
-import { progressPercent } from "../../lib/voice/callEnvironment";
+import { evaluateCallPreflight, type PreflightActionKind } from "../../lib/voice/callPreflight";
+import type { Room } from "livekit-client";
 
 // Same floors CallPanel.tsx uses, same reasoning: a quick tap-and-release
 // can land before the encoder has buffered a real frame, and a bare
@@ -131,30 +130,27 @@ export default function ShareCallPanel({
   const voiceEpochRef = useRef(0);
   const unmountedRef = useRef(false);
   const audioUnlockedRef = useRef(false);
-  const ttsDownloadingRef = useRef(false);
   const [voiceNotice, setVoiceNotice] = useState<string | null>(null);
   // VOICE_OFFER: a reply the server marked voiceless, in a script the
   // on-device voice can speak. Only ever leads to an OFFER (see the header).
   const [serverVoiceMissing, setServerVoiceMissing] = useState(false);
-  const [localTtsSupported, setLocalTtsSupported] = useState(false);
-  const [localTtsInstalled, setLocalTtsInstalled] = useState(false);
-  const [ttsDownload, setTtsDownload] = useState<DownloadState>({ status: "idle" });
-
-  useEffect(() => {
-    let cancelled = false;
-    try {
-      setLocalTtsInstalled(edgeEnabled() && isTtsModelCached());
-    } catch {
-      // Stays false.
-    }
-    void edgeTtsAvailable().then(
-      (ok) => !cancelled && setLocalTtsSupported(ok),
-      () => {}
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // On-device voice models (capability probes, installed flags, download
+  // state machines) live in ./useShareVoiceSetup.ts. With whisper installed,
+  // push-to-talk transcribes on this device and only the text crosses the
+  // wire - voice works even with the platform's whole speech stack down.
+  const {
+    localTtsSupported,
+    localTtsInstalled,
+    ttsDownload,
+    localSttSupported,
+    localSttInstalled,
+    sttDownload,
+    startTtsDownload,
+    startSttDownload,
+  } = useShareVoiceSetup(unmountedRef);
+  // Set when a server voice/turn failed this visit - gates the preflight's
+  // "download the on-device backup" offer.
+  const [serverSttFailedThisCall, setServerSttFailedThisCall] = useState(false);
 
   const roomRef = useRef<Room | null>(null);
   const remoteAudioContainerRef = useRef<HTMLDivElement | null>(null);
@@ -326,8 +322,32 @@ export default function ShareCallPanel({
   }
 
   // The push-to-talk turn itself lives in ./shareTurn.ts (file-size ratchet);
-  // this is the thin wrapper handing it the panel's state.
-  function sendTurn(blob: Blob) {
+  // this is the thin wrapper handing it the panel's state. When the on-device
+  // whisper model is on this device the audio is transcribed locally first
+  // and only the text goes to the shared chat endpoint - the server voice
+  // turn is the fallback, exactly like the console's localTurn routing.
+  async function sendTurn(blob: Blob) {
+    if (localSttInstalled || isSttModelCached()) {
+      const handled = await sendLocalShareTurn(
+        {
+          shareId,
+          unmountedRef,
+          voiceEpochRef,
+          repliesMutedRef,
+          audioElRef,
+          sendChat: sendSharedChat,
+          setStage,
+          setTranscript,
+          setReply,
+          appendCallLog: (entry) => setCallLog((prev) => [...prev, entry]),
+          setMode,
+        },
+        blob
+      );
+      if (handled) return;
+      // The local leg declined (unreadable audio, chat unreachable) - fall
+      // through to the server voice turn with the same recording.
+    }
     return sendShareTurn(
       {
         shareId,
@@ -345,167 +365,73 @@ export default function ShareCallPanel({
         setServerVoiceMissing,
         appendCallLog: (entry) => setCallLog((prev) => [...prev, entry]),
         setMode,
+        onServerError: () => setServerSttFailedThisCall(true),
       },
       blob
     );
   }
 
-  // The one-tap offer's Download button. ensureTtsModel is bounded by
-  // kokoro.ts's idle watchdog, so "downloading" cannot spin forever, and it
-  // rejects with a reason we turn into a plain line - never a toast.
-  async function startTtsDownload() {
-    if (ttsDownloadingRef.current) return;
-    ttsDownloadingRef.current = true;
-    setTtsDownload({ status: "downloading", percent: null });
-    try {
-      await ensureTtsModel((p) => {
-        if (unmountedRef.current) return;
-        const pct = progressPercent(p);
-        if (pct === null) return;
-        setTtsDownload((prev) => (prev.status === "downloading" ? { status: "downloading", percent: pct } : prev));
-      });
-      if (unmountedRef.current) return;
-      setLocalTtsInstalled(true);
-      setTtsDownload({ status: "idle" });
-      setVoiceNotice(null);
-    } catch (err) {
-      console.warn("[Voice] on-device voice download failed:", err);
-      if (!unmountedRef.current) setTtsDownload({ status: "failed", error: displaySafeDownloadError(err) });
-    } finally {
-      ttsDownloadingRef.current = false;
-    }
-  }
-
   function handlePreflightAction(kind: PreflightActionKind) {
     if (kind === "download-tts") void startTtsDownload();
+    if (kind === "download-stt") void startSttDownload();
   }
 
+  // The whisper model bundled for on-device transcription is English-only,
+  // so the preflight's local-STT rules only apply when this browser's
+  // language is English - the honest gate the console computes from settings
+  // is reduced to the one signal an anonymous page has: navigator.language.
+  const speechLikelyEnglish =
+    typeof navigator !== "undefined" && (navigator.language || "").toLowerCase().startsWith("en");
+
   // Only the voice rules of the shared preflight apply here; the microphone
-  // and speech-to-text inputs are passed as "nothing known", which makes
-  // those rules say nothing (this panel has its own error line for them).
+  // input is passed as "nothing known", which makes those rules say nothing
+  // (this panel has its own error line for it).
   const voiceIssues = evaluateCallPreflight({
     mic: "unknown",
     mediaRecorderSupported: true,
     serverSttChecked: false,
     serverSttAvailable: true,
-    serverSttFailedThisCall: false,
+    serverSttFailedThisCall,
     agentHasOwnSttProvider: false,
-    speechLikelyEnglish: false,
+    speechLikelyEnglish,
     edgeOn: edgeEnabled(),
-    localSttSupported: false,
-    localSttInstalled: false,
+    localSttSupported,
+    localSttInstalled,
     localTtsSupported,
     localTtsInstalled,
     serverVoiceMissing,
     webSpeechPresent: webSpeechPresent(),
-    sttDownload: { status: "idle" },
+    sttDownload,
     ttsDownload,
-    sttSizeBytes: 0,
+    sttSizeBytes: STT_MODEL_SIZE_BYTES,
     ttsSizeBytes: TTS_MODEL_SIZE_BYTES,
   });
 
-  // ---- Live call (LiveKit) --------------------------------------------
+  // ---- Live call (LiveKit) - the body lives in ./shareLiveCall.ts
+  // (file-size ratchet); this wrapper hands it the panel's state.
 
-  async function startCall(withCamera: boolean) {
-    if (mode === "push-to-talk" || callStatus === "connecting" || callStatus === "connected") return;
-    setError(null);
-    setMode("call");
-    setCallStatus("connecting");
-    agentAudioMutedRef.current = false;
-    setAgentAudioMuted(false);
-    liveTranscriptIdsRef.current.clear();
-    try {
-      const result = await getShareVoiceToken(shareId, withCamera ? "sight" : "voice");
-      if (!result.ok || !result.voice) {
-        setError(
-          result.error === "rate_limited" ? "Too many calls right now - try again shortly." : "Couldn't start the call."
-        );
-        setCallStatus("error");
-        setMode("idle");
-        return;
-      }
-      const room = new Room();
-      room.on(RoomEvent.Disconnected, () => {
-        roomRef.current = null;
-        setCallStatus("idle");
-        setCameraOn(false);
-        setMode("idle");
-        if (remoteAudioContainerRef.current) remoteAudioContainerRef.current.innerHTML = "";
-      });
-      room.on(RoomEvent.TrackSubscribed, (track) => {
-        if (track.kind === Track.Kind.Audio) {
-          const el = track.attach();
-          el.autoplay = true;
-          el.muted = agentAudioMutedRef.current;
-          remoteAudioContainerRef.current?.appendChild(el);
-        }
-      });
-      room.on(RoomEvent.TrackUnsubscribed, (track) => {
-        track.detach().forEach((el) => el.remove());
-      });
-      // Serializes locally-spoken agent replies (the `voiced:false` path in
-      // the call-transcript handler below) - one speakReply at a time.
-      let localSpeakChain: Promise<unknown> = Promise.resolve();
-      // Retained call transcript + stage over the data channel: the
-      // voice-agent worker publishes each turn's user/agent text on
-      // "call-transcript" and lifecycle stages on "agent-stage" - "the
-      // response in voice keeps its text on screen too". Deduped by the
-      // event id the worker mints.
-      room.on(RoomEvent.DataReceived, (payload, _participant, _kind, topic) => {
-        try {
-          const decoded = JSON.parse(new TextDecoder().decode(payload));
-          if (topic === "call-transcript") {
-            const role = decoded?.role === "user" || decoded?.role === "agent" ? decoded.role : null;
-            const text = typeof decoded?.text === "string" ? decoded.text.trim() : "";
-            const id = typeof decoded?.id === "string" ? decoded.id : `${decoded?.turnId ?? "?"}:${role}`;
-            if (!role || !text || liveTranscriptIdsRef.current.has(id)) return;
-            liveTranscriptIdsRef.current.add(id);
-            setCallLog((prev) => [...prev, { role, text }]);
-            // `voiced:false` = the worker has no server-side TTS key, so
-            // the reply text is all there is - speak it through the same
-            // on-device/browser chain the replay button uses (free, no
-            // key needed). Chained so consecutive replies never overlap.
-            if (role === "agent" && decoded.voiced === false) {
-              localSpeakChain = localSpeakChain.then(() => speakAgentLine(text));
-            }
-          } else if (topic === "agent-stage") {
-            const s = decoded?.stage;
-            if (s === "listening") setStage("listening");
-            else if (s === "understanding" || s === "generating") setStage("thinking");
-            else if (s === "speaking") setStage("speaking");
-            else if (s === "idle") setStage("idle");
-            if (decoded?.error) setError(String(decoded.error));
-          }
-        } catch {
-          // Malformed data message - ignore.
-        }
-      });
-      await room.connect(result.voice.url, result.voice.token);
-      roomRef.current = room;
-      await room.localParticipant.setMicrophoneEnabled(true);
-      if (withCamera) {
-        try {
-          await room.localParticipant.setCameraEnabled(true);
-          setCameraOn(true);
-        } catch {
-          // Camera denial degrades to a working voice-only call.
-        }
-      }
-      setCallStatus("connected");
-    } catch (err: any) {
-      setError(err?.message || "Couldn't start the call.");
-      setCallStatus("error");
-      setMode("idle");
-    }
-  }
+  const liveCallDeps = {
+    shareId,
+    mode,
+    callStatus,
+    getVoiceToken: getShareVoiceToken,
+    roomRef,
+    remoteAudioContainerRef,
+    agentAudioMutedRef,
+    liveTranscriptIdsRef,
+    speakAgentLine,
+    appendCallLog: (entry: { role: "user" | "agent"; text: string }) =>
+      setCallLog((prev) => [...prev, entry]),
+    setError,
+    setMode,
+    setCallStatus,
+    setAgentAudioMuted,
+    setCameraOn,
+    setStage,
+  };
 
-  function endCall() {
-    void roomRef.current?.disconnect();
-    roomRef.current = null;
-    setCallStatus("idle");
-    setCameraOn(false);
-    setMode("idle");
-  }
+  const startCall = (withCamera: boolean) => startShareLiveCall(liveCallDeps, withCamera);
+  const endCall = () => endShareLiveCall(liveCallDeps);
 
   const stageText = stageLabel(stage);
 
@@ -644,6 +570,20 @@ export default function ShareCallPanel({
         </p>
       )}
       <CallPreflight issues={voiceIssues} onAction={handlePreflightAction} disabled={recording} />
+      {/* One-tap on-device voice setup: visible only while an installable
+          model is missing. With both on this device, hold-to-talk works
+          even when the platform's whole speech stack is down. */}
+      {edgeEnabled() && (
+        <ShareVoiceSetup
+          sttInstallable={localSttSupported && !localSttInstalled}
+          ttsInstallable={localTtsSupported && !localTtsInstalled}
+          sttDownload={sttDownload}
+          ttsDownload={ttsDownload}
+          busy={recording || mode === "call"}
+          onSttDownload={() => void startSttDownload()}
+          onTtsDownload={() => void startTtsDownload()}
+        />
+      )}
       {error && <p className="text-center text-xs text-destructive">{error}</p>}
 
       {callStatus === "connected" && (
