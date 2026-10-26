@@ -14,7 +14,6 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
-import org.springframework.ai.chat.prompt.Prompt;
 import reactor.core.publisher.Flux;
 
 /**
@@ -36,7 +35,9 @@ class TerminalRoundStreamAdvisorTest {
                         ? new Generation(new AssistantMessage(text))
                         : new Generation(
                                 new AssistantMessage(text),
-                                ChatGenerationMetadata.builder().finishReason(finishReason).build());
+                                ChatGenerationMetadata.builder()
+                                        .finishReason(finishReason)
+                                        .build());
         return ChatClientResponse.builder()
                 .chatResponse(new ChatResponse(List.of(generation)))
                 .context(Map.of())
@@ -47,8 +48,7 @@ class TerminalRoundStreamAdvisorTest {
         StreamAdvisorChain chain = mock(StreamAdvisorChain.class);
         org.mockito.Mockito.when(chain.nextStream(org.mockito.ArgumentMatchers.any()))
                 .thenReturn(upstream);
-        return advisor
-                .adviseStream(mock(ChatClientRequest.class), chain)
+        return advisor.adviseStream(mock(ChatClientRequest.class), chain)
                 .map(r -> r.chatResponse().getResult().getOutput().getText())
                 .collectList()
                 .block();
@@ -90,8 +90,7 @@ class TerminalRoundStreamAdvisorTest {
 
     @Test
     void aToolOnlyRoundEmitsNothing() {
-        List<String> out =
-                emit(Flux.just(chunk("", "tool_calls"), chunk("done.", "stop")));
+        List<String> out = emit(Flux.just(chunk("", "tool_calls"), chunk("done.", "stop")));
         assertEquals(List.of("done."), out);
     }
 
@@ -109,5 +108,49 @@ class TerminalRoundStreamAdvisorTest {
     void nothingUpstreamMeansNothingEmitted() {
         List<String> out = emit(Flux.empty());
         assertTrue(out == null || out.isEmpty());
+    }
+
+    private static ChatClientResponse toolCallChunk(String text, String finishReason) {
+        AssistantMessage message =
+                AssistantMessage.builder()
+                        .content(text)
+                        .toolCalls(
+                                List.of(
+                                        new AssistantMessage.ToolCall(
+                                                "id-1", "function", "web_search", "{\"q\":\"x\"}")))
+                        .build();
+        Generation generation =
+                finishReason == null
+                        ? new Generation(message)
+                        : new Generation(
+                                message,
+                                ChatGenerationMetadata.builder()
+                                        .finishReason(finishReason)
+                                        .build());
+        return ChatClientResponse.builder()
+                .chatResponse(new ChatResponse(List.of(generation)))
+                .context(Map.of())
+                .build();
+    }
+
+    @Test
+    void aToolCallRoundReportingStopStillDrops() {
+        List<String> out =
+                emit(
+                        Flux.just(
+                                toolCallChunk("Let me search for that.", "stop"),
+                                chunk("The price is "),
+                                chunk("80166.", "stop")));
+        assertEquals(List.of("The price is ", "80166."), out);
+    }
+
+    @Test
+    void aToolCallRoundWithNoFinishReasonStillDrops() {
+        List<String> out =
+                emit(
+                        Flux.just(
+                                toolCallChunk("checking one more thing", null),
+                                chunk("the answer", "stop")));
+        assertEquals(List.of("the answer"), out);
     }
 }
