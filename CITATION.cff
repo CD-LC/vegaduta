@@ -12,8 +12,8 @@ license: BUSL-1.1
 license-url: "https://github.com/CD-LC/vegaduta/blob/main/LICENSE"
 # version and date-released: the latest release in CHANGELOG.md (bumped with each release, see
 # docs/maintainers/releasing.md; sdk/test/citation.test.mjs checks the pair against CHANGELOG.md).
-version: 0.1.9
-date-released: "2026-10-21"
+version: 0.1.11
+date-released: "2026-10-26"
 abstract: >-
   VegaDūta is a self-hostable, multi-tenant platform for building AI agents,
   orchestrating them in workflows with human approval, grounding them in
