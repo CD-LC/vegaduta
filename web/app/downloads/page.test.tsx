@@ -44,22 +44,32 @@ describe("pickAssets", () => {
 describe("/downloads", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("links the real assets of the latest release", async () => {
+  it("links the real assets of the latest platform release", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => ({
         ok: true,
-        json: async () => ({
-          tag_name: "v1.2.3",
-          html_url: "https://github.com/CD-LC/vegaduta/releases/tag/v1.2.3",
-          published_at: "2026-10-20T00:00:00Z",
-          assets: ASSETS.map((a) => ({
-            name: a.name,
-            browser_download_url: a.url,
-            size: a.sizeMb * 1048576,
-          })),
-        }),
-      })),
+        json: async () => [
+          // A component release published after the platform tag: /releases/latest
+          // would follow it, so the page must skip non-vX.Y.Z tags.
+          {
+            tag_name: "sdk-v9.9.9",
+            html_url: "https://github.com/CD-LC/vegaduta/releases/tag/sdk-v9.9.9",
+            published_at: "2026-10-25T00:00:00Z",
+            assets: [],
+          },
+          {
+            tag_name: "v1.2.3",
+            html_url: "https://github.com/CD-LC/vegaduta/releases/tag/v1.2.3",
+            published_at: "2026-10-20T00:00:00Z",
+            assets: ASSETS.map((a) => ({
+              name: a.name,
+              browser_download_url: a.url,
+              size: a.sizeMb * 1048576,
+            })),
+          },
+        ],
+      }))
     );
     render(await DownloadsPage());
     // BrandName splits the wordmark into accent spans; match the level-1 heading, not a flattened name.
@@ -72,14 +82,17 @@ describe("/downloads", () => {
   });
 
   it("falls back to the releases page when no release exists yet", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({ ok: false }))
+    );
     render(await DownloadsPage());
     expect(screen.getByRole("link", { name: /Releases on GitHub/ }).getAttribute("href")).toBe(
-      "https://github.com/CD-LC/vegaduta/releases",
+      "https://github.com/CD-LC/vegaduta/releases"
     );
     // Cards still render with a button that lands on the releases tab - no dead links.
     expect(screen.getByRole("link", { name: /macOS \.dmg/ }).getAttribute("href")).toBe(
-      "https://github.com/CD-LC/vegaduta/releases",
+      "https://github.com/CD-LC/vegaduta/releases"
     );
   });
 });

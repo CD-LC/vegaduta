@@ -58,17 +58,21 @@ fetch() {
   else die "curl or wget is required"; fi
 }
 
-# latest_version -> X.Y.Z of the newest published (non-pre) release
+# latest_version -> X.Y.Z of the newest published PLATFORM release. GitHub's
+# /releases/latest follows whichever release was published most recently - a
+# component release like sdk-v0.1.1 beats the platform's own tag - so the
+# tag must be picked out of the releases list by shape: platform releases are
+# v<digit>..., everything else (sdk-*, pysdk-*, restsdk-*) is skipped.
 latest_version() {
-  _url="https://github.com/$REPO/releases/latest"
+  _api="https://api.github.com/repos/$REPO/releases?per_page=30"
   if have curl; then
-    _eff="$(curl -fsSLI --proto '=https' -o /dev/null -w '%{url_effective}' "$_url")" || return 1
+    _body="$(curl -fsSL --proto '=https' --tlsv1.2 -H 'Accept: application/vnd.github+json' -H 'User-Agent: vegaduta-installer' "$_api")" || return 1
   else
-    _eff="$(wget -q --https-only --max-redirect=5 -S --spider "$_url" 2>&1 | awk '/^ *[Ll]ocation: /{l=$2} END{print l}')" || return 1
+    _body="$(wget -q --https-only -O- --header='Accept: application/vnd.github+json' --header='User-Agent: vegaduta-installer' "$_api")" || return 1
   fi
-  _tag="${_eff##*/}"
+  _tag="$(printf '%s\n' "$_body" | grep -oE '"tag_name"[^:]*:[[:space:]]*"v[0-9][0-9.]*"' | head -n1 | sed 's/.*"\(v[0-9][0-9.]*\)"/\1/')"
   case "$_tag" in
-    v[0-9]*) printf '%s\n' "${_tag#v}" ;;
+    v[0-9]*.[0-9]*.[0-9]*) printf '%s\n' "${_tag#v}" ;;
     *) return 1 ;;
   esac
 }
