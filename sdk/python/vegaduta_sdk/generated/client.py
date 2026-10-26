@@ -6076,45 +6076,54 @@ class LocalAuthApi:
 
         GET /api/auth/local/config
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
         return self._http.request("GET", "/api/auth/local/config")
 
-    def login(self, body: m.LocalAuthController_LoginRequest, *, idempotency_key: Optional[str] = None) -> m.LocalAuthController_SessionResponse:
+    def login(self, body: m.LocalAuthController_LoginRequest) -> m.LocalAuthController_SessionResponse:
         """Login.
 
         POST /api/auth/local/login
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/login", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/login", body=body)
 
-    def logout(self, body: Optional[m.LocalAuthController_RefreshRequest] = None, *, idempotency_key: Optional[str] = None) -> None:
+    def logout(self, body: Optional[m.LocalAuthController_RefreshRequest] = None) -> None:
         """Logout.
 
         POST /api/auth/local/logout
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/logout", headers={"Idempotency-Key": idempotency_key}, body=body, response="void")
+        return self._http.request("POST", "/api/auth/local/logout", body=body, response="void")
 
-    def refresh(self, body: m.LocalAuthController_RefreshRequest, *, idempotency_key: Optional[str] = None) -> m.LocalAuthController_SessionResponse:
+    def refresh(self, body: m.LocalAuthController_RefreshRequest) -> m.LocalAuthController_SessionResponse:
         """Refresh.
 
         POST /api/auth/local/refresh
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/refresh", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/refresh", body=body)
 
-    def setup(self, body: m.LocalAuthController_SetupRequest, *, idempotency_key: Optional[str] = None) -> m.LocalAuthController_SessionResponse:
+    def reset_request(self, body: Optional[m.LocalAuthController_ResetRequest] = None) -> Dict[str, str]:
+        """Reset request.
+
+        POST /api/auth/local/reset-request
+
+        Ask for a password reset on a personal install. The one-time reset link is never returned here: core writes it to password-reset.txt in the install's auth data directory (scripts/vegaduta reset-password prints it), so only someone with access to the machine itself can use it. The answer is the same for an unknown e-mail - it reveals nothing about the account. A blank e-mail resolves to the install's only account. Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        """
+        return self._http.request("POST", "/api/auth/local/reset-request", body=body)
+
+    def setup(self, body: m.LocalAuthController_SetupRequest) -> m.LocalAuthController_SessionResponse:
         """Setup.
 
         POST /api/auth/local/setup
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/setup", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/setup", body=body)
 
 
 class LocalModelsApi:
@@ -6214,14 +6223,14 @@ class LocalUnlockApi:
         """
         return self._http.request("DELETE", f"/api/auth/local/unlock/devices/{quote_path(id)}", response="void")
 
-    def login(self, body: m.LocalUnlockController_UnlockLoginRequest, *, idempotency_key: Optional[str] = None) -> m.LocalAuthController_SessionResponse:
+    def login(self, body: m.LocalUnlockController_UnlockLoginRequest) -> m.LocalAuthController_SessionResponse:
         """Login.
 
         POST /api/auth/local/unlock/login
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/unlock/login", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/unlock/login", body=body)
 
     def methods(self) -> m.LocalUnlockService_Methods:
         """Methods.
@@ -6232,32 +6241,32 @@ class LocalUnlockApi:
         """
         return self._http.request("GET", "/api/auth/local/unlock/methods")
 
-    def login_options(self, *, idempotency_key: Optional[str] = None) -> m.LocalPasskeyService_Options:
+    def login_options(self) -> m.LocalPasskeyService_Options:
         """Login options.
 
         POST /api/auth/local/unlock/passkey/login-options
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/unlock/passkey/login-options", headers={"Idempotency-Key": idempotency_key})
+        return self._http.request("POST", "/api/auth/local/unlock/passkey/login-options")
 
-    def register(self, body: m.LocalUnlockController_RegisterRequest, *, idempotency_key: Optional[str] = None) -> m.LocalUnlockController_RegisterResponse:
+    def register(self, body: m.LocalUnlockController_RegisterRequest) -> m.LocalUnlockController_RegisterResponse:
         """Register.
 
         POST /api/auth/local/unlock/passkey/register
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/unlock/passkey/register", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/unlock/passkey/register", body=body)
 
-    def register_options(self, body: Optional[m.LocalUnlockController_RegisterOptionsRequest] = None, *, idempotency_key: Optional[str] = None) -> m.LocalPasskeyService_Options:
+    def register_options(self, body: Optional[m.LocalUnlockController_RegisterOptionsRequest] = None) -> m.LocalPasskeyService_Options:
         """Register options.
 
         POST /api/auth/local/unlock/passkey/register-options
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/unlock/passkey/register-options", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/unlock/passkey/register-options", body=body)
 
     def remove_passkey(self, id: str) -> None:
         """Remove passkey.
@@ -6277,14 +6286,14 @@ class LocalUnlockApi:
         """
         return self._http.request("POST", "/api/auth/local/unlock/recovery-codes", headers={"Idempotency-Key": idempotency_key})
 
-    def setup_with_pin(self, body: m.LocalUnlockController_SetupPinRequest, *, idempotency_key: Optional[str] = None) -> m.LocalUnlockController_SetupPinResponse:
+    def setup_with_pin(self, body: m.LocalUnlockController_SetupPinRequest) -> m.LocalUnlockController_SetupPinResponse:
         """Setup with pin.
 
         POST /api/auth/local/unlock/setup/pin
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/unlock/setup/pin", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/unlock/setup/pin", body=body)
 
 
 class MatrixApi:
