@@ -63,7 +63,8 @@ public class CodeIntelAnalysis {
         return symbolDetailResult(repoId, qualifiedName, includeBody).body();
     }
 
-    CodeIntelClient.Result symbolDetailResult(String repoId, String qualifiedName, boolean includeBody) {
+    CodeIntelClient.Result symbolDetailResult(
+            String repoId, String qualifiedName, boolean includeBody) {
         return client.get(
                 "/repos/"
                         + CodeIntelClient.enc(repoId)

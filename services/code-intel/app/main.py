@@ -81,26 +81,30 @@ _agent = None
 if SETTINGS.cors_origins.strip():
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[o.strip() for o in SETTINGS.cors_origins.split(",")
-                       if o.strip()],
+        allow_origins=[o.strip() for o in SETTINGS.cors_origins.split(",") if o.strip()],
         allow_credentials=False,
         allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type", "X-Tenant-Id",
-                       "X-Internal-Token"],
+        allow_headers=["Authorization", "Content-Type", "X-Tenant-Id", "X-Internal-Token"],
     )
 
 
 # --------------------------------------------------------------------- #
 # auth dependency + error mapping
 
+
 def tenant(request: Request) -> TenantContext:
     return authenticate(dict(request.headers), SETTINGS)
 
 
 def _error(status: int, message: str) -> JSONResponse:
-    return JSONResponse(status_code=status, content={
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "status": status, "error": message})
+    return JSONResponse(
+        status_code=status,
+        content={
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "status": status,
+            "error": message,
+        },
+    )
 
 
 @app.exception_handler(AuthError)
@@ -152,28 +156,35 @@ async def _policy_denied(_req, exc):
 async def _approval_not_authorized(_req, exc: ApprovalNotAuthorizedError):
     # Mirrors core's ApprovalNotAuthorizedException / 403 - see
     # ApprovalNotAuthorizedError's docstring in service.py.
-    return _error(403, f"Resolving this approval requires an admin role "
-                       f"(codeintel.workspace.apply/.run are adminOnly, "
-                       f"same as on core's Approvals screen): {exc}")
+    return _error(
+        403,
+        f"Resolving this approval requires an admin role "
+        f"(codeintel.workspace.apply/.run are adminOnly, "
+        f"same as on core's Approvals screen): {exc}",
+    )
 
 
 @app.exception_handler(ApprovalRequiredError)
 async def _approval_required(_req, exc: ApprovalRequiredError):
     # 428 Precondition Required: caller must obtain approval, then retry with
     # ?approval_id=... once a human approves it.
-    return JSONResponse(status_code=428, content={
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "status": 428,
-        "error": f"Human approval required: {exc.reason}",
-        "approval_id": exc.approval_id,
-        "how_to_proceed": "A reviewer approves via POST /approvals/"
-                          f"{exc.approval_id}/resolve, then retry this call "
-                          "with ?approval_id=" + exc.approval_id,
-    })
+    return JSONResponse(
+        status_code=428,
+        content={
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "status": 428,
+            "error": f"Human approval required: {exc.reason}",
+            "approval_id": exc.approval_id,
+            "how_to_proceed": "A reviewer approves via POST /approvals/"
+            f"{exc.approval_id}/resolve, then retry this call "
+            "with ?approval_id=" + exc.approval_id,
+        },
+    )
 
 
 # --------------------------------------------------------------------- #
 # models
+
 
 class RegisterRepoRequest(BaseModel):
     repo_id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._\-]{0,127}$")
@@ -205,6 +216,7 @@ class IndexRequest(BaseModel):
 # --------------------------------------------------------------------- #
 # routes
 
+
 @app.get("/health")
 def health():
     """Liveness + an honest capability report.
@@ -221,27 +233,44 @@ def health():
     Unauthenticated, so it says only whether a capability is on and which
     setting governs it - never a key, a value, or a hostname.
     """
-    return {"status": "ok", "auth_mode": SETTINGS.auth_mode,
-            "capabilities": {"agent_resolve": agent_capabilities(SETTINGS)}}
+    return {
+        "status": "ok",
+        "auth_mode": SETTINGS.auth_mode,
+        "capabilities": {"agent_resolve": agent_capabilities(SETTINGS)},
+    }
 
 
 @app.post("/repos", status_code=201)
-def register_repo(body: RegisterRepoRequest,
-                  ctx: TenantContext = Depends(tenant)):
-    entry = service.register(ctx, RepoEntry(
-        repo_id=body.repo_id, source_type=body.source_type, path=body.path,
-        git_url=body.git_url, git_ref=body.git_ref, auth_env=body.auth_env,
-        auth_token=body.auth_token,
-        embedder=body.embedder, embed_model=body.embed_model))
+def register_repo(body: RegisterRepoRequest, ctx: TenantContext = Depends(tenant)):
+    entry = service.register(
+        ctx,
+        RepoEntry(
+            repo_id=body.repo_id,
+            source_type=body.source_type,
+            path=body.path,
+            git_url=body.git_url,
+            git_ref=body.git_ref,
+            auth_env=body.auth_env,
+            auth_token=body.auth_token,
+            embedder=body.embedder,
+            embed_model=body.embed_model,
+        ),
+    )
     return {"repo_id": entry.repo_id, "source_type": entry.source_type}
 
 
 @app.get("/repos")
 def list_repos(ctx: TenantContext = Depends(tenant)):
-    return [{"repo_id": e.repo_id, "source_type": e.source_type,
-             "last_index": e.last_index, "last_graph": e.last_graph,
-             "last_capacity_error": e.last_capacity_error}
-            for e in service.list_repos(ctx)]
+    return [
+        {
+            "repo_id": e.repo_id,
+            "source_type": e.source_type,
+            "last_index": e.last_index,
+            "last_graph": e.last_graph,
+            "last_capacity_error": e.last_capacity_error,
+        }
+        for e in service.list_repos(ctx)
+    ]
 
 
 @app.delete("/repos/{repo_id}")
@@ -267,9 +296,12 @@ def delete_tenant(ctx: TenantContext = Depends(tenant)):
 
 
 @app.post("/repos/{repo_id}/index")
-def index_repo(repo_id: str, body: IndexRequest,
-               background_tasks: BackgroundTasks,
-               ctx: TenantContext = Depends(tenant)):
+def index_repo(
+    repo_id: str,
+    body: IndexRequest,
+    background_tasks: BackgroundTasks,
+    ctx: TenantContext = Depends(tenant),
+):
     if body.background:
         # The task waits (bounded) for a heavy-job slot; if none frees up the
         # failure is persisted on the repo's last_capacity_error (see /status).
@@ -280,8 +312,7 @@ def index_repo(repo_id: str, body: IndexRequest,
 
 def _safe_index(ctx: TenantContext, repo_id: str, full: bool) -> None:
     try:
-        service.index(ctx, repo_id, full=full,
-                      wait=SETTINGS.heavy_queue_wait_seconds)
+        service.index(ctx, repo_id, full=full, wait=SETTINGS.heavy_queue_wait_seconds)
     except Exception:
         pass  # outcome persisted on the registry entry either way
 
@@ -292,16 +323,17 @@ def repo_status(repo_id: str, ctx: TenantContext = Depends(tenant)):
     if repo_id not in entries:
         raise RepoNotFoundError(repo_id)
     e = entries[repo_id]
-    return {"repo_id": repo_id, "last_index": e.last_index,
-            "last_capacity_error": e.last_capacity_error,
-            "last_graph": e.last_graph}
+    return {
+        "repo_id": repo_id,
+        "last_index": e.last_index,
+        "last_capacity_error": e.last_capacity_error,
+        "last_graph": e.last_graph,
+    }
 
 
 @app.post("/repos/{repo_id}/search")
-def search(repo_id: str, body: SearchRequest,
-           ctx: TenantContext = Depends(tenant)):
-    return service.search(ctx, repo_id, body.query,
-                          top_k=body.top_k, path_prefix=body.path_prefix)
+def search(repo_id: str, body: SearchRequest, ctx: TenantContext = Depends(tenant)):
+    return service.search(ctx, repo_id, body.query, top_k=body.top_k, path_prefix=body.path_prefix)
 
 
 @app.post("/repos/{repo_id}/graph/build")
@@ -310,20 +342,17 @@ def graph_build(repo_id: str, ctx: TenantContext = Depends(tenant)):
 
 
 @app.get("/repos/{repo_id}/graph/callers/{symbol}")
-def graph_callers(repo_id: str, symbol: str,
-                  ctx: TenantContext = Depends(tenant)):
+def graph_callers(repo_id: str, symbol: str, ctx: TenantContext = Depends(tenant)):
     return service.graph_callers(ctx, repo_id, symbol)
 
 
 @app.get("/repos/{repo_id}/graph/callees/{symbol}")
-def graph_callees(repo_id: str, symbol: str,
-                  ctx: TenantContext = Depends(tenant)):
+def graph_callees(repo_id: str, symbol: str, ctx: TenantContext = Depends(tenant)):
     return service.graph_callees(ctx, repo_id, symbol)
 
 
 @app.get("/repos/{repo_id}/graph/impact/{symbol}")
-def graph_impact(repo_id: str, symbol: str, depth: int = 3,
-                 ctx: TenantContext = Depends(tenant)):
+def graph_impact(repo_id: str, symbol: str, depth: int = 3, ctx: TenantContext = Depends(tenant)):
     return service.graph_impact(ctx, repo_id, symbol, depth=depth)
 
 
@@ -336,75 +365,87 @@ def graph_stats(repo_id: str, ctx: TenantContext = Depends(tenant)):
 # analysis endpoints (codebase_rag/analysis.py) - deterministic reads over
 # the built graph. All read-only, all tenant-scoped, all cheap (no rebuild).
 
+
 @app.get("/repos/{repo_id}/map")
-def repo_map(repo_id: str, budget: int = 16000, top_n: int = 200,
-             ctx: TenantContext = Depends(tenant)):
+def repo_map(
+    repo_id: str, budget: int = 16000, top_n: int = 200, ctx: TenantContext = Depends(tenant)
+):
     """PageRank-ranked skeleton of the repo - signatures, not bodies. The
     agent's first call: learn the codebase's shape before fetching bodies."""
-    return service.repo_map(ctx, repo_id, budget=min(max(budget, 1000), 64000),
-                            top_n=min(max(top_n, 1), 500))
+    return service.repo_map(
+        ctx, repo_id, budget=min(max(budget, 1000), 64000), top_n=min(max(top_n, 1), 500)
+    )
 
 
 @app.get("/repos/{repo_id}/symbols")
-def find_symbols(repo_id: str, q: str = "", kind: str = "",
-                 path_prefix: str = "", limit: int = 50,
-                 include_tests: bool = True,
-                 ctx: TenantContext = Depends(tenant)):
+def find_symbols(
+    repo_id: str,
+    q: str = "",
+    kind: str = "",
+    path_prefix: str = "",
+    limit: int = 50,
+    include_tests: bool = True,
+    ctx: TenantContext = Depends(tenant),
+):
     """Name-path symbol search (`Auth.login` matches `auth.Auth.login`)."""
-    return service.find_symbols(ctx, repo_id, query=q, kind=kind,
-                                path_prefix=path_prefix, limit=limit,
-                                include_tests=include_tests)
+    return service.find_symbols(
+        ctx,
+        repo_id,
+        query=q,
+        kind=kind,
+        path_prefix=path_prefix,
+        limit=limit,
+        include_tests=include_tests,
+    )
 
 
 @app.get("/repos/{repo_id}/symbols/{qualified_name}")
-def symbol_detail(repo_id: str, qualified_name: str,
-                  include_body: bool = True,
-                  ctx: TenantContext = Depends(tenant)):
+def symbol_detail(
+    repo_id: str,
+    qualified_name: str,
+    include_body: bool = True,
+    ctx: TenantContext = Depends(tenant),
+):
     """One symbol: metadata + exact source span (+ body by default)."""
-    return service.symbol_detail(ctx, repo_id, qualified_name,
-                                 include_body=include_body)
+    return service.symbol_detail(ctx, repo_id, qualified_name, include_body=include_body)
 
 
 @app.get("/repos/{repo_id}/outline")
-def file_outline(repo_id: str, path: str,
-                 ctx: TenantContext = Depends(tenant)):
+def file_outline(repo_id: str, path: str, ctx: TenantContext = Depends(tenant)):
     """One file's symbol tree (the Serena get_symbols_overview shape)."""
     return service.file_outline(ctx, repo_id, path)
 
 
 @app.get("/repos/{repo_id}/references/{symbol}")
-def references(repo_id: str, symbol: str,
-               ctx: TenantContext = Depends(tenant)):
+def references(repo_id: str, symbol: str, ctx: TenantContext = Depends(tenant)):
     """Every inbound mention: calls + inherits + value/type references."""
     return service.references_of(ctx, repo_id, symbol)
 
 
 @app.get("/repos/{repo_id}/graph/implementations/{symbol}")
-def implementations(repo_id: str, symbol: str, depth: int = 4,
-                    ctx: TenantContext = Depends(tenant)):
+def implementations(
+    repo_id: str, symbol: str, depth: int = 4, ctx: TenantContext = Depends(tenant)
+):
     """Recursive subclass/implementer tree over `inherits` edges."""
-    return service.implementations_of(ctx, repo_id, symbol,
-                                      depth=min(max(depth, 1), 10))
+    return service.implementations_of(ctx, repo_id, symbol, depth=min(max(depth, 1), 10))
 
 
 @app.get("/repos/{repo_id}/graph/path")
-def call_path(repo_id: str, src: str, dst: str, max_depth: int = 8,
-              ctx: TenantContext = Depends(tenant)):
+def call_path(
+    repo_id: str, src: str, dst: str, max_depth: int = 8, ctx: TenantContext = Depends(tenant)
+):
     """BFS shortest call chain between two symbols."""
-    return service.call_path(ctx, repo_id, src, dst,
-                             max_depth=min(max(max_depth, 1), 16))
+    return service.call_path(ctx, repo_id, src, dst, max_depth=min(max(max_depth, 1), 16))
 
 
 @app.get("/repos/{repo_id}/dead-code")
-def dead_code(repo_id: str, limit: int = 100,
-              ctx: TenantContext = Depends(tenant)):
+def dead_code(repo_id: str, limit: int = 100, ctx: TenantContext = Depends(tenant)):
     """Top-level symbols with zero inbound edges - review candidates."""
     return service.dead_code(ctx, repo_id, limit=limit)
 
 
 @app.get("/repos/{repo_id}/tests/{symbol}")
-def tests_for(repo_id: str, symbol: str,
-              ctx: TenantContext = Depends(tenant)):
+def tests_for(repo_id: str, symbol: str, ctx: TenantContext = Depends(tenant)):
     """Test-side linkage: test-file symbols that reach `symbol`."""
     return service.tests_for(ctx, repo_id, symbol)
 
@@ -416,11 +457,9 @@ def api_surface(repo_id: str, ctx: TenantContext = Depends(tenant)):
 
 
 @app.get("/repos/{repo_id}/hotspots")
-def hotspots(repo_id: str, days: int = 90, limit: int = 30,
-             ctx: TenantContext = Depends(tenant)):
+def hotspots(repo_id: str, days: int = 90, limit: int = 30, ctx: TenantContext = Depends(tenant)):
     """git churn x size - where bugs concentrate."""
-    return service.hotspots(ctx, repo_id,
-                            days=min(max(days, 1), 3650), limit=limit)
+    return service.hotspots(ctx, repo_id, days=min(max(days, 1), 3650), limit=limit)
 
 
 @app.get("/repos/{repo_id}/import-cycles")
@@ -434,16 +473,18 @@ def import_cycles(repo_id: str, ctx: TenantContext = Depends(tenant)):
 
 
 class ApplyFilesRequest(BaseModel):
-    files: list[dict] = Field(
-        description="[{path, content} | {path, delete: true}]")
+    files: list[dict] = Field(description="[{path, content} | {path, delete: true}]")
 
 
 class RunRequest(BaseModel):
     command: str
     timeout: int | None = Field(default=None, ge=1, le=1800)
-    attempts: int = Field(default=1, ge=1, le=5,
-                          description="Reruns of UNCHANGED code on failure "
-                                      "(flaky absorption), not rework.")
+    attempts: int = Field(
+        default=1,
+        ge=1,
+        le=5,
+        description="Reruns of UNCHANGED code on failure (flaky absorption), not rework.",
+    )
 
 
 @app.exception_handler(ExecDisabledError)
@@ -472,32 +513,42 @@ def workspace_create(repo_id: str, ctx: TenantContext = Depends(tenant)):
 
 
 @app.post("/repos/{repo_id}/workspaces/{ws_id}/apply")
-def workspace_apply(repo_id: str, ws_id: str, body: ApplyFilesRequest,
-                    approval_id: str | None = None,
-                    ctx: TenantContext = Depends(tenant)):
-    return service.workspace_apply(ctx, repo_id, ws_id, body.files,
-                                   approval_id=approval_id)
+def workspace_apply(
+    repo_id: str,
+    ws_id: str,
+    body: ApplyFilesRequest,
+    approval_id: str | None = None,
+    ctx: TenantContext = Depends(tenant),
+):
+    return service.workspace_apply(ctx, repo_id, ws_id, body.files, approval_id=approval_id)
 
 
 @app.post("/repos/{repo_id}/workspaces/{ws_id}/run")
-def workspace_run(repo_id: str, ws_id: str, body: RunRequest,
-                  approval_id: str | None = None,
-                  ctx: TenantContext = Depends(tenant)):
-    return service.workspace_run(ctx, repo_id, ws_id, body.command,
-                                 timeout=body.timeout,
-                                 attempts=body.attempts,
-                                 approval_id=approval_id)
+def workspace_run(
+    repo_id: str,
+    ws_id: str,
+    body: RunRequest,
+    approval_id: str | None = None,
+    ctx: TenantContext = Depends(tenant),
+):
+    return service.workspace_run(
+        ctx,
+        repo_id,
+        ws_id,
+        body.command,
+        timeout=body.timeout,
+        attempts=body.attempts,
+        approval_id=approval_id,
+    )
 
 
 @app.get("/repos/{repo_id}/workspaces/{ws_id}/diff")
-def workspace_diff(repo_id: str, ws_id: str,
-                   ctx: TenantContext = Depends(tenant)):
+def workspace_diff(repo_id: str, ws_id: str, ctx: TenantContext = Depends(tenant)):
     return service.workspace_diff(ctx, repo_id, ws_id)
 
 
 @app.delete("/repos/{repo_id}/workspaces/{ws_id}")
-def workspace_delete(repo_id: str, ws_id: str,
-                     ctx: TenantContext = Depends(tenant)):
+def workspace_delete(repo_id: str, ws_id: str, ctx: TenantContext = Depends(tenant)):
     return service.workspace_delete(ctx, repo_id, ws_id)
 
 
@@ -516,25 +567,33 @@ class StartProcessRequest(BaseModel):
 
 
 @app.post("/repos/{repo_id}/workspaces/{ws_id}/processes", status_code=201)
-def process_start(repo_id: str, ws_id: str, body: StartProcessRequest,
-                  approval_id: str | None = None,
-                  ctx: TenantContext = Depends(tenant)):
-    return service.process_start(ctx, repo_id, ws_id, body.command,
-                                 run_mode=body.run_mode, image=body.image,
-                                 port=body.port,
-                                 env_overrides=body.env_overrides,
-                                 approval_id=approval_id)
+def process_start(
+    repo_id: str,
+    ws_id: str,
+    body: StartProcessRequest,
+    approval_id: str | None = None,
+    ctx: TenantContext = Depends(tenant),
+):
+    return service.process_start(
+        ctx,
+        repo_id,
+        ws_id,
+        body.command,
+        run_mode=body.run_mode,
+        image=body.image,
+        port=body.port,
+        env_overrides=body.env_overrides,
+        approval_id=approval_id,
+    )
 
 
 @app.delete("/repos/{repo_id}/workspaces/{ws_id}/processes/{process_id}")
-def process_stop(repo_id: str, ws_id: str, process_id: str,
-                 ctx: TenantContext = Depends(tenant)):
+def process_stop(repo_id: str, ws_id: str, process_id: str, ctx: TenantContext = Depends(tenant)):
     return service.process_stop(ctx, repo_id, ws_id, process_id)
 
 
 @app.get("/repos/{repo_id}/workspaces/{ws_id}/processes/{process_id}")
-def process_status(repo_id: str, ws_id: str, process_id: str,
-                   ctx: TenantContext = Depends(tenant)):
+def process_status(repo_id: str, ws_id: str, process_id: str, ctx: TenantContext = Depends(tenant)):
     return service.process_status(ctx, repo_id, ws_id, process_id)
 
 
@@ -573,8 +632,7 @@ def list_approvals(ctx: TenantContext = Depends(tenant)):
 
 
 @app.post("/approvals/{approval_id}/resolve")
-def resolve_approval(approval_id: str, approved: bool = True,
-                     ctx: TenantContext = Depends(tenant)):
+def resolve_approval(approval_id: str, approved: bool = True, ctx: TenantContext = Depends(tenant)):
     try:
         return service.resolve_approval(ctx, approval_id, approved)
     except KeyError:
@@ -594,7 +652,7 @@ def audit(limit: int = 100, ctx: TenantContext = Depends(tenant)):
 
 class KnowledgeQuery(BaseModel):
     query: str
-    repo_id: str | None = None      # omit -> search across all tenant repos
+    repo_id: str | None = None  # omit -> search across all tenant repos
     top_k: int = Field(default=6, ge=1, le=20)
 
 
@@ -603,8 +661,7 @@ def knowledge_query(body: KnowledgeQuery, ctx: TenantContext = Depends(tenant)):
     """Grounded code retrieval for the knowledge base. Returns passages with
     citations (path + line span) and NEVER free-text without a source — the
     RAG grounding guardrail: answers are evidence, not generation."""
-    return service.knowledge_query(ctx, body.query, repo_id=body.repo_id,
-                                   top_k=body.top_k)
+    return service.knowledge_query(ctx, body.query, repo_id=body.repo_id, top_k=body.top_k)
 
 
 # --------------------------------------------------------------------- #
@@ -625,17 +682,19 @@ def knowledge_query(body: KnowledgeQuery, ctx: TenantContext = Depends(tenant)):
 class AgentResolveRequest(BaseModel):
     goal: str = Field(description="Issue / bug / change request to resolve")
     test_command: str = Field(
-        description="Command that proves success, e.g. 'pytest -q' or 'mvn -q test'")
+        description="Command that proves success, e.g. 'pytest -q' or 'mvn -q test'"
+    )
     max_iterations: int = Field(default=4, ge=1, le=10)
 
 
 @app.post("/repos/{repo_id}/agent/resolve")
-def agent_resolve(repo_id: str, body: AgentResolveRequest,
-                  ctx: TenantContext = Depends(tenant)):
+def agent_resolve(repo_id: str, body: AgentResolveRequest, ctx: TenantContext = Depends(tenant)):
     global _agent
     from .agent import SdlcAgent
+
     if _agent is None:
         _agent = SdlcAgent(service)
-    result = _agent.resolve(ctx, repo_id, body.goal, body.test_command,
-                            max_iterations=body.max_iterations)
+    result = _agent.resolve(
+        ctx, repo_id, body.goal, body.test_command, max_iterations=body.max_iterations
+    )
     return result.to_dict()

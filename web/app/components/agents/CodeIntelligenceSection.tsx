@@ -80,8 +80,7 @@ export default function CodeIntelligenceSection({
       {!isDraft && codeIntelToolsAvailable === true && (
         <div className="mt-3">
           <div className="flex flex-wrap items-center gap-2">
-            {selectedAgent.codeWorkspaceEnabled &&
-              (selectedAgent.allowedCodeIntelRepoIds || []).length === 0 && (
+            {selectedAgent.codeWorkspaceEnabled && (selectedAgent.allowedCodeIntelRepoIds || []).length === 0 && (
               <span className={SUB_TEXT}>{t("noRepoGrantedWarning")}</span>
             )}
             {(selectedAgent.allowedCodeIntelRepoIds || []).map((repoId: string) => (

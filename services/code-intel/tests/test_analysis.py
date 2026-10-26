@@ -35,36 +35,40 @@ def check(name: str, cond) -> None:
 
 FIXTURE = {
     "src/db.py": 'import os\n\n\ndef connect():\n    """Open the DB."""\n'
-                 '    return os.environ\n\n\ndef close(conn):\n    pass\n',
+    "    return os.environ\n\n\ndef close(conn):\n    pass\n",
     "src/auth.py": (
         '"""Auth service."""\n'
-        'from src.db import connect\n\n\n'
-        'class AuthService:\n'
+        "from src.db import connect\n\n\n"
+        "class AuthService:\n"
         '    """Handles login and tokens."""\n\n'
-        '    def login(self, user, password):\n'
+        "    def login(self, user, password):\n"
         '        """Authenticate and return a session token."""\n'
-        '        conn = connect()\n'
-        '        return self.issue_token(user, conn)\n\n'
-        '    def issue_token(self, user, conn):\n'
+        "        conn = connect()\n"
+        "        return self.issue_token(user, conn)\n\n"
+        "    def issue_token(self, user, conn):\n"
         '        return verify(user) and "tok"\n\n\n'
         'def verify(user):\n    """Docstring for verify."""\n'
-        '    return bool(user)\n\n\n'
-        'def unused_helper():\n    return 42\n'),
+        "    return bool(user)\n\n\n"
+        "def unused_helper():\n    return 42\n"
+    ),
     "src/server.py": (
-        'from src.auth import AuthService\n\n'
-        'app = None\n\n\n'
+        "from src.auth import AuthService\n\n"
+        "app = None\n\n\n"
         '@app.get("/users/{id}")\n'
-        'def get_user():\n    pass\n\n\n'
-        'def main():\n    AuthService().login("a", "b")\n'),
+        "def get_user():\n    pass\n\n\n"
+        'def main():\n    AuthService().login("a", "b")\n'
+    ),
     "src/typed.py": (
-        'from src.auth import AuthService\n\n\n'
-        'def typed_handler(svc: AuthService) -> AuthService:\n'
-        '    cfg = AuthService.instance.config\n'
-        '    return svc\n'),
+        "from src.auth import AuthService\n\n\n"
+        "def typed_handler(svc: AuthService) -> AuthService:\n"
+        "    cfg = AuthService.instance.config\n"
+        "    return svc\n"
+    ),
     "tests/test_auth.py": (
-        'from src.auth import AuthService\n\n\n'
-        'def test_login():\n    svc = AuthService()\n'
-        '    assert svc.login("u", "p")\n'),
+        "from src.auth import AuthService\n\n\n"
+        "def test_login():\n    svc = AuthService()\n"
+        '    assert svc.login("u", "p")\n'
+    ),
 }
 
 
@@ -84,16 +88,16 @@ def main() -> int:
         m = analysis.repo_map(cfg, budget=4000)
         check("repo_map returns files", len(m["files"]) > 0)
         check("repo_map respects budget", m["used_chars"] <= 4000)
-        check("repo_map has signatures",
-              any(s["signature"] for f in m["files"] for s in f["symbols"]))
+        check(
+            "repo_map has signatures", any(s["signature"] for f in m["files"] for s in f["symbols"])
+        )
 
         found = analysis.find_symbols(cfg, query="login")
         qnames = {s["qualified_name"] for s in found}
         check("find_symbols finds login", "AuthService.login" in qnames)
         check("find_symbols finds test symbol", "test_login" in qnames)
         prod = analysis.find_symbols(cfg, query="login", include_tests=False)
-        check("find_symbols excludes tests",
-              all(not s["is_test"] for s in prod))
+        check("find_symbols excludes tests", all(not s["is_test"] for s in prod))
 
         d = analysis.symbol_detail(cfg, "AuthService.login")
         check("symbol_detail signature", d["signature"].startswith("def login"))
@@ -102,17 +106,17 @@ def main() -> int:
 
         refs = analysis.references_of(cfg, "AuthService")
         check("references has calls", len(refs["by_type"].get("calls", [])) >= 2)
-        check("references has ref edges",
-              len(refs["by_type"].get("references", [])) >= 1)
+        check("references has ref edges", len(refs["by_type"].get("references", [])) >= 1)
 
         impl = analysis.implementations_of(cfg, "AuthService")
         check("implementations no false positives", impl["total"] == 0)
 
         path = analysis.call_path(cfg, "main", "verify")
         check("call_path found", path.get("found") is True)
-        check("call_path chain",
-              path.get("path", [])[-1] == "verify"
-              or path.get("path", [])[-1].endswith("verify"))
+        check(
+            "call_path chain",
+            path.get("path", [])[-1] == "verify" or path.get("path", [])[-1].endswith("verify"),
+        )
 
         dc = analysis.dead_code(cfg)
         dead_names = {c["symbol"] for c in dc["candidates"]}
@@ -134,15 +138,15 @@ def main() -> int:
         check("import_cycles none in acyclic fixture", cycles["count"] == 0)
 
         outline = analysis.file_outline(cfg, "src/auth.py")
-        check("outline has class + methods",
-              {"AuthService", "AuthService.login"} <=
-              {s["qualified_name"] for s in outline})
+        check(
+            "outline has class + methods",
+            {"AuthService", "AuthService.login"} <= {s["qualified_name"] for s in outline},
+        )
 
         # doc extraction: the class docstring must land on the symbol row
         doc_rows = analysis.find_symbols(cfg, query="AuthService")
         auth_cls = [s for s in doc_rows if s["name"] == "AuthService"]
-        check("doc on class symbol",
-              auth_cls and "login" in (auth_cls[0]["doc"] or ""))
+        check("doc on class symbol", auth_cls and "login" in (auth_cls[0]["doc"] or ""))
 
         hot = analysis.hotspots(cfg)
         check("hotspots honest on non-git", hot["hotspots"] == [])

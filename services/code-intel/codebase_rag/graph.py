@@ -104,20 +104,17 @@ class GraphStore:
         self._migrate()
 
     def _migrate(self) -> None:
-        have = {r[1] for r in self.conn.execute(
-            "PRAGMA table_info(graph_symbols)")}
+        have = {r[1] for r in self.conn.execute("PRAGMA table_info(graph_symbols)")}
         for col, decl in _SYMBOL_EXTRA_COLS:
             if col not in have:
-                self.conn.execute(
-                    f"ALTER TABLE graph_symbols ADD COLUMN {col} {decl}")  # nosec B608
+                self.conn.execute(f"ALTER TABLE graph_symbols ADD COLUMN {col} {decl}")  # nosec B608
         self.conn.commit()
 
     def close(self):
         self.conn.close()
 
     def known(self) -> dict[str, str]:
-        return dict(self.conn.execute(
-            "SELECT path, file_hash FROM graph_files").fetchall())
+        return dict(self.conn.execute("SELECT path, file_hash FROM graph_files").fetchall())
 
     def delete_file(self, path: str) -> None:
         self.conn.execute("DELETE FROM graph_symbols WHERE path=?", (path,))
@@ -131,25 +128,42 @@ class GraphStore:
             "INSERT INTO graph_symbols(path, language, kind, name, "
             "qualified_name, start_line, end_line, parent, signature, doc, "
             "is_test) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-            [(s.path, s.language, s.kind, s.name, s.qualified_name,
-              s.start_line, s.end_line, s.parent, s.signature, s.doc,
-              1 if s.is_test else 0) for s in fx.symbols])
+            [
+                (
+                    s.path,
+                    s.language,
+                    s.kind,
+                    s.name,
+                    s.qualified_name,
+                    s.start_line,
+                    s.end_line,
+                    s.parent,
+                    s.signature,
+                    s.doc,
+                    1 if s.is_test else 0,
+                )
+                for s in fx.symbols
+            ],
+        )
         self.conn.execute(
             "INSERT INTO graph_files(path, file_hash, language, engine, "
             "extracted_at) VALUES(?,?,?,?,?)",
-            (fx.path, file_hash, fx.language, fx.engine, time.time()))
+            (fx.path, file_hash, fx.language, fx.engine, time.time()),
+        )
 
     def insert_edges(self, rows: list[tuple]) -> None:
         self.conn.executemany(
             "INSERT INTO graph_edges(src_path, src_symbol, edge_type, "
             "target_name, target_path, target_symbol, confidence, line) "
-            "VALUES(?,?,?,?,?,?,?,?)", rows)
+            "VALUES(?,?,?,?,?,?,?,?)",
+            rows,
+        )
 
     def insert_routes(self, routes: list) -> None:
         self.conn.executemany(
-            "INSERT INTO api_routes(path, line, method, route, handler) "
-            "VALUES(?,?,?,?,?)",
-            [(r.path, r.line, r.method, r.route, r.handler) for r in routes])
+            "INSERT INTO api_routes(path, line, method, route, handler) VALUES(?,?,?,?,?)",
+            [(r.path, r.line, r.method, r.route, r.handler) for r in routes],
+        )
 
     def clear_edges_from(self, paths: list[str]) -> None:
         for p in paths:
@@ -163,12 +177,14 @@ class GraphStore:
 # build (incremental) + deterministic resolution
 # ---------------------------------------------------------------------------
 
+
 def _file_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def build_graph(cfg: Config, quiet: bool = False) -> dict:
     import sys
+
     store = GraphStore(cfg.db_path)
     try:
         all_files = discovery.discover_all(cfg)
@@ -195,16 +211,19 @@ def build_graph(cfg: Config, quiet: bool = False) -> dict:
             extracted.append(fx)
             changed += 1
             if not quiet:
-                print(f"  {path}: {len(fx.symbols)} symbol(s), "
-                      f"{len(fx.edges)} raw edge(s) [{fx.engine}]",
-                      file=sys.stderr)
+                print(
+                    f"  {path}: {len(fx.symbols)} symbol(s), "
+                    f"{len(fx.edges)} raw edge(s) [{fx.engine}]",
+                    file=sys.stderr,
+                )
 
         # Resolution needs the full symbol table (changed files can call
         # into unchanged ones), so load it once, then resolve ONLY the
         # changed files' edges.
         symtab: dict[str, list[tuple[str, str]]] = {}  # name -> [(path, qname)]
         for name, path, qname in store.conn.execute(
-                "SELECT name, path, qualified_name FROM graph_symbols"):
+            "SELECT name, path, qualified_name FROM graph_symbols"
+        ):
             symtab.setdefault(name, []).append((path, qname))
 
         rows: list[tuple] = []
@@ -226,40 +245,43 @@ def build_graph(cfg: Config, quiet: bool = False) -> dict:
         store.close()
 
 
-def _resolve(e: RawEdge, src_path: str,
-             symtab: dict[str, list[tuple[str, str]]]) -> tuple:
+def _resolve(e: RawEdge, src_path: str, symtab: dict[str, list[tuple[str, str]]]) -> tuple:
     """Fixed scope rules: same-file match -> 'local'; unique repo-wide
     match -> 'global'; several matches -> 'ambiguous' (first 3 by path
     order, deterministic); none -> 'external'."""
     if e.edge_type in ("imports",):
-        return (src_path, None, e.edge_type, e.target_name,
-                None, None, "external", e.line)
+        return (src_path, None, e.edge_type, e.target_name, None, None, "external", e.line)
     if e.edge_type == "contains":
-        return (src_path, e.src_qualified, e.edge_type, e.target_name,
-                src_path, e.target_name, "local", e.line)
+        return (
+            src_path,
+            e.src_qualified,
+            e.edge_type,
+            e.target_name,
+            src_path,
+            e.target_name,
+            "local",
+            e.line,
+        )
 
     short = e.target_name.split(".")[-1]
     candidates = symtab.get(short, [])
     same_file = [c for c in candidates if c[0] == src_path]
     if same_file:
         tp, tq = same_file[0]
-        return (src_path, e.src_qualified, e.edge_type, e.target_name,
-                tp, tq, "local", e.line)
+        return (src_path, e.src_qualified, e.edge_type, e.target_name, tp, tq, "local", e.line)
     if len(candidates) == 1:
         tp, tq = candidates[0]
-        return (src_path, e.src_qualified, e.edge_type, e.target_name,
-                tp, tq, "global", e.line)
+        return (src_path, e.src_qualified, e.edge_type, e.target_name, tp, tq, "global", e.line)
     if candidates:
         tp, tq = sorted(candidates)[0]
-        return (src_path, e.src_qualified, e.edge_type, e.target_name,
-                tp, tq, "ambiguous", e.line)
-    return (src_path, e.src_qualified, e.edge_type, e.target_name,
-            None, None, "external", e.line)
+        return (src_path, e.src_qualified, e.edge_type, e.target_name, tp, tq, "ambiguous", e.line)
+    return (src_path, e.src_qualified, e.edge_type, e.target_name, None, None, "external", e.line)
 
 
 # ---------------------------------------------------------------------------
 # queries
 # ---------------------------------------------------------------------------
+
 
 def graph_stats(cfg: Config, store: GraphStore | None = None) -> dict:
     own = store is None
@@ -269,15 +291,20 @@ def graph_stats(cfg: Config, store: GraphStore | None = None) -> dict:
         return {
             "files": c.execute("SELECT COUNT(*) FROM graph_files").fetchone()[0],
             "symbols": c.execute("SELECT COUNT(*) FROM graph_symbols").fetchone()[0],
-            "edges": dict(c.execute(
-                "SELECT edge_type, COUNT(*) FROM graph_edges "
-                "GROUP BY edge_type").fetchall()),
-            "engines": dict(c.execute(
-                "SELECT engine, COUNT(*) FROM graph_files "
-                "GROUP BY engine").fetchall()),
-            "resolution": dict(c.execute(
-                "SELECT confidence, COUNT(*) FROM graph_edges "
-                "WHERE edge_type='calls' GROUP BY confidence").fetchall()),
+            "edges": dict(
+                c.execute(
+                    "SELECT edge_type, COUNT(*) FROM graph_edges GROUP BY edge_type"
+                ).fetchall()
+            ),
+            "engines": dict(
+                c.execute("SELECT engine, COUNT(*) FROM graph_files GROUP BY engine").fetchall()
+            ),
+            "resolution": dict(
+                c.execute(
+                    "SELECT confidence, COUNT(*) FROM graph_edges "
+                    "WHERE edge_type='calls' GROUP BY confidence"
+                ).fetchall()
+            ),
         }
     finally:
         if own:
@@ -287,8 +314,7 @@ def graph_stats(cfg: Config, store: GraphStore | None = None) -> dict:
 def callers_of(cfg: Config, name: str, include_ambiguous: bool = True) -> list[dict]:
     store = GraphStore(cfg.db_path)
     try:
-        conf = ("'local','global','ambiguous'" if include_ambiguous
-                else "'local','global'")
+        conf = "'local','global','ambiguous'" if include_ambiguous else "'local','global'"
         # B608 false positive: `conf` is one of the two hardcoded literal
         # lists above, never caller input; `name` is bound as a parameter.
         sql = (
@@ -297,10 +323,19 @@ def callers_of(cfg: Config, name: str, include_ambiguous: bool = True) -> list[d
             "WHERE edge_type='calls' "
             "AND (target_symbol=? OR target_symbol LIKE ? OR target_name=?) "
             f"AND confidence IN ({conf}) "
-            "ORDER BY src_path, line")
+            "ORDER BY src_path, line"
+        )
         rows = store.conn.execute(sql, (name, f"%.{name}", name)).fetchall()
-        return [{"caller": r[1], "path": r[0], "line": r[4],
-                 "resolved_target": r[2], "confidence": r[3]} for r in rows]
+        return [
+            {
+                "caller": r[1],
+                "path": r[0],
+                "line": r[4],
+                "resolved_target": r[2],
+                "confidence": r[3],
+            }
+            for r in rows
+        ]
     finally:
         store.close()
 
@@ -313,9 +348,12 @@ def callees_of(cfg: Config, name: str) -> list[dict]:
                FROM graph_edges
                WHERE edge_type='calls' AND (src_symbol=? OR src_symbol LIKE ?)
                ORDER BY line""",
-            (name, f"%.{name}")).fetchall()
-        return [{"callee": r[0], "path": r[1], "resolved": r[2],
-                 "confidence": r[3], "line": r[4]} for r in rows]
+            (name, f"%.{name}"),
+        ).fetchall()
+        return [
+            {"callee": r[0], "path": r[1], "resolved": r[2], "confidence": r[3], "line": r[4]}
+            for r in rows
+        ]
     finally:
         store.close()
 
@@ -328,10 +366,10 @@ def impact_of(cfg: Config, symbol_or_path: str, depth: int = 3) -> dict:
         c = store.conn
         seeds: set[tuple[str, str | None]] = set()  # (path, qname|None=file)
         for path, qname in c.execute(
-                "SELECT path, qualified_name FROM graph_symbols "
-                "WHERE qualified_name=? OR name=? OR path=?",
-                (symbol_or_path, symbol_or_path.split(".")[-1],
-                 symbol_or_path)):
+            "SELECT path, qualified_name FROM graph_symbols "
+            "WHERE qualified_name=? OR name=? OR path=?",
+            (symbol_or_path, symbol_or_path.split(".")[-1], symbol_or_path),
+        ):
             seeds.add((path, qname))
         if os.sep in symbol_or_path or "/" in symbol_or_path:
             seeds.add((symbol_or_path, None))
@@ -351,30 +389,33 @@ def impact_of(cfg: Config, symbol_or_path: str, depth: int = 3) -> dict:
                            FROM graph_edges
                            WHERE target_symbol=? AND target_path=?
                              AND edge_type IN ('calls','inherits')""",
-                        (qname, path)).fetchall()
-                else:      # importers of this file (by module-ish suffix)
+                        (qname, path),
+                    ).fetchall()
+                else:  # importers of this file (by module-ish suffix)
                     stem = os.path.splitext(os.path.basename(path))[0]
                     rows = c.execute(
                         """SELECT src_path, src_symbol, edge_type, confidence
                            FROM graph_edges
                            WHERE edge_type='imports'
                              AND (target_name LIKE ? OR target_name LIKE ?)""",
-                        (f"%{stem}", f"%{stem}.%")).fetchall()
+                        (f"%{stem}", f"%{stem}.%"),
+                    ).fetchall()
                 for sp, ss, et, conf in rows:
                     key = (sp, ss)
                     if key not in seen:
                         seen.add(key)
                         next_frontier.add(key)
-                        found.append({"path": sp, "symbol": ss,
-                                      "via": et, "confidence": conf})
+                        found.append({"path": sp, "symbol": ss, "via": et, "confidence": conf})
             if found:
                 levels.append(found)
             frontier = next_frontier
             if not frontier:
                 break
-        return {"seeds": [{"path": p, "symbol": q} for p, q in sorted(seeds)],
-                "impacted": levels,
-                "total_impacted": sum(len(lv) for lv in levels)}
+        return {
+            "seeds": [{"path": p, "symbol": q} for p, q in sorted(seeds)],
+            "impacted": levels,
+            "total_impacted": sum(len(lv) for lv in levels),
+        }
     finally:
         store.close()
 
@@ -383,12 +424,13 @@ def export_graph(cfg: Config, fmt: str = "json") -> str:
     store = GraphStore(cfg.db_path)
     try:
         syms = store.conn.execute(
-            "SELECT path, kind, qualified_name, start_line, end_line "
-            "FROM graph_symbols").fetchall()
+            "SELECT path, kind, qualified_name, start_line, end_line FROM graph_symbols"
+        ).fetchall()
         edges = store.conn.execute(
             "SELECT src_path, src_symbol, edge_type, target_name, "
             "target_path, target_symbol, confidence FROM graph_edges "
-            "WHERE edge_type != 'contains'").fetchall()
+            "WHERE edge_type != 'contains'"
+        ).fetchall()
         if fmt == "dot":
             out = ["digraph code {", "  rankdir=LR;", "  node [shape=box];"]
             for sp, ss, et, tn, tp, tsym, conf in edges:  # noqa: B007
@@ -396,18 +438,38 @@ def export_graph(cfg: Config, fmt: str = "json") -> str:
                     continue
                 src = f"{sp}:{ss}" if ss else sp
                 dst = f"{tp}:{tsym}"
-                style = ' [style=dashed]' if conf == "ambiguous" else ""
+                style = " [style=dashed]" if conf == "ambiguous" else ""
                 out.append(f'  "{src}" -> "{dst}" [label="{et}"]{style};')
             out.append("}")
             return "\n".join(out)
         import json
-        return json.dumps({
-            "symbols": [{"path": s[0], "kind": s[1], "qualified_name": s[2],
-                         "start_line": s[3], "end_line": s[4]} for s in syms],
-            "edges": [{"src_path": e[0], "src_symbol": e[1], "type": e[2],
-                       "target_name": e[3], "target_path": e[4],
-                       "target_symbol": e[5], "confidence": e[6]}
-                      for e in edges],
-        }, indent=2)
+
+        return json.dumps(
+            {
+                "symbols": [
+                    {
+                        "path": s[0],
+                        "kind": s[1],
+                        "qualified_name": s[2],
+                        "start_line": s[3],
+                        "end_line": s[4],
+                    }
+                    for s in syms
+                ],
+                "edges": [
+                    {
+                        "src_path": e[0],
+                        "src_symbol": e[1],
+                        "type": e[2],
+                        "target_name": e[3],
+                        "target_path": e[4],
+                        "target_symbol": e[5],
+                        "confidence": e[6],
+                    }
+                    for e in edges
+                ],
+            },
+            indent=2,
+        )
     finally:
         store.close()
