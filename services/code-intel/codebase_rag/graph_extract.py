@@ -25,25 +25,27 @@ from .languages import (
 # data model
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class Symbol:
     path: str
     language: str
-    kind: str            # function | method | class | interface | struct | ...
+    kind: str  # function | method | class | interface | struct | ...
     name: str
     qualified_name: str  # Outer.Inner.name within the file
-    start_line: int      # 1-based inclusive
+    start_line: int  # 1-based inclusive
     end_line: int
-    parent: str | None = None   # qualified_name of enclosing symbol
+    parent: str | None = None  # qualified_name of enclosing symbol
     signature: str = ""  # first line of the definition, trimmed
-    doc: str = ""        # leading docstring/comment snippet (<=300 chars)
+    doc: str = ""  # leading docstring/comment snippet (<=300 chars)
     is_test: bool = False  # file lives under a test path/naming convention
 
 
 _TEST_DIR_RX = re.compile(r"(^|/)(tests?|__tests__|spec|e2e|integration)(/|$)")
 _TEST_NAME_RX = re.compile(
     r"(^test_.+\.|_test\.|\.test\.|\.spec\.|Tests?\.|Test\.|Spec\.)"
-    r"(java|py|js|ts|tsx|jsx|go|rs|rb|cs|kt|scala|swift|php|dart|c|cpp|cc|h)?$")
+    r"(java|py|js|ts|tsx|jsx|go|rs|rb|cs|kt|scala|swift|php|dart|c|cpp|cc|h)?$"
+)
 
 
 def is_test_path(path: str) -> bool:
@@ -55,9 +57,9 @@ def is_test_path(path: str) -> bool:
 
 @dataclass
 class RawEdge:
-    src_qualified: str | None   # None => the file itself (imports)
-    edge_type: str              # calls | imports | inherits | contains
-    target_name: str            # unresolved name / module string
+    src_qualified: str | None  # None => the file itself (imports)
+    edge_type: str  # calls | imports | inherits | contains
+    target_name: str  # unresolved name / module string
     line: int
 
 
@@ -65,42 +67,66 @@ class RawEdge:
 class FileExtraction:
     path: str
     language: str
-    engine: str                 # tree-sitter | regex
+    engine: str  # tree-sitter | regex
     symbols: list[Symbol] = field(default_factory=list)
     edges: list[RawEdge] = field(default_factory=list)
 
 
 # Node-type fragments for call sites across tree-sitter grammars.
 CALL_TYPE_FRAGMENTS = (
-    "call_expression", "method_invocation", "function_call",
-    "invocation_expression", "call",
+    "call_expression",
+    "method_invocation",
+    "function_call",
+    "invocation_expression",
+    "call",
 )
 # Inheritance clause node types across grammars.
 INHERIT_TYPE_FRAGMENTS = (
-    "superclass", "super_interfaces", "extends_clause", "implements_clause",
-    "base_list", "superclasses", "class_heritage", "extends_type",
+    "superclass",
+    "super_interfaces",
+    "extends_clause",
+    "implements_clause",
+    "base_list",
+    "superclasses",
+    "class_heritage",
+    "extends_type",
 )
 
-_KEYWORDS = frozenset("""
+_KEYWORDS = frozenset(
+    """
     if else for while switch catch return new delete typeof instanceof in of
     do try finally throw case break continue yield await async function class
     def lambda print assert raise with elif not and or is pass import from
     require include using namespace public private protected static final
     void int long float double bool boolean string var let const this super
     sizeof match when init until unless begin end defined echo select where
-""".split())
+""".split()
+)
 
 _IDENT_CALL_RX = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(")
 _KIND_MAP = {
-    "function": "function", "method": "method", "class": "class",
-    "interface": "interface", "struct": "struct", "enum": "enum",
-    "trait": "trait", "impl": "impl", "module": "module", "mod": "module",
-    "type": "type", "record": "class", "constructor": "method",
-    "object": "class", "protocol": "interface", "extension": "impl",
+    "function": "function",
+    "method": "method",
+    "class": "class",
+    "interface": "interface",
+    "struct": "struct",
+    "enum": "enum",
+    "trait": "trait",
+    "impl": "impl",
+    "module": "module",
+    "mod": "module",
+    "type": "type",
+    "record": "class",
+    "constructor": "method",
+    "object": "class",
+    "protocol": "interface",
+    "extension": "impl",
 }
 
 _INHERIT_FALLBACK_RX: dict[str, re.Pattern] = {
-    "java": re.compile(r"(?:class|interface|enum|record)\s+(\w+)[^{]*?(?:extends|implements)\s+([\w\s,<>.]+)"),
+    "java": re.compile(
+        r"(?:class|interface|enum|record)\s+(\w+)[^{]*?(?:extends|implements)\s+([\w\s,<>.]+)"
+    ),
     "csharp": re.compile(r"(?:class|interface|struct|record)\s+(\w+)[^{:]*:\s*([\w\s,<>.]+)"),
     "typescript": re.compile(r"class\s+(\w+)[^{]*?(?:extends|implements)\s+([\w\s,<>.]+)"),
     "tsx": re.compile(r"class\s+(\w+)[^{]*?(?:extends|implements)\s+([\w\s,<>.]+)"),
@@ -118,6 +144,7 @@ _INHERIT_FALLBACK_RX: dict[str, re.Pattern] = {
 # extraction: tree-sitter engine
 # ---------------------------------------------------------------------------
 
+
 def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
     grammar = ts_grammar_for(language)
     parser = _get_parser(grammar) if grammar else None
@@ -132,7 +159,7 @@ def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
     fx = FileExtraction(path=path, language=language, engine="tree-sitter")
 
     def node_text(n) -> str:
-        return source[n.start_byte:n.end_byte].decode("utf-8", errors="replace")
+        return source[n.start_byte : n.end_byte].decode("utf-8", errors="replace")
 
     def def_name(node) -> str | None:
         try:
@@ -191,12 +218,14 @@ def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
         for ch in node.named_children:
             if ch.type in ("block", "body", "declaration_list"):
                 for st in ch.named_children[:1]:
-                    inner = (st.named_children[0]
-                             if st.type == "expression_statement"
-                             and st.named_children else st)
+                    inner = (
+                        st.named_children[0]
+                        if st.type == "expression_statement" and st.named_children
+                        else st
+                    )
                     if "string" in inner.type:
                         s = node_text(inner).strip()
-                        return s.strip('\'"').strip()[:300]
+                        return s.strip("'\"").strip()[:300]
                 break
         return ""
 
@@ -207,10 +236,21 @@ def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
     # also take `identifier`/`attribute` nodes whose PARENT is a type,
     # attribute or qualified-name node (value position, not a call callee -
     # calls were already emitted above for the same span).
-    REF_TYPES = ("type_identifier", "property_identifier", "member_identifier",
-                 "scoped_identifier", "constant")
-    REF_PARENT_TYPES = ("type", "attribute", "dotted_name", "generic_type",
-                        "attribute_item", "scoped_type_identifier")
+    REF_TYPES = (
+        "type_identifier",
+        "property_identifier",
+        "member_identifier",
+        "scoped_identifier",
+        "constant",
+    )
+    REF_PARENT_TYPES = (
+        "type",
+        "attribute",
+        "dotted_name",
+        "generic_type",
+        "attribute_item",
+        "scoped_type_identifier",
+    )
     file_is_test = is_test_path(path)
 
     def walk(node, scope: list[str], enclosing: str | None):
@@ -221,50 +261,56 @@ def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
                 if name:
                     qname = ".".join(scope + [name])  # noqa: RUF005
                     sym = Symbol(
-                        path=path, language=language, kind=kind_of(child),
-                        name=name, qualified_name=qname,
+                        path=path,
+                        language=language,
+                        kind=kind_of(child),
+                        name=name,
+                        qualified_name=qname,
                         start_line=child.start_point[0] + 1,
                         end_line=child.end_point[0] + 1,
                         parent=".".join(scope) if scope else None,
-                        signature=signature_of(child), doc=doc_of(child),
+                        signature=signature_of(child),
+                        doc=doc_of(child),
                         is_test=file_is_test,
                     )
                     fx.symbols.append(sym)
                     if sym.parent:
-                        fx.edges.append(RawEdge(sym.parent, "contains",
-                                                qname, sym.start_line))
+                        fx.edges.append(RawEdge(sym.parent, "contains", qname, sym.start_line))
                     walk(child, scope + [name], qname)  # noqa: RUF005
                     continue
-            if "import" in t or t in ("using_directive", "use_declaration",
-                                      "require_call", "include"):
+            if "import" in t or t in (
+                "using_directive",
+                "use_declaration",
+                "require_call",
+                "include",
+            ):
                 for mod in re.findall(r"[\w./@-]+(?:\.[\w]+)*", node_text(child)):
-                    if mod not in ("import", "from", "using", "use", "require",
-                                   "include") and len(mod) > 1:
-                        fx.edges.append(RawEdge(None, "imports", mod,
-                                                child.start_point[0] + 1))
+                    if (
+                        mod not in ("import", "from", "using", "use", "require", "include")
+                        and len(mod) > 1
+                    ):
+                        fx.edges.append(RawEdge(None, "imports", mod, child.start_point[0] + 1))
                         break  # first plausible module string per statement
                 continue
             if any(f in t for f in INHERIT_TYPE_FRAGMENTS):
                 for base in re.findall(r"[A-Za-z_][A-Za-z0-9_.]*", node_text(child)):
                     if base not in ("extends", "implements") and enclosing:
-                        fx.edges.append(RawEdge(enclosing, "inherits", base,
-                                                child.start_point[0] + 1))
+                        fx.edges.append(
+                            RawEdge(enclosing, "inherits", base, child.start_point[0] + 1)
+                        )
                 continue
             if any(f in t for f in CALL_TYPE_FRAGMENTS):
                 cname = call_name(child)
                 if cname and cname not in _KEYWORDS and enclosing:
-                    fx.edges.append(RawEdge(enclosing, "calls", cname,
-                                            child.start_point[0] + 1))
-            elif enclosing and _is_reference_node(child, t, REF_TYPES,
-                                                  REF_PARENT_TYPES):
+                    fx.edges.append(RawEdge(enclosing, "calls", cname, child.start_point[0] + 1))
+            elif enclosing and _is_reference_node(child, t, REF_TYPES, REF_PARENT_TYPES):
                 # Value/type-position use: `Foo` in a type annotation, `.bar`
                 # in a member access, a constant in an expression. These feed
                 # the `references` relation - "who mentions this symbol
                 # without calling it" (find_referencing_symbols).
                 ref = node_text(child).strip()
                 if ref and ref not in _KEYWORDS and len(ref) <= 128:
-                    fx.edges.append(RawEdge(enclosing, "references", ref,
-                                            child.start_point[0] + 1))
+                    fx.edges.append(RawEdge(enclosing, "references", ref, child.start_point[0] + 1))
             walk(child, scope, enclosing)
 
     walk(tree.root_node, [], None)
@@ -291,8 +337,7 @@ def _dedupe_references(fx: FileExtraction) -> None:
     mentions of `Foo` inside one function is one edge. Anything the same
     symbol already calls is dropped too (the `calls` edge is the stronger
     signal and callers/callees queries must not double-count)."""
-    call_pairs = {(e.src_qualified, e.target_name)
-                  for e in fx.edges if e.edge_type == "calls"}
+    call_pairs = {(e.src_qualified, e.target_name) for e in fx.edges if e.edge_type == "calls"}
     seen: set[tuple[str | None, str]] = set()
     kept: list[RawEdge] = []
     for e in fx.edges:
@@ -311,7 +356,7 @@ def _reattribute_calls(fx: FileExtraction) -> None:
     """Walk() attributes calls to the def whose subtree it visited from,
     which for nested defs can be the outer one. Fix by line containment:
     a call belongs to the innermost symbol whose span contains its line."""
-    spans = sorted(fx.symbols, key=lambda s: (s.end_line - s.start_line))
+    spans = sorted(fx.symbols, key=lambda s: s.end_line - s.start_line)
     for e in fx.edges:
         if e.edge_type != "calls":
             continue
@@ -324,6 +369,7 @@ def _reattribute_calls(fx: FileExtraction) -> None:
 # ---------------------------------------------------------------------------
 # extraction: regex fallback engine
 # ---------------------------------------------------------------------------
+
 
 def _rx_extract(text: str, path: str, language: str) -> FileExtraction:
     fx = FileExtraction(path=path, language=language, engine="regex")
@@ -339,7 +385,8 @@ def _rx_extract(text: str, path: str, language: str) -> FileExtraction:
         def_rx = re.compile(r"^[ \t]*(?:" + pat + r")")
     name_rx = re.compile(
         r"(?:def|class|function|fn|func|interface|enum|struct|trait|module|"
-        r"object|record)\s+(\w+)|(\w+)\s*\(")
+        r"object|record)\s+(\w+)|(\w+)\s*\("
+    )
 
     # 1) symbols from definition-start lines; span = until next def at
     #    same-or-lower indentation (deterministic approximation)
@@ -353,41 +400,49 @@ def _rx_extract(text: str, path: str, language: str) -> FileExtraction:
                     starts.append((i, name, len(line) - len(line.lstrip())))
     for j, (i, name, indent) in enumerate(starts):
         end = len(lines) - 1
-        for k, (i2, _n2, ind2) in enumerate(starts[j + 1:], j + 1):  # noqa: B007
+        for k, (i2, _n2, ind2) in enumerate(starts[j + 1 :], j + 1):  # noqa: B007
             if ind2 <= indent:
                 end = i2 - 1
                 break
-        parents = [s for s in fx.symbols
-                   if s.start_line - 1 < i and s.end_line - 1 >= i]
+        parents = [s for s in fx.symbols if s.start_line - 1 < i and s.end_line - 1 >= i]
         parent = parents[-1].qualified_name if parents else None
         qname = f"{parent}.{name}" if parent else name
-        kind = "class" if re.search(
-            r"\b(class|interface|struct|enum|module|trait)\b", lines[i]) \
+        kind = (
+            "class"
+            if re.search(r"\b(class|interface|struct|enum|module|trait)\b", lines[i])
             else "function"
+        )
         # Doc: contiguous comment lines immediately above the def (any
         # comment family), capped like doc_of() in the ts engine.
         doc = ""
         j = i - 1
         while j >= 0 and re.match(r"^\s*(#|//|/\*|\*|<!--)", lines[j]):
-            doc = re.sub(r"^\s*(#|//|/\*|\*|<!--|-->)?", "", lines[j]).strip() \
-                + " " + doc
+            doc = re.sub(r"^\s*(#|//|/\*|\*|<!--|-->)?", "", lines[j]).strip() + " " + doc
             j -= 1
-        fx.symbols.append(Symbol(path, language, kind, name, qname,
-                                 i + 1, end + 1, parent,
-                                 signature=lines[i].strip()[:200],
-                                 doc=" ".join(doc.split())[:300],
-                                 is_test=is_test_path(path)))
+        fx.symbols.append(
+            Symbol(
+                path,
+                language,
+                kind,
+                name,
+                qname,
+                i + 1,
+                end + 1,
+                parent,
+                signature=lines[i].strip()[:200],
+                doc=" ".join(doc.split())[:300],
+                is_test=is_test_path(path),
+            )
+        )
         if parent:
             fx.edges.append(RawEdge(parent, "contains", qname, i + 1))
 
     # 2) imports
-    imp_rx = re.compile(IMPORT_PATTERNS[language]) \
-        if language in IMPORT_PATTERNS else None
+    imp_rx = re.compile(IMPORT_PATTERNS[language]) if language in IMPORT_PATTERNS else None
     if imp_rx:
         for i, line in enumerate(lines[:300]):
             if imp_rx.match(line):
-                mods = re.findall(r"['\"]([\w./@-]+)['\"]|([\w.]+\w)\s*;?\s*$",
-                                  line.strip())
+                mods = re.findall(r"['\"]([\w./@-]+)['\"]|([\w.]+\w)\s*;?\s*$", line.strip())
                 for a, b in mods:
                     mod = a or b
                     if mod and mod not in ("import", "from", "use", "using"):
@@ -418,8 +473,7 @@ def _rx_extract(text: str, path: str, language: str) -> FileExtraction:
             for m in _IDENT_CALL_RX.finditer(lines[i]):
                 name = m.group(1)
                 if name not in _KEYWORDS and name != s.name:
-                    fx.edges.append(RawEdge(s.qualified_name, "calls",
-                                            name, i + 1))
+                    fx.edges.append(RawEdge(s.qualified_name, "calls", name, i + 1))
     return fx
 
 
