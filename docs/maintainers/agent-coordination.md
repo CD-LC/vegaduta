@@ -120,7 +120,6 @@ break the build standalone.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
-<<<<<<< HEAD
 - 2026-10-25, production deploy (local Devin session): deployed **v0.1.10** to the Azure Container Apps
   production (`vegaduta-ai-az-rg` / `vegadutaaiazacr`), in the documented order core → web + web-admin →
   sidecar + mcp-stdio-runner. Release required five fix cycles before publish: #161 (arm64 libatomic),
@@ -134,7 +133,6 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   `local_generate_image` (SD-Turbo ONNX via onnxruntime-web/WebGPU) + `local_generate_audio`
   (MusicGen via transformers.js) as out-of-the-box local tools; consent-gated downloads, capability
   gates, session media registry + Edge console gallery; `LocalTool.timeoutMs` added.
-=======
 - 2026-10-25, search-capability-honesty agent (local Devin session): fixes for the research-run incident
   (agent reported "no web access" on a misconfigured provider, then spent 133 s / ~125k prompt tokens
   answering from memory). `web_search` is always offered - a refusing stub when no provider in the chain
@@ -145,7 +143,6 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   In isolated worktree `vd-capfix-wt` on `fix/search-capability-honesty`. Overlaps the KB/MCP agent's
   parallel audit PR (#166 files per their AGENT-COORDINATION-NOTE.md) - disjoint methods, take both on
   merge; PR title flags it and waits for rr-lead + #166-owner review.
->>>>>>> origin/main
 
 - 2026-10-24, merge queue + background-handoff (local Devin session): root-caused the
   `HotPathQueryBudgetIT` regression blocking every core PR (bisect to `f29212078`: +3 legitimate

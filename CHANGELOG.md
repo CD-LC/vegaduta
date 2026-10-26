@@ -10,7 +10,6 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Added
 
-<<<<<<< HEAD
 - **On-device media generation, out of the box.** The edge tool surface gains
   `local_generate_image` (Stable Diffusion Turbo via onnxruntime-web/WebGPU, ~2.4 GB
   model) and `local_generate_audio` (MusicGen-small via transformers.js, ~1.8 GB
@@ -21,7 +20,6 @@ Release notes on GitHub are generated from the section for each version.
   a tool call on a device without the model refuses with a pointer, never a silent
   download), and report into a session media gallery in the Edge console where the
   person can preview and download artifacts.
-=======
 - **Windows support in `desktop-agent`** (`services/desktop-agent`): `win32`
   hosts previously fell through to the Linux path and every action answered
   501. Input now goes through user32 `SendInput`/`mouse_event` via an inline C#
@@ -196,7 +194,6 @@ Release notes on GitHub are generated from the section for each version.
   (`APP_CONTEXT_COMPACTION_RESERVE_OUTPUT_TOKENS`, default 8,192) is subtracted from the model's
   context window before the clear/compact fractions apply, so a run at the compaction trigger still
   leaves room for the answer instead of riding at ~98% of the real window.
->>>>>>> origin/main
 
 ## [0.1.10] - 2026-10-24
 
