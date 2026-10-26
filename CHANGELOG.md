@@ -10,6 +10,12 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Personal/lite installs never enabled the tool-sandbox client.** `scripts/vegaduta`
+  started the tool-sandbox container with the `tools` choice but exported
+  `TOOL_SANDBOX_ENABLED` only from the profile list - which `tools` never joins on
+  single-box tiers - so core kept `TOOL_SANDBOX_ENABLED=false` and `create_custom_tool`
+  (agents authoring their own tools) never resolved on any personal or lite install.
+  The launcher now exports it whenever the sandbox container ships.
 - **Approvals that park a task now actually resume it.** An approval request recorded
   without the chat turn's origin (a caller with no conversation subject key, or one recorded
   before the origin fields existed) used to show "The agent was not restarted automatically
@@ -26,6 +32,12 @@ Release notes on GitHub are generated from the section for each version.
   always-on-top OS window, so the console tab can be minimized and the desktop left free for
   the agent to work in while the person watches from the floating window; frames keep polling
   while the tab is hidden in that mode.
+- **Personal installs turn on deferred tool search.** A one-person agent resolves far more
+  tools than a small local model should see at once; with `app.tools.search.enabled` off a
+  relevance-trimmed tool was unreachable for the turn and the model reported "limited tools"
+  for capabilities it actually has. The personal profile now enables `search_tools` /
+  `call_tool` (env: `TOOL_SEARCH_ENABLED`) so every tool stays reachable and the model is told
+  to search instead of claiming a capability is missing.
 - **Desktop runs are journaled per step and proposed as recipes.** Each replayed recipe step
   writes its own `tool_call_log` row under the calling turn (the sidecar path and non-secret
   fields only - resolved `{{secret.*}}` values are never journaled), so the run journal, the
