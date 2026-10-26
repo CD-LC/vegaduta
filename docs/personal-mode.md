@@ -766,7 +766,9 @@ to turn a group back on. Lite and Full load everything.
 | `video-demo-media` | Vertex Veo video generation and the demo image and video endpoints |
 
 Public share links for agents and workflows and hosted forms are still available; only voice on a share link is
-left out.
+left out. Even so, a share-page visitor can still talk: the call panel offers one-tap downloads of the on-device
+speech-to-text and reply-voice models onto the visitor's own device, after which hold-to-talk transcribes locally
+and only the text crosses the wire - no `voice-realtime-share` needed (see [local models](local-models.md)).
 
 **Turning one back on.** Put `APP_EDITION_FEATURES_<ID>_ENABLED=true` in `deploy/compose/core.env` (the id with `-`
 written as `_`) and restart core, for example `APP_EDITION_FEATURES_CLOUD_SPEECH_ENABLED=true` to use Sarvam or

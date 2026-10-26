@@ -161,6 +161,18 @@ Browsers without WebGPU (current Firefox on most platforms, older Safari) get
 Chrome's built-in model where it exists, otherwise the hosted route: the CPU
 (WebAssembly) fallback exists in the code but has no install path in the UI yet.
 
+**Voice on shared-agent links.** A public agent-share page (`/agent/<shareId>`)
+offers the same on-device path to its visitors, no sign-in needed: the call
+panel lists the two small models that matter for talking - whisper
+speech-to-text (~45 MB, English) and the kokoro reply voice (~90 MB) - each
+behind its own download button with progress. With whisper on the device,
+hold-to-talk transcribes locally and only the text crosses the wire to the
+shared chat endpoint, so a visitor can talk to a shared agent even when the
+platform's speech services (the STT sidecar, the LiveKit worker, server TTS)
+are down - or never loaded, as on a personal install where
+`voice-realtime-share` is off (see [personal mode](personal-mode.md)). Any
+local miss falls back to the server voice turn.
+
 ## Choosing a model
 
 These are starting points to try on your own hardware, not benchmark results.
