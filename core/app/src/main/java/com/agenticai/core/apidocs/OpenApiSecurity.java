@@ -9,19 +9,19 @@ import org.springframework.util.AntPathMatcher;
 /**
  * Decides which security requirement an operation gets in the generated OpenAPI document.
  *
- * <p>The public routes below are an EXPLICIT allowlist mirroring every
- * {@code requestMatchers(...).permitAll()} line of
- * {@code core/security/.../SecurityConfig.java} (the main chain). They are not derived at runtime
- * because building the real filter chain needs a Spring context, a JWT decoder and a database,
- * and the generator is deliberately a pure, context-free reflection tool. Drift is guarded by
- * {@code OpenApiSpecGeneratorTest#publicAllowlistMirrorsSecurityConfig}, which parses the
- * SecurityConfig source and fails when the two lists disagree.
+ * <p>The public routes below are an EXPLICIT allowlist mirroring every {@code
+ * requestMatchers(...).permitAll()} line of {@code core/security/.../SecurityConfig.java} (the main
+ * chain). They are not derived at runtime because building the real filter chain needs a Spring
+ * context, a JWT decoder and a database, and the generator is deliberately a pure, context-free
+ * reflection tool. Drift is guarded by {@code
+ * OpenApiSpecGeneratorTest#publicAllowlistMirrorsSecurityConfig}, which parses the SecurityConfig
+ * source and fails when the two lists disagree.
  *
  * <p>Everything else is {@code bearerAuth} (a Keycloak-issued JWT), except two families that
- * authenticate with a long-lived {@code vmcp_} grant key instead of (or as well as) a JWT:
- * {@code /api/dev/**} and {@code /mcp/**} (grant key only, see {@code mcpServerFilterChain}) and
- * {@code /v1/**} (the OpenAI-compatible surface: JWT or grant key). Every other authenticated
- * {@code /api/**} route also accepts a tenant API key ({@code Bearer vdak_...}, see {@code
+ * authenticate with a long-lived {@code vmcp_} grant key instead of (or as well as) a JWT: {@code
+ * /api/dev/**} and {@code /mcp/**} (grant key only, see {@code mcpServerFilterChain}) and {@code
+ * /v1/**} (the OpenAI-compatible surface: JWT or grant key). Every other authenticated {@code
+ * /api/**} route also accepts a tenant API key ({@code Bearer vdak_...}, see {@code
  * ApiKeyAuthFilter} in the main chain) as an alternative to the JWT.
  *
  * <p>"Public" here means no bearer token is needed at the gateway. Webhook, device and claim
@@ -35,67 +35,66 @@ final class OpenApiSecurity {
     static final String TENANT_API_KEY = "tenantApiKey";
 
     /** One permitAll rule. {@code method == null} means every HTTP method. */
-    record PublicRule(String method, String pattern) {
-    }
+    record PublicRule(String method, String pattern) {}
 
     // Mirror of SecurityConfig permitAll() lines (minus CORS preflight OPTIONS and /actuator/**,
     // which are not controller routes). Keep in the same order as SecurityConfig.
-    static final List<PublicRule> PUBLIC_RULES = List.of(
-        new PublicRule("GET", "/api/system/status/live"),
-        new PublicRule("GET", "/api/public/status"),
-        new PublicRule("POST", "/api/public/landing-event"),
-        new PublicRule(null, "/webhook/**"),
-        new PublicRule(null, "/api/billing/webhook/**"),
-        new PublicRule("GET", "/oauth/google/callback"),
-        new PublicRule("GET", "/oauth/x/callback"),
-        new PublicRule("GET", "/oauth/atlassian/callback"),
-        new PublicRule("GET", "/oauth/mcp/*/callback"),
-        new PublicRule("GET", "/oauth/mcp/remote/*"),
-        new PublicRule("POST", "/api/devices/claim"),
-        new PublicRule("POST", "/api/devices/poll"),
-        new PublicRule("POST", "/api/devices/commands/*/result"),
-        new PublicRule("POST", "/api/devices/screen-state"),
-        new PublicRule("POST", "/api/devices/notifications"),
-        new PublicRule("POST", "/api/devices/app-usage"),
-        new PublicRule("POST", "/api/devices/sms"),
-        new PublicRule("POST", "/api/signup"),
-        new PublicRule("GET", "/api/auth/social-providers"),
-        new PublicRule(null, "/api/demo/**"),
-        new PublicRule(null, "/api/share/agents/**"),
-        new PublicRule(null, "/api/share/workflows/**"),
-        new PublicRule(null, "/api/public/apps/**"),
-        new PublicRule(null, "/api/public/email/unsubscribe"),
-        new PublicRule("GET", "/api/public/workflow-forms/*"),
-        new PublicRule("POST", "/api/public/workflow-forms/*"),
-        new PublicRule("GET", "/api/share/branding/**"),
-        new PublicRule("GET", "/api/templates/gallery"),
-        new PublicRule("GET", "/api/templates/gallery/**"),
-        new PublicRule("GET", "/api/plugins/catalog"),
-        new PublicRule("GET", "/api/plugins/artifacts/**"),
-        new PublicRule(null, "/api/commerce/feed/**"),
-        new PublicRule("GET", "/.well-known/agent-card.json"),
-        new PublicRule("GET", "/.well-known/agent.json"),
-        new PublicRule("GET", "/.well-known/jwks.json"),
-        new PublicRule("GET", "/api/directory/agents"),
-        new PublicRule("GET", "/api/directory/agents/*"),
-        new PublicRule(null, "/x402/*"),
-        new PublicRule("GET", "/api/edge/config"),
-        new PublicRule("GET", "/api/edge/manifest"),
-        new PublicRule("GET", "/api/edge/tools"),
-        new PublicRule("GET", "/api/edge/memory"),
-        new PublicRule("POST", "/api/edge/tools/execute"),
-        new PublicRule("POST", "/api/edge/turns"),
-        new PublicRule(null, "/scim/v2/**"),
-        new PublicRule("POST", "/api/tenant/comp-grant"),
-        new PublicRule("POST", "/api/internal/app-builder/generate-files"),
-        new PublicRule("POST", "/api/internal/app-builder/generate-image")
-    );
+    static final List<PublicRule> PUBLIC_RULES =
+            List.of(
+                    new PublicRule("GET", "/api/system/status/live"),
+                    new PublicRule("GET", "/api/public/status"),
+                    new PublicRule("POST", "/api/public/landing-event"),
+                    new PublicRule(null, "/webhook/**"),
+                    new PublicRule(null, "/api/billing/webhook/**"),
+                    new PublicRule("GET", "/oauth/google/callback"),
+                    new PublicRule("GET", "/oauth/x/callback"),
+                    new PublicRule("GET", "/oauth/atlassian/callback"),
+                    new PublicRule("GET", "/oauth/mcp/*/callback"),
+                    new PublicRule("GET", "/oauth/mcp/remote/*"),
+                    new PublicRule("POST", "/api/devices/claim"),
+                    new PublicRule("POST", "/api/devices/poll"),
+                    new PublicRule("POST", "/api/devices/commands/*/result"),
+                    new PublicRule("POST", "/api/devices/screen-state"),
+                    new PublicRule("POST", "/api/devices/notifications"),
+                    new PublicRule("POST", "/api/devices/app-usage"),
+                    new PublicRule("POST", "/api/devices/sms"),
+                    new PublicRule("POST", "/api/signup"),
+                    new PublicRule("GET", "/api/auth/social-providers"),
+                    new PublicRule(null, "/api/demo/**"),
+                    new PublicRule(null, "/api/share/agents/**"),
+                    new PublicRule(null, "/api/share/workflows/**"),
+                    new PublicRule(null, "/api/public/apps/**"),
+                    new PublicRule(null, "/api/public/email/unsubscribe"),
+                    new PublicRule("GET", "/api/public/workflow-forms/*"),
+                    new PublicRule("POST", "/api/public/workflow-forms/*"),
+                    new PublicRule("GET", "/api/share/branding/**"),
+                    new PublicRule("GET", "/api/templates/gallery"),
+                    new PublicRule("GET", "/api/templates/gallery/**"),
+                    new PublicRule("GET", "/api/plugins/catalog"),
+                    new PublicRule("GET", "/api/plugins/artifacts/**"),
+                    new PublicRule(null, "/api/commerce/feed/**"),
+                    new PublicRule("GET", "/.well-known/agent-card.json"),
+                    new PublicRule("GET", "/.well-known/agent.json"),
+                    new PublicRule("GET", "/.well-known/jwks.json"),
+                    new PublicRule("GET", "/api/directory/agents"),
+                    new PublicRule("GET", "/api/directory/agents/*"),
+                    new PublicRule(null, "/x402/*"),
+                    new PublicRule("GET", "/api/edge/config"),
+                    new PublicRule("GET", "/api/edge/manifest"),
+                    new PublicRule("GET", "/api/edge/tools"),
+                    new PublicRule("GET", "/api/edge/memory"),
+                    new PublicRule("POST", "/api/edge/tools/execute"),
+                    new PublicRule("POST", "/api/edge/turns"),
+                    new PublicRule(null, "/scim/v2/**"),
+                    new PublicRule("POST", "/api/tenant/comp-grant"),
+                    new PublicRule("POST", "/api/internal/app-builder/generate-files"),
+                    new PublicRule("POST", "/api/internal/app-builder/generate-image"));
 
     /**
      * The local-auth filter chain ({@code LocalAuthSecurityConfig}) is separate from the main
-     * {@code SecurityConfig} the list above mirrors: everything under {@code /api/auth/local/**}
-     * is permitAll EXCEPT these paths, which need a signed-in session (its {@code
-     * BEARER_REQUIRED}). Keep the two in step.
+     * {@code SecurityConfig} the list above mirrors: everything under {@code /api/auth/local/**} is
+     * permitAll EXCEPT these paths, which need a signed-in session (its {@code BEARER_REQUIRED}).
+     * Keep the two in step.
      */
     private static final List<String> LOCAL_AUTH_BEARER_REQUIRED =
             List.of(
@@ -108,8 +107,7 @@ final class OpenApiSecurity {
 
     private static final AntPathMatcher MATCHER = new AntPathMatcher();
 
-    private OpenApiSecurity() {
-    }
+    private OpenApiSecurity() {}
 
     /** True when the (method, path-template) pair is a permitAll route. */
     static boolean isPublic(String httpMethod, String path) {

@@ -6,13 +6,13 @@ import java.time.Duration;
 import org.springframework.core.env.Environment;
 
 /**
- * Every tunable of the local single-user auth mode ({@code app.auth.mode=local}), read once from the
- * {@link Environment} so the key store, the token service, the throttle and the account service
- * cannot disagree about a value. All defaults are safe for a laptop install; nothing here is read at
- * all unless the mode is {@code local} (see {@link LocalAuth#isLocal(Environment)}).
+ * Every tunable of the local single-user auth mode ({@code app.auth.mode=local}), read once from
+ * the {@link Environment} so the key store, the token service, the throttle and the account service
+ * cannot disagree about a value. All defaults are safe for a laptop install; nothing here is read
+ * at all unless the mode is {@code local} (see {@link LocalAuth#isLocal(Environment)}).
  *
- * <p>The roles and tenant claim names are NOT new settings: they are the existing
- * {@code app.security.oidc.roles-claim-path} / {@code app.security.oidc.tenant-claim} mapping, so a
+ * <p>The roles and tenant claim names are NOT new settings: they are the existing {@code
+ * app.security.oidc.roles-claim-path} / {@code app.security.oidc.tenant-claim} mapping, so a
  * locally issued token has exactly the claim shape the Keycloak flow produces and every consumer
  * ({@code KeycloakRoleConverter}, {@code TenantContextFilter}, ...) reads it unchanged.
  *
@@ -23,7 +23,8 @@ import org.springframework.core.env.Environment;
  * @param audience required {@code aud} value.
  * @param dataDir directory holding the signing keys and the first-run setup file; created 0700.
  * @param accessTokenTtl lifetime of an access JWT. Short on purpose: access tokens are not
- *     individually revocable, so this bounds how long a disabled or logged-out session keeps working.
+ *     individually revocable, so this bounds how long a disabled or logged-out session keeps
+ *     working.
  * @param refreshTokenTtl idle lifetime of one refresh token (each use rotates it).
  * @param sessionMaxTtl absolute lifetime of a login session however often it is refreshed.
  * @param keyRotationInterval age after which the signing key is replaced.
@@ -111,8 +112,10 @@ public record LocalAuthSettings(
                 duration(env, "app.auth.local.key-retention"),
                 duration(env, "app.auth.local.setup-token-ttl"),
                 env.getProperty(
-                        "app.security.oidc.roles-claim-path", JwtClaimPaths.DEFAULT_ROLES_CLAIM_PATH),
-                env.getProperty("app.security.oidc.tenant-claim", JwtClaimPaths.DEFAULT_TENANT_CLAIM));
+                        "app.security.oidc.roles-claim-path",
+                        JwtClaimPaths.DEFAULT_ROLES_CLAIM_PATH),
+                env.getProperty(
+                        "app.security.oidc.tenant-claim", JwtClaimPaths.DEFAULT_TENANT_CLAIM));
     }
 
     private static Duration duration(Environment env, String key) {
@@ -124,7 +127,11 @@ public record LocalAuthSettings(
             return env.getProperty(key, Duration.class);
         } catch (RuntimeException e) {
             throw new IllegalStateException(
-                    key + " is not a valid duration (use ISO-8601 like PT15M or 15m): '" + raw + "'", e);
+                    key
+                            + " is not a valid duration (use ISO-8601 like PT15M or 15m): '"
+                            + raw
+                            + "'",
+                    e);
         }
     }
 }
