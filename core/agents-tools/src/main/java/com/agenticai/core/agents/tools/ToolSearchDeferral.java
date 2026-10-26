@@ -186,8 +186,9 @@ final class ToolSearchDeferral {
 
         CompletableFuture<Map<String, ToolCallback>> catalog;
         if (toScreen == null) {
-            catalog = CompletableFuture.completedFuture(
-                    Collections.unmodifiableMap(new LinkedHashMap<>(deferred)));
+            catalog =
+                    CompletableFuture.completedFuture(
+                            Collections.unmodifiableMap(new LinkedHashMap<>(deferred)));
         } else {
             // The catalog screen runs on a background virtual thread, off the reply's critical
             // path: deferred tools never reach the model's prompt, so the turn starts on the
@@ -209,8 +210,7 @@ final class ToolSearchDeferral {
                                         return Map.of();
                                     });
         }
-        boolean anythingDeferred =
-                toScreen == null ? !deferred.isEmpty() : !toScreen.isEmpty();
+        boolean anythingDeferred = toScreen == null ? !deferred.isEmpty() : !toScreen.isEmpty();
         if (!anythingDeferred) {
             // Everything is standing capability: nothing to search for, so offer the list
             // untouched.
