@@ -20,6 +20,7 @@
 #   scripts/vegaduta restore DIR             (database(s) from a backup; asks first)
 #   scripts/vegaduta upgrade [--version X.Y.Z] [--no-backup]
 #   scripts/vegaduta restart [SERVICE]       (personal: restart core; prints a fresh first-run setup link)
+#   scripts/vegaduta reset-password [EMAIL]  (forgot the password; prints a one-time reset link)
 #   scripts/vegaduta make-admin USERNAME_OR_EMAIL
 #   scripts/vegaduta models [list|pull TAG|rm TAG]   (local model catalog; Ollama)
 #   scripts/vegaduta seed-demo [--tenant NAME] [--remove] [--yes]   (fictional "Example" data for the pilot report)
@@ -2054,6 +2055,38 @@ cmd_restart() {
   fi
 }
 
+# `reset-password [EMAIL]`: the owner forgot the password. Asks core to mint a one-time reset link,
+# which lands in password-reset.txt on this machine (file access = proof of ownership, same model
+# as the first-run link), then prints it. Works for containers and the host-JVM personal install.
+cmd_reset_password() {
+  local email="${1:-}"
+  load_state; resolve_profiles; build_compose_args
+  local api body text
+  api="${PUBLIC_API_URL:-$(get_env PUBLIC_API_URL)}"; api="${api:-http://localhost:$(env_or CORE_HOST_PORT 8080)}"
+  body='{}'
+  [ -n "$email" ] && body="{\"email\":\"$email\"}"
+  curl -fsS -X POST "$api/api/auth/local/reset-request" \
+      -H 'Content-Type: application/json' -d "$body" >/dev/null 2>&1 \
+    || die "core at $api did not answer the reset request - is it running? (scripts/vegaduta status)"
+  if [ "$NATIVE_CORE" = 1 ]; then
+    text="$(cat "${APP_AUTH_LOCAL_DATA_DIR:-${HOME:-/tmp}/.vegaduta/auth}/password-reset.txt" 2>/dev/null || true)"
+  else
+    text="$(dc exec -T core cat /data/storage/.auth/password-reset.txt 2>/dev/null || true)"
+  fi
+  local link
+  link="$(printf '%s\n' "$text" | grep -o 'https\{0,1\}://[^ ]*/login?setup=[A-Za-z0-9_-]*' | tail -n 1 || true)"
+  if [ -z "$link" ]; then
+    printf '%s\n' "$text"
+    die "no reset link in password-reset.txt - check the account e-mail and try again"
+  fi
+  cat <<EOF
+
+  Password reset link (one use):
+    $link
+  Open it in your browser, choose a new password, and you are signed in.
+EOF
+}
+
 # personal_sync_public_urls: the console and API URLs a browser uses follow the ports in .env. The copy of
 # .env.example pins PUBLIC_APP_URL / PUBLIC_API_URL to the default ports, so changing WEB_HOST_PORT or
 # CORE_HOST_PORT (the fix doctor suggests for a busy port) left the console talking to the wrong address.
@@ -2235,6 +2268,7 @@ main() {
     upgrade) cmd_upgrade "$@" ;;
     make-admin) cmd_make_admin "$@" ;;
     restart) cmd_restart "$@" ;;
+    reset-password) cmd_reset_password "$@" ;;
     models|model) cmd_models "$@" ;;
     seed-demo) cmd_seed_demo "$@" ;;
     projects) cmd_projects "$@" ;;

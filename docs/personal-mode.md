@@ -90,6 +90,7 @@ It also repairs the usual reasons a start fails:
 |---|---|
 | `./scripts/vegaduta personal` | start the personal stack (unchanged containers are left running) |
 | `./scripts/vegaduta restart` | restart core and print a fresh first-run setup link and the sign-in e-mail. Use it for a lost or expired link |
+| `./scripts/vegaduta reset-password [EMAIL]` | forgot the password. Core writes a one-time reset link to `password-reset.txt` in the auth data directory (file access proves it is your machine); the command prints it. Open it, choose a new password, done. `.\scripts\vegaduta.ps1 reset-password` on Windows |
 | `./scripts/vegaduta personal --native-core` | core on the host JVM (`-Xmx1g`, SerialGC), the rest in Docker. Saves the container's memory limit and the Docker VM overhead; logs go to `~/.vegaduta/personal/core.log` |
 | `--local-ai=host`, `--local-model TAG` | use the Ollama on this machine with that model (see below) |
 | `--cloud` | no local model (by default one is downloaded, see below); you will add a provider key in the console. Remembered: a later plain `personal` stays cloud. Run `personal --local-ai` or `--local-ai=host` to switch |
@@ -278,7 +279,11 @@ point a personal install back at Keycloak (`APP_AUTH_MODE=keycloak`).
 You can unlock the console in four ways, alone or together: a **passkey** (Touch ID, Windows Hello, a phone or a
 security key), a **PIN** on a browser you have enrolled, a **password**, and one-time **recovery codes** for the day
 the other ways are gone. The sign-in screen shows a passkey button first, a PIN pad when this browser holds a PIN,
-and asks for no e-mail address unless you choose "Use a password instead".
+and asks for no e-mail address unless you choose "Use a password instead". **Forgot the password?**
+The sign-in screen has a "Forgot password?" link: it asks core to write a one-time reset link to
+`password-reset.txt` in the auth data directory - the link is never sent over the wire, so only
+someone who can read files on this machine gets it. `./scripts/vegaduta reset-password` prints it;
+on Windows that is `.\scripts\vegaduta.ps1 reset-password`.
 
 1. **First start.** Core creates one owner and a default tenant named `Personal` through the normal sign-up path,
    with a random password nobody sees, and refuses to sign that account in until you set a real way in.

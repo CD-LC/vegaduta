@@ -49,6 +49,9 @@ public record LocalAuthSettings(
     /** File in {@link #dataDir()} holding the one-time first-run setup link (mode 0600). */
     public static final String SETUP_FILE_NAME = "first-run-setup.txt";
 
+    /** File in {@link #dataDir()} holding a requested password-reset link (mode 0600). */
+    public static final String RESET_FILE_NAME = "password-reset.txt";
+
     public LocalAuthSettings {
         if (issuer == null || issuer.isBlank()) {
             issuer = DEFAULT_ISSUER;
