@@ -390,6 +390,17 @@ docker-compose.yml (`APP_AUTH_MODE` on x-core-env, `NEXT_PUBLIC_AUTH_MODE` on we
 the console's own unlock screen handles owner setup (password/passkey/PIN/recovery).
 Verified: LocalFirstRunBootstrap emitted the setup link, `/api/auth/local/unlock/*`
 endpoints live, `window.__ENV` carries `NEXT_PUBLIC_AUTH_MODE:"local"`.
+### CLAIM (in progress): approval-resume + desktop watch/learning (Devin, 2026-10-26)
+
+Branch `fix/desktop-resume-learning`. Three reported defects: (1) "carry on" after an
+approval has no context — continuation only fires when the request's replay envelope
+carries the chat identity, and nothing fills the gap when it can't; (2) the desktop
+watch panel dies with the console tab — adding a document-PiP popout on
+DesktopScreenDock; (3) recipe replays bypass the tool journal and nothing proposes a
+recipe after a successful desktop run. Touches `core/agents-turn`,
+`core/agents-tools` (desktop + approval executor), `web/app/components/desktop`.
+Do not rebase or amend the branch while the claim is open.
+
 ### CLAIM COMPLETE: services/code-intel capability expansion (Devin, 2026-10-26)
 
 Shipped on `feat/code-intel-out-of-the-box`: 12 deterministic read-only analysis

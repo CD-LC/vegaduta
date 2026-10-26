@@ -118,6 +118,10 @@ app:
       enabled: ${APP_LEARNING_ROUTINES_ENABLED:true}
       # The zone your "around 9am" is read in; blank = the server's own zone.
       timezone: ${APP_LEARNING_ROUTINES_TIMEZONE:}
+    desktop-recipes:
+      # A finished turn that ran several local_desktop_* actions is offered for one-click save as
+      # a recipe (you approve it; the recipe replays in MONITOR mode unless you change it).
+      enabled: ${APP_LEARNING_DESKTOP_RECIPES_ENABLED:true}
     review:
       # Daily memory review: proposes merging near-duplicate facts, dropping stale ones.
       enabled: ${APP_LEARNING_REVIEW_ENABLED:true}

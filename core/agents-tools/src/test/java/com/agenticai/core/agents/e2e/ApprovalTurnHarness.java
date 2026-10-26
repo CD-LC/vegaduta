@@ -578,13 +578,13 @@ public final class ApprovalTurnHarness implements AutoCloseable {
                                         settingsResolver),
                                 toolCallLogService,
                                 b.guardrailEngine));
-        // The server-side continuation, wired as in production: the launcher starts an ordinary
-        // chat turn through the same AgentChatService the tests drive directly.
+        // The server-side continuation, wired as in production (chat turns through AgentChatService).
         this.continuationFactory =
                 new ApprovalContinuationFactory(
                         new ObjectMapper(),
                         gate,
                         HarnessProviders.provider(toolCallLogService),
+                        HarnessProviders.provider(memory),
                         continuationProperties);
         this.continuationPrompt = new ApprovalContinuationPrompt(continuationProperties);
         this.continuationClaims =

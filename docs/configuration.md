@@ -1424,6 +1424,7 @@ Spring properties, so the environment variable is the relaxed-binding name (`app
 | `app.learning.lessons.enabled` | `APP_LEARNING_LESSONS_ENABLED` | `false` | `true` |
 | `app.learning.preferences.enabled` | `APP_LEARNING_PREFERENCES_ENABLED` | `false` | `true` |
 | `app.learning.routines.enabled` | `APP_LEARNING_ROUTINES_ENABLED` | `false` | `true` |
+| `app.learning.desktop-recipes.enabled` | `APP_LEARNING_DESKTOP_RECIPES_ENABLED` | `false` | `true` |
 | `app.learning.review.enabled` | `APP_LEARNING_REVIEW_ENABLED` | `false` | `true` |
 | `app.edition.tier` | `APP_EDITION_TIER` | unset (every [edition feature](#edition-tier-and-features) on) | `personal` (the Compose stack derives it from `VEGADUTA_EDITION`) |
 | `app.edition.billing-enabled` | `APP_EDITION_BILLING_ENABLED` | `true` | `false` |
