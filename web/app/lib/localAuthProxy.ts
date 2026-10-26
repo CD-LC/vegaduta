@@ -195,7 +195,11 @@ export async function handleLocalAuth(
     // (which replaces it) or logout (which clears it).
     return json(
       payload && typeof payload === "object"
-        ? { error: payload.error ?? "error", message: payload.message ?? "Request failed.", retryAfterSeconds: payload.retryAfterSeconds }
+        ? {
+            error: payload.error ?? "error",
+            message: payload.message ?? "Request failed.",
+            retryAfterSeconds: payload.retryAfterSeconds,
+          }
         : { error: "error", message: "Request failed." },
       upstream.status,
       extra
