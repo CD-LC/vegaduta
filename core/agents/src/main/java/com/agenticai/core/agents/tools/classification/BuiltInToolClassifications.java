@@ -570,7 +570,7 @@ public final class BuiltInToolClassifications {
      * ToolClassification#withToolName(String)}, so the returned object always names the tool that
      * was asked about.
      */
-    static ToolClassification find(String toolName) {
+    public static ToolClassification find(String toolName) {
         if (toolName == null || toolName.isBlank()) {
             return null;
         }
