@@ -34,7 +34,7 @@ interface Props {
   onDeviceChange: () => void;
 }
 
-type View = "main" | "password" | "recovery";
+type View = "main" | "password" | "recovery" | "forgot";
 
 /**
  * The sign-in methods of a personal install, in the order a person would reach for them: a
@@ -56,6 +56,7 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
   const [password, setPassword] = useState("");
   const [pin, setPin] = useState("");
   const [code, setCode] = useState("");
+  const [resetDone, setResetDone] = useState(false);
   const [busy, setBusy] = useState(false);
   // Which method the request in flight belongs to, so only its button says "Signing in".
   const [active, setActive] = useState<ErrorContext | null>(null);
@@ -129,6 +130,16 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
     void attempt("recovery", async () => ({ payload: await recoveryLogin(code), via: "recovery" }));
   }
 
+  function onForgot(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    localAuthPost<{ status?: string }>("reset-request", { email: email.trim() })
+      .then(() => setResetDone(true))
+      .catch((err) => setError(describeLocalAuthError(t, err, "password")))
+      .finally(() => setBusy(false));
+  }
+
   const status = (
     <div aria-live="polite">
       {error && (
@@ -171,6 +182,60 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
       {t("local.signin.lostDevice")}
     </button>
   ) : null;
+
+  const forgotLink = (
+    <button type="button" className="underline" onClick={() => { setResetDone(false); go("forgot"); }} data-testid="local-forgot-password">
+      {t("local.signin.forgotPassword")}
+    </button>
+  );
+
+  if (shown === "forgot") {
+    return (
+      <form onSubmit={onForgot} className="vd-auth__form" data-testid="local-forgot-form">
+        {notices}
+        {resetDone ? (
+          <>
+            <p role="status" className="text-sm" data-testid="local-forgot-done">
+              {typeof navigator !== "undefined" && /windows/i.test(navigator.userAgent)
+                ? t("local.forgot.doneWindows")
+                : t("local.forgot.done")}
+            </p>
+            <p className="vd-auth__switch">
+              <button type="button" className="underline" onClick={() => go("password")} data-testid="local-forgot-back-done">
+                {t("local.signin.back")}
+              </button>
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">{t("local.forgot.intro")}</p>
+            <div className="vd-auth__field">
+              <Label htmlFor="local-forgot-email">{t("local.forgot.label")}</Label>
+              <Input
+                id="local-forgot-email"
+                type="email"
+                inputMode="email"
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                data-testid="local-forgot-email"
+              />
+              <p className="text-xs text-muted-foreground">{t("local.forgot.hint")}</p>
+            </div>
+            {status}
+            <Button type="submit" size="lg" className="w-full" disabled={busy || locked} data-testid="local-forgot-submit">
+              {busy ? t("local.forgot.sending") : t("local.forgot.button")}
+            </Button>
+            <p className="vd-auth__switch">
+              <button type="button" className="underline" onClick={() => go("password")} data-testid="local-forgot-back">
+                {t("local.signin.back")}
+              </button>
+            </p>
+          </>
+        )}
+      </form>
+    );
+  }
 
   if (shown === "recovery") {
     return (
@@ -238,13 +303,14 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
           {busy ? t("local.signingIn") : t("local.signInButton")}
         </Button>
         {passkeyHint}
-        {(hasAlternative || recoveryLink) && (
+        {(hasAlternative || recoveryLink || forgotLink) && (
           <p className="vd-auth__switch flex flex-wrap justify-center gap-x-4 gap-y-1">
             {hasAlternative && (
               <button type="button" className="underline" onClick={() => go("main")} data-testid="local-back">
                 {t("local.signin.back")}
               </button>
             )}
+            {forgotLink}
             {recoveryLink}
           </p>
         )}
@@ -290,6 +356,7 @@ export default function SignInPanel({ methods, passkey, device, reauth, setupReq
         <button type="button" className="underline" onClick={() => go("password")} data-testid="local-use-password">
           {t("local.signin.usePassword")}
         </button>
+        {forgotLink}
         {recoveryLink}
       </p>
     </div>

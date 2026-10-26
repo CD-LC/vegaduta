@@ -22,6 +22,7 @@ export const ACTIONS: Record<string, "GET" | "POST"> = {
   refresh: "POST",
   logout: "POST",
   "change-password": "POST",
+  "reset-request": "POST",
 };
 
 const MAX_BODY_BYTES = 8 * 1024;

@@ -4,8 +4,13 @@ import com.agenticai.core.admin.localauth.LocalSessionService.Session;
 import com.agenticai.core.security.localauth.LocalAuthSettings;
 import com.agenticai.core.security.localauth.LocalCredentialVerifier;
 import com.agenticai.core.security.localauth.LoginThrottle;
+import com.agenticai.core.security.publicurl.PublicWebUrl;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -14,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +54,7 @@ public class LocalAuthService {
     private final LocalDevices devices;
     private final LocalRecoveryCodes recoveryCodes;
     private final Clock clock;
+    private final String publicWebUrl;
 
     @Autowired
     public LocalAuthService(
@@ -58,8 +65,32 @@ public class LocalAuthService {
             LocalAuthSettings settings,
             List<LocalCredentialVerifier> credentialVerifiers,
             LocalDevices devices,
+            LocalRecoveryCodes recoveryCodes,
+            @org.springframework.beans.factory.annotation.Value("${app.web.public-url:}") String publicWebUrl) {
+        this(
+                store,
+                sessions,
+                passwords,
+                throttle,
+                settings,
+                credentialVerifiers,
+                devices,
+                recoveryCodes,
+                Clock.systemUTC(),
+                publicWebUrl);
+    }
+
+    /** Test convenience: no public URL, so a reset link prints as a path only. */
+    LocalAuthService(
+            LocalAccountStore store,
+            LocalSessionService sessions,
+            LocalPasswords passwords,
+            LoginThrottle throttle,
+            LocalAuthSettings settings,
+            List<LocalCredentialVerifier> credentialVerifiers,
+            LocalDevices devices,
             LocalRecoveryCodes recoveryCodes) {
-        this(store, sessions, passwords, throttle, settings, credentialVerifiers, devices, recoveryCodes, Clock.systemUTC());
+        this(store, sessions, passwords, throttle, settings, credentialVerifiers, devices, recoveryCodes, Clock.systemUTC(), "");
     }
 
     LocalAuthService(
@@ -72,6 +103,20 @@ public class LocalAuthService {
             LocalDevices devices,
             LocalRecoveryCodes recoveryCodes,
             Clock clock) {
+        this(store, sessions, passwords, throttle, settings, credentialVerifiers, devices, recoveryCodes, clock, "");
+    }
+
+    LocalAuthService(
+            LocalAccountStore store,
+            LocalSessionService sessions,
+            LocalPasswords passwords,
+            LoginThrottle throttle,
+            LocalAuthSettings settings,
+            List<LocalCredentialVerifier> credentialVerifiers,
+            LocalDevices devices,
+            LocalRecoveryCodes recoveryCodes,
+            Clock clock,
+            String publicWebUrl) {
         this.store = store;
         this.sessions = sessions;
         this.passwords = passwords;
@@ -80,6 +125,7 @@ public class LocalAuthService {
         this.devices = devices;
         this.recoveryCodes = recoveryCodes;
         this.clock = clock;
+        this.publicWebUrl = publicWebUrl;
         // Listed in a fixed order so the sign-in page sees the same credential types every boot.
         List<LocalCredentialVerifier> ordered = new ArrayList<>(credentialVerifiers);
         ordered.sort(Comparator.comparingInt(v -> {
@@ -249,6 +295,59 @@ public class LocalAuthService {
      */
     void endOtherSessions(String accountId, String keepFamilyId) {
         sessions.revokeAllExcept(accountId, keepFamilyId);
+    }
+
+    /**
+     * A locked-out person asks for a password reset. The request is anonymous, so the link is
+     * never returned over the wire - it is written to {@code <data-dir>/password-reset.txt} (mode
+     * 0600) and logged, the same proof-of-machine-access model as the first-run setup link. The
+     * file carries a one-time setup token, so the existing {@code /login?setup=TOKEN} flow sets a
+     * new password and signs in. A blank e-mail resolves to the install's only account, which is
+     * the common case on a personal install; the answer is generic either way so the endpoint does
+     * not reveal which e-mail owns an account. Throttled per address so the file cannot be
+     * re-minted without limit.
+     */
+    public void requestPasswordReset(String email, String address) {
+        String key = "reset:" + address;
+        requireNotThrottled(address, key);
+        throttle.recordFailure(address, key);
+        LocalAccount account =
+                email == null || email.isBlank()
+                        ? store.listAll().stream().filter(LocalAccount::enabled).findFirst().orElse(null)
+                        : store.findByEmail(email.trim().toLowerCase(Locale.ROOT)).filter(LocalAccount::enabled).orElse(null);
+        if (account == null) {
+            return;
+        }
+        String token = issueSetupToken(account);
+        String expiry = Instant.now().plus(settings.setupTokenTtl()).toString();
+        String link =
+                PublicWebUrl.normalize(publicWebUrl) + "/login?setup=" + token;
+        Path file = settings.dataDir().resolve(LocalAuthSettings.RESET_FILE_NAME);
+        writeResetFile(file, link, expiry);
+        log.info(
+                "Password reset requested for {} - a one-use reset link was saved to {} (expires {}).",
+                account.email(),
+                file,
+                expiry);
+    }
+
+    private void writeResetFile(Path file, String link, String expiry) {
+        try {
+            Files.createDirectories(file.getParent());
+            Path tmp = Files.createTempFile(file.getParent(), "reset-", ".tmp");
+            try {
+                Files.setPosixFilePermissions(tmp, Set.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE));
+            } catch (UnsupportedOperationException ignored) {
+                // Not a POSIX file system; the parent dir's 0700 still restricts it to the owner.
+            }
+            Files.writeString(
+                    tmp,
+                    "Open this link to choose a new password (single use, expires " + expiry + "):\n" + link + "\n",
+                    StandardCharsets.UTF_8);
+            Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            log.warn("Could not save the reset link to {}: {}", file, e.toString());
+        }
     }
 
     /**

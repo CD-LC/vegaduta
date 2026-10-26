@@ -63,6 +63,8 @@ public class LocalAuthController {
     public record SetupRequest(
             @NotBlank @Size(max = 256) String token, @NotBlank @Size(max = 1024) String password) {}
 
+    public record ResetRequest(@Size(max = 320) String email) {}
+
     public record RefreshRequest(@NotBlank @Size(max = 256) String refreshToken) {}
 
     public record ChangePasswordRequest(
@@ -99,6 +101,24 @@ public class LocalAuthController {
         Session session =
                 auth.login(body.type(), body.identifier(), Map.of("password", body.password()), request.getRemoteAddr());
         return noStore(ResponseEntity.ok(view(session)));
+    }
+
+    /**
+     * A locked-out person asks for a reset link. The response never carries it - that would let
+     * anyone who can reach the port reset the owner's password. Core writes it to a file on the
+     * machine instead, and the person reads it with {@code scripts/vegaduta reset-password}.
+     */
+    @PostMapping("/reset-request")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<Map<String, String>> resetRequest(
+            @RequestBody(required = false) ResetRequest body, HttpServletRequest request) {
+        auth.requestPasswordReset(body == null ? null : body.email(), request.getRemoteAddr());
+        return noStore(
+                ResponseEntity.ok(
+                        Map.of(
+                                "status",
+                                "If the account exists, a reset link was saved on this machine. "
+                                        + "Run `scripts/vegaduta reset-password` to see it.")));
     }
 
     @PostMapping("/setup")

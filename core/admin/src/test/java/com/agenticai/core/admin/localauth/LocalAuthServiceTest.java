@@ -335,6 +335,38 @@ class LocalAuthServiceTest {
         assertThat(LocalPasswords.violation("            ", null)).isNotNull();
     }
 
+    // ------------------------------------------------------------------ password reset
+
+    @Test
+    void aResetRequestWritesTheLinkFileAndTheTokenResetsThePassword() throws java.io.IOException {
+        auth.requestPasswordReset(EMAIL, "10.0.0.1");
+
+        String text = java.nio.file.Files.readString(dir.resolve(LocalAuthSettings.RESET_FILE_NAME));
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("setup=(vdls_[A-Za-z0-9_-]+)").matcher(text);
+        assertThat(m.find()).as("a setup link in the reset file").isTrue();
+
+        Session s = auth.completeSetup(m.group(1), "a brand new passphrase", "10.0.0.1");
+        assertThat(s).isNotNull();
+        assertThat(auth.login("password", EMAIL, Map.of("password", "a brand new passphrase"), "10.0.0.1"))
+                .as("the new password signs in")
+                .isNotNull();
+        assertThatThrownBy(() -> auth.login("password", EMAIL, Map.of("password", PASSWORD), "10.0.0.1"))
+                .as("the old password is gone")
+                .isInstanceOfSatisfying(LocalAuthException.class, e -> assertThat(e.code()).isEqualTo("invalid_credentials"));
+    }
+
+    @Test
+    void aResetRequestWithNoEmailUsesTheOnlyAccount() throws java.io.IOException {
+        auth.requestPasswordReset("   ", "10.0.0.1");
+        assertThat(java.nio.file.Files.exists(dir.resolve(LocalAuthSettings.RESET_FILE_NAME))).isTrue();
+    }
+
+    @Test
+    void aResetRequestForAnUnknownEmailWritesNoFile() {
+        auth.requestPasswordReset("nobody@example.test", "10.0.0.1");
+        assertThat(java.nio.file.Files.exists(dir.resolve(LocalAuthSettings.RESET_FILE_NAME))).isFalse();
+    }
+
     private LocalAccount disabled() {
         return InMemoryLocalAccountStore.account("disabled@example.test", PASSWORD, passwords).withEnabled(false);
     }
