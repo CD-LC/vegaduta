@@ -223,8 +223,7 @@ export default function ShareCallPanel({
     stopReplay();
     const token = replayTokenRef.current;
     const epoch = voiceEpochRef.current;
-    const isStale = () =>
-      unmountedRef.current || replayTokenRef.current !== token || voiceEpochRef.current !== epoch;
+    const isStale = () => unmountedRef.current || replayTokenRef.current !== token || voiceEpochRef.current !== epoch;
     unlockAudioElement(audioElRef.current);
     unlockWebSpeech();
     setReplayIndex(index);
@@ -239,8 +238,11 @@ export default function ShareCallPanel({
   async function speakAgentLine(text: string) {
     if (repliesMutedRef.current) return;
     const epoch = voiceEpochRef.current;
-    await speakShareLine(text, () => audioElRef.current,
-      () => unmountedRef.current || voiceEpochRef.current !== epoch);
+    await speakShareLine(
+      text,
+      () => audioElRef.current,
+      () => unmountedRef.current || voiceEpochRef.current !== epoch
+    );
   }
 
   // ---- Push-to-talk ---------------------------------------------------
@@ -420,8 +422,7 @@ export default function ShareCallPanel({
     agentAudioMutedRef,
     liveTranscriptIdsRef,
     speakAgentLine,
-    appendCallLog: (entry: { role: "user" | "agent"; text: string }) =>
-      setCallLog((prev) => [...prev, entry]),
+    appendCallLog: (entry: { role: "user" | "agent"; text: string }) => setCallLog((prev) => [...prev, entry]),
     setError,
     setMode,
     setCallStatus,
