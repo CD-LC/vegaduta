@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
+
+### Added
+
+- **Windows support in `desktop-agent`** (`services/desktop-agent`): `win32`
+  hosts previously fell through to the Linux path and every action answered
+  501. Input now goes through user32 `SendInput`/`mouse_event` via an inline C#
+  interop class, screen capture and monitor frames through
+  `System.Drawing.CopyFromScreen`, and the clipboard through
+  `Get/Set-Clipboard` - all via the bundled Windows PowerShell, no external
+  installs. `/ui` accessibility tree remains macOS-only (honest 501 elsewhere).
+  README gains a Task Scheduler autostart recipe.
 - Fixed live voice transcription: sidecar pinned PyAV 19, which removed the `metadata_errors` kwarg `faster-whisper` passes to `av.open`, so every `/transcribe` call 400'd and calls hung at "Transcribing". Pinned `av==15.1.0` (newest release that keeps the kwarg).
 - Approval cards for `local_desktop_*` and `run_desktop_recipe` calls now show readable labels ("Open an app, file, or link") instead of raw wire names.
 - "The task it was working on" on approval cards now shows the user's actual message: the console's `<app_context>` preamble is stripped when core records the goal and when the web renders already-parked rows.

@@ -26,12 +26,24 @@ export interface LatestRelease {
 
 export async function fetchLatestRelease(): Promise<LatestRelease | null> {
   try {
-    const res = await fetch(`https://api.github.com/repos/${repoPath()}/releases/latest`, {
+    // /releases/latest follows whichever release published most recently - a
+    // component release (sdk-v*, pysdk-*, ...) beats the platform's own tag.
+    // The downloads page must show a PLATFORM release, so pick the newest tag
+    // matching vX.Y.Z out of the release list.
+    const res = await fetch(`https://api.github.com/repos/${repoPath()}/releases?per_page=30`, {
       headers: { Accept: "application/vnd.github+json", "User-Agent": "vegaduta-downloads" },
       next: { revalidate: 3600 },
     });
     if (!res.ok) return null;
-    const body = await res.json();
+    const list = await res.json();
+    const body = Array.isArray(list)
+      ? list.find(
+          (r: unknown) =>
+            typeof (r as Record<string, unknown>)?.tag_name === "string" &&
+            /^v\d+\.\d+\.\d+$/.test((r as { tag_name: string }).tag_name)
+        )
+      : null;
+    if (body == null) return null;
     const assets: ReleaseAsset[] = Array.isArray(body?.assets)
       ? body.assets
           .filter((a: unknown): a is { name: string; browser_download_url: string; size: number } => {
