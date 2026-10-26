@@ -89,6 +89,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Fresh installs and upgrades no longer resolve the wrong release.** Publishing `sdk-v0.1.1` made it GitHub's `/releases/latest`, so `install.sh`, `scripts/vegaduta`, `vegaduta.ps1` and the `/downloads` page all pointed at the SDK release - which has no installer assets, no `vX.Y.Z` tag and no `VegaDuta-Setup-*` downloads. All four now read the releases list and pick the newest platform `vX.Y.Z` tag, skipping component releases (`sdk-*`, `pysdk-*`, `restsdk-*`).
+- **Mid-loop tool-call narration no longer leaks into streamed replies** when a provider reports `stop` (or no reason) on a round that actually ended in tool calls - common on Ollama and other OpenAI-compatible local servers. `TerminalRoundStreamAdvisor` now classifies the round by the chunk's own `hasToolCalls()`, the authoritative signal, not the provider's `finish_reason` metadata.
 - **Turn start no longer waits on catalog screening.** When deferral is active
   (`app.tools.search.*`), each deferred tool's name/description/schema was judged by the
   guardrail model BEFORE the turn's first model call - ~90 sequential calls on a 59-tool catalog,

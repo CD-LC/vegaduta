@@ -80,9 +80,12 @@ A tag with a suffix (`v0.2.0-rc.1`) is a pre-release:
 
 - only the exact version tag is pushed (`ghcr.io/<owner>/core:0.2.0-rc.1`);
   `latest` and `<major>.<minor>` keep pointing at the last stable release;
-- the GitHub Release is marked as a pre-release and is never GitHub's "latest
-  release", so `install.sh` (which downloads `releases/latest/...` unless a
-  version is given) keeps installing the last stable release;
+- the GitHub Release is marked as a pre-release, and `install.sh` resolves the
+  newest platform `vX.Y.Z` tag from the releases list (skipping `sdk-*`,
+  `pysdk-*`, `restsdk-*` and pre-releases) unless a version is given - so it
+  keeps installing the last stable platform release. This is also what stops a
+  component release (`sdk-v0.1.1` once became GitHub's "latest" and broke every
+  default install) from hijacking the resolution;
 - `helm install` without `--version` does not pick it up either.
 
 Consequently, **the first release must be a stable one** (e.g. `v0.1.0`) for
