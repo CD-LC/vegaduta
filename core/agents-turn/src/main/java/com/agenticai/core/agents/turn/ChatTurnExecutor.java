@@ -1,7 +1,6 @@
 package com.agenticai.core.agents.turn;
 
 import static com.agenticai.core.agents.turn.AgentChatService.INTERRUPTED_REPLY_MARKER;
-import static com.agenticai.core.agents.turn.ChatClientResolver.providerOptions;
 import static com.agenticai.core.agents.turn.ChatPromptDirectives.containsFabricatedGenerationUrl;
 
 import com.agenticai.core.agents.core.Agent;
@@ -16,12 +15,7 @@ import com.agenticai.core.agents.turn.quality.LlmQualityJudgeService;
 import com.agenticai.core.agents.turn.quality.ReflexionService;
 import com.agenticai.core.chat.LlmRetryPolicy;
 import com.agenticai.core.chat.ProviderErrorTranslator;
-import com.agenticai.core.chat.UpstreamProviderException;
-import com.agenticai.core.chat.gateway.GatewayCallSpec;
-import com.agenticai.core.chat.gateway.LlmGatewayContentPolicyViolationException;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
-import com.agenticai.core.guardrails.GuardrailViolationException;
-import com.agenticai.core.guardrails.ToolStepLimitExceededException;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
@@ -631,7 +625,7 @@ final class ChatTurnExecutor {
             Agent agent,
             ChatClient primaryClient,
             Function<ChatClient, String> promptExecutor) {
-        return callWithProviderFallback(tenantId, agent, primaryClient, promptExecutor, null, null);
+        return failover().callWithProviderFallback(tenantId, agent, primaryClient, promptExecutor);
     }
 
     /**
@@ -651,85 +645,9 @@ final class ChatTurnExecutor {
             Function<ChatClient, String> promptExecutor,
             TurnToolActivity activity,
             AgentStepEventEmitter stepEvents) {
-        try {
-            return promptExecutor.apply(primaryClient);
-        } catch (RuntimeException e) {
-            if (e instanceof ToolStepLimitExceededException
-                    || e instanceof GuardrailViolationException
-                    || e instanceof LlmGatewayContentPolicyViolationException
-                    || agent.getFallbackProviderName() == null) {
-                throw e;
-            }
-            // Classify BEFORE deciding to fall back. translate() is idempotent
-            // (an UpstreamProviderException passes through unchanged), so this
-            // never double-wraps, and the caller's own onErrorMap downstream
-            // treats the classified exception the same way.
-            UpstreamProviderException classified =
-                    e instanceof UpstreamProviderException upstream
-                            ? upstream
-                            : providerErrorTranslator.translate(e, agent.getProviderName());
-            // classified is contractually never null (translate wraps every
-            // Throwable) - the null-check only shields mocked translators from
-            // an NPE, degrading to the pre-gate "always fall back" behavior.
-            if (classified != null && !HostedFailoverPolicy.isRetryable(classified)) {
-                log.warn(
-                        "Provider {} failed for agent {} with a non-retryable (input-shaped) error"
-                                + " ({}) - not retrying on fallback provider {}, it would reject this"
-                                + " the same way",
-                        agent.getProviderName(),
-                        agent.getId(),
-                        classified.getMessage(),
-                        agent.getFallbackProviderName());
-                throw classified;
-            }
-            if (replayBlockedBy(activity, agent, "byok-fallback", stepEvents).isPresent()) {
-                throw classified != null ? classified : e;
-            }
-            try {
-                String fallbackApiKey =
-                        credentialResolver.resolveActiveKey(agent.getFallbackProviderName());
-                // RL GEN_PARAMS scope boundary - see the identical note at
-                // streamFast's inline fallback above; same reasoning applies to
-                // this shared callWithProviderFallback helper.
-                ChatClient fallbackClient =
-                        llmGatewayService.resolveClient(
-                                tenantId,
-                                new GatewayCallSpec(
-                                        agent.getFallbackProviderName(),
-                                        fallbackApiKey,
-                                        agent.getFallbackModel(),
-                                        agent.getMaxTokens(),
-                                        agent.getTemperature(),
-                                        agent.getTopP(),
-                                        null,
-                                        providerOptions(agent.getFallbackProviderName(), agent)));
-                log.warn(
-                        "Provider {} failed for agent {} ({}), retrying once on fallback provider"
-                                + " {}",
-                        agent.getProviderName(),
-                        agent.getId(),
-                        e.getMessage(),
-                        agent.getFallbackProviderName());
-                issues.recordFallbackTriggeredIssue(agent.getId(), agent, e);
-                TurnLifecycleEvents.failover(stepEvents, agent.getFallbackModel(), e);
-                return promptExecutor.apply(fallbackClient);
-            } catch (RuntimeException fallbackFailure) {
-                log.warn(
-                        "Fallback provider {} could not be resolved/used for agent {}",
-                        agent.getFallbackProviderName(),
-                        agent.getId(),
-                        fallbackFailure);
-                // Covers BOTH failure shapes uniformly (resolveActiveKey/
-                // resolveClient throwing above, or promptExecutor.apply
-                // itself throwing) - this catch can't tell which happened,
-                // and doesn't need to: either way the fallback didn't
-                // rescue the turn. If resolution never even succeeded,
-                // recordFallbackTriggeredIssue above never ran, so only this
-                // one issue is recorded, not both.
-                issues.recordFallbackAlsoFailedIssue(agent.getId(), agent, e, fallbackFailure);
-                throw e;
-            }
-        }
+        return failover()
+                .callWithProviderFallback(
+                        tenantId, agent, primaryClient, promptExecutor, activity, stepEvents);
     }
 
     /**
@@ -803,13 +721,17 @@ final class ChatTurnExecutor {
      */
     java.util.Optional<String> replayBlockedBy(
             TurnToolActivity activity, Agent agent, String path, AgentStepEventEmitter stepEvents) {
-        FailoverReplayGate.Verdict verdict = replayGate.check(activity);
-        if (verdict.allowed()) {
-            return java.util.Optional.empty();
+        return failover().replayBlockedBy(activity, agent, path, stepEvents);
+    }
+
+    private volatile ProviderFailover failover;
+
+    private ProviderFailover failover() {
+        ProviderFailover f = failover;
+        if (f == null) {
+            failover = f = new ProviderFailover(this);
         }
-        DegradedRetrySignal.flagReplayBlocked(
-                meterRegistry, agent, path, verdict.toolsThatRan(), resilience, stepEvents);
-        return java.util.Optional.of(verdict.toolsThatRan());
+        return f;
     }
 
     /**
