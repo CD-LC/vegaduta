@@ -1796,6 +1796,7 @@ Rules of the road: a gated bean is only injected by beans gated by the same feat
 | `app.local-models.rate-limit.pulls-per-minute` | (none) | `6` | |
 | `app.llm.ollama.num-ctx` | `APP_LLM_OLLAMA_NUM_CTX` | `32768` | `num_ctx` sent to Ollama per request (its OpenAI-compat `options` field) - the provider default (~4k) silently truncates tool-heavy prompts |
 | `app.llm.ollama.num-batch` | `APP_LLM_OLLAMA_NUM_BATCH` | `0` (server default 512) | `num_batch` sent to Ollama per request - tokens evaluated per prompt step; a larger value (e.g. `2048`, keep `<= num-ctx`) speeds up the multi-thousand-token fixed-prefix eval that dominates turn latency on a local model |
+| `app.llm.ollama.auto-context-fix` | `APP_LLM_OLLAMA_AUTO_CONTEXT_FIX` | `true` | self-heal for a runner that loads a smaller window than `num-ctx` (the MLX runner ignores the per-request value): on each warm, a `model-ctxNk` variant is derived (weights reused, no download), the serving row is repointed, and the variant is warmed |
 | `app.llm.structured-output.ollama-format.enabled` | (none) | `false` | when on, a structured-output request that Ollama refuses (the MLX runner's `json_schema` 400) is retried with the schema in the prompt |
 
 A `LOCAL_OPENAI` provider (vLLM, llama.cpp, LM Studio, Jan, LocalAI) adds no keys. Its server must be listed in

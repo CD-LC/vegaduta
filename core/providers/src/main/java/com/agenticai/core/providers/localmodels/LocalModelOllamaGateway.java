@@ -1,9 +1,9 @@
 package com.agenticai.core.providers.localmodels;
 
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.net.SsrfBlockedException;
 import com.agenticai.core.security.net.SsrfGuard;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.PreDestroy;
@@ -31,15 +31,17 @@ import org.springframework.web.client.RestClient;
  * {@code POST /api/pull} (install a model, streamed) and {@code POST /api/generate} with no prompt
  * ({@link #warm}: load a model and keep it resident).
  *
- * <p><b>Which server.</b> Only the operator-configured Ollama, {@code app.local-models.ollama-base-url}
- * (default: {@code app.local-llm.bootstrap.base-url}, i.e. {@code http://ollama:11434}). No request
- * parameter can name another host, so these endpoints cannot be turned into a proxy.
+ * <p><b>Which server.</b> Only the operator-configured Ollama, {@code
+ * app.local-models.ollama-base-url} (default: {@code app.local-llm.bootstrap.base-url}, i.e. {@code
+ * http://ollama:11434}). No request parameter can name another host, so these endpoints cannot be
+ * turned into a proxy.
  *
  * <p><b>SSRF.</b> The configured URL goes through the shared {@link SsrfGuard} on every call, with
  * the same rules as every other model-server URL: a private or loopback Ollama must be listed in
- * {@code app.security.outbound.allowed-private-hosts} ({@code ollama:11434}, {@code localhost:11434}).
- * The HTTP client is the {@code SafeHttpClients} one: connects only to addresses the guard
- * validated and follows no redirects. A refusal is logged once and reported as "not reachable".
+ * {@code app.security.outbound.allowed-private-hosts} ({@code ollama:11434}, {@code
+ * localhost:11434}). The HTTP client is the {@code SafeHttpClients} one: connects only to addresses
+ * the guard validated and follows no redirects. A refusal is logged once and reported as "not
+ * reachable".
  */
 @Component
 public class LocalModelOllamaGateway implements com.agenticai.core.providers.LocalModelWarmer {
@@ -56,8 +58,12 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
             if (tag == null) {
                 return false;
             }
-            return installed.stream().anyMatch(t -> t.equalsIgnoreCase(tag)
-                    || (!tag.contains(":") && t.equalsIgnoreCase(tag + ":latest")));
+            return installed.stream()
+                    .anyMatch(
+                            t ->
+                                    t.equalsIgnoreCase(tag)
+                                            || (!tag.contains(":")
+                                                    && t.equalsIgnoreCase(tag + ":latest")));
         }
     }
 
@@ -86,28 +92,46 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
     @Value("${app.local-models.keep-alive:30m}")
     private String keepAlive = "30m";
 
-    /** The context core asks Ollama for on every chat (OllamaAgentChatClientFactory); compared with what was loaded. */
+    /**
+     * The context core asks Ollama for on every chat (OllamaAgentChatClientFactory); compared with
+     * what was loaded.
+     */
     @Value("${app.llm.ollama.num-ctx:32768}")
     private int wantedContext = 32768;
 
+    /**
+     * Self-heal for runners that ignore the per-request num_ctx (the MLX runner on Apple Silicon
+     * loads 4096 whatever core asks): when a warm finds the model serving a smaller window than
+     * {@link #wantedContext}, a {@code -ctxNk} variant is derived on the spot and the serving row
+     * repointed at it, so no turn silently truncates its prompt. Off: warn only, nothing derived.
+     */
+    @Value("${app.llm.ollama.auto-context-fix:true}")
+    private boolean autoFixContext = true;
+
     public LocalModelOllamaGateway(
             SsrfGuard guard,
-            @Value("${app.local-models.ollama-base-url:${app.local-llm.bootstrap.base-url:http://ollama:11434}}")
+            @Value(
+                            "${app.local-models.ollama-base-url:${app.local-llm.bootstrap.base-url:http://ollama:11434}}")
                     String baseUrl) {
         this.guard = guard;
         String trimmed = baseUrl == null ? "" : baseUrl.trim();
         this.baseUrl = trimmed.replaceAll("/+$", "");
-        this.quickHttp = com.agenticai.core.security.net.SafeHttpClients.create(
-                guard, Duration.ofSeconds(3), Duration.ofSeconds(8), false);
-        // A pull is silent for as long as Ollama verifies a layer; the read timeout is per read, not total.
-        this.pullHttp = com.agenticai.core.security.net.SafeHttpClients.create(
-                guard, Duration.ofSeconds(3), Duration.ofMinutes(20), false);
-        this.quick = RestClient.builder()
-                .requestFactory(new HttpComponentsClientHttpRequestFactory(quickHttp))
-                .build();
-        this.pull = RestClient.builder()
-                .requestFactory(new HttpComponentsClientHttpRequestFactory(pullHttp))
-                .build();
+        this.quickHttp =
+                com.agenticai.core.security.net.SafeHttpClients.create(
+                        guard, Duration.ofSeconds(3), Duration.ofSeconds(8), false);
+        // A pull is silent for as long as Ollama verifies a layer; the read timeout is per read,
+        // not total.
+        this.pullHttp =
+                com.agenticai.core.security.net.SafeHttpClients.create(
+                        guard, Duration.ofSeconds(3), Duration.ofMinutes(20), false);
+        this.quick =
+                RestClient.builder()
+                        .requestFactory(new HttpComponentsClientHttpRequestFactory(quickHttp))
+                        .build();
+        this.pull =
+                RestClient.builder()
+                        .requestFactory(new HttpComponentsClientHttpRequestFactory(pullHttp))
+                        .build();
     }
 
     @PreDestroy
@@ -127,33 +151,41 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
     }
 
     /**
-     * Loads {@code tag} into memory and asks Ollama to keep it there for {@link #keepAlive}:
-     * {@code POST /api/generate} with no prompt, which Ollama documents as the warm-up call. The
-     * first chat after a cold start otherwise pays the whole weight load (tens of seconds for a
-     * 4B model on a laptop) before its first token, and Ollama's default unload after five idle
-     * minutes makes that happen again after every pause. Blocks for the load; never throws.
+     * Loads {@code tag} into memory and asks Ollama to keep it there for {@link #keepAlive}: {@code
+     * POST /api/generate} with no prompt, which Ollama documents as the warm-up call. The first
+     * chat after a cold start otherwise pays the whole weight load (tens of seconds for a 4B model
+     * on a laptop) before its first token, and Ollama's default unload after five idle minutes
+     * makes that happen again after every pause. Blocks for the load; never throws.
      *
-     * @return the load time in milliseconds, or empty when the server is not reachable, refused,
-     *     or does not know the tag
+     * @return the load time in milliseconds, or empty when the server is not reachable, refused, or
+     *     does not know the tag
      */
     @Override
     public Optional<Long> warm(String tag) {
         return warm(tag, null);
     }
 
-    /** {@link #warm(String)} with this row's own keep-alive (Providers -> Local model); blank or null = the configured default. */
+    /**
+     * {@link #warm(String)} with this row's own keep-alive (Providers -> Local model); blank or
+     * null = the configured default.
+     */
     public Optional<Long> warm(String tag, String keepAliveOverride) {
-        String keep = keepAliveOverride == null || keepAliveOverride.isBlank() ? keepAlive : keepAliveOverride.trim();
+        String keep =
+                keepAliveOverride == null || keepAliveOverride.isBlank()
+                        ? keepAlive
+                        : keepAliveOverride.trim();
         Optional<String> url = allowedBase();
         if (url.isEmpty() || !StringUtils.hasText(tag)) {
             return Optional.empty();
         }
         ObjectNode body = MAPPER.createObjectNode().put("model", tag).put("stream", false);
-        // "-1" must go out as the number -1 (see OllamaKeepAlive): as a string Ollama answers 400 and the load fails.
+        // "-1" must go out as the number -1 (see OllamaKeepAlive): as a string Ollama answers 400
+        // and the load fails.
         body.set("keep_alive", MAPPER.valueToTree(OllamaKeepAlive.jsonValue(keep)));
         long started = System.nanoTime();
         try {
-            // The pull client: a cold load is silent for longer than the quick client's 8 s read timeout.
+            // The pull client: a cold load is silent for longer than the quick client's 8 s read
+            // timeout.
             pull.post()
                     .uri(url.get() + "/api/generate")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -171,10 +203,10 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
     }
 
     /**
-     * The context window Ollama actually loaded {@code tag} with ({@code GET /api/ps}), or empty when
-     * unknown. Some runners (the MLX runner on Apple Silicon, seen 2026-10-18) ignore the per-request
-     * {@code num_ctx} core sends and load the server default of 4096 instead - smaller than an agent
-     * prompt with tools, which then gets truncated and answers badly or not at all.
+     * The context window Ollama actually loaded {@code tag} with ({@code GET /api/ps}), or empty
+     * when unknown. Some runners (the MLX runner on Apple Silicon, seen 2026-10-18) ignore the
+     * per-request {@code num_ctx} core sends and load the server default of 4096 instead - smaller
+     * than an agent prompt with tools, which then gets truncated and answers badly or not at all.
      */
     public Optional<Integer> loadedContextLength(String tag) {
         Optional<String> url = allowedBase();
@@ -186,8 +218,11 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
             if (body != null && body.path("models").isArray()) {
                 for (JsonNode model : body.get("models")) {
                     String name = model.path("name").asText(model.path("model").asText(""));
-                    if (name.equalsIgnoreCase(tag) || (!tag.contains(":") && name.equalsIgnoreCase(tag + ":latest"))) {
-                        return model.hasNonNull("context_length") ? Optional.of(model.get("context_length").asInt()) : Optional.empty();
+                    if (name.equalsIgnoreCase(tag)
+                            || (!tag.contains(":") && name.equalsIgnoreCase(tag + ":latest"))) {
+                        return model.hasNonNull("context_length")
+                                ? Optional.of(model.get("context_length").asInt())
+                                : Optional.empty();
                     }
                 }
             }
@@ -214,10 +249,40 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
     }
 
     /**
-     * Creates {@code derived} as {@code base} with {@code PARAMETER num_ctx}: {@code POST /api/create}
-     * with {@code from}, which reuses the base model's weights (no download, no copy). The only way to
-     * give a model a bigger context on a runner that ignores the per-request {@code num_ctx} (the MLX
-     * runner on Apple Silicon loads 4096 whatever core sends), and it works on every runner. Blocks.
+     * The tag to actually serve for {@code tag} when its runner's loaded window is smaller than
+     * {@link #wantedContext}: a derived {@code base-ctxNk} variant made with {@link
+     * #createWithContext} (weights reused, no download). Empty when the loaded window already fits,
+     * the server cannot be asked, derivation was refused, or {@code auto-context-fix} is off. Call
+     * after {@link #warm}: the variant is cold until the next load.
+     */
+    public Optional<String> ensureSufficientContext(String tag) {
+        if (!autoFixContext || wantedContext <= 0 || tag == null || tag.isBlank()) {
+            return Optional.empty();
+        }
+        Optional<Integer> loaded = loadedContextLength(tag);
+        if (loaded.isEmpty() || loaded.get() >= wantedContext) {
+            return Optional.empty();
+        }
+        String base = tag.replaceAll("-ctx[0-9]+k$", "");
+        String derived = base + "-ctx" + (wantedContext / 1024) + "k";
+        if (derived.equals(tag) || !createWithContext(base, derived, wantedContext)) {
+            return Optional.empty();
+        }
+        log.info(
+                "Derived local model '{}' from '{}' with a {}-token context - the runner loaded only {}.",
+                derived,
+                base,
+                wantedContext,
+                loaded.get());
+        return Optional.of(derived);
+    }
+
+    /**
+     * Creates {@code derived} as {@code base} with {@code PARAMETER num_ctx}: {@code POST
+     * /api/create} with {@code from}, which reuses the base model's weights (no download, no copy).
+     * The only way to give a model a bigger context on a runner that ignores the per-request {@code
+     * num_ctx} (the MLX runner on Apple Silicon loads 4096 whatever core sends), and it works on
+     * every runner. Blocks.
      *
      * @return true when Ollama reported success
      */
@@ -226,17 +291,27 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
         if (url.isEmpty()) {
             return false;
         }
-        ObjectNode body = MAPPER.createObjectNode().put("model", derived).put("from", base).put("stream", false);
+        ObjectNode body =
+                MAPPER.createObjectNode()
+                        .put("model", derived)
+                        .put("from", base)
+                        .put("stream", false);
         body.putObject("parameters").put("num_ctx", numCtx);
         try {
-            JsonNode reply = pull.post()
-                    .uri(url.get() + "/api/create")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(body.toString())
-                    .retrieve()
-                    .body(JsonNode.class);
+            JsonNode reply =
+                    pull.post()
+                            .uri(url.get() + "/api/create")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(body.toString())
+                            .retrieve()
+                            .body(JsonNode.class);
             boolean ok = reply != null && "success".equalsIgnoreCase(reply.path("status").asText());
-            log.info("Local model '{}' created from '{}' with a {}-token context: {}", derived, base, numCtx, ok ? "ok" : "refused");
+            log.info(
+                    "Local model '{}' created from '{}' with a {}-token context: {}",
+                    derived,
+                    base,
+                    numCtx,
+                    ok ? "ok" : "refused");
             return ok;
         } catch (RuntimeException e) {
             log.warn("Creating local model '{}' from '{}' failed: {}", derived, base, e.toString());
@@ -244,18 +319,25 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
         }
     }
 
-    /** What is installed; {@link Tags#UNREACHABLE} when the server is not allowed, down, or odd. Never throws. */
+    /**
+     * What is installed; {@link Tags#UNREACHABLE} when the server is not allowed, down, or odd.
+     * Never throws.
+     */
     public Tags tags() {
         Optional<String> url = allowedBase();
         if (url.isEmpty()) {
             return Tags.UNREACHABLE;
         }
         try {
-            JsonNode body = quick.get().uri(url.get() + "/api/tags").retrieve().body(JsonNode.class);
+            JsonNode body =
+                    quick.get().uri(url.get() + "/api/tags").retrieve().body(JsonNode.class);
             List<String> names = new ArrayList<>();
             if (body != null && body.path("models").isArray()) {
                 for (JsonNode model : body.get("models")) {
-                    String name = model.hasNonNull("name") ? model.get("name").asText() : model.path("model").asText("");
+                    String name =
+                            model.hasNonNull("name")
+                                    ? model.get("name").asText()
+                                    : model.path("model").asText("");
                     if (!name.isBlank()) {
                         names.add(name);
                     }
@@ -269,45 +351,62 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
     }
 
     /**
-     * Installs {@code tag}: streams {@code POST /api/pull} and hands every progress object to {@code
-     * onProgress} until Ollama says {@code success}. Blocks for as long as the download takes.
+     * Installs {@code tag}: streams {@code POST /api/pull} and hands every progress object to
+     * {@code onProgress} until Ollama says {@code success}. Blocks for as long as the download
+     * takes.
      *
      * @throws PullException the server refused the tag, reported an error, or stopped answering
      */
     public void pull(String tag, Consumer<JsonNode> onProgress) throws PullException {
-        String url = allowedBase().orElseThrow(() -> new PullException("The model server is not reachable."));
+        String url =
+                allowedBase()
+                        .orElseThrow(() -> new PullException("The model server is not reachable."));
         ObjectNode body = MAPPER.createObjectNode().put("model", tag).put("stream", true);
         try {
-            boolean ok = pull.post()
-                    .uri(url + "/api/pull")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(body.toString())
-                    .exchange((request, response) -> {
-                        if (!response.getStatusCode().is2xxSuccessful()) {
-                            String detail = errorText(response.getBody().readNBytes(4096));
-                            throw new PullException(detail.isEmpty()
-                                    ? "The model server answered HTTP " + response.getStatusCode().value() + "."
-                                    : detail);
-                        }
-                        try (BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
-                            String line;
-                            while ((line = reader.readLine()) != null) {
-                                if (line.isBlank()) {
-                                    continue;
-                                }
-                                JsonNode event = MAPPER.readTree(line);
-                                if (event.hasNonNull("error")) {
-                                    throw new PullException(clip(event.get("error").asText()));
-                                }
-                                onProgress.accept(event);
-                                if ("success".equalsIgnoreCase(event.path("status").asText())) {
-                                    return true;
-                                }
-                            }
-                        }
-                        return false;
-                    }, true);
+            boolean ok =
+                    pull.post()
+                            .uri(url + "/api/pull")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(body.toString())
+                            .exchange(
+                                    (request, response) -> {
+                                        if (!response.getStatusCode().is2xxSuccessful()) {
+                                            String detail =
+                                                    errorText(response.getBody().readNBytes(4096));
+                                            throw new PullException(
+                                                    detail.isEmpty()
+                                                            ? "The model server answered HTTP "
+                                                                    + response.getStatusCode()
+                                                                            .value()
+                                                                    + "."
+                                                            : detail);
+                                        }
+                                        try (BufferedReader reader =
+                                                new BufferedReader(
+                                                        new InputStreamReader(
+                                                                response.getBody(),
+                                                                StandardCharsets.UTF_8))) {
+                                            String line;
+                                            while ((line = reader.readLine()) != null) {
+                                                if (line.isBlank()) {
+                                                    continue;
+                                                }
+                                                JsonNode event = MAPPER.readTree(line);
+                                                if (event.hasNonNull("error")) {
+                                                    throw new PullException(
+                                                            clip(event.get("error").asText()));
+                                                }
+                                                onProgress.accept(event);
+                                                if ("success"
+                                                        .equalsIgnoreCase(
+                                                                event.path("status").asText())) {
+                                                    return true;
+                                                }
+                                            }
+                                        }
+                                        return false;
+                                    },
+                                    true);
             if (!ok) {
                 throw new PullException("The model server closed the download before it finished.");
             }
@@ -330,9 +429,11 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
         } catch (SsrfBlockedException e) {
             if (!refusalLogged) {
                 refusalLogged = true;
-                log.warn("The Ollama URL {} is refused by the SSRF guard ({}). List the host in"
-                        + " app.security.outbound.allowed-private-hosts to use a local model server.",
-                        baseUrl, e.getMessage());
+                log.warn(
+                        "The Ollama URL {} is refused by the SSRF guard ({}). List the host in"
+                                + " app.security.outbound.allowed-private-hosts to use a local model server.",
+                        baseUrl,
+                        e.getMessage());
             }
             return Optional.empty();
         }
