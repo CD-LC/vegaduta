@@ -54,8 +54,8 @@ The same result from a terminal (Linux, macOS, WSL):
 curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh
 ```
 
-`install.sh` installs Personal mode unless you pass `--lite` or `--full`. It downloads the latest release tarball
-(or the one you name with `--version X.Y.Z`), verifies it (SHA256SUMS, and the Sigstore signature when `cosign` is
+`install.sh` installs Personal mode unless you pass `--lite` or `--full`. It downloads the newest platform release tarball
+(the newest `vX.Y.Z` tag in the releases list, or the one you name with `--version X.Y.Z`), verifies it (SHA256SUMS, and the Sigstore signature when `cosign` is
 installed) and runs the same `scripts/vegaduta` the Setup app calls.
 
 ## Start with one command

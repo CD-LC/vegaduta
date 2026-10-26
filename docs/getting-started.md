@@ -36,8 +36,9 @@ against the release's `SHA256SUMS` and starts Lite with the signed images:
 curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh -s -- --lite
 ```
 
-Without `--version X.Y.Z` the installer uses GitHub's "latest release", which
-is never a pre-release. Without `--lite` it installs Personal mode instead.
+Without `--version X.Y.Z` the installer resolves the newest platform release
+from the releases list - the newest `vX.Y.Z` tag, skipping component releases
+like `sdk-*` and any pre-release. Without `--lite` it installs Personal mode instead.
 
 **From a git checkout:**
 
