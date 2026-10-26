@@ -125,6 +125,10 @@ x-core-env: &core-env
   # is encrypted with it and becomes undecryptable under a different key.
   APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:?run scripts/vegaduta secrets}
   PLATFORM_MASTER_KEY: ${PLATFORM_MASTER_KEY:-}
+  # keycloak (default) | local: single-owner accounts + sessions held by core
+  # itself (password/passkey/PIN/recovery setup on the console's own unlock
+  # screen) - set APP_AUTH_MODE=local in .env on a single-user install.
+  APP_AUTH_MODE: ${APP_AUTH_MODE:-keycloak}
   # Issuer = the PUBLIC auth URL tokens carry (Keycloak's KC_HOSTNAME below).
   # Signing keys + admin API are fetched over the internal compose name.
   KEYCLOAK_ISSUER_URI: ${PUBLIC_AUTH_URL:-http://localhost:8180}/realms/${KEYCLOAK_REALM:-agentic-ai}
@@ -635,6 +639,10 @@ services:
     # value as fallback, so one published image works for any domain.
     environment: &web-env
       NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+      # local = the console's own unlock screen (localauth: password/passkey/
+      # PIN/recovery); anything else = Keycloak SSO. Pair with core's
+      # APP_AUTH_MODE above - WEB_AUTH_MODE in .env, documented in .env.example.
+      NEXT_PUBLIC_AUTH_MODE: ${WEB_AUTH_MODE:-}
       NEXT_PUBLIC_KEYCLOAK_URL: ${PUBLIC_AUTH_URL:-http://localhost:8180}
       NEXT_PUBLIC_KEYCLOAK_REALM: ${KEYCLOAK_REALM:-agentic-ai}
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: agentic-ai-web
