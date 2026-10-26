@@ -93,10 +93,15 @@ public class ApprovalOutcomeFollowUp implements ApprovalOutcomePort {
         }
         try {
             JsonNode replay = objectMapper.readTree(payload).path("replay");
-            if (!replay.hasNonNull("toolName") || !replay.hasNonNull("goal") || !replay.hasNonNull("memorySessionId")) {
+            if (!replay.hasNonNull("toolName")) {
                 return null;
             }
-            return ReplayTarget.resolve(request, objectMapper);
+            ReplayTarget target = ReplayTarget.resolve(request, objectMapper);
+            // The note goes wherever the replay would run the call. A request recorded without the
+            // turn-path origin (goal + scoped memory id on the envelope) still resolves one - the
+            // scoped id derives from the fields every request carries. Only when nothing identifies
+            // a conversation (no envelope fields, no derivable id) is there nobody to tell.
+            return target.memorySessionIdOrDerived() == null ? null : target;
         } catch (Exception e) {
             log.debug("Approval request {} carries no usable conversation envelope: {}", request.getId(), e.toString());
             return null;

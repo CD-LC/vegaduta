@@ -8,7 +8,7 @@ import { Button } from "../ui/button";
 import type { Learned } from "./useLearned";
 
 /** Kinds in the order the rail lists them; any other kind a newer server sends is shown after these. */
-const KIND_ORDER = ["LESSON", "PREFERENCE", "ROUTINE", "CONSOLIDATION"];
+const KIND_ORDER = ["LESSON", "PREFERENCE", "ROUTINE", "CONSOLIDATION", "DESKTOP_RECIPE"];
 
 export function groupProposals(proposals: LearningProposal[]): [string, LearningProposal[]][] {
   const kinds = [...new Set(proposals.map((p) => p.kind))].sort((a, b) => {
