@@ -1,12 +1,12 @@
 package com.agenticai.core.agents.turn;
 
 import com.agenticai.core.agents.runtime.AgentRuntime;
-import com.agenticai.core.agents.tunables.BehaviourSettings;
-import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.agents.tools.SmallModelProperties;
 import com.agenticai.core.agents.tools.ToolReplaySafety;
+import com.agenticai.core.agents.tunables.BehaviourSettings;
 import com.agenticai.core.chat.LlmRetryPolicy;
 import com.agenticai.core.chat.LlmRetryProperties;
+import com.agenticai.core.settings.SettingsResolver;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Function;
@@ -27,9 +27,9 @@ final class ChatTimeouts {
     private final Duration bufferedTurnTimeout;
 
     /**
-     * The FAST stream's overall wall-clock ceiling ({@code app.llm.http.fast-turn-timeout}) - see the
-     * matching field on {@link ChatTurnExecutor}. The shipped default stands in for the test-seam
-     * constructors, which take only the older three durations.
+     * The FAST stream's overall wall-clock ceiling ({@code app.llm.http.fast-turn-timeout}) - see
+     * the matching field on {@link ChatTurnExecutor}. The shipped default stands in for the
+     * test-seam constructors, which take only the older three durations.
      */
     private Duration fastTurnTimeout = Duration.ofMinutes(10);
 
@@ -140,7 +140,8 @@ final class ChatTimeouts {
                 finish.getIfAvailable(ChatFinishProperties::new),
                 resilience.getIfAvailable(ChatResilienceProperties::new),
                 new LlmRetryPolicy(retry.getIfAvailable(LlmRetryProperties::new)),
-                // Looked up when a tool is judged, not now: the classification beans may not exist yet.
+                // Looked up when a tool is judged, not now: the classification beans may not exist
+                // yet.
                 name -> {
                     ToolReplaySafety safety = replaySafety.getIfAvailable();
                     return safety == null ? Optional.empty() : safety.replaySafeVerdict(name);
@@ -192,8 +193,8 @@ final class ChatTimeouts {
     }
 
     /**
-     * Sets {@code app.chat.parity.*} (where the streamed and the buffered turn deliberately differ, and the
-     * limits on the buffered verifiers); until it is called the shipped defaults apply.
+     * Sets {@code app.chat.parity.*} (where the streamed and the buffered turn deliberately differ,
+     * and the limits on the buffered verifiers); until it is called the shipped defaults apply.
      */
     @Autowired(required = false)
     void useParity(ChatParityProperties parity) {
@@ -201,8 +202,8 @@ final class ChatTimeouts {
     }
 
     /**
-     * Sets {@code app.chat.cache.*} (what the response caches may serve and store, and what they key on);
-     * until it is called the shipped defaults apply.
+     * Sets {@code app.chat.cache.*} (what the response caches may serve and store, and what they
+     * key on); until it is called the shipped defaults apply.
      */
     @Autowired(required = false)
     void useCache(ChatCacheProperties cache) {
@@ -210,7 +211,8 @@ final class ChatTimeouts {
     }
 
     /**
-     * Sets {@code app.chat.limits.*} (limits of the turn classes); until it is called the shipped defaults apply.
+     * Sets {@code app.chat.limits.*} (limits of the turn classes); until it is called the shipped
+     * defaults apply.
      */
     @Autowired(required = false)
     void useLimits(ChatLimitsProperties limits) {
@@ -218,8 +220,8 @@ final class ChatTimeouts {
     }
 
     /**
-     * Sets {@code app.chat.small-model.*} (the tools a small-model turn offers and how they are ranked);
-     * until it is called the shipped defaults apply.
+     * Sets {@code app.chat.small-model.*} (the tools a small-model turn offers and how they are
+     * ranked); until it is called the shipped defaults apply.
      */
     @Autowired(required = false)
     void useSmallModel(SmallModelProperties smallModel) {
@@ -227,8 +229,8 @@ final class ChatTimeouts {
     }
 
     /**
-     * Sets {@code app.chat.local-model.*} (how a turn adapts to a model on the person's own machine); until it is
-     * called the shipped defaults apply.
+     * Sets {@code app.chat.local-model.*} (how a turn adapts to a model on the person's own
+     * machine); until it is called the shipped defaults apply.
      */
     @Autowired(required = false)
     void useLocalModel(LocalModelTurnProperties localModel) {
@@ -236,8 +238,9 @@ final class ChatTimeouts {
     }
 
     /**
-     * Sets the resolver of the per-tenant / per-agent runtime limits ({@code app.agent-runtime.*}); until it is
-     * called (hand-built fixtures) every turn runs under the platform settings this class was built with.
+     * Sets the resolver of the per-tenant / per-agent runtime limits ({@code app.agent-runtime.*});
+     * until it is called (hand-built fixtures) every turn runs under the platform settings this
+     * class was built with.
      */
     @Autowired(required = false)
     void useRuntime(AgentRuntime runtime) {
@@ -245,9 +248,10 @@ final class ChatTimeouts {
     }
 
     /**
-     * Sets the settings catalog the turn reads its curated behaviour settings from ({@code chat.finish.*},
-     * {@code chat.cache.*}, {@code chat.retry.maxAttempts}, ... see docs/settings.md); until it is called (hand-built
-     * fixtures) every turn runs under the platform values. The resolver is looked up when a setting is read, not now.
+     * Sets the settings catalog the turn reads its curated behaviour settings from ({@code
+     * chat.finish.*}, {@code chat.cache.*}, {@code chat.retry.maxAttempts}, ... see
+     * docs/settings.md); until it is called (hand-built fixtures) every turn runs under the
+     * platform values. The resolver is looked up when a setting is read, not now.
      */
     @Autowired(required = false)
     void useSettings(ObjectProvider<SettingsResolver> resolver) {
@@ -282,7 +286,9 @@ final class ChatTimeouts {
         return localModel;
     }
 
-    /** {@code app.chat.cache.*}: what the response caches may serve and store, and what they key on. */
+    /**
+     * {@code app.chat.cache.*}: what the response caches may serve and store, and what they key on.
+     */
     ChatCacheProperties cache() {
         return cache;
     }
@@ -302,7 +308,9 @@ final class ChatTimeouts {
         return continuation;
     }
 
-    /** {@code app.chat.continuation.*}: which models the wording check applies to, and the patterns. */
+    /**
+     * {@code app.chat.continuation.*}: which models the wording check applies to, and the patterns.
+     */
     ContinuationProperties continuationProperties() {
         return continuationProperties;
     }
@@ -312,7 +320,9 @@ final class ChatTimeouts {
         return followUp;
     }
 
-    /** {@code app.chat.resilience.*}: tool-aware idle timeout, replay after tools, timeout notices. */
+    /**
+     * {@code app.chat.resilience.*}: tool-aware idle timeout, replay after tools, timeout notices.
+     */
     ChatResilienceProperties resilience() {
         return resilience;
     }
