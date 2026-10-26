@@ -145,12 +145,18 @@ function Resolve-Version {
   if ($script:DoBuild) { $env:VEGADUTA_VERSION = 'local'; return }
   # A git checkout or a download of main has no release stamped in: use the newest published one.
   try {
-    $r = Invoke-RestMethod -UseBasicParsing -TimeoutSec 20 -Headers @{ 'User-Agent' = 'vegaduta-setup' } "https://api.github.com/repos/$(if ($env:VEGADUTA_REPO) { $env:VEGADUTA_REPO } else { 'CD-LC/vegaduta' })/releases/latest"
-    $tag = [string]$r.tag_name
-    if ($tag -match '^v(\d.*)$') {
-      Say "No release pinned in ${EnvFile}: using the latest published release ($($Matches[1]))"
-      Set-EnvValue VEGADUTA_VERSION $Matches[1] -Force
-      $env:VEGADUTA_VERSION = $Matches[1]; return
+    # /releases/latest follows whichever release was published most recently -
+    # a component release (sdk-v*, pysdk-*) beats the platform tag - so pick the
+    # newest tag matching v<digit>.<digit>.<digit> from the list.
+    $repo = if ($env:VEGADUTA_REPO) { $env:VEGADUTA_REPO } else { 'CD-LC/vegaduta' }
+    $rs = Invoke-RestMethod -UseBasicParsing -TimeoutSec 20 -Headers @{ 'User-Agent' = 'vegaduta-setup' } "https://api.github.com/repos/$repo/releases?per_page=30"
+    foreach ($r in $rs) {
+      $tag = [string]$r.tag_name
+      if ($tag -match '^v(\d+\.\d+\.\d+)$') {
+        Say "No release pinned in ${EnvFile}: using the latest published platform release ($($Matches[1]))"
+        Set-EnvValue VEGADUTA_VERSION $Matches[1] -Force
+        $env:VEGADUTA_VERSION = $Matches[1]; return
+      }
     }
   } catch { }
   Die "VEGADUTA_VERSION is empty in $EnvFile and the latest release could not be looked up (no network?). Set a published release (.\scripts\vegaduta.ps1 upgrade -Version 1.2.3) or build from source with -Build."
