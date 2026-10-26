@@ -464,8 +464,7 @@ public class LocalModelsService {
         Optional<PlatformHostedLlmProvider> serving = servingPoolRow();
         Optional<Long> ms =
                 ollama.warm(
-                        clean,
-                        serving.map(PlatformHostedLlmProvider::getKeepAlive).orElse(null));
+                        clean, serving.map(PlatformHostedLlmProvider::getKeepAlive).orElse(null));
         if (ms.isPresent()) {
             ensureSufficientContext(clean, serving);
         }
@@ -479,8 +478,7 @@ public class LocalModelsService {
      * reused, no download - then the serving row is repointed at it and the variant warmed, so the
      * next turn's prompt is not silently truncated.
      */
-    private void ensureSufficientContext(
-            String tag, Optional<PlatformHostedLlmProvider> serving) {
+    private void ensureSufficientContext(String tag, Optional<PlatformHostedLlmProvider> serving) {
         ollama.ensureSufficientContext(tag)
                 .ifPresent(
                         derived -> {
