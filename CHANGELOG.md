@@ -77,6 +77,18 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Turn start no longer waits on catalog screening.** When deferral is active
+  (`app.tools.search.*`), each deferred tool's name/description/schema was judged by the
+  guardrail model BEFORE the turn's first model call - ~90 sequential calls on a 59-tool catalog,
+  over two minutes of "Gathering context" on a local model. Two changes: platform-authored tool
+  text skips the semantic judge (it is repo-authored; the judge is for MCP/custom descriptions)
+  and the remaining screen runs on a background virtual thread - only `search_tools`/`call_tool`
+  join it, so a turn that never searches pays nothing.
+- **`browser_navigate` now tells the model the sandboxed browser is invisible and inaudible to
+  the person.** The reply is directed to describe it as the agent's own browser (never "your
+  Chrome"), to say when `local_desktop_*` control is unavailable instead of silently substituting
+  the sandbox, and to finish visual tasks with `browser_screenshot` so the person sees proof of
+  what actually happened.
 - **A turn parked on a human approval no longer asks the model to write its closing reply.** The
   tool loop now ends the round the marker lands in (`returnDirect`), and the person reads the
   platform's fixed pause text (new prompt key `message.approval.parked`) - a structured pause,

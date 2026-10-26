@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.ai.tool.ToolCallback;
 
 /**
@@ -28,17 +29,30 @@ import org.springframework.ai.tool.ToolCallback;
 public final class ToolSearchState {
 
     private final Map<String, ToolCallback> exposed;
-    private final Map<String, ToolCallback> deferred;
+
+    /**
+     * The deferred catalog, possibly still being screened: {@code ToolSearchDeferral} builds it on
+     * a background virtual thread (catalog text screening is the one per-tool model call a cold
+     * turn otherwise pays BEFORE the reply's first token - measured ~1.3 s/tool on a local model,
+     * ~2 minutes on a 59-tool catalog). The deferred list never reaches the model's prompt, so
+     * nothing in the turn itself waits on it: {@link #catalog()} joins the first time {@code
+     * search_tools} or {@code call_tool} touches the catalog, by which point the background pass is
+     * normally long finished.
+     */
+    private final CompletableFuture<Map<String, ToolCallback>> catalog;
+
     private final ToolSearchService service;
     private final ToolActivationRegistry registry;
     private final String registryKey;
     private final int maxCarryOver;
+
     /**
      * True when every deferred entry's catalog text was screened at build time (the {@code
      * SearchCatalogScreen} of {@code ToolSearchDeferral}), which is what lets a search RESULT be
      * marked the platform's answer instead of re-screening it per call.
      */
     private final boolean catalogScreened;
+
     private final Set<String> activated = Collections.synchronizedSet(new LinkedHashSet<>());
     private volatile ToolSearchService.Index index;
 
@@ -73,8 +87,32 @@ public final class ToolSearchState {
             String registryKey,
             int maxCarryOver,
             boolean catalogScreened) {
+        this(
+                exposed,
+                CompletableFuture.completedFuture(
+                        Collections.unmodifiableMap(new LinkedHashMap<>(deferred))),
+                service,
+                registry,
+                registryKey,
+                maxCarryOver,
+                catalogScreened);
+    }
+
+    /**
+     * The asynchronous-catalog shape: {@code catalog} is the deferred map when its background
+     * screening completes. Callers treat it as immutable (the producer supplies the final map;
+     * {@link #catalog()} hands out the same reference every time).
+     */
+    public ToolSearchState(
+            Map<String, ToolCallback> exposed,
+            CompletableFuture<Map<String, ToolCallback>> catalog,
+            ToolSearchService service,
+            ToolActivationRegistry registry,
+            String registryKey,
+            int maxCarryOver,
+            boolean catalogScreened) {
         this.exposed = Collections.unmodifiableMap(new LinkedHashMap<>(exposed));
-        this.deferred = Collections.unmodifiableMap(new LinkedHashMap<>(deferred));
+        this.catalog = catalog;
         this.service = service;
         this.registry = registry;
         this.registryKey = registryKey;
@@ -82,9 +120,18 @@ public final class ToolSearchState {
         this.catalogScreened = catalogScreened;
     }
 
+    /**
+     * The deferred catalog: joins its background build on first read. Diagnostics/tests call this
+     * through {@link #deferredCount()}; every production read funnels through {@link #index()} or
+     * the name lookups, so the join happens inside a tool call, never before the reply starts.
+     */
+    private Map<String, ToolCallback> catalog() {
+        return catalog.join();
+    }
+
     /** Number of tools hidden behind search this turn. */
     public int deferredCount() {
-        return deferred.size();
+        return catalog().size();
     }
 
     /**
@@ -97,7 +144,7 @@ public final class ToolSearchState {
             synchronized (this) {
                 built = index;
                 if (built == null) {
-                    built = service.indexCallbacks(deferred.values());
+                    built = service.indexCallbacks(catalog().values());
                     index = built;
                 }
             }
@@ -119,7 +166,7 @@ public final class ToolSearchState {
 
     /** The deferred callback for an exact name, if there is one. */
     Optional<ToolCallback> deferredTool(String name) {
-        return Optional.ofNullable(deferred.get(name));
+        return Optional.ofNullable(catalog().get(name));
     }
 
     /**
@@ -130,8 +177,9 @@ public final class ToolSearchState {
      */
     List<String> activate(List<String> names) {
         List<String> accepted = new ArrayList<>();
+        Map<String, ToolCallback> catalog = catalog();
         for (String name : names) {
-            if (deferred.containsKey(name)) {
+            if (catalog.containsKey(name)) {
                 activated.add(name);
                 accepted.add(name);
             }
@@ -162,12 +210,12 @@ public final class ToolSearchState {
             return Optional.of(direct);
         }
         return activated.contains(name)
-                ? Optional.ofNullable(deferred.get(name))
+                ? Optional.ofNullable(catalog().get(name))
                 : Optional.empty();
     }
 
     /** True for a name that exists as a deferred tool but has not been searched for yet. */
     boolean isDeferredButInactive(String name) {
-        return name != null && deferred.containsKey(name) && !activated.contains(name);
+        return name != null && catalog().containsKey(name) && !activated.contains(name);
     }
 }
