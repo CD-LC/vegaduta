@@ -33,7 +33,9 @@ from the Actions tab: it has no tag-push trigger (see [Releasing](releasing.md))
    javadoc, SBOMs, the runnable scanner CLI (`vegaduta-agent-scanner-<version>-cli.jar`, a shaded jar with the SDK's API and core, SLF4J's API and RE2/J inside) and `SHA256SUMS` to a GitHub Release (a pre-release for `-rc` versions), and,
    if enabled, uploads signed artifacts to the Central Portal.
 5. In the Central Portal, check the validated deployment and press **Publish** (`autoPublish` is
-   deliberately off).
+   deliberately off) - **or** tick the workflow's `publish-deployment` input when dispatching: it
+   calls the same Portal publish endpoint as the button, with the `CENTRAL_*` secrets, and waits for
+   `PUBLISHED`. Useful when nobody is sure which Sonatype login owns the token.
 6. Open the next development version: `mvn versions:set -DnewVersion=0.2.0-SNAPSHOT`.
 
 Re-running for an existing tag: run it again on the same tag. A branch is refused.
