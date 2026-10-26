@@ -1454,6 +1454,7 @@ Compose and launcher variables used by personal mode (none required in `.env`; t
 | `PERSONAL_SPRING_PROFILES` | `security,knowledge,graph-memory,personal` | profile set for core |
 | `PERSONAL_JAVA_OPTS_EXTRA` | empty | appended to the core JVM flags (later flags win), e.g. `-Xmx700m` |
 | `PERSONAL_AOT_CACHE` | `false` | with `--build`, passes `ENABLE_AOT_CACHE=true` to `core/Dockerfile` (an AppCDS archive: faster boot, larger image) |
+| `SIDECAR_BAKE_EXTRA_MODELS` | `true` | with `--build` only: bake the extra ML models into the sidecar image. `false` slims the local image by ~550 MB - Whisper STT still works; other models download on first use |
 | `POSTGRES_MEM_LIMIT` / `CORE_MEM_LIMIT` / `WEB_MEM_LIMIT` | `384m` / `1536m` / `384m` | container memory limits in `personal.yml` |
 | `VEGADUTA_EDITION` | `personal` | `personal` \| `lite` \| `full`. The one switch for the edition: becomes core's `APP_EDITION_TIER` and web's `NEXT_PUBLIC_EDITION`, so the two cannot disagree. The launcher writes `personal` into `.env` and never replaces a value you set. See [Edition tier and features](#edition-tier-and-features) |
 | `WEB_AUTH_MODE` | `local` | becomes `NEXT_PUBLIC_AUTH_MODE` on web |
@@ -2060,6 +2061,7 @@ Android builds of a generated Capacitor app read `ANDROID_KEYSTORE_PATH`, `ANDRO
 | Variable | Default | Effect |
 |---|---|---|
 | `LIVEKIT_AGENT_NAME` | empty | leave empty: the worker uses implicit dispatch; setting it without changing how tokens are minted means the worker is never offered a job |
+| `LIVEKIT_NODE_IP` | `127.0.0.1` | the ICE candidate LiveKit advertises to callers. Loopback is right when the caller is on the same machine (a personal install); set this host's LAN IP when callers connect from other hosts, or the media path cannot be established |
 | `ELEVEN_API_KEY` | unset | fallback for `ELEVENLABS_API_KEY` (a secret) |
 | `ELEVENLABS_MODEL` | `eleven_turbo_v2_5` | ElevenLabs model |
 | `SARVAM_SPEAKER` | empty | as in the sidecar |
