@@ -120,6 +120,19 @@ break the build standalone.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-25, production deploy (local Devin session): deployed **v0.1.10** to the Azure Container Apps
+  production (`vegaduta-ai-az-rg` / `vegadutaaiazacr`), in the documented order core → web + web-admin →
+  sidecar + mcp-stdio-runner. Release required five fix cycles before publish: #161 (arm64 libatomic),
+  #162 (arm64 puppeteer postinstall), #163 (python:3.14.8, CVE-2026-19445), a Slack-test flake re-run,
+  and #164 (release body >125K). One deploy hazard to watch: `az containerapp update --image` without
+  the correct `--container-name` ADDS a phantom container to the template instead of failing; removed
+  via `az rest` PATCH of `properties.template`. All five apps verified Healthy on 0.1.10; 10 Flyway
+  migrations (V662–V671) applied cleanly on core boot; public health + status endpoints green.
+
+- 2026-10-25, edge media generation (local Devin session): opened PR #165 (`feat/edge-media-gen`) —
+  `local_generate_image` (SD-Turbo ONNX via onnxruntime-web/WebGPU) + `local_generate_audio`
+  (MusicGen via transformers.js) as out-of-the-box local tools; consent-gated downloads, capability
+  gates, session media registry + Edge console gallery; `LocalTool.timeoutMs` added.
 - 2026-10-25, search-capability-honesty agent (local Devin session): fixes for the research-run incident
   (agent reported "no web access" on a misconfigured provider, then spent 133 s / ~125k prompt tokens
   answering from memory). `web_search` is always offered - a refusing stub when no provider in the chain

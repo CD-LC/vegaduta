@@ -9,6 +9,16 @@ Release notes on GitHub are generated from the section for each version.
 ## [Unreleased]
 ### Added
 
+- **On-device media generation, out of the box.** The edge tool surface gains
+  `local_generate_image` (Stable Diffusion Turbo via onnxruntime-web/WebGPU, ~2.4 GB
+  model) and `local_generate_audio` (MusicGen-small via transformers.js, ~1.8 GB
+  model) - an agent running on an account-less laptop can produce images and short
+  music/sound clips with no provider key and no data leaving the browser. Both are
+  capability-gated (image needs WebGPU; audio needs WebGPU or an 8GB+ device),
+  consent-gated (model downloads start only from the Edge console's download rows;
+  a tool call on a device without the model refuses with a pointer, never a silent
+  download), and report into a session media gallery in the Edge console where the
+  person can preview and download artifacts.
 - **Windows support in `desktop-agent`** (`services/desktop-agent`): `win32`
   hosts previously fell through to the Linux path and every action answered
   501. Input now goes through user32 `SendInput`/`mouse_event` via an inline C#
