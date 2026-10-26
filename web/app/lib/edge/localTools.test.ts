@@ -396,7 +396,10 @@ describe("runLocalTool", () => {
   });
 
   it("turns a rejecting handler into a typed failure", async () => {
-    const result = await runLocalTool(fakeTool(async () => Promise.reject(new Error("async boom"))), {});
+    const result = await runLocalTool(
+      fakeTool(async () => Promise.reject(new Error("async boom"))),
+      {}
+    );
     if (result.ok === true) throw new Error("expected failure");
     expect(result.code).toBe("failed");
     expect(result.detail).toContain("async boom");
@@ -432,7 +435,10 @@ describe("runLocalTool", () => {
       code: "unavailable",
       detail: "no such local tool",
     });
-    const unprefixed = await runLocalTool(fakeTool(async () => "x", "calculate"), {});
+    const unprefixed = await runLocalTool(
+      fakeTool(async () => "x", "calculate"),
+      {}
+    );
     if (unprefixed.ok === true) throw new Error("expected failure");
     expect(unprefixed.code).toBe("unavailable");
   });
@@ -494,6 +500,7 @@ describe("property: no spend, no download, no data leaves", () => {
       "./localToolsWeb",
       "./browserAi",
       "./deviceTools",
+      "./localToolsMedia",
       // The split-out pure-compute handlers (tools/*.ts) and their siblings.
       "./tools/common",
       "./tools/computeTools",
