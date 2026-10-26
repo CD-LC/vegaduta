@@ -33,6 +33,14 @@ final class ChatTimeouts {
      */
     private Duration fastTurnTimeout = Duration.ofMinutes(10);
 
+    /**
+     * The deadline shared by the three parallel pre-turn reads (history, tool resolution, memory
+     * recall) - {@code app.chat.pre-turn-max-wait}. A stalled read past it is dropped and the turn
+     * proceeds with a reduced prompt, so a dead MCP connect or unresponsive sidecar can never hold
+     * the model call open indefinitely. The test-seam constructors keep the shipped default.
+     */
+    private Duration preTurnMaxWait = Duration.ofMillis(3500);
+
     private final Duration bufferedKeepAliveInterval;
     private final int maxContinuations;
     private final ChatFinishProperties finish;
@@ -117,6 +125,7 @@ final class ChatTimeouts {
             @Value("${app.chat.sse.buffered-keepalive-interval:20s}")
                     Duration bufferedKeepAliveInterval,
             @Value("${app.chat.continuation.max-passes:8}") int maxContinuations,
+            @Value("${app.chat.pre-turn-max-wait:3500ms}") Duration preTurnMaxWait,
             ObjectProvider<ChatFinishProperties> finish,
             ObjectProvider<ChatResilienceProperties> resilience,
             ObjectProvider<LlmRetryProperties> retry,
@@ -137,6 +146,7 @@ final class ChatTimeouts {
                     return safety == null ? Optional.empty() : safety.replaySafeVerdict(name);
                 });
         this.fastTurnTimeout = fastTurnTimeout == null ? Duration.ofMinutes(10) : fastTurnTimeout;
+        this.preTurnMaxWait = preTurnMaxWait == null ? Duration.ofMillis(3500) : preTurnMaxWait;
         useConversationPolicies(
                 continuationProperties.getIfAvailable(ContinuationProperties::new),
                 followUp.getIfAvailable(FollowUpProperties::new));
@@ -341,5 +351,10 @@ final class ChatTimeouts {
 
     Duration bufferedKeepAliveInterval() {
         return bufferedKeepAliveInterval;
+    }
+
+    /** {@code app.chat.pre-turn-max-wait}: the shared deadline for one turn's pre-model reads. */
+    Duration preTurnMaxWait() {
+        return preTurnMaxWait;
     }
 }

@@ -111,6 +111,7 @@ final class ChatServiceParts {
                         timeouts.streamIdleTimeout());
         this.turns.maxContinuations = timeouts.maxContinuations();
         this.turns.fastTurnTimeout = timeouts.fastTurnTimeout();
+        this.turns.preTurnMaxWait = timeouts.preTurnMaxWait();
         this.turns.runtime = timeouts.runtime();
         this.turns.continuation = timeouts.continuation();
         this.followUp = new FollowUpTools(toolCallLogService, timeouts.followUp());
