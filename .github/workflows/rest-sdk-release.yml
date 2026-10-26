@@ -116,7 +116,7 @@ jobs:
           cd dist && sha256sum *.tar.gz *.whl ../vegaduta-sdk-*.tgz > SHA256SUMS 2>/dev/null || \
           ( sha256sum *.tar.gz *.whl > SHA256SUMS && sha256sum ../vegaduta-sdk-*.tgz >> SHA256SUMS )
       - name: Attest provenance
-        uses: actions/attest-build-provenance@977bb373ede98d70efdfc65b84548be8d03c2774f4 # v3.0.0
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: |
             dist/
@@ -166,6 +166,9 @@ jobs:
         with:
           name: rest-sdk-dists
           path: dist
+      # SHA256SUMS ships on the GitHub Release but is not a distribution file - twine
+      # (and the check this action runs first) rejects it in packages-dir.
+      - run: rm -f dist/SHA256SUMS
       - name: Publish to PyPI (trusted publishing)
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd790c9bec43f9625a9b9ad1e8 # v1.13.0
         with:
