@@ -53,7 +53,9 @@ export async function fetchLatestRelease(): Promise<LatestRelease | null> {
 
 /** "<owner>/<repo>" out of REPO_URL, for the API path. */
 function repoPath(): string {
-  return REPO_URL.replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").replace(/\/+$/, "");
+  return REPO_URL.replace(/^https?:\/\/github\.com\//, "")
+    .replace(/\.git$/, "")
+    .replace(/\/+$/, "");
 }
 
 export interface DownloadSet {
