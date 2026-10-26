@@ -411,6 +411,12 @@ resolve_profiles() {
     # STDIO MCP servers run in the mcp-stdio-runner container; core relays to it. A host JVM (--native-core)
     # keeps its own `os` sandbox and launchers, and does not use the runner.
     if [ "$TOOLS" = 1 ] && [ "$NATIVE_CORE" != 1 ]; then export MCP_STDIO_SIDECAR_ENABLED=true; fi
+    # create_custom_tool runs tenant code in tool-sandbox; the container rides the `tools` compose
+    # profile (tools_args), so enable core's client with it. The PROFILES-based export below only
+    # reaches the full tier - on single-box tiers `tools` lives in TOOLS, not PROFILES, so without
+    # this line the sandbox container starts but core keeps TOOL_SANDBOX_ENABLED=false and
+    # create_custom_tool never resolves.
+    if [ "$TOOLS" = 1 ] && [ "$NATIVE_CORE" != 1 ]; then export TOOL_SANDBOX_ENABLED=true; fi
     case " $PROFILES " in
       *" workspace "*)
         # The Assistant's build terminal: the workspace-runner container plus the projects folder,
