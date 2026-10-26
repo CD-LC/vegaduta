@@ -345,6 +345,14 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   published, missing scopes). `GOOGLE_OAUTH_MODE` should be `web` (or unset - the default).
 
 
+
+SPLIT (both agents, 2026-10-26): a parallel agent's `ruff format` commit grew
+app/main.py (700) + app/mcp_bridge.py (672) over the 665-line ratchet. The
+other agent landed `analysis_routes.py` + `deps.py` (shared service/tenant)
++ `mcp_analysis_tools.py` + `mcp_tool_schema.py` - I removed a dead
+dispatch_analysis duplicate and verified include_router mounts all 12
+routes via TestClient (this FastAPI version defers include into
+_IncludedRouter placeholders; import-time app.routes listing is misleading).
 LOCAL DEPLOY + local auth (Devin, 2026-10-26): deployed the branch's images to the
 local full stack (`docker compose ... build code-intel core web`, `up -d`) - all healthy;
 /new analysis endpoints verified live against a smoke repo (map/symbols/api-surface/
