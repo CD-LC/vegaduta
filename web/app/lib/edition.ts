@@ -145,8 +145,11 @@ export const EDITION_ROUTES: readonly EditionRoute[] = [
   rail("/shared-with-me", "railShared", "team", "users"),
   rail("/admin/agent-trust", "railAgentTrust", "team", "users"),
   rail("/admin/api-keys", "railApiKeys", "team", "key"),
-  rail("/admin/access", "railAccess", "team", "users"),
-  rail("/admin/users", "railAccess", "team", "users"),
+  // /admin/access and /admin/users (its redirect target) stay AVAILABLE on personal:
+  // local auth has no public signup - POST /api/signup is closed by design on a
+  // single-owner install - so teammates join through the owner's invite links
+  // (issueInviteLink mints /login?setup=... links; there is no mail server).
+
   // billing: app.edition.billing-enabled is false. /admin/billing and /features are also redirected
   // by the billing switch (lib/billing-flag.ts), which answers first, so the proxy does not 404 them.
   row("/admin/billing", "railBill", "billing", "card", { rail: false, deny: false }),

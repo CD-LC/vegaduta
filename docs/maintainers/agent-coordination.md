@@ -347,6 +347,19 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
 
 
 
+
+FIX (Devin, 2026-10-26): "users can't sign up on a personal install" - by
+design POST /api/signup is closed in local mode (anyone on the LAN would
+get a full tenant on the owner's box) and the proxy 404s /signup AND the
+admin pages the owner would use instead. Un-denied /admin/access and
+/admin/users (a redirect to access) in web/app/lib/edition.ts: the
+LocalUserAdminClient invite path (createUserForInvite + issueInviteLink,
+minting /login?setup= links since local mode has no mail server) is the
+shipped way to add people on personal - the UI was the only missing piece.
+ALSO: the personal stack itself was crash-looping - .env leaked
+CORE_PROFILES_EXTRA=,workflow,temporal into personal core, which has no
+Temporal service (env_file vs environment: scoping). Removed the extra
+profiles; personal core is healthy.
 FIX (Devin, 2026-10-26): the local-auth setup screen failed "Could not reach
 the server" on submit - web's server-side proxy routes fetch core via
 CORE_INTERNAL_URL which compose never set, so they fell back to the public
