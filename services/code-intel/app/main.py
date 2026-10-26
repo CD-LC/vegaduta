@@ -15,21 +15,21 @@ import contextlib
 import time
 from collections.abc import AsyncIterator
 
-from fastapi import BackgroundTasks, Depends, FastAPI, Request
+from fastapi import BackgroundTasks, Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from . import reaper
+from . import analysis_routes, reaper
 from .agent import PlannerUnavailableError, agent_capabilities
-from .auth import AuthError, authenticate
+from .auth import AuthError
+from .deps import service, tenant
 from .executor import ExecDisabledError, WorkspaceError
 from .gitops import GitOpsValidationError, RepoTooLargeError
 from .registry import RepoEntry
 from .service import (
     ApprovalNotAuthorizedError,
     ApprovalRequiredError,
-    CodeIntelService,
     HeavyJobBusyError,
     PolicyDeniedError,
     RepoBusyError,
@@ -68,7 +68,9 @@ app = FastAPI(
     redoc_url="/redoc" if SETTINGS.expose_docs else None,
     openapi_url="/openapi.json" if SETTINGS.expose_docs else None,
 )
-service = CodeIntelService(SETTINGS)
+# `service`/`tenant` come from app.deps so sibling route modules (analysis_routes,
+# any future split) can share the one singleton + auth dependency without a
+# circular import back through this FastAPI module.
 # Lazy SdlcAgent. app.agent itself is safe to import at module scope (it pulls
 # in no LLM SDK - `anthropic` is imported only when a planner is actually
 # built), which is what lets /health report the agent's capability without
@@ -89,11 +91,7 @@ if SETTINGS.cors_origins.strip():
 
 
 # --------------------------------------------------------------------- #
-# auth dependency + error mapping
-
-
-def tenant(request: Request) -> TenantContext:
-    return authenticate(dict(request.headers), SETTINGS)
+# error mapping (the auth dependency `tenant` itself lives in app.deps)
 
 
 def _error(status: int, message: str) -> JSONResponse:
@@ -361,111 +359,11 @@ def graph_stats(repo_id: str, ctx: TenantContext = Depends(tenant)):
     return service.graph_stats(ctx, repo_id)
 
 
-# --------------------------------------------------------------------- #
-# analysis endpoints (codebase_rag/analysis.py) - deterministic reads over
-# the built graph. All read-only, all tenant-scoped, all cheap (no rebuild).
-
-
-@app.get("/repos/{repo_id}/map")
-def repo_map(
-    repo_id: str, budget: int = 16000, top_n: int = 200, ctx: TenantContext = Depends(tenant)
-):
-    """PageRank-ranked skeleton of the repo - signatures, not bodies. The
-    agent's first call: learn the codebase's shape before fetching bodies."""
-    return service.repo_map(
-        ctx, repo_id, budget=min(max(budget, 1000), 64000), top_n=min(max(top_n, 1), 500)
-    )
-
-
-@app.get("/repos/{repo_id}/symbols")
-def find_symbols(
-    repo_id: str,
-    q: str = "",
-    kind: str = "",
-    path_prefix: str = "",
-    limit: int = 50,
-    include_tests: bool = True,
-    ctx: TenantContext = Depends(tenant),
-):
-    """Name-path symbol search (`Auth.login` matches `auth.Auth.login`)."""
-    return service.find_symbols(
-        ctx,
-        repo_id,
-        query=q,
-        kind=kind,
-        path_prefix=path_prefix,
-        limit=limit,
-        include_tests=include_tests,
-    )
-
-
-@app.get("/repos/{repo_id}/symbols/{qualified_name}")
-def symbol_detail(
-    repo_id: str,
-    qualified_name: str,
-    include_body: bool = True,
-    ctx: TenantContext = Depends(tenant),
-):
-    """One symbol: metadata + exact source span (+ body by default)."""
-    return service.symbol_detail(ctx, repo_id, qualified_name, include_body=include_body)
-
-
-@app.get("/repos/{repo_id}/outline")
-def file_outline(repo_id: str, path: str, ctx: TenantContext = Depends(tenant)):
-    """One file's symbol tree (the Serena get_symbols_overview shape)."""
-    return service.file_outline(ctx, repo_id, path)
-
-
-@app.get("/repos/{repo_id}/references/{symbol}")
-def references(repo_id: str, symbol: str, ctx: TenantContext = Depends(tenant)):
-    """Every inbound mention: calls + inherits + value/type references."""
-    return service.references_of(ctx, repo_id, symbol)
-
-
-@app.get("/repos/{repo_id}/graph/implementations/{symbol}")
-def implementations(
-    repo_id: str, symbol: str, depth: int = 4, ctx: TenantContext = Depends(tenant)
-):
-    """Recursive subclass/implementer tree over `inherits` edges."""
-    return service.implementations_of(ctx, repo_id, symbol, depth=min(max(depth, 1), 10))
-
-
-@app.get("/repos/{repo_id}/graph/path")
-def call_path(
-    repo_id: str, src: str, dst: str, max_depth: int = 8, ctx: TenantContext = Depends(tenant)
-):
-    """BFS shortest call chain between two symbols."""
-    return service.call_path(ctx, repo_id, src, dst, max_depth=min(max(max_depth, 1), 16))
-
-
-@app.get("/repos/{repo_id}/dead-code")
-def dead_code(repo_id: str, limit: int = 100, ctx: TenantContext = Depends(tenant)):
-    """Top-level symbols with zero inbound edges - review candidates."""
-    return service.dead_code(ctx, repo_id, limit=limit)
-
-
-@app.get("/repos/{repo_id}/tests/{symbol}")
-def tests_for(repo_id: str, symbol: str, ctx: TenantContext = Depends(tenant)):
-    """Test-side linkage: test-file symbols that reach `symbol`."""
-    return service.tests_for(ctx, repo_id, symbol)
-
-
-@app.get("/repos/{repo_id}/api-surface")
-def api_surface(repo_id: str, ctx: TenantContext = Depends(tenant)):
-    """Extracted HTTP routes (FastAPI/Flask/Express/Spring/Go/Rust)."""
-    return service.api_surface(ctx, repo_id)
-
-
-@app.get("/repos/{repo_id}/hotspots")
-def hotspots(repo_id: str, days: int = 90, limit: int = 30, ctx: TenantContext = Depends(tenant)):
-    """git churn x size - where bugs concentrate."""
-    return service.hotspots(ctx, repo_id, days=min(max(days, 1), 3650), limit=limit)
-
-
-@app.get("/repos/{repo_id}/import-cycles")
-def import_cycles(repo_id: str, ctx: TenantContext = Depends(tenant)):
-    """File-level import-graph cycles (SCCs > 1)."""
-    return service.import_cycles(ctx, repo_id)
+# The analysis suite (map/symbols/outline/references/implementations/path/
+# dead-code/tests/api-surface/hotspots/import-cycles) lives in
+# app/analysis_routes.py - deterministic reads over the built graph, mounted
+# here so it shares this app's auth dependency and service singleton.
+app.include_router(analysis_routes.router)
 
 
 # --------------------------------------------------------------------- #
