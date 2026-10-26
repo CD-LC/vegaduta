@@ -90,6 +90,15 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
     @Value("${app.llm.ollama.num-ctx:32768}")
     private int wantedContext = 32768;
 
+    /**
+     * Self-heal for runners that ignore the per-request num_ctx (the MLX runner on Apple Silicon
+     * loads 4096 whatever core asks): when a warm finds the model serving a smaller window than
+     * {@link #wantedContext}, a {@code -ctxNk} variant is derived on the spot and the serving row
+     * repointed at it, so no turn silently truncates its prompt. Off: warn only, nothing derived.
+     */
+    @Value("${app.llm.ollama.auto-context-fix:true}")
+    private boolean autoFixContext = true;
+
     public LocalModelOllamaGateway(
             SsrfGuard guard,
             @Value("${app.local-models.ollama-base-url:${app.local-llm.bootstrap.base-url:http://ollama:11434}}")
@@ -211,6 +220,35 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
                     wantedContext,
                     wantedContext);
         }
+    }
+
+    /**
+     * The tag to actually serve for {@code tag} when its runner's loaded window is smaller than
+     * {@link #wantedContext}: a derived {@code base-ctxNk} variant made with {@link
+     * #createWithContext} (weights reused, no download). Empty when the loaded window already fits,
+     * the server cannot be asked, derivation was refused, or {@code auto-context-fix} is off. Call
+     * after {@link #warm}: the variant is cold until the next load.
+     */
+    public Optional<String> ensureSufficientContext(String tag) {
+        if (!autoFixContext || wantedContext <= 0 || tag == null || tag.isBlank()) {
+            return Optional.empty();
+        }
+        Optional<Integer> loaded = loadedContextLength(tag);
+        if (loaded.isEmpty() || loaded.get() >= wantedContext) {
+            return Optional.empty();
+        }
+        String base = tag.replaceAll("-ctx[0-9]+k$", "");
+        String derived = base + "-ctx" + (wantedContext / 1024) + "k";
+        if (derived.equals(tag) || !createWithContext(base, derived, wantedContext)) {
+            return Optional.empty();
+        }
+        log.info(
+                "Derived local model '{}' from '{}' with a {}-token context - the runner loaded only {}.",
+                derived,
+                base,
+                wantedContext,
+                loaded.get());
+        return Optional.of(derived);
     }
 
     /**

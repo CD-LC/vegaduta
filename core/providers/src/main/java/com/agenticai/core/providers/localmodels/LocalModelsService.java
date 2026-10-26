@@ -461,16 +461,50 @@ public class LocalModelsService {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "No local model is configured.");
         }
+        Optional<PlatformHostedLlmProvider> serving = servingPoolRow();
         Optional<Long> ms =
                 ollama.warm(
                         clean,
-                        servingPoolRow().map(PlatformHostedLlmProvider::getKeepAlive).orElse(null));
+                        serving.map(PlatformHostedLlmProvider::getKeepAlive).orElse(null));
+        if (ms.isPresent()) {
+            ensureSufficientContext(clean, serving);
+        }
         return new WarmResult(clean, ms.isPresent(), ms.orElse(0L));
+    }
+
+    /**
+     * Self-heal for a runner that loaded {@code tag} under core's {@code app.llm.ollama.num-ctx}
+     * (the MLX runner ignores the per-request num_ctx): {@link
+     * LocalModelOllamaGateway#ensureSufficientContext} derives a {@code -ctxNk} variant - weights
+     * reused, no download - then the serving row is repointed at it and the variant warmed, so the
+     * next turn's prompt is not silently truncated.
+     */
+    private void ensureSufficientContext(
+            String tag, Optional<PlatformHostedLlmProvider> serving) {
+        ollama.ensureSufficientContext(tag)
+                .ifPresent(
+                        derived -> {
+                            // Only repoint when the warmed tag is the row's model: a warm of some
+                            // other tag must not change what the pool serves.
+                            serving.filter(row -> tag.equals(row.getModel()))
+                                    .ifPresent(row -> hostedPool.updateModel(row.getId(), derived));
+                            ollama.warm(
+                                    derived,
+                                    serving.map(PlatformHostedLlmProvider::getKeepAlive)
+                                            .orElse(null));
+                        });
     }
 
     /** {@link #warm} without waiting: the switch replies at once and the load runs behind it. */
     private void warmInBackground(String tag) {
-        BackgroundStartupTask.run(true, "local-model-warm", () -> ollama.warm(tag));
+        BackgroundStartupTask.run(
+                true,
+                "local-model-warm",
+                () -> {
+                    if (ollama.warm(tag).isPresent()) {
+                        ensureSufficientContext(tag, servingPoolRow());
+                    }
+                });
     }
 
     /**
