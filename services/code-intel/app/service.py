@@ -14,6 +14,7 @@ import threading
 import time
 from dataclasses import dataclass
 
+from codebase_rag import analysis as cr_analysis
 from codebase_rag import graph as cr_graph
 from codebase_rag.config import Config
 from codebase_rag.embedders import make_embedder
@@ -406,4 +407,72 @@ class CodeIntelService(GovernedExecutionMixin):
     def graph_stats(self, ctx: TenantContext, repo_id: str) -> dict:
         h = self._handles(ctx, repo_id, refresh_checkout=False)
         return cr_graph.graph_stats(h.cfg)
+
+    # Analysis endpoints (codebase_rag/analysis.py) - deterministic reads over
+    # the graph tables; no heavy gate needed (SQLite lookups, not rebuilds).
+
+    def repo_map(self, ctx: TenantContext, repo_id: str,
+                 budget: int = 16000, top_n: int = 200) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.repo_map(h.cfg, budget=budget, top_n=top_n)
+
+    def find_symbols(self, ctx: TenantContext, repo_id: str, query: str = "",
+                     kind: str = "", path_prefix: str = "", limit: int = 50,
+                     include_tests: bool = True) -> list[dict]:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.find_symbols(
+            h.cfg, query=query, kind=kind, path_prefix=path_prefix,
+            limit=limit, include_tests=include_tests)
+
+    def symbol_detail(self, ctx: TenantContext, repo_id: str,
+                      qualified_name: str, include_body: bool = True):
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        out = cr_analysis.symbol_detail(h.cfg, qualified_name,
+                                        include_body=include_body)
+        if out is None:
+            raise RepoNotFoundError(f"symbol '{qualified_name}'")
+        return out
+
+    def file_outline(self, ctx: TenantContext, repo_id: str,
+                     path: str) -> list[dict]:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.file_outline(h.cfg, path)
+
+    def references_of(self, ctx: TenantContext, repo_id: str,
+                      symbol: str) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.references_of(h.cfg, symbol)
+
+    def implementations_of(self, ctx: TenantContext, repo_id: str,
+                           symbol: str, depth: int = 4) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.implementations_of(h.cfg, symbol, depth=depth)
+
+    def call_path(self, ctx: TenantContext, repo_id: str, src: str,
+                  dst: str, max_depth: int = 8) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.call_path(h.cfg, src, dst, max_depth=max_depth)
+
+    def dead_code(self, ctx: TenantContext, repo_id: str,
+                  limit: int = 100) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.dead_code(h.cfg, limit=limit)
+
+    def tests_for(self, ctx: TenantContext, repo_id: str,
+                  symbol: str) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.tests_for(h.cfg, symbol)
+
+    def api_surface(self, ctx: TenantContext, repo_id: str) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.api_surface(h.cfg)
+
+    def import_cycles(self, ctx: TenantContext, repo_id: str) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.import_cycles(h.cfg)
+
+    def hotspots(self, ctx: TenantContext, repo_id: str, days: int = 90,
+                 limit: int = 30) -> dict:
+        h = self._handles(ctx, repo_id, refresh_checkout=False)
+        return cr_analysis.hotspots(h.cfg, days=days, limit=limit)
 

@@ -35,6 +35,7 @@ from . import discovery
 from .config import Config
 from .graph_extract import FileExtraction, RawEdge, extract_file
 from .languages import detect_language
+from .routes_extract import extract_routes
 from .store import open_db  # WAL-vs-rollback fallback for network mounts
 
 # ---------------------------------------------------------------------------
@@ -76,7 +77,23 @@ CREATE TABLE IF NOT EXISTS graph_edges (
 CREATE INDEX IF NOT EXISTS idx_gedge_src ON graph_edges(src_path);
 CREATE INDEX IF NOT EXISTS idx_gedge_target ON graph_edges(target_name);
 CREATE INDEX IF NOT EXISTS idx_gedge_tsym ON graph_edges(target_symbol);
+CREATE TABLE IF NOT EXISTS api_routes (
+    path TEXT NOT NULL,
+    line INTEGER NOT NULL,
+    method TEXT NOT NULL,
+    route TEXT NOT NULL,
+    handler TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_routes_path ON api_routes(path);
 """
+
+# Columns added after the original schema - ALTER TABLE in _migrate() keeps
+# existing index.db files valid (IF NOT EXISTS on CREATE never upgrades them).
+_SYMBOL_EXTRA_COLS = (
+    ("signature", "TEXT NOT NULL DEFAULT ''"),
+    ("doc", "TEXT NOT NULL DEFAULT ''"),
+    ("is_test", "INTEGER NOT NULL DEFAULT 0"),
+)
 
 
 class GraphStore:
@@ -84,6 +101,16 @@ class GraphStore:
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
         self.conn = open_db(db_path)
         self.conn.executescript(GRAPH_SCHEMA)
+        self._migrate()
+
+    def _migrate(self) -> None:
+        have = {r[1] for r in self.conn.execute(
+            "PRAGMA table_info(graph_symbols)")}
+        for col, decl in _SYMBOL_EXTRA_COLS:
+            if col not in have:
+                self.conn.execute(
+                    f"ALTER TABLE graph_symbols ADD COLUMN {col} {decl}")  # nosec B608
+        self.conn.commit()
 
     def close(self):
         self.conn.close()
@@ -95,16 +122,18 @@ class GraphStore:
     def delete_file(self, path: str) -> None:
         self.conn.execute("DELETE FROM graph_symbols WHERE path=?", (path,))
         self.conn.execute("DELETE FROM graph_edges WHERE src_path=?", (path,))
+        self.conn.execute("DELETE FROM api_routes WHERE path=?", (path,))
         self.conn.execute("DELETE FROM graph_files WHERE path=?", (path,))
 
     def replace_file(self, fx: FileExtraction, file_hash: str) -> None:
         self.delete_file(fx.path)
         self.conn.executemany(
             "INSERT INTO graph_symbols(path, language, kind, name, "
-            "qualified_name, start_line, end_line, parent) "
-            "VALUES(?,?,?,?,?,?,?,?)",
+            "qualified_name, start_line, end_line, parent, signature, doc, "
+            "is_test) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
             [(s.path, s.language, s.kind, s.name, s.qualified_name,
-              s.start_line, s.end_line, s.parent) for s in fx.symbols])
+              s.start_line, s.end_line, s.parent, s.signature, s.doc,
+              1 if s.is_test else 0) for s in fx.symbols])
         self.conn.execute(
             "INSERT INTO graph_files(path, file_hash, language, engine, "
             "extracted_at) VALUES(?,?,?,?,?)",
@@ -115,6 +144,12 @@ class GraphStore:
             "INSERT INTO graph_edges(src_path, src_symbol, edge_type, "
             "target_name, target_path, target_symbol, confidence, line) "
             "VALUES(?,?,?,?,?,?,?,?)", rows)
+
+    def insert_routes(self, routes: list) -> None:
+        self.conn.executemany(
+            "INSERT INTO api_routes(path, line, method, route, handler) "
+            "VALUES(?,?,?,?,?)",
+            [(r.path, r.line, r.method, r.route, r.handler) for r in routes])
 
     def clear_edges_from(self, paths: list[str]) -> None:
         for p in paths:
@@ -155,6 +190,7 @@ def build_graph(cfg: Config, quiet: bool = False) -> dict:
             language = detect_language(path) or "text"
             fx = extract_file(path, text, language)
             store.replace_file(fx, fhash)
+            store.insert_routes(extract_routes(path, text, language))
             pending_edges[path] = fx.edges
             extracted.append(fx)
             changed += 1

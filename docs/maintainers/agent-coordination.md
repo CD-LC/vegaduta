@@ -343,3 +343,21 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   console redirect `https://app.vegaduta.ai/tools`); if connect still fails the remaining causes
   are on the Google Cloud OAuth client itself (redirect URI not registered, consent screen not
   published, missing scopes). `GOOGLE_OAUTH_MODE` should be `web` (or unset - the default).
+
+### CLAIM COMPLETE: services/code-intel capability expansion (Devin, 2026-10-26)
+
+Shipped on `feat/code-intel-out-of-the-box`: 12 deterministic read-only analysis
+endpoints + agent tools - repo map (PageRank skeleton under char budget), find_symbols,
+symbol_detail (exact body), outline, references (calls+inherits+value/type refs),
+implementations, call-path BFS, dead-code candidates, tests-for linkage, api-surface
+(FastAPI/Flask/Express/Spring/Go/Rust/ASP.NET route extraction), hotspots (git churn x
+size), import-cycles (file-level SCCs). Extraction gains signature/doc/is_test on symbols,
+`references` edges, api_routes table (schema auto-migrates via ALTER). Core side:
+`CodeIntelAnalysis` (split out of CodeIntelClient for the 700-line ratchet) +
+spec-driven `CodeIntelAnalysisToolCallback`/`CodeIntelAnalysisTools` - all togglable per
+agent via existing allowedToolNames/ToolsGrid, scoped by allowedCodeIntelRepoIds.
+Workbench: repo-access editor un-gated from codeWorkspaceEnabled (read-only agents
+couldn't reach their own scope). Tests: tests/test_analysis.py 27 checks +
+CodeIntelAnalysisToolCallbackTest 6 tests; full suites green (ci ~380 py, codeintel 38,
+agents-tools 1531). mcp_bridge also fixed: GET params were sent as a JSON body FastAPI
+ignored - now real query strings.

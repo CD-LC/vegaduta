@@ -53,6 +53,7 @@ export default function CodeIntelligenceSection({
     <CollapsibleSection icon={<GitBranch size={13} />} label={t("codeIntelligenceLabel")} cat="var(--cat-creative)">
       <p className={SUB_TEXT}>{t("codeIntelReadOnlyHint")}</p>{" "}
       <p className={cn("mt-1", SUB_TEXT)}>{t("codeWorkspaceExplainer")}</p>
+      <p className={cn("mt-1", SUB_TEXT)}>{t("codeIntelToolsHint")}</p>
       {isDraft && <div className={cn("mt-3 italic", SUB_TEXT)}>{t("codeWorkspaceDraftHint")}</div>}
       {!isDraft && !selectedAgent.codeWorkspaceEnabled && (
         <div className={cn("mt-3 italic", SUB_TEXT)}>{t("codeWorkspaceEnableHint")}</div>
@@ -76,10 +77,11 @@ export default function CodeIntelligenceSection({
           </Notice>
         </div>
       )}
-      {!isDraft && selectedAgent.codeWorkspaceEnabled && (
+      {!isDraft && codeIntelToolsAvailable === true && (
         <div className="mt-3">
           <div className="flex flex-wrap items-center gap-2">
-            {(selectedAgent.allowedCodeIntelRepoIds || []).length === 0 && (
+            {selectedAgent.codeWorkspaceEnabled &&
+              (selectedAgent.allowedCodeIntelRepoIds || []).length === 0 && (
               <span className={SUB_TEXT}>{t("noRepoGrantedWarning")}</span>
             )}
             {(selectedAgent.allowedCodeIntelRepoIds || []).map((repoId: string) => (
@@ -91,7 +93,7 @@ export default function CodeIntelligenceSection({
             <button
               type="button"
               className={CHIP_DASHED}
-              disabled={codeIntelToolsAvailable === false || codeIntelToolsAvailable === "error" || locked}
+              disabled={locked}
               title={locked ? t("editLockedTooltip") : undefined}
               onClick={() =>
                 setEditingRepos((v) => {
@@ -139,7 +141,9 @@ export default function CodeIntelligenceSection({
                   ))}
                 </div>
               )}
-              <p className="mt-2 text-xs text-muted-foreground">{t("denyAllRepoHint")}</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {selectedAgent.codeWorkspaceEnabled ? t("denyAllRepoHint") : t("readOnlyRepoHint")}
+              </p>
               <Button
                 type="button"
                 size="sm"

@@ -9,6 +9,7 @@ a target NAME; graph.py resolves names to symbols across the repo.
 
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass, field
 
@@ -34,6 +35,22 @@ class Symbol:
     start_line: int      # 1-based inclusive
     end_line: int
     parent: str | None = None   # qualified_name of enclosing symbol
+    signature: str = ""  # first line of the definition, trimmed
+    doc: str = ""        # leading docstring/comment snippet (<=300 chars)
+    is_test: bool = False  # file lives under a test path/naming convention
+
+
+_TEST_DIR_RX = re.compile(r"(^|/)(tests?|__tests__|spec|e2e|integration)(/|$)")
+_TEST_NAME_RX = re.compile(
+    r"(^test_.+\.|_test\.|\.test\.|\.spec\.|Tests?\.|Test\.|Spec\.)"
+    r"(java|py|js|ts|tsx|jsx|go|rs|rb|cs|kt|scala|swift|php|dart|c|cpp|cc|h)?$")
+
+
+def is_test_path(path: str) -> bool:
+    """Conventional test-file detection: tests/ dir, test_/_test/.test/.spec
+    basename, or Java *Test/*Tests classes."""
+    p = path.replace(os.sep, "/") if os.sep != "/" else path
+    return bool(_TEST_DIR_RX.search(p) or _TEST_NAME_RX.search(os.path.basename(p)))
 
 
 @dataclass
@@ -151,6 +168,51 @@ def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
         m = re.findall(r"[A-Za-z_][A-Za-z0-9_]*", txt)
         return m[-1] if m else None
 
+    def signature_of(node) -> str:
+        """First line of the definition's source, trimmed - `def foo(a, b):`,
+        `public static int f(`. Cheap, stable, and what an agent needs to
+        decide whether to fetch the body."""
+        txt = node_text(node).split("\n", 1)[0].strip()
+        return txt[:200]
+
+    def doc_of(node) -> str:
+        """Leading comment or docstring for the def: the comment block
+        immediately above it, or a Python-style first-string-statement inside
+        its body. 300-char cap - context, not full doc."""
+        prev = node.prev_named_sibling
+        if prev is not None and "comment" in prev.type:
+            txt = node_text(prev).strip()
+            for marker in ("//", "/*", "*/", "*", "#", "<!--", "-->"):
+                txt = txt.replace(marker, "")
+            return " ".join(txt.split())[:300]
+        # Docstring: first statement of the def's body is a bare string -
+        # either a `string`/`concatenated_string` node directly (Python
+        # grammar) or an `expression_statement` wrapping one (other grammars).
+        for ch in node.named_children:
+            if ch.type in ("block", "body", "declaration_list"):
+                for st in ch.named_children[:1]:
+                    inner = (st.named_children[0]
+                             if st.type == "expression_statement"
+                             and st.named_children else st)
+                    if "string" in inner.type:
+                        s = node_text(inner).strip()
+                        return s.strip('\'"').strip()[:300]
+                break
+        return ""
+
+    # Reference-node types: identifiers used as values/types rather than
+    # invoked. `type_identifier`/`property_identifier`/`member_identifier`
+    # exist in grammars that distinguish them (TS/Java/Go/Rust/C#); grammars
+    # like Python's emit a bare `identifier` everywhere, so for those we
+    # also take `identifier`/`attribute` nodes whose PARENT is a type,
+    # attribute or qualified-name node (value position, not a call callee -
+    # calls were already emitted above for the same span).
+    REF_TYPES = ("type_identifier", "property_identifier", "member_identifier",
+                 "scoped_identifier", "constant")
+    REF_PARENT_TYPES = ("type", "attribute", "dotted_name", "generic_type",
+                        "attribute_item", "scoped_type_identifier")
+    file_is_test = is_test_path(path)
+
     def walk(node, scope: list[str], enclosing: str | None):
         for child in node.named_children:
             t = child.type
@@ -164,6 +226,8 @@ def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
                         start_line=child.start_point[0] + 1,
                         end_line=child.end_point[0] + 1,
                         parent=".".join(scope) if scope else None,
+                        signature=signature_of(child), doc=doc_of(child),
+                        is_test=file_is_test,
                     )
                     fx.symbols.append(sym)
                     if sym.parent:
@@ -191,12 +255,56 @@ def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
                 if cname and cname not in _KEYWORDS and enclosing:
                     fx.edges.append(RawEdge(enclosing, "calls", cname,
                                             child.start_point[0] + 1))
+            elif enclosing and _is_reference_node(child, t, REF_TYPES,
+                                                  REF_PARENT_TYPES):
+                # Value/type-position use: `Foo` in a type annotation, `.bar`
+                # in a member access, a constant in an expression. These feed
+                # the `references` relation - "who mentions this symbol
+                # without calling it" (find_referencing_symbols).
+                ref = node_text(child).strip()
+                if ref and ref not in _KEYWORDS and len(ref) <= 128:
+                    fx.edges.append(RawEdge(enclosing, "references", ref,
+                                            child.start_point[0] + 1))
             walk(child, scope, enclosing)
 
     walk(tree.root_node, [], None)
     # Re-attribute calls to their innermost enclosing symbol by line span.
     _reattribute_calls(fx)
+    _dedupe_references(fx)
     return fx
+
+
+def _is_reference_node(child, node_type: str, ref_types, ref_parents) -> bool:
+    """A name node worth a `references` edge: explicit reference-shaped types
+    (type_identifier etc.) or, for grammars without them, identifier-ish
+    nodes whose parent is a type/attribute/qualified-name position."""
+    if node_type in ref_types:
+        return True
+    if node_type in ("identifier", "attribute"):
+        parent = child.parent
+        return parent is not None and parent.type in ref_parents
+    return False
+
+
+def _dedupe_references(fx: FileExtraction) -> None:
+    """`references` edges are deduped per (src symbol, target name) - ten
+    mentions of `Foo` inside one function is one edge. Anything the same
+    symbol already calls is dropped too (the `calls` edge is the stronger
+    signal and callers/callees queries must not double-count)."""
+    call_pairs = {(e.src_qualified, e.target_name)
+                  for e in fx.edges if e.edge_type == "calls"}
+    seen: set[tuple[str | None, str]] = set()
+    kept: list[RawEdge] = []
+    for e in fx.edges:
+        if e.edge_type != "references":
+            kept.append(e)
+            continue
+        key = (e.src_qualified, e.target_name)
+        if key in seen or key in call_pairs:
+            continue
+        seen.add(key)
+        kept.append(e)
+    fx.edges = kept
 
 
 def _reattribute_calls(fx: FileExtraction) -> None:
@@ -256,8 +364,19 @@ def _rx_extract(text: str, path: str, language: str) -> FileExtraction:
         kind = "class" if re.search(
             r"\b(class|interface|struct|enum|module|trait)\b", lines[i]) \
             else "function"
+        # Doc: contiguous comment lines immediately above the def (any
+        # comment family), capped like doc_of() in the ts engine.
+        doc = ""
+        j = i - 1
+        while j >= 0 and re.match(r"^\s*(#|//|/\*|\*|<!--)", lines[j]):
+            doc = re.sub(r"^\s*(#|//|/\*|\*|<!--|-->)?", "", lines[j]).strip() \
+                + " " + doc
+            j -= 1
         fx.symbols.append(Symbol(path, language, kind, name, qname,
-                                 i + 1, end + 1, parent))
+                                 i + 1, end + 1, parent,
+                                 signature=lines[i].strip()[:200],
+                                 doc=" ".join(doc.split())[:300],
+                                 is_test=is_test_path(path)))
         if parent:
             fx.edges.append(RawEdge(parent, "contains", qname, i + 1))
 

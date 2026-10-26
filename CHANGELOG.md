@@ -15,6 +15,33 @@ Release notes on GitHub are generated from the section for each version.
 
 - **`docs/api/openapi.json` now shows the real security of the local-auth routes.** The generator only mirrored the main security chain, so every `/api/auth/local/*` route claimed `bearerAuth` - including the anonymous `login`, `setup`, `refresh`, `config` and `unlock` sign-in routes. The spec now matches `LocalAuthSecurityConfig`: only `change-password` and the unlock-management routes require a session; the rest are public (and no longer claim an `Idempotency-Key` that anonymous calls never replay-protected).
 - **Password reset for a locked-out personal install.** A new "Forgot password?" link on the local sign-in screen asks core (`POST /api/auth/local/reset-request`) to mint a one-time reset link and write it, owner-readable only, to `password-reset.txt` in the auth data directory - file access on the machine is the proof of ownership, same model as the first-run setup link, so the endpoint never returns the link over the wire. `scripts/vegaduta reset-password [EMAIL]` (and `.\scripts\vegaduta.ps1 reset-password` on Windows) prints the link; opening it runs the existing `/login?setup=` flow, which sets a new password and signs in. The request is throttled per client address, and a blank e-mail resolves to the install's only account.
+- **Code Intelligence analysis suite** (`services/code-intel` + `core/codeintel`):
+  twelve new deterministic, read-only endpoints and matching agent tools, on top
+  of richer extraction - symbols now carry signature/doc/test flags and the graph
+  gains value/type `references` edges and an HTTP route table.
+  New endpoints (`/repos/{id}/...`): `map` (PageRank-ranked skeleton of the repo
+  under a char budget - the agent's first call to learn a codebase's shape),
+  `symbols` (name-path search), `symbols/{qname}` (exact source body),
+  `outline`, `references/{symbol}` (all inbound mentions, not just calls),
+  `graph/implementations/{symbol}` (recursive subclass tree),
+  `graph/path` (BFS call chain between two symbols), `dead-code` (zero-inbound-edge
+  review candidates), `tests/{symbol}` (test-side linkage), `api-surface`
+  (FastAPI/Flask/Express/Spring/Go/Rust route extraction), `hotspots` (git churn
+  x size) and `import-cycles` (file-level SCCs). All surfaced to agents as
+  `code_map`, `find_symbols`, `symbol_detail`, `code_outline`, `code_references`,
+  `code_implementations`, `code_path`, `code_dead_code`, `code_tests`,
+  `code_api_surface`, `code_hotspots`, `code_import_cycles` - per-agent
+  toggleable in the workbench's Tools grid like every other tool, and scoped by
+  the same `allowedCodeIntelRepoIds` grant (empty = unrestricted for read tools).
+  The MCP bridge (`mcp_bridge.py`) exposes the same twelve to MCP clients in
+  read-only mode. Route extraction covers FastAPI/Starlette/Flask/Django,
+  Express/Koa/Hono/Nest, Spring MVC/JAX-RS, net/http/Gin/Echo/chi, axum and
+  ASP.NET attributes.
+- Workbench: the Code Intelligence section's per-agent repository access editor
+  now shows whenever code-intel is reachable, not only for workspace-enabled
+  agents - a read-only agent's `allowedCodeIntelRepoIds` was previously
+  unreachable in the UI. Hint copy now states the two empty-set semantics
+  honestly (read tools treat it as unrestricted; workspace tools as deny-all).
 - **On-device media generation, out of the box.** The edge tool surface gains
   `local_generate_image` (Stable Diffusion Turbo via onnxruntime-web/WebGPU, ~2.4 GB
   model) and `local_generate_audio` (MusicGen-small via transformers.js, ~1.8 GB
