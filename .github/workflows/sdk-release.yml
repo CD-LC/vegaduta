@@ -202,15 +202,26 @@ jobs:
           id="$(grep -oE 'deploymentId: [a-f0-9-]+' deploy-log.txt | tail -1 | awk '{print $2}')"
           [ -n "$id" ] || { echo "::error::no deploymentId in the deploy log - the upload step reported none"; exit 1; }
           token="$(printf '%s:%s' "$CENTRAL_USERNAME" "$CENTRAL_PASSWORD" | base64 -w0)"
-          curl -fsS -X POST -H "Authorization: Bearer $token" \
-            "https://central.sonatype.com/api/v1/publisher/deployment/$id"
+          status_of() {
+            # /api/v1/publisher/status is a POST - a GET answers 5xx.
+            curl -fsS -X POST -H "Authorization: Bearer $token" \
+              "https://central.sonatype.com/api/v1/publisher/status?id=$1" \
+              | python3 -c 'import json,sys; print(json.load(sys.stdin).get("deploymentState",""))'
+          }
+          state="$(status_of "$id" || echo '')"
+          echo "deployment $id starts at ${state:-unknown}"
+          case "$state" in
+            PUBLISHING|PUBLISHED) ;;
+            *)
+              # The API's error body carries the reason - keep it in the log, not just the status.
+              code="$(curl -sS -o publish-resp.txt -w '%{http_code}' -X POST -H "Authorization: Bearer $token" \
+                "https://central.sonatype.com/api/v1/publisher/deployment/$id")"
+              echo "publish call: HTTP $code - $(cat publish-resp.txt 2>/dev/null || true)"
+              [ "$code" = "204" ] || [ "$code" = "200" ] || { echo "::error::publish call failed (HTTP $code)"; exit 1; }
+              ;;
+          esac
           for i in $(seq 1 30); do
-            # /api/v1/publisher/status is a POST - a GET answers 5xx; guard so one
-            # flaky call retries rather than dying on empty stdin.
-            state="$(curl -fsS -X POST -H "Authorization: Bearer $token" \
-              "https://central.sonatype.com/api/v1/publisher/status?id=$id" \
-              | python3 -c 'import json,sys; print(json.load(sys.stdin).get("deploymentState",""))' \
-              || echo '')"
+            state="$(status_of "$id" || echo '')"
             echo "deployment $id: $state"
             case "$state" in
               PUBLISHED) exit 0 ;;
