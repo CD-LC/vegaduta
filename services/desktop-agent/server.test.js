@@ -9,7 +9,7 @@ process.env.DESKTOP_AGENT_DATA_DIR = require('node:os').tmpdir() + '/da-test-' +
 
 const { test, before, after } = require('node:test');
 const assert = require('node:assert');
-const { createServer, actions, appleQuote } = require('./server.js');
+const { createServer, actions, appleQuote, winKeySpec, psQuote } = require('./server.js');
 
 let server;
 let base;
@@ -180,4 +180,27 @@ test('GET /frame failure answers 500 json and frees the slot', async () => {
 
 test('appleQuote escapes quotes and backslashes', () => {
   assert.equal(appleQuote('say "hi"\\path'), 'say \\"hi\\"\\\\path');
+});
+
+// ---------------------------------------------------------------------------
+// Windows (win32) helpers - the pure parts are host-independent.
+// ---------------------------------------------------------------------------
+
+test('winKeySpec maps modifiers, named keys and single keys to virtual keys', () => {
+  assert.deepEqual(winKeySpec('ctrl+s'), { mods: [0x11], vk: 0x53 });
+  assert.deepEqual(winKeySpec('cmd+enter'), { mods: [0x5b], vk: 0x0d });
+  assert.deepEqual(winKeySpec('shift+ctrl+left'), { mods: [0x10, 0x11], vk: 0x25 });
+  assert.deepEqual(winKeySpec('f5'), { mods: [], vk: 0x74 });
+  assert.deepEqual(winKeySpec('a'), { mods: [], vk: 0x41 });
+});
+
+test('winKeySpec rejects unknown modifiers and key names with 400', () => {
+  for (const bad of ['hyper+x', 'whatisthis', 'ctrl+hyper+q']) {
+    assert.throws(() => winKeySpec(bad), (e) => e.status === 400, bad);
+  }
+});
+
+test('psQuote escapes single quotes for PowerShell literals', () => {
+  assert.equal(psQuote("it's a 'test'"), "it''s a ''test''");
+  assert.equal(psQuote('plain'), 'plain');
 });
