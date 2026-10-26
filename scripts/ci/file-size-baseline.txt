@@ -22,7 +22,7 @@ core/agents-turn/src/main/java/com/agenticai/core/agents/memory/SessionMemorySer
 core/agents-turn/src/main/java/com/agenticai/core/agents/memory/TenantMemoryService.java 667
 core/agents-turn/src/main/java/com/agenticai/core/agents/skills/SkillService.java 676
 core/agents-turn/src/main/java/com/agenticai/core/agents/turn/AgentChatService.java 706
-core/agents-turn/src/main/java/com/agenticai/core/agents/turn/ChatTurnDispatcher.java 688
+core/agents-turn/src/main/java/com/agenticai/core/agents/turn/ChatTurnDispatcher.java 674
 core/agents-turn/src/main/java/com/agenticai/core/agents/turn/ChatTurnExecutor.java 759
 core/agents-turn/src/main/java/com/agenticai/core/agents/turn/HostedChainFailover.java 703
 core/agents/src/main/java/com/agenticai/core/agents/core/AgentService.java 685

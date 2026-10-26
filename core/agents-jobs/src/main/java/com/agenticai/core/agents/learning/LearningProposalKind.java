@@ -17,5 +17,6 @@ public enum LearningProposalKind {
     LESSON,
     PREFERENCE,
     ROUTINE,
-    CONSOLIDATION
+    CONSOLIDATION,
+    DESKTOP_RECIPE
 }
