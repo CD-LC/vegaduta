@@ -215,6 +215,10 @@ jobs:
           set -euo pipefail
           tarball="$(ls vegaduta-sdk-*.tgz)"
           case "$tarball" in *$'\n'*) echo "::error::more than one vegaduta-sdk tarball: $tarball"; exit 1 ;; esac
-          tar -tzf "$tarball" | grep -qx 'package/dist/index.js' \
+          # List once, then grep: `tar | grep -q` under pipefail can fail on tar's
+          # SIGPIPE after grep matched - a false "missing file" (same fix as the
+          # build job's check above).
+          tar -tzf "$tarball" > tarball-files.txt
+          grep -qx 'package/dist/index.js' tarball-files.txt \
             || { echo "::error::$tarball has no dist/index.js; refusing to publish an empty package"; exit 1; }
           npm publish "./$tarball" --provenance --access public
