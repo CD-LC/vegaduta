@@ -35,7 +35,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | agents-jobs | kernel | 178 | agents, agents-browser, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, settings, sharing, tenancy |  |
 | agents-studio | kernel | 100 | agents, agents-tools (test), agents-turn, approval, chat, guardrails, json, knowledge, mcp, providers, rl, sdlc, security, sharing, tenancy |  |
 | agents-tools | kernel | 285 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, prompts, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
-| agents-turn | kernel | 402 | agents, agents-budget, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, prompts, providers, rl, security, settings, sharing, storage, tenancy |  |
+| agents-turn | kernel | 403 | agents, agents-budget, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, prompts, providers, rl, security, settings, sharing, storage, tenancy |  |
 | agentspi | kernel | 17 | security |  |
 | app | distribution | 198 | admin, agents, agents-browser, agents-budget, agents-chatport, agents-interop, agents-jobs, agents-studio, agents-tools, agents-turn, app-config, approval, audit, billing, brief, chat, crypto, crypto-kms, devices, documentgen, **elevenlabs**, eventbus, **google**, guardrails, **imagegen**, json, knowledge, mcp, mcpserver, omnichannel, omnichannel-social, **payments**, platform, prompts, providers, quality, rl, **sarvam**, sdlc, secrets, security, settings, sharing, storage, templates, tenancy, voice, workflow, workflow-portability |  |
 | app-config | kernel | 8 | (none) |  |
