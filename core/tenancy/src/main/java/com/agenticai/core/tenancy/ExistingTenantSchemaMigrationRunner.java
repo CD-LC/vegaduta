@@ -70,7 +70,18 @@ public class ExistingTenantSchemaMigrationRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         // Failures are logged inside the service and deliberately never stop startup here.
         try {
-            migrationService.migrateAllActiveTenants();
+            java.util.List<String> failed = migrationService.migrateAllActiveTenants();
+            if (!failed.isEmpty()) {
+                // The service recorded them in TenantMigrationFailures: the status guard answers
+                // 403 for these tenants (instead of serving a stale schema) until a retry
+                // (TenantMigrationRetryJob) or a restart migrates them.
+                org.slf4j.LoggerFactory.getLogger(ExistingTenantSchemaMigrationRunner.class)
+                        .error(
+                                "Opening the readiness gate with {} tenant schema(s) failed to migrate;"
+                                        + " they are refused (403) until migrated: {}",
+                                failed.size(),
+                                failed);
+            }
         } finally {
             // Readiness (TenantMigrationReadinessIndicator) waits on this; opened
             // even after a failure so a bad tenant degrades exactly as before

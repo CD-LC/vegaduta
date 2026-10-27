@@ -10,6 +10,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Tenant isolation hardening.** A JWT or API-key tenant claim naming the `public` (or a reserved) schema is rejected with 403 instead of running tenant queries in the legacy schema (webhook paths that set `public` deliberately are unchanged); the tenant status guard now fails closed on a schema-check SQL error (`app.tenant.status-fail-open-on-schema-check-error=true` restores the old behavior) and rejects claims the schema-name sanitizer would rewrite; tenants whose startup schema migration failed get 403 until a background retry (`app.tenancy.migrate-retry-interval`) migrates them; a non-Keycloak JWT issuer with neither an azp allowlist nor a required audience now fails startup (`app.security.jwt.allow-unrestricted-audience=true` opts out).
+
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
   capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on

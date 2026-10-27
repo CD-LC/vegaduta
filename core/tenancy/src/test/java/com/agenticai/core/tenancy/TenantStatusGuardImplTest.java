@@ -136,11 +136,46 @@ class TenantStatusGuardImplTest {
     }
 
     @Test
-    void aSqlExceptionDuringTheSchemaExistenceCheckFailsOpen() throws SQLException {
+    void aSqlExceptionDuringTheSchemaExistenceCheckFailsClosed() throws SQLException {
         setUp();
         when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.empty());
         when(dataSource.getConnection()).thenThrow(new SQLException("connection pool exhausted"));
 
+        assertFalse(guard.isUsable(SCHEMA_NAME));
+    }
+
+    @Test
+    void aSqlExceptionFailsOpenOnlyWithTheOptOut() throws SQLException {
+        setUp();
+        guard = new TenantStatusGuardImpl(tenantRepository, platformKillSwitchRepository, dataSource,
+            Duration.ZERO, new TenantMigrationFailures(), true);
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.empty());
+        when(dataSource.getConnection()).thenThrow(new SQLException("connection pool exhausted"));
+
+        assertTrue(guard.isUsable(SCHEMA_NAME));
+    }
+
+    @Test
+    void aClaimWhoseSanitisedFormDiffersIsRejectedEvenIfThatSchemaExists() throws SQLException {
+        setUp();
+        when(tenantRepository.findBySchemaName("Acme-Co")).thenReturn(Optional.empty());
+        stubSchemaExistsQuery(true); // "acme_co" exists: the lossy collision
+
+        assertFalse(guard.isUsable("Acme-Co"));
+    }
+
+    @Test
+    void aSchemaWhoseMigrationFailedIsNotUsableUntilItMigratesSuccessfully() {
+        setUp();
+        TenantMigrationFailures failures = new TenantMigrationFailures();
+        guard = new TenantStatusGuardImpl(tenantRepository, platformKillSwitchRepository, dataSource,
+            Duration.ofMinutes(1), failures, false);
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.of(activeTenant()));
+
+        assertTrue(guard.isUsable(SCHEMA_NAME));
+        failures.recordFailure(SCHEMA_NAME);
+        assertFalse(guard.isUsable(SCHEMA_NAME));
+        failures.recordSuccess(SCHEMA_NAME);
         assertTrue(guard.isUsable(SCHEMA_NAME));
     }
 

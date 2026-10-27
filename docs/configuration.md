@@ -1370,6 +1370,9 @@ to `core.env` or the Helm `core.env` map when you need them.
 | `app.security.outbound.egress-allow-list` | `APP_SECURITY_OUTBOUND_EGRESS_ALLOW_LIST` | empty (any public host); comma-separated `host` or `*.suffix`. When set, tenant-configured outbound calls (BYOK, OpenAPI, MCP URLs, web fetch, webhooks) may reach only these hosts; the private-address checks still apply and `allowed-private-hosts` entries are exempt. Platform-wide, not per agent |
 | `app.tenancy.fail-on-missing-context` | `APP_TENANCY_FAIL_ON_MISSING_CONTEXT` | `true`; `false` restores the shared-schema fallback (logged) |
 | `app.security.jwt.required-audience` | `APP_SECURITY_JWT_REQUIRED_AUDIENCE` | empty (off); needs a Keycloak audience mapper first |
+| `app.security.jwt.allow-unrestricted-audience` | `APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE` | `false`. A non-Keycloak issuer (no `/realms/` in the issuer URI) with both `app.keycloak.allowed-azp` and `app.security.jwt.required-audience` empty fails startup; `true` downgrades that to an ERROR log |
+| `app.tenant.status-fail-open-on-schema-check-error` | `APP_TENANT_STATUS_FAIL_OPEN_ON_SCHEMA_CHECK_ERROR` | `false`: a SQL error while checking an untracked tenant's schema refuses the request; `true` restores fail-open |
+| `app.tenancy.migrate-retry-interval` | `APP_TENANCY_MIGRATE_RETRY_INTERVAL` | `60s`: how often tenant schemas whose startup migration failed are retried; until one succeeds the tenant gets 403 |
 | `app.oauth.state.require-browser-cookie` | `APP_OAUTH_STATE_REQUIRE_BROWSER_COOKIE` | `false` |
 | `app.agent.share.visitor-token-secret` | `APP_AGENT_SHARE_VISITOR_TOKEN_SECRET` | empty: derived from `APP_ENCRYPTION_KEY` |
 | `app.storage.local.legacy-unprefixed-fallback` | `APP_STORAGE_LOCAL_LEGACY_UNPREFIXED_FALLBACK` | `false` |
