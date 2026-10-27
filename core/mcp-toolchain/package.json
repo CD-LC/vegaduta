@@ -6,10 +6,12 @@
     "@modelcontextprotocol/server-puppeteer": "2025.5.12",
     "@playwright/mcp": "0.0.83",
     "playwright": "1.64.0-alpha-1790635538000",
-    "puppeteer": "23.11.1"
+    "puppeteer": "23.11.1",
+    "@puppeteer/browsers": "3.2.6"
   },
   "overrides": {
     "@modelcontextprotocol/sdk": "1.32.1",
-    "basic-ftp": "6.2.1"
+    "basic-ftp": "6.2.1",
+    "@puppeteer/browsers": "3.2.6"
   }
 }
