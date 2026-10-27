@@ -564,3 +564,14 @@ Dockerfile via piper_voices_download.py --binary (the piper-tts PyPI package's
 rejects). Dockerfile also bakes en_US-lessac-medium (+json) sha256-verified.
 TTS selection moved to app/tts_select.py (main.py file-size ratchet). Verified:
 3 tts_piper pytest green, ruff clean on changed files, imports resolve.
+
+### Guardrails: turn-level taint seeding (Devin, 2026-10-28)
+
+Completed an abandoned worktree's WIP: AgentToolPort gained a stepCounter
+overload + seedTurnTaint (both default no-op); ChatTurnRequest a taintSource
+field; KnowledgeNodeHandler spotlights chunks in taint enforce mode and
+AgentNodeHandler seeds the consuming chat turn; memory recall seeds
+memory_recall. Fixed the WIP's 12 broken agents-turn tests (stale 8-arg
+stubs; defaults added to the port). Verified: full 60-module reactor
+compiles; tenancy+security 749, agents-turn 2200, workflow 1221 tests green.
+Worktree: /tmp/vd-taint-tenancy.
