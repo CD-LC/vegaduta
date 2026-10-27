@@ -19,6 +19,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       adminOnly: true,
       learnInAcademy: true,
+      academyTopic: "/channels",
     },
   },
   {
@@ -33,6 +34,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       adminOnly: true,
       learnInAcademy: true,
+      academyTopic: "/channels",
     },
   },
   {
@@ -105,6 +107,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       adminOnly: true,
       learnInAcademy: true,
+      academyTopic: "/channels",
     },
   },
   {
@@ -119,6 +122,7 @@ export const ADMIN_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       adminOnly: true,
       learnInAcademy: true,
+      academyTopic: "/channels",
     },
   },
   {
