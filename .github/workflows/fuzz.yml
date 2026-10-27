@@ -52,7 +52,10 @@ jobs:
       - name: Build the fuzzed modules (test-classes + dependency classpath)
         run: |
           cd core
-          mvn -B -ntp -q -pl chat,agents-jobs -am -DskipTests test-compile
+          # install - not just compile: build-classpath resolves inter-module deps
+          # (com.agenticai:*) from ~/.m2, which a bare test-compile never fills.
+          mvn -B -ntp -q -pl chat,agents-jobs -am -DskipTests install
+          mvn -B -ntp -q -pl chat,agents-jobs test-compile
           mvn -B -ntp -q -pl chat dependency:build-classpath \
             -Dmdep.outputFile=/tmp/cp-chat.txt -Dmdep.includeScope=test
           mvn -B -ntp -q -pl agents-jobs dependency:build-classpath \
