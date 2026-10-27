@@ -19,13 +19,12 @@ import org.springframework.stereotype.Service;
 /**
  * "Fetch this URL into a knowledge collection" - the shared pipeline behind {@code
  * add_to_knowledge_base}'s {@code url} argument and {@code POST /api/knowledge/ingest-url}. It
- * reuses the exact upload path rather than inventing a second ingestion lane: a downloaded
- * document (.pdf/.docx/.html/.htm/.md/image) is content-hash deduplicated, gets a {@link
- * KnowledgeDocument} row, its original bytes stored, and goes through {@link
- * KnowledgeIngestionService#ingestFile} - the same three calls {@code KnowledgeController#upload}
- * makes for a file a person uploaded. Anything else (text/plain, JSON, an extensionless page) is
- * decoded as UTF-8 text and handed to {@link KnowledgeIngestionService#ingest} exactly like {@code
- * POST /api/knowledge/ingest}.
+ * reuses the exact upload path rather than inventing a second ingestion lane: a downloaded document
+ * (.pdf/.docx/.html/.htm/.md/image) is content-hash deduplicated, gets a {@link KnowledgeDocument}
+ * row, its original bytes stored, and goes through {@link KnowledgeIngestionService#ingestFile} -
+ * the same three calls {@code KnowledgeController#upload} makes for a file a person uploaded.
+ * Anything else (text/plain, JSON, an extensionless page) is decoded as UTF-8 text and handed to
+ * {@link KnowledgeIngestionService#ingest} exactly like {@code POST /api/knowledge/ingest}.
  *
  * <p>The fetch itself is {@link KnowledgeUrlFetcher}'s job (SSRF guard + bounded download); this
  * class owns what happens to the bytes.
@@ -40,38 +39,43 @@ public class KnowledgeUrlIngester {
     // than widening that HTTP-layer constant's visibility (same "private list, mirrored"
     // convention KnowledgeIngestionService's IMAGE_EXTENSIONS already uses).
     private static final List<String> SUPPORTED_EXTENSIONS =
-        List.of(".md", ".pdf", ".docx", ".html", ".htm", ".png", ".jpg", ".jpeg", ".webp");
+            List.of(".md", ".pdf", ".docx", ".html", ".htm", ".png", ".jpg", ".jpeg", ".webp");
 
-    private static final Map<String, String> CONTENT_TYPE_TO_EXTENSION = Map.ofEntries(
-        Map.entry("application/pdf", ".pdf"),
-        Map.entry("application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".docx"),
-        Map.entry("text/html", ".html"),
-        Map.entry("text/markdown", ".md"),
-        Map.entry("text/x-markdown", ".md"),
-        Map.entry("image/png", ".png"),
-        Map.entry("image/jpeg", ".jpg"),
-        Map.entry("image/webp", ".webp"));
+    private static final Map<String, String> CONTENT_TYPE_TO_EXTENSION =
+            Map.ofEntries(
+                    Map.entry("application/pdf", ".pdf"),
+                    Map.entry(
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            ".docx"),
+                    Map.entry("text/html", ".html"),
+                    Map.entry("text/markdown", ".md"),
+                    Map.entry("text/x-markdown", ".md"),
+                    Map.entry("image/png", ".png"),
+                    Map.entry("image/jpeg", ".jpg"),
+                    Map.entry("image/webp", ".webp"));
 
     // Consulted only while Docling is enabled - the same widening
     // KnowledgeController#supportedExtensions applies to /upload. text/csv stays
     // deliberately out of the base map above: without the service a CSV is best
     // treated as decodable text (the old behaviour), not a failed extraction.
-    private static final Map<String, String> DOCLING_CONTENT_TYPE_TO_EXTENSION = Map.of(
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation", ".pptx",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".xlsx",
-        "image/tiff", ".tiff",
-        "image/bmp", ".bmp",
-        "text/csv", ".csv");
+    private static final Map<String, String> DOCLING_CONTENT_TYPE_TO_EXTENSION =
+            Map.of(
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                            ".pptx",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".xlsx",
+                    "image/tiff", ".tiff",
+                    "image/bmp", ".bmp",
+                    "text/csv", ".csv");
 
     // Content-types that decode straight to text for the plain ingest() path - no extraction
     // step needed.
     private static boolean isTextual(String contentType) {
         return contentType != null
-            && (contentType.startsWith("text/")
-                || contentType.equals("application/json")
-                || contentType.equals("application/xml")
-                || contentType.endsWith("+json")
-                || contentType.endsWith("+xml"));
+                && (contentType.startsWith("text/")
+                        || contentType.equals("application/json")
+                        || contentType.equals("application/xml")
+                        || contentType.endsWith("+json")
+                        || contentType.endsWith("+xml"));
     }
 
     private final KnowledgeIngestionService ingestionService;
@@ -98,8 +102,12 @@ public class KnowledgeUrlIngester {
             KnowledgeCollectionService collectionService,
             KnowledgeDocumentService documentService,
             FileStorageService fileStorageService) {
-        this(ingestionService, collectionService, documentService, fileStorageService,
-            new KnowledgeUrlFetcher());
+        this(
+                ingestionService,
+                collectionService,
+                documentService,
+                fileStorageService,
+                new KnowledgeUrlFetcher());
     }
 
     /** Test seam: a stubbed fetcher so no socket is touched. */
@@ -118,23 +126,27 @@ public class KnowledgeUrlIngester {
 
     /** What the caller reports back - {@code documentId} is null on the text route. */
     public record UrlIngestResult(
-        String filename, String source, int chunkCount, UUID documentId, boolean document) {}
+            String filename, String source, int chunkCount, UUID documentId, boolean document) {}
 
     /**
      * Fetches {@code url} and ingests it into {@code collectionId}. {@code textSource} is the
      * {@code source} label used on the plain-text route (the agent tool builds its auditable
-     * "written by agent ..." label, the REST endpoint a URL-derived one); the document route
-     * labels chunks by filename like a real upload.
+     * "written by agent ..." label, the REST endpoint a URL-derived one); the document route labels
+     * chunks by filename like a real upload.
      *
      * <p>The caller owns authorization: the agent tool checks its write allow-list before calling
      * here; the REST endpoint relies on the collection being resolved in the tenant's own schema,
      * same as {@code /upload}. This method still re-checks existence defensively.
      */
     public UrlIngestResult ingestUrl(
-            String url, UUID collectionId, String textSource, Integer chunkSize, Integer chunkOverlap) {
+            String url,
+            UUID collectionId,
+            String textSource,
+            Integer chunkSize,
+            Integer chunkOverlap) {
         collectionService.requireExists(collectionId);
         Chunker.Settings chunking =
-            collectionService.resolveChunking(collectionId, chunkSize, chunkOverlap);
+                collectionService.resolveChunking(collectionId, chunkSize, chunkOverlap);
         FetchedUrl fetched;
         try {
             fetched = fetcher.fetch(url);
@@ -150,50 +162,74 @@ public class KnowledgeUrlIngester {
         }
 
         String text = decodeText(fetched);
-        IngestResponse response = ingestionService.ingest(
-            textSource, text, chunking.chunkSize(), chunking.chunkOverlap(), collectionId);
+        IngestResponse response =
+                ingestionService.ingest(
+                        textSource,
+                        text,
+                        chunking.chunkSize(),
+                        chunking.chunkOverlap(),
+                        collectionId);
         return new UrlIngestResult(
-            filename != null ? filename : filenameFromType(fetched, "fetched.txt"),
-            textSource, response.chunkCount(), null, false);
+                filename != null ? filename : filenameFromType(fetched, "fetched.txt"),
+                textSource,
+                response.chunkCount(),
+                null,
+                false);
     }
 
     /**
      * The upload-pipeline twin: dedup -> document row -> store original -> ingestFile -> the row's
-     * own status transitions inside ingestFile/markFailed mirror {@code
-     * KnowledgeController#upload} call-for-call.
+     * own status transitions inside ingestFile/markFailed mirror {@code KnowledgeController#upload}
+     * call-for-call.
      */
     private UrlIngestResult ingestDocument(
             UUID collectionId, String filename, FetchedUrl fetched, Chunker.Settings chunking) {
         String contentHash = KnowledgeDocumentService.sha256Hex(fetched.body());
         documentService.requireNoDuplicate(collectionId, contentHash);
-        KnowledgeDocument document = documentService.create(
-            collectionId, filename, fetched.body().length, KnowledgeDocumentStatus.UPLOADED, contentHash);
+        KnowledgeDocument document =
+                documentService.create(
+                        collectionId,
+                        filename,
+                        fetched.body().length,
+                        KnowledgeDocumentStatus.UPLOADED,
+                        contentHash);
         storeOriginalFile(document, filename, fetched.body(), fetched.contentType());
         try {
-            IngestResponse response = ingestionService.ingestFile(
-                filename, fetched.body(), chunking.chunkSize(), chunking.chunkOverlap(),
-                collectionId, document.getId());
+            IngestResponse response =
+                    ingestionService.ingestFile(
+                            filename,
+                            fetched.body(),
+                            chunking.chunkSize(),
+                            chunking.chunkOverlap(),
+                            collectionId,
+                            document.getId());
             return new UrlIngestResult(
-                filename, filename, response.chunkCount(), document.getId(), true);
+                    filename, filename, response.chunkCount(), document.getId(), true);
         } catch (RuntimeException e) {
             documentService.markFailed(document.getId(), e.getMessage());
             throw e;
         }
     }
 
-    /** Byte-identical to {@code KnowledgeController#storeOriginalFile} (kept in sync deliberately). */
+    /**
+     * Byte-identical to {@code KnowledgeController#storeOriginalFile} (kept in sync deliberately).
+     */
     private void storeOriginalFile(
             KnowledgeDocument document, String filename, byte[] content, String contentType) {
         String objectKey = "knowledge-documents/" + document.getId() + "/" + filename;
         String resolvedContentType =
-            contentType != null && !contentType.isBlank() ? contentType : "application/octet-stream";
+                contentType != null && !contentType.isBlank()
+                        ? contentType
+                        : "application/octet-stream";
         try {
             fileStorageService.put(objectKey, content, resolvedContentType);
             documentService.attachOriginalFile(document.getId(), objectKey, resolvedContentType);
         } catch (RuntimeException e) {
             log.warn(
-                "Failed to store original file for knowledge document {} ({}) - text extraction will proceed without it: {}",
-                document.getId(), filename, e.getMessage());
+                    "Failed to store original file for knowledge document {} ({}) - text extraction will proceed without it: {}",
+                    document.getId(),
+                    filename,
+                    e.getMessage());
         }
     }
 
@@ -257,31 +293,36 @@ public class KnowledgeUrlIngester {
 
     private static boolean looksLikePdf(byte[] body) {
         return body.length > 4
-            && body[0] == '%' && body[1] == 'P' && body[2] == 'D' && body[3] == 'F';
+                && body[0] == '%'
+                && body[1] == 'P'
+                && body[2] == 'D'
+                && body[3] == 'F';
     }
 
     /**
-     * UTF-8 for the text route. A body that is neither a supported document nor decodable text
-     * (an unknown binary type) is rejected here with a caller-safe message rather than silently
+     * UTF-8 for the text route. A body that is neither a supported document nor decodable text (an
+     * unknown binary type) is rejected here with a caller-safe message rather than silently
      * ingesting mojibake.
      */
     private static String decodeText(FetchedUrl fetched) {
         try {
             return StandardCharsets.UTF_8
-                .newDecoder()
-                .onMalformedInput(CodingErrorAction.REPORT)
-                .onUnmappableCharacter(CodingErrorAction.REPORT)
-                .decode(java.nio.ByteBuffer.wrap(fetched.body()))
-                .toString();
+                    .newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(CodingErrorAction.REPORT)
+                    .decode(java.nio.ByteBuffer.wrap(fetched.body()))
+                    .toString();
         } catch (CharacterCodingException e) {
             throw new InvalidKnowledgeUploadException(
-                "The URL's content is not a supported document type (PDF/DOCX/HTML/Markdown/image) "
-                    + "and is not decodable text" + describeType(fetched));
+                    "The URL's content is not a supported document type (PDF/DOCX/HTML/Markdown/image) "
+                            + "and is not decodable text"
+                            + describeType(fetched));
         }
     }
 
     private static String describeType(FetchedUrl fetched) {
         return fetched.contentType() == null || fetched.contentType().isBlank()
-            ? "" : " (Content-Type: " + fetched.contentType() + ")";
+                ? ""
+                : " (Content-Type: " + fetched.contentType() + ")";
     }
 }
