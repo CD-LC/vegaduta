@@ -61,7 +61,7 @@ export default {
         ["goto", "/agents/turns"],
         ["tryClick", "text=Skip for now"],
         ["fill", "css=input >> nth=2", "434bc9b9-b90e-40fa-97de-537ee4e23567"],
-        ["fill", "css=input >> nth=3", "84d6cba8-39e3-4063-858e-2192b30dd54c"],
+        ["fill", "css=input >> nth=3", "552d2fdc-5a30-4c14-b207-3ebdb606cf85"],
         ["click", "button:has-text('Inspect turn')"],
         ["waitFor", "text=blocked", 20000],
         ["tryHighlight", "text=/search_knowledge_base.*blocked|blocked.*search/i", 3000],

@@ -122,6 +122,15 @@ break the build standalone.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-28, academy author (Devin, worktree `vd-academy`): ACTIVE CLAIM —
+  full re-record of Series A (episodes 00-10) on the flicker-free recorder
+  with the seeded Ledger newsroom dataset, Kokoro-82M local neural narration
+  (`academy/tools/narrate-kokoro.mjs`, new preference above edge-tts),
+  script passes rewritten to story-driven real-world newsroom framing, then
+  push `feat/academy-video-pipeline` + open the PR to main. Batch-committing
+  agent: please hold off sweeping academy/ until this lands — ping here if
+  you need to touch it first.
+
 - 2026-10-27, academy author (Devin, worktree `vd-academy`): ACTIVE CLAIM on
   Series-A lessons **06-10** (`06-guardrails`, `07-memory-learning`,
   `08-quality`, `09-operate`, `10-ship`) - scripts + lesson.md twins only.

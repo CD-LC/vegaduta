@@ -309,8 +309,10 @@ async function ensureGuardrailRule() {
 // ---------------------------------------------------------------- 6. contacts
 
 const CONTACTS = [
-  { channel: 'WHATSAPP', identifier: '+919845012345', displayName: 'Meera Krishnan (subscriber)' },
-  { channel: 'WHATSAPP', identifier: '+919845067890', displayName: 'Arjun Rao (subscriber)' },
+  // Canonical fictional numbers (555 range) — never mint real-looking
+  // phone numbers; recordings must never show identifiable personal data.
+  { channel: 'WHATSAPP', identifier: '+15551234567', displayName: 'Meera Krishnan (subscriber)' },
+  { channel: 'WHATSAPP', identifier: '+15557654321', displayName: 'Arjun Rao (subscriber)' },
   { channel: 'EMAIL', identifier: 'subscriptions@theledger.example', displayName: 'Ledger subscriptions desk' },
 ];
 

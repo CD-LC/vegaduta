@@ -16,17 +16,17 @@ export default {
            ["highlight", "text=PROPOSED ACTION", 2000], ["scroll", 350]],
     },
     {
-      say: "These are real parked calls on The Ledger — API-guide tool invocations an agent wanted. The duty editor reads the arguments, decides this one isn't needed, and denies it with a reason the agent reads back as the result.",
+      say: "These are real parked calls on The Ledger — WhatsApp sends to a source the agent wanted out the door. The duty editor reads the arguments, decides outbound to sources waits for the fact-check, and denies it with a reason the agent reads back.",
       do: [["goto", "/admin/approvals"], ["wait", 1500],
            ["waitFor", "css=textarea", 15000],
-           ["fill", "css=textarea", "Ledger desk does not need this call right now — denied."],
+           ["fill", "css=textarea", "No outbound to sources until the fact-check lands — denied."],
            ["wait", 800]],
     },
     {
       say: "The decision isn't a silent delete — it goes back to the agent as the tool result, so the run continues knowing the answer was no. Deny here.",
       do: [["goto", "/admin/approvals"], ["wait", 1500],
            ["waitFor", "css=textarea", 15000],
-           ["fill", "css=textarea", "Ledger desk does not need this call right now — denied."],
+           ["fill", "css=textarea", "No outbound to sources until the fact-check lands — denied."],
            ["click", "button:has-text('Deny')"], ["wait", 2500]],
     },
     {
