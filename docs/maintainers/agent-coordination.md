@@ -17,9 +17,18 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
    group per branch). That is what delayed v0.1.7 by an hour.
 4. **Claim before you edit.** Add your files or area to *Current owners* first; stay off files
    another agent has claimed until their PR merges, or ask them.
-5. **Production runs published releases only.** Deploy a release's images by version
+5. **One agent per working tree.** Do not share a checkout between agents: a shared tree means
+   shared `git status` (your `git add -A` picks up another agent's half-written files), shared
+   HEAD (their `git checkout` switches the branch out from under your build), and stash pops
+   that conflict with the other agent's commits. Give yourself a worktree instead -
+   `git worktree add ../<repo>-<agent-or-area> <branch>` (or `git worktree add -b
+   <your-branch> ../<repo>-<agent-or-area> origin/main` for new work) - and do all staging,
+   committing and building inside it. When a worktree is finished, `git worktree remove` it;
+   `git worktree list` shows who has one. If you do have to touch a shared tree, never run a
+   blanket `git add -A` - stage your own paths only, and `git stash` only what is yours.
+6. **Production runs published releases only.** Deploy a release's images by version
    (`VEGADUTA_VERSION=X.Y.Z`); never images built from a branch or from `main`.
-6. **Never change `APP_ENCRYPTION_KEY`** on a deployment that has data (AGENTS.md, rule 5).
+7. **Never change `APP_ENCRYPTION_KEY`** on a deployment that has data (AGENTS.md, rule 5).
 
 ## Current owners
 
