@@ -44,3 +44,9 @@ aiohttp==3.14.5
 # see the header comment's re-verify note.
 numpy==2.5.4
 pillow==13.0.0
+
+# Local TTS provider: app/tts_piper.py shells out to the MIT-licensed
+# rhasspy/piper release binary, which the Dockerfile downloads per-arch and
+# sha256-pins (piper_voices_download.py --binary). Deliberately NOT the
+# piper-tts PyPI package - its >=1.3 releases are the GPL-3.0 piper1-gpl
+# lineage, which dependency review rejects.
