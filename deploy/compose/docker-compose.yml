@@ -501,6 +501,7 @@ services:
       PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
       PUBLIC_ADMIN_URL: ${PUBLIC_ADMIN_URL:-http://localhost:3000}
       KC_VERIFY_EMAIL: ${KC_VERIFY_EMAIL:-false}
+      KC_REGISTRATION_ALLOWED: ${KC_REGISTRATION_ALLOWED:-false}
       # Password grant on the confidential core client: off (first import only).
       # The CI overlay turns it on for the Playwright/smoke logins.
       KC_CORE_DIRECT_GRANTS: ${KC_CORE_DIRECT_GRANTS:-false}
