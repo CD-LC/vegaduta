@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,11 +18,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Covers {@link DoclingConversionService} itself and the routing {@link
- * SidecarClient#extractText} does around it: Docling-first for the formats it handles, sidecar
- * fallback on transport failure, and a 4xx surfacing as the file's fault without a fallback call.
- * Two loopback {@link HttpServer}s stand in for the docling adapter and the sidecar - the same
- * no-external-dependency fixture {@link SidecarClientTransportTest} uses.
+ * Covers {@link DoclingConversionService} itself and the routing {@link SidecarClient#extractText}
+ * does around it: Docling-first for the formats it handles, sidecar fallback on transport failure,
+ * and a 4xx surfacing as the file's fault without a fallback call. Two loopback {@link HttpServer}s
+ * stand in for the docling adapter and the sidecar - the same no-external-dependency fixture {@link
+ * SidecarClientTransportTest} uses.
  */
 class DoclingConversionServiceTest {
 
@@ -92,7 +91,8 @@ class DoclingConversionServiceTest {
         DoclingConversionService service =
                 new DoclingConversionService("http://127.0.0.1:1", "secret", true);
         assertTrue(service.enabled());
-        for (String name : List.of("a.pdf", "B.PPTX", "c.xlsx", "d.csv", "e.tiff", "f.bmp", "g.docx")) {
+        for (String name :
+                List.of("a.pdf", "B.PPTX", "c.xlsx", "d.csv", "e.tiff", "f.bmp", "g.docx")) {
             assertTrue(service.handles(name), name);
         }
         for (String name : List.of("a.mp3", "b.md", "c.txt", "d", "e.PDFX")) {
