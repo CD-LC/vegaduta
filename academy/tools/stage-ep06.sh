@@ -31,7 +31,7 @@ const ASSISTANT = "434bc9b9-b90e-40fa-97de-537ee4e23567";
   const w = await c.request.post(`http://localhost:8080/api/agents/${ASSISTANT}/chat`,
     { headers: h, timeout: 240_000, data: {
       sessionId,
-      message: "Use your channel_send_message tool to send a WhatsApp message to +919845067890 with this exact body: \"The Ledger evening edition is out - markets steady, monsoon alert continues.\" Call the tool now.",
+      message: "Use your channel_send_message tool to send a WhatsApp message to +15551234567 with this exact body: \"The Ledger evening edition is out - markets steady, monsoon alert continues.\" Call the tool now.",
     } });
   const wt = await w.text();
   console.log("whatsapp trigger:", w.status(), wt.includes("approval") ? "approval-parked" : wt.slice(-200));

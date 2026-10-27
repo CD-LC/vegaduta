@@ -6,7 +6,7 @@
 #
 # Requires ffmpeg + ffprobe on PATH.
 set -euo pipefail
-DIR="$1"; DIST="$DIR/dist"
+DIR="$(cd "$1" && pwd)"; DIST="$DIR/dist"
 SLUG=$(node --input-type=module -e "console.log((await import('$DIR/script.mjs')).default.slug)")
 TITLE=$(node --input-type=module -e "console.log((await import('$DIR/script.mjs')).default.title)")
 W=1280; H=720; PAD=0.7
