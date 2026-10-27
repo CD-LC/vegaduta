@@ -164,7 +164,6 @@ updates:
       - /services/tool-sandbox
       - /services/voice-agent
       - /services/rl-trainer
-      - /services/docling
       - /sdk/python
       - /sdk/python-agent
     schedule:
@@ -219,7 +218,6 @@ updates:
       - /services/workspace-runner
       - /services/whatsapp-qr
       - /services/browser-runner
-      - /services/docling
       - /deploy/omnibus
       - /examples/mcp-servers/http-gateway
       - /core/sdlc/e2b-template
