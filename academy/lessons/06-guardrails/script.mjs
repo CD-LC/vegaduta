@@ -9,12 +9,14 @@
 //   - knowledge doc "coinvault-ad-submission.md" in Ledger Style Guide —
 //     its draft copy contains "guaranteed returns", so a knowledge search
 //     that returns it is blocked by the rule (live in scene 3)
-//   - journaled turn 84d6cba8-… — a real recorded turn whose two
-//     search_knowledge_base calls were blocked (scene 4)
-//   - four real pending tool approvals on the Assistant agent (scenes 5-6)
+//   - journaled turn 84d6cba8-… — a real recorded turn whose
+//     search_knowledge_base call was blocked (scene 4)
+//   - a real pending approval: the Assistant's channel_send_message of the
+//     Ledger evening-edition alert to a WhatsApp subscriber, gated under
+//     Semi-autonomous (scenes 5-6; Assistant is flipped back afterwards)
 
 export default {
-  slug: "guardrails",
+  slug: "ep06-guardrails",
   title: "Guardrails, approvals and the turn journal",
   subtitle: "Watch The Ledger's no-certainty rule block a real tool call, replay the tamper-evident journal, and clear the approval queue",
   next: "07-memory-learning",
@@ -54,7 +56,7 @@ export default {
       ],
     },
     {
-      say: "The reply says it plainly — a workspace guardrail blocked the search results. And this is the recorded proof: the turn journal for the same run, hash-chained end to end. Intake, the model call, two knowledge-search calls that were both blocked by the guard, the outbound audit, the verification check, and the final commit.",
+      say: "The reply says it plainly — a workspace guardrail blocked the search results. And this is the recorded proof: the journaled turn from that very run, hash-chained end to end. Intake, the model call, the knowledge search the guard blocked, the outbound audit, the verification check, and the final commit — chain intact.",
       do: [
         ["goto", "/agents/turns"],
         ["tryClick", "text=Skip for now"],
@@ -67,7 +69,7 @@ export default {
       ],
     },
     {
-      say: "Rules shape what reaches the model; approvals shape what the agent may do at all. Four tool calls are parked here right now — each one shows the proposed action, its arguments, the policy that held it, and exactly what happens if you approve or deny.",
+      say: "Rules shape what reaches the model; approvals shape what the agent may do at all. Moments ago the desk assistant tried to push the evening-edition alert to a subscriber over WhatsApp — the gate parked it right here. The card shows the proposed action, its arguments, the policy that held it, and exactly what approve or deny will do.",
       do: [
         ["goto", "/admin/approvals"],
         ["tryClick", "text=Skip for now"],
@@ -77,12 +79,12 @@ export default {
       ],
     },
     {
-      say: "This queue is a decision point, not a formality. The queued request is an API-guide call the newsroom doesn't need — so the duty editor denies it, with a reason the agent reads back as the result. Watch the queue take the decision.",
+      say: "This queue is a decision point, not a formality. Subscriber alerts don't go out on the assistant's say-so — the duty editor denies the WhatsApp send, with a reason the agent reads back as the result. Watch the queue take the decision.",
       do: [
         ["goto", "/admin/approvals"],
         ["tryClick", "text=Skip for now"],
         ["waitFor", "css=textarea", 20000],
-        ["fill", "css=textarea", "Not needed for the Ledger desk — this API-guide call stays denied by the duty editor."],
+        ["fill", "css=textarea", "Subscriber alerts go through channel review, not the assistant — denied by the duty editor."],
         ["highlight", "button:has-text('Deny')", 1600],
         ["click", "button:has-text('Deny')"],
         ["wait", 3000],

@@ -22,7 +22,7 @@
 //      personal stack's `scripts/vegaduta reset-password` prints a one-time
 //      setup link - POST /api/local-auth/setup {token, password} mints it)
 import { chromium } from "@playwright/test";
-import { mkdirSync, readdirSync, renameSync } from "node:fs";
+import { mkdirSync, renameSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const lessonDir = resolve(process.argv[2] || "");
@@ -107,9 +107,7 @@ const browser = await chromium.launch({ headless: true });
 // jar that minted it (a copied storageState loses session state the SPA
 // bootstrap needs), and the local-auth login is cheap and unthrottled at
 // this cadence.
-const filesBefore = () => new Set(readdirSync(outDir));
 for (const [i, scene] of script.scenes.entries()) {
-  const before = filesBefore();
   const context = await browser.newContext({
     viewport: { width: 1280, height: 720 },
     recordVideo: { dir: outDir, size: { width: 1280, height: 720 } },
@@ -163,6 +161,7 @@ for (const [i, scene] of script.scenes.entries()) {
   });
   await signIn(context);
   const page = await context.newPage();
+  const video = page.video();
   try {
     for (const action of scene.do ?? [{ goto: "/" }].map(o => ["goto", o.goto])) {
       await act(page, Array.isArray(action) ? action : [Object.keys(action)[0], ...Object.values(action)]);
@@ -170,8 +169,14 @@ for (const [i, scene] of script.scenes.entries()) {
   } finally {
     await context.close(); // flush the clip
   }
-  const fresh = [...filesBefore()].filter((f) => !before.has(f) && f.endsWith(".webm"));
-  if (fresh.length) renameSync(join(outDir, fresh[0]), join(outDir, `scene-${String(i + 1).padStart(2, "0")}.webm`));
+  // Rename by the video's OWN path — a dir-diff races when a slow scene's
+  // webm lands after the next scene's scan, which shuffles clip numbering.
+  try {
+    const src = await video.path();
+    renameSync(src, join(outDir, `scene-${String(i + 1).padStart(2, "0")}.webm`));
+  } catch (e) {
+    console.warn(`scene ${i + 1}: no clip produced (${e.message})`);
+  }
   console.log(`scene ${i + 1}/${script.scenes.length} recorded`);
 }
 await browser.close();
