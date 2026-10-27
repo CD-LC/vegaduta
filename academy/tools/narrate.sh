@@ -12,10 +12,19 @@ VOICE="${2:-$(node -e "console.log((await import('$DIR/script.mjs')).default.voi
 VOICE="${VOICE:-en-US-ChristopherNeural}"
 EDGE_TTS="$(command -v edge-tts || echo "$HOME/Library/Python/3.9/bin/edge-tts")"
 
-# Prefer ElevenLabs when the key is present — real expressive voice with
-# per-word timing for captions. edge-tts stays the zero-key fallback.
+# Voice preference: ElevenLabs (key) > Kokoro-82M local neural TTS (repo
+# .venv-tts) > edge-tts (zero-setup fallback). Kokoro is the free option with
+# genuinely human pacing; install once with:
+#   python3.12 -m venv .venv-tts && .venv-tts/bin/pip install kokoro soundfile
+#   brew install espeak-ng
+TOOLS="$(cd "$(dirname "$0")" && pwd)"
+KOKORO_PY="$(cd "$TOOLS/../.." && pwd)/.venv-tts/bin/python"
 if [ -n "${ELEVENLABS_API_KEY:-}" ]; then
-  node "$(dirname "$0")/narrate-elevenlabs.mjs" "$DIR"
+  node "$TOOLS/narrate-elevenlabs.mjs" "$DIR"
+  exit 0
+fi
+if [ -x "$KOKORO_PY" ] && "$KOKORO_PY" -c 'import kokoro' 2>/dev/null; then
+  "$KOKORO_PY" "$TOOLS/narrate-kokoro.py" "$DIR" "${ACADEMY_VOICE:-}"
   exit 0
 fi
 
