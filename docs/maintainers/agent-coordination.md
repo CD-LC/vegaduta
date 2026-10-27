@@ -131,6 +131,15 @@ break the build standalone.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): reviewed PR #254's
+  CI failures (piper-tts GPL-3.0 dep review rejection, main.py 691>678 file
+  ratchet, ruff) — `d51860556` resolves all three and is verified locally
+  (ruff 0.12.4 gate clean on changed files, main.py now 555, MIT binary path
+  sha256-pinned). NOTE: worktree `/private/tmp/va-fix` still has pre-fix
+  `3d6776cd7` checked out — pull before touching it further. Watching CI on
+  the new head; also re-triggered #253's flaky AgeOptionalIT run (flyway
+  history PK race, unrelated to that PR's catalog change).
+
 - 2026-10-27, OSS-integrations agent (local Devin session): pushed
   `feat/oss-integrations-docling-composio-n8n` and opened a PR for the three Tier-1
   OSS-integration picks - Docling-first knowledge conversion (`services/docling` +
