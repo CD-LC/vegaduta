@@ -5,8 +5,8 @@ offline TTS provider.
 Both existing providers are hosted and key-gated: ElevenLabs (preferred,
 needs ELEVENLABS_API_KEY) and Sarvam (fallback, needs SARVAM_API_KEY). A
 deployment with no paid TTS key had no working voice path at all - an audio
-call would silently fall back to browser-side speech. `piper-tts` runs a
-small ONNX voice model in-process's subprocess on this container's CPU,
+call would silently fall back to browser-side speech. Piper runs a
+small ONNX voice model in a subprocess on this container's CPU,
 needs no API key and no egress, and is fast enough for live calls
 (~50-150ms per sentence of audio on a 2-core container).
 
@@ -98,7 +98,7 @@ class PiperChunkedStream(tts.ChunkedStream):
             )
         except FileNotFoundError as e:
             raise APIConnectionError(
-                f"piper binary not found ({config.PIPER_BIN}) - is piper-tts installed in this image?"
+                f"piper binary not found ({config.PIPER_BIN}) - is the piper release tarball baked into this image?"
             ) from e
         except asyncio.TimeoutError as e:
             raise APIConnectionError("piper synthesis timed out") from e

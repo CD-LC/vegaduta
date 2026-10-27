@@ -177,7 +177,7 @@ SARVAM_SPEAKER = _env("SARVAM_SPEAKER", "")
 # --- Piper (TTS, tts_piper.py) -------------------------------------------------
 # The local, keyless TTS option: both providers above are hosted and need a
 # paid key, so without one a deployment had no working voice path at all
-# (replies fell back to browser-side speech). `piper-tts` runs a small ONNX
+# (replies fell back to browser-side speech). Piper runs a small ONNX
 # voice in a subprocess on this container's CPU - no egress, ~50-150ms per
 # sentence. VOICE_AGENT_TTS_PROVIDER=piper selects it; it is deliberately NOT
 # part of "auto"'s ordering (a local model voice is a conscious quality pick,
