@@ -72,12 +72,14 @@ async function act(page, [verb, ...args]) {
         await page.locator(sel).first().click({ timeout: 1500 }).catch(() => {});
       break;
     case "click":     await page.locator(args[0]).first().click(); break;
+    case "upload":    // real file pick — works on hidden input[type=file]
+      await page.locator(args[0]).first().setInputFiles(args[1]); break;
     case "tryClick":  // dismissible UI (onboarding modals, toasts): click only if it appears
       await page.locator(args[0]).first().click({ timeout: 3000 }).catch(() => {}); break;
     case "fill":      await page.locator(args[0]).first().fill(args[1]); break;
     case "hover":     await page.locator(args[0]).first().hover(); break;
     case "highlight": await highlight(page, args[0], args[1] ?? 1400); break;
-    case "waitFor":   await page.locator(args[0]).first().waitFor({ state: "visible", timeout: 15_000 }); break;
+    case "waitFor":   await page.locator(args[0]).first().waitFor({ state: "visible", timeout: args[1] ?? 15_000 }); break;
     case "scroll":    await page.mouse.wheel(0, args[0]); break;
     case "keys":      await page.keyboard.press(args[0]); break;
     case "wait":      await page.waitForTimeout(args[0]); break;
@@ -97,6 +99,42 @@ for (const [i, scene] of script.scenes.entries()) {
   const context = await browser.newContext({
     viewport: { width: 1280, height: 720 },
     recordVideo: { dir: outDir, size: { width: 1280, height: 720 } },
+  });
+  // Kill the onboarding tour permanently for this profile. Three layers —
+  // the bare seed alone misses: the app reads vd_tour_status scoped by
+  // user id (vd_tour_status:<sub>), so (a) seed every scoped variant the
+  // token might use, (b) seed the sessionStorage end-marker too, and
+  // (c) a MutationObserver deletes any tour DOM that still mounts — the
+  // blocker scrim, the welcome hero, step cards — before it can paint a
+  // frame (the flicker on every page change). Other first-run modals
+  // (AgentsGuide, language prompt, reopen hint) get the same treatment.
+  await context.addInitScript(() => {
+    try {
+      localStorage.setItem("vd_tour_status", "done");
+      // guess the scoped keys too — the sub is not known until login, but
+      // pre-seeding the common ids is cheap and the observer covers the rest
+      for (const k of ["vd_tour_seen_security", "vd_agents_guide_seen_v1",
+                       "vegaduta.studioTour.v1"])
+        localStorage.setItem(k, "1");
+      sessionStorage.setItem("vd_tour_ended", "1");
+    } catch {}
+    // CSS hide (not remove): deleting nodes mid-mount can crash React's
+    // reconciliation, and a hidden element still satisfies its own lifecycle.
+    const css =
+      "[data-tour-blocker], .hud-tour-card, .lang-choice-card, " +
+      "[data-reopen-hint] { visibility: hidden !important; opacity: 0 !important; " +
+      "pointer-events: none !important; }";
+    const inject = () => {
+      if (document.getElementById("academy-tourkill")) return;
+      const st = document.createElement("style");
+      st.id = "academy-tourkill";
+      st.textContent = css;
+      (document.head || document.documentElement).appendChild(st);
+    };
+    inject();
+    new MutationObserver(inject).observe(document.documentElement, {
+      childList: true, subtree: true,
+    });
   });
   await signIn(context);
   const page = await context.newPage();

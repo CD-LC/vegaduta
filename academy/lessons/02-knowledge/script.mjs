@@ -23,9 +23,12 @@ export default {
            ["highlight", "text=Choose a file to upload", 2400]],
     },
     {
-      say: "Watch a file land and the pipeline strip tells the whole story: upload, extract the text, embed it into vectors, index it. When the badge flips to ready, every agent with access can find it.",
+      say: "Watch a real file land: the ethics addendum, straight from disk. The pipeline strip tells the whole story — upload, extract the text, embed it into vectors, index it — and when the badge flips to ready, every agent with access can quote it.",
       do: [["goto", "/knowledge"], ["wait", 1500],
-           ["highlight", "text=INGESTION PIPELINE", 2400], ["wait", 800]],
+           ["click", "role=button[name='Upload files']"], ["wait", 1200],
+           ["upload", "input[type=file]", "/tmp/vd-academy/academy/fixtures/ledger/ledger-ethics-addendum.md"],
+           ["wait", 4500],
+           ["highlight", "text=INGESTION PIPELINE", 1800]],
     },
     {
       say: "Before trusting a collection, test it. The retrieval box answers one honest question: which chunks would an agent actually see? Ask it like a reader would, not like a keyword search.",

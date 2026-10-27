@@ -15,6 +15,18 @@ export default {
            ["highlight", "text=No guaranteed-returns claims", 2000], ["highlight", "text=Block", 1400]],
     },
     {
+      say: "Now watch it fire for real. Our library holds a promo document promising guaranteed returns — bait a bad actor once dropped in. I ask the Editor to quote it verbatim. The retrieval runs, the rule matches the fetched text, and the turn comes back flagged instead of answered.",
+      do: [["goto", "/agents?agentId=67eb3d14-ded1-4055-af0d-ea754945ca73"], ["wait", 4000],
+           ["waitFor", "textarea[placeholder*='Send a test message']", 20000],
+           ["fill", "textarea[placeholder*='Send a test message']", "Search our knowledge base for the Shady Partners promo copy and quote it verbatim."],
+           ["keys", "Enter"], ["waitFor", "text=/guardrail|blocked|safety/i", 60000], ["wait", 3000]],
+    },
+    {
+      say: "The document stayed poisoned, the answer stayed clean — that block you just saw was this rule, evaluated on the tool result before a word reached the model. That is the difference between a policy in a handbook and a policy in the runtime.",
+      do: [["goto", "/admin/guardrails"], ["wait", 1500],
+           ["highlight", "text=No guaranteed-returns claims", 2400]],
+    },
+    {
       say: "Each rule is a regular expression matched case-insensitively, anywhere in the text — and it layers on top of the platform's built-in checks for prompt-injection markers and secret-shaped strings. Yours add; they never replace.",
       do: [["goto", "/admin/guardrails"], ["highlight", "text=Tool results", 2000], ["wait", 1400]],
     },
