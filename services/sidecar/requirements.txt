@@ -1,4 +1,4 @@
-fastapi==0.150.0
+fastapi==0.151.0
 # Explicit security floor: fastapi 0.115.0 capped starlette at 0.38.x, which
 # carries 7 advisories (PYSEC-2026-161/1941/1943/2280/2281/248/249; fixed by
 # 1.3.1). fastapi 0.142 only floors starlette, so pin it here directly.
