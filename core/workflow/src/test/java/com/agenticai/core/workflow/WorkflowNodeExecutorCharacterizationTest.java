@@ -201,7 +201,11 @@ class WorkflowNodeExecutorCharacterizationTest extends WorkflowNodeExecutorChara
         when(svc.search(eq("q"), eq(3), eq(Set.of()))).thenReturn(List.of(a, b));
         NodeExecutionResult r = run(node("knowledge", Map.of("topK", 3)), "q");
         assertEquals("OK", r.status());
-        assertEquals("Context from knowledge base:\nA\n---\nB\n\nOriginal input: q", r.output());
+        // Retrieved text is untrusted data: spotlighted, numbered with its source, input after the block.
+        assertTrue(r.output().contains("<<<UNTRUSTED_DATA id="), r.output());
+        assertTrue(r.output().contains("[1] Source: unknown, chunk 0\nA"), r.output());
+        assertTrue(r.output().contains("[2] Source: unknown, chunk 0\nB"), r.output());
+        assertTrue(r.output().endsWith("\n\nOriginal input: q"), r.output());
         assertEquals("2 chunk(s) retrieved.", r.summary());
         assertEquals(
                 List.of(
