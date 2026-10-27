@@ -50,20 +50,26 @@ public interface SkillDraftScrubber {
                         Pattern.compile("gh[pousr]_[A-Za-z0-9]{36,}"),
                         Pattern.compile("xox[baprs]-[A-Za-z0-9-]{10,}"),
                         Pattern.compile("sk-[A-Za-z0-9_-]{20,}"),
+                        // JWT segments are possessive: '.' is outside each run's class, so a match
+                        // never needs the run to yield a character back (linear on 'a'+ padding).
                         Pattern.compile(
-                                "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}"),
+                                "eyJ[A-Za-z0-9_-]{10,}++\\.[A-Za-z0-9_-]{10,}++\\.[A-Za-z0-9_-]{10,}"),
                         Pattern.compile("(?i)\\b(?:bearer|basic)\\s+[A-Za-z0-9._~+/=-]{16,}"),
-                        Pattern.compile("(?i)\\bauthorization\\s*[:=]\\s*\\S+(?:\\s+\\S+)?"),
+                        Pattern.compile("(?i)\\bauthorization\\s*[:=]\\s*+\\S++(?:\\s++\\S++)?"),
                         // Any long opaque run (hex digests, base64 blobs, ids) is never general
                         // guidance.
                         Pattern.compile("\\b[A-Za-z0-9_+]{40,}={0,2}"));
 
+        // Each run's boundary char is excluded from the run, so the possessive/char-restricted
+        // forms below keep every scan linear on hostile text (CodeQL polynomial-redos). The bare
+        // KEY_VALUE branch excludes the quote chars the quoted branches start with, so the
+        // alternation can never take two paths over the same input.
         private static final Pattern KEY_VALUE =
                 Pattern.compile(
                         "(?i)\\b(password|passwd|pwd|secret|api[_-]?key|access[_-]?key|token|credential)\\b"
-                                + "(\\s*[:=]\\s*)(\"[^\"]*\"|'[^']*'|[^\\s,;]+)");
+                                + "(\\s*[:=]\\s*)(\"[^\"]*\"|'[^']*'|[^\\s,;'\"]+)");
         private static final Pattern URL_CREDENTIALS =
-                Pattern.compile("(?i)\\b([a-z][a-z0-9+.-]*://)[^\\s/:@]+:[^\\s/@]+@");
+                Pattern.compile("(?i)\\b([a-z][a-z0-9+.-]*://)[^\\s/:@]++:[^\\s/@]++@");
         private static final Pattern CARD_LIKE = Pattern.compile("\\b\\d(?:[ -]?\\d){12,18}\\b");
 
         private Basic() {}

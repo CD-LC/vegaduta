@@ -525,6 +525,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # The omnibus FROMs take manifest digests, not the version tag - the tag
+      # could be moved between `publish` and this build; the digest cannot.
+      - name: Resolve input image digests
+        id: inputs
+        env:
+          REG: ${{ env.REGISTRY }}/${{ needs.prepare.outputs.owner }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          for img in core web postgres; do
+            digest="$(docker buildx imagetools inspect "$REG/$img:$VERSION" --format '{{.Manifest.Digest}}')"
+            echo "$img -> $digest"
+            echo "${img}_image_digest=${digest#sha256:}" >> "$GITHUB_OUTPUT"
+          done
+
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -534,7 +548,9 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           build-args: |
             REGISTRY=${{ env.REGISTRY }}/${{ needs.prepare.outputs.owner }}
-            VEGADUTA_VERSION=${{ needs.prepare.outputs.version }}
+            CORE_IMAGE_DIGEST=${{ steps.inputs.outputs.core_image_digest }}
+            WEB_IMAGE_DIGEST=${{ steps.inputs.outputs.web_image_digest }}
+            POSTGRES_IMAGE_DIGEST=${{ steps.inputs.outputs.postgres_image_digest }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ needs.prepare.outputs.sha }}

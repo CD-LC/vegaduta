@@ -157,19 +157,25 @@ def provision_backend(ctx: TenantContext, project_id: str, settings: Settings = 
             "psycopg is not installed on this deployment (pip install 'psycopg[binary]')"
         )
 
-    role_attrs = (
-        f"LOGIN PASSWORD '{password}' NOSUPERUSER NOCREATEDB "
-        f"NOCREATEROLE NOINHERIT CONNECTION LIMIT {_CONNECTION_LIMIT}"
-    )
     try:
+        # Identifier/Literal composition (psycopg.sql), not f-strings: schema/role
+        # already satisfy _SCHEMA_SAFE_RX, and this adds the driver's own escaping
+        # on top so a future call site can't leak an unchecked value into DDL.
+        sql = psycopg.sql
+        role_attrs = sql.SQL(
+            "LOGIN PASSWORD {} NOSUPERUSER NOCREATEDB "
+            f"NOCREATEROLE NOINHERIT CONNECTION LIMIT {_CONNECTION_LIMIT}"
+        ).format(sql.Literal(password))
         with psycopg.connect(settings.admin_database_url, autocommit=True) as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "DO $$ BEGIN "
-                    f"IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{role}') THEN "
-                    f'CREATE ROLE "{role}" {role_attrs}; '
-                    f'ELSE ALTER ROLE "{role}" {role_attrs}; '
-                    "END IF; END $$"
+                    sql.SQL(
+                        "DO $$ BEGIN "
+                        "IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = {r}) THEN "
+                        "CREATE ROLE {rq} {attrs}; "
+                        "ELSE ALTER ROLE {rq} {attrs}; "
+                        "END IF; END $$"
+                    ).format(r=sql.Literal(role), rq=sql.Identifier(role), attrs=role_attrs)
                 )
                 # PG16: a CREATEROLE admin that is not a superuser gets ADMIN
                 # OPTION on the roles it creates but NOT the right to SET ROLE
@@ -177,22 +183,32 @@ def provision_backend(ctx: TenantContext, project_id: str, settings: Settings = 
                 # `ALTER ... OWNER TO role` need it. Grant it to ourselves.
                 # (Pre-16 has no WITH SET syntax - and no such restriction.)
                 try:
-                    cur.execute(f'GRANT "{role}" TO CURRENT_USER WITH SET TRUE')
+                    cur.execute(sql.SQL('GRANT {} TO CURRENT_USER WITH SET TRUE').format(sql.Identifier(role)))
                 except psycopg.errors.SyntaxError:
                     pass
-                cur.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema}" AUTHORIZATION "{role}"')
+                cur.execute(
+                    sql.SQL('CREATE SCHEMA IF NOT EXISTS {} AUTHORIZATION {}')
+                    .format(sql.Identifier(schema), sql.Identifier(role))
+                )
                 # Covers a legacy admin-owned schema: hand it and its tables to
                 # the role so RLS/DDL work and nothing stays admin-owned.
-                cur.execute(f'ALTER SCHEMA "{schema}" OWNER TO "{role}"')
                 cur.execute(
-                    "DO $$ DECLARE t record; BEGIN "
-                    f"FOR t IN SELECT tablename FROM pg_tables WHERE schemaname = '{schema}' LOOP "
-                    "EXECUTE format('ALTER TABLE %I.%I OWNER TO %I', "
-                    f"'{schema}', t.tablename, '{role}'); "
-                    "END LOOP; END $$"
+                    sql.SQL('ALTER SCHEMA {} OWNER TO {}')
+                    .format(sql.Identifier(schema), sql.Identifier(role))
                 )
-                cur.execute(f'REVOKE ALL ON SCHEMA public FROM "{role}"')
-                cur.execute(f'ALTER ROLE "{role}" SET search_path = "{schema}"')
+                cur.execute(
+                    sql.SQL(
+                        "DO $$ DECLARE t record; BEGIN "
+                        "FOR t IN SELECT tablename FROM pg_tables WHERE schemaname = {s} LOOP "
+                        "EXECUTE format('ALTER TABLE %I.%I OWNER TO %I', {s}, t.tablename, {r}); "
+                        "END LOOP; END $$"
+                    ).format(s=sql.Literal(schema), r=sql.Literal(role))
+                )
+                cur.execute(sql.SQL('REVOKE ALL ON SCHEMA public FROM {}').format(sql.Identifier(role)))
+                cur.execute(
+                    sql.SQL('ALTER ROLE {} SET search_path = {}')
+                    .format(sql.Identifier(role), sql.Identifier(schema))
+                )
     except Exception as e:
         log.exception("backend provisioning failed project_id=%s", clean(project_id))
         return _unavailable(f"provisioning failed{_sqlstate(e)}; see the app-builder service log")

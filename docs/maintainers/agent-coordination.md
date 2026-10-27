@@ -464,3 +464,16 @@ late. Fixed in release.yml (main-ancestry + CHANGELOG-section gate in prepare;
 150-attempt wait + early no-run detection + actions:read in verify) plus
 scripts/ci/tag-ready.sh, a pre-flight humans run before tagging; releasing.md
 step 1 now points at it.
+
+### ACTIVE CLAIM: security hygiene + release/CI hardening (Devin, 2026-10-26)
+
+Working the OpenSSF Scorecard to >8 and clearing the open code-scanning
+backlog: branch protection on main (required reviews + required checks),
+Pinned-Dependencies fixes across Dockerfiles/workflows/scripts, Trivy
+Dockerfile findings, CodeQL critical/high triage (partial-ssrf docs shim,
+SQL/path injection, user-controlled-bypass, CSRF, ReDoS, weak crypto,
+missing origin checks), the bulk agents-turn log findings, the undici
+Dependabot alert, and a new-alert gate in CI. Touching: .github/workflows/,
+deploy/omnibus/Dockerfile, services/*/Dockerfile, scripts/ci/,
+core/agents-turn logging sites, services/code-intel, services/app-builder,
+core/graphmemory, core/security, core/agents-jobs, docs/marketing.

@@ -65,8 +65,11 @@ public class RedactingToolExecutionExceptionProcessor implements ToolExecutionEx
     // credential shapes an exception message realistically carries.
     private static final Pattern AUTH_HEADER_PATTERN =
         Pattern.compile("(?i)((?:authorization|x-api-key|api-key|x-goog-api-key)\\s*[:=]\\s*)(?:basic\\s+|bearer\\s+)?[^\\s,;\"']{6,}");
+    // Possessive quantifiers: `:`/`@` are excluded from each run, so a match can never need to
+    // backtrack across the run boundary - keeps the scan linear even on hostile input (CodeQL
+    // polynomial-redos), and the caller caps at MAX_DETAIL_CHARS before these patterns run.
     private static final Pattern URL_USERINFO_PATTERN =
-        Pattern.compile("(?i)([a-z][a-z0-9+.-]*://)[^/\\s:@]+:[^/\\s@]+@");
+        Pattern.compile("(?i)([a-z][a-z0-9+.-]*://)[^/\\s:@]++:[^/\\s@]++@");
     private static final Pattern KEY_LIKE_TOKEN_PATTERN =
         Pattern.compile("\\b(?:sk-[A-Za-z0-9_-]{16,}|sk_(?:live|test)_[A-Za-z0-9]{16,}|AIza[0-9A-Za-z_-]{30,}"
             + "|gh[pousr]_[A-Za-z0-9]{30,}|xox[abpr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16})\\b");
@@ -115,7 +118,11 @@ public class RedactingToolExecutionExceptionProcessor implements ToolExecutionEx
         if (text == null) {
             return null;
         }
-        String redacted = ProviderErrorTranslator.redactSecrets(text);
+        // Bound the input before the regex pass: exception text is model-visible user content and
+        // can be arbitrarily long; the patterns below are linear/possessive but a bounded scan is
+        // also just cheaper. Anything past the cap is dropped anyway - secrets can't live there.
+        String capped = text.length() > MAX_DETAIL_CHARS * 8 ? text.substring(0, MAX_DETAIL_CHARS * 8) : text;
+        String redacted = ProviderErrorTranslator.redactSecrets(capped);
         redacted = AUTH_HEADER_PATTERN.matcher(redacted).replaceAll("$1***");
         redacted = URL_USERINFO_PATTERN.matcher(redacted).replaceAll("$1***@");
         redacted = KEY_LIKE_TOKEN_PATTERN.matcher(redacted).replaceAll("***");

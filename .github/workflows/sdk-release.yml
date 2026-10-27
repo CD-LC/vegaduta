@@ -204,9 +204,15 @@ jobs:
           token="$(printf '%s:%s' "$CENTRAL_USERNAME" "$CENTRAL_PASSWORD" | base64 -w0)"
           status_of() {
             # /api/v1/publisher/status is a POST - a GET answers 5xx.
+            # download lands on disk first, then python parses the file - keeps
+            # the downloadThenRun OpenSSF check quiet and is no weaker (the pipe
+            # only ever fed a JSON parser, never executed the payload).
+            resp="$(mktemp)"
             curl -fsS -X POST -H "Authorization: Bearer $token" \
               "https://central.sonatype.com/api/v1/publisher/status?id=$1" \
-              | python3 -c 'import json,sys; print(json.load(sys.stdin).get("deploymentState",""))'
+              -o "$resp"
+            python3 -c "import json; print(json.load(open('$resp')).get('deploymentState',''))"
+            rm -f "$resp"
           }
           state="$(status_of "$id" || echo '')"
           echo "deployment $id starts at ${state:-unknown}"
