@@ -70,7 +70,8 @@ public class RedactingToolExecutionExceptionProcessor implements ToolExecutionEx
                     "\\b(?:sk-[A-Za-z0-9_-]{16,}|sk_(?:live|test)_[A-Za-z0-9]{16,}|AIza[0-9A-Za-z_-]{30,}"
                             + "|gh[pousr]_[A-Za-z0-9]{30,}|xox[abpr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16})\\b");
     private static final Pattern JWT_PATTERN =
-            Pattern.compile("\\beyJ[A-Za-z0-9_-]{8,}+\\.[A-Za-z0-9_-]{8,}+\\.[A-Za-z0-9_-]{8,}+\\b");
+            Pattern.compile(
+                    "\\beyJ[A-Za-z0-9_-]{8,}+\\.[A-Za-z0-9_-]{8,}+\\.[A-Za-z0-9_-]{8,}+\\b");
     private static final Pattern JSON_SECRET_FIELD_PATTERN =
             Pattern.compile(
                     "(?i)(\"(?:api[_-]?key|access[_-]?token|refresh[_-]?token|secret|password|client[_-]?secret)\"\\s*+:\\s*+\")[^\"]++");
