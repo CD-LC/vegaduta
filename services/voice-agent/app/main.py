@@ -48,6 +48,7 @@ from livekit.plugins import elevenlabs, silero
 from . import config, edge_sight, perception
 from .llm_core_bridge import CoreChatBridgeLLM, _publish_stage
 from .stt_sidecar_whisper import SidecarWhisperSTT
+from .tts_piper import PiperTTS
 from .tts_sarvam import SarvamTTS
 
 logging.basicConfig(level=config.LOG_LEVEL)
@@ -165,8 +166,12 @@ def _tts_voiced() -> bool:
     answers in voice.
     """
     provider = config.TTS_PROVIDER
-    if provider not in ("auto", "elevenlabs", "sarvam"):
+    if provider not in ("auto", "elevenlabs", "sarvam", "piper"):
         provider = "auto"
+    if provider == "piper":
+        # No credential to check - the model file existing is its own check,
+        # and a missing one fails loud at synthesize() anyway.
+        return True
     use_elevenlabs = provider == "elevenlabs" or (
         provider == "auto" and bool(config.ELEVENLABS_API_KEY)
     )
@@ -195,9 +200,17 @@ def _build_tts_plugin(voice_override: str | None = None, provider_override: str 
     them locally - see _tts_voiced's comment).
     """
     provider = config.TTS_PROVIDER
-    if provider not in ("auto", "elevenlabs", "sarvam"):
+    if provider not in ("auto", "elevenlabs", "sarvam", "piper"):
         logger.warning("unknown VOICE_AGENT_TTS_PROVIDER=%r, falling back to auto", provider)
         provider = "auto"
+
+    if provider == "piper":
+        voice = config.PIPER_VOICE
+        if voice_override and provider_override in (None, "piper"):
+            logger.info("caller picked Piper voice %s for this call", voice_override)
+            voice = voice_override
+        logger.info("TTS provider: piper (voice=%s)", voice)
+        return PiperTTS(voice=voice, speaker_id=config.PIPER_SPEAKER_ID)
 
     use_elevenlabs = provider == "elevenlabs" or (
         provider == "auto" and bool(config.ELEVENLABS_API_KEY)

@@ -31,6 +31,14 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Added
 
+- **Piper: a local, keyless TTS provider for the voice agent.** Until now
+  every voice reply needed a paid hosted key (ElevenLabs preferred, Sarvam
+  fallback); a deployment with neither fell back to browser-side speech.
+  `VOICE_AGENT_TTS_PROVIDER=piper` runs `piper-tts` in the worker via
+  `app/tts_piper.py` - no API key, no egress. The image bakes the
+  `en_US-lessac-medium` voice (sha256-verified at build); `PIPER_VOICE` /
+  `PIPER_MODEL_DIR` / `PIPER_SPEAKER_ID` / `PIPER_SAMPLE_RATE` tune it, and
+  `services/voice-agent/piper_voices_download.py` fetches additional voices.
 - **Docling-first document conversion for knowledge ingestion.** The new
   `services/docling` FastAPI adapter wraps IBM's Docling parser behind the
   sidecar's exact `/extract` contract (`X-Internal-Token` auth, `DOCLING_*`
