@@ -600,7 +600,16 @@ activity stub applied the run retry policy to every node type the same way.
 Touching only core/workflow: RetryPolicy now delegates to
 NodeErrorStrategy.isIrreversible (retryUnsafe opt-in), TemporalRunState picks
 a single-attempt activity stub for irreversible nodes, ToolNodeHandler claims
-(run, node, iteration+input) through WorkflowOutputDedupGuard. Worktree:
+(run, node, iteration+input) through WorkflowOutputDedupGuard. Extended the
+same claim (still PR #256, same worktree) to two more workflow defects:
+(1) approval/human-input/requiresApproval nodes inside loop/fan-out/parallel/
+sub-flow bodies are now rejected at save time by the new
+WorkflowApprovalPlacement (resume carries no iteration cursor, so a nested
+halt cannot resume faithfully); (2) ParallelBranchRunner now joins branches
+in completion order (fail-fast) instead of index order, and the platform/
+docs copy that claimed both engines enforce stepTimeoutSeconds is corrected
+to label the legacy engine best-effort (per-step timeout is Temporal-only;
+crashed legacy runs are reaped FAILED, not resumed). Worktree:
 /tmp/vd-retry-fix on branch fix/workflow-retry-side-effects. Please do not
 reset the shared ~/Documents checkout while this is in flight - a concurrent
 `git reset --hard` already wiped one round of these edits.

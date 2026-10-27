@@ -16,10 +16,13 @@
 // (workflow_definition.max_retry_attempts, V205; PATCH /api/workflows/{id}/
 // execution-limits accepts maxRetryAttempts 0-5 alongside maxStepsPerRun and
 // stepTimeoutSeconds; both WorkflowExecutionEngine and the Temporal
-// WorkflowRunWorkflowImpl read the per-workflow value, which is why the copy
-// can say "both engines"). The TenantLimitExceededException retry exclusion
-// is from the same change. The developer-API page now names the five MCP
-// tools for the same reason /ai/mcp does — see that module's header.
+// WorkflowRunWorkflowImpl read the retry count and step ceiling, which is why
+// the copy can say "both engines" for those two). One honest difference the
+// copy now states: stepTimeoutSeconds is enforced only by the Temporal engine
+// (WorkflowRunWorkflowImpl's activity timeout), so "both engines honour the
+// per-step timeout" is not claimed. The TenantLimitExceededException retry
+// exclusion is from the same change. The developer-API page now names the five
+// MCP tools for the same reason /ai/mcp does — see that module's header.
 //
 // Content sync 2026-10-03. Stale facts corrected: "runs on Temporal" is gone
 // (Temporal is opt-in and OFF by default; WorkflowExecutionEngine is the

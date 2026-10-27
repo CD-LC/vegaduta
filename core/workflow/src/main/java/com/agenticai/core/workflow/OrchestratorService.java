@@ -324,6 +324,9 @@ public class OrchestratorService {
         // A Wait node parks the whole run: refuse placements the engine can only fail on at run time.
         WorkflowWaitPlacement.validate(graph.nodes(), nodesById, adjacency,
             "temporal".equalsIgnoreCase(executionEngine), errors);
+        // An approval / human-input halt inside a container body parks the run with a resume
+        // envelope that carries nodeId + input but no iteration cursor - same placement rule.
+        WorkflowApprovalPlacement.validate(graph.nodes(), nodesById, adjacency, errors);
 
         detectCycle(nodeIds, adjacency, errors);
 
