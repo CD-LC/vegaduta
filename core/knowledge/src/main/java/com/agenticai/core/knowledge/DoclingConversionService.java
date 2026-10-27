@@ -26,18 +26,17 @@ import org.springframework.web.client.RestClient;
  * thing genuinely new here is the routing decision: which files go to Docling, and what happens
  * when it is down.
  *
- * <p><b>Loose coupling, off by default.</b> With {@code base-url} unset this bean is inert -
- * {@link #handles} answers false for everything and {@code SidecarClient#extractText} takes the
- * unchanged sidecar path. Docling's model weight (layout/OCR models, several GB) never becomes a
- * cost every deployment pays; it is a compose profile ({@code docling}) plus one env var, and a
- * deployment can even run Docling with the sidecar disabled since this route is checked before
- * the sidecar gate.
+ * <p><b>Loose coupling, off by default.</b> With {@code base-url} unset this bean is inert - {@link
+ * #handles} answers false for everything and {@code SidecarClient#extractText} takes the unchanged
+ * sidecar path. Docling's model weight (layout/OCR models, several GB) never becomes a cost every
+ * deployment pays; it is a compose profile ({@code docling}) plus one env var, and a deployment can
+ * even run Docling with the sidecar disabled since this route is checked before the sidecar gate.
  *
  * <p><b>Failure policy.</b> A Docling transport/5xx failure falls back to the sidecar's extractor
  * ({@code fallback-to-sidecar}, default true) so enabling the better parser never makes ingestion
  * LESS reliable than the status quo. A 4xx means the file itself was rejected - that propagates
- * as-is, because replaying the same bytes against a weaker parser would only produce a worse
- * result or the same 400.
+ * as-is, because replaying the same bytes against a weaker parser would only produce a worse result
+ * or the same 400.
  */
 @Component
 @Profile("knowledge")
@@ -51,8 +50,8 @@ public class DoclingConversionService {
      */
     static final Set<String> EXTENSIONS =
             Set.of(
-                    ".pdf", ".docx", ".pptx", ".xlsx", ".html", ".htm", ".csv",
-                    ".png", ".jpg", ".jpeg", ".webp", ".tiff", ".tif", ".bmp");
+                    ".pdf", ".docx", ".pptx", ".xlsx", ".html", ".htm", ".csv", ".png", ".jpg",
+                    ".jpeg", ".webp", ".tiff", ".tif", ".bmp");
 
     /**
      * The subset of {@link #EXTENSIONS} the sidecar's extractor does NOT handle - these widen the
@@ -80,12 +79,17 @@ public class DoclingConversionService {
     @Autowired
     public DoclingConversionService(
             @Value("${app.knowledge.docling.base-url:}") String baseUrl,
-            @Value("${app.knowledge.docling.shared-secret:${DOCLING_SHARED_SECRET:}}") String sharedSecret,
+            @Value("${app.knowledge.docling.shared-secret:${DOCLING_SHARED_SECRET:}}")
+                    String sharedSecret,
             @Value("${app.knowledge.docling.fallback-to-sidecar:true}") boolean fallbackToSidecar) {
         this.enabled = baseUrl != null && !baseUrl.isBlank();
         this.fallbackToSidecar = fallbackToSidecar;
         this.sharedSecret = sharedSecret == null ? "" : sharedSecret.trim();
-        this.restClient = enabled ? SidecarClient.buildClient(baseUrl.trim(), SidecarClient.INGEST_READ_TIMEOUT) : null;
+        this.restClient =
+                enabled
+                        ? SidecarClient.buildClient(
+                                baseUrl.trim(), SidecarClient.INGEST_READ_TIMEOUT)
+                        : null;
         this.conversion = new SidecarConversionClient(this::applyInternalToken);
     }
 
@@ -127,8 +131,8 @@ public class DoclingConversionService {
     /**
      * Runs the file through Docling's {@code /extract} and returns its markdown output. Callers
      * must check {@link #handles} first; a tenant's cloud-OCR config is deliberately not threaded
-     * (Docling has its own OCR stack - the field exists on the wire contract for compatibility
-     * and is sent unset).
+     * (Docling has its own OCR stack - the field exists on the wire contract for compatibility and
+     * is sent unset).
      */
     public String extract(String filename, byte[] content) {
         return conversion.extractText(restClient, filename, content, null);
