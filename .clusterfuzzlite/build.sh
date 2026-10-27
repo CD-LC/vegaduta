@@ -55,7 +55,11 @@ else
 fi
 export JAVA_HOME="\$this_dir/jdk21"
 export PATH="\$JAVA_HOME/bin:\$PATH"
-LD_LIBRARY_PATH="$JVM_LD_LIBRARY_PATH":\$this_dir \\
+# jazzer_driver is a native binary: it dlopens libjvm.so from
+# JVM_LD_LIBRARY_PATH, which the runner pre-sets to its JDK 17 - repoint it
+# at our bundled JRE or the v65 classes still fail UnsupportedClassVersionError.
+export JVM_LD_LIBRARY_PATH="\$this_dir/jdk21/lib/server"
+LD_LIBRARY_PATH="\$this_dir/jdk21/lib/server:\$this_dir" \\
 \$this_dir/jazzer_driver --agent_path=\$this_dir/jazzer_agent_deploy.jar \\
 --cp=\$this_dir/chat.jar:\$this_dir/agents-jobs.jar:\$this_dir/deps/* \\
 --target_class=$fqcn \\
