@@ -10,6 +10,17 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Python Agent SDK: audit-chain ordering, truncation anchors and approval
+  defaults.** `evidence_bundle` (and `verify(sort_by_seq=True)`) verify in
+  `chain.seq` order, so a concurrently written log stored out of order is no
+  longer reported broken (Java parity). `verify`/`evidence_bundle` take optional
+  `expected_first_seq`/`expected_first_prev`/`expected_last_seq`/
+  `expected_head_hash` anchors to detect prefix/suffix deletion, and the bundle
+  exposes `head_hash`/`last_seq`. `ApprovalGate` now defaults to
+  `FourEyesAuthorizer` (opt out with `authorizer=allow_any`); resumption
+  failures store the exception type and a bounded, redacted message instead of
+  raw text; `ApprovalStore.update` documents the compare-and-set requirement for
+  multi-process use.
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
   capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on
