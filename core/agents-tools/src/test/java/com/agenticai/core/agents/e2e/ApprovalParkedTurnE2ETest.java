@@ -58,8 +58,8 @@ class ApprovalParkedTurnE2ETest {
 
     /**
      * The model parks, and the turn ends there - the platform's fixed pause reply closes it; the
-     * model is never called to write a wrap-up. The continuation loop used to treat a model's
-     * "I will carry on" prose as a stopped task and re-prompt ("call the tools and do it") against
+     * model is never called to write a wrap-up. The continuation loop used to treat a model's "I
+     * will carry on" prose as a stopped task and re-prompt ("call the tools and do it") against
      * tools that are all stubbed while the turn is parked.
      */
     @Test
@@ -224,8 +224,10 @@ class ApprovalParkedTurnE2ETest {
                 () -> assertEquals(1, receipt.executions(), "the queued sibling ran once approved"),
                 () -> assertEquals(List.of("{\"to\":\"b\"}"), receipt.argumentsSeen()),
                 () ->
+                        // Approving the queued sibling spawns a continuation that files its own
+                        // PENDING row; assert only the two requests recorded before the park.
                         assertTrue(
-                                harness.requestStatuses().stream()
+                                harness.requestStatuses().subList(0, requests.size()).stream()
                                         .allMatch(s -> s == ApprovalStatus.APPROVED),
                                 harness.requestStatuses().toString()),
                 () -> {

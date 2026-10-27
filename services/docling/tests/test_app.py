@@ -14,7 +14,6 @@ without the several-GB model download the Dockerfile bakes. It is still skipped
 when docling itself is not installed - importing DocumentConverter pulls a
 torch-scale dependency tree that a fast auth/contract pass should not pay.
 """
-
 import base64
 import importlib
 import importlib.util
