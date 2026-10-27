@@ -208,6 +208,7 @@ public class McpExposedToolInvoker {
                             .build();
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+            turnContext.taint().mark("inbound:mcp");
             reply =
                     agentChatService
                             .chat(turnContext, chatTurn)

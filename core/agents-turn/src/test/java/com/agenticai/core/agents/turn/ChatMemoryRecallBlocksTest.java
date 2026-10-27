@@ -49,7 +49,11 @@ class ChatMemoryRecallBlocksTest {
         when(agentProvider.getIfAvailable()).thenReturn(agentMemory);
         when(tenantProvider.getIfAvailable()).thenReturn(tenant);
         when(agentService.isShareMemoryWithTenant(agentId)).thenReturn(true);
-        when(tenant.recall(anyString(), anyString(), nullable(QueryEmbedding.class), nullable(UUID.class)))
+        when(tenant.recall(
+                        anyString(),
+                        anyString(),
+                        nullable(QueryEmbedding.class),
+                        nullable(UUID.class)))
                 .thenReturn(List.of());
         recall =
                 new ChatMemoryRecall(
@@ -130,7 +134,11 @@ class ChatMemoryRecallBlocksTest {
                         0);
         when(agentMemory.recall(eq(agentId), eq("alice"), eq("hi"), nullable(QueryEmbedding.class)))
                 .thenReturn(List.of(mine));
-        when(tenant.recall(eq("alice"), eq("hi"), nullable(QueryEmbedding.class), nullable(UUID.class)))
+        when(tenant.recall(
+                        eq("alice"),
+                        eq("hi"),
+                        nullable(QueryEmbedding.class),
+                        nullable(UUID.class)))
                 .thenReturn(List.of(shared));
         AgentStepEventEmitter emitter = AgentStepEventEmitter.active();
 
@@ -225,5 +233,40 @@ class ChatMemoryRecallBlocksTest {
                 recall.recallMemoryFactsBlock(agentId, "alice", "hi"),
                 recall.recallMemoryFactsBlock(
                         agentId, "alice", "hi", AgentStepEventEmitter.active()));
+    }
+
+    @Test
+    void recallMemoryFactsDistinguishesRecalledFactsFromOwnerBlocks() {
+        // Owner blocks only: not counted as recalled facts
+        when(tenant.renderPromptBlocks("alice", "hi")).thenReturn("MY NOTES");
+        when(agentMemory.recall(eq(agentId), eq("alice"), eq("hi"), nullable(QueryEmbedding.class)))
+                .thenReturn(List.of());
+        ChatMemoryRecall.MemoryRecall ownerOnly =
+                recall.recallMemoryFacts(agentId, "alice", "hi", null);
+        assertNotNull(ownerOnly.block());
+        assertEquals(0, ownerOnly.recalledFacts());
+        assertFalse(
+                ownerOnly.hasRecalledFacts(),
+                "owner-authored blocks must not count as recalled facts");
+
+        // Stored facts: counted for taint marking
+        when(agentMemory.recall(eq(agentId), eq("alice"), eq("hi"), nullable(QueryEmbedding.class)))
+                .thenReturn(List.of(privateFact("fact 1"), privateFact("fact 2")));
+        ChatMemoryRecall.MemoryRecall withFacts =
+                recall.recallMemoryFacts(agentId, "alice", "hi", null);
+        assertNotNull(withFacts.block());
+        assertEquals(2, withFacts.recalledFacts());
+        assertTrue(withFacts.hasRecalledFacts());
+
+        // Empty recall: null block and zero count
+        when(tenant.renderPromptBlocks("alice", "empty")).thenReturn(null);
+        when(agentMemory.recall(
+                        eq(agentId), eq("alice"), eq("empty"), nullable(QueryEmbedding.class)))
+                .thenReturn(List.of());
+        ChatMemoryRecall.MemoryRecall empty =
+                recall.recallMemoryFacts(agentId, "alice", "empty", null);
+        assertNull(empty.block());
+        assertEquals(0, empty.recalledFacts());
+        assertFalse(empty.hasRecalledFacts());
     }
 }
