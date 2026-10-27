@@ -37,7 +37,7 @@ done
 #    compiled with. jlink keeps it to the modules actually needed (~90MB
 #    compressed instead of a full 300MB JDK).
 "$JAVA_HOME/bin/jlink" \
-    --add-modules java.se,jdk.unsupported,jdk.jfr,jdk.zipfs \
+    --add-modules java.se,jdk.unsupported,jdk.jfr,jdk.zipfs,jdk.attach,jdk.management,jdk.management.agent \
     --compress=2 --no-man-pages --no-header-files \
     --output "$OUT/jdk21"
 
