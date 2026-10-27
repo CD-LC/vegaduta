@@ -279,6 +279,11 @@ final class ChatPromptAssembler {
         List<ToolCallback> tools =
                 joinPreTurnOrDegrade(
                         toolsFuture, ResolvedToolList.empty(), "tools", preTurnDeadlineNanos);
+        // Reachability fact for the scratchpad directive, captured before the transforms below
+        // (run-tool narrowing mutates in place, the small-model cap swaps in a plain ArrayList)
+        // can lose it - see ResolvedToolList#scratchpadOffered.
+        Boolean scratchpadOffered =
+                tools instanceof ResolvedToolList resolved ? resolved.scratchpadOffered() : null;
         if (runToolNames != null && !suppressAgentTools) {
             // The run-scoped tool selection (ChatRequest.toolNames): narrows the agent's own
             // resolved tools -
@@ -421,6 +426,7 @@ final class ChatPromptAssembler {
                                 svc.directiveComposer,
                                 tools,
                                 anyMcpToolsOffered,
+                                DirectiveKeys.scratchpadReachable(tools, scratchpadOffered),
                                 smallModelTurn,
                                 ChatSystemPromptComposer.Switches.of(svc),
                                 agentId,

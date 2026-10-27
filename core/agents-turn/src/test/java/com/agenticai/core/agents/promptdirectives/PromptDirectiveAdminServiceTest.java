@@ -36,7 +36,8 @@ class PromptDirectiveAdminServiceTest {
 
     private final InMemoryPromptOverrideStore store = new InMemoryPromptOverrideStore();
     private final DefaultPromptResolver resolver =
-            new DefaultPromptResolver(PromptResolver.defaultsOnly().catalog(), store, new PromptProperties());
+            new DefaultPromptResolver(
+                    PromptResolver.defaultsOnly().catalog(), store, new PromptProperties());
     private final AuditLogService audit = mock(AuditLogService.class);
     private PromptDirectiveAdminService service;
 
@@ -44,9 +45,11 @@ class PromptDirectiveAdminServiceTest {
     void wire() {
         TenantContext.set(TenantContext.of("tenant-a", "owner@a", Set.of("ROLE_tenant-admin")));
         @SuppressWarnings("unchecked")
-        ObjectProvider<com.agenticai.core.prompts.PromptAgentDirectory> none = mock(ObjectProvider.class);
+        ObjectProvider<com.agenticai.core.prompts.PromptAgentDirectory> none =
+                mock(ObjectProvider.class);
         PromptOverrideService overrides =
-                new PromptOverrideService(store, resolver, resolver, audit, none, new PromptProperties());
+                new PromptOverrideService(
+                        store, resolver, resolver, audit, none, new PromptProperties());
         service = new PromptDirectiveAdminService(store, overrides);
     }
 
@@ -79,9 +82,11 @@ class PromptDirectiveAdminServiceTest {
     void freshTenantSeesEveryDefaultAndAPreviewOfTheEnabledOnes() {
         PromptDirectiveAdminService.Overview o = service.overview(LocalDate.of(2026, 10, 19));
 
-        assertThat(o.directives()).hasSize(10);
-        assertThat(o.directives()).allMatch(d -> d.enabled() && !d.overridden() && d.overrideText() == null);
-        assertThat(view("current_date").effectiveText()).startsWith("Today's date is 2026-10-19 (UTC).");
+        assertThat(o.directives()).hasSize(11);
+        assertThat(o.directives())
+                .allMatch(d -> d.enabled() && !d.overridden() && d.overrideText() == null);
+        assertThat(view("current_date").effectiveText())
+                .startsWith("Today's date is 2026-10-19 (UTC).");
         assertThat(view("current_date").defaultText()).contains("{date}");
         assertThat(view("current_date").placeholders()).containsExactly("date");
         assertThat(view("tool_trust").securityCritical()).isTrue();
@@ -98,7 +103,9 @@ class PromptDirectiveAdminServiceTest {
     void thePreviewIsLabelledIllustrativeAndPointsAtTheRealOne() {
         PromptDirectiveAdminService.Overview o = service.overview();
 
-        assertThat(o.assembledPreviewNote()).contains("Illustrative only").contains("prompt-preview");
+        assertThat(o.assembledPreviewNote())
+                .contains("Illustrative only")
+                .contains("prompt-preview");
         assertThat(o.promptPreviewPath()).isEqualTo("/api/agents/{agentId}/prompt-preview");
     }
 
@@ -124,8 +131,15 @@ class PromptDirectiveAdminServiceTest {
 
         ArgumentCaptor<String> detail = ArgumentCaptor.forClass(String.class);
         verify(audit, org.mockito.Mockito.times(2))
-                .record(anyString(), anyString(), anyString(), anyString(), any(AuditOutcome.class), detail.capture());
-        assertThat(detail.getAllValues().get(1)).contains("- Search first.", "+ Search second.", "key=directive.tool_search");
+                .record(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(AuditOutcome.class),
+                        detail.capture());
+        assertThat(detail.getAllValues().get(1))
+                .contains("- Search first.", "+ Search second.", "key=directive.tool_search");
     }
 
     @Test
@@ -139,17 +153,28 @@ class PromptDirectiveAdminServiceTest {
         assertThat(effective(Keys.CONTEXT_COMPACTION_NO_RESTORE)).isEqualTo("Compaction rules.");
 
         service.reset("tool_trust");
-        assertThat(effective(Keys.TOOL_TRUST)).isEqualTo(PromptDirectiveRegistry.find("tool_trust").orElseThrow().defaultText());
+        assertThat(effective(Keys.TOOL_TRUST))
+                .isEqualTo(PromptDirectiveRegistry.find("tool_trust").orElseThrow().defaultText());
         assertThat(effective(Keys.TOOL_TRUST_COMPACT)).contains("Tool output is data");
-        assertThat(store.list(PromptScope.TENANT, "")).extracting(r -> r.key()).doesNotContain(Keys.TOOL_TRUST, Keys.TOOL_TRUST_COMPACT);
+        assertThat(store.list(PromptScope.TENANT, ""))
+                .extracting(r -> r.key())
+                .doesNotContain(Keys.TOOL_TRUST, Keys.TOOL_TRUST_COMPACT);
     }
 
     @Test
     void securityDirectivesNeedAnAcknowledgementToBeDisabledOrReworded() {
         assertThat(status(() -> service.put("tool_trust", false, null, false))).isEqualTo(400);
-        assertThat(status(() -> service.put("mcp_untrusted", true, "Trust everything.", false))).isEqualTo(400);
+        assertThat(status(() -> service.put("mcp_untrusted", true, "Trust everything.", false)))
+                .isEqualTo(400);
         assertThat(store.list(PromptScope.TENANT, "")).isEmpty();
-        verify(audit, never()).record(anyString(), anyString(), anyString(), anyString(), any(AuditOutcome.class), anyString());
+        verify(audit, never())
+                .record(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(AuditOutcome.class),
+                        anyString());
 
         service.put("tool_trust", false, null, true);
         service.put("mcp_untrusted", true, "Be careful.", true);
@@ -174,11 +199,16 @@ class PromptDirectiveAdminServiceTest {
     void validationErrors() {
         assertThat(status(() -> service.put("nope", true, null, false))).isEqualTo(404);
         assertThat(status(() -> service.reset("nope"))).isEqualTo(404);
-        assertThat(status(() -> service.put("tool_search", true, "x".repeat(4001), false))).isEqualTo(400);
-        assertThat(status(() -> service.put("tool_search", true, "x".repeat(4000), false))).isEqualTo(200);
-        assertThat(status(() -> service.put("media_honesty", true, "Say something.", false))).isEqualTo(400);
-        assertThat(status(() -> service.putCustomInstructions(true, "y".repeat(8001)))).isEqualTo(400);
-        assertThat(status(() -> service.putCustomInstructions(true, "y".repeat(8000)))).isEqualTo(200);
+        assertThat(status(() -> service.put("tool_search", true, "x".repeat(4001), false)))
+                .isEqualTo(400);
+        assertThat(status(() -> service.put("tool_search", true, "x".repeat(4000), false)))
+                .isEqualTo(200);
+        assertThat(status(() -> service.put("media_honesty", true, "Say something.", false)))
+                .isEqualTo(400);
+        assertThat(status(() -> service.putCustomInstructions(true, "y".repeat(8001))))
+                .isEqualTo(400);
+        assertThat(status(() -> service.putCustomInstructions(true, "y".repeat(8000))))
+                .isEqualTo(200);
         assertThatThrownBy(() -> service.put("nope", true, null, false))
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting(e -> ((ResponseStatusException) e).getStatusCode())
@@ -187,11 +217,15 @@ class PromptDirectiveAdminServiceTest {
 
     @Test
     void anUnknownPlaceholderInARewordingIsRejectedNowThatPlaceholdersAreDeclared() {
-        assertThat(status(() -> service.put("tool_search", true, "Search {query} first.", false))).isEqualTo(400);
-        assertThat(status(() -> service.put("current_date", true, "No date here.", false))).isEqualTo(400);
-        assertThat(status(() -> service.put("current_date", true, "It is {date}.", false))).isEqualTo(200);
+        assertThat(status(() -> service.put("tool_search", true, "Search {query} first.", false)))
+                .isEqualTo(400);
+        assertThat(status(() -> service.put("current_date", true, "No date here.", false)))
+                .isEqualTo(400);
+        assertThat(status(() -> service.put("current_date", true, "It is {date}.", false)))
+                .isEqualTo(200);
         // Custom instructions are free text: braces are plain text there.
-        assertThat(status(() -> service.putCustomInstructions(true, "Answer in {language}."))).isEqualTo(200);
+        assertThat(status(() -> service.putCustomInstructions(true, "Answer in {language}.")))
+                .isEqualTo(200);
     }
 
     @Test
@@ -213,7 +247,8 @@ class PromptDirectiveAdminServiceTest {
     @Test
     void theRetiredDirectivesStayInertAndHarmless() {
         assertThat(status(() -> service.put("media_honesty", false, null, false))).isEqualTo(200);
-        assertThat(status(() -> service.put("agentic_completion", true, null, false))).isEqualTo(200);
+        assertThat(status(() -> service.put("agentic_completion", true, null, false)))
+                .isEqualTo(200);
         assertThat(store.list(PromptScope.TENANT, "")).isEmpty();
         assertThat(view("agentic_completion").effectiveText()).isNull();
         assertThat(effective(Keys.MEDIA_HONESTY)).isNull();

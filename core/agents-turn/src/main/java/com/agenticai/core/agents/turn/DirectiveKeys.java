@@ -9,8 +9,9 @@ import org.springframework.ai.tool.ToolCallback;
  * Which prompt-registry key a standing directive uses on THIS turn, or null when it does not apply.
  * The applicability rules (the tool the directive is about is on the turn's list, compaction is on,
  * the agent opted in) live here and nowhere else; what the text IS (the shipped default, or an
- * override of the agent, tenant or platform) is the registry's business ({@link ResolvedDirectives}).
- * Tool names are literals on purpose: the tools package is not imported here for a name.
+ * override of the agent, tenant or platform) is the registry's business ({@link
+ * ResolvedDirectives}). Tool names are literals on purpose: the tools package is not imported here
+ * for a name.
  */
 final class DirectiveKeys {
 
@@ -19,9 +20,11 @@ final class DirectiveKeys {
     private static final String REMEMBER_FACT_TOOL = "remember_fact";
     private static final String BROWSER_SNAPSHOT_TOOL = "browser_snapshot";
     private static final String RESTORE_TOOL_RESULT = "restore_tool_result";
+    private static final String SCRATCHPAD_WRITE_TOOL = "scratchpad_write";
 
     private static boolean offers(List<ToolCallback> tools, String name) {
-        return tools != null && tools.stream().anyMatch(tool -> name.equals(tool.getToolDefinition().name()));
+        return tools != null
+                && tools.stream().anyMatch(tool -> name.equals(tool.getToolDefinition().name()));
     }
 
     /** {@code directive.memory_usage} when {@code remember_fact} is on the list. */
@@ -29,7 +32,10 @@ final class DirectiveKeys {
         return offers(tools, REMEMBER_FACT_TOOL) ? Keys.MEMORY_USAGE : null;
     }
 
-    /** {@code directive.tool_trust} (or its {@code .compact} form in small-model mode) whenever the turn has any tool. */
+    /**
+     * {@code directive.tool_trust} (or its {@code .compact} form in small-model mode) whenever the
+     * turn has any tool.
+     */
     static String toolTrustKey(List<ToolCallback> tools, boolean compact) {
         if (tools == null || tools.isEmpty()) {
             return null;
@@ -44,18 +50,48 @@ final class DirectiveKeys {
 
     /** {@code directive.tool_search} when {@code search_tools} is on the list. */
     static String toolSearchKey(List<ToolCallback> tools) {
-        return offers(tools, com.agenticai.core.agents.tools.ToolSearchToolNames.SEARCH_TOOLS) ? Keys.TOOL_SEARCH : null;
+        return offers(tools, com.agenticai.core.agents.tools.ToolSearchToolNames.SEARCH_TOOLS)
+                ? Keys.TOOL_SEARCH
+                : null;
     }
 
     /**
-     * {@code directive.context_compaction} (the restore tool is on the list) or {@code .no_restore},
-     * only when compaction is on and the turn has tools.
+     * Whether the agent's scratchpad is reachable on THIS turn: the tools are on the final list
+     * outright, or they made the resolved candidate set ({@code scratchpadOffered}, recorded by the
+     * resolver before deferral) and sit behind {@code search_tools}. Passing the fact separately
+     * rather than reading it off {@code finalTools} matters because post-resolution transforms
+     * (small-model cap, run-tool narrowing) may copy the list into a plain {@code ArrayList} that
+     * no longer carries it.
+     */
+    static boolean scratchpadReachable(List<ToolCallback> finalTools, Boolean scratchpadOffered) {
+        if (finalTools == null) {
+            return false;
+        }
+        if (offers(finalTools, SCRATCHPAD_WRITE_TOOL)) {
+            return true;
+        }
+        return Boolean.TRUE.equals(scratchpadOffered)
+                && offers(
+                        finalTools,
+                        com.agenticai.core.agents.tools.ToolSearchToolNames.SEARCH_TOOLS);
+    }
+
+    /** {@code directive.scratchpad} when the pad is reachable this turn. */
+    static String scratchpadKey(boolean scratchpadReachable) {
+        return scratchpadReachable ? Keys.SCRATCHPAD : null;
+    }
+
+    /**
+     * {@code directive.context_compaction} (the restore tool is on the list) or {@code
+     * .no_restore}, only when compaction is on and the turn has tools.
      */
     static String contextCompactionKey(boolean compactionEnabled, List<ToolCallback> tools) {
         if (!compactionEnabled || tools == null || tools.isEmpty()) {
             return null;
         }
-        return offers(tools, RESTORE_TOOL_RESULT) ? Keys.CONTEXT_COMPACTION : Keys.CONTEXT_COMPACTION_NO_RESTORE;
+        return offers(tools, RESTORE_TOOL_RESULT)
+                ? Keys.CONTEXT_COMPACTION
+                : Keys.CONTEXT_COMPACTION_NO_RESTORE;
     }
 
     /** {@code directive.browser_v2} when {@code browser_snapshot} is on the list. */
@@ -64,7 +100,8 @@ final class DirectiveKeys {
     }
 
     /** {@code directive.artifacts} when the directive applies to this agent. */
-    static String artifactsKey(boolean enabled, boolean allAgents, String agentIdsCsv, UUID agentId) {
+    static String artifactsKey(
+            boolean enabled, boolean allAgents, String agentIdsCsv, UUID agentId) {
         return ArtifactsDirective.keyForAgent(enabled, allAgents, agentIdsCsv, agentId);
     }
 }

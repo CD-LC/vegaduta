@@ -590,3 +590,24 @@ to any PR's diff. No 6.2.x fix exists; the only patched line is Spring
 Framework 7.0.9+ (the #99 migration). Scope-accepted to core/omnichannel +
 core/elevenlabs poms with the reason so the Trivy gate unblocks repo-wide;
 remove when #99 lands.
+
+### Scratchpad: directive + lifecycle + admin REST (Devin, 2026-10-27)
+
+Claimed: core/agents-tools scratchpad package, agents ResolvedToolList,
+agents-turn DirectiveKeys/ChatSystemPromptComposer/ChatPromptAssembler/
+PromptPreviewService/PromptDirectiveRegistry + prompts/en/directive.scratchpad.md,
+app-config application.yml scratchpad block, docs/configuration.md,
+deploy/compose/.env.example scratchpad envs.
+
+Four changes, one PR: (1) directive.scratchpad - a standing "you have a
+private scratchpad" block emitted only when the pad is reachable this turn
+(on the tool list, or offered-and-deferred behind search_tools; the fact is
+recorded on ResolvedToolList at resolution because deferral moves the tools
+off the final list); (2) scratchpad_list is size-aware (key/scope/byte_size/
+bounded preview/total_bytes, bodies via scratchpad_read); (3) full pads evict
+LRU-by-updated_at instead of failing (evict-oldest-on-cap, default on; write
+results name evicted_key + expired_removed), plus lazy TTL sweeps
+(session-note-ttl 30d, agent-note-ttl off); (4) read-only admin REST
+GET /api/agents/{agentId}/scratchpad[?session] and /{key} gated by
+AgentService.requireAccess(VIEWER) - no write/delete by design, session
+"agent"/omitted reads the long-term pad.

@@ -56,9 +56,9 @@ import reactor.core.publisher.Flux;
 
 /**
  * The texts the turn pipeline writes besides the standing directives (framing lines, refusals,
- * nudges, plan block, detector data) are registry keys: an override of the agent, the tenant or
- * the platform reaches every path that sends them. One test per path, each against the real class
- * with an in-memory override store.
+ * nudges, plan block, detector data) are registry keys: an override of the agent, the tenant or the
+ * platform reaches every path that sends them. One test per path, each against the real class with
+ * an in-memory override store.
  */
 @SuppressWarnings("unchecked")
 class TurnTextsOverrideTest {
@@ -69,7 +69,8 @@ class TurnTextsOverrideTest {
 
     private final InMemoryPromptOverrideStore store = new InMemoryPromptOverrideStore();
     private final DefaultPromptResolver resolver =
-            new DefaultPromptResolver(PromptResolver.defaultsOnly().catalog(), store, new PromptProperties());
+            new DefaultPromptResolver(
+                    PromptResolver.defaultsOnly().catalog(), store, new PromptProperties());
     private final PromptDirectiveSettings settings = PromptDirectiveSettings.forTest(resolver);
 
     @BeforeEach
@@ -129,15 +130,34 @@ class TurnTextsOverrideTest {
                 .thenReturn(
                         List.of(
                                 new AgentMemoryEntry(
-                                        UUID.randomUUID(), AGENT, "alice", "likes tea", 0.0, Instant.now(), Instant.now(), 0)));
-        when(tenant.recall(anyString(), anyString(), nullable(QueryEmbedding.class), nullable(UUID.class)))
+                                        UUID.randomUUID(),
+                                        AGENT,
+                                        "alice",
+                                        "likes tea",
+                                        0.0,
+                                        Instant.now(),
+                                        Instant.now(),
+                                        0)));
+        when(tenant.recall(
+                        anyString(),
+                        anyString(),
+                        nullable(QueryEmbedding.class),
+                        nullable(UUID.class)))
                 .thenReturn(
                         List.of(
                                 new TenantMemoryEntry(
-                                        UUID.randomUUID(), "alice", "works nights", 0.0, AGENT, Instant.now(), Instant.now(), 0)));
+                                        UUID.randomUUID(),
+                                        "alice",
+                                        "works nights",
+                                        0.0,
+                                        AGENT,
+                                        Instant.now(),
+                                        Instant.now(),
+                                        0)));
         when(tenant.renderPromptBlocks("alice", "hi"))
                 .thenReturn(MemoryBlocks.defaultNotesHeader() + "\n[persona]\nBe brief.");
-        ChatMemoryRecall recall = new ChatMemoryRecall(agentProvider, tenantProvider, agentService, () -> false);
+        ChatMemoryRecall recall =
+                new ChatMemoryRecall(agentProvider, tenantProvider, agentService, () -> false);
         recall.usePrompts(a -> settings.forTurn(DAY, a));
         override(PromptScope.TENANT, "memory.recall.private", "TENANT MEMORY:\n{facts}");
         override(PromptScope.AGENT, "memory.recall.private", "AGENT MEMORY:\n{facts}");
@@ -147,17 +167,28 @@ class TurnTextsOverrideTest {
         String out = recall.recallMemoryFactsBlock(AGENT, "alice", "hi");
 
         assertThat(out)
-                .isEqualTo("Your own notes:\n[persona]\nBe brief.\n\nAGENT MEMORY:\n- likes tea\n\nTEAM MEMORY:\n- works nights");
+                .isEqualTo(
+                        "Your own notes:\n[persona]\nBe brief.\n\nAGENT MEMORY:\n- likes tea\n\nTEAM MEMORY:\n- works nights");
         // another agent gets the tenant's wording, not this agent's
-        ChatMemoryRecall other = new ChatMemoryRecall(agentProvider, tenantProvider, agentService, () -> false);
+        ChatMemoryRecall other =
+                new ChatMemoryRecall(agentProvider, tenantProvider, agentService, () -> false);
         other.usePrompts(a -> settings.forTurn(DAY, OTHER_AGENT));
         when(agentService.isShareMemoryWithTenant(OTHER_AGENT)).thenReturn(false);
-        when(agentMemory.recall(eq(OTHER_AGENT), eq("alice"), eq("hi"), nullable(QueryEmbedding.class)))
+        when(agentMemory.recall(
+                        eq(OTHER_AGENT), eq("alice"), eq("hi"), nullable(QueryEmbedding.class)))
                 .thenReturn(
                         List.of(
                                 new AgentMemoryEntry(
-                                        UUID.randomUUID(), OTHER_AGENT, "alice", "likes tea", 0.0, Instant.now(), Instant.now(), 0)));
-        assertThat(other.recallMemoryFactsBlock(OTHER_AGENT, "alice", "hi")).isEqualTo("TENANT MEMORY:\n- likes tea");
+                                        UUID.randomUUID(),
+                                        OTHER_AGENT,
+                                        "alice",
+                                        "likes tea",
+                                        0.0,
+                                        Instant.now(),
+                                        Instant.now(),
+                                        0)));
+        assertThat(other.recallMemoryFactsBlock(OTHER_AGENT, "alice", "hi"))
+                .isEqualTo("TENANT MEMORY:\n- likes tea");
     }
 
     // ---- skills header, through the one place that composes the system text ----
@@ -165,16 +196,22 @@ class TurnTextsOverrideTest {
     @Test
     void theSkillsHeaderIsTheOwnersInTheSystemTextAndTheDefaultElsewhere() {
         List<SkillService.SkillMetadata> skills =
-                List.of(new SkillService.SkillMetadata(null, "xlsx", "Make sheets", SkillSource.BUILT_IN, true, 0));
+                List.of(
+                        new SkillService.SkillMetadata(
+                                null, "xlsx", "Make sheets", SkillSource.BUILT_IN, true, 0));
         String shipped = SkillPromptBlock.render(skills);
         String shippedCompact = SkillPromptBlock.renderCompact(skills);
-        override(PromptScope.TENANT, SkillPromptBlock.HEADER_KEY, "## Skills\nUse a skill when it fits.");
+        override(
+                PromptScope.TENANT,
+                SkillPromptBlock.HEADER_KEY,
+                "## Skills\nUse a skill when it fits.");
         override(PromptScope.AGENT, SkillPromptBlock.COMPACT_HEADER_KEY, "## Skills\nPick one:");
 
         ChatSystemPromptComposer.Composed full = compose(shipped, false);
         ChatSystemPromptComposer.Composed compact = compose(shippedCompact, true);
 
-        assertThat(full.systemPrompt()).startsWith("BASE\n\n## Skills\nUse a skill when it fits.\n- xlsx: Make sheets");
+        assertThat(full.systemPrompt())
+                .startsWith("BASE\n\n## Skills\nUse a skill when it fits.\n- xlsx: Make sheets");
         assertThat(full.systemPrompt()).doesNotContain("FIRST action");
         assertThat(compact.systemPrompt()).isEqualTo("BASE\n\n## Skills\nPick one: xlsx.\n");
     }
@@ -182,12 +219,15 @@ class TurnTextsOverrideTest {
     @Test
     void aSkillsBlockWithTheShippedHeaderIsLeftExactlyAsItWas() {
         List<SkillService.SkillMetadata> skills =
-                List.of(new SkillService.SkillMetadata(null, "xlsx", "Make sheets", SkillSource.BUILT_IN, true, 0));
+                List.of(
+                        new SkillService.SkillMetadata(
+                                null, "xlsx", "Make sheets", SkillSource.BUILT_IN, true, 0));
         String shipped = SkillPromptBlock.render(skills);
 
         assertThat(compose(shipped, false).systemPrompt()).isEqualTo("BASE" + shipped);
         assertThat(SkillPromptBlock.withHeader(shipped, null, false)).isSameAs(shipped);
-        assertThat(SkillPromptBlock.withHeader("something else", "## X", false)).isEqualTo("something else");
+        assertThat(SkillPromptBlock.withHeader("something else", "## X", false))
+                .isEqualTo("something else");
     }
 
     private ChatSystemPromptComposer.Composed compose(String skillsBlock, boolean smallModel) {
@@ -202,8 +242,10 @@ class TurnTextsOverrideTest {
                         PromptDirectiveComposer.standard(() -> true, () -> true),
                         List.of(),
                         false,
+                        false,
                         smallModel,
-                        new ChatSystemPromptComposer.Switches(false, false, false, false, false, false, ""),
+                        new ChatSystemPromptComposer.Switches(
+                                false, false, false, false, false, false, false, ""),
                         AGENT,
                         null,
                         null,
@@ -219,50 +261,83 @@ class TurnTextsOverrideTest {
         when(moderationProvider.getIfAvailable()).thenReturn(moderation);
         ChatGuardrailGate gate =
                 new ChatGuardrailGate(
-                        moderationProvider, mock(ObjectProvider.class), mock(ObjectProvider.class), null);
+                        moderationProvider,
+                        mock(ObjectProvider.class),
+                        mock(ObjectProvider.class),
+                        null);
         gate.prompts = a -> settings.forTurn(DAY, a);
         override(PromptScope.TENANT, "refusal.moderation.blocked", "Not allowed here.");
         override(PromptScope.AGENT, "refusal.moderation.queued", "A person will look at it.");
         override(PromptScope.PLATFORM, "refusal.safety_check_unavailable", "Check offline.");
 
         when(moderation.moderate(anyString(), any()))
-                .thenReturn(new ModerationOutcome(ModerationDecision.BLOCK, null, null, 99, "x", null));
-        assertThat(gate.moderateInbound(AGENT, "s", "alice", "m", "tenant-a", null).collectList().block())
+                .thenReturn(
+                        new ModerationOutcome(ModerationDecision.BLOCK, null, null, 99, "x", null));
+        assertThat(
+                        gate.moderateInbound(AGENT, "s", "alice", "m", "tenant-a", null)
+                                .collectList()
+                                .block())
                 .containsExactly("Not allowed here.");
 
         when(moderation.moderate(anyString(), any()))
-                .thenReturn(new ModerationOutcome(ModerationDecision.QUEUE_FOR_REVIEW, null, null, 50, "x", UUID.randomUUID()));
-        assertThat(gate.moderateInbound(AGENT, "s", "alice", "m", "tenant-a", null).collectList().block())
+                .thenReturn(
+                        new ModerationOutcome(
+                                ModerationDecision.QUEUE_FOR_REVIEW,
+                                null,
+                                null,
+                                50,
+                                "x",
+                                UUID.randomUUID()));
+        assertThat(
+                        gate.moderateInbound(AGENT, "s", "alice", "m", "tenant-a", null)
+                                .collectList()
+                                .block())
                 .containsExactly("A person will look at it.");
         // the other agent has no agent-scope override: the shipped queued text
-        assertThat(gate.moderateInbound(OTHER_AGENT, "s", "alice", "m", "tenant-a", null).collectList().block())
-                .containsExactly(PromptResolver.defaultsOnly().catalog().defaultText("refusal.moderation.queued"));
+        assertThat(
+                        gate.moderateInbound(OTHER_AGENT, "s", "alice", "m", "tenant-a", null)
+                                .collectList()
+                                .block())
+                .containsExactly(
+                        PromptResolver.defaultsOnly()
+                                .catalog()
+                                .defaultText("refusal.moderation.queued"));
 
         when(moderation.moderate(anyString(), any())).thenThrow(new IllegalStateException("down"));
-        assertThat(gate.moderateInbound(AGENT, "s", "alice", "m", "tenant-a", null).collectList().block())
+        assertThat(
+                        gate.moderateInbound(AGENT, "s", "alice", "m", "tenant-a", null)
+                                .collectList()
+                                .block())
                 .containsExactly("Check offline.");
     }
 
     @Test
     void theFabricatedLinkCorrectionAndTheGenericFailureAreStoredInTheOwnersWords() {
-        ChatIssueRecorder issues = new ChatIssueRecorder(mock(AgentService.class), mock(ObjectProvider.class));
+        ChatIssueRecorder issues =
+                new ChatIssueRecorder(mock(AgentService.class), mock(ObjectProvider.class));
         issues.prompts = a -> settings.forTurn(DAY, a);
-        override(PromptScope.TENANT, "message.fabricated_url.correction", "That link was invented.");
+        override(
+                PromptScope.TENANT, "message.fabricated_url.correction", "That link was invented.");
         override(PromptScope.TENANT, "message.generic_failure", "We hit a snag.");
 
-        assertThat(issues.recordAndCorrectFabricatedGenerationUrl(AGENT, "s", "https://x.test/a.pdf"))
+        assertThat(
+                        issues.recordAndCorrectFabricatedGenerationUrl(
+                                AGENT, "s", "https://x.test/a.pdf"))
                 .isEqualTo("That link was invented.");
 
         SessionMemoryService memory = mock(SessionMemoryService.class);
         ChatFailedReply failed = new ChatFailedReply(memory);
         failed.prompts = a -> settings.forTurn(DAY, a);
         // the error callback runs on a thread with no tenant: the sentence was taken on this one
-        Flux<String> stream = failed.withFailedReplyPersistence(Flux.error(new RuntimeException("boom")), AGENT, "s", () -> null);
+        Flux<String> stream =
+                failed.withFailedReplyPersistence(
+                        Flux.error(new RuntimeException("boom")), AGENT, "s", () -> null);
         TenantContext.clear();
         stream.onErrorResume(e -> Flux.empty()).blockLast();
         ArgumentCaptor<ChatTurn> stored = ArgumentCaptor.forClass(ChatTurn.class);
         verify(memory).appendTurn(eq("s"), stored.capture());
-        assertThat(stored.getValue().content()).isEqualTo(ChatTurn.FAILED_REPLY_PREFIX + "We hit a snag.");
+        assertThat(stored.getValue().content())
+                .isEqualTo(ChatTurn.FAILED_REPLY_PREFIX + "We hit a snag.");
     }
 
     // ---- nudges: one mechanism (the registry); an override wins ----
@@ -270,7 +345,8 @@ class TurnTextsOverrideTest {
     @Test
     void aNudgeOverrideBeatsTheShippedTextForItsAgentOnly() {
         TurnContinuation policy = new TurnContinuation(new ContinuationProperties());
-        String shipped = PromptResolver.defaultsOnly().catalog().defaultText(NudgeTexts.CONTINUE_UNFINISHED);
+        String shipped =
+                PromptResolver.defaultsOnly().catalog().defaultText(NudgeTexts.CONTINUE_UNFINISHED);
         override(PromptScope.AGENT, "nudge.continue_unfinished", "Go on and use the tools.");
         override(PromptScope.TENANT, "nudge.reply_cut_off", "Keep writing.");
 
@@ -278,9 +354,15 @@ class TurnTextsOverrideTest {
         assertThat(policy.nudge("en", settings.forTurn(DAY, OTHER_AGENT))).isEqualTo(shipped);
         assertThat(pd().text(NudgeTexts.REPLY_CUT_OFF)).isEqualTo("Keep writing.");
         assertThat(pd().text(NudgeTexts.RETRY_TOOL_CALL))
-                .isEqualTo(PromptResolver.defaultsOnly().catalog().defaultText(NudgeTexts.RETRY_TOOL_CALL));
+                .isEqualTo(
+                        PromptResolver.defaultsOnly()
+                                .catalog()
+                                .defaultText(NudgeTexts.RETRY_TOOL_CALL));
         assertThat(ResolvedDirectives.DEFAULTS.text(NudgeTexts.REPLY_CUT_OFF))
-                .isEqualTo(PromptResolver.defaultsOnly().catalog().defaultText(NudgeTexts.REPLY_CUT_OFF));
+                .isEqualTo(
+                        PromptResolver.defaultsOnly()
+                                .catalog()
+                                .defaultText(NudgeTexts.REPLY_CUT_OFF));
     }
 
     // ---- degraded step event ----
@@ -288,10 +370,23 @@ class TurnTextsOverrideTest {
     @Test
     void theDegradedStepEventUsesTheOwnersWording() {
         ChatTurnExecutor executor =
-                new ChatTurnExecutor(null, null, null, null, null, null, null, null, null, java.time.Duration.ofSeconds(30));
+                new ChatTurnExecutor(
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        java.time.Duration.ofSeconds(30));
         executor.setMeterRegistry(new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
         executor.prompts = a -> settings.forTurn(DAY, a);
-        override(PromptScope.TENANT, "message.degraded.tools_disabled", "Tools were off for this answer.");
+        override(
+                PromptScope.TENANT,
+                "message.degraded.tools_disabled",
+                "Tools were off for this answer.");
         AgentStepEventEmitter emitter = mock(AgentStepEventEmitter.class);
         when(emitter.isEnabled()).thenReturn(true);
         Agent agent = mock(Agent.class);
@@ -308,21 +403,38 @@ class TurnTextsOverrideTest {
     @Test
     void theDetectorListsFollowTheOwnersOverrides() {
         String link = "https://files.example.test/q3.pdf";
-        assertThat(ChatPromptDirectives.containsFabricatedGenerationUrl("Done: " + link, pd())).isFalse();
-        assertThat(ChatPromptDirectives.containsFabricatedGenerationUrl("https://evil.example.test/x", pd())).isFalse();
+        assertThat(ChatPromptDirectives.containsFabricatedGenerationUrl("Done: " + link, pd()))
+                .isFalse();
+        assertThat(
+                        ChatPromptDirectives.containsFabricatedGenerationUrl(
+                                "https://evil.example.test/x", pd()))
+                .isFalse();
 
-        override(PromptScope.TENANT, ChatPromptDirectives.FABRICATED_URL_CLAIM_PHRASES_KEY, "done:\nis ready");
-        override(PromptScope.TENANT, ChatPromptDirectives.FABRICATED_URL_MARKERS_KEY, "evil.example.test");
+        override(
+                PromptScope.TENANT,
+                ChatPromptDirectives.FABRICATED_URL_CLAIM_PHRASES_KEY,
+                "done:\nis ready");
+        override(
+                PromptScope.TENANT,
+                ChatPromptDirectives.FABRICATED_URL_MARKERS_KEY,
+                "evil.example.test");
 
-        assertThat(ChatPromptDirectives.containsFabricatedGenerationUrl("Done: " + link, pd())).isTrue();
-        assertThat(ChatPromptDirectives.containsFabricatedGenerationUrl("https://evil.example.test/x", pd())).isTrue();
+        assertThat(ChatPromptDirectives.containsFabricatedGenerationUrl("Done: " + link, pd()))
+                .isTrue();
+        assertThat(
+                        ChatPromptDirectives.containsFabricatedGenerationUrl(
+                                "https://evil.example.test/x", pd()))
+                .isTrue();
         // the shipped list is the fallback for any other tenant or call without settings
         assertThat(ChatPromptDirectives.containsFabricatedGenerationUrl("Done: " + link)).isFalse();
     }
 
     @Test
     void aBrokenFileLinkExpressionNeverLeavesTheGuardBlind() {
-        override(PromptScope.TENANT, ChatPromptDirectives.FABRICATED_URL_FILE_PATTERN_KEY, "([unclosed");
+        override(
+                PromptScope.TENANT,
+                ChatPromptDirectives.FABRICATED_URL_FILE_PATTERN_KEY,
+                "([unclosed");
 
         assertThat(
                         ChatPromptDirectives.containsFabricatedGenerationUrl(
@@ -345,12 +457,22 @@ class TurnTextsOverrideTest {
         assertThat(catalog.problems()).isEmpty();
         ResolvedDirectives multi =
                 new ResolvedDirectives(
-                        new DefaultPromptResolver(catalog, new InMemoryPromptOverrideStore(), new PromptProperties()),
+                        new DefaultPromptResolver(
+                                catalog, new InMemoryPromptOverrideStore(), new PromptProperties()),
                         PromptContext.none());
 
-        assertThat(ChatPromptDirectives.containsFabricatedGenerationUrl("Aqui: descarga https://x.test/informe.pdf", multi)).isTrue();
-        assertThat(ChatPromptDirectives.containsFabricatedGenerationUrl("The download is at https://x.test/a.pdf", multi)).isTrue();
-        assertThat(ChatPromptDirectives.containsFabricatedGenerationUrl("Aqui: https://x.test/informe.pdf", multi)).isFalse();
+        assertThat(
+                        ChatPromptDirectives.containsFabricatedGenerationUrl(
+                                "Aqui: descarga https://x.test/informe.pdf", multi))
+                .isTrue();
+        assertThat(
+                        ChatPromptDirectives.containsFabricatedGenerationUrl(
+                                "The download is at https://x.test/a.pdf", multi))
+                .isTrue();
+        assertThat(
+                        ChatPromptDirectives.containsFabricatedGenerationUrl(
+                                "Aqui: https://x.test/informe.pdf", multi))
+                .isFalse();
     }
 
     private static String classpath(String path) throws IOException {
@@ -363,12 +485,17 @@ class TurnTextsOverrideTest {
 
     @Test
     void aSwitchedOffOrUnknownTextStillGivesThePersonSomethingToRead() {
-        assertThat(pd().textOrShipped("refusal.moderation.blocked")).isEqualTo(
-                PromptResolver.defaultsOnly().catalog().defaultText("refusal.moderation.blocked"));
+        assertThat(pd().textOrShipped("refusal.moderation.blocked"))
+                .isEqualTo(
+                        PromptResolver.defaultsOnly()
+                                .catalog()
+                                .defaultText("refusal.moderation.blocked"));
         assertThat(pd().text("no.such_key")).isNull();
         List<ResolvedDirectives> seen = new ArrayList<>();
         seen.add(pd().recording());
         seen.get(0).textOrShipped("message.generic_failure");
-        assertThat(seen.get(0).trace()).extracting(r -> r.key()).containsExactly("message.generic_failure");
+        assertThat(seen.get(0).trace())
+                .extracting(r -> r.key())
+                .containsExactly("message.generic_failure");
     }
 }
