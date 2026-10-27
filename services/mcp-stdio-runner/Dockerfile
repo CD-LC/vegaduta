@@ -153,6 +153,9 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers \
 # and installing the browser via THAT package's own installer, guaranteeing
 # the binary on disk always matches what the pinned runtime package asks for.
 # playwright@1.64.0-alpha-1790635538000 is exactly the version @playwright/mcp@0.0.83 depends on.
+# CHROME_FOR_TESTING_VERSION: pinned literally - `chrome@stable` resolves through a
+# Google endpoint that can (and on 2026-10-26 did) go down mid-release.
+ARG CHROME_FOR_TESTING_VERSION=156.0.8078.47
 RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium \
     && npx --yes @playwright/mcp@0.0.83 install-browser chrome-for-testing \
     # server-puppeteer pre-warm (2026-08-19 incident): unlike playwright-vision
@@ -177,12 +180,12 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # see its dist/index.js), so install the fixed Chrome-for-Testing build
     # under its own path and point the launch at it via the ENV below - it
     # reaches spawned children through server.js's IMAGE_ENV_PASSTHROUGH.
-    # Chrome-for-Testing STABLE, resolved at build time: a pinned build goes
-    # stale within weeks and then fails the release scan again (153.0.8010.47
-    # did). `current` is a stable path for PUPPETEER_LAUNCH_OPTIONS above, and
-    # the 131 builds puppeteer@23.11.1 downloads for itself are removed so the
-    # image carries only the fixed one.
-    && npx --yes puppeteer@23.11.1 browsers install chrome@stable \
+    # Chrome-for-Testing, version pinned at build time - keep in sync with
+    # core/Dockerfile's CHROME_FOR_TESTING_VERSION. The `stable` tag resolves
+    # through googlechromelabs.github.io's last-known-good-versions.json, which
+    # went down mid-release on 2026-10-26 (HTTP 200, empty body); a literal
+    # version skips that fetch entirely. Bump when the release scan flags it.
+    && npx --yes puppeteer@23.11.1 browsers install chrome@${CHROME_FOR_TESTING_VERSION} \
     && rm -rf /opt/puppeteer-cache/chrome/linux-131.0.6778.204 /opt/puppeteer-cache/chrome-headless-shell/linux-131.0.6778.204 \
     && ln -sfn "$(ls -d /opt/puppeteer-cache/chrome/linux-* | sort -V | tail -n 1)" /opt/puppeteer-cache/chrome/current \
     && test -x /opt/puppeteer-cache/chrome/current/chrome-linux64/chrome \
