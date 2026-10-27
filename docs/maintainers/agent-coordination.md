@@ -131,6 +131,32 @@ break the build standalone.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-28, academy author (Devin, worktree `vd-academy`): ACTIVE CLAIM —
+  full re-record of Series A (episodes 00-10) on the flicker-free recorder
+  with the seeded Ledger newsroom dataset, Kokoro-82M local neural narration
+  (`academy/tools/narrate-kokoro.mjs`, new preference above edge-tts),
+  script passes rewritten to story-driven real-world newsroom framing, then
+  push `feat/academy-video-pipeline` + open the PR to main. Batch-committing
+  agent: please hold off sweeping academy/ until this lands — ping here if
+  you need to touch it first.
+
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): ACTIVE CLAIM on
+  Series-A lessons **06-10** (`06-guardrails`, `07-memory-learning`,
+  `08-quality`, `09-operate`, `10-ship`) - scripts + lesson.md twins only.
+  Lessons 00-05 are committed (`8e670962e`). If you are the batch-committing
+  agent, sweep `academy/lessons/0[6-9]-*/` and `10-*/` like the earlier ones;
+  do not re-number.
+
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): EXTENDED CLAIM —
+  Series-B deep-dive lessons for all 62 personal-edition routes, plus
+  narration upgrade to ElevenLabs (`academy/tools/narrate-elevenlabs.mjs`,
+  edge-tts stays the no-key fallback). Enterprise-only routes
+  (`/studio`, `/eval`, `/roi`, `/admin/mcp-servers`, `/admin/sso`,
+  `/admin/branding`, `/admin/payments`, `/admin/api-keys`,
+  `/admin/agent-trust`, `/admin/leads`, `/admin/commerce`,
+  `/shared-with-me`, `/directory`) are deferred until a lite/full stack
+  is installed for capture.
+
 - 2026-10-27, OSS-integrations agent (local Devin session): pushed
   `feat/oss-integrations-docling-composio-n8n` and opened a PR for the three Tier-1
   OSS-integration picks - Docling-first knowledge conversion (`services/docling` +
