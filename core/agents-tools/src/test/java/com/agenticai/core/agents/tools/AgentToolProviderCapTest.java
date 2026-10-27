@@ -276,6 +276,20 @@ class AgentToolProviderCapTest {
     }
 
     @Test
+    void alwaysRelevantToolNamesKeepTheKnowledgeBaseWriteAndReadPairTogether() {
+        // add_to_knowledge_base (the WRITE sibling) was missing while search_knowledge_base and
+        // list_knowledge_collections (the READ pair) were present - a write-enabled agent on a
+        // relevance-trimmed turn then saw only the read tools and reported "I can only search
+        // collections". Like remember_shared_fact it's a builtin with no MCP-family rescue, and
+        // it's only resolved for opted-in agents, so the listing costs nothing on read-only ones.
+        assertTrue(AgentToolSelection.ALWAYS_RELEVANT_TOOL_NAMES.contains("add_to_knowledge_base"));
+        assertTrue(AgentToolSelection.ALWAYS_RELEVANT_TOOL_NAMES.contains("search_knowledge_base"));
+        assertTrue(
+                AgentToolSelection.ALWAYS_RELEVANT_TOOL_NAMES.contains(
+                        "list_knowledge_collections"));
+    }
+
+    @Test
     void alwaysRelevantToolNamesKeepRequestHumanFromBeingTrimmedByRelevanceFiltering() {
         // request_human is a safety/escalation path, not a lexically-triggered tool - the user
         // does not always say "get me a human" before an agent should recognize it needs to
@@ -401,8 +415,7 @@ class AgentToolProviderCapTest {
         // overrides it (app.tools.hard-cap-per-turn, env TOOL_HARD_CAP_PER_TURN in
         // application.yml).
         List<String> expressions = new ArrayList<>();
-        for (java.lang.reflect.Constructor<?> c :
-                ToolResolver.class.getDeclaredConstructors()) {
+        for (java.lang.reflect.Constructor<?> c : ToolResolver.class.getDeclaredConstructors()) {
             for (java.lang.reflect.Parameter p : c.getParameters()) {
                 org.springframework.beans.factory.annotation.Value v =
                         p.getAnnotation(org.springframework.beans.factory.annotation.Value.class);
