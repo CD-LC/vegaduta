@@ -465,6 +465,16 @@ late. Fixed in release.yml (main-ancestry + CHANGELOG-section gate in prepare;
 scripts/ci/tag-ready.sh, a pre-flight humans run before tagging; releasing.md
 step 1 now points at it.
 
+### ACTIVE CLAIM: scorecard gaps (Devin, 2026-10-27)
+
+OpenSSF >8 push, split to avoid colliding with the claim above: taking
+log4j-api GHSA-qv9r-c865-cp47 (transitive via log4j-to-slf4j, NOT in
+#228's diff), the dependabot queue triage (29 PRs, approvals feed
+CodeReviewID), and FuzzingID investigation. NOT touching:
+Pinned-Dependencies, CodeQL triage, undici (all theirs in #228).
+MaintainedID score-0 is unfixable - the Oct-19 history rewrite makes the
+project read <90 days old; it self-heals with age.
+
 ### ACTIVE CLAIM: security hygiene + release/CI hardening (Devin, 2026-10-26)
 
 Working the OpenSSF Scorecard to >8 and clearing the open code-scanning
