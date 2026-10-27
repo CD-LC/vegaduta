@@ -237,4 +237,45 @@ class McpCatalogServiceTest {
         assertFalse(catalog.isStrictCatalogMatch("atlassian", McpServerType.STREAMABLE_HTTP, null, null, Set.of(),
             "https://mcp.atlassian.com.evil.example.com/v1/mcp"));
     }
+
+    @Test
+    void composioConnectAndRubeAreCredentialGatedRemoteEntriesPinnedToTheirExactEndpoints() {
+        // Composio's two hosted streamable-HTTP entries. On a remote
+        // registration every env entry is sent verbatim as an HTTP request
+        // header (McpRemoteHeaders#staticHeaders), so each requiredEnvVars
+        // key must stay a valid RFC7230 header name - "x-consumer-api-key"
+        // and "Authorization" both are.
+        McpCatalogEntry connect = service.find("composio-connect").orElseThrow(
+            () -> new AssertionError("composio-connect should be in the curated catalog"));
+        assertEquals(McpServerType.STREAMABLE_HTTP, connect.type());
+        assertFalse(connect.ready(), "needs the tenant's Composio API key, must not be one-click ready");
+        assertFalse(connect.requiresOAuth(), "a pasted API key, not a browser-redirect flow");
+        assertEquals(List.of("x-consumer-api-key"), connect.requiredEnvVars());
+        assertEquals("https://connect.composio.dev/mcp", connect.dynamicUrl());
+        assertTrue(connect.dynamicCommand() == null && connect.dynamicArgs() == null,
+            "a remote entry carries a URL, never a subprocess spec");
+
+        McpCatalogEntry rube = service.find("rube").orElseThrow(
+            () -> new AssertionError("rube should be in the curated catalog"));
+        assertEquals(McpServerType.STREAMABLE_HTTP, rube.type());
+        assertFalse(rube.ready());
+        assertFalse(rube.requiresOAuth());
+        assertEquals(List.of("Authorization"), rube.requiredEnvVars());
+        assertEquals("https://rube.app/mcp", rube.dynamicUrl());
+        assertTrue(rube.dynamicCommand() == null && rube.dynamicArgs() == null);
+
+        // Both endpoints are identical for every tenant, so SEC-002's
+        // exact-URL strict match makes a registration built from either
+        // entry catalog-sourced (no staff review, FREE plan allowed) - while
+        // a lookalike host still misses.
+        McpCatalogService catalog = new McpCatalogService();
+        assertTrue(catalog.isStrictCatalogMatch("composio-connect", McpServerType.STREAMABLE_HTTP,
+            null, null, Set.of("x-consumer-api-key"), "https://connect.composio.dev/mcp"));
+        assertFalse(catalog.isStrictCatalogMatch("composio-connect", McpServerType.STREAMABLE_HTTP,
+            null, null, Set.of("x-consumer-api-key"), "https://connect.composio.dev.evil.example.com/mcp"));
+        assertTrue(catalog.isStrictCatalogMatch("rube", McpServerType.STREAMABLE_HTTP,
+            null, null, Set.of("Authorization"), "https://rube.app/mcp"));
+        assertFalse(catalog.isStrictCatalogMatch("rube", McpServerType.STREAMABLE_HTTP,
+            null, null, Set.of("Authorization"), "https://rube.app.evil.example.com/mcp"));
+    }
 }

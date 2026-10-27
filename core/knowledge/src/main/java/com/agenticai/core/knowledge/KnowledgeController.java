@@ -57,7 +57,9 @@ public class KnowledgeController {
     // Kept as a literal list here (not sourced from extraction.py's
     // SUPPORTED_EXTENSIONS) since this is the HTTP-level "is this upload
     // even worth sending to the sidecar" check - .md never goes near the
-    // sidecar at all (see KnowledgeIngestionService.ingestFile).
+    // sidecar at all (see KnowledgeIngestionService.ingestFile). A deployment
+    // with the Docling service configured widens this at request time -
+    // see supportedExtensions().
     private static final List<String> SUPPORTED_EXTENSIONS =
         List.of(".md", ".pdf", ".docx", ".html", ".htm", ".png", ".jpg", ".jpeg", ".webp");
 
@@ -94,6 +96,10 @@ public class KnowledgeController {
     private final FileStorageService fileStorageService;
     private final KnowledgeReembedService reembedService;
     private final KnowledgeUrlIngester urlIngester;
+    // Docling-first extraction (app.knowledge.docling.base-url) - its extraExtensions() widen the
+    // upload allowlist while the service is configured; empty otherwise. Same "bean exists but is
+    // inert when unconfigured" profile-local wiring as the rest of this module.
+    private final DoclingConversionService doclingConversion;
 
     public KnowledgeController(
         KnowledgeIngestionService ingestionService,
@@ -103,7 +109,8 @@ public class KnowledgeController {
         KnowledgeDocumentService documentService,
         FileStorageService fileStorageService,
         KnowledgeReembedService reembedService,
-        KnowledgeUrlIngester urlIngester
+        KnowledgeUrlIngester urlIngester,
+        DoclingConversionService doclingConversion
     ) {
         this.ingestionService = ingestionService;
         this.searchService = searchService;
@@ -113,6 +120,18 @@ public class KnowledgeController {
         this.fileStorageService = fileStorageService;
         this.reembedService = reembedService;
         this.urlIngester = urlIngester;
+        this.doclingConversion = doclingConversion;
+    }
+
+    /** Upload allowlist: the base formats, plus Docling-only ones while that service is configured. */
+    private List<String> supportedExtensions() {
+        List<String> extra = doclingConversion.extraExtensionsSorted();
+        if (extra.isEmpty()) {
+            return SUPPORTED_EXTENSIONS;
+        }
+        List<String> merged = new java.util.ArrayList<>(SUPPORTED_EXTENSIONS);
+        merged.addAll(extra);
+        return List.copyOf(merged);
     }
 
     @PostMapping("/ingest")
@@ -163,9 +182,10 @@ public class KnowledgeController {
             throw new InvalidKnowledgeUploadException("Uploaded file is empty");
         }
         String filename = file.getOriginalFilename();
-        if (filename == null || SUPPORTED_EXTENSIONS.stream().noneMatch(ext -> filename.toLowerCase(java.util.Locale.ROOT).endsWith(ext))) {
+        List<String> supported = supportedExtensions();
+        if (filename == null || supported.stream().noneMatch(ext -> filename.toLowerCase(java.util.Locale.ROOT).endsWith(ext))) {
             throw new InvalidKnowledgeUploadException(
-                "Unsupported file type (got: " + filename + "). Supported: " + String.join(", ", SUPPORTED_EXTENSIONS)
+                "Unsupported file type (got: " + filename + "). Supported: " + String.join(", ", supported)
             );
         }
         if (file.getSize() > MAX_UPLOAD_BYTES) {

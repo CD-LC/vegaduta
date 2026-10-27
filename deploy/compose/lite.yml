@@ -15,6 +15,8 @@
 # Optional (scripts/vegaduta up --lite ...):
 #   --profile rag        adds the Python sidecar (document ingestion,
 #                        embeddings, rerank, transcription)
+#   --profile docling    adds the Docling document parser (services/docling):
+#                        layout-aware extraction ahead of the sidecar's /extract
 #   --profile workspace  workspace-runner: the Assistant's build terminal and
 #                        the projects folder it works in (VEGADUTA_PROJECTS_DIR)
 #
@@ -242,6 +244,9 @@ services:
       sidecar:
         condition: service_healthy
         required: false
+      docling:
+        condition: service_healthy
+        required: false
       mcp-stdio-runner:
         condition: service_healthy
         required: false
@@ -295,6 +300,12 @@ services:
       # cloud key or a registered local Ollama for embeddings.
       APP_SIDECAR_ENABLED: ${APP_SIDECAR_ENABLED:-false}
       APP_EMBEDDINGS_PROVIDER: ${APP_EMBEDDINGS_PROVIDER:-auto}
+      # The docling container only exists under --profile docling; the CLI
+      # exports DOCLING_BASE_URL=http://docling:8002 with it. Empty here keeps
+      # core's DoclingConversionService inert (same posture as APP_SIDECAR_ENABLED
+      # above: the feature reports off instead of failing calls at a missing host).
+      DOCLING_BASE_URL: ${DOCLING_BASE_URL:-}
+      DOCLING_SHARED_SECRET: ${DOCLING_SHARED_SECRET:-}
       # STDIO MCP servers run in the mcp-stdio-runner container (--profile tools;
       # the CLI exports MCP_STDIO_SIDECAR_ENABLED=true). With ",mcp" in
       # LITE_SPRING_PROFILES + CORE_IMAGE_VARIANT=-full they spawn inside core
@@ -484,6 +495,29 @@ services:
       resources:
         limits:
           memory: ${SIDECAR_MEM_LIMIT:-2g}
+
+  # -------------------------------------------------------- profile: docling
+  # Docling document parser (services/docling): layout-aware conversion to
+  # markdown for PDF/Office/image formats, ahead of the sidecar's /extract.
+  # No port is published - core reaches it over the default network only, when
+  # the CLI exports DOCLING_BASE_URL with the profile.
+  docling:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/docling:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["docling"]
+    <<: [*restart, *logging, *hardened]
+    environment:
+      DOCLING_SHARED_SECRET: ${DOCLING_SHARED_SECRET:?run scripts/vegaduta secrets}
+      DOCLING_AUTH_REQUIRED: "true"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${DOCLING_MEM_LIMIT:-3g}
 
   # ---------------------------------------------------------- profile: tools
   # STDIO MCP servers (workspace-registered `npx <pkg>` / `uvx <pkg>` and the

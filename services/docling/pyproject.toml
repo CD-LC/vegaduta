@@ -1,0 +1,44 @@
+# Ruff (lint + format) config for the docling service.
+#
+# Tool config ONLY, exactly like services/sidecar/pyproject.toml - there is no
+# [project]/[build-system] section because the service is not a package (the
+# Dockerfile pip-installs requirements.txt and COPYs app/, it never installs
+# this directory). The rule set below is kept identical to the sidecar's on
+# purpose; see that file's header comments for why per-service configs exist
+# and why these particular rules were selected/not-selected. If a repo-root
+# ruff config lands later, both service files should be deleted together.
+#
+# line-length = 100 and target-version = py312 match the sidecar (the image is
+# python:3.12-slim - the image, not the dev laptop, is the deployment truth).
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# Same selection as services/sidecar: ruff's default E4/E7/E9/F plus E501 and
+# the cheap upgrades the codebase already satisfies (isort-clean imports,
+# modern generics, raise-from hygiene). B008 is the canonical FastAPI false
+# positive - `x_internal_token: str = Header(default="")` in app/main.py is the
+# framework's documented DI idiom, evaluated per request.
+select = ["E4", "E7", "E9", "F", "E501", "I", "UP", "B", "C4", "RUF"]
+ignore = ["B008"]
+
+[tool.ruff.format]
+# Defaults on purpose (double quotes, 4-space indent) - they match the
+# existing style, so a future `ruff format` adoption produces the smallest
+# possible diff.
+
+# mypy (same NON-BLOCKING posture as services/sidecar/pyproject.toml): nothing
+# in CI runs it, but the shared-secret check in app/main.py and the parser
+# boundary in app/conversion.py are held to the strict profile:
+#   mypy app/main.py app/conversion.py
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+follow_imports = "silent"
+
+[[tool.mypy.overrides]]
+module = ["app.main", "app.conversion"]
+disallow_untyped_defs = true
+check_untyped_defs = true
