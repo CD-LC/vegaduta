@@ -564,3 +564,20 @@ Dockerfile via piper_voices_download.py --binary (the piper-tts PyPI package's
 rejects). Dockerfile also bakes en_US-lessac-medium (+json) sha256-verified.
 TTS selection moved to app/tts_select.py (main.py file-size ratchet). Verified:
 3 tts_piper pytest green, ruff clean on changed files, imports resolve.
+### CI: fuzz workflow -> ClusterFuzzLite (Devin, 2026-10-27)
+
+Scorecard's Fuzzing check only detects CFL/OSS-Fuzz integration, not a bare
+jazzer call, so .github/workflows/fuzz.yml now drives
+google/clusterfuzzlite/actions (sha-pinned v1). New .clusterfuzzlite/
+(project.yaml language:jvm, Dockerfile with pinned Temurin 21 + maven,
+build.sh) packages the two sanitizer targets into the canonical $OUT layout
+with jazzer launchers. Triggers/fuzz windows unchanged. Follow-ups on the
+same PR: build.sh jlinks JRE 21 into $OUT (the CFL run container ships JDK
+17 - UnsupportedClassVersionError - and jazzer_driver needs jdk.attach +
+JVM_LD_LIBRARY_PATH repointed; --cp globs expanded at run time). Dispatched
+run 40555305979: RedactionFuzzer 590,710 + ScrubberFuzzer 608,809 execs, 0
+crashes. Gate fixes: /.clusterfuzzlite added to dependabot docker dirs;
+--no-install-recommends (DS-0029); scoped .trivyignore entries for the
+build-only image (DS-0002/DS-0026) and the spring-webmvc 6.2.19 CVEs whose
+fix is the Spring 7 migration (#99) - the CVE exemption is also PR'd to
+main directly as #261 since it blocks every open PR's Trivy scan.
