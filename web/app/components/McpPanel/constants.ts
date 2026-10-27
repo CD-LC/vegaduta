@@ -12,6 +12,7 @@ import {
   Clock,
   Bug,
   BookOpen,
+  Flame,
   Mail,
   Send,
   PhoneCall,
@@ -42,6 +43,8 @@ export const CATALOG_ICONS: Record<string, any> = {
   "list-checks": ListChecks,
   clock: Clock,
   bug: Bug,
+  book: BookOpen,
+  flame: Flame,
 };
 
 // Built-in Tools (#164) - native platform capabilities, not external MCP
