@@ -40,6 +40,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "A system marked available but not engaged is provisioned for you and simply unused.",
       ],
       learnInAcademy: true,
+      academyTopic: "/operate",
     },
   },
   {
@@ -81,6 +82,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
       adminOnly: true,
       next: { label: "Test in Playground first", href: "/playground" },
       learnInAcademy: true,
+      academyTopic: "/channels",
     },
   },
   {
@@ -97,6 +99,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Built-in servers are listed read-only: their credentials are wired at deployment, not here.",
       ],
       learnInAcademy: true,
+      academyTopic: "/tools",
     },
   },
   {
@@ -111,6 +114,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Tools that reach your own systems ask for a key. Store it under Secrets.",
       ],
       learnInAcademy: true,
+      academyTopic: "/tools",
     },
   },
   {
@@ -124,6 +128,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Pick that secret when a tool or connector asks for a key.",
       ],
       learnInAcademy: true,
+      academyTopic: "/tools",
     },
   },
   {
@@ -261,6 +266,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Where a limit applies, the bar shows how close you are to it.",
       ],
       learnInAcademy: true,
+      academyTopic: "/operate",
     },
   },
   {
@@ -290,6 +296,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       adminOnly: true,
       learnInAcademy: true,
+      academyTopic: "/guardrails",
     },
   },
   {
@@ -305,6 +312,7 @@ export const TOOLS_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       adminOnly: true,
       learnInAcademy: true,
+      academyTopic: "/tools",
     },
   },
   {

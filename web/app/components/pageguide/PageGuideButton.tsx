@@ -64,11 +64,7 @@ export default function PageGuideButton({ isAdmin }: { isAdmin: boolean }) {
     function onDown(e: MouseEvent) {
       // The panel is portaled to document.body (see below), so "inside" is
       // either the trigger wrapper or the panel itself.
-      if (
-        e.target instanceof Node &&
-        !rootRef.current?.contains(e.target) &&
-        !panelRef.current?.contains(e.target)
-      )
+      if (e.target instanceof Node && !rootRef.current?.contains(e.target) && !panelRef.current?.contains(e.target))
         setOpen(false);
     }
     document.addEventListener("keydown", onKey);
@@ -100,7 +96,13 @@ export default function PageGuideButton({ isAdmin }: { isAdmin: boolean }) {
     const rect = trigger.getBoundingClientRect();
     const panelWidth = Math.min(352, window.innerWidth - 32);
     const left = Math.max(16, Math.min(rect.right - panelWidth, window.innerWidth - panelWidth - 16));
-    setPanelStyle({ position: "fixed", top: rect.bottom + 8, left, width: panelWidth, backgroundColor: "var(--surface-raised)" });
+    setPanelStyle({
+      position: "fixed",
+      top: rect.bottom + 8,
+      left,
+      width: panelWidth,
+      backgroundColor: "var(--surface-raised)",
+    });
   }, [open]);
 
   if (!guide) return null;
@@ -132,86 +134,90 @@ export default function PageGuideButton({ isAdmin }: { isAdmin: boolean }) {
           a non-none backdrop-filter makes it the containing block for fixed-
           positioned descendants - which anchors the panel's viewport
           coordinates to the header box and misplaces it entirely. */}
-      {open && createPortal(
-        <div
-          id={panelId}
-          ref={panelRef}
-          tabIndex={-1}
-          role="dialog"
-          aria-label={copy(`${guide.id}.title`, guide.title)}
-          className="z-50 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--surface-border)] p-4 text-left shadow-lg outline-none"
-          style={panelStyle}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <h2 className="text-sm font-semibold text-[var(--text-primary)]">
-              {copy(`${guide.id}.title`, guide.title)}
-            </h2>
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                triggerRef.current?.focus();
-              }}
-              aria-label={copy("close", "Close")}
-              className="flex size-6 shrink-0 items-center justify-center rounded border-0 bg-transparent p-0 text-[var(--text-muted)] shadow-none hover:bg-transparent hover:text-[var(--text-primary)]"
-            >
-              <X size={14} aria-hidden="true" />
-            </button>
-          </div>
-          <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">
-            {copy(`${guide.id}.purpose`, guide.purpose)}
-          </p>
-          <ol className="mt-3 space-y-2">
-            {guide.steps.map((step, i) => (
-              <li key={i} className="flex gap-2 text-xs leading-relaxed text-[var(--text-primary)]">
-                <span
-                  aria-hidden="true"
-                  className="flex size-5 shrink-0 items-center justify-center rounded-full border border-[var(--surface-border)] text-[length:var(--fs-micro)] font-semibold text-[var(--text-muted)]"
-                >
-                  {i + 1}
-                </span>
-                <span>{copy(`${guide.id}.step${i + 1}`, step)}</span>
-              </li>
-            ))}
-          </ol>
-          {guide.reassurance && (
-            <p className="mt-3 rounded-md border border-[var(--surface-border)] p-2 text-xs leading-relaxed text-[var(--text-muted)]">
-              {copy(`${guide.id}.reassurance`, guide.reassurance)}
+      {open &&
+        createPortal(
+          <div
+            id={panelId}
+            ref={panelRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-label={copy(`${guide.id}.title`, guide.title)}
+            className="z-50 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--surface-border)] p-4 text-left shadow-lg outline-none"
+            style={panelStyle}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+                {copy(`${guide.id}.title`, guide.title)}
+              </h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  triggerRef.current?.focus();
+                }}
+                aria-label={copy("close", "Close")}
+                className="flex size-6 shrink-0 items-center justify-center rounded border-0 bg-transparent p-0 text-[var(--text-muted)] shadow-none hover:bg-transparent hover:text-[var(--text-primary)]"
+              >
+                <X size={14} aria-hidden="true" />
+              </button>
+            </div>
+            <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">
+              {copy(`${guide.id}.purpose`, guide.purpose)}
             </p>
-          )}
-          {guide.next && (
-            <Link
-              href={guide.next.href}
-              onClick={() => setOpen(false)}
-              className="mt-3 inline-block text-xs font-semibold text-primary hover:underline"
-            >
-              {copy(`${guide.id}.next`, guide.next.label)} →
-            </Link>
-          )}
-          {/* The Academy teaches this surface — a plain link to the Academy
+            <ol className="mt-3 space-y-2">
+              {guide.steps.map((step, i) => (
+                <li key={i} className="flex gap-2 text-xs leading-relaxed text-[var(--text-primary)]">
+                  <span
+                    aria-hidden="true"
+                    className="flex size-5 shrink-0 items-center justify-center rounded-full border border-[var(--surface-border)] text-[length:var(--fs-micro)] font-semibold text-[var(--text-muted)]"
+                  >
+                    {i + 1}
+                  </span>
+                  <span>{copy(`${guide.id}.step${i + 1}`, step)}</span>
+                </li>
+              ))}
+            </ol>
+            {guide.reassurance && (
+              <p className="mt-3 rounded-md border border-[var(--surface-border)] p-2 text-xs leading-relaxed text-[var(--text-muted)]">
+                {copy(`${guide.id}.reassurance`, guide.reassurance)}
+              </p>
+            )}
+            {guide.next && (
+              <Link
+                href={guide.next.href}
+                onClick={() => setOpen(false)}
+                className="mt-3 inline-block text-xs font-semibold text-primary hover:underline"
+              >
+                {copy(`${guide.id}.next`, guide.next.label)} →
+              </Link>
+            )}
+            {/* The Academy teaches this surface — a plain link to the Academy
               origin (academyHref(); the OSS console never names private
               lesson ids). Distinct from `next`, which stays inside the
               console. Opens a new tab: it leaves the app. */}
-          {guide.learnInAcademy && hasAcademy() && (
-            <a
-              href={academyHref()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 block text-xs font-semibold text-primary hover:underline"
-            >
-              {copy(`${guide.id}.learn`, copy("learnCta", "Learn this in the Academy"))} →
-            </a>
-          )}
-          {/* Always last: a human is one email away, for ANY question. */}
-          <p className="mt-3 border-t border-[var(--surface-border)] pt-3 text-xs leading-relaxed text-[var(--text-muted)]">
-            {copy("helpLine", "Stuck, or just curious how agentic AI works? No question is too simple. Write to us at")}{" "}
-            <a href={`mailto:${ENTITY_FACTS.contactEmail}`} className="font-semibold text-primary hover:underline">
-              {ENTITY_FACTS.contactEmail}
-            </a>
-          </p>
-        </div>,
-        document.body
-      )}
+            {guide.learnInAcademy && hasAcademy() && (
+              <a
+                href={academyHref() + (guide.academyTopic ?? "")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 block text-xs font-semibold text-primary hover:underline"
+              >
+                {copy(`${guide.id}.learn`, copy("learnCta", "Learn this in the Academy"))} →
+              </a>
+            )}
+            {/* Always last: a human is one email away, for ANY question. */}
+            <p className="mt-3 border-t border-[var(--surface-border)] pt-3 text-xs leading-relaxed text-[var(--text-muted)]">
+              {copy(
+                "helpLine",
+                "Stuck, or just curious how agentic AI works? No question is too simple. Write to us at"
+              )}{" "}
+              <a href={`mailto:${ENTITY_FACTS.contactEmail}`} className="font-semibold text-primary hover:underline">
+                {ENTITY_FACTS.contactEmail}
+              </a>
+            </p>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
