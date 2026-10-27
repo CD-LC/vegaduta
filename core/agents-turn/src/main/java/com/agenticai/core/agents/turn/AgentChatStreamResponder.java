@@ -229,9 +229,10 @@ public final class AgentChatStreamResponder {
                                             context.scope()
                                                     .get(
                                                             () ->
-                                                                    agentChatService
-                                                                            .genericFailureMessage(
-                                                                                    agentId));
+                                                                    genericFailureMessage(
+                                                                            agentChatService
+                                                                                    .promptDirectiveSettings,
+                                                                            agentId));
                                     return Flux.just(
                                             AgentController.STREAM_ERROR_MARKER
                                                     + midStreamFailureMessage(e, generic));
@@ -317,6 +318,22 @@ public final class AgentChatStreamResponder {
      */
     public static String midStreamFailureMessage(Throwable error) {
         return midStreamFailureMessage(error, null);
+    }
+
+    /**
+     * The sentence a failed reply carries when the provider gave no message of its own: the
+     * agent's, its tenant's or the platform's wording of {@code message.generic_failure}, else the
+     * shipped one. Read in the calling thread's tenant. Never null, never throws.
+     */
+    static String genericFailureMessage(PromptDirectiveSettings settings, UUID agentId) {
+        try {
+            String text =
+                    settings.forTurn(java.time.LocalDate.now(java.time.ZoneOffset.UTC), agentId)
+                            .textOrShipped(GENERIC_FAILURE_KEY);
+            return text != null ? text : defaultGenericFailureMessage();
+        } catch (RuntimeException e) {
+            return defaultGenericFailureMessage();
+        }
     }
 
     /** The shipped wording of the generic sentence ({@code message.generic_failure}). */
