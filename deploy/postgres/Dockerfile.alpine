@@ -60,3 +60,6 @@ RUN apk add --no-cache --virtual .build-deps \
 # Same final user as the debian variant: the official entrypoint starts as
 # root and drops to postgres itself via gosu.
 USER root
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=10 \
+    CMD ["pg_isready", "-U", "postgres"]

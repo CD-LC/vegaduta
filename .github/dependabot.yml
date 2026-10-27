@@ -107,6 +107,7 @@ updates:
   - package-ecosystem: npm
     directories:
       - /tests/e2e
+      - /core/mcp-toolchain
       - /examples/mcp-servers/http-gateway
       - /examples/mcp-servers/home-assistant
       - /services/piece-host
