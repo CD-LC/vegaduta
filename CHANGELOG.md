@@ -22,6 +22,7 @@ Release notes on GitHub are generated from the section for each version.
   now enforced per node attempt by the in-process engine (the attempt is
   interrupted and fails), parallel branches are cancelled when a sibling fails,
   and the parallel join is bounded.
+- **Untrusted-content taint now covers auto-injected memory recall and the workflow `knowledge` node.** A non-empty recalled-facts block injected into the prompt marks the turn tainted (source `memory_recall`; sinks need approval in enforce mode, recorded in observe mode) via `TurnTaintSeeds`, bound to the turn's taint key when tools are resolved. The `knowledge` workflow node wraps retrieved chunks in the untrusted-data spotlight with numbered source citations, skips with a clear result on an invalid `collectionId`, and clamps `topK` to 1..20.
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
   capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on

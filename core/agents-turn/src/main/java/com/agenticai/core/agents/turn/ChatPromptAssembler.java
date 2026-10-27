@@ -58,6 +58,16 @@ final class ChatPromptAssembler {
 
     private static final Logger log = LoggerFactory.getLogger(ChatPromptAssembler.class);
 
+    /** The taint-source label recorded when recalled memory is injected into the prompt. */
+    static final String MEMORY_RECALL_TAINT_SOURCE = "memory_recall";
+
+    /** Marks the turn as having untrusted content in its prompt when a non-empty recalled block is injected. */
+    static void taintIfRecalled(TurnContext context, String recalledMemory) {
+        if (context != null && recalledMemory != null && !recalledMemory.isBlank()) {
+            context.toolActivity().taintSeeds().mark(MEMORY_RECALL_TAINT_SOURCE);
+        }
+    }
+
     /**
      * The conversation replayed to the model, and whether any of its assistant turns starts with
      * the platform's tool record ({@link ToolLedger}) - the cue to tell the model the record is
@@ -409,6 +419,12 @@ final class ChatPromptAssembler {
         // the
         // prompt preview calls the same method, so what it shows is what a turn sends.
         java.time.LocalDate todayUtc = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
+        // Recalled facts are content an outsider may have authored (recall_related_facts is
+        // UNTRUSTED_EXTERNAL) and this path bypasses the tool guard, so a non-empty block taints the
+        // turn here; tool resolution binds the turn's taint key to these seeds (TurnTaintSeeds).
+        String recalledMemory =
+                joinPreTurnOrDegrade(memoryFuture, null, "memory", preTurnDeadlineNanos);
+        taintIfRecalled(context, recalledMemory);
         ChatSystemPromptComposer.Composed composed =
                 ChatSystemPromptComposer.compose(
                         new ChatSystemPromptComposer.Input(
@@ -428,8 +444,7 @@ final class ChatPromptAssembler {
                                 replayedHistory.hasToolRecord()
                                         ? svc.turns.toolLedger.getTrustNote()
                                         : null,
-                                joinPreTurnOrDegrade(
-                                        memoryFuture, null, "memory", preTurnDeadlineNanos)));
+                                recalledMemory));
         String systemPrompt = composed.systemPrompt();
         String memoryBlock = composed.memoryBlock();
         // Tells the request inspector which registry key / scope / version each block of the system
