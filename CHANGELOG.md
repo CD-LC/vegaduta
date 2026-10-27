@@ -44,6 +44,12 @@ Release notes on GitHub are generated from the section for each version.
   importable VegaDūta workflow template (HTTP node -> n8n webhook), an
   importable n8n workflow (HTTP Request -> platform agent), and a README
   covering both directions.
+- **Academy: scriptable how-to video pipeline.** `academy/` holds lessons
+  authored as machine-readable scripts (narration text + Playwright
+  actions per scene); `academy/tools/` narrates them with edge-tts and
+  assembles captioned mp4s with ffmpeg, and `tests/e2e/video/` records the
+  console footage. A UI change means re-running a script, not re-shooting
+  a video. Curriculum index: `academy/lessons/INDEX.md`.
 
 ## [0.1.12] - 2026-10-26
 
