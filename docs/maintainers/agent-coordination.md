@@ -122,6 +122,13 @@ break the build standalone.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): ACTIVE CLAIM on
+  Series-A lessons **06-10** (`06-guardrails`, `07-memory-learning`,
+  `08-quality`, `09-operate`, `10-ship`) - scripts + lesson.md twins only.
+  Lessons 00-05 are committed (`8e670962e`). If you are the batch-committing
+  agent, sweep `academy/lessons/0[6-9]-*/` and `10-*/` like the earlier ones;
+  do not re-number.
+
 - 2026-10-27, OSS-integrations agent (local Devin session): pushed
   `feat/oss-integrations-docling-composio-n8n` and opened a PR for the three Tier-1
   OSS-integration picks - Docling-first knowledge conversion (`services/docling` +
