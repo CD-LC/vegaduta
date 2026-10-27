@@ -31,7 +31,7 @@ for clip in "$DIST"/clips/scene-*.webm; do
   target=$(awk "BEGIN{print $adur + $PAD}")
   freeze=$(awk "BEGIN{d=$target-$vdur; if(d>0) print d; else print 0}")
   ffmpeg -y -i "$clip" -i "$DIST/scene-$n.mp3" \
-    -filter_complex "[0:v]scale=$W:$H,fps=30,tpad=stop_mode=clone:stop=$freeze,setsar=1[v];[1:a]apad=whole_dur=$target[a]" \
+    -filter_complex "[0:v]scale=$W:$H,fps=30,tpad=stop_mode=clone:stop=$freeze,setsar=1[v];[1:a]apad=whole_dur=${target}[a]" \
     -map "[v]" -map "[a]" -t "$target" -c:v libx264 -pix_fmt yuv420p \
     -c:a aac -ar 44100 -ac 2 "$WORK/scene-$n.mp4" 2>/dev/null
   echo "file '$WORK/scene-$n.mp4'" >> "$list"
