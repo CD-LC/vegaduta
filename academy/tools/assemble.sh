@@ -17,7 +17,8 @@ dur() { ffprobe -v error -show_entries format=duration -of csv=p=0 "$1"; }
 
 card() { # $1 png $2 out $3 dur — still image + silent audio
   ffmpeg -y -loop 1 -t "$3" -i "$1" -f lavfi -i "anullsrc=d=$3" \
-    -vf "scale=$W:$H,fps=30,setsar=1" -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "$2" 2>/dev/null
+    -vf "scale=$W:$H,fps=30,setsar=1" -c:v libx264 -pix_fmt yuv420p \
+    -c:a aac -ar 44100 -ac 2 -shortest "$2" 2>/dev/null
 }
 
 card "$DIST/cards/title.png" "$WORK/title.mp4" 3.5
@@ -31,14 +32,18 @@ for clip in "$DIST"/clips/scene-*.webm; do
   freeze=$(awk "BEGIN{d=$target-$vdur; if(d>0) print d; else print 0}")
   ffmpeg -y -i "$clip" -i "$DIST/scene-$n.mp3" \
     -filter_complex "[0:v]scale=$W:$H,fps=30,tpad=stop_mode=clone:stop=$freeze,setsar=1[v];[1:a]apad=whole_dur=$target[a]" \
-    -map "[v]" -map "[a]" -t "$target" -c:v libx264 -pix_fmt yuv420p -c:a aac "$WORK/scene-$n.mp4" 2>/dev/null
+    -map "[v]" -map "[a]" -t "$target" -c:v libx264 -pix_fmt yuv420p \
+    -c:a aac -ar 44100 -ac 2 "$WORK/scene-$n.mp4" 2>/dev/null
   echo "file '$WORK/scene-$n.mp4'" >> "$list"
   echo "[academy] scene $n (audio ${adur}s -> ${target}s)"
 done
 
 card "$DIST/cards/end.png" "$WORK/end.mp4" 3
 { echo "file '$WORK/title.mp4'"; cat "$list"; echo "file '$WORK/end.mp4'"; } > "$WORK/all.txt"
-ffmpeg -y -f concat -safe 0 -i "$WORK/all.txt" -c copy "$DIST/$SLUG.mp4" 2>/dev/null
+# Re-encode audio at the merge: -c copy would splice mismatched AAC headers
+# (cards are 44.1k stereo, narration starts 24k mono) into a corrupt track.
+ffmpeg -y -f concat -safe 0 -i "$WORK/all.txt" \
+  -c:v copy -c:a aac -ar 44100 -ac 2 -b:a 160k "$DIST/$SLUG.mp4" 2>/dev/null
 
 # word-timed captions -> single .srt with cumulative offsets (edge-tts
 # .vtt output is actually SRT-shaped: comma decimals, numbered cues)

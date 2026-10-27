@@ -19,6 +19,13 @@ export default {
       do: [["goto", "/memory"], ["highlight", "text=Choose assistants", 1800], ["wait", 1400]],
     },
     {
+      say: "Proof it works: I ask the Editor-in-Chief what the Fact-Checker must verify before anything publishes. It answers from the newsroom's stored memory — the six AM embargo, verified names and figures — rules we seeded once, recalled every time.",
+      do: [["goto", "/agents?agentId=67eb3d14-ded1-4055-af0d-ea754945ca73"], ["wait", 4000],
+           ["waitFor", "textarea[placeholder*='Send a test message']", 20000],
+           ["fill", "textarea[placeholder*='Send a test message']", "What must the Fact-Checker verify before any story publishes? Answer in two short sentences."],
+           ["keys", "Enter"], ["waitFor", "text=/verif|embargo|fact/i", 45000], ["wait", 2500]],
+    },
+    {
       say: "Skills are the other kind of memory — packaged expertise an agent loads only when a task needs it. A story engine, a decision helper: each card opens the Playground with a ready-made prompt so you can try it on a real agent.",
       do: [["goto", "/skills"], ["wait", 2200], ["highlight", "text=story-engine", 1600]],
     },

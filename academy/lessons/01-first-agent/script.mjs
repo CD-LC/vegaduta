@@ -30,6 +30,13 @@ export default {
       do: [["goto", "/admin/runtime-settings"], ["wait", 2500]],
     },
     {
+      say: "Now watch it actually answer. In the Editor-in-Chief's test console we ask the house embargo time — and it replies from memory: six AM. Under the answer you can see the run telemetry: the steps it took, the model that ran, and the tokens it spent.",
+      do: [["goto", "/agents?agentId=67eb3d14-ded1-4055-af0d-ea754945ca73"], ["wait", 4000],
+           ["waitFor", "textarea[placeholder*='Send a test message']", 20000],
+           ["fill", "textarea[placeholder*='Send a test message']", "What is the house embargo time? One short sentence."],
+           ["keys", "Enter"], ["waitFor", "text=/6:00|6 AM|six/i", 45000], ["wait", 2500]],
+    },
+    {
       say: "Back in the workbench, Save draft keeps the agent private while we iterate — nothing can call it until it's published. Next episode we give it a library to read.",
       do: [["goto", "/agents?new=1"], ["wait", 1500], ["click", "text=Save draft"], ["wait", 2000]],
     },
