@@ -33,24 +33,31 @@ class ParallelBranchRunnerTest {
             WorkflowNodeDto failing = node("failing");
 
             long startedAt = System.nanoTime();
-            ParallelBranchRunner.Joined joined = runner.run(List.of(slow, failing), branch -> {
-                if (branch.id().equals("failing")) {
-                    throw new IllegalStateException("boom");
-                }
-                try {
-                    Thread.sleep(5_000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                return WorkflowNodeExecutor.NodeExecutionResult.ok("x", "done", null);
-            });
+            ParallelBranchRunner.Joined joined =
+                    runner.run(
+                            List.of(slow, failing),
+                            branch -> {
+                                if (branch.id().equals("failing")) {
+                                    throw new IllegalStateException("boom");
+                                }
+                                try {
+                                    Thread.sleep(5_000);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                }
+                                return WorkflowNodeExecutor.NodeExecutionResult.ok(
+                                        "x", "done", null);
+                            });
             long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
 
             assertNotNull(joined.failure());
             assertEquals("failing", joined.failedBranch().id());
-            assertTrue(elapsedMillis < 2_000,
-                "joined after " + elapsedMillis + "ms - a completion-order join must not wait"
-                    + " for the 5s slow branch");
+            assertTrue(
+                    elapsedMillis < 2_000,
+                    "joined after "
+                            + elapsedMillis
+                            + "ms - a completion-order join must not wait"
+                            + " for the 5s slow branch");
         } finally {
             executor.shutdownNow();
         }
@@ -62,13 +69,18 @@ class ParallelBranchRunnerTest {
         try {
             ParallelBranchRunner runner = new ParallelBranchRunner(executor);
             List<WorkflowNodeDto> branches = List.of(node("a"), node("b"), node("c"));
-            ParallelBranchRunner.Joined joined = runner.run(branches, branch ->
-                WorkflowNodeExecutor.NodeExecutionResult.ok(branch.id(), "done", null));
+            ParallelBranchRunner.Joined joined =
+                    runner.run(
+                            branches,
+                            branch ->
+                                    WorkflowNodeExecutor.NodeExecutionResult.ok(
+                                            branch.id(), "done", null));
 
             assertNull(joined.failure());
             assertEquals(3, joined.outcomes().size());
-            assertEquals(List.of("a", "b", "c"), joined.outcomes().stream()
-                .map(o -> o.node().id()).sorted().toList());
+            assertEquals(
+                    List.of("a", "b", "c"),
+                    joined.outcomes().stream().map(o -> o.node().id()).sorted().toList());
         } finally {
             executor.shutdownNow();
         }
@@ -82,16 +94,20 @@ class ParallelBranchRunnerTest {
             WorkflowNodeDto slow = node("slow");
             WorkflowNodeDto fast = node("fast");
 
-            ParallelBranchRunner.Joined joined = runner.run(List.of(slow, fast), branch -> {
-                if (branch.id().equals("slow")) {
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-                return WorkflowNodeExecutor.NodeExecutionResult.ok(branch.id(), "done", null);
-            });
+            ParallelBranchRunner.Joined joined =
+                    runner.run(
+                            List.of(slow, fast),
+                            branch -> {
+                                if (branch.id().equals("slow")) {
+                                    try {
+                                        Thread.sleep(500);
+                                    } catch (InterruptedException e) {
+                                        Thread.currentThread().interrupt();
+                                    }
+                                }
+                                return WorkflowNodeExecutor.NodeExecutionResult.ok(
+                                        branch.id(), "done", null);
+                            });
 
             assertNull(joined.failure());
             assertEquals(2, joined.outcomes().size());

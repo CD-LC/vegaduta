@@ -23,9 +23,9 @@ import org.springframework.ai.tool.definition.ToolDefinition;
 /**
  * A {@code tool} node's side effect is whatever the resolved tool does, so workflow execution's
  * at-least-once posture (node retry, Temporal activity retry, recovered run) must not reach it
- * twice: the handler claims (runId, nodeId, hash of the resolved call input) through the same {@link
- * WorkflowOutputDedupGuard} the output destinations use, suppresses a replayed claim, and releases
- * the claim when the call never completed so a legitimate retry can still go through.
+ * twice: the handler claims (runId, nodeId, hash of the resolved call input) through the same
+ * {@link WorkflowOutputDedupGuard} the output destinations use, suppresses a replayed claim, and
+ * releases the claim when the call never completed so a legitimate retry can still go through.
  */
 class ToolNodeHandlerDedupTest {
 
@@ -116,18 +116,7 @@ class ToolNodeHandlerDedupTest {
 
     private NodeInvocation inv(WorkflowNodeDto node, String input, ExpressionScope scope) {
         return new NodeInvocation(
-                node,
-                node,
-                input,
-                "wf",
-                "wf",
-                RUN,
-                "tester",
-                null,
-                List.of(),
-                null,
-                null,
-                scope,
+                node, node, input, "wf", "wf", RUN, "tester", null, List.of(), null, null, scope,
                 false);
     }
 }

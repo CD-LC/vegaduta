@@ -4,9 +4,9 @@ import static com.agenticai.core.workflow.WorkflowNodeSupport.safeLength;
 import static com.agenticai.core.workflow.WorkflowNodeSupport.stringConfig;
 import static com.agenticai.core.workflow.WorkflowNodeSupport.truncate;
 
+import com.agenticai.core.agents.tools.AgentToolProvider;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.agenticai.core.agents.tools.AgentToolProvider;
 import com.agenticai.core.workflow.output.WorkflowOutputDedupGuard;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,19 +108,25 @@ class ToolNodeHandler implements NodeHandler {
             // idempotent - claim (runId, nodeId, hash of the resolved call input) before the
             // call, the same last-hop contract the output/bulk_email dedup guard uses. Loop /
             // fan-out iterations land in the key via the scope index plus the per-item args.
-            String dedupKey = dedupGuard == null
-                    ? null
-                    : dedupGuard.identityKey(
-                            "tool",
-                            runId,
-                            node.id(),
-                            (scope != null && scope.index() != null ? scope.index() + "|" : "")
-                                    + toolInput);
+            String dedupKey =
+                    dedupGuard == null
+                            ? null
+                            : dedupGuard.identityKey(
+                                    "tool",
+                                    runId,
+                                    node.id(),
+                                    (scope != null && scope.index() != null
+                                                    ? scope.index() + "|"
+                                                    : "")
+                                            + toolInput);
             if (dedupKey != null && !dedupGuard.tryClaim(dedupKey)) {
-                logLines.add("Tool '" + toolName + "' already ran for this run - replay suppressed.");
+                logLines.add(
+                        "Tool '" + toolName + "' already ran for this run - replay suppressed.");
                 return NodeExecutionResult.ok(
                         "{\"deduplicated\":true,\"tool\":\"" + toolName + "\"}",
-                        "Tool '" + toolName + "' already ran for this run (idempotent replay suppressed).",
+                        "Tool '"
+                                + toolName
+                                + "' already ran for this run (idempotent replay suppressed).",
                         null,
                         logLines);
             }
