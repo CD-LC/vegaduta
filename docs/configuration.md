@@ -2075,6 +2075,12 @@ Android builds of a generated Capacitor app read `ANDROID_KEYSTORE_PATH`, `ANDRO
 | `ELEVEN_API_KEY` | unset | fallback for `ELEVENLABS_API_KEY` (a secret) |
 | `ELEVENLABS_MODEL` | `eleven_turbo_v2_5` | ElevenLabs model |
 | `SARVAM_SPEAKER` | empty | as in the sidecar |
+| `VOICE_AGENT_TTS_PROVIDER` | `auto` | TTS backend: `auto`, `elevenlabs`, `sarvam`, or `piper` (local, keyless ONNX TTS in the worker - no vendor key needed; not part of `auto`'s ordering) |
+| `PIPER_BIN` | `piper` | piper executable path |
+| `PIPER_MODEL_DIR` | `/opt/piper-voices` | directory voice `.onnx` files resolve under; the image bakes `en_US-lessac-medium` here |
+| `PIPER_VOICE` | `en_US-lessac-medium` | voice name under `PIPER_MODEL_DIR`, or an `.onnx` path |
+| `PIPER_SPEAKER_ID` | `-1` | speaker index for multi-speaker voice models; `-1` passes no `--speaker` argument |
+| `PIPER_SAMPLE_RATE` | `22050` | must match the voice model's own sample rate (16kHz low / 22.05kHz medium-high) |
 | `PERCEPTION_SCENE_DIFF_THRESHOLD` | `0.10` | how much a camera frame must change (0 to 1, mean grayscale difference) before the agent looks again; raise it for less chatter |
 | `VOICE_AGENT_VAD_MIN_SILENCE_DURATION_S` | `0.35` | silence that ends a turn; raise for slow speakers or noisy rooms |
 | `VOICE_AGENT_LOG_LEVEL` | `INFO` | log level |

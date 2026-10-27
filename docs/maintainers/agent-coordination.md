@@ -131,6 +131,15 @@ break the build standalone.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): reviewed PR #254's
+  CI failures (piper-tts GPL-3.0 dep review rejection, main.py 691>678 file
+  ratchet, ruff) — `d51860556` resolves all three and is verified locally
+  (ruff 0.12.4 gate clean on changed files, main.py now 555, MIT binary path
+  sha256-pinned). NOTE: worktree `/private/tmp/va-fix` still has pre-fix
+  `3d6776cd7` checked out — pull before touching it further. Watching CI on
+  the new head; also re-triggered #253's flaky AgeOptionalIT run (flyway
+  history PK race, unrelated to that PR's catalog change).
+
 - 2026-10-28, academy author (Devin, worktree `vd-academy`): ACTIVE CLAIM —
   full re-record of Series A (episodes 00-10) on the flicker-free recorder
   with the seeded Ledger newsroom dataset, Kokoro-82M local neural narration
@@ -542,3 +551,16 @@ num_ctx/num_batch/keep_alive/reasoning_effort/response_format/tool_choice; and
 the SSRF-guard mechanics). getting-started.md + operations/README.md gained the
 previously undocumented `scripts/vegaduta reset-password` local-account
 recovery path.
+
+### Voice: piper local TTS provider (Devin, 2026-10-27)
+
+services/voice-agent gained a third TTS backend: app/tts_piper.py wraps the
+`piper` subprocess CLI in the same one-shot ChunkedStream shape as
+tts_sarvam.py; VOICE_AGENT_TTS_PROVIDER=piper selects it (deliberately not in
+"auto"'s ordering - a local voice is a conscious quality pick). The binary is
+the MIT rhasspy/piper release tarball, fetched per-arch + sha256-pinned in the
+Dockerfile via piper_voices_download.py --binary (the piper-tts PyPI package's
+>=1.3 releases are the GPL-3.0 piper1-gpl lineage, which dependency review
+rejects). Dockerfile also bakes en_US-lessac-medium (+json) sha256-verified.
+TTS selection moved to app/tts_select.py (main.py file-size ratchet). Verified:
+3 tts_piper pytest green, ruff clean on changed files, imports resolve.
