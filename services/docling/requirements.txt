@@ -1,9 +1,9 @@
-fastapi==0.143.2
+fastapi==0.151.0
 # Explicit security floor, identical to services/sidecar/requirements.txt:
 # fastapi's own starlette range does not enforce the advisory-free version, so
 # it is pinned here directly. One FastAPI/Starlette/Uvicorn baseline across
 # every Python service.
-starlette==1.8.0
+starlette==1.9.0
 uvicorn[standard]==0.54.0
 
 # IBM/LF AI & Data document parser - the whole reason this service exists.
