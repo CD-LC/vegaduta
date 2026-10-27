@@ -171,7 +171,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends zip unzip \
 
 # ---- JRE variants (JRE=full|jlink) ----------------------------------------
 # jre-full is the unmodified temurin JRE (~230 MB of platform modules).
-FROM eclipse-temurin:21.0.12.1_1-jre-noble@sha256:35501d3f93173b420ac9001658eb68157e813316b865087e345c187fca422c4c AS jre-full
+FROM eclipse-temurin:24.0.2_12-jre-noble@sha256:b416d02335e702b0403ff280de9475a3348e29382285969c9d4e17862ce632e7 AS jre-full
 
 # jre-jlink keeps the same jre-jammy base (same glibc, CA store and packages)
 # but replaces /opt/java/openjdk with a jlink-minimal runtime - roughly half
@@ -181,7 +181,7 @@ FROM eclipse-temurin:21.0.12.1_1-jre-noble@sha256:35501d3f93173b420ac9001658eb68
 # (nested-jar reads) are the ones jdeps-style analysis misses. A missing
 # module fails loudly at JVM start; report the name and rebuild with
 # JRE=full.
-FROM eclipse-temurin:21.0.12.1_1-jdk-noble@sha256:107215954359f1ab0be058a247d7c64ed6e69c71c1682d471d38ef751ec8e964 AS jre-linker
+FROM eclipse-temurin:24.0.2_12-jdk-noble@sha256:dacac8e9a0df0d2bd24e702b4431132875c249930b70555ebd7ca285b5bee684 AS jre-linker
 RUN "$JAVA_HOME/bin/jlink" \
         --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.management.rmi,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.transaction.xa,java.xml,jdk.crypto.ec,jdk.jfr,jdk.localedata,jdk.unsupported,jdk.unsupported.desktop,jdk.zipfs \
         --strip-debug --no-man-pages --no-header-files --compress=zip-6 \
