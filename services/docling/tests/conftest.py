@@ -2,6 +2,7 @@
 Puts the docling service root on sys.path so tests can `from app.x import y`
 regardless of where pytest is invoked from (repo root or docling/).
 """
+
 import sys
 from pathlib import Path
 

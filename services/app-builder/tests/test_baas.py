@@ -74,12 +74,61 @@ class _FakeConn:
         pass
 
 
+class _FakeSqlSQL:
+    """Minimal psycopg.sql.SQL: format() renders positional {} and {name}
+    slots, so the cursor sees the same plain strings the real driver would
+    send."""
+
+    def __init__(self, template):
+        self.template = template
+
+    def format(self, *args, **kwargs):
+        rendered = self.template
+        for value in args:
+            rendered = rendered.replace("{}", str(value), 1)
+        for name, value in kwargs.items():
+            rendered = rendered.replace("{" + name + "}", str(value))
+        return rendered
+
+    def __str__(self):
+        return self.template
+
+
+class _FakeSqlIdentifier:
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return '"%s"' % self.name.replace('"', '""')
+
+
+class _FakeSqlLiteral:
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return "'%s'" % str(self.value).replace("'", "''")
+
+
+class _FakeSql:
+    SQL = _FakeSqlSQL
+    Identifier = _FakeSqlIdentifier
+    Literal = _FakeSqlLiteral
+
+
+class _FakePsycopgErrors:
+    class SyntaxError(Exception):
+        pass
+
+
 class _FakePsycopgModule:
     """Stands in for the `psycopg` package in sys.modules so baas.py's
     `import psycopg` picks this up instead of needing the real driver (or a
     real Postgres) installed for the test."""
 
     urls: list[str] = []
+    sql = _FakeSql
+    errors = _FakePsycopgErrors
 
     @staticmethod
     def connect(url, autocommit=False):
