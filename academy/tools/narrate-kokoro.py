@@ -22,7 +22,8 @@ VOICE = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] else "af_heart"
 
 says = json.loads(subprocess.run(
     ["node", "--input-type=module", "-e",
-     f"const s=(await import('{DIR}/script.mjs')).default;"
+     "import { pathToFileURL } from 'node:url';"
+     f"const s=(await import(pathToFileURL('{os.path.abspath(DIR)}/script.mjs').href)).default;"
      "console.log(JSON.stringify(s.scenes.map(sc=>sc.say)))"],
     capture_output=True, text=True, check=True).stdout)
 
