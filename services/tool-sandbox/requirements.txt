@@ -2,8 +2,8 @@
 # boundary service, so a rebuild must never pull a different tree. The image
 # installs requirements.lock (full transitive tree, sha256-hashed, generated
 # from this file) with --require-hashes; regenerate with services/lock-requirements.sh.
-fastapi==0.143.2
+fastapi==0.150.0
 # Security floor, see services/app-builder/requirements.txt.
-starlette==1.8.0
+starlette==1.9.0
 uvicorn[standard]==0.54.0
 pydantic==2.14.1
