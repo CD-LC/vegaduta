@@ -10,6 +10,21 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Auto-injected retrieval and inbound channel turns now propagate taint to tool gates.**
+  Previously, only explicit `UNTRUSTED_EXTERNAL` tool calls (such as `fetch_web_page` or
+  `search_knowledge_base`) marked a turn as tainted. Auto-injected context bypassed the taint gate:
+  - `ChatPromptAssembler` now marks the turn tainted with `recall_related_facts` whenever
+    long-term memory recall injects stored (private or tenant-shared) facts into the prompt,
+    while owner-authored static blocks (persona/profile/notes) remain clean.
+  - The workflow `knowledge` node now wraps retrieved context with `Spotlight.wrap` delimiters
+    and per-chunk source citations rather than raw string concatenation. Downstream agent nodes
+    detecting spotlight-delimited input are marked tainted with `untrusted_input`.
+  - Inbound non-owner entry points across omnichannel adapters (WhatsApp, Telegram, Twilio,
+    Signal, Matrix, Email, Discord, Slack, Teams, X, MCP, and Studio App) now mark `TurnContext.taint()`
+    with `inbound:<channel>`.
+  - `TurnContext` now carries its own `TurnTaint` record, and `AgentToolProvider` binds it to
+    the turn's step counter during tool resolution, ensuring tool guards and taint gates evaluate
+    sink permissions against auto-injected and inbound taint.
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
   capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on
