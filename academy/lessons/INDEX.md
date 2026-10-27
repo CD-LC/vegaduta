@@ -23,39 +23,41 @@ Topics below map to the "academy" sections the videos are filed under.
 | 09 | Operate: cost, health, audit | `/insights`, `/usage`, `/roi`, `/troubleshoot` |
 | 10 | Ship it: scheduled editions & long-running agents | `/scheduled`, `/jobs`, `/quick-task`, background runs |
 
-## Series B — deep-dive library (one lesson per surface)
+## Series B — deep-dive library (grouped lessons, every route covered)
 
-### Build
-`/assistant` (deep), `/studio`, `/templates`, `/playground`, `/coding`,
-`/research`, `/build`, `/quick-task`, `/data-tables`, `/skills`,
-`/skills/library`
+62 routes render on the personal edition; Series A already covered ~15.
+The rest map to these lessons (dir `bNN-slug`, each 3–5 scenes):
 
-### Connect
-`/connect`, `/tools`, `/plugins`, `/add-ons`, `/admin/channels`,
-`/admin/contacts`, `/admin/inbox`, `/admin/leads`, `/admin/mcp-servers`,
-`/admin/integrations`, `/secrets`, `/edge`, `/code-intel`, `/code`
+| # | Lesson | Routes |
+|---|--------|--------|
+| b01 | Assistant deep-dive | `/assistant` (composer, background, quick task) |
+| b02 | Agent templates & learning | `/agents/templates`, `/agents/learning`, `/templates` |
+| b03 | Playground | `/playground` |
+| b04 | Coding & code | `/coding`, `/code`, `/code-intel` |
+| b05 | Research & build modes | `/research`, `/build` |
+| b06 | Quick tasks & jobs | `/quick-task`, `/jobs` |
+| b07 | Data & files | `/data-tables`, `/files`, `/clips` |
+| b08 | Skills library | `/skills`, `/skills/library` |
+| b09 | Connect, plugins & add-ons | `/connect`, `/plugins`, `/add-ons` |
+| b10 | Credentials & secrets | `/tools/credentials`, `/secrets` |
+| b11 | Edge (on-device AI) | `/edge` |
+| b12 | Admin integrations & features | `/admin/integrations`, `/features` |
+| b13 | Contacts, routing & instructions | `/admin/contacts`, `/admin/input-requests`, `/admin/instructions` |
+| b14 | Approvals deep-dive | `/admin/approvals` |
+| b15 | Data privacy | `/admin/data-privacy` |
+| b16 | Turns & compare | `/agents/turns`, `/compare` |
+| b17 | Audit trail | `/admin/audit`, `/admin/audit-tail` |
+| b18 | Usage & data usage | `/usage`, `/data-usage` |
+| b19 | Admin: access, issues, maintenance, billing | `/admin/access`, `/admin/issues`, `/admin/maintenance`, `/admin`, `/admin/billing` |
+| b20 | Providers & capability decisions | `/providers`, `/capabilities/decision` |
+| b21 | Troubleshoot | `/troubleshoot` |
+| b22 | Workflow templates | `/workflows/templates` |
+| b23 | Help surface | `/help`, `/help/docs`, `/help/controls`, `/glossary` |
 
-### Keep memory & knowledge
-`/knowledge`, `/memory`, `/files`, `/data-tables`, `/shared-with-me`
-
-### Govern
-`/admin/guardrails`, `/admin/approvals`, `/admin/input-requests`,
-`/admin/instructions`, `/admin/agent-trust`, `/admin/data-privacy`,
-`/features`
-
-### Verify quality
-`/agents/quality`, `/eval`, `/agents/turns`, `/compare`,
-`/admin/audit`, `/admin/audit-tail`
-
-### Operate & administer
-`/insights`, `/usage`, `/roi`, `/data-usage`, `/jobs`, `/scheduled`,
-`/admin/issues`, `/admin/maintenance`, `/admin/access`,
-`/admin/api-keys`, `/admin/sso`, `/admin/branding`, `/admin/commerce`,
-`/admin/payments`, `/admin/billing`, `/admin`
-
-### Help surface
-`/help`, `/help/docs`, `/help/controls`, `/glossary` — lessons link back
-from these pages.
+Deferred to lite/full edition capture (404 on personal):
+`/studio`, `/admin/leads`, `/admin/mcp-servers`, `/shared-with-me`,
+`/admin/agent-trust`, `/eval`, `/roi`, `/admin/api-keys`, `/admin/sso`,
+`/admin/branding`, `/admin/commerce`, `/admin/payments`, `/directory`
 
 ## Production rules
 

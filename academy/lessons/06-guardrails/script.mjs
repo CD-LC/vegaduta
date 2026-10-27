@@ -3,7 +3,7 @@ export default {
   title: "VegaDūta Academy — Ep 6 · Guardrails",
   subtitle: "The editor's red pen",
   next: "Ep 7 — Memory & learning",
-  voice: "en-US-ChristopherNeural",
+  voice: "en-US-AndrewNeural",
   scenes: [
     {
       say: "Episode six: the red pen. Guardrails are patterns this workspace refuses to pass through — every rule on this page is checked against the result of every tool your agents call, before that text ever reaches the model.",

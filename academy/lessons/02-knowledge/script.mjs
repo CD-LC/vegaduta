@@ -3,7 +3,7 @@ export default {
   title: "VegaDūta Academy — Ep 2 · Knowledge",
   subtitle: "Feeding the newsroom",
   next: "Ep 3 — Tools, MCP & SaaS connectors",
-  voice: "en-US-ChristopherNeural",
+  voice: "en-US-AndrewNeural",
   scenes: [
     {
       say: "Episode two: we feed the newsroom. Knowledge is the reference library — anything you upload here becomes searchable by meaning, so the Editor-in-Chief can quote the paper's rules instead of guessing.",

@@ -3,7 +3,7 @@ export default {
   title: "VegaDūta Academy — Ep 3 · Tools, MCP & connectors",
   subtitle: "Giving the newsroom hands",
   next: "Ep 4 — Workflows: the production line",
-  voice: "en-US-ChristopherNeural",
+  voice: "en-US-AndrewNeural",
   scenes: [
     {
       say: "Episode three: the newsroom gets hands. Tools are what let an agent actually do things — search the live web, read a file, post the finished edition. The Integrations page is the entire catalog.",

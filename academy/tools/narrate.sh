@@ -12,6 +12,13 @@ VOICE="${2:-$(node -e "console.log((await import('$DIR/script.mjs')).default.voi
 VOICE="${VOICE:-en-US-ChristopherNeural}"
 EDGE_TTS="$(command -v edge-tts || echo "$HOME/Library/Python/3.9/bin/edge-tts")"
 
+# Prefer ElevenLabs when the key is present — real expressive voice with
+# per-word timing for captions. edge-tts stays the zero-key fallback.
+if [ -n "${ELEVENLABS_API_KEY:-}" ]; then
+  node "$(dirname "$0")/narrate-elevenlabs.mjs" "$DIR"
+  exit 0
+fi
+
 i=0
 node --input-type=module -e "
   const s = (await import('$DIR/script.mjs')).default;
