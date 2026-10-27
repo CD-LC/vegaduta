@@ -1,0 +1,10 @@
+.venv
+__pycache__
+*.pyc
+.git
+*.log
+# Never ship local secrets or keys into the build context.
+.env
+.env.*
+*.pem
+*.key

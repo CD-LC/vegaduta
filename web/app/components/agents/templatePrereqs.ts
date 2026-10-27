@@ -4,12 +4,12 @@
 // prompt and nothing else. It cannot express "this agent needs the github MCP
 // server switched on" - AgentSnapshot has no field for MCP servers, and
 // neither the console gallery (components/agentTemplates.ts) nor the seeded
-// control_plane.community_template rows reference any of the 17 catalog
+// control_plane.community_template rows reference any of the 19 catalog
 // servers. So the mapping lives here, as plain typed data the setup guide
 // reads, rather than being invented at render time.
 //
 // Rules this file holds itself to:
-//   - Only the 17 curated catalog servers may be suggested. A self-service
+//   - Only the 19 curated catalog servers may be suggested. A self-service
 //     STDIO registration that is NOT a catalog entry needs platform-staff
 //     review before it may connect (McpReviewStatus), and a FREE tenant is
 //     restricted to catalog entries outright, so suggesting anything else
@@ -24,7 +24,7 @@
 
 import { CATEGORY_AUDIENCE } from "../agentTemplates";
 
-/** The 17 curated servers in McpCatalogService. `key` and `name` are identical for every one of them, which is what lets a registration be matched back to a catalog entry by name. */
+/** The 19 curated servers in McpCatalogService. `key` and `name` are identical for every one of them, which is what lets a registration be matched back to a catalog entry by name. */
 export const MCP_SERVER_KEYS = [
   "filesystem",
   "github",
@@ -43,6 +43,8 @@ export const MCP_SERVER_KEYS = [
   "code-intel",
   "home-assistant",
   "atlassian",
+  "composio-connect",
+  "rube",
 ] as const;
 
 export type McpServerKey = (typeof MCP_SERVER_KEYS)[number];
@@ -89,6 +91,8 @@ export const MCP_SERVER_FACTS: Record<McpServerKey, McpServerFacts> = {
     credential: "deployment",
   },
   atlassian: { requiredEnvVars: [], requiresOAuth: true, credential: "oauth" },
+  "composio-connect": { requiredEnvVars: ["x-consumer-api-key"], requiresOAuth: false, credential: "apiKey" },
+  rube: { requiredEnvVars: ["Authorization"], requiresOAuth: false, credential: "apiKey" },
 };
 
 /** The five that need zero credentials - ready=true in the catalog, already wired in application-mcp.yml, so the card on /tools is a single Activate click. */

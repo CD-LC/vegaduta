@@ -23,6 +23,8 @@ services:
     build: ../postgres
   sidecar:
     build: ../../services/sidecar
+  docling:
+    build: ../../services/docling
   core:
     build:
       context: ../../core

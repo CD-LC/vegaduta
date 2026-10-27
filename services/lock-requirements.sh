@@ -41,7 +41,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 PY_VERSION=3.12
-ALL=(app-builder code-intel rl-trainer sidecar tool-sandbox voice-agent)
+ALL=(app-builder code-intel docling rl-trainer sidecar tool-sandbox voice-agent)
 
 if [ "$#" -gt 0 ]; then
   SERVICES=("$@")

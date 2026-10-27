@@ -55,6 +55,16 @@ app:
     # bind on first ingest, so existing installs are unaffected. false = no guard (old behaviour).
     embedding-binding:
       enabled: ${KNOWLEDGE_EMBEDDING_BINDING_ENABLED:true}
+    # Optional Docling-first document conversion (services/docling - a FastAPI adapter around
+    # IBM's Docling parser, speaking the sidecar's exact /extract contract). Empty base-url =
+    # unchanged sidecar-only extraction. When set, supported uploads convert there FIRST
+    # (layout-aware PDF, tables, and formats the sidecar never handled: pptx/xlsx/csv/tiff/bmp)
+    # and the upload allowlist widens accordingly; a transport/5xx failure falls back to the
+    # sidecar unless fallback-to-sidecar=false. Compose: --profile docling + DOCLING_BASE_URL.
+    docling:
+      base-url: ${DOCLING_BASE_URL:}
+      shared-secret: ${DOCLING_SHARED_SECRET:}
+      fallback-to-sidecar: ${KNOWLEDGE_DOCLING_FALLBACK:true}
     rerank:
       # Master-Roadmap-2026.md item #2 (hybrid search + reranking). Off by
       # default - the vector+keyword RRF fusion in KnowledgeSearchService

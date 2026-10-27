@@ -1,0 +1,59 @@
+{
+  "name": "VegaDuta - call an agent from n8n",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "9d2f1c3a-0001-4000-8000-000000000001",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VEGADUTA_BASE_URL }}/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"{{ $env.VEGADUTA_AGENT || 'REPLACE_WITH_AGENT_ID_OR_NAME' }}\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.prompt || 'Say hello and confirm you are reachable.' }}\"\n    }\n  ],\n  \"stream\": false\n}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Header Auth - 'Authorization: Bearer <VegaDuta token>'"
+        }
+      },
+      "id": "9d2f1c3a-0002-4000-8000-000000000002",
+      "name": "Call VegaDuta agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300],
+      "notes": "POST /v1/chat/completions on the VegaDuta OpenAI-compatible surface. Requires OPENAI_COMPAT_ENABLED=true on the core deployment. 'model' is an agent id (UUID) or the agent's exact name - GET /v1/models lists them. Bearer token: a platform JWT or a vmcp_ grant key. Create an n8n 'Header Auth' credential with Name = Authorization, Value = Bearer <token>.",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Call VegaDuta agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "staticData": null,
+  "tags": []
+}
