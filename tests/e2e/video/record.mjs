@@ -85,6 +85,7 @@ async function act(page, [verb, ...args]) {
         await page.locator(sel).first().click({ timeout: 1500 }).catch(() => {});
       break;
     case "click":     await page.locator(args[0]).first().click(); break;
+    case "clickLast": await page.locator(args[0]).last().click(); break;
     case "upload":    // real file pick — works on hidden input[type=file]
       await page.locator(args[0]).first().setInputFiles(args[1]); break;
     case "tryClick":  // dismissible UI (onboarding modals, toasts): click only if it appears
