@@ -1122,7 +1122,7 @@ services:
     networks: [observability]
 
   langfuse-clickhouse:
-    image: clickhouse/clickhouse-server:26.9.22.3
+    image: clickhouse/clickhouse-server:26.9.23.15
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     user: "101:101"
@@ -1205,7 +1205,7 @@ services:
     networks: [observability]
 
   langfuse-worker:
-    image: langfuse/langfuse-worker:4.64.0
+    image: langfuse/langfuse-worker:4.66.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: &langfuse-depends-on
@@ -1261,7 +1261,7 @@ services:
     networks: [observability]
 
   langfuse-web:
-    image: langfuse/langfuse:4.64.0
+    image: langfuse/langfuse:4.66.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: *langfuse-depends-on
