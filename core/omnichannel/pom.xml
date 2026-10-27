@@ -126,7 +126,7 @@
     <dependency>
       <groupId>com.twilio.sdk</groupId>
       <artifactId>twilio</artifactId>
-      <version>13.0.2</version>
+      <version>13.1.0</version>
     </dependency>
     <!-- Email/IMAP channel (#472) - JavaMailSender for outbound replies
          (EmailChannelAdapter) and jakarta.mail's Store/Folder IMAP client for
