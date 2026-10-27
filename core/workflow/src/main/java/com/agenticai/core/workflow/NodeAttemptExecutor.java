@@ -2,6 +2,7 @@ package com.agenticai.core.workflow;
 
 import com.agenticai.core.agents.dto.ChatInlineAttachment;
 import com.agenticai.core.omnichannel.trigger.InboundTriggerContext;
+import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.stream.NodeStreamContext;
@@ -129,14 +130,15 @@ final class NodeAttemptExecutor {
             return runBound(definition, runId, node, input, requestedBy, attachments, scope, mode, sink);
         }
         Optional<InboundTriggerContext> triggerSnapshot = WorkflowTriggerContextHolder.current();
-        Future<WorkflowNodeExecutor.NodeExecutionResult> future = ATTEMPT_POOL.submit(() -> {
+        TenantScope tenantScope = TenantScope.capture();
+        Future<WorkflowNodeExecutor.NodeExecutionResult> future = ATTEMPT_POOL.submit(() -> tenantScope.get(() -> {
             triggerSnapshot.ifPresent(WorkflowTriggerContextHolder::set);
             try {
                 return runBound(definition, runId, node, input, requestedBy, attachments, scope, mode, sink);
             } finally {
                 WorkflowTriggerContextHolder.clear();
             }
-        });
+        }));
         try {
             return future.get(timeoutSeconds, TimeUnit.SECONDS);
         } catch (TimeoutException te) {
