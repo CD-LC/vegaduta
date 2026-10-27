@@ -111,6 +111,13 @@ public final class AgentToolSelection {
                     "remember_shared_fact",
                     "list_knowledge_collections",
                     "search_knowledge_base",
+                    // the WRITE sibling of the two above - resolved only when the agent opted into
+                    // knowledgeWriteEnabled with at least one granted collection, so listing it
+                    // costs nothing on a read-only agent. Same shape as remember_shared_fact: a
+                    // "save this to my knowledge" turn shares no keywords with the tool name, so a
+                    // relevance-trimmed turn left search offered and add trimmed, and the model
+                    // answered "I can only search collections".
+                    "add_to_knowledge_base",
                     // "search the repository" shares words with search_knowledge_base, not with
                     // this tool's code-specific description - the wrong pick then reads as an
                     // empty-result loop. Keep the code index visible whenever code-intel offers it.
