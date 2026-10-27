@@ -312,6 +312,10 @@ ENV PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/home/agentic/.cache/puppeteer/
 # package's own installer, guaranteeing the binary on disk always matches
 # what the pinned runtime package will ask for.
 # playwright@1.64.0-alpha-1790635538000 is exactly the version @playwright/mcp@0.0.83 depends on.
+# CHROME_FOR_TESTING_VERSION: the CfT build puppeteer's `browsers install` fetches below -
+# pinned literally so the build never resolves the `stable` tag through Google's
+# last-known-good-versions.json endpoint. Bump when the release scan flags its CVEs.
+ARG CHROME_FOR_TESTING_VERSION=156.0.8078.47
 RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium \
     && npx --yes @playwright/mcp@0.0.83 install-browser chrome-for-testing \
     # server-puppeteer pre-warm (2026-08-19 incident): unlike playwright-vision
@@ -357,14 +361,19 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # under its own path and point the launch at it via the ENV below - the
     # value reaches the spawned server through application-mcp.yml's
     # puppeteer connection env, which resolves it from this container env.
-    # Chrome-for-Testing STABLE, resolved at build time: a pinned build goes
-    # stale within weeks and then fails the release scan again (153.0.8010.47
-    # did). `current` is a stable path for PUPPETEER_LAUNCH_OPTIONS above, and
-    # the 131 builds puppeteer@23.11.1 downloads for itself are removed so the
-    # image carries only the fixed one.
+    # Chrome-for-Testing, version pinned at build time. The `stable` tag is
+    # resolved through googlechromelabs.github.io's last-known-good-versions.json -
+    # on 2026-10-26 that endpoint went down mid-release (HTTP 200, empty body)
+    # and killed every image leg resolving `chrome@stable`. A literal version
+    # skips the resolution fetch entirely (verified: downloads straight from
+    # storage.googleapis.com). The pin still needs a deliberate bump when the
+    # release scan's fixed-criticals list moves past it. `current` is a stable
+    # path for PUPPETEER_LAUNCH_OPTIONS above, and the 131 builds
+    # puppeteer@23.11.1 downloads for itself are removed so the image carries
+    # only the fixed one.
     # puppeteer@23.11.1 is used here only for its browser installer. Its own npx tree (basic-ftp
     # 5.x, High) is not needed afterwards, so it goes to a throwaway cache, not ~/.npm.
-    && PUPPETEER_SKIP_DOWNLOAD=1 npm_config_cache=/tmp/npx-puppeteer-install npx --yes puppeteer@23.11.1 browsers install chrome@stable \
+    && PUPPETEER_SKIP_DOWNLOAD=1 npm_config_cache=/tmp/npx-puppeteer-install npx --yes puppeteer@23.11.1 browsers install chrome@${CHROME_FOR_TESTING_VERSION} \
     && rm -rf /tmp/npx-puppeteer-install \
     && rm -rf /home/agentic/.cache/puppeteer/chrome/linux-131.0.6778.204 /home/agentic/.cache/puppeteer/chrome-headless-shell/linux-131.0.6778.204 \
     && ln -sfn "$(ls -d /home/agentic/.cache/puppeteer/chrome/linux-* | sort -V | tail -n 1)" /home/agentic/.cache/puppeteer/chrome/current \
