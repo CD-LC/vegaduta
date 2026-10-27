@@ -72,6 +72,15 @@ public final class AgentChatStreamResponder {
                     org.springframework.http.HttpStatus.BAD_REQUEST,
                     "sessionId may not start with 'eval:' or 'sim:'.");
         }
+        // The sessionId is the caller's own label and lands in log lines all the way down the
+        // turn path - a legit client never needs control characters in it, and rejecting them
+        // here keeps forged newlines/ANSI out of every downstream log statement.
+        if (StringUtils.hasText(request.sessionId())
+                && !request.sessionId().equals(request.sessionId().replaceAll("[\\p{Cntrl}]", ""))) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "sessionId may not contain control characters.");
+        }
         String sessionId =
                 StringUtils.hasText(request.sessionId())
                         ? request.sessionId()
