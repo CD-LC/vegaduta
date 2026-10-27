@@ -1,0 +1,50 @@
+{
+  "name": "n8n hand-off - POST run output to an n8n webhook",
+  "description": "Smallest useful VegaDuta -> n8n bridge: whatever this run's input is gets POSTed to an n8n Webhook trigger's production URL as a JSON object, and n8n's response (what its Respond to Webhook node answers, or the default acknowledgment) lands on the log channel as the run's output. Replace the REPLACE_ME in the url with your n8n webhook path before POSTing to /api/workflows. Two deployment facts to know before this fires: (1) the HTTP node's URL is validated by the platform's SSRF guard, which only allows public http(s) addresses - a private-IP or internal-DNS n8n is refused, so expose n8n on a public URL or behind a public reverse proxy; (2) if you add an Authorization header carrying a vault reference like 'Bearer {{secret.N8N_HEADER}}', that secret's own allowed-hosts list must include your n8n host or the reference never resolves. Body uses {{input_json}}: the upstream node's whole output embedded as one JSON string - rename 'input' to whatever the n8n workflow expects.",
+  "graph": {
+    "nodes": [
+      {
+        "id": "trigger-1",
+        "type": "trigger",
+        "position": { "x": 0, "y": 0 },
+        "data": {
+          "label": "Manual trigger - input is handed to n8n",
+          "config": {}
+        }
+      },
+      {
+        "id": "http-n8n-webhook",
+        "type": "http",
+        "position": { "x": 280, "y": 0 },
+        "data": {
+          "label": "POST to n8n webhook",
+          "config": {
+            "method": "POST",
+            "url": "https://n8n.example.com/webhook/REPLACE_ME",
+            "headers": [
+              { "name": "Content-Type", "value": "application/json" }
+            ],
+            "query": [],
+            "bodyType": "json",
+            "body": "{ \"input\": {{input_json}}, \"source\": \"vegaduta\" }",
+            "timeoutSeconds": 15,
+            "failOnHttpError": true
+          }
+        }
+      },
+      {
+        "id": "output-1",
+        "type": "output",
+        "position": { "x": 560, "y": 0 },
+        "data": {
+          "label": "n8n webhook response",
+          "config": { "channel": "log" }
+        }
+      }
+    ],
+    "edges": [
+      { "id": "e1", "source": "trigger-1", "target": "http-n8n-webhook", "sourceHandle": null, "targetHandle": null },
+      { "id": "e2", "source": "http-n8n-webhook", "target": "output-1", "sourceHandle": null, "targetHandle": null }
+    ]
+  }
+}
