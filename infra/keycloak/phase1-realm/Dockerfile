@@ -64,3 +64,7 @@
 FROM quay.io/keycloak/keycloak:26.8.1@sha256:79c623a22abacf3fe6c00a5fb30f5b7843d717b234033b80995891c06116d244
 COPY infra/keycloak/phase1-realm/agentic-ai-realm.json /opt/keycloak/data/import/agentic-ai-realm.json
 COPY deploy/keycloak/themes/agentic-ai /opt/keycloak/themes/agentic-ai
+
+USER 1000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=5 \
+    CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080"]
