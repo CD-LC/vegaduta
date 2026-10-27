@@ -61,7 +61,7 @@ export PATH="\$JAVA_HOME/bin:\$PATH"
 export JVM_LD_LIBRARY_PATH="\$this_dir/jdk21/lib/server"
 LD_LIBRARY_PATH="\$this_dir/jdk21/lib/server:\$this_dir" \\
 \$this_dir/jazzer_driver --agent_path=\$this_dir/jazzer_agent_deploy.jar \\
---cp=\$this_dir/chat.jar:\$this_dir/agents-jobs.jar:\$this_dir/deps/* \\
+--cp=\$this_dir/chat.jar:\$this_dir/agents-jobs.jar:\$(ls -1 \$this_dir/deps/*.jar | tr '\n' ':') \\
 --target_class=$fqcn \\
 --jvm_args="\$mem_settings:-Djava.awt.headless=true" \\
 \$@
