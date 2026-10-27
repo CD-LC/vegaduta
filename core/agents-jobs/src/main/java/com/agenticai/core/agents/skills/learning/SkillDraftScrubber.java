@@ -53,7 +53,7 @@ public interface SkillDraftScrubber {
                         // JWT segments are possessive: '.' is outside each run's class, so a match
                         // never needs the run to yield a character back (linear on 'a'+ padding).
                         Pattern.compile(
-                                "eyJ[A-Za-z0-9_-]{10,}++\\.[A-Za-z0-9_-]{10,}++\\.[A-Za-z0-9_-]{10,}"),
+                                "eyJ[A-Za-z0-9_-]{10,}+\\.[A-Za-z0-9_-]{10,}+\\.[A-Za-z0-9_-]{10,}+"),
                         Pattern.compile("(?i)\\b(?:bearer|basic)\\s+[A-Za-z0-9._~+/=-]{16,}"),
                         Pattern.compile("(?i)\\bauthorization\\s*[:=]\\s*+\\S++(?:\\s++\\S++)?"),
                         // Any long opaque run (hex digests, base64 blobs, ids) is never general
@@ -67,7 +67,7 @@ public interface SkillDraftScrubber {
         private static final Pattern KEY_VALUE =
                 Pattern.compile(
                         "(?i)\\b(password|passwd|pwd|secret|api[_-]?key|access[_-]?key|token|credential)\\b"
-                                + "(\\s*[:=]\\s*)(\"[^\"]*\"|'[^']*'|[^\\s,;'\"]+)");
+                                + "(\\s*[:=]\\s*+)(\"[^\"]*+\"|'[^']*+'|[^\\s,;'\"]++)");
         private static final Pattern URL_CREDENTIALS =
                 Pattern.compile("(?i)\\b([a-z][a-z0-9+.-]*+://)[^\\s/:@]++:[^\\s/@]++@");
         private static final Pattern CARD_LIKE = Pattern.compile("\\b\\d(?:[ -]?\\d){12,18}\\b");
