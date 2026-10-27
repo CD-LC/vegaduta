@@ -471,6 +471,18 @@ late. Fixed in release.yml (main-ancestry + CHANGELOG-section gate in prepare;
 scripts/ci/tag-ready.sh, a pre-flight humans run before tagging; releasing.md
 step 1 now points at it.
 
+### ACTIVE CLAIM: scorecard gaps (Devin, 2026-10-27)
+
+OpenSSF >8 push, split to avoid colliding with the claim below: taking
+log4j-api GHSA-qv9r-c865-cp47 (transitive via log4j-to-slf4j, pinned to
+2.26.1 - PR #230), the dependabot queue triage, and FuzzingID research.
+Pushed `40c261f22` onto this branch for #228 - gate fixes only, not the
+security content: ruff-format services/docling, dependabot.yml coverage
+for the new service, and the psycopg.sql facade the test fake needed
+after the baas.py sql-composition change. Verified locally before push.
+MaintainedID score-0 is unfixable - the Oct-19 history rewrite makes the
+project read <90 days old; it self-heals with age.
+
 ### ACTIVE CLAIM: security hygiene + release/CI hardening (Devin, 2026-10-26)
 
 Working the OpenSSF Scorecard to >8 and clearing the open code-scanning
