@@ -45,8 +45,12 @@ final class TemporalLoopStep implements TemporalStep {
             s.chargeStep();
             s.activeNodeId = bodyNode.id();
             NodeExecutionActivityResult r =
-                    s.nodeActivities.executeNode(
-                            s.nodeInput(bodyNode, items.get(i), ExpressionScope.iteration(items.get(i), i, items)));
+                    s.nodeActivitiesFor(bodyNode)
+                            .executeNode(
+                                    s.nodeInput(
+                                            bodyNode,
+                                            items.get(i),
+                                            ExpressionScope.iteration(items.get(i), i, items)));
 
             s.trace.add(
                     s.withPayloads(

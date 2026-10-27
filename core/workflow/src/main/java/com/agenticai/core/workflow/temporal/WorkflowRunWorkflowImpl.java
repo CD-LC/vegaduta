@@ -120,7 +120,11 @@ public class WorkflowRunWorkflowImpl implements WorkflowRunWorkflow {
     @Override
     public WorkflowRunResult run(WorkflowRunInput input) {
         TemporalRunState s =
-                new TemporalRunState(input, nodeActivityStub(input), progressActivities);
+                new TemporalRunState(
+                        input,
+                        nodeActivityStub(input, Math.max(0, input.maxRetryAttempts()) + 1),
+                        nodeActivityStub(input, 1),
+                        progressActivities);
 
         // Per-node workflow triggers - mirrors WorkflowExecutionEngine#execute's
         // identical startNodeId handling (see that method's javadoc): a
@@ -201,9 +205,10 @@ public class WorkflowRunWorkflowImpl implements WorkflowRunWorkflow {
                 String replayGrant = null;
                 while (true) {
                     result =
-                            s.nodeActivities.executeNode(
-                                    s.nodeInput(node, currentOutput, null)
-                                            .withApprovalReplay(replayGrant));
+                            s.nodeActivitiesFor(node)
+                                    .executeNode(
+                                            s.nodeInput(node, currentOutput, null)
+                                                    .withApprovalReplay(replayGrant));
                     replayGrant = null;
 
                     s.trace.add(
@@ -379,9 +384,11 @@ public class WorkflowRunWorkflowImpl implements WorkflowRunWorkflow {
      * The node-execution activity stub for one run: heartbeating (see {@code
      * WorkflowNodeActivitiesImpl#executeNode}, which beats every 10s - 45s gives four missed-tick headroom before
      * Temporal declares the activity dead and retries it, which is also what lets Stop Run interrupt an in-flight
-     * node rather than waiting out stepTimeoutSeconds), retried per the run's own policy.
+     * node rather than waiting out stepTimeoutSeconds), retried per the run's own policy. {@code maxAttempts} is
+     * TOTAL attempts; irreversible side-effect nodes get a {@code 1}-attempt twin of this stub (see {@link
+     * TemporalRunState#nodeActivitiesFor}), so a Temporal activity retry cannot double their send either.
      */
-    private static WorkflowNodeActivities nodeActivityStub(WorkflowRunInput input) {
+    private static WorkflowNodeActivities nodeActivityStub(WorkflowRunInput input, int maxAttempts) {
         return Workflow.newActivityStub(
                 WorkflowNodeActivities.class,
                 ActivityOptions.newBuilder()
@@ -396,7 +403,7 @@ public class WorkflowRunWorkflowImpl implements WorkflowRunWorkflow {
                                         // input.maxRetryAttempts() is retries AFTER the first try (0-5); Temporal's
                                         // setMaximumAttempts is TOTAL attempts and treats a raw 0 as unlimited, so
                                         // +1 both converts the semantics and guarantees this is never 0.
-                                        .setMaximumAttempts(Math.max(0, input.maxRetryAttempts()) + 1)
+                                        .setMaximumAttempts(maxAttempts)
                                         .setInitialInterval(Duration.ofSeconds(2))
                                         .setBackoffCoefficient(2.0)
                                         .setMaximumInterval(Duration.ofSeconds(20))

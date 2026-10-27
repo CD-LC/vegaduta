@@ -84,7 +84,7 @@ final class TemporalFanOutStep implements TemporalStep {
             for (int i = sliceStart; i < sliceEnd; i++) {
                 NodeExecutionActivityInput itemInput =
                         s.nodeInput(workerNode, items.get(i), ExpressionScope.iteration(items.get(i), i, items));
-                slicePromises.add(Async.function(s.nodeActivities::executeNode, itemInput));
+                slicePromises.add(Async.function(s.nodeActivitiesFor(workerNode)::executeNode, itemInput));
             }
             // Same first-failure semantics as the Parallel join: an uncaught failure from any item in this slice
             // propagates out of the whole Fan-out node, attributed to it via activeNodeId; queued LATER slices
