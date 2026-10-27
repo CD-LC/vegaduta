@@ -12,6 +12,14 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Release images no longer depend on a live upstream version feed.** The
+  Chrome-for-Testing install inside `core` (full variant) and
+  `mcp-stdio-runner-browser` resolved `chrome@stable` through
+  `googlechromelabs.github.io/.../last-known-good-versions.json` at build time;
+  that endpoint went down mid-release (HTTP 200, empty body) and failed every
+  affected image leg. The version is now pinned literally
+  (`CHROME_FOR_TESTING_VERSION`, `156.0.8078.47`), so builds skip the
+  resolution fetch entirely; the pin is bumped deliberately with each release.
 - **Personal/lite installs never enabled the tool-sandbox client.** `scripts/vegaduta`
   started the tool-sandbox container with the `tools` choice but exported
   `TOOL_SANDBOX_ENABLED` only from the profile list - which `tools` never joins on
