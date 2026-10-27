@@ -8,6 +8,32 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Security
+
+- **Hardened dependency pinning across the image build (OpenSSF Pinned-Dependencies).**
+  The npm self-upgrade in `core`, `mcp-stdio-runner` and `workspace-runner`
+  Dockerfiles now fetches the registry tarball and verifies its sha512 before
+  laying it down (npm has no integrity-checked global install); the core-full
+  browser/MCP toolchain installs from a lockfile (`core/mcp-toolchain/`) whose
+  integrity hashes `npm ci` verifies - no floating `npx pkg@ver` resolution in
+  the build; the omnibus image is assembled from digest-pinned input images the
+  release resolves after publish; `services/browser-runner`'s Playwright base is
+  digest-pinned; and the Python side of CI/SDK releases installs only
+  hash-locked requirements files (`--require-hashes`).
+- **`main` branch protection is enforced.** Required PR review (stale-dismissed),
+  required `CI OK` + `CodeQL OK` checks, admin enforcement, no force-push/delete.
+  `CodeQL OK` now also diffs a pull request's critical/high findings against the
+  base branch and fails on new ones - uploading results no longer means merging
+  regressions.
+- **Trivy Dockerfile findings cleared.** Every Python service image carries a
+  `HEALTHCHECK` matching its compose probe; the omnibus documents why its
+  supervisor legitimately runs as root (every workload drops via `gosu`).
+- **CodeQL fixes:** backend-provisioning DDL in `app-builder` composes with
+  `psycopg.sql.Identifier`/`Literal` instead of f-strings; redaction regexes in
+  `chat`/`agents-jobs` are possessive/disambiguated and scan bounded input; the
+  marketing demo shim is out of analysis scope. `undici` bumped to a patched
+  release in `web/package-lock.json`.
+
 ### Fixed
 
 - **Release workflow gates the tag before spending a build matrix.** `prepare`

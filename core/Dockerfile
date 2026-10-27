@@ -231,7 +231,18 @@ FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb
 # services/workspace-runner/Dockerfile (services/mcp-stdio-runner/dockerfile-npm.test.js checks that).
 FROM node-relay AS node-npm
 ARG NPM_VERSION=11.21.1
-RUN npm install -g "npm@${NPM_VERSION}" \
+# sha512 of registry.npmjs.org/npm/-/npm-${NPM_VERSION}.tgz (the published
+# dist.integrity). npm has no hash-verified global install, so the tarball is
+# fetched, verified, and laid down by hand - same layout `npm i -g npm` makes.
+ARG NPM_TGZ_SHA512=613ccbe90044257c87713bb426251ced128ca7e9b3949b65eeb18b98445a5d441e14720c73d6ad76be86f4cf42f2f0d66efe347a9a13400ccd2f6fcfb5954385
+RUN npm pack "npm@${NPM_VERSION}" --pack-destination /tmp \
+    && echo "${NPM_TGZ_SHA512}  /tmp/npm-${NPM_VERSION}.tgz" | sha512sum -c - \
+    && rm -rf /usr/local/lib/node_modules/npm \
+    && tar -xzf "/tmp/npm-${NPM_VERSION}.tgz" -C /usr/local/lib/node_modules \
+    && mv /usr/local/lib/node_modules/package /usr/local/lib/node_modules/npm \
+    && ln -sf ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+    && rm "/tmp/npm-${NPM_VERSION}.tgz" \
     && npm cache clean --force
 
 FROM runtime-base AS mcp-toolchain-none
@@ -316,8 +327,14 @@ ENV PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/home/agentic/.cache/puppeteer/
 # pinned literally so the build never resolves the `stable` tag through Google's
 # last-known-good-versions.json endpoint. Bump when the release scan flags its CVEs.
 ARG CHROME_FOR_TESTING_VERSION=156.0.8078.47
-RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium \
-    && npx --yes @playwright/mcp@0.0.83 install-browser chrome-for-testing \
+# Lockfile-pinned toolchain: mcp-toolchain/package-lock.json carries an integrity hash
+# for every package, `npm ci` verifies them, and the binaries run from its own
+# node_modules/.bin - no floating `npx pkg@ver` resolution inside the image build.
+COPY mcp-toolchain/package.json mcp-toolchain/package-lock.json /opt/mcp-toolchain/
+RUN cd /opt/mcp-toolchain \
+    && PUPPETEER_SKIP_DOWNLOAD=1 npm ci --ignore-scripts \
+    && ./node_modules/.bin/playwright install --with-deps chromium \
+    && ./node_modules/.bin/playwright-mcp install-browser chrome-for-testing \
     # server-puppeteer pre-warm (2026-08-19 incident): unlike playwright-vision
     # above, puppeteer's package AND its browser were still fetched at runtime
     # by the first `npx -y @modelcontextprotocol/server-puppeteer` - a cold
@@ -351,8 +368,14 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # server only uses the sdk's Server/StdioServerTransport; basic-ftp is only reachable for
     # ftp: PAC-script URLs, through puppeteer's browser-download proxy agent (get-uri).
     && sp_dir="$(dirname "$(grep -l '"@modelcontextprotocol/server-puppeteer"' /home/agentic/.npm/_npx/*/package.json)")" \
-    && npm --prefix "$sp_dir" pkg set "overrides.@modelcontextprotocol/sdk=1.32.1" "overrides.basic-ftp=6.2.1" \
-    && npm --prefix "$sp_dir" install --no-audit --no-fund \
+    # Overlay the vendored lockfile tree onto the seeded entry instead of an
+    # unverified `npm install`: mcp-toolchain/package.json carries the same two
+    # overrides (sdk 1.32.1, basic-ftp 6.2.1) and its package-lock resolved them
+    # with integrity hashes. package.json stays as npx wrote it, so the
+    # runtime `npx -y @modelcontextprotocol/server-puppeteer` cache key holds.
+    && rm -rf "$sp_dir/node_modules" \
+    && cp -r node_modules "$sp_dir/node_modules" \
+    && cp package-lock.json "$sp_dir/package-lock.json" \
     # The frozen puppeteer@23.11.1 pins Chrome 131.0.6778.204, which the
     # release image scan (grype, fail on critical) rejects with fixed
     # criticals. server-puppeteer cannot take a newer puppeteer, but it does
@@ -371,13 +394,13 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # path for PUPPETEER_LAUNCH_OPTIONS above, and the 131 builds
     # puppeteer@23.11.1 downloads for itself are removed so the image carries
     # only the fixed one.
-    # puppeteer@23.11.1 is used here only for its browser installer. Its own npx tree (basic-ftp
-    # 5.x, High) is not needed afterwards, so it goes to a throwaway cache, not ~/.npm.
-    && PUPPETEER_SKIP_DOWNLOAD=1 npm_config_cache=/tmp/npx-puppeteer-install npx --yes puppeteer@23.11.1 browsers install chrome@${CHROME_FOR_TESTING_VERSION} \
-    && rm -rf /tmp/npx-puppeteer-install \
+    # The vendored lockfile tree's `browsers` CLI (puppeteer's own installer) fetches the
+    # pinned Chrome straight from storage.googleapis.com - no npx resolution, no extra cache.
+    && PUPPETEER_SKIP_DOWNLOAD=1 ./node_modules/.bin/browsers install chrome@${CHROME_FOR_TESTING_VERSION} \
     && rm -rf /home/agentic/.cache/puppeteer/chrome/linux-131.0.6778.204 /home/agentic/.cache/puppeteer/chrome-headless-shell/linux-131.0.6778.204 \
     && ln -sfn "$(ls -d /home/agentic/.cache/puppeteer/chrome/linux-* | sort -V | tail -n 1)" /home/agentic/.cache/puppeteer/chrome/current \
     && test -x /home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome \
+    && cd / && rm -rf /opt/mcp-toolchain \
     && chown -R agentic:agentic "$PLAYWRIGHT_BROWSERS_PATH" /home/agentic
 
 # server-puppeteer (application-mcp.yml's `puppeteer` stdio connection)

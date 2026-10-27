@@ -11,7 +11,9 @@
 # No published port and no secrets: a Playwright server accepts any client that can reach it, so it
 # joins only the private `browser-net` network that core is on (deploy/compose/browser.yml), never the
 # network holding Postgres and Valkey.
-ARG PLAYWRIGHT_IMAGE=mcr.microsoft.com/playwright:v1.63.0-noble
+# Digest-pinned (OpenSSF Pinned-Dependencies): tag alone can be moved; bump the
+# tag AND digest together when the Playwright base revs.
+ARG PLAYWRIGHT_IMAGE=mcr.microsoft.com/playwright:v1.63.0-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27
 
 FROM ${PLAYWRIGHT_IMAGE}
 

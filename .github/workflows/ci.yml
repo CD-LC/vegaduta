@@ -648,7 +648,11 @@ jobs:
       - name: python-agent tests, incl. sdk-python-agent consumer contract (pytest)
         working-directory: sdk/python-agent
         run: |
-          pip install -e '.[dev]'
+          # Hash-locked dev deps (--require-hashes verifies every wheel), then the
+          # editable package itself with --no-deps: its runtime deps are empty by
+          # design (transports are injected ports, tests/test_contracts.py enforces).
+          pip install --require-hashes -r requirements-dev.lock
+          pip install --no-deps -e .
           python -m pytest tests/ -q
       - name: python-agent lint and format check (ruff)
         working-directory: sdk/python-agent

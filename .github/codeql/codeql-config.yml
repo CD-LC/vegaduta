@@ -21,5 +21,6 @@ paths-ignore:
   - "**/*.test.tsx"
   - "**/*.spec.ts"
   - docs/platform-documentation/assets/**
+  - docs/marketing/**
   - web/scripts/**
   - examples/**
