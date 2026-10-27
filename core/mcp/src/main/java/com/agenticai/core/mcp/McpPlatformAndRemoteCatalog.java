@@ -5,8 +5,9 @@ import java.util.List;
 
 /**
  * The rest of {@link McpCatalogService}'s catalog, after the reference servers: this platform's
- * own first-party connectors (code-intel, home-assistant), Atlassian's hosted remote server and
- * the one-click OAuth provider entries. Each entry's comment carries its own provenance.
+ * own first-party connectors (code-intel, home-assistant), the hosted remote servers (Atlassian,
+ * Composio's Connect and Rube) and the one-click OAuth provider entries. Each entry's comment
+ * carries its own provenance.
  */
 final class McpPlatformAndRemoteCatalog {
 
@@ -222,6 +223,81 @@ final class McpPlatformAndRemoteCatalog {
             true,
             true,
             "linear"
+        ),
+        // Composio Connect (https://connect.composio.dev/mcp) - Composio's
+        // hosted streamable-HTTP MCP server whose seven meta-tools
+        // (discover / authorize / execute) reach 1000+ SaaS apps (Gmail,
+        // Slack, GitHub, Notion, Linear, HubSpot, ...) with each app's own
+        // OAuth consent handled INSIDE Composio, so this platform only ever
+        // holds the one tenant credential below. requiresOAuth=false: the
+        // person pastes a static API key from their Composio dashboard, and -
+        // on a remote registration - every env entry is sent verbatim as an
+        // HTTP request header (McpRemoteHeaders#staticHeaders), so the
+        // requiredEnvVars key IS the wire header name and must stay a valid
+        // RFC7230 token ("x-consumer-api-key" is). dynamicUrl is the fixed
+        // multi-tenant endpoint the Connect form submits; identical for every
+        // tenant, so McpCatalogService#findStrictMatch's exact-URL rule makes
+        // a registration carrying it catalog-sourced (no staff review, and a
+        // FREE tenant may register it - unlike a hand-typed remote URL).
+        new McpCatalogEntry(
+            "composio-connect",
+            "composio-connect",
+            McpServerType.STREAMABLE_HTTP,
+            "1000+ SaaS apps (Gmail, Slack, GitHub, Notion, Linear, HubSpot) through Composio Connect's hosted MCP server - one connection, per-app OAuth handled inside Composio.",
+            "globe",
+            "https://docs.composio.dev/docs/composio-connect",
+            false,
+            List.of("x-consumer-api-key"),
+            """
+            # Composio Connect is a hosted streamable-HTTP endpoint - there is
+            # no static stdio YAML block for it. The Connect form collects one
+            # credential: the API key from the person's Composio dashboard,
+            # which the platform sends verbatim as the x-consumer-api-key
+            # request header on every call to https://connect.composio.dev/mcp.
+            """,
+            null,
+            null,
+            "https://connect.composio.dev/mcp",
+            false,
+            true
+        ),
+        // Rube (https://rube.app/mcp) - Composio's OTHER hosted entry point:
+        // one "universal" MCP server whose built-in agent discovers,
+        // authorizes and executes across the same 1000+ app catalogue, so the
+        // tool list this platform sees is a handful of meta-tools rather than
+        // per-app tools. Auth is a bearer token the person generates at
+        // rube.app (Use Rube -> MCP URL -> Generate token) and pastes WITH
+        // the "Bearer " prefix as the Authorization header value - the env
+        // entry becomes a verbatim HTTP request header
+        // (McpRemoteHeaders#staticHeaders; same shape
+        // McpRegistryServiceTest#registerLeavesRemoteRegistrationEnvAloneBecauseItBecomesHttpHeaders
+        // pins), which is why the requiredEnvVars key is literally
+        // "Authorization". requiresOAuth=false - it is a pasted token, not a
+        // browser-redirect consent flow. Same strict-match story as
+        // composio-connect above: one fixed endpoint for all tenants, so an
+        // exact-URL registration is catalog-sourced.
+        new McpCatalogEntry(
+            "rube",
+            "rube",
+            McpServerType.STREAMABLE_HTTP,
+            "Composio's universal MCP server (Rube): a single hosted endpoint whose built-in agent discovers, authorizes and executes work across 1000+ SaaS apps - no per-app connector to wire.",
+            "brain",
+            "https://rube.app",
+            false,
+            List.of("Authorization"),
+            """
+            # Rube is a hosted streamable-HTTP endpoint - no static stdio
+            # YAML block exists. The Connect form collects the Authorization
+            # header value: generate a token at rube.app (Use Rube -> MCP URL
+            # -> Generate token) and paste it as "Bearer <token>"; the
+            # platform sends it verbatim as the Authorization request header
+            # on every call to https://rube.app/mcp.
+            """,
+            null,
+            null,
+            "https://rube.app/mcp",
+            false,
+            true
         )
     );
 }

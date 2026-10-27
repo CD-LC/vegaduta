@@ -8,32 +8,6 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
-### Security
-
-- **Hardened dependency pinning across the image build (OpenSSF Pinned-Dependencies).**
-  The npm self-upgrade in `core`, `mcp-stdio-runner` and `workspace-runner`
-  Dockerfiles now fetches the registry tarball and verifies its sha512 before
-  laying it down (npm has no integrity-checked global install); the core-full
-  browser/MCP toolchain installs from a lockfile (`core/mcp-toolchain/`) whose
-  integrity hashes `npm ci` verifies - no floating `npx pkg@ver` resolution in
-  the build; the omnibus image is assembled from digest-pinned input images the
-  release resolves after publish; `services/browser-runner`'s Playwright base is
-  digest-pinned; and the Python side of CI/SDK releases installs only
-  hash-locked requirements files (`--require-hashes`).
-- **`main` branch protection is enforced.** Required PR review (stale-dismissed),
-  required `CI OK` + `CodeQL OK` checks, admin enforcement, no force-push/delete.
-  `CodeQL OK` now also diffs a pull request's critical/high findings against the
-  base branch and fails on new ones - uploading results no longer means merging
-  regressions.
-- **Trivy Dockerfile findings cleared.** Every Python service image carries a
-  `HEALTHCHECK` matching its compose probe; the omnibus documents why its
-  supervisor legitimately runs as root (every workload drops via `gosu`).
-- **CodeQL fixes:** backend-provisioning DDL in `app-builder` composes with
-  `psycopg.sql.Identifier`/`Literal` instead of f-strings; redaction regexes in
-  `chat`/`agents-jobs` are possessive/disambiguated and scan bounded input; the
-  marketing demo shim is out of analysis scope. `undici` bumped to a patched
-  release in `web/package-lock.json`.
-
 ### Fixed
 
 - **Release workflow gates the tag before spending a build matrix.** `prepare`
@@ -46,6 +20,30 @@ Release notes on GitHub are generated from the section for each version.
   at all instead of polling an hour for a check that will never exist. New
   pre-flight for humans: `scripts/ci/tag-ready.sh <sha>` reports whether a
   commit is release-ready before tagging (`docs/maintainers/releasing.md`).
+
+### Added
+
+- **Docling-first document conversion for knowledge ingestion.** The new
+  `services/docling` FastAPI adapter wraps IBM's Docling parser behind the
+  sidecar's exact `/extract` contract (`X-Internal-Token` auth, `DOCLING_*`
+  env). Set `DOCLING_BASE_URL` (Compose: `--profile docling`) and supported
+  uploads convert there first - layout-aware PDF, tables, plus formats the
+  sidecar never handled (`.pptx`/`.xlsx`/`.csv`/`.tiff`/`.bmp`, which also
+  widen the upload allowlist while configured). A Docling transport/5xx
+  failure falls back to the sidecar extractor unless
+  `app.knowledge.docling.fallback-to-sidecar=false`; a 4xx still means the
+  file was the problem and surfaces unchanged. Empty `DOCLING_BASE_URL` =
+  byte-for-byte the old behaviour.
+- **Composio hosted MCP connectors in the catalog.** `composio-connect`
+  (`https://connect.composio.dev/mcp`, `x-consumer-api-key` header) and
+  `rube` (`https://rube.app/mcp`, `Authorization: Bearer`) join the MCP
+  gallery as remote entries - 1000+ SaaS apps (Gmail, Slack, GitHub,
+  Notion, Linear, HubSpot...) through one per-tenant registration, no
+  local subprocess.
+- **n8n bridge examples and docs.** `examples/integrations/n8n/` ships an
+  importable VegaDūta workflow template (HTTP node -> n8n webhook), an
+  importable n8n workflow (HTTP Request -> platform agent), and a README
+  covering both directions.
 
 ## [0.1.12] - 2026-10-26
 

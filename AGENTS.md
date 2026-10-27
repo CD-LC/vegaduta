@@ -48,7 +48,9 @@ sdk/                  First-party SDKs. typescript/ and python/ are generated RE
 web/                  Next.js console (tenant UI + public pages + platform-admin at app/platform-admin/)
 services/             sidecar (Python ML), code-intel, app-builder, tool-sandbox,
                       mcp-stdio-runner (Node), piece-host, voice-agent, rl-trainer,
-                      browser-runner, workspace-runner, whatsapp-qr, desktop-agent
+                      browser-runner, workspace-runner, whatsapp-qr, desktop-agent,
+                      docling (Docling document-conversion adapter for knowledge
+                      ingestion; compose profile `docling`, app.knowledge.docling.*)
 examples/             workflow-templates/, mcp-servers/, agent-bundles/, sdk/
 tests/e2e             Playwright suite;  tests/load  load tests;  tests/install  installer tests
 deploy/compose        lite.yml, docker-compose.yml (+ *.build.yml, *.ci.yml, *.domain.yml overlays), .env.example

@@ -39,7 +39,8 @@ public class KnowledgeIngestionService {
     // like markdown. Mirrors KnowledgeController.SUPPORTED_EXTENSIONS'
     // image subset rather than importing it, since that list is a private
     // HTTP-layer constant.
-    private static final List<String> IMAGE_EXTENSIONS = List.of(".png", ".jpg", ".jpeg", ".webp");
+    private static final List<String> IMAGE_EXTENSIONS =
+        List.of(".png", ".jpg", ".jpeg", ".webp", ".tiff", ".tif", ".bmp");
     private static final String SOURCE_TYPE_IMAGE = "image";
     private static final String SOURCE_TYPE_TEXT = "text";
 

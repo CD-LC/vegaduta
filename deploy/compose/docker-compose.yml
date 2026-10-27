@@ -20,6 +20,9 @@
 #   tracing        langfuse (web+worker) + its postgres/clickhouse/valkey/S3
 #   voice          livekit + voice-agent
 #   rl             rl-trainer
+#   docling        docling document parser (services/docling): layout-aware
+#                  extraction ahead of the sidecar for PDF/Office/image formats
+#                  (the CLI exports DOCLING_BASE_URL=http://docling:8002)
 #   code-intel     code-intel + its docker-in-docker executor (CODE_INTEL_ENABLED=true)
 #   builder        app-builder (pulls in code-intel)
 #   sandbox        tool-sandbox + mcp-stdio-runner
@@ -165,6 +168,12 @@ x-core-env: &core-env
   STORAGE_PATH_STYLE_ACCESS: ${STORAGE_PATH_STYLE_ACCESS:-true}
   SIDECAR_BASE_URL: http://sidecar:8001
   SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+  # Docling-first extraction (app.knowledge.docling.*, services/docling): stays
+  # empty unless the `docling` compose profile runs - compose cannot see which
+  # profiles are active, so the CLI exports DOCLING_BASE_URL=http://docling:8002
+  # with it. Empty = core's DoclingConversionService is inert.
+  DOCLING_BASE_URL: ${DOCLING_BASE_URL:-}
+  DOCLING_SHARED_SECRET: ${DOCLING_SHARED_SECRET:-}
   # Base profiles + whatever the enabled compose profiles need (the CLI sets
   # CORE_PROFILES_EXTRA, e.g. ",workflow,temporal"). `workflow` needs Kafka.
   # CORE_MCP_PROFILE=",mcp" turns on the static STDIO MCP built-ins
@@ -594,6 +603,31 @@ services:
       resources:
         limits:
           memory: ${SIDECAR_MEM_LIMIT:-3g}
+    networks: [agent-io]
+
+  docling:
+    # Docling document parser (services/docling): layout-aware conversion to
+    # markdown for PDF/Office/image formats, ahead of the sidecar's /extract.
+    # Opt-in - its model weight (several GB) is a cost only deployments that
+    # want the better parser pay. Core reaches it via DOCLING_BASE_URL above.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/docling:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["docling"]
+    <<: [*restart, *logging, *hardened]
+    environment:
+      DOCLING_SHARED_SECRET: ${DOCLING_SHARED_SECRET:?run scripts/vegaduta secrets}
+      DOCLING_AUTH_REQUIRED: "true"
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${DOCLING_HOST_PORT:-8002}:8002"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${DOCLING_MEM_LIMIT:-4g}
     networks: [agent-io]
 
   core:

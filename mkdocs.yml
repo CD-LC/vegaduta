@@ -140,6 +140,7 @@ nav:
       - MCP registry: core/mcp/REGISTERING-A-CUSTOM-MCP-SERVER.md
       - Connector specs: connectors/README.md
       - Google Calendar booking and Sheets: connectors/google-calendar-sheets.md
+      - n8n bridge: integrations/n8n.md
   - SDKs and dependencies:
       - Overview: sdk/README.md
       - Java Agent SDK: sdk/java-agent-sdk.md

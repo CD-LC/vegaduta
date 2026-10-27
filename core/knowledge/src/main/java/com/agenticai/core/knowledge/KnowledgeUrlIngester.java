@@ -52,6 +52,17 @@ public class KnowledgeUrlIngester {
         Map.entry("image/jpeg", ".jpg"),
         Map.entry("image/webp", ".webp"));
 
+    // Consulted only while Docling is enabled - the same widening
+    // KnowledgeController#supportedExtensions applies to /upload. text/csv stays
+    // deliberately out of the base map above: without the service a CSV is best
+    // treated as decodable text (the old behaviour), not a failed extraction.
+    private static final Map<String, String> DOCLING_CONTENT_TYPE_TO_EXTENSION = Map.of(
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation", ".pptx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".xlsx",
+        "image/tiff", ".tiff",
+        "image/bmp", ".bmp",
+        "text/csv", ".csv");
+
     // Content-types that decode straight to text for the plain ingest() path - no extraction
     // step needed.
     private static boolean isTextual(String contentType) {
@@ -68,6 +79,18 @@ public class KnowledgeUrlIngester {
     private final KnowledgeDocumentService documentService;
     private final FileStorageService fileStorageService;
     private final KnowledgeUrlFetcher fetcher;
+
+    // Docling-first extraction (app.knowledge.docling.base-url) - widens
+    // isSupportedDocument/filenameFor for the formats only that service
+    // handles, exactly as KnowledgeController widens /upload. Setter
+    // injection keeps both constructors (and every test using them)
+    // unchanged; null = inert.
+    private volatile DoclingConversionService doclingConversion;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setDoclingConversionService(DoclingConversionService service) {
+        this.doclingConversion = service;
+    }
 
     @org.springframework.beans.factory.annotation.Autowired
     public KnowledgeUrlIngester(
@@ -186,6 +209,12 @@ public class KnowledgeUrlIngester {
             return fromPath;
         }
         String mapped = CONTENT_TYPE_TO_EXTENSION.get(fetched.contentType());
+        if (mapped == null) {
+            DoclingConversionService docling = doclingConversion;
+            if (docling != null && docling.enabled()) {
+                mapped = DOCLING_CONTENT_TYPE_TO_EXTENSION.get(fetched.contentType());
+            }
+        }
         if (mapped != null) {
             return "fetched-document" + mapped;
         }
@@ -217,9 +246,13 @@ public class KnowledgeUrlIngester {
         return name.isBlank() ? null : name;
     }
 
-    private static boolean isSupportedDocument(String filename) {
+    private boolean isSupportedDocument(String filename) {
         String lower = filename.toLowerCase(Locale.ROOT);
-        return SUPPORTED_EXTENSIONS.stream().anyMatch(lower::endsWith);
+        if (SUPPORTED_EXTENSIONS.stream().anyMatch(lower::endsWith)) {
+            return true;
+        }
+        DoclingConversionService docling = doclingConversion;
+        return docling != null && docling.handles(filename);
     }
 
     private static boolean looksLikePdf(byte[] body) {
