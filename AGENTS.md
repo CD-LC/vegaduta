@@ -53,6 +53,7 @@ services/             sidecar (Python ML), code-intel, app-builder, tool-sandbox
                       ingestion; compose profile `docling`, app.knowledge.docling.*)
 examples/             workflow-templates/, mcp-servers/, agent-bundles/, sdk/
 tests/e2e             Playwright suite;  tests/load  load tests;  tests/install  installer tests
+academy/              how-to video lessons (script.mjs scenes -> narrate + capture + assemble)
 deploy/compose        lite.yml, docker-compose.yml (+ *.build.yml, *.ci.yml, *.domain.yml overlays), .env.example
 deploy/helm           umbrella chart charts/vegaduta + per-service charts + vegaduta-lib library
 deploy/postgres       Postgres 16 + pgvector + Apache AGE image
