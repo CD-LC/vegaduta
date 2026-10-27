@@ -159,6 +159,7 @@ updates:
     directories:
       - /services/sidecar
       - /services/code-intel
+      - /services/docling
       - /services/app-builder
       - /services/tool-sandbox
       - /services/voice-agent
@@ -208,6 +209,7 @@ updates:
       - /deploy/mock-provider
       - /services/sidecar
       - /services/code-intel
+      - /services/docling
       - /services/app-builder
       - /services/tool-sandbox
       - /services/mcp-stdio-runner

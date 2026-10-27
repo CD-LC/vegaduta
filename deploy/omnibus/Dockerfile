@@ -39,14 +39,14 @@ ARG POSTGRES_IMAGE_DIGEST=52fefb560a4a851adc105b5efaf2658e0011e552ca4f9b7ddf9804
 # jlink-minimal JRE: same module list as core/Dockerfile's JRE=jlink variant
 # (keep the two in sync). Roughly half the size of the full temurin JRE on
 # the same glibc generation.
-FROM eclipse-temurin:21.0.12.1_1-jdk-noble@sha256:107215954359f1ab0be058a247d7c64ed6e69c71c1682d471d38ef751ec8e964 AS jre-linker
+FROM eclipse-temurin:24.0.2_12-jdk-noble@sha256:dacac8e9a0df0d2bd24e702b4431132875c249930b70555ebd7ca285b5bee684 AS jre-linker
 RUN "$JAVA_HOME/bin/jlink" \
         --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.management.rmi,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.transaction.xa,java.xml,jdk.crypto.ec,jdk.jfr,jdk.localedata,jdk.unsupported,jdk.unsupported.desktop,jdk.zipfs \
         --strip-debug --no-man-pages --no-header-files --compress=zip-6 \
         --output /jre-minimal \
     && rm -f /jre-minimal/lib/server/classes.jsa
 
-FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS node-img
+FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0 AS node-img
 
 # COPY --from cannot expand ARGs, so the release's own images are named stages.
 FROM ${REGISTRY}/core@sha256:${CORE_IMAGE_DIGEST} AS core-img

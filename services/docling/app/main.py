@@ -117,7 +117,9 @@ def extract(request: ExtractRequest) -> ExtractResponse:
     try:
         content = base64.b64decode(request.content_base64, validate=True)
     except Exception as e:
-        raise HTTPException(status_code=400, detail="content_base64 is not valid base64") from e
+        raise HTTPException(
+            status_code=400, detail="content_base64 is not valid base64"
+        ) from e
 
     try:
         text = convert_to_markdown(request.filename, content)
