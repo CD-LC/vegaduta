@@ -95,6 +95,36 @@ class TenantMigrationServiceTest {
     }
 
     @Test
+    void failedSchemaIsRecordedAndClearedByASuccessfulRetry() {
+        TenantSchemaMigrator migrator = mock(TenantSchemaMigrator.class);
+        java.util.concurrent.atomic.AtomicBoolean broken =
+                new java.util.concurrent.atomic.AtomicBoolean(true);
+        doAnswer(
+                        inv -> {
+                            if ("bad".equals(inv.getArgument(0)) && broken.get()) {
+                                throw new IllegalStateException("boom");
+                            }
+                            return null;
+                        })
+                .when(migrator)
+                .migrate(anyString());
+        TenantMigrationService service =
+                new TenantMigrationService(repoWith("ok1", "bad"), migrator, 2);
+        TenantMigrationFailures failures = new TenantMigrationFailures();
+        service.setFailures(failures);
+
+        service.migrateAllActiveTenants();
+        assertTrue(failures.hasFailed("bad"));
+        assertTrue(!failures.hasFailed("ok1"));
+        assertEquals(List.of("bad"), service.retryFailed());
+        assertTrue(failures.hasFailed("bad"));
+
+        broken.set(false);
+        assertTrue(service.retryFailed().isEmpty());
+        assertTrue(!failures.hasFailed("bad"));
+    }
+
+    @Test
     void parallelismBelowOneStillRunsSequentially() {
         TenantSchemaMigrator migrator = mock(TenantSchemaMigrator.class);
         TenantMigrationService service =

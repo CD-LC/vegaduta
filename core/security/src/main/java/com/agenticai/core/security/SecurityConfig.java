@@ -82,6 +82,9 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 @Profile("!insecure")
 public class SecurityConfig {
 
+    private static final org.slf4j.Logger log =
+            org.slf4j.LoggerFactory.getLogger(SecurityConfig.class);
+
     // Read lazily in jwtDecoder(), not through @Value fields: in app.auth.mode=local there is no
     // Keycloak, these properties are unset (or, with the `security` profile, hold a placeholder
     // that cannot resolve), and an eager @Value would stop the boot for a decoder nobody builds.
@@ -139,6 +142,14 @@ public class SecurityConfig {
     private String requiredAudience = "";
 
     /**
+     * Opt-out for {@link #checkTokenAcceptanceConfig}: set true to run a non-Keycloak issuer with
+     * neither an azp allowlist nor a required audience (any token the issuer mints is accepted).
+     * Env: {@code APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE}.
+     */
+    @Value("${app.security.jwt.allow-unrestricted-audience:false}")
+    private boolean allowUnrestrictedAudience;
+
+    /**
      * Generic-OIDC claim mapping ({@link OidcClaimMapping}) - where roles,
      * tenant and (optionally) scopes live in the token. The defaults reproduce
      * the Keycloak layout EXACTLY ({@code realm_access.roles}, {@code
@@ -164,6 +175,39 @@ public class SecurityConfig {
      */
     private OidcClaimMapping claimMapping() {
         return new OidcClaimMapping(rolesClaimPath, tenantClaim, scopesClaim);
+    }
+
+    /**
+     * A shared multi-client issuer (Auth0, Entra, Okta, a Keycloak realm that is not the bundled
+     * one) signs tokens for every application in it, so signature plus issuer prove nothing about
+     * who the token was minted for. For an issuer that is not the bundled Keycloak (whose issuer
+     * path contains {@code /realms/}) with BOTH the azp allowlist and the required audience empty,
+     * fail startup rather than accept every token the issuer mints. Keycloak defaults are
+     * unchanged (the azp allowlist is non-empty by default).
+     *
+     * @throws IllegalStateException unless {@code allowUnrestricted} is set, in which case an ERROR
+     *     is logged instead
+     */
+    static void checkTokenAcceptanceConfig(
+            String issuerUri, String allowedAzp, String audience, boolean allowUnrestricted) {
+        boolean bundledKeycloak = issuerUri != null && issuerUri.contains("/realms/");
+        boolean noAzp = allowedAzp == null || allowedAzp.isBlank();
+        boolean noAud = audience == null || audience.isBlank();
+        if (bundledKeycloak || !noAzp || !noAud) {
+            return;
+        }
+        String message =
+                "JWT issuer '" + issuerUri + "' is not the bundled Keycloak and both"
+                        + " app.keycloak.allowed-azp and app.security.jwt.required-audience are"
+                        + " empty, so every token this issuer signs for ANY application would be"
+                        + " accepted. Set APP_SECURITY_JWT_REQUIRED_AUDIENCE (preferred) or"
+                        + " APP_KEYCLOAK_ALLOWED_AZP, or set"
+                        + " APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE=true to accept this risk.";
+        if (allowUnrestricted) {
+            log.error("{} (continuing: app.security.jwt.allow-unrestricted-audience=true)", message);
+            return;
+        }
+        throw new IllegalStateException(message);
     }
 
     /**
@@ -247,6 +291,8 @@ public class SecurityConfig {
                             + " (KEYCLOAK_ISSUER_URI) and app.keycloak.jwk-set-uri"
                             + " (KEYCLOAK_JWK_SET_URI); set them, or use app.auth.mode=local");
         }
+        checkTokenAcceptanceConfig(
+                issuerUri, allowedAuthorizedParties, requiredAudience, allowUnrestrictedAudience);
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
 
         java.util.LinkedHashSet<String> acceptedIssuers = new java.util.LinkedHashSet<>();

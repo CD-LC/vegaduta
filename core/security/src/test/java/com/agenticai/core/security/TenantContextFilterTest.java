@@ -155,6 +155,25 @@ class TenantContextFilterTest {
     }
 
     @Test
+    void jwtTenantClaimNamingThePublicSchemaIsRejectedBeforeTheGuard() throws Exception {
+        for (String claim : new String[] {"public", " PUBLIC ", "control_plane"}) {
+            SecurityContextHolder.getContext()
+                    .setAuthentication(new JwtAuthenticationToken(jwt("user-1", claim), List.of()));
+            TenantStatusGuard guard = mock(TenantStatusGuard.class);
+            when(guard.isUsable(any())).thenReturn(true);
+            TenantContextFilter filter = new TenantContextFilter(Optional.of(guard));
+            FilterChain chain = mock(FilterChain.class);
+            HttpServletResponse response = mock(HttpServletResponse.class);
+            when(response.getWriter()).thenReturn(mock(PrintWriter.class));
+
+            filter.doFilterInternal(requestMock(), response, chain);
+
+            verify(chain, never()).doFilter(any(), any());
+            verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
+        }
+    }
+
+    @Test
     void guardAbsentAllowsRequestThroughRegardlessOfTenant() throws Exception {
         // Optional<TenantStatusGuard> empty - the narrower test-context /
         // no-tenancy-module-on-classpath case this class's javadoc calls

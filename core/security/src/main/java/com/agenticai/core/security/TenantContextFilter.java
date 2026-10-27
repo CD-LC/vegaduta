@@ -203,6 +203,15 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 if (jwt.getSubject() != null) {
                     MDC.put("userId", jwt.getSubject());
                 }
+                if (!tenantMissing && isSystemSchemaClaim(tenantId)) {
+                    log.warn(
+                            "Rejected {} {} - tenant claim '{}' names the default/system schema.",
+                            request.getMethod(),
+                            LogMasking.path(request.getRequestURI()),
+                            tenantId.replaceAll("[\\r\\n]", " "));
+                    reject(response, TENANT_UNUSABLE_BODY, request);
+                    return;
+                }
                 if (!tenantMissing
                         && tenantStatusGuard.isPresent()
                         && !tenantStatusGuard.get().isUsable(tenantId)) {
@@ -241,6 +250,15 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     MDC.put("tenantId", tenantId);
                 }
                 MDC.put("userId", subject);
+                if (tenantId != null && isSystemSchemaClaim(tenantId)) {
+                    log.warn(
+                            "Rejected {} {} - API key '{}' resolved the default/system schema.",
+                            request.getMethod(),
+                            LogMasking.path(request.getRequestURI()),
+                            subject);
+                    reject(response, TENANT_UNUSABLE_BODY, request);
+                    return;
+                }
                 if (tenantStatusGuard.isPresent()
                         && !tenantStatusGuard.get().isUsable(tenantId)) {
                     log.warn(
@@ -324,6 +342,24 @@ public class TenantContextFilter extends OncePerRequestFilter {
         } catch (RuntimeException e) {
             log.debug("Last-seen recording failed for subject '{}' - ignored", subject, e);
         }
+    }
+
+    /**
+     * A JWT / API-key tenant claim that is (case-insensitively, after trimming) the legacy {@code
+     * public} schema or a reserved platform schema is never a tenant: it would run tenant queries
+     * in the shared legacy schema. Webhook paths that set {@code public} deliberately build their
+     * {@link TenantContext} directly and never pass through this filter.
+     */
+    static boolean isSystemSchemaClaim(String tenantId) {
+        if (tenantId == null) {
+            return false;
+        }
+        String n = tenantId.trim().toLowerCase(java.util.Locale.ROOT);
+        return "public".equals(n)
+                || "control_plane".equals(n)
+                || "information_schema".equals(n)
+                || "ag_catalog".equals(n)
+                || n.startsWith("pg_");
     }
 
     private static boolean hasPlatformAdminAuthority(JwtAuthenticationToken jwtAuth) {

@@ -26,6 +26,20 @@ class SecurityConfigJwtValidatorTest {
     }
 
     @Test
+    void nonKeycloakIssuerWithNoAzpAndNoAudienceFailsStartupUnlessOptedOut() {
+        String auth0 = "https://tenant.auth0.com/";
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> SecurityConfig.checkTokenAcceptanceConfig(auth0, "", "", false))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("required-audience");
+        SecurityConfig.checkTokenAcceptanceConfig(auth0, "", "", true);
+        SecurityConfig.checkTokenAcceptanceConfig(auth0, "", "my-api", false);
+        SecurityConfig.checkTokenAcceptanceConfig(auth0, "client", "", false);
+        // Keycloak issuer: unchanged even with both empty.
+        SecurityConfig.checkTokenAcceptanceConfig("http://kc/realms/agentic-ai", "", "", false);
+    }
+
+    @Test
     void tokenWithoutAzpIsRejected() {
         assertThat(ok(SecurityConfig.authorizedPartyValidator(ALLOWED), jwt(c -> {}))).isFalse();
     }

@@ -11,6 +11,7 @@ import java.time.Duration;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -61,13 +62,30 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
     private final DataSource dataSource;
     private final TtlCache<Boolean> tenantUsable;
     private final TtlCache<Boolean> platformUsable;
+    private final TenantMigrationFailures migrationFailures;
+    private final boolean failOpenOnSchemaCheckError;
 
     public TenantStatusGuardImpl(
         TenantRepository tenantRepository,
         PlatformKillSwitchRepository platformKillSwitchRepository,
         DataSource dataSource,
-        @Value("${app.tenant.status-cache-ttl:10s}") Duration statusCacheTtl
+        Duration statusCacheTtl
     ) {
+        this(tenantRepository, platformKillSwitchRepository, dataSource, statusCacheTtl,
+            new TenantMigrationFailures(), false);
+    }
+
+    @Autowired
+    public TenantStatusGuardImpl(
+        TenantRepository tenantRepository,
+        PlatformKillSwitchRepository platformKillSwitchRepository,
+        DataSource dataSource,
+        @Value("${app.tenant.status-cache-ttl:10s}") Duration statusCacheTtl,
+        TenantMigrationFailures migrationFailures,
+        @Value("${app.tenant.status-fail-open-on-schema-check-error:false}") boolean failOpenOnSchemaCheckError
+    ) {
+        this.migrationFailures = migrationFailures;
+        this.failOpenOnSchemaCheckError = failOpenOnSchemaCheckError;
         this.tenantRepository = tenantRepository;
         this.platformKillSwitchRepository = platformKillSwitchRepository;
         this.dataSource = dataSource;
@@ -99,21 +117,33 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
         if (platformStopped) {
             return false;
         }
+        // A schema whose startup migration failed is stale: refuse it until a later migration
+        // succeeds. Checked outside the TTL cache (an in-memory set lookup), so the moment a retry
+        // clears the mark the tenant is served again with no eviction needed.
+        if (migrationFailures.hasFailed(tenantId)) {
+            return false;
+        }
         return tenantUsable.get(TtlCache.key(tenantId, "usable"), () -> computeUsable(tenantId));
     }
 
     /** The uncached body of {@link #isUsable}'s per-tenant half - kept verbatim so the cache only wraps, never rewrites, the decision. */
     private boolean computeUsable(String tenantId) {
+        // The raw claim must already be a canonical schema name. The sanitizer is lossy ("Acme-Co"
+        // and "acme_co" both become "acme_co"), so a claim that only matches after sanitising could
+        // reach another tenant's schema.
+        if (tenantId == null || !SchemaNameSanitizer.sanitize(tenantId).equals(tenantId)) {
+            log.warn("Rejecting a tenant claim that is not a canonical schema name (sanitised form differs)");
+            return false;
+        }
         return tenantRepository.findBySchemaName(tenantId)
             .map(tenant -> tenant.getStatus() == TenantStatus.ACTIVE && !tenant.isEmergencyStopped())
             .orElseGet(() -> schemaExists(tenantId));
     }
 
     /**
-     * Fail-open on any SQL error - a transient connectivity blip here should
-     * never lock every untracked-tenant request out of the whole platform;
-     * worst case, this behaves exactly like the pre-2026-07-11 always-true
-     * fallback for the duration of that blip.
+     * Fails CLOSED on any SQL error (logged, false) unless {@code
+     * app.tenant.status-fail-open-on-schema-check-error=true} restores the earlier fail-open
+     * behaviour. A denial is cached for the status TTL (10s by default) like any other answer.
      */
     private boolean schemaExists(String schemaName) {
         try (Connection connection = dataSource.getConnection();
@@ -124,8 +154,9 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
                 return resultSet.next();
             }
         } catch (SQLException e) {
-            log.warn("Could not verify schema existence for untracked tenant '{}' - allowing the request through", schemaName, e);
-            return true;
+            log.warn("Could not verify schema existence for untracked tenant '{}' - {}", schemaName,
+                failOpenOnSchemaCheckError ? "allowing the request through (fail-open opt-in)" : "refusing the request (fail-closed)", e);
+            return failOpenOnSchemaCheckError;
         }
     }
 }
