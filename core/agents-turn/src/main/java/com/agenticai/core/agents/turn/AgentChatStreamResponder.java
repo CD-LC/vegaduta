@@ -154,7 +154,8 @@ public final class AgentChatStreamResponder {
                         null,
                         // The run-scoped tool selection (the playground's "this run only"
                         // switches); null = none.
-                        request.toolNames());
+                        request.toolNames(),
+                        null);
         // ADR-0022 stage 4: this HTTP entry builds the turn context from the tenant
         // TenantContextFilter put on this request thread.
         TurnContext context = TurnContext.forEntry(TenantContext.current().orElse(null), turn);

@@ -98,10 +98,10 @@ class AgentChatServiceBufferedDepthTest {
         when(llmGatewayService.resolveClient(any(), any(), any())).thenReturn(chatClient);
         when(sessionMemoryService.getHistory(any())).thenReturn(List.of());
         when(agentToolProvider.resolveToolsFor(
-                        any(), any(), any(), any(), any(), any(), any(), any()))
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of());
         when(agentToolProvider.resolveToolsFor(
-                        any(), any(), any(), any(), any(), any(), any(), any()))
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of());
 
         agent = mock(Agent.class);
@@ -113,9 +113,8 @@ class AgentChatServiceBufferedDepthTest {
     /**
      * Before the audit, a buffered depth whose completion came back null or blank returned {@code
      * Flux.just("")} - one EMPTY SSE chunk. The user saw an empty assistant bubble with no error
-     * anywhere, nothing was persisted, and nothing was logged. FAST has had
-     * the empty-reply finish notice for exactly this shape since 2026-08-10; the buffered depths now share
-     * it.
+     * anywhere, nothing was persisted, and nothing was logged. FAST has had the empty-reply finish
+     * notice for exactly this shape since 2026-08-10; the buffered depths now share it.
      */
     @Test
     void anEmptyCompletionOnABufferedDepthEmitsTheFallbackInsteadOfAnEmptyChunk() {
@@ -146,7 +145,10 @@ class AgentChatServiceBufferedDepthTest {
                         .anyMatch(
                                 t ->
                                         ChatTurn.isFailedReply(t)
-                                                && t.content().contains(ChatFinishProperties.defaultEmptyReplyMessage())),
+                                                && t.content()
+                                                        .contains(
+                                                                ChatFinishProperties
+                                                                        .defaultEmptyReplyMessage())),
                 "the fallback text should have been persisted as a failed assistant turn");
     }
 
@@ -224,16 +226,17 @@ class AgentChatServiceBufferedDepthTest {
     }
 
     /**
-     * When Gemini still refuses the tool-call history ({@code thought_signature}), the buffered depths
-     * answer once without tools exactly as the streamed depth does - and say so: the reply opens with a
-     * notice that it was written without tools. (They used to fail the turn outright, and the streamed
-     * depth used to rescue it silently.)
+     * When Gemini still refuses the tool-call history ({@code thought_signature}), the buffered
+     * depths answer once without tools exactly as the streamed depth does - and say so: the reply
+     * opens with a notice that it was written without tools. (They used to fail the turn outright,
+     * and the streamed depth used to rescue it silently.)
      */
     @Test
     void theGeminiThoughtSignatureRefusalIsAnsweredWithoutToolsAndSaidSoOnABufferedDepth() {
         stubThoughtSignatureRefusalThenAnAnswerWithoutTools();
         AgentChatService service = buildService();
-        // Off by default (a last resort the operator opts into); this test is about what it does when on.
+        // Off by default (a last resort the operator opts into); this test is about what it does
+        // when on.
         service.turns.resilience.setThoughtSignatureDegrade(true);
 
         List<String> emitted =
@@ -248,9 +251,9 @@ class AgentChatServiceBufferedDepthTest {
     }
 
     /**
-     * The no-tools rescue is a last resort and OFF by default: with the platform now sending the function
-     * call back with its own signature, a refusal is a provider fault to report, not a turn to quietly
-     * re-run without its tools.
+     * The no-tools rescue is a last resort and OFF by default: with the platform now sending the
+     * function call back with its own signature, a refusal is a provider fault to report, not a
+     * turn to quietly re-run without its tools.
      */
     @Test
     void theGeminiThoughtSignatureRefusalIsReportedNotAnsweredWithoutToolsByDefault() {
@@ -260,9 +263,10 @@ class AgentChatServiceBufferedDepthTest {
 
         List<String> emitted = null;
         try {
-            emitted = service.chat(AGENT_ID, "sess-2", "subject-2", "book me a flight", null, null)
-                    .collectList()
-                    .block();
+            emitted =
+                    service.chat(AGENT_ID, "sess-2", "subject-2", "book me a flight", null, null)
+                            .collectList()
+                            .block();
         } catch (RuntimeException reported) {
             // the provider's refusal reaches the caller
         }
@@ -270,7 +274,10 @@ class AgentChatServiceBufferedDepthTest {
         assertTrue(
                 emitted == null
                         || emitted.stream()
-                                .noneMatch(t -> t.contains("recovered without tools") || t.contains("written without any tools")),
+                                .noneMatch(
+                                        t ->
+                                                t.contains("recovered without tools")
+                                                        || t.contains("written without any tools")),
                 String.valueOf(emitted));
     }
 
@@ -278,7 +285,7 @@ class AgentChatServiceBufferedDepthTest {
         ToolCallback tool = mock(ToolCallback.class, RETURNS_DEEP_STUBS);
         when(tool.getToolDefinition().name()).thenReturn("search_flights");
         when(agentToolProvider.resolveToolsFor(
-                        any(), any(), any(), any(), any(), any(), any(), any()))
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of(tool));
         UpstreamProviderException thoughtSignature =
                 new UpstreamProviderException(
@@ -303,7 +310,6 @@ class AgentChatServiceBufferedDepthTest {
                 .thenThrow(thoughtSignature);
         when(withoutTools.advisors(any(java.util.function.Consumer.class)).call().content())
                 .thenReturn("recovered without tools");
-
     }
 
     /**
@@ -331,7 +337,8 @@ class AgentChatServiceBufferedDepthTest {
                         eq("what's on my calendar"),
                         eq(chatClient),
                         any(),
-                        eq(ReasoningDepth.FAST));
+                        eq(ReasoningDepth.FAST),
+                        any());
     }
 
     // ---- L4 verifier-escalated router (flag-off safety and escalation call path) ----

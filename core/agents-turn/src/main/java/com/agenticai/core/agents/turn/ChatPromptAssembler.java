@@ -34,6 +34,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +100,8 @@ final class ChatPromptAssembler {
             boolean forceFastDepth,
             AgentStepEventEmitter stepEvents,
             boolean suppressAgentTools,
-            List<String> runToolNames) {
+            List<String> runToolNames,
+            String taintSource) {
         // Read at call time: the directive flags are @Value field-injected and the compaction /
         // sandbox collaborators are setter-injected after the service is constructed.
         ChatHotpath hotpath = svc.hotpath;
@@ -244,6 +246,10 @@ final class ChatPromptAssembler {
         // effectiveForceFastDepth just above, effReasoningDepth further up.
         ReasoningDepth turnDepth =
                 effectiveForceFastDepth ? ReasoningDepth.FAST : effReasoningDepth;
+        // The turn's shared step counter (one per turn, created HERE so the SAME identity reaches
+        // both the tool wrappers and the pre-turn reads that must seed taint on this turn - see
+        // AgentToolPort#resolveToolsFor(...stepCounter) and #seedTurnTaint).
+        AtomicInteger stepCounter = new AtomicInteger(0);
         CompletableFuture<List<ToolCallback>> toolsFuture =
                 supplyPreTurn(
                         preTurnTenant,
@@ -259,13 +265,25 @@ final class ChatPromptAssembler {
                                                         decisionMessage,
                                                         chatClient,
                                                         stepEvents,
-                                                        turnDepth)));
+                                                        turnDepth,
+                                                        stepCounter)));
         CompletableFuture<String> memoryFuture =
                 supplyPreTurn(
                         preTurnTenant,
                         () ->
                                 memoryRecall.recallMemoryFactsBlock(
-                                        agentId, subjectKey, decisionMessage, stepEvents));
+                                        agentId,
+                                        subjectKey,
+                                        decisionMessage,
+                                        stepEvents,
+                                        stepCounter,
+                                        agentToolProvider::seedTurnTaint));
+        // A workflow Agent node whose input carries a knowledge node's spotlighted output rides the
+        // taint on the request (the workflow module has no turn of its own to mark) - seed it with
+        // the SAME counter here, before any tool can run.
+        if (taintSource != null && !taintSource.isBlank()) {
+            agentToolProvider.seedTurnTaint(stepCounter, taintSource);
+        }
 
         // Stage 4: empty unless the "mcp" profile is active and at least one
         // registry entry is enabled - see AgentToolProvider for why.

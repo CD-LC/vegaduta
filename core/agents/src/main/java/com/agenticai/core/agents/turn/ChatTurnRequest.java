@@ -44,14 +44,19 @@ import org.springframework.ai.tool.ToolCallback;
  *     call: {@code userMessage} is then the platform-written continuation message and this carries
  *     what the pipeline must not derive from it (the original goal, the tools to keep on offer);
  *     {@code null} on every ordinary turn
- * @param caps runtime limits this one run carries with it (an agent job's remaining tool-call budget);
- *     the request layer of the runtime settings, which can only tighten what the platform, tenant and
- *     agent layers allow, never loosen it; {@code null} on every ordinary turn
- * @param toolNames the run-scoped tool selection (the playground's "this run only" tool switches): the
- *     run may use only these of the agent's tools. It can only NARROW the set the agent resolves for the
- *     caller - a name that is not among those tools refuses the request, and a tool kept is still wrapped
- *     by its approval, autonomy and guardrail gates. {@code null} means no selection (every ordinary turn),
- *     an empty list a run without tools. The continuation after an approval carries the same selection
+ * @param caps runtime limits this one run carries with it (an agent job's remaining tool-call
+ *     budget); the request layer of the runtime settings, which can only tighten what the platform,
+ *     tenant and agent layers allow, never loosen it; {@code null} on every ordinary turn
+ * @param toolNames the run-scoped tool selection (the playground's "this run only" tool switches):
+ *     the run may use only these of the agent's tools. It can only NARROW the set the agent
+ *     resolves for the caller - a name that is not among those tools refuses the request, and a
+ *     tool kept is still wrapped by its approval, autonomy and guardrail gates. {@code null} means
+ *     no selection (every ordinary turn), an empty list a run without tools. The continuation after
+ *     an approval carries the same selection
+ * @param taintSource when non-blank, the turn is marked tainted BEFORE any tool runs, attributed to
+ *     this source - used by the workflow Agent node when its input carries a knowledge node's
+ *     spotlighted output (the workflow module has no turn of its own to mark, so the taint rides
+ *     the chat turn that consumes it). {@code null}/blank = an ordinary turn, unchanged
  */
 public record ChatTurnRequest(
         UUID agentId,
@@ -69,9 +74,13 @@ public record ChatTurnRequest(
         boolean suppressAgentTools,
         ApprovalContinuation continuation,
         RuntimeLimits caps,
-        List<String> toolNames) {
+        List<String> toolNames,
+        String taintSource) {
 
-    /** A request with no run-scoped tool selection (every caller but the chat endpoint and its continuation). */
+    /**
+     * A request with no run-scoped tool selection (every caller but the chat endpoint and its
+     * continuation).
+     */
     public ChatTurnRequest(
             UUID agentId,
             String sessionId,
@@ -104,6 +113,7 @@ public record ChatTurnRequest(
                 suppressAgentTools,
                 continuation,
                 caps,
+                null,
                 null);
     }
 
@@ -138,6 +148,8 @@ public record ChatTurnRequest(
                 stepEvents,
                 suppressAgentTools,
                 continuation,
+                null,
+                null,
                 null);
     }
 
@@ -170,6 +182,9 @@ public record ChatTurnRequest(
                 forceFastDepth,
                 stepEvents,
                 suppressAgentTools,
+                null,
+                null,
+                null,
                 null);
     }
 
@@ -201,6 +216,7 @@ public record ChatTurnRequest(
         private ApprovalContinuation continuation;
         private RuntimeLimits caps;
         private List<String> toolNames;
+        private String taintSource;
 
         private Builder(UUID agentId, String sessionId, String subjectKey, String userMessage) {
             this.agentId = agentId;
@@ -266,11 +282,20 @@ public record ChatTurnRequest(
         }
 
         /**
-         * Narrows this run to {@code value} of the agent's tools (see {@link ChatTurnRequest#toolNames()});
-         * {@code null} leaves the agent's tools as they are.
+         * Narrows this run to {@code value} of the agent's tools (see {@link
+         * ChatTurnRequest#toolNames()}); {@code null} leaves the agent's tools as they are.
          */
         public Builder toolNames(List<String> value) {
             this.toolNames = value;
+            return this;
+        }
+
+        /**
+         * Marks this turn tainted before any tool runs, attributed to {@code value} - see {@link
+         * ChatTurnRequest#taintSource()}.
+         */
+        public Builder taintSource(String value) {
+            this.taintSource = value;
             return this;
         }
 
@@ -291,7 +316,8 @@ public record ChatTurnRequest(
                     suppressAgentTools,
                     continuation,
                     caps,
-                    toolNames);
+                    toolNames,
+                    taintSource);
         }
     }
 }

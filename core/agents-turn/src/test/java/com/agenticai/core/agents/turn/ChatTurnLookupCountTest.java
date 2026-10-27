@@ -110,7 +110,8 @@ class ChatTurnLookupCountTest {
 
     @Test
     void oneTurnReadsThePlanOnceAndHandsItToTheGateway() {
-        when(toolProvider.resolveToolsFor(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(toolProvider.resolveToolsFor(
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(ResolvedToolList.of(List.of(), false));
 
         build().chat(UUID.randomUUID(), "s1", "subject", "hello", null, null);
@@ -124,7 +125,8 @@ class ChatTurnLookupCountTest {
 
     @Test
     void oneTurnEvaluatesTheTenantsFlagsOnce() {
-        when(toolProvider.resolveToolsFor(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(toolProvider.resolveToolsFor(
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(ResolvedToolList.of(List.of(), false));
 
         AgentChatService service = build();
@@ -139,7 +141,8 @@ class ChatTurnLookupCountTest {
 
     @Test
     void withoutVersioningTheFlagsAreStillEvaluatedOnce() {
-        when(toolProvider.resolveToolsFor(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(toolProvider.resolveToolsFor(
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(ResolvedToolList.of(List.of(), false));
 
         build().chat(UUID.randomUUID(), "s1", "subject", "hello", null, null);
@@ -149,7 +152,8 @@ class ChatTurnLookupCountTest {
 
     @Test
     void theMcpAnswerComesFromTheResolutionThatAlreadyRan() {
-        when(toolProvider.resolveToolsFor(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(toolProvider.resolveToolsFor(
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(ResolvedToolList.of(List.of(), true));
 
         build().chat(UUID.randomUUID(), "s1", "subject", "hello", null, null);
@@ -159,7 +163,8 @@ class ChatTurnLookupCountTest {
 
     @Test
     void aToolListThatDoesNotCarryTheAnswerStillGetsAskedTheOldWay() {
-        when(toolProvider.resolveToolsFor(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(toolProvider.resolveToolsFor(
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of());
         when(toolProvider.anyMcpToolsOfferedFor(any(), any(), any(), any())).thenReturn(true);
 

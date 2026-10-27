@@ -120,7 +120,8 @@ class AgentChatServiceContentGuardrailTest {
         when(agentService.resolveEffectiveModel(agent)).thenReturn("gpt-4o-mini");
 
         AgentToolPort agentToolProvider = mock(AgentToolPort.class);
-        when(agentToolProvider.resolveToolsFor(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(agentToolProvider.resolveToolsFor(
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of());
         FeatureFlagService featureFlagService = mock(FeatureFlagService.class);
         when(featureFlagService.evaluateActiveFlags(any())).thenReturn(Map.of());
