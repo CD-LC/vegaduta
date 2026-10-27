@@ -495,3 +495,15 @@ Dependabot alert, and a new-alert gate in CI. Touching: .github/workflows/,
 deploy/omnibus/Dockerfile, services/*/Dockerfile, scripts/ci/,
 core/agents-turn logging sites, services/code-intel, services/app-builder,
 core/graphmemory, core/security, core/agents-jobs, docs/marketing.
+
+### Docs: local-model wire protocol + recovery surface (Devin, 2026-10-27)
+
+local-models.md gained the missing pieces: "Option 4: bring your own local
+server" (vLLM, llama.cpp server, LM Studio, Jan, LocalAI - the LOCAL_OPENAI
+provider path, including the allowed-private-hosts gate and host.docker.internal
+guidance) and "The wire: what core sends to a local model" (the endpoint table:
+/v1/models, /api/tags, /v1/chat/completions; the per-server option fields
+num_ctx/num_batch/keep_alive/reasoning_effort/response_format/tool_choice; and
+the SSRF-guard mechanics). getting-started.md + operations/README.md gained the
+previously undocumented `scripts/vegaduta reset-password` local-account
+recovery path.
