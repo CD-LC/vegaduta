@@ -65,7 +65,9 @@ jobs:
       - name: Type-check and build the TypeScript package
         working-directory: sdk/typescript
         run: |
-          npm ci || npm install --no-audit --no-fund
+          # npm ci only: package-lock.json carries the integrity hashes - an
+          # `npm install` fallback would resolve ranges and defeat the lock.
+          npm ci --no-audit --no-fund
           npm run typecheck
           npm run build
       - name: Run runtime and contract tests
@@ -98,7 +100,7 @@ jobs:
         working-directory: sdk/typescript
         run: |
           set -euo pipefail
-          npm ci || npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           # package.json says "private": true so nothing publishes it from a checkout by accident. The
           # tarball built here is what the GitHub release carries and what the npm job publishes, so
           # the flag goes before it is packed (`npm publish` refuses a private manifest, also in a tarball).
@@ -113,7 +115,8 @@ jobs:
           mv vegaduta-sdk-*.tgz ../.. --verbose
       - name: Build the Python package
         run: |
-          python3 -m pip install --user build
+          # hash-locked: --require-hashes verifies every wheel before it runs.
+          python3 -m pip install --user --require-hashes -r sdk/python/requirements-build.lock
           python3 -m build sdk/python --outdir dist
       - name: Checksums
         run: |

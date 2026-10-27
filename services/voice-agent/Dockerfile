@@ -44,4 +44,5 @@ EXPOSE 8081
 # LIVEKIT_API_SECRET env vars flow into via WorkerOptions, same as `core`'s
 # equivalent three vars). "dev" mode (hot-reload, verbose logs) is for local
 # iteration only - see README.md.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 CMD python -c "import socket; socket.create_connection(('127.0.0.1', 8081), 3)" || exit 1
 CMD ["python", "-m", "app.main", "start"]
