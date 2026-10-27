@@ -1,0 +1,20 @@
+{
+  "name": "mcp-toolchain",
+  "private": true,
+  "description": "Lockfile-pinned browser/MCP toolchain for the core-full image. npm ci verifies every integrity hash at image build; the vendored node_modules is also overlaid onto the npx-seeded @modelcontextprotocol/server-puppeteer cache entry, so the overrides below are what protect its deprecated transitive deps (@modelcontextprotocol/sdk 1.0.1 -> GHSA-w48q-cv73-mx4w, basic-ftp 5.x -> GHSA-c475-qrg2-pj4r).",
+  "dependencies": {
+    "@modelcontextprotocol/server-puppeteer": "2025.5.12",
+    "@playwright/mcp": "0.0.83",
+    "playwright": "1.64.0-alpha-1790635538000",
+    "puppeteer": "23.11.1",
+    "@puppeteer/browsers": "3.2.6",
+    "yauzl": "3.4.0"
+  },
+  "overrides": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "basic-ftp": "6.2.1",
+    "@puppeteer/browsers": "3.2.6",
+    "cosmiconfig": "10.0.1",
+    "zod": "4.6.7"
+  }
+}

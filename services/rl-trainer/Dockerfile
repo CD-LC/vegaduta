@@ -28,4 +28,5 @@ USER 10001:10001
 EXPOSE 8095
 # Single worker: matches the other sidecars' posture. The optimizer/judge are
 # stateless LLM calls, so scale by running more replicas, not more workers.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8095/health', timeout=3)" || exit 1
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8095", "--workers", "1"]

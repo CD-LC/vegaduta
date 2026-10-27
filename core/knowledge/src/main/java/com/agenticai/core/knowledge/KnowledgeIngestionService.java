@@ -259,6 +259,13 @@ public class KnowledgeIngestionService {
         // this, every tenant's uploads land in one shared table visible to
         // every other tenant - a real bug this fixes, not a hypothetical.
         String table = KnowledgeSchemaSupport.qualifiedTableName();
+        // qualifiedTableName already quoteIdentifier-escapes the schema part; this explicit
+        // whitelist is the belt-and-suspenders barrier for the raw concatenated statements
+        // below (and the guard static analysis keys on).
+        if (!table.matches("\"[A-Za-z0-9_]+\"\\.[A-Za-z0-9_]+")) {
+            throw new IllegalStateException(
+                    "tenant table name failed the identifier whitelist: " + table);
+        }
         String metadataJson = toMetadataJson(sourceType);
 
         if (parentChildPlan != null) {

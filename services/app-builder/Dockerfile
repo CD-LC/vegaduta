@@ -32,4 +32,5 @@ EXPOSE 8091
 # Single worker on purpose, same reasoning as code-intel: the project
 # registry (projects.py) does its own in-process file locking per tenant
 # subtree, not cross-process. Scale by sharding tenants across containers.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8091/health', timeout=3)" || exit 1
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8091", "--workers", "1"]
