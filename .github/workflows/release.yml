@@ -113,14 +113,37 @@ jobs:
             echo "owner=${OWNER,,}"
             echo "sha=$sha"
           } >> "$GITHUB_OUTPUT"
+      - name: Gate the tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ steps.v.outputs.sha }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          # A release ships main's content: the tagged commit must be an
+          # ancestor of main ("behind"/"identical" in compare(base...head)
+          # means HEAD is reachable from base). Tagging a side commit used
+          # to be caught only by a lucky verify timeout, after the build
+          # matrix had already spent its budget.
+          status="$(gh api "repos/${REPO}/compare/main...${SHA}" --jq .status)"
+          case "$status" in
+            behind|identical) ;;
+            *) echo "::error::tagged commit ${SHA} is not on main (compare status: ${status}). Cut the release from a merged commit."; exit 1 ;;
+          esac
+          # The release notes are generated from CHANGELOG.md's section for
+          # this version - refuse to publish an empty-notes release.
+          grep -q "^## \[${VERSION}\]" CHANGELOG.md \
+            || { echo "::error::CHANGELOG.md has no '## [${VERSION}]' section - move the Unreleased entries under it first"; exit 1; }
+          echo "tag gates passed: ${SHA} is on main, CHANGELOG has a ${VERSION} section"
 
   verify:
     name: Verify CI passed on the tagged commit
     needs: prepare
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 180
     permissions:
       checks: read # read the check runs of the tagged commit
+      actions: read # read workflow runs of the tagged commit
     steps:
       - name: Wait for CI OK and CodeQL OK
         env:
@@ -129,9 +152,11 @@ jobs:
           SHA: ${{ needs.prepare.outputs.sha }}
         run: |
           # The tag normally points at a commit on main that CI already ran on
-          # (push to main). Wait up to an hour if those runs are still going.
+          # (push to main). Main-push CI serializes on a concurrency group, so
+          # the tagged commit's own run can start only after an earlier merge's
+          # run finishes - allow two full CI runs plus queue slack (150 min).
           for check in "CI OK" "CodeQL OK"; do
-            for attempt in $(seq 1 60); do
+            for attempt in $(seq 1 150); do
               runs="$(gh api -X GET "repos/${REPO}/commits/${SHA}/check-runs" \
                 -f check_name="$check" -f filter=latest --jq '.check_runs')"
               total="$(jq 'length' <<< "$runs")"
@@ -146,10 +171,22 @@ jobs:
                 jq -r '.[] | "  \(.name): \(.conclusion)"' <<< "$runs"
                 exit 1
               fi
-              echo "$check: ${total} run(s), ${pending} pending (attempt ${attempt}/60)"
+              # Distinguish "CI run is queued/in progress" from "this commit
+              # never triggered CI at all" (a path-filtered or non-main commit):
+              # with zero workflow runs after 10 attempts there is nothing to
+              # wait for, and waiting the full window only hides the real bug.
+              if [ "$attempt" -eq 10 ]; then
+                run_count="$(gh api "repos/${REPO}/actions/runs?head_sha=${SHA}&per_page=5" --jq .total_count)"
+                if [ "$run_count" = 0 ]; then
+                  echo "::error::no workflow run exists for ${SHA} - this commit never triggered CI. Only tag commits that CI has run on (push them to main first)."
+                  exit 1
+                fi
+                echo "$check: no check run yet, but ${run_count} workflow run(s) exist on the commit - waiting"
+              fi
+              echo "$check: ${total} run(s), ${pending} pending (attempt ${attempt}/150)"
               sleep 60
             done
-            echo "::error::no completed '$check' check on ${SHA} after an hour. Only tag commits that CI has run on (push them to main first)."
+            echo "::error::no completed '$check' check on ${SHA} after 150 minutes. Only tag commits that CI has run on (push them to main first); run scripts/ci/tag-ready.sh <sha> before tagging."
             exit 1
           done
 

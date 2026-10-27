@@ -453,3 +453,14 @@ Rather than retag a pushed ref, the cut moves to v0.1.12 at the post-#223
 main tip: approval-resume + desktop watch/learning (#220), deferred tool
 search in the personal profile + tool-sandbox export fix (#223), code-intel
 suite (#217) and the release-follow-up fixes (#218-#224).
+
+### Release-pipeline hardening (Devin, 2026-10-26)
+
+v0.1.12 exposed three release-workflow gaps: verify's 60-minute poll window is
+shorter than a serialized main-CI queue (two consecutive merges timed it out),
+it could not tell "CI queued" from "CI never ran", and prepare gated nothing -
+a tag on a non-main commit or a version with no CHANGELOG section failed only
+late. Fixed in release.yml (main-ancestry + CHANGELOG-section gate in prepare;
+150-attempt wait + early no-run detection + actions:read in verify) plus
+scripts/ci/tag-ready.sh, a pre-flight humans run before tagging; releasing.md
+step 1 now points at it.
