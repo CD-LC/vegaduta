@@ -59,7 +59,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | guardrails | kernel | 127 | approval, audit, json, prompts, settings, tenancy |  |
 | imagegen | vendor | 39 | agents (test), agents-studio (test), agentspi, prompts, providers, security, storage, tenancy | Image/video generation backends |
 | json | kernel | 2 | (none) |  |
-| knowledge | kernel (hosts vendor code) | 134 | crypto, json, prompts, security, settings, storage, tenancy | embeddings / OCR / sidecar clients |
+| knowledge | kernel (hosts vendor code) | 135 | crypto, json, prompts, security, settings, storage, tenancy | embeddings / OCR / sidecar clients |
 | mcp | kernel | 94 | crypto, json, secrets, security |  |
 | mcpserver | kernel | 45 | agents, agents-interop, agents-turn, audit, chat, json, knowledge, security, tenancy, workflow |  |
 | omnichannel | kernel (hosts vendor code) | 312 | agents, agents-turn, approval, audit, chat, crypto, devices, eventbus, guardrails, json, **sarvam** (test), security, speech, tenancy | 11 channel types + Twilio sub-packages (closed ChannelType) |
