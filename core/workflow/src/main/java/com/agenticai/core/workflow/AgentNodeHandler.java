@@ -14,6 +14,7 @@ import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.agents.turn.cache.LlmResponseCacheService;
 import com.agenticai.core.agents.turn.quality.QueryComplexityClassifier;
+import com.agenticai.core.guardrails.taint.Spotlight;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
@@ -126,7 +127,7 @@ class AgentNodeHandler implements NodeHandler {
                             + (agent.knowledgeBaseEnabled()
                                     ? "long-term knowledge base search is ON for this agent."
                                     : "long-term knowledge base search is OFF for this agent -"
-                                          + " answering from the model + this conversation only."));
+                                            + " answering from the model + this conversation only."));
             logLines.add(
                     "Tools: "
                             + (agent.allowedToolNames() == null
@@ -224,7 +225,11 @@ class AgentNodeHandler implements NodeHandler {
                                 null,
                                 false,
                                 steps,
-                                false);
+                                false,
+                                null,
+                                null,
+                                null,
+                                taintSourceFor(input));
                 TurnContext turnContext =
                         TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
                 reply =
@@ -241,6 +246,7 @@ class AgentNodeHandler implements NodeHandler {
                         ChatTurnRequest.builder(agentId, runId, runId, input)
                                 .inlineAttachments(attachments == null ? List.of() : attachments)
                                 .turnRef(node.id())
+                                .taintSource(taintSourceFor(input))
                                 .build();
                 TurnContext turnContext =
                         TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
@@ -306,5 +312,18 @@ class AgentNodeHandler implements NodeHandler {
      */
     private static String stepCachePrincipal() {
         return "workflow-step:" + TenantContext.current().map(TenantContext::getSubject).orElse("");
+    }
+
+    /**
+     * When the input carries a knowledge node's spotlighted output ({@link Spotlight} delimiters,
+     * written by {@link KnowledgeNodeHandler} in ENFORCE mode), the chat turn consuming it is
+     * marked tainted up front - the same "untrusted data reached the model" signal the tool path
+     * produces, so sink tool calls in this turn are gated like any tainted turn. The delimiter is
+     * unforgeable (a per-call random id in the wrapper), so presence is a reliable signal.
+     */
+    static String taintSourceFor(String input) {
+        return input != null && input.contains(Spotlight.OPENING_DELIMITER)
+                ? "workflow_knowledge"
+                : null;
     }
 }

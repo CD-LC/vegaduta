@@ -148,7 +148,8 @@ class AgentChatServiceVoiceToolResolutionTest {
         // only - no channel argument exists to gate this on, so it is
         // stubbed identically to how a text-turn test would stub it. This
         // agent's resolved tool list includes the marker tool above.
-        when(agentToolProvider.resolveToolsFor(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(agentToolProvider.resolveToolsFor(
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of(resolvedVoiceTool));
         when(agentToolProvider.anyMcpToolsOfferedFor(any(), any(), any(), any())).thenReturn(false);
 
@@ -233,7 +234,8 @@ class AgentChatServiceVoiceToolResolutionTest {
                         eq(userMessage),
                         eq(chatClient),
                         any(),
-                        eq(ReasoningDepth.FAST));
+                        eq(ReasoningDepth.FAST),
+                        any());
     }
 
     @Test
@@ -252,8 +254,8 @@ class AgentChatServiceVoiceToolResolutionTest {
         assertTrue(
                 toolsSentToLlm.contains(resolvedVoiceTool),
                 "expected the agent's resolved tool (e.g. a CustomCodeToolCallback/MCP tool) to"
-                    + " reach ChatClient#toolCallbacks(...) on a voice-shaped turn exactly as it"
-                    + " would on a text turn");
+                        + " reach ChatClient#toolCallbacks(...) on a voice-shaped turn exactly as it"
+                        + " would on a text turn");
     }
 
     @SuppressWarnings("unchecked")

@@ -35,9 +35,7 @@ import com.agenticai.core.chat.ProviderErrorTranslator;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
 import com.agenticai.core.guardrails.ContentGuardrailEngine;
 import com.agenticai.core.guardrails.GuardrailViolationLogger;
-import com.agenticai.core.guardrails.moderation.ModerationLayer;
 import com.agenticai.core.guardrails.moderation.ModerationOutcome;
-import com.agenticai.core.guardrails.moderation.ModerationPolicyPack;
 import com.agenticai.core.guardrails.moderation.ModerationService;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.providers.ProviderName;
@@ -104,7 +102,8 @@ class AgentChatServiceConsentGateTest {
 
         // Pre-turn reads: keep them cheap and non-null so the turn can proceed.
         when(sessionMemoryService.getHistory(any())).thenReturn(List.of());
-        when(agentToolProvider.resolveToolsFor(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(agentToolProvider.resolveToolsFor(
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of());
         when(featureFlagService.evaluateActiveFlags(any())).thenReturn(Map.of());
 
@@ -189,9 +188,10 @@ class AgentChatServiceConsentGateTest {
                 .thenReturn(Flux.just("Please read this notice and reply YES"));
         service.preflight.consentGate = gate;
 
-        List<String> emitted = service.chat(agentId, "sess-1", "subject-1", "hello", null, null)
-                .collectList()
-                .block();
+        List<String> emitted =
+                service.chat(agentId, "sess-1", "subject-1", "hello", null, null)
+                        .collectList()
+                        .block();
 
         assertEquals(List.of("Please read this notice and reply YES"), emitted);
         // Nothing downstream of the gate ran: no moderation, no model, no memory read or write,
@@ -228,7 +228,8 @@ class AgentChatServiceConsentGateTest {
     @Test
     void aFailingGateFailsTheTurnInsteadOfAnsweringAnUnconsentedContact() {
         ConversationConsentGate gate = mock(ConversationConsentGate.class);
-        when(gate.intercept(any(), any(), any(), any())).thenThrow(new IllegalStateException("db down"));
+        when(gate.intercept(any(), any(), any(), any()))
+                .thenThrow(new IllegalStateException("db down"));
         service.preflight.consentGate = gate;
 
         assertThrows(

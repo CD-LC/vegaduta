@@ -5,13 +5,14 @@ import com.agenticai.core.agents.crew.HandoffChain;
 import com.agenticai.core.agents.turn.TurnContext;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallback;
 
 /**
- * Port (ADR-0023): the tool list an agent's chat call gets. The kernel and the turn path (the
- * agent controller, the edge tool endpoints, {@code AgentChatService} and its turn collaborators,
- * {@link TrifectaEnforcementService}) depend on this interface; the implementation is {@code
+ * Port (ADR-0023): the tool list an agent's chat call gets. The kernel and the turn path (the agent
+ * controller, the edge tool endpoints, {@code AgentChatService} and its turn collaborators, {@link
+ * TrifectaEnforcementService}) depend on this interface; the implementation is {@code
  * AgentToolProvider} in core/agents-tools, which owns the tool resolvers, the MCP connection
  * manager and every built-in tool. Each method behaves exactly as the implementation documents it;
  * see that class for the details.
@@ -51,6 +52,41 @@ public interface AgentToolPort {
             AgentStepEventEmitter emitter,
             ReasoningDepth effectiveDepth);
 
+    /**
+     * As above, resolving the turn's tools against the caller-supplied step counter instead of
+     * creating one - so the same {@link AtomicInteger} identity reaches the tool wrappers AND the
+     * pre-turn reads (memory recall) that must seed taint on the same turn. {@code null} falls back
+     * to a fresh counter, i.e. exactly the overload above.
+     */
+    default List<ToolCallback> resolveToolsFor(
+            TurnContext context,
+            UUID agentId,
+            String sessionId,
+            String subjectKey,
+            String userMessage,
+            ChatClient chatClient,
+            AgentStepEventEmitter emitter,
+            ReasoningDepth effectiveDepth,
+            AtomicInteger stepCounter) {
+        return resolveToolsFor(
+                context,
+                agentId,
+                sessionId,
+                subjectKey,
+                userMessage,
+                chatClient,
+                emitter,
+                effectiveDepth);
+    }
+
+    /**
+     * Marks the turn identified by {@code turnKey} as tainted by {@code source} (memory recall, an
+     * inbound channel read, a workflow knowledge node). No-op when the taint layer is absent or
+     * off. The key MUST be the same {@link AtomicInteger} instance the turn's tools were resolved
+     * with, or the mark lands on a different turn.
+     */
+    default void seedTurnTaint(AtomicInteger turnKey, String source) {}
+
     /** Every tool the agent could be offered, before relevance narrowing (edge, MCP Apps). */
     List<ToolCallback> resolveToolCandidatesFor(UUID agentId, String sessionId, String subjectKey);
 
@@ -66,7 +102,9 @@ public interface AgentToolPort {
             ChatClient chatClient,
             HandoffChain chain);
 
-    /** The tools the agent can use, as descriptors (the agent tools endpoint, allow-list checks). */
+    /**
+     * The tools the agent can use, as descriptors (the agent tools endpoint, allow-list checks).
+     */
     List<ToolDescriptor> listAvailableToolsFor(UUID agentId);
 
     /** Whether any MCP tool is offered to this agent for this turn. */

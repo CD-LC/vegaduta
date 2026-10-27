@@ -129,7 +129,10 @@ final class NodeExecutorTestFactory {
         NodeOutputMapper outputMapper = new NodeOutputMapper(objectMapper);
         EconomyModelCaller economy =
                 new EconomyModelCaller(
-                        freeTierChatClientService, llmGatewayService, credentialResolver, tenantLimits);
+                        freeTierChatClientService,
+                        llmGatewayService,
+                        credentialResolver,
+                        tenantLimits);
         StructuredAgentRunner structured =
                 new StructuredAgentRunner(
                         agentChatService, subagentRunRepository, configResolver, outputMapper);
@@ -145,7 +148,7 @@ final class NodeExecutorTestFactory {
                                 new ToolCallLogService(toolCallLogRepository),
                                 economy,
                                 structured),
-                        new KnowledgeNodeHandler(knowledgeSearchService),
+                        new KnowledgeNodeHandler(knowledgeSearchService, "off"),
                         new ConditionNodeHandler(),
                         new SupervisorNodeHandler(agentChatService, configResolver),
                         new ToolNodeHandler(agentToolProvider),

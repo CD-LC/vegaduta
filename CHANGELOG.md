@@ -8,7 +8,16 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
-### Fixed
+### Added
+
+- **Taint now covers knowledge retrieved inside workflows and recalled
+  memory.** In `app.agents.taint.mode=enforce`, the workflow knowledge node
+  wraps retrieved chunks in the same unforgeable untrusted-data delimiters
+  the tool path uses; a downstream Agent node detects them and seeds its
+  chat turn tainted (`workflow_knowledge`), so sink tool calls in that turn
+  are gated. Auto-injected memory recall also seeds the turn
+  (`memory_recall`) when facts are recalled — a remembered fact from an
+  untrusted page can no longer reach a sink with no gate.
 
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-

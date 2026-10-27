@@ -129,7 +129,8 @@ class AgentChatServiceAttachmentKeyTest {
         when(tenantStatusGuard.isUsable(anyString())).thenReturn(true);
 
         when(sessionMemoryService.getHistory(any())).thenReturn(List.of());
-        when(agentToolProvider.resolveToolsFor(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(agentToolProvider.resolveToolsFor(
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of());
         when(featureFlagService.evaluateActiveFlags(any())).thenReturn(Map.of());
 

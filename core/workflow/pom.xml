@@ -79,6 +79,12 @@
       <groupId>com.agenticai</groupId>
       <artifactId>agents-tools</artifactId>
     </dependency>
+    <!-- The knowledge node spotlights retrieved chunks with the guardrails taint layer's
+         Spotlight delimiters (same wrapper as the tool path). Leaf module, no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>guardrails</artifactId>
+    </dependency>
     <!-- The http/ai nodes run HTTP calls through tools.web.HttpRequestExecutor,
          which moved to core/agents-browser with the rest of tools.web
          (ADR-0023). No cycle: agents-browser never depends on workflow. -->

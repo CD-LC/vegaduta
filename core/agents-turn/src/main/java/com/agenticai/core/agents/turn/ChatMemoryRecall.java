@@ -8,10 +8,12 @@ import com.agenticai.core.agents.memory.QueryEmbedding;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
+import com.agenticai.core.guardrails.taint.TurnTaintSeeder;
 import com.agenticai.core.security.logging.LogSafe;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +38,9 @@ final class ChatMemoryRecall {
     private final BooleanSupplier memoryEventsEnabled;
 
     /**
-     * The prompt registry's view for an agent (its, its tenant's and the platform's overrides) for the
-     * lines that frame the recalled facts; the shipped text until {@link ChatServiceParts} wires the
-     * settings bean.
+     * The prompt registry's view for an agent (its, its tenant's and the platform's overrides) for
+     * the lines that frame the recalled facts; the shipped text until {@link ChatServiceParts}
+     * wires the settings bean.
      */
     private volatile java.util.function.Function<UUID, ResolvedDirectives> prompts =
             ResolvedDirectives.DEFAULTS_FOR_AGENT;
@@ -90,6 +92,42 @@ final class ChatMemoryRecall {
      * view, so the framing keys show up in its provenance).
      */
     String recallMemoryFactsBlock(
+            UUID agentId,
+            String subjectKey,
+            String userMessage,
+            AgentStepEventEmitter stepEvents,
+            ResolvedDirectives pd) {
+        return buildBlock(agentId, subjectKey, userMessage, stepEvents, pd).block();
+    }
+
+    /**
+     * As {@link #recallMemoryFactsBlock(UUID, String, String, AgentStepEventEmitter)}; additionally
+     * marks the turn tainted when recalled long-term memory FACTS (not user-authored blocks) were
+     * injected. The auto-injected recall bypasses the tool guard entirely - {@code
+     * recall_related_facts} is classified UNTRUSTED_EXTERNAL because a fact remembered from a
+     * fetched page is still attacker-authored when it is recalled next month - so the taint must be
+     * seeded here, where the block is assembled, or a poisoned memory can reach a sink with no
+     * gate. {@code null} {@code seeder} or {@code stepCounter} keeps the exact old behaviour (no
+     * seeding).
+     */
+    String recallMemoryFactsBlock(
+            UUID agentId,
+            String subjectKey,
+            String userMessage,
+            AgentStepEventEmitter stepEvents,
+            AtomicInteger stepCounter,
+            TurnTaintSeeder seeder) {
+        RecallOutcome outcome =
+                buildBlock(agentId, subjectKey, userMessage, stepEvents, prompts.apply(agentId));
+        if (outcome.factsRecalled() > 0 && stepCounter != null && seeder != null) {
+            seeder.seed(stepCounter, "memory_recall");
+        }
+        return outcome.block();
+    }
+
+    private record RecallOutcome(String block, int factsRecalled) {}
+
+    private RecallOutcome buildBlock(
             UUID agentId,
             String subjectKey,
             String userMessage,
@@ -215,7 +253,7 @@ final class ChatMemoryRecall {
         }
 
         if (block.isEmpty()) {
-            return null;
+            return new RecallOutcome(null, privateFacts + sharedFacts);
         }
         if (report) {
             try {
@@ -231,7 +269,8 @@ final class ChatMemoryRecall {
         }
         // Only trim when user blocks were prepended (their separator can trail). With none, the
         // text is byte-for-byte what it was before blocks existed.
-        return hasUserBlocks ? block.toString().strip() : block.toString();
+        String text = hasUserBlocks ? block.toString().strip() : block.toString();
+        return new RecallOutcome(text, privateFacts + sharedFacts);
     }
 
     private boolean memoryEventsEnabled() {

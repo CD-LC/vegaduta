@@ -74,10 +74,11 @@ import org.springframework.beans.factory.ObjectProvider;
 import reactor.core.publisher.Flux;
 
 /**
- * The turn journal records the buffered reasoning depths (CAREFUL / RIGOROUS / PLANNED), not only the streamed one,
- * with the tool calls the way the guard chain ended them, and the turn is found by the id the entry gave it or by its
- * session. REAL {@link AgentChatService} and REAL {@link GuardedToolCallback}s; the model client is a stub that, like
- * the real tool loop, calls the tools it was handed.
+ * The turn journal records the buffered reasoning depths (CAREFUL / RIGOROUS / PLANNED), not only
+ * the streamed one, with the tool calls the way the guard chain ended them, and the turn is found
+ * by the id the entry gave it or by its session. REAL {@link AgentChatService} and REAL {@link
+ * GuardedToolCallback}s; the model client is a stub that, like the real tool loop, calls the tools
+ * it was handed.
  */
 class AgentChatServiceBufferedJournalTest {
 
@@ -114,7 +115,7 @@ class AgentChatServiceBufferedJournalTest {
         when(gate.recordToolCallForApproval(
                         any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(request);
-                when(gate.recordToolCallWithOrigin(
+        when(gate.recordToolCallWithOrigin(
                         any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(request);
     }
@@ -144,23 +145,45 @@ class AgentChatServiceBufferedJournalTest {
         }
     }
 
-    /** Two real guarded tools: one runs, one is held for a human. They share the turn's approval state. */
+    /**
+     * Two real guarded tools: one runs, one is held for a human. They share the turn's approval
+     * state.
+     */
     private List<ToolCallback> guardedTools(TurnApprovalState turnState) {
         GuardrailService guardrails = mock(GuardrailService.class);
-        when(guardrails.sanitizeToolOutput(anyString(), anyString(), any())).thenAnswer(i -> i.getArgument(1));
-        // The turn's own approval state, as the real tool provider hands it to the guards it builds.
+        when(guardrails.sanitizeToolOutput(anyString(), anyString(), any()))
+                .thenAnswer(i -> i.getArgument(1));
+        // The turn's own approval state, as the real tool provider hands it to the guards it
+        // builds.
         TurnApprovalState state = turnState != null ? turnState : new TurnApprovalState("c1:mem");
         AtomicInteger steps = new AtomicInteger();
         return List.of(
                 new GuardedToolCallback(
-                                new Raw("lookup", "{\"found\":true}"), steps, 10, guardrails, policy, gate, AGENT_ID, "sess-j")
+                                new Raw("lookup", "{\"found\":true}"),
+                                steps,
+                                10,
+                                guardrails,
+                                policy,
+                                gate,
+                                AGENT_ID,
+                                "sess-j")
                         .withTurnApproval(state),
                 new GuardedToolCallback(
-                                new Raw("send_invoice", "{\"sent\":true}"), steps, 10, guardrails, policy, gate, AGENT_ID, "sess-j")
+                                new Raw("send_invoice", "{\"sent\":true}"),
+                                steps,
+                                10,
+                                guardrails,
+                                policy,
+                                gate,
+                                AGENT_ID,
+                                "sess-j")
                         .withTurnApproval(state));
     }
 
-    /** The model stub: the final call hands the tools to {@code onTools}, then answers "final answer". */
+    /**
+     * The model stub: the final call hands the tools to {@code onTools}, then answers "final
+     * answer".
+     */
     @SuppressWarnings("unchecked")
     private void modelCallsTools() {
         AtomicReference<List<ToolCallback>> handed = new AtomicReference<>(List.of());
@@ -170,7 +193,8 @@ class AgentChatServiceBufferedJournalTest {
                         .system(any(String.class))
                         .messages(any(List.class))
                         .user(any(Consumer.class));
-        ChatClient.ChatClientRequestSpec afterTools = mock(ChatClient.ChatClientRequestSpec.class, RETURNS_DEEP_STUBS);
+        ChatClient.ChatClientRequestSpec afterTools =
+                mock(ChatClient.ChatClientRequestSpec.class, RETURNS_DEEP_STUBS);
         when(afterTools.toolContext(any(Map.class)).advisors(any(Consumer.class)).call().content())
                 .thenAnswer(
                         inv -> {
@@ -187,7 +211,16 @@ class AgentChatServiceBufferedJournalTest {
 
     private AgentChatService service(ReasoningDepth depth) {
         when(agent.getReasoningDepth()).thenReturn(depth);
-        when(agentToolProvider.resolveToolsFor(any(TurnContext.class), any(), any(), any(), any(), any(), any(), any()))
+        when(agentToolProvider.resolveToolsFor(
+                        any(TurnContext.class),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any(),
+                        any()))
                 .thenAnswer(inv -> guardedTools(((TurnContext) inv.getArgument(0)).approval()));
         ProviderCredentialResolver credentialResolver = mock(ProviderCredentialResolver.class);
         when(credentialResolver.resolveActiveKey(any())).thenReturn("test-key");
@@ -200,7 +233,8 @@ class AgentChatServiceBufferedJournalTest {
         when(consistencyChecker.checkAndRevise(any(), any(), any(), any(), any(), any(), any()))
                 .thenAnswer(inv -> inv.getArgument(2));
         ReflexionService reflexionService = mock(ReflexionService.class);
-        when(reflexionService.critiqueAndMaybeRevise(any(), any(), any(), any(), any(), any(), any()))
+        when(reflexionService.critiqueAndMaybeRevise(
+                        any(), any(), any(), any(), any(), any(), any()))
                 .thenAnswer(inv -> inv.getArgument(2));
         QueryComplexityClassifier classifier = mock(QueryComplexityClassifier.class);
         ChatTurnCancelService cancel = mock(ChatTurnCancelService.class);
@@ -234,7 +268,9 @@ class AgentChatServiceBufferedJournalTest {
                 providerOf((ContentGuardrailEngine) null),
                 providerOf(new GuardrailViolationLogger(mock(AuditLogService.class))),
                 new AgentGuardrailService(
-                        mock(TenantLimits.class), mock(AgentRepository.class), mock(ResourceAccessService.class)),
+                        mock(TenantLimits.class),
+                        mock(AgentRepository.class),
+                        mock(ResourceAccessService.class)),
                 mock(InlineAttachmentProcessor.class),
                 mock(ResourceAccessService.class),
                 mock(VisionUsageService.class),
@@ -258,34 +294,48 @@ class AgentChatServiceBufferedJournalTest {
         modelCallsTools();
         AgentChatService service = service(depth);
         ChatTurnRequest request =
-                ChatTurnRequest.builder(AGENT_ID, "sess-j", "subject-j", "look it up then invoice them").build();
+                ChatTurnRequest.builder(
+                                AGENT_ID, "sess-j", "subject-j", "look it up then invoice them")
+                        .build();
         TurnContext context = TurnContext.forEntry(null, request);
 
         List<String> emitted = service.chat(context, request).collectList().block();
 
         assertEquals(List.of("final answer"), emitted);
-        // The id the entry gave the turn (the response header names this one) is the id of the journal record.
+        // The id the entry gave the turn (the response header names this one) is the id of the
+        // journal record.
         List<TurnEvent> events = journal.read(AGENT_ID, context.turnId());
         assertFalse(events.isEmpty(), "no journal record under the turn id the entry created");
         assertTrue(TurnHashChain.verify(events).intact());
         // ...and the same turn is found by its session.
         List<TurnSummary> bySession = journal.listBySession(AGENT_ID, "sess-j", 10);
-        assertEquals(List.of(context.turnId()), bySession.stream().map(TurnSummary::turnId).toList());
+        assertEquals(
+                List.of(context.turnId()), bySession.stream().map(TurnSummary::turnId).toList());
         assertEquals("completed", bySession.get(0).status());
         return events;
     }
 
     private static void assertToolAndApprovalEvents(List<TurnEvent> events) {
         List<String> toolSummaries =
-                events.stream().filter(e -> e.type() == TurnEventType.TOOL_CALL).map(TurnEvent::summary).toList();
+                events.stream()
+                        .filter(e -> e.type() == TurnEventType.TOOL_CALL)
+                        .map(TurnEvent::summary)
+                        .toList();
         assertEquals(2, toolSummaries.size(), events.toString());
-        assertTrue(toolSummaries.get(0).contains("tool=lookup") && toolSummaries.get(0).contains("status=ok"), toolSummaries.toString());
         assertTrue(
-                toolSummaries.get(1).contains("tool=send_invoice") && toolSummaries.get(1).contains("status=parked"),
+                toolSummaries.get(0).contains("tool=lookup")
+                        && toolSummaries.get(0).contains("status=ok"),
+                toolSummaries.toString());
+        assertTrue(
+                toolSummaries.get(1).contains("tool=send_invoice")
+                        && toolSummaries.get(1).contains("status=parked"),
                 "a call held for a human is not an ok call: " + toolSummaries);
-        List<TurnEvent> approvals = events.stream().filter(e -> e.type() == TurnEventType.APPROVAL).toList();
+        List<TurnEvent> approvals =
+                events.stream().filter(e -> e.type() == TurnEventType.APPROVAL).toList();
         assertEquals(1, approvals.size(), events.toString());
-        assertTrue(approvals.get(0).summary().contains("decision=pending"), approvals.get(0).summary());
+        assertTrue(
+                approvals.get(0).summary().contains("decision=pending"),
+                approvals.get(0).summary());
         assertTrue(approvals.get(0).summary().contains("request="), approvals.get(0).summary());
     }
 
@@ -295,9 +345,13 @@ class AgentChatServiceBufferedJournalTest {
 
         assertEquals(TurnEventType.INTAKE, events.get(0).type());
         assertEquals(TurnEventType.COMMIT, events.get(events.size() - 1).type());
-        assertTrue(events.stream().anyMatch(e -> e.type() == TurnEventType.MODEL_CALL), events.toString());
-        assertTrue(events.stream().anyMatch(e -> e.type() == TurnEventType.VERIFY), events.toString());
-        assertTrue(events.stream().anyMatch(e -> e.type() == TurnEventType.GUARD), events.toString());
+        assertTrue(
+                events.stream().anyMatch(e -> e.type() == TurnEventType.MODEL_CALL),
+                events.toString());
+        assertTrue(
+                events.stream().anyMatch(e -> e.type() == TurnEventType.VERIFY), events.toString());
+        assertTrue(
+                events.stream().anyMatch(e -> e.type() == TurnEventType.GUARD), events.toString());
         assertToolAndApprovalEvents(events);
         assertTrue(events.get(events.size() - 1).summary().contains("status=completed"));
         assertFalse(events.toString().contains("look it up"), "the prompt is hashed, never stored");
@@ -307,7 +361,9 @@ class AgentChatServiceBufferedJournalTest {
     void aRigorousTurnAlsoJournalsTheReflexionCheck() {
         List<TurnEvent> events = runAndRead(ReasoningDepth.RIGOROUS);
 
-        assertTrue(events.stream().anyMatch(e -> e.summary().contains("check=reflexion")), events.toString());
+        assertTrue(
+                events.stream().anyMatch(e -> e.summary().contains("check=reflexion")),
+                events.toString());
         assertToolAndApprovalEvents(events);
     }
 
@@ -315,7 +371,9 @@ class AgentChatServiceBufferedJournalTest {
     void aPlannedTurnIsJournaledToo() {
         List<TurnEvent> events = runAndRead(ReasoningDepth.PLANNED);
 
-        assertTrue(events.stream().anyMatch(e -> e.summary().contains("guard=plan")), events.toString());
+        assertTrue(
+                events.stream().anyMatch(e -> e.summary().contains("guard=plan")),
+                events.toString());
         assertToolAndApprovalEvents(events);
         assertEquals(TurnEventType.COMMIT, events.get(events.size() - 1).type());
     }
@@ -325,7 +383,8 @@ class AgentChatServiceBufferedJournalTest {
         TurnJournalGateway.install(journal, false);
         modelCallsTools();
         AgentChatService service = service(ReasoningDepth.CAREFUL);
-        ChatTurnRequest request = ChatTurnRequest.builder(AGENT_ID, "sess-off", "subject", "hi").build();
+        ChatTurnRequest request =
+                ChatTurnRequest.builder(AGENT_ID, "sess-off", "subject", "hi").build();
         TurnContext context = TurnContext.forEntry(null, request);
 
         assertEquals(List.of("final answer"), service.chat(context, request).collectList().block());
