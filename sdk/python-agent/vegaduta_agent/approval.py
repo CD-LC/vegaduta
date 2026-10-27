@@ -9,6 +9,7 @@ is journaled and stored on the request.
 
 from __future__ import annotations
 
+import re
 import threading
 import uuid
 from collections.abc import Callable, Iterable
@@ -84,18 +85,33 @@ class ApprovalRequest:
 
 
 class ApprovalDecisionAuthorizer(Protocol):
-    """Optional: who may decide a given request. Raise or return False to
-    refuse; the default authorizer allows anyone who can reach the gate."""
+    """Who may decide a given request. Raise or return False to refuse. The
+    gate's default is ``FourEyesAuthorizer`` (the requester may not decide
+    their own request); pass ``allow_any`` to opt out explicitly."""
 
     def may_decide(self, request: ApprovalRequest, decided_by: str) -> bool: ...
 
 
 class ApprovalStore(Protocol):
+    """Persistence for approval requests.
+
+    Multi-process contract: ``ApprovalGate`` serialises decisions with an
+    in-process lock only, so two processes (or two gate instances) sharing one
+    store can both read PENDING and both approve, running the resumption twice.
+    A store used by more than one process MUST make ``update`` a
+    compare-and-set on the previous status (e.g. ``UPDATE ... WHERE id=? AND
+    status=?``) and refuse a stale write; ``InMemoryApprovalStore.update`` with
+    ``expected_status`` shows the shape. Without it, double execution of an
+    approved action is possible."""
+
     def save(self, request: ApprovalRequest, resumption: Callable[[], str] | None) -> None: ...
 
     def get(self, request_id: uuid.UUID) -> ApprovalRequest | None: ...
 
-    def update(self, request: ApprovalRequest) -> None: ...
+    def update(self, request: ApprovalRequest) -> object:
+        """Persist ``request``. Must be compare-and-set on status for
+        multi-process use (see the class docstring)."""
+        ...
 
     def resumption_of(self, request_id: uuid.UUID) -> Callable[[], str] | None: ...
 
@@ -120,9 +136,18 @@ class InMemoryApprovalStore:
     def get(self, request_id: uuid.UUID) -> ApprovalRequest | None:
         return self._requests.get(request_id)
 
-    def update(self, request: ApprovalRequest) -> None:
+    def update(self, request: ApprovalRequest, expected_status: ApprovalStatus | None = None) -> bool:
+        """Stores ``request``. With ``expected_status`` this is a
+        compare-and-set: the write happens only if the stored status still
+        equals it, and ``False`` is returned otherwise. Without it the write
+        is unconditional (always ``True``)."""
         with self._lock:
+            if expected_status is not None:
+                current = self._requests.get(request.id)
+                if current is None or current.status is not expected_status:
+                    return False
             self._requests[request.id] = request
+            return True
 
     def resumption_of(self, request_id: uuid.UUID) -> Callable[[], str] | None:
         return self._resumptions.get(request_id)
@@ -139,8 +164,41 @@ class InMemoryApprovalStore:
         return rows[:limit]
 
 
+class _AllowAny:
+    """Permits any decider, including the requester. The explicit opt-out of
+    the two-person rule: ``ApprovalGate(authorizer=allow_any)``."""
+
+    def may_decide(self, request: ApprovalRequest, decided_by: str) -> bool:
+        return True
+
+
+allow_any: ApprovalDecisionAuthorizer = _AllowAny()
+
+_MAX_FAILURE_MESSAGE = 200
+_SECRET_RE = re.compile(
+    r"(?i)(bearer\s+[A-Za-z0-9._~+/=-]+"
+    r"|(?:api[_-]?key|token|secret|password|passwd|authorization)\s*[=:]\s*\S+"
+    r"|\b[A-Za-z0-9_-]{32,}\b)"
+)
+
+
+def _failure_result(exc: BaseException) -> str:
+    """Exception type plus a bounded, redacted message, never the raw text,
+    which can carry secrets, PII or provider payloads."""
+    message = _SECRET_RE.sub("[redacted]", str(exc)).replace("\n", " ").strip()
+    if len(message) > _MAX_FAILURE_MESSAGE:
+        message = message[:_MAX_FAILURE_MESSAGE] + "..."
+    return f"{type(exc).__name__}: {message}" if message else type(exc).__name__
+
+
 class ApprovalGate:
-    """The front door for human decisions. Thread-safe."""
+    """The front door for human decisions. Thread-safe within one process (see
+    ``ApprovalStore`` for the multi-process contract).
+
+    The default authorizer is ``FourEyesAuthorizer``: the principal that
+    requested an action cannot approve or reject it. Pass
+    ``authorizer=allow_any`` to opt out (single-operator tools, tests), or your
+    own authorizer for role checks."""
 
     def __init__(
         self,
@@ -150,7 +208,7 @@ class ApprovalGate:
         on_decision: Callable[[ApprovalRequest], None] | None = None,
     ) -> None:
         self._store = store or InMemoryApprovalStore()
-        self._authorizer = authorizer
+        self._authorizer = authorizer if authorizer is not None else FourEyesAuthorizer()
         self._default_ttl = default_ttl
         self._on_decision = on_decision
         self._lock = threading.Lock()
@@ -215,7 +273,7 @@ class ApprovalGate:
     def _check_decidable(self, request: ApprovalRequest, decided_by: str) -> None:
         if request.status.decided:
             raise ApprovalAlreadyDecidedException(f"approval {request.id} is already {request.status.value}")
-        if self._authorizer is not None and not self._authorizer.may_decide(request, decided_by):
+        if not self._authorizer.may_decide(request, decided_by):
             raise ApprovalNotAuthorizedException(f"{decided_by} may not decide approval {request.id}")
 
     def approve(self, request_id: uuid.UUID | str, decided_by: str) -> ApprovalRequest:
@@ -235,7 +293,7 @@ class ApprovalGate:
                 result = resumption()
             except Exception as exc:
                 with self._lock:
-                    request = replace(request, status=ApprovalStatus.FAILED, result_json=str(exc))
+                    request = replace(request, status=ApprovalStatus.FAILED, result_json=_failure_result(exc))
                     self._store.update(request)
             else:
                 with self._lock:

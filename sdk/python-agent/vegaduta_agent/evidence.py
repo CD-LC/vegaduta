@@ -166,7 +166,18 @@ class HashChainedAuditSink:
     previous event's hash, optionally signed, then forwarded. Sequencing,
     hashing and signing happen under one lock so interleaved calls cannot
     fork the chain. Use ``resume`` to continue a chain a previous process
-    started."""
+    started.
+
+    Ordering caveat: the sequence number is assigned under the lock but the
+    event is forwarded to the delegate *after* releasing it (so a slow delegate
+    never blocks other writers). Concurrent callers can therefore reach the
+    delegate out of ``chain.seq`` order, and ``createdAt`` is taken on the
+    calling thread, so time order can differ from chain order too. The chain
+    is defined by ``chain.seq``/``chain.prev``, not by storage order: always
+    verify with ``evidence_bundle`` (which sorts by ``chain.seq``, as the Java
+    ``EvidenceBundle`` does) or ``verify(..., sort_by_seq=True)``. Verifying
+    an unsorted read of a concurrently written log reports a false break.
+    """
 
     def __init__(
         self,
@@ -241,14 +252,49 @@ def _broken(seq: int | None, checked: int, detail: str) -> ChainVerification:
     return ChainVerification(False, checked, break_at_seq=seq, detail=detail)
 
 
-def verify(events: Sequence[AuditEvent], verifier: Verifier | None = None) -> ChainVerification:
+def _seq_key(event: AuditEvent) -> int:
+    return _parse_seq(event.attributes.get(CHAIN_SEQ), 0)
+
+
+def verify(
+    events: Sequence[AuditEvent],
+    verifier: Verifier | None = None,
+    *,
+    sort_by_seq: bool = False,
+    expected_first_prev: str | None = None,
+    expected_first_seq: int | None = None,
+    expected_head_hash: str | None = None,
+    expected_last_seq: int | None = None,
+) -> ChainVerification:
     """Re-walks a stored chain: sequence numbers contiguous, each ``chain.prev``
     the previous hash, each ``chain.hash`` recomputed over the canonical form,
-    and — when a verifier is given — every ``chain.sig`` valid. The first
-    event is trusted only to start at seq 1 with the GENESIS prev."""
+    and — when a verifier is given — every ``chain.sig`` valid.
+
+    Ordering: by default events are verified in the order given. A chain
+    written concurrently can be stored out of ``chain.seq`` order (see
+    ``HashChainedAuditSink``); pass ``sort_by_seq=True`` to verify in
+    ``chain.seq`` order (stable sort; events missing a parsable seq sort first
+    and are reported). ``evidence_bundle`` always sorts.
+
+    Anchors: without anchors the first event is trusted to start the chain (at
+    seq 1 with the GENESIS prev, or any seq with its own prev), so deleting a
+    prefix or suffix of the log is undetectable from the log alone. Supply
+    values you stored outside the log to close that gap: ``expected_first_seq``
+    / ``expected_first_prev`` pin the first event, ``expected_last_seq`` /
+    ``expected_head_hash`` pin the last. Any supplied anchor that does not match
+    (including an empty log) yields a broken result with a detail naming it.
+    """
+    anchored = any(
+        a is not None
+        for a in (expected_first_prev, expected_first_seq, expected_head_hash, expected_last_seq)
+    )
+    if sort_by_seq:
+        events = sorted(events, key=_seq_key)
     expected_seq: int | None = None
     expected_prev = GENESIS
     checked = 0
+    last_seq: int | None = None
+    last_hash: str | None = None
     for event in events:
         attrs = event.attributes
         seq_text = attrs.get(CHAIN_SEQ)
@@ -261,6 +307,20 @@ def verify(events: Sequence[AuditEvent], verifier: Verifier | None = None) -> Ch
         if seq < 1:
             return _broken(seq_for_report, checked, f"invalid chain.seq {seq_text[:32]!r}")
         if expected_seq is None:
+            if expected_first_seq is not None and seq != expected_first_seq:
+                return _broken(
+                    seq,
+                    checked,
+                    f"first event has seq {seq} but anchor expected_first_seq is "
+                    f"{expected_first_seq} (prefix removed or replaced?)",
+                )
+            if expected_first_prev is not None and prev != expected_first_prev:
+                return _broken(
+                    seq,
+                    checked,
+                    "first event chain.prev does not match anchor expected_first_prev "
+                    "(prefix removed or replaced?)",
+                )
             expected_seq = seq
             expected_prev = GENESIS if seq == 1 else prev
         if seq != expected_seq:
@@ -282,7 +342,23 @@ def verify(events: Sequence[AuditEvent], verifier: Verifier | None = None) -> Ch
                 return _broken(seq, checked, "signature invalid")
         expected_prev = hash_
         expected_seq = seq + 1
+        last_seq, last_hash = seq, hash_
         checked += 1
+    if anchored and last_seq is None:
+        return _broken(None, 0, "no chained events but an anchor was supplied (log emptied?)")
+    if expected_last_seq is not None and last_seq != expected_last_seq:
+        return _broken(
+            last_seq,
+            checked,
+            f"last event has seq {last_seq} but anchor expected_last_seq is "
+            f"{expected_last_seq} (suffix removed or extended?)",
+        )
+    if expected_head_hash is not None and last_hash != expected_head_hash:
+        return _broken(
+            last_seq,
+            checked,
+            "last chain.hash does not match anchor expected_head_hash (suffix removed or replaced?)",
+        )
     return ChainVerification(True, checked)
 
 
@@ -305,6 +381,14 @@ class EvidenceBundle:
     verification: ChainVerification
     asi_coverage: tuple[tuple[str, str, int], ...]  # (ASI id, title, event count)
     events_json: tuple[str, ...]  # each event's canonical form
+    # Anchors for external pinning: store these outside the log, then pass them
+    # back as ``expected_*`` to detect prefix/suffix deletion. Read from the
+    # first/last event in chain.seq order; trustworthy only when
+    # ``verification.intact``. ``None`` when no event is chained.
+    first_seq: int | None = None
+    first_prev: str | None = None
+    last_seq: int | None = None
+    head_hash: str | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -319,6 +403,10 @@ class EvidenceBundle:
             },
             "asiCoverage": [{"id": i, "title": t, "events": n} for i, t, n in self.asi_coverage],
             "events": list(self.events_json),
+            "firstSeq": self.first_seq,
+            "firstPrev": self.first_prev,
+            "lastSeq": self.last_seq,
+            "headHash": self.head_hash,
         }
 
     def to_json(self) -> str:
@@ -336,6 +424,7 @@ class EvidenceBundle:
             f"- Chain: {'intact' if v.intact else 'BROKEN'} ({v.checked_events} checked"
             + (f", break at seq {v.break_at_seq}: {v.detail}" if not v.intact else "")
             + ")",
+            f"- Head: seq {self.last_seq}, hash {self.head_hash}" if self.head_hash else "- Head: n/a",
             "",
             "## OWASP ASI coverage",
             "",
@@ -352,14 +441,35 @@ def evidence_bundle(
     events: Sequence[AuditEvent],
     run_id: str,
     verifier: Verifier | None = None,
+    *,
+    expected_first_prev: str | None = None,
+    expected_first_seq: int | None = None,
+    expected_head_hash: str | None = None,
+    expected_last_seq: int | None = None,
 ) -> EvidenceBundle:
-    """Verifies the events' chain and folds them into a bundle for export."""
-    verification = verify(events, verifier)
+    """Verifies the events' chain and folds them into a bundle for export.
+
+    Events are verified and exported in ``chain.seq`` order (as the Java
+    ``EvidenceBundle`` does), so a log stored out of order by concurrent
+    writers is not reported as broken. The optional ``expected_*`` anchors are
+    forwarded to ``verify``; the bundle's ``head_hash``/``last_seq`` let you
+    record anchors for next time."""
+    events = sorted(events, key=_seq_key)
+    verification = verify(
+        events,
+        verifier,
+        expected_first_prev=expected_first_prev,
+        expected_first_seq=expected_first_seq,
+        expected_head_hash=expected_head_hash,
+        expected_last_seq=expected_last_seq,
+    )
     counts: dict[AsiRisk, int] = {}
     for event in events:
         for risk in event.risks:
             counts[risk] = counts.get(risk, 0) + 1
     coverage = tuple((risk.id, risk.title, counts.get(risk, 0)) for risk in AsiRisk if risk in counts)
+    first = events[0].attributes if events else {}
+    last = events[-1].attributes if events else {}
     return EvidenceBundle(
         run_id=run_id,
         generated_at=datetime.now(timezone.utc),
@@ -367,4 +477,8 @@ def evidence_bundle(
         verification=verification,
         asi_coverage=coverage,
         events_json=tuple(canonical(e) for e in events),
+        first_seq=_parse_seq(first[CHAIN_SEQ], -1) if CHAIN_SEQ in first else None,
+        first_prev=first.get(CHAIN_PREV),
+        last_seq=_parse_seq(last[CHAIN_SEQ], -1) if CHAIN_SEQ in last else None,
+        head_hash=last.get(CHAIN_HASH),
     )
