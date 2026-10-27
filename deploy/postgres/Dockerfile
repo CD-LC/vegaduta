@@ -99,4 +99,7 @@ RUN if command -v python3 >/dev/null 2>&1 && python3 -c 'import certifi' 2>/dev/
     fi \
     && rm -f /tmp/replace-certifi.py
 
-USER ${FINAL_USER}
+HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=10 \
+    CMD ["pg_isready", "-U", "postgres"]
+
+USER ${FINAL_USER}USER ${FINAL_USER}

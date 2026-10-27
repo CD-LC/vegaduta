@@ -45,4 +45,6 @@ EXPOSE 3000
 # Playwright starts a fresh headless Chromium per connected client and closes it when the client goes.
 # Started with node, not npx (npx is removed above): the version that runs is exactly the one in
 # package-lock.json.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD node -e "require('net').connect({port:process.env.BROWSER_RUNNER_PORT||3000,host:'127.0.0.1'}).on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))" || exit 1
 CMD ["sh", "-c", "exec node /app/node_modules/playwright/cli.js run-server --host 0.0.0.0 --port ${BROWSER_RUNNER_PORT}"]
