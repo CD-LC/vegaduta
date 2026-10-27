@@ -194,7 +194,7 @@ export default function PageGuideButton({ isAdmin }: { isAdmin: boolean }) {
               console. Opens a new tab: it leaves the app. */}
           {guide.learnInAcademy && hasAcademy() && (
             <a
-              href={academyHref()}
+              href={academyHref() + (guide.academyTopic ?? "")}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 block text-xs font-semibold text-primary hover:underline"
