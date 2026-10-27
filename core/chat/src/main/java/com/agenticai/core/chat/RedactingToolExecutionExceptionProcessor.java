@@ -69,7 +69,7 @@ public class RedactingToolExecutionExceptionProcessor implements ToolExecutionEx
     // backtrack across the run boundary - keeps the scan linear even on hostile input (CodeQL
     // polynomial-redos), and the caller caps at MAX_DETAIL_CHARS before these patterns run.
     private static final Pattern URL_USERINFO_PATTERN =
-        Pattern.compile("(?i)([a-z][a-z0-9+.-]*://)[^/\\s:@]++:[^/\\s@]++@");
+        Pattern.compile("(?i)([a-z][a-z0-9+.-]*+://)[^/\\s:@]++:[^/\\s@]++@");
     private static final Pattern KEY_LIKE_TOKEN_PATTERN =
         Pattern.compile("\\b(?:sk-[A-Za-z0-9_-]{16,}|sk_(?:live|test)_[A-Za-z0-9]{16,}|AIza[0-9A-Za-z_-]{30,}"
             + "|gh[pousr]_[A-Za-z0-9]{30,}|xox[abpr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16})\\b");
