@@ -81,6 +81,13 @@ public final class TurnToolActivity {
     private final Map<String, int[]> finished = new LinkedHashMap<>();
     private final List<Runnable> listeners = new CopyOnWriteArrayList<>();
     private final TurnToolLedger ledger = new TurnToolLedger();
+    private final com.agenticai.core.guardrails.taint.TurnTaintSeeds taintSeeds =
+            new com.agenticai.core.guardrails.taint.TurnTaintSeeds();
+
+    /** Prompt-time content that must taint the turn once tool resolution knows its taint key. */
+    public com.agenticai.core.guardrails.taint.TurnTaintSeeds taintSeeds() {
+        return taintSeeds;
+    }
 
     public TurnToolActivity() {
         this(System::nanoTime);

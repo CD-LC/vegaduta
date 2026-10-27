@@ -419,6 +419,7 @@ public class AgentToolProvider implements AgentToolPort {
             boolean stableToolSet) {
         AtomicInteger stepCounter = new AtomicInteger(0);
         turnRunBudgets.bindAgent(stepCounter, agentId);
+        bindPromptTaint(stepCounter);
         // 2026-08-16 fix: RIGOROUS's tool-call verifier judges each call ONLY against this turn's
         // raw userMessage. A workflow-triggered turn with no run input gets the generic
         // placeholder ("Workflow started manually.") as userMessage, which nothing can match - a
@@ -454,6 +455,27 @@ public class AgentToolProvider implements AgentToolPort {
                 stableToolSet);
     }
 
+
+    private volatile AgentTaintPolicy taintPolicy;
+
+    /** Optional: absent (slim/test contexts) means prompt-time content never taints a turn. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setTaintPolicy(AgentTaintPolicy taintPolicy) {
+        this.taintPolicy = taintPolicy;
+    }
+
+    /**
+     * Connects this resolution's step counter (the turn's taint key) to the turn's prompt-time taint
+     * seeds, so content injected into the prompt before any tool ran (recalled memory) taints the
+     * turn the tool guards see. No-op outside a turn context or with the taint layer absent.
+     */
+    private void bindPromptTaint(AtomicInteger stepCounter) {
+        com.agenticai.core.agents.turn.TurnToolActivity activity = AgentToolGuard.TURN_ACTIVITY_SCOPE.get();
+        AgentTaintPolicy policy = taintPolicy;
+        if (activity != null && policy != null) {
+            activity.taintSeeds().bind(source -> policy.seed(stepCounter, source));
+        }
+    }
 
     /**
      * The tools relevance selection must not trim on a main chat turn: the tools the conversation already used
