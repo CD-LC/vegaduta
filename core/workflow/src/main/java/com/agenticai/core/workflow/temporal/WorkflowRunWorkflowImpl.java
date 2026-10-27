@@ -52,23 +52,26 @@ import org.slf4j.Logger;
  * scratch.
  *
  * <p><b>Shape of the split</b>: this class keeps only the workflow/activity wiring - the stubs, the
- * node walk, the approval park on {@code Workflow.await}, and the terminal handling. Loop, parallel and
- * fan_out are {@link TemporalStep}s ({@link TemporalLoopStep}, {@link TemporalParallelStep}, {@link
- * TemporalFanOutStep}) over a shared {@link TemporalRunState}; the parallel and fan-out steps fan out
- * with {@code Async.function}/{@code Promise.allOf} - Temporal's deterministic-replay-safe substitute
- * for the {@code CompletableFuture} concurrency {@code WorkflowExecutionEngine} uses (raw threads race
- * non-deterministically across replays). A real change to any step's decision logic needs a {@link
- * Workflow#getVersion} guard so already-recorded histories keep replaying their original decisions;
- * each step documents its changeId, and future changes follow the same pattern (a new changeId, or a
- * bumped {@code maxSupported}). {@code WorkflowRunWorkflowHistoryFixturesTest} replays histories
- * recorded before the split and fails on any change to the command sequence.
+ * node walk, the approval park on {@code Workflow.await}, and the terminal handling. Loop, parallel
+ * and fan_out are {@link TemporalStep}s ({@link TemporalLoopStep}, {@link TemporalParallelStep},
+ * {@link TemporalFanOutStep}) over a shared {@link TemporalRunState}; the parallel and fan-out
+ * steps fan out with {@code Async.function}/{@code Promise.allOf} - Temporal's
+ * deterministic-replay-safe substitute for the {@code CompletableFuture} concurrency {@code
+ * WorkflowExecutionEngine} uses (raw threads race non-deterministically across replays). A real
+ * change to any step's decision logic needs a {@link Workflow#getVersion} guard so already-recorded
+ * histories keep replaying their original decisions; each step documents its changeId, and future
+ * changes follow the same pattern (a new changeId, or a bumped {@code maxSupported}). {@code
+ * WorkflowRunWorkflowHistoryFixturesTest} replays histories recorded before the split and fails on
+ * any change to the command sequence.
  */
 public class WorkflowRunWorkflowImpl implements WorkflowRunWorkflow {
 
     private static final Logger log = Workflow.getLogger(WorkflowRunWorkflowImpl.class);
 
-    // The loop / fan-out bounds and next-hop rules live in the pure, deterministic WorkflowTraversalRules, shared
-    // with WorkflowExecutionEngine. Loop, parallel and fan_out are TemporalSteps (see TemporalRunState for the
+    // The loop / fan-out bounds and next-hop rules live in the pure, deterministic
+    // WorkflowTraversalRules, shared
+    // with WorkflowExecutionEngine. Loop, parallel and fan_out are TemporalSteps (see
+    // TemporalRunState for the
     // determinism contract they share); each owns its own Workflow.getVersion changeId.
     private static final List<TemporalStepBinding> STEPS =
             List.of(
@@ -184,7 +187,8 @@ public class WorkflowRunWorkflowImpl implements WorkflowRunWorkflow {
                 WorkflowNodeDto node = s.nodesById.get(currentNodeId);
                 s.activeNodeId = currentNodeId;
 
-                // Loop / Parallel / Dynamic Fan-Out: special-cased constructs, each in its own TemporalStep.
+                // Loop / Parallel / Dynamic Fan-Out: special-cased constructs, each in its own
+                // TemporalStep.
                 TemporalStep step = stepFor(node);
                 if (step != null) {
                     TemporalStep.Outcome outcome = step.run(s, node, currentOutput);
@@ -382,13 +386,15 @@ public class WorkflowRunWorkflowImpl implements WorkflowRunWorkflow {
 
     /**
      * The node-execution activity stub for one run: heartbeating (see {@code
-     * WorkflowNodeActivitiesImpl#executeNode}, which beats every 10s - 45s gives four missed-tick headroom before
-     * Temporal declares the activity dead and retries it, which is also what lets Stop Run interrupt an in-flight
-     * node rather than waiting out stepTimeoutSeconds), retried per the run's own policy. {@code maxAttempts} is
-     * TOTAL attempts; irreversible side-effect nodes get a {@code 1}-attempt twin of this stub (see {@link
-     * TemporalRunState#nodeActivitiesFor}), so a Temporal activity retry cannot double their send either.
+     * WorkflowNodeActivitiesImpl#executeNode}, which beats every 10s - 45s gives four missed-tick
+     * headroom before Temporal declares the activity dead and retries it, which is also what lets
+     * Stop Run interrupt an in-flight node rather than waiting out stepTimeoutSeconds), retried per
+     * the run's own policy. {@code maxAttempts} is TOTAL attempts; irreversible side-effect nodes
+     * get a {@code 1}-attempt twin of this stub (see {@link TemporalRunState#nodeActivitiesFor}),
+     * so a Temporal activity retry cannot double their send either.
      */
-    private static WorkflowNodeActivities nodeActivityStub(WorkflowRunInput input, int maxAttempts) {
+    private static WorkflowNodeActivities nodeActivityStub(
+            WorkflowRunInput input, int maxAttempts) {
         return Workflow.newActivityStub(
                 WorkflowNodeActivities.class,
                 ActivityOptions.newBuilder()
@@ -400,19 +406,27 @@ public class WorkflowRunWorkflowImpl implements WorkflowRunWorkflow {
                         .setHeartbeatTimeout(Duration.ofSeconds(45))
                         .setRetryOptions(
                                 RetryOptions.newBuilder()
-                                        // input.maxRetryAttempts() is retries AFTER the first try (0-5); Temporal's
-                                        // setMaximumAttempts is TOTAL attempts and treats a raw 0 as unlimited, so
-                                        // +1 both converts the semantics and guarantees this is never 0.
+                                        // input.maxRetryAttempts() is retries AFTER the first try
+                                        // (0-5); Temporal's
+                                        // setMaximumAttempts is TOTAL attempts and treats a raw 0
+                                        // as unlimited, so
+                                        // +1 both converts the semantics and guarantees this is
+                                        // never 0.
                                         .setMaximumAttempts(maxAttempts)
                                         .setInitialInterval(Duration.ofSeconds(2))
                                         .setBackoffCoefficient(2.0)
                                         .setMaximumInterval(Duration.ofSeconds(20))
-                                        // A quota-exceeded rejection is deterministic within the same request
-                                        // burst - the daily/monthly cap doesn't clear in the 2-20s backoff window,
+                                        // A quota-exceeded rejection is deterministic within the
+                                        // same request
+                                        // burst - the daily/monthly cap doesn't clear in the 2-20s
+                                        // backoff window,
                                         // so retrying just burns more attempts (and their own
-                                        // reservation-then-rollback token cost) for a guaranteed identical
-                                        // failure. Fail once, fast, instead. Temporal matches failure types by
-                                        // exact class name, so every TenantLimitExceededException subclass that
+                                        // reservation-then-rollback token cost) for a guaranteed
+                                        // identical
+                                        // failure. Fail once, fast, instead. Temporal matches
+                                        // failure types by
+                                        // exact class name, so every TenantLimitExceededException
+                                        // subclass that
                                         // can surface here is listed.
                                         .setDoNotRetry(
                                                 TenantLimitExceededException.class.getName(),
@@ -457,5 +471,4 @@ public class WorkflowRunWorkflowImpl implements WorkflowRunWorkflow {
                     nodeId);
         }
     }
-
 }

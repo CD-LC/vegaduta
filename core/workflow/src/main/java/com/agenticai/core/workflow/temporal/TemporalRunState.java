@@ -17,25 +17,32 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The traversal state of one {@link WorkflowRunWorkflowImpl#run} execution, shared with the per-construct steps
- * ({@link TemporalLoopStep}, {@link TemporalParallelStep}, {@link TemporalFanOutStep}).
+ * The traversal state of one {@link WorkflowRunWorkflowImpl#run} execution, shared with the
+ * per-construct steps ({@link TemporalLoopStep}, {@link TemporalParallelStep}, {@link
+ * TemporalFanOutStep}).
  *
- * <p><b>Determinism</b>: everything here is replay-safe workflow code. It holds plain data derived from the
- * immutable {@link WorkflowRunInput}, never reads a wall clock or random source except through {@link Workflow}
- * (steps do so via {@link Workflow#currentTimeMillis}), and every side effect is an activity call (the two
- * activity stubs it carries). The order of activity calls and {@link Workflow#getVersion} markers made by the
- * steps is the recorded history's contract: {@code WorkflowRunWorkflowHistoryFixturesTest} replays histories
- * recorded before the split and fails if a step changes one.
+ * <p><b>Determinism</b>: everything here is replay-safe workflow code. It holds plain data derived
+ * from the immutable {@link WorkflowRunInput}, never reads a wall clock or random source except
+ * through {@link Workflow} (steps do so via {@link Workflow#currentTimeMillis}), and every side
+ * effect is an activity call (the two activity stubs it carries). The order of activity calls and
+ * {@link Workflow#getVersion} markers made by the steps is the recorded history's contract: {@code
+ * WorkflowRunWorkflowHistoryFixturesTest} replays histories recorded before the split and fails if
+ * a step changes one.
  */
 final class TemporalRunState {
 
-    /** Workflow.getVersion changeId for the recordContainerOutput activity after a loop / parallel / fan_out node. */
+    /**
+     * Workflow.getVersion changeId for the recordContainerOutput activity after a loop / parallel /
+     * fan_out node.
+     */
     private static final String CONTAINER_OUTPUT_CHANGE_ID = "container-node-output-v1";
 
     final WorkflowRunInput input;
     final RunMode runMode;
+
     /** Executes nodes (heartbeating, retried per the run's policy). */
     final WorkflowNodeActivities nodeActivities;
+
     /**
      * Same stub configured with a single attempt, for nodes whose execution has an irreversible
      * side effect - the Temporal counterpart of {@link
@@ -43,15 +50,22 @@ final class TemporalRunState {
      * be blind-retried by the activity policy into a duplicate effect.
      */
     final WorkflowNodeActivities nodeActivitiesOnce;
+
     /** Records progress and container outputs. */
     final WorkflowNodeActivities progressActivities;
+
     final Map<String, WorkflowNodeDto> nodesById = new HashMap<>();
     final Map<String, List<WorkflowEdgeDto>> outgoing = new HashMap<>();
     final List<NodeTraceEntry> trace = new ArrayList<>();
     String fileName;
     String fileData;
-    /** The node executing right now, so a failure is attributed to it and not to the last node that finished. */
+
+    /**
+     * The node executing right now, so a failure is attributed to it and not to the last node that
+     * finished.
+     */
     String activeNodeId;
+
     int steps;
 
     TemporalRunState(
@@ -97,7 +111,9 @@ final class TemporalRunState {
 
     IllegalStateException stepLimit() {
         return new IllegalStateException(
-                "Workflow exceeded the maximum of " + input.maxStepsPerRun() + " steps in one run.");
+                "Workflow exceeded the maximum of "
+                        + input.maxStepsPerRun()
+                        + " steps in one run.");
     }
 
     void captureFile(NodeExecutionActivityResult r) {
@@ -107,10 +123,16 @@ final class TemporalRunState {
         }
     }
 
-    /** The activity input for running {@code node} on {@code nodeInput}; {@code scope} is the iteration scope or null. */
-    NodeExecutionActivityInput nodeInput(WorkflowNodeDto node, String nodeInput, ExpressionScope scope) {
-        // A draft/test run stamps its mode on every node activity so the executor serves pins; a production run
-        // (or an input serialised before this field existed) resolves to null scopes, exactly as before pins.
+    /**
+     * The activity input for running {@code node} on {@code nodeInput}; {@code scope} is the
+     * iteration scope or null.
+     */
+    NodeExecutionActivityInput nodeInput(
+            WorkflowNodeDto node, String nodeInput, ExpressionScope scope) {
+        // A draft/test run stamps its mode on every node activity so the executor serves pins; a
+        // production run
+        // (or an input serialised before this field existed) resolves to null scopes, exactly as
+        // before pins.
         return new NodeExecutionActivityInput(
                         input.workflowDefinitionId(),
                         input.workflowName(),
@@ -127,15 +149,19 @@ final class TemporalRunState {
 
     /**
      * Per-step run data - same sanitized input/output the synchronous engine attaches (see {@link
-     * NodeTracePayloads}). Pure and deterministic, so safe in workflow code. No token/cost here: the lookup is a DB
-     * read, which workflow code must not do, so usage stays null on this engine.
+     * NodeTracePayloads}). Pure and deterministic, so safe in workflow code. No token/cost here:
+     * the lookup is a DB read, which workflow code must not do, so usage stays null on this engine.
      */
-    NodeTraceEntry withPayloads(NodeTraceEntry entry, String entryInput, String output, int perFieldCap) {
+    NodeTraceEntry withPayloads(
+            NodeTraceEntry entry, String entryInput, String output, int perFieldCap) {
         return NodeTracePayloads.attach(
                 entry, entryInput, output, perFieldCap, NodeTracePayloads.payloadCharsUsed(trace));
     }
 
-    /** Mid-run progress write after {@code node} (an activity: workflow code never touches the database). */
+    /**
+     * Mid-run progress write after {@code node} (an activity: workflow code never touches the
+     * database).
+     */
     void recordProgress(WorkflowNodeDto node) {
         progressActivities.recordProgress(
                 new RunProgressInput(
@@ -181,10 +207,10 @@ final class TemporalRunState {
     }
 
     /**
-     * Ends the run at the node that was executing when it was cut short (Stop Run, or an uncaught failure): one
-     * trace entry attributed to {@link #activeNodeId} - NOT to trace's last entry, which is the last node that
-     * already finished successfully - then the terminal write. Stamped with {@link Workflow#currentTimeMillis}, the
-     * replay-safe substitute for the wall clock.
+     * Ends the run at the node that was executing when it was cut short (Stop Run, or an uncaught
+     * failure): one trace entry attributed to {@link #activeNodeId} - NOT to trace's last entry,
+     * which is the last node that already finished successfully - then the terminal write. Stamped
+     * with {@link Workflow#currentTimeMillis}, the replay-safe substitute for the wall clock.
      */
     WorkflowRunResult terminateAtActiveNode(
             WorkflowRunStatus status,
@@ -213,8 +239,8 @@ final class TemporalRunState {
     }
 
     /**
-     * Stores a container node's merged output for {@code $node["<label>"]} (an activity: workflow code never
-     * touches the database). Skipped on histories recorded before it existed.
+     * Stores a container node's merged output for {@code $node["<label>"]} (an activity: workflow
+     * code never touches the database). Skipped on histories recorded before it existed.
      */
     void recordContainerOutput(WorkflowNodeDto node, String output) {
         if (Workflow.getVersion(CONTAINER_OUTPUT_CHANGE_ID, Workflow.DEFAULT_VERSION, 1) < 1) {

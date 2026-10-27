@@ -57,7 +57,4 @@ import type { HubPage } from "../lib/seo-hub";
 import { BUILD_TOPICS } from "./platform-data-build";
 import { OPERATE_TOPICS } from "./platform-data-operate";
 
-export const PLATFORM_TOPICS: HubPage[] = [
-  ...BUILD_TOPICS,
-  ...OPERATE_TOPICS,
-];
+export const PLATFORM_TOPICS: HubPage[] = [...BUILD_TOPICS, ...OPERATE_TOPICS];
