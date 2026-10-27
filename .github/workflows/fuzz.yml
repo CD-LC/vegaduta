@@ -68,7 +68,7 @@ jobs:
           echo "${JAZZER_SHA256}  /tmp/jazzer.tar.gz" | sha256sum -c -
           mkdir -p "$RUNNER_TEMP/jazzer"
           tar xzf /tmp/jazzer.tar.gz -C "$RUNNER_TEMP/jazzer"
-          "$RUNNER_TEMP/jazzer/jazzer" --version
+          test -x "$RUNNER_TEMP/jazzer/jazzer"
 
       - name: Run Jazzer on both redaction targets
         env:
@@ -91,7 +91,13 @@ jobs:
               -timeout=10 \
               -artifact_prefix=crashes/ \
               -print_final_stats=1 \
-              corpus/ || true
+              corpus/ && rc=0 || rc=$?
+            # exit 77 = libFuzzer stopped on a finding; any other nonzero is a
+            # jazzer/env failure that must not pass silently.
+            if [ "$rc" -ne 0 ] && [ "$rc" -ne 77 ] && ! ls crashes/* >/dev/null 2>&1; then
+              echo "::error::jazzer itself failed for $target (exit $rc)"
+              exit 1
+            fi
           done
           # -timeout=10 means any input the sanitizers can't finish in 10s is a
           # ReDoS-class finding; Jazzer drops a reproducer under crashes/.
