@@ -344,9 +344,13 @@ public client, and the password grant off on the core client
 account gets `view-users`, `query-users`, `manage-users`, `query-groups`,
 `view-realm`, `view-identity-providers` and `manage-identity-providers` of
 `realm-management`, not `realm-admin`; `scripts/vegaduta up` removes a
-`realm-admin` grant an older install made. Sign-up e-mail verification follows
-`KC_VERIFY_EMAIL` (off by default because it needs SMTP; `doctor` warns on a
-domain install).
+`realm-admin` grant an older install made. Public self-sign-up in the realm
+follows `KC_REGISTRATION_ALLOWED` (off by default: anyone who can reach
+Keycloak can otherwise self-register and start creating agents/resources -
+keep it off for private installs; on a hosted deployment that wants it, pair
+it with `KC_VERIFY_EMAIL` and a WAF/CAPTCHA in front of the realm). Sign-up
+e-mail verification follows `KC_VERIFY_EMAIL` (off by default because it needs
+SMTP; `doctor` warns on a domain install).
 
 **Dual issuer.** The `iss` claim in a token is the URL the *browser* used to
 reach Keycloak (for example `https://auth.example.com/realms/agentic-ai`), while
