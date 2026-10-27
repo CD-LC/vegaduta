@@ -520,11 +520,12 @@ recovery path.
 ### Voice: piper local TTS provider (Devin, 2026-10-27)
 
 services/voice-agent gained a third TTS backend: app/tts_piper.py wraps the
-piper-tts subprocess CLI (piper-tts==1.8.0, lock regenerated) in the same
-one-shot ChunkedStream shape as tts_sarvam.py; VOICE_AGENT_TTS_PROVIDER=piper
-selects it (deliberately not in "auto"'s ordering - a local voice is a
-conscious quality pick). Dockerfile bakes en_US-lessac-medium (+json)
-sha256-verified via the new piper_voices_download.py, which also serves for
-adding voices at runtime. config.py gained the PIPER_* block; configuration.md
-and .env.example document it. Verified: 44 pytest green incl. 3 new
-tts_piper tests, ruff clean, hadolint shows only the two pre-existing findings.
+`piper` subprocess CLI in the same one-shot ChunkedStream shape as
+tts_sarvam.py; VOICE_AGENT_TTS_PROVIDER=piper selects it (deliberately not in
+"auto"'s ordering - a local voice is a conscious quality pick). The binary is
+the MIT rhasspy/piper release tarball, fetched per-arch + sha256-pinned in the
+Dockerfile via piper_voices_download.py --binary (the piper-tts PyPI package's
+>=1.3 releases are the GPL-3.0 piper1-gpl lineage, which dependency review
+rejects). Dockerfile also bakes en_US-lessac-medium (+json) sha256-verified.
+TTS selection moved to app/tts_select.py (main.py file-size ratchet). Verified:
+3 tts_piper pytest green, ruff clean on changed files, imports resolve.

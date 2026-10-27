@@ -11,6 +11,9 @@ at runtime to add voices under PIPER_MODEL_DIR:
 Hashes for the baked default are hardcoded below - the same pin-everything
 posture as every other external fetch in this repo's images.
 """
+
+from __future__ import annotations
+
 import hashlib
 import pathlib
 import sys
@@ -38,7 +41,48 @@ def fetch(url: str, want: str | None) -> bytes:
     return data
 
 
+# The `piper` binary itself is NOT pip-installed - piper-tts on PyPI >=1.3 is
+# the GPL-licensed piper1-gpl lineage (dependency-review blocks GPL), while
+# the upstream rhasspy/piper release binaries are MIT. The Dockerfile calls
+# `--binary` below to fetch the MIT tarball per-arch instead.
+PIPER_RELEASE = "https://github.com/rhasspy/piper/releases/download/2023.11.14-2"
+PIPER_BIN_SHA256 = {
+    "amd64": (
+        "piper_linux_x86_64.tar.gz",
+        "a50cb45f355b7af1f6d758c1b360717877ba0a398cc8cbe6d2a7a3a26e225992",
+    ),
+    "arm64": (
+        "piper_linux_aarch64.tar.gz",
+        "fea0fd2d87c54dbc7078d0f878289f404bd4d6eea6e7444a77835d1537ab88eb",
+    ),
+}
+
+
+def fetch_binary(arch: str, out_dir: pathlib.Path) -> None:
+    """Download + sha256-verify the MIT piper release tarball for `arch`
+    (Docker's TARGETARCH spelling) and extract it as out_dir/piper/."""
+    import tarfile
+
+    asset, want = PIPER_BIN_SHA256[arch]
+    tarball = fetch(f"{PIPER_RELEASE}/{asset}", want)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with tarfile.open(fileobj=io_bytes(tarball), mode="r:gz") as tar:
+        tar.extractall(out_dir, filter="data")
+    (out_dir / "piper" / "piper").chmod(0o755)
+    print(f"installed piper binary ({arch}) into {out_dir}/piper")
+
+
+def io_bytes(data: bytes):
+    import io
+
+    return io.BytesIO(data)
+
+
 def main() -> None:
+    if sys.argv[1] == "--binary":
+        out = pathlib.Path(sys.argv[3] if len(sys.argv) > 3 else "/opt")
+        fetch_binary(sys.argv[2], out)
+        return
     voice = sys.argv[1]
     out_dir = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "/opt/piper-voices")
     onnx_sha = json_sha = None

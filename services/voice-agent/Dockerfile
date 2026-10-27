@@ -32,11 +32,20 @@ COPY app ./app
 # supply-chain posture as every other external fetch in this repo's images.
 # PIPER_VOICE defaults to this exact voice; other voices are still loadable at
 # runtime by placing the .onnx under PIPER_MODEL_DIR.
+#
+# The `piper` CLI is the MIT-licensed upstream rhasspy/piper release binary,
+# fetched per-arch and sha256-pinned - NOT the piper-tts PyPI package, whose
+# >=1.3 releases are the GPL-3.0 piper1-gpl lineage this repo's dependency
+# review rejects. The tarball is self-contained (binary + espeak-ng-data +
+# bundled libs); keep the piper/ dir intact so it finds its data files.
+ARG TARGETARCH
 RUN mkdir -p /opt/piper-voices
 COPY piper_voices_download.py /tmp/piper_voices_download.py
 RUN python /tmp/piper_voices_download.py en_US-lessac-medium /opt/piper-voices \
+    && python /tmp/piper_voices_download.py --binary "${TARGETARCH:-amd64}" /opt \
     && rm /tmp/piper_voices_download.py
-ENV PIPER_MODEL_DIR=/opt/piper-voices
+ENV PIPER_MODEL_DIR=/opt/piper-voices \
+    PIPER_BIN=/opt/piper/piper
 
 RUN groupadd -r voiceagent && useradd -r -g voiceagent voiceagent \
     && chown -R voiceagent:voiceagent /app /opt/piper-voices
