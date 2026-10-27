@@ -156,6 +156,8 @@ const SERVER_CHIP_NAMES: Readonly<Record<McpServerKey, string>> = {
   "code-intel": "Code intelligence",
   "home-assistant": "Home Assistant",
   atlassian: "Atlassian",
+  "composio-connect": "Composio",
+  rube: "Rube",
 };
 
 function mcpChips(suggestions: readonly McpSuggestion[]): TemplateChip[] {

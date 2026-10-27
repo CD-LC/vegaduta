@@ -93,6 +93,7 @@ now lives in `mcp-stdio-runner` (and its `-browser` variant), or in the opt-in
 | mcp-stdio-runner-browser | plug-and-play | the above plus the browser built-ins `puppeteer` and `playwright-vision` (pinned Chromium/Chrome baked in) | profile `browser` (`MCP_STDIO_RUNNER_VARIANT=-browser`) | `mcp-stdio-runner.browser=true` | same as the runner |
 | core-full image | alternative | stdio MCP servers inside the core container, for hosts that cannot run the runner (single-user only: no isolation) | `CORE_IMAGE_VARIANT=-full` + `CORE_MCP_PROFILE=,mcp` | `global.core.mcpToolchain=full` (API only) | `MCP_STDIO_SIDECAR_ENABLED=false` |
 | sidecar | plug-and-play | document ingestion, embeddings, rerank, STT/TTS, rendering | always in full; lite profile `rag` | `global.components.sidecar` (default on) | `SIDECAR_BASE_URL` |
+| docling | plug-and-play | optional Docling-first document conversion (layout-aware PDF, tables, pptx/xlsx/csv) ahead of the sidecar extractor | profile `docling` | — | `DOCLING_BASE_URL`, `DOCLING_SHARED_SECRET` |
 | tool-sandbox | plug-and-play | tenant-authored Java/Python/JavaScript/TypeScript tools (and agent-authored `create_custom_tool`) | profile `sandbox` (full), `tools` (personal/lite) | | `global.components.toolSandbox` + RuntimeClass | `TOOL_SANDBOX_ENABLED=true` |
 | code-intel | plug-and-play | code intelligence, repository indexing | profile `code-intel` | `global.components.codeIntel` | `CODE_INTEL_ENABLED=true` |
 | app-builder | plug-and-play | the App Builder (`/build`) | profile `builder` | `global.components.appBuilder` | `APP_BUILDER_CORE_SERVICE_TOKEN` |
@@ -451,6 +452,9 @@ replica (Full with `jobs`, Kubernetes) needs S3.
 | `app.embeddings.ollama.keep-alive` | `APP_EMBEDDINGS_OLLAMA_KEEP_ALIVE` | `10m` |
 | `app.knowledge.embedding-binding.enabled` | `KNOWLEDGE_EMBEDDING_BINDING_ENABLED` | `true`. Each knowledge collection records which embedder wrote it (`sidecar` or `provider:model:width`, migration V550). Ingesting with a different one answers `409` naming `POST /api/knowledge/collections/{id}/reembed`, and vector search skips the mismatched collection (keyword search still answers). `false` turns the guard off |
 | `app.knowledge.rerank.enabled` | `KNOWLEDGE_RERANK_ENABLED` | `false` |
+| `app.knowledge.docling.base-url` | `DOCLING_BASE_URL` | empty = sidecar-only extraction; set (e.g. `http://docling:8002`, Compose `--profile docling`) and supported uploads convert via `services/docling` first |
+| `app.knowledge.docling.shared-secret` | `DOCLING_SHARED_SECRET` | `X-Internal-Token` sent to the docling adapter |
+| `app.knowledge.docling.fallback-to-sidecar` | `KNOWLEDGE_DOCLING_FALLBACK` | `true` - a Docling transport/5xx failure falls back to the sidecar `/extract` |
 
 Changing the embedding provider on a populated database requires re-embedding
 every knowledge collection.
