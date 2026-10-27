@@ -44,6 +44,10 @@ Release notes on GitHub are generated from the section for each version.
   importable VegaDūta workflow template (HTTP node -> n8n webhook), an
   importable n8n workflow (HTTP Request -> platform agent), and a README
   covering both directions.
+- **Knowledge upload UI offers the Docling-extended formats.** The console's
+  upload picker now lists `.pptx`/`.xlsx`/`.csv`/`.tiff`/`.tif`/`.bmp`
+  alongside the existing types (PPT/XLS badges); a deployment without the
+  `docling` profile still rejects them server-side with a clear error.
 
 ## [0.1.12] - 2026-10-26
 
