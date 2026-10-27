@@ -30,10 +30,12 @@ concurrency:
   group: fuzz-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# No JAZZER_* env names anywhere: Jazzer maps them onto its own
+  # option registry - JAZZER_VERSION=v0.30.0 would become --version=v0.30.0.
 env:
-  JAZZER_VERSION: "v0.30.0"
-  JAZZER_ASSET: "jazzer-linux-x86-64.tar.gz"
-  JAZZER_SHA256: "6eeaf0026d75599b07527d93b576593ce847cfca8b337a579971a5a9cdf792d0"
+  JZ_RELEASE: "v0.30.0"
+  JZ_ASSET: "jazzer-linux-x86-64.tar.gz"
+  JZ_SHA256: "6eeaf0026d75599b07527d93b576593ce847cfca8b337a579971a5a9cdf792d0"
 
 jobs:
   fuzz:
@@ -64,8 +66,8 @@ jobs:
       - name: Fetch + verify Jazzer (sha256-pinned release tarball)
         run: |
           curl -fsSL -o /tmp/jazzer.tar.gz \
-            "https://github.com/CodeIntelligenceTesting/jazzer/releases/download/${JAZZER_VERSION}/${JAZZER_ASSET}"
-          echo "${JAZZER_SHA256}  /tmp/jazzer.tar.gz" | sha256sum -c -
+            "https://github.com/CodeIntelligenceTesting/jazzer/releases/download/${JZ_RELEASE}/${JZ_ASSET}"
+          echo "${JZ_SHA256}  /tmp/jazzer.tar.gz" | sha256sum -c -
           mkdir -p "$RUNNER_TEMP/jazzer"
           tar xzf /tmp/jazzer.tar.gz -C "$RUNNER_TEMP/jazzer"
           test -x "$RUNNER_TEMP/jazzer/jazzer"
