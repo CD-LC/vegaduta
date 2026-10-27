@@ -53,10 +53,10 @@ export const BUILD_TOPICS: HubPage[] = [
       {
         heading: "Retries you configure, not a fixed policy",
         body:
-          "Every workflow carries its own execution limits rather than inheriting one platform-wide policy: how many retry attempts a failed step gets (anywhere from 0 to 5), the maximum number of steps a single run may take, and a per-step timeout. Both execution engines read the same per-workflow value, so the behaviour does not change depending on how a run happened to be dispatched.",
+          "Every workflow carries its own execution limits rather than inheriting one platform-wide policy: how many retry attempts a failed step gets (anywhere from 0 to 5), the maximum number of steps a single run may take, and a per-step timeout. Retry counts and the step ceiling apply on both execution engines. One honest difference: the per-step timeout is enforced by the durable Temporal engine — on the default in-process engine it is recorded on the workflow but a step runs until it finishes, and a run whose process dies is marked failed by the recovery reaper instead of resuming.",
         bullets: [
           "0–5 retry attempts per workflow — set 0 for a step you never want repeated",
-          "A step ceiling and a per-step timeout, also per workflow",
+          "Irreversible steps (email sends, tool calls, sub-workflows) are never retried automatically — a repeat would duplicate the side effect",
           "A quota rejection is never retried — it would fail identically and burn the attempt",
         ],
       },
@@ -86,7 +86,7 @@ export const BUILD_TOPICS: HubPage[] = [
       },
       {
         q: "Can I control how many times a failed workflow step is retried?",
-        a: "Yes — retries are configured per workflow, from 0 to 5 attempts, alongside a maximum step count and a per-step timeout. Both execution engines honour the same per-workflow setting. A quota-exceeded rejection is deliberately excluded from retry, since it would fail identically on the next attempt.",
+        a: "Yes — retries are configured per workflow, from 0 to 5 attempts, alongside a maximum step count and a per-step timeout. Both engines honour the retry count and the step ceiling; the per-step timeout is enforced by the durable Temporal engine, which is the engine to choose for long, time-bound runs. A quota-exceeded rejection is deliberately excluded from retry, since it would fail identically on the next attempt — as are irreversible steps, whose repetition would duplicate the side effect.",
       },
       {
         q: "Do I have to build workflows from scratch?",
