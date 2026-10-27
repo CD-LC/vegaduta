@@ -591,6 +591,20 @@ build-only image (DS-0002/DS-0026) and the spring-webmvc 6.2.19 CVEs whose
 fix is the Spring 7 migration (#99) - the CVE exemption is also PR'd to
 main directly as #261 since it blocks every open PR's Trivy scan.
 
+### ACTIVE CLAIM: workflow retry side-effect fix (Devin, 2026-10-27)
+
+Defect "workflow retries duplicate side effects": RetryPolicy.isRetryableNode
+excluded only `output`, so bulk_email/tool/crm_lead/device_control/media/
+sub-workflow/non-GET http nodes all got retries+1 attempts; the Temporal
+activity stub applied the run retry policy to every node type the same way.
+Touching only core/workflow: RetryPolicy now delegates to
+NodeErrorStrategy.isIrreversible (retryUnsafe opt-in), TemporalRunState picks
+a single-attempt activity stub for irreversible nodes, ToolNodeHandler claims
+(run, node, iteration+input) through WorkflowOutputDedupGuard. Worktree:
+/tmp/vd-retry-fix on branch fix/workflow-retry-side-effects. Please do not
+reset the shared ~/Documents checkout while this is in flight - a concurrent
+`git reset --hard` already wiped one round of these edits.
+
 ### Trivy: spring-webmvc 6.2.x CVE exemptions (Devin, 2026-10-28)
 
 Newly published CVE-2026-47890 / CVE-2026-47884 (critical, spring-webmvc

@@ -25,6 +25,19 @@ Release notes on GitHub are generated from the section for each version.
   - `TurnContext` now carries its own `TurnTaint` record, and `AgentToolProvider` binds it to
     the turn's step counter during tool resolution, ensuring tool guards and taint gates evaluate
     sink permissions against auto-injected and inbound taint.
+- **Workflow retries no longer duplicate irreversible side effects.** The
+  legacy retry path only excluded `output` nodes, so `bulk_email`, `tool`,
+  `crm_lead`, `device_control`, `media`, sub-workflow and non-GET `http`
+  nodes were each attempted up to three times by default — a retry could
+  double a send, lead or device action when the first attempt had already
+  reached the wire. `RetryPolicy` now shares `NodeErrorStrategy`'s
+  irreversible-type list (including on the Temporal engine, which dispatches
+  those nodes on a single-attempt activity stub), GET/HEAD/OPTIONS calls
+  stay retryable, and a node can still opt back in with
+  `"retryUnsafe": true`. Tool node calls are additionally claimed through
+  the output dedup guard keyed on (run, node, loop index + resolved input),
+  so a replayed attempt is suppressed instead of re-invoking the tool.
+
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
   capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on

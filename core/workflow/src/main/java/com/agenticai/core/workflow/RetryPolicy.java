@@ -4,10 +4,11 @@ import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.security.TenantLimitExceededException;
 
 /**
- * Pure retry rules for the in-process engine: how many total attempts a node gets and whether a failed
- * attempt may be retried. No I/O, no clock, no randomness (see {@link BackoffCalculator} for the delay).
+ * Pure retry rules shared by the node-execution paths: how many total attempts a node gets and whether
+ * a failed attempt may be retried. No I/O, no clock, no randomness (see {@link BackoffCalculator} for the
+ * delay), so the Temporal engine may also consult it when picking an activity stub.
  */
-final class RetryPolicy {
+public final class RetryPolicy {
 
     private static final int MAX_NODE_RETRIES = 5;
 
@@ -41,11 +42,19 @@ final class RetryPolicy {
     }
 
     /**
-     * Output nodes are never retried: they email/WhatsApp/upload and a blind retry risks sending twice when
-     * the destination already received the message before the failure surfaced.
+     * Nodes with an irreversible external side effect are never retried on the legacy path either -
+     * a blind retry risks doubling a send / lead / device action when the first attempt already
+     * reached the wire before its failure surfaced. Same list as the per-node error strategy ({@link
+     * NodeErrorStrategy#isIrreversible}: bulk_email, tool, device_control, crm_lead, media, output,
+     * sub-workflow, and any http call that is not GET/HEAD/OPTIONS); {@code "retryUnsafe": true} on
+     * the node opts back in, the same escape hatch the error strategy exposes.
      */
-    static boolean isRetryableNode(WorkflowNodeDto node) {
-        return !"output".equalsIgnoreCase(node.type());
+    public static boolean isRetryableNode(WorkflowNodeDto node) {
+        Object unsafe = node.config().get("retryUnsafe");
+        if (unsafe instanceof Boolean b ? b : unsafe != null && "true".equalsIgnoreCase(unsafe.toString().trim())) {
+            return true;
+        }
+        return !NodeErrorStrategy.isIrreversible(node);
     }
 
     /** A quota rejection is deterministic within the backoff window, so it is never retried. */

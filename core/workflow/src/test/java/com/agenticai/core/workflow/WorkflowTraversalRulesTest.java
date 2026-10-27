@@ -125,6 +125,21 @@ class WorkflowTraversalRulesTest {
         assertFalse(RetryPolicy.shouldRetry(output, 1, 3, new RuntimeException("x")));
         assertFalse(RetryPolicy.shouldRetry(agent, 1, 3,
             new com.agenticai.core.security.TenantLimitExceededException("quota")));
+        // Irreversible side-effect nodes share the error strategy's list on the legacy path too:
+        // a blind retry would duplicate the send / lead / device action / mutation.
+        for (String type : List.of("bulk_email", "tool", "crm_lead", "device_control", "media", "workflow")) {
+            WorkflowNodeDto n = new WorkflowNodeDto("n", type, Map.of(), Map.of());
+            assertFalse(RetryPolicy.isRetryableNode(n), type + " must not be retried");
+        }
+        WorkflowNodeDto httpPost = new WorkflowNodeDto("h", "http", Map.of(), Map.of("config", Map.of("method", "POST")));
+        WorkflowNodeDto httpGet = new WorkflowNodeDto("h", "http", Map.of(), Map.of("config", Map.of("method", "GET")));
+        WorkflowNodeDto httpDefault = new WorkflowNodeDto("h", "http", Map.of(), Map.of());
+        assertFalse(RetryPolicy.isRetryableNode(httpPost));
+        assertTrue(RetryPolicy.isRetryableNode(httpGet));
+        assertTrue(RetryPolicy.isRetryableNode(httpDefault));
+        // retryUnsafe is the author's explicit opt back in.
+        WorkflowNodeDto unsafe = new WorkflowNodeDto("u", "tool", Map.of(), Map.of("config", Map.of("retryUnsafe", true)));
+        assertTrue(RetryPolicy.isRetryableNode(unsafe));
     }
 
     @Test

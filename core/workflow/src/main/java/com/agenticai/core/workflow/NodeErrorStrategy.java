@@ -39,8 +39,9 @@ import java.util.regex.Pattern;
  * <p>Retry wraps the node execution with a bounded number of TOTAL attempts. A node whose type has an
  * irreversible side effect (an HTTP call that is not GET/HEAD/OPTIONS, bulk email, tool, device control, CRM
  * lead, media, output, sub-workflow) is never retried unless it sets {@code retryUnsafe=true}: a duplicated
- * send is worse than a failed one. This deliberately does NOT change the legacy retry used when no {@code
- * retry} block is configured.
+ * send is worse than a failed one. The same irreversible list also gates the legacy retry path - {@link
+ * RetryPolicy#isRetryableNode} delegates to {@link #isIrreversible} (with the same {@code retryUnsafe}
+ * opt-in), so an un-configured node can no longer be blind-retried into a duplicate side effect.
  *
  * <p>The retry/backoff idea follows the n8n "Retry on fail / On error" settings and Dify's per-node error
  * strategy (continue vs. fail-branch); no code from either is used.

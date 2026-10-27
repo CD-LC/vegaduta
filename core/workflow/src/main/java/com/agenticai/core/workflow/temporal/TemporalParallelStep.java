@@ -88,7 +88,7 @@ final class TemporalParallelStep implements TemporalStep {
         List<Promise<NodeExecutionActivityResult>> branchPromises = new ArrayList<>();
         for (WorkflowNodeDto branchNode : branchNodes) {
             NodeExecutionActivityInput branchInput = s.nodeInput(branchNode, currentOutput, null);
-            branchPromises.add(Async.function(s.nodeActivities::executeNode, branchInput));
+            branchPromises.add(Async.function(s.nodeActivitiesFor(branchNode)::executeNode, branchInput));
         }
 
         // Blocks this workflow's coroutine (not an OS thread) until every branch activity completes. Like the

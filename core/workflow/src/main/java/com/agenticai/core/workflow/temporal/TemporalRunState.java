@@ -36,6 +36,13 @@ final class TemporalRunState {
     final RunMode runMode;
     /** Executes nodes (heartbeating, retried per the run's policy). */
     final WorkflowNodeActivities nodeActivities;
+    /**
+     * Same stub configured with a single attempt, for nodes whose execution has an irreversible
+     * side effect - the Temporal counterpart of {@link
+     * com.agenticai.core.workflow.RetryPolicy#isRetryableNode}: a tool call or email send must not
+     * be blind-retried by the activity policy into a duplicate effect.
+     */
+    final WorkflowNodeActivities nodeActivitiesOnce;
     /** Records progress and container outputs. */
     final WorkflowNodeActivities progressActivities;
     final Map<String, WorkflowNodeDto> nodesById = new HashMap<>();
@@ -50,10 +57,12 @@ final class TemporalRunState {
     TemporalRunState(
             WorkflowRunInput input,
             WorkflowNodeActivities nodeActivities,
+            WorkflowNodeActivities nodeActivitiesOnce,
             WorkflowNodeActivities progressActivities) {
         this.input = input;
         this.runMode = RunMode.fromWire(input.runMode());
         this.nodeActivities = nodeActivities;
+        this.nodeActivitiesOnce = nodeActivitiesOnce;
         this.progressActivities = progressActivities;
         WorkflowGraphDto graph = input.graph();
         for (WorkflowNodeDto node : graph.nodes()) {
@@ -66,6 +75,17 @@ final class TemporalRunState {
 
     List<WorkflowEdgeDto> edgesOf(String nodeId) {
         return outgoing.getOrDefault(nodeId, List.of());
+    }
+
+    /**
+     * The activity stub {@code node} may be executed on: retried per the run policy for retryable
+     * nodes, single-attempt for irreversible side-effect nodes. Pure selection (node type + its
+     * {@code retryUnsafe} opt-in), so the choice is deterministic on replay.
+     */
+    WorkflowNodeActivities nodeActivitiesFor(WorkflowNodeDto node) {
+        return com.agenticai.core.workflow.RetryPolicy.isRetryableNode(node)
+                ? nodeActivities
+                : nodeActivitiesOnce;
     }
 
     /** Charges one step; throws once {@code maxStepsPerRun} is crossed. */
