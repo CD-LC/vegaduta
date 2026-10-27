@@ -40,17 +40,31 @@ function atLeast(version, floor) {
   return true;
 }
 
+function npmSha512Of(text) {
+  const m = text.match(/^ARG NPM_TGZ_SHA512=([0-9a-f]{128})$/m);
+  return m ? m[1] : null;
+}
+
 test('every Node runner Dockerfile pins the same fixed npm release', () => {
   const versions = {};
+  const sha512s = {};
   for (const [rel, text] of Object.entries(DOCKERFILES)) {
     const v = npmVersionOf(text);
     assert.ok(v, `${rel}: no "ARG NPM_VERSION=<x.y.z>" - the bundled npm of the Node base carries High advisories`);
     assert.match(v, /^\d+\.\d+\.\d+$/, `${rel}: NPM_VERSION must be an exact release, not a range or tag (got ${v})`);
     assert.ok(atLeast(v, MIN_NPM), `${rel}: NPM_VERSION ${v} is older than ${MIN_NPM.join('.')}, the first release scanned clean`);
-    assert.match(text, /npm install -g "npm@\$\{NPM_VERSION\}"/, `${rel}: does not install npm@\${NPM_VERSION}`);
+    // Hash-verified install (npm has no integrity-pinned global install): fetch the
+    // registry tarball, sha512-verify it, lay it down manually. A bare
+    // `npm install -g npm@X` resolves over the registry unpinned - flagged by scanners.
+    assert.match(text, /npm pack "npm@\$\{NPM_VERSION\}" --pack-destination \/tmp/, `${rel}: does not fetch npm@\${NPM_VERSION} as a tarball`);
+    assert.match(text, /sha512sum -c -/, `${rel}: tarball is not sha512-verified`);
+    assert.match(text, /mv \/usr\/local\/lib\/node_modules\/package \/usr\/local\/lib\/node_modules\/npm/, `${rel}: tarball is not laid down over the global npm`);
+    sha512s[rel] = npmSha512Of(text);
+    assert.ok(sha512s[rel], `${rel}: no "ARG NPM_TGZ_SHA512=<128-hex>" - bump it together with NPM_VERSION`);
     versions[rel] = v;
   }
   assert.equal(new Set(Object.values(versions)).size, 1, `NPM_VERSION differs between images: ${JSON.stringify(versions)}`);
+  assert.equal(new Set(Object.values(sha512s)).size, 1, `NPM_TGZ_SHA512 differs between images: ${JSON.stringify(sha512s)}`);
 });
 
 test('core-full copies the replaced npm, not the one bundled in the Node image', () => {

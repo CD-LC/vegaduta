@@ -12,3 +12,29 @@ misconfigurations:
       helm drop every other capability and set no-new-privileges, and the app
       refuses to start when CAP_KILL is missing unless explicitly configured
       to allow it. See services/tool-sandbox/README.md's security model.
+  - id: AVD-DS-0002
+    paths:
+      - deploy/omnibus/Dockerfile
+    statement: >
+      Intentional: the omnibus is a single-container supervisor, not a single
+      app - entrypoint.sh must run as root so it can initdb/start postgres,
+      launch redis, and hand core+web to their own users (gosu postgres /
+      gosu redis / gosu agentic per service). No workload process runs as
+      root at steady state.
+  - id: AVD-DS-0002
+    paths:
+      - deploy/postgres/Dockerfile
+      - deploy/postgres/Dockerfile.alpine
+    statement: >
+      Intentional: the official postgres entrypoint must start as root so it
+      can chown the data directory, then drops itself to the postgres user via
+      gosu before exec'ing postgres. postgres never runs as root at steady
+      state. deploy/postgres/Dockerfile's FINAL_USER ARG keeps the same model.
+  - id: AVD-DS-0001
+    paths:
+      - deploy/omnibus/Dockerfile
+    statement: >
+      The release images the omnibus assembles are digest-pinned
+      (@sha256:${*_IMAGE_DIGEST} resolved by the release workflow after
+      publish); a tag-less digest ref is a stronger pin than a tagged ref -
+      this check's "specify a tag" guidance is weaker than what is there.

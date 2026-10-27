@@ -10,6 +10,14 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
+  search siblings stayed.** The write tool was missing from both standing-
+  capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on
+  default) that exempt `search_knowledge_base` and `list_knowledge_collections`
+  from trimming, so an agent with knowledge-base write enabled could see only
+  the read tools on a crowded or small-model turn and report "I can only search
+  collections". The write/read pairing is now asserted in
+  `AgentToolProviderCapTest`.
 - **Release workflow gates the tag before spending a build matrix.** `prepare`
   now refuses tags on commits that are not ancestors of `main` and versions
   with no `CHANGELOG.md` section (the release notes generate from it), instead
@@ -50,6 +58,10 @@ Release notes on GitHub are generated from the section for each version.
   assembles captioned mp4s with ffmpeg, and `tests/e2e/video/` records the
   console footage. A UI change means re-running a script, not re-shooting
   a video. Curriculum index: `academy/lessons/INDEX.md`.
+- **Knowledge upload UI offers the Docling-extended formats.** The console's
+  upload picker now lists `.pptx`/`.xlsx`/`.csv`/`.tiff`/`.tif`/`.bmp`
+  alongside the existing types (PPT/XLS badges); a deployment without the
+  `docling` profile still rejects them server-side with a clear error.
 
 ## [0.1.12] - 2026-10-26
 

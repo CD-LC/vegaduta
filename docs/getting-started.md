@@ -83,6 +83,21 @@ build or the image download.
    ./scripts/vegaduta make-admin you@example.com
    ```
 
+### Locked out? Recover the account
+
+If you forget the local-account password, the machine that runs the install
+can mint a one-time reset link - file access to the install counts as proof
+of ownership, the same trust model as the first-run setup link:
+
+```sh
+./scripts/vegaduta reset-password you@example.com
+```
+
+Core writes a `password-reset.txt` inside the install's storage; the command
+reads it and prints a link of the form `…/login?setup=<token>`. Open it,
+choose a new password, done. The link is single-use; ask for another the same
+way if it expires or a wrong address was used.
+
 ## 4. Add a model provider
 
 In the console, open the providers page and add a key for a provider you use
