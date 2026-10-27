@@ -4,9 +4,9 @@ import com.agenticai.core.agents.skills.learning.SkillDraftScrubber;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Jazzer entry point for {@link SkillDraftScrubber#basic()}'s {@code scrub} - the regex chain
- * that strips credential shapes out of drafted skills before they reach a provider. Same
- * contract as the chat redaction target: rejections are fine, hangs are findings.
+ * Jazzer entry point for {@link SkillDraftScrubber#basic()}'s {@code scrub} - the regex chain that
+ * strips credential shapes out of drafted skills before they reach a provider. Same contract as the
+ * chat redaction target: rejections are fine, hangs are findings.
  */
 public final class ScrubberFuzzTarget {
 

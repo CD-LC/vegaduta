@@ -5,10 +5,9 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Jazzer entry point for {@link
- * com.agenticai.core.chat.RedactingToolExecutionExceptionProcessor#redact}. Feeds arbitrary
- * bytes (as UTF-8) through the same regex-redaction chain a tool exception takes, so a
- * pathological input that hangs a pattern surfaces as a Jazzer timeout and a stored crash
- * input.
+ * com.agenticai.core.chat.RedactingToolExecutionExceptionProcessor#redact}. Feeds arbitrary bytes
+ * (as UTF-8) through the same regex-redaction chain a tool exception takes, so a pathological input
+ * that hangs a pattern surfaces as a Jazzer timeout and a stored crash input.
  */
 public final class RedactionFuzzTarget {
 
