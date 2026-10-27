@@ -3,6 +3,7 @@ package com.agenticai.core.tenancy;
 import com.agenticai.core.security.HotpathCaches;
 import com.agenticai.core.security.TenantStatusGuard;
 import com.agenticai.core.security.TtlCache;
+import com.agenticai.core.security.logging.LogSafe;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -106,7 +107,7 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
         if (SchemaNameSanitizer.DEFAULT_SCHEMA.equals(tenantId)) {
             log.warn(
                     "Rejected tenant id '{}' - the legacy schema is not a usable tenant.",
-                    tenantId);
+                    LogSafe.clean(tenantId));
             return false;
         }
         return tenantRepository
@@ -137,7 +138,7 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
         } catch (SQLException e) {
             log.warn(
                     "Could not verify schema existence for untracked tenant '{}' - refusing the request (fail closed)",
-                    schemaName,
+                    LogSafe.clean(schemaName),
                     e);
             return false;
         }
