@@ -34,7 +34,8 @@ export default {
       do: [["goto", "/agents?agentId=67eb3d14-ded1-4055-af0d-ea754945ca73"], ["wait", 4000],
            ["waitFor", "textarea[placeholder*='Send a test message']", 20000],
            ["fill", "textarea[placeholder*='Send a test message']", "What is the house embargo time? One short sentence."],
-           ["keys", "Enter"], ["waitFor", "text=/6:00|6 AM|six/i", 45000], ["wait", 2500]],
+           ["keys", "Enter"], ["waitFor", "text=Run finished", 60000], ["wait", 2000],
+           ["tryHighlight", "text=/6:00|6 AM|embargo/i", 2000]],
     },
     {
       say: "Back in the workbench, Save draft keeps the agent private while we iterate — nothing can call it until it's published. Next episode we give it a library to read.",

@@ -40,6 +40,19 @@ async function signIn(context) {
     data: { identifier: EMAIL, password: PASSWORD },
   });
   if (!res.ok()) throw new Error(`local-auth login failed: ${res.status()} — owner password set?`);
+  // The tour keys are user-scoped (vd_tour_status:<jwt sub>) — decode sub so the
+  // init script can pre-set the key that actually gates the welcome blocker.
+  try {
+    const { accessToken } = await res.json();
+    const sub = JSON.parse(Buffer.from(accessToken.split(".")[1], "base64url").toString()).sub;
+    await context.addInitScript((s) => {
+      try {
+        for (const k of ["vd_tour_status", `vd_tour_status:${s}`]) localStorage.setItem(k, "done");
+        for (const k of ["vd_tour_seen_security", `vd_tour_seen_security:${s}`, "vd_tour_ended", `vd_tour_ended:${s}`, "vd_agents_guide_seen_v1"])
+          localStorage.setItem(k, "1");
+      } catch {}
+    }, sub);
+  } catch {}
 }
 
 async function highlight(page, selector, ms = 1400) {
@@ -82,6 +95,7 @@ async function act(page, [verb, ...args]) {
     case "waitFor":   await page.locator(args[0]).first().waitFor({ state: "visible", timeout: args[1] ?? 15_000 }); break;
     case "scroll":    await page.mouse.wheel(0, args[0]); break;
     case "keys":      await page.keyboard.press(args[0]); break;
+    case "tryHighlight": try { await highlight(page, args[0], args[1]); } catch {} break;
     case "wait":      await page.waitForTimeout(args[0]); break;
     default: throw new Error(`unknown action verb: ${verb}`);
   }
@@ -110,9 +124,15 @@ for (const [i, scene] of script.scenes.entries()) {
   // (AgentsGuide, language prompt, reopen hint) get the same treatment.
   await context.addInitScript(() => {
     try {
+      // The app reads vd_tour_status SCOPED per user (vd_tour_status:<sub>) and
+      // the sub isn't known until login — intercept the read so every scoped
+      // variant answers "done" instead of guessing key names.
+      const getItem = Storage.prototype.getItem;
+      Storage.prototype.getItem = function (k) {
+        if (k && k.startsWith("vd_tour_status")) return "done";
+        return getItem.call(this, k);
+      };
       localStorage.setItem("vd_tour_status", "done");
-      // guess the scoped keys too — the sub is not known until login, but
-      // pre-seeding the common ids is cheap and the observer covers the rest
       for (const k of ["vd_tour_seen_security", "vd_agents_guide_seen_v1",
                        "vegaduta.studioTour.v1"])
         localStorage.setItem(k, "1");
@@ -120,9 +140,14 @@ for (const [i, scene] of script.scenes.entries()) {
     } catch {}
     // CSS hide (not remove): deleting nodes mid-mount can crash React's
     // reconciliation, and a hidden element still satisfies its own lifecycle.
+    // Covers the blocker scrims, step cards, the welcome hero dialog, the
+    // language prompt, the reopen hint, and the tour's z-[1150]/z-[1152] layers
+    // — every surface the tour paints.
     const css =
       "[data-tour-blocker], .hud-tour-card, .lang-choice-card, " +
-      "[data-reopen-hint] { visibility: hidden !important; opacity: 0 !important; " +
+      "[data-reopen-hint], [role=\"dialog\"][aria-labelledby$=\"-welcome\"], " +
+      "[class*=\"z-[1150]\"], [class*=\"z-[1152]\"] " +
+      "{ visibility: hidden !important; opacity: 0 !important; " +
       "pointer-events: none !important; }";
     const inject = () => {
       if (document.getElementById("academy-tourkill")) return;

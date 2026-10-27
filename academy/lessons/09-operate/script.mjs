@@ -10,9 +10,9 @@ export default {
       do: [["goto", "/insights"], ["tryClick", "text=Skip for now"], ["wait", 2500]],
     },
     {
-      say: "The range chips reframe the same counters — seven, thirty or ninety days — and every failure is listed, not just counted: thirty-two failed calls this week, each one clickable down to what broke.",
+      say: "The range chips reframe the same counters — seven, thirty or ninety days — and every failure is listed, not just counted. Failed calls are each one clickable down to what broke.",
       do: [["goto", "/insights"], ["highlight", "text=30 days", 1500],
-           ["highlight", "text=32 failed", 1600]],
+           ["tryHighlight", "text=/failed/i", 1600]],
     },
     {
       say: "Usage is the meter — every model call your agents, workflows and quick tasks made, counted by tokens. This install has no limit, so the count is a reference, not a ceiling — but it is how you would size a budget.",
