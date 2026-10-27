@@ -564,3 +564,11 @@ Dockerfile via piper_voices_download.py --binary (the piper-tts PyPI package's
 rejects). Dockerfile also bakes en_US-lessac-medium (+json) sha256-verified.
 TTS selection moved to app/tts_select.py (main.py file-size ratchet). Verified:
 3 tts_piper pytest green, ruff clean on changed files, imports resolve.
+### CI: fuzz workflow -> ClusterFuzzLite (Devin, 2026-10-27)
+
+Scorecard's Fuzzing check only detects CFL/OSS-Fuzz integration, not a bare
+jazzer call, so .github/workflows/fuzz.yml now drives
+google/clusterfuzzlite/actions (sha-pinned v1). New .clusterfuzzlite/
+(project.yaml language:jvm, Dockerfile with pinned Temurin 21 + maven,
+build.sh) packages the two sanitizer targets into the canonical $OUT layout
+with jazzer launchers. Triggers/fuzz windows unchanged.
