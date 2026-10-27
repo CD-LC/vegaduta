@@ -29,7 +29,19 @@ cat "$OUT"/cp-*.txt | tr ':' '\n' | sort -u | while read -r j; do
     [ -f "$j" ] && cp "$j" "$OUT/deps/"
 done
 
-# 5. One executable launcher per target - the canonical CFL jvm wrapper.
+# 5. Bundle a JRE 21. The run_fuzzers container (base-runner-jvm) only ships
+#    JDK 17, which cannot load our release-21 classes
+#    (UnsupportedClassVersionError 65 vs 61). jazzer_driver launches
+#    "$JAVA_HOME/bin/java", so a jlink runtime in $OUT + JAVA_HOME override
+#    in each launcher makes the fuzzers run on the same JDK they were
+#    compiled with. jlink keeps it to the modules actually needed (~90MB
+#    compressed instead of a full 300MB JDK).
+"$JAVA_HOME/bin/jlink" \
+    --add-modules java.se,jdk.unsupported,jdk.jfr,jdk.zipfs \
+    --compress=2 --no-man-pages --no-header-files \
+    --output "$OUT/jdk21"
+
+# 6. One executable launcher per target - the canonical CFL jvm wrapper.
 make_launcher() {
     local name="$1" fqcn="$2"
     cat > "$OUT/$name" <<EOF
@@ -41,6 +53,8 @@ if [[ "\$@" =~ (^| )-runs=[0-9]+($| ) ]]; then
 else
   mem_settings='-Xmx2048m:-Xss1024k'
 fi
+export JAVA_HOME="\$this_dir/jdk21"
+export PATH="\$JAVA_HOME/bin:\$PATH"
 LD_LIBRARY_PATH="$JVM_LD_LIBRARY_PATH":\$this_dir \\
 \$this_dir/jazzer_driver --agent_path=\$this_dir/jazzer_agent_deploy.jar \\
 --cp=\$this_dir/chat.jar:\$this_dir/agents-jobs.jar:\$this_dir/deps/* \\
