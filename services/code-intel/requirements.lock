@@ -382,9 +382,9 @@ e2b-dockerfile-utils==0.1.1 \
     --hash=sha256:c1d4179bae6f3131fe0bbb1e6787ffb07c6c6dca8bdb3399abb3de9056b2a08f \
     --hash=sha256:c648ecf56b3ffdb6d91469580850f4691f019cb2c925405e776ad36b761204f1
     # via e2b
-fastapi==0.150.0 \
-    --hash=sha256:97583806e6de1b6fc299866bdb88730fa311ff640829af876c9e847f4c3a3b29 \
-    --hash=sha256:e566bc3f1347cfacf61f2f9ea1d7ab4576fbcff02eb9747c2807b8ced16d9e9a
+fastapi==0.151.0 \
+    --hash=sha256:498923b00b193654c839ec613dd84d1b0f98f8c20a5371e4f41100c522f114b9 \
+    --hash=sha256:f5bd74323048882837f422b6592b11f84dda1754defc4545a4c570cfa19a7a41
     # via -r code-intel/requirements.txt
 fastembed==0.9.0 \
     --hash=sha256:273d408edec8c0f161711d8f6e44e4a5b559d18e8edf6bf805415d55dc772846 \
