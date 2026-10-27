@@ -15,7 +15,18 @@ FROM ${NODE_IMAGE} AS node
 # bundled dependencies are fixed. Keep NPM_VERSION in step with the other Node runner images
 # (services/mcp-stdio-runner/dockerfile-npm.test.js checks that).
 ARG NPM_VERSION=11.21.1
-RUN npm install -g "npm@${NPM_VERSION}" \
+# sha512 of registry.npmjs.org/npm/-/npm-${NPM_VERSION}.tgz (the published
+# dist.integrity). npm has no hash-verified global install, so the tarball is
+# fetched, verified, and laid down by hand - same layout `npm i -g npm` makes.
+ARG NPM_TGZ_SHA512=613ccbe90044257c87713bb426251ced128ca7e9b3949b65eeb18b98445a5d441e14720c73d6ad76be86f4cf42f2f0d66efe347a9a13400ccd2f6fcfb5954385
+RUN npm pack "npm@${NPM_VERSION}" --pack-destination /tmp \
+    && echo "${NPM_TGZ_SHA512}  /tmp/npm-${NPM_VERSION}.tgz" | sha512sum -c - \
+    && rm -rf /usr/local/lib/node_modules/npm \
+    && tar -xzf "/tmp/npm-${NPM_VERSION}.tgz" -C /usr/local/lib/node_modules \
+    && mv /usr/local/lib/node_modules/package /usr/local/lib/node_modules/npm \
+    && ln -sf ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+    && rm "/tmp/npm-${NPM_VERSION}.tgz" \
     && npm cache clean --force
 
 FROM ${JDK_IMAGE}
@@ -48,4 +59,6 @@ ENV WORKSPACE_ROOT=/workspace \
 
 USER runner
 # No published port: core reaches it on the compose network only.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD node -e "fetch('http://127.0.0.1:'+(process.env.WORKSPACE_RUNNER_PORT||8090)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" || exit 1
 CMD ["node", "/app/server.js"]

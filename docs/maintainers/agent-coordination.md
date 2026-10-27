@@ -470,3 +470,28 @@ late. Fixed in release.yml (main-ancestry + CHANGELOG-section gate in prepare;
 150-attempt wait + early no-run detection + actions:read in verify) plus
 scripts/ci/tag-ready.sh, a pre-flight humans run before tagging; releasing.md
 step 1 now points at it.
+
+### ACTIVE CLAIM: scorecard gaps (Devin, 2026-10-27)
+
+OpenSSF >8 push, split to avoid colliding with the claim below: taking
+log4j-api GHSA-qv9r-c865-cp47 (transitive via log4j-to-slf4j, pinned to
+2.26.1 - PR #230), the dependabot queue triage, and FuzzingID research.
+Pushed `40c261f22` onto this branch for #228 - gate fixes only, not the
+security content: ruff-format services/docling, dependabot.yml coverage
+for the new service, and the psycopg.sql facade the test fake needed
+after the baas.py sql-composition change. Verified locally before push.
+MaintainedID score-0 is unfixable - the Oct-19 history rewrite makes the
+project read <90 days old; it self-heals with age.
+
+### ACTIVE CLAIM: security hygiene + release/CI hardening (Devin, 2026-10-26)
+
+Working the OpenSSF Scorecard to >8 and clearing the open code-scanning
+backlog: branch protection on main (required reviews + required checks),
+Pinned-Dependencies fixes across Dockerfiles/workflows/scripts, Trivy
+Dockerfile findings, CodeQL critical/high triage (partial-ssrf docs shim,
+SQL/path injection, user-controlled-bypass, CSRF, ReDoS, weak crypto,
+missing origin checks), the bulk agents-turn log findings, the undici
+Dependabot alert, and a new-alert gate in CI. Touching: .github/workflows/,
+deploy/omnibus/Dockerfile, services/*/Dockerfile, scripts/ci/,
+core/agents-turn logging sites, services/code-intel, services/app-builder,
+core/graphmemory, core/security, core/agents-jobs, docs/marketing.

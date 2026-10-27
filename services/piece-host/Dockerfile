@@ -25,7 +25,7 @@
 # LTS 2026-10-28) - https://raw.githubusercontent.com/nodejs/Release/main/schedule.json.
 # Pin a digest in your build pipeline if you need byte-for-byte reproducibility.
 ARG NODE_IMAGE=node:24.21.0-trixie-slim@sha256:173f125896c3b47ddf056734c7ea789d04595a6a08769a8f78e0df642781fb66
-ARG RUNNER_IMAGE=mcp-stdio-runner:latest
+ARG RUNNER_IMAGE=vegaduta-mcp-stdio-runner-node24:local
 
 # ---------------------------------------------------------------------------
 # assets: host code + allow-listed pieces, root-owned and never writable later

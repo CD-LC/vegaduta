@@ -2,7 +2,7 @@
   "realm": "${env.KEYCLOAK_REALM:agentic-ai}",
   "enabled": true,
   "sslRequired": "external",
-  "registrationAllowed": true,
+  "registrationAllowed": "${env.KC_REGISTRATION_ALLOWED:false}",
   "verifyEmail": "${env.KC_VERIFY_EMAIL:false}",
   "loginWithEmailAllowed": true,
   "rememberMe": true,

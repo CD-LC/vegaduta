@@ -60,6 +60,9 @@ WORKDIR /home/user
 
 # runner.py is the sandbox's start command - passed to `e2b template create`
 # as --cmd / --ready-cmd (README.md; e2b.toml records the same two values).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD ["python3", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health',timeout=3).status==200 else 1)"]
+
 # No CMD/ENTRYPOINT is declared on purpose: E2B's Dockerfile converter would
 # turn one into a start command gated on a fixed 20s wait instead of the
 # /health ready check. runner.py listens on 8080, the port
