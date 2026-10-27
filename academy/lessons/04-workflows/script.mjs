@@ -3,7 +3,7 @@ export default {
   title: "VegaDūta Academy — Ep 4 · Workflows",
   subtitle: "The production line",
   next: "Ep 5 — Approvals & channels: the editor's gate",
-  voice: "en-US-ChristopherNeural",
+  voice: "en-US-AndrewNeural",
   scenes: [
     {
       say: "Episode four: the production line. So far we have hired staff — an Editor-in-Chief agent, a style guide it can read, and tools it can call. A workflow is what turns that staff into a newspaper that comes out on time, every day, without anyone pushing a button.",

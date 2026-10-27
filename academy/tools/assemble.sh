@@ -46,8 +46,11 @@ python3 - "$DIST" "$DIST/$SLUG.srt" <<'EOF'
 import glob, re, subprocess, sys, os
 TITLE_DUR = 3.5
 out, idx, off = [], 1, TITLE_DUR
-for srt in sorted(glob.glob(os.path.join(sys.argv[1], "scene-*.vtt"))):
-    audio = srt.replace(".vtt", ".mp3")
+for srt in sorted(glob.glob(os.path.join(sys.argv[1], "scene-*.vtt"))
+                  + glob.glob(os.path.join(sys.argv[1], "scene-*.srt"))):
+    # edge-tts writes scene-NN.vtt (SRT-shaped); the ElevenLabs narrator
+    # writes scene-NN.srt directly - same cue format either way
+    audio = re.sub(r"\.(vtt|srt)$", ".mp3", srt)
     d = subprocess.run(["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0",audio],
                        capture_output=True, text=True).stdout.strip()
     scene_dur = float(d) + 0.7

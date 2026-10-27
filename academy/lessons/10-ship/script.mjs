@@ -3,7 +3,7 @@ export default {
   title: "VegaDūta Academy — Ep 10 · Ship it",
   subtitle: "Schedules, quick tasks and long-running work",
   next: "Series B — the deep-dive library",
-  voice: "en-US-ChristopherNeural",
+  voice: "en-US-AndrewNeural",
   scenes: [
     {
       say: "Final episode: shipping. Everything we built so far answered when spoken to — now the newsroom works on its own. Scheduled tasks are prompts an agent runs by itself: this install already has a Morning briefing wired for every weekday at eight.",

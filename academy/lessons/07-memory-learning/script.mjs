@@ -3,7 +3,7 @@ export default {
   title: "VegaDūta Academy — Ep 7 · Memory & learning",
   subtitle: "What the newsroom remembers, and what it learns",
   next: "Ep 8 — Quality: grading the paper",
-  voice: "en-US-ChristopherNeural",
+  voice: "en-US-AndrewNeural",
   scenes: [
     {
       say: "Episode seven: memory and learning — the difference between an agent that starts every conversation cold and one that knows the beat. Everything the platform remembers lives here, and everything on this page is yours to read, edit and delete.",

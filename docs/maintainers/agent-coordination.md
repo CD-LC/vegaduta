@@ -129,6 +129,16 @@ Newest first. One line per push, merge, tag, release or deploy: time (UTC), agen
   agent, sweep `academy/lessons/0[6-9]-*/` and `10-*/` like the earlier ones;
   do not re-number.
 
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): EXTENDED CLAIM —
+  Series-B deep-dive lessons for all 62 personal-edition routes, plus
+  narration upgrade to ElevenLabs (`academy/tools/narrate-elevenlabs.mjs`,
+  edge-tts stays the no-key fallback). Enterprise-only routes
+  (`/studio`, `/eval`, `/roi`, `/admin/mcp-servers`, `/admin/sso`,
+  `/admin/branding`, `/admin/payments`, `/admin/api-keys`,
+  `/admin/agent-trust`, `/admin/leads`, `/admin/commerce`,
+  `/shared-with-me`, `/directory`) are deferred until a lite/full stack
+  is installed for capture.
+
 - 2026-10-27, OSS-integrations agent (local Devin session): pushed
   `feat/oss-integrations-docling-composio-n8n` and opened a PR for the three Tier-1
   OSS-integration picks - Docling-first knowledge conversion (`services/docling` +

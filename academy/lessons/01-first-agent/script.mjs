@@ -3,7 +3,7 @@ export default {
   title: "VegaDūta Academy — Ep 1 · Your first agent",
   subtitle: "Hiring the Editor-in-Chief",
   next: "Ep 2 — Knowledge: feeding the newsroom",
-  voice: "en-US-ChristopherNeural",
+  voice: "en-US-AndrewNeural",
   scenes: [
     {
       say: "Episode one: we hire our first journalist. An agent is instructions, a model, a budget and a set of tools — the Agents screen is where all four come together.",

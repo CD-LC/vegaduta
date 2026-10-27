@@ -1,7 +1,7 @@
 export default {
   slug: "ep00-orientation",
   title: "VegaDūta Academy — Ep 0 · The Map",
-  voice: "en-US-ChristopherNeural",
+  voice: "en-US-AndrewNeural",
   scenes: [
     {
       say: "Welcome to VegaDūta Academy. Over this series we will build a working AI newsroom — agents that research, draft, fact-check and publish a daily newspaper. Today, ten minutes on the map, so the console stops feeling like a cockpit and starts feeling like an editor's desk.",

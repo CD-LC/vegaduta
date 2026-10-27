@@ -3,7 +3,7 @@ export default {
   title: "VegaDūta Academy — Ep 5 · Channels, contacts & the inbox",
   subtitle: "Where the newsroom meets its readers",
   next: "Ep 6 — Guardrails: the editor's red pen",
-  voice: "en-US-ChristopherNeural",
+  voice: "en-US-AndrewNeural",
   scenes: [
     {
       say: "Episode five: the newspaper goes live where its readers already are. Every card here is a real door into the newsroom — WhatsApp, Telegram, email, voice. We are going to connect two for real: WhatsApp by QR, and the reader-tips mailbox over IMAP.",

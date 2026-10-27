@@ -3,7 +3,7 @@ export default {
   title: "VegaDūta Academy — Ep 9 · Operate",
   subtitle: "Cost, health and the audit trail",
   next: "Ep 10 — Ship it: schedules & long-running work",
-  voice: "en-US-ChristopherNeural",
+  voice: "en-US-AndrewNeural",
   scenes: [
     {
       say: "Episode nine: running the press room. Insights answers the two questions every owner asks — what did the agents do, and what did it cost. These are this install's real numbers: eighteen hundred AI calls this week, a ninety-eight percent success rate.",

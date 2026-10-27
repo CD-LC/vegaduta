@@ -3,7 +3,7 @@ export default {
   title: "VegaDūta Academy — Ep 8 · Agent quality",
   subtitle: "Grading the paper before it prints",
   next: "Ep 9 — Operate: cost, health, audit",
-  voice: "en-US-ChristopherNeural",
+  voice: "en-US-AndrewNeural",
   scenes: [
     {
       say: "Episode eight: grading the paper. Agent Quality scores an agent's real conversations turn by turn — helpfulness, accuracy, tone, length, relevance and safety — so drift shows up in a number before it shows up in print.",
