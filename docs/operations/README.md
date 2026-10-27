@@ -14,6 +14,7 @@ deployment: [Compose](../../deploy/README.md) and [Helm](../../deploy/helm/READM
 | Secrets model | [handbook](../platform-documentation/security/secrets-management.html) |
 | CLI: doctor, logs, secrets, status, backup, restore, upgrade | `scripts/vegaduta doctor`, `logs`, `secrets`, `status`, `backup`, `restore`, `upgrade` ([deploy/README.md](../../deploy/README.md)) |
 | First platform admin | `scripts/vegaduta make-admin USERNAME_OR_EMAIL` |
+| Locked out of a local account | `scripts/vegaduta reset-password EMAIL` - core writes a one-use link to `password-reset.txt` in the install's storage (file access = proof of ownership); see [getting-started.md](../getting-started.md#locked-out-recover-the-account) |
 | Local model catalog (Ollama) | `scripts/vegaduta models list`, `models pull TAG`, `models rm TAG`; catalog in `deploy/models/catalog.txt`. `scripts/vegaduta.ps1` has only `models pull TAG` (what the Setup app runs; `list`, `rm` and `seed-demo` are bash-only: use WSL2) |
 | Fictional demo data for a pilot | `scripts/vegaduta seed-demo [--tenant NAME] [--remove] [--yes]`; see [pilots](../pilots/README.md) |
 | Using the console (screens, permissions) | [Console guide](../console/README.md) |
