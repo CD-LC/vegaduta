@@ -173,6 +173,41 @@ are down - or never loaded, as on a personal install where
 `voice-realtime-share` is off (see [personal mode](personal-mode.md)). Any
 local miss falls back to the server voice turn.
 
+## Option 4: your own local server (vLLM, llama.cpp, LM Studio, Jan, LocalAI)
+
+Everything above manages an Ollama for you. If you already run another
+OpenAI-compatible server - a vLLM or llama.cpp server on a GPU box, LM Studio
+or Jan on a laptop, LocalAI - core talks to it the same way it talks to
+Ollama: over its OpenAI-compatible endpoint, no API key needed.
+
+1. Start the server so it listens where core can reach it. Inside Docker,
+   core sees `host.docker.internal` for a server on the same machine and a
+   LAN name or address for one on another machine - not `localhost` (that is
+   the core container itself).
+2. Allow it through the outbound guard. Add the `host:port` to
+   `APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS` in `.env` - for example
+   `host.docker.internal:1234` for LM Studio on the same machine, or
+   `192.168.1.20:8000` for a vLLM box on the LAN. Any tenant-supplied private
+   address is refused until it is on this list; see
+   [configuration](configuration.md).
+3. In the console open **Platform Admin → LLM providers** (or agent settings,
+   the provider selector) and add a row: provider **Local OpenAI-compatible
+   server** (`LOCAL_OPENAI`), the base URL without `/v1` (the platform adds
+   it), and the model id exactly as the server reports it (find it with
+   `curl http://<host>:<port>/v1/models`).
+4. Save. Core lists the server's models, checks the URL is one it may reach,
+   and runs the short tool-calling probe so the row gets a grade (see
+   [Tool calls from small models](#tool-calls-from-small-models) for what the
+   grade changes). A row graded `TEXT` or `NONE` on vLLM gets the constrained
+   router's `tool_choice=required` shape; on llama.cpp a JSON-schema
+   constrained reply.
+
+Rate limits, the per-request context window and time-outs come from the same
+knobs as Ollama where the server honours them; fields a server does not know
+are ignored, so an unsupported `num_ctx` or `reasoning_effort` cannot fail a
+call. If the server needs a key even a throwaway one, set it on the row - most
+local servers accept anything.
+
 ## Choosing a model
 
 These are starting points to try on your own hardware, not benchmark results.
@@ -431,6 +466,39 @@ Installing puts the weights on the server. To make the pool use a new model, use
 the console (the wizard above, or **Use** on `/troubleshoot`), or add or edit its
 row in Platform Admin, LLM providers: the startup registration never changes a
 row that already exists.
+
+## The wire: what core sends to a local model
+
+Both provider rows - `OLLAMA` and `LOCAL_OPENAI` - speak OpenAI-compatible
+HTTP to the server. Core never opens a raw socket to a model; every call
+goes through the guarded client below.
+
+| Call | Where | What it does |
+|---|---|---|
+| `GET {root}/v1/models` | save-time validation + the console's model dropdown | lists the server's models; the response is size-capped and never echoed back |
+| `GET {root}/api/tags` | the `OLLAMA` bootstrap tries this first | Ollama-native listing; richer fields than `/v1/models` (parameter size, quantisation) |
+| `POST {root}/v1/chat/completions` | every chat turn | streaming server-sent events; `stream: true` so the reply types out live |
+
+Inside a chat-completion request, these fields carry the per-server tuning:
+
+| Field | Sent to | Purpose |
+|---|---|---|
+| `options.num_ctx` | Ollama | context window - `app.llm.ollama.num-ctx` (default 32768, lowered to fit Docker memory on small installs) |
+| `options.num_batch` | Ollama | tokens evaluated per prompt step - `app.llm.ollama.num-batch` |
+| `options.keep_alive` | Ollama | how long the model stays loaded - the warm-up path (`POST /api/local-models/warm` on core) and `app.local-models.keep-alive`; see [Keep the model warm](#option-2-use-the-ollama-already-on-your-machine-best-on-a-mac) |
+| `reasoning_effort` | Ollama | `none`/`low`/`medium`/`high` - `app.llm.ollama.reasoning-effort`; `none` skips the thinking pass |
+| `response_format` (json_schema) | Ollama, llama.cpp | constrained decoding for the tool router: the reply must match `{action, tool, arguments, answer}` |
+| `tools` + `tool_choice` | all OpenAI-compatible | structured tool calls; on vLLM the constrained router uses `tool_choice: required` with a `final_answer` tool instead of a schema |
+
+**Safety on the wire.** The base URL is tenant-supplied, so it is checked by
+the SSRF guard before every call (`SafeHttpClients`): private and loopback
+hosts are refused unless listed in
+`app.security.outbound.allowed-private-hosts`, the connection is pinned to
+the checked address with no redirects and no proxy, and a `3xx` cannot carry
+the request (or a stored credential) elsewhere. No `Authorization` header is
+sent to a local server unless the row stores one. See
+`LocalOpenAiServerClient` and `OllamaAgentChatClientFactory` in
+`core/providers` / `core/chat`.
 
 ## Troubleshooting
 
