@@ -150,3 +150,4 @@ sdk/python/dist/
 sdk/typescript/dist/
 web/node_modules/
 sdk/typescript/node_modules/
+.venv-tts/
