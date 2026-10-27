@@ -69,7 +69,7 @@ public interface SkillDraftScrubber {
                         "(?i)\\b(password|passwd|pwd|secret|api[_-]?key|access[_-]?key|token|credential)\\b"
                                 + "(\\s*[:=]\\s*)(\"[^\"]*\"|'[^']*'|[^\\s,;'\"]+)");
         private static final Pattern URL_CREDENTIALS =
-                Pattern.compile("(?i)\\b([a-z][a-z0-9+.-]*://)[^\\s/:@]++:[^\\s/@]++@");
+                Pattern.compile("(?i)\\b([a-z][a-z0-9+.-]*+://)[^\\s/:@]++:[^\\s/@]++@");
         private static final Pattern CARD_LIKE = Pattern.compile("\\b\\d(?:[ -]?\\d){12,18}\\b");
 
         private Basic() {}
