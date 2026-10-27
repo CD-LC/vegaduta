@@ -23,7 +23,7 @@ export default {
       do: [["goto", "/agents?agentId=67eb3d14-ded1-4055-af0d-ea754945ca73"], ["wait", 4000],
            ["waitFor", "textarea[placeholder*='Send a test message']", 20000],
            ["fill", "textarea[placeholder*='Send a test message']", "What must the Fact-Checker verify before any story publishes? Answer in two short sentences."],
-           ["keys", "Enter"], ["waitFor", "text=Run finished", 60000], ["wait", 2000], ["tryHighlight", "text=/embargo|verif|6:00|6 AM/i", 2000]],
+           ["keys", "Enter"], ["waitFor", "text=Run finished", 150000], ["wait", 2000], ["tryHighlight", "text=/embargo|verif|6:00|6 AM/i", 2000]],
     },
     {
       say: "Skills are the other kind of memory — packaged expertise an agent loads only when a task needs it. A story engine, a decision helper: each card opens the Playground with a ready-made prompt so you can try it on a real agent.",
