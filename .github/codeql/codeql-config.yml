@@ -19,7 +19,11 @@ paths-ignore:
   - "**/src/test/**"
   - "**/*.test.ts"
   - "**/*.test.tsx"
+  - "**/*.test.js"
+  - "**/test_*.py"
+  - "**/tests/test_*.py"
   - "**/*.spec.ts"
+  - "**/eslint.config.mjs"
   - docs/platform-documentation/assets/**
   - docs/marketing/**
   - web/scripts/**
