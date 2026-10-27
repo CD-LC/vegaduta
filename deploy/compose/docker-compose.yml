@@ -354,7 +354,7 @@ services:
     # MUST stay POOL_MODE=session: schema-per-tenant sets search_path per
     # session; transaction pooling routes queries to the wrong tenant schema.
     # Only the app role is in its userlist (no superuser through the pooler).
-    image: edoburu/pgbouncer:v1.26.0-p0
+    image: edoburu/pgbouncer:v1.26.1-p0
     <<: [*restart, *logging, *nnp]
     depends_on:
       postgres:
@@ -850,7 +850,7 @@ services:
     # Kafka-API event backbone for the `workflow` Spring profile. Redpanda is
     # BSL-1.1 (see NOTICE); any Kafka-compatible broker works via
     # WORKFLOW_KAFKA_BOOTSTRAP_SERVERS in core.env.
-    image: redpandadata/redpanda:v26.2.4
+    image: redpandadata/redpanda:v26.2.5
     profiles: ["events", "temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     command:
@@ -1121,7 +1121,7 @@ services:
     networks: [observability]
 
   langfuse-clickhouse:
-    image: clickhouse/clickhouse-server:26.9.19.9
+    image: clickhouse/clickhouse-server:26.9.22.3
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     user: "101:101"
@@ -1204,7 +1204,7 @@ services:
     networks: [observability]
 
   langfuse-worker:
-    image: langfuse/langfuse-worker:4.61.0
+    image: langfuse/langfuse-worker:4.64.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: &langfuse-depends-on
@@ -1260,7 +1260,7 @@ services:
     networks: [observability]
 
   langfuse-web:
-    image: langfuse/langfuse:4.61.0
+    image: langfuse/langfuse:4.64.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: *langfuse-depends-on
@@ -1454,7 +1454,7 @@ services:
     # Still plaintext TCP: code-intel's docker client does not load TLS client
     # certs yet. Once it does, switch to DOCKER_TLS_CERTDIR=/certs and
     # tcp://code-intel-docker:2376 with a shared read-only client-cert volume.
-    image: docker:29.9.0-dind
+    image: docker:29.9.1-dind
     profiles: ["code-intel", "builder"]
     <<: [*restart, *logging]
     privileged: true
