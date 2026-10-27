@@ -8,6 +8,19 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Release workflow gates the tag before spending a build matrix.** `prepare`
+  now refuses tags on commits that are not ancestors of `main` and versions
+  with no `CHANGELOG.md` section (the release notes generate from it), instead
+  of discovering both late. `verify` waits up to 150 minutes for the tagged
+  commit's `CI OK`/`CodeQL OK` - main-push CI serializes on a concurrency
+  group, so a release tagged right after a merge can sit behind a full earlier
+  run - and fails fast after 10 attempts when the commit has no workflow run
+  at all instead of polling an hour for a check that will never exist. New
+  pre-flight for humans: `scripts/ci/tag-ready.sh <sha>` reports whether a
+  commit is release-ready before tagging (`docs/maintainers/releasing.md`).
+
 ## [0.1.12] - 2026-10-26
 
 ### Fixed
