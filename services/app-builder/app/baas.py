@@ -183,18 +183,24 @@ def provision_backend(ctx: TenantContext, project_id: str, settings: Settings = 
                 # `ALTER ... OWNER TO role` need it. Grant it to ourselves.
                 # (Pre-16 has no WITH SET syntax - and no such restriction.)
                 try:
-                    cur.execute(sql.SQL('GRANT {} TO CURRENT_USER WITH SET TRUE').format(sql.Identifier(role)))
+                    cur.execute(
+                        sql.SQL("GRANT {} TO CURRENT_USER WITH SET TRUE").format(
+                            sql.Identifier(role)
+                        )
+                    )
                 except psycopg.errors.SyntaxError:
                     pass
                 cur.execute(
-                    sql.SQL('CREATE SCHEMA IF NOT EXISTS {} AUTHORIZATION {}')
-                    .format(sql.Identifier(schema), sql.Identifier(role))
+                    sql.SQL("CREATE SCHEMA IF NOT EXISTS {} AUTHORIZATION {}").format(
+                        sql.Identifier(schema), sql.Identifier(role)
+                    )
                 )
                 # Covers a legacy admin-owned schema: hand it and its tables to
                 # the role so RLS/DDL work and nothing stays admin-owned.
                 cur.execute(
-                    sql.SQL('ALTER SCHEMA {} OWNER TO {}')
-                    .format(sql.Identifier(schema), sql.Identifier(role))
+                    sql.SQL("ALTER SCHEMA {} OWNER TO {}").format(
+                        sql.Identifier(schema), sql.Identifier(role)
+                    )
                 )
                 cur.execute(
                     sql.SQL(
@@ -204,10 +210,13 @@ def provision_backend(ctx: TenantContext, project_id: str, settings: Settings = 
                         "END LOOP; END $$"
                     ).format(s=sql.Literal(schema), r=sql.Literal(role))
                 )
-                cur.execute(sql.SQL('REVOKE ALL ON SCHEMA public FROM {}').format(sql.Identifier(role)))
                 cur.execute(
-                    sql.SQL('ALTER ROLE {} SET search_path = {}')
-                    .format(sql.Identifier(role), sql.Identifier(schema))
+                    sql.SQL("REVOKE ALL ON SCHEMA public FROM {}").format(sql.Identifier(role))
+                )
+                cur.execute(
+                    sql.SQL("ALTER ROLE {} SET search_path = {}").format(
+                        sql.Identifier(role), sql.Identifier(schema)
+                    )
                 )
     except Exception as e:
         log.exception("backend provisioning failed project_id=%s", clean(project_id))
