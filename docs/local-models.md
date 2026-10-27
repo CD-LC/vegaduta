@@ -208,6 +208,25 @@ are ignored, so an unsupported `num_ctx` or `reasoning_effort` cannot fail a
 call. If the server needs a key even a throwaway one, set it on the row - most
 local servers accept anything.
 
+### A gateway over many servers: LiteLLM (and friends)
+
+Every row above points at one server. A LiteLLM proxy
+(`ghcr.io/berriai/litellm`) turns that into one endpoint over many backends:
+register **one** `LOCAL_OPENAI` row at the proxy's address and it can route to
+Ollama, vLLM, llama.cpp and hosted OpenAI-compatible APIs behind it - mixing
+local models and hosted fallbacks without a row per server. What the proxy
+adds for free on top: virtual keys per consumer, per-model rate limits and
+budgets, and automatic fallback chains (local model down -> hosted model),
+which are the pieces a local-first deployment most often hand-rolls.
+
+The setup is exactly Option 4 with the proxy in the middle: run LiteLLM where
+core can reach it, allow its `host:port` in
+`APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS`, register the row with the
+proxy's base URL, and set the row's API key to a LiteLLM virtual key (`sk-...`)
+or anything if the proxy has no master key. Model ids on the row are the
+names LiteLLM's `model_list` declares (find them with
+`curl http://<proxy>:4000/v1/models`), not the backends' raw ids.
+
 ## Choosing a model
 
 These are starting points to try on your own hardware, not benchmark results.
