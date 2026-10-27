@@ -21,6 +21,11 @@ export type PageGuide = {
    * OSS console never names its internal content ids. Distinct from `next`:
    * next stays inside the console, learn leaves for the Academy (new tab). */
   learnInAcademy?: boolean;
+  /** Topic path on the Academy origin, appended to academyHref() so the
+   * "Learn this in the Academy" link lands on the page that teaches THIS
+   * surface (e.g. "/guardrails") — the same topic-level linking
+   * troubleshoot/page.tsx already does, never a lesson/content id. */
+  academyTopic?: string;
   /** Only shown to workspace admins (the page itself is admin-only). */
   adminOnly?: boolean;
   /** Only meaningful when on-device AI is built into this deployment. */
