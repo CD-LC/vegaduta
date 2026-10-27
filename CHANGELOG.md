@@ -10,6 +10,18 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Workflow engine: duplicate side effects on retry, unenforced step timeout,
+  approvals inside loop bodies.** (1) The default retry path no longer retries
+  irreversible nodes (`bulk_email`, `tool`, `crm_lead`, `device_control`,
+  `media`, sub-`workflow`, non-GET `http`) unless the node sets
+  `retryUnsafe=true`, matching the per-node error strategy. (2) Saving a graph
+  whose loop, fan-out or sub-flow body is an `approval` / `human_input` node or
+  has `requiresApproval=true` is now rejected (a paused run cannot resume at the
+  right iteration); the "needs exactly one Trigger node" message now says "at
+  least one" (several triggers were always allowed). (3) `stepTimeoutSeconds` is
+  now enforced per node attempt by the in-process engine (the attempt is
+  interrupted and fails), parallel branches are cancelled when a sibling fails,
+  and the parallel join is bounded.
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
   capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on

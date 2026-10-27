@@ -42,7 +42,7 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
             List.of(node("n1", "output", Map.of("channel", "log"))), List.of());
 
         List<String> errors = errorsFrom(graph);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("exactly one Trigger node")));
+        assertTrue(errors.stream().anyMatch(e -> e.contains("at least one Trigger node")));
     }
 
     // Per-node workflow triggers - "each trigger node in a workflow's graph

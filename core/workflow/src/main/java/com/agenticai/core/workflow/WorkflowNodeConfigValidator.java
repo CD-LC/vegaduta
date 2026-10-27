@@ -38,6 +38,32 @@ final class WorkflowNodeConfigValidator {
         }
     }
 
+    /**
+     * A loop, fan-out or sub-flow BODY node cannot be approval-gated: the approval row carries only the node id
+     * and input (no iteration cursor), and a sub-flow body node is not part of the main graph, so a resumed run
+     * could not re-enter the iteration. Adds an error when {@code body} is such a node.
+     *
+     * @param containerKind label of the container, e.g. "Loop"
+     */
+    static void rejectApprovalGatedBody(
+        String containerKind, WorkflowNodeDto container, WorkflowNodeDto body, List<String> errors
+    ) {
+        if (body == null) {
+            return;
+        }
+        String bodyType = body.type() == null ? "" : body.type().toLowerCase(Locale.ROOT);
+        Object flag = body.config().get("requiresApproval");
+        boolean flagged = Boolean.TRUE.equals(flag) || (flag != null && "true".equalsIgnoreCase(flag.toString().trim()));
+        boolean humanStep = "approval".equals(bodyType) || "human_input".equals(bodyType);
+        if (flagged || humanStep) {
+            errors.add(containerKind + " node '" + container.label() + "' repeats node '" + body.label()
+                + "', which waits for a human (" + (humanStep ? "type " + bodyType : "requiresApproval=true")
+                + "). Approval and human-input steps are not supported inside a loop, fan-out or sub-flow body "
+                + "because a paused run cannot resume at the right iteration; move the approval before or after "
+                + "the " + containerKind.toLowerCase(Locale.ROOT) + ".");
+        }
+    }
+
     /** Adds one message per problem in {@code node}'s own config to {@code errors}. */
     void validate(WorkflowNodeDto node, List<String> errors, UUID ownWorkflowId, Set<UUID> assumedAgentIds,
                   Flags flags) {
@@ -386,6 +412,21 @@ final class WorkflowNodeConfigValidator {
                     || !(bodyMap.get("nodes") instanceof List<?> nodes) || nodes.isEmpty()) {
                     errors.add("Sub-Flow node '" + node.label()
                         + "' has no 'body' graph with at least one node - sub-flows iterate an embedded sub-graph, not a single downstream node.");
+                } else {
+                    for (Object bodyNodeRaw : nodes) {
+                        if (bodyNodeRaw instanceof Map<?, ?> bn && bn.get("data") instanceof Map<?, ?>) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> bnData = (Map<String, Object>) bn.get("data");
+                            Object bnType = bn.get("type");
+                            rejectApprovalGatedBody("Sub-flow", node, new WorkflowNodeDto(
+                                String.valueOf(bn.get("id")), bnType == null ? null : bnType.toString(),
+                                Map.of(), bnData), errors);
+                        } else if (bodyNodeRaw instanceof Map<?, ?> bn && "approval".equalsIgnoreCase(
+                            String.valueOf(bn.get("type")))) {
+                            rejectApprovalGatedBody("Sub-flow", node, new WorkflowNodeDto(
+                                String.valueOf(bn.get("id")), "approval", Map.of(), Map.of()), errors);
+                        }
+                    }
                 }
             }
             case "set", "filter", "sort", "aggregate", "limit", "dedupe", "switch", "merge" ->

@@ -41,11 +41,22 @@ final class RetryPolicy {
     }
 
     /**
-     * Output nodes are never retried: they email/WhatsApp/upload and a blind retry risks sending twice when
-     * the destination already received the message before the failure surfaced.
+     * Output nodes and irreversible side-effect nodes are not retried: they email/WhatsApp/upload/call out and a
+     * blind retry risks doing it twice when the destination already acted before the failure surfaced.
      */
     static boolean isRetryableNode(WorkflowNodeDto node) {
-        return !"output".equalsIgnoreCase(node.type());
+        if ("output".equalsIgnoreCase(node.type())) {
+            return false;
+        }
+        // Same guard as the per-node error strategy: bulk_email, tool, crm_lead, device_control, media,
+        // workflow (sub-run) and non-GET http nodes duplicate their side effect when blindly retried, unless
+        // the node opts in with retryUnsafe=true.
+        return !NodeErrorStrategy.isIrreversible(node) || retryUnsafe(node);
+    }
+
+    private static boolean retryUnsafe(WorkflowNodeDto node) {
+        Object raw = node.config() == null ? null : node.config().get("retryUnsafe");
+        return raw instanceof Boolean b ? b : raw != null && "true".equalsIgnoreCase(raw.toString().trim());
     }
 
     /** A quota rejection is deterministic within the backoff window, so it is never retried. */

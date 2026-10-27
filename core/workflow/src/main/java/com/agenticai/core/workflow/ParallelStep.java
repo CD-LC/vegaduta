@@ -62,7 +62,8 @@ final class ParallelStep implements ContainerStep {
         // Workflow Share mic/video - a Loop/Parallel node immediately after Trigger does not receive the
         // attachment; a voice/photo-triggered workflow uses a single Agent node.
         ParallelBranchRunner.Joined joined = runner.run(branchNodes, branchNode -> kit.attempts.execute(
-            s.definition, s.runIdText(), branchNode, fanOutInput, s.requestedBy, List.of(), s.mode));
+            s.definition, s.runIdText(), branchNode, fanOutInput, s.requestedBy, List.of(), s.mode),
+            joinBoundSeconds(s.definition, branchNodes));
         List<ParallelBranchRunner.Outcome> outcomes = joined.outcomes();
         RuntimeException branchFailure = joined.failure();
         WorkflowNodeDto failedBranch = joined.failedBranch();
@@ -130,5 +131,22 @@ final class ParallelStep implements ContainerStep {
         String next = lastBranchNode == null ? null
             : graphSupport.nextNodeId(lastBranchNode, s.edgesOf(lastBranchNode.id()), lastBranchHandle);
         return Outcome.next(next, merged);
+    }
+
+    /**
+     * Upper bound for the whole fan-out: each branch attempt is already capped at {@code stepTimeoutSeconds} by
+     * {@link NodeAttemptExecutor}, so the join allows the slowest branch's attempts (retries included) plus slack
+     * for the retry backoff. Zero (unbounded) when the workflow has no positive step timeout.
+     */
+    static long joinBoundSeconds(WorkflowDefinition definition, List<WorkflowNodeDto> branchNodes) {
+        long timeout = definition.getStepTimeoutSeconds();
+        if (timeout <= 0) {
+            return 0;
+        }
+        int attempts = 1;
+        for (WorkflowNodeDto branch : branchNodes) {
+            attempts = Math.max(attempts, RetryPolicy.totalAttempts(branch, definition.getMaxRetryAttempts(), -1));
+        }
+        return timeout * attempts + 30L;
     }
 }

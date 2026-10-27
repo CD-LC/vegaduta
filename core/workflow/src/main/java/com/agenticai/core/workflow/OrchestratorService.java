@@ -186,7 +186,7 @@ public class OrchestratorService {
             .filter(n -> "trigger".equalsIgnoreCase(n.type()))
             .count();
         if (triggerCount == 0) {
-            errors.add("The graph needs exactly one Trigger node to start a run.");
+            errors.add("The graph needs at least one Trigger node to start a run.");
         }
 
         WorkflowNodeConfigValidator.Flags flags = new WorkflowNodeConfigValidator.Flags(
@@ -252,6 +252,8 @@ public class OrchestratorService {
             } else if (outs.size() > 1) {
                 errors.add("Loop node '" + node.label()
                     + "' has more than one outgoing connection - it can only repeat a single downstream node.");
+            } else {
+                WorkflowNodeConfigValidator.rejectApprovalGatedBody("Loop", node, nodesById.get(outs.get(0)), errors);
             }
         }
 
@@ -316,6 +318,8 @@ public class OrchestratorService {
                 errors.add("Fan-out node '" + node.label()
                     + "' has more than one outgoing connection - it runs a single worker node per item; "
                     + "the item list comes from its runtime input, not from extra edges.");
+            } else {
+                WorkflowNodeConfigValidator.rejectApprovalGatedBody("Fan-out", node, nodesById.get(outs.get(0)), errors);
             }
         }
 
