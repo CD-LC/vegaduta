@@ -37,7 +37,7 @@ export function useEdgeTurns(ctx: PlaygroundContext) {
     // edgeAttempt: true - the ONLY signal the render below uses to decide
     // whether this pending turn shows the real edgePhase state machine
     // (warming/generating) instead of the generic hosted "thinking" label.
-    setTurns((t) => [...t, { role: "assistant", content: "", trace: [], pending: true, edgeAttempt: true }]);
+    setTurns((t) => [...t, { role: "assistant", content: "", trace: [], pending: true, edgeAttempt: true, startedAt: Date.now() }]);
     setSending(true);
     setEdgePhase("checking");
     lastEdgeModelRef.current = null;
@@ -243,7 +243,7 @@ export function useEdgeTurns(ctx: PlaygroundContext) {
     // on-device turn never reached the server (same rule as sendViaEdge).
     setTurns((t) => [
       ...t,
-      { role: "assistant", content: "", trace: [], pending: true, onDevice: true, rescuedFromServer: !!rescueFrom },
+      { role: "assistant", content: "", trace: [], pending: true, onDevice: true, rescuedFromServer: !!rescueFrom, startedAt: Date.now() },
     ]);
     setSending(true);
     try {

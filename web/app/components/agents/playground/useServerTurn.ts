@@ -90,7 +90,7 @@ export function useServerTurn(ctx: PlaygroundContext) {
       ...t,
       { role: "user", content: userMessage, attachment: sentAttachment, frames: framesForHistory(sentFrames), watch },
     ]);
-    setTurns((t) => [...t, { role: "assistant", content: "", trace: [], pending: true, ref: turnRef, watch }]);
+    setTurns((t) => [...t, { role: "assistant", content: "", trace: [], pending: true, ref: turnRef, watch, startedAt: Date.now() }]);
     setSending(true);
 
     // Staged camera/screen frames ride as inline attachments with their
