@@ -26,30 +26,25 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 /**
- * {@link TenantSchemaResolver} is the seam that turns "which tenant is this
- * request for" into "which Postgres schema does Hibernate query" - both via
- * the Hibernate SPI hook ({@link TenantSchemaResolver#resolveCurrentTenantIdentifier()})
- * and via the static {@link TenantSchemaResolver#currentSchemaName()} the
- * knowledge module's raw-JDBC queries call directly (see its own javadoc,
- * which documents a real historical cross-tenant leak that extraction
+ * {@link TenantSchemaResolver} is the seam that turns "which tenant is this request for" into
+ * "which Postgres schema does Hibernate query" - both via the Hibernate SPI hook ({@link
+ * TenantSchemaResolver#resolveCurrentTenantIdentifier()}) and via the static {@link
+ * TenantSchemaResolver#currentSchemaName()} the knowledge module's raw-JDBC queries call directly
+ * (see its own javadoc, which documents a real historical cross-tenant leak that extraction
  * closed).
  *
- * <p>F-14 additions: the public-schema fallback is instrumented (counter
- * per resolution-path kind, fail-closed flag for the one reliably-suspicious
- * kind). These tests pin down the class javadoc's map - in particular that
- * the legitimate control-plane kinds keep working untouched even with
- * {@code app.tenancy.fail-on-missing-context=true}, since flipping that
- * flag in staging must never be able to take down health checks, the admin
- * console, or onboarding.
+ * <p>F-14 additions: the public-schema fallback is instrumented (counter per resolution-path kind,
+ * fail-closed flag for the one reliably-suspicious kind). These tests pin down the class javadoc's
+ * map - in particular that the legitimate control-plane kinds keep working untouched even with
+ * {@code app.tenancy.fail-on-missing-context=true}, since flipping that flag in staging must never
+ * be able to take down health checks, the admin console, or onboarding.
  *
- * <p>Uses the real {@link TenantContext} ThreadLocal rather than mocking it
- * - this class has no dependency-injection seam around TenantContext (it's
- * a static holder by design, see its own javadoc), so exercising the real
- * thing is both simpler and closer to what actually happens at runtime.
- * {@link #clearPerThreadState()} guards against one test's context (or the
- * fail-closed resolver a test registered - see {@link
- * TenantSchemaResolver#resetRegisteredInstanceForTests()}) leaking into the
- * next when tests run on the same thread/fork.
+ * <p>Uses the real {@link TenantContext} ThreadLocal rather than mocking it - this class has no
+ * dependency-injection seam around TenantContext (it's a static holder by design, see its own
+ * javadoc), so exercising the real thing is both simpler and closer to what actually happens at
+ * runtime. {@link #clearPerThreadState()} guards against one test's context (or the fail-closed
+ * resolver a test registered - see {@link TenantSchemaResolver#resetRegisteredInstanceForTests()})
+ * leaking into the next when tests run on the same thread/fork.
  */
 class TenantSchemaResolverTest {
 
@@ -79,7 +74,11 @@ class TenantSchemaResolverTest {
     }
 
     private double fallbackCount(String kind) {
-        Counter counter = meterRegistry.find(TenantSchemaResolver.FALLBACK_METRIC).tag("kind", kind).counter();
+        Counter counter =
+                meterRegistry
+                        .find(TenantSchemaResolver.FALLBACK_METRIC)
+                        .tag("kind", kind)
+                        .counter();
         return counter == null ? 0.0 : counter.count();
     }
 
@@ -89,12 +88,14 @@ class TenantSchemaResolverTest {
         assertEquals(TenantSchemaResolver.DEFAULT_SCHEMA, TenantSchemaResolver.currentSchemaName());
 
         TenantSchemaResolver resolver = newResolver(false);
-        assertEquals(TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(
+                TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
     }
 
     @Test
     void tenantContextWithValidTenantIdResolvesToSanitizedSchema() {
-        TenantContext.set(TenantContext.of("tenant_b", "user-sub-123", Set.of("ROLE_tenant-admin")));
+        TenantContext.set(
+                TenantContext.of("tenant_b", "user-sub-123", Set.of("ROLE_tenant-admin")));
 
         assertEquals("tenant_b", TenantSchemaResolver.currentSchemaName());
 
@@ -150,11 +151,14 @@ class TenantSchemaResolverTest {
     void noContextFallbackIsCountedUnderTheNoContextKindWithTheCallingClassTagged() {
         TenantSchemaResolver resolver = newResolver(false);
 
-        assertEquals(TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(
+                TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
 
-        Counter counter = meterRegistry.find(TenantSchemaResolver.FALLBACK_METRIC)
-            .tag("kind", "no_context")
-            .counter();
+        Counter counter =
+                meterRegistry
+                        .find(TenantSchemaResolver.FALLBACK_METRIC)
+                        .tag("kind", "no_context")
+                        .counter();
         assertNotNull(counter, "every public fallback must be counted");
         assertEquals(1.0, counter.count());
         // The caller tag is the staging triage handle (see the resolver's
@@ -181,7 +185,8 @@ class TenantSchemaResolverTest {
         TenantContext.set(TenantContext.of(null, "admin-sub", Set.of("ROLE_platform-admin")));
         TenantSchemaResolver resolver = newResolver(true);
 
-        assertEquals(TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(
+                TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
         assertEquals(1.0, fallbackCount("platform_admin"));
     }
 
@@ -198,7 +203,8 @@ class TenantSchemaResolverTest {
 
         // SEC-017: never throws (onboarding only touches control_plane), but
         // never lands on public's tenant tables either.
-        assertEquals(TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(
+                TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
         assertEquals(1.0, fallbackCount("tenantless_context"));
     }
 
@@ -213,7 +219,8 @@ class TenantSchemaResolverTest {
 
         // Default (flag off): still falls back, so behavior is unchanged
         // in production today - but loudly counted.
-        assertEquals(TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(
+                TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
         assertEquals(1.0, fallbackCount("authenticated_no_context"));
     }
 
@@ -235,7 +242,8 @@ class TenantSchemaResolverTest {
         // working against the sentinel - but a context-less thread can no
         // longer read or write the shared public copy of the tenant tables.
         TenantSchemaResolver resolver = newResolver(true);
-        assertEquals(TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(
+                TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
         assertEquals(1.0, fallbackCount("no_context"));
     }
 
@@ -247,7 +255,8 @@ class TenantSchemaResolverTest {
         SecurityContextHolder.getContext().setAuthentication(tenantJwtAuthentication(null));
         TenantSchemaResolver resolver = newResolver(true);
 
-        assertEquals(TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(
+                TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
         assertEquals(1.0, fallbackCount("no_context"));
         assertEquals(0.0, fallbackCount("authenticated_no_context"));
     }
@@ -278,7 +287,8 @@ class TenantSchemaResolverTest {
         // javadoc); a context with no MeterRegistry at all must degrade to
         // exactly the old behavior.
         TenantSchemaResolver resolver = newResolver(false, null);
-        assertEquals(TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(
+                TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
     }
 
     // ------------------------------------------------------------------
@@ -289,7 +299,8 @@ class TenantSchemaResolverTest {
     void springDefaultIsFailClosed_andTheSentinelIsNeverPublic() {
         MockEnvironment environment = new MockEnvironment();
         assertTrue(TenantSchemaResolver.effectiveFailClosed(true, environment));
-        assertNotEquals(TenantSchemaResolver.DEFAULT_SCHEMA, TenantSchemaResolver.NO_CONTEXT_SCHEMA);
+        assertNotEquals(
+                TenantSchemaResolver.DEFAULT_SCHEMA, TenantSchemaResolver.NO_CONTEXT_SCHEMA);
         // The sentinel is reserved - no tenant can ever be provisioned into it,
         // and no DROP may ever target it.
         assertTrue(TenantSchemaGuard.isProtectedSchema(TenantSchemaResolver.NO_CONTEXT_SCHEMA));
@@ -299,7 +310,8 @@ class TenantSchemaResolverTest {
     void escapeHatchPropertyRestoresTheLegacyPublicFallback() {
         assertFalse(TenantSchemaResolver.effectiveFailClosed(false, new MockEnvironment()));
         TenantSchemaResolver resolver = newResolver(false);
-        assertEquals(TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(
+                TenantSchemaResolver.DEFAULT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
     }
 
     @Test
@@ -312,8 +324,10 @@ class TenantSchemaResolverTest {
     @Test
     void failClosedWithoutContextNeverResolvesToPublic_viaHibernateOrTheStaticRawJdbcPath() {
         TenantSchemaResolver resolver = newResolver(true);
-        assertEquals(TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
-        assertEquals(TenantSchemaResolver.NO_CONTEXT_SCHEMA, TenantSchemaResolver.currentSchemaName());
+        assertEquals(
+                TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(
+                TenantSchemaResolver.NO_CONTEXT_SCHEMA, TenantSchemaResolver.currentSchemaName());
     }
 
     @Test
@@ -331,7 +345,8 @@ class TenantSchemaResolverTest {
         assertEquals(1.0, fallbackCount("platform_scope"));
         // The marker is removed afterwards - the very next call fails closed again.
         assertFalse(PlatformScope.isActive());
-        assertEquals(TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+        assertEquals(
+                TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
     }
 
     @Test
@@ -345,24 +360,60 @@ class TenantSchemaResolverTest {
     void platformScopeDoesNotMaskTheLostTenantContextSignature() {
         SecurityContextHolder.getContext().setAuthentication(tenantJwtAuthentication("tenant_b"));
         TenantSchemaResolver resolver = newResolver(true);
-        assertThrows(MissingTenantContextException.class,
-            () -> PlatformScope.call(resolver::resolveCurrentTenantIdentifier));
+        assertThrows(
+                MissingTenantContextException.class,
+                () -> PlatformScope.call(resolver::resolveCurrentTenantIdentifier));
     }
 
     @Test
     void aTenantIdNamingASystemSchemaIsRefusedEvenWithTheEscapeHatchOn() {
         TenantSchemaResolver resolver = newResolver(false);
-        for (String hostile : List.of("control_plane", "ag_catalog", "pg_catalog", "information_schema",
-            TenantSchemaResolver.NO_CONTEXT_SCHEMA)) {
+        for (String hostile :
+                List.of(
+                        "control_plane",
+                        "ag_catalog",
+                        "pg_catalog",
+                        "information_schema",
+                        TenantSchemaResolver.NO_CONTEXT_SCHEMA)) {
             TenantContext.set(TenantContext.of(hostile, "sub", Set.of()));
-            assertThrows(MissingTenantContextException.class, resolver::resolveCurrentTenantIdentifier, hostile);
+            assertThrows(
+                    MissingTenantContextException.class,
+                    resolver::resolveCurrentTenantIdentifier,
+                    hostile);
         }
     }
 
+    @Test
+    void aTenantIdOfPublicIsRefusedLikeAnySystemSchema() {
+        // A validly signed token with tenant_id=public must not route to the legacy schema. The
+        // no-context fallback still legitimately resolves to public (health checks, platform
+        // admin/scope) - that path never goes through refuseSystemSchema - but an EXPLICIT tenant
+        // id that sanitises to "public" is refused, exactly like control_plane.
+        TenantSchemaResolver resolver = newResolver(true);
+        TenantContext.set(TenantContext.of("public", "sub", Set.of()));
+        assertThrows(MissingTenantContextException.class, resolver::resolveCurrentTenantIdentifier);
+
+        TenantContext.set(TenantContext.of("Public", "sub", Set.of()));
+        assertThrows(
+                MissingTenantContextException.class,
+                resolver::resolveCurrentTenantIdentifier,
+                "sanitization lowercases before the refusal, so any casing of public is caught");
+    }
+
+    @Test
+    void aBlankTenantIdStillFallsBackToTheNoContextSchema() {
+        // A present-but-blank tenant id is NOT an explicit "public" claim: it takes the same
+        // tenantless-context fallback as no context at all, which is untouched by the public
+        // refusal (the fallback returns NO_CONTEXT_SCHEMA, never refuseSystemSchema).
+        TenantContext.set(TenantContext.of("   ", "sub", Set.of()));
+        TenantSchemaResolver resolver = newResolver(true);
+        assertEquals(
+                TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
+    }
+
     private static JwtAuthenticationToken tenantJwtAuthentication(String tenantId) {
-        Jwt.Builder jwt = Jwt.withTokenValue("test-token")
-            .header("alg", "none")
-            .subject("user-sub-123");
+        Jwt.Builder jwt =
+                Jwt.withTokenValue("test-token").header("alg", "none").subject("user-sub-123");
         if (tenantId != null) {
             jwt.claim("tenant_id", tenantId);
         } else {

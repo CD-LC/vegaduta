@@ -37,6 +37,15 @@ Release notes on GitHub are generated from the section for each version.
   `"retryUnsafe": true`. Tool node calls are additionally claimed through
   the output dedup guard keyed on (run, node, loop index + resolved input),
   so a replayed attempt is suppressed instead of re-invoking the tool.
+- **`tenant_id=public` claims can no longer route into the legacy shared
+  schema.** A JWT or API key asserting the `public` tenant used to pass the
+  schema-exists fallback (Postgres always has `public`) and land tenant
+  queries in the shared schema. `TenantSchemaResolver` now refuses it like
+  any reserved name, `TenantStatusGuardImpl` rejects it explicitly, and its
+  SQL-error path fails closed instead of open. Deployments on a non-Keycloak
+  OIDC issuer must also configure `app.keycloak.allowed-azp` or
+  `app.security.jwt.required-audience`, or the boot refuses to start rather
+  than accept tokens with no client-bound check.
 
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
