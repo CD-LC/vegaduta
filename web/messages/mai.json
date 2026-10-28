@@ -62,7 +62,8 @@
     "railBrand": "ब्रांडिंग",
     "railLearn": "सीखू",
     "railRuntimeSettings": "रनटाइम सेटिंग",
-    "railControls": "हम की नियंत्रित करी...?"
+    "railControls": "हम की नियंत्रित करी...?",
+    "railA2a": "A2A activity"
   },
   "languageSwitcher": {
     "label": "भाषा",
@@ -197,7 +198,22 @@
     "startFree": "निःशुल्क शुरू करू",
     "tryWithoutAccount": "वा बिना खाताक प्रयास करू",
     "trustLine": "सुरक्षित साइन-इन · अहाँक डेटा अहाँक वर्कस्पेस आ क्षेत्र मे रहैत अछि",
-    "newToVegaduta": "VegaDūta पर नव छी?"
+    "newToVegaduta": "VegaDūta पर नव छी?",
+    "local": {
+      "signin": {
+        "forgotPassword": "Forgot password?",
+        "pinNotEnrolled": "A PIN only works in the browser it was set up in - this one isn't enrolled. Sign in another way, then add this browser's PIN in Account security."
+      },
+      "forgot": {
+        "intro": "Request a reset link. It is saved to a file on the computer running this install - that is how it knows it is really you, since anyone can reach this page.",
+        "label": "Account e-mail",
+        "hint": "On a personal install this is usually the one account, so you can leave it blank.",
+        "button": "Request reset link",
+        "sending": "Requesting…",
+        "done": "If the account exists, a reset link was saved on this machine. Run scripts/vegaduta reset-password to see it, then open the link it prints and choose a new password.",
+        "doneWindows": "If the account exists, a reset link was saved on this machine. Run .\\scripts\\vegaduta.ps1 reset-password to see it, then open the link it prints and choose a new password."
+      }
+    }
   },
   "landingRoot": {
     "srTitle": "VegaDūta - एकटा बुद्धिमत्ता जे काज करैत अछि",
@@ -1585,7 +1601,9 @@
     "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn.",
     "knowledgeWriteLabel": "Allow writing to the knowledge base (add_to_knowledge_base tool)",
     "knowledgeWriteLoadError": "Could not load this agent's knowledge-write settings.",
-    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected."
+    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected.",
+    "readOnlyRepoHint": "Checked repositories restrict which repos this agent’s code tools may search and analyse. Leave all unchecked to allow every registered repository.",
+    "codeIntelToolsHint": "Per-tool on/off for search, graph navigation and the analysis suite (repo map, references, implementations, call paths, dead code, API surface, hotspots) lives in the Tools section."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "एकटा नोड चुनू ओकरा कॉन्फिगर करबाक लेल, वा बामा दिसक पैलेट सँ एकटा नव घिचि क' आनु।",
@@ -5818,7 +5836,11 @@
       "builtinDetail": "अहाँक ब्राउज़रक अपन मॉडल। क्रोम 127+ एकरा अपने डाउनलोड आ अपडेट करैत अछि; ई ऐप द्वारा किछु संग्रहीत नहि कएल जाइत अछि।",
       "motionDetail": "स्थिर छवि केँ सहज गति क्लिप मे बदलैत अछि। क्लिप स्टूडियो मे पहिल बेर मोशन+ उपयोग करबा पर स्वतः डाउनलोड भ' जाइत अछि।",
       "motionNotPublished": "अखन धरि प्रकाशित नहि — जल्द आबि रहल अछि",
-      "motionOpenClips": "क्लिप स्टूडियो खोलू"
+      "motionOpenClips": "क्लिप स्टूडियो खोलू",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ई डिवाइस पर स्थापित",
@@ -14772,7 +14794,8 @@
     "closePanel": "Close the panel",
     "conversationLabel": "Conversation",
     "copiedReply": "Copied",
-    "jumpToLatest": "Jump to the latest message"
+    "jumpToLatest": "Jump to the latest message",
+    "learnedKind_DESKTOP_RECIPE": "Desktop runs to save ({n})"
   },
   "agentLab": {
     "wtLabel": "एजेंटक टूल सभक संग चलाउ",
@@ -15881,6 +15904,79 @@
     "monitorPanelHint": "You are watching the agent drive this machine in real time - each click and keystroke lands as you see it. Collapse to pause the stream.",
     "screenDockTitle": "Screen",
     "screenDockOpen": "Open live screen",
-    "screenDockClose": "Close live screen"
+    "screenDockClose": "Close live screen",
+    "screenDockPopOut": "Pop out - keeps watching the agent while this tab is minimized"
+  },
+  "keyboard": {
+    "toggle": "On-screen keyboard",
+    "unavailable": "No on-screen keyboard for this language",
+    "title": "On-screen keyboard",
+    "close": "Close keyboard"
+  },
+  "adminCommerceUi": {
+    "itemTasks": "tasks"
+  },
+  "adminA2aPage": {
+    "eyebrow": "Interoperability",
+    "pageTitle": "Agent-to-agent (A2A)",
+    "pageSubtitle": "Endpoints, remote agents and live tasks for the A2A protocol surface.",
+    "featureOff": "A2A endpoints are not available on this deployment (feature off or an older core).",
+    "inboundHeading": "Inbound endpoints (peers call your agents)",
+    "jsonRpc": "JSON-RPC 2.0",
+    "restBinding": "HTTP+JSON binding",
+    "agentCard": "Per-agent card",
+    "platformCard": "Platform card",
+    "jwks": "Signing keys (JWKS)",
+    "inboundHint": "Hand a peer the JSON-RPC URL (or the platform/agent card) plus a bearer token with RUNNER access on the target agent.",
+    "outboundHeading": "Outbound: remote agents your agents may call",
+    "allowedHosts": "Allow-listed remote hosts",
+    "noAllowedHosts": "None - no remote agent is reachable.",
+    "signedCards": "Signed agent cards required",
+    "maxCallsPerTurn": "Max remote calls per turn",
+    "noCap": "No cap",
+    "maxWait": "Max wait per call",
+    "maxWaitValue": "{seconds} s",
+    "outboundOff": "Outbound calls are disabled - the a2a_call_agent tool is not offered.",
+    "outboundHint": "Set by the operator (app.a2a.client.*) - read-only here so a stolen session cannot widen egress.",
+    "on": "On",
+    "off": "Off",
+    "yes": "Yes",
+    "no": "No",
+    "relatedAgentTrust": "Agent trust & directory publishing",
+    "relatedDirectory": "Public agent directory",
+    "tasksHeading": "A2A tasks",
+    "tasksLoadFailed": "Could not load A2A tasks",
+    "allAgents": "All agents",
+    "refresh": "Refresh",
+    "noTasksTitle": "No A2A tasks",
+    "noTasksHint": "Inbound calls to your agents and outbound a2a_call_agent calls appear here.",
+    "dirInbound": "Inbound",
+    "dirOutbound": "Outbound",
+    "view": "View",
+    "cancel": "Cancel",
+    "canceling": "Canceling…",
+    "cancelSuccess": "Task canceled",
+    "cancelFailed": "Could not cancel the task",
+    "detailTitle": "A2A task",
+    "detailSubtitle": "One agent turn invoked over the A2A protocol.",
+    "detailAgent": "Agent",
+    "detailContext": "Context",
+    "detailSubject": "Caller",
+    "detailCreated": "Created",
+    "detailUpdated": "Last state change",
+    "detailRequest": "Message sent to the agent",
+    "detailReply": "Agent reply",
+    "close": "Close",
+    "remoteAgent": "Remote agent"
+  },
+  "a2aPanel": {
+    "label": "Callable by other agents (A2A)",
+    "hint": "External agents reach this agent over the A2A protocol using these endpoints, with a token that has RUNNER access.",
+    "jsonRpc": "JSON-RPC 2.0 endpoint",
+    "restBinding": "HTTP+JSON message send",
+    "agentCard": "Agent card",
+    "copy": "Copy",
+    "copied": "Copied",
+    "manageNote": "Monitor calls and publish the card at"
   }
 }

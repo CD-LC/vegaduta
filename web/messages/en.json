@@ -203,7 +203,8 @@
     "paletteAgentImport": "Import an agent",
     "paletteAgentTemplates": "Agent templates",
     "railRuntimeSettings": "Runtime settings",
-    "railControls": "Where do I control...?"
+    "railControls": "Where do I control...?",
+    "railA2a": "A2A activity"
   },
   "languageSwitcher": {
     "label": "Language",
@@ -3204,7 +3205,7 @@
     "noRegisteredReposPrefix": "No repositories are registered yet. Add one from the ",
     "codeIntelPageLink": "Code Intel page",
     "denyAllRepoHint": "Leave all unchecked to deny this agent access to every repository.",
-    "readOnlyRepoHint": "Checked repositories restrict which repos this agent\u2019s code tools may search and analyse. Leave all unchecked to allow every registered repository.",
+    "readOnlyRepoHint": "Checked repositories restrict which repos this agent’s code tools may search and analyse. Leave all unchecked to allow every registered repository.",
     "codeIntelToolsHint": "Per-tool on/off for search, graph navigation and the analysis suite (repo map, references, implementations, call paths, dead code, API surface, hotspots) lives in the Tools section.",
     "saveRepoAccess": "Save repository access",
     "codeIntelRepoAccessUpdated": "Repository access updated.",
@@ -13339,7 +13340,8 @@
     "apiKeysPlanGateBody": "Issuing REST API keys needs the developer API entitlement. Upgrade your plan to create keys.",
     "apiKeysPlanGateLink": "View plans and billing",
     "apiKeysPermissionsLegend": "Permissions",
-    "apiKeysCancel": "Cancel"
+    "apiKeysCancel": "Cancel",
+    "itemTasks": "tasks"
   },
   "auditNotifications": {
     "retry": "Retry",
@@ -16591,5 +16593,68 @@
         "keywords": "agent override per agent behavior limits tab"
       }
     }
+  },
+  "adminA2aPage": {
+    "eyebrow": "Interoperability",
+    "pageTitle": "Agent-to-agent (A2A)",
+    "pageSubtitle": "Endpoints, remote agents and live tasks for the A2A protocol surface.",
+    "featureOff": "A2A endpoints are not available on this deployment (feature off or an older core).",
+    "inboundHeading": "Inbound endpoints (peers call your agents)",
+    "jsonRpc": "JSON-RPC 2.0",
+    "restBinding": "HTTP+JSON binding",
+    "agentCard": "Per-agent card",
+    "platformCard": "Platform card",
+    "jwks": "Signing keys (JWKS)",
+    "inboundHint": "Hand a peer the JSON-RPC URL (or the platform/agent card) plus a bearer token with RUNNER access on the target agent.",
+    "outboundHeading": "Outbound: remote agents your agents may call",
+    "allowedHosts": "Allow-listed remote hosts",
+    "noAllowedHosts": "None - no remote agent is reachable.",
+    "signedCards": "Signed agent cards required",
+    "maxCallsPerTurn": "Max remote calls per turn",
+    "noCap": "No cap",
+    "maxWait": "Max wait per call",
+    "maxWaitValue": "{seconds} s",
+    "outboundOff": "Outbound calls are disabled - the a2a_call_agent tool is not offered.",
+    "outboundHint": "Set by the operator (app.a2a.client.*) - read-only here so a stolen session cannot widen egress.",
+    "on": "On",
+    "off": "Off",
+    "yes": "Yes",
+    "no": "No",
+    "relatedAgentTrust": "Agent trust & directory publishing",
+    "relatedDirectory": "Public agent directory",
+    "tasksHeading": "A2A tasks",
+    "tasksLoadFailed": "Could not load A2A tasks",
+    "allAgents": "All agents",
+    "refresh": "Refresh",
+    "noTasksTitle": "No A2A tasks",
+    "noTasksHint": "Inbound calls to your agents and outbound a2a_call_agent calls appear here.",
+    "dirInbound": "Inbound",
+    "dirOutbound": "Outbound",
+    "view": "View",
+    "cancel": "Cancel",
+    "canceling": "Canceling…",
+    "cancelSuccess": "Task canceled",
+    "cancelFailed": "Could not cancel the task",
+    "detailTitle": "A2A task",
+    "detailSubtitle": "One agent turn invoked over the A2A protocol.",
+    "detailAgent": "Agent",
+    "detailContext": "Context",
+    "detailSubject": "Caller",
+    "detailCreated": "Created",
+    "detailUpdated": "Last state change",
+    "detailRequest": "Message sent to the agent",
+    "detailReply": "Agent reply",
+    "close": "Close",
+    "remoteAgent": "Remote agent"
+  },
+  "a2aPanel": {
+    "label": "Callable by other agents (A2A)",
+    "hint": "External agents reach this agent over the A2A protocol using these endpoints, with a token that has RUNNER access.",
+    "jsonRpc": "JSON-RPC 2.0 endpoint",
+    "restBinding": "HTTP+JSON message send",
+    "agentCard": "Agent card",
+    "copy": "Copy",
+    "copied": "Copied",
+    "manageNote": "Monitor calls and publish the card at"
   }
 }
