@@ -327,7 +327,12 @@ public final class ScratchpadToolCallback implements ToolCallback {
 
     private record Scope(String name, UUID sessionId) {}
 
-    static UUID sessionUuid(String sessionId) {
+    /**
+     * The raw caller-visible session id to the session pad's stable UUID ({@code null} = the
+     * agent-long-term pad). Public because the read-only admin surface maps {@code ?session=} the
+     * exact same way.
+     */
+    public static UUID sessionUuid(String sessionId) {
         if (sessionId == null || sessionId.isBlank()) {
             return null;
         }

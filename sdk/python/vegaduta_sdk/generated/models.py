@@ -1219,6 +1219,12 @@ class AgentScheduleRunResponse(TypedDict, total=False):
     sentinelOutcomeNote: str
 
 
+class AgentScratchpadController_ScratchpadListView(TypedDict, total=False):
+    count: int
+    totalBytes: int
+    notes: List[ScratchpadNoteView]
+
+
 class AgentSessionLlmUsageController_SessionLlmCallEntry(TypedDict, total=False):
     id: str
     providerName: ProviderName
@@ -9000,6 +9006,14 @@ class ScheduledTaskDtos_TaskResponse(TypedDict, total=False):
     ownerSubject: str
     createdAt: str
     updatedAt: str
+
+
+class ScratchpadNoteView(TypedDict, total=False):
+    key: str
+    scope: str
+    byteSize: int
+    updatedAt: str
+    body: str
 
 
 class _SearchRequestRequired(TypedDict):

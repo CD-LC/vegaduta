@@ -161,6 +161,26 @@ public class AgentScratchpadService {
         return repository.findVisible(agentId, sessionId);
     }
 
+    /**
+     * {@link #list} as operator-facing views (no entity, no bodies) - the read-only admin surface's
+     * list shape.
+     */
+    @Transactional(readOnly = true)
+    public List<ScratchpadNoteView> listViews(UUID agentId, UUID sessionId) {
+        return list(agentId, sessionId).stream()
+                .map(note -> ScratchpadNoteView.of(note, false))
+                .toList();
+    }
+
+    /**
+     * {@link #read} as an operator-facing view carrying the body - the read-only admin surface's
+     * single-note shape.
+     */
+    @Transactional(readOnly = true)
+    public Optional<ScratchpadNoteView> readView(UUID agentId, UUID sessionId, String key) {
+        return read(agentId, sessionId, key).map(note -> ScratchpadNoteView.of(note, true));
+    }
+
     /** Removes the note under {@code key} in the scope; true when one existed. */
     @Transactional
     public boolean delete(UUID agentId, UUID sessionId, String key) {
