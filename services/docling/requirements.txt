@@ -1,4 +1,4 @@
-fastapi==0.151.0
+fastapi==0.156.1
 # Explicit security floor, identical to services/sidecar/requirements.txt:
 # fastapi's own starlette range does not enforce the advisory-free version, so
 # it is pinned here directly. One FastAPI/Starlette/Uvicorn baseline across
