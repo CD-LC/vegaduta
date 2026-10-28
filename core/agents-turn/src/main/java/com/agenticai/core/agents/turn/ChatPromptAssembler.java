@@ -58,16 +58,6 @@ final class ChatPromptAssembler {
 
     private static final Logger log = LoggerFactory.getLogger(ChatPromptAssembler.class);
 
-    /** The taint-source label recorded when recalled memory is injected into the prompt. */
-    static final String MEMORY_RECALL_TAINT_SOURCE = "memory_recall";
-
-    /** Marks the turn as having untrusted content in its prompt when a non-empty recalled block is injected. */
-    static void taintIfRecalled(TurnContext context, String recalledMemory) {
-        if (context != null && recalledMemory != null && !recalledMemory.isBlank()) {
-            context.toolActivity().taintSeeds().mark(MEMORY_RECALL_TAINT_SOURCE);
-        }
-    }
-
     /**
      * The conversation replayed to the model, and whether any of its assistant turns starts with
      * the platform's tool record ({@link ToolLedger}) - the cue to tell the model the record is
@@ -270,11 +260,11 @@ final class ChatPromptAssembler {
                                                         chatClient,
                                                         stepEvents,
                                                         turnDepth)));
-        CompletableFuture<String> memoryFuture =
+        CompletableFuture<ChatMemoryRecall.MemoryRecall> memoryFuture =
                 supplyPreTurn(
                         preTurnTenant,
                         () ->
-                                memoryRecall.recallMemoryFactsBlock(
+                                memoryRecall.recallMemoryFacts(
                                         agentId, subjectKey, decisionMessage, stepEvents));
 
         // Stage 4: empty unless the "mcp" profile is active and at least one
@@ -289,6 +279,11 @@ final class ChatPromptAssembler {
         List<ToolCallback> tools =
                 joinPreTurnOrDegrade(
                         toolsFuture, ResolvedToolList.empty(), "tools", preTurnDeadlineNanos);
+        // Reachability fact for the scratchpad directive, captured before the transforms below
+        // (run-tool narrowing mutates in place, the small-model cap swaps in a plain ArrayList)
+        // can lose it - see ResolvedToolList#scratchpadOffered.
+        Boolean scratchpadOffered =
+                tools instanceof ResolvedToolList resolved ? resolved.scratchpadOffered() : null;
         if (runToolNames != null && !suppressAgentTools) {
             // The run-scoped tool selection (ChatRequest.toolNames): narrows the agent's own
             // resolved tools -
@@ -419,17 +414,24 @@ final class ChatPromptAssembler {
         // the
         // prompt preview calls the same method, so what it shows is what a turn sends.
         java.time.LocalDate todayUtc = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
-        // Recalled facts are content an outsider may have authored (recall_related_facts is
-        // UNTRUSTED_EXTERNAL) and this path bypasses the tool guard, so a non-empty block taints the
-        // turn here; tool resolution binds the turn's taint key to these seeds (TurnTaintSeeds).
-        String recalledMemory =
+        ChatMemoryRecall.MemoryRecall recalled =
                 joinPreTurnOrDegrade(memoryFuture, null, "memory", preTurnDeadlineNanos);
+        // Untrusted-content taint (app.agents.taint.mode): auto-injected retrieval enters the
+        // model's context without crossing a tool boundary, so nothing upstream of this point
+        // could mark the turn - a poisoned memory or an untrusted-delimited block piped in as the
+        // turn's input (the workflow 'knowledge' node's output is the intended case) would
+        // otherwise let the model reach a sink with the gate blind. The marks land on the
+        // TurnContext's own record, the instance tool resolution adopted as the turn's taint
+        // state (see TurnContext#taint), so the gate consults them on every sink call. The block
+        // itself is not spotlight-wrapped: the tool path wraps output only in ENFORCE, and the
+        // standing memory block is already labelled - the enforceable control is the same in both
+        // paths, the approval gate on sinks.
         // Conversation-level taint: replay what earlier turns of this session recorded onto this
         // turn's taint, and persist whatever this turn adds (app.agents.taint.session-persistence).
         memoryRecall.seedSessionTaint(context.taint(), memorySessionId);
-        taintIfRecalled(context, recalledMemory);
-        // An untrusted-delimited block piped in as the turn's input (the workflow 'knowledge' node's
-        // output is the intended case) enters the context without crossing a tool boundary.
+        if (recalled != null && recalled.hasRecalledFacts()) {
+            context.taint().mark("recall_related_facts");
+        }
         if (com.agenticai.core.guardrails.taint.Spotlight.hasUntrustedBlock(userMessage)) {
             context.taint().mark("untrusted_input");
         }
@@ -445,6 +447,7 @@ final class ChatPromptAssembler {
                                 svc.directiveComposer,
                                 tools,
                                 anyMcpToolsOffered,
+                                DirectiveKeys.scratchpadReachable(tools, scratchpadOffered),
                                 smallModelTurn,
                                 ChatSystemPromptComposer.Switches.of(svc),
                                 agentId,
@@ -452,7 +455,7 @@ final class ChatPromptAssembler {
                                 replayedHistory.hasToolRecord()
                                         ? svc.turns.toolLedger.getTrustNote()
                                         : null,
-                                recalledMemory));
+                                recalled == null ? null : recalled.block()));
         String systemPrompt = composed.systemPrompt();
         String memoryBlock = composed.memoryBlock();
         // Tells the request inspector which registry key / scope / version each block of the system

@@ -20,7 +20,6 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
-
 /**
  * Resolves the full tool list an agent's chat call should get, from two independent sources, each
  * wrapped in GuardedToolCallback (Autonomy/ Guardrails Strategy Stage A - per-turn step ceiling +
@@ -47,7 +46,6 @@ import org.springframework.stereotype.Service;
  * counter per chat turn, shared across every tool in that turn's list, since the guardrail ceiling
  * is "N tool calls total this turn," not per-tool. See {@link GuardedToolCallback}'s javadoc.
  */
-
 @Service
 public class AgentToolProvider implements AgentToolPort {
 
@@ -63,7 +61,6 @@ public class AgentToolProvider implements AgentToolPort {
     private final SkillService skillService;
     private final ObjectProvider<com.agenticai.core.guardrails.procedures.ProcedurePromptService>
             procedurePromptService;
-
 
     public AgentToolProvider(
             AgentService agentService,
@@ -85,6 +82,28 @@ public class AgentToolProvider implements AgentToolPort {
         this.procedurePromptService = procedurePromptService;
     }
 
+    /**
+     * Optional: the untrusted-content taint layer ({@code app.agents.taint.mode}). Absent bean
+     * (slim/test contexts) leaves every resolution as it was before the layer existed. Setter
+     * injection, like {@code AgentToolGovernance#setTaintPolicy}: the policy is itself a tool-layer
+     * bean, so a constructor parameter would make this provider unstartable wherever tools run
+     * without the guardrails surface.
+     */
+    private volatile AgentTaintPolicy taintPolicy;
+
+    /**
+     * The in-flight turn's untrusted-content record (from {@link
+     * com.agenticai.core.agents.turn.TurnContext#taint()}), visible while tools resolve on this
+     * thread. {@link #resolveToolsFor(UUID, ...)} binds it to the turn's step counter so gates see
+     * marks from inbound messages and auto-injected retrieval.
+     */
+    static final ThreadLocal<com.agenticai.core.guardrails.taint.TurnTaint> TURN_TAINT_SCOPE =
+            new ThreadLocal<>();
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setTaintPolicy(AgentTaintPolicy taintPolicy) {
+        this.taintPolicy = taintPolicy;
+    }
 
     /**
      * Whether {@code toolName} is one the relevance selector never trims - see {@link
@@ -192,12 +211,21 @@ public class AgentToolProvider implements AgentToolPort {
             ChatClient chatClient,
             AgentStepEventEmitter emitter,
             ReasoningDepth effectiveDepth) {
-        return resolveToolsFor(agentId, sessionId, subjectKey, userMessage, chatClient, emitter, effectiveDepth, false);
+        return resolveToolsFor(
+                agentId,
+                sessionId,
+                subjectKey,
+                userMessage,
+                chatClient,
+                emitter,
+                effectiveDepth,
+                false);
     }
 
     /**
-     * As above; {@code stableToolSet} offers the model the agent's whole allowed set, unchanged from one message to the
-     * next (no per-message relevance trimming; the hard cap and on-demand tool loading still apply).
+     * As above; {@code stableToolSet} offers the model the agent's whole allowed set, unchanged
+     * from one message to the next (no per-message relevance trimming; the hard cap and on-demand
+     * tool loading still apply).
      */
     private List<ToolCallback> resolveToolsFor(
             UUID agentId,
@@ -246,10 +274,10 @@ public class AgentToolProvider implements AgentToolPort {
      * The chat turn's entry (ADR-0022 stage 3): resolves under the turn's explicit {@link
      * TurnContext} rather than whatever the calling thread holds. {@code context.scope()} is
      * applied for the whole resolution, so every tool's wrap chain - {@code guardAndLog}'s capture
-     * for {@link TenantContextPropagatingToolCallback}, the MCP grant id, the output redactor -
-     * and every tenant-schema read during resolution see the turn's tenant. With a disabled (or
-     * null) {@code emitter} this runs exactly the five-argument path; with a live one, the
-     * step-event path. A null {@code context} behaves like the overloads without one.
+     * for {@link TenantContextPropagatingToolCallback}, the MCP grant id, the output redactor - and
+     * every tenant-schema read during resolution see the turn's tenant. With a disabled (or null)
+     * {@code emitter} this runs exactly the five-argument path; with a live one, the step-event
+     * path. A null {@code context} behaves like the overloads without one.
      */
     public List<ToolCallback> resolveToolsFor(
             TurnContext context,
@@ -260,10 +288,14 @@ public class AgentToolProvider implements AgentToolPort {
             ChatClient chatClient,
             AgentStepEventEmitter emitter,
             ReasoningDepth effectiveDepth) {
-        // A turn on a model served from the person's own machine keeps its tool set unchanged from one message to
-        // the next (TurnModelTraits#stableToolSet), so the local server's prompt cache holds across turns.
+        // A turn on a model served from the person's own machine keeps its tool set unchanged from
+        // one message to
+        // the next (TurnModelTraits#stableToolSet), so the local server's prompt cache holds across
+        // turns.
         boolean stableToolSet =
-                context != null && context.modelTraits() != null && context.modelTraits().stableToolSet();
+                context != null
+                        && context.modelTraits() != null
+                        && context.modelTraits().stableToolSet();
         java.util.function.Supplier<List<ToolCallback>> resolve =
                 () ->
                         resolveToolsFor(
@@ -280,20 +312,24 @@ public class AgentToolProvider implements AgentToolPort {
         }
         // The turn's approval state rides to AgentToolGuard#guardAndLog on this thread (see
         // TURN_APPROVAL_SCOPE) so every guard built for the turn shares the one instance the turn
-        // loop also holds; removed in the finally so a pooled thread never leaks it to another turn.
+        // loop also holds; removed in the finally so a pooled thread never leaks it to another
+        // turn.
         return context.scope()
                 .get(
                         () -> {
                             AgentToolGuard.TURN_APPROVAL_SCOPE.set(context.approval());
                             AgentToolGuard.TURN_ACTIVITY_SCOPE.set(context.toolActivity());
                             AgentToolGuard.TURN_RUNTIME_SCOPE.set(
-                                    new AgentToolGuard.TurnRuntimeScope(agentId, context.runtimeSettings()));
+                                    new AgentToolGuard.TurnRuntimeScope(
+                                            agentId, context.runtimeSettings()));
+                            TURN_TAINT_SCOPE.set(context.taint());
                             try {
                                 return resolve.get();
                             } finally {
                                 AgentToolGuard.TURN_APPROVAL_SCOPE.remove();
                                 AgentToolGuard.TURN_ACTIVITY_SCOPE.remove();
                                 AgentToolGuard.TURN_RUNTIME_SCOPE.remove();
+                                TURN_TAINT_SCOPE.remove();
                             }
                         });
     }
@@ -338,17 +374,16 @@ public class AgentToolProvider implements AgentToolPort {
     }
 
     /**
-     * The delegation-depth
-     * cap. Resolves the exact same tool list {@link #resolveToolsFor} would EXCEPT collaborator
-     * (delegation) tools. Called only by {@code AgentChatService#delegateCall} - never by a normal
-     * chat turn - so a collaborator agent invoked THROUGH a delegation is never itself offered a
-     * delegation tool. That makes agent A delegating to B delegating back to A (or anywhere else)
-     * structurally impossible rather than merely policy-discouraged: there is no tool call B could
-     * even attempt that would delegate further. {@code subjectKey} is passed as {@code sessionId}
-     * itself (a delegated call has no independent subject identity of its own - see {@code
-     * AgentChatService#delegateCall}'s javadoc for why it uses a fresh, throwaway session with no
-     * long-term memory), matching {@code remember_fact}'s tool being effectively a no-op for a
-     * one-shot delegated exchange rather than needing a separate parameter just for it.
+     * The delegation-depth cap. Resolves the exact same tool list {@link #resolveToolsFor} would
+     * EXCEPT collaborator (delegation) tools. Called only by {@code AgentChatService#delegateCall}
+     * - never by a normal chat turn - so a collaborator agent invoked THROUGH a delegation is never
+     * itself offered a delegation tool. That makes agent A delegating to B delegating back to A (or
+     * anywhere else) structurally impossible rather than merely policy-discouraged: there is no
+     * tool call B could even attempt that would delegate further. {@code subjectKey} is passed as
+     * {@code sessionId} itself (a delegated call has no independent subject identity of its own -
+     * see {@code AgentChatService#delegateCall}'s javadoc for why it uses a fresh, throwaway
+     * session with no long-term memory), matching {@code remember_fact}'s tool being effectively a
+     * no-op for a one-shot delegated exchange rather than needing a separate parameter just for it.
      */
     public List<ToolCallback> resolveToolsForDelegatedCall(
             UUID agentId, String sessionId, String userMessage, ChatClient chatClient) {
@@ -419,7 +454,17 @@ public class AgentToolProvider implements AgentToolPort {
             boolean stableToolSet) {
         AtomicInteger stepCounter = new AtomicInteger(0);
         turnRunBudgets.bindAgent(stepCounter, agentId);
-        bindPromptTaint(stepCounter);
+        // Untrusted-content taint (app.agents.taint.mode): when this resolution runs for a chat
+        // turn, adopt the TurnContext's own taint record as the turn's state - an entry that marked
+        // an inbound channel message, or the pipeline that marks auto-injected retrieval, writes to
+        // that instance and the gate below reads it. Null scope (non-turn resolutions: edge,
+        // replay,
+        // delegated calls) leaves the counter-keyed default in place. Read on this thread for the
+        // same reason TURN_APPROVAL_SCOPE is.
+        AgentTaintPolicy taint = taintPolicy;
+        if (taint != null) {
+            taint.bind(stepCounter, TURN_TAINT_SCOPE.get());
+        }
         // 2026-08-16 fix: RIGOROUS's tool-call verifier judges each call ONLY against this turn's
         // raw userMessage. A workflow-triggered turn with no run input gets the generic
         // placeholder ("Workflow started manually.") as userMessage, which nothing can match - a
@@ -450,39 +495,20 @@ public class AgentToolProvider implements AgentToolPort {
                         allowDelegation,
                         mainChatTurn,
                         List.of(),
-                        mainChatTurn && turnApproval != null ? keptOnOffer(turnApproval) : Set.of()),
+                        mainChatTurn && turnApproval != null
+                                ? keptOnOffer(turnApproval)
+                                : Set.of()),
                 applyRelevanceSelection,
                 stableToolSet);
     }
 
-
-    private volatile AgentTaintPolicy taintPolicy;
-
-    /** Optional: absent (slim/test contexts) means prompt-time content never taints a turn. */
-    @org.springframework.beans.factory.annotation.Autowired(required = false)
-    public void setTaintPolicy(AgentTaintPolicy taintPolicy) {
-        this.taintPolicy = taintPolicy;
-    }
-
     /**
-     * Connects this resolution's step counter (the turn's taint key) to the turn's prompt-time taint
-     * seeds, so content injected into the prompt before any tool ran (recalled memory) taints the
-     * turn the tool guards see. No-op outside a turn context or with the taint layer absent.
-     */
-    private void bindPromptTaint(AtomicInteger stepCounter) {
-        com.agenticai.core.agents.turn.TurnToolActivity activity = AgentToolGuard.TURN_ACTIVITY_SCOPE.get();
-        AgentTaintPolicy policy = taintPolicy;
-        if (activity != null && policy != null) {
-            activity.taintSeeds().bind(source -> policy.seed(stepCounter, source));
-        }
-    }
-
-    /**
-     * The tools relevance selection must not trim on a main chat turn: the tools the conversation already used
-     * (the continuation after an approval, a short follow-up) and the tools the person picked for this run
-     * ({@code ChatRequest.toolNames}) - a tool they switched on is not dropped for failing to match the message.
-     * Keeping a tool from being trimmed only keeps it in the list; the run's own narrowing still removes whatever
-     * it did not name, and nothing here adds a tool the agent does not resolve.
+     * The tools relevance selection must not trim on a main chat turn: the tools the conversation
+     * already used (the continuation after an approval, a short follow-up) and the tools the person
+     * picked for this run ({@code ChatRequest.toolNames}) - a tool they switched on is not dropped
+     * for failing to match the message. Keeping a tool from being trimmed only keeps it in the
+     * list; the run's own narrowing still removes whatever it did not name, and nothing here adds a
+     * tool the agent does not resolve.
      */
     private static Set<String> keptOnOffer(TurnApprovalState state) {
         if (state.runToolNames() == null || state.runToolNames().isEmpty()) {
@@ -507,11 +533,12 @@ public class AgentToolProvider implements AgentToolPort {
     }
 
     /**
-     * The dropdown tool picker {@code com.agenticai.core.agents.core.AgentController#setToolAccess}'s
-     * javadoc calls out as future work, now built: every tool this specific agent would currently
-     * be offered, BEFORE the allow-list filter is applied (i.e. {@link #resolveToolsFor} minus
-     * {@link #filterByAllowedTools}) - so an agent that already has an allow-list saved still sees
-     * every tool it COULD add back, not just the ones currently selected.
+     * The dropdown tool picker {@code
+     * com.agenticai.core.agents.core.AgentController#setToolAccess}'s javadoc calls out as future
+     * work, now built: every tool this specific agent would currently be offered, BEFORE the
+     * allow-list filter is applied (i.e. {@link #resolveToolsFor} minus {@link
+     * #filterByAllowedTools}) - so an agent that already has an allow-list saved still sees every
+     * tool it COULD add back, not just the ones currently selected.
      *
      * <p>MCP tool names are only known once their server actually responds (Spring AI's
      * ToolCallbackProvider queries them live), so this can't be a static list without risking drift
@@ -523,7 +550,6 @@ public class AgentToolProvider implements AgentToolPort {
     public List<ToolDescriptor> listAvailableToolsFor(UUID agentId) {
         return toolDiscovery.listAvailableTools(agentId);
     }
-
 
     /**
      * Whether this turn would be offered at least one MCP-sourced tool (static YAML-wired or
@@ -573,7 +599,6 @@ public class AgentToolProvider implements AgentToolPort {
                 .isEmpty();
     }
 
-
     /**
      * Agent Skills, Level 1 - the "## Skills" block for this agent's system prompt, or "" when
      * {@code load_skill} is not on {@code tools} (which, given the per-turn skill gate in {@code
@@ -586,7 +611,10 @@ public class AgentToolProvider implements AgentToolPort {
         return skillsPromptBlock(agentId, tools, false);
     }
 
-    /** {@link #skillsPromptBlock(UUID, List)}; {@code compact} lists skills by name only (small-model mode, V501). */
+    /**
+     * {@link #skillsPromptBlock(UUID, List)}; {@code compact} lists skills by name only
+     * (small-model mode, V501).
+     */
     public String skillsPromptBlock(UUID agentId, List<ToolCallback> tools, boolean compact) {
         if (tools == null
                 || tools.stream()

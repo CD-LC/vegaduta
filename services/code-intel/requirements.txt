@@ -1,5 +1,5 @@
 # code-intel microservice
-fastapi==0.151.0
+fastapi==0.156.1
 # Explicit security floor: fastapi 0.115.0 capped starlette at 0.38.x, which
 # carries 7 advisories (PYSEC-2026-161/1941/1943/2280/2281/248/249; fixed by
 # 1.3.1). fastapi 0.142 only floors starlette, so pin it here directly.
@@ -30,7 +30,7 @@ docker==7.2.0
 # base SDK, not `e2b-code-interpreter` (that one layers a Jupyter-style
 # run_code() on top for Python-only rich output - this service needs
 # general command execution via `Sandbox.commands.run`, which lives here).
-e2b==2.56.0
+e2b==2.58.0
 
 # Optional:
 # sentence-transformers>=3.0   # embedder: sentence-transformers, OR

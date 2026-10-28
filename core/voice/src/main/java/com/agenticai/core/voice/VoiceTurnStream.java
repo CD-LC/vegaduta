@@ -137,6 +137,7 @@ final class VoiceTurnStream {
                         .build();
         TurnContext turnContext =
                 TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+        turnContext.taint().mark("inbound:voice");
         // forceFastDepth=true (reliability blueprint, 2026-08-06 follow-up,
         // contract shared with the LiveKit voice-agent bridge and
         // AgentController#chat's ChatRequest.forceFastDepth): push-to-talk is

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.approval.ApprovalEvaluation;
 import com.agenticai.core.approval.ApprovalReplayGrant;
+import com.agenticai.core.guardrails.taint.Spotlight;
 import com.agenticai.core.knowledge.KnowledgeSearchService;
 import com.agenticai.core.knowledge.dto.SearchResultResponse;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
@@ -24,17 +25,19 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
-
 /**
- * Characterisation of {@link WorkflowNodeExecutor} dispatch: one or more cases per node type, pinning
- * the status, output, branch and key log/summary text each handler produces. Written against the
+ * Characterisation of {@link WorkflowNodeExecutor} dispatch: one or more cases per node type,
+ * pinning the status, output, branch and key log/summary text each handler produces. Written
+ * against the
  *
- * <p>This class covers trigger/default, approval, condition, code and knowledge nodes; agent, supervisor,
- * tool and device nodes are in {@link WorkflowNodeExecutorAgentNodesCharacterizationTest}, output, workflow,
- * human-input and data nodes in {@link WorkflowNodeExecutorOutputNodesCharacterizationTest}.
+ * <p>This class covers trigger/default, approval, condition, code and knowledge nodes; agent,
+ * supervisor, tool and device nodes are in {@link
+ * WorkflowNodeExecutorAgentNodesCharacterizationTest}, output, workflow, human-input and data nodes
+ * in {@link WorkflowNodeExecutorOutputNodesCharacterizationTest}.
  */
 @SuppressWarnings("unchecked")
-class WorkflowNodeExecutorCharacterizationTest extends WorkflowNodeExecutorCharacterizationTestBase {
+class WorkflowNodeExecutorCharacterizationTest
+        extends WorkflowNodeExecutorCharacterizationTestBase {
 
     // ---- trivial / default / wait ------------------------------------------------------
 
@@ -87,7 +90,9 @@ class WorkflowNodeExecutorCharacterizationTest extends WorkflowNodeExecutorChara
         NodeExecutionResult r = run(node("approval", Map.of()), "x");
         assertEquals("OK", r.status());
         assertEquals("x", r.output());
-        assertTrue(r.summary().contains("Auto-approved by policy for action 'workflow.node.approval'"));
+        assertTrue(
+                r.summary()
+                        .contains("Auto-approved by policy for action 'workflow.node.approval'"));
         assertTrue(r.summary().contains("requested by tester"));
     }
 
@@ -104,7 +109,8 @@ class WorkflowNodeExecutorCharacterizationTest extends WorkflowNodeExecutorChara
     void requiresApprovalOnNonApprovalNodeRunsItAfterAutoApprove() {
         when(orchestrator.authorizeSensitiveNode(any(), any(), any(), any(), any(), any()))
                 .thenReturn(ApprovalEvaluation.autoApproved());
-        NodeExecutionResult r = run(node("code", Map.of("requiresApproval", true, "operation", "uppercase")), "ab");
+        NodeExecutionResult r =
+                run(node("code", Map.of("requiresApproval", true, "operation", "uppercase")), "ab");
         assertEquals("AB", r.output());
     }
 
@@ -112,7 +118,8 @@ class WorkflowNodeExecutorCharacterizationTest extends WorkflowNodeExecutorChara
 
     @Test
     void conditionContainsMatchesCaseInsensitively() {
-        NodeExecutionResult r = run(node("condition", Map.of("contains", "REFUND")), "a refund please");
+        NodeExecutionResult r =
+                run(node("condition", Map.of("contains", "REFUND")), "a refund please");
         assertEquals("true", r.branch());
         assertEquals("Condition 'REFUND' -> true", r.summary());
         assertEquals("false", run(node("condition", Map.of("contains", "zzz")), "abc").branch());
@@ -137,16 +144,27 @@ class WorkflowNodeExecutorCharacterizationTest extends WorkflowNodeExecutorChara
         assertEquals("ab", run(node("code", Map.of("operation", "lowercase")), "AB").output());
         assertEquals(
                 "Bob",
-                run(node("code", Map.of("operation", "extract", "field", "user.name")),
+                run(
+                                node("code", Map.of("operation", "extract", "field", "user.name")),
                                 "{\"user\":{\"name\":\"Bob\"}}")
                         .output());
         assertEquals(
                 "a-c",
-                run(node("code", Map.of("operation", "regex_replace", "pattern", "b", "replacement", "-")),
+                run(
+                                node(
+                                        "code",
+                                        Map.of(
+                                                "operation",
+                                                "regex_replace",
+                                                "pattern",
+                                                "b",
+                                                "replacement",
+                                                "-")),
                                 "abc")
                         .output()
                         .replace("a-c", "a-c"));
-        assertEquals("\"hi\"", run(node("code", Map.of("operation", "json_stringify")), "hi").output());
+        assertEquals(
+                "\"hi\"", run(node("code", Map.of("operation", "json_stringify")), "hi").output());
         assertEquals(
                 "{\n  \"a\" : 1\n}",
                 run(node("code", Map.of("operation", "json_parse")), "{\"a\":1}").output());
@@ -156,7 +174,15 @@ class WorkflowNodeExecutorCharacterizationTest extends WorkflowNodeExecutorChara
     void codeTemplateOperation() {
         assertEquals(
                 "Hello Ann",
-                run(node("code", Map.of("operation", "template", "template", "Hello {{input}}")), "Ann")
+                run(
+                                node(
+                                        "code",
+                                        Map.of(
+                                                "operation",
+                                                "template",
+                                                "template",
+                                                "Hello {{input}}")),
+                                "Ann")
                         .output());
         // no template at all emits the input
         assertEquals("Ann", run(node("code", Map.of("operation", "template")), "Ann").output());
@@ -171,7 +197,8 @@ class WorkflowNodeExecutorCharacterizationTest extends WorkflowNodeExecutorChara
         NodeExecutionResult bad = run(node("code", Map.of("operation", "nope")), "x");
         assertEquals("SKIPPED", bad.status());
         assertEquals("Transform failed: Unrecognized operation 'nope'", bad.summary());
-        assertEquals("SKIPPED", run(node("code", Map.of("operation", "json_parse")), "{bad").status());
+        assertEquals(
+                "SKIPPED", run(node("code", Map.of("operation", "json_parse")), "{bad").status());
     }
 
     @Test
@@ -201,11 +228,11 @@ class WorkflowNodeExecutorCharacterizationTest extends WorkflowNodeExecutorChara
         when(svc.search(eq("q"), eq(3), eq(Set.of()))).thenReturn(List.of(a, b));
         NodeExecutionResult r = run(node("knowledge", Map.of("topK", 3)), "q");
         assertEquals("OK", r.status());
-        // Retrieved text is untrusted data: spotlighted, numbered with its source, input after the block.
-        assertTrue(r.output().contains("<<<UNTRUSTED_DATA id="), r.output());
-        assertTrue(r.output().contains("[1] Source: unknown, chunk 0\nA"), r.output());
-        assertTrue(r.output().contains("[2] Source: unknown, chunk 0\nB"), r.output());
-        assertTrue(r.output().endsWith("\n\nOriginal input: q"), r.output());
+        assertTrue(r.output().startsWith("Context from knowledge base:\n"));
+        assertTrue(Spotlight.hasUntrustedBlock(r.output()));
+        assertTrue(r.output().contains("[1] A"));
+        assertTrue(r.output().contains("[2] B"));
+        assertTrue(r.output().endsWith("\n\nOriginal input: q"));
         assertEquals("2 chunk(s) retrieved.", r.summary());
         assertEquals(
                 List.of(

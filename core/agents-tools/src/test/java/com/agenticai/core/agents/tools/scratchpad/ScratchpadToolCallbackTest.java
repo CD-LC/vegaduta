@@ -36,7 +36,9 @@ class ScratchpadToolCallbackTest {
         service = fake();
     }
 
-    /** A stand-in for the real note entity: the tools read key/body/sessionId/byteSize/updatedAt. */
+    /**
+     * A stand-in for the real note entity: the tools read key/body/sessionId/byteSize/updatedAt.
+     */
     private static ScratchpadNote note(UUID sessionId, String key, String body) {
         ScratchpadNote n = mock(ScratchpadNote.class);
         lenient().when(n.getKey()).thenReturn(key);
@@ -55,8 +57,8 @@ class ScratchpadToolCallbackTest {
 
     /**
      * In-memory {@link AgentScratchpadService}: notes keyed by (pad, key), upsert semantics, and
-     * the real {@code list} behaviour - a non-null session sees its own notes AND the agent pad,
-     * a null session sees the agent pad alone.
+     * the real {@code list} behaviour - a non-null session sees its own notes AND the agent pad, a
+     * null session sees the agent pad alone.
      */
     private static AgentScratchpadService fake() {
         AgentScratchpadService svc = mock(AgentScratchpadService.class);
@@ -65,17 +67,19 @@ class ScratchpadToolCallbackTest {
                 .thenAnswer(
                         inv -> {
                             ScratchpadNote n =
-                                    note(inv.getArgument(1), inv.getArgument(2), inv.getArgument(3));
+                                    note(
+                                            inv.getArgument(1),
+                                            inv.getArgument(2),
+                                            inv.getArgument(3));
                             store.put(storeKey(inv.getArgument(1), inv.getArgument(2)), n);
-                            return n;
+                            return new AgentScratchpadService.WriteResult(n, null, 0);
                         });
         when(svc.read(any(), any(), any()))
                 .thenAnswer(
                         inv ->
                                 Optional.ofNullable(
                                         store.get(
-                                                storeKey(
-                                                        inv.getArgument(1), inv.getArgument(2)))));
+                                                storeKey(inv.getArgument(1), inv.getArgument(2)))));
         when(svc.list(any(), any()))
                 .thenAnswer(
                         inv -> {
@@ -105,8 +109,7 @@ class ScratchpadToolCallbackTest {
     private JsonNode call(ScratchpadToolCallback.Kind kind, String json, String sessionId)
             throws Exception {
         return JsonMappers.plain()
-                .readTree(
-                        new ScratchpadToolCallback(service, kind, AGENT, sessionId).call(json));
+                .readTree(new ScratchpadToolCallback(service, kind, AGENT, sessionId).call(json));
     }
 
     @Test
@@ -126,7 +129,8 @@ class ScratchpadToolCallbackTest {
 
     @Test
     void writeThenReadRoundTripsTheBody() throws Exception {
-        JsonNode w = call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"plan\",\"body\":\"step 1\"}");
+        JsonNode w =
+                call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"plan\",\"body\":\"step 1\"}");
         assertThat(w.path("written").asBoolean()).isTrue();
         assertThat(w.path("scope").asText()).isEqualTo("session");
 
@@ -141,10 +145,7 @@ class ScratchpadToolCallbackTest {
     void sessionScopeIsTheDefaultOnlyWhileASessionIsKnown() throws Exception {
         // No session on the turn: a scope-less write lands on the agent pad (session_id null).
         JsonNode w =
-                call(
-                        ScratchpadToolCallback.Kind.WRITE,
-                        "{\"key\":\"k\",\"body\":\"v\"}",
-                        null);
+                call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"k\",\"body\":\"v\"}", null);
         assertThat(w.path("scope").asText()).isEqualTo("agent");
         JsonNode r =
                 call(ScratchpadToolCallback.Kind.READ, "{\"key\":\"k\",\"scope\":\"agent\"}", null);
@@ -154,10 +155,7 @@ class ScratchpadToolCallbackTest {
     @Test
     void sessionScopeKeepsSessionsApartAndAgentScopeIsSharedAcrossSessions() throws Exception {
         String otherSession = "other-" + UUID.randomUUID();
-        call(
-                ScratchpadToolCallback.Kind.WRITE,
-                "{\"key\":\"k\",\"body\":\"mine\"}",
-                SESSION);
+        call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"k\",\"body\":\"mine\"}", SESSION);
         call(
                 ScratchpadToolCallback.Kind.WRITE,
                 "{\"key\":\"k\",\"body\":\"theirs\"}",
@@ -168,7 +166,10 @@ class ScratchpadToolCallbackTest {
                 SESSION);
 
         JsonNode mine =
-                call(ScratchpadToolCallback.Kind.READ, "{\"key\":\"k\",\"scope\":\"session\"}", SESSION);
+                call(
+                        ScratchpadToolCallback.Kind.READ,
+                        "{\"key\":\"k\",\"scope\":\"session\"}",
+                        SESSION);
         assertThat(mine.path("body").asText()).isEqualTo("mine");
         JsonNode theirs =
                 call(
@@ -205,9 +206,15 @@ class ScratchpadToolCallbackTest {
                                 .path("error")
                                 .asText())
                 .contains("scope");
-        assertThat(call(ScratchpadToolCallback.Kind.WRITE, "{\"body\":\"v\"}").path("error").asText())
+        assertThat(
+                        call(ScratchpadToolCallback.Kind.WRITE, "{\"body\":\"v\"}")
+                                .path("error")
+                                .asText())
                 .contains("key");
-        assertThat(call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"k\"}").path("error").asText())
+        assertThat(
+                        call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"k\"}")
+                                .path("error")
+                                .asText())
                 .contains("body");
         assertThat(call(ScratchpadToolCallback.Kind.READ, "not json").has("error")).isTrue();
     }
@@ -232,11 +239,17 @@ class ScratchpadToolCallbackTest {
 
     @Test
     void deleteRemovesTheNoteFromItsPadOnly() throws Exception {
-        call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"k\",\"body\":\"s\",\"scope\":\"session\"}");
-        call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"k\",\"body\":\"a\",\"scope\":\"agent\"}");
-        JsonNode d = call(ScratchpadToolCallback.Kind.DELETE, "{\"key\":\"k\",\"scope\":\"session\"}");
+        call(
+                ScratchpadToolCallback.Kind.WRITE,
+                "{\"key\":\"k\",\"body\":\"s\",\"scope\":\"session\"}");
+        call(
+                ScratchpadToolCallback.Kind.WRITE,
+                "{\"key\":\"k\",\"body\":\"a\",\"scope\":\"agent\"}");
+        JsonNode d =
+                call(ScratchpadToolCallback.Kind.DELETE, "{\"key\":\"k\",\"scope\":\"session\"}");
         assertThat(d.path("deleted").asBoolean()).isTrue();
-        JsonNode agent = call(ScratchpadToolCallback.Kind.READ, "{\"key\":\"k\",\"scope\":\"agent\"}");
+        JsonNode agent =
+                call(ScratchpadToolCallback.Kind.READ, "{\"key\":\"k\",\"scope\":\"agent\"}");
         assertThat(agent.path("body").asText()).isEqualTo("a");
     }
 
@@ -258,8 +271,7 @@ class ScratchpadToolCallbackTest {
         assertThat(first.path("preview").asText()).isEqualTo("session note");
         JsonNode second = both.path("notes").get(1);
         assertThat(second.path("scope").asText()).isEqualTo("agent");
-        assertThat(second.path("preview").asText())
-                .hasSize(ScratchpadToolCallback.PREVIEW_CHARS);
+        assertThat(second.path("preview").asText()).hasSize(ScratchpadToolCallback.PREVIEW_CHARS);
 
         JsonNode sessionOnly = call(ScratchpadToolCallback.Kind.LIST, "{\"scope\":\"session\"}");
         assertThat(sessionOnly.path("count").asInt()).isEqualTo(1);
@@ -267,10 +279,7 @@ class ScratchpadToolCallbackTest {
 
         // A fresh session has no session notes, but the merged list still shows the agent pad.
         JsonNode freshSession =
-                call(
-                        ScratchpadToolCallback.Kind.LIST,
-                        "{}",
-                        "empty-" + UUID.randomUUID());
+                call(ScratchpadToolCallback.Kind.LIST, "{}", "empty-" + UUID.randomUUID());
         assertThat(freshSession.path("count").asInt()).isEqualTo(1);
         assertThat(freshSession.path("notes").get(0).path("scope").asText()).isEqualTo("agent");
 
@@ -286,5 +295,33 @@ class ScratchpadToolCallbackTest {
                                         .call("{}"));
         assertThat(agentRows.path("count").asInt()).isEqualTo(1);
         assertThat(agentRows.path("notes").get(0).path("scope").asText()).isEqualTo("agent");
+    }
+
+    @Test
+    void listReportsTotalBytesAcrossThePads() throws Exception {
+        call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"a\",\"body\":\"1234\"}");
+        call(
+                ScratchpadToolCallback.Kind.WRITE,
+                "{\"key\":\"b\",\"body\":\"123456\",\"scope\":\"agent\"}");
+
+        JsonNode both = call(ScratchpadToolCallback.Kind.LIST, "{}");
+        assertThat(both.path("total_bytes").asInt()).isEqualTo(10);
+        JsonNode sessionOnly = call(ScratchpadToolCallback.Kind.LIST, "{\"scope\":\"session\"}");
+        assertThat(sessionOnly.path("total_bytes").asInt()).isEqualTo(4);
+    }
+
+    @Test
+    void writeAtACappedPadSurfacesTheEvictedKey() throws Exception {
+        AgentScratchpadService.WriteResult result =
+                new AgentScratchpadService.WriteResult(
+                        note(ScratchpadToolCallback.sessionUuid(SESSION), "k", "v"),
+                        "stale-note",
+                        1);
+        when(service.write(any(), any(), any(), any())).thenReturn(result);
+        JsonNode w = call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"k\",\"body\":\"v\"}");
+        assertThat(w.path("written").asBoolean()).isTrue();
+        assertThat(w.path("evicted_key").asText()).isEqualTo("stale-note");
+        assertThat(w.path("expired_removed").asInt()).isEqualTo(1);
+        assertThat(w.path("note").asText()).contains("stale-note");
     }
 }

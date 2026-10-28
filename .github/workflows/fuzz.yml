@@ -1,16 +1,19 @@
 name: Fuzz
 
-# Coverage-guided fuzzing of the security-redaction regex chains with Jazzer -
-# the two spots that take model-visible/untrusted text and run sanitizing
-# regexes over it:
+# Coverage-guided fuzzing of the security-redaction regex chains via
+# ClusterFuzzLite (Jazzer under the hood for `language: jvm`). Same two targets
+# as before, now built + run inside the CFL image so the Fuzzing scorecard check
+# detects the integration:
 #
 #   * RedactingToolExecutionExceptionProcessor.redact   (chat)
 #   * SkillDraftScrubber.basic().scrub                   (agents-jobs)
 #
-# A ReDoS-style pathological input surfaces as a per-input timeout (-timeout)
-# and Jazzer stores the reproducer. Pull requests that touch either sanitizer
-# or this workflow get a short smoke run; the nightly schedule does the long
-# coverage-guided pass. Crashes upload as artifacts for reproduction.
+# Build integration lives in .clusterfuzzlite/ (project.yaml + Dockerfile +
+# build.sh); build.sh packages the module classes + test classpath into $OUT and
+# emits one executable launcher per target (the canonical CFL jvm layout).
+# A pathological (ReDoS) input is a libFuzzer timeout finding and uploads as a
+# crash artifact. Pull requests get a 90s code-change pass; the nightly schedule
+# and manual dispatches get a 15-minute batch pass.
 
 on:
   pull_request:
@@ -18,6 +21,7 @@ on:
       - "core/chat/src/main/java/com/agenticai/core/chat/RedactingToolExecutionExceptionProcessor.java"
       - "core/agents-jobs/src/main/java/com/agenticai/core/agents/skills/learning/SkillDraftScrubber.java"
       - "core/**/fuzz/**"
+      - ".clusterfuzzlite/**"
       - ".github/workflows/fuzz.yml"
   schedule:
     - cron: "41 5 * * *" # nightly, 05:41 UTC
@@ -30,89 +34,28 @@ concurrency:
   group: fuzz-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# No JAZZER_* env names anywhere: Jazzer maps them onto its own
-  # option registry - JAZZER_VERSION=v0.30.0 would become --version=v0.30.0.
-env:
-  JZ_RELEASE: "v0.30.0"
-  JZ_ASSET: "jazzer-linux-x86-64.tar.gz"
-  JZ_SHA256: "6eeaf0026d75599b07527d93b576593ce847cfca8b337a579971a5a9cdf792d0"
-
 jobs:
   fuzz:
-    name: Jazzer regex-sanitizer fuzz
+    name: ClusterFuzzLite jvm fuzz
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      - name: Build fuzzers
+        id: build
+        uses: google/clusterfuzzlite/actions/build_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
         with:
-          distribution: temurin
-          java-version: "21"
-          cache: maven
+          language: jvm
+          bad-build-check: true
 
-      - name: Build the fuzzed modules (test-classes + dependency classpath)
-        run: |
-          cd core
-          # install - not just compile: build-classpath resolves inter-module deps
-          # (com.agenticai:*) from ~/.m2, which a bare test-compile never fills.
-          mvn -B -ntp -q -pl chat,agents-jobs -am -DskipTests install
-          mvn -B -ntp -q -pl chat,agents-jobs test-compile
-          mvn -B -ntp -q -pl chat dependency:build-classpath \
-            -Dmdep.outputFile=/tmp/cp-chat.txt -Dmdep.includeScope=test
-          mvn -B -ntp -q -pl agents-jobs dependency:build-classpath \
-            -Dmdep.outputFile=/tmp/cp-jobs.txt -Dmdep.includeScope=test
-
-      - name: Fetch + verify Jazzer (sha256-pinned release tarball)
-        run: |
-          curl -fsSL -o /tmp/jazzer.tar.gz \
-            "https://github.com/CodeIntelligenceTesting/jazzer/releases/download/${JZ_RELEASE}/${JZ_ASSET}"
-          echo "${JZ_SHA256}  /tmp/jazzer.tar.gz" | sha256sum -c -
-          mkdir -p "$RUNNER_TEMP/jazzer"
-          tar xzf /tmp/jazzer.tar.gz -C "$RUNNER_TEMP/jazzer"
-          test -x "$RUNNER_TEMP/jazzer/jazzer"
-
-      - name: Run Jazzer on both redaction targets
-        env:
-          # PRs smoke-fuzz for 90s per target; the nightly run and manual
-          # dispatches get a real coverage-guided pass.
-          FUZZ_TIME: ${{ github.event_name == 'pull_request' && '90' || '900' }}
-        run: |
-          set -euo pipefail
-          CP="core/chat/target/classes:core/chat/target/test-classes:core/agents-jobs/target/classes:core/agents-jobs/target/test-classes:$(cat /tmp/cp-chat.txt /tmp/cp-jobs.txt | tr '\n' ':')"
-          mkdir -p crashes corpus
-          for target in \
-            com.agenticai.core.chat.fuzz.RedactionFuzzTarget \
-            com.agenticai.core.agents.skills.learning.fuzz.ScrubberFuzzTarget; do
-            echo "== fuzzing $target (${FUZZ_TIME}s) =="
-            "$RUNNER_TEMP/jazzer/jazzer" \
-              --cp="$CP" \
-              --target_class="$target" \
-              --instrumentation_includes=com.agenticai.** \
-              -max_total_time="$FUZZ_TIME" \
-              -timeout=10 \
-              -artifact_prefix=crashes/ \
-              -print_final_stats=1 \
-              corpus/ && rc=0 || rc=$?
-            # exit 77 = libFuzzer stopped on a finding; any other nonzero is a
-            # jazzer/env failure that must not pass silently.
-            if [ "$rc" -ne 0 ] && [ "$rc" -ne 77 ] && ! ls crashes/* >/dev/null 2>&1; then
-              echo "::error::jazzer itself failed for $target (exit $rc)"
-              exit 1
-            fi
-          done
-          # -timeout=10 means any input the sanitizers can't finish in 10s is a
-          # ReDoS-class finding; Jazzer drops a reproducer under crashes/.
-          if ls crashes/* >/dev/null 2>&1; then
-            echo "::error::Jazzer found reproducer inputs - see crashes/ artifact"
-            exit 1
-          fi
-
-      - name: Upload crash reproducers
-        if: failure()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      - name: Run fuzzers
+        uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
         with:
-          name: jazzer-crashes
-          path: crashes/
-          retention-days: 30
-          if-no-files-found: ignore
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          language: jvm
+          # PRs smoke-fuzz the code-change set for 90s; the nightly run and
+          # manual dispatches get a real coverage-guided batch pass.
+          mode: ${{ github.event_name == 'pull_request' && 'code-change' || 'batch' }}
+          fuzz-seconds: ${{ github.event_name == 'pull_request' && '90' || '900' }}
+          output-sarif: false

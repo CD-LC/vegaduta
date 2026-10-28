@@ -50,6 +50,7 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 | Search-capability-honesty agent (Devin) | local editor, worktree `vd-capfix-wt`, branch `fix/search-capability-honesty` | fixes for the incident where an agent with no configured search provider told the user it had no web access, then burned ~125k prompt tokens answering from memory: `core/agents-browser/.../web/WebSearchToolCallback` + `WebSearchProviderWiring` + `BuiltInWebTools` (a refusing `web_search` stub instead of silent absence, boot WARN on an unconfigured chain), `core/chat/` `ToolLoopTranscript`/`ToolLoopRunHooks`/`ToolLoopProperties`/`ArgumentSanitizingToolCallingManager`/`ChatPrompts` + `tool-loop.properties` + `prompts/en/toolresult.tool_budget.tokens.md` (cumulative per-run prompt-token soft stop, `app.chat.tools.maxPromptTokensPerTurn`), `core/agents-turn` `ChatContextCompaction`/`ContextCompactionProperties` (reserve headroom off the window) + `ChatTurnExecutor`/`BehaviourSettingsCatalog` (`chat.toolLoop.maxPromptTokensPerTurn`), `core/app-config/application.yml`, `web/messages/en.json` + the generated `settingsCatalog.snapshot.json`, `docs/configuration.md`, `docs/prompts.md`, `CHANGELOG.md` - **overlaps the KB/MCP agent's parallel audit work** (their `ArgumentSanitizingToolCallingManager`/`ChatTurnExecutor`/`application.yml`/`tool-loop.properties`/`docs/configuration.md`/`CHANGELOG.md` edits; see `AGENT-COORDINATION-NOTE.md` they left in the worktree - our edits sit in disjoint methods, take both on merge) and the release-readiness lead (`web/`), so the PR says so in its title and waits for their review |
 | Desktop-recipes lead (Devin, 5-agent fan-out) | local editor, worktree `vd-capfix-wt`, branch `feat/desktop-recipes` (PR #168) | "record once, replay later, monitor-or-auto" for the PERSONAL tier's `local_desktop_*` surface, mirroring browser recipes: new `desktop/` classes in `core/agents-tools` (entity `desktop_recipe` - spec/validator/recorder/replayer/service, `/api/desktop/recipes`, `run_desktop_recipe`, `/api/desktop/monitor/frame` proxy), `DesktopToolSource`/`DesktopAgentClient`/`RunBrowserRecipeToolCallback`/`BuiltInToolClassifications*` small edits, `services/desktop-agent` (`GET /frame`, `GET /capabilities`, bearer-auth on every route), `application.yml` + `.env.example` + `docs/configuration.md`, `web/app/components/desktop/**` + `web/app/lib/api/desktopRecipes.ts` + in-turn live monitor + console screen dock, `CHANGELOG.md` - feature is OFF by default, personal-tier only. V672 was adopted by the scratchpad agent, so the recipe table renumbered to a fresh version. Overlaps the release-readiness lead (`web/app/**`), so the PR says so and waits for their review |
 || OSS-integrations agent (Devin) | local editor, branch `feat/oss-integrations-docling-composio-n8n` | the three Tier-1 integrations from the 2026-10 OSS-integration review: `services/docling/**` (new FastAPI Docling adapter) + `core/knowledge` Docling routing (`DoclingConversionService`, `SidecarClient`, `KnowledgeController`, `KnowledgeUrlIngester`, `KnowledgeIngestionService`, `application-knowledge.yml`), Composio/Rube remote-MCP catalog entries (`core/mcp` `McpPlatformAndRemoteCatalog`, `web/app/components/agents/templatePrereqs.ts`, `templateAudience.ts`), n8n bridge (`examples/integrations/n8n/`, `docs/integrations/`, `mkdocs.yml`), `deploy/compose/{docker-compose,lite}*.yml` + `.env.example` + `scripts/vegaduta{,.ps1}` + `services/lock-requirements.sh`, `AGENTS.md`, `docs/configuration.md`, `CHANGELOG.md`, this file. Overlaps the release / install agent (`scripts/vegaduta`, `deploy/compose`, `.env.example`, install tests), the release-readiness lead (`web/app/**`, `docs/`), and the KB-URL-ingest agent (`core/knowledge`, `.env.example`), so the PR says so in its title and waits for their reviews |
+| Taint & RAG propagation agent (Devin) | local worktree `/tmp/vd-taint`, branch `fix/turn-taint-retrieval` | taint propagation for auto-injected retrieval (`ChatMemoryRecall`, `ChatPromptAssembler`, `KnowledgeNodeHandler`, `Spotlight`), inbound channel seeding (`TurnContext.taint()`), `AgentToolProvider` step-counter binding |
 
 ## What production must run
 
@@ -130,6 +131,49 @@ break the build standalone.
 ## Log
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
+
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): reviewed PR #254's
+  CI failures (piper-tts GPL-3.0 dep review rejection, main.py 691>678 file
+  ratchet, ruff) — `d51860556` resolves all three and is verified locally
+  (ruff 0.12.4 gate clean on changed files, main.py now 555, MIT binary path
+  sha256-pinned). NOTE: worktree `/private/tmp/va-fix` still has pre-fix
+  `3d6776cd7` checked out — pull before touching it further. Watching CI on
+  the new head; also re-triggered #253's flaky AgeOptionalIT run (flyway
+  history PK race, unrelated to that PR's catalog change).
+- 2026-10-28, taint & RAG propagation agent (Devin, worktree `/tmp/vd-taint`):
+  branch `fix/turn-taint-retrieval`. Fixed auto-injected retrieval and inbound
+  turn taint propagation gap: long-term memory recall now marks `recall_related_facts`
+  when stored facts enter context (leaving static user blocks clean), workflow `knowledge`
+  node spotlight-wraps output with chunk citations, downstream agent nodes detect
+  spotlight markers and mark `untrusted_input`, inbound channel entries seed
+  `TurnContext.taint()`, and `AgentToolProvider` binds `TurnContext` taint to the
+  step counter so tool gates and approval checks fire properly.
+
+- 2026-10-28, academy author (Devin, worktree `vd-academy`): ACTIVE CLAIM —
+  full re-record of Series A (episodes 00-10) on the flicker-free recorder
+  with the seeded Ledger newsroom dataset, Kokoro-82M local neural narration
+  (`academy/tools/narrate-kokoro.mjs`, new preference above edge-tts),
+  script passes rewritten to story-driven real-world newsroom framing, then
+  push `feat/academy-video-pipeline` + open the PR to main. Batch-committing
+  agent: please hold off sweeping academy/ until this lands — ping here if
+  you need to touch it first.
+
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): ACTIVE CLAIM on
+  Series-A lessons **06-10** (`06-guardrails`, `07-memory-learning`,
+  `08-quality`, `09-operate`, `10-ship`) - scripts + lesson.md twins only.
+  Lessons 00-05 are committed (`8e670962e`). If you are the batch-committing
+  agent, sweep `academy/lessons/0[6-9]-*/` and `10-*/` like the earlier ones;
+  do not re-number.
+
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): EXTENDED CLAIM —
+  Series-B deep-dive lessons for all 62 personal-edition routes, plus
+  narration upgrade to ElevenLabs (`academy/tools/narrate-elevenlabs.mjs`,
+  edge-tts stays the no-key fallback). Enterprise-only routes
+  (`/studio`, `/eval`, `/roi`, `/admin/mcp-servers`, `/admin/sso`,
+  `/admin/branding`, `/admin/payments`, `/admin/api-keys`,
+  `/admin/agent-trust`, `/admin/leads`, `/admin/commerce`,
+  `/shared-with-me`, `/directory`) are deferred until a lite/full stack
+  is installed for capture.
 
 - 2026-10-27, OSS-integrations agent (local Devin session): pushed
   `feat/oss-integrations-docling-composio-n8n` and opened a PR for the three Tier-1
@@ -516,3 +560,103 @@ num_ctx/num_batch/keep_alive/reasoning_effort/response_format/tool_choice; and
 the SSRF-guard mechanics). getting-started.md + operations/README.md gained the
 previously undocumented `scripts/vegaduta reset-password` local-account
 recovery path.
+
+### Voice: piper local TTS provider (Devin, 2026-10-27)
+
+services/voice-agent gained a third TTS backend: app/tts_piper.py wraps the
+`piper` subprocess CLI in the same one-shot ChunkedStream shape as
+tts_sarvam.py; VOICE_AGENT_TTS_PROVIDER=piper selects it (deliberately not in
+"auto"'s ordering - a local voice is a conscious quality pick). The binary is
+the MIT rhasspy/piper release tarball, fetched per-arch + sha256-pinned in the
+Dockerfile via piper_voices_download.py --binary (the piper-tts PyPI package's
+>=1.3 releases are the GPL-3.0 piper1-gpl lineage, which dependency review
+rejects). Dockerfile also bakes en_US-lessac-medium (+json) sha256-verified.
+TTS selection moved to app/tts_select.py (main.py file-size ratchet). Verified:
+3 tts_piper pytest green, ruff clean on changed files, imports resolve.
+### CI: fuzz workflow -> ClusterFuzzLite (Devin, 2026-10-27)
+
+Scorecard's Fuzzing check only detects CFL/OSS-Fuzz integration, not a bare
+jazzer call, so .github/workflows/fuzz.yml now drives
+google/clusterfuzzlite/actions (sha-pinned v1). New .clusterfuzzlite/
+(project.yaml language:jvm, Dockerfile with pinned Temurin 21 + maven,
+build.sh) packages the two sanitizer targets into the canonical $OUT layout
+with jazzer launchers. Triggers/fuzz windows unchanged. Follow-ups on the
+same PR: build.sh jlinks JRE 21 into $OUT (the CFL run container ships JDK
+17 - UnsupportedClassVersionError - and jazzer_driver needs jdk.attach +
+JVM_LD_LIBRARY_PATH repointed; --cp globs expanded at run time). Dispatched
+run 40555305979: RedactionFuzzer 590,710 + ScrubberFuzzer 608,809 execs, 0
+crashes. Gate fixes: /.clusterfuzzlite added to dependabot docker dirs;
+--no-install-recommends (DS-0029); scoped .trivyignore entries for the
+build-only image (DS-0002/DS-0026) and the spring-webmvc 6.2.19 CVEs whose
+fix is the Spring 7 migration (#99) - the CVE exemption is also PR'd to
+main directly as #261 since it blocks every open PR's Trivy scan.
+
+### ACTIVE CLAIM: workflow retry side-effect fix (Devin, 2026-10-27)
+
+Defect "workflow retries duplicate side effects": RetryPolicy.isRetryableNode
+excluded only `output`, so bulk_email/tool/crm_lead/device_control/media/
+sub-workflow/non-GET http nodes all got retries+1 attempts; the Temporal
+activity stub applied the run retry policy to every node type the same way.
+Touching only core/workflow: RetryPolicy now delegates to
+NodeErrorStrategy.isIrreversible (retryUnsafe opt-in), TemporalRunState picks
+a single-attempt activity stub for irreversible nodes, ToolNodeHandler claims
+(run, node, iteration+input) through WorkflowOutputDedupGuard. Extended the
+same claim (still PR #256, same worktree) to two more workflow defects:
+(1) approval/human-input/requiresApproval nodes inside loop/fan-out/parallel/
+sub-flow bodies are now rejected at save time by the new
+WorkflowApprovalPlacement (resume carries no iteration cursor, so a nested
+halt cannot resume faithfully); (2) ParallelBranchRunner now joins branches
+in completion order (fail-fast) instead of index order, and the platform/
+docs copy that claimed both engines enforce stepTimeoutSeconds is corrected
+to label the legacy engine best-effort (per-step timeout is Temporal-only;
+crashed legacy runs are reaped FAILED, not resumed). Worktree:
+/tmp/vd-retry-fix on branch fix/workflow-retry-side-effects. Please do not
+reset the shared ~/Documents checkout while this is in flight - a concurrent
+`git reset --hard` already wiped one round of these edits.
+
+### Trivy: spring-webmvc 6.2.x CVE exemptions (Devin, 2026-10-28)
+
+Newly published CVE-2026-47890 / CVE-2026-47884 (critical, spring-webmvc
+6.2.19) fail every PR's fs scan since the feed update - they are unrelated
+to any PR's diff. No 6.2.x fix exists; the only patched line is Spring
+Framework 7.0.9+ (the #99 migration). Scope-accepted to core/omnichannel +
+core/elevenlabs poms with the reason so the Trivy gate unblocks repo-wide;
+remove when #99 lands.
+
+### Scratchpad: directive + lifecycle + admin REST (Devin, 2026-10-27)
+
+Claimed: core/agents-tools scratchpad package, agents ResolvedToolList,
+agents-turn DirectiveKeys/ChatSystemPromptComposer/ChatPromptAssembler/
+PromptPreviewService/PromptDirectiveRegistry + prompts/en/directive.scratchpad.md,
+app-config application.yml scratchpad block, docs/configuration.md,
+deploy/compose/.env.example scratchpad envs.
+
+Four changes, one PR: (1) directive.scratchpad - a standing "you have a
+private scratchpad" block emitted only when the pad is reachable this turn
+(on the tool list, or offered-and-deferred behind search_tools; the fact is
+recorded on ResolvedToolList at resolution because deferral moves the tools
+off the final list); (2) scratchpad_list is size-aware (key/scope/byte_size/
+bounded preview/total_bytes, bodies via scratchpad_read); (3) full pads evict
+LRU-by-updated_at instead of failing (evict-oldest-on-cap, default on; write
+results name evicted_key + expired_removed), plus lazy TTL sweeps
+(session-note-ttl 30d, agent-note-ttl off); (4) read-only admin REST
+GET /api/agents/{agentId}/scratchpad[?session] and /{key} gated by
+AgentService.requireAccess(VIEWER) - no write/delete by design, session
+"agent"/omitted reads the long-term pad.
+### Dependabot lock autofix (Devin, 2026-10-28)
+
+New `.github/workflows/dependabot-autofix.yml` regenerates
+`services/*/requirements.lock` on Dependabot pip pull requests (the failure
+class that hit #264) and re-dispatches ci/codeql/trivy on the new commit, since
+a `GITHUB_TOKEN` push suppresses `pull_request` runs. Docs updated in
+`docs/maintainers/dependabot-prs.md`. No overlap with claimed areas: new file
+only, no edits to `ci.yml`/`static-gates.yml`/`release.yml` or `scripts/ci`.
+### Security: public-schema refusal + fail-closed tenant guard (Devin, 2026-10-28)
+
+Completed an abandoned worktree's SEC-056 follow-up: TenantSchemaResolver no
+longer exempts the legacy 'public' schema from reserved-name refusal,
+TenantStatusGuardImpl rejects tenant_id=public before its schemaExists
+fallback and fails closed on SQL errors, and SecurityConfig requires at
+least one client-bound JWT check (azp or audience) on non-Keycloak issuers.
+Verified: tenancy+security 749 tests green, full reactor compiles.
+Worktree: /tmp/vd-taint-tenancy.

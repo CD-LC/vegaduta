@@ -219,6 +219,7 @@ updates:
       - /services/whatsapp-qr
       - /services/browser-runner
       - /deploy/omnibus
+      - /.clusterfuzzlite
       - /examples/mcp-servers/http-gateway
       - /core/sdlc/e2b-template
       - /infra/keycloak/phase1-realm

@@ -108,8 +108,12 @@ export async function toJson<T = unknown>(res: Response): Promise<T> {
     // expected state with its own clear wording - never the generic error toast.
     const guard: any = knownGuardError(res.status, body);
     if (guard) {
+      // tenant_missing (403, JWT without tenant_id): silent here - OnboardingGate
+      // is the dedicated UI for that state, and the body's "sign out and back in"
+      // toast re-popped on every call and told users to loop a sign-in that can
+      // never fix a pending onboarding.
       if (guard.readOnly) toast.info(guard.message);
-      else toast.warn(guard.message);
+      else if (!guard.tenantMissing) toast.warn(guard.message);
       throw guard;
     }
     // Global HUD popup (ToastHost.js) - fires here, once, for every failed

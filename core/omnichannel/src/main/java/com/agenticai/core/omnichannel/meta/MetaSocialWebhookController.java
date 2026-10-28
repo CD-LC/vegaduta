@@ -305,6 +305,7 @@ public class MetaSocialWebhookController {
                         .build();
         TurnContext turnContext =
                 TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+        turnContext.taint().mark("inbound:meta");
         // Stage 4 (Chat file upload) added trailing attachmentKey/attachmentMimeType
         // params to AgentChatService.chat() - null/null here, same reasoning as
         // every other omnichannel inbound path (see DiscordWebhookController's comment).

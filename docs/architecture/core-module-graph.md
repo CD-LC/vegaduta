@@ -9,7 +9,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 `core/app/src/test/java/com/agenticai/core/archrules/ModuleBoundaryRulesTest.java`.
 
 - Reactor modules: **59**
-- Sibling edges (compile/runtime): **505**
+- Sibling edges (compile/runtime): **506**
 - Kernel -> vendor module edges: **0**
 - Vendor -> vendor module edges: **0**
 
@@ -34,7 +34,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | agents-interop | kernel | 58 | agents, agents-budget, agents-turn, audit, chat, json, prompts, providers, security, settings, sharing, tenancy |  |
 | agents-jobs | kernel | 180 | agents, agents-browser, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, settings, sharing, tenancy |  |
 | agents-studio | kernel | 100 | agents, agents-tools (test), agents-turn, approval, chat, guardrails, json, knowledge, mcp, providers, rl, sdlc, security, sharing, tenancy |  |
-| agents-tools | kernel | 286 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, prompts, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
+| agents-tools | kernel | 288 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, prompts, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
 | agents-turn | kernel | 405 | agents, agents-budget, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, prompts, providers, rl, security, settings, sharing, storage, tenancy |  |
 | agentspi | kernel | 17 | security |  |
 | app | distribution | 198 | admin, agents, agents-browser, agents-budget, agents-chatport, agents-interop, agents-jobs, agents-studio, agents-tools, agents-turn, app-config, approval, audit, billing, brief, chat, crypto, crypto-kms, devices, documentgen, **elevenlabs**, eventbus, **google**, guardrails, **imagegen**, json, knowledge, mcp, mcpserver, omnichannel, omnichannel-social, **payments**, platform, prompts, providers, quality, rl, **sarvam**, sdlc, secrets, security, settings, sharing, storage, templates, tenancy, voice, workflow, workflow-portability |  |
@@ -82,7 +82,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | templates | kernel | 44 | agents, agents-turn, audit, security, tenancy, workflow |  |
 | tenancy | kernel | 230 | admin, audit, billing, dbauth, security, storage |  |
 | voice | kernel | 38 | agents, agents-turn, crypto, **elevenlabs** (test), json, providers, **sarvam** (test), security, speech, storage |  |
-| workflow | kernel | 282 | admin, agents, agents-browser, agents-tools, agents-turn, approval, audit, chat, crypto, devices, documentgen, eventbus, **google** (test), json, knowledge, omnichannel, providers, quality, security, sharing, tenancy, voice, workflow-expression |  |
+| workflow | kernel | 283 | admin, agents, agents-browser, agents-tools, agents-turn, approval, audit, chat, crypto, devices, documentgen, eventbus, **google** (test), guardrails, json, knowledge, omnichannel, providers, quality, security, sharing, tenancy, voice, workflow-expression |  |
 | workflow-expression | kernel | 23 | json |  |
 | workflow-portability | kernel | 30 | agents, agents-studio, devices, json, knowledge, omnichannel, security, sharing, workflow, workflow-expression |  |
 
@@ -635,6 +635,7 @@ graph LR
   workflow --> devices
   workflow --> documentgen
   workflow --> eventbus
+  workflow --> guardrails
   workflow --> json
   workflow --> knowledge
   workflow --> omnichannel
