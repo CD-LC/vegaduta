@@ -5,7 +5,7 @@
 // imagegen.ts / whisper.ts / kokoro.ts:
 //
 //   - edgeAudioGenAvailable() answers capability WITHOUT downloading anything.
-//   - ensureAudioGenModel() is the ONLY entry that may start the ~1.8 GB
+//   - ensureAudioGenModel() is the ONLY entry that may start the ~1.1 GB
 //     acquisition, called from an explicit user gesture behind
 //     EDGE_BRANDING.audioGenDownloadDetails consent copy (E-0b rule 2).
 //   - generateAudioLocally() NEVER throws; without a ready model it answers
@@ -19,9 +19,12 @@ import { addMediaArtifact, type MediaArtifact } from "./mediaRegistry";
 import type { AudioGenWorkerRequest, AudioGenWorkerResponse } from "./audiogenWorker";
 
 export const AUDIO_GEN_ASSET_ID = "edge-audiogen-musicgen";
-/** MusicGen-small ONNX is ~1.8 GB fp32 (fp16 on the WebGPU path). Honest number
- * for the consent copy and storage-headroom check. */
-export const AUDIO_GEN_MODEL_SIZE_BYTES = 1_800_000_000;
+/** MusicGen-small ONNX per runtime path: ~1.13 GB fp16 (WebGPU + shader-f16),
+ * ~570 MB q4 (WebGPU without it), ~600 MB q8 (wasm). The fp32 files are NOT
+ * usable in a browser — the 1.7 GB decoder alone can't session-create in the
+ * 4 GB wasm heap. Largest real path is fp16; honest number for the consent
+ * copy and storage-headroom check. */
+export const AUDIO_GEN_MODEL_SIZE_BYTES = 1_200_000_000;
 const AUDIO_GEN_CACHED_KEY = "edge.audiogen.cached.musicgen-small";
 const GENERATE_TIMEOUT_MS = 300_000;
 const LOAD_IDLE_TIMEOUT_MS = 300_000;
@@ -70,7 +73,7 @@ export function isAudioGenModelCached(): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Audio gen runs on wasm too, but ~1.8 GB of weights plus a wasm inference loop
+ * Audio gen runs on wasm too, but ~600 MB of weights plus a wasm inference loop
  * on an 4GB laptop is a worse answer than honest refusal. Gate on WebGPU OR on
  * the honest "8GB+ device" path - either way it's a device question, not a
  * network one.

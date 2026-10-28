@@ -107,7 +107,7 @@ export const EDGE_BRANDING = {
   audioGenModelDisplayName: "On-device audio generation (MusicGen)",
   /** E-0b rule 2 one-line consent copy, shown BEFORE ensureAudioGenModel() runs. */
   audioGenDownloadDetails:
-    "On-device audio generation — about 1.8 GB, one-time download from the Hugging Face model hub. " +
+    "On-device audio generation — about 1.1 GB, one-time download from the Hugging Face model hub. " +
     "Cached on this device and reused offline; prompts and clips never leave your browser.",
 
   // -- F-1 update channel (chip + panel) -----------------------------------
