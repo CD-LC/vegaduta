@@ -3,8 +3,9 @@ import { APP_BASE_URL } from "./helpers/e2e-env";
 
 /**
  * Playwright project for the PERSONAL edition of the console (VEGADUTA_EDITION=personal: local sign-in, no
- * Keycloak, no billing, one owner). It runs exactly one spec, tests/personal-edition.spec.ts, against a running
- * personal stack; none of the Keycloak-stack suites belong here and none of them run in this project.
+ * Keycloak, no billing, one owner). It runs the personal specs — tests/personal-edition.spec.ts (the route/
+ * feature contract) and tests/personal-smoke.spec.ts (the release smoke: sign-in, keyboard, edge surface, one
+ * real assistant turn) — against a running personal stack; the Keycloak-stack suites do not run in this project.
  *
  *   # 1. a personal stack is up (scripts/vegaduta personal) and its owner has finished first-run setup
  *   # 2. from tests/e2e:
@@ -26,13 +27,16 @@ process.env.E2E_EDITION ||= "personal";
 
 export default defineConfig({
   testDir: "./tests",
-  testMatch: "personal-edition.spec.ts",
+  testMatch: /personal-(edition|smoke)\.spec\.ts/,
   // One owner, one login throttle: keep the signed-in checks sequential.
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
   retries: 1,
-  reporter: [["html", { open: "never", outputFolder: "playwright-report-personal" }], ["list"]],
+  reporter: [
+    ["html", { open: "never", outputFolder: "playwright-report-personal" }],
+    ["list"],
+  ],
   outputDir: "test-results-personal",
   timeout: 60_000,
   expect: { timeout: 10_000 },
@@ -49,7 +53,10 @@ export default defineConfig({
   projects: [
     {
       name: "personal-chromium",
-      use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1440, height: 900 },
+      },
     },
   ],
 });

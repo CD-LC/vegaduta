@@ -704,3 +704,18 @@ Keyboard feature: claimed `web/app/components/keyboard/**`,
 for the release-readiness lead's review per the `web/app/**` overlap.
 Deployed to the maintainer's local personal stack from
 `deploy/local-everything` (worktree /tmp/vd-deploy-all).
+
+### Personal release smoke suite (Devin, 2026-10-28)
+
+Claimed `tests/e2e/tests/personal-smoke.spec.ts`,
+`tests/e2e/playwright.personal.config.ts` for the beta-release smoke:
+eight checks against a live personal stack covering the journeys a green
+unit suite cannot prove — the `/api/local-auth/config` contract, a
+rejected bad login, the rendered sign-in panel, the unenrolled-browser
+PIN hint, the edge manifest's contextWindowSize fields, the edge console
+media cards, the locale keyboard auto-open/type/close journey, and one
+real assistant turn through the configured model. Signed-in checks need
+`E2E_PERSONAL_EMAIL`/`E2E_PERSONAL_PASSWORD` and skip with a reason
+without them. Branch `test/personal-release-smoke`; signed-out half
+verified 5/5 green on the maintainer's local personal stack (39 passed
+incl. the edition suite, 0 failed).
