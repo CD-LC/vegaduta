@@ -50,6 +50,47 @@ class A2aAgentCardApi:
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/a2a/agent-card.json")
 
 
+class A2aConsoleApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def policy(self) -> Dict[str, Any]:
+        """Policy.
+
+        GET /api/a2a/console/policy
+
+        Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+        """
+        return self._http.request("GET", "/api/a2a/console/policy")
+
+    def tasks(self, *, direction: Optional[str] = None, state: Optional[str] = None, agent_id: Optional[str] = None, limit: Optional[int] = None) -> Dict[str, Any]:
+        """Tasks.
+
+        GET /api/a2a/console/tasks
+
+        Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+        """
+        return self._http.request("GET", "/api/a2a/console/tasks", query={"direction": direction, "state": state, "agentId": agent_id, "limit": limit})
+
+    def task(self, id: str) -> Dict[str, Any]:
+        """Task.
+
+        GET /api/a2a/console/tasks/{id}
+
+        Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+        """
+        return self._http.request("GET", f"/api/a2a/console/tasks/{quote_path(id)}")
+
+    def cancel(self, id: str, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
+        """Cancel.
+
+        POST /api/a2a/console/tasks/{id}:cancel
+
+        Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+        """
+        return self._http.request("POST", f"/api/a2a/console/tasks/{quote_path(id)}:cancel", headers={"Idempotency-Key": idempotency_key})
+
+
 class A2aJsonRpcApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -13328,6 +13369,7 @@ class VegadutaClient:
     ) -> None:
         self.http = HttpClient(base_url=base_url, token=token, timeout=timeout, headers=headers)
         self.a2a_agent_card = A2aAgentCardApi(self.http)
+        self.a2a_console = A2aConsoleApi(self.http)
         self.a2a_json_rpc = A2aJsonRpcApi(self.http)
         self.a2a_rest = A2aRestApi(self.http)
         self.abuse_monitor = AbuseMonitorApi(self.http)

@@ -13,6 +13,7 @@ import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import java.security.Principal;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -24,8 +25,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
@@ -279,6 +282,48 @@ public class A2aTaskService {
         }
         return store.find(taskId, currentTenantId(), currentSubject(principal))
                 .orElseThrow(() -> A2aError.taskNotFound(taskId));
+    }
+
+    /**
+     * The tenant's whole task set - every subject's, both directions - for the admin console
+     * ({@code A2aConsoleController}). The controller's {@code @PreAuthorize} manager check is what
+     * replaces the per-subject ownership rule {@link A2aTaskStore#find} applies on the protocol
+     * surface.
+     */
+    public List<A2aTask> consoleTasks() {
+        return store.listForTenant(currentTenantId());
+    }
+
+    /**
+     * @throws ResponseStatusException 404 when unknown, expired, or in another tenant.
+     */
+    public A2aTask consoleGet(String taskId) {
+        return store.findForTenant(taskId, currentTenantId())
+                .orElseThrow(
+                        () ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND, "A2A task not found"));
+    }
+
+    /**
+     * Console cancel - same rules as the protocol path ({@link #cancel}): only a non-terminal task
+     * can be canceled, and a detached cross-replica record flips in Redis so the owner's heartbeat
+     * honours it. Outbound ({@code a2a-out-*}) records are bookkeeping over a remote whose state
+     * this deployment does not control; canceling one only annotates the local record, which is
+     * still the honest thing to show the operator who asked.
+     *
+     * @throws ResponseStatusException 404 unknown; 409 already terminal.
+     */
+    public A2aTask consoleCancel(String taskId) {
+        A2aTask task = consoleGet(taskId);
+        if (!task.cancel()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "A2A task " + taskId + " is already " + task.snapshot().state().wire(A2aVersion.V1_0));
+        }
+        store.save(task);
+        audit(task, AuditOutcome.SUCCESS, "canceled from the console");
+        return task;
     }
 
     /**
