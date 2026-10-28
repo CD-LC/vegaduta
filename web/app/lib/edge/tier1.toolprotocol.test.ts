@@ -206,8 +206,11 @@ describe("edge/tier1 tool-call protocol (triggered tags + both envelope shapes)"
       respondInOrder(fakeEngine, [reply, "2 + 2 is 4."]);
       const seen: string[] = [];
       const toolEvents: Array<{ name: string; phase: string }> = [];
-      const out = await s.prompt("what is 2+2", (d: string) => seen.push(d), undefined, (e: any) =>
-        toolEvents.push({ name: e.name, phase: e.phase })
+      const out = await s.prompt(
+        "what is 2+2",
+        (d: string) => seen.push(d),
+        undefined,
+        (e: any) => toolEvents.push({ name: e.name, phase: e.phase })
       );
 
       expect(out).toBe("2 + 2 is 4.");
@@ -258,8 +261,11 @@ describe("edge/tier1 tool-call protocol (triggered tags + both envelope shapes)"
       "I can't generate audio on this setup.",
     ]);
     const toolEvents: Array<{ name: string; phase: string }> = [];
-    await s.prompt("make a rain sound", () => {}, undefined, (e: any) =>
-      toolEvents.push({ name: e.name, phase: e.phase })
+    await s.prompt(
+      "make a rain sound",
+      () => {},
+      undefined,
+      (e: any) => toolEvents.push({ name: e.name, phase: e.phase })
     );
 
     const calls = fakeEngine.__calls as Array<{ messages?: Array<{ role: string; content: string }> }>;
@@ -358,8 +364,11 @@ describe("edge/tier1 tool-call protocol (triggered tags + both envelope shapes)"
       respondInOrder(fakeEngine, [envelope, "should never be asked for"]);
       const seen: string[] = [];
       const toolEvents: unknown[] = [];
-      const out = await s.prompt("what is 2+2", (d: string) => seen.push(d), undefined, (e: unknown) =>
-        toolEvents.push(e)
+      const out = await s.prompt(
+        "what is 2+2",
+        (d: string) => seen.push(d),
+        undefined,
+        (e: unknown) => toolEvents.push(e)
       );
 
       expect(out).toBe(envelope);
