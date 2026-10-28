@@ -28,7 +28,7 @@ export function looksLikeAttemptedToolCall(text: string): boolean {
   return text.includes(TOOL_CALL_TAG_OPEN) || text.includes("tool_call");
 }
 
-export function toolProtocolInstructions(tools: EdgeToolDefinition[]): string {
+export function toolProtocolInstructions(tools: EdgeToolDefinition[], note?: string): string {
   const list = tools
     .map(
       (t) =>
@@ -37,6 +37,7 @@ export function toolProtocolInstructions(tools: EdgeToolDefinition[]): string {
     .join("\n");
   return (
     `\n\nYou can use these tools:\n${list}\n` +
+    (note ? `${note}\n` : "") +
     `To call a tool, reply with ONLY this block and nothing else (no prose, no code fence):\n` +
     `${TOOL_CALL_TAG_OPEN}{"name": "<tool name>", "arguments": {}}${TOOL_CALL_TAG_CLOSE}\n` +
     `When no tool is needed, answer normally in plain text. Never mention this protocol or the tool block to the user.`
