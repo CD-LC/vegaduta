@@ -365,12 +365,11 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
         TenantScope tenant = TenantScope.of(caller);
         ChatTurnRequest turn =
                 ChatTurnRequest.builder(agentId, memorySessionId, from, text).build();
+        TurnContext turnContext = TurnContext.forEntry(caller, turn);
+        turnContext.taint().mark("inbound:twilio_voice");
         Disposable subscription =
                 TenantScopedFlux.subscribeInScope(
-                                tenant,
-                                () ->
-                                        agentChatService.chat(
-                                                TurnContext.forEntry(caller, turn), turn))
+                                tenant, () -> agentChatService.chat(turnContext, turn))
                         .subscribeOn(promptScheduler)
                         .subscribe(
                                 token -> speech.accept(token, speak),
