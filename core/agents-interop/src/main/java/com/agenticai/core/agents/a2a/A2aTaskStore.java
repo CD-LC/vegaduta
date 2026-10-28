@@ -460,9 +460,9 @@ public class A2aTaskStore {
 
     /**
      * Every task record this deployment still holds for {@code tenantId}: this JVM's live map plus,
-     * in {@code redis} mode, detached snapshots other replicas mirrored ({@link A2aStoredTask#toTask()} -
-     * state/reply for reading, no live subscription). Local entries win the dedup because their
-     * view of an in-flight task is fresher than the last mirrored snapshot.
+     * in {@code redis} mode, detached snapshots other replicas mirrored ({@link
+     * A2aStoredTask#toTask()} - state/reply for reading, no live subscription). Local entries win
+     * the dedup because their view of an in-flight task is fresher than the last mirrored snapshot.
      *
      * <p><b>Console surface only.</b> Unlike {@link #find} this matches on tenant ALONE, not
      * tenant+subject - the console controller re-gates callers on the manager role, which is what
@@ -501,8 +501,9 @@ public class A2aTaskStore {
     /**
      * {@link #find} minus the subject check, for the console's get/cancel: the caller's manager
      * role (enforced by the controller) stands in for task ownership. A detached record restored
-     * from Redis can still be canceled - {@link A2aTask#cancel()} on it flips the mirrored record, which is
-     * exactly the remote-cancel path {@link #honourRemoteCancel} honours on the owning replica.
+     * from Redis can still be canceled - {@link A2aTask#cancel()} on it flips the mirrored record,
+     * which is exactly the remote-cancel path {@link #honourRemoteCancel} honours on the owning
+     * replica.
      */
     public Optional<A2aTask> findForTenant(String taskId, String tenantId) {
         if (taskId == null) {
@@ -632,5 +633,4 @@ public class A2aTaskStore {
             log.debug("A2A task store sweep expired {} tasks", expired);
         }
     }
-
 }

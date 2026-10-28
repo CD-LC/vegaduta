@@ -319,7 +319,10 @@ public class A2aTaskService {
         if (!task.cancel()) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "A2A task " + taskId + " is already " + task.snapshot().state().wire(A2aVersion.V1_0));
+                    "A2A task "
+                            + taskId
+                            + " is already "
+                            + task.snapshot().state().wire(A2aVersion.V1_0));
         }
         store.save(task);
         audit(task, AuditOutcome.SUCCESS, "canceled from the console");

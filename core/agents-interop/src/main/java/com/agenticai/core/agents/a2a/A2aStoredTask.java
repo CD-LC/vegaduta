@@ -5,8 +5,8 @@ import java.util.UUID;
 
 /**
  * The serialised half of a task: everything {@link A2aTask#restore} needs, with instants as epoch
- * millis and the agent id as a string so a plain ObjectMapper round-trips it (no JavaTime
- * module on this path). Kept in its own file so the store stays under the file-size ratchet.
+ * millis and the agent id as a string so a plain ObjectMapper round-trips it (no JavaTime module on
+ * this path). Kept in its own file so the store stays under the file-size ratchet.
  */
 record A2aStoredTask(
         String id,
