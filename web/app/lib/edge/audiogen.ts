@@ -253,9 +253,10 @@ function runLoad(): Promise<void> {
     );
     if (response.type !== "loaded") {
       const detail = response.type === "error" ? response.detail : "unexpected worker reply";
+      const label = alreadyCached ? "Could not start on-device audio generation" : "Download failed";
       downloadManager.reportExternalProgress(AUDIO_GEN_ASSET_ID, EDGE_BRANDING.audioGenModelDisplayName, {
         state: "error",
-        error: alreadyCached ? "Could not start on-device audio generation" : "Download failed",
+        error: detail ? `${label}: ${String(detail).slice(0, 160)}` : label,
       });
       throw new Error(detail || "on-device audio generation setup failed");
     }

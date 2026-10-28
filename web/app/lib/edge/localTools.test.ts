@@ -35,7 +35,7 @@ import { WEBLLM_BASELINE_CONTEXT_WINDOW, type EdgeCapabilities } from "./capabil
 const CAPS = {
   version: 1,
   detectedAt: 1,
-  webgpu: { available: true, maxBufferSize: 1, maxStorageBufferBindingSize: 1 },
+  webgpu: { available: true, maxBufferSize: 1, maxStorageBufferBindingSize: 1, shaderF16: true },
   promptApi: { shape: "none", availability: "unavailable" },
   deviceMemoryGB: 8,
   hardwareConcurrency: 8,
@@ -159,6 +159,20 @@ describe("registry", () => {
     const bigger = names(toolAdvertisementBudgetFor(8192));
     expect(bigger).toContain("local_generate_image");
     expect(bigger).toContain("local_generate_audio");
+  });
+
+  it("hides image generation on adapters without shader-f16 — fp16 weights cannot run there", () => {
+    // SD-Turbo's ONNX weights are fp16-only: an adapter that exposes WebGPU
+    // without the shader-f16 feature would fail every session create, so the
+    // tool is gated off rather than advertised into guaranteed refusal. Audio
+    // stays — it falls back to fp32 weights.
+    const noF16 = {
+      ...CAPS,
+      webgpu: { ...CAPS.webgpu, shaderF16: false },
+    } as unknown as EdgeCapabilities;
+    const names = listLocalTools(noF16, 99_000).map((t) => t.name);
+    expect(names).not.toContain("local_generate_image");
+    expect(names).toContain("local_generate_audio");
   });
 
   it("resolves tools by exact name only, so a local tool cannot shadow a server tool", () => {
