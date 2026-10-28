@@ -42,7 +42,31 @@ Release notes on GitHub are generated from the section for each version.
   Locales with no matching layout keep the toggle disabled rather than
   offering a board in the wrong script.
 
+- **A2A console: `admin/a2a` and per-agent endpoint panels.** Tenant
+  managers get a console view of agent-to-agent traffic that the A2A protocol
+  itself will not list (the spec's `tasks/list` answers
+  UnsupportedOperationError): inbound "who called my agents" and outbound
+  "which remote agents did my agents call" rows with direction, state,
+  subject, timings and a bounded reply preview; a detail view with the full
+  record; cancel for in-flight inbound turns (an outbound cancel only
+  annotates local bookkeeping - the remote task stays authoritative); and a
+  read-only policy panel with the operator-set outbound allow-list and this
+  deployment's JSON-RPC, HTTP+JSON, agent card and JWKS endpoints. Each
+  agent's page also carries an `A2aEndpointPanel` with that agent's own
+  endpoints. The surface is manager-gated
+  (`PERM_MANAGE_AGENTS` / tenant-admin / platform-admin), cross-tenant task
+  ids answer 404, and it is off on personal installs
+  (`EditionFeature.A2A_DIRECTORY`).
+
 ### Fixed
+
+- **Release image builds no longer die on `tool-sandbox` (amd64) or `core-full` (arm64).**
+  Node 26.11's amd64 binary gained a `libatomic` link that was previously
+  arm64-only while the Dockerfile only installed it for aarch64, and
+  core-full's server-puppeteer `npx` pre-warm resolved the package from the
+  local toolchain tree instead of seeding `~/.npm/_npx`, leaving the patched
+  overlay nothing to copy.
+
 
 - **On-device media generation (`local_generate_image` / `local_generate_audio`) works after a reload, on bigger-window models, and on adapters without `shader-f16`.** Three wiring gaps left the tools dead: a model installed in a previous page session left the "cached" marker set but the worker cold, and the tools refused as if it were never installed — the facade now warms the worker from the local cache (a cache hit, not an acquisition, so the no-download consent rule is untouched), the same contract the vision model already follows. The tool-advertisement budget was a flat 3,200 chars for every model, which always trimmed the media tools out of the system prompt — it now scales with the session's context window (`toolAdvertisementBudgetFor`), so models that can afford the schema block are actually offered the tools. And MusicGen hard-required fp16 weights on the WebGPU path, so adapters without the `shader-f16` feature failed every load with a bare "Download failed" — the worker now always takes the model's q4 weights on WebGPU — fp32 and fp16 both fail session creation inside the browser's wasm heap (the fp16 decoder alone is ~850 MB, fp32 ~1.7 GB), while q4 is the supported WebGPU-quantized path at ~570 MB and needs no shader-f16; wasm+q8 stays the no-WebGPU path, while the image tool and its Edge-console card gate honestly on fp16 support since SD-Turbo ships fp16-only weights. Load failures also surface the worker's real error detail in the download chip instead of "Download failed" alone. Finally, models whose context window still can't afford a tool's schema now get a system-prompt note naming the omitted tools with an explicit "calls will be refused — do not substitute a different tool" instruction, so a request like "generate an image" no longer gets silently improvised into `generate_document` with a PNG type; if the model calls a trimmed name anyway, the refusal now says the schema didn't fit this model's prompt budget (and that a bigger-window model offers it) instead of the wrong "this device cannot run it".
 
