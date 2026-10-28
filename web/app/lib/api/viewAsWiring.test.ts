@@ -86,6 +86,28 @@ describe("toJson guard refusals", () => {
     expect(info).toHaveBeenCalledWith("Read-only view: changes are disabled");
     expect(error).not.toHaveBeenCalled();
   });
+
+  it("403 tenant_missing -> throws marked error, NO toast (OnboardingGate owns that state)", async () => {
+    // Regression: the missing-tenant 403 body told users to "sign out and back
+    // in" via the global error toast on every tenant-scoped call - which loops
+    // forever for an account whose onboarding has not run.
+    const info = vi.spyOn(toast, "info");
+    const warn = vi.spyOn(toast, "warn");
+    const error = vi.spyOn(toast, "error");
+    const body = {
+      timestamp: "2026-10-28T00:00:00Z",
+      status: 403,
+      error: "Your account is not linked to an organization. Please sign out and back in; if this persists, contact support.",
+    };
+    await expect(toJson(jsonResponse(403, body))).rejects.toMatchObject({
+      status: 403,
+      code: "tenant_missing",
+      tenantMissing: true,
+    });
+    expect(info).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
+  });
 });
 
 describe("chat SSE spend cap", () => {
