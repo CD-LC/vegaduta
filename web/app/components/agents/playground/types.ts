@@ -125,6 +125,9 @@ export interface PlaygroundTurn {
    * tool_call_log diff that feeds the metrics row and MediaCard's
    * fabricated-media check; when `steps` is non-empty it is the one shown. */
   steps?: ActivityStep[];
+  /** Client epoch ms when this turn went pending; drives the live "Model is
+   * working · N s" clock while the server is silent between step events. */
+  startedAt?: number;
   /** What this turn actually sent to the model (final prompt, options, tools) -
    * the "Request X-ray". Absent for edge turns and when the read failed. */
   requests?: LlmRequestSnapshot[];
