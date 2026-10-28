@@ -61,7 +61,11 @@ export function backspaceAtCaret(el: KeyboardTarget): void {
 
 /** Forward a functional key to the target's own handler (e.g. Enter → the
  * composer's send-on-Enter), so the board honours each input's semantics
- * instead of deciding what Enter "means" globally. */
-export function dispatchKey(el: KeyboardTarget, key: "Enter" | "Tab"): void {
-  el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+ * instead of deciding what Enter "means" globally. Returns whether a
+ * handler consumed it (preventDefault) — callers fall back to the literal
+ * behaviour (a newline) when nothing did. */
+export function dispatchKey(el: KeyboardTarget, key: "Enter" | "Tab"): boolean {
+  const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true });
+  el.dispatchEvent(event);
+  return event.defaultPrevented;
 }
