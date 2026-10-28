@@ -80,4 +80,54 @@ describe("edge/imagegen", () => {
     const { isImageGenModelCached } = await import("./imagegen");
     expect(isImageGenModelCached()).toBe(false);
   });
+
+  it("generateImageLocally() warms the worker from a cached install instead of refusing", async () => {
+    // A model the person enabled in a PREVIOUS page session leaves the marker
+    // set but the worker cold. Refusing 'model-not-ready' there is the bug this
+    // pins: the weights are on-device, so a warm-up moves no bytes and the
+    // no-download rule is not implicated (same contract vision.ts follows).
+    process.env.NEXT_PUBLIC_EDGE_AGENTS = "1";
+    Object.defineProperty(navigator, "gpu", { value: {}, configurable: true });
+    localStorage.setItem("edge.imagegen.cached.sd-turbo", "1");
+    const listeners: Array<(e: { data: unknown }) => void> = [];
+    (globalThis as { Worker?: unknown }).Worker = class {
+      postMessage(msg: { type: string; requestId: number }) {
+        queueMicrotask(() => {
+          const data =
+            msg.type === "load"
+              ? { type: "loaded", requestId: msg.requestId }
+              : { type: "result", requestId: msg.requestId, png: new ArrayBuffer(4), width: 512, height: 512 };
+          listeners.forEach((l) => l({ data }));
+        });
+      }
+      addEventListener(_: string, fn: (e: { data: unknown }) => void) {
+        listeners.push(fn);
+      }
+      terminate() {}
+    };
+    const originalCreateObjectURL = URL.createObjectURL;
+    URL.createObjectURL = (() => "blob:fake") as typeof URL.createObjectURL;
+    try {
+      // jsdom has no WebGPU adapter, so detectCapabilities would report the
+      // device unsupported; stub it to the capability set a real WebGPU device
+      // reports so the warm-up path is what the test actually exercises.
+      vi.doMock("./capabilities", async () => {
+        const orig = await vi.importActual<typeof import("./capabilities")>("./capabilities");
+        return {
+          ...orig,
+          detectCapabilities: async () => ({
+            version: 1,
+            detectedAt: 1,
+            webgpu: { available: true, maxBufferSize: 1, maxStorageBufferBindingSize: 1 },
+          }),
+        };
+      });
+      const { generateImageLocally } = await import("./imagegen");
+      const result = await generateImageLocally("a cabin in the woods", 7);
+      expect(result.handled).toBe(true);
+    } finally {
+      URL.createObjectURL = originalCreateObjectURL;
+      vi.doUnmock("./capabilities");
+    }
+  });
 });

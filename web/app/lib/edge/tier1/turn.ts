@@ -2,7 +2,7 @@
 
 import type { ChatCompletionMessageParam } from "@mlc-ai/web-llm";
 import { fetchEdgeMemory, memoryFactsBlock } from "../edgeMemory";
-import { findLocalTool, listLocalTools, runLocalTool, type LocalTool } from "../localTools";
+import { findLocalTool, listLocalTools, runLocalTool, toolAdvertisementBudgetFor, type LocalTool } from "../localTools";
 import {
   canUseServerTools,
   edgeToolsUnavailable,
@@ -143,7 +143,9 @@ export async function runTurn(
   // — toolsActive is false on every round, so streamCompletion sets no
   // response_format and streams without hold-back, and parseToolCall is never
   // reached.
-  const localTools: LocalTool[] = state.disableTools ? [] : listLocalTools(state.caps);
+  const localTools: LocalTool[] = state.disableTools
+    ? []
+    : listLocalTools(state.caps, toolAdvertisementBudgetFor(state.contextWindowSize));
   let serverTools: EdgeToolDefinition[] | null = null;
   if (
     !state.disableTools &&
@@ -214,8 +216,7 @@ export async function runTurn(
     // The server half going unavailable mid-turn now only ends tool use when
     // there are no local tools to carry on with — dispatch below refuses
     // server names from that point regardless.
-    let toolsActive =
-      !!tools && !(state.serverToolsDisabled && localTools.length === 0) && round < MAX_TOOL_ROUNDS;
+    let toolsActive = !!tools && !(state.serverToolsDisabled && localTools.length === 0) && round < MAX_TOOL_ROUNDS;
     const plainSystem: ChatCompletionMessageParam = {
       role: "system",
       content: withReasoningNudge(state.baseSystemPrompt),
@@ -251,12 +252,7 @@ export async function runTurn(
       }
       assembly = relief.assembly;
     } else {
-      assembly = assembleTier1Prompt(
-        plainSystem,
-        historyWindow,
-        currentTurnMessages,
-        state.contextWindowSize
-      );
+      assembly = assembleTier1Prompt(plainSystem, historyWindow, currentTurnMessages, state.contextWindowSize);
     }
     if (!assembly.fits) {
       // Irreducible prompt over budget: NEVER attempt local inference (the
@@ -331,9 +327,7 @@ export async function runTurn(
       finalText =
         `I kept asking for the same "${call.name}" call with identical arguments, so I stopped ` +
         `instead of repeating it.` +
-        (lastToolResultForPrompt
-          ? `\n\nHere is what it returned the first time:\n\n${lastToolResultForPrompt}`
-          : "");
+        (lastToolResultForPrompt ? `\n\nHere is what it returned the first time:\n\n${lastToolResultForPrompt}` : "");
       break;
     }
     lastToolCallSignature = signature;

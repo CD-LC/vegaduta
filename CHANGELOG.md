@@ -31,6 +31,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **On-device media generation (`local_generate_image` / `local_generate_audio`) works after a reload and on bigger-window models.** Two wiring gaps left the tools dead: a model installed in a previous page session left the "cached" marker set but the worker cold, and the tools refused as if it were never installed — the facade now warms the worker from the local cache (a cache hit, not an acquisition, so the no-download consent rule is untouched), the same contract the vision model already follows. And the tool-advertisement budget was a flat 3,200 chars for every model, which always trimmed the media tools out of the system prompt — it now scales with the session's context window (`toolAdvertisementBudgetFor`), so models that can afford the schema block are actually offered the tools.
+
 - **Auto-injected retrieval and inbound channel turns now propagate taint to tool gates.**
   Previously, only explicit `UNTRUSTED_EXTERNAL` tool calls (such as `fetch_web_page` or
   `search_knowledge_base`) marked a turn as tainted. Auto-injected context bypassed the taint gate:
