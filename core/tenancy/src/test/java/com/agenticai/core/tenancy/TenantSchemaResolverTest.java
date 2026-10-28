@@ -411,6 +411,43 @@ class TenantSchemaResolverTest {
                 TenantSchemaResolver.NO_CONTEXT_SCHEMA, resolver.resolveCurrentTenantIdentifier());
     }
 
+    @Test
+    void aDelegationShapedContextNamingPublicIsRefusedOnBothEntryPoints() {
+        // The delegation-token branch builds exactly this: tenant from the token, no roles, a
+        // "delegation:<jti>" external trigger id.
+        TenantContext.set(TenantContext.of("public", "user-1", Set.of(), "delegation:jti-1"));
+        TenantSchemaResolver resolver = newResolver(false);
+        assertThrows(MissingTenantContextException.class, resolver::resolveCurrentTenantIdentifier);
+        assertThrows(MissingTenantContextException.class, TenantSchemaResolver::currentSchemaName);
+    }
+
+    @Test
+    void theExplicitPlatformDefaultContextStillResolvesToPublic() {
+        TenantSchemaResolver resolver = newResolver(true);
+        TenantContext.set(
+                TenantContext.ofPlatformDefaultSchema("system:whatsapp-inbound:AC1", Set.of()));
+        assertEquals("public", resolver.resolveCurrentTenantIdentifier());
+        assertEquals("public", TenantSchemaResolver.currentSchemaName());
+
+        TenantContext.set(
+                TenantContext.ofWebhookSchema("public", "system:sms-inbound:AC1", Set.of()));
+        assertEquals("public", resolver.resolveCurrentTenantIdentifier());
+    }
+
+    @Test
+    void ofWebhookSchemaForARealTenantIsAnOrdinaryContext() {
+        TenantSchemaResolver resolver = newResolver(true);
+        TenantContext ctx =
+                TenantContext.ofWebhookSchema("tenant_b", "system:sms-inbound:AC1", Set.of());
+        assertFalse(ctx.isPlatformDefaultSchema());
+        TenantContext.set(ctx);
+        assertEquals("tenant_b", resolver.resolveCurrentTenantIdentifier());
+        // and it cannot be used to smuggle a reserved schema
+        TenantContext.set(
+                TenantContext.ofWebhookSchema("control_plane", "system:sms-inbound:AC1", Set.of()));
+        assertThrows(MissingTenantContextException.class, resolver::resolveCurrentTenantIdentifier);
+    }
+
     private static JwtAuthenticationToken tenantJwtAuthentication(String tenantId) {
         Jwt.Builder jwt =
                 Jwt.withTokenValue("test-token").header("alg", "none").subject("user-sub-123");

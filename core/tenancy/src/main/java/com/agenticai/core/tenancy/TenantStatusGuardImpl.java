@@ -12,6 +12,7 @@ import java.time.Duration;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -53,12 +54,29 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
     private final DataSource dataSource;
     private final TtlCache<Boolean> tenantUsable;
     private final TtlCache<Boolean> platformUsable;
+    private final TenantMigrationFailures migrationFailures;
 
     public TenantStatusGuardImpl(
             TenantRepository tenantRepository,
             PlatformKillSwitchRepository platformKillSwitchRepository,
             DataSource dataSource,
-            @Value("${app.tenant.status-cache-ttl:10s}") Duration statusCacheTtl) {
+            Duration statusCacheTtl) {
+        this(
+                tenantRepository,
+                platformKillSwitchRepository,
+                dataSource,
+                statusCacheTtl,
+                new TenantMigrationFailures());
+    }
+
+    @Autowired
+    public TenantStatusGuardImpl(
+            TenantRepository tenantRepository,
+            PlatformKillSwitchRepository platformKillSwitchRepository,
+            DataSource dataSource,
+            @Value("${app.tenant.status-cache-ttl:10s}") Duration statusCacheTtl,
+            TenantMigrationFailures migrationFailures) {
+        this.migrationFailures = migrationFailures;
         this.tenantRepository = tenantRepository;
         this.platformKillSwitchRepository = platformKillSwitchRepository;
         this.dataSource = dataSource;
@@ -107,6 +125,24 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
         if (SchemaNameSanitizer.DEFAULT_SCHEMA.equals(tenantId)) {
             log.warn(
                     "Rejected tenant id '{}' - the legacy schema is not a usable tenant.",
+                    LogSafe.clean(tenantId));
+            return false;
+        }
+        // The raw claim must already be a canonical schema name. The sanitizer is lossy ("Acme-Co"
+        // and "acme_co" both become "acme_co"), so a claim that only matches after sanitising could
+        // reach another tenant's schema.
+        if (tenantId == null || !SchemaNameSanitizer.sanitize(tenantId).equals(tenantId)) {
+            log.warn("Rejecting a tenant claim that is not a canonical schema name");
+            return false;
+        }
+        // A schema whose startup migration failed is stale: refuse it until a later migration
+        // succeeds. The flag is persisted on the tenant row (TenantMigrationFailures), so this sees
+        // failures recorded by ANY shape or pod; it sits inside the TTL cache and the recording pod
+        // evicts its own entry when it marks or clears.
+        if (migrationFailures.hasFailed(tenantId)) {
+            log.warn(
+                    "Refusing tenant '{}': its schema migration failed and has not been retried"
+                            + " successfully",
                     LogSafe.clean(tenantId));
             return false;
         }

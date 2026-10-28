@@ -82,7 +82,7 @@ public class TwilioStatusCallbackController {
                 return TenantSchemaResolver.DEFAULT_SCHEMA;
             });
 
-        TenantContext.set(TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
+        TenantContext.set(TenantContext.ofWebhookSchema(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
         try {
             handle(formParams, servletRequest);
         } catch (RuntimeException e) {

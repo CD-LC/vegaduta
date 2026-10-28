@@ -186,6 +186,56 @@ class TenantProvisioningServiceTest {
     }
 
     @Test
+    void caseAndPunctuationVariantsOfOneOrgNameGetDistinctSchemasNoneEqualToTheLossySanitisedForm() {
+        // The sanitiser is lossy: all of these collapse to "acme_co". Provisioning must not
+        // inherit that - every signup gets its own server-generated schema, so no variant can ever
+        // be allocated (or later claimed as) another variant's schema.
+        List<String> variants = List.of(
+            "Acme-Co", "acme_co", "ACME CO", "acme.co", "Acme--Co", "acme co", "ACME_CO", "acme/co");
+        assertTrue(variants.stream().map(SchemaNameSanitizer::sanitize).distinct().count() < variants.size() / 2,
+            "premise: the sanitiser collapses many variants onto few names");
+        assertEquals(SchemaNameSanitizer.sanitize("Acme-Co"), SchemaNameSanitizer.sanitize("ACME CO"));
+        for (String orgName : variants) {
+            service.signup(signupRequest(orgName));
+        }
+        ArgumentCaptor<String> schemaCaptor = ArgumentCaptor.forClass(String.class);
+        verify(recorder, times(variants.size())).createProvisioningTenant(
+            anyString(), any(), schemaCaptor.capture(), anyString(), any(), any(), anyBoolean()
+        );
+        List<String> schemas = schemaCaptor.getAllValues();
+        assertEquals(variants.size(), schemas.stream().distinct().count(), "schema names must be unique: " + schemas);
+        String lossy = SchemaNameSanitizer.sanitize(variants.get(0));
+        for (String schema : schemas) {
+            assertTrue(TenantSchemaGuard.isNewTenantSchemaName(schema), schema);
+            assertNotEquals(lossy, schema);
+            // A generated name is canonical: it survives the sanitiser unchanged, so the status
+            // guard's "raw claim must equal its sanitised form" check accepts the real tenant ...
+            assertEquals(schema, SchemaNameSanitizer.sanitize(schema));
+        }
+        // ... and rejects every raw variant an attacker could present instead.
+        for (String variant : variants) {
+            if (variant.equals(lossy)) {
+                continue; // the one already-canonical spelling
+            }
+            assertNotEquals(variant, SchemaNameSanitizer.sanitize(variant), variant);
+        }
+    }
+
+    @Test
+    void aNameAlreadyTakenByAnExistingTenantRowIsNeverReallocated() {
+        // First candidate collides with an existing tenant row (in any case/punctuation form the
+        // repository matched); the allocator must move on to a fresh one.
+        when(tenantRepository.findBySchemaName(anyString()))
+            .thenReturn(Optional.of(new Tenant("Other", TenantPlan.FREE, "t_taken", REALM,
+                AccountType.B2C, ExperienceMode.SIMPLE)))
+            .thenReturn(Optional.empty());
+        service.signup(signupRequest("Acme-Co"));
+        String schema = provisionedSchema();
+        assertTrue(TenantSchemaGuard.isNewTenantSchemaName(schema), schema);
+        verify(tenantRepository, times(2)).findBySchemaName(anyString());
+    }
+
+    @Test
     void generatedNamesAreUniquePerSignup() {
         service.signup(signupRequest("Acme"));
         service.signup(signupRequest("Acme 2"));

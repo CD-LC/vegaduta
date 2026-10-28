@@ -202,7 +202,7 @@ public class TwilioWebhookController {
         // (not a raw claim), which TenantSchemaResolver's sanitizer passes
         // through unchanged since it's already a valid schema identifier.
         TenantContext.set(
-                TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
+                TenantContext.ofWebhookSchema(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
         try {
             return handleInbound(formParams, servletRequest);
         } finally {

@@ -161,4 +161,17 @@ class SchemaNameSanitizerTest {
         // re-derive a schema name from a stored value without drift.
         assertEquals(valid, SchemaNameSanitizer.sanitize(SchemaNameSanitizer.sanitize(valid)));
     }
+
+    @Test
+    void sanitiserIsLossyWhichIsWhyCallersMustRequireTheCanonicalForm() {
+        // Different raw claims, one schema: exactly the collision a caller must not accept.
+        String canonical = "acme_co";
+        for (String raw : new String[] {"Acme-Co", "ACME_CO", "acme.co", "acme co", "Acme_Co"}) {
+            assertEquals(canonical, SchemaNameSanitizer.sanitize(raw), raw);
+            assertFalse(raw.equals(SchemaNameSanitizer.sanitize(raw)), raw);
+        }
+        // Only the canonical spelling round-trips, so "claim equals its own sanitised form" admits
+        // exactly one spelling per schema.
+        assertEquals(canonical, SchemaNameSanitizer.sanitize(canonical));
+    }
 }

@@ -173,6 +173,75 @@ class TenantContextFilterTest {
         }
     }
 
+    private static DelegationAuthenticationToken delegation(String tenantId) {
+        return new DelegationAuthenticationToken(
+                tenantId, "user-1", java.util.UUID.randomUUID(), "aud", List.of("agents:read"), "jti-1");
+    }
+
+    @Test
+    void delegationTokenNamingThePublicOrASystemSchemaIsRejected() throws Exception {
+        for (String claim : new String[] {"public", " PUBLIC ", "Public", "control_plane", "pg_catalog", "ag_catalog"}) {
+            SecurityContextHolder.getContext().setAuthentication(delegation(claim));
+            TenantStatusGuard guard = mock(TenantStatusGuard.class);
+            when(guard.isUsable(any())).thenReturn(true);
+            TenantContextFilter filter = new TenantContextFilter(Optional.of(guard));
+            FilterChain chain = mock(FilterChain.class);
+            HttpServletResponse response = mock(HttpServletResponse.class);
+            when(response.getWriter()).thenReturn(mock(PrintWriter.class));
+
+            filter.doFilterInternal(requestMock(), response, chain);
+
+            verify(chain, never()).doFilter(any(), any());
+            verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
+            assertTrue(TenantContext.current().isEmpty(), claim);
+        }
+    }
+
+    @Test
+    void delegationTokenForAnUnusableTenantIsRejectedByTheGuard() throws Exception {
+        SecurityContextHolder.getContext().setAuthentication(delegation("tenant_stopped"));
+        TenantStatusGuard guard = mock(TenantStatusGuard.class);
+        when(guard.isUsable("tenant_stopped")).thenReturn(false);
+        TenantContextFilter filter = new TenantContextFilter(Optional.of(guard));
+        FilterChain chain = mock(FilterChain.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        when(response.getWriter()).thenReturn(mock(PrintWriter.class));
+
+        filter.doFilterInternal(requestMock(), response, chain);
+
+        verify(chain, never()).doFilter(any(), any());
+        verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
+    }
+
+    @Test
+    void delegationTokenForAUsableTenantPopulatesTheContext() throws Exception {
+        SecurityContextHolder.getContext().setAuthentication(delegation("tenant_ok"));
+        TenantStatusGuard guard = mock(TenantStatusGuard.class);
+        when(guard.isUsable("tenant_ok")).thenReturn(true);
+        TenantContextFilter filter = new TenantContextFilter(Optional.of(guard));
+        AtomicReference<TenantContext> seen = new AtomicReference<>();
+        FilterChain chain = mock(FilterChain.class);
+        doAnswer(inv -> {
+            seen.set(TenantContext.current().orElse(null));
+            return null;
+        }).when(chain).doFilter(any(), any());
+
+        filter.doFilterInternal(requestMock(), mock(HttpServletResponse.class), chain);
+
+        assertEquals("tenant_ok", seen.get().getTenantId());
+        assertEquals("delegation:jti-1", seen.get().getExternalTriggerId());
+        assertFalse(seen.get().isPlatformDefaultSchema());
+    }
+
+    @Test
+    void onlyTheNamedFactoriesProduceAPlatformDefaultContext() {
+        assertFalse(TenantContext.of("public", "s", java.util.Set.of()).isPlatformDefaultSchema());
+        assertFalse(TenantContext.of("public", "s", java.util.Set.of(), "x").isPlatformDefaultSchema());
+        assertTrue(TenantContext.ofPlatformDefaultSchema("s", java.util.Set.of()).isPlatformDefaultSchema());
+        assertTrue(TenantContext.ofWebhookSchema("public", "s", java.util.Set.of()).isPlatformDefaultSchema());
+        assertFalse(TenantContext.ofWebhookSchema("t_abc", "s", java.util.Set.of()).isPlatformDefaultSchema());
+    }
+
     @Test
     void guardAbsentAllowsRequestThroughRegardlessOfTenant() throws Exception {
         // Optional<TenantStatusGuard> empty - the narrower test-context /

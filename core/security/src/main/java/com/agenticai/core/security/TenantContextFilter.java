@@ -288,6 +288,33 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     MDC.put("tenantId", delegated.getTenantId());
                 }
                 MDC.put("userId", delegated.getPrincipal().toString());
+                // A delegation token's tenant claim gets the same checks as a JWT's: it must not
+                // name the default/system schema, and the tenant must be usable (active, not
+                // stopped, schema migrated, canonical schema name).
+                if (isSystemSchemaClaim(delegated.getTenantId())) {
+                    log.warn(
+                            "Rejected {} {} - delegation token {} carries a default/system"
+                                    + " schema tenant claim.",
+                            request.getMethod(),
+                            LogMasking.path(request.getRequestURI()),
+                            delegated.getJti());
+                    reject(response, TENANT_UNUSABLE_BODY, request);
+                    return;
+                }
+                if (delegated.getTenantId() != null
+                        && !delegated.getTenantId().isBlank()
+                        && tenantStatusGuard.isPresent()
+                        && !tenantStatusGuard.get().isUsable(delegated.getTenantId())) {
+                    log.warn(
+                            "Rejected {} {} - delegation token {} resolved tenant '{}' which is"
+                                    + " not usable.",
+                            request.getMethod(),
+                            LogMasking.path(request.getRequestURI()),
+                            delegated.getJti(),
+                            delegated.getTenantId().replaceAll("[\\r\\n]", " "));
+                    reject(response, TENANT_UNUSABLE_BODY, request);
+                    return;
+                }
             } else if (authentication != null
                     && !(authentication instanceof AnonymousAuthenticationToken)) {
                 // (Anonymous callers of permitAll endpoints - the web app's
@@ -344,22 +371,9 @@ public class TenantContextFilter extends OncePerRequestFilter {
         }
     }
 
-    /**
-     * A JWT / API-key tenant claim that is (case-insensitively, after trimming) the legacy {@code
-     * public} schema or a reserved platform schema is never a tenant: it would run tenant queries
-     * in the shared legacy schema. Webhook paths that set {@code public} deliberately build their
-     * {@link TenantContext} directly and never pass through this filter.
-     */
+    /** See {@link TenantSchemaClaims#isSystemSchemaClaim}; kept for the filter's own tests. */
     static boolean isSystemSchemaClaim(String tenantId) {
-        if (tenantId == null) {
-            return false;
-        }
-        String n = tenantId.trim().toLowerCase(java.util.Locale.ROOT);
-        return "public".equals(n)
-                || "control_plane".equals(n)
-                || "information_schema".equals(n)
-                || "ag_catalog".equals(n)
-                || n.startsWith("pg_");
+        return TenantSchemaClaims.isSystemSchemaClaim(tenantId);
     }
 
     private static boolean hasPlatformAdminAuthority(JwtAuthenticationToken jwtAuth) {

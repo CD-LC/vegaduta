@@ -290,9 +290,10 @@ public class TenantSchemaResolver
                 .filter(ctx -> ctx.getTenantId() != null && !ctx.getTenantId().isBlank())
                 .map(
                         ctx ->
-                                refuseSystemSchema(
+                                enforceSchema(
                                         SchemaNameSanitizer.sanitize(
-                                                ctx.getTenantId(), DEFAULT_SCHEMA)))
+                                                ctx.getTenantId(), DEFAULT_SCHEMA),
+                                        ctx))
                 .orElse(DEFAULT_SCHEMA);
     }
 
@@ -306,7 +307,8 @@ public class TenantSchemaResolver
         if (current.isPresent()) {
             String tenantId = current.get().getTenantId();
             if (tenantId != null && !tenantId.isBlank()) {
-                return refuseSystemSchema(SchemaNameSanitizer.sanitize(tenantId, DEFAULT_SCHEMA));
+                return enforceSchema(
+                        SchemaNameSanitizer.sanitize(tenantId, DEFAULT_SCHEMA), current.get());
             }
         }
         FallbackKind kind = classifyFallback(current.orElse(null));
@@ -321,16 +323,29 @@ public class TenantSchemaResolver
     }
 
     /**
-     * SEC-001/SEC-017 hardening: a tenant id (JWT claim / explicit context) that sanitises to a
-     * platform or system schema is never a tenant. The legacy {@code public} value is NOT exempt
-     * (since 2026-10-27): the webhook paths that once set it explicitly for unmapped senders now
-     * resolve a real schema via TenantResolutionService and reject unmapped senders, so a {@code
-     * public} here means a claim that tried to route into the shared legacy schema - refused like
-     * any reserved name. The no-context fallbacks (health checks, platform-admin/scope, onboarding)
+     * The single enforcement chokepoint for which schema a {@link TenantContext} may reach: every
+     * Hibernate session and every raw-JDBC {@link #currentSchemaName()} call passes through here,
+     * whoever built the context. SEC-001/SEC-017 hardening: a tenant id that sanitises to a
+     * platform or system schema is never a tenant. The legacy {@code public} value is refused
+     * unless the context was built through {@link TenantContext#ofPlatformDefaultSchema} / {@link
+     * TenantContext#ofWebhookSchema} (the deliberate Twilio fallbacks). The no-context fallbacks (health checks, platform-admin/scope, onboarding)
      * never pass through this method: they return {@value #DEFAULT_SCHEMA} directly from {@link
      * #publicFallback}, which is untouched.
      */
-    private static String refuseSystemSchema(String schema) {
+    private static String enforceSchema(String schema, TenantContext context) {
+        if (DEFAULT_SCHEMA.equals(schema)) {
+            // Only the explicit, named API (the Twilio webhook fallbacks, pinned by
+            // PlatformDefaultSchemaCallersTest) may run on the legacy schema; every other context
+            // - JWT, API key, delegation token, a job, a hand-built one - is refused.
+            if (!context.isPlatformDefaultSchema()) {
+                throw new MissingTenantContextException(
+                        "Tenant id resolves to the default schema without an explicit"
+                                + " platform-default context - refusing to route tenant queries"
+                                + " there (use TenantContext.ofWebhookSchema for deliberate"
+                                + " webhook fallbacks)");
+            }
+            return schema;
+        }
         if (TenantSchemaGuard.isProtectedSchema(schema)) {
             throw new MissingTenantContextException(
                     "Tenant id resolves to the reserved schema '"

@@ -1,5 +1,6 @@
 package com.agenticai.core.tenancy;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -180,6 +181,135 @@ class TenantStatusGuardImplTest {
         assertFalse(guard.isUsable(SchemaNameSanitizer.DEFAULT_SCHEMA));
         verify(tenantRepository, org.mockito.Mockito.never())
                 .findBySchemaName(SchemaNameSanitizer.DEFAULT_SCHEMA);
+    }
+
+    @Test
+    void everyNonCanonicalSpellingOfAnExistingSchemaIsRejected() throws SQLException {
+        setUp();
+        // "acme_co" is a real, active tenant; none of its lossy variants may reach it.
+        Tenant acme = new Tenant("Acme", TenantPlan.PREMIUM, "acme_co", "agentic-ai", AccountType.B2C, ExperienceMode.ADVANCED);
+        acme.markActive();
+        when(tenantRepository.findBySchemaName("acme_co")).thenReturn(Optional.of(acme));
+        stubSchemaExistsQuery(true);
+
+        assertTrue(guard.isUsable("acme_co"));
+        for (String variant : new String[] {"Acme-Co", "ACME_CO", "acme.co", "acme co", "Acme_Co", " acme_co", "acme_co "}) {
+            assertFalse(guard.isUsable(variant), variant);
+        }
+    }
+
+    // --- the failure flag is persisted on the tenant row, so it is shape/pod independent ---
+
+    @Test
+    void aFailureRecordedByAnotherPodOrShapeIsSeenFromAFreshRegistry() throws SQLException {
+        setUp();
+        // Model the control_plane.tenant row as shared state behind two independent registries
+        // (two JVMs): each has its own empty in-memory set, only the "database" is common.
+        SharedFlagDb db = new SharedFlagDb();
+        TenantMigrationFailures migratingPod = new TenantMigrationFailures(db.dataSource());
+        TenantMigrationFailures servingPod = new TenantMigrationFailures(db.dataSource());
+        guard = new TenantStatusGuardImpl(tenantRepository, platformKillSwitchRepository, dataSource,
+            Duration.ZERO, servingPod);
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.of(activeTenant()));
+
+        assertTrue(guard.isUsable(SCHEMA_NAME));
+        migratingPod.recordFailure(SCHEMA_NAME, "boom\non two lines");
+        assertTrue(db.failedSchemas.contains(SCHEMA_NAME));
+        assertTrue(servingPod.snapshot().contains(SCHEMA_NAME), "the retry shape must see it too");
+        assertFalse(guard.isUsable(SCHEMA_NAME), "the serving pod must refuse a tenant another pod marked failed");
+        assertFalse(db.lastError.contains("\n"));
+
+        migratingPod.recordSuccess(SCHEMA_NAME);
+        assertFalse(db.failedSchemas.contains(SCHEMA_NAME));
+        assertTrue(guard.isUsable(SCHEMA_NAME));
+    }
+
+    @Test
+    void theStoredErrorIsBoundedAndSingleLine() {
+        assertTrue(TenantMigrationFailures.boundedError("x".repeat(5000)).length() <= TenantMigrationFailures.MAX_ERROR_LENGTH);
+        assertEquals("a b", TenantMigrationFailures.boundedError("a\r\nb"));
+    }
+
+    @Test
+    void aMissingFlagColumnDuringARollingDeployDoesNotLockEveryoneOut() throws SQLException {
+        setUp();
+        DataSource broken = mock(DataSource.class);
+        when(broken.getConnection()).thenThrow(new SQLException("column does not exist", "42703"));
+        TenantMigrationFailures failures = new TenantMigrationFailures(broken);
+        assertFalse(failures.hasFailed(SCHEMA_NAME));
+        assertTrue(failures.snapshot().isEmpty());
+    }
+
+    @Test
+    void anyOtherErrorReadingTheFlagFailsClosed() throws SQLException {
+        setUp();
+        DataSource broken = mock(DataSource.class);
+        when(broken.getConnection()).thenThrow(new SQLException("connection refused", "08001"));
+        assertTrue(new TenantMigrationFailures(broken).hasFailed(SCHEMA_NAME));
+    }
+
+    /** A one-column stand-in for control_plane.tenant, driven through real JDBC calls on mocks. */
+    private static final class SharedFlagDb {
+        final java.util.Set<String> failedSchemas = new java.util.concurrent.ConcurrentHashMap<String, Boolean>().keySet(true);
+        volatile String lastError = "";
+
+        DataSource dataSource() throws SQLException {
+            DataSource ds = mock(DataSource.class);
+            when(ds.getConnection()).thenAnswer(inv -> connection());
+            return ds;
+        }
+
+        private Connection connection() throws SQLException {
+            Connection c = mock(Connection.class);
+            when(c.prepareStatement(org.mockito.ArgumentMatchers.anyString())).thenAnswer(inv -> statement(inv.getArgument(0, String.class)));
+            return c;
+        }
+
+        private PreparedStatement statement(String sql) throws SQLException {
+            PreparedStatement ps = mock(PreparedStatement.class);
+            java.util.List<Object> params = new java.util.ArrayList<>();
+            org.mockito.Mockito.doAnswer(inv -> {
+                int idx = inv.getArgument(0, Integer.class) - 1;
+                while (params.size() <= idx) {
+                    params.add(null);
+                }
+                params.set(idx, inv.getArgument(1));
+                return null;
+            }).when(ps).setObject(org.mockito.ArgumentMatchers.anyInt(), org.mockito.ArgumentMatchers.any());
+            org.mockito.Mockito.doAnswer(inv -> {
+                params.clear();
+                params.add(inv.getArgument(1));
+                return null;
+            }).when(ps).setString(org.mockito.ArgumentMatchers.eq(1), org.mockito.ArgumentMatchers.anyString());
+            when(ps.executeUpdate()).thenAnswer(inv -> {
+                if (sql.contains("migration_failed_at = now()")) {
+                    lastError = String.valueOf(params.get(0));
+                    failedSchemas.add(String.valueOf(params.get(1)));
+                } else {
+                    failedSchemas.remove(String.valueOf(params.get(0)));
+                }
+                return 1;
+            });
+            ResultSet rs = mock(ResultSet.class);
+            when(ps.executeQuery()).thenAnswer(inv -> {
+                if (sql.startsWith("SELECT 1")) {
+                    when(rs.next()).thenReturn(failedSchemas.contains(String.valueOf(params.get(0))));
+                } else {
+                    java.util.Iterator<String> it = new java.util.ArrayList<>(failedSchemas).iterator();
+                    String[] cur = new String[1];
+                    when(rs.next()).thenAnswer(x -> {
+                        if (it.hasNext()) {
+                            cur[0] = it.next();
+                            return true;
+                        }
+                        return false;
+                    });
+                    when(rs.getString(1)).thenAnswer(x -> cur[0]);
+                }
+                return rs;
+            });
+            return ps;
+        }
     }
 
     // --- the per-request caching itself (the reason this class has a TTL at

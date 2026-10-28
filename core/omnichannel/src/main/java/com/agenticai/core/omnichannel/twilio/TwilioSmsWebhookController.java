@@ -153,7 +153,7 @@ public class TwilioSmsWebhookController {
                                 });
 
         TenantContext.set(
-                TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
+                TenantContext.ofWebhookSchema(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
         try {
             return handleInbound(formParams, servletRequest);
         } finally {

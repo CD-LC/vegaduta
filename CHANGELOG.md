@@ -121,6 +121,19 @@ Release notes on GitHub are generated from the section for each version.
   failures store the exception type and a bounded, redacted message instead of
   raw text; `ApprovalStore.update` documents the compare-and-set requirement for
   multi-process use.
+- **Tenant isolation hardening, follow-up.** A failed startup tenant-schema migration is now
+  persisted on the control-plane tenant row (`migration_failed_at`, `migration_error`, migration
+  V690) instead of a per-JVM set, so the jobs, worker, migrate-only and other API pods refuse a
+  tenant stuck on a stale schema too; the status guard reads it through its TTL cache and a
+  successful (retried) migration clears it. The `public`/system-schema refusal is enforced in
+  `TenantSchemaResolver` for every `TenantContext` (delegation tokens included), with the explicit
+  `TenantContext.ofWebhookSchema` / `ofPlatformDefaultSchema` API for the Twilio webhook fallbacks
+  (callers pinned by `PlatformDefaultSchemaCallersTest`); the delegation-token branch of
+  `TenantContextFilter` now rejects system-schema claims and runs the tenant status guard; the guard
+  rejects claims the sanitizer would rewrite. New `app.security.oidc.provider`
+  (`keycloak`|`generic`) drives the non-Keycloak issuer startup guard instead of the `/realms/`
+  heuristic (unset: derived, with a warning), and `app.security.jwt.allow-unrestricted-audience`
+  is now honoured.
 - **`tenant_id=public` claims can no longer route into the legacy shared
   schema.** A JWT or API key asserting the `public` tenant used to pass the
   schema-exists fallback (Postgres always has `public`) and land tenant

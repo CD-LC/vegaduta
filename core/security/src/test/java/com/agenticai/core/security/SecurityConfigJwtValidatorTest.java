@@ -104,4 +104,38 @@ class SecurityConfigJwtValidatorTest {
         SecurityConfig.requireClientCheckForNonKeycloakIssuer(
                 "http://localhost:8180/realms/agentic-ai", "", "");
     }
+
+    @Test
+    void theExplicitProviderWinsOverTheIssuerUriShape() {
+        // A realm-shaped URI declared generic is NOT exempt ...
+        assertThatThrownBy(
+                        () ->
+                                SecurityConfig.requireClientCheckForNonKeycloakIssuer(
+                                        "generic", "https://idp.example.com/realms/shared", "", "", false))
+                .isInstanceOf(IllegalStateException.class);
+        // ... and a non-realm URI declared keycloak (a reverse-proxied Keycloak) is.
+        SecurityConfig.requireClientCheckForNonKeycloakIssuer(
+                "KeyCloak", "https://sso.example.com/auth", "", "", false);
+    }
+
+    @Test
+    void genericProviderCanOptOutOfTheGuard() {
+        SecurityConfig.requireClientCheckForNonKeycloakIssuer(
+                "generic", "https://tenant.auth0.com/", "", "", true);
+    }
+
+    @Test
+    void anUnsetProviderIsDerivedFromTheIssuerUri() {
+        assertThat(SecurityConfig.resolveProvider("", "http://kc/realms/agentic-ai"))
+                .isEqualTo(SecurityConfig.OidcProvider.KEYCLOAK);
+        assertThat(SecurityConfig.resolveProvider(null, "https://tenant.auth0.com/"))
+                .isEqualTo(SecurityConfig.OidcProvider.GENERIC);
+    }
+
+    @Test
+    void anUnknownProviderValueFailsStartup() {
+        assertThatThrownBy(() -> SecurityConfig.resolveProvider("okta", "https://x/"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("keycloak' or 'generic");
+    }
 }

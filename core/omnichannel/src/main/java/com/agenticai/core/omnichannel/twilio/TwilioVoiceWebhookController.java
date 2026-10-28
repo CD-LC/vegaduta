@@ -141,7 +141,7 @@ public class TwilioVoiceWebhookController {
         String tenantSchema = tenantResolutionService.resolveTenantSchema(ExternalAccountProvider.TWILIO, accountSid)
             .orElse(TenantSchemaResolver.DEFAULT_SCHEMA);
 
-        TenantContext.set(TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
+        TenantContext.set(TenantContext.ofWebhookSchema(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
         try {
             TwilioCredentialService.DecryptedCredential credential = credentialService.resolveActive();
             signatureValidator.validateOrThrow(
@@ -223,7 +223,7 @@ public class TwilioVoiceWebhookController {
         String tenantSchema = tenantResolutionService.resolveTenantSchema(ExternalAccountProvider.TWILIO, accountSid)
             .orElse(TenantSchemaResolver.DEFAULT_SCHEMA);
 
-        TenantContext.set(TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
+        TenantContext.set(TenantContext.ofWebhookSchema(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
         try {
             TwilioCredentialService.DecryptedCredential credential = credentialService.resolveActive();
             signatureValidator.validateOrThrow(
@@ -278,7 +278,7 @@ public class TwilioVoiceWebhookController {
         String tenantSchema = tenantResolutionService.resolveTenantSchema(ExternalAccountProvider.TWILIO, accountSid)
             .orElse(TenantSchemaResolver.DEFAULT_SCHEMA);
 
-        TenantContext.set(TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
+        TenantContext.set(TenantContext.ofWebhookSchema(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
         try {
             TwilioCredentialService.DecryptedCredential credential = credentialService.resolveActive();
             signatureValidator.validateOrThrow(

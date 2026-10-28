@@ -82,6 +82,9 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 @Profile("!insecure")
 public class SecurityConfig {
 
+    private static final org.slf4j.Logger LOG =
+            org.slf4j.LoggerFactory.getLogger(SecurityConfig.class);
+
     // Read lazily in jwtDecoder(), not through @Value fields: in app.auth.mode=local there is no
     // Keycloak, these properties are unset (or, with the `security` profile, hold a placeholder
     // that cannot resolve), and an eager @Value would stop the boot for a decoder nobody builds.
@@ -137,6 +140,23 @@ public class SecurityConfig {
      */
     @Value("${app.security.jwt.required-audience:}")
     private String requiredAudience = "";
+
+    /**
+     * Opt-out for the generic-OIDC startup guard: accept a {@code generic} provider with neither an
+     * azp allowlist nor a required audience (logged at ERROR). Env: {@code
+     * APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE}.
+     */
+    @Value("${app.security.jwt.allow-unrestricted-audience:false}")
+    private boolean allowUnrestrictedAudience;
+
+    /**
+     * Which kind of identity provider signs the tokens: {@code keycloak} (the bundled realm) or
+     * {@code generic} (Auth0, Entra, Okta, any other OIDC issuer). Env: {@code
+     * APP_SECURITY_OIDC_PROVIDER}. Empty means unset: derived from the issuer URI with a warning
+     * (see {@link #resolveProvider}).
+     */
+    @Value("${app.security.oidc.provider:}")
+    private String oidcProvider = "";
 
     /**
      * Generic-OIDC claim mapping ({@link OidcClaimMapping}) - where roles, tenant and (optionally)
@@ -219,7 +239,73 @@ public class SecurityConfig {
      */
     static void requireClientCheckForNonKeycloakIssuer(
             String issuerUri, String allowedAuthorizedParties, String requiredAudience) {
-        boolean keycloakStyleIssuer = issuerUri != null && issuerUri.contains("/realms/");
+        requireClientCheckForNonKeycloakIssuer(
+                "", issuerUri, allowedAuthorizedParties, requiredAudience, false);
+    }
+
+    /** The two supported values of {@code app.security.oidc.provider}. */
+    enum OidcProvider {
+        KEYCLOAK,
+        GENERIC
+    }
+
+    /**
+     * The explicit {@code app.security.oidc.provider} value, or, when unset, one derived from the
+     * issuer URI (a {@code /realms/} path means Keycloak) with a warning: the URI shape is only a
+     * heuristic, so a deployment should say what it runs.
+     *
+     * @throws IllegalStateException for a value other than {@code keycloak} / {@code generic}
+     */
+    static OidcProvider resolveProvider(String configured, String issuerUri) {
+        if (configured != null && !configured.isBlank()) {
+            switch (configured.trim().toLowerCase(java.util.Locale.ROOT)) {
+                case "keycloak":
+                    return OidcProvider.KEYCLOAK;
+                case "generic":
+                    return OidcProvider.GENERIC;
+                default:
+                    throw new IllegalStateException(
+                            "app.security.oidc.provider must be 'keycloak' or 'generic', got '"
+                                    + configured
+                                    + "'");
+            }
+        }
+        OidcProvider derived =
+                issuerUri != null && issuerUri.contains("/realms/")
+                        ? OidcProvider.KEYCLOAK
+                        : OidcProvider.GENERIC;
+        LOG.warn(
+                "app.security.oidc.provider is not set; derived '{}' from the issuer URI. Set"
+                        + " APP_SECURITY_OIDC_PROVIDER=keycloak|generic explicitly - the issuer"
+                        + " URI shape is only a heuristic.",
+                derived.name().toLowerCase(java.util.Locale.ROOT));
+        return derived;
+    }
+
+    /**
+     * Same guard, driven by the explicit {@code app.security.oidc.provider} (blank derives it from
+     * the issuer URI with a warning). {@code allowUnrestricted} downgrades the failure to an ERROR
+     * log ({@code app.security.jwt.allow-unrestricted-audience}).
+     */
+    static void requireClientCheckForNonKeycloakIssuer(
+            String provider,
+            String issuerUri,
+            String allowedAuthorizedParties,
+            String requiredAudience,
+            boolean allowUnrestricted) {
+        boolean keycloakStyleIssuer =
+                resolveProvider(provider, issuerUri) == OidcProvider.KEYCLOAK;
+        if (!keycloakStyleIssuer
+                && allowUnrestricted
+                && isBlank(allowedAuthorizedParties)
+                && isBlank(requiredAudience)) {
+            LOG.error(
+                    "JWT issuer '{}' is a generic OIDC provider with no azp allowlist and no"
+                            + " required audience: every token it signs for ANY application is"
+                            + " accepted (app.security.jwt.allow-unrestricted-audience=true).",
+                    issuerUri);
+            return;
+        }
         if (!keycloakStyleIssuer
                 && isBlank(allowedAuthorizedParties)
                 && isBlank(requiredAudience)) {
@@ -283,7 +369,11 @@ public class SecurityConfig {
         // least one of the two client-bound checks, or the boot refuses to start rather than
         // silently accepting any token from the realm.
         requireClientCheckForNonKeycloakIssuer(
-                issuerUri, allowedAuthorizedParties, requiredAudience);
+                oidcProvider,
+                issuerUri,
+                allowedAuthorizedParties,
+                requiredAudience,
+                allowUnrestrictedAudience);
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
 
         java.util.LinkedHashSet<String> acceptedIssuers = new java.util.LinkedHashSet<>();
