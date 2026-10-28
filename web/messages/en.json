@@ -209,6 +209,12 @@
     "label": "Language",
     "resetToEnglish": "Switch to English"
   },
+  "keyboard": {
+    "toggle": "On-screen keyboard",
+    "unavailable": "No on-screen keyboard for this language",
+    "title": "On-screen keyboard",
+    "close": "Close keyboard"
+  },
   "usage": {
     "eyebrow": "Plan",
     "title": "Usage & limits",

@@ -10,6 +10,7 @@ import TourReopenButton from "../tour/TourReopenButton";
 import PageGuideButton from "../pageguide/PageGuideButton";
 import TwoFactorButton from "../TwoFactorButton";
 import LanguageSwitcher from "../LanguageSwitcher";
+import LanguageKeyboardButton from "../keyboard/LanguageKeyboardButton";
 import { UsageMeterPill } from "../UsageQuota";
 import { useAppChrome } from "../AppChromeProvider";
 import EdgeSetupChip from "../edge/EdgeSetupChip";
@@ -200,6 +201,7 @@ export default function TopBar({
         <EdgeSetupChip />
         <TwoFactorButton accountUrl={profileHref} />
         <LanguageSwitcher />
+        <LanguageKeyboardButton />
         <TourReopenButton />
       </div>
       {/* No language modal auto-opens any more (2026-10-10, direct

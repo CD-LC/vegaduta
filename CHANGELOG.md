@@ -29,6 +29,17 @@ Release notes on GitHub are generated from the section for each version.
   and `GET .../scratchpad/{key}` (VIEWER access; `session=agent` or omitted
   reads the long-term pad).
 
+- **On-screen keyboard follows the selected language.** A keyboard toggle in
+  the topbar (next to the language switcher) opens a floating board in the
+  current locale's script — Arabic, Devanagari, Bengali, Punjabi, Kannada,
+  Malayalam, Odia, Telugu, Sindhi, Urdu, Chinese, Japanese, and the European
+  layouts — and types into whichever input has focus, so chat, search, and
+  forms all work without wiring. Layout data (`simple-keyboard-layouts`)
+  lazy-loads per locale so pages never pay for scripts they don't use;
+  Devanagari-script locales share the Hindi layout and Kashmiri the Urdu one.
+  Locales with no matching layout keep the toggle disabled rather than
+  offering a board in the wrong script.
+
 ### Fixed
 
 - **Auto-injected retrieval and inbound channel turns now propagate taint to tool gates.**
