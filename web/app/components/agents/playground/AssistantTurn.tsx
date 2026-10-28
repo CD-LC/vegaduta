@@ -91,7 +91,7 @@ export function AssistantTurn({
             // The server has said where the turn is: phase, tool or
             // reasoning, with a clock. Compact and read-only (the
             // composer below has the one shared Cancel control).
-            <TurnProgress steps={turn.steps} hasText={Boolean(turn.content)} compact />
+            <TurnProgress steps={turn.steps} hasText={Boolean(turn.content)} startedAt={turn.startedAt} compact />
           ) : chatSnapshot ? (
             // Real CONNECTING/PROCESSING/STREAMING state instead of a
             // static "thinking" label - no cancel button here (the
