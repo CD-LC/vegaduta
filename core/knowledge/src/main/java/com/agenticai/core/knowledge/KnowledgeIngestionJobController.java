@@ -19,13 +19,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class KnowledgeIngestionJobController {
 
     private final KnowledgeIngestionJobService jobService;
+    private final KnowledgeAccessService access;
 
-    public KnowledgeIngestionJobController(KnowledgeIngestionJobService jobService) {
+    public KnowledgeIngestionJobController(
+            KnowledgeIngestionJobService jobService, KnowledgeAccessService access) {
         this.jobService = jobService;
+        this.access = access;
     }
 
+    /** A job reveals the file name and target collection, so it needs read access to that collection. */
     @GetMapping("/{jobId}")
     public KnowledgeIngestionJobResponse get(@PathVariable UUID jobId) {
-        return jobService.get(jobId);
+        KnowledgeIngestionJobResponse job = jobService.get(jobId);
+        if (job.collectionId() != null) {
+            access.requireRead(job.collectionId());
+        }
+        return job;
     }
 }

@@ -107,6 +107,14 @@ public class RagEvalService {
         this.maxMillis = Math.max(1, maxSeconds) * 1000L;
     }
 
+    /** Per-collection access control (V710); setter-injected so the constructor is unchanged. Null = not enforced (tests). */
+    private com.agenticai.core.knowledge.KnowledgeAccessService access;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setAccess(com.agenticai.core.knowledge.KnowledgeAccessService access) {
+        this.access = access;
+    }
+
     public RagEvalResponse run(UUID collectionId, RagEvalRequest request) {
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
         if (tenantId != null && !runningTenants.add(tenantId)) {
@@ -128,6 +136,9 @@ public class RagEvalService {
         int cap = gate.questionCap();
         if (collectionRepository.findById(collectionId).isEmpty()) {
             throw new KnowledgeCollectionNotFoundException(collectionId);
+        }
+        if (access != null) {
+            access.requireRead(collectionId);
         }
         if (request == null || request.questions() == null || request.questions().isEmpty()) {
             throw new IllegalArgumentException("questions must contain at least one question");

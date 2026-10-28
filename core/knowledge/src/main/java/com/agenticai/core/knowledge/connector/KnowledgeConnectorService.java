@@ -90,7 +90,18 @@ public class KnowledgeConnectorService {
 
     // ------------------------------- CRUD -----------------------------------
 
+    /** Per-collection access control (V710); setter-injected so the constructor is unchanged. Null = not enforced (tests). */
+    private com.agenticai.core.knowledge.KnowledgeAccessService access;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setAccess(com.agenticai.core.knowledge.KnowledgeAccessService access) {
+        this.access = access;
+    }
+
     public List<KnowledgeConnector> list(UUID collectionId) {
+        if (access != null) {
+            access.requireRead(collectionId);
+        }
         return connectorRepository.findByCollectionId(collectionId);
     }
 
@@ -99,11 +110,21 @@ public class KnowledgeConnectorService {
             .orElseThrow(() -> new KnowledgeConnectorNotFoundException(id));
     }
 
+    /** EDITOR on the connector's collection (a sync rewrites that collection's documents). */
+    private void requireWrite(KnowledgeConnector connector) {
+        if (access != null) {
+            access.requireWrite(connector.getCollectionId());
+        }
+    }
+
     @Transactional
     public KnowledgeConnector create(UUID collectionId, ConnectorType type, String name,
         Map<String, String> config, String subject) {
         if (!collectionRepository.existsById(collectionId)) {
             throw new com.agenticai.core.knowledge.KnowledgeCollectionNotFoundException(collectionId);
+        }
+        if (access != null) {
+            access.requireWrite(collectionId);
         }
         fetcherFor(type); // validate the type has an implementation before persisting
         KnowledgeConnector connector = new KnowledgeConnector();
@@ -118,6 +139,7 @@ public class KnowledgeConnectorService {
     @Transactional
     public KnowledgeConnector update(UUID id, String name, Boolean enabled, Map<String, String> config) {
         KnowledgeConnector connector = getEntity(id);
+        requireWrite(connector);
         if (name != null && !name.isBlank()) {
             connector.setName(name.trim());
         }
@@ -147,6 +169,7 @@ public class KnowledgeConnectorService {
     @Transactional
     public void delete(UUID id) {
         KnowledgeConnector connector = getEntity(id);
+        requireWrite(connector);
         connectorRepository.delete(connector);
         // Documents stay - deleting a connector stops future syncs, it does
         // not silently erase already-ingested knowledge (the tenant can
@@ -164,6 +187,7 @@ public class KnowledgeConnectorService {
     @Transactional
     public ConnectorSyncResult sync(UUID connectorId) {
         KnowledgeConnector connector = getEntity(connectorId);
+        requireWrite(connector);
         if (!connector.isEnabled()) {
             throw new IllegalStateException("Connector is disabled");
         }

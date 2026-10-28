@@ -38,6 +38,7 @@ public class ResourceAccessService {
     private static final String PERM_MANAGE_AGENTS = "PERM_MANAGE_AGENTS";
     private static final String PERM_MANAGE_WORKFLOWS_ADMIN = "PERM_MANAGE_WORKFLOWS_ADMIN";
     private static final String ROLE_PLATFORM_ADMIN = "ROLE_platform-admin";
+    private static final String ROLE_TENANT_ADMIN = "ROLE_tenant-admin";
 
     private final ResourceGrantRepository repository;
     private final AuditLogService auditLogService;
@@ -316,7 +317,36 @@ public class ResourceAccessService {
                 type, resourceId);
     }
 
-    /** Current caller's active grants across both resource types, for a "shared with me" view. */
+    /**
+     * The permission levels the given subject holds through ACTIVE grants on resources of {@code
+     * type}, keyed by resource id. One indexed query ({@code idx_resource_grant_grantee}); for
+     * callers that filter many resources at once (a knowledge search over every collection) and
+     * evaluate owner / admin / grant in memory. Returns an empty map for a blank subject. Does not
+     * audit and does not throw.
+     */
+    public java.util.Map<UUID, PermissionLevel> activeGrantLevels(ResourceType type, String subject) {
+        if (subject == null || subject.isBlank()) {
+            return java.util.Map.of();
+        }
+        java.util.Map<UUID, PermissionLevel> levels = new java.util.HashMap<>();
+        for (ResourceGrant grant :
+                repository.findByGranteeUserIdAndRevokedAtIsNullOrderByGrantedAtDesc(subject)) {
+            if (grant.getResourceType() == type) {
+                levels.merge(
+                        grant.getResourceId(),
+                        grant.getPermissionLevel(),
+                        (a, b) -> a.compareTo(b) >= 0 ? a : b);
+            }
+        }
+        return levels;
+    }
+
+    /** Whether the context holds the administrator override for {@code type}. */
+    public boolean isAdminFor(ResourceType type, TenantContext context) {
+        return isAdmin(context, type);
+    }
+
+    /** Current caller's active grants across all resource types, for a "shared with me" view. */
     public List<ResourceGrant> listSharedWithMe() {
         String subject = requireCallerSubject();
         return repository.findByGranteeUserIdAndRevokedAtIsNullOrderByGrantedAtDesc(subject);
@@ -348,6 +378,10 @@ public class ResourceAccessService {
                 switch (type) {
                     case AGENT -> PERM_MANAGE_AGENTS;
                     case WORKFLOW -> PERM_MANAGE_WORKFLOWS_ADMIN;
+                    // Collections: PERM_MANAGE_AGENTS is the broad agent-builder bundle that already
+                    // gates knowledge authoring over HTTP, so it must NOT also override a PRIVATE
+                    // collection's ACL; only the tenant/platform administrators do.
+                    case KNOWLEDGE_COLLECTION -> ROLE_TENANT_ADMIN;
                 };
         return context.hasRole(perm) || context.hasRole(ROLE_PLATFORM_ADMIN);
     }

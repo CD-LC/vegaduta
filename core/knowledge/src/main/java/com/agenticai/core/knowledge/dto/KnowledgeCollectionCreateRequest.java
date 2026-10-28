@@ -1,5 +1,6 @@
 package com.agenticai.core.knowledge.dto;
 
+import com.agenticai.core.knowledge.KnowledgeVisibility;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -28,12 +29,23 @@ public record KnowledgeCollectionCreateRequest(
     // Migration V361 - per-collection chunking budget in words; null = the
     // platform default (Chunker.DEFAULT_CHUNK_SIZE / DEFAULT_CHUNK_OVERLAP).
     @Min(10) @Max(200) Integer chunkSize,
-    @Min(0) @Max(199) Integer chunkOverlap
+    @Min(0) @Max(199) Integer chunkOverlap,
+    // Migration V710 - who may read it; null = TENANT (every member), the historic behaviour.
+    // The creator becomes the owner either way.
+    KnowledgeVisibility visibility
 ) {
+    /** Pre-V710 shape (chunking, no visibility) - kept so existing callers compile unchanged. */
+    public KnowledgeCollectionCreateRequest(
+        String name, String description, UUID parentCollectionId, String embeddingModel, String textSearchConfig,
+        Integer chunkSize, Integer chunkOverlap
+    ) {
+        this(name, description, parentCollectionId, embeddingModel, textSearchConfig, chunkSize, chunkOverlap, null);
+    }
+
     /** Pre-V361 shape - kept so existing callers (brief, demo studio) compile unchanged. */
     public KnowledgeCollectionCreateRequest(
         String name, String description, UUID parentCollectionId, String embeddingModel, String textSearchConfig
     ) {
-        this(name, description, parentCollectionId, embeddingModel, textSearchConfig, null, null);
+        this(name, description, parentCollectionId, embeddingModel, textSearchConfig, null, null, null);
     }
 }

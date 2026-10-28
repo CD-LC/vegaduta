@@ -100,6 +100,9 @@ public class KnowledgeController {
     // upload allowlist while the service is configured; empty otherwise. Same "bean exists but is
     // inert when unconfigured" profile-local wiring as the rest of this module.
     private final DoclingConversionService doclingConversion;
+    // Per-collection access control (V710): who may search / download (VIEWER) or ingest / delete
+    // documents (EDITOR). Tenant isolation itself still comes from schema-per-tenant resolution.
+    private final KnowledgeAccessService access;
 
     public KnowledgeController(
             KnowledgeIngestionService ingestionService,
@@ -110,7 +113,8 @@ public class KnowledgeController {
             FileStorageService fileStorageService,
             KnowledgeReembedService reembedService,
             KnowledgeUrlIngester urlIngester,
-            DoclingConversionService doclingConversion) {
+            DoclingConversionService doclingConversion,
+            KnowledgeAccessService access) {
         this.ingestionService = ingestionService;
         this.searchService = searchService;
         this.collectionService = collectionService;
@@ -120,6 +124,7 @@ public class KnowledgeController {
         this.reembedService = reembedService;
         this.urlIngester = urlIngester;
         this.doclingConversion = doclingConversion;
+        this.access = access;
     }
 
     /**
@@ -138,7 +143,7 @@ public class KnowledgeController {
     @PostMapping("/ingest")
     public IngestResponse ingest(@Valid @RequestBody IngestRequest request) {
         String source = request.source() != null ? request.source() : "unnamed";
-        UUID collectionId = resolveCollectionId(request.collectionId());
+        UUID collectionId = resolveWritableCollectionId(request.collectionId());
         // Request value > collection's configured value (V361) > platform default - see Chunker.
         Chunker.Settings chunking =
                 collectionService.resolveChunking(
@@ -162,7 +167,7 @@ public class KnowledgeController {
     @PostMapping("/ingest-url")
     public KnowledgeUrlIngester.UrlIngestResult ingestUrl(
             @Valid @RequestBody IngestUrlRequest request) {
-        UUID resolvedCollectionId = resolveCollectionId(request.collectionId());
+        UUID resolvedCollectionId = resolveWritableCollectionId(request.collectionId());
         return urlIngester.ingestUrl(
                 request.url(),
                 resolvedCollectionId,
@@ -218,7 +223,7 @@ public class KnowledgeController {
         // happened, so the file table shows this upload immediately (status
         // UPLOADED) even though the rest of this method still runs
         // synchronously to completion within this one HTTP request.
-        UUID resolvedCollectionId = resolveCollectionId(collectionId);
+        UUID resolvedCollectionId = resolveWritableCollectionId(collectionId);
         Chunker.Settings chunking =
                 collectionService.resolveChunking(resolvedCollectionId, chunkSize, chunkOverlap);
         // RAG audit fix (2026-07-29) - content-hash dedup BEFORE creating any
@@ -299,7 +304,7 @@ public class KnowledgeController {
         // RAG audit fix (2026-07-29) - same content-hash dedup as the sync
         // upload path above, checked before the job (and its document row)
         // is created.
-        UUID resolvedCollectionId = resolveCollectionId(collectionId);
+        UUID resolvedCollectionId = resolveWritableCollectionId(collectionId);
         Chunker.Settings chunking =
                 collectionService.resolveChunking(resolvedCollectionId, chunkSize, chunkOverlap);
         String contentHash = KnowledgeDocumentService.sha256Hex(content);
@@ -320,6 +325,9 @@ public class KnowledgeController {
     @PostMapping("/search")
     public List<SearchResultResponse> search(@Valid @RequestBody SearchRequest request) {
         int topK = request.topK() != null ? request.topK() : 5;
+        // A named collection the caller cannot read is a 404; an unscoped search is narrowed to the
+        // readable ones inside KnowledgeSearchService.
+        access.requireReadAll(request.collectionIds());
         return searchService.search(
                 request.query(), topK, request.collectionIds(), false, request.metadataFilter());
     }
@@ -335,6 +343,7 @@ public class KnowledgeController {
     @PostMapping("/collections/{collectionId}/reembed")
     public ResponseEntity<KnowledgeReembedJobResponse> reembed(
             @PathVariable UUID collectionId, @Valid @RequestBody KnowledgeReembedRequest request) {
+        access.requireWrite(collectionId);
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .body(reembedService.start(collectionId, request.targetModel()));
     }
@@ -343,7 +352,7 @@ public class KnowledgeController {
     @GetMapping("/collections/{collectionId}/reembed")
     public ResponseEntity<KnowledgeReembedJobResponse> latestReembed(
             @PathVariable UUID collectionId) {
-        collectionService.requireExists(collectionId);
+        collectionService.requireReadable(collectionId);
         return reembedService
                 .latestForCollection(collectionId)
                 .map(ResponseEntity::ok)
@@ -352,7 +361,11 @@ public class KnowledgeController {
 
     @GetMapping("/reembed-jobs/{jobId}")
     public KnowledgeReembedJobResponse reembedJob(@PathVariable UUID jobId) {
-        return reembedService.get(jobId);
+        KnowledgeReembedJobResponse job = reembedService.get(jobId);
+        if (job.collectionId() != null) {
+            access.requireRead(job.collectionId());
+        }
+        return job;
     }
 
     /**
@@ -378,6 +391,8 @@ public class KnowledgeController {
      */
     @GetMapping("/documents/{documentId}/file")
     public ResponseEntity<byte[]> downloadOriginalFile(@PathVariable UUID documentId) {
+        // VIEWER on the document's collection (404 otherwise, like a missing document).
+        access.requireReadDocument(documentId);
         KnowledgeDocument document = documentService.getEntity(documentId);
         if (document.getObjectKey() == null) {
             return ResponseEntity.notFound().build();
@@ -412,6 +427,8 @@ public class KnowledgeController {
      */
     @DeleteMapping("/documents/{documentId}")
     public ResponseEntity<Void> deleteDocument(@PathVariable UUID documentId) {
+        // EDITOR on the document's collection (404 otherwise, like a missing document).
+        access.requireWriteDocument(documentId);
         documentService.delete(documentId);
         return ResponseEntity.noContent().build();
     }
@@ -447,11 +464,13 @@ public class KnowledgeController {
      * Knowledge Stage F1 - null/absent means "the tenant's default collection", validated
      * otherwise.
      */
-    private UUID resolveCollectionId(UUID requested) {
-        if (requested == null) {
-            return collectionService.getDefaultCollectionId();
-        }
-        collectionService.requireExists(requested);
-        return requested;
+    private UUID resolveWritableCollectionId(UUID requested) {
+        UUID collectionId =
+                requested == null ? collectionService.getDefaultCollectionId() : requested;
+        collectionService.requireExists(collectionId);
+        // EDITOR (or owner / admin; anyone for a tenant-wide collection). A collection the caller
+        // cannot even read is a 404, exactly like an unknown id.
+        access.requireWrite(collectionId);
+        return collectionId;
     }
 }

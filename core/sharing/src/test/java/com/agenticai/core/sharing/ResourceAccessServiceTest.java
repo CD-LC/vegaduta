@@ -479,4 +479,38 @@ class ResourceAccessServiceTest {
         when(provider.getIfAvailable()).thenReturn(client);
         return provider;
     }
+
+    // -- knowledge collections (V710) ------------------------------------
+
+    @Test
+    void activeGrantLevels_keepsTheHighestLevelPerCollectionAndIgnoresOtherTypes() {
+        UUID collectionA = UUID.randomUUID();
+        UUID collectionB = UUID.randomUUID();
+        ResourceGrant viewerA = new ResourceGrant(ResourceType.KNOWLEDGE_COLLECTION, collectionA, OTHER_USER, PermissionLevel.VIEWER, OWNER);
+        ResourceGrant editorA = new ResourceGrant(ResourceType.KNOWLEDGE_COLLECTION, collectionA, OTHER_USER, PermissionLevel.EDITOR, OWNER);
+        ResourceGrant viewerB = new ResourceGrant(ResourceType.KNOWLEDGE_COLLECTION, collectionB, OTHER_USER, PermissionLevel.VIEWER, OWNER);
+        ResourceGrant agentGrant = new ResourceGrant(ResourceType.AGENT, RESOURCE_ID, OTHER_USER, PermissionLevel.EDITOR, OWNER);
+        when(repository.findByGranteeUserIdAndRevokedAtIsNullOrderByGrantedAtDesc(OTHER_USER))
+                .thenReturn(List.of(viewerA, editorA, viewerB, agentGrant));
+
+        Map<UUID, PermissionLevel> levels =
+                service.activeGrantLevels(ResourceType.KNOWLEDGE_COLLECTION, OTHER_USER);
+
+        assertEquals(Map.of(collectionA, PermissionLevel.EDITOR, collectionB, PermissionLevel.VIEWER), levels);
+        assertEquals(Map.of(), service.activeGrantLevels(ResourceType.KNOWLEDGE_COLLECTION, null));
+        assertEquals(Map.of(), service.activeGrantLevels(ResourceType.KNOWLEDGE_COLLECTION, " "));
+    }
+
+    @Test
+    void knowledgeCollectionAdminOverride_isTheTenantAdminRoleNotTheBroadBuilderPermission() {
+        TenantContext builder = TenantContext.of(TENANT_ID, OTHER_USER, Set.of("PERM_MANAGE_AGENTS"));
+        TenantContext tenantAdmin = TenantContext.of(TENANT_ID, OTHER_USER, Set.of("ROLE_tenant-admin"));
+        TenantContext platformAdmin = TenantContext.of(TENANT_ID, OTHER_USER, Set.of("ROLE_platform-admin"));
+
+        org.junit.jupiter.api.Assertions.assertFalse(service.isAdminFor(ResourceType.KNOWLEDGE_COLLECTION, builder));
+        assertTrue(service.isAdminFor(ResourceType.KNOWLEDGE_COLLECTION, tenantAdmin));
+        assertTrue(service.isAdminFor(ResourceType.KNOWLEDGE_COLLECTION, platformAdmin));
+        // The agent override is unchanged.
+        assertTrue(service.isAdminFor(ResourceType.AGENT, builder));
+    }
 }

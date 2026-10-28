@@ -137,6 +137,20 @@ public class KnowledgeSearchService {
     }
 
     /**
+     * Per-collection access control (V710): every search is narrowed to the collections the caller may
+     * read, centrally, so the REST search, the {@code search_knowledge_base} tool, workflow knowledge
+     * nodes and the MCP {@code search_knowledge} tool all get it without each repeating the check.
+     * Setter-injected so constructors are unchanged; a service built without it (unit tests, non-Spring
+     * callers) does not filter. In the application the bean always exists (same profile).
+     */
+    private KnowledgeAccessService access;
+
+    @Autowired(required = false)
+    void setAccess(KnowledgeAccessService access) {
+        this.access = access;
+    }
+
+    /**
      * RAG-quality stages (parent-child expansion, configurable fusion/MMR, query rewriting). All
      * setter-injected so constructors are unchanged; with none of them wired, or every
      * {@code app.knowledge.*} switch off, {@link #search} runs the exact legacy path.
@@ -270,6 +284,29 @@ public class KnowledgeSearchService {
         String query, int topK, Set<UUID> collectionIds, boolean excludeImageSourced, Map<String, Object> metadataFilter,
         RetrievalOptions options
     ) {
+        return search(query, topK, collectionIds, excludeImageSourced, metadataFilter, options, null);
+    }
+
+    /**
+     * Search on behalf of an explicit {@code principal} instead of the calling thread's user - for an
+     * unattended run that acts as an agent's owner ({@link KnowledgeAccessService.Principal#ofOwner}).
+     */
+    public List<SearchResultResponse> searchAs(
+        String query, int topK, Set<UUID> collectionIds, boolean excludeImageSourced,
+        KnowledgeAccessService.Principal principal
+    ) {
+        return search(query, topK, collectionIds, excludeImageSourced, null,
+            ragConfig == null ? null : ragConfig.defaultOptions(), principal);
+    }
+
+    /**
+     * @param principal whose access narrows the collections; {@code null} = the calling thread's
+     *     {@code TenantContext} user (no resolvable user = nothing readable)
+     */
+    public List<SearchResultResponse> search(
+        String query, int topK, Set<UUID> collectionIds, boolean excludeImageSourced, Map<String, Object> metadataFilter,
+        RetrievalOptions options, KnowledgeAccessService.Principal principal
+    ) {
         // Validate before any sidecar/DB work so a bad filter is a clean 400.
         KnowledgeMetadataFilter.SqlPredicate vectorMetadataPredicate = KnowledgeMetadataFilter.toSql(metadataFilter, "metadata");
         KnowledgeMetadataFilter.SqlPredicate keywordMetadataPredicate = KnowledgeMetadataFilter.toSql(metadataFilter, "c.metadata");
@@ -284,6 +321,14 @@ public class KnowledgeSearchService {
             targetCollections = targetCollections.stream()
                 .filter(c -> c.getName() == null || !c.getName().startsWith(STUDIO_COLLECTION_PREFIX))
                 .toList();
+        }
+
+        // Per-collection ACL. The agent's allow-list (collectionIds) only SCOPES the search; what it may
+        // actually read is that scope intersected with the caller's own access, so an allow-listed
+        // collection the invoking user cannot see is dropped here (and audited when it was named).
+        if (access != null) {
+            targetCollections = access.filterReadable(
+                targetCollections, principal != null ? principal : access.currentPrincipal(), !unscoped);
         }
 
         if (targetCollections.isEmpty()) {

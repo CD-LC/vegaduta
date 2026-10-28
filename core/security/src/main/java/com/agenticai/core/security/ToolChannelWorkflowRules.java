@@ -112,7 +112,10 @@ final class ToolChannelWorkflowRules {
                 // shared content. Gated on PERM_MANAGE_AGENTS (the
                 // agent-builder bundle) like the agent configuration it
                 // feeds; reads and POST /api/knowledge/search stay open to
-                // every member (collections have no per-user ACL).
+                // every member of the tenant; WHAT a member may read or write
+                // inside a collection is decided per collection by core/knowledge's
+                // KnowledgeAccessService (owner, TENANT/SHARED/PRIVATE visibility,
+                // VIEWER/EDITOR grants; V710) on top of this authority gate.
                 // These controllers are @Profile("knowledge"), which is why
                 // the coverage test never saw them before.
                 .requestMatchers(

@@ -48,6 +48,13 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
     private final double minScore;
 
     /**
+     * Set only for an unattended run (scheduled / webhook / public-link turn, no invoking user): the
+     * agent owner's subject, whose access then governs retrieval instead of the synthetic caller's.
+     * Null = retrieval is evaluated for the invoking user ({@code TenantContext}).
+     */
+    private final String ownerSubject;
+
+    /**
      * @param allowedCollectionIds empty means "no restriction, this agent may search every
      *     collection its tenant has" - same semantics as {@code
      *     Agent.allowedKnowledgeCollectionIds}.
@@ -69,10 +76,32 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
             Set<UUID> allowedCollectionIds,
             int topK,
             double minScore) {
+        this(searchService, allowedCollectionIds, topK, minScore, null);
+    }
+
+    private KnowledgeSearchToolCallback(
+            KnowledgeSearchService searchService,
+            Set<UUID> allowedCollectionIds,
+            int topK,
+            double minScore,
+            String ownerSubject) {
         this.searchService = searchService;
         this.allowedCollectionIds = allowedCollectionIds;
         this.topK = topK > 0 ? topK : DEFAULT_TOP_K;
         this.minScore = minScore;
+        this.ownerSubject = ownerSubject;
+    }
+
+    /**
+     * The same tool for an UNATTENDED run: retrieval uses {@code ownerSubject}'s access (the agent
+     * owner's own collections, grants and tenant-visible collections, never an admin override)
+     * rather than the run's synthetic caller. Interactive turns must not use this; they are evaluated
+     * for the invoking user, intersected with the agent's allow-list. A blank owner leaves the
+     * default: the run's own (synthetic, so tenant-visible-only) caller.
+     */
+    public KnowledgeSearchToolCallback asOwner(String ownerSubject) {
+        return new KnowledgeSearchToolCallback(
+                searchService, allowedCollectionIds, topK, minScore, ownerSubject);
     }
 
     @Override
@@ -153,8 +182,18 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
                             String.valueOf(args.getOrDefault("exclude_image_sourced", false)));
 
             List<SearchResultResponse> results =
-                    searchService.search(
-                            queryValue.toString(), topK, scopedCollectionIds, excludeImageSourced);
+                    ownerSubject == null || ownerSubject.isBlank()
+                            ? searchService.search(
+                                    queryValue.toString(),
+                                    topK,
+                                    scopedCollectionIds,
+                                    excludeImageSourced)
+                            : searchService.searchAs(
+                                    queryValue.toString(),
+                                    topK,
+                                    scopedCollectionIds,
+                                    excludeImageSourced,
+                                    KnowledgeAccessService.Principal.ofOwner(ownerSubject));
             if (minScore > 0.0) {
                 results = results.stream().filter(r -> -r.distance() >= minScore).toList();
             }

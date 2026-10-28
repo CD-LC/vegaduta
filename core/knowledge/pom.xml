@@ -41,6 +41,18 @@
       <groupId>com.agenticai</groupId>
       <artifactId>tenancy</artifactId>
     </dependency>
+    <!-- Per-collection access control: ResourceAccessService grants (ResourceType.KNOWLEDGE_COLLECTION), the
+         ResourceOwnerLookup port and PermissionLevel. sharing depends only on audit, security and admin, none of
+         which depend on knowledge, so this adds no cycle. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>sharing</artifactId>
+    </dependency>
+    <!-- Denied-access audit entries (AuditLogService). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>audit</artifactId>
+    </dependency>
     <!-- OCR provider abstraction - OcrProviderConfigService encrypts the
          tenant's BYOK cloud-OCR API key at rest, same EncryptionService
          SarvamCredentialService/TwilioCredentialService use. -->

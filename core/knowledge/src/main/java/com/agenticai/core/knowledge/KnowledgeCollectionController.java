@@ -97,7 +97,7 @@ public class KnowledgeCollectionController {
             @PathVariable UUID collectionId,
             @RequestParam(required = false) Integer limit,
             @RequestParam(required = false) Long offset) {
-        collectionService.requireExists(collectionId);
+        collectionService.requireReadable(collectionId);
         List<KnowledgeDocumentResponse> rows =
                 documentService.listByCollection(collectionId, limit, offset);
         // Truncation must be visible: X-Total-Count is the real count (queried only

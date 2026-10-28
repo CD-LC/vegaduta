@@ -46,6 +46,14 @@ public class KnowledgeRagSettingsService {
         this.config = config;
     }
 
+    /** Per-collection access control (V710); setter-injected so the constructor is unchanged. Null = not enforced (tests). */
+    private com.agenticai.core.knowledge.KnowledgeAccessService access;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setAccess(com.agenticai.core.knowledge.KnowledgeAccessService access) {
+        this.access = access;
+    }
+
     /** Parent-child sizing to ingest {@code collectionId} with, or empty for the normal flat chunking. Never throws. */
     public Optional<ParentChildChunker.Settings> parentChildIngestSettings(UUID collectionId) {
         if (!config.isParentChildEnabled() || collectionId == null) {
@@ -56,11 +64,17 @@ public class KnowledgeRagSettingsService {
 
     public RagSettingsResponse get(UUID collectionId) {
         requireCollection(collectionId);
+        if (access != null) {
+            access.requireRead(collectionId);
+        }
         return response(collectionId);
     }
 
     public RagSettingsResponse update(UUID collectionId, RagSettingsUpdateRequest request) {
         requireCollection(collectionId);
+        if (access != null) {
+            access.requireWrite(collectionId);
+        }
         if (request != null && request.parentChildEnabled() != null) {
             boolean enable = request.parentChildEnabled();
             if (enable && !config.isParentChildEnabled()) {

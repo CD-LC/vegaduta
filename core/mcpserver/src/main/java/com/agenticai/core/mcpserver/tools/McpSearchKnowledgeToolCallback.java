@@ -44,6 +44,12 @@ import org.springframework.util.StringUtils;
  * See {@link McpCallerContext}'s javadoc for the same note from the other
  * side.
  *
+ * <p><b>Per-collection ACL (V710):</b> {@code KnowledgeSearchService#search} also narrows the exposed
+ * collections to those the caller may read. An MCP key carries no user identity (its context holds a
+ * synthetic subject that owns nothing and holds no grants), so it can only ever reach collections
+ * with {@code TENANT} visibility: a PRIVATE or SHARED collection listed in the grant's exposed set
+ * is silently skipped and the denial is audited by {@code KnowledgeAccessService}. Fails closed.
+ *
  * <p>{@code top_k} is capped server-side at {@link #MAX_TOP_K} regardless of
  * what the caller requests - an external, rate-limited-but-otherwise-
  * unsupervised caller asking for an enormous top_k is an easy way to run up

@@ -65,6 +65,20 @@ Release notes on GitHub are generated from the section for each version.
   read-only REST window, `GET /api/agents/{agentId}/scratchpad[?session=...]`
   and `GET .../scratchpad/{key}` (VIEWER access; `session=agent` or omitted
   reads the long-term pad).
+- **Per-collection access control for the knowledge base.** A collection now has an owner and a
+  visibility (`TENANT`, `SHARED`, `PRIVATE`; tenant migration V710). Every existing collection stays
+  `TENANT` with no owner, so nothing changes on upgrade. `SHARED` collections honour grants made at
+  `/api/knowledge/collections/{id}/grants` (same `ShareController` and `resource_grant` table as agents
+  and workflows): `VIEWER` can search and download, `EDITOR` can also ingest, re-embed and delete
+  documents; `PRIVATE` is owner and tenant/platform admin only. Search, document download, ingest,
+  delete, re-embed, retrieval settings, eval, connectors, job polling and the collection list are
+  enforced (404 on denial, audited as `knowledge.collection.access.denied`). Retrieval is enforced
+  centrally in `KnowledgeSearchService`, so the REST search, `search_knowledge_base`, workflow
+  knowledge nodes and the MCP `search_knowledge` tool all get it. An agent turn reads its
+  allow-list intersected with the invoking user's access; background runs, public share links and MCP
+  keys carry no user and see `TENANT` collections only, unless the run is wired to act as the agent
+  owner (`KnowledgeSearchToolCallback.asOwner`). An unresolvable caller reads nothing. The
+  `knowledge_collection` API gains `visibility`/`createdBy` fields.
 
 ### Fixed
 

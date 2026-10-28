@@ -1,6 +1,7 @@
 package com.agenticai.core.knowledge.dto;
 
 import com.agenticai.core.knowledge.KnowledgeCollection;
+import com.agenticai.core.knowledge.KnowledgeVisibility;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -30,7 +31,11 @@ public record KnowledgeCollectionResponse(
     String embeddingStatus,
     // Migration V361 - the configured chunking budget; null = platform default.
     Integer chunkSize,
-    Integer chunkOverlap
+    Integer chunkOverlap,
+    // Migration V710 - who may read it (TENANT for every pre-existing collection) and the owner's
+    // subject (null for a legacy collection).
+    KnowledgeVisibility visibility,
+    String createdBy
 ) {
     public static KnowledgeCollectionResponse from(KnowledgeCollection collection, long fileCount, long chunkCount) {
         return new KnowledgeCollectionResponse(
@@ -47,7 +52,9 @@ public record KnowledgeCollectionResponse(
             collection.getUpdatedAt(),
             collection.getEmbeddingStatus(),
             collection.getChunkSize(),
-            collection.getChunkOverlap()
+            collection.getChunkOverlap(),
+            collection.getVisibility(),
+            collection.getCreatedBy()
         );
     }
 }

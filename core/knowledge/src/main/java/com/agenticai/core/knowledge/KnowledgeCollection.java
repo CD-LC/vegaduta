@@ -2,6 +2,8 @@ package com.agenticai.core.knowledge;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -102,6 +104,16 @@ public class KnowledgeCollection {
     @Column(name = "text_search_config", length = 64)
     private String textSearchConfig;
 
+    // Migration V710 - the owner's subject; null = a legacy collection that predates per-collection
+    // access control (never backfilled, like agent.created_by in V151).
+    @Column(name = "created_by", length = 255, updatable = false)
+    private String createdBy;
+
+    // Migration V710 - NOT NULL DEFAULT 'TENANT', so every existing row stays tenant-visible.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visibility", nullable = false, length = 16)
+    private KnowledgeVisibility visibility = KnowledgeVisibility.TENANT;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -127,6 +139,16 @@ public class KnowledgeCollection {
         this.updatedAt = now;
     }
 
+    /** Records the owner and visibility chosen at creation (V710). */
+    public KnowledgeCollection(
+        String name, String description, UUID parentCollectionId, String embeddingModel, String textSearchConfig,
+        String createdBy, KnowledgeVisibility visibility
+    ) {
+        this(name, description, parentCollectionId, embeddingModel, textSearchConfig);
+        this.createdBy = createdBy;
+        this.visibility = KnowledgeVisibility.orDefault(visibility);
+    }
+
     public static final String STATUS_READY = "READY";
     public static final String STATUS_REEMBEDDING = "REEMBEDDING";
 
@@ -134,6 +156,12 @@ public class KnowledgeCollection {
         this.name = name;
         this.description = description;
         this.parentCollectionId = parentCollectionId;
+        this.updatedAt = Instant.now();
+    }
+
+    /** Owner / administrator only - enforced by {@link KnowledgeAccessService}, not here. */
+    public void changeVisibility(KnowledgeVisibility visibility) {
+        this.visibility = KnowledgeVisibility.orDefault(visibility);
         this.updatedAt = Instant.now();
     }
 
@@ -192,6 +220,16 @@ public class KnowledgeCollection {
 
     public Integer getChunkOverlap() {
         return chunkOverlap;
+    }
+
+    /** The owner's subject, or null for a legacy collection (V710 does not backfill). */
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    /** Never null: a missing value reads as {@link KnowledgeVisibility#TENANT}. */
+    public KnowledgeVisibility getVisibility() {
+        return KnowledgeVisibility.orDefault(visibility);
     }
 
     public Instant getCreatedAt() {

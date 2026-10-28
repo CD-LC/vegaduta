@@ -55,7 +55,10 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Profile("security")
-@RequestMapping("/api/{resourceKind:agents|workflows}/{resourceId}/grants")
+@RequestMapping({
+    "/api/{resourceKind:agents|workflows}/{resourceId}/grants",
+    "/api/knowledge/{resourceKind:collections}/{resourceId}/grants"
+})
 public class ShareController {
 
     private final ResourceAccessService accessService;
@@ -168,10 +171,11 @@ public class ShareController {
         return switch (resourceKind) {
             case "agents" -> ResourceType.AGENT;
             case "workflows" -> ResourceType.WORKFLOW;
+            case "collections" -> ResourceType.KNOWLEDGE_COLLECTION;
             default ->
                     throw new IllegalStateException(
-                            "Unreachable - path pattern restricts resourceKind to"
-                                    + " agents|workflows");
+                            "Unreachable - path patterns restrict resourceKind to"
+                                    + " agents|workflows|collections");
         };
     }
 

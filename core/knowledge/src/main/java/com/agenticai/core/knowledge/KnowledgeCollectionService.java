@@ -9,6 +9,7 @@ import com.agenticai.core.security.TenantLimits;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,17 @@ public class KnowledgeCollectionService {
     private final JdbcTemplate jdbcTemplate;
     private final KnowledgeDocumentService documentService;
     private final TenantLimits tenantLimits;
+
+    /**
+     * Per-collection access control (V710). Setter-injected so the constructor is unchanged; without it
+     * (unit tests, non-Spring callers) nothing is enforced. In the application it always exists.
+     */
+    private KnowledgeAccessService access;
+
+    @Autowired(required = false)
+    void setAccess(KnowledgeAccessService access) {
+        this.access = access;
+    }
 
     public KnowledgeCollectionService(
         KnowledgeCollectionRepository repository,
@@ -86,8 +98,18 @@ public class KnowledgeCollectionService {
                 "Unknown text search config \"" + textSearchConfig + "\" - see GET /api/knowledge/collections/text-search-configs"
             );
         }
+        // The creator owns the collection. Without a resolvable user there is no owner, so only the
+        // historic tenant-wide visibility is possible (a PRIVATE / SHARED collection nobody owns would
+        // be unreachable except by an administrator).
+        String owner = access == null ? null : access.currentSubject();
+        KnowledgeVisibility visibility = KnowledgeVisibility.orDefault(request.visibility());
+        if (owner == null && access != null && visibility != KnowledgeVisibility.TENANT) {
+            throw new IllegalArgumentException(
+                "A " + visibility + " collection needs an authenticated owner");
+        }
         KnowledgeCollection collection = new KnowledgeCollection(
-            request.name(), request.description(), request.parentCollectionId(), embeddingModel, textSearchConfig
+            request.name(), request.description(), request.parentCollectionId(), embeddingModel, textSearchConfig,
+            owner, visibility
         );
         if (request.chunkSize() != null || request.chunkOverlap() != null) {
             // Validate the combination up front (size 10..200, 0 <= overlap < size)
@@ -103,17 +125,31 @@ public class KnowledgeCollectionService {
 
     @Transactional(readOnly = true)
     public List<KnowledgeCollectionResponse> listAll() {
-        return repository.findAll().stream().map(this::toResponse).toList();
+        List<KnowledgeCollection> all = repository.findAll();
+        if (access != null) {
+            // Collections the caller cannot read are not listed at all (name and description would leak).
+            all = access.filterReadable(all, access.currentPrincipal(), false);
+        }
+        return all.stream().map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
     public KnowledgeCollectionResponse get(UUID collectionId) {
+        if (access != null) {
+            access.requireRead(collectionId);
+        }
         return toResponse(getEntity(collectionId));
     }
 
     @Transactional
     public KnowledgeCollectionResponse update(UUID collectionId, KnowledgeCollectionUpdateRequest request) {
         KnowledgeCollection collection = getEntity(collectionId);
+        if (access != null) {
+            access.requireModify(collection);
+            if (request.visibility() != null && request.visibility() != collection.getVisibility()) {
+                access.requireManage(collection);
+            }
+        }
         if (request.parentCollectionId() != null) {
             if (request.parentCollectionId().equals(collectionId)) {
                 throw new IllegalArgumentException("A collection cannot be its own parent");
@@ -121,6 +157,9 @@ public class KnowledgeCollectionService {
             requireExists(request.parentCollectionId());
         }
         collection.update(request.name(), request.description(), request.parentCollectionId());
+        if (request.visibility() != null) {
+            collection.changeVisibility(request.visibility());
+        }
         if (request.chunkSize() != null || request.chunkOverlap() != null) {
             Chunker.resolve(
                 null, null,
@@ -141,6 +180,9 @@ public class KnowledgeCollectionService {
     @Transactional
     public void delete(UUID collectionId) {
         KnowledgeCollection collection = getEntity(collectionId);
+        if (access != null) {
+            access.requireModify(collection);
+        }
         if (collection.isDefault()) {
             throw new KnowledgeCollectionNotEmptyException(
                 collectionId, "it is this tenant's default collection and must always exist"
@@ -205,6 +247,15 @@ public class KnowledgeCollectionService {
     public Chunker.Settings resolveChunking(UUID collectionId, Integer requestedSize, Integer requestedOverlap) {
         KnowledgeCollection collection = getEntity(collectionId);
         return Chunker.resolve(requestedSize, requestedOverlap, collection.getChunkSize(), collection.getChunkOverlap());
+    }
+
+    /** Exists AND the caller may read it; otherwise the same 404 as an unknown id. */
+    @Transactional(readOnly = true)
+    public void requireReadable(UUID collectionId) {
+        requireExists(collectionId);
+        if (access != null) {
+            access.requireRead(collectionId);
+        }
     }
 
     @Transactional(readOnly = true)
