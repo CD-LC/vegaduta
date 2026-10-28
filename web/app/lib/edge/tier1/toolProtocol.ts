@@ -30,10 +30,7 @@ export function looksLikeAttemptedToolCall(text: string): boolean {
 
 export function toolProtocolInstructions(tools: EdgeToolDefinition[], note?: string): string {
   const list = tools
-    .map(
-      (t) =>
-        `- ${t.name}: ${t.description}\n  Arguments JSON schema: ${JSON.stringify(t.inputSchema ?? {})}`
-    )
+    .map((t) => `- ${t.name}: ${t.description}\n  Arguments JSON schema: ${JSON.stringify(t.inputSchema ?? {})}`)
     .join("\n");
   return (
     `\n\nYou can use these tools:\n${list}\n` +
@@ -48,7 +45,6 @@ export interface ParsedToolCall {
   name: string;
   arguments: unknown;
 }
-
 
 /**
  * Parse a completed reply as a tool call. Accepts an optional ```/```json

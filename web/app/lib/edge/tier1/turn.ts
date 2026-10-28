@@ -2,7 +2,13 @@
 
 import type { ChatCompletionMessageParam } from "@mlc-ai/web-llm";
 import { fetchEdgeMemory, memoryFactsBlock } from "../edgeMemory";
-import { describeToolBudget, findLocalTool, runLocalTool, toolAdvertisementBudgetFor, type LocalTool } from "../localTools";
+import {
+  describeToolBudget,
+  findLocalTool,
+  runLocalTool,
+  toolAdvertisementBudgetFor,
+  type LocalTool,
+} from "../localTools";
 import {
   canUseServerTools,
   edgeToolsUnavailable,
