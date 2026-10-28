@@ -70,7 +70,6 @@ com.agenticai.core.tenancy.AppUserLastSeenRecorder | control_plane-qualified JDB
 com.agenticai.core.tenancy.replica.BoundedRedisCall | time-bounded Redis call; no tenant state
 com.agenticai.core.workflow.AgentScheduleWorkflowRunner | worker sets TenantContext.of(tenantSchema, requestedBy) captured at submit and clears it in finally
 com.agenticai.core.workflow.WorkflowBackgroundRunService | captures the TenantContext on the caller, sets it on the pool thread and clears it in finally
-com.agenticai.core.workflow.ParallelBranchRunner | parallel branches set the tenant snapshot taken on the run thread and clear it in finally (moved out of WorkflowExecutionEngine unchanged)
 com.agenticai.core.workflow.stream.WorkflowRunStreamHub | heartbeat and eviction timers; the run poller re-applies the tenant captured by WorkflowController (set, clear in finally)
 com.agenticai.core.workflow.temporal.WorkflowNodeActivitiesImpl | the activity input carries tenantId, subject and roles; withTenantContext sets and restores them on the worker thread
 com.agenticai.core.security.net.GuardedJdkHttpClient | sendAsync runs on TenantAwareExecutors.newVirtualThreadPerTaskExecutor (and the explicit-executor overload is the JDK HttpClient contract); the body-feeder thread carries the tenant via TenantAwareExecutors.startVirtualThread though it does no tenant work
