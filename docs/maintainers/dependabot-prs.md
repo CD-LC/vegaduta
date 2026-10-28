@@ -25,9 +25,19 @@ Every other commit is still checked, so a commit you push onto a Dependabot bran
 Dependabot edits `requirements.txt` (the direct, exactly pinned dependencies) but cannot
 regenerate `requirements.lock`, the hashed file the service images install with
 `pip install --require-hashes`. A pip update pull request under `services/` therefore fails
-**Python requirements.lock up to date** until a maintainer regenerates the lock and pushes it
-onto the branch. The check regenerates every service's lock with uv 0.13.0 and fails on any
-difference, so regenerate all of them, as CI does:
+**Python requirements.lock up to date** until the locks are regenerated and pushed onto the
+branch. The check regenerates every service's lock with uv 0.13.0 and fails on any
+difference, so regenerate all of them, as CI does.
+
+**`.github/workflows/dependabot-autofix.yml` does this automatically.** On a Dependabot pull
+request that touches `services/*/requirements.txt` it regenerates every lock, commits the
+drift as `github-actions[bot]` (signed off, since that bot is not the pull request's author)
+and pushes onto the Dependabot branch. A `GITHUB_TOKEN` push does not trigger further
+`pull_request` runs, so the workflow then dispatches `ci.yml`, `codeql.yml` and `trivy.yml`
+on the head branch - their checks land on the new commit's SHA. Run it by hand with
+`gh workflow run dependabot-autofix.yml -f pr=<number>` if a Dependabot pull request is
+stuck on the lock check. The manual path below remains the fallback when the workflow itself
+is being changed.
 
 ```sh
 gh pr checkout <number>                         # the Dependabot branch, tracking origin
