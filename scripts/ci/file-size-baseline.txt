@@ -21,7 +21,7 @@ core/agents-tools/src/test/java/com/agenticai/core/agents/e2e/ApprovalTurnHarnes
 core/agents-turn/src/main/java/com/agenticai/core/agents/memory/SessionMemoryService.java 745
 core/agents-turn/src/main/java/com/agenticai/core/agents/memory/TenantMemoryService.java 667
 core/agents-turn/src/main/java/com/agenticai/core/agents/skills/SkillService.java 676
-core/agents-turn/src/main/java/com/agenticai/core/agents/turn/AgentChatService.java 706
+core/agents-turn/src/main/java/com/agenticai/core/agents/turn/AgentChatService.java 702
 core/agents-turn/src/main/java/com/agenticai/core/agents/turn/ChatTurnDispatcher.java 674
 core/agents-turn/src/main/java/com/agenticai/core/agents/turn/ChatTurnExecutor.java 759
 core/agents-turn/src/main/java/com/agenticai/core/agents/turn/HostedChainFailover.java 703
@@ -46,7 +46,6 @@ core/workflow-portability/src/main/java/com/agenticai/core/workflow/portability/
 scripts/ci/conformance-report.py 683
 services/app-builder/app/generate.py 772
 services/app-builder/app/github_client.py 681
-services/voice-agent/app/main.py 678
 web/app/build/ChatPane.tsx 666
 web/app/components/billing/LlmSpendSection.tsx 681
 web/app/components/settings/SettingsPanel.test.tsx 685
