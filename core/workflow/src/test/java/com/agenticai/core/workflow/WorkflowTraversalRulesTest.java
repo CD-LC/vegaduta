@@ -19,8 +19,9 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link WorkflowTraversalRules} runs inside the Temporal workflow class, so it must be deterministic: same
- * input, same answer, no hidden state, and no route to a clock, random source or I/O.
+ * {@link WorkflowTraversalRules} runs inside the Temporal workflow class, so it must be
+ * deterministic: same input, same answer, no hidden state, and no route to a clock, random source
+ * or I/O.
  */
 class WorkflowTraversalRulesTest {
 
@@ -54,8 +55,9 @@ class WorkflowTraversalRulesTest {
     @Test
     void rulesClassHoldsNoMutableState() {
         for (Field f : WorkflowTraversalRules.class.getDeclaredFields()) {
-            assertTrue(Modifier.isStatic(f.getModifiers()) && Modifier.isFinal(f.getModifiers()),
-                "non-constant field would be replay-unsafe: " + f.getName());
+            assertTrue(
+                    Modifier.isStatic(f.getModifiers()) && Modifier.isFinal(f.getModifiers()),
+                    "non-constant field would be replay-unsafe: " + f.getName());
         }
     }
 
@@ -63,21 +65,33 @@ class WorkflowTraversalRulesTest {
     void rulesClassReferencesNoClockRandomOrIo() throws Exception {
         String resource = WorkflowTraversalRules.class.getName().replace('.', '/') + ".class";
         byte[] bytes;
-        try (InputStream in = WorkflowTraversalRules.class.getClassLoader().getResourceAsStream(resource)) {
+        try (InputStream in =
+                WorkflowTraversalRules.class.getClassLoader().getResourceAsStream(resource)) {
             bytes = in.readAllBytes();
         }
         // Constant-pool class and method references appear as UTF-8 strings in the class file.
         String pool = new String(bytes, StandardCharsets.ISO_8859_1);
-        for (String forbidden : List.of("java/time/", "java/util/Random", "ThreadLocalRandom", "SecureRandom",
-            "java/lang/System", "java/util/UUID", "java/io/File", "java/nio/file", "java/net/", "java/lang/Thread",
-            "org/slf4j")) {
+        for (String forbidden :
+                List.of(
+                        "java/time/",
+                        "java/util/Random",
+                        "ThreadLocalRandom",
+                        "SecureRandom",
+                        "java/lang/System",
+                        "java/util/UUID",
+                        "java/io/File",
+                        "java/nio/file",
+                        "java/net/",
+                        "java/lang/Thread",
+                        "org/slf4j")) {
             assertFalse(pool.contains(forbidden), "rules must not reference " + forbidden);
         }
     }
 
     @Test
     void temporalNextHopStillTakesTheFirstEdgeEvenWhenItIsAnErrorEdge() {
-        // Deliberate, documented divergence from the in-process rule (see nextNodeIdFirstEdge javadoc):
+        // Deliberate, documented divergence from the in-process rule (see nextNodeIdFirstEdge
+        // javadoc):
         // changing it would alter decisions on histories already recorded.
         List<WorkflowEdgeDto> edges = List.of(edge("err", "error"), edge("ok", null));
         assertEquals("err", WorkflowTraversalRules.nextNodeIdFirstEdge(edges, null));
@@ -98,9 +112,15 @@ class WorkflowTraversalRulesTest {
     @Test
     void resolveItemsReportsWhyTheListIsEmpty() {
         WorkflowNodeDto n = node(Map.of());
-        assertEquals(WorkflowTraversalRules.ItemsProblem.NONE, WorkflowTraversalRules.resolveItems(MAPPER, n, "[]").problem());
-        assertEquals(WorkflowTraversalRules.ItemsProblem.NOT_A_LIST, WorkflowTraversalRules.resolveItems(MAPPER, n, "{}").problem());
-        assertEquals(WorkflowTraversalRules.ItemsProblem.INVALID_JSON, WorkflowTraversalRules.resolveItems(MAPPER, n, "[").problem());
+        assertEquals(
+                WorkflowTraversalRules.ItemsProblem.NONE,
+                WorkflowTraversalRules.resolveItems(MAPPER, n, "[]").problem());
+        assertEquals(
+                WorkflowTraversalRules.ItemsProblem.NOT_A_LIST,
+                WorkflowTraversalRules.resolveItems(MAPPER, n, "{}").problem());
+        assertEquals(
+                WorkflowTraversalRules.ItemsProblem.INVALID_JSON,
+                WorkflowTraversalRules.resolveItems(MAPPER, n, "[").problem());
     }
 
     @Test
@@ -115,7 +135,9 @@ class WorkflowTraversalRulesTest {
 
     @Test
     void retryPolicyDecisions() {
-        WorkflowNodeDto agent = new WorkflowNodeDto("a", "agent", Map.of(), Map.of("config", Map.of("retryAttempts", 2)));
+        WorkflowNodeDto agent =
+                new WorkflowNodeDto(
+                        "a", "agent", Map.of(), Map.of("config", Map.of("retryAttempts", 2)));
         WorkflowNodeDto output = new WorkflowNodeDto("o", "output", Map.of(), Map.of());
         assertEquals(3, RetryPolicy.totalAttempts(agent, 0, -1));
         assertEquals(1, RetryPolicy.totalAttempts(agent, 0, 1));
@@ -123,8 +145,34 @@ class WorkflowTraversalRulesTest {
         assertTrue(RetryPolicy.shouldRetry(agent, 1, 3, new RuntimeException("x")));
         assertFalse(RetryPolicy.shouldRetry(agent, 3, 3, new RuntimeException("x")));
         assertFalse(RetryPolicy.shouldRetry(output, 1, 3, new RuntimeException("x")));
-        assertFalse(RetryPolicy.shouldRetry(agent, 1, 3,
-            new com.agenticai.core.security.TenantLimitExceededException("quota")));
+        assertFalse(
+                RetryPolicy.shouldRetry(
+                        agent,
+                        1,
+                        3,
+                        new com.agenticai.core.security.TenantLimitExceededException("quota")));
+        // Irreversible side-effect nodes share the error strategy's list on the legacy path too:
+        // a blind retry would duplicate the send / lead / device action / mutation.
+        for (String type :
+                List.of("bulk_email", "tool", "crm_lead", "device_control", "media", "workflow")) {
+            WorkflowNodeDto n = new WorkflowNodeDto("n", type, Map.of(), Map.of());
+            assertFalse(RetryPolicy.isRetryableNode(n), type + " must not be retried");
+        }
+        WorkflowNodeDto httpPost =
+                new WorkflowNodeDto(
+                        "h", "http", Map.of(), Map.of("config", Map.of("method", "POST")));
+        WorkflowNodeDto httpGet =
+                new WorkflowNodeDto(
+                        "h", "http", Map.of(), Map.of("config", Map.of("method", "GET")));
+        WorkflowNodeDto httpDefault = new WorkflowNodeDto("h", "http", Map.of(), Map.of());
+        assertFalse(RetryPolicy.isRetryableNode(httpPost));
+        assertTrue(RetryPolicy.isRetryableNode(httpGet));
+        assertTrue(RetryPolicy.isRetryableNode(httpDefault));
+        // retryUnsafe is the author's explicit opt back in.
+        WorkflowNodeDto unsafe =
+                new WorkflowNodeDto(
+                        "u", "tool", Map.of(), Map.of("config", Map.of("retryUnsafe", true)));
+        assertTrue(RetryPolicy.isRetryableNode(unsafe));
     }
 
     @Test
@@ -132,20 +180,38 @@ class WorkflowTraversalRulesTest {
         ParallelBranchRunner runner = new ParallelBranchRunner(Runnable::run);
         WorkflowNodeDto a = new WorkflowNodeDto("a", "agent", Map.of(), Map.of());
         WorkflowNodeDto b = new WorkflowNodeDto("b", "agent", Map.of(), Map.of());
-        ParallelBranchRunner.Joined joined = runner.run(List.of(a, b), node -> {
-            throw new IllegalStateException("boom " + node.id());
-        });
+        ParallelBranchRunner.Joined joined =
+                runner.run(
+                        List.of(a, b),
+                        node -> {
+                            throw new IllegalStateException("boom " + node.id());
+                        });
         assertSame(a, joined.failedBranch());
         assertTrue(joined.outcomes().isEmpty());
-        assertThrows(RuntimeException.class, () -> { throw joined.failure(); });
+        assertThrows(
+                RuntimeException.class,
+                () -> {
+                    throw joined.failure();
+                });
     }
 
     @Test
     void fanOutRunnerDeclinesToStartItemsAfterCancellation() {
-        FanOutRunner.Joined joined = new FanOutRunner().run("run", List.of("a", "b", "c"), 3, 2, () -> true,
-            (item, scope) -> { throw new AssertionError("must not start"); });
+        FanOutRunner.Joined joined =
+                new FanOutRunner()
+                        .run(
+                                "run",
+                                List.of("a", "b", "c"),
+                                3,
+                                2,
+                                () -> true,
+                                (item, scope) -> {
+                                    throw new AssertionError("must not start");
+                                });
         assertNull(joined.failure());
         assertEquals(3, joined.outcomes().size());
-        assertTrue(joined.outcomes().stream().allMatch(FanOutRunner.ItemOutcome::cancelledBeforeStart));
+        assertTrue(
+                joined.outcomes().stream()
+                        .allMatch(FanOutRunner.ItemOutcome::cancelledBeforeStart));
     }
 }

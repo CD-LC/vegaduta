@@ -36,9 +36,9 @@ final class ChatMemoryRecall {
     private final BooleanSupplier memoryEventsEnabled;
 
     /**
-     * The prompt registry's view for an agent (its, its tenant's and the platform's overrides) for the
-     * lines that frame the recalled facts; the shipped text until {@link ChatServiceParts} wires the
-     * settings bean.
+     * The prompt registry's view for an agent (its, its tenant's and the platform's overrides) for
+     * the lines that frame the recalled facts; the shipped text until {@link ChatServiceParts}
+     * wires the settings bean.
      */
     private volatile java.util.function.Function<UUID, ResolvedDirectives> prompts =
             ResolvedDirectives.DEFAULTS_FOR_AGENT;
@@ -81,15 +81,43 @@ final class ChatMemoryRecall {
      */
     String recallMemoryFactsBlock(
             UUID agentId, String subjectKey, String userMessage, AgentStepEventEmitter stepEvents) {
-        return recallMemoryFactsBlock(
+        return recallMemoryFacts(
+                        agentId, subjectKey, userMessage, stepEvents, prompts.apply(agentId))
+                .block();
+    }
+
+    /**
+     * The recall outcome: the assembled block ({@code null} when nothing applied, same contract as
+     * {@link #recallMemoryFactsBlock}) and how many stored facts were recalled into it. The count
+     * is what lets the turn tell auto-injected retrieval - facts a {@code remember_fact} call or a
+     * shared tier wrote, so attacker-storable content - apart from the owner's own
+     * always-in-context blocks (persona, profile, notes), which ride in the same string but are not
+     * taint-worthy on their own.
+     */
+    record MemoryRecall(String block, int recalledFacts) {
+
+        /** Whether any private or shared fact was recalled into {@link #block()}. */
+        boolean hasRecalledFacts() {
+            return recalledFacts > 0;
+        }
+    }
+
+    /**
+     * As {@link #recallMemoryFacts(UUID, String, String, AgentStepEventEmitter,
+     * ResolvedDirectives)}, with this turn's prompt view.
+     */
+    MemoryRecall recallMemoryFacts(
+            UUID agentId, String subjectKey, String userMessage, AgentStepEventEmitter stepEvents) {
+        return recallMemoryFacts(
                 agentId, subjectKey, userMessage, stepEvents, prompts.apply(agentId));
     }
 
     /**
-     * As above, with the prompt settings to frame the facts with (the preview passes its recording
-     * view, so the framing keys show up in its provenance).
+     * As {@link #recallMemoryFactsBlock(UUID, String, String, AgentStepEventEmitter,
+     * ResolvedDirectives)}, returning the block with its fact count for taint marking (see {@link
+     * MemoryRecall}).
      */
-    String recallMemoryFactsBlock(
+    MemoryRecall recallMemoryFacts(
             UUID agentId,
             String subjectKey,
             String userMessage,
@@ -215,7 +243,7 @@ final class ChatMemoryRecall {
         }
 
         if (block.isEmpty()) {
-            return null;
+            return new MemoryRecall(null, 0);
         }
         if (report) {
             try {
@@ -231,7 +259,9 @@ final class ChatMemoryRecall {
         }
         // Only trim when user blocks were prepended (their separator can trail). With none, the
         // text is byte-for-byte what it was before blocks existed.
-        return hasUserBlocks ? block.toString().strip() : block.toString();
+        return new MemoryRecall(
+                hasUserBlocks ? block.toString().strip() : block.toString(),
+                privateFacts + sharedFacts);
     }
 
     private boolean memoryEventsEnabled() {

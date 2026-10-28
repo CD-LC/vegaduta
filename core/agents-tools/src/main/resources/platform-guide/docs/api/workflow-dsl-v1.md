@@ -44,7 +44,10 @@ SnakeYAML's `SafeConstructor` plus alias, depth and size limits, so `!!java` sty
 
 * `nodes` / `edges` are the canvas graph (React Flow shape) exactly as stored; `type` is a workflow node type.
 * `config` carries the execution limits. On import `maxStepsPerRun` (1-200), `stepTimeoutSeconds` (1-3600) and
-  `maxRetryAttempts` (0-5) are applied; the other keys are informational.
+  `maxRetryAttempts` (0-5) are applied; the other keys are informational. Enforcement is engine-dependent:
+  retries and the step ceiling apply on both engines, while `stepTimeoutSeconds` is enforced only by the
+  durable Temporal engine (`app.workflow.execution-engine=temporal`) - the default in-process engine records
+  it but does not time-bound steps.
 * **Deterministic.** There is no export timestamp and no tenant, user, workflow id, trigger or owner. Exporting the
   same workflow twice gives byte-identical output (two-space indent, `\n` line endings).
 * **`checksum`** is the SHA-256 of the canonical form of the document (object keys sorted, compact) without the

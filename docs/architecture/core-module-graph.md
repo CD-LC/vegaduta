@@ -9,7 +9,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 `core/app/src/test/java/com/agenticai/core/archrules/ModuleBoundaryRulesTest.java`.
 
 - Reactor modules: **59**
-- Sibling edges (compile/runtime): **505**
+- Sibling edges (compile/runtime): **506**
 - Kernel -> vendor module edges: **0**
 - Vendor -> vendor module edges: **0**
 
@@ -82,7 +82,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | templates | kernel | 44 | agents, agents-turn, audit, security, tenancy, workflow |  |
 | tenancy | kernel | 230 | admin, audit, billing, dbauth, security, storage |  |
 | voice | kernel | 38 | agents, agents-turn, crypto, **elevenlabs** (test), json, providers, **sarvam** (test), security, speech, storage |  |
-| workflow | kernel | 282 | admin, agents, agents-browser, agents-tools, agents-turn, approval, audit, chat, crypto, devices, documentgen, eventbus, **google** (test), json, knowledge, omnichannel, providers, quality, security, sharing, tenancy, voice, workflow-expression |  |
+| workflow | kernel | 283 | admin, agents, agents-browser, agents-tools, agents-turn, approval, audit, chat, crypto, devices, documentgen, eventbus, **google** (test), guardrails, json, knowledge, omnichannel, providers, quality, security, sharing, tenancy, voice, workflow-expression |  |
 | workflow-expression | kernel | 23 | json |  |
 | workflow-portability | kernel | 30 | agents, agents-studio, devices, json, knowledge, omnichannel, security, sharing, workflow, workflow-expression |  |
 
@@ -635,6 +635,7 @@ graph LR
   workflow --> devices
   workflow --> documentgen
   workflow --> eventbus
+  workflow --> guardrails
   workflow --> json
   workflow --> knowledge
   workflow --> omnichannel
