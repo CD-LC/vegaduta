@@ -165,7 +165,7 @@ describe("registry", () => {
     // SD-Turbo's ONNX weights are fp16-only: an adapter that exposes WebGPU
     // without the shader-f16 feature would fail every session create, so the
     // tool is gated off rather than advertised into guaranteed refusal. Audio
-    // stays — it falls back to fp32 weights.
+    // stays — it falls back to q4 weights.
     const noF16 = {
       ...CAPS,
       webgpu: { ...CAPS.webgpu, shaderF16: false },
