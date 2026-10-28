@@ -179,6 +179,10 @@ export default function LanguageKeyboardButton() {
 
   // Drag the board by its header; clamped inside the viewport.
   const onDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Buttons in the header must keep their click — pointer capture on the
+    // header would retarget the whole click (and its pointerup) to the
+    // header, so the close button would never fire.
+    if ((e.target as HTMLElement).closest("button")) return;
     const panel = panelRef.current;
     if (!panel) return;
     const rect = panel.getBoundingClientRect();
