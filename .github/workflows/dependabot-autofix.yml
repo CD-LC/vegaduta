@@ -24,10 +24,9 @@ on:
         description: "Dependabot PR number to autofix"
         required: true
 
+# OpenSSF Token-Permissions: writes live on the job, never at the top level.
 permissions:
-  contents: write      # push the regenerated locks to the bot's branch
-  pull-requests: read  # list the PR's changed files
-  actions: write       # re-dispatch ci.yml/codeql.yml/trivy.yml after the push
+  contents: read
 
 concurrency:
   group: dependabot-autofix-${{ github.event.pull_request.number || github.event.inputs.pr }}
@@ -44,13 +43,21 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.user.login == 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: write      # push the regenerated locks to the bot's branch
+      pull-requests: read  # list the PR's changed files
+      actions: write       # re-dispatch ci.yml/codeql.yml/trivy.yml after the push
     steps:
       - name: Resolve the target PR (opened by dependabot, pip requirements touched)
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
-          PR: ${{ github.event.pull_request.number || github.event.inputs.pr }}
+        # The PR number comes out of the event payload on disk, not a
+        # github.event.* interpolation in a run block (OpenSSF Dangerous-Workflow
+        # flags inputs.* as untrusted data reaching a shell).
         run: |
+          PR="$(jq -r '.inputs.pr // .pull_request.number // empty' "$GITHUB_EVENT_PATH")"
+          case "$PR" in ''|*[!0-9]*) echo "::error::bad PR number '$PR'"; exit 1;; esac
           read -r opener headref <<<"$(gh pr view "$PR" --json author,headRefName --jq '.author.login + " " + .headRefName')"
           [ "$opener" = "dependabot[bot]" ] || { echo "::error::PR #$PR was opened by $opener, not dependabot[bot]"; exit 1; }
           if ! gh pr view "$PR" --json files --jq '.files[].path' | grep -q '^services/.*/requirements\.txt$'; then
