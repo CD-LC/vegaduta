@@ -1,5 +1,6 @@
 package io.vegaduta.agent.core.text;
 
+import com.google.re2j.Pattern;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -15,7 +16,18 @@ public final class Text {
   /** Default bound for a single Markdown table cell. */
   public static final int CELL = 512;
 
+  /** Bound on the message part of {@link #failure(Throwable)}. */
+  public static final int FAILURE_MESSAGE = 200;
+
   private static final String ELLIPSIS = "…";
+
+  // Same expression as the Python SDK's approval failure redaction: bearer tokens,
+  // key/token/secret/password assignments, and any 32+ character credential-looking run.
+  private static final Pattern SECRET =
+      Pattern.compile(
+          "(?i)(bearer\\s+[A-Za-z0-9._~+/=-]+"
+              + "|(?:api[_-]?key|token|secret|password|passwd|authorization)\\s*[=:]\\s*(?:(?:bearer|basic)\\s+)?\\S+"
+              + "|\\b[A-Za-z0-9_-]{32,}\\b)");
 
   private Text() {}
 
@@ -43,6 +55,23 @@ public final class Text {
   public static String shortText(@Nullable String s) {
     String b = bounded(s, SHORT);
     return b == null ? "" : b;
+  }
+
+  /**
+   * A failure fit to store or audit: the exception's simple class name plus its message with
+   * credential-looking text replaced by {@code [redacted]}, control characters flattened and the
+   * length bounded to {@value #FAILURE_MESSAGE}. Never the raw {@code toString()}, which can carry
+   * secrets, PII or provider payloads. Matches the Python SDK's approval failure result.
+   */
+  public static String failure(Throwable error) {
+    String name = error.getClass().getSimpleName();
+    String message = error.getMessage();
+    if (message == null || message.isBlank()) {
+      return name;
+    }
+    String redacted = SECRET.matcher(message).replaceAll("[redacted]").strip();
+    String bounded = bounded(redacted, FAILURE_MESSAGE);
+    return bounded == null || bounded.isEmpty() ? name : name + ": " + bounded;
   }
 
   /**

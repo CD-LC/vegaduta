@@ -40,8 +40,15 @@ import org.slf4j.LoggerFactory;
  * ApprovalNotificationBlockedException} (nobody would have seen it); a block at {@code
  * ON_APPROVAL_DECIDED} records the decision but does not execute the action. Decisions are
  * compare-and-set on the store ({@link ApprovalStore#saveIfStatus}), so of two concurrent approvals
- * exactly one executes and the other gets {@link ApprovalAlreadyDecidedException}. Decision reasons
- * are bounded to {@value #MAX_REASON} characters.
+ * exactly one executes and the other gets {@link ApprovalAlreadyDecidedException}; this holds across
+ * gates and processes only if the store's {@code saveIfStatus} is atomic (see {@link
+ * ApprovalStore}). Decision reasons are bounded to {@value #MAX_REASON} characters. A failed
+ * execution stores and audits {@link Text#failure the exception type and a redacted, bounded
+ * message}, not the raw exception text.
+ *
+ * <p>The authorizer is a required constructor argument. {@code Governance} supplies {@link
+ * FourEyesAuthorizer} unless the policy turns {@code fourEyes} off or the host passes its own;
+ * {@link ApprovalDecisionAuthorizer#allowAny()} is the explicit opt-out.
  */
 public final class DefaultApprovalGate implements ApprovalGate {
 
@@ -199,7 +206,11 @@ public final class DefaultApprovalGate implements ApprovalGate {
       return request;
     }
     ApprovalRequest expired = request.withStatus(ApprovalStatus.EXPIRED);
-    store.save(expired);
+    // Compare-and-set: a decision that landed after this read (another gate, another process)
+    // must not be overwritten by the expiry. On a lost race report what is stored.
+    if (!store.saveIfStatus(expired, ApprovalStatus.PENDING)) {
+      return store.find(request.id()).orElse(request);
+    }
     audit.emit(decisionEvent(expired, AuditOutcome.EXPIRED, "system", "expired"));
     return expired;
   }
@@ -220,9 +231,12 @@ public final class DefaultApprovalGate implements ApprovalGate {
       audit.emit(decisionEvent(executed, AuditOutcome.SUCCESS, "system", "executed"));
       return executed;
     } catch (RuntimeException e) {
-      ApprovalRequest failed = approved.withResult(ApprovalStatus.FAILED, e.toString());
+      // The stored result and the audit detail carry the exception type and a bounded, redacted
+      // message, never e.toString(): provider errors and SQL exceptions echo secrets and PII.
+      String failure = Text.failure(e);
+      ApprovalRequest failed = approved.withResult(ApprovalStatus.FAILED, failure);
       store.save(failed);
-      audit.emit(decisionEvent(failed, AuditOutcome.FAILURE, "system", e.toString()));
+      audit.emit(decisionEvent(failed, AuditOutcome.FAILURE, "system", failure));
       log.warn("Approved action {} failed: {}", approved.id(), e.toString());
       return failed;
     }

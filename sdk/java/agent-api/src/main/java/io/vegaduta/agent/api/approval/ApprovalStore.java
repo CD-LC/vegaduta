@@ -8,6 +8,16 @@ import org.jspecify.annotations.Nullable;
 /**
  * Persistence for approval requests. The in-memory implementation is for tests and single-node use;
  * {@code vegaduta-agent-jdbc} provides a durable one.
+ *
+ * <p><b>Compare-and-set requirement.</b> Every decision (approve, reject, expire) is written with
+ * {@link #saveIfStatus}, and a store shared by more than one gate instance or process MUST
+ * implement it atomically: apply the write only if the stored status still equals {@code expected}
+ * and report whether it did (for SQL, {@code UPDATE ... WHERE id = ? AND status = ?} and check the
+ * affected row count; do not read then write). That is the only thing that stops two approvers from
+ * both winning and the action executing twice. The interface default is a non-atomic
+ * find-then-save, safe only for a single thread; it exists so simple test stores compile, not as a
+ * multi-process implementation. {@code InMemoryApprovalStore} and {@code JdbcApprovalStore} are the
+ * references.
  */
 public interface ApprovalStore {
 
@@ -30,7 +40,8 @@ public interface ApprovalStore {
   /**
    * Saves {@code request} only when the stored request with the same id currently has status {@code
    * expected}, so two concurrent decisions on one request cannot both win. The default is a
-   * non-atomic find-then-save; durable stores should override it with a conditional update.
+   * non-atomic find-then-save and is NOT safe across threads, gates or processes: every durable or
+   * shared store must override it with an atomic conditional update (see the class comment).
    *
    * @return true when the request was saved
    */

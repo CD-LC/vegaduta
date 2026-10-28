@@ -117,6 +117,33 @@ Release notes on GitHub are generated from the section for each version.
   `app.security.jwt.required-audience`, or the boot refuses to start rather
   than accept tokens with no client-bound check.
 
+- **Python Agent SDK 0.2.0 (breaking for 0.1.x): approval decisions are
+  compare-and-set.** `ApprovalStore.update(request, expected_status)` returns
+  whether the write applied; `SqliteApprovalStore` runs it as `UPDATE ... WHERE
+  id=? AND status=?` and `ApprovalGate` routes approve, reject, expiry and the
+  result write through it, so two gates, connections or processes sharing a
+  database can no longer both approve a request and run its resumption twice
+  (the loser gets `ApprovalAlreadyDecidedException`). A custom store whose
+  `update` lacks `expected_status` still works but makes the gate warn. With
+  the four-eyes default and the failure-result redaction above, this is why the
+  package moves from `0.1.0` to `0.2.0`: code that relied on self-approval must
+  pass `authorizer=allow_any`. `Mandate.is_expired` is now true at the expiry
+  instant (Java parity), mandates are validated when decoded, and
+  `verify_chain` checks each hop was issued by its parent's subject. `Mandate.encode()` now emits the Java wire text exactly (`exp` URL-encoded, no trailing `;`). See
+  "Release notes" in `sdk/python-agent/README.md`. Not tagged or published.
+- **Java Agent SDK: `JdbcApprovalStore` approvals were not compare-and-set.**
+  It inherited `ApprovalStore.saveIfStatus`'s non-atomic find-then-save default,
+  so two gates on one database could both read `PENDING`, both approve, and
+  execute the action twice. It now overrides it with one `UPDATE ... WHERE id=?
+  AND status=?` and checks the row count. The gate's expiry-on-read uses the
+  same compare-and-set, so a decision that lands between the read and the
+  write is no longer overwritten by `EXPIRED`, and a failed execution stores
+  and audits the exception type plus a bounded, redacted message (matching the
+  Python SDK) instead of `e.toString()`. `ApprovalStore` documents the
+  atomicity requirement; `ApprovalDecisionAuthorizer.allowAny()` is the
+  explicit opt-out of the four-eyes default (`permitAll()` stays as an alias).
+  The Java default itself does not change (four-eyes was already on), so the
+  Java version stays `0.1.1`.
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
   capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on
@@ -165,6 +192,21 @@ Release notes on GitHub are generated from the section for each version.
   silently drop them and the sign-in form loops.
 
 ### Added
+
+- **Java Agent SDK: audit-chain truncation anchors, cross-SDK fixtures.**
+  `HashChainedAuditSink.verify(events, verifier, ChainAnchors)` and the
+  `EvidenceBundle` builder (`expectedFirstSeq`/`expectedFirstPrev`/
+  `expectedLastSeq`/`expectedHeadHash`) pin either end of a chain to values
+  stored outside the log, so a deleted prefix or suffix (invisible to the log
+  alone) fails verification with a message naming the anchor. The bundle
+  exposes `firstSeq()`, `firstPrev()`, `lastSeq()`, `headHash()` over the whole
+  chain, and the EU AI Act JSON Lines/Markdown export carries `firstSeq`,
+  `firstPrev`, `lastSeq`, `headHash` under the same names as the Python SDK
+  (`headHash` was the last event of the reporting period, now the head of the
+  chain). The canonical form is unchanged. `sdk/testdata/cross-sdk` holds a
+  signed chain and a mandate chain written by each SDK; both test suites verify
+  both, including after anchoring, and the Java test asserts it reproduces
+  Python's hashes and HMAC signatures byte for byte.
 
 - **Piper: a local, keyless TTS provider for the voice agent.** Until now
   every voice reply needed a paid hosted key (ElevenLabs preferred, Sarvam

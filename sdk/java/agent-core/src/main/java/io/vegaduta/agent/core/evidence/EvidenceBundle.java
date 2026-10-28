@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -52,6 +53,8 @@ public final class EvidenceBundle {
   private final ChainVerification chainVerification;
   private final boolean chained;
   private final int unchainedEvents;
+  private final @Nullable AuditEvent firstChained;
+  private final @Nullable AuditEvent lastChained;
 
   private EvidenceBundle(Builder b) {
     // The chain is verified over the FULL input in chain.seq order, before the period filter:
@@ -69,10 +72,15 @@ public final class EvidenceBundle {
     chainedAll.sort(Comparator.comparingLong(EvidenceBundle::seqOf));
     this.chained = !chainedAll.isEmpty();
     this.unchainedEvents = unchained;
+    this.firstChained = chained ? chainedAll.get(0) : null;
+    this.lastChained = chained ? chainedAll.get(chainedAll.size() - 1) : null;
     this.chainVerification =
         chained
-            ? HashChainedAuditSink.verify(chainedAll, Optional.ofNullable(b.verifier))
-            : new ChainVerification(false, -1, 0, "events are not hash-chained");
+            ? HashChainedAuditSink.verify(chainedAll, Optional.ofNullable(b.verifier), b.anchors)
+            : b.anchors.any()
+                ? new ChainVerification(
+                    false, -1, 0, "events are not hash-chained but an anchor was supplied")
+                : new ChainVerification(false, -1, 0, "events are not hash-chained");
 
     List<AuditEvent> ordered = new ArrayList<>(b.events);
     if (chained && unchained == 0) {
@@ -134,6 +142,51 @@ public final class EvidenceBundle {
    */
   public ChainVerification chainVerification() {
     return chainVerification;
+  }
+
+  /**
+   * {@code chain.seq} of the first chained event (in {@code chain.seq} order, over every chained
+   * event handed to the builder, not only the period). Record it with {@link #firstPrev()} as the
+   * start anchor; trustworthy only when {@link #chainVerification()} is ok.
+   */
+  public OptionalLong firstSeq() {
+    return seqAnchor(firstChained);
+  }
+
+  /** {@code chain.prev} of the first chained event: {@link HashChainedAuditSink#GENESIS} when the
+   * chain is verified from its start. */
+  public Optional<String> firstPrev() {
+    return attribute(firstChained, HashChainedAuditSink.PREV);
+  }
+
+  /** {@code chain.seq} of the last chained event; the end anchor next to {@link #headHash()}. */
+  public OptionalLong lastSeq() {
+    return seqAnchor(lastChained);
+  }
+
+  /**
+   * {@code chain.hash} of the last chained event, the integrity anchor of this bundle. Store it
+   * outside the log and pass it back through {@link Builder#expectedHeadHash} to detect a removed
+   * suffix.
+   */
+  public Optional<String> headHash() {
+    return attribute(lastChained, HashChainedAuditSink.HASH);
+  }
+
+  private static OptionalLong seqAnchor(@Nullable AuditEvent event) {
+    if (event == null) {
+      return OptionalLong.empty();
+    }
+    String text = event.attributes().get(HashChainedAuditSink.SEQ);
+    try {
+      return text == null ? OptionalLong.empty() : OptionalLong.of(Long.parseLong(text.trim()));
+    } catch (NumberFormatException e) {
+      return OptionalLong.empty();
+    }
+  }
+
+  private static Optional<String> attribute(@Nullable AuditEvent event, String key) {
+    return event == null ? Optional.empty() : Optional.ofNullable(event.attributes().get(key));
   }
 
   /**
@@ -313,6 +366,7 @@ public final class EvidenceBundle {
     private @Nullable Instant to;
     private @Nullable Instant generatedAt;
     private @Nullable Verifier verifier;
+    private ChainAnchors anchors = ChainAnchors.none();
 
     private Builder() {}
 
@@ -357,6 +411,39 @@ public final class EvidenceBundle {
     /** Verifies {@code chain.sig} on every event; without one only the hash links are checked. */
     public Builder verifier(@Nullable Verifier value) {
       this.verifier = value;
+      return this;
+    }
+
+    /**
+     * Pins either end of the chain to values stored outside the log (see {@link ChainAnchors}); a
+     * mismatch makes {@link EvidenceBundle#chainVerification()} not ok.
+     */
+    public Builder anchors(ChainAnchors value) {
+      this.anchors = Objects.requireNonNull(value, "anchors");
+      return this;
+    }
+
+    /** The {@code chain.seq} the first chained event must carry. */
+    public Builder expectedFirstSeq(long value) {
+      this.anchors = anchors.withFirstSeq(value);
+      return this;
+    }
+
+    /** The {@code chain.prev} the first chained event must carry. */
+    public Builder expectedFirstPrev(String value) {
+      this.anchors = anchors.withFirstPrev(Objects.requireNonNull(value, "value"));
+      return this;
+    }
+
+    /** The {@code chain.seq} the last chained event must carry. */
+    public Builder expectedLastSeq(long value) {
+      this.anchors = anchors.withLastSeq(value);
+      return this;
+    }
+
+    /** The {@code chain.hash} the last chained event must carry. */
+    public Builder expectedHeadHash(String value) {
+      this.anchors = anchors.withHeadHash(Objects.requireNonNull(value, "value"));
       return this;
     }
 

@@ -94,6 +94,13 @@ def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _risk(name: str) -> RiskLabel:
+    try:
+        return RiskLabel[name]
+    except KeyError:
+        raise ValueError(f"unknown risk label {name[:32]!r}") from None
+
+
 def _require_text(value: str | None, name: str) -> str:
     if not value or not value.strip():
         raise ValueError(f"{name} must not be blank")
@@ -117,6 +124,23 @@ class Mandate:
     expires_at: datetime
     parent_id: str | None
     digest: str
+
+    def __post_init__(self) -> None:
+        # Same invariants as the Java record constructor, so a decoded or
+        # hand-built mandate is held to what a built one is.
+        _require_text(self.id, "id")
+        _require_text(self.issuer, "issuer")
+        _require_text(self.subject, "subject")
+        if self.principal is not None:
+            _require_text(self.principal, "principal")
+        if len(self.allowed_tools) > MAX_TOOLS:
+            raise ValueError(f"a mandate may carry at most {MAX_TOOLS} tool patterns")
+        for tool in self.allowed_tools:
+            _require_text(tool, "allowed tool pattern")
+        if self.depth < 0 or self.max_depth < 0 or self.depth > self.max_depth:
+            raise ValueError(f"depth {self.depth} exceeds max_depth {self.max_depth}")
+        if (self.depth == 0) != (self.parent_id is None):
+            raise ValueError("a root mandate has depth 0 and no parent, and vice versa")
 
     # -- construction ------------------------------------------------------
 
@@ -163,17 +187,6 @@ class Mandate:
         parent_id: str | None,
         parent_digest: str | None,
     ) -> Mandate:
-        _require_text(id, "id")
-        _require_text(issuer, "issuer")
-        _require_text(subject, "subject")
-        if principal is not None:
-            _require_text(principal, "principal")
-        if len(allowed_tools) > MAX_TOOLS:
-            raise ValueError(f"a mandate may carry at most {MAX_TOOLS} tool patterns")
-        for tool in allowed_tools:
-            _require_text(tool, "allowed tool pattern")
-        if depth < 0 or max_depth < 0 or depth > max_depth:
-            raise ValueError(f"depth {depth} exceeds max_depth {max_depth}")
         partial = cls(
             id=id,
             issuer=issuer,
@@ -207,15 +220,18 @@ class Mandate:
         narrower_tools: Iterable[str],
         lower_or_equal_risk: RiskLabel,
         earlier_or_equal_expiry: datetime,
+        *,
+        id: str | None = None,
     ) -> Mandate:
         """Hands a narrower mandate to the next agent. Issued by this
-        mandate's subject, keeps principal and max_depth, only attenuates."""
+        mandate's subject, keeps principal and max_depth, only attenuates.
+        ``id`` pins the new mandate's id (default: a random UUID)."""
         narrower = frozenset(narrower_tools)
         if self.depth + 1 > self.max_depth:
             raise ValueError(f"mandate {self.id} is at depth {self.depth} of {self.max_depth}; cannot derive")
         self._check_attenuation(narrower, lower_or_equal_risk, earlier_or_equal_expiry)
         return Mandate._build(
-            str(uuid.uuid4()),
+            id or str(uuid.uuid4()),
             self.subject,
             new_subject,
             self.principal,
@@ -252,7 +268,9 @@ class Mandate:
         return self.permits(pattern)
 
     def is_expired(self, now: datetime | None = None) -> bool:
-        return (now or datetime.now(timezone.utc)) > self.expires_at
+        """True at or after ``expires_at`` (the Java ``Mandate.isExpired``
+        boundary: a mandate permits nothing at its expiry instant)."""
+        return (now or datetime.now(timezone.utc)) >= self.expires_at
 
     def is_self_consistent(self) -> bool:
         """True for a root mandate whose digest matches its own fields."""
@@ -294,11 +312,11 @@ class Mandate:
         parts.append(f"risk={self.max_risk.name}")
         parts.append(f"depth={self.depth}")
         parts.append(f"maxDepth={self.max_depth}")
-        parts.append(f"exp={_instant_str(self.expires_at)}")
+        parts.append(f"exp={_url_encode(_instant_str(self.expires_at))}")
         if self.parent_id is not None:
             parts.append(f"parent={_url_encode(self.parent_id)}")
         parts.append(f"digest={_url_encode(self.digest)}")
-        return ";".join(parts) + ";"
+        return ";".join(parts)
 
     @classmethod
     def decode(cls, encoded: str) -> Mandate:
@@ -320,6 +338,7 @@ class Mandate:
         for required in ("id", "iss", "sub", "tools", "risk", "depth", "maxDepth", "exp", "digest"):
             if required not in fields:
                 raise ValueError(f"mandate encoding lacks '{required}'")
+        _require_text(fields["digest"], "digest")
         tools = frozenset(t for t in fields["tools"].split(",") if t)
         return cls(
             id=fields["id"],
@@ -327,7 +346,7 @@ class Mandate:
             subject=fields["sub"],
             principal=fields.get("prn"),
             allowed_tools=tools,
-            max_risk=RiskLabel[fields["risk"]],
+            max_risk=_risk(fields["risk"]),
             depth=int(fields["depth"]),
             max_depth=int(fields["maxDepth"]),
             expires_at=_parse_instant(fields["exp"]),
@@ -373,6 +392,8 @@ def verify_chain(root_to_leaf: list[Mandate]) -> Mandate:
             raise ValueError(f"mandate {child.id} digest does not match its fields")
         if child.principal != parent.principal or child.max_depth != parent.max_depth:
             raise ValueError(f"mandate {child.id} changed principal or maxDepth")
+        if child.issuer != parent.subject:
+            raise ValueError(f"mandate {child.id} was not issued by its parent's subject")
         parent._check_attenuation(child.allowed_tools, child.max_risk, child.expires_at)
         parent = child
     return root_to_leaf[-1]

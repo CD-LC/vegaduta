@@ -1,0 +1,2 @@
+id=00000000-0000-4000-8000-0000000000a1;iss=root-authority;sub=orchestrator;prn=alice%40example.com;tools=pay_*,read_*,send_email;risk=HIGH;depth=0;maxDepth=3;exp=2030-01-01T00%3A00%3A00Z;digest=a222031a304d96719c45626b5386c9ea981f01b389c4ea07e3e61d96fd961a38
+id=00000000-0000-4000-8000-0000000000a2;iss=orchestrator;sub=payer;prn=alice%40example.com;tools=pay_invoice,read_*;risk=MEDIUM;depth=1;maxDepth=3;exp=2029-06-30T12%3A30%3A15.250Z;parent=00000000-0000-4000-8000-0000000000a1;digest=c049170781a99aa7db3007aabebbe682fd472e47a1b3680295727c5445b3b27f

@@ -17,7 +17,7 @@ format. It is a different thing from `sdk/python` (`vegaduta_sdk`), which is
 the generated REST client that *calls* the VegaDūta platform API — this
 library runs *inside your own application*. Apache-2.0. Python 3.10+.
 
-> Status: `0.1.0`, not yet on PyPI. Install from source:
+> Status: `0.2.0`, not yet on PyPI. Install from source:
 > `pip install ./sdk/python-agent` (or `pip install -e ./sdk/python-agent`
 > for development).
 
@@ -168,9 +168,21 @@ them back as `expected_head_hash` / `expected_last_seq` (and
 `expected_first_seq` / `expected_first_prev` for the start).
 
 Approvals are four-eyes by default: the requesting principal cannot decide their
-own request. Opt out explicitly with `ApprovalGate(authorizer=allow_any)`. A
-custom `ApprovalStore` shared by several processes must make `update`
-compare-and-set on status, or an approval can run twice.
+own request. Opt out explicitly with `ApprovalGate(authorizer=allow_any)`.
+
+Every decision (approve, reject, expire, record the result) goes through
+`store.update(request, expected_status)`, which a store applies only if the
+stored status still equals `expected_status` and reports whether it did.
+`SqliteApprovalStore` does this in SQL (`UPDATE ... WHERE id=? AND status=?`),
+so two gates, connections or processes on one database cannot both approve a
+request and run its resumption twice: the loser gets
+`ApprovalAlreadyDecidedException`. A custom `ApprovalStore` shared by several
+processes must do the same (see the `ApprovalStore` docstring); one whose
+`update` has no `expected_status` parameter keeps working but makes
+`ApprovalGate` emit a `RuntimeWarning` and fall back to unconditional writes.
+A resumption lives in the process that created the request, so in a
+multi-process setup the process that wins the decision but never held the
+resumption records the approval without executing it.
 
 `sign_receipt`/`verify_receipt` do the same for an approval decision: a signed
 record of who approved what, verifiable later. HMAC is in the box; plug in
@@ -208,6 +220,39 @@ in one trace view.
   the tool loop; adapters translate them into model-readable errors.
 - **`GovernanceMode.OBSERVE`** is the rollout path: full evaluation and audit,
   nothing blocked. Measure, then enforce.
+
+## Release notes
+
+### 0.2.0
+
+Breaking for 0.1.x users:
+
+- **`ApprovalGate` defaults to `FourEyesAuthorizer`.** Before, with no
+  `authorizer`, anyone could decide any request, including the requester.
+  Code that relied on self-approval (single-operator scripts, tests) now gets
+  `ApprovalNotAuthorizedException`; pass `authorizer=allow_any` to keep the old
+  behaviour explicitly, or your own role-checking authorizer.
+- **`ApprovalStore.update` is compare-and-set.** The protocol is now
+  `update(request, expected_status=None) -> bool`. A custom store written
+  against `update(request)` still runs, with a `RuntimeWarning` from
+  `ApprovalGate` (no multi-process safety); add the parameter to silence it.
+- **A failed resumption stores the exception type and a bounded, redacted
+  message** in `result_json`, not `str(exc)`.
+- **`Mandate.encode()` matches the Java wire text byte for byte:** `exp` is URL-encoded
+  (`:` as `%3A`) and there is no trailing `;`. `decode` accepts both forms; the digest is unchanged.
+- **`Mandate.is_expired` is true at the expiry instant** (`now >= expires_at`),
+  as in the Java SDK; it was `now > expires_at`.
+
+Also new: `allow_any`; `evidence_bundle`/`verify_audit_chain` verify in
+`chain.seq` order and take `expected_first_seq`/`expected_first_prev`/
+`expected_last_seq`/`expected_head_hash` anchors, and the bundle exports
+`firstSeq`, `firstPrev`, `lastSeq`, `headHash` (the Java SDK exports the same
+names); `SqliteApprovalStore` compare-and-set; mandates are validated when
+decoded (a malformed risk or a root with a parent is a `ValueError`, so the
+gate denies it as malformed), `verify_chain` also checks each hop was issued by
+its parent's subject, and `Mandate.derive(..., id=...)` pins the id. Chains and
+mandates written by this SDK verify in the Java SDK and vice versa, pinned by
+fixtures in `sdk/testdata/cross-sdk`.
 
 ## Development
 

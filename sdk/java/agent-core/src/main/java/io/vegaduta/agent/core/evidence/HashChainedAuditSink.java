@@ -177,17 +177,33 @@ public final class HashChainedAuditSink implements AuditSink {
   /**
    * Checks a stored chain. {@code events} must be in emission order and may be a suffix of the full
    * chain (a capped in-memory sink drops old events): the first event's {@code chain.prev} is
-   * trusted unless its sequence number is 1, in which case it must be {@link #GENESIS}.
+   * trusted unless its sequence number is 1, in which case it must be {@link #GENESIS}; pass {@link
+   * ChainAnchors} to pin either end of the chain.
    *
    * @param events the events as read back from storage
    * @param verifier when present, every event must carry a valid {@code chain.sig}
    */
   public static ChainVerification verify(List<AuditEvent> events, Optional<Verifier> verifier) {
+    return verify(events, verifier, ChainAnchors.none());
+  }
+
+  /**
+   * {@link #verify(List, Optional)} with optional {@link ChainAnchors} recorded outside the log.
+   * Without anchors the first event is trusted to start the chain, so a deleted prefix or suffix
+   * cannot be seen from the log alone; each anchor supplied closes that gap for its end of the
+   * chain. A mismatching anchor, or any anchor on a log with no chained events, is reported as a
+   * broken chain naming the anchor.
+   */
+  public static ChainVerification verify(
+      List<AuditEvent> events, Optional<Verifier> verifier, ChainAnchors anchors) {
     Objects.requireNonNull(events, "events");
     Objects.requireNonNull(verifier, "verifier");
+    Objects.requireNonNull(anchors, "anchors");
     long expectedSeq = -1;
     String expectedPrev = GENESIS;
     int checked = 0;
+    long lastSeq = -1;
+    String lastHash = null;
     for (AuditEvent event : events) {
       Map<String, String> attrs = event.attributes();
       String seqText = attrs.get(SEQ);
@@ -203,6 +219,23 @@ public final class HashChainedAuditSink implements AuditSink {
             seqForReport, checked, "invalid chain.seq '" + Text.bounded(seqText, 32) + "'");
       }
       if (expectedSeq < 0) {
+        if (anchors.firstSeq() != null && seq != anchors.firstSeq()) {
+          return ChainVerification.broken(
+              seq,
+              checked,
+              "first event has seq "
+                  + seq
+                  + " but anchor expectedFirstSeq is "
+                  + anchors.firstSeq()
+                  + " (prefix removed or replaced?)");
+        }
+        if (anchors.firstPrev() != null && !prev.equals(anchors.firstPrev())) {
+          return ChainVerification.broken(
+              seq,
+              checked,
+              "first event chain.prev does not match anchor expectedFirstPrev"
+                  + " (prefix removed or replaced?)");
+        }
         expectedSeq = seq;
         expectedPrev = seq == 1 ? GENESIS : prev;
       }
@@ -236,6 +269,33 @@ public final class HashChainedAuditSink implements AuditSink {
       checked++;
       expectedSeq = seq + 1;
       expectedPrev = hash;
+      lastSeq = seq;
+      lastHash = hash;
+    }
+    if (anchors.any() && lastHash == null) {
+      return new ChainVerification(
+          false,
+          -1,
+          0,
+          "chain broken: no chained events but an anchor was supplied (log emptied?)",
+          false);
+    }
+    if (anchors.lastSeq() != null && lastSeq != anchors.lastSeq()) {
+      return ChainVerification.broken(
+          lastSeq,
+          checked,
+          "last event has seq "
+              + lastSeq
+              + " but anchor expectedLastSeq is "
+              + anchors.lastSeq()
+              + " (suffix removed or extended?)");
+    }
+    if (anchors.headHash() != null && !anchors.headHash().equals(lastHash)) {
+      return ChainVerification.broken(
+          lastSeq,
+          checked,
+          "last chain.hash does not match anchor expectedHeadHash"
+              + " (suffix removed or replaced?)");
     }
     return ChainVerification.intact(checked, verifier.isPresent());
   }

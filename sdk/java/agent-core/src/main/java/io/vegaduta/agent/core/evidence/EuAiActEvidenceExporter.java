@@ -30,8 +30,9 @@ public final class EuAiActEvidenceExporter implements EvidenceExporter {
 
   private static final String RETENTION_NOTE =
       "Retain these records for the period required by Art. 12(1) and Art. 19 (at least six months"
-          + " unless Union or national law requires longer). The chain hash of the last event is"
-          + " the integrity anchor for this bundle; store it separately.";
+          + " unless Union or national law requires longer). The head hash and last sequence number"
+          + " are the integrity anchors for this bundle; store them separately and pass them back as"
+          + " expected anchors when verifying.";
 
   private final EvidenceBundle bundle;
 
@@ -75,7 +76,10 @@ public final class EuAiActEvidenceExporter implements EvidenceExporter {
                 .put("firstBrokenSeq", cv.firstBrokenSeq())
                 .put("eventsChecked", cv.eventsChecked())
                 .put("message", cv.message())
-                .put("headHash", headHash())
+                .put("firstSeq", bundle.firstSeq())
+                .put("firstPrev", bundle.firstPrev().orElse(null))
+                .put("lastSeq", bundle.lastSeq())
+                .put("headHash", bundle.headHash().orElse(null))
                 .put("retention", RETENTION_NOTE))
         .append('\n');
     for (AuditEvent e : bundle.events()) {
@@ -154,7 +158,17 @@ public final class EuAiActEvidenceExporter implements EvidenceExporter {
             .append(" in the log carry no chain attributes and are not covered.");
       }
       sb.append("  \nSignature algorithm: `").append(chainAlgorithm()).append("`");
-      sb.append("  \nHead hash: `").append(headHash()).append("`\n\n");
+      sb.append("  \nHead: seq ")
+          .append(bundle.lastSeq().isPresent() ? Long.toString(bundle.lastSeq().getAsLong()) : "-")
+          .append(", hash `")
+          .append(bundle.headHash().orElse("-"))
+          .append("`");
+      sb.append("  \nFirst: seq ")
+          .append(
+              bundle.firstSeq().isPresent() ? Long.toString(bundle.firstSeq().getAsLong()) : "-")
+          .append(", prev `")
+          .append(bundle.firstPrev().orElse("-"))
+          .append("`\n\n");
     }
     sb.append("### Retention\n\n").append(RETENTION_NOTE).append("\n\n");
     sb.append("### Event log\n\n");
@@ -325,14 +339,6 @@ public final class EuAiActEvidenceExporter implements EvidenceExporter {
         .distinct()
         .sorted()
         .toList();
-  }
-
-  private String headHash() {
-    List<AuditEvent> events = bundle.events();
-    if (events.isEmpty()) {
-      return "-";
-    }
-    return events.get(events.size() - 1).attributes().getOrDefault(HashChainedAuditSink.HASH, "-");
   }
 
   /** The {@code chain.alg} seen on the chained events, {@code none} when the chain is unsigned. */

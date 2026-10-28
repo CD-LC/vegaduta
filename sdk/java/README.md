@@ -206,7 +206,28 @@ String shadow = ShadowReport.from(store.events()).toMarkdown();  // what STRICT 
 ```
 
 A restarted process continues the chain with `tamperEvidentAudit(signer, lastSeq, lastHash)`
-read back from the durable sink. Offline, `PolicyReplay.of(candidate, classifications)` runs a
+read back from the durable sink.
+
+**Truncation anchors.** A log cannot show by itself that its first or last events were deleted:
+the first event is trusted to start the chain and the last is whatever remains. Record
+`bundle.headHash()` / `bundle.lastSeq()` (and `bundle.firstSeq()` / `bundle.firstPrev()`) outside
+the log, where the audit writer cannot rewrite them, and pass them back on the next verification:
+
+```java
+EvidenceBundle checked = EvidenceBundle.builder()
+    .events(store.events())
+    .verifier(signer.verifier())
+    .expectedFirstSeq(1).expectedFirstPrev(HashChainedAuditSink.GENESIS)   // start anchor
+    .expectedLastSeq(lastSeq).expectedHeadHash(headHash)                   // end anchor
+    .build();                                                              // mismatch: chainVerification().ok() == false
+```
+
+`HashChainedAuditSink.verify(events, verifier, ChainAnchors)` is the same check without a bundle.
+The EU AI Act JSON Lines export carries `firstSeq`, `firstPrev`, `lastSeq` and `headHash` in its
+`art12.integrity` object and the Markdown a `Head: seq N, hash ...` line, under the same names the
+Python SDK uses. `headHash` is the head of the whole chain, not of the reporting period. Chains
+written by either SDK verify in the other (canonical form pinned by shared fixtures in
+`sdk/testdata/cross-sdk`, tested from both sides). Offline, `PolicyReplay.of(candidate, classifications)` runs a
 candidate policy over stored events without a running agent.
 
 ## What is in the box
@@ -275,8 +296,17 @@ the set is forced to require approval, in `WARN` mode it is audited.
 
 **Approval.** A request records the tool, the raw arguments, the run context and the
 requester; it expires after `approval.ttl`. The four-eyes rule stops the requester deciding
-their own request (`ApprovalDecisionAuthorizer` bean to replace it with role checks). Approving
-executes the tool through the registered executor, journals the result and audits it.
+their own request and is the default; opt out explicitly with `approval.four-eyes=false`, a
+`GovernancePolicy` with `fourEyes(false)`, or `ApprovalDecisionAuthorizer.allowAny()` (an
+`ApprovalDecisionAuthorizer` bean replaces it with role checks). Approving executes the tool
+through the registered executor, journals the result and audits it. A failed execution stores and
+audits the exception type and a bounded, redacted message, never the raw exception text.
+
+An `ApprovalStore` shared by more than one gate or process must implement `saveIfStatus` as an
+atomic compare-and-set on status (`UPDATE ... WHERE id = ? AND status = ?` and check the row
+count), because every decision and the expiry-on-read are written through it; the interface's
+default is a non-atomic find-then-save that is only safe on one thread. `JdbcApprovalStore` and
+`InMemoryApprovalStore` implement it atomically.
 
 **Budget.** Reserve before the call, commit after, in one critical section, so parallel tool
 calls cannot jointly overspend. Caps per run on tool calls, tokens and dollars; zero means

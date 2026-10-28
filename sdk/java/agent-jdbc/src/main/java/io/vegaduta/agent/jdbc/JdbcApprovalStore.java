@@ -35,6 +35,8 @@ public final class JdbcApprovalStore implements ApprovalStore {
       "UPDATE vegaduta_approval SET status = ?, decided_at = ?, decided_by = ?, decision_reason = ?,"
           + " result = ? WHERE id = ?";
 
+  private static final String UPDATE_IF_STATUS = UPDATE + " AND status = ?";
+
   private static final String SELECT = "SELECT " + COLUMNS + " FROM vegaduta_approval";
 
   private final DataSource dataSource;
@@ -82,6 +84,29 @@ public final class JdbcApprovalStore implements ApprovalStore {
       }
     } catch (SQLException e) {
       throw Jdbc.wrap("Saving approval request " + r.id(), e);
+    }
+  }
+
+  /**
+   * Atomic compare-and-set: one {@code UPDATE ... WHERE id = ? AND status = ?}, so of two
+   * connections (threads, gates, JVMs) deciding the same request exactly one affects a row and the
+   * other gets {@code false}, whatever the isolation level. Only the mutable decision columns are
+   * written; the request itself is immutable once inserted.
+   */
+  @Override
+  public boolean saveIfStatus(ApprovalRequest r, ApprovalStatus expected) {
+    try (Connection c = dataSource.getConnection();
+        PreparedStatement ps = c.prepareStatement(UPDATE_IF_STATUS)) {
+      ps.setString(1, r.status().name());
+      Jdbc.setInstant(ps, 2, r.decidedAt());
+      Jdbc.setString(ps, 3, r.decidedBy());
+      Jdbc.setString(ps, 4, r.decisionReason());
+      Jdbc.setString(ps, 5, r.resultJson());
+      ps.setString(6, r.id().toString());
+      ps.setString(7, expected.name());
+      return ps.executeUpdate() == 1;
+    } catch (SQLException e) {
+      throw Jdbc.wrap("Updating approval request " + r.id(), e);
     }
   }
 

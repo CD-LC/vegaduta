@@ -9,9 +9,11 @@ is journaled and stored on the request.
 
 from __future__ import annotations
 
+import inspect
 import re
 import threading
 import uuid
+import warnings
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
@@ -95,22 +97,26 @@ class ApprovalDecisionAuthorizer(Protocol):
 class ApprovalStore(Protocol):
     """Persistence for approval requests.
 
-    Multi-process contract: ``ApprovalGate`` serialises decisions with an
-    in-process lock only, so two processes (or two gate instances) sharing one
-    store can both read PENDING and both approve, running the resumption twice.
-    A store used by more than one process MUST make ``update`` a
-    compare-and-set on the previous status (e.g. ``UPDATE ... WHERE id=? AND
-    status=?``) and refuse a stale write; ``InMemoryApprovalStore.update`` with
-    ``expected_status`` shows the shape. Without it, double execution of an
-    approved action is possible."""
+    Compare-and-set contract. Every decision (approve, reject, expire, record
+    the result) is written with ``update(request, expected_status)``, and the
+    store MUST apply it atomically only when the stored status still equals
+    ``expected_status``, returning ``False`` otherwise (for SQL:
+    ``UPDATE ... WHERE id=? AND status=?`` and check the affected row count).
+    That is what stops two gate instances or two processes sharing one store
+    from both approving the same request and running its resumption twice; the
+    gate's in-process lock cannot. ``expected_status=None`` is an unconditional
+    write for callers that do not need the guard. A store whose ``update`` does
+    not accept ``expected_status`` still works, but ``ApprovalGate`` warns that
+    multi-process safety is lost and falls back to unconditional writes.
+    ``InMemoryApprovalStore`` and ``SqliteApprovalStore`` are the references."""
 
     def save(self, request: ApprovalRequest, resumption: Callable[[], str] | None) -> None: ...
 
     def get(self, request_id: uuid.UUID) -> ApprovalRequest | None: ...
 
-    def update(self, request: ApprovalRequest) -> object:
-        """Persist ``request``. Must be compare-and-set on status for
-        multi-process use (see the class docstring)."""
+    def update(self, request: ApprovalRequest, expected_status: ApprovalStatus | None = None) -> bool:
+        """Persist ``request``; with ``expected_status`` only if the stored
+        status equals it. Returns whether the write was applied."""
         ...
 
     def resumption_of(self, request_id: uuid.UUID) -> Callable[[], str] | None: ...
@@ -177,9 +183,19 @@ allow_any: ApprovalDecisionAuthorizer = _AllowAny()
 _MAX_FAILURE_MESSAGE = 200
 _SECRET_RE = re.compile(
     r"(?i)(bearer\s+[A-Za-z0-9._~+/=-]+"
-    r"|(?:api[_-]?key|token|secret|password|passwd|authorization)\s*[=:]\s*\S+"
+    r"|(?:api[_-]?key|token|secret|password|passwd|authorization)\s*[=:]\s*(?:(?:bearer|basic)\s+)?\S+"
     r"|\b[A-Za-z0-9_-]{32,}\b)"
 )
+
+
+def _supports_cas(store: object) -> bool:
+    try:
+        params = inspect.signature(store.update).parameters  # type: ignore[attr-defined]
+    except (TypeError, ValueError, AttributeError):
+        return False
+    return "expected_status" in params or any(
+        p.kind is inspect.Parameter.VAR_KEYWORD for p in params.values()
+    )
 
 
 def _failure_result(exc: BaseException) -> str:
@@ -208,6 +224,15 @@ class ApprovalGate:
         on_decision: Callable[[ApprovalRequest], None] | None = None,
     ) -> None:
         self._store = store or InMemoryApprovalStore()
+        self._cas = _supports_cas(self._store)
+        if not self._cas:
+            warnings.warn(
+                f"{type(self._store).__name__}.update() does not accept expected_status; approval "
+                "decisions are not compare-and-set, so two processes sharing this store can both "
+                "approve (and execute) one request. See ApprovalStore.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
         self._authorizer = authorizer if authorizer is not None else FourEyesAuthorizer()
         self._default_ttl = default_ttl
         self._on_decision = on_decision
@@ -260,15 +285,37 @@ class ApprovalGate:
 
     # -- deciding -----------------------------------------------------
 
+    def _cas_update(self, request: ApprovalRequest, expected: ApprovalStatus) -> bool:
+        """Writes ``request`` only if the store still holds ``expected``
+        (compare-and-set); see ``ApprovalStore``."""
+        if self._cas:
+            return bool(self._store.update(request, expected))
+        current = self._store.get(request.id)
+        if current is None or current.status is not expected:
+            return False
+        self._store.update(request)
+        return True
+
     def _must_get(self, request_id: uuid.UUID | str) -> ApprovalRequest:
         rid = uuid.UUID(str(request_id)) if not isinstance(request_id, uuid.UUID) else request_id
         request = self._store.get(rid)
         if request is None:
             raise ApprovalNotFoundException(f"no approval request {rid}")
         if request.status is ApprovalStatus.PENDING and _utcnow() > request.expires_at:
-            request = replace(request, status=ApprovalStatus.EXPIRED, decided_at=_utcnow())
-            self._store.update(request)
+            expired = replace(request, status=ApprovalStatus.EXPIRED, decided_at=_utcnow())
+            if self._cas_update(expired, ApprovalStatus.PENDING):
+                return expired
+            # someone else decided (or expired) it first: act on what is stored
+            request = self._store.get(rid) or request
         return request
+
+    def _decide(self, request: ApprovalRequest, decided: ApprovalRequest) -> ApprovalRequest:
+        """PENDING -> ``decided`` as a compare-and-set; losing the race is
+        reported as already decided, never executed twice."""
+        if not self._cas_update(decided, ApprovalStatus.PENDING):
+            latest = self._store.get(request.id) or request
+            raise ApprovalAlreadyDecidedException(f"approval {request.id} is already {latest.status.value}")
+        return decided
 
     def _check_decidable(self, request: ApprovalRequest, decided_by: str) -> None:
         if request.status.decided:
@@ -282,24 +329,33 @@ class ApprovalGate:
         with self._lock:
             request = self._must_get(request_id)
             self._check_decidable(request, decided_by)
-            request = replace(
-                request, status=ApprovalStatus.APPROVED, decided_at=_utcnow(), decided_by=decided_by
+            request = self._decide(
+                request,
+                replace(request, status=ApprovalStatus.APPROVED, decided_at=_utcnow(), decided_by=decided_by),
             )
-            self._store.update(request)
             resumption = self._store.resumption_of(request.id)
         self._notify(request)
         if resumption is not None:
             try:
                 result = resumption()
             except Exception as exc:
-                with self._lock:
-                    request = replace(request, status=ApprovalStatus.FAILED, result_json=_failure_result(exc))
-                    self._store.update(request)
+                request = self._finish(
+                    request, replace(request, status=ApprovalStatus.FAILED, result_json=_failure_result(exc))
+                )
             else:
-                with self._lock:
-                    request = replace(request, status=ApprovalStatus.EXECUTED, result_json=result)
-                    self._store.update(request)
+                request = self._finish(
+                    request, replace(request, status=ApprovalStatus.EXECUTED, result_json=result)
+                )
         return request
+
+    def _finish(self, approved: ApprovalRequest, finished: ApprovalRequest) -> ApprovalRequest:
+        """APPROVED -> EXECUTED/FAILED. Only the caller that won the approval
+        gets here, so the guard should always hold; if something else moved the
+        request meanwhile, report what is stored instead of overwriting it."""
+        with self._lock:
+            if self._cas_update(finished, ApprovalStatus.APPROVED):
+                return finished
+            return self._store.get(approved.id) or approved
 
     def reject(
         self, request_id: uuid.UUID | str, decided_by: str, reason: str | None = None
@@ -307,14 +363,16 @@ class ApprovalGate:
         with self._lock:
             request = self._must_get(request_id)
             self._check_decidable(request, decided_by)
-            request = replace(
+            request = self._decide(
                 request,
-                status=ApprovalStatus.REJECTED,
-                decided_at=_utcnow(),
-                decided_by=decided_by,
-                decision_reason=reason,
+                replace(
+                    request,
+                    status=ApprovalStatus.REJECTED,
+                    decided_at=_utcnow(),
+                    decided_by=decided_by,
+                    decision_reason=reason,
+                ),
             )
-            self._store.update(request)
         self._notify(request)
         return request
 
