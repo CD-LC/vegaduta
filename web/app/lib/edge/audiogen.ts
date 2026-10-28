@@ -294,12 +294,26 @@ export async function generateAudioLocally(prompt: string, durationSeconds?: num
   if (!trimmed) return { handled: false, reason: "empty-prompt" };
   if (trimmed.length > MAX_PROMPT_CHARS) return { handled: false, reason: "prompt-too-long" };
   if (!(await edgeAudioGenAvailable())) return { handled: false, reason: "unsupported" };
-  if (!workerModelLoaded) {
+  // No side-effect downloads: generation only proceeds when the model is live
+  // in the worker or was fully installed on this device before (a cache-hit
+  // warm-up, not an acquisition) - same contract vision.ts's analyzeFramesLocally
+  // already follows.
+  if (!workerModelLoaded && !isAudioGenModelCached()) {
     return { handled: false, reason: "model-not-ready" };
   }
 
   const requestId = nextRequestId++;
   const run = generateChain.then(async (): Promise<AudioGenResult> => {
+    if (!workerModelLoaded) {
+      // Warm-up from the local cache (marker checked above): the weights are
+      // already on this device, so runLoad moves no bytes and the no-download
+      // consent rule is not implicated.
+      try {
+        await runLoad();
+      } catch {
+        return { handled: false, reason: "warmup-failed" };
+      }
+    }
     const response = await request(
       { type: "generate", requestId, prompt: trimmed, durationSeconds },
       GENERATE_TIMEOUT_MS,
