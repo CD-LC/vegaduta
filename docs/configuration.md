@@ -1227,7 +1227,7 @@ switch, `WHATSAPP_TEMPLATES_ENABLED`.
 
 | Property | Env | Default |
 |---|---|---|
-| `app.workflow.execution-engine` | `WORKFLOW_EXECUTION_ENGINE` | `legacy` (in-process); or `temporal` |
+| `app.workflow.execution-engine` | `WORKFLOW_EXECUTION_ENGINE` | `legacy` (in-process, best-effort); or `temporal` (durable) |
 | `app.workflow.temporal.target` | `TEMPORAL_TARGET` | `127.0.0.1:7233` |
 | `app.workflow.temporal.namespace` | `TEMPORAL_NAMESPACE` | `default` |
 | `app.workflow.temporal.run-timeout-seconds` | `TEMPORAL_RUN_TIMEOUT_SECONDS` | `600` |
@@ -1246,6 +1246,15 @@ switch, `WHATSAPP_TEMPLATES_ENABLED`.
 
 `temporal` also needs the `temporal` Spring profile; without it core falls back
 to the in-process engine. Workers run in the `core-worker` shape.
+
+The in-process engine is best-effort: retry counts and the step ceiling are
+enforced, but the per-step timeout (`stepTimeoutSeconds`) is not applied, a
+parallel fan-out joins branches in completion order (fail-fast, but a running
+branch is not interrupted), and a run interrupted by a process crash or deploy
+stays `RUNNING` until the recovery reaper marks it `FAILED` (by default two
+hours later; see `WorkflowRunRecoveryJob`). The traversal state lives on the
+thread stack, so it cannot resume. Choose `temporal` when a workflow needs
+durable, crash-resumable execution and per-step time bounds.
 
 The `app.workflow.poll.*` settings bound the HTTP polling trigger (a Trigger
 node's "new items at this endpoint start the workflow" binding). Polled URLs go
@@ -1558,8 +1567,10 @@ See [Add-ons](personal-mode.md#add-ons) and the [console guide](console/add-ons.
 
 | Property | Env | Default | Meaning |
 |---|---|---|---|
-| `app.agents.taint.mode` | `APP_AGENTS_TAINT_MODE` | `observe` (`enforce` in `personal`; `off` before 2026-10-23, owner decision) | `off`, `observe` (the base default: track, count and audit what would need approval, one audit row and one WARN per tool per tainted turn; behaviour unchanged, but it classifies every guarded tool call and writes `audit_log_entry` rows) or `enforce` (untrusted tool output is delimited as data and, once a turn is tainted, a tool that writes tenant data, uses stored credentials or sends data out needs approval) |
+| `app.agents.taint.mode` | `APP_AGENTS_TAINT_MODE` | `observe` (`enforce` in `personal`; `off` before 2026-10-23, owner decision) | `off`, `observe` (the base default: track, count and audit what would need approval, one audit row and one WARN per tool per tainted turn; behaviour unchanged, but it classifies every guarded tool call and writes `audit_log_entry` rows; scheduled to flip to `enforce` by default for 1.0 once audit logs are reviewed) or `enforce` (untrusted tool output and auto-injected retrieval are delimited as data and, once a turn is tainted, a tool that writes tenant data, uses stored credentials or sends data out needs approval) |
 | `app.agents.taint.http-get-allow-hosts` | `APP_AGENTS_TAINT_HTTP_GET_ALLOW_HOSTS` | empty | comma-separated hosts (and their subdomains) a tainted turn may `GET` through `http_request` / `fetch_web_page`; empty means no restriction on GET. Only consulted while a turn is tainted |
+
+> **Note on ingestion screening vs turn taint:** Turn taint tracks outsider-authored content entering model context at execution time (tools, auto-injected memory recall, workflow knowledge nodes, and inbound messages). Static ingestion screening (`KnowledgeWriteScreen`) currently screens tool-based writes (`add_to_knowledge_base`); file uploads, URL ingestion, and external connectors rely on turn-level spotlighting and taint gating at retrieval/model execution time. Full multi-channel ingestion screening is scheduled for 1.0.
 
 Metrics: `agent.taint.marked{tool}`, `agent.taint.tainted_turns{mode}`, `agent.taint.sink_calls{tool,action}`. Audit entries
 (actor `agent-taint`): `tool.taint.would_block`, `tool.taint.approval_required`; they carry tool name, risk label and

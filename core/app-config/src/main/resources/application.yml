@@ -4059,8 +4059,12 @@ app:
   workflow:
     # "legacy" (default) is the
     # original in-process WorkflowExecutionEngine - byte-for-byte unchanged
-    # behavior. "temporal" routes runs through TemporalWorkflowExecutionEngine
-    # instead (durable, crash-resumable) - only takes effect if core is ALSO
+    # behavior. It is BEST-EFFORT: retries and the step ceiling apply, but the
+    # per-step timeout is not enforced and a crashed/deployed-over run is
+    # reaped FAILED (WorkflowRunRecoveryJob) rather than resumed. "temporal"
+    # routes runs through TemporalWorkflowExecutionEngine
+    # instead (durable, crash-resumable, enforces stepTimeoutSeconds per
+    # activity) - only takes effect if core is ALSO
     # started with the "temporal" profile active (see TemporalConfig); if not,
     # WorkflowService logs a warning and falls back to legacy rather than
     # failing runs. See deploy/docker-compose.yml for the Temporal server

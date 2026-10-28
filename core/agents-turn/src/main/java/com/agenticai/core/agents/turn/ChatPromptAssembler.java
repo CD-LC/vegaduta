@@ -260,11 +260,11 @@ final class ChatPromptAssembler {
                                                         chatClient,
                                                         stepEvents,
                                                         turnDepth)));
-        CompletableFuture<String> memoryFuture =
+        CompletableFuture<ChatMemoryRecall.MemoryRecall> memoryFuture =
                 supplyPreTurn(
                         preTurnTenant,
                         () ->
-                                memoryRecall.recallMemoryFactsBlock(
+                                memoryRecall.recallMemoryFacts(
                                         agentId, subjectKey, decisionMessage, stepEvents));
 
         // Stage 4: empty unless the "mcp" profile is active and at least one
@@ -414,6 +414,24 @@ final class ChatPromptAssembler {
         // the
         // prompt preview calls the same method, so what it shows is what a turn sends.
         java.time.LocalDate todayUtc = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
+        ChatMemoryRecall.MemoryRecall recalled =
+                joinPreTurnOrDegrade(memoryFuture, null, "memory", preTurnDeadlineNanos);
+        // Untrusted-content taint (app.agents.taint.mode): auto-injected retrieval enters the
+        // model's context without crossing a tool boundary, so nothing upstream of this point
+        // could mark the turn - a poisoned memory or an untrusted-delimited block piped in as the
+        // turn's input (the workflow 'knowledge' node's output is the intended case) would
+        // otherwise let the model reach a sink with the gate blind. The marks land on the
+        // TurnContext's own record, the instance tool resolution adopted as the turn's taint
+        // state (see TurnContext#taint), so the gate consults them on every sink call. The block
+        // itself is not spotlight-wrapped: the tool path wraps output only in ENFORCE, and the
+        // standing memory block is already labelled - the enforceable control is the same in both
+        // paths, the approval gate on sinks.
+        if (recalled != null && recalled.hasRecalledFacts()) {
+            context.taint().mark("recall_related_facts");
+        }
+        if (com.agenticai.core.guardrails.taint.Spotlight.hasUntrustedBlock(userMessage)) {
+            context.taint().mark("untrusted_input");
+        }
         ChatSystemPromptComposer.Composed composed =
                 ChatSystemPromptComposer.compose(
                         new ChatSystemPromptComposer.Input(
@@ -434,8 +452,7 @@ final class ChatPromptAssembler {
                                 replayedHistory.hasToolRecord()
                                         ? svc.turns.toolLedger.getTrustNote()
                                         : null,
-                                joinPreTurnOrDegrade(
-                                        memoryFuture, null, "memory", preTurnDeadlineNanos)));
+                                recalled == null ? null : recalled.block()));
         String systemPrompt = composed.systemPrompt();
         String memoryBlock = composed.memoryBlock();
         // Tells the request inspector which registry key / scope / version each block of the system

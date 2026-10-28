@@ -232,6 +232,7 @@ public class DiscordWebhookController {
                         .build();
         TurnContext turnContext =
                 TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+        turnContext.taint().mark("inbound:discord");
         // Stage 4 (Chat file upload) added trailing attachmentKey/attachmentMimeType
         // params to AgentChatService.chat() - null/null here since inbound Discord
         // messages never carry an uploaded chat-attachment reference (that feature
