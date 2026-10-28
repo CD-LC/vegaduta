@@ -41,7 +41,7 @@ import type { EdgeCapabilities } from "./capabilities";
 // Value imports, deliberately: the registry is the one place that may know
 // about every tool set. The NO-RUNTIME-IMPORT rule its own test enforces
 // applies to the pure-compute handlers below, not to this assembly point.
-import { getNetworkToolsEnabled } from "./capabilities";
+import { getNetworkToolsEnabled, WEBLLM_BASELINE_CONTEXT_WINDOW } from "./capabilities";
 import { LOCAL_FILE_TOOLS } from "./localToolsFiles";
 import { WEB_LOCAL_TOOLS } from "./localToolsWeb";
 import { BROWSER_AI_TOOLS } from "./browserAi";
@@ -94,7 +94,11 @@ export const LOCAL_TOOL_PREFIX = "local_";
  * model that will then refuse every call.
  */
 const CAPABILITY_GATES: Record<string, (caps: EdgeCapabilities | null) => boolean> = {
-  local_generate_image: (caps) => caps?.webgpu?.available === true,
+  // SD-Turbo's weights are fp16-only — adapters without shader-f16 can't run
+  // them (ORT fails at session create), so the tool doesn't pretend otherwise.
+  local_generate_image: (caps) => caps?.webgpu?.available === true && caps.webgpu.shaderF16 === true,
+  // Audio gen falls back to fp32 weights on f16-less adapters, so any WebGPU
+  // adapter qualifies; the wasm q8 path stays for 8GB+ devices.
   local_generate_audio: (caps) => caps?.webgpu?.available === true || (caps?.deviceMemoryGB ?? 0) >= 8,
 };
 
@@ -190,6 +194,27 @@ function allLocalTools(): LocalTool[] {
  * to a model that cannot afford to be told about it.
  */
 export const TOOL_ADVERTISEMENT_CHAR_BUDGET = 3_200;
+
+/**
+ * The budget {@link listLocalTools} / {@link describeToolBudget} should be
+ * given for a model whose context window is `windowTokens`: the 3,200-char
+ * baseline on the 4096-window models it was measured for, scaled linearly on
+ * bigger windows so a model that can afford it is offered the whole registry —
+ * including the media-generation tools the baseline always trims (measured:
+ * compute+folder = 3,078 chars; the full catalog = ~5,647). This is the
+ * "caller passes a larger budget" case the constant's doc names. Absent or
+ * absurd input answers the baseline, never less — capability detection failing
+ * must not cost the person their core tools.
+ */
+export function toolAdvertisementBudgetFor(windowTokens: number | null | undefined): number {
+  if (typeof windowTokens !== "number" || !Number.isFinite(windowTokens) || windowTokens <= 0) {
+    return TOOL_ADVERTISEMENT_CHAR_BUDGET;
+  }
+  return Math.max(
+    TOOL_ADVERTISEMENT_CHAR_BUDGET,
+    Math.floor((windowTokens / WEBLLM_BASELINE_CONTEXT_WINDOW) * TOOL_ADVERTISEMENT_CHAR_BUDGET)
+  );
+}
 
 /** What one tool costs in the system prompt: exactly the fields
  * toolProtocolInstructions serialises (tier1.ts). */
