@@ -8,6 +8,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.13] - 2026-10-28
+
 ### Added
 
 - **Agent scratchpad: discoverability, lifecycle and an operator view.** The
