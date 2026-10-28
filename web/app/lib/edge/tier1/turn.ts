@@ -2,7 +2,13 @@
 
 import type { ChatCompletionMessageParam } from "@mlc-ai/web-llm";
 import { fetchEdgeMemory, memoryFactsBlock } from "../edgeMemory";
-import { findLocalTool, listLocalTools, runLocalTool, type LocalTool } from "../localTools";
+import {
+  describeToolBudget,
+  findLocalTool,
+  runLocalTool,
+  toolAdvertisementBudgetFor,
+  type LocalTool,
+} from "../localTools";
 import {
   canUseServerTools,
   edgeToolsUnavailable,
@@ -143,7 +149,21 @@ export async function runTurn(
   // — toolsActive is false on every round, so streamCompletion sets no
   // response_format and streams without hold-back, and parseToolCall is never
   // reached.
-  const localTools: LocalTool[] = state.disableTools ? [] : listLocalTools(state.caps);
+  const localToolsBudget = state.disableTools
+    ? { advertised: [] as LocalTool[], omitted: [] as LocalTool[] }
+    : describeToolBudget(state.caps, toolAdvertisementBudgetFor(state.contextWindowSize));
+  const localTools: LocalTool[] = localToolsBudget.advertised;
+  // Tools the device COULD run but this model's window could not afford to
+  // describe: naming them (without their schemas) costs ~20 chars each and
+  // stops the model reaching for a wrong substitute — a "generate an image"
+  // request improvised as generate_document("PNG") is the failure this
+  // prevents.
+  const omittedLocalNote =
+    localToolsBudget.omitted.length > 0
+      ? `Not offered this turn — their schemas exceed this model's prompt budget and calls to them will be refused, so do not substitute a different tool for what they do: ${localToolsBudget.omitted
+          .map((t) => t.name)
+          .join(", ")}.`
+      : undefined;
   let serverTools: EdgeToolDefinition[] | null = null;
   if (
     !state.disableTools &&
@@ -181,7 +201,7 @@ export async function runTurn(
   const systemContent =
     withReasoningNudge(state.baseSystemPrompt) +
     memoryFactsBlock(memoryFacts) +
-    (tools ? toolProtocolInstructions(tools) : "");
+    (tools ? toolProtocolInstructions(tools, omittedLocalNote) : "");
   const system: ChatCompletionMessageParam = { role: "system", content: systemContent };
 
   state.messages.push({ role: "user", content: text });
@@ -214,8 +234,7 @@ export async function runTurn(
     // The server half going unavailable mid-turn now only ends tool use when
     // there are no local tools to carry on with — dispatch below refuses
     // server names from that point regardless.
-    let toolsActive =
-      !!tools && !(state.serverToolsDisabled && localTools.length === 0) && round < MAX_TOOL_ROUNDS;
+    let toolsActive = !!tools && !(state.serverToolsDisabled && localTools.length === 0) && round < MAX_TOOL_ROUNDS;
     const plainSystem: ChatCompletionMessageParam = {
       role: "system",
       content: withReasoningNudge(state.baseSystemPrompt),
@@ -251,12 +270,7 @@ export async function runTurn(
       }
       assembly = relief.assembly;
     } else {
-      assembly = assembleTier1Prompt(
-        plainSystem,
-        historyWindow,
-        currentTurnMessages,
-        state.contextWindowSize
-      );
+      assembly = assembleTier1Prompt(plainSystem, historyWindow, currentTurnMessages, state.contextWindowSize);
     }
     if (!assembly.fits) {
       // Irreducible prompt over budget: NEVER attempt local inference (the
@@ -331,9 +345,7 @@ export async function runTurn(
       finalText =
         `I kept asking for the same "${call.name}" call with identical arguments, so I stopped ` +
         `instead of repeating it.` +
-        (lastToolResultForPrompt
-          ? `\n\nHere is what it returned the first time:\n\n${lastToolResultForPrompt}`
-          : "");
+        (lastToolResultForPrompt ? `\n\nHere is what it returned the first time:\n\n${lastToolResultForPrompt}` : "");
       break;
     }
     lastToolCallSignature = signature;
@@ -354,12 +366,16 @@ export async function runTurn(
     // consulted — only to tell "this device can't do that" apart from "no such
     // tool", which are different honest answers.
     const local = localTools.find((t) => t.name === call.name) || null;
-    const gatedOffLocal = local === null && findLocalTool(call.name) !== null;
+    // "Trimmed" (schema didn't fit the budget — the device can run it) and
+    // "gated" (the device can't) are different honest answers, so they are
+    // told apart here: a call to a trimmed name gets the why, not a vague no.
+    const trimmedLocal = local === null && localToolsBudget.omitted.some((t) => t.name === call.name);
+    const gatedOffLocal = local === null && !trimmedLocal && findLocalTool(call.name) !== null;
     // "local" covers the gated-off case too: nothing was sent anywhere for it
     // either. The remaining "server" label is therefore the only value that
     // ever means bytes left this device.
     const source: Tier1ToolCallEvent["source"] =
-      local !== null || gatedOffLocal || serverTools === null ? "local" : "server";
+      local !== null || trimmedLocal || gatedOffLocal || serverTools === null ? "local" : "server";
     safeNotifyToolCall(onToolCall, {
       name: call.name,
       phase: "calling",
@@ -375,6 +391,12 @@ export async function runTurn(
     let outcome: EdgeToolExecuteResult;
     if (local !== null) {
       outcome = await runLocalTool(local, call.arguments);
+    } else if (trimmedLocal) {
+      outcome = {
+        ok: false,
+        code: "rejected",
+        detail: `"${call.name}" is a local tool this device can run, but its schema did not fit this model's prompt budget so it was not offered this turn — a model with a larger context window offers it. Do not substitute a different tool for what it does.`,
+      };
     } else if (gatedOffLocal) {
       outcome = {
         ok: false,
