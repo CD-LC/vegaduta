@@ -201,6 +201,7 @@ nav:
           - ADR-0022 Explicit turn context: architecture/ADR-0022-explicit-turn-context.md
           - ADR-0025 Consumer-driven contracts: architecture/ADR-0025-consumer-driven-contracts.md
           - ADR-0026 API styles and GraphQL: architecture/ADR-0026-api-styles-and-graphql.md
+          - ADR-0027 Agent mandates and delegated authority: architecture/ADR-0027-agent-mandates-and-delegated-authority.md
           - Ad Studio research, October 2026: architecture/ad-studio-research-2026-10.md
           - MCP generic OAuth: architecture/ADR-mcp-generic-oauth.md
           - Agent job durability: architecture/ADR-AGENT-JOB-DURABILITY-2026-08-17.md
@@ -225,6 +226,12 @@ nav:
       - Personal data breach runbook: operations/breach-runbook.md
   - Security:
       - Security model (taint, sandbox, pairing): security-model.md
+      - Standards alignment pack (index): compliance/README.md
+      - ISO/IEC 42001 evidence map: compliance/iso-iec-42001.md
+      - NIST AI RMF evidence map: compliance/nist-ai-rmf.md
+      - EU AI Act evidence map: compliance/eu-ai-act.md
+      - SOC 2 and ISO 27001 evidence map: compliance/soc2-iso27001-evidence-map.md
+      - MCP and A2A conformance: compliance/mcp-a2a-conformance.md
       - DPDP obligations and controls: compliance/dpdp-obligations.md
       - Authorization: security/authorization.md
       - OWASP agentic-AI mapping: security/owasp-mapping.md
