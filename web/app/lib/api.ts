@@ -54,6 +54,7 @@ import { chatBranchingApi } from "./api/chatBranching";
 import { chatPortabilityApi } from "./api/chatPortability";
 import { apiKeysApi } from "./api/apiKeys";
 import { localModelsApi } from "./api/localModels";
+import { a2aApi } from "./api/a2a";
 
 export const api = {
   ...providersApi,
@@ -106,4 +107,5 @@ export const api = {
   ...chatPortabilityApi,
   ...apiKeysApi,
   ...localModelsApi,
+  ...a2aApi,
 };

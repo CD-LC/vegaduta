@@ -142,6 +142,15 @@ Release notes on GitHub are generated from the section for each version.
   `en_US-lessac-medium` voice (sha256-verified at build); `PIPER_VOICE` /
   `PIPER_MODEL_DIR` / `PIPER_SPEAKER_ID` / `PIPER_SAMPLE_RATE` tune it, and
   `services/voice-agent/piper_voices_download.py` fetches additional voices.
+- **A2A interoperability console (`/admin/a2a`) and per-agent endpoint panel.**
+  The A2A protocol bindings deliberately answer ListTasks as unsupported, so
+  the console is served by a new manager-gated surface
+  (`/api/a2a/console/**`): a tenant-wide task list in both directions
+  (inbound calls into this workspace's agents plus outbound `a2a_call_agent`
+  bookkeeping), full task detail, cancel for in-flight inbound turns, the
+  deployment's inbound endpoints (JSON-RPC, HTTP+JSON, agent card, JWKS) and
+  a read-only view of the operator's outbound remote-agent allow-list. The
+  agent workbench also shows each agent's A2A endpoints and card URL.
 - **Docling-first document conversion for knowledge ingestion.** The new
   `services/docling` FastAPI adapter wraps IBM's Docling parser behind the
   sidecar's exact `/extract` contract (`X-Internal-Token` auth, `DOCLING_*`
