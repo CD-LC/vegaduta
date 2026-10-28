@@ -359,7 +359,15 @@ RUN cd /opt/mcp-toolchain \
     # explicit `browsers install` below. The same env on THAT call skips the
     # redundant postinstall download while still letting the install command
     # fetch chrome@stable (verified: linux-156 landed, exit 0, on arm64).
+    # The pre-warm runs from an EMPTY cwd: server-puppeteer is also a dep of
+    # mcp-toolchain itself, so run inside /opt/mcp-toolchain npm exec resolves
+    # it locally, seeds nothing into ~/.npm/_npx, and exits 0 - the grep below
+    # then finds no package.json, dirname "" yields ".", and
+    # rm -rf "./node_modules" deletes the very tree this step copies
+    # (v0.1.13 build, arm64 leg). An isolated dir forces a real _npx install.
+    && mkdir -p /opt/npx-prewarm && cd /opt/npx-prewarm \
     && PUPPETEER_SKIP_DOWNLOAD=1 npm exec --yes --package=@modelcontextprotocol/server-puppeteer -- node -e "process.exit(0)" \
+    && cd /opt/mcp-toolchain \
     # The pre-warm above uses the SAME unversioned spec as application-mcp.yml's runtime
     # `npx -y @modelcontextprotocol/server-puppeteer`, so npx reuses this tree (its cache
     # directory is keyed by the spec). The deprecated 2025.5.12 pins @modelcontextprotocol/sdk
@@ -368,6 +376,9 @@ RUN cd /opt/mcp-toolchain \
     # server only uses the sdk's Server/StdioServerTransport; basic-ftp is only reachable for
     # ftp: PAC-script URLs, through puppeteer's browser-download proxy agent (get-uri).
     && sp_dir="$(dirname "$(grep -l '"@modelcontextprotocol/server-puppeteer"' /home/agentic/.npm/_npx/*/package.json)")" \
+    # Fail closed, not sideways: an unseeded cache must abort the build, never
+    # reach rm -rf with a "." path or ship an unpatched npx tree.
+    && case "$sp_dir" in /home/agentic/.npm/_npx/*) : ;; *) echo "server-puppeteer pre-warm did not seed /home/agentic/.npm/_npx" >&2; exit 1;; esac \
     # Overlay the vendored lockfile tree onto the seeded entry instead of an
     # unverified `npm install`: mcp-toolchain/package.json carries the same two
     # overrides (sdk 1.32.1, basic-ftp 6.2.1) and its package-lock resolved them
