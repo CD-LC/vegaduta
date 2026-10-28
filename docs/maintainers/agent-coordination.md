@@ -643,6 +643,7 @@ results name evicted_key + expired_removed), plus lazy TTL sweeps
 GET /api/agents/{agentId}/scratchpad[?session] and /{key} gated by
 AgentService.requireAccess(VIEWER) - no write/delete by design, session
 "agent"/omitted reads the long-term pad.
+<<<<<<< HEAD
 ### Dependabot lock autofix (Devin, 2026-10-28)
 
 New `.github/workflows/dependabot-autofix.yml` regenerates
@@ -660,3 +661,46 @@ fallback and fails closed on SQL errors, and SecurityConfig requires at
 least one client-bound JWT check (azp or audience) on non-Keycloak issuers.
 Verified: tenancy+security 749 tests green, full reactor compiles.
 Worktree: /tmp/vd-taint-tenancy.
+
+### Locale-aware on-screen keyboard (Devin, 2026-10-28)
+
+Claimed: `web/app/components/keyboard/**`, `web/app/lib/keyboard/**`,
+`web/app/components/shell/TopBar.tsx` (one import + one mount line),
+`web/messages/en.json` (`keyboard` namespace), `web/package*.json`
+(simple-keyboard-layouts@3.4.273 dep), `CHANGELOG.md`. Overlaps the
+release-readiness lead's `web/app/**` claim — the PR title says so and
+waits for that review.
+
+A topbar toggle (next to LanguageSwitcher) opens a floating on-screen
+keyboard in the selected locale's script; it types into whichever
+input/textarea has focus (native value setter + bubbling `input` event so
+controlled React inputs see real typing; pointerdown is prevented so the
+board never steals focus). Layout data lazy-loads per locale from
+simple-keyboard-layouts; Devanagari-script locales share the Hindi layout,
+Kashmiri the Urdu one, Meitei the Bengali one. Locales without a mapped
+layout keep the toggle disabled rather than offering the wrong script.
+Verified: 19 new vitest cases green (incl. loading every mapped layout
+module for real), eslint + prettier + typecheck clean against
+`origin/main`. Worktree: /tmp/vd-keyboard, branch
+`feat/locale-onscreen-keyboard`.
+
+### Edge-media / playground / keyboard session (Devin, 2026-10-28)
+
+Merged **PR #276** (`fix(playground): drive the live turn clock from the
+turn's start time`, squash `7a8ec2acb`) and **PR #277** (`fix(edge): let
+cached media models warm the worker and scale the tool budget to the
+window`, squash `d2654a83`) to `main` — both had gone green on CI after
+Prettier-only fix-up pushes; approved + admin-merged from the `vegaduta`
+bot account since the PR author's own approval doesn't count and branch
+protection enforces admins. #277's squash also carries the MusicGen
+always-q4 WebGPU fix (fp32/fp16 decoders exceed the browser session
+limit), the non-f16 SD-Turbo gating, the trimmed-tool prompt notes, and
+the unenrolled-browser PIN hint.
+
+Keyboard feature: claimed `web/app/components/keyboard/**`,
+`web/app/lib/keyboard/**`, `web/app/components/shell/TopBar.tsx`,
+`web/messages/en.json`, `web/package*.json`, `CHANGELOG.md` — open as
+**PR #278** (`feat/locale-onscreen-keyboard`, off `origin/main`), waits
+for the release-readiness lead's review per the `web/app/**` overlap.
+Deployed to the maintainer's local personal stack from
+`deploy/local-everything` (worktree /tmp/vd-deploy-all).
