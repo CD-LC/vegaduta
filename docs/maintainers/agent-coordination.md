@@ -660,3 +660,25 @@ fallback and fails closed on SQL errors, and SecurityConfig requires at
 least one client-bound JWT check (azp or audience) on non-Keycloak issuers.
 Verified: tenancy+security 749 tests green, full reactor compiles.
 Worktree: /tmp/vd-taint-tenancy.
+
+### Locale-aware on-screen keyboard (Devin, 2026-10-28)
+
+Claimed: `web/app/components/keyboard/**`, `web/app/lib/keyboard/**`,
+`web/app/components/shell/TopBar.tsx` (one import + one mount line),
+`web/messages/en.json` (`keyboard` namespace), `web/package*.json`
+(simple-keyboard-layouts@3.4.273 dep), `CHANGELOG.md`. Overlaps the
+release-readiness lead's `web/app/**` claim — the PR title says so and
+waits for that review.
+
+A topbar toggle (next to LanguageSwitcher) opens a floating on-screen
+keyboard in the selected locale's script; it types into whichever
+input/textarea has focus (native value setter + bubbling `input` event so
+controlled React inputs see real typing; pointerdown is prevented so the
+board never steals focus). Layout data lazy-loads per locale from
+simple-keyboard-layouts; Devanagari-script locales share the Hindi layout,
+Kashmiri the Urdu one, Meitei the Bengali one. Locales without a mapped
+layout keep the toggle disabled rather than offering the wrong script.
+Verified: 19 new vitest cases green (incl. loading every mapped layout
+module for real), eslint + prettier + typecheck clean against
+`origin/main`. Worktree: /tmp/vd-keyboard, branch
+`feat/locale-onscreen-keyboard`.
