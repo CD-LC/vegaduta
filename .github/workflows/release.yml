@@ -136,6 +136,45 @@ jobs:
             || { echo "::error::CHANGELOG.md has no '## [${VERSION}]' section - move the Unreleased entries under it first"; exit 1; }
           echo "tag gates passed: ${SHA} is on main, CHANGELOG has a ${VERSION} section"
 
+  boot-check:
+    name: Boot check (packaged jars) - blocking for a release
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      # Release requirement (docs/maintainers/v1.0.0-definition-of-done.md): the packaged api,
+      # migrate-only, jobs and worker jars must boot on the tagged commit. On pull requests the same
+      # script is advisory in ci.yml (continue-on-error) until it has been green on main; here it is
+      # blocking, so a tag whose jars do not boot never reaches the build matrix.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Build the Postgres image (pgvector + Apache AGE)
+        run: |
+          base="$(sed -n 's/^ARG BASE_IMAGE=//p' deploy/postgres/Dockerfile)"
+          case "$base" in *@sha256:*) ;; *) echo "::error::BASE_IMAGE is not digest-pinned: $base"; exit 1 ;; esac
+          ok=
+          for reg in public.ecr.aws/docker/library docker.io/library; do
+            for attempt in 1 2; do
+              if docker build --build-arg BASE_IMAGE="$reg/$base" -t vegaduta-postgres:ci deploy/postgres; then
+                ok=1; break 2
+              fi
+              echo "::warning::postgres base pull via $reg failed (attempt $attempt); retrying"
+              sleep 20
+            done
+          done
+          [ -n "$ok" ] || { echo "::error::postgres base image unreachable on every registry"; exit 1; }
+      - name: Boot check (api, migrate-only, jobs, worker; Postgres + Redis)
+        env:
+          BOOTCHECK_PG_IMAGE: vegaduta-postgres:ci
+        run: bash scripts/ci/boot-check.sh --online --keep-log
+
   verify:
     name: Verify CI passed on the tagged commit
     needs: prepare
@@ -192,7 +231,7 @@ jobs:
 
   build:
     name: Build ${{ matrix.image }} (${{ matrix.arch }})
-    needs: [prepare, verify]
+    needs: [prepare, verify, boot-check]
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     timeout-minutes: 120
     permissions:

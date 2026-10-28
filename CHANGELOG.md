@@ -39,6 +39,36 @@ Release notes on GitHub are generated from the section for each version.
   and the parallel join is bounded.
 - **Untrusted-content taint now covers auto-injected memory recall and the workflow `knowledge` node.** A non-empty recalled-facts block injected into the prompt marks the turn tainted (source `memory_recall`; sinks need approval in enforce mode, recorded in observe mode) via `TurnTaintSeeds`, bound to the turn's taint key when tools are resolved. The `knowledge` workflow node wraps retrieved chunks in the untrusted-data spotlight with numbered source citations, skips with a clear result on an invalid `collectionId`, and clamps `topK` to 1..20.
 - **Tenant isolation hardening.** A JWT or API-key tenant claim naming the `public` (or a reserved) schema is rejected with 403 instead of running tenant queries in the legacy schema (webhook paths that set `public` deliberately are unchanged); the tenant status guard now fails closed on a schema-check SQL error (`app.tenant.status-fail-open-on-schema-check-error=true` restores the old behavior) and rejects claims the schema-name sanitizer would rewrite; tenants whose startup schema migration failed get 403 until a background retry (`app.tenancy.migrate-retry-interval`) migrates them; a non-Keycloak JWT issuer with neither an azp allowlist nor a required audience now fails startup (`app.security.jwt.allow-unrestricted-audience=true` opts out).
+- **Workflow editor hint** now says a workflow needs "at least one" Trigger node (it said "exactly
+  one"; the validator allows several). Control-UI translation keys were back-filled with English
+  fallbacks in every locale file.
+- **Auto-injected retrieval and inbound channel turns now propagate taint to tool gates.**
+  Previously, only explicit `UNTRUSTED_EXTERNAL` tool calls (such as `fetch_web_page` or
+  `search_knowledge_base`) marked a turn as tainted. Auto-injected context bypassed the taint gate:
+  - `ChatPromptAssembler` now marks the turn tainted with `recall_related_facts` whenever
+    long-term memory recall injects stored (private or tenant-shared) facts into the prompt,
+    while owner-authored static blocks (persona/profile/notes) remain clean.
+  - The workflow `knowledge` node now wraps retrieved context with `Spotlight.wrap` delimiters
+    and per-chunk source citations rather than raw string concatenation. Downstream agent nodes
+    detecting spotlight-delimited input are marked tainted with `untrusted_input`.
+  - Inbound non-owner entry points across omnichannel adapters (WhatsApp, Telegram, Twilio,
+    Signal, Matrix, Email, Discord, Slack, Teams, X, MCP, and Studio App) now mark `TurnContext.taint()`
+    with `inbound:<channel>`.
+  - `TurnContext` now carries its own `TurnTaint` record, and `AgentToolProvider` binds it to
+    the turn's step counter during tool resolution, ensuring tool guards and taint gates evaluate
+    sink permissions against auto-injected and inbound taint.
+- **Workflow retries no longer duplicate irreversible side effects.** The
+  legacy retry path only excluded `output` nodes, so `bulk_email`, `tool`,
+  `crm_lead`, `device_control`, `media`, sub-workflow and non-GET `http`
+  nodes were each attempted up to three times by default — a retry could
+  double a send, lead or device action when the first attempt had already
+  reached the wire. `RetryPolicy` now shares `NodeErrorStrategy`'s
+  irreversible-type list (including on the Temporal engine, which dispatches
+  those nodes on a single-attempt activity stub), GET/HEAD/OPTIONS calls
+  stay retryable, and a node can still opt back in with
+  `"retryUnsafe": true`. Tool node calls are additionally claimed through
+  the output dedup guard keyed on (run, node, loop index + resolved input),
+  so a replayed attempt is suppressed instead of re-invoking the tool.
 
 - **Python Agent SDK: audit-chain ordering, truncation anchors and approval
   defaults.** `evidence_bundle` (and `verify(sort_by_seq=True)`) verify in

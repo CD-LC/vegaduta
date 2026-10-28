@@ -197,7 +197,21 @@
     "newToVegaduta": "¿Nuevo en VegaDūta?",
     "startFree": "Comienza gratis",
     "tryWithoutAccount": "o pruébalo sin una cuenta",
-    "trustLine": "Inicio de sesión seguro · tus datos permanecen en tu espacio de trabajo y región"
+    "trustLine": "Inicio de sesión seguro · tus datos permanecen en tu espacio de trabajo y región",
+    "local": {
+      "signin": {
+        "forgotPassword": "Forgot password?"
+      },
+      "forgot": {
+        "intro": "Request a reset link. It is saved to a file on the computer running this install - that is how it knows it is really you, since anyone can reach this page.",
+        "label": "Account e-mail",
+        "hint": "On a personal install this is usually the one account, so you can leave it blank.",
+        "button": "Request reset link",
+        "sending": "Requesting…",
+        "done": "If the account exists, a reset link was saved on this machine. Run scripts/vegaduta reset-password to see it, then open the link it prints and choose a new password.",
+        "doneWindows": "If the account exists, a reset link was saved on this machine. Run .\\scripts\\vegaduta.ps1 reset-password to see it, then open the link it prints and choose a new password."
+      }
+    }
   },
   "landingRoot": {
     "srTitle": "VegaDūta - una inteligencia que actúa",
@@ -1663,7 +1677,9 @@
     "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn.",
     "knowledgeWriteLabel": "Allow writing to the knowledge base (add_to_knowledge_base tool)",
     "knowledgeWriteLoadError": "Could not load this agent's knowledge-write settings.",
-    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected."
+    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected.",
+    "readOnlyRepoHint": "Checked repositories restrict which repos this agent’s code tools may search and analyse. Leave all unchecked to allow every registered repository.",
+    "codeIntelToolsHint": "Per-tool on/off for search, graph navigation and the analysis suite (repo map, references, implementations, call paths, dead code, API surface, hotspots) lives in the Tools section."
   },
   "workflowRunDetailPage": {
     "eyebrow": "Flujos de trabajo / Historial de ejecuciones",
@@ -1770,7 +1786,7 @@
     "adminOnlyEnforcedHint": "Aplicado por el servidor, no solo en esta pantalla. Cualquier otro que intente aprobar o rechazar esta solicitud (incluso vía la API) será rechazado.",
     "requireApprovalLabel": "Requerir aprobación humana antes de que este nodo se ejecute",
     "deleteNode": "Eliminar nodo",
-    "triggerRequiredHint": "Cada flujo de trabajo necesita exactamente un nodo de Disparador.",
+    "triggerRequiredHint": "Cada flujo de trabajo necesita al menos un nodo de Disparador.",
     "toolNodeAgentLabel": "Agente (cuyo acceso a herramientas reutiliza esta llamada)",
     "toolLabel": "Herramienta",
     "loadingToolsPlaceholder": "Cargando herramientas disponibles…",
@@ -5819,7 +5835,11 @@
       "builtinDetail": "El modelo propio de tu navegador. Chrome 127+ lo descarga y actualiza por sí mismo; esta app no almacena nada.",
       "motionDetail": "Convierte imágenes fijas en clips con movimiento fluido. Se descarga automáticamente la primera vez que usas Motion+ en Clip Studio.",
       "motionNotPublished": "Aún no publicado — próximamente",
-      "motionOpenClips": "Abrir Clip Studio"
+      "motionOpenClips": "Abrir Clip Studio",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "Instalados en este dispositivo",
@@ -14664,7 +14684,8 @@
     "closePanel": "Close the panel",
     "conversationLabel": "Conversation",
     "copiedReply": "Copied",
-    "jumpToLatest": "Jump to the latest message"
+    "jumpToLatest": "Jump to the latest message",
+    "learnedKind_DESKTOP_RECIPE": "Desktop runs to save ({n})"
   },
   "agentLab": {
     "wtLabel": "Ejecutar con las herramientas del agente",
@@ -15773,6 +15794,7 @@
     "monitorPanelHint": "You are watching the agent drive this machine in real time - each click and keystroke lands as you see it. Collapse to pause the stream.",
     "screenDockTitle": "Screen",
     "screenDockOpen": "Open live screen",
-    "screenDockClose": "Close live screen"
+    "screenDockClose": "Close live screen",
+    "screenDockPopOut": "Pop out - keeps watching the agent while this tab is minimized"
   }
 }

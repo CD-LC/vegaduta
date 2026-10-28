@@ -197,7 +197,21 @@
     "newToVegaduta": "初次使用 VegaDūta？",
     "startFree": "免费开始",
     "tryWithoutAccount": "或免账户试用",
-    "trustLine": "安全登录 · 您的数据保留在您的工作空间和区域内"
+    "trustLine": "安全登录 · 您的数据保留在您的工作空间和区域内",
+    "local": {
+      "signin": {
+        "forgotPassword": "Forgot password?"
+      },
+      "forgot": {
+        "intro": "Request a reset link. It is saved to a file on the computer running this install - that is how it knows it is really you, since anyone can reach this page.",
+        "label": "Account e-mail",
+        "hint": "On a personal install this is usually the one account, so you can leave it blank.",
+        "button": "Request reset link",
+        "sending": "Requesting…",
+        "done": "If the account exists, a reset link was saved on this machine. Run scripts/vegaduta reset-password to see it, then open the link it prints and choose a new password.",
+        "doneWindows": "If the account exists, a reset link was saved on this machine. Run .\\scripts\\vegaduta.ps1 reset-password to see it, then open the link it prints and choose a new password."
+      }
+    }
   },
   "landingRoot": {
     "srTitle": "VegaDūta - 行动的智能",
@@ -1684,7 +1698,9 @@
     "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn.",
     "knowledgeWriteLabel": "Allow writing to the knowledge base (add_to_knowledge_base tool)",
     "knowledgeWriteLoadError": "Could not load this agent's knowledge-write settings.",
-    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected."
+    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected.",
+    "readOnlyRepoHint": "Checked repositories restrict which repos this agent’s code tools may search and analyse. Leave all unchecked to allow every registered repository.",
+    "codeIntelToolsHint": "Per-tool on/off for search, graph navigation and the analysis suite (repo map, references, implementations, call paths, dead code, API surface, hotspots) lives in the Tools section."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "选择一个节点进行配置，或从左侧面板拖入一个新节点。",
@@ -1770,7 +1786,7 @@
     "adminOnlyEnforcedHint": "由服务器强制执行，不仅限于此屏幕 - 其他任何人（包括直接通过 API）尝试批准或拒绝此请求都将被拒绝。",
     "requireApprovalLabel": "运行此节点前需要人工批准",
     "deleteNode": "删除节点",
-    "triggerRequiredHint": "每个工作流都需要且仅需要一个触发器节点。",
+    "triggerRequiredHint": "每个工作流至少需要一个触发器节点。",
     "toolNodeAgentLabel": "代理（此调用将复用其工具访问权限）",
     "toolLabel": "工具",
     "loadingToolsPlaceholder": "正在加载可用工具…",
@@ -5999,7 +6015,11 @@
       "builtinDetail": "您浏览器的自有模型。Chrome 127+ 会自行下载和更新；本应用不存储任何内容。",
       "motionDetail": "将静态图像转换为平滑的动态片段。首次在 Clip Studio 中使用 Motion+ 时会自动下载。",
       "motionNotPublished": "尚未发布 — 即将推出",
-      "motionOpenClips": "打开 Clip Studio"
+      "motionOpenClips": "打开 Clip Studio",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "已在此设备上安装",
@@ -15176,7 +15196,8 @@
     "closePanel": "Close the panel",
     "conversationLabel": "Conversation",
     "copiedReply": "Copied",
-    "jumpToLatest": "Jump to the latest message"
+    "jumpToLatest": "Jump to the latest message",
+    "learnedKind_DESKTOP_RECIPE": "Desktop runs to save ({n})"
   },
   "agentLab": {
     "wtLabel": "使用智能体的工具运行",
@@ -16285,6 +16306,7 @@
     "monitorPanelHint": "You are watching the agent drive this machine in real time - each click and keystroke lands as you see it. Collapse to pause the stream.",
     "screenDockTitle": "Screen",
     "screenDockOpen": "Open live screen",
-    "screenDockClose": "Close live screen"
+    "screenDockClose": "Close live screen",
+    "screenDockPopOut": "Pop out - keeps watching the agent while this tab is minimized"
   }
 }

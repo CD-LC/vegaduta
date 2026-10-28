@@ -194,7 +194,21 @@
     "newToVegaduta": "VegaDūta ᱨᱮ ᱱᱟᱣᱟ ᱜᱮᱭᱟᱢ?",
     "startFree": "ᱯᱷᱨᱤ ᱛᱮ ᱮᱛᱚᱦᱚᱵ ᱢᱮ",
     "tryWithoutAccount": "ᱥᱮ ᱠᱷᱟᱛᱟ ᱵᱮᱜᱚᱨ ᱪᱮᱥᱴᱟᱭ ᱢᱮ",
-    "trustLine": "ᱥᱩᱨᱟᱹᱠᱷᱤᱛ ᱥᱟᱭᱤᱱᱼᱤᱱ · ᱟᱢᱟᱜᱽ ᱰᱟᱴᱟ ᱟᱢᱟᱜᱽ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱶ ᱟᱨ ᱮᱞᱟᱠᱟ ᱨᱮᱜᱮ ᱛᱟᱦᱮᱱᱟ"
+    "trustLine": "ᱥᱩᱨᱟᱹᱠᱷᱤᱛ ᱥᱟᱭᱤᱱᱼᱤᱱ · ᱟᱢᱟᱜᱽ ᱰᱟᱴᱟ ᱟᱢᱟᱜᱽ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱶ ᱟᱨ ᱮᱞᱟᱠᱟ ᱨᱮᱜᱮ ᱛᱟᱦᱮᱱᱟ",
+    "local": {
+      "signin": {
+        "forgotPassword": "Forgot password?"
+      },
+      "forgot": {
+        "intro": "Request a reset link. It is saved to a file on the computer running this install - that is how it knows it is really you, since anyone can reach this page.",
+        "label": "Account e-mail",
+        "hint": "On a personal install this is usually the one account, so you can leave it blank.",
+        "button": "Request reset link",
+        "sending": "Requesting…",
+        "done": "If the account exists, a reset link was saved on this machine. Run scripts/vegaduta reset-password to see it, then open the link it prints and choose a new password.",
+        "doneWindows": "If the account exists, a reset link was saved on this machine. Run .\\scripts\\vegaduta.ps1 reset-password to see it, then open the link it prints and choose a new password."
+      }
+    }
   },
   "landingRoot": {
     "srTitle": "VegaDūta - ᱢᱤᱫ ᱠᱟᱹᱢᱤᱭᱟᱱ ᱵᱩᱫᱷᱤ",
@@ -1542,7 +1556,9 @@
     "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn.",
     "knowledgeWriteLabel": "Allow writing to the knowledge base (add_to_knowledge_base tool)",
     "knowledgeWriteLoadError": "Could not load this agent's knowledge-write settings.",
-    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected."
+    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected.",
+    "readOnlyRepoHint": "Checked repositories restrict which repos this agent’s code tools may search and analyse. Leave all unchecked to allow every registered repository.",
+    "codeIntelToolsHint": "Per-tool on/off for search, graph navigation and the analysis suite (repo map, references, implementations, call paths, dead code, API surface, hotspots) lives in the Tools section."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "ᱱᱚᱰ ᱥᱮᱞᱮᱠᱴ ᱢᱮ ᱠᱚᱱᱯᱷᱤᱜᱟᱹᱨ ᱞᱟᱹᱜᱤᱫ, ᱥᱮ ᱞᱮᱸᱜᱟ ᱥᱮᱡᱟᱜ ᱯᱮᱞᱮᱴ ᱠᱷᱚᱱ ᱱᱟᱣᱟ ᱢᱤᱫᱴᱟᱝ ᱚᱨ ᱟᱹᱜᱩᱭ ᱢᱮ᱾",
@@ -5775,7 +5791,11 @@
       "builtinDetail": "ᱟᱢᱟᱜ ᱵᱨᱟᱣᱡᱟᱹᱨ ᱨᱮᱱᱟᱜ ᱱᱤᱡᱮᱨᱟᱜ ᱢᱚᱰᱮᱞ᱾ ᱠᱨᱚᱢ ᱑᱒᱗+ ᱱᱤᱡᱮᱛᱮᱭ ᱰᱟᱣᱩᱱᱞᱚᱰ ᱟᱨ ᱟᱯᱰᱮᱴᱟ; ᱱᱚᱣᱟ ᱮᱯ ᱨᱮ ᱪᱮᱫ ᱦᱚᱸ ᱵᱟᱝ ᱡᱚᱜᱟᱣ ᱛᱟᱦᱮᱱᱟ᱾",
       "motionDetail": "ᱛᱷᱤᱨ ᱪᱤᱛᱟᱹᱨ ᱠᱚ ᱥᱩᱢᱩᱫᱽ ᱢᱚᱥᱚᱱ ᱠᱞᱤᱯ ᱨᱮᱭ ᱵᱚᱫᱚᱞᱟ᱾ ᱠᱞᱤᱯ ᱤᱥᱴᱩᱰᱤᱭᱳ ᱨᱮ ᱯᱩᱭᱞᱩ ᱫᱷᱟᱣ ᱢᱚᱥᱚᱱ+ ᱵᱮᱵᱷᱟᱨ ᱨᱮ ᱟᱡᱽᱛᱮᱜᱮ ᱰᱟᱣᱩᱱᱞᱚᱰᱚᱜᱼᱟ᱾",
       "motionNotPublished": "ᱱᱤᱛ ᱫᱷᱟᱹᱵᱤᱡ ᱵᱟᱝ ᱩᱪᱷᱟᱹᱱ ᱟᱠᱟᱱᱟ — ᱩᱥᱟᱹᱨᱟ ᱦᱤᱡᱩᱜ ᱠᱟᱱᱟ",
-      "motionOpenClips": "ᱠᱞᱤᱯ ᱤᱥᱴᱩᱰᱤᱭᱳ ᱡᱷᱤᱡᱽ ᱢᱮ"
+      "motionOpenClips": "ᱠᱞᱤᱯ ᱤᱥᱴᱩᱰᱤᱭᱳ ᱡᱷᱤᱡᱽ ᱢᱮ",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ᱱᱚᱣᱟ ᱰᱤᱵᱷᱟᱭᱤᱥ ᱨᱮ ᱤᱱᱥᱴᱚᱞ ᱟᱠᱟᱱᱟ",
@@ -14686,7 +14706,8 @@
     "closePanel": "Close the panel",
     "conversationLabel": "Conversation",
     "copiedReply": "Copied",
-    "jumpToLatest": "Jump to the latest message"
+    "jumpToLatest": "Jump to the latest message",
+    "learnedKind_DESKTOP_RECIPE": "Desktop runs to save ({n})"
   },
   "agentLab": {
     "wtLabel": "ᱮᱡᱮᱱᱴ ᱟᱜ ᱴᱩᱞ ᱠᱚ ᱥᱟᱶ ᱪᱟᱞᱟᱣ ᱢᱮ",
@@ -15795,6 +15816,7 @@
     "monitorPanelHint": "You are watching the agent drive this machine in real time - each click and keystroke lands as you see it. Collapse to pause the stream.",
     "screenDockTitle": "Screen",
     "screenDockOpen": "Open live screen",
-    "screenDockClose": "Close live screen"
+    "screenDockClose": "Close live screen",
+    "screenDockPopOut": "Pop out - keeps watching the agent while this tab is minimized"
   }
 }

@@ -1,0 +1,4 @@
+{
+  "description": "Line coverage per core module (percent), refreshed by scripts/ci/coverage-ratchet.sh --update. CI fails a module that drops more than 1 point. Empty until seeded from a runner (Maven cannot run in the authoring sandbox).",
+  "modules": {}
+}

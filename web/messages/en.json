@@ -3630,7 +3630,7 @@
     "structuredOutputToolCalls": "Tool calls",
     "structuredOutputMetadata": "Metadata",
     "deleteNode": "Delete node",
-    "triggerRequiredHint": "Every workflow needs exactly one Trigger node.",
+    "triggerRequiredHint": "Every workflow needs at least one Trigger node.",
     "triggerChannelLabel": "Trigger channel",
     "webhookDefaultOption": "Webhook (default)",
     "inboundWhatsappOption": "Inbound WhatsApp message",

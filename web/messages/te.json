@@ -296,7 +296,21 @@
     "newToVegaduta": "VegaDūtaకు కొత్తా?",
     "startFree": "ఉచితంగా ప్రారంభించండి",
     "tryWithoutAccount": "లేదా ఖాతా లేకుండా ప్రయత్నించండి",
-    "trustLine": "సురక్షిత సైన్-ఇన్ · మీ డేటా మీ వర్క్‌స్పేస్ మరియు ప్రాంతంలోనే ఉంటుంది"
+    "trustLine": "సురక్షిత సైన్-ఇన్ · మీ డేటా మీ వర్క్‌స్పేస్ మరియు ప్రాంతంలోనే ఉంటుంది",
+    "local": {
+      "signin": {
+        "forgotPassword": "Forgot password?"
+      },
+      "forgot": {
+        "intro": "Request a reset link. It is saved to a file on the computer running this install - that is how it knows it is really you, since anyone can reach this page.",
+        "label": "Account e-mail",
+        "hint": "On a personal install this is usually the one account, so you can leave it blank.",
+        "button": "Request reset link",
+        "sending": "Requesting…",
+        "done": "If the account exists, a reset link was saved on this machine. Run scripts/vegaduta reset-password to see it, then open the link it prints and choose a new password.",
+        "doneWindows": "If the account exists, a reset link was saved on this machine. Run .\\scripts\\vegaduta.ps1 reset-password to see it, then open the link it prints and choose a new password."
+      }
+    }
   },
   "landingRoot": {
     "srTitle": "VegaDūta - పనిచేసే ఒక మేధస్సు",
@@ -1684,7 +1698,9 @@
     "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn.",
     "knowledgeWriteLabel": "Allow writing to the knowledge base (add_to_knowledge_base tool)",
     "knowledgeWriteLoadError": "Could not load this agent's knowledge-write settings.",
-    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected."
+    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected.",
+    "readOnlyRepoHint": "Checked repositories restrict which repos this agent’s code tools may search and analyse. Leave all unchecked to allow every registered repository.",
+    "codeIntelToolsHint": "Per-tool on/off for search, graph navigation and the analysis suite (repo map, references, implementations, call paths, dead code, API surface, hotspots) lives in the Tools section."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "కాన్ఫిగర్ చేయడానికి ఒక నోడ్‌ను ఎంచుకోండి, లేదా ఎడమ వైపున ఉన్న పాలెట్ నుండి కొత్తదాన్ని లాగండి.",
@@ -5999,7 +6015,11 @@
       "builtinDetail": "మీ బ్రౌజర్ సొంత మోడల్. Chrome 127+ దానంతట అదే డౌన్‌లోడ్ చేసి, అప్‌డేట్ చేస్తుంది; ఈ యాప్ ద్వారా ఏదీ నిల్వ చేయబడదు.",
       "motionDetail": "నిశ్చల చిత్రాలను సున్నితమైన మోషన్ క్లిప్‌లుగా మారుస్తుంది. మీరు క్లిప్ స్టూడియోలో మొదటిసారి Motion+ ఉపయోగించినప్పుడు ఆటోమేటిక్‌గా డౌన్‌లోడ్ అవుతుంది.",
       "motionNotPublished": "ఇంకా ప్రచురించబడలేదు — త్వరలో వస్తుంది",
-      "motionOpenClips": "క్లిప్ స్టూడియో తెరవండి"
+      "motionOpenClips": "క్లిప్ స్టూడియో తెరవండి",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ఈ పరికరంలో ఇన్‌స్టాల్ చేయబడినవి",
@@ -15175,7 +15195,8 @@
     "closePanel": "Close the panel",
     "conversationLabel": "Conversation",
     "copiedReply": "Copied",
-    "jumpToLatest": "Jump to the latest message"
+    "jumpToLatest": "Jump to the latest message",
+    "learnedKind_DESKTOP_RECIPE": "Desktop runs to save ({n})"
   },
   "agentLab": {
     "wtLabel": "ఏజెంట్ టూల్స్‌తో అమలు చేయండి",
@@ -16284,6 +16305,7 @@
     "monitorPanelHint": "You are watching the agent drive this machine in real time - each click and keystroke lands as you see it. Collapse to pause the stream.",
     "screenDockTitle": "Screen",
     "screenDockOpen": "Open live screen",
-    "screenDockClose": "Close live screen"
+    "screenDockClose": "Close live screen",
+    "screenDockPopOut": "Pop out - keeps watching the agent while this tab is minimized"
   }
 }

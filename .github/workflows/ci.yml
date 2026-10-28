@@ -266,13 +266,23 @@ jobs:
       # same Postgres image and Redis, waits for readiness and probes api routes that must answer
       # 401. The jobs and worker shapes scan no controllers and failed to start in v0.1.9 while
       # the api booted. It reuses the jars `verify` just built.
-      # Advisory for now: it has run locally but not yet on a runner. Remove continue-on-error
-      # once it has been green on main (audit item 1, docs/architecture/STRUCTURAL-AUDIT-2026-10-14.md).
+      # Advisory on pull requests for now: it has run locally but not yet on a runner. It is
+      # BLOCKING for a release (release.yml job `boot-check`).
+      # TODO(remove continue-on-error): drop it after 5 consecutive green runs of this step on
+      # main (audit item 1, docs/architecture/STRUCTURAL-AUDIT-2026-10-14.md); tracked in
+      # docs/maintainers/v1.0.0-definition-of-done.md ("Boot check on PRs").
       - name: "Boot check (packaged jars: api, migrate-only, jobs, worker; Postgres + Redis)"
         continue-on-error: true
         env:
           BOOTCHECK_PG_IMAGE: vegaduta-postgres:ci
         run: bash scripts/ci/boot-check.sh --skip-build --keep-log
+
+      # Advisory: fails when a module's line coverage drops more than 1 point below
+      # scripts/ci/coverage-baseline.json. No-op while the baseline has no modules; refresh it
+      # with `bash scripts/ci/coverage-ratchet.sh --update` on the core-coverage artifact.
+      - name: Coverage ratchet (advisory)
+        continue-on-error: true
+        run: bash scripts/ci/coverage-ratchet.sh
 
       - name: Upload coverage report
         if: success() || failure()
