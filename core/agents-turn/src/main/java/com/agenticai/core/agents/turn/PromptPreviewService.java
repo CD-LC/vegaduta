@@ -34,8 +34,8 @@ import org.springframework.stereotype.Service;
  * <p>It shares the assembly with real turns through {@link ChatSystemPromptComposer#compose}: the
  * same code decides which directive applies to which tool list and in which order, so the two
  * cannot drift apart. What differs is only where the inputs come from; the {@code notes} of a
- * result list every input the preview cannot know (hook notes, the live model's small-model
- * status, RL arms).
+ * result list every input the preview cannot know (hook notes, the live model's small-model status,
+ * RL arms).
  */
 @Service
 public class PromptPreviewService {
@@ -46,7 +46,10 @@ public class PromptPreviewService {
     public record Request(
             String message, String sessionId, Boolean smallModel, Boolean includeMemoryRecall) {}
 
-    /** One piece of the prompt with its provenance. {@code key} is null for text that is not a registry key. */
+    /**
+     * One piece of the prompt with its provenance. {@code key} is null for text that is not a
+     * registry key.
+     */
     public record BlockView(
             String message,
             String id,
@@ -58,7 +61,8 @@ public class PromptPreviewService {
             int estimatedTokens,
             String text) {}
 
-    public record ToolView(String name, String description, String inputSchema, int estimatedTokens) {}
+    public record ToolView(
+            String name, String description, String inputSchema, int estimatedTokens) {}
 
     public record Preview(
             UUID agentId,
@@ -90,22 +94,34 @@ public class PromptPreviewService {
         Request req = request == null ? new Request(null, null, null, null) : request;
         Agent live = svc.agentService.requireAccess(agentId, PermissionLevel.EDITOR);
         Agent agent = effectiveAgent(agentId, live);
-        String message = req.message() == null || req.message().isBlank() ? "preview" : req.message();
-        String subjectKey = TenantContext.current().map(TenantContext::getSubject).orElse("preview");
-        String sessionId = req.sessionId() == null || req.sessionId().isBlank() ? null : req.sessionId();
+        String message =
+                req.message() == null || req.message().isBlank() ? "preview" : req.message();
+        String subjectKey =
+                TenantContext.current().map(TenantContext::getSubject).orElse("preview");
+        String sessionId =
+                req.sessionId() == null || req.sessionId().isBlank() ? null : req.sessionId();
         boolean smallModel = Boolean.TRUE.equals(req.smallModel());
         List<String> notes = new ArrayList<>();
 
         // The tool list as a turn resolves it (same resolver, same trimming); a FAST depth only
-        // because the RIGOROUS per-tool verifier needs a live model client, which a preview has none of.
+        // because the RIGOROUS per-tool verifier needs a live model client, which a preview has
+        // none of.
         List<ToolCallback> tools =
                 ResolvedToolList.copyOf(
                         svc.agentToolProvider.resolveToolsFor(
-                                agentId, sessionId, subjectKey, message, null, ReasoningDepth.FAST));
+                                agentId,
+                                sessionId,
+                                subjectKey,
+                                message,
+                                null,
+                                ReasoningDepth.FAST));
         boolean anyMcp =
                 tools instanceof ResolvedToolList resolved && resolved.anyMcpToolsOffered() != null
                         ? resolved.anyMcpToolsOffered()
-                        : svc.agentToolProvider.anyMcpToolsOfferedFor(agentId, sessionId, message, null);
+                        : svc.agentToolProvider.anyMcpToolsOfferedFor(
+                                agentId, sessionId, message, null);
+        Boolean scratchpadOffered =
+                tools instanceof ResolvedToolList resolved ? resolved.scratchpadOffered() : null;
         if (smallModel) {
             tools = AgentToolSelection.capForSmallModel(tools, message, Set.of(), svc.smallModel);
         }
@@ -121,23 +137,31 @@ public class PromptPreviewService {
             List<ChatTurn> history = svc.sessionMemoryService.getHistory(memorySessionId);
             hasToolRecord = history.stream().anyMatch(t -> t.tools() != null);
         } else {
-            notes.add("No sessionId: the conversation history is not replayed, so the tool-record note is absent.");
+            notes.add(
+                    "No sessionId: the conversation history is not replayed, so the tool-record note is absent.");
         }
         String recalled = null;
         if (Boolean.TRUE.equals(req.includeMemoryRecall())) {
-            recalled = svc.memoryRecall.recallMemoryFactsBlock(agentId, subjectKey, message, AgentStepEventEmitter.disabled());
+            recalled =
+                    svc.memoryRecall.recallMemoryFactsBlock(
+                            agentId, subjectKey, message, AgentStepEventEmitter.disabled());
         } else {
-            notes.add("Recalled memory is not included (set includeMemoryRecall=true to read it as a turn would).");
+            notes.add(
+                    "Recalled memory is not included (set includeMemoryRecall=true to read it as a turn would).");
         }
-        notes.add("Hook context notes, RL prompt-variant and tool-subset arms, and the live model's small-model status"
-                + " are decided during a real turn and are not simulated; smallModel is taken from the request.");
-        notes.add("Tools are resolved at FAST depth (the RIGOROUS per-tool verifier needs a live model client).");
+        notes.add(
+                "Hook context notes, RL prompt-variant and tool-subset arms, and the live model's small-model status"
+                        + " are decided during a real turn and are not simulated; smallModel is taken from the request.");
+        notes.add(
+                "Tools are resolved at FAST depth (the RIGOROUS per-tool verifier needs a live model client).");
         if (agent != live) {
-            notes.add("The published version of the agent is shown (explicit-publish versioning is on).");
+            notes.add(
+                    "The published version of the agent is shown (explicit-publish versioning is on).");
         }
 
         LocalDate todayUtc = LocalDate.now(ZoneOffset.UTC);
-        ResolvedDirectives directives = svc.promptDirectiveSettings.forTurn(todayUtc, agentId).recording();
+        ResolvedDirectives directives =
+                svc.promptDirectiveSettings.forTurn(todayUtc, agentId).recording();
         ChatSystemPromptComposer.Composed composed =
                 ChatSystemPromptComposer.compose(
                         new ChatSystemPromptComposer.Input(
@@ -150,6 +174,7 @@ public class PromptPreviewService {
                                 svc.directiveComposer,
                                 tools,
                                 anyMcp,
+                                DirectiveKeys.scratchpadReachable(tools, scratchpadOffered),
                                 smallModel,
                                 ChatSystemPromptComposer.Switches.of(svc),
                                 agentId,
@@ -165,7 +190,9 @@ public class PromptPreviewService {
             ChatSystemPromptComposer.Composed composed,
             List<ToolCallback> tools,
             List<String> notes) {
-        PromptBudget budget = new PromptBudget(properties.getSystemPromptTokenBudget(), properties.getCharsPerToken());
+        PromptBudget budget =
+                new PromptBudget(
+                        properties.getSystemPromptTokenBudget(), properties.getCharsPerToken());
         List<BlockView> blocks = new ArrayList<>();
         for (ChatSystemPromptComposer.Block b : composed.systemBlocks()) {
             blocks.add(view("system", b, budget));
@@ -193,11 +220,14 @@ public class PromptPreviewService {
                 toolTokens,
                 budget.limit(),
                 budget.overBudget(),
-                "Token counts are a rule of thumb (characters / " + properties.getCharsPerToken() + "), not a tokenizer.",
+                "Token counts are a rule of thumb (characters / "
+                        + properties.getCharsPerToken()
+                        + "), not a tokenizer.",
                 List.copyOf(notes));
     }
 
-    private static BlockView view(String message, ChatSystemPromptComposer.Block b, PromptBudget budget) {
+    private static BlockView view(
+            String message, ChatSystemPromptComposer.Block b, PromptBudget budget) {
         ResolvedPrompt p = b.prompt();
         int tokens = budget.add(b.id(), b.text());
         if (p == null) {
@@ -210,7 +240,9 @@ public class PromptPreviewService {
                 p.key(),
                 p.source().name().toLowerCase(Locale.ROOT),
                 p.scope() == null ? null : p.scope().dbValue(),
-                p.source() == PromptSource.DEFAULT || p.source() == PromptSource.FALLBACK ? null : p.version(),
+                p.source() == PromptSource.DEFAULT || p.source() == PromptSource.FALLBACK
+                        ? null
+                        : p.version(),
                 p.hash(),
                 tokens,
                 b.text());
@@ -221,7 +253,8 @@ public class PromptPreviewService {
             var resolver = svc.versionResolver.getIfAvailable();
             return resolver == null ? live : resolver.effectiveAgent(live);
         } catch (RuntimeException e) {
-            log.warn("Version resolution failed for agent {} - previewing the live row", agentId, e);
+            log.warn(
+                    "Version resolution failed for agent {} - previewing the live row", agentId, e);
             return live;
         }
     }

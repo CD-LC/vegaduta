@@ -8,6 +8,27 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Agent scratchpad: discoverability, lifecycle and an operator view.** The
+  four `scratchpad_*` tools are deferred (behind `search_tools`), so a model
+  that never searched for tools never learned the notepad existed. A new
+  standing directive (`directive.scratchpad`, kill-switch
+  `app.chat.directives.scratchpad.enabled`) now tells the turn "you have a
+  private scratchpad - persist plans and large extractions there" on exactly
+  the turns where the pad is reachable: on the tool list outright, or offered
+  and deferred behind `search_tools`. `scratchpad_list` results are
+  size-aware - key, scope, `byte_size`, a bounded preview and `total_bytes`,
+  bodies still fetched via `scratchpad_read` - and `scratchpad_write` to a
+  full pad now evicts the least-recently-updated note instead of failing
+  (`app.tools.scratchpad.evict-oldest-on-cap`, default on; the tool result
+  names the dropped key). Session-pad notes age out lazily on writes
+  (`app.tools.scratchpad.session-note-ttl`, default `30d`; the agent
+  long-term pad never expires unless `agent-note-ttl` is set). Operators get a
+  read-only REST window, `GET /api/agents/{agentId}/scratchpad[?session=...]`
+  and `GET .../scratchpad/{key}` (VIEWER access; `session=agent` or omitted
+  reads the long-term pad).
+
 ### Fixed
 
 - **Auto-injected retrieval and inbound channel turns now propagate taint to tool gates.**
