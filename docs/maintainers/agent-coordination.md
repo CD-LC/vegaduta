@@ -581,3 +581,12 @@ crashes. Gate fixes: /.clusterfuzzlite added to dependabot docker dirs;
 build-only image (DS-0002/DS-0026) and the spring-webmvc 6.2.19 CVEs whose
 fix is the Spring 7 migration (#99) - the CVE exemption is also PR'd to
 main directly as #261 since it blocks every open PR's Trivy scan.
+
+### Trivy: spring-webmvc 6.2.x CVE exemptions (Devin, 2026-10-28)
+
+Newly published CVE-2026-47890 / CVE-2026-47884 (critical, spring-webmvc
+6.2.19) fail every PR's fs scan since the feed update - they are unrelated
+to any PR's diff. No 6.2.x fix exists; the only patched line is Spring
+Framework 7.0.9+ (the #99 migration). Scope-accepted to core/omnichannel +
+core/elevenlabs poms with the reason so the Trivy gate unblocks repo-wide;
+remove when #99 lands.
