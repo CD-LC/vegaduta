@@ -25,6 +25,19 @@ Release notes on GitHub are generated from the section for each version.
   - `TurnContext` now carries its own `TurnTaint` record, and `AgentToolProvider` binds it to
     the turn's step counter during tool resolution, ensuring tool guards and taint gates evaluate
     sink permissions against auto-injected and inbound taint.
+- **Workflow retries no longer duplicate irreversible side effects.** The
+  legacy retry path only excluded `output` nodes, so `bulk_email`, `tool`,
+  `crm_lead`, `device_control`, `media`, sub-workflow and non-GET `http`
+  nodes were each attempted up to three times by default — a retry could
+  double a send, lead or device action when the first attempt had already
+  reached the wire. `RetryPolicy` now shares `NodeErrorStrategy`'s
+  irreversible-type list (including on the Temporal engine, which dispatches
+  those nodes on a single-attempt activity stub), GET/HEAD/OPTIONS calls
+  stay retryable, and a node can still opt back in with
+  `"retryUnsafe": true`. Tool node calls are additionally claimed through
+  the output dedup guard keyed on (run, node, loop index + resolved input),
+  so a replayed attempt is suppressed instead of re-invoking the tool.
+
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
   capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on
@@ -33,6 +46,25 @@ Release notes on GitHub are generated from the section for each version.
   the read tools on a crowded or small-model turn and report "I can only search
   collections". The write/read pairing is now asserted in
   `AgentToolProviderCapTest`.
+- **Workflow approval gates are refused inside loop, fan-out, parallel and
+  sub-flow bodies.** A human-decision halt (approval node, human-input node,
+  or `requiresApproval` on a body node) parks the run with a resume envelope
+  carrying the node id and input but no iteration cursor, so a resumed loop
+  would run only the halted item and drop the rest, and sub-flow body nodes
+  are not in the main graph's node table at all. `WorkflowApprovalPlacement`
+  now rejects these placements at save time (the same rule
+  `WorkflowWaitPlacement` already applied to Wait nodes) until the resume
+  payload grows an iteration cursor.
+- **Parallel branches fail fast.** `ParallelBranchRunner` joined branches in
+  index order, so a failure in the last branch surfaced only after every
+  slower earlier branch had finished. It now joins in completion order and
+  returns on the first failure.
+- **Execution-engine copy is honest about the legacy engine.** The platform
+  pages and configuration docs previously claimed both engines read the same
+  per-workflow value. Retry counts and the step ceiling do apply on both, but
+  `stepTimeoutSeconds` is enforced only by the durable Temporal engine; the
+  default in-process engine is now labelled best-effort (no per-step timeout,
+  crashed runs are reaped `FAILED` rather than resumed).
 - **Release workflow gates the tag before spending a build matrix.** `prepare`
   now refuses tags on commits that are not ancestors of `main` and versions
   with no `CHANGELOG.md` section (the release notes generate from it), instead
