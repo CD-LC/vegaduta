@@ -366,6 +366,15 @@ on Windows that is `.\scripts\vegaduta.ps1 reset-password`.
     core: sign-in is refused until the fresh setup link it prints is used, and completing it signs every login out.
     Deleting the account row does not work; the tenant would still exist and the next first-run sign-up is refused as
     a duplicate.
+12. **Sign-in on a second browser or machine.** A PIN made in one browser does not work in another — that is the
+    design, not a bug (item 4: the digits only count together with this browser's device secret, so a stolen PIN is
+    useless elsewhere). On the other browser sign in with a password, a passkey or a recovery code, then **Account
+    security → add a PIN** there; each browser gets its own binding, up to 20. The same applies after clearing a
+    browser's site data — the binding is gone and the PIN has to be added again. A passkey that works in one browser
+    but is not offered in another is the same story at the authenticator layer: device-bound passkeys stay in the
+    browser profile that made them, while synced passkeys (iCloud Keychain, Google Password Manager, 1Password,
+    Bitwarden) roam with the account you are signed in to there. For one method that works everywhere use a synced
+    passkey or the password; the PIN is the deliberate trade of convenience for device binding.
 
 Not built: one-time codes from an authenticator app (TOTP), conditional-UI passkey autofill (the passkey button is
 pressed, never prompted on page load), a passkey sign-in for Lite and Full (Keycloak has its own), and account

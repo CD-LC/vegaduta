@@ -453,7 +453,8 @@
         "forgotPassword": "Forgot password?",
         "pinLabel": "PIN",
         "pinLabelDevice": "PIN for {device}",
-        "pinButton": "Unlock"
+        "pinButton": "Unlock",
+        "pinNotEnrolled": "A PIN only works in the browser it was set up in - this one isn't enrolled. Sign in another way, then add this browser's PIN in Account security."
       },
       "forgot": {
         "intro": "Request a reset link. It is saved to a file on the computer running this install - that is how it knows it is really you, since anyone can reach this page.",
