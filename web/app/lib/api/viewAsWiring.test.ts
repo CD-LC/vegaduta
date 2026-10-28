@@ -97,7 +97,8 @@ describe("toJson guard refusals", () => {
     const body = {
       timestamp: "2026-10-28T00:00:00Z",
       status: 403,
-      error: "Your account is not linked to an organization. Please sign out and back in; if this persists, contact support.",
+      error:
+        "Your account is not linked to an organization. Please sign out and back in; if this persists, contact support.",
     };
     await expect(toJson(jsonResponse(403, body))).rejects.toMatchObject({
       status: 403,
