@@ -631,3 +631,12 @@ class that hit #264) and re-dispatches ci/codeql/trivy on the new commit, since
 a `GITHUB_TOKEN` push suppresses `pull_request` runs. Docs updated in
 `docs/maintainers/dependabot-prs.md`. No overlap with claimed areas: new file
 only, no edits to `ci.yml`/`static-gates.yml`/`release.yml` or `scripts/ci`.
+### Security: public-schema refusal + fail-closed tenant guard (Devin, 2026-10-28)
+
+Completed an abandoned worktree's SEC-056 follow-up: TenantSchemaResolver no
+longer exempts the legacy 'public' schema from reserved-name refusal,
+TenantStatusGuardImpl rejects tenant_id=public before its schemaExists
+fallback and fails closed on SQL errors, and SecurityConfig requires at
+least one client-bound JWT check (azp or audience) on non-Keycloak issuers.
+Verified: tenancy+security 749 tests green, full reactor compiles.
+Worktree: /tmp/vd-taint-tenancy.
