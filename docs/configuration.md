@@ -369,6 +369,15 @@ and `PUBLIC_APP_URL`. On a server, none of these may be `localhost`. Core's
 CORS list is `app.web.allowed-origins` (`APP_WEB_ALLOWED_ORIGINS`), which must
 contain the console origins.
 
+**HTTPS is required for any non-localhost browser address** (`app.auth.mode=keycloak`).
+The realm marks its session cookies `Secure` (`sslRequired: external`), and
+browsers drop `Secure` cookies received over plain `http://<lan-ip-or-hostname>` —
+the sign-in form then re-appears after every submission and the session never
+sticks. Use `BASE_DOMAIN` (automatic Let's Encrypt) or terminate TLS in your own
+proxy and point `PUBLIC_APP_URL`/`PUBLIC_AUTH_URL` at the `https://` origins.
+Plain HTTP is only safe on `localhost`, which browsers treat as a trustworthy
+origin.
+
 | Property | Env | Default |
 |---|---|---|
 | `app.web.public-url` | `APP_WEB_PUBLIC_URL` (Compose sets it from `PUBLIC_APP_URL`; `PUBLIC_APP_URL` alone also works) | none. The one browser-facing origin of the tenant console that share links, e-mail links and OAuth console redirects are built on. Blank fails start-up under the `security` profile and logs a warning otherwise; there is no `localhost` default |

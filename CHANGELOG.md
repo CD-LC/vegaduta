@@ -105,6 +105,15 @@ Release notes on GitHub are generated from the section for each version.
   at all instead of polling an hour for a check that will never exist. New
   pre-flight for humans: `scripts/ci/tag-ready.sh <sha>` reports whether a
   commit is release-ready before tagging (`docs/maintainers/releasing.md`).
+- **A tenant-less sign-in no longer pops "sign out and back in" on every API
+  call.** Core's 403 "account not linked to an organization" is a normal
+  pre-onboarding state (OnboardingGate owns that UI), but it reached the
+  global error toast - and its advice loops forever for an account whose
+  organization was never created. `toJson` now classifies it as a guard state
+  (`tenant_missing`) that throws for callers without raising the popup. Also
+  documented that non-localhost browser access requires HTTPS: the realm
+  marks session cookies `Secure`, so plain-`http://` LAN/hostname installs
+  silently drop them and the sign-in form loops.
 
 ### Added
 
