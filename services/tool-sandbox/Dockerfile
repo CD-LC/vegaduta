@@ -72,8 +72,16 @@ RUN set -eux; \
 # binary is copied - there is no npm and no node_modules on purpose: tenant
 # tools are single-file programs with no package ecosystem (the identifier
 # policy denies `require`/`import` of anything at all).
+# Node 26+ links libatomic on arm64 (not needed on amd64); python:slim ships
+# libstdc++/libgcc but not libatomic, so install it for the copied binary.
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
-RUN /usr/local/bin/node --version
+RUN set -eux; \
+    if [ "$(uname -m)" = "aarch64" ]; then \
+        apt-get update; \
+        apt-get install -y --no-install-recommends libatomic1; \
+        rm -rf /var/lib/apt/lists/*; \
+    fi; \
+    /usr/local/bin/node --version
 
 # Two identities, and the split is the point:
 #   `sandbox` (uid 5000) owns nothing and is unused today, reserved for running
