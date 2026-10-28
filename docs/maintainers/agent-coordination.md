@@ -599,3 +599,12 @@ to any PR's diff. No 6.2.x fix exists; the only patched line is Spring
 Framework 7.0.9+ (the #99 migration). Scope-accepted to core/omnichannel +
 core/elevenlabs poms with the reason so the Trivy gate unblocks repo-wide;
 remove when #99 lands.
+
+### Dependabot lock autofix (Devin, 2026-10-28)
+
+New `.github/workflows/dependabot-autofix.yml` regenerates
+`services/*/requirements.lock` on Dependabot pip pull requests (the failure
+class that hit #264) and re-dispatches ci/codeql/trivy on the new commit, since
+a `GITHUB_TOKEN` push suppresses `pull_request` runs. Docs updated in
+`docs/maintainers/dependabot-prs.md`. No overlap with claimed areas: new file
+only, no edits to `ci.yml`/`static-gates.yml`/`release.yml` or `scripts/ci`.
