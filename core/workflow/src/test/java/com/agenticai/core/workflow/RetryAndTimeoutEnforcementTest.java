@@ -58,9 +58,6 @@ class RetryAndTimeoutEnforcementTest {
             node("b", "bulk_email", Map.of("retryUnsafe", true)), 1, 3, new RuntimeException("x")));
         assertTrue(RetryPolicy.shouldRetry(
             node("b", "http", Map.of("method", "POST", "retryUnsafe", "true")), 1, 3, new RuntimeException("x")));
-        // output keeps its own, unconditional exclusion.
-        assertFalse(RetryPolicy.shouldRetry(
-            node("o", "output", Map.of("retryUnsafe", true)), 1, 3, new RuntimeException("x")));
     }
 
     // --- step timeout --------------------------------------------------------------

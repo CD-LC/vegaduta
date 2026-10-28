@@ -72,6 +72,8 @@ public final class RetryPolicy {
             WorkflowNodeDto node, int attempt, int maxAttempts, RuntimeException failure) {
         return isRetryableNode(node)
                 && attempt < maxAttempts
-                && !(failure instanceof TenantLimitExceededException);
+                && !(failure instanceof TenantLimitExceededException)
+                // A timed-out attempt's worker may still be running; a retry would run the node twice.
+                && !(failure instanceof NodeAttemptExecutor.NodeStepTimeoutException);
     }
 }

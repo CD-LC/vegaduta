@@ -180,7 +180,7 @@ public class OrchestratorService {
         long triggerCount =
                 graph.nodes().stream().filter(n -> "trigger".equalsIgnoreCase(n.type())).count();
         if (triggerCount == 0) {
-            errors.add("The graph needs exactly one Trigger node to start a run.");
+            errors.add("The graph needs at least one Trigger node to start a run.");
         }
 
         WorkflowNodeConfigValidator.Flags flags =
