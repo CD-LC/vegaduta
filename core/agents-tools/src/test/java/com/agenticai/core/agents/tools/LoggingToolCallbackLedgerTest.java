@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.tools;
 
+import com.agenticai.core.guardrails.ToolResultMarker;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -98,7 +99,9 @@ class LoggingToolCallbackLedgerTest {
 
     @Test
     void aCallAGuardAnsweredInsteadIsRecordedAsNotRun() {
-        wrap(tool("delete_all", args -> "This tool call (delete_all) needs approval before it can run.")).call("{}");
+        wrap(tool("delete_all", args -> ToolResultMarker.mark(
+                "This tool call (delete_all) needs approval before it can run." + System.nanoTime(),
+                ToolResultMarker.Kind.BLOCKED))).call("{}");
 
         assertEquals(ToolLedger.Status.NOT_RUN, onlyEntry().status());
     }

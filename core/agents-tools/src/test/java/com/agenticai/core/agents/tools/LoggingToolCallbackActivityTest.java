@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.tools;
 
+import com.agenticai.core.guardrails.ToolResultMarker;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -128,7 +129,9 @@ class LoggingToolCallbackActivityTest {
     @Test
     void aCallAGuardAnsweredInsteadIsNotRunAndLeavesNothingBehind() {
         LoggingToolCallback refused = wrap(
-                tool("delete_all", args -> "This tool call (delete_all) needs approval before it can run."),
+                tool("delete_all", args -> ToolResultMarker.mark(
+                        "This tool call (delete_all) needs approval before it can run." + System.nanoTime(),
+                        ToolResultMarker.Kind.BLOCKED)),
                 journal(),
                 true);
         LoggingToolCallback overBudget = wrap(tool("get_order", args -> {

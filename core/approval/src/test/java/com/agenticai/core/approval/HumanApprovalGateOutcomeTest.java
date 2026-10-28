@@ -53,6 +53,7 @@ class HumanApprovalGateOutcomeTest {
         requestRepository = mock(ApprovalRequestRepository.class);
         registry = mock(ApprovalActionExecutorRegistry.class);
         recorder = mock(ApprovalRequestRecorder.class);
+        when(recorder.claimExecution(org.mockito.ArgumentMatchers.any())).thenReturn(true);
         port = mock(ApprovalOutcomePort.class);
         executor = mock(ApprovalActionExecutor.class);
         when(registry.find(ACTION)).thenReturn(Optional.of(executor));

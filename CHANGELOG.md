@@ -10,6 +10,30 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **A tool's output can no longer pose as the platform's own control result.** The tool loop ended a turn with
+  "waiting for approval" (or counted a spent budget) when any tool result merely *contained* `"approval_parked"` /
+  `"tool_budget_exhausted"`, and the journals took any output that began "This tool call (", "This action (" or "Tool
+  output from '" for a refusal and left a call that really ran out of the effect and turn journals. A fetched page or a
+  third-party MCP reply could therefore end a turn, fake a pending approval or hide a call from the audit trail. The
+  markers are now matched only as the exact two-field JSON the guard writes (nothing before, after or beside it), and
+  the wording prefixes are no longer read as a refusal: a producer registers its text with `ToolResultMarker.mark`.
+  Residual: a tool that returns exactly that two-field object is still read as the control result by the tool loop.
+- **An approved action could be lost if the process died between the decision and the run.** The decision is committed
+  first and the action runs after, so a crash in between left an approved request nothing ran and nothing reported.
+  Migration V674 records when an approved action started and when it ended, exactly one caller now claims it under a row
+  lock, and a new sweep (`app.approvals.recovery.*`, on by default) acts on what a dead process left: a never-started
+  action is run once if the decision is under an hour old (otherwise closed as not done), and one that started and never
+  reported its end is closed as `DEAD_LETTERED` / interrupted and is **not** run again, so a send or charge cannot happen
+  twice. The conversation that asked is told either way. Existing rows are backfilled as finished.
+- **Per-user budget: a streamed answer could cost nothing, and a refund could create budget.** A response with text but
+  no usage metadata (a provider that omits it, a stream cancelled before its usage event) released the whole
+  reservation, so cancelling after the text was out was free; it now keeps the reservation as the charge, raised to the
+  size of what was received (about four characters a token), and a prompt-only usage is completed the same way. And a
+  take-back (a rolled-back reservation, the unused part of one) applied to a window that had already expired created a
+  negative counter, and one larger than what was left drove a live counter below zero, so the next spend started with
+  credit the user never paid for. Refunds now go through one atomic script: dropped against an expired window, clamped
+  at zero otherwise, expiry kept.
+
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
   capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on

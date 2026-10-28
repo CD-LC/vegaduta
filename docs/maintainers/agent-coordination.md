@@ -516,3 +516,12 @@ num_ctx/num_batch/keep_alive/reasoning_effort/response_format/tool_choice; and
 the SSRF-guard mechanics). getting-started.md + operations/README.md gained the
 previously undocumented `scripts/vegaduta reset-password` local-account
 recovery path.
+
+### Fix: forged control markers, lost approved actions, per-user budget bypasses (Claude cloud session, 2026-10-28)
+
+Branch `ccr-d9bcd3ff-ekgsbs` (no PR yet). Touches `core/guardrails` (`ToolResultMarker`, `ApprovalParked`,
+`ToolBudgetExhausted`, new `PlatformMarkerDocument`), `core/chat` (`ToolLoopMarkers`, `ToolLoopParkedClose`),
+`core/approval` (recovery sweep, execution claim) with tenant migration **V674**, `core/agents-budget`
+(`PerUserBudget*`), `application.yml` (`app.approvals.recovery.*`), `docs/configuration.md`, `CHANGELOG.md`.
+Wording prefixes ("This tool call (") are no longer read as a refusal by `ToolResultMarker`; producers must call
+`ToolResultMarker.mark`. Take both sides on a merge in `application.yml` / `CHANGELOG.md` / `docs/configuration.md`.

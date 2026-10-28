@@ -133,8 +133,8 @@ class GuardedToolCallbackResultMarkerTest {
 
         assertEquals(lookalike, result);
         assertTrue(ToolResultMarker.kindOf(result).isEmpty(), "the guard did not answer, the tool did");
-        // The old wording prefix is still accepted for a producer that never registered itself.
-        assertTrue(ToolResultMarker.isPlatformAnswer(result));
+        // Neither is it taken for the platform's answer by the journals: a tool that printed refusal-like words really ran.
+        assertFalse(ToolResultMarker.isPlatformAnswer(result));
         assertFalse(ToolResultMarker.kindOf("{\"status\":\"sent\"}").isPresent());
     }
 }

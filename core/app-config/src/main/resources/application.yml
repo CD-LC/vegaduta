@@ -4196,6 +4196,19 @@ app:
       # No ${...} env override: a placeholder default cannot contain the braces.
       expired-reason: >-
         No one approved or rejected this request within {ttl}, so it expired and the action was NOT performed. The request can no longer be approved. If the action is still needed, ask for it again or take another route to the goal.
+    # Approved-but-never-executed recovery (ApprovalRecoveryJob, migration V674). A decision is committed before the
+    # action runs, so a process that died in between left an approved request nothing ran. A never-started action is
+    # run once if the decision is younger than max-recovery-age, else closed as not done; one that started and never
+    # reported its end is closed as interrupted and NOT re-run (a second send or charge is worse than a reported gap).
+    recovery:
+      enabled: ${APP_APPROVALS_RECOVERY_ENABLED:true}
+      sweep-interval: ${APP_APPROVALS_RECOVERY_SWEEP_INTERVAL:PT1M}
+      initial-delay: ${APP_APPROVALS_RECOVERY_INITIAL_DELAY:PT2M}
+      unstarted-grace: ${APP_APPROVALS_RECOVERY_UNSTARTED_GRACE:PT2M}
+      max-recovery-age: ${APP_APPROVALS_RECOVERY_MAX_AGE:PT1H}
+      # Longer than the slowest executor (a code-workspace run) or a live run is reported lost.
+      started-stale-after: ${APP_APPROVALS_RECOVERY_STARTED_STALE_AFTER:PT30M}
+      batch-size: ${APP_APPROVALS_RECOVERY_BATCH_SIZE:50}
     # What the platform does after a human decides one of an agent's gated tool calls: it CONTINUES the task
     # (core/agents-turn approval/ApprovalContinuation*; typed ApprovalContinuationProperties, whose code defaults are
     # approval/continuation.properties - keep the two in step, ApprovalContinuationDefaultsTest pins it). A chat

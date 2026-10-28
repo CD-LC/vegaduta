@@ -69,6 +69,14 @@ class PerUserBudgetServiceTest {
             mock(ObjectProvider.class));
     }
 
+    /** A take-back goes through the atomic refund script (never below zero, never into an expired window). */
+    @SuppressWarnings("unchecked")
+    private void verifyRefunded(long microCents) {
+        verify(redisTemplate).execute(
+            eq(PerUserBudgetCounters.REFUND_IF_LIVE), org.mockito.ArgumentMatchers.anyList(), eq(Long.toString(-microCents)));
+        verify(valueOps, never()).increment(anyString(), eq(-microCents));
+    }
+
     @Test
     void allowsWhenUnderCap() {
         when(valueOps.get(anyString())).thenReturn(null); // nothing spent yet
@@ -430,7 +438,7 @@ class PerUserBudgetServiceTest {
         assertThatThrownBy(() -> service.checkAndReserveBudget(TENANT, USER, Modality.TEXT, 1000L, TenantPlan.FREE))
             .isInstanceOf(PerUserBudgetExhaustedException.class);
 
-        verify(valueOps).increment(anyString(), eq(-15_000L));
+        verifyRefunded(15_000L);
     }
 
     @Test
@@ -474,7 +482,7 @@ class PerUserBudgetServiceTest {
     void reconcileReleasesTheFullReservationWhenThereIsNoUsageToReport() {
         service.reconcileSpendReservationForCall(TENANT, USER, Modality.TEXT, 15_000L, null, null, null, TenantPlan.FREE);
 
-        verify(valueOps).increment(anyString(), eq(-15_000L));
+        verifyRefunded(15_000L);
     }
 
     @Test
@@ -503,7 +511,7 @@ class PerUserBudgetServiceTest {
     void releaseSpendReservationIsAConvenienceForAFullRelease() {
         service.releaseSpendReservation(TENANT, USER, Modality.TEXT, 15_000L, TenantPlan.FREE);
 
-        verify(valueOps).increment(anyString(), eq(-15_000L));
+        verifyRefunded(15_000L);
     }
 
     // ---- reconcileSpendReservationForUsage / recordSpendForUsage ------------
@@ -535,7 +543,7 @@ class PerUserBudgetServiceTest {
     void reconcileForUsageReleasesTheFullReservationOnNullUsage() {
         service.reconcileSpendReservationForUsage(TENANT, USER, Modality.TEXT, 15_000L, "claude-x", null, TenantPlan.FREE);
 
-        verify(valueOps).increment(anyString(), eq(-15_000L));
+        verifyRefunded(15_000L);
     }
 
     @Test

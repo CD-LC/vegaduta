@@ -138,9 +138,14 @@ class LoggingToolCallbackTypedResultTest {
         ToolResultMarker.mark(custom, ToolResultMarker.Kind.PARKED);
 
         assertFalse(LoggingToolCallback.wasExecuted(custom));
-        // Compatibility: the old prefixes are still recognised without a marker.
-        assertFalse(LoggingToolCallback.wasExecuted("This tool call ('t') was not executed: blocked"));
-        assertFalse(LoggingToolCallback.wasExecuted("This action ('t') requires human approval"));
+        // The old wording prefixes are NOT recognised any more: a tool's output can start with those words, and when
+        // it did the effect journal skipped a call that really ran.
+        assertTrue(LoggingToolCallback.wasExecuted("This tool call ('t') was not executed: blocked"));
+        assertTrue(LoggingToolCallback.wasExecuted("This action ('t') requires human approval"));
+        // The exact control results are still recognised without a registration.
+        assertFalse(LoggingToolCallback.wasExecuted(com.agenticai.core.guardrails.ApprovalParked.result("Waiting.")));
+        // ...and a tool output that merely contains the marker is a tool's output.
+        assertTrue(LoggingToolCallback.wasExecuted("<p>{\"error\":\"approval_parked\",\"result\":\"x\"}</p>"));
         assertFalse(LoggingToolCallback.wasExecuted(null));
         assertTrue(LoggingToolCallback.wasExecuted("{\"status\":\"sent\"}"));
     }

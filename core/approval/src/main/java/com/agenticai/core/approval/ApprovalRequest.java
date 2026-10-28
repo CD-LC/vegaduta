@@ -89,6 +89,13 @@ public class ApprovalRequest {
      * The {@code decidedBy} of a request nobody decided in time (see {@link ApprovalExpiryProperties}).
      * An expired request is stored as REJECTED by this actor, so it needs no status of its own.
      */
+    // Approved-but-never-executed recovery (migration V674): how far an approved action got.
+    @Column(name = "execution_started_at")
+    private Instant executionStartedAt;
+
+    @Column(name = "execution_completed_at")
+    private Instant executionCompletedAt;
+
     public static final String EXPIRY_ACTOR = "system:approval-expiry";
 
     protected ApprovalRequest() {
@@ -164,6 +171,34 @@ public class ApprovalRequest {
         this.status = ApprovalStatus.APPROVED;
         this.executionError = null;
         this.nextRetryAt = null;
+        this.executionCompletedAt = Instant.now();
+    }
+
+    /** The action is about to run. Only {@link ApprovalRequestRecorder#claimExecution} calls this, under a row lock. */
+    void markExecutionStarted() {
+        this.executionStartedAt = Instant.now();
+    }
+
+    /** The action ended, whatever the outcome. */
+    void markExecutionCompleted() {
+        this.executionCompletedAt = Instant.now();
+    }
+
+    /**
+     * Takes the execution markers from the row as the database holds them. The caller's instance is what an executor
+     * then saves, so it must carry the markers the lock-holding transaction wrote or that save would blank them.
+     */
+    void copyExecutionMarkersFrom(ApprovalRequest persisted) {
+        this.executionStartedAt = persisted.executionStartedAt;
+        this.executionCompletedAt = persisted.executionCompletedAt;
+    }
+
+    public Instant getExecutionStartedAt() {
+        return executionStartedAt;
+    }
+
+    public Instant getExecutionCompletedAt() {
+        return executionCompletedAt;
     }
 
     /**
