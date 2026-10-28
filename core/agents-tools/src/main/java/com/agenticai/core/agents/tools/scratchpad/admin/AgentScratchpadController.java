@@ -1,9 +1,12 @@
-package com.agenticai.core.agents.tools.scratchpad;
+package com.agenticai.core.agents.tools.scratchpad.admin;
 
 import com.agenticai.core.agents.core.AgentService;
+import com.agenticai.core.agents.tools.scratchpad.AgentScratchpadService;
+import com.agenticai.core.agents.tools.scratchpad.ScratchpadNoteView;
+import com.agenticai.core.agents.tools.scratchpad.ScratchpadToolCallback;
 import com.agenticai.core.sharing.PermissionLevel;
-import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +23,15 @@ import org.springframework.web.server.ResponseStatusException;
  * agent-authored state; an operator who needs a note gone deletes it through the agent or the
  * database, not by impersonating the agent's own tool surface.
  *
- * <p>{@code session} is the raw caller-visible session id the turn carried (the callback maps it to
- * the session pad's stable UUID exactly as {@link ScratchpadToolCallback#sessionUuid} does).
- * Omitting it addresses the agent-long-term pad. {@code GET .../scratchpad} lists the visible notes
- * (the session pad merged with the long-term pad when a session is given, matching what the agent's
- * own {@code scratchpad_list} would see); {@code GET .../scratchpad/{key}} returns one note's full
- * body.
+ * <p>{@code session} is the raw caller-visible session id the turn carried (mapped to the session
+ * pad's stable UUID exactly as {@link ScratchpadToolCallback#sessionUuid} does). Omitting it, or
+ * passing {@code "agent"}, addresses the agent-long-term pad. {@code GET .../scratchpad} lists the
+ * visible notes (the session pad merged with the long-term pad when a session is given, matching
+ * the agent's own {@code scratchpad_list}); {@code GET .../scratchpad/{key}} returns one note's
+ * full body.
+ *
+ * <p>Lives in a sub-package, not {@code tools.scratchpad} itself: that package must not gain an
+ * edge onto {@code agents.core} (it would close a package cycle through {@code agents.tools}).
  */
 @RestController
 @RequestMapping("/api/agents/{agentId}/scratchpad")
@@ -40,20 +46,6 @@ public class AgentScratchpadController {
         this.scratchpadService = scratchpadService;
     }
 
-    /** One note as the operator sees it. {@code scope} mirrors the tool's vocabulary. */
-    public record ScratchpadNoteView(
-            String key, String scope, int byteSize, Instant updatedAt, String body) {
-
-        static ScratchpadNoteView of(ScratchpadNote note, boolean withBody) {
-            return new ScratchpadNoteView(
-                    note.getKey(),
-                    note.getSessionId() == null ? "agent" : "session",
-                    note.getByteSize(),
-                    note.getUpdatedAt(),
-                    withBody ? note.getBody() : null);
-        }
-    }
-
     public record ScratchpadListView(int count, long totalBytes, List<ScratchpadNoteView> notes) {}
 
     /**
@@ -64,11 +56,9 @@ public class AgentScratchpadController {
     public ScratchpadListView list(
             @PathVariable UUID agentId, @RequestParam(required = false) String session) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
-        List<ScratchpadNote> notes = list(agentId, padUuid(session));
+        List<ScratchpadNoteView> notes = list(agentId, padUuid(session));
         return new ScratchpadListView(
-                notes.size(),
-                notes.stream().mapToLong(ScratchpadNote::getByteSize).sum(),
-                notes.stream().map(n -> ScratchpadNoteView.of(n, false)).toList());
+                notes.size(), notes.stream().mapToLong(ScratchpadNoteView::byteSize).sum(), notes);
     }
 
     /** One note's full body, addressed by the same {@code (session, key)} the tools use. */
@@ -79,7 +69,7 @@ public class AgentScratchpadController {
             @RequestParam(required = false) String session) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
         return read(agentId, padUuid(session), key)
-                .map(n -> ResponseEntity.ok(ScratchpadNoteView.of(n, true)))
+                .map(ResponseEntity::ok)
                 .orElseThrow(
                         () ->
                                 new ResponseStatusException(
@@ -97,17 +87,17 @@ public class AgentScratchpadController {
                 : ScratchpadToolCallback.sessionUuid(session);
     }
 
-    private List<ScratchpadNote> list(UUID agentId, UUID sessionId) {
+    private List<ScratchpadNoteView> list(UUID agentId, UUID sessionId) {
         try {
-            return scratchpadService.list(agentId, sessionId);
+            return scratchpadService.listViews(agentId, sessionId);
         } catch (IllegalStateException disabled) {
             throw disabled();
         }
     }
 
-    private java.util.Optional<ScratchpadNote> read(UUID agentId, UUID sessionId, String key) {
+    private Optional<ScratchpadNoteView> read(UUID agentId, UUID sessionId, String key) {
         try {
-            return scratchpadService.read(agentId, sessionId, key);
+            return scratchpadService.readView(agentId, sessionId, key);
         } catch (IllegalStateException disabled) {
             throw disabled();
         } catch (IllegalArgumentException badKey) {
