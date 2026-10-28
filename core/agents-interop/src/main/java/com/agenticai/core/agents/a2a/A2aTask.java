@@ -45,6 +45,8 @@ public final class A2aTask {
     private String failureMessage;
     private Instant lastTouched;
     private Disposable subscription;
+    /** Where the request that created this task sits in an agent-call chain; null when unknown. */
+    private volatile A2aCallContext callContext;
 
     A2aTask(
         String id, String contextId, UUID agentId, String tenantId, String subject,
@@ -100,6 +102,15 @@ public final class A2aTask {
 
     public String id() {
         return id;
+    }
+
+    /** The hop/trace context of the inbound request this task serves, or null. */
+    A2aCallContext callContext() {
+        return callContext;
+    }
+
+    void callContext(A2aCallContext callContext) {
+        this.callContext = callContext;
     }
 
     public String contextId() {

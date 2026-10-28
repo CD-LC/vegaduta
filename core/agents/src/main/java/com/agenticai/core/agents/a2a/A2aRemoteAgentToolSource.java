@@ -24,4 +24,14 @@ public interface A2aRemoteAgentToolSource {
      * callback counts its calls against the per-turn cap.
      */
     ToolCallback newCallAgentTool();
+
+    /**
+     * As {@link #newCallAgentTool()}, for the turn running in chat session {@code sessionId}. When
+     * that turn is serving an inbound A2A request, the callback numbers its outbound call one hop
+     * above the request's and carries the request's trace id (the loop guard across instances). The
+     * default ignores the session, for a source that does not track hops.
+     */
+    default ToolCallback newCallAgentTool(String sessionId) {
+        return newCallAgentTool();
+    }
 }

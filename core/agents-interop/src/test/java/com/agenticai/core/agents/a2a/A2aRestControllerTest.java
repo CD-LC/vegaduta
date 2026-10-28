@@ -25,6 +25,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -111,7 +112,7 @@ class A2aRestControllerTest {
     @Test
     void sendMessageReturnsA1TaskEnvelope() throws IOException {
         MockHttpServletResponse r = new MockHttpServletResponse();
-        rest.sendMessage(AGENT_ID, message("hi", null), V1, ALICE, r);
+        rest.sendMessage(AGENT_ID, message("hi", null), V1, ALICE, new MockHttpServletRequest(), r);
 
         assertEquals(200, r.getStatus());
         assertEquals("application/a2a+json", r.getContentType().split(";")[0].trim());
@@ -127,7 +128,7 @@ class A2aRestControllerTest {
     @Test
     void platformRouteNeedsAnAgentIdAndAbsentVersionIsAccepted() throws IOException {
         MockHttpServletResponse r = new MockHttpServletResponse();
-        rest.sendMessage(null, message("hi", null), null, ALICE, r);
+        rest.sendMessage(null, message("hi", null), null, ALICE, new MockHttpServletRequest(), r);
         assertA2aError(r, 400, "INVALID_ARGUMENT", "INVALID_ARGUMENT");
 
         MockHttpServletResponse ok = new MockHttpServletResponse();
@@ -136,23 +137,23 @@ class A2aRestControllerTest {
                 message("hi", "\"metadata\":{\"agentId\":\"" + AGENT_ID + "\"}"),
                 null,
                 ALICE,
-                ok);
+                new MockHttpServletRequest(), ok);
         assertEquals(200, ok.getStatus());
     }
 
     @Test
     void getAndCancelUseTheSection54Statuses() throws IOException {
         MockHttpServletResponse sent = new MockHttpServletResponse();
-        rest.sendMessage(AGENT_ID, message("hi", null), V1, ALICE, sent);
+        rest.sendMessage(AGENT_ID, message("hi", null), V1, ALICE, new MockHttpServletRequest(), sent);
         String taskId = body(sent).get("task").get("id").asText();
 
         MockHttpServletResponse got = new MockHttpServletResponse();
-        rest.getTask(taskId, 1, V1, ALICE, got);
+        rest.getTask(taskId, 1, V1, ALICE, new MockHttpServletRequest(), got);
         assertEquals(200, got.getStatus());
         assertEquals(1, body(got).get("history").size());
 
         MockHttpServletResponse missing = new MockHttpServletResponse();
-        rest.getTask("nope", null, V1, ALICE, missing);
+        rest.getTask("nope", null, V1, ALICE, new MockHttpServletRequest(), missing);
         assertA2aError(missing, 404, "NOT_FOUND", "TASK_NOT_FOUND");
         assertEquals(
                 "nope",
@@ -165,14 +166,14 @@ class A2aRestControllerTest {
                         .asText());
 
         MockHttpServletResponse cancel = new MockHttpServletResponse();
-        rest.cancelTask(taskId, V1, ALICE, cancel);
+        rest.cancelTask(taskId, V1, ALICE, new MockHttpServletRequest(), cancel);
         assertA2aError(cancel, 400, "FAILED_PRECONDITION", "TASK_NOT_CANCELABLE");
     }
 
     @Test
     void unauthorisedAgentIsIndistinguishableFromUnknown() throws IOException {
         MockHttpServletResponse r = new MockHttpServletResponse();
-        rest.sendMessage(FORBIDDEN_AGENT_ID, message("hi", null), V1, ALICE, r);
+        rest.sendMessage(FORBIDDEN_AGENT_ID, message("hi", null), V1, ALICE, new MockHttpServletRequest(), r);
         assertA2aError(r, 404, "NOT_FOUND", "AGENT_NOT_FOUND");
     }
 
@@ -184,26 +185,26 @@ class A2aRestControllerTest {
                 "{\"message\":{\"messageId\":\"m\",\"role\":\"ROLE_USER\",\"parts\":[{\"url\":\"http://x\"}]}}",
                 V1,
                 ALICE,
-                file);
+                new MockHttpServletRequest(), file);
         assertA2aError(file, 400, "INVALID_ARGUMENT", "CONTENT_TYPE_NOT_SUPPORTED");
 
         MockHttpServletResponse bad = new MockHttpServletResponse();
-        rest.sendMessage(AGENT_ID, "{not json", V1, ALICE, bad);
+        rest.sendMessage(AGENT_ID, "{not json", V1, ALICE, new MockHttpServletRequest(), bad);
         assertA2aError(bad, 400, "INVALID_ARGUMENT", "INVALID_ARGUMENT");
 
         MockHttpServletResponse old = new MockHttpServletResponse();
-        rest.sendMessage(AGENT_ID, message("hi", null), "0.3", ALICE, old);
+        rest.sendMessage(AGENT_ID, message("hi", null), "0.3", ALICE, new MockHttpServletRequest(), old);
         assertA2aError(old, 400, "FAILED_PRECONDITION", "VERSION_NOT_SUPPORTED");
 
         MockHttpServletResponse junk = new MockHttpServletResponse();
-        rest.sendMessage(AGENT_ID, message("hi", null), "9.9", ALICE, junk);
+        rest.sendMessage(AGENT_ID, message("hi", null), "9.9", ALICE, new MockHttpServletRequest(), junk);
         assertA2aError(junk, 400, "FAILED_PRECONDITION", "VERSION_NOT_SUPPORTED");
     }
 
     @Test
     void streamFramesAreBareStreamResponsesInSpecOrder() throws IOException {
         MockHttpServletResponse r = new MockHttpServletResponse();
-        rest.streamMessage(AGENT_ID, message("hi", null), V1, ALICE, r);
+        rest.streamMessage(AGENT_ID, message("hi", null), V1, ALICE, new MockHttpServletRequest(), r);
 
         assertEquals("text/event-stream", r.getContentType().split(";")[0].trim());
         String[] blocks = r.getContentAsString().split("\n\n");
@@ -220,7 +221,7 @@ class A2aRestControllerTest {
     @Test
     void streamValidationErrorsAreAPlainHttpErrorNotAnEventStream() throws IOException {
         MockHttpServletResponse r = new MockHttpServletResponse();
-        rest.streamMessage(FORBIDDEN_AGENT_ID, message("hi", null), V1, ALICE, r);
+        rest.streamMessage(FORBIDDEN_AGENT_ID, message("hi", null), V1, ALICE, new MockHttpServletRequest(), r);
         assertA2aError(r, 404, "NOT_FOUND", "AGENT_NOT_FOUND");
     }
 

@@ -212,11 +212,56 @@ public class A2aCardVerifier {
      * window). {@code jwksFetcher} retrieves the JWKS, which may live at a card-advertised {@code
      * jwks_uri} the caller must therefore be able to police.
      */
-    @SuppressWarnings("unchecked")
     VerificationResult verifyCard(Map<String, Object> card, URI uri, Fetcher jwksFetcher) {
+        return verifyCardKey(card, uri, jwksFetcher).result();
+    }
+
+    /** A card verification outcome plus the JWKS key that verified it (null when none did). */
+    record KeyResolution(VerificationResult result, PublicKey key) {}
+
+    /**
+     * Fetches the card at {@code cardUrl}, verifies it exactly as {@link #verifyRemote} does and
+     * returns the key that verified it: the key a caller's message signatures are then checked
+     * against. Never throws; a failure is {@code result().verified() == false} with a key of null.
+     */
+    KeyResolution resolveSigningKey(String cardUrl) {
+        URI uri;
+        try {
+            uri = URI.create(cardUrl == null ? "" : cardUrl.trim());
+        } catch (IllegalArgumentException e) {
+            return new KeyResolution(
+                    new VerificationResult(false, null, "card URL is not parseable"), null);
+        }
+        String scheme = uri.getScheme();
+        boolean loopback =
+                uri.getHost() != null
+                        && (uri.getHost().equals("localhost")
+                                || uri.getHost().equals("127.0.0.1")
+                                || uri.getHost().equals("::1"));
+        if (!"https".equalsIgnoreCase(scheme) && !("http".equalsIgnoreCase(scheme) && loopback)) {
+            return new KeyResolution(
+                    new VerificationResult(
+                            false, null, "card URL must be https (http allowed only for loopback)"),
+                    null);
+        }
+        Map<String, Object> card;
+        try {
+            card = MAPPER.readValue(fetcher.get(cardUrl), Map.class);
+        } catch (Exception e) {
+            return new KeyResolution(
+                    new VerificationResult(
+                            false, null, "could not fetch/parse card: " + e.getMessage()),
+                    null);
+        }
+        return verifyCardKey(card, uri, fetcher);
+    }
+
+    @SuppressWarnings("unchecked")
+    private KeyResolution verifyCardKey(Map<String, Object> card, URI uri, Fetcher jwksFetcher) {
         Object signatures = card.get("signatures");
         if (!(signatures instanceof List<?> list) || list.isEmpty()) {
-            return new VerificationResult(false, null, "card carries no signatures");
+            return new KeyResolution(
+                    new VerificationResult(false, null, "card carries no signatures"), null);
         }
         String kid = null;
         for (Object entryObj : list) {
@@ -235,7 +280,7 @@ public class A2aCardVerifier {
             jwksUrl = s;
             String refusal = jwksUriRefusal(uri, s);
             if (refusal != null) {
-                return new VerificationResult(false, kid, refusal);
+                return failed(kid, refusal);
             }
         } else {
             String port = uri.getPort() >= 0 ? ":" + uri.getPort() : "";
@@ -245,12 +290,12 @@ public class A2aCardVerifier {
         try {
             jwks = MAPPER.readValue(jwksFetcher.get(jwksUrl), Map.class);
         } catch (Exception e) {
-            return new VerificationResult(
-                    false, kid, "could not fetch/parse JWKS at " + jwksUrl + ": " + e.getMessage());
+            return failed(
+                    kid, "could not fetch/parse JWKS at " + jwksUrl + ": " + e.getMessage());
         }
         Object keys = jwks.get("keys");
         if (!(keys instanceof List<?> keyList)) {
-            return new VerificationResult(false, kid, "JWKS at " + jwksUrl + " has no keys");
+            return failed(kid, "JWKS at " + jwksUrl + " has no keys");
         }
         for (Object keyObj : keyList) {
             if (!(keyObj instanceof Map<?, ?> jwk)) {
@@ -267,14 +312,20 @@ public class A2aCardVerifier {
             try {
                 PublicKey publicKey = okpToPublicKey(x);
                 if (signingService.verify(card, publicKey)) {
-                    return new VerificationResult(
-                            true, (String) jwk.get("kid"), "verified against " + jwksUrl);
+                    return new KeyResolution(
+                            new VerificationResult(
+                                    true, (String) jwk.get("kid"), "verified against " + jwksUrl),
+                            publicKey);
                 }
             } catch (GeneralSecurityException e) {
                 log.debug("Skipping malformed Ed25519 JWK (kid={})", jwk.get("kid"), e);
             }
         }
-        return new VerificationResult(false, kid, "no JWKS key verified the card's signatures");
+        return failed(kid, "no JWKS key verified the card's signatures");
+    }
+
+    private static KeyResolution failed(String kid, String detail) {
+        return new KeyResolution(new VerificationResult(false, kid, detail), null);
     }
 
     /** RFC 8037 OKP {@code x} (base64url, little-endian 32 bytes) to a JDK Ed25519 PublicKey. */

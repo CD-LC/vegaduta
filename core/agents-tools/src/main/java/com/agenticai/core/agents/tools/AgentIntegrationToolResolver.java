@@ -393,7 +393,7 @@ final class AgentIntegrationToolResolver {
         // by naming a2a_call_agent in its tool allow-list (empty allow-list = "unrestricted", which
         // is deliberately NOT an opt-in for an egress tool).
         if (a2a != null && a2a.isEnabled() && a2a.hasAllowedHosts() && agentOptedIntoA2a(agentId)) {
-            ToolCallback a2aCall = a2a.newCallAgentTool();
+            ToolCallback a2aCall = a2a.newCallAgentTool(sessionId);
             web.add(
                     guardAndLog(
                             a2aCall,

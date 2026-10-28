@@ -222,6 +222,7 @@ Release notes on GitHub are generated from the section for each version.
   both, including after anchoring, and the Java test asserts it reproduces
   Python's hashes and HMAC signatures byte for byte.
 
+- **A2A message signing, replay protection and a hop limit.** Outbound A2A requests to a peer whose Agent Card advertises `urn:vegaduta:a2a:ext:message-integrity:v1` carry a detached Ed25519 signature (method, path, body digest, timestamp, nonce, hop; same key as card signing), the hop number and the trace id. The server verifies the signature against the caller's card key, enforces a 5-minute timestamp window and a per-tenant nonce replay cache, and refuses a hop above `app.a2a.max-hops` (default 4) with JSON-RPC errors `-32010..-32014` (REST: 401/409/508). The hop of an inbound request is propagated to the `a2a_call_agent` calls made while serving it. Unsigned legacy peers are still accepted (`app.a2a.server.require-signed-messages=false`, default for one release). New settings are in `docs/configuration.md`.
 - **Piper: a local, keyless TTS provider for the voice agent.** Until now
   every voice reply needed a paid hosted key (ElevenLabs preferred, Sarvam
   fallback); a deployment with neither fell back to browser-side speech.

@@ -26,6 +26,14 @@ public class A2aError extends RuntimeException {
     public static final int CONTENT_TYPE_NOT_SUPPORTED = -32005;
     public static final int VERSION_NOT_SUPPORTED = -32009;
 
+    // VegaDuta message-security codes (see A2aInboundGuard). The A2A spec leaves -32010 and below
+    // free for implementations; the REST binding maps them in A2aRestController.mapping.
+    public static final int MESSAGE_SIGNATURE_INVALID = -32010;
+    public static final int MESSAGE_SIGNATURE_REQUIRED = -32011;
+    public static final int MESSAGE_REPLAYED = -32012;
+    public static final int HOP_LIMIT_EXCEEDED = -32013;
+    public static final int MESSAGE_EXPIRED = -32014;
+
     private final int code;
     private final Object data;
 
@@ -98,5 +106,32 @@ public class A2aError extends RuntimeException {
     public static A2aError versionNotSupported(String requested) {
         return new A2aError(VERSION_NOT_SUPPORTED, "Version not supported: " + requested,
             java.util.Map.of("supported", java.util.List.of("0.3", "1.0")));
+    }
+
+    public static A2aError messageSignatureInvalid(String detail) {
+        return new A2aError(MESSAGE_SIGNATURE_INVALID, "Message signature invalid: " + detail);
+    }
+
+    public static A2aError messageSignatureRequired() {
+        return new A2aError(MESSAGE_SIGNATURE_REQUIRED,
+            "Message signature required: this server only accepts signed A2A requests");
+    }
+
+    public static A2aError messageReplayed() {
+        return new A2aError(MESSAGE_REPLAYED, "Message replayed: this nonce was already used");
+    }
+
+    public static A2aError replayCacheFull() {
+        return new A2aError(MESSAGE_REPLAYED, "Replay cache full: retry shortly");
+    }
+
+    public static A2aError messageExpired(long skewSeconds) {
+        return new A2aError(MESSAGE_EXPIRED, "Message timestamp outside the accepted window",
+            java.util.Map.of("skewSeconds", skewSeconds));
+    }
+
+    public static A2aError hopLimitExceeded(int hop, int max) {
+        return new A2aError(HOP_LIMIT_EXCEEDED, "Hop limit exceeded: hop " + hop + " is above the maximum of " + max,
+            java.util.Map.of("hop", hop, "maxHops", max));
     }
 }

@@ -2,31 +2,23 @@ package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.TenantContext;
-import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.agenticai.core.security.edition.ConditionalOnEditionFeature;
 import com.agenticai.core.security.edition.EditionFeature;
 import com.agenticai.core.security.net.GuardedJdkHttpClient;
 import com.agenticai.core.security.net.SsrfGuard;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -75,11 +67,6 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
     private static final int MAX_REMOTE_ERROR_CHARS = 200;
     private static final int MAX_REMOTE_CODE_CHARS = 12;
 
-    /**
-     * Closes response streams whose body read outlives the request deadline (a slow-drip remote).
-     */
-    private static final ScheduledExecutorService BODY_WATCHDOG =
-            TenantAwareExecutors.newSingleThreadScheduledExecutor("a2a-client-body-watchdog", true);
 
     /**
      * Outcome of one remote call. {@code state} is the remote's normalised state (e.g. {@code
@@ -93,17 +80,28 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
     private final ObjectProvider<A2aTaskStore> taskStore;
     private final A2aEgressGuard guard;
     private final HttpClient http;
+    private final A2aMessageSigner signer;
+    private final A2aMessageSecurityProperties security;
+    private final A2aHopRegistry hopRegistry;
+    private final A2aBoundedHttp bounded;
 
     @Autowired
     public A2aClientService(
             A2aProperties properties,
             A2aCardVerifier verifier,
-            ObjectProvider<A2aTaskStore> taskStore) {
+            ObjectProvider<A2aTaskStore> taskStore,
+            A2aMessageSigner signer,
+            A2aMessageSecurityProperties security,
+            A2aHopRegistry hopRegistry) {
         this(
                 properties.getClient(),
                 verifier,
                 taskStore,
-                new A2aEgressGuard(properties.getClient()));
+                new A2aEgressGuard(properties.getClient()),
+                null,
+                signer,
+                security,
+                hopRegistry);
     }
 
     A2aClientService(
@@ -124,6 +122,33 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             ObjectProvider<A2aTaskStore> taskStore,
             A2aEgressGuard guard,
             HttpClient http) {
+        this(
+                config,
+                verifier,
+                taskStore,
+                guard,
+                http,
+                null,
+                new A2aMessageSecurityProperties(),
+                new A2aHopRegistry());
+    }
+
+    /**
+     * Test seam: as above with an explicit signer (null = never sign), message-security settings
+     * and hop registry.
+     */
+    A2aClientService(
+            A2aProperties.Client config,
+            A2aCardVerifier verifier,
+            ObjectProvider<A2aTaskStore> taskStore,
+            A2aEgressGuard guard,
+            HttpClient http,
+            A2aMessageSigner signer,
+            A2aMessageSecurityProperties security,
+            A2aHopRegistry hopRegistry) {
+        this.signer = signer;
+        this.security = security;
+        this.hopRegistry = hopRegistry;
         this.config = config;
         this.verifier = verifier;
         this.taskStore = taskStore;
@@ -139,6 +164,7 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
                                 config.getConnectTimeout(),
                                 config.getRequestTimeout(),
                                 false);
+        this.bounded = new A2aBoundedHttp(this.http, config);
     }
 
     @Override
@@ -152,6 +178,16 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
     @Override
     public org.springframework.ai.tool.ToolCallback newCallAgentTool() {
         return new A2aRemoteAgentToolCallback(this);
+    }
+
+    /**
+     * As {@link #newCallAgentTool()}, bound to the chat session it serves so the callback can read
+     * the hop context of the inbound A2A request that started the turn (see {@link
+     * A2aHopRegistry}).
+     */
+    @Override
+    public org.springframework.ai.tool.ToolCallback newCallAgentTool(String sessionId) {
+        return new A2aRemoteAgentToolCallback(this, sessionId, hopRegistry);
     }
 
     /**
@@ -175,6 +211,17 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
      * remote's words.
      */
     public Result send(String cardUrl, String message) {
+        return send(cardUrl, message, null);
+    }
+
+    /**
+     * As {@link #send(String, String)}, made while serving an inbound A2A request: {@code inbound}
+     * is that request's context, so this call carries {@code inbound.hop() + 1} and the same trace
+     * id. Null = this call starts a chain (hop 1, a fresh trace id).
+     *
+     * @throws A2aClientException when the call would exceed {@code app.a2a.max-hops}
+     */
+    public Result send(String cardUrl, String message, A2aCallContext inbound) {
         if (!config.isEnabled()) {
             throw new A2aClientException(
                     "outbound A2A calls are disabled (app.a2a.client.enabled=false)");
@@ -196,6 +243,7 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             }
         }
         URI endpoint = guard.check(resolveEndpoint(card));
+        Outbound outbound = outbound(inbound, A2aMessageSecurity.advertises(card));
         A2aVersion version =
                 card.path("protocolVersion").asText("").startsWith("1.")
                         ? A2aVersion.V1_0
@@ -203,7 +251,7 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
 
         LocalTask local = LocalTask.open(taskStore.getIfAvailable(), endpoint, message);
         try {
-            Result result = converse(endpoint, version, message, local);
+            Result result = converse(endpoint, version, message, local, outbound);
             local.finish(result);
             return result;
         } catch (RuntimeException e) {
@@ -214,13 +262,54 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
 
     // ------------------------------------------------------------ protocol
 
-    private Result converse(URI endpoint, A2aVersion version, String message, LocalTask local) {
+    /**
+     * How one call is numbered and signed. {@code secure} is true only when the peer's card
+     * advertised the message-integrity extension: a legacy peer gets the request it always got.
+     */
+    private record Outbound(int hop, String traceId, boolean secure) {}
+
+    private Outbound outbound(A2aCallContext inbound, boolean peerSupportsIntegrity) {
+        int hop = inbound == null ? 1 : inbound.nextHop();
+        int max = security.getMaxHops();
+        if (max > 0 && hop > max) {
+            throw new A2aClientException(
+                    "this call would be hop "
+                            + hop
+                            + ", above the limit of "
+                            + max
+                            + " (app.a2a.max-hops): the agent chain is too deep");
+        }
+        String trace =
+                inbound != null
+                        ? inbound.traceId()
+                        : firstNonBlank(
+                                org.slf4j.MDC.get(
+                                        com.agenticai.core.security.RequestCorrelationFilter
+                                                .MDC_KEY),
+                                UUID.randomUUID().toString());
+        return new Outbound(hop, trace, peerSupportsIntegrity);
+    }
+
+    private static String firstNonBlank(String a, String b) {
+        return a != null && !a.isBlank() ? a : b;
+    }
+
+    private Result converse(
+            URI endpoint, A2aVersion version, String message, LocalTask local, Outbound outbound) {
         String contextId = UUID.randomUUID().toString();
         Map<String, Object> params = new LinkedHashMap<>();
-        params.put(
-                "message",
+        Map<String, Object> outMessage =
                 A2aWire.message(
-                        UUID.randomUUID().toString(), "user", message, contextId, null, version));
+                        UUID.randomUUID().toString(), "user", message, contextId, null, version);
+        if (outbound.secure()) {
+            // The same hop and trace as the headers, inside the message: covered by the body digest
+            // the signature binds, and visible to a peer that reads metadata but not our headers.
+            Map<String, Object> metadata = new LinkedHashMap<>();
+            metadata.put(A2aMessageSecurity.METADATA_HOP, outbound.hop());
+            metadata.put(A2aMessageSecurity.METADATA_TRACE, outbound.traceId());
+            outMessage.put("metadata", metadata);
+        }
+        params.put("message", outMessage);
         Map<String, Object> configuration = new LinkedHashMap<>();
         // Non-blocking on purpose: the remote returns the task id at once and we poll, so a slow
         // remote can never leave a running task we have no id for (a blocking send that hit the
@@ -237,22 +326,23 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
                         endpoint,
                         version,
                         version == A2aVersion.V1_0 ? "SendMessage" : "message/send",
-                        params);
-        JsonNode node = unwrap(result);
-        if (!isTask(node)) {
+                        params,
+                        outbound);
+        JsonNode node = A2aRemoteParsing.unwrap(result);
+        if (!A2aRemoteParsing.isTask(node)) {
             // A bare Message reply: the remote answered inline, there is no task to poll.
-            String text = cap(partsText(node.path("parts")));
+            String text = cap(A2aRemoteParsing.partsText(node.path("parts")));
             return new Result(local.id(), null, "completed", text, true);
         }
         String remoteId = node.path("id").asText(null);
         Instant deadline = Instant.now().plus(config.getMaxWait());
-        String state = state(node);
-        while (isActive(state)) {
+        String state = A2aRemoteParsing.state(node);
+        while (A2aRemoteParsing.isActive(state)) {
             if (remoteId == null) {
                 throw new A2aClientException("the remote agent returned a task without an id");
             }
             if (!Instant.now().isBefore(deadline)) {
-                cancelQuietly(endpoint, version, remoteId);
+                cancelQuietly(endpoint, version, remoteId, outbound);
                 return new Result(
                         local.id(),
                         remoteId,
@@ -267,24 +357,25 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             getParams.put("id", remoteId);
             try {
                 node =
-                        unwrap(
+                        A2aRemoteParsing.unwrap(
                                 rpc(
                                         endpoint,
                                         version,
                                         version == A2aVersion.V1_0 ? "GetTask" : "tasks/get",
-                                        getParams));
+                                        getParams,
+                                        outbound));
             } catch (RuntimeException e) {
                 // A poll that timed out or failed must not leave the remote task running.
-                cancelQuietly(endpoint, version, remoteId);
+                cancelQuietly(endpoint, version, remoteId, outbound);
                 throw e;
             }
-            state = state(node);
+            state = A2aRemoteParsing.state(node);
         }
         if (state.equals("input-required") || state.equals("auth-required")) {
             // A one-shot tool cannot answer the remote's question; do not leave its task dangling.
-            cancelQuietly(endpoint, version, remoteId);
+            cancelQuietly(endpoint, version, remoteId, outbound);
         }
-        String text = cap(taskText(node));
+        String text = cap(A2aRemoteParsing.taskText(node));
         boolean success = state.equals("completed");
         if (!success && text.isBlank()) {
             text = "The remote agent ended in state \"" + sanitizeRemoteText(state, 24) + "\".";
@@ -293,7 +384,11 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
     }
 
     private JsonNode rpc(
-            URI endpoint, A2aVersion version, String method, Map<String, Object> params) {
+            URI endpoint,
+            A2aVersion version,
+            String method,
+            Map<String, Object> params,
+            Outbound outbound) {
         Map<String, Object> envelope = new LinkedHashMap<>();
         envelope.put("jsonrpc", "2.0");
         envelope.put("id", UUID.randomUUID().toString());
@@ -305,15 +400,24 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
         } catch (IOException e) {
             throw new A2aClientException("could not encode the request", e);
         }
-        String responseBody =
-                execute(
-                        HttpRequest.newBuilder(guard.check(endpoint.toString()))
-                                .timeout(config.getRequestTimeout())
-                                .header("Content-Type", "application/json")
-                                .header("Accept", "application/json")
-                                .header(A2aVersion.HEADER, version.wire())
-                                .POST(HttpRequest.BodyPublishers.ofString(body))
-                                .build());
+        URI target = guard.check(endpoint.toString());
+        HttpRequest.Builder request =
+                HttpRequest.newBuilder(target)
+                        .timeout(config.getRequestTimeout())
+                        .header("Content-Type", "application/json")
+                        .header("Accept", "application/json")
+                        .header(A2aVersion.HEADER, version.wire())
+                        .POST(HttpRequest.BodyPublishers.ofString(body));
+        if (outbound.secure() && signer != null) {
+            signer.headers(
+                            target,
+                            body,
+                            outbound.hop(),
+                            outbound.traceId(),
+                            security.getClient().isSignRequests())
+                    .forEach(request::header);
+        }
+        String responseBody = execute(request.build());
         JsonNode response;
         try {
             response = MAPPER.readTree(responseBody);
@@ -366,13 +470,15 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
         return trim(flat, max);
     }
 
-    private void cancelQuietly(URI endpoint, A2aVersion version, String remoteId) {
+    private void cancelQuietly(
+            URI endpoint, A2aVersion version, String remoteId, Outbound outbound) {
         try {
             rpc(
                     endpoint,
                     version,
                     version == A2aVersion.V1_0 ? "CancelTask" : "tasks/cancel",
-                    Map.of("id", remoteId));
+                    Map.of("id", remoteId),
+                    outbound);
         } catch (RuntimeException e) {
             log.debug(
                     "Best-effort cancel of remote A2A task {} failed: {}", remoteId, e.toString());
@@ -417,6 +523,10 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
 
     // ------------------------------------------------------------ http
 
+    private String execute(HttpRequest request) {
+        return bounded.execute(request);
+    }
+
     /** Guarded, redirect-free, size-capped GET; also the verifier's JWKS fetcher. */
     private String guardedGet(String url) {
         URI uri = guard.check(url);
@@ -428,75 +538,6 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
                         .build());
     }
 
-    private String execute(HttpRequest request) {
-        long deadlineNanos = System.nanoTime() + config.getRequestTimeout().toNanos();
-        try {
-            HttpResponse<InputStream> response =
-                    http.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            InputStream body = response.body();
-            // HttpRequest.timeout() only covers up to the response headers; this watchdog closes
-            // the
-            // stream if the body is still being read when the same budget runs out.
-            ScheduledFuture<?> watchdog =
-                    BODY_WATCHDOG.schedule(
-                            () -> closeQuietly(body),
-                            Math.max(1, config.getRequestTimeout().toMillis()),
-                            TimeUnit.MILLISECONDS);
-            try (InputStream in = body) {
-                int status = response.statusCode();
-                if (status >= 300) {
-                    throw new A2aClientException(
-                            status < 400
-                                    ? "the remote server tried to redirect (redirects are not followed)"
-                                    : "the remote server answered HTTP " + status);
-                }
-                return readCapped(in, deadlineNanos);
-            } finally {
-                watchdog.cancel(false);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new A2aClientException("the call was interrupted");
-        } catch (IOException e) {
-            throw new A2aClientException(
-                    "could not reach the remote agent: " + e.getClass().getSimpleName());
-        }
-    }
-
-    private String readCapped(InputStream in, long deadlineNanos) throws IOException {
-        int max = config.getMaxResponseBytes();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] buf = new byte[8192];
-        try {
-            int n;
-            while ((n = in.read(buf)) >= 0) {
-                out.write(buf, 0, n);
-                if (out.size() > max) {
-                    throw new A2aClientException("the remote response exceeded " + max + " bytes");
-                }
-                if (System.nanoTime() - deadlineNanos > 0) {
-                    throw new A2aClientException(
-                            "the remote response body was not received in time");
-                }
-            }
-        } catch (IOException e) {
-            // The watchdog closing the stream surfaces here as an IOException.
-            if (System.nanoTime() - deadlineNanos > 0) {
-                throw new A2aClientException("the remote response body was not received in time");
-            }
-            throw e;
-        }
-        return out.toString(StandardCharsets.UTF_8);
-    }
-
-    private static void closeQuietly(InputStream in) {
-        try {
-            in.close();
-        } catch (IOException | RuntimeException ignored) {
-            // best effort
-        }
-    }
-
     private static void sleep(Duration d) {
         try {
             Thread.sleep(Math.max(1, d.toMillis()));
@@ -504,73 +545,6 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             Thread.currentThread().interrupt();
             throw new A2aClientException("the call was interrupted");
         }
-    }
-
-    // ------------------------------------------------------------ parsing
-
-    /**
-     * 1.0 wraps in {@code {"task"|"message": ...}}; 0.3 sends the object bare. Tolerates either
-     * from either.
-     */
-    private static JsonNode unwrap(JsonNode result) {
-        if (result.has("task") && result.get("task").isObject()) {
-            return result.get("task");
-        }
-        if (result.has("message") && result.get("message").isObject() && !result.has("parts")) {
-            return result.get("message");
-        }
-        return result;
-    }
-
-    private static boolean isTask(JsonNode node) {
-        return "task".equals(node.path("kind").asText(null))
-                || node.has("status") && !node.has("parts");
-    }
-
-    /**
-     * Normalises {@code TASK_STATE_INPUT_REQUIRED} / {@code input-required} to {@code
-     * input-required}.
-     */
-    static String state(JsonNode task) {
-        String raw = task.path("status").path("state").asText("");
-        String s = raw.toLowerCase(Locale.ROOT).replace("task_state_", "").replace('_', '-');
-        return s.equals("cancelled") ? "canceled" : s;
-    }
-
-    private static boolean isActive(String state) {
-        return state.isEmpty()
-                || state.equals("submitted")
-                || state.equals("working")
-                || state.equals("unspecified")
-                || state.equals("unknown");
-    }
-
-    private static String taskText(JsonNode task) {
-        StringBuilder text = new StringBuilder();
-        JsonNode artifacts = task.path("artifacts");
-        if (artifacts.isArray()) {
-            for (JsonNode artifact : artifacts) {
-                text.append(partsText(artifact.path("parts")));
-            }
-        }
-        if (text.toString().isBlank()) {
-            text.setLength(0);
-            text.append(partsText(task.path("status").path("message").path("parts")));
-        }
-        return text.toString();
-    }
-
-    private static String partsText(JsonNode parts) {
-        StringBuilder text = new StringBuilder();
-        if (parts.isArray()) {
-            for (JsonNode part : parts) {
-                if (part.hasNonNull("text")) {
-                    text.append(part.get("text").asText());
-                }
-                // file/data parts are deliberately dropped: only text reaches the model.
-            }
-        }
-        return text.toString();
     }
 
     private String cap(String text) {

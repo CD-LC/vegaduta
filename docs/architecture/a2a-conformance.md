@@ -141,6 +141,18 @@ bindings plus `tenant` routing. What it would take, and why I would hold off:
 - **Recommendation:** defer until a concrete integration asks for it. If you want it, say so and
   I will write the design (ADR) first rather than the code.
 
+## Message security (VegaDuta extension)
+
+Not part of the A2A spec; advertised as the Agent Card extension `urn:vegaduta:a2a:ext:message-integrity:v1`
+(`capabilities.extensions`). A request may carry `X-Vegaduta-A2A-Signature` (detached JWS over method, path, body
+digest, timestamp, nonce, hop, trace, origin card), `-Timestamp`, `-Nonce`, `-Key-Id`, `-Origin`, `-Hop`, `-Trace`;
+the hop and trace also go in `message.metadata`. The server checks hop (`-32013`), timestamp window (`-32014`),
+signature (`-32010`), replay (`-32012`) and, if configured, signature presence (`-32011`). A client sends them only
+to a peer whose card lists the extension. Unsigned legacy requests stay accepted until
+`app.a2a.server.require-signed-messages=true`. Known limits: proxy path rewriting breaks verification, the receiving
+host is not bound, the nonce cache is per replica unless the task store is Redis, REST clients can sign but our
+outbound client uses JSON-RPC only. Verified with in-process tests, not with an external A2A implementation.
+
 ## Known gaps worth scheduling
 
 1. `ListTasks` and `SubscribeToTask` (the card says `streaming: true`, so the second one is a

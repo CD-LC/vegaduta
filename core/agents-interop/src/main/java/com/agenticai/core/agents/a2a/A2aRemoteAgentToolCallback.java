@@ -31,8 +31,26 @@ public class A2aRemoteAgentToolCallback implements ToolCallback {
     /** Calls this instance has attempted; an instance is built per resolved tool set, so this is per turn. */
     private final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
 
+    /** The chat session this callback serves; keys the inbound hop context. Null = none known. */
+    private final String sessionId;
+
+    private final A2aHopRegistry hops;
+
     public A2aRemoteAgentToolCallback(A2aClientService client) {
+        this(client, null, null);
+    }
+
+    /**
+     * @param sessionId the chat session of the turn this callback was built for (for an A2A turn,
+     *     the request's contextId)
+     * @param hops where {@link A2aTaskService} registered that turn's inbound call context, so the
+     *     call made here carries the next hop number and the same trace id
+     */
+    public A2aRemoteAgentToolCallback(
+            A2aClientService client, String sessionId, A2aHopRegistry hops) {
         this.client = client;
+        this.sessionId = sessionId;
+        this.hops = hops;
     }
 
     @Override
@@ -84,7 +102,9 @@ public class A2aRemoteAgentToolCallback implements ToolCallback {
             if (url.isBlank() || message.isBlank()) {
                 return "Could not call the remote agent: both agent_card_url and message are required.";
             }
-            A2aClientService.Result result = client.send(url, message);
+            A2aCallContext inbound =
+                hops == null ? null : hops.lookup(sessionId).orElse(null);
+            A2aClientService.Result result = client.send(url, message, inbound);
             String header = result.success()
                 ? "Reply from remote A2A agent"
                 : "Remote A2A agent did not complete (state: " + safeState(result.state()) + ")";

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -43,10 +44,20 @@ public class A2aAgentCardService {
 
     private final A2aProperties properties;
     private final A2aCardSigningService signingService;
+    private final A2aMessageSecurityProperties security;
 
     public A2aAgentCardService(A2aProperties properties, A2aCardSigningService signingService) {
+        this(properties, signingService, new A2aMessageSecurityProperties());
+    }
+
+    @Autowired
+    public A2aAgentCardService(
+            A2aProperties properties,
+            A2aCardSigningService signingService,
+            A2aMessageSecurityProperties security) {
         this.properties = properties;
         this.signingService = signingService;
+        this.security = security;
     }
 
     public Map<String, Object> platformCard(String publicBaseUrl) {
@@ -109,6 +120,22 @@ public class A2aAgentCardService {
         capabilities.put("pushNotifications", false);
         capabilities.put("stateTransitionHistory", false);
         capabilities.put("extendedAgentCard", false);
+        if (security.getServer().isVerifySignatures()) {
+            // Tells a VegaDuta client it may sign its requests and send the hop counter; a peer that
+            // does not list this gets the plain request it always got.
+            capabilities.put(
+                    "extensions",
+                    List.of(
+                            Map.of(
+                                    "uri",
+                                    A2aMessageSecurity.EXTENSION_URI,
+                                    "description",
+                                    "Detached request signatures (method, path, body digest,"
+                                            + " timestamp, nonce, hop), replay protection and a"
+                                            + " hop counter.",
+                                    "required",
+                                    security.getServer().isRequireSignedMessages())));
+        }
         card.put("capabilities", capabilities);
         card.put("defaultInputModes", List.of("text/plain"));
         card.put("defaultOutputModes", List.of("text/plain"));

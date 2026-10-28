@@ -7,6 +7,7 @@ import com.agenticai.core.sharing.ResourceAccessDeniedException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
@@ -92,20 +93,24 @@ public class A2aRestController {
             @RequestBody String body,
             @RequestHeader(value = A2aVersion.HEADER, required = false) String versionHeader,
             Principal principal,
+            HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
         run(
                 response,
                 () -> {
-                    JsonNode request = parseBody(body);
-                    A2aJsonRpcController.Inbound inbound = shared.parseInbound(agentId, request);
+                    JsonNode parsed = parseBody(body);
+                    A2aCallContext call =
+                            shared.inboundCheck(A2aInboundMeta.of(request), body, parsed);
+                    A2aJsonRpcController.Inbound inbound = shared.parseInbound(agentId, parsed);
                     A2aTask task =
                             taskService.create(
                                     inbound.agentId(),
                                     inbound.contextId(),
                                     inbound.messageId(),
                                     inbound.text(),
-                                    principal);
+                                    principal,
+                                    call);
                     if (inbound.blocking()) {
                         taskService.run(task, null);
                         taskService.awaitBlocking(task);
@@ -130,17 +135,20 @@ public class A2aRestController {
             @RequestBody String body,
             @RequestHeader(value = A2aVersion.HEADER, required = false) String versionHeader,
             Principal principal,
+            HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
         run(
                 response,
                 () -> {
-                    JsonNode request = parseBody(body);
+                    JsonNode parsed = parseBody(body);
                     // Validates and RUNNER-checks before any byte of the stream is written, so a
                     // bad request is a normal HTTP error, not a half-open event stream.
-                    shared.parseInbound(agentId, request);
+                    A2aCallContext call =
+                            shared.inboundCheck(A2aInboundMeta.of(request), body, parsed);
+                    shared.parseInbound(agentId, parsed);
                     shared.streamMessage(
-                            agentId, request, A2aVersion.V1_0, principal, null, response);
+                            agentId, parsed, A2aVersion.V1_0, principal, null, call, response);
                 },
                 versionHeader);
     }
@@ -151,18 +159,19 @@ public class A2aRestController {
             @RequestParam(required = false) Integer historyLength,
             @RequestHeader(value = A2aVersion.HEADER, required = false) String versionHeader,
             Principal principal,
+            HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
         run(
                 response,
-                () ->
-                        writeJson(
-                                response,
-                                HttpStatus.OK,
-                                A2aWire.task(
-                                        taskService.get(id, principal),
-                                        A2aVersion.V1_0,
-                                        historyLength)),
+                () -> {
+                    shared.inboundCheck(A2aInboundMeta.of(request), "", null);
+                    writeJson(
+                            response,
+                            HttpStatus.OK,
+                            A2aWire.task(
+                                    taskService.get(id, principal), A2aVersion.V1_0, historyLength));
+                },
                 versionHeader);
     }
 
@@ -171,16 +180,19 @@ public class A2aRestController {
             @PathVariable String id,
             @RequestHeader(value = A2aVersion.HEADER, required = false) String versionHeader,
             Principal principal,
+            HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
         run(
                 response,
-                () ->
-                        writeJson(
-                                response,
-                                HttpStatus.OK,
-                                A2aWire.task(
-                                        taskService.cancel(id, principal), A2aVersion.V1_0, null)),
+                () -> {
+                    shared.inboundCheck(A2aInboundMeta.of(request), "", null);
+                    writeJson(
+                            response,
+                            HttpStatus.OK,
+                            A2aWire.task(
+                                    taskService.cancel(id, principal), A2aVersion.V1_0, null));
+                },
                 versionHeader);
     }
 
@@ -365,6 +377,19 @@ public class A2aRestController {
                             HttpStatus.BAD_REQUEST, "FAILED_PRECONDITION", "VERSION_NOT_SUPPORTED");
             case A2aError.PARSE_ERROR, A2aError.INVALID_REQUEST, A2aError.INVALID_PARAMS ->
                     new Mapping(HttpStatus.BAD_REQUEST, "INVALID_ARGUMENT", "INVALID_ARGUMENT");
+            case A2aError.MESSAGE_SIGNATURE_INVALID, A2aError.MESSAGE_SIGNATURE_REQUIRED ->
+                    new Mapping(
+                            HttpStatus.UNAUTHORIZED,
+                            "UNAUTHENTICATED",
+                            code == A2aError.MESSAGE_SIGNATURE_REQUIRED
+                                    ? "MESSAGE_SIGNATURE_REQUIRED"
+                                    : "MESSAGE_SIGNATURE_INVALID");
+            case A2aError.MESSAGE_EXPIRED ->
+                    new Mapping(HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED", "MESSAGE_EXPIRED");
+            case A2aError.MESSAGE_REPLAYED ->
+                    new Mapping(HttpStatus.CONFLICT, "ABORTED", "MESSAGE_REPLAYED");
+            case A2aError.HOP_LIMIT_EXCEEDED ->
+                    new Mapping(HttpStatus.LOOP_DETECTED, "FAILED_PRECONDITION", "HOP_LIMIT_EXCEEDED");
             case A2aError.METHOD_NOT_FOUND ->
                     new Mapping(HttpStatus.NOT_FOUND, "NOT_FOUND", "NOT_FOUND");
             default -> new Mapping(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL", "INTERNAL");

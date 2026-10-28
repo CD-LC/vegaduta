@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -21,6 +22,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -84,11 +86,35 @@ public class A2aJsonRpcController {
     private final AgentService agentService;
     private final ObjectMapper mapper;
 
+    /** Message-level checks (signature, replay, hop limit); null = none, as before they existed. */
+    private final A2aInboundGuard guard;
+
     public A2aJsonRpcController(
             A2aTaskService taskService, AgentService agentService, ObjectMapper mapper) {
+        this(taskService, agentService, mapper, null);
+    }
+
+    @Autowired
+    public A2aJsonRpcController(
+            A2aTaskService taskService,
+            AgentService agentService,
+            ObjectMapper mapper,
+            A2aInboundGuard guard) {
         this.taskService = taskService;
         this.agentService = agentService;
         this.mapper = mapper;
+        this.guard = guard;
+    }
+
+    /**
+     * Runs the message-level checks for one request ({@link A2aInboundGuard}) and returns the call
+     * context to run it under; null when no guard is wired. Shared with {@link
+     * A2aRestController}.
+     *
+     * @throws A2aError when the request must be refused
+     */
+    A2aCallContext inboundCheck(A2aInboundMeta meta, String body, JsonNode params) {
+        return guard == null ? null : guard.check(meta, body, params);
     }
 
     @PostMapping(value = PLATFORM_ROUTE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -96,9 +122,10 @@ public class A2aJsonRpcController {
             @RequestBody String body,
             @RequestHeader(value = A2aVersion.HEADER, required = false) String versionHeader,
             Principal principal,
+            HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
-        handle(null, body, versionHeader, principal, response);
+        handle(null, body, versionHeader, principal, A2aInboundMeta.of(request), response);
     }
 
     @PostMapping(value = AGENT_ROUTE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -107,9 +134,10 @@ public class A2aJsonRpcController {
             @RequestBody String body,
             @RequestHeader(value = A2aVersion.HEADER, required = false) String versionHeader,
             Principal principal,
+            HttpServletRequest request,
             HttpServletResponse response)
             throws IOException {
-        handle(agentId, body, versionHeader, principal, response);
+        handle(agentId, body, versionHeader, principal, A2aInboundMeta.of(request), response);
     }
 
     /**
@@ -123,6 +151,18 @@ public class A2aJsonRpcController {
             String body,
             String versionHeader,
             Principal principal,
+            HttpServletResponse response)
+            throws IOException {
+        handle(routeAgentId, body, versionHeader, principal, A2aInboundMeta.NONE, response);
+    }
+
+    /** As above, with the HTTP request details the message-level checks need. */
+    void handle(
+            UUID routeAgentId,
+            String body,
+            String versionHeader,
+            Principal principal,
+            A2aInboundMeta meta,
             HttpServletResponse response)
             throws IOException {
         A2aVersion version;
@@ -167,6 +207,8 @@ public class A2aJsonRpcController {
                 throw A2aError.invalidRequest("method is required");
             }
             JsonNode params = request.path("params");
+            // After transport auth, before any work: signature, replay window, hop limit.
+            A2aCallContext call = inboundCheck(meta, body, params);
             switch (method) {
                 case "SendMessage", "message/send" ->
                         writeJson(
@@ -174,10 +216,12 @@ public class A2aJsonRpcController {
                                 version,
                                 envelope(
                                         id,
-                                        sendMessage(routeAgentId, params, version, principal),
+                                        sendMessage(
+                                                routeAgentId, params, version, principal, call),
                                         null));
                 case "SendStreamingMessage", "message/stream" ->
-                        streamMessage(routeAgentId, params, version, principal, id, response);
+                        streamMessage(
+                                routeAgentId, params, version, principal, id, call, response);
                 case "GetTask", "tasks/get" ->
                         writeJson(
                                 response,
@@ -223,7 +267,11 @@ public class A2aJsonRpcController {
     // ------------------------------------------------------------- methods
 
     private Object sendMessage(
-            UUID routeAgentId, JsonNode params, A2aVersion version, Principal principal) {
+            UUID routeAgentId,
+            JsonNode params,
+            A2aVersion version,
+            Principal principal,
+            A2aCallContext call) {
         Inbound inbound = parseInbound(routeAgentId, params);
         A2aTask task =
                 taskService.create(
@@ -231,7 +279,8 @@ public class A2aJsonRpcController {
                         inbound.contextId,
                         inbound.messageId,
                         inbound.text,
-                        principal);
+                        principal,
+                        call);
         if (inbound.blocking) {
             taskService.run(task, null);
             taskService.awaitBlocking(task);
@@ -270,6 +319,7 @@ public class A2aJsonRpcController {
             A2aVersion version,
             Principal principal,
             JsonNode id,
+            A2aCallContext call,
             HttpServletResponse response)
             throws IOException {
         Inbound inbound = parseInbound(routeAgentId, params);
@@ -279,7 +329,8 @@ public class A2aJsonRpcController {
                         inbound.contextId,
                         inbound.messageId,
                         inbound.text,
-                        principal);
+                        principal,
+                        call);
 
         response.setStatus(HttpStatus.OK.value());
         response.setContentType(MediaType.TEXT_EVENT_STREAM_VALUE);

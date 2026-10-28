@@ -599,6 +599,14 @@ effective defaults are the ones in this table and now in the yml. Seeding keys a
 | `GRAPH_MEMORY_ARBITRATION_ENABLED` | `false` | graph-memory conflict arbitration | |
 | `APP_A2A_ENABLED` | `true` | the inbound A2A surface: agent cards, `/api/a2a` JSON-RPC and REST. `false` turns the whole surface off | |
 | `APP_A2A_SIGNING_ENABLED` | `true` | Ed25519-signed A2A agent cards | |
+| `APP_A2A_MAX_HOPS` (`app.a2a.max-hops`) | `4` | largest hop number an inbound A2A request may carry, and the largest an outbound `a2a_call_agent` may send (hop 1 = first agent-to-agent call of a chain; the hop is also propagated from the inbound request to calls made while serving it, with the originating trace id). `0` = off. Over the limit: JSON-RPC error `-32013` (REST: HTTP 508) | |
+| `APP_A2A_SERVER_VERIFY_SIGNATURES` (`app.a2a.server.verify-signatures`) | `true` | verify the detached message signature (`X-Vegaduta-A2A-Signature`: method, path, body digest, timestamp, nonce, hop) when a request carries one, with the timestamp window and nonce replay cache; also makes the Agent Card advertise the `urn:vegaduta:a2a:ext:message-integrity:v1` extension | |
+| `APP_A2A_SERVER_REQUIRE_SIGNED_MESSAGES` (`app.a2a.server.require-signed-messages`) | `false` | refuse A2A requests with no valid message signature (`-32011`). `false` for one release so peers that predate signing keep working; turn on once all peers advertise the extension. Implies verification | |
+| `APP_A2A_SERVER_TIMESTAMP_WINDOW` (`app.a2a.server.timestamp-window`) | `5m` | a signed request whose timestamp is further than this from the server clock is refused (`-32014`); nonces are remembered for twice this | |
+| `APP_A2A_SERVER_MAX_NONCES_PER_TENANT` (`app.a2a.server.max-nonces-per-tenant`) | `10000` | replay-cache size per tenant; when full of live nonces new signed requests are refused (`-32012`) rather than evicting one. Per replica, or shared through Redis with `APP_A2A_TASK_STORE=redis` | |
+| `APP_A2A_SERVER_TRUSTED_CARD_HOSTS` (`app.a2a.server.trusted-card-hosts`) | empty | optional allow-list (`host` or `*.suffix`) of hosts whose Agent Card may be fetched to find a caller's signing key; empty = any host the SSRF guard allows, for an authenticated caller | |
+| `APP_A2A_SERVER_KEY_CACHE_TTL` (`app.a2a.server.key-cache-ttl`) | `10m` | how long a caller's resolved signing key is cached (failures: 1 minute) | |
+| `APP_A2A_CLIENT_SIGN_REQUESTS` (`app.a2a.client.sign-requests`) | `true` | sign outbound A2A requests and send hop/trace, only to a peer whose card advertises the message-integrity extension; signing needs `APP_A2A_PUBLIC_BASE_URL` | |
 | `TOOL_AUTO_SELECTION_ENABLED` | `true` | automatic tool selection per turn | |
 | `APP_VISION_ENABLED` | `true` | image inputs in chat | |
 | `AGENT_JOB_TRIGGERS_ENABLED` | `true` | scheduled agent jobs | |
