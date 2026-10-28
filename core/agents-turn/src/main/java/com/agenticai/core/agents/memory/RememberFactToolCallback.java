@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.memory;
 
+import com.agenticai.core.screen.ContentWriteScreen;
 import com.agenticai.core.graphmemory.EntityExtractionService;
 import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.graphmemory.GraphTriple;
@@ -101,6 +102,13 @@ public class RememberFactToolCallback implements ToolCallback {
             Object factValue = args.get("fact");
             if (factValue == null || factValue.toString().isBlank()) {
                 return "{\"error\": \"fact is required\"}";
+            }
+            // Stored-injection / credential tripwire (ASI06, LLM04, LLM02): a remembered fact is
+            // recalled into later turns, so a directive or a key written here outlives this turn.
+            var refusal = ContentWriteScreen.refusal(factValue.toString());
+            if (refusal.isPresent()) {
+                log.warn("remember_fact refused for agent {}: write screen tripped", agentId);
+                return errorJson(refusal.get());
             }
             UUID memoryId = memoryService.remember(agentId, subjectKey, factValue.toString());
             writeToGraphIfAvailable(factValue.toString());

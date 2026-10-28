@@ -278,7 +278,8 @@ public class GraphMemoryService {
      * write.
      */
     public void supersede(UUID agentId, String subjectKey, GraphTriple triple) {
-        if (triple == null) {
+        if (triple == null || triple.tripsWriteScreen()) {
+            // A screened triple must not close the fact it would have replaced either.
             return;
         }
         String graphName = graphNameOrNull();
@@ -567,6 +568,10 @@ public class GraphMemoryService {
     private void writeTriple(
         Statement st, String graphName, String tierStr, String subjectKeyStr, GraphTriple triple, long now
     ) throws SQLException {
+        if (triple.tripsWriteScreen()) {
+            log.warn("Graph triple dropped: write screen tripped (injection phrase or credential)");
+            return;
+        }
         String subject = sanitize(triple.subject());
         String relation = sanitize(triple.relation().toUpperCase(Locale.ROOT));
         String object = sanitize(triple.object());

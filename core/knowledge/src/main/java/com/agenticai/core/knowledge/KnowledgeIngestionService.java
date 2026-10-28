@@ -1,6 +1,7 @@
 package com.agenticai.core.knowledge;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.screen.ContentWriteScreen;
 import com.agenticai.core.knowledge.dto.IngestResponse;
 import com.agenticai.core.knowledge.dto.SidecarChunk;
 import com.agenticai.core.knowledge.dto.SidecarEmbedResponse;
@@ -89,6 +90,52 @@ public class KnowledgeIngestionService {
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     void setEmbeddingBinding(KnowledgeEmbeddingBinding embeddingBinding) {
         this.embeddingBinding = embeddingBinding;
+    }
+
+    /**
+     * Ingestion write-screen ({@code app.knowledge.ingest-screen.*}). A credential in the text is
+     * refused (the whole document: a leaked key must not become a search hit); an instruction-
+     * shaped phrase is NOT a refusal - each affected chunk gets a {@code screen_flags} marker in its
+     * metadata that search results surface to the model. Setter-injected so the constructor and
+     * every test that builds this service are unchanged; unset = both on.
+     */
+    private volatile boolean refuseCredentials = true;
+
+    private volatile boolean flagInjection = true;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setIngestScreen(
+            @org.springframework.beans.factory.annotation.Value(
+                            "${app.knowledge.ingest-screen.refuse-credentials:true}")
+                    boolean refuseCredentials,
+            @org.springframework.beans.factory.annotation.Value(
+                            "${app.knowledge.ingest-screen.flag-injection:true}")
+                    boolean flagInjection) {
+        this.refuseCredentials = refuseCredentials;
+        this.flagInjection = flagInjection;
+    }
+
+    /**
+     * The chunk's metadata with a {@code screen_flags} array merged in when {@code text} matched the
+     * write screen's injection family; {@code metadataJson} unchanged when clean or flagging is off.
+     * Credentials never reach here (the document is refused first).
+     */
+    private String withScreenFlags(String metadataJson, String text) {
+        if (!flagInjection || !ContentWriteScreen.injectionHit(text)) {
+            return metadataJson;
+        }
+        try {
+            com.fasterxml.jackson.databind.node.ObjectNode node =
+                    metadataJson == null || metadataJson.isBlank()
+                            ? MAPPER.createObjectNode()
+                            : (com.fasterxml.jackson.databind.node.ObjectNode)
+                                    MAPPER.readTree(metadataJson);
+            node.putArray("screen_flags").add(ContentWriteScreen.FLAG_INJECTION);
+            return MAPPER.writeValueAsString(node);
+        } catch (Exception e) {
+            log.warn("Could not record screen_flags for a chunk: {}", e.getMessage());
+            return metadataJson;
+        }
     }
 
     /**
@@ -196,6 +243,12 @@ public class KnowledgeIngestionService {
             UUID collectionId,
             UUID documentId,
             String sourceType) {
+        if (refuseCredentials && ContentWriteScreen.credentialHit(text)) {
+            // Before any embedding work; the callers mark the document FAILED with this message.
+            throw new InvalidKnowledgeUploadException(
+                    "Document contains what looks like a credential or private key and was not"
+                            + " ingested - remove it and upload again");
+        }
         java.util.Optional<KnowledgeCollection> collection =
                 collectionRepository.findById(collectionId);
         String embeddingModel =
@@ -277,10 +330,14 @@ public class KnowledgeIngestionService {
             UUID id = UUID.randomUUID();
             // chunk.index() is the position in `pieces` (see SidecarClient#embedPreChunked), so it
             // addresses the matching per-child metadata of a parent-child plan.
+            // A parent-child hit returns the (larger) parent passage, so its flag comes from the
+            // whole document rather than the small child that was embedded.
             String chunkMetadata =
-                    parentChildPlan != null
-                            ? parentChildPlan.metadata().get(chunk.index())
-                            : metadataJson;
+                    withScreenFlags(
+                            parentChildPlan != null
+                                    ? parentChildPlan.metadata().get(chunk.index())
+                                    : metadataJson,
+                            parentChildPlan != null ? text : chunk.text());
             // Stage 5 (KB multi-modal storage, migration V66) - document_id
             // lets a search hit resolve back to the KnowledgeDocument that
             // owns it (and from there, the original file in object storage

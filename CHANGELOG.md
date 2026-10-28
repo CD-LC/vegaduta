@@ -21,6 +21,11 @@ Release notes on GitHub are generated from the section for each version.
   `WorkflowRunRecoveryJob` now states in the failed run's message whether the crash left an uncertain effect
   or the run is resumable after its last completed node, and purges journal rows past
   `app.workflow.effects.journal.retention-days`. Off switch: `app.workflow.effects.journal.enabled=false`.
+### Security
+
+- **Taint now survives across the turns of a conversation.** A turn that became tainted (web page, email, recalled memory, inbound channel) leaves a small marker with the chat session, and every later turn of the same session starts tainted from it, including after the history is summarised. `GET`/`DELETE /api/agents/{id}/chat/sessions/{sid}/taint` show and clear it (audited). `app.agents.taint.session-persistence`, default on whenever the taint layer is.
+- **Memory and knowledge writes are screened.** `remember_fact`, `remember_shared_fact` and graph-memory writes refuse injection phrases and credentials (one shared `ContentWriteScreen`); ingestion by upload, URL, connector or job refuses credentials and records a `screen_flags` marker on chunks that match an injection phrase, which `search_knowledge_base` results now show the model.
+- **`app.agents.taint.inbound-channel-sources` (`off` | `all` | `non-owner`, default `off`)** and `InboundChannelTaintPolicy`: the seam for marking inbound channel turns, without choosing the policy.
 
 ### Fixed
 

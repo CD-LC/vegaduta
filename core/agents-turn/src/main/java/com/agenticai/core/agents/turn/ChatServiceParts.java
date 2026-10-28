@@ -97,6 +97,7 @@ final class ChatServiceParts {
                         context.tenantMemoryService(),
                         agentService,
                         () -> svc.memoryStepEventsEnabled);
+        this.memoryRecall.useSessionTaint(context.sessionTaintStore());
         this.turns =
                 new ChatTurnExecutor(
                         credentialResolver,

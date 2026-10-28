@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Taint state for ONE agent turn: has any content an outsider could have authored entered the
@@ -26,6 +27,7 @@ public final class TurnTaint {
     private final List<String> sources = new ArrayList<>(2);
     private final Set<String> reported = new HashSet<>();
     private volatile boolean tainted;
+    private volatile Consumer<List<String>> listener;
 
     /**
      * Records that content from {@code source} (a tool name or channel label) entered the turn.
@@ -34,14 +36,41 @@ public final class TurnTaint {
      */
     public boolean mark(String source) {
         String label = source == null || source.isBlank() ? "unknown" : source;
+        boolean first;
+        boolean changed;
+        List<String> snapshot = null;
         synchronized (sources) {
-            boolean first = !tainted;
+            first = !tainted;
             tainted = true;
+            changed = first;
             if (sources.size() < MAX_SOURCES && !sources.contains(label)) {
                 sources.add(label);
+                changed = true;
             }
-            return first;
+            if (changed && listener != null) {
+                snapshot = List.copyOf(sources);
+            }
         }
+        Consumer<List<String>> l = listener;
+        if (snapshot != null && l != null) {
+            try {
+                l.accept(snapshot);
+            } catch (RuntimeException e) {
+                // A persistence hook must never break the turn that is being tainted.
+            }
+        }
+        return first;
+    }
+
+    /**
+     * Registers the single hook told whenever the set of sources changes (the first mark, and each
+     * new source label after it) with a snapshot. The chat pipeline uses it to persist a session
+     * level taint marker (see {@code SessionTaintStore}) so a later turn of the same conversation
+     * starts tainted. Called on the marking thread, outside the lock; exceptions are swallowed.
+     * Replaces any earlier hook.
+     */
+    public void onChange(Consumer<List<String>> hook) {
+        this.listener = hook;
     }
 
     /**

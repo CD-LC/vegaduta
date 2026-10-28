@@ -424,7 +424,15 @@ final class ChatPromptAssembler {
         // turn here; tool resolution binds the turn's taint key to these seeds (TurnTaintSeeds).
         String recalledMemory =
                 joinPreTurnOrDegrade(memoryFuture, null, "memory", preTurnDeadlineNanos);
+        // Conversation-level taint: replay what earlier turns of this session recorded onto this
+        // turn's taint, and persist whatever this turn adds (app.agents.taint.session-persistence).
+        memoryRecall.seedSessionTaint(context.taint(), memorySessionId);
         taintIfRecalled(context, recalledMemory);
+        // An untrusted-delimited block piped in as the turn's input (the workflow 'knowledge' node's
+        // output is the intended case) enters the context without crossing a tool boundary.
+        if (com.agenticai.core.guardrails.taint.Spotlight.hasUntrustedBlock(userMessage)) {
+            context.taint().mark("untrusted_input");
+        }
         ChatSystemPromptComposer.Composed composed =
                 ChatSystemPromptComposer.compose(
                         new ChatSystemPromptComposer.Input(

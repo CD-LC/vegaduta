@@ -310,7 +310,7 @@ public class KnowledgeSearchService {
         List<SearchResultResponse> reranked = rerankIfEnabled(query, fused);
 
         List<SearchResultResponse> results =
-            attachSpans(query, attachSourceUrls(reranked.stream().limit(topK).toList()));
+            attachSpans(query, attachScreenFlags(attachSourceUrls(reranked.stream().limit(topK).toList())));
 
         log.debug(
             "Knowledge search: query='{}' topK={} collectionIds={} excludeImageSourced={} vectorHits={} keywordHits={} fused={} reranked={} -> {} results",
@@ -388,7 +388,7 @@ public class KnowledgeSearchService {
         List<SearchResultResponse> shaped = options.expandParents() ? expandParents(ranked) : ranked;
 
         List<SearchResultResponse> results =
-            attachSpans(query, attachSourceUrls(shaped.stream().limit(topK).toList()));
+            attachSpans(query, attachScreenFlags(attachSourceUrls(shaped.stream().limit(topK).toList())));
         log.debug(
             "Knowledge search (enhanced): query='{}' topK={} lists={} (expansion {}) fused={} mmr={} parentExpand={} -> {} results",
             query, topK, lists.size(), expansionLists, fused.size(), options.mmrLambda(), options.expandParents(), results.size()
@@ -564,5 +564,22 @@ public class KnowledgeSearchService {
         return results.stream()
             .map(r -> r.withSourceUrl(urls.get(r.documentId())))
             .toList();
+    }
+
+    /**
+     * Provenance fill: copies each hit's ingestion {@code screen_flags} onto the result (one batch
+     * query over the final result set), so the model that receives a chunk also receives the marker
+     * that it matched an instruction-shaped phrase when ingested. Fails open.
+     */
+    List<SearchResultResponse> attachScreenFlags(List<SearchResultResponse> results) {
+        if (results.isEmpty()) {
+            return results;
+        }
+        Map<UUID, List<String>> flags = scanner.screenFlags(
+            results.stream().map(SearchResultResponse::id).toList(), KnowledgeSchemaSupport.qualifiedTableName());
+        if (flags.isEmpty()) {
+            return results;
+        }
+        return results.stream().map(r -> flags.containsKey(r.id()) ? r.withScreenFlags(flags.get(r.id())) : r).toList();
     }
 }

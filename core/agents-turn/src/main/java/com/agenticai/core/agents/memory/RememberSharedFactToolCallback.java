@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.memory;
 
+import com.agenticai.core.screen.ContentWriteScreen;
 import com.agenticai.core.graphmemory.EntityExtractionService;
 import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.graphmemory.GraphTriple;
@@ -91,6 +92,12 @@ public class RememberSharedFactToolCallback implements ToolCallback {
             Object factValue = args.get("fact");
             if (factValue == null || factValue.toString().isBlank()) {
                 return "{\"error\": \"fact is required\"}";
+            }
+            // Shared tier: recalled by EVERY agent of the tenant, so the same write screen applies.
+            var refusal = ContentWriteScreen.refusal(factValue.toString());
+            if (refusal.isPresent()) {
+                log.warn("remember_shared_fact refused for agent {}: write screen tripped", agentId);
+                return errorJson(refusal.get());
             }
             UUID memoryId = tenantMemoryService.remember(subjectKey, factValue.toString(), agentId);
             writeToSharedGraphIfAvailable(factValue.toString());

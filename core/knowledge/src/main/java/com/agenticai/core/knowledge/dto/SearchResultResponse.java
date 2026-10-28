@@ -1,6 +1,7 @@
 package com.agenticai.core.knowledge.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -32,14 +33,29 @@ import java.util.UUID;
  * the query. All three are null unless {@code app.knowledge.span-citations.enabled}
  * is on, and are omitted from JSON when null, so existing consumers and payloads
  * are unchanged.
+ *
+ * <p>{@code screenFlags}: the ingestion write-screen's provenance marker for this chunk
+ * (for example {@code injection_phrase}: the text matched an instruction-shaped phrase when it was
+ * ingested). Omitted from JSON when empty. It is surfaced to the model on purpose - the chunk is
+ * stored, not refused, but the model should treat it as untrusted text, not as a directive.
  */
 public record SearchResultResponse(
     UUID id, String source, int chunkIndex, String content, UUID collectionId, double distance, UUID documentId,
     String sourceUrl,
     @JsonInclude(JsonInclude.Include.NON_NULL) Integer startChar,
     @JsonInclude(JsonInclude.Include.NON_NULL) Integer endChar,
-    @JsonInclude(JsonInclude.Include.NON_NULL) String quote
+    @JsonInclude(JsonInclude.Include.NON_NULL) String quote,
+    @JsonInclude(JsonInclude.Include.NON_EMPTY) List<String> screenFlags
 ) {
+    /** Compatibility ctor for the pre-screen-flags shape. */
+    public SearchResultResponse(
+        UUID id, String source, int chunkIndex, String content, UUID collectionId, double distance, UUID documentId,
+        String sourceUrl, Integer startChar, Integer endChar, String quote
+    ) {
+        this(id, source, chunkIndex, content, collectionId, distance, documentId, sourceUrl, startChar, endChar,
+            quote, null);
+    }
+
     /** Compatibility ctor for the pre-span shape (no span fields). */
     public SearchResultResponse(
         UUID id, String source, int chunkIndex, String content, UUID collectionId, double distance, UUID documentId,
@@ -58,13 +74,13 @@ public record SearchResultResponse(
     /** Copy with a different ranking value; keeps every other field including the span. */
     public SearchResultResponse withDistance(double newDistance) {
         return new SearchResultResponse(id, source, chunkIndex, content, collectionId, newDistance, documentId,
-            sourceUrl, startChar, endChar, quote);
+            sourceUrl, startChar, endChar, quote, screenFlags);
     }
 
     /** Copy with a resolved source URL; keeps every other field including the span. */
     public SearchResultResponse withSourceUrl(String newSourceUrl) {
         return new SearchResultResponse(id, source, chunkIndex, content, collectionId, distance, documentId,
-            newSourceUrl, startChar, endChar, quote);
+            newSourceUrl, startChar, endChar, quote, screenFlags);
     }
 
     /** Copy with no span fields (span citations switched off); returns this when there is none to drop. */
@@ -73,12 +89,18 @@ public record SearchResultResponse(
             return this;
         }
         return new SearchResultResponse(id, source, chunkIndex, content, collectionId, distance, documentId,
-            sourceUrl, null, null, null);
+            sourceUrl, null, null, null, screenFlags);
+    }
+
+    /** Copy carrying the ingestion screen's flags for this chunk. */
+    public SearchResultResponse withScreenFlags(List<String> flags) {
+        return new SearchResultResponse(id, source, chunkIndex, content, collectionId, distance, documentId,
+            sourceUrl, startChar, endChar, quote, flags);
     }
 
     /** Copy carrying a span into {@link #content()}. */
     public SearchResultResponse withSpan(int start, int end, String spanQuote) {
         return new SearchResultResponse(id, source, chunkIndex, content, collectionId, distance, documentId,
-            sourceUrl, start, end, spanQuote);
+            sourceUrl, start, end, spanQuote, screenFlags);
     }
 }

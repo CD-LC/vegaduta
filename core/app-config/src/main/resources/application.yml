@@ -696,6 +696,14 @@ app:
     # Listed here so the key has one visible default.
     taint:
       mode: ${APP_AGENTS_TAINT_MODE:observe}
+      # Conversation-level taint: once a turn is tainted, a marker (sources, first-tainted-at) is kept with the
+      # chat session (same Redis TTL as the history) and seeds every later turn of that session, so a reply built
+      # from poisoned content does not start the next turn clean. Active only when mode != off. Cleared only by
+      # an explicit, audited DELETE /api/agents/{id}/chat/sessions/{sid}/taint.
+      session-persistence: ${APP_AGENTS_TAINT_SESSION_PERSISTENCE:true}
+      # Inbound channel turns: off | all | non-owner. DEFAULT off - policy not decided by the product owner. When
+      # on, an adapter that calls InboundChannelTaintPolicy.apply(turnContext.taint(), senderIsOwner) marks the turn.
+      inbound-channel-sources: ${APP_AGENTS_TAINT_INBOUND_CHANNEL_SOURCES:off}
     # Anthropic model alias. Check https://docs.anthropic.com/en/docs/about-claude/models
     # for the current default and adjust - model names are versioned and change over time.
     default-model: ${DEFAULT_MODEL:claude-sonnet-4-5}

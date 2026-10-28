@@ -313,4 +313,38 @@ final class KnowledgeChunkScanner {
             return List.of();
         }
     }
+
+    /**
+     * The ingestion write-screen's {@code screen_flags} marker (see {@link KnowledgeIngestionService})
+     * for each of {@code ids} that has one, in one query. Chunks without a marker are absent from the
+     * map. Fails open to an empty map: a lookup problem must never fail a search.
+     */
+    Map<UUID, List<String>> screenFlags(List<UUID> ids, String table) {
+        Map<UUID, List<String>> out = new java.util.HashMap<>();
+        if (ids.isEmpty()) {
+            return out;
+        }
+        String idArray = ids.stream().map(UUID::toString).collect(Collectors.joining(",", "{", "}"));
+        com.fasterxml.jackson.databind.ObjectMapper mapper = com.agenticai.core.json.JsonMappers.plain();
+        try {
+            jdbcTemplate.query(
+                "SELECT id, metadata->'screen_flags' AS flags FROM " + table
+                    + " WHERE id = ANY(?::uuid[]) AND metadata->'screen_flags' IS NOT NULL",
+                rs -> {
+                    try {
+                        List<String> flags = mapper.readValue(
+                            rs.getString("flags"), new com.fasterxml.jackson.core.type.TypeReference<List<String>>() { });
+                        out.put(UUID.fromString(rs.getString("id")), flags);
+                    } catch (Exception ignored) {
+                        // a malformed marker is skipped, never fails the search
+                    }
+                },
+                idArray
+            );
+        } catch (RuntimeException e) {
+            log.debug("screen_flags lookup skipped: {}", e.getMessage());
+            out.clear();
+        }
+        return out;
+    }
 }
