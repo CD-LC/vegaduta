@@ -166,7 +166,8 @@ final class NodeErrorStrategy {
 
     /** Whether {@code failure} may be retried under {@code retry}: never a quota rejection; transient-only filters. */
     static boolean shouldRetry(Retry retry, RuntimeException failure) {
-        if (failure instanceof TenantLimitExceededException) {
+        if (failure instanceof TenantLimitExceededException
+            || failure instanceof NodeAttemptExecutor.NodeStepTimeoutException) {
             return false;
         }
         return !retry.transientOnly() || isTransient(failure);

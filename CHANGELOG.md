@@ -10,6 +10,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Workflow step timeout no longer breaks slow nodes.** The workflow-level `stepTimeoutSeconds` (default 30 in every existing row, never enforced before) now bounds only fast node types (`http`, `condition`); agent, supervisor, sub-workflow, tool, code and other long-running nodes get a 600 s floor (`-Dvegaduta.workflow.longRunningStepTimeoutSeconds`, 0 = no limit). A node's own `timeoutSeconds` (1..3600) overrides both. A timed-out attempt is never retried, because its worker may still be running.
 - **Workflow engine: duplicate side effects on retry, unenforced step timeout,
   approvals inside loop bodies.** (1) The default retry path no longer retries
   irreversible nodes (`bulk_email`, `tool`, `crm_lead`, `device_control`,

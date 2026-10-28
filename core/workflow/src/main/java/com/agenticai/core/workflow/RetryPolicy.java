@@ -61,6 +61,9 @@ final class RetryPolicy {
 
     /** A quota rejection is deterministic within the backoff window, so it is never retried. */
     static boolean shouldRetry(WorkflowNodeDto node, int attempt, int maxAttempts, RuntimeException failure) {
-        return isRetryableNode(node) && attempt < maxAttempts && !(failure instanceof TenantLimitExceededException);
+        return isRetryableNode(node) && attempt < maxAttempts && !(failure instanceof TenantLimitExceededException)
+            // A timed-out attempt's worker may still be running (an LLM or HTTP call can ignore the interrupt);
+            // starting a second copy would run the node's side effects twice.
+            && !(failure instanceof NodeAttemptExecutor.NodeStepTimeoutException);
     }
 }

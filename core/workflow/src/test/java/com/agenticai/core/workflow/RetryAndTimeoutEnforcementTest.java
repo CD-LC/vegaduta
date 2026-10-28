@@ -101,7 +101,7 @@ class RetryAndTimeoutEnforcementTest {
         }), null);
         long start = System.nanoTime();
         RuntimeException failure = assertThrows(RuntimeException.class, () -> attempts.execute(
-            definition(1, 0), "run", node("a", "agent", Map.of()), "in", "u", List.of(), RunMode.PRODUCTION));
+            definition(1, 0), "run", node("a", "http", Map.of()), "in", "u", List.of(), RunMode.PRODUCTION));
         assertInstanceOf(NodeAttemptExecutor.NodeStepTimeoutException.class, failure);
         assertTrue(TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start) < 10);
         assertTrue(done.await(5, TimeUnit.SECONDS));
@@ -230,8 +230,58 @@ class RetryAndTimeoutEnforcementTest {
 
     @Test
     void joinBoundCoversRetriesAndIsZeroWithoutATimeout() {
-        WorkflowNodeDto agent = node("a", "agent", Map.of());
-        assertEquals(0, ParallelStep.joinBoundSeconds(definition(0, 2), List.of(agent)));
-        assertEquals(10 * 3 + 30, ParallelStep.joinBoundSeconds(definition(10, 2), List.of(agent)));
+        WorkflowNodeDto http = node("a", "http", Map.of());
+        assertEquals(0, ParallelStep.joinBoundSeconds(definition(0, 2), List.of(http)));
+        assertEquals(10 * 3 + 30, ParallelStep.joinBoundSeconds(definition(10, 2), List.of(http)));
+    }
+
+    // --- timeout policy ------------------------------------------------------------
+
+    @Test
+    void workflowStepTimeoutOnlyBoundsFastNodeTypes() {
+        assertEquals(30, NodeAttemptExecutor.effectiveTimeoutSeconds(node("h", "http", Map.of()), 30));
+        assertEquals(30, NodeAttemptExecutor.effectiveTimeoutSeconds(node("c", "condition", Map.of()), 30));
+        // an agent / LLM / sub-workflow node keeps working under the legacy default of 30
+        for (String type : List.of("agent", "supervisor", "workflow", "tool", "code", "human_input")) {
+            assertEquals(NodeAttemptExecutor.LONG_RUNNING_FLOOR_SECONDS,
+                NodeAttemptExecutor.effectiveTimeoutSeconds(node("n", type, Map.of()), 30), type);
+        }
+        // a larger workflow value is respected for slow types
+        assertEquals(900, NodeAttemptExecutor.effectiveTimeoutSeconds(node("a", "agent", Map.of()), 900));
+    }
+
+    @Test
+    void perNodeTimeoutOverridesAndIsClamped() {
+        assertEquals(45, NodeAttemptExecutor.effectiveTimeoutSeconds(
+            node("a", "agent", Map.of("timeoutSeconds", 45)), 30));
+        assertEquals(7, NodeAttemptExecutor.effectiveTimeoutSeconds(
+            node("h", "http", Map.of("timeoutSeconds", "7")), 30));
+        assertEquals(NodeAttemptExecutor.MAX_NODE_TIMEOUT_SECONDS, NodeAttemptExecutor.effectiveTimeoutSeconds(
+            node("a", "agent", Map.of("timeoutSeconds", 999_999)), 30));
+        // malformed or non-positive falls back to the type default
+        assertEquals(30, NodeAttemptExecutor.effectiveTimeoutSeconds(
+            node("h", "http", Map.of("timeoutSeconds", "soon")), 30));
+        assertEquals(30, NodeAttemptExecutor.effectiveTimeoutSeconds(
+            node("h", "http", Map.of("timeoutSeconds", 0)), 30));
+    }
+
+    @Test
+    void aTimedOutAttemptIsNeverRetried() {
+        WorkflowNodeDto http = node("h", "http", Map.of());
+        RuntimeException timeout = new NodeAttemptExecutor.NodeStepTimeoutException(http, 5);
+        assertFalse(RetryPolicy.shouldRetry(http, 1, 3, timeout));
+        NodeErrorStrategy.Retry retry = new NodeErrorStrategy.Retry(3, 3, 0, false, false, false);
+        assertFalse(NodeErrorStrategy.shouldRetry(retry, timeout));
+    }
+
+    @Test
+    void aNodeLongerThanTheLegacyDefaultStillCompletes() {
+        NodeAttemptExecutor attempts = new NodeAttemptExecutor(executorAnswering(inv -> {
+            Thread.sleep(1_500);
+            return ok();
+        }), null);
+        // workflow step timeout 1s (below the node's runtime) must not kill an agent node
+        assertEquals("out", attempts.execute(definition(1, 0), "run", node("a", "agent", Map.of()), "in", "u",
+            List.of(), RunMode.PRODUCTION).output());
     }
 }

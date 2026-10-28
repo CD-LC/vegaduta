@@ -139,14 +139,15 @@ final class ParallelStep implements ContainerStep {
      * for the retry backoff. Zero (unbounded) when the workflow has no positive step timeout.
      */
     static long joinBoundSeconds(WorkflowDefinition definition, List<WorkflowNodeDto> branchNodes) {
-        long timeout = definition.getStepTimeoutSeconds();
-        if (timeout <= 0) {
-            return 0;
-        }
-        int attempts = 1;
+        long slowest = 0;
         for (WorkflowNodeDto branch : branchNodes) {
-            attempts = Math.max(attempts, RetryPolicy.totalAttempts(branch, definition.getMaxRetryAttempts(), -1));
+            int t = NodeAttemptExecutor.effectiveTimeoutSeconds(branch, definition.getStepTimeoutSeconds());
+            if (t <= 0) {
+                return 0; // a branch with no limit makes the join unbounded too
+            }
+            int attempts = RetryPolicy.totalAttempts(branch, definition.getMaxRetryAttempts(), -1);
+            slowest = Math.max(slowest, (long) t * attempts);
         }
-        return timeout * attempts + 30L;
+        return slowest == 0 ? 0 : slowest + 30L;
     }
 }

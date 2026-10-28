@@ -125,7 +125,7 @@ final class NodeAttemptExecutor {
         WorkflowDefinition definition, String runId, WorkflowNodeDto node, String input, String requestedBy,
         List<ChatInlineAttachment> attachments, ExpressionScope scope, RunMode mode, NodeStreamSink sink
     ) {
-        int timeoutSeconds = definition.getStepTimeoutSeconds();
+        int timeoutSeconds = effectiveTimeoutSeconds(node, definition.getStepTimeoutSeconds());
         if (timeoutSeconds <= 0) {
             return runBound(definition, runId, node, input, requestedBy, attachments, scope, mode, sink);
         }
@@ -176,6 +176,49 @@ final class NodeAttemptExecutor {
             NodeStreamContext.clear();
             ExpressionScopeContext.clear();
         }
+    }
+
+
+    /**
+     * Floor for every node type that is legitimately slow (agent / LLM / sub-workflow / tool ...). The
+     * workflow-level {@code stepTimeoutSeconds} defaults to 30 in every existing row and was never enforced
+     * before, so applying it to an agent node would fail workflows that have always worked. Override with
+     * {@code -Dvegaduta.workflow.longRunningStepTimeoutSeconds=N} (0 = no limit for those types).
+     */
+    static final int LONG_RUNNING_FLOOR_SECONDS =
+        Integer.getInteger("vegaduta.workflow.longRunningStepTimeoutSeconds", 600);
+
+    /** Upper bound accepted for a per-node {@code timeoutSeconds}. */
+    static final int MAX_NODE_TIMEOUT_SECONDS = 3600;
+
+    /** Types where the workflow-level step timeout is a sensible bound: no model call, no nested run. */
+    private static final java.util.Set<String> FAST_TYPES = java.util.Set.of("http", "condition");
+
+    /**
+     * Timeout for one attempt of {@code node}: a node's own {@code timeoutSeconds} config wins (1..3600);
+     * otherwise the workflow-level value for {@link #FAST_TYPES}; otherwise at least
+     * {@link #LONG_RUNNING_FLOOR_SECONDS}. Zero or less means "no limit".
+     */
+    static int effectiveTimeoutSeconds(WorkflowNodeDto node, int workflowStepTimeoutSeconds) {
+        Object raw = node.config() == null ? null : node.config().get("timeoutSeconds");
+        if (raw != null) {
+            try {
+                int v = raw instanceof Number n ? n.intValue() : Integer.parseInt(raw.toString().trim());
+                if (v >= 1) {
+                    return Math.min(v, MAX_NODE_TIMEOUT_SECONDS);
+                }
+            } catch (NumberFormatException ignored) {
+                // malformed override: fall through to the type default
+            }
+        }
+        String type = node.type() == null ? "" : node.type().toLowerCase(java.util.Locale.ROOT);
+        if (FAST_TYPES.contains(type)) {
+            return workflowStepTimeoutSeconds;
+        }
+        if (LONG_RUNNING_FLOOR_SECONDS <= 0) {
+            return 0;
+        }
+        return Math.max(workflowStepTimeoutSeconds, LONG_RUNNING_FLOOR_SECONDS);
     }
 
     /** A node attempt exceeded the workflow's {@code stepTimeoutSeconds}. */
