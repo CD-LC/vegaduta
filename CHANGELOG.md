@@ -29,6 +29,17 @@ Release notes on GitHub are generated from the section for each version.
   and `GET .../scratchpad/{key}` (VIEWER access; `session=agent` or omitted
   reads the long-term pad).
 
+- **On-screen keyboard follows the selected language.** A keyboard toggle in
+  the topbar (next to the language switcher) opens a floating board in the
+  current locale's script — Arabic, Devanagari, Bengali, Punjabi, Kannada,
+  Malayalam, Odia, Telugu, Sindhi, Urdu, Chinese, Japanese, and the European
+  layouts — and types into whichever input has focus, so chat, search, and
+  forms all work without wiring. Layout data (`simple-keyboard-layouts`)
+  lazy-loads per locale so pages never pay for scripts they don't use;
+  Devanagari-script locales share the Hindi layout and Kashmiri the Urdu one.
+  Locales with no matching layout keep the toggle disabled rather than
+  offering a board in the wrong script.
+
 ### Fixed
 
 - **On-device media generation (`local_generate_image` / `local_generate_audio`) works after a reload, on bigger-window models, and on adapters without `shader-f16`.** Three wiring gaps left the tools dead: a model installed in a previous page session left the "cached" marker set but the worker cold, and the tools refused as if it were never installed — the facade now warms the worker from the local cache (a cache hit, not an acquisition, so the no-download consent rule is untouched), the same contract the vision model already follows. The tool-advertisement budget was a flat 3,200 chars for every model, which always trimmed the media tools out of the system prompt — it now scales with the session's context window (`toolAdvertisementBudgetFor`), so models that can afford the schema block are actually offered the tools. And MusicGen hard-required fp16 weights on the WebGPU path, so adapters without the `shader-f16` feature failed every load with a bare "Download failed" — the worker now always takes the model's q4 weights on WebGPU — fp32 and fp16 both fail session creation inside the browser's wasm heap (the fp16 decoder alone is ~850 MB, fp32 ~1.7 GB), while q4 is the supported WebGPU-quantized path at ~570 MB and needs no shader-f16; wasm+q8 stays the no-WebGPU path, while the image tool and its Edge-console card gate honestly on fp16 support since SD-Turbo ships fp16-only weights. Load failures also surface the worker's real error detail in the download chip instead of "Download failed" alone. Finally, models whose context window still can't afford a tool's schema now get a system-prompt note naming the omitted tools with an explicit "calls will be refused — do not substitute a different tool" instruction, so a request like "generate an image" no longer gets silently improvised into `generate_document` with a PNG type; if the model calls a trimmed name anyway, the refusal now says the schema didn't fit this model's prompt budget (and that a bigger-window model offers it) instead of the wrong "this device cannot run it".
