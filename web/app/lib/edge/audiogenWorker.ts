@@ -80,10 +80,30 @@ async function ensureAssets(requestId: number): Promise<LoadedAssets> {
         // Progress is best-effort.
       }
     };
-    const hasWebGpu = !!workerScope.navigator?.gpu;
+    // Device + dtype follow the adapter, not just the API's presence: fp16
+    // kernels need the adapter's "shader-f16" feature (SwiftShader and some
+    // older/integrated adapters lack it — transformers.js refuses the load
+    // outright). fp32 keeps the GPU path working there; only a missing adapter
+    // drops to wasm+q8.
+    let device: "webgpu" | "wasm" = "wasm";
+    let dtype: "fp16" | "fp32" | "q8" = "q8";
+    const gpu = workerScope.navigator?.gpu;
+    if (gpu) {
+      try {
+        const adapter = await (
+          gpu as { requestAdapter?: () => Promise<{ features?: { has?: (f: string) => boolean } } | null> }
+        ).requestAdapter?.();
+        if (adapter) {
+          device = "webgpu";
+          dtype = adapter.features?.has?.("shader-f16") === true ? "fp16" : "fp32";
+        }
+      } catch {
+        // Adapter request failed — stay on the wasm path.
+      }
+    }
     const generator = await tf.pipeline("text-to-audio", MODEL_ID, {
-      device: hasWebGpu ? "webgpu" : "wasm",
-      dtype: hasWebGpu ? "fp16" : "q8",
+      device,
+      dtype,
       progress_callback,
     });
     assets = { generator };

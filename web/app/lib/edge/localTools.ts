@@ -94,7 +94,11 @@ export const LOCAL_TOOL_PREFIX = "local_";
  * model that will then refuse every call.
  */
 const CAPABILITY_GATES: Record<string, (caps: EdgeCapabilities | null) => boolean> = {
-  local_generate_image: (caps) => caps?.webgpu?.available === true,
+  // SD-Turbo's weights are fp16-only — adapters without shader-f16 can't run
+  // them (ORT fails at session create), so the tool doesn't pretend otherwise.
+  local_generate_image: (caps) => caps?.webgpu?.available === true && caps.webgpu.shaderF16 === true,
+  // Audio gen falls back to fp32 weights on f16-less adapters, so any WebGPU
+  // adapter qualifies; the wasm q8 path stays for 8GB+ devices.
   local_generate_audio: (caps) => caps?.webgpu?.available === true || (caps?.deviceMemoryGB ?? 0) >= 8,
 };
 

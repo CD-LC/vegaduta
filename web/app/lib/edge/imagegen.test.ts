@@ -118,7 +118,7 @@ describe("edge/imagegen", () => {
           detectCapabilities: async () => ({
             version: 1,
             detectedAt: 1,
-            webgpu: { available: true, maxBufferSize: 1, maxStorageBufferBindingSize: 1 },
+            webgpu: { available: true, maxBufferSize: 1, maxStorageBufferBindingSize: 1, shaderF16: true },
           }),
         };
       });
