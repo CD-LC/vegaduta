@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.tools.scratchpad;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,14 +19,38 @@ import org.springframework.data.repository.query.Param;
  */
 public interface ScratchpadNoteRepository extends JpaRepository<ScratchpadNote, UUID> {
 
-    /** The upsert lookup behind {@code AgentScratchpadService#write}; a null sessionId reads the agent-long-term note. */
-    Optional<ScratchpadNote> findByAgentIdAndSessionIdAndKey(UUID agentId, UUID sessionId, String key);
+    /**
+     * The upsert lookup behind {@code AgentScratchpadService#write}; a null sessionId reads the
+     * agent-long-term note.
+     */
+    Optional<ScratchpadNote> findByAgentIdAndSessionIdAndKey(
+            UUID agentId, UUID sessionId, String key);
 
-    /** How many notes the {@code (agentId, sessionId)} scope already holds; a null sessionId counts the agent-long-term scope. */
+    /**
+     * How many notes the {@code (agentId, sessionId)} scope already holds; a null sessionId counts
+     * the agent-long-term scope.
+     */
     long countByAgentIdAndSessionId(UUID agentId, UUID sessionId);
 
-    /** Returns rows removed (0 or 1 - the scope+key is unique); a null sessionId deletes the agent-long-term note. */
+    /**
+     * Returns rows removed (0 or 1 - the scope+key is unique); a null sessionId deletes the
+     * agent-long-term note.
+     */
     long deleteByAgentIdAndSessionIdAndKey(UUID agentId, UUID sessionId, String key);
+
+    /**
+     * The stalest note in the scope - the LRU eviction candidate on a full pad; null sessionId
+     * reads the agent-long-term scope.
+     */
+    Optional<ScratchpadNote> findFirstByAgentIdAndSessionIdOrderByUpdatedAtAsc(
+            UUID agentId, UUID sessionId);
+
+    /**
+     * TTL sweep for a scope: removes every note not touched since {@code cutoff}; returns the count
+     * removed.
+     */
+    long deleteByAgentIdAndSessionIdAndUpdatedAtBefore(
+            UUID agentId, UUID sessionId, Instant cutoff);
 
     /**
      * Everything the agent can see from {@code sessionId}: that session's notes AND the
@@ -36,5 +61,6 @@ public interface ScratchpadNoteRepository extends JpaRepository<ScratchpadNote, 
             "select n from ScratchpadNote n where n.agentId = :agentId"
                     + " and (n.sessionId = :sessionId or n.sessionId is null)"
                     + " order by n.updatedAt desc")
-    List<ScratchpadNote> findVisible(@Param("agentId") UUID agentId, @Param("sessionId") UUID sessionId);
+    List<ScratchpadNote> findVisible(
+            @Param("agentId") UUID agentId, @Param("sessionId") UUID sessionId);
 }

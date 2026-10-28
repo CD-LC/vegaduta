@@ -1761,6 +1761,12 @@ app:
         # "Some of your tools are not listed ... call search_tools" - only sent on turns where
         # app.tools.search deferral is active (search_tools is on the resolved tool list).
         enabled: ${APP_CHAT_DIRECTIVES_TOOL_SEARCH_ENABLED:true}
+      scratchpad:
+        # "You have a private scratchpad (scratchpad_write/read/list/delete) ..." - only sent on
+        # turns where the pad is reachable: the tools are on the resolved list, or they were
+        # offered and deferred behind search_tools. Without it a deferred scratchpad is invisible
+        # to the model (nothing names it until it searches).
+        enabled: ${APP_CHAT_DIRECTIVES_SCRATCHPAD_ENABLED:true}
       browser-v2:
         # "Browser tools: call browser_snapshot, then act with the [index]..." - only sent on turns where
         # browser_snapshot is on the resolved tool list (app.browser.v2.enabled).
@@ -3791,6 +3797,14 @@ app:
       enabled: ${APP_TOOLS_SCRATCHPAD_ENABLED:true}
       max-notes: ${APP_TOOLS_SCRATCHPAD_MAX_NOTES:200}
       max-note-bytes: ${APP_TOOLS_SCRATCHPAD_MAX_NOTE_BYTES:65536}
+      # Full pad: true drops the least-recently-updated note so the new write lands (the tool
+      # result names it via evicted_key); false keeps refusing the write as before.
+      evict-oldest-on-cap: ${APP_TOOLS_SCRATCHPAD_EVICT_OLDEST_ON_CAP:true}
+      # Lazy TTLs swept on writes to that scope (ISO-8601 duration). Session pads are
+      # per-conversation, so dead-session notes age out; the agent-long-term pad defaults to
+      # never (0) - it is meant to outlive conversations.
+      session-note-ttl: ${APP_TOOLS_SCRATCHPAD_SESSION_NOTE_TTL:30d}
+      agent-note-ttl: ${APP_TOOLS_SCRATCHPAD_AGENT_NOTE_TTL:0}
     # Built-in http_request ("call any HTTP API"). enabled: offer the tool at all (default true - it already
     # shipped unconditionally, so this keeps today's behaviour; false removes it from agents).
     # safe-mode (default OFF = today's tool exactly): http_request narrows to GET/HEAD/OPTIONS and a separate

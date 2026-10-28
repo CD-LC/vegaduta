@@ -29,7 +29,8 @@ class ResolvedDirectivesTest {
 
     private final InMemoryPromptOverrideStore store = new InMemoryPromptOverrideStore();
     private final DefaultPromptResolver resolver =
-            new DefaultPromptResolver(PromptResolver.defaultsOnly().catalog(), store, new PromptProperties());
+            new DefaultPromptResolver(
+                    PromptResolver.defaultsOnly().catalog(), store, new PromptProperties());
     private final PromptDirectiveSettings settings = PromptDirectiveSettings.forTest(resolver);
 
     @AfterEach
@@ -44,7 +45,15 @@ class ResolvedDirectivesTest {
     private void override(PromptScope scope, String key, String text, boolean enabled) {
         store.put(
                 new PromptOverride(
-                        scope, scope == PromptScope.AGENT ? AGENT.toString() : "", key, "en", text, enabled, 1, "owner", Instant.now()));
+                        scope,
+                        scope == PromptScope.AGENT ? AGENT.toString() : "",
+                        key,
+                        "en",
+                        text,
+                        enabled,
+                        1,
+                        "owner",
+                        Instant.now()));
         resolver.evictAll();
     }
 
@@ -68,7 +77,8 @@ class ResolvedDirectivesTest {
 
     @Test
     void registryDefaultsAreTheTextTheHardcodedDirectivesSend() {
-        PromptDirectiveRegistry.Entry date = PromptDirectiveRegistry.find("current_date").orElseThrow();
+        PromptDirectiveRegistry.Entry date =
+                PromptDirectiveRegistry.find("current_date").orElseThrow();
         assertThat(date.defaultText().replace("{date}", DAY.toString()))
                 .isEqualTo(ChatPromptDirectives.currentDateDirective(DAY));
         assertThat(ChatPromptDirectives.currentDateDirective(DAY))
@@ -76,23 +86,39 @@ class ResolvedDirectivesTest {
                         "Today's date is 2026-10-19 (UTC). Use it for anything time-relative "
                                 + "(today, latest, this week) and never guess a different date.");
         assertThat(text("tool_trust")).isEqualTo(ChatPromptDirectives.toolTrustDirective(ONE_TOOL));
-        assertThat(text("mcp_untrusted")).isEqualTo(ChatPromptDirectives.mcpUntrustedDataDirective(true));
-        assertThat(text("artifacts")).isEqualTo(ChatPromptDirectives.artifactsDirective(true, true, "", UUID.randomUUID()));
+        assertThat(text("mcp_untrusted"))
+                .isEqualTo(ChatPromptDirectives.mcpUntrustedDataDirective(true));
+        assertThat(text("artifacts"))
+                .isEqualTo(
+                        ChatPromptDirectives.artifactsDirective(true, true, "", UUID.randomUUID()));
         assertThat(text("agentic_completion")).isEmpty();
         assertThat(ChatPromptDirectives.agenticCompletionDirective(ONE_TOOL)).isNull();
         assertThat(text("media_honesty")).isEmpty();
         assertThat(ChatPromptDirectives.mediaGenerationHonestyDirective(ONE_TOOL)).isNull();
-        assertThat(PromptDirectiveRegistry.all()).extracting(PromptDirectiveRegistry.Entry::key)
-                .containsExactly("current_date", "memory_usage", "media_honesty", "tool_trust",
-                        "agentic_completion", "mcp_untrusted", "tool_search", "context_compaction",
-                        "browser_v2", "artifacts");
-        assertThat(PromptDirectiveRegistry.all().stream().filter(PromptDirectiveRegistry.Entry::securityCritical)
-                        .map(PromptDirectiveRegistry.Entry::key))
+        assertThat(PromptDirectiveRegistry.all())
+                .extracting(PromptDirectiveRegistry.Entry::key)
+                .containsExactly(
+                        "current_date",
+                        "memory_usage",
+                        "media_honesty",
+                        "tool_trust",
+                        "agentic_completion",
+                        "mcp_untrusted",
+                        "tool_search",
+                        "scratchpad",
+                        "context_compaction",
+                        "browser_v2",
+                        "artifacts");
+        assertThat(
+                        PromptDirectiveRegistry.all().stream()
+                                .filter(PromptDirectiveRegistry.Entry::securityCritical)
+                                .map(PromptDirectiveRegistry.Entry::key))
                 .containsExactly("tool_trust", "mcp_untrusted");
         assertThat(PromptDirectiveRegistry.find("tool_trust").orElseThrow().promptKeys())
                 .containsExactly("directive.tool_trust", "directive.tool_trust.compact");
         assertThat(PromptDirectiveRegistry.find("context_compaction").orElseThrow().promptKeys())
-                .containsExactly("directive.context_compaction", "directive.context_compaction.no_restore");
+                .containsExactly(
+                        "directive.context_compaction", "directive.context_compaction.no_restore");
     }
 
     private static String text(String key) {
@@ -125,10 +151,12 @@ class ResolvedDirectivesTest {
     @Test
     void currentDateGetsThePlaceholderSubstitutedInTheDefaultAndInAnOverride() {
         tenant("a");
-        assertThat(settings.forToday(DAY).text(Keys.CURRENT_DATE)).isEqualTo(ChatPromptDirectives.currentDateDirective(DAY));
+        assertThat(settings.forToday(DAY).text(Keys.CURRENT_DATE))
+                .isEqualTo(ChatPromptDirectives.currentDateDirective(DAY));
         override(PromptScope.TENANT, Keys.CURRENT_DATE, "It is {date} today.", true);
 
-        assertThat(settings.forToday(DAY).text(Keys.CURRENT_DATE)).isEqualTo("It is 2026-10-19 today.");
+        assertThat(settings.forToday(DAY).text(Keys.CURRENT_DATE))
+                .isEqualTo("It is 2026-10-19 today.");
     }
 
     @Test
@@ -148,8 +176,10 @@ class ResolvedDirectivesTest {
         override(PromptScope.TENANT, Keys.TOOL_SEARCH, "Tenant search rule.", true);
         override(PromptScope.AGENT, Keys.TOOL_SEARCH, "Agent search rule.", true);
 
-        assertThat(settings.forTurn(DAY, AGENT).text(Keys.TOOL_SEARCH)).isEqualTo("Agent search rule.");
-        assertThat(settings.forTurn(DAY, UUID.randomUUID()).text(Keys.TOOL_SEARCH)).isEqualTo("Tenant search rule.");
+        assertThat(settings.forTurn(DAY, AGENT).text(Keys.TOOL_SEARCH))
+                .isEqualTo("Agent search rule.");
+        assertThat(settings.forTurn(DAY, UUID.randomUUID()).text(Keys.TOOL_SEARCH))
+                .isEqualTo("Tenant search rule.");
         assertThat(settings.forToday(DAY).text(Keys.TOOL_SEARCH)).isEqualTo("Tenant search rule.");
     }
 
@@ -163,8 +193,11 @@ class ResolvedDirectivesTest {
         pd.text(Keys.BROWSER_V2);
         pd.text(null);
 
-        assertThat(pd.trace()).extracting(r -> r.key() + ":" + r.source())
-                .containsExactly("directive.tool_search:" + PromptSource.AGENT, "directive.browser_v2:" + PromptSource.DEFAULT);
+        assertThat(pd.trace())
+                .extracting(r -> r.key() + ":" + r.source())
+                .containsExactly(
+                        "directive.tool_search:" + PromptSource.AGENT,
+                        "directive.browser_v2:" + PromptSource.DEFAULT);
         assertThat(pd.trace().get(0).scope()).isEqualTo(PromptScope.AGENT);
         assertThat(pd.trace().get(0).version()).isEqualTo(1);
         assertThat(ResolvedDirectives.DEFAULTS.trace()).isEmpty();
@@ -179,7 +212,10 @@ class ResolvedDirectivesTest {
                         ChatPromptDirectives.agenticCompletionDirective(ONE_TOOL),
                         ChatPromptDirectives.mcpUntrustedDataDirective(true));
 
-        assertThat(composer.compose(new PromptDirectiveComposer.Context(ONE_TOOL, true, false, ResolvedDirectives.DEFAULTS)))
+        assertThat(
+                        composer.compose(
+                                new PromptDirectiveComposer.Context(
+                                        ONE_TOOL, true, false, ResolvedDirectives.DEFAULTS)))
                 .isEqualTo(old);
 
         tenant("a");
@@ -187,20 +223,30 @@ class ResolvedDirectivesTest {
         override(PromptScope.TENANT, Keys.TOOL_TRUST_COMPACT, "Short house rules.", true);
         override(PromptScope.TENANT, Keys.MCP_UNTRUSTED, null, false);
         ResolvedDirectives pd = settings.forToday(DAY);
-        assertThat(composer.compose(new PromptDirectiveComposer.Context(ONE_TOOL, true, false, pd))).isEqualTo("House rules.");
-        // Small-model (compact) mode is a key of its own: the full wording's override does not leak into it.
-        assertThat(composer.compose(new PromptDirectiveComposer.Context(ONE_TOOL, true, true, pd))).isEqualTo("Short house rules.");
+        assertThat(composer.compose(new PromptDirectiveComposer.Context(ONE_TOOL, true, false, pd)))
+                .isEqualTo("House rules.");
+        // Small-model (compact) mode is a key of its own: the full wording's override does not leak
+        // into it.
+        assertThat(composer.compose(new PromptDirectiveComposer.Context(ONE_TOOL, true, true, pd)))
+                .isEqualTo("Short house rules.");
         // A turn without tools sends no tool_trust, and the override does not conjure one.
-        assertThat(composer.compose(new PromptDirectiveComposer.Context(List.of(), false, false, pd))).isNull();
+        assertThat(
+                        composer.compose(
+                                new PromptDirectiveComposer.Context(List.of(), false, false, pd)))
+                .isNull();
     }
 
     @Test
     void theCompactWordingFallsBackToItsOwnDefaultWhenOnlyTheFullOneIsOverridden() {
         tenant("a");
         override(PromptScope.TENANT, Keys.TOOL_TRUST, "House rules.", true);
-        PromptDirectiveComposer composer = PromptDirectiveComposer.standard(() -> true, () -> false);
+        PromptDirectiveComposer composer =
+                PromptDirectiveComposer.standard(() -> true, () -> false);
 
-        assertThat(composer.compose(new PromptDirectiveComposer.Context(ONE_TOOL, false, true, settings.forToday(DAY))))
+        assertThat(
+                        composer.compose(
+                                new PromptDirectiveComposer.Context(
+                                        ONE_TOOL, false, true, settings.forToday(DAY))))
                 .isEqualTo(ChatPromptDirectives.TOOL_TRUST_DIRECTIVE_COMPACT);
     }
 
@@ -224,11 +270,16 @@ class ResolvedDirectivesTest {
 
     @Test
     void compactionHasASeparateKeyWhenTheRestoreToolIsNotOffered() {
-        assertThat(DirectiveKeys.contextCompactionKey(true, List.of(tool("search_code")))).isEqualTo(Keys.CONTEXT_COMPACTION_NO_RESTORE);
-        assertThat(DirectiveKeys.contextCompactionKey(true, List.of(tool("restore_tool_result")))).isEqualTo(Keys.CONTEXT_COMPACTION);
-        assertThat(DirectiveKeys.contextCompactionKey(false, List.of(tool("search_code")))).isNull();
+        assertThat(DirectiveKeys.contextCompactionKey(true, List.of(tool("search_code"))))
+                .isEqualTo(Keys.CONTEXT_COMPACTION_NO_RESTORE);
+        assertThat(DirectiveKeys.contextCompactionKey(true, List.of(tool("restore_tool_result"))))
+                .isEqualTo(Keys.CONTEXT_COMPACTION);
+        assertThat(DirectiveKeys.contextCompactionKey(false, List.of(tool("search_code"))))
+                .isNull();
         assertThat(DirectiveKeys.contextCompactionKey(true, List.of())).isNull();
-        assertThat(ChatPromptDirectives.contextCompactionDirective(true, List.of(tool("search_code"))))
+        assertThat(
+                        ChatPromptDirectives.contextCompactionDirective(
+                                true, List.of(tool("search_code"))))
                 .isEqualTo(ChatPromptDirectives.CONTEXT_COMPACTION_DIRECTIVE);
     }
 }
