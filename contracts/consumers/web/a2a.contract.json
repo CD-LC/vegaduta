@@ -1,0 +1,58 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-a2a-console-policy",
+      "method": "GET",
+      "path": "/api/a2a/console/policy",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-a2a-console-tasks",
+      "method": "GET",
+      "path": "/api/a2a/console/tasks",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-a2a-console-tasks-id",
+      "method": "GET",
+      "path": "/api/a2a/console/tasks/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-a2a-console-tasks-id_cancel",
+      "method": "POST",
+      "path": "/api/a2a/console/tasks/{id}:cancel",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.contextId",
+          "$.createdAt",
+          "$.direction",
+          "$.failureMessage",
+          "$.id",
+          "$.lastTouched",
+          "$.reply",
+          "$.replyLength",
+          "$.replyTruncated",
+          "$.state",
+          "$.stateTimestamp",
+          "$.subject",
+          "$.terminal",
+          "$.userText"
+        ]
+      }
+    }
+  ]
+}

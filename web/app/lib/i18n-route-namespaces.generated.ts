@@ -57,6 +57,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "desktopAutomation",
     "edge",
     "featureUnavailable",
+    "keyboard",
     "localCode",
     "nav",
     "pageGuide",
