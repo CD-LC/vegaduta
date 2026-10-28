@@ -46,6 +46,7 @@
     "pino": "^10.4.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "simple-keyboard-layouts": "3.4.273",
     "tailwind-merge": "^3.7.0",
     "zod": "^4.6.7"
   },
