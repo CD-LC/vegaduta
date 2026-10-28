@@ -4,14 +4,16 @@ import static com.agenticai.core.workflow.WorkflowNodeSupport.safeLength;
 import static com.agenticai.core.workflow.WorkflowNodeSupport.stringConfig;
 import static com.agenticai.core.workflow.WorkflowNodeSupport.truncate;
 
+import com.agenticai.core.agents.tools.AgentToolProvider;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
-import com.agenticai.core.agents.tools.AgentToolProvider;
+import com.agenticai.core.workflow.output.WorkflowOutputDedupGuard;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.ai.tool.ToolCallback;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** "tool": invokes exactly one named tool from an agent's resolvable tool catalog. */
@@ -19,8 +21,18 @@ import org.springframework.stereotype.Component;
 class ToolNodeHandler implements NodeHandler {
 
     private final AgentToolProvider agentToolProvider;
+    // Null in slim test contexts: the node then runs without idempotency (a
+    // retry may duplicate the tool's side effect) - same posture as before.
+    private final WorkflowOutputDedupGuard dedupGuard;
+
     ToolNodeHandler(AgentToolProvider agentToolProvider) {
+        this(agentToolProvider, null);
+    }
+
+    @Autowired
+    ToolNodeHandler(AgentToolProvider agentToolProvider, WorkflowOutputDedupGuard dedupGuard) {
         this.agentToolProvider = agentToolProvider;
+        this.dedupGuard = dedupGuard;
     }
 
     @Override
@@ -30,7 +42,7 @@ class ToolNodeHandler implements NodeHandler {
 
     @Override
     public NodeExecutionResult handle(NodeInvocation inv) {
-        return executeToolNode(inv.node(), inv.input(), inv.runId());
+        return executeToolNode(inv.node(), inv.input(), inv.runId(), inv.scope());
     }
 
     /**
@@ -41,7 +53,8 @@ class ToolNodeHandler implements NodeHandler {
      * output sanitization, per-tool approval) and logging (LoggingToolCallback -> ToolCallLog)
      * every other tool call in this platform already goes through.
      */
-    private NodeExecutionResult executeToolNode(WorkflowNodeDto node, String input, String runId) {
+    private NodeExecutionResult executeToolNode(
+            WorkflowNodeDto node, String input, String runId, ExpressionScope scope) {
         Object agentIdRaw = node.config().get("agentId");
         if (agentIdRaw == null || agentIdRaw.toString().isBlank()) {
             return NodeExecutionResult.skipped(input, "No agent selected for this Tool node.");
@@ -90,7 +103,44 @@ class ToolNodeHandler implements NodeHandler {
                                 + "' is not currently available to this agent (check its allowed-tools list and enabled MCP servers).");
             }
             logLines.add("Calling tool '" + toolName + "' with input: " + truncate(toolInput, 300));
-            String result = match.call(toolInput);
+            // Idempotency: workflow execution is at-least-once (a node retry, a Temporal
+            // activity retry, a recovered run), and the tool's side effect is not necessarily
+            // idempotent - claim (runId, nodeId, hash of the resolved call input) before the
+            // call, the same last-hop contract the output/bulk_email dedup guard uses. Loop /
+            // fan-out iterations land in the key via the scope index plus the per-item args.
+            String dedupKey =
+                    dedupGuard == null
+                            ? null
+                            : dedupGuard.identityKey(
+                                    "tool",
+                                    runId,
+                                    node.id(),
+                                    (scope != null && scope.index() != null
+                                                    ? scope.index() + "|"
+                                                    : "")
+                                            + toolInput);
+            if (dedupKey != null && !dedupGuard.tryClaim(dedupKey)) {
+                logLines.add(
+                        "Tool '" + toolName + "' already ran for this run - replay suppressed.");
+                return NodeExecutionResult.ok(
+                        "{\"deduplicated\":true,\"tool\":\"" + toolName + "\"}",
+                        "Tool '"
+                                + toolName
+                                + "' already ran for this run (idempotent replay suppressed).",
+                        null,
+                        logLines);
+            }
+            String result;
+            try {
+                result = match.call(toolInput);
+            } catch (RuntimeException callFailure) {
+                // Release so a legitimate retry can still reach the tool - the send may never
+                // have happened (same release-on-failure convention as the output sends).
+                if (dedupKey != null) {
+                    dedupGuard.release(dedupKey);
+                }
+                throw callFailure;
+            }
             logLines.add(
                     "Tool '"
                             + toolName

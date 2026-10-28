@@ -1224,7 +1224,7 @@ switch, `WHATSAPP_TEMPLATES_ENABLED`.
 
 | Property | Env | Default |
 |---|---|---|
-| `app.workflow.execution-engine` | `WORKFLOW_EXECUTION_ENGINE` | `legacy` (in-process); or `temporal` |
+| `app.workflow.execution-engine` | `WORKFLOW_EXECUTION_ENGINE` | `legacy` (in-process, best-effort); or `temporal` (durable) |
 | `app.workflow.temporal.target` | `TEMPORAL_TARGET` | `127.0.0.1:7233` |
 | `app.workflow.temporal.namespace` | `TEMPORAL_NAMESPACE` | `default` |
 | `app.workflow.temporal.run-timeout-seconds` | `TEMPORAL_RUN_TIMEOUT_SECONDS` | `600` |
@@ -1243,6 +1243,15 @@ switch, `WHATSAPP_TEMPLATES_ENABLED`.
 
 `temporal` also needs the `temporal` Spring profile; without it core falls back
 to the in-process engine. Workers run in the `core-worker` shape.
+
+The in-process engine is best-effort: retry counts and the step ceiling are
+enforced, but the per-step timeout (`stepTimeoutSeconds`) is not applied, a
+parallel fan-out joins branches in completion order (fail-fast, but a running
+branch is not interrupted), and a run interrupted by a process crash or deploy
+stays `RUNNING` until the recovery reaper marks it `FAILED` (by default two
+hours later; see `WorkflowRunRecoveryJob`). The traversal state lives on the
+thread stack, so it cannot resume. Choose `temporal` when a workflow needs
+durable, crash-resumable execution and per-step time bounds.
 
 The `app.workflow.poll.*` settings bound the HTTP polling trigger (a Trigger
 node's "new items at this endpoint start the workflow" binding). Polled URLs go
