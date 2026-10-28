@@ -1,6 +1,7 @@
 package com.agenticai.core.workflow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -214,5 +215,61 @@ class WorkflowRunRecoveryJobTest {
         job.reapStaleRuns();
 
         verify(schemaIterator).forEachActiveTenantSchema(any());
+    }
+
+    // ---- effect journal (V680): the reaper says what the crash left behind ----
+
+    private WorkflowEffectJournal wireJournal(List<WorkflowEffectJournalEntry> uncertain) {
+        WorkflowEffectJournal journal = mock(WorkflowEffectJournal.class);
+        when(journal.isEnabled()).thenReturn(true);
+        when(journal.uncertainEffects(any())).thenReturn(uncertain);
+        @SuppressWarnings("unchecked")
+        ObjectProvider<WorkflowEffectJournal> provider = mock(ObjectProvider.class);
+        when(provider.getIfAvailable()).thenReturn(journal);
+        job.setEffectJournal(provider, 30);
+        return journal;
+    }
+
+    private WorkflowRun staleRunWithCompletedNode() throws Exception {
+        WorkflowRun stale = runStartedAgo(Duration.ofHours(3));
+        Instant t = Instant.now().minus(Duration.ofHours(3));
+        stale.updateTrace(mapper().writeValueAsString(List.of(
+            new NodeTraceEntry("n1", "agent", "Draft reply", "OK", "done", t, t.plusSeconds(5)))));
+        when(runRepository.findByStatusAndStartedAtBefore(eq(WorkflowRunStatus.RUNNING), any()))
+            .thenReturn(List.of(stale));
+        return stale;
+    }
+
+    @Test
+    void crashWithNoUncertainEffectSaysWhereTheRunIsResumable() throws Exception {
+        WorkflowEffectJournal journal = wireJournal(List.of());
+        WorkflowRun stale = staleRunWithCompletedNode();
+
+        job.sweepAllTenants();
+
+        assertEquals(WorkflowRunStatus.FAILED, stale.getStatus());
+        assertTrue(stale.getErrorMessage().startsWith(WorkflowRunRecoveryJob.FAILURE_REASON));
+        assertTrue(stale.getErrorMessage().contains("Resumable from the node after 'Draft reply' (n1)"),
+            stale.getErrorMessage());
+        verify(journal).markRunEffectsUncertain(stale.getId());
+        verify(journal).purgeOlderThan(any());
+    }
+
+    @Test
+    void crashWithAnUncertainEffectIsExplicitlyNotResumable() throws Exception {
+        WorkflowEffectJournalEntry uncertain = mock(WorkflowEffectJournalEntry.class);
+        when(uncertain.getNodeType()).thenReturn("bulk_email");
+        when(uncertain.getNodeId()).thenReturn("mail1");
+        when(uncertain.getIterationKey()).thenReturn("4");
+        wireJournal(List.of(uncertain));
+        WorkflowRun stale = staleRunWithCompletedNode();
+
+        job.sweepAllTenants();
+
+        assertTrue(stale.getErrorMessage().contains("Effect uncertain: bulk_email node mail1 (iteration 4)"),
+            stale.getErrorMessage());
+        assertTrue(stale.getErrorMessage().contains("NOT resumable"));
+        assertFalse(stale.getErrorMessage().contains("Resumable from"));
+        assertTrue(stale.getTraceJson().contains("effect(s) of unknown outcome"));
     }
 }

@@ -4052,6 +4052,19 @@ app:
     # failing runs. See deploy/docker-compose.yml for the Temporal server
     # this connects to locally.
     execution-engine: ${WORKFLOW_EXECUTION_ENGINE:legacy}
+    # Effect journal (V680 workflow_effect_journal): exactly-once bookkeeping for the irreversible nodes
+    # (bulk_email, tool, crm_lead, device_control, media, output, workflow, non-GET http). STARTED is written
+    # before the side effect and COMPLETED (with the result) after it; a re-execution of a COMPLETED
+    # (run, node, iteration) replays the recorded result instead of running the effect again. A STARTED row with
+    # no COMPLETED after a crash is "effect uncertain": on-uncertain=fail (default) halts the node FAILED for a
+    # human decision; rerun re-executes it (the effect may then happen twice). journal.enabled=false restores the
+    # plain at-least-once behaviour. Rows older than retention-days are purged by WorkflowRunRecoveryJob.
+    effects:
+      on-uncertain: ${WORKFLOW_EFFECTS_ON_UNCERTAIN:fail}
+      journal:
+        enabled: ${WORKFLOW_EFFECTS_JOURNAL_ENABLED:true}
+        max-output-chars: ${WORKFLOW_EFFECTS_JOURNAL_MAX_OUTPUT_CHARS:200000}
+        retention-days: ${WORKFLOW_EFFECTS_JOURNAL_RETENTION_DAYS:30}
     # Workflow portability (WorkflowPortabilityService): export a workflow as the VegaDuta workflow DSL v1
     # (GET /api/workflows/{id}/export) and import one from a DSL file, an n8n export or a Dify app DSL as a
     # DRAFT (POST /api/workflows/import/preview, POST /api/workflows/import). false (default): all three

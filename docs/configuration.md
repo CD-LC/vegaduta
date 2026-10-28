@@ -1225,6 +1225,11 @@ switch, `WHATSAPP_TEMPLATES_ENABLED`.
 | Property | Env | Default |
 |---|---|---|
 | `app.workflow.execution-engine` | `WORKFLOW_EXECUTION_ENGINE` | `legacy` (in-process); or `temporal` |
+| `app.workflow.effects.journal.enabled` | `WORKFLOW_EFFECTS_JOURNAL_ENABLED` | `true`; effect journal for irreversible workflow nodes (below). `false` = plain at-least-once, nothing journaled |
+| `app.workflow.effects.on-uncertain` | `WORKFLOW_EFFECTS_ON_UNCERTAIN` | `fail` (default): a node whose earlier attempt has a STARTED journal row but no COMPLETED halts FAILED for a human decision; `rerun`: execute it again (the external effect may happen twice) |
+| `app.workflow.effects.journal.max-output-chars` | `WORKFLOW_EFFECTS_JOURNAL_MAX_OUTPUT_CHARS` | `200000`; recorded output kept for replay (longer output is truncated and the replay says so) |
+| `app.workflow.effects.journal.retention-days` | `WORKFLOW_EFFECTS_JOURNAL_RETENTION_DAYS` | `30`; journal rows older than this are purged by the recovery sweep (`0` keeps them) |
+| `app.workflow.recovery.stale-after-minutes` | none (property only) | `120`; a RUNNING run on the in-process engine with no trace activity for this long is reaped FAILED. Deliberately not shorter by default: a single long node (an LLM or tool call) writes no trace entry until it finishes, so a lower value would reap healthy runs |
 | `app.workflow.temporal.target` | `TEMPORAL_TARGET` | `127.0.0.1:7233` |
 | `app.workflow.temporal.namespace` | `TEMPORAL_NAMESPACE` | `default` |
 | `app.workflow.temporal.run-timeout-seconds` | `TEMPORAL_RUN_TIMEOUT_SECONDS` | `600` |
@@ -1243,6 +1248,24 @@ switch, `WHATSAPP_TEMPLATES_ENABLED`.
 
 `temporal` also needs the `temporal` Spring profile; without it core falls back
 to the in-process engine. Workers run in the `core-worker` shape.
+
+**Workflow effect journal.** The in-process engine is at-least-once: a node retry, a Temporal activity
+retry, an approval resume or a re-run after a crash can reach the same `(run, node, iteration)` twice. For
+the irreversible node types (`bulk_email`, `tool`, `crm_lead`, `device_control`, `media`, `output`,
+`workflow`, and `http` with a method other than GET/HEAD/OPTIONS) the engine writes a `STARTED` row to
+`workflow_effect_journal` (V680) before the side effect and `COMPLETED`, with the recorded result, after it.
+A second execution of a `COMPLETED` key returns the recorded output with a trace line ("side effect NOT
+re-run") instead of running the effect. A `STARTED` row without `COMPLETED` means the process died between the
+call and the bookkeeping, so whether the effect happened is unknown: with `on-uncertain=fail` the node halts the
+run `FAILED` with an "Effect uncertain at node ..." message and is never re-run silently. An operator checks the
+destination, then either records the effect as done or releases the key (`WorkflowEffectJournal#resolveUncertain`)
+and the run can be re-entered from that node. A handler exception or a halt (awaiting approval) releases the key,
+so ordinary retries still work. The iteration part of the key is the loop / fan-out / sub-flow item index, so
+iterations and parallel branches never share a key. The same stable `runId:nodeId:iteration` key is sent as the
+`Idempotency-Key` header by the HTTP node for POST/PUT/PATCH when the node does not set that header itself.
+When the recovery job reaps a crashed run it now says in `errorMessage` whether the journal holds an uncertain
+effect ("NOT resumable until a human ... resolves") or none ("Resumable from the node after 'X'"); no new run
+status was added.
 
 The `app.workflow.poll.*` settings bound the HTTP polling trigger (a Trigger
 node's "new items at this endpoint start the workflow" binding). Polled URLs go

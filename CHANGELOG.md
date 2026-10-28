@@ -8,6 +8,20 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Workflow effect journal: exactly-once effects for irreversible nodes.** New tenant table
+  `workflow_effect_journal` (V680) and `WorkflowEffectJournal`: `bulk_email`, `tool`, `crm_lead`,
+  `device_control`, `media`, `output`, `workflow` and non-GET `http` nodes record `STARTED` before and
+  `COMPLETED` (with the result) after their side effect, keyed `(run, node, iteration)`. A retry, crash
+  re-run or approval resume of a completed key replays the recorded output with a trace line instead of
+  repeating the effect; a `STARTED` row with no `COMPLETED` is "effect uncertain" and fails the node for a
+  human decision (`app.workflow.effects.on-uncertain=fail|rerun`, default `fail`). The HTTP node sends the
+  stable `runId:nodeId:iteration` key as `Idempotency-Key` on POST/PUT/PATCH unless the node sets one.
+  `WorkflowRunRecoveryJob` now states in the failed run's message whether the crash left an uncertain effect
+  or the run is resumable after its last completed node, and purges journal rows past
+  `app.workflow.effects.journal.retention-days`. Off switch: `app.workflow.effects.journal.enabled=false`.
+
 ### Fixed
 
 - **Workflow step timeout no longer breaks slow nodes.** The workflow-level `stepTimeoutSeconds` (default 30 in every existing row, never enforced before) now bounds only fast node types (`http`, `condition`); agent, supervisor, sub-workflow, tool, code and other long-running nodes get a 600 s floor (`-Dvegaduta.workflow.longRunningStepTimeoutSeconds`, 0 = no limit). A node's own `timeoutSeconds` (1..3600) overrides both. A timed-out attempt is never retried, because its worker may still be running.

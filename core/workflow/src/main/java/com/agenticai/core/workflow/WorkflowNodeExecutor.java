@@ -57,6 +57,15 @@ public class WorkflowNodeExecutor {
     // served.
     private WorkflowPinStore pinStore;
 
+    // Effect journal (V680): exactly-once bookkeeping around irreversible nodes. Setter-injected and
+    // optional so hand-built executors (tests) run effects directly, as before.
+    private WorkflowEffectJournal effectJournal;
+
+    @Autowired(required = false)
+    void setEffectJournal(WorkflowEffectJournal effectJournal) {
+        this.effectJournal = effectJournal;
+    }
+
     @Autowired(required = false)
     void setPinStore(WorkflowPinStore pinStore) {
         this.pinStore = pinStore;
@@ -301,7 +310,7 @@ public class WorkflowNodeExecutor {
                         : WorkflowDryRun.markRealExecution(
                                 resolvedNode,
                                 scope,
-                                dispatchNode(
+                                guardedDispatch(
                                         resolvedNode,
                                         workflowDefinitionId,
                                         workflowDefinitionName,
@@ -420,6 +429,36 @@ public class WorkflowNodeExecutor {
                 data,
                 result);
         return result;
+    }
+
+    /** Dispatches under the effect journal when one is wired (irreversible nodes only). */
+    private NodeExecutionResult guardedDispatch(
+            WorkflowNodeDto node,
+            String workflowDefinitionId,
+            String workflowDefinitionName,
+            String runId,
+            String input,
+            String requestedBy,
+            WorkflowIntelligenceSettings intelligenceSettings,
+            List<ChatInlineAttachment> attachments,
+            WorkflowExpressionResolver.NodeEvalInfo evalInfo,
+            ExpressionScope scope,
+            WorkflowNodeDto unresolvedNode) {
+        java.util.function.Supplier<NodeExecutionResult> effect =
+                () ->
+                        dispatchNode(
+                                node,
+                                workflowDefinitionId,
+                                workflowDefinitionName,
+                                runId,
+                                input,
+                                requestedBy,
+                                intelligenceSettings,
+                                attachments,
+                                evalInfo,
+                                scope,
+                                unresolvedNode);
+        return effectJournal == null ? effect.get() : effectJournal.guard(runId, node, scope, effect);
     }
 
     private NodeExecutionResult dispatchNode(
