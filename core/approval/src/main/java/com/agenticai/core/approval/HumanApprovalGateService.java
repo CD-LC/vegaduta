@@ -522,13 +522,70 @@ public class HumanApprovalGateService {
     }
 
     private void runExecutor(ApprovalActionExecutor executor, ApprovalRequest request, String decidedBy) {
+        // The decision is committed; from here exactly one caller may run the action. Without this a process that died
+        // between the decision and the run left an approved action nobody ever ran (and nobody could find), and the
+        // recovery sweep could not tell a dead run from a live one.
+        if (!recorder.claimExecution(request)) {
+            log.warn("Approval request {} (action type '{}') was already claimed for execution - not running it again",
+                request.getId(), request.getActionType());
+            return;
+        }
         try {
             executor.execute(request);
         } catch (RuntimeException e) {
             recordFailureAndMaybeScheduleRetry(request, e, decidedBy);
             throw e;
         }
+        recorder.recordExecutionFinished(request);
         reportOutcome(executor, request, ApprovalOutcomePort.Outcome.COMPLETED, request.getExecutionResult());
+    }
+
+    /**
+     * Recovery of an approved action the process never started (it died between the decision and the run). Called only
+     * by {@code ApprovalRecoveryJob}, which has set the tenant. Runs it once through the same claim as a live decision,
+     * so a decision thread that is merely slow cannot run it a second time. Never rethrows: a sweep has no caller to
+     * show a failure to, and one request must not stop the batch.
+     */
+    public void runUnstartedApproval(ApprovalRequest request) {
+        ApprovalActionExecutor executor = executorRegistry.find(request.getActionType()).orElse(null);
+        if (executor == null) {
+            log.warn("Action type '{}' has no registered executor - approved request {} cannot be recovered",
+                request.getActionType(), request.getId());
+            recorder.recordNoExecutorRegistered(request, ApprovalRequestRecorder.RECOVERY_ACTOR);
+            return;
+        }
+        try {
+            runExecutor(executor, request, ApprovalRequestRecorder.RECOVERY_ACTOR);
+        } catch (RuntimeException e) {
+            log.warn("Recovered approval request {} (action type '{}') failed - recorded against the request: {}",
+                request.getId(), request.getActionType(), e.getMessage());
+        }
+    }
+
+    /**
+     * Closes an approved action that was never started and is too old to run now (see {@code
+     * ApprovalRecoveryProperties#getMaxRecoveryAge}). Not run; the conversation is told it was not done. Returns false
+     * when it was started or finished in the meantime.
+     */
+    public boolean abandonStaleApproval(ApprovalRequest request, String reason) {
+        if (!recorder.recordNeverRan(request, reason)) {
+            return false;
+        }
+        reportOutcome(request, ApprovalOutcomePort.Outcome.FAILED, reason);
+        return true;
+    }
+
+    /**
+     * Closes an approved action that started and never reported how it ended. It is not run again (see {@link
+     * ApprovalRequestRecorder#recordInterrupted}); the conversation that asked is told it failed with an unknown
+     * outcome so it does not wait for it or assume it happened. Returns false when the action finished first.
+     */
+    public boolean abandonInterruptedApproval(ApprovalRequest request, String reason) {
+        if (!recorder.recordInterrupted(request, reason)) {
+            return false;
+        }
+        reportOutcome(request, ApprovalOutcomePort.Outcome.FAILED, reason);
+        return true;
     }
 
     /**

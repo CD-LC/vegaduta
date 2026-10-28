@@ -461,14 +461,61 @@ public class PerUserBudgetService {
         String tenantId, String userKey, Modality modality, long reservedMicroCents,
         BigDecimal actualCost, TenantPlan knownPlan
     ) {
+        applySpendDelta(tenantId, userKey, modality, reservedMicroCents, actualCost, knownPlan, false);
+    }
+
+    /**
+     * @param keepReservation true when {@code actualCost} is only an estimate of what a response cost: the reservation
+     *     then stays as a floor and the charge can only grow, never shrink below what was reserved.
+     */
+    private void applySpendDelta(
+        String tenantId, String userKey, Modality modality, long reservedMicroCents,
+        BigDecimal actualCost, TenantPlan knownPlan, boolean keepReservation
+    ) {
         long actualMicroCents = actualCost == null || actualCost.signum() <= 0 ? 0L
             : actualCost.multiply(MICRO_CENTS_PER_USD).setScale(0, RoundingMode.HALF_UP).longValueExact();
         long delta = actualMicroCents - reservedMicroCents;
+        if (keepReservation && delta < 0) {
+            return;
+        }
         if (delta == 0) {
             return;
         }
         BudgetConfig config = configResolver.resolveConfig(tenantId, userKey, knownPlan);
         counters.incrementBy(PerUserBudgetCounters.key(tenantId, userKey, modality), Duration.ofSeconds(config.windowSeconds()), delta);
+    }
+
+    /** A model writes about four characters per token; used only when the provider reported no usage at all. */
+    static final double CHARS_PER_TOKEN = 4.0;
+
+    /**
+     * A response that was produced and shown but came back without usage metadata (a provider that omits it, a stream
+     * cancelled before the usage event). Releasing the reservation here, as a zero-token call would, made the call free:
+     * a user could cancel every stream after the text was out and spend nothing. The reservation is kept as the
+     * charge, raised to the size of what was actually received if that is more; with no reservation (a sibling call of
+     * the same turn) the received text is charged at the fallback rate.
+     */
+    public void chargeUnmeasuredResponse(
+        String tenantId, String userKey, Modality modality, long reservedMicroCents, long receivedChars,
+        TenantPlan knownPlan
+    ) {
+        if (tenantId == null || receivedChars <= 0) {
+            return;
+        }
+        BigDecimal estimated = estimateCostForChars(tenantId, userKey, receivedChars, knownPlan);
+        if (reservedMicroCents > 0) {
+            applySpendDelta(tenantId, userKey, modality, reservedMicroCents, estimated, knownPlan, true);
+        } else {
+            recordSpend(tenantId, userKey, modality, estimated, knownPlan);
+        }
+    }
+
+    /** The output-token estimate for {@code receivedChars} of text, priced at the fallback rate. */
+    BigDecimal estimateCostForChars(String tenantId, String userKey, long receivedChars, TenantPlan knownPlan) {
+        long tokens = (long) Math.ceil(receivedChars / CHARS_PER_TOKEN);
+        return configResolver.resolveConfig(tenantId, userKey, knownPlan).fallbackUsdPer1kTokens()
+            .multiply(BigDecimal.valueOf(tokens))
+            .divide(BigDecimal.valueOf(1000), 8, RoundingMode.HALF_UP);
     }
 
     /**

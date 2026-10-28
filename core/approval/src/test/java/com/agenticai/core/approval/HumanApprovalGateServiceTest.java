@@ -66,6 +66,7 @@ class HumanApprovalGateServiceTest {
         requestRepository = mock(ApprovalRequestRepository.class);
         executorRegistry = mock(ApprovalActionExecutorRegistry.class);
         recorder = mock(ApprovalRequestRecorder.class);
+        when(recorder.claimExecution(org.mockito.ArgumentMatchers.any())).thenReturn(true);
         feedbackService = mock(FeedbackService.class);
         gateService = new HumanApprovalGateService(
             policyService, requestRepository, executorRegistry, recorder, feedbackService, new ObjectMapper(),

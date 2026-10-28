@@ -162,7 +162,8 @@ public class PerUserBudgetTrackingAdvisor implements CallAdvisor, StreamAdvisor 
     @Override
     public ChatClientResponse adviseCall(ChatClientRequest chatClientRequest, CallAdvisorChain callAdvisorChain) {
         ChatClientResponse response = callAdvisorChain.nextCall(chatClientRequest);
-        reconcile(usageOf(response == null ? null : response.chatResponse()));
+        ChatResponse chat = response == null ? null : response.chatResponse();
+        reconcile(usageOf(chat), textLength(chat));
         return response;
     }
 
@@ -178,10 +179,14 @@ public class PerUserBudgetTrackingAdvisor implements CallAdvisor, StreamAdvisor 
         // dollar budget for completion tokens alone) and dropped the merged
         // chunk's native usage that carries billable cache/reasoning counts.
         LlmMetricsAdvisor.StreamUsageAccumulator usage = new LlmMetricsAdvisor.StreamUsageAccumulator();
+        java.util.concurrent.atomic.AtomicLong received = new java.util.concurrent.atomic.AtomicLong();
         return streamAdvisorChain.nextStream(chatClientRequest)
-            .doOnNext(usage::accept)
-            .doOnComplete(() -> reconcile(usage.merged()))
-            .doOnCancel(() -> reconcile(usage.merged()));
+            .doOnNext(chunk -> {
+                usage.accept(chunk);
+                received.addAndGet(textLength(chunk == null ? null : chunk.chatResponse()));
+            })
+            .doOnComplete(() -> reconcile(usage.merged(), received.get()))
+            .doOnCancel(() -> reconcile(usage.merged(), received.get()));
         // Still no doOnError hook - deliberately (see class javadoc).
     }
 
@@ -189,13 +194,42 @@ public class PerUserBudgetTrackingAdvisor implements CallAdvisor, StreamAdvisor 
         return (chatResponse == null || chatResponse.getMetadata() == null) ? null : chatResponse.getMetadata().getUsage();
     }
 
-    private void reconcile(Usage usage) {
-        // A null usage (no usage metadata at all - a partial/failed response
-        // typically carries none) flows straight through to
+    private static boolean hasTokens(Integer tokens) {
+        return tokens != null && tokens > 0;
+    }
+
+    /** True when the provider reported any token count at all (Spring AI's empty usage reports none). */
+    private static boolean isMeasured(Usage usage) {
+        return usage != null && (hasTokens(usage.getPromptTokens()) || hasTokens(usage.getCompletionTokens()));
+    }
+
+    /** Characters of model text in a response (0 for none, a tool-call-only turn included). */
+    private static long textLength(ChatResponse chatResponse) {
+        try {
+            if (chatResponse == null || chatResponse.getResult() == null || chatResponse.getResult().getOutput() == null) {
+                return 0L;
+            }
+            String text = chatResponse.getResult().getOutput().getText();
+            return text == null ? 0L : text.length();
+        } catch (RuntimeException e) {
+            return 0L;
+        }
+    }
+
+    /**
+     * @param receivedChars characters of model text that reached the caller. A response with text but no usage, or with
+     *     a prompt count and no completion count (a stream cancelled after the first event), used to release the whole
+     *     reservation and cost nothing; it is now charged for what was received (see
+     *     {@link PerUserBudgetService#chargeUnmeasuredResponse}).
+     */
+    private void reconcile(Usage usage, long receivedChars) {
+        // A null usage with NO text received (a failed call, a stream cancelled
+        // before the first token) flows straight through to
         // reconcileSpendReservationForUsage exactly like a real call with 0
-        // tokens would: no price to derive, so it releases the full
-        // reservation (or no-ops if nothing was reserved) - no separate
-        // branch needed here.
+        // tokens would: nothing was produced, so it releases the full
+        // reservation (or no-ops if nothing was reserved). A null or
+        // completion-less usage WITH text received is a call that happened
+        // and cost money - that is charged below, not released.
         //
         // 2026-08-08 edge-case audit: a provider that bills for a partial
         // completion before erroring mid-stream is NOT reconciled against
@@ -225,6 +259,19 @@ public class PerUserBudgetTrackingAdvisor implements CallAdvisor, StreamAdvisor 
             return;
         }
         long reservedForThisReconcile = guards.consumeSpendReservation() ? reservedMicroCents : 0L;
+        if (receivedChars > 0 && !isMeasured(usage)) {
+            budgetService.chargeUnmeasuredResponse(
+                tenantId, userKey, modality, reservedForThisReconcile, receivedChars, knownPlan);
+            return;
+        }
+        if (receivedChars > 0 && !hasTokens(usage.getCompletionTokens())) {
+            // The prompt was measured and the completion was not (a stream cancelled after its first event): price
+            // the prompt as reported and the completion from the text that arrived.
+            usage = new org.springframework.ai.chat.metadata.DefaultUsage(
+                usage.getPromptTokens(),
+                (int) Math.min(Integer.MAX_VALUE, Math.ceil(receivedChars / PerUserBudgetService.CHARS_PER_TOKEN)),
+                null, usage.getNativeUsage());
+        }
         budgetService.reconcileSpendReservationForUsage(
             tenantId, userKey, modality, reservedForThisReconcile, model, usage, knownPlan);
     }

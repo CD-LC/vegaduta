@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 /**
  * The Redis side of {@link PerUserBudgetService}: key shapes, fail-open counter reads and writes,
@@ -175,6 +176,9 @@ final class PerUserBudgetCounters {
      * under existing callers.
      */
     Long incrementByAndGet(String key, Duration window, long by) {
+        if (by < 0) {
+            return refund(key, by);
+        }
         try {
             Long count = redisTemplate.opsForValue().increment(key, by);
             if (count != null && count == by) {
@@ -191,6 +195,30 @@ final class PerUserBudgetCounters {
             return null;
         }
     }
+
+    /**
+     * Takes {@code -by} back out of a window that is still open: a rolled-back reservation, or the unused part of one.
+     * One atomic script, because a plain {@code INCRBY} of a negative number is wrong in two ways. On a key whose window
+     * already expired it creates a fresh negative counter, which is credit the user never paid for: the next window
+     * starts below zero and the cap is exceeded by that much. And a refund larger than what is left drives a live
+     * counter below zero for the same reason. A refund against an expired window is dropped (that window's spend is
+     * gone with its key); one that would overshoot stops at zero. Returns the counter after the refund.
+     */
+    private Long refund(String key, long by) {
+        try {
+            return redisTemplate.execute(REFUND_IF_LIVE, java.util.List.of(key), Long.toString(by));
+        } catch (RuntimeException e) {
+            log.debug("Per-user budget refund failed - failing open", e);
+            return null;
+        }
+    }
+
+    /** KEEPTTL so a clamp never turns a window with an expiry into one without. */
+    static final DefaultRedisScript<Long> REFUND_IF_LIVE = new DefaultRedisScript<>(
+        "if redis.call('EXISTS', KEYS[1]) == 0 then return 0 end "
+            + "local v = redis.call('INCRBY', KEYS[1], ARGV[1]) "
+            + "if v < 0 then redis.call('SET', KEYS[1], '0', 'KEEPTTL') v = 0 end "
+            + "return v", Long.class);
 
     String budgetMessage(BudgetConfig config, Modality modality, long capMicroCents, String key) {
         BigDecimal capUsd = BigDecimal.valueOf(capMicroCents).divide(MICRO_CENTS_PER_USD, 4, RoundingMode.HALF_UP);

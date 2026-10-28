@@ -20,9 +20,10 @@ import java.util.WeakHashMap;
  * {@link #mark registers} the exact text it returns, and a consumer asks {@link #kindOf}. The registry holds its keys
  * weakly, so a finished turn's texts are collected with it.
  *
- * <p>{@link #isPlatformAnswer} also accepts the old wording prefixes, so an answer from a producer that has not
- * registered itself (a plugin, a test double, a deployment that overrides the text through a path not migrated) is still
- * recognised exactly as before.
+ * <p>{@link #isPlatformAnswer} no longer accepts the old wording prefixes ("This tool call (", ...): a tool's output is
+ * attacker-influenced text, and one that began with those words was read as the platform's own refusal and left out of
+ * the effect and turn journals. A producer must register its text with {@link #mark}; the two typed control results
+ * ({@link ApprovalParked}, {@link ToolBudgetExhausted}) are also recognised by their exact two-field JSON shape.
  */
 public final class ToolResultMarker {
 
@@ -41,18 +42,6 @@ public final class ToolResultMarker {
     }
 
     private static final Map<String, Kind> MARKED = Collections.synchronizedMap(new WeakHashMap<>());
-
-    /**
-     * The wording prefixes the platform's own refusals have always started with. Kept so an unregistered producer is
-     * still recognised; new code registers its text with {@link #mark} instead of relying on them.
-     */
-    private static final String[] LEGACY_PREFIXES = {
-        "This tool call (",
-        "This tool call failed",
-        "This action (",
-        "This tool (",
-        "Tool output from '"
-    };
 
     private ToolResultMarker() {}
 
@@ -91,8 +80,8 @@ public final class ToolResultMarker {
     }
 
     /**
-     * True when {@code result} is the platform's answer and not a tool's output: it was {@link #mark registered}, it is
-     * a structural-validation failure or a budget-exhausted result, or it starts with one of the old refusal prefixes.
+     * True when {@code result} is the platform's answer and not a tool's output: it was {@link #mark registered},
+     * or it is exactly a budget-exhausted or approval-parked control result.
      */
     public static boolean isPlatformAnswer(String result) {
         if (result == null) {
@@ -101,21 +90,13 @@ public final class ToolResultMarker {
         if (kindOf(result).isPresent()) {
             return true;
         }
-        for (String prefix : LEGACY_PREFIXES) {
-            if (result.startsWith(prefix)) {
-                return true;
-            }
-        }
-        return result.startsWith(ToolCallOutputValidator.VALIDATION_FAILURE_PREFIX)
-                || ToolBudgetExhausted.isBudgetExhausted(result)
-                || ApprovalParked.isParked(result);
+        return ToolBudgetExhausted.isBudgetExhausted(result) || ApprovalParked.isParked(result);
     }
 
     /**
      * The kind of a platform answer, for a reader that needs to tell a parked call from a refused one: the registered
-     * kind, else a kind inferred from the old wording ({@code This action (} is the park text, a budget-exhausted
-     * result is {@link Kind#BUDGET_EXHAUSTED}, any other platform answer is {@link Kind#BLOCKED}); empty when
-     * {@code result} is a tool's output.
+     * kind, else the kind of an exact control result (a budget-exhausted result is {@link Kind#BUDGET_EXHAUSTED}, a
+     * parked one {@link Kind#PARKED}); empty when {@code result} is a tool's output or an unregistered text.
      */
     public static Optional<Kind> classify(String result) {
         Optional<Kind> registered = kindOf(result);
@@ -131,12 +112,6 @@ public final class ToolResultMarker {
         if (ApprovalParked.isParked(result)) {
             return Optional.of(Kind.PARKED);
         }
-        if (result.startsWith("This action (")) {
-            return Optional.of(Kind.PARKED);
-        }
-        if (result.startsWith("Tool output from '")) {
-            return Optional.of(Kind.WITHHELD);
-        }
-        return isPlatformAnswer(result) ? Optional.of(Kind.BLOCKED) : Optional.empty();
+        return Optional.empty();
     }
 }

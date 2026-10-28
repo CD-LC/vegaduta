@@ -180,6 +180,91 @@ class ApprovalRequestRecorder {
             decidedBy, request.getActionType(), TARGET_TYPE, request.getId().toString(), AuditOutcome.FAILURE,
             "No executor registered for action type " + request.getActionType()
         );
+        // Nothing will ever run it, so it is not "approved and waiting": the recovery sweep must not keep finding it.
+        finishLocked(request);
+    }
+
+    static final String RECOVERY_ACTOR = "system:approval-recovery";
+
+    /**
+     * Makes the caller the one that runs an approved action. Under the row lock it refuses unless the request is still
+     * APPROVED and nobody has started or finished it, so the thread that was just handed the decision and the recovery
+     * sweep cannot both run it. {@code request} gets the markers the database now holds (see {@link
+     * ApprovalRequest#copyExecutionMarkersFrom}).
+     */
+    @Transactional
+    boolean claimExecution(ApprovalRequest request) {
+        ApprovalRequest locked = requestRepository.findByIdForUpdate(request.getId()).orElse(null);
+        if (locked == null || locked.getStatus() != ApprovalStatus.APPROVED
+            || locked.getExecutionStartedAt() != null || locked.getExecutionCompletedAt() != null) {
+            return false;
+        }
+        locked.markExecutionStarted();
+        requestRepository.save(locked);
+        request.copyExecutionMarkersFrom(locked);
+        return true;
+    }
+
+    /** The action ended and its outcome is recorded elsewhere (or is success): stop the sweep looking at it. */
+    @Transactional
+    void recordExecutionFinished(ApprovalRequest request) {
+        finishLocked(request);
+    }
+
+    private void finishLocked(ApprovalRequest request) {
+        ApprovalRequest locked = requestRepository.findByIdForUpdate(request.getId()).orElse(null);
+        if (locked == null || locked.getStatus() != ApprovalStatus.APPROVED || locked.getExecutionCompletedAt() != null) {
+            return;
+        }
+        locked.markExecutionCompleted();
+        requestRepository.save(locked);
+        request.copyExecutionMarkersFrom(locked);
+    }
+
+    /**
+     * An approved action nobody started and that is too old to run. Same lock-and-check as a claim, so a live caller
+     * that starts it at this moment wins and this returns false; recorded as dead-lettered with {@code reason}.
+     */
+    @Transactional
+    boolean recordNeverRan(ApprovalRequest request, String reason) {
+        ApprovalRequest locked = requestRepository.findByIdForUpdate(request.getId()).orElse(null);
+        if (locked == null || locked.getStatus() != ApprovalStatus.APPROVED
+            || locked.getExecutionStartedAt() != null || locked.getExecutionCompletedAt() != null) {
+            return false;
+        }
+        locked.markDeadLettered(reason);
+        locked.markExecutionCompleted();
+        requestRepository.save(locked);
+        request.markDeadLettered(reason);
+        request.copyExecutionMarkersFrom(locked);
+        auditLogService.record(
+            RECOVERY_ACTOR, locked.getActionType(), TARGET_TYPE, locked.getId().toString(), AuditOutcome.FAILURE, reason
+        );
+        publishExecutionRecorded(locked);
+        return true;
+    }
+
+    /**
+     * An approved action that started and never reported how it ended (the process died mid-run). What it did is
+     * unknown, so it is NOT run again - a second send, charge or delete is worse than a reported gap. Recorded as
+     * dead-lettered so a person or the agent can decide. Returns false when it finished or was handled first.
+     */
+    @Transactional
+    boolean recordInterrupted(ApprovalRequest request, String reason) {
+        ApprovalRequest locked = requestRepository.findByIdForUpdate(request.getId()).orElse(null);
+        if (locked == null || locked.getStatus() != ApprovalStatus.APPROVED || locked.getExecutionCompletedAt() != null) {
+            return false;
+        }
+        locked.markDeadLettered(reason);
+        locked.markExecutionCompleted();
+        requestRepository.save(locked);
+        request.markDeadLettered(reason);
+        request.copyExecutionMarkersFrom(locked);
+        auditLogService.record(
+            RECOVERY_ACTOR, locked.getActionType(), TARGET_TYPE, locked.getId().toString(), AuditOutcome.FAILURE, reason
+        );
+        publishExecutionRecorded(locked);
+        return true;
     }
 
     // Autonomy/Guardrails Strategy Stage C. The three methods below reuse

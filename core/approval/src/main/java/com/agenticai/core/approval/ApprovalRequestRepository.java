@@ -63,4 +63,30 @@ public interface ApprovalRequestRepository extends JpaRepository<ApprovalRequest
      * see {@code ApprovalStatus}'s javadoc.
      */
     List<ApprovalRequest> findByStatusAndNextRetryAtBefore(ApprovalStatus status, Instant cutoff);
+
+    /**
+     * {@code ApprovalRecoveryJob}'s first query: approved more than a moment ago and no caller ever started the action
+     * (the process died between the decision and the run). Oldest first.
+     */
+    @Query("""
+        select r from ApprovalRequest r
+        where r.status = com.agenticai.core.approval.ApprovalStatus.APPROVED
+          and r.executionStartedAt is null and r.executionCompletedAt is null
+          and r.decidedAt < :cutoff
+        order by r.decidedAt asc
+        """)
+    List<ApprovalRequest> findApprovedNeverStarted(@Param("cutoff") Instant cutoff, Pageable page);
+
+    /**
+     * {@code ApprovalRecoveryJob}'s second query: the action started long ago and nothing recorded how it ended
+     * (the process died mid-run), so what it did is unknown. Oldest first.
+     */
+    @Query("""
+        select r from ApprovalRequest r
+        where r.status = com.agenticai.core.approval.ApprovalStatus.APPROVED
+          and r.executionStartedAt is not null and r.executionCompletedAt is null
+          and r.executionStartedAt < :cutoff
+        order by r.executionStartedAt asc
+        """)
+    List<ApprovalRequest> findApprovedStartedNeverFinished(@Param("cutoff") Instant cutoff, Pageable page);
 }

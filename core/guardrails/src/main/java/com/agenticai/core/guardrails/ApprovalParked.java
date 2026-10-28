@@ -47,6 +47,6 @@ public final class ApprovalParked {
 
     /** True when {@code toolResult} is a parked-turn result (from this class or the tool loop). */
     public static boolean isParked(String toolResult) {
-        return toolResult != null && toolResult.contains("\"error\":\"" + MARKER + "\"");
+        return PlatformMarkerDocument.is(toolResult, MARKER);
     }
 }

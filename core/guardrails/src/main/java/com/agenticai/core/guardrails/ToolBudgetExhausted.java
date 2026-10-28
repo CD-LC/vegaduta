@@ -46,6 +46,6 @@ public final class ToolBudgetExhausted {
 
     /** True when {@code toolResult} is a budget-exhausted result (from this class or the tool loop). */
     public static boolean isBudgetExhausted(String toolResult) {
-        return toolResult != null && toolResult.contains("\"error\":\"" + MARKER + "\"");
+        return PlatformMarkerDocument.is(toolResult, MARKER);
     }
 }

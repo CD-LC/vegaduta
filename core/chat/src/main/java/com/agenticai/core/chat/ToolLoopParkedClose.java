@@ -90,7 +90,7 @@ final class ToolLoopParkedClose {
         List<ToolResponseMessage.ToolResponse> ordered = new ArrayList<>(toolResponses.getResponses());
         for (int i = 0; i < ordered.size(); i++) {
             String data = ordered.get(i).responseData();
-            if (data != null && data.contains("\"approval_parked\"")) {
+            if (ToolLoopMarkers.isMarkerDocument(data, ArgumentSanitizingToolCallingManager.APPROVAL_PARKED)) {
                 // The parked call's own response becomes the closing reply (clean text for the
                 // person and a legible result for the model's next turn); its id stays so the
                 // call->response pairing still matches.
