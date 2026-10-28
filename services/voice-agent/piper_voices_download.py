@@ -104,7 +104,7 @@ def main() -> None:
         path = f"{locale.split('_')[0]}/{locale}/{name}/{quality}/{voice}"
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / f"{voice}.onnx").write_bytes(fetch(f"{HF_BASE}/{path}.onnx", onnx_sha))
-    (out_dir / f"{voice}.onnx.json").write_bytes(fetch(f"{HF_BASE}/{path}.json", json_sha))
+    (out_dir / f"{voice}.onnx.json").write_bytes(fetch(f"{HF_BASE}/{path}.onnx.json", json_sha))
     print(f"baked {voice} into {out_dir}")
 
 
