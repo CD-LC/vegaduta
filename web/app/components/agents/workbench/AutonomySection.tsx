@@ -3,6 +3,7 @@
 import { ShieldCheck } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import McpExposureField from "../../McpExposureField";
+import A2aEndpointPanel from "../A2aEndpointPanel";
 import AgentBrowserAutomation from "../AgentBrowserAutomation";
 import AgentDesktopAutomation from "../../desktop/AgentDesktopAutomation";
 import AgentGuardrailsCard from "../AgentGuardrailsCard";
@@ -172,6 +173,10 @@ export default function AutonomySection() {
           )}
 
           {!isDraft && selectedAgent && <McpExposureField kind="agents" resourceId={selectedAgent.id} />}
+
+          {/* A2A endpoints for this agent (core/agents-interop) - read-only panel next to the MCP
+           * exposure switch; self-hides on personal edition and on an older core. */}
+          {!isDraft && selectedAgent && <A2aEndpointPanel agentId={selectedAgent.id} />}
 
           {/* Per-agent content guardrails. Draft agents have no id to PATCH
            * against yet, hence the same !isDraft gate every other
