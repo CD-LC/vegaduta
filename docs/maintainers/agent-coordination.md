@@ -643,6 +643,7 @@ results name evicted_key + expired_removed), plus lazy TTL sweeps
 GET /api/agents/{agentId}/scratchpad[?session] and /{key} gated by
 AgentService.requireAccess(VIEWER) - no write/delete by design, session
 "agent"/omitted reads the long-term pad.
+<<<<<<< HEAD
 ### Dependabot lock autofix (Devin, 2026-10-28)
 
 New `.github/workflows/dependabot-autofix.yml` regenerates
@@ -682,3 +683,24 @@ Verified: 19 new vitest cases green (incl. loading every mapped layout
 module for real), eslint + prettier + typecheck clean against
 `origin/main`. Worktree: /tmp/vd-keyboard, branch
 `feat/locale-onscreen-keyboard`.
+
+### Edge-media / playground / keyboard session (Devin, 2026-10-28)
+
+Merged **PR #276** (`fix(playground): drive the live turn clock from the
+turn's start time`, squash `7a8ec2acb`) and **PR #277** (`fix(edge): let
+cached media models warm the worker and scale the tool budget to the
+window`, squash `d2654a83`) to `main` — both had gone green on CI after
+Prettier-only fix-up pushes; approved + admin-merged from the `vegaduta`
+bot account since the PR author's own approval doesn't count and branch
+protection enforces admins. #277's squash also carries the MusicGen
+always-q4 WebGPU fix (fp32/fp16 decoders exceed the browser session
+limit), the non-f16 SD-Turbo gating, the trimmed-tool prompt notes, and
+the unenrolled-browser PIN hint.
+
+Keyboard feature: claimed `web/app/components/keyboard/**`,
+`web/app/lib/keyboard/**`, `web/app/components/shell/TopBar.tsx`,
+`web/messages/en.json`, `web/package*.json`, `CHANGELOG.md` — open as
+**PR #278** (`feat/locale-onscreen-keyboard`, off `origin/main`), waits
+for the release-readiness lead's review per the `web/app/**` overlap.
+Deployed to the maintainer's local personal stack from
+`deploy/local-everything` (worktree /tmp/vd-deploy-all).
