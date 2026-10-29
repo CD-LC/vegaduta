@@ -94,7 +94,7 @@ export default function DeployPanel({
                   <span className="truncate">{a.name}</span>
                   {a.live && (
                     <Badge className="text-[10px]">
-                      <CheckCircle2 aria-hidden="true" className="mr-1 h-3 w-3 shrink-0" /> live
+                      <CheckCircle2 aria-hidden="true" className="me-1 h-3 w-3 shrink-0" /> live
                     </Badge>
                   )}
                 </div>
@@ -148,7 +148,7 @@ export default function DeployPanel({
         </p>
         <Button asChild>
           <Link href={signupHref}>
-            Create my workspace <ArrowRight aria-hidden="true" className="ml-2 h-4 w-4 shrink-0" />
+            Create my workspace <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
           </Link>
         </Button>
       </section>

@@ -11,7 +11,16 @@ import { Card, CardContent } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import StoreReadiness from "./StoreReadiness";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { useTranslations } from "../lib/i18n";
 import { appBuilder } from "./lib";
 import SyncPanel from "./SyncPanel";
@@ -34,7 +43,15 @@ function expiryLabel(expiresAt, t) {
 /* ------------------------------------------------------------------ */
 /* Project view: chat (left) + preview/backend (right)                */
 
-export function ProjectView({ project, setProject, onDeleted, onError, onClearError, onProjectsChanged, githubStatus }) {
+export function ProjectView({
+  project,
+  setProject,
+  onDeleted,
+  onError,
+  onClearError,
+  onProjectsChanged,
+  githubStatus,
+}) {
   const t = useTranslations("appBuilder");
   const [tab, setTab] = useState("preview");
   // The project's file set: fetched once on open, then merged with every
@@ -83,9 +100,11 @@ export function ProjectView({ project, setProject, onDeleted, onError, onClearEr
     setLifecycleBusy(op);
     try {
       const fn =
-        op === "extend" ? () => appBuilder.extendProject(project.project_id, 72)
-        : op === "keep" ? () => appBuilder.keepProject(project.project_id)
-        : () => appBuilder.archiveProject(project.project_id);
+        op === "extend"
+          ? () => appBuilder.extendProject(project.project_id, 72)
+          : op === "keep"
+            ? () => appBuilder.keepProject(project.project_id)
+            : () => appBuilder.archiveProject(project.project_id);
       const updated = await fn();
       if (updated) setProject(updated);
       onClearError?.();
@@ -119,7 +138,7 @@ export function ProjectView({ project, setProject, onDeleted, onError, onClearEr
             <Archive size={11} aria-hidden="true" /> {t("lifecycleArchived")}
           </Badge>
         )}
-        <div className="ml-auto flex flex-wrap items-center gap-1.5">
+        <div className="ms-auto flex flex-wrap items-center gap-1.5">
           <Button
             variant="outline"
             size="sm"
@@ -132,18 +151,30 @@ export function ProjectView({ project, setProject, onDeleted, onError, onClearEr
           {ephemeral && (
             <>
               <Button variant="outline" size="sm" disabled={!!lifecycleBusy} onClick={() => runLifecycle("extend")}>
-                {lifecycleBusy === "extend" ? <Loader2 aria-hidden="true" size={13} className="animate-spin" /> : <Timer aria-hidden="true" size={13} />}
+                {lifecycleBusy === "extend" ? (
+                  <Loader2 aria-hidden="true" size={13} className="animate-spin" />
+                ) : (
+                  <Timer aria-hidden="true" size={13} />
+                )}
                 {t("extendButton")}
               </Button>
               <Button variant="outline" size="sm" disabled={!!lifecycleBusy} onClick={() => runLifecycle("keep")}>
-                {lifecycleBusy === "keep" ? <Loader2 aria-hidden="true" size={13} className="animate-spin" /> : <InfinityIcon aria-hidden="true" size={13} />}
+                {lifecycleBusy === "keep" ? (
+                  <Loader2 aria-hidden="true" size={13} className="animate-spin" />
+                ) : (
+                  <InfinityIcon aria-hidden="true" size={13} />
+                )}
                 {t("keepButton")}
               </Button>
             </>
           )}
           {archived ? (
             <Button variant="outline" size="sm" disabled={!!lifecycleBusy} onClick={() => runLifecycle("keep")}>
-              {lifecycleBusy === "keep" ? <Loader2 aria-hidden="true" size={13} className="animate-spin" /> : <RotateCw aria-hidden="true" size={13} />}
+              {lifecycleBusy === "keep" ? (
+                <Loader2 aria-hidden="true" size={13} className="animate-spin" />
+              ) : (
+                <RotateCw aria-hidden="true" size={13} />
+              )}
               {t("restoreButton")}
             </Button>
           ) : (

@@ -124,7 +124,7 @@ export function ConvertBar({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: "spring", stiffness: 220, damping: 24 }}
-          className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-3xl items-center gap-3 rounded-2xl border border-violet-500/40 bg-background/90 p-3 pl-4 shadow-2xl shadow-violet-500/20 backdrop-blur-xl"
+          className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-3xl items-center gap-3 rounded-2xl border border-violet-500/40 bg-background/90 p-3 ps-4 shadow-2xl shadow-violet-500/20 backdrop-blur-xl"
           role="region"
           aria-label="Keep your agent"
         >

@@ -25,7 +25,7 @@ export default function AskAiPopover({
   return (
     <Popover open={gen.open} onOpenChange={(open: boolean) => (open ? gen.setOpen(true) : gen.reset())}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm" className="ml-auto gap-1.5">
+        <Button type="button" variant="outline" size="sm" className="ms-auto gap-1.5">
           <Sparkles aria-hidden="true" size={13} /> {t("askAiTriggerLabel")}
         </Button>
       </PopoverTrigger>
@@ -122,14 +122,14 @@ export default function AskAiPopover({
               {genResult.valid ? t("askAiGeneratedValidBody") : t("askAiGeneratedInvalidBody")}
             </p>
             {genResult.errors.length > 0 && (
-              <ul className="list-disc space-y-0.5 pl-4 font-mono text-[0.6875rem] text-[var(--danger-text)]">
+              <ul className="list-disc space-y-0.5 ps-4 font-mono text-[0.6875rem] text-[var(--danger-text)]">
                 {genResult.errors.map((err, i) => (
                   <li key={i}>{err.message || JSON.stringify(err)}</li>
                 ))}
               </ul>
             )}
             {genResult.warnings.length > 0 && (
-              <ul className="list-disc space-y-0.5 pl-4 text-[0.6875rem] text-muted-foreground">
+              <ul className="list-disc space-y-0.5 ps-4 text-[0.6875rem] text-muted-foreground">
                 {genResult.warnings.map((w, i) => (
                   <li key={i}>{w}</li>
                 ))}

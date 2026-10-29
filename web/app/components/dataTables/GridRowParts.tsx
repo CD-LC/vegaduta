@@ -2,13 +2,7 @@
 
 import { Check, X } from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
-import {
-  cellOf,
-  cellToDisplay,
-  cellToInput,
-  type DataTableColumn,
-  type DataTableRow,
-} from "../../lib/dataTables";
+import { cellOf, cellToDisplay, cellToInput, type DataTableColumn, type DataTableRow } from "../../lib/dataTables";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { TableCell, TableRow } from "../ui/table";
@@ -76,7 +70,7 @@ export function GridCell({
   return (
     <button
       type="button"
-      className="block min-h-6 w-full rounded px-1 text-left hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+      className="block min-h-6 w-full rounded px-1 text-start hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
       aria-label={t("editCell", { column: col.name })}
       onClick={() => setEdit({ rowId: row.id, column: col.name, text: cellToInput(col.type, value), error: null })}
     >

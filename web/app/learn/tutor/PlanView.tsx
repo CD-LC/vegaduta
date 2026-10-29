@@ -138,7 +138,7 @@ export default function PlanView({
                         type="button"
                         variant="ghost"
                         onClick={() => onOpenLesson(lesson.id)}
-                        className="h-auto w-full items-start justify-start gap-3 whitespace-normal px-2 py-2 text-left font-normal"
+                        className="h-auto w-full items-start justify-start gap-3 whitespace-normal px-2 py-2 text-start font-normal"
                         data-testid={`tutor-lesson-row-${lesson.id}`}
                       >
                         <span className="mt-0.5">

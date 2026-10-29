@@ -153,7 +153,7 @@ export default function DescribeComposer({ onCreated }: DescribeComposerProps) {
                   size="sm"
                   disabled={busy}
                   data-testid={`workflow-describe-example-${key}`}
-                  className="h-auto min-h-8 max-w-full whitespace-normal py-1.5 text-left"
+                  className="h-auto min-h-8 max-w-full whitespace-normal py-1.5 text-start"
                   onClick={() => {
                     setPrompt(t(`${key}Prompt`));
                     setError(null);

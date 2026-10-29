@@ -134,7 +134,7 @@ export function RunScene({ p }: SceneProps) {
               >
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Icon className="h-4 w-4 text-emerald-300" /> {s.label}
-                  <span className="ml-auto text-[10px] text-zinc-400">{done > 0.5 ? "done" : "running…"}</span>
+                  <span className="ms-auto text-[10px] text-zinc-400">{done > 0.5 ? "done" : "running…"}</span>
                 </div>
                 <div className="mt-1 font-mono text-[11px] text-zinc-400">
                   {s.tool}({JSON.stringify(s.detail)})

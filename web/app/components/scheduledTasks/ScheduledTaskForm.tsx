@@ -377,7 +377,7 @@ export default function ScheduledTaskForm({
                   {t(schedule.kind === "custom" ? "previewCustomPending" : "previewNone")}
                 </p>
               ) : (
-                <ol className="mt-1 list-decimal pl-5 text-xs text-muted-foreground">
+                <ol className="mt-1 list-decimal ps-5 text-xs text-muted-foreground">
                   {previewRuns.map((iso) => (
                     <li key={iso}>{formatRunTime(iso, previewZone)}</li>
                   ))}

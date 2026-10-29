@@ -70,7 +70,11 @@ export function PromptPreviewView({ agent, sessionId }: { agent: PlaygroundAgent
   }
   if (state.status === "error") {
     return (
-      <div role="alert" className="flex flex-wrap items-center gap-2 text-sm text-destructive" data-testid="rs-preview-error">
+      <div
+        role="alert"
+        className="flex flex-wrap items-center gap-2 text-sm text-destructive"
+        data-testid="rs-preview-error"
+      >
         <span className="min-w-0">{state.message}</span>
         <Button type="button" size="sm" variant="outline" onClick={build}>
           {t("rsRetry")}
@@ -93,7 +97,9 @@ export function PromptPreviewView({ agent, sessionId }: { agent: PlaygroundAgent
         <Alert variant="warning">
           <TriangleAlert aria-hidden="true" />
           <AlertTitle>{t("rsPreviewOverBudgetTitle")}</AlertTitle>
-          <AlertDescription>{t("rsPreviewOverBudget", { budget: NUMBER.format(preview.tokenBudget) })}</AlertDescription>
+          <AlertDescription>
+            {t("rsPreviewOverBudget", { budget: NUMBER.format(preview.tokenBudget) })}
+          </AlertDescription>
         </Alert>
       )}
       {messages.length === 0 && <p className="m-0 text-xs text-muted-foreground">{t("rsPreviewNoBlocks")}</p>}
@@ -111,14 +117,18 @@ export function PromptPreviewView({ agent, sessionId }: { agent: PlaygroundAgent
                 >
                   <div className="flex flex-wrap items-center gap-1.5">
                     <code className="break-all font-mono font-medium text-foreground">{b.key ?? b.id}</code>
-                    <Badge variant={b.version && b.version > 0 ? "accent" : "secondary"}>{blockSourceLabel(t, b)}</Badge>
+                    <Badge variant={b.version && b.version > 0 ? "accent" : "secondary"}>
+                      {blockSourceLabel(t, b)}
+                    </Badge>
                     <span className="text-muted-foreground">
                       {t("rsPreviewTokens", { tokens: NUMBER.format(b.estimatedTokens) })}
                     </span>
                   </div>
                   <details className="mt-1">
                     <summary className="cursor-pointer text-muted-foreground">{t("rsPreviewShowText")}</summary>
-                    <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-words font-sans">{b.text}</pre>
+                    <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-words font-sans">
+                      {b.text}
+                    </pre>
                   </details>
                 </li>
               ))}
@@ -126,7 +136,9 @@ export function PromptPreviewView({ agent, sessionId }: { agent: PlaygroundAgent
         </section>
       ))}
       <section aria-label={t("rsPreviewTools", { count: preview.tools.length })} className="space-y-1.5">
-        <h4 className="m-0 text-xs font-semibold text-foreground">{t("rsPreviewTools", { count: preview.tools.length })}</h4>
+        <h4 className="m-0 text-xs font-semibold text-foreground">
+          {t("rsPreviewTools", { count: preview.tools.length })}
+        </h4>
         {preview.tools.length === 0 ? (
           <p className="m-0 text-xs text-muted-foreground">{t("rsPreviewNoTools")}</p>
         ) : (
@@ -147,7 +159,7 @@ export function PromptPreviewView({ agent, sessionId }: { agent: PlaygroundAgent
         <Alert>
           <AlertTitle>{t("rsPreviewNotes")}</AlertTitle>
           <AlertDescription>
-            <ul className="m-0 list-disc pl-4">
+            <ul className="m-0 list-disc ps-4">
               {preview.notes.map((n) => (
                 <li key={n}>{n}</li>
               ))}
@@ -155,7 +167,10 @@ export function PromptPreviewView({ agent, sessionId }: { agent: PlaygroundAgent
           </AlertDescription>
         </Alert>
       )}
-      <Link href={PROMPTS_ADMIN_HREF} className="inline-block text-xs font-medium text-primary underline-offset-4 hover:underline">
+      <Link
+        href={PROMPTS_ADMIN_HREF}
+        className="inline-block text-xs font-medium text-primary underline-offset-4 hover:underline"
+      >
         {t("rsPreviewOpenAdmin")}
       </Link>
     </div>

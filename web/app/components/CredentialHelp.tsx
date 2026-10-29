@@ -105,7 +105,7 @@ export default function CredentialHelp({ title, steps, href, hrefLabel, pricingH
   }, [open]);
 
   return (
-    <span className="relative ml-1.5 inline-block" ref={ref}>
+    <span className="relative ms-1.5 inline-block" ref={ref}>
       <Button
         type="button"
         variant="link"
@@ -134,7 +134,7 @@ export default function CredentialHelp({ title, steps, href, hrefLabel, pricingH
           tabIndex={-1}
         >
           <strong className="mb-1.5 block font-semibold text-foreground">{title}</strong>
-          <ol className="m-0 flex list-decimal flex-col gap-1.5 pl-4">
+          <ol className="m-0 flex list-decimal flex-col gap-1.5 ps-4">
             {steps?.map((step: string, i: number) => (
               <li key={i}>{step}</li>
             ))}

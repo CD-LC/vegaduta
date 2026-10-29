@@ -47,16 +47,8 @@ export function DatasetCardHeader({
   const pinned = dataset.toolExecutionEnabled != null;
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <button
-        type="button"
-        className="flex items-center gap-2 bg-transparent p-0 text-left"
-        onClick={onToggleExpand}
-      >
-        {expanded ? (
-          <ChevronDown size={16} aria-hidden="true" />
-        ) : (
-          <ChevronRight size={16} aria-hidden="true" />
-        )}
+      <button type="button" className="flex items-center gap-2 bg-transparent p-0 text-start" onClick={onToggleExpand}>
+        {expanded ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}
         <span className="font-medium text-foreground">{dataset.name}</span>
       </button>
       <Badge variant="secondary">
@@ -74,12 +66,8 @@ export function DatasetCardHeader({
           auto-approve
         </Badge>
       )}
-      <div className="ml-auto flex items-center gap-2">
-        <Button
-          size="sm"
-          onClick={onRun}
-          disabled={busy || dataset.caseCount === 0}
-        >
+      <div className="ms-auto flex items-center gap-2">
+        <Button size="sm" onClick={onRun} disabled={busy || dataset.caseCount === 0}>
           <Play size={14} aria-hidden="true" /> Run
         </Button>
         <Button
@@ -102,12 +90,7 @@ export function DatasetCardHeader({
         </Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={busy}
-              aria-label={`Delete dataset ${dataset.name}`}
-            >
+            <Button variant="outline" size="sm" disabled={busy} aria-label={`Delete dataset ${dataset.name}`}>
               <Trash2 size={14} aria-hidden="true" />
             </Button>
           </AlertDialogTrigger>

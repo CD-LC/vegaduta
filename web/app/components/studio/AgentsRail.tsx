@@ -43,7 +43,7 @@ export default function AgentsRail({
         selectedId === a.id && showingSelected
       )}`}
     >
-      <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onSelect(a.id)}>
+      <button type="button" className="min-w-0 flex-1 text-start" onClick={() => onSelect(a.id)}>
         <div className="flex items-center gap-2 font-medium">
           <Bot aria-hidden="true" className="h-4 w-4 shrink-0" />
           <span className="truncate">{a.name}</span>
@@ -84,7 +84,7 @@ export default function AgentsRail({
       )}
       {!readOnly && (
         <Button variant="outline" size="sm" className="w-full" disabled={atCap} onClick={onNew}>
-          <Plus aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" /> New agent
+          <Plus aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> New agent
         </Button>
       )}
       {atCap && (

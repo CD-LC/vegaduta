@@ -274,14 +274,14 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
           <Search
             aria-hidden="true"
             size={15}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("browseRegistrySearchPlaceholder")}
-            className="pl-8"
+            className="ps-8"
             aria-label={t("browseRegistryTitle")}
           />
         </div>

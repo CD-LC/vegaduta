@@ -84,7 +84,7 @@ function Item({ it, k, tone }: { it: PhoneItem; k: number; tone: string }) {
       return (
         <div
           style={style}
-          className="max-w-[86%] rounded-2xl rounded-tl-sm bg-white/10 px-3 py-2 text-[13px] leading-snug"
+          className="max-w-[86%] rounded-2xl rounded-ss-sm bg-white/10 px-3 py-2 text-[13px] leading-snug"
         >
           {it.text}
           {it.sub && <div className="mt-1 text-[10px] text-zinc-400">{it.sub}</div>}
@@ -94,7 +94,7 @@ function Item({ it, k, tone }: { it: PhoneItem; k: number; tone: string }) {
       return (
         <div
           style={{ ...style, background: `${t.ring}33` }}
-          className="ml-auto max-w-[86%] rounded-2xl rounded-tr-sm px-3 py-2 text-[13px] leading-snug"
+          className="ms-auto max-w-[86%] rounded-2xl rounded-se-sm px-3 py-2 text-[13px] leading-snug"
         >
           {it.text}
           {it.sub && <div className="mt-1 text-[10px] text-zinc-300">{it.sub}</div>}
@@ -134,7 +134,7 @@ function Item({ it, k, tone }: { it: PhoneItem; k: number; tone: string }) {
           <div className="flex items-start gap-1.5">
             <ShieldAlert aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-300" /> {it.text}
           </div>
-          {it.sub && <div className="mt-1 pl-5 text-[10px] text-zinc-400">{it.sub}</div>}
+          {it.sub && <div className="mt-1 ps-5 text-[10px] text-zinc-400">{it.sub}</div>}
         </div>
       );
     case "ok":
@@ -146,7 +146,7 @@ function Item({ it, k, tone }: { it: PhoneItem; k: number; tone: string }) {
           <div className="flex items-start gap-1.5">
             <Check aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-300" /> {it.text}
           </div>
-          {it.sub && <div className="mt-1 pl-5 text-[10px] text-zinc-400">{it.sub}</div>}
+          {it.sub && <div className="mt-1 ps-5 text-[10px] text-zinc-400">{it.sub}</div>}
         </div>
       );
     case "note":
@@ -161,7 +161,7 @@ function Item({ it, k, tone }: { it: PhoneItem; k: number; tone: string }) {
       );
     default:
       return (
-        <div style={style} className="flex items-baseline gap-2 border-l-2 pl-3 text-[12.5px]">
+        <div style={style} className="flex items-baseline gap-2 border-s-2 ps-3 text-[12.5px]">
           <span className="text-zinc-100">{it.text}</span>
           {it.sub && <span className="text-[10px] text-zinc-400">{it.sub}</span>}
         </div>

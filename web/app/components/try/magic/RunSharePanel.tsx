@@ -117,7 +117,7 @@ export default function RunSharePanel({
           <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             {t("magic_resultLabel")}
             {result.simulated ? (
-              <span className="ml-2 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-500">
+              <span className="ms-2 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-500">
                 {t("magic_sampleBadge")}
               </span>
             ) : null}
@@ -130,9 +130,7 @@ export default function RunSharePanel({
               className="w-full rounded-xl border border-border/50"
             />
           ) : (
-            <div className="max-h-80 overflow-auto whitespace-pre-wrap text-sm leading-relaxed">
-              {result.text}
-            </div>
+            <div className="max-h-80 overflow-auto whitespace-pre-wrap text-sm leading-relaxed">{result.text}</div>
           )}
         </div>
       ) : null}

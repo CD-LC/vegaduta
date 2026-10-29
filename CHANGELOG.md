@@ -155,6 +155,19 @@ Release notes on GitHub are generated from the section for each version.
   documented that non-localhost browser access requires HTTPS: the realm
   marks session cookies `Secure`, so plain-`http://` LAN/hostname installs
   silently drop them and the sign-in form loops.
+- **RTL locales now mirror the whole console, not just the text.** Arabic,
+  Urdu, Kashmiri and Sindhi already set `<html dir="rtl">`, but a large part
+  of the UI was written in physical terms: the language menu anchored
+  `right-0` and stayed on the LTR edge, drawers and side panels pinned to
+  physical `left-0`/`right-0` while their borders kept pointing inward on
+  the wrong side, search-input icons sat over the text the logical padding
+  opened, and sticky first table columns pinned the wrong edge. The audit
+  converted roughly 450 files to logical properties (`ps-`/`pe-`, `ms-`/`me-`,
+  `text-start`, `border-s`/`border-e`, logical corner radii, `start-`/`end-`
+  anchors where the anchor is leading-edge, `ltr:`/`rtl:` transform pairs on
+  slide-in drawers), one CSS rule mirrors the directional lucide icons
+  (arrows/chevrons; transport and media glyphs intentionally unmirrored),
+  and `global-error` now renders a direction-aware `<html>` as well.
 
 ### Added
 
@@ -206,6 +219,13 @@ Release notes on GitHub are generated from the section for each version.
   upload picker now lists `.pptx`/`.xlsx`/`.csv`/`.tiff`/`.tif`/`.bmp`
   alongside the existing types (PPT/XLS badges); a deployment without the
   `docling` profile still rejects them server-side with a clear error.
+- **Personal installs keep language packs off the device until asked.**
+  Picking a non-English language on a personal install no longer silently
+  fetches its ~0.6 MB catalog: the language menu first shows a consent card
+  naming the pack size, downloads it on approval (failure stays in the menu
+  with a retry instead of half-applying the locale), and remembers the grant
+  in localStorage so a restart never re-asks. Lite/full/hosted editions are
+  unchanged — they already treat every catalog as present.
 
 ## [0.1.12] - 2026-10-26
 

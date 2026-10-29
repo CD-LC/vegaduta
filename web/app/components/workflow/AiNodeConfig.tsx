@@ -60,7 +60,7 @@ export default function AiNodeConfigForm({ type, config, setConfig }: ConfigProp
       {type === "variable_aggregator" && <VariableAggregatorConfig t={t} config={config} setConfig={setConfig} />}
       {type === "document_extractor" && <DocumentExtractorConfig t={t} config={config} setConfig={setConfig} />}
       {problems.length > 0 && (
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-destructive" data-testid="ai-node-problems">
+        <ul className="mt-2 list-disc space-y-1 ps-5 text-xs text-destructive" data-testid="ai-node-problems">
           {problems.map((p, i) => (
             <li key={`${p.code}-${i}`}>{t(`problem_${p.code}`, { value: p.value || "" })}</li>
           ))}

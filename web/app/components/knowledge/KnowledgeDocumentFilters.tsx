@@ -31,7 +31,7 @@ export default function KnowledgeDocumentFilters({
           <Search
             aria-hidden="true"
             size={14}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             type="search"
@@ -39,7 +39,7 @@ export default function KnowledgeDocumentFilters({
             onChange={(e) => setDocQuery(e.target.value)}
             placeholder="Filter files by name"
             aria-label="Filter files by name"
-            className="h-8 pl-9"
+            className="h-8 ps-9"
           />
         </div>
         <Select

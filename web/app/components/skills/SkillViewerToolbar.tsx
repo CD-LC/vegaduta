@@ -31,7 +31,7 @@ export default function SkillViewerToolbar({
   return (
     <>
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="mr-auto font-mono text-base font-semibold text-foreground">{detail.name}</h2>
+        <h2 className="me-auto font-mono text-base font-semibold text-foreground">{detail.name}</h2>
         <Button size="sm" variant="outline" disabled={busy} onClick={onExport}>
           <Download aria-hidden="true" size={14} /> {t("exportButton")}
         </Button>
@@ -52,34 +52,21 @@ export default function SkillViewerToolbar({
             title="Start a new custom skill from a copy of this one"
             onClick={onDuplicate}
           >
-            <Copy aria-hidden="true" size={14} />{" "}
-            {detail.source === "BUILT_IN" ? "Customize" : "Duplicate"}
+            <Copy aria-hidden="true" size={14} /> {detail.source === "BUILT_IN" ? "Customize" : "Duplicate"}
           </Button>
         )}
         {canManageSkills && detail.source === "CUSTOM" && (
           <>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={busy}
-              onClick={onEdit}
-            >
+            <Button size="sm" variant="outline" disabled={busy} onClick={onEdit}>
               <Pencil aria-hidden="true" size={14} /> {t("editButton")}
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={busy}
-              onClick={onDelete}
-            >
+            <Button size="sm" variant="outline" disabled={busy} onClick={onDelete}>
               <Trash2 aria-hidden="true" size={14} /> {t("deleteButton")}
             </Button>
           </>
         )}
       </div>
-      {detail.source === "BUILT_IN" && (
-        <p className="text-xs text-muted-foreground">{t("builtInReadOnly")}</p>
-      )}
+      {detail.source === "BUILT_IN" && <p className="text-xs text-muted-foreground">{t("builtInReadOnly")}</p>}
     </>
   );
 }

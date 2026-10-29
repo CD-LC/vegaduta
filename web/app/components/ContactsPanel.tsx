@@ -468,7 +468,7 @@ export default function ContactsPanel({ agents }: { agents?: AgentOption[] }) {
                   <TableHead className="w-[170px]">{t("colChannel")}</TableHead>
                   <TableHead>{t("colAgent")}</TableHead>
                   <TableHead className="w-[260px]">{t("colNewSenders")}</TableHead>
-                  <TableHead className="w-[120px] text-right">{t("colActions")}</TableHead>
+                  <TableHead className="w-[120px] text-end">{t("colActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -482,7 +482,7 @@ export default function ContactsPanel({ agents }: { agents?: AgentOption[] }) {
                       </TableCell>
                       <TableCell className="min-w-[200px]">{routingAgentSelect(row, draft)}</TableCell>
                       <TableCell className="min-w-[220px]">{routingModeSelect(row, draft)}</TableCell>
-                      <TableCell className="text-right">{routingSaveButton(row, draft, dirty)}</TableCell>
+                      <TableCell className="text-end">{routingSaveButton(row, draft, dirty)}</TableCell>
                     </TableRow>
                   );
                 })}

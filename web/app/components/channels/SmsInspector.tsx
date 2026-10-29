@@ -105,7 +105,7 @@ export function SmsInspector({
         </div>
       )}
 
-      <ol className="m-0 list-decimal space-y-1.5 pl-5 text-sm text-muted-foreground">
+      <ol className="m-0 list-decimal space-y-1.5 ps-5 text-sm text-muted-foreground">
         <li>{t("step1")}</li>
         <li>{t("step2")}</li>
         <li>{t("step3")}</li>

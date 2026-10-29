@@ -172,10 +172,10 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           <Button size="sm" className={TONES.sky.cta} disabled={disabled} onClick={() => inputRef.current?.click()}>
-            <UploadCloud aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 shrink-0" /> Choose files
+            <UploadCloud aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Choose files
           </Button>
           <Button size="sm" variant="outline" disabled={disabled} onClick={() => setPasteOpen((v) => !v)}>
-            <ClipboardPaste aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 shrink-0" /> Paste notes
+            <ClipboardPaste aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Paste notes
           </Button>
           <Button
             size="sm"
@@ -186,7 +186,7 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
               void addText(s.title, s.text);
             }}
           >
-            <FlaskConical aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 shrink-0" /> Try a sample
+            <FlaskConical aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Try a sample
           </Button>
         </div>
         <input

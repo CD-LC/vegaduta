@@ -62,15 +62,26 @@ export default function ApprovalsTable({
               <Checkbox
                 aria-label={q("selectAllLabel")}
                 disabled={selectableRows.length === 0}
-                checked={selectableRows.length > 0 && ticked === selectableRows.length ? true : ticked > 0 ? "indeterminate" : false}
-                onCheckedChange={(next) => onToggleAll?.(selectableRows.map((r) => r.id), next)}
+                checked={
+                  selectableRows.length > 0 && ticked === selectableRows.length
+                    ? true
+                    : ticked > 0
+                      ? "indeterminate"
+                      : false
+                }
+                onCheckedChange={(next) =>
+                  onToggleAll?.(
+                    selectableRows.map((r) => r.id),
+                    next
+                  )
+                }
               />
             </TableHead>
           )}
           <TableHead>{t("colStatus")}</TableHead>
           <TableHead>{t("colAction")}</TableHead>
           <TableHead className="hidden md:table-cell">{t("colRequester")}</TableHead>
-          <TableHead className="text-right">{t("colAge")}</TableHead>
+          <TableHead className="text-end">{t("colAge")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -130,7 +141,7 @@ export default function ApprovalsTable({
                   </span>
                 </div>
               </TableCell>
-              <TableCell className="whitespace-nowrap text-right text-sm text-muted-foreground">
+              <TableCell className="whitespace-nowrap text-end text-sm text-muted-foreground">
                 <div>{relTime(r.createdAt, t)}</div>
                 <ExpiryCountdown item={r} ttlSeconds={ttlSeconds} />
               </TableCell>

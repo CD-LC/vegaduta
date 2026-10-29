@@ -22,14 +22,42 @@ export type SetupTarget =
   | "workflows";
 
 export const SETUP_TARGETS: Record<SetupTarget, { href: string; label: string; help: string }> = {
-  providers: { href: "/providers", label: "LLM providers", help: "Add and activate an API key (OpenAI, Anthropic, Gemini, and more) so the agent can answer." },
-  edge: { href: "/edge", label: "Edge (on-device AI)", help: "Download an on-device model so browser chat can run locally and privately." },
+  providers: {
+    href: "/providers",
+    label: "LLM providers",
+    help: "Add and activate an API key (OpenAI, Anthropic, Gemini, and more) so the agent can answer.",
+  },
+  edge: {
+    href: "/edge",
+    label: "Edge (on-device AI)",
+    help: "Download an on-device model so browser chat can run locally and privately.",
+  },
   tools: { href: "/tools", label: "Tools", help: "Pick which built-in tools the agent may call." },
-  mcp: { href: "/tools/servers", label: "MCP servers", help: "Connect external tool servers and grant them to agents." },
-  secrets: { href: "/secrets", label: "Secrets", help: "Store credentials once, then reference them as {{secret.NAME}}." },
-  channels: { href: "/admin/channels", label: "Channels", help: "Deploy the agent to WhatsApp, web chat, voice and more." },
-  knowledge: { href: "/knowledge", label: "Knowledge", help: "Upload documents so the agent can answer from your own content." },
-  integrations: { href: "/integrations", label: "Integrations catalog", help: "Browse every app and service VegaDuta connects to." },
+  mcp: {
+    href: "/tools/servers",
+    label: "MCP servers",
+    help: "Connect external tool servers and grant them to agents.",
+  },
+  secrets: {
+    href: "/secrets",
+    label: "Secrets",
+    help: "Store credentials once, then reference them as {{secret.NAME}}.",
+  },
+  channels: {
+    href: "/admin/channels",
+    label: "Channels",
+    help: "Deploy the agent to WhatsApp, web chat, voice and more.",
+  },
+  knowledge: {
+    href: "/knowledge",
+    label: "Knowledge",
+    help: "Upload documents so the agent can answer from your own content.",
+  },
+  integrations: {
+    href: "/integrations",
+    label: "Integrations catalog",
+    help: "Browse every app and service VegaDuta connects to.",
+  },
   agents: { href: "/agents", label: "Agent workbench", help: "Create and tune the agents your workflows call." },
   workflows: { href: "/workflows", label: "Workflows", help: "Chain agents, tools and approvals into automations." },
 };
@@ -85,9 +113,9 @@ export function SetupGuideCard({
       <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-foreground">
         <Plug size={14} className="text-primary" />
         {title}
-        <span className="ml-auto text-xs font-normal text-muted-foreground group-open:hidden">Show</span>
+        <span className="ms-auto text-xs font-normal text-muted-foreground group-open:hidden">Show</span>
       </summary>
-      <ol className="mb-0 mt-2.5 space-y-1.5 pl-0">
+      <ol className="mb-0 mt-2.5 space-y-1.5 ps-0">
         {steps.map((k, i) => (
           <li key={k} className="flex items-start gap-2 text-xs text-muted-foreground">
             <span className="mt-px flex size-4 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">

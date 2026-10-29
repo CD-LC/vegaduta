@@ -45,8 +45,14 @@ export function DesignPanel({ html, onChange }: { html: string; onChange: (next:
               className="flex flex-col items-center gap-1 rounded-lg p-1 text-[10px] text-muted-foreground hover:bg-secondary"
               title={p.name}
             >
-              <span className="relative size-8 overflow-hidden rounded-full border border-border" style={{ background: p.tokens.bg }}>
-                <span className="absolute bottom-0 right-0 size-4 rounded-tl-full" style={{ background: p.tokens.primary }} />
+              <span
+                className="relative size-8 overflow-hidden rounded-full border border-border"
+                style={{ background: p.tokens.bg }}
+              >
+                <span
+                  className="absolute bottom-0 right-0 size-4 rounded-ss-full"
+                  style={{ background: p.tokens.primary }}
+                />
               </span>
               {p.name}
             </button>
@@ -63,7 +69,10 @@ export function DesignPanel({ html, onChange }: { html: string; onChange: (next:
             ["muted", "Subtle text"],
           ] as const
         ).map(([k, label]) => (
-          <label key={k} className="flex items-center gap-2 rounded-lg border border-border p-1.5 text-xs text-foreground">
+          <label
+            key={k}
+            className="flex items-center gap-2 rounded-lg border border-border p-1.5 text-xs text-foreground"
+          >
             <input
               type="color"
               value={/^#[0-9a-f]{6}$/i.test(t[k] || "") ? t[k] : "#000000"}
@@ -115,7 +124,9 @@ export function DesignPanel({ html, onChange }: { html: string; onChange: (next:
           ))}
         </div>
       </div>
-      <p className="text-[11px] text-muted-foreground">Design changes are instant and free. No AI is involved, so the layout never shifts.</p>
+      <p className="text-[11px] text-muted-foreground">
+        Design changes are instant and free. No AI is involved, so the layout never shifts.
+      </p>
     </div>
   );
 }
@@ -175,14 +186,27 @@ export function ElementPanel({
             <div className="flex flex-col gap-1 text-xs text-foreground">
               <label htmlFor="studio-direct-edit-text">Text</label>
               <div className="flex gap-1.5">
-                <Input id="studio-direct-edit-text" value={text} onChange={(e) => setText(e.target.value)} className="h-8" />
+                <Input
+                  id="studio-direct-edit-text"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  className="h-8"
+                />
                 <Button
                   size="sm"
                   variant="outline"
                   disabled={text === selected.text}
                   onClick={() => {
                     // textContent, full length: nothing is truncated or case-transformed on the way in.
-                    if (directEdit((el) => { if (el.children.length === 0) el.textContent = text; }, `Text: "${text.slice(0, 30)}"`)) onSelectedChange({ text });
+                    if (
+                      directEdit(
+                        (el) => {
+                          if (el.children.length === 0) el.textContent = text;
+                        },
+                        `Text: "${text.slice(0, 30)}"`
+                      )
+                    )
+                      onSelectedChange({ text });
                   }}
                 >
                   Set
@@ -197,7 +221,11 @@ export function ElementPanel({
                 defaultValue={rgbToHex(selected.color)}
                 onBlur={(e) => {
                   const v = e.target.value;
-                  if (v !== e.target.defaultValue && directEdit((el) => el.style.setProperty("color", v), "Text colour")) onSelectedChange({ color: v });
+                  if (
+                    v !== e.target.defaultValue &&
+                    directEdit((el) => el.style.setProperty("color", v), "Text colour")
+                  )
+                    onSelectedChange({ color: v });
                 }}
                 className="size-7 cursor-pointer rounded border-0 bg-transparent p-0"
               />
@@ -209,7 +237,11 @@ export function ElementPanel({
                 defaultValue={rgbToHex(selected.background)}
                 onBlur={(e) => {
                   const v = e.target.value;
-                  if (v !== e.target.defaultValue && directEdit((el) => el.style.setProperty("background", v), "Background colour")) onSelectedChange({ background: v });
+                  if (
+                    v !== e.target.defaultValue &&
+                    directEdit((el) => el.style.setProperty("background", v), "Background colour")
+                  )
+                    onSelectedChange({ background: v });
                 }}
                 className="size-7 cursor-pointer rounded border-0 bg-transparent p-0"
               />
@@ -228,14 +260,23 @@ export function ElementPanel({
                 variant="outline"
                 onClick={() => {
                   // Computed from the CURRENT size and then refreshed, so repeated taps compound.
-                  const next = Math.min(96, Math.max(8, Math.round((parseFloat(selected.fontSize) || 16) * (f as number))));
-                  if (directEdit((el) => el.style.setProperty("font-size", `${next}px`), "Text size")) onSelectedChange({ fontSize: `${next}px` });
+                  const next = Math.min(
+                    96,
+                    Math.max(8, Math.round((parseFloat(selected.fontSize) || 16) * (f as number)))
+                  );
+                  if (directEdit((el) => el.style.setProperty("font-size", `${next}px`), "Text size"))
+                    onSelectedChange({ fontSize: `${next}px` });
                 }}
               >
                 {l}
               </Button>
             ))}
-            <Button size="sm" variant="ghost" className="ml-auto text-destructive" onClick={() => directEdit((el) => el.remove(), `Removed <${selected.tag}>`)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="ms-auto text-destructive"
+              onClick={() => directEdit((el) => el.remove(), `Removed <${selected.tag}>`)}
+            >
               <Trash2 aria-hidden="true" size={13} />
             </Button>
           </div>
@@ -247,7 +288,13 @@ export function ElementPanel({
       )}
       <div className="flex flex-col gap-1.5 border-t border-border pt-3">
         <p className="text-xs font-medium text-foreground">Ask the AI about this element</p>
-        <Textarea value={ask} onChange={(e) => setAsk(e.target.value)} rows={2} className="resize-none text-sm" placeholder="e.g. turn this into a card with an icon" />
+        <Textarea
+          value={ask}
+          onChange={(e) => setAsk(e.target.value)}
+          rows={2}
+          className="resize-none text-sm"
+          placeholder="e.g. turn this into a card with an icon"
+        />
         <Button size="sm" disabled={!ask.trim() || busy} onClick={() => onAsk(ask.trim())} className="gap-1.5">
           <Sparkles aria-hidden="true" size={13} /> Change it
         </Button>

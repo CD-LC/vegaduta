@@ -142,7 +142,7 @@ export default function PageGuideButton({ isAdmin }: { isAdmin: boolean }) {
             tabIndex={-1}
             role="dialog"
             aria-label={copy(`${guide.id}.title`, guide.title)}
-            className="z-50 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--surface-border)] p-4 text-left shadow-lg outline-none"
+            className="z-50 max-w-[calc(100vw-2rem)] rounded-lg border border-[var(--surface-border)] p-4 text-start shadow-lg outline-none"
             style={panelStyle}
           >
             <div className="flex items-start justify-between gap-3">

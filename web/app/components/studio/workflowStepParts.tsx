@@ -46,7 +46,7 @@ export function AddMenu({ onAdd }: { onAdd: (type: WorkflowStepType) => void }) 
                 onAdd(t.type);
                 setOpen(false);
               }}
-              className="flex w-full items-start gap-2 rounded-lg p-2 text-left text-sm hover:bg-muted"
+              className="flex w-full items-start gap-2 rounded-lg p-2 text-start text-sm hover:bg-muted"
             >
               <StepIcon type={t.type} />
               <span>

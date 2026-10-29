@@ -38,7 +38,15 @@ export default function SkillDiffView({ before, after }: { before: string; after
               ? "bg-red-500/10"
               : "";
     const sr =
-      text === null ? "" : kind === "same" ? "" : kind === "change" ? t("diffChanged") : side === "left" ? t("diffRemoved") : t("diffAdded");
+      text === null
+        ? ""
+        : kind === "same"
+          ? ""
+          : kind === "change"
+            ? t("diffChanged")
+            : side === "left"
+              ? t("diffRemoved")
+              : t("diffAdded");
     return (
       <div className={cn("flex min-w-0 gap-2 px-2 py-0.5", tone)}>
         <span aria-hidden="true" className="w-3 shrink-0 select-none text-muted-foreground">
@@ -65,7 +73,10 @@ export default function SkillDiffView({ before, after }: { before: string; after
             <div role="columnheader" className="border-b border-border bg-muted px-2 py-1 font-sans font-medium">
               {t("diffSaved")}
             </div>
-            <div role="columnheader" className="border-b border-l border-border bg-muted px-2 py-1 font-sans font-medium">
+            <div
+              role="columnheader"
+              className="border-b border-s border-border bg-muted px-2 py-1 font-sans font-medium"
+            >
               {t("diffDraft")}
             </div>
           </div>

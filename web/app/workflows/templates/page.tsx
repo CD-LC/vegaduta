@@ -47,7 +47,9 @@ export default function WorkflowTemplatesPage() {
   const facts = useMemo(
     () =>
       new Map(
-        WORKFLOW_TEMPLATES.map((tpl) => [tpl.key, { agents: templateAgentSlots(tpl), steps: templateStepCount(tpl) }] as const)
+        WORKFLOW_TEMPLATES.map(
+          (tpl) => [tpl.key, { agents: templateAgentSlots(tpl), steps: templateStepCount(tpl) }] as const
+        )
       ),
     []
   );
@@ -101,22 +103,37 @@ export default function WorkflowTemplatesPage() {
 
       <div className="mb-6 space-y-3">
         <div className="relative w-full sm:max-w-sm">
-          <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <Search
+            size={15}
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
           <Input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("searchPlaceholder")}
             aria-label={t("searchPlaceholder")}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
         <div className="flex flex-wrap gap-2" role="group" aria-label={t("categoryFilterLabel")}>
-          <Button size="sm" variant={category === null ? "default" : "outline"} aria-pressed={category === null} onClick={() => setCategory(null)}>
+          <Button
+            size="sm"
+            variant={category === null ? "default" : "outline"}
+            aria-pressed={category === null}
+            onClick={() => setCategory(null)}
+          >
             {t("allCategories", { count: WORKFLOW_TEMPLATES.length })}
           </Button>
           {WORKFLOW_TEMPLATE_CATEGORIES.map((c) => (
-            <Button key={c} size="sm" variant={category === c ? "default" : "outline"} aria-pressed={category === c} onClick={() => setCategory(c)}>
+            <Button
+              key={c}
+              size="sm"
+              variant={category === c ? "default" : "outline"}
+              aria-pressed={category === c}
+              onClick={() => setCategory(c)}
+            >
               {tTemplates(categoryLabelKey(c))}
             </Button>
           ))}
@@ -124,7 +141,10 @@ export default function WorkflowTemplatesPage() {
       </div>
 
       {visible.length === 0 && (
-        <p role="status" className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+        <p
+          role="status"
+          className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground"
+        >
           {t("noMatches")}
         </p>
       )}
@@ -154,9 +174,13 @@ export default function WorkflowTemplatesPage() {
                           {facts.get(template.key)?.agents === 0 ? (
                             <Badge variant="accent">{t("noAgentNeeded")}</Badge>
                           ) : (
-                            <Badge variant="secondary">{t("agentsToAssign", { count: facts.get(template.key)?.agents ?? 0 })}</Badge>
+                            <Badge variant="secondary">
+                              {t("agentsToAssign", { count: facts.get(template.key)?.agents ?? 0 })}
+                            </Badge>
                           )}
-                          <Badge variant="outline">{t("stepsCount", { count: facts.get(template.key)?.steps ?? 0 })}</Badge>
+                          <Badge variant="outline">
+                            {t("stepsCount", { count: facts.get(template.key)?.steps ?? 0 })}
+                          </Badge>
                         </div>
                         <div className="mt-auto pt-4">
                           <Button size="sm" onClick={() => applyTemplate(template)}>

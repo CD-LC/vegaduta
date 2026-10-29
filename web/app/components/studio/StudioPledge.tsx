@@ -56,7 +56,7 @@ export default function StudioPledge({ open, ip, missionSeconds, runsPerMinute, 
             Keep it that way.
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
-            <div className="space-y-4 text-left text-sm">
+            <div className="space-y-4 text-start text-sm">
               <p>
                 No signup, no card and no message allowance - build as many agents and run as many missions as you like.
                 In return, please refrain from any illegal or abusive activity.
