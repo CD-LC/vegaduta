@@ -622,6 +622,20 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
         transports.setClientBuilders(builders);
     }
 
+    /**
+     * {@code app.mcp.max-response-bytes} -> the remote transports' heap ceiling (see {@link
+     * McpTransportFactory#maxResponseBytes}). Setter-injected so the constructor keeps its arity,
+     * the same seam this class uses for every other config-driven field on a manually-built
+     * collaborator.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setMcpMaxResponseBytes(
+            @org.springframework.beans.factory.annotation.Value(
+                            "${app.mcp.max-response-bytes:33554432}")
+                    long maxResponseBytes) {
+        transports.setMaxResponseBytes(maxResponseBytes);
+    }
+
     /** See {@link McpTransportFactory#remoteRequestHeaders}. */
     McpRemoteHeaders.PerRequestHeaders remoteRequestHeaders(McpDynamicConfig config) {
         return transports.remoteRequestHeaders(config);

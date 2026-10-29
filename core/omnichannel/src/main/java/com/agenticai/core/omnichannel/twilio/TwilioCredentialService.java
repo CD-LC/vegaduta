@@ -14,6 +14,7 @@ import com.twilio.http.HttpClient;
 import com.twilio.http.NetworkHttpClient;
 import com.twilio.http.TwilioRestClient;
 import com.twilio.rest.api.v2010.Account;
+import java.util.List;
 import java.util.Optional;
 import org.apache.hc.client5.http.config.RequestConfig;
 
@@ -183,8 +184,27 @@ public class TwilioCredentialService {
             Account.fetcher(request.accountSid()).fetch(client);
         } catch (RuntimeException e) {
             String checked = request.hasApiKey() ? "the Account SID and API Key SID/Secret" : "the Account SID and Auth Token";
-            throw new ChannelConfigurationException("whatsapp", "Twilio credential validation failed - check " + checked + ": " + e.getMessage());
+            throw new ChannelConfigurationException("whatsapp", "Twilio credential validation failed - check " + checked + ": " + redactCredentials(e.getMessage(), request));
         }
+    }
+
+    /**
+     * SDK error text is echoed into the API error above, and an SDK message can quote the request
+     * it failed on - the exact credential values submitted here are the only secrets it could
+     * carry, so blank those out before the text reaches a caller.
+     */
+    private static String redactCredentials(String message, TwilioActivationRequest request) {
+        if (message == null || message.isEmpty()) {
+            return message;
+        }
+        String result = message;
+        for (String value : List.of(
+                request.accountSid(), request.authToken(), request.apiKeySid(), request.apiKeySecret())) {
+            if (value != null && value.length() >= 6) {
+                result = result.replace(value, "[redacted]");
+            }
+        }
+        return result;
     }
 
     public record DecryptedCredential(String accountSid, String authToken, String apiKeySid, String apiKeySecret, String whatsAppFromNumber) {

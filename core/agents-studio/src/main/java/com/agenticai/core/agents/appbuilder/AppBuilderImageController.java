@@ -2,14 +2,14 @@ package com.agenticai.core.agents.appbuilder;
 
 import com.agenticai.core.agentspi.ImageGenerator;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.TenantStatusGuard;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -34,15 +34,17 @@ public class AppBuilderImageController {
     private static final int MAX_PROMPT_CHARS = 4000;
 
     private final ImageGenerator orchestrator;
-    private final String serviceToken;
+    private final AppBuilderServiceAuth serviceAuth;
     private final ObjectMapper objectMapper;
 
     public AppBuilderImageController(
             ImageGenerator orchestrator,
             @Value("${app.app-builder.service-token:}") String serviceToken,
-            ObjectMapper objectMapper) {
+            @Value("${app.app-builder.allowed-tenants:}") String allowedTenants,
+            ObjectMapper objectMapper,
+            ObjectProvider<TenantStatusGuard> tenantStatusGuard) {
         this.orchestrator = orchestrator;
-        this.serviceToken = serviceToken;
+        this.serviceAuth = new AppBuilderServiceAuth(serviceToken, allowedTenants, tenantStatusGuard);
         this.objectMapper = objectMapper;
     }
 
@@ -51,10 +53,11 @@ public class AppBuilderImageController {
             @RequestHeader(value = "X-Service-Token", required = false) String presentedToken,
             @RequestHeader(value = "X-Tenant-Id", required = false) String tenantId,
             @RequestBody(required = false) String rawBody) {
-        authenticate(presentedToken);
+        serviceAuth.authenticate(presentedToken);
         if (tenantId == null || tenantId.isBlank()) {
             throw new AppBuilderTokenMissingException("Missing X-Tenant-Id header.");
         }
+        serviceAuth.authorizeTenantClaim(tenantId);
         String prompt;
         String size;
         try {
@@ -73,6 +76,7 @@ public class AppBuilderImageController {
         TenantContext.set(
                 TenantContext.of(tenantId, "app-builder-service", Set.of(), "app-builder"));
         try {
+            serviceAuth.requireUsableTenant(tenantId);
             ImageGenerator.GeneratedImage r = orchestrator.generate(prompt, size);
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("contentBase64", Base64.getEncoder().encodeToString(r.bytes()));
@@ -87,24 +91,6 @@ public class AppBuilderImageController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
         } finally {
             TenantContext.clear();
-        }
-    }
-
-    private void authenticate(String presentedToken) {
-        if (serviceToken == null || serviceToken.isBlank()) {
-            throw new AppBuilderTokenMissingException(
-                    "App Builder service token is not configured on this server; endpoint"
-                            + " disabled.");
-        }
-        if (presentedToken == null || presentedToken.isBlank()) {
-            throw new AppBuilderTokenMissingException("Missing X-Service-Token header.");
-        }
-        boolean matches =
-                MessageDigest.isEqual(
-                        serviceToken.getBytes(StandardCharsets.UTF_8),
-                        presentedToken.getBytes(StandardCharsets.UTF_8));
-        if (!matches) {
-            throw new AppBuilderTokenInvalidException("Invalid X-Service-Token.");
         }
     }
 }

@@ -4,6 +4,7 @@ import com.agenticai.core.graphmemory.EntityExtractionService;
 import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.graphmemory.GraphTriple;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.knowledge.KnowledgeWriteScreen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +92,13 @@ public class RememberSharedFactToolCallback implements ToolCallback {
             Object factValue = args.get("fact");
             if (factValue == null || factValue.toString().isBlank()) {
                 return "{\"error\": \"fact is required\"}";
+            }
+            // Same write screen as remember_fact - and higher stakes here:
+            // one poisoned shared fact is recalled by every agent on the
+            // team for this subject.
+            java.util.Optional<String> refusal = KnowledgeWriteScreen.refusal(factValue.toString());
+            if (refusal.isPresent()) {
+                return errorJson(refusal.get());
             }
             UUID memoryId = tenantMemoryService.remember(subjectKey, factValue.toString(), agentId);
             writeToSharedGraphIfAvailable(factValue.toString());

@@ -288,6 +288,34 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     MDC.put("tenantId", delegated.getTenantId());
                 }
                 MDC.put("userId", delegated.getPrincipal().toString());
+                // Same enforcement as the JWT/API-key branches: a delegation
+                // token minted before a tenant was emergency-stopped or
+                // suspended must not keep acting until token expiry, and a
+                // system-schema claim is never a tenant. The claim itself is
+                // not forgeable (Ed25519-signed by DelegationTokenService) -
+                // this closes the kill-switch gap, not a spoofing one.
+                String delegatedTenantId = delegated.getTenantId();
+                if (delegatedTenantId != null && isSystemSchemaClaim(delegatedTenantId)) {
+                    log.warn(
+                            "Rejected {} {} - delegation token '{}' names the default/system schema.",
+                            request.getMethod(),
+                            LogMasking.path(request.getRequestURI()),
+                            delegated.getJti());
+                    reject(response, TENANT_UNUSABLE_BODY, request);
+                    return;
+                }
+                if (delegatedTenantId != null
+                        && tenantStatusGuard.isPresent()
+                        && !tenantStatusGuard.get().isUsable(delegatedTenantId)) {
+                    log.warn(
+                            "Rejected {} {} - delegation token '{}' resolved tenant '{}' which is not usable.",
+                            request.getMethod(),
+                            LogMasking.path(request.getRequestURI()),
+                            delegated.getJti(),
+                            delegatedTenantId);
+                    reject(response, TENANT_UNUSABLE_BODY, request);
+                    return;
+                }
             } else if (authentication != null
                     && !(authentication instanceof AnonymousAuthenticationToken)) {
                 // (Anonymous callers of permitAll endpoints - the web app's
@@ -350,7 +378,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
      * in the shared legacy schema. Webhook paths that set {@code public} deliberately build their
      * {@link TenantContext} directly and never pass through this filter.
      */
-    static boolean isSystemSchemaClaim(String tenantId) {
+    public static boolean isSystemSchemaClaim(String tenantId) {
         if (tenantId == null) {
             return false;
         }

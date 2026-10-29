@@ -17,8 +17,14 @@ import java.util.regex.Pattern;
  * injection passes. This module cannot depend on {@code guardrails}, so the lists are repeated
  * here on purpose; the human-upload {@code /ingest} path is unscreened by design (an
  * authenticated person chose that content).
+ *
+ * <p>Also applied to agent-initiated MEMORY writes ({@code remember_fact},
+ * {@code remember_shared_fact} in {@code core-agents-turn}): a recalled fact is
+ * injected into every later turn's context block with no sanitizer pass, which is
+ * exactly the same stored-injection surface as a knowledge note. Public since
+ * 2026-10-29 for that reuse.
  */
-final class KnowledgeWriteScreen {
+public final class KnowledgeWriteScreen {
 
     private static final List<Pattern> INJECTION = List.of(
         Pattern.compile("ignore\\s+(all\\s+)?(the\\s+)?(above|previous|prior)\\s+instructions", Pattern.CASE_INSENSITIVE),
@@ -43,7 +49,7 @@ final class KnowledgeWriteScreen {
     }
 
     /** A caller-safe reason the text must not be stored, or empty when it passes. Never echoes the match. */
-    static Optional<String> refusal(String content) {
+    public static Optional<String> refusal(String content) {
         for (Pattern p : INJECTION) {
             if (p.matcher(content).find()) {
                 return Optional.of("content looks like instructions aimed at a future model (prompt injection) "

@@ -173,6 +173,18 @@ public class WorkflowTriggerNodeService {
     }
 
     /**
+     * Every trigger-node row bound to a workflow. {@code
+     * WorkflowWebhookController}'s OIDC endpoint needs this to confirm the
+     * target workflow actually has a WEBHOOK-channel trigger node configured
+     * for OAUTH2 before running it (a coarse tenant-wide {@code
+     * workflow-trigger} role must not unlock every ACTIVE workflow).
+     */
+    @Transactional(readOnly = true)
+    public java.util.List<WorkflowTriggerNode> triggerNodesFor(UUID workflowId) {
+        return repository.findByWorkflowId(workflowId);
+    }
+
+    /**
      * Added alongside {@link #findByNodeId} for the same reason (see that
      * method's javadoc) - {@code WorkflowService#setTriggerChannel}'s WEBHOOK
      * branch needs to persist a node's auth mode (SHARED_SECRET/OAUTH2)

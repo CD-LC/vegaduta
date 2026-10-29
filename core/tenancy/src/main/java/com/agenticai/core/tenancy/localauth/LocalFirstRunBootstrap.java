@@ -74,6 +74,16 @@ public class LocalFirstRunBootstrap implements ApplicationRunner {
     private final String tenantName;
     private final Set<String> extraRoles;
     private final String publicWebUrl;
+    // app.auth.local.setup-link-in-logs: when false (log-aggregated deploys), the
+    // one-use setup link is written only to the 0600 file, never to WARN output -
+    // a link sitting in a log shipper is owner takeover until it is consumed.
+    private boolean setupLinkInLogs = true;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setSetupLinkInLogs(
+            @Value("${app.auth.local.setup-link-in-logs:true}") boolean setupLinkInLogs) {
+        this.setupLinkInLogs = setupLinkInLogs;
+    }
 
     @Autowired
     public LocalFirstRunBootstrap(
@@ -172,7 +182,11 @@ public class LocalFirstRunBootstrap implements ApplicationRunner {
         log.warn("");
         log.warn("=========================== VegaDuta: finish setting up ===========================");
         log.warn("  Open this link in your browser to choose the owner password (one use):");
-        log.warn("    {}", link);
+        if (setupLinkInLogs) {
+            log.warn("    {}", link);
+        } else {
+            log.warn("    <suppressed - app.auth.local.setup-link-in-logs=false; read {} instead>", file);
+        }
         if (base.isEmpty()) {
             log.warn("  (Set APP_WEB_PUBLIC_URL so this prints a full link.)");
         }

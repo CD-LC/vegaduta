@@ -1,6 +1,7 @@
 package com.agenticai.core.workflow;
 
 import com.agenticai.core.crypto.EncryptionService;
+import com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerNodeService;
 import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
@@ -351,24 +352,24 @@ public class WorkflowWebhookController {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("error", "This workflow is enabled for webhooks but is not Activated - activate it from the canvas first."));
             }
-            // Per-node workflow triggers - SCOPE LIMITATION: this endpoint takes
-            // only a workflowId (no node), and a workflow can now legitimately
-            // have several Trigger nodes independently configured for
-            // WEBHOOK/OAUTH2. Resolving "which specific trigger node did this
-            // caller mean" would need a per-node OIDC URL (out of scope for
-            // this change - the contract this endpoint was built against never
-            // had one either), so this keeps the old "use the sole/first
-            // Trigger node in the graph" behavior (startNodeId=null) rather
-            // than trying to guess among several. The old per-workflow
-            // triggerChannel==WEBHOOK/webhookAuthMode==OAUTH2/webhookEnabled
-            // gates that used to live directly on WorkflowDefinition are gone
-            // (that config is per-node now) and are NOT reproduced here -
-            // any caller with a valid bearer JWT carrying the workflow-trigger
-            // role for this tenant can reach this endpoint for any ACTIVE
-            // workflow, whether or not any of its trigger nodes are actually
-            // configured for OAUTH2. Tightening this back up (e.g. requiring
-            // at least one trigger node in the graph to be WEBHOOK+OAUTH2)
-            // is real follow-up scope, not solved by this pass.
+            // Per-node workflow triggers: the workflow-trigger role is a
+            // coarse, tenant-wide grant handed to service accounts, so the
+            // role alone must not unlock EVERY ACTIVE workflow - the target
+            // workflow must have at least one WEBHOOK-channel trigger node
+            // explicitly configured for OAUTH2 auth before it answers here.
+            // This endpoint still takes only a workflowId (no node) and
+            // starts from the graph's default trigger (startNodeId=null) -
+            // resolving "which specific OAUTH2 node" would need a per-node
+            // OIDC URL, which remains follow-up scope.
+            boolean oidcTriggerConfigured =
+                workflowTriggerNodeService.triggerNodesFor(definition.getId()).stream()
+                    .anyMatch(node -> node.getChannel() == WorkflowTriggerChannel.WEBHOOK
+                        && WebhookAuthMode.fromNullableName(node.getWebhookAuthMode()) == WebhookAuthMode.OAUTH2);
+            if (!oidcTriggerConfigured) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                    "error", "This workflow has no webhook trigger node configured for OAuth2/OIDC auth - "
+                        + "configure one on the canvas before calling this endpoint."));
+            }
             WorkflowRunResponse result = workflowService.run(definition.getId(), null, extractInput(body), OIDC_REQUESTED_BY_PREFIX + jwt.getSubject());
             return ResponseEntity.ok(result);
         } finally {

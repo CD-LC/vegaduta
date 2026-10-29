@@ -9,9 +9,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Maps one external channel identity (a WhatsApp phone number today, a
@@ -44,6 +44,11 @@ import java.util.concurrent.ThreadLocalRandom;
     uniqueConstraints = @UniqueConstraint(name = "uq_channel_session_channel_external", columnNames = {"channel", "external_id"})
 )
 public class ChannelSession {
+
+    // The pairing code gates whether an unknown external sender is ever
+    // routed to an agent, so it must not come from a predictable PRNG -
+    // same fix DevicePairingService took for its pairing code.
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -162,7 +167,7 @@ public class ChannelSession {
     }
 
     private static String generatePairingCode() {
-        return String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
+        return String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
     }
 
     public void touch() {

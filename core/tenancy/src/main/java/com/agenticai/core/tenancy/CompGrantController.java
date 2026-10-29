@@ -73,10 +73,12 @@ public class CompGrantController {
     private final String serviceToken;
     private final ObjectMapper objectMapper;
     private final Validator validator;
+    private final java.util.Set<String> allowedTenants;
 
     public CompGrantController(
         CompGrantService compGrantService,
         @Value("${app.tenant.comp.service-token:}") String serviceToken,
+        @Value("${app.tenant.comp.allowed-tenants:}") String allowedTenantsRaw,
         ObjectMapper objectMapper,
         Validator validator
     ) {
@@ -84,6 +86,16 @@ public class CompGrantController {
         this.serviceToken = serviceToken;
         this.objectMapper = objectMapper;
         this.validator = validator;
+        java.util.Set<String> parsed = new java.util.LinkedHashSet<>();
+        if (allowedTenantsRaw != null && !allowedTenantsRaw.isBlank()) {
+            for (String part : allowedTenantsRaw.split(",")) {
+                String trimmed = part.trim();
+                if (!trimmed.isEmpty()) {
+                    parsed.add(trimmed);
+                }
+            }
+        }
+        this.allowedTenants = java.util.Collections.unmodifiableSet(parsed);
     }
 
     @PostMapping
@@ -94,6 +106,13 @@ public class CompGrantController {
         // Auth FIRST, on a raw, un-parsed body - see class javadoc.
         authenticate(presentedToken);
         CompGrantRequest request = parseAndValidate(rawBody);
+        // The service token is one static credential not bound to a tenant:
+        // when the allow-list is configured it must not flip the plan of a
+        // tenant outside it (same bound as app.app-builder.allowed-tenants).
+        if (!allowedTenants.isEmpty() && !allowedTenants.contains(request.tenantId().toString())) {
+            throw new CompGrantTokenInvalidException(
+                "tenantId is not in this server's comp-grant tenant allow-list.");
+        }
         return compGrantService.grant(request);
     }
 

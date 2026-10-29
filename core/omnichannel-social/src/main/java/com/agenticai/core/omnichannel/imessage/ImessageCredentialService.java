@@ -105,8 +105,22 @@ public class ImessageCredentialService {
                                 toResponse(
                                         c,
                                         c.getStatus() == ImessageCredentialStatus.ACTIVE
-                                                ? encryptionService.decrypt(c.getEncryptedWebhookSecret())
+                                                ? maskSecret(encryptionService.decrypt(c.getEncryptedWebhookSecret()))
                                                 : null));
+    }
+
+    /**
+     * The full webhook token, only on explicit request. Reads carry a masked preview (the token is
+     * the sole authenticator of the unauthenticated inbound webhook, so it should not ride every
+     * credential-read response); the console calls {@code GET .../webhook-token} when the operator
+     * asks to reveal or copy the URL. The only other place the full value is returned is {@link
+     * #activate}'s one-time response.
+     */
+    @Transactional(readOnly = true)
+    public String revealWebhookToken() {
+        ImessageCredential credential =
+                repository.findFirstByOrderByCreatedAtAsc().orElseThrow(ImessageNotConfiguredException::new);
+        return encryptionService.decrypt(credential.getEncryptedWebhookSecret());
     }
 
     /** The server address of an ACTIVE connection, for status lines. Decrypts nothing. */
@@ -154,7 +168,7 @@ public class ImessageCredentialService {
                 pollingService.ifAvailable(p -> p.stopPolling(webhookId));
             }
         }
-        return toResponse(saved, encryptionService.decrypt(saved.getEncryptedWebhookSecret()));
+        return toResponse(saved, maskSecret(encryptionService.decrypt(saved.getEncryptedWebhookSecret())));
     }
 
     /**
@@ -288,6 +302,14 @@ public class ImessageCredentialService {
                 webhookSecret,
                 c.getCreatedAt(),
                 c.getLastValidatedAt());
+    }
+
+    /** Masked preview of the webhook secret: last 4 hex chars only, enough to confirm which token is configured. */
+    private static String maskSecret(String secret) {
+        if (secret == null || secret.isEmpty()) {
+            return secret;
+        }
+        return "••••" + secret.substring(Math.max(0, secret.length() - 4));
     }
 
     private String randomHex(int bytes) {

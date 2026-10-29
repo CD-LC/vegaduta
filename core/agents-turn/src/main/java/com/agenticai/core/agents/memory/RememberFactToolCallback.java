@@ -5,6 +5,7 @@ import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.graphmemory.GraphTriple;
 import com.agenticai.core.graphmemory.MemoryWriteArbitrationService;
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.knowledge.KnowledgeWriteScreen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +102,14 @@ public class RememberFactToolCallback implements ToolCallback {
             Object factValue = args.get("fact");
             if (factValue == null || factValue.toString().isBlank()) {
                 return "{\"error\": \"fact is required\"}";
+            }
+            // Recalled facts are injected into every later turn's context
+            // unsanitized - screen the write the same way knowledge-base
+            // writes already are (stored prompt injection / pasted
+            // credentials; OWASP ASI06, LLM02).
+            java.util.Optional<String> refusal = KnowledgeWriteScreen.refusal(factValue.toString());
+            if (refusal.isPresent()) {
+                return errorJson(refusal.get());
             }
             UUID memoryId = memoryService.remember(agentId, subjectKey, factValue.toString());
             writeToGraphIfAvailable(factValue.toString());

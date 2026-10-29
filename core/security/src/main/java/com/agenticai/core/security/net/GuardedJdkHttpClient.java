@@ -75,20 +75,34 @@ import org.apache.hc.core5.net.URIBuilder;
  */
 public final class GuardedJdkHttpClient extends HttpClient {
 
+    /**
+     * The response body grew past the client's {@code maxResponseBytes} cap. An {@link
+     * IOException} so callers that already handle transport errors need no new catch clause; the
+     * connection is aborted, not drained.
+     */
+    public static final class ResponseSizeExceededException extends IOException {
+        public ResponseSizeExceededException(long limit) {
+            super("response body exceeded the " + limit + "-byte cap for this client");
+        }
+    }
+
     private final CloseableHttpClient delegate;
     private final Duration connectTimeout;
     private final Redirect redirectPolicy;
     private final Executor executor;
+    private final long maxResponseBytes;
 
     private GuardedJdkHttpClient(
             CloseableHttpClient delegate,
             Duration connectTimeout,
             Redirect redirectPolicy,
-            Executor executor) {
+            Executor executor,
+            long maxResponseBytes) {
         this.delegate = delegate;
         this.connectTimeout = connectTimeout;
         this.redirectPolicy = redirectPolicy;
         this.executor = executor;
+        this.maxResponseBytes = maxResponseBytes;
     }
 
     /**
@@ -115,11 +129,28 @@ public final class GuardedJdkHttpClient extends HttpClient {
             Duration responseTimeout,
             boolean followRedirects,
             Executor executor) {
+        return create(guard, connectTimeout, responseTimeout, followRedirects, executor, 0L);
+    }
+
+    /**
+     * Same, plus a per-response body byte cap ({@code <= 0} means unlimited): a peer that streams
+     * past the cap fails the body future with {@link ResponseSizeExceededException} instead of
+     * growing the heap - the ceiling {@code ToolOutputProperties}' post-receipt truncation cannot
+     * provide because the bytes are already materialised by then.
+     */
+    public static GuardedJdkHttpClient create(
+            SsrfGuard guard,
+            Duration connectTimeout,
+            Duration responseTimeout,
+            boolean followRedirects,
+            Executor executor,
+            long maxResponseBytes) {
         return new GuardedJdkHttpClient(
                 SafeHttpClients.create(guard, connectTimeout, responseTimeout, followRedirects),
                 connectTimeout,
                 followRedirects ? Redirect.NORMAL : Redirect.NEVER,
-                executor);
+                executor,
+                maxResponseBytes);
     }
 
     /**
@@ -135,7 +166,8 @@ public final class GuardedJdkHttpClient extends HttpClient {
                         lazyGuardResolver(), connectTimeout, responseTimeout, followRedirects),
                 connectTimeout,
                 followRedirects ? Redirect.NORMAL : Redirect.NEVER,
-                TenantAwareExecutors.newVirtualThreadPerTaskExecutor("guarded-http-"));
+                TenantAwareExecutors.newVirtualThreadPerTaskExecutor("guarded-http-"),
+                0L);
     }
 
     /**
@@ -149,6 +181,18 @@ public final class GuardedJdkHttpClient extends HttpClient {
             boolean followRedirects,
             int maxPerRoute,
             int maxTotal) {
+        return defaults(
+                connectTimeout, responseTimeout, followRedirects, maxPerRoute, maxTotal, 0L);
+    }
+
+    /** {@link #defaults(Duration, Duration, boolean, int, int)} plus a per-response byte cap. */
+    public static GuardedJdkHttpClient defaults(
+            Duration connectTimeout,
+            Duration responseTimeout,
+            boolean followRedirects,
+            int maxPerRoute,
+            int maxTotal,
+            long maxResponseBytes) {
         return new GuardedJdkHttpClient(
                 SafeHttpClients.create(
                         lazyGuardResolver(),
@@ -160,7 +204,8 @@ public final class GuardedJdkHttpClient extends HttpClient {
                         null),
                 connectTimeout,
                 followRedirects ? Redirect.NORMAL : Redirect.NEVER,
-                TenantAwareExecutors.newVirtualThreadPerTaskExecutor("guarded-http-"));
+                TenantAwareExecutors.newVirtualThreadPerTaskExecutor("guarded-http-"),
+                maxResponseBytes);
     }
 
     /**
@@ -193,7 +238,7 @@ public final class GuardedJdkHttpClient extends HttpClient {
         // The feeder owns the response lifecycle once it starts; if subscribing or
         // the body future fails before/while the feeder runs, we close it here or
         // the feeder does.
-        FlowExchange<T> exchange = new FlowExchange<>(request, response, bodyHandler);
+        FlowExchange<T> exchange = new FlowExchange<>(request, response, bodyHandler, maxResponseBytes);
         try {
             T body = exchange.awaitBody();
             if (!exchange.streaming()) {
@@ -245,8 +290,14 @@ public final class GuardedJdkHttpClient extends HttpClient {
         private final CompletableFuture<Void> fed = new CompletableFuture<>();
         private final CompletableFuture<T> bodyFuture;
         private final Demand demand = new Demand();
+        private final long maxResponseBytes;
 
-        FlowExchange(HttpRequest request, ClassicHttpResponse response, BodyHandler<T> handler) {
+        FlowExchange(
+                HttpRequest request,
+                ClassicHttpResponse response,
+                BodyHandler<T> handler,
+                long maxResponseBytes) {
+            this.maxResponseBytes = maxResponseBytes;
             this.response = response;
             this.info = new ResponseInfoImpl(response);
             this.subscriber = handler.apply(info);
@@ -329,6 +380,7 @@ public final class GuardedJdkHttpClient extends HttpClient {
             try (InputStream in =
                     entity == null ? InputStream.nullInputStream() : entity.getContent()) {
                 byte[] buf = new byte[16 * 1024];
+                long delivered = 0;
                 while (true) {
                     // Demand is measured in onNext items, not bytes - one item per chunk.
                     if (!demand.await()) {
@@ -337,6 +389,15 @@ public final class GuardedJdkHttpClient extends HttpClient {
                     int n = in.read(buf);
                     if (n < 0) {
                         subscriber.onComplete();
+                        return;
+                    }
+                    delivered += n;
+                    if (maxResponseBytes > 0 && delivered > maxResponseBytes) {
+                        // Oversized body: fail the subscriber and ABORT the
+                        // connection (a plain close drains the rest of the
+                        // body first - the very bytes we are capping).
+                        subscriber.onError(new ResponseSizeExceededException(maxResponseBytes));
+                        abortQuietly();
                         return;
                     }
                     // Copy: buf is reused; a subscriber may retain the buffer past onNext.

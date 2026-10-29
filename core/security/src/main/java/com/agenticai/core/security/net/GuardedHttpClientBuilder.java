@@ -1,5 +1,6 @@
 package com.agenticai.core.security.net;
 
+import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import java.net.Authenticator;
 import java.net.CookieHandler;
 import java.net.InetAddress;
@@ -39,7 +40,10 @@ public final class GuardedHttpClientBuilder implements HttpClient.Builder {
     private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(10);
 
     private record Key(
-            Duration connectTimeout, Duration responseTimeout, boolean followRedirects) {}
+            Duration connectTimeout,
+            Duration responseTimeout,
+            boolean followRedirects,
+            long maxResponseBytes) {}
 
     private static final Map<Key, GuardedJdkHttpClient> SHARED = new ConcurrentHashMap<>();
 
@@ -47,6 +51,7 @@ public final class GuardedHttpClientBuilder implements HttpClient.Builder {
     private final SsrfGuard fixedGuard;
     private Duration connectTimeout = DEFAULT_CONNECT_TIMEOUT;
     private boolean followRedirects;
+    private long maxResponseBytes;
 
     /**
      * @param responseTimeout the longest a connection may sit silent between two packets before the
@@ -83,6 +88,18 @@ public final class GuardedHttpClientBuilder implements HttpClient.Builder {
     @Override
     public HttpClient.Builder followRedirects(HttpClient.Redirect policy) {
         this.followRedirects = policy != null && policy != HttpClient.Redirect.NEVER;
+        return this;
+    }
+
+    /**
+     * Per-response body byte cap on every client this builder hands out ({@code <= 0} means
+     * unlimited, the default). Not part of {@link HttpClient.Builder} - set it on this concrete
+     * type before {@link #build()}: a peer streaming past the cap fails the body future with
+     * {@link GuardedJdkHttpClient.ResponseSizeExceededException} rather than growing the heap
+     * (the remote-MCP heap-exhaustion fix).
+     */
+    public GuardedHttpClientBuilder maxResponseBytes(long maxResponseBytes) {
+        this.maxResponseBytes = maxResponseBytes;
         return this;
     }
 
@@ -135,17 +152,23 @@ public final class GuardedHttpClientBuilder implements HttpClient.Builder {
     public HttpClient build() {
         if (fixedGuard != null) {
             return GuardedJdkHttpClient.create(
-                    fixedGuard, connectTimeout, responseTimeout, followRedirects);
+                    fixedGuard,
+                    connectTimeout,
+                    responseTimeout,
+                    followRedirects,
+                    TenantAwareExecutors.newVirtualThreadPerTaskExecutor("guarded-http-"),
+                    maxResponseBytes);
         }
         return SHARED.computeIfAbsent(
-                new Key(connectTimeout, responseTimeout, followRedirects),
+                new Key(connectTimeout, responseTimeout, followRedirects, maxResponseBytes),
                 k ->
                         GuardedJdkHttpClient.defaults(
                                 k.connectTimeout(),
                                 k.responseTimeout(),
                                 k.followRedirects(),
                                 MAX_PER_ROUTE,
-                                MAX_TOTAL));
+                                MAX_TOTAL,
+                                k.maxResponseBytes()));
     }
 
     private static UnsupportedOperationException unsupported(String setting) {
