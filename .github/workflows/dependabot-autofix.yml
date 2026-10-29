@@ -1,0 +1,121 @@
+name: Dependabot autofix
+
+# Dependabot edits requirements.txt but cannot run services/lock-requirements.sh,
+# so every pip bump PR failed "Python requirements.lock up to date" until a
+# maintainer regenerated and pushed the locks by hand
+# (docs/maintainers/dependabot-prs.md). This job does that maintainer step.
+#
+# One GitHub subtlety drives the re-fire step: a push made with this run's
+# GITHUB_TOKEN does NOT trigger further pull_request workflow runs, so after
+# committing the locks we dispatch ci.yml / codeql.yml / trivy.yml on the head
+# branch ourselves - their check runs land on the new commit's SHA and the PR
+# sees them exactly as if the bot had pushed. workflow_dispatch is explicitly
+# exempt from the token-suppression rule.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "services/*/requirements.txt"
+      - ".github/workflows/dependabot-autofix.yml"
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: "Dependabot PR number to autofix"
+        required: true
+
+# OpenSSF Token-Permissions: writes live on the job, never at the top level.
+permissions:
+  contents: read
+
+concurrency:
+  group: dependabot-autofix-${{ github.event.pull_request.number || github.event.inputs.pr }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  regen-locks:
+    name: Regenerate requirements.lock on Dependabot PRs
+    # Skipped entirely on human-authored PRs - a failed job here would land a
+    # failing check on every non-Dependabot pull request.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write      # push the regenerated locks to the bot's branch
+      pull-requests: read  # list the PR's changed files
+      actions: write       # re-dispatch ci.yml/codeql.yml/trivy.yml after the push
+    steps:
+      - name: Resolve the target PR (opened by dependabot, pip requirements touched)
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # The PR number comes out of the event payload on disk, not a
+        # github.event.* interpolation in a run block (OpenSSF Dangerous-Workflow
+        # flags inputs.* as untrusted data reaching a shell).
+        run: |
+          PR="$(jq -r '.inputs.pr // .pull_request.number // empty' "$GITHUB_EVENT_PATH")"
+          case "$PR" in ''|*[!0-9]*) echo "::error::bad PR number '$PR'"; exit 1;; esac
+          read -r opener headref <<<"$(gh pr view "$PR" --json author,headRefName --jq '.author.login + " " + .headRefName')"
+          [ "$opener" = "dependabot[bot]" ] || { echo "::error::PR #$PR was opened by $opener, not dependabot[bot]"; exit 1; }
+          if ! gh pr view "$PR" --json files --jq '.files[].path' | grep -q '^services/.*/requirements\.txt$'; then
+            echo "PR #$PR does not touch services/*/requirements.txt - nothing to do"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "target is dependabot PR #$PR on $headref"
+            echo "ref=$headref" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.pr.outputs.skip != 'true'
+        with:
+          ref: ${{ steps.pr.outputs.ref }}
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        if: steps.pr.outputs.skip != 'true'
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        if: steps.pr.outputs.skip != 'true'
+        with:
+          version: "0.13.0"
+          enable-cache: false
+
+      # Same command the CI lock check runs, so what it commits is byte-for-byte
+      # what the gate expects.
+      - name: Regenerate every lock
+        if: steps.pr.outputs.skip != 'true'
+        run: bash services/lock-requirements.sh
+
+      - name: Commit and push the regenerated locks
+        if: steps.pr.outputs.skip != 'true'
+        id: push
+        run: |
+          if git diff --quiet -- services/*/requirements.lock; then
+            echo "locks already current - the earlier failure must be elsewhere"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add services/*/requirements.lock
+          git commit -s -m "build(deps): regenerate requirements.lock for the dependabot bump"
+          git push origin "HEAD:${{ steps.pr.outputs.ref }}"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # The token push above suppresses pull_request events on the new commit;
+      # dispatch the required-check workflows on the branch so the PR turns
+      # green. Runs under workflow_dispatch skip the PR-only alert-diff step -
+      # acceptable here because the diff is hashed requirements data, not code,
+      # and the PR's own pull_request run already diffed the real change.
+      - name: Re-fire CI on the pushed commit
+        if: steps.push.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sleep 5
+          for wf in ci.yml codeql.yml trivy.yml; do
+            gh workflow run "$wf" --ref "${{ steps.pr.outputs.ref }}" || echo "::warning::could not dispatch $wf"
+          done

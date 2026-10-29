@@ -33,6 +33,9 @@
       "name": "A2aAgentCard"
     },
     {
+      "name": "A2aConsole"
+    },
+    {
       "name": "A2aJsonRpc"
     },
     {
@@ -115,6 +118,9 @@
     },
     {
       "name": "AgentSchedule"
+    },
+    {
+      "name": "AgentScratchpad"
     },
     {
       "name": "AgentSessionLlmRequest"
@@ -1171,6 +1177,250 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/a2a/console/policy": {
+      "get": {
+        "tags": [
+          "A2aConsole"
+        ],
+        "summary": "Policy",
+        "operationId": "A2aConsoleController_policy",
+        "x-feature-flag": "app.a2a.enabled=true",
+        "description": "Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/a2a/console/tasks": {
+      "get": {
+        "tags": [
+          "A2aConsole"
+        ],
+        "summary": "Tasks",
+        "operationId": "A2aConsoleController_tasks",
+        "parameters": [
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 200
+            }
+          }
+        ],
+        "x-feature-flag": "app.a2a.enabled=true",
+        "description": "Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/a2a/console/tasks/{id}": {
+      "get": {
+        "tags": [
+          "A2aConsole"
+        ],
+        "summary": "Task",
+        "operationId": "A2aConsoleController_task",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-feature-flag": "app.a2a.enabled=true",
+        "description": "Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/a2a/console/tasks/{id}:cancel": {
+      "post": {
+        "tags": [
+          "A2aConsole"
+        ],
+        "summary": "Cancel",
+        "operationId": "A2aConsoleController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "x-feature-flag": "app.a2a.enabled=true",
+        "description": "Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
@@ -16309,6 +16559,140 @@
                   "items": {
                     "$ref": "#/components/schemas/AgentScheduleRunResponse"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/agents/{agentId}/scratchpad": {
+      "get": {
+        "tags": [
+          "AgentScratchpad"
+        ],
+        "summary": "List",
+        "operationId": "AgentScratchpadController_list",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "session",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentScratchpadController_ScratchpadListView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/agents/{agentId}/scratchpad/{key}": {
+      "get": {
+        "tags": [
+          "AgentScratchpad"
+        ],
+        "summary": "Read",
+        "operationId": "AgentScratchpadController_read",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScratchpadNoteView"
                 }
               }
             }
@@ -92985,6 +93369,31 @@
           }
         }
       },
+      "AgentScratchpadController_ScratchpadListView": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "totalBytes": {
+            "type": "integer",
+            "format": "int64",
+            "default": 0
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScratchpadNoteView"
+            }
+          }
+        },
+        "required": [
+          "count",
+          "totalBytes"
+        ]
+      },
       "AgentSessionLlmUsageController_SessionLlmCallEntry": {
         "type": "object",
         "properties": {
@@ -119422,6 +119831,32 @@
           "enabled",
           "consecutiveFailures",
           "runCount"
+        ]
+      },
+      "ScratchpadNoteView": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "body": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "byteSize"
         ]
       },
       "SearchRequest": {

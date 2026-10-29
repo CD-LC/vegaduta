@@ -105,7 +105,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
             aria-modal="true"
             aria-labelledby="trace-drawer-title"
             tabIndex={-1}
-            className="h-full w-full max-w-2xl overflow-y-auto border-l border-border bg-card p-5 shadow-xl outline-none"
+            className="h-full w-full max-w-2xl overflow-y-auto border-s border-border bg-card p-5 shadow-xl outline-none"
             initial={{ x: 40, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 40, opacity: 0 }}
@@ -300,13 +300,13 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
           </div>
           {data.byModel?.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] text-left text-sm">
+              <table className="w-full min-w-[560px] text-start text-sm">
                 <thead className="text-xs text-muted-foreground">
                   <tr className="border-b border-border">
-                    <th className="py-2 pr-3 font-medium">Model</th>
-                    <th className="py-2 pr-3 font-medium">Calls</th>
-                    <th className="py-2 pr-3 font-medium">Tokens in</th>
-                    <th className="py-2 pr-3 font-medium">Tokens out</th>
+                    <th className="py-2 pe-3 font-medium">Model</th>
+                    <th className="py-2 pe-3 font-medium">Calls</th>
+                    <th className="py-2 pe-3 font-medium">Tokens in</th>
+                    <th className="py-2 pe-3 font-medium">Tokens out</th>
                     <th className="py-2 font-medium">Cost</th>
                   </tr>
                 </thead>
@@ -315,10 +315,10 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
                     .sort((a, b) => (b.costUsd ?? -1) - (a.costUsd ?? -1))
                     .map((m) => (
                       <tr key={m.model} className="border-b border-border/60">
-                        <td className="py-2 pr-3 font-mono text-xs">{m.model}</td>
-                        <td className="py-2 pr-3 font-mono text-xs">{formatCountOrUnavailable(m.calls)}</td>
-                        <td className="py-2 pr-3 font-mono text-xs">{formatCompact(m.inputTokens)}</td>
-                        <td className="py-2 pr-3 font-mono text-xs">{formatCompact(m.outputTokens)}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{m.model}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{formatCountOrUnavailable(m.calls)}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{formatCompact(m.inputTokens)}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{formatCompact(m.outputTokens)}</td>
                         <td className="py-2 font-mono text-xs">{formatUsdOrUnavailable(m.costUsd)}</td>
                       </tr>
                     ))}
@@ -520,14 +520,14 @@ export default function ObservabilityPage() {
         )}
         {list?.available && rows.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
+            <table className="w-full min-w-[760px] text-start text-sm">
               <thead className="text-xs text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="py-2 pr-3 font-medium">Trace</th>
-                  <th className="py-2 pr-3 font-medium">When</th>
-                  <th className="py-2 pr-3 font-medium">Tenant / user</th>
-                  <th className="py-2 pr-3 font-medium">Latency</th>
-                  <th className="py-2 pr-3 font-medium">Tokens</th>
+                  <th className="py-2 pe-3 font-medium">Trace</th>
+                  <th className="py-2 pe-3 font-medium">When</th>
+                  <th className="py-2 pe-3 font-medium">Tenant / user</th>
+                  <th className="py-2 pe-3 font-medium">Latency</th>
+                  <th className="py-2 pe-3 font-medium">Tokens</th>
                   <th className="py-2 font-medium">Cost</th>
                 </tr>
               </thead>
@@ -539,10 +539,10 @@ export default function ObservabilityPage() {
                     onClick={() => setOpenId(t.id)}
                     data-testid="trace-row"
                   >
-                    <td className="py-2 pr-3">
+                    <td className="py-2 pe-3">
                       <button
                         type="button"
-                        className="border-0 bg-transparent p-0 text-left font-medium text-foreground hover:underline"
+                        className="border-0 bg-transparent p-0 text-start font-medium text-foreground hover:underline"
                         onClick={(e) => {
                           e.stopPropagation();
                           setOpenId(t.id);
@@ -551,19 +551,19 @@ export default function ObservabilityPage() {
                         {t.name || t.id.slice(0, 12)}
                       </button>
                       {t.level && t.level !== "DEFAULT" && (
-                        <span className="ml-2">
+                        <span className="ms-2">
                           <ToneChip tone={levelTone(t.level)} label={t.level} />
                         </span>
                       )}
                     </td>
-                    <td className="py-2 pr-3 text-xs" title={formatExact(t.timestamp)}>
+                    <td className="py-2 pe-3 text-xs" title={formatExact(t.timestamp)}>
                       {formatRelative(t.timestamp)}
                     </td>
-                    <td className="py-2 pr-3 font-mono text-[11px] text-muted-foreground">
+                    <td className="py-2 pe-3 font-mono text-[11px] text-muted-foreground">
                       {(t.tenantId || "—").slice(0, 8)} / {(t.userId || "—").slice(0, 12)}
                     </td>
-                    <td className="py-2 pr-3 font-mono text-xs">{formatDurationMs(t.latencyMs)}</td>
-                    <td className="py-2 pr-3 font-mono text-xs">
+                    <td className="py-2 pe-3 font-mono text-xs">{formatDurationMs(t.latencyMs)}</td>
+                    <td className="py-2 pe-3 font-mono text-xs">
                       {formatCompact(t.inputTokens)} / {formatCompact(t.outputTokens)}
                     </td>
                     <td className="py-2 font-mono text-xs">{formatUsdOrUnavailable(t.totalCostUsd)}</td>

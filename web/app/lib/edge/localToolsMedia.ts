@@ -45,7 +45,7 @@ async function runGenerateImage(args: Record<string, unknown>): Promise<string> 
   const seed = readOptionalNumber(args, "seed");
   if (!(await edgeImageGenAvailable())) {
     refuse(
-      "on-device image generation needs WebGPU, which this browser doesn't provide. The hosted generate_image tool is the fallback when a provider key exists."
+      "on-device image generation needs WebGPU with fp16 (shader-f16) support, which this browser/GPU doesn't provide. The hosted generate_image tool is the fallback when a provider key exists."
     );
   }
   if (!isImageGenModelCached()) {

@@ -350,7 +350,7 @@ function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: S
               onChange={(e) => setSummary(e.target.value)}
               placeholder="One or two sentences on what this does and who it's for."
             />
-            <p className="text-right text-[0.6875rem] text-muted-foreground">{summary.length}/280</p>
+            <p className="text-end text-[0.6875rem] text-muted-foreground">{summary.length}/280</p>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

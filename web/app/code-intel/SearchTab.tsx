@@ -63,7 +63,9 @@ export default function SearchTab({ repoId, onError }: { repoId: string; onError
           onKeyDown={(e) => e.key === "Enter" && run()}
         />
         <div className="space-y-1">
-          <Label htmlFor="ci-topk" className="text-xs">{ts("topK")}</Label>
+          <Label htmlFor="ci-topk" className="text-xs">
+            {ts("topK")}
+          </Label>
           <select
             id="ci-topk"
             value={topK}
@@ -71,7 +73,9 @@ export default function SearchTab({ repoId, onError }: { repoId: string; onError
             className="h-9 rounded-md border border-border bg-card px-2 text-sm"
           >
             {TOP_K.map((n) => (
-              <option key={n} value={n}>{n}</option>
+              <option key={n} value={n}>
+                {n}
+              </option>
             ))}
           </select>
         </div>
@@ -79,7 +83,9 @@ export default function SearchTab({ repoId, onError }: { repoId: string; onError
           {busy ? <Loader2 size={15} className="animate-spin" /> : <SearchIcon size={15} />} {t("searchButton")}
         </Button>
       </div>
-      {searched && hits.length === 0 && <EmptyState icon={SearchIcon} title={ts("noResultsTitle")} description={ts("noResultsBody")} />}
+      {searched && hits.length === 0 && (
+        <EmptyState icon={SearchIcon} title={ts("noResultsTitle")} description={ts("noResultsBody")} />
+      )}
       {hits.length > 0 && (
         <p className="mb-3 text-sm text-muted-foreground" data-testid="ci-search-count">
           {hits.length >= topK ? ts("countCapped", { count: hits.length }) : ts("count", { count: hits.length })}
@@ -92,7 +98,7 @@ export default function SearchTab({ repoId, onError }: { repoId: string; onError
               {h.path}:{h.start_line}-{h.end_line}
             </span>
             {h.symbol && <Badge variant="secondary">{h.symbol}</Badge>}
-            <span className="ml-auto font-mono text-xs text-muted-foreground">{(h.score ?? 0).toFixed(3)}</span>
+            <span className="ms-auto font-mono text-xs text-muted-foreground">{(h.score ?? 0).toFixed(3)}</span>
           </div>
           <pre className={CODE_CLS}>{(h.content || "").split("\n").slice(0, 12).join("\n")}</pre>
         </div>

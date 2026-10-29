@@ -5,6 +5,7 @@ import com.agenticai.core.agents.runtime.AgentRuntimeSettings;
 import com.agenticai.core.agents.runtime.TurnRuntime;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.guardrails.TurnApprovalState;
+import com.agenticai.core.guardrails.taint.TurnTaint;
 import com.agenticai.core.security.RequestCorrelationFilter;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
@@ -49,25 +50,30 @@ import org.slf4j.MDC;
  * @param reply how the turn's reply ended (a finished answer, cut off, refused, ...), shared by
  *     reference with the stage that produces the reply and the stages that cache or store it; never
  *     null (a fresh one is created when the caller passes none). The second mutable member
- * @param toolActivity what the turn's tools have done so far (running, finished, whether their effect
- *     was journaled), shared by reference with the tool wrapper that reports it and the turn loop that
- *     decides on it (idle timeout, whether a failover may replay the turn); never null (a fresh one is
- *     created when the caller passes none). The third mutable member
+ * @param toolActivity what the turn's tools have done so far (running, finished, whether their
+ *     effect was journaled), shared by reference with the tool wrapper that reports it and the turn
+ *     loop that decides on it (idle timeout, whether a failover may replay the turn); never null (a
+ *     fresh one is created when the caller passes none). The third mutable member
  * @param modelTraits what is known about the model the turn runs on (whether it is a weak tool
- *     caller), set by client selection and read by the stages that adapt to the model; never null (a
- *     fresh one is created when the caller passes none). The fourth mutable member
+ *     caller), set by client selection and read by the stages that adapt to the model; never null
+ *     (a fresh one is created when the caller passes none). The fourth mutable member
  * @param runtime the turn's resolved runtime limits (tool steps, timeouts, output cap, retrieval,
- *     continuation passes), set by client selection once the agent is loaded and read by every stage
- *     that enforces one; never null (a fresh, still empty one is created when the caller passes none).
- *     The fifth mutable member
- * @param turnId the turn's own id, made when the context is built and carried unchanged through every copy:
- *     the id of its turn journal record ({@code X-Journal-Turn-Id} on the response, {@code
- *     GET /api/agents/{agentId}/turns/{turnId}/journal}); never null. Unlike {@code requestId} it is never taken
- *     from the caller, so two turns can never share it
- * @param stepEvents the turn's step-event emitter (the request's, or {@link AgentStepEventEmitter#disabled()}
- *     when the caller did not ask for step events); never null. What a stage that is not handed the emitter
- *     directly (a buffered pass, a continuation) uses to tell the client it is retrying, failing over or
- *     continuing
+ *     continuation passes), set by client selection once the agent is loaded and read by every
+ *     stage that enforces one; never null (a fresh, still empty one is created when the caller
+ *     passes none). The fifth mutable member
+ * @param turnId the turn's own id, made when the context is built and carried unchanged through
+ *     every copy: the id of its turn journal record ({@code X-Journal-Turn-Id} on the response,
+ *     {@code GET /api/agents/{agentId}/turns/{turnId}/journal}); never null. Unlike {@code
+ *     requestId} it is never taken from the caller, so two turns can never share it
+ * @param stepEvents the turn's step-event emitter (the request's, or {@link
+ *     AgentStepEventEmitter#disabled()} when the caller did not ask for step events); never null.
+ *     What a stage that is not handed the emitter directly (a buffered pass, a continuation) uses
+ *     to tell the client it is retrying, failing over or continuing
+ * @param taint the turn's untrusted-content record: an entry that knows content an outsider could
+ *     have authored is entering the turn (an inbound channel message, a retrieval block assembled
+ *     into the prompt) marks it here, and tool resolution adopts this exact instance as the turn's
+ *     taint state so the {@code TaintGate} built for each tool sees the marks. The sixth mutable
+ *     member
  */
 public record TurnContext(
         TenantContext tenant,
@@ -84,9 +90,13 @@ public record TurnContext(
         TurnModelTraits modelTraits,
         TurnRuntime runtime,
         UUID turnId,
-        AgentStepEventEmitter stepEvents) {
+        AgentStepEventEmitter stepEvents,
+        TurnTaint taint) {
 
-    /** Every field but the step-event emitter, which a fresh context starts without (the disabled one). */
+    /**
+     * Every field but the step-event emitter, which a fresh context starts without (the disabled
+     * one).
+     */
     public TurnContext(
             TenantContext tenant,
             UUID requestedAgentId,
@@ -117,6 +127,7 @@ public record TurnContext(
                 modelTraits,
                 runtime,
                 turnId,
+                null,
                 null);
     }
 
@@ -238,7 +249,16 @@ public record TurnContext(
             Instant startedAt,
             Instant deadline,
             TurnReservationGuards budget) {
-        this(tenant, requestedAgentId, sessionId, requestId, startedAt, deadline, budget, null, null);
+        this(
+                tenant,
+                requestedAgentId,
+                sessionId,
+                requestId,
+                startedAt,
+                deadline,
+                budget,
+                null,
+                null);
     }
 
     /** A context for an ordinary turn (no approval continuation). */
@@ -251,7 +271,16 @@ public record TurnContext(
             Instant deadline,
             TurnReservationGuards budget,
             TurnApprovalState approval) {
-        this(tenant, requestedAgentId, sessionId, requestId, startedAt, deadline, budget, approval, null);
+        this(
+                tenant,
+                requestedAgentId,
+                sessionId,
+                requestId,
+                startedAt,
+                deadline,
+                budget,
+                approval,
+                null);
     }
 
     public TurnContext {
@@ -263,6 +292,7 @@ public record TurnContext(
         runtime = runtime == null ? new TurnRuntime() : runtime;
         turnId = turnId == null ? UUID.randomUUID() : turnId;
         stepEvents = stepEvents == null ? AgentStepEventEmitter.disabled() : stepEvents;
+        taint = taint == null ? new TurnTaint() : taint;
         if (deadline != null && deadline.isBefore(startedAt)) {
             throw new IllegalArgumentException(
                     "deadline " + deadline + " is before start " + startedAt);
@@ -434,7 +464,8 @@ public record TurnContext(
                 modelTraits,
                 runtime,
                 turnId,
-                stepEvents);
+                stepEvents,
+                taint);
     }
 
     /**
@@ -457,7 +488,8 @@ public record TurnContext(
                 modelTraits,
                 runtime,
                 turnId,
-                stepEvents);
+                stepEvents,
+                taint);
     }
 
     /**
@@ -483,14 +515,15 @@ public record TurnContext(
                 modelTraits,
                 runtime,
                 turnId,
-                stepEvents);
+                stepEvents,
+                taint);
     }
 
     /**
-     * A copy that should give up at {@code limit}: the instant an enclosing deadline (an agent job's
-     * own timeout) ends. {@code null} returns this context unchanged. A limit before the start is
-     * clamped to the start rather than rejected, since the caller computed it from a clock that may
-     * be a moment ahead of this context's.
+     * A copy that should give up at {@code limit}: the instant an enclosing deadline (an agent
+     * job's own timeout) ends. {@code null} returns this context unchanged. A limit before the
+     * start is clamped to the start rather than rejected, since the caller computed it from a clock
+     * that may be a moment ahead of this context's.
      */
     public TurnContext withDeadline(Instant limit) {
         if (limit == null) {
@@ -511,10 +544,13 @@ public record TurnContext(
                 modelTraits,
                 runtime,
                 turnId,
-                stepEvents);
+                stepEvents,
+                taint);
     }
 
-    /** A copy carrying the turn's step-event emitter; {@code null} returns this context unchanged. */
+    /**
+     * A copy carrying the turn's step-event emitter; {@code null} returns this context unchanged.
+     */
     public TurnContext withStepEvents(AgentStepEventEmitter emitter) {
         if (emitter == null) {
             return this;
@@ -534,6 +570,7 @@ public record TurnContext(
                 modelTraits,
                 runtime,
                 turnId,
-                emitter);
+                emitter,
+                taint);
     }
 }

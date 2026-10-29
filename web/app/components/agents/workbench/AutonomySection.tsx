@@ -3,6 +3,7 @@
 import { ShieldCheck } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import McpExposureField from "../../McpExposureField";
+import A2aEndpointPanel from "../A2aEndpointPanel";
 import AgentBrowserAutomation from "../AgentBrowserAutomation";
 import AgentDesktopAutomation from "../../desktop/AgentDesktopAutomation";
 import AgentGuardrailsCard from "../AgentGuardrailsCard";
@@ -80,7 +81,7 @@ export default function AutonomySection() {
                     aria-pressed={reasoningDepth === depth}
                     title={locked ? t("editLockedTooltip") : undefined}
                     className={cn(
-                      "rounded-lg border px-3 py-2 text-left transition-colors",
+                      "rounded-lg border px-3 py-2 text-start transition-colors",
                       reasoningDepth === depth
                         ? "border-primary bg-primary/10"
                         : "border-border bg-card hover:bg-accent",
@@ -137,7 +138,7 @@ export default function AutonomySection() {
                     aria-pressed={autonomyTier === tier}
                     title={locked ? t("editLockedTooltip") : undefined}
                     className={cn(
-                      "rounded-lg border px-3 py-2 text-left transition-colors",
+                      "rounded-lg border px-3 py-2 text-start transition-colors",
                       autonomyTier === tier ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-accent",
                       (autonomyTierBusy || locked) && "pointer-events-none opacity-50"
                     )}
@@ -172,6 +173,10 @@ export default function AutonomySection() {
           )}
 
           {!isDraft && selectedAgent && <McpExposureField kind="agents" resourceId={selectedAgent.id} />}
+
+          {/* A2A endpoints for this agent (core/agents-interop) - read-only panel next to the MCP
+           * exposure switch; self-hides on personal edition and on an older core. */}
+          {!isDraft && selectedAgent && <A2aEndpointPanel agentId={selectedAgent.id} />}
 
           {/* Per-agent content guardrails. Draft agents have no id to PATCH
            * against yet, hence the same !isDraft gate every other

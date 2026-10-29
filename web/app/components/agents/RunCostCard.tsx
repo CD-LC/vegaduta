@@ -160,7 +160,9 @@ export default function RunCostCard({
       </PopoverTrigger>
       <PopoverContent className="p-3 text-sm" data-testid="run-cost-panel">
         <div className="flex items-baseline justify-between gap-2">
-          <span className="font-medium text-foreground"><BrandText text={billing ? t("title") : t("titleUsage")} /></span>
+          <span className="font-medium text-foreground">
+            <BrandText text={billing ? t("title") : t("titleUsage")} />
+          </span>
           <span className="font-mono text-foreground" data-testid="run-cost-total">
             {billing ? total : `${totalTokens} tok`}
           </span>
@@ -169,11 +171,11 @@ export default function RunCostCard({
 
         <dl className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 text-xs">
           <dt className="text-muted-foreground">{t("calls")}</dt>
-          <dd className="text-right font-mono text-foreground" data-testid="run-cost-calls">
+          <dd className="text-end font-mono text-foreground" data-testid="run-cost-calls">
             {(toNumber(summary.callCount) ?? 0).toLocaleString()}
           </dd>
           <dt className="text-muted-foreground">{t("tokens")}</dt>
-          <dd className="text-right font-mono text-foreground" data-testid="run-cost-tokens">
+          <dd className="text-end font-mono text-foreground" data-testid="run-cost-tokens">
             {(toNumber(summary.totalTokens) ?? 0).toLocaleString()}
           </dd>
           {(toNumber(summary.reasoningTokens) ?? 0) > 0 && (
@@ -181,7 +183,7 @@ export default function RunCostCard({
               <dt className="text-muted-foreground" title={t("reasoningTokensHint")}>
                 {t("reasoningTokens")}
               </dt>
-              <dd className="text-right font-mono text-foreground" data-testid="run-cost-reasoning">
+              <dd className="text-end font-mono text-foreground" data-testid="run-cost-reasoning">
                 {(toNumber(summary.reasoningTokens) ?? 0).toLocaleString()}
               </dd>
             </>
@@ -189,7 +191,7 @@ export default function RunCostCard({
           {failed > 0 && (
             <>
               <dt className="text-muted-foreground">{t("failedCalls")}</dt>
-              <dd className="text-right font-mono text-foreground">{failed.toLocaleString()}</dd>
+              <dd className="text-end font-mono text-foreground">{failed.toLocaleString()}</dd>
             </>
           )}
         </dl>

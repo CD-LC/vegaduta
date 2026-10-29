@@ -4,7 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import BrandName from "../../components/BrandName";
 import PublicWorkflowNav from "./PublicWorkflowNav";
-import { ArrowRight, Sparkles, Network, UserCheck, Layers, Search, X, Workflow, Boxes, ListChecks, Loader2 } from "lucide-react";
+import {
+  ArrowRight,
+  Sparkles,
+  Network,
+  UserCheck,
+  Layers,
+  Search,
+  X,
+  Workflow,
+  Boxes,
+  ListChecks,
+  Loader2,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
@@ -200,7 +212,7 @@ export default function WorkflowRecipesClient() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full sm:max-w-md">
               <Search
-                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <Input
@@ -209,14 +221,14 @@ export default function WorkflowRecipesClient() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search industries, use-cases or scenarios…"
                 aria-label="Search workflow recipes"
-                className="pl-9 pr-9"
+                className="ps-9 pe-9"
               />
               {searching && (
                 <button
                   type="button"
                   onClick={() => setQuery("")}
                   aria-label="Clear search"
-                  className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
+                  className="absolute end-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
                 >
                   <X className="size-3.5" aria-hidden="true" />
                 </button>
@@ -256,7 +268,7 @@ export default function WorkflowRecipesClient() {
                   >
                     <ind.icon className="size-3.5 shrink-0" aria-hidden="true" />
                     <span className="truncate">{ind.name}</span>
-                    <span className="ml-auto shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground group-hover:text-muted-foreground">
+                    <span className="ms-auto shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground group-hover:text-muted-foreground">
                       {ind.recipeCount}
                     </span>
                   </a>

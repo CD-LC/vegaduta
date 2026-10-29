@@ -113,8 +113,8 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
             <Alert variant="warning">
               <Info />
               <AlertDescription>
-                No hosted provider is configured yet - FREE-plan tenants cannot chat until at least one row exists
-                here and is enabled.
+                No hosted provider is configured yet - FREE-plan tenants cannot chat until at least one row exists here
+                and is enabled.
               </AlertDescription>
             </Alert>
           )}
@@ -154,7 +154,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
                       {row.completionsPath ? row.completionsPath : ""} · {row.model}
                       {row.modelAutoSelected && (
                         <span
-                          className="ml-1 normal-case text-muted-foreground/80"
+                          className="ms-1 normal-case text-muted-foreground/80"
                           title="Auto-selected - blank the model field and save to re-detect after a vendor deprecates it"
                         >
                           (auto)

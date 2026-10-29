@@ -146,3 +146,62 @@
     text-decoration-color: currentColor;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * RTL: mirror directional chrome.
+ *
+ * Lucide stamps `lucide-<kebab-name>` on every svg, so one rule flips every
+ * direction-carrying icon in the app instead of editing ~200 call sites.
+ * The list is deliberately narrow: horizontal direction indicators (arrows,
+ * chevrons, panel-side glyphs, send/reply/undo, indents) mirror; vertical
+ * arrows, transport/media controls (play, skip, rewind) and symmetric shapes
+ * (arrow-left-right, move) do NOT - universal RTL convention.
+ * ------------------------------------------------------------------------ */
+html[dir="rtl"] .lucide-arrow-right,
+html[dir="rtl"] .lucide-arrow-left,
+html[dir="rtl"] .lucide-arrow-up-right,
+html[dir="rtl"] .lucide-arrow-up-left,
+html[dir="rtl"] .lucide-arrow-down-right,
+html[dir="rtl"] .lucide-arrow-down-left,
+html[dir="rtl"] .lucide-arrow-right-to-line,
+html[dir="rtl"] .lucide-arrow-left-to-line,
+html[dir="rtl"] .lucide-arrow-right-from-line,
+html[dir="rtl"] .lucide-arrow-left-from-line,
+html[dir="rtl"] .lucide-arrow-big-right,
+html[dir="rtl"] .lucide-arrow-big-left,
+html[dir="rtl"] .lucide-chevron-right,
+html[dir="rtl"] .lucide-chevron-left,
+html[dir="rtl"] .lucide-chevrons-right,
+html[dir="rtl"] .lucide-chevrons-left,
+html[dir="rtl"] .lucide-chevron-first,
+html[dir="rtl"] .lucide-chevron-last,
+html[dir="rtl"] .lucide-send,
+html[dir="rtl"] .lucide-send-horizontal,
+html[dir="rtl"] .lucide-reply,
+html[dir="rtl"] .lucide-reply-all,
+html[dir="rtl"] .lucide-undo,
+html[dir="rtl"] .lucide-undo-2,
+html[dir="rtl"] .lucide-redo,
+html[dir="rtl"] .lucide-redo-2,
+html[dir="rtl"] .lucide-corner-down-right,
+html[dir="rtl"] .lucide-corner-down-left,
+html[dir="rtl"] .lucide-corner-up-right,
+html[dir="rtl"] .lucide-corner-up-left,
+html[dir="rtl"] .lucide-corner-right-up,
+html[dir="rtl"] .lucide-corner-right-down,
+html[dir="rtl"] .lucide-corner-left-up,
+html[dir="rtl"] .lucide-corner-left-down,
+html[dir="rtl"] .lucide-move-right,
+html[dir="rtl"] .lucide-move-left,
+html[dir="rtl"] .lucide-panel-left,
+html[dir="rtl"] .lucide-panel-right,
+html[dir="rtl"] .lucide-panel-left-open,
+html[dir="rtl"] .lucide-panel-right-open,
+html[dir="rtl"] .lucide-panel-left-close,
+html[dir="rtl"] .lucide-panel-right-close,
+html[dir="rtl"] .lucide-indent-increase,
+html[dir="rtl"] .lucide-indent-decrease,
+html[dir="rtl"] .lucide-log-in,
+html[dir="rtl"] .lucide-log-out {
+  transform: scaleX(-1);
+}

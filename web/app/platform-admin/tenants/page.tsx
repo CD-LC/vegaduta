@@ -3,13 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import {
-  RefreshCw,
-  CreditCard,
-  Search,
-  ArrowDown,
-  ArrowUp,
-} from "lucide-react";
+import { RefreshCw, CreditCard, Search, ArrowDown, ArrowUp } from "lucide-react";
 import { api } from "../lib/api";
 import AdminShell from "../components/AdminShell";
 import Select from "../components/Select";
@@ -343,13 +337,13 @@ export default function TenantsUsersPage() {
                 <div className="relative w-full max-w-sm">
                   <Search
                     size={14}
-                    className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                   />
                   <Input
                     value={tenantSearch}
                     onChange={(e) => setTenantSearch(e.target.value)}
                     placeholder="Search by name or owner email…"
-                    className="pl-8"
+                    className="ps-8"
                   />
                 </div>
                 <div className="w-full space-y-1.5 sm:w-52">

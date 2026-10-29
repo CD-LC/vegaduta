@@ -86,8 +86,8 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
                 className="min-w-0 flex-1 rounded-xl bg-transparent px-3 py-2.5 text-base outline-none placeholder:text-muted-foreground"
               />
               <Button type="submit" size="lg" className={TONES.violet.cta} disabled={phase === "unavailable"}>
-                <Sparkles aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Build it{" "}
-                <ArrowRight aria-hidden="true" className="ml-2 h-4 w-4 shrink-0" />
+                <Sparkles aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Build it{" "}
+                <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
               </Button>
             </div>
             <div className="mt-2 flex min-h-5 items-center gap-2 text-xs text-muted-foreground" aria-live="polite">
@@ -108,7 +108,7 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
             type="button"
             onClick={onShowtime}
             data-tour="showtime-btn"
-            className="group mt-4 inline-flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 py-2 pl-2 pr-5 text-left transition hover:border-emerald-400 hover:bg-emerald-500/15"
+            className="group mt-4 inline-flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 py-2 ps-2 pe-5 text-start transition hover:border-emerald-400 hover:bg-emerald-500/15"
           >
             <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-emerald-950 shadow-lg shadow-emerald-500/30 transition-transform group-hover:scale-105">
               <Clapperboard aria-hidden="true" className="h-5 w-5 shrink-0" />

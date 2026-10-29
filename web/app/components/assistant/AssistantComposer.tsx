@@ -81,7 +81,8 @@ export default function AssistantComposer({
   // so the next message can be typed straight away. Focus the person put somewhere else stays there.
   const wasSending = useRef(sending);
   useLayoutEffect(() => {
-    const idle = typeof document !== "undefined" && (!document.activeElement || document.activeElement === document.body);
+    const idle =
+      typeof document !== "undefined" && (!document.activeElement || document.activeElement === document.body);
     if (wasSending.current && !sending && !disabled && idle) boxRef.current?.focus({ preventScroll: true });
     wasSending.current = sending;
   }, [sending, disabled]);
@@ -142,7 +143,7 @@ export default function AssistantComposer({
               <li key={command} role="option" aria-selected={false}>
                 <button
                   type="button"
-                  className="flex w-full items-baseline gap-2 rounded-md px-2 py-1 text-left hover:bg-secondary/60"
+                  className="flex w-full items-baseline gap-2 rounded-md px-2 py-1 text-start hover:bg-secondary/60"
                   onClick={() => {
                     onChange(`/${command} `);
                     boxRef.current?.focus();

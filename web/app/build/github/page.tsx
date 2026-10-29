@@ -36,8 +36,8 @@ export default function ConnectGithubPage() {
           </div>
           <h2 className="text-lg font-semibold text-foreground">App Builder is not available on this deployment</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-            The app-builder service is an optional add-on and is not running here yet. There is nothing to
-            connect GitHub to.
+            The app-builder service is an optional add-on and is not running here yet. There is nothing to connect
+            GitHub to.
           </p>
         </div>
       </AppShell>
@@ -47,7 +47,7 @@ export default function ConnectGithubPage() {
   return (
     <AppShell title="Connect GitHub" eyebrow="App Builder" wide>
       <div className="mx-auto max-w-2xl py-2">
-        <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2 text-muted-foreground">
+        <Button asChild variant="ghost" size="sm" className="mb-4 -ms-2 text-muted-foreground">
           <Link href="/build">
             <ArrowLeft aria-hidden="true" size={14} /> Back to App Builder
           </Link>
@@ -56,9 +56,9 @@ export default function ConnectGithubPage() {
         <GithubConnectCard />
 
         <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-          Nothing here talks to a preview container we run — that infrastructure is being retired. Once a repo
-          is connected, go back to App Builder and keep chatting with the assistant; each change opens or
-          updates a pull request on {APP_BUILDER_URL ? "your connected repo" : "GitHub"}.
+          Nothing here talks to a preview container we run — that infrastructure is being retired. Once a repo is
+          connected, go back to App Builder and keep chatting with the assistant; each change opens or updates a pull
+          request on {APP_BUILDER_URL ? "your connected repo" : "GitHub"}.
         </p>
       </div>
     </AppShell>

@@ -297,7 +297,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
 # the spawned server.
 # Single-quoted on purpose: ENV drops unquoted double quotes, which left this value as
 # `{executablePath:...}` (invalid JSON, "Failed to parse PUPPETEER_LAUNCH_OPTIONS").
-ENV PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome"}'
+ENV PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/home/agentic/.cache/puppeteer/chrome/current/chrome"}'
 # This RUN still executes as root (HOME=/home/agentic above only points
 # npm/npx at that directory, it doesn't change the executing uid), so npx
 # fetching the `playwright` CLI package leaves root-owned files under
@@ -359,7 +359,15 @@ RUN cd /opt/mcp-toolchain \
     # explicit `browsers install` below. The same env on THAT call skips the
     # redundant postinstall download while still letting the install command
     # fetch chrome@stable (verified: linux-156 landed, exit 0, on arm64).
+    # The pre-warm runs from an EMPTY cwd: server-puppeteer is also a dep of
+    # mcp-toolchain itself, so run inside /opt/mcp-toolchain npm exec resolves
+    # it locally, seeds nothing into ~/.npm/_npx, and exits 0 - the grep below
+    # then finds no package.json, dirname "" yields ".", and
+    # rm -rf "./node_modules" deletes the very tree this step copies
+    # (v0.1.13 build, arm64 leg). An isolated dir forces a real _npx install.
+    && mkdir -p /opt/npx-prewarm && cd /opt/npx-prewarm \
     && PUPPETEER_SKIP_DOWNLOAD=1 npm exec --yes --package=@modelcontextprotocol/server-puppeteer -- node -e "process.exit(0)" \
+    && cd /opt/mcp-toolchain \
     # The pre-warm above uses the SAME unversioned spec as application-mcp.yml's runtime
     # `npx -y @modelcontextprotocol/server-puppeteer`, so npx reuses this tree (its cache
     # directory is keyed by the spec). The deprecated 2025.5.12 pins @modelcontextprotocol/sdk
@@ -368,6 +376,9 @@ RUN cd /opt/mcp-toolchain \
     # server only uses the sdk's Server/StdioServerTransport; basic-ftp is only reachable for
     # ftp: PAC-script URLs, through puppeteer's browser-download proxy agent (get-uri).
     && sp_dir="$(dirname "$(grep -l '"@modelcontextprotocol/server-puppeteer"' /home/agentic/.npm/_npx/*/package.json)")" \
+    # Fail closed, not sideways: an unseeded cache must abort the build, never
+    # reach rm -rf with a "." path or ship an unpatched npx tree.
+    && case "$sp_dir" in /home/agentic/.npm/_npx/*) : ;; *) echo "server-puppeteer pre-warm did not seed /home/agentic/.npm/_npx" >&2; exit 1;; esac \
     # Overlay the vendored lockfile tree onto the seeded entry instead of an
     # unverified `npm install`: mcp-toolchain/package.json carries the same two
     # overrides (sdk 1.32.1, basic-ftp 6.2.1) and its package-lock resolved them
@@ -396,10 +407,22 @@ RUN cd /opt/mcp-toolchain \
     # only the fixed one.
     # The vendored lockfile tree's `browsers` CLI (puppeteer's own installer) fetches the
     # pinned Chrome straight from storage.googleapis.com - no npx resolution, no extra cache.
-    && PUPPETEER_SKIP_DOWNLOAD=1 ./node_modules/.bin/browsers install chrome@${CHROME_FOR_TESTING_VERSION} \
-    && rm -rf /home/agentic/.cache/puppeteer/chrome/linux-131.0.6778.204 /home/agentic/.cache/puppeteer/chrome-headless-shell/linux-131.0.6778.204 \
-    && ln -sfn "$(ls -d /home/agentic/.cache/puppeteer/chrome/linux-* | sort -V | tail -n 1)" /home/agentic/.cache/puppeteer/chrome/current \
-    && test -x /home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome \
+    # --path must be explicit: @puppeteer/browsers' CLI defaults the install
+    # root to the current working directory, so run from /opt/mcp-toolchain it
+    # lands in /opt/mcp-toolchain/chrome and the `current` link below finds
+    # nothing under ~/.cache/puppeteer (v0.1.13 build, arm64 leg).
+    && PUPPETEER_SKIP_DOWNLOAD=1 ./node_modules/.bin/browsers install --path /home/agentic/.cache/puppeteer chrome@${CHROME_FOR_TESTING_VERSION} \
+    && rm -rf /home/agentic/.cache/puppeteer/chrome/linux-131.0.6778.204 /home/agentic/.cache/puppeteer/chrome/linux_arm-131.0.6778.204 \
+        /home/agentic/.cache/puppeteer/chrome-headless-shell/linux-131.0.6778.204 \
+        /home/agentic/.cache/puppeteer/chrome-headless-shell/linux_arm-131.0.6778.204 \
+    # The version dir and inner binary dir are arch-shaped (linux-<ver>/
+    # chrome-linux64 on amd64, linux_arm-<ver>/chrome-linux-arm64 on arm64),
+    # so glob the installed chrome binary itself and link `current` at the
+    # inner dir - `current/chrome` is then the executable on BOTH arches and
+    # PUPPETEER_LAUNCH_OPTIONS stays arch-agnostic.
+    && chrome_bin="$(ls /home/agentic/.cache/puppeteer/chrome/linux*/chrome-linux*/chrome | sort -V | tail -n 1)" \
+    && ln -sfn "$(dirname "$chrome_bin")" /home/agentic/.cache/puppeteer/chrome/current \
+    && test -x /home/agentic/.cache/puppeteer/chrome/current/chrome \
     && cd / && rm -rf /opt/mcp-toolchain \
     && chown -R agentic:agentic "$PLAYWRIGHT_BROWSERS_PATH" /home/agentic
 

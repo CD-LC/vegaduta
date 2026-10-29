@@ -1,0 +1,61 @@
+name: Fuzz
+
+# Coverage-guided fuzzing of the security-redaction regex chains via
+# ClusterFuzzLite (Jazzer under the hood for `language: jvm`). Same two targets
+# as before, now built + run inside the CFL image so the Fuzzing scorecard check
+# detects the integration:
+#
+#   * RedactingToolExecutionExceptionProcessor.redact   (chat)
+#   * SkillDraftScrubber.basic().scrub                   (agents-jobs)
+#
+# Build integration lives in .clusterfuzzlite/ (project.yaml + Dockerfile +
+# build.sh); build.sh packages the module classes + test classpath into $OUT and
+# emits one executable launcher per target (the canonical CFL jvm layout).
+# A pathological (ReDoS) input is a libFuzzer timeout finding and uploads as a
+# crash artifact. Pull requests get a 90s code-change pass; the nightly schedule
+# and manual dispatches get a 15-minute batch pass.
+
+on:
+  pull_request:
+    paths:
+      - "core/chat/src/main/java/com/agenticai/core/chat/RedactingToolExecutionExceptionProcessor.java"
+      - "core/agents-jobs/src/main/java/com/agenticai/core/agents/skills/learning/SkillDraftScrubber.java"
+      - "core/**/fuzz/**"
+      - ".clusterfuzzlite/**"
+      - ".github/workflows/fuzz.yml"
+  schedule:
+    - cron: "41 5 * * *" # nightly, 05:41 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fuzz-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  fuzz:
+    name: ClusterFuzzLite jvm fuzz
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Build fuzzers
+        id: build
+        uses: google/clusterfuzzlite/actions/build_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
+        with:
+          language: jvm
+          bad-build-check: true
+
+      - name: Run fuzzers
+        uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          language: jvm
+          # PRs smoke-fuzz the code-change set for 90s; the nightly run and
+          # manual dispatches get a real coverage-guided batch pass.
+          mode: ${{ github.event_name == 'pull_request' && 'code-change' || 'batch' }}
+          fuzz-seconds: ${{ github.event_name == 'pull_request' && '90' || '900' }}
+          output-sarif: false

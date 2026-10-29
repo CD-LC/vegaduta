@@ -106,7 +106,9 @@ function SettingsPanelInner({
   draftsRef.current = drafts;
 
   // Closing the tab or navigating away with unsaved edits asks first (the browser shows its own generic prompt).
-  const hasUnsaved = scoped.some((e) => isDirty(e, drafts[e.key], effective.values[e.key] ? effective.values[e.key].value : e.default));
+  const hasUnsaved = scoped.some((e) =>
+    isDirty(e, drafts[e.key], effective.values[e.key] ? effective.values[e.key].value : e.default)
+  );
   useEffect(() => {
     if (!hasUnsaved) return undefined;
     const warn = (e: BeforeUnloadEvent) => {
@@ -147,7 +149,11 @@ function SettingsPanelInner({
   const focusField = (key: string) => {
     // After the DOM updates, put focus on the control of the first field that needs attention.
     setTimeout(() => {
-      document.querySelector<HTMLElement>(`[data-testid="setting-${key}"] input, [data-testid="setting-${key}"] textarea, [data-testid="setting-${key}"] [role="switch"], [data-testid="setting-${key}"] [role="combobox"]`)?.focus();
+      document
+        .querySelector<HTMLElement>(
+          `[data-testid="setting-${key}"] input, [data-testid="setting-${key}"] textarea, [data-testid="setting-${key}"] [role="switch"], [data-testid="setting-${key}"] [role="combobox"]`
+        )
+        ?.focus();
     }, 0);
   };
 
@@ -178,7 +184,14 @@ function SettingsPanelInner({
         if (!parsed.ok) continue;
         changes.push({ key, value: parsed.value });
         if (needsReason(entry)) {
-          risky.push(buildRiskyChange(text, entry, effective.values[key] ? effective.values[key].value : entry.default, parsed.value));
+          risky.push(
+            buildRiskyChange(
+              text,
+              entry,
+              effective.values[key] ? effective.values[key].value : entry.default,
+              parsed.value
+            )
+          );
         }
       }
       if (!changes.length) return;
@@ -277,7 +290,13 @@ function SettingsPanelInner({
       ) : null}
 
       {loading ? (
-        <div role="status" aria-busy="true" aria-label={ui("loading")} className="space-y-3" data-testid="settings-loading">
+        <div
+          role="status"
+          aria-busy="true"
+          aria-label={ui("loading")}
+          className="space-y-3"
+          data-testid="settings-loading"
+        >
           <Skeleton className="h-10" />
           <Skeleton className="h-28" />
           <Skeleton className="h-28" />
@@ -294,12 +313,19 @@ function SettingsPanelInner({
       ) : (
         <>
           {showFilters && scoped.length > 0 ? (
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center" role="search" aria-label={ui("filters.label")}>
+            <div
+              className="flex flex-col gap-2 sm:flex-row sm:items-center"
+              role="search"
+              aria-label={ui("filters.label")}
+            >
               <div className="relative sm:max-w-xs sm:flex-1">
-                <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Search
+                  aria-hidden="true"
+                  className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                />
                 <Input
                   type="search"
-                  className="pl-9"
+                  className="ps-9"
                   aria-label={ui("filters.search")}
                   placeholder={ui("filters.searchPlaceholder")}
                   value={search}
@@ -311,7 +337,10 @@ function SettingsPanelInner({
                   aria-label={ui("filters.group")}
                   value={groupFilter}
                   onValueChange={setGroupFilter}
-                  options={[{ value: ALL, label: ui("filters.allGroups") }, ...groupIds.map((g) => ({ value: g, label: groupLabel(g) }))]}
+                  options={[
+                    { value: ALL, label: ui("filters.allGroups") },
+                    ...groupIds.map((g) => ({ value: g, label: groupLabel(g) })),
+                  ]}
                 />
               </div>
               <div className="sm:w-44">
@@ -319,7 +348,10 @@ function SettingsPanelInner({
                   aria-label={ui("filters.risk")}
                   value={riskFilter}
                   onValueChange={setRiskFilter}
-                  options={[{ value: ALL, label: ui("filters.allRisks") }, ...RISKS.map((r) => ({ value: r, label: ui(`risk.${r}`) }))]}
+                  options={[
+                    { value: ALL, label: ui("filters.allRisks") },
+                    ...RISKS.map((r) => ({ value: r, label: ui(`risk.${r}`) })),
+                  ]}
                 />
               </div>
               {filtered ? (

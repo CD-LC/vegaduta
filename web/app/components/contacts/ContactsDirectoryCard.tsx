@@ -176,14 +176,14 @@ export default function ContactsDirectoryCard({
           <div className="relative">
             <Search
               size={16}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
             />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("searchPlaceholder")}
-              className="pl-9"
+              className="ps-9"
               aria-label={t("searchPlaceholder")}
             />
           </div>
@@ -272,7 +272,7 @@ export default function ContactsDirectoryCard({
                     <TableHead className="w-[200px]">{t("colGroup")}</TableHead>
                     <TableHead className="w-[220px]">{t("colAgent")}</TableHead>
                     <TableHead className="w-[150px]">{t("colRoutesVia")}</TableHead>
-                    <TableHead className="w-[64px] text-right">
+                    <TableHead className="w-[64px] text-end">
                       <span className="sr-only">{t("colActions")}</span>
                     </TableHead>
                   </TableRow>
@@ -295,7 +295,7 @@ export default function ContactsDirectoryCard({
                       <TableCell className="min-w-[180px]">{contactGroupSelect(c)}</TableCell>
                       <TableCell className="min-w-[200px]">{contactAgentSelect(c)}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{contactRoutesVia(c)}</TableCell>
-                      <TableCell className="text-right">{contactDeleteButton(c)}</TableCell>
+                      <TableCell className="text-end">{contactDeleteButton(c)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

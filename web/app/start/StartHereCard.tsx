@@ -52,7 +52,7 @@ export default function StartHereCard() {
           type="button"
           variant="ghost"
           size="icon"
-          className="-mr-2 -mt-2 shrink-0"
+          className="-me-2 -mt-2 shrink-0"
           aria-label={t("hereDismiss")}
           onClick={() => {
             dismissStartHere();

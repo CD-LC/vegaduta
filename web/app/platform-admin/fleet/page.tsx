@@ -276,28 +276,28 @@ export default function FleetHealthPage() {
           <AdminTableWrap>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="py-2 pr-3 font-semibold">Health</th>
-                  <th className="py-2 pr-3 font-semibold">Agent</th>
-                  <th className="py-2 pr-3 font-semibold">Tenant</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Calls</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Error rate</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Spend</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Jobs OK</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Eval</th>
-                  <th className="py-2 pr-3 font-semibold">Alerts</th>
-                  <th className="py-2 pr-3 font-semibold text-right">Last activity</th>
-                  <th className="py-2 font-semibold text-right">Escalate</th>
+                <tr className="border-b border-border text-start text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <th className="py-2 pe-3 font-semibold">Health</th>
+                  <th className="py-2 pe-3 font-semibold">Agent</th>
+                  <th className="py-2 pe-3 font-semibold">Tenant</th>
+                  <th className="py-2 pe-3 font-semibold text-end">Calls</th>
+                  <th className="py-2 pe-3 font-semibold text-end">Error rate</th>
+                  <th className="py-2 pe-3 font-semibold text-end">Spend</th>
+                  <th className="py-2 pe-3 font-semibold text-end">Jobs OK</th>
+                  <th className="py-2 pe-3 font-semibold text-end">Eval</th>
+                  <th className="py-2 pe-3 font-semibold">Alerts</th>
+                  <th className="py-2 pe-3 font-semibold text-end">Last activity</th>
+                  <th className="py-2 font-semibold text-end">Escalate</th>
                 </tr>
               </thead>
               <tbody>
                 {pg.pageItems.map((a) => (
                   <tr key={`${a.tenantId}:${a.agentId}`} className="border-b border-border/60 align-top">
-                    <td className="py-2.5 pr-3">
+                    <td className="py-2.5 pe-3">
                       <Badge variant={HEALTH_TONE[a.health] ?? "outline"}>{a.health}</Badge>
                     </td>
-                    <td className="py-2.5 pr-3 font-medium">{a.agentName}</td>
-                    <td className="py-2.5 pr-3">
+                    <td className="py-2.5 pe-3 font-medium">{a.agentName}</td>
+                    <td className="py-2.5 pe-3">
                       <Link
                         href={`/platform-admin/tenant-detail?id=${a.tenantId}`}
                         className="text-primary hover:underline"
@@ -305,9 +305,9 @@ export default function FleetHealthPage() {
                         {a.tenantName}
                       </Link>
                     </td>
-                    <td className="py-2.5 pr-3 text-right tabular-nums">{a.calls.toLocaleString()}</td>
+                    <td className="py-2.5 pe-3 text-end tabular-nums">{a.calls.toLocaleString()}</td>
                     <td
-                      className={`py-2.5 pr-3 text-right tabular-nums ${
+                      className={`py-2.5 pe-3 text-end tabular-nums ${
                         a.errorRate != null && a.errorRate > data.slo.maxErrorRate && a.calls >= data.slo.minCallsForSlo
                           ? "font-semibold text-destructive"
                           : ""
@@ -315,20 +315,20 @@ export default function FleetHealthPage() {
                     >
                       {pct(a.errorRate)}
                     </td>
-                    <td className="py-2.5 pr-3 text-right tabular-nums">
+                    <td className="py-2.5 pe-3 text-end tabular-nums">
                       {money(a.costUsd)}
                       {a.spendRatio != null && a.spendRatio > data.slo.spendSpikeRatio && (
-                        <span className="ml-1 text-[11px] font-semibold text-destructive">
+                        <span className="ms-1 text-[11px] font-semibold text-destructive">
                           {a.spendRatio.toFixed(1)}x
                         </span>
                       )}
                     </td>
-                    <td className="py-2.5 pr-3 text-right tabular-nums">
+                    <td className="py-2.5 pe-3 text-end tabular-nums">
                       {a.jobSuccessRate == null
                         ? "-"
                         : `${a.jobsSucceeded}/${a.jobsFinished} (${pct(a.jobSuccessRate)})`}
                     </td>
-                    <td className="py-2.5 pr-3 text-right tabular-nums">
+                    <td className="py-2.5 pe-3 text-end tabular-nums">
                       {a.latestEvalScore == null ? (
                         "-"
                       ) : (
@@ -336,7 +336,7 @@ export default function FleetHealthPage() {
                           {a.latestEvalScore.toFixed(2)}
                           {a.previousEvalScore != null && (
                             <span
-                              className={`ml-1 text-[11px] ${
+                              className={`ms-1 text-[11px] ${
                                 a.previousEvalScore - a.latestEvalScore > data.slo.evalDriftDrop
                                   ? "font-semibold text-destructive"
                                   : "text-muted-foreground"
@@ -349,7 +349,7 @@ export default function FleetHealthPage() {
                         </>
                       )}
                     </td>
-                    <td className="py-2.5 pr-3">
+                    <td className="py-2.5 pe-3">
                       <div className="flex flex-wrap gap-1">
                         {a.alerts.map((al) => (
                           <Badge key={al} variant="destructive" className="text-[10px]">
@@ -358,10 +358,10 @@ export default function FleetHealthPage() {
                         ))}
                       </div>
                     </td>
-                    <td className="py-2.5 pr-3 text-right text-muted-foreground">
+                    <td className="py-2.5 pe-3 text-end text-muted-foreground">
                       {a.lastCallAt ? timeAgo(a.lastCallAt) : "-"}
                     </td>
-                    <td className="py-2.5 text-right">
+                    <td className="py-2.5 text-end">
                       {a.tenantEmergencyStopped ? (
                         <Button
                           size="sm"

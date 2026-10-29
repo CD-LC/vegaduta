@@ -93,7 +93,7 @@ export default function ApprovalContinuationStatus({
         title={t("close")}
         data-testid="approval-continuation-dismiss"
         onClick={dismiss}
-        className="-mr-1 shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        className="-me-1 shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
       >
         <X size={14} className="size-3.5" aria-hidden="true" />
       </button>

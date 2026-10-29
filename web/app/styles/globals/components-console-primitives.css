@@ -206,7 +206,7 @@
 
     .ax-rail-logo {
       align-self: flex-start;
-      margin-left: 0.25rem;
+      margin-inline-start: 0.25rem;
     }
 
     .ax-rail-link {
@@ -264,7 +264,7 @@
     }
 
     .app-main {
-      margin-left: 0;
+      margin-inline-start: 0;
     }
 
     /* Longer org names/eyebrow text has no room to spare on a phone-width

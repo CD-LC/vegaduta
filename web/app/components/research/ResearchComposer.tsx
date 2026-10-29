@@ -112,7 +112,7 @@ export default function ResearchComposer({
               type="button"
               size="sm"
               variant={dictation.listening ? "default" : "outline"}
-              className="ml-auto"
+              className="ms-auto"
               aria-pressed={dictation.listening}
               disabled={busy}
               onClick={dictation.listening ? dictation.stop : dictation.start}
@@ -140,7 +140,7 @@ export default function ResearchComposer({
                     type="button"
                     disabled={busy}
                     onClick={() => setQuestion(ex)}
-                    className="max-w-full rounded-full border border-border px-3 py-1.5 text-left text-xs text-foreground hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring [overflow-wrap:anywhere]"
+                    className="max-w-full rounded-full border border-border px-3 py-1.5 text-start text-xs text-foreground hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring [overflow-wrap:anywhere]"
                   >
                     {ex}
                   </button>

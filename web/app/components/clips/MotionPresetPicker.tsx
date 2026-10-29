@@ -28,7 +28,7 @@ export default function MotionPresetPicker({
             onClick={() => onChange(preset.id)}
             aria-pressed={selected}
             className={
-              "rounded-md border px-3 py-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50 " +
+              "rounded-md border px-3 py-2 text-start transition-colors disabled:cursor-not-allowed disabled:opacity-50 " +
               (selected
                 ? "border-primary bg-primary/10 text-foreground"
                 : "border-border bg-transparent text-muted-foreground hover:border-primary/40 hover:text-foreground")

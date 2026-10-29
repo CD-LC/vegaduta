@@ -59,7 +59,12 @@ class DependencyAdvisoryFloorTest {
                             "lz4-java",
                             "net.jpountz.lz4.LZ4Factory",
                             "1.11.4",
-                            "GHSA-mcr4-qmvw-px4g"));
+                            "GHSA-mcr4-qmvw-px4g"),
+                    new Floor(
+                            "log4j-api",
+                            "org.apache.logging.log4j.Logger",
+                            "2.26.1",
+                            "GHSA-qv9r-c865-cp47"));
 
     // mcp-core is deliberately absent: GHSA-8jxr-pr72-r468 is fixed only in 1.0.0, which has no
     // SseMessageEndpointValidator or io.modelcontextprotocol.json.jackson (McpOriginPinning and

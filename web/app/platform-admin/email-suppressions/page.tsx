@@ -124,13 +124,13 @@ export default function EmailSuppressionsPage() {
         )}
         {items.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-sm">
+            <table className="w-full min-w-[640px] text-start text-sm">
               <thead className="text-xs text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="py-2 pr-3 font-medium">Email</th>
-                  <th className="py-2 pr-3 font-medium">Reason</th>
-                  <th className="py-2 pr-3 font-medium">Source</th>
-                  <th className="py-2 pr-3 font-medium">Added</th>
+                  <th className="py-2 pe-3 font-medium">Email</th>
+                  <th className="py-2 pe-3 font-medium">Reason</th>
+                  <th className="py-2 pe-3 font-medium">Source</th>
+                  <th className="py-2 pe-3 font-medium">Added</th>
                   <th className="py-2 font-medium">
                     <span className="sr-only">Actions</span>
                   </th>
@@ -139,17 +139,17 @@ export default function EmailSuppressionsPage() {
               <tbody>
                 {items.map((s) => (
                   <tr key={s.email} className="border-b border-border/60">
-                    <td className="py-2 pr-3 font-mono text-xs">{s.email}</td>
-                    <td className="py-2 pr-3">
+                    <td className="py-2 pe-3 font-mono text-xs">{s.email}</td>
+                    <td className="py-2 pe-3">
                       <Badge variant={/complain|spam/i.test(s.reason || "") ? "destructive" : "secondary"}>
                         {s.reason || "—"}
                       </Badge>
                     </td>
-                    <td className="py-2 pr-3 text-xs text-muted-foreground">{s.source || "—"}</td>
-                    <td className="py-2 pr-3 text-xs" title={formatExact(s.createdAt)}>
+                    <td className="py-2 pe-3 text-xs text-muted-foreground">{s.source || "—"}</td>
+                    <td className="py-2 pe-3 text-xs" title={formatExact(s.createdAt)}>
                       {formatRelative(s.createdAt)}
                     </td>
-                    <td className="py-2 text-right">
+                    <td className="py-2 text-end">
                       <Button
                         size="sm"
                         variant="outline"

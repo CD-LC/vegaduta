@@ -31,10 +31,10 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -193,6 +193,9 @@ public class AgentChatService extends LegacyChatEntryPoints {
     @Value("${app.chat.directives.tool-search.enabled:true}")
     boolean toolSearchDirectiveEnabled = true;
 
+    @Value("${app.chat.directives.scratchpad.enabled:true}")
+    boolean scratchpadDirectiveEnabled = true;
+
     @Value("${app.chat.directives.context-compaction.enabled:true}")
     boolean contextCompactionDirectiveEnabled = true;
 
@@ -278,23 +281,6 @@ public class AgentChatService extends LegacyChatEntryPoints {
      */
     volatile PromptDirectiveSettings promptDirectiveSettings =
             PromptDirectiveSettings.defaultsOnly();
-
-    /**
-     * The sentence a failed reply carries when the provider gave no message of its own: the agent's,
-     * its tenant's or the platform's wording of {@code message.generic_failure}, else the shipped one.
-     * Read in the calling thread's tenant. Never null, never throws.
-     */
-    String genericFailureMessage(UUID agentId) {
-        try {
-            String text =
-                    promptDirectiveSettings
-                            .forTurn(java.time.LocalDate.now(java.time.ZoneOffset.UTC), agentId)
-                            .textOrShipped(AgentChatStreamResponder.GENERIC_FAILURE_KEY);
-            return text != null ? text : AgentChatStreamResponder.defaultGenericFailureMessage();
-        } catch (RuntimeException e) {
-            return AgentChatStreamResponder.defaultGenericFailureMessage();
-        }
-    }
 
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     void usePromptDirectiveSettings(PromptDirectiveSettings settings) {
@@ -409,7 +395,12 @@ public class AgentChatService extends LegacyChatEntryPoints {
         this.structuredCalls = new ChatStructuredCall(this, agentService, toolCallLogService);
         this.preflight = new ChatTurnPreflight(this);
         this.rlArmSelection = new RlArmSelection(this);
-        this.clientSelection = new ChatClientSelection(this, parts.followUp, timeouts.continuationProperties(), timeouts.localModel());
+        this.clientSelection =
+                new ChatClientSelection(
+                        this,
+                        parts.followUp,
+                        timeouts.continuationProperties(),
+                        timeouts.localModel());
         this.promptAssembler = new ChatPromptAssembler(this);
         this.dispatcher = new ChatTurnDispatcher(this);
     }
@@ -454,8 +445,10 @@ public class AgentChatService extends LegacyChatEntryPoints {
             return preflightOutcome.earlyReturn();
         }
         ChatTurnPreflight.Turn turn = preflightOutcome.turn();
-        // The agent is known: its runtime limits (tool steps, timeouts, output cap, continuation passes), with
-        // the tenant's defaults under them and this run's caps (an agent job's remaining budget) over them,
+        // The agent is known: its runtime limits (tool steps, timeouts, output cap, continuation
+        // passes), with
+        // the tenant's defaults under them and this run's caps (an agent job's remaining budget)
+        // over them,
         // are decided ONCE here and read by every stage that enforces one.
         turns.resolveRuntime(context, turn.agentId(), request.caps());
         // Phase events (step-event turns only; the shared no-op emitter drops them): which
@@ -545,7 +538,10 @@ public class AgentChatService extends LegacyChatEntryPoints {
         return failedReplies.withFailedReplyPersistence(stream, agentId, sessionId, () -> null);
     }
 
-    /** As above, keeping the turn's tool record with the failed reply (the tools ran before it failed). */
+    /**
+     * As above, keeping the turn's tool record with the failed reply (the tools ran before it
+     * failed).
+     */
     Flux<String> withFailedReplyPersistence(
             Flux<String> stream, UUID agentId, String sessionId, Supplier<ToolLedger> toolRecord) {
         return failedReplies.withFailedReplyPersistence(stream, agentId, sessionId, toolRecord);

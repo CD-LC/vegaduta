@@ -3,21 +3,11 @@
 import type { EdgeCapabilities, PromptApiAvailability } from "../../lib/edge/capabilities";
 import type { EdgeInUseState } from "./edgeConsoleBridge";
 
-import {
-  Cloud,
-  Cpu,
-  Globe,
-  HardDrive,
-  SlidersHorizontal,
-  Zap,
-} from "lucide-react";
+import { Cloud, Cpu, Globe, HardDrive, SlidersHorizontal, Zap } from "lucide-react";
 import { cn } from "../../lib/utils";
 import Select from "../Select";
 import { useTranslations } from "../../lib/i18n";
-import {
-  setEdgeMode,
-  type EdgeMode,
-} from "./edgeConsoleBridge";
+import { setEdgeMode, type EdgeMode } from "./edgeConsoleBridge";
 
 type ModeOption = { value: EdgeMode; label: string; hint: string; disabled?: boolean };
 
@@ -77,7 +67,7 @@ export default function EdgeHeroStrip({
                   { value: "", label: t("hero.memoryAuto") },
                   ...[4, 8, 12, 16, 24, 32, 48, 64, 96].map((gb) => ({ value: String(gb), label: `${gb} GB` })),
                 ]}
-                className="ml-1 w-24"
+                className="ms-1 w-24"
               />
             </span>
             <span className="inline-flex items-center gap-1">
@@ -108,7 +98,7 @@ export default function EdgeHeroStrip({
             {inUse.active && nowRunningName ? t("hero.nowRunning", { model: nowRunningName }) : t("hero.idle")}
           </div>
         </div>
-  
+
         {/* Mode master toggle */}
         <div className="w-full shrink-0 lg:w-96">
           <div className="mb-1.5 flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -124,7 +114,7 @@ export default function EdgeHeroStrip({
                 disabled={option.disabled}
                 aria-pressed={mode === option.value}
                 className={cn(
-                  "flex w-full flex-col items-start gap-0.5 rounded-md border px-2.5 py-2 text-left text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                  "flex w-full flex-col items-start gap-0.5 rounded-md border px-2.5 py-2 text-start text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                   mode === option.value
                     ? "border-primary bg-primary/10 text-foreground"
                     : "border-border bg-transparent text-muted-foreground hover:bg-secondary/60 hover:text-foreground"

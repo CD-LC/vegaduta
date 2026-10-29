@@ -154,7 +154,7 @@ export default function ToolsPage() {
   // catalog.length is McpCatalogService's real static list size.
   // Tool pinning is a deployment-wide mode, so one registration's status is enough to show it persistently.
   const pinProbeId = (servers as Array<{ id: string; dynamic?: boolean; enabled?: boolean }>).find(
-    (s) => s.dynamic && s.enabled,
+    (s) => s.dynamic && s.enabled
   )?.id;
   const pinProbe = useToolPinStatuses(pinProbeId ? [pinProbeId] : [], servers);
 
@@ -193,7 +193,7 @@ export default function ToolsPage() {
             <div className="relative">
               <Search
                 size={14}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <Input
@@ -202,7 +202,7 @@ export default function ToolsPage() {
                 aria-label={t("searchPlaceholder")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="h-8 w-48 pl-8 text-xs sm:w-56"
+                className="h-8 w-48 ps-8 text-xs sm:w-56"
               />
             </div>
             {/* Follow-through screen (MCP-UX task, 2026-07-26): every enabled

@@ -126,7 +126,7 @@ export default function TurnFeedback({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.16 }}
-              className="ml-1 inline-flex items-center gap-1 text-xs text-muted-foreground"
+              className="ms-1 inline-flex items-center gap-1 text-xs text-muted-foreground"
             >
               <Check size={11} style={{ color: "var(--state-success)" }} aria-hidden="true" /> Thanks
             </motion.span>
@@ -137,7 +137,7 @@ export default function TurnFeedback({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.16 }}
-              className="ml-1 text-xs text-muted-foreground"
+              className="ms-1 text-xs text-muted-foreground"
             >
               Not saved
             </motion.span>

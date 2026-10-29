@@ -20,7 +20,7 @@ function Row({ label, value, testId }: { label: string; value: string; testId: s
   return (
     <div className="flex items-baseline justify-between gap-3 py-1" data-testid={testId}>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="m-0 min-w-0 truncate text-right text-sm tabular-nums text-foreground">{value}</dd>
+      <dd className="m-0 min-w-0 truncate text-end text-sm tabular-nums text-foreground">{value}</dd>
     </div>
   );
 }
@@ -82,11 +82,7 @@ export function ModelSection({ agent }: { agent: PlaygroundAgent }) {
           label={t("rsModel")}
           value={provider && modelId ? `${provider} / ${modelId}` : t("rsModelNotSet")}
         />
-        <Row
-          testId="rs-depth"
-          label={t("rsDepth")}
-          value={depth ? tw(`reasoningDepth${depth}`) : unset}
-        />
+        <Row testId="rs-depth" label={t("rsDepth")} value={depth ? tw(`reasoningDepth${depth}`) : unset} />
         <Row testId="rs-temperature" label={t("rsParam_temperature")} value={num(agent.temperature)} />
         <Row testId="rs-topP" label={t("rsParam_topP")} value={num(agent.topP)} />
         <Row testId="rs-maxTokens" label={t("rsParam_maxTokens")} value={num(agent.maxTokens)} />
@@ -114,7 +110,9 @@ export function ModelSection({ agent }: { agent: PlaygroundAgent }) {
           <AlertDescription>
             <ul className="m-0 list-none space-y-0.5 p-0">
               {dropped.map((p) => (
-                <li key={p}>{t("rsParamDropped", { param: paramLabel(p), model: modelId ?? "", provider: provider ?? "" })}</li>
+                <li key={p}>
+                  {t("rsParamDropped", { param: paramLabel(p), model: modelId ?? "", provider: provider ?? "" })}
+                </li>
               ))}
             </ul>
           </AlertDescription>

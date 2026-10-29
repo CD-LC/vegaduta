@@ -120,7 +120,7 @@ export default function TrustStrip({
           </span>
           {countdown && (
             <span
-              className="topbar-label topbar-status-label ml-1.5 font-mono text-[10.5px] tabular-nums"
+              className="topbar-label topbar-status-label ms-1.5 font-mono text-[10.5px] tabular-nums"
               style={{ color: "var(--text-faint)" }}
             >
               {countdown}

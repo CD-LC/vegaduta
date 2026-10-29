@@ -262,6 +262,7 @@ public class DeveloperApiController {
                             .build();
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+            turnContext.taint().mark("inbound:developer_api");
             String reply =
                     agentChatService
                             .chat(turnContext, chatTurn)

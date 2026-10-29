@@ -18,7 +18,16 @@ interface CallStatusNoticesProps {
   localVideoRef: RefObject<HTMLVideoElement | null>;
 }
 
-export default function CallStatusNotices({ t, status, agentMissing, callNotice, callStage, cameraOn, edgeSightActive, localVideoRef }: CallStatusNoticesProps) {
+export default function CallStatusNotices({
+  t,
+  status,
+  agentMissing,
+  callNotice,
+  callStage,
+  cameraOn,
+  edgeSightActive,
+  localVideoRef,
+}: CallStatusNoticesProps) {
   return (
     <>
       {/* In-call notices: non-fatal, so styled as information rather than the
@@ -43,8 +52,12 @@ export default function CallStatusNotices({ t, status, agentMissing, callNotice,
           messages (a parallel session's scope); harmlessly stays hidden
           (callStageLabel returns null for "idle") until then. */}
       {status === "connected" && callStageLabel(callStage) && (
-        <div className="flex items-center gap-1.5 pl-1 text-xs text-muted-foreground">
-          <span className="state-dot state-dot-live" style={{ ["--state" as any]: "var(--state-success)" } as any} aria-hidden="true" />
+        <div className="flex items-center gap-1.5 ps-1 text-xs text-muted-foreground">
+          <span
+            className="state-dot state-dot-live"
+            style={{ ["--state" as any]: "var(--state-success)" } as any}
+            aria-hidden="true"
+          />
           {callStageLabel(callStage)}
         </div>
       )}
@@ -54,10 +67,20 @@ export default function CallStatusNotices({ t, status, agentMissing, callNotice,
           can see you" is never ambiguous. */}
       {cameraOn && (
         <div className="flex items-center gap-2.5">
-          { }
-          <video ref={localVideoRef} autoPlay muted playsInline className="h-24 rounded-lg border border-border object-cover" />
+          {}
+          <video
+            ref={localVideoRef}
+            autoPlay
+            muted
+            playsInline
+            className="h-24 rounded-lg border border-border object-cover"
+          />
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="state-dot state-dot-live" style={{ ["--state" as any]: "var(--state-error)" } as any} aria-hidden="true" />
+            <span
+              className="state-dot state-dot-live"
+              style={{ ["--state" as any]: "var(--state-error)" } as any}
+              aria-hidden="true"
+            />
             {/* Fix #7 (P1): the server-sight path (real frames streamed to
                 and analyzed by the server) previously shared the generic
                 "Camera on" label with edge-sight's "frames never leave your

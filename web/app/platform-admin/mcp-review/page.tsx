@@ -273,13 +273,13 @@ export default function McpReviewQueuePage() {
               <div className="hidden overflow-x-auto md:block">
                 <table className="w-full min-w-[64rem] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                    <tr className="border-b border-border text-start text-xs uppercase tracking-wide text-muted-foreground">
                       <th className="px-3 py-2 font-medium">Tenant</th>
                       <th className="px-3 py-2 font-medium">Server</th>
                       <th className="px-3 py-2 font-medium">Command</th>
                       <th className="px-3 py-2 font-medium">Requested by</th>
                       <th className="px-3 py-2 font-medium">Created</th>
-                      <th className="px-3 py-2 text-right font-medium">Actions</th>
+                      <th className="px-3 py-2 text-end font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>

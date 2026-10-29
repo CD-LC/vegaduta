@@ -109,9 +109,9 @@ function TenantUsersCard({ tenantId, tenantName }: { tenantId: string; tenantNam
             <div key={u.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
               <span className="min-w-0">
                 <span className="font-medium">{u.username}</span>
-                <span className="ml-2 text-xs text-muted-foreground">{u.email || UNAVAILABLE}</span>
+                <span className="ms-2 text-xs text-muted-foreground">{u.email || UNAVAILABLE}</span>
                 {!u.enabled && (
-                  <Badge variant="destructive" className="ml-2">
+                  <Badge variant="destructive" className="ms-2">
                     Suspended
                   </Badge>
                 )}

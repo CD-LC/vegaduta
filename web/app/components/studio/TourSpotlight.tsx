@@ -304,14 +304,14 @@ export default function TourSpotlight({ open, steps, onClose }: Props) {
 
         <div className="mt-3 flex items-center gap-2">
           <Button variant="ghost" size="sm" disabled={index === 0} onClick={() => go(-1)}>
-            <ArrowLeft aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" /> Back
+            <ArrowLeft aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> Back
           </Button>
           <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => onClose(false)}>
             Skip tour
           </Button>
-          <Button size="sm" className={`ml-auto ${t.cta}`} onClick={() => go(1)}>
+          <Button size="sm" className={`ms-auto ${t.cta}`} onClick={() => go(1)}>
             {last ? "Finish" : isAction ? "Skip ahead" : "Next"}{" "}
-            {!last && <ArrowRight aria-hidden="true" className="ml-1 h-3.5 w-3.5 shrink-0" />}
+            {!last && <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />}
           </Button>
         </div>
       </div>

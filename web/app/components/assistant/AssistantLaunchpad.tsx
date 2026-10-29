@@ -27,7 +27,11 @@ export default function AssistantLaunchpad({ onPrompt }: { onPrompt: (text: stri
   const t = useTranslations("assistant");
   return (
     <div className="flex flex-col items-center gap-7 pb-6 pt-[8vh] text-center" data-testid="assistant-launchpad">
-      <span className="flex size-12 items-center justify-center rounded-2xl asst-mark" aria-hidden="true" data-testid="assistant-mark">
+      <span
+        className="flex size-12 items-center justify-center rounded-2xl asst-mark"
+        aria-hidden="true"
+        data-testid="assistant-mark"
+      >
         <Sparkles className="size-6" />
       </span>
       <div>
@@ -44,9 +48,11 @@ export default function AssistantLaunchpad({ onPrompt }: { onPrompt: (text: stri
               onClick={() => {
                 onPrompt(t(`${key}_prompt`));
                 // The prompt lands in the box; the cursor follows so it can be finished and sent.
-                requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>(COMPOSER_BOX_SELECTOR)?.focus());
+                requestAnimationFrame(() =>
+                  document.querySelector<HTMLTextAreaElement>(COMPOSER_BOX_SELECTOR)?.focus()
+                );
               }}
-              className="asst-chip flex h-full w-full items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm text-foreground/85 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              className="asst-chip flex h-full w-full items-center gap-2 rounded-xl border px-3 py-2.5 text-start text-sm text-foreground/85 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
               <Icon size={15} className="size-4 shrink-0 text-primary" aria-hidden="true" />
               <span className="min-w-0">{t(key)}</span>

@@ -198,7 +198,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                       onChange={(e) => set("job", e.target.value)}
                       className="resize-none text-base"
                     />
-                    <div className="text-right text-xs text-muted-foreground">{brief.job.length}/240</div>
+                    <div className="text-end text-xs text-muted-foreground">{brief.job.length}/240</div>
                     <div className="space-y-1.5">
                       <div className="text-xs text-muted-foreground">
                         Nothing in mind? Start from an idea, then make it yours:
@@ -328,7 +328,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                               setCareTouched(true);
                               set("care", c.id);
                             }}
-                            className={`rounded-xl border p-2.5 text-left text-sm transition-colors ${pick("amber", brief.care === c.id)}`}
+                            className={`rounded-xl border p-2.5 text-start text-sm transition-colors ${pick("amber", brief.care === c.id)}`}
                           >
                             <div className="font-medium">{c.label}</div>
                             <div className="text-xs text-muted-foreground">{c.blurb}</div>
@@ -359,7 +359,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                             key={id}
                             type="button"
                             onClick={() => set("autonomy", id)}
-                            className={`rounded-xl border p-2.5 text-left text-sm transition-colors ${pick("sky", brief.autonomy === id)}`}
+                            className={`rounded-xl border p-2.5 text-start text-sm transition-colors ${pick("sky", brief.autonomy === id)}`}
                           >
                             <div className="font-medium">{label}</div>
                             <div className="text-xs text-muted-foreground">{blurb}</div>
@@ -399,7 +399,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
 
             <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
               <Button variant="ghost" size="sm" disabled={idx === 0 || busy} onClick={() => setStep(STEPS[idx - 1].id)}>
-                <ArrowLeft aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" /> Back
+                <ArrowLeft aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> Back
               </Button>
               {idx < STEPS.length - 1 ? (
                 <Button
@@ -408,12 +408,12 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                   disabled={busy || (step === "job" && !ready)}
                   onClick={() => setStep(STEPS[idx + 1].id)}
                 >
-                  Next <ArrowRight aria-hidden="true" className="ml-1 h-3.5 w-3.5 shrink-0" />
+                  Next <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
                 </Button>
               ) : null}
-              <div className="ml-auto flex gap-2">
+              <div className="ms-auto flex gap-2">
                 <Button variant="ghost" size="sm" disabled={busy || readOnly} onClick={onBlank}>
-                  <PenLine aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 shrink-0" /> Write it all myself
+                  <PenLine aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Write it all myself
                 </Button>
                 <Button
                   size="sm"
@@ -423,9 +423,9 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                   data-tour="build-btn"
                 >
                   {busy ? (
-                    <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin shrink-0" />
+                    <Loader2 aria-hidden="true" className="me-1.5 h-4 w-4 animate-spin shrink-0" />
                   ) : (
-                    <Sparkles aria-hidden="true" className="mr-1.5 h-4 w-4 shrink-0" />
+                    <Sparkles aria-hidden="true" className="me-1.5 h-4 w-4 shrink-0" />
                   )}
                   {busy ? "Assembling…" : "Build my agent"}
                 </Button>

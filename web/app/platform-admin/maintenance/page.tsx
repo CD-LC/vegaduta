@@ -445,7 +445,7 @@ function AnnouncementSection() {
           </div>
 
           {problems.length > 0 && (
-            <ul className="list-disc space-y-0.5 pl-5 text-xs text-destructive">
+            <ul className="list-disc space-y-0.5 ps-5 text-xs text-destructive">
               {problems.map((p) => (
                 <li key={p}>{p}</li>
               ))}

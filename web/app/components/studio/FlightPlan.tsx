@@ -234,7 +234,7 @@ export default function FlightPlan({ onStart, onShowtime }: { onStart: () => voi
           Watch it as a film
         </Button>
         <Button className={TONES.violet.cta} onClick={onStart}>
-          Do it for real <ArrowRight aria-hidden="true" className="ml-2 h-4 w-4 shrink-0" />
+          Do it for real <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
         </Button>
       </div>
     </section>

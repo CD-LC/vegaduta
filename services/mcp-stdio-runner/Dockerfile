@@ -138,7 +138,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers \
     PUPPETEER_CACHE_DIR=/opt/puppeteer-cache \
     # Single-quoted on purpose: ENV drops unquoted double quotes, which left this value as
     # `{executablePath:...}` (invalid JSON, "Failed to parse PUPPETEER_LAUNCH_OPTIONS").
-    PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/opt/puppeteer-cache/chrome/current/chrome-linux64/chrome"}'
+    PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/opt/puppeteer-cache/chrome/current/chrome"}'
 
 # This RUN executes as root (HOME=/home/mcprunner only points npm/npx at that
 # directory, it doesn't change the executing uid), so npx fetching the
@@ -197,9 +197,19 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # went down mid-release on 2026-10-26 (HTTP 200, empty body); a literal
     # version skips that fetch entirely. Bump when the release scan flags it.
     && npx --yes puppeteer@23.11.1 browsers install chrome@${CHROME_FOR_TESTING_VERSION} \
-    && rm -rf /opt/puppeteer-cache/chrome/linux-131.0.6778.204 /opt/puppeteer-cache/chrome-headless-shell/linux-131.0.6778.204 \
-    && ln -sfn "$(ls -d /opt/puppeteer-cache/chrome/linux-* | sort -V | tail -n 1)" /opt/puppeteer-cache/chrome/current \
-    && test -x /opt/puppeteer-cache/chrome/current/chrome-linux64/chrome \
+    && rm -rf /opt/puppeteer-cache/chrome/linux-131.0.6778.204 /opt/puppeteer-cache/chrome/linux_arm-131.0.6778.204 \
+        /opt/puppeteer-cache/chrome-headless-shell/linux-131.0.6778.204 \
+        /opt/puppeteer-cache/chrome-headless-shell/linux_arm-131.0.6778.204 \
+    # Chrome-for-Testing now ships linux-arm builds for the pinned version, so
+    # the version dir and inner binary dir are arch-shaped (linux-<ver>/
+    # chrome-linux64 on amd64, linux_arm-<ver>/chrome-linux-arm64 on arm64);
+    # the old linux-* glob + chrome-linux64 path only matched amd64 and killed
+    # the arm64 leg at `current`. Resolve the installed binary itself and link
+    # `current` at the INNER dir - `current/chrome` is then the executable on
+    # both arches and PUPPETEER_LAUNCH_OPTIONS stays arch-agnostic.
+    && chrome_bin="$(ls /opt/puppeteer-cache/chrome/linux*/chrome-linux*/chrome | sort -V | tail -n 1)" \
+    && ln -sfn "$(dirname "$chrome_bin")" /opt/puppeteer-cache/chrome/current \
+    && test -x /opt/puppeteer-cache/chrome/current/chrome \
     # Drop the npx/npm cache the steps above filled. Each connection now runs with its OWN
     # private npm cache (server.js createSession), so nothing here is ever read at runtime,
     # while the frozen server-puppeteer/puppeteer trees in it carried High advisories

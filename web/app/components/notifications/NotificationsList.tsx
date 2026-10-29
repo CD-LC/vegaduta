@@ -117,7 +117,7 @@ export default function NotificationsList() {
         >
           {t("filterUnread")}
         </Button>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
+        <div className="ms-auto flex flex-wrap items-center gap-2">
           <Button type="button" size="sm" variant="outline" onClick={() => void load()}>
             <RefreshCw size={14} aria-hidden="true" /> {t("refresh")}
           </Button>
@@ -157,7 +157,7 @@ export default function NotificationsList() {
                 type="button"
                 onClick={() => openRow(n)}
                 className={cn(
-                  "flex w-full flex-col items-stretch gap-1 border-0 bg-transparent px-4 py-3 text-left shadow-none transition-colors hover:bg-secondary",
+                  "flex w-full flex-col items-stretch gap-1 border-0 bg-transparent px-4 py-3 text-start shadow-none transition-colors hover:bg-secondary",
                   !n.read && "bg-secondary/40"
                 )}
               >
@@ -173,9 +173,9 @@ export default function NotificationsList() {
                   </span>
                   {n.category === "AGENT" && <Badge variant="secondary">{t("agentChip")}</Badge>}
                   {!n.read && <Badge variant="outline">{t("unreadBadge")}</Badge>}
-                  <span className="ml-auto shrink-0 text-xs text-muted-foreground">{timeAgo(n.createdAt)}</span>
+                  <span className="ms-auto shrink-0 text-xs text-muted-foreground">{timeAgo(n.createdAt)}</span>
                 </span>
-                {n.body && <span className="line-clamp-2 pl-4 text-xs text-muted-foreground">{n.body}</span>}
+                {n.body && <span className="line-clamp-2 ps-4 text-xs text-muted-foreground">{n.body}</span>}
               </button>
             </li>
           ))}

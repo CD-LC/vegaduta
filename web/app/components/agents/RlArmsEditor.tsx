@@ -243,8 +243,8 @@ export default function RlArmsEditor({
               <TableRow>
                 <TableHead>Candidate model</TableHead>
                 <TableHead>Context</TableHead>
-                <TableHead className="text-right">Turns tried</TableHead>
-                <TableHead className="text-right">Observed reward</TableHead>
+                <TableHead className="text-end">Turns tried</TableHead>
+                <TableHead className="text-end">Observed reward</TableHead>
                 {canEdit && <TableHead className="w-10" />}
               </TableRow>
             </TableHeader>
@@ -268,10 +268,10 @@ export default function RlArmsEditor({
                         <span>All traffic</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums text-muted-foreground">
+                    <TableCell className="text-end tabular-nums text-muted-foreground">
                       {observed.pulls.toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-end">
                       {observed.rate === null ? (
                         // Never pulled. The stored posterior would average to a
                         // confident-looking 50% here (Beta(1,1) prior); showing
@@ -295,7 +295,7 @@ export default function RlArmsEditor({
                       )}
                     </TableCell>
                     {canEdit && (
-                      <TableCell className="text-right">
+                      <TableCell className="text-end">
                         <Button
                           variant="ghost"
                           size="icon"
