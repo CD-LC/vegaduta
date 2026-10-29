@@ -30,9 +30,9 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * The per-invocation tool-loop cap and the runtime-exception-to-tool-result
- * translation, both through Spring AI's real {@code DefaultToolCallingManager}
- * so the assertions pin what a chat model's internal loop would actually get.
+ * The per-invocation tool-loop cap and the runtime-exception-to-tool-result translation, both
+ * through Spring AI's real {@code DefaultToolCallingManager} so the assertions pin what a chat
+ * model's internal loop would actually get.
  */
 class ToolLoopLimitAndExceptionTranslationTest {
 
@@ -47,7 +47,8 @@ class ToolLoopLimitAndExceptionTranslationTest {
         CountingTool tool = new CountingTool(TOOL, "ok");
         ToolCallingManager manager = managerWithCaps(3, 8, new SimpleMeterRegistry());
 
-        ToolExecutionResult result = manager.executeToolCalls(promptWithPriorRounds(tool, 2), responseCalling(TOOL));
+        ToolExecutionResult result =
+                manager.executeToolCalls(promptWithPriorRounds(tool, 2), responseCalling(TOOL));
 
         assertFalse(result.returnDirect());
         assertEquals(1, tool.calls.get());
@@ -60,15 +61,33 @@ class ToolLoopLimitAndExceptionTranslationTest {
         SimpleMeterRegistry meters = new SimpleMeterRegistry();
         ToolCallingManager manager = managerWithCaps(3, 8, meters);
 
-        ToolExecutionResult result = manager.executeToolCalls(promptWithPriorRounds(tool, 3), responseCalling(TOOL, TOOL));
+        ToolExecutionResult result =
+                manager.executeToolCalls(
+                        promptWithPriorRounds(tool, 3), responseCalling(TOOL, TOOL));
 
-        assertFalse(result.returnDirect(), "the soft stop must let the model write a normal final answer");
+        assertFalse(
+                result.returnDirect(),
+                "the soft stop must let the model write a normal final answer");
         assertEquals(0, tool.calls.get(), "no tool may execute once the budget is exhausted");
         List<ToolResponseMessage.ToolResponse> responses = lastToolResponses(result);
-        assertEquals(2, responses.size(), "every call must still be answered - providers require 1:1 on replay");
-        assertTrue(responses.get(0).responseData().contains(ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED));
-        assertEquals(1.0, meters.counter(ArgumentSanitizingToolCallingManager.LOOP_LIMIT_METRIC,
-            "stage", "soft", "reason", "rounds").count());
+        assertEquals(
+                2,
+                responses.size(),
+                "every call must still be answered - providers require 1:1 on replay");
+        assertTrue(
+                responses
+                        .get(0)
+                        .responseData()
+                        .contains(ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED));
+        assertEquals(
+                1.0,
+                meters.counter(
+                                ArgumentSanitizingToolCallingManager.LOOP_LIMIT_METRIC,
+                                "stage",
+                                "soft",
+                                "reason",
+                                "rounds")
+                        .count());
     }
 
     @Test
@@ -77,7 +96,8 @@ class ToolLoopLimitAndExceptionTranslationTest {
         ToolCallingManager manager = managerWithCaps(3, 8, new SimpleMeterRegistry());
 
         // Round 4 got the soft stop; the model asks again in round 5.
-        ToolExecutionResult soft = manager.executeToolCalls(promptWithPriorRounds(tool, 3), responseCalling(TOOL));
+        ToolExecutionResult soft =
+                manager.executeToolCalls(promptWithPriorRounds(tool, 3), responseCalling(TOOL));
         List<Message> continued = new ArrayList<>(soft.conversationHistory());
         Prompt next = new Prompt(continued, optionsOffering(tool));
 
@@ -85,7 +105,9 @@ class ToolLoopLimitAndExceptionTranslationTest {
 
         assertTrue(hard.returnDirect(), "the loop must end rather than call the model again");
         assertEquals(0, tool.calls.get());
-        assertEquals(new ToolLoopProperties().getHardStopReply(), lastToolResponses(hard).get(0).responseData());
+        assertEquals(
+                new ToolLoopProperties().getHardStopReply(),
+                lastToolResponses(hard).get(0).responseData());
     }
 
     @Test
@@ -97,8 +119,9 @@ class ToolLoopLimitAndExceptionTranslationTest {
         List<Message> history = new ArrayList<>(priorRounds(5));
         history.add(new UserMessage("new question"));
 
-        ToolExecutionResult result = manager.executeToolCalls(
-            new Prompt(history, optionsOffering(tool)), responseCalling(TOOL));
+        ToolExecutionResult result =
+                manager.executeToolCalls(
+                        new Prompt(history, optionsOffering(tool)), responseCalling(TOOL));
 
         assertEquals(1, tool.calls.get(), "the budget is per invocation, not per conversation");
         assertFalse(result.returnDirect());
@@ -110,15 +133,97 @@ class ToolLoopLimitAndExceptionTranslationTest {
         SimpleMeterRegistry meters = new SimpleMeterRegistry();
         ToolCallingManager manager = managerWithCaps(25, 2, meters);
 
-        ToolExecutionResult result = manager.executeToolCalls(
-            new Prompt(List.of(new UserMessage("hi")), optionsOffering(tool)),
-            responseCalling("made_up_a", "made_up_b", "made_up_c"));
+        ToolExecutionResult result =
+                manager.executeToolCalls(
+                        new Prompt(List.of(new UserMessage("hi")), optionsOffering(tool)),
+                        responseCalling("made_up_a", "made_up_b", "made_up_c"));
 
-        assertTrue(lastToolResponses(result).get(0).responseData()
-            .contains(ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED));
-        assertEquals(3.0, meters.counter(ArgumentSanitizingToolCallingManager.UNKNOWN_TOOL_METRIC).count());
-        assertEquals(1.0, meters.counter(ArgumentSanitizingToolCallingManager.LOOP_LIMIT_METRIC,
-            "stage", "soft", "reason", "unknown_tools").count());
+        assertTrue(
+                lastToolResponses(result)
+                        .get(0)
+                        .responseData()
+                        .contains(ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED));
+        assertEquals(
+                3.0,
+                meters.counter(ArgumentSanitizingToolCallingManager.UNKNOWN_TOOL_METRIC).count());
+        assertEquals(
+                1.0,
+                meters.counter(
+                                ArgumentSanitizingToolCallingManager.LOOP_LIMIT_METRIC,
+                                "stage",
+                                "soft",
+                                "reason",
+                                "unknown_tools")
+                        .count());
+    }
+
+    @Test
+    void aToolTheAllowListLeftOutIsAnsweredAndARepeatEndsTheLoop() {
+        // Issue #295: an agent whose tool allow-list leaves out the tool the model wants gets an
+        // "unavailable" tool-result for the first call (the model can answer without it), and a
+        // repeat of the SAME refused name ends the loop at once - it must not burn the whole
+        // maxUnknownCallsPerInvocation budget, one slow model call per round.
+        CountingTool tool = new CountingTool(TOOL, "ok");
+        SimpleMeterRegistry meters = new SimpleMeterRegistry();
+        ToolCallingManager manager = managerWithCaps(25, 8, meters);
+
+        ToolExecutionResult first =
+                manager.executeToolCalls(
+                        new Prompt(
+                                List.of(new UserMessage("fetch the page")), optionsOffering(tool)),
+                        responseCalling("fetch_web_page"));
+
+        assertFalse(
+                first.returnDirect(),
+                "the first denied call is answered, letting the model recover");
+        String deniedResult = lastToolResponses(first).get(0).responseData();
+        assertTrue(deniedResult.contains("\"tool_unavailable\""), deniedResult);
+        assertEquals(0, tool.calls.get(), "a never-offered tool never executes");
+
+        // The model ignores the notice and asks for the same refused name again.
+        Prompt second =
+                new Prompt(new ArrayList<>(first.conversationHistory()), optionsOffering(tool));
+        ToolExecutionResult repeat =
+                manager.executeToolCalls(second, responseCalling("fetch_web_page"));
+
+        assertTrue(
+                repeat.returnDirect(),
+                "a repeat of an already-refused name ends the loop, not another model round");
+        assertEquals(0, tool.calls.get());
+        List<ToolResponseMessage.ToolResponse> responses = lastToolResponses(repeat);
+        assertEquals(new ToolLoopProperties().getHardStopReply(), responses.get(0).responseData());
+        assertEquals(
+                1.0,
+                meters.counter(
+                                ArgumentSanitizingToolCallingManager.LOOP_LIMIT_METRIC,
+                                "stage",
+                                "hard",
+                                "reason",
+                                "unavailable_repeat")
+                        .count());
+    }
+
+    @Test
+    void aDifferentUnknownNameAfterARefusalStillGetsAnAnswer() {
+        // Only a repeat of an ALREADY-refused name ends the loop early: a different hallucinated
+        // name is new information to the model and still gets its own unavailable answer.
+        CountingTool tool = new CountingTool(TOOL, "ok");
+        ToolCallingManager manager = managerWithCaps(25, 8, new SimpleMeterRegistry());
+
+        ToolExecutionResult first =
+                manager.executeToolCalls(
+                        new Prompt(
+                                List.of(new UserMessage("fetch the page")), optionsOffering(tool)),
+                        responseCalling("fetch_web_page"));
+        Prompt second =
+                new Prompt(new ArrayList<>(first.conversationHistory()), optionsOffering(tool));
+
+        ToolExecutionResult another =
+                manager.executeToolCalls(second, responseCalling("web_search"));
+
+        assertFalse(another.returnDirect());
+        assertTrue(
+                lastToolResponses(another).get(0).responseData().contains("\"tool_unavailable\""));
     }
 
     @Test
@@ -131,69 +236,111 @@ class ToolLoopLimitAndExceptionTranslationTest {
         // calls another tool anyway. Without the parked check this would loop to the round cap.
         List<Message> history = new ArrayList<>();
         history.add(new UserMessage("send the invoice"));
-        history.add(AssistantMessage.builder().content("")
-            .toolCalls(List.of(new AssistantMessage.ToolCall("p1", "function", TOOL, "{}"))).build());
-        history.add(ToolResponseMessage.builder()
-            .responses(List.of(new ToolResponseMessage.ToolResponse("p1", TOOL,
-                "{\"error\":\"" + ArgumentSanitizingToolCallingManager.APPROVAL_PARKED + "\",\"result\":\"waiting on approval\"}")))
-            .build());
+        history.add(
+                AssistantMessage.builder()
+                        .content("")
+                        .toolCalls(
+                                List.of(
+                                        new AssistantMessage.ToolCall(
+                                                "p1", "function", TOOL, "{}")))
+                        .build());
+        history.add(
+                ToolResponseMessage.builder()
+                        .responses(
+                                List.of(
+                                        new ToolResponseMessage.ToolResponse(
+                                                "p1",
+                                                TOOL,
+                                                "{\"error\":\""
+                                                        + ArgumentSanitizingToolCallingManager
+                                                                .APPROVAL_PARKED
+                                                        + "\",\"result\":\"waiting on approval\"}")))
+                        .build());
 
-        ToolExecutionResult result = manager.executeToolCalls(
-            new Prompt(history, optionsOffering(tool)), responseCalling(TOOL));
+        ToolExecutionResult result =
+                manager.executeToolCalls(
+                        new Prompt(history, optionsOffering(tool)), responseCalling(TOOL));
 
         assertEquals(0, tool.calls.get(), "a post-park call must not execute");
         // returnDirect: the loop closes without another model call; the fixed pause reply rides the
         // first response and the rest keep the approval_parked marker.
         assertTrue(result.returnDirect());
         List<ToolResponseMessage.ToolResponse> responses = lastToolResponses(result);
-        assertTrue(responses.get(0).responseData().contains("waiting"),
-            responses.get(0).responseData());
-        assertTrue(responses.stream().skip(1).allMatch(r ->
-            r.responseData().contains("\"approval_parked\"")),
-            responses.toString());
-        assertEquals(1.0, meters.counter(ArgumentSanitizingToolCallingManager.LOOP_LIMIT_METRIC,
-            "stage", "parked", "reason", "approval_parked").count());
+        assertTrue(
+                responses.get(0).responseData().contains("waiting"),
+                responses.get(0).responseData());
+        assertTrue(
+                responses.stream()
+                        .skip(1)
+                        .allMatch(r -> r.responseData().contains("\"approval_parked\"")),
+                responses.toString());
+        assertEquals(
+                1.0,
+                meters.counter(
+                                ArgumentSanitizingToolCallingManager.LOOP_LIMIT_METRIC,
+                                "stage",
+                                "parked",
+                                "reason",
+                                "approval_parked")
+                        .count());
     }
 
     // --- exception translation ------------------------------------------
 
     @Test
     void aPlainRuntimeExceptionComesBackAsARedactedToolResultInsteadOfKillingTheTurn() {
-        ToolCallback throwing = new StubTool(TOOL, input -> {
-            throw new IllegalStateException("upstream 500 for https://x.test/api?token=supersecretvalue123");
-        });
+        ToolCallback throwing =
+                new StubTool(
+                        TOOL,
+                        input -> {
+                            throw new IllegalStateException(
+                                    "upstream 500 for https://x.test/api?token=supersecretvalue123");
+                        });
         ToolCallingManager manager = new ResilientToolCallingManagerFactory(objectMapper).create();
 
-        ToolExecutionResult result = manager.executeToolCalls(
-            new Prompt(List.of(new UserMessage("hi")), optionsOffering(throwing)), responseCalling(TOOL));
+        ToolExecutionResult result =
+                manager.executeToolCalls(
+                        new Prompt(List.of(new UserMessage("hi")), optionsOffering(throwing)),
+                        responseCalling(TOOL));
 
         String reply = lastToolResponses(result).get(0).responseData();
         assertTrue(reply.contains("\"error\""), reply);
-        assertTrue(reply.contains("upstream 500"), "the model should still see what went wrong: " + reply);
+        assertTrue(
+                reply.contains("upstream 500"),
+                "the model should still see what went wrong: " + reply);
         assertFalse(reply.contains("supersecretvalue123"), reply);
     }
 
     @Test
     void anErrorStillPropagates() {
-        ToolCallback throwing = new StubTool(TOOL, input -> {
-            throw new StackOverflowError();
-        });
+        ToolCallback throwing =
+                new StubTool(
+                        TOOL,
+                        input -> {
+                            throw new StackOverflowError();
+                        });
         ToolCallingManager manager = new ResilientToolCallingManagerFactory(objectMapper).create();
 
-        assertThrows(StackOverflowError.class, () -> manager.executeToolCalls(
-            new Prompt(List.of(new UserMessage("hi")), optionsOffering(throwing)), responseCalling(TOOL)));
+        assertThrows(
+                StackOverflowError.class,
+                () ->
+                        manager.executeToolCalls(
+                                new Prompt(
+                                        List.of(new UserMessage("hi")), optionsOffering(throwing)),
+                                responseCalling(TOOL)));
     }
 
     @Test
     void translatingWrapperForwardsTheToolContext() {
         AtomicReference<ToolContext> seen = new AtomicReference<>();
-        ToolCallback contextAware = new StubTool(TOOL, input -> "ok") {
-            @Override
-            public String call(String toolInput, ToolContext toolContext) {
-                seen.set(toolContext);
-                return "ok";
-            }
-        };
+        ToolCallback contextAware =
+                new StubTool(TOOL, input -> "ok") {
+                    @Override
+                    public String call(String toolInput, ToolContext toolContext) {
+                        seen.set(toolContext);
+                        return "ok";
+                    }
+                };
         ToolContext context = new ToolContext(Map.of("tenant", "t1"));
 
         new ToolExceptionTranslatingCallback(contextAware).call("{}", context);
@@ -203,12 +350,18 @@ class ToolLoopLimitAndExceptionTranslationTest {
 
     // --- helpers ----------------------------------------------------------
 
-    private ToolCallingManager managerWithCaps(int maxRounds, int maxUnknown, SimpleMeterRegistry meters) {
+    private ToolCallingManager managerWithCaps(
+            int maxRounds, int maxUnknown, SimpleMeterRegistry meters) {
         return new ArgumentSanitizingToolCallingManager(
-            ToolCallingManager.builder()
-                .toolExecutionExceptionProcessor(new RedactingToolExecutionExceptionProcessor())
-                .build(),
-            objectMapper, maxRounds, maxUnknown, true, meters);
+                ToolCallingManager.builder()
+                        .toolExecutionExceptionProcessor(
+                                new RedactingToolExecutionExceptionProcessor())
+                        .build(),
+                objectMapper,
+                maxRounds,
+                maxUnknown,
+                true,
+                meters);
     }
 
     private static ToolCallingChatOptions optionsOffering(ToolCallback... tools) {
@@ -227,10 +380,19 @@ class ToolLoopLimitAndExceptionTranslationTest {
         List<Message> messages = new ArrayList<>();
         for (int i = 0; i < rounds; i++) {
             String id = "prior-" + i;
-            messages.add(AssistantMessage.builder().content("")
-                .toolCalls(List.of(new AssistantMessage.ToolCall(id, "function", TOOL, "{}"))).build());
-            messages.add(ToolResponseMessage.builder()
-                .responses(List.of(new ToolResponseMessage.ToolResponse(id, TOOL, "ok"))).build());
+            messages.add(
+                    AssistantMessage.builder()
+                            .content("")
+                            .toolCalls(
+                                    List.of(
+                                            new AssistantMessage.ToolCall(
+                                                    id, "function", TOOL, "{}")))
+                            .build());
+            messages.add(
+                    ToolResponseMessage.builder()
+                            .responses(
+                                    List.of(new ToolResponseMessage.ToolResponse(id, TOOL, "ok")))
+                            .build());
         }
         return messages;
     }
@@ -240,12 +402,17 @@ class ToolLoopLimitAndExceptionTranslationTest {
         for (int i = 0; i < toolNames.length; i++) {
             calls.add(new AssistantMessage.ToolCall("call-" + i, "function", toolNames[i], "{}"));
         }
-        return new ChatResponse(List.of(new Generation(AssistantMessage.builder().content("").toolCalls(calls).build())));
+        return new ChatResponse(
+                List.of(
+                        new Generation(
+                                AssistantMessage.builder().content("").toolCalls(calls).build())));
     }
 
-    private static List<ToolResponseMessage.ToolResponse> lastToolResponses(ToolExecutionResult result) {
+    private static List<ToolResponseMessage.ToolResponse> lastToolResponses(
+            ToolExecutionResult result) {
         List<Message> history = result.conversationHistory();
-        return assertInstanceOf(ToolResponseMessage.class, history.get(history.size() - 1)).getResponses();
+        return assertInstanceOf(ToolResponseMessage.class, history.get(history.size() - 1))
+                .getResponses();
     }
 
     private static class StubTool implements ToolCallback {
@@ -261,10 +428,10 @@ class ToolLoopLimitAndExceptionTranslationTest {
         @Override
         public ToolDefinition getToolDefinition() {
             return ToolDefinition.builder()
-                .name(name)
-                .description("stub")
-                .inputSchema("{\"type\": \"object\", \"properties\": {}}")
-                .build();
+                    .name(name)
+                    .description("stub")
+                    .inputSchema("{\"type\": \"object\", \"properties\": {}}")
+                    .build();
         }
 
         @Override
@@ -282,10 +449,12 @@ class ToolLoopLimitAndExceptionTranslationTest {
         }
 
         private CountingTool(String name, String output, AtomicInteger calls) {
-            super(name, input -> {
-                calls.incrementAndGet();
-                return output;
-            });
+            super(
+                    name,
+                    input -> {
+                        calls.incrementAndGet();
+                        return output;
+                    });
             this.calls = calls;
         }
     }
