@@ -129,12 +129,6 @@ public class LocalModelsService {
     static final java.util.Set<String> EFFORTS =
             java.util.Set.of("none", "low", "medium", "high", "default");
 
-    /** Context windows the console offers; 0 = the server default. */
-    static final java.util.Set<Integer> CONTEXTS = java.util.Set.of(0, 4096, 8192, 16384, 32768);
-
-    /** num_parallel values the console offers; 0 = the server default. */
-    static final java.util.Set<Integer> PARALLELS = java.util.Set.of(0, 1, 2, 4);
-
     /** The largest {@code num_batch} the console accepts (must stay within the model's context). */
     static final int MAX_BATCH = 32768;
 
@@ -144,15 +138,6 @@ public class LocalModelsService {
     /** The largest stream idle timeout the console accepts (one hour). */
     static final long MAX_RESPONSE_TIMEOUT_MS = 3_600_000L;
 
-    /**
-     * Console-made variant tags: {@code base-ctxNk} and {@code base-ctxNk-parM}, where a variant
-     * carries the context window Ollama's per-request num_ctx cannot always reach and/or the
-     * runner-level num_parallel (not a per-request option - see applyModelVariant).
-     */
-    private static final Pattern CTX_SUFFIX =
-            Pattern.compile("^(.+)-ctx([0-9]+)k(?:-par([0-9]+))?$");
-
-    private static final Pattern PAR_SUFFIX = Pattern.compile("^(.+)-par([0-9]+)$");
     static final Pattern KEEP_ALIVE = Pattern.compile("^(-1|[0-9]{1,4}[smh])$");
 
     @Value("${app.llm.ollama.reasoning-effort:none}")
@@ -395,93 +380,19 @@ public class LocalModelsService {
                 row == null ? null : row.getToolDeferral());
     }
 
-    /**
-     * The base tag of a console-made variant ({@code qwen3.5:4b-ctx16k}, {@code
-     * qwen3.5:4b-ctx16k-par2} or {@code qwen3.5:4b-par2} -> {@code qwen3.5:4b}); any other tag as
-     * it is.
-     */
+    /** The base tag of a console-made variant; see {@link LocalModelVariants#baseTag}. */
     static String baseTag(String model) {
-        java.util.regex.Matcher m = model == null ? null : CTX_SUFFIX.matcher(model);
-        if (m != null && m.matches()) {
-            return m.group(1);
-        }
-        m = model == null ? null : PAR_SUFFIX.matcher(model);
-        return m != null && m.matches() ? m.group(1) : model;
+        return LocalModelVariants.baseTag(model);
     }
 
-    /**
-     * The context a console-made variant carries ({@code -ctx16k} -> 16384, with or without a
-     * {@code -parM} trailer), or null for a plain tag.
-     */
+    /** The context a console-made variant carries; see {@link LocalModelVariants#contextOf}. */
     static Integer contextOf(String model) {
-        java.util.regex.Matcher m = model == null ? null : CTX_SUFFIX.matcher(model);
-        return m != null && m.matches() ? Integer.valueOf(m.group(2)) * 1024 : null;
+        return LocalModelVariants.contextOf(model);
     }
 
-    /**
-     * The runner parallelism a console-made variant carries ({@code -par2} -> 2, with or without a
-     * leading {@code -ctxNk}), or null for a plain tag.
-     */
+    /** The parallelism a console-made variant carries; see {@link LocalModelVariants#parallelOf}. */
     static Integer parallelOf(String model) {
-        java.util.regex.Matcher m = model == null ? null : CTX_SUFFIX.matcher(model);
-        if (m != null && m.matches()) {
-            return m.group(3) == null ? null : Integer.valueOf(m.group(3));
-        }
-        m = model == null ? null : PAR_SUFFIX.matcher(model);
-        return m != null && m.matches() ? Integer.valueOf(m.group(2)) : null;
-    }
-
-    /** The tag a variant of {@code base} with this context and parallelism gets. */
-    private static String variantTag(String base, Integer context, Integer parallel) {
-        String tag = base;
-        if (context != null && context > 0) {
-            tag += "-ctx" + (context / 1024) + "k";
-        }
-        if (parallel != null && parallel > 0) {
-            tag += "-par" + parallel;
-        }
-        return tag;
-    }
-
-    /**
-     * Points the serving row at a {@code -ctxNk}/{@code -parM} variant of {@code base}: a model
-     * derived with {@link LocalModelOllamaGateway#createVariant} (weights reused, no download), or
-     * the base tag itself when both knobs are the server default. {@code context} null keeps the
-     * variant's current window, 0 returns it to the server default; {@code parallel} likewise.
-     * num_parallel is a runner-level parameter - not a per-request option - so it can only ride a
-     * derived variant, the same mechanism the context window already uses. The row is re-measured
-     * by the pool service like any model change.
-     */
-    private void applyModelVariant(
-            PlatformHostedLlmProvider row, Integer context, Integer parallel) {
-        if (context != null && !CONTEXTS.contains(context)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Context must be 4096, 8192, 16384, 32768 or 0 for the server default.");
-        }
-        if (parallel != null && !PARALLELS.contains(parallel)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Parallel requests must be 1, 2, 4 or 0 for the server default.");
-        }
-        Integer ctx = context == null ? contextOf(row.getModel()) : context;
-        Integer par = parallel == null ? parallelOf(row.getModel()) : parallel;
-        String base = baseTag(row.getModel());
-        String target = variantTag(base, ctx, par);
-        if (target.equals(row.getModel())) {
-            return;
-        }
-        LocalModelOllamaGateway.Tags tags = ollama.tags();
-        if (!tags.reachable()) {
-            throw new ResponseStatusException(
-                    HttpStatus.SERVICE_UNAVAILABLE, "The model server is not reachable.");
-        }
-        if (!tags.has(target) && !ollama.createVariant(base, target, ctx, par)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_GATEWAY,
-                    "The model server could not make that variant of " + base + ".");
-        }
-        hostedPool.updateModel(row.getId(), target);
+        return LocalModelVariants.parallelOf(model);
     }
 
     /**
@@ -501,7 +412,8 @@ public class LocalModelsService {
                                                 HttpStatus.NOT_FOUND,
                                                 "No local model is configured."));
         if (update.contextLength() != null || update.numParallel() != null) {
-            applyModelVariant(row, update.contextLength(), update.numParallel());
+            LocalModelVariants.apply(
+                    ollama, hostedPool, row, update.contextLength(), update.numParallel());
             // The model change saved the row; read it back so the switches below do not overwrite
             // it.
             row = servingPoolRow().orElse(row);

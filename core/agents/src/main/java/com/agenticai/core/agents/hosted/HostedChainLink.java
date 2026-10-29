@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.hosted;
 
 import com.agenticai.core.agents.budget.TurnReservationGuards;
+import java.util.List;
 import org.springframework.ai.chat.client.ChatClient;
 
 /**
@@ -73,7 +74,8 @@ public record HostedChainLink(
         com.agenticai.core.chat.SamplingOptions sampling, boolean smallModel,
         com.agenticai.core.providers.ToolCallGrade toolCallGrade, boolean localModel
     ) {
-        this(client, healthKey, label, model, priority, reservedTokens, reservedMicroCents, guards, sampling, smallModel, toolCallGrade, localModel, null, null);
+        this(client, healthKey, label, model, priority, reservedTokens, reservedMicroCents,
+                guards, sampling, smallModel, toolCallGrade, localModel, null, null);
     }
 
     /** Pre-local-flag shape, kept so every existing call site still compiles. */
@@ -128,5 +130,24 @@ public record HostedChainLink(
         long reservedTokens, long reservedMicroCents
     ) {
         this(client, healthKey, label, model, priority, reservedTokens, reservedMicroCents, null);
+    }
+
+    /**
+     * The stream idle-timeout of the link whose client {@code client} is (V674): the serving row's
+     * own {@code responseTimeoutMs}, or null for a BYOK client or a row that leaves the platform
+     * {@code app.llm.http.stream-idle-timeout}. Matched by client identity, the same way {@code
+     * TurnLifecycleEvents.HostedChain#modelOf} names a failed rung.
+     */
+    public static java.time.Duration streamIdleTimeoutFor(
+            List<HostedChainLink> chain, ChatClient client) {
+        if (chain == null || client == null) {
+            return null;
+        }
+        for (HostedChainLink link : chain) {
+            if (link.client() == client) {
+                return link.streamIdleTimeout();
+            }
+        }
+        return null;
     }
 }

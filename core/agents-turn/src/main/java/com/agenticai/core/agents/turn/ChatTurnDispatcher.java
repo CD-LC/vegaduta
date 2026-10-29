@@ -249,13 +249,10 @@ final class ChatTurnDispatcher {
                                 });
         Function<ChatClient, Flux<String>> dispatchTurn =
                 turnClient -> {
-                    // V674 - the serving row's own stream idle-timeout (null = the platform's
-                    // app.llm.http.stream-idle-timeout). The link is matched by client identity,
-                    // the same way TurnLifecycleEvents' HostedChain names a failed rung; a
-                    // failover attempt re-points the trait at the next link's row, so each
-                    // model's own patience applies to its own stream. A BYOK turn (no chain)
-                    // always lands on the platform default.
-                    context.modelTraits().streamIdleTimeout(streamIdleTimeoutOf(hostedChain, turnClient));
+                    // V674 - the row's own stream idle-timeout, re-pointed per attempt.
+                    context.modelTraits()
+                            .streamIdleTimeout(
+                                    HostedChainLink.streamIdleTimeoutFor(hostedChain, turnClient));
                     ChatClient client =
                             compactionRun == null ? turnClient : compactionRun.attach(turnClient);
                     if (effectiveForceFastDepth || effReasoningDepth == ReasoningDepth.FAST) {
@@ -587,10 +584,6 @@ final class ChatTurnDispatcher {
         boolean semanticPutEligible =
                 semanticEligible && tools.isEmpty() && (cacheEligibleWithTools || toolFree);
         String cacheConversationKey = turn.cacheConversationKey();
-        System.err.println(
-                "DBG cacheEligible=" + cacheEligible + " semanticEligible=" + semanticEligible
-                        + " ewt=" + cacheEligibleWithTools + " toolFree=" + toolFree
-                        + " toolsEmpty=" + tools.isEmpty() + " ran=" + context.toolActivity().anyToolRan());
         Flux<Long> cancelled =
                 chatTurnCancelService.watchForCancellation(requestedAgentId, memorySessionId);
         if (!exactPutEligible && !semanticPutEligible) {
@@ -651,24 +644,6 @@ final class ChatTurnDispatcher {
      * AgentChatStreamResponder#midStreamFailureMessage} walks the chain, and the same bounded walk: a cause
      * chain can be cyclic and this runs on a live stream's error path.
      */
-    /**
-     * The stream idle-timeout of the link whose client {@code turnClient} is (V674): the serving
-     * row's own {@code responseTimeoutMs}, or null for a BYOK client or a row that leaves the
-     * platform {@code app.llm.http.stream-idle-timeout}. Matched by client identity, the same way
-     * {@code TurnLifecycleEvents.HostedChain#modelOf} names a failed rung.
-     */
-    private static Duration streamIdleTimeoutOf(List<HostedChainLink> chain, ChatClient client) {
-        if (chain == null || client == null) {
-            return null;
-        }
-        for (HostedChainLink link : chain) {
-            if (link.client() == client) {
-                return link.streamIdleTimeout();
-            }
-        }
-        return null;
-    }
-
     private static GuardrailViolationException findGuardrailViolation(Throwable error) {
         Throwable current = error;
         for (int depth = 0; current != null && depth < 16; depth++) {

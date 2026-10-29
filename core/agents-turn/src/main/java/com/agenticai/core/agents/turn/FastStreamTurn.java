@@ -184,19 +184,12 @@ final class FastStreamTurn {
         }
     }
 
-    /**
-     * One pass's idle timeout: model silence only, never tool time (see {@link StreamIdleWatch}).
-     * The serving row's own {@code responseTimeoutMs} (V674, carried on {@code
-     * TurnModelTraits#streamIdleTimeout} by dispatchTurn) overrides the platform {@code
-     * app.llm.http.stream-idle-timeout} for this attempt's stream only.
-     */
+    /** One pass's idle timeout: model silence only, never tool time (see {@link StreamIdleWatch}). */
     Flux<String> idleTimeout(Flux<String> stream) {
-        return owner.idleTimeout(
-                stream,
-                activity(),
-                context == null || context.modelTraits() == null
-                        ? null
-                        : context.modelTraits().streamIdleTimeout());
+        // V674: context carries the serving row's own responseTimeoutMs (set per attempt).
+        return StreamIdleWatch.apply(stream, owner.streamIdleTimeout,
+                owner.resilience.getToolIdleCeiling(), activity(), context,
+                com.agenticai.core.security.concurrent.TenantAwareSchedulers.parallel());
     }
 
     /** How this turn's reply ends; shared with the stages that cache and store it. */

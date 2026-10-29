@@ -300,9 +300,7 @@ public class AgentToolProvider implements AgentToolPort {
                 context != null
                         && context.modelTraits() != null
                         && context.modelTraits().stableToolSet();
-        // The serving row's own tool-deferral switch (V674): a slow local model's turns hide most
-        // of the catalog behind search_tools/call_tool even when app.tools.search.enabled is off.
-        boolean forceToolDeferral =
+        boolean forceToolDeferral = // V674 - the serving row's own forced tool-deferral switch.
                 context != null
                         && context.modelTraits() != null
                         && context.modelTraits().toolDeferral();
